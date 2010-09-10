@@ -29,9 +29,9 @@ c     **  M. G. Martin   2-3-98                                ***
 c     ************************************************************
 
       implicit none
-      integer ii
-      double precision random, x, y, z
-      double precision xi1,xi2,xisq
+      integer::ii
+      real(8)::random, x, y, z
+      real(8)::xi1,xi2,xisq
 
 c     --- calculate random vector on the unit sphere ---
       do ii = 1,100

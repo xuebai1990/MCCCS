@@ -50,9 +50,9 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'cell.inc'
       include 'eepar.inc'
 
-      logical ovrlap
-      integer i,ibox,iunit,imolty,imolty1,j,idummy(nmax)
-      double precision dum,vrecipn,vrecipo,vnew,vold,vintern,vintero
+      logical::ovrlap
+      integer::i,ibox,iunit,imolty,imolty1,j,idummy(nmax)
+      real(8)::dum,vrecipn,vrecipo,vnew,vold,vintern,vintero
      &                ,vintran,vintrao,velectn,velecto,vewaldn,vewaldo
      &                ,vextn,vexto,deltv,deltvb,random,wdeltvb,vtailn
      &                ,vtailo

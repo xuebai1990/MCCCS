@@ -31,7 +31,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'conver.inc'
       include 'contorsion.inc'
 
-      integer i
+      integer::i
 
 c ----------------------------------------------------------------
 

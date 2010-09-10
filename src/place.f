@@ -34,23 +34,23 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'rosen.inc'
       include 'tabulated.inc'
 
-      logical lnew,lterm,ovrlap
+      logical::lnew,lterm,ovrlap
 
-      integer i,j,imolty,count,counta,iu,ju,ku,jtvib,start,iv,dir
+      integer::i,j,imolty,count,counta,iu,ju,ku,jtvib,start,iv,dir
      &     ,index,ivib,nchvib,ibend,ib,type,site,ip,ichoi,niplace
      &     ,iw,iufrom,it,jut2,jut3,jut4,jttor,ja,ibox,glist,iwalk
      &     ,iuprev,list,nchben_a, nchben_b,iuback2,iuone,max,iu2back
  
       parameter(max=10)
 
-      double precision wplace,equil,kforce,bsum_try,mincb,delcb
+      real(8)::wplace,equil,kforce,bsum_try,mincb,delcb
      &     ,ux,uy,uz,r,vvib,bfactor,third,random,length,bs,rbf
      &     ,vvibtr,wei_vib,bendang,vangle,vbbtr,angle,vphi,phione
      &     ,thetac,rx,ry,rz,rsint,dist
      &     ,wei_bend,ang_trial,angles,vctor,vdha
      &     ,vbend,vtorsion,bsum,alpha,gamma,twopi,dum,phi,thetaone
      &     ,thetatwo,phitwo
-      double precision tabulated_vib
+      real(8)::tabulated_vib
 
       dimension r(nchbn_max),bfactor(nchbn_max)
      &     ,bendang(numax,numax),ang_trial(nchbn_max),dist(max)

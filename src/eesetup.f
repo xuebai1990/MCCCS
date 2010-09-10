@@ -13,10 +13,10 @@ c
       include 'nsix.inc'
       include 'poten.inc'
 
-      logical ovrlap,ldum
-      integer i,m,j,ntii,ntij,ntjj,ntjjs,ii,jj,ntijs,imolty,irem
+      logical::ovrlap,ldum
+      integer::i,m,j,ntii,ntij,ntjj,ntjjs,ii,jj,ntijs,imolty,irem
      &       ,isv,cnt
-      double precision qelect,random,vmstate,volde,vnewe,dum,vintra
+      real(8)::qelect,random,vmstate,volde,vnewe,dum,vintra
      &  ,vinter,vext,velect,vewald
       dimension qelect(nntype)
 

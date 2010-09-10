@@ -28,7 +28,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'system.inc'
       include 'peboco.inc'
 
-      integer ibox
+      integer::ibox
 
 c ----------------------------------------------------------------
 

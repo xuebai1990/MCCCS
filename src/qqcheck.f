@@ -36,9 +36,9 @@ c     **************************************************************
       include 'system.inc'
       include 'qqlist.inc'
 
-      integer i,ibox,jmolty,j
+      integer::i,ibox,jmolty,j
 
-      double precision rcutsq,rxuu1,ryuu1,rzuu1,rxuij,ryuij,rzuij
+      real(8)::rcutsq,rxuu1,ryuu1,rzuu1,rxuij,ryuij,rzuij
      &     ,rijsq
 
       rcutsq = rcut(ibox)*rcut(ibox)

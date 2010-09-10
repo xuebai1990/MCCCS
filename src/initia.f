@@ -38,40 +38,40 @@ c *** common blocks ***
       include 'mpi.inc'
 
 
-      logical lhere(nmax)       
-      integer i,j,m,m1,m2,n,nn,ic,jc,kc,it,ip1,ip2,ip3,ii,jj
+      logical::lhere(nmax)       
+      integer::i,j,m,m1,m2,n,nn,ic,jc,kc,it,ip1,ip2,ip3,ii,jj
      &       ,iivib,jjben,jjtor,intemp,imol,nt
      &       ,ibtype,imolty,ibuild,rand_id,offset,count_chain
 
-      integer iboxst,iboxed,ibox,pct,check,chktot
-      integer mcmt(ntmax,nbxmax),pcmt(ntmax),mcmtma(ntmax,nbxmax)
-      integer unitc,ntii,ichain
+      integer::iboxst,iboxed,ibox,pct,check,chktot
+      integer::mcmt(ntmax,nbxmax),pcmt(ntmax),mcmtma(ntmax,nbxmax)
+      integer::unitc,ntii,ichain
 
-      integer bmap(numax),imap(numax),zzz,prev,ifrom,nsave
-      logical lacc(numax),lgrow,lterm,lgrown(ntmax)
+      integer::bmap(numax),imap(numax),zzz,prev,ifrom,nsave
+      logical::lacc(numax),lgrow,lterm,lgrown(ntmax)
 
-      double precision xtemp(numax),ytemp(numax),ztemp(numax)
-      double precision ddum
+      real(8)::xtemp(numax),ytemp(numax),ztemp(numax)
+      real(8)::ddum
 
-      double precision ux,uy,uz,xshift,dic
+      real(8)::ux,uy,uz,xshift,dic
      &     ,xnext,ynext,znext,xynext,angold,angnew,rot
      &     ,x1,y1,z1,d1,x2,y2,z2,d2,bang,blen,random
 
-      double precision rxui,ryui,rzui,xaa1,yaa1,zaa1,daa1
+      real(8)::rxui,ryui,rzui,xaa1,yaa1,zaa1,daa1
      &                ,xa1a2,ya1a2,za1a2,da1a2 
 
-      double precision xcc,ycc,zcc,tcc,spltor
+      real(8)::xcc,ycc,zcc,tcc,spltor
 
-      double precision vtorso,vbend,vtg,thetac,theta,dot,aben,ator
+      real(8)::vtorso,vbend,vtg,thetac,theta,dot,aben,ator
 
-      double precision xvec(numax,numax),yvec(numax,numax)
+      real(8)::xvec(numax,numax),yvec(numax,numax)
      &                ,zvec(numax,numax),distij(numax,numax)
 
-      double precision samx(ntmax,numax),samy(ntmax,numax)
+      real(8)::samx(ntmax,numax),samy(ntmax,numax)
      &     ,samz(ntmax,numax)
 
-      double precision vdummy
-      double precision qelect
+      real(8)::vdummy
+      real(8)::qelect
       dimension qelect(nntype)
 
       dimension ux(nbxmax),uy(nbxmax),uz(nbxmax)

@@ -23,9 +23,9 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-        double precision z,nu
-        double precision mbessel
-        double precision pi
+        real(8)::z,nu
+        real(8)::mbessel
+        real(8)::pi
         parameter (pi = 3.14159265359d0)
         
 c       mbessel = sqrt(pi/(2.0d0*z))*exp(-z)*

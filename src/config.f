@@ -53,21 +53,21 @@ c    *******************************************************************
       include 'ipswpar.inc'
       include 'eepar.inc'
       
-      logical lterm, ovrlap, ltors, lneighij,lfixnow
+      logical::lterm, ovrlap, ltors, lneighij,lfixnow
 
-      integer i,j,k,iii,ibox,iunit,igrow,icbu,islen,imolty,iutry
+      integer::i,j,k,iii,ibox,iunit,igrow,icbu,islen,imolty,iutry
 
-      integer istt,iett,nchp1,ic,ncount,total,bin,count,findex,iw
-      integer ddum,idum,ip
+      integer::istt,iett,nchp1,ic,ncount,total,bin,count,findex,iw
+      integer::ddum,idum,ip
 
       dimension ddum(27)
 
-      double precision v,vintra,vinter,vext,velect,vewald,vtorold
+      real(8)::v,vintra,vinter,vext,velect,vewald,vtorold
      & ,vtornew,delen,deleo,vdum,tofo,wplace,wrig,vorient
      & ,velect_intra,velect_inter
-      double precision dchain,random,rchain,wnlog,wolog,wdlog,wratio
+      real(8)::dchain,random,rchain,wnlog,wolog,wdlog,wratio
 
-      double precision vrecipn,vrecipo,cwtorfo,cwtorfn,x,y,z
+      real(8)::vrecipn,vrecipo,cwtorfo,cwtorfn,x,y,z
 
 c ------------------------------------------------------------------
 

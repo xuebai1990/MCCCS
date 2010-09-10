@@ -32,9 +32,9 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'poten.inc'
       include 'mpi.inc'
 
-      integer m,n,nb,mb,imolty,ioffset
-      integer inclnum,inclmol,inclbead,inclsign,ncarbon
-      integer ainclnum,ainclmol,ainclbead,a15t
+      integer::m,n,nb,mb,imolty,ioffset
+      integer::inclnum,inclmol,inclbead,inclsign,ncarbon
+      integer::ainclnum,ainclmol,ainclbead,a15t
       dimension inclmol(ntmax*numax*numax),inclsign(ntmax*numax*numax)
       dimension inclbead(ntmax*numax*numax,2),ncarbon(ntmax)
       dimension ainclmol(ntmax*numax*numax)
@@ -42,7 +42,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       dimension a15t(ntmax*numax*numax)
       
 c -- variables added (3/24/05) for variable 1-4 interactions 	
-      double precision ofscale,ofscale2
+      real(8)::ofscale,ofscale2
       dimension ofscale(ntmax*numax*numax),ofscale2(ntmax*numax*numax)
 
 c ----------------------------------------------------------------

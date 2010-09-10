@@ -43,27 +43,27 @@ c    ********************************************************************
       include 'connect.inc'
       include 'inputdata.inc'
 
-      logical lctrl
+      logical::lctrl
       parameter (lctrl=.false.)
 
-      logical ovrlap,lterm,lbo,ltors
+      logical::ovrlap,lterm,lbo,ltors
 
-      integer boxins,ichoi,ip,iwalk,ntries,itry,iincre
-      integer istt,iett
-      integer ibranp(20),nbranp
+      integer::boxins,ichoi,ip,iwalk,ntries,itry,iincre
+      integer::istt,iett
+      integer::ibranp(20),nbranp
 
-      integer iu,iutry,iulast,iut,iub,icbu,islen,iins
+      integer::iu,iutry,iulast,iut,iub,icbu,islen,iins
      &       ,iii,ibr,ibr1,j,jj,jj2,jj3,jj4,invtry,ibox,iunit
      &       ,imolty,jmt,igrow
-      double precision v,vintra,vinter,vext,velect,vtornew,vtordum
+      real(8)::v,vintra,vinter,vext,velect,vtornew,vtordum
      &     ,delen,vewald
 
 
-      double precision bsswap
-      double precision random,rdir,qelect,rbf,bsum
-      double precision waddnew
+      real(8)::bsswap
+      real(8)::random,rdir,qelect,rbf,bsum
+      real(8)::waddnew
 
-      double precision v1insext,v1ins,w1ins
+      real(8)::v1insext,v1ins,w1ins
      &                ,v1insint
      &                ,volins,rho,arg,coru,v1inselc
       dimension bsswap(ntmax,4)

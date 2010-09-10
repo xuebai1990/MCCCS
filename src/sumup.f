@@ -28,7 +28,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c    *******************************************************************
 c    ** calculates the total potential energy for a configuration.    **
 c    **                                                               **
-c    ** logical ovrlap            true for substantial atom overlap   **
+c    ** logical::ovrlap            true for substantial atom overlap   **
 c    *******************************************************************
  
       implicit none

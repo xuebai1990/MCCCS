@@ -38,13 +38,13 @@ c     ************************************************************
       include 'system.inc'
       include 'cell.inc'
 
-      integer ibox, i,ii,imolty,iunit,j,stt,edd,mtype,iwarn
+      integer::ibox, i,ii,imolty,iunit,j,stt,edd,mtype,iwarn
      &        ,inboxx,inboxy,inboxz,iadjust,itype
-      logical lall,ldx,ldy,ldz,lintbx
-      double precision bx,by,bz,boxlen,dx,dy,dz,nxcm,nycm,nzcm
-      double precision dmaxsq,rxuij,ryuij,rzuij,rijsq
+      logical::lall,ldx,ldy,ldz,lintbx
+      real(8)::bx,by,bz,boxlen,dx,dy,dz,nxcm,nycm,nzcm
+      real(8)::dmaxsq,rxuij,ryuij,rzuij,rijsq
 
-      double precision sx,sy,sz,nxcm2,nycm2,nzcm2
+      real(8)::sx,sy,sz,nxcm2,nycm2,nzcm2
 
       bx = boxlx(ibox)
       by = boxly(ibox)

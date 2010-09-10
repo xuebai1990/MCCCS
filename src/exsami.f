@@ -32,8 +32,8 @@ c    **********************************************************
 c *** common blocks ***
       include 'external.inc'
 
-      double precision exsami, z
-      integer ntj
+      real(8)::exsami, z
+      integer::ntj
 
 C --------------------------------------------------------------------
 

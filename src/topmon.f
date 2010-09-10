@@ -25,8 +25,8 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
 
-      integer i,seed
-      double precision random,rtest
+      integer::i,seed
+      real(8)::random,rtest
       dimension rtest(10)
       character *50 fileout
 

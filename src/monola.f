@@ -62,60 +62,60 @@ c   RP added for MPI
 c -----------------------
 
 c - variables added for GCMC histogram reweighting
-      integer fmax,idum,nummol
+      integer::fmax,idum,nummol
       parameter (fmax=1e6)
       character*20 file_flt,file_hist,file_ndis(ntmax)
       character*20 file_config,file_cell
       character*20 fname2,fname3,fname4,ftemp
       character*50 fileout
-      integer fname,ntii,findpos
-      integer imax,itmax
-      integer n,nconfig,nentry,nminp(ntmax),nmaxp(ntmax)
-      integer ncmt_list(fmax,ntmax),ndist(0:nmax,ntmax)
-      double precision eng_list(fmax)
-      double precision vhist
+      integer::fname,ntii,findpos
+      integer::imax,itmax
+      integer::n,nconfig,nentry,nminp(ntmax),nmaxp(ntmax)
+      integer::ncmt_list(fmax,ntmax),ndist(0:nmax,ntmax)
+      real(8)::eng_list(fmax)
+      real(8)::vhist
 
-      double precision Temp_Energy, Temp_Mol_Vol
+      real(8)::Temp_Energy, Temp_Mol_Vol
 
-      integer point_of_start, point_to_end
+      integer::point_of_start, point_to_end
 
-      integer im,mnbox,i,j,inb,nblock,ibox,jbox,nend,nnn,ii,itemp
+      integer::im,mnbox,i,j,inb,nblock,ibox,jbox,nend,nnn,ii,itemp
      &  ,itype,itype2,intg,imolty,ilunit,nbl,itel,ig,il,ucheck
      &  ,jbox_max,k,histtot,Temp_nmol
-      integer nvirial,zz,steps,igrow,ddum,total
-      double precision starvir,stepvir,starviro
-      double precision acv,acvsq,aflv,acpres,acnp,acmove,acsurf
+      integer::nvirial,zz,steps,igrow,ddum,total
+      real(8)::starvir,stepvir,starviro
+      real(8)::acv,acvsq,aflv,acpres,acnp,acmove,acsurf
      &  ,acboxl,acboxa,asetel,acdens,acnbox,dsq,v,vinter,vtail,vend
      &  ,vintra,vvib,vbend,vtg,vext,vstart,press1,press2,dsq1
      &  ,velect,vflucq,boxlen,acnbox2,pres(nbxmax),surf,acvolume
-      double precision rm,random,temvol,setx,sety,setz,setel
+      real(8)::rm,random,temvol,setx,sety,setz,setel
      &  ,pscb1,pscb2,ratvol,avv,temacd,temspd,dblock,dbl1
      &  ,sterr,stdev,errme,qelect
-      double precision bsswap,bnswap,ostwald,stdost,dummy,debroglie
+      real(8)::bsswap,bnswap,ostwald,stdost,dummy,debroglie
      &  ,bnswap_in,bnswap_out, acvkjmol(nener,nbxmax)
 
       double precision, dimension(nprop1,nbxmax,nbxmax)::acsolpar
  
       double precision, dimension(nbxmax)::acEnthalpy,acEnthalpy1
 
-      double precision :: enthalpy,enthalpy2,sigma2Hsimulation
-      double precision :: inst_enth, inst_enth2, tmp,sigma2H,Cp
+      real(8):::: enthalpy,enthalpy2,sigma2Hsimulation
+      real(8):::: inst_enth, inst_enth2, tmp,sigma2H,Cp
 
-      double precision :: ennergy,ennergy2,sigma2Esimulation
-      double precision :: inst_energy, inst_energy2, sigma2E,Cv
+      real(8):::: ennergy,ennergy2,sigma2Esimulation
+      real(8):::: inst_energy, inst_energy2, sigma2E,Cv
 
       
   
-      double precision binvir,binvir2,inside,bvirial
-      double precision enchg1,enthchg1,srand
-      double precision enchg2,enthchg2
-      double precision enchg3,enthchg3
-      double precision cal2joule, joule2cal
-      double precision HSP_T, HSP_LJ, HSP_COUL 
-      double precision CED_T, CED_LJ, CED_COUL
-      double precision Heat_vapor_T,Heat_vapor_LJ,Heat_vapor_COUL   
-      double precision Heat_vapor_EXT, Ext_Energy_Liq, Ext_Energy_Gas
-      double precision DeltaU_Ext, pdV 
+      real(8)::binvir,binvir2,inside,bvirial
+      real(8)::enchg1,enthchg1,srand
+      real(8)::enchg2,enthchg2
+      real(8)::enchg3,enthchg3
+      real(8)::cal2joule, joule2cal
+      real(8)::HSP_T, HSP_LJ, HSP_COUL 
+      real(8)::CED_T, CED_LJ, CED_COUL
+      real(8)::Heat_vapor_T,Heat_vapor_LJ,Heat_vapor_COUL   
+      real(8)::Heat_vapor_EXT, Ext_Energy_Liq, Ext_Energy_Gas
+      real(8)::DeltaU_Ext, pdV 
 
       double precision, dimension(nprop1,nbxmax,nbxmax)::stdev1,
      &                     sterr1,errme1       
@@ -129,11 +129,11 @@ c - variables added for GCMC histogram reweighting
       dimension bsswap(ntmax,npabmax,nbxmax*2),
      &     bnswap(ntmax,npabmax,nbxmax*2),bnswap_in(ntmax,2),
      &     bnswap_out(ntmax,2)
-      double precision molfra,molfrac,gconst,vdum
+      real(8)::molfra,molfrac,gconst,vdum
       dimension mnbox(nbxmax,ntmax),asetel(nbxmax,ntmax),
      &     acdens(nbxmax,ntmax),molfra(nbxmax,ntmax)
-      double precision molvol(nbxmax),speden(nbxmax)
-      double precision flucmom(nbxmax),flucmom2(nbxmax),flucev(nbxmax)
+      real(8)::molvol(nbxmax),speden(nbxmax)
+      real(8)::flucmom(nbxmax),flucmom2(nbxmax),flucev(nbxmax)
      &     ,flucv(nbxmax),dielect,acvol(nbxmax),acvolsq(nbxmax)
       dimension qelect(nntype)
 c --- dimension statements for block averages ---
@@ -143,19 +143,19 @@ c --- dimension statements for block averages ---
      +          sterr(nprop,nbxmax),errme(nprop,nbxmax)
       dimension ucheck(ntmax),ddum(27)
 
-      logical ovrlap,lratio,lratv,lprint,lmv,lrsave,lblock,lucall
+      logical::ovrlap,lratio,lratv,lprint,lmv,lrsave,lblock,lucall
      &     ,lvirial2,ltfix,lratfix,ltsolute,lsolute,lpr
 
       dimension lratfix(ntmax),lsolute(ntmax)
       character *25 enth
       character *25 enth1
 
-      integer bin,cnt_wf1(0:6,0:6,4),cnt_wf2(0:6,0:6,4),
+      integer::bin,cnt_wf1(0:6,0:6,4),cnt_wf2(0:6,0:6,4),
      &     cnt_wra1(1000,4),cnt_wra2(1000,4)
-      double precision binstep,profile(1000)
+      real(8)::binstep,profile(1000)
 
 c KEA
-      integer ttor
+      integer::ttor
 
 C -------------------------------------------------------------------
 
@@ -278,7 +278,7 @@ c --- set up expanded ensemble stuff
 
       if (lexpee.and.lmipsw) stop 'not for BOTH lexpee AND lmipsw'
       
-c - use internal read/write to get integer number in character format
+c - use internal read/write to get integer::number in character format
       write(ftemp,*) fname
       read(ftemp,*) fname2
 

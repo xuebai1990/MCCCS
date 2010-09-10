@@ -39,7 +39,7 @@ c     ******************************************************************
 
       implicit none
       include 'control.inc'
-      double precision thetaone, thetatwo, phione, phitwo, angle
+      real(8)::thetaone, thetatwo, phione, phitwo, angle
      &     ,sintheone,costheone,sinthetwo,costhetwo
      &     ,sinphione,cosphione,sinphitwo,cosphitwo,cosangle
 

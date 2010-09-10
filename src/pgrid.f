@@ -25,7 +25,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 c --- converts 3d array to 1D array
       implicit none
-      integer pgrid,i,j,k,ngrx,ngry
+      integer::pgrid,i,j,k,ngrx,ngry
       pgrid = i + j * ngrx + k * ngry*ngrx
       return
       end

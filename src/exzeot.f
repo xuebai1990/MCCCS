@@ -24,12 +24,12 @@ c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
-      double precision exzeot,xi,yi,zi,xr,yr,zr,dy
-      integer m,idi,j0,j,jp,k,k0,kp,l,l0,lp,mt,mp,
+      real(8)::exzeot,xi,yi,zi,xr,yr,zr,dy
+      integer::m,idi,j0,j,jp,k,k0,kp,l,l0,lp,mt,mp,
      +        pgrid
       parameter (m=2,mt=2*m+1)
-      double precision yjtmp(mt),yktmp(mt),yltmp(mt)
-      double precision xt(mt),yt(mt),zt(mt)
+      real(8)::yjtmp(mt),yktmp(mt),yltmp(mt)
+      real(8)::xt(mt),yt(mt),zt(mt)
       include 'grid.inc'
       include 'zeolite.inc' 
 c
@@ -78,11 +78,11 @@ C  (C) Copr. 1986-92 Numerical Recipes Software +3Y.
 
       subroutine polint(xa,ya,n,x,y,dy)
       implicit none
-      integer n,nmax
-      double precision dy,x,y,xa(n),ya(n)
+      integer::n,nmax
+      real(8)::dy,x,y,xa(n),ya(n)
       parameter (nmax=10)
-      integer i,m,ns
-      double precision den,dif,dift,ho,hp,w,c(nmax),d(nmax)
+      integer::i,m,ns
+      real(8)::den,dif,dift,ho,hp,w,c(nmax),d(nmax)
       ns=1
       dif=abs(x-xa(1))
       do  i=1,n

@@ -55,50 +55,50 @@ c      include 'gor.inc'
       include 'mpi.inc'
  
 c -- variables for histograms	
-      integer fname
+      integer::fname
       character*20 file_movie,file_run,ftemp,fname2,file_dipole 
       character*20 fname4
       character*50 fileout
  
-      integer temnc, imol, iutemp, imolty, itype,ipair,bdum,bin,histtot
-      integer idummy(ntmax), atemp 
+      integer::temnc, imol, iutemp, imolty, itype,ipair,bdum,bin,histtot
+      integer::idummy(ntmax), atemp 
 
-      integer i,j,k,ncres, nmtres, iensem, inpbc, nmcount
-      integer im,nures, ibox,  ij, tcount,ucheck,nnframe
-      integer nijspecial,ispecial,jspecial,ji,ii,jj,nexclu,ndum,ntii
+      integer::i,j,k,ncres, nmtres, iensem, inpbc, nmcount
+      integer::im,nures, ibox,  ij, tcount,ucheck,nnframe
+      integer::nijspecial,ispecial,jspecial,ji,ii,jj,nexclu,ndum,ntii
 
-      integer zz,temphe,z,itemp,zzz
-      integer nvirial,k_max_l,k_max_m,k_max_n
-      integer inclnum,inclmol,inclbead,inclsign,ncarbon
+      integer::zz,temphe,z,itemp,zzz
+      integer::nvirial,k_max_l,k_max_m,k_max_n
+      integer::inclnum,inclmol,inclbead,inclsign,ncarbon
       dimension inclmol(ntmax*numax*numax),inclsign(ntmax*numax*numax)
       dimension inclbead(ntmax*numax*numax,2)
 
-      integer ainclnum,ainclmol,ainclbead,a15t
+      integer::ainclnum,ainclmol,ainclbead,a15t
       dimension ainclmol(ntmax*numax*numax)
       dimension ainclbead(ntmax*numax*numax,2)
       dimension a15t(ntmax*numax*numax)
 
-      double precision starvir,stepvir,fqtemp,qelect,qbox,vol,v(3),w(3)
-      double precision debroglie, qtot,min_boxl
+      real(8)::starvir,stepvir,fqtemp,qelect,qbox,vol,v(3),w(3)
+      real(8)::debroglie, qtot,min_boxl
 
-      double precision pie2,rcnnsq,umatch,aspecd,bspecd,dum,pm,pcumu
-      logical newtab,lnrtab,lucall,lpolar,lqqelect,lee,lratfix,lreadq
-      logical  linit, lecho, lmixlb, lmixjo, lhere,lsetup,lsolute
-      logical lprint,lverbose,lxyz,lfound
+      real(8)::pie2,rcnnsq,umatch,aspecd,bspecd,dum,pm,pcumu
+      logical::newtab,lnrtab,lucall,lpolar,lqqelect,lee,lratfix,lreadq
+      logical:: linit, lecho, lmixlb, lmixjo, lhere,lsetup,lsolute
+      logical::lprint,lverbose,lxyz,lfound
 
       dimension lratfix(ntmax)
       dimension qbox(nbxmax)
       
 c -- variables added (3/24/05) for scaling of 1-4 interactions      
-      double precision ofscale,ofscale2
+      real(8)::ofscale,ofscale2
       dimension ofscale(ntmax*numax*numax),ofscale2(ntmax*numax*numax)
       
 c -- Variables added (6/30/2006) for fort.4 consistency check
   
-      integer numvib,numbend,numtor,vib1,bend2,bend3,tor2,tor3,tor4
-      integer vibtype,bendtype,tortype
+      integer::numvib,numbend,numtor,vib1,bend2,bend3,tor2,tor3,tor4
+      integer::vibtype,bendtype,tortype
 
-c      double precision temx,temy,temz
+c      real(8)::temx,temy,temz
       
       dimension nures(ntmax)
       dimension ncarbon(ntmax)
@@ -111,17 +111,17 @@ c      dimension temx(nmax,numax),temy(nmax,numax),temz(nmax,numax)
       dimension k_max_l(nbxmax),k_max_m(nbxmax),k_max_n(nbxmax)
 
 c Conversion factor for Mpa to simulation unit
-      double precision MPa2SimUnits
+      real(8)::MPa2SimUnits
 
       character(100) line
 
 c KEA torsion variables
-      Logical Lttor,lspline,linter
-      integer mmm,ttor
+      logical::Lttor,lspline,linter
+      integer::mmm,ttor
 c KM tabulated potential variables
-      integer tvib, tbend, iivdW,jjvdW, iielect, jjelect
+      integer::tvib, tbend, iivdW,jjvdW, iielect, jjelect
 c KM variable added when analysis removed
-      integer nhere
+      integer::nhere
 
 c -- reads input data and initializes the positions
 c
@@ -197,7 +197,7 @@ c -- generate output file name
 c - create output file name
       fname = run_num
 
-c - use internal read/write to get integer number in character format
+c - use internal read/write to get integer::number in character format
       write(ftemp,*) fname
       read(ftemp,*) fname2
       file_run = 'run'//fname2(1:len_trim(fname2))//suffix//'.dat' 
@@ -372,7 +372,7 @@ c - read information for histogram output (added 8/30/99)
 c - create output file name
       fname = run_num
 
-c - use internal read/write to get integer number in character format
+c - use internal read/write to get integer::number in character format
 c      write(ftemp,*) fname
 c      read(ftemp,*) fname2
 c      file_run = 'run'//fname2(1:len_trim(fname2))//suffix//'.dat' 
@@ -1109,7 +1109,7 @@ ckea 6/4/09 -- added for multiple rotation centers
 c -- To assign multiple rotation centers, set iurot(imol) < 0
 c -- Add line after molecule specification, avbmc parameters
 c -- First, number of rotation centers
-c -- Second, identity of centers (0=COM,integer > 0 = bead number)
+c -- Second, identity of centers (0=COM,integer::> 0 = bead number)
 c -- Third, give probability to rotate around different centers
          if(iurot(imol).lt.0) then
             read(4,*)

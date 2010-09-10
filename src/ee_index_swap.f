@@ -8,8 +8,8 @@ c
       include 'coord.inc'
       include 'eepar.inc'
 
-      integer imolty,ibox,ibox1
-      double precision accr,random
+      integer::imolty,ibox,ibox1
+      real(8)::accr,random
 
 c --- if mstate = 1, with equal probability change the tagged index
 c --- to another one in the same box (m = 1, still), or with the other

@@ -37,9 +37,9 @@ c **********************************
       include 'merck.inc'
       include 'nsix.inc'
 
-      double precision coru,rci3,rho,epsilon2,sigma2
-      double precision rci1
-      integer imolty,jmolty,ii,jj, ntii, ntjj, ntij,ibox
+      real(8)::coru,rci3,rho,epsilon2,sigma2
+      real(8)::rci1
+      integer::imolty,jmolty,ii,jj, ntii, ntjj, ntij,ibox
 
       coru = 0.0d0
 

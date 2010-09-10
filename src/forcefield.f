@@ -29,8 +29,8 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'zeopoten.inc'
       include 'control.inc'
 
-      double precision epsilon,sigma,rczeo
-      integer          itype,jtype,idz
+      real(8)::epsilon,sigma,rczeo
+      integer::         itype,jtype,idz
 
 C     In atomtype.f atoms O of the zeolite have been given id=1
 C     Hopefully in some other place the guestmolecules CH4 have been

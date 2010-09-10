@@ -10,8 +10,8 @@ c *** common blocks ***
       include 'external.inc'
       include 'coord.inc'
 
-      double precision v_elect_field, convert, rzfield, E
-      integer i, j,ibox
+      real(8)::v_elect_field, convert, rzfield, E
+      integer::i, j,ibox
 
 
 c ********************************************

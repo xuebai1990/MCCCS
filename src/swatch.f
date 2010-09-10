@@ -45,33 +45,33 @@ c      **********************************************************
       include 'ewaldsum.inc'
       include 'cell.inc'
 
-      logical lempty,lterm
+      logical::lempty,lterm
 
-      integer type_a,type_b,from,prev,self,iboxnew,iboxold
+      integer::type_a,type_b,from,prev,self,iboxnew,iboxold
      &     ,imolty,igrow,new,old,islen,ifirst,iprev,iii,j
-      integer oldchain,newchain,oldunit,newunit,ncount,iunit,iins
+      integer::oldchain,newchain,oldunit,newunit,ncount,iunit,iins
 
-      integer ic,ibox,icbu,jj,mm,imt,jmt,imolin,imolrm
-      integer boxa,boxb,ipair,imolta,imoltb,iboxa
+      integer::ic,ibox,icbu,jj,mm,imt,jmt,imolin,imolrm
+      integer::boxa,boxb,ipair,imolta,imoltb,iboxa
      &  ,iboxb,iboxal,iboxbl,iboxia,iboxib,iunita,iunitb,orgaia
      &  ,orgaib,orgbia,orgbib,ipairb 
 
-      double precision random,tweight,tweiold,rxut,ryut,rzut
+      real(8)::random,tweight,tweiold,rxut,ryut,rzut
      &  ,dvol,vola,volb,rho,coru,dinsta,rpair
 
-      double precision vnbox,vninte,vnintr,vnvibb,vntgb,vnextb
+      real(8)::vnbox,vninte,vnintr,vnvibb,vntgb,vnextb
      &  ,vnbend,vntail,vnelect,vnewald,wnlog,wolog,wdlog,wswat
          
-      double precision v,vintra,vinter,vext,velect,vewald,vdum,delen
+      real(8)::v,vintra,vinter,vext,velect,vewald,vdum,delen
      &     ,deleo,dicount,vrecipn,vrecipo
 c * additions from iswatch
 
-      integer zz,zzz,box,iboxi,bdmol_a,bdmol_b
-      integer imola,imolb,moltaid,moltbid,i,ii,iu
+      integer::zz,zzz,box,iboxi,bdmol_a,bdmol_b
+      integer::imola,imolb,moltaid,moltbid,i,ii,iu
 
-      integer s_type, o_type, thisbox, otherbox
+      integer::s_type, o_type, thisbox, otherbox
 
-      double precision rx_1(numax),ry_1(numax),rz_1(numax),dummy
+      real(8)::rx_1(numax),ry_1(numax),rz_1(numax),dummy
 
 c      dimension from(2),prev(2)
       dimension from(2*numax),prev(2*numax)
@@ -81,14 +81,14 @@ c      dimension rxut(2,numax),ryut(2,numax),rzut(2,numax)
 
 c * end additions
 
-      double precision waddold,waddnew,vdum2
+      real(8)::waddold,waddnew,vdum2
 
       dimension vnbox(nbxmax),vninte(nbxmax),vnintr(nbxmax)
      &  ,vnvibb(nbxmax),vntgb(nbxmax),vnextb(nbxmax),vnbend(nbxmax)
      &  ,vntail(nbxmax),vnelect(nbxmax),vnewald(nbxmax)
 
 c --- JLR 11-24-09
-      integer icallrose
+      integer::icallrose
 c --- END JLR 11-24-09
 
 c +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

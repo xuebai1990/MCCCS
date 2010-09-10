@@ -48,40 +48,40 @@ c     ***********************************************************************
 
 c     --- variables passed to/from the subroutine
 
-      logical lnew
-      integer iw,imolty,angstart,iuprev,glist,i
-      double precision bondlen,bendang,phi,vvibtr,vbbtr,maxlen
-      double precision wei_bend
+      logical::lnew
+      integer::iw,imolty,angstart,iuprev,glist,i
+      real(8)::bondlen,bendang,phi,vvibtr,vbbtr,maxlen
+      real(8)::wei_bend
 
       dimension glist(numax)
       dimension bondlen(numax),bendang(numax),phi(numax)
 
 c     --- local variables
       
-      integer count,ntogrow,iugrow,iufrom,iv,juvib
+      integer::count,ntogrow,iugrow,iufrom,iv,juvib
      &     ,jtvib,iu2back,ib,iulast,type,aaa,iuone
 
-      double precision equil,kforce,thetaone,thetatwo
+      real(8)::equil,kforce,thetaone,thetatwo
      &     ,vvib,length,angle,phione,phitwo,vangle,random,vphi
 
 c     --- new variables
-      integer ibend,nchben_a,nchben_b,start,start_ang
-      double precision bsum_try,rsint,ang_trial,bfactor,rbf,bs
+      integer::ibend,nchben_a,nchben_b,start,start_ang
+      real(8)::bsum_try,rsint,ang_trial,bfactor,rbf,bs
 
       dimension ang_trial(nchbn_max),bfactor(nchbn_max)
 
 c     --- variables from geomold
-      double precision rxui,ryui,rzui,rxuij,ryuij,rzuij
+      real(8)::rxui,ryui,rzui,rxuij,ryuij,rzuij
      &     ,xvecprev,yvecprev,zvecprev,distprev,xvecgrow
      &     ,yvecgrow,zvecgrow,distgrow,anglec
-      double precision xub,yub,zub,dum,ux,uy,uz,alpha,gamma
-      double precision tabulated_vib, tabulated_bend
-      double precision rbend, rbendsq
+      real(8)::xub,yub,zub,dum,ux,uy,uz,alpha,gamma
+      real(8)::tabulated_vib, tabulated_bend
+      real(8)::rbend, rbendsq
 
 ! Neeraj: Adding for the lookup table for CG model
 
-      double precision distprev2,distgrow2
-      double precision lengtha,lengthb,lengtha2,lengthb2,
+      real(8)::distprev2,distgrow2
+      real(8)::lengtha,lengthb,lengtha2,lengthb2,
      &                 lengthc,lengthc2,lengthFP,lengthFP2
 
 c     --- assign nchben_a and ncben_b
@@ -541,7 +541,7 @@ c     *************************************************************
 
       implicit none
 
-      double precision equil, kforce, beta, angle, vangle, rr, v1, v2
+      real(8)::equil, kforce, beta, angle, vangle, rr, v1, v2
      &     ,random, tabulated_bend
 
 c      write(2,*) 'start BENDANGLE'

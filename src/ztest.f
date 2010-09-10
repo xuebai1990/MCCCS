@@ -27,10 +27,10 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'grid.inc'
       include 'zeolite.inc'
       include 'control.inc'
-      integer i,idi,tel
-      double precision errm,errt,err,res,rest,erra
-      integer samp
-      double precision xi,yi,zi,random,exzeof,exzeo
+      integer::i,idi,tel
+      real(8)::errm,errt,err,res,rest,erra
+      integer::samp
+      real(8)::xi,yi,zi,random,exzeof,exzeo
      +     ,ebolt,bolt,boltf,eboltf
 c     --- test accuracy
       idi=1

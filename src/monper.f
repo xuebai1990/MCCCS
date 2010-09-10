@@ -47,23 +47,23 @@ C -----------------------------------------------------------------
       include 'poten.inc'
       include 'mpi.inc'
  
-      integer nummol,ntii
-      integer nibox,im,nnn,ntot,nblock,imolty,m,mm,i,j,jjtor
+      integer::nummol,ntii
+      integer::nibox,im,nnn,ntot,nblock,imolty,m,mm,i,j,jjtor
      &     ,ibox,itype,itel,mnbox,zz,steps,igrow,jmolty,jbox
-      integer imend,itemp,bin,k,jjben,ip2,ip1,ip3,it,ii,jj,ivib
-      logical lratio,lratv,lprint,lmv,lrsave,lblock,lfq,lratfix
+      integer::imend,itemp,bin,k,jjben,ip2,ip1,ip3,it,ii,jj,ivib
+      logical::lratio,lratv,lprint,lmv,lrsave,lblock,lfq,lratfix
      &     ,lsolute,ovrlap
       double precision, dimension(nprop1,nbxmax,nbxmax):: acsolpar
       double precision, dimension(nbxmax):: acEnthalpy,acEnthalpy1
-      double precision press1,press2,dp,dpp,debroglie,histrat
-      double precision acv, molfra,acpres,acsurf,acvolume,asetel,acdens
+      real(8)::press1,press2,dp,dpp,debroglie,histrat
+      real(8)::acv, molfra,acpres,acsurf,acvolume,asetel,acdens
      & ,histtot,acmove,acnp,dvalue,dnchoi,dnchoi1,dnchoih,dnunit,ratflcq
      & ,v,vintra,vinter,vext,velect,vewald,vtors,vtail,rho,coru
      & ,thetac,vbend,xvec,yvec,zvec,distij,theta,vtorso
      & ,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2,dot,daa1,da1a2
      & ,velect_intra,velect_inter
 
-      double precision xcc,ycc,zcc,tcc,spltor,rcutmin      
+      real(8)::xcc,ycc,zcc,tcc,spltor,rcutmin      
  
       dimension acv(nener,nbxmax),lratfix(ntmax)
       dimension mnbox(nbxmax,ntmax)
@@ -74,7 +74,7 @@ C -----------------------------------------------------------------
       dimension xvec(numax,numax),yvec(numax,numax),zvec(numax,numax)
      &     ,distij(numax,numax)
 
-      double precision ratrax,ratray,ratraz,rttrax,rttray,rttraz
+      real(8)::ratrax,ratray,ratraz,rttrax,rttray,rttraz
      & ,rarotx,raroty,rarotz,rtrotx,rtroty,rtrotz,vol
      & ,ratvol,temmass,dn,pres(nbxmax)
 C -------------------------------------------------------------------

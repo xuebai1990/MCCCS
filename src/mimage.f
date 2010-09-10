@@ -6,8 +6,8 @@
       include 'system.inc'
       include 'cell.inc'
 
-      integer ibox
-      double precision rxuij,ryuij,rzuij,hsx,hsy,hsz,sx,sy,sz
+      integer::ibox
+      real(8)::rxuij,ryuij,rzuij,hsx,hsy,hsz,sx,sy,sz
 
 c ----------------------------------------------------------------
 

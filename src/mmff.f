@@ -29,8 +29,8 @@ c   ***  parameters defined in suijtab.f          Bin Chen         ***
 c   ******************************************************************
 
       implicit none
-      double precision rijsq,mmff,rs2,rs1,sr1,sr7,rs7
-      integer ntij
+      real(8)::rijsq,mmff,rs2,rs1,sr1,sr7,rs7
+      integer::ntij
 
       include 'control.inc'
       include 'merck.inc'

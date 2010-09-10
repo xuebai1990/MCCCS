@@ -43,34 +43,34 @@ c    *******************************************************************
       include 'ipswpar.inc'
 
 c     --- variables passed to the subroutine
-      logical lnew,lterm,lwbef
-      integer i,j,ja,icharge,imolty,ifrom,ibox,igrow,tac
+      logical::lnew,lterm,lwbef
+      integer::i,j,ja,icharge,imolty,ifrom,ibox,igrow,tac
 
 c     --- local variables
       
-      logical ovrlap,ltorsion,lfixnow,lfixed,lreturn
+      logical::ovrlap,ltorsion,lfixnow,lfixed,lreturn
 
-      integer glist,iuprev,iufrom,ichoi,ntogrow,count
-      integer iu,iv,iw,ju,ip,ichtor
+      integer::glist,iuprev,iufrom,ichoi,ntogrow,count
+      integer::iu,iv,iw,ju,ip,ichtor
      &       ,it,jut2,jut3,jut4,jttor,iwalk,ivect
-      integer angstart,toracc
+      integer::angstart,toracc
       
       dimension glist(numax)
 
-      double precision dum,xub,yub,zub,length,lengtha,lengthb,wadd
+      real(8)::dum,xub,yub,zub,length,lengtha,lengthb,wadd
 
-      double precision vdha,x,y,z,maxlen,vorient,vtorf
+      real(8)::vdha,x,y,z,maxlen,vorient,vtorf
      &                ,xaa1,yaa1,zaa1,daa1,xa1a2,ya1a2,za1a2,da1a2
      &                ,thetac,dot,rbf,bsum,bs,random,xcc,ycc,zcc,tcc
-      double precision vbbtr,vvibtr,vtorso,wei_vib,wbendv,dist
-      double precision bondlen,bendang,phi,phidisp,phinew,thetanew
-      double precision cwtorf,vfbbtr,vphi,theta,spltor,rm
+      real(8)::vbbtr,vvibtr,vtorso,wei_vib,wbendv,dist
+      real(8)::bondlen,bendang,phi,phidisp,phinew,thetanew
+      real(8)::cwtorf,vfbbtr,vphi,theta,spltor,rm
 
       dimension bondlen(numax),bendang(numax),phi(numax)
      
 c     -- new stuff
-      integer itor,bin,counta,movetype,ku
-      double precision bf_tor,vtorsion,phitors,ran_tor
+      integer::itor,bin,counta,movetype,ku
+      real(8)::bf_tor,vtorsion,phitors,ran_tor
      &     ,wei_bend,jacobian,ctorf
       dimension bf_tor(nchtor_max),vtorsion(nchtor_max)
      &     ,phitors(nchtor_max),ctorf(nchmax,nchtor_max)

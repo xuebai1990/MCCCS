@@ -25,7 +25,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
       character atom*4
-      integer ntype,id
+      integer::ntype,id
       character at1*1,at2*2,at3*3
 
 C     Assigning id's to atomtypes

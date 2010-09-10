@@ -38,13 +38,13 @@ ckea
       include 'garofalini.inc'
       include 'conver.inc'
 
-      logical lmixlb, lmixjo
+      logical::lmixlb, lmixjo
 
-      integer i, j, ij, ji,ibox
-      double precision qelect(nntype)
-      double precision rzeronx(nxatom),epsilonnx(nxatom)
+      integer::i, j, ij, ji,ibox
+      real(8)::qelect(nntype)
+      real(8)::rzeronx(nxatom),epsilonnx(nxatom)
 
-      double precision rcheck, sr2, sr6, adum, bdum, rs1, rs7, sr7,
+      real(8)::rcheck, sr2, sr6, adum, bdum, rs1, rs7, sr7,
      +     pi,djay
 
 c ----------------------------------------------------------------

@@ -41,9 +41,9 @@ c    *********************************************************************
       include 'inputdata.inc'
       include 'system.inc'
 
-      logical laccept,lswapinter
-      integer i,ibox,boxrem,mtype,imolty,iunit,ichoiq,ip,ibox2,j
-      double precision deltv,vintern,vintran,vextn,velectn,vintero,
+      logical::laccept,lswapinter
+      integer::i,ibox,boxrem,mtype,imolty,iunit,ichoiq,ip,ibox2,j
+      real(8)::deltv,vintern,vintran,vextn,velectn,vintero,
      &     vintrao,vexto,velecto,vinsta,vremta,vnewflucq,voldflucq,
      &     vboxo(nbxmax),vinterbo(nbxmax),vintrabo(nbxmax),
      &     vextbo(nbxmax),velectbo(nbxmax),vflucqbo(nbxmax),
@@ -51,7 +51,7 @@ c    *********************************************************************
      &     vbendbo(nbxmax),rxuo(numax),ryuo(numax),rzuo(numax),
      &     xcmo,ycmo,zcmo,vdum,wratio,volins,volrem,deltvb,random,
      &     vnewt2,voldt2
-      double precision qquo(nmax,numax) 
+      real(8)::qquo(nmax,numax) 
 
 c      write(iou,*) 'START the optimization of the charge configuration'
 

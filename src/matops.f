@@ -12,9 +12,9 @@
       include 'conver.inc'       
       include 'system.inc' 
  
-      double precision abx,aby,abz,bcx,bcy,bcz,cax,cay,caz
-      double precision elem(9),inv_vol,adj(9),cosa,cosb,cosg
-      integer ibox,i,j
+      real(8)::abx,aby,abz,bcx,bcy,bcz,cax,cay,caz
+      real(8)::elem(9),inv_vol,adj(9),cosa,cosb,cosg
+      integer::ibox,i,j
 
       do i=1,9
          elem(i)=hmat(ibox,i)

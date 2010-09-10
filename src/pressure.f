@@ -50,29 +50,29 @@ c RP added for MPI
       include 'mpi.inc'
       include 'mpif.h'
 
-      logical lcoulo,lexplt,lqimol,lqjmol,lij2
-      integer ibox,itype
-      integer i,ii,j,jj,ntii,ntjj,ntij,imolty,jmolty,iii,jjj,k
+      logical::lcoulo,lexplt,lqimol,lqjmol,lij2
+      integer::ibox,itype
+      integer::i,ii,j,jj,ntii,ntjj,ntij,imolty,jmolty,iii,jjj,k
  
-      double precision press,repress,erfunc
+      real(8)::press,repress,erfunc
 
-      double precision rxui,ryui,rzui,rxuij,ryuij,rzuij,rijsq,
+      real(8)::rxui,ryui,rzui,rxuij,ryuij,rzuij,rijsq,
      +                 rcutsq,sr2,sr6,rhosq,corp,rij,rs1,
      +                 sr1,rs2,sr7,rs7,rs6
-      double precision srij
-      double precision surf,pxx,pyy,pzz,rpxx,rpyy,rpzz,pxy,pyx
+      real(8)::srij
+      real(8)::surf,pxx,pyy,pzz,rpxx,rpyy,rpzz,pxy,pyx
      &                ,pxz,pzx,pyz,pzy,rpxy,rpyx,rpxz,rpzx,rpyz,rpzy
 
-      double precision fxcmi,fycmi,fzcmi,fij,xcmi,ycmi,zcmi,flj
-      double precision rcm,rcmsq,rcmi
-      double precision rvdwsq,rchgsq,rbcut,qave,
+      real(8)::fxcmi,fycmi,fzcmi,fij,xcmi,ycmi,zcmi,flj
+      real(8)::rcm,rcmsq,rcmi
+      real(8)::rvdwsq,rchgsq,rbcut,qave,
      &     volsq,epsilon2,sigma2,pwell,vol 
 
       dimension lcoulo(numax,numax)
 
 c RP added for MPI
-      double precision pips12,pips13,pips21,pips23,pips31,pips32
-      double precision diff_pips12,diff_pips13,diff_pips21,diff_pips23,
+      real(8)::pips12,pips13,pips21,pips23,pips31,pips32
+      real(8)::diff_pips12,diff_pips13,diff_pips21,diff_pips23,
      & diff_pips31,diff_pips32,diff_pxx,diff_pyy,diff_pzz,sum_press
 C --------------------------------------------------------------------
       if ( lpbc ) call setpbc (ibox)

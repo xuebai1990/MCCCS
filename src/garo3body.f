@@ -7,9 +7,9 @@
       include "coord.inc"
       include 'garofalini.inc'
 
-      integer ntang,nta,ntb,tri,i,j,k
-      double precision vthree,vthreea,thetac,g,p
-      logical lwrite
+      integer::ntang,nta,ntb,tri,i,j,k
+      real(8)::vthree,vthreea,thetac,g,p
+      logical::lwrite
 
       vthreea = 0.0d0
       vthree = 0.0d0
@@ -122,7 +122,7 @@ c**************************************************************************
       include "garofalini.inc"
       include "neigh.inc"
 
-      integer i,j,k,imolty,ptr,ptr2
+      integer::i,j,k,imolty,ptr,ptr2
 
 c      write(6,*) 'starting triad'
 
@@ -176,13 +176,13 @@ c      write(6,*) 'end triad'
       include "garofalini.inc"
       include "neigh.inc"
 
-      integer i,j,k,m,imolty,jmolty,kmolty,mmolty,atomj,atomk,atomm
-      integer nta,ntb,ntang,cnt,ni(nmax),temp_cnt,temp,number(nmax)
-      integer temp_nei(nmax),nnn,itype,jtype,ktype,mtype
-      logical ltemp(nmax),lupdate,lwrite
-      double precision vthree,vthreea,thetac,p,g,nrij(nmax),
+      integer::i,j,k,m,imolty,jmolty,kmolty,mmolty,atomj,atomk,atomm
+      integer::nta,ntb,ntang,cnt,ni(nmax),temp_cnt,temp,number(nmax)
+      integer::temp_nei(nmax),nnn,itype,jtype,ktype,mtype
+      logical::ltemp(nmax),lupdate,lwrite
+      real(8)::vthree,vthreea,thetac,p,g,nrij(nmax),
      &     nxi(nmax),nyi(nmax),nzi(nmax)
-      double precision temp_dist(nmax),temp_x(nmax),temp_y(nmax),
+      real(8)::temp_dist(nmax),temp_x(nmax),temp_y(nmax),
      &     temp_z(nmax)
 
       lwrite=.false.

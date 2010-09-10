@@ -24,7 +24,7 @@ c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       IMPLICIT NONE
-      double precision RANDOM2 , nRCARRY
+      real(8)::RANDOM2 , nRCARRY
       RANDOM2 = nRCARRY()
       RETURN
 C ----------------------------------------------------C
@@ -43,8 +43,8 @@ c RP added for debugging
 c      include 'mpif.h'
 c      include 'mpi.inc'
 
-      INTEGER nIA , nIC , nISEED , nM1
-      double precision nRANDx , nRM
+      integer::nIA , nIC , nISEED , nM1
+      real(8)::nRANDx , nRM
       PARAMETER (nM1=714025,nIA=1366,nIC=150889,nRM=1.D+0/nM1)
 c
       nISEED = MOD(nIA*nISEED+nIC,nM1)
@@ -59,7 +59,7 @@ c
 
       SUBROUTINE nRANSET(nISEED)
       IMPLICIT NONE
-      INTEGER nISEED
+      integer::nISEED
 
       CALL nRSTART(nISEED)
       RETURN
@@ -75,8 +75,8 @@ c ----RP added for debugging
 c      include 'mpif.h'
 c      include 'mpi.inc'
 
-      double precision nCarry , nran , nRANDx , nSeed
-      INTEGER ni , nI24 , nIseed , nISEEDA , nJ24
+      real(8)::nCarry , nran , nRANDx , nSeed
+      integer::ni , nI24 , nIseed , nISEEDA , nJ24
       COMMON /nRANDM/ nSeed(24) , nCarry , nI24 , nJ24 , nIseed
 
       nI24 = 24
@@ -107,8 +107,8 @@ C----------------------------------------------------------------------C
 C       Random number generator from Marsaglia.
 C----------------------------------------------------------------------C
       IMPLICIT NONE
-      double precision nCarry , nRCARRY , nSeed , nTWOM24,nTWOP24,nuni
-      INTEGER nI24 , nIseed , nJ24
+      real(8)::nCarry , nRCARRY , nSeed , nTWOM24,nTWOP24,nuni
+      integer::nI24 , nIseed , nJ24
       PARAMETER (nTWOP24=16777216.D+0,nTWOM24=1.D+0/nTWOP24)
       COMMON /nRANDM/ nSeed(24) , nCarry , nI24 , nJ24 , nIseed
 c

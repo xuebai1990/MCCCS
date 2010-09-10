@@ -59,7 +59,7 @@ c kea include for garofalini potential
 c **********************************************************************
 c local variables
 
-      integer ibend,ibox,i,imolty,iunit,iprop,jblock,itype
+      integer::ibend,ibox,i,imolty,iunit,iprop,jblock,itype
 
 
 c **********************************************************************

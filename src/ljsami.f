@@ -33,8 +33,8 @@ c *** common blocks ***
       include 'external.inc'
       include 'ljsamipara.inc'
 
-      double precision ljsami, rijsq, rij, sr
-      integer ntij
+      real(8)::ljsami, rijsq, rij, sr
+      integer::ntij
 
 C --------------------------------------------------------------------
 

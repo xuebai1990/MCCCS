@@ -32,8 +32,8 @@ c    *********************************************************
 c *** common blocks ***
       include 'external.inc'
 
-      double precision ljpsur, rijsq, sr, sr6
-      integer ntij
+      real(8)::ljpsur, rijsq, sr, sr6
+      integer::ntij
 
 C --------------------------------------------------------------------
 c AT PRESENT: all sigma = 1.0

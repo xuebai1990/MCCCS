@@ -27,8 +27,8 @@ c
 c *** this subroutine updates the block averages
 c
       implicit none
-      integer nblock,ipos,ibox,jbox
-      double precision acmove,dp,dn,value
+      integer::nblock,ipos,ibox,jbox
+      real(8)::acmove,dp,dn,value
       
       include 'control.inc'
       include 'coord.inc'

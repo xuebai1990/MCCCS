@@ -46,40 +46,40 @@ ckea
       include 'garofalini.inc'
       include 'neigh.inc'
 
-c      logical ovrlap,lvol,lx(nbxmax),ly(nbxmax),lz(nbxmax),lncubic
-      logical ovrlap,lvol,lx,ly,lz,lncubic
-      logical la,lb,lc
+c      logical::ovrlap,lvol,lx(nbxmax),ly(nbxmax),lz(nbxmax),lncubic
+      logical::ovrlap,lvol,lx,ly,lz,lncubic
+      logical::la,lb,lc
 
-      integer i,j,ibox,imolty,ic,ncount,boxa,boxb,ipair,ipairb
-      double precision bxo(nbxmax),byo(nbxmax),bzo(nbxmax)
-      double precision volo(nbxmax),vboxo(nbxmax),dfac(nbxmax),
+      integer::i,j,ibox,imolty,ic,ncount,boxa,boxb,ipair,ipairb
+      real(8)::bxo(nbxmax),byo(nbxmax),bzo(nbxmax)
+      real(8)::volo(nbxmax),vboxo(nbxmax),dfac(nbxmax),
      +                 voln(nbxmax),vflucqo(nbxmax),vintero(nbxmax),
      +                 vtailo(nbxmax),vexto(nbxmax),velecto(nbxmax)
-      double precision kxo(vectormax,nbxmax),kyo(vectormax,nbxmax),
+      real(8)::kxo(vectormax,nbxmax),kyo(vectormax,nbxmax),
      +                 kzo(vectormax,nbxmax),prefacto(vectormax,nbxmax)
-      double precision vboxn(nbxmax),vintern(nbxmax),
+      real(8)::vboxn(nbxmax),vintern(nbxmax),
      +                 vtailn(nbxmax),vextn(nbxmax),velectn(nbxmax)
-      double precision rxuo(nmax,numax),ryuo(nmax,numax)
+      real(8)::rxuo(nmax,numax),ryuo(nmax,numax)
      &                ,rzuo(nmax,numax),qquo(nmax,numax)
-      double precision volt,expdv,random,df,dx,dy,dz,v,dele,
+      real(8)::volt,expdv,random,df,dx,dy,dz,v,dele,
      &                 vinter,vtail,vext,boxlen,vdum,velect
      &                 ,velect_intra,velect_inter
-      double precision vminim(nbxmax)
-      double precision xcmo,ycmo,zcmo,calpo(nbxmax),numvecto(nbxmax)
-      double precision rbcut(nbxmax),rbcuta,rbcutb,rpair,rm
+      real(8)::vminim(nbxmax)
+      real(8)::xcmo,ycmo,zcmo,calpo(nbxmax),numvecto(nbxmax)
+      real(8)::rbcut(nbxmax),rbcuta,rbcutb,rpair,rm
 
-      double precision w(3),vx,vy,vz,min_boxl
+      real(8)::w(3),vx,vy,vz,min_boxl
 
       dimension xcmo(nmax),ycmo(nmax),zcmo(nmax)
 
-      integer ichoiq
-      integer hbox,jbox,jhmat
-      double precision rbox,hmato(9),hmatio(9)
+      integer::ichoiq
+      integer::hbox,jbox,jhmat
+      real(8)::rbox,hmato(9),hmatio(9)
 
-      integer idum
-      double precision lddum,lddum2(27)
+      integer::idum
+      real(8)::lddum,lddum2(27)
 ckea
-      double precision v3n(nbxmax),v3o(nbxmax)
+      real(8)::v3n(nbxmax),v3o(nbxmax)
 
 C --------------------------------------------------------------------
 

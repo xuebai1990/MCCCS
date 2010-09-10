@@ -25,9 +25,9 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
 
-      integer itype
-      double precision vtorso, thetac, theta
-      double precision tac2,tac3,tac4,tac5,tac6,tac7
+      integer::itype
+      real(8)::vtorso, thetac, theta
+      real(8)::tac2,tac3,tac4,tac5,tac6,tac7
 
 c *** common blocks ***
       include 'conver.inc' 

@@ -47,20 +47,20 @@ c *** common blocks ***
       include 'ipswpar.inc'
       include 'eepar.inc'
 
-      logical lx,ly,lz,ovrlap,lneighij,lclu_cmp,lexclude(nmax)
-      integer i,ibox,flagon,iunit,j,imolty,iuroty,icbu,ic,ip,k
-      double precision rx,ry,rz,dchain,rchain,random,vnew,vold
+      logical::lx,ly,lz,ovrlap,lneighij,lclu_cmp,lexclude(nmax)
+      integer::i,ibox,flagon,iunit,j,imolty,iuroty,icbu,ic,ip,k
+      real(8)::rx,ry,rz,dchain,rchain,random,vnew,vold
      +                ,vintrao,dgamma,rxorig,ryorig,rzorig
      +                ,rxnew2,rynew2,rznew2,vintran,disvsq,deltv
      +                ,deltvb,vintern,vintero,vextn,vexto,vdum
      &                ,velectn,velecto
      & ,velectn_intra,velectn_inter,velecto_intra,velecto_inter
 c *** further variable definitions
-      double precision cosdg, sindg, rmrot
-      double precision vrecipn,vrecipo
+      real(8)::cosdg, sindg, rmrot
+      real(8)::vrecipn,vrecipo
 
 
-      logical laccept
+      logical::laccept
 
 C --------------------------------------------------------------------
 

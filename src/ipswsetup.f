@@ -10,11 +10,11 @@ c
       include 'system.inc'
       include 'cell.inc'
 
-      integer i,j,k,tnw,ibox
+      integer::i,j,k,tnw,ibox
 
-      double precision lx,hmata(9),hmatc(9),hm(9)
+      real(8)::lx,hmata(9),hmatc(9),hm(9)
 
-      logical lhm,llwell
+      logical::lhm,llwell
 
       ibox = 1
       if (lmipsw.and.(nbox.gt.1)) stop 'ipsw only for 1 box'

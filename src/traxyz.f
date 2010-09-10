@@ -46,12 +46,12 @@ c    *******************************************************************
 ckea
       include 'garofalini.inc'
 
-      logical lx,ly,lz,ovrlap,idum,ddum
+      logical::lx,ly,lz,ovrlap,idum,ddum
 
-      logical lneighij,lclu_cmp,lexclude(nmax)
+      logical::lneighij,lclu_cmp,lexclude(nmax)
 
-      integer i,ibox,flagon,iunit,j,imolty,icbu,ncount,ic,ip,k
-      double precision rx,ry,rz,dchain,ddx,ddy,ddz,random,vnew,vold
+      integer::i,ibox,flagon,iunit,j,imolty,icbu,ncount,ic,ip,k
+      real(8)::rx,ry,rz,dchain,ddx,ddy,ddz,random,vnew,vold
      +                 ,vintran,vintrao,deltv,deltvb,disvsq
      +                 ,vintern,vintero,vextn,vexto,rchain
      &                 ,velectn,velecto,vdum
@@ -59,7 +59,7 @@ ckea
      & ,velectn_intra,velectn_inter,velecto_intra,velecto_inter 
       dimension ddum(27)
 
-      logical laccept
+      logical::laccept
 
 C --------------------------------------------------------------------
 

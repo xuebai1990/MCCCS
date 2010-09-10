@@ -24,9 +24,9 @@ c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none 
-      double precision exzeof,xi,yi,zi,r2
+      real(8)::exzeof,xi,yi,zi,r2
      +                ,xr,yr,zr,r2i,r6
-      integer j,idi,idj
+      integer::j,idi,idj
       include 'zeopoten.inc'
       include 'zeolite.inc'
       include 'control.inc'

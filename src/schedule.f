@@ -36,13 +36,13 @@ c     *******************************************************************
       include 'connect.inc'
       include 'inputdata.inc'
 
-      logical lprint,lfind
-      integer random_index
-      integer kickout,icbu,igrow,imolty,iutry,iut,invtry,iu,ju
-      integer ibead,count,ivib,idir,movetype,iprev,itry,i,ib2
-      integer temp_store,temp_count,zz,outer_sites,index,outer_num
+      logical::lprint,lfind
+      integer::random_index
+      integer::kickout,icbu,igrow,imolty,iutry,iut,invtry,iu,ju
+      integer::ibead,count,ivib,idir,movetype,iprev,itry,i,ib2
+      integer::temp_store,temp_count,zz,outer_sites,index,outer_num
      &     ,outer_prev,iufrom,outer_try
-      double precision dbgrow,random
+      real(8)::dbgrow,random
       parameter (lprint = .false.)
       dimension temp_store(numax),outer_sites(numax),outer_prev(numax)
      &     ,lfind(numax)

@@ -39,19 +39,19 @@ c ---RP added for MPI
       include 'mpi.inc'
       include 'mpif.h'
 
-      integer ncount,ibox,i,ii,imolty
-      double precision factor,repress,repressx,repressy,repressz
+      integer::ncount,ibox,i,ii,imolty
+      real(8)::factor,repress,repressx,repressy,repressz
      &     ,recipintra,piix,piiy,piiz,xcmi,ycmi,zcmi,arg
 
-      double precision pxx,pyy,pzz,intraxx,intrayy,intrazz,intraxy
+      real(8)::pxx,pyy,pzz,intraxx,intrayy,intrazz,intraxy
      &     ,intraxz,intrazy,intrayz,intrayx,intrazx,pxy,pyx,pyz,pzy
      &     ,pxz,pzx
 
 c----RP added for MPI
-      integer blocksize,mystart,myend
-      double precision sum_repressx,sum_repressy,sum_repressz,
+      integer::blocksize,mystart,myend
+      real(8)::sum_repressx,sum_repressy,sum_repressz,
      &   sum_pxy,sum_pxz,sum_pyz
-      double precision sum_recipintra,sum_intraxx,sum_intrayy,
+      real(8)::sum_recipintra,sum_intraxx,sum_intrayy,
      & sum_intrazz,sum_intraxy,sum_intrazy,sum_intraxz,sum_intrayz,
      & sum_intrazx,sum_intrayx
 

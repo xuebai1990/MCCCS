@@ -44,15 +44,15 @@ c     &*&*&*&*&*&*&*&*&*&*&*&* IMPORTANT *&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&
       include 'conver.inc'
       include 'ipswpar.inc'
 
-      logical lnew,ovrlap,lovrr,lterm,ltors
+      logical::lnew,ovrlap,lovrr,lterm,ltors
 
-      integer i,ibox,igrow,iii,j,ip,iwalk,iunit,imolty,iu,iskip
-      integer ichoi,imol,istt,iend,stch,glist,ntogrow,count
+      integer::i,ibox,igrow,iii,j,ip,iwalk,iunit,imolty,iu,iskip
+      integer::ichoi,imol,istt,iend,stch,glist,ntogrow,count
 
-      double precision rx,ry,rz,rxorig,ryorig,rzorig,rxnw,rynw,rznw
-      double precision xdgamma,ydgamma,zdgamma,xcosdg,xsindg,ycosdg
+      real(8)::rx,ry,rz,rxorig,ryorig,rzorig,rxnw,rynw,rznw
+      real(8)::xdgamma,ydgamma,zdgamma,xcosdg,xsindg,ycosdg
      &     ,ysindg,zcosdg,zsindg,rbf,rxur,ryur,rzur,delo,length
-      double precision delen,v,vtor,w,bsum,vdum,vintra,vinter
+      real(8)::delen,v,vtor,w,bsum,vdum,vintra,vinter
      &     ,velect,vewald,wadd,vext,random,maxlen,bs
   
       dimension lovrr(nchmax),delen(nchmax),rxur(numax)

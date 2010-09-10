@@ -39,19 +39,19 @@ c    ** not implemented for new version of CBMC
       include 'connect.inc'
       include 'nrtab.inc'
 
-      logical lpoly,lcone
+      logical::lpoly,lcone
 c     lpoly used to have a meaning in iclude files but does not any longer
-      integer i,j,iunit,iutry,iincre,istart,iend,idiff,nrtc,iu,
+      integer::i,j,iunit,iutry,iincre,istart,iend,idiff,nrtc,iu,
      +        iulast,iuprev,iuppre,ivib,iben,itor,ibin,it
 
-      double precision xprev,yprev,zprev,dprev
+      real(8)::xprev,yprev,zprev,dprev
      +                ,xpprev,ypprev,zpprev,xa1a2,ya1a2,za1a2
      +                ,da1a2,xub,yub,zub,va,vbba,vdha,vtorso
      +                ,x,y,z,dlast,xi1,xi2, xisq,thetac,theta
      +                ,random,xaa1,yaa1,zaa1,daa1,dot,bf,rij,dum
 
-      double precision rxnew(numax),rynew(numax),rznew(numax)
-      double precision nnrtab(nrtmax),hnrtab(nrtmax,nrtbin)
+      real(8)::rxnew(numax),rynew(numax),rznew(numax)
+      real(8)::nnrtab(nrtmax),hnrtab(nrtmax,nrtbin)
 
 c     lcone has no meaning any longer 2-16-98
 

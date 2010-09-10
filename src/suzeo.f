@@ -27,8 +27,8 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'zeopoten.inc'
       include 'zeolite.inc'
       include 'external.inc'
-      double precision rczeo
-      logical newztab
+      real(8)::rczeo
+      logical::newztab
 
 c === load force field
  

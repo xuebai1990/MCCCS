@@ -36,26 +36,26 @@ c
       include 'swtcmove.inc'
 
 c     --- INPUT VARIABLES ---
-      integer iparty, imol_b, imol_a, itype_b, itype_a
+      integer::iparty, imol_b, imol_a, itype_b, itype_a
    
 c     --- OUTPUT VARIABLES ---
-      double precision xb(numax), yb(numax), zb(numax)
+      real(8)::xb(numax), yb(numax), zb(numax)
 
 c     --- LOCAL VARIABLES ---
-      integer i, imoltype_b, nunit_b, nunit_a
-      integer ia_bead1, ia_bead2, ia_bead3
-      integer ib_bead1, ib_bead2, ib_bead3
+      integer::i, imoltype_b, nunit_b, nunit_a
+      integer::ia_bead1, ia_bead2, ia_bead3
+      integer::ib_bead1, ib_bead2, ib_bead3
 
-      double precision xa(3),   ya(3),   za(3)
-      double precision xorigin, yorigin, zorigin
-      double precision xcross,  ycross,  zcross
-      double precision xtemp,   ytemp,   ztemp
-      double precision dxa,     dya,     dza
-      double precision dxb,     dyb,     dzb
+      real(8)::xa(3),   ya(3),   za(3)
+      real(8)::xorigin, yorigin, zorigin
+      real(8)::xcross,  ycross,  zcross
+      real(8)::xtemp,   ytemp,   ztemp
+      real(8)::dxa,     dya,     dza
+      real(8)::dxb,     dyb,     dzb
 
-      double precision rnorm, d
-      double precision gamma_a, gamma_b
-      double precision theta, cos_theta, sin_theta
+      real(8)::rnorm, d
+      real(8)::gamma_a, gamma_b
+      real(8)::theta, cos_theta, sin_theta
 
       
 

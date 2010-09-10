@@ -33,16 +33,16 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'connect.inc'
       include 'system.inc'
 
-      logical lnew,ovrlap,lterm,lovra,lfind,lshit
+      logical::lnew,ovrlap,lterm,lovra,lfind,lshit
 
-      integer iw,i,ibox,imolty,iufrom,iuprev,ntogrow,count,iu,counta
+      integer::iw,i,ibox,imolty,iufrom,iuprev,ntogrow,count,iu,counta
      &     ,ilist,ja,max,num,inum,j,ju,iv,nlist,ichoi,ichtor,ip,itor
      &     ,it,jut2,jut3,jut4,jttor,iwalk,glist,ifrom,inuma
 
       parameter(max=10)
 
 
-      double precision xub,yub,zub,lengtha,lengthb,dum,xfix,yfix,zfix
+      real(8)::xub,yub,zub,lengtha,lengthb,dum,xfix,yfix,zfix
      &     ,phia,bendang,thetac,twopi,phidisp,phi,rlength,vdha,vtor
      &     ,vtorsion,phitors,bf_tor,random,ran_tor,bs,rxpa,rypa,rzpa
      &     ,bsuma,vtrya,vtrintraa,vtrexta,vtrelecta,vtrewalda

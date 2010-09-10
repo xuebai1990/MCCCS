@@ -30,8 +30,8 @@ c    ** rewritten on June 25/99 by Bin Chen.                            **
 c    *********************************************************************
 
       implicit none
-      integer ic,zz,ii,imolty,ibox,ncount,type
-      double precision vrecipnew,vrecipold,sumr(2),sumi(2),arg
+      integer::ic,zz,ii,imolty,ibox,ncount,type
+      real(8)::vrecipnew,vrecipold,sumr(2),sumi(2),arg
       include 'control.inc'
       include 'coord.inc'
       include 'coord2.inc'
@@ -42,10 +42,10 @@ c RP added for MPI
       include 'mpi.inc'
        
 c RP added for MPI
-      integer mystart,myend,blocksize,i
-      double precision ssumrn_arr(vectormax),ssumin_arr(vectormax),
+      integer::mystart,myend,blocksize,i
+      real(8)::ssumrn_arr(vectormax),ssumin_arr(vectormax),
      &      ssumrn_one(vectormax),ssumin_one(vectormax)
-      integer countn,ncount_displs(numprocmax),ncount_arr(numprocmax)   
+      integer::countn,ncount_displs(numprocmax),ncount_arr(numprocmax)   
     
 !      if (LSOLPAR.and.(ibox.eq.2))then
 !        return

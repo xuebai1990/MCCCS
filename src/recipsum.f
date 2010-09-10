@@ -42,22 +42,22 @@ c RP added for MPI
       include 'mpif.h'
       include 'mpi.inc'
 
-      integer ibox,nkx,nky,nkz
+      integer::ibox,nkx,nky,nkz
      &     ,nkx_min,nkx_max,nky_min,nky_max,nkz_min,nkz_max
      &     ,i,ii,imolty,kmax1,ncount
 
 c * from h-matrix formulation
-      integer l,m,n,m_min,m_max,n_min,n_max,kmaxl,kmaxm,kmaxn
+      integer::l,m,n,m_min,m_max,n_min,n_max,kmaxl,kmaxm,kmaxn
 
-      double precision alpsqr4,vol,ksqr,sumr,sumi,arg,boxlen,vrecip,
+      real(8)::alpsqr4,vol,ksqr,sumr,sumi,arg,boxlen,vrecip,
      &     bx1,by1,bz1,bmin,xratio,yratio,zratio,
      &     constx,consty,constz,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi
-!      double precision sum_sumr,sum_sumi
+!      real(8)::sum_sumr,sum_sumi
 
 c RP added for calculating time for communication step
-      integer mystart,myend,blocksize
-      integer ncount_arr(numprocmax),ncount_displs(numprocmax)
-      double precision sum_vrecip,kx_arr(vectormax),ky_arr(vectormax),
+      integer::mystart,myend,blocksize
+      integer::ncount_arr(numprocmax),ncount_displs(numprocmax)
+      real(8)::sum_vrecip,kx_arr(vectormax),ky_arr(vectormax),
      &   kz_arr(vectormax),kx_one(vectormax),ky_one(vectormax),
      &   kz_one(vectormax),
      &   ssumi_arr(vectormax),prefact_arr(vectormax),

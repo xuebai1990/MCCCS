@@ -29,7 +29,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'coord.inc'
       include 'connect.inc'
 
-      integer i,j,k,n,iunit,imolty,dum,iu,countbend,counttor
+      integer::i,j,k,n,iunit,imolty,dum,iu,countbend,counttor
      &     ,atype,btype,ctype,dtype,tortype
      &     ,ibend,bendtype,ntor,itor,ju,ku,nu,type,sitelook
      &     ,vibtype,countvib
@@ -164,9 +164,9 @@ c     *************************************************************
 
       subroutine vibcheck(iinit,atype,btype,vibtype)
 
-      logical lfinda,lfindb,lfound
+      logical::lfinda,lfindb,lfound
 
-      integer iinit,atype,btype,vibtype,nsite,isite,vbtype
+      integer::iinit,atype,btype,vibtype,nsite,isite,vbtype
      &     ,ntvib,n,i,ia,ib
 
       dimension nsite(20,2),isite(20,2,7),vbtype(20)
@@ -246,9 +246,9 @@ c     **************************************************************
 
       subroutine bendcheck(iinit,atype,btype,ctype,bendtype)
 
-      logical lfinda,lfindb,lfindc,lfound
+      logical::lfinda,lfindb,lfindc,lfound
 
-      integer iinit,atype,btype,ctype,bendtype,nsite,isite
+      integer::iinit,atype,btype,ctype,bendtype,nsite,isite
      &     ,bntype,ntbend,n,i,ia,ib,ic
 
       dimension nsite(20,3),isite(20,3,7),bntype(20)
@@ -347,9 +347,9 @@ c     *************************************************************
       subroutine torcheck(iinit,atype,btype,ctype,dtype,tortype)
 
 
-      logical lfinda,lfindb,lfindc,lfindd,lfound,lrev
+      logical::lfinda,lfindb,lfindc,lfindd,lfound,lrev
 
-      integer iinit,atype,btype,ctype,dtype,tortype,isite,nsite
+      integer::iinit,atype,btype,ctype,dtype,tortype,isite,nsite
      &     ,n,i,ia,ib,ic,id,trtype,nttor,ir
 
 

@@ -31,19 +31,19 @@ c - calculates the energy of a bead with a graphite surface
         include 'control.inc'
         include 'external.inc'
         include 'poten.inc'
-        double precision aa,aa2
-        double precision a1sq
-        double precision e0,e1
-        double precision exgrph
-        double precision fxy
-        double precision x,y,z
-        double precision pi2,pi4
-        double precision bb,cc,dd
-        double precision k2,k5
-        double precision mbessel
-        double precision sz2
-        double precision zz
-        integer ntij
+        real(8)::aa,aa2
+        real(8)::a1sq
+        real(8)::e0,e1
+        real(8)::exgrph
+        real(8)::fxy
+        real(8)::x,y,z
+        real(8)::pi2,pi4
+        real(8)::bb,cc,dd
+        real(8)::k2,k5
+        real(8)::mbessel
+        real(8)::sz2
+        real(8)::zz
+        integer::ntij
         
         parameter (pi2 = 6.28318530718d0, pi4 = 12.5663706144d0)
 

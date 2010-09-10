@@ -5,9 +5,9 @@ C  --  Newton-Raphson method.
 
        implicit none
   
-       integer i,j,maxiter
-       double precision x_in,x_out,erfunc
-       double precision root(11),sqrtpi,deno
+       integer::i,j,maxiter
+       real(8)::x_in,x_out,erfunc
+       real(8)::root(11),sqrtpi,deno
 
        parameter (maxiter = 10)
  

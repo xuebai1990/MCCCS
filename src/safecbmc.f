@@ -48,16 +48,16 @@ c     iinit = 3  does final crankshaft move
       include 'rosen.inc'
       include 'cbmc.inc'
 
-      logical lnew,lshit,lterm,ldo,lreturn
+      logical::lnew,lshit,lterm,ldo,lreturn
 
-      integer igrow,imolty,count,counta,j,ja,ivib,iufrom,iuprev
+      integer::igrow,imolty,count,counta,j,ja,ivib,iufrom,iuprev
      +     ,iinit,iu,ju,ku,i,iv,juvib,jtvib,type,iu2,ib,iw,ntogrow
      +     ,itor,ip,ichoi,ichtor,countb,bin,max,nu,iu1,dir,diracc
      +     ,start,nchben_a,nchben_b,ibend,iopen,last,iclose,nchvib
 
-      integer jttor,it,jut2,jut3,jut4,movetype,lu,k,opencount
+      integer::jttor,it,jut2,jut3,jut4,movetype,lu,k,opencount
 
-      double precision vdha,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2,dot
+      real(8)::vdha,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2,dot
      +     ,daa1,da1a2,phicrank,bf_tor,vtorsion,vbend,rbf
      +     ,vtorso,ran_tor,bs,ang_bend,bfactor,bsum_bend,wei_bv
      +     ,bsum_try,third,vibtr,lengthc
@@ -66,7 +66,7 @@ c     *** to conserve memory, max is the maximum number of endpoints
 c     *** possible in place of numax
       parameter(max=10)
 
-      double precision flength,x,y,z,equil,kforce,length
+      real(8)::flength,x,y,z,equil,kforce,length
      +     ,vvib,equilb,kforceb,ux,uy,uz,hdist,lengtha,lengthb
      +     ,vtor,vphi,thetac,angle,equila,kforcea,ovphi
      +     ,alpha,twopi,phidisp,dum,random,rxt,ryt,rzt

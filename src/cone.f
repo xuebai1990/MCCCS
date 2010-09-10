@@ -46,14 +46,14 @@ c     ******************************************************************
       include 'conver.inc'
 
 c     --- variables passed to/from the subroutine
-      integer iinit
-      double precision x,y,z,alpha,gamma,ux,uy,uz
+      integer::iinit
+      real(8)::x,y,z,alpha,gamma,ux,uy,uz
 
 c     --- local variables
-      double precision a11,a12,a13,a21,a22,a31,a32,a33
+      real(8)::a11,a12,a13,a21,a22,a31,a32,a33
      &     ,sinthe,costhe,sinpsi,cospsi,singamma,cosgamma
      &     ,uxtemp,uytemp,uztemp,sinalph,cosalph
-      double precision determ,arccos
+      real(8)::determ,arccos
       save a11,a12,a13,a21,a22,a31,a32,a33,cosalph,sinalph
 
 c      write(iou,*) 'start CONE'
@@ -195,9 +195,9 @@ c     ******************************************************************
 
 c#include "constant.inc"      
 
-      double precision arccos,value
+      real(8)::arccos,value
 
-c      double precision arccos,value,onepi
+c      real(8)::arccos,value,onepi
 c      onepi = 3.141592653d0
 
       if ( value .gt. 1.0d0 ) then

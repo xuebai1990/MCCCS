@@ -46,34 +46,34 @@ c RP added for MPI
       include 'mpi.inc'
 
 c     --- variables passed to the subroutine
-      logical lnew,lterm,lwbef
-      integer i,j,ja,icharge,imolty,ifrom,ibox,igrow,tac
+      logical::lnew,lterm,lwbef
+      integer::i,j,ja,icharge,imolty,ifrom,ibox,igrow,tac
 
 c     --- local variables
       
-      logical ovrlap,ltorsion,lfixnow,lfixed,lreturn
+      logical::ovrlap,ltorsion,lfixnow,lfixed,lreturn
 
-      integer glist,iuprev,iufrom,ichoi,ntogrow,count
-      integer iu,iv,iw,ju,ip,ichtor
+      integer::glist,iuprev,iufrom,ichoi,ntogrow,count
+      integer::iu,iv,iw,ju,ip,ichtor
      &       ,it,jut2,jut3,jut4,jttor,iwalk,ivect
-      integer angstart,toracc
+      integer::angstart,toracc
       
       dimension glist(numax)
 
-      double precision dum,xub,yub,zub,length,lengtha,lengthb,wadd
+      real(8)::dum,xub,yub,zub,length,lengtha,lengthb,wadd
 
-      double precision vdha,x,y,z,maxlen,vorient,vtorf
+      real(8)::vdha,x,y,z,maxlen,vorient,vtorf
      &                ,xaa1,yaa1,zaa1,daa1,xa1a2,ya1a2,za1a2,da1a2
      &                ,thetac,dot,rbf,bsum,bs,random,xcc,ycc,zcc,tcc
-      double precision vbbtr,vvibtr,vtorso,wei_vib,wbendv,dist
-      double precision bondlen,bendang,phi,phidisp,phinew,thetanew
-      double precision cwtorf,vfbbtr,vphi,theta,spltor,rm
+      real(8)::vbbtr,vvibtr,vtorso,wei_vib,wbendv,dist
+      real(8)::bondlen,bendang,phi,phidisp,phinew,thetanew
+      real(8)::cwtorf,vfbbtr,vphi,theta,spltor,rm
 
       dimension bondlen(numax),bendang(numax),phi(numax)
      
 c     -- new stuff
-      integer itor,bin,counta,movetype,ku
-      double precision bf_tor,vtorsion,phitors,ran_tor
+      integer::itor,bin,counta,movetype,ku
+      real(8)::bf_tor,vtorsion,phitors,ran_tor
      &     ,wei_bend,jacobian,ctorf
       dimension bf_tor(nchtor_max),vtorsion(nchtor_max)
      &     ,phitors(nchtor_max),ctorf(nchmax,nchtor_max)
@@ -81,10 +81,10 @@ c     -- new stuff
      &     ,vfbbtr(nchmax,nchtor_max)
 c RP added for MPI
 
-      integer my_start,my_end,loops_per_proc,scount,itorcount,countcount
-      integer rmnddr,myip,ipitor,ipcount
-      double precision my_ctorf,my_vfbbtr,my_rxp,my_ryp,my_rzp
-      double precision rxp_one,ryp_one,rzp_one,ctorf_one,vfbbtr_one,
+      integer::my_start,my_end,loops_per_proc,scount,itorcount,countcount
+      integer::rmnddr,myip,ipitor,ipcount
+      real(8)::my_ctorf,my_vfbbtr,my_rxp,my_ryp,my_rzp
+      real(8)::rxp_one,ryp_one,rzp_one,ctorf_one,vfbbtr_one,
      &   my_bsum_tor,my_vtgtr,my_toracc
       dimension my_ctorf(nchmax*nchtor_max),
      &    my_vfbbtr(nchmax*nchtor_max),
@@ -94,11 +94,11 @@ c RP added for MPI
      &   rzp_one(nchmax*numax),ctorf_one(nchmax*nchtor_max),
      &   vfbbtr_one(nchmax*nchtor_max)
       dimension my_toracc(nchmax),my_vtgtr(nchmax),my_bsum_tor(nchmax)
-      integer procid
-      double precision random_array
+      integer::procid
+      real(8)::random_array
       dimension random_array(numprocmax)
-      double precision dummy_x,dummy_y,dummy_z
-      integer ncount_arr(numprocmax),ncount_displs(numprocmax),
+      real(8)::dummy_x,dummy_y,dummy_z
+      integer::ncount_arr(numprocmax),ncount_displs(numprocmax),
      &          itorcount_arr(numprocmax),itorcount_displs(numprocmax),
      &         countcount_arr(numprocmax),countcount_displs(numprocmax)
 c ------------------------------------------------------------------

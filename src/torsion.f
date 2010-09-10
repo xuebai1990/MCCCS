@@ -5,8 +5,8 @@
       include 'conver.inc'
       include 'control.inc'
 
-      integer ttyp,klo,khi,k,xa,bin,addl
-      double precision theta,spltor,thetarem,tordiff,torstep,left
+      integer::ttyp,klo,khi,k,xa,bin,addl
+      real(8)::theta,spltor,thetarem,tordiff,torstep,left
 
 c Routine to calculate torsion potential using linear interpolation between 2 points
 c Requires a file (fort.40) running from -180 to 180 in 1/4 degree intervals
@@ -63,8 +63,8 @@ c      tordiff=tabtorso(khi,ttyp)-tabtorso(klo,ttyp)
       include 'torsion.inc'
       include 'control.inc'
       
-c      integer n,nmax
-c      double precision yp1,ypn,x(n),y(n),y2(n)
+c      integer::n,nmax
+c      real(8)::yp1,ypn,x(n),y(n),y2(n)
 c      parameter (nmax=500)
 
 c     Numerical recipes, 2nd ed, 1992. - cubic spline
@@ -79,8 +79,8 @@ c     a natural spline, with zero second derivative on that boundary
 c     nmax = largest value of n
 c     x=deg y=tabtorso y2=torderiv2 n=points
 
-      integer i,k,points,tortyp
-      double precision p,qn,sig,un,u(500,10),yp1,ypn
+      integer::i,k,points,tortyp
+      real(8)::p,qn,sig,un,u(500,10),yp1,ypn
       
 c Routine sets up derivatives for use with spline interpolations
 c Requires file (fort.40) running from -195 to 195 in degree steps
@@ -146,8 +146,8 @@ c     by the time the degrees of interest are reached.)
 
       implicit none
 
-c      integer n
-c      double precision x,y,xa(n),y2a(n),ya(n)
+c      integer::n
+c      real(8)::x,y,xa(n),y2a(n),ya(n)
 
 c     From Numerical recipes, 2nd ed, 1992. - spline interpolation
 c     Given the arrays xa(1:n) and ya(1:n) of length n, which tabulate a
@@ -159,8 +159,8 @@ c     xa = deg, ya = tabtorso, y2a = torderiv2, n = points
       include 'torsion.inc'
       include 'conver.inc'
       include 'control.inc'
-      integer k, khi,klo,points,jttor,tortyp,xa
-      double precision a,b,h,x,y,vtorso,vtorsoa
+      integer::k, khi,klo,points,jttor,tortyp,xa
+      real(8)::a,b,h,x,y,vtorso,vtorsoa
 
       points = splpnts(tortyp)
 

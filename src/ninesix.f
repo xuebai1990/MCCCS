@@ -29,8 +29,8 @@ c     ***  parameters defined in suijtab.f  JMS       ***
 c     ***************************************************
 
       implicit none
-      double precision rijsq,rij,ror,ninesix
-      integer ntij
+      real(8)::rijsq,rij,ror,ninesix
+      integer::ntij
 
       include 'control.inc'
       include 'nsix.inc'

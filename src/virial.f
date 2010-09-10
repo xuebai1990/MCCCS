@@ -46,29 +46,29 @@ c *** common blocks ***
       include 'inputdata.inc'
       include 'eepar.inc'
 
-      integer i, imolty, ii, j, jmolty, jj, ntii, ntjj, ntij
+      integer::i, imolty, ii, j, jmolty, jj, ntii, ntjj, ntij
      +     ,nnn,nvirial,ip,itemp,iii
-      double precision vinter,rminsq,rxui,ryui,rzui,rxuij,ryuij,rzuij
+      real(8)::vinter,rminsq,rxui,ryui,rzui,rxuij,ryuij,rzuij
      &       ,rijsq,sr2, sr6 ,velect,mayer
 
-      double precision ljsami,ljpsur,ljmuir,xdiff,ydiff,zdiff
+      real(8)::ljsami,ljpsur,ljmuir,xdiff,ydiff,zdiff
      &     ,dvircm,stepvir,exsix,starvir
-      double precision binvir
+      real(8)::binvir
       dimension binvir(maxvir,maxntemp),mayer(maxntemp)
 
-      logical ovrlap,lqimol,lqjmol,lmatrix
+      logical::ovrlap,lqimol,lqjmol,lmatrix
   
 c *** only use for polarizable models
-      integer chgmax
+      integer::chgmax
       parameter (chgmax=10)
-      integer ip1,ip2,iunit,numchg,info,ipiv(chgmax),mainsite(2,2),
+      integer::ip1,ip2,iunit,numchg,info,ipiv(chgmax),mainsite(2,2),
      &     lam1,lam2
-      double precision a(chgmax,chgmax),b2(chgmax,1),mainxiq(2,2)
+      real(8)::a(chgmax,chgmax),b2(chgmax,1),mainxiq(2,2)
 
-      double precision consa1,consa2,consb1,consb2,selfadd1,selfadd2,
+      real(8)::consa1,consa2,consb1,consb2,selfadd1,selfadd2,
      &     vtotal,epsilon2,vmin
 
-      double precision mass_t,binvir2(maxvir,maxntemp),
+      real(8)::mass_t,binvir2(maxvir,maxntemp),
      &     factor,corr,vold,deri_u
 
 C --------------------------------------------------------------------

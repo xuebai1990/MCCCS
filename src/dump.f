@@ -49,7 +49,7 @@ C -----------------------------------------------------------------
       include 'clusterbias.inc'
       include 'cell.inc'
 
-      integer i,j,im,imolty,ibox
+      integer::i,j,im,imolty,ibox
 
       open (unit=8, file="final-config",status="unknown")
       write(8,*) tmcc

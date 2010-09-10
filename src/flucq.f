@@ -43,24 +43,24 @@ c    *******************************************************************
       include 'fepsi.inc'
       include 'poten.inc'
       
-      logical linterqt,ovrlap
-      integer i,ibox,iunit,j,imolty,icbu,mainunit,ic,ii
+      logical::linterqt,ovrlap
+      integer::i,ibox,iunit,j,imolty,icbu,mainunit,ic,ii
      &     ,ncount,ichoiq,ichoice,qunit,boxi,flagon
-      double precision dchain,random,vnew,vold,deltv,deltvb
+      real(8)::dchain,random,vnew,vold,deltv,deltvb
      &  ,velectn,velecto,vflucqn,vflucqo
      &  ,dispbig,displit,vintern,vintero,vewaldn,vewaldo
-      double precision qion
-      double precision velectn_intra,velectn_inter,velecto_intra,
+      real(8)::qion
+      real(8)::velectn_intra,velectn_inter,velecto_intra,
      &  velecto_inter 
       dimension qion(numax)
-      double precision vrecipn,vrecipo,sumr,sumi,arg
+      real(8)::vrecipn,vrecipo,sumr,sumi,arg
       dimension sumr(2),sumi(2)
       
-      integer maini,mainj,jchain
-      double precision qionj(numax),vinterjo,vflucqjo,velectjo,
+      integer::maini,mainj,jchain
+      real(8)::qionj(numax),vinterjo,vflucqjo,velectjo,
      &     voldj,vinterjn,vflucqjn,velectjn,vnewj,corr,rij,erfunc,
      &     rxuij,ryuij,rzuij,vdum,vewaldjn,vewaldjo
-      double precision qoldj2,vnewi,velectni,vinterni,voldi,
+      real(8)::qoldj2,vnewi,velectni,vinterni,voldi,
      &     velectoi,vinteroi
 
 C --------------------------------------------------------------------

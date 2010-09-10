@@ -41,23 +41,23 @@ c *** common blocks ***
       include 'blkavg.inc'
       include 'inputdata.inc'
 
-      logical lvol,ovrlap
-      integer i,j,itest,imolty
+      logical::lvol,ovrlap
+      integer::i,j,itest,imolty
 
-      integer ibox,ic,ncount
-      double precision dv,apress
-      double precision bxo(2),byo(2),bzo(2)
-      double precision volo(2),vboxo(2),dfac(2),voln(2),
+      integer::ibox,ic,ncount
+      real(8)::dv,apress
+      real(8)::bxo(2),byo(2),bzo(2)
+      real(8)::volo(2),vboxo(2),dfac(2),voln(2),
      +                 vintero(2),vtailo(2),vexto(2),velecto(2)
-      double precision kxo(vectormax,2),kyo(vectormax,2),
+      real(8)::kxo(vectormax,2),kyo(vectormax,2),
      +                 kzo(vectormax,2),prefacto(vectormax,2)
-      double precision vboxn(2),
+      real(8)::vboxn(2),
      +              vintern(2),vtailn(2),vextn(2),velectn(2)
-      double precision rxuo(nmax,numax),ryuo(nmax,numax)
+      real(8)::rxuo(nmax,numax),ryuo(nmax,numax)
      &                ,rzuo(nmax,numax)
-      double precision volt,expdv,random,df,dx,dy,dz,v,dele,
+      real(8)::volt,expdv,random,df,dx,dy,dz,v,dele,
      &                 vinter,vtail,vext,vminim,vdum,velect
-      double precision xcmo,ycmo,zcmo
+      real(8)::xcmo,ycmo,zcmo
       dimension xcmo(nmax),ycmo(nmax),zcmo(nmax)
 
 C --------------------------------------------------------------------

@@ -29,7 +29,7 @@ c  are evaluated with this assumption which is rarely incorrect.)
 c  ********************************************************************
 
       implicit none
-      double precision rijsq,rij,srij,sr2,epsilon2,genlj
+      real(8)::rijsq,rij,srij,sr2,epsilon2,genlj
 
 
       include 'control.inc'

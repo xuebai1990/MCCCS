@@ -41,15 +41,15 @@ c    **********************************************************************
       include 'expand.inc'
       include 'poten.inc'
 
-      logical ovrlap
-      integer i,ibox,iunit,flagon,itype,j,imolty,icbu,ic,imt,jmt,
+      logical::ovrlap
+      integer::i,ibox,iunit,flagon,itype,j,imolty,icbu,ic,imt,jmt,
      &     itype2,disp
-      double precision dchain,random,vnew,vold
+      real(8)::dchain,random,vnew,vold
      +                 ,vintran,vintrao,deltv,deltvb,disvsq
      +                 ,vintern,vintero,vextn,vexto,rchain
      &                 ,velectn,velecto,vdum
      &                 ,vrecipo,vrecipn,vexpta,vexptb,volume,rho,coru
-      logical laccept
+      logical::laccept
 
 c      write(iou,*) 'start expand-ensemble move'
 c ***    select a chain at random ***

@@ -33,8 +33,8 @@ c *** common blocks ***
       include 'external.inc'
       include 'externalmuir.inc'
 
-      double precision exmuir, z
-      integer ntj
+      real(8)::exmuir, z
+      integer::ntj
 
 C --------------------------------------------------------------------
 

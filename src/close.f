@@ -40,11 +40,11 @@ c     **************************************************************
 
       include 'control.inc'
 
-      logical lterm
+      logical::lterm
 
-      integer n,iinit
+      integer::n,iinit
 
-      double precision x,y,z,rx,ry,rz,length,lengtha,lengthb
+      real(8)::x,y,z,rx,ry,rz,length,lengtha,lengthb
      +     ,xa,ya,za,theta,thetac,ux,uy,uz,bondl,avar,bvar,cvar
      +     ,rxa,rya,rza,lengthc,angle,rxf,ryf,rzf,var,dvar,a,b,c
 

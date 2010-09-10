@@ -24,7 +24,7 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      double precision p,a1,a2,a3,a4,a5,x,erfunc,tt,eee
+      real(8)::p,a1,a2,a3,a4,a5,x,erfunc,tt,eee
       parameter (p=0.3275911d0,a1=0.254829592d0,
      &     a2=-0.284496736d0,a3=1.421413741d0,
      &     a4=-1.453152027d0,a5=1.061405429d0)

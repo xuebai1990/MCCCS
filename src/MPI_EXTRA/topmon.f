@@ -25,13 +25,13 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
 
-      integer i,seed
-      double precision random,rtest
+      integer::i,seed
+      real(8)::random,rtest
       dimension rtest(10)
       character *50 fileout
 c --- RP added for MPI for random2.f
-      integer nseed
-      double precision random2,nrtest
+      integer::nseed
+      real(8)::random2,nrtest
       dimension nrtest(10)
       character *50 nfileout
 

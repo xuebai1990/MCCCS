@@ -24,7 +24,7 @@ c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       IMPLICIT NONE
-      double precision RANDOM , RCARRY
+      real(8)::RANDOM , RCARRY
       RANDOM = RCARRY()
       RETURN
 C ----------------------------------------------------C
@@ -39,8 +39,8 @@ C  reproducible, for any machine with at least 32 bits / real number.
 C  REF: Press, Flannery, Teukolsky, Vetterling, Numerical Recipes (1986)
 C----------------------------------------------------------------------C
       IMPLICIT NONE
-      INTEGER IA , IC , ISEED , M1
-      double precision RANDx , RM
+      integer::IA , IC , ISEED , M1
+      real(8)::RANDx , RM
       PARAMETER (M1=714025,IA=1366,IC=150889,RM=1.D+0/M1)
 c
       ISEED = MOD(IA*ISEED+IC,M1)
@@ -52,7 +52,7 @@ c
 
       SUBROUTINE RANSET(ISEED)
       IMPLICIT NONE
-      INTEGER ISEED
+      integer::ISEED
 
       CALL RSTART(ISEED)
       RETURN
@@ -63,8 +63,8 @@ C----------------------------------------------------------------------C
 C       Initialize Marsaglia list of 24 random numbers.
 C----------------------------------------------------------------------C
       IMPLICIT NONE
-      double precision Carry , ran , RANDx , Seed
-      INTEGER i , I24 , Iseed , ISEEDA , J24
+      real(8)::Carry , ran , RANDx , Seed
+      integer::i , I24 , Iseed , ISEEDA , J24
       COMMON /RANDM/ Seed(24) , Carry , I24 , J24 , Iseed
 
       I24 = 24
@@ -95,8 +95,8 @@ C----------------------------------------------------------------------C
 C       Random number generator from Marsaglia.
 C----------------------------------------------------------------------C
       IMPLICIT NONE
-      double precision Carry , RCARRY , Seed , TWOM24 , TWOP24 , uni
-      INTEGER I24 , Iseed , J24
+      real(8)::Carry , RCARRY , Seed , TWOM24 , TWOP24 , uni
+      integer::I24 , Iseed , J24
       PARAMETER (TWOP24=16777216.D+0,TWOM24=1.D+0/TWOP24)
       COMMON /RANDM/ Seed(24) , Carry , I24 , J24 , Iseed
 c

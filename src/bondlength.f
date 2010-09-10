@@ -38,8 +38,8 @@ c     **************************************************************
 
       include 'tabulated.inc'
 
-      integer vibtype
-      double precision length, bond, random, bf, vvib, beta, kvib
+      integer::vibtype
+      real(8)::length, bond, random, bf, vvib, beta, kvib
      &     , requil, tabulated_vib
 
       vvib = 0.0d0

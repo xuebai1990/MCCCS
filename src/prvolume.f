@@ -46,34 +46,34 @@ c
 ckea
       include 'garofalini.inc'
 
-      logical ovrlap,lvol,lx,ly,lz,la,lb,lc
+      logical::ovrlap,lvol,lx,ly,lz,la,lb,lc
 
-      integer i,j,imolty,ic,ncount,jhmat,numvecto
-      double precision bxo,byo,bzo,hbxo,hbyo,hbzo
-      double precision volo,vboxo,dfac,
+      integer::i,j,imolty,ic,ncount,jhmat,numvecto
+      real(8)::bxo,byo,bzo,hbxo,hbyo,hbzo
+      real(8)::volo,vboxo,dfac,
      +                 vintero,vtailo,vexto,velecto,vflucqo
-      double precision kxo(vectormax),kyo(vectormax),
+      real(8)::kxo(vectormax),kyo(vectormax),
      +                 kzo(vectormax),prefacto(vectormax)
-      double precision voln,vboxn,
+      real(8)::voln,vboxn,
      +                 vintern,vtailn,vextn,velectn,vflucqn
-      double precision rxuo(nmax,numax),ryuo(nmax,numax)
+      real(8)::rxuo(nmax,numax),ryuo(nmax,numax)
      &                ,rzuo(nmax,numax),qquo(nmax,numax)
-      double precision random,df,dx0,dy0,dz0,dx,dy,dz,v,dele,vdum
+      real(8)::random,df,dx0,dy0,dz0,dx,dy,dz,v,dele,vdum
      &                 ,vinter,vtail,vext,vminim,velect,vflucq
      &                 ,velect_intra,velect_inter
-      double precision xcmo(nmax),ycmo(nmax),zcmo(nmax),calpo
+      real(8)::xcmo(nmax),ycmo(nmax),zcmo(nmax),calpo
      &                 ,xcmoi,ycmoi,zcmoi,xcmi,ycmi,zcmi
      &                 ,xcmj,ycmj,zcmj,rxuij,ryuij,rzuij
-      double precision rbcut,rbox
-      double precision w(3),vx,vy,vz
-      integer boxvch,ichoiq,ibox
-      integer neigho_cnt(nmax),neigho(100,nmax)
-      double precision hmato(9),hmatio(9)
+      real(8)::rbcut,rbox
+      real(8)::w(3),vx,vy,vz
+      integer::boxvch,ichoiq,ibox
+      integer::neigho_cnt(nmax),neigho(100,nmax)
+      real(8)::hmato(9),hmatio(9)
 
-      integer idum
-      double precision lddum,lddum2(27),min_boxl
+      integer::idum
+      real(8)::lddum,lddum2(27),min_boxl
 c KEA
-      double precision v3o,v3n
+      real(8)::v3o,v3n
 
 C --------------------------------------------------------------------
 

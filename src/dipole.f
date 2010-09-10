@@ -24,8 +24,8 @@ c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
-      integer ibox,mtype,i,imolty,zz,ii
-      double precision dipox(2),dipoy(2),dipoz(2)
+      integer::ibox,mtype,i,imolty,zz,ii
+      real(8)::dipox(2),dipoy(2),dipoz(2)
       include 'control.inc'
       include 'coord.inc'
       include 'coord2.inc'

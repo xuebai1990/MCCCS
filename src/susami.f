@@ -33,13 +33,13 @@ c *** common blocks ***
       include 'external.inc'
       include 'ljsamipara.inc'
 
-      double precision hsig,heps,tsig,teps
+      real(8)::hsig,heps,tsig,teps
 
       parameter ( hsig=4.220d0, heps=110.68816d0, 
      &            tsig=3.527d0, teps=79.982210d0 )
 
-      double precision rcsami
-      integer ij
+      real(8)::rcsami
+      integer::ij
 
 C --------------------------------------------------------------------
 

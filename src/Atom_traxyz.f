@@ -42,26 +42,26 @@ c    *******************************************************************
       include 'bnbsma.inc'
       include 'neigh.inc'
 
-      logical lx,ly,lz,ovrlap,idum,ddum
+      logical::lx,ly,lz,ovrlap,idum,ddum
 
-      logical lneighij,lclu_cmp,lexclude(nmax)
+      logical::lneighij,lclu_cmp,lexclude(nmax)
 
-      integer i,ibox,flagon,iunit,j,imolty,icbu,ncount,ic,ip,k
-      integer pick_unit, pick_chain
-      double precision rx,ry,rz,dchain,ddx,ddy,ddz,random,vnew,vold
+      integer::i,ibox,flagon,iunit,j,imolty,icbu,ncount,ic,ip,k
+      integer::pick_unit, pick_chain
+      real(8)::rx,ry,rz,dchain,ddx,ddy,ddz,random,vnew,vold
      +                 ,vintran,vintrao,deltv,deltvb,disvsq
      +                 ,vintern,vintero,vextn,vexto,rchain
      &                 ,velectn,velecto,vdum
      &                 ,vrecipo,vrecipn   
      & ,velectn_intra,velectn_inter,velecto_intra,velecto_inter
  
-      double precision vvibn,vbendn,vtgn,vvibo,vbendo,vtgo
+      real(8)::vvibn,vbendn,vtgn,vvibo,vbendo,vtgo
 
-      double precision vewaldn, vewaldo   
+      real(8)::vewaldn, vewaldo   
 
       dimension ddum(27)
 
-      logical laccept
+      logical::laccept
 
 C --------------------------------------------------------------------
 

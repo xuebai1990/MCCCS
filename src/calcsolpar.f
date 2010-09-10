@@ -23,21 +23,21 @@ c ******************************************************************************
       include 'system.inc'
       include 'cell.inc'
 
-      integer ibox, jbox, ig, il, imolty
+      integer::ibox, jbox, ig, il, imolty
       integer, dimension(nbxmax):: temp_nmol,box_volume
       integer, dimension(nbxmax,ntmax):: acnbox
       double precision, dimension(nbxmax)::mol_vol      
       double precision, dimension(nbxmax)::pres
-      double precision enchg1, enchg2,enchg3
-      double precision Heat_vapor_T, Heat_vapor_LJ, Heat_vapor_COUL
-      double precision CED_T, HSP_T, CED_LJ, HSP_LJ
-      double precision CED_COUL,HSP_COUL
-      double precision cal2joule, joule2cal
-      double precision pdV
+      real(8)::enchg1, enchg2,enchg3
+      real(8)::Heat_vapor_T, Heat_vapor_LJ, Heat_vapor_COUL
+      real(8)::CED_T, HSP_T, CED_LJ, HSP_LJ
+      real(8)::CED_COUL,HSP_COUL
+      real(8)::cal2joule, joule2cal
+      real(8)::pdV
 
-      double precision T_Energy_Liq, T_Energy_Gas
-      double precision LJ_Energy_Liq, LJ_Energy_Gas
-      double precision Coul_Energy_Liq, Coul_Energy_Gas
+      real(8)::T_Energy_Liq, T_Energy_Gas
+      real(8)::LJ_Energy_Liq, LJ_Energy_Gas
+      real(8)::Coul_Energy_Liq, Coul_Energy_Gas
 
 
 c     -- This is different than the conventional 4.184

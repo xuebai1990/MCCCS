@@ -30,10 +30,10 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'coord.inc'
       include 'system.inc'      
 
-      integer i,j,k,n,ncellx,ncelly,ncellz,iinit,ibox,linkdecode
+      integer::i,j,k,n,ncellx,ncelly,ncellz,iinit,ibox,linkdecode
      &     ,imolty,imol,ic,cellinc,ia,ja,ka,ib,jb,kb,count,ncell,ncello
 
-      double precision dcellx,dcelly,dcellz,rx,ry,rz,xcmi,ycmi,zcmi
+      real(8)::dcellx,dcelly,dcellz,rx,ry,rz,xcmi,ycmi,zcmi
 
 c     *** rintramax is the maximum distance between endpoints 
 c     *** in a molecule
@@ -242,7 +242,7 @@ c      write(iou,*) 'END LINKCELL IINIT=',iinit
             
       implicit none
       
-      integer i,j,k,ncellx,ncelly,ncellz,linkdecode
+      integer::i,j,k,ncellx,ncelly,ncellz,linkdecode
       
 c     *** decodes x,y,z to a single number
 

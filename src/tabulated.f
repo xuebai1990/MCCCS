@@ -16,8 +16,8 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'tabulated.inc'
       include 'conver.inc'
 
-      integer vibtyp, vlow, vhigh, xa, bin, add1
-      double precision len, tabulated_vib, left, lenrem
+      integer::vibtyp, vlow, vhigh, xa, bin, add1
+      real(8)::len, tabulated_vib, left, lenrem
       
       vlow=1
       vhigh=vibsplits(vibtyp)
@@ -70,8 +70,8 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'tabulated.inc'
       include 'conver.inc'
 
-      integer bendtyp, blow, bhigh, xa, bin, add1
-      double precision r, tabulated_bend, left, rem
+      integer::bendtyp, blow, bhigh, xa, bin, add1
+      real(8)::r, tabulated_bend, left, rem
 
       blow=1
       bhigh=bendsplits(bendtyp)
@@ -126,8 +126,8 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'tabulated.inc'
       include 'conver.inc'
 
-      integer typi, typj, low, high, xa, bin, add1
-      double precision r,  tabulated_vdW, left, rem
+      integer::typi, typj, low, high, xa, bin, add1
+      real(8)::r,  tabulated_vdW, left, rem
 
       low=1
       high=vdWsplits(typi, typj)
@@ -180,8 +180,8 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'tabulated.inc'
       include 'conver.inc'
 
-      integer typi, typj, low, high, xa, bin, add1
-      double precision r,  tabulated_elect, left, rem
+      integer::typi, typj, low, high, xa, bin, add1
+      real(8)::r,  tabulated_elect, left, rem
 
       low=1
       high=electsplits(typi, typj)

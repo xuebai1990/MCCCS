@@ -26,9 +26,9 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'control.inc'
       include 'fix.inc'
 
-      integer iu1,iu2,iu3,iu4,jttor
+      integer::iu1,iu2,iu3,iu4,jttor
       
-      double precision thetac,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2
+      real(8)::thetac,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2
      &     ,daa1,da1a2,dot,vtor,vtorso,tcc,xcc,ycc,zcc,theta,spltor
       
 c     --- calculate cross products d_a x d_a-1 

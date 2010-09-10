@@ -50,38 +50,38 @@ c *** common blocks ***
       include 'conver.inc'
       include 'tabulated.inc'
 
-      logical lqimol,lqjmol,lexplt,lcoulo,lfavor,lij2,liji,lqchgi
-      logical lljii,ovrlap,ltors,lcharge_table,lt,lfound
-      logical lmim
+      logical::lqimol,lqjmol,lexplt,lcoulo,lfavor,lij2,liji,lqchgi
+      logical::lljii,ovrlap,ltors,lcharge_table,lt,lfound
+      logical::lmim
 
-      integer growii,growjj,k,cellinc,jcell,ic,nmole
-      integer i,ibox, istart, iend,ii,ntii,flagon,jjj,iii
+      integer::growii,growjj,k,cellinc,jcell,ic,nmole
+      integer::i,ibox, istart, iend,ii,ntii,flagon,jjj,iii
      +       ,j,jj,ntjj,ntij,ntj,imolty,jmolty,ncell
-      integer iivib,jjtor,ip1,ip2,ip3,it,nchp2,acellinc
+      integer::iivib,jjtor,ip1,ip2,ip3,it,nchp2,acellinc
 
-      integer jjvib,jjben,mmm  
+      integer::jjvib,jjben,mmm  
 
-      double precision vvib,vbend,vtg,theta,mlen2
+      real(8)::vvib,vbend,vtg,theta,mlen2
 
-      double precision ljsami,ljpsur,ljmuir,v,vintra, vinter,vext 
+      real(8)::ljsami,ljpsur,ljmuir,v,vintra, vinter,vext 
      +                ,rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq
      +                ,ryuij,rzuij,sr2,sr6,rij,rijsq,dzui,dz3,dz12
      +                ,exgrph,exsami,exmuir,exzeo,vtors,exsix,velect
      +                ,vewald,mmff,rbcut,ninesix, genlj
-      double precision erfunc,qave
-      double precision xvec,yvec,zvec,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2
+      real(8)::erfunc,qave
+      real(8)::xvec,yvec,zvec,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2
      &     ,daa1,da1a2,dot,thetac,vtorso
-      double precision xcmi,ycmi,zcmi,rcmi,rcm,rcmsq,epsilon2,sigma2
-      double precision sx,sy,sz
-      double precision slitpore,v_elect_field
-      double precision distij(numax,numax)
-      double precision xcc,ycc,zcc,tcc,spltor
+      real(8)::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq,epsilon2,sigma2
+      real(8)::sx,sy,sz
+      real(8)::slitpore,v_elect_field
+      real(8)::distij(numax,numax)
+      real(8)::xcc,ycc,zcc,tcc,spltor
 
       dimension xvec(numax,numax),yvec(numax,numax),zvec(numax,numax)
       dimension lcoulo(numax,numax),cellinc(cmax),jcell(nmax)
       dimension acellinc(numax,27)
 
-      double precision tabulated_vib, tabulated_bend, tabulated_vdW,
+      real(8)::tabulated_vib, tabulated_bend, tabulated_vdW,
      &     tabulated_elect
 
 C --------------------------------------------------------------------

@@ -40,11 +40,11 @@ c ***************************************************
       include 'nsix.inc'
       include 'external.inc'
 
-      double precision coruz,eps,rci3,rho
-      integer iunit,ibox
-      double precision epsilon2,sigma2
-      double precision rci1
-      integer imolty,jmolty,ii,jj, ntii, ntjj, ntij
+      real(8)::coruz,eps,rci3,rho
+      integer::iunit,ibox
+      real(8)::epsilon2,sigma2
+      real(8)::rci1
+      integer::imolty,jmolty,ii,jj, ntii, ntjj, ntij
 
 c --- note works only for alkanes!!!
 c      if (iunit.ne.1) then

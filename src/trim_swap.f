@@ -53,15 +53,15 @@ c    ********************************************************************
       include 'neigh.inc'
       include 'cell.inc'
       
-      logical ovrlap,lterm,lnew,lempty,ldone,ltors,lovrh,lfavor,
+      logical::ovrlap,lterm,lnew,lempty,ldone,ltors,lovrh,lfavor,
      &     laccept,lswapinter,lrem_out,lins_in,lneighij,linsk_in,
      &     lremk_in,lrem_clu,lins_clu,lfixnow
 
      
-      integer boxins,boxrem,imol,ichoi,ip,iwalk,idum
-      integer istt,iett,ncount,itype,ipair,ipairb,beg,flagon
+      integer::boxins,boxrem,imol,ichoi,ip,iwalk,idum
+      integer::istt,iett,ncount,itype,ipair,ipairb,beg,flagon
 
-      integer iutry,icbu,ifrom,irem,iins,glist,findex
+      integer::iutry,icbu,ifrom,irem,iins,glist,findex
      &     ,iii,j,ibox,iunit,ic,pointp,imolty,imt,jmt,igrow
      &     ,pointp2,jins,jmolty,neighj_num,neighk_num
      &     ,joffset,koffset,kmolty,kins,target,cnt_wf1
@@ -70,35 +70,35 @@ c    ********************************************************************
       dimension glist(numax),cnt_wf1(0:6,0:6,4),cnt_wf2(0:6,0:6,4),
      &     cnt_wra1(1000,4),cnt_wra2(1000,4)
 
-      double precision sx,sy,sz,ddum(27)
+      real(8)::sx,sy,sz,ddum(27)
 
-      double precision v,vintra,vinter,vext,velect,vtorold,vtornew
+      real(8)::v,vintra,vinter,vext,velect,vtorold,vtornew
      &     ,vewald,vflucq,delen,deleo,rpair
-      double precision vnewflucq,voldflucq,qion,ctorfo,ctorfn
+      real(8)::vnewflucq,voldflucq,qion,ctorfo,ctorfn
       dimension qion(numax)
-      double precision rxuold,ryuold,rzuold
+      real(8)::rxuold,ryuold,rzuold
       dimension rxuold(numax),ryuold(numax),rzuold(numax)
-      double precision bsswap,bnswap,bnswap_in,bnswap_out
-      double precision random,rmol,qelect,rbf,bsum
-      double precision waddnew,waddold
+      real(8)::bsswap,bnswap,bnswap_in,bnswap_out
+      real(8)::random,rmol,qelect,rbf,bsum
+      real(8)::waddnew,waddold
 
-      double precision total_NBE,vintran,velectn,vewaldn,vtgn
-      double precision vbendn,vvibn 
+      real(8)::total_NBE,vintran,velectn,vewaldn,vtgn
+      real(8)::vbendn,vvibn 
 
 
 
-      double precision v1insext,v1remext,v1ins,w1ins,v1rem,w1rem
+      real(8)::v1insext,v1remext,v1ins,w1ins,v1rem,w1rem
      &     ,v1insint,v1remint,v1insewd,v1remewd
      &     ,wnlog,wolog,wdlog,wratio,vinsta,vremta
      &     ,volins,volrem,rho,arg,coru,v1inselc,v1remelc
-      double precision rvol,x,y,z,rijsq,wbias_ins,wbias_rem,r
+      real(8)::rvol,x,y,z,rijsq,wbias_ins,wbias_rem,r
      &     ,xi1,xi2,xisq
       dimension bsswap(ntmax,npabmax,nbxmax*2),
      &     bnswap(ntmax,npabmax,nbxmax*2),bnswap_in(ntmax,2),
      &     bnswap_out(ntmax,2)
       dimension qelect(nntype)
-      double precision vrecipn,vrecipo,vdum,whins,whrem
-      double precision rxuh,ryuh,rzuh,delenh,vtrhext,vtrhintra
+      real(8)::vrecipn,vrecipo,vdum,whins,whrem
+      real(8)::rxuh,ryuh,rzuh,delenh,vtrhext,vtrhintra
      &     ,vtrhinter,vtrhelect,vtrhewald,vtrhtg,bfach
      
       dimension bfach(nchmax),delenh(nchmax),vtrhinter(nchmax)

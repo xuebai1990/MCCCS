@@ -34,9 +34,9 @@ c     **************************************************************
       include 'garofalini.inc'
       include 'poten.inc'
 
-      double precision rijsq,rij,hterm,coul,erfunc,qa,qb
-      double precision hterma
-      integer ntij,ntii,ntjj,aa,bb,i
+      real(8)::rijsq,rij,hterm,coul,erfunc,qa,qb
+      real(8)::hterma
+      integer::ntij,ntii,ntjj,aa,bb,i
 
 c      write(6,*) 'input',rijsq,ntij,qa,qb
       rij = dsqrt(rijsq)

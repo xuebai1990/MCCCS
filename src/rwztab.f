@@ -25,7 +25,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 c   read/write zeolite table from/to disk
       implicit none
-      integer iswitc
+      integer::iswitc
       include 'control.inc'
       include 'grid.inc'
       include 'zeolite.inc'

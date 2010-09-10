@@ -7,13 +7,13 @@ c -- graphite surface
 	include 'control.inc'
 	include 'external.inc'
 	include 'poten.inc'	
-	integer twopi
-	integer ntij
+	integer::twopi
+	integer::ntij
 	parameter (twopi=6.283185307179586d0)
-	double precision vgs,z
-	double precision slitpore
-	double precision sig
-c	double precision coef1,coef2,coef3,coef4
+	real(8)::vgs,z
+	real(8)::slitpore
+	real(8)::sig
+c	real(8)::coef1,coef2,coef3,coef4
 	
 	sig = sqrt(sig2ij(ntij))
 	

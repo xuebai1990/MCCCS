@@ -18,20 +18,20 @@ c     *******************************************************************
 
       character*50 fileout
       character*20 ftemp,fname2,fname3
-      integer switch,ichain,fname
-      logical lskip
-      integer bin,k,kk,box,z
-      integer tempbx,dummy,xx,yy,g,gg
-      integer chnum,imolty,i,ii,j,jj
+      integer::switch,ichain,fname
+      logical::lskip
+      integer::bin,k,kk,box,z
+      integer::tempbx,dummy,xx,yy,g,gg
+      integer::chnum,imolty,i,ii,j,jj
      &     ,jmolty,binadj,ntij,ntii,ntjj,jstart,istart,ntji
-      integer iivib,ip1,ip2,ip3,gaudef,uu,dum,units,zzz,zz1
+      integer::iivib,ip1,ip2,ip3,gaudef,uu,dum,units,zzz,zz1
 
-      double precision avolume,rho,binstep,vec_hist
+      real(8)::avolume,rho,binstep,vec_hist
      &     ,rxui,ryui,rzui,xxideal
      &     ,rxuij,ryuij,rzuij,ruijsq,ruij
      &     ,numxx,numyy,count,const,rlower,rupper,nideal,analhist
-      double precision comanalhist
-      double precision shlsumx,shlsumy,rcutsq
+      real(8)::comanalhist
+      real(8)::shlsumx,shlsumy,rcutsq
 
 C   NOW DEFINED IN CONTROL.INC
 
@@ -39,15 +39,15 @@ Cc     ntmax = number of moltyps, ntdifmx = max number of diff beads in sim
 C      parameter (nbinmx=200,nbxmax=1,ntmax=5,nmax=1600,numax=18
 C     & ,ntdifmx=8)
 
-      integer bend,iv,iuvib,iuv,iutest
-      double precision onepi,
+      integer::bend,iv,iuvib,iuv,iutest
+      real(8)::onepi,
      &    value,total,degree
       parameter (onepi = 3.141592654d0)
-      integer torsion, tor_code,itor,iutor,patt,bthree
+      integer::torsion, tor_code,itor,iutor,patt,bthree
      &     ,decimal,power
-      double precision xcc,ycc,zcc,tcc,fplus,fminus
+      real(8)::xcc,ycc,zcc,tcc,fplus,fminus
      &     ,ftrans
-      double precision xvec,yvec,zvec,distij,xaa1,yaa1,zaa1,xa1a2
+      real(8)::xvec,yvec,zvec,distij,xaa1,yaa1,zaa1,xa1a2
      &     ,ya1a2,za1a2,daa1,da1a2,dot,thetac,theta
      &     ,ratio
      &     ,psum,tempzcm,tempmasst,slab_vol
@@ -59,21 +59,21 @@ C     & ,ntdifmx=8)
 ********* Taking out charge part*************************
 
 CCc     --- variables used in the charge parts
-CC     logical qhere
-CC      integer qbin,qbinmax,qbins,qqcode,imol,iunit
-CC      integer qbin,qbins,qqcode,imol,iunit
+CC     logical::qhere
+CC      integer::qbin,qbinmax,qbins,qqcode,imol,iunit
+CC      integer::qbin,qbins,qqcode,imol,iunit
 CC    NOW DEFINED IN CONTROL.INC
 CC      parameter (qbinmax=1000)
 
-CC      double precision qdisp
-CC     double precision qmin,qmax,qdiff,qstep,qdummy
+CC      real(8)::qdisp
+CC     real(8)::qmin,qmax,qdiff,qstep,qdummy
 CC      dimension qanalhist(numax*ntdifmx+numax,nbxmax,qbinmax)
 CC      dimension qcount(numax*ntdifmx+numax,nbxmax)
 
 CCc     --- variables used in the dipole parts
-CC     logical ldipole
-CC     integer qblock,block,nblock
-CC      double precision dipole,dicount,dipx,dipy,dipz,diconv,stddev
+CC     logical::ldipole
+CC     integer::qblock,block,nblock
+CC      real(8)::dipole,dicount,dipx,dipy,dipz,diconv,stddev
 CC     &     ,avera,diprev,dcprev,dipblk
 CC     dimension dipole(ntdifmx,nbxmax),dicount(ntdifmx,nbxmax)
 CC     dimension diprev(ntdifmx,nbxmax),dcprev(ntdifmx,nbxmax)

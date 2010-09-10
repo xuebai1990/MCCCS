@@ -27,7 +27,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c    *******************************************************************
 c    ** calculates the potential energy and the boltzmann factor      **
 c    ** for ichoi trial positions.                                    **
-c    ** logical ovrlap            true for walk termination           **
+c    ** logical::ovrlap            true for walk termination           **
 c    *******************************************************************
 
       implicit none

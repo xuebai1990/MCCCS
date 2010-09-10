@@ -30,8 +30,8 @@ c    ** rewritten on June 25/99 by Bin Chen.                            **
 c    *********************************************************************
 
       implicit none
-      integer ic,zz,ii,imolty,ibox,ncount,type
-      double precision vrecipnew,vrecipold,sumr(2),sumi(2),arg
+      integer::ic,zz,ii,imolty,ibox,ncount,type
+      real(8)::vrecipnew,vrecipold,sumr(2),sumi(2),arg
       include 'control.inc'
       include 'coord.inc'
       include 'coord2.inc'

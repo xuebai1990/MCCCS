@@ -39,8 +39,8 @@ c    *******************************************************************
       include 'ewaldsum.inc'
       include 'connect.inc'      
 
-      integer i,imolty,iunit,ii,jj,ntii,ntjj,ntij,ibox
-      double precision vflucq,qion(numax),qqii,vewald,rxui,ryui,rzui,
+      integer::i,imolty,iunit,ii,jj,ntii,ntjj,ntij,ibox
+      real(8)::vflucq,qion(numax),qqii,vewald,rxui,ryui,rzui,
      &     rxuij,ryuij,rzuij,rij,erfunc
       vflucq = 0.0d0
       vewald = 0.0d0

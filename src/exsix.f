@@ -28,8 +28,8 @@ c     ***  calculates the energy using the exp-6 potential       ***
 c     ***  parameters defined in suijtab.f  M.G. Martin          ***
 c     **************************************************************
       implicit none
-      double precision rijsq,rij,exsix
-      integer ntij
+      real(8)::rijsq,rij,exsix
+      integer::ntij
 
       include 'control.inc'
       include 'expsix.inc'

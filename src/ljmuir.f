@@ -35,8 +35,8 @@ c *** common blocks ***
       include 'coord.inc'
       include 'poten.inc'
 
-      double precision ljmuir, rijsq, sr, sr2, sr6, epshead, sighead
-      integer ntij
+      real(8)::ljmuir, rijsq, sr, sr2, sr6, epshead, sighead
+      integer::ntij
 
 c --- attention: eps_hh / 4 used, since later multiplied by 4 --- 
 c      parameter (epshead=27.67204d0,sighead=4.22d0)

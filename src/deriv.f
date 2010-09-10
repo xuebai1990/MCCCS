@@ -9,9 +9,9 @@ c
       include 'ipswpar.inc'
       include 'cell.inc'
 
-      integer ibox,i,j,k
+      integer::ibox,i,j,k
 
-      double precision vol,hmats(3,3),hmatsi(3,3)
+      real(8)::vol,hmats(3,3),hmatsi(3,3)
 
       if (lstagea) then
          dvdl = -(1.0d0-etais)*vipsw
