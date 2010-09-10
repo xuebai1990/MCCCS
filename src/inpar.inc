@@ -21,9 +21,9 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      logical lbranch
-      integer ininch,inix, iniy, iniz, inirot, inimix
-      double precision zshift, dshift
+      logical::lbranch
+      integer::ininch,inix, iniy, iniz, inirot, inimix
+      real(8)::zshift, dshift
       dimension inix(nbxmax),iniy(nbxmax),iniz(nbxmax),
      &          inirot(nbxmax),inimix(nbxmax)
       dimension zshift(nbxmax),dshift(nbxmax)

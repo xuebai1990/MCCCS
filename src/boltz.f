@@ -387,7 +387,7 @@ c     --- if lcompute then compute the electrostatic energy
      &                             qqu(icharge,ii)*
      &                             qqu(icharge,iu)*tabulated_elect
                            elseif (lewald) then
-c                          --- compute real space term of vewald
+c                          --- compute real::space term of vewald
                               velect = velect + 
      &                          qscale2(imolty,ii,iu)*qqu(icharge,ii)
      &                             *qqu(icharge,iu)*
@@ -758,7 +758,7 @@ c     --- if lcompute then compute the electrostatic energy
                               velect = velect + qqu(icharge,ii)*
      &                             qqu(j,jj)*tabulated_elect
                            elseif (lewald) then
-c                             --- compute real space term of velect
+c                             --- compute real::space term of velect
                               velect = velect + qqu(icharge,ii)
      &                             *qqu(j,jj)*
      &                             erfunc(calp(ibox)*rij)/
@@ -802,7 +802,6 @@ c         if (.not. (lslit .and. ibox.eq.2)) then
 c              --- assign bead type for ii
                ii = glist(count)
                ntii = ntype(imolty,ii)
-               ntij = (ntii - 1) * nntype + ntsubst
                rxui = rxp(count,itrial)
                ryui = ryp(count,itrial)
                rzui = rzp(count,itrial)
@@ -832,7 +831,7 @@ c -- calculate interaction with the surface at the top of the box
 
                if ( lsami ) vext = vext + exsami(rzui,ntii)
                if ( lmuir ) vext = vext + exmuir(rzui,ntii)
-               if ( lexzeo ) vext = vext + exzeo(rxui,ryui,rzui,ntij)
+               if ( lexzeo ) vext = vext + exzeo(rxui,ryui,rzui,ntii)
             enddo
          endif
 	 endif

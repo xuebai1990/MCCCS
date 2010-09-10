@@ -21,5 +21,5 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      double precision raddeg, degrad ,twopi, onepi,eXV_to_K
+      real(8)::raddeg, degrad ,twopi, onepi,eXV_to_K
       common /convrs/ raddeg, degrad, twopi, onepi,eXV_to_K

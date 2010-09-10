@@ -21,7 +21,7 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      double precision disvec
+      real(8)::disvec
 c      common /nn1/ disvec(2,nmax,3)
 c 	replace the 1 with nmax to use neighbor lists
       common /nn1/ disvec(2,1,3)

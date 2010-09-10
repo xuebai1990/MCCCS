@@ -97,7 +97,7 @@ c      write(iou,*) 'START PLACE'
 
             if (invib(imolty,iu).gt.1) then
                write(iou,*) 'iu,invib',iu,invib(imolty,iu)
-               stop 'invib can no be larger than one for hydrogen'
+               call cleanup('invib can no be larger than one for hydrogen')
             endif
 
 c     --- determine bond lengths
@@ -107,7 +107,7 @@ c     --- determine bond lengths
 
             if (iufrom.ne.ju) then
                write(iou,*) 'iu,ju,iufrom',iu,ju,iufrom
-               stop 'ju not equal to iufrom'
+               call cleanup('ju not equal to iufrom')
             endif
 
             jtvib = itvib(imolty,iu,iv)
@@ -264,7 +264,7 @@ c     --- determine angle with iuprev
 
                      if (ju.ne.ijben2(imolty,iu,ib)) then
                         write(iou,*) 'ju,ijben2',ju,ijben2(imolty,iu,ib)
-                        stop 'ju not equal to ijben2 in place'
+                        call cleanup('ju not equal to ijben2 in place')
                      endif
 
                      type = itben(imolty,iu,ib)
@@ -483,7 +483,7 @@ c     --- now to calculate all torsions
                      if (.not. lexist(jut4)) then
                         write(iou,*) 'jut4,jut3,jut2,iu',
      &                       jut4,jut3,jut2,iu
-                        stop 'trouble jut4 in place'
+                        call cleanup('trouble jut4 in place')
                      endif
                      
                      jttor = ittor(imolty,iu,it)
@@ -551,7 +551,7 @@ c     --- update new rosenbluth weight + vibrations
                endif
             enddo
 
-            stop 'BIG TIME SCREWUP IN PLACE'
+            call cleanup('BIG TIME SCREWUP IN PLACE')
 
          endif
  20      continue

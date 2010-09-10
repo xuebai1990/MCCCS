@@ -93,12 +93,12 @@ CC      dimension dipblk(ntdifmx,nbxmax,20)
 
       if(nhere.gt.ntdifmx) then
         write(6,*) 'nhere greater than ntdifmax', nhere, ntdifmx
-        stop 'choose a larger ntdifmx in control.inc'
+        call cleanup('choose a larger ntdifmx in control.inc')
       endif
  
       if(nbin.gt.nbinmx) then
          write(6,*) 'number of bins "nbin" .gt. nbinmx', nbin, nbinmx
-         stop 'choose a larger nbinmx in control.inc'
+         call cleanup('choose a larger nbinmx in control.inc')
        endif  
       
       do kk=1,nbxmax
@@ -127,7 +127,7 @@ C  THIS PART SHOULD GO TO READDAT
 !         read(5,*) qmax
 !         write(6,*) 'input qbins must be less than',qbinmax
 !         read(5,*) qbins
-!         if ( qmax .lt. qmin ) stop 'qmax cannont be less than qmin'
+!         if ( qmax .lt. qmin ) call cleanup('qmax cannont be less than qmin')
 !         qdiff = qmax - qmin
 !         qstep = qdiff/dble(qbins)
 !         write(6,*) 'input additional disp for charges (0.0 for none)'
@@ -165,7 +165,7 @@ C  end to end vector probability distribution
 	       write(6,*) 'Stopped in Analysis end-to-end dist calc'
                write(6,*) 'number of bins greater than nbinmax_ete',i,
      &              nbinmax_ete
-               stop 'choose larger nbinmax_ete in control.inc'
+               call cleanup('choose larger nbinmax_ete in control.inc')
             endif 
          enddo
          
@@ -199,7 +199,7 @@ c      initializing the arrays
                write(6,*) 'Stopped in Analysis Z profile calculation'  
                write(6,*) 'number of bins greater than nbinmax_ete',i,
      &              nbinmax_ete
-               stop 'choose larger nbinmax_ete in control.inc'
+               call cleanup('choose larger nbinmax_ete in control.inc')
             endif
          enddo 
          
@@ -244,7 +244,7 @@ c     --- are of higher index than ii
             if(bend.gt.angle_max) then
                write(6,*) 'number of bends greater than angle_max',
      &              'molecule type', imolty,' bends', bend   
-               stop 'choose a larger angle_max in control.inc'
+               call cleanup('choose a larger angle_max in control.inc')
             endif
          enddo
       endif
@@ -275,8 +275,8 @@ c     --- is of higher index than ii
             if(torsion.gt.tor_max) then
                write(6,*) 'number of torsions greater than tor_max',
      &               'molecule type', imolty,'torsions', torsion
-               stop 'choose a larger tor_max in control.inc*** requires
-     &            memory 3**torsion so choose it equal to torsions'
+               call cleanup('choose a larger tor_max in control.inc*** requires
+     &            memory 3**torsion so choose it equal to torsions')
              endif
          enddo
       endif
@@ -433,7 +433,7 @@ c     initialize frame specific arrays
 !                        if ( qdummy .lt. qmin .or. qdummy .gt. qmax) then
 !                           write(6,*) 'q value out of range'
 !                           write(6,*) 'frame,i,ii,q',k,i,ii,qdummy
-!                           stop
+!                           call cleanup('q value out of range')
 !                        endif
 !                        qdummy = qdummy - qmin
 !                        qbin = dint(qdummy/qstep) + 1
@@ -1258,7 +1258,7 @@ c         write(6,*) 'avg. number of beads vs. shell size in *num*'
                       write(6,*) 'nframe',nframe
                       write(6,*) 'nnone(kk,ntij),kk,ntij',
      &                     nnone(kk,ntij),kk,ntij
-                      stop 'srewup aframe'
+                      call cleanup('srewup aframe')
                      endif
                    endif
                  enddo
@@ -1315,7 +1315,7 @@ c     --- same thing for the COM rdf
                   write(6,*) 'nframe',nframe
                   write(6,*) 'comnone(kk,ntij),kk,ntij',
      &                 comnone(kk,ntij),kk,ntij
-                  stop 'srewup aframe'
+                  call cleanup('srewup aframe')
                endif
             enddo
          enddo

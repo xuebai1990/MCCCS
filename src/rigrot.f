@@ -219,7 +219,7 @@ c     --- select ip position
             endif
          enddo
          write(iou,*) 'screwup in rigrot'
-         stop 
+         call cleanup('screwup in rigrot')
  15      continue
             
          

@@ -131,7 +131,7 @@ c     - include or exclude additional beads accoring to incl
                   lqinclu(imolty,nb,m) = .false.
                else
                   write(iou,*) 'INCLUS: n,inclsign(n)',n,inclsign(n)
-                  stop 'inclusign must be 1 or -1'
+                  call cleanup('inclusign must be 1 or -1')
                endif
             endif
 

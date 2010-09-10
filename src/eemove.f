@@ -84,7 +84,7 @@ c     &   box_state(mstate), ncmt(box_state(mstate),ee_moltyp(mstate))
 
       if (ncmt(box_state(mstate),ee_moltyp(mstate)).eq.0) then
          write(iou,*)'problem: mstate, but no molecule in mstate',mstate
-         stop
+         call cleanup('')
       endif
 
 c --- type of move depending upon mstate and nstate. one type of move
@@ -155,7 +155,7 @@ c     &               ,.false.,dum,.false.,.false.)
 c	write(iou,*) vnew,vold
          if (ovrlap) then
             write(iou,*) 'disaster ovrlap in old conf eemove'
-            stop
+            call cleanup('')
          endif
 
          if (lewald.and.(lelect(moltion(2)).or.lelect(moltion(1))))then

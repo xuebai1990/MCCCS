@@ -114,7 +114,7 @@ c     --- the distances are too far to be able to close
 c     --- determine perpendicular distance from here to final point
          lengthc = dsqrt( bondl**2 - length**2 )
          
-c     --- find vectors from 1 to 2, 2 to 3, and 3 to 1 in real space
+c     --- find vectors from 1 to 2, 2 to 3, and 3 to 1 in real::space
          x(1) = (rx(2) - rx(1)) 
          y(1) = (ry(2) - ry(1))
          z(1) = (rz(2) - rz(1))

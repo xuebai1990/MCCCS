@@ -110,7 +110,7 @@ c     --- initialize nchbox ---
                write(iou,*) 'ininch',j,(ininch(i,j),i=1,nmolty)
             enddo
             write(iou,*) 'nchain',nchain
-            stop
+            call cleanup('')
          endif
          
          do i = 1, nmolty
@@ -118,7 +118,7 @@ c     --- initialize nchbox ---
                write(iou,*) 'inconsistant number of chains in INITIA'
                write(iou,*) 'moltyp',i,(ininch(i,j),j=1,nbox)
                write(iou,*) 'temtyp:',temtyp(i)
-               stop
+               call cleanup('')
             endif            
          enddo
 
@@ -126,7 +126,7 @@ c     --- initialize nchbox ---
             unitc = inix(i)*iniy(i)*iniz(i)
             if ( nchbox(i) .gt. unitc ) then
                write(iou,*) 'unit cell too small in box',i
-               stop
+               call cleanup('')
             endif
          enddo
          
@@ -161,7 +161,7 @@ c - count number of molecules of each type -
          if ( mcmt(i,1) .ne. check(i) ) then
             write(iou,*) 'inconsistant number of type in INITIA'
             write(iou,*) 'mcmt(i,total),check(i)',mcmt(i,1),check(i)
-            stop
+            call cleanup('')
          endif
       enddo
 
@@ -214,7 +214,7 @@ c * to grow it with cbmc
                if (nunit(i) .ne. nugrow(i)) then
                   write(iou,*) 'Cant grow molecule.  Please',
      &                 ' provide a structure via fort.78'
-                  stop
+                  call cleanup('')
                endif
 c * put the first bead at the origin
                rxnew(1) = 0.0d0
@@ -240,7 +240,7 @@ c * actually grow the structure
                if (lterm) then
                   write(iou,*) 'error in initia growing molecule'
                   write(iou,*) 'maybe increasing nchoi would help?'
-                  stop
+                  call cleanup('')
                endif
 
 c * return the value of nchain
@@ -434,7 +434,7 @@ c * first find the end with the lowest number
                            write(iou,*) 'initia only works for linear',
      &                          ' molecules!  Maybe you should make',
      &                          ' a fort.78 file and use lbranch?'
-                           stop
+                           call cleanup('')
                         endif
                      enddo
 

@@ -21,9 +21,9 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      double precision hmat(nbxmax,9),hmati(nbxmax,9)
-      double precision cell_length(nbxmax,3),min_width(nbxmax,3)
-      double precision cell_vol(nbxmax) 
-      double precision cell_ang(nbxmax,3)
+      real(8)::hmat(nbxmax,9),hmati(nbxmax,9)
+      real(8)::cell_length(nbxmax,3),min_width(nbxmax,3)
+      real(8)::cell_vol(nbxmax) 
+      real(8)::cell_ang(nbxmax,3)
       common /cella/ hmat,hmati
       common /cellb/ cell_length,min_width,cell_vol,cell_ang

@@ -462,7 +462,7 @@ c --- OPLS SEVEN PARAMETER FIT
 
       else
          write(6,*) 'you picked a non-defined torsional type'
-         stop
+         call cleanup('')
       endif
 
       return

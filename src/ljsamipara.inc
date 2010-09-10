@@ -21,6 +21,6 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      double precision sij(9), eij(9), vsh(9), vsha(9)
+      real(8)::sij(9), eij(9), vsh(9), vsha(9)
       common /ljspar/ sij,eij,vsh,vsha
 	

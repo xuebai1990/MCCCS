@@ -183,7 +183,7 @@ c ---    select a box given in pmswatyp
 c      write(iou,*) 'boxins:',boxins,'boxrem:',boxrem
       if ( .not. (lgibbs .or. lgrand) .and. lswapinter ) then
          write(iou,*) 'no interbox swap if not gibbs/grand ensemble!'
-         stop
+         call cleanup('')
       endif
 
 c *** select a chain in BOXREM at random ***
@@ -215,7 +215,7 @@ c *** sub-regions defined by Vin
          ibox = nboxi(irem)
          if ( ibox .ne. boxrem ) then
             write(iou,*) 'problem in swap'
-            stop
+            call cleanup('')
          endif
       endif
 
@@ -294,7 +294,7 @@ c *** for the chain to be INSERTED                           ***
 
          if (boxins .ne. boxrem) then
             write(iou,*) 'avbmc, boxins, boxrem:',boxins,boxrem
-            stop
+            call cleanup('')
          endif
          
 c *********************
@@ -382,7 +382,7 @@ c               enddo
      &              ,kins,moltyp(kins),kmolty
                if ( nboxi(kins) .ne. boxins ) then 
                   write(iou,*) 'problem in swap with kins'
-                  stop
+                  call cleanup('')
                endif
             endif
             neighk_num = neigh_cnt(kins)
@@ -441,7 +441,7 @@ c *** out -> j case
                ibox = nboxi(irem)
                if ( ibox .ne. boxrem ) then
                   write(iou,*) 'problem in swap'
-                  stop
+                  call cleanup('')
                endif
                iins = irem
                lremk_in = .false.
@@ -525,7 +525,7 @@ c                  write(iou,*) 'jins,irem:',jins,irem,neighj_num
                   ibox = nboxi(irem)
                   if ( ibox .ne. boxrem ) then
                      write(iou,*) 'problem in swap'
-                     stop
+                     call cleanup('')
                   endif
                   iins = irem
                endif
@@ -737,7 +737,7 @@ c     --- select ip position ---
          enddo
          write(iou,*) 'w1ins:',w1ins,'rbf:',rbf
          write(iou,*) 'big time screwup -- w1ins'
-         stop
+         call cleanup('')
       else
          iwalk = 1
       endif
@@ -848,7 +848,7 @@ c     calculate the true site-site energy
          if (ovrlap) then
             write(iou,*) 'iins',iins,'irem',irem
             write(iou,*) 'strange screwup in DC-CBMC swap'
-            stop
+            call cleanup('')
          endif
 c v1insewd, vnewewald and vnewintra now accounted for in v from energy
 c$$$         delen = v - ( vnewinter + vnewext +vnewelect) 
@@ -950,7 +950,7 @@ c        --- check for termination of walk
                endif
             enddo
             write(iou,*) 'screw up in explicit hydrogen'
-            stop
+            call cleanup('')
          else
             iwalk = 1
          endif
@@ -1127,7 +1127,7 @@ c *********************
 
          if (boxins .ne. boxrem) then
             write(iou,*) 'avbmc, boxins, boxrem:',boxins,boxrem
-            stop
+            call cleanup('')
          endif
          
          if ( lbias(imolty) ) then
@@ -1371,7 +1371,7 @@ c     --- calculate the Full rcut site-site energy
             
          if (ovrlap) then
             write(iou,*) 'disaster ovrlap in old conf SWAP'
-            stop
+            call cleanup('')
          endif
 c v now includes vnewintra,v1remewd and voldewald, take out
 c$$$         deleo = v - ( voldinter + voldext +voldelect) 
@@ -1407,7 +1407,7 @@ c        --- iii=1 old conformation
 c         if (irem .eq. 118)  write(iou,*) 'for old',vinter
          if (ovrlap) then
             write(iou,*) 'disaster ovrlap in old conf SWAP'
-            stop
+            call cleanup('')
          endif
          deleo = v + vtorold
          voldt     = voldt + deleo

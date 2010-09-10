@@ -21,11 +21,11 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      integer growfrom,growprev,growlist,grownum
+      integer::growfrom,growprev,growlist,grownum
       dimension growfrom(numax),growprev(numax),grownum(numax)
       dimension growlist(numax,numax)
 
-      double precision weight,  weiold, voldt,voldbb,voldtg,voldext
+      real(8)::weight,  weiold, voldt,voldbb,voldtg,voldext
      +     ,voldintra,voldinter,voldbvib,voldelect,voldewald
      +     ,vnewt,vnewbb,vnewtg,vnewext,vnewintra,vnewbvib
      +     ,vnewinter,vnewelect,vnewewald,vneworient

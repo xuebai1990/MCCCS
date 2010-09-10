@@ -239,7 +239,7 @@ c *** calculate the energy of i in the old configuration ***
      &     ,flagon,ibox, 1, iunit,.false.,ovrlap,.false.,vdum,
      &     .false.,.false.)
 
-      if (ovrlap) stop 'disaster- overlap for old conf in ROTXYZ'
+      if (ovrlap) call cleanup('disaster- overlap for old conf in ROTXYZ')
       if ( lewald .and. lelect(imolty) ) then
          call recip(ibox,vrecipn,vrecipo,1)
          velectn = velectn + vrecipn

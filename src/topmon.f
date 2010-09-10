@@ -28,7 +28,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       integer::i,seed
       real(8)::random,rtest
       dimension rtest(10)
-      character *50 fileout
+      character::*50 fileout
 
 
 c ----------------------------------------------------------------
@@ -66,5 +66,5 @@ c --- call main program
 
 c ----------------------------------------------------------------
 
-      stop
+      call cleanup('')
       end

@@ -63,7 +63,7 @@ c     ************************************************************
 
             write(iou,*) 'imolty',imolty,'   i',i,'   invib'
      &           ,invib(imolty,i)
-            stop 'too many vibrations'
+            call cleanup('too many vibrations')
          endif
 
       enddo
@@ -86,7 +86,7 @@ c     ************************************************************
             
             if (vibtype.eq.0) then
                write(iou,*) 'atype,btype',atype,btype
-               stop 'screwup in vibrations'
+               call cleanup('screwup in vibrations')
             endif
                         
             countvib = countvib + 1
@@ -107,7 +107,7 @@ c     ************************************************************
                   if (bendtype.eq.0) then
                      write(iou,*) 'atype,btype,ctype',atype
      &                    ,btype,ctype
-                     stop 'screwup in bending angles'
+                     call cleanup('screwup in bending angles')
                   endif
 
                   countbend = countbend + 1
@@ -128,7 +128,7 @@ c     ************************************************************
                         if (tortype.eq.0) then
                            write(iou,*) 'atype,btype,ctype,dtype',atype
      &                          ,btype,ctype,dtype
-                           stop 'screwup in torsion angles'
+                           call cleanup('screwup in torsion angles')
                         endif
                         
                         counttor = counttor + 1
@@ -230,7 +230,7 @@ c     *************************************************************
             
             if (lfinda.and.lfindb) then
                if (lfound) then
-                  stop 'vibration type not distinguishable'
+                  call cleanup('vibration type not distinguishable')
                endif
                vibtype = vbtype(n)
                lfound = .true.
@@ -325,7 +325,7 @@ c     **************************************************************
 
             if (lfinda.and.lfindb.and.lfindc) then
                if (lfound) then
-                  stop 'bend type not distinguishable'
+                  call cleanup('bend type not distinguishable')
                endif
                bendtype = bntype(n)
                lfound = .true.
@@ -474,7 +474,7 @@ c     *************************************************************
            if (lfinda.and.lfindb.and.lfindc.and.lfindd) then
               if (lfound) then
                  write(iou,*) 'a,b,c,d',atype,btype,ctype,dtype
-                 stop 'torsion type not distinguishable'
+                 call cleanup('torsion type not distinguishable')
               endif
               
               tortype = trtype(n)

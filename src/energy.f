@@ -886,7 +886,6 @@ c         if (.not.(lgrand.and.(ibox.eq.2))) then
             do 399 j = istart,iend
 
                ntj = ntype(imolty,j)
-               ntij = (ntj - 1) * nntype + ntsubst
 
                if ( ljoe ) then
                   if ( extc12(ntj) .gt. 0.1d0 ) then
@@ -917,7 +916,7 @@ c -- calculate interaction with the surface at the top of the box
                if ( lmuir ) vext = vext + exmuir(rzuion(j,flagon),ntj)
 
                if ( lexzeo ) vext = vext + exzeo(rxuion(j,flagon)
-     &              ,ryuion(j,flagon),rzuion(j,flagon),ntij)
+     &              ,ryuion(j,flagon),rzuion(j,flagon),ntj)
                
  399        continue
 

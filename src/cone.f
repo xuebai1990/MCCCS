@@ -148,7 +148,7 @@ c        --- now need to find the gamma on [-Pi,Pi] that satisfies cos and sin
 
       else
          write(iou,*) 'iinit ',iinit
-         stop 'non valid iinit in cone.f'
+         call cleanup('non valid iinit in cone.f')
       endif
       
 c      write(iou,*) 'finish CONE'

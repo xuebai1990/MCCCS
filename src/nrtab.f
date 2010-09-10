@@ -171,7 +171,7 @@ c --- calculate random vector on the unit sphere ---
             xisq = xi1**2 + xi2**2
             if ( xisq .lt. 1.0d0 ) then
                if ( brvibk(1) .gt. 0.1d0 ) 
-     +              stop 'bond vibrations not implemented'
+     +              call cleanup('bond vibrations not implemented')
                x = brvib(1) * 2.0d0 * xi1 * dsqrt( 1.0d0 - xisq )
                y = brvib(1) * 2.0d0 * xi2 * dsqrt( 1.0d0 - xisq )
                z = brvib(1) * ( 1.0d0 - 2.0d0 * xisq )

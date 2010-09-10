@@ -21,9 +21,9 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      integer natom
+      integer::natom
       parameter (natom = 3)
-      double precision aexsix,bexsix,cexsix,sexsix,consp,consu
+      real(8)::aexsix,bexsix,cexsix,sexsix,consp,consu
       dimension aexsix(natom),bexsix(natom),cexsix(natom)
      &   ,sexsix(natom),consu(natom),consp(natom)
 

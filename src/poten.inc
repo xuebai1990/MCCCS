@@ -21,15 +21,15 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      logical lspecial,lqchg,lij,lpl,lq14scale
-      logical L_Coul_CBMC
-      logical L_tor_table, L_spline, L_linear
-      integer a15type	
-      double precision sig2ij,epsij,epsilon,sigma,epsi,sigi,ecut
+      logical::lspecial,lqchg,lij,lpl,lq14scale
+      logical::L_Coul_CBMC
+      logical::L_tor_table, L_spline, L_linear
+      integer::a15type	
+      real(8)::sig2ij,epsij,epsilon,sigma,epsi,sigi,ecut
      +   ,extc12, extc3, extz0,aspecial,bspecial,q1
-      double precision qqfact,xiq,jayq,jayself,fqegp,a15
+      real(8)::qqfact,xiq,jayq,jayself,fqegp,a15
      &   ,qscale
-      double precision ljscale,qscale2
+      real(8)::ljscale,qscale2
       
       dimension fqegp(ntmax),a15(2),a15type(ntmax,numax,numax)
       dimension extc12(nntype), extc3(nntype), extz0(nntype)
@@ -45,7 +45,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       
       dimension ljscale(ntmax,numax,numax),qscale2(ntmax,numax,numax)
       dimension lq14scale(ntmax),qscale(ntmax)
-      double precision n0,n1
+      real(8)::n0,n1
 
 c ***********************************************************
 c *** parameters for Generalized Lennard Jones Potential  ***

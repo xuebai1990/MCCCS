@@ -21,6 +21,6 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      integer mvatno, mvatty
+      integer::mvatno, mvatty
       dimension mvatno(numax),mvatty(numax)
       common /beadda/ mvatno, mvatty

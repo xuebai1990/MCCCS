@@ -94,7 +94,7 @@ c     --- now reweight ncell one more time
 
          if (ncell.gt.cmax) then
             write(iou,*) 'ncell,cmax',ncell,cmax
-            stop 'ncell greater than cmax in linkcell'
+            call cleanup('ncell greater than cmax in linkcell')
          endif
          
          do n = 1, ncell
@@ -118,7 +118,7 @@ c     --- assign molecules to cells
 
                if (ic.gt.cmax) then
                   write(iou,*) 'ic,cmax',ic,cmax
-                  stop 'ic gt cmax'
+                  call cleanup('ic gt cmax')
                endif
 
                icell(n) = ic
@@ -127,7 +127,7 @@ c     --- assign molecules to cells
                if (nicell(ic).gt.cmaxa) then
                   write(iou,*) 'nicell,cmaxa',nicell(ic)
      &                 ,cmaxa
-                  stop 'nicell gt cmaxa'
+                  call cleanup('nicell gt cmaxa')
                endif
 
                iucell(ic,nicell(ic)) = n
@@ -153,7 +153,7 @@ c     --- replace removed occupant with last occupant and erase last spot
                endif               
             enddo
          
-            stop 'screwup for iinit = 2 for linkcell'
+            call cleanup('screwup for iinit = 2 for linkcell')
  100        continue
             icell(imol) = 0
          endif
@@ -173,7 +173,7 @@ c     --- now we will add the molecule
 
             nicell(ic) = nicell(ic) + 1
          
-            if (nicell(ic).gt.cmaxa) stop 'nicell too big'
+            if (nicell(ic).gt.cmaxa) call cleanup('nicell too big')
 
             iucell(ic,nicell(ic)) = imol
 

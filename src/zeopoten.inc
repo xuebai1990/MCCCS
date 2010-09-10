@@ -21,8 +21,7 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      double precision zeps,zsig2,zrc2,zencut
-      integer zntype
-      parameter (zntype=4)
-      common/forces/zeps(zntype,zntype),zsig2(zntype,zntype)
-     +             ,zrc2(zntype,zntype),zencut(zntype,zntype)
+c      real(8)::zeps,zsig2,zrc2,zencut
+      integer,parameter::zntype=2
+c      common/forces/zeps(zntype,zntype),zsig2(zntype,zntype)
+c     +             ,zrc2(zntype,zntype),zencut(zntype,zntype)

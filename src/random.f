@@ -35,7 +35,7 @@ C----------------------------------------------------------------------C
 C  Random number generator, fast and rough, machine independent.
 C  Returns an uniformly distributed deviate in the 0 to 1 interval.
 C  This random number generator is portable, machine-independent and
-C  reproducible, for any machine with at least 32 bits / real number.
+C  reproducible, for any machine with at least 32 bits / real::number.
 C  REF: Press, Flannery, Teukolsky, Vetterling, Numerical Recipes (1986)
 C----------------------------------------------------------------------C
       IMPLICIT NONE
@@ -45,7 +45,7 @@ C----------------------------------------------------------------------C
 c
       ISEED = MOD(IA*ISEED+IC,M1)
       RANDx= ISEED*RM
-      IF ( RANDx.LT.0.D+0 ) STOP '*** Random number is negative ***'
+      IF ( RANDx.LT.0.D+0 ) call cleanup('*** Random number is negative ***')
 c
       RETURN
       END

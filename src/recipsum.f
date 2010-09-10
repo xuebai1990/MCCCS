@@ -244,7 +244,7 @@ c *** safety check ***
 c      write(iou,*) 'A total of ',ncount,' vectors are used'
       if ( ncount .gt. vectormax ) then
          write(iou,*) 'choose a larger vectormax'
-         stop
+         call cleanup('')
       endif
 
       numvect(ibox) = ncount

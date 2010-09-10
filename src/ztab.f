@@ -48,7 +48,7 @@ c --- find closest values for x and y
       ngry=int(zunity/dgr)
       ngrz=int(zunitz/dgr)
       ngrid=ngrx*ngry*ngrz
-c      if (ngrid.gt.maxtab) stop  'ngrid.gt.maxtab'
+c      if (ngrid.gt.maxtab) call cleanup('ngrid.gt.maxtab')
       dgrx=zunitx/ngrx
       dgry=zunity/ngry
       dgrz=zunitz/ngrz

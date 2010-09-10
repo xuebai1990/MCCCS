@@ -137,7 +137,7 @@ c - variables added for GCMC histogram reweighting
      &     ,flucv(nbxmax),dielect,acvol(nbxmax),acvolsq(nbxmax)
       dimension qelect(nntype)
 c --- dimension statements for block averages ---
-      character *15 vname(nener)
+      character::*15 vname(nener)
       dimension dsq(nprop,nbxmax), stdev(nprop,nbxmax),
      +          dsq1(nprop1,nbxmax,nbxmax),  
      +          sterr(nprop,nbxmax),errme(nprop,nbxmax)
@@ -147,8 +147,8 @@ c --- dimension statements for block averages ---
      &     ,lvirial2,ltfix,lratfix,ltsolute,lsolute,lpr
 
       dimension lratfix(ntmax),lsolute(ntmax)
-      character *25 enth
-      character *25 enth1
+      character::*25 enth
+      character::*25 enth1
 
       integer::bin,cnt_wf1(0:6,0:6,4),cnt_wf2(0:6,0:6,4),
      &     cnt_wra1(1000,4),cnt_wra2(1000,4)
@@ -207,9 +207,9 @@ c only one processor at a time reads and writes data from files
       enddo
 
 c KM for MPI
-c program will hang if stop called from readdat
-c set ldie in readdat and have all processors stop here
-      if (ldie) stop
+c program will hang if call cleanup('') called from readdat
+c set ldie in readdat and have all processors call cleanup('') here
+      if (ldie) call cleanup('')
 
 
 c KM for MPI
@@ -217,19 +217,19 @@ c check that if lneigh or lgaro numprocs .eq. 1
       if (lneigh.and.numprocs.ne.1) then
          write(iou,*) 'Cannot run on more than 1 processor with 
      &        neighbor list!!'
-         stop
+         call cleanup('')
       endif
       if (lgaro.and.numprocs.ne.1) then
          write(iou,*) 'Cannot run on more than 1 processor with 
      &        lgaro = .true.!!'
-         stop
+         call cleanup('')
       endif
 
-c kea don't stop for lgaro
+c kea don't call cleanup('') for lgaro
 c      if (lchgall .and. (.not. lewald).and.(.not.lgaro)) then
 c         write(iou,*) 'lchgall is true and lewald is false.',
 c     &        ' Not checked for accuracy!'
-c         stop
+c         call cleanup('')
 c      endif
 
       vname(1)  = ' Total energy'
@@ -276,9 +276,9 @@ c      write(6,*) 'lexpee ', lexpee
 c --- set up expanded ensemble stuff
       if (lexpee) call eesetup(qelect)
 
-      if (lexpee.and.lmipsw) stop 'not for BOTH lexpee AND lmipsw'
+      if (lexpee.and.lmipsw) call cleanup('not for BOTH lexpee AND lmipsw')
       
-c - use internal read/write to get integer::number in character format
+c - use internal read/write to get integer::number in character::format
       write(ftemp,*) fname
       read(ftemp,*) fname2
 
@@ -596,7 +596,7 @@ c     kea
          
          if( ovrlap ) then
             write(iou,*) ' overlap in initial configuration '
-            stop
+            call cleanup('')
          endif
          vstart(ibox) = vbox(ibox)
          if (myid.eq.0) then
@@ -989,7 +989,7 @@ c               enddo
 
          if (lucall) then
             write(iou,*) 'not recently checked for accuracy'
-            stop
+            call cleanup('')
 c            do j = 1,nmolty
 c               if ( ucheck(j) .gt. 0 ) then
 c                  call chempt(bsswap,j,ucheck(j),qelect)
@@ -2496,7 +2496,7 @@ c     & 3f15.4)
  1601 format(i5,1x,i10)
 
 
-      stop
+      call cleanup('')
       end
 
 
@@ -2538,8 +2538,8 @@ C=====================================================================72
 
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 ccc MPI timing subroutines from David Porter at MSI (porter@msi.umn.edu)
-ccc call start with a character variable, then call stop with the
-ccc same character variable
+ccc call start with a character::variable, then call call cleanup('') with the
+ccc same character::variable
 ccc at the end of monola call stopwatch_write to get the timing info
 ccc this has not been personally tested
 ccc KM 02/08/10

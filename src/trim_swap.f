@@ -159,7 +159,7 @@ c ---    select a box given in pmswatyp
       endif
 c      write(iou,*) 'boxins:',boxins,'boxrem:',boxrem
       if ( .not. (lgibbs .or. lgrand) .and. lswapinter ) 
-     &     stop 'no interbox swap if not gibbs/grand ensemble!'
+     &     call cleanup('no interbox swap if not gibbs/grand ensemble!')
          
 c *** select a chain in BOXREM at random ***
 
@@ -177,7 +177,7 @@ c *** sub-regions defined by Vin
          if ( moltyp(irem) .ne. imolty ) 
      &       write(iou,*) 'screwup swap, irem:',irem,moltyp(irem),imolty
          ibox = nboxi(irem)
-         if ( ibox .ne. boxrem ) stop 'problem in swap'
+         if ( ibox .ne. boxrem ) call cleanup('problem in swap')
       endif
 
 c$$$      write(iou,*) 'particle ',irem,' is being removed, imolty is:',
@@ -310,7 +310,7 @@ c     --- select ip position ---
             endif
          enddo
          write(iou,*) 'w1ins:',w1ins,'rbf:',rbf
-         stop 'big time screwup -- w1ins'
+         call cleanup('big time screwup -- w1ins')
       else
          iwalk = 1
       endif
@@ -397,7 +397,7 @@ c     calculate the true site-site energy
          
          if (ovrlap) then
             write(iou,*) 'iins',iins,'irem',irem
-            stop 'strange screwup in DC-CBMC swap'
+            call cleanup('strange screwup in DC-CBMC swap')
          endif
 c v1insewd, vnewewald and vnewintra now accounted for in v from energy
 c$$$         delen = v - ( vnewinter + vnewext +vnewelect) 
@@ -612,7 +612,7 @@ c     --- calculate the Full rcut site-site energy
      &        ,vewald,iii, boxrem, istt, iett, .true.,ovrlap
      &        ,.false.,vtorold,.false.,lfavor)
             
-         if (ovrlap) stop 'disaster ovrlap in old conf SWAP'
+         if (ovrlap) call cleanup('disaster ovrlap in old conf SWAP')
 c v now includes vnewintra,v1remewd and voldewald, take out
 c$$$         deleo = v - ( voldinter + voldext +voldelect) 
 c$$$     &        - (v1rem - v1remewd)

@@ -21,6 +21,6 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      double precision rxi1,ryi1,rzi1,vi1,wi1,vext1,velect1
+      real(8)::rxi1,ryi1,rzi1,vi1,wi1,vext1,velect1
       common /boltzm/ rxi1,ryi1,rzi1,vi1,wi1,vext1,velect1
 

@@ -30,7 +30,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'coord.inc'
 
       integer::im,ia,nmol,natom,iguest,imm,ibox
-      character atom*4
+      character::atom*4
 
       open(unit=48, file='system.pdb', form='formatted')
       rewind(48)

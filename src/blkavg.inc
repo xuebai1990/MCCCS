@@ -21,13 +21,13 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      integer nener,nprop,blockm
-      double precision naccu,nccold,accum,bccold,aver,baver
+      integer::nener,nprop,blockm
+      real(8)::naccu,nccold,accum,bccold,aver,baver
      &     ,acsvol,acnvol,acshmat,acnhmat
 c ** Neeraj adding for solubility parameter and heat of vaporization
 
-      double precision naccu1,nccold1,accum1,bccold1,aver1,baver1
-      integer nprop1
+      real(8)::naccu1,nccold1,accum1,bccold1,aver1,baver1
+      integer::nprop1
       parameter (nener=18,nprop=4+nener+(4*ntmax)+3,blockm=100)
       parameter (nprop1=11)
       dimension naccu(nprop,nbxmax),nccold(nprop,nbxmax)

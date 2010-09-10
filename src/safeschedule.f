@@ -99,7 +99,7 @@ c     --- now determine findex excluding 1, it won't do anything
 c     --- set begining conditions
       if (movetype.eq.2) then
          if (.not.lring(imolty)) then
-            stop 'you can not use safecbmc for swap unless it is a ring'
+            call cleanup('you can not use safecbmc for swap unless it is a ring')
          endif
          fmaxgrow = nunit(imolty)
       else
@@ -117,7 +117,7 @@ c     --- set begining conditions
          lfix(j) = .false.
       enddo
       
-      if (kickouta.eq.5) stop
+      if (kickouta.eq.5) call cleanup('')
 
       if (movetype.eq.2) then
          findex = fmaxgrow
@@ -142,7 +142,7 @@ c     ******************************
       enddo
 
       if (kickout.gt.250) then
-         stop 'SAFESCHEDULE KICKED YOU OUT'
+         call cleanup('SAFESCHEDULE KICKED YOU OUT')
       endif
  
 c     --- find iutry 
@@ -152,7 +152,7 @@ c     --- find iutry
          invtry = invib(imolty,iutry) - 1
 
          if (invtry.lt.1) then
-            stop 'You need a ring to do this'
+            call cleanup('You need a ring to do this')
          endif
 
          ffrom(1,1) = iutry
@@ -193,7 +193,7 @@ c     *************************
 
          invtry = invib(imolty,iutry)
          if (invtry.eq.0) then
-            stop 'cant do safecbmc on single bead'
+            call cleanup('cant do safecbmc on single bead')
          elseif(invtry.eq.1) then
 c     --- At the end point of a molecule
 
@@ -342,7 +342,7 @@ c     --- lets set logic so rosenbluth can read it
             do ja = 1, fnuma(iw,j)
  115           continue
                if (kickout.gt.150) then
-                  stop 'Randomizer in FECMBC kicked you out'
+                  call cleanup('Randomizer in FECMBC kicked you out')
                endif
 c     --- this is the only random part
                counta = int(random() * dble(fnuma(iw,j))) + 1
@@ -572,7 +572,7 @@ c     ---- begin part for rig logic
                enddo
 
                if (ja.eq.0) then
-                  stop 'PROBLEM WITH RIG LOGIC IN SAFESCHEDULE'
+                  call cleanup('PROBLEM WITH RIG LOGIC IN SAFESCHEDULE')
                else
                   rnum(counta) = ja
                endif
@@ -624,7 +624,7 @@ c     --- cycle through the rest of the rigid beads to set lexshed to false
             enddo
             if (ja.gt.10) then
                write(iou,*) 'ja',ja
-               stop 'need to set max greater in safeschedule'
+               call cleanup('need to set max greater in safeschedule')
             endif
 
             num = ja
@@ -662,7 +662,7 @@ c     ****** take out return for diagnostics ************
          write(iou,*) rfrom(iw),(rlist(iw,count),count=1,rnum(iw))
       enddo
       
-      stop
+      call cleanup('')
             
 c     ***************************************************
 

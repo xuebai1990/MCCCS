@@ -223,7 +223,7 @@ c     * imola is the overall molecule id number (runs from 1 to total #) *
 
            iboxi = nboxi(imola)
 
-           if (iboxi .ne. box) stop 'problem in iswatch'
+           if (iboxi .ne. box) call cleanup('problem in iswatch')
 
 c     *** get particle of type b ***
 
@@ -234,7 +234,7 @@ c     *** get particle of type b ***
      &                write(iou,*) 'screwup in iswatch'
            iboxi = nboxi(imolb)
 
-           if (iboxi .ne. box) stop 'problem in iswatch'
+           if (iboxi .ne. box) call cleanup('problem in iswatch')
          endif  
 c     *** add one attempt to the count for iparty
 c$$$  bniswat(iparty,box) = bniswat(iparty,box) + 1.0d0   
@@ -288,7 +288,7 @@ c$$$            write(iou,*) zz,'from',from(type_b+2*(zz-1)),' prev',
 c$$$     &        prev(type_b+2*(zz-1))
 c$$$         enddo
 c$$$         
-c$$$         stop
+c$$$         call cleanup('')
       
 c     *** store number of units in iunita and iunitb
          iunita = nunit(imolta)
@@ -678,7 +678,7 @@ c     * return a to position 1 *
             
             if (lterm) then
                write(iou,*) 'other ',other,' self ',self,ic
-               stop 'interesting screwup in CBMC iswatch'
+               call cleanup('interesting screwup in CBMC iswatch')
             endif
 
 c     *** add on the changes in energy ***
@@ -784,7 +784,7 @@ c     * return b to current box *
                nboxi(imolb) = thisbox
             endif
 
-            if (lterm) stop 'disaster ovrlap in old conf iSWATCH'
+            if (lterm) call cleanup('disaster ovrlap in old conf iSWATCH')
             deleo = v - ( voldt - (voldbvib + voldbb + voldtg) ) 
 
             tweiold = tweiold*dexp(-beta*deleo)
@@ -943,7 +943,7 @@ c     *** update center of mass
             call ctrmas(.false.,box,imola,8)
 
             if (licell .and. (box .eq. boxlink)) 
-     &           stop 'not yet implemented!'
+     &           call cleanup('not yet implemented!')
 
 c     --- call nearest neighbor list
             if ( lneigh ) then
@@ -976,7 +976,7 @@ c     ---get particle from box a
             iboxa = parbox(iboxal,boxa,imolta)
             if ( moltyp(iboxa) .ne. imolta ) write(iou,*) 'screwup'
             iboxia = nboxi(iboxa)
-            if (iboxia .ne. boxa) stop 'problem in swatch'
+            if (iboxia .ne. boxa) call cleanup('problem in swatch')
 
 c     ---get particle from box b
 
@@ -984,7 +984,7 @@ c     ---get particle from box b
             iboxb = parbox(iboxbl,boxb,imoltb)
             if ( moltyp(iboxb) .ne. imoltb ) write(iou,*) 'screwup'
             iboxib = nboxi(iboxb)
-            if (iboxib .ne. boxb) stop 'problem in swatch'
+            if (iboxib .ne. boxb) call cleanup('problem in swatch')
 
 ccc--!!!JLR - for test write coordinates of a and b                                              
 c            open(unit=91,file='a_init.xyz',status='unknown')                                 
@@ -1266,7 +1266,7 @@ c     and torsional type for those units swatched!!!!!!
             
             if (lterm) then
 c     write(iou,*) 'other ',other,' self ',self
-c     stop 'interesting screwup in CBMC swatch'
+c     call cleanup('interesting screwup in CBMC swatch')
                return
             endif
             delen = v - ( vnewt - (vnewbvib + vnewbb + vnewtg )) 
@@ -1347,7 +1347,7 @@ c     --- calculate the Full rcut site-site energy
      &           ,vewald,iii,iboxold, 1,iunit,.true.,lterm,.false.,vdum
      &           ,.false.,.false.)
 
-            if (lterm) stop 'disaster ovrlap in old conf SWATCH'
+            if (lterm) call cleanup('disaster ovrlap in old conf SWATCH')
             deleo = v - ( voldt - (voldbvib + voldbb + voldtg) ) 
             
             tweiold = tweiold*dexp(-beta*deleo)
@@ -1590,7 +1590,7 @@ c     ---update center of mass
             call ctrmas(.false.,boxb,iboxa,8)
 
             if (licell .and. (boxa .eq. boxlink .or. boxb .eq. boxlink))
-     &           stop 'not yet implemented!'
+     &           call cleanup('not yet implemented!')
 
 c     --- call nearest neighbor list
             if ( lneigh ) then
@@ -1612,7 +1612,7 @@ c         write(93,*)
 c         do zz = 1,iunitb                                                                    
 c            write(93,*) 'C ', rxu(iboxb,zz),ryu(iboxb,zz),rzu(iboxb,zz)                      
 c         enddo                                                                               
-c         STOP 'END OF SWATCH TEST'                                                           
+c         call cleanup('END OF SWATCH TEST')                                                           
 ccc--!!!JLR - end of coordinate test         
 
          endif

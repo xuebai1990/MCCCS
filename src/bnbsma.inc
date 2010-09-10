@@ -21,12 +21,12 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      double precision bsvol,bnvol,bntrax,bntray,bntraz,bshmat
+      real(8)::bsvol,bnvol,bntrax,bntray,bntraz,bshmat
      &  ,bstrax,bstray,bstraz,bnrotx,bnroty,bnrotz,bnhmat
      &  ,bsrotx,bsroty,bsrotz,bnflcq,bsflcq,bnexpc,bsexpc
      &  ,bnflcq2,bsflcq2
 
-       double precision Abntrax,Abntray,Abntraz,   
+       real(8)::Abntrax,Abntray,Abntraz,   
      &                  Abstrax,Abstray,Abstraz
 
       dimension bsvol(nbxmax), bnvol(nbxmax),bshmat(nbxmax,9),

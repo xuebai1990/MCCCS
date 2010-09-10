@@ -21,15 +21,15 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      logical L_Ewald_Auto
-      integer kmax,numvect
-c - kalp, a parameter to control the real space sum
+      logical::L_Ewald_Auto
+      integer::kmax,numvect
+c - kalp, a parameter to control the real::space sum
 c - kmax, a parameter to control the total number of reciprocal vectors
 c - numvect, the total number of reciprocal vectors
       dimension numvect(nbxmax)
-      double precision kx,ky,kz,prefact,ssumr,ssumi,ssumrn,ssumin,
+      real(8)::kx,ky,kz,prefact,ssumr,ssumi,ssumrn,ssumin,
      &                 ssumro,ssumio
-      double precision sself,correct,kalp,calp,dipolex,dipoley,dipolez,
+      real(8)::sself,correct,kalp,calp,dipolex,dipoley,dipolez,
      &                 dipolexo,dipoleyo,dipolezo
 c - calp = kalp / boxlen
       dimension kx(vectormax,nbxmax),ky(vectormax,nbxmax),

@@ -21,19 +21,19 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      logical lgibbs,lgrand,lnpt,lanes,llj,lmipsw,lexpee
-      logical lpbc,lpbcx,lpbcy,lpbcz,lfold,lijall,lewald
-      logical lchgall,ldielect
-      logical lexpsix,lmmff 
-      logical lninesix,lgaro,lionic
-      logical lgenlj
-      logical ltailc,lshift
-      logical lneigh,lvirial
-      logical lcutcm,ldual
-      integer nmax,numax,ntmax,nntype,nvmax,nbxmax,npamax,npabmax
+      logical::lgibbs,lgrand,lnpt,lanes,llj,lmipsw,lexpee
+      logical::lpbc,lpbcx,lpbcy,lpbcz,lfold,lijall,lewald
+      logical::lchgall,ldielect
+      logical::lexpsix,lmmff 
+      logical::lninesix,lgaro,lionic
+      logical::lgenlj
+      logical::ltailc,lshift
+      logical::lneigh,lvirial
+      logical::lcutcm,ldual
+      integer::nmax,numax,ntmax,nntype,nvmax,nbxmax,npamax,npabmax
      & ,maxbin,cmax,cmaxa,tor_bin_max,nbinmax_ete,smax
-      integer vectormax,maxvir,maxntemp,nchmax,nchtor_max,nchbn_max
-      integer ntdifmx,nbinmx,angle_max,ang_bin_max,tor_max,iou
+      integer::vectormax,maxvir,maxntemp,nchmax,nchtor_max,nchbn_max
+      integer::ntdifmx,nbinmx,angle_max,ang_bin_max,tor_max,iou
 
       common /iounit/ iou	
 c --------------------------------------------------------------

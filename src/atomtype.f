@@ -1,4 +1,4 @@
-      subroutine atomtype(ntype,atom,id)
+      function atomtype(ntype,atom)
 
 c atomtype 
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -24,26 +24,22 @@ c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
-      character atom*4
-      integer::ntype,id
-      character at1*1,at2*2,at3*3
+      character(len=*)::atom
+      integer::ntype,atomtype
 
 C     Assigning id's to atomtypes
 
-      at1 = atom 
-      at2 = atom 
-      at3 = atom 
-
-c      if (ntype.ne.2) stop '** atomtype: ntype ne 2 not allowed **'
+c      if (ntype.ne.2) call cleanup('** atomtype: ntype ne 2 not allowed **')
 
 C List of conversions
-
-      if (at1.eq."O".or.at1.eq."o") then
-         id =4
-      else 
-         stop "** atomtype: unknown atomtype **"
+      atom=trim(atom)
+      if (atom.eq."O") then
+         atomtype = 190
+      elseif (atom.eq."Si") then
+         atomtype = 191
+      else
+         call cleanup('** atomtype: unknown atomtype **')
       endif
 
       return
       end
-

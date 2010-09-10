@@ -1,20 +1,20 @@
       
-      integer beadtyp,decode,tor_num,angle_num
-      integer tor_1,tor_2,tor_3,tor_4,nhere
-      double precision  aframe,nframe,ang_bin_size 		
-      double precision angle_bin, angle_tot,tor_bin,tor_tot
-      double precision gdefect,btrans,bg_plus,bg_minus
-      double precision g_plus,g_minus,nskip,trans	
-      double precision biganalhist,shell,combiganalhist,comshell
-      double precision angle_avg,nnone,comnone,cmolec
-      double precision angle_1,angle_2,angle_3    
-      double precision  tor_bin_size   			
-      double precision end_to_end,max_length,boxcom_rhoz,rhoz
-      double precision bigboxcom_rhoz,bigrhoz,max_boxlz,boxmin
+      integer::beadtyp,decode,tor_num,angle_num
+      integer::tor_1,tor_2,tor_3,tor_4,nhere
+      real(8):: aframe,nframe,ang_bin_size 		
+      real(8)::angle_bin, angle_tot,tor_bin,tor_tot
+      real(8)::gdefect,btrans,bg_plus,bg_minus
+      real(8)::g_plus,g_minus,nskip,trans	
+      real(8)::biganalhist,shell,combiganalhist,comshell
+      real(8)::angle_avg,nnone,comnone,cmolec
+      real(8)::angle_1,angle_2,angle_3    
+      real(8):: tor_bin_size   			
+      real(8)::end_to_end,max_length,boxcom_rhoz,rhoz
+      real(8)::bigboxcom_rhoz,bigrhoz,max_boxlz,boxmin
 	
 C This is being removed because of high memory requirement
 
-      double precision pattern  
+      real(8)::pattern  
 	
       dimension angle_bin(nbxmax,ntmax,angle_max,ang_bin_max)
       dimension angle_tot(nbxmax,ntmax,angle_max) 

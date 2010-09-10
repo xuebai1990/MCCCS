@@ -21,9 +21,9 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      integer ntormax
+      integer::ntormax
       parameter (ntormax=700)
-      double precision vtt0,vtt1,vtt2,vtt3,vtt4,vtt5,vtt6,vtt7,vtt8,vtt9
+      real(8)::vtt0,vtt1,vtt2,vtt3,vtt4,vtt5,vtt6,vtt7,vtt8,vtt9
       common /contor/ vtt0(ntormax),vtt1(ntormax),vtt2(ntormax),
      +		      vtt3(ntormax),vtt4(ntormax),vtt5(ntormax),
      +		      vtt6(ntormax),vtt7(ntormax),vtt8(ntormax),

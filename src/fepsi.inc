@@ -21,8 +21,8 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      logical lfepsi
-      double precision aslope,bslope,ashift,bshift,a0,b0
+      logical::lfepsi
+      real(8)::aslope,bslope,ashift,bshift,a0,b0
 
 c ----- If lfepsi is true, the fluctuation of epsilon is used instead of
 c ----- the fluctuation of the sigma.
@@ -203,7 +203,7 @@ c	parameter (aslope = 3.0d5)
 c	parameter (bslope = 0.0d0)
 c	parameter (ashift = 8.0d5)
 c	parameter (bshift = 1200.0d0)
-      double precision favor(nmax),favor2(nmax)
+      real(8)::favor(nmax),favor2(nmax)
       common /fdata/ favor,favor2
 
 

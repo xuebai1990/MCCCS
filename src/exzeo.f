@@ -39,11 +39,12 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'system.inc'
       include 'poten.inc'
       
+      ntij = (ntii - 1) * nntype + ntsubst
       rcutsq = rcut(1)**2
       if (.not.lzgrid) then
          exzeo=0.
          do j=1,nzeo
-c            idj=idzeo(j)
+            idj=idzeo(j)
             xr=xi-zeox(j)
             xr=xr-zeorx*anint(xr*zeorxi)
             yr=yi-zeoy(j)

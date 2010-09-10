@@ -21,9 +21,9 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      logical lsolid,lrect,ltwice,lideal
-      integer icell,nicell,iucell,solcount
-      double precision boxlx, boxly, boxlz, rcut, rmin
+      logical::lsolid,lrect,ltwice,lideal
+      integer::icell,nicell,iucell,solcount
+      real(8)::boxlx, boxly, boxlz, rcut, rmin
      +   ,rcutnn, softcut,softlog,rcutin
      +   ,avsolinter,avsolintra,avsolbend,avsoltor,avsolelc
       dimension icell(nmax),nicell(cmax),iucell(cmax,cmaxa)

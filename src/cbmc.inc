@@ -21,21 +21,21 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      logical lovr,lexist,lexshed,llplace,lpnow,llrig,lsave,lrplc
+      logical::lovr,lexist,lexshed,llplace,lpnow,llrig,lsave,lrplc
 
 c *** adding this for iswatch move ***
-      logical liswinc, liswatch
+      logical::liswinc, liswatch
       dimension liswinc(numax,ntmax),llplace(ntmax)
-      integer other,iparty,iplace, pfrom, pnum, pprev,nplace
+      integer::other,iparty,iplace, pfrom, pnum, pprev,nplace
 c *** end add ***
 
-      double precision bncb,bscb,rxp,ryp,rzp,rxnew,rynew,rznew
+      real(8)::bncb,bscb,rxp,ryp,rzp,rxnew,rynew,rznew
      +   ,bnregr,bsregr,bfac,bsswat,bsiswat,fbncb,fbscb
      +   ,vtry,vtrext,vtrintra,vtrinter,vtrelect,vtrewald
      +   ,vtrorient,vtrelect_intra,vtrelect_inter
-      integer nchoi1,nchoi,icbdir,icbsta,nmaxcbmc,nchoih,nchtor
+      integer::nchoi1,nchoi,icbdir,icbsta,nmaxcbmc,nchoih,nchtor
      &  ,nchbna,nchbnb,nrigi,nchoir,rlist,rfrom,rprev,rnum
-      double precision acchem, bnchem
+      real(8)::acchem, bnchem
       dimension lexist(numax),lexshed(numax)
       common /pbias/  bncb(ntmax,numax), bscb(ntmax,2,numax)
      +   ,bnregr(ntmax),bsregr(ntmax,2)

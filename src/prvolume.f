@@ -266,7 +266,7 @@ c *** select one of the cell edge
             write(iou,*) 'w1:',w(1),'w2:',w(2),'w3:',w(3)
             hmat(boxvch,jhmat) = hmato(jhmat)
             call dump
-            stop
+            call cleanup('')
 c            goto 500
          endif
 
@@ -355,7 +355,7 @@ c         endif
             write(iou,*) 'A move was attempted that would lead to a 
      & boxlength less than twice rcut'
             call dump
-            stop
+            call cleanup('')
             return
          endif
 
@@ -364,7 +364,7 @@ c *** calculate centre of mass and its displacement
 
 c - WARNING
          if ( .not. lfold ) 
-     &        stop 'volume move only correct with folded coordinates'
+     &        call cleanup('volume move only correct with folded coordinates')
 
          df = dfac - 1.0d0
 

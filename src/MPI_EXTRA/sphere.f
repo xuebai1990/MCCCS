@@ -47,7 +47,7 @@ c RP added for MPI ------changed random() to random2()
          endif
       enddo
 
-      stop 'exceeded 100 tries to get a vector in sphere'
+      call cleanup('exceeded 100 tries to get a vector in sphere')
 
       end
 

@@ -21,12 +21,12 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      logical lnn(1,1),lneighbor
-      integer maxneigh
+      logical::lnn(1,1),lneighbor
+      integer::maxneigh
       parameter (maxneigh = 20)
-      integer neighbor(maxneigh,nmax),neigh_cnt(nmax),neigh_icnt,
+      integer::neighbor(maxneigh,nmax),neigh_cnt(nmax),neigh_icnt,
      &        neighi(maxneigh),neighboro(maxneigh,nmax),neigh_o(nmax)
-      double precision ndij(maxneigh,nmax),nxij(maxneigh,nmax),
+      real(8)::ndij(maxneigh,nmax),nxij(maxneigh,nmax),
      &        nyij(maxneigh,nmax),nxijo(maxneigh,nmax),
      &        nzij(maxneigh,nmax),ndiji(nmax),nxiji(maxneigh),
      &        nyiji(maxneigh),nziji(maxneigh),ndijo(maxneigh,nmax),

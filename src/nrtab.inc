@@ -21,11 +21,11 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      integer nrtcon,nrtmax,nrtbin
+      integer::nrtcon,nrtmax,nrtbin
 c - parameters currently set low to minimize storage
       parameter(nrtcon=50,nrtmax=10,nrtbin=10)
 
-      double precision dmrtab(nrtmax),dbrtab(nrtmax),
+      real(8)::dmrtab(nrtmax),dbrtab(nrtmax),
      &                 wnrtab(nrtmax,nrtbin)
 
       common /nrtabc/ dmrtab,dbrtab,wnrtab

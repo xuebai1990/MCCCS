@@ -17,8 +17,8 @@ c
       logical::lhm,llwell
 
       ibox = 1
-      if (lmipsw.and.(nbox.gt.1)) stop 'ipsw only for 1 box'
-      if (lmipsw.and.lnpt.and.pmvol.gt.1.0d-7) stop 'ipsw only for NVT'
+      if (lmipsw.and.(nbox.gt.1)) call cleanup('ipsw only for 1 box')
+      if (lmipsw.and.lnpt.and.pmvol.gt.1.0d-7) call cleanup('ipsw only for NVT')
       read(35,*)
       read(35,*) (lwell(i),i=1,nmolty)
       read(35,*)
@@ -36,7 +36,7 @@ c
       enddo 
       if (nw.lt.tnw) then
          write(iou,*) 'increase nw in ipswpar to ', tnw
-         stop
+         call cleanup('')
       endif
       read(35,*)
       read(35,*) bwell
@@ -44,24 +44,24 @@ c
       read(35,*) lstagea, lstageb, lstagec
       if (lmipsw) then
          if ((.not.lstagea).and.(.not.lstageb).and.(.not.lstagec))
-     &      stop 'one stage must be true'
+     &      call cleanup('one stage must be true')
       endif
-      if (llwell.and.lstagea) stop 'ipsw well NOT for stage a'
+      if (llwell.and.lstagea) call cleanup('ipsw well NOT for stage a')
       if (lstagea) then
-         if (lstageb.or.lstagec) stop 'only one lstage must be true'
+         if (lstageb.or.lstagec) call cleanup('only one lstage must be true')
       endif
       if (lstageb) then
-         if (lstagea.or.lstagec) stop 'only one lstage must be true'
+         if (lstagea.or.lstagec) call cleanup('only one lstage must be true')
       endif
       if (lstagec) then
-         if (lstagea.or.lstageb) stop 'only one lstage must be true'
+         if (lstagea.or.lstageb) call cleanup('only one lstage must be true')
       endif
       read(35,*)
       read(35,*) etais, lambdais
       if ((lambdais.le.-1.0d-6).or.(lambdais.ge.1.000001))
-     &   stop 'lambdais must be between 0 and 1'
+     &   call cleanup('lambdais must be between 0 and 1')
       if ((etais.le.-1.0d-6).or.(etais.ge.1.000001))
-     &   stop 'etais must be between 0 and 1'
+     &   call cleanup('etais must be between 0 and 1')
       read(35,*)
       if (lsolid(ibox).and.(.not.lrect(ibox))) then
          read(35,*) hmata(1),hmata(2),hmata(3)
@@ -85,13 +85,13 @@ c
                write(iou,*) hm(1),hm(2),hm(3)
                write(iou,*) hm(4),hm(5),hm(6)
                write(iou,*) hm(7),hm(8),hm(9)
-               stop
+               call cleanup('')
             endif
          elseif (.not.lsolid(ibox)) then
             lx = (1.0d0-lambdais)*lena+lambdais*lenc
             if (dabs(boxlx(1)-lx).gt.1.0d-6) then
                write(iou,*) 'input correct boxl', lx
-               stop
+               call cleanup('')
             endif
          endif
       endif
@@ -106,13 +106,13 @@ c
                write(iou,*) hmata(1),hmata(2),hmata(3)
                write(iou,*) hmata(4),hmata(5),hmata(6)
                write(iou,*) hmata(7),hmata(8),hmata(9)
-               stop
+               call cleanup('')
             endif
 c	write(iou,*) boxlx(1),lena
          elseif (.not.lsolid(ibox)) then
             if (dabs(boxlx(1)-lena).gt.1.0d-6) then
                write(iou,*) 'input correct boxl', lena
-               stop
+               call cleanup('')
             endif
          endif
       endif
@@ -127,12 +127,12 @@ c	write(iou,*) boxlx(1),lena
                write(iou,*) hmatc(1),hmatc(2),hmatc(3)
                write(iou,*) hmatc(4),hmatc(5),hmatc(6)
                write(iou,*) hmatc(7),hmatc(8),hmatc(9)
-               stop
+               call cleanup('')
             endif
          elseif (.not.lsolid(ibox)) then
             if (dabs(boxlx(1)-lenc).gt.1.0d-6) then
                write(iou,*) 'input correct boxl', lenc
-               stop
+               call cleanup('')
             endif
          endif
       endif
@@ -148,8 +148,8 @@ c	write(iou,*) boxlx(1),lena
       read(35,*)
       read(35,*) iratipsw
       if (lmipsw.and.lstageb) then
-         if (mod(iratipsw,iratp).ne.0) stop 'iratipsw must be integer
-     &       multiple of iratp if lstageb is true'
+         if (mod(iratipsw,iratp).ne.0) call cleanup('iratipsw must be integer
+     &       multiple of iratp if lstageb is true')
       endif
       do i = 1, nmolty
          if (lwell(i)) then

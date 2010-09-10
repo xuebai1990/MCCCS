@@ -106,7 +106,7 @@ c         write(iou,*) 'counters not implemented properly for grand'
          i = int( dchain*random() + 1 )
          i = parall(imolty,i)
          ibox = nboxi(i)
-         if ( moltyp(i) .ne. imolty ) stop 'screwup config'
+         if ( moltyp(i) .ne. imolty ) call cleanup('screwup config')
       endif
 
 c *** store number of units in iunit and # to be grown in igrow ***
@@ -263,7 +263,7 @@ c          iii = 2 new conformation
             if (ovrlap .and. (iii .eq. 1)) then
 c            if (ovrlap) then
                write(iou,*) 'disaster: overlap in old conf config',i
-               stop
+               call cleanup('')
             endif
 
             if (iii .eq. 2) then

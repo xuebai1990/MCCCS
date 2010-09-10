@@ -21,12 +21,12 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      integer   iend,ipast,endnum,pastnum,fclose,fcount,iwbef
+      integer::  iend,ipast,endnum,pastnum,fclose,fcount,iwbef
      +   ,ibef,befnum,wbefnum,nextnum,inext
 
-      logical lcrank
+      logical::lcrank
 
-      double precision xx,yy,zz,xvec,yvec,zvec,distij,vtgtr,vtbend
+      real(8)::xx,yy,zz,xvec,yvec,zvec,distij,vtgtr,vtbend
      +   ,bsum_tor,vtvib
 
       dimension iend(numax),ipast(numax,numax)

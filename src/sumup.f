@@ -149,7 +149,7 @@ c *** check the molecule count ***
       enddo
       if ( nmcount .ne. nchbox(ibox) ) then
          write(iou,*) 'SUMUP: nmcount ne nchbox', nmcount, nchbox
-         stop
+         call cleanup('')
       endif
  
 c ###############################################################
@@ -1227,7 +1227,6 @@ c ### check if i is in relevant box ###
                   imolty = moltyp(i)
                   do j = 1, nunit(imolty)
                      ntj = ntype(imolty,j)
-                     ntij = (ntj - 1) * nntype + ntsubst
                      if ( ljoe ) then
                         if ( extc12(ntj) .gt. 0.1d0 ) then
                            dzui = rzu(i,j) - extz0(ntj)
@@ -1258,7 +1257,7 @@ c -- calculate interaction with the surface at the top of the box
                      if ( lmuir ) 
      &                    vext = vext + exmuir(rzu(i,j),ntj)
                      if ( lexzeo ) vext = vext + 
-     &                    exzeo(rxu(i,j),ryu(i,j),rzu(i,j),ntij)
+     &                    exzeo(rxu(i,j),ryu(i,j),rzu(i,j),ntj)
                      
                   enddo
                endif

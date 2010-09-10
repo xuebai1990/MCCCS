@@ -21,5 +21,5 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      double precision bx,by,bz,hbx,hby,hbz,bxi,byi,bzi
+      real(8)::bx,by,bz,hbx,hby,hbz,bxi,byi,bzi
       common /peboco/ bx,by,bz,hbx,hby,hbz,bxi,byi,bzi

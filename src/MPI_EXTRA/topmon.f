@@ -28,12 +28,12 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       integer::i,seed
       real(8)::random,rtest
       dimension rtest(10)
-      character *50 fileout
+      character::*50 fileout
 c --- RP added for MPI for random2.f
       integer::nseed
       real(8)::random2,nrtest
       dimension nrtest(10)
-      character *50 nfileout
+      character::*50 nfileout
 
 c ----------------------------------------------------------------
 
@@ -90,5 +90,5 @@ c --- call main program
 
 c ----------------------------------------------------------------
 
-      stop
+      call cleanup('')
       end

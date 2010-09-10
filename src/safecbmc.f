@@ -551,7 +551,7 @@ c     --- determine angles for iu - iend - ipast if they exist
                            endif
                         enddo
                         write(iou,*) 'iu,ju,ku',iu,ju,ku
-                        stop 'no bond angle for these'
+                        call cleanup('no bond angle for these')
  125                    continue
                         
                         if (pastnum(ju).gt.1) then
@@ -1401,7 +1401,7 @@ c     --- jut4 must already exist or we made a big mistake
                            endif
                            write(iou,*) 'jut4,jut3,jut2,iu',
      &                          jut4,jut3,jut2,iu
-                           stop 'trouble jut4 in crankshaft'
+                           call cleanup('trouble jut4 in crankshaft')
                         endif
                         jttor = ittor(imolty,iu,it)
 
@@ -1453,7 +1453,7 @@ c     --- jut4 must already exist or we made a big mistake
                            if (.not. lexist(jut4)) then
                               write(iou,*) 'jut4,jut3,jut2,iu',
      &                             jut4,jut3,jut2,iu
-                              stop 'trouble jut4 in crankshaft'
+                              call cleanup('trouble jut4 in crankshaft')
                            endif
 
                            jttor = ittor(imolty,ku,it)
@@ -1528,7 +1528,7 @@ c     --- determine angles for iend - iu - iend
                               write(iou,*) iu,ku,xvec(iu,ku)
      &                             ,yvec(iu,ku)
      &                             ,zvec(iu,ku),lengthb
-                              stop 'shitfuck'
+                              call cleanup('shitfuck')
                            endif
 
                            angle = dacos(thetac)
@@ -1665,7 +1665,7 @@ c                  elseif (fcount(iu).gt.1) then
 
 c                     j = diracc(count)
 
-c                     if (ip.gt.1.and..not.lnew) stop
+c                     if (ip.gt.1.and..not.lnew) call cleanup('')
 
 c                     if (lnew) then
 c                        xx(count) = rxa(count,j) - rxnew(iufrom)  

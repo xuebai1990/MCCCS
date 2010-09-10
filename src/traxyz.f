@@ -182,7 +182,7 @@ c *** calculate the energy of i in the old configuration ***
 
       if (ovrlap) then
          write(iou,*) 'disaster ovrlap in old conf of TRAXYZ'
-         stop
+         call cleanup('')
       endif
 
       if ( lewald .and. lelect(imolty) ) then

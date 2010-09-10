@@ -36,8 +36,7 @@ C     In atomtype.f atoms O of the zeolite have been given id=1
 C     Hopefully in some other place the guestmolecules CH4 have been
 C     assigned id=2
 
-
-c      if (zntype.ne.2) stop '** forcefield: ntype ne 2 not allowed **'
+c      if (zntype.ne.2) call cleanup('** forcefield: ntype ne 2 not allowed **')
 
 C     Force field data:
 
@@ -51,7 +50,7 @@ C Energy = 4*epsilon*((sigma/r)**12 - (sigma/r)**6)
 
       read(25,*)  
       read(25,*)
-      idz=4
+      idz=1
       do itype = 1,zntype
 	 read(25,*) epsilon,sigma
          zeps(itype,idz) = epsilon
@@ -61,20 +60,16 @@ C Energy = 4*epsilon*((sigma/r)**12 - (sigma/r)**6)
 C Write epsilons and sigma's:
 
       write(16,100)
-c      write( 6,100)
       jtype=idz
       do itype = 1,zntype
          write(16,1001) itype,jtype,zeps(itype,jtype),
      +                  itype,jtype,dsqrt(zsig2(itype,jtype))
-c         write( 6,1001) itype,jtype,zeps(itype,jtype),
-c     +                  itype,jtype,dsqrt(zsig2(itype,jtype))
       enddo
  
 C Force field cutoff radius rczeo for interactions between guests
 C and zeolite atoms:
 
       write(16,101) rczeo
-c      write( 6,101) rczeo
       do itype = 1,zntype
         zrc2(itype,idz)=rczeo**2
       enddo

@@ -230,7 +230,7 @@ c *** for unit which is not a charge site
 c *** For charge transfer case, i molecule increases by dispbig and
 c *** jchain molecule decreases by dispbig. 
 c *** correction for the reptition of the calculation of the 
-c *** coulombic real space term between maini and mainj
+c *** coulombic real::space term between maini and mainj
          maini = mainunit
  32      mainunit = int( dble(iunit)*random() ) + 1
 c *** for unit which is not a charge site
@@ -416,7 +416,7 @@ c *** Begin Ewald-sum correction
 c *** check for acceptance ***
  
       deltv  = vnew - vold
-c --- use the thermostat temperature instead of real temp
+c --- use the thermostat temperature instead of real::temp
       deltvb = fqbeta * deltv
 
 c      if ( deltv .lt. -100.0d0) then

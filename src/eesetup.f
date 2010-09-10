@@ -25,10 +25,10 @@ c --- initialize a few things
       leemove = .false.
       if ((pmexpc1.gt.1.0d-6).and.(.not.lexpee)) then
          write(iou,*) 'pmexp nonzero but no lexpee?'
-         stop
+         call cleanup('')
       elseif ((pmexpc1.lt.1.0d-6).and.lexpee) then
          write(iou,*) 'pmexp zero but lexpee?'
-         stop
+         call cleanup('')
       endif
 
 c --- read necessary stuff
@@ -46,7 +46,7 @@ c --- the number for final state (first one is 1)
       read(44,*)
       read(44,*) fmstate
 
-      if (fmstate.lt.3) stop 'EE when no intermediate state'
+      if (fmstate.lt.3) call cleanup('EE when no intermediate state')
 
 c --- weight (psi) associated with each state
       read(44,*)
@@ -56,7 +56,7 @@ c --- the two states between which 'swap' is. ensure that sstate1 is
 c --- sstate2-1
       read(44,*)
       read(44,*) sstate1, sstate2
-      if (sstate1.ne.(sstate2-1)) stop 'choose sstates in order'
+      if (sstate1.ne.(sstate2-1)) call cleanup('choose sstates in order')
 
 c --- once an ee move is performed, the prob that it will be
 c --- ee_index_swap move (keep is quite low)
@@ -71,13 +71,13 @@ c --- check with temtyp
       cnt = 0
       do i = nmolty1, nmolty
          if (temtyp(i).gt.0) then
-            if (temtyp(i).ne.1) stop 'ee must be on one molecule only'
+            if (temtyp(i).ne.1) call cleanup('ee must be on one molecule only')
             isv = i
             cnt = cnt+1
          endif
       enddo
-      if (cnt.gt.1) stop 'only one state should be present in ee'
-      if ((nmolty1+mstate-1).ne.isv) stop
+      if (cnt.gt.1) call cleanup('only one state should be present in ee')
+      if ((nmolty1+mstate-1).ne.isv) call cleanup('')
      &   'initial mstate inconsistent with temtyp'
       if ((mstate.eq.1).or.(mstate.eq.fmstate)) lmstate = .true.
 
@@ -235,7 +235,7 @@ c	enddo
 c	enddo
 c	enddo
 c	enddo
-c	stop
+c	call cleanup('')
 
 c --- associate moltyp with mstate
 
@@ -291,7 +291,7 @@ c         eepointp = idint(dble(ncmt(box_state(2),imolty))*random())+1
 c         mstate = fmstate
 c      else
 c         write(iou,*)'the type is in neither box, imolty:',imolty
-c         stop
+c         call cleanup('')
 c      endif
 c      lmstate = .true.
 c	write(iou,*) 'starting point', eepointp, mstate

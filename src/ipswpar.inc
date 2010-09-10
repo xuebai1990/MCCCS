@@ -1,13 +1,13 @@
-      integer nw,nwell,iratipsw
+      integer::nw,nwell,iratipsw
       parameter (nw = 4000)
 
-      double precision dvdl,acdvdl,acipsw,vipsw,pipsw,vwellipsw
+      real(8)::dvdl,acdvdl,acipsw,vipsw,pipsw,vwellipsw
      &   ,pwellipsw,vwellipswb,vipswb,etais,lambdais,rxwell,rywell
      &   ,rzwell,awell,bwell,vipswo,vipswn,vwellipswo,vwellipswn
      &   ,lena,lenc,pwellips,pips,dhmat,sxwell,sywell,szwell
      &   ,vwellipswot,vwellipswnt,vipswnt,vipswot
 
-      logical lwell,lstagea,lstageb,lstagec
+      logical::lwell,lstagea,lstageb,lstagec
 
       dimension vipswb(nbxmax),vwellipswb(nbxmax),rxwell(nw,ntmax)
      &         ,rywell(nw,ntmax)

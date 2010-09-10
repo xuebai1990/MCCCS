@@ -50,7 +50,7 @@
       cell_vol(ibox) = elem(1)*bcx+elem(2)*bcy+elem(3)*bcz
       
       if(abs(cell_vol(ibox)).lt.1D-16) then 
-         stop 'Volume of cell negligible, check input H matrix'
+         call cleanup('Volume of cell negligible, check input H matrix')
       endif
               
       inv_vol = 1.0d0/cell_vol(ibox) 

@@ -61,7 +61,7 @@ c ***    select a chain at random ***
          endif
       enddo
       if ( .not. lexpand(imolty) ) 
-     &     stop 'select a wrong type of molecule for the ES-move'
+     &     call cleanup('select a wrong type of molecule for the ES-move')
 
       if (lgrand) then
 c ---    select a chain at random in box 1!
@@ -167,7 +167,7 @@ c     Start of intermolecular tail correction for old
 
       bnexpc(imolty,ibox) = bnexpc(imolty,ibox) + 1.0d0
 
-      if (ovrlap) stop 'disaster ovrlap in old conf of TRAXYZ'
+      if (ovrlap) call cleanup('disaster ovrlap in old conf of TRAXYZ')
       
       if ( lewald ) then
          call recip(ibox,vrecipn,vrecipo,1)

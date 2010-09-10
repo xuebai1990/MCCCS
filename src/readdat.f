@@ -197,7 +197,7 @@ c -- generate output file name
 c - create output file name
       fname = run_num
 
-c - use internal read/write to get integer::number in character format
+c - use internal read/write to get integer::number in character::format
       write(ftemp,*) fname
       read(ftemp,*) fname2
       file_run = 'run'//fname2(1:len_trim(fname2))//suffix//'.dat' 
@@ -372,14 +372,14 @@ c - read information for histogram output (added 8/30/99)
 c - create output file name
       fname = run_num
 
-c - use internal read/write to get integer::number in character format
+c - use internal read/write to get integer::number in character::format
 c      write(ftemp,*) fname
 c      read(ftemp,*) fname2
 c      file_run = 'run'//fname2(1:len_trim(fname2))//suffix//'.dat' 
 c      file_movie = 'movie'//fname2(1:len_trim(fname2))//suffix//'.dat' 
 
 c KM for MPI
-c jobs stop in monola so that all processors die
+c jobs call cleanup('') in monola so that all processors die
       if (dint(dble(nstep)/dble(iblock)) .gt. 100) then
          write(iou,*) 'too many blocks'
          ldie = .true.
@@ -2320,7 +2320,7 @@ c * check information of .INC-files
                ldie = .true.
                return
             endif
-c         if ( lchgall ) stop 'cannot have lchgall with lcutcm'
+c         if ( lchgall ) call cleanup('cannot have lchgall with lcutcm')
          endif
          if ( ldual ) then
             write(iou,*) 'Dual Cutoff Configurational-bias Monte Carlo'
@@ -2604,7 +2604,7 @@ c            if ( nures(i) .ne. nunit(i) ) then
 c               write(iou,*)
 c     +           'conflicting information in restart and control files'
 c               write(iou,*) 'unit',i,'nunit',nunit(i),'nures',nures(i)
-c               stop
+c               call cleanup('')
 c            endif
 c         enddo
 c         write(iou,*) 'ncres',ncres,'   nmtres',nmtres
@@ -2761,7 +2761,7 @@ c            write(iou,*) 'reading coord of chain i',i
         endif
       else
         if ( lchgall ) then
-c *** if real space term are summed over all possible pairs in the box
+c *** if real::space term are summed over all possible pairs in the box
 c *** kalp(1) & kalp(2) are fixed while calp(1) & calp(2) change
 c *** according to the boxlength, kalp(1) should have a value greater than
 c *** 5.0
@@ -2799,8 +2799,8 @@ c *** if not lchgall, calp(1) & calp(2) are fixed
                   write(iou,*) ibox,calp(ibox),rcut(ibox)
 ccc --- JLR 11-24-09  
 ccc --- you may want a smaller kalp, e.g. when comparing to previous work
-ccc --- This does not need to be a stop  
-c                  stop 'kalp is too small, set to 3.2/rcutchg'
+ccc --- This does not need to be a call cleanup('')  
+c                  call cleanup('kalp is too small, set to 3.2/rcutchg')
                   write(iou,*) 'kalp is too small, set to 3.2/rcutchg'
 ccc --- END JLR 11-24-09
                endif

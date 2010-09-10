@@ -88,7 +88,7 @@ c      write(iou,*) 'binvir',binvir
 
       if ( nboxi(1) .eq. nboxi(2) ) then
          write(iou,*) 'particles found in same box'
-         stop
+         call cleanup('')
       endif
  
 c ################################################################

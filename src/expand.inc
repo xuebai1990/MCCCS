@@ -21,6 +21,6 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      double precision epsil(ntmax,numax,100),sigm(ntmax,numax,100)
-      double precision qcharge(ntmax,numax,100)
+      real(8)::epsil(ntmax,numax,100),sigm(ntmax,numax,100)
+      real(8)::qcharge(ntmax,numax,100)
       common /expand2/ epsil,sigm,qcharge

@@ -21,8 +21,8 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      integer         idzeo,nzeomax,nzeo,nx,ny,nz
-      double precision zeox,zeoy,zeoz,zeorx,zeory,zeorz,
+      integer::        idzeo,nzeomax,nzeo,nx,ny,nz
+      real(8)::zeox,zeoy,zeoz,zeorx,zeory,zeorz,
      +                 zeorxi,zeoryi,zeorzi,zunitx,zunity
      +                ,zunitz,zunitxi,zunityi,zunitzi
 

@@ -11,10 +11,10 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
 
-      character (len=30) infile,outfile
-      character (len=5) sname(500),celltype
+      character::(len=30) infile,outfile
+      character::(len=5) sname(500),celltype
       integer::nbead, i, j
-      real cell(6),bead(3,500),dum
+      real::cell(6),bead(3,500),dum
       
       read(4,*) infile
       read(4,*) nbead

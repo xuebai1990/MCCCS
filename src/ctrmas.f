@@ -260,7 +260,7 @@ c ----- Determine new center of mass for chain i
                   lintbx = .true.
                   write(iou,*) 'nxcm,nycm,nzcm',nxcm,nycm,nzcm
                   write(iou,*) 'dx,dy,dz',dx,dy,dz
-                  if (iwarn .ne. 0) stop
+                  if (iwarn .ne. 0) call cleanup('')
                endif
                iadjust = iadjust + 1
                goto 25

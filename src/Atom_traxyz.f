@@ -171,7 +171,7 @@ c *** calculate the energy of i in the old configuration ***
      &       .false.
      &     ,vdum,.false.,.false.,vvibo,vbendo,vtgo)
 
-      if (ovrlap) stop 'disaster ovrlap in old conf of TRAXYZ'
+      if (ovrlap) call cleanup('disaster ovrlap in old conf of TRAXYZ')
       
       if ( lewald .and. lelect(imolty) ) then
          call recip_atom(ibox,vrecipn,vrecipo,1,pick_unit)

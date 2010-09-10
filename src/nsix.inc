@@ -25,9 +25,9 @@ c ***************************************************
 c * stores interaction parameters for 9-6 potential *
 c ***************************************************
 
-      integer nxatom
+      integer::nxatom
       parameter (nxatom=5)
-      double precision rzero(nxatom*nxatom),epsnx(nxatom*nxatom)
-      double precision shiftnsix(nxatom*nxatom)
+      real(8)::rzero(nxatom*nxatom),epsnx(nxatom*nxatom)
+      real(8)::shiftnsix(nxatom*nxatom)
 
       common /formic/ rzero,epsnx,shiftnsix

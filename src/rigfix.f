@@ -108,7 +108,7 @@ c     --- now we must cycle through all sites that we want to be rigid
             thetac = -(xfix(iu)*xfix(iufrom) + yfix(iu)*yfix(iufrom)
      &           + zfix(iu)*zfix(iufrom)) / (lengtha*lengthb)
             
-            if (abs(thetac).gt.1.0d0) stop 'screwup in rigfix'
+            if (abs(thetac).gt.1.0d0) call cleanup('screwup in rigfix')
             
             bendang(iu) = dacos(thetac)
             
@@ -253,7 +253,7 @@ c     --- check to see if jut4 exists
                         if (.not. lexist(jut4)) then
                            write(iou,*) 'iu,jut2,jut3,jut4',iu
      &                          ,jut2,jut3,jut4
-                           stop 'trouble, jut4 does not exist in rigfix'
+                           call cleanup('trouble, jut4 does not exist in rigfix')
                         endif
                         
                         jttor = ittor(imolty,iu,it)

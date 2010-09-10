@@ -57,7 +57,7 @@ c ----------------------------------------------------------------
       if(lshift) then
          do ibox = 2,nbox
            if (dabs(rcut(1)-rcut(ibox)).gt.1.0d-10) then
-               stop 'Keep rcut for each box same'
+               call cleanup('Keep rcut for each box same')
            endif
          enddo
       endif
@@ -213,7 +213,7 @@ c     Si-O-H
 c --- Keep the rcut same for each box
          do ibox = 2,nbox
            if (dabs(rcut(1)-rcut(ibox)).gt.1.0d-10) then
-              stop 'Keep rcut for each box same'
+              call cleanup('Keep rcut for each box same')
            endif
          enddo
 
@@ -305,7 +305,7 @@ c            write(11,*) 'consu(i)',consu
 c --- Keep the rcut same for each box
       do ibox = 2,nbox
          if (dabs(rcut(1)-rcut(ibox)).gt.1.0d-10) then
-            stop 'Keep rcut for each box same'
+            call cleanup('Keep rcut for each box same')
          endif
       enddo
 c --- Merk Molecular Force Field (MMFF)
@@ -396,7 +396,7 @@ c            corp_cons(1) = 4.0098456560842058E-02
 c * special potential for all-atom formic acid from llnl 4/6/04 jms 
       do ibox = 2,nbox
          if (dabs(rcut(1)-rcut(ibox)).gt.1.0d-10) then
-            stop 'Keep rcut for each box same'
+            call cleanup('Keep rcut for each box same')
          endif
       enddo
 
@@ -3636,7 +3636,7 @@ c *** convert input data to program units ***
       if ( lsami ) then
       do ibox = 2,nbox
          if (dabs(rcut(1)-rcut(ibox)).gt.1.0d-10) then
-            stop 'Keep rcut for each box same'
+            call cleanup('Keep rcut for each box same')
          endif
       enddo
          call susami

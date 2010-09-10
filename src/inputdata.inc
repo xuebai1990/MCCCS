@@ -21,25 +21,25 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      logical lstop, ldie
-      logical lrdf,lintra,lstretch,lgvst,lbend,lete, lrhoz
-      logical L_movie_xyz
+      logical::lstop, ldie
+      logical::lrdf,lintra,lstretch,lgvst,lbend,lete, lrhoz
+      logical::L_movie_xyz
       character*1 suffix
-      integer run_num
-      logical L_add, L_sub
-      integer N_add,N_box2add,N_moltyp2add
-      integer N_sub,N_box2sub,N_moltyp2sub
-      integer ghost_particles
-      integer ianalyze,nbin,tmcc
-      integer nequil,ninstf,ninsth,ndumph
-      integer nstep, iprint, imv, iratio, iblock, idiele, isolute
+      integer::run_num
+      logical::L_add, L_sub
+      integer::N_add,N_box2add,N_moltyp2add
+      integer::N_sub,N_box2sub,N_moltyp2sub
+      integer::ghost_particles
+      integer::ianalyze,nbin,tmcc
+      integer::nequil,ninstf,ninsth,ndumph
+      integer::nstep, iprint, imv, iratio, iblock, idiele, isolute
      &       ,iratv,iratp,irsave,nnstep,nchoiq,numcoeff,rmexpc
      &       ,nswapb,box1,box2,nvolb,box5,box6,ntemp, iheatcapacity
 
-      double precision Armtrax,Armtray,Armtraz
-      double precision Num_cell_a, Num_cell_b, Num_cell_c
+      real(8)::Armtrax,Armtray,Armtraz
+      real(8)::Num_cell_a, Num_cell_b, Num_cell_c
 
-      double precision pmcb, pmtra, temp, express, ewald_precision
+      real(8)::pmcb, pmtra, temp, express, ewald_precision
      &                ,rmtrax, rmtray, rmtraz, rmrotx, rmroty, rmrotz
      &                ,rmflcq,taflcq,fqbeta,tatra, tarot,pmvolx,pmvoly
      &                ,pmvol, pmswap,rmvol, rmhmat, tavol,pmfix

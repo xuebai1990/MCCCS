@@ -21,11 +21,11 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      integer nswaty,nswatb,gswatc,nswach
-      integer nsampos,splist,nswtcb,box3,box4,ncut
+      integer::nswaty,nswatb,gswatc,nswach
+      integer::nsampos,splist,nswtcb,box3,box4,ncut
 
-      double precision bnswat,bniswat,pmswtcb
-      double precision bnswat_empty	
+      real(8)::bnswat,bniswat,pmswtcb
+      real(8)::bnswat_empty	
 
       dimension nswach(npamax),nsampos(npamax)
       dimension nswatb(npamax,npabmax)

@@ -178,7 +178,7 @@ c            lz(boxb) = .true.
          if (lsolid(boxb) .and. .not. lrect(boxb)) then
             write(iou,*) 'can not perform volume move between',
      &           ' two non-rectangular boxes'
-            stop
+            call cleanup('')
          endif
       endif
 
@@ -351,7 +351,7 @@ c *** select one of the cell edge
             write(iou,*) 'w1:',w(1),'w2:',w(2),'w3:',w(3)
             hmat(hbox,jhmat) = hmato(jhmat)
             call dump
-            stop
+            call cleanup('')
 c            goto 500
          endif
 
@@ -497,7 +497,7 @@ c *** volume move independently in x, y, z directions
                boxlz(boxb) = bzo(boxb)
             endif
             call dump 
-            stop
+            call cleanup('')
             return
          endif
 
@@ -507,7 +507,7 @@ c *** calculate centre of mass and its displacement
 
 c - WARNING
          if ( .not. lfold ) 
-     &        stop 'volume move only correct with folded coordinates'
+     &        call cleanup('volume move only correct with folded coordinates')
 
          do i = 1, nchain
 

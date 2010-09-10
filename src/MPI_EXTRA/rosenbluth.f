@@ -439,7 +439,7 @@ c * allow regrowth where one torsion may already exist and one may not
                               goto 299
 c                              write(iou,*) 'jut4,jut3,jut2,iu',
 c     &                             jut4,jut3,jut2,iu
-c                              stop 'trouble jut4'
+c                              call cleanup('trouble jut4')
                            endif
                            jttor = ittor(imolty,iu,it)
                            

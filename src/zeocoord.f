@@ -38,13 +38,13 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       read(47,*)    alpha,beta,gamma
       write(16,102) alpha,beta,gamma
       if (alpha.ne.90.or.beta.ne.90.or.gamma.ne.90) 
-     +     stop '** zeocoord: not cubic **'
+     +     call cleanup('** zeocoord: not cubic **')
 
       read(47,*)   nzeo,frac,nx,ny,nz
       
 
       write(16,103) nzeo
-      if (nzeo.gt.nzeomax) stop '** zeocoord: nzeo gt nzeomax **'
+      if (nzeo.gt.nzeomax) call cleanup('** zeocoord: nzeo gt nzeomax **')
 
 c     === Calculate zeolite density from assumption no of Si = 0.5* no O
 
@@ -57,8 +57,8 @@ C     === Converting to absolute coordinates within [0,ri>
 
       do izeo = 1,nzeo
          read(47,99) count,atom,zeox(izeo),zeoy(izeo),
-     +        zeoz(izeo),charge
-         if (frac.eq.0) then
+     +        zeoz(izeo)
+         if (frac.eq.1) then
             zeox(izeo) = mod(zeox(izeo)+1.0d0,1.0d0)*zeorx
             zeoy(izeo) = mod(zeoy(izeo)+1.0d0,1.0d0)*zeory
             zeoz(izeo) = mod(zeoz(izeo)+1.0d0,1.0d0)*zeorz
@@ -68,15 +68,15 @@ C     === Converting to absolute coordinates within [0,ri>
             zeoz(izeo) = mod(zeoz(izeo)+zeorz,zeorz)
          endif 
          idzeo(izeo)=atomtype(zntype,atom)
+         write(16,*) zeox(izeo),zeox(izeo),zeoy(izeo),idzeo(izeo)
       enddo
 
       write(16,105) nx,ny,nz
-c      write( 6,105) nx,ny,nz
 
       close(16)
 
 c 99   format(i4,1x,a4,2x,3(f9.5,1x),8i4,1x,f7.3)
- 99   format(i4,1x,a4,2x,3(f9.5,1x),f7.3)
+ 99   format(i4,1x,a4,2x,3(f9.5,1x))
  100  format(/,' READING ZEOLITE LATTICE FROM FILE zeolite.cssr:',/,
      +     ' --------------------------------------------------')
  101  format(  ' box dimensions                    = ',3f10.3,

@@ -21,13 +21,13 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      double precision alpha1,alpha2,beta1,beta2
-      double precision a1,delta,rsol
-      integer ntsubst
-      integer tau1,tau2
-      logical ljoe,lsami,lexzeo,lpsurf,lzgrid,lmuir,lgraphite
-      logical lslit
-      logical lcorreg,lelect_field
+      real(8)::alpha1,alpha2,beta1,beta2
+      real(8)::a1,delta,rsol
+      integer::ntsubst
+      integer::tau1,tau2
+      logical::ljoe,lsami,lexzeo,lpsurf,lzgrid,lmuir,lgraphite
+      logical::lslit
+      logical::lcorreg,lelect_field
 c  external electric field
       parameter (lelect_field=.false.)
 c surfaces:

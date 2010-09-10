@@ -46,7 +46,7 @@ c     --- calculate random vector on the unit sphere ---
          endif
       enddo
 
-      stop 'exceeded 100 tries to get a vector in sphere'
+      call cleanup('exceeded 100 tries to get a vector in sphere')
 
       end
 

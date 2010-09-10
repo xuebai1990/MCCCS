@@ -77,7 +77,7 @@ c     --- initialize lexshed so all beads currently exist
             lexshed(iu) = .true.
          enddo
 
-         if ( kickout .eq. 50 ) stop 'kickout is 50'
+         if ( kickout .eq. 50 ) call cleanup('kickout is 50')
  
 c        -- select the first bead to grow from
          if (lrigid(imolty)) then
@@ -114,7 +114,7 @@ c         write(iou,*) 'iutry',iutry
 
          if ( invtry .eq. 0 ) then
 c           --- problem, cannot do config move on a 1 bead molecule
-            stop 'cannot do CBMC on a one grow unit molecule'
+            call cleanup('cannot do CBMC on a one grow unit molecule')
 
          elseif ( invtry .eq. 1 ) then
 c           --- regrow entire molecule, check nmaxcbmc
@@ -198,7 +198,7 @@ c              --- we regrew all branches, no previous bead
 c              --- problem in logic, should only be one nongrown bead
                write(iou,*) 'invtry,count',invtry,count
                write(iou,*) 'igrow,imolty',igrow,imolty
-               stop 'logic problem in schedule'
+               call cleanup('logic problem in schedule')
             endif
          endif   
 
@@ -384,7 +384,7 @@ c * end iswatch stuff *
 
 c        --- non-existant move type
          write(iou,*) 'schedule movetype ',movetype
-         stop 'non-valid move type'
+         call cleanup('non-valid move type')
       endif
 
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc

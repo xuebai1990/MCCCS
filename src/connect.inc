@@ -21,11 +21,11 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      logical linclu,lqinclu,lainclu,lexclu,wschvib,wschben,wschtor
-      integer invib,itvib,ijvib,inben,itben,ijben2,ijben3
+      logical::linclu,lqinclu,lainclu,lexclu,wschvib,wschben,wschtor
+      integer::invib,itvib,ijvib,inben,itben,ijben2,ijben3
      +   ,intor,ittor,ijtor2,ijtor3,ijtor4
      +   ,wsched
-      double precision brvib,brvibk,brvibmin,brvibmax,brben,brbenk
+      real(8)::brvib,brvibk,brvibmin,brvibmax,brben,brbenk
       
       common /connev/ brvib(nvmax),brvibk(nvmax),brvibmin(60)
      &   ,brvibmax(60)

@@ -21,9 +21,9 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      double precision vbox,wbox,vinterb,vtailb,vintrab,vvibb,vbendb
+      real(8)::vbox,wbox,vinterb,vtailb,vintrab,vvibb,vbendb
      +   ,vtgb, vextb, velectb,vflucqb,v3garob
-c      double precision velectb_intra, velectb_inter
+c      real(8)::velectb_intra, velectb_inter
       common /vwbox/  vbox(nbxmax),wbox(nbxmax),vinterb(nbxmax)
      +   ,vtailb(nbxmax),vintrab(nbxmax),vvibb(nbxmax)
      +   ,vbendb(nbxmax),vtgb(nbxmax),vextb(nbxmax)

@@ -21,10 +21,10 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      integer natomtyp
+      integer::natomtyp
       parameter (natomtyp = 3)
-      double precision epsimmff,sigimmff,smmff,sigisq,ammff,nmmff
-      double precision gmmff,alphammff,coru_cons,corp_cons 
+      real(8)::epsimmff,sigimmff,smmff,sigisq,ammff,nmmff
+      real(8)::gmmff,alphammff,coru_cons,corp_cons 
       dimension epsimmff(natomtyp),sigimmff(natomtyp),smmff(natomtyp)
       dimension ammff(natomtyp),nmmff(natomtyp),gmmff(natomtyp)
       dimension sigisq(natomtyp),alphammff(natomtyp)
