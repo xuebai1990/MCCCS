@@ -60,41 +60,41 @@ c RP added for MPI
       include 'mpif.h'
       include 'mpi.inc'
  
-      logical ovrlap, lvol 
-      logical lexplt,lqimol,lqjmol,lcoulo,lij2,liji,lqchgi,lexclude
-      integer i, imolty, ii, j, jmolty, jj, ntii, ntjj, ntij, iunit
+      logical::ovrlap, lvol 
+      logical::lexplt,lqimol,lqjmol,lcoulo,lij2,liji,lqchgi,lexclude
+      integer::i, imolty, ii, j, jmolty, jj, ntii, ntjj, ntij, iunit
      +     , ip1, ip2, ip3,ibox,nmcount,iii,jjj,ip
      +     ,iivib, jjvib, jjben, jjtor, it, ntj,itype,k, mmm
-      double precision v, vinter, vintra, vtail, vvib, vbend, vtg, vext
+      real(8)::v, vinter, vintra, vtail, vvib, vbend, vtg, vext
      &     ,velect,vflucq,qqii
-      double precision rcutsq,rminsq,rxui,ryui,rzui,rxuij,ryuij,rzuij
+      real(8)::rcutsq,rminsq,rxui,ryui,rzui,rxuij,ryuij,rzuij
      &       ,rijsq,sr2, sr6, rho, thetac, theta 
      +     ,xaa1, yaa1, zaa1, xa1a2, ya1a2, za1a2, daa1, da1a2, dot
      +     ,vtorso, dzui, dz3, dz12, rhoz,xcc,ycc,zcc,tcc,spltor
      +     ,mmff,rij,vrecipsum,erfunc
      +     ,rbcut,ninesix,vwell, genlj
 c tabulated potential variables
-      double precision tabulated_vib, tabulated_bend, tabulated_vdW, 
+      real(8)::tabulated_vib, tabulated_bend, tabulated_vdW, 
      &     tabulated_elect, rbend, rbendsq
 
-      double precision sx,sy,sz
+      real(8)::sx,sy,sz
 
-c      double precision vtemp
-      double precision vsc
+c      real(8)::vtemp
+      real(8)::vsc
 
-      double precision coru,coruz,xcmi,ycmi,zcmi,rcmi,rcm,rcmsq,qave
-      double precision ljsami,ljpsur,ljmuir,exsami,exmuir,exzeo,exsix
-      double precision exgrph,vintera,velecta,vol
-      double precision xvec(numax,numax),yvec(numax,numax)
+      real(8)::coru,coruz,xcmi,ycmi,zcmi,rcmi,rcm,rcmsq,qave
+      real(8)::ljsami,ljpsur,ljmuir,exsami,exmuir,exzeo,exsix
+      real(8)::exgrph,vintera,velecta,vol
+      real(8)::xvec(numax,numax),yvec(numax,numax)
      +                ,zvec(numax,numax),distij(numax,numax),epsilon2
      +                ,sigma2, distij2(numax,numax)
-      double precision slitpore, v_elect_field, field
+      real(8)::slitpore, v_elect_field, field
       dimension lcoulo(numax,numax),lexclude(nmax)
 ! Neeraj & RP for MPI
-      double precision sum_velect,sum_vinter,sum_vtail,sum_vintra
+      real(8)::sum_velect,sum_vinter,sum_vtail,sum_vintra
      +       ,sum_vflucq,sum_vvib,sum_vbend,sum_vtg,sum_vext,sum_vwell
      +      ,sum_sself,sum_correct,my_velect,sum_my_velect
-      logical all_ovrlap
+      logical::all_ovrlap
 c --------------------------------------------------------------------
       vintera = 0.0d0
       velecta = 0.0d0
@@ -587,6 +587,13 @@ c     &               ( boxlx(ibox)*boxly(ibox)*boxlz(ibox) )
      &                 ncmt(ibox,imolty) * coru(imolty,jmolty,rho,ibox)
                enddo
             enddo
+            if (ibox .eq. 1 .and. lexzeo) then
+               rho = nzeo/(zeorx*zeory*zeorz)
+               do imolty = 1, nmolty
+                  vtail = vtail + 
+     &                 ncmt(ibox,imolty) * coruz(imolty,rho,ibox)
+               enddo
+            endif
 c-----
   
             vinter = vinter + vtail
@@ -1206,7 +1213,8 @@ c --- not if lgrand and ibox =2
 c      if (.not.(lgrand.and.ibox.eq.2)) then
 c --- for adsorption isotherms, don't calculate energy w/surface
 c --- in box 2
-      if ( .not. (lslit.and.ibox.eq.2)) then
+c      if ( .not. (lslit.and.ibox.eq.2)) then
+      if (ibox .eq. 1) then
          if ( ljoe .or. lsami .or. lmuir .or. 
      +        lexzeo .or. lgraphite .or. lslit ) then
 
@@ -1216,11 +1224,10 @@ c         do i = 1, nchain
 
 c ### check if i is in relevant box ###
                if ( nboxi(i) .eq. ibox ) then
-                  
+                  imolty = moltyp(i)
                   do j = 1, nunit(imolty)
-                     
                      ntj = ntype(imolty,j)
- 
+                     ntij = (ntj - 1) * nntype + ntsubst
                      if ( ljoe ) then
                         if ( extc12(ntj) .gt. 0.1d0 ) then
                            dzui = rzu(i,j) - extz0(ntj)
@@ -1251,7 +1258,7 @@ c -- calculate interaction with the surface at the top of the box
                      if ( lmuir ) 
      &                    vext = vext + exmuir(rzu(i,j),ntj)
                      if ( lexzeo ) vext = vext + 
-     &                    exzeo(rxu(i,j),ryu(i,j),rzu(i,j),ntj)
+     &                    exzeo(rxu(i,j),ryu(i,j),rzu(i,j),ntij)
                      
                   enddo
                endif
@@ -1264,11 +1271,11 @@ c RP added for MPI
             vext = sum_vext
 
          endif
-         if (ltailc .and. lexzeo) then
+c         if (ltailc .and. lexzeo) then
 c     ---    add tailcorrections for the zeolite
-            rhoz=nzeo/(zeorx*zeory*zeorz)
-            vext=vext+nchbox(ibox)*coruz(iunit,rhoz,ibox)
-         endif
+c            rhoz=nzeo/(zeorx*zeory*zeorz)
+c            vext=vext+nchbox(ibox)*coruz(iunit,rhoz,ibox)
+c         endif
       endif
 
 c **********************************************************************
@@ -1392,9 +1399,9 @@ c      velect = qqfact*velect
          if (ltailc) write(iou,*)
      +        'Tail correction ', vtail
          
-         if (ltailc.and.lexzeo) write(iou,*)
-     +        'Tail corr. zeol', nchbox(ibox)*coruz(iunit,rhoz,
-     +        ibox) 
+c         if (ltailc.and.lexzeo) write(iou,*)
+c     +        'Tail corr. zeol', nchbox(ibox)*coruz(iunit,rhoz,
+c     +        ibox) 
          write(iou,*) 'bond vibration  ', vvib
          write(iou,*) 'bond bending    ', vbend
          write(iou,*) 'torsional       ', vtg

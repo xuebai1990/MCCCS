@@ -27,8 +27,9 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'grid.inc'
       include 'zeolite.inc'
       include 'control.inc'
-      integer i,j,k,pgrid,idi,ngrid
-      double precision xi,yi,zi,exzeof,dgr
+      integer::i,j,k,pgrid,idi,ngrid
+      real(8)::xi,yi,zi,exzeof,dgr
+      logical::precise
 c make a tabulated potential of the zeolite
 c
 c     ideal grid size: dgr
@@ -40,14 +41,14 @@ c     ideal grid size: dgr
       zunityi=1./zunity 
       zunitzi=1./zunitz 
 c --- volume minimal box
-      dgr = zunitx * zunity * zunitz/maxtab
-      dgr=(dgr)**(1.d00/3.d00)
+      dgr = 0.1
+c      dgr=(dgr)**(1.d00/3.d00)
 c --- find closest values for x and y
       ngrx=int(zunitx/dgr)
       ngry=int(zunity/dgr)
       ngrz=int(zunitz/dgr)
       ngrid=ngrx*ngry*ngrz
-      if (ngrid.gt.maxtab) stop  'ngrid.gt.maxtab'
+c      if (ngrid.gt.maxtab) stop  'ngrid.gt.maxtab'
       dgrx=zunitx/ngrx
       dgry=zunity/ngry
       dgrz=zunitz/ngrz
@@ -67,21 +68,24 @@ c      for polynom fitting)
       enddo
       write(iou,1000) ngrid,ngrx,dgrx,ngry,dgry,ngrz,dgrz
 c --- calculate interactions on grid
-      idi=1
-      xi=-dgrx
-      do i=0,ngrx-1
-         xi=xi+dgrx
-	 yi=-dgry
-         do j=0,ngry-1
-            yi=yi+dgry
-	    zi=-dgrz
-            do k=0,ngrz-1
-               zi=zi+dgrz
-	       egrid(pgrid(i,j,k,ngrx,ngry))=sngl(exzeof(xi,yi,zi,idi))
-	    enddo
-	 enddo
-         write(iou,*) 'Ztable: done ',i+1,' out of ',ngrx
-      enddo
+      precise=.false.
+      do while (.not. precise)
+         idi=1
+         xi=-dgrx
+         do i=0,ngrx-1
+            xi=xi+dgrx
+            yi=-dgry
+            do j=0,ngry-1
+               yi=yi+dgry
+               zi=-dgrz
+               do k=0,ngrz-1
+                  zi=zi+dgrz
+                  egrid(pgrid(i,j,k,ngrx,ngry))=exzeof(xi,yi,zi,idi)
+               end do
+            enddo
+            write(iou,*) 'Ztable: done ',i+1,' out of ',ngrx
+         enddo
+      end do
 c--   write table to disk
       call rwztab(1) 
 

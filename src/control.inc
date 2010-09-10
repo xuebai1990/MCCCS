@@ -44,7 +44,7 @@ c if LNPT=.TRUE..
 c    then a NPT volume move is used to equilibrate with a pressure bath
 c    (implies cubic simulation boxes)
 c    else an NVT simulation is performed 
-      parameter (lnpt = .false.)
+      parameter (lnpt = .true.)
 c if LGIBBS=.TRUE.. 
 c    then a Gibbs-ensemble simulation is performed
 c    (implies cubic simulation boxes)
@@ -171,11 +171,11 @@ c ***************************************
 c ** DIMENSIONS FOR ARRAYS             **
 c ***************************************
 c - nmax = maximum number of chains +2
-      parameter (nmax = 2000)
+      parameter (nmax = 5000)
 c - numax = maximum number of units
-      parameter (numax = 30)
+      parameter (numax = 12)
 c - ntmax = maximum number of types of chains
-      parameter (ntmax = 50)
+      parameter (ntmax = 12)
 c - smax = max no. of mstates
       parameter (smax = 35)
 c - nbxmax = maximum number of boxes

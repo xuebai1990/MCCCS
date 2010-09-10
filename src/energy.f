@@ -56,40 +56,40 @@ ckea include for garofalini 3 body term
 c RP added for MPI
       include 'mpif.h'
       include 'mpi.inc'
-      logical lqimol,lqjmol,lexplt,lcoulo,lfavor,lij2,liji,lqchgi
-      logical lljii,ovrlap,ltors,lcharge_table,lt,lfound
-      logical lmim
+      logical::lqimol,lqjmol,lexplt,lcoulo,lfavor,lij2,liji,lqchgi
+      logical::lljii,ovrlap,ltors,lcharge_table,lt,lfound
+      logical::lmim
 
-      integer growii,growjj,k,cellinc,jcell,ic,nmole
-      integer i,ibox, istart, iend,ii,ntii,flagon,jjj,iii,mmm
+      integer::growii,growjj,k,cellinc,jcell,ic,nmole
+      integer::i,ibox, istart, iend,ii,ntii,flagon,jjj,iii,mmm
      +       ,j,jj,ntjj,ntij,ntj,imolty,jmolty,ncell
-      integer iivib,jjtor,ip1,ip2,ip3,it,nchp2,acellinc
+      integer::iivib,jjtor,ip1,ip2,ip3,it,nchp2,acellinc
 
-      double precision ljsami,ljpsur,ljmuir,v,vintra, vinter,vext 
+      real(8)::ljsami,ljpsur,ljmuir,v,vintra, vinter,vext 
      +                ,rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq
      +                ,ryuij,rzuij,sr2,sr6,rij,rijsq,dzui,dz3,dz12
      +                ,exgrph,exsami,exmuir,exzeo,vtors,exsix,velect
      +                ,vewald,mmff,rbcut,ninesix, genlj
-      double precision erfunc,qave
-      double precision xvec,yvec,zvec,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2
+      real(8)::erfunc,qave
+      real(8)::xvec,yvec,zvec,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2
      &     ,daa1,da1a2,dot,thetac,vtorso,vwell
-      double precision xcc,ycc,zcc,tcc,theta,spltor
-      double precision xcmi,ycmi,zcmi,rcmi,rcm,rcmsq,epsilon2,sigma2
-      double precision sx,sy,sz
-      double precision slitpore,mlen2,v_elect_field, field
+      real(8)::xcc,ycc,zcc,tcc,theta,spltor
+      real(8)::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq,epsilon2,sigma2
+      real(8)::sx,sy,sz
+      real(8)::slitpore,mlen2,v_elect_field, field
 
       dimension xvec(numax,numax),yvec(numax,numax),zvec(numax,numax)
       dimension lcoulo(numax,numax),cellinc(cmax),jcell(nmax)
       dimension acellinc(numax,27)
 c KEA
-      integer neigh_j,neighj(maxneigh)
-      double precision ndijj(maxneigh),nxijj(maxneigh),
+      integer::neigh_j,neighj(maxneigh)
+      real(8)::ndijj(maxneigh),nxijj(maxneigh),
      &     nyijj(maxneigh),nzijj(maxneigh)
 c KM
-      double precision tabulated_vdW, tabulated_bend, tabulated_elect
+      real(8)::tabulated_vdW, tabulated_bend, tabulated_elect
 c Neeraj & RP added for MPI
-      double precision sum_velect, sum_vinter
-      logical all_ovrlap
+      real(8)::sum_velect, sum_vinter
+      logical::all_ovrlap
 C --------------------------------------------------------------------
 
 c      write(iou,*) 'start ENERGY'
@@ -881,11 +881,13 @@ C ***************************************************************
       if ( ljoe .or. lsami .or. lmuir .or. lexzeo
      +			   .or. lgraphite .or. lslit) then
 c ---  not for grand can. with ibox=2 !
-         if (.not.(lgrand.and.(ibox.eq.2))) then    
+c         if (.not.(lgrand.and.(ibox.eq.2))) then    
+         if (ibox .eq. 1) then
             do 399 j = istart,iend
 
                ntj = ntype(imolty,j)
- 
+               ntij = (ntj - 1) * nntype + ntsubst
+
                if ( ljoe ) then
                   if ( extc12(ntj) .gt. 0.1d0 ) then
                      dzui = rzuion(j,flagon) - extz0(ntj)
@@ -915,7 +917,7 @@ c -- calculate interaction with the surface at the top of the box
                if ( lmuir ) vext = vext + exmuir(rzuion(j,flagon),ntj)
 
                if ( lexzeo ) vext = vext + exzeo(rxuion(j,flagon)
-     &              ,ryuion(j,flagon),rzuion(j,flagon),ntj)
+     &              ,ryuion(j,flagon),rzuion(j,flagon),ntij)
                
  399        continue
 

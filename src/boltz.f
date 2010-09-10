@@ -54,40 +54,40 @@ c RP added for MPI
       include 'mpif.h'
       include 'mpi.inc'
 
-      logical lnew,ovrlap,lcmno,lfirst,lcompute,lcoulo
-      logical lqimol,lqjmol,liji,lqchgi
-      integer ichoi,growjj,igrow,count,glist,icharge,cnt,jcell,ic
-      integer i,imolty,ibox,ntogrow,itrial,ntii,j,jj,ntjj,ntij
+      logical::lnew,ovrlap,lcmno,lfirst,lcompute,lcoulo
+      logical::lqimol,lqjmol,liji,lqchgi
+      integer::ichoi,growjj,igrow,count,glist,icharge,cnt,jcell,ic
+      integer::i,imolty,ibox,ntogrow,itrial,ntii,j,jj,ntjj,ntij
      +       ,iu,jmolty,jjj,iufrom,ii,zz,bdmol_b,cellinc,k,nmole
 
 
-!      integer NRtype 
+!      integer::NRtype 
 
-      double precision ljsami,rminsq,rxui,sr6,ryui,rzui
+      real(8)::ljsami,rminsq,rxui,sr6,ryui,rzui
      +     ,rxuij,ryuij,rzuij,rij,rijsq,sr2,dzui,dz3,dz12
      +     ,exzeo,exsami,exmuir,exgrph,ljpsur,ljmuir,exsix
      +     ,mmff,maxlen,rcm,rcmsq
      +     ,corr,erfunc,rcutmax,ninesix, genlj
-      double precision vinter,vintra,vext,velect,vewald,qave,
+      real(8)::vinter,vintra,vext,velect,vewald,qave,
      &     epsilon2,sigma2,vwell,v,rcutsq,rcinsq
 
-      double precision sx,sy,sz,v_elect_field, field
-      double precision slitpore
+      real(8)::sx,sy,sz,v_elect_field, field
+      real(8)::slitpore
       	
       dimension lcmno(nmax),lcoulo(numax,numax)
       dimension glist(numax),cellinc(27),jcell(nmax)
 
-      double precision tabulated_bend, tabulated_vdW, tabulated_elect
-      integer mmm
+      real(8)::tabulated_bend, tabulated_vdW, tabulated_elect
+      integer::mmm
 
 c------------- RP added for MPI
-      integer my_start,my_end,loops_per_proc,scount,my_itrial
-      double precision my_vtry(nchmax),my_vtrintra(nchmax),
+      integer::my_start,my_end,loops_per_proc,scount,my_itrial
+      real(8)::my_vtry(nchmax),my_vtrintra(nchmax),
      &   my_vtrext(nchmax),my_vtrinter(nchmax),my_vtrelect(nchmax)
      &   ,my_vtrewald(nchmax),my_bfac(nchmax),my_vipswot(nchmax)
      & ,my_vwellipswot(nchmax),my_vipswnt(nchmax),my_vwellipswnt(nchmax)
-      logical my_lovr(nchmax)
-      integer ncount_arr(numprocmax+1),ncount_displs(numprocmax+1)
+      logical::my_lovr(nchmax)
+      integer::ncount_arr(numprocmax+1),ncount_displs(numprocmax+1)
 c ------------------------------------------
 c ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
       
@@ -794,13 +794,15 @@ c ---  not for grand can. with ibox=2 !
 c -- required for histogram reweighting to work for monolayer 
 c -- phase diagrams.
 c -- not used for adsorption isotherms
-         if (.not. (lslit .and. ibox.eq.2)) then
+c         if (.not. (lslit .and. ibox.eq.2)) then
+      if (ibox .eq. 1) then
          if ( ljoe .or. lsami .or. lmuir .or. lexzeo
      +         .or. lgraphite .or. lslit ) then
             do count = 1,ntogrow
 c              --- assign bead type for ii
                ii = glist(count)
                ntii = ntype(imolty,ii)
+               ntij = (ntii - 1) * nntype + ntsubst
                rxui = rxp(count,itrial)
                ryui = ryp(count,itrial)
                rzui = rzp(count,itrial)
@@ -830,7 +832,7 @@ c -- calculate interaction with the surface at the top of the box
 
                if ( lsami ) vext = vext + exsami(rzui,ntii)
                if ( lmuir ) vext = vext + exmuir(rzui,ntii)
-               if ( lexzeo ) vext = vext + exzeo(rxui,ryui,rzui,ntii)
+               if ( lexzeo ) vext = vext + exzeo(rxui,ryui,rzui,ntij)
             enddo
          endif
 	 endif

@@ -1,4 +1,5 @@
-      function coruz(iunit,rho,ibox)
+      function coruz(imolty,rho,ibox)
+c      function coruz(iunit,rho,ibox)
 
 c coruz
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -28,19 +29,52 @@ c *** tail-corrections in energy with the zeolite ***
 c ***************************************************
 
       implicit none
+      include 'zeopoten.inc'
       include 'control.inc'
+      include 'coord.inc'
+      include 'poten.inc'
       include 'conver.inc'
       include 'system.inc'
-      include 'zeopoten.inc'
+      include 'expsix.inc'
+      include 'merck.inc'
+      include 'nsix.inc'
+      include 'external.inc'
+
       double precision coruz,eps,rci3,rho
       integer iunit,ibox
+      double precision epsilon2,sigma2
+      double precision rci1
+      integer imolty,jmolty,ii,jj, ntii, ntjj, ntij
+
 c --- note works only for alkanes!!!
-      if (iunit.ne.1) then
-        eps=zeps(1,4)+(iunit-2)*zeps(2,4)+zeps(3,4)
-      else
-        eps=zeps(1,4)
-      endif
-      rci3=zsig2(1,4)**(3.d0/2.d0)/rcut(ibox)**3 
-      coruz=8.*onepi*eps*rho*(rci3*rci3*rci3/9.-rci3/3.)
+c      if (iunit.ne.1) then
+c        eps=zeps(1,4)+(iunit-2)*zeps(2,4)+zeps(3,4)
+c      else
+c        eps=zeps(1,4)
+c      endif
+c      rci3=zsig2(1,4)**(3.d0/2.d0)/rcut(ibox)**3 
+c      coruz=8.*onepi*eps*rho*(rci3*rci3*rci3/9.-rci3/3.)
+
+      coruz=0.
+      ntjj=ntsubst
+      do ii = 1, nunit(imolty) 
+         ntii = ntype(imolty,ii)
+c         do jj = 1, nunit(jmolty) 
+c            ntjj = ntype(jmolty,jj)
+            ntij = (ntii-1)*nntype + ntjj
+            rci3 = sig2ij(ntij)**(3.0d0/2.0d0) / rcut(ibox)**3
+            if ( lexpand(imolty) ) then
+               sigma2 = (sigma(imolty,ii)+sigi(ntjj))**2/4.0d0
+               epsilon2 = dsqrt(epsilon(imolty,ii)*epsi(ntjj))
+            else
+               sigma2 = sig2ij(ntij)
+               epsilon2 = epsij(ntij)
+            endif
+            coruz = coruz + 
+     +           8.0d0 * onepi * epsilon2 * 
+     +           sigma2**(1.5d0) *rho * 
+     +           (rci3 * rci3 * rci3 / 9.0d0 - rci3 / 3.0d0)
+c            enddo
+      enddo
       return
       end

@@ -61,20 +61,20 @@ C Energy = 4*epsilon*((sigma/r)**12 - (sigma/r)**6)
 C Write epsilons and sigma's:
 
       write(16,100)
-      write( 6,100)
+c      write( 6,100)
       jtype=idz
       do itype = 1,zntype
          write(16,1001) itype,jtype,zeps(itype,jtype),
      +                  itype,jtype,dsqrt(zsig2(itype,jtype))
-         write( 6,1001) itype,jtype,zeps(itype,jtype),
-     +                  itype,jtype,dsqrt(zsig2(itype,jtype))
+c         write( 6,1001) itype,jtype,zeps(itype,jtype),
+c     +                  itype,jtype,dsqrt(zsig2(itype,jtype))
       enddo
  
 C Force field cutoff radius rczeo for interactions between guests
 C and zeolite atoms:
 
       write(16,101) rczeo
-      write( 6,101) rczeo
+c      write( 6,101) rczeo
       do itype = 1,zntype
         zrc2(itype,idz)=rczeo**2
       enddo

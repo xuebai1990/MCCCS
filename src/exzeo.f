@@ -30,17 +30,20 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       integer m,j0,jp,k,k0,kp,l,l0,lp,mt,mp,pgrid
       parameter (m=2,mt=2*m+1)
       double precision yjtmp(mt),yktmp(mt),yltmp(mt)
-      double precision xt(mt),yt(mt),zt(mt),dy
+      double precision xt(mt),yt(mt),zt(mt),dy,rcutsq
       include 'zeopoten.inc'
       include 'zeolite.inc'
       include 'control.inc'
       include 'grid.inc'
       include 'external.inc'
+      include 'system.inc'
+      include 'poten.inc'
       
+      rcutsq = rcut(1)**2
       if (.not.lzgrid) then
          exzeo=0.
          do j=1,nzeo
-            idj=idzeo(j)
+c            idj=idzeo(j)
             xr=xi-zeox(j)
             xr=xr-zeorx*anint(xr*zeorxi)
             yr=yi-zeoy(j)
@@ -48,14 +51,15 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
             zr=zi-zeoz(j)
             zr=zr-zeorz*anint(zr*zeorzi)
             r2=xr*xr+yr*yr+zr*zr
-            if (r2.lt.zrc2(idi,idj)) then
-              r2i=zsig2(idi,idj)/r2
+c            if (r2.lt.zrc2(idi,idj)) then
+            if (r2 .lt. rcutsq) then
+              r2i=sig2ij(idi)/r2
               r6=r2i*r2i*r2i
               if (lshift) then     
-                 exzeo=exzeo+4.*zeps(idi,idj)*(r6-1.0)*r6-
+                 exzeo=exzeo+4.*epsij(idi)*(r6-1.0)*r6-
      +                 zencut(idi,idj)
               else
-                 exzeo=exzeo+4.*zeps(idi,idj)*(r6-1.0)*r6
+                 exzeo=exzeo+4.*epsij(idi)*(r6-1.0)*r6
               endif
            endif
          enddo

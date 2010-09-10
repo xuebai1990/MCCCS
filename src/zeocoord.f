@@ -24,24 +24,19 @@ c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
-
       include 'zeolite.inc'
       include 'zeopoten.inc'
-
-      integer count,frac,izeo,bonding(8)
-      double precision wzeo,charge,alpha,beta,gamma
-      character atom*4
+      integer::count,frac,izeo,bonding(8)
+      real(8)::wzeo,charge,alpha,beta,gamma
+      character::atom*4
 
       open (unit = 47, file = 'zeolite.cssr', form = 'formatted')
 
       write(16,100)
-      write( 6,100)
       read(47,*)    zeorx,zeory,zeorz
       write(16,101) zeorx,zeory,zeorz,zeorx*zeory*zeorz
-      write( 6,101) zeorx,zeory,zeorz,zeorx*zeory*zeorz
       read(47,*)    alpha,beta,gamma
       write(16,102) alpha,beta,gamma
-      write( 6,102) alpha,beta,gamma
       if (alpha.ne.90.or.beta.ne.90.or.gamma.ne.90) 
      +     stop '** zeocoord: not cubic **'
 
@@ -49,14 +44,12 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       
 
       write(16,103) nzeo
-      write( 6,103) nzeo
-      if (nzeo.gt.nzeo max) stop '** zeocoord: nzeo gt nzeomax **'
+      if (nzeo.gt.nzeomax) stop '** zeocoord: nzeo gt nzeomax **'
 
 c     === Calculate zeolite density from assumption no of Si = 0.5* no O
 
       wzeo = (nzeo*16.00 + 0.5*nzeo*28.09)/(6.023e23)      
       write(16,104) wzeo,1000.0/(wzeo*6.023e23)
-      write( 6,104) wzeo,1000.0/(wzeo*6.023e23)
 
       read(47,*) 
 
@@ -64,7 +57,7 @@ C     === Converting to absolute coordinates within [0,ri>
 
       do izeo = 1,nzeo
          read(47,99) count,atom,zeox(izeo),zeoy(izeo),
-     +        zeoz(izeo),bonding,charge
+     +        zeoz(izeo),charge
          if (frac.eq.0) then
             zeox(izeo) = mod(zeox(izeo)+1.0d0,1.0d0)*zeorx
             zeoy(izeo) = mod(zeoy(izeo)+1.0d0,1.0d0)*zeory
@@ -74,13 +67,16 @@ C     === Converting to absolute coordinates within [0,ri>
             zeoy(izeo) = mod(zeoy(izeo)+zeory,zeory)
             zeoz(izeo) = mod(zeoz(izeo)+zeorz,zeorz)
          endif 
-         call atomtype(zntype,atom,idzeo(izeo))
+         idzeo(izeo)=atomtype(zntype,atom)
       enddo
 
       write(16,105) nx,ny,nz
-      write( 6,105) nx,ny,nz
+c      write( 6,105) nx,ny,nz
 
- 99   format(i4,1x,a4,2x,3(f9.5,1x),8i4,1x,f7.3)
+      close(16)
+
+c 99   format(i4,1x,a4,2x,3(f9.5,1x),8i4,1x,f7.3)
+ 99   format(i4,1x,a4,2x,3(f9.5,1x),f7.3)
  100  format(/,' READING ZEOLITE LATTICE FROM FILE zeolite.cssr:',/,
      +     ' --------------------------------------------------')
  101  format(  ' box dimensions                    = ',3f10.3,

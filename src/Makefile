@@ -10,11 +10,11 @@
 #COMPFLAGS     = -w90 -w95 -cm -CB -CU -g
 
 #COMPFLAGS     =  -O2 -w90 -w95 #-cm -p
-COMPFLAGS     =  -O3 -no-prec-div -ipo #-p  #-ipo
+COMPFLAGS     =  -ipo -O3 -no-prec-div -xHost 
 #COMPFLAGS     =  -O3 -no-prec-div -check bounds 
-LD            = mpif90 -g 
-LDS           = mpif90 -c -g $(COMPFLAGS)
-LDFLAGS       = -i-dynamic $(COMPFLAGS)
+LD            = mpif90 
+LDS           = mpif90 -c $(COMPFLAGS)
+LDFLAGS       =  $(COMPFLAGS)
 
 ### NAG Compiler for OSX
 #COMPFLAGS     = -O0 -gline -f77 -mismatch_all -C=all -C=undefined -nan
@@ -181,7 +181,7 @@ OBJS	      = Atom_traxyz.o \
 		garo3body.o \
                 tabulated.o
 
-PROGRAM       = topmon4
+PROGRAM       = topmon
 
 SHELL	      = /bin/sh
 

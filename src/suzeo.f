@@ -32,7 +32,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 c === load force field
  
-      call forcefield(rczeo)
+c      call forcefield(rczeo)
  
 c === load positions of zeolite atoms
  

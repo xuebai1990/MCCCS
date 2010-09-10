@@ -21,9 +21,9 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      integer maxtab,ngrx,ngry,ngrz,maxl,maxp
-      double precision egrid
-      double precision factx,facty,factz,dgrx,dgry,dgrz,xzz,yzz,zzz
+      integer::maxtab,ngrx,ngry,ngrz,maxl,maxp
+      real(8)::egrid,eps
+      real(8)::factx,facty,factz,dgrx,dgry,dgrz,xzz,yzz,zzz
 c - parameters currently set low since zeolites not used
       parameter (maxtab=10,maxl=20,maxp=10)
       dimension egrid(0:maxtab)

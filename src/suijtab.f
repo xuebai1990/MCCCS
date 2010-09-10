@@ -2203,6 +2203,13 @@ C   benzene 12 site model
       chname(186) = 'H Trappe AA benzene  '
       chemid(186)  = 'H  '
 
+c -- MFI silicalite-1 oxygen
+      sigi(190) = 3.0d0
+      epsi(190) = 93.53d0
+      mass(190) = 15.999d0
+      chname(190) = ' silicalite-1 O '
+      chemid(190) = 'O  '
+
 c ---- added 7/12/06 for nitrotoluene
 
 c -- TraPPE-UA [C] alpha aro carbon for nitro

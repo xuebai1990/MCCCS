@@ -45,7 +45,7 @@ c -- rsol [=] 1/A^3
       parameter (ntsubst = 190)
       parameter (rsol = 0.114d0)
 c zeolites: 
-      parameter (lexzeo=.false.,lzgrid=.false.)
+      parameter (lexzeo=.true.,lzgrid=.false.)
 c Joe Hautman's parameters are read from standard input:
 c               to be used with ljoe = .true. 
 c Sami's parameters: to be used with lsami = .true. AND lmuir = .true.
