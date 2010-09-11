@@ -28,7 +28,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'zeolite.inc'
       include 'control.inc'
       integer::i,j,k,pgrid,idi,ngrid
-      real(8)::xi,yi,zi,exzeof,dgr
+      real(8)::xi,yi,zi,exzeof,newvalue,dgr
       logical::precise
 c make a tabulated potential of the zeolite
 c
@@ -72,6 +72,7 @@ c --- calculate interactions on grid
       do while (.not. precise)
          idi=1
          xi=-dgrx
+         precise=.true.
          do i=0,ngrx-1
             xi=xi+dgrx
             yi=-dgry
@@ -80,7 +81,9 @@ c --- calculate interactions on grid
                zi=-dgrz
                do k=0,ngrz-1
                   zi=zi+dgrz
-                  egrid(pgrid(i,j,k,ngrx,ngry))=exzeof(xi,yi,zi,idi)
+                  newvalue=exzeof(xi,yi,zi,idi)
+                  if (dabs(newvalue-egrid(i,j,k))>eps) precise=.false.
+                  egrid(i,j,k)=newvalue
                end do
             enddo
             write(iou,*) 'Ztable: done ',i+1,' out of ',ngrx

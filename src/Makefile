@@ -374,7 +374,7 @@ exsami.o: external.inc exsami.f
 	$(LDS) exsami.f
 explct.o: control.inc coord.inc explct.f
 	$(LDS) explct.f
-exzeo.o: zeopoten.inc zeolite.inc control.inc grid.inc external.inc exzeo.f
+exzeo.o: zeopoten.inc zeolite.inc control.inc grid.inc external.inc system.inc poten.inc exzeo.f
 	$(LDS) exzeo.f
 exzeof.o: zeopoten.inc zeolite.inc control.inc exzeof.f
 	$(LDS) exzeof.f

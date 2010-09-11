@@ -22,7 +22,7 @@ c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       integer::maxtab,ngrx,ngry,ngrz,maxl,maxp
-      real(8)::egrid,eps
+      real(8)::egrid,eps=1d-5
       real(8)::factx,facty,factz,dgrx,dgry,dgrz,xzz,yzz,zzz
 c - parameters currently set low since zeolites not used
       parameter (maxtab=10,maxl=20,maxp=10)

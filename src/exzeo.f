@@ -24,13 +24,13 @@ c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none 
-      real(8)::exzeo,xi,yi,zi,r2
-     +                ,xr,yr,zr,r2i,r6
-      integer::j,idi,idj
+      real(8)::exzeo,xi,yi,zi,r2,rcutsq
+     +     ,xr,yr,zr,r2i,r6
+      integer::j,idi,idj,ntij
       integer::m,j0,jp,k,k0,kp,l,l0,lp,mt,mp,pgrid
       parameter (m=2,mt=2*m+1)
       real(8)::yjtmp(mt),yktmp(mt),yltmp(mt)
-      real(8)::xt(mt),yt(mt),zt(mt),dy,rcutsq
+      real(8)::xt(mt),yt(mt),zt(mt),dy
       include 'zeopoten.inc'
       include 'zeolite.inc'
       include 'control.inc'
@@ -39,12 +39,12 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'system.inc'
       include 'poten.inc'
       
-      ntij = (ntii - 1) * nntype + ntsubst
       rcutsq = rcut(1)**2
       if (.not.lzgrid) then
          exzeo=0.
          do j=1,nzeo
             idj=idzeo(j)
+            ntij = (idi - 1) * nntype + idj
             xr=xi-zeox(j)
             xr=xr-zeorx*anint(xr*zeorxi)
             yr=yi-zeoy(j)
@@ -54,14 +54,15 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
             r2=xr*xr+yr*yr+zr*zr
 c            if (r2.lt.zrc2(idi,idj)) then
             if (r2 .lt. rcutsq) then
-              r2i=sig2ij(idi)/r2
+              r2i=sig2ij(ntij)/r2
               r6=r2i*r2i*r2i
-              if (lshift) then     
-                 exzeo=exzeo+4.*epsij(idi)*(r6-1.0)*r6-
-     +                 zencut(idi,idj)
-              else
-                 exzeo=exzeo+4.*epsij(idi)*(r6-1.0)*r6
-              endif
+c              if (lshift) then     
+c                 exzeo=exzeo+4.*epsij(ntij)*(r6-1.0)*r6-
+c     +                 zencut(idi,idj)
+c              else
+                 exzeo=exzeo+4.*epsij(ntij)*(r6-1.0)*r6+
+     +             qelect(idi)*qelect(idj)/dsqrt(r2)
+c              endif
            endif
          enddo
       else

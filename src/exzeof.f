@@ -24,15 +24,18 @@ c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none 
-      real(8)::exzeof,xi,yi,zi,r2
-     +                ,xr,yr,zr,r2i,r6
-      integer::j,idi,idj
+      real(8)::exzeof,xi,yi,zi,r2,rcutsq
+     +     ,xr,yr,zr,r2i,r6
+      integer::j,idi,idj,ntij
       include 'zeopoten.inc'
       include 'zeolite.inc'
       include 'control.inc'
+      
+      rcutsq = rcut(1)**2
       exzeof=0.
       do j=1,nzeo
          idj=idzeo(j)
+         ntij = (idi - 1) * nntype + idj
          xr=xi-zeox(j)
          xr=xr-zeorx*anint(xr*zeorxi)
          yr=yi-zeoy(j)
