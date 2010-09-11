@@ -1,63 +1,63 @@
       subroutine safeschedule(igrow,imolty,islen,iutry,findex,movetype)
 
-c safeschedule
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! safeschedule
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
  
-c     *********************************************************************
-c     **  Self-Adapting Fixed-Endpoint Configurational-Bias Monte Carlo  **
-c     **                    --- SAFE-CBMC ---                            **
-c     *********************************************************************
-c     **    Determines logic for a CBMC Move Between Fixed End Points    **
-c     **           for Linear, Branched, and Cyclic Molecules            **
-c     *********************************************************************
-c     **       Originally completed by Collin Wick around 1-1-2000       **
-c     *********************************************************************
+!     *********************************************************************
+!     **  Self-Adapting Fixed-Endpoint Configurational-Bias Monte Carlo  **
+!     **                    --- SAFE-CBMC ---                            **
+!     *********************************************************************
+!     **    Determines logic for a CBMC Move Between Fixed End Points    **
+!     **           for Linear, Branched, and Cyclic Molecules            **
+!     *********************************************************************
+!     **       Originally completed by Collin Wick around 1-1-2000       **
+!     *********************************************************************
 
 
-c     *********************************************************************
-c     **     Most work is in this subroutine, safecbmc.f, and close.f.   ** 
-c     *********************************************************************
-c     **     Presently, works for linear molecules with rigid bond       **
-c     **     lengths, and can (with little program changes) work for     **
-c     **     branched molecules with rigid bonds, as long as it closes   **
-c     **     at a binary or tertiary segment.                            **
-c     *********************************************************************
-c     **     Does work for any branched molecule with flexible bond      **
-c     **     lengths.                                                    **
-c     *********************************************************************
+!     *********************************************************************
+!     **     Most work is in this subroutine, safecbmc.f, and close.f.   ** 
+!     *********************************************************************
+!     **     Presently, works for linear molecules with rigid bond       **
+!     **     lengths, and can (with little program changes) work for     **
+!     **     branched molecules with rigid bonds, as long as it closes   **
+!     **     at a binary or tertiary segment.                            **
+!     *********************************************************************
+!     **     Does work for any branched molecule with flexible bond      **
+!     **     lengths.                                                    **
+!     *********************************************************************
 
-c     *********************************************************************
-c     **                 NEW LOGIC ONLY FOR SAFE-CMBC                    ** 
-c     **  -------------------------------------------------------------  **
-c     **  iend = beads to grow to                                        **
-c     **  ipast = one bead past iend                                     **
-c     **  inext = two beads past iend                                    **
-c     **  ibef = one bead before iend                                    **
-c     **  iwbef = two beads before iend                                  **
-c     **  fclose(iu) = beads to calculate interaction with from iu       **
-c     **  fcount(iu) = number of fcloses for iu                          **
-c     **  COLLIN = MASTER of the known universe                          **
-c     *********************************************************************
+!     *********************************************************************
+!     **                 NEW LOGIC ONLY FOR SAFE-CMBC                    ** 
+!     **  -------------------------------------------------------------  **
+!     **  iend = beads to grow to                                        **
+!     **  ipast = one bead past iend                                     **
+!     **  inext = two beads past iend                                    **
+!     **  ibef = one bead before iend                                    **
+!     **  iwbef = two beads before iend                                  **
+!     **  fclose(iu) = beads to calculate interaction with from iu       **
+!     **  fcount(iu) = number of fcloses for iu                          **
+!     **  COLLIN = MASTER of the known universe                          **
+!     *********************************************************************
 
 
 
@@ -87,24 +87,24 @@ c     *********************************************************************
       real(8)::random,rbf
 
       dimension fint(numax),ffrom(numax,max),fprev(numax,max)
-     +     ,flist(numax,max,max),fnum(numax),fnuma(numax,max)
-     +     ,lpick(numax),lfix(numax),inum(max),inuma(max),lfind(numax)
+     &     ,flist(numax,max,max),fnum(numax),fnuma(numax,max)
+     &     ,lpick(numax),lfix(numax),inum(max),inuma(max),lfind(numax)
 
-c     --------------------------------------------------------------------
+!     --------------------------------------------------------------------
       
-c     *** safecbmc scheduler ****
+!     *** safecbmc scheduler ****
 
-c     --- now determine findex excluding 1, it won't do anything
+!     --- now determine findex excluding 1, it won't do anything
 
-c     --- set begining conditions
+!     --- set begining conditions
       if (movetype.eq.2) then
          if (.not.lring(imolty)) then
             call cleanup('you can not use safecbmc for swap unless it is a ring')
-         endif
+         end if
          fmaxgrow = nunit(imolty)
       else
          fmaxgrow = maxgrow(imolty) + 1
-      endif
+      end if
       lterm = .false.
       kickout = 0
 
@@ -115,7 +115,7 @@ c     --- set begining conditions
       
       do j = 1, nunit(imolty)
          lfix(j) = .false.
-      enddo
+      end do
       
       if (kickouta.eq.5) call cleanup('')
 
@@ -123,11 +123,11 @@ c     --- set begining conditions
          findex = fmaxgrow
       else
          findex = int( random() * dble(fmaxgrow - 1)) + 2
-      endif
+      end if
 
-c     ******************************
-c      findex = 7
-c     ******************************
+!     ******************************
+!      findex = 7
+!     ******************************
 
       lfixed = .false.
 
@@ -135,17 +135,17 @@ c     ******************************
          lcrank = .true.
       else
          lcrank = .false.
-      endif
+      end if
 
       do j = 1, igrow
          lexshed(j) = .true.
-      enddo
+      end do
 
       if (kickout.gt.250) then
          call cleanup('SAFESCHEDULE KICKED YOU OUT')
-      endif
+      end if
  
-c     --- find iutry 
+!     --- find iutry 
       if (movetype.eq.2) then
 
          iutry = 1
@@ -153,79 +153,79 @@ c     --- find iutry
 
          if (invtry.lt.1) then
             call cleanup('You need a ring to do this')
-         endif
+         end if
 
          ffrom(1,1) = iutry
          fprev(1,1) = 0
          do iv = 1, invtry
             flist(1,1,iv) = ijvib(imolty,iutry,iv)
             lexshed(flist(1,1,iv)) = .false.
-         enddo
+         end do
          fnum(1) = 1
          fnuma(1,1) = invtry
       else
-c--- JLR 11-11-09
-c--- factoring in icbsta for safecbmc 
+!--- JLR 11-11-09
+!--- factoring in icbsta for safecbmc 
 
-c --- OLD WAY   
-c         iutry = int( random() * dble(iring(imolty)) ) + 1
-c --- NEW WAY - picks between icbsta and last unit of chain
+! --- OLD WAY   
+!         iutry = int( random() * dble(iring(imolty)) ) + 1
+! --- NEW WAY - picks between icbsta and last unit of chain
          iutry = int( random() * dble(iring(imolty)+icbsta(imolty)))+1
      &        -icbsta(imolty)
 
-c --- need the following of scheduler gets confused!
+! --- need the following of scheduler gets confused!
          if (lrplc(imolty)) then
             if(iutry .eq.7 .or. iutry .eq.8) then 
                iutry=5
-            endif
+            end if
             if (iutry.eq.5.and.lcrank) goto 100
-         endif
-c --- END JLR 11-11-09
+         end if
+! --- END JLR 11-11-09
 
-c     *************************
-c         iutry = 1
-c     *************************
+!     *************************
+!         iutry = 1
+!     *************************
 
          if (lplace(imolty,iutry)) then
             kickout = kickout + 1
             goto 100
-         endif
+         end if
 
          invtry = invib(imolty,iutry)
          if (invtry.eq.0) then
             call cleanup('cant do safecbmc on single bead')
          elseif(invtry.eq.1) then
-c     --- At the end point of a molecule
+!     --- At the end point of a molecule
 
-c     --- we will let regular cbmc handle the end points
+!     --- we will let regular cbmc handle the end points
             kickout = kickout + 1
             goto 100
 
             fprev(1,1) = 0
             ivib = 0
          else
-c     --- at a branch point, decide which way not to grow
-c --- JLR 11-11-09
-c --- adding statements so we don't get messed up at the branch point in ODS chains 
-c            ivib = int(random() * dble(invtry)) + 1
+!     --- at a branch point, decide which way not to grow
+! --- JLR 11-11-09
+! --- adding statements so we don't get messed up at the branch point in ODS chains 
+!            ivib = int(random() * dble(invtry)) + 1
  13         ivib = int(random() * dble(invtry)) + 1
-c     ********************************
-c            ivib = 2
-c     *******************************
+!     ********************************
+!            ivib = 2
+!     *******************************
 
             fprev(1,1) = ijvib(imolty,iutry,ivib)
             if (lrplc(imolty)) then
                if (icbdir(imolty).eq.1.and.fprev(1,1).gt.iutry) goto 13
-            endif
-c --- END JLR 11-11-09
+            end if
+! --- END JLR 11-11-09
 
 
             if (fprev(1,1).gt.iring(imolty)
      &           .or.lplace(imolty,fprev(1,1))) then
                kickout = kickout + 1
                goto 100
-            endif
-         endif
+            end if
+         end if
          ffrom(1,1) = iutry
          count = 0
          do iv = 1, invtry
@@ -234,18 +234,18 @@ c --- END JLR 11-11-09
                count = count + 1
                flist(1,1,count) = ijvib(imolty,iutry,iv)
                lexshed(flist(1,1,count)) = .false.
-            endif
-         enddo
+            end if
+         end do
 
          if (count.eq.0) then
             kickout = kickout + 1
             goto 100
-         endif
+         end if
          fnum(1) = 1
          fnuma(1,1) = count
-      endif
+      end if
 
-c     --- find all branches going to maxgrow or end of molecule
+!     --- find all branches going to maxgrow or end of molecule
       do iw = 2, nunit(imolty)
          count = 0
          do j = 1, fnum(iw-1)
@@ -266,30 +266,30 @@ c     --- find all branches going to maxgrow or end of molecule
                               flist(iw,count+1,counta) = ju
                               lexshed(ju) = .false.
                               lcount = .true.
-                           endif
+                           end if
                         else
                            counta = counta + 1
                            flist(iw,count+1,counta) = ju
                            lexshed(ju) = .false.
                            lcount = .true.
-                        endif                     
-                     endif
-                  enddo
+                        end if                     
+                     end if
+                  end do
                   if (lcount) then
                      count = count + 1
                      fprev(iw,count) = ffrom(iw-1,j)
                      ffrom(iw,count) = iu
                      fnuma(iw,count) = counta
-                  endif
-               endif
-            enddo
-         enddo
+                  end if
+               end if
+            end do
+         end do
          
          if (count.eq.0) then
-c     --- we hit the end, lets get out of here
+!     --- we hit the end, lets get out of here
             index = iw - 1
             goto 110
-         endif
+         end if
          fnum(iw) = count
          if (iw.eq.findex) then
             lfixed = .true.
@@ -297,84 +297,84 @@ c     --- we hit the end, lets get out of here
                do ja = 1, fnuma(findex,j)
                   if (flist(findex,j,ja).le.iring(imolty)) then
                      lfix(flist(findex,j,ja)) = .true.
-                  endif
-               enddo
-            enddo
-         endif
-      enddo
-c      index = fmaxgrow
+                  end if
+               end do
+            end do
+         end if
+      end do
+!      index = fmaxgrow
  110  continue
 
-c     --- don't allow 1-bead regrowths, it won't do anything
+!     --- don't allow 1-bead regrowths, it won't do anything
       if (index.lt.2) then
          kickout = kickout + 1
          goto 100
-      endif
+      end if
 
       if (index.lt.findex) then
          kickout = kickout + 1
          goto 100
-      endif
+      end if
 
       lfixed = .false.
 
-c     --- lets set logic so rosenbluth can read it
+!     --- lets set logic so rosenbluth can read it
       count = 0
       do iw = 1, index 
 
          if (iw.eq.findex) then
             lfixed = .true.
-         endif
+         end if
 
          do j = 1, fnum(iw)
             kickout = 0
 
             if (lfixed) then
                if (flist(iw,j,1).le.iring(imolty)) goto 122
-            endif
+            end if
             count = count + 1 
             grownum(count) = fnuma(iw,j)
             growfrom(count) = ffrom(iw,j)
             growprev(count) = fprev(iw,j)
             do ja = 1, fnuma(iw,j)
                lpick(ja) = .false.
-            enddo
+            end do
             do ja = 1, fnuma(iw,j)
  115           continue
                if (kickout.gt.150) then
                   call cleanup('Randomizer in FECMBC kicked you out')
-               endif
-c     --- this is the only random part
+               end if
+!     --- this is the only random part
                counta = int(random() * dble(fnuma(iw,j))) + 1
                if (lpick(counta)) then
                   kickout = kickout + 1
                   goto 115
-               endif
+               end if
                lpick(counta) = .true.
                growlist(count,counta) = flist(iw,j,ja)
-            enddo
-c     --- reset our logic keep have counta coicide 
+            end do
+!     --- reset our logic keep have counta coicide 
             do ja = 1, fnuma(iw,j)
                flist(iw,j,ja) = growlist(count,ja)
-            enddo
+            end do
  122        continue 
-         enddo
-      enddo
+         end do
+      end do
       islen = count
 
-c     --- set all fixed points to true
+!     --- set all fixed points to true
       do iw = findex, index 
          do count = 1, fnum(iw)
             do counta = 1, fnuma(iw,count)
                iu = flist(iw,count,counta)
                if (iu.le.iring(imolty)) then
                   lexshed(iu) = .true.
-               endif
-            enddo
-         enddo
-      enddo
+               end if
+            end do
+         end do
+      end do
 
-c     --- find ends, ipasts, and inexts
+!     --- find ends, ipasts, and inexts
       count = 0
       do j = 1, fnum(findex)
          do ja = 1, fnuma(findex,j)
@@ -394,23 +394,23 @@ c     --- find ends, ipasts, and inexts
                         if (ju.ne.iend(count)) then
                            countb = countb + 1
                            inext(iu,countb) = ju
-                        endif
-                     enddo
+                        end if
+                     end do
                      nextnum(iu) = countb
-                  endif
-               enddo
+                  end if
+               end do
                pastnum(iend(count)) = counta
-            endif
-         enddo
+            end if
+         end do
          endnum = count
-      enddo
+      end do
 
-c     --- now that we found iends and ipasts, 
-c     --- determine which beads to close with each iend
+!     --- now that we found iends and ipasts, 
+!     --- determine which beads to close with each iend
       
       do j = 1, igrow
          fcount(j) = 0
-      enddo
+      end do
       
       do count = 1, endnum
          fintnum = 1
@@ -426,15 +426,15 @@ c     --- determine which beads to close with each iend
                         fclose(ju,fcount(ju)) = iend(count)
                         counta = counta + 1
                         fint(counta) = ju
-                     endif
-                  enddo
-               enddo
-            enddo
-         enddo
+                     end if
+                  end do
+               end do
+            end do
+         end do
          fintnum = counta
-      enddo
+      end do
 
-c     --- define iwbef and ibef
+!     --- define iwbef and ibef
       count = 0
       if (lcrank) then
          do j = 1, fnum(findex-1)
@@ -444,10 +444,10 @@ c     --- define iwbef and ibef
                if (fcount(iu).ne.0) then
                   counta = counta + 1
                   ibef(j,counta) = iu
-               endif
-            enddo
+               end if
+            end do
             befnum(j) = counta
-         enddo
+         end do
          wbefnum = fnum(findex-1)
       else
          do j = 1, fnum(findex - 1)
@@ -461,24 +461,24 @@ c     --- define iwbef and ibef
                   if (fcount(ju).ne.0) then
                      counta = counta + 1
                      ibef(count,counta) = ju
-                  endif
-               enddo
+                  end if
+               end do
                befnum(count) = counta
-            endif
-         enddo
+            end if
+         end do
          wbefnum = count
-      endif
+      end if
       
-c      write(iou,*) '**********************************'
-c      write(iou,*) iutry,ivib,findex,fprev(1,1)
+!      write(iou,*) '**********************************'
+!      write(iou,*) iutry,ivib,findex,fprev(1,1)
 
 
-c     --- set up place move logic -----------
+!     --- set up place move logic -----------
 
       do j = 1, nunit(imolty)
          lpnow(j) = .false.
          pnum(j) = 0
-      enddo
+      end do
 
       nplace = 0
      
@@ -496,17 +496,17 @@ c     --- set up place move logic -----------
                   pnum(counta) = pnum(counta) + 1
                   if (pnum(counta).eq.1) then
                      nplace = nplace + 1
-                  endif
+                  end if
                   lexshed(iu) = .false.
                   pprev(nplace) = fprev(iw,j)
                   pfrom(nplace) = iufrom
                   iplace(nplace,pnum(counta)) = iu
                   lpnow(iu) = .true. 
-               endif
-            enddo
+               end if
+            end do
             if (pnum(counta).eq.0) counta = counta - 1
-         endif
-      enddo
+         end if
+      end do
 
       do iw = 1, findex - 1
          do j = 1, fnum(iw)
@@ -522,29 +522,29 @@ c     --- set up place move logic -----------
                         pnum(counta) = pnum(counta) + 1
                         if (pnum(counta).eq.1) then
                            nplace = nplace + 1
-                        endif
+                        end if
                         lexshed(iu) = .false.
                         pprev(nplace) = iuprev
                         pfrom(nplace) = iufrom
                         iplace(nplace,pnum(counta)) = iu
                         lpnow(iu) = .true. 
-                     endif
-                  enddo
+                     end if
+                  end do
                   if (pnum(counta).eq.0) counta = counta - 1
-               endif
-            enddo
-         enddo
-      enddo
+               end if
+            end do
+         end do
+      end do
       
-c     ------ end place move logic setup ---------
+!     ------ end place move logic setup ---------
 
       
 
-c     ---- begin part for rig logic
+!     ---- begin part for rig logic
 
       do iu = 1, nunit(imolty)
          lfind(iu) = .false.
-      enddo
+      end do
 
       counta = 0
       do iw = 1, islen
@@ -568,37 +568,37 @@ c     ---- begin part for rig logic
                      rlist(counta,ja) = ju
                      lfind(ju) = .true.
                      lexshed(ju) = .false.
-                  endif
-               enddo
+                  end if
+               end do
 
                if (ja.eq.0) then
                   call cleanup('PROBLEM WITH RIG LOGIC IN SAFESCHEDULE')
                else
                   rnum(counta) = ja
-               endif
-            endif
+               end if
+            end if
 
-         enddo
-      enddo
+         end do
+      end do
       
       if (counta.eq.0) then
          llrig = .false.
       else
          do iu = 1, islen
             lsave(iw) = .false.
-         enddo
+         end do
          llrig = .true.
          nrigi = counta
-      endif
+      end if
 
       if (llrig) then
-c     --- cycle through the rest of the rigid beads to set lexshed to false
+!     --- cycle through the rest of the rigid beads to set lexshed to false
 
          do iw = 1, nrigi
             do count = 1, rnum(iw)
                iu = rlist(iw,count)
                inum(count) = iu 
-            enddo
+            end do
             
             num = rnum(iw)
  5          continue
@@ -619,52 +619,52 @@ c     --- cycle through the rest of the rigid beads to set lexshed to false
                      inuma(ja) = ju
                      
                      lexshed(ju) = .false.
-                  endif
-               enddo
-            enddo
+                  end if
+               end do
+            end do
             if (ja.gt.10) then
                write(iou,*) 'ja',ja
                call cleanup('need to set max greater in safeschedule')
-            endif
+            end if
 
             num = ja
 
             if (ja.ne.0) then
                do j = 1, ja
                   inum(j) = inuma(j)
-               enddo
+               end do
                goto 5
-            endif
-         enddo
+            end if
+         end do
 
-      endif
+      end if
 
       return
 
 
-c     ****** take out return for diagnostics ************
+!     ****** take out return for diagnostics ************
 
       do iw = 1, islen
          write(iou,*) growfrom(iw),(growlist(iw,count),count=1
      &        ,grownum(iw))
 
-      enddo
+      end do
 
       write(iou,*) '---------------------------------------------'
 
       do iw = 1, nplace
          write(iou,*) pfrom(iw),(iplace(iw,count),count=1,pnum(iw))
-      enddo
+      end do
 
       write(iou,*) '--------------------------------------------'
 
       do iw = 1, nrigi
          write(iou,*) rfrom(iw),(rlist(iw,count),count=1,rnum(iw))
-      enddo
+      end do
       
       call cleanup('')
             
-c     ***************************************************
+!     ***************************************************
 
       return
       end

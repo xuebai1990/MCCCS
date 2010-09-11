@@ -1,9 +1,9 @@
       subroutine analysis(switch)
 
-c     *******************************************************************
-c     *** Modified to perform analysis on the fly based on anal10.f   ***
-c     *** [Marcus Martin] by Neeraj Rai 07/14/04                      ***
-c     *******************************************************************
+!     *******************************************************************
+!     *** Modified to perform analysis on the fly based on anal10.f   ***
+!     *** [Marcus Martin] by Neeraj Rai 07/14/04                      ***
+!     *******************************************************************
 
       implicit none
 
@@ -33,11 +33,11 @@ c     *******************************************************************
       real(8)::comanalhist
       real(8)::shlsumx,shlsumy,rcutsq
 
-C   NOW DEFINED IN CONTROL.INC
+!   NOW DEFINED IN CONTROL.INC
 
-Cc     ntmax = number of moltyps, ntdifmx = max number of diff beads in sim
-C      parameter (nbinmx=200,nbxmax=1,ntmax=5,nmax=1600,numax=18
-C     & ,ntdifmx=8)
+!c     ntmax = number of moltyps, ntdifmx = max number of diff beads in sim
+!      parameter (nbinmx=200,nbxmax=1,ntmax=5,nmax=1600,numax=18
+!     & ,ntdifmx=8)
 
       integer::bend,iv,iuvib,iuv,iutest
       real(8)::onepi,
@@ -56,29 +56,29 @@ C     & ,ntdifmx=8)
       dimension tor_code(numax,numax)
       dimension vec_hist(nbxmax,ntmax,nbinmax_ete)  
 
-********* Taking out charge part*************************
+!******** Taking out charge part*************************
 
-CCc     --- variables used in the charge parts
-CC     logical::qhere
-CC      integer::qbin,qbinmax,qbins,qqcode,imol,iunit
-CC      integer::qbin,qbins,qqcode,imol,iunit
-CC    NOW DEFINED IN CONTROL.INC
-CC      parameter (qbinmax=1000)
+!Cc     --- variables used in the charge parts
+!C     logical::qhere
+!C      integer::qbin,qbinmax,qbins,qqcode,imol,iunit
+!C      integer::qbin,qbins,qqcode,imol,iunit
+!C    NOW DEFINED IN CONTROL.INC
+!C      parameter (qbinmax=1000)
 
-CC      real(8)::qdisp
-CC     real(8)::qmin,qmax,qdiff,qstep,qdummy
-CC      dimension qanalhist(numax*ntdifmx+numax,nbxmax,qbinmax)
-CC      dimension qcount(numax*ntdifmx+numax,nbxmax)
+!C      real(8)::qdisp
+!C     real(8)::qmin,qmax,qdiff,qstep,qdummy
+!C      dimension qanalhist(numax*ntdifmx+numax,nbxmax,qbinmax)
+!C      dimension qcount(numax*ntdifmx+numax,nbxmax)
 
-CCc     --- variables used in the dipole parts
-CC     logical::ldipole
-CC     integer::qblock,block,nblock
-CC      real(8)::dipole,dicount,dipx,dipy,dipz,diconv,stddev
-CC     &     ,avera,diprev,dcprev,dipblk
-CC     dimension dipole(ntdifmx,nbxmax),dicount(ntdifmx,nbxmax)
-CC     dimension diprev(ntdifmx,nbxmax),dcprev(ntdifmx,nbxmax)
-CC      dimension dipblk(ntdifmx,nbxmax,20)
-********** end charge part ********************************
+!Cc     --- variables used in the dipole parts
+!C     logical::ldipole
+!C     integer::qblock,block,nblock
+!C      real(8)::dipole,dicount,dipx,dipy,dipz,diconv,stddev
+!C     &     ,avera,diprev,dcprev,dipblk
+!C     dimension dipole(ntdifmx,nbxmax),dicount(ntdifmx,nbxmax)
+!C     dimension diprev(ntdifmx,nbxmax),dcprev(ntdifmx,nbxmax)
+!C      dimension dipblk(ntdifmx,nbxmax,20)
+!********* end charge part ********************************
 
       dimension analhist(ntdifmx*ntdifmx*ntmax*ntmax,nbinmx)
       dimension comanalhist(ntmax*ntmax,nbinmx)
@@ -94,16 +94,16 @@ CC      dimension dipblk(ntdifmx,nbxmax,20)
       if(nhere.gt.ntdifmx) then
         write(6,*) 'nhere greater than ntdifmax', nhere, ntdifmx
         call cleanup('choose a larger ntdifmx in control.inc')
-      endif
+      end if
  
       if(nbin.gt.nbinmx) then
          write(6,*) 'number of bins "nbin" .gt. nbinmx', nbin, nbinmx
          call cleanup('choose a larger nbinmx in control.inc')
-       endif  
+       end if  
       
       do kk=1,nbxmax
          max_boxlz(kk)=boxlz(kk)
-      enddo
+      end do
       
 
       if (lrdf) then
@@ -111,14 +111,14 @@ CC      dimension dipblk(ntdifmx,nbxmax,20)
             nskip = 0.5d0
          else
             nskip = 1.5d0
-         endif
+         end if
 
-      endif
+      end if
 
       lstretch = .false.
 
-*************************************************************************
-C  THIS PART SHOULD GO TO READDAT
+!************************************************************************
+!  THIS PART SHOULD GO TO READDAT
 
 !      if (lcharge) then
 !         write(6,*) 'input minimum charge for dist (qmin)'
@@ -132,18 +132,18 @@ C  THIS PART SHOULD GO TO READDAT
 !         qstep = qdiff/dble(qbins)
 !         write(6,*) 'input additional disp for charges (0.0 for none)'
 !         read(5,*) qdisp
-!      endif
+!      end if
 !      write(6,*) 'do you want the average dipole moments?'
 !      read(5,*) ldipole
 !      if ( ldipole ) then
 !         write(6,*) 'number of blocks for dipole?'
 !         read(5,*) qblock
-!      endif
-*************************************************************************
+!      end if
+!************************************************************************
 
 
 
-C  end to end vector probability distribution
+!  end to end vector probability distribution
 
       if(lete) then
          do imolty = 1,nmolty
@@ -153,10 +153,10 @@ C  end to end vector probability distribution
                   if(i<ijvib(imolty,i,j)) then
                      max_length(imolty)=max_length(imolty)
      &                    +brvib(itvib(imolty,i,j))
-                  endif 
-               enddo
-            enddo
-         enddo  
+                  end if 
+               end do
+            end do
+         end do  
       
    
          do imolty=1,nmolty
@@ -166,20 +166,20 @@ C  end to end vector probability distribution
                write(6,*) 'number of bins greater than nbinmax_ete',i,
      &              nbinmax_ete
                call cleanup('choose larger nbinmax_ete in control.inc')
-            endif 
-         enddo
+            end if 
+         end do
          
-c      initializing the arrays
+!      initializing the arrays
 
          do kk= 1,nbxmax
             do i=1,nmolty
                do j= 1,nbinmax_ete
                   end_to_end(kk,i,j)=0.0d0
-               enddo
-            enddo   
-         enddo
+               end do
+            end do   
+         end do
          
-      endif 
+      end if 
 
 !      print*, '*************'
 !      print*, '*************'
@@ -200,35 +200,35 @@ c      initializing the arrays
                write(6,*) 'number of bins greater than nbinmax_ete',i,
      &              nbinmax_ete
                call cleanup('choose larger nbinmax_ete in control.inc')
-            endif
-         enddo 
+            end if
+         end do 
          
          do kk=1,nbox
             do i = 1,nmolty 
                do j = 1, nbinmax_ete
                   bigrhoz(kk,i,j)=0.0d0
-               enddo
+               end do
                do j=-nbinmax_ete,nbinmax_ete
                   bigboxcom_rhoz(kk,i,j)=0.0d0
-               enddo
-            enddo
-         enddo
-      endif 
+               end do
+            end do
+         end do
+      end if 
       
 
 
 
       if ( lbend ) then
-c     --- compute ang_bin_size
+!     --- compute ang_bin_size
          ang_bin_size = onepi/dble(ang_bin_max)
-c     --- figure out how many angles exist and assign them numbers
+!     --- figure out how many angles exist and assign them numbers
          do imolty = 1,nmolty
             bend = 0
             do ii = 1,nunit(imolty)
                do iv = 1,invib(imolty,ii)
                   iuvib = ijvib(imolty,ii,iv)
-c     --- determine whether the beads connected to this unit
-c     --- are of higher index than ii
+!     --- determine whether the beads connected to this unit
+!     --- are of higher index than ii
                   do iuv = 1,invib(imolty,iuvib)
                      iutest = ijvib(imolty,iuvib,iuv)
                      if ( iutest .gt. ii ) then
@@ -236,31 +236,31 @@ c     --- are of higher index than ii
                         angle_1(imolty,bend) = ii
                         angle_2(imolty,bend) = iuvib
                         angle_3(imolty,bend) = iutest
-                     endif
-                  enddo
-               enddo
-            enddo
+                     end if
+                  end do
+               end do
+            end do
             angle_num(imolty) = bend
             if(bend.gt.angle_max) then
                write(6,*) 'number of bends greater than angle_max',
      &              'molecule type', imolty,' bends', bend   
                call cleanup('choose a larger angle_max in control.inc')
-            endif
-         enddo
-      endif
+            end if
+         end do
+      end if
       
       
       if ( lgvst ) then
-c     --- compute tor_bin_size
+!     --- compute tor_bin_size
          tor_bin_size = 360.0d0/dble(tor_bin_max)
-c     --- figure out how many torsions exist and assign them numbers
+!     --- figure out how many torsions exist and assign them numbers
          do imolty = 1,nmolty
             torsion = 0
             do ii = 1,nunit(imolty)
                do itor = 1,intor(imolty,ii)
                   iutor = ijtor4(imolty,ii,itor)
-c     --- determine whether final bead connected to this unit
-c     --- is of higher index than ii
+!     --- determine whether final bead connected to this unit
+!     --- is of higher index than ii
                   if ( iutor .gt. ii ) then
                      torsion = torsion + 1
                      tor_1(imolty,torsion) = ii
@@ -268,21 +268,21 @@ c     --- is of higher index than ii
                      tor_3(imolty,torsion) = ijtor3(imolty,ii,itor)
                      tor_4(imolty,torsion) = iutor
                      tor_code(ii,iutor) = torsion
-                  endif
-               enddo
-            enddo
+                  end if
+               end do
+            end do
             tor_num(imolty) = torsion
             if(torsion.gt.tor_max) then
                write(6,*) 'number of torsions greater than tor_max',
      &               'molecule type', imolty,'torsions', torsion
                call cleanup('choose a larger tor_max in control.inc*** requires
      &            memory 3**torsion so choose it equal to torsions')
-             endif
-         enddo
-      endif
+             end if
+         end do
+      end if
 
 
-c --- initialize the arrays
+! --- initialize the arrays
 
       if ( lbend ) then
          do kk = 1,nbox
@@ -291,11 +291,11 @@ c --- initialize the arrays
                   do bin = 1,ang_bin_max
                      angle_bin(kk,imolty,bend,bin) = 0.0d0
                      angle_tot(kk,imolty,bend) = 0.0d0
-                  enddo
-               enddo
-            enddo
-         enddo
-      endif
+                  end do
+               end do
+            end do
+         end do
+      end if
 
       if ( lgvst ) then
          do kk = 1,nbox
@@ -304,11 +304,11 @@ c --- initialize the arrays
                   do bin = 1,tor_bin_max
                      tor_bin(kk,imolty,torsion,bin) = 0.0d0
                      tor_tot(kk,imolty,torsion) = 0.0d0
-                  enddo
+                  end do
 
-               enddo
-            enddo
-         enddo
+               end do
+            end do
+         end do
 
          do xx = 1,ntmax
             do zzz = 1,nbox
@@ -317,12 +317,12 @@ c --- initialize the arrays
                   btrans(zzz,xx,uu) = 0.0d0
                   bg_plus(zzz,xx,uu) = 0.0d0
                   bg_minus(zzz,xx,uu) = 0.0d0
-               enddo
+               end do
                gdefect(zzz,xx,tor_max+1) = 0.0d0
-            enddo
-         enddo
+            end do
+         end do
 
-      endif
+      end if
 
       if ( lrdf ) then
          dummy = ntdifmx*ntdifmx*ntmax*ntmax
@@ -334,9 +334,9 @@ c --- initialize the arrays
                   biganalhist(binadj,bin) = 0.0d0
                   shell(binadj,bin,1) = 0.0d0
                   shell(binadj,bin,2) = 0.0d0
-               enddo
-            enddo
-         enddo
+               end do
+            end do
+         end do
 
          dummy = ntmax*ntmax
          do ntij = 1,dummy
@@ -347,10 +347,10 @@ c --- initialize the arrays
                   combiganalhist(binadj,bin) = 0.0d0
                   comshell(binadj,bin,1) = 0.0d0
                   comshell(binadj,bin,1) = 0.0d0 
-               enddo
-            enddo
-         enddo
-      endif
+               end do
+            end do
+         end do
+      end if
 
 !      if ( lcharge ) then
 !         do kk = 1, nbox
@@ -360,11 +360,11 @@ c --- initialize the arrays
 !                  do qbin = 1,qbins
 !                     qanalhist(qqcode,kk,qbin) = 0.0d0
 !                     qcount(qqcode,kk) = 0.0d0
-!                  enddo
-!               enddo
-!            enddo
-!         enddo
-!      endif
+!                  end do
+!               end do
+!            end do
+!         end do
+!      end if
       
 !      if ( ldipole ) then
 !         do kk = 1,nbox
@@ -373,24 +373,24 @@ c --- initialize the arrays
 !               dicount(imol,kk) = 0.0d0
 !               diprev(imol,kk) = 0.0d0
 !               dcprev(imol,kk) = 0.0d0
-!            enddo
-!         enddo
-!      endif
+!            end do
+!         end do
+!      end if
       return
-      endif 
+      end if 
 
 
 
 
-c     cycle through all of the frames and calculate the radial dist func
+!     cycle through all of the frames and calculate the radial dist func
 
       if(switch.eq.1) then
          
          do kk=1,nbox
              if(boxlz(kk).gt.max_boxlz(kk)) then
                 max_boxlz(kk)=boxlz(kk)
-             endif
-         enddo
+             end if
+         end do
 
          nframe = nframe + 1.0d0
          
@@ -399,19 +399,19 @@ c     cycle through all of the frames and calculate the radial dist func
                  avolume(kk) = hmat(kk,1)*hmat(kk,5)*hmat(kk,9)
 	   else      
                  avolume(kk) = boxlx(kk)*boxly(kk)*boxlz(kk)
- 	  endif 
-         enddo
+ 	  end if 
+         end do
 
-c     initialize frame specific arrays
+!     initialize frame specific arrays
          do ii = 1,nmolty
             do gg = 1,nbox
                cmolec(ii,gg) = 0.0d0
                do g = 1,nhere
                   dummy = nhere*(ii-1) + g
                   count(gg,dummy) = 0.0d0
-               enddo
-            enddo
-         enddo
+               end do
+            end do
+         end do
          
          do ichain = 1,nchain
             imolty= moltyp(ichain)
@@ -420,8 +420,8 @@ c     initialize frame specific arrays
             do z = 1, nunit(imolty)
                dummy = nhere*(imolty-1)+decode(ntype(imolty,z))
                count(tempbx,dummy) = count(tempbx,dummy) + 1.0d0
-            enddo
-         enddo
+            end do
+         end do
 
 !         if (lcharge) then
 !            do kk = 1,nbox
@@ -434,18 +434,18 @@ c     initialize frame specific arrays
 !                           write(6,*) 'q value out of range'
 !                           write(6,*) 'frame,i,ii,q',k,i,ii,qdummy
 !                           call cleanup('q value out of range')
-!                        endif
+!                        end if
 !                        qdummy = qdummy - qmin
 !                        qbin = dint(qdummy/qstep) + 1
 !                        qqcode = numax*(imolty-1) + ii
 !                        qanalhist(qqcode,kk,qbin) = 
 !     &                       qanalhist(qqcode,kk,qbin) + 1.0d0
 !                        qcount(qqcode,kk) = qcount(qqcode,kk) + 1.0d0
-!                     enddo
-!                  endif
-!               enddo
-!            enddo
-!         endif
+!                     end do
+!                  end if
+!               end do
+!            end do
+!         end if
 
 !         if ( ldipole ) then
 !            do i = 1,nchain
@@ -459,11 +459,11 @@ c     initialize frame specific arrays
 !                  dipx = dipx + qdummy*rxu(i,iunit)
 !                  dipy = dipy + qdummy*ryu(i,iunit)
 !                  dipz = dipz + qdummy*rzu(i,iunit)
-!               enddo
+!               end do
 !               dipole(imolty,kk) = dipole(imolty,kk) 
 !     &              + dsqrt(dipx*dipx + dipy*dipy + dipz*dipz)
 !               dicount(imolty,kk) = dicount(imolty,kk) + 1.0d0
-!            enddo
+!            end do
 !
 !            if ( mod(k,block) .eq. 0 ) then
 !               nblock = nblock + 1
@@ -473,14 +473,14 @@ c     initialize frame specific arrays
 !                        dipblk(imol,kk,nblock) = 
 !     &                       (dipole(imolty,kk) - diprev(imolty,kk))/
 !     &                       (dicount(imolty,kk) - dcprev(imolty,kk))
-!                     endif
+!                     end if
 !                     diprev(imolty,kk) = dipole(imolty,kk)
 !                     dcprev(imolty,kk) = dicount(imolty,kk)
-!                  enddo
-!               enddo
-!            endif
+!                  end do
+!               end do
+!            end if
 !
-!         endif
+!         end if
         
 !   Compute end to end vector distribution
 
@@ -491,9 +491,9 @@ c     initialize frame specific arrays
               do imolty=1,nmolty
                   do i=1,nbinmax_ete
                       vec_hist(kk,imolty,i) =0.0d0
-                  enddo
-               enddo
-            enddo      
+                  end do
+               end do
+            end do      
 
            do i=1,nchain
               kk = nboxi(i)
@@ -510,7 +510,7 @@ c     initialize frame specific arrays
               vec_hist(kk,imolty,(idint(ruij/bin_width)+1))=
      &         vec_hist(kk,imolty,(idint(ruij/bin_width)+1))+1
 
-           enddo
+           end do
  
            do kk=1,nbox
              do imolty=1,nmolty
@@ -521,11 +521,11 @@ c     initialize frame specific arrays
                 
                   end_to_end(kk,imolty,bin)=end_to_end(kk,imolty,bin)+
      &                     vec_hist(kk,imolty,bin)
-                enddo    
-             enddo
-           enddo 
+                end do    
+             end do
+           end do 
 
-        endif 
+        end if 
 
         if(lrhoz) then
 
@@ -533,12 +533,12 @@ c     initialize frame specific arrays
            do i = 1,nmolty
              do j = 1, nbinmax_ete
                  rhoz(kk,i,j)=0.0d0
-             enddo
+             end do
              do j=-nbinmax_ete,nbinmax_ete
                  boxcom_rhoz(kk,i,j)=0.0d0
-             enddo
-           enddo
-         enddo
+             end do
+           end do
+         end do
            
 !! CALCULATE CENTER OF MASS OF EACH BOX
 
@@ -549,10 +549,10 @@ c     initialize frame specific arrays
                if(nboxi(i).eq.kk) then
                    tempzcm(kk)   = tempzcm(kk)+mass(moltyp(i))*zcm(i) 
                    tempmasst(kk) = tempmasst(kk)+mass(moltyp(i))
-               endif
-            enddo
+               end if
+            end do
             tempzcm(kk)=tempzcm(kk)/tempmasst(kk)  
-         enddo
+         end do
          
          do i=1,nchain
             kk=nboxi(i)
@@ -563,7 +563,7 @@ c     initialize frame specific arrays
             rzuij=zcm(i)-tempzcm(kk)
             boxcom_rhoz(kk,imolty,idint(rzuij/bin_width))=boxcom_rhoz( 
      &         kk,imolty,idint(rzuij/bin_width))+1          
-         enddo  
+         end do  
 
          do kk=1,nbox
             do imolty=1,nmolty
@@ -573,65 +573,65 @@ c     initialize frame specific arrays
                  rhoz(kk,imolty,bin)=rhoz(kk,imolty,bin)/slab_vol
                  bigrhoz(kk,imolty,bin)=bigrhoz(kk,imolty,bin)+
      &                        rhoz(kk,imolty,bin)
-               enddo
+               end do
               
                do bin=-xx,xx
                  boxcom_rhoz(kk,imolty,bin)=boxcom_rhoz(kk,imolty,bin)/
      &                        slab_vol
                  bigboxcom_rhoz(kk,imolty,bin)=bigboxcom_rhoz(kk,imolty,
      &           bin)+boxcom_rhoz(kk,imolty,bin)
-               enddo 
-            enddo
-         enddo 
-        endif
+               end do 
+            end do
+         end do 
+        end if
 
  
        if (lrdf) then
-c        --- compute the radial distribution analhistograms for this frame
+!        --- compute the radial distribution analhistograms for this frame
          do kk = 1,nbox
             rcutsq = rcut(kk)*rcut(kk)
             binstep = rcut(kk)/dble(nbin)
-c           initiallize analhist
+!           initiallize analhist
             do g = 1,nmolty*nmolty*nhere*nhere
                do gg = 1,nbin
                   analhist(g,gg) = 0.0d0
-               enddo
-            enddo
-c           initiallize comanalhist
+               end do
+            end do
+!           initiallize comanalhist
             do g = 1,nmolty*nmolty
                do gg = 1,nbin
                   comanalhist(g,gg) = 0.0d0
-               enddo
-            enddo
+               end do
+            end do
 
             do i = 1, nchain
  
-c  check if i is in relevant box 
+!  check if i is in relevant box 
                if ( nboxi(i) .eq. kk ) then
                   imolty = moltyp(i)
-c     --- loop over all beads ii of chain i 
+!     --- loop over all beads ii of chain i 
                   do ii = 1, nunit(imolty)
                      ntii = nhere*(imolty-1) + decode(ntype(imolty,ii))
                      rxui = rxu(i,ii)
                      ryui = ryu(i,ii)
                      rzui = rzu(i,ii)
 
-c     --- loop over all chains j with j>=i 
+!     --- loop over all chains j with j>=i 
                      if ( lintra ) then
                         istart = i
                      else
                         istart = i+1
-                     endif
+                     end if
                      do j = istart, nchain
-c                       ### check for simulation box ###
+!                       ### check for simulation box ###
                         if ( nboxi(j) .eq. kk ) then
                            jmolty = moltyp(j)
-c                       --- loop over all beads jj of chain j 
+!                       --- loop over all beads jj of chain j 
                            if (i .eq. j) then 
                               jstart = ii+1
                            else
                               jstart = 1
-                           endif
+                           end if
                            do jj = jstart, nunit(jmolty)
                         
                               ntjj = nhere*(jmolty-1) + 
@@ -640,7 +640,7 @@ c                       --- loop over all beads jj of chain j
                                  ntij = (ntjj-1)*nhere*nmolty + ntii
                               else
                                  ntij = (ntii-1)*nhere*nmolty + ntjj
-                              endif
+                              end if
 
                               rxuij = rxui - rxu(j,jj)
                               ryuij = ryui - ryu(j,jj)
@@ -649,24 +649,24 @@ c                       --- loop over all beads jj of chain j
                               if ( lpbc ) 
      &                          call mimage (rxuij,ryuij,rzuij,kk)
 
-c *** minimum image the pair separations ***
+! *** minimum image the pair separations ***
 !                              if ( rxuij .gt. hbx ) then
 !                                 rxuij=rxuij-bx
 !                              else
 !                                 if (rxuij.lt.-hbx) rxuij=rxuij+bx
-!                              endif
+!                              end if
 !
 !                              if ( ryuij .gt. hby ) then
 !                                 ryuij=ryuij-by
 !                              else
 !                                 if (ryuij.lt.-hby) ryuij=ryuij+by
-!                              endif
+!                              end if
 
 !                              if (rzuij.gt.hbz) then
 !                                 rzuij=rzuij-bz
 !                              else
 !                                 if (rzuij.lt.-hbz) rzuij=rzuij+bz
-!                              endif
+!                              end if
 !
                               ruijsq = rxuij*rxuij + ryuij*ryuij 
      &                             + rzuij*rzuij
@@ -677,24 +677,24 @@ c *** minimum image the pair separations ***
                                  bin = dint(ruij/binstep) + 1 
                                  analhist(ntij,bin) = analhist(ntij,
      &                                                 bin) + 1.0d0
-                              endif
+                              end if
 
-                           enddo
-                        endif
-                     enddo
-                  enddo
-               endif
-            enddo
+                           end do
+                        end if
+                     end do
+                  end do
+               end if
+            end do
 
-c     normalize the analhistogram and add it to the big analhistogram
+!     normalize the analhistogram and add it to the big analhistogram
             
             do ii = 1,nmolty
                do xx  = 1,nhere
                   ntii = nhere*(ii-1) + xx
                   rho(ntii) = (4.0d0 * 3.1415d0 * count(kk,ntii)) 
      &                 / (3.0d0 * avolume(kk) )
-               enddo
-            enddo
+               end do
+            end do
             
             do ii = 1,nmolty
                do xx = 1,nhere
@@ -715,12 +715,12 @@ c     normalize the analhistogram and add it to the big analhistogram
                            const = rho(ntjj)/2.0d0
                         else
                            const = rho(ntjj)
-                        endif
+                        end if
                         
                         shlsumx = 0.0d0
                         shlsumy = 0.0d0  
-c     check to see if there are enough molecules to have any interactions
-c     if not then lskip is set to true
+!     check to see if there are enough molecules to have any interactions
+!     if not then lskip is set to true
 
                         lskip = .false.
                         if ( ntii .eq. ntjj ) then
@@ -728,14 +728,14 @@ c     if not then lskip is set to true
                               lskip = .true.
                            elseif ( numxx .lt. 0.5d0 ) then
                               lskip =.true.
-                           endif
+                           end if
                         else
                            if ( cmolec(ii,kk)*cmolec(jj,kk) 
      &                          .lt. 0.5d0 .or. numxx*numyy 
      &                          .lt. 0.5d0) then
                               lskip = .true.
-                           endif
-                        endif
+                           end if
+                        end if
                         
                         if ( .not. lskip  ) then
 
@@ -759,7 +759,7 @@ c     if not then lskip is set to true
                                     shell(binadj,bin,2) =
      &                                   shell(binadj,bin,2)
      &                                   + shlsumy
-                                 endif
+                                 end if
 
                               
                               rlower = dble(bin-1)*binstep
@@ -772,20 +772,20 @@ c     if not then lskip is set to true
      &                             + analhist(ntij,bin)/xxideal
 
 
-                           enddo
+                           end do
                            
                         else
                            nnone(kk,ntij) = nnone(kk,ntij) + 1.0d0
-                        endif
-                     enddo
-                  enddo
-               enddo
-            enddo
+                        end if
+                     end do
+                  end do
+               end do
+            end do
 
-c           --- Center of Mass Radial Distribution Functions
+!           --- Center of Mass Radial Distribution Functions
             do i = 1, nchain
  
-c  check if i is in relevant box 
+!  check if i is in relevant box 
                if ( nboxi(i) .eq. kk ) then
                   imolty = moltyp(i)
 
@@ -793,10 +793,10 @@ c  check if i is in relevant box
                   ryui = ycm(i)
                   rzui = zcm(i)
 
-c     --- loop over all chains j with j>=i 
+!     --- loop over all chains j with j>=i 
                   istart = i+1
                   do j = istart, nchain
-c                       ### check for simulation box ###
+!                       ### check for simulation box ###
                      if ( nboxi(j) .eq. kk ) then
                         jmolty = moltyp(j)
 
@@ -804,13 +804,13 @@ c                       ### check for simulation box ###
                            ntij = (jmolty-1)*nmolty + imolty
                         else
                            ntij = (imolty-1)*nmolty + jmolty
-                        endif
+                        end if
 
                         rxuij = rxui - xcm(j)
                         ryuij = ryui - ycm(j)
                         rzuij = rzui - zcm(j)
 
-c *** minimum image the pair separations ***
+! *** minimum image the pair separations ***
                         if ( lpbc )
      &                      call mimage (rxuij,ryuij,rzuij,kk)         
 
@@ -823,19 +823,19 @@ c *** minimum image the pair separations ***
                            bin = dint(ruij/binstep) + 1 
                            comanalhist(ntij,bin) = comanalhist(ntij,bin) 
      &                          + 1.0d0
-                        endif
+                        end if
 
-                     endif
-                  enddo
-               endif
-            enddo
+                     end if
+                  end do
+               end if
+            end do
 
-c     normalize the COM analhistogram and add it to the big analhistogram
+!     normalize the COM analhistogram and add it to the big analhistogram
             
             do ii = 1,nmolty
                rho(ii) = (4.0d0 * 3.1415d0 * cmolec(ii,kk)) 
      &                 / (3.0d0 * avolume(kk) )
-            enddo
+            end do
             
             do ii = 1,nmolty
                ntii = ii
@@ -854,25 +854,25 @@ c     normalize the COM analhistogram and add it to the big analhistogram
                      const = rho(ntjj)/2.0d0
                   else
                      const = rho(ntjj)
-                  endif
+                  end if
                   
                   shlsumx = 0.0d0
                   shlsumy = 0.0d0
 
-c     check to see if there are enough molecules to have any interactions
-c     if not then lskip is set to true
+!     check to see if there are enough molecules to have any interactions
+!     if not then lskip is set to true
 
                   lskip = .false.
                   
                   if ( ntii .eq. ntjj ) then
                      if ( cmolec(ii,kk) .lt. nskip ) then
                         lskip = .true.
-                     endif
+                     end if
                   elseif ( cmolec(ii,kk)*cmolec(jj,kk) 
      &                    .lt. 0.5d0 .or. numxx*numyy 
      &                    .lt. 0.5d0) then
                      lskip = .true.
-                  endif
+                  end if
                            
                   if ( .not. lskip  ) then
 
@@ -893,7 +893,7 @@ c     if not then lskip is set to true
      &                          comshell(binadj,bin,1)+ shlsumx
                            comshell(binadj,bin,2) =
      &                          comshell(binadj,bin,2)+ shlsumy
-                        endif
+                        end if
 
 
                         rlower = dble(bin-1)*binstep
@@ -907,22 +907,22 @@ c     if not then lskip is set to true
      &                          combiganalhist(binadj,bin) + 
      &                          comanalhist(ntij,bin)/xxideal
 
-                        endif
+                        end if
 
-                     enddo
+                     end do
                               
                   else
                      comnone(kk,ntij) = comnone(kk,ntij) + 1.0d0
-                  endif
-               enddo
-            enddo
+                  end if
+               end do
+            end do
 
-         enddo
-        endif
+         end do
+        end if
 
-cccccccccccccccccccccccccc
+!ccccccccccccccccccccccccc
 
-c     analyse the torsional angles
+!     analyse the torsional angles
 
         if (lstretch .or. lbend .or. lgvst ) then
            do kk=1,nbox
@@ -930,10 +930,10 @@ c     analyse the torsional angles
           
                imolty = moltyp(i)
 
-c  check if i is in relevant box 
+!  check if i is in relevant box 
                if ( nboxi(i) .eq. kk ) then
 
-c                 --- calculate all bonds vectors and lengths
+!                 --- calculate all bonds vectors and lengths
 
                   do ii = 1, nunit(imolty)
                      rxui=rxu(i,ii)
@@ -945,15 +945,15 @@ c                 --- calculate all bonds vectors and lengths
                         yvec(ii,jj) = ryu(i,jj) - ryui
                         zvec(ii,jj) = rzu(i,jj) - rzui
                         distij(ii,jj) = dsqrt( xvec(ii,jj)**2
-     +                       + yvec(ii,jj)**2 + zvec(ii,jj)**2 )
-                     enddo
-                  enddo
+     &                       + yvec(ii,jj)**2 + zvec(ii,jj)**2 )
+                     end do
+                  end do
                   
-c - stretching -
+! - stretching -
                   if ( lstretch ) then
-                  endif
+                  end if
 
-c - bending -
+! - bending -
                   if ( lbend ) then
                      do bend = 1,angle_num(imolty)
                         j = angle_1(imolty,bend)
@@ -961,13 +961,13 @@ c - bending -
                         ip2 = angle_3(imolty,bend)
 
                         thetac = ( xvec(ip1,j)*xvec(ip1,ip2) +
-     +                       yvec(ip1,j)*yvec(ip1,ip2) +
-     +                       zvec(ip1,j)*zvec(ip1,ip2) ) /
-     +                       ( distij(ip1,j)*distij(ip1,ip2) )
+     &                       yvec(ip1,j)*yvec(ip1,ip2) +
+     &                       zvec(ip1,j)*zvec(ip1,ip2) ) /
+     &                       ( distij(ip1,j)*distij(ip1,ip2) )
                         theta = dacos(thetac)
                         if(abs(theta).lt.0.000001) then
                             theta =0.0d0
-                        endif
+                        end if
 !                        write(6,*) 'value of theta',theta
                         angle_avg(kk,imolty,bend) = 
      &                       angle_avg(kk,imolty,bend) + theta
@@ -976,17 +976,17 @@ c - bending -
                             write(6,*) 'theta, ang_bin_size, bin',theta,
      &                                ang_bin_size, bin
                             bin=1
-		        endif
+		        end if
                         angle_bin(kk,imolty,bend,bin) = 
      &                       angle_bin(kk,imolty,bend,bin) + 1.0d0
                         angle_tot(kk,imolty,bend) = 
      &                       angle_tot(kk,imolty,bend)+ 1.0d0
-                     enddo
-                  endif
+                     end do
+                  end if
 
-c - torsions -
+! - torsions -
                   if ( lgvst ) then
-c  molecule with dihedral potenials 
+!  molecule with dihedral potenials 
                      gaudef = 1
                      dum = 0
                      do torsion = 1, tor_num(imolty)
@@ -995,42 +995,42 @@ c  molecule with dihedral potenials
                         ip2 = tor_3(imolty,torsion)
                         ip3 = tor_4(imolty,torsion)
 
-c              ***  calculate cross product d_a x d_a-1  ***
+!              ***  calculate cross product d_a x d_a-1  ***
                         xaa1 = yvec(ip1,j) * zvec(ip2,ip1) +
-     +                       zvec(ip1,j) * yvec(ip1,ip2)
+     &                       zvec(ip1,j) * yvec(ip1,ip2)
                         yaa1 = zvec(ip1,j) * xvec(ip2,ip1) +
-     +                       xvec(ip1,j) * zvec(ip1,ip2)
+     &                       xvec(ip1,j) * zvec(ip1,ip2)
                         zaa1 = xvec(ip1,j) * yvec(ip2,ip1) +
-     +                       yvec(ip1,j) * xvec(ip1,ip2)
-c              ***  calculate cross product d_a-1 x d_a-2 ***
+     &                       yvec(ip1,j) * xvec(ip1,ip2)
+!              ***  calculate cross product d_a-1 x d_a-2 ***
                         xa1a2 = yvec(ip1,ip2) * zvec(ip2,ip3) +
-     +                       zvec(ip1,ip2) * yvec(ip3,ip2)
+     &                       zvec(ip1,ip2) * yvec(ip3,ip2)
                         ya1a2 = zvec(ip1,ip2) * xvec(ip2,ip3) +
-     +                       xvec(ip1,ip2) * zvec(ip3,ip2)
+     &                       xvec(ip1,ip2) * zvec(ip3,ip2)
                         za1a2 = xvec(ip1,ip2) * yvec(ip2,ip3) +
-     +                       yvec(ip1,ip2) * xvec(ip3,ip2)
+     &                       yvec(ip1,ip2) * xvec(ip3,ip2)
                               
-c     *** calculate lengths of cross products ***
+!     *** calculate lengths of cross products ***
                         daa1 = dsqrt(xaa1**2+yaa1**2+zaa1**2)
                         da1a2 = dsqrt(xa1a2**2+ya1a2**2+za1a2**2)
-c              *** calculate dot product of cross products ***
+!              *** calculate dot product of cross products ***
                         dot = xaa1*xa1a2 + yaa1*ya1a2 + zaa1*za1a2
                         thetac = - dot / ( daa1 * da1a2 )
                         theta = dacos(thetac)
 
-c              *** calculate cross product of cross products ***
+!              *** calculate cross product of cross products ***
                         xcc = yaa1*za1a2 - zaa1*ya1a2
                         ycc = zaa1*xa1a2 - xaa1*za1a2
                         zcc = xaa1*ya1a2 - yaa1*xa1a2
-c              *** calculate scalar triple product ***
+!              *** calculate scalar triple product ***
                         tcc = xcc*xvec(ip1,ip2) + ycc*yvec(ip1,ip2) 
      &                       + zcc*zvec(ip1,ip2) 
                         if ( tcc .lt. 0.0d0 ) theta = - theta
 
-c              *** convert theta to degrees ***
+!              *** convert theta to degrees ***
                         theta = theta*(180.0d0/onepi)
 
-c                       --- bin the torsion --
+!                       --- bin the torsion --
                         bin = dint( (theta+180.0d0)/tor_bin_size)+1
                         tor_bin(kk,imolty,torsion,bin) = 
      &                       tor_bin(kk,imolty,torsion,bin)+1.0d0
@@ -1038,46 +1038,46 @@ c                       --- bin the torsion --
      &                       tor_tot(kk,imolty,torsion) + 1.0d0
 
                         if ( theta .lt. -60.0d0 ) then
-c                          --- gauch minus
+!                          --- gauch minus
                            g_minus(kk,imolty)=g_minus(kk,imolty) + 1.0d0
                            gaudef = gaudef + 1
                            bg_minus(kk,imolty,torsion) = 
      &                          bg_minus(kk,imolty,torsion) + 1.0d0
                            dum = dum + 0 * 3**(torsion-1)
                         elseif ( theta .lt. 60.0d0 ) then
-c                          --- trans
+!                          --- trans
                            trans(kk,imolty) = trans(kk,imolty)+1.0d0
                            btrans(kk,imolty,torsion) = 
      &                          btrans(kk,imolty,torsion) + 1.0d0
                            dum = dum + 1 * 3**(torsion-1)
                         else
-c                          --- gauch plus
+!                          --- gauch plus
                            g_plus(kk,imolty)=g_plus(kk,imolty) + 1.0d0
                            gaudef = gaudef + 1
                            bg_plus(kk,imolty,torsion) = 
      &                          bg_plus(kk,imolty,torsion) + 1.0d0
                            dum = dum + 2 * 3**(torsion-1)
-                        endif
+                        end if
 
-                     enddo
+                     end do
 
                      gdefect(kk,imolty,gaudef) = 
      &                    gdefect(kk,imolty,gaudef) + 1.0d0 
                      gdefect(kk,imolty,tor_max+1) = 
      &                    gdefect(kk,imolty,tor_max+1) + 1.0d0
 
-c  Being removed because of high memory requirement
-c                     pattern(kk,imolty,dum) = pattern(kk,imolty,dum) 
-c     &                    + 1.0d0
+!  Being removed because of high memory requirement
+!                     pattern(kk,imolty,dum) = pattern(kk,imolty,dum) 
+!     &                    + 1.0d0
 
-                  endif
-               endif
-              enddo
-           enddo
-        endif
+                  end if
+               end if
+              end do
+           end do
+        end if
 
       return
-      endif
+      end if
 
       if(switch.eq.2) then
  
@@ -1088,17 +1088,17 @@ c     &                    + 1.0d0
 
       if(lete) then
          do i=1,nbox
-c             fname = i
+!             fname = i
              write(ftemp,*) i 
              read(ftemp,*) fname2 
              fileout = 'end2end_box'//fname2(1:len_trim(fname2))
              open (unit=140+i,FILE=fileout,STATUS="unknown")
-          enddo
+          end do
 
 
 
-c         open (unit=142,FILE="end2end_box2",STATUS="unknown")
-c         open (unit=143,FILE="end2end_box3",STATUS="unknown")
+!         open (unit=142,FILE="end2end_box2",STATUS="unknown")
+!         open (unit=143,FILE="end2end_box3",STATUS="unknown")
 
          do kk=1,nbox
            do imolty=1,nmolty
@@ -1109,19 +1109,19 @@ c         open (unit=143,FILE="end2end_box3",STATUS="unknown")
                   rxuij=bin_width*(dble(bin)-0.5d0)
                   write(140+kk,*) rxuij,end_to_end(kk,imolty,bin)/
      &                                    nframe
-              enddo
-           enddo
-         enddo              
+              end do
+           end do
+         end do              
          
          do i = 1,nbox          
             close(140+i)
-         enddo 
+         end do 
 
 
-c         close(142)
-c         close(143)
+!         close(142)
+!         close(143)
 
-      endif
+      end if
 
 
       if(lrhoz) then
@@ -1133,7 +1133,7 @@ c         close(143)
              open (unit=150+i,FILE=fileout,STATUS="unknown")
              fileout = 'comrhoz_box'//fname2(1:len_trim(fname2))
              open (unit=153+i,FILE=fileout,STATUS="unknown") 
-         enddo
+         end do
                      
          do kk=1,nbox
            do imolty=1,nmolty
@@ -1146,18 +1146,18 @@ c         close(143)
                   rxuij=bin_width*(dble(bin)-0.5d0)
                   write(150+kk,*) rxuij,bigrhoz(kk,imolty,bin)/
      &                                    nframe
-              enddo
+              end do
               do bin=-xx,xx
                  if (bin.eq.0) then
                      rxuij=0.0
                  else
                      rxuij=bin_width*(dble(bin)+0.5d0) 
-                 endif
+                 end if
                  write(153+kk,*) rxuij,bigboxcom_rhoz(kk,imolty,bin)/
      &                           nframe
-              enddo 
-           enddo
-         enddo
+              end do 
+           end do
+         end do
 
          close(151)
          close(152)
@@ -1166,11 +1166,11 @@ c         close(143)
          close(155)
          close(156)
 
-      endif
+      end if
 
 
-c     whew, now that is done we just have to divide out the number of
-c     frames in biganalhist
+!     whew, now that is done we just have to divide out the number of
+!     frames in biganalhist
 
 
       if (lrdf) then
@@ -1190,13 +1190,13 @@ c     frames in biganalhist
              fileout = 'comnum_box'//fname2(1:len_trim(fname2))//
      &'_'//fname3(1:len_trim(fname3))//suffix//'.dat'
              open (unit=113+i,FILE=fileout,STATUS="unknown")
-         enddo
+         end do
          
 
-c         write(6,*)
-c         write(6,*) 'bead bead radial distribution functions in *gor*'
-c         write(6,*)
-c         write(6,*) 'avg. number of beads vs. shell size in *num*'
+!         write(6,*)
+!         write(6,*) 'bead bead radial distribution functions in *gor*'
+!         write(6,*)
+!         write(6,*) 'avg. number of beads vs. shell size in *num*'
          
 !         print*, 'nhere', nhere
          
@@ -1237,7 +1237,7 @@ c         write(6,*) 'avg. number of beads vs. shell size in *num*'
      &                        /aframe
                          write(110+kk,*) rxuij,shell(binadj,bin,1)
                          
-                      enddo
+                      end do
                       write(100+kk,*)
 	              write(110+kk,*)
  
@@ -1249,9 +1249,9 @@ c         write(6,*) 'avg. number of beads vs. shell size in *num*'
                               shell(binadj,bin,2) =
      &                             shell(binadj,bin,2) /aframe
                               write(110+kk,*) rxuij,shell(binadj,bin,2)
-                            enddo
+                            end do
                             write(110+kk,*)
-                      endif
+                      end if
                       
                    elseif( aframe .lt. -0.5d0 ) then
                       write(6,*) 'aframe',aframe
@@ -1259,15 +1259,15 @@ c         write(6,*) 'avg. number of beads vs. shell size in *num*'
                       write(6,*) 'nnone(kk,ntij),kk,ntij',
      &                     nnone(kk,ntij),kk,ntij
                       call cleanup('srewup aframe')
-                     endif
-                   endif
-                 enddo
-               enddo
-            enddo
-         enddo
-       enddo
+                     end if
+                   end if
+                 end do
+               end do
+            end do
+         end do
+       end do
 
-c     --- same thing for the COM rdf
+!     --- same thing for the COM rdf
        do kk = 1,nbox
          binstep = rcut(kk)/dble(nbin)
          do ii = 1,nmolty
@@ -1295,7 +1295,7 @@ c     --- same thing for the COM rdf
      &                    /aframe
                      write(113+kk,*) rxuij,comshell(binadj,bin,1)
 
-                  enddo
+                  end do
 
                   write(103+kk,*)
                   write(113+kk,*)
@@ -1307,19 +1307,19 @@ c     --- same thing for the COM rdf
                        comshell(binadj,bin,2) =
      &                       comshell(binadj,bin,2) /aframe
                        write(113+kk,*) rxuij,comshell(binadj,bin,2)
-	            enddo
+	            end do
                     write(113+kk,*)
-                  endif    
+                  end if    
                elseif( aframe .lt. -0.5d0 ) then
                   write(6,*) 'aframe',aframe
                   write(6,*) 'nframe',nframe
                   write(6,*) 'comnone(kk,ntij),kk,ntij',
      &                 comnone(kk,ntij),kk,ntij
                   call cleanup('srewup aframe')
-               endif
-            enddo
-         enddo
-       enddo
+               end if
+            end do
+         end do
+       end do
 
        close(101)
        close(102)
@@ -1333,7 +1333,7 @@ c     --- same thing for the COM rdf
        close(114)
        close(115)
        close(116)
-      endif 
+      end if 
 
 !      if ( lcharge ) then
 !         write(6,*) 'charge distributions in fort.35+box'
@@ -1347,8 +1347,8 @@ c     --- same thing for the COM rdf
 !                        qhere = .true.
 !                        qanalhist(qqcode,kk,qbin) = 
 !     &                       qanalhist(qqcode,kk,qbin)/qcount(qqcode,kk)
-!                     endif
-!                  enddo
+!                     end if
+!                  end do
 !                  if (qhere) then
 !                     qdummy = ( (dble(1)-0.5d0)*qstep)+qmin
 !                     write(35+kk,*) qdummy,qanalhist(qqcode,kk,1)+qdisp
@@ -1358,13 +1358,13 @@ c     --- same thing for the COM rdf
 !                        qdummy = ( (dble(qbin)-0.5d0)*qstep)+qmin
 !                        write(35+kk,*) qdummy
 !     &                       ,qanalhist(qqcode,kk,qbin)+qdisp
-!                     enddo
+!                     end do
 !                     write(35+kk,*)
-!                  endif
-!               enddo
-!            enddo
-!         enddo
-!      endif
+!                  end if
+!               end do
+!            end do
+!         end do
+!      end if
 
 !      if ( ldipole ) then
 !         diconv = (1.602d-19)/((1d10)*(3.336d-30))
@@ -1373,11 +1373,11 @@ c     --- same thing for the COM rdf
 !            do imol = 1,nmolty
 !               if ( dicount(imol,kk) .gt. 0.5d0 ) then
 !                  dipole(imol,kk) = dipole(imol,kk)/dicount(imol,kk)
-!               endif
+!               end if
 !               write(6,*) 'Moltyp,dipole',imolty
 !     &              ,dipole(imol,kk),dipole(imol,kk)*diconv
-!            enddo
-!         enddo
+!            end do
+!         end do
 !
 !         if ( block .gt. 1 ) then
 !            write(6,*) 'Number of blocks input and used',block,nblock
@@ -1387,21 +1387,21 @@ c     --- same thing for the COM rdf
 !                  avera = 0.0d0
 !                  do k=1,nblock
 !                     avera = avera + dipblk(imol,kk,k)
-!                  enddo
+!                  end do
 !                  avera = avera/nblock
 !                  stddev = 0.0d0
 !                  do k = 1,nblock
 !                     stddev = stddev + (dipblk(imol,kk,k)-avera)**2
-!                  enddo
+!                  end do
 !                  stddev = dsqrt( stddev/dble(nblock-1) )
 !                  stddev = stddev*diconv
 !                  avera = avera*diconv
 !                  write(6,'(i3,4x,i3,4x,2f10.4)') kk,imol,avera,stddev
-!               enddo
-!            enddo
-!         endif
+!               end do
+!            end do
+!         end if
 
-!      endif
+!      end if
                
       if ( lbend ) then
          do i=1,nbox
@@ -1409,10 +1409,10 @@ c     --- same thing for the COM rdf
              read(ftemp,*) fname2
              fileout = 'bendang_dist_box'//fname2
              open (unit=120+i,FILE=fileout,STATUS="unknown")
-         enddo
+         end do
 
-c     --- output the bending angle distributions for each angle in the molecule
-c     --- write to 37+box
+!     --- output the bending angle distributions for each angle in the molecule
+!     --- write to 37+box
 
          do kk = 1,nbox
             do imolty = 1,nmolty
@@ -1431,9 +1431,9 @@ c     --- write to 37+box
                         degree = value*180.0d0/onepi
                         write(120+kk,*) degree
      &                       ,angle_bin(kk,imolty,bend,bin)/total
-                     enddo
+                     end do
                      write(120+kk,*)
-c                    --- output the average angle to the screen
+!                    --- output the average angle to the screen
                      value = angle_avg(kk,imolty,bend)/total
                      degree = value*180.0d0/onepi
                      write(6,*) 
@@ -1441,14 +1441,14 @@ c                    --- output the average angle to the screen
      &                    ,angle_1(imolty,bend),angle_2(imolty,bend)
      &                    ,angle_3(imolty,bend),' average ',degree
                      
-                  endif
-               enddo
-            enddo
-         enddo                
+                  end if
+               end do
+            end do
+         end do                
          close(121)
          close(122)
          close(123)
-      endif
+      end if
 
       if ( lgvst ) then
 
@@ -1459,11 +1459,11 @@ c                    --- output the average angle to the screen
              open (unit=130+i,FILE=fileout,STATUS="unknown")
              fileout = 'torsprob_box'//fname2
              open (unit=133+i,FILE=fileout,STATUS="unknown")
-         enddo
+         end do
  
 
 
-c     output the gauch versus trans data for each moltype
+!     output the gauch versus trans data for each moltype
          write(6,*) 'moltyp  box  trans      g+        g-       g frac'
          do kk  = 1,nbox
             do imolty = 1,nmolty
@@ -1474,9 +1474,9 @@ c     output the gauch versus trans data for each moltype
                if((dint(trans(kk,imolty))+gaudef).ne.0) then
                   ratio = gaudef/(trans(kk,imolty)+gaudef)
                else
-c                  ratio = 0.0d0
+!                  ratio = 0.0d0
                   write(6,*) 'ratio not defined'
-               endif
+               end if
                
                write(6,40)imolty,kk ,trans(kk,imolty),g_plus(kk,imolty)
      &              ,g_minus(kk,imolty),ratio
@@ -1487,7 +1487,7 @@ c                  ratio = 0.0d0
      &                 btrans(kk,imolty,torsion)
 
                   if ( total .gt. 0.5d0) then
-c                    --- output torsion type fractions 
+!                    --- output torsion type fractions 
                      fplus = bg_plus(kk,imolty,torsion)/total
                      fminus = bg_minus(kk,imolty,torsion)/total
                      ftrans = btrans(kk,imolty,torsion)/total
@@ -1495,7 +1495,7 @@ c                    --- output torsion type fractions
      &                    ,tor_2(imolty,torsion),tor_3(imolty,torsion)
      &                    ,tor_4(imolty,torsion),fplus,fminus,ftrans
 
-C                    --- output the torsion probablility distributions
+!                    --- output the torsion probablility distributions
                      value = -180.0d0 + (0.5d0*tor_bin_size)
                      write(133+kk,*) value,tor_bin(kk,imolty,torsion,1)
      &                    ,imolty,tor_1(imolty,torsion)
@@ -1506,12 +1506,12 @@ C                    --- output the torsion probablility distributions
                         value = value + tor_bin_size
                         write(133+kk,*) value
      &                       ,tor_bin(kk,imolty,torsion,bin)
-                     enddo
+                     end do
                      write(133+kk,*)
-                  endif
-               enddo
-            enddo
-         enddo
+                  end if
+               end do
+            end do
+         end do
  40      format(i3,5x,i3,3(2x,e8.2),f8.4)
  41      format('Units',8x,'Frac g+',1x,'Frac g-',1x,'Frac t')
  42      format(4(i2,1x),1x,3(f5.3,3x))
@@ -1537,15 +1537,15 @@ C                    --- output the torsion probablility distributions
              read(ftemp,*) fname2
              fileout = 'Gauchedefects_box'//fname2
              open (unit=136+i,FILE=fileout,STATUS="unknown")
-c             fileout = 'pattern_box'//fname2
-c             open (unit=124+i,FILE=fileout,STATUS="unknown")
-         enddo
+!             fileout = 'pattern_box'//fname2
+!             open (unit=124+i,FILE=fileout,STATUS="unknown")
+         end do
 
          open(unit=124,FILE="decoder",status="unknown")
 
 
 
-c     analyse the number of gauch defects per chain
+!     analyse the number of gauch defects per chain
          do kk = 1,nbox
             do imolty = 1,nmolty
                total = gdefect(kk,imolty,tor_max+1)
@@ -1555,55 +1555,55 @@ c     analyse the number of gauch defects per chain
                      gdefect(kk,imolty,torsion) = 
      &                    gdefect(kk,imolty,torsion)/total
                      write(136+kk,*) torsion,gdefect(kk,imolty,torsion)
-                  enddo
-               endif
+                  end do
+               end if
 
                psum = 0.0d0
-c               if ( tor_num(imolty) .gt. 0 ) then
-cc                 --- write out a decoder for the torsions
-c                  if ( kk .eq. 1 ) then
-c                     write(124,*) 'Moltyp ',imolty,' torsions'
-c                     do torsion = 1,tor_num(imolty)
-c                        write(124,*) torsion,'   ',tor_1(imolty,torsion)
-c     &                       ,tor_2(imolty,torsion)
-c     &                       ,tor_3(imolty,torsion)
-c     &                       ,tor_4(imolty,torsion)
-c                     enddo
-c                  endif
-c                  units = 3**( tor_num(imolty) )
-c                  do uu = 0,units
-c                     psum = psum + pattern(kk,imolty,uu)
-c                  enddo
-c                  write(124+kk,*) 'Code     Prob.     Torsion pattern'
-c                  do uu = 0,units-1
-c                     if ( pattern(kk,imolty,uu) .gt. 0.5d0 ) then
-c                        decimal = uu
-c                        power = units
-c                        torsion = tor_num(imolty)
-c                        do dummy = torsion,1,-1
-c                           power = power/3
-c                           bthree = decimal/power 
-c                           decimal = decimal - bthree*power
-c                           patt(dummy) = bthree-1
-c                        enddo
+!               if ( tor_num(imolty) .gt. 0 ) then
+!c                 --- write out a decoder for the torsions
+!                  if ( kk .eq. 1 ) then
+!                     write(124,*) 'Moltyp ',imolty,' torsions'
+!                     do torsion = 1,tor_num(imolty)
+!                        write(124,*) torsion,'   ',tor_1(imolty,torsion)
+!     &                       ,tor_2(imolty,torsion)
+!     &                       ,tor_3(imolty,torsion)
+!     &                       ,tor_4(imolty,torsion)
+!                     end do
+!                  end if
+!                  units = 3**( tor_num(imolty) )
+!                  do uu = 0,units
+!                     psum = psum + pattern(kk,imolty,uu)
+!                  end do
+!                  write(124+kk,*) 'Code     Prob.     Torsion pattern'
+!                  do uu = 0,units-1
+!                     if ( pattern(kk,imolty,uu) .gt. 0.5d0 ) then
+!                        decimal = uu
+!                        power = units
+!                        torsion = tor_num(imolty)
+!                        do dummy = torsion,1,-1
+!                           power = power/3
+!                           bthree = decimal/power 
+!                           decimal = decimal - bthree*power
+!                           patt(dummy) = bthree-1
+!                        end do
 
-c                        write(124+kk,52) uu,
-c     &                       pattern(kk,imolty,uu)/psum
-c     &                       ,(patt(dummy),dummy=1,torsion)
-c 52                     format(i8,2x,f5.3,2x,20(i2,1x))
-c                     endif
-c                  enddo 
-c               endif
+!                        write(124+kk,52) uu,
+!     &                       pattern(kk,imolty,uu)/psum
+!     &                       ,(patt(dummy),dummy=1,torsion)
+! 52                     format(i8,2x,f5.3,2x,20(i2,1x))
+!                     end if
+!                  end do 
+!               end if
 
-            enddo
-         enddo
+            end do
+         end do
          close(137)
          close(138)
          close(139)
-c         close(124)
-c         close(125)
-c         close(126)
-c         close(127)
+!         close(124)
+!         close(125)
+!         close(126)
+!         close(127)
 
 !         write(6,*) 'patterns of gauch defects in fort.2*'
 !         write(6,*) 'transform first number into base 3 to get the'
@@ -1614,8 +1614,8 @@ c         close(127)
 !         write(6,*)
          
 
-      endif
+      end if
       return 
-      endif
+      end if
        
       end subroutine analysis

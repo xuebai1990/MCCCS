@@ -1,27 +1,27 @@
       subroutine ztest
 
-c ztest
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! ztest
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
       include 'grid.inc'
@@ -31,15 +31,15 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       real(8)::errm,errt,err,res,rest,erra
       integer::samp
       real(8)::xi,yi,zi,random,exzeof,exzeo
-     +     ,ebolt,bolt,boltf,eboltf
-c     --- test accuracy
+     &     ,ebolt,bolt,boltf,eboltf
+!     --- test accuracy
       idi=1
       errm=0
       errt=0
       erra=0
       samp=100 
       tel=0
-c---  test accuracy
+!---  test accuracy
       write(16,*) ' Program uses a grid of the zeolite lattice '
       write(16,*) ' --- accuracy test '
       bolt=0
@@ -48,7 +48,7 @@ c---  test accuracy
       eboltf=0
       do i=1,samp
          if (mod(i,100).eq.0) print*,' test table ',i,
-     +        ' out ',samp
+     &        ' out ',samp
          xi=(4-8*random())*zeorx
          yi=(4-8*random())*zeory
          zi=(4-8*random())*zeorz
@@ -64,12 +64,12 @@ c---  test accuracy
             if (err.gt.0.03) then
                print*,' warning err. interp.larger than 3% '
                print*,err,res,rest
-            endif
+            end if
             if (erra.lt.abs(res-rest)) erra=abs(res-rest)
             errt=errt+err
             if (errm.lt.err) errm=err
-         endif
-      enddo
+         end if
+      end do
       write(iou,*) ' test over : ',samp,tel, ' random positions '
       write(iou,*) ' average error : ',errt/tel
       write(iou,*) ' maximum error : ',errm

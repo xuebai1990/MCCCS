@@ -1,40 +1,40 @@
       subroutine geometry(lnew,iw,i,imolty,angstart,iuprev,glist
      &     ,bondlen,bendang,phi,vvibtr,vbbtr, maxlen, wei_bend )
 
-c geometry
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! geometry
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-c     ***********************************************************************
-c     ** determines the new geometry of the bond lengths and angles to be  **
-c     ** rotated on the cone for rosenb.f                                  **
-c     ** for old computes the rosenbluth weight for bending and determines **
-c     ** the old bond lenghts, angles, and phi for growth                  **
-c     ** bondlen(count) is the bondlengths from the grow bead to count     **
-c     ** bendang(count) is the bond angle between iuprev,iufrom, and count **
-c     ** phi(count) is the angle around the cone between count and 1       **
-c     ** written by M.G. Martin 7-10-98 from geomnew and geomold           **
-c     ** last modified by Neeraj Rai on 12/23/2008 for CG models           **
-c     ***********************************************************************
+!     ***********************************************************************
+!     ** determines the new geometry of the bond lengths and angles to be  **
+!     ** rotated on the cone for rosenb.f                                  **
+!     ** for old computes the rosenbluth weight for bending and determines **
+!     ** the old bond lenghts, angles, and phi for growth                  **
+!     ** bondlen(count) is the bondlengths from the grow bead to count     **
+!     ** bendang(count) is the bond angle between iuprev,iufrom, and count **
+!     ** phi(count) is the angle around the cone between count and 1       **
+!     ** written by M.G. Martin 7-10-98 from geomnew and geomold           **
+!     ** last modified by Neeraj Rai on 12/23/2008 for CG models           **
+!     ***********************************************************************
 
       implicit none
 
@@ -46,7 +46,7 @@ c     ***********************************************************************
       include 'cbmc.inc'
       include 'tabulated.inc'
 
-c     --- variables passed to/from the subroutine
+!     --- variables passed to/from the subroutine
 
       logical::lnew
       integer::iw,imolty,angstart,iuprev,glist,i
@@ -56,7 +56,7 @@ c     --- variables passed to/from the subroutine
       dimension glist(numax)
       dimension bondlen(numax),bendang(numax),phi(numax)
 
-c     --- local variables
+!     --- local variables
       
       integer::count,ntogrow,iugrow,iufrom,iv,juvib
      &     ,jtvib,iu2back,ib,iulast,type,aaa,iuone
@@ -64,13 +64,13 @@ c     --- local variables
       real(8)::equil,kforce,thetaone,thetatwo
      &     ,vvib,length,angle,phione,phitwo,vangle,random,vphi
 
-c     --- new variables
+!     --- new variables
       integer::ibend,nchben_a,nchben_b,start,start_ang
       real(8)::bsum_try,rsint,ang_trial,bfactor,rbf,bs
 
       dimension ang_trial(nchbn_max),bfactor(nchbn_max)
 
-c     --- variables from geomold
+!     --- variables from geomold
       real(8)::rxui,ryui,rzui,rxuij,ryuij,rzuij
      &     ,xvecprev,yvecprev,zvecprev,distprev,xvecgrow
      &     ,yvecgrow,zvecgrow,distgrow,anglec
@@ -84,60 +84,60 @@ c     --- variables from geomold
       real(8)::lengtha,lengthb,lengtha2,lengthb2,
      &                 lengthc,lengthc2,lengthFP,lengthFP2
 
-c     --- assign nchben_a and ncben_b
+!     --- assign nchben_a and ncben_b
       nchben_a = nchbna(imolty)
       nchben_b = nchbnb(imolty)
 
 !      write(iou,*) 'START GEOMETRY'
 
-c     --- initialize trial energies
+!     --- initialize trial energies
       vvibtr = 0.0d0
       vbbtr = 0.0d0
 
-c     --- assign grownum and growfrom to local variables
+!     --- assign grownum and growfrom to local variables
       ntogrow = grownum(iw)
       iufrom = growfrom(iw)
 
       if ( .not. lnew ) then
-c        --- OLD store r*ui positions for unit iufrom
+!        --- OLD store r*ui positions for unit iufrom
          rxui = rxu(i,iufrom)
          ryui = ryu(i,iufrom)
          rzui = rzu(i,iufrom)
-      endif
+      end if
 
-c     --- Begin Bond length selection based on Boltzmann rejection
+!     --- Begin Bond length selection based on Boltzmann rejection
 
-c     --- determine the bond lengths of the beads to be grown
+!     --- determine the bond lengths of the beads to be grown
       maxlen = 0.0d0
 
       do count = 1,ntogrow
          iugrow = growlist(iw,count)
          glist(count) = iugrow
             
-c        --- determine the vibration (bond) type as jtvib
+!        --- determine the vibration (bond) type as jtvib
          do iv = 1, invib(imolty,iugrow)
             juvib = ijvib(imolty,iugrow,iv)
             if ( juvib .eq. iufrom ) then
                jtvib = itvib(imolty,iugrow,iv)
-            endif
-         enddo
+            end if
+         end do
 
          if ( lnew ) then
-c           --- compute bond length
+!           --- compute bond length
             equil = brvib(jtvib)
             kforce = brvibk(jtvib)
             call bondlength( jtvib,equil,kforce,beta,length,vvib )
 
          else
-c           --- compute bond length
+!           --- compute bond length
             rxuij = rxu(i,iugrow) - rxui
             ryuij = ryu(i,iugrow) - ryui
             rzuij = rzu(i,iugrow) - rzui
 
-c           --- do not need mimage for intramolecular
+!           --- do not need mimage for intramolecular
             length = dsqrt(rxuij*rxuij + ryuij*ryuij + rzuij*rzuij)
          
-c           --- compute vibration energy
+!           --- compute vibration energy
 
             if (L_vib_table) then
                call lininter_vib(length,tabulated_vib, jtvib)
@@ -146,25 +146,25 @@ c           --- compute vibration energy
                equil = brvib(jtvib)
                kforce = brvibk(jtvib)
                vvib = kforce * (length-equil )**2
-            endif
-         endif
+            end if
+         end if
             
-c        --- adjust maximum bond length of those being grown
+!        --- adjust maximum bond length of those being grown
          if ( length .gt. maxlen ) maxlen = length
 
-c        --- assign bondlength and add up vibrational energy
+!        --- assign bondlength and add up vibrational energy
          bondlen(count) = length
          vvibtr = vvibtr + vvib
-      enddo
+      end do
 
       if ( growprev(iw) .eq. 0 ) then
-c        --- need to choose one bead to grow on unit sphere
+!        --- need to choose one bead to grow on unit sphere
          iuprev = growlist(iw,1)
          angstart = 2
       else
          iuprev = growprev(iw)
          angstart = 1
-      endif
+      end if
 
       if (L_bend_table) then
          if ( growprev(iw) .eq. 0 ) then
@@ -185,28 +185,28 @@ c        --- need to choose one bead to grow on unit sphere
                 rzuij = rznew(iuprev) - rznew(iufrom)
                 lengthFP = dsqrt(rxuij*rxuij+ryuij*ryuij+rzuij*rzuij)
                 lengthFP2 = lengthFP*lengthFP
-              endif
-         endif
-      endif     
+              end if
+         end if
+      end if     
 
 
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c     --- Begin Bond angle biased selection ---                 c
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!     --- Begin Bond angle biased selection ---                 c
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       if ( .not. lnew ) then
-c        --- compute the vector from iufrom to iuprev
+!        --- compute the vector from iufrom to iuprev
          xvecprev = rxu(i,iuprev) - rxui
          yvecprev = ryu(i,iuprev) - ryui
          zvecprev = rzu(i,iuprev) - rzui
          distprev = dsqrt( xvecprev*xvecprev + yvecprev*yvecprev 
      &        + zvecprev*zvecprev )
-      endif
+      end if
 
-c     --- initialize wei_bend
+!     --- initialize wei_bend
       wei_bend = 1.0d0
 
-c     --- determine the iugrow-iufrom-iuprev angles 
+!     --- determine the iugrow-iufrom-iuprev angles 
       do count = angstart,ntogrow
          iugrow = growlist(iw,count)
          do ib = 1, inben(imolty,iugrow)
@@ -217,24 +217,24 @@ c     --- determine the iugrow-iufrom-iuprev angles
                   type = itben(imolty,iugrow,ib)
                   equil = brben(type)
                   kforce = brbenk(type)
-               endif
-            endif
-         enddo
+               end if
+            end if
+         end do
 
 
          if ( kforce .gt. 0.1d0 ) then
-c           --- flexible bond angle
-c           --- initialize bsum_try
+!           --- flexible bond angle
+!           --- initialize bsum_try
             bsum_try = 0.0d0
 
             if ( .not. lnew ) then
-c              --- first ibend is the old conformation
+!              --- first ibend is the old conformation
                xvecgrow = rxu(i,iugrow) - rxui
                yvecgrow = ryu(i,iugrow) - ryui
                zvecgrow = rzu(i,iugrow) - rzui
                distgrow = bondlen(count)
                distgrow2 = distgrow*distgrow 
-c              --- dot product divided by lengths gives cos(angle)
+!              --- dot product divided by lengths gives cos(angle)
                anglec = ( xvecprev*xvecgrow + yvecprev*yvecgrow 
      &              + zvecprev*zvecgrow ) / (distprev*distgrow)
                angle = dacos(anglec)
@@ -246,31 +246,31 @@ c              --- dot product divided by lengths gives cos(angle)
                   vangle = tabulated_bend
                 else
                   vangle = kforce * (angle - equil)**2
-               endif
+               end if
 
                ang_trial(1) = angle
                bfactor(1) = dexp( -beta*vangle )
                bsum_try = bsum_try + bfactor(1)
-c              --- skip first ibend in next loop
+!              --- skip first ibend in next loop
                start = 2
 
             else
-c              --- new conformation start at 1
+!              --- new conformation start at 1
                start = 1
-            endif
+            end if
          
             if (L_bend_table) then
                   distgrow = bondlen(count)
                   distgrow2 = distgrow*distgrow
-            endif 
-c           --- compute trial angles and energies
+            end if 
+!           --- compute trial angles and energies
             do ibend = start,nchben_a
-c               --- choose the angle uniformly on sin(theta)
+!               --- choose the angle uniformly on sin(theta)
                rsint = 2.0d0*random() - 1.0d0
                angle = dacos(rsint)
                ang_trial(ibend) = angle
 
-c              --- calculate the bond angle energy
+!              --- calculate the bond angle energy
                if (L_bend_table) then
                   lengthc2 = lengthFP2 + distgrow2 -
      &                       2.0d0*lengthFP*distgrow*dcos(angle)
@@ -279,13 +279,13 @@ c              --- calculate the bond angle energy
                   vangle = tabulated_bend
                else
                   vangle = kforce * (angle - equil)**2
-               endif
+               end if
                bfactor(ibend) = dexp(-beta*vangle)
                bsum_try = bsum_try + bfactor(ibend)
-            enddo
+            end do
 
             if ( lnew ) then
-c              --- select one of the trial sites via bias
+!              --- select one of the trial sites via bias
                rbf = random()*bsum_try
                bs = 0.0d0
                do ibend = 1,nchben_a
@@ -294,50 +294,50 @@ c              --- select one of the trial sites via bias
                      angle = ang_trial(ibend)
                      vangle = dlog(bfactor(ibend))/(-beta)
                      goto 10
-                  endif
-               enddo
+                  end if
+               end do
  10            continue
             else
-c              --- select the old conformation
+!              --- select the old conformation
                angle = ang_trial(1)
                vangle = dlog(bfactor(1))/(-beta)
-            endif
+            end if
 
-c           --- propagate the rosenbluth weight
+!           --- propagate the rosenbluth weight
             wei_bend = wei_bend * bsum_try/dble(nchben_a)
 
          else
-c           --- fixed bond angle
+!           --- fixed bond angle
             angle = equil
             vangle = 0.0d0
-         endif
+         end if
          
          bendang(count) = angle
 
          vbbtr = vbbtr + vangle
          
-      enddo
+      end do
 
 ! Neeraj  iugrow-iufrom-iuprev bend angle has been selected!
 
       if ( lnew ) then
-c        --- assign phi(angstart) to 0.0
+!        --- assign phi(angstart) to 0.0
          phi(angstart) = 0.0d0
-c        --- skip angstart in the loop below
+!        --- skip angstart in the loop below
          start_ang = angstart+1
       else
-c        --- set up the cone using iuprev
+!        --- set up the cone using iuprev
          xub = -xvecprev/distprev
          yub = -yvecprev/distprev
          zub = -zvecprev/distprev
          
          call cone(1,xub,yub,zub,dum,dum,dum,dum,dum)
          
-c        --- need to determine angstart
+!        --- need to determine angstart
          start_ang = angstart
-      endif
+      end if
          
-c     --- determine the angles of the grown beads relative to anglestart
+!     --- determine the angles of the grown beads relative to anglestart
 
       do count = start_ang,ntogrow
          iugrow = growlist(iw,count)
@@ -345,17 +345,17 @@ c     --- determine the angles of the grown beads relative to anglestart
          lengtha = bondlen(count)
          lengtha2 = lengtha * lengtha
 
-c        --- initialize bsum_try
+!        --- initialize bsum_try
          bsum_try = 0.0d0
 
          if ( .not. lnew ) then
-c           --- compute vector from iufrom to iugrow
+!           --- compute vector from iufrom to iugrow
             xvecgrow = rxu(i,iugrow) - rxui
             yvecgrow = ryu(i,iugrow) - ryui
             zvecgrow = rzu(i,iugrow) - rzui
             distgrow = bondlen(count)
 
-c           --- turn this into a unit vector
+!           --- turn this into a unit vector
             ux = xvecgrow/distgrow
             uy = yvecgrow/distgrow
             uz = zvecgrow/distgrow
@@ -365,17 +365,17 @@ c           --- turn this into a unit vector
 
             phitwo = gamma
 
-c     ******************************************************************
-c     * if iinit = 2 then it creates a unit vector that has an angle   *
-c     * of alpha from the +z direction (previous vector) and an angle  *
-c     * of gamma (0,2Pi) around the cone circle and returns this as    *
-c     * ux,uy,uz                                                       *
-c     ******************************************************************
+!     ******************************************************************
+!     * if iinit = 2 then it creates a unit vector that has an angle   *
+!     * of alpha from the +z direction (previous vector) and an angle  *
+!     * of gamma (0,2Pi) around the cone circle and returns this as    *
+!     * ux,uy,uz                                                       *
+!     ******************************************************************
 
             call cone(2,dum,dum,dum,alpha,gamma,ux,uy,uz)
 
             if ( angstart .eq. count ) then
-c              --- this is the first phi, no need to compute bias
+!              --- this is the first phi, no need to compute bias
                vphi = 0.0d0
                goto 20
             else
@@ -396,7 +396,7 @@ c              --- this is the first phi, no need to compute bias
                         iu2back = ijben3(imolty,iugrow,ib)
                         if ( iu2back .eq. iuone ) then
                            type = itben(imolty,iugrow,ib)
-c                          --- calculate the bond angle energy
+!                          --- calculate the bond angle energy
                            if (L_bend_table) then
                               lengthc2 = lengtha2 + lengthb2 - 
      &                                 2.0d0*lengtha*lengthb*dcos(angle)
@@ -407,27 +407,27 @@ c                          --- calculate the bond angle energy
                            else
                               vphi = vphi + brbenk(type) 
      &                             * (angle - brben(type))**2
-                           endif
-                        endif
-                     endif
-                  enddo
-               enddo
+                           end if
+                        end if
+                     end if
+                  end do
+               end do
 
                ang_trial(1) = phitwo
                bfactor(1) = dexp( -beta * vphi )
                bsum_try = bsum_try + bfactor(1)
 
-            endif
-c           --- skip first ibend for OLD
+            end if
+!           --- skip first ibend for OLD
             start = 2
          else
-c           --- perform all ibend for NEW
+!           --- perform all ibend for NEW
             start = 1
-         endif
+         end if
 
-c        --- compute trial energies and weights
+!        --- compute trial energies and weights
          do ibend = start,nchben_b
-c           --- determine a value of phitwo
+!           --- determine a value of phitwo
             phitwo = random()*twopi
             vphi = 0.0d0
             do aaa = angstart,count-1
@@ -446,7 +446,7 @@ c           --- determine a value of phitwo
                      iu2back = ijben3(imolty,iugrow,ib)
                      if ( iu2back .eq. iuone ) then
                         type = itben(imolty,iugrow,ib)
-c                       --- calculate the bond angle energy
+!                       --- calculate the bond angle energy
                         if (L_bend_table) then
                            lengthc2 = lengtha2 + lengthb2 - 
      &                                2.0d0*lengtha*lengthb*dcos(angle)
@@ -457,20 +457,20 @@ c                       --- calculate the bond angle energy
                         else
                            vphi = vphi + brbenk(type) 
      &                          * (angle - brben(type))**2
-                        endif
-                     endif
-                  endif
-               enddo
-            enddo
+                        end if
+                     end if
+                  end if
+               end do
+            end do
 
-c           --- store the boltzmann factors and phi
+!           --- store the boltzmann factors and phi
             bfactor(ibend) = dexp(-beta*vphi)
             ang_trial(ibend) = phitwo
             bsum_try = bsum_try + bfactor(ibend)
-         enddo
+         end do
    
          if ( lnew ) then
-c           --- select a value of phitwo in a biased fashion
+!           --- select a value of phitwo in a biased fashion
             rbf = random()*bsum_try
             bs = 0.0d0
             do ibend = 1,nchben_b
@@ -479,29 +479,29 @@ c           --- select a value of phitwo in a biased fashion
                   phitwo = ang_trial(ibend)
                   vphi = dlog( bfactor(ibend) )/(-beta)
                   goto 15
-               endif
-            enddo
+               end if
+            end do
  15         continue
          else
-c           --- select the OLD value of phitwo
+!           --- select the OLD value of phitwo
             phitwo = ang_trial(1)
             vphi = dlog( bfactor(1) )/(-beta)
-         endif
+         end if
 
-c        --- propagate angle weight
+!        --- propagate angle weight
          wei_bend = wei_bend * (bsum_try/dble(nchben_b))
 
  20      continue
-c        --- store the angle for thetatwo
+!        --- store the angle for thetatwo
          phi(count) = phitwo
          vbbtr = vbbtr + vphi
-      enddo
+      end do
 
        
 
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c     --- End Bond angle biased selection ---           c 
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!     --- End Bond angle biased selection ---           c 
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !      write(iou,*) 'FINISH GEOMETRY'
 
       return
@@ -509,73 +509,73 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       subroutine bendangle(equil,kforce,beta,angle,vangle )
 
-c bendagle 
-c Copyright (C) 2000 Marcus Martin, Bin Chen, Collin Wick, and Ilja Siepmann
+! bendagle 
+! Copyright (C) 2000 Marcus Martin, Bin Chen, Collin Wick, and Ilja Siepmann
 
 
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
 
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
 
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to the Free Software
-c Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to the Free Software
+! Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 
 
-c     *************************************************************
-c     *** choose a bond angle                                   ***
-c     *** equil is equilibrium bond angle                       ***
-c     *** kforce is the force constant                          ***
-c     *** beta is 1/kT                                          ***
-c     *** angle is the angle returned by this subroutine        ***
-c     *** vangle is the energy of the angle                     ***
-c     *** M.G. Martin                                           ***
-c     *************************************************************
+!     *************************************************************
+!     *** choose a bond angle                                   ***
+!     *** equil is equilibrium bond angle                       ***
+!     *** kforce is the force constant                          ***
+!     *** beta is 1/kT                                          ***
+!     *** angle is the angle returned by this subroutine        ***
+!     *** vangle is the energy of the angle                     ***
+!     *** M.G. Martin                                           ***
+!     *************************************************************
 
       implicit none
 
       real(8)::equil, kforce, beta, angle, vangle, rr, v1, v2
      &     ,random, tabulated_bend
 
-c      write(2,*) 'start BENDANGLE'
+!      write(2,*) 'start BENDANGLE'
 
       if ( kforce .gt. 0.1d0 ) then
-c        --- find a vector inside the unit sphere
+!        --- find a vector inside the unit sphere
  80      v1 = 2.0d0*random()-1.0d0
          v2 = 2.0d0*random()-1.0d0
          rr = v1*v1 + v2*v2
          if (rr .ge. 1.0d0 ) goto 80
          
-c        --- select angle from a gaussian distribution
+!        --- select angle from a gaussian distribution
          angle = equil + v1*dsqrt( (-dlog(rr))
      &        /( kforce*beta*rr) )
          
          if (angle .le. 0.0d0 .or. angle .ge. 3.1415 ) then
             write(2,*) 'chose angle outside of 0,Pi in bendangle'
             goto 80
-         endif
+         end if
 
-c        --- correct for the phase space of the angle
+!        --- correct for the phase space of the angle
          if ( random() .gt. dsin(angle) ) goto 80
-c         if (L_bend_table) then
-c            call lininter_bend(angle, tabulated_bend, type)
-c         type isn't specified in this subroutine, but
-c         I don't think its called anywhere anymore
+!         if (L_bend_table) then
+!            call lininter_bend(angle, tabulated_bend, type)
+!         type isn't specified in this subroutine, but
+!         I don't think its called anywhere anymore
          vangle = kforce * (angle - equil)**2
       else
-c        --- fixed bond angle
+!        --- fixed bond angle
          angle = equil
          vangle = 0.0d0
-      endif
+      end if
 
-c      write(2,*) 'end BENDANGLE'
+!      write(2,*) 'end BENDANGLE'
 
       return
       end

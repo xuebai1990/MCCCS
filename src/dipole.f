@@ -1,27 +1,27 @@
       subroutine dipole(ibox,mtype)
 
-c dipole
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! dipole
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
       integer::ibox,mtype,i,imolty,zz,ii
@@ -33,7 +33,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       
       if ( mtype .eq. 0 ) then
 
-c in sumup, initiliaze dipole to be 0 and then sum up all the dipoles
+! in sumup, initiliaze dipole to be 0 and then sum up all the dipoles
 
          dipolex(ibox) = 0.0d0
          dipoley(ibox) = 0.0d0
@@ -49,14 +49,14 @@ c in sumup, initiliaze dipole to be 0 and then sum up all the dipoles
      &                 + qqu(i,ii)*ryu(i,ii)
                   dipolez(ibox) = dipolez(ibox) 
      &                 + qqu(i,ii)*rzu(i,ii)
-               enddo
-            endif
-         enddo
+               end do
+            end if
+         end do
 
       elseif(mtype .eq. 1 ) then
          
-c *** calculate the dipole moment after the traslation, rotation and 
-c *** charge move
+! *** calculate the dipole moment after the traslation, rotation and 
+! *** charge move
 
          do zz = 1,2
             dipox(zz) = 0.0d0
@@ -70,15 +70,15 @@ c *** charge move
      &              qquion(i,zz)*ryuion(i,zz)
                dipoz(zz) = dipoz(zz) +
      &              qquion(i,zz)*rzuion(i,zz)
-            enddo
-         enddo
+            end do
+         end do
          dipolex(ibox) = dipolex(ibox) - dipox(1) + dipox(2) 
          dipoley(ibox) = dipoley(ibox) - dipoy(1) + dipoy(2)
          dipolez(ibox) = dipolez(ibox) - dipoz(1) + dipoz(2)
 
       elseif(mtype .eq. 2) then
 
-c *** store the old dipole moment
+! *** store the old dipole moment
 
          dipolexo = dipolex(ibox) 
          dipoleyo = dipoley(ibox)
@@ -86,13 +86,13 @@ c *** store the old dipole moment
          
       elseif(mtype .eq. 3) then
 
-c *** restore the old dipole moment
+! *** restore the old dipole moment
 
          dipolex(ibox) = dipolexo 
          dipoley(ibox) = dipoleyo
          dipolez(ibox) = dipolezo
 
-      endif
+      end if
       
        
       return

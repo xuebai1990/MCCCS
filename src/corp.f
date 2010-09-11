@@ -1,31 +1,31 @@
       function corp(imolty,jmolty,rhosq,ibox)
 
-c corp 
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! corp 
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-c ************************************
-c *** tail-corrections in pressure ***
-c ************************************
+! ************************************
+! *** tail-corrections in pressure ***
+! ************************************
 
       implicit none
       include 'control.inc'
@@ -54,7 +54,7 @@ c ************************************
             elseif (lmmff) then
                ntij = (ntii+ntjj)/2
                corp = corp+((-2.0d0)/3.0d0)*onepi*rhosq*epsimmff(ntij)
-     +              *sigimmff(ntij)**3.0d0*corp_cons(ntij)
+     &              *sigimmff(ntij)**3.0d0*corp_cons(ntij)
             elseif (lninesix) then
                ntij = (ntii-1)*nxatom + ntjj
                corp = corp + 16.0d0 * onepi * epsnx(ntij) *
@@ -78,7 +78,7 @@ c ************************************
                else
                   sigma2 = sig2ij(ntij)
                   epsilon2 = epsij(ntij)
-               endif
+               end if
                  corp = corp
      &  + (2.0d0/3.0d0) * onepi * epsilon2 * sigma2 ** (1.50d0)
      &    * rhosq * n1 *
@@ -103,13 +103,13 @@ c ************************************
                else
                   sigma2 = sig2ij(ntij)
                   epsilon2 = epsij(ntij)
-               endif
+               end if
                corp = corp + 
-     +          32.0d0 * onepi * epsilon2 * sigma2**(1.5d0)*
-     +          rhosq * ( rci3*rci3*rci3 / 9.0d0 - rci3 / 6.0d0 )
-            endif
-         enddo
-      enddo
+     &          32.0d0 * onepi * epsilon2 * sigma2**(1.5d0)*
+     &          rhosq * ( rci3*rci3*rci3 / 9.0d0 - rci3 / 6.0d0 )
+            end if
+         end do
+      end do
 
       return
       end

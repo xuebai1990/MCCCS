@@ -1,37 +1,37 @@
       subroutine rigrot(lnew,lterm,iskip,imol,imolty,ibox,wadd )
 
-c rigrot
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! rigrot
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 
-c     *******************************************************************
-c     **      performs a rotational configurational bias move          **
-c     *******************************************************************
+!     *******************************************************************
+!     **      performs a rotational configurational bias move          **
+!     *******************************************************************
 
 
-c     &*&*&*&*&*&*&*&*&*&*&*&* IMPORTANT *&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&
-c             All Rigid Molecules Should Come After Riutry
-c     &*&*&*&*&*&*&*&*&*&*&*&* IMPORTANT *&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&
+!     &*&*&*&*&*&*&*&*&*&*&*&* IMPORTANT *&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&
+!             All Rigid Molecules Should Come After Riutry
+!     &*&*&*&*&*&*&*&*&*&*&*&* IMPORTANT *&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&
 
       implicit none
 
@@ -59,11 +59,11 @@ c     &*&*&*&*&*&*&*&*&*&*&*&* IMPORTANT *&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&
       dimension rzur(numax),ryur(numax),glist(numax)
      
 
-c ----------------------------------------------------------------------
+! ----------------------------------------------------------------------
       
-c      write(iou,*) 'start RIGROT'
+!      write(iou,*) 'start RIGROT'
      
-c     --- initialize conformation energies and weight
+!     --- initialize conformation energies and weight
 
       wadd = 1.0d0
       w = 0.0d0
@@ -85,7 +85,7 @@ c     --- initialize conformation energies and weight
             ryur(j) = rynew(j)
             rzur(j) = rznew(j)
 
-         enddo
+         end do
       else
          rxorig = rxu(imol,igrow)
          ryorig = ryu(imol,igrow)
@@ -95,10 +95,10 @@ c     --- initialize conformation energies and weight
             rxur(j) = rxu(imol,j)
             ryur(j) = ryu(imol,j)
             rzur(j) = rzu(imol,j)
-         enddo
-      endif
+         end do
+      end if
 
-c     --- find maxlen
+!     --- find maxlen
       maxlen = 0.0d0
      
       do j = igrow+1, iunit
@@ -106,7 +106,7 @@ c     --- find maxlen
      &        +(rzur(j)-rzorig)**2
 
          if (length.gt.maxlen) maxlen = length
-      enddo
+      end do
       
       maxlen = dsqrt(maxlen)
 
@@ -115,22 +115,22 @@ c     --- find maxlen
  
          if (lnew.or.ip.ne.1) then
 
-c            xdgamma = 8.0d0*atan(1.0d0)*random()
-c            ydgamma = 8.0d0*atan(1.0d0)*random()
-c            zdgamma = 8.0d0*atan(1.0d0)*random()
+!            xdgamma = 8.0d0*atan(1.0d0)*random()
+!            ydgamma = 8.0d0*atan(1.0d0)*random()
+!            zdgamma = 8.0d0*atan(1.0d0)*random()
             xdgamma = twopi*random()
             ydgamma = twopi*random()
             zdgamma = twopi*random()
-c     --- set up rotation matrix
+!     --- set up rotation matrix
             xcosdg = dcos(xdgamma)
             xsindg = dsin(xdgamma)
             ycosdg = dcos(ydgamma)
             ysindg = dsin(ydgamma)
             zcosdg = dcos(zdgamma)
             zsindg = dsin(zdgamma)
-c     --- set molecule to rotate around
+!     --- set molecule to rotate around
              
-c     --- rotate around all axis  
+!     --- rotate around all axis  
             count = 0            
             do j = igrow+1, iunit 
                count = count + 1
@@ -154,7 +154,7 @@ c     --- rotate around all axis
                rynw = zcosdg * ry - zsindg * rx
                rxp(count,ip) = rxorig + rxnw
                ryp(count,ip) = ryorig + rynw
-            enddo
+            end do
 
          else
             count = 0
@@ -163,16 +163,16 @@ c     --- rotate around all axis
                rxp(count,ip) = rxu(imol,j)
                ryp(count,ip) = ryu(imol,j)
                rzp(count,ip) = rzu(imol,j)
-            enddo
-         endif
-      enddo         
+            end do
+         end if
+      end do         
    
       ntogrow = iunit-igrow
       
       count = 0
       do j=1,igrow-1
           lexist(j) = .false.
-      enddo
+      end do
 
 !      write(iou,*) 'igrow',igrow
  
@@ -182,7 +182,7 @@ c     --- rotate around all axis
          count = count + 1
          glist(count) = j
          lexist(j) = .false.
-      enddo
+      end do
       
       call boltz( lnew,.false.,ovrlap,iskip,imol,imolty,ibox
      &     ,ichoi,igrow,ntogrow,glist,maxlen )
@@ -190,12 +190,12 @@ c     --- rotate around all axis
       if (ovrlap) then
          lterm = .true.
          return
-      endif
+      end if
       
       bsum = 0.0d0
       do ip = 1, ichoi
          bsum = bsum + bfac(ip)
-      enddo
+      end do
 
       wadd = wadd * bsum
 
@@ -203,21 +203,21 @@ c     --- rotate around all axis
          if ( wadd .lt. softlog ) then
             lterm = .true.
             return
-         endif
+         end if
 
-c     --- select one position at random ---
+!     --- select one position at random ---
          rbf = bsum * random()
          bs = 0.0d0
          do ip = 1, ichoi
             if (.not. lovr(ip) ) then
                bs = bs + bfac(ip)
                if ( rbf .lt. bs ) then
-c     --- select ip position
+!     --- select ip position
                   iwalk = ip
                   goto 15
-               endif
-            endif
-         enddo
+               end if
+            end if
+         end do
          write(iou,*) 'screwup in rigrot'
          call cleanup('screwup in rigrot')
  15      continue
@@ -227,8 +227,8 @@ c     --- select ip position
          iwalk = 1
          if ( wadd .lt. softlog ) then
             write(iou,*) '###old rigrot weight too low'
-         endif
-      endif
+         end if
+      end if
       
       if ( lnew ) then
          vnewt = vnewt + vtry(iwalk)
@@ -248,7 +248,7 @@ c     --- select ip position
          voldewald = voldewald + vtrewald(iwalk)
          vipswo = vipswo+vipswot(iwalk)
          vwellipswo = vwellipswo+vwellipswot(iwalk)
-      endif
+      end if
      
 !	write(iou,*) 'vtry', vtry(iwalk),iwalk
     
@@ -258,11 +258,11 @@ c     --- select ip position
             rxnew(iu) = rxp(j,iwalk)
             rynew(iu) = ryp(j,iwalk)
             rznew(iu) = rzp(j,iwalk)
-         endif
-      enddo
+         end if
+      end do
 
 
-c      write(iou,*) 'end RIGROT'
+!      write(iou,*) 'end RIGROT'
  
       return
       end

@@ -1,6 +1,6 @@
 	function slitpore(z,ntij)
-c -- calculates the surface energy of a bend with a featureless
-c -- graphite surface
+! -- calculates the surface energy of a bend with a featureless
+! -- graphite surface
 
 	implicit none
 	
@@ -13,19 +13,19 @@ c -- graphite surface
 	real(8)::vgs,z
 	real(8)::slitpore
 	real(8)::sig
-c	real(8)::coef1,coef2,coef3,coef4
+!	real(8)::coef1,coef2,coef3,coef4
 	
 	sig = sqrt(sig2ij(ntij))
 	
-c	coef1 = twopi*rsol*epsij(ntij)*sig2ij(ntij)*delta
-c	coef2 = 2.0/5.0*(sig/z)**10
-c	coef3 = (sig/z)**4
-c	coef4 = sig2ij(ntij)**2/(3*delta*(z+0.61*delta)**3)
+!	coef1 = twopi*rsol*epsij(ntij)*sig2ij(ntij)*delta
+!	coef2 = 2.0/5.0*(sig/z)**10
+!	coef3 = (sig/z)**4
+!	coef4 = sig2ij(ntij)**2/(3*delta*(z+0.61*delta)**3)
 	
 	vgs = twopi*rsol*epsij(ntij)*sig2ij(ntij)*delta
-     +		*(2.0/5.0*(sig/z)**10
-     +		-(sig/z)**4
-     +		-(sig2ij(ntij)**2/(3*delta*(z+0.61*delta)**3)))
+     &		*(2.0/5.0*(sig/z)**10
+     &		-(sig/z)**4
+     &		-(sig2ij(ntij)**2/(3*delta*(z+0.61*delta)**3)))
      
      	slitpore = vgs
 	end

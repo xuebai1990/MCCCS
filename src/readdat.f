@@ -1,28 +1,28 @@
       subroutine readdat(lucall,ucheck,nvirial,starvir
-     &     ,stepvir,qelect)
+     &     ,stepvir)
 
-c readdat
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! readdat
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
  
@@ -48,13 +48,13 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'neigh.inc'
       include 'cell.inc'
       include 'nsix.inc'
-c KM 01/10 remove analysis
-c      include 'gor.inc'
+! KM 01/10 remove analysis
+!      include 'gor.inc'
       include 'torsion.inc'
       include 'tabulated.inc'
       include 'mpi.inc'
  
-c -- variables for histograms	
+! -- variables for histograms	
       integer::fname
       character*20 file_movie,file_run,ftemp,fname2,file_dipole 
       character*20 fname4
@@ -78,7 +78,7 @@ c -- variables for histograms
       dimension ainclbead(ntmax*numax*numax,2)
       dimension a15t(ntmax*numax*numax)
 
-      real(8)::starvir,stepvir,fqtemp,qelect,qbox,vol,v(3),w(3)
+      real(8)::starvir,stepvir,fqtemp,qbox,vol,v(3),w(3)
       real(8)::debroglie, qtot,min_boxl
 
       real(8)::pie2,rcnnsq,umatch,aspecd,bspecd,dum,pm,pcumu
@@ -89,103 +89,102 @@ c -- variables for histograms
       dimension lratfix(ntmax)
       dimension qbox(nbxmax)
       
-c -- variables added (3/24/05) for scaling of 1-4 interactions      
+! -- variables added (3/24/05) for scaling of 1-4 interactions      
       real(8)::ofscale,ofscale2
       dimension ofscale(ntmax*numax*numax),ofscale2(ntmax*numax*numax)
       
-c -- Variables added (6/30/2006) for fort.4 consistency check
+! -- Variables added (6/30/2006) for fort.4 consistency check
   
       integer::numvib,numbend,numtor,vib1,bend2,bend3,tor2,tor3,tor4
       integer::vibtype,bendtype,tortype
 
-c      real(8)::temx,temy,temz
+!      real(8)::temx,temy,temz
       
       dimension nures(ntmax)
       dimension ncarbon(ntmax)
       dimension lhere(nntype)
       dimension lsolute(ntmax)
       dimension ucheck(ntmax)
-      dimension qelect(nntype)
       dimension temphe(nntype)
-c      dimension temx(nmax,numax),temy(nmax,numax),temz(nmax,numax)
+!      dimension temx(nmax,numax),temy(nmax,numax),temz(nmax,numax)
       dimension k_max_l(nbxmax),k_max_m(nbxmax),k_max_n(nbxmax)
 
-c Conversion factor for Mpa to simulation unit
+! Conversion factor for Mpa to simulation unit
       real(8)::MPa2SimUnits
 
       character(100) line
 
-c KEA torsion variables
+! KEA torsion variables
       logical::Lttor,lspline,linter
       integer::mmm,ttor
-c KM tabulated potential variables
+! KM tabulated potential variables
       integer::tvib, tbend, iivdW,jjvdW, iielect, jjelect
-c KM variable added when analysis removed
+! KM variable added when analysis removed
       integer::nhere
 
-c -- reads input data and initializes the positions
-c
-C --------------------------------------------------------------------
+! -- reads input data and initializes the positions
+!
+! --------------------------------------------------------------------
  
       MPa2SimUnits = 7.2429d-02
 
-c *** set input arrays to zero ***
+! *** set input arrays to zero ***
       do j=1, ntmax
          lratfix(j) = .false.
          nugrow(j) = 0
          nunit(j) = 0
          do i=1, numax
             ntype(j,i) = 0
-         enddo
-      enddo
+         end do
+      end do
       do i = 1,nntype**2
          lspecial(i) = .false.
-      enddo
+      end do
       do i = 1, nntype
          lhere(i) = .false.
-      enddo
+      end do
 
       lee = .false.
       qtot = 0.0d0
       ldie = .false.
  
-c *** Output unit (if 2, write to runXX.dat file; if 6, write to stdout/screen; outherwise, 
-c *** user designate a file to which to write) KEA 6/3/09 (defined in control.inc)
+! *** Output unit (if 2, write to runXX.dat file; if 6, write to stdout/screen; outherwise, 
+! *** user designate a file to which to write) KEA 6/3/09 (defined in control.inc)
 
-c KM for MPI
-c must start at the top of the file, first two lines read in topmon.f for processor 0
+! KM for MPI
+! must start at the top of the file, first two lines read in topmon.f for processor 0
       if (myid.ne.0) then
          open(4)
          read(4,*)
          read(4,*)
-      endif
+      end if
 
       read(4,*)
       read(4,*) iou
 
-c *** To add or remove helium atoms
+! *** To add or remove helium atoms
       read(4,*)
       read(4,*) L_add,N_add,N_box2add,N_moltyp2add
       read(4,*) 
       read(4,*) L_sub,N_sub,N_box2sub,N_moltyp2sub
 
 
-c *** read echoing and long output flags
+! *** read echoing and long output flags
       read(4,*)
       read(4,*) lecho,lverbose
 
-c - read whether to compute electrostatic interaction or not during CBMC/SWAP
+! - read whether to compute electrostatic interaction or not during CBMC/SWAP
       read(4,*)
       read(4,*) L_Coul_CBMC 
-c-- read the number of unitcell replicated in each directions (a, b, and c)
+!-- read the number of unitcell replicated in each directions (a, b, and c)
       read(4,*)
       read(4,*) Num_cell_a,Num_cell_b,Num_cell_c 
-c - read run information
+! - read run information
       read(4,*) 
       read(4,*) run_num, suffix	
       read(4,*)
       read(4,*) nstep, lstop, lpresim, iupdatefix
-c - read torsion, decide whether to use torsion in function form or Table
+! - read torsion, decide whether to use torsion in function form or Table
       read(4,*)
       read(4,*) L_tor_table,L_spline,L_linear
       read(4,*)
@@ -193,29 +192,29 @@ c - read torsion, decide whether to use torsion in function form or Table
      &     L_elect_table
 
 
-c -- generate output file name
-c - create output file name
+! -- generate output file name
+! - create output file name
       fname = run_num
 
-c - use internal read/write to get integer::number in character::format
+! - use internal read/write to get integer::number in character::format
       write(ftemp,*) fname
       read(ftemp,*) fname2
       file_run = 'run'//fname2(1:len_trim(fname2))//suffix//'.dat' 
       file_movie = 'movie'//fname2(1:len_trim(fname2))//suffix//'.dat' 
       file_dipole='dipole'//fname2(1:len_trim(fname2))//suffix//'.dat'
 
-c KM ldielect writes to fort.27      
-c      if (ldielect) then
-c        open(unit=17,file=file_dipole,status='unknown')  
+! KM ldielect writes to fort.27      
+!      if (ldielect) then
+!        open(unit=17,file=file_dipole,status='unknown')  
 !        write(17,*) '# step  ibox   dipole_x   dipole_y   dipole_z'
-c      endif
+!      end if
 
 ! kea 6/3/09 -- only open runXX.dat if io=2
       if(iou.eq.2.and.myid.eq.0) then
          open(unit=2,file=file_run,status='unknown')  
-      endif  
-c KM for MPI
-c only processor 0 writes data  
+      end if  
+! KM for MPI
+! only processor 0 writes data  
       if ( lecho.and.myid.eq.0) then
          if (lverbose) then
             write(iou,*) 'Number of processors: ', numprocs
@@ -228,7 +227,7 @@ c only processor 0 writes data
                write(iou,*) 'number of steps:',nstep
             else
                write(iou,*) 'number of cycles:',nstep
-            endif
+            end if
             write(iou,*) 'lstep:',lstop
             write(iou,*) 'lpresim:',lpresim
             write(iou,*) 'iupdatefix:',iupdatefix
@@ -244,8 +243,8 @@ c only processor 0 writes data
             write(iou,*) L_tor_table, L_spline,  L_linear
             write(iou,*) L_vib_table, L_bend_table, L_vdW_table, 
      &           L_elect_table
-         endif
-      endif
+         end if
+      end if
 
       
       
@@ -276,14 +275,14 @@ c only processor 0 writes data
          else 
             write(iou,*) temp, (express(ibox),ibox=1,nbox), fqtemp,
      &           Elect_field
-         endif
-      endif
+         end if
+      end if
  
       do ibox = 1,nbox
          express(ibox)  = express(ibox)*MPa2SimUnits
-      enddo
+      end do
 
-C$$   read the analysis information
+!$$   read the analysis information
       read(4,*)
       read(4,*)ianalyze,nbin,lrdf,lintra,lstretch,lgvst,lbend,lete,
      &           lrhoz,bin_width
@@ -302,25 +301,25 @@ C$$   read the analysis information
          else
             write(iou,*) ianalyze,nbin,lrdf,lintra,lstretch,lgvst,lbend
      &    ,lete, lrhoz, bin_width  
-         endif
-      endif
+         end if
+      end if
 
-C -------------------------------------------------------------------
+! -------------------------------------------------------------------
 
-c *** set up constants and conversion factors ***     
+! *** set up constants and conversion factors ***     
       pie2 = 8.0d0 * datan(1.0d0)
       raddeg = 360.0d0 / pie2
       degrad = pie2 / 360.0d0
       twopi=pie2
       onepi=pie2/2.d00
-c  e times V to Kelvin
+!  e times V to Kelvin
       eXV_to_K = 11600.0d0  
 
       
       beta = 1.0d0 / temp
       fqbeta = 1.0d0 / fqtemp
  
-C -------------------------------------------------------------------
+! -------------------------------------------------------------------
 
       read(4,*)
       read(4,*) iprint, imv, iratio, iblock, idiele, L_movie_xyz,
@@ -335,9 +334,9 @@ C -------------------------------------------------------------------
      &                         //suffix//'.xyz'
 	if (myid.eq.0) then
           open (unit=210+ibox,FILE=fileout,status='unknown')
-        endif
-        enddo
-      endif
+        end if
+        end do
+      end if
 
       if ( lecho.and.myid.eq.0 ) then
          if (lverbose) then
@@ -349,9 +348,9 @@ C -------------------------------------------------------------------
             write(iou,*) 'L_movie_xyz',L_movie_xyz
          else
             write(iou,*) iprint, imv, iratio, iblock, idiele,L_movie_xyz
-         endif
-      endif
-c - read information for histogram output (added 8/30/99)
+         end if
+      end if
+! - read information for histogram output (added 8/30/99)
       if (lgrand) then
          read(4,*)
          read(4,*) nequil,ninstf, ninsth, ndumph 
@@ -365,33 +364,33 @@ c - read information for histogram output (added 8/30/99)
                write(iou,*) 'suffix:',suffix
             else
                write(iou,*) nequil,ninstf,ninsth,ndumph,run_num,suffix
-            endif
-         endif
+            end if
+         end if
       end if
       
-c - create output file name
+! - create output file name
       fname = run_num
 
-c - use internal read/write to get integer::number in character::format
-c      write(ftemp,*) fname
-c      read(ftemp,*) fname2
-c      file_run = 'run'//fname2(1:len_trim(fname2))//suffix//'.dat' 
-c      file_movie = 'movie'//fname2(1:len_trim(fname2))//suffix//'.dat' 
+! - use internal read/write to get integer::number in character::format
+!      write(ftemp,*) fname
+!      read(ftemp,*) fname2
+!      file_run = 'run'//fname2(1:len_trim(fname2))//suffix//'.dat' 
+!      file_movie = 'movie'//fname2(1:len_trim(fname2))//suffix//'.dat' 
 
-c KM for MPI
-c jobs call cleanup('') in monola so that all processors die
+! KM for MPI
+! jobs call cleanup('') in monola so that all processors die
       if (dint(dble(nstep)/dble(iblock)) .gt. 100) then
          write(iou,*) 'too many blocks'
          ldie = .true.
          return
-      endif
+      end if
 
-c - read system information
+! - read system information
 
       do i = 1,nbox
          read(4,*)
          read(4,*) boxlx(i),boxly(i),boxlz(i),lsolid(i),lrect(i),
-     +        kalp(i),rcut(i),rcutnn(i)
+     &        kalp(i),rcut(i),rcutnn(i)
          if ( lecho.and.myid.eq.0 ) then
             if (lverbose) then
                write(iou,*) 'box:',i
@@ -405,16 +404,16 @@ c - read system information
                write(iou,*) '   rcut:',rcut(i),'A'
                if(.not.L_Ewald_Auto) then
                    write(iou,*) '   kalp:',kalp(i)
-               endif 
+               end if 
             else
                write(iou,*) boxlx(i),boxly(i),boxlz(i),
-     +        lsolid(i),lrect(i),rcut(i),rcutnn(i)
+     &        lsolid(i),lrect(i),rcut(i),rcutnn(i)
               if (.not.L_Ewald_Auto) then  
                  write(iou,*) kalp(i)
-              endif
-            endif
-         endif
-      enddo
+              end if
+            end if
+         end if
+      end do
 
       read(4,*) 
       read(4,*) nchain, nmolty
@@ -422,20 +421,20 @@ c - read system information
          write(iou,*) 'nmolty gt ntmax'
          ldie = .true.
          return
-      endif
+      end if
       if ( nchain .gt. nmax-2 ) then
          write(iou,*) 'nchain gt nmax-2'
          ldie = .true.
          return
-      endif
+      end if
       if ( lecho.and.myid.eq.0 ) then
          if (lverbose) then
             write(iou,*) 'number of chains:',nchain
             write(iou,*) 'number of molecule types:',nmolty
          else 
             write(iou,*) nchain, nmolty
-         endif
-      endif
+         end if
+      end if
       read(4,*)
       read(4,*) (temtyp(i),i=1,nmolty)
       if ( lecho.and.myid.eq.0 ) then
@@ -443,21 +442,21 @@ c - read system information
             do i = 1,nmolty
                write(iou,*) 'number of chains of molecule type',i,':',
      &              temtyp(i)
-            enddo
+            end do
          else 
             write(iou,*) (temtyp(i),i=1,nmolty)
-         endif
-      endif
+         end if
+      end if
       temnc = 0
       do i = 1, nmolty
          do j = 1, temtyp(i)
             temnc = temnc + 1
             moltyp(temnc) = i
-         enddo
-      enddo
+         end do
+      end do
 
       if (lgrand) then
-c - read chemical potentials (added 8/30/99 by jpotoff)
+! - read chemical potentials (added 8/30/99 by jpotoff)
          read(4,*) 
          read(4,*) (B(i),i=1,nmolty)
          if (lecho.and.myid.eq.0) then
@@ -465,27 +464,27 @@ c - read chemical potentials (added 8/30/99 by jpotoff)
                do i = 1,nmolty
                   write(iou,*) 'chemical potential for molecule type',
      &                 i,':',B(i)
-               enddo
+               end do
             else 
                write(iou,*) "B ", (B(i),i=1,nmolty)
-            endif
-         endif
-C --- removing from here. It will be calculated once we have molecular mass 
-C --- to calculate debroglie wavelength.
+            end if
+         end if
+! --- removing from here. It will be calculated once we have molecular mass 
+! --- to calculate debroglie wavelength.
 
-c - convert chemical potentials to activities 
-c         do i=1,nmolty
-c            B(i) = exp(B(i)/temp) 
-c         enddo
+! - convert chemical potentials to activities 
+!         do i=1,nmolty
+!            B(i) = exp(B(i)/temp) 
+!         end do
          
       end if
 
-c      if ( lecho.and.myid.eq.0 ) write(iou,*) 'moltyp',(moltyp(i),i=1,nchain)
+!      if ( lecho.and.myid.eq.0 ) write(iou,*) 'moltyp',(moltyp(i),i=1,nchain)
 
       if (lgrand) then
          nchain=nmax
          write(iou,*)'in GCMC total number of chains set by NMAX!'
-      endif
+      end if
 
       read(4,*)
       read(4,*) lmixlb, lmixjo
@@ -493,20 +492,20 @@ c      if ( lecho.and.myid.eq.0 ) write(iou,*) 'moltyp',(moltyp(i),i=1,nchain)
          write(iou,*) 'cant use both combining rules!'
          ldie = .true.
          return
-      endif
+      end if
       if ( lecho.and.myid.eq.0 ) then
          if (lverbose) then
             if (lmixlb) then
                write(iou,*) 'Lorentz-Berthelot combining rules apply'
             else
                write(iou,*) 'Jorgensen combining rules apply'
-            endif
+            end if
             write(iou,*) '   lmixlb:',lmixlb,' lmixjo:',lmixjo
          else 
             write(iou,*) lmixlb,lmixjo
-         endif
-      endif
-c --- read special combining rule information
+         end if
+      end if
+! --- read special combining rule information
       read(4,*)
       read(4,*) nijspecial
       if (lecho.and.myid.eq.0) then
@@ -515,8 +514,8 @@ c --- read special combining rule information
      &           nijspecial
          else
             write(iou,*) nijspecial
-         endif
-      endif
+         end if
+      end if
       read(4,*)
       if ( nijspecial .eq. 0 ) then
          read(4,*)
@@ -540,10 +539,10 @@ c --- read special combining rule information
                   write(iou,*) '   bspecd:',bspecd
                else 
                   write(iou,*) ispecial,jspecial,aspecd,bspecd
-               endif
-            endif
-         enddo
-      endif
+               end if
+            end if
+         end do
+      end if
 
       read(4,*) 
       read(4,*) rmin, softcut,rcutin,
@@ -558,28 +557,28 @@ c --- read special combining rule information
          else 
             write(iou,*) rmin, softcut
      &           ,rcutin,rbsmax,rbsmin 
-         endif
-      endif
+         end if
+      end if
       do i = 1, nbox
          if( rcut(i)/boxlx(i) .gt. 0.5d0) then
             write(iou,*) 'rcut > 0.5*boxlx'
             ldie = .true.
             return
-         endif
-c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
+         end if
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
          call setpbc(i)
-      enddo
+      end do
 
       softlog = 10.0d0**(-softcut)
       vol_eff = (4.0d0/3.0d0)*onepi*
      &     (rbsmax*rbsmax*rbsmax-rbsmin*rbsmin*rbsmin)
 
-c - set up the strectching and bending constants
+! - set up the strectching and bending constants
       call suvibe
-c - set up the forcefield and the masses
+! - set up the forcefield and the masses
       call suijtab( lmixlb,lmixjo,qelect )      
      
-c - read bead potential information
+! - read bead potential information
       do imol = 1, nmolty
          read(4,*) 
          read(4,*) nunit(imol),nugrow(imol),ncarbon(imol),nmaxcbmc(imol)
@@ -597,94 +596,94 @@ c - read bead potential information
             lsolute(imol) = .true.
          else
             lsolute(imol) = .false.
-         endif
+         end if
 
          if (lring(imol)) then
             read(4,*)
             read(4,*) iring(imol)
          else
             iring(imol) = nunit(imol)
-         endif
+         end if
 
          do i = 1, nunit(imol)
             lrigi(imol,i) = .false.
-         enddo
+         end do
 
-c     *** irig is the site rigid sites will be grown from
-c     *** and frig will be the previous site (not kept rigid)
+!     *** irig is the site rigid sites will be grown from
+!     *** and frig will be the previous site (not kept rigid)
 
          if (lrig(imol)) then
             read(4,*) 
             read(4,*) nrig(imol)
 
             if (nrig(imol).gt.0) then
-c     --- read in specific points to keep rigid in growth
+!     --- read in specific points to keep rigid in growth
                read(4,*) 
                do i = 1, nrig(imol)
                   read(4,*) irig(imol,i),frig(imol,i)
                   lrigi(imol,irig(imol,i)) = .true.
-               enddo
+               end do
             else
-c     --- we will pick irig at random in each case if nrig = 0
+!     --- we will pick irig at random in each case if nrig = 0
                read(4,*) 
                read(4,*) nrigmin(imol),nrigmax(imol)
                
-c     --- nrigmin is the minimum amount of the chain to keep rigid
-c     --- nrigmax is the maximum
+!     --- nrigmin is the minimum amount of the chain to keep rigid
+!     --- nrigmax is the maximum
 
-            endif
-         endif
+            end if
+         end if
 
          if (lrigid(imol)) then
             read(4,*) 
-c     - number of flexible parts
+!     - number of flexible parts
             read(4,*) rindex(imol)
             if ( rindex(imol).gt.0) then
                do i = 1, rindex(imol)
                   read(4,*) riutry(imol,i)
-               enddo
+               end do
             else
                riutry(imol,1) = 1
-            endif
-         endif   
+            end if
+         end if   
          
 
          if ( nunit(imol) .gt. numax ) then
             write(iou,*) 'nunit gt numax'
             ldie = .true.
             return
-         endif
+         end if
          if ( lflucq(imol)
      &        .and. (.not. lelect(imol) ) ) then
             write(iou,*) 'lelect must be true if flucq is true' 
             ldie = .true.
             return
-         endif
+         end if
          if ( lqtrans(imol) ) then
             if (.not. lflucq(imol) ) then
                write(iou,*) 'lflucq must be true if interm. 
      &              CT is allowed'
                ldie = .true.
                return
-            endif
+            end if
             write(iou,*) 'Intermolecular Charge Transfer is allowed'
-         endif
+         end if
 
          lbias(imol) = .false.
          if (lavbmc1(imol) .or. lavbmc2(imol) .or. lavbmc3(imol)) then
             lbias(imol) = .true.
-         endif
+         end if
 
-c *** choose only one from the three AVBMC algorithms
+! *** choose only one from the three AVBMC algorithms
 
          if ( lavbmc1(imol) ) then
             lavbmc2(imol) = .false.
             lavbmc3(imol) = .false.
          elseif ( lavbmc2(imol) ) then
             lavbmc3(imol) = .false.
-         endif
+         end if
 
-c         lneighbor = .true.
+!         lneighbor = .true.
          lneighbor = .false.
          if ( (lavbmc2(imol) .or. lavbmc3(imol)).and.(.not.lgaro) ) 
      &                    lneighbor = .true.
@@ -714,15 +713,15 @@ c         lneighbor = .true.
                do i = 1,nbox
                   write(iou,*) '   energy offset for box',
      &                 i,':',eta2(i,imol),' K'
-               enddo
+               end do
             else 
                write(iou,*) nunit(imol),nugrow(imol),ncarbon(imol)
      &        ,nmaxcbmc(imol),iurot(imol) ,lelect(imol),lflucq(imol) 
      &        ,lqtrans(imol),lexpand(imol),lavbmc1(imol),lavbmc2(imol)
      &        ,lavbmc3(imol),fqegp(imol)
      &        ,lsetup,(eta2(i,imol), i=1,nbox)
-            endif
-         endif
+            end if
+         end if
          masst(imol) = 0.0d0
 
          if (lsetup) then
@@ -730,19 +729,19 @@ c         lneighbor = .true.
 
             do i = 1,nunit(imol)
                lhere(ntype(imol,i)) = .true.
-            enddo
+            end do
 
             goto 112
-         endif
+         end if
 
          do i = 1, nunit(imol)
-c - linear/branched chain with connectivity table -
+! - linear/branched chain with connectivity table -
             read(4,*)
             if ( lelect(imol) .and. .not. lchgall ) then
                read(4,*) j, ntype(imol,i), leaderq(imol,i)
-c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
-c for other potentials, sigi isn't defined, so I added this if/else statement
-c maybe should have a switch for every potential flag as a check?
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
+! for other potentials, sigi isn't defined, so I added this if/else statement
+! maybe should have a switch for every potential flag as a check?
                IF(llj)THEN
                if(sigi(ntype(imol,i)).lt.1d-06.and.epsi(ntype(imol,i))
      &          .lt.1d-06.and.abs(qelect(ntype(imol,i))).lt.1d-06) then
@@ -752,12 +751,12 @@ c maybe should have a switch for every potential flag as a check?
      &           'is defined'
                  ldie = .true.
                  return
-               endif
-c KM this isn't necessary
-c               ELSE
-c                  if (myid.eq.0)  write(iou,*) 
-c     &                 'Confirm that your parameters are defined.'
-               ENDIF
+               end if
+! KM this isn't necessary
+!               ELSE
+!                  if (myid.eq.0)  write(iou,*) 
+!     &                 'Confirm that your parameters are defined.'
+               end if
 
                if ( lecho.and.myid.eq.0 ) 
      &              write(iou,*) '   bead ',j,' beadtype ',ntype(imol,i)
@@ -766,7 +765,7 @@ c     &                 'Confirm that your parameters are defined.'
                   write(iou,*) 'group-based cut-off screwed for qq'
                   ldie = .true.
                   return
-               endif
+               end if
             else
                read(4,*) j, ntype(imol,i)
                if ( lecho.and.myid.eq.0 ) then
@@ -776,9 +775,9 @@ c     &                 'Confirm that your parameters are defined.'
                   else 
                      write(iou,*) '   bead ',j,' beadtype ',
      &                    ntype(imol,i)
-                  endif
-               endif
-            endif
+                  end if
+               end if
+            end if
             iutemp = ntype(imol,i)
 
             if (lpl(iutemp)) then
@@ -786,12 +785,12 @@ c     &                 'Confirm that your parameters are defined.'
                llplace(imol) = .true.
             else
                lplace(imol,i) = .false.
-            endif
+            end if
 
             masst(imol)=masst(imol)+mass(iutemp)
             lhere(iutemp) = .true.
             
-c - bond vibration -
+! - bond vibration -
             read(4,*)
             read(4,*) invib(imol,i)
             if ( invib(imol,i) .gt. 6 ) then
@@ -799,7 +798,7 @@ c - bond vibration -
                write(iou,*) 'too many vibrations'
                ldie = .true.
                return
-            endif
+            end if
             do j = 1, invib(imol,i)
                read(4,*) ijvib(imol,i,j),itvib(imol,i,j)
                 if(brvib(itvib(imol,i,j)).lt.1d-06) then
@@ -809,7 +808,7 @@ c - bond vibration -
      &           'is defined'
                  ldie = .true.
                  return
-               endif            
+               end if            
                
                if((ijvib(imol,i,j).eq.i).or.(ijvib(imol,i,j).gt.
      &   nunit(imol))) then
@@ -817,28 +816,28 @@ c - bond vibration -
      &                        'and bead',i
                  ldie = .true.
                  return
-               endif              
+               end if              
                if (lverbose.and.myid.eq.0) then
-c                  write(iou,*) '      bead',i,' bonded to bead',
-c     &                 ijvib(imol,i,j),' with bond type:',
-c     &                 itvib(imol,i,j)
+!                  write(iou,*) '      bead',i,' bonded to bead',
+!     &                 ijvib(imol,i,j),' with bond type:',
+!     &                 itvib(imol,i,j)
                   write(iou,*) '      bead',i,' bonded to bead',
      &                 ijvib(imol,i,j)
                   write(iou,1013) '          bond type:',
      &                 itvib(imol,i,j),' bond length:',
      &                 brvib(itvib(imol,i,j)),' k/2:',
      &                 brvibk(itvib(imol,i,j))
-               endif
-            enddo
-c - bond bending -
+               end if
+            end do
+! - bond bending -
             read(4,*)
             read(4,*) inben(imol,i)
-c            write(iou,*) inben(imol,i)
+!            write(iou,*) inben(imol,i)
             if ( inben(imol,i) .gt. 12 ) then
                write(iou,*) 'too many bends'
                ldie = .true.
                return
-            endif
+            end if
             do j = 1, inben(imol,i)
                read(4,*) ijben2(imol,i,j),ijben3(imol,i,j)
      &              ,itben(imol,i,j)
@@ -849,7 +848,7 @@ c            write(iou,*) inben(imol,i)
      &                 'is defined'
                  ldie = .true.
                  return
-               endif
+               end if
                          
                
                if ((ijben2(imol,i,j).gt.nunit(imol)).or.(
@@ -858,7 +857,7 @@ c            write(iou,*) inben(imol,i)
      &                      'bead',i
                    ldie = .true.
                    return
-               endif
+               end if
                if ((ijben2(imol,i,j).eq.i).or.(
      &                ijben3(imol,i,j).eq.i).or.(ijben2(imol,i,j)
      &                  .eq.ijben3(imol,i,j))) then
@@ -866,13 +865,13 @@ c            write(iou,*) inben(imol,i)
      &                      'bead',i
                    ldie = .true.
                    return
-               endif
+               end if
  
    
                if (lverbose.and.myid.eq.0) then
-c                  write(iou,*) '      bead',i, ' bending interaction',
-c     &                 ' through',ijben2(imol,i,j),' with bead',
-c     &                 ijben3(imol,i,j),' of bend type:',itben(imol,i,j)
+!                  write(iou,*) '      bead',i, ' bending interaction',
+!     &                 ' through',ijben2(imol,i,j),' with bead',
+!     &                 ijben3(imol,i,j),' of bend type:',itben(imol,i,j)
                   write(iou,1017) '      bead',i, ' bending interaction'
      &                 ,' through',ijben2(imol,i,j),' with bead',
      &                 ijben3(imol,i,j)
@@ -880,16 +879,16 @@ c     &                 ijben3(imol,i,j),' of bend type:',itben(imol,i,j)
      &                 ,' bend angle :',
      &                 brben(itben(imol,i,j))*180.0d0/onepi,
      &                 ' k/2:',brbenk(itben(imol,i,j))
-               endif
-            enddo
-c - bond torsion -
+               end if
+            end do
+! - bond torsion -
             read(4,*)
             read(4,*) intor(imol,i)
             if ( intor(imol,i) .gt. 12 ) then
                write(iou,*) 'too many torsions'
                ldie = .true.
                return
-            endif
+            end if
             do j = 1, intor(imol,i)
                read(4,*) ijtor2(imol,i,j),ijtor3(imol,i,j),
      &              ijtor4(imol,i,j),ittor(imol,i,j)
@@ -900,7 +899,7 @@ c - bond torsion -
      &                      'bead',i
                    ldie = .true.
                    return
-               endif
+               end if
      
                if((ijtor2(imol,i,j).eq.i.or.ijtor3(imol,i,j).eq.i
      &          .or.ijtor4(imol,i,j).eq.i).or.(ijtor2(imol,i,j).eq.
@@ -911,23 +910,23 @@ c - bond torsion -
      &                      'bead',i
                    ldie = .true.
                    return
-               endif
+               end if
 
                if (lverbose.and.myid.eq.0) then
                   write(iou,1018) '      bead',i, ' torsional '
      &                 ,'interaction through',ijtor2(imol,i,j),' and',
      &                 ijtor3(imol,i,j),' with bead',ijtor4(imol,i,j),
      &                 ' of torsional type:',ittor(imol,i,j)
-               endif
-            enddo
-         enddo
+               end if
+            end do
+         end do
 
  112     continue
 
 
-c -- starting the self consistency check for the bond vibrations, bending, and torsions
-c -- this would help in catching errors in fort.4 connectivity. Starting after continue
-c -- so that if we use molsetup subroutine it will provide extra checking. (Neeraj)
+! -- starting the self consistency check for the bond vibrations, bending, and torsions
+! -- this would help in catching errors in fort.4 connectivity. Starting after continue
+! -- so that if we use molsetup subroutine it will provide extra checking. (Neeraj)
       if (.not.lrigid(imol)) then 
       do i = 1,nunit(imol)
          numvib=invib(imol,i)
@@ -943,7 +942,7 @@ c -- so that if we use molsetup subroutine it will provide extra checking. (Neer
      &                   'bead',vib1,'with',i
                ldie = .true.
                return
-            endif              
+            end if              
             do k =1,invib(imol,vib1)
                if(ijvib(imol,vib1,k).eq.i) then
                   lfound = .true. 
@@ -954,24 +953,24 @@ c -- so that if we use molsetup subroutine it will provide extra checking. (Neer
      &                  'with',vib1,'molecule type',imol,'vice versa'
                      ldie = .true.
                      return
-                   endif
-               endif
-            enddo
+                   end if
+               end if
+            end do
             if(.not.lfound) then
               write(iou,*) 'Error in fort.4 vibration iformation'
               write(iou,*) 'Check vibration for mol. type:',imol,
      &                   'bead ',vib1,'with ',i
               ldie = .true.
               return
-            endif
-         enddo 
+            end if
+         end do 
          lfound= .false.
          do j = 1,numbend
             bend2 = ijben2(imol,i,j)
             bend3 = ijben3(imol,i,j)
-c            if ( i .eq. 17) then
-c              write(iou,*) bend2, bend3, numbend
-c            endif
+!            if ( i .eq. 17) then
+!              write(iou,*) bend2, bend3, numbend
+!            end if
             bendtype = itben(imol,i,j)
             if(inben(imol,bend3).eq.0) then
                write(iou,*) 'ERROR IN FORT.4 BENDING'
@@ -979,7 +978,7 @@ c            endif
      &                   'bead ',bend3,'with ',i
                ldie = .true.
                return
-            endif
+            end if
             do k = 1,inben(imol,bend3)
                if((ijben2(imol,bend3,k).eq.bend2).and.
      &                 (ijben3(imol,bend3,k).eq.i)) then
@@ -991,17 +990,17 @@ c            endif
      &                  'with',bend3,'mol. typ.',imol,'and vice versa'
                    ldie = .true.
                    return
-                 endif
-               endif
-            enddo   
+                 end if
+               end if
+            end do   
             if(.not.lfound) then
               write(iou,*) 'Error in fort.4 bending iformation'
               write(iou,*) 'Check bending for mol. type:',imol,
      &                 'bead ',bend3,'with ',i
               ldie = .true.
               return
-            endif
-         enddo
+            end if
+         end do
          lfound = .false. 
          do j = 1,numtor
             tor2 = ijtor2(imol,i,j)
@@ -1014,7 +1013,7 @@ c            endif
      &                   'bead ',tor4,'with ',i,'and vice versa'
                ldie = .true.
                return
-            endif
+            end if
             do k = 1,intor(imol,tor4)
                if((ijtor2(imol,tor4,k).eq.tor3).and.(ijtor3(imol,tor4
      &            ,k).eq.tor2).and.(ijtor4(imol,tor4,k).eq.i)) then
@@ -1026,35 +1025,35 @@ c            endif
      &                  'with',tor4,'mol. typ.',imol,'and vice versa'
                    ldie = .true.
                    return
-                 endif 
-               endif
-            enddo
+                 end if 
+               end if
+            end do
             if(.not.lfound) then
                write(iou,*) 'Error in fort.4 torsion iformation'
                write(iou,*) 'Check torsion for mol. type:',imol,
      &                'bead ',tor4,'with ',i
                ldie = .true.
                return
-            endif
-         enddo
-      enddo    
-      endif   
+            end if
+         end do
+      end do    
+      end if   
 
-c -- Neeraj Adding molecule neutrality check
-ckea skip if lgaro
+! -- Neeraj Adding molecule neutrality check
+!kea skip if lgaro
       if(.not.(lgaro .or.lionic)) then
          do i=1,nmolty
             qtot =0.0d0
             do j = 1,nunit(i)
                qtot = qtot+qelect(ntype(i,j))
-            enddo
+            end do
             if(dabs(qtot).gt.1d-7) then
                write(iou,*)'molecule type',i,'not neutral check charges'
                ldie = .true.
                return
-            endif
-         enddo
-      endif
+            end if
+         end do
+      end if
         
 
          if ( lexpand(imol) ) then
@@ -1062,7 +1061,7 @@ ckea skip if lgaro
                write(iou,*) 'Only one molecule of this type is allowed!'
                ldie = .true.
                return
-            endif
+            end if
             lee = .true.
             read(7,*) 
             read(7,*) numcoeff(imol)
@@ -1078,8 +1077,8 @@ ckea skip if lgaro
                read(7,*)
                read(7,*) (eta(ii,imol,j),ii=1,2)
                write(iou,*) 'eta:',(eta(ii,imol,j),ii=1,2)
-            enddo
-         endif
+            end do
+         end if
          if ( lbias(imol) ) then
             read(4,*)
             read(4,*) pmbias(imol),(pmbsmt(ii),ii=1,nmolty)
@@ -1090,27 +1089,27 @@ ckea skip if lgaro
                   do ii = 1,nmolty
                      write(iou,*) '   AVBMC2 and 3 probability for',
      &                    ' molecule',' type',ii,':',pmbsmt(ii)
-                  enddo
+                  end do
                   write(iou,*) '   AVBMC3 pmbias2:',pmbias2(imol)
                else
                   write(iou,*) '   AVBMC bias for cluster formation and'
      &                 ,' destruction'
                   write(iou,*) pmbias(imol),(pmbsmt(ii),ii=1,nmolty)
      &                 ,pmbias2(imol)
-               endif
-            endif
+               end if
+            end if
             if (rbsmax .lt. rbsmin) then
                write(iou,*)'rbsmax should be greater than rbsmin'
                ldie = .true.
                return
-            endif
-         endif
-ckea 6/4/09 -- added for multiple rotation centers
-c -- To assign multiple rotation centers, set iurot(imol) < 0
-c -- Add line after molecule specification, avbmc parameters
-c -- First, number of rotation centers
-c -- Second, identity of centers (0=COM,integer::> 0 = bead number)
-c -- Third, give probability to rotate around different centers
+            end if
+         end if
+!kea 6/4/09 -- added for multiple rotation centers
+! -- To assign multiple rotation centers, set iurot(imol) < 0
+! -- Add line after molecule specification, avbmc parameters
+! -- First, number of rotation centers
+! -- Second, identity of centers (0=COM,integer::> 0 = bead number)
+! -- Third, give probability to rotate around different centers
          if(iurot(imol).lt.0) then
             read(4,*)
             read(4,*) nrotbd(imol),irotbd(1:nrotbd(imol),imol),
@@ -1122,18 +1121,18 @@ c -- Third, give probability to rotate around different centers
                      write(iou,*) 'Rotation center',ii,':',
      &                    irotbd(ii,imol),'    probability to select:',
      &                    pmrotbd(ii,imol)
-                  enddo
-               endif
-            endif
-         endif
-      enddo
+                  end do
+               end if
+            end if
+         end if
+      end do
 
-c   KEA - read in tabulated torsion potentials and set up derivatives
-c         for spline interpolation if L_tor_table 
+!   KEA - read in tabulated torsion potentials and set up derivatives
+!         for spline interpolation if L_tor_table 
        if (L_tor_table) then
           read(40,*) nttor
           write(iou,*)
-c          write(6,*) 'in spline read loop, nttor',nttor
+!          write(6,*) 'in spline read loop, nttor',nttor
           do mmm = 1,nttor
              read(40,*) ttor
              i=1
@@ -1141,7 +1140,7 @@ c          write(6,*) 'in spline read loop, nttor',nttor
              if(deg(i,ttor).eq.1000) goto 11
              if (myid.eq.0) then
                 write(56,*) i,deg(i,ttor),tabtorso(i,ttor)
-             endif
+             end if
              i=i+1
              goto 10
  11          splpnts(ttor)=i-1
@@ -1152,14 +1151,14 @@ c          write(6,*) 'in spline read loop, nttor',nttor
                 if (myid.eq.0) write(iou,*) 'using linear interpolation'
                 do i=1,splpnts(ttor)-1
                    tordif(i,ttor) = tabtorso(i+1,ttor)-tabtorso(i,ttor)
-                enddo
-             endif
-          enddo
+                end do
+             end if
+          end do
           close(40)
-       endif
+       end if
 
-c   KM 12/02/08 - read in tabulated vibrational potential
-c   and set up linear interpolation
+!   KM 12/02/08 - read in tabulated vibrational potential
+!   and set up linear interpolation
 
        if (L_vib_table) then
           read(41,*) ntabvib
@@ -1171,7 +1170,7 @@ c   and set up linear interpolation
              i=1
  12          read(41,*,end=13) vib(i,tvib), tabvib(i,tvib)
              if (vib(i,tvib).eq.1000) goto 13
-c             write(57,*) i, vib(i,tvib),tabvib(i,tvib)
+!             write(57,*) i, vib(i,tvib),tabvib(i,tvib)
              i=i+1
              goto 12
  13          vibsplits(tvib)=i-1
@@ -1179,13 +1178,13 @@ c             write(57,*) i, vib(i,tvib),tabvib(i,tvib)
      &            for vibrations'
              do i=1,vibsplits(tvib)-1
                 vibdiff(i,tvib)=tabvib(i+1,tvib)-tabvib(i,tvib)
-             enddo
-          enddo
+             end do
+          end do
           close(41)
-       endif
+       end if
 
-c   KM 12/02/08 - read in tabulated 1-3 nonbonded 'bending' potential
-c   and set up linear interpolation
+!   KM 12/02/08 - read in tabulated 1-3 nonbonded 'bending' potential
+!   and set up linear interpolation
 
        if (L_bend_table) then
           read(42,*) ntabbend
@@ -1197,7 +1196,7 @@ c   and set up linear interpolation
              i=1
  14          read(42,*,end=15) bend(i,tbend), tabbend(i,tbend)
              if (bend(i,tbend).eq.1000) goto 15
-c             write(58,*) i, bend(i,tbend),tabbend(i,tbend)
+!             write(58,*) i, bend(i,tbend),tabbend(i,tbend)
              i=i+1
              goto 14
  15          bendsplits(tbend)=i-1
@@ -1205,28 +1204,28 @@ c             write(58,*) i, bend(i,tbend),tabbend(i,tbend)
      &            1-3 nonbonded bending'
              do i=1,bendsplits(tbend)-1
                 benddiff(i,tbend)=tabbend(i+1,tbend)-tabbend(i,tbend)
-             enddo
-          enddo
+             end do
+          end do
           close(42)
-       endif
+       end if
 
-c   KM 12/02/08 - read in tabulated nonbonded potential
-c   and set up linear interpolation
+!   KM 12/02/08 - read in tabulated nonbonded potential
+!   and set up linear interpolation
 
        if (L_vdW_table) then
           read(43,*) ntabvdW
           write(iou,*)
           mmm=1
           do mmm=1,ntabvdW
-c            iinvdW and jjvdW are bead types
+!            iinvdW and jjvdW are bead types
              read(43,*) iivdW, jjvdW
              read(43,*) num_int_vdW(iivdW,jjvdW)
              i=1
  16          read(43,*,end=17) rvdW(i,iivdW,jjvdW), 
      &            tabvdW(i,iivdW,jjvdW)
              if (rvdW(i,iivdW,jjvdW).eq.1000) goto 17
-c             write(59,*) i, rvdW(i,iivdW,jjvdW),
-c     &            tabvdW(i,iivdW,jjvdW)
+!             write(59,*) i, rvdW(i,iivdW,jjvdW),
+!     &            tabvdW(i,iivdW,jjvdW)
              i=i+1
              goto 16
  17          vdWsplits(iivdW,jjvdW)=i-1
@@ -1236,29 +1235,29 @@ c     &            tabvdW(i,iivdW,jjvdW)
                 vdWdiff(i,iivdW,jjvdW)=
      &               tabvdW(i+1,iivdW,jjvdW)-
      &               tabvdW(i,iivdW,jjvdW)
-             enddo
-          enddo
+             end do
+          end do
           close(43)
-       endif
+       end if
 
-c   KM 04/23/09 - read in tabulated electrostatic potential
-c   and set up linear interpolation
+!   KM 04/23/09 - read in tabulated electrostatic potential
+!   and set up linear interpolation
 
        if (L_elect_table) then
           read(44,*) ntabelect
           write(iou,*)
           mmm=1
           do mmm=1,ntabelect
-c            iielect and jjelect are bead types
+!            iielect and jjelect are bead types
              read(44,*) iielect, jjelect
-c             write(59,*) iielect,jjelect
+!             write(59,*) iielect,jjelect
              read(44,*) num_int_elect(iielect,jjelect)
-c             write(59,*) num_int_elect(iielect,jjelect)
+!             write(59,*) num_int_elect(iielect,jjelect)
              i=1
  18          read(44,*,end=19) relect(i,iielect,jjelect), 
      &            tabelect(i,iielect,jjelect)
-c             write(59,*) relect(i,iielect,jjelect), 
-c     &            tabelect(i,iielect,jjelect)
+!             write(59,*) relect(i,iielect,jjelect), 
+!     &            tabelect(i,iielect,jjelect)
              if (relect(i,iielect,jjelect).eq.1000) goto 19
              i=i+1
              goto 18
@@ -1269,12 +1268,12 @@ c     &            tabelect(i,iielect,jjelect)
                 electdiff(i,iielect,jjelect)=
      &               tabelect(i+1,iielect,jjelect)-
      &               tabelect(i,iielect,jjelect)
-             enddo
-          enddo
+             end do
+          end do
           close(44)
-       endif
+       end if
 
-c -- check whether there is a polarizable molecule
+! -- check whether there is a polarizable molecule
 
       lpolar = .false.
       lqqelect = .false.
@@ -1282,15 +1281,15 @@ c -- check whether there is a polarizable molecule
       do imol = 1, nmolty
          if (lflucq(imol)) lpolar = .true.
          if (lelect(imol)) lqqelect = .true.
-      enddo
+      end do
 
       if ( .not. lqqelect ) then
          if ( lewald .or. lchgall ) then
             write(iou,*) 'no charges in the system and turn off lewald'
             ldie = .true.
             return
-         endif
-      endif
+         end if
+      end if
 
       if ( .not. lpolar ) then
          if ( lanes  ) then
@@ -1298,25 +1297,25 @@ c -- check whether there is a polarizable molecule
      &           systems!'
             ldie = .true.
             return
-         endif
+         end if
          if ( lfepsi ) then 
             write(iou,*) 'lfepsi should be false for nonpolarizable 
      &           systems!'
             ldie = .true.
             return
-         endif
-      endif
+         end if
+      end if
 
-C This B(i) goes in the acceptance rules
+! This B(i) goes in the acceptance rules
 
       if (lgrand) then
         do i=1,nmolty
             debroglie = 17.458d0/( dsqrt(masst(i)/beta ))
             B(i) = exp(B(i)/temp)/(debroglie*debroglie*debroglie)
-         enddo
-      endif
+         end do
+      end if
       
-c - read linkcell information
+! - read linkcell information
       read(4,*)
       read(4,*) licell,rintramax,boxlink
 
@@ -1327,10 +1326,10 @@ c - read linkcell information
             write(iou,*) 'boxlink:',boxlink
          else 
             write(iou,*) licell,rintramax,boxlink
-         endif
-      endif
+         end if
+      end if
 
-c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
       IF(boxlink .LE. nbxmax)THEN
          if (lsolid(boxlink).and.(.not.lrect(boxlink))) then
 
@@ -1339,11 +1338,11 @@ c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
              ldie = .true.
              return
 
-         endif
-      ENDIF
+         end if
+      end if
 
 
-c -- read the atomic displacements
+! -- read the atomic displacements
 
       read(4,*)
       read(4,*) Armtrax, Armtray, Armtraz
@@ -1354,11 +1353,11 @@ c -- read the atomic displacements
      &          Armtrax, Armtray, Armtraz
          else
            write(iou,*) Armtrax, Armtray, Armtraz
-         endif
-       endif
+         end if
+       end if
 
 
-c - read displacement information
+! - read displacement information
       read(4,*) 
       read(4,*) rmtrax(1,1),rmtray(1,1),rmtraz(1,1)
       do im = 1,nbox
@@ -1366,16 +1365,16 @@ c - read displacement information
             rmtrax(imol,im) = rmtrax(1,1)
             rmtray(imol,im) = rmtray(1,1)
             rmtraz(imol,im) = rmtraz(1,1)
-         enddo
-      enddo
+         end do
+      end do
       if ( lecho.and.myid.eq.0 ) then
          if (lverbose) then
             write(iou,1019) ' initial maximum x, y and z displacement:',
      &           rmtrax(1,1),rmtray(1,1),rmtraz(1,1)
          else 
             write(iou,*) rmtrax(1,1), rmtray(1,1), rmtraz(1,1)
-         endif
-      endif
+         end if
+      end if
 
 
       read(4,*) 
@@ -1385,16 +1384,16 @@ c - read displacement information
             rmrotx(imol,im) = rmrotx(1,1)
             rmroty(imol,im) = rmroty(1,1)
             rmrotz(imol,im) = rmrotz(1,1)
-         enddo
-      enddo
+         end do
+      end do
       if ( lecho.and.myid.eq.0 ) then
          if (lverbose) then
             write(iou,1019) ' initial maximum x, y and z rotation:    ',
      &           rmrotx(1,1),rmroty(1,1),rmrotz(1,1)
          else 
             write(iou,*) rmrotx(1,1), rmroty(1,1), rmrotz(1,1)
-         endif
-      endif
+         end if
+      end if
       read(4,*) 
       read(4,*) tatra,tarot
       if ( lecho.and.myid.eq.0 ) then
@@ -1403,10 +1402,10 @@ c - read displacement information
             write(iou,*) 'target rotational acceptance ratio:',tarot
          else 
             write(iou,*) tatra, tarot
-         endif
-      endif
+         end if
+      end if
 
-c - read initial setup information
+! - read initial setup information
       read(4,*)
       read(4,*) linit,newtab,lreadq
       if ( lecho.and.myid.eq.0 ) then
@@ -1416,19 +1415,19 @@ c - read initial setup information
             write(iou,*) 'lreadq:',lreadq
          else 
             write(iou,*) linit, newtab, lreadq
-         endif
-      endif
+         end if
+      end if
       read(4,*)
       read(4,*) (lbranch(i),i=1,nmolty)
       if ( lecho.and.myid.eq.0 ) then
          if (lverbose) then
             do i = 1,nmolty
                write(iou,*) 'lbranch for molecule type',i,':',lbranch(i)
-            enddo
+            end do
          else 
             write(iou,*) (lbranch(i),i=1,nmolty)
-         endif
-      endif
+         end if
+      end if
       do i = 1, nbox
          read(4,*)
          read(4,*) (ininch(j,i),j=1,nmolty)
@@ -1438,11 +1437,11 @@ c - read initial setup information
                do j = 1,nmolty
                   write(iou,*) '   initial number of chains of type',
      &                 j,':',ininch(j,i)
-               enddo
+               end do
             else 
                write(iou,*) 'box:',i,(ininch(j,i),j=1,nmolty)
-            endif
-         endif
+            end if
+         end if
          read(4,*)
          read(4,*) inix(i),iniy(i),iniz(i),inirot(i),inimix(i),
      &        zshift(i),dshift(i),nchoiq(i)
@@ -1459,29 +1458,29 @@ c - read initial setup information
             else 
                write(iou,*) inix(i),iniy(i),iniz(i),inirot(i),
      &        inimix(i),zshift(i),dshift(i),nchoiq(i)
-            endif
-         endif
-      enddo
+            end if
+         end if
+      end do
 
-c - read ensemble specific information
+! - read ensemble specific information
       read(4,*)
       read(4,*) rmvol(1), tavol, iratv, iratp, rmflcq(1,1), taflcq
       do zz = 1,nmolty
          do zzz = 1,nbox
             rmflcq(zz,zzz) = rmflcq(1,1)
-         enddo
-      enddo
+         end do
+      end do
       if ( lgibbs ) then
          do zzz = 2, nbox
             rmvol(zzz) = rmvol(1)
-         enddo
-      endif
+         end do
+      end if
       if ( lecho.and.myid.eq.0 ) then
          if (lverbose) then
             do zz = 1,nbox
                write(iou,*) 'initial maximum volume displacement '
      &              ,'(rmvol) in box',zz,':',rmvol(zz)
-            enddo
+            end do
             write(iou,*) 'target volume acceptance ratio (tavol):',tavol
             write(iou,*) 'iratv:',iratv
             write(iou,*) 'iratp:',iratp
@@ -1490,16 +1489,16 @@ c - read ensemble specific information
                   write(iou,*) 'initial maximum fluct. charge',
      &                 ' displ. for chain type',zz,' box',
      &                 zzz,':',rmflcq(zz,zzz)
-               enddo
-            enddo
+               end do
+            end do
             write(iou,*) 'target fluctuating charge acceptance ratio',
      &           ' (taflcq):',taflcq
          else
             write(iou,*) rmvol, tavol, iratv, iratp
             write(iou,*) 'rmflcq',
      &           ((rmflcq(zz,zzz),zzz=1,nbox),zz=1,nmolty),taflcq
-         endif
-      endif
+         end if
+      end if
 
       read(4,*)
       read(4,*) pmvol,(pmvlmt(j),j=1,nbox)
@@ -1508,11 +1507,11 @@ c - read ensemble specific information
             write(iou,*) 'pmvol:',pmvol
             do j = 1,nbox
                write(iou,*) '   pmvlmt for box',j,':',pmvlmt(j)
-            enddo
+            end do
          else 
             write(iou,*) 'pmvol',pmvol,(pmvlmt(j),j=1,nbox)
-         endif
-      endif
+         end if
+      end if
       read(4,*)
       read(4,*) nvolb,(pmvolb(j),j=1,nvolb)
       if ( lecho.and.myid.eq.0 ) then
@@ -1520,11 +1519,11 @@ c - read ensemble specific information
             write(iou,*) 'nvolb:',nvolb
             do j = 1,nvolb
                write(iou,*) '   pmvolb:',pmvolb(j)
-            enddo
+            end do
          else 
             write(iou,*) '   nvolb',nvolb,(pmvolb(j),j=1,nvolb)
-         endif
-      endif
+         end if
+      end if
       read(4,*)
       do j = 1,nvolb
          read(4,*) box5(j),box6(j)
@@ -1534,9 +1533,9 @@ c - read ensemble specific information
      &              box5(j),box6(j)
             else 
                write(iou,*) box5(j),box6(j)
-            endif
-         endif
-      enddo
+            end if
+         end if
+      end do
       
       lxyz = .false.
       do j = 1,nbox
@@ -1550,19 +1549,19 @@ c - read ensemble specific information
                   write(iou,*) 'pmvoly:',pmvoly
                else
                   write(iou,*) pmvolx,pmvoly
-               endif
-            endif
-         endif
-      enddo
+               end if
+            end if
+         end if
+      end do
     
-c     --- read swatch information
+!     --- read swatch information
       read(4,*)
       read(4,*) pmswat,nswaty
       if ( nswaty .gt. npamax ) then
          write(iou,*) 'nswaty gt npamax'
          ldie = .true.
          return
-      endif
+      end if
 
       if ( lecho.and.myid.eq.0 ) then
          if (lverbose) then
@@ -1570,8 +1569,8 @@ c     --- read swatch information
             write(iou,*) '   number of swatch pairs (nswaty):',nswaty
          else 
             write(iou,*) 'pmswat, nswaty',pmswat,nswaty
-         endif
-      endif
+         end if
+      end if
 
       if (nswaty .gt. 0) then
          read(4,*)
@@ -1579,36 +1578,36 @@ c     --- read swatch information
          read(4,*)
          read(4,*) (pmsatc(i),i=1,nswaty)
 
-c        --- safety checks on swatch
+!        --- safety checks on swatch
          do i = 1,nswaty
             if ( nswatb(i,1) .eq. nswatb(i,2) ) then
                write(iou,*) 'nswaty ',i,' has identical moltyp'
                write(iou,*) 'cannot swatch identical moltyp'
                ldie = .true.
                return
-            endif
-         enddo
+            end if
+         end do
 
          if( lecho.and.myid.eq.0 ) then
             if (lverbose) then
                do i = 1,nswaty
                   write(iou,*) '   swatch molecule type pairs:',
      &                 (nswatb(i,j),j=1,2)
-               enddo
+               end do
                do i = 1,nswaty
                   write(iou,*) '   probability of each swatch pair:',
      &                 pmsatc(i)
-               enddo
+               end do
             else
                do i=1,nswaty
                   write(iou,*) 'nswatb', (nswatb(i,j),j=1,2)
                   write(iou,*) 'pmsatc',pmsatc(i)
-               enddo
-            endif
-         endif
+               end do
+            end if
+         end if
          
          do i=1,nswaty
-c           --- number of beads that remain in the same position
+!           --- number of beads that remain in the same position
             read(4,*)
             read(4,*) nsampos(i),(ncut(i,j),j=1,2)
             if (lecho.and.myid.eq.0) then
@@ -1618,9 +1617,9 @@ c           --- number of beads that remain in the same position
                else 
                   write(iou,*) 'nsampos',nsampos(i),' ncut',
      &                 (ncut(i,j),j=1,2)
-               endif
-            endif
-c           --- bead number
+               end if
+            end if
+!           --- bead number
             read(4,*)
             do j = 1,nsampos(i)
                read(4,*) (splist(i,j,k),k=1,2)
@@ -1630,9 +1629,9 @@ c           --- bead number
      &                    (splist(i,j,k),k=1,2)
                   else 
                      write(iou,*) 'splist',(splist(i,j,k),k=1,2)
-                  endif
-               endif
-            enddo
+                  end if
+               end if
+            end do
             
             read(4,*)
             read(4,*) (( gswatc(i,j,k), k=1,2*ncut(i,j) ), j=1,2 )
@@ -1641,12 +1640,12 @@ c           --- bead number
 !!                  do zz = 1,ncut(i,j)
 !!                     write(iou,*) '   grow from and prev for ncut',zz,':',
 !!     &                    (gswatc(i,j,zz),j=1,2)
-!!                  enddo
+!!                  end do
 !!               else 
 !!                  write(iou,*) 'gswatc',(( gswatc(i,j,k), 
 !!     &                 k=1,2*ncut(i,j) ), j=1,2 )
-!!               endif
-!!            endif
+!!               end if
+!!            end if
 
             read(4,*) 
             read(4,*) nswtcb(i), (pmswtcb(i,ipair), ipair=1,nswtcb(i))
@@ -1659,13 +1658,13 @@ c           --- bead number
      &                    box3(i,ipair),box4(i,ipair)
                   else
                      write(iou,*) box3(i,ipair),box4(i,ipair)
-                  endif
-               endif
-            enddo
-         enddo
+                  end if
+               end if
+            end do
+         end do
 
       else
-c        --- skip past all of the swatch info
+!        --- skip past all of the swatch info
          read(4,*)
          read(4,*)
          read(4,*)
@@ -1676,9 +1675,9 @@ c        --- skip past all of the swatch info
          read(4,*)
          read(4,*)
          read(4,*)
-      endif
+      end if
 
-c --- read swap info
+! --- read swap info
       read(4,*)
       read(4,*) pmswap, (pmswmt(i),i=1,nmolty)
       if ( lecho.and.myid.eq.0 ) then
@@ -1687,11 +1686,11 @@ c --- read swap info
             do i = 1,nmolty
                write(iou,1021) '   swap probability for molecule type '
      &              ,'        ',i,' (pmswmt):',pmswmt(i)
-            enddo
+            end do
          else 
             write(iou,*) 'pmswap',pmswap,(pmswmt(i),i=1,nmolty)
-         endif
-      endif
+         end if
+      end if
       do i = 1, nmolty
          read(4,*)
          read(4,*) nswapb(i), (pmswapb(i,ipair),ipair=1,nswapb(i))
@@ -1701,12 +1700,12 @@ c --- read swap info
      &              i,':',nswapb(i)
                do ipair = 1,nswapb(i)
                   write(iou,*) '      pmswapb:',pmswapb(i,ipair)
-               enddo
+               end do
             else 
                write(iou,*) nswapb(i), 
      &              (pmswapb(i,ipair),ipair=1,nswapb(i))
-            endif
-         endif
+            end if
+         end if
          read(4,*)
          do ipair = 1, nswapb(i)
             read(4,*) box1(i,ipair), box2(i,ipair)
@@ -1717,12 +1716,12 @@ c --- read swap info
                else 
                   write(iou,*) 'box pair:',
      &                 box1(i,ipair), box2(i,ipair)
-               endif
-            endif
-         enddo
-      enddo
+               end if
+            end if
+         end do
+      end do
 
-c --- read cbmc info
+! --- read cbmc info
       read(4,*)
       read(4,*) pmcb, (pmcbmt(i),i=1,nmolty)
       read(4,*)
@@ -1733,15 +1732,15 @@ c --- read cbmc info
             do i = 1,nmolty
                write(iou,1021) '   CBMC probability for molecule type '
      &              ,'        ',i,' (pmcbmt):',pmcbmt(i)
-            enddo
+            end do
             do i = 1,nmolty
                write(iou,*) '   pmall for molecule type',i,':',pmall(i)
-            enddo
+            end do
          else 
             write(iou,*) 'pmcb',pmcb,(pmcbmt(i),i=1,nmolty),
      &           'pmall',(pmall(i),i=1,nmolty)
-         endif
-      endif
+         end if
+      end if
       read(4,*)
       read(4,*) (pmfix(i),i=1,nmolty)
       if (lecho.and.myid.eq.0) then
@@ -1749,20 +1748,20 @@ c --- read cbmc info
             do i = 1,nmolty
                write(iou,1021) '   probability for SAFE-CBMC for '
      &              ,'molecule type',i,'  (pmfix):',pmfix(i)
-            enddo
+            end do
          else
             write(iou,*) (pmfix(i),i=1,nmolty)
-         endif
-      endif
+         end if
+      end if
       do i = 1, nmolty
          if (lring(i).and.pmfix(i).lt.0.999.and.
      &        .not.lrig(i)) then
             write(iou,*) 'a ring can only be used with safe-cbmc'
             ldie = .true.
             return
-         endif
-      enddo
-c --- read fluctuating charge info
+         end if
+      end do
+! --- read fluctuating charge info
       read(4,*)
       read(4,*) pmflcq, (pmfqmt(i),i=1,nmolty)
       if ( lecho.and.myid.eq.0 ) then
@@ -1771,12 +1770,12 @@ c --- read fluctuating charge info
             do i = 1,nmolty
                write(iou,1021) '   flcq probability for molecule type '
      &              ,'        ',i,' (pmfqmt):',pmfqmt(i)
-            enddo
+            end do
          else 
             write(iou,*) 'pmflcq',pmflcq,(pmfqmt(i),i=1,nmolty)
-         endif
-      endif
-c --- read expanded-coefficient move info
+         end if
+      end if
+! --- read expanded-coefficient move info
       read(4,*)
       read(4,*) pmexpc, (pmeemt(i),i=1,nmolty)
       if ( lecho.and.myid.eq.0 ) then
@@ -1785,18 +1784,18 @@ c --- read expanded-coefficient move info
             do i = 1,nmolty
                write(iou,1021) '   expanded ens. prob. for molecule '
      &              ,'type      ',i,' (pmeemt):',pmeemt(i)
-            enddo
+            end do
          else 
             write(iou,*) 'pmexpc',pmexpc,(pmeemt(i),i=1,nmolty)
-         endif
-      endif
-c read new expanded ensemble info
+         end if
+      end if
+! read new expanded ensemble info
       read(4,*)
       read(4,*) pmexpc1
-c -- read atom translation probability
+! -- read atom translation probability
       read(4,*)
       read(4,*) pm_atom_tra        
-c --- read translation info
+! --- read translation info
       read(4,*)
       read(4,*) pmtra,(pmtrmt(i),i=1,nmolty)
       if ( lecho.and.myid.eq.0 ) then
@@ -1805,13 +1804,13 @@ c --- read translation info
             do i = 1,nmolty
                write(iou,1021) '   translation probability for molecule'
      &              ,'   type',i,' (pmtrmt):',pmtrmt(i)
-            enddo
+            end do
          else 
             write(iou,*) 'pmtra',pmtra,(pmtrmt(i),i=1,nmolty)
-         endif
-      endif
+         end if
+      end if
 
-c --- read rotation info
+! --- read rotation info
       read(4,*)
       read(4,*) (pmromt(i),i=1,nmolty)
       if ( lecho.and.myid.eq.0 ) then
@@ -1820,13 +1819,13 @@ c --- read rotation info
             do i = 1,nmolty
                write(iou,1021) '   rotational probability for molecule'
      &              ,'    type',i,' (pmromt):',pmromt(i)
-            enddo
+            end do
          else 
             write(iou,*) (pmromt(i),i=1,nmolty)
-         endif
-      endif
+         end if
+      end if
 
-c *** writeout probabilities, in percent
+! *** writeout probabilities, in percent
       if (lverbose.and.myid.eq.0) then
          write(iou,*)
          write(iou,*) 'percentage move probabilities:'
@@ -1838,7 +1837,7 @@ c *** writeout probabilities, in percent
             pcumu = pcumu + pm
          else
             pm = 0.0d0
-         endif
+         end if
          write(iou,'(1x,a19,f8.2,a2)') 'swatch move       :',
      &      100.0d0*pm,' %'
          if (pmswap .gt. pmswat) then
@@ -1846,7 +1845,7 @@ c *** writeout probabilities, in percent
             pcumu = pcumu + pm
          else
             pm = 0.0d0
-         endif
+         end if
          write(iou,'(1x,a19,f8.2,a2)') 'swap move         :',
      &      100.0d0*pm,' %'
          if (pmcb .gt. pmswap) then
@@ -1854,7 +1853,7 @@ c *** writeout probabilities, in percent
             pcumu = pcumu + pm
          else
             pm = 0.0d0
-         endif
+         end if
          write(iou,'(1x,a19,f8.2,a2)') 'CBMC move         :',
      &      100.0d0*pm,' %'
          if (pmflcq .gt. pmcb) then
@@ -1862,7 +1861,7 @@ c *** writeout probabilities, in percent
             pcumu = pcumu + pm
          else
             pm = 0.0d0
-         endif
+         end if
          write(iou,'(1x,a19,f8.2,a2)') 'fluct charge move :',
      &      100.0d0*pm,' %'
          if (pmexpc .gt. pmflcq) then
@@ -1870,7 +1869,7 @@ c *** writeout probabilities, in percent
             pcumu = pcumu + pm
          else
             pm = 0.0d0
-         endif
+         end if
          write(iou,'(1x,a19,f8.2,a2)') 'expanded ens move :',
      &      100.0d0*pm,' %'
          if (pmtra .gt. pmexpc) then
@@ -1878,7 +1877,7 @@ c *** writeout probabilities, in percent
             pcumu = pcumu + pm
          else
             pm = 0.0d0
-         endif
+         end if
          write(iou,'(1x,a19,f8.2,a2)') 'translation move  :',
      &      100.0d0*pm,' %'
          pm = 1.0d0 - pmtra
@@ -1888,11 +1887,11 @@ c *** writeout probabilities, in percent
          write(iou,*)
          write(iou,*) 'Fraction of atom translations move', pm_atom_tra            
 
-      endif
+      end if
       
  
 
-c --- read growth details
+! --- read growth details
       read(4,*)
       read(4,*) (nchoi1(i),i=1,nmolty),(nchoi(i),i=1,nmolty)
      &     ,(nchoir(i),i=1,nmolty)
@@ -1912,27 +1911,27 @@ c --- read growth details
             write(iou,*) 'nchoir',(nchoir(i),i=1,nmolty)
             write(iou,*) 'nchoih',(nchoih(i),i=1,nmolty)
             write(iou,*) 'nchtor',(nchtor(i),i=1,nmolty)
-         endif
-      endif
+         end if
+      end if
 
       do imol = 1, nmolty
          if (pmfix(imol).gt.0) then
             read(23,*) counttot
-c     --- read in from fort.23 the bead-bead distribution
+!     --- read in from fort.23 the bead-bead distribution
             do i = 1, iring(imol) 
                do j = 1, iring(imol)
                   if (i.eq.j) goto 110
                   do bin = 1, maxbin
                      read(23,*) bdum,probf(i,j,bin)
                      hist(i,j,bin) = 0
-                  enddo                 
+                  end do                 
  110              continue
-               enddo
-            enddo
-         endif
-      enddo
+               end do
+            end do
+         end if
+      end do
 
-c     --- read information for CBMC bond angle growth
+!     --- read information for CBMC bond angle growth
       read(4,*) 
       read(4,*) (nchbna(i),i=1,nmolty),(nchbnb(i),i=1,nmolty)
       if ( lecho.and.myid.eq.0 ) then
@@ -1940,12 +1939,12 @@ c     --- read information for CBMC bond angle growth
             do i = 1,nmolty
                write(iou,*) 'nchbna and nchbnb for molecule type',i,':',
      &              nchbna(i),nchbnb(i)
-            enddo
+            end do
          else
             write(iou,*) 'nchbna ',(nchbna(i),i=1,nmolty)
             write(iou,*) 'nchbnb ',(nchbnb(i),i=1,nmolty)
-         endif
-      endif
+         end if
+      end if
 
       read(4,*)
       read(4,*) (icbdir(i),i=1,nmolty),(icbsta(i),i=1,nmolty)
@@ -1953,57 +1952,57 @@ c     --- read information for CBMC bond angle growth
          if (lverbose) then
             do i = 1,nmolty
                write(iou,*) 'icbdir for molecule type',i,':',icbdir(i)
-            enddo
+            end do
             do i = 1,nmolty
                write(iou,*) 'icbsta for molecule type',i,':',icbsta(i)
-            enddo
+            end do
          else
             write(iou,*) 'icbdir',(icbdir(i),i=1,nmolty)
             write(iou,*) 'icbsta',(icbsta(i),i=1,nmolty)
-         endif
-      endif
+         end if
+      end if
 
-c     ---- Error checking
+!     ---- Error checking
       do i=1,nmolty
          if ( nchoi1(i) .gt. nchmax ) then
             write(iou,*) 'nchoi1 gt nchmax'
             ldie = .true.
             return
-         endif
+         end if
          if (nchoi(i) .gt. nchmax ) then
             write(iou,*) 'nchoi gt nchmax'
             ldie = .true.
             return
-         endif
+         end if
          if ( nchoih(i) .ne. 1 .and. nunit(i) .eq. nugrow(i) ) 
      &        then
             write(iou,*) ' nchoih must be one if nunit = nugrow'
             ldie = .true.
             return
-         endif
+         end if
          if ( nchtor(i) .gt. nchtor_max ) then
             write(iou,*) 'nchtor gt nchtor_max'
             ldie = .true.
             return
-         endif
+         end if
          if ( nchbna(i) .gt. nchbn_max ) then
             write(iou,*) 'nchbna gt nchbn_max'
             ldie = .true.
             return
-         endif
+         end if
          if ( nchbnb(i) .gt. nchbn_max ) then
             write(iou,*) 'nchbnb gt nchbn_max'
             ldie = .true.
             return
-         endif
+         end if
          if ( icbsta(i) .gt. numax ) then
             write(iou,*) 'icbsta gt numax'
             ldie = .true.
             return
-         endif
-      enddo
+         end if
+      end do
 
-c --- read exclusion table for intermolecular interactions
+! --- read exclusion table for intermolecular interactions
       read(4,*)
       read(4,*) nexclu
       do i = 1, nmolty
@@ -2011,17 +2010,17 @@ c --- read exclusion table for intermolecular interactions
             do j = 1, nmolty
                do jj = 1, numax
                   lexclu(i,ii,j,jj) = .false.
-               enddo
-            enddo
-         enddo
-      enddo       
+               end do
+            end do
+         end do
+      end do       
       if ( lecho.and.myid.eq.0 ) then
          if (lverbose) then
             write(iou,*)'nexclu:',nexclu
          else 
             write(iou,*) nexclu
-         endif
-      endif
+         end if
+      end if
       if (nexclu .ne. 0) then
          do ndum = 1, nexclu
             read(4,*) i, ii, j, jj
@@ -2030,13 +2029,13 @@ c --- read exclusion table for intermolecular interactions
             if (lverbose.and.myid.eq.0) then
                write(iou,*) 'excluding interactions between bead',ii,
      &              ' on chain',i,' and bead',jj,' on chain',j
-            endif
-         enddo
+            end if
+         end do
       else
          read(4,*)
-      endif
+      end if
 
-c --- read inclusion list 
+! --- read inclusion list 
       read(4,*)
       read(4,*) inclnum
       if ( lecho.and.myid.eq.0 ) then
@@ -2044,8 +2043,8 @@ c --- read inclusion list
             write(iou,*) 'inclnum:',inclnum
          else 
             write(iou,*) inclnum
-         endif
-      endif
+         end if
+      end if
       if (inclnum .ne. 0) then
          do ndum = 1, inclnum
             read(4,*) inclmol(ndum),inclbead(ndum,1),inclbead(ndum,2)
@@ -2063,19 +2062,19 @@ c --- read inclusion list
      &                    ' between beads',inclbead(ndum,1),' and',
      &                    inclbead(ndum,2)
 
-                  endif
+                  end if
                else
                   write(iou,*) inclmol(ndum),inclbead(ndum,1)
      &                 ,inclbead(ndum,2),inclsign(ndum),ofscale(ndum)
      &		       ,ofscale2(ndum)	
-               endif
-            endif
-         enddo
+               end if
+            end if
+         end do
       else
          read(4,*)
-      endif
+      end if
 
-c --- read a15 inclusion list 
+! --- read a15 inclusion list 
       read(4,*)
       read(4,*) ainclnum
       if ( lecho.and.myid.eq.0 ) then
@@ -2083,8 +2082,8 @@ c --- read a15 inclusion list
             write(iou,*) 'ainclnum:',ainclnum
          else 
             write(iou,*) ainclnum
-         endif
-      endif
+         end if
+      end if
       if (ainclnum .ne. 0) then
          do ndum = 1, ainclnum
             read(4,*) ainclmol(ndum),ainclbead(ndum,1),ainclbead(ndum,2)
@@ -2098,18 +2097,18 @@ c --- read a15 inclusion list
                else
                   write(iou,*) ainclmol(ndum),ainclbead(ndum,1)
      &                 ,ainclbead(ndum,2),a15t(ndum)
-               endif
-            endif
-         enddo
+               end if
+            end if
+         end do
       else
          read(4,*)
-      endif
+      end if
 
-c - set up the inclusion table
+! - set up the inclusion table
       call inclus( inclnum,inclmol,inclbead,inclsign,ncarbon,
      &     ainclnum,ainclmol,ainclbead,a15t,ofscale,ofscale2)
 
-c -  read in information on the chemical potential checker
+! -  read in information on the chemical potential checker
       read(4,*)
       read(4,*) lucall
       read(4,*)
@@ -2120,13 +2119,13 @@ c -  read in information on the chemical potential checker
             do jj = 1,nmolty
                write(iou,*) '   ucheck for molecule type',
      &              jj,':',ucheck(jj)
-            enddo
+            end do
          else 
             write(iou,*) lucall,(ucheck(jj),jj=1,nmolty)
-         endif
-      endif
+         end if
+      end if
 
-c -   read information for virial coefficient calculation
+! -   read information for virial coefficient calculation
       read(4,*) 
       read(4,*) nvirial,starvir,stepvir
       if (lecho.and.myid.eq.0) then
@@ -2136,15 +2135,15 @@ c -   read information for virial coefficient calculation
             write(iou,*) 'stepvir:',stepvir
          else 
             write(iou,*) nvirial,starvir,stepvir
-         endif
-      endif
+         end if
+      end if
 
       if (lvirial) then
          if ( nvirial .gt. maxvir ) then
             write(iou,*) 'nvirial .gt. maxvir'
             ldie = .true.
             return
-         endif
+         end if
 
          read(4,*)
          read(4,*) ntemp,(virtemp(jj),jj=1,ntemp)
@@ -2159,28 +2158,28 @@ c -   read information for virial coefficient calculation
      &              'Calculation of virial coefficient ',
      &              'at the following temperatures:',
      &              (virtemp(jj),jj=1,ntemp)
-            endif
-         endif
-      endif
+            end if
+         end if
+      end if
 
-c --- JLR 11-11-09 
-c --- reading in extra variables for RPLC simulations
-c --- if lideal=.true. then intermolecular interactions are not computed    
-c --- if ltwice=.true. then mimage is applied twice  
-c --- if lrplc=.true. there are some special rules in CBMC for how to grow chains  
+! --- JLR 11-11-09 
+! --- reading in extra variables for RPLC simulations
+! --- if lideal=.true. then intermolecular interactions are not computed    
+! --- if ltwice=.true. then mimage is applied twice  
+! --- if lrplc=.true. there are some special rules in CBMC for how to grow chains  
       read(4,*)
       read(4,*) (lideal(i),i=1,nbox)  
       if (lecho.and.myid.eq.0)  then
          write(iou,*) 'lideal: ', (lideal(i),i=1,nbox)  
-      endif
+      end if
       do i = 1,nbox 
          if (lideal(i) .and. lexpee) then
             write(iou,*) 'cannot have lideal and lexpee both true'
             write(iou,*) 'If you want this you will have change code'
             ldie = .true.
             return
-         endif
-      enddo
+         end if
+      end do
       read(4,*)
       read(4,*) (ltwice(i),i=1,nbox)
       read(4,*)
@@ -2188,41 +2187,41 @@ c --- if lrplc=.true. there are some special rules in CBMC for how to grow chain
       if (lecho.and.myid.eq.0) then
          write(iou,*) 'ltwice: ', (ltwice(i),i=1,nbox) 
          write(iou,*) 'lrplc: ', (lrplc(i),i=1,nmolty)
-      endif
-c --- END JLR 11-11-09                         
+      end if
+! --- END JLR 11-11-09                         
 
-c--- JLR 11-11-09
-c--- skip this part if analysis will not be done (if ianalyze .gt. nstep)
-c KM 01/10 remove analysis 
-c      if (ianalyze.lt.nstep) then
-c         nhere = 0
-c         do zz=1,nntype
-c            if ( lhere(zz) ) then
-c               nhere = nhere + 1
-c               temphe(nhere) = zz
-c               beadtyp(nhere)=zz
-c            endif
-c         enddo
-c         do zz = 1,nhere 
-c            atemp = temphe(zz)
-c            decode(atemp) = zz
-c         enddo
-c      endif
-c --- END JLR 11-11-09
+!--- JLR 11-11-09
+!--- skip this part if analysis will not be done (if ianalyze .gt. nstep)
+! KM 01/10 remove analysis 
+!      if (ianalyze.lt.nstep) then
+!         nhere = 0
+!         do zz=1,nntype
+!            if ( lhere(zz) ) then
+!               nhere = nhere + 1
+!               temphe(nhere) = zz
+!               beadtyp(nhere)=zz
+!            end if
+!         end do
+!         do zz = 1,nhere 
+!            atemp = temphe(zz)
+!            decode(atemp) = zz
+!         end do
+!      end if
+! --- END JLR 11-11-09
 
 
-C -------------------------------------------------------------------
+! -------------------------------------------------------------------
  
-c *** restart saver
+! *** restart saver
       if ( nstep .gt. 100 ) then
          irsave = nstep / 20
       else
          irsave = nstep + 1
-      endif
+      end if
 
-c -------------------------------------------------------------------
+! -------------------------------------------------------------------
  
-c * check information of .INC-files 
+! * check information of .INC-files 
       if (myid.eq.0) then
          write(iou,*)
          write(iou,*) '***** program   =  THE MAGIC BLACK BOX'
@@ -2230,23 +2229,23 @@ c * check information of .INC-files
          if ( lgrand ) then
             iensem = iensem + 1
             write(iou,*) 'grand-canonical ensemble'
-         endif
+         end if
          if ( lvirial ) then
             write(iou,*) 'Computing Second Virial Coefficient'
             if ( nchain .ne. 2) then
                write(iou,*) 'nchain must equal 2'
                ldie = .true.
                return
-            endif
-         endif
+            end if
+         end if
          if ( lgibbs ) then
             iensem = iensem + 1
             if ( lnpt ) then
                write(iou,*) 'NPT Gibbs ensemble'
             else
                write(iou,*) 'NVT Gibbs ensemble'
-            endif
-         endif
+            end if
+         end if
          if ( iensem .eq. 0 ) then
             if ( lnpt ) then
                write(iou,*) 'Isobaric-isothermal ensemble'
@@ -2254,13 +2253,13 @@ c * check information of .INC-files
             else
                write(iou,*) 'Canonical ensemble'
                iensem = iensem + 1
-            endif
-         endif
+            end if
+         end if
          if ( iensem .gt. 1 ) then
             write(iou,*) 'INCONSISTENT ENSEMBLE SPECIFICATION'
             ldie = .true.
             return
-         endif
+         end if
          
          inpbc = 0
          if ( lpbc ) then
@@ -2268,20 +2267,20 @@ c * check information of .INC-files
             if ( lpbcx ) then
                inpbc = inpbc + 1
                write(iou,*) 'in x-direction'
-            endif
+            end if
             if ( lpbcy ) then
                inpbc = inpbc + 1
                write(iou,*) 'in y-direction'
-            endif
+            end if
             if ( lpbcz ) then
                inpbc = inpbc + 1
                write(iou,*) 'in z-direction'
-            endif
+            end if
             if ( inpbc .eq. 0 ) then
                write(iou,*) 'INCONSISTENT PBC SPECIFICATION'
                ldie = .true.
                return
-            endif
+            end if
             write(iou,*) inpbc,'-dimensional periodic box'
          else
             write(iou,*) 'cluster mode (no pbc)'
@@ -2290,8 +2289,8 @@ c * check information of .INC-files
      &              AND ENSEMBLE'
                ldie = .true.
                return
-            endif
-         endif
+            end if
+         end if
          
          if ( lfold ) then
             write(iou,*) 'particle coordinates are folded 
@@ -2301,30 +2300,30 @@ c * check information of .INC-files
      &              LFOLD'
                ldie = .true.
                return
-            endif
-         endif
+            end if
+         end if
          
          if ( lijall ) then
             write(iou,*) 'all i-j-interactions are considered',
      &           '  (no potential cut-off)'
-         endif
+         end if
          
          if ( lchgall ) then
             write(iou,*) 'all the inter- and intramolecular Coulombic',
      &           ' interactions are considered (no group-based cutoff)'
-         endif
+         end if
          if ( lcutcm ) then
             write(iou,*) 'additional (COM) cutoff on computed rcmu'
             if ( lijall ) then
                write(iou,*) 'cannot have lijall with lcutcm'
                ldie = .true.
                return
-            endif
-c         if ( lchgall ) call cleanup('cannot have lchgall with lcutcm')
-         endif
+            end if
+!         if ( lchgall ) call cleanup('cannot have lchgall with lcutcm')
+         end if
          if ( ldual ) then
             write(iou,*) 'Dual Cutoff Configurational-bias Monte Carlo'
-         endif
+         end if
          
          write(iou,*) 
      &        'CBMC simultaneously grows all beads conected to the 
@@ -2334,10 +2333,10 @@ c         if ( lchgall ) call cleanup('cannot have lchgall with lcutcm')
          
          if ( ljoe ) then
             write(iou,*) 'external 12-3 potential for SAM (Joe Hautman)'
-         endif
+         end if
          if (lslit) then
             write(iou,*) '10-4-3 graphite slit pore potential'
-         endif
+         end if
          if ( lsami ) then
             write(iou,*) 'external potential for Langmuir films (Sami)'
             write(iou,*) 'WARNING: LJ potential defined in SUSAMI'
@@ -2348,13 +2347,13 @@ c         if ( lchgall ) call cleanup('cannot have lchgall with lcutcm')
      &              LSAMI'
                ldie = .true.
                return
-            endif
-         endif
+            end if
+         end if
          
          if ( lexzeo ) then
             write(iou,*) 'external potential for zeolites (Berend)'
             write(iou,*) 'WARNING: potential defined in SUZEO'
-         endif
+         end if
          
          write(iou,*) 'Program will call Explct.f if needed'
          
@@ -2371,7 +2370,7 @@ c         if ( lchgall ) call cleanup('cannot have lchgall with lcutcm')
             write(iou,*) 'Feuston-Garofalini potential for bead-bead'
          else
             write(iou,*) 'Lennard-Jones potential for bead-bead'
-         endif
+         end if
          
          if ( ltailc ) then
             write(iou,*) 'with additional tail corrections'
@@ -2379,8 +2378,8 @@ c         if ( lchgall ) call cleanup('cannot have lchgall with lcutcm')
                write(iou,*) ' lshift.and.ltailc!'
                ldie = .true.
                return
-            endif
-         endif
+            end if
+         end if
          
          if ( lshift) then
             write(iou,*) 'using a shifted potential'
@@ -2388,8 +2387,8 @@ c         if ( lchgall ) call cleanup('cannot have lchgall with lcutcm')
                write(iou,*) ' lshift.and.ltailc!'
                ldie = .true.
                return
-            endif
-         endif
+            end if
+         end if
          
          write(iou,*) 'Coulombic inter- and intramolecular interactions'
          if ( lewald ) write(iou,*)
@@ -2397,12 +2396,12 @@ c         if ( lchgall ) call cleanup('cannot have lchgall with lcutcm')
      &        interactions'
          write(iou,*)
          write(iou,*) 'MOLECULAR MASS:', (masst(i),i=1,nmolty)
-      endif
+      end if
 
-C -------------------------------------------------------------------
+! -------------------------------------------------------------------
 
-c *** read/produce initial/starting configuration ***
-c *** zeolite external potential
+! *** read/produce initial/starting configuration ***
+! *** zeolite external potential
       if ( lexzeo ) then
          call suzeo(rcut(1),newtab)
          boxlx(1)=zeorx
@@ -2410,31 +2409,31 @@ c *** zeolite external potential
          boxlz(1)=zeorz
          if (myid.eq.0) write(iou,*) ' note zeolite determines 
      &        the box size !'
-      endif
+      end if
 
-C ----------------------------------------------------------------      
+! ----------------------------------------------------------------      
       if (lgrand .and. .not.(lslit)) then
-c ---     volume ideal gas box is set arbitry large!
+! ---     volume ideal gas box is set arbitry large!
          boxlx(2)=1000*boxlx(1)          
          boxly(2)=1000*boxly(1)
          boxlz(2)=1000*boxlz(1)
-      endif
+      end if
       if (linit) then
          do ibox = 1,nbox
             if (lsolid(ibox) .and. .not. lrect(ibox)) then
                write(iou,*) 'Cannot initialize non-rectangular system'
                ldie = .true.
                return
-            endif
-         enddo
-      endif
+            end if
+         end do
+      end if
 
       if ( linit ) then
          call initia(qelect)
          nnstep = 0
       else
-c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM needed for long input records, like
-c nboxi and moltyp for a lot of molecules
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM needed for long input records, like
+! nboxi and moltyp for a lot of molecules
          OPEN(77,FILE='fort.77',RECL=4096)
          read (77,*) nnstep
          read(77,*) Armtrax, Armtray, Armtraz
@@ -2444,8 +2443,8 @@ c nboxi and moltyp for a lot of molecules
      &              , rmtraz(imol,im)
                read(77,*) rmrotx(imol,im), rmroty(imol,im)
      &              , rmrotz(imol,im)
-            enddo
-         enddo
+            end do
+         end do
          if (myid.eq.0) then 
             write(iou,*) 
      &           'new maximum displacements read from restart-file'
@@ -2457,45 +2456,45 @@ c nboxi and moltyp for a lot of molecules
      &                 , rmtraz(imol,im)
                   write(iou,1102) rmrotx(imol,im), rmroty(imol,im)
      &                 , rmrotz(imol,im)
-               enddo
-            enddo
-         endif
+               end do
+            end do
+         end if
 
          do im=1,nbox
             read (77,*) (rmflcq(i,im),i=1,nmolty)
-         enddo
+         end do
          if ( lecho.and.myid.eq.0) then
             do im=1,nbox
                write(iou,*) 'maximum fluc q displacements: Box #',im
                write(iou,*) (rmflcq(i,im),i=1,nmolty)
-            enddo
-         endif
-c -- changed so fort.77 the same for all ensembles
-c -- 06/08/09 KM
-c         if ( lgibbs .or. lgrand .or. lnpt ) then
+            end do
+         end if
+! -- changed so fort.77 the same for all ensembles
+! -- 06/08/09 KM
+!         if ( lgibbs .or. lgrand .or. lnpt ) then
          read (77,*) (rmvol(ibox), ibox = 1,nbox)
          if (myid.eq.0) then
             write(iou,1103) (rmvol(ibox), ibox = 1,nbox)
             write(iou,*)
             write(iou,*) 
-         endif
+         end if
          do ibox = 1,nbox
             if (lsolid(ibox) .and. .not. lrect(ibox)) then
                read(77,*) (rmhmat(ibox,j),j=1,9)
                if (myid.eq.0) write(iou,*) (rmhmat(ibox,j),j=1,9)
-            endif
-         enddo
+            end if
+         end do
          
          if (lexzeo) then
             do ibox = 1,nbox
                read(77,*) dum,dum,dum
-            enddo
+            end do
          else
             if (myid.eq.0) then
                write(iou,*) 
                write(iou,*) 'new box size read from restart-file'
                write(iou,*)
-            endif
+            end if
             
             do ibox = 1,nbox
                
@@ -2509,7 +2508,7 @@ c         if ( lgibbs .or. lgrand .or. lnpt ) then
                      write(iou,*) (hmat(ibox,j),j=4,6)
                      write(iou,*) (hmat(ibox,j),j=7,9)
                      write(iou,*)
-                  endif
+                  end if
                   
                   call matops(ibox) 
                   
@@ -2517,7 +2516,7 @@ c         if ( lgibbs .or. lgrand .or. lnpt ) then
                      write(iou,*)    
                      write(iou,1106) ibox,min_width(ibox,1),min_width
      &                    (ibox,2),min_width(ibox,3)
-                  endif
+                  end if
 
                   w(1) = min_width(ibox,1)
                   w(2) = min_width(ibox,2)
@@ -2529,7 +2528,7 @@ c         if ( lgibbs .or. lgrand .or. lnpt ) then
                      write(iou,*) 'rcut > half cell width'
                      ldie = .true.
                      return
-                  endif
+                  end if
                   
                   if (myid.eq.0) then
                      write(iou,*)
@@ -2549,10 +2548,10 @@ c         if ( lgibbs .or. lgrand .or. lnpt ) then
                      write(iou,'("cell angle gamma:",2x,f12.3)')
      &                    cell_ang(ibox,3)*180.0d0/onepi
                    
-c                     write(iou,1105) ibox,cell_ang(ibox,1)*180.0d0/onepi,
-c     &                cell_ang(ibox,2)*180.0d0/onepi,cell_ang(ibox,3)
-c     &                *180/onepi     
-                  endif
+!                     write(iou,1105) ibox,cell_ang(ibox,1)*180.0d0/onepi,
+!     &                cell_ang(ibox,2)*180.0d0/onepi,cell_ang(ibox,3)
+!     &                *180/onepi     
+                  end if
                else
 
                   read (77,*) boxlx(ibox),boxly(ibox),boxlz(ibox)
@@ -2561,7 +2560,7 @@ c     &                *180/onepi
                      write(iou,*) 
                      write(iou,1104) ibox,
      &                    boxlx(ibox),boxly(ibox),boxlz(ibox)
-                  endif
+                  end if
 
                   do i = 1, nbox
                      if( (rcut(i)/boxlx(i) .gt. 0.5d0).or.
@@ -2570,79 +2569,79 @@ c     &                *180/onepi
                         write(iou,*) 'rcut > 0.5*boxlx'
                         ldie = .true.
                         return
-                     endif
-                  enddo
+                     end if
+                  end do
                   
                   
                   
-               endif
+               end if
                
-            enddo
-         endif
+            end do
+         end if
 
-c         endif ! end if ( lgibbs .or. lgrand .or. lnpt )
+!         end if ! end if ( lgibbs .or. lgrand .or. lnpt )
          if (myid.eq.0) then
             write(iou,*)
             write(iou,*) 'Finished writing simulation box related info'
-         endif
+         end if
 
          read (77,*) ncres
          read (77,*) nmtres
-c --- check that number of particles in fort.4 & fort.77 agree ---
+! --- check that number of particles in fort.4 & fort.77 agree ---
          if ( ncres .ne. nchain .or. nmtres .ne. nmolty ) then
             write(iou,*)
-     +         'conflicting information in restart and control files'
+     &         'conflicting information in restart and control files'
             write(iou,*) 'nchain',nchain,'ncres',ncres
             write(iou,*) 'nmolty',nmolty,'nmtres',nmtres
             ldie = .true.
             return
-         endif
+         end if
          read (77,*) (nures(i),i=1,nmtres)
 
-c         do i = 1, nmtres
-c            if ( nures(i) .ne. nunit(i) ) then
-c               write(iou,*)
-c     +           'conflicting information in restart and control files'
-c               write(iou,*) 'unit',i,'nunit',nunit(i),'nures',nures(i)
-c               call cleanup('')
-c            endif
-c         enddo
-c         write(iou,*) 'ncres',ncres,'   nmtres',nmtres
+!         do i = 1, nmtres
+!            if ( nures(i) .ne. nunit(i) ) then
+!               write(iou,*)
+!     +           'conflicting information in restart and control files'
+!               write(iou,*) 'unit',i,'nunit',nunit(i),'nures',nures(i)
+!               call cleanup('')
+!            end if
+!         end do
+!         write(iou,*) 'ncres',ncres,'   nmtres',nmtres
 
          read (77,*) (moltyp(i),i=1,ncres)
          read (77,*) (nboxi(i),i=1,ncres)
          if ( lee ) then
             do i = 1, nmtres
                if ( lexpand(i) ) read(77,*) eetype(i)
-            enddo
+            end do
             do i = 1, nmtres
                if ( lexpand(i) ) read(77,*) rmexpc(i)
-            enddo
-         endif
+            end do
+         end if
 
-c         write(iou,*) 'start reading coordinates'
-c --- check that particles are in correct boxes ---
-c --- obtain ncmt values
+!         write(iou,*) 'start reading coordinates'
+! --- check that particles are in correct boxes ---
+! --- obtain ncmt values
          do ibox = 1,nbox
 
             nchbox(ibox) = 0
  
-         enddo
+         end do
          do i = 1, nmolty
             do ibox = 1,nbox
                ncmt(ibox,i) = 0
-            enddo
+            end do
             if ( lexpand(i) ) then
 
-c ??? problem in expand ensemble
+! ??? problem in expand ensemble
 
                do j = 1, numcoeff(i)
                   do ibox = 1,2
                      ncmt2(ibox,i,j) = 0
-                  enddo
-               enddo
-            endif
-         enddo
+                  end do
+               end do
+            end if
+         end do
 
 
          do i = 1, ncres
@@ -2654,7 +2653,7 @@ c ??? problem in expand ensemble
                   write(iou,*) 'Particle found outside BOX 1'
                   ldie = .true.
                   return
-               endif
+               end if
                nchbox(ibox) = nchbox(ibox) + 1
                imolty = moltyp(i)
                ncmt(ibox,imolty) = ncmt(ibox,imolty) + 1
@@ -2664,30 +2663,30 @@ c ??? problem in expand ensemble
      &                    molecules'
                      ldie = .true.
                      return
-                  endif
+                  end if
                   itype = eetype(imolty)
                   ncmt2(ibox,imolty,itype) = 
      &                 ncmt2(ibox,imolty,itype) + 1
                   do j = 1,nunit(imolty)
                      sigma(imolty,j) = sigm(imolty,j,itype)
                      epsilon(imolty,j) = epsil(imolty,j,itype)
-                  enddo
-               endif 
+                  end do
+               end if 
             else
                write(iou,*) 'i:',i,'nboxi(i)',nboxi(i)
                write(iou,*) 'Particle found in ill-defined box'
                ldie = .true.
                return
-            endif
+            end if
 
-         enddo
+         end do
 
-c --- check that number of particles of each type is consistent
+! --- check that number of particles of each type is consistent
          do i = 1, nmolty
             tcount = 0
             do ibox = 1, nbox
                tcount = tcount + ncmt(ibox,i)
-            enddo
+            end do
             if ( tcount .ne. temtyp(i) ) then
                write(iou,*) 'Particle type number inconsistency'
                write(iou,*) 'type',i
@@ -2695,25 +2694,25 @@ c --- check that number of particles of each type is consistent
                write(iou,*) 'temtyp', temtyp(i)
                ldie = .true.
                return
-            endif
-         enddo
+            end if
+         end do
 
-c         write(iou,*) 'particles found in correct box with correct type'
+!         write(iou,*) 'particles found in correct box with correct type'
 
          do i = 1,nbxmax
             qbox(i) = 0.0d0
-         enddo
+         end do
 
          do 22 i = 1, nchain
-c            write(iou,*) 'reading coord of chain i',i
+!            write(iou,*) 'reading coord of chain i',i
             imolty = moltyp(i)
             do j = 1, nunit(imolty)
                read (77,*) rxu(i,j), ryu(i,j), rzu(i,j),qqu(i,j)
                if (.not. lreadq) then
                   qqu(i,j) = qelect(ntype(imolty,j))
-               endif
+               end if
                qbox(nboxi(i)) = qbox(nboxi(i)) + qqu(i,j)
-            enddo
+            end do
             
  22      continue
 
@@ -2724,10 +2723,10 @@ c            write(iou,*) 'reading coord of chain i',i
                write(iou,*) 'box',i,' has a net charge of',qbox(i)
                ldie = .true.
                return
-            endif
-         enddo
+            end if
+         end do
 
-      endif
+      end if
  
       if (L_Ewald_Auto) then
         if ( lchgall ) then
@@ -2738,15 +2737,15 @@ c            write(iou,*) 'reading coord of chain i',i
      &                       min_width(ibox,3))
                   else
                      min_boxl = min(boxlx(ibox),boxly(ibox),boxlz(ibox))
-                  endif
+                  end if
                   kalp(ibox) = 6.40d0
                   calp(ibox) = kalp(ibox)/min_boxl
-               enddo 
+               end do 
            else
               write(iou,*) 'lewald should be true when lchgall is true'
               ldie = .true.
               return
-           endif
+           end if
         else
            do ibox = 1, nbox 
               if (lsolid(ibox).and.(.not.lrect(ibox))) then
@@ -2754,60 +2753,60 @@ c            write(iou,*) 'reading coord of chain i',i
      &                       min_width(ibox,3))
               else
                   min_boxl = min(boxlx(ibox),boxly(ibox),boxlz(ibox))
-              endif
+              end if
 !              rcut(ibox) = 0.4d0*min_boxl
               calp(ibox) = 3.2d0/rcut(ibox) 
-           enddo 
-        endif
+           end do 
+        end if
       else
         if ( lchgall ) then
-c *** if real::space term are summed over all possible pairs in the box
-c *** kalp(1) & kalp(2) are fixed while calp(1) & calp(2) change
-c *** according to the boxlength, kalp(1) should have a value greater than
-c *** 5.0
+! *** if real::space term are summed over all possible pairs in the box
+! *** kalp(1) & kalp(2) are fixed while calp(1) & calp(2) change
+! *** according to the boxlength, kalp(1) should have a value greater than
+! *** 5.0
           do ibox = 1, nbox
              if (lsolid(ibox).and.(.not.lrect(ibox))) then
                   min_boxl = min(min_width(ibox,1),min_width(ibox,2),
      &                       min_width(ibox,3))
               else
                   min_boxl = min(boxlx(ibox),boxly(ibox),boxlz(ibox))
-              endif
+              end if
              calp(ibox) = kalp(ibox)/min_boxl
              if ( lewald ) then
                 if ( kalp(ibox) .lt. 5.6d0 ) then
                    write(iou,*) 'Warning, kalp is too small'
                    ldie = .true.
                    return
-                endif
+                end if
              else
-ckea
+!kea
                 if(.not. lgaro) then
                    write(iou,*) 'lewald should be true when lchgall 
      &                  is true'
                    ldie = .true.
                    return
-                endif
-             endif
-          enddo
+                end if
+             end if
+          end do
         else
-c *** if not lchgall, calp(1) & calp(2) are fixed
+! *** if not lchgall, calp(1) & calp(2) are fixed
          do ibox = 1, nbox
             calp(ibox) = kalp(ibox)
             if ( lewald ) then
                if (calp(ibox)*rcut(ibox).lt.3.2d0.and.myid.eq.0) then
                   write(iou,*) 'Warning, kalp too small in box',ibox
                   write(iou,*) ibox,calp(ibox),rcut(ibox)
-ccc --- JLR 11-24-09  
-ccc --- you may want a smaller kalp, e.g. when comparing to previous work
-ccc --- This does not need to be a call cleanup('')  
-c                  call cleanup('kalp is too small, set to 3.2/rcutchg')
+!cc --- JLR 11-24-09  
+!cc --- you may want a smaller kalp, e.g. when comparing to previous work
+!cc --- This does not need to be a call cleanup('')  
+!                  call cleanup('kalp is too small, set to 3.2/rcutchg')
                   write(iou,*) 'kalp is too small, set to 3.2/rcutchg'
-ccc --- END JLR 11-24-09
-               endif
-            endif
-         enddo
-        endif
-      endif
+!cc --- END JLR 11-24-09
+               end if
+            end if
+         end do
+        end if
+      end if
 
       if (L_Ewald_Auto) then
         do ibox = 1,nbox
@@ -2819,9 +2818,9 @@ ccc --- END JLR 11-24-09
               k_max_l(ibox) = dint(hmat(ibox,1)*calp(ibox))+2
               k_max_m(ibox) = dint(hmat(ibox,5)*calp(ibox))+2
               k_max_n(ibox) = dint(hmat(ibox,9)*calp(ibox))+2
-           endif
-        enddo  
-      endif
+           end if
+        end do  
+      end if
 
       if (L_Ewald_Auto.and.myid.eq.0) then
          write(iou,*) 
@@ -2832,98 +2831,98 @@ ccc --- END JLR 11-24-09
             write(iou,'(i4,5x,f12.6,3i12,12x,f12.4)') ibox, calp(ibox), 
      &                 k_max_l(ibox),k_max_m(ibox),
      &                 k_max_n(ibox),rcut(ibox) 
-         enddo 
+         end do 
          write(iou,*)
-      endif
+      end if
 
-c--- book keeping arrays
+!--- book keeping arrays
       do ibox=1,nbox
          do imolty=1,nmolty
             idummy(imolty)=0
-         enddo      
+         end do      
          do i = 1, nchain
             if ( nboxi(i) .eq. ibox ) then
                imolty=moltyp(i)
                idummy(imolty) = idummy(imolty)+1
                parbox(idummy(imolty),ibox,imolty)=i
-c               pparbox(i,ibox) = nmcount
-            endif
-         enddo
+!               pparbox(i,ibox) = nmcount
+            end if
+         end do
          nmcount = 0
          do imolty=1,nmolty
             nmcount = nmcount + idummy(imolty)
-         enddo
+         end do
          if ( nmcount .ne. nchbox(ibox) ) then
             write(iou,*) 'Readdat: nmcount ne nchbox', nmcount, nchbox
             ldie = .true.
             return
-         endif
-      enddo
-c     set idummy counter to 0
+         end if
+      end do
+!     set idummy counter to 0
       do imolty=1,nmolty
          idummy(imolty)=0
-      enddo
-c     set up parall
+      end do
+!     set up parall
       do i =1,nchain
          imolty = moltyp(i)
          idummy(imolty) = idummy(imolty) + 1
          parall(imolty,idummy(imolty)) = i
-      enddo
+      end do
 
-C -------------------------------------------------------------------
+! -------------------------------------------------------------------
  
-c - reordering of numbers for charmm
-c      do i = 1, nchain
-c         imolty = moltyp(i)
-c         temtyp(i) = imolty
-c         do j = 1, nunit(imolty)
-c            temx(i,j) = rxu(i,j)
-c            temy(i,j) = ryu(i,j)
-c            temz(i,j) = rzu(i,j)
-c         enddo
-c      enddo
-c      innew = 0
-c      do it = 1, nmolty
-c         do i = 1, nchain
-c            imolty = temtyp(i)
-c            if ( imolty .eq. it ) then
-c               innew = innew + 1
-c               moltyp(innew) = it
-c               do j = 1, nunit(imolty)
-c                  rxu(innew,j) = temx(i,j)
-c                  ryu(innew,j) = temy(i,j)
-c                  rzu(innew,j) = temz(i,j)
-c               enddo
-c            endif
-c         enddo
-c         write(iou,*) 'it =',it,'   innew =',innew
-c      enddo
+! - reordering of numbers for charmm
+!      do i = 1, nchain
+!         imolty = moltyp(i)
+!         temtyp(i) = imolty
+!         do j = 1, nunit(imolty)
+!            temx(i,j) = rxu(i,j)
+!            temy(i,j) = ryu(i,j)
+!            temz(i,j) = rzu(i,j)
+!         end do
+!      end do
+!      innew = 0
+!      do it = 1, nmolty
+!         do i = 1, nchain
+!            imolty = temtyp(i)
+!            if ( imolty .eq. it ) then
+!               innew = innew + 1
+!               moltyp(innew) = it
+!               do j = 1, nunit(imolty)
+!                  rxu(innew,j) = temx(i,j)
+!                  ryu(innew,j) = temy(i,j)
+!                  rzu(innew,j) = temz(i,j)
+!               end do
+!            end if
+!         end do
+!         write(iou,*) 'it =',it,'   innew =',innew
+!      end do
 
-C -------------------------------------------------------------------
+! -------------------------------------------------------------------
 
-c --- set the centers of mass if LFOLD = .TRUE.
+! --- set the centers of mass if LFOLD = .TRUE.
 
       if ( lfold ) then
          do ibox = 1, nbox
             call ctrmas(.true.,ibox,0,6)
-         enddo
-      endif
+         end do
+      end if
 
-c * check that rintramax is really valid
+! * check that rintramax is really valid
       if (licell) then
          do i = 1,nchain
             if (2.0d0*rcmu(i) .gt. rintramax) then
                write(iou,*) 'rintramax for the linkcell list too small'
                ldie = .true.
                return
-            endif
-         enddo
-      endif
+            end if
+         end do
+      end if
 
-c * calculate number of frames *
+! * calculate number of frames *
       nnframe = nstep / imv
  
-c *** write out movie-header ***
+! *** write out movie-header ***
       if (myid.eq.0) then
          open(unit=10, file=file_movie, status='unknown')
          if ( nnframe .ne. 0 ) then
@@ -2933,60 +2932,60 @@ c *** write out movie-header ***
                if ( lhere(zz) ) then
                   nhere = nhere + 1
                   temphe(nhere) = zz
-               endif
-            enddo
+               end if
+            end do
 
             write(10,*) nhere,(temphe(zz),zz=1,nhere)
          
             do imolty = 1,nmolty
                write(10,*) nunit(imolty)
-c     output bond connectivity information
+!     output bond connectivity information
                do ii=1,nunit(imolty)
                   write(10,*) invib(imolty,ii)
      &                 ,(ijvib(imolty,ii,z),z=1,invib(imolty,ii))
-               enddo
+               end do
 
-c     output torsional connectivity information
+!     output torsional connectivity information
                do j = 1,nunit(imolty)
                   write(10,*) intor(imolty,j)
                   do ii = 1,intor(imolty,j)
                      write(10,*) ijtor2(imolty,j,ii)
      &                    ,ijtor3(imolty,j,ii),ijtor4(imolty,j,ii)
-                  enddo
-               enddo
-            enddo
+                  end do
+               end do
+            end do
 
-         endif
-      endif
+         end if
+      end if
 
-c     --- write out isolute movie header
+!     --- write out isolute movie header
       lprint = .false.
       do imol = 1,nmolty
          if (lsolute(imol)) then
             lprint = .true.
-         endif
-      enddo
+         end if
+      end do
 
       if (lprint.and.myid.eq.0) then
          write(11,*) nmolty
          do imol = 1, nmolty
             write(11,*) imol,nunit(imol),(nstep / isolute(imol))
      &           * temtyp(imol)
-         enddo
-      endif
+         end do
+      end if
 
 
-c *** write out initial configuration for first movie frame ***
+! *** write out initial configuration for first movie frame ***
       if (nnstep .eq. 0) then
          dum = 1.0d0
             call monper(dum,dum,dum,dum,dum,dum,dum,dum
-c * fixed by adding nbox, why the hell didn't this cause errors before?
-c * KM fixed by adding dum for acsolpar
+! * fixed by adding nbox, why the hell didn't this cause errors before?
+! * KM fixed by adding dum for acsolpar
      &       ,dum,dum,dum,nbox,nnstep,dum,.false.,.false.,.false.
      &       ,.true.,.false.,.false.,lratfix,lsolute,dum,0.0d0,0.0d0)
-      endif
+      end if
 
-c *** calculate constants for lmuir external potential ***
+! *** calculate constants for lmuir external potential ***
       if ( lmuir ) then
          sigpri = 0.715d0 * dsqrt( 3.8d0 * 3.93d0 )
          c9ch2 = 4.0d0 * ( 1.43d0 * dsqrt(80.0d0*47.0d0) ) * sigpri**9
@@ -3001,31 +3000,31 @@ c *** calculate constants for lmuir external potential ***
          write(iou,*) 'external potential for Langmuir monolayers used'
          write(iou,*) 'zprmin',zprmin
          write(iou,*) 'v2prmin',v2prmin,'v3prmin',v3prmin
-      endif
+      end if
 
-C -------------------------------------------------------------------
+! -------------------------------------------------------------------
 
-c * write out connectivity and bonded interactions
+! * write out connectivity and bonded interactions
       if (lverbose.and.myid.eq.0) then
          do imol = 1,nmolty
             write(iou,*) 'molecule type',imol
             if (nunit(imol) .gt. 1) then
                write(iou,*) '   i   j   type_i type_j   bond length',
      &              '        k/2'
-            endif
+            end if
             do i = 1,nunit(imol)
                do j = 1, invib(imol,i)
                   write(iou,1014) i,ijvib(imol,i,j),ntype(imol,i),
      &                 ntype(imol,ijvib(imol,i,j)),
      &                 brvib(itvib(imol,i,j)),brvibk(itvib(imol,i,j))
-               enddo
-            enddo
+               end do
+            end do
 
             if (nunit(imol) .gt. 2) then
                write(iou,*)
                write(iou,*) '   i   j   k   type_i type_j type_k',
      &              '     angle      k/2'
-            endif
+            end if
             do i = 1,nunit(imol)
                do j = 1,inben(imol,i)
                   write(iou,1015) i,ijben2(imol,i,j),
@@ -3034,14 +3033,14 @@ c * write out connectivity and bonded interactions
      &                 ntype(imol,ijben3(imol,i,j)),
      &                 brben(itben(imol,i,j))*180.0d0/onepi,
      &                 brbenk(itben(imol,i,j))
-               enddo
-            enddo
+               end do
+            end do
 
             if (nunit(imol) .gt. 3) then
                write(iou,*)
                write(iou,*) '   i   j   k   l    type_i type_j type_k',
      &              ' type_l     torsion type'
-            endif
+            end if
 
             do i = 1,nunit(imol)
                do j = 1, intor(imol,i)
@@ -3051,17 +3050,17 @@ c * write out connectivity and bonded interactions
      &                 ntype(imol,ijtor3(imol,i,j)),
      &                 ntype(imol,ijtor4(imol,i,j)),
      &                 ittor(imol,i,j)
-               enddo
-            enddo
+               end do
+            end do
 
-         enddo
-      endif
+         end do
+      end if
 
-c * write out non-bonded interaction table
+! * write out non-bonded interaction table
       if (myid.eq.0) then
          write(iou,*)
-c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
-c added a flag for lgaro...need to add for all potentials, probably
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
+! added a flag for lgaro...need to add for all potentials, probably
          if ((.not.lexpsix).and.(.not.lmmff).and.(.not.lgaro)) then
             if (lninesix) then
                write(iou,*)
@@ -3072,7 +3071,7 @@ c added a flag for lgaro...need to add for all potentials, probably
             else
                write(iou,*) 
      & '     i   j    sig2ij     epsij         q0(i)          q0(j)'
-            endif
+            end if
             do i = 1, nntype
                do j = 1,nntype
                   if ( lhere(i) .and. lhere(j) ) then
@@ -3090,16 +3089,16 @@ c added a flag for lgaro...need to add for all potentials, probably
                         write(iou,'(3x,2i4,2f10.5,2f15.6)') i,j
      &                    ,dsqrt(sig2ij(ij))
      &                    , epsij(ij),qelect(i),qelect(j)
-                     endif
-                  endif
-               enddo
-            enddo
-         endif
-      endif
+                     end if
+                  end if
+               end do
+            end do
+         end if
+      end if
 
       if ( lneigh ) then
-c *** If using neighbour list make sure the rcut & rcutnn is the same
-c *** for all the boxes
+! *** If using neighbour list make sure the rcut & rcutnn is the same
+! *** for all the boxes
          do ibox = 2,nbox
             if ((dabs(rcut(1)-rcut(ibox)).gt.1.0d-10).and.
      &           (dabs(rcutnn(1)-rcut(ibox)).gt.1.0d-10)) then
@@ -3107,20 +3106,20 @@ c *** for all the boxes
      &              boxes same'
                ldie = .true.
                return
-            endif
-         enddo
+            end if
+         end do
  
-c *** calculate squares of nn-radius and max. update displacement ***
+! *** calculate squares of nn-radius and max. update displacement ***
          rcnnsq = rcutnn(1) * rcutnn(1)
          upnn = ( rcutnn(1) - rcut(1) ) / 3.0d0
          upnnsq = upnn * upnn
  
-c *** calculate max. angular displacement that doesn't violate upnn ***
-c *** calculate max. all-trans chain length ( umatch ) ***
+! *** calculate max. angular displacement that doesn't violate upnn ***
+! *** calculate max. all-trans chain length ( umatch ) ***
          umatch = 0.0d0
          do j = 1, nunit(1) - 1
             umatch = umatch + brvib(1)
-         enddo
+         end do
          upnndg = asin( upnn / umatch )
  
         do im=1,2
@@ -3128,33 +3127,33 @@ c *** calculate max. all-trans chain length ( umatch ) ***
               if ( rmtrax(imol,im) .gt. upnn ) then
                  write(iou,*) ' rmtrax greater than upnn',im,imol
                  rmtrax(imol,im) = upnn
-              endif
+              end if
               if ( rmtray(imol,im) .gt. upnn ) then
                  write(iou,*) ' rmtray greater than upnn',im,imol
                  rmtray(imol,im) = upnn
-              endif
+              end if
               if ( rmtraz(imol,im) .gt. upnn ) then
                  write(iou,*) ' rmtraz greater than upnn',im,imol
                  rmtraz(imol,im) = upnn
-              endif
+              end if
               
               if ( rmrotx(imol,im) .gt. upnndg ) then
                  write(iou,*) ' rmrotx greater than upnndg',im,imol
                  rmrotx(imol,im) = upnndg
-              endif
+              end if
               if ( rmroty(imol,im) .gt. upnndg ) then
                  write(iou,*) ' rmroty greater than upnndg',im,imol
                  rmroty(imol,im) = upnndg
-              endif
+              end if
               if ( rmrotz(imol,im) .gt. upnndg ) then
                  write(iou,*) ' rmrotz greater than upnndg',im,imol
                  rmrotz(imol,im) = upnndg
-              endif
-           enddo
-        enddo
-      endif
+              end if
+           end do
+        end do
+      end if
 
-c *** write input data to unit 6 for control ***
+! *** write input data to unit 6 for control ***
       if (myid.eq.0) then
          write(iou,*)
          write(iou,*) 'number of mc cycles:            ', nstep
@@ -3162,22 +3161,22 @@ c *** write input data to unit 6 for control ***
          write(iou,*)
          write(iou,*) 'temperature:                    ', temp
          write(iou,*)
-c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
          write(iou,*) 'ex-pressure:                    ', 
      &        (express(ibox),ibox=1,nbox)
          write(iou,*)
-      endif
+      end if
 
 
-C -------------------------------------------------------------------
+! -------------------------------------------------------------------
 
       do i = 1,nbox   
          if ( rcut(i) .ge. rcutnn(i) .and. lneigh ) then
             write(iou,*) ' rcut greater equal rcutnn for box',i
             ldie = .true.
             return
-         endif
-      enddo
+         end if
+      end do
  
  1012 format(3(1x,f10.6),2i5)
  1013 format(a20,i3,a13,f9.3,a5,f9.1)

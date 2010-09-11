@@ -1,27 +1,27 @@
       subroutine suvibe
 
-c suvibe
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! suvibe
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
 
@@ -33,1085 +33,1085 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       integer::i
 
-c ----------------------------------------------------------------
+! ----------------------------------------------------------------
 
-c - TraPPE-UA- fixed bond length for C-C bonds -
+! - TraPPE-UA- fixed bond length for C-C bonds -
       brvib(1) = 1.54d0
       brvibk(1) = 0.0d0
 
-c - bond stretching for C-C bonds -
-c      brvib(2) = 1.54d0
-c      brvibk(2) = 226450.3d0
-c - bond stretching for C-C bonds - CHARMM
+! - bond stretching for C-C bonds -
+!      brvib(2) = 1.54d0
+!      brvibk(2) = 226450.3d0
+! - bond stretching for C-C bonds - CHARMM
       brvib(2) = 1.54d0
       brvibk(2) = 237018.0d0
 
-c - fixed bond length for C - C double bonds (not aromatic)
-c - from table 1.6 of McMurry Organic Chemistry 3rd edition
+! - fixed bond length for C - C double bonds (not aromatic)
+! - from table 1.6 of McMurry Organic Chemistry 3rd edition
       brvib(3) = 1.33d0
       brvibk(3) = 0.0d0
 
-c - fixed bond length for sp2 C - C sp3 single bonds (not aromatic)
-c - from Jorgensen JACS 106 6638-6646 (1984)
+! - fixed bond length for sp2 C - C sp3 single bonds (not aromatic)
+! - from Jorgensen JACS 106 6638-6646 (1984)
       brvib(4) = 1.50d0
       brvibk(4) = 0.0d0
 
-c - fixed bond length for H-C bond Williams 
+! - fixed bond length for H-C bond Williams 
       brvib(5) = 1.04d0
       brvibk(5) = 0.0d0
 
-c - fixed bond length for C-C bond Williams, also Freire UA C-C, OPLS-UA 
+! - fixed bond length for C-C bond Williams, also Freire UA C-C, OPLS-UA 
       brvib(6) = 1.53d0
       brvibk(6) = 0.0d0
 
-c - fixed bond length for C-CH3 in neopentane Freire Mol Phys 1997
+! - fixed bond length for C-CH3 in neopentane Freire Mol Phys 1997
       brvib(7) = 1.55d0
       brvibk(7) = 0.0d0
 
-c - fixed bond length for C-CH2 in neohexane and CHCH 23 dimethyl butane
-c -  Freire Mol Phys 1997
+! - fixed bond length for C-CH2 in neohexane and CHCH 23 dimethyl butane
+! -  Freire Mol Phys 1997
       brvib(8) = 1.56d0
       brvibk(8) = 0.0d0
 
-c - bond stretching for C-COOH bonds - CHARMM
+! - bond stretching for C-COOH bonds - CHARMM
       brvib(10) = 1.52d0
       brvibk(10) = 0.0d0
-c      brvibk(10) = 239627.0d0
+!      brvibk(10) = 239627.0d0
 
-c - bond stretching for C=O bonds in COOH - CHARMM
+! - bond stretching for C=O bonds in COOH - CHARMM
       brvib(11) = 1.23d0
       brvibk(11) = 0.0d0
-c      brvibk(11) = 619288.2d0
+!      brvibk(11) = 619288.2d0
 
-c - bond stretching for C(CO)-OH bonds - CHARMM
+! - bond stretching for C(CO)-OH bonds - CHARMM
       brvib(12) = 1.37d0
       brvibk(12) = 402578.3d0
 
-c     AMBER94 Cornell et. at.  JACS 117, 5179-5197 (1995)
+!     AMBER94 Cornell et. at.  JACS 117, 5179-5197 (1995)
 
-c - fixed bond length for C==O bonds in COOH - AMBER94
+! - fixed bond length for C==O bonds in COOH - AMBER94
       brvib(13) = 1.229d0
       brvibk(13) = 0.0d0
 
-c - fixed bond length for C--O bonds in COOH - AMBER 94
+! - fixed bond length for C--O bonds in COOH - AMBER 94
       brvib(14) = 1.364d0
       brvibk(14) = 0.0d0
 
-c - fixed bond length for sp2C-sp3C bonds - AMBER 94
+! - fixed bond length for sp2C-sp3C bonds - AMBER 94
       brvib(15) = 1.522d0
       brvibk(15) = 0.0d0
 
-c - fixed bond length for O-H bonds in COOH and COH - AMBER 94
+! - fixed bond length for O-H bonds in COOH and COH - AMBER 94
       brvib(16) = 0.96d0
       brvibk(16) = 0.0d0
 
-c - fixed bond length for C-O bonds in alkanol 
+! - fixed bond length for C-O bonds in alkanol 
       brvib(17) = 1.41d0
       brvibk(17) = 0.0d0
 
-c - fixed bond length for H-O bonds in water 
+! - fixed bond length for H-O bonds in water 
       brvib(18) = 0.9572d0
       brvibk(18) = 0.0d0
 
-c - OPLS AA bond length for c-c in alkanes
-c      brvib(19) = 1.529d0
-c      brvibk(19) = 0.0d0
+! - OPLS AA bond length for c-c in alkanes
+!      brvib(19) = 1.529d0
+!      brvibk(19) = 0.0d0
       brvib(19) = 1.535d0
       brvibk(19) = 0.0d0
 
-c - MMFF bond length for c-c in alkanes
-c      brvib(19) = 1.508d0
-c      brvibk(19) = 0.0d0
+! - MMFF bond length for c-c in alkanes
+!      brvib(19) = 1.508d0
+!      brvibk(19) = 0.0d0
 
-c - OPLS AA bond length for c-h in alkanes
-c      brvib(20) = 1.09d0
-c      brvibk(20) = 0.0d0
+! - OPLS AA bond length for c-h in alkanes
+!      brvib(20) = 1.09d0
+!      brvibk(20) = 0.0d0
       brvib(20) = 0.55d0
       brvibk(20) = 0.0d0
 
-c - MMFF bond length for c-h in alkanes
-c      brvib(20) = 1.093
-c      brvibk(20) = 0.0d0
+! - MMFF bond length for c-h in alkanes
+!      brvib(20) = 1.093
+!      brvibk(20) = 0.0d0
 
-c - OPLS AA bond length for h-h from CRC 72nd Ed.
-c      brvib(21) = 0.74611d0
+! - OPLS AA bond length for h-h from CRC 72nd Ed.
+!      brvib(21) = 0.74611d0
       brvib(21) = 1.535d0/2.0d0
       brvibk(21) = 0.0d0
 
-c --- AA for CF4 bond length C-F (Surface Science 367(1996) P177) ---
+! --- AA for CF4 bond length C-F (Surface Science 367(1996) P177) ---
       brvib(22) = 1.37d0
       brvibk(22) = 0.0d0
 
-c --- AA for CF4 bond length C-F(Nose and Klein J.Chem.Phys. 78(1983) 6928) ---
+! --- AA for CF4 bond length C-F(Nose and Klein J.Chem.Phys. 78(1983) 6928) ---
       brvib(23) = 1.323d0
       brvibk(23) = 0.0d0
 
-c --- Amber AA for CF4 bond length C-F (JCC 13(1992) P963) ---
+! --- Amber AA for CF4 bond length C-F (JCC 13(1992) P963) ---
       brvib(24) = 1.38d0
       brvibk(24) = 0.0d0
 
-c --- SPC-FQ JCP 101, (7) 1 1994 6141
+! --- SPC-FQ JCP 101, (7) 1 1994 6141
       brvib(25) = 1.0d0
       brvibk(25) = 0.0d0
 
-c --- TIP4P OH bond length
+! --- TIP4P OH bond length
       brvib(26) = 0.9572d0
       brvibk(26) = 0.0d0
 
-c --- TIP4P OM length
+! --- TIP4P OM length
       brvib(27) = 0.15d0
       brvibk(27) = 0.0d0
 
-c --- Fixed bond length for O-O in dioxygen
-c     J Chem Phys 98 (12) 9895--9904 Muller-Plathe et al
+! --- Fixed bond length for O-O in dioxygen
+!     J Chem Phys 98 (12) 9895--9904 Muller-Plathe et al
       brvib(28) = 1.21d0
       brvibk(28) = 0.0d0
 
-c - TraPPE fixed bond length for O-H bonds in COH - from OPLS
+! - TraPPE fixed bond length for O-H bonds in COH - from OPLS
       brvib(29) = 0.945d0
       brvibk(29) = 0.0d0
 
-c - TraPPE fixed bond length for C-O bonds in alkanol - from OPLS
+! - TraPPE fixed bond length for C-O bonds in alkanol - from OPLS
       brvib(30) = 1.43d0
       brvibk(30) = 0.0d0
 
-c --- Fixed bond length for N-N in dinitrogen
-c     53rd ed CRC Handbook page F-180, also used for C-H distance
+! --- Fixed bond length for N-N in dinitrogen
+!     53rd ed CRC Handbook page F-180, also used for C-H distance
       brvib(31) = 1.10d0
       brvibk(31) = 0.0d0
 
-c --- TraPPE C-O bond length for CO2
+! --- TraPPE C-O bond length for CO2
        brvib(32) = 1.160d0
        brvibk(32) = 0.0d0
 
-c --- SPECIAL LJ CHAIN J Phys Chem fit to give octane phase diagram
+! --- SPECIAL LJ CHAIN J Phys Chem fit to give octane phase diagram
       brvib(33) = 3.2664d0
       brvibk(33) = 0.0d0
 
-c --- N - charge site bond length for N2 w/quadrupole
+! --- N - charge site bond length for N2 w/quadrupole
       brvib(34) = 0.55d0
       brvibk(34) = 0.0d0
 
-c -- CH3-C in ketones, also carboxylic acids
+! -- CH3-C in ketones, also carboxylic acids
       brvib(35) = 1.52d0
       brvibk(35) = 0.0d0
 
-c --- C=O bond length in carboxylic acid (OPLS)
+! --- C=O bond length in carboxylic acid (OPLS)
       brvib(36) = 1.214d0
       brvibk(36) = 0.0d0
       
-c -- C-O in carboxylic acids
+! -- C-O in carboxylic acids
       brvib(37) = 1.364d0
       brvibk(37) = 0.0d0
 
-c -- O-H in carboxylic acids
+! -- O-H in carboxylic acids
       brvib(38) = 0.970d0
       brvibk(38) = 0.0d0
 
-c -- CH3-S in thiols
+! -- CH3-S in thiols
       brvib(39) = 1.82d0
       brvibk(39) = 0.0d0
 
-c -- S-H in thiols
+! -- S-H in thiols
       brvib(40) = 1.34d0
       brvibk(40) = 0.0d0
 
-c -- C-N in amines (TraPPE-7)
+! -- C-N in amines (TraPPE-7)
       brvib(41) = 1.448d0
       brvibk(41) = 0.0d0
 
-c -- N-H in amines (TraPPE-7)
+! -- N-H in amines (TraPPE-7)
       brvib(42) = 1.01d0
       brvibk(42) = 0.0d0
 
-c -- C-N tertiary amines
+! -- C-N tertiary amines
       brvib(43) = 1.47d0
       brvibk(43) = 0.0d0
 
-c -- TraPPE-UA C-O in ethers from OPLS
+! -- TraPPE-UA C-O in ethers from OPLS
       brvib(44) = 1.41d0
       brvibk(44) = 0.0d0
 
-c --- H-F bond length in HF
+! --- H-F bond length in HF
       brvib(45) = 0.917d0
       brvibk(45) = 0.0d0
 
-c --- M site bond length in HF
+! --- M site bond length in HF
       brvib(46) = 0.166d0
       brvibk(46) = 0.0d0
 
-c --- C(arom)-C(arom) fixed bond length
+! --- C(arom)-C(arom) fixed bond length
       brvib(47) = 1.4d0
       brvibk(47) = 0.0d0
 
-c --- TraPPE-UA CH3-[C=-N] triple bond length (from OPLS)
+! --- TraPPE-UA CH3-[C=-N] triple bond length (from OPLS)
       brvib(48) = 1.157d0
       brvibk(48) = 0.0d0
 
-c --- OPLS [CH3-C]=-N bond length -not- for TraPPE-UA
+! --- OPLS [CH3-C]=-N bond length -not- for TraPPE-UA
       brvib(49) = 1.458d0
       brvibk(49) = 0.0d0
 
-c --- CH3-CH2 bond length in OPLS-UA Ether model
+! --- CH3-CH2 bond length in OPLS-UA Ether model
       brvib(50) = 1.516d0
       brvibk(50) = 0.0d0
 
-c --- dinitrogen bond length (Tildesley?) From Nose + Klein Mol Phys 1983, 50, 1055.
+! --- dinitrogen bond length (Tildesley?) From Nose + Klein Mol Phys 1983, 50, 1055.
       brvib(51) = 1.098d0
       brvibk(51) = 0.0d0
 
-c * formic acid model from llnl 4/6/04 jms
-c --- C-O bond length in 9-6 formic acid model
+! * formic acid model from llnl 4/6/04 jms
+! --- C-O bond length in 9-6 formic acid model
       brvib(52) = 1.376d0
       brvibk(52) = 237518.0d0
 
-c --- C=O bond length in 9-6 formic acid model
+! --- C=O bond length in 9-6 formic acid model
       brvib(53) = 1.188d0
       brvibk(53) = 558190.5d0
 
-c --- C-H bond length in 9-6 formic acid model
+! --- C-H bond length in 9-6 formic acid model
       brvib(54) = 1.075d0
       brvibk(54) = 227599.8d0
 
-c --- O-H bond length in 9-6 formic acid model
+! --- O-H bond length in 9-6 formic acid model
       brvib(55) = 1.038d0
       brvibk(55) = 317466.8d0
 
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c -- added 7/12/06 for nitro group and rigid aromatic ring
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! -- added 7/12/06 for nitro group and rigid aromatic ring
 
-c -- C-N bond length for nitro
+! -- C-N bond length for nitro
       brvib(56) = 1.49d0
       brvibk(56) = 0.0d0
 
-c -- N-O bond length for nitro
+! -- N-O bond length for nitro
       brvib(57) = 1.225d0
       brvibk(57) = 0.0d0
 
-c -- center-pi site, 9 site benzene
+! -- center-pi site, 9 site benzene
       brvib(58) = 0.785d0
       brvibk(58) = 0.0d0
 
-c -- C4-C5 oNT
+! -- C4-C5 oNT
       brvib(59) = 1.396d0
       brvibk(59) = 0.0d0
 
-c -- C4-C9 oNT
+! -- C4-C9 oNT
       brvib(60) = 1.4075d0
       brvibk(60) = 0.0d0
 
-c -- C4-C5 mNT
+! -- C4-C5 mNT
       brvib(61) = 1.3908d0
       brvibk(61) = 0.0d0
 
-c -- C4-C9 mNT
+! -- C4-C9 mNT
       brvib(62) = 1.3927d0
       brvibk(62) = 0.0d0
 
-c -- N-O1 oNT
+! -- N-O1 oNT
       brvib(63) = 1.2271d0
       brvibk(63) = 0.0d0
 
-c -- N-O2 oNT
+! -- N-O2 oNT
       brvib(64) = 1.2272d0
       brvibk(64) = 0.0d0
 
-c -- N-O1 mNT
+! -- N-O1 mNT
       brvib(65) = 1.2265d0
       brvibk(65) = 0.0d0
 
-c -- N-O2 mNT
+! -- N-O2 mNT
       brvib(66) = 1.2263d0
       brvibk(66) = 0.0d0
 
-c -- C4-N oNT
+! -- C4-N oNT
       brvib(67) = 1.4692d0
       brvibk(67) = 0.0d0
 
-c -- C4-N mNT
+! -- C4-N mNT
       brvib(68) = 1.4699d0
       brvibk(68) = 0.0d0
 
-c -- bond lengths for Neimark DMMP JPCA v108, 1435 (2004)
+! -- bond lengths for Neimark DMMP JPCA v108, 1435 (2004)
 
-c  -- P=O
+!  -- P=O
       brvib(70) = 1.458d0
       brvibk(70) = 0.0d0
 
-c -- P-CH3
+! -- P-CH3
       brvib(71) = 1.795d0
       brvibk(71) = 0.0d0
 
-c -- P-O(CH3)
+! -- P-O(CH3)
       brvib(72) = 1.586d0
       brvibk(72) = 0.0d0
 
-c -- O-CH3
+! -- O-CH3
       brvib(73) = 1.418d0
       brvibk(73) = 0.0d0
 
-c -- end parameters for Neimark DMMP
+! -- end parameters for Neimark DMMP
 
 
-C -- Starting floro-alkanes (Neeraj)
+! -- Starting floro-alkanes (Neeraj)
 
-c --  C-F All atom floroalkanes
+! --  C-F All atom floroalkanes
       brvib(80)  = 1.33d0
       brvibk(80) = 0.0d0
 
-c --  C-C All atom Floroalkanes
+! --  C-C All atom Floroalkanes
 
       brvib(81) = 1.54d0
       brvibk(81) = 0.0d0
 
-c --  C-H all atom Fluoroalkanes
+! --  C-H all atom Fluoroalkanes
       brvib(82) = 1.08d0
       brvibk(82)= 0.0d0
 
-c -- C-Cl bond for Chloroflouroalkanes
+! -- C-Cl bond for Chloroflouroalkanes
       brvib(83) = 1.754
       brvibk(83) = 0.0d0
 
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c - parameters for acrylates
-c - some values already listed elsewhere - will fix that later
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! - parameters for acrylates
+! - some values already listed elsewhere - will fix that later
 
-c - bond length for CHx-O(ether) bonds
+! - bond length for CHx-O(ether) bonds
       brvib(100) = 1.41d0
       brvibk(100) = 0.0d0
 
-c - bond length for O(ether)-C(carbonyl) bonds
+! - bond length for O(ether)-C(carbonyl) bonds
       brvib(101) = 1.344d0
       brvibk(101) = 0.0d0
 
-c - bond length for C=O for carboylate esters
+! - bond length for C=O for carboylate esters
       brvib(102) = 1.20d0
       brvibk(102) = 0.0d0
 
-c - bond length for C-CH bonds
+! - bond length for C-CH bonds
       brvib(103) = 1.52d0
       brvibk(103) = 0.0d0
 
-c - bond length for C=C bonds
+! - bond length for C=C bonds
       brvib(104) = 1.33d0
       brvibk(104) = 0.0d0
       
-c - bond length for CHx-CHy bonds (#1)
+! - bond length for CHx-CHy bonds (#1)
       brvib(105) = 1.54d0
       brvibk(105) = 0.0d0
 
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c - test parameters for coarse-grain model
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! - test parameters for coarse-grain model
       brvib(110) = 3.25d0
       brvibk(110) = 0.0d0
 
       brben(110) = 150.0d0
       brbenk(110) = 1.0d-12
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-c--- JLR 11-11-09
-c--- adding vibrational parameters for RPLC simulation
-c --- Si-O in silica
+!--- JLR 11-11-09
+!--- adding vibrational parameters for RPLC simulation
+! --- Si-O in silica
       brvib(111) = 1.61d0
       brvibk(111) = 0.0d0
-c --- Si-CHx in alkylsilane
+! --- Si-CHx in alkylsilane
       brvib(112) = 1.90d0
       brvibk(112) = 0.0d0
-c--- END JLR 11-11-09
+!--- END JLR 11-11-09
 
-c * unused 
-c
-c * methanol O-H from H2 parameter set from Monica's dissertation *
-c      brvib() = 1.0285d0
-c      brvibk() = 0.0d0
-c
-c * methanol C-O from H2 parameter set from Monica's dissertation *
-c      brvib() = 1.4175d0
-c      brvibk() = 0.0d0
+! * unused 
+!
+! * methanol O-H from H2 parameter set from Monica's dissertation *
+!      brvib() = 1.0285d0
+!      brvibk() = 0.0d0
+!
+! * methanol C-O from H2 parameter set from Monica's dissertation *
+!      brvib() = 1.4175d0
+!      brvibk() = 0.0d0
 
-c -- C--C TATB
+! -- C--C TATB
        brvib(120) = 1.442d0
        brvibk(120) = 0.5d0*1400.0d0*503.25
-c -- C--NO2 TATB
+! -- C--NO2 TATB
        brvib(121) = 1.419d0
        brvibk(121) = 0.5d0*1400.0d0*503.25
-c -- C--NH2 TATB
+! -- C--NH2 TATB
        brvib(122) = 1.314d0
        brvibk(122) = 0.5d0*1400.0d0*503.25
-c -- N--O TATB
+! -- N--O TATB
        brvib(123) = 1.243d0
        brvibk(123) = 0.5d0*1400.0d0*503.25
-c -- N--H TATB
+! -- N--H TATB
        brvib(124) = 1.0d0
        brvibk(124) = 0.5d0*700.0d0*503.25
 
 
-c ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+! ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-c - TraPPE-UA bond angle for alkane segment centered at methylene (CH2 sp3)-
+! - TraPPE-UA bond angle for alkane segment centered at methylene (CH2 sp3)-
       brben(1) = 114.0d0
-c     write(iou,*) '***** brben', brben(1) * raddeg
+!     write(iou,*) '***** brben', brben(1) * raddeg
       brbenk(1) = 31250.0d0
 
-c - TraPPE-UA bond angle for alkane segment centered at ternary (CH sp3)-
-c - also used by Freire for most alkane bond angles
+! - TraPPE-UA bond angle for alkane segment centered at ternary (CH sp3)-
+! - also used by Freire for most alkane bond angles
       brben(2) = 112.0d0
       brbenk(2) = 31250.0d0
 
-c - TraPPE-UA bond angle for alkane segment centered at quaternary (C sp3)-
-c - basically the same as used by Freire for neopentane and 
-c                                        2,3-dimethylbutane
+! - TraPPE-UA bond angle for alkane segment centered at quaternary (C sp3)-
+! - basically the same as used by Freire for neopentane and 
+!                                        2,3-dimethylbutane
       brben(3) = 109.47d0
       brbenk(3) = 31250.0d0
 
-c - bond angle for C=C-C -  segment centered at (CH sp2)
-c - taken from Amber JACS (1995) 117, 5179-5197
+! - bond angle for C=C-C -  segment centered at (CH sp2)
+! - taken from Amber JACS (1995) 117, 5179-5197
       brben(4) = 119.70d0
       brbenk(4) = 35210.0d0
 
-c - bond angle for cis C=C-C NO LONGER USED 4-13-99
+! - bond angle for cis C=C-C NO LONGER USED 4-13-99
       brben(5) = 127.4d0
       brbenk(5) = 31250.0d0
 
-c - bond angle for H-C[methyl]-C[methylene] Ryckaert 
+! - bond angle for H-C[methyl]-C[methylene] Ryckaert 
       brben(6) = 112.49d0
       brbenk(6) = 0.0d0
 
-c - bond angle for C-C-C Van der Ploeg
+! - bond angle for C-C-C Van der Ploeg
       brben(7) = 112.0d0
       brbenk(7) = 31278.0d0
 
-c - bond angle for H-C[methylene]-H Ryckaert
+! - bond angle for H-C[methylene]-H Ryckaert
       brben(8) = 106.0d0
       brbenk(8) = 0.0d0 
 
-c - bond angle for C-C=O (in carboxylic headgroup) - taken from Charmm
-c      brben(10) = 120.0d0
-c --- OPLS value
+! - bond angle for C-C=O (in carboxylic headgroup) - taken from Charmm
+!      brben(10) = 120.0d0
+! --- OPLS value
       brben(10) = 125.0d0
       brbenk(10) = 68438.0d0
 
-c - bond angle for C-C-O (in carboxylic headgroup) - taken from Charmm
+! - bond angle for C-C-O (in carboxylic headgroup) - taken from Charmm
       brben(11) = 110.0d0
       brbenk(11) = 12359.0d0
 
-c - bond angle for C2-P-O (in DPPC) - taken from Charmm
+! - bond angle for C2-P-O (in DPPC) - taken from Charmm
       brben(12) = 120.5d0
       brbenk(12) = 0.0d0
 
-c - bond angle for C2-C1-H (in DPPC) - taken from Charmm
+! - bond angle for C2-C1-H (in DPPC) - taken from Charmm
       brben(13) = 110.0d0
       brbenk(13) = 0.0d0
 
-c - bond angle for H-C2-H (in DPPC) - taken from Charmm
+! - bond angle for H-C2-H (in DPPC) - taken from Charmm
       brben(14) = 106.4d0
       brbenk(14) = 0.0d0
 
-c - bond angle for H-C2-O (in DPPC) - taken from Charmm
+! - bond angle for H-C2-O (in DPPC) - taken from Charmm
       brben(15) = 109.5d0
       brbenk(15) = 0.0d0
 
-c - bond angle for H-C2-C1 (in DPPC) - taken from Charmm
+! - bond angle for H-C2-C1 (in DPPC) - taken from Charmm
       brben(16) = 110.0d0
       brbenk(16) = 0.0d0
 
-c - bond angle for O-C2-C1 (in DPPC) - taken from Charmm
+! - bond angle for O-C2-C1 (in DPPC) - taken from Charmm
       brben(17) = 109.5d0
       brbenk(17) = 0.0d0
 
-c - bond angle for O-P-O' (in DPPC) - taken from Charmm
+! - bond angle for O-P-O' (in DPPC) - taken from Charmm
       brben(18) = 108.2d0
       brbenk(18) = 0.0d0
 
-c - bond angle for O-P-O (in DPPC) - taken from Charmm
+! - bond angle for O-P-O (in DPPC) - taken from Charmm
       brben(19) = 102.6d0
       brbenk(19) = 0.0d0
 
-c - bond angle for O'-P-O' (in DPPC) - taken from Charmm
+! - bond angle for O'-P-O' (in DPPC) - taken from Charmm
       brben(20) = 119.9d0
       brbenk(20) = 0.0d0
 
-c - bond angle for O-C2-C2 (in DPPC) - taken from Charmm
+! - bond angle for O-C2-C2 (in DPPC) - taken from Charmm
       brben(21) = 109.5d0
       brbenk(21) = 0.0d0
 
-c - bond angle for C2-C2-H (in DPPC) - taken from Charmm
+! - bond angle for C2-C2-H (in DPPC) - taken from Charmm
       brben(22) = 110.0d0
       brbenk(22) = 0.0d0
 
-c - bond angle for C2-C2-N3 (in DPPC) - taken from Charmm
+! - bond angle for C2-C2-N3 (in DPPC) - taken from Charmm
       brben(23) = 109.5d0
       brbenk(23) = 0.0d0
 
-c - bond angle for C2-N3-C3 (in DPPC) - taken from Charmm
-c   same parameters as OPLS-UA ether C-C-O and C-O-C
+! - bond angle for C2-N3-C3 (in DPPC) - taken from Charmm
+!   same parameters as OPLS-UA ether C-C-O and C-O-C
       brben(24) = 112.0d0
       brbenk(24) = 0.0d0
 
-c - bond angle for H-C2-N3 (in DPPC) - taken from Charmm
+! - bond angle for H-C2-N3 (in DPPC) - taken from Charmm
       brben(25) = 109.5d0
       brbenk(25) = 0.0d0
 
-c - bond angle for N3-C3-H (in DPPC) - taken from Charmm
+! - bond angle for N3-C3-H (in DPPC) - taken from Charmm
       brben(26) = 109.5d0
       brbenk(26) = 0.0d0
 
-c - bond angle for C3-N3-C3 (in DPPC) - taken from Charmm
+! - bond angle for C3-N3-C3 (in DPPC) - taken from Charmm
       brben(27) = 112.0d0
       brbenk(27) = 0.0d0
 
-c - bond angle for H-C3-H (in DPPC) - taken from Charmm
+! - bond angle for H-C3-H (in DPPC) - taken from Charmm
       brben(28) = 106.4d0
       brbenk(28) = 0.0d0
 
-c - bond angle for O-C'-O' (in DPPC) - taken from Charmm
+! - bond angle for O-C'-O' (in DPPC) - taken from Charmm
       brben(29) = 123.0d0
       brbenk(29) = 0.0d0
 
-c - bond angle for C1-O-C' (in DPPC) - taken from Charmm
+! - bond angle for C1-O-C' (in DPPC) - taken from Charmm
       brben(30) = 109.5d0
       brbenk(30) = 0.0d0
 
-c   bond angles from the All-atom AMBER force field
-c   Cornell et al JACS 117 19 5179-5197 1995
-c   and from OPLS-AA JACS 118 45 11225-11236 (1996)
+!   bond angles from the All-atom AMBER force field
+!   Cornell et al JACS 117 19 5179-5197 1995
+!   and from OPLS-AA JACS 118 45 11225-11236 (1996)
 
-c - bond angle for C-C=O H3C-COOH  AMBER 
+! - bond angle for C-C=O H3C-COOH  AMBER 
       brben(31) = 120.4d0
       brbenk(31) = 4.03d4
 
-c - bond angle for C--O--H (carboxyllic acid) AMBER
+! - bond angle for C--O--H (carboxyllic acid) AMBER
       brben(32) = 113.0d0
       brbenk(32) = 1.76d4
 
-c - bond angle for H3C--C--OH (carboxyllic acid) OPLS-AA 1995
+! - bond angle for H3C--C--OH (carboxyllic acid) OPLS-AA 1995
       brben(33) = 108.0d0
       brbenk(33) = 3.53d4
  
-c - bond angle for O==C--OH (carboxyllic acid) OPLS-AA 1995
+! - bond angle for O==C--OH (carboxyllic acid) OPLS-AA 1995
       brben(34) = 121.0d0
       brbenk(34) = 4.03d4
 
-c - TraPPE bond angle for C-O-H in alkanol - from AMBER (OPLS) flexible
+! - TraPPE bond angle for C-O-H in alkanol - from AMBER (OPLS) flexible
       brben(35) = 108.5d0
       brbenk(35) = 27720.0d0
 
-c - TraPPE bond angle for C-C-O in alkanol - from AMBER
+! - TraPPE bond angle for C-C-O in alkanol - from AMBER
       brben(36) = 109.47d0
       brbenk(36) = 25200.0d0
 
-c - WATER - SPC-FQ JCP 101 (7) 1 1994
-c --   SPC/E J. Phys. Chem. 91 6269-6271 (1987)
+! - WATER - SPC-FQ JCP 101 (7) 1 1994
+! --   SPC/E J. Phys. Chem. 91 6269-6271 (1987)
       brben(37) = 109.47d0
       brbenk(37) = 17640.0d0
 
-c - OPLS AA for c-c-c in alkanes
+! - OPLS AA for c-c-c in alkanes
       brben(38) = 112.7d0
       brbenk(38) = 29382.3d0
 
-c - MMFF for c-c-c in alkanes
-c      brben(38) = 109.608d0
-c      brbenk(38) = 30818.6d0
+! - MMFF for c-c-c in alkanes
+!      brben(38) = 109.608d0
+!      brbenk(38) = 30818.6d0
 
-c - OPLS AA for c-c-h in alkanes
+! - OPLS AA for c-c-h in alkanes
       brben(39) = 110.7d0
-c      brbenk(39) = 0.0d0
+!      brbenk(39) = 0.0d0
       brbenk(39) = 18883.2d0
 
-c - MMFF for c-c-h in alkanes
-c      brben(39) = 110.549d0
-c      brbenk(39) = 0.0d0
-c     brbenk(39) = 23032.5d0
+! - MMFF for c-c-h in alkanes
+!      brben(39) = 110.549d0
+!      brbenk(39) = 0.0d0
+!     brbenk(39) = 23032.5d0
 
-c - OPLS AA for h-c-h in alkanes
+! - OPLS AA for h-c-h in alkanes
       brben(40) = 107.8d0
-c    brbenk(40) = 0.0d0
-c - Methane h-c-h
-c      brben(40) = 109.4712206344907d0
+!    brbenk(40) = 0.0d0
+! - Methane h-c-h
+!      brben(40) = 109.4712206344907d0
       brbenk(40) = 16617.2d0
-c - MMFF for h-c-h in alkanes
-c      brben(40) = 108.836d0
-c      brbenk(40) = 0.0d0
-c      brbenk(40) = 18686.7d0
+! - MMFF for h-c-h in alkanes
+!      brben(40) = 108.836d0
+!      brbenk(40) = 0.0d0
+!      brbenk(40) = 18686.7d0
 
 
-c - AA F-C-F & F-C-C in Methyl group
+! - AA F-C-F & F-C-C in Methyl group
       brben(41) = 109.4712206344907d0
       brbenk(41) = 0.0d0
 
-c - AA C-C-C in C3F8 (JPC 95 1991 P3136)
+! - AA C-C-C in C3F8 (JPC 95 1991 P3136)
       brben(42) = 115.9d0
       brbenk(42) = 31250.0d0
 
-c - AA F-C-F in Methylene group (JPC 95 1991 P3136)
+! - AA F-C-F in Methylene group (JPC 95 1991 P3136)
       brben(43) = 107.0
       brbenk(43) = 0.0d0
 
-c - TIP4P HOH angle
+! - TIP4P HOH angle
       brben(44) = 104.52d0
       brbenk(44) = 0.0d0
 
-c - ??? OPLS C-C-O angle
+! - ??? OPLS C-C-O angle
       brben(45) = 108.0d0
       brbenk(45) = 25200.0d0
 
-c - bond angle for C-O-H in alkanol 
-c - Monica's Alcohol Fixed bond angle
+! - bond angle for C-O-H in alkanol 
+! - Monica's Alcohol Fixed bond angle
       brben(46) = 108.5d0
       brbenk(46) = 0.0d0
-c *** methanol C-O-H angle from H2 param set Monica's dissertation ***
-c      brben(46) = 108.63d0
-c      brbenk(46) = 0.0d0
+! *** methanol C-O-H angle from H2 param set Monica's dissertation ***
+!      brben(46) = 108.63d0
+!      brbenk(46) = 0.0d0
 
-c - bond angle for O-C-C in alkanol 
-c - Monica's Alcohol Fixed bond angle
+! - bond angle for O-C-C in alkanol 
+! - Monica's Alcohol Fixed bond angle
       brben(47) = 108.0d0
       brbenk(47) = 0.0d0
 
-c - bond angle for C-C-C in alkanol 
-c - Monica's Alcohol Fixed bond angle
+! - bond angle for C-C-C in alkanol 
+! - Monica's Alcohol Fixed bond angle
       brben(48) = 112.0d0
       brbenk(48) = 0.0d0
 
-c - bond angle for O-C-O in CO2 and R-C=-N (nitriles)
+! - bond angle for O-C-O in CO2 and R-C=-N (nitriles)
       brben(49) = 180.0d0
       brbenk(49) = 0.0d0
 
-c - bond angle for (O=)C-O-C for OPLS
+! - bond angle for (O=)C-O-C for OPLS
       brben(50) = 115.0d0
       brbenk(50) = 31250d0
 
-c - bond angle for O=C-O for ester
+! - bond angle for O=C-O for ester
       brben(51) = 125d0
       brbenk(51) = 31250d0
  
-c - bond angle for C-C=O in carboxylic acids
+! - bond angle for C-C=O in carboxylic acids
       brben(52) = 126.0d0
-c      brbenk(52) = 31250.0d0
+!      brbenk(52) = 31250.0d0
       brbenk(52) = brbenk(31)
       
-c - bond angle for C-C-O in carboxylic acids
+! - bond angle for C-C-O in carboxylic acids
       brben(53) = 111.0d0
-c      brbenk(53) = 31250.0d0
+!      brbenk(53) = 31250.0d0
       brbenk(53) = brbenk(33)
 
-c - bond angle for O=C-O in carboxylic acids
+! - bond angle for O=C-O in carboxylic acids
       brben(54) = 123.0d0
-c      brbenk(54) = 31250.0d0
+!      brbenk(54) = 31250.0d0
       brbenk(54) = brbenk(34)
 
-c - bond angle for C-O-H in carboxylic acids
+! - bond angle for C-O-H in carboxylic acids
       brben(55) = 107.0d0
-c      brbenk(55) = 0.0d0
+!      brbenk(55) = 0.0d0
       brbenk(55) = brbenk(32)
 
-c --- TraPPE Ether C-O-C angle from OPLS
-c   - constant from AMBER ether (off of website)
+! --- TraPPE Ether C-O-C angle from OPLS
+!   - constant from AMBER ether (off of website)
       brben(56) = 112.0d0
-c wrong value!     brbenk(56) = 15102.0d0
+! wrong value!     brbenk(56) = 15102.0d0
       brbenk(56) = 30200.0d0
 
-c --- TraPPE Ether C-C-O angle from OPLS
-c   - constant from AMBER '94 website
+! --- TraPPE Ether C-C-O angle from OPLS
+!   - constant from AMBER '94 website
       brben(57) = 112.0d0
-c wrong value!     brbenk(57) = 12581.2d0
+! wrong value!     brbenk(57) = 12581.2d0
       brbenk(57) = 25150.0d0
 
-c -- C-N-H in amines (TraPPE-7)
+! -- C-N-H in amines (TraPPE-7)
       brben(58) = 112.9d0
       brbenk(58) = 31250.0d0
 
-c -- H-N-H in amines (TraPPE-7)
+! -- H-N-H in amines (TraPPE-7)
       brben(59) = 106.4d0
       brbenk(59) = 21955.0d0
  
-c -- C-N-C in amines (TraPPE-7)
+! -- C-N-C in amines (TraPPE-7)
       brben(60) = 109.5d0
       brbenk(60) = 25178.0d0
 
-c -- Ch3-C=O bond angle -> in Ketones
+! -- Ch3-C=O bond angle -> in Ketones
       brben(61) = 121.4d0
       brbenk(61) = 31250.0d0
-c	brbenk(61) = 0.0d0
+!	brbenk(61) = 0.0d0
 
-c -- Ch3-C-CH3 in ketones
+! -- Ch3-C-CH3 in ketones
       brben(62) = 117.2d0
       brbenk(62) = 31250.0d0 
-c        brbenk(62) = 0.0d0
+!        brbenk(62) = 0.0d0
 
-c -- C-S-H in thiols
+! -- C-S-H in thiols
       brben(63) = 96.0d0
       brbenk(63) = 31250.0d0 
 
-c -- C-S-C in sulfides
+! -- C-S-C in sulfides
       brben(64) = 99.0d0
       brbenk(64) = 31250.0d0
 
-c -- C-O-C in hydrofuran
-c        brben(65) = 111.0d0
+! -- C-O-C in hydrofuran
+!        brben(65) = 111.0d0
       brben(65) = 110.0d0
       brbenk(65) = 0.0d0
 
-c * formic acid model from llnl 4/6/04 jms
-c --- O-C=O bend in 9-6 formic acid model
+! * formic acid model from llnl 4/6/04 jms
+! --- O-C=O bend in 9-6 formic acid model
       brben(66) = 125.6d0
       brbenk(66) = 76992.0d0
 
-c --- O-C-H bend in 9-6 formic acid model
+! --- O-C-H bend in 9-6 formic acid model
       brben(67) = 112.3d0
       brbenk(67) = 23148.0d0
 
-c --- O=C-H bend in 9-6 formic acid model
+! --- O=C-H bend in 9-6 formic acid model
       brben(68) = 122.1d0
       brbenk(68) = 23148.0d0
 
-c --- C-O-H bend in 9-6 formic acid model
+! --- C-O-H bend in 9-6 formic acid model
       brben(69) = 103.0d0
       brbenk(69) = 26670.0d0
       
-c --  C-N-O bond angle for nitro (UA)
+! --  C-N-O bond angle for nitro (UA)
       brben(70) = 111.5d0
       brbenk(70) = 40284.0d0
 
-c -- O-N-O for nitro (UA + EH/TATB)
+! -- O-N-O for nitro (UA + EH/TATB)
       brben(71) = 125.0d0
       brbenk(71) = 40284.0d0
 
-c -- CH(aro)-CH(aro)-[CH(aro) or CHx]
+! -- CH(aro)-CH(aro)-[CH(aro) or CHx]
       brben(72) = 120.0d0
       brbenk(72) = 0.0d0
 
-c --  C-N-O bond angle for nitro (EH/TATB)
+! --  C-N-O bond angle for nitro (EH/TATB)
       brben(73) = 117.7d0
       brbenk(73) = 40284.0d0
 
-c -- Parameters for DMMP (bending constants are not correct)
-c --  O=P-O     
+! -- Parameters for DMMP (bending constants are not correct)
+! --  O=P-O     
       brben(78) = 114.2d0
       brbenk(78) = 31250.0d0
-c -- O=P-CH3
+! -- O=P-CH3
       brben(79) = 119.25d0
       brbenk(79) = 31250.0d0
-c -- O-P-O
+! -- O-P-O
       brben(80) = 106.5d0
       brbenk(80) = 31250.0d0
-c -- CH3-P-O
+! -- CH3-P-O
       brben(81)= 100.5d0
       brbenk(81) = 31250.0d0
-c -- O-P-O in DMMP
+! -- O-P-O in DMMP
       brben(82) = 159.0d0
       brbenk(82) = 31250.0d0	
-c-  C(aro)-C(aro)-C(aro)
+!-  C(aro)-C(aro)-C(aro)
       brben(83) = 120.0d0
       brbenk(83) = 0.0d0
 
-c -- BEGIN parameters for Neimark DMMP
-c -- O=P-CH3
+! -- BEGIN parameters for Neimark DMMP
+! -- O=P-CH3
       brben(84) = 116.3d0
       brbenk(84) = 40293.0d0 
 
-c -- O=P-O
+! -- O=P-O
       brben(85) = 116.5d0
       brbenk(85) = 50397.0d0
 
-c -- CH3-P-O
+! -- CH3-P-O
       brben(86) = 104.3d0
       brbenk(86) = 20447.0d0
 
-c -- P-O-CH3
+! -- P-O-CH3
       brben(87) = 121.0
       brbenk(87) = 40293.0d0
 
-c -- END parameters for Neimark DMMP
+! -- END parameters for Neimark DMMP
 
 
-C -- Starting All atom floro-alkanes (Neeraj)
+! -- Starting All atom floro-alkanes (Neeraj)
 
-c -- F-C-F bend angle for floroalkanes (Bending const. OPLS)
+! -- F-C-F bend angle for floroalkanes (Bending const. OPLS)
 
       brben(90)  = 109.47d0
       brbenk(90) = 38731.0d0
 
-c -- F-C-C (OPLS)
+! -- F-C-C (OPLS)
 
       brben(91)  = 109.5d0
       brbenk(91) = 25150.0d0
 
-c -- H-C-F (OPLS)
+! -- H-C-F (OPLS)
  
       brben(92)  = 107.0d0
       brbenk(92) = 20120.0d0
 
-c -- C-C-C
+! -- C-C-C
       brben(93) = 115.90d0
       brbenk(93) = 31250.0d0
 
-c -- C-C-H
+! -- C-C-H
       brben(94)  = 108.30d0
       brbenk(94) = 20120.0d0
 
-c -- Cl-C-Cl Cf2Cl2
+! -- Cl-C-Cl Cf2Cl2
       brben(95)  = 111.70d0
       brbenk(95) = 39234.0d0
 
-c -- Cl-C-F CF2Cl2
+! -- Cl-C-F CF2Cl2
       brben(96) = 107.80
       brbenk(96) = 37725.0d0 
 
-c - parameters for acrylates
+! - parameters for acrylates
 
-c - bond angle for CHx-O-C
+! - bond angle for CHx-O-C
       brben(100) = 115.0d0
       brbenk(100) = 31250.0d0
    
-c - bond angle for O-C=O
-cc      brben(101) = 125.0d0
-cc      brbenk(101) = 62500.0d0
+! - bond angle for O-C=O
+!c      brben(101) = 125.0d0
+!c      brbenk(101) = 62500.0d0
       brben(101) = 123.0d0
       brbenk(101) = 20150.0d0
 
-c - bond angle for O-CHx-CHy
+! - bond angle for O-CHx-CHy
       brben(102) = 111.0d0
       brbenk(102) = 17650.0d0
 
-c - bond angle for O=C-CHx (carboxylic acids)
+! - bond angle for O=C-CHx (carboxylic acids)
       brben(103) = 126.0d0
       brbenk(103) = 20150.0d0
 
-c - bond angle for C-CH=CH2, C-C=CH2, and CHx-C(sp2)-CHx
+! - bond angle for C-CH=CH2, C-C=CH2, and CHx-C(sp2)-CHx
       brben(104) = 119.7d0
       brbenk(104) = 35210.0d0
 
 
-c -- TraPPE-7 Bending parameters Collin's part added by Neeraj
+! -- TraPPE-7 Bending parameters Collin's part added by Neeraj
 
-c -- C-N-0 in nitro
+! -- C-N-0 in nitro
       brben(105) = 111.5d0
       brbenk(105) = 40284.0d0
 
-c -- C-C-N in nitro
+! -- C-C-N in nitro
       brben(106) = 111.1d0
       brbenk(106) = 31724.0d0
 
-c -- H-C-N in nitro
+! -- H-C-N in nitro
       brben(107) = 105.0d0
       brbenk(107) = 17624.0d0
 
-c -- O-N-O in nitro
+! -- O-N-O in nitro
       brben(108) = 125.0d0
       brbenk(108) = 40284.0d0
 
-c --- H - C - O in alcohols and ethers H-C-N and C-N-H for amines
+! --- H - C - O in alcohols and ethers H-C-N and C-N-H for amines
       brben(109) = 109.5d0
       brbenk(109) = 17624.39d0
 
-c --- H-N-H for amine
+! --- H-N-H for amine
       brben(110) = 106.4d0
       brbenk(110) = 21955.0d0
 
-c --- C - N - C for amine and O - C - H for alkanol
+! --- C - N - C for amine and O - C - H for alkanol
       brben(111) = 109.5d0
       brbenk(111) = 25178.0d0
 
-c --- amine C-C-N
+! --- amine C-C-N
       brben(112) = 109.47d0
       brbenk(112) = 28300.0d0
 
-c --- OPLS C - C - Cl
+! --- OPLS C - C - Cl
       brben(113) =  111.7d0
       brbenk(113) = 39276.9d0
 
-c --- OPLS H - C - Cl
-c      brben(114) = 114.20d0
-c      brbenk(114) = 35248.5d0
+! --- OPLS H - C - Cl
+!      brben(114) = 114.20d0
+!      brbenk(114) = 35248.5d0
 
-c -- OPLS H-C-O in alcohols
+! -- OPLS H-C-O in alcohols
       brben(115) = 109.5d0
       brbenk(115) = 17605d0 
 
-c --Begin TATB
-c -- C--C--N TATB
+! --Begin TATB
+! -- C--C--N TATB
       brben(150) = 120.0d0
       brbenk(150) = 0.5d0*100.0d0*503.25
 
-c -- C--C(NO2)--C, N--C--H, C--N--O TATB
+! -- C--C(NO2)--C, N--C--H, C--N--O TATB
       brben(151) = 122.0d0
       brbenk(151) = 0.5d0*100.0d0*503.25
 
-c -- C--(NH2)--C, O--N--O
+! -- C--(NH2)--C, O--N--O
       brben(152) = 118.0d0
       brbenk(152) = 0.5d0*100.0d0*503.25
 
-c -- H--N--H TATB
+! -- H--N--H TATB
       brben(153) = 123.0d0
       brbenk(153) = 0.5d0*100.0d0*503.25
-c -- END TATTB
+! -- END TATTB
 
-c --- JLR 11-11-09
-c --- Silica Si-O-Si
+! --- JLR 11-11-09
+! --- Silica Si-O-Si
       brben(154) = 147.0d0
       brbenk(154) = 20.0d0*1000.0d0/1.9872
-c --- END JLR 11-11-09
+! --- END JLR 11-11-09
 
       do i = 1, nvmax
          brben(i) = brben(i) * 8.0d0 * datan(1.0d0) / 360.0d0
-      enddo
-c ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+      end do
+! ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-c - TraPPE-UA alkane torsional parameters for linear segment -
-c     - OPLS torsion Jorgensen, Madura, Swenson JACS 1984 106, 813
+! - TraPPE-UA alkane torsional parameters for linear segment -
+!     - OPLS torsion Jorgensen, Madura, Swenson JACS 1984 106, 813
       vtt0(1) = 0.0d0
       vtt1(1) = 355.03d0
       vtt2(1) = -68.19d0
       vtt3(1) = 791.32d0
 
-c - TraPPE-UA alkane torsional parameters for segment containing a ternary -
-c - carbon CH midsegment split OPLS torsion 
-c - Siepmann et al Mol Phys 1997, 90, 687-693
-c      vtt0(2) =  0.0d0
+! - TraPPE-UA alkane torsional parameters for segment containing a ternary -
+! - carbon CH midsegment split OPLS torsion 
+! - Siepmann et al Mol Phys 1997, 90, 687-693
+!      vtt0(2) =  0.0d0
       vtt0(2) = -251.06d0
       vtt1(2) =  428.73d0
       vtt2(2) = -111.85d0
       vtt3(2) =  441.27d0
 
-c - TraPPE-UA alkane torsional parameters for segment containing a -
-c - quaternary carbon C as mid-segment -
-c - Mundy et al, Faraday Disc 104, 17-36 (1996)
+! - TraPPE-UA alkane torsional parameters for segment containing a -
+! - quaternary carbon C as mid-segment -
+! - Mundy et al, Faraday Disc 104, 17-36 (1996)
       vtt0(3) =    0.00d0
       vtt1(3) =    0.00d0
       vtt2(3) =    0.00d0
       vtt3(3) =  461.29d0
 
-c - torsional parameters for X--(CH2 sp3)--(CH sp2)--Y
-c - taken from jorgensen JACS 106 22 6638-6646 (1984)
+! - torsional parameters for X--(CH2 sp3)--(CH sp2)--Y
+! - taken from jorgensen JACS 106 22 6638-6646 (1984)
       vtt0(4) =    686.1d0
       vtt1(4) =     86.4d0
       vtt2(4) =   -109.8d0
       vtt3(4) =   -282.2d0
 
-c - TraPPE torsional parameters for alkanol (H-)-O-C-(-C) from OPLS
+! - TraPPE torsional parameters for alkanol (H-)-O-C-(-C) from OPLS
       vtt0(5) =    0.00d0
       vtt1(5) =  209.82d0
       vtt2(5) =  -29.17d0
       vtt3(5) =  187.93d0
 
-c - TraPPE torsional parameters for alkanol (HO)-C-C-(-C) from OPLS
+! - TraPPE torsional parameters for alkanol (HO)-C-C-(-C) from OPLS
       vtt0(6) =    0.00d0
       vtt1(6) =  176.62d0
       vtt2(6) =  -53.34d0
       vtt3(6) =  769.93d0
 
-c - TraPPE torsional parameters for alkanol (H-)-O-CH-(CH3)_2 from OPLS
+! - TraPPE torsional parameters for alkanol (H-)-O-CH-(CH3)_2 from OPLS
       vtt0(7) =  215.89d0
       vtt1(7) =  197.33d0
       vtt2(7) =   31.46d0
       vtt3(7) =  -173.92d0
 
-c - torsional parameters for TRANS alkene X-(CH sp2)-(CH sp2)-Y
-c - used in harmonic potential E = vtt0 * (theta - vtt1)**2
-c - Fitted from pcmodel trans 2-butene 4-14-99 MGM
+! - torsional parameters for TRANS alkene X-(CH sp2)-(CH sp2)-Y
+! - used in harmonic potential E = vtt0 * (theta - vtt1)**2
+! - Fitted from pcmodel trans 2-butene 4-14-99 MGM
       vtt0(11) =  13400.0d0
       vtt1(11) =  0.0d0
 
-c - torsional parameters for CIS alkene X-(CH sp2)-(CH sp2)-Y
-c - used in harmonic potential E = vtt0 * (theta - vtt1)**2
-c - Fitted from pcmodel CIS 2-butene 4-14-99 MGM
+! - torsional parameters for CIS alkene X-(CH sp2)-(CH sp2)-Y
+! - used in harmonic potential E = vtt0 * (theta - vtt1)**2
+! - Fitted from pcmodel CIS 2-butene 4-14-99 MGM
       vtt0(12) =  12400.0d0
       vtt1(12) =  onepi
 
-c *** torsional parameters for diethyl ether C-C-O-C from OPLS
-c *** V = v1(1+cos()) - v2(1-cos(2*)) + v3(1+cos(3*))
-c *** this is torsional type 25.
+! *** torsional parameters for diethyl ether C-C-O-C from OPLS
+! *** V = v1(1+cos()) - v2(1-cos(2*)) + v3(1+cos(3*))
+! *** this is torsional type 25.
 
-c *** type 27 is O-C-C-O
+! *** type 27 is O-C-C-O
 
-c - torsional parameters for acrylates
+! - torsional parameters for acrylates
 
-c - CHx-O-C=O
+! - CHx-O-C=O
       vtt0(34) = 1820.74d0
       vtt1(34) = -417.41d0
       vtt2(34) = -1373.14d0
       vtt3(34) = -30.19d0
       vtt4(34) = 0.0d0
 
-c - CH2=CH-C-O
+! - CH2=CH-C-O
       vtt0(35) = 823.03d0
       vtt1(35) = 47.91d0
       vtt2(35) = -773.13d0
       vtt3(35) = 1.99d0
       vtt4(35) = 0.0d0
 
-c - CHx-O-C-CHy(sp2)
+! - CHx-O-C-CHy(sp2)
       vtt0(36) = 1820.74d0
       vtt1(36) = 417.41d0
       vtt2(36) = -1373.14d0
       vtt3(36) = 30.19d0
       vtt4(36) = 0.0d0
 
-c - CH2=C-CH=O
+! - CH2=C-CH=O
       vtt0(37) = 823.03d0
       vtt1(37) = -47.91d0
       vtt2(37) = -773.13d0
       vtt3(37) = -1.99 d0
       vtt4(37) = 0.0d0
 
-c - O=C-C(sp2)-CHx(sp3)
+! - O=C-C(sp2)-CHx(sp3)
       vtt0(38) = 195.185d0
       vtt1(38) = -149.30d0
       vtt2(38) = 164.38d0
       vtt3(38) = 24.12d0
       vtt4(38) = 28.45d0
 
-c - O-C(carbonyl)-C(sp2)-CHx(sp3)
+! - O-C(carbonyl)-C(sp2)-CHx(sp3)
       vtt0(39) =195.185d0
       vtt1(39) = 149.30d0
       vtt2(39) = 164.38d0
       vtt3(39) = -24.12d0
       vtt4(39) = 28.45d0
 
-c - CHx-CHy-O-C(carbonyl)
+! - CHx-CHy-O-C(carbonyl)
       vtt0(40) = 2029.99d0
       vtt1(40) = -751.83d0
       vtt2(40) = -538.95d0
       vtt3(40) = -22.10d0
       vtt4(40) = -51.27d0
 
-c - CH2=CH-CH=CH2 potential for butadiene
+! - CH2=CH-CH=CH2 potential for butadiene
       vtt0(41) = 2034.577d0
       vtt1(41) = 531.571d0
       vtt2(41) = -1239.35d0
       vtt3(41) = 460.038d0
       vtt4(41) = 196.382d0
 
-c - O=CH-CH-CH3 torsion for 2-methyl propanal
+! - O=CH-CH-CH3 torsion for 2-methyl propanal
       vtt0(42) = 1063.29d0
       vtt1(42) = -736.9d0
       vtt2(42) = 57.84d0
       vtt3(42) = -293.23d0
       vtt4(42) = 0.0d0
 
-c - O-CH2-CH2-CHx torsion for ether/acrylate w/long side chain (new functional form)
+! - O-CH2-CH2-CHx torsion for ether/acrylate w/long side chain (new functional form)
       vtt0(43) = 893.21d0
       vtt1(43) = 176.62d0
       vtt2(43) = 53.34d0
       vtt3(43) = 769.93d0
       vtt4(43) = 0.0d0
 
-c - H-O-CH2-CH2 torsion from TraPPE 5 alcohols (new functional form)
+! - H-O-CH2-CH2 torsion from TraPPE 5 alcohols (new functional form)
       vtt0(44) = 368.58d0
       vtt1(44) = 209.8d0
       vtt2(44) = 29.17d0
       vtt3(44) = 187.93d0
       vtt4(44) = 0.0d0
 
-c - O-CH2-CH2-O from TraPPE 6 glycols for HEA (new functional form)
+! - O-CH2-CH2-O from TraPPE 6 glycols for HEA (new functional form)
       vtt0(45) = 1258.09d0
       vtt1(45) = 0.0d0
       vtt2(45) = 251.62d0
       vtt3(45) = 1006.47d0
       vtt4(45) = 0.0d0
 
-c - CH2=CH-C(sp2)-CH3 potential for isoprene
+! - CH2=CH-C(sp2)-CH3 potential for isoprene
       vtt0(46) = 1861.286d0
       vtt1(46) = -349.966d0
       vtt2(46) = -1048.70d0
@@ -1119,23 +1119,23 @@ c - CH2=CH-C(sp2)-CH3 potential for isoprene
       vtt4(46) = 117.915d0
 
 
-c -- Torsional parameters for Neimark DMMP.  Six parameter
-c -- torsional function
-c -- CH3-P-O-CH3
+! -- Torsional parameters for Neimark DMMP.  Six parameter
+! -- torsional function
+! -- CH3-P-O-CH3
         vtt0(48) = 33.80d0
         vtt1(48) = 317.0d0
         vtt2(48) = 38.0d0 
         vtt3(48) = -29.35d0
         vtt4(48) = 37.0d0
         vtt5(48) = -3.0d0
-c -- O=P-O-CH3
+! -- O=P-O-CH3
         vtt0(49) = 0.0d0
         vtt1(49) = 0.0d0
         vtt2(49) = 50.5d0 
         vtt3(49) = 0.0d0
         vtt4(49) = 0.0d0
         vtt5(49) = 0.0d0
-c -- O-P-O-CH3
+! -- O-P-O-CH3
         vtt0(50) = 0.0d0
         vtt1(50) = 480.0d0
         vtt2(50) = 252.6d0 
@@ -1143,22 +1143,22 @@ c -- O-P-O-CH3
         vtt4(50) = 0.0d0
         vtt5(50) = 0.0d0
 
-c *** Starting  fluorocarbons: Fit by Neeraj 6/24/2006 MP2/6-311+G**.
-c *** All atom forcefield
+! *** Starting  fluorocarbons: Fit by Neeraj 6/24/2006 MP2/6-311+G**.
+! *** All atom forcefield
 
-c -- F-C-C-F
+! -- F-C-C-F
         vtt0(51) = 2543.43d0
         vtt1(51) = 1.25603d0
         vtt2(51) = -8.58713d0
         vtt3(51) = -1261.59
 
-c -- F-C-C-C
+! -- F-C-C-C
         vtt0(52)  = 1985.58d0
         vtt1(52)  = -0.18585d0
         vtt2(52)  = 4.07924d0
         vtt3(52)  = -992.516d0
 
-c -- CF-CF-CF-CF Fitted for perfluoropentane
+! -- CF-CF-CF-CF Fitted for perfluoropentane
         vtt0(53)   = 1124.71
         vtt1(53)   = 849.824
         vtt2(53)   = 331.375
@@ -1170,7 +1170,7 @@ c -- CF-CF-CF-CF Fitted for perfluoropentane
         vtt8(53)   = 46.9091
         vtt9(53)   = 60.7336
 
-c -- H-C-C-F
+! -- H-C-C-F
         vtt0(54)  = 819.016
         vtt1(54)  = -6.14744
         vtt2(54)  = -43.9376
@@ -1180,7 +1180,7 @@ c -- H-C-C-F
         vtt6(54)  = 87.2734
 
 
-c -- CF-CF-CF-CF for flourobutane
+! -- CF-CF-CF-CF for flourobutane
         vtt0(55)   = 1231.36d0 
         vtt1(55)   = 972.012d0
         vtt2(55)   = 365.577
@@ -1192,21 +1192,21 @@ c -- CF-CF-CF-CF for flourobutane
         vtt8(55)   = 28.2703
         vtt9(55)   = 44.6317
        
-C -- Available for other Fluororcarbon. They have been shifted down 101 102 etc...
-c -- Ethane H-C-C-H vtorso=a0+a1*(1-cosx)+a2*(1+cos2x)+a3*(1-cos3x)
+! -- Available for other Fluororcarbon. They have been shifted down 101 102 etc...
+! -- Ethane H-C-C-H vtorso=a0+a1*(1-cosx)+a2*(1+cos2x)+a3*(1-cos3x)
         vtt0(56) = 1521.29d0
         vtt1(56) = -0.135221d0
         vtt2(56) = -0.545298d0
         vtt3(56) = -765.161d0
 
-c -- Ethanol H-O-C-C vtorso=a0+a1*(1-cosx)+a2*(1+cos2x)+a3*(1-cos3x)+a4*(1+cos4x)
+! -- Ethanol H-O-C-C vtorso=a0+a1*(1-cosx)+a2*(1+cos2x)+a3*(1-cos3x)+a4*(1+cos4x)
         vtt0(57) = 639.492d0
         vtt1(57) = -101.095d0
         vtt2(57) = 10.2389d0
         vtt3(57) = -321.075d0
         vtt4(57) = 89.8948d0
 
-c -- Ethanol H-O-C-H vtorso=a0+a1*cosx+a2*cos2x+a3*cos3x+a4*cos4x+a5*cos5x+a6*cos6x+a7*cos7x
+! -- Ethanol H-O-C-H vtorso=a0+a1*cosx+a2*cos2x+a3*cos3x+a4*cos4x+a5*cos5x+a6*cos6x+a7*cos7x
         vtt0(58) = 262.743 
         vtt1(58) = -72.2022
         vtt2(58) = 25.3956
@@ -1216,7 +1216,7 @@ c -- Ethanol H-O-C-H vtorso=a0+a1*cosx+a2*cos2x+a3*cos3x+a4*cos4x+a5*cos5x+a6*co
         vtt6(58) = 7.93367
         vtt7(58) = 15.1805
 
-c-- Ethanol O-C-C-H vtorso=a0+a1*cosx+a2*cos2x+a3*cos3x+a4*cos4x+a5*cos5x+a6*cos6x
+!-- Ethanol O-C-C-H vtorso=a0+a1*cosx+a2*cos2x+a3*cos3x+a4*cos4x+a5*cos5x+a6*cos6x
         vtt0(59) = 853.463 
         vtt1(59) = 11.4499
         vtt2(59) = -12.8932
@@ -1225,23 +1225,23 @@ c-- Ethanol O-C-C-H vtorso=a0+a1*cosx+a2*cos2x+a3*cos3x+a4*cos4x+a5*cos5x+a6*cos
         vtt5(59) = -10.5521
         vtt6(59) = 35.1449
 
-c - type 44 is under type 39
+! - type 44 is under type 39
 
 
-c -Hydrofluoroethers F-C-O-C vtorso=a0+a1*cosx+a2*cos(2*x)=a3*cos(3*x)
+! -Hydrofluoroethers F-C-O-C vtorso=a0+a1*cosx+a2*cos(2*x)=a3*cos(3*x)
        vtt0(60) = 804.608 
        vtt1(60) = -6.3210
        vtt2(60) = 9.1809
        vtt3(60) = 785.878
  
-c -Hydrofluoroethers H-C-O-C vtorso=a0+a1*cosx+a2*cos(2*x)+a3*cos(3*x)
+! -Hydrofluoroethers H-C-O-C vtorso=a0+a1*cosx+a2*cos(2*x)+a3*cos(3*x)
        vtt0(61) = 327.282d0
        vtt1(61) = 5.29603d0
        vtt2(61) = 9.29972d0
        vtt3(61) = 324.084d0
    
-c - Hydrofluoroethers F-C-C-O vtorso = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x) + a5*c
-c os(5*x)
+! - Hydrofluoroethers F-C-C-O vtorso = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x) + a5*c
+! os(5*x)
         vtt0(62) = 1738.42d0 
         vtt1(62) = -462.352d0
         vtt2(62) =  9.39616d0
@@ -1249,8 +1249,8 @@ c os(5*x)
         vtt4(62) = 238.459d0
         vtt5(62) =  40.9771d0
       
-c - Hydrofluorethers C-O-C-C vtorso = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x) + a4*cos(4*x) + a5
-c *cos(5*x) + a6*cos(6*x) + a7*cos(7*x
+! - Hydrofluorethers C-O-C-C vtorso = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x) + a4*cos(4*x) + a5
+! *cos(5*x) + a6*cos(6*x) + a7*cos(7*x
         vtt0(63) = 1207.59d0
         vtt1(63) = 1146.14d0
         vtt2(63) = 90.5438d0
@@ -1260,8 +1260,8 @@ c *cos(5*x) + a6*cos(6*x) + a7*cos(7*x
         vtt6(63) = 14.9379d0
         vtt7(63) = -104.586d0
       
-c - Hydrofluorethers H-C-C-O vtorso = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x) + a4*cos(4*x) + a5
-c *cos(5*x) + a6*cos(6*x) + a7*cos(7*x)
+! - Hydrofluorethers H-C-C-O vtorso = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x) + a4*cos(4*x) + a5
+! *cos(5*x) + a6*cos(6*x) + a7*cos(7*x)
         vtt0(64) = 1434.36d0
         vtt1(64) = -56.6214d0
         vtt2(64) = 76.6241d0
@@ -1271,15 +1271,15 @@ c *cos(5*x) + a6*cos(6*x) + a7*cos(7*x)
         vtt6(64) = 555.559d0
         vtt7(64) = 354.076d0
 
-c *** Ketones Jeff's Email
+! *** Ketones Jeff's Email
 
-c --- Ch3-C(=O)-CH2-CH2
+! --- Ch3-C(=O)-CH2-CH2
         vtt0(65) = -17.26d0
         vtt1(65) = 752.6d0
         vtt2(65) = 14.89d0
         vtt3(65) = 282.1d0
  
-c --- O=CH2-CH2-CHx: Fit by me (Jeff) to HF/3-21G ab initio data
+! --- O=CH2-CH2-CHx: Fit by me (Jeff) to HF/3-21G ab initio data
 
         vtt0(66) = 2035.5876d0
         vtt1(66) = -736.8992d0
@@ -1287,10 +1287,10 @@ c --- O=CH2-CH2-CHx: Fit by me (Jeff) to HF/3-21G ab initio data
         vtt3(66) = -293.229d0
 
 
-c -- From TraPPE-7 Added by Neeraj for amines and nitro
-c *** 60 through 70 fit by the BEST TORSIONAL FITTING PROGRAM EVER!
+! -- From TraPPE-7 Added by Neeraj for amines and nitro
+! *** 60 through 70 fit by the BEST TORSIONAL FITTING PROGRAM EVER!
 
-c - torsional parameters for nitro H-C-C-N fit to OPLS
+! - torsional parameters for nitro H-C-C-N fit to OPLS
       vtt0(70) = 165.24d0
       vtt1(70) = -219.263d0
       vtt2(70) = 63.667d0
@@ -1299,7 +1299,7 @@ c - torsional parameters for nitro H-C-C-N fit to OPLS
       vtt5(70) = -2.63063d0
       vtt6(70) = 0.78009d0
 
-c - torsional parameters for nitro C-C-N-O fit to OPLS
+! - torsional parameters for nitro C-C-N-O fit to OPLS
       vtt0(71) = 69.1666d0
       vtt1(71) = -41.3563d0
       vtt2(71) = -14.5474d0
@@ -1308,7 +1308,7 @@ c - torsional parameters for nitro C-C-N-O fit to OPLS
       vtt5(71) = -2.91134d0
       vtt6(71) = 0.954035d0
 
-c - torsional parameters for nitro H-C-N-O fit to OPLS
+! - torsional parameters for nitro H-C-N-O fit to OPLS
       vtt0(72) = 75.4217d0
       vtt1(72) = -40.797d0
       vtt2(72) = 80.445d0
@@ -1317,7 +1317,7 @@ c - torsional parameters for nitro H-C-N-O fit to OPLS
       vtt5(72) = -5.44169d0
       vtt6(72) = 1.67867d0
 
-c - torsional parameters for ether H-C-O-H fit to OPLS
+! - torsional parameters for ether H-C-O-H fit to OPLS
       vtt0(73) = 192.557d0
       vtt1(73) = -88.3325d0
       vtt2(73) = 10.2361d0
@@ -1326,7 +1326,7 @@ c - torsional parameters for ether H-C-O-H fit to OPLS
       vtt5(73) = -0.0247285d0
       vtt6(73) = 0.00349949d0
 
-c - torsional parameters for alkanol and ether H-C-C-O OPLS
+! - torsional parameters for alkanol and ether H-C-C-O OPLS
       vtt0(74) = 215.758d0
       vtt1(74) = 94.6829d0
       vtt2(74) = 40.9651d0
@@ -1335,7 +1335,7 @@ c - torsional parameters for alkanol and ether H-C-C-O OPLS
       vtt5(74) = -3.6513d0
       vtt6(74) = 1.11172d0
 
-c - torsional parameters for alkanol H-C-O-C fit to OPLS
+! - torsional parameters for alkanol H-C-O-C fit to OPLS
       vtt0(75) = 351.912d0
       vtt1(75) = -289.934d0
       vtt2(75) = 195.209d0
@@ -1344,7 +1344,7 @@ c - torsional parameters for alkanol H-C-O-C fit to OPLS
       vtt5(75) = -13.173d0
       vtt6(75) = 4.28713d0
 
-c - torisonal parameters for amine H-C-N-H
+! - torisonal parameters for amine H-C-N-H
       vtt0(76) = 198.768d0
       vtt1(76) = -109.123d0
       vtt2(76) = 12.4603d0
@@ -1353,7 +1353,7 @@ c - torisonal parameters for amine H-C-N-H
       vtt5(76) = -0.0287978d0
       vtt6(76) = 0.00401613
 
-c - torisonal parameters for amine H-C-N-C
+! - torisonal parameters for amine H-C-N-C
       vtt0(77) = 173.871d0
       vtt1(77) = -36.9908d0
       vtt2(77) = 4.69016d0
@@ -1362,7 +1362,7 @@ c - torisonal parameters for amine H-C-N-C
       vtt5(77) = -0.0148358d0
       vtt6(77) = 0.0022968d0
 
-c - torisonal parameters for amine H-N-C-C
+! - torisonal parameters for amine H-N-C-C
       vtt0(78) = 189.877d0
       vtt1(78) =47.8376d0
       vtt2(78) =104.991d0
@@ -1371,7 +1371,7 @@ c - torisonal parameters for amine H-N-C-C
       vtt5(78) = 0.0d0
       vtt6(78) = 0.0d0
 
-c - torisonal parameters for amine C-N-C-C
+! - torisonal parameters for amine C-N-C-C
       vtt0(79) = 1466.12d0
       vtt1(79) = -2188.07d0
       vtt2(79) = 1380.77d0
@@ -1380,15 +1380,15 @@ c - torisonal parameters for amine C-N-C-C
       vtt5(79) = -136.897d0
       vtt6(79) = 52.6532d0
 
-c      vtt0(79) = 864.411d0
-c      vtt1(79) = -1029.11d0
-c      vtt2(79) = 718.434d0
-c      vtt3(79) = -43.7331d0
-c      vtt4(79) = 8.24626d0
-c      vtt5(79) = -1.59901d0
-c      vtt6(79) = 0.315767d0
+!      vtt0(79) = 864.411d0
+!      vtt1(79) = -1029.11d0
+!      vtt2(79) = 718.434d0
+!      vtt3(79) = -43.7331d0
+!      vtt4(79) = 8.24626d0
+!      vtt5(79) = -1.59901d0
+!      vtt6(79) = 0.315767d0
 
-c - torisonal parameters for amine H-C-C-N same as C-C-C-N
+! - torisonal parameters for amine H-C-C-N same as C-C-C-N
       vtt0(80) = 438.11d0
       vtt1(80) = 480.681d0
       vtt2(80) = 150.364d0
@@ -1397,14 +1397,14 @@ c - torisonal parameters for amine H-C-C-N same as C-C-C-N
       vtt5(80) = 0.0847927d0
       vtt6(80) = -0.0129149d0
 
-c -- Starting methyl, dimethyl, diethyl acetamide torsions
-c -- Mp2/6-311+g**//HF/6-311+g**
+! -- Starting methyl, dimethyl, diethyl acetamide torsions
+! -- Mp2/6-311+g**//HF/6-311+g**
 
-c --------------Beging All atom alkane potentials---------------
+! --------------Beging All atom alkane potentials---------------
 
-c -- All atom alkane. This torsion is fit to the C5H12.
+! -- All atom alkane. This torsion is fit to the C5H12.
 
-c -- torsion H-C3-C2-C2 (Linear Alkanes) vtorso=a0 + a3*cos(3x)       
+! -- torsion H-C3-C2-C2 (Linear Alkanes) vtorso=a0 + a3*cos(3x)       
         vtt0(100) = 750.517d0+22.0d0
         vtt1(100) = 0.0d0
         vtt2(100) = 0.0d0
@@ -1416,8 +1416,8 @@ c -- torsion H-C3-C2-C2 (Linear Alkanes) vtorso=a0 + a3*cos(3x)
         vtt8(100) = 0.0d0
         vtt9(100) = 0.0d0
 
-c -- Ethane H-C3-C3-H vtorso=a0+a1*(cosx)+a2*(cos2x)+a3*(cos3x)
-c --- Using the same for H-C3-C2-H
+! -- Ethane H-C3-C3-H vtorso=a0+a1*(cosx)+a2*(cos2x)+a3*(cos3x)
+! --- Using the same for H-C3-C2-H
         vtt0(101) = 755.453+10.0
         vtt1(101) = 0.135223
         vtt2(101) = -0.545309
@@ -1429,7 +1429,7 @@ c --- Using the same for H-C3-C2-H
         vtt8(101) = 0.0d0
         vtt9(101) = 0.0d0
 
-c -- torsion H-C3-C0-C3 (NeoPentane) V = a0+a1*cosx+a2*cos(2x)+a3*cos(3*x)
+! -- torsion H-C3-C0-C3 (NeoPentane) V = a0+a1*cosx+a2*cos(2x)+a3*cos(3*x)
         vtt0(102) = 929.219d0 + 7.8d0
         vtt1(102) = -0.00692145d0
         vtt2(102) = 0.314788d0
@@ -1441,7 +1441,7 @@ c -- torsion H-C3-C0-C3 (NeoPentane) V = a0+a1*cosx+a2*cos(2x)+a3*cos(3*x)
         vtt8(102) = 0.0d0
         vtt9(102) = 0.0d0
 
-c -- torsion for C2-C2-C2-C3 MP2/6-311+G** for C5H12
+! -- torsion for C2-C2-C2-C3 MP2/6-311+G** for C5H12
         vtt0(103) = 1124.71
         vtt1(103)  = 849.824
         vtt2(103)  = 331.375
@@ -1453,17 +1453,17 @@ c -- torsion for C2-C2-C2-C3 MP2/6-311+G** for C5H12
         vtt8(103)  = 46.9091
         vtt9(103)  = 60.7336
 
-c Type 104   C*-C1-C1-C*
+! Type 104   C*-C1-C1-C*
 
 
-c Type 105   C*-C1-C0-C*
+! Type 105   C*-C1-C0-C*
 
 
-c Type 106   C*-C0-C0-C*
+! Type 106   C*-C0-C0-C*
 
 
 
-c --HF/6-311+g** C3-C0-C2-C1 fitted for 224trimethylhexane
+! --HF/6-311+g** C3-C0-C2-C1 fitted for 224trimethylhexane
         vtt0(107) = 1107.68+100.0
         vtt1(107) = 36.2517
         vtt2(107) = 121.795
@@ -1474,8 +1474,8 @@ c --HF/6-311+g** C3-C0-C2-C1 fitted for 224trimethylhexane
         vtt7(107) = 0.0d0
         vtt8(107) = 0.0d0
         vtt9(107) = 0.0d0
-c --HF/6-311+g** C3-C2-C1-C2 fitted for 224trimethylhexane
-c y = a0 + a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)
+! --HF/6-311+g** C3-C2-C1-C2 fitted for 224trimethylhexane
+! y = a0 + a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)
         vtt0(108) = 1837.67
         vtt1(108) = 190.996
         vtt2(108) = 51.5605
@@ -1487,8 +1487,8 @@ c y = a0 + a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)
         vtt8(108) = 0.0d0
         vtt9(108) = 0.0d0
 
-c --MP2/6-311+G** C3-C1-C2-C2 2Methylhexane
-c y = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)+a5*cos(5*x)+a6*cos(6*x)
+! --MP2/6-311+G** C3-C1-C2-C2 2Methylhexane
+! y = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)+a5*cos(5*x)+a6*cos(6*x)
         vtt0(109) = 788.503
         vtt1(109) = 410.738
         vtt2(109) = 283.868
@@ -1500,8 +1500,8 @@ c y = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)+a5*cos(5*x)+a6*cos(6*x)
         vtt8(109) = 0.0d0
         vtt9(109) = 0.0d0
 
-c--MP2/6-311+G** C2-C2-C1-C2 4Methyl Hexane
-c y = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)
+!--MP2/6-311+G** C2-C2-C1-C2 4Methyl Hexane
+! y = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)
         vtt0(110) = 1326.64+5.0
         vtt1(110) = 129.728
         vtt2(110) = 154.814
@@ -1513,8 +1513,8 @@ c y = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)
         vtt8(110) = 0.0d0
         vtt9(110) = 0.0d0
  
-c -- MP2/6-311+G** H-C2-C2-H
-c -- y = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)+a5*cos(5*x)+a6*cos(6*x)
+! -- MP2/6-311+G** H-C2-C2-H
+! -- y = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)+a5*cos(5*x)+a6*cos(6*x)
         vtt0(111) = 952.756+17
         vtt1(111) = -337.392
         vtt2(111) = -508.6
@@ -1526,8 +1526,8 @@ c -- y = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)+a5*cos(5*x)+a6*cos(6*x
         vtt8(111) = 0.0d0
         vtt9(111) = 0.0d0
  
-c MP2/6-311+G** H-C2-C2-C2
-c y = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)+a5*cos(5*x)+a6*cos(6*x)
+! MP2/6-311+G** H-C2-C2-C2
+! y = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)+a5*cos(5*x)+a6*cos(6*x)
         vtt0(112) = 759.436+3
         vtt1(112) = -76.9545
         vtt2(112) = 2.98074
@@ -1539,7 +1539,7 @@ c y = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)+a5*cos(5*x)+a6*cos(6*x)
         vtt8(112) = 0.0d0
         vtt9(112) = 0.0d0
 
-c Type 113   H-C2-C1-H
+! Type 113   H-C2-C1-H
         vtt0(113) = 1315.38
         vtt1(113) = 118.146
         vtt2(113) = -210.975
@@ -1552,7 +1552,7 @@ c Type 113   H-C2-C1-H
         vtt9(113) = 0.0d0  
 
 
-c Type 114   H-C3-C1-H
+! Type 114   H-C3-C1-H
         vtt0(114) = 799.89+55
         vtt1(114) = 3.09152
         vtt2(114) = 2.50577
@@ -1564,10 +1564,10 @@ c Type 114   H-C3-C1-H
         vtt8(114) = 0.0d0
         vtt9(114) = 0.0d0
 
-c Type 115   H-C1-C1-H 
+! Type 115   H-C1-C1-H 
 
 
-c Type 116   H-C3-C1-C*
+! Type 116   H-C3-C1-C*
         vtt0(116) = 773.277
         vtt1(116) = 1.9856
         vtt2(116) = 138.805
@@ -1580,7 +1580,7 @@ c Type 116   H-C3-C1-C*
         vtt9(116) = 0.0d0
  
 
-c Type 117   H-C2-C1-C*
+! Type 117   H-C2-C1-C*
         vtt0(117) = 1079.02+30
         vtt1(117) = -449.079
         vtt2(117) = -450.254
@@ -1593,7 +1593,7 @@ c Type 117   H-C2-C1-C*
         vtt9(117) = 0.0d0
 
 
-c Type 118   H-C2-C0-C*
+! Type 118   H-C2-C0-C*
         vtt0(118) = 1112.86
         vtt1(118) = -14.327
         vtt2(118) = 123.98
@@ -1606,7 +1606,7 @@ c Type 118   H-C2-C0-C*
         vtt9(118) = 0.0d0
 
 
-c Type 119   H-C1-C2-C*  (Hc1c2c3)
+! Type 119   H-C1-C2-C*  (Hc1c2c3)
         vtt0(119) = 1115.19
         vtt1(119) = -513.756
         vtt2(119) = -231.342
@@ -1618,24 +1618,24 @@ c Type 119   H-C1-C2-C*  (Hc1c2c3)
         vtt8(119) = 0.0d0
         vtt9(119) = 0.0d0 
 
-c Type 120   H-C1-C1-C*
+! Type 120   H-C1-C1-C*
 
 
-c Type 121   H-C1-C0-C*
-
-
-
+! Type 121   H-C1-C0-C*
 
 
 
 
-c ----------End All atom alkane potentials-----------------------------
 
-c ---------Begin Amide potential------------------------------------
 
-c -- Adding for Formamide
-c -- MP2/6-311+G** H-C(=O)-N-H
-c y = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)+a5*cos(5*x)
+
+! ----------End All atom alkane potentials-----------------------------
+
+! ---------Begin Amide potential------------------------------------
+
+! -- Adding for Formamide
+! -- MP2/6-311+G** H-C(=O)-N-H
+! y = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)+a5*cos(5*x)
         vtt0(131) = 1914.53
         vtt1(131) = -361.234
         vtt2(131) = -2574.16
@@ -1646,9 +1646,9 @@ c y = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)+a5*cos(5*x)
         vtt7(131) = 0.0d0
         vtt8(131) = 0.0d0
         vtt9(131) = 0.0d0
-c MP2/6-311+G** O-C(=O)-N-H
-c y = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)+a5*cos(5*x)+a6*cos(6*x)+a7*cos(7*x)+a8*cos(8*x)
-Computed values:
+! MP2/6-311+G** O-C(=O)-N-H
+! y = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)+a5*cos(5*x)+a6*cos(6*x)+a7*cos(7*x)+a8*cos(8*x)
+!omputed values:
         vtt0(132) = 2014.47+75
         vtt1(132) = 184.106
         vtt2(132) = -2728.3
@@ -1660,11 +1660,11 @@ Computed values:
         vtt8(132) = 125.165
         vtt9(132) = 0.0d0
 
-c 1) H-C(=O)-N-C
+! 1) H-C(=O)-N-C
 
-c Fitting with formula: y =
-c a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)+a5*cos(5*x)+a6*cos(6*x)+a7*
-c cos(7*x)+a8*cos(8*x)
+! Fitting with formula: y =
+! a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)+a5*cos(5*x)+a6*cos(6*x)+a7*
+! cos(7*x)+a8*cos(8*x)
         vtt0(133) = 2667.38+50
         vtt1(133) = -566.191
         vtt2(133) = -3339.08
@@ -1676,10 +1676,10 @@ c cos(7*x)+a8*cos(8*x)
         vtt8(133) = 114.365
         vtt9(133) = 0.0d0 
 
-c  H-C-N-C(=O)
+!  H-C-N-C(=O)
 
-c y=a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)+a5*cos(5*x)+a6*cos(6*x)+a7*
-c cos(7*x)+a8*cos(8*x)+a9*cos(9*x)
+! y=a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)+a5*cos(5*x)+a6*cos(6*x)+a7*
+! cos(7*x)+a8*cos(8*x)+a9*cos(9*x)
         vtt0(134) = 253.627
         vtt1(134) = -5.62679
         vtt2(134) = -2.32438
@@ -1691,7 +1691,7 @@ c cos(7*x)+a8*cos(8*x)+a9*cos(9*x)
         vtt8(134) = -8.09161
         vtt9(134) = -62.3274
 
-c H-C-N-C
+! H-C-N-C
         vtt0(135) = 532.285+40
         vtt1(135) = 11.956
         vtt2(135) = -7.03127
@@ -1703,9 +1703,9 @@ c H-C-N-C
         vtt8(135) = 0.0d0
         vtt9(135) = 0.0d0
  
-c C-N-C(=O)-O
+! C-N-C(=O)-O
 
-c y= a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)+a5*cos(5*x)+a6*cos(6*x)+a7* cos(7*x)+a8*cos(8*x)+a9*cos(9*x)
+! y= a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)+a5*cos(5*x)+a6*cos(6*x)+a7* cos(7*x)+a8*cos(8*x)+a9*cos(9*x)
         vtt0(136) = 2835.23+20
         vtt1(136) = 411.734
         vtt2(136) = -3616.28
@@ -1716,16 +1716,16 @@ c y= a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)+a5*cos(5*x)+a6*cos(6*x)+a7
         vtt7(136) = -99.6365
         vtt8(136) = 232.172
         vtt9(136) = 68.6528
-c ---------------------------------------------------------------------
-C Starting Alkanol
-c -- Ethanol H-O-C-C vtorso=a0+a1*(1-cosx)+a2*(1+cos2x)+a3*(1-cos3x)+a4*(1+cos4x)
+! ---------------------------------------------------------------------
+! Starting Alkanol
+! -- Ethanol H-O-C-C vtorso=a0+a1*(1-cosx)+a2*(1+cos2x)+a3*(1-cos3x)+a4*(1+cos4x)
         vtt0(144) = 639.492d0
         vtt1(144) = -101.095d0
         vtt2(144) = 10.2389d0
         vtt3(144) = -321.075d0
         vtt4(144) = 89.8948d0
 
-c -- Ethanol H-O-C-H vtorso=a0+a1*cosx+a2*cos2x+a3*cos3x+a4*cos4x+a5*cos5x+a6*cos6x+a7*cos7x
+! -- Ethanol H-O-C-H vtorso=a0+a1*cosx+a2*cos2x+a3*cos3x+a4*cos4x+a5*cos5x+a6*cos6x+a7*cos7x
         vtt0(145) = 262.743
         vtt1(145) = -72.2022
         vtt2(145) = 25.3956
@@ -1735,7 +1735,7 @@ c -- Ethanol H-O-C-H vtorso=a0+a1*cosx+a2*cos2x+a3*cos3x+a4*cos4x+a5*cos5x+a6*co
         vtt6(145) = 7.93367
         vtt7(145) = 15.1805
 
-c-- Ethanol O-C-C-H vtorso=a0+a1*cosx+a2*cos2x+a3*cos3x+a4*cos4x+a5*cos5x+a6*cos6x
+!-- Ethanol O-C-C-H vtorso=a0+a1*cosx+a2*cos2x+a3*cos3x+a4*cos4x+a5*cos5x+a6*cos6x
         vtt0(146) = 853.463
         vtt1(146) = 11.4499
         vtt2(146) = -12.8932
@@ -1744,15 +1744,15 @@ c-- Ethanol O-C-C-H vtorso=a0+a1*cosx+a2*cos2x+a3*cos3x+a4*cos4x+a5*cos5x+a6*cos
         vtt5(146) = -10.5521
         vtt6(146) = 35.1449
 
-c Starting TATB part
+! Starting TATB part
 
-c    H--N--C--C
+!    H--N--C--C
        vtt0(200) = 0.5d0*17.0d0*503.25d0
 
-c    O--N--C--C
+!    O--N--C--C
        vtt0(201) = 0.5d0*5.6d0*503.25d0
 
-c    C--C--C--C, C--C--C--N, N--C--C--N
+!    C--C--C--C, C--C--C--N, N--C--C--N
        vtt0(202) = 0.5d0*25.0d0*503.25d0
 
       return

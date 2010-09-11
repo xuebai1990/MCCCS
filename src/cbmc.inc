@@ -1,46 +1,46 @@
-C CBMC.INC
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff,
-c John Stubbs, and Collin Wick and Ilja Siepmann
-c
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to
-c
-c Free Software Foundation, Inc.
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! CBMC.INC
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff,
+! John Stubbs, and Collin Wick and Ilja Siepmann
+!
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to
+!
+! Free Software Foundation, Inc.
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       logical::lovr,lexist,lexshed,llplace,lpnow,llrig,lsave,lrplc
 
-c *** adding this for iswatch move ***
+! *** adding this for iswatch move ***
       logical::liswinc, liswatch
       dimension liswinc(numax,ntmax),llplace(ntmax)
       integer::other,iparty,iplace, pfrom, pnum, pprev,nplace
-c *** end add ***
+! *** end add ***
 
       real(8)::bncb,bscb,rxp,ryp,rzp,rxnew,rynew,rznew
-     +   ,bnregr,bsregr,bfac,bsswat,bsiswat,fbncb,fbscb
-     +   ,vtry,vtrext,vtrintra,vtrinter,vtrelect,vtrewald
-     +   ,vtrorient,vtrelect_intra,vtrelect_inter
+     &   ,bnregr,bsregr,bfac,bsswat,bsiswat,fbncb,fbscb
+     &   ,vtry,vtrext,vtrintra,vtrinter,vtrelect,vtrewald
+     &   ,vtrorient,vtrelect_intra,vtrelect_inter
       integer::nchoi1,nchoi,icbdir,icbsta,nmaxcbmc,nchoih,nchtor
      &  ,nchbna,nchbnb,nrigi,nchoir,rlist,rfrom,rprev,rnum
       real(8)::acchem, bnchem
       dimension lexist(numax),lexshed(numax)
       common /pbias/  bncb(ntmax,numax), bscb(ntmax,2,numax)
-     +   ,bnregr(ntmax),bsregr(ntmax,2)
-     +   ,bsswat(npamax,npabmax),bsiswat(npamax,npabmax)
-     +   ,fbncb(ntmax,numax), fbscb(ntmax,2,numax)
+     &   ,bnregr(ntmax),bsregr(ntmax,2)
+     &   ,bsswat(npamax,npabmax),bsiswat(npamax,npabmax)
+     &   ,fbncb(ntmax,numax), fbscb(ntmax,2,numax)
       common /cbpara/ nchoi1(ntmax),nchoi(ntmax),icbdir(ntmax)
      &   ,icbsta(ntmax),nmaxcbmc(ntmax),nchoih(ntmax)
      &   ,nchtor(ntmax),nchbna(ntmax),nchbnb(ntmax)

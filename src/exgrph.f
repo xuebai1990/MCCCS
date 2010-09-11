@@ -1,29 +1,29 @@
         function exgrph (x,y,z,ntij)
 
-c exgrph
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! exgrph
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-c - calculates the energy of a bead with a graphite surface
+! - calculates the energy of a bead with a graphite surface
 
 
         implicit none
@@ -52,16 +52,16 @@ c - calculates the energy of a bead with a graphite surface
         e1 = 0.0d0
         fxy = 0.0d0
 
-c       write(81,*) ntij,sqrt(sig2ij(ntij))
+!       write(81,*) ntij,sqrt(sig2ij(ntij))
         
         sz2 = sig2ij(ntij)/(z**2)
         
         aa = pi2 * rsol * delta * sig2ij(ntij)
 
         e0 = aa*epsij(ntij)*((2.0d0/5.0d0)*(sz2**5) - (sz2**2) -
-     +          (sig2ij(ntij)**2/(3.0d0*delta*(0.61*delta+z)**3)))
+     &          (sig2ij(ntij)**2/(3.0d0*delta*(0.61*delta+z)**3)))
 
-c       write(82,*) e0,aa,delta,z       
+!       write(82,*) e0,aa,delta,z       
         if ( lcorreg ) then
                 a1sq = a1**2
         
@@ -69,13 +69,13 @@ c       write(82,*) e0,aa,delta,z
         
                 bb = aa2*pi4*epsij(ntij)/sqrt(3.0d0)
                 
-c               bb = pi4*epsij(ntij)*sig2ij(ntij)**3/
-c     +                 (sqrt(3.0d0)*a1**6)     
+!               bb = pi4*epsij(ntij)*sig2ij(ntij)**3/
+!     +                 (sqrt(3.0d0)*a1**6)     
 
                 cc = aa2/(30.0d0*(pi2/sqrt(3.0d0))**5)
                 
-c               cc = sig2ij(ntij)**6/
-c     +         (30.0d0*a1**6*(pi2/sqrt(3.0d0)**5))
+!               cc = sig2ij(ntij)**6/
+!     +         (30.0d0*a1**6*(pi2/sqrt(3.0d0)**5))
 
                 dd = 2.0d0*(pi2/sqrt(3.0d0))**2
                 
@@ -84,19 +84,19 @@ c     +         (30.0d0*a1**6*(pi2/sqrt(3.0d0)**5))
                 k2 = mbessel(zz,2.0d0)
                 
                 k5 = mbessel(zz,5.0d0)
-c               write(84,*) zz,k2,k5            
+!               write(84,*) zz,k2,k5            
                 e1 = bb*(cc * k5 * (a1/z)**5 - dd * k2 * (a1/z)**2)
-c               write(82,*) bb,cc,dd,e1,k2,k5
+!               write(82,*) bb,cc,dd,e1,k2,k5
                 fxy = -2.0d0*(cos(pi2*(x/a1 + y/sqrt(3.0d0)/a1)) +
-     +                  cos(pi2*(x/a1 - y/sqrt(3.0d0)/a1)) +
-     +                  cos(pi4*y/sqrt(3.0d0)/a1))
+     &                  cos(pi2*(x/a1 - y/sqrt(3.0d0)/a1)) +
+     &                  cos(pi4*y/sqrt(3.0d0)/a1))
 
-c       write(82,'(6g12.5)') x,y,z,fxy,e1,e0
+!       write(82,'(6g12.5)') x,y,z,fxy,e1,e0
                 exgrph = e0 + e1*fxy
         else
-c       write(83,'(6g12.5)') x,y,z,e0
+!       write(83,'(6g12.5)') x,y,z,e0
                 exgrph = e0     
-        endif
+        end if
         end function exgrph
 
 

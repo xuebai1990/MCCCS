@@ -1,89 +1,89 @@
-c     ******************************************************************
-c     * MCCCS - Towhee: A Monte Carlo molecular simulation program     *
-c     * Copyright (C) 2000 Bin Chen, Marcus G. Martin,                 *
-c     * J. Ilja Siepmann, John Stubbs, and Collin D. Wick              *
-c     * see the file license.gpl for the full license information      *
-c     *                                                                *
-c     * This program is free software; you can redistribute it and/or  *
-c     * modify it under the terms of the GNU General Public License    *
-c     * as published by the Free Software Foundation; either version 2 *
-c     * of the License, or (at your option) any later version.         *
-c     *                                                                *
-c     * This program is distributed in the hope that it will be useful,*
-c     * but WITHOUT ANY WARRANTY; without even the implied warranty of *
-c     * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  *
-c     * GNU General Public License for more details.                   *
-c     *                                                                *
-c     * You should have received a copy of the GNU General Public      *
-c     * License along with this program; if not, write to the Free     *
-c     * Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,*
-c     * MA  02111-1307, USA.                                           *
-c     *                                                                *
-c     * See the file towhee.F for more information about the code      *
-c     ******************************************************************
+!     ******************************************************************
+!     * MCCCS - Towhee: A Monte Carlo molecular simulation program     *
+!     * Copyright (C) 2000 Bin Chen, Marcus G. Martin,                 *
+!     * J. Ilja Siepmann, John Stubbs, and Collin D. Wick              *
+!     * see the file license.gpl for the full license information      *
+!     *                                                                *
+!     * This program is free software; you can redistribute it and/or  *
+!     * modify it under the terms of the GNU General Public License    *
+!     * as published by the Free Software Foundation; either version 2 *
+!     * of the License, or (at your option) any later version.         *
+!     *                                                                *
+!     * This program is distributed in the hope that it will be useful,*
+!     * but WITHOUT ANY WARRANTY; without even the implied warranty of *
+!     * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  *
+!     * GNU General Public License for more details.                   *
+!     *                                                                *
+!     * You should have received a copy of the GNU General Public      *
+!     * License along with this program; if not, write to the Free     *
+!     * Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,*
+!     * MA  02111-1307, USA.                                           *
+!     *                                                                *
+!     * See the file towhee.F for more information about the code      *
+!     ******************************************************************
       subroutine cone(iinit,x,y,z,alpha,gamma,ux,uy,uz)
-c     ******************************************************************
-c     * if iinit = 1 then it sets up the rotation matrix for the cone  *
-c     * using x,y,z as a unit vector pointing in the +z direction      *
-c     ******************************************************************
-c     * if iinit = 2 then it creates a unit vector that has an angle   *
-c     * of alpha from the +z direction (previous vector) and an angle  *
-c     * of gamma (0,2Pi) around the cone circle and returns this as    *
-c     * ux,uy,uz                                                       *
-c     ******************************************************************
-c     * if iinit = 3 then this computes gamma (0,2Pi) for a unit       *
-c     * vector ux,uy,uz with angle alpha from the -z direction         *
-c     ******************************************************************
-c     * note that the rotation matrix is saved after each call so it   *
-c     * needs to be reset when you wish to use another cone            *
-c     *                                                                *
-c     * originally written prior to 1995                               *
-c     * last modified 02-12-2001 by M.G. Martin                        *
-c     ******************************************************************
+!     ******************************************************************
+!     * if iinit = 1 then it sets up the rotation matrix for the cone  *
+!     * using x,y,z as a unit vector pointing in the +z direction      *
+!     ******************************************************************
+!     * if iinit = 2 then it creates a unit vector that has an angle   *
+!     * of alpha from the +z direction (previous vector) and an angle  *
+!     * of gamma (0,2Pi) around the cone circle and returns this as    *
+!     * ux,uy,uz                                                       *
+!     ******************************************************************
+!     * if iinit = 3 then this computes gamma (0,2Pi) for a unit       *
+!     * vector ux,uy,uz with angle alpha from the -z direction         *
+!     ******************************************************************
+!     * note that the rotation matrix is saved after each call so it   *
+!     * needs to be reset when you wish to use another cone            *
+!     *                                                                *
+!     * originally written prior to 1995                               *
+!     * last modified 02-12-2001 by M.G. Martin                        *
+!     ******************************************************************
       implicit none
 
       include 'control.inc'
       include 'conver.inc'
 
-c     --- variables passed to/from the subroutine
+!     --- variables passed to/from the subroutine
       integer::iinit
       real(8)::x,y,z,alpha,gamma,ux,uy,uz
 
-c     --- local variables
+!     --- local variables
       real(8)::a11,a12,a13,a21,a22,a31,a32,a33
      &     ,sinthe,costhe,sinpsi,cospsi,singamma,cosgamma
      &     ,uxtemp,uytemp,uztemp,sinalph,cosalph
       real(8)::determ,arccos
       save a11,a12,a13,a21,a22,a31,a32,a33,cosalph,sinalph
 
-c      write(iou,*) 'start CONE'
+!      write(iou,*) 'start CONE'
 
       if ( iinit .eq. 1 ) then      
-c       --- setup the unit cone
-c       --- assume x,y,z is a rotation of vector (0,0,1)
-c       --- conversions from xyz to theta,psi
-c           x = -dsin(theta)*dcos(psi)
-c           y = dsin(theta)*dsin(psi)
-c           z = dcos(theta)
-c       --- rotation matrix (note that sin(phi) = 0, cos(phi) = 1)
-c       a11 = cos(psi) cos(theta) cos(phi) - sin(psi) sin(phi)
-c           = cos(psi) cos(theta)
-c       a12 = -sin(psi) cos(theta) cos(phi) - cos(psi) sin(phi)
-c           = -sin(psi) cos(theta)
-c       a13 = sin(theta) cos(phi) 
-c           = sin(theta)
-c       a21 = cos(psi) cos(theta) sin(phi) + sin (psi) cos(phi)
-c           = sin(psi)
-c       a22 = -sin(psi) cos(theta) sin(phi) + cos (psi) cos(phi)
-c           = cos(psi)
-c       a23 = sin(theta) sin(phi) 
-c           = 0.0
-c       a31 = -cos(psi) sin(theta)
-c           = x
-c       a32 = sin(psi)  sin (theta)
-c           = y
-c       a33 = cos(theta)
-c           = z
+!       --- setup the unit cone
+!       --- assume x,y,z is a rotation of vector (0,0,1)
+!       --- conversions from xyz to theta,psi
+!           x = -dsin(theta)*dcos(psi)
+!           y = dsin(theta)*dsin(psi)
+!           z = dcos(theta)
+!       --- rotation matrix (note that sin(phi) = 0, cos(phi) = 1)
+!       a11 = cos(psi) cos(theta) cos(phi) - sin(psi) sin(phi)
+!           = cos(psi) cos(theta)
+!       a12 = -sin(psi) cos(theta) cos(phi) - cos(psi) sin(phi)
+!           = -sin(psi) cos(theta)
+!       a13 = sin(theta) cos(phi) 
+!           = sin(theta)
+!       a21 = cos(psi) cos(theta) sin(phi) + sin (psi) cos(phi)
+!           = sin(psi)
+!       a22 = -sin(psi) cos(theta) sin(phi) + cos (psi) cos(phi)
+!           = cos(psi)
+!       a23 = sin(theta) sin(phi) 
+!           = 0.0
+!       a31 = -cos(psi) sin(theta)
+!           = x
+!       a32 = sin(psi)  sin (theta)
+!           = y
+!       a33 = cos(theta)
+!           = z
 
         costhe = z
         sinthe = dsqrt(1.0d0 - costhe*costhe)
@@ -93,9 +93,9 @@ c           = z
         else
            sinpsi = 0.0d0
            cospsi = 1.0d0
-        endif
+        end if
 
-c rotation matrix
+! rotation matrix
         a11 = cospsi*costhe
         a12 = -(sinpsi*costhe)
         a13 = sinthe
@@ -106,11 +106,11 @@ c rotation matrix
         a33 = z
 
       elseif ( iinit .eq. 2 ) then
-c        --- find the vector on a cone:
-c        --- alpha is the angle with the cone axis (theta)
+!        --- find the vector on a cone:
+!        --- alpha is the angle with the cone axis (theta)
          sinalph = dsin(alpha)
          cosalph = dcos(alpha)
-c        --- gamma is now passed to cone - (phi)
+!        --- gamma is now passed to cone - (phi)
          uztemp = -cosalph
          uytemp = sinalph*dcos(gamma)
          uxtemp = sinalph*dsin(gamma)
@@ -119,9 +119,9 @@ c        --- gamma is now passed to cone - (phi)
          uz = a13*uxtemp +              a33*uztemp
 
       elseif ( iinit .eq. 3 ) then
-c        --- find gamma for a given unit vector on the cone
-c        --- use cramer's rule where a23 has already been replaced with 0
-c        --- we don't need the uztemp so it is not computed
+!        --- find gamma for a given unit vector on the cone
+!        --- use cramer's rule where a23 has already been replaced with 0
+!        --- we don't need the uztemp so it is not computed
 
          determ = 
      &        ( a11*a22*a33
@@ -142,63 +142,63 @@ c        --- we don't need the uztemp so it is not computed
          singamma = uxtemp/sinalph
          cosgamma = uytemp/sinalph
 
-c        --- now need to find the gamma on [-Pi,Pi] that satisfies cos and sin
+!        --- now need to find the gamma on [-Pi,Pi] that satisfies cos and sin
          gamma = arccos(cosgamma)
          if ( singamma .lt. 0.0d0 ) gamma = -gamma
 
       else
          write(iou,*) 'iinit ',iinit
          call cleanup('non valid iinit in cone.f')
-      endif
+      end if
       
-c      write(iou,*) 'finish CONE'
+!      write(iou,*) 'finish CONE'
 
       return
       end
 
 
-c     ******************************************************************
-c     * MCCCS - Towhee: A Monte Carlo molecular simulation program     *
-c     * Copyright (C) 2000 Bin Chen, Marcus G. Martin,                 *
-c     * J. Ilja Siepmann, John Stubbs, and Collin D. Wick              *
-c     * see the file license.gpl for the full license information      *
-c     *                                                                *
-c     * This program is free software; you can redistribute it and/or  *
-c     * modify it under the terms of the GNU General Public License    *
-c     * as published by the Free Software Foundation; either version 2 *
-c     * of the License, or (at your option) any later version.         *
-c     *                                                                *
-c     * This program is distributed in the hope that it will be useful,*
-c     * but WITHOUT ANY WARRANTY; without even the implied warranty of *
-c     * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  *
-c     * GNU General Public License for more details.                   *
-c     *                                                                *
-c     * You should have received a copy of the GNU General Public      *
-c     * License along with this program; if not, write to the Free     *
-c     * Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,*
-c     * MA  02111-1307, USA.                                           *
-c     *                                                                *
-c     * See the file towhee.F for more information about the code      *
-c     ******************************************************************
+!     ******************************************************************
+!     * MCCCS - Towhee: A Monte Carlo molecular simulation program     *
+!     * Copyright (C) 2000 Bin Chen, Marcus G. Martin,                 *
+!     * J. Ilja Siepmann, John Stubbs, and Collin D. Wick              *
+!     * see the file license.gpl for the full license information      *
+!     *                                                                *
+!     * This program is free software; you can redistribute it and/or  *
+!     * modify it under the terms of the GNU General Public License    *
+!     * as published by the Free Software Foundation; either version 2 *
+!     * of the License, or (at your option) any later version.         *
+!     *                                                                *
+!     * This program is distributed in the hope that it will be useful,*
+!     * but WITHOUT ANY WARRANTY; without even the implied warranty of *
+!     * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  *
+!     * GNU General Public License for more details.                   *
+!     *                                                                *
+!     * You should have received a copy of the GNU General Public      *
+!     * License along with this program; if not, write to the Free     *
+!     * Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,*
+!     * MA  02111-1307, USA.                                           *
+!     *                                                                *
+!     * See the file towhee.F for more information about the code      *
+!     ******************************************************************
       function arccos( value )
-c     ******************************************************************
-c     * computes the arc cosine of a value, with safety checks to make *
-c     * sure that value is between -1.0 and 1.0.  If value is outside  *
-c     * of that range, it is set to the nearest extreme of the range   *
-c     *                                                                *
-c     * originally written 02-12-2001 by M.G. Martin                   *
-c     * last modified 02-12-2001 by M.G. Martin                        *
-c     ******************************************************************
+!     ******************************************************************
+!     * computes the arc cosine of a value, with safety checks to make *
+!     * sure that value is between -1.0 and 1.0.  If value is outside  *
+!     * of that range, it is set to the nearest extreme of the range   *
+!     *                                                                *
+!     * originally written 02-12-2001 by M.G. Martin                   *
+!     * last modified 02-12-2001 by M.G. Martin                        *
+!     ******************************************************************
       implicit none
 
       include 'conver.inc'
 
-c#include "constant.inc"      
+!#include "constant.inc"      
 
       real(8)::arccos,value
 
-c      real(8)::arccos,value,onepi
-c      onepi = 3.141592653d0
+!      real(8)::arccos,value,onepi
+!      onepi = 3.141592653d0
 
       if ( value .gt. 1.0d0 ) then
          arccos = 0.0d0
@@ -206,7 +206,7 @@ c      onepi = 3.141592653d0
          arccos = onepi
       else
          arccos = dacos(value)
-      endif
+      end if
 
       return
       end

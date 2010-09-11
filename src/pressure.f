@@ -1,35 +1,35 @@
       subroutine pressure ( press, surf, ibox )
 
-c pressure
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! pressure
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
  
-c    *****************************************************
-c    ** calculates the pressure for a configuration.    **
-c    *****************************************************
+!    *****************************************************
+!    ** calculates the pressure for a configuration.    **
+!    *****************************************************
  
       implicit none
  
-c *** common blocks ***
+! *** common blocks ***
 
       include 'control.inc'
       include 'coord.inc'
@@ -46,7 +46,7 @@ c *** common blocks ***
       include 'nsix.inc'
       include 'ipswpar.inc'
       include 'cell.inc'
-c RP added for MPI
+! RP added for MPI
       include 'mpi.inc'
       include 'mpif.h'
 
@@ -57,8 +57,8 @@ c RP added for MPI
       real(8)::press,repress,erfunc
 
       real(8)::rxui,ryui,rzui,rxuij,ryuij,rzuij,rijsq,
-     +                 rcutsq,sr2,sr6,rhosq,corp,rij,rs1,
-     +                 sr1,rs2,sr7,rs7,rs6
+     &                 rcutsq,sr2,sr6,rhosq,corp,rij,rs1,
+     &                 sr1,rs2,sr7,rs7,rs6
       real(8)::srij
       real(8)::surf,pxx,pyy,pzz,rpxx,rpyy,rpzz,pxy,pyx
      &                ,pxz,pzx,pyz,pzy,rpxy,rpyx,rpxz,rpzx,rpyz,rpzy
@@ -70,11 +70,11 @@ c RP added for MPI
 
       dimension lcoulo(numax,numax)
 
-c RP added for MPI
+! RP added for MPI
       real(8)::pips12,pips13,pips21,pips23,pips31,pips32
       real(8)::diff_pips12,diff_pips13,diff_pips21,diff_pips23,
      & diff_pips31,diff_pips32,diff_pxx,diff_pyy,diff_pzz,sum_press
-C --------------------------------------------------------------------
+! --------------------------------------------------------------------
       if ( lpbc ) call setpbc (ibox)
 
       rcutsq = rcut(ibox) * rcut(ibox)
@@ -88,17 +88,17 @@ C --------------------------------------------------------------------
       do i = 1, 3
          do j = 1, 3
             pips(i,j) = 0.0d0
-         enddo
-      enddo
+         end do
+      end do
 
-c RP added for MPI
+! RP added for MPI
       pips12 = 0.0d0
       pips13 = 0.0d0
       pips21 = 0.0d0
       pips23 = 0.0d0
       pips31 = 0.0d0
       pips32 = 0.0d0
-c KM for MPI
+! KM for MPI
       diff_pips12 = 0.0d0
       diff_pips13 = 0.0d0
       diff_pips21 = 0.0d0
@@ -109,29 +109,29 @@ c KM for MPI
       diff_pyy = 0.0d0
       diff_pzz = 0.0d0
       sum_press = 0.0d0
-c ----------------------------------
+! ----------------------------------
 
 
-C *******************************
-C *** INTERCHAIN INTERACTIONS ***
-C *******************************
+! *******************************
+! *** INTERCHAIN INTERACTIONS ***
+! *******************************
 
       
 
-c      if(LSOLPAR.and.(ibox.eq.2)) then
-c         press= 1.380662d4 * ( ( nchbox(ibox) / beta) -
-c     +     ( press/3.0d0 ) ) /
-c     +     ( boxlx(ibox)*boxly(ibox)*boxlz(ibox) )
-c         surf = 0.0d0
-c         return
-c      endif
+!      if(LSOLPAR.and.(ibox.eq.2)) then
+!         press= 1.380662d4 * ( ( nchbox(ibox) / beta) -
+!     +     ( press/3.0d0 ) ) /
+!     +     ( boxlx(ibox)*boxly(ibox)*boxlz(ibox) )
+!         surf = 0.0d0
+!         return
+!      end if
 
 
-c --- loop over all chains i 
-c RP added for MPI
+! --- loop over all chains i 
+! RP added for MPI
       do 100 i = myid+1, nchain - 1,numprocs
-c      do 100 i = 1, nchain - 1 
-c ### check if i is in relevant box ###
+!      do 100 i = 1, nchain - 1 
+! ### check if i is in relevant box ###
          if ( nboxi(i) .eq. ibox ) then
 
             imolty = moltyp(i)
@@ -140,7 +140,7 @@ c ### check if i is in relevant box ###
                lexplt = .false.
             else
                lexplt = .true.
-            endif
+            end if
             xcmi = xcm(i)
             ycmi = ycm(i)
             zcmi = zcm(i)
@@ -148,12 +148,12 @@ c ### check if i is in relevant box ###
                rcmi = rcmu(i)
             else
                lij2 = .true.
-            endif
+            end if
 
-c --- loop over all chains j with j>i 
+! --- loop over all chains j with j>i 
             do 99 j = i + 1, nchain
                
-c ### check for simulation box ###
+! ### check for simulation box ###
                if ( nboxi(j) .eq. ibox ) then
                   
                   jmolty = moltyp(j)
@@ -162,11 +162,11 @@ c ### check for simulation box ###
                   fycmi = 0.0d0
                   fzcmi = 0.0d0
                   if ( lcutcm ) then
-c                    --- check if ctrmas within rcmsq
+!                    --- check if ctrmas within rcmsq
                      rxuij = xcmi - xcm(j)
                      ryuij = ycmi - ycm(j)
                      rzuij = zcmi - zcm(j)
-c                    --- minimum image the ctrmas pair separations
+!                    --- minimum image the ctrmas pair separations
                      if ( lpbc ) call mimage (rxuij,ryuij,rzuij,ibox)
                      rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
                      rcm = rbcut + rcmi + rcmu(j)
@@ -177,14 +177,14 @@ c                    --- minimum image the ctrmas pair separations
                            goto 108
                         else
                            goto 99
-                        endif
+                        end if
                      else
                         lij2 = .true.
-                     endif
-                  endif
+                     end if
+                  end if
 
 
-c --- loop over all beads ii of chain i 
+! --- loop over all beads ii of chain i 
  108              do 98 ii = 1, nunit(imolty)
 
                      ntii = ntype(imolty,ii)
@@ -193,7 +193,7 @@ c --- loop over all beads ii of chain i
                      ryui = ryu(i,ii)
                      rzui = rzu(i,ii)
 
-c --- loop over all beads jj of chain j 
+! --- loop over all beads jj of chain j 
                      do 97 jj = 1, nunit(jmolty)
                         
                         ntjj = ntype(jmolty,jj)
@@ -205,7 +205,7 @@ c --- loop over all beads jj of chain j
                         else
                            if (.not. (lqchg(ntii) .and. lqchg(ntjj)))
      &                          goto 97
-                        endif
+                        end if
                         if ( lexpsix .or. lmmff ) then
                            ntij = (ntii+ntjj)/2
                         elseif (lninesix) then
@@ -214,20 +214,20 @@ c --- loop over all beads jj of chain j
                            ntij = (ntii-1)*nntype + ntjj
                         else
                            ntij = (ntii-1)*nntype + ntjj
-                        endif
+                        end if
 
                         rxuij = rxui - rxu(j,jj)
                         ryuij = ryui - ryu(j,jj)
                         rzuij = rzui - rzu(j,jj)
 
-c *** minimum image the pair separations ***
+! *** minimum image the pair separations ***
                         if ( lpbc ) call mimage (rxuij,ryuij,rzuij,ibox)
 
-c     write(2,*) 'bead ruij',rxuij,ryuij,rzuij
+!     write(2,*) 'bead ruij',rxuij,ryuij,rzuij
                         
                         rijsq = rxuij*rxuij+ryuij*ryuij+rzuij*rzuij
                         
-c --- compute whether the charged groups will interact & fij
+! --- compute whether the charged groups will interact & fij
                         fij = 0.0d0
                         if ( lchgall ) then
                            if ( lewald ) then
@@ -238,10 +238,10 @@ c --- compute whether the charged groups will interact & fij
      &                             dsqrt(rijsq))*qqu(i,ii)*qqu(j,jj)*
      &                             qqfact/rijsq
                            else
-c -- KM 06/09/09
+! -- KM 06/09/09
                               fij = -(qqfact*qqu(i,ii)*qqu(j,jj)
      &                             /dsqrt(rijsq))/rijsq
-                           endif
+                           end if
 
                         elseif ( lqimol .and. lqjmol .and. 
      &                          lqchg(ntii) .and. lqchg(ntjj) ) then
@@ -250,13 +250,13 @@ c -- KM 06/09/09
                            jjj = leaderq(jmolty,jj)
                             
                            if ( ii .eq. iii .and. jj .eq. jjj ) then
-c --- set up the charge-interaction table
+! --- set up the charge-interaction table
                               if ( rijsq .lt. rcutsq ) then
                                  lcoulo(ii,jj) = .true.
                               else
                                  lcoulo(ii,jj) = .false.
-                              endif
-                           endif
+                              end if
+                           end if
                            
                            if ( lcoulo(iii,jjj) ) then
                               if ( lewald ) then
@@ -269,9 +269,9 @@ c --- set up the charge-interaction table
                               else
                                  fij = -(qqfact*qqu(i,ii)*qqu(j,jj)
      &                                /dsqrt(rijsq))/rijsq
-                              endif
-                           endif
-                        endif
+                              end if
+                           end if
+                        end if
 
                         if ( rijsq .lt. rcutsq .or. lijall) then
                            if ( lexpsix ) then
@@ -280,7 +280,7 @@ c --- set up the charge-interaction table
      &                             *rijsq*rijsq) + bexsix(ntij)
      &                             *cexsix(ntij)*rij*dexp( cexsix(ntij)
      &				   *rij ))/rijsq
-c                              write(2,*) 'rij,fij,ntij',rij,fij,ntij
+!                              write(2,*) 'rij,fij,ntij',rij,fij,ntij
                            elseif ( lmmff ) then
                               rs2 = rijsq/(sigisq(ntij))
                               rs1 = dsqrt(rs2)
@@ -289,9 +289,9 @@ c                              write(2,*) 'rij,fij,ntij',rij,fij,ntij
                               sr1 = 1.07d0/(rs1+0.07d0)
                               sr7 = sr1**7.0d0
                               fij = fij - 7.0d0*epsimmff(ntij)*rs1*sr7*(
-     +                           sr1*(1.12d0/(rs7+0.12d0)-2.0d0)/1.07d0+
-     +                           1.12d0*rs6/((rs7+0.12d0)*(rs7+0.12d0)))
-     +                             /rijsq
+     &                           sr1*(1.12d0/(rs7+0.12d0)-2.0d0)/1.07d0+
+     &                           1.12d0*rs6/((rs7+0.12d0)*(rs7+0.12d0)))
+     &                             /rijsq
                            elseif (lninesix) then
                               rij = dsqrt(rijsq)
                               fij = fij + ( 72.0d0*epsnx(ntij)/
@@ -323,7 +323,7 @@ c                              write(2,*) 'rij,fij,ntij',rij,fij,ntij
                                  sr2 = sig2ij(ntij) / rijsq
                                  epsilon2 = epsij(ntij)
                                  srij = dsqrt (sr2)
-                              endif
+                              end if
                               if ( (rij) .le. (rij*srij)*
      &                             2.0d0**(2.0d0/n0) ) then
                                  flj=-4.0d0*epsilon2*((n0*((srij)**n0))-
@@ -336,7 +336,7 @@ c                              write(2,*) 'rij,fij,ntij',rij,fij,ntij
      &                                (n1*((srij)**(n1))*
      &                                (2.0d0 ** ((2.0d0*n1/n0)+1.0d0))))
      &                                /rijsq
-                              endif
+                              end if
                               fij = fij + flj
                            else
                               if ( lfepsi ) then
@@ -345,15 +345,15 @@ c                              write(2,*) 'rij,fij,ntij',rij,fij,ntij
                                  if ( (.not. lqchg(ntii)) .and. 
      &                                (.not. lqchg(ntjj)) ) then
                                     if ( nunit(imolty) .eq. 4 ) then
-c *** TIP-4P structure (temperary use ???)
+! *** TIP-4P structure (temperary use ???)
                                        qave = (qqu(i,4)+qqu(j,4))/2.0d0
                                     else
                                        qave = (qqu(i,4)+qqu(i,5)+
      &                                      qqu(j,4)+qqu(j,5))*0.85d0
-                                    endif
+                                    end if
                                  else
                                     qave = (qqu(i,ii)+qqu(j,jj))/2.0d0
-                                 endif
+                                 end if
 
                                  if ( lexpand(imolty) 
      &                                .and. lexpand(jmolty)) then
@@ -367,7 +367,7 @@ c *** TIP-4P structure (temperary use ???)
      &                                   *epsi(ntii))
                                  else
                                     epsilon2=epsij(ntij)
-                                 endif
+                                 end if
                                  flj = 48.0d0*epsilon2*
      &                                sr6*(-sr6*(aslope*(qave-a0)*
      &                                (qave-a0)+ashift)+0.5d0*
@@ -396,14 +396,14 @@ c *** TIP-4P structure (temperary use ???)
                                  else
                                     sr2 = sig2ij(ntij) / rijsq
                                     epsilon2 = epsij(ntij)
-                                 endif
+                                 end if
                                  sr6 = sr2 * sr2 * sr2
                                  flj = 48.0d0*sr6*(-sr6+0.5d0)
      &                                *epsilon2 / rijsq
-                              endif
+                              end if
                               fij = fij + flj
-                           endif
-                        endif
+                           end if
+                        end if
                         fxcmi = fxcmi + fij * rxuij 
                         fycmi = fycmi + fij * ryuij 
                         fzcmi = fzcmi + fij * rzuij 
@@ -412,21 +412,21 @@ c *** TIP-4P structure (temperary use ???)
  98               continue
 
 
-c --- calculate distance between c-o-m ---
+! --- calculate distance between c-o-m ---
                   rxuij = xcmi - xcm(j)
                   ryuij = ycmi - ycm(j)
                   rzuij = zcmi - zcm(j)
 
-c *** minimum image the pair separations ***
+! *** minimum image the pair separations ***
                   if ( lpbc ) call mimage (rxuij,ryuij,rzuij,ibox)
 
-c                  write(2,*) 'COM  ruij',rxuij,ryuij,rzuij
+!                  write(2,*) 'COM  ruij',rxuij,ryuij,rzuij
 
                   press = press + 
-     +                 fxcmi*rxuij + fycmi*ryuij + fzcmi*rzuij
+     &                 fxcmi*rxuij + fycmi*ryuij + fzcmi*rzuij
 
-c * for surface tension                  
-c * this is correct for the coulombic part and for LJ.  Note sign difference!
+! * for surface tension                  
+! * this is correct for the coulombic part and for LJ.  Note sign difference!
                   pxx = pxx - fxcmi*rxuij
                   pyy = pyy - fycmi*ryuij
                   pzz = pzz - fzcmi*rzuij
@@ -437,12 +437,12 @@ c * this is correct for the coulombic part and for LJ.  Note sign difference!
                   pips31 = pips31 - rzuij*fxcmi
                   pips32 = pips32 - rzuij*fycmi
                   
-               endif
+               end if
  99         continue
-         endif
+         end if
  100  continue
 
-c RP for MPI
+! RP for MPI
 
        CALL MPI_ALLREDUCE(press,sum_press,1,
      &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
@@ -477,20 +477,20 @@ c RP for MPI
       pips(3,1) = diff_pips31
       pips(3,2) = diff_pips32
  
-c      if(myid .eq. 0)then
-c        write(6,*)'press=',press,'pxx=',pxx,'pyy=',pyy
-c     &   ,'pzz=',pzz,'pips(1,2)',pips(1,2),'pips(1,3)=',pips(1,3)
-c     &   ,'pips(2,1)=',pips(2,1),'pips(2,3)=',pips(2,3),'pips(3,1)=',
-c     &   pips(3,1),'pips(3,2)=',pips(3,2)
-c      endif
+!      if(myid .eq. 0)then
+!        write(6,*)'press=',press,'pxx=',pxx,'pyy=',pyy
+!     &   ,'pzz=',pzz,'pips(1,2)',pips(1,2),'pips(1,3)=',pips(1,3)
+!     &   ,'pips(2,1)=',pips(2,1),'pips(2,3)=',pips(2,3),'pips(3,1)=',
+!     &   pips(3,1),'pips(3,2)=',pips(3,2)
+!      end if
 
-c ################################################################
+! ################################################################
 
       if ( lewald ) then
 
-c *** Compute the reciprocal space contribution
-c *** by using the thermodynamic definition
-c *** 
+! *** Compute the reciprocal space contribution
+! *** by using the thermodynamic definition
+! *** 
          call recippress(ibox,repress,rpxx,rpyy,rpzz,rpxy,rpyx,rpxz,
      &                  rpzx,rpyz,rpzy)
          press = press - repress
@@ -505,7 +505,7 @@ c ***
          pips(3,1) = pips(3,1) + qqfact*rpzx
          pips(3,2) = pips(3,2) + qqfact*rpzy
 
-      endif
+      end if
 
       pips(1,1) = pxx
       pips(2,2) = pyy
@@ -516,12 +516,12 @@ c ***
       do i = 1,3
          do j = 1,3
              pwellips(i,j) = 0.0d0
-         enddo
-      enddo
+         end do
+      end do
 
 
-c KM for MPI - comment:
-c this could likely be parallelized in the future
+! KM for MPI - comment:
+! this could likely be parallelized in the future
       do i = 1,nchain
          imolty = moltyp(i)
          if (lwell(imolty)) then
@@ -558,11 +558,11 @@ c this could likely be parallelized in the future
                      pwellips(1,2) = pwellips(1,2)+fij*rxuij*ryuij
                      pwellips(1,3) = pwellips(1,3)+fij*rxuij*rzuij
                      pwellips(2,3) = pwellips(2,3)+fij*ryuij*rzuij
- 666              enddo
-               endif
-            enddo
-         endif
-      enddo
+ 666              end do
+               end if
+            end do
+         end if
+      end do
       pwellips(2,1) = pwellips(1,2)
       pwellips(3,1) = pwellips(1,3)
       pwellips(3,2) = pwellips(2,3)
@@ -571,7 +571,7 @@ c this could likely be parallelized in the future
          vol = cell_vol(ibox) 
       else
          vol = boxlx(ibox)*boxly(ibox)*boxlz(ibox)
-      endif
+      end if
      
       pipsw = -(press/3.0d0)/vol
       pwellipsw = -(pwell/3.0d0)/vol
@@ -580,26 +580,26 @@ c this could likely be parallelized in the future
          do j = 1, 3
             pips(i,j) = pips(i,j)/vol
             pwellips(i,j) = -pwellips(i,j)/vol
-         enddo
-      enddo
+         end do
+      end do
 
 ! Chainging the order of calculation of tail correction
 ! So that it could be included in the scaled version for
 ! thermodynamic integration
 
-c$$$      if (ltailc) then
-c$$$c --     add tail corrections for the Lennard-Jones energy
-c$$$c --     Not adding tail correction for the ghost particles
-c$$$c --     as they are ideal (no interaction) Neeraj.
-c$$$         volsq = ( vol )**2
-c$$$         do imolty=1, nmolty
-c$$$            do jmolty=1, nmolty
-c$$$               rhosq = ncmt(ibox,imolty)*ncmt(ibox,jmolty)
-c$$$     +              / volsq
-c$$$               press=press + 1.380662d4 * corp(imolty,jmolty,rhosq,ibox)
-c$$$            enddo
-c$$$        enddo
-c$$$      endif
+!$$$      if (ltailc) then
+!$$$c --     add tail corrections for the Lennard-Jones energy
+!$$$c --     Not adding tail correction for the ghost particles
+!$$$c --     as they are ideal (no interaction) Neeraj.
+!$$$         volsq = ( vol )**2
+!$$$         do imolty=1, nmolty
+!$$$            do jmolty=1, nmolty
+!$$$               rhosq = ncmt(ibox,imolty)*ncmt(ibox,jmolty)
+!$$$     +              / volsq
+!$$$               press=press + 1.380662d4 * corp(imolty,jmolty,rhosq,ibox)
+!$$$            end do
+!$$$        end do
+!$$$      end if
 
       if (lstagea) then
          press = (1.0d0-lambdais*(1.0d0-etais))*press
@@ -608,33 +608,33 @@ c$$$      endif
       elseif (lstagec) then
          press = (etais+(1.0d0-etais)*lambdais)*press
      &           +(1.0d0-lambdais)*pwell
-      endif
+      end if
 
       press = 1.380662d4 * ( ( (nchbox(ibox)+ ghost_particles(ibox))
-     +      / beta) -
-     +     ( press/3.0d0 ) ) / 
-     +     ( vol )
+     &      / beta) -
+     &     ( press/3.0d0 ) ) / 
+     &     ( vol )
 
       surf = pzz - 0.5d0*(pxx + pyy)
-c * divide by surface area and convert from K to put surf in mN/m 
+! * divide by surface area and convert from K to put surf in mN/m 
       surf = 1.380658d0*surf / (2.0d0*boxlx(ibox)*boxly(ibox))
 
-c----check pressure tail correction
+!----check pressure tail correction
 
       if (ltailc) then
-c --     add tail corrections for the Lennard-Jones energy
-c --     Not adding tail correction for the ghost particles
-c --     as they are ideal (no interaction) Neeraj.
+! --     add tail corrections for the Lennard-Jones energy
+! --     Not adding tail correction for the ghost particles
+! --     as they are ideal (no interaction) Neeraj.
          volsq = ( vol )**2
          do imolty=1, nmolty        
             do jmolty=1, nmolty  
                rhosq = ncmt(ibox,imolty)*ncmt(ibox,jmolty)
-     +              / volsq
+     &              / volsq
                press=press + 1.380662d4 * corp(imolty,jmolty,rhosq,ibox)
-            enddo
-        enddo
-      endif
-c      write (iou,*) ' press tail' ,  press
+            end do
+        end do
+      end if
+!      write (iou,*) ' press tail' ,  press
 
       return
       end

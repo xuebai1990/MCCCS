@@ -1,40 +1,40 @@
       subroutine close(iinit,rx,ry,rz,bondl,angle,lterm)
 
-c close
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! close
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-c     **************************************************************
-c     **    Takes three or four points and determines a point     ** 
-c     **       that is a certain length from all of them          **
-c     **            - ALL LENGTHS MUST BE THE SAME -              **
-c     **************************************************************
-c     **   This wonderful subroutine can also find a unit vector  **
-c     **  connected to two other unit vectors with all the angles **
-c     **                    between them given.                   **
-c     **************************************************************
-c     **    This mess was unfortunately created by Collin Wick    **
-c     **            on December 1999, BUT IT DOES WORK            **
-c     **************************************************************
+!     **************************************************************
+!     **    Takes three or four points and determines a point     ** 
+!     **       that is a certain length from all of them          **
+!     **            - ALL LENGTHS MUST BE THE SAME -              **
+!     **************************************************************
+!     **   This wonderful subroutine can also find a unit vector  **
+!     **  connected to two other unit vectors with all the angles **
+!     **                    between them given.                   **
+!     **************************************************************
+!     **    This mess was unfortunately created by Collin Wick    **
+!     **            on December 1999, BUT IT DOES WORK            **
+!     **************************************************************
 
       implicit none
 
@@ -45,24 +45,24 @@ c     **************************************************************
       integer::n,iinit
 
       real(8)::x,y,z,rx,ry,rz,length,lengtha,lengthb
-     +     ,xa,ya,za,theta,thetac,ux,uy,uz,bondl,avar,bvar,cvar
-     +     ,rxa,rya,rza,lengthc,angle,rxf,ryf,rzf,var,dvar,a,b,c
+     &     ,xa,ya,za,theta,thetac,ux,uy,uz,bondl,avar,bvar,cvar
+     &     ,rxa,rya,rza,lengthc,angle,rxf,ryf,rzf,var,dvar,a,b,c
 
       dimension rx(6),ry(6),rz(6),x(4),y(4),z(4),ux(3),uy(3),uz(3)
       dimension angle(3)
 
-c ---------------------------------------------------------------------
-c     Determines a point from three others with equal bond lengths
+! ---------------------------------------------------------------------
+!     Determines a point from three others with equal bond lengths
 
 
-c     *******************************************************
-c     if iinit=1 it finds two possibilities to close 3 beads
-c     if iinit=2 it finds one possibility to close 4 beads
-c     if iinit=3 it finds a vector connected two others given 
-c     *******************************************************
+!     *******************************************************
+!     if iinit=1 it finds two possibilities to close 3 beads
+!     if iinit=2 it finds one possibility to close 4 beads
+!     if iinit=3 it finds a vector connected two others given 
+!     *******************************************************
 
 
-c      write(iou,*) 'START CLOSE iinit=',iinit
+!      write(iou,*) 'START CLOSE iinit=',iinit
 
 
       if (iinit.ne.3) then
@@ -71,10 +71,10 @@ c      write(iou,*) 'START CLOSE iinit=',iinit
             rxf = rx(4)
             ryf = ry(4)
             rzf = rz(4)
-         endif
+         end if
 
 
-c     --- determine lengths from all coordinates
+!     --- determine lengths from all coordinates
          lengtha = dsqrt( (rx(2)-rx(1))**2 + (ry(2)-ry(1))**2
      &        + (rz(2)-rz(1))**2)
          lengthb = dsqrt( (rx(2)-rx(3))**2 + (ry(2)-ry(3))**2
@@ -82,12 +82,12 @@ c     --- determine lengths from all coordinates
          lengthc = dsqrt( (rx(3)-rx(1))**2 + (ry(3)-ry(1))**2
      &        + (rz(3)-rz(1))**2)
       
-c     --- detemine the angle at 1
+!     --- detemine the angle at 1
          thetac = - 0.5d0 * ( lengthb**2 - lengtha**2 - lengthc**2 )
      &        / ( lengtha * lengthc )
          theta = dacos(thetac)
 
-c     --- now lets determine the in-plane coordinates
+!     --- now lets determine the in-plane coordinates
          x(1) = 0
          y(1) = 0
          x(2) = lengtha
@@ -95,26 +95,26 @@ c     --- now lets determine the in-plane coordinates
          x(3) = lengthc * thetac
          y(3) = lengthc * dsin( theta )
          
-c     --- determine the in-plane coordinates with the same length
+!     --- determine the in-plane coordinates with the same length
          ya = 0.5d0 * ( ( x(2)**2 - x(3)**2 - y(3)**2 )
      &        / ( - y(3) ) + ( x(2)**2 * ( x(3) - x(2) ) ) 
      &        / ( ( - y(3) ) * ( x(2) ) ) )
          
          xa = 0.5d0 * x(2)
       
-c     --- determine length to new position
+!     --- determine length to new position
          length = dsqrt( (x(1)-xa)**2 + (y(1)-ya)**2 )
          
          if (length.gt.bondl) then
-c     --- the distances are too far to be able to close
+!     --- the distances are too far to be able to close
             lterm = .true. 
             return
-         endif
+         end if
          
-c     --- determine perpendicular distance from here to final point
+!     --- determine perpendicular distance from here to final point
          lengthc = dsqrt( bondl**2 - length**2 )
          
-c     --- find vectors from 1 to 2, 2 to 3, and 3 to 1 in real::space
+!     --- find vectors from 1 to 2, 2 to 3, and 3 to 1 in real::space
          x(1) = (rx(2) - rx(1)) 
          y(1) = (ry(2) - ry(1))
          z(1) = (rz(2) - rz(1))
@@ -127,29 +127,29 @@ c     --- find vectors from 1 to 2, 2 to 3, and 3 to 1 in real::space
          y(3) = (ry(1) - ry(3)) 
          z(3) = (rz(1) - rz(3)) 
          
-c     --- find middle point from 1 to 2
+!     --- find middle point from 1 to 2
          
          rx(4) = 0.5d0 * x(1) + rx(1)
          ry(4) = 0.5d0 * y(1) + ry(1)
          rz(4) = 0.5d0 * z(1) + rz(1)
          
-c     --- find distance from this point to a
+!     --- find distance from this point to a
          
          length = dsqrt( length**2 - (0.5d0*lengtha)**2 )
       
-c     --- cross 1 with 2 to find perpendicular vector
+!     --- cross 1 with 2 to find perpendicular vector
          
          ux(1) = y(1)*z(2) - z(1)*y(2)
          uy(1) = z(1)*x(2) - x(1)*z(2)
          uz(1) = x(1)*y(2) - y(1)*x(2)
          
-c     --- cross this vector with 1 to find vector to final spot
+!     --- cross this vector with 1 to find vector to final spot
          
          ux(2) = y(1)*uz(1) - z(1)*uy(1)
          uy(2) = z(1)*ux(1) - x(1)*uz(1)
          uz(2) = x(1)*uy(1) - y(1)*ux(1)
          
-c     --- normalize this vector and give it the appropriate distance
+!     --- normalize this vector and give it the appropriate distance
          
          lengtha = dsqrt( ux(2)**2 + uy(2)**2 + uz(2)**2)
          
@@ -157,7 +157,7 @@ c     --- normalize this vector and give it the appropriate distance
          uy(2) = length * uy(2) / lengtha
          uz(2) = length * uz(2) / lengtha
          
-c     --- now determine the two possible points here
+!     --- now determine the two possible points here
          
          rx(5) = rx(4) + ux(2)
          ry(5) = ry(4) + uy(2)
@@ -167,7 +167,7 @@ c     --- now determine the two possible points here
          ry(6) = ry(4) - uy(2)
          rz(6) = rz(4) - uz(2)
          
-c     --- with the two possibilities, determine which is closer to 3
+!     --- with the two possibilities, determine which is closer to 3
          
          lengtha = dsqrt((rx(3)-rx(5))**2 + (ry(3)-ry(5))**2
      &        + (rz(3) - rz(5))**2)
@@ -175,30 +175,30 @@ c     --- with the two possibilities, determine which is closer to 3
      &        + (rz(3) - rz(6))**2)
          
          if (lengtha.lt.lengthb) then
-c     --- number 5 is right
+!     --- number 5 is right
             rxa = rx(5)
             rya = ry(5)
             rza = rz(5)
          else
-c     --- number 6 is right
+!     --- number 6 is right
             rxa = rx(6)
             rya = ry(6)
             rza = rz(6)
-         endif
+         end if
          
-c     --- find vector from 1 to a
+!     --- find vector from 1 to a
       
          xa = rxa - rx(1)
          ya = rya - ry(1)
          za = rza - rz(1)
          
-c     --- cross vector a with 1
+!     --- cross vector a with 1
          
          ux(1) = ya*z(1) - za*y(1)
          uy(1) = za*x(1) - xa*z(1) 
          uz(1) = xa*y(1) - ya*x(1)
          
-c     --- normalize this and give it the length to our final point
+!     --- normalize this and give it the length to our final point
          
          length = dsqrt(ux(1)**2 + uy(1)**2 + uz(1)**2)
          
@@ -206,7 +206,7 @@ c     --- normalize this and give it the length to our final point
          uy(1) = uy(1) * lengthc / length
          uz(1) = uz(1) * lengthc / length
          
-c     --- finally lets find our final points and send them back
+!     --- finally lets find our final points and send them back
 
          rx(1) = rxa + ux(1)
          ry(1) = rya + uy(1)
@@ -218,7 +218,7 @@ c     --- finally lets find our final points and send them back
 
          if (iinit.eq.2) then
             
-c     --- for four bead closes, only one of these will work
+!     --- for four bead closes, only one of these will work
             
             x(1) = rxf - rx(1)
             y(1) = ryf - ry(1)
@@ -240,25 +240,25 @@ c     --- for four bead closes, only one of these will work
                if (abs(lengtha-bondl).gt.0.0001) then
                   lterm = .true.
                   return
-               endif
+               end if
             else
                if (abs(lengthb-bondl).gt.0.0001) then
                   lterm = .true.
                   return
-               endif
+               end if
 
                rx(1) = rx(2)
                ry(1) = ry(2)
                rz(1) = rz(2)
-            endif
-         endif
+            end if
+         end if
 
       else
-c     --- lets find our open vector with angles from prev and closed
+!     --- lets find our open vector with angles from prev and closed
   
-c     angle 1 is from vector 1 to the new
-c     angle 2 is from vector 2 to the new
-c     angle 3 is between vectors 1 and 2
+!     angle 1 is from vector 1 to the new
+!     angle 2 is from vector 2 to the new
+!     angle 3 is between vectors 1 and 2
 
          avar = dcos(angle(2)) - rx(2)*dcos(angle(1))/rx(1) 
          bvar = rx(2) * rz(1) / rx(1) - rz(2)
@@ -279,7 +279,7 @@ c     angle 3 is between vectors 1 and 2
          if (var.lt.0) then
             lterm = .true.
             return
-         endif
+         end if
 
          rz(3) = (-b + dsqrt(var)) / (2.0d0 * a )
          rz(4) = (-b - dsqrt(var)) / (2.0d0 * a )
@@ -313,8 +313,8 @@ c     angle 3 is between vectors 1 and 2
             var = abs(var)
             lterm = .true.
 
-c            return
-         endif
+!            return
+         end if
 
          bvar = (rx(1)*ry(2) - rx(2)*ry(1))*dsqrt(var)
 
@@ -339,11 +339,11 @@ c            return
      &        / rx(1)
                 
 
-      endif
+      end if
 
-c      write(iou,*) 'END CLOSE iinit=',iinit
+!      write(iou,*) 'END CLOSE iinit=',iinit
       
-c     ---------------------------------------------------------------
+!     ---------------------------------------------------------------
 
 
       return

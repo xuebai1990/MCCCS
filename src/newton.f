@@ -1,7 +1,7 @@
 	subroutine newton(x_in,x_out)
 
-C  --  This subroutine calcultes the roots of non-linear equation using 
-C  --  Newton-Raphson method.
+!  --  This subroutine calcultes the roots of non-linear equation using 
+!  --  Newton-Raphson method.
 
        implicit none
   
@@ -21,8 +21,8 @@ C  --  Newton-Raphson method.
           if(abs(root(i+1)-root(i)).lt.1.0d-2) then
           x_out = root(i+1)
           return
-          endif
-       enddo
+          end if
+       end do
        x_out = root(maxiter+1)
        return
        end subroutine newton   

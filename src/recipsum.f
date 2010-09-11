@@ -1,36 +1,36 @@
       subroutine recipsum(ibox,vrecip)
 
-c recipsum
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! recipsum
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
 
-c    *********************************************************************
-c    ** calculates the total reciprocal space ewald-sum term for volume **
-c    ** moves, written in 1998 by Bin Chen.                             **
-c    ** rewritten in 2001 by Bin Chen.                                  **
-c    ** rewritten again, probably by Bin.                               **
-c    *********************************************************************
+!    *********************************************************************
+!    ** calculates the total reciprocal space ewald-sum term for volume **
+!    ** moves, written in 1998 by Bin Chen.                             **
+!    ** rewritten in 2001 by Bin Chen.                                  **
+!    ** rewritten again, probably by Bin.                               **
+!    *********************************************************************
       include 'control.inc'
       include 'system.inc'
       include 'coord.inc'
@@ -38,7 +38,7 @@ c    *********************************************************************
       include 'poten.inc'
       include 'conver.inc'
       include 'cell.inc'
-c RP added for MPI
+! RP added for MPI
       include 'mpif.h'
       include 'mpi.inc'
 
@@ -46,7 +46,7 @@ c RP added for MPI
      &     ,nkx_min,nkx_max,nky_min,nky_max,nkz_min,nkz_max
      &     ,i,ii,imolty,kmax1,ncount
 
-c * from h-matrix formulation
+! * from h-matrix formulation
       integer::l,m,n,m_min,m_max,n_min,n_max,kmaxl,kmaxm,kmaxn
 
       real(8)::alpsqr4,vol,ksqr,sumr,sumi,arg,boxlen,vrecip,
@@ -54,7 +54,7 @@ c * from h-matrix formulation
      &     constx,consty,constz,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi
 !      real(8)::sum_sumr,sum_sumi
 
-c RP added for calculating time for communication step
+! RP added for calculating time for communication step
       integer::mystart,myend,blocksize
       integer::ncount_arr(numprocmax),ncount_displs(numprocmax)
       real(8)::sum_vrecip,kx_arr(vectormax),ky_arr(vectormax),
@@ -65,14 +65,14 @@ c RP added for calculating time for communication step
      &   ssumi_one(vectormax),prefact_one(vectormax),
      &   ssumr_arr(vectormax)
  
-c KM for MPI
+! KM for MPI
       do i=1,numprocmax
          ncount_displs(i) = 0
          ncount_arr(i) = 0
-      enddo
+      end do
       
 
-c *** Set up the reciprocal space vectors ***
+! *** Set up the reciprocal space vectors ***
 
       ncount = 0
       vrecip = 0.0d0
@@ -88,7 +88,7 @@ c *** Set up the reciprocal space vectors ***
          hmat(ibox,9) = bz1
          do i = 1,9
             hmatik(i) = 0.0d0
-         enddo
+         end do
          hmatik(1) = twopi/bx1
          hmatik(5) = twopi/by1
          hmatik(9) = twopi/bz1
@@ -98,11 +98,11 @@ c *** Set up the reciprocal space vectors ***
       else
          do i = 1,9
             hmatik(i) = twopi*hmati(ibox,i)
-         enddo
+         end do
          kmaxl = dint(hmat(ibox,1)*calpi)+2
          kmaxm = dint(hmat(ibox,5)*calpi)+2
          kmaxn = dint(hmat(ibox,9)*calpi)+2
-      endif
+      end if
     
       alpsqr4 = 4.0d0*calpi*calpi
          
@@ -116,7 +116,7 @@ c *** Set up the reciprocal space vectors ***
       vol = vol/(4.0d0*onepi)
 
       hmaxsq = alpsqr4*onepi*onepi
-c RP added for MPI        
+! RP added for MPI        
        blocksize = kmaxl/numprocs
        
        mystart = myid * blocksize
@@ -124,21 +124,21 @@ c RP added for MPI
          myend = kmaxl
        else 
          myend = (myid + 1) * blocksize - 1
-       endif
-c *** generate the reciprocal-space 
+       end if
+! *** generate the reciprocal-space 
       do l = mystart,myend
 !      do l = 0,kmaxl 
         if ( l .eq. 0 ) then
             m_min = 0
          else
             m_min = -kmaxm
-         endif
+         end if
          do m = m_min, kmaxm
             if (l .eq. 0 .and. m .eq. 0) then
                n_min = 1
             else
                n_min = -kmaxn
-            endif
+            end if
             do n = n_min, kmaxn
                kx1 = dble(l)*hmatik(1)+dble(m)*hmatik(2)+
      &              dble(n)*hmatik(3)
@@ -147,9 +147,9 @@ c *** generate the reciprocal-space
                kz1 = dble(l)*hmatik(7)+dble(m)*hmatik(8)+
      &              dble(n)*hmatik(9)
                ksqr = kx1*kx1+ky1*ky1+kz1*kz1
-c               if ( ksqr .lt. hmaxsq ) then
-c --- sometimes these are about equal, which can cause different
-c --- behavior on 32 and 64 bit machines without this .and. statement
+!               if ( ksqr .lt. hmaxsq ) then
+! --- sometimes these are about equal, which can cause different
+! --- behavior on 32 and 64 bit machines without this .and. statement
                if ( ksqr .lt. hmaxsq .and.
      &              abs(ksqr-hmaxsq) .gt. 1d-9 ) then
                   ncount = ncount + 1
@@ -158,7 +158,7 @@ c --- behavior on 32 and 64 bit machines without this .and. statement
                   kz_arr(ncount) = kz1
                   prefact_arr(ncount) =
      &                 dexp(-ksqr/alpsqr4)/(ksqr*vol)
-c     *** sum up q*cos and q*sin ***
+!     *** sum up q*cos and q*sin ***
                   sumr = 0.0d0
                   sumi = 0.0d0
 !                  do 10 i = myid+1,nchain,numprocs
@@ -173,20 +173,20 @@ c     *** sum up q*cos and q*sin ***
      &                             kz1*rzu(i,ii)
                               sumr = sumr + dcos(arg)*qqu(i,ii)
                               sumi = sumi + dsin(arg)*qqu(i,ii)
-                           endif
-                        enddo
-                     endif
+                           end if
+                        end do
+                     end if
  10               continue
 
                   ssumr_arr(ncount) = sumr
                   ssumi_arr(ncount) = sumi
-c *** Potential energy ***
+! *** Potential energy ***
                   vrecip = vrecip + (sumr*sumr + sumi*sumi)
      &                 * prefact_arr(ncount)
-               endif
-            enddo
-         enddo
-      enddo
+               end if
+            end do
+         end do
+      end do
     
        CALL MPI_ALLREDUCE(vrecip,sum_vrecip,1,
      &     MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,
@@ -200,7 +200,7 @@ c *** Potential energy ***
        ncount_displs(1) = 0
        do i = 2,numprocs
            ncount_displs(i) = ncount_displs(i-1) + ncount_arr(i-1)
-       enddo
+       end do
  
       CALL MPI_ALLGATHERV(kx_arr,ncount,MPI_DOUBLE_PRECISION,kx_one,
      &         ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION,
@@ -228,7 +228,7 @@ c *** Potential energy ***
       ncount = 0
       do i = 1,numprocs
         ncount = ncount + ncount_arr(i)
-       enddo
+       end do
       do i = 1, ncount
         kx(i,ibox) = kx_one(i)
         ky(i,ibox) = ky_one(i)
@@ -236,16 +236,16 @@ c *** Potential energy ***
         ssumr(i,ibox) = ssumr_one(i)
         ssumi(i,ibox) = ssumi_one(i)
         prefact(i,ibox) = prefact_one(i)
-      enddo
+      end do
 
       vrecip = vrecip*qqfact
-c      write(iou,*) 'in recipsum:',ssumr(100,ibox),ibox
-c *** safety check ***
-c      write(iou,*) 'A total of ',ncount,' vectors are used'
+!      write(iou,*) 'in recipsum:',ssumr(100,ibox),ibox
+! *** safety check ***
+!      write(iou,*) 'A total of ',ncount,' vectors are used'
       if ( ncount .gt. vectormax ) then
          write(iou,*) 'choose a larger vectormax'
          call cleanup('')
-      endif
+      end if
 
       numvect(ibox) = ncount
       return

@@ -1,41 +1,41 @@
       subroutine recippress(ibox,repress,pxx,pyy,pzz,pxy,pyx,pxz,pzx,
      &                      pyz,pzy)
-c recippress
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! recippress
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
-c    ********************************************************************
-c    ** calculates the reciprocal space contribution to pressure using **
-c    ** thermodynamic definition. See J. Chem. Phys. Vol. 109 P2791.   **
-c    ** written in 1998 by Bin Chen.                                   **
-c    ** modified to calculate surface tension, 11/24/03 JMS            **
-c    ********************************************************************
+!    ********************************************************************
+!    ** calculates the reciprocal space contribution to pressure using **
+!    ** thermodynamic definition. See J. Chem. Phys. Vol. 109 P2791.   **
+!    ** written in 1998 by Bin Chen.                                   **
+!    ** modified to calculate surface tension, 11/24/03 JMS            **
+!    ********************************************************************
 
       include 'control.inc'
       include 'ewaldsum.inc'
       include 'coord.inc'
       include 'poten.inc'
-c ---RP added for MPI
+! ---RP added for MPI
       include 'mpi.inc'
       include 'mpif.h'
 
@@ -47,7 +47,7 @@ c ---RP added for MPI
      &     ,intraxz,intrazy,intrayz,intrayx,intrazx,pxy,pyx,pyz,pzy
      &     ,pxz,pzx
 
-c----RP added for MPI
+!----RP added for MPI
       integer::blocksize,mystart,myend
       real(8)::sum_repressx,sum_repressy,sum_repressz,
      &   sum_pxy,sum_pxz,sum_pyz
@@ -77,7 +77,7 @@ c----RP added for MPI
       intrayz = 0.0d0
       intrayx = 0.0d0
 
-c KM for MPI
+! KM for MPI
       sum_repressx = 0.0d0
       sum_repressy = 0.0d0
       sum_repressz = 0.0d0
@@ -95,7 +95,7 @@ c KM for MPI
       sum_intrazx = 0.0d0
       sum_intrayx = 0.0d0
 
-c RP for MPI
+! RP for MPI
       do ncount = myid+1,numvect(ibox),numprocs
 !      do ncount = 1, numvect(ibox)
          factor = prefact(ncount,ibox)*(ssumr(ncount,ibox)*
@@ -126,9 +126,9 @@ c RP for MPI
      &        ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)*
      &        kz(ncount,ibox)))*2.0d0*ky(ncount,ibox)*kz(ncount,ibox))
       
-       enddo
+       end do
 
-c -- RP added for MPI
+! -- RP added for MPI
        CALL MPI_ALLREDUCE(repressx,sum_repressx,1,
      &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
        CALL MPI_ALLREDUCE(repressy,sum_repressy,1,
@@ -150,7 +150,7 @@ c -- RP added for MPI
       pyz = sum_pyz
 
       repress = repressx + repressy + repressz
-c * keep x,y,z separate for surface tension calculation
+! * keep x,y,z separate for surface tension calculation
       pxx = repressx
       pyy = repressy
       pzz = repressz
@@ -158,10 +158,10 @@ c * keep x,y,z separate for surface tension calculation
       pzx = pxz
       pzy = pyz
 
-c --- the intramolecular part should be substracted
-c RP for MPI
+! --- the intramolecular part should be substracted
+! RP for MPI
       do 10 i = myid+1, nchain, numprocs
-c ### check if i is in relevant box ###
+! ### check if i is in relevant box ###
          if ( nboxi(i) .eq. ibox ) then
 
             imolty = moltyp(i)
@@ -170,10 +170,10 @@ c ### check if i is in relevant box ###
             ycmi = ycm(i)
             zcmi = zcm(i)  
 
-c --- loop over all beads ii of chain i 
+! --- loop over all beads ii of chain i 
             do ii = 1, nunit(imolty)
                
-c --- compute the vector of the bead to the COM (p)
+! --- compute the vector of the bead to the COM (p)
                
                piix = rxu(i,ii) - xcmi
                piiy = ryu(i,ii) - ycmi
@@ -181,7 +181,7 @@ c --- compute the vector of the bead to the COM (p)
              
                do ncount = 1,numvect(ibox)
 
-c --- compute the dot product of k and r
+! --- compute the dot product of k and r
                   
                   arg = kx(ncount,ibox)*rxu(i,ii) +
      &                 ky(ncount,ibox)*ryu(i,ii) +
@@ -192,7 +192,7 @@ c --- compute the dot product of k and r
                   recipintra = recipintra + factor*
      &                 (kx(ncount,ibox)*piix+ky(ncount,ibox)*piiy
      &                 +kz(ncount,ibox)*piiz)
-c * keep x,y and z separate for surface tension calculation
+! * keep x,y and z separate for surface tension calculation
                   intraxx = intraxx + factor*(kx(ncount,ibox)*piix)
                   intrayy = intrayy + factor*(ky(ncount,ibox)*piiy)
                   intrazz = intrazz + factor*(kz(ncount,ibox)*piiz)
@@ -203,9 +203,9 @@ c * keep x,y and z separate for surface tension calculation
                   intrazx = intrazx + factor*(kz(ncount,ibox)*piix)
                   intrazy = intrazy + factor*(kz(ncount,ibox)*piiy)
 
-               enddo
-            enddo
-         endif
+               end do
+            end do
+         end if
  10   continue
  
        CALL MPI_ALLREDUCE(recipintra,sum_recipintra,1,
@@ -253,7 +253,7 @@ c * keep x,y and z separate for surface tension calculation
       pyz = pyz + intrayz
       pzy = pzy + intrazy
 
-c      write(iou,*) 'internal part:',intraxx,intrayy,intrazz
+!      write(iou,*) 'internal part:',intraxx,intrayy,intrazz
       
       return
       end

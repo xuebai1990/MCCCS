@@ -1,34 +1,34 @@
       subroutine charge ( i, qion, vflucq, vewald )    
 
-c charge
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! charge
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
  
-c    *******************************************************************
-c    ** calculates the intramolcular polarization energies            **
-c    ** for fluctuating charge moves                                  **
-c    ** written by Marcus G. Martin 9-16-97                           **
-c    ** rewritten by Bin Chen 6-25-99                                 **
-c    *******************************************************************
+!    *******************************************************************
+!    ** calculates the intramolcular polarization energies            **
+!    ** for fluctuating charge moves                                  **
+!    ** written by Marcus G. Martin 9-16-97                           **
+!    ** rewritten by Bin Chen 6-25-99                                 **
+!    *******************************************************************
  
       implicit none
 
@@ -48,11 +48,11 @@ c    *******************************************************************
       iunit = nunit(imolty)
       ibox = nboxi(i)
 
-C *************************************
-C *** INTRACHAIN FLUCQ INTERACTIONS ***
-C *************************************
+! *************************************
+! *** INTRACHAIN FLUCQ INTERACTIONS ***
+! *************************************
 
-c --- calculate intramolecular flucq energy for chain i      
+! --- calculate intramolecular flucq energy for chain i      
       do ii = 1, iunit
          ntii = ntype(imolty,ii)
          qqii = qion(ii)
@@ -66,10 +66,10 @@ c --- calculate intramolecular flucq energy for chain i
                ntij = (ntii-1)*nntype + ntjj
                
                vflucq = vflucq + jayq(ntij)*qqii*qion(jj)
-            endif
-         enddo
-      enddo
-c     --- remove the ground state gas phase energy
+            end if
+         end do
+      end do
+!     --- remove the ground state gas phase energy
       vflucq = vflucq - fqegp(imolty)
 
       if ( lewald ) then
@@ -80,7 +80,7 @@ c     --- remove the ground state gas phase energy
             qqii = qion(ii)
             
             do jj = ii+1, iunit
-c              --- correction term in ewald sum
+!              --- correction term in ewald sum
                rxuij = rxui - rxu(i,jj)
                ryuij = ryui - ryu(i,jj)
                rzuij = rzui - rzu(i,jj)
@@ -93,12 +93,12 @@ c              --- correction term in ewald sum
                    vewald = vewald + (1.0d0-qscale2(imolty,ii,jj))*qqii*
      &                       qion(jj)*
      &                       (erfunc(calp(ibox)*rij)-1.0d0)/rij
-               endif 
-            enddo
-c --- self term in ewald sum ---
+               end if 
+            end do
+! --- self term in ewald sum ---
             vewald = vewald - qqii*qqii*calp(ibox)/dsqrt(onepi)
-         enddo
-      endif
+         end do
+      end if
       vewald = qqfact*vewald
       return
       end

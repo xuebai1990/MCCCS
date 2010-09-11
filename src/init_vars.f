@@ -1,35 +1,35 @@
       subroutine init_vars
-c init_vars
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! init_vars
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
  
-c    *******************************************************************
-c    *** initializes some variables that otherwise cause errors      ***
-c    *** Matt McGrath, October 1, 2009                               ***
-c    *******************************************************************
+!    *******************************************************************
+!    *** initializes some variables that otherwise cause errors      ***
+!    *** Matt McGrath, October 1, 2009                               ***
+!    *******************************************************************
  
       implicit none
 
-c *** common blocks ***
+! *** common blocks ***
       include 'control.inc'
       include 'coord.inc'
       include 'system.inc'
@@ -50,42 +50,42 @@ c *** common blocks ***
       include 'ipswpar.inc'
       include 'eepar.inc'
       include 'cbmc.inc'
-c KM 01/10 remove analysis
-c      include 'gor.inc'
+! KM 01/10 remove analysis
+!      include 'gor.inc'
       include 'blkavg.inc'
-c kea include for garofalini potential
+! kea include for garofalini potential
       include 'garofalini.inc'
       include 'tabulated.inc'
-c **********************************************************************
-c local variables
+! **********************************************************************
+! local variables
 
       integer::ibend,ibox,i,imolty,iunit,iprop,jblock,itype
 
 
-c **********************************************************************
+! **********************************************************************
       nmolty1=0
       leemove=.false.
       iratipsw=0
       acipsw=0.0d0
-c KM remove analysis
-c      nframe=0.0d0
+! KM remove analysis
+!      nframe=0.0d0
       DO ibend=1,nvmax
          brben(ibend)=0.0d0
-      ENDDO
+      end do
       DO itype=1,nntype
          lij(itype)=.FALSE.
-      ENDDO
+      end do
       DO itype=1,nntype*nntype
          sig2ij(itype)=0.0d0
          epsij(itype)=0.0d0
-      ENDDO
+      end do
       DO iprop=1,nprop
          DO ibox=1,nbxmax
             DO jblock=1,blockm
                baver(iprop,ibox,jblock)=0.0d0
-            ENDDO
-         ENDDO
-      ENDDO
+            end do
+         end do
+      end do
       DO ibox=1,nbxmax
          rmvol(ibox)=0.0d0
          boxlx(ibox)=0.0d0
@@ -93,10 +93,10 @@ c      nframe=0.0d0
          boxlz(ibox)=0.0d0
          DO i=1,9
             hmat(ibox,i)=0.0d0
-         ENDDO
+         end do
          lsolid(ibox)=.FALSE.
          lrect(ibox)=.FALSE.
-      ENDDO
+      end do
       upnn=0.0d0
 
       DO imolty=1,ntmax
@@ -104,11 +104,11 @@ c      nframe=0.0d0
          lwell(imolty)=.FALSE.
          nrig(imolty)=0
          lbias(imolty)=.false.
-      ENDDO
+      end do
 
       DO iunit=1,numax
          lsave(iunit)=.false.
-      ENDDO
+      end do
 
       return
       end 

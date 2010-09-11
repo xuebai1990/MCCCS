@@ -1,11 +1,11 @@
       function v_elect_field(i, j, rzfield,E)
-c **********************************************************************
-c **  calculates interaction of molecule i with an external field E  ***
-c **  added 06/24/07 by KM                                           ***
-c **********************************************************************
+! **********************************************************************
+! **  calculates interaction of molecule i with an external field E  ***
+! **  added 06/24/07 by KM                                           ***
+! **********************************************************************
       implicit none
 
-c *** common blocks ***
+! *** common blocks ***
       include 'control.inc'
       include 'external.inc'
       include 'coord.inc'
@@ -14,16 +14,16 @@ c *** common blocks ***
       integer::i, j,ibox
 
 
-c ********************************************
-c **  units
-c **  E in V/A, q in e, rz in A
-c **  E*q*rz = V*e
-c **  1 V*e = 11600 K
-c ********************************************
+! ********************************************
+! **  units
+! **  E in V/A, q in e, rz in A
+! **  E*q*rz = V*e
+! **  1 V*e = 11600 K
+! ********************************************
 
       v_elect_field = -E*rzfield*qqu(i,j)  
       
-c      write(6,*) 'E ', E, ' exfield ', exfield
+!      write(6,*) 'E ', E, ' exfield ', exfield
 
       return
       end

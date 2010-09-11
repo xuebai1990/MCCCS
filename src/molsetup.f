@@ -1,27 +1,27 @@
       subroutine molsetup(imolty)
 
-c molsetup
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! molsetup
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
 
@@ -34,7 +34,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
      &     ,ibend,bendtype,ntor,itor,ju,ku,nu,type,sitelook
      &     ,vibtype,countvib
 
-c     ************************************************************
+!     ************************************************************
 
 
       call vibcheck(1,dum,dum,dum)
@@ -64,9 +64,9 @@ c     ************************************************************
             write(iou,*) 'imolty',imolty,'   i',i,'   invib'
      &           ,invib(imolty,i)
             call cleanup('too many vibrations')
-         endif
+         end if
 
-      enddo
+      end do
       
       do iu = 1, iunit
          
@@ -87,7 +87,7 @@ c     ************************************************************
             if (vibtype.eq.0) then
                write(iou,*) 'atype,btype',atype,btype
                call cleanup('screwup in vibrations')
-            endif
+            end if
                         
             countvib = countvib + 1
 
@@ -108,7 +108,7 @@ c     ************************************************************
                      write(iou,*) 'atype,btype,ctype',atype
      &                    ,btype,ctype
                      call cleanup('screwup in bending angles')
-                  endif
+                  end if
 
                   countbend = countbend + 1
 
@@ -129,7 +129,7 @@ c     ************************************************************
                            write(iou,*) 'atype,btype,ctype,dtype',atype
      &                          ,btype,ctype,dtype
                            call cleanup('screwup in torsion angles')
-                        endif
+                        end if
                         
                         counttor = counttor + 1
 
@@ -138,21 +138,21 @@ c     ************************************************************
                         ijtor4(imolty,iu,counttor) = nu
                         ittor(imolty,iu,counttor) = tortype
 
-                     endif
+                     end if
                                        
-                  enddo
+                  end do
                
-               endif   
+               end if   
 
-            enddo
+            end do
             
-         enddo
+         end do
       
          inben(imolty,iu) = countbend
          intor(imolty,iu) = counttor
          
 
-      enddo
+      end do
 
 
       return
@@ -160,7 +160,7 @@ c     ************************************************************
 
 
 
-c     *************************************************************
+!     *************************************************************
 
       subroutine vibcheck(iinit,atype,btype,vibtype)
 
@@ -185,7 +185,7 @@ c     *************************************************************
             read(60,*) nsite(n,1),(isite(n,1,i),i=1,nsite(n,1))
             read(60,*) nsite(n,2),(isite(n,2,i),i=1,nsite(n,2))
             
-         enddo
+         end do
 
       else
 
@@ -206,8 +206,8 @@ c     *************************************************************
                   lfindb = .true.
                   ia = i
                   goto 105
-               endif
-            enddo
+               end if
+            end do
 
  105        continue
 
@@ -217,32 +217,32 @@ c     *************************************************************
                      lfindb = .true.
                      ib = i
                      goto 110
-                  endif
+                  end if
                elseif (lfindb) then
                   if (atype.eq.isite(n,2,i)) then
                      lfinda = .true.
                      ib = i
                      goto 110
-                  endif
-               endif
-            enddo
+                  end if
+               end if
+            end do
  110        continue
             
             if (lfinda.and.lfindb) then
                if (lfound) then
                   call cleanup('vibration type not distinguishable')
-               endif
+               end if
                vibtype = vbtype(n)
                lfound = .true.
-            endif
-         enddo
+            end if
+         end do
 
-      endif
+      end if
 
       return
       end
 
-c     **************************************************************
+!     **************************************************************
 
       subroutine bendcheck(iinit,atype,btype,ctype,bendtype)
 
@@ -269,7 +269,7 @@ c     **************************************************************
             read(61,*) nsite(n,2),(isite(n,2,i),i=1,nsite(n,2))
             read(61,*) nsite(n,3),(isite(n,3,i),i=1,nsite(n,3))
 
-         enddo
+         end do
 
       else
          bendtype = 0
@@ -289,8 +289,8 @@ c     **************************************************************
                   lfindc = .true.
                   ia = i
                   goto 105
-               endif
-            enddo
+               end if
+            end do
 
  105        continue
 
@@ -299,9 +299,9 @@ c     **************************************************************
                   lfindb = .true.
                   ib = i
                   goto 110
-               endif
+               end if
 
-            enddo
+            end do
 
  110        continue
 
@@ -311,37 +311,37 @@ c     **************************************************************
                      lfindc = .true.
                      ic = i
                      goto 115
-                  endif
+                  end if
                elseif (lfindc) then
                   if (atype.eq.isite(n,3,i)) then
                      lfinda = .true.
                      ic = i
                      goto 115
-                  endif
-               endif
-            enddo
+                  end if
+               end if
+            end do
 
  115        continue
 
             if (lfinda.and.lfindb.and.lfindc) then
                if (lfound) then
                   call cleanup('bend type not distinguishable')
-               endif
+               end if
                bendtype = bntype(n)
                lfound = .true.
 
-            endif
+            end if
 
             
 
             
-         enddo
-      endif
+         end do
+      end if
 
       return
       end
       
-c     *************************************************************
+!     *************************************************************
 
 
       subroutine torcheck(iinit,atype,btype,ctype,dtype,tortype)
@@ -369,7 +369,7 @@ c     *************************************************************
             read(62,*) nsite(n,3),(isite(n,3,i),i=1,nsite(n,3))
             read(62,*) nsite(n,4),(isite(n,4,i),i=1,nsite(n,4))
 
-         enddo
+         end do
       else
          tortype = 0
          lfound = .false.
@@ -391,8 +391,8 @@ c     *************************************************************
                   lfindd = .true.
                   ia = i
                   goto 104
-               endif
-            enddo
+               end if
+            end do
 
  104        continue
 
@@ -402,15 +402,15 @@ c     *************************************************************
                      lrev = .true.
                      ir = i
                      goto 105
-                  endif
+                  end if
                elseif (lfindd) then
                   if (atype.eq.isite(n,4,i)) then
                      lrev = .true.
                      ir = i
                      goto 105
-                  endif
-               endif
-            enddo
+                  end if
+               end if
+            end do
 
  105        continue
             
@@ -420,16 +420,16 @@ c     *************************************************************
                      lfindb = .true.
                      ib = i
                      goto 110
-                  endif
+                  end if
                elseif (lfindd) then
                   if (ctype.eq.isite(n,2,i)) then
                      lfindc = .true.
                      ib = i
                      goto 110
-                  endif
-               endif
+                  end if
+               end if
                
-            enddo
+            end do
             
  110        continue
             
@@ -439,15 +439,15 @@ c     *************************************************************
                      lfindc = .true.
                      ic = i
                      goto 115
-                  endif
+                  end if
                elseif (lfindc) then
                   if (btype.eq.isite(n,3,i)) then
                      lfindb = .true.
                      ic = i
                      goto 115
-                  endif
-               endif
-            enddo
+                  end if
+               end if
+            end do
             
  115        continue
            
@@ -459,15 +459,15 @@ c     *************************************************************
                     lfindd = .true.
                     id = i
                     goto 120
-                 endif
+                 end if
               elseif (lfindd) then
                  if (atype.eq.isite(n,4,i)) then
                     lfinda = .true.
                     id = i
                     goto 120
-                 endif
-              endif
-           enddo
+                 end if
+              end if
+           end do
            
  120       continue
  
@@ -475,7 +475,7 @@ c     *************************************************************
               if (lfound) then
                  write(iou,*) 'a,b,c,d',atype,btype,ctype,dtype
                  call cleanup('torsion type not distinguishable')
-              endif
+              end if
               
               tortype = trtype(n)
               lfound = .true.
@@ -490,13 +490,13 @@ c     *************************************************************
                  lfindd = .false.
                  lfinda = .true.
                  ia = ir
-              endif
+              end if
               goto 105
-           endif
+           end if
             
-        enddo
+        end do
                 
-      endif
+      end if
       
       return
       end

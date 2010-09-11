@@ -1,12 +1,12 @@
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-ccccc  for use with tabulated potentials   
-ccccc  if you are not using a tabulated potential,
-ccccc  reduce the size of the arrays!!!
-ccccc  to pass the test suite, arrays for tabulated electrostatics
-ccccc  need to be sufficiently large
-ccccc  num_int_elect(150,150), tabelect(1500,150,150), etc.
-ccccc  KM 2009
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!cccc  for use with tabulated potentials   
+!cccc  if you are not using a tabulated potential,
+!cccc  reduce the size of the arrays!!!
+!cccc  to pass the test suite, arrays for tabulated electrostatics
+!cccc  need to be sufficiently large
+!cccc  num_int_elect(150,150), tabelect(1500,150,150), etc.
+!cccc  KM 2009
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       integer::vibsplits(150), bendsplits(150), ntabvib, ntabbend
       integer::vdWsplits(150,150), ntabvdW

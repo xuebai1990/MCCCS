@@ -1,34 +1,34 @@
-      subroutine chempt(bsswap,imolty,ntries,qelect)
+      subroutine chempt(bsswap,imolty,ntries)
 
-c chempt
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! chempt
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
  
-c    ********************************************************************
-c    ** Ghost insertion of molecule into the boxes to compute chem pot **
-c    ** using CBMC insertion techniques.  Works for linear or branched **
-c    ** molecules and for anisotropic and Explicit atom                **
-c    ** Written M.G. Martin  9-24-97                                   **
-c    ********************************************************************
+!    ********************************************************************
+!    ** Ghost insertion of molecule into the boxes to compute chem pot **
+!    ** using CBMC insertion techniques.  Works for linear or branched **
+!    ** molecules and for anisotropic and Explicit atom                **
+!    ** Written M.G. Martin  9-24-97                                   **
+!    ********************************************************************
  
       implicit none
 
@@ -39,6 +39,7 @@ c    ********************************************************************
       include 'cbmc.inc'
       include 'rosen.inc' 
       include 'boltzmann.inc'
+      include 'poten.inc'
       include 'external.inc'
       include 'connect.inc'
       include 'inputdata.inc'
@@ -60,52 +61,51 @@ c    ********************************************************************
 
 
       real(8)::bsswap
-      real(8)::random,rdir,qelect,rbf,bsum
+      real(8)::random,rdir,rbf,bsum
       real(8)::waddnew
 
       real(8)::v1insext,v1ins,w1ins
      &                ,v1insint
      &                ,volins,rho,arg,coru,v1inselc
       dimension bsswap(ntmax,4)
-      dimension qelect(nntype)
 
-C --------------------------------------------------------------------
+! --------------------------------------------------------------------
 
-c      write(iou,*) 'start CHEMP'
+!      write(iou,*) 'start CHEMP'
 
-c *** store number of units in iunit and igrow ***
+! *** store number of units in iunit and igrow ***
       iunit = nunit(imolty)
       igrow = nugrow(imolty)
-c *** give i a phony number ***
+! *** give i a phony number ***
       iins = nchain + 1
       moltyp(iins) = imolty
 
-c *** give i a phony number ***
+! *** give i a phony number ***
       iins = nchain + 1
       moltyp(iins) = imolty
-c     give charges to phony number 
+!     give charges to phony number 
       do icbu = 1, iunit
          qqu(iins,icbu) = qelect(ntype(imolty,icbu))
-      enddo
+      end do
 
       do 500 itry = 1,ntries
-c ---    select a box at random
+! ---    select a box at random
       
          if (random().lt.0.5d00) then
             boxins=1
          else
             boxins=2
-         endif
+         end if
 
-c      X = 2 is # attempts into box 2 X=3 is success into box 1
-c      X = 4 is success into box 2
-c     bsswap is the same thing but keeps track of successful growths
+!      X = 2 is # attempts into box 2 X=3 is success into box 1
+!      X = 4 is success into box 2
+!     bsswap is the same thing but keeps track of successful growths
          
          bsswap(imolty,boxins) = bsswap(imolty,boxins) + 1.0d0
 
-c *** select a position of the first/starting unit at RANDOM ***
-c *** and calculate the boltzmann weight                     ***
-c *** for the chain to be INSERTED                           ***
+! *** select a position of the first/starting unit at RANDOM ***
+! *** and calculate the boltzmann weight                     ***
+! *** for the chain to be INSERTED                           ***
          ichoi = nchoi1(imolty)
          do icbu = 1,ichoi
             rxp(1,icbu) = boxlx(boxins) * random()
@@ -116,32 +116,32 @@ c *** for the chain to be INSERTED                           ***
                rzp(1,icbu) = 20*random()-10
             else
                rzp(1,icbu) = 0.0d0
-            endif
-         enddo
+            end if
+         end do
          
-c *** select starting unit ***
-c --- always using bead 1 as the starting unit
+! *** select starting unit ***
+! --- always using bead 1 as the starting unit
          iutry = 1
          lbo = .true.
 
-c --  insert the first atom
+! --  insert the first atom
          call boltz( lbo,iins,iins,imolty,igrow,ovrlap,boxins,.true.
      &        ,0.0d0,0,ichoi)
          bnchem(boxins,imolty) = bnchem(boxins,imolty) + 1.0d0
          if ( ovrlap ) goto 500
 
-c *** perform the walk according to the availibility of the choices ***
-c *** and calculate the correct weight for the trial walk           ***
+! *** perform the walk according to the availibility of the choices ***
+! *** and calculate the correct weight for the trial walk           ***
 
          w1ins = 0.0d0
          do ip = 1, ichoi
             w1ins = w1ins + bfac(ip)
-         enddo
+         end do
 
-c --- check for termination of walk ---
+! --- check for termination of walk ---
          if ( w1ins .lt. softlog ) goto 500
 
-c --- select one position at random ---
+! --- select one position at random ---
          if ( ichoi .gt. 1 ) then
             rbf = w1ins * random()
             bsum = 0.0d0 
@@ -149,15 +149,15 @@ c --- select one position at random ---
                if ( .not. lovr(ip) ) then
                   bsum = bsum + bfac(ip)
                   if ( rbf .lt. bsum ) then
-c                    --- select ip position ---
+!                    --- select ip position ---
                      iwalk = ip
                      goto 180
-                  endif
-               endif
-            enddo
+                  end if
+               end if
+            end do
          else
             iwalk = 1
-         endif
+         end if
 
  180     v1ins =  vtry(iwalk)  
          v1insext = vtrext(iwalk)
@@ -168,18 +168,18 @@ c                    --- select ip position ---
          rynew(1) = ryp(1,iwalk)
          rznew(1) = rzp(1,iwalk)
 
-c         if ( lelect(imolty) ) then
-c            call qqcheck(iins,boxins,rxnew(1),rynew(1),rznew(1))
-c         endif
+!         if ( lelect(imolty) ) then
+!            call qqcheck(iins,boxins,rxnew(1),rynew(1),rznew(1))
+!         end if
 
-c *** set walk conditions ***
+! *** set walk conditions ***
          invtry = invib(imolty,iutry)
          if ( invtry .eq. 0 ) then
-c --- Bead 1 is the only bead to be grown ---
+! --- Bead 1 is the only bead to be grown ---
             islen = 0
             goto 100
          elseif ( invtry .eq. 1 ) then
-c --- Bead 1 is an endpoint ---
+! --- Bead 1 is an endpoint ---
             nbranp = 0
             iincre = 1
 
@@ -188,39 +188,39 @@ c --- Bead 1 is an endpoint ---
             wsched(1) = iut
             islen = 1
          else
-c --- Bead 1 is a midpoint or branchpoint ---
+! --- Bead 1 is a midpoint or branchpoint ---
             nbranp = 0
-c --- all branches will be regrown - starting at the lowest/highest ---
+! --- all branches will be regrown - starting at the lowest/highest ---
             rdir = random()
             if ( rdir .le. 0.5d0 ) then
                iincre = -1
             else
                iincre = 1
-            endif
+            end if
             if ( iincre .eq. -1 ) then
                write(2,*) 'imolty,iutry,invtry',imolty,iutry,invtry
                iut = ijvib(imolty,iutry,invtry)
                do iii = invtry-1, 1, -1
                   nbranp = nbranp + 1
                   ibranp(nbranp) = ijvib(imolty,iutry,iii)
-               enddo
+               end do
             else
                iut = ijvib(imolty,iutry,1)
                do iii = 2, invtry
                   nbranp = nbranp + 1
                   ibranp(nbranp) = ijvib(imolty,iutry,iii)
-               enddo
-            endif
+               end do
+            end if
             lexist(iut) = .false.
             wsched(1) = iut
             islen = 1
-         endif
+         end if
 
-c *** calculate number of trial segments ***
-c *** set LEXIST of trial segments to false ***
-c *** generate growing schedule ***
+! *** calculate number of trial segments ***
+! *** set LEXIST of trial segments to false ***
+! *** generate growing schedule ***
          if ( iincre .eq. 1 ) then
-c --- find trial segment with lowest index ---
+! --- find trial segment with lowest index ---
  21         iulast = wsched(islen)
             iut = 0
             iutry = 0
@@ -229,13 +229,13 @@ c --- find trial segment with lowest index ---
                if ( lexist(iub) ) then
                   iut = iub
                   go to 22
-               endif
-            enddo
+               end if
+            end do
  22         if ( iut .ne. 0 ) then
                if ( nbranp .gt. 0 ) then
-c --- compare to index of lowest branchpoint ---
+! --- compare to index of lowest branchpoint ---
                   if ( iut .gt. ibranp(1) ) then
-c --- select branchpoint and remove it from list of branchpoints ---
+! --- select branchpoint and remove it from list of branchpoints ---
                      iutry = ibranp(1)
                      lexist(iutry) = .false.
                      if ( nbranp .eq. 1 ) then
@@ -244,21 +244,21 @@ c --- select branchpoint and remove it from list of branchpoints ---
                         do ibr = 2, nbranp
                            ibr1 = ibr - 1
                            ibranp(ibr1) = ibranp(ibr)
-                        enddo
+                        end do
                         ibranp(nbranp) = 0
-                     endif
+                     end if
                      nbranp = nbranp - 1
                   else
-c --- select IUT and leave branches ---
+! --- select IUT and leave branches ---
                      iutry = iut
                      lexist(iutry) = .false.
-                  endif
+                  end if
                else
-c --- select IUT ---
+! --- select IUT ---
                   iutry = iut
                   lexist(iutry) = .false.
-               endif
-c --- add other connections (including non-selected IUT) to branchpoints ---
+               end if
+! --- add other connections (including non-selected IUT) to branchpoints ---
  23            do iu = 1, invib(imolty,iulast)
                   iub = ijvib(imolty,iulast,iu)
                   if ( lexist(iub) ) then
@@ -274,34 +274,34 @@ c --- add other connections (including non-selected IUT) to branchpoints ---
                            else
                               ibranp(ibr1) = iub
                               go to 24
-                           endif
-                        enddo
-                     endif
-                  endif
+                           end if
+                        end do
+                     end if
+                  end if
  24               continue
-               enddo
+               end do
             else
                if ( nbranp .gt. 0 ) then
-c --- take lowest branchpoint ---
+! --- take lowest branchpoint ---
                   iutry = ibranp(1)
                   lexist(iutry) = .false.
                   do ibr = 2, nbranp
                      ibr1 = ibr - 1
                      ibranp(ibr1) = ibranp(ibr)
-                  enddo
+                  end do
                   nbranp = nbranp - 1
                else
-c --- iulast is the last unit in the walkschedule ---
+! --- iulast is the last unit in the walkschedule ---
                   go to 100
-               endif
-            endif
+               end if
+            end if
 
             islen = islen + 1
             wsched(islen) = iutry
             go to 21
          else
 
-c --- find trial segment with highest index ---
+! --- find trial segment with highest index ---
  31         iulast = wsched(islen)
             write(2,*) '*************'
             write(2,*) 'iulast',iulast
@@ -313,13 +313,13 @@ c --- find trial segment with highest index ---
                if ( lexist(iub) ) then
                   iut = iub
                   go to 32
-               endif
-            enddo
+               end if
+            end do
  32         if ( iut .ne. 0 ) then
                if ( nbranp .gt. 0 ) then
-c --- compare to index of highest branchpoint ---
+! --- compare to index of highest branchpoint ---
                   if ( iut .lt. ibranp(1) ) then
-c --- select branchpoint and remove it from list of branchpoints ---
+! --- select branchpoint and remove it from list of branchpoints ---
                      iutry = ibranp(1)
                      lexist(iutry) = .false.
                      if ( nbranp .eq. 1 ) then
@@ -328,21 +328,21 @@ c --- select branchpoint and remove it from list of branchpoints ---
                         do ibr = 2, nbranp
                            ibr1 = ibr - 1
                            ibranp(ibr1) = ibranp(ibr)
-                        enddo
+                        end do
                         ibranp(nbranp) = 0
-                     endif
+                     end if
                      nbranp = nbranp - 1
                   else
-c --- select IUT and leave branches ---
+! --- select IUT and leave branches ---
                      iutry = iut
                      lexist(iutry) = .false.
-                  endif
+                  end if
                else
-c --- select IUT ---
+! --- select IUT ---
                   iutry = iut
                   lexist(iutry) = .false.
-               endif
-c --- add other connections (including non-selected IUT) to branchpoints ---
+               end if
+! --- add other connections (including non-selected IUT) to branchpoints ---
  33            do iu = invib(imolty,iulast), 1, -1
                   iub = ijvib(imolty,iulast,iu)
                   if ( lexist(iub) ) then
@@ -358,44 +358,44 @@ c --- add other connections (including non-selected IUT) to branchpoints ---
                            else
                               ibranp(ibr1) = iub
                               go to 34
-                           endif
-                        enddo
-                     endif
-                  endif
+                           end if
+                        end do
+                     end if
+                  end if
  34               continue
-               enddo
+               end do
             else
                if ( nbranp .gt. 0 ) then
-c --- take highest branchpoint ---
+! --- take highest branchpoint ---
                   iutry = ibranp(1)
                   lexist(iutry) = .false.
                   do ibr = 2, nbranp
                      ibr1 = ibr - 1
                      ibranp(ibr1) = ibranp(ibr)
-                  enddo
+                  end do
                   nbranp = nbranp - 1
                else
-c --- iulast is the last unit in the walkschedule ---
+! --- iulast is the last unit in the walkschedule ---
                   go to 100
-               endif
-            endif
+               end if
+            end if
 
             islen = islen + 1
             wsched(islen) = iutry
             go to 31
 
-         endif
+         end if
 
  100     continue
 
-c - create walk schedule for bonded interactions -
+! - create walk schedule for bonded interactions -
          do iii = 1, igrow
             lexist(iii) = .true.
-         enddo
+         end do
          do iii = 1, islen
             iut = wsched(iii)
             lexist(iut) = .false.
-         enddo
+         end do
          do iii = 1, islen
             iut = wsched(iii)
             do j = 1, invib(imolty,iut)
@@ -404,8 +404,8 @@ c - create walk schedule for bonded interactions -
                   wschvib(iut,j) = .true.
                else
                   wschvib(iut,j) = .false.
-               endif
-            enddo
+               end if
+            end do
             do j = 1, inben(imolty,iut)
                jj2 = ijben2(imolty,iut,j)
                jj3 = ijben3(imolty,iut,j)
@@ -413,8 +413,8 @@ c - create walk schedule for bonded interactions -
                   wschben(iut,j) = .true.
                else
                   wschben(iut,j) = .false.
-               endif
-            enddo
+               end if
+            end do
             do j = 1, intor(imolty,iut)
                jj2 = ijtor2(imolty,iut,j)
                jj3 = ijtor3(imolty,iut,j)
@@ -424,31 +424,31 @@ c - create walk schedule for bonded interactions -
                   wschtor(iut,j) = .true.
                else
                   wschtor(iut,j) = .false.
-               endif
-            enddo
+               end if
+            end do
             lexist(iut) = .true.
-         enddo
+         end do
 
-c ------------------------------------------------------------------
-c     --- not currently working 2-11-98
+! ------------------------------------------------------------------
+!     --- not currently working 2-11-98
          lterm = .false.
-c         call rosnbr ( iins, imolty, islen, boxins, lterm, igrow  )
-c --- termination of cbmc attempt due to walk termination ---
+!         call rosnbr ( iins, imolty, islen, boxins, lterm, igrow  )
+! --- termination of cbmc attempt due to walk termination ---
          if ( lterm ) goto 500
 
 
-c --- Begin DC-CBMC Corrections for NEW configuration
+! --- Begin DC-CBMC Corrections for NEW configuration
          waddnew = 1.0d0
          if (ldual .or. ((.not. lchgall) .and. lelect(imolty))) then 
-c     compute the energy of the inserted molecule
-c           calculate the full site-site energy
-c           iii=1 new conformation
+!     compute the energy of the inserted molecule
+!           calculate the full site-site energy
+!           iii=1 new conformation
             do j=1,igrow
                rxuion(j,1) = rxnew(j)
                ryuion(j,1) = rynew(j)
                rzuion(j,1) = rznew(j)
                qquion(j,1) = qqu(iins,j)
-            enddo
+            end do
 
             ibox=boxins
             nboxi(iins) = ibox
@@ -469,18 +469,18 @@ c           iii=1 new conformation
             vnewinter = vinter - v1insint
             vnewext   = vext - v1insext
             vnewelect = velect - v1inselc
-         endif
-c     End DC-CBMC Corrections for NEW configuration
+         end if
+!     End DC-CBMC Corrections for NEW configuration
 
-c     Begin Explicit Atom Corrections for NEW configuration
+!     Begin Explicit Atom Corrections for NEW configuration
          if ( iunit .ne. igrow ) then
-c        calculate the true Lennard-Jones energy for the hydrogens
-c        iii=1 new conformation
+!        calculate the true Lennard-Jones energy for the hydrogens
+!        iii=1 new conformation
             do j=1,iunit
                rxu(iins,j)=rxnew(j)
                ryu(iins,j)=rynew(j)
                rzu(iins,j)=rznew(j)
-            enddo
+            end do
             ibox = boxins
             call explct(iins,vtornew,.false.,.false.)
             ltors = .false.
@@ -490,14 +490,14 @@ c        iii=1 new conformation
                ryuion(j,1) = ryu(iins,j)
                rzuion(j,1) = rzu(iins,j)
                qquion(j,1) = qqu(iins,j)
-            enddo
-c Calculate the energy of the non-backbone beads 
+            end do
+! Calculate the energy of the non-backbone beads 
             istt = igrow+1
             iett = iunit
             call energy (iins,imolty,v, vintra,vinter,vext,velect
      &           ,vewald,1
      &           ,ibox,istt,iett, .true.,ovrlap,ltors,vtordum,
-     +           .true.,.false.)
+     &           .true.,.false.)
             if (ovrlap) goto 500
             delen = v - vnewintra + vtornew
 
@@ -509,11 +509,11 @@ c Calculate the energy of the non-backbone beads
             vnewext   = vnewext + vext
             vnewtg    = vnewtg + vtornew
             vnewelect = vnewelect + velect
-         endif
+         end if
 
-c     End Explicit Atom Corrections for NEW configuration
+!     End Explicit Atom Corrections for NEW configuration
 
-c     add in the contribution from the first bead
+!     add in the contribution from the first bead
          vnewt     = vnewt + v1ins
          vnewinter = vnewinter + v1insint
          vnewext   = vnewext + v1insext
@@ -523,7 +523,7 @@ c     add in the contribution from the first bead
             volins=boxlx(boxins)*boxly(boxins)*boxlz(boxins)
          else
             volins=boxlx(boxins)*boxly(boxins)
-         endif
+         end if
 
          arg = w1ins * waddnew * weight * volins 
      &        / dble( ncmt(boxins,imolty)+1 )
@@ -534,10 +534,10 @@ c     add in the contribution from the first bead
                   rho = dble(ncmt(boxins,jmt)+1)/volins
                else
                   rho = dble(ncmt(boxins,jmt))/volins
-               endif
+               end if
                arg=arg*dexp(-(beta*2.0d0*coru(imolty,jmt,rho,boxins)))
-            enddo
-         endif
+            end do
+         end if
 
          acchem(boxins,imolty) = acchem(boxins,imolty)+arg
          bsswap(imolty,boxins+2) = bsswap(imolty,boxins+2) + 1.0d0
@@ -545,7 +545,7 @@ c     add in the contribution from the first bead
  500  continue
 
 
-c       write(2,*) 'end CHEMPT'
+!       write(2,*) 'end CHEMPT'
 
       return
       end

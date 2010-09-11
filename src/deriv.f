@@ -1,7 +1,7 @@
       subroutine deriv(ibox)
-c
-c calculate integrand in maginns interphase switch
-c
+!
+! calculate integrand in maginns interphase switch
+!
       implicit none
       include 'control.inc'
       include 'system.inc'
@@ -46,18 +46,18 @@ c
                   do k = 1, 3
                      dvdl = dvdl - hmatsi(j,k)*dhmat(i,j)*
      &                    (etais*pips(i,k)+lambdais*pwellips(i,k))
-c	write(6,*) i,j,pips(i,j),pwellips(i,j)
-                  enddo
-c	write(6,*) i,j,pips(i,j)
-               enddo
-            enddo
+!	write(6,*) i,j,pips(i,j),pwellips(i,j)
+                  end do
+!	write(6,*) i,j,pips(i,j)
+               end do
+            end do
             dvdl = vol*dvdl+vwellipsw
-         endif
+         end if
       else
          dvdl = (1.0d0-etais)*vipsw-vwellipsw
-      endif
+      end if
 
-c	write(6,*) 'deriv', dvdl,vwellipsw,pipsw,pwellipsw,vol
+!	write(6,*) 'deriv', dvdl,vwellipsw,pipsw,pwellipsw,vol
 
       return
       end

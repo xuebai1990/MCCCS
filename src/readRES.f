@@ -1,12 +1,12 @@
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c     Ordering the .res file to input coord for fort.77
-c     Readin files: fort.33,source_filename(.res)
-c     Format of fort.33, which is from source_filename.inp:
-c     source_filename
-c     nbead
-c     C1 H2 C5 O4 ...
-c     Output file: source_filename.frac
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!     Ordering the .res file to input coord for fort.77
+!     Readin files: fort.33,source_filename(.res)
+!     Format of fort.33, which is from source_filename.inp:
+!     source_filename
+!     nbead
+!     C1 H2 C5 O4 ...
+!     Output file: source_filename.frac
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       program getfrac
 
       implicit none
@@ -28,7 +28,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       read(22,*)
       do i=1,nbead
          read(22,*) sname(i),dum,bead(1:3,i)
-      enddo
+      end do
       close(22)
       
       print*, nbead
@@ -37,7 +37,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       write(23,*) nbead
       do i=1,nbead
          write(23,*) sname(i), bead(1:3,i)
-      enddo
+      end do
       close(23)
       print*, 'coordinates are in : ', outfile
       end program

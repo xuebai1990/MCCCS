@@ -1,16 +1,16 @@
       subroutine lininter_vib(len, tabulated_vib, vibtyp)
 
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-cccc  calculates vibrational potential using linear interpolation
-cccc  between two points
-cccc  must specify equilibrium bond length in suvibe, force
-cccc  constant must be zero
-cccc  requires a file (fort.41) that starts with 0.0 (not 0.5)
-cccc  fort.41: number of tabulated potentials, potential number from
-cccc  suvibe, number of points per angstrom, tabulated potential
-cccc  (repeat last three parts for each additional potential)
-cccc  KM 12/02/08
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!ccc  calculates vibrational potential using linear interpolation
+!ccc  between two points
+!ccc  must specify equilibrium bond length in suvibe, force
+!ccc  constant must be zero
+!ccc  requires a file (fort.41) that starts with 0.0 (not 0.5)
+!ccc  fort.41: number of tabulated potentials, potential number from
+!ccc  suvibe, number of points per angstrom, tabulated potential
+!ccc  (repeat last three parts for each additional potential)
+!ccc  KM 12/02/08
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
       include 'tabulated.inc'
@@ -25,8 +25,8 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       xa = int(len)
       left = len-xa
 
-c     select correct bin
-c     multiply by num_int_vib - number of intervals per angstrom
+!     select correct bin
+!     multiply by num_int_vib - number of intervals per angstrom
       add1 = int(left*num_int_vib(vibtyp))
       bin = (xa-vib(1,vibtyp))*num_int_vib(vibtyp) + 1 + add1
       vlow = bin
@@ -38,7 +38,7 @@ c     multiply by num_int_vib - number of intervals per angstrom
          write(2,*) 'vlow ', vlow, vib(vlow, vibtyp),len
          write(2,*) 'vhigh ', vhigh, vib(vhigh, vibtyp), len
          write(2,*)
-      endif
+      end if
 
       lenrem=len-vib(vlow, vibtyp)
       lenrem=lenrem*dble(num_int_vib(vibtyp))
@@ -51,20 +51,20 @@ c     multiply by num_int_vib - number of intervals per angstrom
 
       subroutine lininter_bend(r, tabulated_bend, bendtyp)
 
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-cccc  calculates 1-3 nonbonded 'bending' potential using linear
-cccc  interpolation between two points
-cccc  must include 1-3 interactions
-cccc  must specify equilibrium angle in suvibe, force constant
-cccc  must be very small but non-zero
-cccc  requires a file (fort.42) with distances in A
-cccc  fort.42: number of tabulated potentials, potential number from
-cccc  suvibe, number of points per degree, tabulated potential
-cccc  (repeat last three parts for each additional potential,
-cccc   separated by 1000 1000)
-cccc  make sure potential does not go up to infinity!
-cccc  KM 12/03/08
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!ccc  calculates 1-3 nonbonded 'bending' potential using linear
+!ccc  interpolation between two points
+!ccc  must include 1-3 interactions
+!ccc  must specify equilibrium angle in suvibe, force constant
+!ccc  must be very small but non-zero
+!ccc  requires a file (fort.42) with distances in A
+!ccc  fort.42: number of tabulated potentials, potential number from
+!ccc  suvibe, number of points per degree, tabulated potential
+!ccc  (repeat last three parts for each additional potential,
+!ccc   separated by 1000 1000)
+!ccc  make sure potential does not go up to infinity!
+!ccc  KM 12/03/08
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
       include 'tabulated.inc'
@@ -79,8 +79,8 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       xa = int(r)
       left = r-xa
 
-c     select correct bin
-c     multiply by num_int_bend - number of intervals per A
+!     select correct bin
+!     multiply by num_int_bend - number of intervals per A
       add1 = int(left*num_int_bend(bendtyp))
       bin = (xa-bend(1,bendtyp))*num_int_bend(bendtyp) + 1 + add1
       blow = bin
@@ -93,34 +93,34 @@ c     multiply by num_int_bend - number of intervals per A
          write(2,*) 'blow ', blow, bend(blow, bendtyp),r
          write(2,*) 'bhigh ', bhigh, bend(bhigh, bendtyp), r
          write(2,*)
-      endif
+      end if
 
       rem=r-bend(blow, bendtyp)
       rem=rem*dble(num_int_bend(bendtyp))
 
       tabulated_bend=rem*benddiff(blow,bendtyp)
       tabulated_bend=tabulated_bend+tabbend(blow,bendtyp)
-c      write(2,*) 'tabulated_bend ', tabulated_bend
+!      write(2,*) 'tabulated_bend ', tabulated_bend
 
       return
       end
 
       subroutine lininter_vdW(r, tabulated_vdW, typi, typj)
 
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-cccc  calculates nonbonding van der Waals potential using linear 
-cccc  interpolation between two points
-cccc  requires a file (fort.43)
-cccc  fort.43: number of tabulated potentials, potential number,
-cccc  number of points per angstrom, tabulated potential
-cccc  (repeat last three parts for each additional potential)
-cccc  for unlike interactions, list 1-2 and 2-1
-cccc  separate potentials with 1000
-cccc  make sure potential does not go up to infinity!
-cccc  bead type numbers should be defined in suijtab, but it doesn't
-cccc  matter what they are (the parameters aren't used)
-cccc  KM 12/03/08
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!ccc  calculates nonbonding van der Waals potential using linear 
+!ccc  interpolation between two points
+!ccc  requires a file (fort.43)
+!ccc  fort.43: number of tabulated potentials, potential number,
+!ccc  number of points per angstrom, tabulated potential
+!ccc  (repeat last three parts for each additional potential)
+!ccc  for unlike interactions, list 1-2 and 2-1
+!ccc  separate potentials with 1000
+!ccc  make sure potential does not go up to infinity!
+!ccc  bead type numbers should be defined in suijtab, but it doesn't
+!ccc  matter what they are (the parameters aren't used)
+!ccc  KM 12/03/08
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
       include 'tabulated.inc'
@@ -135,8 +135,8 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       xa = int(r)
       left = r-xa
 
-c     select correct bin
-c     multiply by num_int_vdW - number of intervals per angstrom
+!     select correct bin
+!     multiply by num_int_vdW - number of intervals per angstrom
       add1 = int(left*num_int_vdW(typi,typj))
       bin = (xa-rvdW(1,typi,typj))*num_int_vdW(typi,typj) + 
      &     1 + add1
@@ -150,7 +150,7 @@ c     multiply by num_int_vdW - number of intervals per angstrom
          write(2,*) 'low ', low, rvdW(low, typi, typj)
          write(2,*) 'high ', high, rvdW(high, typi, typj)
          write(2,*)
-      endif
+      end if
 
       rem=r-rvdW(low, typi, typj)
       rem=rem*dble(num_int_vdW(typi,typj))
@@ -164,17 +164,17 @@ c     multiply by num_int_vdW - number of intervals per angstrom
 
       subroutine lininter_elect(r, tabulated_elect, typi, typj)
 
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-cccc  calculates electrostatic potential using linear interpolation
-cccc  between two points
-cccc  requires a file (fort.44)
-cccc  fort.44: number of tabulated potentials, potential number,
-cccc  number of points per angstrom, tabulated potential
-cccc  (repeat last three parts for each additional potential)
-cccc  for unlike interactions, list 1-2 and 2-1
-cccc  separate potentials with 1000
-cccc  KM 04/23/09
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!ccc  calculates electrostatic potential using linear interpolation
+!ccc  between two points
+!ccc  requires a file (fort.44)
+!ccc  fort.44: number of tabulated potentials, potential number,
+!ccc  number of points per angstrom, tabulated potential
+!ccc  (repeat last three parts for each additional potential)
+!ccc  for unlike interactions, list 1-2 and 2-1
+!ccc  separate potentials with 1000
+!ccc  KM 04/23/09
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
       include 'tabulated.inc'
@@ -189,8 +189,8 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       xa = int(r)
       left = r-xa
 
-c     select correct bin
-c     multiply by num_int_nonbond - number of intervals per angstrom
+!     select correct bin
+!     multiply by num_int_nonbond - number of intervals per angstrom
       add1 = int(left*num_int_elect(typi,typj))
       bin = (xa-relect(1,typi,typj))*num_int_elect(typi,typj) + 
      &     1 + add1
@@ -204,7 +204,7 @@ c     multiply by num_int_nonbond - number of intervals per angstrom
          write(2,*) 'low ', low, relect(low, typi, typj)
          write(2,*) 'high ', high, relect(high, typi, typj)
          write(2,*)
-      endif
+      end if
 
       rem=r-relect(low, typi, typj)
       rem=rem*dble(num_int_elect(typi,typj))

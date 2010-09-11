@@ -9,10 +9,10 @@
       integer::ibox
       real(8)::rxuij,ryuij,rzuij,hsx,hsy,hsz,sx,sy,sz
 
-c ----------------------------------------------------------------
+! ----------------------------------------------------------------
 
       if ( lsolid(ibox) .and. .not. lrect(ibox) ) then
-c *** non-hexagonal box
+! *** non-hexagonal box
          hsx = 0.5d0*hmat(ibox,1)
          hsy = 0.5d0*hmat(ibox,5)
          hsz = 0.5d0*hmat(ibox,9)
@@ -25,31 +25,31 @@ c *** non-hexagonal box
 
 
 
-c         if ( sx .gt. 0.5d0 ) then
-c            sx = sx-1d0
-c         elseif ( sx .lt. -0.5d0 ) then
-c            sx = sx+1d0
-c         endif
-c         if ( sy .gt. 0.5d0 ) then
-c            sy = sy-1d0
-c         elseif ( sy .lt. -0.5d0 ) then
-c            sy = sy+1d0
-c         endif
-c         if ( sz .gt. 0.5d0 ) then
-c            sz = sz-1d0
-c         elseif ( sz .lt. -0.5d0 ) then
-c            sz = sz+1d0
-c         endif
-c         sx = sx-nint(sx)
-c         sy = sy-nint(sy)
-c         sz = sz-nint(sz)
-c         rxuij = sx*hmat(ibox,1)+sy*hmat(ibox,4)+sz*hmat(ibox,7)
-c         ryuij = sx*hmat(ibox,2)+sy*hmat(ibox,5)+sz*hmat(ibox,8)
-c         rzuij = sx*hmat(ibox,3)+sy*hmat(ibox,6)+sz*hmat(ibox,9)
+!         if ( sx .gt. 0.5d0 ) then
+!            sx = sx-1d0
+!         elseif ( sx .lt. -0.5d0 ) then
+!            sx = sx+1d0
+!         end if
+!         if ( sy .gt. 0.5d0 ) then
+!            sy = sy-1d0
+!         elseif ( sy .lt. -0.5d0 ) then
+!            sy = sy+1d0
+!         end if
+!         if ( sz .gt. 0.5d0 ) then
+!            sz = sz-1d0
+!         elseif ( sz .lt. -0.5d0 ) then
+!            sz = sz+1d0
+!         end if
+!         sx = sx-nint(sx)
+!         sy = sy-nint(sy)
+!         sz = sz-nint(sz)
+!         rxuij = sx*hmat(ibox,1)+sy*hmat(ibox,4)+sz*hmat(ibox,7)
+!         ryuij = sx*hmat(ibox,2)+sy*hmat(ibox,5)+sz*hmat(ibox,8)
+!         rzuij = sx*hmat(ibox,3)+sy*hmat(ibox,6)+sz*hmat(ibox,9)
 
 
 
-c         print*,rxuij,ryuij,rzuij
+!         print*,rxuij,ryuij,rzuij
 
          if ( rzuij .gt. hsz ) then
             rzuij=rzuij-hmat(ibox,9)
@@ -57,15 +57,15 @@ c         print*,rxuij,ryuij,rzuij
             if ( rzuij .gt. hsz ) then
                rzuij=rzuij-hmat(ibox,9)
                sz=sz-1d0
-            endif
+            end if
          elseif ( rzuij .lt. -hsz ) then
             rzuij=rzuij+hmat(ibox,9)
             sz=sz+1d0
             if ( rzuij .lt. -hsz ) then
               rzuij=rzuij+hmat(ibox,9)
                sz=sz+1d0
-            endif
-         endif
+            end if
+         end if
 
          ryuij=sy*hmat(ibox,5)+sz*hmat(ibox,8)
          if ( ryuij .gt. hsy ) then
@@ -74,32 +74,32 @@ c         print*,rxuij,ryuij,rzuij
             if ( ryuij .gt. hsy ) then
                ryuij=ryuij-hmat(ibox,5)
                sy=sy-1d0
-            endif
+            end if
          elseif ( ryuij .lt. -hsy ) then
             ryuij=ryuij+hmat(ibox,5)
             sy=sy+1d0
             if ( ryuij .lt. -hsy ) then
                ryuij=ryuij+hmat(ibox,5)
               sy=sy+1d0
-            endif
-        endif
+            end if
+        end if
 
          rxuij=sx*hmat(ibox,1)+sy*hmat(ibox,4)+sz*hmat(ibox,7)
          if ( rxuij .gt. hsx ) then
             rxuij=rxuij-hmat(ibox,1)
             if ( rxuij .gt. hsx ) then
                rxuij=rxuij-hmat(ibox,1)
-            endif
+            end if
          elseif ( rxuij .lt. -hsx ) then
             rxuij=rxuij+hmat(ibox,1)
             if ( rxuij .lt. -hsx ) then
                rxuij=rxuij+hmat(ibox,1)
-            endif
-         endif
+            end if
+         end if
 
 
-c         print*, sqrt(rxuij**2+ryuij**2+rzuij**2)
-c         print*
+!         print*, sqrt(rxuij**2+ryuij**2+rzuij**2)
+!         print*
 
       else
 
@@ -109,12 +109,12 @@ c         print*
                   rxuij=rxuij-bx
                else
                   if (rxuij.lt.-hbx) rxuij=rxuij+bx
-               endif
+               end if
             else
-c            rxuij = rxuij - bx*anint(rxuij*bxi)
+!            rxuij = rxuij - bx*anint(rxuij*bxi)
                rxuij = rxuij - bx*dint(rxuij*bxi+dsign(0.5d0,rxuij))
-            endif
-         endif
+            end if
+         end if
 
          if ( lpbcy ) then
             if ( lfold ) then
@@ -122,12 +122,12 @@ c            rxuij = rxuij - bx*anint(rxuij*bxi)
                   ryuij=ryuij-by
                else
                   if (ryuij.lt.-hby) ryuij=ryuij+by
-               endif
+               end if
             else
-c           ryuij  = ryuij - by*anint(ryuij*byi)
+!           ryuij  = ryuij - by*anint(ryuij*byi)
                ryuij = ryuij - by*dint(ryuij*byi+dsign(0.5d0,ryuij))
-            endif
-         endif
+            end if
+         end if
 
          if ( lpbcz ) then
             if ( lfold ) then
@@ -135,31 +135,31 @@ c           ryuij  = ryuij - by*anint(ryuij*byi)
                   rzuij=rzuij-bz
                else
                   if (rzuij.lt.-hbz) rzuij=rzuij+bz
-               endif
+               end if
             else
-c            rzuij  = rzuij - bz*anint(rzuij*bzi)
+!            rzuij  = rzuij - bz*anint(rzuij*bzi)
                rzuij = rzuij - bz*dint(rzuij*bzi+dsign(0.5d0,rzuij))
-            endif
-         endif
+            end if
+         end if
 
-c --- JLR 11-17-09
-c --- for orginal RPLC setup, mimage must be applied twice or energy errors can result 
-c --- this may be removed in future if larger system size is used!!!
+! --- JLR 11-17-09
+! --- for orginal RPLC setup, mimage must be applied twice or energy errors can result 
+! --- this may be removed in future if larger system size is used!!!
          if (ltwice(ibox)) then !everthing is folded again
             if ( rxuij .gt. hbx ) then
                rxuij=rxuij-bx
             else
                if (rxuij.lt.-hbx) rxuij=rxuij+bx
-            endif
+            end if
             if ( ryuij .gt. hby ) then
                ryuij=ryuij-by
             else
                if (ryuij.lt.-hby) ryuij=ryuij+by
-            endif
-         endif
-c --- END JLR 11-17-09
+            end if
+         end if
+! --- END JLR 11-17-09
 
-      endif
+      end if
 
 
       return

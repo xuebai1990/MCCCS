@@ -1,36 +1,36 @@
       subroutine volume
 
-c volume
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! volume
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
  
-c    *************************************************************
-c    ** makes an isotropic volume change                        **
-c    ** the maximum change is controlled by rmtrax and the      **
-c    ** number of successful trial moves is stored in bsvol.    **
-c    *************************************************************
-c
-c --- perform change of the volume: random walk in ln(vol)
-c
+!    *************************************************************
+!    ** makes an isotropic volume change                        **
+!    ** the maximum change is controlled by rmtrax and the      **
+!    ** number of successful trial moves is stored in bsvol.    **
+!    *************************************************************
+!
+! --- perform change of the volume: random walk in ln(vol)
+!
  
       implicit none
 
@@ -42,23 +42,23 @@ c
       include 'bnbsma.inc'
       include 'ewaldsum.inc'
       include 'cell.inc'
-ckea
+!kea
       include 'garofalini.inc'
       include 'neigh.inc'
 
-c      logical::ovrlap,lvol,lx(nbxmax),ly(nbxmax),lz(nbxmax),lncubic
+!      logical::ovrlap,lvol,lx(nbxmax),ly(nbxmax),lz(nbxmax),lncubic
       logical::ovrlap,lvol,lx,ly,lz,lncubic
       logical::la,lb,lc
 
       integer::i,j,ibox,imolty,ic,ncount,boxa,boxb,ipair,ipairb
       real(8)::bxo(nbxmax),byo(nbxmax),bzo(nbxmax)
       real(8)::volo(nbxmax),vboxo(nbxmax),dfac(nbxmax),
-     +                 voln(nbxmax),vflucqo(nbxmax),vintero(nbxmax),
-     +                 vtailo(nbxmax),vexto(nbxmax),velecto(nbxmax)
+     &                 voln(nbxmax),vflucqo(nbxmax),vintero(nbxmax),
+     &                 vtailo(nbxmax),vexto(nbxmax),velecto(nbxmax)
       real(8)::kxo(vectormax,nbxmax),kyo(vectormax,nbxmax),
-     +                 kzo(vectormax,nbxmax),prefacto(vectormax,nbxmax)
+     &                 kzo(vectormax,nbxmax),prefacto(vectormax,nbxmax)
       real(8)::vboxn(nbxmax),vintern(nbxmax),
-     +                 vtailn(nbxmax),vextn(nbxmax),velectn(nbxmax)
+     &                 vtailn(nbxmax),vextn(nbxmax),velectn(nbxmax)
       real(8)::rxuo(nmax,numax),ryuo(nmax,numax)
      &                ,rzuo(nmax,numax),qquo(nmax,numax)
       real(8)::volt,expdv,random,df,dx,dy,dz,v,dele,
@@ -78,25 +78,25 @@ c      logical::ovrlap,lvol,lx(nbxmax),ly(nbxmax),lz(nbxmax),lncubic
 
       integer::idum
       real(8)::lddum,lddum2(27)
-ckea
+!kea
       real(8)::v3n(nbxmax),v3o(nbxmax)
 
-C --------------------------------------------------------------------
+! --------------------------------------------------------------------
 
-c      write(iou,*) 'start VOLUME'
+!      write(iou,*) 'start VOLUME'
 
-c *** select pair of boxes to do the volume move
+! *** select pair of boxes to do the volume move
       if ( nvolb .gt. 1 ) then
          rpair = random()
          do 96 ipair = 1, nvolb
             if ( rpair .lt. pmvolb(ipair) ) then
                ipairb = ipair
                goto 97
-            endif
+            end if
  96      continue
       else
          ipairb = 1
-      endif
+      end if
       
  97   boxa = box5(ipairb)
       boxb = box6(ipairb)
@@ -108,81 +108,81 @@ c *** select pair of boxes to do the volume move
       lz = .false.
 
       if ( lsolid(boxa) ) then
-c *** volume move independently in x, y, z directions
-c * changing to only move in z direction:
+! *** volume move independently in x, y, z directions
+! * changing to only move in z direction:
          rm = random()
          if ( rm .le. pmvolx ) then
-c            lx(boxa) = .true.
-c            ly(boxa) = .false.
-c            lz(boxa) = .false.
+!            lx(boxa) = .true.
+!            ly(boxa) = .false.
+!            lz(boxa) = .false.
             lx = .true.
             ly = .false.
             lz = .false.
          elseif ( rm .le. pmvoly ) then
-c            lx(boxa) = .false.
-c            ly(boxa) = .true.
-c            lz(boxa) = .false.
+!            lx(boxa) = .false.
+!            ly(boxa) = .true.
+!            lz(boxa) = .false.
             lx = .false.
             ly = .true.
             lz = .false.
          else
-c            lx(boxa) = .false.
-c            ly(boxa) = .false.
-c            lz(boxa) = .true.
+!            lx(boxa) = .false.
+!            ly(boxa) = .false.
+!            lz(boxa) = .true.
             lx = .false.
             ly = .false.
             lz = .true.
-         endif
+         end if
          if (.not. lrect(boxa)) then
             do i = 1,9
                hmato(i) = hmat(boxa,i)
                hmatio(i) = hmati(boxa,i)
-            enddo
-         endif
-      endif
+            end do
+         end if
+      end if
       if ( lsolid(boxb) ) then
-c *** volume move independently in x, y, z directions
-c * changing to only move in z direction:
+! *** volume move independently in x, y, z directions
+! * changing to only move in z direction:
          rm = random()
          if ( rm .le. pmvolx ) then
-c            lx(boxb) = .true.
-c            ly(boxb) = .false.
-c            lz(boxb) = .false.
+!            lx(boxb) = .true.
+!            ly(boxb) = .false.
+!            lz(boxb) = .false.
             lx = .true.
             ly = .false.
             lz = .false.
          elseif ( rm .le. pmvoly ) then
-c            lx(boxb) = .false.
-c            ly(boxb) = .true.
-c            lz(boxb) = .false.
+!            lx(boxb) = .false.
+!            ly(boxb) = .true.
+!            lz(boxb) = .false.
             lx = .false.
             ly = .true.
             lz = .false.
          else
-c            lx(boxb) = .false.
-c            ly(boxb) = .false.
-c            lz(boxb) = .true.
+!            lx(boxb) = .false.
+!            ly(boxb) = .false.
+!            lz(boxb) = .true.
             lx = .false.
             ly = .false.
             lz = .true.
-         endif
+         end if
          if ( .not. lrect(boxb) ) then
             do i = 1,9
                hmato(i) = hmat(boxb,i)
                hmatio(i) = hmati(boxb,i)
-            enddo
-         endif
-      endif
+            end do
+         end if
+      end if
 
       if (lsolid(boxa) .and. .not. lrect(boxa)) then
          if (lsolid(boxb) .and. .not. lrect(boxb)) then
             write(iou,*) 'can not perform volume move between',
      &           ' two non-rectangular boxes'
             call cleanup('')
-         endif
-      endif
+         end if
+      end if
 
-c --- store old box lengths, energy, configuration etc
+! --- store old box lengths, energy, configuration etc
       lncubic = .false.
 
       do ibox = 1, 2
@@ -194,7 +194,7 @@ c --- store old box lengths, energy, configuration etc
 
          if ( lpbcz ) then
             bzo(i) = boxlz(i)
-         endif
+         end if
 
          if (lsolid(i) .and. .not. lrect(i)) then
              volo(i) = cell_vol(i)
@@ -204,8 +204,8 @@ c --- store old box lengths, energy, configuration etc
                volo(i)   = bxo(i)*byo(i)*bzo(i)
             else
                volo(i)   = bxo(i)*byo(i)
-            endif
-         endif
+            end if
+         end if
          vboxo(i)    = vbox(i)
          vintero(i)  = vinterb(i)
          vtailo(i)   = vtailb(i)
@@ -214,7 +214,7 @@ c --- store old box lengths, energy, configuration etc
          vflucqo(i) = vflucqb(i)
          v3o(i)      = v3garob(i)
 
-c --- store neighbor list for garofalini --- KEA
+! --- store neighbor list for garofalini --- KEA
       if (lgaro) then
          do i=1,nchain
             neigh_o(i) = neigh_cnt(i)
@@ -224,11 +224,11 @@ c --- store neighbor list for garofalini --- KEA
                nxijo(j,i) = nxij(j,i)
                nyijo(j,i) = nyij(j,i)
                nzijo(j,i) = nzij(j,i)
-            enddo
-         enddo
-      endif
+            end do
+         end do
+      end if
 
-c --- store old k vectors and reciprocal sum
+! --- store old k vectors and reciprocal sum
          if ( lewald ) then
             calpo(i) = calp(i)
             numvecto(i) = numvect(i)
@@ -239,9 +239,9 @@ c --- store old k vectors and reciprocal sum
                kyo(ic,i) = ky(ic,i)
                kzo(ic,i) = kz(ic,i)
                prefacto(ic,i) = prefact(ic,i)
-            enddo
-         endif
-      enddo
+            end do
+         end if
+      end do
 
       do i = 1, nchain
          ibox = nboxi(i)
@@ -255,20 +255,20 @@ c --- store old k vectors and reciprocal sum
                   ryuo(i,j) = ryu(i,j)
                   if ( lpbcz ) rzuo(i,j) = rzu(i,j)
                   qquo(i,j) = qqu(i,j)
-               enddo
-         endif
+               end do
+         end if
 
-      enddo
+      end do
 
 
-c      write(iou,*) 'before lncubic', lx,ly,lz
+!      write(iou,*) 'before lncubic', lx,ly,lz
 
-c --- calculate total volume
+! --- calculate total volume
       volt = volo(boxa) + volo(boxb)
 
       if ( lncubic ) then
 
-c *** select one of the cell edge
+! *** select one of the cell edge
          rbox = 3.0d0*random()
          if ( lx ) then
             if ( rbox .le. 1.0d0 ) then
@@ -283,7 +283,7 @@ c *** select one of the cell edge
                la = .false.
                lb = .false.
                lc = .true.
-            endif
+            end if
          elseif ( ly ) then
             la = .false.
             if ( rbox .le. 1.5d0 ) then
@@ -292,12 +292,12 @@ c *** select one of the cell edge
             else
                lb = .false.
                lc = .true.
-            endif
+            end if
          else
             la = .false.
             lb = .false.
             lc = .true.
-         endif
+         end if
 
          if ( la ) then
             if ( lx ) jhmat = 1
@@ -311,14 +311,14 @@ c *** select one of the cell edge
             if ( lx ) jhmat = 7
             if ( ly ) jhmat = 8
             if ( lz ) jhmat = 9
-         endif
+         end if
 
          if ( lsolid(boxa) .and. .not. lsolid(boxb) ) then
             hbox = boxa
             jbox = boxb
 
             hmat(boxa,jhmat) = hmat(boxa,jhmat) + rmhmat(boxa,jhmat)*
-     +           ( 2.0d0*random() - 1.0d0 )
+     &           ( 2.0d0*random() - 1.0d0 )
             bnhmat(boxa,jhmat) = bnhmat(boxa,jhmat) + 1.0d0
 
          else
@@ -326,10 +326,10 @@ c *** select one of the cell edge
             jbox = boxa
 
             hmat(boxb,jhmat) = hmat(boxb,jhmat) + rmhmat(boxb,jhmat)*
-     +           ( 2.0d0*random() - 1.0d0 )
+     &           ( 2.0d0*random() - 1.0d0 )
             bnhmat(boxb,jhmat) = bnhmat(boxb,jhmat) + 1.0d0
 
-         endif
+         end if
 
          call matops(hbox)
 
@@ -352,18 +352,18 @@ c *** select one of the cell edge
             hmat(hbox,jhmat) = hmato(jhmat)
             call dump
             call cleanup('')
-c            goto 500
-         endif
+!            goto 500
+         end if
 
          voln(jbox) = volt-voln(hbox)
-c         if ( la ) boxlx(hbox) = hmat(hbox,1)
-c         if ( lb ) boxly(hbox) = dsqrt(hmat(hbox,4)*hmat(hbox,4)+
-c     &                 hmat(hbox,5)*hmat(hbox,5))
-c         if ( lc ) boxlz(hbox) = dsqrt(hmat(hbox,7)*hmat(hbox,7)
-c     &        +hmat(hbox,8)*hmat(hbox,8) +
-c     &        hmat(hbox,9)*hmat(hbox,9))
+!         if ( la ) boxlx(hbox) = hmat(hbox,1)
+!         if ( lb ) boxly(hbox) = dsqrt(hmat(hbox,4)*hmat(hbox,4)+
+!     &                 hmat(hbox,5)*hmat(hbox,5))
+!         if ( lc ) boxlz(hbox) = dsqrt(hmat(hbox,7)*hmat(hbox,7)
+!     &        +hmat(hbox,8)*hmat(hbox,8) +
+!     &        hmat(hbox,9)*hmat(hbox,9))
 
-c *** determine the displacement of the COM
+! *** determine the displacement of the COM
         
          df=(voln(jbox)/volo(jbox))**(1.0d0/3.0d0)
          boxlx(jbox) = boxlx(jbox)*df
@@ -376,29 +376,29 @@ c *** determine the displacement of the COM
             if (nboxi(i) .eq. hbox) then
                if ( lx ) then
                   dx = sxcm(i)*(hmat(hbox,1)-hmato(1))+
-     +                 sycm(i)*(hmat(hbox,4)-hmato(4))+
-     +                 szcm(i)*(hmat(hbox,7)-hmato(7))
+     &                 sycm(i)*(hmat(hbox,4)-hmato(4))+
+     &                 szcm(i)*(hmat(hbox,7)-hmato(7))
                   xcm(i) = xcm(i) + dx
                   do j = 1, nunit(imolty)
                      rxu(i,j) = rxu(i,j) + dx
-                  enddo
+                  end do
                elseif ( ly ) then
                   dy = sxcm(i)*(hmat(hbox,2)-hmato(2))+
-     +                 sycm(i)*(hmat(hbox,5)-hmato(5))+
-     +                 szcm(i)*(hmat(hbox,8)-hmato(8))
+     &                 sycm(i)*(hmat(hbox,5)-hmato(5))+
+     &                 szcm(i)*(hmat(hbox,8)-hmato(8))
                   ycm(i) = ycm(i) + dy
                   do j = 1, nunit(imolty)
                      ryu(i,j) = ryu(i,j) + dy
-                  enddo
+                  end do
                else
                   dz = sxcm(i)*(hmat(hbox,3)-hmato(3))+
-     +                 sycm(i)*(hmat(hbox,6)-hmato(6))+
-     +                 szcm(i)*(hmat(hbox,9)-hmato(9))
+     &                 sycm(i)*(hmat(hbox,6)-hmato(6))+
+     &                 szcm(i)*(hmat(hbox,9)-hmato(9))
                   zcm(i) = zcm(i) + dz
                   do j = 1, nunit(imolty)
                      rzu(i,j) = rzu(i,j) + dz
-                  enddo
-               endif
+                  end do
+               end if
             elseif (nboxi(i) .eq. jbox) then
                dx = xcm(i) * df
                dy = ycm(i) * df
@@ -411,17 +411,17 @@ c *** determine the displacement of the COM
                   rxu(i,j) = rxu(i,j) + dx
                   ryu(i,j) = ryu(i,j) + dy
                   if ( lpbcz ) rzu(i,j) = rzu(i,j) + dz
-               enddo
-            endif
+               end do
+            end if
 
-         enddo
+         end do
 
       else
       
         
-c --- calculate new volume
+! --- calculate new volume
          expdv = dexp(dlog(volo(boxa)/volo(boxb))
-     +        + rmvol(ipairb)*(2.0d0*random()-1.0d0))
+     &        + rmvol(ipairb)*(2.0d0*random()-1.0d0))
          voln(boxa)= expdv*volt/(1+expdv)
          voln(boxb)= volt-voln(boxa)
          rbcut(boxa) = rcut(boxa)
@@ -430,25 +430,25 @@ c --- calculate new volume
          if ( lpbcz ) then
 
             if ( lsolid(boxa).and.lrect(boxa) ) then
-c *** volume move independently in x, y, z directions
+! *** volume move independently in x, y, z directions
                dfac(boxa)=voln(boxa)/volo(boxa)
             else
                dfac(boxa)= (voln(boxa)/volo(boxa))**(1.0d0/3.0d0)
-            endif
+            end if
          
 
             if ( lsolid(boxb).and.lrect(boxb) ) then
-c *** volume move independently in x, y, z directions
+! *** volume move independently in x, y, z directions
                dfac(boxb)=voln(boxb)/volo(boxb)
             else
                dfac(boxb)= (voln(boxb)/volo(boxb))**(1.0d0/3.0d0)
-            endif
+            end if
             vminim(boxa) = (2.0d0*rbcut(boxa))**(3.0d0)
          else
             dfac(boxa)= dsqrt(voln(boxa)/volo(boxa))
             dfac(boxb)= dsqrt(voln(boxb)/volo(boxb))
             vminim(boxb) = (2.0d0*rbcut(boxb))**(2.0d0)
-         endif
+         end if
          
          if ( lsolid(boxa).and. lrect(boxa) ) then
             if (lx) boxlx(boxa) = boxlx(boxa) * dfac(boxa)
@@ -460,8 +460,8 @@ c *** volume move independently in x, y, z directions
             boxly(boxa) = boxly(boxa) * dfac(boxa)
             if ( lpbcz ) then
                boxlz(boxa) = boxlz(boxa) * dfac(boxa)
-            endif
-         endif
+            end if
+         end if
 
          if ( lsolid(boxb).and.lrect(boxb) ) then
             if (lx) boxlx(boxb) = boxlx(boxb) * dfac(boxb)
@@ -472,8 +472,8 @@ c *** volume move independently in x, y, z directions
             boxly(boxb) = boxly(boxb) * dfac(boxb)
             if ( lpbcz ) then
                boxlz(boxb) = boxlz(boxb) * dfac(boxb)
-            endif
-         endif
+            end if
+         end if
 
          rbcuta = 2.0d0*rbcut(boxa)
          rbcutb = 2.0d0*rbcut(boxb)
@@ -495,17 +495,17 @@ c *** volume move independently in x, y, z directions
             if ( lpbcz ) then 
                boxlz(boxa) = bzo(boxa)
                boxlz(boxb) = bzo(boxb)
-            endif
+            end if
             call dump 
             call cleanup('')
             return
-         endif
+         end if
 
 
-c *** determine new positions of the molecules
-c *** calculate centre of mass and its displacement
+! *** determine new positions of the molecules
+! *** calculate centre of mass and its displacement
 
-c - WARNING
+! - WARNING
          if ( .not. lfold ) 
      &        call cleanup('volume move only correct with folded coordinates')
 
@@ -518,32 +518,32 @@ c - WARNING
                imolty = moltyp(i)
                df = dfac(ibox) - 1.0d0
                
-c     if ( lsolid(ibox) ) then
+!     if ( lsolid(ibox) ) then
                if ( lsolid(ibox).and.lrect(ibox) ) then
-c     if ( lx(ibox) ) then
+!     if ( lx(ibox) ) then
                   if ( lx ) then
                      dx = xcm(i) * df
                      xcm(i) = xcm(i) + dx
                      do j = 1, nunit(imolty)
                         rxu(i,j) = rxu(i,j) + dx
-                     enddo
-                  endif
-c     if ( ly(ibox) ) then
+                     end do
+                  end if
+!     if ( ly(ibox) ) then
                   if ( ly ) then
                      dy = ycm(i) * df
                      ycm(i) = ycm(i) + dy
                      do j = 1, nunit(imolty)
                         ryu(i,j) = ryu(i,j) + dy
-                     enddo
-                  endif
-c     if ( lz(ibox) ) then
+                     end do
+                  end if
+!     if ( lz(ibox) ) then
                   if ( lz ) then
                      dz = zcm(i) * df
                      zcm(i) = zcm(i) + dz
                      do j = 1, nunit(imolty)
                         rzu(i,j) = rzu(i,j) + dz
-                     enddo
-                  endif
+                     end do
+                  end if
                else
                   
                   dx = xcm(i) * df
@@ -557,12 +557,12 @@ c     if ( lz(ibox) ) then
                      rxu(i,j) = rxu(i,j) + dx
                      ryu(i,j) = ryu(i,j) + dy
                      if ( lpbcz ) rzu(i,j) = rzu(i,j) + dz
-                  enddo
-               endif
-            endif
-         enddo
+                  end do
+               end if
+            end if
+         end do
 
-      endif
+      end if
 
       lvol = .true.
       if ( lchgall ) then
@@ -571,22 +571,22 @@ c     if ( lz(ibox) ) then
      &                    min_width(boxa,3))
          else
               min_boxl = min(boxlx(boxa),boxly(boxa),boxlz(boxa))
-         endif
+         end if
          calp(boxa) = kalp(boxa)/min_boxl
          if (lsolid(boxb).and.(.not.lrect(boxb))) then
              min_boxl = min(min_width(boxb,1),min_width(boxb,2),
      &                    min_width(boxb,3))
          else
               min_boxl = min(boxlx(boxb),boxly(boxb),boxlz(boxb))
-         endif
+         end if
          calp(boxb) = kalp(boxb)/min_boxl
-      endif
+      end if
 
       do i = 1,2
          if ( i .eq. 1 ) ibox = boxa
          if ( i .eq. 2 ) ibox = boxb
          call sumup( ovrlap, v, vinter,vtail, vdum,vdum,
-     +                  vdum,vdum,vext,velect,vdum, ibox, lvol)
+     &                  vdum,vdum,vext,velect,vdum, ibox, lvol)
          if ( ovrlap ) goto 500
          vintern(ibox) = vinter
          vtailn(ibox)  = vtail
@@ -596,17 +596,17 @@ c     if ( lz(ibox) ) then
          vboxn(ibox)   = vboxo(ibox) + (vintern(ibox)-vintero(ibox))
      &       + (vextn(ibox)-vexto(ibox)) + (velectn(ibox)-velecto(ibox))
      &        + (v3n(ibox)-v3o(ibox))
-ckea
-      enddo
+!kea
+      end do
 
       if ( lanes ) then
-c *** for ANES algorithm, optimize the charge configuration
+! *** for ANES algorithm, optimize the charge configuration
          do i = 1,2
             if ( i .eq. 1 ) ibox = boxa
             if ( i .eq. 2 ) ibox = boxb
-c *** on the new coordinates, continue to use the fluctuating charge
-c *** algorithm to optimize the charge configurations, update the
-c *** energy, coordinates and the ewald sum
+! *** on the new coordinates, continue to use the fluctuating charge
+! *** algorithm to optimize the charge configurations, update the
+! *** energy, coordinates and the ewald sum
 
             vbox(ibox) = vbox(ibox) + (vboxn(ibox) - vboxo(ibox)) 
             vinterb(ibox)  = vinterb(ibox) + 
@@ -617,42 +617,42 @@ c *** energy, coordinates and the ewald sum
      &           (velectn(ibox) - velecto(ibox))
             do ichoiq = 1,nchoiq(ibox)
                call flucq(0,ibox)
-            enddo
-         enddo
+            end do
+         end do
          
          dele = (vbox(boxa) - vboxo(boxa))+( vbox(boxb)- vboxo(boxb))
-     +        - ((nchbox(boxa)+1+ghost_particles(boxa))
-     +        *dlog(voln(boxa)/volo(boxa))/beta)
-     +        - ((nchbox(boxb)+1+ghost_particles(boxb))
-     +        *dlog(voln(boxb)/volo(boxb))/beta)
+     &        - ((nchbox(boxa)+1+ghost_particles(boxa))
+     &        *dlog(voln(boxa)/volo(boxa))/beta)
+     &        - ((nchbox(boxb)+1+ghost_particles(boxb))
+     &        *dlog(voln(boxb)/volo(boxb))/beta)
 
       elseif (lncubic) then
 
          dele = (vboxn(boxa)-vboxo(boxa)) + (vboxn(boxb)-vboxo(boxb))
-     +        - ((nchbox(boxa)+ghost_particles(boxa))
-     +        *dlog(voln(boxa)/volo(boxa))/beta)
-     +        - ((nchbox(boxb)+ghost_particles(boxb))
-     +        *dlog(voln(boxb)/volo(boxb))/beta)
+     &        - ((nchbox(boxa)+ghost_particles(boxa))
+     &        *dlog(voln(boxa)/volo(boxa))/beta)
+     &        - ((nchbox(boxb)+ghost_particles(boxb))
+     &        *dlog(voln(boxb)/volo(boxb))/beta)
 
       else
          
          dele = (vboxn(boxa)-vboxo(boxa)) + (vboxn(boxb)-vboxo(boxb))
-     +        - ((nchbox(boxa)+1+ghost_particles(boxa))
-     +        *dlog(voln(boxa)/volo(boxa))/beta)
-     +        - ((nchbox(boxb)+1+ghost_particles(boxb))
-     +        *dlog(voln(boxb)/volo(boxb))/beta)
-      endif
+     &        - ((nchbox(boxa)+1+ghost_particles(boxa))
+     &        *dlog(voln(boxa)/volo(boxa))/beta)
+     &        - ((nchbox(boxb)+1+ghost_particles(boxb))
+     &        *dlog(voln(boxb)/volo(boxb))/beta)
+      end if
 
-c --- acceptance test
+! --- acceptance test
 
-c      write(iou,*) 'dele',dele
+!      write(iou,*) 'dele',dele
       if (random() .lt. dexp(-beta*dele) ) then
-c --      accepted
+! --      accepted
          if ( lncubic ) then
             bshmat(hbox,jhmat) = bshmat(hbox,jhmat) + 1.0d0
          else
             bsvol(ipairb) = bsvol(ipairb) + 1.0d0
-         endif
+         end if
 
           if ( .not. lanes ) then
              do ibox = 1,2
@@ -664,21 +664,21 @@ c --      accepted
                 vextb(i)   = vextb(i) + (vextn(i) - vexto(i))  
                 velectb(i) = velectb(i) + (velectn(i) - velecto(i))
                 v3garob(i)     = v3garob(i) + (v3n(i)-v3o(i))
-             enddo
-          endif
+             end do
+          end if
 
-c --      update centers of mass
+! --      update centers of mass
           call ctrmas(.true.,boxa,0,5)
           call ctrmas(.true.,boxb,0,5)
-c *** update linkcell, if applicable
+! *** update linkcell, if applicable
           if (licell .and. (boxa .eq. boxlink .or. boxb .eq. boxlink)) 
      &         then
              call linkcell(1,1,lddum,lddum,lddum,lddum2)
-          endif
+          end if
           return
-      endif
-c ---     rejected
-c --- restore old energy, box lengths
+      end if
+! ---     rejected
+! --- restore old energy, box lengths
  500  do ibox = 1, 2
          if ( ibox .eq. 1 ) i = boxa
          if ( ibox .eq. 2 ) i = boxb
@@ -693,18 +693,18 @@ c --- restore old energy, box lengths
          if (lsolid(i) .and. .not. lrect(i)) then
             do j = 1,9
                hmat(ibox,j) = hmato(j)
-            enddo
+            end do
             call matops(i)
-         endif
+         end if
         
          boxlx(i)   = bxo(i)
          boxly(i)   = byo(i)
          if ( lpbcz ) boxlz(i)   = bzo(i)
 
          if ( lewald ) then
-c --- restore old k vectors and reciprocal sum and calp
+! --- restore old k vectors and reciprocal sum and calp
             calp(i) = calpo(i)
-c           ncount = numvect(i)
+!           ncount = numvect(i)
             ncount = numvecto(i)
             numvect(i) = numvecto(i)
             call recip(i,vdum,vdum,4)
@@ -713,11 +713,11 @@ c           ncount = numvect(i)
                ky(ic,i) = kyo(ic,i)
                kz(ic,i) = kzo(ic,i)
                prefact(ic,i) = prefacto(ic,i)
-            enddo
-         endif
-      enddo
+            end do
+         end if
+      end do
 
-c --- restore old neighbor list for garofalini --- KEA
+! --- restore old neighbor list for garofalini --- KEA
       if (lgaro) then
          do i=1,nchain
             neigh_cnt(i) = neigh_o(i)
@@ -727,9 +727,9 @@ c --- restore old neighbor list for garofalini --- KEA
                nxij(j,i) = nxijo(j,i)
                nyij(j,i) = nyijo(j,i)
                nzij(j,i) = nzijo(j,i)
-            enddo
-         enddo
-      endif
+            end do
+         end do
+      end if
 
       do i = 1, nchain
          ibox = nboxi(i) 
@@ -743,12 +743,12 @@ c --- restore old neighbor list for garofalini --- KEA
                ryu(i,j) = ryuo(i,j)
                if ( lpbcz ) rzu(i,j) = rzuo(i,j)
                qqu(i,j) = qquo(i,j)
-            enddo
-         endif
-      enddo
+            end do
+         end if
+      end do
 
-c      write(iou,*) 'end VOLUME'
-c      call dump
+!      write(iou,*) 'end VOLUME'
+!      call dump
 
       return
       end

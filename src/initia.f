@@ -1,31 +1,31 @@
-      subroutine initia(qelect)
+      subroutine initia
 
-c initia
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! initia
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
 
-c *** common blocks ***
+! *** common blocks ***
       include 'control.inc'
       include 'coord.inc'
       include 'system.inc'
@@ -71,23 +71,21 @@ c *** common blocks ***
      &     ,samz(ntmax,numax)
 
       real(8)::vdummy
-      real(8)::qelect
-      dimension qelect(nntype)
 
       dimension ux(nbxmax),uy(nbxmax),uz(nbxmax)
       dimension check(ntmax)
 
-C --------------------------------------------------------------------
+! --------------------------------------------------------------------
       if (myid.eq.0) then
          write(iou,*) 
          write(iou,*) 'subroutine initia'
          write(iou,*) 
-      endif
+      end if
 
-c     --- initialize nchbox ---
+!     --- initialize nchbox ---
       do i=1,nbox
          nchbox(i) = 0
-      enddo
+      end do
 
       iboxst = 1
       iboxed = nbox
@@ -99,19 +97,19 @@ c     --- initialize nchbox ---
             do j = 1, nbox
                nchbox(j) = nchbox(j) + ininch(i,j)
                check(i)= check(i) + ininch(i,j) 
-            enddo
+            end do
 
             chktot = chktot + check(i)
-         enddo
+         end do
 
          if ( chktot .ne. nchain ) then
             write(iou,*) 'inconsistant number of chains in INITIA'
             do j = 1,nbox
                write(iou,*) 'ininch',j,(ininch(i,j),i=1,nmolty)
-            enddo
+            end do
             write(iou,*) 'nchain',nchain
             call cleanup('')
-         endif
+         end if
          
          do i = 1, nmolty
             if ( temtyp(i) .ne. check(i) ) then
@@ -119,21 +117,21 @@ c     --- initialize nchbox ---
                write(iou,*) 'moltyp',i,(ininch(i,j),j=1,nbox)
                write(iou,*) 'temtyp:',temtyp(i)
                call cleanup('')
-            endif            
-         enddo
+            end if            
+         end do
 
          do i = iboxst,iboxed
             unitc = inix(i)*iniy(i)*iniz(i)
             if ( nchbox(i) .gt. unitc ) then
                write(iou,*) 'unit cell too small in box',i
                call cleanup('')
-            endif
-         enddo
+            end if
+         end do
          
          
-C -----------------------------------------------------------------------------
+! -----------------------------------------------------------------------------
  
-c *** calculation of unit cell dimensions ***
+! *** calculation of unit cell dimensions ***
       do i = 1,nbox
          ux(i) = boxlx(i) / dble(inix(i)) 
          uy(i) = boxly(i) / dble(iniy(i))
@@ -143,50 +141,50 @@ c *** calculation of unit cell dimensions ***
             write(iou,*) 'ini',inix(i),iniy(i),iniz(i)
             write(iou,*) 'box',boxlx(i),boxly(i),boxlz(i)
             write(iou,*) 'uni',ux(i),uy(i),uz(i)
-         endif
-      enddo
+         end if
+      end do
 
-c - count number of molecules of each type -
+! - count number of molecules of each type -
       do i = 1,nmolty
          mcmt(i,1) = 0
-      enddo
+      end do
 
       do i=1,nchain
          imolty = moltyp(i)
          mcmt(imolty,1) = mcmt(imolty,1) + 1
          lhere(i) = .false.
-      enddo
+      end do
 
       do i = 1,nmolty
          if ( mcmt(i,1) .ne. check(i) ) then
             write(iou,*) 'inconsistant number of type in INITIA'
             write(iou,*) 'mcmt(i,total),check(i)',mcmt(i,1),check(i)
             call cleanup('')
-         endif
-      enddo
+         end if
+      end do
 
       do i = 1,nmolty
          do j = 1, nbox
             mcmt(i,j) = ininch(i,j)
             mcmtma(i,j) = 0
-         enddo
-      enddo
+         end do
+      end do
       do ibox = 1,nbox
          mcmtma(1,ibox) = mcmt(1,ibox)
          do i = 2, nmolty
             mcmtma(i,ibox) = mcmtma(i-1,ibox) + mcmt(i,ibox)
-         enddo
-      enddo
+         end do
+      end do
 
       if (myid.eq.0) then
          write(iou,*) 'nmolty',nmolty
          write(iou,*) '   mcmt',((mcmt(i,ibox),i=1,nmolty),ibox=1,nbox)
-      endif
+      end if
 
-c *****************************
-c *** calculate coordinates ***
+! *****************************
+! *** calculate coordinates ***
 
-c     read sample structure from unit 78 -
+!     read sample structure from unit 78 -
       open(unit=78,FILE='input_struc.xyz',status="unknown")
 
       do i = 1, nmolty         
@@ -195,42 +193,42 @@ c     read sample structure from unit 78 -
             read(78,*)
             do m = 1, nunit(i)
                read(78,*) samx(i,m), samy(i,m), samz(i,m)
-            enddo
+            end do
          elseif ( .not. lbranch(i)) then
-c * if lbranch is false but the molecule is not linear attempt
-c * to grow it with cbmc
+! * if lbranch is false but the molecule is not linear attempt
+! * to grow it with cbmc
             lgrow = .false.
             do m = 1,nunit(i)
                if (invib(i,m) .gt. 2) then
                   lgrow = .true.
-               endif
-            enddo
+               end if
+            end do
             if (lgrow) then
 
                if (myid.eq.0) then
                   write(iou,*) 'growing a sample structure with CBMC'
-               endif
+               end if
 
                if (nunit(i) .ne. nugrow(i)) then
                   write(iou,*) 'Cant grow molecule.  Please',
      &                 ' provide a structure via fort.78'
                   call cleanup('')
-               endif
-c * put the first bead at the origin
+               end if
+! * put the first bead at the origin
                rxnew(1) = 0.0d0
                rynew(1) = 0.0d0
                rznew(1) = 0.0d0
 
-c * determine the growth schedule
+! * determine the growth schedule
                call schedule(nugrow(i),i,ifrom,1,0,2)
 
-c * actually grow the structure
+! * actually grow the structure
                nsave = nchain
 
                moltyp(1) = i
                do m = 1,nunit(i)
                   qqu(1,m) = qelect(ntype(i,m))
-               enddo
+               end do
 
                nchain = 1
 
@@ -241,36 +239,36 @@ c * actually grow the structure
                   write(iou,*) 'error in initia growing molecule'
                   write(iou,*) 'maybe increasing nchoi would help?'
                   call cleanup('')
-               endif
+               end if
 
-c * return the value of nchain
+! * return the value of nchain
                nchain = nsave
-c * assign the coordinates
+! * assign the coordinates
                do m = 1,nunit(i)
                   samx(i,m) = rxnew(m)
                   samy(i,m) = rynew(m)
                   samz(i,m) = rznew(m)
-               enddo
+               end do
 
                lgrown(i) = .true.
 
-            endif
-         endif
-      enddo
+            end if
+         end if
+      end do
 
       close(unit=78)
 
       do i = 1,nmolty
          if (lgrown(i)) then
             lbranch(i) = .true.
-         endif
-      enddo
+         end if
+      end do
 
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c     - inimix = 0 : take molecules at random
-c     - inimix > 0 : take molecules in order (first type I etc.)
-c     - inimix < 0 : take molecules in alternating order
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc 
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!     - inimix = 0 : take molecules at random
+!     - inimix > 0 : take molecules in order (first type I etc.)
+!     - inimix < 0 : take molecules in alternating order
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc 
 
       count_chain = 0 
       offset = 0
@@ -282,7 +280,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                  offset = 0
               else
                  offset = offset+nchbox(ibox-1)
-              endif
+              end if
  18           rand_id = idint(dble(nchbox(ibox))*random())+ 1 + offset
               if (.not.lhere(rand_id)) then
                  count_chain = count_chain + 1
@@ -292,19 +290,19 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
      &                                                          then
                        moltyp(rand_id) = imolty     
                        goto 20 
-                    endif 
-                 enddo
+                    end if 
+                 end do
  20              continue
 !             write(6,*) count_chain, rand_id,moltyp(rand_id) 
               else
                  goto 18
-              endif
+              end if
               if (count_chain.lt.(nchbox(ibox)+offset)) then
                  goto 18
-              endif 
-           endif
-         endif
-      enddo   
+              end if 
+           end if
+         end if
+      end do   
 
 
       nn = 0
@@ -312,7 +310,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       do 102 ibox = iboxst,iboxed
          do imol = 1,nmolty
             pcmt(imol) = 0
-         enddo
+         end do
 
          n = 0
 
@@ -321,7 +319,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                xshift = 0.0d0
             else
                xshift = dshift(ibox)
-            endif
+            end if
             
             do 100 ic = 0, inix(ibox)-1
                
@@ -331,7 +329,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                      dic = 0.0d0
                   else
                      dic = 0.5d0
-                  endif
+                  end if
 
                   n=n+1
 
@@ -343,13 +341,13 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                      nboxi(nn) = ibox
                   else
                      goto 102
-                  endif
+                  end if
                   
-c                  write(iou,*) 'nn',nn
-c                  write(iou,*) 'ic',ic,'   jc',jc,'   kc',kc
+!                  write(iou,*) 'nn',nn
+!                  write(iou,*) 'ic',ic,'   jc',jc,'   kc',kc
                   
-c     - inimix > 0 : take molecules in order (first type I etc.)
-c     - inimix < 0 : take molecules in alternating order
+!     - inimix > 0 : take molecules in order (first type I etc.)
+!     - inimix < 0 : take molecules in alternating order
 
                   if ( nmolty .gt. 1 ) then
                      if ( inimix(ibox) .gt. 0 ) then
@@ -357,92 +355,92 @@ c     - inimix < 0 : take molecules in alternating order
                            if ( n .le. mcmtma(imol,ibox) ) then
                               intemp = imol
                               goto 19
-                           endif
-                        enddo
+                           end if
+                        end do
  19                     continue
                      elseif ( inimix(ibox) .lt. 0 ) then
                         do imol = 1, nmolty
                            nt = n - imol
                            if ( mod( nt, nmolty ) .eq. 0 ) then
                               intemp = imol
-                           endif
-                        enddo
-                     endif
+                           end if
+                        end do
+                     end if
                   else
                      intemp = 1
-                  endif
+                  end if
 
                   if (inimix(ibox).eq.0) then
                       intemp = moltyp(nn)
                   else
                        moltyp(nn) = intemp
-                  endif 
+                  end if 
 
                   ncmt(ibox,intemp) = ncmt(ibox,intemp) + 1
                   
-c                  write(iou,*) 'intemp', intemp     
+!                  write(iou,*) 'intemp', intemp     
 
                   if ( lbranch(intemp) ) then
                      ibuild = nunit(intemp)
                   else
                      ibuild = nugrow(intemp)
-                  endif
+                  end if
 
                   if ( .not. lbranch(intemp)) then
-c *************************************************
-c *** start determination of linear chain positions
-c *** allowing for numbering out of order
-c *** note: doesn't exactly create equilibrium structure with
-c *** respect to bond angles or torsions, but that will shake out
-c *** with CBMC anyways.  Should at least take away the overlaps of
-c *** the previous method
-c *************************************************
-c * first need to determine re-mapped bead order- search through connectivity
-c
-c   call the results map(i) where i=1 is one chain end, and its
-c   value is equal to the bead number of that end
-c 
-c   for example, methanol oxygen first, then hydrogen, then CH3
-c   
-c                        H---O--CH3
-c
-c        bead numbers:   2 - 1 - 3
-c
-c        bmap(1) = 2
-c        bmap(2) = 1
-c        bmap(3) = 3
-c
-c        the inverse map is just the opposite:
-c
-c        imap(1) = 2
-c        imap(2) = 1
-c        imap(3) = 3
-c
-c * initialize accounted for variable
+! *************************************************
+! *** start determination of linear chain positions
+! *** allowing for numbering out of order
+! *** note: doesn't exactly create equilibrium structure with
+! *** respect to bond angles or torsions, but that will shake out
+! *** with CBMC anyways.  Should at least take away the overlaps of
+! *** the previous method
+! *************************************************
+! * first need to determine re-mapped bead order- search through connectivity
+!
+!   call the results map(i) where i=1 is one chain end, and its
+!   value is equal to the bead number of that end
+! 
+!   for example, methanol oxygen first, then hydrogen, then CH3
+!   
+!                        H---O--CH3
+!
+!        bead numbers:   2 - 1 - 3
+!
+!        bmap(1) = 2
+!        bmap(2) = 1
+!        bmap(3) = 3
+!
+!        the inverse map is just the opposite:
+!
+!        imap(1) = 2
+!        imap(2) = 1
+!        imap(3) = 3
+!
+! * initialize accounted for variable
                      do m = 1,ibuild
                         lacc(m) = .false.
-                     enddo
+                     end do
 
-c * first find the end with the lowest number
+! * first find the end with the lowest number
                      zzz = ibuild
                      do m = 1,ibuild
                         if (invib(intemp,m) .le. 1) then
                            if (m .le. zzz) then
                               zzz = m
-                           endif
+                           end if
                         elseif (invib(intemp,m) .gt. 2) then
                            write(iou,*) 'initia only works for linear',
      &                          ' molecules!  Maybe you should make',
      &                          ' a fort.78 file and use lbranch?'
                            call cleanup('')
-                        endif
-                     enddo
+                        end if
+                     end do
 
                      bmap(1) = zzz
                      imap(zzz) = 1
                      lacc(zzz) = .true.
 
-c * now determine the rest
+! * now determine the rest
                      do m = 2,ibuild
                         prev = bmap(m-1)
                         do zzz = 1,ibuild
@@ -452,18 +450,18 @@ c * now determine the rest
                                  bmap(m) = zzz
                                  imap(zzz) = m
                                  lacc(zzz) = .true.
-                              endif
-                           endif
-                        enddo
-                     enddo
+                              end if
+                           end if
+                        end do
+                     end do
 
-c * now use old method with re-mapped numbers:
-c * put first end at origin:
+! * now use old method with re-mapped numbers:
+! * put first end at origin:
                      xtemp(1) = 0.0d0
                      ytemp(1) = 0.0d0
                      ztemp(1) = 0.0d0
 
-c * now we need to loop over all the other beads:
+! * now we need to loop over all the other beads:
                      do m = 2, ibuild
                      
                         m1 = m - 1
@@ -478,8 +476,8 @@ c * now we need to loop over all the other beads:
                               rot = dble(inirot(ibox)) * degrad
                            else
                               rot = -(dble(inirot(ibox)) * degrad)
-                           endif
-                        endif
+                           end if
+                        end if
 
                         if ( inben(intemp,bmap(m1)) .gt. 0 ) then
                            ibtype = itben(intemp,bmap(m1),1)
@@ -491,37 +489,37 @@ c * now we need to loop over all the other beads:
                            else
                               ibtype = itben(intemp,bmap(m2),1)
                               angnew = brben(ibtype) - angold
-                           endif 
-c     write(iou,*) 'angold',angold*raddeg,
-c     +                       '   angnew',angnew*raddeg
+                           end if 
+!     write(iou,*) 'angold',angold*raddeg,
+!     +                       '   angnew',angnew*raddeg
                            angold = angnew
                            
-c * need to search for proper bond length
+! * need to search for proper bond length
                            do zzz = 1,invib(intemp,bmap(m))
                               if (ijvib(intemp,bmap(m),zzz) 
      &                             .eq. bmap(m1)) then
                                  ibtype = itvib(intemp,bmap(m),zzz)
-                              endif
-                           enddo
+                              end if
+                           end do
 
                            ztemp(m) = dsin(angnew) * brvib(ibtype)
                            xynext = dcos(angnew) * brvib(ibtype)
-c                           write(iou,*) 'znext',znext,'   xynext',xynext
+!                           write(iou,*) 'znext',znext,'   xynext',xynext
                         else
-c * need to search for proper bond length
+! * need to search for proper bond length
                            do zzz = 1,invib(intemp,bmap(m))
                               if (ijvib(intemp,bmap(m),zzz) 
      &                             .eq. bmap(m1)) then
                                  ibtype = itvib(intemp,bmap(m),zzz)
-                              endif
-                           enddo
+                              end if
+                           end do
 
-c                           ztemp(m) = dsin(angnew) * brvib(ibtype)
-c                           xynext = dcos(angnew) * brvib(ibtype)
+!                           ztemp(m) = dsin(angnew) * brvib(ibtype)
+!                           xynext = dcos(angnew) * brvib(ibtype)
 
                            ztemp(m) = brvib(ibtype)
                            xynext = 0.0d0
-                        endif
+                        end if
                         
                         if ( mod(m,2) .eq. 0 ) then
                            xtemp(m) = dcos(rot) * xynext
@@ -529,97 +527,97 @@ c                           xynext = dcos(angnew) * brvib(ibtype)
                         else
                            xtemp(m) = -(dcos(rot) * xynext)
                            ytemp(m) = -(dsin(rot) * xynext)
-                        endif
+                        end if
 
                         xtemp(m) = xtemp(m1) + xtemp(m)
                         ytemp(m) = ytemp(m1) + ytemp(m)
                         ztemp(m) = ztemp(m1) + ztemp(m)
 
 
-                     enddo
+                     end do
 
-c * translate so that first bead number is at origin
+! * translate so that first bead number is at origin
                      do m = 1,ibuild
                         if (m .ne. imap(1)) then
                           xtemp(m) = xtemp(m) - xtemp(imap(1)) 
                           ytemp(m) = ytemp(m) - ytemp(imap(1)) 
                           ztemp(m) = ztemp(m) - ztemp(imap(1)) 
-                        endif
-                     enddo
+                        end if
+                     end do
                      xtemp(imap(1)) = 0.0d0
                      ytemp(imap(1)) = 0.0d0
                      ztemp(imap(1)) = 0.0d0
 
-                  endif
-c *** end linear determination
-c ****************************
-c                  write(iou,*) 'ibuild',ibuild
+                  end if
+! *** end linear determination
+! ****************************
+!                  write(iou,*) 'ibuild',ibuild
                   do 98 m = 2, ibuild
                      
                      m1 = m - 1
                      m2 = m - 2
-c                     write(iou,*) 'intemp',intemp 
+!                     write(iou,*) 'intemp',intemp 
                      if ( lbranch(intemp) ) then
-c     - branched molecule with sample structure -
+!     - branched molecule with sample structure -
                         xnext = samx(intemp,m) -samx(intemp,m1)
                         ynext = samy(intemp,m) -samy(intemp,m1)
                         znext = samz(intemp,m) -samz(intemp,m1)
                      else
-c * linear molecule determined above- replacing old code that follows.
+! * linear molecule determined above- replacing old code that follows.
                         xnext = xtemp(bmap(m)) - xtemp(bmap(m1))
                         ynext = ytemp(bmap(m)) - ytemp(bmap(m1))
                         znext = ztemp(bmap(m)) - ztemp(bmap(m1))
-c$$$c     - alkane type molecule -
-c$$$                        if ( inirot(ibox) .eq. 0 ) then
-c$$$                           rot = random() * 360.0d0 * degrad
-c$$$                        elseif ( inirot(ibox) .gt. 0 ) then
-c$$$                           rot = dble(inirot(ibox)) * degrad
-c$$$                        else
-c$$$                           if ( mod(jc,2) .eq. 0 ) then
-c$$$                              rot = dble(inirot(ibox)) * degrad
-c$$$                           else
-c$$$                              rot = -(dble(inirot(ibox)) * degrad)
-c$$$                           endif
-c$$$                        endif
-c$$$                        
-c$$$                        if ( inben(intemp,m1) .gt. 0 ) then
-c$$$                           ibtype = itben(intemp,1,1)
-c$$$                           angold = brben(ibtype) / 2.0d0
-c$$$                           if ( m .eq. 2 ) then
-c$$$                              ibtype = itben(intemp,m1,1)
-c$$$                              angnew = brben(ibtype) - angold
-c$$$                           else
-c$$$                              ibtype = itben(intemp,m2,1)
-c$$$                              angnew = brben(ibtype) - angold
-c$$$                           endif 
-c$$$c     write(iou,*) 'angold',angold*raddeg,
-c$$$c     +                       '   angnew',angnew*raddeg
-c$$$                           angold = angnew
-c$$$                           
-c$$$                           ibtype = itvib(intemp,m,1)
-c$$$                           znext = dsin(angnew) * brvib(ibtype)
-c$$$                           xynext = dcos(angnew) * brvib(ibtype)
-c$$$c                           write(iou,*) 'znext',znext,'   xynext',xynext
-c$$$                        else
-c$$$                           ibtype = itvib(intemp,m,1)
-c$$$                           znext = brvib(ibtype)
-c$$$                           xynext = 0.0d0
-c$$$                        endif
-c$$$                        
-c$$$                        if ( mod(m,2) .eq. 0 ) then
-c$$$                           xnext = dcos(rot) * xynext
-c$$$                           ynext = dsin(rot) * xynext
-c$$$                        else
-c$$$                           xnext = -(dcos(rot) * xynext)
-c$$$                           ynext = -(dsin(rot) * xynext)
-c$$$                        endif
-                     endif
+!$$$c     - alkane type molecule -
+!$$$                        if ( inirot(ibox) .eq. 0 ) then
+!$$$                           rot = random() * 360.0d0 * degrad
+!$$$                        elseif ( inirot(ibox) .gt. 0 ) then
+!$$$                           rot = dble(inirot(ibox)) * degrad
+!$$$                        else
+!$$$                           if ( mod(jc,2) .eq. 0 ) then
+!$$$                              rot = dble(inirot(ibox)) * degrad
+!$$$                           else
+!$$$                              rot = -(dble(inirot(ibox)) * degrad)
+!$$$                           end if
+!$$$                        end if
+!$$$                        
+!$$$                        if ( inben(intemp,m1) .gt. 0 ) then
+!$$$                           ibtype = itben(intemp,1,1)
+!$$$                           angold = brben(ibtype) / 2.0d0
+!$$$                           if ( m .eq. 2 ) then
+!$$$                              ibtype = itben(intemp,m1,1)
+!$$$                              angnew = brben(ibtype) - angold
+!$$$                           else
+!$$$                              ibtype = itben(intemp,m2,1)
+!$$$                              angnew = brben(ibtype) - angold
+!$$$                           end if 
+!$$$c     write(iou,*) 'angold',angold*raddeg,
+!$$$c     +                       '   angnew',angnew*raddeg
+!$$$                           angold = angnew
+!$$$                           
+!$$$                           ibtype = itvib(intemp,m,1)
+!$$$                           znext = dsin(angnew) * brvib(ibtype)
+!$$$                           xynext = dcos(angnew) * brvib(ibtype)
+!$$$c                           write(iou,*) 'znext',znext,'   xynext',xynext
+!$$$                        else
+!$$$                           ibtype = itvib(intemp,m,1)
+!$$$                           znext = brvib(ibtype)
+!$$$                           xynext = 0.0d0
+!$$$                        end if
+!$$$                        
+!$$$                        if ( mod(m,2) .eq. 0 ) then
+!$$$                           xnext = dcos(rot) * xynext
+!$$$                           ynext = dsin(rot) * xynext
+!$$$                        else
+!$$$                           xnext = -(dcos(rot) * xynext)
+!$$$                           ynext = -(dsin(rot) * xynext)
+!$$$                        end if
+                     end if
 
                      if (n.le.nchbox(ibox)) then
                         rxu(nn,m) = rxu(nn,m1) + xnext
                         ryu(nn,m) = ryu(nn,m1) + ynext
                         rzu(nn,m) = rzu(nn,m1) + znext
-                     endif
+                     end if
                 
  98               continue
 
@@ -627,9 +625,9 @@ c$$$                        endif
  100        continue
  101     continue
  102  continue
-c -----------------------------------------------------
+! -----------------------------------------------------
 
-c *** check initial structure ***
+! *** check initial structure ***
 
       nn = nchain
       if (lgrand) nn=nchain
@@ -640,15 +638,15 @@ c *** check initial structure ***
       do 200 n = 1, nn
 
          imolty = moltyp(n)
-c         write(iou,*) 'n',n,'   imolty',imolty
+!         write(iou,*) 'n',n,'   imolty',imolty
 
             
          if ( lbranch(imolty) ) then
-c - branched molecule with connectivity table -
-c - go through entire chain -
-c - calculate all bonds vectors and lengths
-c - calculate all stretching, bending, and torsional potentials
-c - that have an end-bead with an index smaller than the current bead
+! - branched molecule with connectivity table -
+! - go through entire chain -
+! - calculate all bonds vectors and lengths
+! - calculate all stretching, bending, and torsional potentials
+! - that have an end-bead with an index smaller than the current bead
             do ii = 1, nunit(imolty)
                rxui=rxu(n,ii)
                ryui=ryu(n,ii)
@@ -662,80 +660,80 @@ c - that have an end-bead with an index smaller than the current bead
                   yvec(ii,jj) = ryu(n,jj) - ryui
                   zvec(ii,jj) = rzu(n,jj) - rzui
                   distij(ii,jj) = dsqrt( xvec(ii,jj)**2
-     +                 + yvec(ii,jj)**2 + zvec(ii,jj)**2 )
+     &                 + yvec(ii,jj)**2 + zvec(ii,jj)**2 )
                   if ( nunit(imolty) .ne. nugrow(imolty) )then
-c                 --- account for explct atoms in opposite direction
+!                 --- account for explct atoms in opposite direction
                      xvec(jj,ii)   = -xvec(ii,jj)
                      yvec(jj,ii)   = -yvec(ii,jj)
                      zvec(jj,ii)   = -zvec(ii,jj)
                      distij(jj,ii) = distij(ii,jj)
-                  endif
-               enddo
-            enddo
+                  end if
+               end do
+            end do
  
             do j = 1, nunit(imolty)
 
-c - vibrations -
+! - vibrations -
                do iivib = 1, invib(1,j)
                   jj = ijvib(1,j,iivib)
                   if ( n .eq. 1 ) write(iou,1003) j,jj,distij(j,jj)
-               enddo
+               end do
 
-c - bending -
+! - bending -
                do jjben = 1, inben(imolty,j)
                   ip2 = ijben3(imolty,j,jjben)
                   ip1 = ijben2(imolty,j,jjben)
                   it  = itben(imolty,j,jjben)
                   thetac = ( xvec(ip1,j)*xvec(ip1,ip2) +
-     +                 yvec(ip1,j)*yvec(ip1,ip2) +
-     +                 zvec(ip1,j)*zvec(ip1,ip2) ) /
-     +                 ( distij(ip1,j)*distij(ip1,ip2) )
+     &                 yvec(ip1,j)*yvec(ip1,ip2) +
+     &                 zvec(ip1,j)*zvec(ip1,ip2) ) /
+     &                 ( distij(ip1,j)*distij(ip1,ip2) )
                   theta = dacos(thetac)
                   vbend = brbenk(it) * (theta-brben(it))**2
                   aben = aben + vbend
-c                  if ( n .eq. 1 ) then
-c                  write(iou,*) 'theta',theta,'vbend',vbend
-c                  write(iou,*) 'brben',brben(it),'brbenk',brbenk(it)
-c                  endif
+!                  if ( n .eq. 1 ) then
+!                  write(iou,*) 'theta',theta,'vbend',vbend
+!                  write(iou,*) 'brben',brben(it),'brbenk',brbenk(it)
+!                  end if
                   if ( n .eq. 1 ) write(iou,1004) j,ip1,ip2,it,
      &                 theta*raddeg,vbend
-               enddo
+               end do
 
-c - torsions -
+! - torsions -
                do jjtor = 1, intor(imolty,j)
                   ip3 = ijtor4(imolty,j,jjtor)
                   ip1 = ijtor2(imolty,j,jjtor)
                   ip2 = ijtor3(imolty,j,jjtor)
                   it  = ittor(imolty,j,jjtor)
-c *** calculate cross products d_a x d_a-1 and d_a-1 x d_a-2 ***
+! *** calculate cross products d_a x d_a-1 and d_a-1 x d_a-2 ***
                   xaa1 = yvec(ip1,j) * zvec(ip2,ip1) +
-     +                 zvec(ip1,j) * yvec(ip1,ip2)
+     &                 zvec(ip1,j) * yvec(ip1,ip2)
                   yaa1 = zvec(ip1,j) * xvec(ip2,ip1) +
-     +                 xvec(ip1,j) * zvec(ip1,ip2)
+     &                 xvec(ip1,j) * zvec(ip1,ip2)
                   zaa1 = xvec(ip1,j) * yvec(ip2,ip1) +
-     +                 yvec(ip1,j) * xvec(ip1,ip2)
+     &                 yvec(ip1,j) * xvec(ip1,ip2)
                   xa1a2 = yvec(ip1,ip2) * zvec(ip2,ip3) +
-     +                 zvec(ip1,ip2) * yvec(ip3,ip2)
+     &                 zvec(ip1,ip2) * yvec(ip3,ip2)
                   ya1a2 = zvec(ip1,ip2) * xvec(ip2,ip3) +
-     +                 xvec(ip1,ip2) * zvec(ip3,ip2)
+     &                 xvec(ip1,ip2) * zvec(ip3,ip2)
                   za1a2 = xvec(ip1,ip2) * yvec(ip2,ip3) +
-     +                 yvec(ip1,ip2) * xvec(ip3,ip2)
-c *** calculate lengths of cross products ***
+     &                 yvec(ip1,ip2) * xvec(ip3,ip2)
+! *** calculate lengths of cross products ***
                   daa1 = dsqrt(xaa1**2+yaa1**2+zaa1**2)
                   da1a2 = dsqrt(xa1a2**2+ya1a2**2+za1a2**2)
-c *** calculate dot product of cross products ***
+! *** calculate dot product of cross products ***
                   dot = xaa1*xa1a2 + yaa1*ya1a2 + zaa1*za1a2
                   thetac = -(dot / ( daa1 * da1a2 ))
                   if (thetac.gt.1.0d0) thetac=1.0d0
                   if (thetac.lt.-1.0d0) thetac=-1.0d0
 
-c     KEA -- added for extending range to +/- 180
+!     KEA -- added for extending range to +/- 180
                   if (it .ge. 500) then
-c     *** calculate cross product of cross products ***
+!     *** calculate cross product of cross products ***
                      xcc = yaa1*za1a2 - zaa1*ya1a2
                      ycc = zaa1*xa1a2 - xaa1*za1a2
                      zcc = xaa1*ya1a2 - yaa1*xa1a2
-c     *** calculate scalar triple product ***
+!     *** calculate scalar triple product ***
                      tcc = xcc*xvec(ip1,ip2) + ycc*yvec(ip1,ip2)
      &                    + zcc*zvec(ip1,ip2)
                      theta=dacos(thetac)
@@ -745,22 +743,22 @@ c     *** calculate scalar triple product ***
                         call splint(theta,spltor,it)
                      else
                         call lininter(theta,spltor,it)
-                     endif
+                     end if
 
                      vtg=spltor
                   else
                      vtg = vtorso (thetac,it)
-                  endif
+                  end if
 
                   ator = ator + vtg
-c                  if ( n .eq. 1 ) write(iou,*) 'thetac',thetac,'vtg',vtg
+!                  if ( n .eq. 1 ) write(iou,*) 'thetac',thetac,'vtg',vtg
                   if ( n .eq. 1 ) write(iou,1005) j,ip1,ip2,ip3,it,
      &                 dacos(thetac)*raddeg,vtg
-               enddo
-            enddo
+               end do
+            end do
 
          else
-c ---                  
+! ---                  
             ibuild = nugrow(imolty)
             do 199 m = 1, ibuild
 
@@ -780,23 +778,23 @@ c ---
                      bang = dacos((x1*x2+y1*y2+ z1*z2)/(d1*d2))*raddeg
                   else
                      bang  = 0.0d0
-                  endif
+                  end if
                   blen = d1
                else
                   blen = 0.0d0
                   bang = 0.0d0
-               endif
+               end if
 
-c               if ( n .eq. 1 .or. m .eq. 1 )
-c     &              write(iou,1001) n,m,rxu(n,m),ryu(n,m),rzu(n,m),
-c     &                            blen,bang,nboxi(n)
+!               if ( n .eq. 1 .or. m .eq. 1 )
+!     &              write(iou,1001) n,m,rxu(n,m),ryu(n,m),rzu(n,m),
+!     &                            blen,bang,nboxi(n)
 
-c               write(iou,1001) n,m,rxu(n,m),ryu(n,m),rzu(n,m),
-c     &                            blen,bang,nboxi(n)
+!               write(iou,1001) n,m,rxu(n,m),ryu(n,m),rzu(n,m),
+!     &                            blen,bang,nboxi(n)
 
  199        continue
 
-         endif
+         end if
 
  200  continue
 
@@ -804,20 +802,20 @@ c     &                            blen,bang,nboxi(n)
          imolty = moltyp(i)
          if ( nugrow(imolty) .ne. nunit(imolty) ) then
             call explct(i,vdummy,.true.,.false.)
-         endif
-      enddo
-c     --- set up intial charges on the atoms
+         end if
+      end do
+!     --- set up intial charges on the atoms
       do i = 1,nchain
          imolty = moltyp(i)
          do ii = 1,nunit(imolty)
             ntii = ntype(imolty,ii)
             qqu(i,ii) = qelect(ntii)
-         enddo
-      enddo
+         end do
+      end do
 
       if (myid.eq.0) then
          write(iou,*) 'aben',aben/2.0d0,'ator',ator/2.0d0
-      endif
+      end if
 
  1001 format(2i4,5f9.3,i6)
  1002 format('coord. unit:   ',2i4,3f9.3,i6)

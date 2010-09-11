@@ -2,35 +2,35 @@
      &     vextn,velectn,vintero,vintrao,vexto,velecto,vinsta,vremta,
      &     vnewflucq,voldflucq,lswapinter)
 
-c anes 
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! anes 
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-c    *********************************************************************
-c    ** optimize the electronic configuration for trans, rot, and swap  **
-c    ** (config, swatch in the future) moves and accept/reject the      **
-c    ** combined move.                                                  **
-c    ** written on June 25/99 by Bin Chen.                              **
-c    *********************************************************************
+!    *********************************************************************
+!    ** optimize the electronic configuration for trans, rot, and swap  **
+!    ** (config, swatch in the future) moves and accept/reject the      **
+!    ** combined move.                                                  **
+!    ** written on June 25/99 by Bin Chen.                              **
+!    *********************************************************************
 
       implicit none
       include 'control.inc'
@@ -53,12 +53,12 @@ c    *********************************************************************
      &     vnewt2,voldt2
       real(8)::qquo(nmax,numax) 
 
-c      write(iou,*) 'START the optimization of the charge configuration'
+!      write(iou,*) 'START the optimization of the charge configuration'
 
       imolty = moltyp(i)
       iunit = nunit(imolty)
 
-c *** store the old energy, old coordinates and ewald sum
+! *** store the old energy, old coordinates and ewald sum
       do ibox2 = 1,nbox
          vboxo(ibox2) = vbox(ibox2)
          vinterbo(ibox2) = vinterb(ibox2)
@@ -72,39 +72,39 @@ c *** store the old energy, old coordinates and ewald sum
             vvibbo(ibox2) = vvibb(ibox2)
             vtgbo(ibox2) = vtgb(ibox2)
             vbendbo(ibox2) = vbendb(ibox2)
-         endif
+         end if
          
-      enddo
+      end do
       do j = 1,iunit
          rxuo(j) = rxu(i,j)
          ryuo(j) = ryu(i,j)
          rzuo(j) = rzu(i,j)
-      enddo
+      end do
       xcmo = xcm(i)
       ycmo = ycm(i)
       zcmo = zcm(i)
-c *** store the old charges
+! *** store the old charges
       do ip = 1,nchain
          do j = 1,nunit(moltyp(ip))
             qquo(ip,j) = qqu(ip,j)
-         enddo
-      enddo
+         end do
+      end do
       if (lewald) then
-c *** store the reciprocal-space sum
+! *** store the reciprocal-space sum
          do ibox2 = 1,nbox
             call recip(ibox2,vdum,vdum,3)
-         enddo
+         end do
          if ( ldielect ) then
             call dipole(ibox,2)
-         endif
-      endif
+         end if
+      end if
 
-c *** on the new coordinates, continue to use the fluctuating charge
-c *** algorithm to optimize the charge configurations, update the
-c *** energy, coordinates and the ewald sum
+! *** on the new coordinates, continue to use the fluctuating charge
+! *** algorithm to optimize the charge configurations, update the
+! *** energy, coordinates and the ewald sum
       
       if ( mtype .eq. 3 ) then
-c *** for swap move
+! *** for swap move
          vbox(ibox)     = vbox(ibox) + vnewt
          vinterb(ibox)  = vinterb(ibox) + vnewinter
          vintrab(ibox)  = vintrab(ibox) + vnewintra
@@ -134,38 +134,38 @@ c *** for swap move
          vintrab(ibox)  = vintrab(ibox) + (vintran - vintrao)
          vextb(ibox)    = vextb(ibox)   + (vextn   - vexto)
          velectb(ibox)   = velectb(ibox)  + (velectn - velecto)
-      endif
+      end if
       
       do j = 1,iunit
          rxu(i,j) = rxuion(j,2)
          ryu(i,j) = ryuion(j,2)
          rzu(i,j) = rzuion(j,2)
-      enddo
-c *** update chain center of mass
+      end do
+! *** update chain center of mass
       call ctrmas(.false.,ibox,i,mtype)
 
       if (lewald) then
-c *** update reciprocal-space sum
+! *** update reciprocal-space sum
          call recip(ibox,vdum,vdum,2)
          if (mtype .eq. 3) call recip(boxrem,vdum,vdum,2)
          if ( ldielect ) then
-c *** update the dipole term
+! *** update the dipole term
             call dipole(ibox,1)
-         endif
-      endif            
+         end if
+      end if            
 
-c *** begin to optimize the charge configuration
+! *** begin to optimize the charge configuration
 
       if ( mtype .eq. 3 ) then
          do ichoiq = 1,500
             call flucq(-1,0)
-         enddo
-c         do ichoiq = 1,0
-c            call flucq(-2,0)
-c         enddo
+         end do
+!         do ichoiq = 1,0
+!            call flucq(-2,0)
+!         end do
          do ichoiq = 1,500
             call flucq(2,0) 
-         enddo
+         end do
          deltv = vbox(ibox) - vboxo(ibox)
          weight = dexp(-deltv*beta)
          deltv = vboxo(boxrem) - vbox(boxrem)
@@ -175,41 +175,41 @@ c         enddo
 
          if ( lswapinter ) then
             if (lgibbs) then
-c     --- Note: acceptance based on only molecules of type imolty
+!     --- Note: acceptance based on only molecules of type imolty
                wratio = ( weight / weiold ) *
-     +              ( volins * dble( ncmt(boxrem,imolty)+1 ) / 
-     +              ( volrem * dble( ncmt(ibox,imolty) ) ) )
+     &              ( volins * dble( ncmt(boxrem,imolty)+1 ) / 
+     &              ( volrem * dble( ncmt(ibox,imolty) ) ) )
             elseif (lgrand) then
                if (ibox.eq.1) then
-c           --- molecule added to box 1
+!           --- molecule added to box 1
                   wratio = (weight /  weiold ) * 
-     +                 volins * B(imolty) / (ncmt(ibox,imolty)) 
+     &                 volins * B(imolty) / (ncmt(ibox,imolty)) 
                else
-c            --- molecule removed from box 1
+!            --- molecule removed from box 1
                   wratio = (weight /  weiold ) * 
-     +                 (ncmt(boxrem,imolty)+1)/ (B(imolty)*volrem) 
-               endif
-            endif
+     &                 (ncmt(boxrem,imolty)+1)/ (B(imolty)*volrem) 
+               end if
+            end if
          else
                wratio = weight / weiold
-         endif
+         end if
          if ( wratio .gt. random() ) then
             laccept = .true.
          else
             laccept = .false.
-         endif
+         end if
 
       else
 
          do ichoiq = 1,nchoiq(ibox)
             call flucq(0,ibox)
-         enddo
+         end do
          vnewt2 = 0.0d0
          voldt2 = 0.0d0
          do ibox2 = 1, nbox
             vnewt2 = vnewt2 + vbox(ibox2)
             voldt2 = voldt2 + vboxo(ibox2)
-         enddo
+         end do
          deltv = vnewt2 - voldt2
 
          deltvb = beta * deltv
@@ -221,16 +221,16 @@ c            --- molecule removed from box 1
             laccept = .true.
          else
             laccept = .false.
-         endif
+         end if
 
-      endif
+      end if
 
       if ( laccept ) then
 
-c *** combined move can be accepted now !!!
+! *** combined move can be accepted now !!!
 
       else
-c *** restore the old energy and old coordinates and ewald sum
+! *** restore the old energy and old coordinates and ewald sum
          do ibox2 = 1,nbox
             vbox(ibox2) = vboxo(ibox2)
             vinterb(ibox2) = vinterbo(ibox2)
@@ -243,34 +243,34 @@ c *** restore the old energy and old coordinates and ewald sum
                vvibb(ibox2) = vvibbo(ibox2)
                vtgb(ibox2) = vtgbo(ibox2)
                vbendb(ibox2) = vbendbo(ibox2)
-            endif
-         enddo
+            end if
+         end do
          do j = 1,iunit
             rxu(i,j) = rxuo(j)
             ryu(i,j) = ryuo(j)
             rzu(i,j) = rzuo(j)
-         enddo
+         end do
          do ip = 1,nchain
             do j = 1,nunit(moltyp(ip))
                qqu(ip,j) = qquo(ip,j)
-            enddo
-         enddo
+            end do
+         end do
          xcm(i) = xcmo
          ycm(i) = ycmo
          zcm(i) = zcmo
          if (lewald) then
-c *** restore the reciprocal-space sum
+! *** restore the reciprocal-space sum
             do ibox2 = 1,nbox
                call recip(ibox2,vdum,vdum,4)
-            enddo
+            end do
             if ( ldielect ) then
-c *** restore old dipole moment
+! *** restore old dipole moment
                call dipole(ibox,3)
-            endif
-         endif
-      endif    
+            end if
+         end if
+      end if    
 
-c      write(iou,*) 'END the optimization of the charge configuration'
+!      write(iou,*) 'END the optimization of the charge configuration'
 
       return         
       end

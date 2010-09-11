@@ -18,16 +18,16 @@
 
       do i=1,9
          elem(i)=hmat(ibox,i)
-      enddo
+      end do
    
 !         -- calculating the length of cell vectors 
            
       cell_length(ibox,1)=sqrt(elem(1)*elem(1)+elem(2)*elem(2)+
-     +                          elem(3)*elem(3))
+     &                          elem(3)*elem(3))
       cell_length(ibox,2)=sqrt(elem(4)*elem(4)+elem(5)*elem(5)+
-     +                          elem(6)*elem(6))
+     &                          elem(6)*elem(6))
       cell_length(ibox,3)=sqrt(elem(7)*elem(7)+elem(8)*elem(8)+
-     +                          elem(9)*elem(9))
+     &                          elem(9)*elem(9))
 
       boxlx(ibox) = cell_length(ibox,1)
       boxly(ibox) = cell_length(ibox,2)
@@ -51,18 +51,18 @@
       
       if(abs(cell_vol(ibox)).lt.1D-16) then 
          call cleanup('Volume of cell negligible, check input H matrix')
-      endif
+      end if
               
       inv_vol = 1.0d0/cell_vol(ibox) 
 
 !    -- calculating minimum cell widths
 
       min_width(ibox,1) = cell_vol(ibox)/sqrt(bcx*bcx+bcy*bcy+
-     +                                                 bcz*bcz)
+     &                                                 bcz*bcz)
       min_width(ibox,2) = cell_vol(ibox)/sqrt(cax*cax+cay*cay+
-     +                                                 caz*caz)
+     &                                                 caz*caz)
       min_width(ibox,3) = cell_vol(ibox)/sqrt(abx*abx+aby*aby+
-     +                                                 abz*abz)
+     &                                                 abz*abz)
 
 !    -- calculating adjoint for inverting the h-matrix
                
@@ -97,13 +97,13 @@
 
 
       cosa = (elem(4)*elem(7)+elem(5)*elem(8)+elem(6)*elem(9))/
-     +           (cell_length(ibox,2)*cell_length(ibox,3))
+     &           (cell_length(ibox,2)*cell_length(ibox,3))
 
       cosb = (elem(1)*elem(7)+elem(2)*elem(8)+elem(3)*elem(9))/
-     +           (cell_length(ibox,1)*cell_length(ibox,3))
+     &           (cell_length(ibox,1)*cell_length(ibox,3))
 
       cosg = (elem(4)*elem(1)+elem(5)*elem(2)+elem(6)*elem(3))/
-     +           (cell_length(ibox,2)*cell_length(ibox,1))
+     &           (cell_length(ibox,2)*cell_length(ibox,1))
 
       cell_ang(ibox,1) = dacos(cosa)
       cell_ang(ibox,2) = dacos(cosb)

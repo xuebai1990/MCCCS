@@ -1,27 +1,27 @@
       subroutine linkcell(iinit,imol,xcmi,ycmi,zcmi,cellinc)
 
-c linkcell
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! linkcell
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
 
@@ -35,46 +35,46 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       real(8)::dcellx,dcelly,dcellz,rx,ry,rz,xcmi,ycmi,zcmi
 
-c     *** rintramax is the maximum distance between endpoints 
-c     *** in a molecule
+!     *** rintramax is the maximum distance between endpoints 
+!     *** in a molecule
 
       dimension cellinc(27)
 
       save dcellx,dcelly,dcellz,ncellx,ncelly,ncellz,ncello
       
-c      write(iou,*) 'START LINKCELL IINIT=',iinit
+!      write(iou,*) 'START LINKCELL IINIT=',iinit
 
        
 
       if (iinit.eq.1) then
-c     --- we will set up or update our cell sizes
+!     --- we will set up or update our cell sizes
 
          ibox = boxlink
 
          if (imol .eq. 0) then
-c * called from monola
+! * called from monola
             ncello = 0
-         endif
+         end if
 
-c     --- determine dcell
-c         write(iou,*) 'linkcell used',rcut,rintramax
+!     --- determine dcell
+!         write(iou,*) 'linkcell used',rcut,rintramax
 
          dcellx = rcut(ibox) + rintramax
          dcelly = dcellx
          dcellz = dcellx
 
-c     --- find hypothetical ncell
+!     --- find hypothetical ncell
          ncellx = int( boxlx(ibox) / dcellx ) 
          ncelly = int( boxly(ibox) / dcelly ) 
          ncellz = int( boxlz(ibox) / dcellz )
 
          
-c     --- make dcells larger so each each cell is the same size
+!     --- make dcells larger so each each cell is the same size
          dcellx = boxlx(ibox) / dble(ncellx)
          dcelly = boxly(ibox) / dble(ncelly)
          dcellz = boxlz(ibox) / dble(ncellz)
 
-c     --- now reweight ncell one more time
+!     --- now reweight ncell one more time
 
          ncellx = anint( boxlx(ibox) / dcellx ) 
          ncelly = anint( boxly(ibox) / dcelly ) 
@@ -87,21 +87,21 @@ c     --- now reweight ncell one more time
                write(iou,*) 'number of linkcells set to',ncell
             else
                write(iou,*) 'number of linkcells changed to',ncell
-            endif
-         endif
+            end if
+         end if
 
          ncello = ncell
 
          if (ncell.gt.cmax) then
             write(iou,*) 'ncell,cmax',ncell,cmax
             call cleanup('ncell greater than cmax in linkcell')
-         endif
+         end if
          
          do n = 1, ncell
             nicell(n) = 0
-         enddo
+         end do
 
-c     --- assign molecules to cells
+!     --- assign molecules to cells
          do n = 1, nchain
 
             if (nboxi(n).eq.boxlink) then
@@ -119,7 +119,7 @@ c     --- assign molecules to cells
                if (ic.gt.cmax) then
                   write(iou,*) 'ic,cmax',ic,cmax
                   call cleanup('ic gt cmax')
-               endif
+               end if
 
                icell(n) = ic
                nicell(ic) = nicell(ic) + 1
@@ -128,37 +128,37 @@ c     --- assign molecules to cells
                   write(iou,*) 'nicell,cmaxa',nicell(ic)
      &                 ,cmaxa
                   call cleanup('nicell gt cmaxa')
-               endif
+               end if
 
                iucell(ic,nicell(ic)) = n
             else
                icell(n) = 0
-            endif
-         enddo
+            end if
+         end do
 
       elseif (iinit.eq.2) then
-c     --- we will update our cell's occupants
+!     --- we will update our cell's occupants
 
          ic = icell(imol)
 
          if (ic.gt.0) then
-c     --- first we will remove our molecule
+!     --- first we will remove our molecule
             do n = 1, nicell(ic) 
                if (iucell(ic,n).eq.imol) then
-c     --- replace removed occupant with last occupant and erase last spot
+!     --- replace removed occupant with last occupant and erase last spot
                   iucell(ic,n) = iucell(ic,nicell(ic))
                   iucell(ic,nicell(ic)) = 0
                   nicell(ic) = nicell(ic) - 1
                   goto 100
-               endif               
-            enddo
+               end if               
+            end do
          
             call cleanup('screwup for iinit = 2 for linkcell')
  100        continue
             icell(imol) = 0
-         endif
+         end if
 
-c     --- now we will add the molecule 
+!     --- now we will add the molecule 
          if (nboxi(imol).eq.boxlink) then
             rx = xcm(imol) / dcellx
             ry = ycm(imol) / dcelly
@@ -177,9 +177,9 @@ c     --- now we will add the molecule
 
             iucell(ic,nicell(ic)) = imol
 
-         endif
+         end if
       else
-c     --- we will determine the cell neighbors
+!     --- we will determine the cell neighbors
          
          rx = xcmi / dcellx
          ry = ycmi / dcelly
@@ -200,7 +200,7 @@ c     --- we will determine the cell neighbors
                      ib = ia + ncellx
                   else
                      ib = ia
-                  endif
+                  end if
 
                   if (ja.gt.ncelly) then
                      jb = ja - ncelly
@@ -208,7 +208,7 @@ c     --- we will determine the cell neighbors
                      jb = ja + ncelly
                   else
                      jb = ja
-                  endif
+                  end if
 
                   if (ka.gt.ncellz) then
                      kb = ka - ncellz
@@ -216,7 +216,7 @@ c     --- we will determine the cell neighbors
                      kb = ka + ncellz
                   else
                      kb = ka
-                  endif
+                  end if
                   
                   count = count + 1
 
@@ -224,12 +224,12 @@ c     --- we will determine the cell neighbors
 
                   cellinc(count) = ic          
                           
-               enddo
-            enddo
-         enddo
-      endif
+               end do
+            end do
+         end do
+      end if
 
-c      write(iou,*) 'END LINKCELL IINIT=',iinit
+!      write(iou,*) 'END LINKCELL IINIT=',iinit
 
       return
       end
@@ -244,7 +244,7 @@ c      write(iou,*) 'END LINKCELL IINIT=',iinit
       
       integer::i,j,k,ncellx,ncelly,ncellz,linkdecode
       
-c     *** decodes x,y,z to a single number
+!     *** decodes x,y,z to a single number
 
       linkdecode = (i-1)*ncelly*ncellz + (j-1)*ncellz + k
 

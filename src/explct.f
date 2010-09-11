@@ -1,37 +1,37 @@
       subroutine explct(ichain,vmethyl,lcrysl,lswitch)
 
-c explct
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! explct
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-c     adds H-atoms to a linear carbon chain
-c     Potential for methyl-group rotation
-c     is: V = 0.5*E0*(1-cos(3*alpha)), where
-c     alpha is Ryckaert torsion angle!
-c     ------
+!     adds H-atoms to a linear carbon chain
+!     Potential for methyl-group rotation
+!     is: V = 0.5*E0*(1-cos(3*alpha)), where
+!     alpha is Ryckaert torsion angle!
+!     ------
 
       implicit none
 
-c - arguments
+! - arguments
       integer::ichain,nngrow,negrow,i,iplus,imins,nn,
      &        imolty,iben,iend,ii,jj
       real(8)::vmethyl,ch,cc,cch,ca,ah,hch2,hk,ck,en0
@@ -47,30 +47,30 @@ c - arguments
       include 'conver.inc'
       include 'connect.inc'
 
-c - find intramolecular structure 
+! - find intramolecular structure 
       imolty = moltyp(ichain)
       nngrow = nugrow(imolty)
       negrow = nunit(imolty) - 3
       vmethyl = 0.0d0
       if ((nunit(imolty)-6) .eq. 3*(nngrow-3) ) then
-c *** alkanol cases
+! *** alkanol cases
          lalkanol = .true.
          iend = 2
       else
          lalkanol = .false.
          iend = 1
-      endif
+      end if
 
 
       if ( nunit(imolty) .eq. 3 .or. nunit(imolty) .eq. 4) then
 
-c - Water case
+! - Water case
         
          if ( nngrow .eq. 3 ) then
 
-c - TIP-4P geometry with 2H and O as the growing unit
-c - M site has been determined by their positions through geometry 
-c - constraint
+! - TIP-4P geometry with 2H and O as the growing unit
+! - M site has been determined by their positions through geometry 
+! - constraint
 
             om = brvib(itvib(imolty,4,1))
             a1 = 0.5d0*(rxu(ichain,2)+rxu(ichain,3)) 
@@ -91,14 +91,14 @@ c - constraint
      &           itvib(imolty,nngrow+2,1) ) then
                oh = brvib(itvib(imolty,nngrow+1,1))
                if ( nunit(imolty) .eq. 3 ) then
-c - SPC geometry
+! - SPC geometry
 
                   hoh = brben(itben(imolty,nngrow+1,1))
                else
-c - TIP-4P geometry
+! - TIP-4P geometry
             
                   hoh = brben(itben(imolty,nngrow+1,1))
-               endif
+               end if
                if ( lcrysl ) then
                   hoh2 = hoh / 2.0d0
                   hk = oh*dsin(hoh2)
@@ -112,7 +112,7 @@ c - TIP-4P geometry
                else
                   oa = oh*dcos(onepi-hoh)
                   ah = oh*dsin(onepi-hoh)
-c --- generate a random vector on a sphere for the first H ---
+! --- generate a random vector on a sphere for the first H ---
  111              rx = 2.0d0*random() - 1.0d0
                   ry = 2.0d0*random() - 1.0d0
                   dr = rx*rx + ry*ry
@@ -125,7 +125,7 @@ c --- generate a random vector on a sphere for the first H ---
                   rxu(ichain,2) = rxu(ichain,1) - oh*a2
                   ryu(ichain,2) = ryu(ichain,1) - oh*b2
                   rzu(ichain,2) = rzu(ichain,1) - oh*c2
-c --- generate another random vector on a sphere for the second H ---
+! --- generate another random vector on a sphere for the second H ---
  222              rx = 2.0d0*random() - 1.0d0
                   ry = 2.0d0*random() - 1.0d0
                   dr = rx*rx + ry*ry
@@ -135,7 +135,7 @@ c --- generate another random vector on a sphere for the second H ---
                   ry = ry*rz
                   rz = 1 - 2.0d0*dr
                 
-c --- The two vectors above form a plane identified by n1 ---
+! --- The two vectors above form a plane identified by n1 ---
                   a1 = b2*rz - c2*ry
                   b1 = -(a2*rz - rx*c2)
                   c1 = a2*ry - rx*b2
@@ -144,7 +144,7 @@ c --- The two vectors above form a plane identified by n1 ---
                   b1 = b1/dln1
                   c1 = c1/dln1
 
-c --- cross product n1 x n2 calc.-> n3 ---
+! --- cross product n1 x n2 calc.-> n3 ---
             
                   a3 = b1*c2 - b2*c1
                   b3 = -(a1*c2 - a2*c1)
@@ -152,7 +152,7 @@ c --- cross product n1 x n2 calc.-> n3 ---
                   rxu(ichain,3) = rxu(ichain,1) + a2*oa + ah*a3
                   ryu(ichain,3) = ryu(ichain,1) + b2*oa + ah*b3
                   rzu(ichain,3) = rzu(ichain,1) + c2*oa + ah*c3
-               endif
+               end if
                if ( nunit(imolty) .eq. 4 ) then
                   om = brvib(itvib(imolty,4,1))
                   a1 = 0.5d0*(rxu(ichain,2)+rxu(ichain,3)) 
@@ -165,11 +165,11 @@ c --- cross product n1 x n2 calc.-> n3 ---
                   rxu(ichain,4) = rxu(ichain,1) + om*a1/dr
                   ryu(ichain,4) = ryu(ichain,1) + om*b1/dr
                   rzu(ichain,4) = rzu(ichain,1) + om*c1/dr
-               endif
+               end if
                return
             else
-c --- HF model
-c --- generate a random vector on a sphere for the H and M sites ---
+! --- HF model
+! --- generate a random vector on a sphere for the H and M sites ---
  333           rx = 2.0d0*random() - 1.0d0
                ry = 2.0d0*random() - 1.0d0
                dr = rx*rx + ry*ry
@@ -184,48 +184,48 @@ c --- generate a random vector on a sphere for the H and M sites ---
                   rxu(ichain,i) = rxu(ichain,1) + ch*a2
                   ryu(ichain,i) = ryu(ichain,1) + ch*b2
                   rzu(ichain,i) = rzu(ichain,1) + ch*c2
-               enddo
-            endif 
-         endif
+               end do
+            end if 
+         end if
          
       elseif ( nunit(imolty) .eq. 5 .or. nunit(imolty) .eq. 7
      &        .or. nunit(imolty) .eq. 9 ) then
          
 
-c - Methane case or other rigid molecule with 5 units
+! - Methane case or other rigid molecule with 5 units
 
          ch = brvib(itvib(imolty,nngrow+1,1))
          hch = brben(itben(imolty,nngrow+1,1))
          if ( nngrow .eq. 3 ) then
 
-c *** for hydro-furan
+! *** for hydro-furan
 
-c            a1 = rxu(ichain,3)-rxu(ichain,1)
-c            b1 = ryu(ichain,3)-ryu(ichain,1)
-c            c1 = rzu(ichain,3)-rzu(ichain,1)
-c            dln1 = dsqrt(a1*a1 + b1*b1 + c1*c1)
-c            a1 = a1/dln1
-c            b1 = b1/dln1
-c            c1 = c1/dln1
-c            a2 = 0.5d0*(rxu(ichain,1)+rxu(ichain,3))-
-c     &           rxu(ichain,2)
-c            b2 = 0.5d0*(ryu(ichain,1)+ryu(ichain,3))-
-c     &           ryu(ichain,2)
-c            c2 = 0.5d0*(rzu(ichain,1)+rzu(ichain,3))-
-c     &           rzu(ichain,2)
-c            dln1 = dsqrt(a2*a2 + b2*b2 + c2*c2)
-c            a2 = a2/dln1
-c            b2 = b2/dln1
-c            c2 = c2/dln1
-c            rxu(ichain,4) = rxu(ichain,2) + 2.2758059d0*a2 + 
-c     &           0.765d0*a1
-c            ryu(ichain,4) = ryu(ichain,2) + 2.2758059d0*b2 + 
-c     &           0.765d0*b1
-c            rzu(ichain,4) = rzu(ichain,2) + 2.2758059d0*c2 + 
-c     &           0.765d0*c1
-c            rxu(ichain,5) = rxu(ichain,4) - 1.53d0*a1
-c            ryu(ichain,5) = ryu(ichain,4) - 1.53d0*b1
-c            rzu(ichain,5) = rzu(ichain,4) - 1.53d0*c1            
+!            a1 = rxu(ichain,3)-rxu(ichain,1)
+!            b1 = ryu(ichain,3)-ryu(ichain,1)
+!            c1 = rzu(ichain,3)-rzu(ichain,1)
+!            dln1 = dsqrt(a1*a1 + b1*b1 + c1*c1)
+!            a1 = a1/dln1
+!            b1 = b1/dln1
+!            c1 = c1/dln1
+!            a2 = 0.5d0*(rxu(ichain,1)+rxu(ichain,3))-
+!     &           rxu(ichain,2)
+!            b2 = 0.5d0*(ryu(ichain,1)+ryu(ichain,3))-
+!     &           ryu(ichain,2)
+!            c2 = 0.5d0*(rzu(ichain,1)+rzu(ichain,3))-
+!     &           rzu(ichain,2)
+!            dln1 = dsqrt(a2*a2 + b2*b2 + c2*c2)
+!            a2 = a2/dln1
+!            b2 = b2/dln1
+!            c2 = c2/dln1
+!            rxu(ichain,4) = rxu(ichain,2) + 2.2758059d0*a2 + 
+!     &           0.765d0*a1
+!            ryu(ichain,4) = ryu(ichain,2) + 2.2758059d0*b2 + 
+!     &           0.765d0*b1
+!            rzu(ichain,4) = rzu(ichain,2) + 2.2758059d0*c2 + 
+!     &           0.765d0*c1
+!            rxu(ichain,5) = rxu(ichain,4) - 1.53d0*a1
+!            ryu(ichain,5) = ryu(ichain,4) - 1.53d0*b1
+!            rzu(ichain,5) = rzu(ichain,4) - 1.53d0*c1            
 
             a1 = rxu(ichain,2)-rxu(ichain,1)
             b1 = ryu(ichain,2)-ryu(ichain,1)
@@ -235,7 +235,7 @@ c            rzu(ichain,5) = rzu(ichain,4) - 1.53d0*c1
             b2 = ryu(ichain,3)-ryu(ichain,2)
             c2 = rzu(ichain,3)-rzu(ichain,2)
 
-c     -------cross product n1 x n2 calc.-> n3 ---
+!     -------cross product n1 x n2 calc.-> n3 ---
             a3 = b1*c2 - b2*c1
             b3 = -(a1*c2 - a2*c1)
             c3 = a1*b2 - a2*b1
@@ -272,14 +272,14 @@ c     -------cross product n1 x n2 calc.-> n3 ---
             ca = ch*dcos(onepi-hch)
             ah = ch*dsin(onepi-hch)
 
-c - only one H participate in the growing
-c - this subroutine put on the rest 3 hydrogens
-c     -------H-atoms for the first CH3-group---
-c     -------first define vector C-H ------
+! - only one H participate in the growing
+! - this subroutine put on the rest 3 hydrogens
+!     -------H-atoms for the first CH3-group---
+!     -------first define vector C-H ------
             x12 = rxu(ichain,2)-rxu(ichain,1)
             y12 = ryu(ichain,2)-ryu(ichain,1)
             z12 = rzu(ichain,2)-rzu(ichain,1)
-c     ------ generate a random vector ------
+!     ------ generate a random vector ------
  444        rx = 2.0d0*random() - 1.0d0
             ry = 2.0d0*random() - 1.0d0
             dr = rx*rx + ry*ry
@@ -289,7 +289,7 @@ c     ------ generate a random vector ------
             ry = ry*rz
             rz = 1 - 2.0d0*dr
 
-c     ------ the two vectors above form a plane identified by n1 ------
+!     ------ the two vectors above form a plane identified by n1 ------
             a1 = y12*rz - z12*ry
             b1 = -(x12*rz - rx*z12)
             c1 = x12*ry - rx*y12
@@ -297,19 +297,19 @@ c     ------ the two vectors above form a plane identified by n1 ------
             a1 = a1/dln1
             b1 = b1/dln1
             c1 = c1/dln1
-c     --------normalizing C-H vector -> n2 ----
+!     --------normalizing C-H vector -> n2 ----
             a2 = x12/ch
             b2 = y12/ch
             c2 = z12/ch
-c     -------cross product n1 x n2 calc.-> n3 ---
+!     -------cross product n1 x n2 calc.-> n3 ---
             a3 = b1*c2 - b2*c1
             b3 = -(a1*c2 - a2*c1)
             c3 = a1*b2 - a2*b1
-c     ------- point A ------ 
+!     ------- point A ------ 
             xa = rxu(ichain,2)+a2*ca
             ya = ryu(ichain,2)+b2*ca
             za = rzu(ichain,2)+c2*ca
-c     ------H-atoms for the first methyl group------
+!     ------H-atoms for the first methyl group------
             r = 0.0d0
             do i = 1,3
                a4 = ah*a3*dcos(r) + ah*a1*dsin(r)
@@ -319,12 +319,12 @@ c     ------H-atoms for the first methyl group------
                ryu(ichain,nngrow+i) = ya + b4
                rzu(ichain,nngrow+i) = za + c4
                r = r + 120.0d0*onepi/180.0d0
-            enddo
+            end do
 
          else
-c *** only carbon has been grown
+! *** only carbon has been grown
 
-c     ------ METHANE ------
+!     ------ METHANE ------
             if ( lcrysl ) then
                hch2 = brben(itben(imolty,2,1))/2
                hk = ch*dsin(hch2)
@@ -346,16 +346,16 @@ c     ------ METHANE ------
                ryu(ichain,5) = ryu(ichain,1) - hk
                rzu(ichain,5) = rzu(ichain,1) 
 
-c - KEEP THE OLD CONFIGURATION in SWITCH MOVE
+! - KEEP THE OLD CONFIGURATION in SWITCH MOVE
 
             elseif ( lswitch ) then
-c               if (imolty .eq. 1) then
-c                  ratio = brvib(itvib(1,nngrow+1,1))
-c     &                 /brvib(itvib(2,nngrow+1,1))
-c               else
-c                  ratio = brvib(itvib(2,nngrow+1,1))
-c     &                 /brvib(itvib(1,nngrow+1,1))
-c               endif
+!               if (imolty .eq. 1) then
+!                  ratio = brvib(itvib(1,nngrow+1,1))
+!     &                 /brvib(itvib(2,nngrow+1,1))
+!               else
+!                  ratio = brvib(itvib(2,nngrow+1,1))
+!     &                 /brvib(itvib(1,nngrow+1,1))
+!               end if
                ratio = 1.0d0
                rxu(ichain,2) = rxu(ichain,1) + ratio*(rxu(ichain,2)
      &              -rxu(ichain,1))
@@ -387,7 +387,7 @@ c               endif
                hch2 = brben(itben(imolty,2,1))/2
                ca = ch*dcos(hch2)
                ah = ch*dsin(hch2)         
-c     ------ generate a random vector for the first H ------
+!     ------ generate a random vector for the first H ------
  555           rx = 2.0d0*random() - 1.0d0
                ry = 2.0d0*random() - 1.0d0
                dr = rx*rx + ry*ry
@@ -396,7 +396,7 @@ c     ------ generate a random vector for the first H ------
                a2 = rx*rz
                b2 = ry*rz
                c2 = 1 - 2.0d0*dr
-c     ------ generate another random vector for the rotation ------
+!     ------ generate another random vector for the rotation ------
  666           rx = 2.0d0*random() - 1.0d0
                ry = 2.0d0*random() - 1.0d0
                dr = rx*rx + ry*ry
@@ -405,7 +405,7 @@ c     ------ generate another random vector for the rotation ------
                rx = rx*rz
                ry = ry*rz
                rz = 1 - 2.0d0*dr
-c     ------ the two vectors above form a plane identified by n1 ------
+!     ------ the two vectors above form a plane identified by n1 ------
                a1 = b2*rz - c2*ry
                b1 = -(a2*rz - rx*c2)
                c1 = a2*ry - rx*b2
@@ -427,7 +427,7 @@ c     ------ the two vectors above form a plane identified by n1 ------
                ah = ch*dsin(hch2)         
 
             
-c     -------cross product n1 x n2 calc.-> n3 ---
+!     -------cross product n1 x n2 calc.-> n3 ---
                a3 = b1*c2 - b2*c1
                b3 = -(a1*c2 - a2*c1)
                c3 = a1*b2 - a2*b1
@@ -439,7 +439,7 @@ c     -------cross product n1 x n2 calc.-> n3 ---
                ryu(ichain,5) = ryu(ichain,1) - b2*ca - b3*ah
                rzu(ichain,5) = rzu(ichain,1) - c2*ca - c3*ah
                
-            endif
+            end if
             if ( nunit(imolty) .eq. 9 ) then
                ce = brvib(itvib(imolty,6,1))
                ratio = ce / ch
@@ -452,11 +452,11 @@ c     -------cross product n1 x n2 calc.-> n3 ---
      &                 (ryu(ichain,ii)-ryu(ichain,1))
                   rzu(ichain,jj) = rzu(ichain,1) + ratio*
      &                 (rzu(ichain,ii)-rzu(ichain,1))
-               enddo
-            endif
-         endif
+               end do
+            end if
+         end if
          if ( nunit(imolty) .eq. 7 ) then
-c *** for seven site water model
+! *** for seven site water model
             rxu(ichain,6) = 
      &           4d0*rxu(ichain,4)-3d0*rxu(ichain,1)
             ryu(ichain,6) = 
@@ -469,12 +469,12 @@ c *** for seven site water model
      &           4d0*ryu(ichain,5)-3d0*ryu(ichain,1)
             rzu(ichain,7) = 
      &           4d0*rzu(ichain,5)-3d0*rzu(ichain,1)
-         endif
+         end if
       else
 
-c - ALKANES (not for methane)          
-c - find intramolecular structure for longer alkanes
-c - WARNING: work only for pure hydro- or perfluoro-carbons!!!
+! - ALKANES (not for methane)          
+! - find intramolecular structure for longer alkanes
+! - WARNING: work only for pure hydro- or perfluoro-carbons!!!
 
          cc = brvib(itvib(imolty,1,1))
          ch = brvib(itvib(imolty,nngrow+1,1))
@@ -489,10 +489,10 @@ c - WARNING: work only for pure hydro- or perfluoro-carbons!!!
             ck = ch*dcos(hch2)
             en0 = 853.93d0
 
-c     ------ REGULAR N-ALKANE ------   
-c     ------ main loop
-c     calculates hydrogen positions for methylene groups
-c     WARNING only works for linear alkanes
+!     ------ REGULAR N-ALKANE ------   
+!     ------ main loop
+!     calculates hydrogen positions for methylene groups
+!     WARNING only works for linear alkanes
             do i = 2,nngrow-iend
                iplus = i+1
                imins = i-1
@@ -530,12 +530,12 @@ c     WARNING only works for linear alkanes
                      rxu(ichain,nn) = rxu(ichain,i) + a3*ck - a1*hk
                      ryu(ichain,nn) = ryu(ichain,i) + b3*ck - b1*hk
                      rzu(ichain,nn) = rzu(ichain,i) + c3*ck - c1*hk
-                  endif
-               enddo
-            enddo
+                  end if
+               end do
+            end do
 
-c     -------H-atoms for the first CH3-group---
-c     -------define c1c2c3 plane -> n1 ------
+!     -------H-atoms for the first CH3-group---
+!     -------define c1c2c3 plane -> n1 ------
             x12 = rxu(ichain,1)-rxu(ichain,2)
             y12 = ryu(ichain,1)-ryu(ichain,2)
             z12 = rzu(ichain,1)-rzu(ichain,2)
@@ -549,19 +549,19 @@ c     -------define c1c2c3 plane -> n1 ------
             a1 = a1/dln1
             b1 = b1/dln1
             c1 = c1/dln1
-c     --------normalizing c2c1 vector -> n2 ----
+!     --------normalizing c2c1 vector -> n2 ----
             a2 = x12/cc
             b2 = y12/cc
             c2 = z12/cc
-c     -------cross product n1 x n2 calc.-> n3 ---
+!     -------cross product n1 x n2 calc.-> n3 ---
             a3 = b1*c2 - b2*c1
             b3 = -(a1*c2 - a2*c1)
             c3 = a1*b2 - a2*b1
-c     ------- point A ------ 
+!     ------- point A ------ 
             xa = rxu(ichain,1)+a2*ca
             ya = ryu(ichain,1)+b2*ca
             za = rzu(ichain,1)+c2*ca
-c     ------H-atoms ------
+!     ------H-atoms ------
             if ( lcrysl ) then
                r=0.0d0
                ven = 0.0d0
@@ -571,9 +571,9 @@ c     ------H-atoms ------
                prob = dexp(-beta*ven)
                rn = random()
                if (rn.gt.prob) goto 101
-            endif
-c     rgr = r*180.0d0/onepi
-c     write(iou,*) 'final Ryckaert angle: ',rgr
+            end if
+!     rgr = r*180.0d0/onepi
+!     write(iou,*) 'final Ryckaert angle: ',rgr
             vmethyl = vmethyl + ven
             do i = 1,3
                a4 = ah*a3*dcos(r+onepi) + ah*a1*dsin(r+onepi)
@@ -584,14 +584,14 @@ c     write(iou,*) 'final Ryckaert angle: ',rgr
                ryu(ichain,nngrow+i) = ya + b4
                rzu(ichain,nngrow+i) = za + c4
                r = r + 120.0d0*onepi/180.0d0
-            enddo
+            end do
 
-c --- if it is an alkanol molecule, it did not have the other ending CH3
+! --- if it is an alkanol molecule, it did not have the other ending CH3
 
             if ( lalkanol ) return
 
-c     ------H-atoms for the last CH3------
-c     -------define c1c2c3 plane -> n1 ------
+!     ------H-atoms for the last CH3------
+!     -------define c1c2c3 plane -> n1 ------
             x12 = rxu(ichain,nngrow)-rxu(ichain,nngrow-1)
             y12 = ryu(ichain,nngrow)-ryu(ichain,nngrow-1)
             z12 = rzu(ichain,nngrow)-rzu(ichain,nngrow-1)
@@ -605,19 +605,19 @@ c     -------define c1c2c3 plane -> n1 ------
             a1 = a1/dln1
             b1 = b1/dln1
             c1 = c1/dln1
-c     --------normalizing c2c1 vector -> n2 ----
+!     --------normalizing c2c1 vector -> n2 ----
             a2 = x12/cc
             b2 = y12/cc
             c2 = z12/cc
-c     -------cross product n1 x n2 calc.-> n3 ---
+!     -------cross product n1 x n2 calc.-> n3 ---
             a3 = b1*c2 - b2*c1
             b3 = -(a1*c2 - a2*c1)
             c3 = a1*b2 - a2*b1
-c     ------- point A ------ 
+!     ------- point A ------ 
             xa = rxu(ichain,nngrow)+a2*ca
             ya = ryu(ichain,nngrow)+b2*ca
             za = rzu(ichain,nngrow)+c2*ca
-c     ---- H-atoms -------
+!     ---- H-atoms -------
             if (lcrysl) then
                r = 0.0d0
                ven = 0.0d0
@@ -627,7 +627,7 @@ c     ---- H-atoms -------
                prob = dexp(-beta*ven)
                rn = random()
                if (rn.gt.prob) goto 200
-            endif
+            end if
             vmethyl = vmethyl + ven
             do i = 1,3
                a4 = ah*a3*dcos(r+onepi) + ah*a1*dsin(r+onepi)
@@ -637,20 +637,20 @@ c     ---- H-atoms -------
                ryu(ichain,negrow+i) = ya + b4
                rzu(ichain,negrow+i) = za + c4
                r = r + 120.0d0*onepi/180.0d0
-            enddo
+            end do
             
          else if (nngrow .eq. 2 .and. nunit(imolty) .eq. 8) then
-c     ------ ETHANE  -----
-c     ------ define the new type en0 ------
-c     use en0 for torsion type 19
+!     ------ ETHANE  -----
+!     ------ define the new type en0 ------
+!     use en0 for torsion type 19
             en0 = 716.77d0 
-c     ------ for ethane case ------
-c     -------H-atoms for the first CH3-group---
-c     -------first define vector C2C1 ------
+!     ------ for ethane case ------
+!     -------H-atoms for the first CH3-group---
+!     -------first define vector C2C1 ------
             x12 = rxu(ichain,1)-rxu(ichain,2)
             y12 = ryu(ichain,1)-ryu(ichain,2)
             z12 = rzu(ichain,1)-rzu(ichain,2)
-c     ------ generate a random vector ------
+!     ------ generate a random vector ------
  777        rx = 2.0d0*random() - 1.0d0
             ry = 2.0d0*random() - 1.0d0
             dr = rx*rx + ry*ry
@@ -660,7 +660,7 @@ c     ------ generate a random vector ------
             ry = ry*rz
             rz = 1 - 2.0d0*dr
 
-c     ------ the two vectors above form a plane identified by n1 ------
+!     ------ the two vectors above form a plane identified by n1 ------
             a1 = y12*rz - z12*ry
             b1 = -(x12*rz - rx*z12)
             c1 = x12*ry - rx*y12
@@ -668,19 +668,19 @@ c     ------ the two vectors above form a plane identified by n1 ------
             a1 = a1/dln1
             b1 = b1/dln1
             c1 = c1/dln1
-c     --------normalizing c2c1 vector -> n2 ----
+!     --------normalizing c2c1 vector -> n2 ----
             a2 = x12/cc
             b2 = y12/cc
             c2 = z12/cc
-c     -------cross product n1 x n2 calc.-> n3 ---
+!     -------cross product n1 x n2 calc.-> n3 ---
             a3 = b1*c2 - b2*c1
             b3 = -(a1*c2 - a2*c1)
             c3 = a1*b2 - a2*b1
-c     ------- point A ------ 
+!     ------- point A ------ 
             xa = rxu(ichain,1)+a2*ca
             ya = ryu(ichain,1)+b2*ca
             za = rzu(ichain,1)+c2*ca
-c     ------H-atoms for the first methyl group------
+!     ------H-atoms for the first methyl group------
             r = 0.0d0
             do i = 1,3
                a4 = ah*a3*dcos(r) + ah*a1*dsin(r)
@@ -690,9 +690,9 @@ c     ------H-atoms for the first methyl group------
                ryu(ichain,nngrow+i) = ya + b4
                rzu(ichain,nngrow+i) = za + c4
                r = r + 120.0d0*onepi/180.0d0
-            enddo
-c     ------ H-atoms for the second methyl group ------
-c     ------ point A' is opposite to point A ------ 
+            end do
+!     ------ H-atoms for the second methyl group ------
+!     ------ point A' is opposite to point A ------ 
             xa = rxu(ichain,2)-a2*ca
             ya = ryu(ichain,2)-b2*ca
             za = rzu(ichain,2)-c2*ca
@@ -705,9 +705,9 @@ c     ------ point A' is opposite to point A ------
                prob = dexp(-beta*ven)
                rn = random()
                if (rn.gt.prob) goto 100
-            endif
-c     rgr = r*180.0d0/onepi
-c      write(iou,*) 'final Ryckaert angle: ',rgr
+            end if
+!     rgr = r*180.0d0/onepi
+!      write(iou,*) 'final Ryckaert angle: ',rgr
             vmethyl = vmethyl + ven
 
             do i = 4,6
@@ -718,10 +718,10 @@ c      write(iou,*) 'final Ryckaert angle: ',rgr
                ryu(ichain,nngrow+i) = ya + b4
                rzu(ichain,nngrow+i) = za + c4
                r = r + 120.0d0*onepi/180.0d0
-            enddo
+            end do
      
-         endif
-      endif
+         end if
+      end if
       return
       end
 

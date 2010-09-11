@@ -1,7 +1,7 @@
       subroutine ipswsetup
-c
-c setup maginns interphase switch
-c
+!
+! setup maginns interphase switch
+!
       implicit none
       include 'control.inc'
       include 'coord.inc'
@@ -31,13 +31,13 @@ c
             tnw = tnw+nwell(i)*nunit(i)
             do j = 1, nunit(i)
                read(35,*) (awell(j,k,i), k = 1,nunit(i))
-            enddo
-         endif
-      enddo 
+            end do
+         end if
+      end do 
       if (nw.lt.tnw) then
          write(iou,*) 'increase nw in ipswpar to ', tnw
          call cleanup('')
-      endif
+      end if
       read(35,*)
       read(35,*) bwell
       read(35,*)
@@ -45,17 +45,17 @@ c
       if (lmipsw) then
          if ((.not.lstagea).and.(.not.lstageb).and.(.not.lstagec))
      &      call cleanup('one stage must be true')
-      endif
+      end if
       if (llwell.and.lstagea) call cleanup('ipsw well NOT for stage a')
       if (lstagea) then
          if (lstageb.or.lstagec) call cleanup('only one lstage must be true')
-      endif
+      end if
       if (lstageb) then
          if (lstagea.or.lstagec) call cleanup('only one lstage must be true')
-      endif
+      end if
       if (lstagec) then
          if (lstagea.or.lstageb) call cleanup('only one lstage must be true')
-      endif
+      end if
       read(35,*)
       read(35,*) etais, lambdais
       if ((lambdais.le.-1.0d-6).or.(lambdais.ge.1.000001))
@@ -72,70 +72,70 @@ c
          read(35,*) hmatc(7),hmatc(8),hmatc(9)
       elseif (.not.lsolid(ibox).and.(.not.lrect(ibox))) then
          read(35,*) lena, lenc
-      endif
+      end if
       if (lmipsw.and.lstageb) then
          if (lsolid(ibox).and.(.not.lrect(ibox))) then
             lhm = .false.
             do i = 1, 9
                hm(i) = (1.0d0-lambdais)*hmata(i)+lambdais*hmatc(i)
                if (dabs(hmat(ibox,i)-hm(i)).gt.1.0d-6) lhm = .true.
-            enddo
+            end do
             if (lhm) then
                write(iou,*) 'enter correct hmat'
                write(iou,*) hm(1),hm(2),hm(3)
                write(iou,*) hm(4),hm(5),hm(6)
                write(iou,*) hm(7),hm(8),hm(9)
                call cleanup('')
-            endif
+            end if
          elseif (.not.lsolid(ibox)) then
             lx = (1.0d0-lambdais)*lena+lambdais*lenc
             if (dabs(boxlx(1)-lx).gt.1.0d-6) then
                write(iou,*) 'input correct boxl', lx
                call cleanup('')
-            endif
-         endif
-      endif
+            end if
+         end if
+      end if
       if (lmipsw.and.lstagea) then
          if (lsolid(ibox).and.(.not.lrect(ibox))) then
             lhm = .false.
             do i = 1, 9
                if (dabs(hmat(ibox,i)-hmata(i)).gt.1.0d-6) lhm = .true.
-            enddo
+            end do
             if (lhm) then
                write(iou,*) 'enter correct hmat'
                write(iou,*) hmata(1),hmata(2),hmata(3)
                write(iou,*) hmata(4),hmata(5),hmata(6)
                write(iou,*) hmata(7),hmata(8),hmata(9)
                call cleanup('')
-            endif
-c	write(iou,*) boxlx(1),lena
+            end if
+!	write(iou,*) boxlx(1),lena
          elseif (.not.lsolid(ibox)) then
             if (dabs(boxlx(1)-lena).gt.1.0d-6) then
                write(iou,*) 'input correct boxl', lena
                call cleanup('')
-            endif
-         endif
-      endif
+            end if
+         end if
+      end if
       if (lmipsw.and.lstagec) then
          if (lsolid(ibox).and.(.not.lrect(ibox))) then
             lhm = .false.
             do i = 1, 9
                if (dabs(hmat(ibox,i)-hmatc(i)).gt.1.0d-6) lhm = .true.
-            enddo
+            end do
             if (lhm) then
                write(iou,*) 'enter correct hmat'
                write(iou,*) hmatc(1),hmatc(2),hmatc(3)
                write(iou,*) hmatc(4),hmatc(5),hmatc(6)
                write(iou,*) hmatc(7),hmatc(8),hmatc(9)
                call cleanup('')
-            endif
+            end if
          elseif (.not.lsolid(ibox)) then
             if (dabs(boxlx(1)-lenc).gt.1.0d-6) then
                write(iou,*) 'input correct boxl', lenc
                call cleanup('')
-            endif
-         endif
-      endif
+            end if
+         end if
+      end if
       dhmat(1,1) = hmatc(1)-hmata(1)
       dhmat(1,2) = hmatc(4)-hmata(4)
       dhmat(1,3) = hmatc(7)-hmata(7)
@@ -150,14 +150,14 @@ c	write(iou,*) boxlx(1),lena
       if (lmipsw.and.lstageb) then
          if (mod(iratipsw,iratp).ne.0) call cleanup('iratipsw must be integer
      &       multiple of iratp if lstageb is true')
-      endif
+      end if
       do i = 1, nmolty
          if (lwell(i)) then
             do j = 1, nwell(i)*nunit(i)
                read(35,*) sxwell(j,i),sywell(j,i),szwell(j,i)
-            enddo
-         endif
-      enddo
+            end do
+         end if
+      end do
       if (lmipsw) then
          write(iou,*) '*****************************************'
          write(iou,*) 'Some parameters used for interphase switch'
@@ -167,8 +167,8 @@ c	write(iou,*) boxlx(1),lena
                write(iou,*) i, lwell(i), nwell(i)
             else
                write(iou,*) i, lwell(i), 'not defined'
-            endif 
-         enddo
+            end if 
+         end do
          write(iou,*) 'lstagea,lstageb,lstagec', lstagea,lstageb,lstagec
          write(iou,*) 'etais, lambdais', etais,lambdais
          write(iou,*) '*****************************************'
@@ -178,9 +178,9 @@ c	write(iou,*) boxlx(1),lena
          lstagec = .false.
          do i = 1, nmolty
             lwell(i) = .false.
-         enddo
+         end do
          lambdais = 0.0d0
-      endif
+      end if
       acdvdl = 0.0d0
       acipsw = 0.0d0
 
@@ -194,9 +194,9 @@ c	write(iou,*) boxlx(1),lena
      &               sywell(j,i)*hmat(ibox,5)+szwell(j,i)*hmat(ibox,8)
                   rzwell(j,i) = sxwell(j,i)*hmat(ibox,3)+
      &               sywell(j,i)*hmat(ibox,6)+szwell(j,i)*hmat(ibox,9)
-               enddo
-            endif
-         enddo
+               end do
+            end if
+         end do
       else
          do i = 1, nmolty
             if (lwell(i)) then
@@ -204,10 +204,10 @@ c	write(iou,*) boxlx(1),lena
                   rxwell(j,i) = sxwell(j,i)*boxlx(ibox)
                   rywell(j,i) = sywell(j,i)*boxly(ibox)
                   rzwell(j,i) = szwell(j,i)*boxlz(ibox)
-               enddo
-            endif
-         enddo
-      endif
+               end do
+            end if
+         end do
+      end if
 
       return
       end

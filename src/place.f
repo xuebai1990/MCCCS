@@ -1,27 +1,27 @@
       subroutine place(lnew,lterm,i,imolty,ibox,index,wplace)
 
-c place
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! place
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
 
@@ -57,14 +57,14 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
      &     ,niplace(numax),vbend(nchmax),vtorsion(nchmax),phi(max)
      &     ,list(max),glist(max)
 
-c     ***********************************************************
-c     **  Places hydrogens after the growth of the backbone of **
-c     **  a molecule for linear, branched or cylic molecules.  **
-c     **           -- Uses CDCBMC to grow them --              **
-c     ***********************************************************
+!     ***********************************************************
+!     **  Places hydrogens after the growth of the backbone of **
+!     **  a molecule for linear, branched or cylic molecules.  **
+!     **           -- Uses CDCBMC to grow them --              **
+!     ***********************************************************
 
 
-c      write(iou,*) 'START PLACE'
+!      write(iou,*) 'START PLACE'
 
 
       nchvib = nchbna(imolty)
@@ -78,14 +78,14 @@ c      write(iou,*) 'START PLACE'
 
       do j = 1, nunit(imolty)
          niplace(j) = 0
-      enddo
+      end do
 
       do iw = 1, nplace
          do count = 1, pnum(iw)
             iu = iplace(iw,count)
             niplace(iu) = iw     
-         enddo
-      enddo
+         end do
+      end do
       
       do iw = 1, nplace
          vvibtr = 0.0d0
@@ -98,9 +98,9 @@ c      write(iou,*) 'START PLACE'
             if (invib(imolty,iu).gt.1) then
                write(iou,*) 'iu,invib',iu,invib(imolty,iu)
                call cleanup('invib can no be larger than one for hydrogen')
-            endif
+            end if
 
-c     --- determine bond lengths
+!     --- determine bond lengths
             iv = 1
             
             ju = ijvib(imolty,iu,iv)
@@ -108,7 +108,7 @@ c     --- determine bond lengths
             if (iufrom.ne.ju) then
                write(iou,*) 'iu,ju,iufrom',iu,ju,iufrom
                call cleanup('ju not equal to iufrom')
-            endif
+            end if
 
             jtvib = itvib(imolty,iu,iv)
             
@@ -116,7 +116,7 @@ c     --- determine bond lengths
             kforce = brvibk(jtvib)
 
             if (kforce.gt.0.001) then
-c     --- we will use flexible bond lengths
+!     --- we will use flexible bond lengths
                bsum_try = 0.0d0
                mincb = brvibmin(jtvib)**3
                delcb = brvibmax(jtvib)**3 - mincb
@@ -131,13 +131,13 @@ c     --- we will use flexible bond lengths
                      vvib = tabulated_vib
                    else
                      vvib = kforce * (r(1) - equil)**2
-                  endif
+                  end if
                   bfactor(1) = dexp(-beta*vvib)
                   bsum_try = bsum_try + bfactor(1)
                   start = 2
                else
                   start = 1
-               endif
+               end if
                
                do ivib = start, nchvib
                   r(ivib) = (mincb + random()*delcb)**third
@@ -146,15 +146,15 @@ c     --- we will use flexible bond lengths
                      vvib = tabulated_vib
                   else
                      vvib = kforce * ( r(ivib) - equil )**2
-                  endif
+                  end if
                   bfactor(ivib) = dexp(-beta*vvib)
                   bsum_try = bsum_try + bfactor(ivib)
-               enddo
+               end do
                
                wei_vib = wei_vib * bsum_try
                
                if (lnew) then
-c     --- select one of the trial sites via bias
+!     --- select one of the trial sites via bias
                   rbf = random()*bsum_try
                   bs = 0.0d0
                   do ivib = 1, nchvib
@@ -163,42 +163,42 @@ c     --- select one of the trial sites via bias
                         length = r(ivib)
                         vvib = dlog(bfactor(ivib))/(-beta)
                         goto 5
-                     endif
-                  enddo
+                     end if
+                  end do
  5                continue
                else
-c     --- select old conformation
+!     --- select old conformation
                   length = r(1)
                   vvib = dlog(bfactor(1))/(-beta)
-               endif
+               end if
                vvibtr = vvibtr + vvib
 
             else
                
-c     --- our bond lengths are fixed
+!     --- our bond lengths are fixed
                length = equil
                
-            endif
+            end if
             
             distij(iu,ju) = length
             distij(ju,iu) = length
-         enddo
+         end do
          if (lnew) then
             vnewt = vnewt + vvibtr
             vnewbvib  = vnewbvib  + vvibtr
          else
             voldt = voldt + vvibtr
             voldbvib = voldbvib + vvibtr
-         endif
+         end if
 
-      enddo
+      end do
 
       do iw = 1, nplace
 
          iufrom = pfrom(iw)
          iuprev = pprev(iw)
 
-c     --- first, set up cone
+!     --- first, set up cone
          dist(2) = distij(iuprev,iufrom)
 
          rx = xvec(iuprev,iufrom) / dist(2) 
@@ -207,28 +207,28 @@ c     --- first, set up cone
          
          call cone(1,rx,ry,rz,dum,dum,dum,dum,dum)
                
-c     --- now that we set up cone, we must determine other beads grown
-c     --- from iufrom
+!     --- now that we set up cone, we must determine other beads grown
+!     --- from iufrom
          counta = 2
 
          do iv = 1, invib(imolty,iufrom)
             ku = ijvib(imolty,iufrom,iv)
 
-c     --- make sure that ku is not equal to a site we are growing or iuprev
+!     --- make sure that ku is not equal to a site we are growing or iuprev
             if (ku.eq.iuprev) goto 95
             do count = 1, pnum(iw)
                iu = iplace(iw,count)
                if (iu.eq.ku) goto 95
-            enddo
+            end do
             
-c     --- we must determine the angle associated with this one
+!     --- we must determine the angle associated with this one
             counta = counta + 1
             dist(counta) = distij(iufrom,ku)
             ux = xvec(iufrom,ku) / dist(counta)
             uy = yvec(iufrom,ku) / dist(counta)
             uz = zvec(iufrom,ku) / dist(counta)
            
-c     --- determine angle with iuprev
+!     --- determine angle with iuprev
             thetac = -(ux*rx + uy*ry + uz*rz)
 
             bendang(ku,iuprev) = dacos(thetac)
@@ -241,7 +241,7 @@ c     --- determine angle with iuprev
             list(counta) = ku
 
  95         continue
-         enddo
+         end do
 
        
          do ip = 1, ichoi
@@ -265,58 +265,58 @@ c     --- determine angle with iuprev
                      if (ju.ne.ijben2(imolty,iu,ib)) then
                         write(iou,*) 'ju,ijben2',ju,ijben2(imolty,iu,ib)
                         call cleanup('ju not equal to ijben2 in place')
-                     endif
+                     end if
 
                      type = itben(imolty,iu,ib)
                      equil = brben(type)
                      kforce = brbenk(type)
                
-c     --- initialize bsum_try
+!     --- initialize bsum_try
                      bsum_try = 0
                   
                      if (.not.lnew.and.ip.eq.1) then
-c     --- first ibend is the old conformation
-c     --- compute vector from iufrom to iugrow
+!     --- first ibend is the old conformation
+!     --- compute vector from iufrom to iugrow
                         ux = rxu(i,iu) - rxu(i,ju)
                         uy = ryu(i,iu) - ryu(i,ju)
                         uz = rzu(i,iu) - rzu(i,ju)
                         dist(1) = dsqrt(ux**2 + uy**2 + uz**2)
                         
-c     --- dot product divided by lengths gives cos(angle)
+!     --- dot product divided by lengths gives cos(angle)
                         thetac = -( ux*rx + uy*ry 
      &                       + uz*rz ) 
      &                       / (dist(1))
                         angle = dacos(thetac)
                         
-c     --- compute the energy of this angle
+!     --- compute the energy of this angle
                         vangle = kforce * (angle - equil)**2
                         ang_trial(1) = angle
                         bfactor(1) = dexp( -beta*vangle )
                         bsum_try = bsum_try + bfactor(1)
                         
-c     --- skip first ibend in next loop
+!     --- skip first ibend in next loop
                         start = 2
                         
                      else
-c     --- new conformation start at 1
+!     --- new conformation start at 1
                         start = 1
-                     endif
+                     end if
                      
-c     --- compute trial angles and energies
+!     --- compute trial angles and energies
                      do ibend = start,nchben_a
-c     --- choose the angle uniformly on sin(theta)
+!     --- choose the angle uniformly on sin(theta)
                         rsint = 2.0d0*random() - 1.0d0
                         angle = dacos(rsint)
                         ang_trial(ibend) = angle
                         
-c     --- calculate the bond angle energy
+!     --- calculate the bond angle energy
                         vangle = kforce * (angle - equil)**2
                         bfactor(ibend) = dexp(-beta*vangle)
                         bsum_try = bsum_try + bfactor(ibend)
-                     enddo
+                     end do
                   
                      if ( lnew.or.ip.ne.1 ) then
-c     --- select one of the trial sites via bias
+!     --- select one of the trial sites via bias
                         rbf = random()*bsum_try
                         bs = 0.0d0
                         do ibend = 1,nchben_a
@@ -325,34 +325,34 @@ c     --- select one of the trial sites via bias
                               angle = ang_trial(ibend)
                               vangle = dlog(bfactor(ibend))/(-beta)
                               goto 10
-                           endif
-                        enddo
+                           end if
+                        end do
  10                     continue
                      else
-c     --- select the old conformation
+!     --- select the old conformation
                         angle = ang_trial(1)
                         vangle = dlog(bfactor(1))/(-beta)
-                     endif
+                     end if
                   
-c     --- propagate the rosenbluth weight
+!     --- propagate the rosenbluth weight
                      wei_bend = wei_bend * bsum_try/dble(nchben_a)
                      
                      bendang(iu,ku) = angle
 
                      vbbtr = vbbtr + vangle
-                  endif
+                  end if
                
-               enddo
+               end do
 
-            enddo
+            end do
             
-c     --- now we must determine the second posible position for our sites
+!     --- now we must determine the second posible position for our sites
                         
             do count = 1, pnum(iw)
 
                iu = iplace(iw,count)
                
-c     --- initialize bsum_try
+!     --- initialize bsum_try
                bsum_try = 0.0d0
 
                if ( .not. lnew .and.ip.eq.1) then
@@ -393,9 +393,9 @@ c     --- initialize bsum_try
                            vphi = vphi + brbenk(type)
      &                          * (angle - brben(type))**2
 
-                        endif
-                     enddo
-                  enddo
+                        end if
+                     end do
+                  end do
                   
                   ang_trial(1) = phitwo
                   bfactor(1) = dexp( -beta * vphi )
@@ -405,7 +405,7 @@ c     --- initialize bsum_try
                else
                   start = 1
                   thetatwo = bendang(iu,iuprev)
-               endif
+               end if
                   
                do ibend = start, nchben_b
                   phitwo = random() * twopi
@@ -424,14 +424,14 @@ c     --- initialize bsum_try
                            type = itben(imolty,iu,ib)
                            vphi = vphi + brbenk(type) 
      &                          * (angle - brben(type))**2
-                        endif
-                     enddo
-                  enddo
-c           --- store the boltzmann factors and phi
+                        end if
+                     end do
+                  end do
+!           --- store the boltzmann factors and phi
                   bfactor(ibend) = dexp(-beta*vphi)
                   ang_trial(ibend) = phitwo
                   bsum_try = bsum_try + bfactor(ibend)
-               enddo
+               end do
 
                if ( lnew.or.ip.ne.1 ) then
                   rbf = random() * bsum_try
@@ -442,12 +442,12 @@ c           --- store the boltzmann factors and phi
                         phitwo = ang_trial(ibend)
                         vphi = dlog( bfactor(ibend)) / (-beta)
                         goto 15
-                     endif
-                  enddo
+                     end if
+                  end do
                else
                   phitwo = ang_trial(1)
                   vphi = dlog( bfactor(1) )/ (-beta)
-               endif
+               end if
 
  15            continue
 
@@ -458,7 +458,7 @@ c           --- store the boltzmann factors and phi
                phi(counta+count) = phitwo
                list(counta+count) = iu
 
-c     --- determine vectors associated with this
+!     --- determine vectors associated with this
                
                call cone(2,dum,dum,dum,thetatwo,phitwo,ux,uy,uz)
                
@@ -470,7 +470,7 @@ c     --- determine vectors associated with this
                yvec(iu,iufrom) = -uy
                zvec(iu,iufrom) = -uz
                         
-c     --- now to calculate all torsions
+!     --- now to calculate all torsions
 
                do it = 1, intor(imolty,iu)
 
@@ -484,15 +484,15 @@ c     --- now to calculate all torsions
                         write(iou,*) 'jut4,jut3,jut2,iu',
      &                       jut4,jut3,jut2,iu
                         call cleanup('trouble jut4 in place')
-                     endif
+                     end if
                      
                      jttor = ittor(imolty,iu,it)
 
                      call calctor(iu,jut2,jut3,jut4,jttor,vctor)
                      vdha = vdha + vctor
-                  endif
-               enddo
-            enddo
+                  end if
+               end do
+            end do
                     
             do count = 1, pnum(iw)
                iu = iplace(iw,count)
@@ -504,38 +504,38 @@ c     --- now to calculate all torsions
                   rxp(count,ip) = xvec(iufrom,iu) + rxu(i,iufrom)
                   ryp(count,ip) = yvec(iufrom,iu) + ryu(i,iufrom)
                   rzp(count,ip) = zvec(iufrom,iu) + rzu(i,iufrom)
-               endif
+               end if
                glist(count) = iu
-            enddo
+            end do
             vtorsion(ip) = vdha
             vbend(ip) = vbbtr
             bsum_tor(ip) = dexp(-beta * vdha) * wei_bend
-         enddo
+         end do
 
-c     --- now we calculate the nonbonded interactions
+!     --- now we calculate the nonbonded interactions
          call boltz( lnew, .false., ovrlap,i,i,imolty,ibox,ichoi
      &        ,iufrom,pnum(iw),glist)
 
          if (ovrlap) then
             lterm = .true.
             return
-         endif
+         end if
 
          bsum = 0.0d0
 
          do ip = 1, ichoi
             if (.not. lovr(ip)) then
                bsum = bsum + bfac(ip) * bsum_tor(ip)
-            endif
-         enddo
+            end if
+         end do
 
-c     --- update new rosenbluth weight + vibrations
+!     --- update new rosenbluth weight + vibrations
          wplace = wplace * bsum * wei_vib
          
          if (wplace .lt. softlog) then
             lterm = .true.
             return
-         endif
+         end if
          
          if (lnew) then
             rbf = bsum * random()
@@ -547,13 +547,13 @@ c     --- update new rosenbluth weight + vibrations
                   if (rbf .lt. bs) then
                      iwalk = ip
                      goto 20
-                  endif
-               endif
-            enddo
+                  end if
+               end if
+            end do
 
             call cleanup('BIG TIME SCREWUP IN PLACE')
 
-         endif
+         end if
  20      continue
 
          if (lnew) then
@@ -578,7 +578,7 @@ c     --- update new rosenbluth weight + vibrations
             voldelect = voldelect + vtrelect(1)
 
             voldewald = voldewald + vtrewald(1)
-         endif
+         end if
 
          do count = 1, pnum(iw)
             iu = iplace(iw,count)
@@ -587,7 +587,7 @@ c     --- update new rosenbluth weight + vibrations
                rxnew(iu) = rxp(count,iwalk)
                rynew(iu) = ryp(count,iwalk)
                rznew(iu) = rzp(count,iwalk)
-            endif
+            end if
 
             lexist(iu) = .true.
 
@@ -599,18 +599,18 @@ c     --- update new rosenbluth weight + vibrations
                xvec(iu,iufrom) = rxu(i,iufrom) - rxu(i,iu)
                yvec(iu,iufrom) = ryu(i,iufrom) - ryu(i,iu)
                zvec(iu,iufrom) = rzu(i,iufrom) - rzu(i,iu)
-            endif
+            end if
             distij(iu,iufrom) = dsqrt( xvec(iu,iufrom)**2
-     +           + yvec(iu,iufrom)**2 + zvec(iu,iufrom)**2 )
+     &           + yvec(iu,iufrom)**2 + zvec(iu,iufrom)**2 )
 
             xvec(iufrom,iu) = - xvec(iu,iufrom)
             yvec(iufrom,iu) = - yvec(iu,iufrom)
             zvec(iufrom,iu) = - zvec(iu,iufrom)
             distij(iufrom,iu) = distij(iu,iufrom)
-         enddo
-      enddo
+         end do
+      end do
 
-c      write(iou,*) 'END PLACE'
+!      write(iou,*) 'END PLACE'
       
       return
       end

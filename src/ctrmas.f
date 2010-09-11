@@ -1,35 +1,35 @@
        subroutine ctrmas ( lall, ibox, j, mtype)
 
-c ctrmas
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! ctrmas
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-c     ************************************************************
-c     ** finds the center of mass of a chain and returns it to  **
-c     ** the periodic box if it has left the box.  lall controls**
-c     ** whether this is done for just one chain or for the     **
-c     ** entire box. ibox is the box of the particle and j is   **
-c     ** the particle number.                                   **
-c     ************************************************************
+!     ************************************************************
+!     ** finds the center of mass of a chain and returns it to  **
+!     ** the periodic box if it has left the box.  lall controls**
+!     ** whether this is done for just one chain or for the     **
+!     ** entire box. ibox is the box of the particle and j is   **
+!     ** the particle number.                                   **
+!     ************************************************************
 
       implicit none
 
@@ -56,7 +56,7 @@ c     ************************************************************
       else
          stt = j
          edd = j
-      endif
+      end if
 
       if ((mtype .eq. 1) .or.(mtype .eq. 2).or.(mtype .eq. 5)) then 
 
@@ -68,21 +68,21 @@ c     ************************************************************
             iwarn = 2
          else
             iwarn = 1
-         endif
+         end if
       elseif ( mtype .eq. 6 ) then
          iwarn = 0
       else
          iwarn = 2
-      endif
+      end if
 
       do i = stt, edd
          imolty = moltyp(i)
          iunit = nunit(imolty)
          iadjust = 1            
 
-c ----- Check if the chain i is in the correct box
+! ----- Check if the chain i is in the correct box
          if (nboxi(i) .eq. ibox) then
-c ----- Determine new center of mass for chain i 
+! ----- Determine new center of mass for chain i 
             lintbx = .false.
  25         nxcm = 0.0d0
             nycm = 0.0d0
@@ -92,7 +92,7 @@ c ----- Determine new center of mass for chain i
                nxcm = nxcm + rxu(i,ii) * mass(itype)
                nycm = nycm + ryu(i,ii) * mass(itype)
                nzcm = nzcm + rzu(i,ii) * mass(itype)
-            enddo
+            end do
             nxcm = nxcm / masst(imolty)
             nycm = nycm / masst(imolty)
             nzcm = nzcm / masst(imolty)
@@ -119,21 +119,21 @@ c ----- Determine new center of mass for chain i
                elseif( sx .gt. 1d0 ) then
                   sx = sx - 1.0d0
                   ldx = .true.
-               endif
+               end if
                if ( sy .lt. -1.0d-10 ) then
                   sy = sy + 1.0d0
                   ldy = .true.
                elseif( sy .gt. 1d0 ) then
                   sy = sy - 1.0d0
                   ldy = .true.
-               endif
+               end if
                if ( sz .lt. -1.0d-10 ) then
                   sz = sz + 1.0d0
                   ldz = .true.
                elseif( sz .gt. 1d0 ) then
                   sz = sz - 1.0d0
                   ldz = .true.
-               endif
+               end if
 
                sxcm(i) = sx
                sycm(i) = sy
@@ -141,7 +141,7 @@ c ----- Determine new center of mass for chain i
                if ( ldx .or. ldy .or. ldz ) then
                   if ( mtype .eq. 5 ) then
                      write(iou,*) 'sx, sy, sz:',sx,sy,sz
-                  endif
+                  end if
                   nxcm2 = sx*hmat(ibox,1)+sy*hmat(ibox,4)
      &                 +sz*hmat(ibox,7)
                   nycm2 = sx*hmat(ibox,2)+sy*hmat(ibox,5)
@@ -155,11 +155,11 @@ c ----- Determine new center of mass for chain i
                      rxu(i,ii) = rxu(i,ii) + dx
                      ryu(i,ii) = ryu(i,ii) + dy
                      rzu(i,ii) = rzu(i,ii) + dz
-                  enddo
+                  end do
                   nxcm = nxcm2
                   nycm = nycm2
                   nzcm = nzcm2
-               endif               
+               end if               
 
             else
 
@@ -170,14 +170,14 @@ c ----- Determine new center of mass for chain i
                   elseif ( nxcm .lt. -1.0d-10 ) then
                      inboxx = idint(nxcm/bx) - 1
                      ldx = .true.
-                  endif
+                  end if
                   if ( nycm .gt. by ) then
                      inboxy = idint(nycm/by)
                      ldy = .true.
                   elseif( nycm .lt. -1.0d-10 )then
                      inboxy = idint(nycm/by) - 1
                      ldy = .true.
-                  endif
+                  end if
                   if (lpbcz) then
                      if ( nzcm .gt. bz ) then
                         inboxz = idint(nzcm/bz)
@@ -185,17 +185,17 @@ c ----- Determine new center of mass for chain i
                      elseif( nzcm .lt. -1.0d-10 ) then
                         inboxz = idint(nzcm/bz) - 1
                         ldz = .true.
-                     endif
-                  endif
+                     end if
+                  end if
                   if ( ldx ) then
                      dx = -(dble(inboxx)*bz)
-                  endif
+                  end if
                   if ( ldy ) then
                      dy = -(dble(inboxy)*by)
-                  endif
+                  end if
                   if ( ldz ) then
                      dz = -(dble(inboxz)*bz)
-                  endif
+                  end if
                else
                   if (nxcm .lt. -1.0d-10) then
                      dx = bx
@@ -203,7 +203,7 @@ c ----- Determine new center of mass for chain i
                   elseif (nxcm .gt. bx) then
                      dx = -bx
                      ldx = .true.
-                  endif
+                  end if
                   
                   if (nycm .lt. -1.0d-10) then
                      dy = by
@@ -211,7 +211,7 @@ c ----- Determine new center of mass for chain i
                   elseif (nycm .gt. by) then
                      dy = -by
                      ldy = .true.
-                  endif
+                  end if
                   
                   if(lpbcz) then
                      if (nzcm .lt. -1.0d-10) then
@@ -220,29 +220,29 @@ c ----- Determine new center of mass for chain i
                      elseif (nzcm .gt. bz) then
                         dz = -bz
                         ldz = .true.
-                     endif
-                  endif
-               endif
+                     end if
+                  end if
+               end if
                
                if (ldx) then
                   do ii = 1, iunit
                      rxu(i,ii) = rxu(i,ii) + dx
-                  enddo
-               endif
+                  end do
+               end if
                
                if (ldy) then
                   do ii = 1, iunit
                      ryu(i,ii) = ryu(i,ii) + dy
-                  enddo
-               endif
+                  end do
+               end if
                
                if (ldz) then
                   do ii = 1, iunit
                      rzu(i,ii) = rzu(i,ii) + dz
-                  enddo
-               endif
+                  end do
+               end if
                
-            endif
+            end if
 
             if( ldx .or. ldy .or. ldz ) then
                if ( (iadjust .ge. iwarn) ) then
@@ -261,12 +261,12 @@ c ----- Determine new center of mass for chain i
                   write(iou,*) 'nxcm,nycm,nzcm',nxcm,nycm,nzcm
                   write(iou,*) 'dx,dy,dz',dx,dy,dz
                   if (iwarn .ne. 0) call cleanup('')
-               endif
+               end if
                iadjust = iadjust + 1
                goto 25
-            endif
+            end if
 
-c     assign the new center of mass
+!     assign the new center of mass
             xcm(i) = nxcm
             ycm(i) = nycm
             zcm(i) = nzcm
@@ -277,21 +277,21 @@ c     assign the new center of mass
                   ryuij = ryu(i,ii)-nycm
                   rzuij = rzu(i,ii)-nzcm
                   
-c     --- minimum image the ctrmas pair separations ---
+!     --- minimum image the ctrmas pair separations ---
                   if ( lpbc ) call mimage ( rxuij,ryuij,rzuij,ibox )
                   
                   rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
                   
                   if ( rijsq .gt. dmaxsq ) dmaxsq = rijsq
-               enddo                  
+               end do                  
                rcmu(i) = dsqrt(dmaxsq)+ 1.0d-10
-c               write(iou,*) 'rcmu(i)',rcmu(i)
-            endif
+!               write(iou,*) 'rcmu(i)',rcmu(i)
+            end if
                   
          else
             if (.not. lall) write(iou,*)'prob with box in ctrmas'
-         endif
-      enddo
+         end if
+      end do
 
       return
       end

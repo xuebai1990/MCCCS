@@ -1,31 +1,31 @@
       function coru(imolty,jmolty,rho,ibox)
 
-c coru
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! coru
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-c **********************************
-c *** tail-corrections in energy ***
-c **********************************
+! **********************************
+! *** tail-corrections in energy ***
+! **********************************
 
       implicit none
       include 'control.inc'
@@ -54,7 +54,7 @@ c **********************************
             elseif (lmmff) then
                ntij = (ntii+ntjj)/2
                coru = coru + rho * epsimmff(ntij) * coru_cons(ntij) *
-     +              sigimmff(ntij)**3.0d0*twopi
+     &              sigimmff(ntij)**3.0d0*twopi
             elseif (lninesix) then
                ntij = (ntii-1)*nxatom + ntjj
                coru = coru + 8.0d0*onepi*rho*epsnx(ntij)*
@@ -78,7 +78,7 @@ c **********************************
                else
                   sigma2 = sig2ij(ntij)
                   epsilon2 = epsij(ntij)
-               endif
+               end if
                coru = coru
      &          + 2.0d0 * onepi * epsilon2 * sigma2 ** (1.50d0) * rho *
      &        (  (( (2.0d0**(4.0d0*n1/n0))/(2.0d0*n1-3.0d0))
@@ -102,14 +102,14 @@ c **********************************
                else
                   sigma2 = sig2ij(ntij)
                   epsilon2 = epsij(ntij)
-               endif
+               end if
                coru = coru + 
-     +              8.0d0 * onepi * epsilon2 * 
-     +              sigma2**(1.5d0) *rho * 
-     +              (rci3 * rci3 * rci3 / 9.0d0 - rci3 / 3.0d0)
-            endif
-         enddo
-      enddo
+     &              8.0d0 * onepi * epsilon2 * 
+     &              sigma2**(1.5d0) *rho * 
+     &              (rci3 * rci3 * rci3 / 9.0d0 - rci3 / 3.0d0)
+            end if
+         end do
+      end do
       return
       end
 

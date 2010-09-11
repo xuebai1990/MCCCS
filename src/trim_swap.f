@@ -1,36 +1,36 @@
       subroutine trim_swap(bsswap,bnswap,bnswap_in,bnswap_out,cnt_wf1,
-     &     cnt_wf2,cnt_wra1,cnt_wra2,qelect)
+     &     cnt_wf2,cnt_wra1,cnt_wra2)
       
-c swap
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! swap
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-c    ********************************************************************
-c    ** removes a molecule from one box and inserts it into the other  **
-c    ** using CBMC insertion techniques.  Works for linear or branched **
-c    ** molecules and for DC-CBMC and Explicit atom                    **
-c    ** Rewritten from old swap and swapbr subroutines by M.G. Martin  **
-c    ** 9-18-97                                                        ** 
-c    ********************************************************************
+!    ********************************************************************
+!    ** removes a molecule from one box and inserts it into the other  **
+!    ** using CBMC insertion techniques.  Works for linear or branched **
+!    ** molecules and for DC-CBMC and Explicit atom                    **
+!    ** Rewritten from old swap and swapbr subroutines by M.G. Martin  **
+!    ** 9-18-97                                                        ** 
+!    ********************************************************************
  
       implicit none
       
@@ -79,7 +79,7 @@ c    ********************************************************************
       real(8)::rxuold,ryuold,rzuold
       dimension rxuold(numax),ryuold(numax),rzuold(numax)
       real(8)::bsswap,bnswap,bnswap_in,bnswap_out
-      real(8)::random,rmol,qelect,rbf,bsum
+      real(8)::random,rmol,rbf,bsum
       real(8)::waddnew,waddold
 
       real(8)::total_NBE,vintran,velectn,vewaldn,vtgn
@@ -96,7 +96,6 @@ c    ********************************************************************
       dimension bsswap(ntmax,npabmax,nbxmax*2),
      &     bnswap(ntmax,npabmax,nbxmax*2),bnswap_in(ntmax,2),
      &     bnswap_out(ntmax,2)
-      dimension qelect(nntype)
       real(8)::vrecipn,vrecipo,vdum,whins,whrem
       real(8)::rxuh,ryuh,rzuh,delenh,vtrhext,vtrhintra
      &     ,vtrhinter,vtrhelect,vtrhewald,vtrhtg,bfach
@@ -107,12 +106,12 @@ c    ********************************************************************
      
       dimension lovrh(nchmax)
       dimension rxuh(numax,nchmax),ryuh(numax,nchmax)
-     +     ,rzuh(numax,nchmax)
+     &     ,rzuh(numax,nchmax)
 
-C --------------------------------------------------------------------
+! --------------------------------------------------------------------
 
-c      write(iou,*) 'START TRIM_SWAP'
-c      write(11,*) '1:',neigh_cnt(18)
+!      write(iou,*) 'START TRIM_SWAP'
+!      write(11,*) '1:',neigh_cnt(18)
 
       lempty = .false.
       lfixnow = .false.
@@ -120,7 +119,7 @@ c      write(11,*) '1:',neigh_cnt(18)
       linsk_in = .false.
       
    
-c --- select a molecule typ with probabilities given in pmswmt
+! --- select a molecule typ with probabilities given in pmswmt
       rmol = random()
       ldone = .false.
       do imol = 1, nmolty
@@ -128,22 +127,22 @@ c --- select a molecule typ with probabilities given in pmswmt
             if ( .not. ldone ) then
                imolty = imol
                ldone = .true.
-            endif
-         endif
-      enddo
+            end if
+         end if
+      end do
          
-c ---    select a box given in pmswatyp
+! ---    select a box given in pmswatyp
       if ( nswapb(imolty) .gt. 1 ) then
          rpair = random()
          do 96 ipair = 1, nswapb(imolty)
             if ( rpair .lt. pmswapb(imolty,ipair) ) then
                ipairb = ipair
                goto 97
-            endif
+            end if
  96      continue
       else
          ipairb = 1
-      endif
+      end if
 
  97   if (random().lt.0.5d0) then
          boxins=box1(imolty,ipairb)
@@ -151,17 +150,17 @@ c ---    select a box given in pmswatyp
       else
          boxins=box2(imolty,ipairb)
          boxrem=box1(imolty,ipairb)
-      endif
+      end if
       if ( boxins .eq. boxrem ) then
          lswapinter = .false.
       else
          lswapinter = .true.
-      endif
-c      write(iou,*) 'boxins:',boxins,'boxrem:',boxrem
+      end if
+!      write(iou,*) 'boxins:',boxins,'boxrem:',boxrem
       if ( .not. (lgibbs .or. lgrand) .and. lswapinter ) 
      &     call cleanup('no interbox swap if not gibbs/grand ensemble!')
          
-c *** select a chain in BOXREM at random ***
+! *** select a chain in BOXREM at random ***
 
       if ( ncmt(boxrem,imolty) .eq. 0 ) then
          lempty = .true.
@@ -169,8 +168,8 @@ c *** select a chain in BOXREM at random ***
       elseif ( lswapinter .or. lavbmc1(imolty) .and. .not.  
      &        (lavbmc2(imolty) .or. lavbmc3(imolty)) ) then
 
-c *** for the advanced AVBMC algorithm, this particle will be selected in
-c *** sub-regions defined by Vin
+! *** for the advanced AVBMC algorithm, this particle will be selected in
+! *** sub-regions defined by Vin
 
          pointp = idint( dble(ncmt(boxrem,imolty))*random() ) + 1
          irem = parbox(pointp,boxrem,imolty)
@@ -178,58 +177,58 @@ c *** sub-regions defined by Vin
      &       write(iou,*) 'screwup swap, irem:',irem,moltyp(irem),imolty
          ibox = nboxi(irem)
          if ( ibox .ne. boxrem ) call cleanup('problem in swap')
-      endif
+      end if
 
-c$$$      write(iou,*) 'particle ',irem,' is being removed, imolty is:',
-c$$$     &     imolty,' and the box is:',boxrem
+!$$$      write(iou,*) 'particle ',irem,' is being removed, imolty is:',
+!$$$     &     imolty,' and the box is:',boxrem
 
 
-c ===>  for both gibbs and grand-canonical we have:
-c --- insert a chain in box: boxins 
-c --- remove one in box: boxrem
-c      write(iou,*) 'boxrem',boxrem,' imolty',imolty,' lempty',lempty
-c     bnswap(imolty,X) decoder X = 1 is # attempts into box 1
-c      X = 2 is # attempts into box 2 X=3 is success into box 1
-c      X = 4 is success into box 2
-c     bsswap is the same thing but keeps track of successful growths
+! ===>  for both gibbs and grand-canonical we have:
+! --- insert a chain in box: boxins 
+! --- remove one in box: boxrem
+!      write(iou,*) 'boxrem',boxrem,' imolty',imolty,' lempty',lempty
+!     bnswap(imolty,X) decoder X = 1 is # attempts into box 1
+!      X = 2 is # attempts into box 2 X=3 is success into box 1
+!      X = 4 is success into box 2
+!     bsswap is the same thing but keeps track of successful growths
 
       if (.not. lempty) bnswap(imolty,ipairb,boxins) 
      &     = bnswap(imolty,ipairb,boxins) + 1.0d0
       bsswap(imolty,ipairb,boxins) = bsswap(imolty,ipairb,boxins)+1.0d0
       
-c     *** store number of units in iunit ***
+!     *** store number of units in iunit ***
       iunit = nunit(imolty)
       igrow = nugrow(imolty)
-c     *** give i a phony number ***
+!     *** give i a phony number ***
       if ( lswapinter ) then
          iins = nchain + 1
          moltyp(iins) = imolty
-c     give charges to phony number 
+!     give charges to phony number 
          if ( lempty ) then
             do icbu = 1, iunit
                qqu(iins,icbu) = qelect(ntype(imolty,icbu))
-            enddo
+            end do
          else
             do icbu = 1, iunit
                qqu(iins,icbu) = qqu(irem,icbu)
-            enddo
-         endif
+            end do
+         end if
       elseif ( lavbmc2(imolty) .or. lavbmc3(imolty) ) then
          iins = 0
       else
          iins = irem
-      endif
+      end if
 
-c *** select a position of the first/starting unit at RANDOM ***
-c *** and calculate the boltzmann weight                     ***
-c *** for the chain to be INSERTED                           ***
+! *** select a position of the first/starting unit at RANDOM ***
+! *** and calculate the boltzmann weight                     ***
+! *** for the chain to be INSERTED                           ***
 
 
       if (lrigid(imolty)) then
          beg = riutry(imolty,1)
       else
          beg = 1
-      endif
+      end if
 
       wbias_ins = 1.0d0
       wbias_rem = 1.0d0
@@ -248,7 +247,7 @@ c *** for the chain to be INSERTED                           ***
      &                 +sz*hmat(ibox,8)
                   rzp(1,icbu) = sx*hmat(ibox,3)+sy*hmat(ibox,6)
      &                 +sz*hmat(ibox,9)
-            enddo
+            end do
          else
             do icbu = 1,ichoi
                rxp(1,icbu) = boxlx(boxins) * random()
@@ -260,42 +259,42 @@ c *** for the chain to be INSERTED                           ***
                      rzp(1,icbu) = 20*random()-10
                   else
                      rzp(1,icbu) = rzu(irem,1)
-                  endif
+                  end if
                else
                   rzp(1,icbu) = 0.0d0
-               endif
-            enddo
-      endif
+               end if
+            end do
+      end if
 
 
-c     *** select starting unit ***
-c     --- always using bead 1 as the starting unit
+!     *** select starting unit ***
+!     --- always using bead 1 as the starting unit
       iutry = beg
       lnew = .true.
       glist(1) = beg
 
-c     --  insert the first atom
+!     --  insert the first atom
 
       call boltz(lnew,.true.,ovrlap,iins,iins,imolty,boxins,
      &     ichoi,idum,1,glist,0.0d0)
 
       if ( ovrlap ) return
       
-c     *** perform the walk according to the availibility of the choices ***
-c     *** and calculate the correct weight for the trial walk           ***
+!     *** perform the walk according to the availibility of the choices ***
+!     *** and calculate the correct weight for the trial walk           ***
       
       w1ins = 0.0d0
       do ip = 1, ichoi
          w1ins = w1ins + bfac(ip)
-      enddo
+      end do
       
-c     --- check for termination of walk ---
+!     --- check for termination of walk ---
       if ( w1ins .lt. softlog ) then
          write(iou,*) 'caught in swap'
          return
-      endif
+      end if
 
-c     --- select one position at random ---
+!     --- select one position at random ---
       if ( ichoi .gt. 1 ) then
          rbf = w1ins * random()
          bsum = 0.0d0 
@@ -303,17 +302,17 @@ c     --- select one position at random ---
             if ( .not. lovr(ip) ) then
                bsum = bsum + bfac(ip)
                if ( rbf .lt. bsum ) then
-c     --- select ip position ---
+!     --- select ip position ---
                   iwalk = ip
                   goto 180
-               endif
-            endif
-         enddo
+               end if
+            end if
+         end do
          write(iou,*) 'w1ins:',w1ins,'rbf:',rbf
          call cleanup('big time screwup -- w1ins')
       else
          iwalk = 1
-      endif
+      end if
       
  180  v1ins =  vtry(iwalk)  
       v1insext = vtrext(iwalk)
@@ -331,7 +330,7 @@ c     --- select ip position ---
       rznew(beg) = rzp(1,iwalk)
 
       if (lrigid(imolty)) then
-c     --- calculate new vector from initial bead
+!     --- calculate new vector from initial bead
 
          do j = beg,iunit
             rxnew(j) = rxnew(beg) 
@@ -341,17 +340,17 @@ c     --- calculate new vector from initial bead
             rznew(j) = rznew(beg) 
      &           - (rzu(irem,beg) - rzu(irem,j))
             qqu(iins,j) = qqu(irem,j)
-         enddo
+         end do
          call schedule(igrow,imolty,ifrom,iutry,0,4)
       elseif (lring(imolty)) then
          lfixnow = .true.
          call safeschedule(igrow,imolty,ifrom,iutry,findex,2)
       else
          call schedule(igrow,imolty,ifrom,iutry,0,2)
-      endif
+      end if
       
 
-c     ------------------------------------------------------------------
+!     ------------------------------------------------------------------
       
       waddnew = 1.0d0
       lterm = .false.
@@ -359,34 +358,34 @@ c     ------------------------------------------------------------------
       call rosenbluth( .true.,lterm,iins,iins,imolty,ifrom
      &     ,boxins,igrow,waddnew,lfixnow,ctorfn,2 )
 
-c     --- termination of cbmc attempt due to walk termination ---
+!     --- termination of cbmc attempt due to walk termination ---
       if ( lterm ) return
 
       if ( ldual .or. lewald .or. iunit .ne. igrow 
      &     .or. ((.not. lchgall) .and. lelect(imolty)) ) then
-c     --- Put on hydrogens for explicit AA model for calculation of COM
-c     --- and assign all of the grown new and old beads to rxuion
-c     --- with rxuion: new = 2
+!     --- Put on hydrogens for explicit AA model for calculation of COM
+!     --- and assign all of the grown new and old beads to rxuion
+!     --- with rxuion: new = 2
          iii = 2
          do j=1,igrow
             rxuion(j,iii) = rxnew(j)
             ryuion(j,iii) = rynew(j)
             rzuion(j,iii) = rznew(j)
             qquion(j,iii) = qqu(iins,j)
-         enddo
+         end do
          moltion(iii) = imolty
          
          ibox=boxins
          nboxi(iins) = ibox
-      endif
+      end if
       
-c     --- Begin DC-CBMC Corrections for NEW configuration
-c      if (ldual .or. ((.not. lchgall) .and. lelect(imolty))) then 
+!     --- Begin DC-CBMC Corrections for NEW configuration
+!      if (ldual .or. ((.not. lchgall) .and. lelect(imolty))) then 
 
       if (ldual .or. ((.not. lchgall) .and. lelect(imolty))
      &     .or. (lchgall .and. lewald .and. (.not. ldual))) then
 
-c     calculate the true site-site energy
+!     calculate the true site-site energy
          istt = 1
          iett = igrow
 !         write(6,*) igrow
@@ -398,10 +397,10 @@ c     calculate the true site-site energy
          if (ovrlap) then
             write(iou,*) 'iins',iins,'irem',irem
             call cleanup('strange screwup in DC-CBMC swap')
-         endif
-c v1insewd, vnewewald and vnewintra now accounted for in v from energy
-c$$$         delen = v - ( vnewinter + vnewext +vnewelect) 
-c$$$     &        - (v1ins - v1insewd)
+         end if
+! v1insewd, vnewewald and vnewintra now accounted for in v from energy
+!$$$         delen = v - ( vnewinter + vnewext +vnewelect) 
+!$$$     &        - (v1ins - v1insewd)
          delen = v - ( vnewinter + vnewext +vnewelect + vnewintra
      &        + vnewewald + v1ins) 
          waddnew = waddnew*dexp(-beta*delen)
@@ -411,27 +410,27 @@ c$$$     &        - (v1ins - v1insewd)
          vnewelect = velect - v1inselc
          vnewewald = vewald - v1insewd
          vnewintra = vintra
-      endif
-c     End DC-CBMC Corrections for NEW configuration
+      end if
+!     End DC-CBMC Corrections for NEW configuration
 
-c     Begin Ewald-sum Corrections
+!     Begin Ewald-sum Corrections
       if ( lewald ) then
-c --- reciprocal space sum
-c --- prepare qquion(jj,1) etc
+! --- reciprocal space sum
+! --- prepare qquion(jj,1) etc
          moltion(1) = imolty
          if ( lswapinter ) then
             do j = 1,iunit
                qquion(j,1) = 0.0d0
-            enddo
+            end do
             call recip(boxins,vrecipn,vrecipo,1)
             delen = vrecipn - vrecipo 
             waddnew = waddnew*dexp(-beta*delen)
             vnewelect = vnewelect + delen
             vnewt = vnewt + delen
-         endif
-      endif
+         end if
+      end if
       
-c     End Ewald-sum Corrections
+!     End Ewald-sum Corrections
 
       if (lpbcz) then
           if (lsolid(boxins) .and. .not. lrect(boxins)) then
@@ -439,12 +438,12 @@ c     End Ewald-sum Corrections
              volins = cell_vol(ibox)
          else
             volins=boxlx(boxins)*boxly(boxins)*boxlz(boxins)
-         endif
+         end if
       else
          volins=boxlx(boxins)*boxly(boxins)
-      endif
+      end if
       
-c     Begin Tail corrections for BOXINS with inserted particle
+!     Begin Tail corrections for BOXINS with inserted particle
 
       if (ltailc .and. lswapinter) then
          vinsta = 0.0d0
@@ -456,7 +455,7 @@ c     Begin Tail corrections for BOXINS with inserted particle
                   rho = dble( ncmt(boxins,jmt) + 1 ) / volins
                else
                   rho = dble( ncmt(boxins,jmt) ) / volins
-               endif
+               end if
                if ( imt .eq. imolty ) then
                   vinsta = vinsta + 
      &              dble( ncmt(boxins,imt) + 1 ) * coru(imt,jmt,rho,
@@ -465,9 +464,9 @@ c     Begin Tail corrections for BOXINS with inserted particle
                   vinsta = vinsta + 
      &                 dble( ncmt(boxins,imt) ) * coru(imt,jmt,rho,
      &                                                boxins)
-               endif
-            enddo
-         enddo
+               end if
+            end do
+         end do
 
          vinsta = vinsta - vtailb( boxins )
          waddnew = waddnew*dexp(-beta*vinsta)
@@ -475,36 +474,36 @@ c     Begin Tail corrections for BOXINS with inserted particle
          vnewinter = vnewinter + vinsta
       else
          vinsta = 0.0d0
-      endif
+      end if
 
-c     End Tail corrections for BOXINS with inserted particle
+!     End Tail corrections for BOXINS with inserted particle
 
       if ( .not. lanes ) then
          if ( lswapinter ) then
             arg = w1ins * waddnew * weight * volins 
      &           / dble( ncmt(boxins,imolty)+1 )
             acchem(boxins,imolty) = acchem(boxins,imolty)+arg
-         endif
-      endif
+         end if
+      end if
 
       bsswap(imolty,ipairb,boxins+nbox) = 
      &     bsswap(imolty,ipairb,boxins+nbox) + 1.0d0
 
-C     Compute weights for the molecule to be removed from boxrem
+!     Compute weights for the molecule to be removed from boxrem
 
-c *** check that there is at least one molecule in BOXREM ***
+! *** check that there is at least one molecule in BOXREM ***
       if ( lempty ) then
-c         write(iou,*) 'no molecule in BOXREM'
+!         write(iou,*) 'no molecule in BOXREM'
          if (lgrand) then
 	    if (boxrem.eq.2) write(iou,*) ' ERROR ***** array too low !'
-         endif
+         end if
          return
-      endif
+      end if
 
 
-c *** select a position of the first/starting unit at RANDOM ***
-c *** and calculate the boltzmann weight                     ***
-c *** for the chain to be REMOVED                           ***
+! *** select a position of the first/starting unit at RANDOM ***
+! *** and calculate the boltzmann weight                     ***
+! *** for the chain to be REMOVED                           ***
 
       rxp(1,1) = rxu(irem,beg)
       ryp(1,1) = ryu(irem,beg)
@@ -524,7 +523,7 @@ c *** for the chain to be REMOVED                           ***
      &              +sz*hmat(ibox,8)
                rzp(1,icbu) = sx*hmat(ibox,3)+sy*hmat(ibox,6)
      &              +sz*hmat(ibox,9)
-            enddo
+            end do
       else
             do icbu = 2,ichoi
                rxp(1,icbu) = boxlx(boxrem) * random()
@@ -536,14 +535,14 @@ c *** for the chain to be REMOVED                           ***
                      rzp(1,icbu) = 20*random()-10
                   else
                      rzp(1,icbu) = rzu(irem,1)
-                  endif
+                  end if
                else
                   rzp(1,icbu) = 0.0d0
-               endif
-            enddo
-      endif
+               end if
+            end do
+      end if
          
-c *** calculate the boltzmann weight of first bead          ***
+! *** calculate the boltzmann weight of first bead          ***
 
       lnew = .false.
       call boltz(lnew,.true.,ovrlap,irem,irem,imolty,boxrem,ichoi,idum
@@ -551,18 +550,18 @@ c *** calculate the boltzmann weight of first bead          ***
 
       if ( ovrlap ) then
          write(iou,*) 'disaster: overlap for 1st bead in SWAP'
-      endif
-c *** calculate the correct weight for the  old  walk ***
+      end if
+! *** calculate the correct weight for the  old  walk ***
 
       w1rem = 0.0d0
       do ip = 1, ichoi
          w1rem = w1rem + bfac(ip)
-      enddo
+      end do
 
-c --- check for termination of walk ---
+! --- check for termination of walk ---
       if ( w1rem .lt. softlog ) then 
          write(iou,*) ' run problem : soft overlap in old'
-      endif
+      end if
 
       v1rem = vtry(1)
       v1remint = vtrinter(1)
@@ -572,7 +571,7 @@ c --- check for termination of walk ---
 
       waddold = 1.0d0
 
-c     --- call rosenbluth for old conformation
+!     --- call rosenbluth for old conformation
 
       call rosenbluth(.false.,lterm,irem,irem,imolty,ifrom
      &     ,boxrem,igrow,waddold,lfixnow,ctorfo,2 )
@@ -580,31 +579,31 @@ c     --- call rosenbluth for old conformation
       if ( lterm ) then 
          write(iou,*) 'SWAP: rosenbluth old rejected'
          return
-      endif
+      end if
 
       if ( ldual .or. lewald .or. igrow .ne. iunit 
      &     .or. ((.not. lchgall) .and. lelect(imolty)) ) then
-c     --- store the old grown beads and explict placed beads positions
-c     --- 1 = old conformation
+!     --- store the old grown beads and explict placed beads positions
+!     --- 1 = old conformation
          iii = 1
          do j = 1,iunit
             rxuion(j,1) = rxu(irem,j)
             ryuion(j,1) = ryu(irem,j)
             rzuion(j,1) = rzu(irem,j)
             qquion(j,1) = qqu(irem,j)
-         enddo
-      endif
+         end do
+      end if
 
-c     Begin Correction for DC-CBMC for OLD configuration
-c      if (ldual .or. ((.not. lchgall) .and. lelect(imolty)) ) then 
+!     Begin Correction for DC-CBMC for OLD configuration
+!      if (ldual .or. ((.not. lchgall) .and. lelect(imolty)) ) then 
 
 
       if (ldual .or. ((.not. lchgall) .and. lelect(imolty))
      &     .or. (lchgall .and. lewald .and. (.not. ldual))) then
 
 
-c     --- correct the acceptance rules 
-c     --- calculate the Full rcut site-site energy
+!     --- correct the acceptance rules 
+!     --- calculate the Full rcut site-site energy
          istt=1
          iett = igrow
 
@@ -613,9 +612,9 @@ c     --- calculate the Full rcut site-site energy
      &        ,.false.,vtorold,.false.,lfavor)
             
          if (ovrlap) call cleanup('disaster ovrlap in old conf SWAP')
-c v now includes vnewintra,v1remewd and voldewald, take out
-c$$$         deleo = v - ( voldinter + voldext +voldelect) 
-c$$$     &        - (v1rem - v1remewd)
+! v now includes vnewintra,v1remewd and voldewald, take out
+!$$$         deleo = v - ( voldinter + voldext +voldelect) 
+!$$$     &        - (v1rem - v1remewd)
          deleo = v - ( voldinter + voldext +voldelect + voldintra 
      &        + voldewald + v1rem) 
          waddold = waddold*dexp(-beta*deleo)
@@ -625,26 +624,26 @@ c$$$     &        - (v1rem - v1remewd)
          voldelect = velect - v1remelc
          voldewald = vewald - v1remewd
          voldintra = vintra
-      endif
-c     End Correction for DC-CBMC for OLD configuration
+      end if
+!     End Correction for DC-CBMC for OLD configuration
 
-c     Begin Ewald-sum Corrections for OLD configuration
+!     Begin Ewald-sum Corrections for OLD configuration
       if ( lewald ) then
-c --- reciprocal space sum on r*uion
-c --- prepare qquion(jj,1) etc
+! --- reciprocal space sum on r*uion
+! --- prepare qquion(jj,1) etc
          if ( lswapinter ) then
             do j = 1,iunit
                qquion(j,2) = 0.0d0
-            enddo
-         endif
+            end do
+         end if
          call recip(boxrem,vrecipn,vrecipo,1)
          deleo = vrecipo - vrecipn
          voldt = voldt + deleo 
          voldelect = voldelect + deleo
          waddold = waddold * dexp(-beta*deleo)
-      endif
+      end if
 
-c     End Ewald-sum Corrections for OLD configuration
+!     End Ewald-sum Corrections for OLD configuration
       
       if (lpbcz) then
          if (lsolid(boxrem) .and. .not. lrect(boxrem)) then
@@ -652,15 +651,15 @@ c     End Ewald-sum Corrections for OLD configuration
             volrem = cell_vol(ibox)
          else
             volrem=boxlx(boxrem)*boxly(boxrem)*boxlz(boxrem)
-         endif
+         end if
       else
          volrem=boxlx(boxrem)*boxly(boxrem)
-      endif
+      end if
       
-c     Start of intermolecular tail correction for boxrem
+!     Start of intermolecular tail correction for boxrem
 
       if (ltailc .and. lswapinter) then
-c     --- BOXREM without removed particle
+!     --- BOXREM without removed particle
          vremta = 0.0d0
          do imt = 1, nmolty
             do jmt = 1, nmolty
@@ -669,7 +668,7 @@ c     --- BOXREM without removed particle
                   rho = dble( ncmt(boxrem,jmt) - 1 ) / volrem
                else
                   rho = dble( ncmt(boxrem,jmt) ) / volrem
-               endif
+               end if
                if ( imt .eq. imolty ) then
                   vremta = vremta + 
      &              dble( ncmt(boxrem,imt) - 1 ) * coru(imt,jmt,rho,
@@ -678,9 +677,9 @@ c     --- BOXREM without removed particle
                   vremta = vremta + 
      &              dble( ncmt(boxrem,imt) ) * coru(imt,jmt,rho,
      &                                                 boxrem)
-               endif
-            enddo
-         enddo
+               end if
+            end do
+         end do
    
          vremta = - vremta + vtailb( boxrem )
          waddold=waddold*dexp(-beta*vremta) 
@@ -688,10 +687,10 @@ c     --- BOXREM without removed particle
          voldinter = voldinter + vremta
       else
          vremta = 0.0d0
-      endif
-c     End of intermolecular tail correction for boxrem
+      end if
+!     End of intermolecular tail correction for boxrem
 
-c     --- Add contributions of the first bead and additional beads:
+!     --- Add contributions of the first bead and additional beads:
 
       vnewt     = vnewt  + v1ins
       vnewinter = vnewinter + v1insint
@@ -713,41 +712,41 @@ c     --- Add contributions of the first bead and additional beads:
       wdlog = wnlog - wolog
       
       if ( wdlog .lt. -softcut ) then
-c         write(iou,*) '### underflow in wratio calculation ###'
+!         write(iou,*) '### underflow in wratio calculation ###'
          return
-      endif
+      end if
 
       if ( lswapinter ) then
          if (lgibbs) then
-c     --- Note: acceptance based on only molecules of type imolty
+!     --- Note: acceptance based on only molecules of type imolty
             wratio = ( weight / weiold ) *
-     +           ( volins * dble( ncmt(boxrem,imolty) ) / 
-     +           ( volrem * dble( ncmt(boxins,imolty) + 1 ) ) )
-     +           * dexp(beta*(eta2(boxrem,imolty)-
-     +           eta2(boxins,imolty)))
+     &           ( volins * dble( ncmt(boxrem,imolty) ) / 
+     &           ( volrem * dble( ncmt(boxins,imolty) + 1 ) ) )
+     &           * dexp(beta*(eta2(boxrem,imolty)-
+     &           eta2(boxins,imolty)))
 
          else if (lgrand) then
             if (boxins.eq.1) then
-c              --- molecule added to box 1
+!              --- molecule added to box 1
                wratio = (weight /  weiold ) * 
-     +              volins * B(imolty) / (ncmt(boxins,imolty)+1) 
+     &              volins * B(imolty) / (ncmt(boxins,imolty)+1) 
             else
-c              --- molecule removed from box 1
+!              --- molecule removed from box 1
                wratio = (weight /weiold)*
-     +              dble(ncmt(boxrem,imolty))/(volrem*B(imolty))
+     &              dble(ncmt(boxrem,imolty))/(volrem*B(imolty))
 
-            endif
-         endif
+            end if
+         end if
       else
          wratio = (weight*wbias_ins)/(weiold*wbias_rem)
-      endif
+      end if
 
        
-c         wratio = 1.0   
+!         wratio = 1.0   
 
       if ( random() .le. wratio ) then
-c         write(iou,*) 'SWAP MOVE ACCEPTED',irem
-c *** we can now accept !!!!! ***
+!         write(iou,*) 'SWAP MOVE ACCEPTED',irem
+! *** we can now accept !!!!! ***
          bnswap(imolty,ipairb,boxins+nbox) = 
      &        bnswap(imolty,ipairb,boxins+nbox) + 1.0d0
          if ( .not. lswapinter .and. lbias(imolty) ) then
@@ -755,28 +754,28 @@ c *** we can now accept !!!!! ***
                bnswap_in(imolty,2) = bnswap_in(imolty,2) + 1.0d0
             elseif ( (.not. lrem_out) .and. (.not. lins_in ) ) then
                bnswap_out(imolty,2) = bnswap_out(imolty,2) + 1.0d0
-            endif
-         endif
+            end if
+         end if
 
-c---update the position, it will be used to get the bonded energy
+!---update the position, it will be used to get the bonded energy
          do ic = 1,igrow
             rxu(irem,ic) = rxnew(ic)
             ryu(irem,ic) = rynew(ic)
             rzu(irem,ic) = rznew(ic)
-         enddo
+         end do
          do ic = igrow+1,iunit
             rxu(irem,ic) = rxuion(ic,2)
             ryu(irem,ic) = ryuion(ic,2)
             rzu(irem,ic) = rzuion(ic,2)
-         enddo
+         end do
 
-c         call Intra_energy(irem,imolty, vdum ,vintran, vdum,vdum,
-c     &     velectn,vewaldn,flagon, boxins, 1, iunit,.true.,ovrlap,
-c     &      .false.
-c     &     ,vdum,.false.,.false.,vvibn,vbendn,vtgn) 
+!         call Intra_energy(irem,imolty, vdum ,vintran, vdum,vdum,
+!     &     velectn,vewaldn,flagon, boxins, 1, iunit,.true.,ovrlap,
+!     &      .false.
+!     &     ,vdum,.false.,.false.,vvibn,vbendn,vtgn) 
 
 
-c         total_NBE = vintran+velectn+vewaldn+vtgn+vbendn+vvibn 
+!         total_NBE = vintran+velectn+vewaldn+vtgn+vbendn+vvibn 
           total_NBE = 0.0d0
           vtgn      = 0.0d0
           vbendn    = 0.0d0
@@ -785,7 +784,7 @@ c         total_NBE = vintran+velectn+vewaldn+vtgn+vbendn+vvibn
 
 !         write(6,*) 'irem', irem  
 
-c ---    update energies:
+! ---    update energies:
 
          vbox(boxrem)     = vbox(boxrem)     - voldt - total_NBE
 	 vinterb(boxrem)  = vinterb(boxrem)  - voldinter
@@ -810,7 +809,7 @@ c ---    update energies:
          velectb(boxins)  = velectb(boxins)  + (vnewelect+vnewewald)
          vflucqb(boxins)  = vflucqb(boxins)  + vnewflucq
 
-c ---    update book keeping
+! ---    update book keeping
 
          if ( lswapinter ) then
             nboxi(irem) = boxins
@@ -831,39 +830,39 @@ c ---    update book keeping
      &              ncmt2(boxins,imolty,itype) + 1
                ncmt2(boxrem,imolty,itype) = 
      &              ncmt2(boxrem,imolty,itype) + 1
-            endif
-         endif
+            end if
+         end if
 
 !         do ic = 1,igrow
 !            rxu(irem,ic) = rxnew(ic)
 !            ryu(irem,ic) = rynew(ic)
 !            rzu(irem,ic) = rznew(ic)
-!         enddo
+!         end do
 !         do ic = igrow+1,iunit
 !            rxu(irem,ic) = rxuion(ic,2)
 !            ryu(irem,ic) = ryuion(ic,2)
 !            rzu(irem,ic) = rzuion(ic,2)
-!         enddo
+!         end do
          
          if ( lewald ) then
-c *** update reciprocal-space sum
+! *** update reciprocal-space sum
             if ( lswapinter ) then
                call recip(boxins,vdum,vdum,2)
                call recip(boxrem,vdum,vdum,2)
             else
                call recip(boxins,vdum,vdum,2)
-            endif
-         endif
+            end if
+         end if
 
-c ---    update center of mass
+! ---    update center of mass
          call ctrmas(.false.,boxins,irem,3)
-c *** update linkcell, if applicable
+! *** update linkcell, if applicable
          if ( licell .and. ((boxins .eq. boxlink) .or. (boxrem .eq.  
      &        boxlink))) then
             call linkcell(2,irem,vdum,vdum,vdum,ddum)
-         endif
+         end if
          
-c         write(iou,*) 'lneighbor:',lneighbor
+!         write(iou,*) 'lneighbor:',lneighbor
 
          if ( lneigh ) call updnn( irem )
          if ( lneighbor ) then
@@ -871,7 +870,7 @@ c         write(iou,*) 'lneighbor:',lneighbor
             if ( neigh_old .le. 6 .and. neigh_icnt .le. 6 ) then
                cnt_wf2(neigh_old,neigh_icnt,ip)
      &              = cnt_wf2(neigh_old,neigh_icnt,ip)+1
-            endif
+            end if
 
             do 10 ic = 1, neigh_old
                j = neighbor(ic,irem)
@@ -880,11 +879,11 @@ c         write(iou,*) 'lneighbor:',lneighbor
                      neighbor(ip,j)=neighbor(neigh_cnt(j),j)
                      neigh_cnt(j) = neigh_cnt(j)-1
                      goto 10
-                  endif
-               enddo
+                  end if
+               end do
  10         continue
             neigh_cnt(irem) = neigh_icnt
-c            write(iou,*) 'irem:',irem,neigh_icnt
+!            write(iou,*) 'irem:',irem,neigh_icnt
             do ic = 1,neigh_icnt
                j = neighi(ic)
                neighbor(ic,irem)=j
@@ -892,20 +891,20 @@ c            write(iou,*) 'irem:',irem,neigh_icnt
                do ip = 1,neigh_cnt(j)
                   if ( neighbor(ip,j) .eq. irem ) then
                      lneighij = .true.
-                  endif
-               enddo
+                  end if
+               end do
                if ( .not. lneighij ) then
                   neigh_cnt(j) = neigh_cnt(j)+1
                   neighbor(neigh_cnt(j),j) = irem
-               endif
-            enddo
-         endif
+               end if
+            end do
+         end if
 
-c         write(iou,*) irem,'end SWAP'
+!         write(iou,*) irem,'end SWAP'
 
-      endif
+      end if
  
-c -----------------------------------------------------------------
+! -----------------------------------------------------------------
       return
       end
 

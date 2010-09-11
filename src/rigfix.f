@@ -1,27 +1,27 @@
       subroutine rigfix(lnew,i,ibox,imolty,lterm,wrig)
 
-c rigfix
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! rigfix
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
 
@@ -58,15 +58,15 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
      &     ,vtrorienta(nchmax),vtrexta(nchmax),glist(max)
      &     ,lovra(nchmax),vtrintera(nchmax),ifrom(numax),inuma(max)
      &     ,vtrelecta_intra(nchmax),vtrelecta_inter(nchmax)
-c     ----------------------------------------------------------
+!     ----------------------------------------------------------
 
-c      write(iou,*) 'START RIGFIX'
+!      write(iou,*) 'START RIGFIX'
 
       twopi = dacos(-1.0d0) * 2.0d0
       wrig = 1.0d0
       do j = 1, nunit(imolty)
          lfind(j) = .false.
-      enddo
+      end do
             
       ichoi = nchoi(imolty)
       ichtor = nchtor(imolty)
@@ -78,7 +78,7 @@ c      write(iou,*) 'START RIGFIX'
          
          lfind(iufrom) = .true.
 
-c     --- we must first set up cone for old configuration
+!     --- we must first set up cone for old configuration
          xfix(iufrom) = rxu(i,iufrom) - rxu(i,iuprev)
          yfix(iufrom) = ryu(i,iufrom) - ryu(i,iuprev)
          zfix(iufrom) = rzu(i,iufrom) - rzu(i,iuprev)
@@ -92,7 +92,7 @@ c     --- we must first set up cone for old configuration
          
          call cone(1,xub,yub,zub,dum,dum,dum,dum,dum )
          
-c     --- now we must cycle through all sites that we want to be rigid
+!     --- now we must cycle through all sites that we want to be rigid
          do count = 1, ntogrow
             iu = rlist(iw,count)
             
@@ -116,12 +116,12 @@ c     --- now we must cycle through all sites that we want to be rigid
             yub = yfix(iu) / lengtha
             zub = zfix(iu) / lengtha
             
-c     --- determine the phi value associated with this
+!     --- determine the phi value associated with this
             call cone(3,dum,dum,dum,bendang(iu),phia(iu),xub,yub,zub)
             
             lfind(iu) = .true.
             inum(count) = iu
-         enddo
+         end do
 
          counta = 0
          num = ntogrow
@@ -161,25 +161,25 @@ c     --- determine the phi value associated with this
                   xub = xfix(ju) / lengtha
                   yub = yfix(ju) / lengtha
                   zub = zfix(ju) / lengtha
-c     --- determine the phi value associated with this
+!     --- determine the phi value associated with this
                   call cone(3,dum,dum,dum,bendang(ju)
      &                 ,phia(ju),xub,yub,zub)
 
-               endif
-            enddo
-         enddo
+               end if
+            end do
+         end do
          num = ja
                   
          if (ja.ne.0) then
             do j = 1, ja
                inum(j) = inuma(j)
-            enddo
+            end do
             goto 5
-         endif
+         end if
          nlist = counta
          
-c     --- now that we determined the phi values for the old configuration,
-c     --- let's set up cone for the new configuration
+!     --- now that we determined the phi values for the old configuration,
+!     --- let's set up cone for the new configuration
 
          if (lnew) then
             xub = xvec(iuprev,iufrom)
@@ -193,7 +193,7 @@ c     --- let's set up cone for the new configuration
             zub = zub / lengthb
             
             call cone(1,xub,yub,zub,dum,dum,dum,dum,dum)
-         endif
+         end if
                  
          do ip = 1, ichoi
             bsum_tor(ip) = 0.0d0
@@ -204,11 +204,11 @@ c     --- let's set up cone for the new configuration
                lshit = .false.
                if (lnew.and.ip.eq.17.and.itor.eq.6) then
                   lshit = .true.
-               endif
+               end if
 
                if (.not.lnew.and.ip.eq.1.and.itor.eq.1) then
                   lshit = .true.
-               endif
+               end if
 
 
                do count = 1, ntogrow
@@ -232,7 +232,7 @@ c     --- let's set up cone for the new configuration
                      zub = zub * lengtha
 
 
-                  endif
+                  end if
          
                   xvec(iufrom,iu) = xub
                   yvec(iufrom,iu) = yub
@@ -249,28 +249,28 @@ c     --- let's set up cone for the new configuration
 
                      if (jut2.eq.iufrom.and.jut3.eq.iuprev
      &                    .and..not.lplace(imolty,jut4)) then
-c     --- check to see if jut4 exists
+!     --- check to see if jut4 exists
                         if (.not. lexist(jut4)) then
                            write(iou,*) 'iu,jut2,jut3,jut4',iu
      &                          ,jut2,jut3,jut4
                            call cleanup('trouble, jut4 does not exist in rigfix')
-                        endif
+                        end if
                         
                         jttor = ittor(imolty,iu,it)
                         
                         call calctor(iu,jut2,jut3,jut4,jttor,vtor)
                         vdha = vdha + vtor
-                     endif
-                  enddo
-               enddo
+                     end if
+                  end do
+               end do
             
                vtorsion(itor) = vdha
                phitors(itor) = phidisp
                bf_tor(itor) = dexp(-beta*vdha)
                bsum_tor(ip) = bsum_tor(ip) + bf_tor(itor)
-            enddo
+            end do
                 
-c     --- pick a torsion at random
+!     --- pick a torsion at random
             if (lnew .or. ip .ne. 1) then
                ran_tor = random()*bsum_tor(ip)
                bs = 0.0d0
@@ -280,12 +280,12 @@ c     --- pick a torsion at random
                      vtgtr(ip) = vtorsion(itor)
                      phidisp = phitors(itor)
                      goto 100
-                  endif
-               enddo
+                  end if
+               end do
             else
                vtgtr(ip) = vtorsion(1)
                phidisp = phitors(1)
-            endif
+            end if
 
  100        continue
 
@@ -313,16 +313,16 @@ c     --- pick a torsion at random
                      rxpa(iu,ip) = xub + rxu(i,iufrom)
                      rypa(iu,ip) = yub + ryu(i,iufrom)
                      rzpa(iu,ip) = zub + rzu(i,iufrom)
-                  endif
+                  end if
                else
                   rxpa(iu,ip) = rxu(i,iu)
                   rypa(iu,ip) = ryu(i,iu)
                   rzpa(iu,ip) = rzu(i,iu)
-               endif
-            enddo
+               end if
+            end do
             
                  
-c     --- we must determine the positions of the remaining sites
+!     --- we must determine the positions of the remaining sites
             do counta = 1, nlist
                iu = ilist(counta)
                
@@ -346,20 +346,20 @@ c     --- we must determine the positions of the remaining sites
                      rxpa(iu,ip) = xub + rxu(i,iufrom)
                      rypa(iu,ip) = yub + ryu(i,iufrom)
                      rzpa(iu,ip) = zub + rzu(i,iufrom)
-                  endif
+                  end if
                else
                   rxpa(iu,ip) = rxu(i,iu)
                   rypa(iu,ip) = ryu(i,iu)
                   rzpa(iu,ip) = rzu(i,iu)
-               endif
+               end if
                
-            enddo
+            end do
 
-         enddo
+         end do
     
-c     --- now calculate the intramolecular energies of the beads
+!     --- now calculate the intramolecular energies of the beads
       
-c     --- initialize rosenbluth weight
+!     --- initialize rosenbluth weight
          do ip = 1, ichoi
             bsuma(ip) = 1.0d0
             vtrya(ip) = 0.0d0
@@ -372,7 +372,7 @@ c     --- initialize rosenbluth weight
             vtrelecta_inter(ip) =  0.0d0
             vtrewalda(ip) = 0.0d0
             vtrorienta(ip) = 0.0d0
-         enddo
+         end do
 
          do count = 1, ntogrow
             iu = rlist(iw,count)
@@ -381,9 +381,9 @@ c     --- initialize rosenbluth weight
                rxp(count,ip) = rxpa(iu,ip)
                ryp(count,ip) = rypa(iu,ip)
                rzp(count,ip) = rzpa(iu,ip)
-            enddo
+            end do
             glist(count) = iu
-         enddo
+         end do
 
 
          call boltz(lnew,.false.,ovrlap,i,i,imolty,ibox,ichoi
@@ -392,13 +392,13 @@ c     --- initialize rosenbluth weight
          if (ovrlap) then
             lterm = .true.
             return
-         endif
+         end if
 
-c     --- propagate rosenbluth weigth and energies
+!     --- propagate rosenbluth weigth and energies
          do ip = 1, ichoi
             if (lovr(ip)) then
                lovra(ip) = .true.
-            endif
+            end if
             bsuma(ip) = bsuma(ip) * bfac(ip)
             vtrya(ip) = vtrya(ip) + vtry(ip)
             vtrintraa(ip) = vtrintraa(ip) + vtrintra(ip) 
@@ -412,9 +412,9 @@ c     --- propagate rosenbluth weigth and energies
   
             vtrewalda(ip) = vtrewalda(ip) + vtrewald(ip)
             vtrorienta(ip) = vtrorienta(ip) + vtrorient(ip)
-         enddo
+         end do
          
-c     --- now run through all other sites
+!     --- now run through all other sites
          do counta = 1, nlist
             count = 1
             iu = ilist(counta)
@@ -423,7 +423,7 @@ c     --- now run through all other sites
                rxp(count,ip) = rxpa(iu,ip)
                ryp(count,ip) = rypa(iu,ip)
                rzp(count,ip) = rzpa(iu,ip)
-            enddo
+            end do
 
             glist(count) = iu
 
@@ -433,13 +433,13 @@ c     --- now run through all other sites
             if (ovrlap) then
                lterm = .true.
                return
-            endif
+            end if
 
-c     --- propagate rosenbluth weigth and energies
+!     --- propagate rosenbluth weigth and energies
             do ip = 1, ichoi
                if (lovr(ip)) then
                   lovra(ip) = .true.
-               endif
+               end if
                bsuma(ip) = bsuma(ip) * bfac(ip)
                vtrya(ip) = vtrya(ip) + vtry(ip)
                vtrintraa(ip) = vtrintraa(ip) + vtrintra(ip) 
@@ -452,16 +452,16 @@ c     --- propagate rosenbluth weigth and energies
      &                                  vtrelect_inter(ip)
                vtrewalda(ip) = vtrewalda(ip) + vtrewald(ip)
                vtrorienta(ip) = vtrorienta(ip) + vtrorient(ip)
-            enddo         
-         enddo
+            end do         
+         end do
 
          bsum = 0.0d0
-c     --- add up rosenbluth weight
+!     --- add up rosenbluth weight
          do ip = 1, ichoi
             if (.not. lovra(ip)) then
                bsum = bsum + bsuma(ip) * bsum_tor(ip)
-            endif
-         enddo
+            end if
+         end do
 
          if (lnew) then
             wrig = wrig * bsum
@@ -469,7 +469,7 @@ c     --- add up rosenbluth weight
             if (wrig .lt. softlog) then
                lterm = .true.
                return
-            endif
+            end if
 
             rbf = bsum * random()
             bs = 0.0d0
@@ -479,9 +479,9 @@ c     --- add up rosenbluth weight
                   if (rbf .lt. bs ) then
                      iwalk = ip
                      goto 120
-                  endif
-               endif
-            enddo
+                  end if
+               end if
+            end do
  120        continue
          else
             wrig = wrig * bsum
@@ -489,10 +489,10 @@ c     --- add up rosenbluth weight
                lterm = .true.
                write(iou,*) 'RIGFIX OLD REJECTED'
                return
-            endif
-         endif
+            end if
+         end if
 
-c     --- now we must add up energies and record new positions
+!     --- now we must add up energies and record new positions
          if (lnew) then
             vnewt = vnewt + vtrya(iwalk) + vtgtr(iwalk)  
             vnewtg = vnewtg + vtgtr(iwalk)
@@ -511,7 +511,7 @@ c     --- now we must add up energies and record new positions
             voldelect = voldelect + vtrelecta(1)
             voldewald = voldewald + vtrewalda(1)
             voldorient = voldorient + vtrorienta(1)
-         endif
+         end if
          
          do count = 1, ntogrow
             iu = rlist(iw,count)
@@ -522,7 +522,7 @@ c     --- now we must add up energies and record new positions
                rxnew(iu) = rxpa(iu,iwalk)
                rynew(iu) = rypa(iu,iwalk)
                rznew(iu) = rzpa(iu,iwalk)
-            endif
+            end if
             ju = iufrom
 
             if (lnew) then
@@ -533,7 +533,7 @@ c     --- now we must add up energies and record new positions
                xvec(iu,ju) = rxu(i,ju) - rxu(i,iu)
                yvec(iu,ju) = ryu(i,ju) - ryu(i,iu)
                zvec(iu,ju) = rzu(i,ju) - rzu(i,iu)
-            endif
+            end if
             
             distij(iu,ju) = dsqrt(xvec(iu,ju)**2
      &           + yvec(iu,ju)**2 + zvec(iu,ju)**2)
@@ -544,7 +544,7 @@ c     --- now we must add up energies and record new positions
             yvec(ju,iu) = -yvec(iu,ju)
             zvec(ju,iu) = -zvec(iu,ju)
             
-         enddo
+         end do
 
          do counta = 1, nlist
             iu = ilist(counta)
@@ -555,7 +555,7 @@ c     --- now we must add up energies and record new positions
                rxnew(iu) = rxpa(iu,iwalk)
                rynew(iu) = rypa(iu,iwalk)
                rznew(iu) = rzpa(iu,iwalk)
-            endif
+            end if
 
             ju = ifrom(counta)
 
@@ -568,7 +568,7 @@ c     --- now we must add up energies and record new positions
                xvec(iu,ju) = rxu(i,ju) - rxu(i,iu)
                yvec(iu,ju) = ryu(i,ju) - ryu(i,iu)
                zvec(iu,ju) = rzu(i,ju) - rzu(i,iu)
-            endif
+            end if
             
             distij(iu,ju) = dsqrt(xvec(iu,ju)**2
      &           + yvec(iu,ju)**2 + zvec(iu,ju)**2)
@@ -579,10 +579,10 @@ c     --- now we must add up energies and record new positions
             yvec(ju,iu) = -yvec(iu,ju)
             zvec(ju,iu) = -zvec(iu,ju)
             
-         enddo
-      enddo
+         end do
+      end do
 
-c      write(iou,*) 'END RIGFIX'
+!      write(iou,*) 'END RIGFIX'
         
       return
       end

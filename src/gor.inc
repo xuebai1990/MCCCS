@@ -12,7 +12,7 @@
       real(8)::end_to_end,max_length,boxcom_rhoz,rhoz
       real(8)::bigboxcom_rhoz,bigrhoz,max_boxlz,boxmin
 	
-C This is being removed because of high memory requirement
+! This is being removed because of high memory requirement
 
       real(8)::pattern  
 	

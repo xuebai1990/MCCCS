@@ -1,7 +1,7 @@
-      subroutine eesetup(qelect)
-c
-c sets up EE. contains some EE stuff, see eemove.f for more details
-c
+      subroutine eesetup
+!
+! sets up EE. contains some EE stuff, see eemove.f for more details
+!
       implicit none
 
       include 'control.inc'
@@ -16,11 +16,10 @@ c
       logical::ovrlap,ldum
       integer::i,m,j,ntii,ntij,ntjj,ntjjs,ii,jj,ntijs,imolty,irem
      &       ,isv,cnt
-      real(8)::qelect,random,vmstate,volde,vnewe,dum,vintra
+      real(8)::random,vmstate,volde,vnewe,dum,vintra
      &  ,vinter,vext,velect,vewald
-      dimension qelect(nntype)
 
-c --- initialize a few things
+! --- initialize a few things
 
       leemove = .false.
       if ((pmexpc1.gt.1.0d-6).and.(.not.lexpee)) then
@@ -29,64 +28,64 @@ c --- initialize a few things
       elseif ((pmexpc1.lt.1.0d-6).and.lexpee) then
          write(iou,*) 'pmexp zero but lexpee?'
          call cleanup('')
-      endif
+      end if
 
-c --- read necessary stuff
+! --- read necessary stuff
 
-c --- moltyp (of fort.4) on which EE is performed
+! --- moltyp (of fort.4) on which EE is performed
       read(44,*)
       read(44,*) imolty
 
-c --- number of actual types of molecules (i.e. nmolty minus the
-c --- types that identify intermediate states.
+! --- number of actual types of molecules (i.e. nmolty minus the
+! --- types that identify intermediate states.
       read(44,*)
       read(44,*) nmolty1
 
-c --- the number for final state (first one is 1)
+! --- the number for final state (first one is 1)
       read(44,*)
       read(44,*) fmstate
 
       if (fmstate.lt.3) call cleanup('EE when no intermediate state')
 
-c --- weight (psi) associated with each state
+! --- weight (psi) associated with each state
       read(44,*)
       read(44,*) (psi(i), i = 1, fmstate)
 
-c --- the two states between which 'swap' is. ensure that sstate1 is
-c --- sstate2-1
+! --- the two states between which 'swap' is. ensure that sstate1 is
+! --- sstate2-1
       read(44,*)
       read(44,*) sstate1, sstate2
       if (sstate1.ne.(sstate2-1)) call cleanup('choose sstates in order')
 
-c --- once an ee move is performed, the prob that it will be
-c --- ee_index_swap move (keep is quite low)
+! --- once an ee move is performed, the prob that it will be
+! --- ee_index_swap move (keep is quite low)
       read(44,*)
       read(44,*) eeratio
 
-c --- read the starting mstate
+! --- read the starting mstate
       read(44,*)
       read(44,*) mstate
 
-c --- check with temtyp
+! --- check with temtyp
       cnt = 0
       do i = nmolty1, nmolty
          if (temtyp(i).gt.0) then
             if (temtyp(i).ne.1) call cleanup('ee must be on one molecule only')
             isv = i
             cnt = cnt+1
-         endif
-      enddo
+         end if
+      end do
       if (cnt.gt.1) call cleanup('only one state should be present in ee')
       if ((nmolty1+mstate-1).ne.isv) call cleanup('')
      &   'initial mstate inconsistent with temtyp'
       if ((mstate.eq.1).or.(mstate.eq.fmstate)) lmstate = .true.
 
-c --- setup rminee for each unit. for fully grown units (same as in
-c --- the full molecules), rminee is to be set to rmin (read from
-c --- fort.4). for the partially grown units scale rmin by equating
-c --- the 12th power potential values of the partially grown beads
-c --- with the 12th power of the equivalent full beads. this choice
-c --- is more or less arbitrary - but is consistent.
+! --- setup rminee for each unit. for fully grown units (same as in
+! --- the full molecules), rminee is to be set to rmin (read from
+! --- fort.4). for the partially grown units scale rmin by equating
+! --- the 12th power potential values of the partially grown beads
+! --- with the 12th power of the equivalent full beads. this choice
+! --- is more or less arbitrary - but is consistent.
 
       do i = 1, nmolty1-1
          do ii = 1, nunit(i)
@@ -102,13 +101,13 @@ c --- is more or less arbitrary - but is consistent.
                      ntij = (ntii-1)*nntype+ntjj
                   else
                      ntij = (ntii-1)*nntype+ntjj
-                  endif
+                  end if
                   rminee(ntij) = rmin
-c	write(iou,*) i,ii,j,jj,rminee(ntij)
-               enddo
-            enddo
-         enddo
-      enddo
+!	write(iou,*) i,ii,j,jj,rminee(ntij)
+               end do
+            end do
+         end do
+      end do
       do i = 1, nmolty1-1
          do ii = 1, nunit(i)
             ntii = ntype(i,ii)
@@ -128,7 +127,7 @@ c	write(iou,*) i,ii,j,jj,rminee(ntij)
                   else
                      ntij = (ntii-1)*nntype+ntjj
                      ntijs = (ntii-1)*nntype+ntjjs
-                  endif
+                  end if
                   if (epsij(ntijs).ge.1.0d-6.and.sig2ij(ntijs).ge.
      &                1.0d-6) then
                      rminee(ntij) = (epsij(ntij)/epsij(ntijs))**
@@ -139,15 +138,15 @@ c	write(iou,*) i,ii,j,jj,rminee(ntij)
                      rminee(ntij) = rmin
                   else
                      rminee(ntij) = 0.0d0
-                  endif
-c	write(iou,*) i,ii,j,jj,rminee(ntij)
-c	write(iou,*) 'nt', ntii,ntjj,ntij,ntjjs,ntijs
-c	write(iou,*) 'eps', sig2ij(ntij),sig2ij(ntijs),epsij(ntij),
-c     &              epsij(ntijs),qelect(ntii),qelect(ntjj)
-               enddo
-            enddo
-         enddo
-      enddo
+                  end if
+!	write(iou,*) i,ii,j,jj,rminee(ntij)
+!	write(iou,*) 'nt', ntii,ntjj,ntij,ntjjs,ntijs
+!	write(iou,*) 'eps', sig2ij(ntij),sig2ij(ntijs),epsij(ntij),
+!     &              epsij(ntijs),qelect(ntii),qelect(ntjj)
+               end do
+            end do
+         end do
+      end do
       do i = nmolty1, nmolty
          do ii = 1, nunit(i)
             ntii = ntype(i,ii)
@@ -167,7 +166,7 @@ c     &              epsij(ntijs),qelect(ntii),qelect(ntjj)
                   else
                      ntij = (ntii-1)*nntype+ntjj
                      ntijs = (ntjjs-1)*nntype+ntjj
-                  endif
+                  end if
                   if (epsij(ntijs).ge.1.0d-6.and.sig2ij(ntijs).ge.
      &                1.0d-6) then
                      rminee(ntij) = (epsij(ntij)/epsij(ntijs))**
@@ -178,15 +177,15 @@ c     &              epsij(ntijs),qelect(ntii),qelect(ntjj)
                      rminee(ntij) = rmin
                   else
                      rminee(ntij) = 0.0d0
-                  endif
-c	write(iou,*) i,ii,j,jj,rminee(ntij)
-c	write(iou,*) 'nt', ntii,ntjj,ntij,ntjjs,ntijs
-c	write(iou,*) 'eps', sig2ij(ntij),sig2ij(ntijs),epsij(ntij),
-c     &              epsij(ntijs)
-               enddo
-            enddo
-         enddo
-      enddo
+                  end if
+!	write(iou,*) i,ii,j,jj,rminee(ntij)
+!	write(iou,*) 'nt', ntii,ntjj,ntij,ntjjs,ntijs
+!	write(iou,*) 'eps', sig2ij(ntij),sig2ij(ntijs),epsij(ntij),
+!     &              epsij(ntijs)
+               end do
+            end do
+         end do
+      end do
       do i = nmolty1, nmolty
          do ii = 1, nunit(i)
             ntii = ntype(i,ii)
@@ -205,7 +204,7 @@ c     &              epsij(ntijs)
                else
                   ntij = (ntii-1)*nntype+ntjj
                   ntijs = (ntii-1)*nntype+ntjjs
-               endif
+               end if
                if (epsij(ntijs).ge.1.0d-6.and.sig2ij(ntijs).ge.
      &             1.0d-6) then
                   rminee(ntij) = (epsij(ntij)/epsij(ntijs))**
@@ -216,94 +215,94 @@ c     &              epsij(ntijs)
                   rminee(ntij) = rmin
                else
                   rminee(ntij) = 0.0d0
-               endif
-c	write(iou,*) i,ii,i,jj,rminee(ntij)
-            enddo
-         enddo
-      enddo
+               end if
+!	write(iou,*) i,ii,i,jj,rminee(ntij)
+            end do
+         end do
+      end do
 
-c	write(iou,*) 'enumerate'
-c	do i = 1, nmolty
-c	do ii = 1, nunit(i)
-c	ntii = ntype(i,ii)
-c	do j = 1, nmolty
-c	do jj = 1, nunit(j)
-c	ntjj = ntype(j,jj)
-c                  ntij = (ntii-1)*nntype+ntjj
-c	write(iou,999) i,ii,j,jj,rminee(ntij),epsij(ntij),sig2ij(ntij)
-c	enddo
-c	enddo
-c	enddo
-c	enddo
-c	call cleanup('')
+!	write(iou,*) 'enumerate'
+!	do i = 1, nmolty
+!	do ii = 1, nunit(i)
+!	ntii = ntype(i,ii)
+!	do j = 1, nmolty
+!	do jj = 1, nunit(j)
+!	ntjj = ntype(j,jj)
+!                  ntij = (ntii-1)*nntype+ntjj
+!	write(iou,999) i,ii,j,jj,rminee(ntij),epsij(ntij),sig2ij(ntij)
+!	end do
+!	end do
+!	end do
+!	end do
+!	call cleanup('')
 
-c --- associate moltyp with mstate
+! --- associate moltyp with mstate
 
       do m = 1, fmstate
          ee_moltyp(m) = nmolty1+m-1
-      enddo
-c      ee_moltyp(fmstate) = imolty
+      end do
+!      ee_moltyp(fmstate) = imolty
       do i = 1, nunit(imolty)
          do m = 1, fmstate
             ee_qqu(i,m) = qelect(ntype(nmolty1+m-1,i))
-c	write(iou,*) i,m,ee_qqu(i,m)
-         enddo
-c         ee_qqu(i,fmstate) = qelect(ntype(imolty,i))
-c	write(iou,*) i,1,ee_qqu(i,1)
-c	write(iou,*) i,fmstate,ee_qqu(i,fmstate)
-      enddo
+!	write(iou,*) i,m,ee_qqu(i,m)
+         end do
+!         ee_qqu(i,fmstate) = qelect(ntype(imolty,i))
+!	write(iou,*) i,1,ee_qqu(i,1)
+!	write(iou,*) i,fmstate,ee_qqu(i,fmstate)
+      end do
 
-c --- associate a box with each state (convention: box 2 with states
-c --- 1 to sstate1, and box 1 with sstate2 to fmstate)
+! --- associate a box with each state (convention: box 2 with states
+! --- 1 to sstate1, and box 1 with sstate2 to fmstate)
 
       do m = 1, fmstate
          box_state(m) = 1
-      enddo
-c      do m = 1, sstate1
-c         box_state(m) = 2
-c      enddo
-c      do m = sstate2, fmstate
-c         box_state(m) = 1
-c      enddo
+      end do
+!      do m = 1, sstate1
+!         box_state(m) = 2
+!      end do
+!      do m = sstate2, fmstate
+!         box_state(m) = 1
+!      end do
 
-c --- the underlying matix of the markov chain (nonsymmetric if one of
-c --- the state is an end state)
+! --- the underlying matix of the markov chain (nonsymmetric if one of
+! --- the state is an end state)
 
       do m = 2, fmstate-1
          um_markov(m,m+1) = 0.5d0
          um_markov(m,m-1) = 0.5d0
-      enddo
+      end do
       um_markov(1,2) = 1.0d0
       um_markov(fmstate,fmstate-1) = 1.0d0
 
-c --- pick a random chain at m=1 (i.e, in boxstate 1 ) to start off things
-c --- if chain not present in boxstate 1, start with m = 6. for brute
-c --- force method, there is always a unique tagged one (the tag doesn't
-c --- change)
+! --- pick a random chain at m=1 (i.e, in boxstate 1 ) to start off things
+! --- if chain not present in boxstate 1, start with m = 6. for brute
+! --- force method, there is always a unique tagged one (the tag doesn't
+! --- change)
 
        eepointp = 1
 
-c      if (dble(ncmt(box_state(1),imolty)).gt.0) then
-c         eepointp = idint(dble(ncmt(box_state(1),imolty))*random())+1
-c         mstate = 1
-c      elseif (dble(ncmt(box_state(2),imolty)).gt.0) then
-c         eepointp = idint(dble(ncmt(box_state(2),imolty))*random())+1
-c         mstate = fmstate
-c      else
-c         write(iou,*)'the type is in neither box, imolty:',imolty
-c         call cleanup('')
-c      endif
-c      lmstate = .true.
-c	write(iou,*) 'starting point', eepointp, mstate
+!      if (dble(ncmt(box_state(1),imolty)).gt.0) then
+!         eepointp = idint(dble(ncmt(box_state(1),imolty))*random())+1
+!         mstate = 1
+!      elseif (dble(ncmt(box_state(2),imolty)).gt.0) then
+!         eepointp = idint(dble(ncmt(box_state(2),imolty))*random())+1
+!         mstate = fmstate
+!      else
+!         write(iou,*)'the type is in neither box, imolty:',imolty
+!         call cleanup('')
+!      end if
+!      lmstate = .true.
+!	write(iou,*) 'starting point', eepointp, mstate
 
-c --- probability accumulators
+! --- probability accumulators
 
-c	write(iou,*) 'prob check start'
+!	write(iou,*) 'prob check start'
       do m = 1, fmstate
          ee_prob(m) = 0
-c	write(iou,*) m, ee_prob(m)
-      enddo
-c	write(iou,*) 'prob check end'
+!	write(iou,*) m, ee_prob(m)
+      end do
+!	write(iou,*) 'prob check end'
 
  999	format(4(i4,1x),3(1x,e17.8))
       return

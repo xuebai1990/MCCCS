@@ -1,32 +1,32 @@
       subroutine rosenbluth ( lnew,lterm,i,icharge,imolty,ifrom,ibox
      &     ,igrow,wadd,lfixnow,cwtorf,movetype )
 
-c rosenbluth
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-c John Stubbs, and Collin Wick and Ilja Siepmann  
-c                     
-c This program is free software; you can redistribute it and/or
-c modify it under the terms of the GNU General Public License
-c as published by the Free Software Foundation; either version 2
-c of the License, or (at your option) any later version.
-c
-c This program is distributed in the hope that it will be useful,
-c but WITHOUT ANY WARRANTY; without even the implied warranty of
-c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-c GNU General Public License for more details.
-c
-c You should have received a copy of the GNU General Public License
-c along with this program; if not, write to 
-c
-c Free Software Foundation, Inc. 
-c 59 Temple Place - Suite 330
-c Boston, MA  02111-1307, USA.
-ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! rosenbluth
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
+! John Stubbs, and Collin Wick and Ilja Siepmann  
+!                     
+! This program is free software; you can redistribute it and/or
+! modify it under the terms of the GNU General Public License
+! as published by the Free Software Foundation; either version 2
+! of the License, or (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program; if not, write to 
+!
+! Free Software Foundation, Inc. 
+! 59 Temple Place - Suite 330
+! Boston, MA  02111-1307, USA.
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
  
-c    *******************************************************************
-c    **   performs a configurational bias move for branched molecules **
-c    *******************************************************************
+!    *******************************************************************
+!    **   performs a configurational bias move for branched molecules **
+!    *******************************************************************
 
       implicit none
       
@@ -42,11 +42,11 @@ c    *******************************************************************
       include 'fix.inc'
       include 'ipswpar.inc'
 
-c     --- variables passed to the subroutine
+!     --- variables passed to the subroutine
       logical::lnew,lterm,lwbef
       integer::i,j,ja,icharge,imolty,ifrom,ibox,igrow,tac
 
-c     --- local variables
+!     --- local variables
       
       logical::ovrlap,ltorsion,lfixnow,lfixed,lreturn
 
@@ -68,7 +68,7 @@ c     --- local variables
 
       dimension bondlen(numax),bendang(numax),phi(numax)
      
-c     -- new stuff
+!     -- new stuff
       integer::itor,bin,counta,movetype,ku
       real(8)::bf_tor,vtorsion,phitors,ran_tor
      &     ,wei_bend,jacobian,ctorf
@@ -78,23 +78,23 @@ c     -- new stuff
      &     ,vfbbtr(nchmax,nchtor_max)
 
 
-c ------------------------------------------------------------------
+! ------------------------------------------------------------------
 
-c      write(iou,*) 'start ROSENBLUTH'
+!      write(iou,*) 'start ROSENBLUTH'
 
       lterm = .false.
       cwtorf = 1.0d0
       wei_vib = 1.0d0
 
-c *******************************************
-c * Rosenbluth weight of trial conformation *
-c *******************************************
+! *******************************************
+! * Rosenbluth weight of trial conformation *
+! *******************************************
 
-c        --- initialize conformation energies and weight
+!        --- initialize conformation energies and weight
       if ( lnew ) then
-c        --- set the initial weight to unity ***
+!        --- set the initial weight to unity ***
          weight = 1.0d0
-c        --- set total energy of trial configuration to zero ***
+!        --- set total energy of trial configuration to zero ***
          vnewt     = 0.0d0
          vnewtg    = 0.0d0
          vnewbb    = 0.0d0
@@ -107,10 +107,10 @@ c        --- set total energy of trial configuration to zero ***
          vipswn = 0.0d0
          vwellipswn = 0.0d0
       else
-c        --- old conformation
-c        --- set the initial weight of the old configuration to unity ***
+!        --- old conformation
+!        --- set the initial weight of the old configuration to unity ***
          weiold = 1.0d0
-c        --- set total energy of trial configuration to zero ***
+!        --- set total energy of trial configuration to zero ***
          voldt     = 0.0d0
          voldtg    = 0.0d0
          voldbb    = 0.0d0
@@ -122,68 +122,68 @@ c        --- set total energy of trial configuration to zero ***
          voldewald = 0.0d0
          vipswo = 0.0d0
          vwellipswo = 0.0d0
-      endif
+      end if
 
-c     --- for rigid molecules
+!     --- for rigid molecules
 
-c --- JLR 11-14-09 modifying for calls from swatch for rigid molecules
-ccc      we don't want to do rigrot for rigid swatch when nsampos .ge. 3 
+! --- JLR 11-14-09 modifying for calls from swatch for rigid molecules
+!cc      we don't want to do rigrot for rigid swatch when nsampos .ge. 3 
       if (lrigid(imolty).and.movetype.ne.1) then
          wadd = 1.0d0
          if (movetype.eq.2) then
             call rigrot( lnew,lterm,i,icharge,imolty,ibox,wadd )
-         endif
+         end if
 
          if (rindex(imolty).eq.0) then
             return
-         endif
+         end if
 
-c         if (movetype.eq.4) then
-c            return
-c         endif
+!         if (movetype.eq.4) then
+!            return
+!         end if
 
          if (lterm) then
             return
-         endif
+         end if
 
-      endif
+      end if
 
-ccc    Swatch and swap the same from here change imovetype to 2
+!cc    Swatch and swap the same from here change imovetype to 2
       if (movetype.gt.2) movetype=2
-ccc --- END JLR 11-24-09   
+!cc --- END JLR 11-24-09   
 
-c     --- set lexist to lexshed
+!     --- set lexist to lexshed
       do iu = 1,igrow
          lexist(iu) = lexshed(iu)
-      enddo
+      end do
 
-c     --- calculate all bond vectors for lexist 
+!     --- calculate all bond vectors for lexist 
       do iu = 1, igrow
          do iv = 1, invib(imolty,iu)
             ju = ijvib(imolty,iu,iv)
             if ( lexist(iu) .and. lexist(ju) ) then
                if ( lnew ) then
-c                 --- use new coordinates
+!                 --- use new coordinates
                   xvec(iu,ju) = rxnew(ju) - rxnew(iu)
                   yvec(iu,ju) = rynew(ju) - rynew(iu)
                   zvec(iu,ju) = rznew(ju) - rznew(iu)
                else
-c                 --- use old coordinates
+!                 --- use old coordinates
                   xvec(iu,ju) = rxu(i,ju) - rxu(i,iu)
                   yvec(iu,ju) = ryu(i,ju) - ryu(i,iu)
                   zvec(iu,ju) = rzu(i,ju) - rzu(i,iu)
-               endif
+               end if
                distij(iu,ju) = dsqrt( xvec(iu,ju)**2
-     +              + yvec(iu,ju)**2 + zvec(iu,ju)**2 )
-            endif
-         enddo
-      enddo 
+     &              + yvec(iu,ju)**2 + zvec(iu,ju)**2 )
+            end if
+         end do
+      end do 
 
-c *************************
-c * loop over trial units *
-c *************************
+! *************************
+! * loop over trial units *
+! *************************
       do 200 iw = 1, ifrom
-c        --- set vibration and bending energies for this growth to 0.0
+!        --- set vibration and bending energies for this growth to 0.0
 
          if (llrig.and.lsave(iw)) goto 200
 
@@ -197,49 +197,49 @@ c        --- set vibration and bending energies for this growth to 0.0
                do j = 1, wbefnum
                   do ja = 1, befnum(j)
                      if (iu.eq.ibef(j,ja)) then
-c     --- time to do final crankshaft move
+!     --- time to do final crankshaft move
                         call safecbmc(3,lnew,i,iw,igrow,imolty
      &                       ,count,x,y,z,vphi,vtorf,wbendv
      &                       ,lterm,movetype)
 
                         if (lterm) then
                            return
-                        endif
+                        end if
                         lfixed = .true.
                         wei_bend = wbendv
                         if (lcrank) then
                            vvibtr = vphi
                         else
                            vvibtr = 0.0d0
-                        endif
+                        end if
                         do counta = 1, ntogrow
                            glist(counta) = growlist(iw,counta)
-                        enddo
+                        end do
                         ichoi = nchoi(imolty)
-c     --- sometimes this loop makes the code skip geometry, which sets this
-c     --- maxlen (the maximum bond length that CBMC will try to grow)
+!     --- sometimes this loop makes the code skip geometry, which sets this
+!     --- maxlen (the maximum bond length that CBMC will try to grow)
                         maxlen=2.0d0
                         goto 250
-                     endif
-                  enddo
-               enddo
-            enddo
-         endif      
+                     end if
+                  end do
+               end do
+            end do
+         end if      
          
-c        --- perform the biased selection of bond angles and get lengths
+!        --- perform the biased selection of bond angles and get lengths
          call geometry(lnew,iw,i,imolty,angstart,iuprev,glist
      &        ,bondlen,bendang,phi,vvibtr,vbbtr,maxlen,wei_bend )
 
-c         write(iou,*) 'lnew, wei_bend',lnew,wei_bend
+!         write(iou,*) 'lnew, wei_bend',lnew,wei_bend
 
-c     --- for lfixnow check if there are two beads to go
+!     --- for lfixnow check if there are two beads to go
 
          if (lfixnow) then
             do count = 1, ntogrow
                iu = growlist(iw,count)
                do j = 1, wbefnum
                   if (iu.eq.iwbef(j)) then
-c     --- lets setup for two beads to go
+!     --- lets setup for two beads to go
                      
                      call safecbmc(1,lnew,i,iw,igrow,imolty
      &                    ,count,x,y,z,vphi,vtorf,wbendv
@@ -248,15 +248,15 @@ c     --- lets setup for two beads to go
                      vvibtr = vvibtr + vphi
                      lwbef = .true.
                      goto 150
-                  endif
-               enddo
-            enddo
-         endif
+                  end if
+               end do
+            end do
+         end if
  150     continue
 
 
-c        --- we now have the bond lengths and angles for the grown beads
-c        -- select nchoi trial positions based only on torsions
+!        --- we now have the bond lengths and angles for the grown beads
+!        -- select nchoi trial positions based only on torsions
          ichoi = nchoi(imolty)
          ichtor = nchtor(imolty)
          do ip = 1,ichoi
@@ -264,48 +264,48 @@ c        -- select nchoi trial positions based only on torsions
 
             lreturn = .false.
  205        continue
-c           --- set up the cone based on iuprev (could be grown if no prev)
+!           --- set up the cone based on iuprev (could be grown if no prev)
             if ( .not.lreturn.and.growprev(iw) .eq. 0 ) then
-c              --- calculate random vector on the unit sphere for the first bead
+!              --- calculate random vector on the unit sphere for the first bead
                count = 1
                if ( (.not. lnew) .and. ip .eq. 1 ) then
-c                 --- use old molecule position
+!                 --- use old molecule position
                   iu = growlist(iw,count)
                   length = bondlen(count)
-c                 --- compute unit vector to be used in cone and torsion
+!                 --- compute unit vector to be used in cone and torsion
                   x = ( rxu(i,iu) - rxu(i,iufrom) )/length 
                   y = ( ryu(i,iu) - ryu(i,iufrom) )/length 
                   z = ( rzu(i,iu) - rzu(i,iufrom) )/length 
-c                 --- store this in xx yy zz
+!                 --- store this in xx yy zz
                   xx(count) = x
                   yy(count) = y
                   zz(count) = z
                else
-c                 --- choose randomly on the unit sphere
+!                 --- choose randomly on the unit sphere
                   call sphere(x,y,z)
                   xx(count) = x
                   yy(count) = y
                   zz(count) = z
-               endif
+               end if
 
                if ( ntogrow .gt. 1 ) then
-c                 ---set up the cone 
+!                 ---set up the cone 
                   xub = -x 
                   yub = -y 
                   zub = -z 
                   call cone (1,xub,yub,zub,dum,dum,dum,dum,dum )
-               endif
+               end if
 
                if (lrigid(imolty)) then
                   growprev(iw)=riutry(imolty,iw)+1
                   lreturn = .true.
                   goto 205
-               endif
+               end if
 
                ltorsion = .false.
                
             else
-c              --- set up the cone based on iuprev and iufrom
+!              --- set up the cone based on iuprev and iufrom
                length = distij(iuprev,iufrom)
                xub = xvec(iuprev,iufrom) / length 
                yub = yvec(iuprev,iufrom) / length
@@ -316,42 +316,42 @@ c              --- set up the cone based on iuprev and iufrom
                   ltorsion = .false.
                else
                   ltorsion = .true.
-               endif
-            endif
+               end if
+            end if
 
-c           --- Begin loop to determine torsional angle
+!           --- Begin loop to determine torsional angle
 
             if ( ltorsion ) then
 
-c              --- initialize bsum_tor
+!              --- initialize bsum_tor
                bsum_tor(ip) = 0.0d0
                
                do itor = 1,ichtor
 
                   if ( (.not. lnew) .and. ip .eq. 1 
      &                 .and. itor .eq. 1) then
-c                    --- old conformation - set phidisp to 0.0d0
+!                    --- old conformation - set phidisp to 0.0d0
                      phidisp = 0.0d0
                   else
-c                    --- choose a random displacement angle from anglestart
-c                    --- assign the positions based on angles and lengths above
+!                    --- choose a random displacement angle from anglestart
+!                    --- assign the positions based on angles and lengths above
                      phidisp = twopi*random()
-                  endif
+                  end if
 
                   do count = angstart,ntogrow
                      phinew = phi(count) + phidisp
                      thetanew = bendang(count)
                      
                      call cone(2,dum,dum,dum,thetanew,phinew,x,y,z)
-c     --- store the unit vectors in xx, yy, zz
+!     --- store the unit vectors in xx, yy, zz
                      xx(count) = x
                      yy(count) = y
                      zz(count) = z
-                  enddo
+                  end do
 
-c              --- set energies of trial position to zero ---
+!              --- set energies of trial position to zero ---
                   vdha = 0.0d0
-c              --- compute torsion energy for given trial conformation
+!              --- compute torsion energy for given trial conformation
                   do count = 1,ntogrow
                      iu = growlist(iw,count)
 
@@ -359,7 +359,7 @@ c              --- compute torsion energy for given trial conformation
      &                    .lring(imolty).and.iw.lt.3) then
                         bf_tor(itor) = 1.0d0
                         goto 300
-                     endif
+                     end if
 
                      do 299 it = 1, intor(imolty,iu)
                         jut2 = ijtor2(imolty,iu,it)
@@ -368,17 +368,17 @@ c              --- compute torsion energy for given trial conformation
      &                       jut3 .eq. iuprev) then
                            jut4 = ijtor4(imolty,iu,it)
                            
-c                       --- jut4 must already exist or we made a big mistake
+!                       --- jut4 must already exist or we made a big mistake
                            if ( .not. lexist(jut4) )  then
-c * allow regrowth where one torsion may already exist and one may not
+! * allow regrowth where one torsion may already exist and one may not
                               goto 299
-c                              write(iou,*) 'jut4,jut3,jut2,iu',
-c     &                             jut4,jut3,jut2,iu
-c                              call cleanup('trouble jut4')
-                           endif
+!                              write(iou,*) 'jut4,jut3,jut2,iu',
+!     &                             jut4,jut3,jut2,iu
+!                              call cleanup('trouble jut4')
+                           end if
                            jttor = ittor(imolty,iu,it)
                            
-c                       --- calculate cross products d_a x d_a-1 
+!                       --- calculate cross products d_a x d_a-1 
                            xaa1 = yy(count) * zvec(jut3,jut2) 
      &                          + zz(count) * yvec(jut2,jut3)
                            yaa1 = zz(count) * xvec(jut3,jut2) 
@@ -386,32 +386,32 @@ c                       --- calculate cross products d_a x d_a-1
                            zaa1 = xx(count) * yvec(jut3,jut2) 
      &                          + yy(count) * xvec(jut2,jut3)
                            
-c                       --- calculate cross products d_a-1 x d_a-2
+!                       --- calculate cross products d_a-1 x d_a-2
                            xa1a2 = yvec(jut2,jut3) * zvec(jut3,jut4) -
-     +                          zvec(jut2,jut3) * yvec(jut3,jut4)
+     &                          zvec(jut2,jut3) * yvec(jut3,jut4)
                            ya1a2 = zvec(jut2,jut3) * xvec(jut3,jut4) -
-     +                          xvec(jut2,jut3) * zvec(jut3,jut4)
+     &                          xvec(jut2,jut3) * zvec(jut3,jut4)
                            za1a2 = xvec(jut2,jut3) * yvec(jut3,jut4) -
-     +                          yvec(jut2,jut3) * xvec(jut3,jut4)
+     &                          yvec(jut2,jut3) * xvec(jut3,jut4)
 
-c                       --- calculate lengths of cross products ***
+!                       --- calculate lengths of cross products ***
                            daa1 = dsqrt ( xaa1**2 + yaa1**2 + zaa1**2 )
                            da1a2 = dsqrt ( xa1a2**2 + ya1a2**2 
      &                          + za1a2**2 )
                            
-c                       --- calculate dot product of cross products ***
+!                       --- calculate dot product of cross products ***
                            dot = xaa1*xa1a2 + yaa1*ya1a2 + zaa1*za1a2
                            thetac = - (dot / ( daa1 * da1a2 ))
                            if (thetac.gt.1.0d0) thetac=1.0d0
                            if (thetac.lt.-1.0d0) thetac=-1.0d0
 
-c     KEA -- added for extending range to +/- 180
+!     KEA -- added for extending range to +/- 180
                            if (L_tor_table) then
-c     *** calculate cross product of cross products ***
+!     *** calculate cross product of cross products ***
                               xcc = yaa1*za1a2 - zaa1*ya1a2
                               ycc = zaa1*xa1a2 - xaa1*za1a2
                               zcc = xaa1*ya1a2 - yaa1*xa1a2
-c     *** calculate scalar triple product ***
+!     *** calculate scalar triple product ***
                               tcc = xcc*xvec(jut2,jut3)
      &                             + ycc*yvec(jut2,jut3)
      &                             + zcc*zvec(jut2,jut3)
@@ -421,31 +421,31 @@ c     *** calculate scalar triple product ***
                                  call splint(theta,spltor,jttor)
                               elseif(L_linear) then
                                  call lininter(theta,spltor,jttor)
-                              endif
+                              end if
 
-c                       --- add torsion energy to vdha
+!                       --- add torsion energy to vdha
                               vdha = vdha + spltor
                            else
-c                       --- add torsion energy to vdha
+!                       --- add torsion energy to vdha
                               vdha = vdha + vtorso( thetac, jttor )
-                           endif
-                        endif
+                           end if
+                        end if
 
-c                     enddo
+!                     end do
  299                 continue
 
-                  enddo
+                  end do
 
-c                 --- compute boltzmann factor and add it to bsum_tor
+!                 --- compute boltzmann factor and add it to bsum_tor
                   bf_tor(itor) = dexp ( -vdha * beta )
 
  300              continue
 
-c                 --- store vtorsion and phidisp for this trial
+!                 --- store vtorsion and phidisp for this trial
                   vtorsion(itor) = vdha
                   phitors(itor) = phidisp
                   
-c                 --- for safecbmc add extra weight to assure closure
+!                 --- for safecbmc add extra weight to assure closure
                   if (lfixnow) then
                      
                      ctorf(ip,itor) = 1.0d0
@@ -463,14 +463,14 @@ c                 --- for safecbmc add extra weight to assure closure
                            x = rxu(i,iufrom) + xx(count)*length
                            y = ryu(i,iufrom) + yy(count)*length
                            z = rzu(i,iufrom) + zz(count)*length
-                        endif
+                        end if
                         
                         iu = growlist(iw,count)
                        
                         if (movetype.eq.2.and.lnew) then
                         if (lwbef) then
 
-c                       --- determine special closing energies
+!                       --- determine special closing energies
                            
                            call safecbmc(2,lnew,i,iw,igrow,imolty
      &                          ,count,x,y,z,vphi,vtorf,wbendv
@@ -509,18 +509,18 @@ c                       --- determine special closing energies
      &                                      * probf(iu,ku,bin)
                                        ctorf(ip,itor) = ctorf(ip,itor) * 
      &                                      probf(iu,ku,bin)   
-                                    endif
-                                 enddo
-                              endif
+                                    end if
+                                 end do
+                              end if
 
 
-                           enddo
-                        endif
+                           end do
+                        end if
 
                         else
                         if (lwbef) then
 
-c                       --- determine special closing energies
+!                       --- determine special closing energies
                            
                            call safecbmc(2,lnew,i,iw,igrow,imolty
      &                          ,count,x,y,z,vphi,vtorf
@@ -560,105 +560,105 @@ c                       --- determine special closing energies
      &                                      * probf(iu,ku,bin)
                                        ctorf(ip,itor) = ctorf(ip,itor) * 
      &                                      probf(iu,ku,bin)   
-                                    endif
+                                    end if
 
-                                 enddo
-                              endif
-                           enddo
-                        endif
-                        endif
-                        endif
+                                 end do
+                              end if
+                           end do
+                        end if
+                        end if
+                        end if
 
-                     enddo
-                  endif
+                     end do
+                  end if
                   
                   bsum_tor(ip) = bsum_tor(ip) + bf_tor(itor)
 
 
-               enddo
+               end do
 
                if ( lnew .or. ip .ne. 1 ) then
-c                 --- choose one of the trial sites in a biased fashion
+!                 --- choose one of the trial sites in a biased fashion
                   ran_tor = random()*bsum_tor(ip)
                   bs = 0.0d0
                   do itor = 1,ichtor
                      bs = bs + bf_tor(itor)
                      if ( ran_tor .lt. bs ) then
-c                       --- save torsion energy of this trial position
+!                       --- save torsion energy of this trial position
                         vtgtr(ip) = vtorsion(itor)
 
                         toracc(ip) = itor
 
-c                       --- assign the phidisp of this trial postion
+!                       --- assign the phidisp of this trial postion
                         phidisp = phitors(itor)
 
-c                       --- exit the loop
+!                       --- exit the loop
                         goto 100
-                     endif
-                  enddo
+                     end if
+                  end do
  100              continue
                else
-c                 --- select the old conformation
+!                 --- select the old conformation
                   vtgtr(ip) = vtorsion(1)
                   phidisp = phitors(1)
-               endif
+               end if
 
-c              --- divide bsum by ichtor
+!              --- divide bsum by ichtor
                bsum_tor(ip) = bsum_tor(ip) / dble(ichtor)
                
             else
-c              --- no torsion energy, choose phidisp at random (except old)
+!              --- no torsion energy, choose phidisp at random (except old)
                if ( (.not. lnew) .and. ip .eq. 1 ) then
-c                 --- old conformation - set phidisp to 0.0d0
+!                 --- old conformation - set phidisp to 0.0d0
                   phidisp = 0.0d0
                else
 
-c                 --- choose a random displacement angle from anglestart
-c                 --- assign the positions based on angles and lengths above
+!                 --- choose a random displacement angle from anglestart
+!                 --- assign the positions based on angles and lengths above
                   phidisp = twopi*random()
-               endif
+               end if
 
-c              --- assign the torsional energy a value of 0.0
+!              --- assign the torsional energy a value of 0.0
                vtgtr(ip) = 0.0d0
 
-c              --- set bsum_tor to 1.0d0
+!              --- set bsum_tor to 1.0d0
                bsum_tor(ip) = 1.0d0
 
-            endif
+            end if
 
-c           --- for accepted phidisp set up the vectors
+!           --- for accepted phidisp set up the vectors
             do count = angstart,ntogrow
                phinew = phi(count) + phidisp
                thetanew = bendang(count)
                
                call cone(2,dum,dum,dum,thetanew,phinew,x,y,z)
-c              --- store the unit vectors in xx, yy, zz
+!              --- store the unit vectors in xx, yy, zz
                xx(count) = x
                yy(count) = y
                zz(count) = z
 
-            enddo
+            end do
 
-c           --- accepted coordinates, save them in r*p(trial)
+!           --- accepted coordinates, save them in r*p(trial)
             do count = 1,ntogrow
                length = bondlen(count)
                if ( lnew ) then
-c                 --- use new positions
+!                 --- use new positions
                   rxp(count,ip) = rxnew(iufrom) + xx(count)*length
                   ryp(count,ip) = rynew(iufrom) + yy(count)*length
                   rzp(count,ip) = rznew(iufrom) + zz(count)*length
                else
-c                 --- use old coordinates
+!                 --- use old coordinates
                   rxp(count,ip) = rxu(i,iufrom) + xx(count)*length
                   ryp(count,ip) = ryu(i,iufrom) + yy(count)*length
                   rzp(count,ip) = rzu(i,iufrom) + zz(count)*length
-               endif
+               end if
                
-            enddo
+            end do
 
-         enddo
+         end do
 
-c       --- now that we have the trial site need to compute non-bonded energy
+!       --- now that we have the trial site need to compute non-bonded energy
 
  250     continue
          
@@ -668,52 +668,52 @@ c       --- now that we have the trial site need to compute non-bonded energy
          if ( ovrlap ) then
             lterm = .true.
             return
-         endif
+         end if
 
-c ---------------------------------------------------------------------
+! ---------------------------------------------------------------------
  
-c *** perform the walk according to the availibility of the choices ***
-c *** and calculate the correct weight for the trial walk           ***
+! *** perform the walk according to the availibility of the choices ***
+! *** and calculate the correct weight for the trial walk           ***
 
          bsum = 0.0d0
          do ip = 1, ichoi
-c           --- include both the torsional and the LJ/qq
+!           --- include both the torsional and the LJ/qq
             bsum = bsum + bfac(ip)*bsum_tor(ip)
-         enddo
+         end do
 
          if ( lnew ) then
-c           --- update new rosenbluth weight - include bending weight
+!           --- update new rosenbluth weight - include bending weight
             weight = weight * bsum * wei_bend * wei_vib
 
             if ( weight .lt. softlog ) then
                lterm=.true.
                return
-            endif
+            end if
 
-c           --- select one position at random ---
+!           --- select one position at random ---
             rbf = bsum * random()
             bs = 0.0d0 
             do 170 ip = 1, ichoi
                if ( .not. lovr(ip) ) then
                   bs = bs + bfac(ip)*bsum_tor(ip)
                   if ( rbf .lt. bs ) then
-c                    --- select ip position ---
+!                    --- select ip position ---
                      iwalk = ip
                      goto 180
-                  endif
-               endif
+                  end if
+               end if
  170        continue
          else
-c           --- old conformation, update weiold - include wei_bend
+!           --- old conformation, update weiold - include wei_bend
             weiold = weiold * bsum * wei_bend * wei_vib
             if (weiold .lt. softlog) write(iou,*) 
      &           '###old weight too low'
-         endif
+         end if
 
  180     continue
 
          if (lfixed) then
-c     --- determine jacobian contribution for crankshaft
+!     --- determine jacobian contribution for crankshaft
             jacobian = 1.0d0
             do count = 1, ntogrow
                iu = growlist(iw,count)
@@ -741,7 +741,7 @@ c     --- determine jacobian contribution for crankshaft
                         y = ryu(i,ju) - ryp(count,iwalk)
                         z = rzu(i,ju) - rzp(count,iwalk)
                         lengtha = dsqrt( x**2 + y**2 + z**2 )
-                     endif
+                     end if
                                   
                      x = rxp(count,iwalk) - rxnew(iufrom)
                      y = ryp(count,iwalk) - rynew(iufrom)
@@ -762,19 +762,19 @@ c     --- determine jacobian contribution for crankshaft
                      y = ryu(i,iu) - ryu(i,iufrom)
                      z = rzu(i,iu) - rzu(i,iufrom)
                      lengthb = dsqrt( x**2 + y**2 + z**2 )
-                  endif
+                  end if
                   jacobian = jacobian / (length*lengtha*lengthb)
-               endif
-            enddo
+               end if
+            end do
             bsum = bsum * jacobian
-         endif
+         end if
 
          if ( lnew ) then
             if (lfixnow) then
                if (lwbef) then
                   tac = toracc(iwalk)
                   vbbtr = vbbtr + vfbbtr(iwalk,tac)
-               endif
+               end if
                if (lfixed) then
                   vbbtr = vtbend(iwalk)
                   vvibtr = vvibtr + vtvib(iwalk)
@@ -786,13 +786,13 @@ c     --- determine jacobian contribution for crankshaft
                      tac = toracc(iwalk)
                      cwtorf = cwtorf * ctorf(iwalk,tac)
 
-                  endif
-               endif
-            endif
+                  end if
+               end if
+            end if
 
-c           --- update new trial energies
+!           --- update new trial energies
             vnewt     = vnewt     + vtry(iwalk)  
-     +           + vtgtr(iwalk) + vvibtr + vbbtr
+     &           + vtgtr(iwalk) + vvibtr + vbbtr
             vnewbvib  = vnewbvib  + vvibtr
             vnewbb    = vnewbb    + vbbtr
             vnewtg    = vnewtg    + vtgtr(iwalk)
@@ -815,16 +815,16 @@ c           --- update new trial energies
                      
                      cwtorf = cwtorf * ctorf(1,1)
 
-                  endif
-               endif
+                  end if
+               end if
                if (lwbef) then
                   vbbtr = vbbtr + vfbbtr(1,1)
-               endif
-            endif
+               end if
+            end if
 
-c            --- update old trail energies
+!            --- update old trail energies
             voldt     = voldt     + vtry(1)  
-     +           + vtgtr(1) + vvibtr + vbbtr
+     &           + vtgtr(1) + vvibtr + vbbtr
             voldbvib  = voldbvib  + vvibtr
             voldbb    = voldbb    + vbbtr
             voldtg    = voldtg    + vtgtr(1)
@@ -835,34 +835,34 @@ c            --- update old trail energies
             voldewald = voldewald + vtrewald(1)
             vipswo = vipswo+vipswot(1)
             vwellipswo = vwellipswo+vwellipswot(1)
-         endif
+         end if
 
          do count = 1,ntogrow
             iu = growlist(iw,count)
             if ( lnew ) then
-c              --- assign new positions to r*new
+!              --- assign new positions to r*new
                rxnew(iu) = rxp(count,iwalk)
                rynew(iu) = ryp(count,iwalk)
                rznew(iu) = rzp(count,iwalk)
-            endif
+            end if
 
-c           --- set lexist(iu) to true so ewald sum computed properly
+!           --- set lexist(iu) to true so ewald sum computed properly
             lexist(iu) = .true.
 
-c           --- store new existing vectors between beads and iufrom
+!           --- store new existing vectors between beads and iufrom
             if ( lnew ) then
-c              --- use r*new positions
+!              --- use r*new positions
                xvec(iu,iufrom) = rxnew(iufrom) - rxnew(iu)
                yvec(iu,iufrom) = rynew(iufrom) - rynew(iu)
                zvec(iu,iufrom) = rznew(iufrom) - rznew(iu)
             else
-c              --- use r*u positions
+!              --- use r*u positions
                xvec(iu,iufrom) = rxu(i,iufrom) - rxu(i,iu)
                yvec(iu,iufrom) = ryu(i,iufrom) - ryu(i,iu)
                zvec(iu,iufrom) = rzu(i,iufrom) - rzu(i,iu)
-            endif
+            end if
             distij(iu,iufrom) = dsqrt( xvec(iu,iufrom)**2
-     +           + yvec(iu,iufrom)**2 + zvec(iu,iufrom)**2 )
+     &           + yvec(iu,iufrom)**2 + zvec(iu,iufrom)**2 )
             
             xvec(iufrom,iu) = - xvec(iu,iufrom)
             yvec(iufrom,iu) = - yvec(iu,iufrom)
@@ -870,7 +870,7 @@ c              --- use r*u positions
             distij(iufrom,iu) = distij(iu,iufrom)
 
             if (lfixnow) then
-c     --- we must store new vectors with endpoints
+!     --- we must store new vectors with endpoints
                if (fcount(iu).gt.0) then
                   do j = 1, fcount(iu)
                      ju = fclose(iu,j)
@@ -883,7 +883,7 @@ c     --- we must store new vectors with endpoints
                         xvec(iu,ju) = rxu(i,ju) - rxu(i,iu)
                         yvec(iu,ju) = ryu(i,ju) - ryu(i,iu)
                         zvec(iu,ju) = rzu(i,ju) - rzu(i,iu)
-                     endif
+                     end if
 
                      xvec(ju,iu) = - xvec(iu,ju)
                      yvec(ju,iu) = - yvec(iu,ju)
@@ -895,20 +895,20 @@ c     --- we must store new vectors with endpoints
                      
                        
 
-                  enddo
-               endif
+                  end do
+               end if
                
-            endif
-         enddo
+            end if
+         end do
 
-c ********************************
-c * end of loop over trial units *
-c ********************************
+! ********************************
+! * end of loop over trial units *
+! ********************************
  200  continue
 
-c      write(iou,*) 'end ROSENBLUTH'
+!      write(iou,*) 'end ROSENBLUTH'
 
-c ------------------------------------------------------------------
+! ------------------------------------------------------------------
 
       return
       end
