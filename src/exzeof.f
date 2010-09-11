@@ -23,6 +23,7 @@
 ! Boston, MA  02111-1307, USA.
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
+      use grid
       implicit none 
       real(8)::exzeof,xi,yi,zi,r2,rcutsq,xr,yr,zr,r2i,r6,velect
       integer::j,idi,idj,ntij,layer,ii,jj,kk

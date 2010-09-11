@@ -222,7 +222,7 @@
          rynew (iu) = rynew(iulast) + y
          rznew (iu) = rznew(iulast) + z
 
-!00      continue
+200      continue
 
 ! ------------------------------------------------------------------
 

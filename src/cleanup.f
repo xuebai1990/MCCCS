@@ -5,6 +5,8 @@
 
       call MPI_FINALIZE(ierr)
 
-      stop msg
+      print *,msg
+
+      stop -1
 
       end

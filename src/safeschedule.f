@@ -99,7 +99,8 @@
 !     --- set begining conditions
       if (movetype.eq.2) then
          if (.not.lring(imolty)) then
-            call cleanup('you can not use safecbmc for swap unless it is a ring')
+            call cleanup('you can not use safecbmc for swap
+     &                unless it is a ring')
          end if
          fmaxgrow = nunit(imolty)
       else

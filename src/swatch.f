@@ -784,7 +784,8 @@
                nboxi(imolb) = thisbox
             end if
 
-            if (lterm) call cleanup('disaster ovrlap in old conf iSWATCH')
+            if (lterm) call cleanup('disaster ovrlap in old
+     &                          conf iSWATCH')
             deleo = v - ( voldt - (voldbvib + voldbb + voldtg) ) 
 
             tweiold = tweiold*dexp(-beta*deleo)
@@ -1347,7 +1348,8 @@
      &           ,vewald,iii,iboxold, 1,iunit,.true.,lterm,.false.,vdum
      &           ,.false.,.false.)
 
-            if (lterm) call cleanup('disaster ovrlap in old conf SWATCH')
+            if (lterm) call cleanup('disaster ovrlap in old
+     &                           conf SWATCH')
             deleo = v - ( voldt - (voldbvib + voldbb + voldtg) ) 
             
             tweiold = tweiold*dexp(-beta*deleo)

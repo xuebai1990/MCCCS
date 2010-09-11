@@ -26,7 +26,7 @@
       implicit none
       include 'zeolite.inc'
       include 'zeopoten.inc'
-      integer::count,frac,izeo,bonding(8)
+      integer::count,frac,izeo,bonding(8),atomtype
       real(8)::wzeo,charge,alpha,beta,gamma
       character::atom*4
 

@@ -85,6 +85,7 @@ OBJS	      = Atom_traxyz.o \
 		calcsolpar.o \
 		calctor.o \
 		charge.o \
+	        cleanup.o \
 		close.o \
 		cone.o \
 		coneangle.o \
@@ -106,8 +107,8 @@ OBJS	      = Atom_traxyz.o \
 		exzeo.o \
 		exzeof.o \
 		flucq.o \
-		forcefield.o \
-		geometry.o \
+	    geometry.o \
+		grid.o \
 		inclus.o \
 		initia.o \
 		init_vars.o \
@@ -116,17 +117,16 @@ OBJS	      = Atom_traxyz.o \
 		ljpsur.o \
 		ljsami.o \
 		matops.o \
-                mbessel.o \
+        mbessel.o \
 		mmff.o \
 		mimage.o \
 		molsetup.o \
 		monola.o \
 		monper.o \
-                ninesix.o \
-                genlj.o \
+        ninesix.o \
+        genlj.o \
 		nrtab.o \
 		place.o \
-		pgrid.o \
 		pressure.o \
 		prvolume.o \
 		random.o \
@@ -139,7 +139,6 @@ OBJS	      = Atom_traxyz.o \
 		rigrot.o \
 		rosenbluth.o \
 		rotxyz.o \
-		rwztab.o \
 		safecbmc.o \
 		safeschedule.o \
 		setnn.o \
@@ -165,7 +164,6 @@ OBJS	      = Atom_traxyz.o \
 		vtorso.o \
 		writepdb.o \
 		zeocoord.o \
-		ztab.o \
 		ztest.o \
 		Intra_energy.o  \
                 deriv.o \
@@ -195,6 +193,7 @@ SRCS	     =  Atom_traxyz.f \
 		calcsolpar.f \
 		calctor.f \
 		charge.f \
+                cleanup.f \
 		close.f \
 		cone.f \
 		coneangle.f \
@@ -216,8 +215,8 @@ SRCS	     =  Atom_traxyz.f \
 		exzeo.f \
 		exzeof.f \
 		flucq.f \
-		forcefield.f \
 		geometry.f \
+		grid.f \
 		initia.f \
 		init_vars.f \
 		inclus.f \
@@ -235,7 +234,6 @@ SRCS	     =  Atom_traxyz.f \
                 ninesix.f \
                 genlj.f \
 		nrtab.f \
-		pgrid.f \
 		place.f \
 		pressure.f \
 		prvolume.f \
@@ -249,7 +247,6 @@ SRCS	     =  Atom_traxyz.f \
 		recipsum.f \
 		rosenbluth.f \
 		rotxyz.f \
-		rwztab.f \
 		safecbmc.f \
 		safeschedule.f \
 		setnn.f \
@@ -275,7 +272,6 @@ SRCS	     =  Atom_traxyz.f \
 		vtorso.f \
 		writepdb.f \
 		zeocoord.f \
-		ztab.f \
 		ztest.f \
 		Intra_energy.f \
                 deriv.f \
@@ -327,6 +323,8 @@ calctor.o: control.inc fix.inc calctor.f
 	$(LDS) calctor.f
 charge.o: control.inc coord.inc poten.inc conver.inc ewaldsum.inc connect.inc charge.f
 	$(LDS) charge.f
+cleanup.o: mpi.inc cleanup.f
+	$(LDS) cleanup.f
 close.o: control.inc close.f
 	$(LDS) close.f
 cone.o: control.inc conver.inc cone.f
@@ -374,9 +372,9 @@ exsami.o: external.inc exsami.f
 	$(LDS) exsami.f
 explct.o: control.inc coord.inc explct.f
 	$(LDS) explct.f
-exzeo.o: zeopoten.inc zeolite.inc control.inc grid.inc external.inc system.inc poten.inc exzeo.f
+exzeo.o: zeopoten.inc zeolite.inc control.inc external.inc system.inc poten.inc exzeo.f
 	$(LDS) exzeo.f
-exzeof.o: zeopoten.inc zeolite.inc control.inc exzeof.f
+exzeof.o: zeopoten.inc zeolite.inc control.inc external.inc system.inc poten.inc exzeof.f
 	$(LDS) exzeof.f
 flucq.o: control.inc coord.inc coord2.inc ensemble.inc system.inc \
 	inputdata.inc bnbsma.inc ewaldsum.inc fepsi.inc poten.inc flucq.f
@@ -384,8 +382,10 @@ flucq.o: control.inc coord.inc coord2.inc ensemble.inc system.inc \
 geometry.o: control.inc coord.inc connect.inc conver.inc \
 	rosen.inc cbmc.inc tabulated.inc geometry.f
 	$(LDS) geometry.f
-forcefield.o: zeolite.inc zeopoten.inc control.inc forcefield.f
-	$(LDS) forcefield.f
+grid.o:	grid.f
+	$(LDS) grid.f
+#forcefield.o: zeolite.inc zeopoten.inc control.inc forcefield.f
+#	$(LDS) forcefield.f
 inclus.o: control.inc coord.inc connect.inc poten.inc mpi.inc inclus.f
 	$(LDS) inclus.f
 initia.o: control.inc coord.inc system.inc poten.inc conver.inc inpar.inc \
@@ -434,8 +434,8 @@ nrtab.o: control.inc coord.inc poten.inc connect.inc nrtab.inc nrtab.f
 place.o: control.inc coord.inc cbmc.inc connect.inc fix.inc system.inc \
 	rosen.inc place.f
 	$(LDS) place.f
-pgrid.o: pgrid.f
-	$(LDS) pgrid.f
+#pgrid.o: pgrid.f
+#	$(LDS) pgrid.f
 pressure.o: control.inc coord.inc system.inc poten.inc expsix.inc \
 	merck.inc connect.inc ewaldsum.inc conver.inc \
 	inputdata.inc fepsi.inc qqlist.inc ipswpar.inc mpi.inc pressure.f
@@ -474,8 +474,6 @@ rotxyz.o: coord.inc coord2.inc ensemble.inc neigh2.inc system.inc \
 	control.inc inputdata.inc bnbsma.inc fepsi.inc ipswpar.inc \
 	eepar.inc rotxyz.f 
 	$(LDS) rotxyz.f
-rwztab.o: control.inc grid.inc zeolite.inc rwztab.f
-	$(LDS) rwztab.f
 safecbmc.o: coord.inc control.inc fix.inc connect.inc rosen.inc cbmc.inc \
 	safecbmc.f
 	$(LDS) safecbmc.f
@@ -506,7 +504,7 @@ susami.o: external.inc ljsamipara.inc susami.f
 suvibe.o: control.inc coord.inc connect.inc conver.inc contorsion.inc \
 	suvibe.f
 	$(LDS) suvibe.f
-suzeo.o: zeopoten.inc zeolite.inc external.inc suzeo.f
+suzeo.o: zeopoten.inc zeolite.inc external.inc coord.inc control.inc suzeo.f
 	$(LDS) suzeo.f
 swatch.o: coord.inc coord2.inc system.inc ensemble.inc cbmc.inc control.inc \
 	inputdata.inc rosen.inc swtcmove.inc ewaldsum.inc cell.inc swatch.f
@@ -545,9 +543,7 @@ writepdb.o: control.inc zeolite.inc coord.inc writepdb.f
 	$(LDS) writepdb.f
 zeocoord.o: zeolite.inc zeopoten.inc zeocoord.f
 	$(LDS) zeocoord.f
-ztab.o: grid.inc zeolite.inc control.inc ztab.f
-	$(LDS) ztab.f
-ztest.o: grid.inc zeolite.inc control.inc ztest.f
+ztest.o: zeolite.inc control.inc ztest.f
 	$(LDS) ztest.f
 Intra_energy.o: control.inc coord.inc system.inc neigh.inc poten.inc coord2.inc \
 	external.inc connect.inc ewaldsum.inc fepsi.inc qqlist.inc nsix.inc Intra_energy.f

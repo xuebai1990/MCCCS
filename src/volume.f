@@ -507,7 +507,8 @@
 
 ! - WARNING
          if ( .not. lfold ) 
-     &        call cleanup('volume move only correct with folded coordinates')
+     &        call cleanup('volume move only correct with
+     &                  folded coordinates')
 
          do i = 1, nchain
 

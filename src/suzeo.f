@@ -23,15 +23,16 @@
 ! Boston, MA  02111-1307, USA.
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
+      use grid
       implicit none 
+      include 'control.inc'
+      include 'coord.inc'
       include 'zeopoten.inc'
       include 'zeolite.inc'
       include 'external.inc'
-      include 'grid.inc'
-      include 'control.inc'
       integer::imol,iunit,igtype,idi,ierr,i,j,k,ngrxt,ngryt,ngrzt
       character(len=8)::filename
-      real(8)::rczeo,zunitxt,zunityt,zunitzt
+      real(8)::rczeo,zunitxt,zunityt,zunitzt,exzeof
 
 ! === load force field
 !      call forcefield(rczeo)
@@ -83,8 +84,8 @@
      &        ngrx,dgrx,ngry,dgry,ngrz,dgrz
 
          allocate(egrid(0:ngrx-1,0:ngry-1,0:ngrz-1,gntype),
-     &        xzz(-maxp,ngrx+maxp-1),yzz(-maxp,ngry+maxp-1),
-     &        zzz(-maxp,ngrz+maxp-1),stat=ierr)
+     &        xzz(-maxp:ngrx+maxp-1),yzz(-maxp:ngry+maxp-1),
+     &        zzz(-maxp:ngrz+maxp-1),stat=ierr)
          if (ierr.ne.0) call cleanup('allocate failed')
 
 ! ---  set up hulp array: (allow for going beyond unit cell
@@ -103,7 +104,7 @@
             idi=gtable(igtype)
             write(filename,'(I3.3,A)'),idi,'.ztb'
             print*,filename
-            open(91,file=filename,iostat=ierr,status=old)
+            open(91,file=filename,iostat=ierr,status='old')
             if (ierr.eq.0) then
 ! ---    read zeolite table from disk
                read(91) zunitxt,zunityt,zunitzt,ngrxt,ngryt,ngrzt
@@ -120,7 +121,7 @@
                end do
             else
 ! make a tabulated potential of the zeolite
-               open(91,file=filename,status=unknown)
+               open(91,file=filename)
                write(91) zunitx,zunity,zunitz,ngrx,ngry,ngrz
                do i=0,ngrx-1
                   do j=0,ngry-1
@@ -140,7 +141,7 @@
       return
 
  1000 format(' Tabulated zeolite potential: ',/,
-     &     ' Size unit-cell zeolite: ',f7.4,' x ',f7.4,' x ',f7.4,/)
+     &     ' Size unit-cell zeolite: ',f7.4,' x ',f7.4,' x ',f7.4,/
      &     '         x-dir           : ',i12,'  size: ',f7.4,/,
      &     '         y-dir           : ',i12,'  size: ',f7.4,/,
      &     '         z-dir           : ',i12,'  size: ',f7.4,/)

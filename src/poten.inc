@@ -59,7 +59,7 @@
 ! *** common blocks *** 
       common /ljpot/ sig2ij,epsij,ecut,epsilon,sigma,epsi,sigi
      &   ,q1,qscale,a15,a15type
-      common /ljepot/ ljscale,qscale2,lq14scale
+      common /ljepot/ ljscale,qscale2,lq14scale,qelect
       common /extpot/ extc12, extc3, extz0
       common /specail/ aspecial,bspecial,lspecial,lpl
       common /electr/ qqfact,xiq,jayq,jayself,fqegp,lqchg,lij

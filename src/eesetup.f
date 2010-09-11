@@ -55,7 +55,8 @@
 ! --- sstate2-1
       read(44,*)
       read(44,*) sstate1, sstate2
-      if (sstate1.ne.(sstate2-1)) call cleanup('choose sstates in order')
+      if (sstate1.ne.(sstate2-1)) call cleanup('choose sstates in
+     &  order')
 
 ! --- once an ee move is performed, the prob that it will be
 ! --- ee_index_swap move (keep is quite low)
@@ -70,14 +71,16 @@
       cnt = 0
       do i = nmolty1, nmolty
          if (temtyp(i).gt.0) then
-            if (temtyp(i).ne.1) call cleanup('ee must be on one molecule only')
+            if (temtyp(i).ne.1) call cleanup('ee must be on one
+     &  molecule only')
             isv = i
             cnt = cnt+1
          end if
       end do
-      if (cnt.gt.1) call cleanup('only one state should be present in ee')
-      if ((nmolty1+mstate-1).ne.isv) call cleanup('')
-     &   'initial mstate inconsistent with temtyp'
+      if (cnt.gt.1) call cleanup('only one state should be present
+     &   in ee')
+      if ((nmolty1+mstate-1).ne.isv) call cleanup('initial mstate
+     & inconsistent with temtyp')
       if ((mstate.eq.1).or.(mstate.eq.fmstate)) lmstate = .true.
 
 ! --- setup rminee for each unit. for fully grown units (same as in

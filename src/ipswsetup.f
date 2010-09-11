@@ -18,7 +18,8 @@
 
       ibox = 1
       if (lmipsw.and.(nbox.gt.1)) call cleanup('ipsw only for 1 box')
-      if (lmipsw.and.lnpt.and.pmvol.gt.1.0d-7) call cleanup('ipsw only for NVT')
+      if (lmipsw.and.lnpt.and.pmvol.gt.1.0d-7) call cleanup('ipsw
+     &                                                  only for NVT')
       read(35,*)
       read(35,*) (lwell(i),i=1,nmolty)
       read(35,*)
@@ -48,13 +49,16 @@
       end if
       if (llwell.and.lstagea) call cleanup('ipsw well NOT for stage a')
       if (lstagea) then
-         if (lstageb.or.lstagec) call cleanup('only one lstage must be true')
+         if (lstageb.or.lstagec) call cleanup('only one lstage must
+     &        be true')
       end if
       if (lstageb) then
-         if (lstagea.or.lstagec) call cleanup('only one lstage must be true')
+         if (lstagea.or.lstagec) call cleanup('only one lstage must
+     &        be true')
       end if
       if (lstagec) then
-         if (lstagea.or.lstageb) call cleanup('only one lstage must be true')
+         if (lstagea.or.lstageb) call cleanup('only one lstage must
+     &        be true')
       end if
       read(35,*)
       read(35,*) etais, lambdais

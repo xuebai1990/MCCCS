@@ -23,8 +23,8 @@
 ! Boston, MA  02111-1307, USA.
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
+      use grid
       implicit none
-      include 'grid.inc'
       include 'zeolite.inc'
       include 'control.inc'
       integer::i,idi,tel

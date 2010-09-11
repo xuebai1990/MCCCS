@@ -97,7 +97,8 @@
 
             if (invib(imolty,iu).gt.1) then
                write(iou,*) 'iu,invib',iu,invib(imolty,iu)
-               call cleanup('invib can no be larger than one for hydrogen')
+               call cleanup('invib can no be larger than one
+     &                     for hydrogen')
             end if
 
 !     --- determine bond lengths

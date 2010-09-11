@@ -61,7 +61,7 @@
          end if
       end do
       if ( .not. lexpand(imolty) ) 
-     &     call cleanup('select a wrong type of molecule for the ES-move')
+     &     call cleanup('wrong type of molecule for the ES-move')
 
       if (lgrand) then
 ! ---    select a chain at random in box 1!

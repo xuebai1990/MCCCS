@@ -118,8 +118,8 @@
          do 1099 j = 1, 3
             disvec(1,i,j) = 0.0d0
             disvec(2,i,j) = 0.0d0
-!099     continue
-!100  continue
+1099     continue
+1100  continue
  
 !      write(iou,*) '@@@ control setnn @@@'
 !      do 2000 i = 1, nchain

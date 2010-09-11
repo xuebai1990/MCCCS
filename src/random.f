@@ -45,7 +45,8 @@
 !
       ISEED = MOD(IA*ISEED+IC,M1)
       RANDx= ISEED*RM
-      IF ( RANDx.LT.0.D+0 ) call cleanup('*** Random number is negative ***')
+      IF ( RANDx.LT.0.D+0 ) call cleanup('*** Random number
+     &                              is negative ***')
 !
       RETURN
       END

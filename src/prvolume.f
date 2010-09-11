@@ -363,8 +363,8 @@
 ! *** calculate centre of mass and its displacement
 
 ! - WARNING
-         if ( .not. lfold ) 
-     &        call cleanup('volume move only correct with folded coordinates')
+         if ( .not. lfold ) call cleanup('volume move only correct
+     &                         with folded coordinates')
 
          df = dfac - 1.0d0
 

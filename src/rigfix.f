@@ -253,7 +253,8 @@
                         if (.not. lexist(jut4)) then
                            write(iou,*) 'iu,jut2,jut3,jut4',iu
      &                          ,jut2,jut3,jut4
-                           call cleanup('trouble, jut4 does not exist in rigfix')
+                           call cleanup('trouble, jut4 does not
+     &                                    exist in rigfix')
                         end if
                         
                         jttor = ittor(imolty,iu,it)

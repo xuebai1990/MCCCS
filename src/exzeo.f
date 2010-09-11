@@ -23,6 +23,7 @@
 ! Boston, MA  02111-1307, USA.
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
+      use grid
       implicit none 
       real(8)::exzeo,xi,yi,zi,r2,rcutsq
      &     ,xr,yr,zr,r2i,r6
@@ -34,7 +35,6 @@
       include 'zeopoten.inc'
       include 'zeolite.inc'
       include 'control.inc'
-      include 'grid.inc'
       include 'external.inc'
       include 'system.inc'
       include 'poten.inc'
@@ -81,7 +81,7 @@
          l=int(zr*factz)
 ! ---    test if in the reosanble regime
          exzeo=1.0d+6
-         if ( egrid(j,k,l,idi)).gt.exzeo) return
+         if ( egrid(j,k,l,idi).gt.exzeo) return
 ! --     block m*m*m centered around: j,k,l
          mp=m+1
 ! ---    store x,y,z values around xi,yi,zi in arrays

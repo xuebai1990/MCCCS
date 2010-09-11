@@ -98,11 +98,11 @@
  
       double precision, dimension(nbxmax)::acEnthalpy,acEnthalpy1
 
-      real(8):::: enthalpy,enthalpy2,sigma2Hsimulation
-      real(8):::: inst_enth, inst_enth2, tmp,sigma2H,Cp
+      real(8):: enthalpy,enthalpy2,sigma2Hsimulation
+      real(8):: inst_enth, inst_enth2, tmp,sigma2H,Cp
 
-      real(8):::: ennergy,ennergy2,sigma2Esimulation
-      real(8):::: inst_energy, inst_energy2, sigma2E,Cv
+      real(8):: ennergy,ennergy2,sigma2Esimulation
+      real(8):: inst_energy, inst_energy2, sigma2E,Cv
 
       
   
@@ -136,7 +136,7 @@
       real(8)::flucmom(nbxmax),flucmom2(nbxmax),flucev(nbxmax)
      &     ,flucv(nbxmax),dielect,acvol(nbxmax),acvolsq(nbxmax)
 ! --- dimension statements for block averages ---
-      character::*15 vname(nener)
+      character*15 vname(nener)
       dimension dsq(nprop,nbxmax), stdev(nprop,nbxmax),
      &          dsq1(nprop1,nbxmax,nbxmax),  
      &          sterr(nprop,nbxmax),errme(nprop,nbxmax)
@@ -146,8 +146,8 @@
      &     ,lvirial2,ltfix,lratfix,ltsolute,lsolute,lpr
 
       dimension lratfix(ntmax),lsolute(ntmax)
-      character::*25 enth
-      character::*25 enth1
+      character*25 enth
+      character*25 enth1
 
       integer::bin,cnt_wf1(0:6,0:6,4),cnt_wf2(0:6,0:6,4),
      &     cnt_wra1(1000,4),cnt_wra2(1000,4)
@@ -939,7 +939,7 @@
 	      end if
 	 end if
 
-!9       continue
+99       continue
 
 ! *** perform periodic operations  ***
  
@@ -1246,7 +1246,7 @@
 
 
 
-!00   continue
+100   continue
 
       lpr = .false.
       do i = 1,ntmax
