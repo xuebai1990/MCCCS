@@ -25,20 +25,22 @@
 
       use grid
       implicit none 
-      real(8)::exzeof,xi,yi,zi,r2,rcutsq,xr,yr,zr,r2i,r6,velect
+      real(8)::exzeof,xi,yi,zi,r2,rcutsq,xr,yr,zr,r2i,r6,velect,
+     &     sum
       integer::j,idi,idj,ntij,layer,ii,jj,kk
-      logical::precise
       include 'zeopoten.inc'
       include 'zeolite.inc'
       include 'control.inc'
       include 'external.inc'
       include 'system.inc'
       include 'poten.inc'      
+      include 'mpif.h'
+      include 'mpi.inc'
 
       exzeof=0.
 !     calculate the Lennard-Jones part
       rcutsq = rcut(1)**2
-      do j=1,nzeo
+      do j=myid+1,nzeo,numprocs
          idj=idzeo(j)
          ntij = (idi - 1) * nntype + idj
          xr=xi-zeox(j)
@@ -58,14 +60,15 @@
 !            end if
          end if
       end do
+      call MPI_ALLREDUCE(exzeof,sum,1,MPI_DOUBLE_PRECISION,
+     &     MPI_SUM,MPI_COMM_WORLD,ierr)
+      exzeof=sum
 
 !     calculate the Coulombic interaction, include as many layers of
 !     neighboring unit cells as needed for the specified precision
-      layer=0
-      precise=.false.
-      do while (.not. precise)
+      do layer=0,nlayermax
          velect=0.
-         do j=1,nzeo
+         do j=myid+1,nzeo,numprocs
             if (zeox(j).lt.zunitx .and. zeoy(j).lt.zunity .and.
      &           zeoz(j).lt.zunitz) then
                do ii=-layer,layer
@@ -85,10 +88,14 @@
                end do
             end if
          end do
+         call MPI_ALLREDUCE(velect,sum,1,MPI_DOUBLE_PRECISION,
+     &     MPI_SUM,MPI_COMM_WORLD,ierr)
+         velect=sum
          exzeof=exzeof+velect
-         if (velect.le.eps) precise=.true.
-         layer=layer+1
+         if (velect.le.eps) exit
       end do
+!      if (myid.eq.0 .and. layer.gt.nlayermax) write(iou,*)
+!     &     'precision not met: ',xi,yi,zi,idi
       return
       end
  

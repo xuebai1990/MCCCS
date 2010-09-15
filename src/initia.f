@@ -354,17 +354,18 @@
                         do imol = 1, nmolty
                            if ( n .le. mcmtma(imol,ibox) ) then
                               intemp = imol
-                              goto 19
+                              exit
                            end if
                         end do
- 19                     continue
                      elseif ( inimix(ibox) .lt. 0 ) then
-                        do imol = 1, nmolty
-                           nt = n - imol
-                           if ( mod( nt, nmolty ) .eq. 0 ) then
-                              intemp = imol
-                           end if
-                        end do
+!     This is not right. It doesn't consider the number of molecules of each type in the box.
+!                        do imol = 1, nmolty
+!                           nt = n - imol
+!                           if ( mod( nt, nmolty ) .eq. 0 ) then
+!                              intemp = imol
+!                           end if
+!                        end do
+                        intemp = mod(n,nmolty)
                      end if
                   else
                      intemp = 1

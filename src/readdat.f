@@ -73,7 +73,7 @@
       dimension inclmol(ntmax*numax*numax),inclsign(ntmax*numax*numax)
       dimension inclbead(ntmax*numax*numax,2)
 
-      integer::ainclnum,ainclmol,ainclbead,a15t
+      integer::ainclnum,ainclmol,ainclbead,a15t,maxlayer
       dimension ainclmol(ntmax*numax*numax)
       dimension ainclbead(ntmax*numax*numax,2)
       dimension a15t(ntmax*numax*numax)
@@ -82,7 +82,7 @@
       real(8)::debroglie, qtot,min_boxl
 
       real(8)::pie2,rcnnsq,umatch,aspecd,bspecd,dum,pm,pcumu
-      logical::newtab,lnrtab,lucall,lpolar,lqqelect,lee,lratfix,lreadq
+      logical::lnrtab,lucall,lpolar,lqqelect,lee,lratfix,lreadq
       logical:: linit, lecho, lmixlb, lmixjo, lhere,lsetup,lsolute
       logical::lprint,lverbose,lxyz,lfound
 
@@ -1407,14 +1407,14 @@
 
 ! - read initial setup information
       read(4,*)
-      read(4,*) linit,newtab,lreadq
+      read(4,*) linit,maxlayer,lreadq
       if ( lecho.and.myid.eq.0 ) then
          if (lverbose) then
             write(iou,*) 'linit:',linit
-            write(iou,*) 'lnewtab:',newtab
+            write(iou,*) 'maxlayer:',maxlayer
             write(iou,*) 'lreadq:',lreadq
          else 
-            write(iou,*) linit, newtab, lreadq
+            write(iou,*) linit, maxlayer, lreadq
          end if
       end if
       read(4,*)
@@ -2403,7 +2403,7 @@
 ! *** read/produce initial/starting configuration ***
 ! *** zeolite external potential
       if ( lexzeo ) then
-         call suzeo(rcut(1),newtab)
+         call suzeo(rcut(1),maxlayer)
          boxlx(1)=zeorx
          boxly(1)=zeory
          boxlz(1)=zeorz

@@ -323,7 +323,7 @@ calctor.o: control.inc fix.inc calctor.f
 	$(LDS) calctor.f
 charge.o: control.inc coord.inc poten.inc conver.inc ewaldsum.inc connect.inc charge.f
 	$(LDS) charge.f
-cleanup.o: mpi.inc cleanup.f
+cleanup.o: control.inc mpi.inc cleanup.f
 	$(LDS) cleanup.f
 close.o: control.inc close.f
 	$(LDS) close.f
@@ -372,9 +372,9 @@ exsami.o: external.inc exsami.f
 	$(LDS) exsami.f
 explct.o: control.inc coord.inc explct.f
 	$(LDS) explct.f
-exzeo.o: zeopoten.inc zeolite.inc control.inc external.inc system.inc poten.inc exzeo.f
+exzeo.o: grid.o zeopoten.inc zeolite.inc control.inc external.inc system.inc poten.inc exzeo.f
 	$(LDS) exzeo.f
-exzeof.o: zeopoten.inc zeolite.inc control.inc external.inc system.inc poten.inc exzeof.f
+exzeof.o: grid.o zeopoten.inc zeolite.inc control.inc external.inc system.inc poten.inc exzeof.f
 	$(LDS) exzeof.f
 flucq.o: control.inc coord.inc coord2.inc ensemble.inc system.inc \
 	inputdata.inc bnbsma.inc ewaldsum.inc fepsi.inc poten.inc flucq.f
@@ -504,7 +504,7 @@ susami.o: external.inc ljsamipara.inc susami.f
 suvibe.o: control.inc coord.inc connect.inc conver.inc contorsion.inc \
 	suvibe.f
 	$(LDS) suvibe.f
-suzeo.o: zeopoten.inc zeolite.inc external.inc coord.inc control.inc suzeo.f
+suzeo.o: grid.o zeopoten.inc zeolite.inc external.inc coord.inc control.inc suzeo.f
 	$(LDS) suzeo.f
 swatch.o: coord.inc coord2.inc system.inc ensemble.inc cbmc.inc control.inc \
 	inputdata.inc rosen.inc swtcmove.inc ewaldsum.inc cell.inc swatch.f
@@ -543,7 +543,7 @@ writepdb.o: control.inc zeolite.inc coord.inc writepdb.f
 	$(LDS) writepdb.f
 zeocoord.o: zeolite.inc zeopoten.inc zeocoord.f
 	$(LDS) zeocoord.f
-ztest.o: zeolite.inc control.inc ztest.f
+ztest.o: grid.o zeolite.inc control.inc ztest.f
 	$(LDS) ztest.f
 Intra_energy.o: control.inc coord.inc system.inc neigh.inc poten.inc coord2.inc \
 	external.inc connect.inc ewaldsum.inc fepsi.inc qqlist.inc nsix.inc Intra_energy.f

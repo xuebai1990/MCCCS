@@ -2495,9 +2495,5 @@
  1517 format(a15,'[kJ/mol] for box',i3,' =',3(f12.4))
  1601 format(i5,1x,i10)
 
-
-      call cleanup('')
+      return
       end
-
-
-

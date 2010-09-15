@@ -1,4 +1,4 @@
-      subroutine suzeo(rczeo)
+      subroutine suzeo(rczeo,maxlayer)
 
 ! suzeo
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -30,7 +30,9 @@
       include 'zeopoten.inc'
       include 'zeolite.inc'
       include 'external.inc'
-      integer::imol,iunit,igtype,idi,ierr,i,j,k,ngrxt,ngryt,ngrzt
+      include 'mpi.inc'
+      integer::imol,iunit,igtype,idi,jerr,i,j,k,
+     &     ngrxt,ngryt,ngrzt,maxlayer
       character(len=8)::filename
       real(8)::rczeo,zunitxt,zunityt,zunitzt,exzeof
 
@@ -80,13 +82,14 @@
          factx=ngrx/zunitx
          facty=ngry/zunity
          factz=ngrz/zunitz
-         write(iou,1000) zunitx,zunity,zunitz,
+         if (myid.eq.0) write(iou,1000) zunitx,zunity,zunitz,
      &        ngrx,dgrx,ngry,dgry,ngrz,dgrz
+
 
          allocate(egrid(0:ngrx-1,0:ngry-1,0:ngrz-1,gntype),
      &        xzz(-maxp:ngrx+maxp-1),yzz(-maxp:ngry+maxp-1),
-     &        zzz(-maxp:ngrz+maxp-1),stat=ierr)
-         if (ierr.ne.0) call cleanup('allocate failed')
+     &        zzz(-maxp:ngrz+maxp-1),stat=jerr)
+         if (jerr.ne.0) call cleanup('allocate failed')
 
 ! ---  set up hulp array: (allow for going beyond unit cell
 !      for polynom fitting)
@@ -100,13 +103,16 @@
             zzz(i)=i*dgrz
          end do
 
+         nlayermax=maxlayer
+
          do igtype=1,gntype
             idi=gtable(igtype)
             write(filename,'(I3.3,A)'),idi,'.ztb'
-            print*,filename
-            open(91,file=filename,iostat=ierr,status='old')
-            if (ierr.eq.0) then
+            open(91,file=filename,form='binary',iostat=jerr,
+     &           status='old')
+            if (jerr.eq.0) then
 ! ---    read zeolite table from disk
+               if (myid.eq.0) write(iou,*) 'read in',filename
                read(91) zunitxt,zunityt,zunitzt,ngrxt,ngryt,ngrzt
                if (abs(zunitxt-zunitx).gt.eps .or. abs(zunityt-zunity)
      &              .gt.eps .or. abs(zunitzt-zunitz).gt.eps .or.
@@ -115,27 +121,29 @@
                do i=0,ngrx-1
                   do j=0,ngry-1
                      do k=0,ngrz-1
-                        read(91) egrid(i,j,k,idi)
+                        read(91) egrid(i,j,k,igtype)
                      end do
                   end do
                end do
             else
 ! make a tabulated potential of the zeolite
-               open(91,file=filename)
-               write(91) zunitx,zunity,zunitz,ngrx,ngry,ngrz
+               if (myid.eq.0) write(iou,*) 'make new',filename
+               if (myid.eq.0) open(91,file=filename,form='binary')
+               if (myid.eq.0) write(91) zunitx,zunity,zunitz,ngrx,
+     &              ngry,ngrz
                do i=0,ngrx-1
                   do j=0,ngry-1
                      do k=0,ngrz-1
-                        egrid(i,j,k,idi)=exzeof(dgrx*i,dgry*j,
+                        egrid(i,j,k,igtype)=exzeof(dgrx*i,dgry*j,
      &                       dgrz*k,idi)
-                        write(91) egrid(i,j,k,idi)
+                        if (myid.eq.0) write(91) egrid(i,j,k,igtype)
                      end do
                   end do
                end do
             end if
-            close(91)
-         end do
-         call ztest
+            if (myid.eq.0) close(91)
+         end do        
+!         call ztest
       end if
 
       return

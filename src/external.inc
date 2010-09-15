@@ -45,7 +45,7 @@
       parameter (ntsubst = 190)
       parameter (rsol = 0.114d0)
 ! zeolites: 
-      parameter (lexzeo=.true.,lzgrid=.false.)
+      parameter (lexzeo=.true.,lzgrid=.true.)
 ! Joe Hautman's parameters are read from standard input:
 !               to be used with ljoe = .true. 
 ! Sami's parameters: to be used with lsami = .true. AND lmuir = .true.

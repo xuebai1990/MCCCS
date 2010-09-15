@@ -21,12 +21,12 @@
 ! 59 Temple Place - Suite 330
 ! Boston, MA  02111-1307, USA.
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+      implicit none
       save
-      integer::ngrx,ngry,ngrz,maxl,maxp
+      integer::ngrx,ngry,ngrz,maxp,nlayermax
       real(8),allocatable::egrid(:,:,:,:),xzz(:),yzz(:),zzz(:)
       real(8)::factx,facty,factz,dgrx,dgry,dgrz,eps=1d-5,dgr
-! - parameters currently set low since zeolites not used
-      parameter (maxl=20,maxp=10)
+      parameter (maxp=10)
 !      common/gridd/factx,facty,factz,dgrx,dgry,dgrz,
 !     &             xzz,yzz,zzz,egrid
 !     &            ,ngrx,ngry,ngrz,eps

@@ -27,7 +27,7 @@
       implicit none 
       real(8)::exzeo,xi,yi,zi,r2,rcutsq
      &     ,xr,yr,zr,r2i,r6
-      integer::m,mt,mp,idi,idj,ntij
+      integer::m,mt,mp,idi,idj,ntij,igtype
       integer::j,j0,jp,k,k0,kp,l,l0,lp
       parameter (m=2,mt=2*m+1)
       real(8)::yjtmp(mt),yktmp(mt),yltmp(mt)
@@ -38,7 +38,7 @@
       include 'external.inc'
       include 'system.inc'
       include 'poten.inc'
-      
+
       rcutsq = rcut(1)**2
       if (.not.lzgrid) then
          exzeo=0.
@@ -67,6 +67,15 @@
          end do
       else
 !     calculation using a grid
+!         write(iou,*) 'entering exzeo. xi yi zi idi',xi,yi,zi,idi
+
+         do igtype=1,gntype
+            if (gtable(igtype).eq.idi) exit
+         end do
+         if (igtype.gt.gntype) then
+            call cleanup('exzeo: no such bead type')
+         end if
+         
 !
 ! --- determine cell parameters
 !
@@ -81,7 +90,7 @@
          l=int(zr*factz)
 ! ---    test if in the reosanble regime
          exzeo=1.0d+6
-         if ( egrid(j,k,l,idi).gt.exzeo) return
+         if ( egrid(j,k,l,igtype).gt.exzeo) return
 ! --     block m*m*m centered around: j,k,l
          mp=m+1
 ! ---    store x,y,z values around xi,yi,zi in arrays
@@ -102,7 +111,7 @@
 	          lp=l+l0
 	          if (lp.lt.0)    lp=lp+ngrz
 	          if (lp.ge.ngrz) lp=lp-ngrz
-                  yltmp(l0+mp)=egrid(jp,kp,lp,idi)
+                  yltmp(l0+mp)=egrid(jp,kp,lp,igtype)
                end do
                call polint(zt,yltmp,mt,zr,yktmp(k0+mp),dy)
 	    end do

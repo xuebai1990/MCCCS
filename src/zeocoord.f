@@ -26,33 +26,32 @@
       implicit none
       include 'zeolite.inc'
       include 'zeopoten.inc'
-      integer::count,frac,izeo,bonding(8),atomtype
+      include 'mpi.inc'
+      integer::count,frac,izeo,bonding(8),atomtype,nsi=0,no=0
       real(8)::wzeo,charge,alpha,beta,gamma
       character::atom*4
 
       open (unit = 47, file = 'zeolite.cssr', form = 'formatted')
 
-      write(16,100)
+      if (myid.eq.0) write(16,100)
       read(47,*)    zeorx,zeory,zeorz
-      write(16,101) zeorx,zeory,zeorz,zeorx*zeory*zeorz
+      if (myid.eq.0) write(16,101) zeorx,zeory,zeorz,zeorx*zeory*zeorz
       read(47,*)    alpha,beta,gamma
-      write(16,102) alpha,beta,gamma
+      if (myid.eq.0) write(16,102) alpha,beta,gamma
       if (alpha.ne.90.or.beta.ne.90.or.gamma.ne.90) 
      &     call cleanup('** zeocoord: not cubic **')
 
       read(47,*)   nzeo,frac,nx,ny,nz
       
 
-      write(16,103) nzeo
+      if (myid.eq.0) write(16,103) nzeo
       if (nzeo.gt.nzeomax)
      &     call cleanup('** zeocoord: nzeo gt nzeomax **')
 
 !     === Calculate zeolite density from assumption no of Si = 0.5* no O
 
       wzeo = (nzeo*16.00 + 0.5*nzeo*28.09)/(6.023e23)      
-      write(16,104) wzeo,1000.0/(wzeo*6.023e23)
-
-      read(47,*) 
+      if (myid.eq.0) write(16,104) wzeo,1000.0/(wzeo*6.023e23)
 
 !     === Converting to absolute coordinates within [0,ri>
 
@@ -69,12 +68,21 @@
             zeoz(izeo) = mod(zeoz(izeo)+zeorz,zeorz)
          end if 
          idzeo(izeo)=atomtype(zntype,atom)
-         write(16,*) zeox(izeo),zeox(izeo),zeoy(izeo),idzeo(izeo)
+         if (idzeo(izeo) .eq. 177) then
+            nsi=nsi+1
+         elseif (idzeo(izeo) .eq.178) then
+            no=no+1
+         end if
+!         if (myid.eq.0) write(16,*) zeox(izeo),zeox(izeo),
+!     &        zeoy(izeo),idzeo(izeo)
       end do
 
-      write(16,105) nx,ny,nz
+      if (myid.eq.0) then
+         write(16,105) nx,ny,nz
+         write(16,*) 'number of Si:',nSi,' number of O:',nO
+      end if
 
-      close(16)
+      if (myid.eq.0) close(16)
 
 ! 99   format(i4,1x,a4,2x,3(f9.5,1x),8i4,1x,f7.3)
  99   format(i4,1x,a4,2x,3(f9.5,1x))
