@@ -1371,11 +1371,11 @@
             end do
          end do
  71      format(' x-dir: attempts =',F10.1,'   ratio =',f6.3,
-     &        '   max.displ. =',e10.4)
+     &        '   max.displ. =',e11.4)
  72      format(' y-dir: attempts =',F10.1,'   ratio =',f6.3,
-     &      '   max.displ. =',e10.4)
+     &      '   max.displ. =',e11.4)
  73      format(' z-dir: attempts =',F10.1,'   ratio =',f6.3,
-     &        '   max.displ. =',e10.4)
+     &        '   max.displ. =',e11.4)
 ! *** write some information about config performance ***
          if ( pmcb .gt. 0.0d0 ) then
             write(iou,*)
@@ -1518,7 +1518,7 @@
         end do
         
  61     format(' attempts =',f8.1,'   ratio =',f6.3,
-     &      '   max.displ. =',e10.4)
+     &      '   max.displ. =',e11.4)
 ! --- JLR 12-1-09
 !62   format('between box ',i2,'and ',i2,
 !     +     ' attempts =',f9.1,'   accepted =',f8.1) 
@@ -1539,7 +1539,7 @@
  69     format('number of times move out: ', f12.1, 
      &       '  accepted=',f8.1)
  70     format(' h-matrix attempts =',f8.1,'   ratio =',f6.3,
-     &       '   max.displ. =',e10.4)
+     &       '   max.displ. =',e11.4)
         if (lexzeo) then
 !        --- write end-conf to picture file
            call writepdb(ncmt(1,1),nunit(1),1)
@@ -2411,8 +2411,8 @@
  1012 format(3(1x,f10.6),2i5)
 
  1101 format(' max trans. displacement:        ',3f10.6)
- 1102 format(' max rot. displacement:          ',3f10.6)
- 1103 format(' max volume displacement:        ',e12.6)
+ 1102 format(' max rot. displacement:          ',3f12.4)
+ 1103 format(' max volume displacement:        ',e13.6)
  1104 format(' dimension box 1:                ',3f10.6)
  1105 format(' dimension box 2:                ',3f10.6)
 
@@ -2451,11 +2451,11 @@
  1372 format(i5,i5,3f12.5,3f12.5,3f12.5,3f12.5,3f12.5)
 
 
- 1401 format(2x,f6.1,4(1x,e10.5))
+ 1401 format(2x,f6.1,4(1x,e12.5))
  1400 format('  ------------ box: ' ,i4,/,
      & ' block   mu    msetl  density  press  '
      &       ,' dens(av/dif)  energies ... ') 
- 1402 format(2x,i2,15(2x,e9.3))
+ 1402 format(2x,i2,15(2x,e10.3))
  1403 format('  ------------ box: ' ,i4,/,
      & ' block   energy    density   pressure   surf ten  mol fracs') 
  1501 format(' vstart       =',3f24.10)

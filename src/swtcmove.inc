@@ -39,6 +39,6 @@
 
       common /swtcma/ nswaty,nswtcb
       common /swtcmb/ nswach,nsampos
-      common /swtcmc/ nswatb,bnswat,box3,box4,bnswat_empty
+      common /swtcmc/ box3,box4,bnswat,bnswat_empty,nswatb
       common /swtcmd/ gswatc,splist,ncut
       common /swtcme/ pmswtcb
