@@ -2485,11 +2485,6 @@
             end if
          end do
          
-         if (lexzeo) then
-            do ibox = 1,nbox
-               read(77,*) dum,dum,dum
-            end do
-         else
             if (myid.eq.0) then
                write(iou,*) 
                write(iou,*) 'new box size read from restart-file'
@@ -2498,7 +2493,9 @@
             
             do ibox = 1,nbox
                
-               if (lsolid(ibox) .and. .not. lrect(ibox)) then
+               if (lexzeo .and. ibox.eq.1) then
+                  read(77,*) dum,dum,dum
+               elseif (lsolid(ibox) .and. .not. lrect(ibox)) then
                   
                   read(77,*) (hmat(ibox,j),j=1,9)
                   if (myid.eq.0) then
@@ -2553,7 +2550,6 @@
 !     &                *180/onepi     
                   end if
                else
-
                   read (77,*) boxlx(ibox),boxly(ibox),boxlz(ibox)
                   if (myid.eq.0) then
                      write(iou,*)
@@ -2561,23 +2557,18 @@
                      write(iou,1104) ibox,
      &                    boxlx(ibox),boxly(ibox),boxlz(ibox)
                   end if
-
-                  do i = 1, nbox
-                     if( (rcut(i)/boxlx(i) .gt. 0.5d0).or.
-     &                    (rcut(i)/boxly(i) .gt. 0.5d0).or.
-     &                    (rcut(i)/boxlz(i) .gt. 0.5d0)) then
-                        write(iou,*) 'rcut > 0.5*boxlx'
-                        ldie = .true.
-                        return
-                     end if
-                  end do
-                  
-                  
-                  
                end if
-               
             end do
-         end if
+
+            do i = 1, nbox
+               if( (rcut(i)/boxlx(i) .gt. 0.5d0).or.
+     &              (rcut(i)/boxly(i) .gt. 0.5d0).or.
+     &              (rcut(i)/boxlz(i) .gt. 0.5d0)) then
+                  write(iou,*) 'rcut > 0.5*boxlx'
+                  ldie = .true.
+                  return
+               end if
+            end do
 
 !         end if ! end if ( lgibbs .or. lgrand .or. lnpt )
          if (myid.eq.0) then
