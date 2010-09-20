@@ -33,10 +33,12 @@
 
 ! List of conversions
       atom=trim(atom)
-      if (atom.eq."   O") then
-         atomtype = 178
-      elseif (atom.eq."  Si") then
-         atomtype = 177
+      if (atom.eq."  Si") then
+         atomtype = ztype(1)
+         znum(1)=znum(1)+1
+      elseif (atom.eq."   O") then
+         atomtype = ztype(2)
+         znum(2)=znum(2)+1
       else
          print*,len(atom),atom,atom.eq."Si",atom.eq."O"
          call cleanup('** atomtype: unknown atomtype **')

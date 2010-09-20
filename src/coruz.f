@@ -1,4 +1,4 @@
-      function coruz(imolty,rho,ibox)
+      function coruz(imolty,jmolty,rho,ibox)
 !      function coruz(iunit,rho,ibox)
 
 ! coruz
@@ -56,11 +56,10 @@
 !      coruz=8.*onepi*eps*rho*(rci3*rci3*rci3/9.-rci3/3.)
 
       coruz=0.
-      ntjj=ntsubst
       do ii = 1, nunit(imolty) 
          ntii = ntype(imolty,ii)
-!         do jj = 1, nunit(jmolty) 
-!            ntjj = ntype(jmolty,jj)
+!         do jj = 1, zntype
+            ntjj = ztype(jmolty)
             ntij = (ntii-1)*nntype + ntjj
             rci3 = sig2ij(ntij)**(3.0d0/2.0d0) / rcut(ibox)**3
             if ( lexpand(imolty) ) then

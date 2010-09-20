@@ -1025,26 +1025,37 @@
       if (ltailc .and. lswapinter .and. .not. lideal(boxins) ) then
 ! --- END JLR 11-24-09
          vinsta = 0.0d0
-         do imt = 1, nmolty
-            do jmt = 1, nmolty
-
-
-               if ( jmt .eq. imolty ) then
-                  rho = dble( ncmt(boxins,jmt) + 1 ) / volins
-               else
-                  rho = dble( ncmt(boxins,jmt) ) / volins
-               end if
+         do jmt = 1, nmolty
+            if ( jmt .eq. imolty ) then
+               rho = dble( ncmt(boxins,jmt) + 1 ) / volins
+            else
+               rho = dble( ncmt(boxins,jmt) ) / volins
+            end if
+            do imt = 1, nmolty
                if ( imt .eq. imolty ) then
-                  vinsta = vinsta + 
-     &              dble( ncmt(boxins,imt) + 1 ) * coru(imt,jmt,rho
-     &                                               ,boxins)
+                  vinsta = vinsta + dble(ncmt(boxins,imt) + 1)*
+     &                 coru(imt,jmt,rho,boxins)
                else
-                  vinsta = vinsta + 
-     &                 dble( ncmt(boxins,imt) ) * coru(imt,jmt,rho
-     &                                                ,boxins)
+                  vinsta = vinsta + dble(ncmt(boxins,imt))*
+     &                 coru(imt,jmt,rho,boxins)
                end if
             end do
          end do
+
+         if (boxins .eq. 1 .and. lexzeo) then
+            do jmt = 1,zntype
+               rho = znum(jmt)/volins
+               do imt = 1, nmolty
+                  if (imt.eq.imolty) then
+                     vinsta = vinsta + dble(ncmt(boxins,imt)+1)*
+     &                    coruz(imt,jmt,rho,boxins)
+                  else
+                     vinsta = vinsta + dble(ncmt(boxins,imt))*
+     &                    coruz(imt,jmt,rho,boxins)
+                  end if
+               end do
+            end do
+         end if
 
 !         if(LSOLPAR.and.(boxins.eq.2))then
 !           vinsta = 0.0d0
@@ -1521,28 +1532,41 @@
 ! --- END JLR 11-24-09
 !     --- BOXREM without removed particle
          vremta = 0.0d0
-         do imt = 1, nmolty
-            do jmt = 1, nmolty
-                  
-               if ( jmt .eq. imolty ) then
-                  rho = dble( ncmt(boxrem,jmt) - 1 ) / volrem
-               else
-                  rho = dble( ncmt(boxrem,jmt) ) / volrem
-               end if
+         do jmt = 1, nmolty
+            if ( jmt .eq. imolty ) then
+               rho = dble( ncmt(boxrem,jmt) - 1 ) / volrem
+            else
+               rho = dble( ncmt(boxrem,jmt) ) / volrem
+            end if
+            do imt = 1, nmolty
                if ( imt .eq. imolty ) then
-                  vremta = vremta + 
-     &              dble( ncmt(boxrem,imt) - 1 ) * coru(imt,jmt,rho,
-     &                                                boxrem)
+                  vremta = vremta + dble(ncmt(boxrem,imt) - 1)*
+     &                 coru(imt,jmt,rho,boxrem)
                else
-                  vremta = vremta + 
-     &              dble( ncmt(boxrem,imt) ) * coru(imt,jmt,rho
-     &                                              ,boxrem )
+                  vremta = vremta + dble(ncmt(boxrem,imt))*
+     &                 coru(imt,jmt,rho,boxrem)
                end if
             end do
          end do
+
 !         if(LSOLPAR.and.(boxrem.eq.2)) then
 !           vremta = 0.0d0
 !         end if
+
+         if (boxrem .eq. 1 .and. lexzeo) then
+            do jmt = 1,zntype
+               rho = znum(jmt)/volrem
+               do imt = 1, nmolty
+                  if (imt.eq.imolty) then
+                     vremta = vremta + dble(ncmt(boxrem,imt)-1)*
+     &                    coruz(imt,jmt,rho,boxrem)
+                  else
+                     vremta = vremta + dble(ncmt(boxrem,imt))*
+     &                    coruz(imt,jmt,rho,boxrem)
+                  end if
+               end do
+            end do
+         end if
    
          vremta = - vremta + vtailb( boxrem )
          waddold=waddold*dexp(-beta*vremta) 

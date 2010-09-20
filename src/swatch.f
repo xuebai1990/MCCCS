@@ -1490,23 +1490,31 @@
                end if
 ! --- JLR 11-24-09 don't do tail corrections for ideal box
                if (.not.lideal(ibox)) then 
-                  do imt = 1, nmolty
-                     do jmt = 1, nmolty
 !     --- new logic for tail correction (same answer) MGM 3-25-98
-                        rho = dble( ncmt(ibox,jmt) )
-                        if ( jmt .eq. imolin ) rho = rho + 1.0d0
-                        if ( jmt .eq. imolrm ) rho = rho - 1.0d0
-
-                        rho = rho / dvol
-
+                  do jmt = 1, nmolty
+                     rho = dble( ncmt(ibox,jmt) )
+                     if ( jmt .eq. imolin ) rho = rho + 1.0d0
+                     if ( jmt .eq. imolrm ) rho = rho - 1.0d0
+                     rho = rho / dvol
+                     do imt = 1, nmolty
                         dicount = ncmt(ibox,imt)
                         if ( imt .eq. imolin ) dicount = dicount + 1
                         if ( imt .eq. imolrm ) dicount = dicount - 1
-
                         dinsta = dinsta + 
      &                       dicount * coru(imt,jmt,rho,ibox)
                      end do
                   end do
+                  if (ibox .eq. 1 .and. lexzeo) then
+                     do jmt = 1,zntype
+                        rho = znum(jmt)/dvol
+                        do imt = 1, nmolty
+                           dicount=ncmt(ibox,imt)
+                           if ( imt .eq. imolin ) dicount=dicount+1
+                           if ( imt .eq. imolrm ) dicount=dicount-1
+                           dinsta=dinsta+dicount*coruz(imt,jmt,rho,ibox)
+                        end do
+                     end do
+                  end if
                else
                   dinsta = 0.0d0
                end if

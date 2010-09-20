@@ -27,11 +27,13 @@
       include 'zeolite.inc'
       include 'zeopoten.inc'
       include 'mpi.inc'
-      integer::count,frac,izeo,bonding(8),atomtype,nsi=0,no=0
+      integer::count,frac,izeo,bonding(8),atomtype
       real(8)::wzeo,charge,alpha,beta,gamma
       character::atom*4
 
-      open (unit = 47, file = 'zeolite.cssr', form = 'formatted')
+      open (unit = 47, file = 'zeolite.cssr')
+
+      znum=0
 
       if (myid.eq.0) write(16,100)
       read(47,*)    zeorx,zeory,zeorz
@@ -68,18 +70,13 @@
             zeoz(izeo) = mod(zeoz(izeo)+zeorz,zeorz)
          end if 
          idzeo(izeo)=atomtype(zntype,atom)
-         if (idzeo(izeo) .eq. 177) then
-            nsi=nsi+1
-         elseif (idzeo(izeo) .eq.178) then
-            no=no+1
-         end if
-!         if (myid.eq.0) write(16,*) zeox(izeo),zeox(izeo),
-!     &        zeoy(izeo),idzeo(izeo)
+!         if (myid.eq.0) write(16,*) zeox(izeo),zeoy(izeo),
+!     &        zeoz(izeo),idzeo(izeo)
       end do
 
       if (myid.eq.0) then
          write(16,105) nx,ny,nz
-         write(16,*) 'number of Si:',nSi,' number of O:',nO
+         write(16,*) 'number of Si:',znum(1),'number of O:',znum(2)
       end if
 
       if (myid.eq.0) close(16)

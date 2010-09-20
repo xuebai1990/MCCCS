@@ -38,6 +38,8 @@
 
 ! === load force field
 !      call forcefield(rczeo)
+      ztype(1)=177
+      ztype(2)=178
 
 ! === load positions of zeolite atoms
       call zeocoord()
@@ -112,7 +114,7 @@
      &           status='old')
             if (jerr.eq.0) then
 ! ---    read zeolite table from disk
-               if (myid.eq.0) write(iou,*) 'read in',filename
+               if (myid.eq.0) write(iou,*) 'read in ',filename
                read(91) zunitxt,zunityt,zunitzt,ngrxt,ngryt,ngrzt
                if (abs(zunitxt-zunitx).gt.eps .or. abs(zunityt-zunity)
      &              .gt.eps .or. abs(zunitzt-zunitz).gt.eps .or.
@@ -127,7 +129,7 @@
                end do
             else
 ! make a tabulated potential of the zeolite
-               if (myid.eq.0) write(iou,*) 'make new',filename
+               if (myid.eq.0) write(iou,*) 'make new ',filename
                if (myid.eq.0) open(91,file=filename,form='binary')
                if (myid.eq.0) write(91) zunitx,zunity,zunitz,ngrx,
      &              ngry,ngrz

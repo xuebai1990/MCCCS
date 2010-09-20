@@ -578,20 +578,20 @@
             else
                vol = boxlx(ibox)*boxly(ibox)*boxlz(ibox)
             end if
-            do imolty = 1, nmolty
-               do jmolty = 1, nmolty
-!               rho = ncmt(ibox,jmolty) / 
-!     &               ( boxlx(ibox)*boxly(ibox)*boxlz(ibox) )
-                  rho = ncmt(ibox,jmolty) / vol
+            do jmolty = 1, nmolty
+               rho = ncmt(ibox,jmolty) / vol
+               do imolty = 1, nmolty
                   vtail = vtail + 
      &                 ncmt(ibox,imolty) * coru(imolty,jmolty,rho,ibox)
                end do
             end do
             if (ibox .eq. 1 .and. lexzeo) then
-               rho = nzeo/(zeorx*zeory*zeorz)
-               do imolty = 1, nmolty
-                  vtail = vtail + 
-     &                 ncmt(ibox,imolty) * coruz(imolty,rho,ibox)
+               do jmolty = 1,zntype
+                  rho = znum(jmolty)/vol
+                  do imolty = 1, nmolty
+                     vtail = vtail + ncmt(ibox,imolty)*
+     &                    coruz(imolty,jmolty,rho,ibox)
+                  end do
                end do
             end if
 !-----
