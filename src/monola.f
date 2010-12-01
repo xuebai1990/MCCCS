@@ -595,8 +595,7 @@
          v3garob(ibox) = v3garo
          
          if( ovrlap ) then
-            write(iou,*) ' overlap in initial configuration '
-            call cleanup('')
+            call cleanup('overlap in initial configuration')
          end if
          vstart(ibox) = vbox(ibox)
          if (myid.eq.0) then
@@ -988,8 +987,7 @@
          end if
 
          if (lucall) then
-            write(iou,*) 'not recently checked for accuracy'
-            call cleanup('')
+            call cleanup('not recently checked for accuracy')
 !            do j = 1,nmolty
 !               if ( ucheck(j) .gt. 0 ) then
 !                  call chempt(bsswap,j,ucheck(j))

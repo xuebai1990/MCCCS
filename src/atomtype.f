@@ -24,6 +24,7 @@
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       implicit none
+      include "zeopoten.inc"
       character(len=*)::atom
       integer::ntype,atomtype
 

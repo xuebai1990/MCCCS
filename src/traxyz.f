@@ -181,8 +181,7 @@
       v3o = v3garo
 
       if (ovrlap) then
-         write(iou,*) 'disaster ovrlap in old conf of TRAXYZ'
-         call cleanup('')
+         call cleanup('disaster ovrlap in old conf of TRAXYZ')
       end if
 
       if ( lewald .and. lelect(imolty) ) then

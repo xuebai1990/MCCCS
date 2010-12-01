@@ -181,8 +181,7 @@
       end if
 !      write(iou,*) 'boxins:',boxins,'boxrem:',boxrem
       if ( .not. (lgibbs .or. lgrand) .and. lswapinter ) then
-         write(iou,*) 'no interbox swap if not gibbs/grand ensemble!'
-         call cleanup('')
+         call cleanup('no interbox swap if not gibbs/grand ensemble!')
       end if
 
 ! *** select a chain in BOXREM at random ***
@@ -213,8 +212,7 @@
      &       write(iou,*) 'screwup swap, irem:',irem,moltyp(irem),imolty
          ibox = nboxi(irem)
          if ( ibox .ne. boxrem ) then
-            write(iou,*) 'problem in swap'
-            call cleanup('')
+            call cleanup('problem in swap')
          end if
       end if
 
@@ -380,8 +378,7 @@
      &              write(iou,*) 'screwup swap, kins:'
      &              ,kins,moltyp(kins),kmolty
                if ( nboxi(kins) .ne. boxins ) then 
-                  write(iou,*) 'problem in swap with kins'
-                  call cleanup('')
+                  call cleanup('problem in swap with kins')
                end if
             end if
             neighk_num = neigh_cnt(kins)
@@ -846,8 +843,7 @@
          
          if (ovrlap) then
             write(iou,*) 'iins',iins,'irem',irem
-            write(iou,*) 'strange screwup in DC-CBMC swap'
-            call cleanup('')
+            call cleanup('strange screwup in DC-CBMC swap')
          end if
 ! v1insewd, vnewewald and vnewintra now accounted for in v from energy
 !$$$         delen = v - ( vnewinter + vnewext +vnewelect) 

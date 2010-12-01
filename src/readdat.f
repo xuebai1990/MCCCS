@@ -2757,11 +2757,11 @@
 ! *** 5.0
           do ibox = 1, nbox
              if (lsolid(ibox).and.(.not.lrect(ibox))) then
-                  min_boxl = min(min_width(ibox,1),min_width(ibox,2),
-     &                       min_width(ibox,3))
-              else
-                  min_boxl = min(boxlx(ibox),boxly(ibox),boxlz(ibox))
-              end if
+                min_boxl = min(min_width(ibox,1),min_width(ibox,2),
+     &               min_width(ibox,3))
+             else
+                min_boxl = min(boxlx(ibox),boxly(ibox),boxlz(ibox))
+             end if
              calp(ibox) = kalp(ibox)/min_boxl
              if ( lewald ) then
                 if ( kalp(ibox) .lt. 5.6d0 ) then
