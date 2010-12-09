@@ -777,7 +777,7 @@
 
       if ( lrsave .and.myid.eq.0) then
 !     *** write out the restart configurations to SAFETY-file ***
-         open(unit=88,file="save-config",status='unknown')
+         open(unit=88,file="save-config")
          write (88,*) nnn + nnstep
          write (88,*) Armtrax, Armtray, Armtraz 
          do im=1,nbox

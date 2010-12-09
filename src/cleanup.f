@@ -8,6 +8,6 @@
 
       write(iou,*) msg
 
-      stop -1
+      stop
 
       end

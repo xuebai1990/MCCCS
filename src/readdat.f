@@ -576,7 +576,7 @@
 ! - set up the strectching and bending constants
       call suvibe
 ! - set up the forcefield and the masses
-      call suijtab( lmixlb,lmixjo,qelect )      
+      call suijtab( lmixlb,lmixjo )      
      
 ! - read bead potential information
       do imol = 1, nmolty
@@ -1047,11 +1047,11 @@
             do j = 1,nunit(i)
                qtot = qtot+qelect(ntype(i,j))
             end do
-            if(dabs(qtot).gt.1d-7) then
-               write(iou,*)'molecule type',i,'not neutral check charges'
-               ldie = .true.
-               return
-            end if
+!            if(dabs(qtot).gt.1d-7) then
+!               write(iou,*)'molecule type',i,'not neutral check charges'
+!               ldie = .true.
+!               return
+!            end if
          end do
       end if
         
@@ -2214,7 +2214,7 @@
  
 ! *** restart saver
       if ( nstep .gt. 100 ) then
-         irsave = nstep / 20
+         irsave = nstep / 50
       else
          irsave = nstep + 1
       end if
@@ -2445,6 +2445,17 @@
      &              , rmrotz(imol,im)
             end do
          end do
+!     For production (iratio > nstep), set max disp to average
+         if (iratio.gt.nstep) then
+               rmtrax(1:nmolty,1:nbox)=(rmtrax(1:nmolty,1:nbox)+
+     &           rmtray(1:nmolty,1:nbox)+rmtraz(1:nmolty,1:nbox))/3
+               rmtray(1:nmolty,1:nbox)=rmtray(1:nmolty,1:nbox)
+               rmtraz(1:nmolty,1:nbox)=rmtraz(1:nmolty,1:nbox)
+               rmrotx(1:nmolty,1:nbox)=(rmrotx(1:nmolty,1:nbox)+
+     &              rmroty(1:nmolty,1:nbox)+rmrotz(1:nmolty,1:nbox))/3
+               rmroty(1:nmolty,1:nbox)=rmroty(1:nmolty,1:nbox)
+               rmrotz(1:nmolty,1:nbox)=rmrotx(1:nmolty,1:nbox)
+         end if
          if (myid.eq.0) then 
             write(iou,*) 
      &           'new maximum displacements read from restart-file'
@@ -2694,7 +2705,7 @@
             qbox(i) = 0.0d0
          end do
 
-         do 22 i = 1, nchain
+         do i = 1, nchain
 !            write(iou,*) 'reading coord of chain i',i
             imolty = moltyp(i)
             do j = 1, nunit(imolty)
@@ -2704,8 +2715,7 @@
                end if
                qbox(nboxi(i)) = qbox(nboxi(i)) + qqu(i,j)
             end do
-            
- 22      continue
+         end do
 
          close(77)
 
@@ -2716,7 +2726,6 @@
                return
             end if
          end do
-
       end if
  
       if (L_Ewald_Auto) then
@@ -2917,7 +2926,6 @@
       if (myid.eq.0) then
          open(unit=10, file=file_movie, status='unknown')
          if ( nnframe .ne. 0 ) then
-            write(10,*) nnframe,nchain,nmolty,(rcut(ibox),ibox=1,nbox)
             nhere = 0
             do zz=1,nntype
                if ( lhere(zz) ) then
@@ -2925,8 +2933,9 @@
                   temphe(nhere) = zz
                end if
             end do
-
-            write(10,*) nhere,(temphe(zz),zz=1,nhere)
+            write(10,*) nnframe,nchain,nmolty,nbox,nhere
+            write(10,*) (rcut(ibox),ibox=1,nbox)
+            write(10,*) (temphe(zz),zz=1,nhere)
          
             do imolty = 1,nmolty
                write(10,*) nunit(imolty)
@@ -2938,11 +2947,8 @@
 
 !     output torsional connectivity information
                do j = 1,nunit(imolty)
-                  write(10,*) intor(imolty,j)
-                  do ii = 1,intor(imolty,j)
-                     write(10,*) ijtor2(imolty,j,ii)
-     &                    ,ijtor3(imolty,j,ii),ijtor4(imolty,j,ii)
-                  end do
+                  write(10,*) intor(imolty,j),(ijtor2(imolty,j,ii),
+     & ijtor3(imolty,j,ii),ijtor4(imolty,j,ii),ii=1,intor(imolty,j))
                end do
             end do
 
@@ -3065,7 +3071,8 @@
             end if
             do i = 1, nntype
                do j = 1,nntype
-                  if ( lhere(i) .and. lhere(j) ) then
+                  if ((lhere(i).or.(i.eq.177).or.(i.eq.178))
+     &      .and.(lhere(j).or.(j.eq.177).or.(j.eq.178)) ) then
                      if (lninesix) then
                         ij = (i-1)*nxatom + j
                         write(iou,'(3x,2i4,2f10.5,2f15.6)') i,j

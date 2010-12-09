@@ -37,6 +37,8 @@
       include 'coord.inc'
       include 'coord2.inc'
       include 'system.inc'
+      include 'external.inc'
+      include 'zeopoten.inc'
       include 'ensemble.inc'
       include 'cbmc.inc'
       include 'inputdata.inc'
@@ -57,7 +59,7 @@
      &  ,orgaib,orgbia,orgbib,ipairb 
 
       real(8)::random,tweight,tweiold,rxut,ryut,rzut
-     &  ,dvol,vola,volb,rho,coru,dinsta,rpair
+     &  ,dvol,vola,volb,rho,coru,coruz,dinsta,rpair
 
       real(8)::vnbox,vninte,vnintr,vnvibb,vntgb,vnextb
      &  ,vnbend,vntail,vnelect,vnewald,wnlog,wolog,wdlog,wswat
@@ -1504,17 +1506,17 @@
      &                       dicount * coru(imt,jmt,rho,ibox)
                      end do
                   end do
-                  if (ibox .eq. 1 .and. lexzeo) then
-                     do jmt = 1,zntype
-                        rho = znum(jmt)/dvol
-                        do imt = 1, nmolty
-                           dicount=ncmt(ibox,imt)
-                           if ( imt .eq. imolin ) dicount=dicount+1
-                           if ( imt .eq. imolrm ) dicount=dicount-1
-                           dinsta=dinsta+dicount*coruz(imt,jmt,rho,ibox)
-                        end do
-                     end do
-                  end if
+!$$$                  if (ibox .eq. 1 .and. lexzeo) then
+!$$$                     do jmt = 1,zntype
+!$$$                        rho = znum(jmt)/dvol
+!$$$                        do imt = 1, nmolty
+!$$$                           dicount=ncmt(ibox,imt)
+!$$$                           if ( imt .eq. imolin ) dicount=dicount+1
+!$$$                           if ( imt .eq. imolrm ) dicount=dicount-1
+!$$$                           dinsta=dinsta+dicount*coruz(imt,jmt,rho,ibox)
+!$$$                        end do
+!$$$                     end do
+!$$$                  end if
                else
                   dinsta = 0.0d0
                end if

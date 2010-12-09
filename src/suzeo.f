@@ -105,7 +105,7 @@
             zzz(i)=i*dgrz
          end do
 
-         nlayermax=maxlayer
+         nlayermax=0
 
          do igtype=1,gntype
             idi=gtable(igtype)
@@ -142,10 +142,14 @@
                      end do
                   end do
                end do
+               if (myid.eq.0) write(iou,*) 'maxlayer = ',nlayermax
+!               call ztest(idi)
             end if
-            if (myid.eq.0) close(91)
+            if (myid.eq.0) then
+               close(91)
+               close(16)
+            end if
          end do        
-!         call ztest
       end if
 
       return

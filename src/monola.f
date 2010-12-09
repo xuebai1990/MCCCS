@@ -1716,7 +1716,7 @@
          
          file_config = 'config'//fname2(1:len_trim(fname2))
      &        //suffix//'.dat'
-         open(8, file=file_config,status='unknown')
+         open(8, file=file_config)
          
          write(8,*) nend
          if ( nend .gt. 0 ) then
@@ -1769,7 +1769,7 @@
             do  i = 1, nchain
                imolty = moltyp(i)
                do  j = 1, nunit(imolty)
-                  write(8,'(4f15.6)') rxu(i,j), ryu(i,j), rzu(i,j), 
+                  write(8,*) rxu(i,j), ryu(i,j), rzu(i,j), 
      &                 qqu(i,j)
                end do
             end do 
@@ -1804,7 +1804,7 @@
      &              (point_of_start+N_sub-1)) then
                   imolty = moltyp(i)
                   do  j = 1, nunit(imolty)
-                     write(8,'(4f15.6)') rxu(i,j), ryu(i,j), rzu(i,j), 
+                     write(8,*) rxu(i,j), ryu(i,j), rzu(i,j), 
      &                    qqu(i,j)
                   end do
                end if
@@ -1824,7 +1824,7 @@
             do i = 1, nchain
                imolty = moltyp(i)
                do j = 1, nunit(imolty)
-                  write(8,'(4f15.6)') rxu(i,j), ryu(i,j), rzu(i,j), 
+                  write(8,*) rxu(i,j), ryu(i,j), rzu(i,j), 
      &                 qqu(i,j)
                end do 
             end do

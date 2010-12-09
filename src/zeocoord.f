@@ -36,10 +36,11 @@
       znum=0
 
       if (myid.eq.0) write(16,100)
-      read(47,*)    zeorx,zeory,zeorz
-      if (myid.eq.0) write(16,101) zeorx,zeory,zeorz,zeorx*zeory*zeorz
-      read(47,*)    alpha,beta,gamma
-      if (myid.eq.0) write(16,102) alpha,beta,gamma
+      read(47,*)    zeorx,zeory,zeorz,alpha,beta,gamma
+      if (myid.eq.0) then
+         write(16,101) zeorx,zeory,zeorz,zeorx*zeory*zeorz
+         write(16,102) alpha,beta,gamma
+      end if
       if (alpha.ne.90.or.beta.ne.90.or.gamma.ne.90) 
      &     call cleanup('** zeocoord: not cubic **')
 
@@ -79,10 +80,8 @@
          write(16,*) 'number of Si:',znum(1),'number of O:',znum(2)
       end if
 
-      if (myid.eq.0) close(16)
-
 ! 99   format(i4,1x,a4,2x,3(f9.5,1x),8i4,1x,f7.3)
- 99   format(i4,1x,a4,2x,3(f9.5,1x))
+ 99   format(i5,1x,a4,2x,3(f9.5,1x))
  100  format(/,' READING ZEOLITE LATTICE FROM FILE zeolite.cssr:',/,
      &     ' --------------------------------------------------')
  101  format(  ' box dimensions                    = ',3f10.3,

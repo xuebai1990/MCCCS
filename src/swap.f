@@ -40,6 +40,7 @@
       include 'coord2.inc'
       include 'system.inc'
       include 'ensemble.inc'
+      include 'zeopoten.inc'
       include 'cbmc.inc'
       include 'rosen.inc' 
       include 'boltzmann.inc'
@@ -77,7 +78,7 @@
      &     ,vewald,vflucq,delen,deleo,rpair
       real(8)::vnewflucq,voldflucq,qion,ctorfo,ctorfn
       dimension qion(numax)
-      real(8)::rxuold,ryuold,rzuold
+      real(8)::rxuold,ryuold,rzuold,coruz
       dimension rxuold(numax),ryuold(numax),rzuold(numax)
       real(8)::bsswap,bnswap,bnswap_in,bnswap_out
       real(8)::random,rmol,rbf,bsum
@@ -1038,20 +1039,20 @@
             end do
          end do
 
-         if (boxins .eq. 1 .and. lexzeo) then
-            do jmt = 1,zntype
-               rho = znum(jmt)/volins
-               do imt = 1, nmolty
-                  if (imt.eq.imolty) then
-                     vinsta = vinsta + dble(ncmt(boxins,imt)+1)*
-     &                    coruz(imt,jmt,rho,boxins)
-                  else
-                     vinsta = vinsta + dble(ncmt(boxins,imt))*
-     &                    coruz(imt,jmt,rho,boxins)
-                  end if
-               end do
-            end do
-         end if
+!$$$         if (boxins .eq. 1 .and. lexzeo) then
+!$$$            do jmt = 1,zntype
+!$$$               rho = znum(jmt)/volins
+!$$$               do imt = 1, nmolty
+!$$$                  if (imt.eq.imolty) then
+!$$$                     vinsta = vinsta + dble(ncmt(boxins,imt)+1)*
+!$$$     &                    coruz(imt,jmt,rho,boxins)
+!$$$                  else
+!$$$                     vinsta = vinsta + dble(ncmt(boxins,imt))*
+!$$$     &                    coruz(imt,jmt,rho,boxins)
+!$$$                  end if
+!$$$               end do
+!$$$            end do
+!$$$         end if
 
 !         if(LSOLPAR.and.(boxins.eq.2))then
 !           vinsta = 0.0d0
@@ -1549,20 +1550,20 @@
 !           vremta = 0.0d0
 !         end if
 
-         if (boxrem .eq. 1 .and. lexzeo) then
-            do jmt = 1,zntype
-               rho = znum(jmt)/volrem
-               do imt = 1, nmolty
-                  if (imt.eq.imolty) then
-                     vremta = vremta + dble(ncmt(boxrem,imt)-1)*
-     &                    coruz(imt,jmt,rho,boxrem)
-                  else
-                     vremta = vremta + dble(ncmt(boxrem,imt))*
-     &                    coruz(imt,jmt,rho,boxrem)
-                  end if
-               end do
-            end do
-         end if
+!$$$         if (boxrem .eq. 1 .and. lexzeo) then
+!$$$            do jmt = 1,zntype
+!$$$               rho = znum(jmt)/volrem
+!$$$               do imt = 1, nmolty
+!$$$                  if (imt.eq.imolty) then
+!$$$                     vremta = vremta + dble(ncmt(boxrem,imt)-1)*
+!$$$     &                    coruz(imt,jmt,rho,boxrem)
+!$$$                  else
+!$$$                     vremta = vremta + dble(ncmt(boxrem,imt))*
+!$$$     &                    coruz(imt,jmt,rho,boxrem)
+!$$$                  end if
+!$$$               end do
+!$$$            end do
+!$$$         end if
    
          vremta = - vremta + vtailb( boxrem )
          waddold=waddold*dexp(-beta*vremta) 

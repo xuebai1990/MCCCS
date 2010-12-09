@@ -44,6 +44,7 @@
       include 'connect.inc'
       include 'ewaldsum.inc'
       include 'fepsi.inc'
+      include 'zeopoten.inc'
       include 'inputdata.inc'
       include 'qqlist.inc'
       include 'clusterbias.inc'
@@ -585,15 +586,15 @@
      &                 ncmt(ibox,imolty) * coru(imolty,jmolty,rho,ibox)
                end do
             end do
-            if (ibox .eq. 1 .and. lexzeo) then
-               do jmolty = 1,zntype
-                  rho = znum(jmolty)/vol
-                  do imolty = 1, nmolty
-                     vtail = vtail + ncmt(ibox,imolty)*
-     &                    coruz(imolty,jmolty,rho,ibox)
-                  end do
-               end do
-            end if
+!$$$            if (ibox .eq. 1 .and. lexzeo) then
+!$$$               do jmolty = 1,zntype
+!$$$                  rho = znum(jmolty)/vol
+!$$$                  do imolty = 1, nmolty
+!$$$                     vtail = vtail + ncmt(ibox,imolty)*
+!$$$     &                    coruz(imolty,jmolty,rho,ibox)
+!$$$                  end do
+!$$$               end do
+!$$$            end if
 !-----
   
             vinter = vinter + vtail
@@ -639,7 +640,7 @@
                         ryuij = ryu(i,ii) - ryu(i,jj)
                         rzuij = rzu(i,ii) - rzu(i,jj)
 ! --- JLR 11-17-09  need call to mimage for intrachain
-                        if (lpbc) call mimage ( rxuij,ryuij,rzuij,ibox )
+                        if (lpbc) call mimage(rxuij,ryuij,rzuij,ibox)
 ! --- END JLR 11-17-09
                         rij = dsqrt(rxuij*rxuij + ryuij*ryuij + 
      &                       rzuij*rzuij)
@@ -652,7 +653,7 @@
                         ryuij = ryu(i,ii) - ryu(i,jj)
                         rzuij = rzu(i,ii) - rzu(i,jj)
 ! --- JLR 11-17-09  need call to mimage for intrachain
-                        if (lpbc) call mimage ( rxuij,ryuij,rzuij,ibox )
+                        if (lpbc) call mimage(rxuij,ryuij,rzuij,ibox)
 ! --- END JLR 11-17-09
                         rij = dsqrt(rxuij*rxuij + ryuij*ryuij + 
      &                       rzuij*rzuij)

@@ -67,7 +67,20 @@
          vtorso = vtt0(itype) + vtt1(itype)*(1.0d0-thetac) +
      &            vtt2(itype)*(1.d0-dcos(2.d0*theta)) +
      &            vtt3(itype)*(1.d0+dcos(3.d0*theta))
-
+      elseif ( itype .eq. 0) then
+! -- type 1 torsion from Dubbeldam D., Calero S., Vlugt T.J.H., Krishna R., Maesen T.L.M., Smit B., J Phys Chem B 2004 108 12301
+         if (thetac.gt.1.d0) thetac=1.0d0
+         if (thetac.lt.-1.d0) thetac=-1.0d0
+         tac2 = thetac*thetac
+         tac3 = tac2*thetac
+         tac4 = tac3*thetac
+         tac5 = tac4*thetac
+         vtorso = 1204.654
+     &        +1947.740*thetac
+     &        -357.845*tac2
+     &        -1944.666*tac3
+     &        +715.690*tac4
+     &        -1565.572*tac5
       elseif ( itype .eq. 8 ) then
 ! - Cummings torsional potential
 ! - PERFLUOROCARBON CURRENTLY USED starting 10-1-97

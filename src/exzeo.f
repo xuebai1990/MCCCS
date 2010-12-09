@@ -58,7 +58,7 @@
               r6=r2i*r2i*r2i
 !              if (lshift) then     
 !                 exzeo=exzeo+4.*epsij(ntij)*(r6-1.0)*r6-
-!     +                 zencut(idi,idj)
+!     &                 zencut(idi,idj)
 !              else
                  exzeo=exzeo+4.*epsij(ntij)*(r6-1.0)*r6+
      &             qelect(idi)*qelect(idj)/dsqrt(r2)

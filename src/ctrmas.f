@@ -188,7 +188,7 @@
                      end if
                   end if
                   if ( ldx ) then
-                     dx = -(dble(inboxx)*bz)
+                     dx = -(dble(inboxx)*bx)
                   end if
                   if ( ldy ) then
                      dy = -(dble(inboxy)*by)

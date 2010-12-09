@@ -1,28 +1,5 @@
       subroutine recipsum(ibox,vrecip)
 
-! recipsum
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-! John Stubbs, and Collin Wick and Ilja Siepmann  
-!                     
-! This program is free software; you can redistribute it and/or
-! modify it under the terms of the GNU General Public License
-! as published by the Free Software Foundation; either version 2
-! of the License, or (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program; if not, write to 
-!
-! Free Software Foundation, Inc. 
-! 59 Temple Place - Suite 330
-! Boston, MA  02111-1307, USA.
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-
       implicit none
 
 !    *********************************************************************
@@ -117,14 +94,14 @@
 
       hmaxsq = alpsqr4*onepi*onepi
 ! RP added for MPI        
-       blocksize = kmaxl/numprocs
+      blocksize = kmaxl/numprocs
        
-       mystart = myid * blocksize
-       if(myid .eq. (numprocs-1))then
+      mystart = myid * blocksize
+      if(myid .eq. (numprocs-1))then
          myend = kmaxl
-       else 
+      else 
          myend = (myid + 1) * blocksize - 1
-       end if
+      end if
 ! *** generate the reciprocal-space 
       do l = mystart,myend
 !      do l = 0,kmaxl 
@@ -161,22 +138,19 @@
 !     *** sum up q*cos and q*sin ***
                   sumr = 0.0d0
                   sumi = 0.0d0
-!                  do 10 i = myid+1,nchain,numprocs
-                  do 10 i = 1,nchain
+!                  do i = myid+1,nchain,numprocs
+                  do i = 1,nchain
                      imolty = moltyp(i)
-                     if ( .not. lelect(imolty) ) goto 10
-                     if ( nboxi(i) .eq. ibox) then
-                        do ii = 1,nunit(imolty)
-                           if ( lqchg(ntype(imolty,ii)) ) then
-                              arg = kx1*rxu(i,ii) +
-     &                             ky1*ryu(i,ii) +
-     &                             kz1*rzu(i,ii)
-                              sumr = sumr + dcos(arg)*qqu(i,ii)
-                              sumi = sumi + dsin(arg)*qqu(i,ii)
-                           end if
-                        end do
-                     end if
- 10               continue
+                     if (.not.lelect(imolty).or.nboxi(i).ne.ibox ) cycle
+                     do ii = 1,nunit(imolty)
+                        if ( lqchg(ntype(imolty,ii)) ) then
+                           arg=kx1*rxu(i,ii)+ky1*ryu(i,ii)+kz1*rzu(i
+     &                          ,ii)
+                           sumr = sumr + dcos(arg)*qqu(i,ii)
+                           sumi = sumi + dsin(arg)*qqu(i,ii)
+                        end if
+                     end do
+                  end do
 
                   ssumr_arr(ncount) = sumr
                   ssumi_arr(ncount) = sumi
@@ -242,10 +216,8 @@
 !      write(iou,*) 'in recipsum:',ssumr(100,ibox),ibox
 ! *** safety check ***
 !      write(iou,*) 'A total of ',ncount,' vectors are used'
-      if ( ncount .gt. vectormax ) then
-         write(iou,*) 'choose a larger vectormax'
-         call cleanup('')
-      end if
+      if ( ncount .gt. vectormax ) call cleanup
+     &     ('choose a larger vectormax')
 
       numvect(ibox) = ncount
       return

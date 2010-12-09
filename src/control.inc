@@ -158,7 +158,7 @@
 ! if LTAILC=.TRUE. tail corrections are added
 !    (WARNING:  .lsami. in external.inc switches an intrinsic
 !               tailcorrection on)
-      parameter (ltailc = .true.)
+      parameter (ltailc = .false.)
 ! truncated and shifted potentials
       parameter (lshift = .false.)
 ! ***************************************
@@ -175,7 +175,7 @@
 ! - numax = maximum number of units
       parameter (numax = 12)
 ! - ntmax = maximum number of types of chains
-      parameter (ntmax = 12)
+      parameter (ntmax = 10)
 ! - smax = max no. of mstates
       parameter (smax = 35)
 ! - nbxmax = maximum number of boxes
@@ -185,7 +185,7 @@
 ! - nvmax = maximum number of bond vibration and bending constants
       parameter (nvmax = 300)
 ! - npamax = maximum number of pairs to switch or swatch
-      parameter (npamax = 40)
+      parameter (npamax = 10)
 ! - npabmax = maximum number of box pairs (for swatch and swap) 
       parameter (npabmax = 3)
 ! - maxvir = maximum number of bins for the 2nd virial coefficient

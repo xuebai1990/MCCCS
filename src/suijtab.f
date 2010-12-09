@@ -40,11 +40,11 @@
 
       logical::lmixlb, lmixjo
 
-      integer::i, j, ij, ji,ibox
+      integer::i, j, ij, ji,ibox,nntype5,nmix,imix
       real(8)::rzeronx(nxatom),epsilonnx(nxatom)
 
       real(8)::rcheck, sr2, sr6, adum, bdum, rs1, rs7, sr7,
-     &     pi,djay
+     &     pi,djay,sigmaTmp,epsilonTmp
 
 ! ----------------------------------------------------------------
       do i = 1, nntype
@@ -3631,13 +3631,33 @@
       ij = (i-1)*nntype + j
       jayq(ij) = 112537.0d0
 
-! *** convert input data to program units ***
-      if ( lsami ) then
-      do ibox = 2,nbox
-         if (dabs(rcut(1)-rcut(ibox)).gt.1.0d-10) then
-            call cleanup('Keep rcut for each box same')
+      open(5,file='lj.poten')
+      read(5,*)
+      read(5,*) nntype5
+      read(5,*)
+      do j=1,nntype5
+         read(5,*) i,sigi(i),epsi(i),qelect(i)
+!         read(5,'(I,4F,2A)') i,sigi(i),epsi(i),qelect(i),mass(i)
+!     &        ,chemid(i),chname(i)
+         if (qelect(i).ne.0) then
+            lqchg(i)=.true.
+         else
+            lqchg(i)=.false.
+         end if
+         if (sigi(i).eq.0 .and. epsi(i).eq.0) then
+            lij(i)=.false. 
+         else
+            lij(i)=.true.
          end if
       end do
+
+! *** convert input data to program units ***
+      if ( lsami ) then
+         do ibox = 2,nbox
+            if (dabs(rcut(1)-rcut(ibox)).gt.1.0d-10) then
+               call cleanup('Keep rcut for each box same')
+            end if
+         end do
          call susami
          rcheck = 2.5d0 * 3.527d0
          if ( rcut(1) .ne. rcheck ) then
@@ -3682,6 +3702,24 @@
       end if
 ! ---  Conversion factor for intermolecular coulomb interactions
       qqfact = 1.67d5
+
+      read(5,*)
+      read(5,*) nmix 
+      read(5,*)
+      do imix=1,nmix
+         read(5,*) i,j,sigmaTmp,epsilonTmp
+         ij=(i-1)*nntype+j
+         sig2ij(ij)=sigmaTmp*sigmaTmp
+         sig2ij((j-1)*nntype+i)=sig2ij(ij)
+         epsij(ij)=epsilonTmp
+         epsij((j-1)*nntype+i)=epsilonTmp
+         if (lshift) then
+            sr2 = sig2ij(ij) / (rcut(1)*rcut(1))
+            sr6 = sr2 * sr2 * sr2
+            ecut(ij)= sr6*(sr6-1.0d0)*epsij(ij)
+            ecut((j-1)*nntype+i)=ecut(ij)
+         end if
+      end do
 
       return
       end

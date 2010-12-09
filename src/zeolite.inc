@@ -26,7 +26,7 @@
      &                 zeorxi,zeoryi,zeorzi,zunitx,zunity
      &                ,zunitz,zunitxi,zunityi,zunitzi
 
-      parameter       (nzeomax=3500)
+      parameter       (nzeomax=57600)
 
       common/zeolit/zeox(nzeomax),zeoy(nzeomax),zeoz(nzeomax),
      &              idzeo(nzeomax),nzeo
