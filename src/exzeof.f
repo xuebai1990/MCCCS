@@ -134,7 +134,7 @@
 
 ! * from h-matrix formulation
       integer::l,m,n,m_min,m_max,n_min,n_max,kmaxl,kmaxm,kmaxn
-
+      integer::mystart,myend,blocksize
       real(8)::alpsqr4,vol,ksqr,sum,arg,recipzeo,xi,yi,zi,qi
      &     ,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi
 
@@ -177,10 +177,18 @@
       vol = vol/(8.0d0*onepi)
 
       hmaxsq = alpsqr4*onepi*onepi
-       
+
+      blocksize = kmaxl/numprocs
+      mystart = myid * blocksize
+      if(myid .eq. (numprocs-1))then
+         myend = kmaxl
+      else 
+         myend = (myid + 1) * blocksize - 1
+      end if
 ! *** generate the reciprocal-space
 ! here -kmaxl,-kmaxl+1,...,-1 are skipped, so no need to divide by 2 for the prefactor
-      do l = 0,kmaxl 
+      do l = mystart,myend       
+!      do l = 0,kmaxl 
         if ( l .eq. 0 ) then
             m_min = 0
          else
