@@ -1,27 +1,4 @@
-      subroutine suzeo(rczeo,maxlayer)
-
-! suzeo
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-! John Stubbs, and Collin Wick and Ilja Siepmann  
-!                     
-! This program is free software; you can redistribute it and/or
-! modify it under the terms of the GNU General Public License
-! as published by the Free Software Foundation; either version 2
-! of the License, or (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program; if not, write to 
-!
-! Free Software Foundation, Inc. 
-! 59 Temple Place - Suite 330
-! Boston, MA  02111-1307, USA.
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+      subroutine suzeo()
 
       use grid
       implicit none 
@@ -32,17 +9,14 @@
       include 'external.inc'
       include 'mpi.inc'
       integer::imol,iunit,igtype,idi,jerr,i,j,k,
-     &     ngrxt,ngryt,ngrzt,maxlayer
+     &     ngrxt,ngryt,ngrzt
       character(len=8)::filename
-      real(8)::rczeo,zunitxt,zunityt,zunitzt,exzeof
+      real(8)::zunitxt,zunityt,zunitzt,exzeof
 
 ! === load force field
 !      call forcefield(rczeo)
-      ztype(1)=177
-      ztype(2)=178
 
 ! === load positions of zeolite atoms
-      call zeocoord()
       zeorxi=1./zeorx
       zeoryi=1./zeory
       zeorzi=1./zeorz

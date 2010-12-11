@@ -1,29 +1,6 @@
       subroutine readdat(lucall,ucheck,nvirial,starvir
      &     ,stepvir)
 
-! readdat
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-! John Stubbs, and Collin Wick and Ilja Siepmann  
-!                     
-! This program is free software; you can redistribute it and/or
-! modify it under the terms of the GNU General Public License
-! as published by the Free Software Foundation; either version 2
-! of the License, or (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program; if not, write to 
-!
-! Free Software Foundation, Inc. 
-! 59 Temple Place - Suite 330
-! Boston, MA  02111-1307, USA.
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-
       implicit none
  
       include 'control.inc'
@@ -36,6 +13,7 @@
       include 'external.inc'
       include 'externalmuir.inc'
       include 'zeolite.inc'
+      include 'zeopoten.inc'
       include 'nrtab.inc'
       include 'connect.inc'
       include 'inputdata.inc'
@@ -391,6 +369,15 @@
          read(4,*)
          read(4,*) boxlx(i),boxly(i),boxlz(i),lsolid(i),lrect(i),
      &        kalp(i),rcut(i),rcutnn(i)
+         if (i.eq.1 .and. lexzeo) then
+            call zeocoord()
+            boxlx(1)=zeorx
+            boxly(1)=zeory
+            boxlz(1)=zeorz
+            if (myid.eq.0) write(iou,*) ' note zeolite determines 
+     &the box size !'
+         end if
+
          if ( lecho.and.myid.eq.0 ) then
             if (lverbose) then
                write(iou,*) 'box:',i
@@ -2400,18 +2387,6 @@
 
 ! -------------------------------------------------------------------
 
-! *** read/produce initial/starting configuration ***
-! *** zeolite external potential
-      if ( lexzeo ) then
-         call suzeo(rcut(1),maxlayer)
-         boxlx(1)=zeorx
-         boxly(1)=zeory
-         boxlz(1)=zeorz
-         if (myid.eq.0) write(iou,*) ' note zeolite determines 
-     &        the box size !'
-      end if
-
-! ----------------------------------------------------------------      
       if (lgrand .and. .not.(lslit)) then
 ! ---     volume ideal gas box is set arbitry large!
          boxlx(2)=1000*boxlx(1)          
@@ -2870,6 +2845,11 @@
       end do
 
 ! -------------------------------------------------------------------
+! *** read/produce initial/starting configuration ***
+! *** zeolite external potential
+      if ( lexzeo ) call suzeo()
+
+! ----------------------------------------------------------------      
  
 ! - reordering of numbers for charmm
 !      do i = 1, nchain
@@ -3071,8 +3051,8 @@
             end if
             do i = 1, nntype
                do j = 1,nntype
-                  if ((lhere(i).or.(i.eq.177).or.(i.eq.178))
-     &      .and.(lhere(j).or.(j.eq.177).or.(j.eq.178)) ) then
+                  if ((lhere(i).or.(i.eq.ztype(1)).or.(i.eq.ztype(2)))
+     &      .and.(lhere(j).or.(j.eq.ztype(1)).or.(j.eq.ztype(2))) ) then
                      if (lninesix) then
                         ij = (i-1)*nxatom + j
                         write(iou,'(3x,2i4,2f10.5,2f15.6)') i,j

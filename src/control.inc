@@ -158,7 +158,7 @@
 ! if LTAILC=.TRUE. tail corrections are added
 !    (WARNING:  .lsami. in external.inc switches an intrinsic
 !               tailcorrection on)
-      parameter (ltailc = .false.)
+      parameter (ltailc = .true.)
 ! truncated and shifted potentials
       parameter (lshift = .false.)
 ! ***************************************

@@ -1,29 +1,5 @@
       subroutine sumup( ovrlap, v, vinter,vtail,vintra,vvib,
      &                  vbend,vtg,vext,velect,vflucq,ibox,lvol)
-                       
-
-! sumup     
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-! John Stubbs, and Collin Wick and Ilja Siepmann  
-!                     
-! This program is free software; you can redistribute it and/or
-! modify it under the terms of the GNU General Public License
-! as published by the Free Software Foundation; either version 2
-! of the License, or (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program; if not, write to 
-!
-! Free Software Foundation, Inc. 
-! 59 Temple Place - Suite 330
-! Boston, MA  02111-1307, USA.
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
  
 !    *******************************************************************
 !    ** calculates the total potential energy for a configuration.    **
@@ -191,7 +167,7 @@
                end if
                
 ! --- loop over all chains j with j>i 
-               do 99 j = i + 1, nchain
+               molecule2: do j = i + 1, nchain
 ! ### check for simulation box ###
                   if ( nboxi(j) .eq. ibox ) then
 
@@ -225,7 +201,7 @@
                               lij2 = .false.
                               goto 98
                            else
-                              goto 99
+                              cycle molecule2
                            end if
                         else
                            lij2 = .true.
@@ -241,18 +217,18 @@
                         rzui = rzu(i,ii)
                         
 ! --- loop over all beads jj of chain j 
-                        do 97 jj = 1, nunit(jmolty) 
+                        bead2: do jj = 1, nunit(jmolty) 
 ! --- check exclusion table
-                           if ( lexclu(imolty,ii,jmolty,jj) ) goto 97
+                           if (lexclu(imolty,ii,jmolty,jj)) cycle bead2
                            
                            ntjj = ntype(jmolty,jj)
                            if ( lij2 ) then
                               if ( (.not. (liji .and. lij(ntjj))) 
      &                             .and. (.not. (lqchgi .and. 
-     &                             lqchg(ntjj)))) goto 97
+     &                             lqchg(ntjj)))) cycle bead2
                            else
                               if (.not. (lqchgi .and. lqchg(ntjj)))
-     &                             goto 97
+     &                             cycle bead2
                            end if
                            if (lexpsix .or. lmmff) then
                               ntij = (ntii+ntjj)/2
@@ -524,10 +500,10 @@
                                  nzij(neigh_cnt(j),j) = -rzuij
                               end if
                            end if
- 97                     continue
+                        end do bead2
                      end do
                   end if
- 99            continue
+               end do molecule2
             end if
             
  100     continue

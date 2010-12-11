@@ -102,7 +102,8 @@
       else 
          myend = (myid + 1) * blocksize - 1
       end if
-! *** generate the reciprocal-space 
+! *** generate the reciprocal-space
+! here -kmaxl,-kmaxl+1,...,-1 are skipped, so no need to divide by 2 for the prefactor
       do l = mystart,myend
 !      do l = 0,kmaxl 
         if ( l .eq. 0 ) then
@@ -134,7 +135,7 @@
                   ky_arr(ncount) = ky1
                   kz_arr(ncount) = kz1
                   prefact_arr(ncount) =
-     &                 dexp(-ksqr/alpsqr4)/(ksqr*vol)
+     &                 exp(-ksqr/alpsqr4)/(ksqr*vol)
 !     *** sum up q*cos and q*sin ***
                   sumr = 0.0d0
                   sumi = 0.0d0
@@ -146,8 +147,8 @@
                         if ( lqchg(ntype(imolty,ii)) ) then
                            arg=kx1*rxu(i,ii)+ky1*ryu(i,ii)+kz1*rzu(i
      &                          ,ii)
-                           sumr = sumr + dcos(arg)*qqu(i,ii)
-                           sumi = sumi + dsin(arg)*qqu(i,ii)
+                           sumr = sumr + cos(arg)*qqu(i,ii)
+                           sumi = sumi + sin(arg)*qqu(i,ii)
                         end if
                      end do
                   end do
