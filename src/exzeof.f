@@ -136,7 +136,7 @@
       integer::l,m,n,m_min,m_max,n_min,n_max,kmaxl,kmaxm,kmaxn
       integer::mystart,myend,blocksize
       real(8)::alpsqr4,vol,ksqr,sum,arg,recipzeo,xi,yi,zi,qi
-     &     ,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi
+     &     ,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi,sumrecipzeo
 
 ! *** Set up the reciprocal space vectors ***
 
@@ -178,16 +178,9 @@
 
       hmaxsq = alpsqr4*onepi*onepi
 
-      blocksize = kmaxl/numprocs
-      mystart = myid * blocksize
-      if(myid .eq. (numprocs-1))then
-         myend = kmaxl
-      else 
-         myend = (myid + 1) * blocksize - 1
-      end if
 ! *** generate the reciprocal-space
 ! here -kmaxl,-kmaxl+1,...,-1 are skipped, so no need to divide by 2 for the prefactor
-      do l = mystart,myend       
+      do l = myid,kmaxl,numprocs       
 !      do l = 0,kmaxl 
         if ( l .eq. 0 ) then
             m_min = 0
@@ -226,6 +219,11 @@
             end do
          end do
       end do
+
+      CALL MPI_ALLREDUCE(recipzeo,sumrecipzeo,1,MPI_DOUBLE_PRECISION
+     &     ,MPI_SUM,MPI_COMM_WORLD,ierr)
+      recipzeo = sumrecipzeo
+
       recipzeo=recipzeo*qi/vol
 
       return
