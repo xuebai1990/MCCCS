@@ -3540,9 +3540,9 @@
 ! --- Computation of un-like interactions
       if ( ljoe ) then
 ! --- STANDARD METHYL GROUP
-         extc12(1) = 3.41d7
-         extc3(1)  = 20800.0d0
-         extz0(1)  = 0.86d0
+         extc12(4) = 3.41d7
+         extc3(4)  = 20800.0d0
+         extz0(4)  = 0.86d0
 
 ! --- STANDARD METHYLENE GROUP
          extc12(5) = 2.80d7
