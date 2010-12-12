@@ -180,8 +180,8 @@
 
 ! *** generate the reciprocal-space
 ! here -kmaxl,-kmaxl+1,...,-1 are skipped, so no need to divide by 2 for the prefactor
-      do l = myid,kmaxl,numprocs       
-!      do l = 0,kmaxl 
+!      do l = myid,kmaxl,numprocs       
+      do l = 0,kmaxl 
         if ( l .eq. 0 ) then
             m_min = 0
          else
@@ -220,9 +220,9 @@
          end do
       end do
 
-      CALL MPI_ALLREDUCE(recipzeo,sumrecipzeo,1,MPI_DOUBLE_PRECISION
-     &     ,MPI_SUM,MPI_COMM_WORLD,ierr)
-      recipzeo = sumrecipzeo
+!      CALL MPI_ALLREDUCE(recipzeo,sumrecipzeo,1,MPI_DOUBLE_PRECISION
+!     &     ,MPI_SUM,MPI_COMM_WORLD,ierr)
+!      recipzeo = sumrecipzeo
 
       recipzeo=recipzeo*qi/vol
 

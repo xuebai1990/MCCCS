@@ -1,4 +1,4 @@
-      subroutine suijtab( lmixlb,lmixjo)
+      subroutine suijtab(lmixlb,lmixjo,ltab)
 
 ! suijtab
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -38,8 +38,7 @@
       include 'garofalini.inc'
       include 'conver.inc'
 
-      logical::lmixlb, lmixjo
-
+      logical::lmixlb, lmixjo,ltab
       integer::i, j, ij, ji,ibox,nntype5,nmix,imix
       real(8)::rzeronx(nxatom),epsilonnx(nxatom)
 
@@ -3631,25 +3630,27 @@
       ij = (i-1)*nntype + j
       jayq(ij) = 112537.0d0
 
-      open(5,file='lj.poten')
-      read(5,*)
-      read(5,*) nntype5
-      read(5,*)
-      do j=1,nntype5
-         read(5,*) i,sigi(i),epsi(i),qelect(i)
+      if (ltab) then
+         open(5,file='lj.poten')
+         read(5,*)
+         read(5,*) nntype5
+         read(5,*)
+         do j=1,nntype5
+            read(5,*) i,sigi(i),epsi(i),qelect(i)
 !         read(5,'(I,4F,2A)') i,sigi(i),epsi(i),qelect(i),mass(i)
 !     &        ,chemid(i),chname(i)
-         if (qelect(i).ne.0) then
-            lqchg(i)=.true.
-         else
-            lqchg(i)=.false.
-         end if
-         if (sigi(i).eq.0 .and. epsi(i).eq.0) then
-            lij(i)=.false. 
-         else
-            lij(i)=.true.
-         end if
-      end do
+            if (qelect(i).ne.0) then
+               lqchg(i)=.true.
+            else
+               lqchg(i)=.false.
+            end if
+            if (sigi(i).eq.0 .and. epsi(i).eq.0) then
+               lij(i)=.false. 
+            else
+               lij(i)=.true.
+            end if
+         end do
+      end if
 
 ! *** convert input data to program units ***
       if ( lsami ) then
@@ -3703,23 +3704,26 @@
 ! ---  Conversion factor for intermolecular coulomb interactions
       qqfact = 1.67d5
 
-      read(5,*)
-      read(5,*) nmix 
-      read(5,*)
-      do imix=1,nmix
-         read(5,*) i,j,sigmaTmp,epsilonTmp
-         ij=(i-1)*nntype+j
-         sig2ij(ij)=sigmaTmp*sigmaTmp
-         sig2ij((j-1)*nntype+i)=sig2ij(ij)
-         epsij(ij)=epsilonTmp
-         epsij((j-1)*nntype+i)=epsilonTmp
-         if (lshift) then
-            sr2 = sig2ij(ij) / (rcut(1)*rcut(1))
-            sr6 = sr2 * sr2 * sr2
-            ecut(ij)= sr6*(sr6-1.0d0)*epsij(ij)
-            ecut((j-1)*nntype+i)=ecut(ij)
-         end if
-      end do
+      if (ltab) then
+         read(5,*)
+         read(5,*) nmix 
+         read(5,*)
+         do imix=1,nmix
+            read(5,*) i,j,sigmaTmp,epsilonTmp
+            ij=(i-1)*nntype+j
+            sig2ij(ij)=sigmaTmp*sigmaTmp
+            sig2ij((j-1)*nntype+i)=sig2ij(ij)
+            epsij(ij)=epsilonTmp
+            epsij((j-1)*nntype+i)=epsilonTmp
+            if (lshift) then
+               sr2 = sig2ij(ij) / (rcut(1)*rcut(1))
+               sr6 = sr2 * sr2 * sr2
+               ecut(ij)= sr6*(sr6-1.0d0)*epsij(ij)
+               ecut((j-1)*nntype+i)=ecut(ij)
+            end if
+         end do
+         close(5)
+      end if
 
       return
       end

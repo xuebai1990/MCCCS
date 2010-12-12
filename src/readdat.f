@@ -51,7 +51,7 @@
       dimension inclmol(ntmax*numax*numax),inclsign(ntmax*numax*numax)
       dimension inclbead(ntmax*numax*numax,2)
 
-      integer::ainclnum,ainclmol,ainclbead,a15t,maxlayer
+      integer::ainclnum,ainclmol,ainclbead,a15t
       dimension ainclmol(ntmax*numax*numax)
       dimension ainclbead(ntmax*numax*numax,2)
       dimension a15t(ntmax*numax*numax)
@@ -62,7 +62,7 @@
       real(8)::pie2,rcnnsq,umatch,aspecd,bspecd,dum,pm,pcumu
       logical::lnrtab,lucall,lpolar,lqqelect,lee,lratfix,lreadq
       logical:: linit, lecho, lmixlb, lmixjo, lhere,lsetup,lsolute
-      logical::lprint,lverbose,lxyz,lfound
+      logical::lprint,lverbose,lxyz,lfound,ltab
 
       dimension lratfix(ntmax)
       dimension qbox(nbxmax)
@@ -474,7 +474,7 @@
       end if
 
       read(4,*)
-      read(4,*) lmixlb, lmixjo
+      read(4,*) lmixlb, lmixjo, ltab
       if (lmixlb .and. lmixjo) then
          write(iou,*) 'cant use both combining rules!'
          ldie = .true.
@@ -487,9 +487,10 @@
             else
                write(iou,*) 'Jorgensen combining rules apply'
             end if
-            write(iou,*) '   lmixlb:',lmixlb,' lmixjo:',lmixjo
+            write(iou,*) '   lmixlb:',lmixlb,' lmixjo:',lmixjo,' ltab:'
+     &           ,ltab
          else 
-            write(iou,*) lmixlb,lmixjo
+            write(iou,*) lmixlb,lmixjo,ltab
          end if
       end if
 ! --- read special combining rule information
@@ -563,7 +564,7 @@
 ! - set up the strectching and bending constants
       call suvibe
 ! - set up the forcefield and the masses
-      call suijtab( lmixlb,lmixjo )      
+      call suijtab( lmixlb,lmixjo,ltab )      
      
 ! - read bead potential information
       do imol = 1, nmolty
@@ -1394,7 +1395,7 @@
 
 ! - read initial setup information
       read(4,*)
-      read(4,*) linit,maxlayer,lreadq
+      read(4,*) linit,lreadq
       if ( lecho.and.myid.eq.0 ) then
          if (lverbose) then
             write(iou,*) 'linit:',linit
@@ -2338,8 +2339,7 @@
          end if
          
          if ( lexzeo ) then
-            write(iou,*) 'external potential for zeolites (Berend)'
-            write(iou,*) 'WARNING: potential defined in SUZEO'
+            write(iou,*) 'external potential for zeolites'
          end if
          
          write(iou,*) 'Program will call Explct.f if needed'

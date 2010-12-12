@@ -2,68 +2,42 @@
 ### Compiler definitions
 #########################
 
-### Intel Compiler for x86 architecture
-#COMPFLAGS      =  -w90  -check all -traceback 
-#COMPFLAGS     =     -w90 -w95 -cm -check all -traceback#-check_bounds# -g
-#COMPFLAGS     =  -O2 -w90 -w95 -cm -p#-check_bounds# -g
-## only for debugging
-#COMPFLAGS     = -w90 -w95 -cm -CB -CU -g
-
-#COMPFLAGS     =  -O2 -w90 -w95 #-cm -p
-COMPFLAGS     =  -ipo -O3 -no-prec-div -xHost 
-#COMPFLAGS     =  -O3 -no-prec-div -check bounds 
 LD            = mpif90 
 LDS           = mpif90 -c $(COMPFLAGS)
 LDFLAGS       =  $(COMPFLAGS)
 
-### NAG Compiler for OSX
+### Intel Compiler for x86 architecture (ifort,mpif90)
+#COMPFLAGS     =  -O2 -w90 -w95 -cm
+## only for debugging
+#COMPFLAGS     = -w90 -w95 -cm -CB -CU -p -g -check_bounds -check all -traceback
+## for MPI
+COMPFLAGS     =  -ipo -O3 -no-prec-div -xHost 
+
+### NAG Compiler for OSX (f95)
 #COMPFLAGS     = -O0 -gline -f77 -mismatch_all -C=all -C=undefined -nan
 ## only for debugging
-#COMPFLAGS     = -O2 
-#LD            = f95
-#LDS           = f95 -c $(COMPFLAGS)
-#LDFLAGS       = $(COMPFLAGS)
+#COMPFLAGS     = -O2
 
-### SGI Altix: Intel Compiler for ia64 architecture
-#COMPFLAGS     = -O2 -tpp2 -w90 -w95 -cm #-check all -traceback
+### SGI Altix: Intel Compiler for ia64 architecture (ifort)
+#COMPFLAGS     = -O2 -tpp2 -w90 -w95 -cm
 # only for debugging
 #COMPFLAGS     =  -check all -traceback -w90 -w95 -cm -CB -CU -g
-#LD            = ifort
-#LDS           = ifort -c $(COMPFLAGS)
-#LDFLAGS       = -static $(COMPFLAGS)
 
-### GNU Compiler
+### GNU Compiler (g95,gfortran,g77)
+#COMPFLAGS     = -O3 -fomit-frame-pointer -finline-functions -ffast-math #-mcpu=i686 -march=i686 
+## only for debugging
 #COMPFLAGS     =  -ftrace=full -pg -fbounds-check
-#COMPFLAGS     = -O3 -fomit-frame-pointer -finline-functions -ffast-math 
-#LD	      = g95
-#LDS 	      = g95 -c $(COMPFLAGS)
-#LDFLAGS	      = $(COMPFLAGS)
 
-### Portland Compiler for x86 architecture
-#COMPFLAGS     =  -O2 -tp k8-64 -Mvect=sse#-check_bounds# -g
-#COMPFLAGS     =  -tp k8-64 -Mbounds -g -Mchkptr#-check_bounds# -g
-#LD	      = /opt/pgi/linux86-64/6.1/bin/pgf95
-#LDS 	      = /opt/pgi/linux86-64/6.1/bin/pgf95 -c $(COMPFLAGS)
-#LDFLAGS	      = $(COMPFLAGS)
+### Portland Compiler for x86 architecture (pgf95)
+#COMPFLAGS     =  -O2 -tp k8-64 -Mvect=sse
+## only for debugging
+#COMPFLAGS     =  -tp k8-64 -Mbounds -g -Mchkptr -check_bounds
 
-### SGI Compiler for Origin
-#COMPFLAGS     = -O2 #-march=opteron # -mips4 -r12000 #-check_bounds# -g
-#LD            = f77 
-#LDS           = f77 -c $(COMPFLAGS)
-#LDFLAGS       = $(COMPFLAGS)
+### SGI Compiler for Origin (f77)
+#COMPFLAGS     = -O2 #-march=opteron #-mips4 -r12000 #-check_bounds -g
 
-### IBM AIX Compiler for SP
-#COMPFLAGS     = -O3 -qstrict  -bmaxdata:2000000000 #-check_bounds# -g
-#LD            = xlf
-#LDS           = xlf -c $(COMPFLAGS)
-#LDFLAGS	      = $(COMPFLAGS)
-
-### GNU Compiler
-#COMPFLAGS     =  -fbounds-check -g
-#COMPFLAGS     = -O3 #-fomit-frame-pointer -finline-functions -ffast-math #-fbounds-check #-mcpu=i686 -march=i686# 
-#LD	      = g77
-#LDS 	      = g77 -c $(COMPFLAGS)
-#LDFLAGS	      = $(COMPFLAGS)
+### IBM AIX Compiler for SP (xlf)
+#COMPFLAGS     = -O3 -qstrict -bmaxdata:2000000000 #-check_bounds -g
 
 #############################
 ### End compiler definitions 
@@ -580,6 +554,6 @@ tabulated.o:  tabulated.inc conver.inc tabulated.f
 
 ##### remove object files
 clean:
-	rm -f *.o
+	rm -f *.o *.mod
 
 
