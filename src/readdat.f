@@ -1399,10 +1399,9 @@
       if ( lecho.and.myid.eq.0 ) then
          if (lverbose) then
             write(iou,*) 'linit:',linit
-            write(iou,*) 'maxlayer:',maxlayer
             write(iou,*) 'lreadq:',lreadq
          else 
-            write(iou,*) linit, maxlayer, lreadq
+            write(iou,*) linit, lreadq
          end if
       end if
       read(4,*)

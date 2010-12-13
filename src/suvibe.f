@@ -37,7 +37,7 @@
 
 ! - TraPPE-UA- fixed bond length for C-C bonds -
       brvib(1) = 1.54d0
-      brvibk(1) = 48250.0d0
+      brvibk(1) = 0.0d0
 
 ! - bond stretching for C-C bonds -
 !      brvib(2) = 1.54d0

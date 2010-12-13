@@ -62,6 +62,7 @@
                end if
             end do
             exzeof=exzeof+vljnew
+            write(iou,*) 'layer:',layer,';energy:',exzeof
             layer=layer+1
          end do
       end if
