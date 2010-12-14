@@ -25,7 +25,7 @@
       save
       integer::ngrx,ngry,ngrz,maxp,nlayermax
       real(8),allocatable::egrid(:,:,:,:),xzz(:),yzz(:),zzz(:)
-      real(8)::factx,facty,factz,dgrx,dgry,dgrz,eps=1d-5,dgr
+      real(8)::factx,facty,factz,dgrx,dgry,dgrz,eps=1d-2,dgr
       parameter (maxp=10)
 !      common/gridd/factx,facty,factz,dgrx,dgry,dgrz,
 !     &             xzz,yzz,zzz,egrid

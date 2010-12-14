@@ -25,7 +25,7 @@
       if (ltailc.and.lij(idi)) then
          vljnew=100
          layer=0
-         do while (vljnew.gt.eps)
+         do while (abs(vljnew).gt.eps)
             if (layer.gt.nlayermax) nlayermax=layer
             vljnew=0.
             do j=1,nzeo
@@ -62,7 +62,6 @@
                end if
             end do
             exzeof=exzeof+vljnew
-            write(iou,*) 'layer:',layer,';energy:',exzeof
             layer=layer+1
          end do
       end if
