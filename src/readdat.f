@@ -356,7 +356,7 @@
 !      file_movie = 'movie'//fname2(1:len_trim(fname2))//suffix//'.dat' 
 
 ! KM for MPI
-! jobs call cleanup('') in monola so that all processors die
+! jobs stop in monola so that all processors die
       if (dint(dble(nstep)/dble(iblock)) .gt. 100) then
          write(iou,*) 'too many blocks'
          ldie = .true.
@@ -370,10 +370,8 @@
          read(4,*) boxlx(i),boxly(i),boxlz(i),lsolid(i),lrect(i),
      &        kalp(i),rcut(i),rcutnn(i)
          if (i.eq.1 .and. lexzeo) then
+! === load positions of zeolite atoms
             call zeocoord()
-            boxlx(1)=zeorx
-            boxly(1)=zeory
-            boxlz(1)=zeorz
             if (myid.eq.0) write(iou,*) ' note zeolite determines 
      &the box size !'
          end if
@@ -2394,7 +2392,8 @@
       end if
       if (linit) then
          do ibox = 1,nbox
-            if (lsolid(ibox) .and. .not. lrect(ibox)) then
+            if (lsolid(ibox).and..not.lrect(ibox)
+     &           .and..not.(ibox.eq.1.and.lexzeo)) then
                write(iou,*) 'Cannot initialize non-rectangular system'
                ldie = .true.
                return
@@ -2478,9 +2477,7 @@
             
             do ibox = 1,nbox
                
-               if (lexzeo .and. ibox.eq.1) then
-                  read(77,*) dum,dum,dum
-               elseif (lsolid(ibox) .and. .not. lrect(ibox)) then
+               if (lsolid(ibox) .and. .not. lrect(ibox)) then
                   
                   read(77,*) (hmat(ibox,j),j=1,9)
                   if (myid.eq.0) then
@@ -2542,16 +2539,15 @@
                      write(iou,1104) ibox,
      &                    boxlx(ibox),boxly(ibox),boxlz(ibox)
                   end if
-               end if
-            end do
-
-            do i = 1, nbox
-               if( (rcut(i)/boxlx(i) .gt. 0.5d0).or.
-     &              (rcut(i)/boxly(i) .gt. 0.5d0).or.
-     &              (rcut(i)/boxlz(i) .gt. 0.5d0)) then
-                  write(iou,*) 'rcut > 0.5*boxlx'
-                  ldie = .true.
-                  return
+                  do i = 1, nbox
+                     if( (rcut(i)/boxlx(i) .gt. 0.5d0).or.
+     &                    (rcut(i)/boxly(i) .gt. 0.5d0).or.
+     &                    (rcut(i)/boxlz(i) .gt. 0.5d0)) then
+                        write(iou,*) 'rcut > 0.5*boxlx'
+                        ldie = .true.
+                        return
+                     end if
+                  end do
                end if
             end do
 

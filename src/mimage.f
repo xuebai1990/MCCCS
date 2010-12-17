@@ -16,6 +16,10 @@
          hsx = 0.5d0*hmat(ibox,1)
          hsy = 0.5d0*hmat(ibox,5)
          hsz = 0.5d0*hmat(ibox,9)
+! sx, sy, sz are the coordinates of vector (rxuij,ryuij,rzuij) in the
+! basis (n1,n2,n3), which is the transpose of the H matrix, and is the
+! transforming matrix from basis (n1,n2,n3) to the canonical basis
+! (e1,e2,e3), where e1, e2, e3 are the three perpendicular unit vector.
          sx = rxuij*hmati(ibox,1)+ryuij*hmati(ibox,4)
      &        +rzuij*hmati(ibox,7)
          sy = rxuij*hmati(ibox,2)+ryuij*hmati(ibox,5)
@@ -47,10 +51,12 @@
 !         ryuij = sx*hmat(ibox,2)+sy*hmat(ibox,5)+sz*hmat(ibox,8)
 !         rzuij = sx*hmat(ibox,3)+sy*hmat(ibox,6)+sz*hmat(ibox,9)
 
-
-
 !         print*,rxuij,ryuij,rzuij
 
+
+! Here it implies that in the H matrix, the first vector must only have
+! the x component, the second vector the x,y components, and only the
+! third can have all the x,y,z components
          if ( rzuij .gt. hsz ) then
             rzuij=rzuij-hmat(ibox,9)
             sz=sz-1d0

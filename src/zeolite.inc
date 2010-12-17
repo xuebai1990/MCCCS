@@ -1,36 +1,12 @@
 ! ZEOLITE.INC
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff,
-! John Stubbs, and Collin Wick and Ilja Siepmann
-!
-! This program is free software; you can redistribute it and/or
-! modify it under the terms of the GNU General Public License
-! as published by the Free Software Foundation; either version 2
-! of the License, or (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program; if not, write to
-!
-! Free Software Foundation, Inc.
-! 59 Temple Place - Suite 330
-! Boston, MA  02111-1307, USA.
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      integer::        idzeo,nzeomax,nzeo,nx,ny,nz
-      real(8)::zeox,zeoy,zeoz,zeorx,zeory,zeorz,
-     &                 zeorxi,zeoryi,zeorzi,zunitx,zunity
-     &                ,zunitz,zunitxi,zunityi,zunitzi
+      integer::idzeo,nzeomax,nzeo,nx,ny,nz
+      real(8)::zeox,zeoy,zeoz,zeorx,zeory,zeorz,zunitx,zunity,zunitz
+      logical::lunitcell
 
       parameter       (nzeomax=57600)
 
       common/zeolit/zeox(nzeomax),zeoy(nzeomax),zeoz(nzeomax),
-     &              idzeo(nzeomax),nzeo
-      common/box  /zeorx,zeory,zeorz,zeorxi,zeoryi,zeorzi,
-     &             zunitx,zunity,zunitz,zunitxi,zunityi,zunitzi
-     &            ,nx,ny,nz
+     &              idzeo(nzeomax),lunitcell(nzeomax),nzeo
+      common/box  /zeorx,zeory,zeorz,zunitx,zunity,zunitz,nx,ny,nz
 

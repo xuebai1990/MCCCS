@@ -1,46 +1,58 @@
-      function exzeof(xi,yi,zi,idi)
+      function exzeof(i,j,k,idi)
 
       use grid
       implicit none 
       real(8)::exzeof,xi,yi,zi,r2,rcutsq,xr,yr,zr,r2i,r6,vljnew,vqnew
-     &     ,overflow=10.0_8**15,rminsq,r,recipzeo,erfunc
-      integer::j,idi,idj,ntij,layer,ii,jj,kk
+     &     ,overflow=10.0_8**8,rminsq,r,recipzeo,erfunc,i,j,k,sx,sy,sz
+      integer::izeo,idi,idj,ntij,layer,ii,jj,kk,ibox=1
       include 'zeopoten.inc'
       include 'zeolite.inc'
       include 'control.inc'
       include 'external.inc'
       include 'system.inc'
+      include 'cell.inc'
       include 'poten.inc'      
       include 'ewaldsum.inc'
       include 'mpif.h'
       include 'mpi.inc'
 
-!     calculate the Lennard-Jones and Coulombic interactions, include as
-!     many layers of neighboring unit cells as needed for the specified
-!     precision
+!     calculate the Lennard-Jones interactions, include as many layers
+!     of neighboring unit cells as needed for the specified precision
 
       exzeof=0.
       rminsq=rmin*rmin
       
       if (ltailc.and.lij(idi)) then
-         vljnew=100
+         vljnew=eps+1.
          layer=0
          do while (abs(vljnew).gt.eps)
             if (layer.gt.nlayermax) nlayermax=layer
             vljnew=0.
-            do j=1,nzeo
-               if (zeox(j).lt.zunitx .and. zeoy(j).lt.zunity .and.
-     &              zeoz(j).lt.zunitz) then
-                  idj=idzeo(j)
+            do izeo=1,nzeo
+               if (lunitcell(izeo)) then
+                  idj=idzeo(izeo)
                   ntij = (idi - 1) * nntype + idj
                   do ii=-layer,layer
                      do jj=-layer,layer
                         do kk=-layer,layer
                            if (abs(ii).eq.layer .or. abs(jj).eq.layer
      &                          .or.abs(kk).eq.layer) then
-                              xr=zeox(j)+ii*zunitx-xi
-                              yr=zeoy(j)+jj*zunity-yi
-                              zr=zeoz(j)+kk*zunitz-zi
+
+                              sx = zeox(izeo)*hmati(ibox,1)+zeoy(izeo)
+     &                             *hmati(ibox,4)+zeoz(izeo)*hmati(ibox
+     &                             ,7)+dble(ii-i)/nx
+                              sy = zeox(izeo)*hmati(ibox,2)+zeoy(izeo)
+     &                             *hmati(ibox,5)+zeoz(izeo)*hmati(ibox
+     &                             ,8)+dble(jj-j)/ny
+                              sz = zeox(izeo)*hmati(ibox,3)+zeoy(izeo)
+     &                             *hmati(ibox,6)+zeoz(izeo)*hmati(ibox
+     &                             ,9)+dble(kk-k)/nz
+
+                              xr=sx*hmat(ibox,1)+sy*hmat(ibox,4)+sz
+     &                             *hmat(ibox,7)
+                              yr=sy*hmat(ibox,5)+sz*hmat(ibox,8)
+                              zr=sz*hmat(ibox,9)
+
                               r2=xr*xr+yr*yr+zr*zr
                               if (r2.le.rminsq) then
                                  exzeof=overflow
@@ -69,21 +81,26 @@
       if ((.not.ltailc.and.lij(idi)).or.(lqchg(idi))) then
          vljnew=0.
          vqnew=0.
-         rcutsq = rcut(1)*rcut(1)
-         do j=1,nzeo
-            idj=idzeo(j)
+         rcutsq = rcut(ibox)*rcut(ibox)
+         sx=dble(i)/nx
+         sy=dble(j)/ny
+         sz=dble(k)/nz
+         xi=sx*hmat(ibox,1)+sy*hmat(ibox,4)+sz*hmat(ibox,7)
+         yi=sy*hmat(ibox,5)+sz*hmat(ibox,8)
+         zi=sz*hmat(ibox,9)
+         do izeo=1,nzeo
+            idj=idzeo(izeo)
             ntij = (idi - 1) * nntype + idj
-            xr=xi-zeox(j)
-            xr=xr-zeorx*anint(xr*zeorxi)
-            yr=yi-zeoy(j)
-            yr=yr-zeory*anint(yr*zeoryi)
-            zr=zi-zeoz(j)
-            zr=zr-zeorz*anint(zr*zeorzi)
+            xr=xi-zeox(izeo)
+            yr=yi-zeoy(izeo)
+            zr=zi-zeoz(izeo)
+            call mimage(xr,yr,zr,ibox)
             r2=xr*xr+yr*yr+zr*zr
             if (r2.le.rminsq) then
                exzeof=overflow
                return
-            else if (r2 .lt. rcutsq) then
+            end if
+            if (r2 .lt. rcutsq) then
                if (.not.ltailc.and.lij(idi)) then
                   r2i=sig2ij(ntij)/r2
                   r6=r2i*r2i*r2i
@@ -97,8 +114,8 @@
                if (lqchg(idi)) then
                   r=dsqrt(r2)
                   if (lewald) then
-                     vqnew=vqnew+qelect(idi)*qelect(idj)*erfunc(calp(1)
-     &                    *r)/r
+                     vqnew=vqnew+qelect(idi)*qelect(idj)
+     &                    *erfunc(calp(ibox)*r)/r
                   else
                      vqnew=vqnew+qelect(idi)*qelect(idj)/r
                   end if
@@ -136,30 +153,22 @@
       integer::l,m,n,m_min,m_max,n_min,n_max,kmaxl,kmaxm,kmaxn
       integer::mystart,myend,blocksize
       real(8)::alpsqr4,vol,ksqr,sum,arg,recipzeo,xi,yi,zi,qi
-     &     ,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi,sumrecipzeo
+     &     ,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi
 
 ! *** Set up the reciprocal space vectors ***
 
       recipzeo = 0.0d0
+
       calpi = calp(ibox)
 
+      do i = 1,9
+         hmatik(i) = twopi*hmati(ibox,i)
+      end do
       if ( (.not. lsolid(ibox)) .or. lrect(ibox) )  then
-         hmat(ibox,1) = boxlx(ibox)
-         hmat(ibox,5) = boxly(ibox)
-         hmat(ibox,9) = boxlz(ibox)
-         do i = 1,9
-            hmatik(i) = 0.0d0
-         end do
-         hmatik(1) = twopi/hmat(ibox,1)
-         hmatik(5) = twopi/hmat(ibox,5)
-         hmatik(9) = twopi/hmat(ibox,9)
          kmaxl = dint(hmat(ibox,1)*calpi)+1
          kmaxm = dint(hmat(ibox,5)*calpi)+1
          kmaxn = dint(hmat(ibox,9)*calpi)+1
       else
-         do i = 1,9
-            hmatik(i) = twopi*hmati(ibox,i)
-         end do
          kmaxl = dint(hmat(ibox,1)*calpi)+2
          kmaxm = dint(hmat(ibox,5)*calpi)+2
          kmaxn = dint(hmat(ibox,9)*calpi)+2

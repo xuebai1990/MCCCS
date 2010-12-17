@@ -1,25 +1,4 @@
 ! CONTROL.INC
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff,
-! John Stubbs, and Collin Wick and Ilja Siepmann
-!
-! This program is free software; you can redistribute it and/or
-! modify it under the terms of the GNU General Public License
-! as published by the Free Software Foundation; either version 2
-! of the License, or (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program; if not, write to
-!
-! Free Software Foundation, Inc.
-! 59 Temple Place - Suite 330
-! Boston, MA  02111-1307, USA.
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       logical::lgibbs,lgrand,lnpt,lanes,llj,lmipsw,lexpee
       logical::lpbc,lpbcx,lpbcy,lpbcz,lfold,lijall,lewald
@@ -101,7 +80,7 @@
       parameter (lcutcm = .true.)
 ! if LEWALD=.TRUE. then ewald-sum will be used to calculate the
 ! electrostatic interactions.
-      parameter (lewald = .false.)
+      parameter (lewald = .true.)
 ! if LDIELECT=.TRUE. then dielectric constant will be calculated and
 ! LEWALD must be .TRUE.
 ! Correct only in NVT ensemble
@@ -158,7 +137,7 @@
 ! if LTAILC=.TRUE. tail corrections are added
 !    (WARNING:  .lsami. in external.inc switches an intrinsic
 !               tailcorrection on)
-      parameter (ltailc = .true.)
+      parameter (ltailc = .false.)
 ! truncated and shifted potentials
       parameter (lshift = .false.)
 ! ***************************************

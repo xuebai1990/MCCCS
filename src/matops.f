@@ -66,7 +66,7 @@
 
 !    -- calculating adjoint for inverting the h-matrix
                
-      adj(1)=elem(5)*elem(9)-elem(3)*elem(8)
+      adj(1)=elem(5)*elem(9)-elem(6)*elem(8)
       adj(2)=elem(3)*elem(8)-elem(2)*elem(9)
       adj(3)=elem(2)*elem(6)-elem(3)*elem(5)
       adj(4)=elem(6)*elem(7)-elem(4)*elem(9)
@@ -108,7 +108,7 @@
       cell_ang(ibox,1) = dacos(cosa)
       cell_ang(ibox,2) = dacos(cosb)
       cell_ang(ibox,3) = dacos(cosg)
-          
+
       return
       end subroutine matops
 

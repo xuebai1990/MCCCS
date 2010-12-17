@@ -2,46 +2,22 @@
 
       use grid
       implicit none 
-      real(8)::exzeo,xi,yi,zi,r2,rcutsq
-     &     ,xr,yr,zr,r2i,r6
-      integer::m,mt,mp,idi,idj,ntij,igtype
+      real(8)::exzeo,xi,yi,zi,r2,xr,yr,zr,r2i,r6
+      integer::m,mt,mp,idi,idj,ntij,igtype,ibox=1
       integer::j,j0,jp,k,k0,kp,l,l0,lp
-      parameter (m=2,mt=2*m+1)
+      parameter (m=2,mt=2*m+1,mp=m+1)
       real(8)::yjtmp(mt),yktmp(mt),yltmp(mt)
-      real(8)::xt(mt),yt(mt),zt(mt),dy
+      real(8)::xt(mt),yt(mt),zt(mt),sx,sy,sz
       include 'zeopoten.inc'
       include 'zeolite.inc'
       include 'control.inc'
       include 'external.inc'
       include 'system.inc'
+      include 'cell.inc'
       include 'poten.inc'
 
-      rcutsq = rcut(1)**2
       if (.not.lzgrid) then
-         exzeo=0.
-         do j=1,nzeo
-            idj=idzeo(j)
-            ntij = (idi - 1) * nntype + idj
-            xr=xi-zeox(j)
-            xr=xr-zeorx*anint(xr*zeorxi)
-            yr=yi-zeoy(j)
-            yr=yr-zeory*anint(yr*zeoryi)
-            zr=zi-zeoz(j)
-            zr=zr-zeorz*anint(zr*zeorzi)
-            r2=xr*xr+yr*yr+zr*zr
-!            if (r2.lt.zrc2(idi,idj)) then
-            if (r2 .lt. rcutsq) then
-              r2i=sig2ij(ntij)/r2
-              r6=r2i*r2i*r2i
-!              if (lshift) then     
-!                 exzeo=exzeo+4.*epsij(ntij)*(r6-1.0)*r6-
-!     &                 zencut(idi,idj)
-!              else
-                 exzeo=exzeo+4.*epsij(ntij)*(r6-1.0)*r6+
-     &             qelect(idi)*qelect(idj)/dsqrt(r2)
-!              end if
-           end if
-         end do
+! to be implemented
       else
 !     calculation using a grid
 !         write(iou,*) 'entering exzeo. xi yi zi idi',xi,yi,zi,idi
@@ -53,53 +29,58 @@
             call cleanup('exzeo: no such bead type')
          end if
          
-!
 ! --- determine cell parameters
-!
-         xr=xi-zunitx*anint(xi*zunitxi)
-         if (xr.lt.0) xr=xr+zunitx
-         j=int(xr*factx)
-         yr=yi-zunity*anint(yi*zunityi)
-         if (yr.lt.0) yr=yr+zunity
-         k=int(yr*facty)
-         zr=zi-zunitz*anint(zi*zunitzi)
-         if (zr.lt.0) zr=zr+zunitz
-         l=int(zr*factz)
-! ---    test if in the reosanble regime
+         sx=(xi*hmati(ibox,1)+yi*hmati(ibox,4)+zi*hmati(ibox,7))*nx
+         sy=(xi*hmati(ibox,2)+yi*hmati(ibox,5)+zi*hmati(ibox,8))*ny
+         sz=(xi*hmati(ibox,3)+yi*hmati(ibox,6)+zi*hmati(ibox,9))*nz
+         sx=sx-floor(sx)
+         sy=sy-floor(sy)
+         sz=sz-floor(sz)
+         xr=sx*hmat(ibox,1)/nx+sy*hmat(ibox,4)/ny+sz *hmat(ibox,7)/nz
+         yr=sy*hmat(ibox,5)/ny+sz*hmat(ibox,8)/nz
+         zr=sz*hmat(ibox,9)/nz
+         j = sx*ngrx
+         k = sy*ngry
+         l = sz*ngrz
+
+! ---    test if in the reasonable regime
          exzeo=1.0d+6
          if ( egrid(j,k,l,igtype).gt.exzeo) return
 ! --     block m*m*m centered around: j,k,l
-         mp=m+1
+! ---  set up hulp array: (allow for going beyond unit cell
+!      for polynom fitting)
+         do l0=-m,m
+            lp=l+l0
+            sz=dble(lp)/ngrz/nz
 ! ---    store x,y,z values around xi,yi,zi in arrays
-         do j0=-m,m
-	    xt(j0+mp)=xzz(j+j0)
-            yt(j0+mp)=yzz(k+j0)
-            zt(j0+mp)=zzz(l+j0)
-         end do
-         do j0=-m,m
-            jp=j+j0
-	    if (jp.lt.0)    jp=jp+ngrx
-	    if (jp.ge.ngrx) jp=jp-ngrx
+            zt(l0+mp)=sz*hmat(ibox,9)
+            if (lp.lt.0)    lp=lp+ngrz
+            if (lp.ge.ngrz) lp=lp-ngrz
             do k0=-m,m
 	       kp=k+k0
+               sy=dble(kp)/ngry/ny
+               yt(k0+mp)=sy*hmat(ibox,5)+sz*hmat(ibox,8)
 	       if (kp.lt.0)    kp=kp+ngry
 	       if (kp.ge.ngry) kp=kp-ngry
-	       do l0=-m,m
-	          lp=l+l0
-	          if (lp.lt.0)    lp=lp+ngrz
-	          if (lp.ge.ngrz) lp=lp-ngrz
-                  yltmp(l0+mp)=egrid(jp,kp,lp,igtype)
+               do j0=-m,m
+                  jp=j+j0
+                  sx=dble(jp)/ngrx/nx
+                  xt(j0+mp)=sx*hmat(ibox,1)+sy*hmat(ibox,4)+sz*hmat(ibox
+     &                 ,7)
+                  if (jp.lt.0)    jp=jp+ngrx
+                  if (jp.ge.ngrx) jp=jp-ngrx
+                  yjtmp(j0+mp)=egrid(jp,kp,lp,igtype)
                end do
-               call polint(zt,yltmp,mt,zr,yktmp(k0+mp),dy)
+               call polint(xt,yjtmp,mt,xr,yktmp(k0+mp))
 	    end do
-            call polint(yt,yktmp,mt,yr,yjtmp(j0+mp),dy)
+            call polint(yt,yktmp,mt,yr,yltmp(l0+mp))
          end do
-         call polint(xt,yjtmp,mt,xr,exzeo,dy)
+         call polint(zt,yltmp,mt,zr,exzeo)
       end if
       return
       end
- 
-      subroutine polint(xa,ya,n,x,y,dy)
+
+      subroutine polint(xa,ya,n,x,y)
 !  (C) Copr. 1986-92 Numerical Recipes Software +3Y.
 
       implicit none

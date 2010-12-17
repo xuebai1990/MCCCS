@@ -9,20 +9,16 @@
       include 'external.inc'
       include 'mpi.inc'
       integer::imol,iunit,igtype,idi,jerr,i,j,k,
-     &     ngrxt,ngryt,ngrzt
+     &     ngrxt,ngryt,ngrzt,ibox=1
       character(len=8)::filename
-      real(8)::zunitxt,zunityt,zunitzt,exzeof
+      real(8)::zunitxt,zunityt,zunitzt,exzeof,xi,yi,zi
 
 ! === load force field
 !      call forcefield(rczeo)
 
-! === load positions of zeolite atoms
-      zeorxi=1./zeorx
-      zeoryi=1./zeory
-      zeorzi=1./zeorz
-!
 ! === tabulation of the zeolite potential
       if (lzgrid) then
+         call setpbc(ibox)
 ! find all bead types and store them in an array
          gntype=0
          do imol=1,nmolty
@@ -40,13 +36,10 @@
          zunitx = zeorx/nx
          zunity = zeory/ny
          zunitz = zeorz/nz
-         zunitxi=1./zunitx
-         zunityi=1./zunity 
-         zunitzi=1./zunitz 
 !     --- volume minimal box
 !     ideal grid size: dgr
-         dgr = 0.2
-!     dgr=(dgr)**(1.d00/3.d00)
+!         dgr = 0.2
+!         dgr=(dgr)**(1.d00/3.d00)
 !     --- find closest values for x and y
          ngrx=int(zunitx/dgr)
          ngry=int(zunity/dgr)
@@ -55,29 +48,12 @@
          dgrx=zunitx/ngrx
          dgry=zunity/ngry
          dgrz=zunitz/ngrz
-         factx=ngrx/zunitx
-         facty=ngry/zunity
-         factz=ngrz/zunitz
          if (myid.eq.0) write(iou,1000) zunitx,zunity,zunitz,
      &        ngrx,dgrx,ngry,dgry,ngrz,dgrz
 
 
-         allocate(egrid(0:ngrx-1,0:ngry-1,0:ngrz-1,gntype),
-     &        xzz(-maxp:ngrx+maxp-1),yzz(-maxp:ngry+maxp-1),
-     &        zzz(-maxp:ngrz+maxp-1),stat=jerr)
+         allocate(egrid(0:ngrx-1,0:ngry-1,0:ngrz-1,gntype),stat=jerr)
          if (jerr.ne.0) call cleanup('allocate failed')
-
-! ---  set up hulp array: (allow for going beyond unit cell
-!      for polynom fitting)
-         do i=-maxp,ngrx+maxp-1
-            xzz(i)=i*dgrx
-         end do
-         do i=-maxp,ngry+maxp-1
-            yzz(i)=i*dgry
-         end do
-         do i=-maxp,ngrz+maxp-1
-            zzz(i)=i*dgrz
-         end do
 
          nlayermax=0
 
@@ -105,19 +81,19 @@
 ! make a tabulated potential of the zeolite
                if (myid.eq.0) write(iou,*) 'make new ',filename
                if (myid.eq.0) open(91,file=filename,form='binary')
-               if (myid.eq.0) write(91) zunitx,zunity,zunitz,ngrx,
-     &              ngry,ngrz
+               if (myid.eq.0) write(91) zunitx,zunity,zunitz,ngrx, ngry
+     &              ,ngrz
                do i=0,ngrx-1
                   do j=0,ngry-1
                      do k=0,ngrz-1
-                        egrid(i,j,k,igtype)=exzeof(dgrx*i,dgry*j,
-     &                       dgrz*k,idi)
+                        egrid(i,j,k,igtype)=exzeof(dble(i)/ngrx
+     &                       ,dble(j)/ngry,dble(k)/ngrz,idi)
                         if (myid.eq.0) write(91) egrid(i,j,k,igtype)
                      end do
                   end do
                end do
                if (myid.eq.0) write(iou,*) 'maxlayer = ',nlayermax
-!               call ztest(idi)
+!     call ztest(idi)
             end if
             if (myid.eq.0) then
                close(91)
