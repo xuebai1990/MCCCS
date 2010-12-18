@@ -39,7 +39,7 @@
      &     -2*cos(alpha)*cos(beta)*cos(gamma))/sin(gamma)
       hmat(ibox,9)=zeorz*sqrt(1-cos(alpha)**2-cos(beta)**2-cos(gamma)
      &     **2+2*cos(alpha)*cos(beta)*cos(gamma))/sin(gamma)
-      where(hmat(ibox,:).lt.eps) hmat(ibox,:)=0
+      where(abs(hmat(ibox,:)).lt.eps) hmat(ibox,:)=0
       call matops(ibox)
 
       if (myid.eq.0) then

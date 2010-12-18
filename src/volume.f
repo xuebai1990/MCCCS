@@ -1,28 +1,5 @@
       subroutine volume
 
-! volume
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-! John Stubbs, and Collin Wick and Ilja Siepmann  
-!                     
-! This program is free software; you can redistribute it and/or
-! modify it under the terms of the GNU General Public License
-! as published by the Free Software Foundation; either version 2
-! of the License, or (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program; if not, write to 
-!
-! Free Software Foundation, Inc. 
-! 59 Temple Place - Suite 330
-! Boston, MA  02111-1307, USA.
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
- 
 !    *************************************************************
 !    ** makes an isotropic volume change                        **
 !    ** the maximum change is controlled by rmtrax and the      **
@@ -88,17 +65,17 @@
 ! *** select pair of boxes to do the volume move
       if ( nvolb .gt. 1 ) then
          rpair = random()
-         do 96 ipair = 1, nvolb
+         do ipair = 1, nvolb
             if ( rpair .lt. pmvolb(ipair) ) then
                ipairb = ipair
-               goto 97
+               exit
             end if
- 96      continue
+         end do
       else
          ipairb = 1
       end if
       
- 97   boxa = box5(ipairb)
+      boxa = box5(ipairb)
       boxb = box6(ipairb)
 
       bnvol(ipairb) = bnvol(ipairb) + 1.0d0
@@ -176,9 +153,8 @@
 
       if (lsolid(boxa) .and. .not. lrect(boxa)) then
          if (lsolid(boxb) .and. .not. lrect(boxb)) then
-            write(iou,*) 'can not perform volume move between',
-     &           ' two non-rectangular boxes'
-            call cleanup('')
+            call cleanup('can not perform volume move between two non-re
+     &ctangular boxes')
          end if
       end if
 
