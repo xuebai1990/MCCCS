@@ -1,32 +1,21 @@
       subroutine rosenbluth ( lnew,lterm,i,icharge,imolty,ifrom,ibox
      &     ,igrow,wadd,lfixnow,cwtorf,movetype )
 
-! rosenbluth
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-! John Stubbs, and Collin Wick and Ilja Siepmann  
-!                     
-! This program is free software; you can redistribute it and/or
-! modify it under the terms of the GNU General Public License
-! as published by the Free Software Foundation; either version 2
-! of the License, or (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program; if not, write to 
-!
-! Free Software Foundation, Inc. 
-! 59 Temple Place - Suite 330
-! Boston, MA  02111-1307, USA.
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
- 
 !    *******************************************************************
 !    **   performs a configurational bias move for branched molecules **
 !    *******************************************************************
+!     lnew: true for new configurations
+!     lterm: true if early terminated
+!     i:
+!     icharge:
+!     imolty:
+!     ifrom:
+!     ibox:
+!     igrow:
+!     wadd:
+!     lfixnow:
+!     cwtorf:
+!     movetype:
 
       implicit none
       
@@ -693,24 +682,22 @@
 !           --- select one position at random ---
             rbf = bsum * random()
             bs = 0.0d0 
-            do 170 ip = 1, ichoi
+            do ip = 1, ichoi
                if ( .not. lovr(ip) ) then
                   bs = bs + bfac(ip)*bsum_tor(ip)
                   if ( rbf .lt. bs ) then
 !                    --- select ip position ---
                      iwalk = ip
-                     goto 180
+                     exit
                   end if
                end if
- 170        continue
+            end do
          else
 !           --- old conformation, update weiold - include wei_bend
             weiold = weiold * bsum * wei_bend * wei_vib
             if (weiold .lt. softlog) write(iou,*) 
      &           '###old weight too low'
          end if
-
- 180     continue
 
          if (lfixed) then
 !     --- determine jacobian contribution for crankshaft

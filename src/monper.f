@@ -10,6 +10,7 @@
  
       implicit none
 
+      include 'common.inc'
       include 'control.inc'
       include 'coord.inc'      
       include 'system.inc'
@@ -22,7 +23,6 @@
       include 'coord2.inc'
       include 'cell.inc'
       include 'poten.inc'
-      include 'mpi.inc'
  
       integer::nummol,ntii
       integer::nibox,im,nnn,ntot,nblock,imolty,m,mm,i,j,jjtor

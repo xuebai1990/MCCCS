@@ -2,7 +2,7 @@
      &     ,stepvir)
 
       implicit none
- 
+      include 'common.inc'
       include 'control.inc'
       include 'coord.inc'
       include 'cbmc.inc'
@@ -30,8 +30,10 @@
 !      include 'gor.inc'
       include 'torsion.inc'
       include 'tabulated.inc'
-      include 'mpi.inc'
- 
+      
+      integer::seed
+      real(8)::random,rtest(10)
+
 ! -- variables for histograms	
       integer::fname
       character*20 file_movie,file_run,ftemp,fname2,file_dipole 
@@ -129,13 +131,34 @@
 ! *** Output unit (if 2, write to runXX.dat file; if 6, write to stdout/screen; outherwise, 
 ! *** user designate a file to which to write) KEA 6/3/09 (defined in control.inc)
 
-! KM for MPI
-! must start at the top of the file, first two lines read in topmon.f for processor 0
-      if (myid.ne.0) then
-         open(4)
-         read(4,*)
-         read(4,*)
-      end if
+! -------------------------------------------------------------------
+      open(4)
+      read(4,*)
+      read(4,*) seed
+
+      fileout = 'Nrandomtest.dat'
+
+      open(unit=71,FILE=fileout,status="unknown") 
+
+! --- initialize random number generator 
+      call ranset(seed)
+! *** set up random number generator ***
+!      call g05ccf
+!      call g05cbf(54581)
+!      idum = 5481
+!      xini = ran1(idum)
+ 
+! --- print 10 random numbers for control ---
+      do i=1,10
+         rtest(i) = random()
+      end do
+      write(71,1000) (rtest(i),i=1,5)
+      write(71,1000) (rtest(i),i=6,10)
+ 1000 format(2x,5f10.6)
+
+      close(71)
+
+! -------------------------------------------------------------------
 
       read(4,*)
       read(4,*) iou
@@ -551,8 +574,6 @@
             ldie = .true.
             return
          end if
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
-         call setpbc(i)
       end do
 
       softlog = 10.0d0**(-softcut)
@@ -2193,7 +2214,7 @@
 !         end do
 !      end if
 ! --- END JLR 11-11-09
-
+      close(4)
 
 ! -------------------------------------------------------------------
  

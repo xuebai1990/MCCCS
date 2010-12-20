@@ -58,21 +58,18 @@
       do izeo = 1,nzeo
          read(47,99) count,atom,zeox(izeo),zeoy(izeo),
      &        zeoz(izeo)
-         if (frac.eq.1) then
-            zeox(izeo) = mod(zeox(izeo)+1.0d0,1.0d0)*zeorx
-            zeoy(izeo) = mod(zeoy(izeo)+1.0d0,1.0d0)*zeory
-            zeoz(izeo) = mod(zeoz(izeo)+1.0d0,1.0d0)*zeorz
-         else
-            zeox(izeo) = mod(zeox(izeo)+zeorx,zeorx)
-            zeoy(izeo) = mod(zeoy(izeo)+zeory,zeory)
-            zeoz(izeo) = mod(zeoz(izeo)+zeorz,zeorz)
-         end if
          sx = zeox(izeo)*hmati(ibox,1)+zeoy(izeo)*hmati(ibox,4)
      &        +zeoz(izeo)*hmati(ibox,7)
          sy = zeox(izeo)*hmati(ibox,2)+zeoy(izeo)*hmati(ibox,5)
      &        +zeoz(izeo)*hmati(ibox,8)
          sz = zeox(izeo)*hmati(ibox,3)+zeoy(izeo)*hmati(ibox,6)
      &        +zeoz(izeo)*hmati(ibox,9)
+         sx = sx - floor(sx)
+         sy = sy - floor(sy)
+         sz = sz - floor(sz)
+         zeox(izeo)=sx*hmat(ibox,1)+sy*hmat(ibox,4)+sz*hmat(ibox,7)
+         zeoy(izeo)=sy*hmat(ibox,5)+sz*hmat(ibox,8)
+         zeoz(izeo)=sz*hmat(ibox,9)
          if (sx*nx.lt.1.and.sy*ny.lt.1.and.sz*nz.lt.1) then
             lunitcell(izeo)=.true.
          else

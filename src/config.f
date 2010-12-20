@@ -1,28 +1,5 @@
       subroutine config
 
-! config
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-! John Stubbs, and Collin Wick and Ilja Siepmann  
-!                     
-! This program is free software; you can redistribute it and/or
-! modify it under the terms of the GNU General Public License
-! as published by the Free Software Foundation; either version 2
-! of the License, or (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program; if not, write to 
-!
-! Free Software Foundation, Inc. 
-! 59 Temple Place - Suite 330
-! Boston, MA  02111-1307, USA.
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
- 
 !    *******************************************************************
 !    ** performs a lengthconserving configurational bias move         **
 !    ** for linear, branched, anisotropic, and explicit atom          **
@@ -77,7 +54,7 @@
       do icbu = 1,nmolty
          if ( rchain .lt. pmcbmt(icbu) ) then
             imolty = icbu
-            rchain = 2.0d0
+            exit
          end if
       end do
 
@@ -172,7 +149,8 @@
 
 !     --- termination of old walk due to problems generating orientations
       if ( lterm ) then
-         write(iou,*) 'CONFIG: old growth rejected'
+         write(iou,*) 'CONFIG:old growth rejected in box',ibox
+     &    ,' for moltyp',imolty
          return
       end if
 
@@ -495,11 +473,11 @@
                   if ( neighbor(ip,j) .eq. i ) then
                      neighbor(ip,j)=neighbor(neigh_cnt(j),j)
                      neigh_cnt(j) = neigh_cnt(j)-1
-                     goto 10
+                     exit
                   end if
                end do
             end do
- 10         neigh_cnt(i) = neigh_icnt
+            neigh_cnt(i) = neigh_icnt
             do ic = 1,neigh_icnt
                j = neighi(ic)
                neighbor(ic,i)=j
@@ -525,18 +503,17 @@
              do count = 1, grownum(iw)
                 k = growlist(iw,count)
                 do j = 1, nunit(imolty)
-                   if (k.eq.j) goto 100
+                   if (k.eq.j) cycle
                    x = rxu(i,j) - rxu(i,k)
                    y = ryu(i,j) - ryu(i,k)
                    z = rzu(i,j) - rzu(i,k)
                    
                    bin = anint(10.0d0*dsqrt(x**2+y**2+z**2))
                    
-                   if (bin.gt.maxbin) goto 100
+                   if (bin.gt.maxbin) cycle
                    
                    hist(j,k,bin) = hist(j,k,bin) + 1
                    hist(k,j,bin) = hist(k,j,bin) + 1
- 100               continue
                 end do
              end do
           end do

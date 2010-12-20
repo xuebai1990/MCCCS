@@ -5,10 +5,13 @@
 !    ** calculates the total potential energy for a configuration.    **
 !    **                                                               **
 !    ** logical::ovrlap            true for substantial atom overlap   **
+!     lvol: true if called from volume.f
 !    *******************************************************************
  
       implicit none
 
+! RP added for MPI
+      include 'common.inc'
 ! *** common blocks ***
       include 'control.inc'
       include 'coord.inc'
@@ -33,9 +36,6 @@
 ! kea include for garofalini potential
       include 'garofalini.inc'
       include 'tabulated.inc'
-! RP added for MPI
-      include 'mpif.h'
-      include 'mpi.inc'
  
       logical::ovrlap, lvol 
       logical::lexplt,lqimol,lqjmol,lcoulo,lij2,liji,lqchgi,lexclude

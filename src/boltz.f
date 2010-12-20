@@ -1,33 +1,22 @@
       subroutine boltz( lnew,lfirst,ovrlap,i,icharge,imolty,ibox
      &     ,ichoi,iufrom,ntogrow,glist,maxlen)
 
-! boltz
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-! John Stubbs, and Collin Wick and Ilja Siepmann  
-!                     
-! This program is free software; you can redistribute it and/or
-! modify it under the terms of the GNU General Public License
-! as published by the Free Software Foundation; either version 2
-! of the License, or (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program; if not, write to 
-!
-! Free Software Foundation, Inc. 
-! 59 Temple Place - Suite 330
-! Boston, MA  02111-1307, USA.
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-
 !    *******************************************************************
 !    ** calculates the potential energy and the boltzmann factor      **
-!    ** for ichoi trial positions.                                    **
-!    ** logical::ovrlap            true for walk termination           **
+!    ** for ichoi trial positions.   
+!    *******************************************************************
+!     lnew: true for new configurations
+!     lfirst: true for insertion of the first bead in swap moves
+!     ovrlap: logical variable, true for walk termination
+!     i:
+!     icharge:
+!     imolty:
+!     ibox:
+!     ichoi: number of trial positions
+!     iufrom:
+!     ntogrow:
+!     glist:
+!     maxlen:
 !    *******************************************************************
 
       implicit none
@@ -95,7 +84,7 @@
 
 !      lcompute = .false.
 
-      if ( lpbc ) call setpbc (ibox)
+      if ( lpbc ) call setpbc(ibox)
 
 !     --- determine the potential cutoffs
 
@@ -164,7 +153,7 @@
                ryuij = ryui-ycm(j)
                rzuij = rzui-zcm(j)
 !                --- minimum image the pseudo-ctrmas pair separation
-               if ( lpbc ) call mimage ( rxuij,ryuij,rzuij,ibox )
+               if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
 
                rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
                rij  = dsqrt(rijsq)                
@@ -197,8 +186,8 @@
 !     &    ,'ichoi=',ichoi,'loops_per_proc=',loops_per_proc,'myid=',myid
 !
       my_itrial  = 0
-!      do 20 itrial = 1, ichoi
-      do 20 itrial = my_start,my_end
+!      do itrial = 1, ichoi
+      do itrial = my_start,my_end
          my_itrial  = my_itrial + 1
          my_lovr(my_itrial) = .false.
        
@@ -211,18 +200,18 @@
 
 ! -- if L_Coul_CBMC is true  only then compute electrostatic interactions/corrections
          if(L_Coul_CBMC) then
-         do count = 1,ntogrow
-            ii = glist(count)
+            do count = 1,ntogrow
+               ii = glist(count)
 
-            if (lewald) then
+               if (lewald) then
 !              -- This part does not change for fixed charge moves, but is
 !              -- used in the swap rosenbluth weight. - ewald self term
 !              -- 1.772 is sqrt of pi
-               vewald = vewald - qqu(icharge,ii)*qqu(icharge,ii)
-     &              *calp(ibox)/1.772453851d0
-            end if
-
-         end do
+                  vewald = vewald - qqu(icharge,ii)*qqu(icharge,ii)
+     &             *calp(ibox)/1.772453851d0
+               end if
+            
+            end do
          end if
 
 !        --- no intramolecular interactions if this is the first bead
@@ -233,10 +222,10 @@
 ! *****************************************
 
 !        --- cycle through molecule and check bead by bead
-         do 17 iu = 1, igrow
+         do iu = 1, igrow
 
 !           --- see if iu exists in the new chain yet
-            if (.not. lexist(iu)) goto 17
+            if (.not. lexist(iu)) cycle
             
 !           --- loop over all the grown beads
             do count = 1,ntogrow
@@ -419,7 +408,7 @@
                   end if
             end do
 
- 17      continue
+         end do
 
          if (L_Coul_CBMC) then 
          if ( lewald .and. ntogrow .gt. 1) then
@@ -952,7 +941,7 @@
                my_bfac(my_itrial) = dexp ( -(my_vtry(my_itrial)*beta) )
             end if
          end if
- 20   continue
+      end do
 
 !      scount = loops_per_proc
        loops_per_proc = (my_end-my_start) + 1

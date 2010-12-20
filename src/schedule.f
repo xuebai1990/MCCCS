@@ -1,32 +1,9 @@
       subroutine schedule(igrow,imolty,index,iutry,iprev,movetype)
 
-! schedule
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-! John Stubbs, and Collin Wick and Ilja Siepmann  
-!                     
-! This program is free software; you can redistribute it and/or
-! modify it under the terms of the GNU General Public License
-! as published by the Free Software Foundation; either version 2
-! of the License, or (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program; if not, write to 
-!
-! Free Software Foundation, Inc. 
-! 59 Temple Place - Suite 330
-! Boston, MA  02111-1307, USA.
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
- 
 !     *******************************************************************
 !     ** computes the growth shedule for CBMC type moves               **
 !     *******************************************************************
- 
+!     movetype=1: called from config.f
       implicit none
 
       include 'control.inc'
@@ -84,12 +61,12 @@
 ! N.R. Randomly select one of the grow points
             random_index = int(dble(rindex(imolty))*random()+1)
             iutry = riutry(imolty,random_index)
-         elseif ( lrig(imolty).and.nrig(imolty).gt.0 ) then
+         else if ( lrig(imolty).and.nrig(imolty).gt.0 ) then
             dbgrow = random()*dble(nrig(imolty)) + 1.0d0
             iutry = irig(imolty,int(dbgrow))
-         elseif ( icbsta(imolty) .gt. 0 ) then
+         else if ( icbsta(imolty) .gt. 0 ) then
             iutry = icbsta(imolty)
-         elseif ( icbsta(imolty) .eq. 0 ) then
+         else if ( icbsta(imolty) .eq. 0 ) then
             dbgrow = dble( igrow )
             iutry = int( dbgrow*random() ) + 1
          else
@@ -194,7 +171,7 @@
 !              --- we regrew all branches, no previous bead
                   growprev(1) = 0
                end if
-            elseif ( invtry - count .ne. 1 ) then
+            else if ( invtry - count .ne. 1 ) then
 !              --- problem in logic, should only be one nongrown bead
                write(iou,*) 'invtry,count',invtry,count
                write(iou,*) 'igrow,imolty',igrow,imolty

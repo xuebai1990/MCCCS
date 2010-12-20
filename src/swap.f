@@ -111,88 +111,84 @@
             lswapinter = .true.
          end if
 !       write(iou,*) 'ee val', imolty, irem, pointp, boxrem, boxins
-         goto 300
-      end if
-                                                                                
-      wee_ratio = 1.0d0
+      else
+         wee_ratio = 1.0d0
    
 ! --- select a molecule typ with probabilities given in pmswmt
-      rmol = random()
-      ldone = .false.
-      do imol = 1, nmolty
-         if ( rmol .lt. pmswmt(imol) ) then
-            if ( .not. ldone ) then
+         rmol = random()
+         do imol = 1, nmolty
+            if ( rmol .lt. pmswmt(imol) ) then
                imolty = imol
-               ldone = .true.
+               exit
             end if
-         end if
-      end do
+         end do
 
-      if (temtyp(imolty).eq.0) return
-      imolty1 = imolty
+         if (temtyp(imolty).eq.0) return
+         imolty1 = imolty
          
 ! ---    select a box given in pmswatyp
-      if ( nswapb(imolty) .gt. 1 ) then
-         rpair = random()
-         do 96 ipair = 1, nswapb(imolty)
-            if ( rpair .lt. pmswapb(imolty,ipair) ) then
-               ipairb = ipair
-               goto 97
-            end if
- 96      continue
-      else
-         ipairb = 1
-      end if
+         if ( nswapb(imolty) .gt. 1 ) then
+            rpair = random()
+            do ipair = 1, nswapb(imolty)
+               if ( rpair .lt. pmswapb(imolty,ipair) ) then
+                  ipairb = ipair
+                  exit
+               end if
+            end do
+         else
+            ipairb = 1
+         end if
 
- 97   if (random().lt.0.5d0) then
-         boxins=box1(imolty,ipairb)
-         boxrem=box2(imolty,ipairb)
-      else
-         boxins=box2(imolty,ipairb)
-         boxrem=box1(imolty,ipairb)
-      end if
+         if (random().lt.0.5d0) then
+            boxins=box1(imolty,ipairb)
+            boxrem=box2(imolty,ipairb)
+         else
+            boxins=box2(imolty,ipairb)
+            boxrem=box1(imolty,ipairb)
+         end if
 
-      if ( boxins .eq. boxrem ) then
-         lswapinter = .false.
-      else
-         lswapinter = .true.
-      end if
-!      write(iou,*) 'boxins:',boxins,'boxrem:',boxrem
-      if ( .not. (lgibbs .or. lgrand) .and. lswapinter ) then
-         call cleanup('no interbox swap if not gibbs/grand ensemble!')
-      end if
+         if ( boxins .eq. boxrem ) then
+            lswapinter = .false.
+         else
+            lswapinter = .true.
+         end if
+!     write(iou,*) 'boxins:',boxins,'boxrem:',boxrem
+         if ( .not. (lgibbs .or. lgrand) .and. lswapinter ) then
+            call cleanup('no interbox swap if not gibbs/grand ensemble!'
+     $           )
+         end if
 
 ! *** select a chain in BOXREM at random ***
 
-      if ( ncmt(boxrem,imolty) .eq. 0 ) then
-         lempty = .true.
-         if ( .not. lswapinter .or. lrigid(imolty) ) return
-      elseif ( lswapinter .or. lavbmc1(imolty) .and. .not.  
-     &        (lavbmc2(imolty) .or. lavbmc3(imolty)) ) then
+         if ( ncmt(boxrem,imolty) .eq. 0 ) then
+            lempty = .true.
+            if ( .not. lswapinter .or. lrigid(imolty) ) return !???not counting bsswap
+         else if ( lswapinter .or. lavbmc1(imolty) .and. .not.  
+     &           (lavbmc2(imolty) .or. lavbmc3(imolty)) ) then
 
-! *** for the advanced AVBMC algorithm, this particle will be selected in
-! *** sub-regions defined by Vin
+!     *** for the advanced AVBMC algorithm, this particle will be selected in
+!     *** sub-regions defined by Vin
 
- 197     pointp = idint( dble(ncmt(boxrem,imolty))*random() ) + 1
-         if (lexpee) then
-            if ((pointp.eq.eepointp).and.
-     &               (boxrem.eq.box_state(mstate)).and.
-     &               (ncmt(boxrem,imolty).gt.1)) then
-               goto 197
-            else
-               return
+ 197        pointp = idint( dble(ncmt(boxrem,imolty))*random() ) + 1
+            if (lexpee) then
+               if ((pointp.eq.eepointp).and.
+     &              (boxrem.eq.box_state(mstate)).and.
+     &              (ncmt(boxrem,imolty).gt.1)) then
+                  goto 197
+               else
+                  return
+               end if
+            end if
+
+            irem = parbox(pointp,boxrem,imolty)
+
+            if ( moltyp(irem) .ne. imolty ) write(iou,*)
+     &       'screwup swap, irem:',irem,moltyp(irem),imolty
+            ibox = nboxi(irem)
+            if ( ibox .ne. boxrem ) then
+               call cleanup('problem in swap')
             end if
          end if
-
-         irem = parbox(pointp,boxrem,imolty)
-
-         if ( moltyp(irem) .ne. imolty ) 
-     &       write(iou,*) 'screwup swap, irem:',irem,moltyp(irem),imolty
-         ibox = nboxi(irem)
-         if ( ibox .ne. boxrem ) then
-            call cleanup('problem in swap')
-         end if
-      end if
 
 !$$$      write(iou,*) 'particle ',irem,' is being removed, imolty is:',
 !$$$     &     imolty,' and the box is:',boxrem
@@ -207,11 +203,12 @@
 !      X = 4 is success into box 2
 !     bsswap is the same thing but keeps track of successful growths
 
-      if (.not. lempty) bnswap(imolty,ipairb,boxins) 
-     &     = bnswap(imolty,ipairb,boxins) + 1.0d0
-      bsswap(imolty,ipairb,boxins) = bsswap(imolty,ipairb,boxins)+1.0d0
+         if (.not. lempty) bnswap(imolty,ipairb,boxins) 
+     &        = bnswap(imolty,ipairb,boxins) + 1.0d0
 
- 300  continue
+         bsswap(imolty,ipairb,boxins)=bsswap(imolty,ipairb,boxins)+1
+     $        .0d0
+      end if
       
 !     *** store number of units in iunit ***
       iunit = nunit(imolty)
@@ -237,10 +234,10 @@
                qqu(iins,icbu) = ee_qqu(icbu,nstate)
             end do
          end if
-      elseif ( lavbmc2(imolty) .or. lavbmc3(imolty) ) then
+      else if ( lavbmc2(imolty) .or. lavbmc3(imolty) ) then
          iins = 0
       else
-         iins = irem
+         iins = irem !??? irem not defined
          if (lexpee.and.leemove) then
             iins1 = iins
             do icbu = 1, iunit
@@ -252,7 +249,6 @@
 ! *** select a position of the first/starting unit at RANDOM ***
 ! *** and calculate the boltzmann weight                     ***
 ! *** for the chain to be INSERTED                           ***
-
 
       if (lrigid(imolty)) then
          beg = riutry(imolty,1)
@@ -705,18 +701,19 @@
                if ( rbf .lt. bsum ) then
 !     --- select ip position ---
                   iwalk = ip
-                  goto 180
+                  exit
                end if
             end if
          end do
-         write(iou,*) 'w1ins:',w1ins,'rbf:',rbf
-         write(iou,*) 'big time screwup -- w1ins'
-         call cleanup('')
+         if (ip.gt.ichoi) then
+            write(iou,*) 'w1ins:',w1ins,'rbf:',rbf
+            call cleanup('big time screwup -- w1ins')
+         end if
       else
          iwalk = 1
       end if
 
- 180  v1ins =  vtry(iwalk)  
+      v1ins =  vtry(iwalk)  
       v1insext = vtrext(iwalk)
       v1insint = vtrinter(iwalk)
       v1inselc = vtrelect(iwalk)
@@ -1291,7 +1288,8 @@
      &     ,1,glist,0.0d0)
 
       if ( ovrlap ) then
-         write(iou,*) 'disaster: overlap for 1st bead in SWAP'
+         write(iou,*) 'SWAP:1st bead overlap in rembox',boxrem
+     &    ,' for moltyp',imolty
       end if
 ! *** calculate the correct weight for the  old  walk ***
 
@@ -1302,7 +1300,8 @@
 
 ! --- check for termination of walk ---
       if ( w1rem .lt. softlog ) then 
-         write(iou,*) ' run problem : soft overlap in old'
+         write(iou,*) 'SWAP:soft overlap in rembox',boxrem,' for moltyp'
+     &    ,imolty
       end if
 
       v1rem = vtry(1)
@@ -1868,16 +1867,16 @@
      &              = cnt_wf2(neigh_old,neigh_icnt,ip)+1
             end if
             
-            do 10 ic = 1, neigh_old
+            do ic = 1, neigh_old
                j = neighbor(ic,irem)
                do ip = 1,neigh_cnt(j)
                   if ( neighbor(ip,j) .eq. irem ) then
                      neighbor(ip,j)=neighbor(neigh_cnt(j),j)
                      neigh_cnt(j) = neigh_cnt(j)-1
-                     goto 10
+                     exit
                   end if
                end do
- 10         continue
+            end do
             neigh_cnt(irem) = neigh_icnt
 !            write(iou,*) 'irem:',irem,neigh_icnt
             do ic = 1,neigh_icnt

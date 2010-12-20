@@ -80,7 +80,7 @@
       parameter (lcutcm = .true.)
 ! if LEWALD=.TRUE. then ewald-sum will be used to calculate the
 ! electrostatic interactions.
-      parameter (lewald = .true.)
+      parameter (lewald = .false.)
 ! if LDIELECT=.TRUE. then dielectric constant will be calculated and
 ! LEWALD must be .TRUE.
 ! Correct only in NVT ensemble
@@ -137,7 +137,7 @@
 ! if LTAILC=.TRUE. tail corrections are added
 !    (WARNING:  .lsami. in external.inc switches an intrinsic
 !               tailcorrection on)
-      parameter (ltailc = .false.)
+      parameter (ltailc = .true.)
 ! truncated and shifted potentials
       parameter (lshift = .false.)
 ! ***************************************

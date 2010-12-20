@@ -9,7 +9,7 @@
 ! -----------------------------------------------------------------
 
       implicit none
-
+      include 'common.inc'
       include 'control.inc'
       include 'coord.inc'      
       include 'poten.inc'
@@ -33,9 +33,6 @@
 !   KEA -- spline torsion inc file
       include 'torsion.inc'
       include 'garofalini.inc'
-!   RP added for MPI
-      include 'mpif.h'
-      include 'mpi.inc'
 ! -----------------------
 
 ! - variables added for GCMC histogram reweighting
@@ -71,9 +68,9 @@
       real(8)::bsswap,bnswap,ostwald,stdost,dummy,debroglie
      &  ,bnswap_in,bnswap_out, acvkjmol(nener,nbxmax)
 
-      double precision, dimension(nprop1,nbxmax,nbxmax)::acsolpar
+      real(8), dimension(nprop1,nbxmax,nbxmax)::acsolpar
  
-      double precision, dimension(nbxmax)::acEnthalpy,acEnthalpy1
+      real(8), dimension(nbxmax)::acEnthalpy,acEnthalpy1
 
       real(8):: enthalpy,enthalpy2,sigma2Hsimulation
       real(8):: inst_enth, inst_enth2, tmp,sigma2H,Cp
@@ -94,7 +91,7 @@
       real(8)::Heat_vapor_EXT, Ext_Energy_Liq, Ext_Energy_Gas
       real(8)::DeltaU_Ext, pdV 
 
-      double precision, dimension(nprop1,nbxmax,nbxmax)::stdev1,
+      real(8), dimension(nprop1,nbxmax,nbxmax)::stdev1,
      &                     sterr1,errme1       
  
       dimension binvir(maxvir,maxntemp),binvir2(maxvir,maxntemp)
@@ -123,8 +120,7 @@
      &     ,lvirial2,ltfix,lratfix,ltsolute,lsolute,lpr
 
       dimension lratfix(ntmax),lsolute(ntmax)
-      character*25 enth
-      character*25 enth1
+      character*25::enth,enth1
 
       integer::bin,cnt_wf1(0:6,0:6,4),cnt_wf2(0:6,0:6,4),
      &     cnt_wra1(1000,4),cnt_wra2(1000,4)
@@ -165,25 +161,20 @@
 
       liswatch = .false.
 
-! RP added for MPI       
-      call MPI_INIT( ierr )
-      call MPI_COMM_RANK( MPI_COMM_WORLD, myid, ierr )
-      call MPI_COMM_SIZE( MPI_COMM_WORLD, numprocs, ierr )
 ! --------------------------------------
 
-! KM for MPI
-! only one processor at a time reads and writes data from files
+c KM for MPI
+c only one processor at a time reads and writes data from files
       do i=1,numprocs
          if (myid.eq.i-1) then
             call readdat(lucall,ucheck,nvirial,starvir
-     &           ,stepvir)
-         end if
+     &           ,stepvir,qelect)
+         endif
          call MPI_BARRIER(MPI_COMM_WORLD,ierr)
-         close(4)
-      end do
+      enddo
 
 ! KM for MPI
-! program will hang if call cleanup('') called from readdat
+! program will hang if stop called from readdat
 ! set ldie in readdat and have all processors call cleanup('') here
       if (ldie) call cleanup('')
 
@@ -584,7 +575,7 @@
             call setnn (ibox)
          end if
 ! *** calculate initial pressure ***
-         call pressure ( press1, surf, ibox )
+         call pressure( press1, surf, ibox )
          if (myid.eq.0) then
             write(iou,74) ibox, surf
             write(iou,64) ibox, press1
@@ -627,25 +618,25 @@
                   call volume
                end if
 
-            elseif (rm .le. pmswat) then
+            else if (rm .le. pmswat) then
 !           --- CBMC switch move ---
                call swatch
-            elseif ( rm .le. pmswap ) then
+            else if ( rm .le. pmswap ) then
 !           --- swap move for linear and branched molecules ---
                call swap(bsswap,bnswap,bnswap_in,bnswap_out,
      &              cnt_wf1,cnt_wf2,cnt_wra1,cnt_wra2)
-            elseif ( rm .le. pmcb ) then
+            else if ( rm .le. pmcb ) then
 !           --- configurational bias move ---
                call config
-            elseif ( rm .le. pmflcq ) then
+            else if ( rm .le. pmflcq ) then
 !           --- displacement of fluctuating charges ---
                call flucq(2,0)
 
-            elseif (rm .le. pmexpc ) then
+            else if (rm .le. pmexpc ) then
 !           --- expanded-ensemble move ---
                call expand
 
-            elseif (rm .le. pmexpc1 ) then
+            else if (rm .le. pmexpc1 ) then
 !           --- new expanded-ensemble move ---
 !               call expand
                if (random().le.eeratio) then
@@ -653,7 +644,7 @@
                else
                   call eemove
                end if
-            elseif ( rm .le. pm_atom_tra) then
+            else if ( rm .le. pm_atom_tra) then
                rm = 3.0d0 * random()
                  if ( rm .le. 1.0d0 ) then
                      call Atom_traxyz (.true.,.false.,.false.)
@@ -662,7 +653,7 @@
                  else
                      call Atom_traxyz (.false.,.false.,.true.)
                  end if
-            elseif ( rm .le. pmtra ) then
+            else if ( rm .le. pmtra ) then
 !           --- translational move in x,y, or z direction ---
                  rm = 3.0d0 * random()
                  if ( rm .le. 1.0d0 ) then
@@ -831,26 +822,22 @@
 	       if ( int(acmove) .ge. nstep ) goto 101
 	    end if
 
-! *************************************************************
-! ** ends loop over chains                                   **
-! *************************************************************
+            If  ( lnpt.and..not.lgibbs ) then
+               ibox = 1
+               tmp= vbox(ibox) + express(ibox) * ( boxlx(ibox)
+     &          *boxly(ibox)*boxlz(ibox))
+!     write(49,*) nnn, tmp
+               inst_enth=inst_enth+ tmp
+               inst_enth2=inst_enth2+(tmp*tmp)
+            end if
 
-        If  ( lnpt.and..not.lgibbs ) then
-            ibox = 1
-            tmp= vbox(ibox) + express(ibox) * ( boxlx(ibox)*boxly(ibox)
-     &        * boxlz(ibox))
-!         write(49,*) nnn, tmp
-         inst_enth=inst_enth+ tmp
-         inst_enth2=inst_enth2+(tmp*tmp)
-         end if
-
-         If  (.not. lnpt .and..not.lgibbs ) then
-            ibox = 1
-            tmp= vbox(ibox) 
-!         write(49,*) nnn, tmp
-         inst_energy=inst_energy + tmp
-         inst_energy2=inst_energy2+ (tmp*tmp)
-         end if
+            If  (.not. lnpt .and..not.lgibbs ) then
+               ibox = 1
+               tmp= vbox(ibox) 
+!     write(49,*) nnn, tmp
+               inst_energy=inst_energy + tmp
+               inst_energy2=inst_energy2+ (tmp*tmp)
+            end if
 
 
 ! - collect histogram data (added 8/30/99)
@@ -916,6 +903,10 @@
 	 end if
 
 99       continue
+
+! *************************************************************
+! ** ends loop over chains                                   **
+! *************************************************************
 
 ! *** perform periodic operations  ***
  
@@ -1219,9 +1210,10 @@
           end if
        end if
 
-
-
 100   continue
+! *******************************************************************
+! ** ends the loop over cycles                                     **
+! *******************************************************************
 
       lpr = .false.
       do i = 1,ntmax
@@ -1261,9 +1253,6 @@
 !         write(26,*) binstep*(dble(bin)-0.5d0),profile(bin)/nstep
 !      end do
 
-! *******************************************************************
-! ** ends the loop over cycles                                     **
-! *******************************************************************
   101 continue 
 
       if (lneighbor) then
@@ -2380,8 +2369,7 @@
 
       end if  ! end if myid. eq. 0
 
-! RP added for MPI
-      call MPI_FINALIZE(ierr)
+
 
  1012 format(3(1x,f10.6),2i5)
 
