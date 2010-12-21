@@ -3,7 +3,7 @@
       use grid
       implicit none 
       real(8)::exzeof,xi,yi,zi,r2,rcutsq,xr,yr,zr,r2i,r6,vljnew,vqnew
-     &     ,overflow=10.0_8**8,rminsq,r,recipzeo,erfunc,i,j,k,sx,sy,sz
+     &     ,overflow=1.0d8,rminsq,r,recipzeo,erfunc,i,j,k,sx,sy,sz
       integer::izeo,idi,idj,ntij,layer,ii,jj,kk,ibox=1
       include 'zeopoten.inc'
       include 'zeolite.inc'

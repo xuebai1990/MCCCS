@@ -191,11 +191,10 @@
 
                      if (ic.eq.cellinc(jj)) then
                         lfound = .true.
-                        goto 92
+                        exit
                      end if
                                           
                   end do
- 92               continue
                   
                   if (.not.lfound) then
                      ncell = ncell + 1
@@ -858,7 +857,7 @@
 ! ---  not for grand can. with ibox=2 !
 !         if (.not.(lgrand.and.(ibox.eq.2))) then    
          if (ibox .eq. 1) then
-            do 399 j = istart,iend
+            do j = istart,iend
 
                ntj = ntype(imolty,j)
 
@@ -893,7 +892,7 @@
                if ( lexzeo ) vext = vext + exzeo(rxuion(j,flagon)
      &              ,ryuion(j,flagon),rzuion(j,flagon),ntj)
                
- 399        continue
+            end do
 
          end if
       end if
@@ -1009,7 +1008,7 @@
             rcmsq = rcm*rcm
             if (rijsq.lt.rcmsq) then
             do ii = 1, nunit(imolty)
-               if (awell(ii,k,imolty).lt.1.0d-6) goto 666
+               if (awell(ii,k,imolty).lt.1.0d-6) cycle
                rxui = rxuion(ii,flagon)
                ryui = ryuion(ii,flagon)
                rzui = rzuion(ii,flagon)
@@ -1019,7 +1018,7 @@
                call mimage(rxuij,ryuij,rzuij,ibox)
                rijsq = rxuij*rxuij+ryuij*ryuij+rzuij*rzuij
                vwell = vwell-awell(ii,k,imolty)*dexp(-bwell*rijsq)
- 666        end do
+            end do
             end if
          end do
       end if

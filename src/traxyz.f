@@ -271,7 +271,7 @@
 
       if ( lneighbor .or. lgaro) then
          
-         do 10 ic = 1, neigh_cnt(i)
+         do ic = 1, neigh_cnt(i)
             j = neighbor(ic,i)
 !            write(iou,*) ic,i,'j:',j
             do ip = 1,neigh_cnt(j)
@@ -282,10 +282,10 @@
                   nyij(ip,j) = nyij(neigh_cnt(j),j)
                   nzij(ip,j) = nzij(neigh_cnt(j),j)
                   neigh_cnt(j) = neigh_cnt(j)-1
-                  goto 10
+                  cycle
                end if
             end do
- 10      continue
+         end do
          neigh_cnt(i) = neigh_icnt
          do ic = 1,neigh_icnt
             j = neighi(ic)

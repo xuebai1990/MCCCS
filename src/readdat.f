@@ -690,7 +690,6 @@
             lavbmc3(imol) = .false.
          end if
 
-!         lneighbor = .true.
          lneighbor = .false.
          if ( (lavbmc2(imol) .or. lavbmc3(imol)).and.(.not.lgaro) ) 
      &                    lneighbor = .true.

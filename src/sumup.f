@@ -43,7 +43,7 @@
      &     , ip1, ip2, ip3,ibox,nmcount,iii,jjj,ip
      &     ,iivib, jjvib, jjben, jjtor, it, ntj,itype,k, mmm
       real(8)::v, vinter, vintra, vtail, vvib, vbend, vtg, vext
-     &     ,velect,vflucq,qqii
+     &     ,velect,vflucq,qqii,vtmp
       real(8)::rcutsq,rminsq,rxui,ryui,rzui,rxuij,ryuij,rzuij
      &       ,rijsq,sr2, sr6, rho, thetac, theta 
      &     ,xaa1, yaa1, zaa1, xa1a2, ya1a2, za1a2, daa1, da1a2, dot
@@ -1233,9 +1233,12 @@
      &                    vext = vext + exsami(rzu(i,j),ntj)
                      if ( lmuir ) 
      &                    vext = vext + exmuir(rzu(i,j),ntj)
-                     if ( lexzeo ) vext = vext + 
-     &                    exzeo(rxu(i,j),ryu(i,j),rzu(i,j),ntj)
-                     
+                     if ( lexzeo ) then 
+                        vtmp=exzeo(rxu(i,j),ryu(i,j),rzu(i,j),ntj)
+                        if (abs(vtmp).gt.1d5) write(iou,*) i,j,rxu(i
+     &                   ,j),ryu(i,j),rzu(i,j),vtmp
+                        vext = vext + vtmp
+                     end if
                   end do
                end if
             end do

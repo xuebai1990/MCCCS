@@ -15,7 +15,6 @@
       parameter (lpsurf=.false.)
       parameter (lgraphite=.false.)
       parameter (lcorreg = .false.)
-!      parameter (lcorreg = .false.)
 ! Graphite surface
 ! -- a1, delta are in Angstroms
 ! -- rsol [=] 1/A^3
