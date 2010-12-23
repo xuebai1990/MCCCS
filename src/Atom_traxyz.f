@@ -32,13 +32,12 @@
 
       logical::lneighij,lclu_cmp,lexclude(nmax)
 
-      integer(KIND=int)::i,ibox,flagon,iunit,j,imolty,icbu,ncount,ic,ip,k
+      integer(KIND=int)::i,ibox,flagon,iunit,j,imolty,icbu,ncount,ic,ip
+     & ,k
       integer(KIND=int)::pick_unit, pick_chain
-      real(KIND=double_precision)::rx,ry,rz,dchain,ddx,ddy,ddz,random,vnew,vold
-     &                 ,vintran,vintrao,deltv,deltvb,disvsq
-     &                 ,vintern,vintero,vextn,vexto,rchain
-     &                 ,velectn,velecto,vdum
-     &                 ,vrecipo,vrecipn   
+      real(KIND=double_precision)::rx,ry,rz,dchain,ddx,ddy,ddz,random
+     & ,vnew,vold,vintran,vintrao,deltv,deltvb,disvsq,vintern,vintero
+     & ,vextn,vexto,rchain,velectn,velecto,vdum,vrecipo,vrecipn
      & ,velectn_intra,velectn_inter,velecto_intra,velecto_inter
  
       real(KIND=double_precision)::vvibn,vbendn,vtgn,vvibo,vbendo,vtgo

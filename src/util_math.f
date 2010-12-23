@@ -1,6 +1,5 @@
       module util_math
       implicit none
-      include 'common.inc'
   
 !      contains
 

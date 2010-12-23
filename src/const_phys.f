@@ -1,7 +1,6 @@
       module const_phys
       use var_type, only: double_precision
       implicit none
-      include 'common.inc'
       save
       real(KIND=double_precision),parameter::eXV_to_K
      & =11600.0_double_precision

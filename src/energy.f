@@ -1,5 +1,5 @@
       subroutine energy ( i,imolty, v, vintra, vinter,vext
-     &     ,velect,vewald,flagon,ibox, istart,iend,lljii,ovrlap
+     &     ,velect,vewald,flagon,ibox, istart,iuend,lljii,ovrlap
      &     ,ltors,vtors,lcharge_table,lfavor)
 
 !    *******************************************************************
@@ -45,7 +45,7 @@
       logical::lmim
 
       integer(KIND=int)::growii,growjj,k,cellinc,jcell,ic,nmole
-      integer(KIND=int)::i,ibox, istart, iend,ii,ntii,flagon,jjj,iii,mmm
+      integer(KIND=int)::i,ibox, istart, iuend,ii,ntii,flagon,jjj,iii,mmm
      &       ,j,jj,ntjj,ntij,ntj,imolty,jmolty,ncell
       integer(KIND=int)::iivib,jjtor,ip1,ip2,ip3,it,nchp2,acellinc
 
@@ -55,14 +55,14 @@
      &                ,exgrph,exsami,exmuir,exzeo,vtors,exsix,velect
      &                ,vewald,mmff,rbcut,ninesix, genlj
       real(KIND=double_precision)::erfunc,qave
-      real(KIND=double_precision)::xvec,yvec,zvec,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2
+      real(KIND=double_precision)::rxvec,ryvec,rzvec,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2
      &     ,daa1,da1a2,dot,thetac,vtorso,vwell
       real(KIND=double_precision)::xcc,ycc,zcc,tcc,theta,spltor
       real(KIND=double_precision)::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq,epsilon2,sigma2
       real(KIND=double_precision)::sx,sy,sz
       real(KIND=double_precision)::slitpore,mlen2,v_elect_field, field
 
-      dimension xvec(numax,numax),yvec(numax,numax),zvec(numax,numax)
+      dimension rxvec(numax,numax),ryvec(numax,numax),rzvec(numax,numax)
       dimension lcoulo(numax,numax),cellinc(cmax),jcell(nmax)
       dimension acellinc(numax,27)
 ! KEA
@@ -149,7 +149,7 @@
       end if
 
       if (licell.and.(ibox.eq.boxlink)) then
-         do ii = istart, iend
+         do ii = istart, iuend
 
             rxui = rxuion(ii,flagon)
             ryui = ryuion(ii,flagon)
@@ -188,8 +188,8 @@
             cellinc(j) = acellinc(1,j)
          end do
 
-         if (abs(iend-istart).gt.0) then
-            do ii = istart+1, iend
+         if (abs(iuend-istart).gt.0) then
+            do ii = istart+1, iuend
                
                do j = 1, 27
                   
@@ -324,7 +324,7 @@
                end if
 
 !              --- loop over all beads ii of chain i 
- 108           do ii = istart, iend
+ 108           do ii = istart, iuend
                   ntii = ntype(imolty,ii)
                   liji = lij(ntii)
                   lqchgi = lqchg(ntii)
@@ -650,7 +650,7 @@
 ! --- END JLR 11-19-09 
   
 ! --- calculate intramolecular energy correction for chain i 
-      do ii = istart, iend
+      do ii = istart, iuend
          ntii = ntype(imolty,ii)
          rxui = rxuion(ii,flagon)
          ryui = ryuion(ii,flagon)
@@ -866,7 +866,7 @@
 ! ---  not for grand can. with ibox=2 !
 !         if (.not.(lgrand.and.(ibox.eq.2))) then    
          if (ibox .eq. 1) then
-            do j = istart,iend
+            do j = istart,iuend
 
                ntj = ntype(imolty,j)
 
@@ -933,13 +933,13 @@
             rzui=rzuion(ii,flagon)
             do iivib = 1, invib(imolty,ii)
                jj = ijvib(imolty,ii,iivib)
-               xvec(ii,jj) = rxuion(jj,flagon) - rxui
-               yvec(ii,jj) = ryuion(jj,flagon) - ryui
-               zvec(ii,jj) = rzuion(jj,flagon) - rzui
+               rxvec(ii,jj) = rxuion(jj,flagon) - rxui
+               ryvec(ii,jj) = ryuion(jj,flagon) - ryui
+               rzvec(ii,jj) = rzuion(jj,flagon) - rzui
 !              --- account for explicit atoms in opposite direction
-               xvec(jj,ii)   = -xvec(ii,jj)
-               yvec(jj,ii)   = -yvec(ii,jj)
-               zvec(jj,ii)   = -zvec(ii,jj)
+               rxvec(jj,ii)   = -rxvec(ii,jj)
+               ryvec(jj,ii)   = -ryvec(ii,jj)
+               rzvec(jj,ii)   = -rzvec(ii,jj)
             end do
          end do
 
@@ -951,18 +951,18 @@
                   ip2 = ijtor3(imolty,j,jjtor)
                   it  = ittor(imolty,j,jjtor)
 !*** calculate cross products d_a x d_a-1 and d_a-1 x d_a-2 ***
-                  xaa1 = yvec(ip1,j) * zvec(ip2,ip1) +
-     &                 zvec(ip1,j) * yvec(ip1,ip2)
-                  yaa1 = zvec(ip1,j) * xvec(ip2,ip1) +
-     &                 xvec(ip1,j) * zvec(ip1,ip2)
-                  zaa1 = xvec(ip1,j) * yvec(ip2,ip1) +
-     &                 yvec(ip1,j) * xvec(ip1,ip2)
-                  xa1a2 = yvec(ip1,ip2) * zvec(ip2,ip3) +
-     &                 zvec(ip1,ip2) * yvec(ip3,ip2)
-                  ya1a2 = zvec(ip1,ip2) * xvec(ip2,ip3) +
-     &                 xvec(ip1,ip2) * zvec(ip3,ip2)
-                  za1a2 = xvec(ip1,ip2) * yvec(ip2,ip3) +
-     &                 yvec(ip1,ip2) * xvec(ip3,ip2)
+                  xaa1 = ryvec(ip1,j) * rzvec(ip2,ip1) +
+     &                 rzvec(ip1,j) * ryvec(ip1,ip2)
+                  yaa1 = rzvec(ip1,j) * rxvec(ip2,ip1) +
+     &                 rxvec(ip1,j) * rzvec(ip1,ip2)
+                  zaa1 = rxvec(ip1,j) * ryvec(ip2,ip1) +
+     &                 ryvec(ip1,j) * rxvec(ip1,ip2)
+                  xa1a2 = ryvec(ip1,ip2) * rzvec(ip2,ip3) +
+     &                 rzvec(ip1,ip2) * ryvec(ip3,ip2)
+                  ya1a2 = rzvec(ip1,ip2) * rxvec(ip2,ip3) +
+     &                 rxvec(ip1,ip2) * rzvec(ip3,ip2)
+                  za1a2 = rxvec(ip1,ip2) * ryvec(ip2,ip3) +
+     &                 ryvec(ip1,ip2) * rxvec(ip3,ip2)
 ! *** calculate lengths of cross products ***
                   daa1 = dsqrt(xaa1**2+yaa1**2+zaa1**2)
                   da1a2 = dsqrt(xa1a2**2+ya1a2**2+za1a2**2)
@@ -977,8 +977,8 @@
                      ycc = zaa1*xa1a2 - xaa1*za1a2
                      zcc = xaa1*ya1a2 - yaa1*xa1a2
 !     *** calculate scalar triple product ***
-                     tcc = xcc*xvec(ip1,ip2) + ycc*yvec(ip1,ip2)
-     &                    + zcc*zvec(ip1,ip2)
+                     tcc = xcc*rxvec(ip1,ip2) + ycc*ryvec(ip1,ip2)
+     &                    + zcc*rzvec(ip1,ip2)
                      theta = dacos(thetac)
                      if (tcc .lt. 0.0d0) theta = -theta
 

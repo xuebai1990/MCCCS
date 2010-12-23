@@ -8,7 +8,6 @@
       use util_files
       use util_timings
       implicit none
-      include 'common.inc'
       save
 
 ! CONTROL.INC
@@ -447,8 +446,8 @@
 ! COORD2.INC
 
       integer(KIND=int)::moltion(2)
-      real(KIND=double_precision)::rxuion(numax,2),ryuion(numax,2),rzuion(numax,2)
-     & ,qquion(numax,2),exp_cion(2)
+      real(KIND=double_precision)::rxuion(numax,2),ryuion(numax,2)
+     & ,rzuion(numax,2),qquion(numax,2),exp_cion(2)
 !      common /coord2/ rxuion,ryuion,rzuion,
 !     &                qquion,moltion,exp_cion
 
@@ -810,8 +809,9 @@
       logical::lnn(1,1),lneighbor !	lnn(1,1):replace the 1s with nmax to use neighbor list
       integer(KIND=int)::maxneigh
       parameter (maxneigh = 20)
-      integer(KIND=int)::neighbor(maxneigh,nmax),neigh_cnt(nmax),neigh_icnt,
-     &        neighi(maxneigh),neighboro(maxneigh,nmax),neigh_o(nmax)
+      integer(KIND=int)::neighbor(maxneigh,nmax),neigh_cnt(nmax)
+     & ,neigh_icnt,neighi(maxneigh),neighboro(maxneigh,nmax)
+     & ,neigh_o(nmax)
       real(KIND=double_precision)::ndij(maxneigh,nmax),nxij(maxneigh
      & ,nmax),nyij(maxneigh,nmax),nxijo(maxneigh,nmax),nzij(maxneigh
      & ,nmax),ndiji(nmax),nxiji(maxneigh),nyiji(maxneigh)

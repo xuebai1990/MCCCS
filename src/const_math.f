@@ -1,7 +1,6 @@
       module const_math
       use var_type, only: double_precision
       implicit none
-      include 'common.inc'
       save
       real(KIND=double_precision),parameter::onepi
      & =3.14159265358979323846264338_double_precision
