@@ -23,10 +23,10 @@
 !$$$      include 'inputdata.inc'
 
       logical::lprint,lfind
-      integer(KIND=int)::random_index
-      integer(KIND=int)::kickout,icbu,igrow,imolty,iutry,iut,invtry,iu,ju
-      integer(KIND=int)::ibead,count,ivib,idir,movetype,iprev,itry,i,ib2
-      integer(KIND=int)::temp_store,temp_count,zz,outer_sites,index,outer_num
+      integer(KIND=normal_int)::random_index
+      integer(KIND=normal_int)::kickout,icbu,igrow,imolty,iutry,iut,invtry,iu,ju
+      integer(KIND=normal_int)::ibead,count,ivib,idir,movetype,iprev,itry,i,ib2
+      integer(KIND=normal_int)::temp_store,temp_count,zz,outer_sites,index,outer_num
      &     ,outer_prev,iufrom,outer_try
       real(KIND=double_precision)::dbgrow,random
       parameter (lprint = .false.)

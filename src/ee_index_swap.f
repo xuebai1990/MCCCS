@@ -17,7 +17,7 @@
 !$$$      include 'coord.inc'
 !$$$      include 'eepar.inc'
 
-      integer(KIND=int)::imolty,ibox,ibox1
+      integer(KIND=normal_int)::imolty,ibox,ibox1
       real(KIND=double_precision)::accr,random
 
 ! --- if mstate = 1, with equal probability change the tagged index

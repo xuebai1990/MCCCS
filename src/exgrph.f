@@ -28,7 +28,7 @@
         real(KIND=double_precision)::mbessel
         real(KIND=double_precision)::sz2
         real(KIND=double_precision)::zz
-        integer(KIND=int)::ntij
+        integer(KIND=normal_int)::ntij
         
         parameter (pi2 = 6.28318530718d0, pi4 = 12.5663706144d0)
 

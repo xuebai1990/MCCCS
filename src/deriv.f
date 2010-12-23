@@ -18,7 +18,7 @@
 !$$$      include 'ipswpar.inc'
 !$$$      include 'cell.inc'
 
-      integer(KIND=int)::ibox,i,j,k
+      integer(KIND=normal_int)::ibox,i,j,k
 
       real(KIND=double_precision)::vol,hmats(3,3),hmatsi(3,3)
 

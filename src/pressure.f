@@ -34,8 +34,8 @@
 !$$$      include 'cell.inc'
 
       logical::lcoulo,lexplt,lqimol,lqjmol,lij2
-      integer(KIND=int)::ibox,itype
-      integer(KIND=int)::i,ii,j,jj,ntii,ntjj,ntij,imolty,jmolty,iii,jjj,k
+      integer(KIND=normal_int)::ibox,itype
+      integer(KIND=normal_int)::i,ii,j,jj,ntii,ntjj,ntij,imolty,jmolty,iii,jjj,k
  
       real(KIND=double_precision)::press,repress,erfunc
 

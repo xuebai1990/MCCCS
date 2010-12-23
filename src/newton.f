@@ -14,7 +14,7 @@
        implicit none
        include 'common.inc'
   
-       integer(KIND=int)::i,j,maxiter
+       integer(KIND=normal_int)::i,j,maxiter
        real(KIND=double_precision)::x_in,x_out,erfunc
        real(KIND=double_precision)::root(11),sqrtpi,deno
 

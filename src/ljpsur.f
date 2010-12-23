@@ -18,7 +18,7 @@
 !$$$      include 'external.inc'
 
       real(KIND=double_precision)::ljpsur, rijsq, sr, sr6
-      integer(KIND=int)::ntij
+      integer(KIND=normal_int)::ntij
 
 ! --------------------------------------------------------------------
 ! AT PRESENT: all sigma = 1.0

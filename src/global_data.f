@@ -20,11 +20,11 @@
       logical::ltailc,lshift
       logical::lneigh,lvirial
       logical::lcutcm,ldual
-      integer(KIND=int)::nmax,numax,ntmax,nntype,nvmax,nbxmax,npamax
+      integer(KIND=normal_int)::nmax,numax,ntmax,nntype,nvmax,nbxmax,npamax
      & ,npabmax,maxbin,cmax,cmaxa,tor_bin_max,nbinmax_ete,smax
-      integer(KIND=int)::vectormax,maxvir,maxntemp,nchmax,nchtor_max
+      integer(KIND=normal_int)::vectormax,maxvir,maxntemp,nchmax,nchtor_max
      & ,nchbn_max
-      integer(KIND=int)::ntdifmx,nbinmx,angle_max,ang_bin_max,tor_max
+      integer(KIND=normal_int)::ntdifmx,nbinmx,angle_max,ang_bin_max,tor_max
      & ,iou
 
 !      common /iounit/ iou
@@ -232,8 +232,8 @@
 
       real(KIND=double_precision)::alpha1,alpha2,beta1,beta2
       real(KIND=double_precision)::a1,delta,rsol
-      integer(KIND=int)::ntsubst
-      integer(KIND=int)::tau1,tau2
+      integer(KIND=normal_int)::ntsubst
+      integer(KIND=normal_int)::tau1,tau2
       logical::ljoe,lsami,lexzeo,lpsurf,lzgrid,lmuir,lgraphite
       logical::lslit
       logical::lcorreg,lelect_field
@@ -266,8 +266,8 @@
 
 ! ZEOLITE.INC
 
-      integer(KIND=int),parameter::nzeomax=57600
-      integer(KIND=int)::idzeo(nzeomax),nzeo,nx,ny,nz
+      integer(KIND=normal_int),parameter::nzeomax=57600
+      integer(KIND=normal_int)::idzeo(nzeomax),nzeo,nx,ny,nz
       logical::lunitcell(nzeomax)
       real(KIND=double_precision)::zeox(nzeomax),zeoy(nzeomax)
      & ,zeoz(nzeomax),zeorx,zeory,zeorz,zunitx,zunity,zunitz
@@ -278,13 +278,13 @@
 ! ZEOPOTEN.INC
 
 !      real(KIND=double_precision)::zeps(zntype,zntype),zsig2(zntype,zntype),zrc2(zntype,zntype),zencut(zntype,zntype)
-      integer(KIND=int),parameter::zntype=2,gntypemax=32
-      integer(KIND=int)::gntype,gtable(gntypemax),ztype(zntype)
+      integer(KIND=normal_int),parameter::zntype=2,gntypemax=32
+      integer(KIND=normal_int)::gntype,gtable(gntypemax),ztype(zntype)
      & ,znum(zntype)
 !      common/forces/gtable,znum,ztype,gntype,zeps,zsig2,zrc2,zencut
 
 ! GRID.INC
-      integer(KIND=int)::ngrx,ngry,ngrz,maxp,nlayermax
+      integer(KIND=normal_int)::ngrx,ngry,ngrz,maxp,nlayermax
       real(KIND=double_precision),allocatable::egrid(:,:,:,:)
       real(KIND=double_precision)::dgrx,dgry,dgrz,dgr
       parameter (maxp=10,dgr=0.2)
@@ -292,8 +292,8 @@
 
 ! MPI.INC
 
-      integer(KIND=int)::myid,numprocs,ierr
-      integer(KIND=int),parameter::numprocmax=32
+      integer(KIND=normal_int)::myid,numprocs,ierr
+      integer(KIND=normal_int),parameter::numprocmax=32
 !      common /mpivar/ myid,numprocs,ierr
 
 ! CBMC.INC
@@ -303,7 +303,7 @@
 
 ! *** adding this for iswatch move ***
       logical::liswinc(numax,ntmax), liswatch
-      integer(KIND=int)::other,iparty,iplace(numax,numax),pfrom(numax),pnum(numax)
+      integer(KIND=normal_int)::other,iparty,iplace(numax,numax),pfrom(numax),pnum(numax)
      & ,pprev(numax),nplace
 ! *** end add ***
 
@@ -315,7 +315,7 @@
      & ,numax),vtry(nchmax),vtrext(nchmax),vtrintra(nchmax)
      & ,vtrinter(nchmax) ,vtrelect(nchmax),vtrewald(nchmax)
      & ,vtrorient(nchmax),vtrelect_intra(nchmax),vtrelect_inter(nchmax)
-      integer(KIND=int)::nchoi1(ntmax),nchoi(ntmax),icbdir(ntmax)
+      integer(KIND=normal_int)::nchoi1(ntmax),nchoi(ntmax),icbdir(ntmax)
      & ,icbsta(ntmax),nmaxcbmc(ntmax),nchoih(ntmax),nchtor(ntmax)
      & ,nchbna(ntmax),nchbnb(ntmax),nrigi,nchoir(ntmax),rlist(numax
      & ,numax),rfrom(numax),rprev(numax) ,rnum(numax)
@@ -350,7 +350,7 @@
       logical::lspecial,lqchg,lij,lpl,lq14scale
       logical::L_Coul_CBMC
       logical::L_tor_table, L_spline, L_linear
-      integer(KIND=int)::a15type(ntmax,numax,numax)
+      integer(KIND=normal_int)::a15type(ntmax,numax,numax)
       real(KIND=double_precision)::sig2ij,epsij,epsilon,sigma,epsi,sigi
      & ,ecut,extc12, extc3, extz0,aspecial,bspecial,q1
       real(KIND=double_precision)::xiq,jayq,jayself,fqegp(ntmax),a15(2)
@@ -391,12 +391,12 @@
 
       logical::lelect,lflucq,lqtrans,lexpand,lpresim,lring,lrigid,lplace
      & ,lrig,lrigi,lchiral,licell
-      integer(KIND=int)::nbox,nchain,nmolty,moltyp,nunit,nugrow,ntype
+      integer(KIND=normal_int)::nbox,nchain,nmolty,moltyp,nunit,nugrow,ntype
      & ,nchbox,ncmt,ncmt2,iring,nrig,irig,frig,counthist,counttot
      & ,boxlink
-      integer(KIND=int)::nboxi, eetype, parbox,iurot,iupdatefix,nrigmin
+      integer(KIND=normal_int)::nboxi, eetype, parbox,iurot,iupdatefix,nrigmin
      & ,nrigmax
-      integer(KIND=int)::parall,temtyp,riutry,rindex,prior,maxgrow
+      integer(KIND=normal_int)::parall,temtyp,riutry,rindex,prior,maxgrow
      & ,nrotbd,irotbd
       real(KIND=double_precision)::rxu, ryu, rzu, mass, masst, beta,xcm
      & ,ycm,zcm,exp_c,eta,eta2,sxcm,sycm,szcm
@@ -445,7 +445,7 @@
 
 ! COORD2.INC
 
-      integer(KIND=int)::moltion(2)
+      integer(KIND=normal_int)::moltion(2)
       real(KIND=double_precision)::rxuion(numax,2),ryuion(numax,2)
      & ,rzuion(numax,2),qquion(numax,2),exp_cion(2)
 !      common /coord2/ rxuion,ryuion,rzuion,
@@ -456,7 +456,7 @@
       logical::linclu(ntmax,numax,numax),lqinclu(ntmax,numax,numax)
      & ,lainclu(ntmax,numax,numax),lexclu(ntmax,numax,ntmax,numax)
      & ,wschvib(numax,6),wschben(numax,12),wschtor(numax,12)
-      integer(KIND=int)::invib(ntmax,numax),itvib(ntmax,numax,6)
+      integer(KIND=normal_int)::invib(ntmax,numax),itvib(ntmax,numax,6)
      & ,ijvib(ntmax,numax,6),inben(ntmax,numax),itben(ntmax,numax,12)
      & ,ijben2(ntmax,numax,12),ijben3(ntmax,numax,12),intor(ntmax,numax)
      & ,ittor(ntmax,numax,12),ijtor2(ntmax,numax,12),ijtor3(ntmax,numax
@@ -484,7 +484,7 @@
 ! EWALDSUM.INC
 
       logical::L_Ewald_Auto
-      integer(KIND=int)::kmax,numvect
+      integer(KIND=normal_int)::kmax,numvect
 ! - kalp, a parameter to control the real::space sum
 ! - kmax, a parameter to control the total number of reciprocal vectors
 ! - numvect, the total number of reciprocal vectors
@@ -700,7 +700,7 @@
 
 ! QQLIST.INC
 
-      integer(KIND=int)::leaderq
+      integer(KIND=normal_int)::leaderq
       dimension leaderq(ntmax,numax)
 !      common /qleader/ leaderq
 
@@ -718,7 +718,7 @@
 ! * stores interaction parameters for 9-6 potential *
 ! ***************************************************
 
-      integer(KIND=int)::nxatom
+      integer(KIND=normal_int)::nxatom
       parameter (nxatom=5)
       real(KIND=double_precision)::rzero(nxatom*nxatom),epsnx(nxatom
      & *nxatom)
@@ -757,11 +757,11 @@
 !cccc  KM 2009
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      integer(KIND=int)::vibsplits(150), bendsplits(150), ntabvib,
+      integer(KIND=normal_int)::vibsplits(150), bendsplits(150), ntabvib,
      & ntabbend
-      integer(KIND=int)::vdWsplits(150,150), ntabvdW
-      integer(KIND=int)::electsplits(1500,1500), ntabelect
-      integer(KIND=int)::num_int_vib(150), num_int_bend(150),
+      integer(KIND=normal_int)::vdWsplits(150,150), ntabvdW
+      integer(KIND=normal_int)::electsplits(1500,1500), ntabelect
+      integer(KIND=normal_int)::num_int_vib(150), num_int_bend(150),
      &	num_int_vdW(150,150), num_int_elect(150,150)
       real(KIND=double_precision)::vib(1500,150), tabvib(1500,150)
       real(KIND=double_precision)::bend(1500,150), tabbend(1500,150)
@@ -786,7 +786,7 @@
 
       logical::lsolid(nbxmax),lrect(nbxmax),ltwice(nbxmax)
      & ,lideal(nbxmax)
-      integer(KIND=int)::icell,nicell,iucell,solcount
+      integer(KIND=normal_int)::icell,nicell,iucell,solcount
       real(KIND=double_precision)::boxlx(nbxmax), boxly(nbxmax),
      & boxlz(nbxmax), rcut(nbxmax), rmin,rcutnn(nbxmax), softcut,softlog
      & ,rcutin,avsolinter,avsolintra,avsolbend,avsoltor,avsolelc
@@ -807,9 +807,9 @@
 ! NEIGH.INC
 
       logical::lnn(1,1),lneighbor !	lnn(1,1):replace the 1s with nmax to use neighbor list
-      integer(KIND=int)::maxneigh
+      integer(KIND=normal_int)::maxneigh
       parameter (maxneigh = 20)
-      integer(KIND=int)::neighbor(maxneigh,nmax),neigh_cnt(nmax)
+      integer(KIND=normal_int)::neighbor(maxneigh,nmax),neigh_cnt(nmax)
      & ,neigh_icnt,neighi(maxneigh),neighboro(maxneigh,nmax)
      & ,neigh_o(nmax)
       real(KIND=double_precision)::ndij(maxneigh,nmax),nxij(maxneigh
@@ -848,14 +848,14 @@
       logical::lrdf,lintra,lstretch,lgvst,lbend,lete, lrhoz
       logical::L_movie_xyz
       character(LEN=1)::suffix
-      integer(KIND=int)::run_num
+      integer(KIND=normal_int)::run_num
       logical::L_add, L_sub
-      integer(KIND=int)::N_add,N_box2add,N_moltyp2add
-      integer(KIND=int)::N_sub,N_box2sub,N_moltyp2sub
-      integer(KIND=int)::ghost_particles
-      integer(KIND=int)::ianalyze,nbin,tmcc
-      integer(KIND=int)::nequil,ninstf,ninsth,ndumph
-      integer(KIND=int)::nstep, iprint, imv, iratio, iblock, idiele,
+      integer(KIND=normal_int)::N_add,N_box2add,N_moltyp2add
+      integer(KIND=normal_int)::N_sub,N_box2sub,N_moltyp2sub
+      integer(KIND=normal_int)::ghost_particles
+      integer(KIND=normal_int)::ianalyze,nbin,tmcc
+      integer(KIND=normal_int)::nequil,ninstf,ninsth,ndumph
+      integer(KIND=normal_int)::nstep, iprint, imv, iratio, iblock, idiele,
      & isolute,iratv,iratp,irsave,nnstep,nchoiq,numcoeff,rmexpc,nswapb
      & ,box1,box2,nvolb,box5,box6,ntemp, iheatcapacity
 
@@ -940,8 +940,8 @@
 
 ! SWTCMOVE.INC
 
-      integer(KIND=int)::nswaty,nswatb,gswatc,nswach
-      integer(KIND=int)::nsampos,splist,nswtcb,box3,box4,ncut
+      integer(KIND=normal_int)::nswaty,nswatb,gswatc,nswach
+      integer(KIND=normal_int)::nsampos,splist,nswtcb,box3,box4,ncut
 
       real(KIND=double_precision)::bnswat,bniswat,pmswtcb
       real(KIND=double_precision)::bnswat_empty
@@ -964,7 +964,7 @@
 
 ! ROSEN.INC
 
-      integer(KIND=int)::growfrom,growprev,growlist,grownum
+      integer(KIND=normal_int)::growfrom,growprev,growlist,grownum
       dimension growfrom(numax),growprev(numax),grownum(numax)
       dimension growlist(numax,numax)
 
@@ -984,7 +984,7 @@
 
 ! IPSWPAR.INC
 
-      integer(KIND=int)::nw,nwell,iratipsw
+      integer(KIND=normal_int)::nw,nwell,iratipsw
       parameter (nw = 4000)
 
       real(KIND=double_precision)::dvdl,acdvdl,acipsw,vipsw,pipsw
@@ -1016,7 +1016,7 @@
 ! EEPAR.INC
 
       logical::leemove,lmstate, leeacc
-      integer(KIND=int)::fmstate,sstate1,sstate2,mstate,nstate,ee_moltyp
+      integer(KIND=normal_int)::fmstate,sstate1,sstate2,mstate,nstate,ee_moltyp
      & ,box_state,eepointp,eeirem,boxrem1,boxins1,ee_prob,nmolty1
       real(KIND=double_precision)::wee_ratio,psi,ee_qqu,um_markov
      & ,eeratio,rminee
@@ -1032,14 +1032,14 @@
 
 ! BLKAVG.INC
 
-      integer(KIND=int)::nener,nprop,blockm
+      integer(KIND=normal_int)::nener,nprop,blockm
       real(KIND=double_precision)::naccu,nccold,accum,bccold,aver,baver
      & ,acsvol,acnvol,acshmat,acnhmat
 ! ** Neeraj adding for solubility parameter and heat of vaporization
 
       real(KIND=double_precision)::naccu1,nccold1,accum1,bccold1,aver1
      & ,baver1
-      integer(KIND=int)::nprop1
+      integer(KIND=normal_int)::nprop1
       parameter (nener=18,nprop=4+nener+(4*ntmax)+3,blockm=100)
       parameter (nprop1=11)
       dimension naccu(nprop,nbxmax),nccold(nprop,nbxmax)
@@ -1067,7 +1067,7 @@
 
 ! FIX.INC
 
-      integer(KIND=int)::  iend,ipast,endnum,pastnum,fclose,fcount,iwbef
+      integer(KIND=normal_int)::  iend,ipast,endnum,pastnum,fclose,fcount,iwbef
      &   ,ibef,befnum,wbefnum,nextnum,inext
 
       logical::lcrank
@@ -1095,7 +1095,7 @@
 
 ! EXPSIX.INC
 
-      integer(KIND=int)::natom
+      integer(KIND=normal_int)::natom
       parameter (natom = 3)
       real(KIND=double_precision)::aexsix,bexsix,cexsix,sexsix,consp
      & ,consu
@@ -1106,7 +1106,7 @@
 
 ! MERCK.INC
 
-      integer(KIND=int)::natomtyp
+      integer(KIND=normal_int)::natomtyp
       parameter (natomtyp = 3)
       real(KIND=double_precision)::epsimmff,sigimmff,smmff,sigisq,ammff
      & ,nmmff
@@ -1121,7 +1121,7 @@
 ! INPAR.INC
 
       logical::lbranch
-      integer(KIND=int)::ininch,inix, iniy, iniz, inirot, inimix
+      integer(KIND=normal_int)::ininch,inix, iniy, iniz, inirot, inimix
       real(KIND=double_precision)::zshift, dshift
       dimension inix(nbxmax),iniy(nbxmax),iniz(nbxmax),
      &          inirot(nbxmax),inimix(nbxmax)
@@ -1133,7 +1133,7 @@
 
 ! GAROFALINI.INC
 
-      integer(KIND=int)::pair_max
+      integer(KIND=normal_int)::pair_max
       parameter(pair_max=50000)
 
       real(KIND=double_precision)::galpha(6),grho(6),gbeta(6),ga(6,3),
@@ -1144,7 +1144,7 @@
      &	 dzij(pair_max),dij(pair_max),dik(pair_max),dxik(pair_max)
      &   ,dyik(pair_max),dzik(pair_max)
 
-      integer(KIND=int)::itr1(pair_max),itr2(pair_max),itr3(pair_max),
+      integer(KIND=normal_int)::itr1(pair_max),itr2(pair_max),itr3(pair_max),
      &   ntr,tagged
 
       real(KIND=double_precision)::v3garo,garofalini
@@ -1176,7 +1176,7 @@
 
 ! TORSION.INC
 
-	integer(KIND=int)::splpnts(10),nttor
+	integer(KIND=normal_int)::splpnts(10),nttor
 	real(KIND=double_precision)::deg(1500,2),tabtorso(1500,2)
      &   ,torderiv2(1500,2)
 	real(KIND=double_precision)::tordif(1500,2)
@@ -1185,7 +1185,7 @@
 
 ! NRTAB.INC
 
-      integer(KIND=int)::nrtcon,nrtmax,nrtbin
+      integer(KIND=normal_int)::nrtcon,nrtmax,nrtbin
 ! - parameters currently set low to minimize storage
       parameter(nrtcon=50,nrtmax=10,nrtbin=10)
 
@@ -1196,7 +1196,7 @@
 
 ! CONTORSION.INC
 
-      integer(KIND=int)::ntormax
+      integer(KIND=normal_int)::ntormax
       parameter (ntormax=700)
       real(KIND=double_precision)::vtt0(ntormax),vtt1(ntormax)
      & ,vtt2(ntormax),vtt3(ntormax),vtt4(ntormax),vtt5(ntormax)

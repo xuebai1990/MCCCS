@@ -33,7 +33,7 @@
 !$$$      include 'eepar.inc'
 
       logical::lx,ly,lz,ovrlap,lneighij,lclu_cmp,lexclude(nmax)
-      integer(KIND=int)::i,ibox,flagon,iunit,j,imolty,iuroty,icbu,ic,ip,k
+      integer(KIND=normal_int)::i,ibox,flagon,iunit,j,imolty,iuroty,icbu,ic,ip,k
       real(KIND=double_precision)::rx,ry,rz,dchain,rchain,random,vnew,vold
      &                ,vintrao,dgamma,rxorig,ryorig,rzorig
      &                ,rxnew2,rynew2,rznew2,vintran,disvsq,deltv

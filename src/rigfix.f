@@ -21,7 +21,7 @@
 
       logical::lnew,ovrlap,lterm,lovra,lfind,lshit
 
-      integer(KIND=int)::iw,i,ibox,imolty,iufrom,iuprev,ntogrow,count,iu,counta
+      integer(KIND=normal_int)::iw,i,ibox,imolty,iufrom,iuprev,ntogrow,count,iu,counta
      &     ,ilist,ja,max,num,inum,j,ju,iv,nlist,ichoi,ichtor,ip,itor
      &     ,it,jut2,jut3,jut4,jttor,iwalk,glist,ifrom,inuma
 

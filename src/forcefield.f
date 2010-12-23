@@ -16,7 +16,7 @@
 !$$$      include 'control.inc'
 
       real(KIND=double_precision)::epsilon,sigma,rczeo
-      integer(KIND=int)::         itype,jtype,idz
+      integer(KIND=normal_int)::         itype,jtype,idz
 
 !     In atomtype.f atoms O of the zeolite have been given id=1
 !     Hopefully in some other place the guestmolecules CH4 have been

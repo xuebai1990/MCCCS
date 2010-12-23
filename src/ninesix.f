@@ -18,7 +18,7 @@
 !$$$      include 'control.inc'
 !$$$      include 'nsix.inc'
       real(KIND=double_precision)::rijsq,rij,ror,ninesix
-      integer(KIND=int)::ntij
+      integer(KIND=normal_int)::ntij
 
       rij=dsqrt(rijsq)
       ror = rzero(ntij)/rij

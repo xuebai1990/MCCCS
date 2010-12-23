@@ -22,7 +22,7 @@
 !$$$      include 'connect.inc'
 
 ! - arguments
-      integer(KIND=int)::ichain,nngrow,negrow,i,iplus,imins,nn,
+      integer(KIND=normal_int)::ichain,nngrow,negrow,i,iplus,imins,nn,
      &        imolty,iben,iend,ii,jj
       real(KIND=double_precision)::vmethyl,ch,cc,cch,ca,ah,hch2,hk,ck,en0
      &     ,a1,b1,c1,dln1,a2,b2,c2,dln2,a3,b3,c3,x12,y12,z12

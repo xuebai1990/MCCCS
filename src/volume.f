@@ -36,7 +36,7 @@
       logical::ovrlap,lvol,lx,ly,lz,lncubic
       logical::la,lb,lc
 
-      integer(KIND=int)::i,j,ibox,imolty,ic,ncount,boxa,boxb,ipair,ipairb
+      integer(KIND=normal_int)::i,j,ibox,imolty,ic,ncount,boxa,boxb,ipair,ipairb
       real(KIND=double_precision)::bxo(nbxmax),byo(nbxmax),bzo(nbxmax)
       real(KIND=double_precision)::volo(nbxmax),vboxo(nbxmax),dfac(nbxmax),
      &                 voln(nbxmax),vflucqo(nbxmax),vintero(nbxmax),
@@ -58,11 +58,11 @@
 
       dimension xcmo(nmax),ycmo(nmax),zcmo(nmax)
 
-      integer(KIND=int)::ichoiq
-      integer(KIND=int)::hbox,jbox,jhmat
+      integer(KIND=normal_int)::ichoiq
+      integer(KIND=normal_int)::hbox,jbox,jhmat
       real(KIND=double_precision)::rbox,hmato(9),hmatio(9)
 
-      integer(KIND=int)::idum
+      integer(KIND=normal_int)::idum
       real(KIND=double_precision)::lddum,lddum2(27)
 !kea
       real(KIND=double_precision)::v3n(nbxmax),v3o(nbxmax)

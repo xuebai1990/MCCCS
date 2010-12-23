@@ -28,7 +28,7 @@
 
       logical::lterm
 
-      integer(KIND=int)::n,iinit
+      integer(KIND=normal_int)::n,iinit
 
       real(KIND=double_precision)::x,y,z,rx,ry,rz,length,lengtha,lengthb
      &     ,xa,ya,za,theta,thetac,ux,uy,uz,bondl,avar,bvar,cvar

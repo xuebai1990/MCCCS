@@ -35,12 +35,12 @@
 
       logical::lempty,lterm
 
-      integer(KIND=int)::type_a,type_b,from,prev,self,iboxnew,iboxold
+      integer(KIND=normal_int)::type_a,type_b,from,prev,self,iboxnew,iboxold
      &     ,imolty,igrow,new,old,islen,ifirst,iprev,iii,j
-      integer(KIND=int)::oldchain,newchain,oldunit,newunit,ncount,iunit,iins
+      integer(KIND=normal_int)::oldchain,newchain,oldunit,newunit,ncount,iunit,iins
 
-      integer(KIND=int)::ic,ibox,icbu,jj,mm,imt,jmt,imolin,imolrm
-      integer(KIND=int)::boxa,boxb,ipair,imolta,imoltb,iboxa
+      integer(KIND=normal_int)::ic,ibox,icbu,jj,mm,imt,jmt,imolin,imolrm
+      integer(KIND=normal_int)::boxa,boxb,ipair,imolta,imoltb,iboxa
      &  ,iboxb,iboxal,iboxbl,iboxia,iboxib,iunita,iunitb,orgaia
      &  ,orgaib,orgbia,orgbib,ipairb 
 
@@ -54,10 +54,10 @@
      &     ,deleo,dicount,vrecipn,vrecipo
 ! * additions from iswatch
 
-      integer(KIND=int)::zz,zzz,box,iboxi,bdmol_a,bdmol_b
-      integer(KIND=int)::imola,imolb,moltaid,moltbid,i,ii,iu
+      integer(KIND=normal_int)::zz,zzz,box,iboxi,bdmol_a,bdmol_b
+      integer(KIND=normal_int)::imola,imolb,moltaid,moltbid,i,ii,iu
 
-      integer(KIND=int)::s_type, o_type, thisbox, otherbox
+      integer(KIND=normal_int)::s_type, o_type, thisbox, otherbox
 
       real(KIND=double_precision)::rx_1(numax),ry_1(numax),rz_1(numax),dummy
 
@@ -76,7 +76,7 @@
      &  ,vntail(nbxmax),vnelect(nbxmax),vnewald(nbxmax)
 
 ! --- JLR 11-24-09
-      integer(KIND=int)::icallrose
+      integer(KIND=normal_int)::icallrose
 ! --- END JLR 11-24-09
 
 ! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

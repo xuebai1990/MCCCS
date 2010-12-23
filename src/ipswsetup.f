@@ -19,7 +19,7 @@
 !$$$      include 'system.inc'
 !$$$      include 'cell.inc'
 
-      integer(KIND=int)::i,j,k,tnw,ibox
+      integer(KIND=normal_int)::i,j,k,tnw,ibox
 
       real(KIND=double_precision)::lx,hmata(9),hmatc(9),hm(9)
 

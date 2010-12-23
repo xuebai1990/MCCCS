@@ -45,7 +45,7 @@
 ! **********************************************************************
 ! local variables
 
-      integer(KIND=int)::ibend,ibox,i,imolty,iunit,iprop,jblock,itype
+      integer(KIND=normal_int)::ibend,ibox,i,imolty,iunit,iprop,jblock,itype
 
 
 ! **********************************************************************

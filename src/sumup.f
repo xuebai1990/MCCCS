@@ -47,7 +47,7 @@
  
       logical::ovrlap, lvol 
       logical::lexplt,lqimol,lqjmol,lcoulo,lij2,liji,lqchgi,lexclude
-      integer(KIND=int)::i, imolty, ii, j, jmolty, jj, ntii, ntjj, ntij, iunit
+      integer(KIND=normal_int)::i, imolty, ii, j, jmolty, jj, ntii, ntjj, ntij, iunit
      &     , ip1, ip2, ip3,ibox,nmcount,iii,jjj,ip
      &     ,iivib, jjvib, jjben, jjtor, it, ntj,itype,k, mmm
       real(KIND=double_precision)::v, vinter, vintra, vtail, vvib, vbend, vtg, vext

@@ -18,9 +18,9 @@
 !$$$      include 'connect.inc'
 !$$$      include 'poten.inc'
 
-      integer(KIND=int)::m,n,nb,mb,imolty,ioffset
-      integer(KIND=int)::inclnum,inclmol,inclbead,inclsign,ncarbon
-      integer(KIND=int)::ainclnum,ainclmol,ainclbead,a15t
+      integer(KIND=normal_int)::m,n,nb,mb,imolty,ioffset
+      integer(KIND=normal_int)::inclnum,inclmol,inclbead,inclsign,ncarbon
+      integer(KIND=normal_int)::ainclnum,ainclmol,ainclbead,a15t
       dimension inclmol(ntmax*numax*numax),inclsign(ntmax*numax*numax)
       dimension inclbead(ntmax*numax*numax,2),ncarbon(ntmax)
       dimension ainclmol(ntmax*numax*numax)

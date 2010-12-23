@@ -19,7 +19,7 @@
 !$$$      include 'ljsamipara.inc'
 
       real(KIND=double_precision)::ljsami, rijsq, rij, sr
-      integer(KIND=int)::ntij
+      integer(KIND=normal_int)::ntij
 
 ! --------------------------------------------------------------------
 

@@ -17,7 +17,7 @@
 !$$$      include 'conver.inc'
 !$$$      include 'contorsion.inc'
 
-      integer(KIND=int)::i
+      integer(KIND=normal_int)::i
 
 ! ----------------------------------------------------------------
 

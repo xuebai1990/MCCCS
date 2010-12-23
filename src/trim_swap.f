@@ -44,10 +44,10 @@
      &     lremk_in,lrem_clu,lins_clu,lfixnow
 
      
-      integer(KIND=int)::boxins,boxrem,imol,ichoi,ip,iwalk,idum
-      integer(KIND=int)::istt,iett,ncount,itype,ipair,ipairb,beg,flagon
+      integer(KIND=normal_int)::boxins,boxrem,imol,ichoi,ip,iwalk,idum
+      integer(KIND=normal_int)::istt,iett,ncount,itype,ipair,ipairb,beg,flagon
 
-      integer(KIND=int)::iutry,icbu,ifrom,irem,iins,glist,findex
+      integer(KIND=normal_int)::iutry,icbu,ifrom,irem,iins,glist,findex
      &     ,iii,j,ibox,iunit,ic,pointp,imolty,imt,jmt,igrow
      &     ,pointp2,jins,jmolty,neighj_num,neighk_num
      &     ,joffset,koffset,kmolty,kins,target,cnt_wf1

@@ -42,16 +42,16 @@
 
 !     --- variables passed to the subroutine
       logical::lnew,lterm,lwbef
-      integer(KIND=int)::i,j,ja,icharge,imolty,ifrom,ibox,igrow,tac
+      integer(KIND=normal_int)::i,j,ja,icharge,imolty,ifrom,ibox,igrow,tac
 
 !     --- local variables
       
       logical::ovrlap,ltorsion,lfixnow,lfixed,lreturn
 
-      integer(KIND=int)::glist,iuprev,iufrom,ichoi,ntogrow,count
-      integer(KIND=int)::iu,iv,iw,ju,ip,ichtor
+      integer(KIND=normal_int)::glist,iuprev,iufrom,ichoi,ntogrow,count
+      integer(KIND=normal_int)::iu,iv,iw,ju,ip,ichtor
      &       ,it,jut2,jut3,jut4,jttor,iwalk,ivect
-      integer(KIND=int)::angstart,toracc
+      integer(KIND=normal_int)::angstart,toracc
       
       dimension glist(numax)
 
@@ -67,7 +67,7 @@
       dimension bondlen(numax),bendang(numax),phi(numax)
      
 !     -- new stuff
-      integer(KIND=int)::itor,bin,counta,movetype,ku
+      integer(KIND=normal_int)::itor,bin,counta,movetype,ku
       real(KIND=double_precision)::bf_tor,vtorsion,phitors,ran_tor
      &     ,wei_bend,jacobian,ctorf
       dimension bf_tor(nchtor_max),vtorsion(nchtor_max)

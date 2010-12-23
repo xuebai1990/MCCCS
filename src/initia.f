@@ -25,15 +25,15 @@
 
 
       logical::lhere(nmax)       
-      integer(KIND=int)::i,j,m,m1,m2,n,nn,ic,jc,kc,it,ip1,ip2,ip3,ii,jj
+      integer(KIND=normal_int)::i,j,m,m1,m2,n,nn,ic,jc,kc,it,ip1,ip2,ip3,ii,jj
      &       ,iivib,jjben,jjtor,intemp,imol,nt
      &       ,ibtype,imolty,ibuild,rand_id,offset,count_chain
 
-      integer(KIND=int)::iboxst,iboxed,ibox,pct,check,chktot
-      integer(KIND=int)::mcmt(ntmax,nbxmax),pcmt(ntmax),mcmtma(ntmax,nbxmax)
-      integer(KIND=int)::unitc,ntii,ichain
+      integer(KIND=normal_int)::iboxst,iboxed,ibox,pct,check,chktot
+      integer(KIND=normal_int)::mcmt(ntmax,nbxmax),pcmt(ntmax),mcmtma(ntmax,nbxmax)
+      integer(KIND=normal_int)::unitc,ntii,ichain
 
-      integer(KIND=int)::bmap(numax),imap(numax),zzz,prev,ifrom,nsave
+      integer(KIND=normal_int)::bmap(numax),imap(numax),zzz,prev,ifrom,nsave
       logical::lacc(numax),lgrow,lterm,lgrown(ntmax)
 
       real(KIND=double_precision)::xtemp(numax),ytemp(numax),ztemp(numax)

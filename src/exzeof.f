@@ -23,7 +23,7 @@
 !$$$      include 'mpi.inc'
       real(KIND=double_precision)::exzeof,xi,yi,zi,r2,rcutsq,xr,yr,zr,r2i,r6,vljnew,vqnew
      &     ,overflow=1.0d8,rminsq,r,recipzeo,erfunc,i,j,k,sx,sy,sz
-      integer(KIND=int)::izeo,idi,idj,ntij,layer,ii,jj,kk,ibox=1
+      integer(KIND=normal_int)::izeo,idi,idj,ntij,layer,ii,jj,kk,ibox=1
 
 !     calculate the Lennard-Jones interactions, include as many layers
 !     of neighboring unit cells as needed for the specified precision
@@ -165,11 +165,11 @@
 !$$$      include 'mpif.h'
 !$$$      include 'mpi.inc'
 
-      integer(KIND=int)::ibox=1,i,ii
+      integer(KIND=normal_int)::ibox=1,i,ii
 
 ! * from h-matrix formulation
-      integer(KIND=int)::l,m,n,m_min,m_max,n_min,n_max,kmaxl,kmaxm,kmaxn
-      integer(KIND=int)::mystart,myend,blocksize
+      integer(KIND=normal_int)::l,m,n,m_min,m_max,n_min,n_max,kmaxl,kmaxm,kmaxn
+      integer(KIND=normal_int)::mystart,myend,blocksize
       real(KIND=double_precision)::alpsqr4,vol,ksqr,sum,arg,recipzeo,xi,yi,zi,qi
      &     ,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi
 

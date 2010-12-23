@@ -41,30 +41,30 @@
 !$$$      include 'torsion.inc'
 !$$$      include 'tabulated.inc'
       
-      integer(KIND=int)::seed
+      integer(KIND=normal_int)::seed
       real(KIND=double_precision)::random,rtest(10)
 
 ! -- variables for histograms	
-      integer(KIND=int)::fname
+      integer(KIND=normal_int)::fname
       character(LEN=default_path_length)::file_movie,file_run,ftemp
      & ,fname2,file_dipole 
       character(LEN=default_path_length)::fname4
       character(LEN=default_path_length)::fileout
  
-      integer(KIND=int)::temnc, imol, iutemp, imolty, itype,ipair,bdum,bin,histtot
-      integer(KIND=int)::idummy(ntmax), atemp 
+      integer(KIND=normal_int)::temnc, imol, iutemp, imolty, itype,ipair,bdum,bin,histtot
+      integer(KIND=normal_int)::idummy(ntmax), atemp 
 
-      integer(KIND=int)::i,j,k,ncres, nmtres, iensem, inpbc, nmcount
-      integer(KIND=int)::im,nures, ibox,  ij, tcount,ucheck,nnframe
-      integer(KIND=int)::nijspecial,ispecial,jspecial,ji,ii,jj,nexclu,ndum,ntii
+      integer(KIND=normal_int)::i,j,k,ncres, nmtres, iensem, inpbc, nmcount
+      integer(KIND=normal_int)::im,nures, ibox,  ij, tcount,ucheck,nnframe
+      integer(KIND=normal_int)::nijspecial,ispecial,jspecial,ji,ii,jj,nexclu,ndum,ntii
 
-      integer(KIND=int)::zz,temphe,z,itemp,zzz
-      integer(KIND=int)::nvirial,k_max_l,k_max_m,k_max_n
-      integer(KIND=int)::inclnum,inclmol,inclbead,inclsign,ncarbon
+      integer(KIND=normal_int)::zz,temphe,z,itemp,zzz
+      integer(KIND=normal_int)::nvirial,k_max_l,k_max_m,k_max_n
+      integer(KIND=normal_int)::inclnum,inclmol,inclbead,inclsign,ncarbon
       dimension inclmol(ntmax*numax*numax),inclsign(ntmax*numax*numax)
       dimension inclbead(ntmax*numax*numax,2)
 
-      integer(KIND=int)::ainclnum,ainclmol,ainclbead,a15t
+      integer(KIND=normal_int)::ainclnum,ainclmol,ainclbead,a15t
       dimension ainclmol(ntmax*numax*numax)
       dimension ainclbead(ntmax*numax*numax,2)
       dimension a15t(ntmax*numax*numax)
@@ -86,8 +86,8 @@
       
 ! -- Variables added (6/30/2006) for fort.4 consistency check
   
-      integer(KIND=int)::numvib,numbend,numtor,vib1,bend2,bend3,tor2,tor3,tor4
-      integer(KIND=int)::vibtype,bendtype,tortype
+      integer(KIND=normal_int)::numvib,numbend,numtor,vib1,bend2,bend3,tor2,tor3,tor4
+      integer(KIND=normal_int)::vibtype,bendtype,tortype
 
 !      real(KIND=double_precision)::temx,temy,temz
       
@@ -107,11 +107,11 @@
 
 ! KEA torsion variables
       logical::Lttor,lspline,linter
-      integer(KIND=int)::mmm,ttor
+      integer(KIND=normal_int)::mmm,ttor
 ! KM tabulated potential variables
-      integer(KIND=int)::tvib, tbend, iivdW,jjvdW, iielect, jjelect
+      integer(KIND=normal_int)::tvib, tbend, iivdW,jjvdW, iielect, jjelect
 ! KM variable added when analysis removed
-      integer(KIND=int)::nhere
+      integer(KIND=normal_int)::nhere
 
 ! -- reads input data and initializes the positions
 !
@@ -208,7 +208,7 @@
 ! - create output file name
       fname = run_num
 
-! - use internal read/write to get integer(KIND=int)::number in character::format
+! - use internal read/write to get integer(KIND=normal_int)::number in character::format
       write(ftemp,*) fname
       read(ftemp,*) fname2
       file_run = 'run'//fname2(1:len_trim(fname2))//suffix//'.dat' 
@@ -383,7 +383,7 @@
 ! - create output file name
       fname = run_num
 
-! - use internal read/write to get integer(KIND=int)::number in character::format
+! - use internal read/write to get integer(KIND=normal_int)::number in character::format
 !      write(ftemp,*) fname
 !      read(ftemp,*) fname2
 !      file_run = 'run'//fname2(1:len_trim(fname2))//suffix//'.dat' 
@@ -1125,7 +1125,7 @@
 ! -- To assign multiple rotation centers, set iurot(imol) < 0
 ! -- Add line after molecule specification, avbmc parameters
 ! -- First, number of rotation centers
-! -- Second, identity of centers (0=COM,integer(KIND=int)::> 0 = bead number)
+! -- Second, identity of centers (0=COM,integer(KIND=normal_int)::> 0 = bead number)
 ! -- Third, give probability to rotate around different centers
          if(iurot(imol).lt.0) then
             read(4,*)

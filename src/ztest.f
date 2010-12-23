@@ -14,7 +14,7 @@
 !$$$      include 'zeolite.inc'
 !$$$      include 'control.inc'
 !$$$      include 'mpi.inc'
-      integer(KIND=int)::i,idi,tel,samp
+      integer(KIND=normal_int)::i,idi,tel,samp
       real(KIND=double_precision)::errm,errt,err,res,rest,erra
      &     ,xi,yi,zi,random,exzeof,exzeo
      &     ,ebolt,bolt,boltf,eboltf

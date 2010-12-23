@@ -22,7 +22,7 @@
 !$$$      include 'system.inc'
 !$$$      include 'qqlist.inc'
 
-      integer(KIND=int)::i,ibox,jmolty,j
+      integer(KIND=normal_int)::i,ibox,jmolty,j
 
       real(KIND=double_precision)::rcutsq,rxuu1,ryuu1,rzuu1,rxuij,ryuij,rzuij
      &     ,rijsq

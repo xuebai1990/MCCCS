@@ -25,7 +25,7 @@
 !$$$      include 'tabulated.inc'
 !$$$      include 'conver.inc'
 
-      integer(KIND=int)::vibtyp, vlow, vhigh, xa, bin, add1
+      integer(KIND=normal_int)::vibtyp, vlow, vhigh, xa, bin, add1
       real(KIND=double_precision)::len, tabulated_vib, left, lenrem
       
       vlow=1
@@ -88,7 +88,7 @@
 !$$$      include 'tabulated.inc'
 !$$$      include 'conver.inc'
 
-      integer(KIND=int)::bendtyp, blow, bhigh, xa, bin, add1
+      integer(KIND=normal_int)::bendtyp, blow, bhigh, xa, bin, add1
       real(KIND=double_precision)::r, tabulated_bend, left, rem
 
       blow=1
@@ -153,7 +153,7 @@
 !$$$      include 'tabulated.inc'
 !$$$      include 'conver.inc'
 
-      integer(KIND=int)::typi, typj, low, high, xa, bin, add1
+      integer(KIND=normal_int)::typi, typj, low, high, xa, bin, add1
       real(KIND=double_precision)::r,  tabulated_vdW, left, rem
 
       low=1
@@ -216,7 +216,7 @@
 !$$$      include 'tabulated.inc'
 !$$$      include 'conver.inc'
 
-      integer(KIND=int)::typi, typj, low, high, xa, bin, add1
+      integer(KIND=normal_int)::typi, typj, low, high, xa, bin, add1
       real(KIND=double_precision)::r,  tabulated_elect, left, rem
 
       low=1

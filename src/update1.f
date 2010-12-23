@@ -19,7 +19,7 @@
 !$$$      include 'neigh.inc'
 !$$$      include 'neigh2.inc'
 !$$$      include 'blkavg.inc'
-      integer(KIND=int)::nblock,ipos,ibox,jbox
+      integer(KIND=normal_int)::nblock,ipos,ibox,jbox
       real(KIND=double_precision)::acmove,dp,dn,value
       
       if (nblock.eq.1) then

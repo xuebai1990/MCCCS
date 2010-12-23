@@ -12,7 +12,7 @@
       include 'common.inc'
 !$$$      include 'zeopoten.inc'
       character(LEN=*)::atom
-      integer(KIND=int)::ntype,atomtype
+      integer(KIND=normal_int)::ntype,atomtype
 
 !     Assigning id's to atomtypes
 

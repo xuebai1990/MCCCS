@@ -19,7 +19,7 @@
 !$$$      include 'externalmuir.inc'
 
       real(KIND=double_precision)::exmuir, z
-      integer(KIND=int)::ntj
+      integer(KIND=normal_int)::ntj
 
 ! --------------------------------------------------------------------
 

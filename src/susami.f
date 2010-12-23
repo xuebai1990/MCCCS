@@ -24,7 +24,7 @@
      &            tsig=3.527d0, teps=79.982210d0 )
 
       real(KIND=double_precision)::rcsami
-      integer(KIND=int)::ij
+      integer(KIND=normal_int)::ij
 
 ! --------------------------------------------------------------------
 

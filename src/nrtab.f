@@ -27,7 +27,7 @@
 
       logical::lpoly,lcone
 !     lpoly used to have a meaning in iclude files but does not any longer
-      integer(KIND=int)::i,j,iunit,iutry,iincre,istart,iend,idiff,nrtc,iu,
+      integer(KIND=normal_int)::i,j,iunit,iutry,iincre,istart,iend,idiff,nrtc,iu,
      &        iulast,iuprev,iuppre,ivib,iben,itor,ibin,it
 
       real(KIND=double_precision)::xprev,yprev,zprev,dprev

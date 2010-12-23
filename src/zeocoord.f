@@ -17,7 +17,7 @@
 !$$$      include 'system.inc'
 !$$$      include 'cell.inc'
 !$$$      include 'mpi.inc'
-      integer(KIND=int)::count,frac,izeo,bonding(8),atomtype,ibox=1
+      integer(KIND=normal_int)::count,frac,izeo,bonding(8),atomtype,ibox=1
       real(KIND=double_precision)::wzeo,charge,alpha,beta,gamma,sx,sy,sz,onepi
       character(LEN=4)::atom
 

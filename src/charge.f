@@ -25,7 +25,7 @@
 !$$$      include 'ewaldsum.inc'
 !$$$      include 'connect.inc'      
 
-      integer(KIND=int)::i,imolty,iunit,ii,jj,ntii,ntjj,ntij,ibox
+      integer(KIND=normal_int)::i,imolty,iunit,ii,jj,ntii,ntjj,ntij,ibox
       real(KIND=double_precision)::vflucq,qion(numax),qqii,vewald,rxui,ryui,rzui,
      &     rxuij,ryuij,rzuij,rij,erfunc
       vflucq = 0.0d0

@@ -17,7 +17,7 @@
 !$$$      include 'control.inc'
 !$$$      include 'expsix.inc'
       real(KIND=double_precision)::rijsq,rij,exsix
-      integer(KIND=int)::ntij
+      integer(KIND=normal_int)::ntij
 
       rij=dsqrt(rijsq)
       exsix = aexsix(ntij)/(rijsq*rijsq*rijsq)

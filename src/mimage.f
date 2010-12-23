@@ -15,7 +15,7 @@
 !$$$      include 'system.inc'
 !$$$      include 'cell.inc'
 
-      integer(KIND=int)::ibox
+      integer(KIND=normal_int)::ibox
       real(KIND=double_precision)::rxuij,ryuij,rzuij,hsx,hsy,hsz,sx,sy,sz
 
 ! ----------------------------------------------------------------

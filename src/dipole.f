@@ -14,7 +14,7 @@
 !$$$      include 'coord.inc'
 !$$$      include 'coord2.inc'
 !$$$      include 'ewaldsum.inc'
-      integer(KIND=int)::ibox,mtype,i,imolty,zz,ii
+      integer(KIND=normal_int)::ibox,mtype,i,imolty,zz,ii
       real(KIND=double_precision)::dipox(2),dipoy(2),dipoz(2)
       
       if ( mtype .eq. 0 ) then

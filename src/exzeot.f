@@ -13,7 +13,7 @@
 !$$$      include 'grid.inc'
 !$$$      include 'zeolite.inc' 
       real(KIND=double_precision)::exzeot,xi,yi,zi,xr,yr,zr,dy
-      integer(KIND=int)::m,idi,j0,j,jp,k,k0,kp,l,l0,lp,mt,mp,
+      integer(KIND=normal_int)::m,idi,j0,j,jp,k,k0,kp,l,l0,lp,mt,mp,
      &        pgrid
       parameter (m=2,mt=2*m+1)
       real(KIND=double_precision)::yjtmp(mt),yktmp(mt),yltmp(mt)
@@ -73,10 +73,10 @@
       use util_timings
       implicit none
       include 'common.inc'
-      integer(KIND=int)::n,nmax
+      integer(KIND=normal_int)::n,nmax
       real(KIND=double_precision)::dy,x,y,xa(n),ya(n)
       parameter (nmax=10)
-      integer(KIND=int)::i,m,ns
+      integer(KIND=normal_int)::i,m,ns
       real(KIND=double_precision)::den,dif,dift,ho,hp,w,c(nmax),d(nmax)
       ns=1
       dif=abs(x-xa(1))

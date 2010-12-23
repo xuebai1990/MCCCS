@@ -27,10 +27,10 @@
 !$$$      include 'external.inc'
 
       real(KIND=double_precision)::coruz,eps,rci3,rho
-      integer(KIND=int)::iunit,ibox
+      integer(KIND=normal_int)::iunit,ibox
       real(KIND=double_precision)::epsilon2,sigma2
       real(KIND=double_precision)::rci1
-      integer(KIND=int)::imolty,jmolty,ii,jj, ntii, ntjj, ntij
+      integer(KIND=normal_int)::imolty,jmolty,ii,jj, ntii, ntjj, ntij
 
 ! --- note works only for alkanes!!!
 !      if (iunit.ne.1) then

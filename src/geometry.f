@@ -34,7 +34,7 @@
 !     --- variables passed to/from the subroutine
 
       logical::lnew
-      integer(KIND=int)::iw,imolty,angstart,iuprev,glist,i
+      integer(KIND=normal_int)::iw,imolty,angstart,iuprev,glist,i
       real(KIND=double_precision)::bondlen,bendang,phi,vvibtr,vbbtr,maxlen
       real(KIND=double_precision)::wei_bend
 
@@ -43,14 +43,14 @@
 
 !     --- local variables
       
-      integer(KIND=int)::count,ntogrow,iugrow,iufrom,iv,juvib
+      integer(KIND=normal_int)::count,ntogrow,iugrow,iufrom,iv,juvib
      &     ,jtvib,iu2back,ib,iulast,type,aaa,iuone
 
       real(KIND=double_precision)::equil,kforce,thetaone,thetatwo
      &     ,vvib,length,angle,phione,phitwo,vangle,random,vphi
 
 !     --- new variables
-      integer(KIND=int)::ibend,nchben_a,nchben_b,start,start_ang
+      integer(KIND=normal_int)::ibend,nchben_a,nchben_b,start,start_ang
       real(KIND=double_precision)::bsum_try,rsint,ang_trial,bfactor,rbf,bs
 
       dimension ang_trial(nchbn_max),bfactor(nchbn_max)

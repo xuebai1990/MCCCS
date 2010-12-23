@@ -53,12 +53,12 @@
 
       logical::lnew,ovrlap,lcmno,lfirst,lcompute,lcoulo
       logical::lqimol,lqjmol,liji,lqchgi
-      integer(KIND=int)::ichoi,growjj,igrow,count,glist,icharge,cnt,jcell,ic
-      integer(KIND=int)::i,imolty,ibox,ntogrow,itrial,ntii,j,jj,ntjj,ntij
+      integer(KIND=normal_int)::ichoi,growjj,igrow,count,glist,icharge,cnt,jcell,ic
+      integer(KIND=normal_int)::i,imolty,ibox,ntogrow,itrial,ntii,j,jj,ntjj,ntij
      &       ,iu,jmolty,jjj,iufrom,ii,zz,bdmol_b,cellinc,k,nmole
 
 
-!      integer(KIND=int)::NRtype 
+!      integer(KIND=normal_int)::NRtype 
 
       real(KIND=double_precision)::ljsami,rminsq,rxui,sr6,ryui,rzui
      &     ,rxuij,ryuij,rzuij,rij,rijsq,sr2,dzui,dz3,dz12
@@ -75,16 +75,16 @@
       dimension glist(numax),cellinc(27),jcell(nmax)
 
       real(KIND=double_precision)::tabulated_bend, tabulated_vdW, tabulated_elect
-      integer(KIND=int)::mmm
+      integer(KIND=normal_int)::mmm
 
 !------------- RP added for MPI
-      integer(KIND=int)::my_start,my_end,loops_per_proc,scount,my_itrial
+      integer(KIND=normal_int)::my_start,my_end,loops_per_proc,scount,my_itrial
       real(KIND=double_precision)::my_vtry(nchmax),my_vtrintra(nchmax),
      &   my_vtrext(nchmax),my_vtrinter(nchmax),my_vtrelect(nchmax)
      &   ,my_vtrewald(nchmax),my_bfac(nchmax),my_vipswot(nchmax)
      & ,my_vwellipswot(nchmax),my_vipswnt(nchmax),my_vwellipswnt(nchmax)
       logical::my_lovr(nchmax)
-      integer(KIND=int)::ncount_arr(numprocmax+1),ncount_displs(numprocmax+1)
+      integer(KIND=normal_int)::ncount_arr(numprocmax+1),ncount_displs(numprocmax+1)
 ! ------------------------------------------
 ! ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
       

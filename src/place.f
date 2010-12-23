@@ -22,7 +22,7 @@
 
       logical::lnew,lterm,ovrlap
 
-      integer(KIND=int)::i,j,imolty,count,counta,iu,ju,ku,jtvib,start,iv,dir
+      integer(KIND=normal_int)::i,j,imolty,count,counta,iu,ju,ku,jtvib,start,iv,dir
      &     ,index,ivib,nchvib,ibend,ib,type,site,ip,ichoi,niplace
      &     ,iw,iufrom,it,jut2,jut3,jut4,jttor,ja,ibox,glist,iwalk
      &     ,iuprev,list,nchben_a, nchben_b,iuback2,iuone,max,iu2back

@@ -16,7 +16,7 @@
 !$$$      include "coord.inc"
 !$$$      include 'garofalini.inc'
 
-      integer(KIND=int)::ntang,nta,ntb,tri,i,j,k
+      integer(KIND=normal_int)::ntang,nta,ntb,tri,i,j,k
       real(KIND=double_precision)::vthree,vthreea,thetac,g,p
       logical::lwrite
 
@@ -140,7 +140,7 @@
 !$$$      include "garofalini.inc"
 !$$$      include "neigh.inc"
 
-      integer(KIND=int)::i,j,k,imolty,ptr,ptr2
+      integer(KIND=normal_int)::i,j,k,imolty,ptr,ptr2
 
 !      write(6,*) 'starting triad'
 
@@ -203,9 +203,9 @@
 !$$$      include "garofalini.inc"
 !$$$      include "neigh.inc"
 
-      integer(KIND=int)::i,j,k,m,imolty,jmolty,kmolty,mmolty,atomj,atomk,atomm
-      integer(KIND=int)::nta,ntb,ntang,cnt,ni(nmax),temp_cnt,temp,number(nmax)
-      integer(KIND=int)::temp_nei(nmax),nnn,itype,jtype,ktype,mtype
+      integer(KIND=normal_int)::i,j,k,m,imolty,jmolty,kmolty,mmolty,atomj,atomk,atomm
+      integer(KIND=normal_int)::nta,ntb,ntang,cnt,ni(nmax),temp_cnt,temp,number(nmax)
+      integer(KIND=normal_int)::temp_nei(nmax),nnn,itype,jtype,ktype,mtype
       logical::ltemp(nmax),lupdate,lwrite
       real(KIND=double_precision)::vthree,vthreea,thetac,p,g,nrij(nmax),
      &     nxi(nmax),nyi(nmax),nzi(nmax)

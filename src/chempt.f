@@ -35,11 +35,11 @@
 
       logical::ovrlap,lterm,lbo,ltors
 
-      integer(KIND=int)::boxins,ichoi,ip,iwalk,ntries,itry,iincre
-      integer(KIND=int)::istt,iett
-      integer(KIND=int)::ibranp(20),nbranp
+      integer(KIND=normal_int)::boxins,ichoi,ip,iwalk,ntries,itry,iincre
+      integer(KIND=normal_int)::istt,iett
+      integer(KIND=normal_int)::ibranp(20),nbranp
 
-      integer(KIND=int)::iu,iutry,iulast,iut,iub,icbu,islen,iins
+      integer(KIND=normal_int)::iu,iutry,iulast,iut,iub,icbu,islen,iins
      &       ,iii,ibr,ibr1,j,jj,jj2,jj3,jj4,invtry,ibox,iunit
      &       ,imolty,jmt,igrow
       real(KIND=double_precision)::v,vintra,vinter,vext,velect,vtornew,vtordum

@@ -15,7 +15,7 @@
 !$$$      include 'system.inc'
 !$$$      include 'neigh.inc'
 !$$$      include 'neigh2.inc'
-      integer(KIND=int)::i,j,ii,jj,ibox
+      integer(KIND=normal_int)::i,j,ii,jj,ibox
       real(KIND=double_precision)::rxuij,ryuij,rzuij,rijsq,rcnnsq
 ! -----------------------------------------------------------------------------
  

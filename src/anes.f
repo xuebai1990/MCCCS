@@ -28,7 +28,7 @@
 !$$$      include 'system.inc'
 
       logical::laccept,lswapinter
-      integer(KIND=int)::i,ibox,boxrem,mtype,imolty,iunit,ichoiq,ip,ibox2,j
+      integer(KIND=normal_int)::i,ibox,boxrem,mtype,imolty,iunit,ichoiq,ip,ibox2,j
       real(KIND=double_precision)::deltv,vintern,vintran,vextn,velectn,vintero,
      &     vintrao,vexto,velecto,vinsta,vremta,vnewflucq,voldflucq,
      &     vboxo(nbxmax),vinterbo(nbxmax),vintrabo(nbxmax),

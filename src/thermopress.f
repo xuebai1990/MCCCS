@@ -27,9 +27,9 @@
 !$$$      include 'inputdata.inc'
 
       logical::lvol,ovrlap
-      integer(KIND=int)::i,j,itest,imolty
+      integer(KIND=normal_int)::i,j,itest,imolty
 
-      integer(KIND=int)::ibox,ic,ncount
+      integer(KIND=normal_int)::ibox,ic,ncount
       real(KIND=double_precision)::dv,apress
       real(KIND=double_precision)::bxo(2),byo(2),bzo(2)
       real(KIND=double_precision)::volo(2),vboxo(2),dfac(2),voln(2),

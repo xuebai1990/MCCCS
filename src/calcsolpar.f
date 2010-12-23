@@ -32,9 +32,9 @@
 !$$$      include 'system.inc'
 !$$$      include 'cell.inc'
 
-      integer(KIND=int)::ibox, jbox, ig, il, imolty
-      integer(KIND=int),dimension(nbxmax):: temp_nmol,box_volume
-      integer(KIND=int),dimension(nbxmax,ntmax):: acnbox
+      integer(KIND=normal_int)::ibox, jbox, ig, il, imolty
+      integer(KIND=normal_int),dimension(nbxmax):: temp_nmol,box_volume
+      integer(KIND=normal_int),dimension(nbxmax,ntmax):: acnbox
       real(KIND=double_precision),dimension(nbxmax)::mol_vol      
       real(KIND=double_precision),dimension(nbxmax)::pres
       real(KIND=double_precision)::enchg1, enchg2,enchg3

@@ -16,8 +16,8 @@
 !$$$	include 'control.inc'
 !$$$	include 'external.inc'
 !$$$	include 'poten.inc'	
-	integer(KIND=int)::twopi
-	integer(KIND=int)::ntij
+	integer(KIND=normal_int)::twopi
+	integer(KIND=normal_int)::ntij
 	parameter (twopi=6.283185307179586d0)
 	real(KIND=double_precision)::vgs,z
 	real(KIND=double_precision)::slitpore

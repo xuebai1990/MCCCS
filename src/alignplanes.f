@@ -45,15 +45,15 @@
 !$$$      include 'swtcmove.inc'
 
 !     --- INPUT VARIABLES ---
-      integer(KIND=int)::iparty, imol_b, imol_a, itype_b, itype_a
+      integer(KIND=normal_int)::iparty, imol_b, imol_a, itype_b, itype_a
    
 !     --- OUTPUT VARIABLES ---
       real(KIND=double_precision)::xb(numax), yb(numax), zb(numax)
 
 !     --- LOCAL VARIABLES ---
-      integer(KIND=int)::i, imoltype_b, nunit_b, nunit_a
-      integer(KIND=int)::ia_bead1, ia_bead2, ia_bead3
-      integer(KIND=int)::ib_bead1, ib_bead2, ib_bead3
+      integer(KIND=normal_int)::i, imoltype_b, nunit_b, nunit_a
+      integer(KIND=normal_int)::ia_bead1, ia_bead2, ia_bead3
+      integer(KIND=normal_int)::ib_bead1, ib_bead2, ib_bead3
 
       real(KIND=double_precision)::xa(3),   ya(3),   za(3)
       real(KIND=double_precision)::xorigin, yorigin, zorigin

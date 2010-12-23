@@ -28,7 +28,7 @@
 !$$$      include 'poten.inc'
 
       logical::ovrlap
-      integer(KIND=int)::i,ibox,iunit,flagon,itype,j,imolty,icbu,ic,imt,jmt,
+      integer(KIND=normal_int)::i,ibox,iunit,flagon,itype,j,imolty,icbu,ic,imt,jmt,
      &     itype2,disp
       real(KIND=double_precision)::dchain,random,vnew,vold
      &                 ,vintran,vintrao,deltv,deltvb,disvsq

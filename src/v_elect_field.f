@@ -19,7 +19,7 @@
 !$$$      include 'coord.inc'
 
       real(KIND=double_precision)::v_elect_field, convert, rzfield, E
-      integer(KIND=int)::i, j,ibox
+      integer(KIND=normal_int)::i, j,ibox
 
 
 ! ********************************************

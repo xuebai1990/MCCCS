@@ -25,7 +25,7 @@
 !$$$      include 'conver.inc'
 
       logical::lmixlb, lmixjo,ltab
-      integer(KIND=int)::i, j, ij, ji,ibox,nntype5,nmix,imix
+      integer(KIND=normal_int)::i, j, ij, ji,ibox,nntype5,nmix,imix
       real(KIND=double_precision)::rzeronx(nxatom),epsilonnx(nxatom)
 
       real(KIND=double_precision)::rcheck, sr2, sr6, adum, bdum, rs1, rs7, sr7,

@@ -27,13 +27,13 @@
 
       character(LEN=default_path_length)::fileout
       character(LEN=default_string_length)::ftemp,fname2,fname3
-      integer(KIND=int)::switch,ichain,fname
+      integer(KIND=normal_int)::switch,ichain,fname
       logical::lskip
-      integer(KIND=int)::bin,k,kk,box,z
-      integer(KIND=int)::tempbx,dummy,xx,yy,g,gg
-      integer(KIND=int)::chnum,imolty,i,ii,j,jj
+      integer(KIND=normal_int)::bin,k,kk,box,z
+      integer(KIND=normal_int)::tempbx,dummy,xx,yy,g,gg
+      integer(KIND=normal_int)::chnum,imolty,i,ii,j,jj
      &     ,jmolty,binadj,ntij,ntii,ntjj,jstart,istart,ntji
-      integer(KIND=int)::iivib,ip1,ip2,ip3,gaudef,uu,dum,units,zzz,zz1
+      integer(KIND=normal_int)::iivib,ip1,ip2,ip3,gaudef,uu,dum,units,zzz,zz1
 
       real(KIND=double_precision)::avolume,rho,binstep,vec_hist
      &     ,rxui,ryui,rzui,xxideal
@@ -48,11 +48,11 @@
 !      parameter (nbinmx=200,nbxmax=1,ntmax=5,nmax=1600,numax=18
 !     & ,ntdifmx=8)
 
-      integer(KIND=int)::bend,iv,iuvib,iuv,iutest
+      integer(KIND=normal_int)::bend,iv,iuvib,iuv,iutest
       real(KIND=double_precision)::onepi,
      &    value,total,degree
       parameter (onepi = 3.141592654d0)
-      integer(KIND=int)::torsion, tor_code,itor,iutor,patt,bthree
+      integer(KIND=normal_int)::torsion, tor_code,itor,iutor,patt,bthree
      &     ,decimal,power
       real(KIND=double_precision)::xcc,ycc,zcc,tcc,fplus,fminus
      &     ,ftrans
@@ -69,8 +69,8 @@
 
 !Cc     --- variables used in the charge parts
 !C     logical::qhere
-!C      integer(KIND=int)::qbin,qbinmax,qbins,qqcode,imol,iunit
-!C      integer(KIND=int)::qbin,qbins,qqcode,imol,iunit
+!C      integer(KIND=normal_int)::qbin,qbinmax,qbins,qqcode,imol,iunit
+!C      integer(KIND=normal_int)::qbin,qbins,qqcode,imol,iunit
 !C    NOW DEFINED IN CONTROL.INC
 !C      parameter (qbinmax=1000)
 
@@ -81,7 +81,7 @@
 
 !Cc     --- variables used in the dipole parts
 !C     logical::ldipole
-!C     integer(KIND=int)::qblock,block,nblock
+!C     integer(KIND=normal_int)::qblock,block,nblock
 !C      real(KIND=double_precision)::dipole,dicount,dipx,dipy,dipz,diconv,stddev
 !C     &     ,avera,diprev,dcprev,dipblk
 !C     dimension dipole(ntdifmx,nbxmax),dicount(ntdifmx,nbxmax)

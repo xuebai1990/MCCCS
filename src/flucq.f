@@ -30,7 +30,7 @@
 !$$$      include 'poten.inc'
       
       logical::linterqt,ovrlap
-      integer(KIND=int)::i,ibox,iunit,j,imolty,icbu,mainunit,ic,ii
+      integer(KIND=normal_int)::i,ibox,iunit,j,imolty,icbu,mainunit,ic,ii
      &     ,ncount,ichoiq,ichoice,qunit,boxi,flagon
       real(KIND=double_precision)::dchain,random,vnew,vold,deltv,deltvb
      &  ,velectn,velecto,vflucqn,vflucqo
@@ -42,7 +42,7 @@
       real(KIND=double_precision)::vrecipn,vrecipo,sumr,sumi,arg
       dimension sumr(2),sumi(2)
       
-      integer(KIND=int)::maini,mainj,jchain
+      integer(KIND=normal_int)::maini,mainj,jchain
       real(KIND=double_precision)::qionj(numax),vinterjo,vflucqjo,velectjo,
      &     voldj,vinterjn,vflucqjn,velectjn,vnewj,corr,rij,erfunc,
      &     rxuij,ryuij,rzuij,vdum,vewaldjn,vewaldjo

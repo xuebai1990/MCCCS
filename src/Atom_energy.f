@@ -39,12 +39,12 @@
       logical::lljii,ovrlap,ltors,lcharge_table,lt,lfound
       logical::lmim
 
-      integer(KIND=int)::growii,growjj,k,cellinc,jcell,ic,nmole
-      integer(KIND=int)::i,ibox, istart, iuend,ii,ntii,flagon,jjj,iii
+      integer(KIND=normal_int)::growii,growjj,k,cellinc,jcell,ic,nmole
+      integer(KIND=normal_int)::i,ibox, istart, iuend,ii,ntii,flagon,jjj,iii
      &       ,j,jj,ntjj,ntij,ntj,imolty,jmolty,ncell
-      integer(KIND=int)::iivib,jjtor,ip1,ip2,ip3,it,nchp2,acellinc
+      integer(KIND=normal_int)::iivib,jjtor,ip1,ip2,ip3,it,nchp2,acellinc
 
-      integer(KIND=int)::jjvib,jjben,mmm  
+      integer(KIND=normal_int)::jjvib,jjben,mmm  
 
       real(KIND=double_precision)::vvib,vbend,vtg,theta,mlen2
 

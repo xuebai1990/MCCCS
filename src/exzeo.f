@@ -20,8 +20,8 @@
 !$$$      include 'poten.inc'
 !$$$      include 'grid.inc'
       real(KIND=double_precision)::exzeo,xi,yi,zi,r2,xr,yr,zr,r2i,r6
-      integer(KIND=int)::m,mt,mp,idi,idj,ntij,igtype,ibox=1
-      integer(KIND=int)::j,j0,jp,k,k0,kp,l,l0,lp
+      integer(KIND=normal_int)::m,mt,mp,idi,idj,ntij,igtype,ibox=1
+      integer(KIND=normal_int)::j,j0,jp,k,k0,kp,l,l0,lp
       parameter (m=2,mt=2*m+1,mp=m+1)
       real(KIND=double_precision)::yjtmp(mt),yktmp(mt),yltmp(mt)
       real(KIND=double_precision)::xt(mt),yt(mt),zt(mt),sx,sy,sz
@@ -103,10 +103,10 @@
       use util_timings
       implicit none
       include 'common.inc'
-      integer(KIND=int)::n,nmax
+      integer(KIND=normal_int)::n,nmax
       real(KIND=double_precision)::dy,x,y,xa(n),ya(n)
       parameter (nmax=10)
-      integer(KIND=int)::i,m,ns
+      integer(KIND=normal_int)::i,m,ns
       real(KIND=double_precision)::den,dif,dift,ho,hp,w,c(nmax),d(nmax)
       ns=1
       dif=abs(x-xa(1))

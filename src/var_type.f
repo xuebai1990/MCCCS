@@ -11,7 +11,7 @@
       integer,parameter::double_precision=selected_real_kind(14,200)
      & ,double_precision_size=8
 
-      integer,parameter::int=selected_int_kind(5),int_size=4
+      integer,parameter::normal_int=selected_int_kind(5),int_size=4
       integer,parameter::long_int=selected_int_kind(10),long_int_size=8
 
       integer,parameter::default_string_length=128

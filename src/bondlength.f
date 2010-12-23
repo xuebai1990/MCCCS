@@ -24,7 +24,7 @@
 
 !$$$      include 'tabulated.inc'
 
-      integer(KIND=int)::vibtype
+      integer(KIND=normal_int)::vibtype
       real(KIND=double_precision)::length, bond, random, bf, vvib, beta, kvib
      &     , requil, tabulated_vib
 

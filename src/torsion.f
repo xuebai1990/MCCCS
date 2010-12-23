@@ -14,7 +14,7 @@
 !$$$      include 'conver.inc'
 !$$$      include 'control.inc'
 
-      integer(KIND=int)::ttyp,klo,khi,k,xa,bin,addl
+      integer(KIND=normal_int)::ttyp,klo,khi,k,xa,bin,addl
       real(KIND=double_precision)::theta,spltor,thetarem,tordiff,torstep,left
 
 ! Routine to calculate torsion potential using linear interpolation between 2 points
@@ -81,7 +81,7 @@
 !$$$      include 'torsion.inc'
 !$$$      include 'control.inc'
       
-!      integer(KIND=int)::n,nmax
+!      integer(KIND=normal_int)::n,nmax
 !      real(KIND=double_precision)::yp1,ypn,x(n),y(n),y2(n)
 !      parameter (nmax=500)
 
@@ -97,7 +97,7 @@
 !     nmax = largest value of n
 !     x=deg y=tabtorso y2=torderiv2 n=points
 
-      integer(KIND=int)::i,k,points,tortyp
+      integer(KIND=normal_int)::i,k,points,tortyp
       real(KIND=double_precision)::p,qn,sig,un,u(500,10),yp1,ypn
       
 ! Routine sets up derivatives for use with spline interpolations
@@ -182,9 +182,9 @@
 !$$$      include 'conver.inc'
 !$$$      include 'control.inc'
 
-!      integer(KIND=int)::n
+!      integer(KIND=normal_int)::n
 !      real(KIND=double_precision)::x,y,xa(n),y2a(n),ya(n)
-      integer(KIND=int)::k, khi,klo,points,jttor,tortyp,xa
+      integer(KIND=normal_int)::k, khi,klo,points,jttor,tortyp,xa
       real(KIND=double_precision)::a,b,h,x,y,vtorso,vtorsoa
 
       points = splpnts(tortyp)

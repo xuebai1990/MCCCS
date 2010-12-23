@@ -14,7 +14,7 @@
 !$$$      include 'conver.inc' 
 !$$$      include 'contorsion.inc'
 
-      integer(KIND=int)::itype
+      integer(KIND=normal_int)::itype
       real(KIND=double_precision)::vtorso, thetac, theta
       real(KIND=double_precision)::tac2,tac3,tac4,tac5,tac6,tac7
 ! ----------------------------------------------------------------

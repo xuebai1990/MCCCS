@@ -59,11 +59,11 @@
 
       logical::lcount,lpick,lterm,lfixed,lfix,lfind
 
-      integer(KIND=int)::igrow,imolty,count,counta,iw,ivib,iv,iu,ju,iutry
-      integer(KIND=int)::j,ja,kickout,invtry,index,fintnum,fint,k,islen
-      integer(KIND=int)::ffrom,fprev,flist,fnum,fnuma,findex,countb,iv1
-      integer(KIND=int)::movetype,fmaxgrow,ku,kickouta,iufrom,iuprev
-      integer(KIND=int)::num,inum,inuma,max
+      integer(KIND=normal_int)::igrow,imolty,count,counta,iw,ivib,iv,iu,ju,iutry
+      integer(KIND=normal_int)::j,ja,kickout,invtry,index,fintnum,fint,k,islen
+      integer(KIND=normal_int)::ffrom,fprev,flist,fnum,fnuma,findex,countb,iv1
+      integer(KIND=normal_int)::movetype,fmaxgrow,ku,kickouta,iufrom,iuprev
+      integer(KIND=normal_int)::num,inum,inuma,max
 
       parameter(max=10)
 

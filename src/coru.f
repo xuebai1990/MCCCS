@@ -25,7 +25,7 @@
 
       real(KIND=double_precision)::coru,rci3,rho,epsilon2,sigma2
       real(KIND=double_precision)::rci1
-      integer(KIND=int)::imolty,jmolty,ii,jj, ntii, ntjj, ntij,ibox
+      integer(KIND=normal_int)::imolty,jmolty,ii,jj, ntii, ntjj, ntij,ibox
 
       coru = 0.0d0
 

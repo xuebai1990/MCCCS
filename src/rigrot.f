@@ -31,8 +31,8 @@
 
       logical::lnew,ovrlap,lovrr,lterm,ltors
 
-      integer(KIND=int)::i,ibox,igrow,iii,j,ip,iwalk,iunit,imolty,iu,iskip
-      integer(KIND=int)::ichoi,imol,istt,iend,stch,glist,ntogrow,count
+      integer(KIND=normal_int)::i,ibox,igrow,iii,j,ip,iwalk,iunit,imolty,iu,iskip
+      integer(KIND=normal_int)::ichoi,imol,istt,iend,stch,glist,ntogrow,count
 
       real(KIND=double_precision)::rx,ry,rz,rxorig,ryorig,rzorig,rxnw,rynw,rznw
       real(KIND=double_precision)::xdgamma,ydgamma,zdgamma,xcosdg,xsindg,ycosdg

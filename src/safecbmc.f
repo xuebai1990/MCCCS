@@ -36,12 +36,12 @@
 
       logical::lnew,lshit,lterm,ldo,lreturn
 
-      integer(KIND=int)::igrow,imolty,count,counta,j,ja,ivib,iufrom,iuprev
+      integer(KIND=normal_int)::igrow,imolty,count,counta,j,ja,ivib,iufrom,iuprev
      &     ,iinit,iu,ju,ku,i,iv,juvib,jtvib,type,iu2,ib,iw,ntogrow
      &     ,itor,ip,ichoi,ichtor,countb,bin,max,nu,iu1,dir,diracc
      &     ,start,nchben_a,nchben_b,ibend,iopen,last,iclose,nchvib
 
-      integer(KIND=int)::jttor,it,jut2,jut3,jut4,movetype,lu,k,opencount
+      integer(KIND=normal_int)::jttor,it,jut2,jut3,jut4,movetype,lu,k,opencount
 
       real(KIND=double_precision)::vdha,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2,dot
      &     ,daa1,da1a2,phicrank,bf_tor,vtorsion,vbend,rbf

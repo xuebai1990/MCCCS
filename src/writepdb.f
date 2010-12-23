@@ -15,7 +15,7 @@
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 
-      integer(KIND=int)::im,ia,nmol,natom,iguest,imm,ibox
+      integer(KIND=normal_int)::im,ia,nmol,natom,iguest,imm,ibox
       character(LEN=4)::atom
 
       open(unit=48, file='system.pdb', form='formatted')

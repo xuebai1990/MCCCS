@@ -32,7 +32,7 @@
 !$$$      include 'conver.inc'
 
 !     --- variables passed to/from the subroutine
-      integer(KIND=int)::iinit
+      integer(KIND=normal_int)::iinit
       real(KIND=double_precision)::x,y,z,alpha,gamma,ux,uy,uz
 
 !     --- local variables

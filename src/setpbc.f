@@ -14,7 +14,7 @@
 !$$$      include 'system.inc'
 !$$$      include 'peboco.inc'
 
-      integer(KIND=int)::ibox
+      integer(KIND=normal_int)::ibox
 
 ! ----------------------------------------------------------------
 

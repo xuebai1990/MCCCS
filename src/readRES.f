@@ -21,7 +21,7 @@
 
       character(LEN=default_path_length)::infile,outfile
       character(LEN=default_string_length)::sname(500),celltype
-      integer(KIND=int)::nbead, i, j
+      integer(KIND=normal_int)::nbead, i, j
       real::cell(6),bead(3,500),dum
       
       read(4,*) infile

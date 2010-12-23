@@ -21,7 +21,7 @@
 !$$$      include 'poten.inc'
 
       real(KIND=double_precision)::ljmuir, rijsq, sr, sr2, sr6, epshead, sighead
-      integer(KIND=int)::ntij
+      integer(KIND=normal_int)::ntij
 
 ! --- attention: eps_hh / 4 used, since later multiplied by 4 --- 
 !      parameter (epshead=27.67204d0,sighead=4.22d0)

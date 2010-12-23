@@ -24,7 +24,7 @@
 !$$$      include 'system.inc'
 !$$$      include 'cell.inc'
 
-      integer(KIND=int)::ibox, i,ii,imolty,iunit,j,stt,edd,mtype,iwarn
+      integer(KIND=normal_int)::ibox, i,ii,imolty,iunit,j,stt,edd,mtype,iwarn
      &        ,inboxx,inboxy,inboxz,iadjust,itype
       logical::lall,ldx,ldy,ldz,lintbx
       real(KIND=double_precision)::bx,by,bz,boxlen,dx,dy,dz,nxcm,nycm,nzcm

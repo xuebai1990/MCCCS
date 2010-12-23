@@ -31,7 +31,7 @@
 !$$$      include 'inputdata.inc'
 !$$$      include 'eepar.inc'
 
-      integer(KIND=int)::i, imolty, ii, j, jmolty, jj, ntii, ntjj, ntij
+      integer(KIND=normal_int)::i, imolty, ii, j, jmolty, jj, ntii, ntjj, ntij
      &     ,nnn,nvirial,ip,itemp,iii
       real(KIND=double_precision)::vinter,rminsq,rxui,ryui,rzui,rxuij,ryuij,rzuij
      &       ,rijsq,sr2, sr6 ,velect,mayer
@@ -44,9 +44,9 @@
       logical::ovrlap,lqimol,lqjmol,lmatrix
   
 ! *** only use for polarizable models
-      integer(KIND=int)::chgmax
+      integer(KIND=normal_int)::chgmax
       parameter (chgmax=10)
-      integer(KIND=int)::ip1,ip2,iunit,numchg,info,ipiv(chgmax),mainsite(2,2),
+      integer(KIND=normal_int)::ip1,ip2,iunit,numchg,info,ipiv(chgmax),mainsite(2,2),
      &     lam1,lam2
       real(KIND=double_precision)::a(chgmax,chgmax),b2(chgmax,1),mainxiq(2,2)
 

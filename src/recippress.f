@@ -26,7 +26,7 @@
 !$$$      include 'mpi.inc'
 !$$$      include 'mpif.h'
 
-      integer(KIND=int)::ncount,ibox,i,ii,imolty
+      integer(KIND=normal_int)::ncount,ibox,i,ii,imolty
       real(KIND=double_precision)::factor,repress,repressx,repressy,repressz
      &     ,recipintra,piix,piiy,piiz,xcmi,ycmi,zcmi,arg
 
@@ -35,7 +35,7 @@
      &     ,pxz,pzx
 
 !----RP added for MPI
-      integer(KIND=int)::blocksize,mystart,myend
+      integer(KIND=normal_int)::blocksize,mystart,myend
       real(KIND=double_precision)::sum_repressx,sum_repressy,sum_repressz,
      &   sum_pxy,sum_pxz,sum_pyz
       real(KIND=double_precision)::sum_recipintra,sum_intraxx,sum_intrayy,

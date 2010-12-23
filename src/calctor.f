@@ -14,7 +14,7 @@
 !$$$      include 'control.inc'
 !$$$      include 'fix.inc'
 
-      integer(KIND=int)::iu1,iu2,iu3,iu4,jttor
+      integer(KIND=normal_int)::iu1,iu2,iu3,iu4,jttor
       
       real(KIND=double_precision)::thetac,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2
      &     ,daa1,da1a2,dot,vtor,vtorso,tcc,xcc,ycc,zcc,theta,spltor

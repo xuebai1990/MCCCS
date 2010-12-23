@@ -18,7 +18,7 @@
 !$$$      include 'control.inc'
 !$$$      include 'merck.inc'
       real(KIND=double_precision)::rijsq,mmff,rs2,rs1,sr1,sr7,rs7
-      integer(KIND=int)::ntij
+      integer(KIND=normal_int)::ntij
 
         rs2 = rijsq / (sigisq(ntij))
         rs1 = dsqrt(rs2)

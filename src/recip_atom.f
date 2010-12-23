@@ -21,7 +21,7 @@
 !$$$      include 'coord2.inc'
 !$$$      include 'ewaldsum.inc'
 !$$$      include 'poten.inc'
-      integer(KIND=int)::ic,zz,ii,imolty,ibox,ncount,type
+      integer(KIND=normal_int)::ic,zz,ii,imolty,ibox,ncount,type
       real(KIND=double_precision)::vrecipnew,vrecipold,sumr(2),sumi(2),arg
 
       ncount = numvect(ibox)

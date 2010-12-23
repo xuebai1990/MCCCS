@@ -25,13 +25,13 @@
 !$$$      include 'mpif.h'
 !$$$      include 'mpi.inc'
 
-      integer(KIND=int)::ic,zz,ii,imolty,ibox,ncount,type
+      integer(KIND=normal_int)::ic,zz,ii,imolty,ibox,ncount,type
       real(KIND=double_precision)::vrecipnew,vrecipold,sumr(2),sumi(2),arg       
 ! RP added for MPI
-      integer(KIND=int)::mystart,myend,blocksize,i
+      integer(KIND=normal_int)::mystart,myend,blocksize,i
       real(KIND=double_precision)::ssumrn_arr(vectormax),ssumin_arr(vectormax),
      &      ssumrn_one(vectormax),ssumin_one(vectormax)
-      integer(KIND=int)::countn,ncount_displs(numprocmax),ncount_arr(numprocmax)   
+      integer(KIND=normal_int)::countn,ncount_displs(numprocmax),ncount_arr(numprocmax)   
     
 !      if (LSOLPAR.and.(ibox.eq.2))then
 !        return

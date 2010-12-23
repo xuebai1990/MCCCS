@@ -11,7 +11,7 @@
       use util_timings
       implicit none
       include 'common.inc'
-      integer(KIND=int)::pgrid,i,j,k,ngrx,ngry
+      integer(KIND=normal_int)::pgrid,i,j,k,ngrx,ngry
       pgrid = i + j * ngrx + k * ngry*ngrx
       return
       end

@@ -41,10 +41,10 @@
       
       logical::lterm, ovrlap, ltors, lneighij,lfixnow
 
-      integer(KIND=int)::i,j,k,iii,ibox,iunit,igrow,icbu,islen,imolty,iutry
+      integer(KIND=normal_int)::i,j,k,iii,ibox,iunit,igrow,icbu,islen,imolty,iutry
 
-      integer(KIND=int)::istt,iett,nchp1,ic,ncount,total,bin,count,findex,iw
-      integer(KIND=int)::ddum,idum,ip
+      integer(KIND=normal_int)::istt,iett,nchp1,ic,ncount,total,bin,count,findex,iw
+      integer(KIND=normal_int)::ddum,idum,ip
 
       dimension ddum(27)
 

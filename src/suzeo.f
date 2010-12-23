@@ -17,7 +17,7 @@
 !$$$      include 'zeolite.inc'
 !$$$      include 'external.inc'
 !$$$      include 'mpi.inc'
-      integer(KIND=int)::imol,iunit,igtype,idi,jerr,i,j,k,
+      integer(KIND=normal_int)::imol,iunit,igtype,idi,jerr,i,j,k,
      &     ngrxt,ngryt,ngrzt,ibox=1
       character(LEN=default_path_length)::filename
       real(KIND=double_precision)::zunitxt,zunityt,zunitzt,exzeof,xi,yi,zi

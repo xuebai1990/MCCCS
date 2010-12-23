@@ -15,7 +15,7 @@
 !$$$      include 'coord.inc'
 !$$$      include 'connect.inc'
 
-      integer(KIND=int)::i,j,k,n,iunit,imolty,dum,iu,countbend,counttor
+      integer(KIND=normal_int)::i,j,k,n,iunit,imolty,dum,iu,countbend,counttor
      &     ,atype,btype,ctype,dtype,tortype
      &     ,ibend,bendtype,ntor,itor,ju,ku,nu,type,sitelook
      &     ,vibtype,countvib
@@ -152,7 +152,7 @@
 
       logical::lfinda,lfindb,lfound
 
-      integer(KIND=int)::iinit,atype,btype,vibtype,nsite,isite,vbtype
+      integer(KIND=normal_int)::iinit,atype,btype,vibtype,nsite,isite,vbtype
      &     ,ntvib,n,i,ia,ib
 
       dimension nsite(20,2),isite(20,2,7),vbtype(20)
@@ -234,7 +234,7 @@
 
       logical::lfinda,lfindb,lfindc,lfound
 
-      integer(KIND=int)::iinit,atype,btype,ctype,bendtype,nsite,isite
+      integer(KIND=normal_int)::iinit,atype,btype,ctype,bendtype,nsite,isite
      &     ,bntype,ntbend,n,i,ia,ib,ic
 
       dimension nsite(20,3),isite(20,3,7),bntype(20)
@@ -335,7 +335,7 @@
 
       logical::lfinda,lfindb,lfindc,lfindd,lfound,lrev
 
-      integer(KIND=int)::iinit,atype,btype,ctype,dtype,tortype,isite,nsite
+      integer(KIND=normal_int)::iinit,atype,btype,ctype,dtype,tortype,isite,nsite
      &     ,n,i,ia,ib,ic,id,trtype,nttor,ir
 
 

@@ -34,10 +34,10 @@
 !$$$      include 'cell.inc'
 !$$$      include 'poten.inc'
  
-      integer(KIND=int)::nummol,ntii
-      integer(KIND=int)::nibox,im,nnn,ntot,nblock,imolty,m,mm,i,j,jjtor
+      integer(KIND=normal_int)::nummol,ntii
+      integer(KIND=normal_int)::nibox,im,nnn,ntot,nblock,imolty,m,mm,i,j,jjtor
      &     ,ibox,itype,itel,mnbox,zz,steps,igrow,jmolty,jbox
-      integer(KIND=int)::imend,itemp,bin,k,jjben,ip2,ip1,ip3,it,ii,jj,ivib
+      integer(KIND=normal_int)::imend,itemp,bin,k,jjben,ip2,ip1,ip3,it,ii,jj,ivib
       logical::lratio,lratv,lprint,lmv,lrsave,lblock,lfq,lratfix
      &     ,lsolute,ovrlap
       real(KIND=double_precision), dimension(nprop1,nbxmax,nbxmax):: acsolpar

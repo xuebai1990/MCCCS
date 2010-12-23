@@ -46,28 +46,28 @@
 ! -----------------------
 
 ! - variables added for GCMC histogram reweighting
-      integer(KIND=int)::fmax,idum,nummol
+      integer(KIND=normal_int)::fmax,idum,nummol
       parameter (fmax=1e6)
       character(LEN=default_path_length)::file_flt,file_hist
      & ,file_ndis(ntmax)
       character(LEN=default_path_length)::file_config,file_cell
       character(LEN=default_path_length)::fname2,fname3,fname4,ftemp
       character(LEN=default_path_length)::fileout
-      integer(KIND=int)::fname,ntii,findpos
-      integer(KIND=int)::imax,itmax
-      integer(KIND=int)::n,nconfig,nentry,nminp(ntmax),nmaxp(ntmax)
-      integer(KIND=int)::ncmt_list(fmax,ntmax),ndist(0:nmax,ntmax)
+      integer(KIND=normal_int)::fname,ntii,findpos
+      integer(KIND=normal_int)::imax,itmax
+      integer(KIND=normal_int)::n,nconfig,nentry,nminp(ntmax),nmaxp(ntmax)
+      integer(KIND=normal_int)::ncmt_list(fmax,ntmax),ndist(0:nmax,ntmax)
       real(KIND=double_precision)::eng_list(fmax)
       real(KIND=double_precision)::vhist
 
       real(KIND=double_precision)::Temp_Energy, Temp_Mol_Vol
 
-      integer(KIND=int)::point_of_start, point_to_end
+      integer(KIND=normal_int)::point_of_start, point_to_end
 
-      integer(KIND=int)::im,mnbox,i,j,inb,nblock,ibox,jbox,nend,nnn,ii,itemp
+      integer(KIND=normal_int)::im,mnbox,i,j,inb,nblock,ibox,jbox,nend,nnn,ii,itemp
      &  ,itype,itype2,intg,imolty,ilunit,nbl,itel,ig,il,ucheck
      &  ,jbox_max,k,histtot,Temp_nmol
-      integer(KIND=int)::nvirial,zz,steps,igrow,ddum,total
+      integer(KIND=normal_int)::nvirial,zz,steps,igrow,ddum,total
       real(KIND=double_precision)::starvir,stepvir,starviro
       real(KIND=double_precision)::acv,acvsq,aflv,acpres,acnp,acmove,acsurf
      &  ,acboxl,acboxa,asetel,acdens,acnbox,dsq,v,vinter,vtail,vend
@@ -138,12 +138,12 @@
       dimension lratfix(ntmax),lsolute(ntmax)
       character(LEN=default_string_length)::enth,enth1
 
-      integer(KIND=int)::bin,cnt_wf1(0:6,0:6,4),cnt_wf2(0:6,0:6,4),
+      integer(KIND=normal_int)::bin,cnt_wf1(0:6,0:6,4),cnt_wf2(0:6,0:6,4),
      &     cnt_wra1(1000,4),cnt_wra2(1000,4)
       real(KIND=double_precision)::binstep,profile(1000)
 
 ! KEA
-      integer(KIND=int)::ttor
+      integer(KIND=normal_int)::ttor
 
 ! -------------------------------------------------------------------
 
@@ -262,7 +262,7 @@ c only one processor at a time reads and writes data from files
       if (lexpee.and.lmipsw)
      &     call cleanup('not for BOTH lexpee AND lmipsw')
       
-! - use internal read/write to get integer(KIND=int)::number in character::format
+! - use internal read/write to get integer(KIND=normal_int)::number in character::format
       write(ftemp,*) fname
       read(ftemp,*) fname2
 

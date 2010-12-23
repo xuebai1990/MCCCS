@@ -44,10 +44,10 @@
       logical::lljii,ovrlap,ltors,lcharge_table,lt,lfound
       logical::lmim
 
-      integer(KIND=int)::growii,growjj,k,cellinc,jcell,ic,nmole
-      integer(KIND=int)::i,ibox, istart, iuend,ii,ntii,flagon,jjj,iii,mmm
+      integer(KIND=normal_int)::growii,growjj,k,cellinc,jcell,ic,nmole
+      integer(KIND=normal_int)::i,ibox, istart, iuend,ii,ntii,flagon,jjj,iii,mmm
      &       ,j,jj,ntjj,ntij,ntj,imolty,jmolty,ncell
-      integer(KIND=int)::iivib,jjtor,ip1,ip2,ip3,it,nchp2,acellinc
+      integer(KIND=normal_int)::iivib,jjtor,ip1,ip2,ip3,it,nchp2,acellinc
 
       real(KIND=double_precision)::ljsami,ljpsur,ljmuir,v,vintra, vinter,vext 
      &                ,rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq
@@ -66,7 +66,7 @@
       dimension lcoulo(numax,numax),cellinc(cmax),jcell(nmax)
       dimension acellinc(numax,27)
 ! KEA
-      integer(KIND=int)::neigh_j,neighj(maxneigh)
+      integer(KIND=normal_int)::neigh_j,neighj(maxneigh)
       real(KIND=double_precision)::ndijj(maxneigh),nxijj(maxneigh),
      &     nyijj(maxneigh),nzijj(maxneigh)
 ! KM

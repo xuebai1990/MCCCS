@@ -35,7 +35,7 @@
 !$$$      include 'clusterbias.inc'
 !$$$      include 'cell.inc'
 
-      integer(KIND=int)::i,j,im,imolty,ibox
+      integer(KIND=normal_int)::i,j,im,imolty,ibox
 
       open (unit=8, file="final-config")
       write(8,*) tmcc

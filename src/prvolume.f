@@ -33,7 +33,7 @@
 
       logical::ovrlap,lvol,lx,ly,lz,la,lb,lc
 
-      integer(KIND=int)::i,j,imolty,ic,ncount,jhmat,numvecto
+      integer(KIND=normal_int)::i,j,imolty,ic,ncount,jhmat,numvecto
       real(KIND=double_precision)::bxo,byo,bzo,hbxo,hbyo,hbzo
       real(KIND=double_precision)::volo,vboxo,dfac,
      &                 vintero,vtailo,vexto,velecto,vflucqo
@@ -51,11 +51,11 @@
      &                 ,xcmj,ycmj,zcmj,rxuij,ryuij,rzuij
       real(KIND=double_precision)::rbcut,rbox
       real(KIND=double_precision)::w(3),vx,vy,vz
-      integer(KIND=int)::boxvch,ichoiq,ibox
-      integer(KIND=int)::neigho_cnt(nmax),neigho(100,nmax)
+      integer(KIND=normal_int)::boxvch,ichoiq,ibox
+      integer(KIND=normal_int)::neigho_cnt(nmax),neigho(100,nmax)
       real(KIND=double_precision)::hmato(9),hmatio(9)
 
-      integer(KIND=int)::idum
+      integer(KIND=normal_int)::idum
       real(KIND=double_precision)::lddum,lddum2(27),min_boxl
 ! KEA
       real(KIND=double_precision)::v3o,v3n
