@@ -23,10 +23,10 @@
 !$$$      include 'poten.inc'
 
       logical::ovrlap,ldum
-      integer(KIND=normal_int)::i,m,j,ntii,ntij,ntjj,ntjjs,ii,jj,ntijs,imolty,irem
-     &       ,isv,cnt
+      integer(KIND=normal_int)::i,m,j,ntii,ntij,ntjj,ntjjs,ii,jj,ntijs
+     & ,imolty,irem,isv,cnt
       real(KIND=double_precision)::random,vmstate,volde,vnewe,dum,vintra
-     &  ,vinter,vext,velect,vewald
+     & ,vinter,vext,velect,vewald
 
 ! --- initialize a few things
 

@@ -31,13 +31,13 @@
 !$$$      include 'inputdata.inc'
 !$$$      include 'eepar.inc'
 
-      integer(KIND=normal_int)::i, imolty, ii, j, jmolty, jj, ntii, ntjj, ntij
-     &     ,nnn,nvirial,ip,itemp,iii
-      real(KIND=double_precision)::vinter,rminsq,rxui,ryui,rzui,rxuij,ryuij,rzuij
-     &       ,rijsq,sr2, sr6 ,velect,mayer
+      integer(KIND=normal_int)::i, imolty, ii, j, jmolty, jj, ntii, ntjj
+     & , ntij,nnn,nvirial,ip,itemp,iii
+      real(KIND=double_precision)::vinter,rminsq,rxui,ryui,rzui,rxuij
+     & ,ryuij,rzuij,rijsq,sr2, sr6 ,velect,mayer
 
-      real(KIND=double_precision)::ljsami,ljpsur,ljmuir,xdiff,ydiff,zdiff
-     &     ,dvircm,stepvir,exsix,starvir
+      real(KIND=double_precision)::ljsami,ljpsur,ljmuir,xdiff,ydiff
+     & ,zdiff,dvircm,stepvir,exsix,starvir
       real(KIND=double_precision)::binvir
       dimension binvir(maxvir,maxntemp),mayer(maxntemp)
 
@@ -46,15 +46,16 @@
 ! *** only use for polarizable models
       integer(KIND=normal_int)::chgmax
       parameter (chgmax=10)
-      integer(KIND=normal_int)::ip1,ip2,iunit,numchg,info,ipiv(chgmax),mainsite(2,2),
-     &     lam1,lam2
-      real(KIND=double_precision)::a(chgmax,chgmax),b2(chgmax,1),mainxiq(2,2)
+      integer(KIND=normal_int)::ip1,ip2,iunit,numchg,info,ipiv(chgmax)
+     & ,mainsite(2,2),lam1,lam2
+      real(KIND=double_precision)::a(chgmax,chgmax),b2(chgmax,1)
+     & ,mainxiq(2,2)
 
-      real(KIND=double_precision)::consa1,consa2,consb1,consb2,selfadd1,selfadd2,
-     &     vtotal,epsilon2,vmin
+      real(KIND=double_precision)::consa1,consa2,consb1,consb2,selfadd1
+     & ,selfadd2,vtotal,epsilon2,vmin
 
       real(KIND=double_precision)::mass_t,binvir2(maxvir,maxntemp),
-     &     factor,corr,vold,deri_u
+     & factor,corr,vold,deri_u
 
 ! --------------------------------------------------------------------
 

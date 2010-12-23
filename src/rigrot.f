@@ -31,14 +31,17 @@
 
       logical::lnew,ovrlap,lovrr,lterm,ltors
 
-      integer(KIND=normal_int)::i,ibox,igrow,iii,j,ip,iwalk,iunit,imolty,iu,iskip
-      integer(KIND=normal_int)::ichoi,imol,istt,iend,stch,glist,ntogrow,count
+      integer(KIND=normal_int)::i,ibox,igrow,iii,j,ip,iwalk,iunit,imolty
+     & ,iu,iskip
+      integer(KIND=normal_int)::ichoi,imol,istt,iuend,stch,glist,ntogrow
+     & ,count
 
-      real(KIND=double_precision)::rx,ry,rz,rxorig,ryorig,rzorig,rxnw,rynw,rznw
-      real(KIND=double_precision)::xdgamma,ydgamma,zdgamma,xcosdg,xsindg,ycosdg
-     &     ,ysindg,zcosdg,zsindg,rbf,rxur,ryur,rzur,delo,length
-      real(KIND=double_precision)::delen,v,vtor,w,bsum,vdum,vintra,vinter
-     &     ,velect,vewald,wadd,vext,random,maxlen,bs
+      real(KIND=double_precision)::rx,ry,rz,rxorig,ryorig,rzorig,rxnw
+     & ,rynw,rznw
+      real(KIND=double_precision)::xdgamma,ydgamma,zdgamma,xcosdg,xsindg
+     & ,ycosdg,ysindg,zcosdg,zsindg,rbf,rxur,ryur,rzur,delo,length
+      real(KIND=double_precision)::delen,v,vtor,w,bsum,vdum,vintra
+     & ,vinter,velect,vewald,wadd,vext,random,maxlen,bs
   
       dimension lovrr(nchmax),delen(nchmax),rxur(numax)
       dimension rzur(numax),ryur(numax),glist(numax)
@@ -57,7 +60,7 @@
       iunit = nunit(imolty)
       igrow = riutry(imolty,1) 
       istt = igrow + 1 
-      iend = iunit
+      iuend = iunit
 
         
       if (lnew) then

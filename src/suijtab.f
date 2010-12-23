@@ -28,8 +28,8 @@
       integer(KIND=normal_int)::i, j, ij, ji,ibox,nntype5,nmix,imix
       real(KIND=double_precision)::rzeronx(nxatom),epsilonnx(nxatom)
 
-      real(KIND=double_precision)::rcheck, sr2, sr6, adum, bdum, rs1, rs7, sr7,
-     &     pi,djay,sigmaTmp,epsilonTmp
+      real(KIND=double_precision)::rcheck, sr2, sr6, adum, bdum, rs1,
+     & rs7, sr7,pi,djay,sigmaTmp,epsilonTmp,garofalini
 
 ! ----------------------------------------------------------------
       do i = 1, nntype
@@ -75,11 +75,6 @@
 !     h3(rij rik thetajik) = lambda exp[(gamma/(rij-rij*))+(gamma/(rik-rik*))]*
 !             [cos(theta)-cos(theta*)]**2     for rij<rij* and rik<rik*
 !                          = 0 otherwise
-
-! conversion for coulomb potential (incl C/e, m-->A, J-->K, 4pi epsi naught)
-       qqfact = 1.67125d5
-! qqfact for bohr/hartree - from pot_KAng.f code
-!         qqfact = 0.99865377d0
 
 !     Parameters (galpha,grho,gbeta,ga,gb,gc; lambda,grij,ggamma,gtheta)
 !     Si-Si
@@ -438,8 +433,6 @@
                end if
             end do
          end do
-
-         qqfact = 1.67d5
 
          return
 
@@ -3687,8 +3680,6 @@
             end do
          end do
       end if
-! ---  Conversion factor for intermolecular coulomb interactions
-      qqfact = 1.67d5
 
       if (ltab) then
          read(5,*)

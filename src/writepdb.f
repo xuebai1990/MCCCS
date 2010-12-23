@@ -1,6 +1,6 @@
       subroutine writepdb(nmol,natom,ibox)
 
-      use global_data
+      use global_data,only:parbox,rxu,ryu,rzu,iou
       use var_type
       use const_phys
       use const_math

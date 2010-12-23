@@ -47,38 +47,39 @@
  
       logical::ovrlap, lvol 
       logical::lexplt,lqimol,lqjmol,lcoulo,lij2,liji,lqchgi,lexclude
-      integer(KIND=normal_int)::i, imolty, ii, j, jmolty, jj, ntii, ntjj, ntij, iunit
-     &     , ip1, ip2, ip3,ibox,nmcount,iii,jjj,ip
-     &     ,iivib, jjvib, jjben, jjtor, it, ntj,itype,k, mmm
-      real(KIND=double_precision)::v, vinter, vintra, vtail, vvib, vbend, vtg, vext
-     &     ,velect,vflucq,qqii,vtmp
-      real(KIND=double_precision)::rcutsq,rminsq,rxui,ryui,rzui,rxuij,ryuij,rzuij
-     &       ,rijsq,sr2, sr6, rho, thetac, theta 
-     &     ,xaa1, yaa1, zaa1, xa1a2, ya1a2, za1a2, daa1, da1a2, dot
-     &     ,vtorso, dzui, dz3, dz12, rhoz,xcc,ycc,zcc,tcc,spltor
-     &     ,mmff,rij,vrecipsum,erfunc
-     &     ,rbcut,ninesix,vwell, genlj
+      integer(KIND=normal_int)::i, imolty, ii, j, jmolty, jj, ntii, ntjj
+     & , ntij, iunit, ip1, ip2, ip3,ibox,nmcount,iii,jjj,ip,iivib, jjvib
+     & , jjben, jjtor, it, ntj,itype,k, mmm
+      real(KIND=double_precision)::v, vinter, vintra, vtail, vvib, vbend
+     & , vtg, vext,velect,vflucq,qqii,vtmp
+      real(KIND=double_precision)::rcutsq,rminsq,rxui,ryui,rzui,rxuij
+     & ,ryuij,rzuij,rijsq,sr2, sr6, rho, thetac, theta,xaa1, yaa1, zaa1,
+     & xa1a2, ya1a2, za1a2, daa1, da1a2, dot,vtorso, dzui, dz3, dz12,
+     & rhoz,xcc,ycc,zcc,tcc,spltor,mmff,rij,vrecipsum,erfunc,rbcut
+     & ,ninesix,vwell, genlj
 ! tabulated potential variables
-      real(KIND=double_precision)::tabulated_vib, tabulated_bend, tabulated_vdW, 
-     &     tabulated_elect, rbend, rbendsq
+      real(KIND=double_precision)::tabulated_vib, tabulated_bend,
+     & tabulated_vdW,tabulated_elect, rbend, rbendsq
 
       real(KIND=double_precision)::sx,sy,sz
 
 !      real(KIND=double_precision)::vtemp
       real(KIND=double_precision)::vsc
 
-      real(KIND=double_precision)::coru,coruz,xcmi,ycmi,zcmi,rcmi,rcm,rcmsq,qave
-      real(KIND=double_precision)::ljsami,ljpsur,ljmuir,exsami,exmuir,exzeo,exsix
+      real(KIND=double_precision)::coru,coruz,xcmi,ycmi,zcmi,rcmi,rcm
+     & ,rcmsq,qave,garofalini
+      real(KIND=double_precision)::ljsami,ljpsur,ljmuir,exsami,exmuir
+     & ,exzeo,exsix
       real(KIND=double_precision)::exgrph,vintera,velecta,vol
-      real(KIND=double_precision)::xvec(numax,numax),yvec(numax,numax)
-     &                ,zvec(numax,numax),distij(numax,numax),epsilon2
-     &                ,sigma2, distij2(numax,numax)
+      real(KIND=double_precision)::rxvec(numax,numax),ryvec(numax,numax)
+     & ,rzvec(numax,numax),distanceij(numax,numax),epsilon2 ,sigma2,
+     & distij2(numax,numax)
       real(KIND=double_precision)::slitpore, v_elect_field, field
       dimension lcoulo(numax,numax),lexclude(nmax)
 ! Neeraj & RP for MPI
-      real(KIND=double_precision)::sum_velect,sum_vinter,sum_vtail,sum_vintra
-     &       ,sum_vflucq,sum_vvib,sum_vbend,sum_vtg,sum_vext,sum_vwell
-     &      ,sum_sself,sum_correct,my_velect,sum_my_velect
+      real(KIND=double_precision)::sum_velect,sum_vinter,sum_vtail
+     & ,sum_vintra,sum_vflucq,sum_vvib,sum_vbend,sum_vtg,sum_vext
+     & ,sum_vwell,sum_sself,sum_correct,my_velect,sum_my_velect
       logical::all_ovrlap
 ! --------------------------------------------------------------------
       vintera = 0.0d0
@@ -1038,19 +1039,19 @@
                   rzui=rzu(i,ii)
                   do iivib = 1, invib(imolty,ii)
                      jj = ijvib(imolty,ii,iivib)
-                     xvec(ii,jj) = rxu(i,jj) - rxui
-                     yvec(ii,jj) = ryu(i,jj) - ryui
-                     zvec(ii,jj) = rzu(i,jj) - rzui
-                     distij2(ii,jj) = ( xvec(ii,jj)**2
-     &                    + yvec(ii,jj)**2 + zvec(ii,jj)**2 )
-                     distij(ii,jj) = dsqrt(distij2(ii,jj))
+                     rxvec(ii,jj) = rxu(i,jj) - rxui
+                     ryvec(ii,jj) = ryu(i,jj) - ryui
+                     rzvec(ii,jj) = rzu(i,jj) - rzui
+                     distij2(ii,jj) = ( rxvec(ii,jj)**2
+     &                    + ryvec(ii,jj)**2 + rzvec(ii,jj)**2 )
+                     distanceij(ii,jj) = dsqrt(distij2(ii,jj))
                      
                      if ( nunit(imolty) .ne. nugrow(imolty) )then
 !                  --- account for explct atoms in opposite direction
-                        xvec(jj,ii)   = -xvec(ii,jj)
-                        yvec(jj,ii)   = -yvec(ii,jj)
-                        zvec(jj,ii)   = -zvec(ii,jj)
-                        distij(jj,ii) = distij(ii,jj)
+                        rxvec(jj,ii)   = -rxvec(ii,jj)
+                        ryvec(jj,ii)   = -ryvec(ii,jj)
+                        rzvec(jj,ii)   = -rzvec(ii,jj)
+                        distanceij(jj,ii) = distanceij(ii,jj)
                      end if
                   end do
                end do
@@ -1062,14 +1063,14 @@
                      ip1 = ijvib(imolty,j,jjvib)
                      it  = itvib(imolty,j,jjvib)
                      if ( ip1. lt. j .and. L_vib_table) then
-                        call lininter_vib(distij(ip1,j), 
+                        call lininter_vib(distanceij(ip1,j), 
      &                       tabulated_vib, it)
                         vvib = vvib + tabulated_vib
 !                         write(2,*) 'TABULATED VVIB: ', tabulated_vib, 
-!     &                        distij(ip1,j), ip1, j
+!     &                        distanceij(ip1,j), ip1, j
                      end if
                      if ( ip1 .lt. j .and..not.L_vib_table) vvib = vvib
-     &                    + brvibk(it) * (distij(ip1,j) - brvib(it))**2
+     &                    + brvibk(it) * (distanceij(ip1,j) - brvib(it))**2
                   end do
                end do
 !     end if
@@ -1082,10 +1083,10 @@
                      if ( ip2 .lt. j ) then
                         ip1 = ijben2(imolty,j,jjben)
                         it  = itben(imolty,j,jjben)
-                        thetac = ( xvec(ip1,j)*xvec(ip1,ip2) +
-     &                       yvec(ip1,j)*yvec(ip1,ip2) +
-     &                       zvec(ip1,j)*zvec(ip1,ip2) ) /
-     &                       ( distij(ip1,j)*distij(ip1,ip2) )
+                        thetac = ( rxvec(ip1,j)*rxvec(ip1,ip2) +
+     &                       ryvec(ip1,j)*ryvec(ip1,ip2) +
+     &                       rzvec(ip1,j)*rzvec(ip1,ip2) ) /
+     &                       ( distanceij(ip1,j)*distanceij(ip1,ip2) )
                         if ( thetac .ge. 1.0d0 ) thetac = 1.0d0
                         if ( thetac .le. -1.0d0 ) thetac = -1.0d0
                         
@@ -1093,7 +1094,7 @@
 
 !$$$                      if (L_bend_table) then
 !$$$                         rbendsq=distij2(ip1,j)+distij2(ip1,ip2)
-!$$$     &                           -2.0d0*distij(ip1,j)*distij(ip1,ip2)
+!$$$     &                           -2.0d0*distanceij(ip1,j)*distanceij(ip1,ip2)
 !$$$     &                           *thetac
 !$$$                         rbend = dsqrt(rbendsq)
 !$$$                         call lininter_bend(rbend, tabulated_bend, it)
@@ -1121,18 +1122,18 @@
                         ip2 = ijtor3(imolty,j,jjtor)
                         it  = ittor(imolty,j,jjtor)
 !*** calculate cross products d_a x d_a-1 and d_a-1 x d_a-2 ***
-                        xaa1 = yvec(ip1,j) * zvec(ip2,ip1) +
-     &                       zvec(ip1,j) * yvec(ip1,ip2)
-                        yaa1 = zvec(ip1,j) * xvec(ip2,ip1) +
-     &                       xvec(ip1,j) * zvec(ip1,ip2)
-                        zaa1 = xvec(ip1,j) * yvec(ip2,ip1) +
-     &                       yvec(ip1,j) * xvec(ip1,ip2)
-                        xa1a2 = yvec(ip1,ip2) * zvec(ip2,ip3) +
-     &                       zvec(ip1,ip2) * yvec(ip3,ip2)
-                        ya1a2 = zvec(ip1,ip2) * xvec(ip2,ip3) +
-     &                       xvec(ip1,ip2) * zvec(ip3,ip2)
-                        za1a2 = xvec(ip1,ip2) * yvec(ip2,ip3) +
-     &                       yvec(ip1,ip2) * xvec(ip3,ip2)
+                        xaa1 = ryvec(ip1,j) * rzvec(ip2,ip1) +
+     &                       rzvec(ip1,j) * ryvec(ip1,ip2)
+                        yaa1 = rzvec(ip1,j) * rxvec(ip2,ip1) +
+     &                       rxvec(ip1,j) * rzvec(ip1,ip2)
+                        zaa1 = rxvec(ip1,j) * ryvec(ip2,ip1) +
+     &                       ryvec(ip1,j) * rxvec(ip1,ip2)
+                        xa1a2 = ryvec(ip1,ip2) * rzvec(ip2,ip3) +
+     &                       rzvec(ip1,ip2) * ryvec(ip3,ip2)
+                        ya1a2 = rzvec(ip1,ip2) * rxvec(ip2,ip3) +
+     &                       rxvec(ip1,ip2) * rzvec(ip3,ip2)
+                        za1a2 = rxvec(ip1,ip2) * ryvec(ip2,ip3) +
+     &                       ryvec(ip1,ip2) * rxvec(ip3,ip2)
 ! *** calculate lengths of cross products ***
                         daa1 = dsqrt(xaa1**2+yaa1**2+zaa1**2)
                         da1a2 = dsqrt(xa1a2**2+ya1a2**2+za1a2**2)
@@ -1150,8 +1151,8 @@
                            ycc = zaa1*xa1a2 - xaa1*za1a2
                            zcc = xaa1*ya1a2 - yaa1*xa1a2
 !     *** calculate scalar triple product ***
-                           tcc = xcc*xvec(ip1,ip2) + ycc*yvec(ip1,ip2)
-     &                          + zcc*zvec(ip1,ip2)
+                           tcc = xcc*rxvec(ip1,ip2) + ycc*ryvec(ip1,ip2)
+     &                      + zcc*rzvec(ip1,ip2)
                            theta = dacos (thetac)
 
                            if (tcc .lt. 0.0d0) theta = -theta

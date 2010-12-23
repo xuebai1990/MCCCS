@@ -15,7 +15,8 @@
 !$$$      include 'control.inc'
 
       integer(KIND=normal_int)::ttyp,klo,khi,k,xa,bin,addl
-      real(KIND=double_precision)::theta,spltor,thetarem,tordiff,torstep,left
+      real(KIND=double_precision)::theta,spltor,thetarem,tordiff,torstep
+     & ,left
 
 ! Routine to calculate torsion potential using linear interpolation between 2 points
 ! Requires a file (fort.40) running from -180 to 180 in 1/4 degree intervals
@@ -185,7 +186,7 @@
 !      integer(KIND=normal_int)::n
 !      real(KIND=double_precision)::x,y,xa(n),y2a(n),ya(n)
       integer(KIND=normal_int)::k, khi,klo,points,jttor,tortyp,xa
-      real(KIND=double_precision)::a,b,h,x,y,vtorso,vtorsoa
+      real(KIND=double_precision)::a,bb,h,x,y,vtorso,vtorsoa
 
       points = splpnts(tortyp)
 
@@ -212,9 +213,9 @@
       if (dabs(h).lt.1.0d-8) write(iou,*) 'bad deg input in splint',h,
      &     khi,deg(khi,tortyp),klo,deg(klo,tortyp)
       a = (deg(khi,tortyp)-x)/h
-      b = (x-deg(klo,tortyp))/h
-      y = a*tabtorso(klo,tortyp)+b*tabtorso(khi,tortyp)+
-     &     ((a**3-a)*torderiv2(klo,tortyp)+(b**3-b)*
+      bb = (x-deg(klo,tortyp))/h
+      y = a*tabtorso(klo,tortyp)+bb*tabtorso(khi,tortyp)+
+     &     ((a**3-a)*torderiv2(klo,tortyp)+(bb**3-bb)*
      &     torderiv2(khi,tortyp))*(h**2)/6.0d0
 
 !      write(iou,*) x,y,tortyp

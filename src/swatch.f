@@ -35,31 +35,33 @@
 
       logical::lempty,lterm
 
-      integer(KIND=normal_int)::type_a,type_b,from,prev,self,iboxnew,iboxold
-     &     ,imolty,igrow,new,old,islen,ifirst,iprev,iii,j
-      integer(KIND=normal_int)::oldchain,newchain,oldunit,newunit,ncount,iunit,iins
+      integer(KIND=normal_int)::type_a,type_b,from,prev,self,iboxnew
+     & ,iboxold,imolty,igrow,new,old,islen,ifirst,iprev,iii,j
+      integer(KIND=normal_int)::oldchain,newchain,oldunit,newunit,ncount
+     & ,iunit,iins
 
       integer(KIND=normal_int)::ic,ibox,icbu,jj,mm,imt,jmt,imolin,imolrm
       integer(KIND=normal_int)::boxa,boxb,ipair,imolta,imoltb,iboxa
-     &  ,iboxb,iboxal,iboxbl,iboxia,iboxib,iunita,iunitb,orgaia
-     &  ,orgaib,orgbia,orgbib,ipairb 
+     & ,iboxb,iboxal,iboxbl,iboxia,iboxib,iunita,iunitb,orgaia ,orgaib
+     & ,orgbia,orgbib,ipairb 
 
       real(KIND=double_precision)::random,tweight,tweiold,rxut,ryut,rzut
-     &  ,dvol,vola,volb,rho,coru,coruz,dinsta,rpair
+     & ,dvol,vola,volb,rho,coru,coruz,dinsta,rpair
 
-      real(KIND=double_precision)::vnbox,vninte,vnintr,vnvibb,vntgb,vnextb
-     &  ,vnbend,vntail,vnelect,vnewald,wnlog,wolog,wdlog,wswat
+      real(KIND=double_precision)::vnbox,vninte,vnintr,vnvibb,vntgb
+     & ,vnextb,vnbend,vntail,vnelect,vnewald,wnlog,wolog,wdlog,wswat
          
-      real(KIND=double_precision)::v,vintra,vinter,vext,velect,vewald,vdum,delen
-     &     ,deleo,dicount,vrecipn,vrecipo
+      real(KIND=double_precision)::v,vintra,vinter,vext,velect,vewald
+     & ,vdum,delen,deleo,dicount,vrecipn,vrecipo
 ! * additions from iswatch
 
-      integer(KIND=normal_int)::zz,zzz,box,iboxi,bdmol_a,bdmol_b
+      integer(KIND=normal_int)::izz,zzz,box,iboxi,bdmol_a,bdmol_b
       integer(KIND=normal_int)::imola,imolb,moltaid,moltbid,i,ii,iu
 
       integer(KIND=normal_int)::s_type, o_type, thisbox, otherbox
 
-      real(KIND=double_precision)::rx_1(numax),ry_1(numax),rz_1(numax),dummy
+      real(KIND=double_precision)::rx_1(numax),ry_1(numax),rz_1(numax)
+     & ,dummy
 
 !      dimension from(2),prev(2)
       dimension from(2*numax),prev(2*numax)
@@ -72,8 +74,8 @@
       real(KIND=double_precision)::waddold,waddnew,vdum2
 
       dimension vnbox(nbxmax),vninte(nbxmax),vnintr(nbxmax)
-     &  ,vnvibb(nbxmax),vntgb(nbxmax),vnextb(nbxmax),vnbend(nbxmax)
-     &  ,vntail(nbxmax),vnelect(nbxmax),vnewald(nbxmax)
+     & ,vnvibb(nbxmax),vntgb(nbxmax),vnextb(nbxmax),vnbend(nbxmax)
+     & ,vntail(nbxmax),vnelect(nbxmax),vnewald(nbxmax)
 
 ! --- JLR 11-24-09
       integer(KIND=normal_int)::icallrose
@@ -245,25 +247,25 @@
 
 !     *** assign from and prev for each moltyp
 
-         do zz = 1,ncut(iparty,type_a)
+         do izz = 1,ncut(iparty,type_a)
 
-            from(type_a+2*(zz-1)) = gswatc(iparty,type_a,1+2*(zz-1)) 
-            prev(type_a+2*(zz-1)) = gswatc(iparty,type_a,2+2*(zz-1)) 
+            from(type_a+2*(izz-1)) = gswatc(iparty,type_a,1+2*(izz-1)) 
+            prev(type_a+2*(izz-1)) = gswatc(iparty,type_a,2+2*(izz-1)) 
 
          end do
 
-         do zz = 1,ncut(iparty,type_b)
+         do izz = 1,ncut(iparty,type_b)
 
-            from(type_b+2*(zz-1)) = gswatc(iparty,type_b,1+2*(zz-1)) 
-            prev(type_b+2*(zz-1)) = gswatc(iparty,type_b,2+2*(zz-1)) 
+            from(type_b+2*(izz-1)) = gswatc(iparty,type_b,1+2*(izz-1)) 
+            prev(type_b+2*(izz-1)) = gswatc(iparty,type_b,2+2*(izz-1)) 
 
          end do
 
 !$$$         write(iou,*) 'mol a'
 !$$$  
-!$$$         do zz = 1,ncut(type_a)
-!$$$            write(iou,*) zz,'from',from(type_a+2*(zz-1)),' prev',
-!$$$     &        prev(type_a+2*(zz-1))
+!$$$         do izz = 1,ncut(type_a)
+!$$$            write(iou,*) izz,'from',from(type_a+2*(izz-1)),' prev',
+!$$$     &        prev(type_a+2*(izz-1))
 !$$$         end do
 !$$$  
 !$$$         write(iou,*) 'mol b'
@@ -271,9 +273,9 @@
 !$$$         write(iou,*) gswatc(iparty,type_b,3),gswatc(iparty,type_b,4)
 !$$$         write(iou,*) from(3),prev(3),type_b
 !$$$  
-!$$$         do zz = 1,ncut(type_b)
-!$$$            write(iou,*) zz,'from',from(type_b+2*(zz-1)),' prev',
-!$$$     &        prev(type_b+2*(zz-1))
+!$$$         do izz = 1,ncut(type_b)
+!$$$            write(iou,*) izz,'from',from(type_b+2*(izz-1)),' prev',
+!$$$     &        prev(type_b+2*(izz-1))
 !$$$         end do
 !$$$         
 !$$$         call cleanup('')
@@ -299,11 +301,11 @@
 
 !     *** store position 1, a's original site ***
 
-         do zz = 1, nunit(imolta)
+         do izz = 1, nunit(imolta)
 
-            rx_1(zz) = rxu(imola,zz)
-            ry_1(zz) = ryu(imola,zz)
-            rz_1(zz) = rzu(imola,zz)
+            rx_1(izz) = rxu(imola,izz)
+            ry_1(izz) = ryu(imola,izz)
+            rz_1(izz) = rzu(imola,izz)
 
          end do
 
@@ -345,9 +347,9 @@
          call schedule(igrow,imolty,islen,ifirst,iprev,3)
 
          if (ncut(iparty,type_b) .gt. 1) then
-            do zz = 2,ncut(iparty,type_b)
-               ifirst = from(type_b+2*(zz-1))
-               iprev = prev(type_b+2*(zz-1))
+            do izz = 2,ncut(iparty,type_b)
+               ifirst = from(type_b+2*(izz-1))
+               iprev = prev(type_b+2*(izz-1))
 
                call schedule(igrow,imolty,islen,ifirst,iprev,5)
 
@@ -356,11 +358,11 @@
 
 !     * assign growth schedule for molecule b *
 
-         do zz = 1,nunit(imolty)
+         do izz = 1,nunit(imolty)
 
-            liswinc(zz,imolty) = lexshed(zz)
+            liswinc(izz,imolty) = lexshed(izz)
 
-!     write(iou,*) zz, liswinc(zz,imolty)
+!     write(iou,*) izz, liswinc(izz,imolty)
             
          end do
 
@@ -454,9 +456,9 @@
 
 ! * I wonder if this works with lrigid?                                                             
             if (ncut(iparty,s_type) .gt. 1) then
-               do zz = 2,ncut(iparty,s_type)
-                  ifirst = from(s_type+2*(zz-1))
-                  iprev = prev(s_type+2*(zz-1))
+               do izz = 2,ncut(iparty,s_type)
+                  ifirst = from(s_type+2*(izz-1))
+                  iprev = prev(s_type+2*(izz-1))
 
                   call schedule(igrow,imolty,islen,ifirst,iprev,5)
 
@@ -480,13 +482,13 @@
 
 !     * putting molecule b in position 1 *
 
-               do zz = 1, nsampos(iparty)
+               do izz = 1, nsampos(iparty)
 
-                  bdmol_b = splist(iparty,zz,type_b)
+                  bdmol_b = splist(iparty,izz,type_b)
 
-                  rxu(other,bdmol_b) = rxut(3,zz)
-                  ryu(other,bdmol_b) = ryut(3,zz)
-                  rzu(other,bdmol_b) = rzut(3,zz)
+                  rxu(other,bdmol_b) = rxut(3,izz)
+                  ryu(other,bdmol_b) = ryut(3,izz)
+                  rzu(other,bdmol_b) = rzut(3,izz)
 
                end do
 
@@ -494,11 +496,11 @@
 
 !     * putting molecule a into its (fully grown) trial position 2 *
 
-               do zz = 1, nunit(moltyp(other))
+               do izz = 1, nunit(moltyp(other))
 
-                  rxu(other,zz) = rxut(1,zz)
-                  ryu(other,zz) = ryut(1,zz)
-                  rzu(other,zz) = rzut(1,zz)
+                  rxu(other,izz) = rxut(1,izz)
+                  ryu(other,izz) = ryut(1,izz)
+                  rzu(other,izz) = rzut(1,izz)
 
                end do
 
@@ -543,22 +545,22 @@
 !     * moving molecules back *
             if (ic .eq. 1) then
 
-               do zz = 1, nsampos(iparty)
+               do izz = 1, nsampos(iparty)
 
-                  bdmol_b = splist(iparty,zz,type_b)
+                  bdmol_b = splist(iparty,izz,type_b)
 
-                  rxu(other,bdmol_b) = rxut(4,zz)
-                  ryu(other,bdmol_b) = ryut(4,zz)
-                  rzu(other,bdmol_b) = rzut(4,zz)
+                  rxu(other,bdmol_b) = rxut(4,izz)
+                  ryu(other,bdmol_b) = ryut(4,izz)
+                  rzu(other,bdmol_b) = rzut(4,izz)
 
                end do
 
             else
 
-               do zz = 1, nunit(moltyp(other))
-                  rxu(other,zz) = rx_1(zz)
-                  ryu(other,zz) = ry_1(zz)
-                  rzu(other,zz) = rz_1(zz)
+               do izz = 1, nunit(moltyp(other))
+                  rxu(other,izz) = rx_1(izz)
+                  ryu(other,izz) = ry_1(izz)
+                  rzu(other,izz) = rz_1(izz)
                end do
 
             end if
@@ -633,10 +635,10 @@
             else
 !     * put molecule a into position 2 (fully grown trial position)
 !     * for the energy of b's new position (second time around)
-               do zz = 1,nunit(imolta)
-                  rxu(imola,zz) = rxut(1,zz)
-                  ryu(imola,zz) = ryut(1,zz)
-                  rzu(imola,zz) = rzut(1,zz)
+               do izz = 1,nunit(imolta)
+                  rxu(imola,izz) = rxut(1,izz)
+                  ryu(imola,izz) = ryut(1,izz)
+                  rzu(imola,izz) = rzut(1,izz)
                end do
             end if
 
@@ -655,10 +657,10 @@
             else
 
 !     * return a to position 1 *
-               do zz = 1, nunit(imolta)
-                  rxu(imola,zz) = rx_1(zz)
-                  ryu(imola,zz) = ry_1(zz)
-                  rzu(imola,zz) = rz_1(zz)
+               do izz = 1, nunit(imolta)
+                  rxu(imola,izz) = rx_1(izz)
+                  ryu(imola,izz) = ry_1(izz)
+                  rzu(imola,izz) = rz_1(izz)
 
                end do
 
@@ -979,17 +981,17 @@
 !            open(unit=91,file='a_init.xyz',status='unknown')                                 
 !            write(91,*) nunit(imolta)                                                        
 !            write(91,*)                                                                      
-!            do zz = 1,nunit(imolta)                                                          
-!               write(91,*) 'C ', rxu(iboxa,zz),ryu(iboxa,zz),                                
-!     &              rzu(iboxa,zz)                                                            
+!            do izz = 1,nunit(imolta)                                                          
+!               write(91,*) 'C ', rxu(iboxa,izz),ryu(iboxa,izz),                                
+!     &              rzu(iboxa,izz)                                                            
 !            end do                                                                            
 !            close(91)                                                                        
 !            open(unit=92,file='b_init.xyz',status='unknown')                                 
 !            write(92,*) nunit(imoltb)                                                        
 !            write(92,*)                                                                      
-!            do zz = 1,nunit(imoltb)                                                          
-!               write(92,*) 'O ', rxu(iboxb,zz),ryu(iboxb,zz),                                
-!     &              rzu(iboxb,zz)                                                            
+!            do izz = 1,nunit(imoltb)                                                          
+!               write(92,*) 'O ', rxu(iboxb,izz),ryu(iboxb,izz),                                
+!     &              rzu(iboxb,izz)                                                            
 !            end do                                                                            
 !            close(92)                                                                        
 !cc--!!!JLR - end of coordinate test            
@@ -1015,17 +1017,17 @@
 !$$$         from(2) = gswatc(iparty,type_b,1) 
 !$$$         prev(2) = gswatc(iparty,type_b,2) 
 
-         do zz = 1,ncut(iparty,type_a)
+         do izz = 1,ncut(iparty,type_a)
 
-            from(type_a+2*(zz-1)) = gswatc(iparty,type_a,1+2*(zz-1)) 
-            prev(type_a+2*(zz-1)) = gswatc(iparty,type_a,2+2*(zz-1)) 
+            from(type_a+2*(izz-1)) = gswatc(iparty,type_a,1+2*(izz-1)) 
+            prev(type_a+2*(izz-1)) = gswatc(iparty,type_a,2+2*(izz-1)) 
 
          end do
 
-         do zz = 1,ncut(iparty,type_b)
+         do izz = 1,ncut(iparty,type_b)
 
-            from(type_b+2*(zz-1)) = gswatc(iparty,type_b,1+2*(zz-1)) 
-            prev(type_b+2*(zz-1)) = gswatc(iparty,type_b,2+2*(zz-1)) 
+            from(type_b+2*(izz-1)) = gswatc(iparty,type_b,1+2*(izz-1)) 
+            prev(type_b+2*(izz-1)) = gswatc(iparty,type_b,2+2*(izz-1)) 
 
          end do
 !     ---store number of units in iunita and iunitb
@@ -1150,9 +1152,9 @@
 !           --- Adding in multiple end regrowths
 
             if (ncut(iparty,s_type) .gt. 1) then
-               do zz = 2,ncut(iparty,s_type)
-                  ifirst = from(s_type+2*(zz-1))
-                  iprev = prev(s_type+2*(zz-1))
+               do izz = 2,ncut(iparty,s_type)
+                  ifirst = from(s_type+2*(izz-1))
+                  iprev = prev(s_type+2*(izz-1))
                   
                   call schedule(igrow,imolty,islen,ifirst,iprev,5)
                   
@@ -1600,15 +1602,15 @@
 !         open(unit=93,file='a_final.xyz',status='unknown')                                   
 !         write(93,*) iunita                                                                  
 !         write(93,*)                                                                         
-!         do zz = 1,iunita                                                                    
-!            write(93,*) 'C ', rxu(iboxa,zz),ryu(iboxa,zz),rzu(iboxa,zz)                      
+!         do izz = 1,iunita                                                                    
+!            write(93,*) 'C ', rxu(iboxa,izz),ryu(iboxa,izz),rzu(iboxa,izz)                      
 !         end do                                                                               
 !                                                                                             
 !         open(unit=93,file='b_final.xyz',status='unknown')                                   
 !         write(93,*) iunitb                                                                  
 !         write(93,*)                                                                         
-!         do zz = 1,iunitb                                                                    
-!            write(93,*) 'C ', rxu(iboxb,zz),ryu(iboxb,zz),rzu(iboxb,zz)                      
+!         do izz = 1,iunitb                                                                    
+!            write(93,*) 'C ', rxu(iboxb,izz),ryu(iboxb,izz),rzu(iboxb,izz)                      
 !         end do                                                                               
 !         call cleanup('END OF SWATCH TEST')                                                           
 !cc--!!!JLR - end of coordinate test         

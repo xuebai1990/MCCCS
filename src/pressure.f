@@ -35,28 +35,31 @@
 
       logical::lcoulo,lexplt,lqimol,lqjmol,lij2
       integer(KIND=normal_int)::ibox,itype
-      integer(KIND=normal_int)::i,ii,j,jj,ntii,ntjj,ntij,imolty,jmolty,iii,jjj,k
+      integer(KIND=normal_int)::i,ii,j,jj,ntii,ntjj,ntij,imolty,jmolty
+     & ,iii,jjj,k
  
       real(KIND=double_precision)::press,repress,erfunc
 
-      real(KIND=double_precision)::rxui,ryui,rzui,rxuij,ryuij,rzuij,rijsq,
-     &                 rcutsq,sr2,sr6,rhosq,corp,rij,rs1,
-     &                 sr1,rs2,sr7,rs7,rs6
+      real(KIND=double_precision)::rxui,ryui,rzui,rxuij,ryuij,rzuij
+     & ,rijsq,rcutsq,sr2,sr6,rhosq,corp,rij,rs1,sr1,rs2,sr7,rs7,rs6
       real(KIND=double_precision)::srij
-      real(KIND=double_precision)::surf,pxx,pyy,pzz,rpxx,rpyy,rpzz,pxy,pyx
-     &                ,pxz,pzx,pyz,pzy,rpxy,rpyx,rpxz,rpzx,rpyz,rpzy
+      real(KIND=double_precision)::surf,pxx,pyy,pzz,rpxx,rpyy,rpzz,pxy
+     & ,pyx,pxz,pzx,pyz,pzy,rpxy,rpyx,rpxz,rpzx,rpyz,rpzy
 
-      real(KIND=double_precision)::fxcmi,fycmi,fzcmi,fij,xcmi,ycmi,zcmi,flj
+      real(KIND=double_precision)::fxcmi,fycmi,fzcmi,fij,xcmi,ycmi,zcmi
+     & ,flj
       real(KIND=double_precision)::rcm,rcmsq,rcmi
-      real(KIND=double_precision)::rvdwsq,rchgsq,rbcut,qave,
-     &     volsq,epsilon2,sigma2,pwell,vol 
+      real(KIND=double_precision)::rvdwsq,rchgsq,rbcut,qave, volsq
+     & ,epsilon2,sigma2,pwell,vol 
 
       dimension lcoulo(numax,numax)
 
 ! RP added for MPI
-      real(KIND=double_precision)::pips12,pips13,pips21,pips23,pips31,pips32
-      real(KIND=double_precision)::diff_pips12,diff_pips13,diff_pips21,diff_pips23,
-     & diff_pips31,diff_pips32,diff_pxx,diff_pyy,diff_pzz,sum_press
+      real(KIND=double_precision)::pips12,pips13,pips21,pips23,pips31
+     & ,pips32
+      real(KIND=double_precision)::diff_pips12,diff_pips13,diff_pips21
+     & ,diff_pips23,diff_pips31,diff_pips32,diff_pxx,diff_pyy,diff_pzz
+     & ,sum_press
 ! --------------------------------------------------------------------
       if ( lpbc ) call setpbc (ibox)
 

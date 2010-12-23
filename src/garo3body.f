@@ -203,14 +203,17 @@
 !$$$      include "garofalini.inc"
 !$$$      include "neigh.inc"
 
-      integer(KIND=normal_int)::i,j,k,m,imolty,jmolty,kmolty,mmolty,atomj,atomk,atomm
-      integer(KIND=normal_int)::nta,ntb,ntang,cnt,ni(nmax),temp_cnt,temp,number(nmax)
-      integer(KIND=normal_int)::temp_nei(nmax),nnn,itype,jtype,ktype,mtype
+      integer(KIND=normal_int)::i,j,k,m,imolty,jmolty,kmolty,mmolty
+     & ,atomj,atomk,atomm
+      integer(KIND=normal_int)::nta,ntb,ntang,cnt,ni(nmax),temp_cnt
+     & ,itemp,number(nmax)
+      integer(KIND=normal_int)::temp_nei(nmax),nnn,itype,jtype,ktype
+     & ,mtype
       logical::ltemp(nmax),lupdate,lwrite
       real(KIND=double_precision)::vthree,vthreea,thetac,p,g,nrij(nmax),
-     &     nxi(nmax),nyi(nmax),nzi(nmax)
-      real(KIND=double_precision)::temp_dist(nmax),temp_x(nmax),temp_y(nmax),
-     &     temp_z(nmax)
+     & nxi(nmax),nyi(nmax),nzi(nmax)
+      real(KIND=double_precision)::temp_dist(nmax),temp_x(nmax)
+     & ,temp_y(nmax),temp_z(nmax)
 
       lwrite=.false.
 
@@ -222,12 +225,12 @@
 
       vthree = 0.0d0
       temp_cnt = 0
-      do temp = 1,nmax
-         ltemp(temp) = .false.
-         temp_dist(temp) = 0.0d0
-         temp_x(temp) = 0.0d0
-         temp_y(temp) = 0.0d0
-         temp_z(temp) = 0.0d0
+      do itemp = 1,nmax
+         ltemp(itemp) = .false.
+         temp_dist(itemp) = 0.0d0
+         temp_x(itemp) = 0.0d0
+         temp_y(itemp) = 0.0d0
+         temp_z(itemp) = 0.0d0
       end do
 
       imolty = moltyp(i)
@@ -455,22 +458,22 @@
 !      if(lupdate) then
 !         if(i.eq.18) then
 !            write(6,*) 'updating actual neighbors',temp_cnt
-!            do temp = 1,temp_cnt
-!               write(6,*) 'temp_cnt number',temp,number(temp),
-!     &              neighi(number(temp))
+!            do itemp = 1,temp_cnt
+!               write(6,*) 'temp_cnt number',itemp,number(itemp),
+!     &              neighi(number(itemp))
 !            end do
 !         end if
 !         neigh_icnt=temp_cnt
-!         do temp=1,neigh_icnt
-!            neighi(temp) = temp_nei(temp)
-!            ndiji(temp) = temp_dist(temp)
-!            nxiji(temp) = temp_x(temp)
-!            nyiji(temp) = temp_y(temp)
-!            nziji(temp) = temp_z(temp)
+!         do itemp=1,neigh_icnt
+!            neighi(itemp) = temp_nei(itemp)
+!            ndiji(itemp) = temp_dist(itemp)
+!            nxiji(itemp) = temp_x(itemp)
+!            nyiji(itemp) = temp_y(itemp)
+!            nziji(itemp) = temp_z(itemp)
 !         end do
-!         do temp = 1,neigh_icnt
-!            write(6,*) 'neigh_icnt number',temp,neighi(temp)
-!            write(6,*) 'dists',nxiji(temp),nyiji(temp),nziji(temp)
+!         do itemp = 1,neigh_icnt
+!            write(6,*) 'neigh_icnt number',itemp,neighi(itemp)
+!            write(6,*) 'dists',nxiji(itemp),nyiji(itemp),nziji(itemp)
 !         end do
 !      end if
       if(lwrite) write(6,*) 'triad_en vthree',vthree

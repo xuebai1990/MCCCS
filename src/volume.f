@@ -36,24 +36,24 @@
       logical::ovrlap,lvol,lx,ly,lz,lncubic
       logical::la,lb,lc
 
-      integer(KIND=normal_int)::i,j,ibox,imolty,ic,ncount,boxa,boxb,ipair,ipairb
+      integer(KIND=normal_int)::i,j,ibox,imolty,ic,ncount,boxa,boxb
+     & ,ipair,ipairb
       real(KIND=double_precision)::bxo(nbxmax),byo(nbxmax),bzo(nbxmax)
-      real(KIND=double_precision)::volo(nbxmax),vboxo(nbxmax),dfac(nbxmax),
-     &                 voln(nbxmax),vflucqo(nbxmax),vintero(nbxmax),
-     &                 vtailo(nbxmax),vexto(nbxmax),velecto(nbxmax)
-      real(KIND=double_precision)::kxo(vectormax,nbxmax),kyo(vectormax,nbxmax),
-     &                 kzo(vectormax,nbxmax),prefacto(vectormax,nbxmax)
+      real(KIND=double_precision)::volo(nbxmax),vboxo(nbxmax)
+     & ,dfac(nbxmax),voln(nbxmax),vflucqo(nbxmax),vintero(nbxmax)
+     & ,vtailo(nbxmax),vexto(nbxmax),velecto(nbxmax)
+      real(KIND=double_precision)::kxo(vectormax,nbxmax),kyo(vectormax
+     & ,nbxmax),kzo(vectormax,nbxmax),prefacto(vectormax,nbxmax)
       real(KIND=double_precision)::vboxn(nbxmax),vintern(nbxmax),
-     &                 vtailn(nbxmax),vextn(nbxmax),velectn(nbxmax)
+     & vtailn(nbxmax),vextn(nbxmax),velectn(nbxmax)
       real(KIND=double_precision)::rxuo(nmax,numax),ryuo(nmax,numax)
-     &                ,rzuo(nmax,numax),qquo(nmax,numax)
+     & ,rzuo(nmax,numax),qquo(nmax,numax)
       real(KIND=double_precision)::volt,expdv,random,df,dx,dy,dz,v,dele,
-     &                 vinter,vtail,vext,boxlen,vdum,velect
-     &                 ,velect_intra,velect_inter
+     & vinter,vtail,vext,boxlen,vdum,velect ,velect_intra,velect_inter
       real(KIND=double_precision)::vminim(nbxmax)
-      real(KIND=double_precision)::xcmo,ycmo,zcmo,calpo(nbxmax),numvecto(nbxmax)
+      real(KIND=double_precision)::xcmo,ycmo,zcmo,calpo(nbxmax)
+     & ,numvecto(nbxmax)
       real(KIND=double_precision)::rbcut(nbxmax),rbcuta,rbcutb,rpair,rm
-
       real(KIND=double_precision)::w(3),vx,vy,vz,min_boxl
 
       dimension xcmo(nmax),ycmo(nmax),zcmo(nmax)

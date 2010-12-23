@@ -36,40 +36,37 @@
 
       logical::lnew,lshit,lterm,ldo,lreturn
 
-      integer(KIND=normal_int)::igrow,imolty,count,counta,j,ja,ivib,iufrom,iuprev
-     &     ,iinit,iu,ju,ku,i,iv,juvib,jtvib,type,iu2,ib,iw,ntogrow
-     &     ,itor,ip,ichoi,ichtor,countb,bin,max,nu,iu1,dir,diracc
-     &     ,start,nchben_a,nchben_b,ibend,iopen,last,iclose,nchvib
+      integer(KIND=normal_int)::igrow,imolty,count,counta,j,ja,ivib
+     & ,iufrom,iuprev,iinit,iu,ju,ku,i,iv,juvib,jtvib,type,iu2,ib,iw
+     & ,ntogrow,itor,ip,ichoi,ichtor,countb,bin,max,nu,iu1,dir,diracc
+     & ,start,nchben_a,nchben_b,ibend,iopen,last,iclose,nchvib
 
-      integer(KIND=normal_int)::jttor,it,jut2,jut3,jut4,movetype,lu,k,opencount
+      integer(KIND=normal_int)::jttor,it,jut2,jut3,jut4,movetype,lu,k
+     & ,opencount
 
-      real(KIND=double_precision)::vdha,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2,dot
-     &     ,daa1,da1a2,phicrank,bf_tor,vtorsion,vbend,rbf
-     &     ,vtorso,ran_tor,bs,ang_bend,bfactor,bsum_bend,wei_bv
-     &     ,bsum_try,third,vibtr,lengthc
+      real(KIND=double_precision)::vdha,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2
+     & ,dot,daa1,da1a2,phicrank,bf_tor,vtorsion,vbend,rbf,vtorso,ran_tor
+     & ,bs,ang_bend,bfactor,bsum_bend,wei_bv,bsum_try,third,vibtr
+     & ,lengthc
 
 !     *** to conserve memory, max is the maximum number of endpoints
 !     *** possible in place of numax
       parameter(max=10)
 
       real(KIND=double_precision)::flength,x,y,z,equil,kforce,length
-     &     ,vvib,equilb,kforceb,ux,uy,uz,hdist,lengtha,lengthb
-     &     ,vtor,vphi,thetac,angle,equila,kforcea,ovphi
-     &     ,alpha,twopi,phidisp,dum,random,rxt,ryt,rzt
-     &     ,phiacc,rxa,rya,rza,angles,bangles,vctor
-     &     ,r,mincb,delcb,vkforce,vequil,vvibration,ovvib
+     & ,vvib,equilb,kforceb,ux,uy,uz,hdist,lengtha,lengthb ,vtor,vphi
+     & ,thetac,angle,equila,kforcea,ovphi ,alpha,phidisp,dum,random,rxt
+     & ,ryt,rzt ,phiacc,rxa,rya,rza,angles,bangles,vctor ,r,mincb,delcb
+     & ,vkforce,vequil,vvibration,ovvib
 
-      dimension flength(numax,numax),alpha(max,numax)
-     &     ,equilb(numax,numax),kforceb(numax,numax),equila(max)
-     &     ,rxa(max,max),rya(max,max),rza(max,max)
-     &     ,rxt(max),ryt(max),rzt(max),vbend(2*nchtor_max)
-     &     ,phicrank(2*nchtor_max,max),phiacc(max)
-     &     ,vtorsion(2*nchtor_max),bf_tor(2*nchtor_max)
-     &     ,dir(2*nchtor_max,max),diracc(max),kforcea(max)
-     &     ,bfactor(nchbn_max),ang_bend(nchbn_max),angles(3)
-     &     ,bangles(max,3),iopen(2),r(nchbn_max)
-     &     ,vkforce(numax,numax),vequil(numax,numax)
-     &     ,vvibration(2*nchtor_max)
+      dimension flength(numax,numax),alpha(max,numax) ,equilb(numax
+     & ,numax),kforceb(numax,numax),equila(max) ,rxa(max,max),rya(max
+     & ,max),rza(max,max) ,rxt(max),ryt(max),rzt(max),vbend(2
+     & *nchtor_max) ,phicrank(2*nchtor_max,max),phiacc(max) ,vtorsion(2
+     & *nchtor_max),bf_tor(2*nchtor_max) ,dir(2*nchtor_max,max)
+     & ,diracc(max),kforcea(max) ,bfactor(nchbn_max),ang_bend(nchbn_max)
+     & ,angles(3) ,bangles(max,3),iopen(2),r(nchbn_max) ,vkforce(numax
+     & ,numax),vequil(numax,numax) ,vvibration(2*nchtor_max)
 
       save kforceb,equilb,flength,vequil,vkforce
 
@@ -910,7 +907,6 @@
          ichoi = nchoi(imolty)
 !     --- double ichtor to give extra help for this move
          ichtor = nchtor(imolty) * 2
-         twopi = 2.0d0 * dacos(-1.0d0)
          
          do ip = 1, ichoi
             

@@ -15,10 +15,9 @@
 !$$$      include 'coord.inc'
 !$$$      include 'connect.inc'
 
-      integer(KIND=normal_int)::i,j,k,n,iunit,imolty,dum,iu,countbend,counttor
-     &     ,atype,btype,ctype,dtype,tortype
-     &     ,ibend,bendtype,ntor,itor,ju,ku,nu,type,sitelook
-     &     ,vibtype,countvib
+      integer(KIND=normal_int)::i,j,k,n,iunit,imolty,dum,iu,countbend
+     & ,counttor,atype,btype,ctype,dtype,tortype,ibend,bendtype,ntor
+     & ,itor,ju,ku,nu,type,sitelook,vibtype,countvib
 
 !     ************************************************************
 
@@ -150,10 +149,13 @@
 
       subroutine vibcheck(iinit,atype,btype,vibtype)
 
+      use var_type
+      implicit none
+
       logical::lfinda,lfindb,lfound
 
-      integer(KIND=normal_int)::iinit,atype,btype,vibtype,nsite,isite,vbtype
-     &     ,ntvib,n,i,ia,ib
+      integer(KIND=normal_int)::iinit,atype,btype,vibtype,nsite,isite
+     & ,vbtype,ntvib,n,i,ia,ib
 
       dimension nsite(20,2),isite(20,2,7),vbtype(20)
 
@@ -232,10 +234,13 @@
 
       subroutine bendcheck(iinit,atype,btype,ctype,bendtype)
 
+      use var_type
+      implicit none
+
       logical::lfinda,lfindb,lfindc,lfound
 
-      integer(KIND=normal_int)::iinit,atype,btype,ctype,bendtype,nsite,isite
-     &     ,bntype,ntbend,n,i,ia,ib,ic
+      integer(KIND=normal_int)::iinit,atype,btype,ctype,bendtype,nsite
+     & ,isite,bntype,ntbend,n,i,ia,ib,ic
 
       dimension nsite(20,3),isite(20,3,7),bntype(20)
       
@@ -332,11 +337,14 @@
 
       subroutine torcheck(iinit,atype,btype,ctype,dtype,tortype)
 
+      use global_data,only:iou
+      use var_type
+      implicit none
 
       logical::lfinda,lfindb,lfindc,lfindd,lfound,lrev
 
-      integer(KIND=normal_int)::iinit,atype,btype,ctype,dtype,tortype,isite,nsite
-     &     ,n,i,ia,ib,ic,id,trtype,nttor,ir
+      integer(KIND=normal_int)::iinit,atype,btype,ctype,dtype,tortype
+     & ,isite,nsite,n,i,ia,ib,ic,id,trtype,nttor,ir
 
 
       dimension trtype(35),nsite(35,7),isite(35,7,7)

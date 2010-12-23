@@ -42,26 +42,30 @@
 
 !     --- variables passed to the subroutine
       logical::lnew,lterm,lwbef
-      integer(KIND=normal_int)::i,j,ja,icharge,imolty,ifrom,ibox,igrow,tac
+      integer(KIND=normal_int)::i,j,ja,icharge,imolty,ifrom,ibox,igrow
+     & ,tac
 
 !     --- local variables
       
       logical::ovrlap,ltorsion,lfixnow,lfixed,lreturn
 
       integer(KIND=normal_int)::glist,iuprev,iufrom,ichoi,ntogrow,count
-      integer(KIND=normal_int)::iu,iv,iw,ju,ip,ichtor
-     &       ,it,jut2,jut3,jut4,jttor,iwalk,ivect
+      integer(KIND=normal_int)::iu,iv,iw,ju,ip,ichtor ,it,jut2,jut3,jut4
+     & ,jttor,iwalk,ivect
       integer(KIND=normal_int)::angstart,toracc
       
       dimension glist(numax)
 
-      real(KIND=double_precision)::dum,xub,yub,zub,length,lengtha,lengthb,wadd
+      real(KIND=double_precision)::dum,xub,yub,zub,length,lengtha
+     & ,lengthb,wadd
 
-      real(KIND=double_precision)::vdha,x,y,z,maxlen,vorient,vtorf
-     &                ,xaa1,yaa1,zaa1,daa1,xa1a2,ya1a2,za1a2,da1a2
-     &                ,thetac,dot,rbf,bsum,bs,random,xcc,ycc,zcc,tcc
-      real(KIND=double_precision)::vbbtr,vvibtr,vtorso,wei_vib,wbendv,dist
-      real(KIND=double_precision)::bondlen,bendang,phi,phidisp,phinew,thetanew
+      real(KIND=double_precision)::vdha,x,y,z,maxlen,vorient,vtorf ,xaa1
+     & ,yaa1,zaa1,daa1,xa1a2,ya1a2,za1a2,da1a2 ,thetac,dot,rbf,bsum,bs
+     & ,random,xcc,ycc,zcc,tcc
+      real(KIND=double_precision)::vbbtr,vvibtr,vtorso,wei_vib,wbendv
+     & ,dist
+      real(KIND=double_precision)::bondlen,bendang,phi,phidisp,phinew
+     & ,thetanew
       real(KIND=double_precision)::cwtorf,vfbbtr,vphi,theta,spltor,rm
 
       dimension bondlen(numax),bendang(numax),phi(numax)
@@ -69,11 +73,10 @@
 !     -- new stuff
       integer(KIND=normal_int)::itor,bin,counta,movetype,ku
       real(KIND=double_precision)::bf_tor,vtorsion,phitors,ran_tor
-     &     ,wei_bend,jacobian,ctorf
+     & ,wei_bend,jacobian,ctorf
       dimension bf_tor(nchtor_max),vtorsion(nchtor_max)
-     &     ,phitors(nchtor_max),ctorf(nchmax,nchtor_max)
-      dimension toracc(nchmax)
-     &     ,vfbbtr(nchmax,nchtor_max)
+     & ,phitors(nchtor_max),ctorf(nchmax,nchtor_max)
+      dimension toracc(nchmax) ,vfbbtr(nchmax,nchtor_max)
 
 
 ! ------------------------------------------------------------------

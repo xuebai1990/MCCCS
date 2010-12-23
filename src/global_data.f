@@ -757,8 +757,8 @@
 !cccc  KM 2009
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      integer(KIND=normal_int)::vibsplits(150), bendsplits(150), ntabvib,
-     & ntabbend
+      integer(KIND=normal_int)::vibsplits(150), bendsplits(150),ntabvib
+     & ,ntabbend
       integer(KIND=normal_int)::vdWsplits(150,150), ntabvdW
       integer(KIND=normal_int)::electsplits(1500,1500), ntabelect
       integer(KIND=normal_int)::num_int_vib(150), num_int_bend(150),
@@ -1148,7 +1148,7 @@
       integer(KIND=normal_int)::itr1(pair_max),itr2(pair_max)
      & ,itr3(pair_max),ntr,tagged
 
-      real(KIND=double_precision)::v3garo,garofalini
+      real(KIND=double_precision)::v3garo
 
 !      common /garo/ ga,gb,gc,ggamma,grij,galpha,grho,gbeta,
 !     &              glambda,gtheta,grijsq,tagged

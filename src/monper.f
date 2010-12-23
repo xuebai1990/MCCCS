@@ -35,20 +35,24 @@
 !$$$      include 'poten.inc'
  
       integer(KIND=normal_int)::nummol,ntii
-      integer(KIND=normal_int)::nibox,im,nnn,ntot,nblock,imolty,m,mm,i,j,jjtor
-     &     ,ibox,itype,itel,mnbox,zz,steps,igrow,jmolty,jbox
-      integer(KIND=normal_int)::imend,itemp,bin,k,jjben,ip2,ip1,ip3,it,ii,jj,ivib
+      integer(KIND=normal_int)::nibox,im,nnn,ntot,nblock,imolty,m,mm,i,j
+     & ,jjtor,ibox,itype,itel,mnbox,zzz,steps,igrow,jmolty,jbox
+      integer(KIND=normal_int)::imend,itemp,bin,k,jjben,ip2,ip1,ip3,it
+     & ,ii,jj,ivib
       logical::lratio,lratv,lprint,lmv,lrsave,lblock,lfq,lratfix
-     &     ,lsolute,ovrlap
-      real(KIND=double_precision), dimension(nprop1,nbxmax,nbxmax):: acsolpar
-      real(KIND=double_precision), dimension(nbxmax):: acEnthalpy,acEnthalpy1
-      real(KIND=double_precision)::press1,press2,dp,dpp,debroglie,histrat
-      real(KIND=double_precision)::acv, molfra,acpres,acsurf,acvolume,asetel,acdens
-     & ,histtot,acmove,acnp,dvalue,dnchoi,dnchoi1,dnchoih,dnunit,ratflcq
-     & ,v,vintra,vinter,vext,velect,vewald,vtors,vtail,rho,coru
-     & ,thetac,vbend,xvec,yvec,zvec,distij,theta,vtorso
-     & ,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2,dot,daa1,da1a2
-     & ,velect_intra,velect_inter
+     & ,lsolute,ovrlap
+      real(KIND=double_precision), dimension(nprop1,nbxmax,nbxmax)::
+     & acsolpar
+      real(KIND=double_precision), dimension(nbxmax):: acEnthalpy
+     & ,acEnthalpy1
+      real(KIND=double_precision)::press1,press2,dp,dpp,debroglie
+     & ,histrat
+      real(KIND=double_precision)::acv, molfra,acpres,acsurf,acvolume
+     & ,asetel,acdens,histtot,acmove,acnp,dvalue,dnchoi,dnchoi1,dnchoih
+     & ,dnunit,ratflcq,v,vintra,vinter,vext,velect,vewald,vtors,vtail
+     & ,rho,coru,thetac,vbend,rxvec,ryvec,rzvec,distanceij,theta,vtorso
+     & ,xaa1 ,yaa1,zaa1,xa1a2,ya1a2,za1a2,dot,daa1,da1a2,velect_intra
+     & ,velect_inter
 
       real(KIND=double_precision)::xcc,ycc,zcc,tcc,spltor,rcutmin      
  
@@ -58,12 +62,12 @@
       dimension asetel(nbxmax,ntmax),acdens(nbxmax,ntmax)
      & ,molfra(nbxmax,ntmax)
       dimension lsolute(ntmax)
-      dimension xvec(numax,numax),yvec(numax,numax),zvec(numax,numax)
-     &     ,distij(numax,numax)
+      dimension rxvec(numax,numax),ryvec(numax,numax),rzvec(numax,numax)
+     & ,distanceij(numax,numax)
 
-      real(KIND=double_precision)::ratrax,ratray,ratraz,rttrax,rttray,rttraz
-     & ,rarotx,raroty,rarotz,rtrotx,rtroty,rtrotz,vol
-     & ,ratvol,temmass,dn,pres(nbxmax)
+      real(KIND=double_precision)::ratrax,ratray,ratraz,rttrax,rttray
+     & ,rttraz,rarotx,raroty,rarotz,rtrotx,rtroty,rtrotz,vol,ratvol
+     & ,temmass,dn,pres(nbxmax)
 ! -------------------------------------------------------------------
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
@@ -512,16 +516,16 @@
                   do ii = 1, nunit(imolty)
                      do ivib = 1, invib(imolty,ii)
                         jj = ijvib(imolty,ii,ivib)
-                        xvec(ii,jj) = rxu(i,jj) - rxu(i,ii)
-                        yvec(ii,jj) = ryu(i,jj) - ryu(i,ii)
-                        zvec(ii,jj) = rzu(i,jj) - rzu(i,ii)
-                        distij(ii,jj) = dsqrt(xvec(ii,jj)**2
-     &                       + yvec(ii,jj)**2 + zvec(ii,jj)**2)
+                        rxvec(ii,jj) = rxu(i,jj) - rxu(i,ii)
+                        ryvec(ii,jj) = ryu(i,jj) - ryu(i,ii)
+                        rzvec(ii,jj) = rzu(i,jj) - rzu(i,ii)
+                        distanceij(ii,jj) = dsqrt(rxvec(ii,jj)**2
+     &                       + ryvec(ii,jj)**2 + rzvec(ii,jj)**2)
                         
-                        xvec(jj,ii)   = -xvec(ii,jj)
-                        yvec(jj,ii)   = -yvec(ii,jj)
-                        zvec(jj,ii)   = -zvec(ii,jj)
-                        distij(jj,ii) = distij(ii,jj)
+                        rxvec(jj,ii)   = -rxvec(ii,jj)
+                        ryvec(jj,ii)   = -ryvec(ii,jj)
+                        rzvec(jj,ii)   = -rzvec(ii,jj)
+                        distanceij(jj,ii) = distanceij(ii,jj)
                      end do
                   end do
                      
@@ -535,10 +539,10 @@
                            it  = itben(imolty,j,jjben)
                            if (brbenk(it).gt.0.001d0) then
 
-                              thetac = ( xvec(ip1,j)*xvec(ip1,ip2) +
-     &                             yvec(ip1,j)*yvec(ip1,ip2) +
-     &                             zvec(ip1,j)*zvec(ip1,ip2) ) /
-     &                             ( distij(ip1,j)*distij(ip1,ip2) )
+                              thetac = ( rxvec(ip1,j)*rxvec(ip1,ip2) +
+     &                         ryvec(ip1,j)*ryvec(ip1,ip2) + rzvec(ip1
+     &                         ,j)*rzvec(ip1,ip2) ) / ( distanceij(ip1
+     &                         ,j)*distanceij(ip1,ip2) )
                               if ( thetac .ge. 1.0d0 ) thetac = 1.0d0
                               if ( thetac .le. -1.0d0 ) thetac = -1.0d0
                               
@@ -561,18 +565,18 @@
                            ip2 = ijtor3(imolty,j,jjtor)
                            it  = ittor(imolty,j,jjtor)
 !***  calculate cross products d_a x d_a-1 and d_a-1 x d_a-2 ***
-                           xaa1 = yvec(ip1,j) * zvec(ip2,ip1) +
-     &                          zvec(ip1,j) * yvec(ip1,ip2)
-                           yaa1 = zvec(ip1,j) * xvec(ip2,ip1) +
-     &                          xvec(ip1,j) * zvec(ip1,ip2)
-                           zaa1 = xvec(ip1,j) * yvec(ip2,ip1) +
-     &                          yvec(ip1,j) * xvec(ip1,ip2)
-                           xa1a2 = yvec(ip1,ip2) * zvec(ip2,ip3) +
-     &                          zvec(ip1,ip2) * yvec(ip3,ip2)
-                           ya1a2 = zvec(ip1,ip2) * xvec(ip2,ip3) +
-     &                          xvec(ip1,ip2) * zvec(ip3,ip2)
-                           za1a2 = xvec(ip1,ip2) * yvec(ip2,ip3) +
-     &                          yvec(ip1,ip2) * xvec(ip3,ip2)
+                           xaa1 = ryvec(ip1,j) * rzvec(ip2,ip1) +
+     &                          rzvec(ip1,j) * ryvec(ip1,ip2)
+                           yaa1 = rzvec(ip1,j) * rxvec(ip2,ip1) +
+     &                          rxvec(ip1,j) * rzvec(ip1,ip2)
+                           zaa1 = rxvec(ip1,j) * ryvec(ip2,ip1) +
+     &                          ryvec(ip1,j) * rxvec(ip1,ip2)
+                           xa1a2 = ryvec(ip1,ip2) * rzvec(ip2,ip3) +
+     &                          rzvec(ip1,ip2) * ryvec(ip3,ip2)
+                           ya1a2 = rzvec(ip1,ip2) * rxvec(ip2,ip3) +
+     &                          rxvec(ip1,ip2) * rzvec(ip3,ip2)
+                           za1a2 = rxvec(ip1,ip2) * ryvec(ip2,ip3) +
+     &                          ryvec(ip1,ip2) * rxvec(ip3,ip2)
 !     *** calculate lengths of cross products ***
                            daa1 = dsqrt(xaa1**2+yaa1**2+zaa1**2)
                            da1a2 = dsqrt(xa1a2**2+ya1a2**2+za1a2**2)
@@ -589,8 +593,8 @@
                               ycc = zaa1*xa1a2 - xaa1*za1a2
                               zcc = xaa1*ya1a2 - yaa1*xa1a2
 !     *** calculate scalar triple product ***
-                              tcc = xcc*xvec(ip1,ip2)+ycc*yvec(ip1,ip2)
-     &                             + zcc*zvec(ip1,ip2)
+                              tcc = xcc*rxvec(ip1,ip2)+ycc*ryvec(ip1
+     &                         ,ip2)+ zcc*rzvec(ip1,ip2)
                               theta = dacos(thetac)
                               if (tcc .lt. 0.0d0) theta = -theta
                               if (L_spline) then
@@ -717,10 +721,10 @@
 !     *** write out the movie configurations ***
          write(10,*) nnn
          do ibox = 1, nbox
-            write(10,*) (ncmt(ibox,zz),zz=1,nmolty)
+            write(10,*) (ncmt(ibox,zzz),zzz=1,nmolty)
 
             if (lsolid(ibox) .and. .not. lrect(ibox)) then
-               write(10,*) (hmat(ibox,zz),zz=1,9)
+               write(10,*) (hmat(ibox,zzz),zzz=1,9)
             else
                write(10,*) boxlx(ibox),boxly(ibox),boxlz(ibox)
             end if
@@ -784,8 +788,8 @@
             do im = 1,nbox
 
                if (lsolid(im) .and. .not. lrect(im)) then
-                  write(88,*) (rmhmat(im,zz),zz=1,9)
-                  write(88,*) (hmat(im,zz),zz=1,9)
+                  write(88,*) (rmhmat(im,zzz),zzz=1,9)
+                  write(88,*) (hmat(im,zzz),zzz=1,9)
                else
                   write (88,*) boxlx(im),boxly(im),boxlz(im)
                end if

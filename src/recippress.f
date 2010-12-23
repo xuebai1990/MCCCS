@@ -27,20 +27,20 @@
 !$$$      include 'mpif.h'
 
       integer(KIND=normal_int)::ncount,ibox,i,ii,imolty
-      real(KIND=double_precision)::factor,repress,repressx,repressy,repressz
-     &     ,recipintra,piix,piiy,piiz,xcmi,ycmi,zcmi,arg
+      real(KIND=double_precision)::factor,repress,repressx,repressy
+     & ,repressz,recipintra,piix,piiy,piiz,xcmi,ycmi,zcmi,arg
 
-      real(KIND=double_precision)::pxx,pyy,pzz,intraxx,intrayy,intrazz,intraxy
-     &     ,intraxz,intrazy,intrayz,intrayx,intrazx,pxy,pyx,pyz,pzy
-     &     ,pxz,pzx
+      real(KIND=double_precision)::pxx,pyy,pzz,intraxx,intrayy,intrazz
+     & ,intraxy,intraxz,intrazy,intrayz,intrayx,intrazx,pxy,pyx,pyz,pzy
+     & ,pxz,pzx
 
 !----RP added for MPI
       integer(KIND=normal_int)::blocksize,mystart,myend
-      real(KIND=double_precision)::sum_repressx,sum_repressy,sum_repressz,
-     &   sum_pxy,sum_pxz,sum_pyz
-      real(KIND=double_precision)::sum_recipintra,sum_intraxx,sum_intrayy,
-     & sum_intrazz,sum_intraxy,sum_intrazy,sum_intraxz,sum_intrayz,
-     & sum_intrazx,sum_intrayx
+      real(KIND=double_precision)::sum_repressx,sum_repressy
+     & ,sum_repressz,sum_pxy,sum_pxz,sum_pyz
+      real(KIND=double_precision)::sum_recipintra,sum_intraxx
+     & ,sum_intrayy,sum_intrazz,sum_intraxy,sum_intrazy,sum_intraxz
+     & ,sum_intrayz,sum_intrazx,sum_intrayx
 
       repress  = 0.0d0
       repressx = 0.0d0

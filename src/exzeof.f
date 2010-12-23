@@ -21,8 +21,9 @@
 !$$$      include 'ewaldsum.inc'
 !$$$      include 'mpif.h'
 !$$$      include 'mpi.inc'
-      real(KIND=double_precision)::exzeof,xi,yi,zi,r2,rcutsq,xr,yr,zr,r2i,r6,vljnew,vqnew
-     &     ,overflow=1.0d8,rminsq,r,recipzeo,erfunc,i,j,k,sx,sy,sz
+      real(KIND=double_precision)::exzeof,xi,yi,zi,r2,rcutsq,xr,yr,zr
+     & ,r2i,r6,vljnew,vqnew,overflow=1.0d8,rminsq,r,recipzeo,erfunc,i,j
+     & ,k,sx,sy,sz
       integer(KIND=normal_int)::izeo,idi,idj,ntij,layer,ii,jj,kk,ibox=1
 
 !     calculate the Lennard-Jones interactions, include as many layers
@@ -168,10 +169,11 @@
       integer(KIND=normal_int)::ibox=1,i,ii
 
 ! * from h-matrix formulation
-      integer(KIND=normal_int)::l,m,n,m_min,m_max,n_min,n_max,kmaxl,kmaxm,kmaxn
+      integer(KIND=normal_int)::l,m,n,m_min,m_max,n_min,n_max,kmaxl
+     & ,kmaxm,kmaxn
       integer(KIND=normal_int)::mystart,myend,blocksize
-      real(KIND=double_precision)::alpsqr4,vol,ksqr,sum,arg,recipzeo,xi,yi,zi,qi
-     &     ,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi
+      real(KIND=double_precision)::alpsqr4,vol,ksqr,sum,arg,recipzeo,xi
+     & ,yi,zi,qi,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi
 
 ! *** Set up the reciprocal space vectors ***
 

@@ -36,11 +36,11 @@
 !$$$      include 'eepar.inc'
 
       logical::ovrlap
-      integer(KIND=normal_int)::i,ibox,iunit,imolty,imolty1,j,idummy(nmax)
-      real(KIND=double_precision)::dum,vrecipn,vrecipo,vnew,vold,vintern,vintero
-     &                ,vintran,vintrao,velectn,velecto,vewaldn,vewaldo
-     &                ,vextn,vexto,deltv,deltvb,random,wdeltvb,vtailn
-     &                ,vtailo
+      integer(KIND=normal_int)::i,ibox,iunit,imolty,imolty1,j
+     & ,idummy(nmax)
+      real(KIND=double_precision)::dum,vrecipn,vrecipo,vnew,vold,vintern
+     & ,vintero,vintran,vintrao,velectn,velecto,vewaldn,vewaldo,vextn
+     & ,vexto,deltv,deltvb,random,wdeltvb,vtailn,vtailo
       
 ! --------------------------------------------------------------------
 

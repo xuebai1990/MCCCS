@@ -19,7 +19,8 @@
 !$$$      include 'poten.inc'
 
       integer(KIND=normal_int)::m,n,nb,mb,imolty,ioffset
-      integer(KIND=normal_int)::inclnum,inclmol,inclbead,inclsign,ncarbon
+      integer(KIND=normal_int)::inclnum,inclmol,inclbead,inclsign
+     & ,ncarbon
       integer(KIND=normal_int)::ainclnum,ainclmol,ainclbead,a15t
       dimension inclmol(ntmax*numax*numax),inclsign(ntmax*numax*numax)
       dimension inclbead(ntmax*numax*numax,2),ncarbon(ntmax)

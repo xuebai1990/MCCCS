@@ -16,7 +16,8 @@
 !$$$      include 'neigh.inc'
 !$$$      include 'neigh2.inc'
       integer(KIND=normal_int)::i,j,ii,jj,ibox
-      real(KIND=double_precision)::rxuij,ryuij,rzuij,rijsq,rcnnsq
+      real(KIND=double_precision)::rxui,ryui,rzui,rxuij,ryuij,rzuij
+     & ,rijsq,rcnnsq
 ! -----------------------------------------------------------------------------
  
       rcnnsq = rcutnn(ibox)**2

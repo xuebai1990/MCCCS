@@ -93,16 +93,10 @@
       subroutine polint(xa,ya,n,x,y)
 !  (C) Copr. 1986-92 Numerical Recipes Software +3Y.
 
-      use global_data
       use var_type
-      use const_phys
       use const_math
       use util_math
-      use util_string
-      use util_files
-      use util_timings
       implicit none
-      include 'common.inc'
       integer(KIND=normal_int)::n,nmax
       real(KIND=double_precision)::dy,x,y,xa(n),ya(n)
       parameter (nmax=10)

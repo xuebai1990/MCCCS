@@ -25,36 +25,40 @@
 
 
       logical::lhere(nmax)       
-      integer(KIND=normal_int)::i,j,m,m1,m2,n,nn,ic,jc,kc,it,ip1,ip2,ip3,ii,jj
-     &       ,iivib,jjben,jjtor,intemp,imol,nt
-     &       ,ibtype,imolty,ibuild,rand_id,offset,count_chain
+      integer(KIND=normal_int)::i,j,m,m1,m2,n,nn,ic,jc,kc,it,ip1,ip2,ip3
+     & ,ii,jj,iivib,jjben,jjtor,intemp,imol,nt,ibtype,imolty,ibuild
+     & ,rand_id,offset,count_chain
 
       integer(KIND=normal_int)::iboxst,iboxed,ibox,pct,check,chktot
-      integer(KIND=normal_int)::mcmt(ntmax,nbxmax),pcmt(ntmax),mcmtma(ntmax,nbxmax)
+      integer(KIND=normal_int)::mcmt(ntmax,nbxmax),pcmt(ntmax)
+     & ,mcmtma(ntmax,nbxmax)
       integer(KIND=normal_int)::unitc,ntii,ichain
 
-      integer(KIND=normal_int)::bmap(numax),imap(numax),zzz,prev,ifrom,nsave
+      integer(KIND=normal_int)::bmap(numax),imap(numax),zzz,prev,ifrom
+     & ,nsave
       logical::lacc(numax),lgrow,lterm,lgrown(ntmax)
 
-      real(KIND=double_precision)::xtemp(numax),ytemp(numax),ztemp(numax)
+      real(KIND=double_precision)::xtemp(numax),ytemp(numax)
+     & ,ztemp(numax)
       real(KIND=double_precision)::ddum
 
-      real(KIND=double_precision)::ux,uy,uz,xshift,dic
-     &     ,xnext,ynext,znext,xynext,angold,angnew,rot
-     &     ,x1,y1,z1,d1,x2,y2,z2,d2,bang,blen,random
+      real(KIND=double_precision)::ux,uy,uz,xshift,dic ,xnext,ynext
+     & ,znext,xynext,angold,angnew,rot ,x1,y1,z1,d1,x2,y2,z2,d2,bang
+     & ,blen,random
 
       real(KIND=double_precision)::rxui,ryui,rzui,xaa1,yaa1,zaa1,daa1
-     &                ,xa1a2,ya1a2,za1a2,da1a2 
+     & ,xa1a2,ya1a2,za1a2,da1a2 
 
       real(KIND=double_precision)::xcc,ycc,zcc,tcc,spltor
 
-      real(KIND=double_precision)::vtorso,vbend,vtg,thetac,theta,dot,aben,ator
+      real(KIND=double_precision)::vtorso,vbend,vtg,thetac,theta,dot
+     & ,aben,ator
 
-      real(KIND=double_precision)::xvec(numax,numax),yvec(numax,numax)
-     &                ,zvec(numax,numax),distij(numax,numax)
+      real(KIND=double_precision)::rxvec(numax,numax),ryvec(numax,numax)
+     & ,rzvec(numax,numax),distanceij(numax,numax)
 
       real(KIND=double_precision)::samx(ntmax,numax),samy(ntmax,numax)
-     &     ,samz(ntmax,numax)
+     & ,samz(ntmax,numax)
 
       real(KIND=double_precision)::vdummy
 
@@ -643,17 +647,17 @@
      &              write(iou,1002) n,ii,rxui,ryui,rzui,nboxi(n)
                do iivib = 1, invib(1,ii)
                   jj = ijvib(1,ii,iivib)
-                  xvec(ii,jj) = rxu(n,jj) - rxui
-                  yvec(ii,jj) = ryu(n,jj) - ryui
-                  zvec(ii,jj) = rzu(n,jj) - rzui
-                  distij(ii,jj) = dsqrt( xvec(ii,jj)**2
-     &                 + yvec(ii,jj)**2 + zvec(ii,jj)**2 )
+                  rxvec(ii,jj) = rxu(n,jj) - rxui
+                  ryvec(ii,jj) = ryu(n,jj) - ryui
+                  rzvec(ii,jj) = rzu(n,jj) - rzui
+                  distanceij(ii,jj) = dsqrt( rxvec(ii,jj)**2
+     &                 + ryvec(ii,jj)**2 + rzvec(ii,jj)**2 )
                   if ( nunit(imolty) .ne. nugrow(imolty) )then
 !                 --- account for explct atoms in opposite direction
-                     xvec(jj,ii)   = -xvec(ii,jj)
-                     yvec(jj,ii)   = -yvec(ii,jj)
-                     zvec(jj,ii)   = -zvec(ii,jj)
-                     distij(jj,ii) = distij(ii,jj)
+                     rxvec(jj,ii)   = -rxvec(ii,jj)
+                     ryvec(jj,ii)   = -ryvec(ii,jj)
+                     rzvec(jj,ii)   = -rzvec(ii,jj)
+                     distanceij(jj,ii) = distanceij(ii,jj)
                   end if
                end do
             end do
@@ -663,7 +667,7 @@
 ! - vibrations -
                do iivib = 1, invib(1,j)
                   jj = ijvib(1,j,iivib)
-                  if ( n .eq. 1 ) write(iou,1003) j,jj,distij(j,jj)
+                  if ( n .eq. 1 ) write(iou,1003) j,jj,distanceij(j,jj)
                end do
 
 ! - bending -
@@ -671,10 +675,10 @@
                   ip2 = ijben3(imolty,j,jjben)
                   ip1 = ijben2(imolty,j,jjben)
                   it  = itben(imolty,j,jjben)
-                  thetac = ( xvec(ip1,j)*xvec(ip1,ip2) +
-     &                 yvec(ip1,j)*yvec(ip1,ip2) +
-     &                 zvec(ip1,j)*zvec(ip1,ip2) ) /
-     &                 ( distij(ip1,j)*distij(ip1,ip2) )
+                  thetac = ( rxvec(ip1,j)*rxvec(ip1,ip2) +
+     &                 ryvec(ip1,j)*ryvec(ip1,ip2) +
+     &                 rzvec(ip1,j)*rzvec(ip1,ip2) ) /
+     &                 ( distanceij(ip1,j)*distanceij(ip1,ip2) )
                   theta = dacos(thetac)
                   vbend = brbenk(it) * (theta-brben(it))**2
                   aben = aben + vbend
@@ -693,18 +697,18 @@
                   ip2 = ijtor3(imolty,j,jjtor)
                   it  = ittor(imolty,j,jjtor)
 ! *** calculate cross products d_a x d_a-1 and d_a-1 x d_a-2 ***
-                  xaa1 = yvec(ip1,j) * zvec(ip2,ip1) +
-     &                 zvec(ip1,j) * yvec(ip1,ip2)
-                  yaa1 = zvec(ip1,j) * xvec(ip2,ip1) +
-     &                 xvec(ip1,j) * zvec(ip1,ip2)
-                  zaa1 = xvec(ip1,j) * yvec(ip2,ip1) +
-     &                 yvec(ip1,j) * xvec(ip1,ip2)
-                  xa1a2 = yvec(ip1,ip2) * zvec(ip2,ip3) +
-     &                 zvec(ip1,ip2) * yvec(ip3,ip2)
-                  ya1a2 = zvec(ip1,ip2) * xvec(ip2,ip3) +
-     &                 xvec(ip1,ip2) * zvec(ip3,ip2)
-                  za1a2 = xvec(ip1,ip2) * yvec(ip2,ip3) +
-     &                 yvec(ip1,ip2) * xvec(ip3,ip2)
+                  xaa1 = ryvec(ip1,j) * rzvec(ip2,ip1) +
+     &                 rzvec(ip1,j) * ryvec(ip1,ip2)
+                  yaa1 = rzvec(ip1,j) * rxvec(ip2,ip1) +
+     &                 rxvec(ip1,j) * rzvec(ip1,ip2)
+                  zaa1 = rxvec(ip1,j) * ryvec(ip2,ip1) +
+     &                 ryvec(ip1,j) * rxvec(ip1,ip2)
+                  xa1a2 = ryvec(ip1,ip2) * rzvec(ip2,ip3) +
+     &                 rzvec(ip1,ip2) * ryvec(ip3,ip2)
+                  ya1a2 = rzvec(ip1,ip2) * rxvec(ip2,ip3) +
+     &                 rxvec(ip1,ip2) * rzvec(ip3,ip2)
+                  za1a2 = rxvec(ip1,ip2) * ryvec(ip2,ip3) +
+     &                 ryvec(ip1,ip2) * rxvec(ip3,ip2)
 ! *** calculate lengths of cross products ***
                   daa1 = dsqrt(xaa1**2+yaa1**2+zaa1**2)
                   da1a2 = dsqrt(xa1a2**2+ya1a2**2+za1a2**2)
@@ -721,8 +725,8 @@
                      ycc = zaa1*xa1a2 - xaa1*za1a2
                      zcc = xaa1*ya1a2 - yaa1*xa1a2
 !     *** calculate scalar triple product ***
-                     tcc = xcc*xvec(ip1,ip2) + ycc*yvec(ip1,ip2)
-     &                    + zcc*zvec(ip1,ip2)
+                     tcc = xcc*rxvec(ip1,ip2) + ycc*ryvec(ip1,ip2)
+     &                    + zcc*rzvec(ip1,ip2)
                      theta=dacos(thetac)
 
                      if (tcc .lt. 0.0d0) theta = -theta

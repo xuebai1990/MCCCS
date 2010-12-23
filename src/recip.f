@@ -25,13 +25,16 @@
 !$$$      include 'mpif.h'
 !$$$      include 'mpi.inc'
 
-      integer(KIND=normal_int)::ic,zz,ii,imolty,ibox,ncount,type
-      real(KIND=double_precision)::vrecipnew,vrecipold,sumr(2),sumi(2),arg       
+      integer(KIND=normal_int)::ic,izz,ii,imolty,ibox,ncount,type
+      real(KIND=double_precision)::vrecipnew,vrecipold,sumr(2),sumi(2)
+     & ,arg       
 ! RP added for MPI
       integer(KIND=normal_int)::mystart,myend,blocksize,i
-      real(KIND=double_precision)::ssumrn_arr(vectormax),ssumin_arr(vectormax),
-     &      ssumrn_one(vectormax),ssumin_one(vectormax)
-      integer(KIND=normal_int)::countn,ncount_displs(numprocmax),ncount_arr(numprocmax)   
+      real(KIND=double_precision)::ssumrn_arr(vectormax)
+     & ,ssumin_arr(vectormax),ssumrn_one(vectormax)
+     & ,ssumin_one(vectormax)
+      integer(KIND=normal_int)::countn,ncount_displs(numprocmax)
+     & ,ncount_arr(numprocmax)   
     
 !      if (LSOLPAR.and.(ibox.eq.2))then
 !        return
@@ -48,15 +51,15 @@
          
 ! *** recalculate the reciprocal space part for one-particle move, translation,
 ! *** rotation, swap, flucq, and swatch.
-! *** old conformation zz = 1 (which is 0 for swap inserted molecule)
-! *** new conformation zz = 2 (which is 0 for swap removed molecule)
+! *** old conformation izz = 1 (which is 0 for swap inserted molecule)
+! *** new conformation izz = 2 (which is 0 for swap removed molecule)
 
 !         write(iou,*) 'in recip:',moltion(1),moltion(2)
-!         do zz = 1,2
-!            imolty = moltion(zz)
+!         do izz = 1,2
+!            imolty = moltion(izz)
 !            do ii = 1, nunit(imolty)
-!               write(iou,*) rxuion(ii,zz),ryuion(ii,zz),rzuion(ii,zz),
-!     &              qquion(ii,zz)
+!               write(iou,*) rxuion(ii,izz),ryuion(ii,izz),rzuion(ii,izz),
+!     &              qquion(ii,izz)
 !            end do
 !         end do
       
@@ -71,22 +74,22 @@
          countn = myend - mystart + 1
          do 30 ic = mystart,myend
 !         do 30 ic = 1,ncount
-            do 20 zz = 1,2
-! --- zz = 1: old configuration 
-! --- zz = 2: new configuration
+            do 20 izz = 1,2
+! --- izz = 1: old configuration 
+! --- izz = 2: new configuration
 
-               sumr(zz) = 0.0d0
-               sumi(zz) = 0.0d0
-               imolty = moltion(zz)
+               sumr(izz) = 0.0d0
+               sumi(izz) = 0.0d0
+               imolty = moltion(izz)
                do ii = 1, nunit(imolty)
                   if ( lqchg(ntype(imolty,ii)) ) then
-                     arg = kx(ic,ibox)*rxuion(ii,zz) +
-     &                    ky(ic,ibox)*ryuion(ii,zz) +
-     &                    kz(ic,ibox)*rzuion(ii,zz)
-                     sumr(zz) = sumr(zz) + 
-     &                    qquion(ii,zz)*dcos(arg)
-                     sumi(zz) = sumi(zz) + 
-     &                    qquion(ii,zz)*dsin(arg)
+                     arg = kx(ic,ibox)*rxuion(ii,izz) +
+     &                    ky(ic,ibox)*ryuion(ii,izz) +
+     &                    kz(ic,ibox)*rzuion(ii,izz)
+                     sumr(izz) = sumr(izz) + 
+     &                    qquion(ii,izz)*dcos(arg)
+                     sumi(izz) = sumi(izz) + 
+     &                    qquion(ii,izz)*dsin(arg)
                   end if
                end do
  20         continue

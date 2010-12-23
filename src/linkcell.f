@@ -15,10 +15,12 @@
 !$$$      include 'coord.inc'
 !$$$      include 'system.inc'      
 
-      integer(KIND=normal_int)::i,j,k,n,ncellx,ncelly,ncellz,iinit,ibox,linkdecode
-     &     ,imolty,imol,ic,cellinc,ia,ja,ka,ib,jb,kb,count,ncell,ncello
+      integer(KIND=normal_int)::i,j,k,n,ncellx,ncelly,ncellz,iinit,ibox
+     & ,linkdecode,imolty,imol,ic,cellinc,ia,ja,ka,ib,jb,kb,count,ncell
+     & ,ncello
 
-      real(KIND=double_precision)::dcellx,dcelly,dcellz,rx,ry,rz,xcmi,ycmi,zcmi
+      real(KIND=double_precision)::dcellx,dcelly,dcellz,rx,ry,rz,xcmi
+     & ,ycmi,zcmi
 
 !     *** rintramax is the maximum distance between endpoints 
 !     *** in a molecule

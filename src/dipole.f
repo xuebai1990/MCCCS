@@ -14,7 +14,7 @@
 !$$$      include 'coord.inc'
 !$$$      include 'coord2.inc'
 !$$$      include 'ewaldsum.inc'
-      integer(KIND=normal_int)::ibox,mtype,i,imolty,zz,ii
+      integer(KIND=normal_int)::ibox,mtype,i,imolty,zzz,ii
       real(KIND=double_precision)::dipox(2),dipoy(2),dipoz(2)
       
       if ( mtype .eq. 0 ) then
@@ -43,18 +43,18 @@
 ! *** calculate the dipole moment after the traslation, rotation and 
 ! *** charge move
 
-         do zz = 1,2
-            dipox(zz) = 0.0d0
-            dipoy(zz) = 0.0d0
-            dipoz(zz) = 0.0d0
-            imolty = moltion(zz)
+         do zzz = 1,2
+            dipox(zzz) = 0.0d0
+            dipoy(zzz) = 0.0d0
+            dipoz(zzz) = 0.0d0
+            imolty = moltion(zzz)
             do i = 1,nunit(imolty)
-               dipox(zz) = dipox(zz) + 
-     &              qquion(i,zz)*rxuion(i,zz)
-               dipoy(zz) = dipoy(zz) +
-     &              qquion(i,zz)*ryuion(i,zz)
-               dipoz(zz) = dipoz(zz) +
-     &              qquion(i,zz)*rzuion(i,zz)
+               dipox(zzz) = dipox(zzz) + 
+     &              qquion(i,zzz)*rxuion(i,zzz)
+               dipoy(zzz) = dipoy(zzz) +
+     &              qquion(i,zzz)*ryuion(i,zzz)
+               dipoz(zzz) = dipoz(zzz) +
+     &              qquion(i,zzz)*rzuion(i,zzz)
             end do
          end do
          dipolex(ibox) = dipolex(ibox) - dipox(1) + dipox(2) 

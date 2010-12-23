@@ -55,8 +55,10 @@
       character(LEN=default_path_length)::fileout
       integer(KIND=normal_int)::fname,ntii,findpos
       integer(KIND=normal_int)::imax,itmax
-      integer(KIND=normal_int)::n,nconfig,nentry,nminp(ntmax),nmaxp(ntmax)
-      integer(KIND=normal_int)::ncmt_list(fmax,ntmax),ndist(0:nmax,ntmax)
+      integer(KIND=normal_int)::n,nconfig,nentry,nminp(ntmax)
+     & ,nmaxp(ntmax)
+      integer(KIND=normal_int)::ncmt_list(fmax,ntmax),ndist(0:nmax
+     & ,ntmax)
       real(KIND=double_precision)::eng_list(fmax)
       real(KIND=double_precision)::vhist
 
@@ -64,18 +66,18 @@
 
       integer(KIND=normal_int)::point_of_start, point_to_end
 
-      integer(KIND=normal_int)::im,mnbox,i,j,inb,nblock,ibox,jbox,nend,nnn,ii,itemp
-     &  ,itype,itype2,intg,imolty,ilunit,nbl,itel,ig,il,ucheck
-     &  ,jbox_max,k,histtot,Temp_nmol
-      integer(KIND=normal_int)::nvirial,zz,steps,igrow,ddum,total
+      integer(KIND=normal_int)::im,mnbox,i,j,inb,nblock,ibox,jbox,nend
+     & ,nnn,ii,itemp,itype,itype2,intg,imolty,ilunit,nbl,itel,ig,il
+     & ,ucheck,jbox_max,k,histtot,Temp_nmol
+      integer(KIND=normal_int)::nvirial,zzz,steps,igrow,ddum,total
       real(KIND=double_precision)::starvir,stepvir,starviro
-      real(KIND=double_precision)::acv,acvsq,aflv,acpres,acnp,acmove,acsurf
-     &  ,acboxl,acboxa,asetel,acdens,acnbox,dsq,v,vinter,vtail,vend
-     &  ,vintra,vvib,vbend,vtg,vext,vstart,press1,press2,dsq1
-     &  ,velect,vflucq,boxlen,acnbox2,pres(nbxmax),surf,acvolume
+      real(KIND=double_precision)::acv,acvsq,aflv,acpres,acnp,acmove
+     & ,acsurf,acboxl,acboxa,asetel,acdens,acnbox,dsq,v,vinter,vtail
+     & ,vend,vintra,vvib,vbend,vtg,vext,vstart,press1,press2,dsq1,velect
+     & ,vflucq,boxlen,acnbox2,pres(nbxmax),surf,acvolume
       real(KIND=double_precision)::rm,random,temvol,setx,sety,setz,setel
-     &  ,pscb1,pscb2,ratvol,avv,temacd,temspd,dblock,dbl1
-     &  ,sterr,stdev,errme
+     & ,pscb1,pscb2,ratvol,avv,temacd,temspd,dblock,dbl1 ,sterr,stdev
+     & ,errme
       real(KIND=double_precision)::bsswap,bnswap,ostwald,stdost,dummy
      & ,debroglie,bnswap_in,bnswap_out, acvkjmol(nener,nbxmax)
 
@@ -86,10 +88,12 @@
      & ,acEnthalpy1
 
       real(KIND=double_precision):: enthalpy,enthalpy2,sigma2Hsimulation
-      real(KIND=double_precision):: inst_enth, inst_enth2, tmp,sigma2H,Cp
+      real(KIND=double_precision):: inst_enth, inst_enth2, tmp,sigma2H
+     & ,Cp
 
       real(KIND=double_precision):: ennergy,ennergy2,sigma2Esimulation
-      real(KIND=double_precision):: inst_energy, inst_energy2, sigma2E,Cv
+      real(KIND=double_precision):: inst_energy, inst_energy2, sigma2E
+     & ,Cv
 
       
   
@@ -127,19 +131,18 @@
      & ,acvolsq(nbxmax)
 ! --- dimension statements for block averages ---
       character(LEN=default_string_length)::vname(nener)
-      dimension dsq(nprop,nbxmax), stdev(nprop,nbxmax),
-     &          dsq1(nprop1,nbxmax,nbxmax),  
-     &          sterr(nprop,nbxmax),errme(nprop,nbxmax)
+      dimension dsq(nprop,nbxmax), stdev(nprop,nbxmax), dsq1(nprop1
+     & ,nbxmax,nbxmax), sterr(nprop,nbxmax),errme(nprop,nbxmax)
       dimension ucheck(ntmax),ddum(27)
 
       logical::ovrlap,lratio,lratv,lprint,lmv,lrsave,lblock,lucall
-     &     ,lvirial2,ltfix,lratfix,ltsolute,lsolute,lpr
+     & ,lvirial2,ltfix,lratfix,ltsolute,lsolute,lpr
 
       dimension lratfix(ntmax),lsolute(ntmax)
       character(LEN=default_string_length)::enth,enth1
 
-      integer(KIND=normal_int)::bin,cnt_wf1(0:6,0:6,4),cnt_wf2(0:6,0:6,4),
-     &     cnt_wra1(1000,4),cnt_wra2(1000,4)
+      integer(KIND=normal_int)::bin,cnt_wf1(0:6,0:6,4),cnt_wf2(0:6,0:6
+     & ,4),cnt_wra1(1000,4),cnt_wra2(1000,4)
       real(KIND=double_precision)::binstep,profile(1000)
 
 ! KEA
@@ -2348,10 +2351,10 @@ c only one processor at a time reads and writes data from files
                do nbl = 1, nblock
 ! -- changed so output the same for all ensembles
 ! -- 06/08/09 KM
-                  write(iou,1402) nbl,baver(3,ibox,nbl),
-     &                 baver(1,ibox,nbl),baver(2,ibox,nbl),
-     &                 baver(3+nener+4*nmolty,ibox,nbl),
-     &                 (baver(2+nener+3*nmolty+zz,ibox,nbl),zz=1,nmolty)
+                  write(iou,1402) nbl,baver(3,ibox,nbl), baver(1,ibox
+     &             ,nbl),baver(2,ibox,nbl), baver(3+nener+4*nmolty,ibox
+     &             ,nbl), (baver(2+nener+3*nmolty+zzz,ibox,nbl),zzz=1
+     &             ,nmolty)
                end do
                if (lmipsw) then
                   write(iou,*) 'lambdais', lambdais

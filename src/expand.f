@@ -28,13 +28,12 @@
 !$$$      include 'poten.inc'
 
       logical::ovrlap
-      integer(KIND=normal_int)::i,ibox,iunit,flagon,itype,j,imolty,icbu,ic,imt,jmt,
-     &     itype2,disp
-      real(KIND=double_precision)::dchain,random,vnew,vold
-     &                 ,vintran,vintrao,deltv,deltvb,disvsq
-     &                 ,vintern,vintero,vextn,vexto,rchain
-     &                 ,velectn,velecto,vdum
-     &                 ,vrecipo,vrecipn,vexpta,vexptb,volume,rho,coru
+      integer(KIND=normal_int)::i,ibox,iunit,flagon,itype,j,imolty,icbu
+     & ,ic,imt,jmt,itype2,disp
+      real(KIND=double_precision)::dchain,random,vnew,vold ,vintran
+     & ,vintrao,deltv,deltvb,disvsq ,vintern,vintero,vextn,vexto,rchain
+     & ,velectn,velecto,vdum ,vrecipo,vrecipn,vexpta,vexptb,volume,rho
+     & ,coru
       logical::laccept
 
 !      write(iou,*) 'start expand-ensemble move'

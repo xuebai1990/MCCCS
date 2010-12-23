@@ -1,4 +1,9 @@
       subroutine place(lnew,lterm,i,imolty,ibox,index,wplace)
+!     ***********************************************************
+!     **  Places hydrogens after the growth of the backbone of **
+!     **  a molecule for linear, branched or cylic molecules.  **
+!     **           -- Uses CDCBMC to grow them --              **
+!     ***********************************************************
 
       use global_data
       use var_type
@@ -22,33 +27,23 @@
 
       logical::lnew,lterm,ovrlap
 
-      integer(KIND=normal_int)::i,j,imolty,count,counta,iu,ju,ku,jtvib,start,iv,dir
-     &     ,index,ivib,nchvib,ibend,ib,type,site,ip,ichoi,niplace
-     &     ,iw,iufrom,it,jut2,jut3,jut4,jttor,ja,ibox,glist,iwalk
-     &     ,iuprev,list,nchben_a, nchben_b,iuback2,iuone,max,iu2back
+      integer(KIND=normal_int)::i,j,imolty,count,counta,iu,ju,ku,jtvib
+     & ,start,iv,dir,index,ivib,nchvib,ibend,ib,type,site,ip,ichoi
+     & ,niplace,iw,iufrom,it,jut2,jut3,jut4,jttor,ja,ibox,glist,iwalk
+     & ,iuprev,list,nchben_a, nchben_b,iuback2,iuone,max,iu2back
  
       parameter(max=10)
 
-      real(KIND=double_precision)::wplace,equil,kforce,bsum_try,mincb,delcb
-     &     ,ux,uy,uz,r,vvib,bfactor,third,random,length,bs,rbf
-     &     ,vvibtr,wei_vib,bendang,vangle,vbbtr,angle,vphi,phione
-     &     ,thetac,rx,ry,rz,rsint,dist
-     &     ,wei_bend,ang_trial,angles,vctor,vdha
-     &     ,vbend,vtorsion,bsum,alpha,gamma,twopi,dum,phi,thetaone
-     &     ,thetatwo,phitwo
+      real(KIND=double_precision)::wplace,equil,kforce,bsum_try,mincb
+     & ,delcb,ux,uy,uz,r,vvib,bfactor,third,random,length,bs,rbf,vvibtr
+     & ,wei_vib,bendang,vangle,vbbtr,angle,vphi,phione,thetac,rx,ry,rz
+     & ,rsint,dist,wei_bend,ang_trial,angles,vctor,vdha,vbend,vtorsion
+     & ,bsum,alpha,gamma,dum,phi,thetaone,thetatwo,phitwo
       real(KIND=double_precision)::tabulated_vib
 
-      dimension r(nchbn_max),bfactor(nchbn_max)
-     &     ,bendang(numax,numax),ang_trial(nchbn_max),dist(max)
-     &     ,niplace(numax),vbend(nchmax),vtorsion(nchmax),phi(max)
-     &     ,list(max),glist(max)
-
-!     ***********************************************************
-!     **  Places hydrogens after the growth of the backbone of **
-!     **  a molecule for linear, branched or cylic molecules.  **
-!     **           -- Uses CDCBMC to grow them --              **
-!     ***********************************************************
-
+      dimension r(nchbn_max),bfactor(nchbn_max) ,bendang(numax,numax)
+     & ,ang_trial(nchbn_max),dist(max) ,niplace(numax),vbend(nchmax)
+     & ,vtorsion(nchmax),phi(max) ,list(max),glist(max)
 
 !      write(iou,*) 'START PLACE'
 
@@ -57,7 +52,6 @@
       nchben_a = nchvib
       nchben_b = nchbnb(imolty)
       third = 1.0d0 / 3.0d0
-      twopi = dacos(-1.0d0) * 2.0d0
       wplace = 1.0d0
      
       ichoi = nchoi(imolty)

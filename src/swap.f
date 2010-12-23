@@ -42,27 +42,29 @@
 !$$$      include 'eepar.inc'
       
       logical::ovrlap,lterm,lnew,lempty,ldone,ltors,lovrh,lfavor,
-     &     laccept,lswapinter,lrem_out,lins_in,lneighij,linsk_in,
-     &     lremk_in,lrem_clu,lins_clu,lfixnow
+     & laccept,lswapinter,lrem_out,lins_in,lneighij,linsk_in, lremk_in
+     & ,lrem_clu,lins_clu,lfixnow
 
      
-      integer(KIND=normal_int)::boxins,boxrem,imol,ichoi,ip,iwalk,idum,iins1,imolty1
-      integer(KIND=normal_int)::istt,iett,ncount,itype,ipair,ipairb,beg,flagon
+      integer(KIND=normal_int)::boxins,boxrem,imol,ichoi,ip,iwalk,idum
+     & ,iins1,imolty1
+      integer(KIND=normal_int)::istt,iett,ncount,itype,ipair,ipairb,beg
+     & ,flagon
 
       integer(KIND=normal_int)::iutry,icbu,ifrom,irem,iins,glist,findex
-     &     ,iii,j,ibox,iunit,ic,pointp,imolty,imt,jmt,igrow
-     &     ,pointp2,jins,jmolty,neighj_num,neighk_num
-     &     ,joffset,koffset,kmolty,kins,target,cnt_wf1
-     &     ,cnt_wf2,neigh_old,cnt_wra1,cnt_wra2,k
+     & ,iii,j,ibox,iunit,ic,pointp,imolty,imt,jmt,igrow ,pointp2,jins
+     & ,jmolty,neighj_num,neighk_num ,joffset,koffset,kmolty,kins,target
+     & ,cnt_wf1 ,cnt_wf2,neigh_old,cnt_wra1,cnt_wra2,k
 
       dimension glist(numax),cnt_wf1(0:6,0:6,4),cnt_wf2(0:6,0:6,4),
-     &     cnt_wra1(1000,4),cnt_wra2(1000,4)
+     & cnt_wra1(1000,4),cnt_wra2(1000,4)
 
       real(KIND=double_precision)::sx,sy,sz,ddum(27)
 
-      real(KIND=double_precision)::v,vintra,vinter,vext,velect,vtorold,vtornew
-     &     ,vewald,vflucq,delen,deleo,rpair
-      real(KIND=double_precision)::vnewflucq,voldflucq,qion,ctorfo,ctorfn
+      real(KIND=double_precision)::v,vintra,vinter,vext,velect,vtorold
+     & ,vtornew,vewald,vflucq,delen,deleo,rpair
+      real(KIND=double_precision)::vnewflucq,voldflucq,qion,ctorfo
+     & ,ctorfn
       dimension qion(numax)
       real(KIND=double_precision)::rxuold,ryuold,rzuold,coruz
       dimension rxuold(numax),ryuold(numax),rzuold(numax)
@@ -70,31 +72,29 @@
       real(KIND=double_precision)::random,rmol,rbf,bsum
       real(KIND=double_precision)::waddnew,waddold
 
-      real(KIND=double_precision)::total_NBE,vintran,velectn,vewaldn,vtgn
+      real(KIND=double_precision)::total_NBE,vintran,velectn,vewaldn
+     & ,vtgn
       real(KIND=double_precision)::vbendn,vvibn 
 
-
-
-      real(KIND=double_precision)::v1insext,v1remext,v1ins,w1ins,v1rem,w1rem
-     &     ,v1insint,v1remint,v1insewd,v1remewd
-     &     ,wnlog,wolog,wdlog,wratio,vinsta,vremta
-     &     ,volins,volrem,rho,arg,coru,v1inselc,v1remelc
-      real(KIND=double_precision)::rvol,x,y,z,rijsq,wbias_ins,wbias_rem,r
-     &     ,xi1,xi2,xisq
-      dimension bsswap(ntmax,npabmax,nbxmax*2),
-     &     bnswap(ntmax,npabmax,nbxmax*2),bnswap_in(ntmax,2),
-     &     bnswap_out(ntmax,2)
+      real(KIND=double_precision)::v1insext,v1remext,v1ins,w1ins,v1rem
+     & ,w1rem,v1insint,v1remint,v1insewd,v1remewd,wnlog,wolog,wdlog
+     & ,wratio,vinsta,vremta,volins,volrem,rho,arg,coru,v1inselc
+     & ,v1remelc
+      real(KIND=double_precision)::rvol,x,y,z,rijsq,wbias_ins,wbias_rem
+     & ,r,xi1,xi2,xisq
+      dimension bsswap(ntmax,npabmax,nbxmax*2), bnswap(ntmax,npabmax
+     & ,nbxmax*2),bnswap_in(ntmax,2), bnswap_out(ntmax,2)
       real(KIND=double_precision)::vrecipn,vrecipo,vdum,whins,whrem
-      real(KIND=double_precision)::rxuh,ryuh,rzuh,delenh,vtrhext,vtrhintra
-     &     ,vtrhinter,vtrhelect,vtrhewald,vtrhtg,bfach
+      real(KIND=double_precision)::rxuh,ryuh,rzuh,delenh,vtrhext
+     & ,vtrhintra,vtrhinter,vtrhelect,vtrhewald,vtrhtg,bfach
      
       dimension bfach(nchmax),delenh(nchmax),vtrhinter(nchmax)
-     &     ,vtrhext(nchmax),vtrhintra(nchmax),vtrhelect(nchmax)
-     &     ,vtrhewald(nchmax),vtrhtg(nchmax)
+     & ,vtrhext(nchmax),vtrhintra(nchmax),vtrhelect(nchmax)
+     & ,vtrhewald(nchmax),vtrhtg(nchmax)
      
       dimension lovrh(nchmax)
-      dimension rxuh(numax,nchmax),ryuh(numax,nchmax)
-     &     ,rzuh(numax,nchmax)
+      dimension rxuh(numax,nchmax),ryuh(numax,nchmax) ,rzuh(numax
+     & ,nchmax)
 
 ! --------------------------------------------------------------------
 

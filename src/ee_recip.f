@@ -21,8 +21,9 @@
 !$$$      include 'coord2.inc'
 !$$$      include 'ewaldsum.inc'
 !$$$      include 'poten.inc'
-      integer(KIND=normal_int)::ic,zz,ii,imolty,ibox,ncount,type
-      real(KIND=double_precision)::vrecipnew,vrecipold,sumr(2),sumi(2),arg
+      integer(KIND=normal_int)::ic,zzz,ii,imolty,ibox,ncount,type
+      real(KIND=double_precision)::vrecipnew,vrecipold,sumr(2),sumi(2)
+     & ,arg
 
       ncount = numvect(ibox)
 
@@ -30,35 +31,35 @@
          
 ! *** recalculate the reciprocal space part for one-particle move, translation,
 ! *** rotation, swap, flucq, and swatch.
-! *** old conformation zz = 1 (which is 0 for swap inserted molecule)
-! *** new conformation zz = 2 (which is 0 for swap removed molecule)
+! *** old conformation zzz = 1 (which is 0 for swap inserted molecule)
+! *** new conformation zzz = 2 (which is 0 for swap removed molecule)
 
 !         write(iou,*) 'in recip:',moltion(1),moltion(2)
-!         do zz = 1,2
-!            imolty = moltion(zz)
+!         do zzz = 1,2
+!            imolty = moltion(zzz)
 !            do ii = 1, nunit(imolty)
-!               write(iou,*) rxuion(ii,zz),ryuion(ii,zz),rzuion(ii,zz),
-!     &              qquion(ii,zz)
+!               write(iou,*) rxuion(ii,zzz),ryuion(ii,zzz),rzuion(ii,zzz),
+!     &              qquion(ii,zzz)
 !            end do
 !         end do
 
          do 30 ic = 1, ncount
-            do 20 zz = 1,2
-! --- zz = 1: old configuration 
-! --- zz = 2: new configuration
+            do 20 zzz = 1,2
+! --- zzz = 1: old configuration 
+! --- zzz = 2: new configuration
 
-               sumr(zz) = 0.0d0
-               sumi(zz) = 0.0d0
-               imolty = moltion(zz)
+               sumr(zzz) = 0.0d0
+               sumi(zzz) = 0.0d0
+               imolty = moltion(zzz)
                do ii = 1, nunit(imolty)
 !                  if ( lqchg(ntype(imolty,ii)) ) then
-                     arg = kx(ic,ibox)*rxuion(ii,zz) +
-     &                    ky(ic,ibox)*ryuion(ii,zz) +
-     &                    kz(ic,ibox)*rzuion(ii,zz)
-                     sumr(zz) = sumr(zz) + 
-     &                    qquion(ii,zz)*dcos(arg)
-                     sumi(zz) = sumi(zz) + 
-     &                    qquion(ii,zz)*dsin(arg)
+                     arg = kx(ic,ibox)*rxuion(ii,zzz) +
+     &                    ky(ic,ibox)*ryuion(ii,zzz) +
+     &                    kz(ic,ibox)*rzuion(ii,zzz)
+                     sumr(zzz) = sumr(zzz) + 
+     &                    qquion(ii,zzz)*dcos(arg)
+                     sumi(zzz) = sumi(zzz) + 
+     &                    qquion(ii,zzz)*dsin(arg)
 !                  end if
                end do
  20         continue

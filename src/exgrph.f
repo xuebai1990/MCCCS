@@ -27,7 +27,7 @@
         real(KIND=double_precision)::k2,k5
         real(KIND=double_precision)::mbessel
         real(KIND=double_precision)::sz2
-        real(KIND=double_precision)::zz
+        real(KIND=double_precision)::zzz
         integer(KIND=normal_int)::ntij
         
         parameter (pi2 = 6.28318530718d0, pi4 = 12.5663706144d0)
@@ -64,12 +64,12 @@
 
                 dd = 2.0d0*(pi2/sqrt(3.0d0))**2
                 
-                zz = pi4*z/(sqrt(3.0d0)*a1)
+                zzz = pi4*z/(sqrt(3.0d0)*a1)
                 
-                k2 = mbessel(zz,2.0d0)
+                k2 = mbessel(zzz,2.0d0)
                 
-                k5 = mbessel(zz,5.0d0)
-!               write(84,*) zz,k2,k5            
+                k5 = mbessel(zzz,5.0d0)
+!               write(84,*) zzz,k2,k5            
                 e1 = bb*(cc * k5 * (a1/z)**5 - dd * k2 * (a1/z)**2)
 !               write(82,*) bb,cc,dd,e1,k2,k5
                 fxy = -2.0d0*(cos(pi2*(x/a1 + y/sqrt(3.0d0)/a1)) +

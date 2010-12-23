@@ -59,10 +59,14 @@
 
       logical::lcount,lpick,lterm,lfixed,lfix,lfind
 
-      integer(KIND=normal_int)::igrow,imolty,count,counta,iw,ivib,iv,iu,ju,iutry
-      integer(KIND=normal_int)::j,ja,kickout,invtry,index,fintnum,fint,k,islen
-      integer(KIND=normal_int)::ffrom,fprev,flist,fnum,fnuma,findex,countb,iv1
-      integer(KIND=normal_int)::movetype,fmaxgrow,ku,kickouta,iufrom,iuprev
+      integer(KIND=normal_int)::igrow,imolty,count,counta,iw,ivib,iv,iu
+     & ,ju,iutry
+      integer(KIND=normal_int)::j,ja,kickout,invtry,index,fintnum,fint,k
+     & ,islen
+      integer(KIND=normal_int)::ffrom,fprev,flist,fnum,fnuma,findex
+     & ,countb,iv1
+      integer(KIND=normal_int)::movetype,fmaxgrow,ku,kickouta,iufrom
+     & ,iuprev
       integer(KIND=normal_int)::num,inum,inuma,max
 
       parameter(max=10)
@@ -70,8 +74,8 @@
       real(KIND=double_precision)::random,rbf
 
       dimension fint(numax),ffrom(numax,max),fprev(numax,max)
-     &     ,flist(numax,max,max),fnum(numax),fnuma(numax,max)
-     &     ,lpick(numax),lfix(numax),inum(max),inuma(max),lfind(numax)
+     & ,flist(numax,max,max),fnum(numax),fnuma(numax,max) ,lpick(numax)
+     & ,lfix(numax),inum(max),inuma(max),lfind(numax)
 
 !     --------------------------------------------------------------------
       

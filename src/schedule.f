@@ -24,14 +24,16 @@
 
       logical::lprint,lfind
       integer(KIND=normal_int)::random_index
-      integer(KIND=normal_int)::kickout,icbu,igrow,imolty,iutry,iut,invtry,iu,ju
-      integer(KIND=normal_int)::ibead,count,ivib,idir,movetype,iprev,itry,i,ib2
-      integer(KIND=normal_int)::temp_store,temp_count,zz,outer_sites,index,outer_num
-     &     ,outer_prev,iufrom,outer_try
+      integer(KIND=normal_int)::kickout,icbu,igrow,imolty,iutry,iut
+     & ,invtry,iu,ju
+      integer(KIND=normal_int)::ibead,count,ivib,idir,movetype,iprev
+     & ,itry,i,ib2
+      integer(KIND=normal_int)::temp_store,temp_count,izz,outer_sites
+     & ,index,outer_num,outer_prev,iufrom,outer_try
       real(KIND=double_precision)::dbgrow,random
       parameter (lprint = .false.)
       dimension temp_store(numax),outer_sites(numax),outer_prev(numax)
-     &     ,lfind(numax)
+     & ,lfind(numax)
 ! ------------------------------------------------------------------
 
 !      write(iou,*) 'start SCHEDULE'
@@ -138,16 +140,16 @@
                end if
             end do
 
-            do zz = temp_count,1,-1
+            do izz = temp_count,1,-1
 !              --- choose grow bead randomly from temp_store
-               itry = int( dble(zz) * random() ) + 1
+               itry = int( dble(izz) * random() ) + 1
                iut = temp_store(itry)
                count = count + 1
                growlist(1,count) = iut
                lexshed(iut) = .false.
 
 !              --- update temp_store for next iteration
-               temp_store(itry) = temp_store(zz)
+               temp_store(itry) = temp_store(izz)
             end do
             grownum(1) = count
 
@@ -216,16 +218,16 @@
             end do
 
             count = 0
-            do zz = temp_count,1,-1
+            do izz = temp_count,1,-1
 !              --- choose grow bead randomly from temp_store
-               itry = int( dble(zz) * random() ) + 1
+               itry = int( dble(izz) * random() ) + 1
                iut = temp_store(itry)
                count = count + 1
                growlist(1,count) = iut
                lexshed(iut) = .false.
                
 !              --- update temp_store for next iteration
-               temp_store(itry) = temp_store(zz)
+               temp_store(itry) = temp_store(izz)
             end do
          end if
 
@@ -262,16 +264,16 @@
             end do
 
             count = 0
-            do zz = temp_count,1,-1
+            do izz = temp_count,1,-1
 !              --- choose grow bead randomly from temp_store
-               itry = int( dble(zz) * random() ) + 1
+               itry = int( dble(izz) * random() ) + 1
                iut = temp_store(itry)
                count = count + 1
                growlist(1,count) = iut
                lexshed(iut) = .false.
 
 !              --- update temp_store for next iteration
-               temp_store(itry) = temp_store(zz)
+               temp_store(itry) = temp_store(izz)
             end do
 
             grownum(1) = count
@@ -309,16 +311,16 @@
 
                count = 0
 
-               do zz = temp_count,1,-1
+               do izz = temp_count,1,-1
 !                 --- choose grow bead randomly from temp_store
-                  itry = int ( dble(zz) * random() ) + 1
+                  itry = int ( dble(izz) * random() ) + 1
                   iut = temp_store(itry)
                   count = count + 1
                   growlist(i,count) = iut
                   lexshed(iut) = .false.
 
 !                 --- update temp_store for next iteration
-                  temp_store(itry) = temp_store(zz)
+                  temp_store(itry) = temp_store(izz)
                end do
             end do
          end if
@@ -350,15 +352,15 @@
             end do
 
             count = 0
-            do zz = temp_count,1,-1
+            do izz = temp_count,1,-1
 !              --- choose grow bead randomly from temp_store
-               itry = int( dble(zz) * random() ) + 1
+               itry = int( dble(izz) * random() ) + 1
                iut = temp_store(itry)
                count = count + 1
                growlist(index,count) = iut
                lexshed(iut) = .false.
 !              --- update temp_store for next iteration
-               temp_store(itry) = temp_store(zz)
+               temp_store(itry) = temp_store(izz)
             end do
 
             grownum(index) = count
@@ -465,8 +467,8 @@
             end do
 
             count = 0
-            do zz = temp_count, 1, -1
-               itry = int ( dble(zz) * random() ) + 1
+            do izz = temp_count, 1, -1
+               itry = int ( dble(izz) * random() ) + 1
                iut = temp_store(itry)
                count = count + 1
 !              --- assign growlist for current index and count
@@ -474,7 +476,7 @@
                lexshed(iut) = .false.
 
 !              --- update temp_store for next iteration
-               temp_store(itry) = temp_store(zz)
+               temp_store(itry) = temp_store(izz)
             end do
 !           --- assign grownum for this index
             grownum(index) = count

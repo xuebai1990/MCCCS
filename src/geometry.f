@@ -35,7 +35,8 @@
 
       logical::lnew
       integer(KIND=normal_int)::iw,imolty,angstart,iuprev,glist,i
-      real(KIND=double_precision)::bondlen,bendang,phi,vvibtr,vbbtr,maxlen
+      real(KIND=double_precision)::bondlen,bendang,phi,vvibtr,vbbtr
+     & ,maxlen
       real(KIND=double_precision)::wei_bend
 
       dimension glist(numax)
@@ -44,21 +45,22 @@
 !     --- local variables
       
       integer(KIND=normal_int)::count,ntogrow,iugrow,iufrom,iv,juvib
-     &     ,jtvib,iu2back,ib,iulast,type,aaa,iuone
+     & ,jtvib,iu2back,ib,iulast,type,aaa,iuone
 
-      real(KIND=double_precision)::equil,kforce,thetaone,thetatwo
-     &     ,vvib,length,angle,phione,phitwo,vangle,random,vphi
+      real(KIND=double_precision)::equil,kforce,thetaone,thetatwo ,vvib
+     & ,length,angle,phione,phitwo,vangle,random,vphi
 
 !     --- new variables
       integer(KIND=normal_int)::ibend,nchben_a,nchben_b,start,start_ang
-      real(KIND=double_precision)::bsum_try,rsint,ang_trial,bfactor,rbf,bs
+      real(KIND=double_precision)::bsum_try,rsint,ang_trial,bfactor,rbf
+     & ,bs
 
       dimension ang_trial(nchbn_max),bfactor(nchbn_max)
 
 !     --- variables from geomold
       real(KIND=double_precision)::rxui,ryui,rzui,rxuij,ryuij,rzuij
-     &     ,xvecprev,yvecprev,zvecprev,distprev,xvecgrow
-     &     ,yvecgrow,zvecgrow,distgrow,anglec
+     & ,xvecprev,yvecprev,zvecprev,distprev,xvecgrow ,yvecgrow,zvecgrow
+     & ,distgrow,anglec
       real(KIND=double_precision)::xub,yub,zub,dum,ux,uy,uz,alpha,gamma
       real(KIND=double_precision)::tabulated_vib, tabulated_bend
       real(KIND=double_precision)::rbend, rbendsq
@@ -67,7 +69,7 @@
 
       real(KIND=double_precision)::distprev2,distgrow2
       real(KIND=double_precision)::lengtha,lengthb,lengtha2,lengthb2,
-     &                 lengthc,lengthc2,lengthFP,lengthFP2
+     & lengthc,lengthc2,lengthFP,lengthFP2
 
 !     --- assign nchben_a and ncben_b
       nchben_a = nchbna(imolty)
@@ -492,14 +494,14 @@
       return
       end
 
-      subroutine bendangle(equil,kforce,beta,angle,vangle )
+      subroutine bendangle(equil,kforce,betaT,angle,vangle )
 
 
 !     *************************************************************
 !     *** choose a bond angle                                   ***
 !     *** equil is equilibrium bond angle                       ***
 !     *** kforce is the force constant                          ***
-!     *** beta is 1/kT                                          ***
+!     *** betaT is 1/kT                                          ***
 !     *** angle is the angle returned by this subroutine        ***
 !     *** vangle is the energy of the angle                     ***
 !     *** M.G. Martin                                           ***
@@ -516,8 +518,8 @@
       implicit none
       include 'common.inc'
 
-      real(KIND=double_precision)::equil, kforce, beta, angle, vangle, rr, v1, v2
-     &     ,random, tabulated_bend
+      real(KIND=double_precision)::equil, kforce, betaT, angle, vangle,
+     & rr, v1, v2,random, tabulated_bend
 
 !      write(2,*) 'start BENDANGLE'
 
@@ -530,7 +532,7 @@
          
 !        --- select angle from a gaussian distribution
          angle = equil + v1*dsqrt( (-dlog(rr))
-     &        /( kforce*beta*rr) )
+     &        /( kforce*betaT*rr) )
          
          if (angle .le. 0.0d0 .or. angle .ge. 3.1415 ) then
             write(2,*) 'chose angle outside of 0,Pi in bendangle'

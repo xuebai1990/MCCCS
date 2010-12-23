@@ -27,28 +27,27 @@
 !$$$      include 'mpif.h'
 !$$$      include 'mpi.inc'
 
-      integer(KIND=normal_int)::ibox,nkx,nky,nkz
-     &     ,nkx_min,nkx_max,nky_min,nky_max,nkz_min,nkz_max
-     &     ,i,ii,imolty,kmax1,ncount
+      integer(KIND=normal_int)::ibox,nkx,nky,nkz ,nkx_min,nkx_max
+     & ,nky_min,nky_max,nkz_min,nkz_max ,i,ii,imolty,kmax1,ncount
 
 ! * from h-matrix formulation
-      integer(KIND=normal_int)::l,m,n,m_min,m_max,n_min,n_max,kmaxl,kmaxm,kmaxn
+      integer(KIND=normal_int)::l,m,n,m_min,m_max,n_min,n_max,kmaxl
+     & ,kmaxm,kmaxn
 
-      real(KIND=double_precision)::alpsqr4,vol,ksqr,sumr,sumi,arg,boxlen,vrecip,
-     &     bx1,by1,bz1,bmin,xratio,yratio,zratio,
-     &     constx,consty,constz,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi
+      real(KIND=double_precision)::alpsqr4,vol,ksqr,sumr,sumi,arg,boxlen
+     & ,vrecip,bx1,by1,bz1,bmin,xratio,yratio,zratio,constx,consty
+     & ,constz,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi
 !      real(KIND=double_precision)::sum_sumr,sum_sumi
 
 ! RP added for calculating time for communication step
       integer(KIND=normal_int)::mystart,myend,blocksize
-      integer(KIND=normal_int)::ncount_arr(numprocmax),ncount_displs(numprocmax)
-      real(KIND=double_precision)::sum_vrecip,kx_arr(vectormax),ky_arr(vectormax),
-     &   kz_arr(vectormax),kx_one(vectormax),ky_one(vectormax),
-     &   kz_one(vectormax),
-     &   ssumi_arr(vectormax),prefact_arr(vectormax),
-     &   ssumr_one(vectormax),
-     &   ssumi_one(vectormax),prefact_one(vectormax),
-     &   ssumr_arr(vectormax)
+      integer(KIND=normal_int)::ncount_arr(numprocmax)
+     & ,ncount_displs(numprocmax)
+      real(KIND=double_precision)::sum_vrecip,kx_arr(vectormax)
+     & ,ky_arr(vectormax),kz_arr(vectormax),kx_one(vectormax)
+     & ,ky_one(vectormax),kz_one(vectormax),ssumi_arr(vectormax)
+     & ,prefact_arr(vectormax),ssumr_one(vectormax),ssumi_one(vectormax)
+     & ,prefact_one(vectormax),ssumr_arr(vectormax)
  
 ! KM for MPI
       do i=1,numprocmax

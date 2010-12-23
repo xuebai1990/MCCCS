@@ -3,14 +3,16 @@ analysis.f
 coruz.f
 exzeot.f
 forcefield.f
+pgrid.f
 qqcheck.f
 readRES.f
 test1.f
 testupdate.f
 thermopress.f
+trim_swap.f
 beaddat.inc
 gor.inc
-
+	
 added:
 global_data.f
 var_type.f

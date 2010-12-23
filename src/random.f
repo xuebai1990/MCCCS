@@ -1,16 +1,11 @@
       FUNCTION RANDOM()
 
-      use global_data
       use var_type
-      use const_phys
       use const_math
       use util_math
-      use util_string
-      use util_files
-      use util_timings
       implicit none
       include 'common.inc'
-      real(KIND=double_precision)::RANDOM , RCARRY
+      real(KIND=double_precision)::RANDOM,RCARRY
       RANDOM = RCARRY()
       RETURN
 ! ----------------------------------------------------C
@@ -24,14 +19,9 @@
 !  reproducible, for any machine with at least 32 bits / real::number.
 !  REF: Press, Flannery, Teukolsky, Vetterling, Numerical Recipes (1986)
 !----------------------------------------------------------------------C
-      use global_data
       use var_type
-      use const_phys
       use const_math
       use util_math
-      use util_string
-      use util_files
-      use util_timings
       implicit none
       include 'common.inc'
       integer(KIND=normal_int)::IA , IC , ISEED , M1
@@ -47,14 +37,9 @@
       END
 
       SUBROUTINE RANSET(ISEED)
-      use global_data
       use var_type
-      use const_phys
       use const_math
       use util_math
-      use util_string
-      use util_files
-      use util_timings
       implicit none
       include 'common.inc'
       integer(KIND=normal_int)::ISEED
@@ -67,14 +52,9 @@
 !----------------------------------------------------------------------C
 !       Initialize Marsaglia list of 24 random numbers.
 !----------------------------------------------------------------------C
-      use global_data
       use var_type
-      use const_phys
       use const_math
       use util_math
-      use util_string
-      use util_files
-      use util_timings
       implicit none
       include 'common.inc'
       real(KIND=double_precision)::Carry , ran , RANDx , Seed
@@ -108,17 +88,13 @@
 !----------------------------------------------------------------------C
 !       Random number generator from Marsaglia.
 !----------------------------------------------------------------------C
-      use global_data
       use var_type
-      use const_phys
       use const_math
       use util_math
-      use util_string
-      use util_files
-      use util_timings
       implicit none
       include 'common.inc'
-      real(KIND=double_precision)::Carry , RCARRY , Seed , TWOM24 , TWOP24 , uni
+      real(KIND=double_precision)::Carry , RCARRY , Seed , TWOM24 ,
+     & TWOP24 , uni
       integer(KIND=normal_int)::I24 , Iseed , J24
       PARAMETER (TWOP24=16777216.D+0,TWOM24=1.D+0/TWOP24)
       COMMON /RANDM/ Seed(24) , Carry , I24 , J24 , Iseed

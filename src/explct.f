@@ -23,13 +23,13 @@
 
 ! - arguments
       integer(KIND=normal_int)::ichain,nngrow,negrow,i,iplus,imins,nn,
-     &        imolty,iben,iend,ii,jj
-      real(KIND=double_precision)::vmethyl,ch,cc,cch,ca,ah,hch2,hk,ck,en0
-     &     ,a1,b1,c1,dln1,a2,b2,c2,dln2,a3,b3,c3,x12,y12,z12
-     &     ,x32,y32,z32,xa,ya,za
-     &     ,r,rx,ry,rz,dr,ven,random,prob,a4,b4,c4,rn
-     &     ,hch,coh,ce,ratio
-      real(KIND=double_precision)::oa,hoh,hoh2,oh,ok,om,oc,v1,v2,alpha,rr
+     & imolty,iben,iuend,ii,jj
+      real(KIND=double_precision)::vmethyl,ch,cc,cch,ca,ah,hch2,hk,ck
+     & ,en0,aa1,b1,c1,dln1,a2,b2,c2,dln2,a3,b3,c3,x12,y12,z12,x32,y32
+     & ,z32,xa,ya,za,r,rx,ry,rz,dr,ven,random,prob,a4,b4,c4,rn,hch,coh
+     & ,ce,ratio
+      real(KIND=double_precision)::oa,hoh,hoh2,oh,ok,om,oc,v1,v2,alpha
+     & ,rr
       logical::lcrysl,londone,lswitch,lalkanol
 
 ! - find intramolecular structure 
@@ -40,10 +40,10 @@
       if ((nunit(imolty)-6) .eq. 3*(nngrow-3) ) then
 ! *** alkanol cases
          lalkanol = .true.
-         iend = 2
+         iuend = 2
       else
          lalkanol = .false.
-         iend = 1
+         iuend = 1
       end if
 
 
@@ -58,14 +58,14 @@
 ! - constraint
 
             om = brvib(itvib(imolty,4,1))
-            a1 = 0.5d0*(rxu(ichain,2)+rxu(ichain,3)) 
+            aa1 = 0.5d0*(rxu(ichain,2)+rxu(ichain,3)) 
      &           - rxu(ichain,1)
             b1 = 0.5d0*(ryu(ichain,2)+ryu(ichain,3)) 
      &           - ryu(ichain,1)
             c1 = 0.5d0*(rzu(ichain,2)+rzu(ichain,3)) 
      &           - rzu(ichain,1)
-            dr = dsqrt(a1*a1+b1*b1+c1*c1)
-            rxu(ichain,4) = rxu(ichain,1) + om*a1/dr
+            dr = dsqrt(aa1*aa1+b1*b1+c1*c1)
+            rxu(ichain,4) = rxu(ichain,1) + om*aa1/dr
             ryu(ichain,4) = ryu(ichain,1) + om*b1/dr
             rzu(ichain,4) = rzu(ichain,1) + om*c1/dr
             return
@@ -121,33 +121,33 @@
                   rz = 1 - 2.0d0*dr
                 
 ! --- The two vectors above form a plane identified by n1 ---
-                  a1 = b2*rz - c2*ry
+                  aa1 = b2*rz - c2*ry
                   b1 = -(a2*rz - rx*c2)
                   c1 = a2*ry - rx*b2
-                  dln1 = dsqrt(a1*a1 + b1*b1 + c1*c1)
-                  a1 = a1/dln1
+                  dln1 = dsqrt(aa1*aa1 + b1*b1 + c1*c1)
+                  aa1 = aa1/dln1
                   b1 = b1/dln1
                   c1 = c1/dln1
 
 ! --- cross product n1 x n2 calc.-> n3 ---
             
                   a3 = b1*c2 - b2*c1
-                  b3 = -(a1*c2 - a2*c1)
-                  c3 = a1*b2 - a2*b1
+                  b3 = -(aa1*c2 - a2*c1)
+                  c3 = aa1*b2 - a2*b1
                   rxu(ichain,3) = rxu(ichain,1) + a2*oa + ah*a3
                   ryu(ichain,3) = ryu(ichain,1) + b2*oa + ah*b3
                   rzu(ichain,3) = rzu(ichain,1) + c2*oa + ah*c3
                end if
                if ( nunit(imolty) .eq. 4 ) then
                   om = brvib(itvib(imolty,4,1))
-                  a1 = 0.5d0*(rxu(ichain,2)+rxu(ichain,3)) 
+                  aa1 = 0.5d0*(rxu(ichain,2)+rxu(ichain,3)) 
      &                 - rxu(ichain,1)
                   b1 = 0.5d0*(ryu(ichain,2)+ryu(ichain,3)) 
      &                 - ryu(ichain,1)
                   c1 = 0.5d0*(rzu(ichain,2)+rzu(ichain,3)) 
      &                 - rzu(ichain,1)
-                  dr = dsqrt(a1*a1+b1*b1+c1*c1)
-                  rxu(ichain,4) = rxu(ichain,1) + om*a1/dr
+                  dr = dsqrt(aa1*aa1+b1*b1+c1*c1)
+                  rxu(ichain,4) = rxu(ichain,1) + om*aa1/dr
                   ryu(ichain,4) = ryu(ichain,1) + om*b1/dr
                   rzu(ichain,4) = rzu(ichain,1) + om*c1/dr
                end if
@@ -185,11 +185,11 @@
 
 ! *** for hydro-furan
 
-!            a1 = rxu(ichain,3)-rxu(ichain,1)
+!            aa1 = rxu(ichain,3)-rxu(ichain,1)
 !            b1 = ryu(ichain,3)-ryu(ichain,1)
 !            c1 = rzu(ichain,3)-rzu(ichain,1)
-!            dln1 = dsqrt(a1*a1 + b1*b1 + c1*c1)
-!            a1 = a1/dln1
+!            dln1 = dsqrt(aa1*aa1 + b1*b1 + c1*c1)
+!            aa1 = aa1/dln1
 !            b1 = b1/dln1
 !            c1 = c1/dln1
 !            a2 = 0.5d0*(rxu(ichain,1)+rxu(ichain,3))-
@@ -203,16 +203,16 @@
 !            b2 = b2/dln1
 !            c2 = c2/dln1
 !            rxu(ichain,4) = rxu(ichain,2) + 2.2758059d0*a2 + 
-!     &           0.765d0*a1
+!     &           0.765d0*aa1
 !            ryu(ichain,4) = ryu(ichain,2) + 2.2758059d0*b2 + 
 !     &           0.765d0*b1
 !            rzu(ichain,4) = rzu(ichain,2) + 2.2758059d0*c2 + 
 !     &           0.765d0*c1
-!            rxu(ichain,5) = rxu(ichain,4) - 1.53d0*a1
+!            rxu(ichain,5) = rxu(ichain,4) - 1.53d0*aa1
 !            ryu(ichain,5) = ryu(ichain,4) - 1.53d0*b1
 !            rzu(ichain,5) = rzu(ichain,4) - 1.53d0*c1            
 
-            a1 = rxu(ichain,2)-rxu(ichain,1)
+            aa1 = rxu(ichain,2)-rxu(ichain,1)
             b1 = ryu(ichain,2)-ryu(ichain,1)
             c1 = rzu(ichain,2)-rzu(ichain,1)
             
@@ -222,28 +222,28 @@
 
 !     -------cross product n1 x n2 calc.-> n3 ---
             a3 = b1*c2 - b2*c1
-            b3 = -(a1*c2 - a2*c1)
-            c3 = a1*b2 - a2*b1
+            b3 = -(aa1*c2 - a2*c1)
+            c3 = aa1*b2 - a2*b1
             dln1 = dsqrt(a3*a3 + b3*b3 + c3*c3)
             a2 = a3/dln1
             b2 = b3/dln1
             c2 = c3/dln1
 
-            a1 = 0.5d0*(rxu(ichain,1)+rxu(ichain,3))-
+            aa1 = 0.5d0*(rxu(ichain,1)+rxu(ichain,3))-
      &           rxu(ichain,2)
             b1 = 0.5d0*(ryu(ichain,1)+ryu(ichain,3))-
      &           ryu(ichain,2)
             c1 = 0.5d0*(rzu(ichain,1)+rzu(ichain,3))-
      &           rzu(ichain,2)
-            dln1 = dsqrt(a1*a1 + b1*b1 + c1*c1)
-            a1 = a1/dln1
+            dln1 = dsqrt(aa1*aa1 + b1*b1 + c1*c1)
+            aa1 = aa1/dln1
             b1 = b1/dln1
             c1 = c1/dln1
             a3 = b1*c2 - b2*c1
-            b3 = -(a1*c2 - a2*c1)
-            c3 = a1*b2 - a2*b1
+            b3 = -(aa1*c2 - a2*c1)
+            c3 = aa1*b2 - a2*b1
            
-            rxu(ichain,4) = rxu(ichain,2) + 2.25d0*a1 + 
+            rxu(ichain,4) = rxu(ichain,2) + 2.25d0*aa1 + 
      &           0.41d0*a2+0.77d0*a3
             ryu(ichain,4) = ryu(ichain,2) + 2.25d0*b1 + 
      &           0.41d0*b2+0.77d0*b3
@@ -275,11 +275,11 @@
             rz = 1 - 2.0d0*dr
 
 !     ------ the two vectors above form a plane identified by n1 ------
-            a1 = y12*rz - z12*ry
+            aa1 = y12*rz - z12*ry
             b1 = -(x12*rz - rx*z12)
             c1 = x12*ry - rx*y12
-            dln1 = dsqrt(a1**2 + b1**2 + c1**2)
-            a1 = a1/dln1
+            dln1 = dsqrt(aa1**2 + b1**2 + c1**2)
+            aa1 = aa1/dln1
             b1 = b1/dln1
             c1 = c1/dln1
 !     --------normalizing C-H vector -> n2 ----
@@ -288,8 +288,8 @@
             c2 = z12/ch
 !     -------cross product n1 x n2 calc.-> n3 ---
             a3 = b1*c2 - b2*c1
-            b3 = -(a1*c2 - a2*c1)
-            c3 = a1*b2 - a2*b1
+            b3 = -(aa1*c2 - a2*c1)
+            c3 = aa1*b2 - a2*b1
 !     ------- point A ------ 
             xa = rxu(ichain,2)+a2*ca
             ya = ryu(ichain,2)+b2*ca
@@ -297,7 +297,7 @@
 !     ------H-atoms for the first methyl group------
             r = 0.0d0
             do i = 1,3
-               a4 = ah*a3*dcos(r) + ah*a1*dsin(r)
+               a4 = ah*a3*dcos(r) + ah*aa1*dsin(r)
                b4 = ah*b3*dcos(r) + ah*b1*dsin(r)
                c4 = ah*c3*dcos(r) + ah*c1*dsin(r)
                rxu(ichain,nngrow+i) = xa + a4 
@@ -391,18 +391,18 @@
                ry = ry*rz
                rz = 1 - 2.0d0*dr
 !     ------ the two vectors above form a plane identified by n1 ------
-               a1 = b2*rz - c2*ry
+               aa1 = b2*rz - c2*ry
                b1 = -(a2*rz - rx*c2)
                c1 = a2*ry - rx*b2
-               dln1 = dsqrt(a1**2 + b1**2 + c1**2)
-               a1 = a1/dln1
+               dln1 = dsqrt(aa1**2 + b1**2 + c1**2)
+               aa1 = aa1/dln1
                b1 = b1/dln1
                c1 = c1/dln1
 
-               rxu(ichain,2) = rxu(ichain,1) + a2*ca + a1*ah 
+               rxu(ichain,2) = rxu(ichain,1) + a2*ca + aa1*ah 
                ryu(ichain,2) = ryu(ichain,1) + b2*ca + b1*ah
                rzu(ichain,2) = rzu(ichain,1) + c2*ca + c1*ah
-               rxu(ichain,3) = rxu(ichain,1) + a2*ca - a1*ah 
+               rxu(ichain,3) = rxu(ichain,1) + a2*ca - aa1*ah 
                ryu(ichain,3) = ryu(ichain,1) + b2*ca - b1*ah
                rzu(ichain,3) = rzu(ichain,1) + c2*ca - c1*ah
 
@@ -414,8 +414,8 @@
             
 !     -------cross product n1 x n2 calc.-> n3 ---
                a3 = b1*c2 - b2*c1
-               b3 = -(a1*c2 - a2*c1)
-               c3 = a1*b2 - a2*b1
+               b3 = -(aa1*c2 - a2*c1)
+               c3 = aa1*b2 - a2*b1
 
                rxu(ichain,4) = rxu(ichain,1) - a2*ca + a3*ah 
                ryu(ichain,4) = ryu(ichain,1) - b2*ca + b3*ah
@@ -478,20 +478,20 @@
 !     ------ main loop
 !     calculates hydrogen positions for methylene groups
 !     WARNING only works for linear alkanes
-            do i = 2,nngrow-iend
+            do i = 2,nngrow-iuend
                iplus = i+1
                imins = i-1
-               a1 = (ryu(ichain,imins)-ryu(ichain,i))*(rzu(ichain,iplus)
-     &              -rzu(ichain,i)) - (rzu(ichain,imins)-rzu(ichain,i))*
-     &              (ryu(ichain,iplus)-ryu(ichain,i))
-              b1 = -(rxu(ichain,imins)-rxu(ichain,i))*(rzu(ichain,iplus)
-     &              -rzu(ichain,i)) + (rzu(ichain,imins)-rzu(ichain,i))*
-     &              (rxu(ichain,iplus)-rxu(ichain,i))
+               aa1 = (ryu(ichain,imins)-ryu(ichain,i))*(rzu(ichain
+     &          ,iplus)-rzu(ichain,i)) - (rzu(ichain,imins)-rzu(ichain
+     &          ,i))*(ryu(ichain,iplus)-ryu(ichain,i))
+               b1 = -(rxu(ichain,imins)-rxu(ichain,i))*(rzu(ichain
+     &          ,iplus)-rzu(ichain,i)) + (rzu(ichain,imins)-rzu(ichain
+     &          ,i))*(rxu(ichain,iplus)-rxu(ichain,i))
                c1 = (rxu(ichain,imins)-rxu(ichain,i))*(ryu(ichain,iplus)
-     &              -ryu(ichain,i)) - (ryu(ichain,imins)-ryu(ichain,i))*
-     &              (rxu(ichain,iplus)-rxu(ichain,i))
-               dln1 = dsqrt(a1**2 + b1**2 + c1**2)
-               a1 = a1/dln1
+     &          -ryu(ichain,i)) - (ryu(ichain,imins)-ryu(ichain,i))*
+     &          (rxu(ichain,iplus)-rxu(ichain,i))
+               dln1 = dsqrt(aa1**2 + b1**2 + c1**2)
+               aa1 = aa1/dln1
                b1 = b1/dln1
                c1 = c1/dln1
                a2 = (rxu(ichain,iplus)-rxu(ichain,imins))
@@ -502,17 +502,17 @@
                b2 = b2/dln2
                c2 = c2/dln2
                a3 = b1*c2 - c1*b2
-               b3 = -a1*c2 + a2*c1
-               c3 = a1*b2 - b1*a2
+               b3 = -aa1*c2 + a2*c1
+               c3 = aa1*b2 - b1*a2
                londone = .false.
                do nn = nngrow+4+2*(i-2), nngrow+5+2*(i-2)
                   if (.not.londone) then
-                     rxu(ichain,nn) = rxu(ichain,i) + a3*ck + a1*hk
+                     rxu(ichain,nn) = rxu(ichain,i) + a3*ck + aa1*hk
                      ryu(ichain,nn) = ryu(ichain,i) + b3*ck + b1*hk
                      rzu(ichain,nn) = rzu(ichain,i) + c3*ck + c1*hk
                      londone = .true.
                   else
-                     rxu(ichain,nn) = rxu(ichain,i) + a3*ck - a1*hk
+                     rxu(ichain,nn) = rxu(ichain,i) + a3*ck - aa1*hk
                      ryu(ichain,nn) = ryu(ichain,i) + b3*ck - b1*hk
                      rzu(ichain,nn) = rzu(ichain,i) + c3*ck - c1*hk
                   end if
@@ -527,11 +527,11 @@
             x32 = rxu(ichain,3)-rxu(ichain,2)
             y32 = ryu(ichain,3)-ryu(ichain,2)
             z32 = rzu(ichain,3)-rzu(ichain,2)
-            a1 = y12*z32 - z12*y32
+            aa1 = y12*z32 - z12*y32
             b1 = -(x12*z32 - x32*z12)
             c1 = x12*y32 - x32*y12
-            dln1 = dsqrt(a1**2 + b1**2 + c1**2)
-            a1 = a1/dln1
+            dln1 = dsqrt(aa1**2 + b1**2 + c1**2)
+            aa1 = aa1/dln1
             b1 = b1/dln1
             c1 = c1/dln1
 !     --------normalizing c2c1 vector -> n2 ----
@@ -540,8 +540,8 @@
             c2 = z12/cc
 !     -------cross product n1 x n2 calc.-> n3 ---
             a3 = b1*c2 - b2*c1
-            b3 = -(a1*c2 - a2*c1)
-            c3 = a1*b2 - a2*b1
+            b3 = -(aa1*c2 - a2*c1)
+            c3 = aa1*b2 - a2*b1
 !     ------- point A ------ 
             xa = rxu(ichain,1)+a2*ca
             ya = ryu(ichain,1)+b2*ca
@@ -561,7 +561,7 @@
 !     write(iou,*) 'final Ryckaert angle: ',rgr
             vmethyl = vmethyl + ven
             do i = 1,3
-               a4 = ah*a3*dcos(r+onepi) + ah*a1*dsin(r+onepi)
+               a4 = ah*a3*dcos(r+onepi) + ah*aa1*dsin(r+onepi)
                b4 = ah*b3*dcos(r+onepi) + ah*b1*dsin(r+onepi)
                c4 = ah*c3*dcos(r+onepi) + ah*c1*dsin(r+onepi)
                
@@ -583,11 +583,11 @@
             x32 = rxu(ichain,nngrow-2)-rxu(ichain,nngrow-1)
             y32 = ryu(ichain,nngrow-2)-ryu(ichain,nngrow-1)
             z32 = rzu(ichain,nngrow-2)-rzu(ichain,nngrow-1)
-            a1 = y12*z32 - z12*y32
+            aa1 = y12*z32 - z12*y32
             b1 = -(x12*z32 - x32*z12)
             c1 = x12*y32 - x32*y12
-            dln1 = dsqrt(a1**2 + b1**2 + c1**2)
-            a1 = a1/dln1
+            dln1 = dsqrt(aa1**2 + b1**2 + c1**2)
+            aa1 = aa1/dln1
             b1 = b1/dln1
             c1 = c1/dln1
 !     --------normalizing c2c1 vector -> n2 ----
@@ -596,8 +596,8 @@
             c2 = z12/cc
 !     -------cross product n1 x n2 calc.-> n3 ---
             a3 = b1*c2 - b2*c1
-            b3 = -(a1*c2 - a2*c1)
-            c3 = a1*b2 - a2*b1
+            b3 = -(aa1*c2 - a2*c1)
+            c3 = aa1*b2 - a2*b1
 !     ------- point A ------ 
             xa = rxu(ichain,nngrow)+a2*ca
             ya = ryu(ichain,nngrow)+b2*ca
@@ -615,7 +615,7 @@
             end if
             vmethyl = vmethyl + ven
             do i = 1,3
-               a4 = ah*a3*dcos(r+onepi) + ah*a1*dsin(r+onepi)
+               a4 = ah*a3*dcos(r+onepi) + ah*aa1*dsin(r+onepi)
                b4 = ah*b3*dcos(r+onepi) + ah*b1*dsin(r+onepi)
                c4 = ah*c3*dcos(r+onepi) + ah*c1*dsin(r+onepi)
                rxu(ichain,negrow+i) = xa + a4 
@@ -646,11 +646,11 @@
             rz = 1 - 2.0d0*dr
 
 !     ------ the two vectors above form a plane identified by n1 ------
-            a1 = y12*rz - z12*ry
+            aa1 = y12*rz - z12*ry
             b1 = -(x12*rz - rx*z12)
             c1 = x12*ry - rx*y12
-            dln1 = dsqrt(a1**2 + b1**2 + c1**2)
-            a1 = a1/dln1
+            dln1 = dsqrt(aa1**2 + b1**2 + c1**2)
+            aa1 = aa1/dln1
             b1 = b1/dln1
             c1 = c1/dln1
 !     --------normalizing c2c1 vector -> n2 ----
@@ -659,8 +659,8 @@
             c2 = z12/cc
 !     -------cross product n1 x n2 calc.-> n3 ---
             a3 = b1*c2 - b2*c1
-            b3 = -(a1*c2 - a2*c1)
-            c3 = a1*b2 - a2*b1
+            b3 = -(aa1*c2 - a2*c1)
+            c3 = aa1*b2 - a2*b1
 !     ------- point A ------ 
             xa = rxu(ichain,1)+a2*ca
             ya = ryu(ichain,1)+b2*ca
@@ -668,7 +668,7 @@
 !     ------H-atoms for the first methyl group------
             r = 0.0d0
             do i = 1,3
-               a4 = ah*a3*dcos(r) + ah*a1*dsin(r)
+               a4 = ah*a3*dcos(r) + ah*aa1*dsin(r)
                b4 = ah*b3*dcos(r) + ah*b1*dsin(r)
                c4 = ah*c3*dcos(r) + ah*c1*dsin(r)
                rxu(ichain,nngrow+i) = xa + a4 
@@ -696,7 +696,7 @@
             vmethyl = vmethyl + ven
 
             do i = 4,6
-               a4 = ah*a3*dcos(r+onepi) + ah*a1*dsin(r+onepi)
+               a4 = ah*a3*dcos(r+onepi) + ah*aa1*dsin(r+onepi)
                b4 = ah*b3*dcos(r+onepi) + ah*b1*dsin(r+onepi)
                c4 = ah*c3*dcos(r+onepi) + ah*c1*dsin(r+onepi)        
                rxu(ichain,nngrow+i) = xa + a4 

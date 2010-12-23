@@ -45,20 +45,21 @@
       logical::lmim
 
       integer(KIND=normal_int)::growii,growjj,k,cellinc,jcell,ic,nmole
-      integer(KIND=normal_int)::i,ibox, istart, iuend,ii,ntii,flagon,jjj,iii,mmm
-     &       ,j,jj,ntjj,ntij,ntj,imolty,jmolty,ncell
-      integer(KIND=normal_int)::iivib,jjtor,ip1,ip2,ip3,it,nchp2,acellinc
+      integer(KIND=normal_int)::i,ibox, istart, iuend,ii,ntii,flagon,jjj
+     & ,iii,mmm,j,jj,ntjj,ntij,ntj,imolty,jmolty,ncell
+      integer(KIND=normal_int)::iivib,jjtor,ip1,ip2,ip3,it,nchp2
+     & ,acellinc
 
-      real(KIND=double_precision)::ljsami,ljpsur,ljmuir,v,vintra, vinter,vext 
-     &                ,rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq
-     &                ,ryuij,rzuij,sr2,sr6,rij,rijsq,dzui,dz3,dz12
-     &                ,exgrph,exsami,exmuir,exzeo,vtors,exsix,velect
-     &                ,vewald,mmff,rbcut,ninesix, genlj
+      real(KIND=double_precision)::ljsami,ljpsur,ljmuir,v,vintra, vinter
+     & ,vext,rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq,ryuij,rzuij,sr2
+     & ,sr6,rij,rijsq,dzui,dz3,dz12,exgrph,exsami,exmuir,exzeo,vtors
+     & ,exsix,velect,vewald,mmff,rbcut,ninesix, genlj,garofalini
       real(KIND=double_precision)::erfunc,qave
-      real(KIND=double_precision)::rxvec,ryvec,rzvec,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2
-     &     ,daa1,da1a2,dot,thetac,vtorso,vwell
+      real(KIND=double_precision)::rxvec,ryvec,rzvec,xaa1,yaa1,zaa1
+     & ,xa1a2,ya1a2,za1a2,daa1,da1a2,dot,thetac,vtorso,vwell
       real(KIND=double_precision)::xcc,ycc,zcc,tcc,theta,spltor
-      real(KIND=double_precision)::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq,epsilon2,sigma2
+      real(KIND=double_precision)::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq
+     & ,epsilon2,sigma2
       real(KIND=double_precision)::sx,sy,sz
       real(KIND=double_precision)::slitpore,mlen2,v_elect_field, field
 
@@ -68,9 +69,10 @@
 ! KEA
       integer(KIND=normal_int)::neigh_j,neighj(maxneigh)
       real(KIND=double_precision)::ndijj(maxneigh),nxijj(maxneigh),
-     &     nyijj(maxneigh),nzijj(maxneigh)
+     & nyijj(maxneigh),nzijj(maxneigh)
 ! KM
-      real(KIND=double_precision)::tabulated_vdW, tabulated_bend, tabulated_elect
+      real(KIND=double_precision)::tabulated_vdW, tabulated_bend,
+     & tabulated_elect
 ! Neeraj & RP added for MPI
       real(KIND=double_precision)::sum_velect, sum_vinter
       logical::all_ovrlap

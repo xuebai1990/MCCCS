@@ -51,16 +51,21 @@
       character(LEN=default_path_length)::fname4
       character(LEN=default_path_length)::fileout
  
-      integer(KIND=normal_int)::temnc, imol, iutemp, imolty, itype,ipair,bdum,bin,histtot
+      integer(KIND=normal_int)::temnc, imol, iutemp, imolty, itype,ipair
+     & ,bdum,bin,histtot
       integer(KIND=normal_int)::idummy(ntmax), atemp 
 
-      integer(KIND=normal_int)::i,j,k,ncres, nmtres, iensem, inpbc, nmcount
-      integer(KIND=normal_int)::im,nures, ibox,  ij, tcount,ucheck,nnframe
-      integer(KIND=normal_int)::nijspecial,ispecial,jspecial,ji,ii,jj,nexclu,ndum,ntii
+      integer(KIND=normal_int)::i,j,k,ncres, nmtres, iensem, inpbc,
+     & nmcount
+      integer(KIND=normal_int)::im,nures, ibox,  ij, tcount,ucheck
+     & ,nnframe
+      integer(KIND=normal_int)::nijspecial,ispecial,jspecial,ji,ii,jj
+     & ,nexclu,ndum,ntii
 
-      integer(KIND=normal_int)::zz,temphe,z,itemp,zzz
+      integer(KIND=normal_int)::izz,temphe,z,itemp,zzz
       integer(KIND=normal_int)::nvirial,k_max_l,k_max_m,k_max_n
-      integer(KIND=normal_int)::inclnum,inclmol,inclbead,inclsign,ncarbon
+      integer(KIND=normal_int)::inclnum,inclmol,inclbead,inclsign
+     & ,ncarbon
       dimension inclmol(ntmax*numax*numax),inclsign(ntmax*numax*numax)
       dimension inclbead(ntmax*numax*numax,2)
 
@@ -69,10 +74,12 @@
       dimension ainclbead(ntmax*numax*numax,2)
       dimension a15t(ntmax*numax*numax)
 
-      real(KIND=double_precision)::starvir,stepvir,fqtemp,qbox,vol,v(3),w(3)
+      real(KIND=double_precision)::starvir,stepvir,fqtemp,qbox,vol,v(3)
+     & ,w(3)
       real(KIND=double_precision)::debroglie, qtot,min_boxl
 
-      real(KIND=double_precision)::pie2,rcnnsq,umatch,aspecd,bspecd,dum,pm,pcumu
+      real(KIND=double_precision)::pie2,rcnnsq,umatch,aspecd,bspecd,dum
+     & ,pm,pcumu
       logical::lnrtab,lucall,lpolar,lqqelect,lee,lratfix,lreadq
       logical:: linit, lecho, lmixlb, lmixjo, lhere,lsetup,lsolute
       logical::lprint,lverbose,lxyz,lfound,ltab
@@ -86,7 +93,8 @@
       
 ! -- Variables added (6/30/2006) for fort.4 consistency check
   
-      integer(KIND=normal_int)::numvib,numbend,numtor,vib1,bend2,bend3,tor2,tor3,tor4
+      integer(KIND=normal_int)::numvib,numbend,numtor,vib1,bend2,bend3
+     & ,tor2,tor3,tor4
       integer(KIND=normal_int)::vibtype,bendtype,tortype
 
 !      real(KIND=double_precision)::temx,temy,temz
@@ -109,7 +117,8 @@
       logical::Lttor,lspline,linter
       integer(KIND=normal_int)::mmm,ttor
 ! KM tabulated potential variables
-      integer(KIND=normal_int)::tvib, tbend, iivdW,jjvdW, iielect, jjelect
+      integer(KIND=normal_int)::tvib, tbend, iivdW,jjvdW, iielect,
+     & jjelect
 ! KM variable added when analysis removed
       integer(KIND=normal_int)::nhere
 
@@ -319,15 +328,6 @@
 ! -------------------------------------------------------------------
 
 ! *** set up constants and conversion factors ***     
-      pie2 = 8.0d0 * datan(1.0d0)
-      raddeg = 360.0d0 / pie2
-      degrad = pie2 / 360.0d0
-      twopi=pie2
-      onepi=pie2/2.d00
-!  e times V to Kelvin
-      eXV_to_K = 11600.0d0  
-
-      
       beta = 1.0d0 / temp
       fqbeta = 1.0d0 / fqtemp
  
@@ -1481,9 +1481,9 @@
 ! - read ensemble specific information
       read(4,*)
       read(4,*) rmvol(1), tavol, iratv, iratp, rmflcq(1,1), taflcq
-      do zz = 1,nmolty
+      do izz = 1,nmolty
          do zzz = 1,nbox
-            rmflcq(zz,zzz) = rmflcq(1,1)
+            rmflcq(izz,zzz) = rmflcq(1,1)
          end do
       end do
       if ( lgibbs ) then
@@ -1493,18 +1493,18 @@
       end if
       if ( lecho.and.myid.eq.0 ) then
          if (lverbose) then
-            do zz = 1,nbox
+            do izz = 1,nbox
                write(iou,*) 'initial maximum volume displacement '
-     &              ,'(rmvol) in box',zz,':',rmvol(zz)
+     &              ,'(rmvol) in box',izz,':',rmvol(izz)
             end do
             write(iou,*) 'target volume acceptance ratio (tavol):',tavol
             write(iou,*) 'iratv:',iratv
             write(iou,*) 'iratp:',iratp
-            do zz = 1,nmolty
+            do izz = 1,nmolty
                do zzz = 1,nbox
                   write(iou,*) 'initial maximum fluct. charge',
-     &                 ' displ. for chain type',zz,' box',
-     &                 zzz,':',rmflcq(zz,zzz)
+     &                 ' displ. for chain type',izz,' box',
+     &                 zzz,':',rmflcq(izz,zzz)
                end do
             end do
             write(iou,*) 'target fluctuating charge acceptance ratio',
@@ -1512,7 +1512,7 @@
          else
             write(iou,*) rmvol, tavol, iratv, iratp
             write(iou,*) 'rmflcq',
-     &           ((rmflcq(zz,zzz),zzz=1,nbox),zz=1,nmolty),taflcq
+     &           ((rmflcq(izz,zzz),zzz=1,nbox),izz=1,nmolty),taflcq
          end if
       end if
 
@@ -1653,9 +1653,9 @@
             read(4,*) (( gswatc(i,j,k), k=1,2*ncut(i,j) ), j=1,2 )
 !!            if (lecho.and.myid.eq.0) then
 !!               if (lverbose) then
-!!                  do zz = 1,ncut(i,j)
-!!                     write(iou,*) '   grow from and prev for ncut',zz,':',
-!!     &                    (gswatc(i,j,zz),j=1,2)
+!!                  do izz = 1,ncut(i,j)
+!!                     write(iou,*) '   grow from and prev for ncut',izz,':',
+!!     &                    (gswatc(i,j,izz),j=1,2)
 !!                  end do
 !!               else 
 !!                  write(iou,*) 'gswatc',(( gswatc(i,j,k), 
@@ -2211,16 +2211,16 @@
 ! KM 01/10 remove analysis 
 !      if (ianalyze.lt.nstep) then
 !         nhere = 0
-!         do zz=1,nntype
-!            if ( lhere(zz) ) then
+!         do izz=1,nntype
+!            if ( lhere(izz) ) then
 !               nhere = nhere + 1
-!               temphe(nhere) = zz
-!               beadtyp(nhere)=zz
+!               temphe(nhere) = izz
+!               beadtyp(nhere)=izz
 !            end if
 !         end do
-!         do zz = 1,nhere 
-!            atemp = temphe(zz)
-!            decode(atemp) = zz
+!         do izz = 1,nhere 
+!            atemp = temphe(izz)
+!            decode(atemp) = izz
 !         end do
 !      end if
 ! --- END JLR 11-11-09
@@ -2933,15 +2933,15 @@
          open(unit=10, file=file_movie, status='unknown')
          if ( nnframe .ne. 0 ) then
             nhere = 0
-            do zz=1,nntype
-               if ( lhere(zz) ) then
+            do izz=1,nntype
+               if ( lhere(izz) ) then
                   nhere = nhere + 1
-                  temphe(nhere) = zz
+                  temphe(nhere) = izz
                end if
             end do
             write(10,*) nnframe,nchain,nmolty,nbox,nhere
             write(10,*) (rcut(ibox),ibox=1,nbox)
-            write(10,*) (temphe(zz),zz=1,nhere)
+            write(10,*) (temphe(izz),izz=1,nhere)
          
             do imolty = 1,nmolty
                write(10,*) nunit(imolty)

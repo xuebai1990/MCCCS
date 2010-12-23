@@ -27,16 +27,16 @@
 
       logical::lpoly,lcone
 !     lpoly used to have a meaning in iclude files but does not any longer
-      integer(KIND=normal_int)::i,j,iunit,iutry,iincre,istart,iend,idiff,nrtc,iu,
-     &        iulast,iuprev,iuppre,ivib,iben,itor,ibin,it
+      integer(KIND=normal_int)::i,j,iunit,iutry,iincre,istart,iuend
+     & ,idiff,nrtc,iu,iulast,iuprev,iuppre,ivib,iben,itor,ibin,it
 
-      real(KIND=double_precision)::xprev,yprev,zprev,dprev
-     &                ,xpprev,ypprev,zpprev,xa1a2,ya1a2,za1a2
-     &                ,da1a2,xub,yub,zub,va,vbba,vdha,vtorso
-     &                ,x,y,z,dlast,xi1,xi2, xisq,thetac,theta
-     &                ,random,xaa1,yaa1,zaa1,daa1,dot,bf,rij,dum
+      real(KIND=double_precision)::xprev,yprev,zprev,dprev ,xpprev
+     & ,ypprev,zpprev,xa1a2,ya1a2,za1a2 ,da1a2,xub,yub,zub,va,vbba,vdha
+     & ,vtorso ,x,y,z,dlast,xi1,xi2, xisq,thetac,theta ,random,xaa1,yaa1
+     & ,zaa1,daa1,dot,bf,rij,dum
 
-      real(KIND=double_precision)::rxnew(numax),rynew(numax),rznew(numax)
+      real(KIND=double_precision)::rxtmp(numax),rytmp(numax)
+     & ,rztmp(numax)
       real(KIND=double_precision)::nnrtab(nrtmax),hnrtab(nrtmax,nrtbin)
 
 !     lcone has no meaning any longer 2-16-98
@@ -76,12 +76,12 @@
       iunit = nunit(1)
 ! *** select starting unit ***
       iutry = 1
-      rxnew(1) = 0.0d0
-      rynew(1) = 0.0d0
-      rznew(1) = 0.0d0
+      rxtmp(1) = 0.0d0
+      rytmp(1) = 0.0d0
+      rztmp(1) = 0.0d0
       iincre = 1
       istart = iutry + 1
-      iend = iunit
+      iuend = iunit
 
 ! ------------------------------------------------------------------
 
@@ -92,7 +92,7 @@
 !    **         with all bonded-intramolecular interactions           **
 !    *******************************************************************
  
-      do 200 iu = istart, iend, iincre
+      do 200 iu = istart, iuend, iincre
 
          iulast = iu - iincre
          iuprev = iulast - iincre
@@ -113,15 +113,15 @@
 
          if ( iben .gt. 0 .and. .not. lpoly ) then
 ! ---       vector from last to previous unit ---
-            xprev = rxnew(iuprev) - rxnew(iulast)
-            yprev = rynew(iuprev) - rynew(iulast)
-            zprev = rznew(iuprev) - rznew(iulast)
+            xprev = rxtmp(iuprev) - rxtmp(iulast)
+            yprev = rytmp(iuprev) - rytmp(iulast)
+            zprev = rztmp(iuprev) - rztmp(iulast)
             dprev = brvib(1)
             if ( itor .gt. 0 ) then
 ! ---          vector from previous to preprevious unit ---
-               xpprev = rxnew(iuppre) - rxnew(iuprev)
-               ypprev = rynew(iuppre) - rynew(iuprev)
-               zpprev = rznew(iuppre) - rznew(iuprev)
+               xpprev = rxtmp(iuppre) - rxtmp(iuprev)
+               ypprev = rytmp(iuppre) - rytmp(iuprev)
+               zpprev = rztmp(iuppre) - rztmp(iuprev)
 ! ***          calculate cross products d_a-1 x d_a-2 ***
                xa1a2 = yprev*zpprev - zprev*ypprev
                ya1a2 = zprev*xpprev - xprev*zpprev
@@ -204,9 +204,9 @@
             va = 0.0d0
          end if
 
-         rxnew (iu) = rxnew(iulast) + x
-         rynew (iu) = rynew(iulast) + y
-         rznew (iu) = rznew(iulast) + z
+         rxtmp (iu) = rxtmp(iulast) + x
+         rytmp (iu) = rytmp(iulast) + y
+         rztmp (iu) = rztmp(iulast) + z
 
 200      continue
 
@@ -223,9 +223,9 @@
 
                if ( idiff .le. nrtmax ) then
                   nnrtab(idiff) = nnrtab(idiff) + 1
-                  x = rxnew(i) - rxnew(j)
-                  y = rynew(i) - rynew(j)
-                  z = rznew(i) - rznew(j)
+                  x = rxtmp(i) - rxtmp(j)
+                  y = rytmp(i) - rytmp(j)
+                  z = rztmp(i) - rztmp(j)
                   rij = dsqrt( x*x + y*y + z*z )
                   if ( rij .gt. dmrtab(idiff) ) then
                      write(iou,*) 'WARNING NRTAB: rij .gt. dmrtab'
@@ -238,8 +238,8 @@
 
                   if ( idiff .le. 3 .and. ibin .eq. 1 ) then
                      write(iou,*) 'nrtc',nrtc,'i',i,'j',j
-                     write(iou,*) 'ri',rxnew(i),rynew(i),rznew(i)
-                     write(iou,*) 'rj',rxnew(j),rynew(j),rznew(j)
+                     write(iou,*) 'ri',rxtmp(i),rytmp(i),rztmp(i)
+                     write(iou,*) 'rj',rxtmp(j),rytmp(j),rztmp(j)
                      write(iou,*) 'rij',rij
                   end if
 

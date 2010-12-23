@@ -18,24 +18,24 @@
 !$$$      include 'cell.inc'
 !$$$      include 'mpi.inc'
       integer(KIND=normal_int)::count,frac,izeo,bonding(8),atomtype,ibox=1
-      real(KIND=double_precision)::wzeo,charge,alpha,beta,gamma,sx,sy,sz,onepi
+      real(KIND=double_precision)::wzeo,charge,alpha,betaang,gamma,sx,sy
+     & ,sz
       character(LEN=4)::atom
 
       open (unit = 47, file = 'zeolite.cssr')
       if (myid.eq.0) write(16,100)
 
-      read(47,*)    zeorx,zeory,zeorz,alpha,beta,gamma
-      if (abs(alpha-90)>eps.or.abs(beta-90)>eps.or.abs(gamma-90)>eps)
+      read(47,*)    zeorx,zeory,zeorz,alpha,betaang,gamma
+      if (abs(alpha-90)>eps.or.abs(betaang-90)>eps.or.abs(gamma-90)>eps)
      &     then
          lsolid(ibox)=.true.
          lrect(ibox)=.false.
       else
          lsolid(ibox)=.false.
       end if
-      if (myid.eq.0) write(16,102) alpha,beta,gamma
-      onepi=datan(1d0)*4
+      if (myid.eq.0) write(16,102) alpha,betaang,gamma
       alpha=alpha*onepi/180
-      beta=beta*onepi/180
+      betaang=betaang*onepi/180
       gamma=gamma*onepi/180
       hmat(ibox,1)=zeorx
       hmat(ibox,2)=0.
@@ -43,11 +43,11 @@
       hmat(ibox,4)=zeory*cos(gamma)
       hmat(ibox,5)=zeory*sin(gamma)
       hmat(ibox,6)=0.
-      hmat(ibox,7)=zeorz*cos(beta)
-      hmat(ibox,8)=zeorz*sqrt(cos(beta)**2*cos(gamma)**2+cos(alpha)**2
-     &     -2*cos(alpha)*cos(beta)*cos(gamma))/sin(gamma)
-      hmat(ibox,9)=zeorz*sqrt(1-cos(alpha)**2-cos(beta)**2-cos(gamma)
-     &     **2+2*cos(alpha)*cos(beta)*cos(gamma))/sin(gamma)
+      hmat(ibox,7)=zeorz*cos(betaang)
+      hmat(ibox,8)=zeorz*sqrt(cos(betaang)**2*cos(gamma)**2+cos(alpha)**2
+     &     -2*cos(alpha)*cos(betaang)*cos(gamma))/sin(gamma)
+      hmat(ibox,9)=zeorz*sqrt(1-cos(alpha)**2-cos(betaang)**2-cos(gamma)
+     &     **2+2*cos(alpha)*cos(betaang)*cos(gamma))/sin(gamma)
       where(abs(hmat(ibox,:)).lt.eps) hmat(ibox,:)=0
       call matops(ibox)
 

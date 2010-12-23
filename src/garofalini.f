@@ -21,7 +21,7 @@
 !$$$      include 'poten.inc'
 
       real(KIND=double_precision)::rijsq,rij,hterm,coul,erfunc,qa,qb
-      real(KIND=double_precision)::hterma
+      real(KIND=double_precision)::hterma,garofalini
       integer(KIND=normal_int)::ntij,ntii,ntjj,aa,bb,i
 
 !      write(6,*) 'input',rijsq,ntij,qa,qb

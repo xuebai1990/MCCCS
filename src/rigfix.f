@@ -21,34 +21,32 @@
 
       logical::lnew,ovrlap,lterm,lovra,lfind,lshit
 
-      integer(KIND=normal_int)::iw,i,ibox,imolty,iufrom,iuprev,ntogrow,count,iu,counta
-     &     ,ilist,ja,max,num,inum,j,ju,iv,nlist,ichoi,ichtor,ip,itor
-     &     ,it,jut2,jut3,jut4,jttor,iwalk,glist,ifrom,inuma
+      integer(KIND=normal_int)::iw,i,ibox,imolty,iufrom,iuprev,ntogrow
+     & ,count,iu,counta,ilist,ja,max,num,inum,j,ju,iv,nlist,ichoi,ichtor
+     & ,ip,itor,it,jut2,jut3,jut4,jttor,iwalk,glist,ifrom,inuma
 
       parameter(max=10)
 
 
-      real(KIND=double_precision)::xub,yub,zub,lengtha,lengthb,dum,xfix,yfix,zfix
-     &     ,phia,bendang,thetac,twopi,phidisp,phi,rlength,vdha,vtor
-     &     ,vtorsion,phitors,bf_tor,random,ran_tor,bs,rxpa,rypa,rzpa
-     &     ,bsuma,vtrya,vtrintraa,vtrexta,vtrelecta,vtrewalda
-     &     ,vtrorienta,vtrintera,bsum,rbf,wrig
-     &     ,vtrelecta_intra,vtrelecta_inter
+      real(KIND=double_precision)::xub,yub,zub,lengtha,lengthb,dum,xfix
+     & ,yfix,zfix,phia,bendang,thetac,phidisp,phi,rlength,vdha
+     & ,vtor,vtorsion,phitors,bf_tor,random,ran_tor,bs,rxpa,rypa,rzpa
+     & ,bsuma,vtrya,vtrintraa,vtrexta,vtrelecta,vtrewalda,vtrorienta
+     & ,vtrintera,bsum,rbf,wrig,vtrelecta_intra,vtrelecta_inter
 
       dimension ilist(numax),inum(max),xfix(numax),yfix(numax)
-     &     ,zfix(numax),lfind(numax),phia(numax),bendang(numax)
-     &     ,rlength(numax),vtorsion(nchtor_max),phitors(nchtor_max)
-     &     ,bf_tor(nchtor_max),rxpa(numax,nchmax),rypa(numax,nchmax)
-     &     ,rzpa(numax,nchmax),vtrelecta(nchmax),vtrewalda(nchmax)
-     &     ,bsuma(nchmax),vtrya(nchmax),vtrintraa(nchmax)
-     &     ,vtrorienta(nchmax),vtrexta(nchmax),glist(max)
-     &     ,lovra(nchmax),vtrintera(nchmax),ifrom(numax),inuma(max)
-     &     ,vtrelecta_intra(nchmax),vtrelecta_inter(nchmax)
+     & ,zfix(numax),lfind(numax),phia(numax),bendang(numax)
+     & ,rlength(numax),vtorsion(nchtor_max),phitors(nchtor_max)
+     & ,bf_tor(nchtor_max),rxpa(numax,nchmax),rypa(numax,nchmax)
+     & ,rzpa(numax,nchmax),vtrelecta(nchmax),vtrewalda(nchmax)
+     & ,bsuma(nchmax),vtrya(nchmax),vtrintraa(nchmax)
+     & ,vtrorienta(nchmax),vtrexta(nchmax),glist(max) ,lovra(nchmax)
+     & ,vtrintera(nchmax),ifrom(numax),inuma(max)
+     & ,vtrelecta_intra(nchmax),vtrelecta_inter(nchmax)
 !     ----------------------------------------------------------
 
 !      write(iou,*) 'START RIGFIX'
 
-      twopi = dacos(-1.0d0) * 2.0d0
       wrig = 1.0d0
       do j = 1, nunit(imolty)
          lfind(j) = .false.

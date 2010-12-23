@@ -35,20 +35,20 @@
 
       integer(KIND=normal_int)::i,j,imolty,ic,ncount,jhmat,numvecto
       real(KIND=double_precision)::bxo,byo,bzo,hbxo,hbyo,hbzo
-      real(KIND=double_precision)::volo,vboxo,dfac,
-     &                 vintero,vtailo,vexto,velecto,vflucqo
+      real(KIND=double_precision)::volo,vboxo,dfac, vintero,vtailo,vexto
+     & ,velecto,vflucqo
       real(KIND=double_precision)::kxo(vectormax),kyo(vectormax),
-     &                 kzo(vectormax),prefacto(vectormax)
-      real(KIND=double_precision)::voln,vboxn,
-     &                 vintern,vtailn,vextn,velectn,vflucqn
+     & kzo(vectormax),prefacto(vectormax)
+      real(KIND=double_precision)::voln,vboxn, vintern,vtailn,vextn
+     & ,velectn,vflucqn
       real(KIND=double_precision)::rxuo(nmax,numax),ryuo(nmax,numax)
-     &                ,rzuo(nmax,numax),qquo(nmax,numax)
-      real(KIND=double_precision)::random,df,dx0,dy0,dz0,dx,dy,dz,v,dele,vdum
-     &                 ,vinter,vtail,vext,vminim,velect,vflucq
-     &                 ,velect_intra,velect_inter
-      real(KIND=double_precision)::xcmo(nmax),ycmo(nmax),zcmo(nmax),calpo
-     &                 ,xcmoi,ycmoi,zcmoi,xcmi,ycmi,zcmi
-     &                 ,xcmj,ycmj,zcmj,rxuij,ryuij,rzuij
+     & ,rzuo(nmax,numax),qquo(nmax,numax)
+      real(KIND=double_precision)::random,df,dx0,dy0,dz0,dx,dy,dz,v,dele
+     & ,vdum,vinter,vtail,vext,vminim,velect,vflucq,velect_intra
+     & ,velect_inter
+      real(KIND=double_precision)::xcmo(nmax),ycmo(nmax),zcmo(nmax)
+     & ,calpo,xcmoi,ycmoi,zcmoi,xcmi,ycmi,zcmi,xcmj,ycmj,zcmj,rxuij
+     & ,ryuij,rzuij
       real(KIND=double_precision)::rbcut,rbox
       real(KIND=double_precision)::w(3),vx,vy,vz
       integer(KIND=normal_int)::boxvch,ichoiq,ibox
