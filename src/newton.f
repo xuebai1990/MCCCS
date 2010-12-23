@@ -12,6 +12,7 @@
        use util_files
        use util_timings
        implicit none
+       include 'common.inc'
   
        integer(KIND=int)::i,j,maxiter
        real(KIND=double_precision)::x_in,x_out,erfunc

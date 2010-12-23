@@ -26,6 +26,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
 
 !$$$      include 'control.inc'
 !$$$      include 'conver.inc'
@@ -159,6 +160,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
 
 !$$$      include 'conver.inc'
 

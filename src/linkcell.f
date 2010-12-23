@@ -9,6 +9,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
 
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
@@ -233,6 +234,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
       
       integer(KIND=int)::i,j,k,ncellx,ncelly,ncellz,linkdecode
       

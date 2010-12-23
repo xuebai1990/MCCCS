@@ -8,7 +8,8 @@
       use util_string
       use util_files
       use util_timings
-      implicit none 
+      implicit none
+      include 'common.inc' 
 !$$$      include 'grid.inc'
 !$$$      include 'zeopoten.inc'
 !$$$      include 'zeolite.inc'
@@ -151,6 +152,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
 
 !$$$      include 'control.inc'
 !$$$      include 'zeolite.inc'

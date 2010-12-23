@@ -4,6 +4,7 @@
 ! cause inconsistent behavior across platforms
 
       implicit none
+      include 'common.inc'
       save
 
       integer,parameter::single_precision=selected_real_kind(6,30)

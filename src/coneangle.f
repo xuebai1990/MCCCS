@@ -23,6 +23,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
 !$$$      include 'control.inc'
       real(KIND=double_precision)::thetaone, thetatwo, phione, phitwo, angle
      &     ,sintheone,costheone,sinthetwo,costhetwo

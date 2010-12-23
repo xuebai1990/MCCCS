@@ -9,6 +9,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
 !$$$      include 'control.inc'
 !$$$      include 'system.inc'
 !$$$      include 'peboco.inc'

@@ -10,7 +10,8 @@
       use util_string
       use util_files
       use util_timings
-      implicit none      
+      implicit none
+      include 'common.inc'      
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'system.inc'

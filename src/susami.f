@@ -13,6 +13,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
 
 !$$$      include 'external.inc'
 !$$$      include 'ljsamipara.inc'

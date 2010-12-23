@@ -9,6 +9,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
 !$$$      include 'zeopoten.inc'
       character(LEN=*)::atom
       integer(KIND=int)::ntype,atomtype

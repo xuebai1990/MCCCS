@@ -15,6 +15,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
  
 !$$$      include 'coord.inc'
 !$$$      include 'system.inc'

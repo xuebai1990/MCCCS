@@ -32,6 +32,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
 
       integer(KIND=int)::i,seed
       real(KIND=double_precision)::random,rtest

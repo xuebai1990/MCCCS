@@ -22,6 +22,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'connect.inc'
@@ -513,6 +514,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
 
       real(KIND=double_precision)::equil, kforce, beta, angle, vangle, rr, v1, v2
      &     ,random, tabulated_bend

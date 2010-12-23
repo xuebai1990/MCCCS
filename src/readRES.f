@@ -17,6 +17,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
 
       character(LEN=default_path_length)::infile,outfile
       character(LEN=default_string_length)::sname(500),celltype

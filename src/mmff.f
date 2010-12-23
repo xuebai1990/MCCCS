@@ -14,6 +14,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
 !$$$      include 'control.inc'
 !$$$      include 'merck.inc'
       real(KIND=double_precision)::rijsq,mmff,rs2,rs1,sr1,sr7,rs7

@@ -9,6 +9,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
       real(KIND=double_precision)::RANDOM , RCARRY
       RANDOM = RCARRY()
       RETURN
@@ -32,6 +33,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
       integer(KIND=int)::IA , IC , ISEED , M1
       real(KIND=double_precision)::RANDx , RM
       PARAMETER (M1=714025,IA=1366,IC=150889,RM=1.D+0/M1)
@@ -54,6 +56,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
       integer(KIND=int)::ISEED
 
       CALL RSTART(ISEED)
@@ -73,6 +76,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
       real(KIND=double_precision)::Carry , ran , RANDx , Seed
       integer(KIND=int)::i , I24 , Iseed , ISEEDA , J24
       COMMON /RANDM/ Seed(24) , Carry , I24 , J24 , Iseed
@@ -113,6 +117,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
       real(KIND=double_precision)::Carry , RCARRY , Seed , TWOM24 , TWOP24 , uni
       integer(KIND=int)::I24 , Iseed , J24
       PARAMETER (TWOP24=16777216.D+0,TWOM24=1.D+0/TWOP24)

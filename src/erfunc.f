@@ -8,6 +8,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
 
 ! complementary error function
 

@@ -14,6 +14,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
       integer(KIND=int)::ii
       real(KIND=double_precision)::random, x, y, z
       real(KIND=double_precision)::xi1,xi2,xisq

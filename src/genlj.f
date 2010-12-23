@@ -19,6 +19,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
 !$$$      include 'control.inc'
 !$$$      include 'poten.inc'
       real(KIND=double_precision)::rijsq,rij,srij,sr2,epsilon2,genlj

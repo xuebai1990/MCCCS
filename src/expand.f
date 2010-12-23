@@ -9,6 +9,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
 
 !    **********************************************************************
 !    ** make a transition of a selected molecule from state i to state j **

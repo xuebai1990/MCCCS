@@ -9,6 +9,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
 !$$$      include 'torsion.inc'
 !$$$      include 'conver.inc'
 !$$$      include 'control.inc'
@@ -75,6 +76,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
 
 !$$$      include 'torsion.inc'
 !$$$      include 'control.inc'
@@ -174,6 +176,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
 
 !$$$      include 'torsion.inc'
 !$$$      include 'conver.inc'

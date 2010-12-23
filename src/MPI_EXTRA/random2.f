@@ -32,6 +32,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
       real(KIND=double_precision)::RANDOM2 , nRCARRY
       RANDOM2 = nRCARRY()
       RETURN
@@ -55,6 +56,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
 ! RP added for debugging
 !      include 'mpif.h'
 !      include 'mpi.inc'
@@ -83,6 +85,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
       integer(KIND=int)::nISEED
 
       CALL nRSTART(nISEED)
@@ -103,6 +106,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
 ! ----RP added for debugging
 !      include 'mpif.h'
 !      include 'mpi.inc'
@@ -147,6 +151,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
       real(KIND=double_precision)::nCarry , nRCARRY , nSeed , nTWOM24,nTWOP24,nuni
       integer(KIND=int)::nI24 , nIseed , nJ24
       PARAMETER (nTWOP24=16777216.D+0,nTWOM24=1.D+0/nTWOP24)

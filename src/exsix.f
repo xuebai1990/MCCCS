@@ -13,6 +13,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
 !$$$      include 'control.inc'
 !$$$      include 'expsix.inc'
       real(KIND=double_precision)::rijsq,rij,exsix

@@ -10,6 +10,7 @@
       use util_files
       use util_timings
       implicit none
+      include 'common.inc'
 !    ********************************************************************
 !    ** calculates the reciprocal space contribution to pressure using **
 !    ** thermodynamic definition. See J. Chem. Phys. Vol. 109 P2791.   **
