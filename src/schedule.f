@@ -4,22 +4,30 @@
 !     ** computes the growth shedule for CBMC type moves               **
 !     *******************************************************************
 !     movetype=1: called from config.f
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include 'control.inc'
-      include 'coord.inc'
-      include 'cbmc.inc'
-      include 'rosen.inc'
-      include 'connect.inc'
-      include 'inputdata.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'cbmc.inc'
+!$$$      include 'rosen.inc'
+!$$$      include 'connect.inc'
+!$$$      include 'inputdata.inc'
 
       logical::lprint,lfind
-      integer::random_index
-      integer::kickout,icbu,igrow,imolty,iutry,iut,invtry,iu,ju
-      integer::ibead,count,ivib,idir,movetype,iprev,itry,i,ib2
-      integer::temp_store,temp_count,zz,outer_sites,index,outer_num
+      integer(KIND=int)::random_index
+      integer(KIND=int)::kickout,icbu,igrow,imolty,iutry,iut,invtry,iu,ju
+      integer(KIND=int)::ibead,count,ivib,idir,movetype,iprev,itry,i,ib2
+      integer(KIND=int)::temp_store,temp_count,zz,outer_sites,index,outer_num
      &     ,outer_prev,iufrom,outer_try
-      real(8)::dbgrow,random
+      real(KIND=double_precision)::dbgrow,random
       parameter (lprint = .false.)
       dimension temp_store(numax),outer_sites(numax),outer_prev(numax)
      &     ,lfind(numax)

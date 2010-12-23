@@ -1,3 +1,5 @@
+! TABULATED.INC
+
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !cccc  for use with tabulated potentials   
 !cccc  if you are not using a tabulated potential,

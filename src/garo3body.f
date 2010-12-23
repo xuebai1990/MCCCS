@@ -1,14 +1,22 @@
       subroutine vthreebody(vthree)
 
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include "control.inc"
-      include "coord.inc"
-      include 'garofalini.inc'
+!$$$      include "control.inc"
+!$$$      include "coord.inc"
+!$$$      include 'garofalini.inc'
 
-      integer::ntang,nta,ntb,tri,i,j,k
-      real(8)::vthree,vthreea,thetac,g,p
+      integer(KIND=int)::ntang,nta,ntb,tri,i,j,k
+      real(KIND=double_precision)::vthree,vthreea,thetac,g,p
       logical::lwrite
 
       vthreea = 0.0d0
@@ -115,14 +123,22 @@
 !**************************************************************************
       subroutine triad
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include "control.inc"
-      include "coord.inc"
-      include "garofalini.inc"
-      include "neigh.inc"
+!$$$      include "control.inc"
+!$$$      include "coord.inc"
+!$$$      include "garofalini.inc"
+!$$$      include "neigh.inc"
 
-      integer::i,j,k,imolty,ptr,ptr2
+      integer(KIND=int)::i,j,k,imolty,ptr,ptr2
 
 !      write(6,*) 'starting triad'
 
@@ -169,20 +185,28 @@
 !******************************************************************
       subroutine triad_en(i,vthree,cnt,ni,nrij,nxi,nyi,nzi,lupdate)
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include "control.inc"
-      include "coord.inc"
-      include "garofalini.inc"
-      include "neigh.inc"
+!$$$      include "control.inc"
+!$$$      include "coord.inc"
+!$$$      include "garofalini.inc"
+!$$$      include "neigh.inc"
 
-      integer::i,j,k,m,imolty,jmolty,kmolty,mmolty,atomj,atomk,atomm
-      integer::nta,ntb,ntang,cnt,ni(nmax),temp_cnt,temp,number(nmax)
-      integer::temp_nei(nmax),nnn,itype,jtype,ktype,mtype
+      integer(KIND=int)::i,j,k,m,imolty,jmolty,kmolty,mmolty,atomj,atomk,atomm
+      integer(KIND=int)::nta,ntb,ntang,cnt,ni(nmax),temp_cnt,temp,number(nmax)
+      integer(KIND=int)::temp_nei(nmax),nnn,itype,jtype,ktype,mtype
       logical::ltemp(nmax),lupdate,lwrite
-      real(8)::vthree,vthreea,thetac,p,g,nrij(nmax),
+      real(KIND=double_precision)::vthree,vthreea,thetac,p,g,nrij(nmax),
      &     nxi(nmax),nyi(nmax),nzi(nmax)
-      real(8)::temp_dist(nmax),temp_x(nmax),temp_y(nmax),
+      real(KIND=double_precision)::temp_dist(nmax),temp_x(nmax),temp_y(nmax),
      &     temp_z(nmax)
 
       lwrite=.false.

@@ -1,30 +1,15 @@
       FUNCTION RANDOM()
 
-! random
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-! John Stubbs, and Collin Wick and Ilja Siepmann  
-!                     
-! This program is free software; you can redistribute it and/or
-! modify it under the terms of the GNU General Public License
-! as published by the Free Software Foundation; either version 2
-! of the License, or (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program; if not, write to 
-!
-! Free Software Foundation, Inc. 
-! 59 Temple Place - Suite 330
-! Boston, MA  02111-1307, USA.
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-
-      IMPLICIT NONE
-      real(8)::RANDOM , RCARRY
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
+      implicit none
+      real(KIND=double_precision)::RANDOM , RCARRY
       RANDOM = RCARRY()
       RETURN
 ! ----------------------------------------------------C
@@ -38,9 +23,17 @@
 !  reproducible, for any machine with at least 32 bits / real::number.
 !  REF: Press, Flannery, Teukolsky, Vetterling, Numerical Recipes (1986)
 !----------------------------------------------------------------------C
-      IMPLICIT NONE
-      integer::IA , IC , ISEED , M1
-      real(8)::RANDx , RM
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
+      implicit none
+      integer(KIND=int)::IA , IC , ISEED , M1
+      real(KIND=double_precision)::RANDx , RM
       PARAMETER (M1=714025,IA=1366,IC=150889,RM=1.D+0/M1)
 !
       ISEED = MOD(IA*ISEED+IC,M1)
@@ -52,8 +45,16 @@
       END
 
       SUBROUTINE RANSET(ISEED)
-      IMPLICIT NONE
-      integer::ISEED
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
+      implicit none
+      integer(KIND=int)::ISEED
 
       CALL RSTART(ISEED)
       RETURN
@@ -63,9 +64,17 @@
 !----------------------------------------------------------------------C
 !       Initialize Marsaglia list of 24 random numbers.
 !----------------------------------------------------------------------C
-      IMPLICIT NONE
-      real(8)::Carry , ran , RANDx , Seed
-      integer::i , I24 , Iseed , ISEEDA , J24
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
+      implicit none
+      real(KIND=double_precision)::Carry , ran , RANDx , Seed
+      integer(KIND=int)::i , I24 , Iseed , ISEEDA , J24
       COMMON /RANDM/ Seed(24) , Carry , I24 , J24 , Iseed
 
       I24 = 24
@@ -95,9 +104,17 @@
 !----------------------------------------------------------------------C
 !       Random number generator from Marsaglia.
 !----------------------------------------------------------------------C
-      IMPLICIT NONE
-      real(8)::Carry , RCARRY , Seed , TWOM24 , TWOP24 , uni
-      integer::I24 , Iseed , J24
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
+      implicit none
+      real(KIND=double_precision)::Carry , RCARRY , Seed , TWOM24 , TWOP24 , uni
+      integer(KIND=int)::I24 , Iseed , J24
       PARAMETER (TWOP24=16777216.D+0,TWOM24=1.D+0/TWOP24)
       COMMON /RANDM/ Seed(24) , Carry , I24 , J24 , Iseed
 !

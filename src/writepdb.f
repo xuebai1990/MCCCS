@@ -1,13 +1,21 @@
       subroutine writepdb(nmol,natom,ibox)
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include 'zeolite.inc'
-      include 'control.inc'
-      include 'coord.inc'
+!$$$      include 'zeolite.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
 
-      integer::im,ia,nmol,natom,iguest,imm,ibox
-      character::atom*4
+      integer(KIND=int)::im,ia,nmol,natom,iguest,imm,ibox
+      character(LEN=4)::atom
 
       open(unit=48, file='system.pdb', form='formatted')
       rewind(48)

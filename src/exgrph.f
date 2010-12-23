@@ -1,49 +1,33 @@
         function exgrph (x,y,z,ntij)
 
-! exgrph
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-! John Stubbs, and Collin Wick and Ilja Siepmann  
-!                     
-! This program is free software; you can redistribute it and/or
-! modify it under the terms of the GNU General Public License
-! as published by the Free Software Foundation; either version 2
-! of the License, or (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program; if not, write to 
-!
-! Free Software Foundation, Inc. 
-! 59 Temple Place - Suite 330
-! Boston, MA  02111-1307, USA.
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-
 ! - calculates the energy of a bead with a graphite surface
 
-
+        use global_data
+        use var_type
+        use const_phys
+        use const_math
+        use util_math
+        use util_string
+        use util_files
+        use util_timings
         implicit none
         
-        include 'control.inc'
-        include 'external.inc'
-        include 'poten.inc'
-        real(8)::aa,aa2
-        real(8)::a1sq
-        real(8)::e0,e1
-        real(8)::exgrph
-        real(8)::fxy
-        real(8)::x,y,z
-        real(8)::pi2,pi4
-        real(8)::bb,cc,dd
-        real(8)::k2,k5
-        real(8)::mbessel
-        real(8)::sz2
-        real(8)::zz
-        integer::ntij
+!$$$        include 'control.inc'
+!$$$        include 'external.inc'
+!$$$        include 'poten.inc'
+        real(KIND=double_precision)::aa,aa2
+        real(KIND=double_precision)::a1sq
+        real(KIND=double_precision)::e0,e1
+        real(KIND=double_precision)::exgrph
+        real(KIND=double_precision)::fxy
+        real(KIND=double_precision)::x,y,z
+        real(KIND=double_precision)::pi2,pi4
+        real(KIND=double_precision)::bb,cc,dd
+        real(KIND=double_precision)::k2,k5
+        real(KIND=double_precision)::mbessel
+        real(KIND=double_precision)::sz2
+        real(KIND=double_precision)::zz
+        integer(KIND=int)::ntij
         
         parameter (pi2 = 6.28318530718d0, pi4 = 12.5663706144d0)
 

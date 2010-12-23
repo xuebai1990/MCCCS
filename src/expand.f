@@ -1,5 +1,13 @@
       subroutine expand
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
 !    **********************************************************************
@@ -8,20 +16,20 @@
 !    ** written on Aug. 4/99 by Bin Chen.                                **
 !    **********************************************************************
       
-      include 'control.inc'
-      include 'coord.inc'
-      include 'coord2.inc'
-      include 'system.inc'
-      include 'ensemble.inc'
-      include 'bnbsma.inc'
-      include 'inputdata.inc'
-      include 'expand.inc'
-      include 'poten.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'coord2.inc'
+!$$$      include 'system.inc'
+!$$$      include 'ensemble.inc'
+!$$$      include 'bnbsma.inc'
+!$$$      include 'inputdata.inc'
+!$$$      include 'expand.inc'
+!$$$      include 'poten.inc'
 
       logical::ovrlap
-      integer::i,ibox,iunit,flagon,itype,j,imolty,icbu,ic,imt,jmt,
+      integer(KIND=int)::i,ibox,iunit,flagon,itype,j,imolty,icbu,ic,imt,jmt,
      &     itype2,disp
-      real(8)::dchain,random,vnew,vold
+      real(KIND=double_precision)::dchain,random,vnew,vold
      &                 ,vintran,vintrao,deltv,deltvb,disvsq
      &                 ,vintern,vintero,vextn,vexto,rchain
      &                 ,velectn,velecto,vdum

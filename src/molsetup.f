@@ -1,12 +1,20 @@
       subroutine molsetup(imolty)
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include 'control.inc'
-      include 'coord.inc'
-      include 'connect.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'connect.inc'
 
-      integer::i,j,k,n,iunit,imolty,dum,iu,countbend,counttor
+      integer(KIND=int)::i,j,k,n,iunit,imolty,dum,iu,countbend,counttor
      &     ,atype,btype,ctype,dtype,tortype
      &     ,ibend,bendtype,ntor,itor,ju,ku,nu,type,sitelook
      &     ,vibtype,countvib
@@ -143,7 +151,7 @@
 
       logical::lfinda,lfindb,lfound
 
-      integer::iinit,atype,btype,vibtype,nsite,isite,vbtype
+      integer(KIND=int)::iinit,atype,btype,vibtype,nsite,isite,vbtype
      &     ,ntvib,n,i,ia,ib
 
       dimension nsite(20,2),isite(20,2,7),vbtype(20)
@@ -225,7 +233,7 @@
 
       logical::lfinda,lfindb,lfindc,lfound
 
-      integer::iinit,atype,btype,ctype,bendtype,nsite,isite
+      integer(KIND=int)::iinit,atype,btype,ctype,bendtype,nsite,isite
      &     ,bntype,ntbend,n,i,ia,ib,ic
 
       dimension nsite(20,3),isite(20,3,7),bntype(20)
@@ -326,7 +334,7 @@
 
       logical::lfinda,lfindb,lfindc,lfindd,lfound,lrev
 
-      integer::iinit,atype,btype,ctype,dtype,tortype,isite,nsite
+      integer(KIND=int)::iinit,atype,btype,ctype,dtype,tortype,isite,nsite
      &     ,n,i,ia,ib,ic,id,trtype,nttor,ir
 
 

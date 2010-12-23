@@ -1,20 +1,29 @@
       function exzeo(xi,yi,zi,idi)
 
-      use grid
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none 
-      real(8)::exzeo,xi,yi,zi,r2,xr,yr,zr,r2i,r6
-      integer::m,mt,mp,idi,idj,ntij,igtype,ibox=1
-      integer::j,j0,jp,k,k0,kp,l,l0,lp
+ 
+!$$$      include 'zeopoten.inc'
+!$$$      include 'zeolite.inc'
+!$$$      include 'control.inc'
+!$$$      include 'external.inc'
+!$$$      include 'system.inc'
+!$$$      include 'cell.inc'
+!$$$      include 'poten.inc'
+!$$$      include 'grid.inc'
+      real(KIND=double_precision)::exzeo,xi,yi,zi,r2,xr,yr,zr,r2i,r6
+      integer(KIND=int)::m,mt,mp,idi,idj,ntij,igtype,ibox=1
+      integer(KIND=int)::j,j0,jp,k,k0,kp,l,l0,lp
       parameter (m=2,mt=2*m+1,mp=m+1)
-      real(8)::yjtmp(mt),yktmp(mt),yltmp(mt)
-      real(8)::xt(mt),yt(mt),zt(mt),sx,sy,sz
-      include 'zeopoten.inc'
-      include 'zeolite.inc'
-      include 'control.inc'
-      include 'external.inc'
-      include 'system.inc'
-      include 'cell.inc'
-      include 'poten.inc'
+      real(KIND=double_precision)::yjtmp(mt),yktmp(mt),yltmp(mt)
+      real(KIND=double_precision)::xt(mt),yt(mt),zt(mt),sx,sy,sz
 
       if (.not.lzgrid) then
 ! to be implemented
@@ -83,12 +92,20 @@
       subroutine polint(xa,ya,n,x,y)
 !  (C) Copr. 1986-92 Numerical Recipes Software +3Y.
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-      integer::n,nmax
-      real(8)::dy,x,y,xa(n),ya(n)
+      integer(KIND=int)::n,nmax
+      real(KIND=double_precision)::dy,x,y,xa(n),ya(n)
       parameter (nmax=10)
-      integer::i,m,ns
-      real(8)::den,dif,dift,ho,hp,w,c(nmax),d(nmax)
+      integer(KIND=int)::i,m,ns
+      real(KIND=double_precision)::den,dif,dift,ho,hp,w,c(nmax),d(nmax)
       ns=1
       dif=abs(x-xa(1))
       do  i=1,n

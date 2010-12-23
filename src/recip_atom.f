@@ -6,14 +6,22 @@
 !    ** rewritten on June 25/99 by Bin Chen.                            **
 !    *********************************************************************
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-      integer::ic,zz,ii,imolty,ibox,ncount,type
-      real(8)::vrecipnew,vrecipold,sumr(2),sumi(2),arg
-      include 'control.inc'
-      include 'coord.inc'
-      include 'coord2.inc'
-      include 'ewaldsum.inc'
-      include 'poten.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'coord2.inc'
+!$$$      include 'ewaldsum.inc'
+!$$$      include 'poten.inc'
+      integer(KIND=int)::ic,zz,ii,imolty,ibox,ncount,type
+      real(KIND=double_precision)::vrecipnew,vrecipold,sumr(2),sumi(2),arg
 
       ncount = numvect(ibox)
 

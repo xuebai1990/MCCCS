@@ -1,9 +1,17 @@
       function atomtype(ntype,atom)
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-      include 'zeopoten.inc'
-      character(len=*)::atom
-      integer::ntype,atomtype
+!$$$      include 'zeopoten.inc'
+      character(LEN=*)::atom
+      integer(KIND=int)::ntype,atomtype
 
 !     Assigning id's to atomtypes
 

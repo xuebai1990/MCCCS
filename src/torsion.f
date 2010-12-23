@@ -1,12 +1,20 @@
       subroutine lininter(theta,spltor,ttyp)
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-      include 'torsion.inc'
-      include 'conver.inc'
-      include 'control.inc'
+!$$$      include 'torsion.inc'
+!$$$      include 'conver.inc'
+!$$$      include 'control.inc'
 
-      integer::ttyp,klo,khi,k,xa,bin,addl
-      real(8)::theta,spltor,thetarem,tordiff,torstep,left
+      integer(KIND=int)::ttyp,klo,khi,k,xa,bin,addl
+      real(KIND=double_precision)::theta,spltor,thetarem,tordiff,torstep,left
 
 ! Routine to calculate torsion potential using linear interpolation between 2 points
 ! Requires a file (fort.40) running from -180 to 180 in 1/4 degree intervals
@@ -58,13 +66,21 @@
 
       subroutine spline(yp1,ypn,tortyp)
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include 'torsion.inc'
-      include 'control.inc'
+!$$$      include 'torsion.inc'
+!$$$      include 'control.inc'
       
-!      integer::n,nmax
-!      real(8)::yp1,ypn,x(n),y(n),y2(n)
+!      integer(KIND=int)::n,nmax
+!      real(KIND=double_precision)::yp1,ypn,x(n),y(n),y2(n)
 !      parameter (nmax=500)
 
 !     Numerical recipes, 2nd ed, 1992. - cubic spline
@@ -79,8 +95,8 @@
 !     nmax = largest value of n
 !     x=deg y=tabtorso y2=torderiv2 n=points
 
-      integer::i,k,points,tortyp
-      real(8)::p,qn,sig,un,u(500,10),yp1,ypn
+      integer(KIND=int)::i,k,points,tortyp
+      real(KIND=double_precision)::p,qn,sig,un,u(500,10),yp1,ypn
       
 ! Routine sets up derivatives for use with spline interpolations
 ! Requires file (fort.40) running from -195 to 195 in degree steps
@@ -143,24 +159,30 @@
 
 
       subroutine splint(x,y,tortyp)
-
-      implicit none
-
-!      integer::n
-!      real(8)::x,y,xa(n),y2a(n),ya(n)
-
 !     From Numerical recipes, 2nd ed, 1992. - spline interpolation
 !     Given the arrays xa(1:n) and ya(1:n) of length n, which tabulate a
 !     function and given the array y2a(1:n), which is from the ouput of 
 !     spline, and given a value of x, this routine returns a cubic-spline
 !     interpolated value of y.
 !     xa = deg, ya = tabtorso, y2a = torderiv2, n = points
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
+      implicit none
 
-      include 'torsion.inc'
-      include 'conver.inc'
-      include 'control.inc'
-      integer::k, khi,klo,points,jttor,tortyp,xa
-      real(8)::a,b,h,x,y,vtorso,vtorsoa
+!$$$      include 'torsion.inc'
+!$$$      include 'conver.inc'
+!$$$      include 'control.inc'
+
+!      integer(KIND=int)::n
+!      real(KIND=double_precision)::x,y,xa(n),y2a(n),ya(n)
+      integer(KIND=int)::k, khi,klo,points,jttor,tortyp,xa
+      real(KIND=double_precision)::a,b,h,x,y,vtorso,vtorsoa
 
       points = splpnts(tortyp)
 

@@ -1,26 +1,3 @@
-!     ******************************************************************
-!     * MCCCS - Towhee: A Monte Carlo molecular simulation program     *
-!     * Copyright (C) 2000 Bin Chen, Marcus G. Martin,                 *
-!     * J. Ilja Siepmann, John Stubbs, and Collin D. Wick              *
-!     * see the file license.gpl for the full license information      *
-!     *                                                                *
-!     * This program is free software; you can redistribute it and/or  *
-!     * modify it under the terms of the GNU General Public License    *
-!     * as published by the Free Software Foundation; either version 2 *
-!     * of the License, or (at your option) any later version.         *
-!     *                                                                *
-!     * This program is distributed in the hope that it will be useful,*
-!     * but WITHOUT ANY WARRANTY; without even the implied warranty of *
-!     * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  *
-!     * GNU General Public License for more details.                   *
-!     *                                                                *
-!     * You should have received a copy of the GNU General Public      *
-!     * License along with this program; if not, write to the Free     *
-!     * Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,*
-!     * MA  02111-1307, USA.                                           *
-!     *                                                                *
-!     * See the file towhee.F for more information about the code      *
-!     ******************************************************************
       subroutine cone(iinit,x,y,z,alpha,gamma,ux,uy,uz)
 !     ******************************************************************
 !     * if iinit = 1 then it sets up the rotation matrix for the cone  *
@@ -40,20 +17,28 @@
 !     * originally written prior to 1995                               *
 !     * last modified 02-12-2001 by M.G. Martin                        *
 !     ******************************************************************
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include 'control.inc'
-      include 'conver.inc'
+!$$$      include 'control.inc'
+!$$$      include 'conver.inc'
 
 !     --- variables passed to/from the subroutine
-      integer::iinit
-      real(8)::x,y,z,alpha,gamma,ux,uy,uz
+      integer(KIND=int)::iinit
+      real(KIND=double_precision)::x,y,z,alpha,gamma,ux,uy,uz
 
 !     --- local variables
-      real(8)::a11,a12,a13,a21,a22,a31,a32,a33
+      real(KIND=double_precision)::a11,a12,a13,a21,a22,a31,a32,a33
      &     ,sinthe,costhe,sinpsi,cospsi,singamma,cosgamma
      &     ,uxtemp,uytemp,uztemp,sinalph,cosalph
-      real(8)::determ,arccos
+      real(KIND=double_precision)::determ,arccos
       save a11,a12,a13,a21,a22,a31,a32,a33,cosalph,sinalph
 
 !      write(iou,*) 'start CONE'
@@ -156,30 +141,6 @@
       return
       end
 
-
-!     ******************************************************************
-!     * MCCCS - Towhee: A Monte Carlo molecular simulation program     *
-!     * Copyright (C) 2000 Bin Chen, Marcus G. Martin,                 *
-!     * J. Ilja Siepmann, John Stubbs, and Collin D. Wick              *
-!     * see the file license.gpl for the full license information      *
-!     *                                                                *
-!     * This program is free software; you can redistribute it and/or  *
-!     * modify it under the terms of the GNU General Public License    *
-!     * as published by the Free Software Foundation; either version 2 *
-!     * of the License, or (at your option) any later version.         *
-!     *                                                                *
-!     * This program is distributed in the hope that it will be useful,*
-!     * but WITHOUT ANY WARRANTY; without even the implied warranty of *
-!     * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  *
-!     * GNU General Public License for more details.                   *
-!     *                                                                *
-!     * You should have received a copy of the GNU General Public      *
-!     * License along with this program; if not, write to the Free     *
-!     * Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,*
-!     * MA  02111-1307, USA.                                           *
-!     *                                                                *
-!     * See the file towhee.F for more information about the code      *
-!     ******************************************************************
       function arccos( value )
 !     ******************************************************************
 !     * computes the arc cosine of a value, with safety checks to make *
@@ -189,15 +150,23 @@
 !     * originally written 02-12-2001 by M.G. Martin                   *
 !     * last modified 02-12-2001 by M.G. Martin                        *
 !     ******************************************************************
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include 'conver.inc'
+!$$$      include 'conver.inc'
 
 !#include "constant.inc"      
 
-      real(8)::arccos,value
+      real(KIND=double_precision)::arccos,value
 
-!      real(8)::arccos,value,onepi
+!      real(KIND=double_precision)::arccos,value,onepi
 !      onepi = 3.141592653d0
 
       if ( value .gt. 1.0d0 ) then

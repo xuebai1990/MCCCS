@@ -1,11 +1,19 @@
       subroutine setpbc (ibox)
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-      include 'control.inc'
-      include 'system.inc'
-      include 'peboco.inc'
+!$$$      include 'control.inc'
+!$$$      include 'system.inc'
+!$$$      include 'peboco.inc'
 
-      integer::ibox
+      integer(KIND=int)::ibox
 
 ! ----------------------------------------------------------------
 

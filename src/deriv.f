@@ -2,16 +2,24 @@
 !
 ! calculate integrand in maginns interphase switch
 !
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-      include 'control.inc'
-      include 'system.inc'
-      include 'coord.inc'
-      include 'ipswpar.inc'
-      include 'cell.inc'
+!$$$      include 'control.inc'
+!$$$      include 'system.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'ipswpar.inc'
+!$$$      include 'cell.inc'
 
-      integer::ibox,i,j,k
+      integer(KIND=int)::ibox,i,j,k
 
-      real(8)::vol,hmats(3,3),hmatsi(3,3)
+      real(KIND=double_precision)::vol,hmats(3,3),hmatsi(3,3)
 
       if (lstagea) then
          dvdl = -(1.0d0-etais)*vipsw

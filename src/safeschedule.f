@@ -36,32 +36,37 @@
 !     **  COLLIN = MASTER of the known universe                          **
 !     *********************************************************************
 
-
-
-
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include 'control.inc'
-      include 'cbmc.inc'
-      include 'connect.inc'
-      include 'coord.inc'
-      include 'coord2.inc'
-      include 'fix.inc'
-      include 'inputdata.inc'
-      include 'rosen.inc'
+!$$$      include 'control.inc'
+!$$$      include 'cbmc.inc'
+!$$$      include 'connect.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'coord2.inc'
+!$$$      include 'fix.inc'
+!$$$      include 'inputdata.inc'
+!$$$      include 'rosen.inc'
 
 
       logical::lcount,lpick,lterm,lfixed,lfix,lfind
 
-      integer::igrow,imolty,count,counta,iw,ivib,iv,iu,ju,iutry
-      integer::j,ja,kickout,invtry,index,fintnum,fint,k,islen
-      integer::ffrom,fprev,flist,fnum,fnuma,findex,countb,iv1
-      integer::movetype,fmaxgrow,ku,kickouta,iufrom,iuprev
-      integer::num,inum,inuma,max
+      integer(KIND=int)::igrow,imolty,count,counta,iw,ivib,iv,iu,ju,iutry
+      integer(KIND=int)::j,ja,kickout,invtry,index,fintnum,fint,k,islen
+      integer(KIND=int)::ffrom,fprev,flist,fnum,fnuma,findex,countb,iv1
+      integer(KIND=int)::movetype,fmaxgrow,ku,kickouta,iufrom,iuprev
+      integer(KIND=int)::num,inum,inuma,max
 
       parameter(max=10)
 
-      real(8)::random,rbf
+      real(KIND=double_precision)::random,rbf
 
       dimension fint(numax),ffrom(numax,max),fprev(numax,max)
      &     ,flist(numax,max,max),fnum(numax),fnuma(numax,max)

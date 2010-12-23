@@ -13,31 +13,39 @@
 ! If you have more than two boxes then there are couple changes that need to be done
 ! in order for this subroutine to work. nprop in blkavg.inc needs to be set properly
 ! ************************************************************************************
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include 'control.inc'
-      include 'inputdata.inc'
-      include 'blkavg.inc'
-      include 'coord.inc'
-      include 'ensemble.inc'
-      include 'system.inc'
-      include 'cell.inc'
+!$$$      include 'control.inc'
+!$$$      include 'inputdata.inc'
+!$$$      include 'blkavg.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'ensemble.inc'
+!$$$      include 'system.inc'
+!$$$      include 'cell.inc'
 
-      integer::ibox, jbox, ig, il, imolty
-      integer, dimension(nbxmax):: temp_nmol,box_volume
-      integer, dimension(nbxmax,ntmax):: acnbox
-      double precision, dimension(nbxmax)::mol_vol      
-      double precision, dimension(nbxmax)::pres
-      real(8)::enchg1, enchg2,enchg3
-      real(8)::Heat_vapor_T, Heat_vapor_LJ, Heat_vapor_COUL
-      real(8)::CED_T, HSP_T, CED_LJ, HSP_LJ
-      real(8)::CED_COUL,HSP_COUL
-      real(8)::cal2joule, joule2cal
-      real(8)::pdV
+      integer(KIND=int)::ibox, jbox, ig, il, imolty
+      integer(KIND=int),dimension(nbxmax):: temp_nmol,box_volume
+      integer(KIND=int),dimension(nbxmax,ntmax):: acnbox
+      real(KIND=double_precision),dimension(nbxmax)::mol_vol      
+      real(KIND=double_precision),dimension(nbxmax)::pres
+      real(KIND=double_precision)::enchg1, enchg2,enchg3
+      real(KIND=double_precision)::Heat_vapor_T, Heat_vapor_LJ, Heat_vapor_COUL
+      real(KIND=double_precision)::CED_T, HSP_T, CED_LJ, HSP_LJ
+      real(KIND=double_precision)::CED_COUL,HSP_COUL
+      real(KIND=double_precision)::cal2joule, joule2cal
+      real(KIND=double_precision)::pdV
 
-      real(8)::T_Energy_Liq, T_Energy_Gas
-      real(8)::LJ_Energy_Liq, LJ_Energy_Gas
-      real(8)::Coul_Energy_Liq, Coul_Energy_Gas
+      real(KIND=double_precision)::T_Energy_Liq, T_Energy_Gas
+      real(KIND=double_precision)::LJ_Energy_Liq, LJ_Energy_Gas
+      real(KIND=double_precision)::Coul_Energy_Liq, Coul_Energy_Gas
 
 
 !     -- This is different than the conventional 4.184

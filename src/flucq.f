@@ -7,37 +7,45 @@
 !    ** rewritten by Bin Chen at 6-25-99.                             **
 !    *******************************************************************
  
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include 'control.inc'
-      include 'coord.inc'
-      include 'coord2.inc'
-      include 'ensemble.inc'
-      include 'system.inc' 
-      include 'inputdata.inc'
-      include 'bnbsma.inc'
-      include 'ewaldsum.inc'
-      include 'fepsi.inc'
-      include 'poten.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'coord2.inc'
+!$$$      include 'ensemble.inc'
+!$$$      include 'system.inc' 
+!$$$      include 'inputdata.inc'
+!$$$      include 'bnbsma.inc'
+!$$$      include 'ewaldsum.inc'
+!$$$      include 'fepsi.inc'
+!$$$      include 'poten.inc'
       
       logical::linterqt,ovrlap
-      integer::i,ibox,iunit,j,imolty,icbu,mainunit,ic,ii
+      integer(KIND=int)::i,ibox,iunit,j,imolty,icbu,mainunit,ic,ii
      &     ,ncount,ichoiq,ichoice,qunit,boxi,flagon
-      real(8)::dchain,random,vnew,vold,deltv,deltvb
+      real(KIND=double_precision)::dchain,random,vnew,vold,deltv,deltvb
      &  ,velectn,velecto,vflucqn,vflucqo
      &  ,dispbig,displit,vintern,vintero,vewaldn,vewaldo
-      real(8)::qion
-      real(8)::velectn_intra,velectn_inter,velecto_intra,
+      real(KIND=double_precision)::qion
+      real(KIND=double_precision)::velectn_intra,velectn_inter,velecto_intra,
      &  velecto_inter 
       dimension qion(numax)
-      real(8)::vrecipn,vrecipo,sumr,sumi,arg
+      real(KIND=double_precision)::vrecipn,vrecipo,sumr,sumi,arg
       dimension sumr(2),sumi(2)
       
-      integer::maini,mainj,jchain
-      real(8)::qionj(numax),vinterjo,vflucqjo,velectjo,
+      integer(KIND=int)::maini,mainj,jchain
+      real(KIND=double_precision)::qionj(numax),vinterjo,vflucqjo,velectjo,
      &     voldj,vinterjn,vflucqjn,velectjn,vnewj,corr,rij,erfunc,
      &     rxuij,ryuij,rzuij,vdum,vewaldjn,vewaldjo
-      real(8)::qoldj2,vnewi,velectni,vinterni,voldi,
+      real(KIND=double_precision)::qoldj2,vnewi,velectni,vinterni,voldi,
      &     velectoi,vinteroi
 
 ! --------------------------------------------------------------------
@@ -207,7 +215,7 @@
 ! *** For charge transfer case, i molecule increases by dispbig and
 ! *** jchain molecule decreases by dispbig. 
 ! *** correction for the reptition of the calculation of the 
-! *** coulombic real::space term between maini and mainj
+! *** coulombic real space term between maini and mainj
          maini = mainunit
  32      mainunit = int( dble(iunit)*random() ) + 1
 ! *** for unit which is not a charge site

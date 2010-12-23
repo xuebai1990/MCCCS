@@ -9,18 +9,26 @@
 !    ** written on June 25/99 by Bin Chen.                              **
 !    *********************************************************************
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-      include 'control.inc'
-      include 'coord.inc'
-      include 'coord2.inc'
-      include 'ensemble.inc'
-      include 'rosen.inc'
-      include 'inputdata.inc'
-      include 'system.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'coord2.inc'
+!$$$      include 'ensemble.inc'
+!$$$      include 'rosen.inc'
+!$$$      include 'inputdata.inc'
+!$$$      include 'system.inc'
 
       logical::laccept,lswapinter
-      integer::i,ibox,boxrem,mtype,imolty,iunit,ichoiq,ip,ibox2,j
-      real(8)::deltv,vintern,vintran,vextn,velectn,vintero,
+      integer(KIND=int)::i,ibox,boxrem,mtype,imolty,iunit,ichoiq,ip,ibox2,j
+      real(KIND=double_precision)::deltv,vintern,vintran,vextn,velectn,vintero,
      &     vintrao,vexto,velecto,vinsta,vremta,vnewflucq,voldflucq,
      &     vboxo(nbxmax),vinterbo(nbxmax),vintrabo(nbxmax),
      &     vextbo(nbxmax),velectbo(nbxmax),vflucqbo(nbxmax),
@@ -28,7 +36,7 @@
      &     vbendbo(nbxmax),rxuo(numax),ryuo(numax),rzuo(numax),
      &     xcmo,ycmo,zcmo,vdum,wratio,volins,volrem,deltvb,random,
      &     vnewt2,voldt2
-      real(8)::qquo(nmax,numax) 
+      real(KIND=double_precision)::qquo(nmax,numax) 
 
 !      write(iou,*) 'START the optimization of the charge configuration'
 

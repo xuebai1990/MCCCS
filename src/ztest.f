@@ -1,14 +1,20 @@
       subroutine ztest(idi)
 
-! ztest
-
-      use grid
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-      include 'zeolite.inc'
-      include 'control.inc'
-      include 'mpi.inc'
-      integer::i,idi,tel,samp
-      real(8)::errm,errt,err,res,rest,erra
+!$$$      include 'grid.inc'
+!$$$      include 'zeolite.inc'
+!$$$      include 'control.inc'
+!$$$      include 'mpi.inc'
+      integer(KIND=int)::i,idi,tel,samp
+      real(KIND=double_precision)::errm,errt,err,res,rest,erra
      &     ,xi,yi,zi,random,exzeof,exzeo
      &     ,ebolt,bolt,boltf,eboltf
      &     ,halfpx,halfmx,halfpy,halfmy,halfpz,halfmz

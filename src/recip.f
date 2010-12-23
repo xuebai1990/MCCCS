@@ -6,23 +6,31 @@
 !    ** rewritten on June 25/99 by Bin Chen.                            **
 !    *********************************************************************
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-      integer::ic,zz,ii,imolty,ibox,ncount,type
-      real(8)::vrecipnew,vrecipold,sumr(2),sumi(2),arg
-      include 'control.inc'
-      include 'coord.inc'
-      include 'coord2.inc'
-      include 'ewaldsum.inc'
-      include 'poten.inc'
-! RP added for MPI     
-      include 'mpif.h'
-      include 'mpi.inc'
-       
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'coord2.inc'
+!$$$      include 'ewaldsum.inc'
+!$$$      include 'poten.inc'
+!$$$! RP added for MPI     
+!$$$      include 'mpif.h'
+!$$$      include 'mpi.inc'
+
+      integer(KIND=int)::ic,zz,ii,imolty,ibox,ncount,type
+      real(KIND=double_precision)::vrecipnew,vrecipold,sumr(2),sumi(2),arg       
 ! RP added for MPI
-      integer::mystart,myend,blocksize,i
-      real(8)::ssumrn_arr(vectormax),ssumin_arr(vectormax),
+      integer(KIND=int)::mystart,myend,blocksize,i
+      real(KIND=double_precision)::ssumrn_arr(vectormax),ssumin_arr(vectormax),
      &      ssumrn_one(vectormax),ssumin_one(vectormax)
-      integer::countn,ncount_displs(numprocmax),ncount_arr(numprocmax)   
+      integer(KIND=int)::countn,ncount_displs(numprocmax),ncount_arr(numprocmax)   
     
 !      if (LSOLPAR.and.(ibox.eq.2))then
 !        return

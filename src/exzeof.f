@@ -1,20 +1,28 @@
       function exzeof(i,j,k,idi)
 
-      use grid
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none 
-      real(8)::exzeof,xi,yi,zi,r2,rcutsq,xr,yr,zr,r2i,r6,vljnew,vqnew
+!$$$      include 'grid.inc'
+!$$$      include 'zeopoten.inc'
+!$$$      include 'zeolite.inc'
+!$$$      include 'control.inc'
+!$$$      include 'external.inc'
+!$$$      include 'system.inc'
+!$$$      include 'cell.inc'
+!$$$      include 'poten.inc'      
+!$$$      include 'ewaldsum.inc'
+!$$$      include 'mpif.h'
+!$$$      include 'mpi.inc'
+      real(KIND=double_precision)::exzeof,xi,yi,zi,r2,rcutsq,xr,yr,zr,r2i,r6,vljnew,vqnew
      &     ,overflow=1.0d8,rminsq,r,recipzeo,erfunc,i,j,k,sx,sy,sz
-      integer::izeo,idi,idj,ntij,layer,ii,jj,kk,ibox=1
-      include 'zeopoten.inc'
-      include 'zeolite.inc'
-      include 'control.inc'
-      include 'external.inc'
-      include 'system.inc'
-      include 'cell.inc'
-      include 'poten.inc'      
-      include 'ewaldsum.inc'
-      include 'mpif.h'
-      include 'mpi.inc'
+      integer(KIND=int)::izeo,idi,idj,ntij,layer,ii,jj,kk,ibox=1
 
 !     calculate the Lennard-Jones interactions, include as many layers
 !     of neighboring unit cells as needed for the specified precision
@@ -134,25 +142,33 @@
  
       function recipzeo(xi,yi,zi,qi)
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include 'control.inc'
-      include 'zeolite.inc'
-      include 'system.inc'
-      include 'coord.inc'
-      include 'ewaldsum.inc'
-      include 'poten.inc'
-      include 'conver.inc'
-      include 'cell.inc'
-      include 'mpif.h'
-      include 'mpi.inc'
+!$$$      include 'control.inc'
+!$$$      include 'zeolite.inc'
+!$$$      include 'system.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'ewaldsum.inc'
+!$$$      include 'poten.inc'
+!$$$      include 'conver.inc'
+!$$$      include 'cell.inc'
+!$$$      include 'mpif.h'
+!$$$      include 'mpi.inc'
 
-      integer::ibox=1,i,ii
+      integer(KIND=int)::ibox=1,i,ii
 
 ! * from h-matrix formulation
-      integer::l,m,n,m_min,m_max,n_min,n_max,kmaxl,kmaxm,kmaxn
-      integer::mystart,myend,blocksize
-      real(8)::alpsqr4,vol,ksqr,sum,arg,recipzeo,xi,yi,zi,qi
+      integer(KIND=int)::l,m,n,m_min,m_max,n_min,n_max,kmaxl,kmaxm,kmaxn
+      integer(KIND=int)::mystart,myend,blocksize
+      real(KIND=double_precision)::alpsqr4,vol,ksqr,sum,arg,recipzeo,xi,yi,zi,qi
      &     ,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi
 
 ! *** Set up the reciprocal space vectors ***

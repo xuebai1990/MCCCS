@@ -1,40 +1,47 @@
       subroutine recipsum(ibox,vrecip)
-
-      implicit none
-
 !    *********************************************************************
 !    ** calculates the total reciprocal space ewald-sum term for volume **
 !    ** moves, written in 1998 by Bin Chen.                             **
 !    ** rewritten in 2001 by Bin Chen.                                  **
 !    ** rewritten again, probably by Bin.                               **
 !    *********************************************************************
-      include 'control.inc'
-      include 'system.inc'
-      include 'coord.inc'
-      include 'ewaldsum.inc'
-      include 'poten.inc'
-      include 'conver.inc'
-      include 'cell.inc'
-! RP added for MPI
-      include 'mpif.h'
-      include 'mpi.inc'
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
+      implicit none
 
-      integer::ibox,nkx,nky,nkz
+!$$$      include 'control.inc'
+!$$$      include 'system.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'ewaldsum.inc'
+!$$$      include 'poten.inc'
+!$$$      include 'conver.inc'
+!$$$      include 'cell.inc'
+!$$$! RP added for MPI
+!$$$      include 'mpif.h'
+!$$$      include 'mpi.inc'
+
+      integer(KIND=int)::ibox,nkx,nky,nkz
      &     ,nkx_min,nkx_max,nky_min,nky_max,nkz_min,nkz_max
      &     ,i,ii,imolty,kmax1,ncount
 
 ! * from h-matrix formulation
-      integer::l,m,n,m_min,m_max,n_min,n_max,kmaxl,kmaxm,kmaxn
+      integer(KIND=int)::l,m,n,m_min,m_max,n_min,n_max,kmaxl,kmaxm,kmaxn
 
-      real(8)::alpsqr4,vol,ksqr,sumr,sumi,arg,boxlen,vrecip,
+      real(KIND=double_precision)::alpsqr4,vol,ksqr,sumr,sumi,arg,boxlen,vrecip,
      &     bx1,by1,bz1,bmin,xratio,yratio,zratio,
      &     constx,consty,constz,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi
-!      real(8)::sum_sumr,sum_sumi
+!      real(KIND=double_precision)::sum_sumr,sum_sumi
 
 ! RP added for calculating time for communication step
-      integer::mystart,myend,blocksize
-      integer::ncount_arr(numprocmax),ncount_displs(numprocmax)
-      real(8)::sum_vrecip,kx_arr(vectormax),ky_arr(vectormax),
+      integer(KIND=int)::mystart,myend,blocksize
+      integer(KIND=int)::ncount_arr(numprocmax),ncount_displs(numprocmax)
+      real(KIND=double_precision)::sum_vrecip,kx_arr(vectormax),ky_arr(vectormax),
      &   kz_arr(vectormax),kx_one(vectormax),ky_one(vectormax),
      &   kz_one(vectormax),
      &   ssumi_arr(vectormax),prefact_arr(vectormax),

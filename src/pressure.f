@@ -4,49 +4,57 @@
 !    ** calculates the pressure for a configuration.    **
 !    *****************************************************
  
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
  
-      include 'common.inc'
-! *** common blocks ***
-      include 'control.inc'
-      include 'coord.inc'
-      include 'system.inc'
-      include 'poten.inc' 
-      include 'expsix.inc'
-      include 'merck.inc' 
-      include 'connect.inc'
-      include 'ewaldsum.inc'
-      include 'conver.inc'
-      include 'inputdata.inc'
-      include 'fepsi.inc'
-      include 'qqlist.inc'
-      include 'nsix.inc'
-      include 'ipswpar.inc'
-      include 'cell.inc'
+!$$$      include 'mpi.inc'
+!$$$      include 'mpif.h'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'system.inc'
+!$$$      include 'poten.inc' 
+!$$$      include 'expsix.inc'
+!$$$      include 'merck.inc' 
+!$$$      include 'connect.inc'
+!$$$      include 'ewaldsum.inc'
+!$$$      include 'conver.inc'
+!$$$      include 'inputdata.inc'
+!$$$      include 'fepsi.inc'
+!$$$      include 'qqlist.inc'
+!$$$      include 'nsix.inc'
+!$$$      include 'ipswpar.inc'
+!$$$      include 'cell.inc'
 
       logical::lcoulo,lexplt,lqimol,lqjmol,lij2
-      integer::ibox,itype
-      integer::i,ii,j,jj,ntii,ntjj,ntij,imolty,jmolty,iii,jjj,k
+      integer(KIND=int)::ibox,itype
+      integer(KIND=int)::i,ii,j,jj,ntii,ntjj,ntij,imolty,jmolty,iii,jjj,k
  
-      real(8)::press,repress,erfunc
+      real(KIND=double_precision)::press,repress,erfunc
 
-      real(8)::rxui,ryui,rzui,rxuij,ryuij,rzuij,rijsq,
+      real(KIND=double_precision)::rxui,ryui,rzui,rxuij,ryuij,rzuij,rijsq,
      &                 rcutsq,sr2,sr6,rhosq,corp,rij,rs1,
      &                 sr1,rs2,sr7,rs7,rs6
-      real(8)::srij
-      real(8)::surf,pxx,pyy,pzz,rpxx,rpyy,rpzz,pxy,pyx
+      real(KIND=double_precision)::srij
+      real(KIND=double_precision)::surf,pxx,pyy,pzz,rpxx,rpyy,rpzz,pxy,pyx
      &                ,pxz,pzx,pyz,pzy,rpxy,rpyx,rpxz,rpzx,rpyz,rpzy
 
-      real(8)::fxcmi,fycmi,fzcmi,fij,xcmi,ycmi,zcmi,flj
-      real(8)::rcm,rcmsq,rcmi
-      real(8)::rvdwsq,rchgsq,rbcut,qave,
+      real(KIND=double_precision)::fxcmi,fycmi,fzcmi,fij,xcmi,ycmi,zcmi,flj
+      real(KIND=double_precision)::rcm,rcmsq,rcmi
+      real(KIND=double_precision)::rvdwsq,rchgsq,rbcut,qave,
      &     volsq,epsilon2,sigma2,pwell,vol 
 
       dimension lcoulo(numax,numax)
 
 ! RP added for MPI
-      real(8)::pips12,pips13,pips21,pips23,pips31,pips32
-      real(8)::diff_pips12,diff_pips13,diff_pips21,diff_pips23,
+      real(KIND=double_precision)::pips12,pips13,pips21,pips23,pips31,pips32
+      real(KIND=double_precision)::diff_pips12,diff_pips13,diff_pips21,diff_pips23,
      & diff_pips31,diff_pips32,diff_pxx,diff_pyy,diff_pzz,sum_press
 ! --------------------------------------------------------------------
       if ( lpbc ) call setpbc (ibox)

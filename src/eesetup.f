@@ -2,21 +2,29 @@
 !
 ! sets up EE. contains some EE stuff, see eemove.f for more details
 !
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include 'control.inc'
-      include 'coord.inc'
-      include 'coord2.inc'
-      include 'eepar.inc'
-      include 'inputdata.inc'
-      include 'system.inc'
-      include 'nsix.inc'
-      include 'poten.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'coord2.inc'
+!$$$      include 'eepar.inc'
+!$$$      include 'inputdata.inc'
+!$$$      include 'system.inc'
+!$$$      include 'nsix.inc'
+!$$$      include 'poten.inc'
 
       logical::ovrlap,ldum
-      integer::i,m,j,ntii,ntij,ntjj,ntjjs,ii,jj,ntijs,imolty,irem
+      integer(KIND=int)::i,m,j,ntii,ntij,ntjj,ntjjs,ii,jj,ntijs,imolty,irem
      &       ,isv,cnt
-      real(8)::random,vmstate,volde,vnewe,dum,vintra
+      real(KIND=double_precision)::random,vmstate,volde,vnewe,dum,vintra
      &  ,vinter,vext,velect,vewald
 
 ! --- initialize a few things

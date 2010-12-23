@@ -1,67 +1,77 @@
       subroutine readdat(lucall,ucheck,nvirial,starvir
      &     ,stepvir)
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-      include 'common.inc'
-      include 'control.inc'
-      include 'coord.inc'
-      include 'cbmc.inc'
-      include 'conver.inc'
-      include 'system.inc'
-      include 'poten.inc'
-      include 'inpar.inc'
-      include 'external.inc'
-      include 'externalmuir.inc'
-      include 'zeolite.inc'
-      include 'zeopoten.inc'
-      include 'nrtab.inc'
-      include 'connect.inc'
-      include 'inputdata.inc'
-      include 'ewaldsum.inc'
-      include 'swtcmove.inc'
-      include 'fepsi.inc'
-      include 'expand.inc'
-      include 'qqlist.inc'
-      include 'clusterbias.inc'
-      include 'neigh.inc'
-      include 'cell.inc'
-      include 'nsix.inc'
-! KM 01/10 remove analysis
-!      include 'gor.inc'
-      include 'torsion.inc'
-      include 'tabulated.inc'
+!$$$      include 'mpi.inc'
+!$$$      include 'mpif.h'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'cbmc.inc'
+!$$$      include 'conver.inc'
+!$$$      include 'system.inc'
+!$$$      include 'poten.inc'
+!$$$      include 'inpar.inc'
+!$$$      include 'external.inc'
+!$$$      include 'externalmuir.inc'
+!$$$      include 'zeolite.inc'
+!$$$      include 'zeopoten.inc'
+!$$$      include 'nrtab.inc'
+!$$$      include 'connect.inc'
+!$$$      include 'inputdata.inc'
+!$$$      include 'ewaldsum.inc'
+!$$$      include 'swtcmove.inc'
+!$$$      include 'fepsi.inc'
+!$$$      include 'expand.inc'
+!$$$      include 'qqlist.inc'
+!$$$      include 'clusterbias.inc'
+!$$$      include 'neigh.inc'
+!$$$      include 'cell.inc'
+!$$$      include 'nsix.inc'
+!$$$! KM 01/10 remove analysis
+!$$$!      include 'gor.inc'
+!$$$      include 'torsion.inc'
+!$$$      include 'tabulated.inc'
       
-      integer::seed
-      real(8)::random,rtest(10)
+      integer(KIND=int)::seed
+      real(KIND=double_precision)::random,rtest(10)
 
 ! -- variables for histograms	
-      integer::fname
-      character*20 file_movie,file_run,ftemp,fname2,file_dipole 
-      character*20 fname4
-      character*50 fileout
+      integer(KIND=int)::fname
+      character(LEN=default_path_length)::file_movie,file_run,ftemp
+     & ,fname2,file_dipole 
+      character(LEN=default_path_length)::fname4
+      character(LEN=default_path_length)::fileout
  
-      integer::temnc, imol, iutemp, imolty, itype,ipair,bdum,bin,histtot
-      integer::idummy(ntmax), atemp 
+      integer(KIND=int)::temnc, imol, iutemp, imolty, itype,ipair,bdum,bin,histtot
+      integer(KIND=int)::idummy(ntmax), atemp 
 
-      integer::i,j,k,ncres, nmtres, iensem, inpbc, nmcount
-      integer::im,nures, ibox,  ij, tcount,ucheck,nnframe
-      integer::nijspecial,ispecial,jspecial,ji,ii,jj,nexclu,ndum,ntii
+      integer(KIND=int)::i,j,k,ncres, nmtres, iensem, inpbc, nmcount
+      integer(KIND=int)::im,nures, ibox,  ij, tcount,ucheck,nnframe
+      integer(KIND=int)::nijspecial,ispecial,jspecial,ji,ii,jj,nexclu,ndum,ntii
 
-      integer::zz,temphe,z,itemp,zzz
-      integer::nvirial,k_max_l,k_max_m,k_max_n
-      integer::inclnum,inclmol,inclbead,inclsign,ncarbon
+      integer(KIND=int)::zz,temphe,z,itemp,zzz
+      integer(KIND=int)::nvirial,k_max_l,k_max_m,k_max_n
+      integer(KIND=int)::inclnum,inclmol,inclbead,inclsign,ncarbon
       dimension inclmol(ntmax*numax*numax),inclsign(ntmax*numax*numax)
       dimension inclbead(ntmax*numax*numax,2)
 
-      integer::ainclnum,ainclmol,ainclbead,a15t
+      integer(KIND=int)::ainclnum,ainclmol,ainclbead,a15t
       dimension ainclmol(ntmax*numax*numax)
       dimension ainclbead(ntmax*numax*numax,2)
       dimension a15t(ntmax*numax*numax)
 
-      real(8)::starvir,stepvir,fqtemp,qbox,vol,v(3),w(3)
-      real(8)::debroglie, qtot,min_boxl
+      real(KIND=double_precision)::starvir,stepvir,fqtemp,qbox,vol,v(3),w(3)
+      real(KIND=double_precision)::debroglie, qtot,min_boxl
 
-      real(8)::pie2,rcnnsq,umatch,aspecd,bspecd,dum,pm,pcumu
+      real(KIND=double_precision)::pie2,rcnnsq,umatch,aspecd,bspecd,dum,pm,pcumu
       logical::lnrtab,lucall,lpolar,lqqelect,lee,lratfix,lreadq
       logical:: linit, lecho, lmixlb, lmixjo, lhere,lsetup,lsolute
       logical::lprint,lverbose,lxyz,lfound,ltab
@@ -70,15 +80,15 @@
       dimension qbox(nbxmax)
       
 ! -- variables added (3/24/05) for scaling of 1-4 interactions      
-      real(8)::ofscale,ofscale2
+      real(KIND=double_precision)::ofscale,ofscale2
       dimension ofscale(ntmax*numax*numax),ofscale2(ntmax*numax*numax)
       
 ! -- Variables added (6/30/2006) for fort.4 consistency check
   
-      integer::numvib,numbend,numtor,vib1,bend2,bend3,tor2,tor3,tor4
-      integer::vibtype,bendtype,tortype
+      integer(KIND=int)::numvib,numbend,numtor,vib1,bend2,bend3,tor2,tor3,tor4
+      integer(KIND=int)::vibtype,bendtype,tortype
 
-!      real(8)::temx,temy,temz
+!      real(KIND=double_precision)::temx,temy,temz
       
       dimension nures(ntmax)
       dimension ncarbon(ntmax)
@@ -90,17 +100,17 @@
       dimension k_max_l(nbxmax),k_max_m(nbxmax),k_max_n(nbxmax)
 
 ! Conversion factor for Mpa to simulation unit
-      real(8)::MPa2SimUnits
+      real(KIND=double_precision)::MPa2SimUnits
 
-      character(100) line
+      character(LEN=default_string_length)::line
 
 ! KEA torsion variables
       logical::Lttor,lspline,linter
-      integer::mmm,ttor
+      integer(KIND=int)::mmm,ttor
 ! KM tabulated potential variables
-      integer::tvib, tbend, iivdW,jjvdW, iielect, jjelect
+      integer(KIND=int)::tvib, tbend, iivdW,jjvdW, iielect, jjelect
 ! KM variable added when analysis removed
-      integer::nhere
+      integer(KIND=int)::nhere
 
 ! -- reads input data and initializes the positions
 !
@@ -197,7 +207,7 @@
 ! - create output file name
       fname = run_num
 
-! - use internal read/write to get integer::number in character::format
+! - use internal read/write to get integer(KIND=int)::number in character::format
       write(ftemp,*) fname
       read(ftemp,*) fname2
       file_run = 'run'//fname2(1:len_trim(fname2))//suffix//'.dat' 
@@ -372,7 +382,7 @@
 ! - create output file name
       fname = run_num
 
-! - use internal read/write to get integer::number in character::format
+! - use internal read/write to get integer(KIND=int)::number in character::format
 !      write(ftemp,*) fname
 !      read(ftemp,*) fname2
 !      file_run = 'run'//fname2(1:len_trim(fname2))//suffix//'.dat' 
@@ -1114,7 +1124,7 @@
 ! -- To assign multiple rotation centers, set iurot(imol) < 0
 ! -- Add line after molecule specification, avbmc parameters
 ! -- First, number of rotation centers
-! -- Second, identity of centers (0=COM,integer::> 0 = bead number)
+! -- Second, identity of centers (0=COM,integer(KIND=int)::> 0 = bead number)
 ! -- Third, give probability to rotate around different centers
          if(iurot(imol).lt.0) then
             read(4,*)

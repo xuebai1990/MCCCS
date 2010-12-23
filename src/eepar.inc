@@ -1,3 +1,5 @@
+! EEPAR.INC
+
       logical::leemove,lmstate, leeacc
       integer::fmstate,sstate1,sstate2,mstate,nstate,ee_moltyp
      &       ,box_state,eepointp,eeirem,boxrem1,boxins1,ee_prob,nmolty1

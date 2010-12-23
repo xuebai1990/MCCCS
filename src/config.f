@@ -14,37 +14,45 @@
 !    **    bscb ( 2,inb ).                                            **
 !    *******************************************************************
  
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include 'control.inc'
-      include 'coord.inc'
-      include 'coord2.inc'
-      include 'system.inc'
-      include 'ensemble.inc'
-      include 'cbmc.inc'
-      include 'rosen.inc' 
-      include 'inputdata.inc'
-      include 'ewaldsum.inc'
-      include 'poten.inc'
-      include 'neigh.inc'
-      include 'ipswpar.inc'
-      include 'eepar.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'coord2.inc'
+!$$$      include 'system.inc'
+!$$$      include 'ensemble.inc'
+!$$$      include 'cbmc.inc'
+!$$$      include 'rosen.inc' 
+!$$$      include 'inputdata.inc'
+!$$$      include 'ewaldsum.inc'
+!$$$      include 'poten.inc'
+!$$$      include 'neigh.inc'
+!$$$      include 'ipswpar.inc'
+!$$$      include 'eepar.inc'
       
       logical::lterm, ovrlap, ltors, lneighij,lfixnow
 
-      integer::i,j,k,iii,ibox,iunit,igrow,icbu,islen,imolty,iutry
+      integer(KIND=int)::i,j,k,iii,ibox,iunit,igrow,icbu,islen,imolty,iutry
 
-      integer::istt,iett,nchp1,ic,ncount,total,bin,count,findex,iw
-      integer::ddum,idum,ip
+      integer(KIND=int)::istt,iett,nchp1,ic,ncount,total,bin,count,findex,iw
+      integer(KIND=int)::ddum,idum,ip
 
       dimension ddum(27)
 
-      real(8)::v,vintra,vinter,vext,velect,vewald,vtorold
+      real(KIND=double_precision)::v,vintra,vinter,vext,velect,vewald,vtorold
      & ,vtornew,delen,deleo,vdum,tofo,wplace,wrig,vorient
      & ,velect_intra,velect_inter
-      real(8)::dchain,random,rchain,wnlog,wolog,wdlog,wratio
+      real(KIND=double_precision)::dchain,random,rchain,wnlog,wolog,wdlog,wratio
 
-      real(8)::vrecipn,vrecipo,cwtorfo,cwtorfn,x,y,z
+      real(KIND=double_precision)::vrecipn,vrecipo,cwtorfo,cwtorfn,x,y,z
 
 ! ------------------------------------------------------------------
 

@@ -3,16 +3,23 @@
 !
 ! *** this subroutine updates the block averages
 !
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-      integer::nblock,ipos,ibox
-      real(8)::acmove,dp,dn,value
-      
-      include 'control.inc'
-      include 'coord.inc'
-      include 'system.inc'
-      include 'neigh.inc'
-      include 'neigh2.inc'
-      include 'blkavg.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'system.inc'
+!$$$      include 'neigh.inc'
+!$$$      include 'neigh2.inc'
+!$$$      include 'blkavg.inc'
+      integer(KIND=int)::nblock,ipos,ibox
+      real(KIND=double_precision)::acmove,dp,dn,value      
       
       if (nblock.eq.1) then
 

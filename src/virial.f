@@ -9,43 +9,50 @@
 !    ** Marcus Martin 1-15-97                                         **
 !    *******************************************************************
  
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-! *** common blocks ***
-      include 'control.inc'
-      include 'coord.inc'
-      include 'system.inc'
-      include 'poten.inc'
-      include 'conver.inc' 
-      include 'external.inc'
-      include 'connect.inc'
-      include 'fepsi.inc'
-      include 'inputdata.inc'
-      include 'eepar.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'system.inc'
+!$$$      include 'poten.inc'
+!$$$      include 'conver.inc' 
+!$$$      include 'external.inc'
+!$$$      include 'connect.inc'
+!$$$      include 'fepsi.inc'
+!$$$      include 'inputdata.inc'
+!$$$      include 'eepar.inc'
 
-      integer::i, imolty, ii, j, jmolty, jj, ntii, ntjj, ntij
+      integer(KIND=int)::i, imolty, ii, j, jmolty, jj, ntii, ntjj, ntij
      &     ,nnn,nvirial,ip,itemp,iii
-      real(8)::vinter,rminsq,rxui,ryui,rzui,rxuij,ryuij,rzuij
+      real(KIND=double_precision)::vinter,rminsq,rxui,ryui,rzui,rxuij,ryuij,rzuij
      &       ,rijsq,sr2, sr6 ,velect,mayer
 
-      real(8)::ljsami,ljpsur,ljmuir,xdiff,ydiff,zdiff
+      real(KIND=double_precision)::ljsami,ljpsur,ljmuir,xdiff,ydiff,zdiff
      &     ,dvircm,stepvir,exsix,starvir
-      real(8)::binvir
+      real(KIND=double_precision)::binvir
       dimension binvir(maxvir,maxntemp),mayer(maxntemp)
 
       logical::ovrlap,lqimol,lqjmol,lmatrix
   
 ! *** only use for polarizable models
-      integer::chgmax
+      integer(KIND=int)::chgmax
       parameter (chgmax=10)
-      integer::ip1,ip2,iunit,numchg,info,ipiv(chgmax),mainsite(2,2),
+      integer(KIND=int)::ip1,ip2,iunit,numchg,info,ipiv(chgmax),mainsite(2,2),
      &     lam1,lam2
-      real(8)::a(chgmax,chgmax),b2(chgmax,1),mainxiq(2,2)
+      real(KIND=double_precision)::a(chgmax,chgmax),b2(chgmax,1),mainxiq(2,2)
 
-      real(8)::consa1,consa2,consb1,consb2,selfadd1,selfadd2,
+      real(KIND=double_precision)::consa1,consa2,consb1,consb2,selfadd1,selfadd2,
      &     vtotal,epsilon2,vmin
 
-      real(8)::mass_t,binvir2(maxvir,maxntemp),
+      real(KIND=double_precision)::mass_t,binvir2(maxvir,maxntemp),
      &     factor,corr,vold,deri_u
 
 ! --------------------------------------------------------------------

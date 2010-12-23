@@ -8,39 +8,48 @@
 ! performs periodic updates and block averages
 ! -----------------------------------------------------------------
  
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include 'common.inc'
-      include 'control.inc'
-      include 'coord.inc'      
-      include 'system.inc'
-      include 'ensemble.inc'
-      include 'cbmc.inc'
-      include 'inputdata.inc'
-      include 'blkavg.inc'
-      include 'bnbsma.inc'
-      include 'connect.inc'
-      include 'coord2.inc'
-      include 'cell.inc'
-      include 'poten.inc'
+!$$$      include 'mpi.inc'
+!$$$      include 'mpif.h'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'      
+!$$$      include 'system.inc'
+!$$$      include 'ensemble.inc'
+!$$$      include 'cbmc.inc'
+!$$$      include 'inputdata.inc'
+!$$$      include 'blkavg.inc'
+!$$$      include 'bnbsma.inc'
+!$$$      include 'connect.inc'
+!$$$      include 'coord2.inc'
+!$$$      include 'cell.inc'
+!$$$      include 'poten.inc'
  
-      integer::nummol,ntii
-      integer::nibox,im,nnn,ntot,nblock,imolty,m,mm,i,j,jjtor
+      integer(KIND=int)::nummol,ntii
+      integer(KIND=int)::nibox,im,nnn,ntot,nblock,imolty,m,mm,i,j,jjtor
      &     ,ibox,itype,itel,mnbox,zz,steps,igrow,jmolty,jbox
-      integer::imend,itemp,bin,k,jjben,ip2,ip1,ip3,it,ii,jj,ivib
+      integer(KIND=int)::imend,itemp,bin,k,jjben,ip2,ip1,ip3,it,ii,jj,ivib
       logical::lratio,lratv,lprint,lmv,lrsave,lblock,lfq,lratfix
      &     ,lsolute,ovrlap
-      real(8), dimension(nprop1,nbxmax,nbxmax):: acsolpar
-      real(8), dimension(nbxmax):: acEnthalpy,acEnthalpy1
-      real(8)::press1,press2,dp,dpp,debroglie,histrat
-      real(8)::acv, molfra,acpres,acsurf,acvolume,asetel,acdens
+      real(KIND=double_precision), dimension(nprop1,nbxmax,nbxmax):: acsolpar
+      real(KIND=double_precision), dimension(nbxmax):: acEnthalpy,acEnthalpy1
+      real(KIND=double_precision)::press1,press2,dp,dpp,debroglie,histrat
+      real(KIND=double_precision)::acv, molfra,acpres,acsurf,acvolume,asetel,acdens
      & ,histtot,acmove,acnp,dvalue,dnchoi,dnchoi1,dnchoih,dnunit,ratflcq
      & ,v,vintra,vinter,vext,velect,vewald,vtors,vtail,rho,coru
      & ,thetac,vbend,xvec,yvec,zvec,distij,theta,vtorso
      & ,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2,dot,daa1,da1a2
      & ,velect_intra,velect_inter
 
-      real(8)::xcc,ycc,zcc,tcc,spltor,rcutmin      
+      real(KIND=double_precision)::xcc,ycc,zcc,tcc,spltor,rcutmin      
  
       dimension acv(nener,nbxmax),lratfix(ntmax)
       dimension mnbox(nbxmax,ntmax)
@@ -51,7 +60,7 @@
       dimension xvec(numax,numax),yvec(numax,numax),zvec(numax,numax)
      &     ,distij(numax,numax)
 
-      real(8)::ratrax,ratray,ratraz,rttrax,rttray,rttraz
+      real(KIND=double_precision)::ratrax,ratray,ratraz,rttrax,rttray,rttraz
      & ,rarotx,raroty,rarotz,rtrotx,rtroty,rtrotz,vol
      & ,ratvol,temmass,dn,pres(nbxmax)
 ! -------------------------------------------------------------------

@@ -5,10 +5,18 @@
 !     **  M. G. Martin   2-3-98                                ***
 !     ************************************************************
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-      integer::ii
-      real(8)::random, x, y, z
-      real(8)::xi1,xi2,xisq
+      integer(KIND=int)::ii
+      real(KIND=double_precision)::random, x, y, z
+      real(KIND=double_precision)::xi1,xi2,xisq
 
 !     --- calculate random vector on the unit sphere ---
       do ii = 1,100

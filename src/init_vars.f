@@ -5,39 +5,46 @@
 !    *** Matt McGrath, October 1, 2009                               ***
 !    *******************************************************************
  
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-! *** common blocks ***
-      include 'control.inc'
-      include 'coord.inc'
-      include 'system.inc'
-      include 'poten.inc'
-      include 'conver.inc' 
-      include 'external.inc'
-      include 'zeolite.inc'
-      include 'connect.inc'
-      include 'ewaldsum.inc'
-      include 'fepsi.inc'
-      include 'inputdata.inc'
-      include 'qqlist.inc'
-      include 'clusterbias.inc'
-      include 'neigh.inc'
-      include 'cell.inc'
-      include 'nsix.inc'
-      include 'peboco.inc'     
-      include 'ipswpar.inc'
-      include 'eepar.inc'
-      include 'cbmc.inc'
-! KM 01/10 remove analysis
-!      include 'gor.inc'
-      include 'blkavg.inc'
-! kea include for garofalini potential
-      include 'garofalini.inc'
-      include 'tabulated.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'system.inc'
+!$$$      include 'poten.inc'
+!$$$      include 'conver.inc' 
+!$$$      include 'external.inc'
+!$$$      include 'zeolite.inc'
+!$$$      include 'connect.inc'
+!$$$      include 'ewaldsum.inc'
+!$$$      include 'fepsi.inc'
+!$$$      include 'inputdata.inc'
+!$$$      include 'qqlist.inc'
+!$$$      include 'clusterbias.inc'
+!$$$      include 'neigh.inc'
+!$$$      include 'cell.inc'
+!$$$      include 'nsix.inc'
+!$$$      include 'peboco.inc'     
+!$$$      include 'ipswpar.inc'
+!$$$      include 'eepar.inc'
+!$$$      include 'cbmc.inc'
+!$$$! KM 01/10 remove analysis
+!$$$!      include 'gor.inc'
+!$$$      include 'blkavg.inc'
+!$$$! kea include for garofalini potential
+!$$$      include 'garofalini.inc'
+!$$$      include 'tabulated.inc'
 ! **********************************************************************
 ! local variables
 
-      integer::ibend,ibox,i,imolty,iunit,iprop,jblock,itype
+      integer(KIND=int)::ibend,ibox,i,imolty,iunit,iprop,jblock,itype
 
 
 ! **********************************************************************

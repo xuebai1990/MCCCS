@@ -1,28 +1,5 @@
       subroutine close(iinit,rx,ry,rz,bondl,angle,lterm)
 
-! close
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-! John Stubbs, and Collin Wick and Ilja Siepmann  
-!                     
-! This program is free software; you can redistribute it and/or
-! modify it under the terms of the GNU General Public License
-! as published by the Free Software Foundation; either version 2
-! of the License, or (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program; if not, write to 
-!
-! Free Software Foundation, Inc. 
-! 59 Temple Place - Suite 330
-! Boston, MA  02111-1307, USA.
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-
 !     **************************************************************
 !     **    Takes three or four points and determines a point     ** 
 !     **       that is a certain length from all of them          **
@@ -36,15 +13,23 @@
 !     **            on December 1999, BUT IT DOES WORK            **
 !     **************************************************************
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include 'control.inc'
+!$$$      include 'control.inc'
 
       logical::lterm
 
-      integer::n,iinit
+      integer(KIND=int)::n,iinit
 
-      real(8)::x,y,z,rx,ry,rz,length,lengtha,lengthb
+      real(KIND=double_precision)::x,y,z,rx,ry,rz,length,lengtha,lengthb
      &     ,xa,ya,za,theta,thetac,ux,uy,uz,bondl,avar,bvar,cvar
      &     ,rxa,rya,rza,lengthc,angle,rxf,ryf,rzf,var,dvar,a,b,c
 

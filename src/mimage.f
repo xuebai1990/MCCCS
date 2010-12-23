@@ -1,13 +1,21 @@
       subroutine mimage ( rxuij,ryuij,rzuij,ibox)
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-      include 'peboco.inc'
-      include 'control.inc'
-      include 'system.inc'
-      include 'cell.inc'
+!$$$      include 'peboco.inc'
+!$$$      include 'control.inc'
+!$$$      include 'system.inc'
+!$$$      include 'cell.inc'
 
-      integer::ibox
-      real(8)::rxuij,ryuij,rzuij,hsx,hsy,hsz,sx,sy,sz
+      integer(KIND=int)::ibox
+      real(KIND=double_precision)::rxuij,ryuij,rzuij,hsx,hsy,hsz,sx,sy,sz
 
 ! ----------------------------------------------------------------
 

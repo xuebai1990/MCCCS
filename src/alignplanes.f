@@ -29,33 +29,41 @@
 !
 
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none 
-      include 'control.inc'
-      include 'conver.inc'
-      include 'coord.inc'
-      include 'swtcmove.inc'
+!$$$      include 'control.inc'
+!$$$      include 'conver.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'swtcmove.inc'
 
 !     --- INPUT VARIABLES ---
-      integer::iparty, imol_b, imol_a, itype_b, itype_a
+      integer(KIND=int)::iparty, imol_b, imol_a, itype_b, itype_a
    
 !     --- OUTPUT VARIABLES ---
-      real(8)::xb(numax), yb(numax), zb(numax)
+      real(KIND=double_precision)::xb(numax), yb(numax), zb(numax)
 
 !     --- LOCAL VARIABLES ---
-      integer::i, imoltype_b, nunit_b, nunit_a
-      integer::ia_bead1, ia_bead2, ia_bead3
-      integer::ib_bead1, ib_bead2, ib_bead3
+      integer(KIND=int)::i, imoltype_b, nunit_b, nunit_a
+      integer(KIND=int)::ia_bead1, ia_bead2, ia_bead3
+      integer(KIND=int)::ib_bead1, ib_bead2, ib_bead3
 
-      real(8)::xa(3),   ya(3),   za(3)
-      real(8)::xorigin, yorigin, zorigin
-      real(8)::xcross,  ycross,  zcross
-      real(8)::xtemp,   ytemp,   ztemp
-      real(8)::dxa,     dya,     dza
-      real(8)::dxb,     dyb,     dzb
+      real(KIND=double_precision)::xa(3),   ya(3),   za(3)
+      real(KIND=double_precision)::xorigin, yorigin, zorigin
+      real(KIND=double_precision)::xcross,  ycross,  zcross
+      real(KIND=double_precision)::xtemp,   ytemp,   ztemp
+      real(KIND=double_precision)::dxa,     dya,     dza
+      real(KIND=double_precision)::dxb,     dyb,     dzb
 
-      real(8)::rnorm, d
-      real(8)::gamma_a, gamma_b
-      real(8)::theta, cos_theta, sin_theta
+      real(KIND=double_precision)::rnorm, d
+      real(KIND=double_precision)::gamma_a, gamma_b
+      real(KIND=double_precision)::theta, cos_theta, sin_theta
 
       
 

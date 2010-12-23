@@ -7,51 +7,58 @@
 !    ** calculates the total potential energy for a configuration.    **
 !    *******************************************************************
  
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-! *** common blocks ***
-      include 'control.inc'
-      include 'coord.inc'
-      include 'system.inc'
-      include 'neigh.inc'
-      include 'poten.inc'
-      include 'coord2.inc' 
-      include 'external.inc'
-      include 'connect.inc'
-      include 'ewaldsum.inc'
-      include 'fepsi.inc'
-      include 'qqlist.inc'
-      include 'clusterbias.inc'
-      include 'nsix.inc'
-      include 'peboco.inc'
-      include 'cell.inc'
-      include 'tabulated.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'system.inc'
+!$$$      include 'neigh.inc'
+!$$$      include 'poten.inc'
+!$$$      include 'coord2.inc' 
+!$$$      include 'external.inc'
+!$$$      include 'connect.inc'
+!$$$      include 'ewaldsum.inc'
+!$$$      include 'fepsi.inc'
+!$$$      include 'qqlist.inc'
+!$$$      include 'clusterbias.inc'
+!$$$      include 'nsix.inc'
+!$$$      include 'peboco.inc'
+!$$$      include 'cell.inc'
+!$$$      include 'tabulated.inc'
 
       logical::lqimol,lqjmol,lexplt,lcoulo,lfavor,lij2,liji,lqchgi
       logical::lljii,ovrlap,ltors,lcharge_table,lt,lfound
 
-      integer::growii,growjj,k,cellinc,jcell,ic,nmole
-      integer::i,ibox, istart, iend,ii,ntii,flagon,jjj,iii
+      integer(KIND=int)::growii,growjj,k,cellinc,jcell,ic,nmole
+      integer(KIND=int)::i,ibox, istart, iend,ii,ntii,flagon,jjj,iii
      &       ,j,jj,ntjj,ntij,ntj,imolty,jmolty,ncell
-      integer::iivib,jjtor,ip1,ip2,ip3,it,nchp2,acellinc
+      integer(KIND=int)::iivib,jjtor,ip1,ip2,ip3,it,nchp2,acellinc
 
-      integer::jjvib,jjben  
+      integer(KIND=int)::jjvib,jjben  
 
-      real(8)::vvib,vbend,vtg,theta
+      real(KIND=double_precision)::vvib,vbend,vtg,theta
 
-      real(8)::ljsami,ljpsur,ljmuir,v,vintra, vinter,vext 
+      real(KIND=double_precision)::ljsami,ljpsur,ljmuir,v,vintra, vinter,vext 
      &                ,rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq
      &                ,ryuij,rzuij,sr2,sr6,rij,rijsq,dzui,dz3,dz12
      &                ,exgrph,exsami,exmuir,exzeo,vtors,exsix,velect
      &                ,vewald,mmff,rbcut,rvdwsq,rchgsq,ninesix, genlj
-      real(8)::erfunc,qave
-      real(8)::xvec,yvec,zvec,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2
+      real(KIND=double_precision)::erfunc,qave
+      real(KIND=double_precision)::xvec,yvec,zvec,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2
      &     ,daa1,da1a2,dot,thetac,vtorso
-      real(8)::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq,epsilon2,sigma2
-      real(8)::sx,sy,sz
-      real(8)::slitpore	
-      real(8)::distij(numax,numax)
-      real(8)::xcc,ycc,zcc,tcc,spltor, tabulated_vib
+      real(KIND=double_precision)::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq,epsilon2,sigma2
+      real(KIND=double_precision)::sx,sy,sz
+      real(KIND=double_precision)::slitpore	
+      real(KIND=double_precision)::distij(numax,numax)
+      real(KIND=double_precision)::xcc,ycc,zcc,tcc,spltor, tabulated_vib
 
       dimension xvec(numax,numax),yvec(numax,numax),zvec(numax,numax)
       dimension lcoulo(numax,numax),cellinc(cmax),jcell(nmax)

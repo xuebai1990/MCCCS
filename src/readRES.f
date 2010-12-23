@@ -1,3 +1,4 @@
+      program getfrac
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !     Ordering the .res file to input coord for fort.77
 !     Readin files: fort.33,source_filename(.res)
@@ -7,13 +8,19 @@
 !     C1 H2 C5 O4 ...
 !     Output file: source_filename.frac
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-      program getfrac
-
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      character::(len=30) infile,outfile
-      character::(len=5) sname(500),celltype
-      integer::nbead, i, j
+      character(LEN=default_path_length)::infile,outfile
+      character(LEN=default_string_length)::sname(500),celltype
+      integer(KIND=int)::nbead, i, j
       real::cell(6),bead(3,500),dum
       
       read(4,*) infile

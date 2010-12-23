@@ -9,54 +9,62 @@
 ! --- perform change of the volume: random walk in ln(vol)
 !
  
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include 'control.inc'
-      include 'coord.inc'
-      include 'ensemble.inc'
-      include 'system.inc' 
-      include 'inputdata.inc'
-      include 'bnbsma.inc'
-      include 'ewaldsum.inc'
-      include 'cell.inc'
-!kea
-      include 'garofalini.inc'
-      include 'neigh.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'ensemble.inc'
+!$$$      include 'system.inc' 
+!$$$      include 'inputdata.inc'
+!$$$      include 'bnbsma.inc'
+!$$$      include 'ewaldsum.inc'
+!$$$      include 'cell.inc'
+!$$$!kea
+!$$$      include 'garofalini.inc'
+!$$$      include 'neigh.inc'
 
 !      logical::ovrlap,lvol,lx(nbxmax),ly(nbxmax),lz(nbxmax),lncubic
       logical::ovrlap,lvol,lx,ly,lz,lncubic
       logical::la,lb,lc
 
-      integer::i,j,ibox,imolty,ic,ncount,boxa,boxb,ipair,ipairb
-      real(8)::bxo(nbxmax),byo(nbxmax),bzo(nbxmax)
-      real(8)::volo(nbxmax),vboxo(nbxmax),dfac(nbxmax),
+      integer(KIND=int)::i,j,ibox,imolty,ic,ncount,boxa,boxb,ipair,ipairb
+      real(KIND=double_precision)::bxo(nbxmax),byo(nbxmax),bzo(nbxmax)
+      real(KIND=double_precision)::volo(nbxmax),vboxo(nbxmax),dfac(nbxmax),
      &                 voln(nbxmax),vflucqo(nbxmax),vintero(nbxmax),
      &                 vtailo(nbxmax),vexto(nbxmax),velecto(nbxmax)
-      real(8)::kxo(vectormax,nbxmax),kyo(vectormax,nbxmax),
+      real(KIND=double_precision)::kxo(vectormax,nbxmax),kyo(vectormax,nbxmax),
      &                 kzo(vectormax,nbxmax),prefacto(vectormax,nbxmax)
-      real(8)::vboxn(nbxmax),vintern(nbxmax),
+      real(KIND=double_precision)::vboxn(nbxmax),vintern(nbxmax),
      &                 vtailn(nbxmax),vextn(nbxmax),velectn(nbxmax)
-      real(8)::rxuo(nmax,numax),ryuo(nmax,numax)
+      real(KIND=double_precision)::rxuo(nmax,numax),ryuo(nmax,numax)
      &                ,rzuo(nmax,numax),qquo(nmax,numax)
-      real(8)::volt,expdv,random,df,dx,dy,dz,v,dele,
+      real(KIND=double_precision)::volt,expdv,random,df,dx,dy,dz,v,dele,
      &                 vinter,vtail,vext,boxlen,vdum,velect
      &                 ,velect_intra,velect_inter
-      real(8)::vminim(nbxmax)
-      real(8)::xcmo,ycmo,zcmo,calpo(nbxmax),numvecto(nbxmax)
-      real(8)::rbcut(nbxmax),rbcuta,rbcutb,rpair,rm
+      real(KIND=double_precision)::vminim(nbxmax)
+      real(KIND=double_precision)::xcmo,ycmo,zcmo,calpo(nbxmax),numvecto(nbxmax)
+      real(KIND=double_precision)::rbcut(nbxmax),rbcuta,rbcutb,rpair,rm
 
-      real(8)::w(3),vx,vy,vz,min_boxl
+      real(KIND=double_precision)::w(3),vx,vy,vz,min_boxl
 
       dimension xcmo(nmax),ycmo(nmax),zcmo(nmax)
 
-      integer::ichoiq
-      integer::hbox,jbox,jhmat
-      real(8)::rbox,hmato(9),hmatio(9)
+      integer(KIND=int)::ichoiq
+      integer(KIND=int)::hbox,jbox,jhmat
+      real(KIND=double_precision)::rbox,hmato(9),hmatio(9)
 
-      integer::idum
-      real(8)::lddum,lddum2(27)
+      integer(KIND=int)::idum
+      real(KIND=double_precision)::lddum,lddum2(27)
 !kea
-      real(8)::v3n(nbxmax),v3o(nbxmax)
+      real(KIND=double_precision)::v3n(nbxmax),v3o(nbxmax)
 
 ! --------------------------------------------------------------------
 

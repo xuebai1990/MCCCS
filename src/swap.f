@@ -9,38 +9,46 @@
 !    ** 9-18-97                                                        ** 
 !    ********************************************************************
  
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
       
-      include 'control.inc'
-      include 'coord.inc'
-      include 'conver.inc'
-      include 'coord2.inc'
-      include 'system.inc'
-      include 'ensemble.inc'
-      include 'zeopoten.inc'
-      include 'cbmc.inc'
-      include 'rosen.inc' 
-      include 'boltzmann.inc'
-      include 'external.inc'
-      include 'connect.inc'
-      include 'inputdata.inc'
-      include 'ewaldsum.inc'
-      include 'poten.inc'
-      include 'fepsi.inc'
-      include 'clusterbias.inc'
-      include 'neigh.inc'
-      include 'cell.inc'
-      include 'eepar.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'conver.inc'
+!$$$      include 'coord2.inc'
+!$$$      include 'system.inc'
+!$$$      include 'ensemble.inc'
+!$$$      include 'zeopoten.inc'
+!$$$      include 'cbmc.inc'
+!$$$      include 'rosen.inc' 
+!$$$      include 'boltzmann.inc'
+!$$$      include 'external.inc'
+!$$$      include 'connect.inc'
+!$$$      include 'inputdata.inc'
+!$$$      include 'ewaldsum.inc'
+!$$$      include 'poten.inc'
+!$$$      include 'fepsi.inc'
+!$$$      include 'clusterbias.inc'
+!$$$      include 'neigh.inc'
+!$$$      include 'cell.inc'
+!$$$      include 'eepar.inc'
       
       logical::ovrlap,lterm,lnew,lempty,ldone,ltors,lovrh,lfavor,
      &     laccept,lswapinter,lrem_out,lins_in,lneighij,linsk_in,
      &     lremk_in,lrem_clu,lins_clu,lfixnow
 
      
-      integer::boxins,boxrem,imol,ichoi,ip,iwalk,idum,iins1,imolty1
-      integer::istt,iett,ncount,itype,ipair,ipairb,beg,flagon
+      integer(KIND=int)::boxins,boxrem,imol,ichoi,ip,iwalk,idum,iins1,imolty1
+      integer(KIND=int)::istt,iett,ncount,itype,ipair,ipairb,beg,flagon
 
-      integer::iutry,icbu,ifrom,irem,iins,glist,findex
+      integer(KIND=int)::iutry,icbu,ifrom,irem,iins,glist,findex
      &     ,iii,j,ibox,iunit,ic,pointp,imolty,imt,jmt,igrow
      &     ,pointp2,jins,jmolty,neighj_num,neighk_num
      &     ,joffset,koffset,kmolty,kins,target,cnt_wf1
@@ -49,34 +57,34 @@
       dimension glist(numax),cnt_wf1(0:6,0:6,4),cnt_wf2(0:6,0:6,4),
      &     cnt_wra1(1000,4),cnt_wra2(1000,4)
 
-      real(8)::sx,sy,sz,ddum(27)
+      real(KIND=double_precision)::sx,sy,sz,ddum(27)
 
-      real(8)::v,vintra,vinter,vext,velect,vtorold,vtornew
+      real(KIND=double_precision)::v,vintra,vinter,vext,velect,vtorold,vtornew
      &     ,vewald,vflucq,delen,deleo,rpair
-      real(8)::vnewflucq,voldflucq,qion,ctorfo,ctorfn
+      real(KIND=double_precision)::vnewflucq,voldflucq,qion,ctorfo,ctorfn
       dimension qion(numax)
-      real(8)::rxuold,ryuold,rzuold,coruz
+      real(KIND=double_precision)::rxuold,ryuold,rzuold,coruz
       dimension rxuold(numax),ryuold(numax),rzuold(numax)
-      real(8)::bsswap,bnswap,bnswap_in,bnswap_out
-      real(8)::random,rmol,rbf,bsum
-      real(8)::waddnew,waddold
+      real(KIND=double_precision)::bsswap,bnswap,bnswap_in,bnswap_out
+      real(KIND=double_precision)::random,rmol,rbf,bsum
+      real(KIND=double_precision)::waddnew,waddold
 
-      real(8)::total_NBE,vintran,velectn,vewaldn,vtgn
-      real(8)::vbendn,vvibn 
+      real(KIND=double_precision)::total_NBE,vintran,velectn,vewaldn,vtgn
+      real(KIND=double_precision)::vbendn,vvibn 
 
 
 
-      real(8)::v1insext,v1remext,v1ins,w1ins,v1rem,w1rem
+      real(KIND=double_precision)::v1insext,v1remext,v1ins,w1ins,v1rem,w1rem
      &     ,v1insint,v1remint,v1insewd,v1remewd
      &     ,wnlog,wolog,wdlog,wratio,vinsta,vremta
      &     ,volins,volrem,rho,arg,coru,v1inselc,v1remelc
-      real(8)::rvol,x,y,z,rijsq,wbias_ins,wbias_rem,r
+      real(KIND=double_precision)::rvol,x,y,z,rijsq,wbias_ins,wbias_rem,r
      &     ,xi1,xi2,xisq
       dimension bsswap(ntmax,npabmax,nbxmax*2),
      &     bnswap(ntmax,npabmax,nbxmax*2),bnswap_in(ntmax,2),
      &     bnswap_out(ntmax,2)
-      real(8)::vrecipn,vrecipo,vdum,whins,whrem
-      real(8)::rxuh,ryuh,rzuh,delenh,vtrhext,vtrhintra
+      real(KIND=double_precision)::vrecipn,vrecipo,vdum,whins,whrem
+      real(KIND=double_precision)::rxuh,ryuh,rzuh,delenh,vtrhext,vtrhintra
      &     ,vtrhinter,vtrhelect,vtrhewald,vtrhtg,bfach
      
       dimension bfach(nchmax),delenh(nchmax),vtrhinter(nchmax)

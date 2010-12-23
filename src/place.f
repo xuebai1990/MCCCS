@@ -1,56 +1,41 @@
       subroutine place(lnew,lterm,i,imolty,ibox,index,wplace)
 
-! place
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-! John Stubbs, and Collin Wick and Ilja Siepmann  
-!                     
-! This program is free software; you can redistribute it and/or
-! modify it under the terms of the GNU General Public License
-! as published by the Free Software Foundation; either version 2
-! of the License, or (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program; if not, write to 
-!
-! Free Software Foundation, Inc. 
-! 59 Temple Place - Suite 330
-! Boston, MA  02111-1307, USA.
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include 'control.inc'
-      include 'coord.inc'
-      include 'cbmc.inc'
-      include 'connect.inc'
-      include 'fix.inc'
-      include 'system.inc'
-      include 'rosen.inc'
-      include 'tabulated.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'cbmc.inc'
+!$$$      include 'connect.inc'
+!$$$      include 'fix.inc'
+!$$$      include 'system.inc'
+!$$$      include 'rosen.inc'
+!$$$      include 'tabulated.inc'
 
       logical::lnew,lterm,ovrlap
 
-      integer::i,j,imolty,count,counta,iu,ju,ku,jtvib,start,iv,dir
+      integer(KIND=int)::i,j,imolty,count,counta,iu,ju,ku,jtvib,start,iv,dir
      &     ,index,ivib,nchvib,ibend,ib,type,site,ip,ichoi,niplace
      &     ,iw,iufrom,it,jut2,jut3,jut4,jttor,ja,ibox,glist,iwalk
      &     ,iuprev,list,nchben_a, nchben_b,iuback2,iuone,max,iu2back
  
       parameter(max=10)
 
-      real(8)::wplace,equil,kforce,bsum_try,mincb,delcb
+      real(KIND=double_precision)::wplace,equil,kforce,bsum_try,mincb,delcb
      &     ,ux,uy,uz,r,vvib,bfactor,third,random,length,bs,rbf
      &     ,vvibtr,wei_vib,bendang,vangle,vbbtr,angle,vphi,phione
      &     ,thetac,rx,ry,rz,rsint,dist
      &     ,wei_bend,ang_trial,angles,vctor,vdha
      &     ,vbend,vtorsion,bsum,alpha,gamma,twopi,dum,phi,thetaone
      &     ,thetatwo,phitwo
-      real(8)::tabulated_vib
+      real(KIND=double_precision)::tabulated_vib
 
       dimension r(nchbn_max),bfactor(nchbn_max)
      &     ,bendang(numax,numax),ang_trial(nchbn_max),dist(max)

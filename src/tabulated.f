@@ -12,12 +12,20 @@
 !ccc  KM 12/02/08
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-      include 'tabulated.inc'
-      include 'conver.inc'
+!$$$      include 'tabulated.inc'
+!$$$      include 'conver.inc'
 
-      integer::vibtyp, vlow, vhigh, xa, bin, add1
-      real(8)::len, tabulated_vib, left, lenrem
+      integer(KIND=int)::vibtyp, vlow, vhigh, xa, bin, add1
+      real(KIND=double_precision)::len, tabulated_vib, left, lenrem
       
       vlow=1
       vhigh=vibsplits(vibtyp)
@@ -66,12 +74,20 @@
 !ccc  KM 12/03/08
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-      include 'tabulated.inc'
-      include 'conver.inc'
+!$$$      include 'tabulated.inc'
+!$$$      include 'conver.inc'
 
-      integer::bendtyp, blow, bhigh, xa, bin, add1
-      real(8)::r, tabulated_bend, left, rem
+      integer(KIND=int)::bendtyp, blow, bhigh, xa, bin, add1
+      real(KIND=double_precision)::r, tabulated_bend, left, rem
 
       blow=1
       bhigh=bendsplits(bendtyp)
@@ -122,12 +138,20 @@
 !ccc  KM 12/03/08
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-      include 'tabulated.inc'
-      include 'conver.inc'
+!$$$      include 'tabulated.inc'
+!$$$      include 'conver.inc'
 
-      integer::typi, typj, low, high, xa, bin, add1
-      real(8)::r,  tabulated_vdW, left, rem
+      integer(KIND=int)::typi, typj, low, high, xa, bin, add1
+      real(KIND=double_precision)::r,  tabulated_vdW, left, rem
 
       low=1
       high=vdWsplits(typi, typj)
@@ -176,12 +200,20 @@
 !ccc  KM 04/23/09
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-      include 'tabulated.inc'
-      include 'conver.inc'
+!$$$      include 'tabulated.inc'
+!$$$      include 'conver.inc'
 
-      integer::typi, typj, low, high, xa, bin, add1
-      real(8)::r,  tabulated_elect, left, rem
+      integer(KIND=int)::typi, typj, low, high, xa, bin, add1
+      real(KIND=double_precision)::r,  tabulated_elect, left, rem
 
       low=1
       high=electsplits(typi, typj)

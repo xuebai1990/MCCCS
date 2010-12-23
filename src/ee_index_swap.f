@@ -2,14 +2,22 @@
 !
 ! swaps the tagged index for ee moves
 !
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include 'control.inc'
-      include 'coord.inc'
-      include 'eepar.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'eepar.inc'
 
-      integer::imolty,ibox,ibox1
-      real(8)::accr,random
+      integer(KIND=int)::imolty,ibox,ibox1
+      real(KIND=double_precision)::accr,random
 
 ! --- if mstate = 1, with equal probability change the tagged index
 ! --- to another one in the same box (m = 1, still), or with the other

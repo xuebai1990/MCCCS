@@ -5,33 +5,41 @@
 !     *** [Marcus Martin] by Neeraj Rai 07/14/04                      ***
 !     *******************************************************************
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include 'control.inc'
-      include 'coord.inc'
-      include 'inputdata.inc'
-      include 'connect.inc'
-      include 'system.inc'
-      include 'cell.inc' 
-      include 'gor.inc'
-      include 'peboco.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'inputdata.inc'
+!$$$      include 'connect.inc'
+!$$$      include 'system.inc'
+!$$$      include 'cell.inc' 
+!$$$      include 'gor.inc'
+!$$$      include 'peboco.inc'
 
-      character*50 fileout
-      character*20 ftemp,fname2,fname3
-      integer::switch,ichain,fname
+      character(LEN=default_path_length)::fileout
+      character(LEN=default_string_length)::ftemp,fname2,fname3
+      integer(KIND=int)::switch,ichain,fname
       logical::lskip
-      integer::bin,k,kk,box,z
-      integer::tempbx,dummy,xx,yy,g,gg
-      integer::chnum,imolty,i,ii,j,jj
+      integer(KIND=int)::bin,k,kk,box,z
+      integer(KIND=int)::tempbx,dummy,xx,yy,g,gg
+      integer(KIND=int)::chnum,imolty,i,ii,j,jj
      &     ,jmolty,binadj,ntij,ntii,ntjj,jstart,istart,ntji
-      integer::iivib,ip1,ip2,ip3,gaudef,uu,dum,units,zzz,zz1
+      integer(KIND=int)::iivib,ip1,ip2,ip3,gaudef,uu,dum,units,zzz,zz1
 
-      real(8)::avolume,rho,binstep,vec_hist
+      real(KIND=double_precision)::avolume,rho,binstep,vec_hist
      &     ,rxui,ryui,rzui,xxideal
      &     ,rxuij,ryuij,rzuij,ruijsq,ruij
      &     ,numxx,numyy,count,const,rlower,rupper,nideal,analhist
-      real(8)::comanalhist
-      real(8)::shlsumx,shlsumy,rcutsq
+      real(KIND=double_precision)::comanalhist
+      real(KIND=double_precision)::shlsumx,shlsumy,rcutsq
 
 !   NOW DEFINED IN CONTROL.INC
 
@@ -39,15 +47,15 @@
 !      parameter (nbinmx=200,nbxmax=1,ntmax=5,nmax=1600,numax=18
 !     & ,ntdifmx=8)
 
-      integer::bend,iv,iuvib,iuv,iutest
-      real(8)::onepi,
+      integer(KIND=int)::bend,iv,iuvib,iuv,iutest
+      real(KIND=double_precision)::onepi,
      &    value,total,degree
       parameter (onepi = 3.141592654d0)
-      integer::torsion, tor_code,itor,iutor,patt,bthree
+      integer(KIND=int)::torsion, tor_code,itor,iutor,patt,bthree
      &     ,decimal,power
-      real(8)::xcc,ycc,zcc,tcc,fplus,fminus
+      real(KIND=double_precision)::xcc,ycc,zcc,tcc,fplus,fminus
      &     ,ftrans
-      real(8)::xvec,yvec,zvec,distij,xaa1,yaa1,zaa1,xa1a2
+      real(KIND=double_precision)::xvec,yvec,zvec,distij,xaa1,yaa1,zaa1,xa1a2
      &     ,ya1a2,za1a2,daa1,da1a2,dot,thetac,theta
      &     ,ratio
      &     ,psum,tempzcm,tempmasst,slab_vol
@@ -60,20 +68,20 @@
 
 !Cc     --- variables used in the charge parts
 !C     logical::qhere
-!C      integer::qbin,qbinmax,qbins,qqcode,imol,iunit
-!C      integer::qbin,qbins,qqcode,imol,iunit
+!C      integer(KIND=int)::qbin,qbinmax,qbins,qqcode,imol,iunit
+!C      integer(KIND=int)::qbin,qbins,qqcode,imol,iunit
 !C    NOW DEFINED IN CONTROL.INC
 !C      parameter (qbinmax=1000)
 
-!C      real(8)::qdisp
-!C     real(8)::qmin,qmax,qdiff,qstep,qdummy
+!C      real(KIND=double_precision)::qdisp
+!C     real(KIND=double_precision)::qmin,qmax,qdiff,qstep,qdummy
 !C      dimension qanalhist(numax*ntdifmx+numax,nbxmax,qbinmax)
 !C      dimension qcount(numax*ntdifmx+numax,nbxmax)
 
 !Cc     --- variables used in the dipole parts
 !C     logical::ldipole
-!C     integer::qblock,block,nblock
-!C      real(8)::dipole,dicount,dipx,dipy,dipz,diconv,stddev
+!C     integer(KIND=int)::qblock,block,nblock
+!C      real(KIND=double_precision)::dipole,dicount,dipx,dipy,dipz,diconv,stddev
 !C     &     ,avera,diprev,dcprev,dipblk
 !C     dimension dipole(ntdifmx,nbxmax),dicount(ntdifmx,nbxmax)
 !C     dimension diprev(ntdifmx,nbxmax),dcprev(ntdifmx,nbxmax)

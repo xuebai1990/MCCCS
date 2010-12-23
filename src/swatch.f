@@ -8,49 +8,57 @@
 !    ***                                     9-25-02 JMS        ***
 !      **********************************************************
  
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
  
-      include 'control.inc'
-      include 'coord.inc'
-      include 'coord2.inc'
-      include 'system.inc'
-      include 'external.inc'
-      include 'zeopoten.inc'
-      include 'ensemble.inc'
-      include 'cbmc.inc'
-      include 'inputdata.inc'
-      include 'rosen.inc'
-      include 'swtcmove.inc'
-      include 'ewaldsum.inc'
-      include 'cell.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'coord2.inc'
+!$$$      include 'system.inc'
+!$$$      include 'external.inc'
+!$$$      include 'zeopoten.inc'
+!$$$      include 'ensemble.inc'
+!$$$      include 'cbmc.inc'
+!$$$      include 'inputdata.inc'
+!$$$      include 'rosen.inc'
+!$$$      include 'swtcmove.inc'
+!$$$      include 'ewaldsum.inc'
+!$$$      include 'cell.inc'
 
       logical::lempty,lterm
 
-      integer::type_a,type_b,from,prev,self,iboxnew,iboxold
+      integer(KIND=int)::type_a,type_b,from,prev,self,iboxnew,iboxold
      &     ,imolty,igrow,new,old,islen,ifirst,iprev,iii,j
-      integer::oldchain,newchain,oldunit,newunit,ncount,iunit,iins
+      integer(KIND=int)::oldchain,newchain,oldunit,newunit,ncount,iunit,iins
 
-      integer::ic,ibox,icbu,jj,mm,imt,jmt,imolin,imolrm
-      integer::boxa,boxb,ipair,imolta,imoltb,iboxa
+      integer(KIND=int)::ic,ibox,icbu,jj,mm,imt,jmt,imolin,imolrm
+      integer(KIND=int)::boxa,boxb,ipair,imolta,imoltb,iboxa
      &  ,iboxb,iboxal,iboxbl,iboxia,iboxib,iunita,iunitb,orgaia
      &  ,orgaib,orgbia,orgbib,ipairb 
 
-      real(8)::random,tweight,tweiold,rxut,ryut,rzut
+      real(KIND=double_precision)::random,tweight,tweiold,rxut,ryut,rzut
      &  ,dvol,vola,volb,rho,coru,coruz,dinsta,rpair
 
-      real(8)::vnbox,vninte,vnintr,vnvibb,vntgb,vnextb
+      real(KIND=double_precision)::vnbox,vninte,vnintr,vnvibb,vntgb,vnextb
      &  ,vnbend,vntail,vnelect,vnewald,wnlog,wolog,wdlog,wswat
          
-      real(8)::v,vintra,vinter,vext,velect,vewald,vdum,delen
+      real(KIND=double_precision)::v,vintra,vinter,vext,velect,vewald,vdum,delen
      &     ,deleo,dicount,vrecipn,vrecipo
 ! * additions from iswatch
 
-      integer::zz,zzz,box,iboxi,bdmol_a,bdmol_b
-      integer::imola,imolb,moltaid,moltbid,i,ii,iu
+      integer(KIND=int)::zz,zzz,box,iboxi,bdmol_a,bdmol_b
+      integer(KIND=int)::imola,imolb,moltaid,moltbid,i,ii,iu
 
-      integer::s_type, o_type, thisbox, otherbox
+      integer(KIND=int)::s_type, o_type, thisbox, otherbox
 
-      real(8)::rx_1(numax),ry_1(numax),rz_1(numax),dummy
+      real(KIND=double_precision)::rx_1(numax),ry_1(numax),rz_1(numax),dummy
 
 !      dimension from(2),prev(2)
       dimension from(2*numax),prev(2*numax)
@@ -60,14 +68,14 @@
 
 ! * end additions
 
-      real(8)::waddold,waddnew,vdum2
+      real(KIND=double_precision)::waddold,waddnew,vdum2
 
       dimension vnbox(nbxmax),vninte(nbxmax),vnintr(nbxmax)
      &  ,vnvibb(nbxmax),vntgb(nbxmax),vnextb(nbxmax),vnbend(nbxmax)
      &  ,vntail(nbxmax),vnelect(nbxmax),vnewald(nbxmax)
 
 ! --- JLR 11-24-09
-      integer::icallrose
+      integer(KIND=int)::icallrose
 ! --- END JLR 11-24-09
 
 ! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

@@ -23,8 +23,16 @@
 ! Boston, MA  02111-1307, USA.
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      IMPLICIT NONE
-      real(8)::RANDOM2 , nRCARRY
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
+      implicit none
+      real(KIND=double_precision)::RANDOM2 , nRCARRY
       RANDOM2 = nRCARRY()
       RETURN
 ! ----------------------------------------------------C
@@ -38,13 +46,21 @@
 !  reproducible, for any machine with at least 32 bits / real::number.
 !  REF: Press, Flannery, Teukolsky, Vetterling, Numerical Recipes (1986)
 !----------------------------------------------------------------------C
-      IMPLICIT NONE
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
+      implicit none
 ! RP added for debugging
 !      include 'mpif.h'
 !      include 'mpi.inc'
 
-      integer::nIA , nIC , nISEED , nM1
-      real(8)::nRANDx , nRM
+      integer(KIND=int)::nIA , nIC , nISEED , nM1
+      real(KIND=double_precision)::nRANDx , nRM
       PARAMETER (nM1=714025,nIA=1366,nIC=150889,nRM=1.D+0/nM1)
 !
       nISEED = MOD(nIA*nISEED+nIC,nM1)
@@ -58,8 +74,16 @@
       END
 
       SUBROUTINE nRANSET(nISEED)
-      IMPLICIT NONE
-      integer::nISEED
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
+      implicit none
+      integer(KIND=int)::nISEED
 
       CALL nRSTART(nISEED)
       RETURN
@@ -70,13 +94,21 @@
 !       Initialize Marsaglia list of 24 random numbers.
 !----------------------------------------------------------------------C
 
-      IMPLICIT NONE
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
+      implicit none
 ! ----RP added for debugging
 !      include 'mpif.h'
 !      include 'mpi.inc'
 
-      real(8)::nCarry , nran , nRANDx , nSeed
-      integer::ni , nI24 , nIseed , nISEEDA , nJ24
+      real(KIND=double_precision)::nCarry , nran , nRANDx , nSeed
+      integer(KIND=int)::ni , nI24 , nIseed , nISEEDA , nJ24
       COMMON /nRANDM/ nSeed(24) , nCarry , nI24 , nJ24 , nIseed
 
       nI24 = 24
@@ -106,9 +138,17 @@
 !----------------------------------------------------------------------C
 !       Random number generator from Marsaglia.
 !----------------------------------------------------------------------C
-      IMPLICIT NONE
-      real(8)::nCarry , nRCARRY , nSeed , nTWOM24,nTWOP24,nuni
-      integer::nI24 , nIseed , nJ24
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
+      implicit none
+      real(KIND=double_precision)::nCarry , nRCARRY , nSeed , nTWOM24,nTWOP24,nuni
+      integer(KIND=int)::nI24 , nIseed , nJ24
       PARAMETER (nTWOP24=16777216.D+0,nTWOM24=1.D+0/nTWOP24)
       COMMON /nRANDM/ nSeed(24) , nCarry , nI24 , nJ24 , nIseed
 !

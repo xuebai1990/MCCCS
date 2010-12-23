@@ -1,27 +1,4 @@
       subroutine thermopress
-
-! thermopress
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-! John Stubbs, and Collin Wick and Ilja Siepmann  
-!                     
-! This program is free software; you can redistribute it and/or
-! modify it under the terms of the GNU General Public License
-! as published by the Free Software Foundation; either version 2
-! of the License, or (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program; if not, write to 
-!
-! Free Software Foundation, Inc. 
-! 59 Temple Place - Suite 330
-! Boston, MA  02111-1307, USA.
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
  
 !    *******************************************************************
 !    ** calculates the pressure for a configuration according to the  **
@@ -29,35 +6,42 @@
 !    ** written in 1998 by Bin Chen.                                  **
 !    *******************************************************************
  
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
  
-! *** common blocks ***
-      include 'coord.inc'
-      include 'system.inc'
-      include 'control.inc'
-      include 'ewaldsum.inc'
-      include 'conver.inc'
-      include 'ensemble.inc'
-      include 'blkavg.inc'
-      include 'inputdata.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'system.inc'
+!$$$      include 'control.inc'
+!$$$      include 'ewaldsum.inc'
+!$$$      include 'conver.inc'
+!$$$      include 'ensemble.inc'
+!$$$      include 'blkavg.inc'
+!$$$      include 'inputdata.inc'
 
       logical::lvol,ovrlap
-      integer::i,j,itest,imolty
+      integer(KIND=int)::i,j,itest,imolty
 
-      integer::ibox,ic,ncount
-      real(8)::dv,apress
-      real(8)::bxo(2),byo(2),bzo(2)
-      real(8)::volo(2),vboxo(2),dfac(2),voln(2),
+      integer(KIND=int)::ibox,ic,ncount
+      real(KIND=double_precision)::dv,apress
+      real(KIND=double_precision)::bxo(2),byo(2),bzo(2)
+      real(KIND=double_precision)::volo(2),vboxo(2),dfac(2),voln(2),
      &                 vintero(2),vtailo(2),vexto(2),velecto(2)
-      real(8)::kxo(vectormax,2),kyo(vectormax,2),
+      real(KIND=double_precision)::kxo(vectormax,2),kyo(vectormax,2),
      &                 kzo(vectormax,2),prefacto(vectormax,2)
-      real(8)::vboxn(2),
+      real(KIND=double_precision)::vboxn(2),
      &              vintern(2),vtailn(2),vextn(2),velectn(2)
-      real(8)::rxuo(nmax,numax),ryuo(nmax,numax)
+      real(KIND=double_precision)::rxuo(nmax,numax),ryuo(nmax,numax)
      &                ,rzuo(nmax,numax)
-      real(8)::volt,expdv,random,df,dx,dy,dz,v,dele,
+      real(KIND=double_precision)::volt,expdv,random,df,dx,dy,dz,v,dele,
      &                 vinter,vtail,vext,vminim,vdum,velect
-      real(8)::xcmo,ycmo,zcmo
+      real(KIND=double_precision)::xcmo,ycmo,zcmo
       dimension xcmo(nmax),ycmo(nmax),zcmo(nmax)
 
 ! --------------------------------------------------------------------

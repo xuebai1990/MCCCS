@@ -1,87 +1,71 @@
       subroutine Atom_energy ( i,imolty, v, vintra, vinter,vext
      &     ,velect,vewald,flagon,ibox, istart, iend,lljii,ovrlap
      &     ,ltors,vtors,lcharge_table,lfavor,vvib,vbend,vtg)
-
-! energy
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-! John Stubbs, and Collin Wick and Ilja Siepmann  
-!                     
-! This program is free software; you can redistribute it and/or
-! modify it under the terms of the GNU General Public License
-! as published by the Free Software Foundation; either version 2
-! of the License, or (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program; if not, write to 
-!
-! Free Software Foundation, Inc. 
-! 59 Temple Place - Suite 330
-! Boston, MA  02111-1307, USA.
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
  
 !    *******************************************************************
 !    ** calculates the total potential energy for a configuration.    **
 !    *******************************************************************
- 
+
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-! *** common blocks ***
-      include 'control.inc'
-      include 'coord.inc'
-      include 'system.inc'
-      include 'neigh.inc'
-      include 'poten.inc'
-      include 'coord2.inc' 
-      include 'external.inc'
-      include 'connect.inc'
-      include 'ewaldsum.inc'
-      include 'fepsi.inc'
-      include 'qqlist.inc'
-      include 'clusterbias.inc'
-      include 'nsix.inc'
-      include 'peboco.inc'
-      include 'cell.inc'
-      include 'conver.inc'
-      include 'tabulated.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'system.inc'
+!$$$      include 'neigh.inc'
+!$$$      include 'poten.inc'
+!$$$      include 'coord2.inc' 
+!$$$      include 'external.inc'
+!$$$      include 'connect.inc'
+!$$$      include 'ewaldsum.inc'
+!$$$      include 'fepsi.inc'
+!$$$      include 'qqlist.inc'
+!$$$      include 'clusterbias.inc'
+!$$$      include 'nsix.inc'
+!$$$      include 'peboco.inc'
+!$$$      include 'cell.inc'
+!$$$      include 'conver.inc'
+!$$$      include 'tabulated.inc'
 
       logical::lqimol,lqjmol,lexplt,lcoulo,lfavor,lij2,liji,lqchgi
       logical::lljii,ovrlap,ltors,lcharge_table,lt,lfound
       logical::lmim
 
-      integer::growii,growjj,k,cellinc,jcell,ic,nmole
-      integer::i,ibox, istart, iend,ii,ntii,flagon,jjj,iii
+      integer(KIND=int)::growii,growjj,k,cellinc,jcell,ic,nmole
+      integer(KIND=int)::i,ibox, istart, iend,ii,ntii,flagon,jjj,iii
      &       ,j,jj,ntjj,ntij,ntj,imolty,jmolty,ncell
-      integer::iivib,jjtor,ip1,ip2,ip3,it,nchp2,acellinc
+      integer(KIND=int)::iivib,jjtor,ip1,ip2,ip3,it,nchp2,acellinc
 
-      integer::jjvib,jjben,mmm  
+      integer(KIND=int)::jjvib,jjben,mmm  
 
-      real(8)::vvib,vbend,vtg,theta,mlen2
+      real(KIND=double_precision)::vvib,vbend,vtg,theta,mlen2
 
-      real(8)::ljsami,ljpsur,ljmuir,v,vintra, vinter,vext 
+      real(KIND=double_precision)::ljsami,ljpsur,ljmuir,v,vintra, vinter,vext 
      &                ,rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq
      &                ,ryuij,rzuij,sr2,sr6,rij,rijsq,dzui,dz3,dz12
      &                ,exgrph,exsami,exmuir,exzeo,vtors,exsix,velect
      &                ,vewald,mmff,rbcut,ninesix, genlj
-      real(8)::erfunc,qave
-      real(8)::xvec,yvec,zvec,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2
+      real(KIND=double_precision)::erfunc,qave
+      real(KIND=double_precision)::xvec,yvec,zvec,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2
      &     ,daa1,da1a2,dot,thetac,vtorso
-      real(8)::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq,epsilon2,sigma2
-      real(8)::sx,sy,sz
-      real(8)::slitpore,v_elect_field
-      real(8)::distij(numax,numax)
-      real(8)::xcc,ycc,zcc,tcc,spltor
+      real(KIND=double_precision)::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq,epsilon2,sigma2
+      real(KIND=double_precision)::sx,sy,sz
+      real(KIND=double_precision)::slitpore,v_elect_field
+      real(KIND=double_precision)::distij(numax,numax)
+      real(KIND=double_precision)::xcc,ycc,zcc,tcc,spltor
 
       dimension xvec(numax,numax),yvec(numax,numax),zvec(numax,numax)
       dimension lcoulo(numax,numax),cellinc(cmax),jcell(nmax)
       dimension acellinc(numax,27)
 
-      real(8)::tabulated_vib, tabulated_bend, tabulated_vdW,
+      real(KIND=double_precision)::tabulated_vib, tabulated_bend, tabulated_vdW,
      &     tabulated_elect
 
 ! --------------------------------------------------------------------

@@ -9,32 +9,39 @@
 !    ** and rotates the molecule around this axis by dgamma radians.  **
 !    ** the maximum angular displacement is dgamax.                   **
 !    *******************************************************************
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-! *** common blocks ***
-      include 'control.inc'
-      include 'coord.inc'
-      include 'coord2.inc'
-      include 'ensemble.inc'
-      include 'neigh2.inc'
-      include 'system.inc' 
-      include 'inputdata.inc'
-      include 'bnbsma.inc'
-      include 'neigh.inc'
-      include 'ipswpar.inc'
-      include 'eepar.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'coord2.inc'
+!$$$      include 'ensemble.inc'
+!$$$      include 'neigh2.inc'
+!$$$      include 'system.inc' 
+!$$$      include 'inputdata.inc'
+!$$$      include 'bnbsma.inc'
+!$$$      include 'neigh.inc'
+!$$$      include 'ipswpar.inc'
+!$$$      include 'eepar.inc'
 
       logical::lx,ly,lz,ovrlap,lneighij,lclu_cmp,lexclude(nmax)
-      integer::i,ibox,flagon,iunit,j,imolty,iuroty,icbu,ic,ip,k
-      real(8)::rx,ry,rz,dchain,rchain,random,vnew,vold
+      integer(KIND=int)::i,ibox,flagon,iunit,j,imolty,iuroty,icbu,ic,ip,k
+      real(KIND=double_precision)::rx,ry,rz,dchain,rchain,random,vnew,vold
      &                ,vintrao,dgamma,rxorig,ryorig,rzorig
      &                ,rxnew2,rynew2,rznew2,vintran,disvsq,deltv
      &                ,deltvb,vintern,vintero,vextn,vexto,vdum
      &                ,velectn,velecto
      & ,velectn_intra,velectn_inter,velecto_intra,velecto_inter
 ! *** further variable definitions
-      real(8)::cosdg, sindg, rmrot
-      real(8)::vrecipn,vrecipo
+      real(KIND=double_precision)::cosdg, sindg, rmrot
+      real(KIND=double_precision)::vrecipn,vrecipo
 
 
       logical::laccept

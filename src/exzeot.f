@@ -1,14 +1,22 @@
       function exzeot(xi,yi,zi,idi)
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-      real(8)::exzeot,xi,yi,zi,xr,yr,zr,dy
-      integer::m,idi,j0,j,jp,k,k0,kp,l,l0,lp,mt,mp,
+!$$$      include 'grid.inc'
+!$$$      include 'zeolite.inc' 
+      real(KIND=double_precision)::exzeot,xi,yi,zi,xr,yr,zr,dy
+      integer(KIND=int)::m,idi,j0,j,jp,k,k0,kp,l,l0,lp,mt,mp,
      &        pgrid
       parameter (m=2,mt=2*m+1)
-      real(8)::yjtmp(mt),yktmp(mt),yltmp(mt)
-      real(8)::xt(mt),yt(mt),zt(mt)
-      include 'grid.inc'
-      include 'zeolite.inc' 
+      real(KIND=double_precision)::yjtmp(mt),yktmp(mt),yltmp(mt)
+      real(KIND=double_precision)::xt(mt),yt(mt),zt(mt)
 !
 ! --- determine cell parameters
 !
@@ -54,12 +62,20 @@
 !  (C) Copr. 1986-92 Numerical Recipes Software +3Y.
 
       subroutine polint(xa,ya,n,x,y,dy)
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-      integer::n,nmax
-      real(8)::dy,x,y,xa(n),ya(n)
+      integer(KIND=int)::n,nmax
+      real(KIND=double_precision)::dy,x,y,xa(n),ya(n)
       parameter (nmax=10)
-      integer::i,m,ns
-      real(8)::den,dif,dift,ho,hp,w,c(nmax),d(nmax)
+      integer(KIND=int)::i,m,ns
+      real(KIND=double_precision)::den,dif,dift,ho,hp,w,c(nmax),d(nmax)
       ns=1
       dif=abs(x-xa(1))
       do  i=1,n

@@ -1,3 +1,4 @@
+obsolete:
 analysis.f
 exzeot.f
 forcefield.f
@@ -6,6 +7,9 @@ readRES.f
 test1.f
 testupdate.f
 thermopress.f
+beaddat.inc
+gor.inc
 
+added:
 physical_constants.f
 utilmath.f

@@ -1,25 +1,33 @@
       subroutine suijtab(lmixlb,lmixjo,ltab)
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include 'control.inc'
-      include 'coord.inc'
-      include 'external.inc'
-      include 'poten.inc'
-      include 'system.inc'
-      include 'cell.inc'
-      include 'expsix.inc'
-      include 'merck.inc'
-      include 'nsix.inc'
-!kea
-      include 'garofalini.inc'
-      include 'conver.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'external.inc'
+!$$$      include 'poten.inc'
+!$$$      include 'system.inc'
+!$$$      include 'cell.inc'
+!$$$      include 'expsix.inc'
+!$$$      include 'merck.inc'
+!$$$      include 'nsix.inc'
+!$$$!kea
+!$$$      include 'garofalini.inc'
+!$$$      include 'conver.inc'
 
       logical::lmixlb, lmixjo,ltab
-      integer::i, j, ij, ji,ibox,nntype5,nmix,imix
-      real(8)::rzeronx(nxatom),epsilonnx(nxatom)
+      integer(KIND=int)::i, j, ij, ji,ibox,nntype5,nmix,imix
+      real(KIND=double_precision)::rzeronx(nxatom),epsilonnx(nxatom)
 
-      real(8)::rcheck, sr2, sr6, adum, bdum, rs1, rs7, sr7,
+      real(KIND=double_precision)::rcheck, sr2, sr6, adum, bdum, rs1, rs7, sr7,
      &     pi,djay,sigmaTmp,epsilonTmp
 
 ! ----------------------------------------------------------------

@@ -8,91 +8,105 @@
 ! - starts and controls the simulation
 ! -----------------------------------------------------------------
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-      include 'common.inc'
-      include 'control.inc'
-      include 'coord.inc'      
-      include 'poten.inc'
-      include 'system.inc'
-      include 'ensemble.inc'
-      include 'cbmc.inc'
-      include 'conver.inc'
-      include 'inpar.inc' 
-      include 'external.inc'
-      include 'zeolite.inc'
-      include 'inputdata.inc'
-      include 'blkavg.inc'
-      include 'bnbsma.inc'
-      include 'swtcmove.inc'
-      include 'ewaldsum.inc'
-      include 'neigh.inc'
-      include 'clusterbias.inc'
-      include 'cell.inc'
-      include 'ipswpar.inc'
-      include 'eepar.inc'
-!   KEA -- spline torsion inc file
-      include 'torsion.inc'
-      include 'garofalini.inc'
+!$$$      include 'mpi.inc'
+!$$$      include 'mpif.h'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'      
+!$$$      include 'poten.inc'
+!$$$      include 'system.inc'
+!$$$      include 'ensemble.inc'
+!$$$      include 'cbmc.inc'
+!$$$      include 'conver.inc'
+!$$$      include 'inpar.inc' 
+!$$$      include 'external.inc'
+!$$$      include 'zeolite.inc'
+!$$$      include 'inputdata.inc'
+!$$$      include 'blkavg.inc'
+!$$$      include 'bnbsma.inc'
+!$$$      include 'swtcmove.inc'
+!$$$      include 'ewaldsum.inc'
+!$$$      include 'neigh.inc'
+!$$$      include 'clusterbias.inc'
+!$$$      include 'cell.inc'
+!$$$      include 'ipswpar.inc'
+!$$$      include 'eepar.inc'
+!$$$!   KEA -- spline torsion inc file
+!$$$      include 'torsion.inc'
+!$$$      include 'garofalini.inc'
 ! -----------------------
 
 ! - variables added for GCMC histogram reweighting
-      integer::fmax,idum,nummol
+      integer(KIND=int)::fmax,idum,nummol
       parameter (fmax=1e6)
-      character*20 file_flt,file_hist,file_ndis(ntmax)
-      character*20 file_config,file_cell
-      character*20 fname2,fname3,fname4,ftemp
-      character*50 fileout
-      integer::fname,ntii,findpos
-      integer::imax,itmax
-      integer::n,nconfig,nentry,nminp(ntmax),nmaxp(ntmax)
-      integer::ncmt_list(fmax,ntmax),ndist(0:nmax,ntmax)
-      real(8)::eng_list(fmax)
-      real(8)::vhist
+      character(LEN=default_path_length)::file_flt,file_hist
+     & ,file_ndis(ntmax)
+      character(LEN=default_path_length)::file_config,file_cell
+      character(LEN=default_path_length)::fname2,fname3,fname4,ftemp
+      character(LEN=default_path_length)::fileout
+      integer(KIND=int)::fname,ntii,findpos
+      integer(KIND=int)::imax,itmax
+      integer(KIND=int)::n,nconfig,nentry,nminp(ntmax),nmaxp(ntmax)
+      integer(KIND=int)::ncmt_list(fmax,ntmax),ndist(0:nmax,ntmax)
+      real(KIND=double_precision)::eng_list(fmax)
+      real(KIND=double_precision)::vhist
 
-      real(8)::Temp_Energy, Temp_Mol_Vol
+      real(KIND=double_precision)::Temp_Energy, Temp_Mol_Vol
 
-      integer::point_of_start, point_to_end
+      integer(KIND=int)::point_of_start, point_to_end
 
-      integer::im,mnbox,i,j,inb,nblock,ibox,jbox,nend,nnn,ii,itemp
+      integer(KIND=int)::im,mnbox,i,j,inb,nblock,ibox,jbox,nend,nnn,ii,itemp
      &  ,itype,itype2,intg,imolty,ilunit,nbl,itel,ig,il,ucheck
      &  ,jbox_max,k,histtot,Temp_nmol
-      integer::nvirial,zz,steps,igrow,ddum,total
-      real(8)::starvir,stepvir,starviro
-      real(8)::acv,acvsq,aflv,acpres,acnp,acmove,acsurf
+      integer(KIND=int)::nvirial,zz,steps,igrow,ddum,total
+      real(KIND=double_precision)::starvir,stepvir,starviro
+      real(KIND=double_precision)::acv,acvsq,aflv,acpres,acnp,acmove,acsurf
      &  ,acboxl,acboxa,asetel,acdens,acnbox,dsq,v,vinter,vtail,vend
      &  ,vintra,vvib,vbend,vtg,vext,vstart,press1,press2,dsq1
      &  ,velect,vflucq,boxlen,acnbox2,pres(nbxmax),surf,acvolume
-      real(8)::rm,random,temvol,setx,sety,setz,setel
+      real(KIND=double_precision)::rm,random,temvol,setx,sety,setz,setel
      &  ,pscb1,pscb2,ratvol,avv,temacd,temspd,dblock,dbl1
      &  ,sterr,stdev,errme
-      real(8)::bsswap,bnswap,ostwald,stdost,dummy,debroglie
-     &  ,bnswap_in,bnswap_out, acvkjmol(nener,nbxmax)
+      real(KIND=double_precision)::bsswap,bnswap,ostwald,stdost,dummy
+     & ,debroglie,bnswap_in,bnswap_out, acvkjmol(nener,nbxmax)
 
-      real(8), dimension(nprop1,nbxmax,nbxmax)::acsolpar
+      real(KIND=double_precision), dimension(nprop1,nbxmax
+     & ,nbxmax)::acsolpar
  
-      real(8), dimension(nbxmax)::acEnthalpy,acEnthalpy1
+      real(KIND=double_precision), dimension(nbxmax)::acEnthalpy
+     & ,acEnthalpy1
 
-      real(8):: enthalpy,enthalpy2,sigma2Hsimulation
-      real(8):: inst_enth, inst_enth2, tmp,sigma2H,Cp
+      real(KIND=double_precision):: enthalpy,enthalpy2,sigma2Hsimulation
+      real(KIND=double_precision):: inst_enth, inst_enth2, tmp,sigma2H,Cp
 
-      real(8):: ennergy,ennergy2,sigma2Esimulation
-      real(8):: inst_energy, inst_energy2, sigma2E,Cv
+      real(KIND=double_precision):: ennergy,ennergy2,sigma2Esimulation
+      real(KIND=double_precision):: inst_energy, inst_energy2, sigma2E,Cv
 
       
   
-      real(8)::binvir,binvir2,inside,bvirial
-      real(8)::enchg1,enthchg1,srand
-      real(8)::enchg2,enthchg2
-      real(8)::enchg3,enthchg3
-      real(8)::cal2joule, joule2cal
-      real(8)::HSP_T, HSP_LJ, HSP_COUL 
-      real(8)::CED_T, CED_LJ, CED_COUL
-      real(8)::Heat_vapor_T,Heat_vapor_LJ,Heat_vapor_COUL   
-      real(8)::Heat_vapor_EXT, Ext_Energy_Liq, Ext_Energy_Gas
-      real(8)::DeltaU_Ext, pdV 
+      real(KIND=double_precision)::binvir,binvir2,inside,bvirial
+      real(KIND=double_precision)::enchg1,enthchg1,srand
+      real(KIND=double_precision)::enchg2,enthchg2
+      real(KIND=double_precision)::enchg3,enthchg3
+      real(KIND=double_precision)::cal2joule, joule2cal
+      real(KIND=double_precision)::HSP_T, HSP_LJ, HSP_COUL 
+      real(KIND=double_precision)::CED_T, CED_LJ, CED_COUL
+      real(KIND=double_precision)::Heat_vapor_T,Heat_vapor_LJ
+     & ,Heat_vapor_COUL   
+      real(KIND=double_precision)::Heat_vapor_EXT, Ext_Energy_Liq,
+     & Ext_Energy_Gas
+      real(KIND=double_precision)::DeltaU_Ext, pdV 
 
-      real(8), dimension(nprop1,nbxmax,nbxmax)::stdev1,
-     &                     sterr1,errme1       
+      real(KIND=double_precision), dimension(nprop1,nbxmax
+     & ,nbxmax)::stdev1,sterr1,errme1       
  
       dimension binvir(maxvir,maxntemp),binvir2(maxvir,maxntemp)
       dimension vstart(nbxmax),vend(nbxmax),avv(nener,nbxmax),
@@ -103,14 +117,15 @@
       dimension bsswap(ntmax,npabmax,nbxmax*2),
      &     bnswap(ntmax,npabmax,nbxmax*2),bnswap_in(ntmax,2),
      &     bnswap_out(ntmax,2)
-      real(8)::molfra,molfrac,gconst,vdum
+      real(KIND=double_precision)::molfra,molfrac,gconst,vdum
       dimension mnbox(nbxmax,ntmax),asetel(nbxmax,ntmax),
      &     acdens(nbxmax,ntmax),molfra(nbxmax,ntmax)
-      real(8)::molvol(nbxmax),speden(nbxmax)
-      real(8)::flucmom(nbxmax),flucmom2(nbxmax),flucev(nbxmax)
-     &     ,flucv(nbxmax),dielect,acvol(nbxmax),acvolsq(nbxmax)
+      real(KIND=double_precision)::molvol(nbxmax),speden(nbxmax)
+      real(KIND=double_precision)::flucmom(nbxmax),flucmom2(nbxmax)
+     & ,flucev(nbxmax),flucv(nbxmax),dielect,acvol(nbxmax)
+     & ,acvolsq(nbxmax)
 ! --- dimension statements for block averages ---
-      character*15 vname(nener)
+      character(LEN=default_string_length)::vname(nener)
       dimension dsq(nprop,nbxmax), stdev(nprop,nbxmax),
      &          dsq1(nprop1,nbxmax,nbxmax),  
      &          sterr(nprop,nbxmax),errme(nprop,nbxmax)
@@ -120,14 +135,14 @@
      &     ,lvirial2,ltfix,lratfix,ltsolute,lsolute,lpr
 
       dimension lratfix(ntmax),lsolute(ntmax)
-      character*25::enth,enth1
+      character(LEN=default_string_length)::enth,enth1
 
-      integer::bin,cnt_wf1(0:6,0:6,4),cnt_wf2(0:6,0:6,4),
+      integer(KIND=int)::bin,cnt_wf1(0:6,0:6,4),cnt_wf2(0:6,0:6,4),
      &     cnt_wra1(1000,4),cnt_wra2(1000,4)
-      real(8)::binstep,profile(1000)
+      real(KIND=double_precision)::binstep,profile(1000)
 
 ! KEA
-      integer::ttor
+      integer(KIND=int)::ttor
 
 ! -------------------------------------------------------------------
 
@@ -246,7 +261,7 @@ c only one processor at a time reads and writes data from files
       if (lexpee.and.lmipsw)
      &     call cleanup('not for BOTH lexpee AND lmipsw')
       
-! - use internal read/write to get integer::number in character::format
+! - use internal read/write to get integer(KIND=int)::number in character::format
       write(ftemp,*) fname
       read(ftemp,*) fname2
 

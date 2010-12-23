@@ -5,28 +5,36 @@
 ! dumps the final configuration before stopping the program (Neeraj).
 ! -----------------------------------------------------------------
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include 'control.inc'
-      include 'coord.inc'      
-      include 'poten.inc'
-      include 'system.inc'
-      include 'ensemble.inc'
-      include 'cbmc.inc'
-      include 'conver.inc'
-      include 'inpar.inc' 
-      include 'external.inc'
-      include 'zeolite.inc'
-      include 'inputdata.inc'
-      include 'blkavg.inc'
-      include 'bnbsma.inc'
-      include 'swtcmove.inc'
-      include 'ewaldsum.inc'
-      include 'neigh.inc'
-      include 'clusterbias.inc'
-      include 'cell.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'      
+!$$$      include 'poten.inc'
+!$$$      include 'system.inc'
+!$$$      include 'ensemble.inc'
+!$$$      include 'cbmc.inc'
+!$$$      include 'conver.inc'
+!$$$      include 'inpar.inc' 
+!$$$      include 'external.inc'
+!$$$      include 'zeolite.inc'
+!$$$      include 'inputdata.inc'
+!$$$      include 'blkavg.inc'
+!$$$      include 'bnbsma.inc'
+!$$$      include 'swtcmove.inc'
+!$$$      include 'ewaldsum.inc'
+!$$$      include 'neigh.inc'
+!$$$      include 'clusterbias.inc'
+!$$$      include 'cell.inc'
 
-      integer::i,j,im,imolty,ibox
+      integer(KIND=int)::i,j,im,imolty,ibox
 
       open (unit=8, file="final-config")
       write(8,*) tmcc

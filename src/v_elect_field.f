@@ -3,15 +3,22 @@
 ! **  calculates interaction of molecule i with an external field E  ***
 ! **  added 06/24/07 by KM                                           ***
 ! **********************************************************************
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-! *** common blocks ***
-      include 'control.inc'
-      include 'external.inc'
-      include 'coord.inc'
+!$$$      include 'control.inc'
+!$$$      include 'external.inc'
+!$$$      include 'coord.inc'
 
-      real(8)::v_elect_field, convert, rzfield, E
-      integer::i, j,ibox
+      real(KIND=double_precision)::v_elect_field, convert, rzfield, E
+      integer(KIND=int)::i, j,ibox
 
 
 ! ********************************************

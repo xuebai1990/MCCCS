@@ -1,3 +1,5 @@
+! IPSWPAR.INC
+
       integer::nw,nwell,iratipsw
       parameter (nw = 4000)
 

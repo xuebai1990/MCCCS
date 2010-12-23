@@ -5,30 +5,38 @@
 ! corresponding bead types in suijtab. can only do EE if the number
 ! of beads between states remain constant.
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
       
-      include 'control.inc'
-      include 'coord.inc'
-      include 'conver.inc'
-      include 'coord2.inc'
-      include 'system.inc'
-      include 'ensemble.inc'
-      include 'cbmc.inc'
-      include 'rosen.inc' 
-      include 'boltzmann.inc'
-      include 'external.inc'
-      include 'inputdata.inc'
-      include 'ewaldsum.inc'
-      include 'poten.inc'
-      include 'fepsi.inc'
-      include 'clusterbias.inc'
-      include 'neigh.inc'
-      include 'cell.inc'
-      include 'eepar.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'conver.inc'
+!$$$      include 'coord2.inc'
+!$$$      include 'system.inc'
+!$$$      include 'ensemble.inc'
+!$$$      include 'cbmc.inc'
+!$$$      include 'rosen.inc' 
+!$$$      include 'boltzmann.inc'
+!$$$      include 'external.inc'
+!$$$      include 'inputdata.inc'
+!$$$      include 'ewaldsum.inc'
+!$$$      include 'poten.inc'
+!$$$      include 'fepsi.inc'
+!$$$      include 'clusterbias.inc'
+!$$$      include 'neigh.inc'
+!$$$      include 'cell.inc'
+!$$$      include 'eepar.inc'
 
       logical::ovrlap
-      integer::i,ibox,iunit,imolty,imolty1,j,idummy(nmax)
-      real(8)::dum,vrecipn,vrecipo,vnew,vold,vintern,vintero
+      integer(KIND=int)::i,ibox,iunit,imolty,imolty1,j,idummy(nmax)
+      real(KIND=double_precision)::dum,vrecipn,vrecipo,vnew,vold,vintern,vintero
      &                ,vintran,vintrao,velectn,velecto,vewaldn,vewaldo
      &                ,vextn,vexto,deltv,deltvb,random,wdeltvb,vtailn
      &                ,vtailo

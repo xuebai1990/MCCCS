@@ -23,15 +23,23 @@
 ! Boston, MA  02111-1307, USA.
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      integer::i,seed
-      real(8)::random,rtest
+      integer(KIND=int)::i,seed
+      real(KIND=double_precision)::random,rtest
       dimension rtest(10)
       character::*50 fileout
 ! --- RP added for MPI for random2.f
-      integer::nseed
-      real(8)::random2,nrtest
+      integer(KIND=int)::nseed
+      real(KIND=double_precision)::random2,nrtest
       dimension nrtest(10)
       character::*50 nfileout
 

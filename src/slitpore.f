@@ -2,18 +2,26 @@
 ! -- calculates the surface energy of a bend with a featureless
 ! -- graphite surface
 
+	use global_data
+	use var_type
+	use const_phys
+	use const_math
+	use util_math
+	use util_string
+	use util_files
+	use util_timings
 	implicit none
 	
-	include 'control.inc'
-	include 'external.inc'
-	include 'poten.inc'	
-	integer::twopi
-	integer::ntij
+!$$$	include 'control.inc'
+!$$$	include 'external.inc'
+!$$$	include 'poten.inc'	
+	integer(KIND=int)::twopi
+	integer(KIND=int)::ntij
 	parameter (twopi=6.283185307179586d0)
-	real(8)::vgs,z
-	real(8)::slitpore
-	real(8)::sig
-!	real(8)::coef1,coef2,coef3,coef4
+	real(KIND=double_precision)::vgs,z
+	real(KIND=double_precision)::slitpore
+	real(KIND=double_precision)::sig
+!	real(KIND=double_precision)::coef1,coef2,coef3,coef4
 	
 	sig = sqrt(sig2ij(ntij))
 	

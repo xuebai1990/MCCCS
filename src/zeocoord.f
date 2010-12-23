@@ -1,16 +1,24 @@
       subroutine zeocoord
 
-      use grid
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-      include 'control.inc'
-      include 'zeolite.inc'
-      include 'zeopoten.inc'
-      include 'system.inc'
-      include 'cell.inc'
-      include 'mpi.inc'
-      integer::count,frac,izeo,bonding(8),atomtype,ibox=1
-      real(8)::wzeo,charge,alpha,beta,gamma,sx,sy,sz,onepi
-      character::atom*4
+!$$$      include 'control.inc'
+!$$$      include 'grid.inc'
+!$$$      include 'zeolite.inc'
+!$$$      include 'zeopoten.inc'
+!$$$      include 'system.inc'
+!$$$      include 'cell.inc'
+!$$$      include 'mpi.inc'
+      integer(KIND=int)::count,frac,izeo,bonding(8),atomtype,ibox=1
+      real(KIND=double_precision)::wzeo,charge,alpha,beta,gamma,sx,sy,sz,onepi
+      character(LEN=4)::atom
 
       open (unit = 47, file = 'zeolite.cssr')
       if (myid.eq.0) write(16,100)

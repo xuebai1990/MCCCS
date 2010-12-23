@@ -1,29 +1,6 @@
       subroutine safecbmc(iinit,lnew,i,iw,igrow,imolty,count
      &     ,ux,uy,uz,vphi,vtor,wei_bv,lterm,movetype)
 
-! safecbmc
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-! John Stubbs, and Collin Wick and Ilja Siepmann  
-!                     
-! This program is free software; you can redistribute it and/or
-! modify it under the terms of the GNU General Public License
-! as published by the Free Software Foundation; either version 2
-! of the License, or (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program; if not, write to 
-!
-! Free Software Foundation, Inc. 
-! 59 Temple Place - Suite 330
-! Boston, MA  02111-1307, USA.
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-
 !     **************************************************************
 !     **   Finshes the last two steps for Fixed Endpoint CBMC     **
 !     **************************************************************
@@ -39,25 +16,33 @@
 !     iinit = 3  does final crankshaft move
 
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include 'control.inc'
-      include 'coord.inc'
-      include 'connect.inc'
-      include 'fix.inc'
-      include 'rosen.inc'
-      include 'cbmc.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'connect.inc'
+!$$$      include 'fix.inc'
+!$$$      include 'rosen.inc'
+!$$$      include 'cbmc.inc'
 
       logical::lnew,lshit,lterm,ldo,lreturn
 
-      integer::igrow,imolty,count,counta,j,ja,ivib,iufrom,iuprev
+      integer(KIND=int)::igrow,imolty,count,counta,j,ja,ivib,iufrom,iuprev
      &     ,iinit,iu,ju,ku,i,iv,juvib,jtvib,type,iu2,ib,iw,ntogrow
      &     ,itor,ip,ichoi,ichtor,countb,bin,max,nu,iu1,dir,diracc
      &     ,start,nchben_a,nchben_b,ibend,iopen,last,iclose,nchvib
 
-      integer::jttor,it,jut2,jut3,jut4,movetype,lu,k,opencount
+      integer(KIND=int)::jttor,it,jut2,jut3,jut4,movetype,lu,k,opencount
 
-      real(8)::vdha,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2,dot
+      real(KIND=double_precision)::vdha,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2,dot
      &     ,daa1,da1a2,phicrank,bf_tor,vtorsion,vbend,rbf
      &     ,vtorso,ran_tor,bs,ang_bend,bfactor,bsum_bend,wei_bv
      &     ,bsum_try,third,vibtr,lengthc
@@ -66,7 +51,7 @@
 !     *** possible in place of numax
       parameter(max=10)
 
-      real(8)::flength,x,y,z,equil,kforce,length
+      real(KIND=double_precision)::flength,x,y,z,equil,kforce,length
      &     ,vvib,equilb,kforceb,ux,uy,uz,hdist,lengtha,lengthb
      &     ,vtor,vphi,thetac,angle,equila,kforcea,ovphi
      &     ,alpha,twopi,phidisp,dum,random2,rxt,ryt,rzt

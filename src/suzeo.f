@@ -1,17 +1,25 @@
       subroutine suzeo()
 
-      use grid
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none 
-      include 'control.inc'
-      include 'coord.inc'
-      include 'zeopoten.inc'
-      include 'zeolite.inc'
-      include 'external.inc'
-      include 'mpi.inc'
-      integer::imol,iunit,igtype,idi,jerr,i,j,k,
+!$$$      include 'grid.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'zeopoten.inc'
+!$$$      include 'zeolite.inc'
+!$$$      include 'external.inc'
+!$$$      include 'mpi.inc'
+      integer(KIND=int)::imol,iunit,igtype,idi,jerr,i,j,k,
      &     ngrxt,ngryt,ngrzt,ibox=1
-      character(len=8)::filename
-      real(8)::zunitxt,zunityt,zunitzt,exzeof,xi,yi,zi
+      character(LEN=default_path_length)::filename
+      real(KIND=double_precision)::zunitxt,zunityt,zunitzt,exzeof,xi,yi,zi
 
 ! === load force field
 !      call forcefield(rczeo)

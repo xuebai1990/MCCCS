@@ -17,49 +17,57 @@
 !     cwtorf:
 !     movetype:
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
       
-      include 'control.inc'
-      include 'coord.inc'
-      include 'system.inc'
-      include 'ensemble.inc'
-      include 'poten.inc'
-      include 'conver.inc'
-      include 'cbmc.inc'
-      include 'rosen.inc' 
-      include 'connect.inc'
-      include 'fix.inc'
-      include 'ipswpar.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'system.inc'
+!$$$      include 'ensemble.inc'
+!$$$      include 'poten.inc'
+!$$$      include 'conver.inc'
+!$$$      include 'cbmc.inc'
+!$$$      include 'rosen.inc' 
+!$$$      include 'connect.inc'
+!$$$      include 'fix.inc'
+!$$$      include 'ipswpar.inc'
 
 !     --- variables passed to the subroutine
       logical::lnew,lterm,lwbef
-      integer::i,j,ja,icharge,imolty,ifrom,ibox,igrow,tac
+      integer(KIND=int)::i,j,ja,icharge,imolty,ifrom,ibox,igrow,tac
 
 !     --- local variables
       
       logical::ovrlap,ltorsion,lfixnow,lfixed,lreturn
 
-      integer::glist,iuprev,iufrom,ichoi,ntogrow,count
-      integer::iu,iv,iw,ju,ip,ichtor
+      integer(KIND=int)::glist,iuprev,iufrom,ichoi,ntogrow,count
+      integer(KIND=int)::iu,iv,iw,ju,ip,ichtor
      &       ,it,jut2,jut3,jut4,jttor,iwalk,ivect
-      integer::angstart,toracc
+      integer(KIND=int)::angstart,toracc
       
       dimension glist(numax)
 
-      real(8)::dum,xub,yub,zub,length,lengtha,lengthb,wadd
+      real(KIND=double_precision)::dum,xub,yub,zub,length,lengtha,lengthb,wadd
 
-      real(8)::vdha,x,y,z,maxlen,vorient,vtorf
+      real(KIND=double_precision)::vdha,x,y,z,maxlen,vorient,vtorf
      &                ,xaa1,yaa1,zaa1,daa1,xa1a2,ya1a2,za1a2,da1a2
      &                ,thetac,dot,rbf,bsum,bs,random,xcc,ycc,zcc,tcc
-      real(8)::vbbtr,vvibtr,vtorso,wei_vib,wbendv,dist
-      real(8)::bondlen,bendang,phi,phidisp,phinew,thetanew
-      real(8)::cwtorf,vfbbtr,vphi,theta,spltor,rm
+      real(KIND=double_precision)::vbbtr,vvibtr,vtorso,wei_vib,wbendv,dist
+      real(KIND=double_precision)::bondlen,bendang,phi,phidisp,phinew,thetanew
+      real(KIND=double_precision)::cwtorf,vfbbtr,vphi,theta,spltor,rm
 
       dimension bondlen(numax),bendang(numax),phi(numax)
      
 !     -- new stuff
-      integer::itor,bin,counta,movetype,ku
-      real(8)::bf_tor,vtorsion,phitors,ran_tor
+      integer(KIND=int)::itor,bin,counta,movetype,ku
+      real(KIND=double_precision)::bf_tor,vtorsion,phitors,ran_tor
      &     ,wei_bend,jacobian,ctorf
       dimension bf_tor(nchtor_max),vtorsion(nchtor_max)
      &     ,phitors(nchtor_max),ctorf(nchmax,nchtor_max)

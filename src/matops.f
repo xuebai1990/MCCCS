@@ -6,15 +6,23 @@
 !     non cubic simulation cell
 !     Written by Neeraj Rai (in Merck Apr 2005)
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-      include 'control.inc'
-      include 'cell.inc'
-      include 'conver.inc'       
-      include 'system.inc' 
+!$$$      include 'control.inc'
+!$$$      include 'cell.inc'
+!$$$      include 'conver.inc'       
+!$$$      include 'system.inc' 
  
-      real(8)::abx,aby,abz,bcx,bcy,bcz,cax,cay,caz
-      real(8)::elem(9),inv_vol,adj(9),cosa,cosb,cosg
-      integer::ibox,i,j
+      real(KIND=double_precision)::abx,aby,abz,bcx,bcy,bcz,cax,cay,caz
+      real(KIND=double_precision)::elem(9),inv_vol,adj(9),cosa,cosb,cosg
+      integer(KIND=int)::ibox,i,j
 
       do i=1,9
          elem(i)=hmat(ibox,i)

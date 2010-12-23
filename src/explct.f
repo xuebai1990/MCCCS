@@ -6,23 +6,30 @@
 !     alpha is Ryckaert torsion angle!
 !     ------
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'conver.inc'
+!$$$      include 'connect.inc'
 
 ! - arguments
-      integer::ichain,nngrow,negrow,i,iplus,imins,nn,
+      integer(KIND=int)::ichain,nngrow,negrow,i,iplus,imins,nn,
      &        imolty,iben,iend,ii,jj
-      real(8)::vmethyl,ch,cc,cch,ca,ah,hch2,hk,ck,en0
+      real(KIND=double_precision)::vmethyl,ch,cc,cch,ca,ah,hch2,hk,ck,en0
      &     ,a1,b1,c1,dln1,a2,b2,c2,dln2,a3,b3,c3,x12,y12,z12
      &     ,x32,y32,z32,xa,ya,za
      &     ,r,rx,ry,rz,dr,ven,random,prob,a4,b4,c4,rn
      &     ,hch,coh,ce,ratio
-      real(8)::oa,hoh,hoh2,oh,ok,om,oc,v1,v2,alpha,rr
+      real(KIND=double_precision)::oa,hoh,hoh2,oh,ok,om,oc,v1,v2,alpha,rr
       logical::lcrysl,londone,lswitch,lalkanol
-
-      include 'control.inc'
-      include 'coord.inc'
-      include 'conver.inc'
-      include 'connect.inc'
 
 ! - find intramolecular structure 
       imolty = moltyp(ichain)

@@ -1,28 +1,5 @@
       subroutine chempt(bsswap,imolty,ntries)
 
-! chempt
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-! John Stubbs, and Collin Wick and Ilja Siepmann  
-!                     
-! This program is free software; you can redistribute it and/or
-! modify it under the terms of the GNU General Public License
-! as published by the Free Software Foundation; either version 2
-! of the License, or (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program; if not, write to 
-!
-! Free Software Foundation, Inc. 
-! 59 Temple Place - Suite 330
-! Boston, MA  02111-1307, USA.
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
- 
 !    ********************************************************************
 !    ** Ghost insertion of molecule into the boxes to compute chem pot **
 !    ** using CBMC insertion techniques.  Works for linear or branched **
@@ -30,41 +7,49 @@
 !    ** Written M.G. Martin  9-24-97                                   **
 !    ********************************************************************
  
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include 'control.inc'
-      include 'coord.inc'
-      include 'coord2.inc'
-      include 'system.inc'
-      include 'cbmc.inc'
-      include 'rosen.inc' 
-      include 'boltzmann.inc'
-      include 'poten.inc'
-      include 'external.inc'
-      include 'connect.inc'
-      include 'inputdata.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'coord2.inc'
+!$$$      include 'system.inc'
+!$$$      include 'cbmc.inc'
+!$$$      include 'rosen.inc' 
+!$$$      include 'boltzmann.inc'
+!$$$      include 'poten.inc'
+!$$$      include 'external.inc'
+!$$$      include 'connect.inc'
+!$$$      include 'inputdata.inc'
 
       logical::lctrl
       parameter (lctrl=.false.)
 
       logical::ovrlap,lterm,lbo,ltors
 
-      integer::boxins,ichoi,ip,iwalk,ntries,itry,iincre
-      integer::istt,iett
-      integer::ibranp(20),nbranp
+      integer(KIND=int)::boxins,ichoi,ip,iwalk,ntries,itry,iincre
+      integer(KIND=int)::istt,iett
+      integer(KIND=int)::ibranp(20),nbranp
 
-      integer::iu,iutry,iulast,iut,iub,icbu,islen,iins
+      integer(KIND=int)::iu,iutry,iulast,iut,iub,icbu,islen,iins
      &       ,iii,ibr,ibr1,j,jj,jj2,jj3,jj4,invtry,ibox,iunit
      &       ,imolty,jmt,igrow
-      real(8)::v,vintra,vinter,vext,velect,vtornew,vtordum
+      real(KIND=double_precision)::v,vintra,vinter,vext,velect,vtornew,vtordum
      &     ,delen,vewald
 
 
-      real(8)::bsswap
-      real(8)::random,rdir,rbf,bsum
-      real(8)::waddnew
+      real(KIND=double_precision)::bsswap
+      real(KIND=double_precision)::random,rdir,rbf,bsum
+      real(KIND=double_precision)::waddnew
 
-      real(8)::v1insext,v1ins,w1ins
+      real(KIND=double_precision)::v1insext,v1ins,w1ins
      &                ,v1insint
      &                ,volins,rho,arg,coru,v1inselc
       dimension bsswap(ntmax,4)

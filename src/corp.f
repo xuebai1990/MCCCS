@@ -1,45 +1,30 @@
       function corp(imolty,jmolty,rhosq,ibox)
 
-! corp 
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-! John Stubbs, and Collin Wick and Ilja Siepmann  
-!                     
-! This program is free software; you can redistribute it and/or
-! modify it under the terms of the GNU General Public License
-! as published by the Free Software Foundation; either version 2
-! of the License, or (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program; if not, write to 
-!
-! Free Software Foundation, Inc. 
-! 59 Temple Place - Suite 330
-! Boston, MA  02111-1307, USA.
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-
 ! ************************************
 ! *** tail-corrections in pressure ***
 ! ************************************
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-      include 'control.inc'
-      include 'coord.inc'
-      include 'conver.inc'
-      include 'poten.inc'
-      include 'system.inc'
-      include 'expsix.inc'
-      include 'merck.inc'
-      include 'nsix.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'conver.inc'
+!$$$      include 'poten.inc'
+!$$$      include 'system.inc'
+!$$$      include 'expsix.inc'
+!$$$      include 'merck.inc'
+!$$$      include 'nsix.inc'
 
-      real(8)::corp,rci3,rhosq, epsilon2, sigma2
-      real(8)::rci1
-      integer::imolty,jmolty,ii,jj, ntii, ntjj, ntij,ibox
+      real(KIND=double_precision)::corp,rci3,rhosq, epsilon2, sigma2
+      real(KIND=double_precision)::rci1
+      integer(KIND=int)::imolty,jmolty,ii,jj, ntii, ntjj, ntij,ibox
       corp = 0.0d0
 
       do ii = 1, nunit(imolty) 

@@ -1,29 +1,6 @@
       subroutine geometry(lnew,iw,i,imolty,angstart,iuprev,glist
      &     ,bondlen,bendang,phi,vvibtr,vbbtr, maxlen, wei_bend )
 
-! geometry
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-! John Stubbs, and Collin Wick and Ilja Siepmann  
-!                     
-! This program is free software; you can redistribute it and/or
-! modify it under the terms of the GNU General Public License
-! as published by the Free Software Foundation; either version 2
-! of the License, or (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program; if not, write to 
-!
-! Free Software Foundation, Inc. 
-! 59 Temple Place - Suite 330
-! Boston, MA  02111-1307, USA.
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-
 !     ***********************************************************************
 !     ** determines the new geometry of the bond lengths and angles to be  **
 !     ** rotated on the cone for rosenb.f                                  **
@@ -36,52 +13,59 @@
 !     ** last modified by Neeraj Rai on 12/23/2008 for CG models           **
 !     ***********************************************************************
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-
-      include 'control.inc'
-      include 'coord.inc'
-      include 'connect.inc'
-      include 'conver.inc'
-      include 'rosen.inc'
-      include 'cbmc.inc'
-      include 'tabulated.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'connect.inc'
+!$$$      include 'conver.inc'
+!$$$      include 'rosen.inc'
+!$$$      include 'cbmc.inc'
+!$$$      include 'tabulated.inc'
 
 !     --- variables passed to/from the subroutine
 
       logical::lnew
-      integer::iw,imolty,angstart,iuprev,glist,i
-      real(8)::bondlen,bendang,phi,vvibtr,vbbtr,maxlen
-      real(8)::wei_bend
+      integer(KIND=int)::iw,imolty,angstart,iuprev,glist,i
+      real(KIND=double_precision)::bondlen,bendang,phi,vvibtr,vbbtr,maxlen
+      real(KIND=double_precision)::wei_bend
 
       dimension glist(numax)
       dimension bondlen(numax),bendang(numax),phi(numax)
 
 !     --- local variables
       
-      integer::count,ntogrow,iugrow,iufrom,iv,juvib
+      integer(KIND=int)::count,ntogrow,iugrow,iufrom,iv,juvib
      &     ,jtvib,iu2back,ib,iulast,type,aaa,iuone
 
-      real(8)::equil,kforce,thetaone,thetatwo
+      real(KIND=double_precision)::equil,kforce,thetaone,thetatwo
      &     ,vvib,length,angle,phione,phitwo,vangle,random,vphi
 
 !     --- new variables
-      integer::ibend,nchben_a,nchben_b,start,start_ang
-      real(8)::bsum_try,rsint,ang_trial,bfactor,rbf,bs
+      integer(KIND=int)::ibend,nchben_a,nchben_b,start,start_ang
+      real(KIND=double_precision)::bsum_try,rsint,ang_trial,bfactor,rbf,bs
 
       dimension ang_trial(nchbn_max),bfactor(nchbn_max)
 
 !     --- variables from geomold
-      real(8)::rxui,ryui,rzui,rxuij,ryuij,rzuij
+      real(KIND=double_precision)::rxui,ryui,rzui,rxuij,ryuij,rzuij
      &     ,xvecprev,yvecprev,zvecprev,distprev,xvecgrow
      &     ,yvecgrow,zvecgrow,distgrow,anglec
-      real(8)::xub,yub,zub,dum,ux,uy,uz,alpha,gamma
-      real(8)::tabulated_vib, tabulated_bend
-      real(8)::rbend, rbendsq
+      real(KIND=double_precision)::xub,yub,zub,dum,ux,uy,uz,alpha,gamma
+      real(KIND=double_precision)::tabulated_vib, tabulated_bend
+      real(KIND=double_precision)::rbend, rbendsq
 
 ! Neeraj: Adding for the lookup table for CG model
 
-      real(8)::distprev2,distgrow2
-      real(8)::lengtha,lengthb,lengtha2,lengthb2,
+      real(KIND=double_precision)::distprev2,distgrow2
+      real(KIND=double_precision)::lengtha,lengthb,lengtha2,lengthb2,
      &                 lengthc,lengthc2,lengthFP,lengthFP2
 
 !     --- assign nchben_a and ncben_b
@@ -509,25 +493,6 @@
 
       subroutine bendangle(equil,kforce,beta,angle,vangle )
 
-! bendagle 
-! Copyright (C) 2000 Marcus Martin, Bin Chen, Collin Wick, and Ilja Siepmann
-
-
-! This program is free software; you can redistribute it and/or
-! modify it under the terms of the GNU General Public License
-! as published by the Free Software Foundation; either version 2
-! of the License, or (at your option) any later version.
-
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-
-! You should have received a copy of the GNU General Public License
-! along with this program; if not, write to the Free Software
-! Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
-
 
 !     *************************************************************
 !     *** choose a bond angle                                   ***
@@ -539,9 +504,17 @@
 !     *** M.G. Martin                                           ***
 !     *************************************************************
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      real(8)::equil, kforce, beta, angle, vangle, rr, v1, v2
+      real(KIND=double_precision)::equil, kforce, beta, angle, vangle, rr, v1, v2
      &     ,random, tabulated_bend
 
 !      write(2,*) 'start BENDANGLE'

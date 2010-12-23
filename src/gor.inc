@@ -1,3 +1,4 @@
+!GOR.INC
       
       integer::beadtyp,decode,tor_num,angle_num
       integer::tor_1,tor_2,tor_3,tor_4,nhere

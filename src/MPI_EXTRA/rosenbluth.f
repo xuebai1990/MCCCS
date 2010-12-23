@@ -1,79 +1,64 @@
       subroutine rosenbluth ( lnew,lterm,i,icharge,imolty,ifrom,ibox
      &     ,igrow,wadd,lfixnow,cwtorf,movetype )
-
-! rosenbluth
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-! John Stubbs, and Collin Wick and Ilja Siepmann  
-!                     
-! This program is free software; you can redistribute it and/or
-! modify it under the terms of the GNU General Public License
-! as published by the Free Software Foundation; either version 2
-! of the License, or (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program; if not, write to 
-!
-! Free Software Foundation, Inc. 
-! 59 Temple Place - Suite 330
-! Boston, MA  02111-1307, USA.
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
  
 !    *******************************************************************
 !    **   performs a configurational bias move for branched molecules **
 !    *******************************************************************
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
       
-      include 'control.inc'
-      include 'coord.inc'
-      include 'system.inc'
-      include 'ensemble.inc'
-      include 'poten.inc'
-      include 'conver.inc'
-      include 'cbmc.inc'
-      include 'rosen.inc' 
-      include 'connect.inc'
-      include 'fix.inc'
-      include 'ipswpar.inc'
-! RP added for MPI
-      include 'mpif.h'
-      include 'mpi.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'system.inc'
+!$$$      include 'ensemble.inc'
+!$$$      include 'poten.inc'
+!$$$      include 'conver.inc'
+!$$$      include 'cbmc.inc'
+!$$$      include 'rosen.inc' 
+!$$$      include 'connect.inc'
+!$$$      include 'fix.inc'
+!$$$      include 'ipswpar.inc'
+!$$$! RP added for MPI
+!$$$      include 'mpif.h'
+!$$$      include 'mpi.inc'
 
 !     --- variables passed to the subroutine
       logical::lnew,lterm,lwbef
-      integer::i,j,ja,icharge,imolty,ifrom,ibox,igrow,tac
+      integer(KIND=int)::i,j,ja,icharge,imolty,ifrom,ibox,igrow,tac
 
 !     --- local variables
       
       logical::ovrlap,ltorsion,lfixnow,lfixed,lreturn
 
-      integer::glist,iuprev,iufrom,ichoi,ntogrow,count
-      integer::iu,iv,iw,ju,ip,ichtor
+      integer(KIND=int)::glist,iuprev,iufrom,ichoi,ntogrow,count
+      integer(KIND=int)::iu,iv,iw,ju,ip,ichtor
      &       ,it,jut2,jut3,jut4,jttor,iwalk,ivect
-      integer::angstart,toracc
+      integer(KIND=int)::angstart,toracc
       
       dimension glist(numax)
 
-      real(8)::dum,xub,yub,zub,length,lengtha,lengthb,wadd
+      real(KIND=double_precision)::dum,xub,yub,zub,length,lengtha,lengthb,wadd
 
-      real(8)::vdha,x,y,z,maxlen,vorient,vtorf
+      real(KIND=double_precision)::vdha,x,y,z,maxlen,vorient,vtorf
      &                ,xaa1,yaa1,zaa1,daa1,xa1a2,ya1a2,za1a2,da1a2
      &                ,thetac,dot,rbf,bsum,bs,random,xcc,ycc,zcc,tcc
-      real(8)::vbbtr,vvibtr,vtorso,wei_vib,wbendv,dist
-      real(8)::bondlen,bendang,phi,phidisp,phinew,thetanew
-      real(8)::cwtorf,vfbbtr,vphi,theta,spltor,rm
+      real(KIND=double_precision)::vbbtr,vvibtr,vtorso,wei_vib,wbendv,dist
+      real(KIND=double_precision)::bondlen,bendang,phi,phidisp,phinew,thetanew
+      real(KIND=double_precision)::cwtorf,vfbbtr,vphi,theta,spltor,rm
 
       dimension bondlen(numax),bendang(numax),phi(numax)
      
 !     -- new stuff
-      integer::itor,bin,counta,movetype,ku
-      real(8)::bf_tor,vtorsion,phitors,ran_tor
+      integer(KIND=int)::itor,bin,counta,movetype,ku
+      real(KIND=double_precision)::bf_tor,vtorsion,phitors,ran_tor
      &     ,wei_bend,jacobian,ctorf
       dimension bf_tor(nchtor_max),vtorsion(nchtor_max)
      &     ,phitors(nchtor_max),ctorf(nchmax,nchtor_max)
@@ -81,10 +66,10 @@
      &     ,vfbbtr(nchmax,nchtor_max)
 ! RP added for MPI
 
-      integer::my_start,my_end,loops_per_proc,scount,itorcount,countcount
-      integer::rmnddr,myip,ipitor,ipcount
-      real(8)::my_ctorf,my_vfbbtr,my_rxp,my_ryp,my_rzp
-      real(8)::rxp_one,ryp_one,rzp_one,ctorf_one,vfbbtr_one,
+      integer(KIND=int)::my_start,my_end,loops_per_proc,scount,itorcount,countcount
+      integer(KIND=int)::rmnddr,myip,ipitor,ipcount
+      real(KIND=double_precision)::my_ctorf,my_vfbbtr,my_rxp,my_ryp,my_rzp
+      real(KIND=double_precision)::rxp_one,ryp_one,rzp_one,ctorf_one,vfbbtr_one,
      &   my_bsum_tor,my_vtgtr,my_toracc
       dimension my_ctorf(nchmax*nchtor_max),
      &    my_vfbbtr(nchmax*nchtor_max),
@@ -94,11 +79,11 @@
      &   rzp_one(nchmax*numax),ctorf_one(nchmax*nchtor_max),
      &   vfbbtr_one(nchmax*nchtor_max)
       dimension my_toracc(nchmax),my_vtgtr(nchmax),my_bsum_tor(nchmax)
-      integer::procid
-      real(8)::random_array
+      integer(KIND=int)::procid
+      real(KIND=double_precision)::random_array
       dimension random_array(numprocmax)
-      real(8)::dummy_x,dummy_y,dummy_z
-      integer::ncount_arr(numprocmax),ncount_displs(numprocmax),
+      real(KIND=double_precision)::dummy_x,dummy_y,dummy_z
+      integer(KIND=int)::ncount_arr(numprocmax),ncount_displs(numprocmax),
      &          itorcount_arr(numprocmax),itorcount_displs(numprocmax),
      &         countcount_arr(numprocmax),countcount_displs(numprocmax)
 ! ------------------------------------------------------------------

@@ -6,64 +6,72 @@
 !    ** calculates the total potential energy for a configuration.    **
 !    *******************************************************************
  
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include 'common.inc'
-! *** common blocks ***
-      include 'control.inc'
-      include 'coord.inc'
-      include 'system.inc'
-      include 'neigh.inc'
-      include 'poten.inc'
-      include 'coord2.inc' 
-      include 'external.inc'
-      include 'connect.inc'
-      include 'ewaldsum.inc'
-      include 'fepsi.inc'
-      include 'qqlist.inc'
-      include 'clusterbias.inc'
-      include 'nsix.inc'
-      include 'peboco.inc'
-      include 'cell.inc'
-      include 'ipswpar.inc'
-      include 'eepar.inc'
-      include 'conver.inc'
-!kea include for garofalini 3 body term
-      include 'garofalini.inc'
-      include 'tabulated.inc'
+!$$$      include 'mpi.inc'
+!$$$      include 'mpif.h'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'system.inc'
+!$$$      include 'neigh.inc'
+!$$$      include 'poten.inc'
+!$$$      include 'coord2.inc' 
+!$$$      include 'external.inc'
+!$$$      include 'connect.inc'
+!$$$      include 'ewaldsum.inc'
+!$$$      include 'fepsi.inc'
+!$$$      include 'qqlist.inc'
+!$$$      include 'clusterbias.inc'
+!$$$      include 'nsix.inc'
+!$$$      include 'peboco.inc'
+!$$$      include 'cell.inc'
+!$$$      include 'ipswpar.inc'
+!$$$      include 'eepar.inc'
+!$$$      include 'conver.inc'
+!$$$!kea include for garofalini 3 body term
+!$$$      include 'garofalini.inc'
+!$$$      include 'tabulated.inc'
       logical::lqimol,lqjmol,lexplt,lcoulo,lfavor,lij2,liji,lqchgi
       logical::lljii,ovrlap,ltors,lcharge_table,lt,lfound
       logical::lmim
 
-      integer::growii,growjj,k,cellinc,jcell,ic,nmole
-      integer::i,ibox, istart, iend,ii,ntii,flagon,jjj,iii,mmm
+      integer(KIND=int)::growii,growjj,k,cellinc,jcell,ic,nmole
+      integer(KIND=int)::i,ibox, istart, iend,ii,ntii,flagon,jjj,iii,mmm
      &       ,j,jj,ntjj,ntij,ntj,imolty,jmolty,ncell
-      integer::iivib,jjtor,ip1,ip2,ip3,it,nchp2,acellinc
+      integer(KIND=int)::iivib,jjtor,ip1,ip2,ip3,it,nchp2,acellinc
 
-      real(8)::ljsami,ljpsur,ljmuir,v,vintra, vinter,vext 
+      real(KIND=double_precision)::ljsami,ljpsur,ljmuir,v,vintra, vinter,vext 
      &                ,rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq
      &                ,ryuij,rzuij,sr2,sr6,rij,rijsq,dzui,dz3,dz12
      &                ,exgrph,exsami,exmuir,exzeo,vtors,exsix,velect
      &                ,vewald,mmff,rbcut,ninesix, genlj
-      real(8)::erfunc,qave
-      real(8)::xvec,yvec,zvec,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2
+      real(KIND=double_precision)::erfunc,qave
+      real(KIND=double_precision)::xvec,yvec,zvec,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2
      &     ,daa1,da1a2,dot,thetac,vtorso,vwell
-      real(8)::xcc,ycc,zcc,tcc,theta,spltor
-      real(8)::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq,epsilon2,sigma2
-      real(8)::sx,sy,sz
-      real(8)::slitpore,mlen2,v_elect_field, field
+      real(KIND=double_precision)::xcc,ycc,zcc,tcc,theta,spltor
+      real(KIND=double_precision)::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq,epsilon2,sigma2
+      real(KIND=double_precision)::sx,sy,sz
+      real(KIND=double_precision)::slitpore,mlen2,v_elect_field, field
 
       dimension xvec(numax,numax),yvec(numax,numax),zvec(numax,numax)
       dimension lcoulo(numax,numax),cellinc(cmax),jcell(nmax)
       dimension acellinc(numax,27)
 ! KEA
-      integer::neigh_j,neighj(maxneigh)
-      real(8)::ndijj(maxneigh),nxijj(maxneigh),
+      integer(KIND=int)::neigh_j,neighj(maxneigh)
+      real(KIND=double_precision)::ndijj(maxneigh),nxijj(maxneigh),
      &     nyijj(maxneigh),nzijj(maxneigh)
 ! KM
-      real(8)::tabulated_vdW, tabulated_bend, tabulated_elect
+      real(KIND=double_precision)::tabulated_vdW, tabulated_bend, tabulated_elect
 ! Neeraj & RP added for MPI
-      real(8)::sum_velect, sum_vinter
+      real(KIND=double_precision)::sum_velect, sum_vinter
       logical::all_ovrlap
 ! --------------------------------------------------------------------
 

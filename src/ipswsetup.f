@@ -2,17 +2,25 @@
 !
 ! setup maginns interphase switch
 !
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
-      include 'control.inc'
-      include 'coord.inc'
-      include 'ipswpar.inc'
-      include 'inputdata.inc'
-      include 'system.inc'
-      include 'cell.inc'
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'ipswpar.inc'
+!$$$      include 'inputdata.inc'
+!$$$      include 'system.inc'
+!$$$      include 'cell.inc'
 
-      integer::i,j,k,tnw,ibox
+      integer(KIND=int)::i,j,k,tnw,ibox
 
-      real(8)::lx,hmata(9),hmatc(9),hm(9)
+      real(KIND=double_precision)::lx,hmata(9),hmatc(9),hm(9)
 
       logical::lhm,llwell
 

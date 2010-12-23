@@ -1,29 +1,5 @@
       subroutine rigrot(lnew,lterm,iskip,imol,imolty,ibox,wadd )
 
-! rigrot
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
-! John Stubbs, and Collin Wick and Ilja Siepmann  
-!                     
-! This program is free software; you can redistribute it and/or
-! modify it under the terms of the GNU General Public License
-! as published by the Free Software Foundation; either version 2
-! of the License, or (at your option) any later version.
-!
-! This program is distributed in the hope that it will be useful,
-! but WITHOUT ANY WARRANTY; without even the implied warranty of
-! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-! GNU General Public License for more details.
-!
-! You should have received a copy of the GNU General Public License
-! along with this program; if not, write to 
-!
-! Free Software Foundation, Inc. 
-! 59 Temple Place - Suite 330
-! Boston, MA  02111-1307, USA.
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-
-
 !     *******************************************************************
 !     **      performs a rotational configurational bias move          **
 !     *******************************************************************
@@ -33,26 +9,34 @@
 !             All Rigid Molecules Should Come After Riutry
 !     &*&*&*&*&*&*&*&*&*&*&*&* IMPORTANT *&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&
 
+      use global_data
+      use var_type
+      use const_phys
+      use const_math
+      use util_math
+      use util_string
+      use util_files
+      use util_timings
       implicit none
 
-      include 'control.inc'
-      include 'cbmc.inc'
-      include 'coord.inc'
-      include 'coord2.inc'
-      include 'rosen.inc'
-      include 'system.inc'
-      include 'conver.inc'
-      include 'ipswpar.inc'
+!$$$      include 'control.inc'
+!$$$      include 'cbmc.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'coord2.inc'
+!$$$      include 'rosen.inc'
+!$$$      include 'system.inc'
+!$$$      include 'conver.inc'
+!$$$      include 'ipswpar.inc'
 
       logical::lnew,ovrlap,lovrr,lterm,ltors
 
-      integer::i,ibox,igrow,iii,j,ip,iwalk,iunit,imolty,iu,iskip
-      integer::ichoi,imol,istt,iend,stch,glist,ntogrow,count
+      integer(KIND=int)::i,ibox,igrow,iii,j,ip,iwalk,iunit,imolty,iu,iskip
+      integer(KIND=int)::ichoi,imol,istt,iend,stch,glist,ntogrow,count
 
-      real(8)::rx,ry,rz,rxorig,ryorig,rzorig,rxnw,rynw,rznw
-      real(8)::xdgamma,ydgamma,zdgamma,xcosdg,xsindg,ycosdg
+      real(KIND=double_precision)::rx,ry,rz,rxorig,ryorig,rzorig,rxnw,rynw,rznw
+      real(KIND=double_precision)::xdgamma,ydgamma,zdgamma,xcosdg,xsindg,ycosdg
      &     ,ysindg,zcosdg,zsindg,rbf,rxur,ryur,rzur,delo,length
-      real(8)::delen,v,vtor,w,bsum,vdum,vintra,vinter
+      real(KIND=double_precision)::delen,v,vtor,w,bsum,vdum,vintra,vinter
      &     ,velect,vewald,wadd,vext,random,maxlen,bs
   
       dimension lovrr(nchmax),delen(nchmax),rxur(numax)
