@@ -38,7 +38,8 @@
       real(KIND=double_precision),dimension(nbxmax)::mol_vol      
       real(KIND=double_precision),dimension(nbxmax)::pres
       real(KIND=double_precision)::enchg1, enchg2,enchg3
-      real(KIND=double_precision)::Heat_vapor_T, Heat_vapor_LJ, Heat_vapor_COUL
+      real(KIND=double_precision)::Heat_vapor_T, Heat_vapor_LJ,
+     & Heat_vapor_COUL
       real(KIND=double_precision)::CED_T, HSP_T, CED_LJ, HSP_LJ
       real(KIND=double_precision)::CED_COUL,HSP_COUL
       real(KIND=double_precision)::cal2joule, joule2cal

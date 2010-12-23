@@ -26,8 +26,8 @@
 !$$$      include 'connect.inc'      
 
       integer(KIND=normal_int)::i,imolty,iunit,ii,jj,ntii,ntjj,ntij,ibox
-      real(KIND=double_precision)::vflucq,qion(numax),qqii,vewald,rxui,ryui,rzui,
-     &     rxuij,ryuij,rzuij,rij,erfunc
+      real(KIND=double_precision)::vflucq,qion(numax),qqii,vewald,rxui
+     & ,ryui,rzui,rxuij,ryuij,rzuij,rij,erfunc
       vflucq = 0.0d0
       vewald = 0.0d0
       imolty = moltyp(i)

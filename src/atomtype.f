@@ -1,6 +1,6 @@
       function atomtype(ntype,atom)
 
-      use global_data
+      use global_data,only:ztype,znum
       use var_type
       use const_phys
       use const_math

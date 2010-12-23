@@ -31,8 +31,8 @@
       integer(KIND=normal_int)::n,iinit
 
       real(KIND=double_precision)::x,y,z,rx,ry,rz,length,lengtha,lengthb
-     &     ,xa,ya,za,theta,thetac,ux,uy,uz,bondl,avar,bvar,cvar
-     &     ,rxa,rya,rza,lengthc,angle,rxf,ryf,rzf,var,dvar,a,b,c
+     & ,xa,ya,za,theta,thetac,ux,uy,uz,bondl,avar,bvar,cvar ,rxa,rya,rza
+     & ,lengthc,angle,rxf,ryf,rzf,var,dvar,a,bb,c
 
       dimension rx(6),ry(6),rz(6),x(4),y(4),z(4),ux(3),uy(3),uz(3)
       dimension angle(3)
@@ -257,18 +257,18 @@
          dvar = (dcos(angle(1)) - ry(1) * avar) / rx(1)
 
          a = cvar**2 + bvar**2 + 1.0d0
-         b = 2.0d0 * (avar*bvar - cvar*dvar)
+         bb = 2.0d0 * (avar*bvar - cvar*dvar)
          c = dvar**2 + avar**2 - 1.0d0
 
-         var = b**2 - 4.0d0 * a * c
+         var = bb**2 - 4.0d0 * a * c
 
          if (var.lt.0) then
             lterm = .true.
             return
          end if
 
-         rz(3) = (-b + dsqrt(var)) / (2.0d0 * a )
-         rz(4) = (-b - dsqrt(var)) / (2.0d0 * a )
+         rz(3) = (-bb + dsqrt(var)) / (2.0d0 * a )
+         rz(4) = (-bb - dsqrt(var)) / (2.0d0 * a )
 
          rx(3) = dvar - rz(3) * cvar
          rx(4) = dvar - rz(4) * cvar

@@ -28,15 +28,15 @@
 !$$$      include 'system.inc'
 
       logical::laccept,lswapinter
-      integer(KIND=normal_int)::i,ibox,boxrem,mtype,imolty,iunit,ichoiq,ip,ibox2,j
-      real(KIND=double_precision)::deltv,vintern,vintran,vextn,velectn,vintero,
-     &     vintrao,vexto,velecto,vinsta,vremta,vnewflucq,voldflucq,
-     &     vboxo(nbxmax),vinterbo(nbxmax),vintrabo(nbxmax),
-     &     vextbo(nbxmax),velectbo(nbxmax),vflucqbo(nbxmax),
-     &     vtailbo(nbxmax),vvibbo(nbxmax),vtgbo(nbxmax),
-     &     vbendbo(nbxmax),rxuo(numax),ryuo(numax),rzuo(numax),
-     &     xcmo,ycmo,zcmo,vdum,wratio,volins,volrem,deltvb,random,
-     &     vnewt2,voldt2
+      integer(KIND=normal_int)::i,ibox,boxrem,mtype,imolty,iunit,ichoiq
+     & ,ip,ibox2,j
+      real(KIND=double_precision)::deltv,vintern,vintran,vextn,velectn
+     & ,vintero,vintrao,vexto,velecto,vinsta,vremta,vnewflucq,voldflucq
+     & ,vboxo(nbxmax),vinterbo(nbxmax),vintrabo(nbxmax),vextbo(nbxmax)
+     & ,velectbo(nbxmax),vflucqbo(nbxmax),vtailbo(nbxmax),vvibbo(nbxmax)
+     & ,vtgbo(nbxmax),vbendbo(nbxmax),rxuo(numax),ryuo(numax)
+     & ,rzuo(numax),xcmo,ycmo,zcmo,vdum,wratio,volins,volrem,deltvb
+     & ,random,vnewt2,voldt2
       real(KIND=double_precision)::qquo(nmax,numax) 
 
 !      write(iou,*) 'START the optimization of the charge configuration'

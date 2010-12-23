@@ -41,18 +41,19 @@
       
       logical::lterm, ovrlap, ltors, lneighij,lfixnow
 
-      integer(KIND=normal_int)::i,j,k,iii,ibox,iunit,igrow,icbu,islen,imolty,iutry
-
-      integer(KIND=normal_int)::istt,iett,nchp1,ic,ncount,total,bin,count,findex,iw
+      integer(KIND=normal_int)::i,j,k,iii,ibox,iunit,igrow,icbu,islen
+     & ,imolty,iutry
+      integer(KIND=normal_int)::istt,iett,nchp1,ic,ncount,total,bin
+     & ,count,findex,iw
       integer(KIND=normal_int)::ddum,idum,ip
 
       dimension ddum(27)
 
-      real(KIND=double_precision)::v,vintra,vinter,vext,velect,vewald,vtorold
-     & ,vtornew,delen,deleo,vdum,tofo,wplace,wrig,vorient
+      real(KIND=double_precision)::v,vintra,vinter,vext,velect,vewald
+     & ,vtorold,vtornew,delen,deleo,vdum,tofo,wplace,wrig,vorient
      & ,velect_intra,velect_inter
-      real(KIND=double_precision)::dchain,random,rchain,wnlog,wolog,wdlog,wratio
-
+      real(KIND=double_precision)::dchain,random,rchain,wnlog,wolog
+     & ,wdlog,wratio
       real(KIND=double_precision)::vrecipn,vrecipo,cwtorfo,cwtorfn,x,y,z
 
 ! ------------------------------------------------------------------

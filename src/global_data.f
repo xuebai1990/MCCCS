@@ -20,12 +20,12 @@
       logical::ltailc,lshift
       logical::lneigh,lvirial
       logical::lcutcm,ldual
-      integer(KIND=normal_int)::nmax,numax,ntmax,nntype,nvmax,nbxmax,npamax
-     & ,npabmax,maxbin,cmax,cmaxa,tor_bin_max,nbinmax_ete,smax
-      integer(KIND=normal_int)::vectormax,maxvir,maxntemp,nchmax,nchtor_max
-     & ,nchbn_max
-      integer(KIND=normal_int)::ntdifmx,nbinmx,angle_max,ang_bin_max,tor_max
-     & ,iou
+      integer(KIND=normal_int)::nmax,numax,ntmax,nntype,nvmax,nbxmax
+     & ,npamax,npabmax,maxbin,cmax,cmaxa,tor_bin_max,nbinmax_ete,smax
+      integer(KIND=normal_int)::vectormax,maxvir,maxntemp,nchmax
+     & ,nchtor_max,nchbn_max
+      integer(KIND=normal_int)::ntdifmx,nbinmx,angle_max,ang_bin_max
+     & ,tor_max,iou
 
 !      common /iounit/ iou
 ! --------------------------------------------------------------
@@ -303,8 +303,8 @@
 
 ! *** adding this for iswatch move ***
       logical::liswinc(numax,ntmax), liswatch
-      integer(KIND=normal_int)::other,iparty,iplace(numax,numax),pfrom(numax),pnum(numax)
-     & ,pprev(numax),nplace
+      integer(KIND=normal_int)::other,iparty,iplace(numax,numax)
+     & ,pfrom(numax),pnum(numax),pprev(numax),nplace
 ! *** end add ***
 
       real(KIND=double_precision)::bncb(ntmax,numax),bscb(ntmax,2,numax)
@@ -391,13 +391,13 @@
 
       logical::lelect,lflucq,lqtrans,lexpand,lpresim,lring,lrigid,lplace
      & ,lrig,lrigi,lchiral,licell
-      integer(KIND=normal_int)::nbox,nchain,nmolty,moltyp,nunit,nugrow,ntype
-     & ,nchbox,ncmt,ncmt2,iring,nrig,irig,frig,counthist,counttot
+      integer(KIND=normal_int)::nbox,nchain,nmolty,moltyp,nunit,nugrow
+     & ,ntype,nchbox,ncmt,ncmt2,iring,nrig,irig,frig,counthist,counttot
      & ,boxlink
-      integer(KIND=normal_int)::nboxi, eetype, parbox,iurot,iupdatefix,nrigmin
-     & ,nrigmax
-      integer(KIND=normal_int)::parall,temtyp,riutry,rindex,prior,maxgrow
-     & ,nrotbd,irotbd
+      integer(KIND=normal_int)::nboxi, eetype, parbox,iurot,iupdatefix
+     & ,nrigmin,nrigmax
+      integer(KIND=normal_int)::parall,temtyp,riutry,rindex,prior
+     & ,maxgrow,nrotbd,irotbd
       real(KIND=double_precision)::rxu, ryu, rzu, mass, masst, beta,xcm
      & ,ycm,zcm,exp_c,eta,eta2,sxcm,sycm,szcm
       real(KIND=double_precision)::pmrotbd
@@ -855,9 +855,9 @@
       integer(KIND=normal_int)::ghost_particles
       integer(KIND=normal_int)::ianalyze,nbin,tmcc
       integer(KIND=normal_int)::nequil,ninstf,ninsth,ndumph
-      integer(KIND=normal_int)::nstep, iprint, imv, iratio, iblock, idiele,
-     & isolute,iratv,iratp,irsave,nnstep,nchoiq,numcoeff,rmexpc,nswapb
-     & ,box1,box2,nvolb,box5,box6,ntemp, iheatcapacity
+      integer(KIND=normal_int)::nstep, iprint, imv, iratio, iblock,
+     & idiele,isolute,iratv,iratp,irsave,nnstep,nchoiq,numcoeff,rmexpc
+     & ,nswapb,box1,box2,nvolb,box5,box6,ntemp, iheatcapacity
 
       real(KIND=double_precision)::Armtrax,Armtray,Armtraz
       real(KIND=double_precision)::Num_cell_a, Num_cell_b, Num_cell_c
@@ -1016,8 +1016,9 @@
 ! EEPAR.INC
 
       logical::leemove,lmstate, leeacc
-      integer(KIND=normal_int)::fmstate,sstate1,sstate2,mstate,nstate,ee_moltyp
-     & ,box_state,eepointp,eeirem,boxrem1,boxins1,ee_prob,nmolty1
+      integer(KIND=normal_int)::fmstate,sstate1,sstate2,mstate,nstate
+     & ,ee_moltyp,box_state,eepointp,eeirem,boxrem1,boxins1,ee_prob
+     & ,nmolty1
       real(KIND=double_precision)::wee_ratio,psi,ee_qqu,um_markov
      & ,eeratio,rminee
 
@@ -1067,8 +1068,8 @@
 
 ! FIX.INC
 
-      integer(KIND=normal_int)::  iend,ipast,endnum,pastnum,fclose,fcount,iwbef
-     &   ,ibef,befnum,wbefnum,nextnum,inext
+      integer(KIND=normal_int)::  iend,ipast,endnum,pastnum,fclose
+     & ,fcount,iwbef,ibef,befnum,wbefnum,nextnum,inext
 
       logical::lcrank
 
@@ -1144,8 +1145,8 @@
      &	 dzij(pair_max),dij(pair_max),dik(pair_max),dxik(pair_max)
      &   ,dyik(pair_max),dzik(pair_max)
 
-      integer(KIND=normal_int)::itr1(pair_max),itr2(pair_max),itr3(pair_max),
-     &   ntr,tagged
+      integer(KIND=normal_int)::itr1(pair_max),itr2(pair_max)
+     & ,itr3(pair_max),ntr,tagged
 
       real(KIND=double_precision)::v3garo,garofalini
 

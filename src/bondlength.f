@@ -1,4 +1,4 @@
-      subroutine bondlength( vibtype, requil, kvib, beta, length, vvib )
+      subroutine bondlength(vibtype,requil,kvib,betaT,length,vvib)
 
 !     **************************************************************
 !     *** computes the bond length for a given vibration type    ***
@@ -6,7 +6,7 @@
 !     *** requil is the equilibrium bond length                  ***
 !     *** kvib is the force constant for the bond length         ***
 !     *** length is the bond length returned by this subroutine  ***
-!     *** beta is 1/kT                                           ***
+!     *** betaT is 1/kT                                           ***
 !     *** vvib is the vibration energy for this bond             ***
 !     *** M.G. Martin  2-4-98                                    ***
 !     **************************************************************
@@ -25,8 +25,8 @@
 !$$$      include 'tabulated.inc'
 
       integer(KIND=normal_int)::vibtype
-      real(KIND=double_precision)::length, bond, random, bf, vvib, beta, kvib
-     &     , requil, tabulated_vib
+      real(KIND=double_precision)::length,bond,random,bf,vvib,betaT
+     & ,kvib,requil,tabulated_vib
 
       vvib = 0.0d0
 
@@ -42,7 +42,7 @@
          
 !     --- correct for the bond energy
          vvib = kvib * (bond-requil )**2
-         bf = dexp ( -(vvib * beta) )
+         bf = dexp ( -(vvib * betaT) )
          if ( random() .ge. bf ) goto 107
          length = bond
 
@@ -62,7 +62,7 @@
          call lininter_vib(bond, tabulated_vib, vibtype)
          vvib=tabulated_vib
 
-         bf = dexp ( -(vvib * beta) )
+         bf = dexp ( -(vvib * betaT) )
          
          if ( random() .ge. bf ) goto 108
          length = bond

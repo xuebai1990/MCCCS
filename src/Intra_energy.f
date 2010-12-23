@@ -1,5 +1,5 @@
       subroutine Intra_energy ( i,imolty, v, vintra, vinter,vext
-     &     ,velect,vewald,flagon,ibox, istart, iend,lljii,ovrlap
+     &     ,velect,vewald,flagon,ibox, istart, iuend,lljii,ovrlap
      &     ,ltors,vtors,lcharge_table,lfavor,vvib,vbend,vtg)
 
  
@@ -39,29 +39,30 @@
       logical::lljii,ovrlap,ltors,lcharge_table,lt,lfound
 
       integer(KIND=normal_int)::growii,growjj,k,cellinc,jcell,ic,nmole
-      integer(KIND=normal_int)::i,ibox, istart, iend,ii,ntii,flagon,jjj,iii
-     &       ,j,jj,ntjj,ntij,ntj,imolty,jmolty,ncell
-      integer(KIND=normal_int)::iivib,jjtor,ip1,ip2,ip3,it,nchp2,acellinc
+      integer(KIND=normal_int)::i,ibox, istart, iuend,ii,ntii,flagon,jjj
+     & ,iii,j,jj,ntjj,ntij,ntj,imolty,jmolty,ncell
+      integer(KIND=normal_int)::iivib,jjtor,ip1,ip2,ip3,it,nchp2
+     & ,acellinc
 
       integer(KIND=normal_int)::jjvib,jjben  
 
       real(KIND=double_precision)::vvib,vbend,vtg,theta
 
-      real(KIND=double_precision)::ljsami,ljpsur,ljmuir,v,vintra, vinter,vext 
-     &                ,rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq
-     &                ,ryuij,rzuij,sr2,sr6,rij,rijsq,dzui,dz3,dz12
-     &                ,exgrph,exsami,exmuir,exzeo,vtors,exsix,velect
-     &                ,vewald,mmff,rbcut,rvdwsq,rchgsq,ninesix, genlj
+      real(KIND=double_precision)::ljsami,ljpsur,ljmuir,v,vintra, vinter
+     & ,vext,rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq,ryuij,rzuij,sr2
+     & ,sr6,rij,rijsq,dzui,dz3,dz12,exgrph,exsami,exmuir,exzeo,vtors
+     & ,exsix,velect,vewald,mmff,rbcut,rvdwsq,rchgsq,ninesix, genlj
       real(KIND=double_precision)::erfunc,qave
-      real(KIND=double_precision)::xvec,yvec,zvec,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2
-     &     ,daa1,da1a2,dot,thetac,vtorso
-      real(KIND=double_precision)::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq,epsilon2,sigma2
+      real(KIND=double_precision)::rxvec,ryvec,rzvec,xaa1,yaa1,zaa1
+     & ,xa1a2,ya1a2,za1a2,daa1,da1a2,dot,thetac,vtorso
+      real(KIND=double_precision)::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq
+     & ,epsilon2,sigma2
       real(KIND=double_precision)::sx,sy,sz
       real(KIND=double_precision)::slitpore	
-      real(KIND=double_precision)::distij(numax,numax)
+      real(KIND=double_precision)::distanceij(numax,numax)
       real(KIND=double_precision)::xcc,ycc,zcc,tcc,spltor, tabulated_vib
 
-      dimension xvec(numax,numax),yvec(numax,numax),zvec(numax,numax)
+      dimension rxvec(numax,numax),ryvec(numax,numax),rzvec(numax,numax)
       dimension lcoulo(numax,numax),cellinc(cmax),jcell(nmax)
       dimension acellinc(numax,27)
 
@@ -91,21 +92,21 @@
                 rzui=rzu(i,ii)
                 do iivib = 1, invib(imolty,ii)
                    jj = ijvib(imolty,ii,iivib)
-!                   xvec(ii,jj) = rxu(i,jj) - rxui
-!                   yvec(ii,jj) = ryu(i,jj) - ryui
-!                   zvec(ii,jj) = rzu(i,jj) - rzui
-                   xvec(ii,jj) = rxu(i,jj) - rxui
-                   yvec(ii,jj) = ryu(i,jj) - ryui
-                   zvec(ii,jj) = rzu(i,jj) - rzui 
-                   distij(ii,jj) = dsqrt( xvec(ii,jj)**2
-     &                 + yvec(ii,jj)**2 + zvec(ii,jj)**2 )
+!                   rxvec(ii,jj) = rxu(i,jj) - rxui
+!                   ryvec(ii,jj) = ryu(i,jj) - ryui
+!                   rzvec(ii,jj) = rzu(i,jj) - rzui
+                   rxvec(ii,jj) = rxu(i,jj) - rxui
+                   ryvec(ii,jj) = ryu(i,jj) - ryui
+                   rzvec(ii,jj) = rzu(i,jj) - rzui 
+                   distanceij(ii,jj) = dsqrt( rxvec(ii,jj)**2
+     &                 + ryvec(ii,jj)**2 + rzvec(ii,jj)**2 )
 
                    if ( nunit(imolty) .ne. nugrow(imolty) )then
 !                  --- account for explct atoms in opposite direction
-                      xvec(jj,ii)   = -xvec(ii,jj)
-                      yvec(jj,ii)   = -yvec(ii,jj)
-                      zvec(jj,ii)   = -zvec(ii,jj)
-                      distij(jj,ii) = distij(ii,jj)
+                      rxvec(jj,ii)   = -rxvec(ii,jj)
+                      ryvec(jj,ii)   = -ryvec(ii,jj)
+                      rzvec(jj,ii)   = -rzvec(ii,jj)
+                      distanceij(jj,ii) = distanceij(ii,jj)
                    end if
                 end do
              end do
@@ -117,14 +118,14 @@
                       ip1 = ijvib(imolty,j,jjvib)
                       it  = itvib(imolty,j,jjvib)
                       if (L_vib_table) then
-                         call lininter_vib(distij(ip1,j), 
+                         call lininter_vib(distanceij(ip1,j), 
      &                        tabulated_vib, it)
                          vvib = vvib + tabulated_vib
 !                         write(2,*) 'INTRA_ENERGY VVIB: ', 
 !     &                        tabulated_vib
                       end if
                       if ( ip1 .lt. j .and..not.L_vib_table) vvib = vvib
-     &                 + brvibk(it) * ( distij(ip1,j) - brvib(it) )**2
+     &                 + brvibk(it)*( distanceij(ip1,j)-brvib(it) ) **2
                    end do
                 end do
 !             end if
@@ -138,10 +139,10 @@
                    if ( ip2 .lt. j ) then
                       ip1 = ijben2(imolty,j,jjben)
                       it  = itben(imolty,j,jjben)
-                      thetac = ( xvec(ip1,j)*xvec(ip1,ip2) +
-     &                     yvec(ip1,j)*yvec(ip1,ip2) +
-     &                     zvec(ip1,j)*zvec(ip1,ip2) ) /
-     &                     ( distij(ip1,j)*distij(ip1,ip2) )
+                      thetac = ( rxvec(ip1,j)*rxvec(ip1,ip2) +
+     &                     ryvec(ip1,j)*ryvec(ip1,ip2) +
+     &                     rzvec(ip1,j)*rzvec(ip1,ip2) ) /
+     &                     ( distanceij(ip1,j)*distanceij(ip1,ip2) )
                       if ( thetac .ge. 1.0d0 ) thetac = 1.0d0
                       if ( thetac .le. -1.0d0 ) thetac = -1.0d0
 
@@ -166,18 +167,18 @@
                       ip2 = ijtor3(imolty,j,jjtor)
                       it  = ittor(imolty,j,jjtor)
 !*** calculate cross products d_a x d_a-1 and d_a-1 x d_a-2 ***
-                      xaa1 = yvec(ip1,j) * zvec(ip2,ip1) +
-     &                     zvec(ip1,j) * yvec(ip1,ip2)
-                      yaa1 = zvec(ip1,j) * xvec(ip2,ip1) +
-     &                     xvec(ip1,j) * zvec(ip1,ip2)
-                      zaa1 = xvec(ip1,j) * yvec(ip2,ip1) +
-     &                     yvec(ip1,j) * xvec(ip1,ip2)
-                      xa1a2 = yvec(ip1,ip2) * zvec(ip2,ip3) +
-     &                     zvec(ip1,ip2) * yvec(ip3,ip2)
-                      ya1a2 = zvec(ip1,ip2) * xvec(ip2,ip3) +
-     &                     xvec(ip1,ip2) * zvec(ip3,ip2)
-                      za1a2 = xvec(ip1,ip2) * yvec(ip2,ip3) +
-     &                     yvec(ip1,ip2) * xvec(ip3,ip2)
+                      xaa1 = ryvec(ip1,j) * rzvec(ip2,ip1) +
+     &                     rzvec(ip1,j) * ryvec(ip1,ip2)
+                      yaa1 = rzvec(ip1,j) * rxvec(ip2,ip1) +
+     &                     rxvec(ip1,j) * rzvec(ip1,ip2)
+                      zaa1 = rxvec(ip1,j) * ryvec(ip2,ip1) +
+     &                     ryvec(ip1,j) * rxvec(ip1,ip2)
+                      xa1a2 = ryvec(ip1,ip2) * rzvec(ip2,ip3) +
+     &                     rzvec(ip1,ip2) * ryvec(ip3,ip2)
+                      ya1a2 = rzvec(ip1,ip2) * rxvec(ip2,ip3) +
+     &                     rxvec(ip1,ip2) * rzvec(ip3,ip2)
+                      za1a2 = rxvec(ip1,ip2) * ryvec(ip2,ip3) +
+     &                     ryvec(ip1,ip2) * rxvec(ip3,ip2)
 ! *** calculate lengths of cross products ***
                       daa1 = dsqrt(xaa1**2+yaa1**2+zaa1**2)
                       da1a2 = dsqrt(xa1a2**2+ya1a2**2+za1a2**2)
@@ -192,8 +193,8 @@
                        ycc = zaa1*xa1a2 - xaa1*za1a2
                        zcc = xaa1*ya1a2 - yaa1*xa1a2
 !     *** calculate scalar triple product ***
-                       tcc = xcc*xvec(ip1,ip2) + ycc*yvec(ip1,ip2)
-     &                    + zcc*zvec(ip1,ip2)
+                       tcc = xcc*rxvec(ip1,ip2) + ycc*ryvec(ip1,ip2)
+     &                    + zcc*rzvec(ip1,ip2)
                        theta = dacos(thetac)
                        if (tcc .lt. 0.0d0) theta = -theta
                        if (L_spline) then

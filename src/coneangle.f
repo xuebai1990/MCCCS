@@ -25,9 +25,9 @@
       implicit none
       include 'common.inc'
 !$$$      include 'control.inc'
-      real(KIND=double_precision)::thetaone, thetatwo, phione, phitwo, angle
-     &     ,sintheone,costheone,sinthetwo,costhetwo
-     &     ,sinphione,cosphione,sinphitwo,cosphitwo,cosangle
+      real(KIND=double_precision)::thetaone, thetatwo, phione, phitwo,
+     & angle,sintheone,costheone,sinthetwo,costhetwo,sinphione,cosphione
+     & ,sinphitwo,cosphitwo,cosangle
 
       sintheone = dsin(thetaone)
       costheone = dcos(thetaone)

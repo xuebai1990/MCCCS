@@ -1,4 +1,4 @@
-      subroutine align_planes(iparty,imol_b,imol_a,itype_b,itype_a,
+      subroutine align_planes(isplist,imol_b,imol_a,itype_b,itype_a,
      &     xb,yb,zb)
 
 !--- align_planes.f
@@ -45,7 +45,8 @@
 !$$$      include 'swtcmove.inc'
 
 !     --- INPUT VARIABLES ---
-      integer(KIND=normal_int)::iparty, imol_b, imol_a, itype_b, itype_a
+      integer(KIND=normal_int)::isplist, imol_b, imol_a, itype_b,
+     & itype_a
    
 !     --- OUTPUT VARIABLES ---
       real(KIND=double_precision)::xb(numax), yb(numax), zb(numax)
@@ -74,12 +75,12 @@
       nunit_b = nunit(imoltype_b)
 
 !     Find the three beads on each that are being swatched
-      ia_bead1=splist(iparty,1,itype_a)
-      ia_bead2=splist(iparty,2,itype_a)
-      ia_bead3=splist(iparty,3,itype_a)
-      ib_bead1=splist(iparty,1,itype_b)
-      ib_bead2=splist(iparty,2,itype_b)
-      ib_bead3=splist(iparty,3,itype_b)
+      ia_bead1=splist(isplist,1,itype_a)
+      ia_bead2=splist(isplist,2,itype_a)
+      ia_bead3=splist(isplist,3,itype_a)
+      ib_bead1=splist(isplist,1,itype_b)
+      ib_bead2=splist(isplist,2,itype_b)
+      ib_bead3=splist(isplist,3,itype_b)
 
 !CC -- FIRST ROTATION
 

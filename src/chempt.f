@@ -42,8 +42,8 @@
       integer(KIND=normal_int)::iu,iutry,iulast,iut,iub,icbu,islen,iins
      &       ,iii,ibr,ibr1,j,jj,jj2,jj3,jj4,invtry,ibox,iunit
      &       ,imolty,jmt,igrow
-      real(KIND=double_precision)::v,vintra,vinter,vext,velect,vtornew,vtordum
-     &     ,delen,vewald
+      real(KIND=double_precision)::v,vintra,vinter,vext,velect,vtornew
+     & ,vtordum,delen,vewald
 
 
       real(KIND=double_precision)::bsswap

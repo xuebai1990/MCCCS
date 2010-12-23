@@ -40,9 +40,10 @@
       logical::lmim
 
       integer(KIND=normal_int)::growii,growjj,k,cellinc,jcell,ic,nmole
-      integer(KIND=normal_int)::i,ibox, istart, iuend,ii,ntii,flagon,jjj,iii
-     &       ,j,jj,ntjj,ntij,ntj,imolty,jmolty,ncell
-      integer(KIND=normal_int)::iivib,jjtor,ip1,ip2,ip3,it,nchp2,acellinc
+      integer(KIND=normal_int)::i,ibox, istart, iuend,ii,ntii,flagon,jjj
+     & ,iii,j,jj,ntjj,ntij,ntj,imolty,jmolty,ncell
+      integer(KIND=normal_int)::iivib,jjtor,ip1,ip2,ip3,it,nchp2
+     & ,acellinc
 
       integer(KIND=normal_int)::jjvib,jjben,mmm  
 

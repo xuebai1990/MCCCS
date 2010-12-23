@@ -24,17 +24,18 @@
 !$$$      include 'system.inc'
 !$$$      include 'cell.inc'
 
-      integer(KIND=normal_int)::ibox, i,ii,imolty,iunit,j,stt,edd,mtype,iwarn
-     &        ,inboxx,inboxy,inboxz,iadjust,itype
+      integer(KIND=normal_int)::ibox, i,ii,imolty,iunit,j,stt,edd,mtype
+     & ,iwarn,inboxx,inboxy,inboxz,iadjust,itype
       logical::lall,ldx,ldy,ldz,lintbx
-      real(KIND=double_precision)::bx,by,bz,boxlen,dx,dy,dz,nxcm,nycm,nzcm
+      real(KIND=double_precision)::rbx,rby,rbz,boxlen,dx,dy,dz,nxcm,nycm
+     & ,nzcm
       real(KIND=double_precision)::dmaxsq,rxuij,ryuij,rzuij,rijsq
 
       real(KIND=double_precision)::sx,sy,sz,nxcm2,nycm2,nzcm2
 
-      bx = boxlx(ibox)
-      by = boxly(ibox)
-      bz = boxlz(ibox)
+      rbx = boxlx(ibox)
+      rby = boxly(ibox)
+      rbz = boxlz(ibox)
 
       if (lall) then
          stt = 1
@@ -150,61 +151,61 @@
             else
 
                if( lintbx ) then
-                  if ( nxcm .gt. bx ) then
-                     inboxx = idint(nxcm/bx)
+                  if ( nxcm .gt. rbx ) then
+                     inboxx = idint(nxcm/rbx)
                      ldx = .true.
                   elseif ( nxcm .lt. -1.0d-10 ) then
-                     inboxx = idint(nxcm/bx) - 1
+                     inboxx = idint(nxcm/rbx) - 1
                      ldx = .true.
                   end if
-                  if ( nycm .gt. by ) then
-                     inboxy = idint(nycm/by)
+                  if ( nycm .gt. rby ) then
+                     inboxy = idint(nycm/rby)
                      ldy = .true.
                   elseif( nycm .lt. -1.0d-10 )then
-                     inboxy = idint(nycm/by) - 1
+                     inboxy = idint(nycm/rby) - 1
                      ldy = .true.
                   end if
                   if (lpbcz) then
-                     if ( nzcm .gt. bz ) then
-                        inboxz = idint(nzcm/bz)
+                     if ( nzcm .gt. rbz ) then
+                        inboxz = idint(nzcm/rbz)
                         ldz = .true.
                      elseif( nzcm .lt. -1.0d-10 ) then
-                        inboxz = idint(nzcm/bz) - 1
+                        inboxz = idint(nzcm/rbz) - 1
                         ldz = .true.
                      end if
                   end if
                   if ( ldx ) then
-                     dx = -(dble(inboxx)*bx)
+                     dx = -(dble(inboxx)*rbx)
                   end if
                   if ( ldy ) then
-                     dy = -(dble(inboxy)*by)
+                     dy = -(dble(inboxy)*rby)
                   end if
                   if ( ldz ) then
-                     dz = -(dble(inboxz)*bz)
+                     dz = -(dble(inboxz)*rbz)
                   end if
                else
                   if (nxcm .lt. -1.0d-10) then
-                     dx = bx
+                     dx = rbx
                      ldx = .true.
-                  elseif (nxcm .gt. bx) then
-                     dx = -bx
+                  elseif (nxcm .gt. rbx) then
+                     dx = -rbx
                      ldx = .true.
                   end if
                   
                   if (nycm .lt. -1.0d-10) then
-                     dy = by
+                     dy = rby
                      ldy = .true.
-                  elseif (nycm .gt. by) then
-                     dy = -by
+                  elseif (nycm .gt. rby) then
+                     dy = -rby
                      ldy = .true.
                   end if
                   
                   if(lpbcz) then
                      if (nzcm .lt. -1.0d-10) then
-                        dz = bz
+                        dz = rbz
                         ldz = .true.
-                     elseif (nzcm .gt. bz) then
-                        dz = -bz
+                     elseif (nzcm .gt. rbz) then
+                        dz = -rbz
                         ldz = .true.
                      end if
                   end if
@@ -241,8 +242,8 @@
                   if (mtype .eq. 7) write(iou,*) 'config move'
                   if (mtype .eq. 8) write(iou,*) 'swatch move'
                   if (mtype .eq. 9) write(iou,*) 'energy call'
-                  write(iou,*) 'ibox,i,iunit,boxlen',ibox,i,iunit,bx,
-     &                 by,bz
+                  write(iou,*) 'ibox,i,iunit,boxlen',ibox,i,iunit,rbx,
+     &                 rby,rbz
                   lintbx = .true.
                   write(iou,*) 'nxcm,nycm,nzcm',nxcm,nycm,nzcm
                   write(iou,*) 'dx,dy,dz',dx,dy,dz
