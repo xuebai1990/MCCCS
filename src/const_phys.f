@@ -1,4 +1,5 @@
       module const_phys
+      use var_type, only: double_precision
       implicit none
       save
       real(KIND=double_precision),parameter::eXV_to_K

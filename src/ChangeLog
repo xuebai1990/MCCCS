@@ -1,5 +1,6 @@
 obsolete:
 analysis.f
+coruz.f
 exzeot.f
 forcefield.f
 qqcheck.f
@@ -11,5 +12,11 @@ beaddat.inc
 gor.inc
 
 added:
-physical_constants.f
-utilmath.f
+global_data.f
+var_type.f
+const_phys.f
+const_math.f
+util_math.f
+util_string.f
+util_files.f
+util_timings.f

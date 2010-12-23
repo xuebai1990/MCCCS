@@ -20,10 +20,12 @@
       logical::ltailc,lshift
       logical::lneigh,lvirial
       logical::lcutcm,ldual
-      integer(KIND=int)::nmax,numax,ntmax,nntype,nvmax,nbxmax,npamax,npabmax
-     & ,maxbin,cmax,cmaxa,tor_bin_max,nbinmax_ete,smax
-      integer(KIND=int)::vectormax,maxvir,maxntemp,nchmax,nchtor_max,nchbn_max
-      integer(KIND=int)::ntdifmx,nbinmx,angle_max,ang_bin_max,tor_max,iou
+      integer(KIND=int)::nmax,numax,ntmax,nntype,nvmax,nbxmax,npamax
+     & ,npabmax,maxbin,cmax,cmaxa,tor_bin_max,nbinmax_ete,smax
+      integer(KIND=int)::vectormax,maxvir,maxntemp,nchmax,nchtor_max
+     & ,nchbn_max
+      integer(KIND=int)::ntdifmx,nbinmx,angle_max,ang_bin_max,tor_max
+     & ,iou
 
 !      common /iounit/ iou
 ! --------------------------------------------------------------
@@ -267,8 +269,8 @@
       integer(KIND=int),parameter::nzeomax=57600
       integer(KIND=int)::idzeo(nzeomax),nzeo,nx,ny,nz
       logical::lunitcell(nzeomax)
-      real(KIND=double_precision)::zeox(nzeomax),zeoy(nzeomax),zeoz(nzeomax),zeorx,zeory
-     &     ,zeorz,zunitx,zunity,zunitz
+      real(KIND=double_precision)::zeox(nzeomax),zeoy(nzeomax)
+     & ,zeoz(nzeomax),zeorx,zeory,zeorz,zunitx,zunity,zunitz
 
 !      common/zeolit/zeox,zeoy,zeoz,idzeo,lunitcell,nzeo
 !      common/box  /zeorx,zeory,zeorz,zunitx,zunity,zunitz,nx,ny,nz
@@ -277,15 +279,22 @@
 
 !      real(KIND=double_precision)::zeps(zntype,zntype),zsig2(zntype,zntype),zrc2(zntype,zntype),zencut(zntype,zntype)
       integer(KIND=int),parameter::zntype=2,gntypemax=32
-      integer(KIND=int)::gntype,gtable(gntypemax),ztype(zntype),znum(zntype)
+      integer(KIND=int)::gntype,gtable(gntypemax),ztype(zntype)
+     & ,znum(zntype)
 !      common/forces/gtable,znum,ztype,gntype,zeps,zsig2,zrc2,zencut
 
 ! GRID.INC
       integer(KIND=int)::ngrx,ngry,ngrz,maxp,nlayermax
       real(KIND=double_precision),allocatable::egrid(:,:,:,:)
-      real(KIND=double_precision)::dgrx,dgry,dgrz,eps=1d-2,dgr
+      real(KIND=double_precision)::dgrx,dgry,dgrz,dgr
       parameter (maxp=10,dgr=0.2)
-!      common/gridd/dgrx,dgry,dgrz,egrid,ngrx,ngry,ngrz,eps
+!      common/gridd/dgrx,dgry,dgrz,egrid,ngrx,ngry,ngrz
+
+! MPI.INC
+
+      integer(KIND=int)::myid,numprocs,ierr
+      integer(KIND=int),parameter::numprocmax=32
+!      common /mpivar/ myid,numprocs,ierr
 
 ! CBMC.INC
 
@@ -298,19 +307,20 @@
      & ,pprev(numax),nplace
 ! *** end add ***
 
-      real(KIND=double_precision)::bncb(ntmax,numax),bscb(ntmax,2,numax),rxp(numax,nchmax)
-     & ,ryp(numax,nchmax),rzp(numax,nchmax),rxnew(numax),rynew(numax)
-     & ,rznew(numax) ,bnregr(ntmax),bsregr(ntmax,2),bfac(nchmax)
-     & ,bsswat(npamax ,npabmax),bsiswat(npamax,npabmax),fbncb(ntmax
-     & ,numax) ,fbscb(ntmax ,2,numax),vtry(nchmax),vtrext(nchmax)
-     & ,vtrintra(nchmax) ,vtrinter(nchmax) ,vtrelect(nchmax)
-     & ,vtrewald(nchmax) ,vtrorient(nchmax),vtrelect_intra(nchmax)
-     & ,vtrelect_inter(nchmax)
-      integer(KIND=int)::nchoi1(ntmax),nchoi(ntmax),icbdir(ntmax),icbsta(ntmax)
-     & ,nmaxcbmc(ntmax),nchoih(ntmax),nchtor(ntmax),nchbna(ntmax)
-     & ,nchbnb(ntmax),nrigi,nchoir(ntmax),rlist(numax,numax)
-     & ,rfrom(numax),rprev(numax) ,rnum(numax)
-      real(KIND=double_precision)::acchem(nbxmax,ntmax), bnchem(nbxmax,ntmax)
+      real(KIND=double_precision)::bncb(ntmax,numax),bscb(ntmax,2,numax)
+     & ,rxp(numax,nchmax),ryp(numax,nchmax),rzp(numax,nchmax)
+     & ,rxnew(numax),rynew(numax),rznew(numax) ,bnregr(ntmax)
+     & ,bsregr(ntmax,2),bfac(nchmax),bsswat(npamax ,npabmax)
+     & ,bsiswat(npamax,npabmax),fbncb(ntmax,numax) ,fbscb(ntmax ,2
+     & ,numax),vtry(nchmax),vtrext(nchmax),vtrintra(nchmax)
+     & ,vtrinter(nchmax) ,vtrelect(nchmax),vtrewald(nchmax)
+     & ,vtrorient(nchmax),vtrelect_intra(nchmax),vtrelect_inter(nchmax)
+      integer(KIND=int)::nchoi1(ntmax),nchoi(ntmax),icbdir(ntmax)
+     & ,icbsta(ntmax),nmaxcbmc(ntmax),nchoih(ntmax),nchtor(ntmax)
+     & ,nchbna(ntmax),nchbnb(ntmax),nrigi,nchoir(ntmax),rlist(numax
+     & ,numax),rfrom(numax),rprev(numax) ,rnum(numax)
+      real(KIND=double_precision)::acchem(nbxmax,ntmax), bnchem(nbxmax
+     & ,ntmax)
 !      common /pbias/  bncb, bscb
 !     &   ,bnregr,bsregr
 !     &   ,bsswat,bsiswat
@@ -341,10 +351,10 @@
       logical::L_Coul_CBMC
       logical::L_tor_table, L_spline, L_linear
       integer(KIND=int)::a15type(ntmax,numax,numax)
-      real(KIND=double_precision)::sig2ij,epsij,epsilon,sigma,epsi,sigi,ecut
-     &   ,extc12, extc3, extz0,aspecial,bspecial,q1
-      real(KIND=double_precision)::qqfact,xiq,jayq,jayself,fqegp(ntmax),a15(2)
-     &   ,qscale,qelect
+      real(KIND=double_precision)::sig2ij,epsij,epsilon,sigma,epsi,sigi
+     & ,ecut,extc12, extc3, extz0,aspecial,bspecial,q1
+      real(KIND=double_precision)::xiq,jayq,jayself,fqegp(ntmax),a15(2)
+     & ,qscale,qelect
       real(KIND=double_precision)::ljscale,qscale2
       real(KIND=double_precision)::n0,n1
 
@@ -380,15 +390,19 @@
 ! COORD.INC
 
       logical::lelect,lflucq,lqtrans,lexpand,lpresim,lring,lrigid,lplace
-     &  ,lrig,lrigi,lchiral,licell
-      integer(KIND=int)::nbox,nchain,nmolty,moltyp,nunit,nugrow,ntype,nchbox,ncmt
-     &  ,ncmt2,iring,nrig,irig,frig,counthist,counttot,boxlink
-      integer(KIND=int)::nboxi, eetype, parbox,iurot,iupdatefix,nrigmin,nrigmax
-      integer(KIND=int)::parall,temtyp,riutry,rindex,prior,maxgrow,nrotbd,irotbd
-      real(KIND=double_precision)::rxu, ryu, rzu, mass, masst, beta,xcm,ycm,zcm
-     &  ,exp_c,eta,eta2,sxcm,sycm,szcm
+     & ,lrig,lrigi,lchiral,licell
+      integer(KIND=int)::nbox,nchain,nmolty,moltyp,nunit,nugrow,ntype
+     & ,nchbox,ncmt,ncmt2,iring,nrig,irig,frig,counthist,counttot
+     & ,boxlink
+      integer(KIND=int)::nboxi, eetype, parbox,iurot,iupdatefix,nrigmin
+     & ,nrigmax
+      integer(KIND=int)::parall,temtyp,riutry,rindex,prior,maxgrow
+     & ,nrotbd,irotbd
+      real(KIND=double_precision)::rxu, ryu, rzu, mass, masst, beta,xcm
+     & ,ycm,zcm,exp_c,eta,eta2,sxcm,sycm,szcm
       real(KIND=double_precision)::pmrotbd
-      real(KIND=double_precision)::qqu,rcmu,rintramax,hist,probf,Elect_field
+      real(KIND=double_precision)::qqu,rcmu,rintramax,hist,probf
+     & ,Elect_field
       character(LEN=18)::chname
       character(LEN=4)::chemid
       dimension lelect(ntmax),lflucq(ntmax),lqtrans(ntmax)
@@ -411,7 +425,7 @@
       dimension xcm(nmax),ycm(nmax),zcm(nmax),exp_c(nmax)
      &  ,eta2(nbxmax,ntmax),sxcm(nmax),sycm(nmax),szcm(nmax)
       dimension riutry(ntmax,3),rindex(ntmax),lrigid(ntmax),lrig(ntmax)
-     &  ,lrigi(ntmax,numax),lchiral(ntmax,numax),lring(ntmax)
+     & ,lrigi(ntmax,numax),lchiral(ntmax,numax),lring(ntmax)
       dimension chname(nntype), chemid(nntype)
 
 !      common /ncnunt/ moltyp,nunit,nugrow,ntype,parbox,boxlink
@@ -442,13 +456,13 @@
       logical::linclu(ntmax,numax,numax),lqinclu(ntmax,numax,numax)
      & ,lainclu(ntmax,numax,numax),lexclu(ntmax,numax,ntmax,numax)
      & ,wschvib(numax,6),wschben(numax,12),wschtor(numax,12)
-      integer(KIND=int)::invib(ntmax,numax),itvib(ntmax,numax,6),ijvib(ntmax,numax
-     & ,6),inben(ntmax,numax),itben(ntmax,numax,12),ijben2(ntmax,numax
-     & ,12),ijben3(ntmax,numax,12),intor(ntmax,numax),ittor(ntmax,numax
-     & ,12),ijtor2(ntmax,numax,12),ijtor3(ntmax,numax,12),ijtor4(ntmax
-     & ,numax,12),wsched(numax)
-      real(KIND=double_precision)::brvib(nvmax),brvibk(nvmax),brvibmin(60),brvibmax(60)
-     & ,brben(nvmax),brbenk(nvmax)
+      integer(KIND=int)::invib(ntmax,numax),itvib(ntmax,numax,6)
+     & ,ijvib(ntmax,numax,6),inben(ntmax,numax),itben(ntmax,numax,12)
+     & ,ijben2(ntmax,numax,12),ijben3(ntmax,numax,12),intor(ntmax,numax)
+     & ,ittor(ntmax,numax,12),ijtor2(ntmax,numax,12),ijtor3(ntmax,numax
+     & ,12),ijtor4(ntmax,numax,12),wsched(numax)
+      real(KIND=double_precision)::brvib(nvmax),brvibk(nvmax)
+     & ,brvibmin(60),brvibmax(60),brben(nvmax),brbenk(nvmax)
 
 !      common /connev/ brvib,brvibk,brvibmin
 !     &   ,brvibmax
@@ -475,10 +489,10 @@
 ! - kmax, a parameter to control the total number of reciprocal vectors
 ! - numvect, the total number of reciprocal vectors
       dimension numvect(nbxmax)
-      real(KIND=double_precision)::kx,ky,kz,prefact,ssumr,ssumi,ssumrn,ssumin,
-     &                 ssumro,ssumio
-      real(KIND=double_precision)::sself,correct,kalp,calp,dipolex,dipoley,dipolez,
-     &                 dipolexo,dipoleyo,dipolezo
+      real(KIND=double_precision)::kx,ky,kz,prefact,ssumr,ssumi,ssumrn
+     & ,ssumin,ssumro,ssumio
+      real(KIND=double_precision)::sself,correct,kalp,calp,dipolex
+     & ,dipoley,dipolez,dipolexo,dipoleyo,dipolezo
 ! - calp = kalp / boxlen
       dimension kx(vectormax,nbxmax),ky(vectormax,nbxmax),
      &          kz(vectormax,nbxmax),prefact(vectormax,nbxmax),
@@ -693,8 +707,8 @@
 ! CLUSTERBIAS.INC
 
       logical::lbias(ntmax),lavbmc1(ntmax),lavbmc2(ntmax),lavbmc3(ntmax)
-      real(KIND=double_precision)::rbsmax,rbsmin,vol_eff,pmbias(ntmax),pmbsmt(ntmax)
-     &                 ,pmbias2(ntmax)
+      real(KIND=double_precision)::rbsmax,rbsmin,vol_eff,pmbias(ntmax)
+     & ,pmbsmt(ntmax),pmbias2(ntmax)
 !      common /cbiasa/ lbias,lavbmc1,lavbmc2,lavbmc3
 !      common /cbiasb/ rbsmax,rbsmin,vol_eff,pmbias,pmbias2,pmbsmt
 
@@ -706,7 +720,8 @@
 
       integer(KIND=int)::nxatom
       parameter (nxatom=5)
-      real(KIND=double_precision)::rzero(nxatom*nxatom),epsnx(nxatom*nxatom)
+      real(KIND=double_precision)::rzero(nxatom*nxatom),epsnx(nxatom
+     & *nxatom)
       real(KIND=double_precision)::shiftnsix(nxatom*nxatom)
 !      common /formic/ rzero,epsnx,shiftnsix
 
@@ -718,7 +733,8 @@
 ! CELL.INC
 
       real(KIND=double_precision)::hmat(nbxmax,9),hmati(nbxmax,9)
-      real(KIND=double_precision)::cell_length(nbxmax,3),min_width(nbxmax,3)
+      real(KIND=double_precision)::cell_length(nbxmax,3)
+     & ,min_width(nbxmax,3)
       real(KIND=double_precision)::cell_vol(nbxmax)
       real(KIND=double_precision)::cell_ang(nbxmax,3)
 !      common /cella/ hmat,hmati
@@ -741,17 +757,20 @@
 !cccc  KM 2009
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      integer(KIND=int)::vibsplits(150), bendsplits(150), ntabvib, ntabbend
+      integer(KIND=int)::vibsplits(150), bendsplits(150), ntabvib,
+     & ntabbend
       integer(KIND=int)::vdWsplits(150,150), ntabvdW
       integer(KIND=int)::electsplits(1500,1500), ntabelect
       integer(KIND=int)::num_int_vib(150), num_int_bend(150),
      &	num_int_vdW(150,150), num_int_elect(150,150)
       real(KIND=double_precision)::vib(1500,150), tabvib(1500,150)
       real(KIND=double_precision)::bend(1500,150), tabbend(1500,150)
-      real(KIND=double_precision)::rvdW(1500,150,150), tabvdW(1500,150,150)
-      real(KIND=double_precision)::relect(1500,150,150), tabelect(1500,150,150)
-      real(KIND=double_precision)::vibdiff(1500,150), benddiff(1500,150),
-     & 	vdWdiff(1500,150,150), electdiff(1500,150,150)
+      real(KIND=double_precision)::rvdW(1500,150,150), tabvdW(1500,150
+     & ,150)
+      real(KIND=double_precision)::relect(1500,150,150), tabelect(1500
+     & ,150,150)
+      real(KIND=double_precision)::vibdiff(1500,150), benddiff(1500,150)
+     & ,vdWdiff(1500,150,150), electdiff(1500,150,150)
       logical::L_vib_table, L_bend_table, L_vdW_table,
      &  L_elect_table
 
@@ -765,11 +784,12 @@
 
 ! SYSTEM.INC
 
-      logical::lsolid(nbxmax),lrect(nbxmax),ltwice(nbxmax),lideal(nbxmax)
+      logical::lsolid(nbxmax),lrect(nbxmax),ltwice(nbxmax)
+     & ,lideal(nbxmax)
       integer(KIND=int)::icell,nicell,iucell,solcount
-      real(KIND=double_precision)::boxlx(nbxmax), boxly(nbxmax), boxlz(nbxmax), rcut(nbxmax)
-     & , rmin,rcutnn(nbxmax), softcut,softlog,rcutin,avsolinter
-     & ,avsolintra,avsolbend,avsoltor,avsolelc
+      real(KIND=double_precision)::boxlx(nbxmax), boxly(nbxmax),
+     & boxlz(nbxmax), rcut(nbxmax), rmin,rcutnn(nbxmax), softcut,softlog
+     & ,rcutin,avsolinter,avsolintra,avsolbend,avsoltor,avsolelc
       dimension icell(nmax),nicell(cmax),iucell(cmax,cmaxa)
      &   ,solcount(nbxmax,ntmax)
       dimension avsolinter(nbxmax,ntmax),avsolintra(nbxmax,ntmax)
@@ -791,11 +811,11 @@
       parameter (maxneigh = 20)
       integer(KIND=int)::neighbor(maxneigh,nmax),neigh_cnt(nmax),neigh_icnt,
      &        neighi(maxneigh),neighboro(maxneigh,nmax),neigh_o(nmax)
-      real(KIND=double_precision)::ndij(maxneigh,nmax),nxij(maxneigh,nmax),
-     &        nyij(maxneigh,nmax),nxijo(maxneigh,nmax),
-     &        nzij(maxneigh,nmax),ndiji(nmax),nxiji(maxneigh),
-     &        nyiji(maxneigh),nziji(maxneigh),ndijo(maxneigh,nmax),
-     &        nyijo(maxneigh,nmax),nzijo(maxneigh,nmax)
+      real(KIND=double_precision)::ndij(maxneigh,nmax),nxij(maxneigh
+     & ,nmax),nyij(maxneigh,nmax),nxijo(maxneigh,nmax),nzij(maxneigh
+     & ,nmax),ndiji(nmax),nxiji(maxneigh),nyiji(maxneigh)
+     & ,nziji(maxneigh),ndijo(maxneigh,nmax),nyijo(maxneigh,nmax)
+     & ,nzijo(maxneigh,nmax)
 !      common /nn2/ lnn,lneighbor
 !      common /nn4/ neighbor
 !      common /nn3/ neigh_cnt,neigh_icnt,neighi
@@ -810,9 +830,10 @@
 
 ! ENSEMBLE.INC
 
-      real(KIND=double_precision)::vbox(nbxmax),wbox(nbxmax),vinterb(nbxmax),vtailb(nbxmax)
-     & ,vintrab(nbxmax),vvibb(nbxmax),vbendb(nbxmax),vtgb(nbxmax),
-     & vextb(nbxmax), velectb(nbxmax),vflucqb(nbxmax),v3garob(nbxmax)
+      real(KIND=double_precision)::vbox(nbxmax),wbox(nbxmax)
+     & ,vinterb(nbxmax),vtailb(nbxmax),vintrab(nbxmax),vvibb(nbxmax)
+     & ,vbendb(nbxmax),vtgb(nbxmax),vextb(nbxmax), velectb(nbxmax)
+     & ,vflucqb(nbxmax),v3garob(nbxmax)
 !      real(KIND=double_precision)::velectb_intra(nbxmax), velectb_inter(nbxmax)
 !      common /vwbox/  vbox,wbox,vinterb
 !     &   ,vtailb,vintrab,vvibb
@@ -833,19 +854,20 @@
       integer(KIND=int)::ghost_particles
       integer(KIND=int)::ianalyze,nbin,tmcc
       integer(KIND=int)::nequil,ninstf,ninsth,ndumph
-      integer(KIND=int)::nstep, iprint, imv, iratio, iblock, idiele, isolute
-     &       ,iratv,iratp,irsave,nnstep,nchoiq,numcoeff,rmexpc
-     &       ,nswapb,box1,box2,nvolb,box5,box6,ntemp, iheatcapacity
+      integer(KIND=int)::nstep, iprint, imv, iratio, iblock, idiele,
+     & isolute,iratv,iratp,irsave,nnstep,nchoiq,numcoeff,rmexpc,nswapb
+     & ,box1,box2,nvolb,box5,box6,ntemp, iheatcapacity
 
       real(KIND=double_precision)::Armtrax,Armtray,Armtraz
       real(KIND=double_precision)::Num_cell_a, Num_cell_b, Num_cell_c
 
-      real(KIND=double_precision)::pmcb, pmtra, temp, express, ewald_precision ,rmtrax,
-     & rmtray, rmtraz, rmrotx, rmroty, rmrotz ,rmflcq,taflcq,fqbeta
-     & ,tatra, tarot,pmvolx,pmvoly ,pmvol, pmswap,rmvol, rmhmat, tavol
-     & ,pmfix ,upnn, upnnsq, upnndg, B, pmswmt,pmiswat,pmisatc ,pmswat
-     & ,pmsatc,pmcbmt,pmtrmt,pmromt ,pmvlmt,pmall,pmflcq, pmfqmt,pmexpc
-     & ,pmeemt ,pmswapb,pmvolb,virtemp,bin_width,pm_atom_tra ,pmexpc1
+      real(KIND=double_precision)::pmcb, pmtra, temp, express,
+     & ewald_precision ,rmtrax,rmtray, rmtraz, rmrotx, rmroty, rmrotz
+     & ,rmflcq,taflcq,fqbeta,tatra, tarot,pmvolx,pmvoly ,pmvol, pmswap
+     & ,rmvol, rmhmat, tavol,pmfix ,upnn, upnnsq, upnndg, B, pmswmt
+     & ,pmiswat,pmisatc ,pmswat,pmsatc,pmcbmt,pmtrmt,pmromt ,pmvlmt
+     & ,pmall,pmflcq, pmfqmt,pmexpc,pmeemt ,pmswapb,pmvolb,virtemp
+     & ,bin_width,pm_atom_tra ,pmexpc1
 
       dimension pmswmt(ntmax),pmcbmt(ntmax) ,pmtrmt(ntmax),pmromt(ntmax)
      & ,pmall(ntmax),pmfqmt(ntmax),pmeemt(ntmax) ,rmexpc(ntmax)
@@ -888,10 +910,9 @@
 
 ! BNBSMA.INC
 
-      real(KIND=double_precision)::bsvol,bnvol,bntrax,bntray,bntraz,bshmat
-     &  ,bstrax,bstray,bstraz,bnrotx,bnroty,bnrotz,bnhmat
-     &  ,bsrotx,bsroty,bsrotz,bnflcq,bsflcq,bnexpc,bsexpc
-     &  ,bnflcq2,bsflcq2
+      real(KIND=double_precision)::bsvol,bnvol,bntrax,bntray,bntraz
+     & ,bshmat,bstrax,bstray,bstraz,bnrotx,bnroty,bnrotz,bnhmat,bsrotx
+     & ,bsroty,bsrotz,bnflcq,bsflcq,bnexpc,bsexpc,bnflcq2,bsflcq2
       real(KIND=double_precision)::Abntrax,Abntray,Abntraz,
      &                  Abstrax,Abstray,Abstraz
 
@@ -946,12 +967,11 @@
       dimension growfrom(numax),growprev(numax),grownum(numax)
       dimension growlist(numax,numax)
 
-      real(KIND=double_precision)::weight,  weiold, voldt,voldbb,voldtg,voldext
-     &     ,voldintra,voldinter,voldbvib,voldelect,voldewald
-     &     ,vnewt,vnewbb,vnewtg,vnewext,vnewintra,vnewbvib
-     &     ,vnewinter,vnewelect,vnewewald,vneworient
-     &     ,vnewinterr,vnewextr,vnewelectr,voldinterr
-     &     ,voldextr,voldelectr,voldorient
+      real(KIND=double_precision)::weight,  weiold, voldt,voldbb,voldtg
+     & ,voldext,voldintra,voldinter,voldbvib,voldelect,voldewald,vnewt
+     & ,vnewbb,vnewtg,vnewext,vnewintra,vnewbvib,vnewinter,vnewelect
+     & ,vnewewald,vneworient,vnewinterr,vnewextr,vnewelectr,voldinterr
+     & ,voldextr,voldelectr,voldorient
 
 !      common /rosena/ growfrom,growprev,growlist,grownum
 !      common /rosenb/ weight,  weiold, voldt,voldbb,voldtg,voldext
@@ -966,11 +986,11 @@
       integer(KIND=int)::nw,nwell,iratipsw
       parameter (nw = 4000)
 
-      real(KIND=double_precision)::dvdl,acdvdl,acipsw,vipsw,pipsw,vwellipsw
-     &   ,pwellipsw,vwellipswb,vipswb,etais,lambdais,rxwell,rywell
-     &   ,rzwell,awell,bwell,vipswo,vipswn,vwellipswo,vwellipswn
-     &   ,lena,lenc,pwellips,pips,dhmat,sxwell,sywell,szwell
-     &   ,vwellipswot,vwellipswnt,vipswnt,vipswot
+      real(KIND=double_precision)::dvdl,acdvdl,acipsw,vipsw,pipsw
+     & ,vwellipsw,pwellipsw,vwellipswb,vipswb,etais,lambdais,rxwell
+     & ,rywell,rzwell,awell,bwell,vipswo,vipswn,vwellipswo,vwellipswn
+     & ,lena,lenc,pwellips,pips,dhmat,sxwell,sywell,szwell,vwellipswot
+     & ,vwellipswnt,vipswnt,vipswot
 
       logical::lwell,lstagea,lstageb,lstagec
 
@@ -996,12 +1016,13 @@
 
       logical::leemove,lmstate, leeacc
       integer(KIND=int)::fmstate,sstate1,sstate2,mstate,nstate,ee_moltyp
-     &       ,box_state,eepointp,eeirem,boxrem1,boxins1,ee_prob,nmolty1
-      real(KIND=double_precision)::wee_ratio,psi,ee_qqu,um_markov,eeratio,rminee
+     & ,box_state,eepointp,eeirem,boxrem1,boxins1,ee_prob,nmolty1
+      real(KIND=double_precision)::wee_ratio,psi,ee_qqu,um_markov
+     & ,eeratio,rminee
 
       dimension psi(smax),ee_qqu(numax,smax),box_state(smax)
-     &         ,ee_moltyp(smax),um_markov(smax,smax),ee_prob(smax)
-     &         ,rminee(nntype*nntype)
+     & ,ee_moltyp(smax),um_markov(smax,smax),ee_prob(smax)
+     & ,rminee(nntype*nntype)
 
 !      common /expepar/ rminee,ee_qqu,psi,wee_ratio,lmstate,leemove
 !     &      ,fmstate,sstate1,sstate2,mstate,nstate,ee_moltyp,box_state
@@ -1012,10 +1033,11 @@
 
       integer(KIND=int)::nener,nprop,blockm
       real(KIND=double_precision)::naccu,nccold,accum,bccold,aver,baver
-     &     ,acsvol,acnvol,acshmat,acnhmat
+     & ,acsvol,acnvol,acshmat,acnhmat
 ! ** Neeraj adding for solubility parameter and heat of vaporization
 
-      real(KIND=double_precision)::naccu1,nccold1,accum1,bccold1,aver1,baver1
+      real(KIND=double_precision)::naccu1,nccold1,accum1,bccold1,aver1
+     & ,baver1
       integer(KIND=int)::nprop1
       parameter (nener=18,nprop=4+nener+(4*ntmax)+3,blockm=100)
       parameter (nprop1=11)
@@ -1049,17 +1071,15 @@
 
       logical::lcrank
 
-      real(KIND=double_precision)::xx,yy,zz,xvec,yvec,zvec,distij,vtgtr,vtbend
-     &   ,bsum_tor,vtvib
+      real(KIND=double_precision)::xx,yy,zz,xvec,yvec,zvec,distij,vtgtr
+     & ,vtbend,bsum_tor,vtvib
 
-      dimension iend(numax),ipast(numax,numax)
-     &   ,pastnum(numax),fclose(numax,numax)
-     &   ,fcount(numax),iwbef(numax),ibef(numax,numax)
-     &   ,befnum(numax),xx(numax),yy(numax),zz(numax)
-     &   ,xvec(numax,numax),yvec(numax,numax)
-     &   ,zvec(numax,numax),distij(numax,numax)
-     &   ,nextnum(numax),inext(numax,numax),vtvib(nchmax)
-     &   ,vtgtr(nchmax),vtbend(nchmax),bsum_tor(nchmax)
+      dimension iend(numax),ipast(numax,numax) ,pastnum(numax)
+     & ,fclose(numax,numax) ,fcount(numax),iwbef(numax),ibef(numax
+     & ,numax) ,befnum(numax),xx(numax),yy(numax),zz(numax) ,xvec(numax
+     & ,numax),yvec(numax,numax) ,zvec(numax,numax),distij(numax,numax)
+     & ,nextnum(numax),inext(numax,numax),vtvib(nchmax) ,vtgtr(nchmax)
+     & ,vtbend(nchmax),bsum_tor(nchmax)
 
 !      common /fecba/ iend,ipast,endnum,pastnum,fclose,fcount
 !     &   ,befnum,wbefnum,iwbef,ibef,nextnum
@@ -1076,7 +1096,8 @@
 
       integer(KIND=int)::natom
       parameter (natom = 3)
-      real(KIND=double_precision)::aexsix,bexsix,cexsix,sexsix,consp,consu
+      real(KIND=double_precision)::aexsix,bexsix,cexsix,sexsix,consp
+     & ,consu
       dimension aexsix(natom),bexsix(natom),cexsix(natom)
      &   ,sexsix(natom),consu(natom),consp(natom)
 
@@ -1086,7 +1107,8 @@
 
       integer(KIND=int)::natomtyp
       parameter (natomtyp = 3)
-      real(KIND=double_precision)::epsimmff,sigimmff,smmff,sigisq,ammff,nmmff
+      real(KIND=double_precision)::epsimmff,sigimmff,smmff,sigisq,ammff
+     & ,nmmff
       real(KIND=double_precision)::gmmff,alphammff,coru_cons,corp_cons
       dimension epsimmff(natomtyp),sigimmff(natomtyp),smmff(natomtyp)
       dimension ammff(natomtyp),nmmff(natomtyp),gmmff(natomtyp)
@@ -1141,7 +1163,8 @@
 
 ! EXPAND.INC
 
-      real(KIND=double_precision)::epsil(ntmax,numax,100),sigm(ntmax,numax,100)
+      real(KIND=double_precision)::epsil(ntmax,numax,100),sigm(ntmax
+     & ,numax,100)
       real(KIND=double_precision)::qcharge(ntmax,numax,100)
 !      common /expand2/ epsil,sigm,qcharge
 
@@ -1153,7 +1176,8 @@
 ! TORSION.INC
 
 	integer(KIND=int)::splpnts(10),nttor
-	real(KIND=double_precision)::deg(1500,2),tabtorso(1500,2),torderiv2(1500,2)
+	real(KIND=double_precision)::deg(1500,2),tabtorso(1500,2)
+     &   ,torderiv2(1500,2)
 	real(KIND=double_precision)::tordif(1500,2)
 
 !	common /torsion/ deg,tabtorso,torderiv2,tordif,splpnts,nttor
@@ -1173,12 +1197,12 @@
 
       integer(KIND=int)::ntormax
       parameter (ntormax=700)
-      real(KIND=double_precision)::vtt0(ntormax),vtt1(ntormax),vtt2(ntormax),vtt3(ntormax)
-     & ,vtt4(ntormax),vtt5(ntormax),vtt6(ntormax),vtt7(ntormax)
-     & ,vtt8(ntormax),vtt9(ntormax)
+      real(KIND=double_precision)::vtt0(ntormax),vtt1(ntormax)
+     & ,vtt2(ntormax),vtt3(ntormax),vtt4(ntormax),vtt5(ntormax)
+     & ,vtt6(ntormax),vtt7(ntormax),vtt8(ntormax),vtt9(ntormax)
 !      common /contor/ vtt0,vtt1,vtt2,
 !     &		      vtt3,vtt4,vtt5,
 !     &		      vtt6,vtt7,vtt8,
 !     &                vtt9
 
-      end module grid
+      end module global_data
