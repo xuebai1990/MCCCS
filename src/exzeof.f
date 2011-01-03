@@ -21,18 +21,68 @@
 !$$$      include 'ewaldsum.inc'
 !$$$      include 'mpif.h'
 !$$$      include 'mpi.inc'
+      integer(KIND=normal_int)::izeo,idi,idj,ntij,layer,ii,jj,kk,ibox=1
       real(KIND=double_precision)::exzeof,xi,yi,zi,r2,rcutsq,xr,yr,zr
      & ,r2i,r6,vljnew,vqnew,overflow=1.0d8,rminsq,r,recipzeo,erfunc,i,j
      & ,k,sx,sy,sz
-      integer(KIND=normal_int)::izeo,idi,idj,ntij,layer,ii,jj,kk,ibox=1
-
-!     calculate the Lennard-Jones interactions, include as many layers
-!     of neighboring unit cells as needed for the specified precision
 
       exzeof=0.
-      rminsq=rmin*rmin
+      rminsq=rmin*rmin/4.
       
-      if (ltailc.and.lij(idi)) then
+       if (idi.eq.0.or.(.not.ltailc.and.lij(idi)).or.
+     & (.not.lewald.and.lqchg(idi))) then
+         vljnew=0.
+         vqnew=0.
+         rcutsq = rcut(ibox)*rcut(ibox)
+         sx=dble(i)/nx
+         sy=dble(j)/ny
+         sz=dble(k)/nz
+         xi=sx*hmat(ibox,1)+sy*hmat(ibox,4)+sz*hmat(ibox,7)
+         yi=sy*hmat(ibox,5)+sz*hmat(ibox,8)
+         zi=sz*hmat(ibox,9)
+         do izeo=1,nzeo
+            idj=idzeo(izeo)
+            ntij = (idi - 1) * nntype + idj
+            xr=xi-zeox(izeo)
+            yr=yi-zeoy(izeo)
+            zr=zi-zeoz(izeo)
+            call mimage(xr,yr,zr,ibox)
+            r2=xr*xr+yr*yr+zr*zr
+            if (r2.le.rminsq) then
+               exzeof=overflow
+               return
+            end if
+            if (r2 .lt. rcutsq) then
+               if (idi.eq.0) then
+                  r=dsqrt(r2)
+                  vqnew=vqnew+qelect(idj)*erfunc(calp(ibox)*r)/r
+               else
+                  if (.not.lewald.and.lqchg(idi)) then
+                     r=dsqrt(r2)
+                     vqnew=vqnew+qelect(idi)*qelect(idj)/r
+                  end if
+                  if (.not.ltailc.and.lij(idi)) then
+                     r2i=sig2ij(ntij)/r2
+                     r6=r2i*r2i*r2i
+                     if (lshift) then     
+                        vljnew=vljnew+4.*(epsij(ntij)*(r6-1.0)*r6
+     &                   -ecut(ntij))
+                     else
+                        vljnew=vljnew+4.*epsij(ntij)*(r6-1.0)*r6
+                     end if               
+                  end if
+               end if
+            end if
+         end do
+
+         if (idi.eq.0) vqnew=vqnew+recipzeo(xi,yi,zi,1.)
+
+         exzeof=vljnew+vqnew*qqfact
+      end if
+
+! Calculate the Lennard-Jones interactions, include as many layers
+! of neighboring unit cells as needed for the specified precision
+      if (idi.ne.0.and.ltailc.and.lij(idi)) then
          vljnew=eps+1.
          layer=0
          do while (abs(vljnew).gt.eps)
@@ -86,57 +136,6 @@
             exzeof=exzeof+vljnew
             layer=layer+1
          end do
-      end if
-
-      if ((.not.ltailc.and.lij(idi)).or.(lqchg(idi))) then
-         vljnew=0.
-         vqnew=0.
-         rcutsq = rcut(ibox)*rcut(ibox)
-         sx=dble(i)/nx
-         sy=dble(j)/ny
-         sz=dble(k)/nz
-         xi=sx*hmat(ibox,1)+sy*hmat(ibox,4)+sz*hmat(ibox,7)
-         yi=sy*hmat(ibox,5)+sz*hmat(ibox,8)
-         zi=sz*hmat(ibox,9)
-         do izeo=1,nzeo
-            idj=idzeo(izeo)
-            ntij = (idi - 1) * nntype + idj
-            xr=xi-zeox(izeo)
-            yr=yi-zeoy(izeo)
-            zr=zi-zeoz(izeo)
-            call mimage(xr,yr,zr,ibox)
-            r2=xr*xr+yr*yr+zr*zr
-            if (r2.le.rminsq) then
-               exzeof=overflow
-               return
-            end if
-            if (r2 .lt. rcutsq) then
-               if (.not.ltailc.and.lij(idi)) then
-                  r2i=sig2ij(ntij)/r2
-                  r6=r2i*r2i*r2i
-                  if (lshift) then     
-                     vljnew=vljnew+4.*(epsij(ntij)*(r6-1.0)*r6
-     &                    -ecut(ntij))
-                  else
-                     vljnew=vljnew+4.*epsij(ntij)*(r6-1.0)*r6
-                  end if               
-               end if
-               if (lqchg(idi)) then
-                  r=dsqrt(r2)
-                  if (lewald) then
-                     vqnew=vqnew+qelect(idi)*qelect(idj)
-     &                    *erfunc(calp(ibox)*r)/r
-                  else
-                     vqnew=vqnew+qelect(idi)*qelect(idj)/r
-                  end if
-               end if
-            end if
-         end do
-
-         if (lqchg(idi).and.lewald) vqnew=vqnew+recipzeo(xi,yi,zi
-     &        ,qelect(idi))
-
-         exzeof=exzeof+vljnew+vqnew*qqfact
       end if
 
       return

@@ -626,7 +626,7 @@
       aben = 0.0d0
       ator = 0.0d0
 
-      do 200 n = 1, nn
+      do n = 1, nn
 
          imolty = moltyp(n)
 !         write(iou,*) 'n',n,'   imolty',imolty
@@ -643,8 +643,9 @@
                ryui=ryu(n,ii)
                rzui=rzu(n,ii)
 
-               if ( n .eq. 1 .or. m .eq. 1 )
-     &              write(iou,1002) n,ii,rxui,ryui,rzui,nboxi(n)
+               if ( n .eq. 1 .or. m .eq. 1 ) write(iou,"
+     &          ('coord. unit:   ',2i4,3f9.3,i6)") n,ii,rxui,ryui,rzui
+     &          ,nboxi(n)
                do iivib = 1, invib(1,ii)
                   jj = ijvib(1,ii,iivib)
                   rxvec(ii,jj) = rxu(n,jj) - rxui
@@ -667,7 +668,8 @@
 ! - vibrations -
                do iivib = 1, invib(1,j)
                   jj = ijvib(1,j,iivib)
-                  if ( n .eq. 1 ) write(iou,1003) j,jj,distanceij(j,jj)
+                  if ( n .eq. 1 ) write(iou,"('bond with units:',2i3
+     &             ,'   length:',f9.4)") j,jj,distanceij(j,jj)
                end do
 
 ! - bending -
@@ -686,8 +688,9 @@
 !                  write(iou,*) 'theta',theta,'vbend',vbend
 !                  write(iou,*) 'brben',brben(it),'brbenk',brbenk(it)
 !                  end if
-                  if ( n .eq. 1 ) write(iou,1004) j,ip1,ip2,it,
-     &                 theta*raddeg,vbend
+                  if ( n .eq. 1 ) write(iou,"('bend with units:',3i3
+     &             ,'   type:',i3,'   angle:',f9.4,f9.2)") j,ip1,ip2,it
+     &             ,theta*raddeg,vbend
                end do
 
 ! - torsions -
@@ -743,15 +746,16 @@
 
                   ator = ator + vtg
 !                  if ( n .eq. 1 ) write(iou,*) 'thetac',thetac,'vtg',vtg
-                  if ( n .eq. 1 ) write(iou,1005) j,ip1,ip2,ip3,it,
-     &                 dacos(thetac)*raddeg,vtg
+                  if ( n .eq. 1 ) write(iou,"('tors with units:',4i3
+     &             ,'   type:',i3,'   angle:',f9.4,f9.2)") j,ip1,ip2,ip3
+     &             ,it,dacos(thetac)*raddeg,vtg
                end do
             end do
 
          else
 ! ---                  
             ibuild = nugrow(imolty)
-            do 199 m = 1, ibuild
+            do m = 1, ibuild
 
                m1 = m - 1
                m2 = m - 2
@@ -777,17 +781,16 @@
                end if
 
 !               if ( n .eq. 1 .or. m .eq. 1 )
-!     &              write(iou,1001) n,m,rxu(n,m),ryu(n,m),rzu(n,m),
+!     &              write(iou,'(2i4,5f9.3,i6)') n,m,rxu(n,m),ryu(n,m),rzu(n,m),
 !     &                            blen,bang,nboxi(n)
 
-!               write(iou,1001) n,m,rxu(n,m),ryu(n,m),rzu(n,m),
+!               write(iou,'(2i4,5f9.3,i6)') n,m,rxu(n,m),ryu(n,m),rzu(n,m),
 !     &                            blen,bang,nboxi(n)
 
- 199        continue
+            end do
 
          end if
-
- 200  continue
+      end do
 
       do i=1,nchain
          imolty = moltyp(i)
@@ -807,12 +810,6 @@
       if (myid.eq.0) then
          write(iou,*) 'aben',aben/2.0d0,'ator',ator/2.0d0
       end if
-
- 1001 format(2i4,5f9.3,i6)
- 1002 format('coord. unit:   ',2i4,3f9.3,i6)
- 1003 format('bond with units:',2i3,'   length:',f9.4)
- 1004 format('bend with units:',3i3,'   type:',i3,'   angle:',f9.4,f9.2)
- 1005 format('tors with units:',4i3,'   type:',i3,'   angle:',f9.4,f9.2)
 
       return
       end

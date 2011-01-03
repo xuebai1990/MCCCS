@@ -187,7 +187,7 @@ c only one processor at a time reads and writes data from files
       do i=1,numprocs
          if (myid.eq.i-1) then
             call readdat(lucall,ucheck,nvirial,starvir
-     &           ,stepvir,qelect)
+     &           ,stepvir)
          endif
          call MPI_BARRIER(MPI_COMM_WORLD,ierr)
       enddo
@@ -231,7 +231,7 @@ c only one processor at a time reads and writes data from files
       enth      = ' Enthalpy Inst. Press '
       enth1     = ' Enthalpy Ext.  Press '
 
-      fname = run_num
+!      fname = run_num
 !      write(6,*) 'fname ', fname
 ! --  SETTING UP ARRAYS  FOR ANALYSYS PURPOSE
 
@@ -265,15 +265,16 @@ c only one processor at a time reads and writes data from files
       if (lexpee.and.lmipsw)
      &     call cleanup('not for BOTH lexpee AND lmipsw')
       
-! - use internal read/write to get integer(KIND=normal_int)::number in character::format
-      write(ftemp,*) fname
-      read(ftemp,*) fname2
+! - use internal read/write to get integer number in character format
+!      write(ftemp,*) fname
+!      read(ftemp,*) fname2
 
 ! KM for MPI
 ! only processor 0 opens files     
       if (myid.eq.0) then 
-         file_cell =
-     &        'cell_param'//fname2(1:len_trim(fname2))//suffix//'.dat'
+!         file_cell =
+!     &        'cell_param'//fname2(1:len_trim(fname2))//suffix//'.dat'
+         write(file_cell,'("cell_param",I1.1,A,".dat")') run_num,suffix
          open(unit=13,file=file_cell, status='unknown')
          close(unit=13)
       end if
@@ -283,17 +284,23 @@ c only one processor at a time reads and writes data from files
 ! will need to check this file I/O if want to run grand canonical in parallel
       if(lgrand) then
          if (myid.eq.0) then
-            file_flt =
-     &           'nfl'//fname2(1:len_trim(fname2))//suffix//'.dat'
-            file_hist =
-     &           'his'//fname2(1:len_trim(fname2))//suffix//'.dat'
+!            file_flt =
+!     &           'nfl'//fname2(1:len_trim(fname2))//suffix//'.dat'
+!            file_hist =
+!     &           'his'//fname2(1:len_trim(fname2))//suffix//'.dat'
+            write(file_flt,'("nfl",I1.1,A,".dat")') run_num,suffix
+            write(file_hist,'("his",I1.1,A,".dat")') run_num,suffix
+
 
             do i=1,nmolty
-               write(ftemp,*) i
-               read(ftemp,*) fname3
-               file_ndis(i) = 'n'//fname3(1:len_trim(fname3))
-     &              //'dis'//fname2(1:len_trim(fname2)) 
-     &              //suffix//'.dat'
+!               write(ftemp,*) i
+!               read(ftemp,*) fname3
+!               file_ndis(i) = 'n'//fname3(1:len_trim(fname3))
+!     &              //'dis'//fname2(1:len_trim(fname2)) 
+!     &              //suffix//'.dat'
+               write(file_ndis(i),'("n",I2.2,"dis",I1.1,A,".dat")')
+     &          i,run_num,suffix
+
             end do
 
             open(unit=50, file = file_flt, status='unknown')  
@@ -1668,11 +1675,13 @@ c only one processor at a time reads and writes data from files
 
 ! ** write out the final configuration for each box, Added by Neeraj 06/26/2006 3M ***
          do ibox = 1,nbox
-            write(ftemp,*) ibox
-            read(ftemp,*) fname4
-            fileout = 'box'//fname4(1:len_trim(fname4))//'config'//
-     &           fname2(1:len_trim(fname2))
-     &           //suffix//'.xyz'
+!            write(ftemp,*) ibox
+!            read(ftemp,*) fname4
+!            fileout = 'box'//fname4(1:len_trim(fname4))//'config'//
+!     &           fname2(1:len_trim(fname2))
+!     &           //suffix//'.xyz'
+            write(fileout,'("box",I1.1,"config",I1.1,A,".xyz")') ibox
+     &       ,run_num,suffix
             open (unit=200+ibox,FILE=fileout,status="unknown")
             
             nummol = 0
@@ -1699,8 +1708,9 @@ c only one processor at a time reads and writes data from files
          
 ! ** write out the final configuration from the run ***
          
-         file_config = 'config'//fname2(1:len_trim(fname2))
-     &        //suffix//'.dat'
+!         file_config = 'config'//fname2(1:len_trim(fname2))
+!     &        //suffix//'.dat'
+         write(file_config,'("config",I1.1,A,".dat")') run_num,suffix
          open(8, file=file_config)
          
          write(8,*) nend

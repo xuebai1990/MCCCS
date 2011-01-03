@@ -81,7 +81,7 @@
       real(KIND=double_precision)::pie2,rcnnsq,umatch,aspecd,bspecd,dum
      & ,pm,pcumu
       logical::lnrtab,lucall,lpolar,lqqelect,lee,lratfix,lreadq
-      logical:: linit, lecho, lmixlb, lmixjo, lhere,lsetup,lsolute
+      logical::linit, lecho, lmixlb, lmixjo, lhere,lsetup,lsolute
       logical::lprint,lverbose,lxyz,lfound,ltab
 
       dimension lratfix(ntmax)
@@ -172,10 +172,7 @@
       do i=1,10
          rtest(i) = random()
       end do
-      write(71,1000) (rtest(i),i=1,5)
-      write(71,1000) (rtest(i),i=6,10)
- 1000 format(2x,5f10.6)
-
+      write(71,'(2(5(f10.6,2x),/))') (rtest(i),i=1,10)
       close(71)
 
 ! -------------------------------------------------------------------
@@ -189,7 +186,6 @@
       read(4,*) 
       read(4,*) L_sub,N_sub,N_box2sub,N_moltyp2sub
 
-
 ! *** read echoing and long output flags
       read(4,*)
       read(4,*) lecho,lverbose
@@ -202,7 +198,9 @@
       read(4,*) Num_cell_a,Num_cell_b,Num_cell_c 
 ! - read run information
       read(4,*) 
-      read(4,*) run_num, suffix	
+      read(4,*) run_num
+      suffix='a'
+!      read(4,*) suffix	
       read(4,*)
       read(4,*) nstep, lstop, lpresim, iupdatefix
 ! - read torsion, decide whether to use torsion in function form or Table
@@ -215,14 +213,19 @@
 
 ! -- generate output file name
 ! - create output file name
-      fname = run_num
+!      fname = run_num
 
-! - use internal read/write to get integer(KIND=normal_int)::number in character::format
-      write(ftemp,*) fname
-      read(ftemp,*) fname2
-      file_run = 'run'//fname2(1:len_trim(fname2))//suffix//'.dat' 
-      file_movie = 'movie'//fname2(1:len_trim(fname2))//suffix//'.dat' 
-      file_dipole='dipole'//fname2(1:len_trim(fname2))//suffix//'.dat'
+! - use internal read/write to get integer number in character format
+!      write(ftemp,*) fname
+!      read(ftemp,*) fname2
+!      file_run = 'run'//fname2(1:len_trim(fname2))//suffix//'.dat' 
+!      file_movie = 'movie'//fname2(1:len_trim(fname2))//suffix//'.dat' 
+!      file_dipole='dipole'//fname2(1:len_trim(fname2))//suffix//'.dat'
+      write(file_run,'("run",I1.1,A,".dat")') run_num,suffix
+      write(file_movie,'("movie",I1.1,A,".dat")') run_num,suffix
+      write(file_dipole,'("dipole",I1.1,A,".dat")') run_num,suffix
+      write(iou,'(3(A,1X))') trim(file_run),trim(file_movie)
+     & ,trim(file_dipole)
 
 ! KM ldielect writes to fort.27      
 !      if (ldielect) then
@@ -239,6 +242,7 @@
       if ( lecho.and.myid.eq.0) then
          if (lverbose) then
             write(iou,*) 'Number of processors: ', numprocs
+            write(iou,*) 'Random number seed: ',seed
             write(iou,*) 'L_Coul_CBMC:',L_Coul_CBMC 
             write(iou,*) 'Number of unit cells in a dir = ', Num_cell_a
             write(iou,*) 'Number of unit cells in b dir = ', Num_cell_b
@@ -267,8 +271,6 @@
          end if
       end if
 
-      
-      
       read(4,*)
       read(4,*) nbox
       if ( lecho.and.myid.eq.0 ) write(iou,*) 'number of boxes 
@@ -298,7 +300,7 @@
      &           Elect_field
          end if
       end if
- 
+
       do ibox = 1,nbox
          express(ibox)  = express(ibox)*MPa2SimUnits
       end do
@@ -331,22 +333,23 @@
       beta = 1.0d0 / temp
       fqbeta = 1.0d0 / fqtemp
  
-! -------------------------------------------------------------------
-
+! ------------------------------------------------------------------
       read(4,*)
       read(4,*) iprint, imv, iratio, iblock, idiele, L_movie_xyz,
      & iheatcapacity
 
       if (L_movie_xyz) then
         do ibox = 1,nbox
-          write(ftemp,*) ibox
-          read(ftemp,*) fname4
-          fileout = 'box'//fname4(1:len_trim(fname4))//'movie'//
-     &               fname2(1:len_trim(fname2))
-     &                         //suffix//'.xyz'
-	if (myid.eq.0) then
-          open (unit=210+ibox,FILE=fileout,status='unknown')
-        end if
+!          write(ftemp,*) ibox
+!          read(ftemp,*) fname4
+!          fileout = 'box'//fname4(1:len_trim(fname4))//'movie'//
+!     &               fname2(1:len_trim(fname2))
+!     &                         //suffix//'.xyz'
+           write(fileout,'("box",I1.1,"movie",I1.1,A,".xyz")') ibox
+     &      ,run_num,suffix
+           if (myid.eq.0) then
+              open (unit=210+ibox,FILE=fileout,status='unknown')
+           end if
         end do
       end if
 
@@ -381,9 +384,9 @@
       end if
       
 ! - create output file name
-      fname = run_num
+!      fname = run_num
 
-! - use internal read/write to get integer(KIND=normal_int)::number in character::format
+! - use internal read/write to get integer number in character format
 !      write(ftemp,*) fname
 !      read(ftemp,*) fname2
 !      file_run = 'run'//fname2(1:len_trim(fname2))//suffix//'.dat' 
@@ -398,17 +401,18 @@
       end if
 
 ! - read system information
-
       do i = 1,nbox
          read(4,*)
          read(4,*) boxlx(i),boxly(i),boxlz(i),lsolid(i),lrect(i),
      &        kalp(i),rcut(i),rcutnn(i)
+         write(iou,*) 'BP0'
          if (i.eq.1 .and. lexzeo) then
 ! === load positions of zeolite atoms
             call zeocoord()
             if (myid.eq.0) write(iou,*) ' note zeolite determines 
      &the box size !'
          end if
+         write(iou,*) 'BP1'
 
          if ( lecho.and.myid.eq.0 ) then
             if (lverbose) then
@@ -454,6 +458,7 @@
             write(iou,*) nchain, nmolty
          end if
       end if
+      write(iou,*) 'BP2'
       read(4,*)
       read(4,*) (temtyp(i),i=1,nmolty)
       if ( lecho.and.myid.eq.0 ) then
@@ -528,6 +533,7 @@
 ! --- read special combining rule information
       read(4,*)
       read(4,*) nijspecial
+      write(iou,*) 'BP3'
       if (lecho.and.myid.eq.0) then
          if (lverbose) then
             write(iou,*) 'number of special combining parameters:',
@@ -840,10 +846,10 @@
 !     &                 itvib(imol,i,j)
                   write(iou,*) '      bead',i,' bonded to bead',
      &                 ijvib(imol,i,j)
-                  write(iou,1013) '          bond type:',
-     &                 itvib(imol,i,j),' bond length:',
-     &                 brvib(itvib(imol,i,j)),' k/2:',
-     &                 brvibk(itvib(imol,i,j))
+
+      write(iou,'(a20,i3,a13,f9.3,a5,f9.1)') '          bond type:',
+     & itvib(imol,i,j),' bond length:', brvib(itvib(imol,i,j)),' k/2:',
+     & brvibk(itvib(imol,i,j))
                end if
             end do
 ! - bond bending -
@@ -889,13 +895,13 @@
 !                  write(iou,*) '      bead',i, ' bending interaction',
 !     &                 ' through',ijben2(imol,i,j),' with bead',
 !     &                 ijben3(imol,i,j),' of bend type:',itben(imol,i,j)
-                  write(iou,1017) '      bead',i, ' bending interaction'
-     &                 ,' through',ijben2(imol,i,j),' with bead',
-     &                 ijben3(imol,i,j)
-                  write(iou,1013) '          bend type:',itben(imol,i,j)
-     &                 ,' bend angle :',
-     &                 brben(itben(imol,i,j))*180.0d0/onepi,
-     &                 ' k/2:',brbenk(itben(imol,i,j))
+                  write(iou,'(1x,a10,i4,a20,a8,i4,a10,i4)') '      bead'
+     &             ,i, ' bending interaction',' through',ijben2(imol,i,j
+     &             ),' with bead',ijben3(imol,i,j)
+                  write(iou,'(a20,i3,a13,f9.3,a5,f9.1)')
+     &             '          bend type:',itben(imol,i,j)
+     &             ,' bend angle :',brben(itben(imol,i,j))*180.0d0/onepi
+     &             ,' k/2:',brbenk(itben(imol,i,j))
                end if
             end do
 ! - bond torsion -
@@ -930,10 +936,11 @@
                end if
 
                if (lverbose.and.myid.eq.0) then
-                  write(iou,1018) '      bead',i, ' torsional '
-     &                 ,'interaction through',ijtor2(imol,i,j),' and',
-     &                 ijtor3(imol,i,j),' with bead',ijtor4(imol,i,j),
-     &                 ' of torsional type:',ittor(imol,i,j)
+                  write(iou,'(1x,a10,i3,a22,a8,i3,a4,i3,a10,i3,a19,i4)')
+     &             '      bead',i, ' torsional ','interaction through'
+     &             ,ijtor2(imol,i,j),' and',ijtor3(imol,i,j)
+     &             ,' with bead',ijtor4(imol,i,j),' of torsional type:'
+     &             ,ittor(imol,i,j)
                end if
             end do
          end do
@@ -1217,8 +1224,8 @@
              i=i+1
              goto 14
  15          bendsplits(tbend)=i-1
-             if (myid.eq.0) write(iou,*) 'using linear interpolation for 
-     &            1-3 nonbonded bending'
+             if (myid.eq.0) write(iou,*)
+     &        'using linear interpolation for1-3 nonbonded bending'
              do i=1,bendsplits(tbend)-1
                 benddiff(i,tbend)=tabbend(i+1,tbend)-tabbend(i,tbend)
              end do
@@ -1246,8 +1253,8 @@
              i=i+1
              goto 16
  17          vdWsplits(iivdW,jjvdW)=i-1
-             if (myid.eq.0) write(iou,*) 'using linear interpolation for nonbonded 
-     &            van der Waals interactions'
+             if (myid.eq.0) write(iou,*) 'using linear interpolation
+     & for nonbonded van der Waals interactions'
              do i=1,vdWsplits(iivdW,jjvdW)-1
                 vdWdiff(i,iivdW,jjvdW)=
      &               tabvdW(i+1,iivdW,jjvdW)-
@@ -1366,8 +1373,9 @@
 
       if(lecho.and.myid.eq.0) then
          if(lverbose) then
-           write(iou,1019) 'initial maximum displacements for atoms:',
-     &          Armtrax, Armtray, Armtraz
+            write(iou,'(a41,f8.4,f8.4,f8.4)')
+     &       'initial maximum displacements for atoms:',Armtrax, Armtray
+     &       , Armtraz
          else
            write(iou,*) Armtrax, Armtray, Armtraz
          end if
@@ -1386,8 +1394,9 @@
       end do
       if ( lecho.and.myid.eq.0 ) then
          if (lverbose) then
-            write(iou,1019) ' initial maximum x, y and z displacement:',
-     &           rmtrax(1,1),rmtray(1,1),rmtraz(1,1)
+            write(iou,'(a41,f8.4,f8.4,f8.4)')
+     &       ' initial maximum x, y and z displacement:',rmtrax(1,1)
+     &       ,rmtray(1,1),rmtraz(1,1)
          else 
             write(iou,*) rmtrax(1,1), rmtray(1,1), rmtraz(1,1)
          end if
@@ -1405,8 +1414,9 @@
       end do
       if ( lecho.and.myid.eq.0 ) then
          if (lverbose) then
-            write(iou,1019) ' initial maximum x, y and z rotation:    ',
-     &           rmrotx(1,1),rmroty(1,1),rmrotz(1,1)
+            write(iou,'(a41,f8.4,f8.4,f8.4)')
+     &       ' initial maximum x, y and z rotation:    ',rmrotx(1,1)
+     &       ,rmroty(1,1),rmrotz(1,1)
          else 
             write(iou,*) rmrotx(1,1), rmroty(1,1), rmrotz(1,1)
          end if
@@ -1463,8 +1473,9 @@
      &        zshift(i),dshift(i),nchoiq(i)
          if ( lecho.and.myid.eq.0 ) then
             if (lverbose) then
-               write(iou,1020) '    initial number of chains in x, y',
-     &              ' and z directions:',inix(i),iniy(i),iniz(i)
+               write(iou,'(a36,a18,3i5)')
+     &          '    initial number of chains in x, y'
+     &          ,' and z directions:',inix(i),iniy(i),iniz(i)
                write(iou,*) '   initial rotational displacement:',
      &              inirot(i)
                write(iou,*) '   inimix:',inimix(i)
@@ -1700,8 +1711,9 @@
          if (lverbose) then
             write(iou,*) 'pmswap:',pmswap
             do i = 1,nmolty
-               write(iou,1021) '   swap probability for molecule type '
-     &              ,'        ',i,' (pmswmt):',pmswmt(i)
+               write(iou,'(1x,a41,a5,i4,a10,f8.4)')
+     &          '   swap probability for molecule type ','
+     &          ',i ,' (pmswmt):',pmswmt(i)
             end do
          else 
             write(iou,*) 'pmswap',pmswap,(pmswmt(i),i=1,nmolty)
@@ -1746,8 +1758,9 @@
          if (lverbose) then
             write(iou,*) 'pmcb:',pmcb
             do i = 1,nmolty
-               write(iou,1021) '   CBMC probability for molecule type '
-     &              ,'        ',i,' (pmcbmt):',pmcbmt(i)
+               write(iou,'(1x,a41,a5,i4,a10,f8.4)')
+     &          '   CBMC probability for molecule type ','
+     &          ',i ,' (pmcbmt):',pmcbmt(i)
             end do
             do i = 1,nmolty
                write(iou,*) '   pmall for molecule type',i,':',pmall(i)
@@ -1762,8 +1775,9 @@
       if (lecho.and.myid.eq.0) then
          if (lverbose) then
             do i = 1,nmolty
-               write(iou,1021) '   probability for SAFE-CBMC for '
-     &              ,'molecule type',i,'  (pmfix):',pmfix(i)
+               write(iou,'(1x,a41,a5,i4,a10,f8.4)')
+     &          '   probability for SAFE-CBMC for ','molecule typ
+     &          e',i ,'  (pmfix):',pmfix(i)
             end do
          else
             write(iou,*) (pmfix(i),i=1,nmolty)
@@ -1784,8 +1798,9 @@
          if (lverbose) then
             write(iou,*) 'pmflcq:',pmflcq
             do i = 1,nmolty
-               write(iou,1021) '   flcq probability for molecule type '
-     &              ,'        ',i,' (pmfqmt):',pmfqmt(i)
+               write(iou,'(1x,a41,a5,i4,a10,f8.4)')
+     &          '   flcq probability for molecule type ','
+     &          ',i ,' (pmfqmt):',pmfqmt(i)
             end do
          else 
             write(iou,*) 'pmflcq',pmflcq,(pmfqmt(i),i=1,nmolty)
@@ -1798,8 +1813,9 @@
          if (lverbose) then
             write(iou,*) 'pmexpc:',pmexpc
             do i = 1,nmolty
-               write(iou,1021) '   expanded ens. prob. for molecule '
-     &              ,'type      ',i,' (pmeemt):',pmeemt(i)
+               write(iou,'(1x,a41,a5,i4,a10,f8.4)')
+     &          '   expanded ens. prob. for molecule ','type
+     &          ',i ,' (pmeemt):',pmeemt(i)
             end do
          else 
             write(iou,*) 'pmexpc',pmexpc,(pmeemt(i),i=1,nmolty)
@@ -1818,8 +1834,9 @@
          if (lverbose) then
             write(iou,*) 'pmtra:',pmtra
             do i = 1,nmolty
-               write(iou,1021) '   translation probability for molecule'
-     &              ,'   type',i,' (pmtrmt):',pmtrmt(i)
+               write(iou,'(1x,a41,a5,i4,a10,f8.4)')
+     &          '   translation probability for molecule','   typ
+     &          e',i ,' (pmtrmt):',pmtrmt(i)
             end do
          else 
             write(iou,*) 'pmtra',pmtra,(pmtrmt(i),i=1,nmolty)
@@ -1833,8 +1850,9 @@
          if (lverbose) then
             write(iou,*) 'pmrot:',1.0d0
             do i = 1,nmolty
-               write(iou,1021) '   rotational probability for molecule'
-     &              ,'    type',i,' (pmromt):',pmromt(i)
+               write(iou,'(1x,a41,a5,i4,a10,f8.4)')
+     &          '   rotational probability for molecule','    typ
+     &          e',i ,' (pmromt):',pmromt(i)
             end do
          else 
             write(iou,*) (pmromt(i),i=1,nmolty)
@@ -2467,10 +2485,10 @@
                if (myid.eq.0) write(iou,*)'box      #',im
                do imol = 1,nmolty
                   write(iou,*) 'molecule type',imol
-                  write(iou,1101) rmtrax(imol,im), rmtray(imol,im)
-     &                 , rmtraz(imol,im)
-                  write(iou,1102) rmrotx(imol,im), rmroty(imol,im)
-     &                 , rmrotz(imol,im)
+                  write(iou,"(' max trans. displacement: ',3f10.6)")
+     &             rmtrax(imol,im), rmtray(imol,im), rmtraz(imol,im)
+                  write(iou,"(' max rot. displacement: ',3f10.6)")
+     &             rmrotx(imol,im), rmroty(imol,im), rmrotz(imol,im)
                end do
             end do
          end if
@@ -2489,7 +2507,8 @@
 !         if ( lgibbs .or. lgrand .or. lnpt ) then
          read (77,*) (rmvol(ibox), ibox = 1,nbox)
          if (myid.eq.0) then
-            write(iou,1103) (rmvol(ibox), ibox = 1,nbox)
+            write(iou,"(' max volume displacement:        ',3e12.4)")
+     &       (rmvol(ibox), ibox = 1,nbox)
             write(iou,*)
             write(iou,*) 
          end if
@@ -2508,7 +2527,11 @@
             
             do ibox = 1,nbox
                if (ibox.eq.1.and.lexzeo) then
-                  read(77,*) dum,dum,dum
+                  if (lsolid(ibox) .and. .not. lrect(ibox)) then
+                     read(77,*) dum,dum,dum,dum,dum,dum,dum,dum,dum
+                  else
+                     read(77,*) dum,dum,dum
+                  end if
                else if (lsolid(ibox) .and. .not. lrect(ibox)) then
                   
                   read(77,*) (hmat(ibox,j),j=1,9)
@@ -2525,8 +2548,9 @@
                   
                   if (myid.eq.0) then
                      write(iou,*)    
-                     write(iou,1106) ibox,min_width(ibox,1),min_width
-     &                    (ibox,2),min_width(ibox,3)
+                     write(iou,"(' width of  box ',i1,':',3f12.6)") ibox
+     &                ,min_width(ibox,1),min_width(ibox,2)
+     &                ,min_width(ibox,3)
                   end if
 
                   w(1) = min_width(ibox,1)
@@ -2559,7 +2583,8 @@
                      write(iou,'("cell angle gamma:",2x,f12.3)')
      &                    cell_ang(ibox,3)*180.0d0/onepi
                    
-!                     write(iou,1105) ibox,cell_ang(ibox,1)*180.0d0/onepi,
+!                     write(iou,"(' angle of  box ',i1,'  :  ','   alpha:   ',f12.6,' 
+!     &  beta: ', f12.6, '    gamma:   ',f12.6)") ibox,cell_ang(ibox,1)*180.0d0/onepi,
 !     &                cell_ang(ibox,2)*180.0d0/onepi,cell_ang(ibox,3)
 !     &                *180/onepi     
                   end if
@@ -2568,8 +2593,9 @@
                   if (myid.eq.0) then
                      write(iou,*)
                      write(iou,*) 
-                     write(iou,1104) ibox,
-     &                    boxlx(ibox),boxly(ibox),boxlz(ibox)
+                     write(iou,"(' dimension box ',i1,'  :','  a:
+     &                ',f12.6,'   b:   ',f12.6,'   c   :  ' ,f12.6)")
+     &                ibox,boxlx(ibox),boxly(ibox),boxlz(ibox)
                   end if
                   do i = 1, nbox
                      if( (rcut(i)/boxlx(i) .gt. 0.5d0).or.
@@ -3018,9 +3044,9 @@
             end if
             do i = 1,nunit(imol)
                do j = 1, invib(imol,i)
-                  write(iou,1014) i,ijvib(imol,i,j),ntype(imol,i),
-     &                 ntype(imol,ijvib(imol,i,j)),
-     &                 brvib(itvib(imol,i,j)),brvibk(itvib(imol,i,j))
+                  write(iou,'(i5,i4,i7,i7,f13.4,f14.1)') i,ijvib(imol,i
+     &             ,j),ntype(imol,i),ntype(imol,ijvib(imol,i,j))
+     &             ,brvib(itvib(imol,i,j)),brvibk(itvib(imol,i,j))
                end do
             end do
 
@@ -3031,12 +3057,11 @@
             end if
             do i = 1,nunit(imol)
                do j = 1,inben(imol,i)
-                  write(iou,1015) i,ijben2(imol,i,j),
-     &                 ijben3(imol,i,j),ntype(imol,i),
-     &                 ntype(imol,ijben2(imol,i,j)),
-     &                 ntype(imol,ijben3(imol,i,j)),
-     &                 brben(itben(imol,i,j))*180.0d0/onepi,
-     &                 brbenk(itben(imol,i,j))
+                  write(iou,'(i5,i4,i4,i7,i7,i7,f12.2,f12.1)') i
+     &             ,ijben2(imol,i,j),ijben3(imol,i,j),ntype(imol,i)
+     &             ,ntype(imol,ijben2(imol,i,j)),ntype(imol,ijben3(imol
+     &             ,i,j)),brben(itben(imol,i,j))*180.0d0/onepi
+     &             ,brbenk(itben(imol,i,j))
                end do
             end do
 
@@ -3048,12 +3073,11 @@
 
             do i = 1,nunit(imol)
                do j = 1, intor(imol,i)
-                  write(iou,1016) i,ijtor2(imol,i,j),ijtor3(imol,i,j),
-     &                 ijtor4(imol,i,j),ntype(imol,i),
-     &                 ntype(imol,ijtor2(imol,i,j)),
-     &                 ntype(imol,ijtor3(imol,i,j)),
-     &                 ntype(imol,ijtor4(imol,i,j)),
-     &                 ittor(imol,i,j)
+                  write(iou,'(i5,i4,i4,i4,i8,i7,i7,i7,i14)') i
+     &             ,ijtor2(imol,i,j),ijtor3(imol,i,j),ijtor4(imol,i,j)
+     &             ,ntype(imol,i),ntype(imol,ijtor2(imol,i,j))
+     &             ,ntype(imol,ijtor3(imol,i,j)),ntype(imol,ijtor4(imol
+     &             ,i,j)),ittor(imol,i,j)
                end do
             end do
 
@@ -3183,27 +3207,6 @@
          end if
       end do
  
- 1012 format(3(1x,f10.6),2i5)
- 1013 format(a20,i3,a13,f9.3,a5,f9.1)
- 1014 format(i5,i4,i7,i7,f13.4,f14.1)
- 1015 format(i5,i4,i4,i7,i7,i7,f12.2,f12.1)
- 1016 format(i5,i4,i4,i4,i8,i7,i7,i7,i14)
- 1017 format(1x,a10,i4,a20,a8,i4,a10,i4)
- 1018 format(1x,a10,i3,a22,a8,i3,a4,i3,a10,i3,a19,i4)
- 1019 format(a41,f8.4,f8.4,f8.4)
- 1020 format(a36,a18,i5,i5,i5)
- 1021 format(1x,a41,a5,i4,a10,f8.4)
-      
- 1101 format(' max trans. displacement:        ',3f10.6)
- 1102 format(' max rot. displacement:          ',3f10.6)
- 1103 format(' max volume displacement:        ',3e12.4)
- 1104 format(' dimension box ',i1,'  :','  a:   ',f12.6,'   b:   ',f12.6
-     & ,'   c   :  ' ,f12.6)
- 1105 format(' angle of  box ',i1,'  :  ','   alpha:   ',f12.6,' 
-     &  beta: ', f12.6, '    gamma:   ',f12.6)
- 1106 format(' width of  box ',i1,':',3f12.6)
-
-
       return
       end
 

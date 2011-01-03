@@ -45,17 +45,22 @@
 
 ! Write epsilons and sigma's:
 
-      write(16,100)
+      write(16,"(/,' FORCE FIELD DEFINITION:',/,
+     & ' ------------------------------------------------',/
+     & ,' Lennard-Jones Parameters (K, Angstrom):')")
       jtype=idz
       do itype = 1,zntype
-         write(16,1001) itype,jtype,zeps(itype,jtype),
-     &                  itype,jtype,dsqrt(zsig2(itype,jtype))
+         write(16,"(  ' epsilon(',i2,',',i2,') = ',f6.1, ' K &  sigma
+     &    (',i2,',',i2,') = ',f6.1,' Angstrom')") itype,jtype,zeps(itype
+     &    ,jtype), itype,jtype,dsqrt(zsig2(itype,jtype))
       end do
  
 ! Force field cutoff radius rczeo for interactions between guests
 ! and zeolite atoms:
 
-      write(16,101) rczeo
+      write(16,"(/,' Force field cutoffs: rczeo = ',f6.1,/,
+     & '                      rcads = ',f6.1,' Angstrom',/,
+     & ' ------------------------------------------------',//)") rczeo
       do itype = 1,zntype
         zrc2(itype,idz)=rczeo**2
       end do
@@ -63,25 +68,16 @@
 ! === calculate cutt-off of the potential
 !
       if (lshift) then
-        write(iou,102)
+        write(iou,*) ' Value at cut-off distance '
         do itype = 1,zntype
           zencut(itype,idz)=4.*zeps(itype,idz)*
      &         ( (zsig2(itype,idz)/zrc2(itype,idz))**6
      &          -(zsig2(itype,idz)/zrc2(itype,idz))**3)
-          write(iou,103) itype,zencut(itype,idz)
+          write(iou,"('    interaction ',i3, '   : ',f8.2,'[K]')") itype
+     &     ,zencut(itype,idz)
         end do
       end if     
 
-  100 format(/,' FORCE FIELD DEFINITION:',/,
-     &         ' ------------------------------------------------')
-  101 format(/,' Force field cutoffs: rczeo = ',f6.1,/,
-     &         '                      rcads = ',f6.1,' Angstrom',/,
-     &         ' ------------------------------------------------',//)
- 1000 format(/,' Lennard-Jones Parameters (K, Angstrom):')
- 1001 format(  ' epsilon(',i2,',',i2,') = ',f6.1,
-     &         ' K &  sigma(',i2,',',i2,') = ',f6.1,' Angstrom')
- 102  format(' Value at cut-off distance ' )
- 103  format('    interaction ',i3, '   : ',f8.2,'[K]')        
       return
       end
 

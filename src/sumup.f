@@ -1070,7 +1070,7 @@
 !     &                        distanceij(ip1,j), ip1, j
                      end if
                      if ( ip1 .lt. j .and..not.L_vib_table) vvib = vvib
-     &                    + brvibk(it) * (distanceij(ip1,j) - brvib(it))**2
+     &                + brvibk(it) * (distanceij(ip1,j) - brvib(it))**2
                   end do
                end do
 !     end if

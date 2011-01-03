@@ -49,9 +49,7 @@
 !     & ,ntdifmx=8)
 
       integer(KIND=normal_int)::bend,iv,iuvib,iuv,iutest
-      real(KIND=double_precision)::onepi,
-     &    value,total,degree
-      parameter (onepi = 3.141592654d0)
+      real(KIND=double_precision)::value,total,degree
       integer(KIND=normal_int)::torsion, tor_code,itor,iutor,patt,bthree
      &     ,decimal,power
       real(KIND=double_precision)::xcc,ycc,zcc,tcc,fplus,fminus
@@ -1226,12 +1224,11 @@
 
                       if ( aframe .gt. 0.5d0 ) then
 
-                         write(100+kk,50)0.0d0, 0.0d0,ii,beadtyp(xx)
-     &                        ,jj,beadtyp(yy) 
+                         write(100+kk,'(2f7.2,4i5)')0.0d0, 0.0d0,ii
+     &                    ,beadtyp(xx),jj,beadtyp(yy) 
 
-                         write(110+kk,50) 0.0d0,0.0d0,ii,beadtyp(xx)
-     &                     ,jj,beadtyp(yy) 
- 50                   format(2f7.2,4i5)
+                         write(110+kk,'(2f7.2,4i5)') 0.0d0,0.0d0,ii
+     &                    ,beadtyp(xx),jj,beadtyp(yy) 
                       do bin = 1,nbin
 
                             rxuij =  binstep*(dble(bin)-0.5d0)
@@ -1251,8 +1248,8 @@
 	              write(110+kk,*)
  
                       if (ntii .ne. ntjj) then
-                          write(110+kk,50) 0.0d0,0.0d0,jj,beadtyp(yy)
-     &                           ,ii,beadtyp(xx)
+                         write(110+kk,'(2f7.2,4i5)') 0.0d0,0.0d0,jj
+     &                    ,beadtyp(yy),ii,beadtyp(xx)
                           do bin = 1,nbin
                               rxuij =  binstep*(dble(bin)-0.5d0)
                               shell(binadj,bin,2) =
@@ -1290,9 +1287,8 @@
                aframe = nframe-comnone(kk,ntij)
 
                if ( aframe .gt. 0.5d0 ) then
-                  write(103+kk,51) 0.0d0,0.0d0,ii,jj
-                  write(113+kk,51) 0.0d0,0.0d0,ii,jj
- 51               format(2f7.2,2i5)
+                  write(103+kk,'(2f7.2,2i5)') 0.0d0,0.0d0,ii,jj
+                  write(113+kk,'(2f7.2,2i5)') 0.0d0,0.0d0,ii,jj
                   do bin = 1,nbin
                      rxuij =  binstep*(dble(bin)-0.5d0)
                      
@@ -1310,7 +1306,7 @@
                   write(113+kk,*)
                   
                   if(ntii.ne.ntjj) then  
-                    write(113+kk,51) 0.0d0,0.0d0,jj,ii
+                    write(113+kk,'(2f7.2,2i5)') 0.0d0,0.0d0,jj,ii
                     do bin = 1,nbin
                        rxuij =  binstep*(dble(bin)-0.5d0)
                        comshell(binadj,bin,2) =
@@ -1477,7 +1473,8 @@
          do kk  = 1,nbox
             do imolty = 1,nmolty
                write(130+kk,*) 'Moltype ',imolty
-               write(130+kk,41)
+               write(130+kk,"('Units',8x,'Frac g+',1x,'Frac g-',1x
+     &          ,'Frac t')")
                gaudef = g_plus(kk,imolty)+g_minus(kk,imolty)
        
                if((dint(trans(kk,imolty))+gaudef).ne.0) then
@@ -1487,8 +1484,8 @@
                   write(6,*) 'ratio not defined'
                end if
                
-               write(6,40)imolty,kk ,trans(kk,imolty),g_plus(kk,imolty)
-     &              ,g_minus(kk,imolty),ratio
+               write(6,'(i3,5x,i3,3(2x,e8.2),f8.4)')imolty,kk ,trans(kk
+     &          ,imolty),g_plus(kk,imolty),g_minus(kk,imolty),ratio
 
                do torsion = 1,tor_num(imolty)
                   total = bg_plus(kk,imolty,torsion) + 
@@ -1500,9 +1497,10 @@
                      fplus = bg_plus(kk,imolty,torsion)/total
                      fminus = bg_minus(kk,imolty,torsion)/total
                      ftrans = btrans(kk,imolty,torsion)/total
-                     write(130+kk,42) tor_1(imolty,torsion)
-     &                    ,tor_2(imolty,torsion),tor_3(imolty,torsion)
-     &                    ,tor_4(imolty,torsion),fplus,fminus,ftrans
+                     write(130+kk,'(4(i2,1x),1x,3(f5.3,3x))')
+     &                tor_1(imolty,torsion),tor_2(imolty,torsion)
+     &                ,tor_3(imolty,torsion),tor_4(imolty,torsion),fplus
+     &                ,fminus,ftrans
 
 !                    --- output the torsion probablility distributions
                      value = -180.0d0 + (0.5d0*tor_bin_size)
@@ -1521,9 +1519,6 @@
                end do
             end do
          end do
- 40      format(i3,5x,i3,3(2x,e8.2),f8.4)
- 41      format('Units',8x,'Frac g+',1x,'Frac g-',1x,'Frac t')
- 42      format(4(i2,1x),1x,3(f5.3,3x))
 
          close(131)
          close(132)
@@ -1596,10 +1591,9 @@
 !                           patt(dummy) = bthree-1
 !                        end do
 
-!                        write(124+kk,52) uu,
+!                        write(124+kk,'(i8,2x,f5.3,2x,20(i2,1x))') uu,
 !     &                       pattern(kk,imolty,uu)/psum
 !     &                       ,(patt(dummy),dummy=1,torsion)
-! 52                     format(i8,2x,f5.3,2x,20(i2,1x))
 !                     end if
 !                  end do 
 !               end if

@@ -54,7 +54,7 @@
          l = sz*ngrz
 
 ! ---    test if in the reasonable regime
-         exzeo=1.0d+6
+         exzeo=1.0d+7
          if ( egrid(j,k,l,igtype).gt.exzeo) return
 ! --     block m*m*m centered around: j,k,l
 ! ---  set up hulp array: (allow for going beyond unit cell
@@ -80,6 +80,7 @@
                   if (jp.lt.0)    jp=jp+ngrx
                   if (jp.ge.ngrx) jp=jp-ngrx
                   yjtmp(j0+mp)=egrid(jp,kp,lp,igtype)
+                  if (yjtmp(j0+mp).gt.exzeo) return
                end do
                call polint(xt,yjtmp,mt,xr,yktmp(k0+mp))
 	    end do

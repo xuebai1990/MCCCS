@@ -445,9 +445,9 @@
      &                          - (rzu(self,ifirst) - rzu(self,j))
                         end do
 
-                     end if      !nsampos.eq.3                                                       
-                  end if         !ifirst.lt.riutry...                                                
-               end if            !nsampos.lt.iunit                                                   
+                     end if      !nsampos.eq.3
+                  end if         !ifirst.lt.riutry
+               end if            !nsampos.lt.iunit
                call schedule(igrow,imolty,islen,ifirst,iprev,4)
 !cc---END JLR 11-24-09
             else
@@ -517,7 +517,7 @@
             if (lrigid(imolty)) then
 
                if(nsampos(iparty).ge.iunit) then
-                  !molecule is all there                                                      
+                  !molecule is all there
                   !don't regrow anything in rosenbluth  
                   icallrose = 4
                elseif( (nsampos(iparty).ge.3)      .or.

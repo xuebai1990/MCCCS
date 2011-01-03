@@ -91,9 +91,12 @@
          if(lwrite) then
 !            write(6,*) 'details:',ntang,' out of vthreebody',vthreea
 !            write(6,*) 'thetac',thetac,' gtheta',gtheta(ntang)
-               write(69,1201) 'vthree jik',j,i,k,vthreea
-              write(69,1202) 'ij',dxij(tri),dyij(tri),dzij(tri),dij(tri)
-              write(69,1202) 'ik',dxik(tri),dyik(tri),dzik(tri),dik(tri)
+            write(69,'(A11,I10,I10,I10,F15.6)') 'vthree jik',j,i,k
+     &       ,vthreea
+            write(69,'(A11,3F10.6,F25.6)') 'ij',dxij(tri),dyij(tri)
+     &       ,dzij(tri),dij(tri)
+            write(69,'(A11,3F10.6,F25.6)') 'ik',dxik(tri),dyik(tri)
+     &       ,dzik(tri),dik(tri)
 !               write(6,*) 'dij',dij(tri),' dik',dik(tri)
 !            write(6,*) 'g',g,' theta',p
 !            write(6,*)
@@ -111,10 +114,6 @@
       end do
       ntr = 0
 
- 1200 format(A9,I3,I3,I3,A7,F7.3,A7,F7.3,A7,F7.3,A7,I2,I2,I2,A1,L1,A1,L1
-     &     ,A1,L1)
- 1201 format(A11,I10,I10,I10,F15.6)
- 1202 format(A11,3F10.6,F25.6)
 !      write(6,*) 'end Vthreebody'
 
       return
@@ -425,7 +424,8 @@
                if(lwrite) then
 !                  write(6,*) 'details:',lupdate,' triad_en 2'
 !$$$                  write(6,*) 'thetac',thetac,' ntang',ntang
-                  write(6,1201) 'vthree ijm',i,atomj,atomm,vthreea
+                  write(6,'(A13,I5,I5,I5,F15.7)') 'vthree ijm',i,atomj
+     &             ,atomm,vthreea
 !$$$                  write(6,*) nxi(j),nyi(j),nzi(j)
 !$$$                  write(6,*) nxij(m,atomj),nyij(m,atomj),nzij(m,atomj)
 !$$$                  write(6,*) nrij(j),ndij(m,atomj)
@@ -478,6 +478,5 @@
 !      end if
       if(lwrite) write(6,*) 'triad_en vthree',vthree
 
- 1201 format(A13,I5,I5,I5,F15.7)
       return
       end

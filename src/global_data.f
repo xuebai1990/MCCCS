@@ -152,7 +152,7 @@
 !               tailcorrection on)
       parameter (ltailc = .false.)
 ! truncated and shifted potentials
-      parameter (lshift = .true.)
+      parameter (lshift = .false.)
 ! ***************************************
 ! *** PARAMETERS OF NEIGHBOR LIST     ***
 ! ***************************************

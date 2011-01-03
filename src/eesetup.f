@@ -241,7 +241,7 @@
 !	do jj = 1, nunit(j)
 !	ntjj = ntype(j,jj)
 !                  ntij = (ntii-1)*nntype+ntjj
-!	write(iou,999) i,ii,j,jj,rminee(ntij),epsij(ntij),sig2ij(ntij)
+!	write(iou,'(4(i4,1x),3(1x,e17.8))') i,ii,j,jj,rminee(ntij),epsij(ntij),sig2ij(ntij)
 !	end do
 !	end do
 !	end do
@@ -316,6 +316,5 @@
       end do
 !	write(iou,*) 'prob check end'
 
- 999	format(4(i4,1x),3(1x,e17.8))
       return
       end

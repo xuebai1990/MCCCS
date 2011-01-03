@@ -161,8 +161,8 @@
       read(35,*)
       read(35,*) iratipsw
       if (lmipsw.and.lstageb) then
-         if (mod(iratipsw,iratp).ne.0) call cleanup('iratipsw must be integer
-     &       multiple of iratp if lstageb is true')
+         if (mod(iratipsw,iratp).ne.0) call cleanup('iratipsw must
+     & be integer multiple of iratp if lstageb is true')
       end if
       do i = 1, nmolty
          if (lwell(i)) then

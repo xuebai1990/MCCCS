@@ -347,20 +347,17 @@
 ! only processor 0 writes to output files (except for error messages)
                if (myid.eq.0) then
 ! *** write some ratio update information ***
-                  write(iou,57) imolty,bntrax(imolty,im),
-     &                 bntray(imolty,im), bntraz(imolty,im), 
-     &                 bnrotx(imolty,im), bnroty(imolty,im), 
-     &                 bnrotz(imolty,im)
-!              write(iou,58) ratrax, ratray, ratraz,rarotx, raroty,rarotz
-                  write(iou,59) rmtrax(imolty,im), rmtray(imolty,im)
-     &                 , rmtraz(imolty,im), rmrotx(imolty,im)
-     &                 , rmroty(imolty,im), rmrotz(imolty,im)
+                  write(iou,"(' Type ',i1,' bn ',6(f7.0,1x))") imolty
+     &             ,bntrax(imolty,im),bntray(imolty,im), bntraz(imolty
+     &             ,im),bnrotx(imolty,im), bnroty(imolty,im)
+     &             ,bnrotz(imolty,im)
+!              write(iou,"(' ratio       ',6(f7.4,1x))") ratrax, ratray, ratraz,rarotx, raroty,rarotz
+                  write(iou,"(' max.displ.  ',6(f7.4,1x))")
+     &             rmtrax(imolty,im), rmtray(imolty,im), rmtraz(imolty
+     &             ,im), rmrotx(imolty,im), rmroty(imolty,im),
+     &             rmrotz(imolty,im)
                end if
 
- 57            format(' Type ',i1,' bn ',6(f7.0,1x))
-!     58            format(' ratio       ',6(f7.4,1x))
- 59            format(' max.displ.  ',6(f7.4,1x))
-               
                acntrax(imolty,im) = acntrax(imolty,im)+bntrax(imolty,im)
                acntray(imolty,im) = acntray(imolty,im)+bntray(imolty,im)
                acntraz(imolty,im) = acntraz(imolty,im)+bntraz(imolty,im)
@@ -665,11 +662,14 @@
                do ibox = 1, nbox
                   if (lsolid(ibox) .and. .not. lrect(ibox)) then
                      do j = 1,9
-                        write(iou,56) bnhmat(ibox,j),bshmat(ibox,j),
-     &                       rmhmat(ibox,j)
+                        write(iou,"(' h-matrix change:  bn =',f8.1,
+     &                   '   bs =',f8.1,'   max.displ. =',e12.5)")
+     &                   bnhmat(ibox,j),bshmat(ibox,j), rmhmat(ibox,j)
                      end do
                   else
-                     write(iou,60) bnvol(ibox),bsvol(ibox),rmvol(ibox)
+                     write(iou,"(' volume change:  bn =',f8.1,
+     &                '   bs =',f8.1,'   max.displ. =',e12.5)")
+     &                bnvol(ibox),bsvol(ibox),rmvol(ibox)
                   end if
                end do
             end if	
@@ -692,11 +692,6 @@
 
             end do
          end if
-
- 56      format(' h-matrix change:  bn =',f8.1,
-     &        '   bs =',f8.1,'   max.displ. =',e12.5)
- 60      format(' volume change:  bn =',f8.1,
-     &        '   bs =',f8.1,'   max.displ. =',e12.5)
       end if
 
 ! KM for MPI
@@ -731,15 +726,13 @@
          end do
          do m = 1, nchain
             imolty = moltyp(m)
-            write(10,1015) m, imolty, nunit(imolty), nboxi(m)
-     &           ,xcm(m),ycm(m),zcm(m)
+            write(10,'(4(1x,i5),3(1x,f16.6))') m, imolty, nunit(imolty),
+     &       nboxi(m),xcm(m),ycm(m),zcm(m)
             do mm = 1, nunit(imolty)
-               write(10,1012) rxu(m,mm), ryu(m,mm), rzu(m,mm)
-     &              , qqu(m,mm),ntype( imolty, mm )
+               write(10,'(4(1x,f14.6),i5)') rxu(m,mm), ryu(m,mm), rzu(m
+     &          ,mm), qqu(m,mm),ntype( imolty, mm )
             end do
          end do
- 1012    format(4(1x,f14.6),i5)
- 1015    format(4(1x,i5),3(1x,f16.6))
       end if
 
 ! KM for MPI
