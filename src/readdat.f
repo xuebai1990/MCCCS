@@ -198,9 +198,7 @@
       read(4,*) Num_cell_a,Num_cell_b,Num_cell_c 
 ! - read run information
       read(4,*) 
-      read(4,*) run_num
-      suffix='a'
-!      read(4,*) suffix	
+      read(4,*) run_num,suffix	
       read(4,*)
       read(4,*) nstep, lstop, lpresim, iupdatefix
 ! - read torsion, decide whether to use torsion in function form or Table
@@ -405,14 +403,12 @@
          read(4,*)
          read(4,*) boxlx(i),boxly(i),boxlz(i),lsolid(i),lrect(i),
      &        kalp(i),rcut(i),rcutnn(i)
-         write(iou,*) 'BP0'
          if (i.eq.1 .and. lexzeo) then
 ! === load positions of zeolite atoms
             call zeocoord()
             if (myid.eq.0) write(iou,*) ' note zeolite determines 
      &the box size !'
          end if
-         write(iou,*) 'BP1'
 
          if ( lecho.and.myid.eq.0 ) then
             if (lverbose) then
@@ -458,7 +454,6 @@
             write(iou,*) nchain, nmolty
          end if
       end if
-      write(iou,*) 'BP2'
       read(4,*)
       read(4,*) (temtyp(i),i=1,nmolty)
       if ( lecho.and.myid.eq.0 ) then
@@ -533,7 +528,6 @@
 ! --- read special combining rule information
       read(4,*)
       read(4,*) nijspecial
-      write(iou,*) 'BP3'
       if (lecho.and.myid.eq.0) then
          if (lverbose) then
             write(iou,*) 'number of special combining parameters:',

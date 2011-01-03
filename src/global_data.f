@@ -93,7 +93,7 @@
       parameter (lcutcm = .true.)
 ! if LEWALD=.TRUE. then ewald-sum will be used to calculate the
 ! electrostatic interactions.
-      parameter (lewald = .false.)
+      parameter (lewald = .true.)
 ! if LDIELECT=.TRUE. then dielectric constant will be calculated and
 ! LEWALD must be .TRUE.
 ! Correct only in NVT ensemble
@@ -150,7 +150,7 @@
 ! if LTAILC=.TRUE. tail corrections are added
 !    (WARNING:  .lsami. in external.inc switches an intrinsic
 !               tailcorrection on)
-      parameter (ltailc = .false.)
+      parameter (ltailc = .true.)
 ! truncated and shifted potentials
       parameter (lshift = .false.)
 ! ***************************************
@@ -245,7 +245,6 @@
       parameter (lpsurf=.false.)
       parameter (lgraphite=.false.)
       parameter (lcorreg = .false.)
-!      parameter (lcorreg = .false.)
 ! Graphite surface
 ! -- a1, delta are in Angstroms
 ! -- rsol [=] 1/A^3
@@ -279,7 +278,7 @@
 
 !      real(KIND=double_precision)::zeps(zntype,zntype),zsig2(zntype,zntype),zrc2(zntype,zntype),zencut(zntype,zntype)
       integer(KIND=normal_int),parameter::zntype=2,gntypemax=32
-      integer(KIND=normal_int)::gntype,gtable(gntypemax),ztype(zntype)
+      integer(KIND=normal_int)::gntype,gtable(0:gntypemax),ztype(zntype)
      & ,znum(zntype)
 !      common/forces/gtable,znum,ztype,gntype,zeps,zsig2,zrc2,zencut
 
@@ -359,8 +358,8 @@
       real(KIND=double_precision)::n0,n1
 
       dimension extc12(nntype), extc3(nntype), extz0(nntype)
-     &   ,xiq(nntype),jayself(nntype),lqchg(nntype)
-     &   ,lij(nntype)
+     &   ,xiq(nntype),jayself(nntype),lqchg(0:nntype)
+     &   ,lij(0:nntype)
       dimension sig2ij(nntype*nntype), epsij(nntype*nntype),
      &   ecut(nntype*nntype), jayq(nntype*nntype),
      &   epsilon(2,numax),sigma(2,numax),epsi(nntype),

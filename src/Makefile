@@ -9,7 +9,7 @@ LDFLAGS       =  $(COMPFLAGS)
 ### Intel Compiler for x86 architecture (ifort,mpif90)
 #COMPFLAGS     =  -O2 -w90 -w95 -cm
 ## only for debugging
-#COMPFLAGS     = -w90 -w95 -cm -CB -CU -p -g -check_bounds -check all -traceback
+#COMPFLAGS     = -w90 -w95 -cm -CB -CU -p -g -check all -traceback -warn declarations -warn truncated_source -warn unused -warn uncalled
 ## for MPI
 COMPFLAGS     =  -ipo -O3 -no-prec-div -xHost 
 
