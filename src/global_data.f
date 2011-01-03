@@ -150,9 +150,9 @@
 ! if LTAILC=.TRUE. tail corrections are added
 !    (WARNING:  .lsami. in external.inc switches an intrinsic
 !               tailcorrection on)
-      parameter (ltailc = .true.)
+      parameter (ltailc = .false.)
 ! truncated and shifted potentials
-      parameter (lshift = .false.)
+      parameter (lshift = .true.)
 ! ***************************************
 ! *** PARAMETERS OF NEIGHBOR LIST     ***
 ! ***************************************

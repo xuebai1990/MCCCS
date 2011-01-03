@@ -2507,8 +2507,9 @@
             end if
             
             do ibox = 1,nbox
-               
-               if (lsolid(ibox) .and. .not. lrect(ibox)) then
+               if (ibox.eq.1.and.lexzeo) then
+                  read(77,*) dum,dum,dum
+               else if (lsolid(ibox) .and. .not. lrect(ibox)) then
                   
                   read(77,*) (hmat(ibox,j),j=1,9)
                   if (myid.eq.0) then
