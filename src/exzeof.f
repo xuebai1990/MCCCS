@@ -75,7 +75,8 @@
             end if
          end do
 
-         if (idi.eq.0) vqnew=vqnew+recipzeo(xi,yi,zi,1.)
+         if (idi.eq.0) vqnew=vqnew+recipzeo(xi,yi,zi
+     &    ,1._double_precision)
 
          exzeof=vljnew+vqnew*qqfact
       end if

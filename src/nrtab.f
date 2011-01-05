@@ -136,7 +136,7 @@
             xub = -(xprev / dprev)
             yub = -(yprev / dprev)
             zub = -(zprev / dprev)
-            call cone (1,xub,yub,zub,brben(1),dum,dum,dum )
+            call cone(1,xub,yub,zub,brben(1),dum,dum,dum )
 	 end if
 	    
 ! *** select ONE trial position ***
@@ -145,7 +145,7 @@
          vdha = 0.0d0
 
  108     if ( iben .gt. 0 .and. lcone ) then
-            call cone (2,dum,dum,dum,dum,x,y,z )
+            call cone(2,dum,dum,dum,dum,x,y,z )
             x = brvib(1) * x
             y = brvib(1) * y
             z = brvib(1) * z

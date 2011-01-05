@@ -1,5 +1,4 @@
-      subroutine readdat(lucall,ucheck,nvirial,starvir
-     &     ,stepvir)
+      subroutine readdat(infile,lucall,ucheck,nvirial,starvir,stepvir)
 
       use global_data
       use var_type
@@ -40,7 +39,7 @@
 !$$$!      include 'gor.inc'
 !$$$      include 'torsion.inc'
 !$$$      include 'tabulated.inc'
-      
+      character(LEN=*),intent(in)::infile
       integer(KIND=normal_int)::seed
       real(KIND=double_precision)::random,rtest(10)
 
@@ -142,8 +141,8 @@
       qtot = 0.0d0
       ldie = .false.
  
-! *** Output unit (if 2, write to runXX.dat file; if 6, write to stdout/screen; outherwise, 
-! *** user designate a file to which to write) KEA 6/3/09 (defined in control.inc)
+! -------------------------------------------------------------------
+      
 
 ! -------------------------------------------------------------------
       open(4)
@@ -170,7 +169,8 @@
       close(71)
 
 ! -------------------------------------------------------------------
-
+! *** Output unit (if 2, write to runXX.dat file; if 6, write to stdout/screen; outherwise, 
+! *** user designate a file to which to write) KEA 6/3/09 (defined in control.inc)
       read(4,*)
       read(4,*) iou
 
@@ -245,6 +245,7 @@
             write(iou,*) 'L_vdW_table:', L_vdW_table
             write(iou,*) 'L_elect_table:', L_elect_table
          else
+            write(iou,*) numprocs,seed
             write(iou,*) L_Coul_CBMC,nstep, lstop, lpresim, iupdatefix
             write(iou,*) L_tor_table, L_spline,  L_linear
             write(iou,*) L_vib_table, L_bend_table, L_vdW_table, 
@@ -2414,7 +2415,7 @@
       end if
 
       if ( linit ) then
-         call initia(qelect)
+         call initia
          nnstep = 0
       else
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM needed for long input records, like

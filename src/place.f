@@ -32,7 +32,7 @@
      & ,niplace,iw,iufrom,it,jut2,jut3,jut4,jttor,ibox,glist,iwalk
      & ,iuprev,list,nchben_a, nchben_b,max,iu2back
  
-      parameter(max=10)
+      parameter(max=numax)
 
       real(KIND=double_precision)::wplace,equil,kforce,bsum_try,mincb
      & ,delcb,ux,uy,uz,r,vvib,bfactor,third,random,length,bs,rbf,vvibtr
@@ -494,8 +494,8 @@
          end do
 
 !     --- now we calculate the nonbonded interactions
-         call boltz( lnew, .false., ovrlap,i,i,imolty,ibox,ichoi
-     &        ,iufrom,pnum(iw),glist)
+         call boltz(lnew,.false., ovrlap,i,i,imolty,ibox,ichoi
+     &        ,iufrom,pnum(iw),glist,0._double_precision)
 
          if (ovrlap) then
             lterm = .true.

@@ -1,8 +1,11 @@
 obsolete:
 analysis.f
+chempt.f
 coruz.f
 exzeot.f
 forcefield.f
+jtrim.f
+nrtab.f
 pgrid.f
 qqcheck.f
 readRES.f

@@ -49,10 +49,10 @@
      & ,calpo
       real(KIND=double_precision)::rbcut,rbox
       real(KIND=double_precision)::w(3)
-      integer(KIND=normal_int)::boxvch,ichoiq,ibox
+      integer(KIND=normal_int)::boxvch,ichoiq,ibox,lddum2(27)
       integer(KIND=normal_int)::neigho_cnt(nmax),neigho(100,nmax)
       real(KIND=double_precision)::hmato(9),hmatio(9)
-      real(KIND=double_precision)::lddum,lddum2(27),min_boxl
+      real(KIND=double_precision)::lddum,min_boxl
 ! KEA
       real(KIND=double_precision)::v3o,v3n
 

@@ -24,8 +24,8 @@ get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 if (Fortran_COMPILER_NAME STREQUAL "mpif90")
   # mpif90 wrapper
   #set (CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O3")
-  set (CMAKE_Fortran_FLAGS_RELEASE "-ipo -O3 -no-prec-div -xHost")
-  set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g -traceback -check all -warn all")
+  set (CMAKE_Fortran_FLAGS_RELEASE "-ipo -O3 -no-prec-div -xHost -nofixed")
+  set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g -nofixed -traceback -check all -warn unused -warn declarations -warn truncated_source -warn uncalled -warn ignore_loc")
 elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
   # Intel Compiler for x86 architecture
   set (CMAKE_Fortran_FLAGS_RELEASE "-O2 -w90 -w95 -cm")
@@ -72,7 +72,7 @@ else (Fortran_COMPILER_NAME STREQUAL "mpif90")
 endif (Fortran_COMPILER_NAME STREQUAL "mpif90")
 
 # build executables
-set (NMPROGRAMS "topmon.f" "global_data.f" "var_type.f" "const_phys.f" "const_math.f" "util_math.f" "util_string.f" "util_files.f" "util_timings.f" "Atom_energy.f" "Atom_traxyz.f" "Intra_energy.f" "alignplanes.f" "anes.f" "atomtype.f" "boltz.f" "bondlength.f" "calcsolpar.f" "calctor.f" "charge.f" "chempt.f" "cleanup.f" "close.f" "cone.f" "coneangle.f" "config.f" "corp.f" "coru.f" "ctrmas.f" "deriv.f" "dipole.f" "dump.f" "ee_energy.f" "ee_index_swap.f" "ee_recip.f" "eemove.f" "eesetup.f" "energy.f" "erfunc.f" "exgrph.f" "exmuir.f" "expand.f" "explct.f" "exsami.f" "exsix.f" "exzeo.f" "exzeof.f" "flucq.f" "garo3body.f" "garofalini.f" "genlj.f" "geometry.f" "inclus.f" "init_vars.f" "initia.f" "ipswsetup.f" "jtrim.f" "linkcell.f" "ljmuir.f" "ljpsur.f" "ljsami.f" "matops.f" "mbessel.f" "mimage.f" "mmff.f" "molsetup.f" "monola.f" "monper.f" "newton.f" "ninesix.f" "nrtab.f" "place.f" "pressure.f" "prvolume.f" "random.f" "readdat.f" "recip.f" "recip_atom.f" "recippress.f" "recipsum.f" "rigfix.f" "rigrot.f" "rosenbluth.f" "rotxyz.f" "safecbmc.f" "safeschedule.f" "schedule.f" "setnn.f" "setpbc.f" "slitpore.f" "sphere.f" "suijtab.f" "sumup.f" "susami.f" "suvibe.f" "suzeo.f" "swap.f" "swatch.f" "tabulated.f" "torsion.f" "traxyz.f" "update.f" "update1.f" "updnn.f" "v_elect_field.f" "virial.f" "volume.f" "vtorso.f" "writepdb.f" "zeocoord.f")
+set (NMPROGRAMS "topmon.f" "global_data.f" "var_type.f" "const_phys.f" "const_math.f" "util_math.f" "util_string.f" "util_files.f" "util_timings.f" "Atom_energy.f" "Atom_traxyz.f" "Intra_energy.f" "alignplanes.f" "anes.f" "atomtype.f" "boltz.f" "bondlength.f" "calcsolpar.f" "calctor.f" "charge.f" "cleanup.f" "close.f" "cone.f" "coneangle.f" "config.f" "corp.f" "coru.f" "ctrmas.f" "deriv.f" "dipole.f" "dump.f" "ee_energy.f" "ee_index_swap.f" "ee_recip.f" "eemove.f" "eesetup.f" "energy.f" "erfunc.f" "exgrph.f" "exmuir.f" "expand.f" "explct.f" "exsami.f" "exsix.f" "exzeo.f" "exzeof.f" "flucq.f" "garo3body.f" "garofalini.f" "genlj.f" "geometry.f" "inclus.f" "init_vars.f" "initia.f" "ipswsetup.f" "linkcell.f" "ljmuir.f" "ljpsur.f" "ljsami.f" "matops.f" "mbessel.f" "mimage.f" "mmff.f" "molsetup.f" "monola.f" "monper.f" "newton.f" "ninesix.f" "place.f" "pressure.f" "prvolume.f" "random.f" "readdat.f" "recip.f" "recip_atom.f" "recippress.f" "recipsum.f" "rigfix.f" "rigrot.f" "rosenbluth.f" "rotxyz.f" "safecbmc.f" "safeschedule.f" "schedule.f" "setnn.f" "setpbc.f" "slitpore.f" "sphere.f" "suijtab.f" "sumup.f" "susami.f" "suvibe.f" "suzeo.f" "swap.f" "swatch.f" "tabulated.f" "torsion.f" "traxyz.f" "update.f" "update1.f" "updnn.f" "v_elect_field.f" "virial.f" "volume.f" "vtorso.f" "writepdb.f" "zeocoord.f")
 #set (EXECUTABLES "topmon" ${NMPROGRAMS})
 set (EXECUTABLES "topmon")
 set (SCRIPTS "reconf")

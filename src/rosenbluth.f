@@ -49,16 +49,13 @@
       
       logical::ovrlap,ltorsion,lfixnow,lfixed,lreturn
 
-      integer(KIND=normal_int)::glist,iuprev,iufrom,ichoi,ntogrow,count
+      integer(KIND=normal_int)::glist(numax),iuprev,iufrom,ichoi,ntogrow
+     & ,count
       integer(KIND=normal_int)::iu,iv,iw,ju,ip,ichtor ,it,jut2,jut3,jut4
      & ,jttor,iwalk,ivect
       integer(KIND=normal_int)::angstart,toracc
-      
-      dimension glist(numax)
-
       real(KIND=double_precision)::dum,xub,yub,zub,length,lengtha
      & ,lengthb,wadd
-
       real(KIND=double_precision)::vdha,x,y,z,maxlen,vtorf ,xaa1
      & ,yaa1,zaa1,daa1,xa1a2,ya1a2,za1a2,da1a2 ,thetac,dot,rbf,bsum,bs
      & ,random,xcc,ycc,zcc,tcc
@@ -77,8 +74,6 @@
       dimension bf_tor(nchtor_max),vtorsion(nchtor_max)
      & ,phitors(nchtor_max),ctorf(nchmax,nchtor_max)
       dimension toracc(nchmax) ,vfbbtr(nchmax,nchtor_max)
-
-
 ! ------------------------------------------------------------------
 
 !      write(iou,*) 'start ROSENBLUTH'

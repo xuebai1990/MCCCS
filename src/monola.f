@@ -1,4 +1,4 @@
-      subroutine monola  
+      subroutine monola(infile)
 
 ! -----------------------------------------------------------------
 ! subroutine monola
@@ -44,7 +44,7 @@
 !$$$      include 'torsion.inc'
 !$$$      include 'garofalini.inc'
 ! -----------------------
-
+      character(LEN=*),intent(in)::infile
 ! - variables added for GCMC histogram reweighting
       integer(KIND=normal_int)::fmax,nummol
       parameter (fmax=1e6)
@@ -177,8 +177,7 @@ c KM for MPI
 c only one processor at a time reads and writes data from files
       do i=1,numprocs
          if (myid.eq.i-1) then
-            call readdat(lucall,ucheck,nvirial,starvir
-     &           ,stepvir)
+            call readdat(infile,lucall,ucheck,nvirial,starvir,stepvir)
          endif
          call MPI_BARRIER(MPI_COMM_WORLD,ierr)
       enddo
