@@ -1,5 +1,4 @@
-      subroutine sumup( ovrlap, v, vinter,vtail,vintra,vvib,
-     &                  vbend,vtg,vext,velect,vflucq,ibox,lvol)
+      subroutine sumup( ovrlap, v, vinter,vtail,vintra,vvib, vbend,vtg,vext,velect,vflucq,ibox,lvol)
  
 !    *******************************************************************
 !    ** calculates the total potential energy for a configuration.    **
@@ -47,36 +46,22 @@
  
       logical::ovrlap, lvol 
       logical::lexplt,lqimol,lqjmol,lcoulo,lij2,liji,lqchgi
-      integer(KIND=normal_int)::i, imolty, ii, j, jmolty, jj, ntii, ntjj
-     & , ntij, iunit, ip1, ip2, ip3,ibox,nmcount,iii,jjj,iivib, jjvib
-     & , jjben, jjtor, it, ntj,k, mmm
-      real(KIND=double_precision)::v, vinter, vintra, vtail, vvib, vbend
-     & , vtg, vext,velect,vflucq,qqii,vtmp
-      real(KIND=double_precision)::rcutsq,rminsq,rxui,ryui,rzui,rxuij
-     & ,ryuij,rzuij,rijsq,sr2, sr6, rho, thetac, theta,xaa1, yaa1, zaa1,
-     & xa1a2, ya1a2, za1a2, daa1, da1a2, dot,vtorso, dzui, dz3, dz12
-     & ,xcc,ycc,zcc,tcc,spltor,mmff,rij,vrecipsum,erfunc,rbcut
-     & ,ninesix,vwell, genlj
+      integer(KIND=normal_int)::i, imolty, ii, j, jmolty, jj, ntii, ntjj , ntij, iunit, ip1, ip2, ip3,ibox,nmcount,iii,jjj,iivib, jjvib , jjben, jjtor, it, ntj,k, mmm
+      real(KIND=double_precision)::v, vinter, vintra, vtail, vvib, vbend , vtg, vext,velect,vflucq,qqii,vtmp
+      real(KIND=double_precision)::rcutsq,rminsq,rxui,ryui,rzui,rxuij ,ryuij,rzuij,rijsq,sr2, sr6, rho, thetac, theta,xaa1, yaa1, zaa1, xa1a2, ya1a2, za1a2, daa1, da1a2, dot,vtorso, dzui, dz3, dz12 ,xcc,ycc,zcc,tcc,spltor,mmff,rij,vrecipsum,erfunc,rbcut ,ninesix,vwell, genlj
 ! tabulated potential variables
-      real(KIND=double_precision)::tabulated_vib, tabulated_bend,
-     & tabulated_vdW,tabulated_elect
+      real(KIND=double_precision)::tabulated_vib, tabulated_bend, tabulated_vdW,tabulated_elect
 
 !      real(KIND=double_precision)::vtemp
 
-      real(KIND=double_precision)::coru,xcmi,ycmi,zcmi,rcmi,rcm
-     & ,rcmsq,qave,garofalini
-      real(KIND=double_precision)::ljsami,ljpsur,ljmuir,exsami,exmuir
-     & ,exzeo,exsix
+      real(KIND=double_precision)::coru,xcmi,ycmi,zcmi,rcmi,rcm ,rcmsq,qave,garofalini
+      real(KIND=double_precision)::ljsami,ljpsur,ljmuir,exsami,exmuir ,exzeo,exsix
       real(KIND=double_precision)::exgrph,vintera,velecta,vol
-      real(KIND=double_precision)::rxvec(numax,numax),ryvec(numax,numax)
-     & ,rzvec(numax,numax),distanceij(numax,numax),epsilon2 ,sigma2,
-     & distij2(numax,numax)
+      real(KIND=double_precision)::rxvec(numax,numax),ryvec(numax,numax) ,rzvec(numax,numax),distanceij(numax,numax),epsilon2 ,sigma2, distij2(numax,numax)
       real(KIND=double_precision)::slitpore, v_elect_field, field
       dimension lcoulo(numax,numax)
 ! Neeraj & RP for MPI
-      real(KIND=double_precision)::sum_velect,sum_vinter,sum_vtail
-     & ,sum_vintra,sum_vflucq,sum_vvib,sum_vbend,sum_vtg,sum_vext
-     & ,sum_vwell,sum_sself,sum_correct,my_velect,sum_my_velect
+      real(KIND=double_precision)::sum_velect,sum_vinter,sum_vtail ,sum_vintra,sum_vflucq,sum_vvib,sum_vbend,sum_vtg,sum_vext ,sum_vwell,sum_sself,sum_correct,my_velect,sum_my_velect
       logical::all_ovrlap
 ! --------------------------------------------------------------------
       vintera = 0.0d0
@@ -145,8 +130,7 @@
 ! --- not if lgrand and ibox =2
 ! --- JLR 11-24-09 don't loop if box is ideal
 !      if (.not.(lgrand.and.(ibox.eq.2))) then
-      if (.not.(lgrand.and.ibox.eq.2) .and.
-     &     .not.lideal(ibox) ) then
+      if (.not.(lgrand.and.ibox.eq.2) .and. .not.lideal(ibox) ) then
 ! --- END JLR 11-24-09
 ! RP added for MPI
 !       do 100 i = 1, nchain - 1
@@ -229,12 +213,9 @@
                            
                            ntjj = ntype(jmolty,jj)
                            if ( lij2 ) then
-                              if ( (.not. (liji .and. lij(ntjj))) 
-     &                             .and. (.not. (lqchgi .and. 
-     &                             lqchg(ntjj)))) cycle bead2
+                              if ( (.not. (liji .and. lij(ntjj)))  .and. (.not. (lqchgi .and.  lqchg(ntjj)))) cycle bead2
                            else
-                              if (.not. (lqchgi .and. lqchg(ntjj)))
-     &                             cycle bead2
+                              if (.not. (lqchgi .and. lqchg(ntjj))) cycle bead2
                            end if
                            if (lexpsix .or. lmmff) then
                               ntij = (ntii+ntjj)/2
@@ -261,8 +242,7 @@
 ! *** minimum image the pair separations ***
                            if (lpbc) call mimage(rxuij,ryuij,rzuij,ibox)
 
-                           rijsq = (rxuij*rxuij)+(ryuij*ryuij)
-     &                          + (rzuij*rzuij)
+                           rijsq = (rxuij*rxuij)+(ryuij*ryuij) + (rzuij*rzuij)
                            rij   = dsqrt(rijsq)
                          
 !                           if ( i .eq. 12 .and. ii .eq. 6 .and.
@@ -277,17 +257,14 @@
 !                           write(iou,*) 'distance', dsqrt(rijsq)
 !                        end if
 
-                           if ( rijsq .lt. rminsq .and. .not.
-     &                          (lexpand(imolty) .or. 
-     &                          lexpand(jmolty))) then
+                           if ( rijsq .lt. rminsq .and. .not. (lexpand(imolty) .or.  lexpand(jmolty))) then
                               if ( .not. lvol .and.myid.eq.0) then
                                  write(iou,*) 'overlap inter'
                                  write(iou,*)'rijsq rminsq',rijsq,rminsq
                                  write(iou,*) 'i ii', i, ii
                                  write(iou,*) 'i-pos', rxui,ryui,rzui
                                  write(iou,*) 'j jj', j, jj
-                                 write(iou,*) 'j-pos', 
-     &                                rxu(j,jj),ryu(j,jj),rzu(j,jj)
+                                 write(iou,*) 'j-pos',  rxu(j,jj),ryu(j,jj),rzu(j,jj)
                               end if
                               ovrlap = .true.
 
@@ -299,22 +276,17 @@
 !                            return
                            elseif ( rijsq .lt. rcutsq .or. lijall) then
 
-                              if (L_vdW_table.and.(.not.(
-     &                             lexpand(imolty).or.lexpand(jmolty)))
-     &                             )then
-                                 call lininter_vdW(rij, 
-     &                                tabulated_vdW, ntii, ntjj)
+                              if (L_vdW_table.and.(.not.( lexpand(imolty).or.lexpand(jmolty))) )then
+                                 call lininter_vdW(rij,  tabulated_vdW, ntii, ntjj)
                                  
                                  vinter = vinter + tabulated_vdW
                                  
-                              elseif (llj.and.(.not.(lexpand(imolty).or.
-     &                                lexpand(jmolty)))) then
+                              elseif (llj.and.(.not.(lexpand(imolty).or. lexpand(jmolty)))) then
                                  if ( lij(ntii) .and. lij(ntjj) ) then
                                     sr2 = sig2ij(ntij) / rijsq
                                     epsilon2=epsij(ntij)        
                                     sr6 = sr2 * sr2 * sr2
-                                    vinter = vinter 
-     &                                   + sr6*(sr6-1.0d0)*epsilon2
+                                    vinter = vinter  + sr6*(sr6-1.0d0)*epsilon2
                                  end if
                               elseif ( lsami ) then
                                  vinter = vinter + ljsami(rijsq,ntij)
@@ -328,91 +300,69 @@
                               elseif (lgenlj) then
                                  sr2 = sig2ij(ntij) / rijsq
                                  epsilon2=epsij(ntij)
-                                 vinter = vinter + 
-     &                                genlj(rijsq,sr2,epsilon2)
+                                 vinter = vinter +  genlj(rijsq,sr2,epsilon2)
                               elseif ( lmuir ) then
                                  vinter = vinter + ljmuir(rijsq,ntij)
                               elseif ( lpsurf ) then
                                  vinter = vinter + ljpsur(rijsq,ntij)
 ! KEA garofalini potential
                               elseif ( lgaro) then
-                                 vinter = vinter + garofalini(rijsq,ntij
-     &                                ,qqu(i,ii),qqu(j,jj),i,j)
+                                 vinter = vinter + garofalini(rijsq,ntij ,qqu(i,ii),qqu(j,jj),i,j)
                                  if(lshift) then
                                     vinter = vinter-ecut(ntij)
                                  end if
                               else if (lshift) then
                                  sr2 = sig2ij(ntij) / rijsq
                                  sr6 = sr2 * sr2 * sr2
-                                 vinter = vinter + 
-     &                                sr6*(sr6-1.0d0)*epsij(ntij)-
-     &                                ecut(ntij) 
+                                 vinter = vinter +  sr6*(sr6-1.0d0)*epsij(ntij)- ecut(ntij) 
                                  
                               elseif ( lfepsi ) then
                                  if ( lij(ntii) .and. lij(ntjj) ) then
                                     sr6 = rijsq*rijsq*rijsq
                                     
-                                    if ( (.not. lqchg(ntii)) .and. 
-     &                                   (.not. lqchg(ntjj)) ) then
+                                    if ( (.not. lqchg(ntii)) .and.  (.not. lqchg(ntjj)) ) then
                                        if ( nunit(imolty) .eq. 4 ) then
 ! *** TIP-4P structure (temperary use ???)
                                           qave=(qqu(i,4)+qqu(j,4))/2.0d0
                                        else
-                                          qave=(qqu(i,4)+qqu(i,5)+
-     &                                         qqu(j,4)+qqu(j,5))*0.85d0
+                                          qave=(qqu(i,4)+qqu(i,5)+ qqu(j,4)+qqu(j,5))*0.85d0
                                        end if
                                     else
                                        qave =(qqu(i,ii)+qqu(j,jj))/2.0d0
                                     end if
-                                    if ( lexpand(imolty) 
-     &                                   .and. lexpand(jmolty)) then
-                                       epsilon2=dsqrt(epsilon(imolty,ii)
-     &                                      *epsilon(jmolty,jj))
+                                    if ( lexpand(imolty)  .and. lexpand(jmolty)) then
+                                       epsilon2=dsqrt(epsilon(imolty,ii) *epsilon(jmolty,jj))
                                     elseif (lexpand(imolty)) then
-                                       epsilon2=dsqrt(epsilon(imolty,ii)
-     &                                      *epsi(ntjj))
+                                       epsilon2=dsqrt(epsilon(imolty,ii) *epsi(ntjj))
                                     elseif ( lexpand(jmolty) ) then
                                        
-                                       epsilon2=dsqrt(epsi(ntii)*
-     &                                      epsilon(jmolty,jj))
+                                       epsilon2=dsqrt(epsi(ntii)* epsilon(jmolty,jj))
                                     else
                                        epsilon2=epsij(ntij)
                                     end if
-                                    vinter = vinter + 
-     &                                   ((aslope*(qave-a0)*(qave-a0)
-     &                                   +ashift)/sr6 - (bslope*(qave-
-     &                                   b0)*(qave-b0)+bshift))/
-     &                                   sr6*epsilon2  
+                                    vinter = vinter +  ((aslope*(qave-a0)*(qave-a0) +ashift)/sr6 - (bslope*(qave- b0)*(qave-b0)+bshift))/ sr6*epsilon2  
                                     
                                  end if      
                               else
                                  if ( lij(ntii) .and. lij(ntjj) ) then
-                                    if ( lexpand(imolty) 
-     &                                   .and. lexpand(jmolty)) then
-                                       sigma2=(sigma(imolty,ii)+
-     &                                      sigma(jmolty,jj))/2.0d0
+                                    if ( lexpand(imolty)  .and. lexpand(jmolty)) then
+                                       sigma2=(sigma(imolty,ii)+ sigma(jmolty,jj))/2.0d0
                                        sr2 = sigma2*sigma2/rijsq
-                                       epsilon2=dsqrt(epsilon(imolty,ii)
-     &                                      *epsilon(jmolty,jj))
+                                       epsilon2=dsqrt(epsilon(imolty,ii) *epsilon(jmolty,jj))
                                     elseif ( lexpand(imolty) ) then
-                                       sigma2=(sigma(imolty,ii)+
-     &                                      sigi(ntjj))/2.0d0
+                                       sigma2=(sigma(imolty,ii)+ sigi(ntjj))/2.0d0
                                        sr2 = sigma2*sigma2/rijsq
-                                       epsilon2=dsqrt(epsilon(imolty,ii)
-     &                                      *epsi(ntjj))
+                                       epsilon2=dsqrt(epsilon(imolty,ii) *epsi(ntjj))
                                     elseif ( lexpand(jmolty) ) then
-                                       sigma2=(sigma(jmolty,jj)+
-     &                                      sigi(ntii))/2.0d0
+                                       sigma2=(sigma(jmolty,jj)+ sigi(ntii))/2.0d0
                                        sr2 = sigma2*sigma2/rijsq
-                                       epsilon2=dsqrt(epsi(ntii)*
-     &                                      epsilon(jmolty,jj))
+                                       epsilon2=dsqrt(epsi(ntii)* epsilon(jmolty,jj))
                                     else
                                        sr2 = sig2ij(ntij) / rijsq
                                        epsilon2=epsij(ntij)
                                     end if
                                     sr6 = sr2 * sr2 * sr2
-                                    vinter = vinter 
-     &                                   + sr6*(sr6-1.0d0)*epsilon2
+                                    vinter = vinter  + sr6*(sr6-1.0d0)*epsilon2
                                  end if
                               end if
                            end if
@@ -420,24 +370,17 @@
 ! charge interactions
 !kea - skip for garofalini; included in vinter
                            if(lgaro) then
-                           elseif ( lchgall.and. lqchg(ntii) 
-     &                             .and. lqchg(ntjj)) then
+                           elseif ( lchgall.and. lqchg(ntii)  .and. lqchg(ntjj)) then
                               if ( lewald ) then
-                                 velect = velect + qqu(i,ii)*qqu(j,jj)*
-     &                                erfunc(calp(ibox)*rij)/
-     &                              rij
+                                 velect = velect + qqu(i,ii)*qqu(j,jj)* erfunc(calp(ibox)*rij)/ rij
                               else
-                                 velect = velect + qqu(i,ii)*qqu(j,jj)/
-     &                                rij
+                                 velect = velect + qqu(i,ii)*qqu(j,jj)/ rij
                               end if
-                           elseif ( lqimol .and. lqjmol .and. 
-     &                             lqchgi .and. lqchg(ntjj) ) then
+                           elseif ( lqimol .and. lqjmol .and.  lqchgi .and. lqchg(ntjj) ) then
                               
                               if (lewald) then               
                                  if (rijsq.lt.rcutsq) then
-                                    velect = velect + qqu(i,ii)*
-     &                                   qqu(j,jj)*erfunc(calp(ibox)*
-     &                                   rij)/rij
+                                    velect = velect + qqu(i,ii)* qqu(j,jj)*erfunc(calp(ibox)* rij)/rij
                                  end if
                               else
 ! --- All-Atom charges (charge-group look-up table)
@@ -453,13 +396,10 @@
                                  end if
                                  if ( lcoulo(iii,jjj) ) then
                                     if (L_elect_table) then 
-                                       call lininter_elect(rij, 
-     &                                      tabulated_elect, ntii, ntjj)
-                                       velect = velect + qqu(i,ii)*
-     &                                      qqu(j,jj)*tabulated_elect
+                                       call lininter_elect(rij,  tabulated_elect, ntii, ntjj)
+                                       velect = velect + qqu(i,ii)* qqu(j,jj)*tabulated_elect
                                     else
-                                       velect = velect + qqu(i,ii)
-     &                                      *qqu(j,jj)/rij
+                                       velect = velect + qqu(i,ii) *qqu(j,jj)/rij
                                     end if
                                  end if
                               end if
@@ -471,9 +411,7 @@
 !cc  all processors need to know neighbor information
 !cc  lneighbor and lgaro will not work in parallel
 !cc  calculation of neighbors assumes everything is sequential
-                           if ( lneighbor .and. ii .eq. 1 .and. 
-     &                          jj .eq. 1 .and. rijsq .lt. rbsmax**2 
-     &                          .and. rijsq .gt. rbsmin**2 ) then
+                           if ( lneighbor .and. ii .eq. 1 .and.  jj .eq. 1 .and. rijsq .lt. rbsmax**2  .and. rijsq .gt. rbsmin**2 ) then
 !                            neigh_cnt(i,jmolty)=neigh_cnt(i,jmolty)+1
 !                            neighbor(neigh_cnt(i,jmolty),i,jmolty)=j
 !                            neigh_cnt(j,imolty)=neigh_cnt(j,imolty)+1
@@ -484,20 +422,14 @@
                               neigh_cnt(j)=neigh_cnt(j)+1
                               neighbor(neigh_cnt(j),j)=i
                            elseif(lgaro) then
-                              if((ntij.eq.4.and.rijsq.lt.grijsq(2,1))
-     &                             .or.(ntij.eq.6.and.rijsq.lt.
-     &                             grijsq(3,1)))
-     &                             then
-                                 write(64,*) 'neighbor',i,' (',
-     &                                neigh_cnt(i)+1,')',j,' (',
-     &                                neigh_cnt(j)+1,')'
+                              if((ntij.eq.4.and.rijsq.lt.grijsq(2,1)) .or.(ntij.eq.6.and.rijsq.lt. grijsq(3,1))) then
+                                 write(64,*) 'neighbor',i,' (', neigh_cnt(i)+1,')',j,' (', neigh_cnt(j)+1,')'
                                  neigh_cnt(i)=neigh_cnt(i)+1
                                  neighbor(neigh_cnt(i),i)=j
                                  neigh_cnt(j)=neigh_cnt(j)+1
                                  neighbor(neigh_cnt(j),j)=i
                                  ndij(neigh_cnt(i),i) = rij
-                                 ndij(neigh_cnt(j),j) = 
-     &                                ndij(neigh_cnt(i),i)
+                                 ndij(neigh_cnt(j),j) =  ndij(neigh_cnt(i),i)
                                  nxij(neigh_cnt(i),i) = rxuij
                                  nyij(neigh_cnt(i),i) = ryuij
                                  nzij(neigh_cnt(i),i) = rzuij
@@ -523,8 +455,7 @@
 !      end if
 ! -----------------------------------------
 
-         CALL MPI_ALLREDUCE(ovrlap,all_ovrlap,1,MPI_LOGICAL,MPI_LOR,
-     &        MPI_COMM_WORLD,ierr)
+         CALL MPI_ALLREDUCE(ovrlap,all_ovrlap,1,MPI_LOGICAL,MPI_LOR, MPI_COMM_WORLD,ierr)
 
          ovrlap = all_ovrlap
          if(ovrlap)then
@@ -532,18 +463,14 @@
             return
          end if
 
-         CALL MPI_ALLREDUCE(vinter, sum_vinter,1,MPI_DOUBLE_PRECISION,
-     &        MPI_SUM,MPI_COMM_WORLD,ierr)
+         CALL MPI_ALLREDUCE(vinter, sum_vinter,1,MPI_DOUBLE_PRECISION, MPI_SUM,MPI_COMM_WORLD,ierr)
 
-         CALL MPI_ALLREDUCE(velect, sum_velect,1,MPI_DOUBLE_PRECISION,
-     &        MPI_SUM,MPI_COMM_WORLD,ierr)
+         CALL MPI_ALLREDUCE(velect, sum_velect,1,MPI_DOUBLE_PRECISION, MPI_SUM,MPI_COMM_WORLD,ierr)
 
          velect = sum_velect
          vinter = sum_vinter
 
-         if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff 
-     &        .and. .not. lgenlj .and. .not. lninesix .and..not.lgaro
-     &        .and..not.L_vdW_table) then 
+         if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff  .and. .not. lgenlj .and. .not. lninesix .and..not.lgaro .and..not.L_vdW_table) then 
             vinter = 4.0d0 * vinter
          end if
          
@@ -564,8 +491,7 @@
             do jmolty = 1, nmolty
                rho = ncmt(ibox,jmolty) / vol
                do imolty = 1, nmolty
-                  vtail = vtail + 
-     &                 ncmt(ibox,imolty) * coru(imolty,jmolty,rho,ibox)
+                  vtail = vtail +  ncmt(ibox,imolty) * coru(imolty,jmolty,rho,ibox)
                end do
             end do
 !$$$            if (ibox .eq. 1 .and. lexzeo) then
@@ -624,10 +550,8 @@
 ! --- JLR 11-17-09  need call to mimage for intrachain
                         if (lpbc) call mimage(rxuij,ryuij,rzuij,ibox)
 ! --- END JLR 11-17-09
-                        rij = dsqrt(rxuij*rxuij + ryuij*ryuij + 
-     &                       rzuij*rzuij)
-                        correct = correct + qqu(i,ii)*qqu(i,jj)*
-     &                            (erfunc(calp(ibox)*rij)-1.0d0)/rij
+                        rij = dsqrt(rxuij*rxuij + ryuij*ryuij +  rzuij*rzuij)
+                        correct = correct + qqu(i,ii)*qqu(i,jj)* (erfunc(calp(ibox)*rij)-1.0d0)/rij
 !                        vsc = vsc + qqu(i,ii)*qqu(i,jj)*
 !     &                       (erfunc(calp(ibox)*rij)-1.0d0)/rij
                      elseif (lqinclu(imolty,ii,jj)) then
@@ -637,11 +561,8 @@
 ! --- JLR 11-17-09  need call to mimage for intrachain
                         if (lpbc) call mimage(rxuij,ryuij,rzuij,ibox)
 ! --- END JLR 11-17-09
-                        rij = dsqrt(rxuij*rxuij + ryuij*ryuij + 
-     &                       rzuij*rzuij)
-                        correct=correct+(1.0d0 - qscale2(imolty,ii,jj))
-     &                           *qqu(i,ii)*qqu(i,jj)*
-     &                           (erfunc(calp(ibox)*rij)-1.0d0)/rij
+                        rij = dsqrt(rxuij*rxuij + ryuij*ryuij +  rzuij*rzuij)
+                        correct=correct+(1.0d0 - qscale2(imolty,ii,jj)) *qqu(i,ii)*qqu(i,jj)* (erfunc(calp(ibox)*rij)-1.0d0)/rij
 !                        vsc = vsc +
 !     &                       (1.0d0 - qscale2(imolty,ii,jj))*qqu(i,ii)
 !     *                             *qqu(i,jj)*
@@ -654,10 +575,8 @@
 
 ! RP added for MPI
 
-         CALL MPI_ALLREDUCE(correct, sum_correct,1,MPI_DOUBLE_PRECISION,
-     &          MPI_SUM,MPI_COMM_WORLD,ierr)
-         CALL MPI_ALLREDUCE(sself, sum_sself,1,MPI_DOUBLE_PRECISION,
-     &          MPI_SUM,MPI_COMM_WORLD,ierr)
+         CALL MPI_ALLREDUCE(correct, sum_correct,1,MPI_DOUBLE_PRECISION, MPI_SUM,MPI_COMM_WORLD,ierr)
+         CALL MPI_ALLREDUCE(sself, sum_sself,1,MPI_DOUBLE_PRECISION, MPI_SUM,MPI_COMM_WORLD,ierr)
 
          sself = sum_sself
          correct = sum_correct
@@ -717,8 +636,7 @@
                   
                   do jj = ii+1, nunit(imolty)
                      
-                     if ( linclu(imolty,ii,jj) .or. 
-     &                    lqinclu(imolty,ii,jj)) then
+                     if ( linclu(imolty,ii,jj) .or.  lqinclu(imolty,ii,jj)) then
                         
                         ntjj = ntype(imolty,jj)
 
@@ -743,17 +661,14 @@
                         rij  = dsqrt(rijsq) 
                         if (linclu(imolty,ii,jj)) then
 
-                           if ( rijsq .lt. rminsq .and. 
-     &                          .not. lexpand(imolty)) then
+                           if ( rijsq .lt. rminsq .and.  .not. lexpand(imolty)) then
                               if ( .not. lvol ) then
                                  write(iou,*) 'overlap intra'
-                                 write(iou,*) 'rijsq rminsq', rijsq, 
-     &                                rminsq
+                                 write(iou,*) 'rijsq rminsq', rijsq,  rminsq
                                  write(iou,*) 'i ii', i, ii
                                  write(iou,*) 'i-pos', rxui,ryui,rzui
                                  write(iou,*) 'jj', jj
-                                 write(iou,*) 'j-pos'
-     &                                ,rxu(i,jj),ryu(i,jj),rzu(i,jj)
+                                 write(iou,*) 'j-pos' ,rxu(i,jj),ryu(i,jj),rzu(i,jj)
                               end if
                               ovrlap = .true.
 !-------- RP added for MPI to compensate ovrlap
@@ -764,39 +679,29 @@
 !                          return
                            elseif ( rijsq .lt. rcutsq .or. lijall) then
                           
-                              if (L_vdW_table.or.L_bend_table.and.(.not.
-     &                             (lexpand(imolty)))) then
+                              if (L_vdW_table.or.L_bend_table.and.(.not. (lexpand(imolty)))) then
                                  
                                  do mmm=1,inben(imolty,ii)
                                     if (ijben3(imolty,ii,mmm).eq.jj)then
                                        
-                                       call lininter_bend(rij,
-     &                                      tabulated_bend, 
-     &                                      itben(imolty,ii,mmm))
+                                       call lininter_bend(rij, tabulated_bend,  itben(imolty,ii,mmm))
                                        vintra = vintra + tabulated_bend
                                        
                                        goto 94
                                     end if
                                  end do
                                  
-                                 call lininter_vdW(rij, tabulated_vdW, 
-     &                                ntii, ntjj)
+                                 call lininter_vdW(rij, tabulated_vdW,  ntii, ntjj)
                                  vintra = vintra + tabulated_vdW
                                  
-                              elseif (llj.and.(.not.(lexpand(imolty)
-     &                                ))) then
+                              elseif (llj.and.(.not.(lexpand(imolty) ))) then
                                  sr2 = sig2ij(ntij) / rijsq
                                  epsilon2=epsij(ntij)
                                  sr6 = sr2 * sr2 * sr2
-                                 vintra = vintra 
-     &                                + sr6*(sr6-1.0d0)*epsilon2
-     &                                *ljscale(imolty,ii,jj)
+                                 vintra = vintra  + sr6*(sr6-1.0d0)*epsilon2 *ljscale(imolty,ii,jj)
                                  
                                  if (lainclu(imolty,ii,jj)) then
-                                    vintra = vintra + 0.25d0 * 
-     &                                   a15(a15type(imolty,ii,jj)) /
-     &                                   ((rijsq**2)*(rijsq**2)*
-     &                                   (rijsq**2))
+                                    vintra = vintra + 0.25d0 *  a15(a15type(imolty,ii,jj)) / ((rijsq**2)*(rijsq**2)* (rijsq**2))
                                  end if
                               elseif ( lsami ) then
                                  vintra = vintra + ljsami(rijsq,ntij)
@@ -811,37 +716,28 @@
                               elseif (lgenlj) then
                                  sr2 = sig2ij(ntij) / rijsq
                                  epsilon2=epsij(ntij)
-                                 vintra = vintra + 
-     &                                genlj(rijsq,sr2,epsilon2)
+                                 vintra = vintra +  genlj(rijsq,sr2,epsilon2)
                               elseif ( lpsurf ) then
                                  vintra = vintra + ljpsur(rijsq,ntij)
                               else if (lshift) then
                                  sr2 = sig2ij(ntij) / rijsq
                                  sr6 = sr2 * sr2 * sr2
-                                 vintra = vintra + 
-     &                                (sr6*(sr6-1.0d0)*epsij(ntij)-
-     &                                ecut(ntij))*ljscale(imolty,ii,jj) 
+                                 vintra = vintra +  (sr6*(sr6-1.0d0)*epsij(ntij)- ecut(ntij))*ljscale(imolty,ii,jj) 
                               else
                                  if ( lexpand(imolty) ) then
-                                    sigma2=(sigma(imolty,ii)+
-     &                                   sigma(imolty,jj))/2.0d0
+                                    sigma2=(sigma(imolty,ii)+ sigma(imolty,jj))/2.0d0
                                     sr2 = sigma2*sigma2/rijsq
-                                    epsilon2 = dsqrt(epsilon(imolty,ii)
-     &                                   *epsilon(imolty,jj))
+                                    epsilon2 = dsqrt(epsilon(imolty,ii) *epsilon(imolty,jj))
                                  else
                                     sr2 = sig2ij(ntij) / rijsq
                                     epsilon2 = epsij(ntij)
                                  end if
                                  sr6 = sr2 * sr2 * sr2
-                                 vintra = vintra + sr6*(sr6-1.0d0)
-     &                                *epsilon2*ljscale(imolty,ii,jj)
+                                 vintra = vintra + sr6*(sr6-1.0d0) *epsilon2*ljscale(imolty,ii,jj)
                                  
 ! * OH 1-5 interaction
                                  if (lainclu(imolty,ii,jj)) then
-                                    vintra = vintra + 0.25d0 * 
-     &                                   a15(a15type(imolty,ii,jj)) /
-     &                                   ((rijsq**2)*(rijsq**2)*
-     &                                   (rijsq**2))
+                                    vintra = vintra + 0.25d0 *  a15(a15type(imolty,ii,jj)) / ((rijsq**2)*(rijsq**2)* (rijsq**2))
                                  end if
                               end if
                            end if
@@ -849,31 +745,19 @@
 
 ! * calculate intramolecular charge interaction
 
- 94                     if ( lchgall .and. lqchg(ntii)
-     &                       .and. lqchg(ntjj)) then
+ 94                     if ( lchgall .and. lqchg(ntii) .and. lqchg(ntjj)) then
                            if (lqinclu(imolty,ii,jj)) then
                               if ( lewald ) then
-                                 my_velect = my_velect + 
-     &                                qscale2(imolty,ii,jj)
-     &                            * qqu(i,ii)*qqu(i,jj)*
-     &                                erfunc(calp(ibox)*rij)/
-     &                                rij
+                                 my_velect = my_velect +  qscale2(imolty,ii,jj) * qqu(i,ii)*qqu(i,jj)* erfunc(calp(ibox)*rij)/ rij
                               else
-                                 my_velect = my_velect + 
-     &                                qscale2(imolty,ii,jj)*qqu(i,ii)*
-     &                                qqu(i,jj)/rij
+                                 my_velect = my_velect +  qscale2(imolty,ii,jj)*qqu(i,ii)* qqu(i,jj)/rij
                               end if
                            end if
                        
-                        elseif ( lelect(imolty) .and.
-     &                          (lqchg(ntii) .and. lqchg(ntjj)) ) then
+                        elseif ( lelect(imolty) .and. (lqchg(ntii) .and. lqchg(ntjj)) ) then
                            if (lewald) then
-                              if (lqinclu(imolty,ii,jj).and.
-     &                             (rijsq.lt.rcutsq)) then
-                                 my_velect = my_velect +
-     &                                qscale2(imolty,ii,jj)*qqu(i,ii)*
-     &                                qqu(i,jj)*erfunc(calp(ibox)*
-     &                                rij)/rij
+                              if (lqinclu(imolty,ii,jj).and. (rijsq.lt.rcutsq)) then
+                                 my_velect = my_velect + qscale2(imolty,ii,jj)*qqu(i,ii)* qqu(i,jj)*erfunc(calp(ibox)* rij)/rij
                               end if 
                            else
 ! --- All-Atom charges (charge-group look-up table)
@@ -896,17 +780,11 @@
                                  if (lqinclu(imolty,ii,jj)) then
                                     if (L_elect_table) then
 !     check this                   if (rij.gt.rmin) then 
-                                       call lininter_elect(rij, 
-     &                                      tabulated_elect, ntii,ntjj)
-                                       my_velect = my_velect + 
-     &                                      qscale2(imolty,ii,jj)*
-     &                                      qqu(i,ii)*qqu(i,jj)*
-     &                                      tabulated_elect
+                                       call lininter_elect(rij,  tabulated_elect, ntii,ntjj)
+                                       my_velect = my_velect +  qscale2(imolty,ii,jj)* qqu(i,ii)*qqu(i,jj)* tabulated_elect
 !                                     end if
                                     else
-                                       my_velect = my_velect + 
-     &                                      qscale2(imolty,ii,jj)
-     &                                      *qqu(i,ii)*qqu(i,jj)/rij
+                                       my_velect = my_velect +  qscale2(imolty,ii,jj) *qqu(i,ii)*qqu(i,jj)/rij
                                     end if
                                  end if
                               end if
@@ -928,8 +806,7 @@
 !          write(iou,*)'924: in sumup ovrlap=',ovrlap,'myid=',myid
 !       end if
        
-         CALL MPI_ALLREDUCE(ovrlap,all_ovrlap,1,MPI_LOGICAL,MPI_LOR,
-     &        MPI_COMM_WORLD,ierr)
+         CALL MPI_ALLREDUCE(ovrlap,all_ovrlap,1,MPI_LOGICAL,MPI_LOR, MPI_COMM_WORLD,ierr)
 
          ovrlap = all_ovrlap
          if(ovrlap)then
@@ -937,12 +814,9 @@
             return
          end if
 ! -----------------------------------------
-         CALL MPI_ALLREDUCE(vintra, sum_vintra,1,MPI_DOUBLE_PRECISION,
-     &        MPI_SUM,MPI_COMM_WORLD,ierr)
+         CALL MPI_ALLREDUCE(vintra, sum_vintra,1,MPI_DOUBLE_PRECISION, MPI_SUM,MPI_COMM_WORLD,ierr)
 
-         CALL MPI_ALLREDUCE(my_velect, sum_my_velect,1
-     &        ,MPI_DOUBLE_PRECISION,
-     &        MPI_SUM,MPI_COMM_WORLD,ierr)
+         CALL MPI_ALLREDUCE(my_velect, sum_my_velect,1 ,MPI_DOUBLE_PRECISION, MPI_SUM,MPI_COMM_WORLD,ierr)
          
          vintra = sum_vintra
          velect = velect + sum_my_velect
@@ -955,9 +829,7 @@
 !       write(iou,*) 'vinter ', vinter
 !       write(6,*) 'test', vintra
 
-         if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff 
-     &        .and. .not. lgenlj .and. .not. lninesix .and..not.lgaro
-     &        .and..not.L_vdW_table) then
+         if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff  .and. .not. lgenlj .and. .not. lninesix .and..not.lgaro .and..not.L_vdW_table) then
             vintra = 4.0d0 * vintra
          end if
 
@@ -985,14 +857,12 @@
                         do jj = ii, iunit
                            
                            if ( ii .eq. jj) then
-                              vflucq = vflucq + xiq(ntii)*qqii 
-     &                             + jayself(ntii)*qqii*qqii
+                              vflucq = vflucq + xiq(ntii)*qqii  + jayself(ntii)*qqii*qqii
                            else
                               ntjj = ntype(imolty,jj)
                               ntij = (ntii-1)*nntype + ntjj
                               
-                              vflucq = vflucq 
-     &                             + jayq(ntij)*qqii*qqu(i,jj)
+                              vflucq = vflucq  + jayq(ntij)*qqii*qqu(i,jj)
                            end if
                         end do
                      end do
@@ -1039,8 +909,7 @@
                      rxvec(ii,jj) = rxu(i,jj) - rxui
                      ryvec(ii,jj) = ryu(i,jj) - ryui
                      rzvec(ii,jj) = rzu(i,jj) - rzui
-                     distij2(ii,jj) = ( rxvec(ii,jj)**2
-     &                    + ryvec(ii,jj)**2 + rzvec(ii,jj)**2 )
+                     distij2(ii,jj) = ( rxvec(ii,jj)**2 + ryvec(ii,jj)**2 + rzvec(ii,jj)**2 )
                      distanceij(ii,jj) = dsqrt(distij2(ii,jj))
                      
                      if ( nunit(imolty) .ne. nugrow(imolty) )then
@@ -1060,14 +929,12 @@
                      ip1 = ijvib(imolty,j,jjvib)
                      it  = itvib(imolty,j,jjvib)
                      if ( ip1. lt. j .and. L_vib_table) then
-                        call lininter_vib(distanceij(ip1,j), 
-     &                       tabulated_vib, it)
+                        call lininter_vib(distanceij(ip1,j),  tabulated_vib, it)
                         vvib = vvib + tabulated_vib
 !                         write(2,*) 'TABULATED VVIB: ', tabulated_vib, 
 !     &                        distanceij(ip1,j), ip1, j
                      end if
-                     if ( ip1 .lt. j .and..not.L_vib_table) vvib = vvib
-     &                + brvibk(it) * (distanceij(ip1,j) - brvib(it))**2
+                     if ( ip1 .lt. j .and..not.L_vib_table) vvib = vvib + brvibk(it) * (distanceij(ip1,j) - brvib(it))**2
                   end do
                end do
 !     end if
@@ -1080,10 +947,7 @@
                      if ( ip2 .lt. j ) then
                         ip1 = ijben2(imolty,j,jjben)
                         it  = itben(imolty,j,jjben)
-                        thetac = ( rxvec(ip1,j)*rxvec(ip1,ip2) +
-     &                       ryvec(ip1,j)*ryvec(ip1,ip2) +
-     &                       rzvec(ip1,j)*rzvec(ip1,ip2) ) /
-     &                       ( distanceij(ip1,j)*distanceij(ip1,ip2) )
+                        thetac = ( rxvec(ip1,j)*rxvec(ip1,ip2) + ryvec(ip1,j)*ryvec(ip1,ip2) + rzvec(ip1,j)*rzvec(ip1,ip2) ) / ( distanceij(ip1,j)*distanceij(ip1,ip2) )
                         if ( thetac .ge. 1.0d0 ) thetac = 1.0d0
                         if ( thetac .le. -1.0d0 ) thetac = -1.0d0
                         
@@ -1097,8 +961,7 @@
 !$$$                         call lininter_bend(rbend, tabulated_bend, it)
 !$$$                         vbend = vbend + tabulated_bend
 !$$$                      else
-                        vbend = vbend + 
-     &                       brbenk(it) * (theta-brben(it))**2
+                        vbend = vbend +  brbenk(it) * (theta-brben(it))**2
 !                      end if
 
 !                        write(iou,*) 'j,ip1,ip2, it',j,ip1,ip2, it
@@ -1119,18 +982,12 @@
                         ip2 = ijtor3(imolty,j,jjtor)
                         it  = ittor(imolty,j,jjtor)
 !*** calculate cross products d_a x d_a-1 and d_a-1 x d_a-2 ***
-                        xaa1 = ryvec(ip1,j) * rzvec(ip2,ip1) +
-     &                       rzvec(ip1,j) * ryvec(ip1,ip2)
-                        yaa1 = rzvec(ip1,j) * rxvec(ip2,ip1) +
-     &                       rxvec(ip1,j) * rzvec(ip1,ip2)
-                        zaa1 = rxvec(ip1,j) * ryvec(ip2,ip1) +
-     &                       ryvec(ip1,j) * rxvec(ip1,ip2)
-                        xa1a2 = ryvec(ip1,ip2) * rzvec(ip2,ip3) +
-     &                       rzvec(ip1,ip2) * ryvec(ip3,ip2)
-                        ya1a2 = rzvec(ip1,ip2) * rxvec(ip2,ip3) +
-     &                       rxvec(ip1,ip2) * rzvec(ip3,ip2)
-                        za1a2 = rxvec(ip1,ip2) * ryvec(ip2,ip3) +
-     &                       ryvec(ip1,ip2) * rxvec(ip3,ip2)
+                        xaa1 = ryvec(ip1,j) * rzvec(ip2,ip1) + rzvec(ip1,j) * ryvec(ip1,ip2)
+                        yaa1 = rzvec(ip1,j) * rxvec(ip2,ip1) + rxvec(ip1,j) * rzvec(ip1,ip2)
+                        zaa1 = rxvec(ip1,j) * ryvec(ip2,ip1) + ryvec(ip1,j) * rxvec(ip1,ip2)
+                        xa1a2 = ryvec(ip1,ip2) * rzvec(ip2,ip3) + rzvec(ip1,ip2) * ryvec(ip3,ip2)
+                        ya1a2 = rzvec(ip1,ip2) * rxvec(ip2,ip3) + rxvec(ip1,ip2) * rzvec(ip3,ip2)
+                        za1a2 = rxvec(ip1,ip2) * ryvec(ip2,ip3) + ryvec(ip1,ip2) * rxvec(ip3,ip2)
 ! *** calculate lengths of cross products ***
                         daa1 = dsqrt(xaa1**2+yaa1**2+zaa1**2)
                         da1a2 = dsqrt(xa1a2**2+ya1a2**2+za1a2**2)
@@ -1148,8 +1005,7 @@
                            ycc = zaa1*xa1a2 - xaa1*za1a2
                            zcc = xaa1*ya1a2 - yaa1*xa1a2
 !     *** calculate scalar triple product ***
-                           tcc = xcc*rxvec(ip1,ip2) + ycc*ryvec(ip1,ip2)
-     &                      + zcc*rzvec(ip1,ip2)
+                           tcc = xcc*rxvec(ip1,ip2) + ycc*ryvec(ip1,ip2) + zcc*rzvec(ip1,ip2)
                            theta = dacos (thetac)
 
                            if (tcc .lt. 0.0d0) theta = -theta
@@ -1170,14 +1026,11 @@
          end do
 ! RP added for MPI
 
-         CALL MPI_ALLREDUCE(vbend, sum_vbend,1,MPI_DOUBLE_PRECISION,
-     &        MPI_SUM,MPI_COMM_WORLD,ierr)
+         CALL MPI_ALLREDUCE(vbend, sum_vbend,1,MPI_DOUBLE_PRECISION, MPI_SUM,MPI_COMM_WORLD,ierr)
 
-         CALL MPI_ALLREDUCE(vtg, sum_vtg,1,MPI_DOUBLE_PRECISION,
-     &        MPI_SUM,MPI_COMM_WORLD,ierr)
+         CALL MPI_ALLREDUCE(vtg, sum_vtg,1,MPI_DOUBLE_PRECISION, MPI_SUM,MPI_COMM_WORLD,ierr)
 
-         CALL MPI_ALLREDUCE(vvib, sum_vvib,1,MPI_DOUBLE_PRECISION,
-     &        MPI_SUM,MPI_COMM_WORLD,ierr)
+         CALL MPI_ALLREDUCE(vvib, sum_vvib,1,MPI_DOUBLE_PRECISION, MPI_SUM,MPI_COMM_WORLD,ierr)
 
        
          vbend = sum_vbend
@@ -1198,8 +1051,7 @@
 ! --- in box 2
 !      if ( .not. (lslit.and.ibox.eq.2)) then
       if (ibox .eq. 1) then
-         if ( ljoe .or. lsami .or. lmuir .or. 
-     &        lexzeo .or. lgraphite .or. lslit ) then
+         if ( ljoe .or. lsami .or. lmuir .or.  lexzeo .or. lgraphite .or. lslit ) then
 
 ! RP added for MPI
 !         do i = 1, nchain
@@ -1215,8 +1067,7 @@
                            dzui = rzu(i,j) - extz0(ntj)
                            dz3  = dzui * dzui * dzui
                            dz12 = dz3**4
-                           vext = vext + 
-     &                          (extc12(ntj)/dz12) - (extc3(ntj)/dz3)  
+                           vext = vext +  (extc12(ntj)/dz12) - (extc3(ntj)/dz3)  
                         end if
                      end if
 		  
@@ -1231,18 +1082,14 @@
 		  
                      if( lgraphite ) then
 			ntij = (ntj-1)*nntype + ntsubst
-			vext = vext + exgrph(rxu(i,j),ryu(i,j),
-     &				      rzu(i,j),ntij)
+			vext = vext + exgrph(rxu(i,j),ryu(i,j), 				      rzu(i,j),ntij)
                      end if
                      
-                     if ( lsami ) 
-     &                    vext = vext + exsami(rzu(i,j),ntj)
-                     if ( lmuir ) 
-     &                    vext = vext + exmuir(rzu(i,j),ntj)
+                     if ( lsami )  vext = vext + exsami(rzu(i,j),ntj)
+                     if ( lmuir )  vext = vext + exmuir(rzu(i,j),ntj)
                      if ( lexzeo ) then 
                         vtmp=exzeo(rxu(i,j),ryu(i,j),rzu(i,j),ntj)
-                        if (abs(vtmp).gt.1d5) write(iou,*) i,j,rxu(i
-     &                   ,j),ryu(i,j),rzu(i,j),vtmp
+                        if (abs(vtmp).gt.1d5) write(iou,*) i,j,rxu(i ,j),ryu(i,j),rzu(i,j),vtmp
                         vext = vext + vtmp
                      end if
                   end do
@@ -1250,8 +1097,7 @@
             end do
 
 ! RP added for MPI
-            CALL MPI_ALLREDUCE(vext, sum_vext,1,MPI_DOUBLE_PRECISION,
-     &           MPI_SUM,MPI_COMM_WORLD,ierr)
+            CALL MPI_ALLREDUCE(vext, sum_vext,1,MPI_DOUBLE_PRECISION, MPI_SUM,MPI_COMM_WORLD,ierr)
 
             vext = sum_vext
 
@@ -1282,8 +1128,7 @@
             end if 
          end do
 ! RP added for MPI
-         CALL MPI_ALLREDUCE(vext, sum_vext,1,MPI_DOUBLE_PRECISION,
-     &        MPI_SUM,MPI_COMM_WORLD,ierr)
+         CALL MPI_ALLREDUCE(vext, sum_vext,1,MPI_DOUBLE_PRECISION, MPI_SUM,MPI_COMM_WORLD,ierr)
 
        vext = sum_vext
        vext = vext * eXV_to_K 
@@ -1334,8 +1179,7 @@
       end do
       
 ! RP added for MPI
-      CALL MPI_ALLREDUCE(vwell, sum_vwell,1,MPI_DOUBLE_PRECISION,
-     &     MPI_SUM,MPI_COMM_WORLD,ierr)
+      CALL MPI_ALLREDUCE(vwell, sum_vwell,1,MPI_DOUBLE_PRECISION, MPI_SUM,MPI_COMM_WORLD,ierr)
       vwell = sum_vwell
       
       end if
@@ -1381,8 +1225,7 @@
          end do
          write(iou,*) 'inter lj energy ', vinter
          write(iou,*) 'intra lj energy ', vintra
-         if (ltailc) write(iou,*)
-     &        'Tail correction ', vtail
+         if (ltailc) write(iou,*) 'Tail correction ', vtail
          
 !         if (ltailc.and.lexzeo) write(iou,*)
 !     +        'Tail corr. zeol', nchbox(ibox)*coruz(iunit,rhoz,

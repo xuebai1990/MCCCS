@@ -32,12 +32,9 @@
 
       logical::lneighij
 
-      integer(KIND=normal_int)::i,ibox,flagon,iunit,j,imolty,icbu
-     & ,ic,ip
+      integer(KIND=normal_int)::i,ibox,flagon,iunit,j,imolty,icbu ,ic,ip
       integer(KIND=normal_int)::pick_unit, pick_chain
-      real(KIND=double_precision)::rx,ry,rz,dchain,random
-     & ,vnew,vold,vintran,vintrao,deltv,deltvb,disvsq,vintern,vintero
-     & ,vextn,vexto,rchain,velectn,velecto,vdum,vrecipo,vrecipn
+      real(KIND=double_precision)::rx,ry,rz,dchain,random ,vnew,vold,vintran,vintrao,deltv,deltvb,disvsq,vintern,vintero ,vextn,vexto,rchain,velectn,velecto,vdum,vrecipo,vrecipn
  
       real(KIND=double_precision)::vvibn,vbendn,vtgn,vvibo,vbendo,vtgo
 
@@ -72,8 +69,7 @@
          end if
          pick_chain = idint( dble(ncmt(1,imolty))*random() ) + 1
          pick_chain = parbox(pick_chain,1,imolty)
-         if ( moltyp(pick_chain) .ne. imolty ) 
-     &           write(iou,*) 'screwup traxyz'
+         if ( moltyp(pick_chain) .ne. imolty )  write(iou,*) 'screwup traxyz'
 
 
       else
@@ -142,18 +138,12 @@
       
 !  *** calculate the energy of i in the new configuration ***
       flagon = 2 
-       call Atom_energy(i,imolty, vnew,vintran, vintern,vextn,velectn
-     &     ,vewaldn,flagon, ibox,pick_unit, pick_unit,.true.,ovrlap,
-     &      .false.
-     &     ,vdum,.false.,.false.,vvibn,vbendn,vtgn)
+       call Atom_energy(i,imolty, vnew,vintran, vintern,vextn,velectn ,vewaldn,flagon, ibox,pick_unit, pick_unit,.true.,ovrlap, .false. ,vdum,.false.,.false.,vvibn,vbendn,vtgn)
       if (ovrlap) return
 
 ! *** calculate the energy of i in the old configuration ***
       flagon = 1
-      call Atom_energy(i,imolty,vold,vintrao,vintero,vexto,velecto
-     &     ,vewaldo,flagon,ibox,pick_unit, pick_unit,.true.,ovrlap,
-     &       .false.
-     &     ,vdum,.false.,.false.,vvibo,vbendo,vtgo)
+      call Atom_energy(i,imolty,vold,vintrao,vintero,vexto,velecto ,vewaldo,flagon,ibox,pick_unit, pick_unit,.true.,ovrlap, .false. ,vdum,.false.,.false.,vvibo,vbendo,vtgo)
 
       if (ovrlap) call cleanup('disaster ovrlap in old conf of TRAXYZ')
       
@@ -172,9 +162,7 @@
 ! *** For ANES algorithm, do the Fluctuating charge moves.
 ! *** For time being it will not work for atom disp [Neeraj]****
       if ( lanes ) then
-         call anes(i,ibox,ibox,1,laccept,deltv,vintern,vintran,vextn,
-     &        velectn,vintero,vintrao,vexto,velecto,vdum,vdum,
-     &        vdum,vdum,.false.)
+         call anes(i,ibox,ibox,1,laccept,deltv,vintern,vintran,vextn, velectn,vintero,vintrao,vexto,velecto,vdum,vdum, vdum,vdum,.false.)
          if ( laccept ) then
             if (lx) Abstrax = Abstrax + 1.0d0
             if (ly) Abstray = Abstray + 1.0d0
@@ -238,15 +226,11 @@
 ! *** check for update of near neighbour bitmap ***
 ! *** check for headgroup ***
          disvec(1,i,1) = disvec(1,i,1) + rx
-         disvsq = disvec(1,i,1) * disvec(1,i,1) +
-     &        disvec(1,i,2) * disvec(1,i,2) +
-     &        disvec(1,i,3) * disvec(1,i,3)
+         disvsq = disvec(1,i,1) * disvec(1,i,1) + disvec(1,i,2) * disvec(1,i,2) + disvec(1,i,3) * disvec(1,i,3)
          if (disvsq .gt. upnnsq) call updnn( i )
 ! *** check for last unit ***
          disvec(2,i,1) = disvec(2,i,1) + rx
-         disvsq = disvec(2,i,1) * disvec(2,i,1) +
-     &        disvec(2,i,2) * disvec(2,i,2) +
-     &        disvec(2,i,3) * disvec(2,i,3)
+         disvsq = disvec(2,i,1) * disvec(2,i,1) + disvec(2,i,2) * disvec(2,i,2) + disvec(2,i,3) * disvec(2,i,3)
          if (disvsq .gt. upnnsq) call updnn( i )
       end if
 

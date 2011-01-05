@@ -24,11 +24,9 @@
 !$$$      include 'system.inc'
 !$$$      include 'cell.inc'
 
-      integer(KIND=normal_int)::ibox, i,ii,imolty,iunit,j,stt,edd,mtype
-     & ,iwarn,inboxx,inboxy,inboxz,iadjust,itype
+      integer(KIND=normal_int)::ibox, i,ii,imolty,iunit,j,stt,edd,mtype ,iwarn,inboxx,inboxy,inboxz,iadjust,itype
       logical::lall,ldx,ldy,ldz,lintbx
-      real(KIND=double_precision)::rbx,rby,rbz,dx,dy,dz,nxcm,nycm
-     & ,nzcm
+      real(KIND=double_precision)::rbx,rby,rbz,dx,dy,dz,nxcm,nycm ,nzcm
       real(KIND=double_precision)::dmaxsq,rxuij,ryuij,rzuij,rijsq
 
       real(KIND=double_precision)::sx,sy,sz,nxcm2,nycm2,nzcm2
@@ -47,8 +45,7 @@
 
       if ((mtype .eq. 1) .or.(mtype .eq. 2).or.(mtype .eq. 5)) then 
 
-         if (mtype .eq. 1 .and. 
-     &        (lsolid(ibox) .and. .not. lrect(ibox))) then
+         if (mtype .eq. 1 .and.  (lsolid(ibox) .and. .not. lrect(ibox))) then
             iwarn = 2
          elseif(mtype.eq.2) then
 ! kea 6/3/09 --- necessary for non-COM rotations
@@ -93,12 +90,9 @@
 
             if (lsolid(ibox) .and. .not. lrect(ibox)) then
 
-               sx = nxcm*hmati(ibox,1)+nycm*hmati(ibox,4)
-     &              +nzcm*hmati(ibox,7)
-               sy = nxcm*hmati(ibox,2)+nycm*hmati(ibox,5)
-     &              +nzcm*hmati(ibox,8)
-               sz = nxcm*hmati(ibox,3)+nycm*hmati(ibox,6)
-     &              +nzcm*hmati(ibox,9)
+               sx = nxcm*hmati(ibox,1)+nycm*hmati(ibox,4) +nzcm*hmati(ibox,7)
+               sy = nxcm*hmati(ibox,2)+nycm*hmati(ibox,5) +nzcm*hmati(ibox,8)
+               sz = nxcm*hmati(ibox,3)+nycm*hmati(ibox,6) +nzcm*hmati(ibox,9)
 
                if ( sx .lt. -1.0d-10 ) then
                   sx = sx + 1.0d0
@@ -129,12 +123,9 @@
                   if ( mtype .eq. 5 ) then
                      write(iou,*) 'sx, sy, sz:',sx,sy,sz
                   end if
-                  nxcm2 = sx*hmat(ibox,1)+sy*hmat(ibox,4)
-     &                 +sz*hmat(ibox,7)
-                  nycm2 = sx*hmat(ibox,2)+sy*hmat(ibox,5)
-     &                 +sz*hmat(ibox,8)
-                  nzcm2 = sx*hmat(ibox,3)+sy*hmat(ibox,6)
-     &                 +sz*hmat(ibox,9)
+                  nxcm2 = sx*hmat(ibox,1)+sy*hmat(ibox,4) +sz*hmat(ibox,7)
+                  nycm2 = sx*hmat(ibox,2)+sy*hmat(ibox,5) +sz*hmat(ibox,8)
+                  nzcm2 = sx*hmat(ibox,3)+sy*hmat(ibox,6) +sz*hmat(ibox,9)
                   dx = nxcm2-nxcm
                   dy = nycm2-nycm
                   dz = nzcm2-nzcm
@@ -242,8 +233,7 @@
                   if (mtype .eq. 7) write(iou,*) 'config move'
                   if (mtype .eq. 8) write(iou,*) 'swatch move'
                   if (mtype .eq. 9) write(iou,*) 'energy call'
-                  write(iou,*) 'ibox,i,iunit,boxlen',ibox,i,iunit,rbx,
-     &                 rby,rbz
+                  write(iou,*) 'ibox,i,iunit,boxlen',ibox,i,iunit,rbx, rby,rbz
                   lintbx = .true.
                   write(iou,*) 'nxcm,nycm,nzcm',nxcm,nycm,nzcm
                   write(iou,*) 'dx,dy,dz',dx,dy,dz

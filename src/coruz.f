@@ -55,10 +55,7 @@
                sigma2 = sig2ij(ntij)
                epsilon2 = epsij(ntij)
             end if
-            coruz = coruz + 
-     &           8.0d0 * onepi * epsilon2 * 
-     &           sigma2**(1.5d0) *rho * 
-     &           (rci3 * rci3 * rci3 / 9.0d0 - rci3 / 3.0d0)
+            coruz = coruz +  8.0d0 * onepi * epsilon2 *  sigma2**(1.5d0) *rho *  (rci3 * rci3 * rci3 / 9.0d0 - rci3 / 3.0d0)
 !            end do
       end do
       return

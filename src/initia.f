@@ -25,40 +25,29 @@
 
 
       logical::lhere(nmax)       
-      integer(KIND=normal_int)::i,j,m,m1,m2,n,nn,ic,jc,kc,it,ip1,ip2,ip3
-     & ,ii,jj,iivib,jjben,jjtor,intemp,imol,ibtype,imolty,ibuild
-     & ,rand_id,offset,count_chain
+      integer(KIND=normal_int)::i,j,m,m1,m2,n,nn,ic,jc,kc,it,ip1,ip2,ip3 ,ii,jj,iivib,jjben,jjtor,intemp,imol,ibtype,imolty,ibuild ,rand_id,offset,count_chain
 
       integer(KIND=normal_int)::iboxst,iboxed,ibox,check,chktot
-      integer(KIND=normal_int)::mcmt(ntmax,nbxmax),pcmt(ntmax)
-     & ,mcmtma(ntmax,nbxmax)
+      integer(KIND=normal_int)::mcmt(ntmax,nbxmax),pcmt(ntmax) ,mcmtma(ntmax,nbxmax)
       integer(KIND=normal_int)::unitc,ntii
 
-      integer(KIND=normal_int)::bmap(numax),imap(numax),zzz,prev,ifrom
-     & ,nsave
+      integer(KIND=normal_int)::bmap(numax),imap(numax),zzz,prev,ifrom ,nsave
       logical::lacc(numax),lgrow,lterm,lgrown(ntmax)
 
-      real(KIND=double_precision)::xtemp(numax),ytemp(numax)
-     & ,ztemp(numax)
+      real(KIND=double_precision)::xtemp(numax),ytemp(numax) ,ztemp(numax)
       real(KIND=double_precision)::ddum
 
-      real(KIND=double_precision)::ux,uy,uz,xshift,dic ,xnext,ynext
-     & ,znext,xynext,angold,angnew,rot ,x1,y1,z1,d1,x2,y2,z2,d2,bang
-     & ,blen,random
+      real(KIND=double_precision)::ux,uy,uz,xshift,dic ,xnext,ynext ,znext,xynext,angold,angnew,rot ,x1,y1,z1,d1,x2,y2,z2,d2,bang ,blen,random
 
-      real(KIND=double_precision)::rxui,ryui,rzui,xaa1,yaa1,zaa1,daa1
-     & ,xa1a2,ya1a2,za1a2,da1a2 
+      real(KIND=double_precision)::rxui,ryui,rzui,xaa1,yaa1,zaa1,daa1 ,xa1a2,ya1a2,za1a2,da1a2 
 
       real(KIND=double_precision)::xcc,ycc,zcc,tcc,spltor
 
-      real(KIND=double_precision)::vtorso,vbend,vtg,thetac,theta,dot
-     & ,aben,ator
+      real(KIND=double_precision)::vtorso,vbend,vtg,thetac,theta,dot ,aben,ator
 
-      real(KIND=double_precision)::rxvec(numax,numax),ryvec(numax,numax)
-     & ,rzvec(numax,numax),distanceij(numax,numax)
+      real(KIND=double_precision)::rxvec(numax,numax),ryvec(numax,numax) ,rzvec(numax,numax),distanceij(numax,numax)
 
-      real(KIND=double_precision)::samx(ntmax,numax),samy(ntmax,numax)
-     & ,samz(ntmax,numax)
+      real(KIND=double_precision)::samx(ntmax,numax),samy(ntmax,numax) ,samz(ntmax,numax)
 
       real(KIND=double_precision)::vdummy
 
@@ -200,8 +189,7 @@
                end if
 
                if (nunit(i) .ne. nugrow(i)) then
-                  write(iou,*) 'Cant grow molecule.  Please',
-     &                 ' provide a structure via fort.78'
+                  write(iou,*) 'Cant grow molecule.  Please', ' provide a structure via fort.78'
                   call cleanup('')
                end if
 ! * put the first bead at the origin
@@ -222,8 +210,7 @@
 
                nchain = 1
 
-               call rosenbluth( .true.,lterm,1,1,i,ifrom
-     &              ,1,nugrow(i),ddum,.false.,ddum,2 )
+               call rosenbluth( .true.,lterm,1,1,i,ifrom ,1,nugrow(i),ddum,.false.,ddum,2 )
 
                if (lterm) then
                   write(iou,*) 'error in initia growing molecule'
@@ -276,8 +263,7 @@
                  count_chain = count_chain + 1
                  lhere(rand_id) = .true.
                  do imolty = 1,nmolty  
-                    if (count_chain.le.(mcmtma(imolty,ibox)+offset)) 
-     &                                                          then
+                    if (count_chain.le.(mcmtma(imolty,ibox)+offset)) then
                        moltyp(rand_id) = imolty     
                        goto 20 
                     end if 
@@ -420,9 +406,7 @@
                               zzz = m
                            end if
                         elseif (invib(intemp,m) .gt. 2) then
-                           write(iou,*) 'initia only works for linear',
-     &                          ' molecules!  Maybe you should make',
-     &                          ' a fort.78 file and use lbranch?'
+                           write(iou,*) 'initia only works for linear', ' molecules!  Maybe you should make', ' a fort.78 file and use lbranch?'
                            call cleanup('')
                         end if
                      end do
@@ -435,8 +419,7 @@
                      do m = 2,ibuild
                         prev = bmap(m-1)
                         do zzz = 1,ibuild
-                           if (ijvib(intemp,zzz,1) .eq. prev
-     &                          .or. ijvib(intemp,zzz,2) .eq. prev) then
+                           if (ijvib(intemp,zzz,1) .eq. prev .or. ijvib(intemp,zzz,2) .eq. prev) then
                               if (.not. lacc(zzz)) then
                                  bmap(m) = zzz
                                  imap(zzz) = m
@@ -487,8 +470,7 @@
                            
 ! * need to search for proper bond length
                            do zzz = 1,invib(intemp,bmap(m))
-                              if (ijvib(intemp,bmap(m),zzz) 
-     &                             .eq. bmap(m1)) then
+                              if (ijvib(intemp,bmap(m),zzz)  .eq. bmap(m1)) then
                                  ibtype = itvib(intemp,bmap(m),zzz)
                               end if
                            end do
@@ -499,8 +481,7 @@
                         else
 ! * need to search for proper bond length
                            do zzz = 1,invib(intemp,bmap(m))
-                              if (ijvib(intemp,bmap(m),zzz) 
-     &                             .eq. bmap(m1)) then
+                              if (ijvib(intemp,bmap(m),zzz)  .eq. bmap(m1)) then
                                  ibtype = itvib(intemp,bmap(m),zzz)
                               end if
                            end do
@@ -643,16 +624,13 @@
                ryui=ryu(n,ii)
                rzui=rzu(n,ii)
 
-               if ( n .eq. 1 .or. m .eq. 1 ) write(iou,"
-     &          ('coord. unit:   ',2i4,3f9.3,i6)") n,ii,rxui,ryui,rzui
-     &          ,nboxi(n)
+               if ( n .eq. 1 .or. m .eq. 1 ) write(iou," ('coord. unit:   ',2i4,3f9.3,i6)") n,ii,rxui,ryui,rzui ,nboxi(n)
                do iivib = 1, invib(1,ii)
                   jj = ijvib(1,ii,iivib)
                   rxvec(ii,jj) = rxu(n,jj) - rxui
                   ryvec(ii,jj) = ryu(n,jj) - ryui
                   rzvec(ii,jj) = rzu(n,jj) - rzui
-                  distanceij(ii,jj) = dsqrt( rxvec(ii,jj)**2
-     &                 + ryvec(ii,jj)**2 + rzvec(ii,jj)**2 )
+                  distanceij(ii,jj) = dsqrt( rxvec(ii,jj)**2 + ryvec(ii,jj)**2 + rzvec(ii,jj)**2 )
                   if ( nunit(imolty) .ne. nugrow(imolty) )then
 !                 --- account for explct atoms in opposite direction
                      rxvec(jj,ii)   = -rxvec(ii,jj)
@@ -668,8 +646,7 @@
 ! - vibrations -
                do iivib = 1, invib(1,j)
                   jj = ijvib(1,j,iivib)
-                  if ( n .eq. 1 ) write(iou,"('bond with units:',2i3
-     &             ,'   length:',f9.4)") j,jj,distanceij(j,jj)
+                  if ( n .eq. 1 ) write(iou,"('bond with units:',2i3 ,'   length:',f9.4)") j,jj,distanceij(j,jj)
                end do
 
 ! - bending -
@@ -677,10 +654,7 @@
                   ip2 = ijben3(imolty,j,jjben)
                   ip1 = ijben2(imolty,j,jjben)
                   it  = itben(imolty,j,jjben)
-                  thetac = ( rxvec(ip1,j)*rxvec(ip1,ip2) +
-     &                 ryvec(ip1,j)*ryvec(ip1,ip2) +
-     &                 rzvec(ip1,j)*rzvec(ip1,ip2) ) /
-     &                 ( distanceij(ip1,j)*distanceij(ip1,ip2) )
+                  thetac = ( rxvec(ip1,j)*rxvec(ip1,ip2) + ryvec(ip1,j)*ryvec(ip1,ip2) + rzvec(ip1,j)*rzvec(ip1,ip2) ) / ( distanceij(ip1,j)*distanceij(ip1,ip2) )
                   theta = dacos(thetac)
                   vbend = brbenk(it) * (theta-brben(it))**2
                   aben = aben + vbend
@@ -688,9 +662,7 @@
 !                  write(iou,*) 'theta',theta,'vbend',vbend
 !                  write(iou,*) 'brben',brben(it),'brbenk',brbenk(it)
 !                  end if
-                  if ( n .eq. 1 ) write(iou,"('bend with units:',3i3
-     &             ,'   type:',i3,'   angle:',f9.4,f9.2)") j,ip1,ip2,it
-     &             ,theta*raddeg,vbend
+                  if ( n .eq. 1 ) write(iou,"('bend with units:',3i3 ,'   type:',i3,'   angle:',f9.4,f9.2)") j,ip1,ip2,it ,theta*raddeg,vbend
                end do
 
 ! - torsions -
@@ -700,18 +672,12 @@
                   ip2 = ijtor3(imolty,j,jjtor)
                   it  = ittor(imolty,j,jjtor)
 ! *** calculate cross products d_a x d_a-1 and d_a-1 x d_a-2 ***
-                  xaa1 = ryvec(ip1,j) * rzvec(ip2,ip1) +
-     &                 rzvec(ip1,j) * ryvec(ip1,ip2)
-                  yaa1 = rzvec(ip1,j) * rxvec(ip2,ip1) +
-     &                 rxvec(ip1,j) * rzvec(ip1,ip2)
-                  zaa1 = rxvec(ip1,j) * ryvec(ip2,ip1) +
-     &                 ryvec(ip1,j) * rxvec(ip1,ip2)
-                  xa1a2 = ryvec(ip1,ip2) * rzvec(ip2,ip3) +
-     &                 rzvec(ip1,ip2) * ryvec(ip3,ip2)
-                  ya1a2 = rzvec(ip1,ip2) * rxvec(ip2,ip3) +
-     &                 rxvec(ip1,ip2) * rzvec(ip3,ip2)
-                  za1a2 = rxvec(ip1,ip2) * ryvec(ip2,ip3) +
-     &                 ryvec(ip1,ip2) * rxvec(ip3,ip2)
+                  xaa1 = ryvec(ip1,j) * rzvec(ip2,ip1) + rzvec(ip1,j) * ryvec(ip1,ip2)
+                  yaa1 = rzvec(ip1,j) * rxvec(ip2,ip1) + rxvec(ip1,j) * rzvec(ip1,ip2)
+                  zaa1 = rxvec(ip1,j) * ryvec(ip2,ip1) + ryvec(ip1,j) * rxvec(ip1,ip2)
+                  xa1a2 = ryvec(ip1,ip2) * rzvec(ip2,ip3) + rzvec(ip1,ip2) * ryvec(ip3,ip2)
+                  ya1a2 = rzvec(ip1,ip2) * rxvec(ip2,ip3) + rxvec(ip1,ip2) * rzvec(ip3,ip2)
+                  za1a2 = rxvec(ip1,ip2) * ryvec(ip2,ip3) + ryvec(ip1,ip2) * rxvec(ip3,ip2)
 ! *** calculate lengths of cross products ***
                   daa1 = dsqrt(xaa1**2+yaa1**2+zaa1**2)
                   da1a2 = dsqrt(xa1a2**2+ya1a2**2+za1a2**2)
@@ -728,8 +694,7 @@
                      ycc = zaa1*xa1a2 - xaa1*za1a2
                      zcc = xaa1*ya1a2 - yaa1*xa1a2
 !     *** calculate scalar triple product ***
-                     tcc = xcc*rxvec(ip1,ip2) + ycc*ryvec(ip1,ip2)
-     &                    + zcc*rzvec(ip1,ip2)
+                     tcc = xcc*rxvec(ip1,ip2) + ycc*ryvec(ip1,ip2) + zcc*rzvec(ip1,ip2)
                      theta=dacos(thetac)
 
                      if (tcc .lt. 0.0d0) theta = -theta
@@ -746,9 +711,7 @@
 
                   ator = ator + vtg
 !                  if ( n .eq. 1 ) write(iou,*) 'thetac',thetac,'vtg',vtg
-                  if ( n .eq. 1 ) write(iou,"('tors with units:',4i3
-     &             ,'   type:',i3,'   angle:',f9.4,f9.2)") j,ip1,ip2,ip3
-     &             ,it,dacos(thetac)*raddeg,vtg
+                  if ( n .eq. 1 ) write(iou,"('tors with units:',4i3 ,'   type:',i3,'   angle:',f9.4,f9.2)") j,ip1,ip2,ip3 ,it,dacos(thetac)*raddeg,vtg
                end do
             end do
 

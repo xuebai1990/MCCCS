@@ -27,8 +27,7 @@
 
       ibox = 1
       if (lmipsw.and.(nbox.gt.1)) call cleanup('ipsw only for 1 box')
-      if (lmipsw.and.lnpt.and.pmvol.gt.1.0d-7) call cleanup('ipsw
-     &                                                  only for NVT')
+      if (lmipsw.and.lnpt.and.pmvol.gt.1.0d-7) call cleanup('ipsw only for NVT')
       read(35,*)
       read(35,*) (lwell(i),i=1,nmolty)
       read(35,*)
@@ -53,28 +52,22 @@
       read(35,*)
       read(35,*) lstagea, lstageb, lstagec
       if (lmipsw) then
-         if ((.not.lstagea).and.(.not.lstageb).and.(.not.lstagec))
-     &      call cleanup('one stage must be true')
+         if ((.not.lstagea).and.(.not.lstageb).and.(.not.lstagec)) call cleanup('one stage must be true')
       end if
       if (llwell.and.lstagea) call cleanup('ipsw well NOT for stage a')
       if (lstagea) then
-         if (lstageb.or.lstagec) call cleanup('only one lstage must
-     &        be true')
+         if (lstageb.or.lstagec) call cleanup('only one lstage must be true')
       end if
       if (lstageb) then
-         if (lstagea.or.lstagec) call cleanup('only one lstage must
-     &        be true')
+         if (lstagea.or.lstagec) call cleanup('only one lstage must be true')
       end if
       if (lstagec) then
-         if (lstagea.or.lstageb) call cleanup('only one lstage must
-     &        be true')
+         if (lstagea.or.lstageb) call cleanup('only one lstage must be true')
       end if
       read(35,*)
       read(35,*) etais, lambdais
-      if ((lambdais.le.-1.0d-6).or.(lambdais.ge.1.000001))
-     &   call cleanup('lambdais must be between 0 and 1')
-      if ((etais.le.-1.0d-6).or.(etais.ge.1.000001))
-     &   call cleanup('etais must be between 0 and 1')
+      if ((lambdais.le.-1.0d-6).or.(lambdais.ge.1.000001)) call cleanup('lambdais must be between 0 and 1')
+      if ((etais.le.-1.0d-6).or.(etais.ge.1.000001)) call cleanup('etais must be between 0 and 1')
       read(35,*)
       if (lsolid(ibox).and.(.not.lrect(ibox))) then
          read(35,*) hmata(1),hmata(2),hmata(3)
@@ -161,8 +154,7 @@
       read(35,*)
       read(35,*) iratipsw
       if (lmipsw.and.lstageb) then
-         if (mod(iratipsw,iratp).ne.0) call cleanup('iratipsw must
-     & be integer multiple of iratp if lstageb is true')
+         if (mod(iratipsw,iratp).ne.0) call cleanup('iratipsw must be integer multiple of iratp if lstageb is true')
       end if
       do i = 1, nmolty
          if (lwell(i)) then
@@ -201,12 +193,9 @@
          do i = 1, nmolty
             if (lwell(i)) then
                do j = 1, nwell(i)*nunit(i)
-                  rxwell(j,i) = sxwell(j,i)*hmat(ibox,1)+
-     &               sywell(j,i)*hmat(ibox,4)+szwell(j,i)*hmat(ibox,7)
-                  rywell(j,i) = sxwell(j,i)*hmat(ibox,2)+
-     &               sywell(j,i)*hmat(ibox,5)+szwell(j,i)*hmat(ibox,8)
-                  rzwell(j,i) = sxwell(j,i)*hmat(ibox,3)+
-     &               sywell(j,i)*hmat(ibox,6)+szwell(j,i)*hmat(ibox,9)
+                  rxwell(j,i) = sxwell(j,i)*hmat(ibox,1)+ sywell(j,i)*hmat(ibox,4)+szwell(j,i)*hmat(ibox,7)
+                  rywell(j,i) = sxwell(j,i)*hmat(ibox,2)+ sywell(j,i)*hmat(ibox,5)+szwell(j,i)*hmat(ibox,8)
+                  rzwell(j,i) = sxwell(j,i)*hmat(ibox,3)+ sywell(j,i)*hmat(ibox,6)+szwell(j,i)*hmat(ibox,9)
                end do
             end if
          end do

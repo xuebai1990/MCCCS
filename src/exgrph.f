@@ -43,8 +43,7 @@
         
         aa = pi2 * rsol * delta * sig2ij(ntij)
 
-        e0 = aa*epsij(ntij)*((2.0d0/5.0d0)*(sz2**5) - (sz2**2) -
-     &          (sig2ij(ntij)**2/(3.0d0*delta*(0.61*delta+z)**3)))
+        e0 = aa*epsij(ntij)*((2.0d0/5.0d0)*(sz2**5) - (sz2**2) - (sig2ij(ntij)**2/(3.0d0*delta*(0.61*delta+z)**3)))
 
 !       write(82,*) e0,aa,delta,z       
         if ( lcorreg ) then
@@ -72,9 +71,7 @@
 !               write(84,*) zzz,k2,k5            
                 e1 = bb*(cc * k5 * (a1/z)**5 - dd * k2 * (a1/z)**2)
 !               write(82,*) bb,cc,dd,e1,k2,k5
-                fxy = -2.0d0*(cos(pi2*(x/a1 + y/sqrt(3.0d0)/a1)) +
-     &                  cos(pi2*(x/a1 - y/sqrt(3.0d0)/a1)) +
-     &                  cos(pi4*y/sqrt(3.0d0)/a1))
+                fxy = -2.0d0*(cos(pi2*(x/a1 + y/sqrt(3.0d0)/a1)) + cos(pi2*(x/a1 - y/sqrt(3.0d0)/a1)) + cos(pi4*y/sqrt(3.0d0)/a1))
 
 !       write(82,'(6g12.5)') x,y,z,fxy,e1,e0
                 exgrph = e0 + e1*fxy

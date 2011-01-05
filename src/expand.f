@@ -28,12 +28,8 @@
 !$$$      include 'poten.inc'
 
       logical::ovrlap
-      integer(KIND=normal_int)::i,ibox,iunit,flagon,itype,j,imolty,icbu
-     & ,ic,imt,jmt,itype2,disp
-      real(KIND=double_precision)::dchain,random,vnew,vold ,vintran
-     & ,vintrao,deltv,deltvb,vintern,vintero,vextn,vexto
-     & ,velectn,velecto,vdum ,vrecipo,vrecipn,vexpta,vexptb,volume,rho
-     & ,coru
+      integer(KIND=normal_int)::i,ibox,iunit,flagon,itype,j,imolty,icbu ,ic,imt,jmt,itype2,disp
+      real(KIND=double_precision)::dchain,random,vnew,vold ,vintran ,vintrao,deltv,deltvb,vintern,vintero,vextn,vexto ,velectn,velecto,vdum ,vrecipo,vrecipn,vexpta,vexptb,volume,rho ,coru
 
 !      write(iou,*) 'start expand-ensemble move'
 ! ***    select a chain at random ***
@@ -44,8 +40,7 @@
             dchain = 2.0d0
          end if
       end do
-      if ( .not. lexpand(imolty) ) 
-     &     call cleanup('wrong type of molecule for the ES-move')
+      if ( .not. lexpand(imolty) )  call cleanup('wrong type of molecule for the ES-move')
 
       if (lgrand) then
 ! ---    select a chain at random in box 1!
@@ -72,8 +67,7 @@
 ! *** perform a move in the expanded coefficients
 
  10   disp = int( rmexpc(imolty)*(2.0d0*random()-1.0d0) )
-      itype = mod(eetype(imolty)+disp+numcoeff(imolty)
-     &     , numcoeff(imolty))
+      itype = mod(eetype(imolty)+disp+numcoeff(imolty) , numcoeff(imolty))
       if ( disp .eq. 0 ) goto 10
       if ( itype .eq. 0 ) itype = numcoeff(imolty)
       do ic = 1,2
@@ -98,9 +92,7 @@
          epsilon(imolty,j) = epsil(imolty,j,itype)
          sigma(imolty,j) = sigm(imolty,j,itype)
       end do
-      call energy(i,imolty, vnew,vintran, vintern,vextn,velectn
-     &     ,vdum,flagon, ibox,1, iunit,.false.,ovrlap,.false.
-     &     ,vdum,.false.,.false.)
+      call energy(i,imolty, vnew,vintran, vintern,vextn,velectn ,vdum,flagon, ibox,1, iunit,.false.,ovrlap,.false. ,vdum,.false.,.false.)
       if (ovrlap) return
 
 !     Start of intermolecular tail correction for new
@@ -114,8 +106,7 @@
          do imt = 1, nmolty
             do jmt = 1, nmolty
                rho = dble(ncmt(ibox,jmt))/volume
-               vexpta = vexpta +
-     &              dble( ncmt(ibox,imt) ) * coru(imt,jmt,rho,ibox)
+               vexpta = vexpta + dble( ncmt(ibox,imt) ) * coru(imt,jmt,rho,ibox)
             end do
          end do
          vnew = vnew + vexpta
@@ -128,9 +119,7 @@
          epsilon(imolty,j) = epsil(imolty,j,eetype(imolty))
          sigma(imolty,j) = sigm(imolty,j,eetype(imolty))
       end do
-      call energy(i,imolty,vold,vintrao,vintero,vexto,velecto
-     &     ,vdum,flagon,ibox,1, iunit,.false.,ovrlap,.false.
-     &     ,vdum,.false.,.false.)
+      call energy(i,imolty,vold,vintrao,vintero,vexto,velecto ,vdum,flagon,ibox,1, iunit,.false.,ovrlap,.false. ,vdum,.false.,.false.)
 
 
 !     Start of intermolecular tail correction for old
@@ -140,8 +129,7 @@
          do imt = 1, nmolty
             do jmt = 1, nmolty
                rho = ncmt(ibox,jmt) / volume
-               vexptb = vexptb + 
-     &              dble(ncmt(ibox,imt)) * coru(imt,jmt,rho,ibox)
+               vexptb = vexptb +  dble(ncmt(ibox,imt)) * coru(imt,jmt,rho,ibox)
             end do
          end do
          vold = vold + vexptb
@@ -163,8 +151,7 @@
 
 ! *** check for acceptance ***
  
-      deltv  = vnew - vold + eta(ibox,imolty,itype) 
-     &     - eta(ibox,imolty,eetype(imolty))
+      deltv  = vnew - vold + eta(ibox,imolty,itype)  - eta(ibox,imolty,eetype(imolty))
       deltvb = beta * deltv
 
       if ( deltvb .gt. (2.3d0*softcut) ) return
@@ -187,8 +174,7 @@
       vtailb(ibox) = vtailb(ibox) + vexpta - vexptb
       
       ncmt2(ibox,imolty,itype) = ncmt2(ibox,imolty,itype) + 1
-      ncmt2(ibox,imolty,eetype(imolty)) = 
-     &     ncmt2(ibox,imolty,eetype(imolty)) - 1
+      ncmt2(ibox,imolty,eetype(imolty)) =  ncmt2(ibox,imolty,eetype(imolty)) - 1
       eetype(imolty) = itype
       do j = 1,iunit
          qqu(i,j) = qquion(j,2)

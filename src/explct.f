@@ -22,12 +22,8 @@
 !$$$      include 'connect.inc'
 
 ! - arguments
-      integer(KIND=normal_int)::ichain,nngrow,negrow,i,iplus,imins,nn,
-     & imolty,iuend,ii,jj
-      real(KIND=double_precision)::vmethyl,ch,cc,cch,ca,ah,hch2,hk,ck
-     & ,en0,aa1,b1,c1,dln1,a2,b2,c2,dln2,a3,b3,c3,x12,y12,z12,x32,y32
-     & ,z32,xa,ya,za,r,rx,ry,rz,dr,ven,random,prob,a4,b4,c4,rn,hch
-     & ,ce,ratio
+      integer(KIND=normal_int)::ichain,nngrow,negrow,i,iplus,imins,nn, imolty,iuend,ii,jj
+      real(KIND=double_precision)::vmethyl,ch,cc,cch,ca,ah,hch2,hk,ck ,en0,aa1,b1,c1,dln1,a2,b2,c2,dln2,a3,b3,c3,x12,y12,z12,x32,y32 ,z32,xa,ya,za,r,rx,ry,rz,dr,ven,random,prob,a4,b4,c4,rn,hch ,ce,ratio
       real(KIND=double_precision)::oa,hoh,hoh2,oh,ok,om
       logical::lcrysl,londone,lswitch,lalkanol
 
@@ -57,12 +53,9 @@
 ! - constraint
 
             om = brvib(itvib(imolty,4,1))
-            aa1 = 0.5d0*(rxu(ichain,2)+rxu(ichain,3)) 
-     &           - rxu(ichain,1)
-            b1 = 0.5d0*(ryu(ichain,2)+ryu(ichain,3)) 
-     &           - ryu(ichain,1)
-            c1 = 0.5d0*(rzu(ichain,2)+rzu(ichain,3)) 
-     &           - rzu(ichain,1)
+            aa1 = 0.5d0*(rxu(ichain,2)+rxu(ichain,3))  - rxu(ichain,1)
+            b1 = 0.5d0*(ryu(ichain,2)+ryu(ichain,3))  - ryu(ichain,1)
+            c1 = 0.5d0*(rzu(ichain,2)+rzu(ichain,3))  - rzu(ichain,1)
             dr = dsqrt(aa1*aa1+b1*b1+c1*c1)
             rxu(ichain,4) = rxu(ichain,1) + om*aa1/dr
             ryu(ichain,4) = ryu(ichain,1) + om*b1/dr
@@ -71,8 +64,7 @@
             
          elseif ( nngrow .eq. 1 ) then
 
-            if ( itvib(imolty,nngrow+1,1) .eq. 
-     &           itvib(imolty,nngrow+2,1) ) then
+            if ( itvib(imolty,nngrow+1,1) .eq.  itvib(imolty,nngrow+2,1) ) then
                oh = brvib(itvib(imolty,nngrow+1,1))
                if ( nunit(imolty) .eq. 3 ) then
 ! - SPC geometry
@@ -139,12 +131,9 @@
                end if
                if ( nunit(imolty) .eq. 4 ) then
                   om = brvib(itvib(imolty,4,1))
-                  aa1 = 0.5d0*(rxu(ichain,2)+rxu(ichain,3)) 
-     &                 - rxu(ichain,1)
-                  b1 = 0.5d0*(ryu(ichain,2)+ryu(ichain,3)) 
-     &                 - ryu(ichain,1)
-                  c1 = 0.5d0*(rzu(ichain,2)+rzu(ichain,3)) 
-     &                 - rzu(ichain,1)
+                  aa1 = 0.5d0*(rxu(ichain,2)+rxu(ichain,3))  - rxu(ichain,1)
+                  b1 = 0.5d0*(ryu(ichain,2)+ryu(ichain,3))  - ryu(ichain,1)
+                  c1 = 0.5d0*(rzu(ichain,2)+rzu(ichain,3))  - rzu(ichain,1)
                   dr = dsqrt(aa1*aa1+b1*b1+c1*c1)
                   rxu(ichain,4) = rxu(ichain,1) + om*aa1/dr
                   ryu(ichain,4) = ryu(ichain,1) + om*b1/dr
@@ -172,8 +161,7 @@
             end if 
          end if
          
-      elseif ( nunit(imolty) .eq. 5 .or. nunit(imolty) .eq. 7
-     &        .or. nunit(imolty) .eq. 9 ) then
+      elseif ( nunit(imolty) .eq. 5 .or. nunit(imolty) .eq. 7 .or. nunit(imolty) .eq. 9 ) then
          
 
 ! - Methane case or other rigid molecule with 5 units
@@ -228,12 +216,9 @@
             b2 = b3/dln1
             c2 = c3/dln1
 
-            aa1 = 0.5d0*(rxu(ichain,1)+rxu(ichain,3))-
-     &           rxu(ichain,2)
-            b1 = 0.5d0*(ryu(ichain,1)+ryu(ichain,3))-
-     &           ryu(ichain,2)
-            c1 = 0.5d0*(rzu(ichain,1)+rzu(ichain,3))-
-     &           rzu(ichain,2)
+            aa1 = 0.5d0*(rxu(ichain,1)+rxu(ichain,3))- rxu(ichain,2)
+            b1 = 0.5d0*(ryu(ichain,1)+ryu(ichain,3))- ryu(ichain,2)
+            c1 = 0.5d0*(rzu(ichain,1)+rzu(ichain,3))- rzu(ichain,2)
             dln1 = dsqrt(aa1*aa1 + b1*b1 + c1*c1)
             aa1 = aa1/dln1
             b1 = b1/dln1
@@ -242,12 +227,9 @@
             b3 = -(aa1*c2 - a2*c1)
             c3 = aa1*b2 - a2*b1
            
-            rxu(ichain,4) = rxu(ichain,2) + 2.25d0*aa1 + 
-     &           0.41d0*a2+0.77d0*a3
-            ryu(ichain,4) = ryu(ichain,2) + 2.25d0*b1 + 
-     &           0.41d0*b2+0.77d0*b3
-            rzu(ichain,4) = rzu(ichain,2) + 2.25d0*c1 + 
-     &           0.41d0*c2+0.77d0*c3
+            rxu(ichain,4) = rxu(ichain,2) + 2.25d0*aa1 +  0.41d0*a2+0.77d0*a3
+            ryu(ichain,4) = ryu(ichain,2) + 2.25d0*b1 +  0.41d0*b2+0.77d0*b3
+            rzu(ichain,4) = rzu(ichain,2) + 2.25d0*c1 +  0.41d0*c2+0.77d0*c3
             rxu(ichain,5) = rxu(ichain,4) - 1.54d0*a3
             ryu(ichain,5) = ryu(ichain,4) - 1.54d0*b3
             rzu(ichain,5) = rzu(ichain,4) - 1.54d0*c3
@@ -341,31 +323,19 @@
 !     &                 /brvib(itvib(1,nngrow+1,1))
 !               end if
                ratio = 1.0d0
-               rxu(ichain,2) = rxu(ichain,1) + ratio*(rxu(ichain,2)
-     &              -rxu(ichain,1))
-               ryu(ichain,2) = ryu(ichain,1) + ratio*(ryu(ichain,2)
-     &              -ryu(ichain,1))
-               rzu(ichain,2) = rzu(ichain,1) + ratio*(rzu(ichain,2)
-     &              -rzu(ichain,1))
-               rxu(ichain,3) = rxu(ichain,1) + ratio*(rxu(ichain,3)
-     &              -rxu(ichain,1))
-               ryu(ichain,3) = ryu(ichain,1) + ratio*(ryu(ichain,3)
-     &              -ryu(ichain,1))
-               rzu(ichain,3) = rzu(ichain,1) + ratio*(rzu(ichain,3)
-     &              -rzu(ichain,1))
+               rxu(ichain,2) = rxu(ichain,1) + ratio*(rxu(ichain,2) -rxu(ichain,1))
+               ryu(ichain,2) = ryu(ichain,1) + ratio*(ryu(ichain,2) -ryu(ichain,1))
+               rzu(ichain,2) = rzu(ichain,1) + ratio*(rzu(ichain,2) -rzu(ichain,1))
+               rxu(ichain,3) = rxu(ichain,1) + ratio*(rxu(ichain,3) -rxu(ichain,1))
+               ryu(ichain,3) = ryu(ichain,1) + ratio*(ryu(ichain,3) -ryu(ichain,1))
+               rzu(ichain,3) = rzu(ichain,1) + ratio*(rzu(ichain,3) -rzu(ichain,1))
                ratio = 0.7d0/0.25d0
-               rxu(ichain,4) = rxu(ichain,1) + ratio*(rxu(ichain,4)
-     &              -rxu(ichain,1))
-               ryu(ichain,4) = ryu(ichain,1) + ratio*(ryu(ichain,4)
-     &              -ryu(ichain,1))
-               rzu(ichain,4) = rzu(ichain,1) + ratio*(rzu(ichain,4)
-     &              -rzu(ichain,1))
-               rxu(ichain,5) = rxu(ichain,1) + ratio*(rxu(ichain,5)
-     &              -rxu(ichain,1))
-               ryu(ichain,5) = ryu(ichain,1) + ratio*(ryu(ichain,5)
-     &              -ryu(ichain,1))
-               rzu(ichain,5) = rzu(ichain,1) + ratio*(rzu(ichain,5)
-     &              -rzu(ichain,1))
+               rxu(ichain,4) = rxu(ichain,1) + ratio*(rxu(ichain,4) -rxu(ichain,1))
+               ryu(ichain,4) = ryu(ichain,1) + ratio*(ryu(ichain,4) -ryu(ichain,1))
+               rzu(ichain,4) = rzu(ichain,1) + ratio*(rzu(ichain,4) -rzu(ichain,1))
+               rxu(ichain,5) = rxu(ichain,1) + ratio*(rxu(ichain,5) -rxu(ichain,1))
+               ryu(ichain,5) = ryu(ichain,1) + ratio*(ryu(ichain,5) -ryu(ichain,1))
+               rzu(ichain,5) = rzu(ichain,1) + ratio*(rzu(ichain,5) -rzu(ichain,1))
             else
                ch = brvib(itvib(imolty,2,1))
                hch2 = brben(itben(imolty,2,1))/2
@@ -430,29 +400,20 @@
                do i = 1,4
                   ii = i + 1
                   jj = i + 5
-                  rxu(ichain,jj) = rxu(ichain,1) + ratio*
-     &                 (rxu(ichain,ii)-rxu(ichain,1))
-                  ryu(ichain,jj) = ryu(ichain,1) + ratio*
-     &                 (ryu(ichain,ii)-ryu(ichain,1))
-                  rzu(ichain,jj) = rzu(ichain,1) + ratio*
-     &                 (rzu(ichain,ii)-rzu(ichain,1))
+                  rxu(ichain,jj) = rxu(ichain,1) + ratio* (rxu(ichain,ii)-rxu(ichain,1))
+                  ryu(ichain,jj) = ryu(ichain,1) + ratio* (ryu(ichain,ii)-ryu(ichain,1))
+                  rzu(ichain,jj) = rzu(ichain,1) + ratio* (rzu(ichain,ii)-rzu(ichain,1))
                end do
             end if
          end if
          if ( nunit(imolty) .eq. 7 ) then
 ! *** for seven site water model
-            rxu(ichain,6) = 
-     &           4d0*rxu(ichain,4)-3d0*rxu(ichain,1)
-            ryu(ichain,6) = 
-     &           4d0*ryu(ichain,4)-3d0*ryu(ichain,1)
-            rzu(ichain,6) = 
-     &           4d0*rzu(ichain,4)-3d0*rzu(ichain,1)
-            rxu(ichain,7) = 
-     &           4d0*rxu(ichain,5)-3d0*rxu(ichain,1)
-            ryu(ichain,7) = 
-     &           4d0*ryu(ichain,5)-3d0*ryu(ichain,1)
-            rzu(ichain,7) = 
-     &           4d0*rzu(ichain,5)-3d0*rzu(ichain,1)
+            rxu(ichain,6) =  4d0*rxu(ichain,4)-3d0*rxu(ichain,1)
+            ryu(ichain,6) =  4d0*ryu(ichain,4)-3d0*ryu(ichain,1)
+            rzu(ichain,6) =  4d0*rzu(ichain,4)-3d0*rzu(ichain,1)
+            rxu(ichain,7) =  4d0*rxu(ichain,5)-3d0*rxu(ichain,1)
+            ryu(ichain,7) =  4d0*ryu(ichain,5)-3d0*ryu(ichain,1)
+            rzu(ichain,7) =  4d0*rzu(ichain,5)-3d0*rzu(ichain,1)
          end if
       else
 
@@ -480,15 +441,9 @@
             do i = 2,nngrow-iuend
                iplus = i+1
                imins = i-1
-               aa1 = (ryu(ichain,imins)-ryu(ichain,i))*(rzu(ichain
-     &          ,iplus)-rzu(ichain,i)) - (rzu(ichain,imins)-rzu(ichain
-     &          ,i))*(ryu(ichain,iplus)-ryu(ichain,i))
-               b1 = -(rxu(ichain,imins)-rxu(ichain,i))*(rzu(ichain
-     &          ,iplus)-rzu(ichain,i)) + (rzu(ichain,imins)-rzu(ichain
-     &          ,i))*(rxu(ichain,iplus)-rxu(ichain,i))
-               c1 = (rxu(ichain,imins)-rxu(ichain,i))*(ryu(ichain,iplus)
-     &          -ryu(ichain,i)) - (ryu(ichain,imins)-ryu(ichain,i))*
-     &          (rxu(ichain,iplus)-rxu(ichain,i))
+               aa1 = (ryu(ichain,imins)-ryu(ichain,i))*(rzu(ichain ,iplus)-rzu(ichain,i)) - (rzu(ichain,imins)-rzu(ichain ,i))*(ryu(ichain,iplus)-ryu(ichain,i))
+               b1 = -(rxu(ichain,imins)-rxu(ichain,i))*(rzu(ichain ,iplus)-rzu(ichain,i)) + (rzu(ichain,imins)-rzu(ichain ,i))*(rxu(ichain,iplus)-rxu(ichain,i))
+               c1 = (rxu(ichain,imins)-rxu(ichain,i))*(ryu(ichain,iplus) -ryu(ichain,i)) - (ryu(ichain,imins)-ryu(ichain,i))* (rxu(ichain,iplus)-rxu(ichain,i))
                dln1 = dsqrt(aa1**2 + b1**2 + c1**2)
                aa1 = aa1/dln1
                b1 = b1/dln1

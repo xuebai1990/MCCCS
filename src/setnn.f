@@ -32,8 +32,7 @@
 !$$$      include 'neigh.inc'
 !$$$      include 'system.inc'
       integer(KIND=normal_int)::i,j,ii,jj,ibox
-      real(KIND=double_precision)::rxui,ryui,rzui,rxuij,ryuij,rzuij
-     & ,rijsq,rcnnsq
+      real(KIND=double_precision)::rxui,ryui,rzui,rxuij,ryuij,rzuij ,rijsq,rcnnsq
 ! -----------------------------------------------------------------------------
  
       rcnnsq = rcutnn(ibox)**2
@@ -66,8 +65,7 @@
 ! --- loop over all chains j
             do 98 j = 1, nchain
                
-               if ( ( i .eq. j ) .or. 
-     &              ( nboxi(i) .ne. nboxi(j) ) ) go to 98
+               if ( ( i .eq. j ) .or.  ( nboxi(i) .ne. nboxi(j) ) ) go to 98
 
                if ( lnn(i,j) ) go to 98
 

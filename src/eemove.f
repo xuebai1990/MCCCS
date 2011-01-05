@@ -36,11 +36,8 @@
 !$$$      include 'eepar.inc'
 
       logical::ovrlap
-      integer(KIND=normal_int)::i,ibox,iunit,imolty,imolty1,j
-     & ,idummy(nmax)
-      real(KIND=double_precision)::dum,vrecipn,vrecipo,vnew,vold,vintern
-     & ,vintero,vintran,vintrao,velectn,velecto,vewaldn,vewaldo,vextn
-     & ,vexto,deltv,deltvb,random,wdeltvb,vtailn,vtailo
+      integer(KIND=normal_int)::i,ibox,iunit,imolty,imolty1,j ,idummy(nmax)
+      real(KIND=double_precision)::dum,vrecipn,vrecipo,vnew,vold,vintern ,vintero,vintran,vintrao,velectn,velecto,vewaldn,vewaldo,vextn ,vexto,deltv,deltvb,random,wdeltvb,vtailn,vtailo
       
 ! --------------------------------------------------------------------
 
@@ -75,14 +72,12 @@
 ! --- type of move depending upon mstate and nstate. one type of move
 ! --- is 'swap', other is usual ee
 
-      wee_ratio = dexp(psi(nstate)-psi(mstate))*
-     &      um_markov(nstate,mstate)/um_markov(mstate,nstate)
+      wee_ratio = dexp(psi(nstate)-psi(mstate))* um_markov(nstate,mstate)/um_markov(mstate,nstate)
 
 !	write(iou,*) 'mstate', mstate, ee_moltyp(mstate)
 !	write(iou,*) 'nstate', nstate, ee_moltyp(nstate)
 
-      if ((mstate.eq.sstate1.and.nstate.eq.sstate2).or.
-     &    (mstate.eq.sstate2.and.nstate.eq.sstate1)) then
+      if ((mstate.eq.sstate1.and.nstate.eq.sstate2).or. (mstate.eq.sstate2.and.nstate.eq.sstate1)) then
 
          boxrem1 = box_state(mstate)
          boxins1 = box_state(nstate)
@@ -112,9 +107,7 @@
          end do
 
          moltion(1) = imolty
-         call ee_energy(eeirem,imolty,vnew,vintran,vintern,vextn,velectn
-     &               ,vewaldn,vtailn,2,ibox,1,iunit,.false.,ovrlap
-     &               ,.false.,dum,.false.,.false.)
+         call ee_energy(eeirem,imolty,vnew,vintran,vintern,vextn,velectn ,vewaldn,vtailn,2,ibox,1,iunit,.false.,ovrlap ,.false.,dum,.false.,.false.)
 !         call energy(eeirem,imolty,vnew,vintran,vintern,vextn,velectn
 !     &               ,vewaldn,2,ibox,1,iunit,.false.,ovrlap
 !     &               ,.false.,dum,.false.,.false.)
@@ -131,9 +124,7 @@
             qquion(i,1) = qqu(eeirem,i)
          end do
          moltion(2) = imolty
-         call ee_energy(eeirem,imolty,vold,vintrao,vintero,vexto,velecto
-     &               ,vewaldo,vtailo,1,ibox,1,iunit,.false.,ovrlap
-     &               ,.false.,dum,.false.,.false.)
+         call ee_energy(eeirem,imolty,vold,vintrao,vintero,vexto,velecto ,vewaldo,vtailo,1,ibox,1,iunit,.false.,ovrlap ,.false.,dum,.false.,.false.)
 !         call energy(eeirem,imolty,vold,vintrao,vintero,vexto,velecto
 !     &               ,vewaldo,1,ibox,1,iunit,.false.,ovrlap
 !     &               ,.false.,dum,.false.,.false.)
@@ -174,8 +165,7 @@
 !     &          parbox(eepointp,ibox,imolty1),
 !     &          parbox(eepointp,ibox,imolty)
 
-         parbox(eepointp,ibox,imolty) =
-     &      parbox(ncmt(ibox,imolty),ibox,imolty)
+         parbox(eepointp,ibox,imolty) = parbox(ncmt(ibox,imolty),ibox,imolty)
 
 !	write(iou,*) 'update new1', imolty,parbox(eepointp,ibox,imolty),
 !     &              ncmt(ibox,imolty)

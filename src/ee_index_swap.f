@@ -34,8 +34,7 @@
          if (random().le.0.5d0) then
             eepointp = idint(dble(ncmt(ibox,imolty))*random())+1
          else
-            accr=dble(ncmt(ibox1,imolty))/(dble(ncmt(ibox,imolty))+1.0)
-     &           *dexp(psi(fmstate)-psi(1))
+            accr=dble(ncmt(ibox1,imolty))/(dble(ncmt(ibox,imolty))+1.0) *dexp(psi(fmstate)-psi(1))
             if (random().le.accr) then
                mstate = fmstate
                eepointp = idint(dble(ncmt(ibox1,imolty))*random())+1
@@ -46,8 +45,7 @@
          if (random().le.0.5d0) then
             eepointp = idint(dble(ncmt(ibox1,imolty))*random())+1
          else
-            accr=dble(ncmt(ibox,imolty))/(dble(ncmt(ibox1,imolty))+1.0)
-     &           *dexp(psi(1)-psi(fmstate))
+            accr=dble(ncmt(ibox,imolty))/(dble(ncmt(ibox1,imolty))+1.0) *dexp(psi(1)-psi(fmstate))
             if (random().le.accr) then
                mstate = 1
                eepointp = idint(dble(ncmt(ibox,imolty))*random())+1

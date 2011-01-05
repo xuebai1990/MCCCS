@@ -1,6 +1,4 @@
-      subroutine Intra_energy ( i,imolty, v, vintra, vinter,vext
-     &     ,velect,vewald,flagon,ibox, istart, iuend,lljii,ovrlap
-     &     ,ltors,vtors,lcharge_table,lfavor,vvib,vbend,vtg)
+      subroutine Intra_energy ( i,imolty, v, vintra, vinter,vext ,velect,vewald,flagon,ibox, istart, iuend,lljii,ovrlap ,ltors,vtors,lcharge_table,lfavor,vvib,vbend,vtg)
 
  
 !    *******************************************************************
@@ -45,10 +43,8 @@
 
       real(KIND=double_precision)::vvib,vbend,vtg,theta
 
-      real(KIND=double_precision)::v,vintra, vinter ,vext,rcutsq,rminsq
-     & ,rxui,rzui,ryui,rcinsq ,vtors ,velect,vewald,rbcut
-      real(KIND=double_precision)::rxvec,ryvec,rzvec,xaa1,yaa1,zaa1
-     & ,xa1a2,ya1a2,za1a2,daa1,da1a2,dot,thetac,vtorso
+      real(KIND=double_precision)::v,vintra, vinter ,vext,rcutsq,rminsq ,rxui,rzui,ryui,rcinsq ,vtors ,velect,vewald,rbcut
+      real(KIND=double_precision)::rxvec,ryvec,rzvec,xaa1,yaa1,zaa1 ,xa1a2,ya1a2,za1a2,daa1,da1a2,dot,thetac,vtorso
       real(KIND=double_precision)::distanceij(numax,numax)
       real(KIND=double_precision)::xcc,ycc,zcc,tcc,spltor, tabulated_vib
 
@@ -86,8 +82,7 @@
                    rxvec(ii,jj) = rxu(i,jj) - rxui
                    ryvec(ii,jj) = ryu(i,jj) - ryui
                    rzvec(ii,jj) = rzu(i,jj) - rzui 
-                   distanceij(ii,jj) = dsqrt( rxvec(ii,jj)**2
-     &                 + ryvec(ii,jj)**2 + rzvec(ii,jj)**2 )
+                   distanceij(ii,jj) = dsqrt( rxvec(ii,jj)**2 + ryvec(ii,jj)**2 + rzvec(ii,jj)**2 )
 
                    if ( nunit(imolty) .ne. nugrow(imolty) )then
 !                  --- account for explct atoms in opposite direction
@@ -106,14 +101,12 @@
                       ip1 = ijvib(imolty,j,jjvib)
                       it  = itvib(imolty,j,jjvib)
                       if (L_vib_table) then
-                         call lininter_vib(distanceij(ip1,j), 
-     &                        tabulated_vib, it)
+                         call lininter_vib(distanceij(ip1,j),  tabulated_vib, it)
                          vvib = vvib + tabulated_vib
 !                         write(2,*) 'INTRA_ENERGY VVIB: ', 
 !     &                        tabulated_vib
                       end if
-                      if ( ip1 .lt. j .and..not.L_vib_table) vvib = vvib
-     &                 + brvibk(it)*( distanceij(ip1,j)-brvib(it) ) **2
+                      if ( ip1 .lt. j .and..not.L_vib_table) vvib = vvib + brvibk(it)*( distanceij(ip1,j)-brvib(it) ) **2
                    end do
                 end do
 !             end if
@@ -127,16 +120,12 @@
                    if ( ip2 .lt. j ) then
                       ip1 = ijben2(imolty,j,jjben)
                       it  = itben(imolty,j,jjben)
-                      thetac = ( rxvec(ip1,j)*rxvec(ip1,ip2) +
-     &                     ryvec(ip1,j)*ryvec(ip1,ip2) +
-     &                     rzvec(ip1,j)*rzvec(ip1,ip2) ) /
-     &                     ( distanceij(ip1,j)*distanceij(ip1,ip2) )
+                      thetac = ( rxvec(ip1,j)*rxvec(ip1,ip2) + ryvec(ip1,j)*ryvec(ip1,ip2) + rzvec(ip1,j)*rzvec(ip1,ip2) ) / ( distanceij(ip1,j)*distanceij(ip1,ip2) )
                       if ( thetac .ge. 1.0d0 ) thetac = 1.0d0
                       if ( thetac .le. -1.0d0 ) thetac = -1.0d0
 
                       theta = dacos(thetac)
-                      vbend = vbend +
-     &                     brbenk(it) * (theta-brben(it))**2
+                      vbend = vbend + brbenk(it) * (theta-brben(it))**2
 
 !                      write(iou,*) 'ip2,ip1,j',ip2,ip1,j
 !                      write(iou,*) 'bend energy, theta '
@@ -155,18 +144,12 @@
                       ip2 = ijtor3(imolty,j,jjtor)
                       it  = ittor(imolty,j,jjtor)
 !*** calculate cross products d_a x d_a-1 and d_a-1 x d_a-2 ***
-                      xaa1 = ryvec(ip1,j) * rzvec(ip2,ip1) +
-     &                     rzvec(ip1,j) * ryvec(ip1,ip2)
-                      yaa1 = rzvec(ip1,j) * rxvec(ip2,ip1) +
-     &                     rxvec(ip1,j) * rzvec(ip1,ip2)
-                      zaa1 = rxvec(ip1,j) * ryvec(ip2,ip1) +
-     &                     ryvec(ip1,j) * rxvec(ip1,ip2)
-                      xa1a2 = ryvec(ip1,ip2) * rzvec(ip2,ip3) +
-     &                     rzvec(ip1,ip2) * ryvec(ip3,ip2)
-                      ya1a2 = rzvec(ip1,ip2) * rxvec(ip2,ip3) +
-     &                     rxvec(ip1,ip2) * rzvec(ip3,ip2)
-                      za1a2 = rxvec(ip1,ip2) * ryvec(ip2,ip3) +
-     &                     ryvec(ip1,ip2) * rxvec(ip3,ip2)
+                      xaa1 = ryvec(ip1,j) * rzvec(ip2,ip1) + rzvec(ip1,j) * ryvec(ip1,ip2)
+                      yaa1 = rzvec(ip1,j) * rxvec(ip2,ip1) + rxvec(ip1,j) * rzvec(ip1,ip2)
+                      zaa1 = rxvec(ip1,j) * ryvec(ip2,ip1) + ryvec(ip1,j) * rxvec(ip1,ip2)
+                      xa1a2 = ryvec(ip1,ip2) * rzvec(ip2,ip3) + rzvec(ip1,ip2) * ryvec(ip3,ip2)
+                      ya1a2 = rzvec(ip1,ip2) * rxvec(ip2,ip3) + rxvec(ip1,ip2) * rzvec(ip3,ip2)
+                      za1a2 = rxvec(ip1,ip2) * ryvec(ip2,ip3) + ryvec(ip1,ip2) * rxvec(ip3,ip2)
 ! *** calculate lengths of cross products ***
                       daa1 = dsqrt(xaa1**2+yaa1**2+zaa1**2)
                       da1a2 = dsqrt(xa1a2**2+ya1a2**2+za1a2**2)
@@ -181,8 +164,7 @@
                        ycc = zaa1*xa1a2 - xaa1*za1a2
                        zcc = xaa1*ya1a2 - yaa1*xa1a2
 !     *** calculate scalar triple product ***
-                       tcc = xcc*rxvec(ip1,ip2) + ycc*ryvec(ip1,ip2)
-     &                    + zcc*rzvec(ip1,ip2)
+                       tcc = xcc*rxvec(ip1,ip2) + ycc*ryvec(ip1,ip2) + zcc*rzvec(ip1,ip2)
                        theta = dacos(thetac)
                        if (tcc .lt. 0.0d0) theta = -theta
                        if (L_spline) then

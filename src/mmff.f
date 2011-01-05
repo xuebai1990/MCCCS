@@ -25,8 +25,7 @@
         rs7 = rs1*rs2*rs2*rs2
         sr1 = 1.07d0/(rs1+0.07d0)
         sr7 = sr1**7.0d0
-        mmff = sr7*(1.12d0/(rs7+0.12d0) - 2.0d0)
-     &           *epsimmff(ntij)
+        mmff = sr7*(1.12d0/(rs7+0.12d0) - 2.0d0) *epsimmff(ntij)
 
       if (lshift) mmff = mmff-smmff(ntij)
       return

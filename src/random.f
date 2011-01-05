@@ -30,8 +30,7 @@
 !
       ISEED = MOD(IA*ISEED+IC,M1)
       RANDx= ISEED*RM
-      IF ( RANDx.LT.0.D+0 ) call cleanup('*** Random number
-     &                              is negative ***')
+      IF ( RANDx.LT.0.D+0 ) call cleanup('*** Random number is negative ***')
 !
       RETURN
       END
@@ -93,8 +92,7 @@
       use util_math
       implicit none
       include 'common.inc'
-      real(KIND=double_precision)::Carry , RCARRY , Seed , TWOM24 ,
-     & TWOP24 , uni
+      real(KIND=double_precision)::Carry , RCARRY , Seed , TWOM24 , TWOP24 , uni
       integer(KIND=normal_int)::I24 , Iseed , J24
       PARAMETER (TWOP24=16777216.D+0,TWOM24=1.D+0/TWOP24)
       COMMON /RANDM/ Seed(24) , Carry , I24 , J24 , Iseed

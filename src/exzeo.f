@@ -75,8 +75,7 @@
                do j0=-m,m
                   jp=j+j0
                   sx=dble(jp)/ngrx/nx
-                  xt(j0+mp)=sx*hmat(ibox,1)+sy*hmat(ibox,4)+sz*hmat(ibox
-     &                 ,7)
+                  xt(j0+mp)=sx*hmat(ibox,1)+sy*hmat(ibox,4)+sz*hmat(ibox ,7)
                   if (jp.lt.0)    jp=jp+ngrx
                   if (jp.ge.ngrx) jp=jp-ngrx
                   yjtmp(j0+mp)=egrid(jp,kp,lp,igtype)

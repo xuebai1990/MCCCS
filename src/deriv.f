@@ -27,8 +27,7 @@
       elseif (lstageb) then
          if (.not.lsolid(ibox)) then
             vol = boxlx(ibox)*boxly(ibox)*boxlz(ibox)
-            dvdl = -3.0d0*vol/boxlx(ibox)*(lenc-lena)*(etais*pipsw
-     &              +lambdais*pwellipsw)+vwellipsw
+            dvdl = -3.0d0*vol/boxlx(ibox)*(lenc-lena)*(etais*pipsw +lambdais*pwellipsw)+vwellipsw
          elseif (lsolid(ibox).and.(.not.lrect(ibox))) then
             vol = cell_vol(ibox) 
             hmats(1,1) = hmat(ibox,1)
@@ -53,8 +52,7 @@
             do i = 1, 3
                do j = 1, 3
                   do k = 1, 3
-                     dvdl = dvdl - hmatsi(j,k)*dhmat(i,j)*
-     &                    (etais*pips(i,k)+lambdais*pwellips(i,k))
+                     dvdl = dvdl - hmatsi(j,k)*dhmat(i,j)* (etais*pips(i,k)+lambdais*pwellips(i,k))
 !	write(6,*) i,j,pips(i,j),pwellips(i,j)
                   end do
 !	write(6,*) i,j,pips(i,j)

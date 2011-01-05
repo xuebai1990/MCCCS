@@ -16,8 +16,7 @@
 !$$$      include 'cell.inc'
 
       integer(KIND=normal_int)::ibox
-      real(KIND=double_precision)::rxuij,ryuij,rzuij,hsx,hsy,hsz,sx,sy
-     & ,sz
+      real(KIND=double_precision)::rxuij,ryuij,rzuij,hsx,hsy,hsz,sx,sy ,sz
 
 ! ----------------------------------------------------------------
 
@@ -30,12 +29,9 @@
 ! basis (n1,n2,n3), which is the transpose of the H matrix, and is the
 ! transforming matrix from basis (n1,n2,n3) to the canonical basis
 ! (e1,e2,e3), where e1, e2, e3 are the three perpendicular unit vector.
-         sx = rxuij*hmati(ibox,1)+ryuij*hmati(ibox,4)
-     &        +rzuij*hmati(ibox,7)
-         sy = rxuij*hmati(ibox,2)+ryuij*hmati(ibox,5)
-     &        +rzuij*hmati(ibox,8)
-         sz = rxuij*hmati(ibox,3)+ryuij*hmati(ibox,6)
-     &        +rzuij*hmati(ibox,9)
+         sx = rxuij*hmati(ibox,1)+ryuij*hmati(ibox,4) +rzuij*hmati(ibox,7)
+         sy = rxuij*hmati(ibox,2)+ryuij*hmati(ibox,5) +rzuij*hmati(ibox,8)
+         sz = rxuij*hmati(ibox,3)+ryuij*hmati(ibox,6) +rzuij*hmati(ibox,9)
 
 
 

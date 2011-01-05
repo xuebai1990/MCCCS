@@ -35,18 +35,12 @@
 
       integer(KIND=normal_int)::i,j,imolty,ic,ncount,jhmat,numvecto
       real(KIND=double_precision)::bxo,byo,bzo
-      real(KIND=double_precision)::volo,vboxo,dfac, vintero,vtailo,vexto
-     & ,velecto,vflucqo
-      real(KIND=double_precision)::kxo(vectormax),kyo(vectormax),
-     & kzo(vectormax),prefacto(vectormax)
-      real(KIND=double_precision)::voln,vboxn, vintern,vtailn,vextn
-     & ,velectn
-      real(KIND=double_precision)::rxuo(nmax,numax),ryuo(nmax,numax)
-     & ,rzuo(nmax,numax),qquo(nmax,numax)
-      real(KIND=double_precision)::random,df,dx,dy,dz,v,dele
-     & ,vdum,vinter,vtail,vext,velect
-      real(KIND=double_precision)::xcmo(nmax),ycmo(nmax),zcmo(nmax)
-     & ,calpo
+      real(KIND=double_precision)::volo,vboxo,dfac, vintero,vtailo,vexto ,velecto,vflucqo
+      real(KIND=double_precision)::kxo(vectormax),kyo(vectormax), kzo(vectormax),prefacto(vectormax)
+      real(KIND=double_precision)::voln,vboxn, vintern,vtailn,vextn ,velectn
+      real(KIND=double_precision)::rxuo(nmax,numax),ryuo(nmax,numax) ,rzuo(nmax,numax),qquo(nmax,numax)
+      real(KIND=double_precision)::random,df,dx,dy,dz,v,dele ,vdum,vinter,vtail,vext,velect
+      real(KIND=double_precision)::xcmo(nmax),ycmo(nmax),zcmo(nmax) ,calpo
       real(KIND=double_precision)::rbcut,rbox
       real(KIND=double_precision)::w(3)
       integer(KIND=normal_int)::boxvch,ichoiq,ibox,lddum2(27)
@@ -224,8 +218,7 @@
             if ( lz ) jhmat = 9
          end if
 
-         hmat(boxvch,jhmat) = hmat(boxvch,jhmat) + rmhmat(boxvch,jhmat)*
-     &        ( 2.0d0*random() - 1.0d0 )
+         hmat(boxvch,jhmat) = hmat(boxvch,jhmat) + rmhmat(boxvch,jhmat)* ( 2.0d0*random() - 1.0d0 )
          bnhmat(boxvch,jhmat) = bnhmat(boxvch,jhmat) + 1.0d0
           
          call matops(boxvch)
@@ -238,12 +231,9 @@
 
          rbcut = rcut(boxvch)
 
-         if (rbcut/w(1) .gt. 0.5d0 .or.
-     &        rbcut/w(2) .gt. 0.5d0 .or.
-     &        rbcut/w(3) .gt. 0.5d0) then
+         if (rbcut/w(1) .gt. 0.5d0 .or. rbcut/w(2) .gt. 0.5d0 .or. rbcut/w(3) .gt. 0.5d0) then
             write(iou,*) 'Problem with line 275 prvolume.f'
-            write(iou,*) 'non-rectangular prvolume move rejected-',
-     & ' box width below cutoff size'
+            write(iou,*) 'non-rectangular prvolume move rejected-', ' box width below cutoff size'
             write(iou,*) 'w1:',w(1),'w2:',w(2),'w3:',w(3)
             hmat(boxvch,jhmat) = hmato(jhmat)
             call dump
@@ -257,25 +247,19 @@
             imolty = moltyp(i)
             if (nboxi(i) .eq. boxvch) then
                if ( lx ) then
-                  dx = sxcm(i)*(hmat(boxvch,1)-hmato(1))+
-     &                 sycm(i)*(hmat(boxvch,4)-hmato(4))+
-     &                 szcm(i)*(hmat(boxvch,7)-hmato(7))
+                  dx = sxcm(i)*(hmat(boxvch,1)-hmato(1))+ sycm(i)*(hmat(boxvch,4)-hmato(4))+ szcm(i)*(hmat(boxvch,7)-hmato(7))
                   xcm(i) = xcm(i) + dx
                   do j = 1, nunit(imolty)
                      rxu(i,j) = rxu(i,j) + dx
                   end do
                elseif ( ly ) then
-                  dy = sxcm(i)*(hmat(boxvch,2)-hmato(2))+
-     &                 sycm(i)*(hmat(boxvch,5)-hmato(5))+
-     &                 szcm(i)*(hmat(boxvch,8)-hmato(8))
+                  dy = sxcm(i)*(hmat(boxvch,2)-hmato(2))+ sycm(i)*(hmat(boxvch,5)-hmato(5))+ szcm(i)*(hmat(boxvch,8)-hmato(8))
                   ycm(i) = ycm(i) + dy
                   do j = 1, nunit(imolty)
                      ryu(i,j) = ryu(i,j) + dy
                   end do
                else
-                  dz = sxcm(i)*(hmat(boxvch,3)-hmato(3))+
-     &                 sycm(i)*(hmat(boxvch,6)-hmato(6))+
-     &                 szcm(i)*(hmat(boxvch,9)-hmato(9))
+                  dz = sxcm(i)*(hmat(boxvch,3)-hmato(3))+ sycm(i)*(hmat(boxvch,6)-hmato(6))+ szcm(i)*(hmat(boxvch,9)-hmato(9))
                   zcm(i) = zcm(i) + dz
                   do j = 1, nunit(imolty)
                      rzu(i,j) = rzu(i,j) + dz
@@ -287,8 +271,7 @@
       else
 
 ! --- calculate new volume         
-         voln = volo +
-     &        rmvol(boxvch) * ( 2.0d0*random() - 1.0d0 )
+         voln = volo + rmvol(boxvch) * ( 2.0d0*random() - 1.0d0 )
          rbcut = rcut(boxvch)
          if ( lpbcz ) then
             if (lsolid(boxvch).and.lrect(boxvch)) then
@@ -323,9 +306,7 @@
 
          rbcut = 2.0d0*rbcut
 
-         if (boxlx(boxvch) .lt. rbcut .or.
-     &        boxly(boxvch) .lt. rbcut .or.
-     &        (lpbcz .and. boxlz(boxvch) .lt. rbcut) ) then
+         if (boxlx(boxvch) .lt. rbcut .or. boxly(boxvch) .lt. rbcut .or. (lpbcz .and. boxlz(boxvch) .lt. rbcut) ) then
             boxlx(boxvch) = bxo
             boxly(boxvch) = byo
             if ( lpbcz ) then
@@ -333,8 +314,7 @@
             end if
             write(iou,*) 'boxvch',boxvch
             write(iou,*) 'Problem in line 381 of subroutine prvolume.f'
-            write(iou,*) 'A move was attempted that would lead to a 
-     & boxlength less than twice rcut'
+            write(iou,*) 'A move was attempted that would lead to a  boxlength less than twice rcut'
             call dump
             call cleanup('')
             return
@@ -344,8 +324,7 @@
 ! *** calculate centre of mass and its displacement
 
 ! - WARNING
-         if ( .not. lfold ) call cleanup('volume move only correct
-     &                         with folded coordinates')
+         if ( .not. lfold ) call cleanup('volume move only correct with folded coordinates')
 
          df = dfac - 1.0d0
 
@@ -398,15 +377,13 @@
       lvol = .true.
       if ( lchgall ) then
            if (lsolid(boxvch).and.(.not.lrect(boxvch))) then
-             min_boxl = min(min_width(boxvch,1),min_width(boxvch,2),
-     &                    min_width(boxvch,3))
+             min_boxl = min(min_width(boxvch,1),min_width(boxvch,2), min_width(boxvch,3))
            else
               min_boxl = min(boxlx(boxvch),boxly(boxvch),boxlz(boxvch))
            end if
            calp(boxvch) = kalp(boxvch)/boxlx(boxvch)
       end if    
-      call sumup( ovrlap, v, vinter, vtail, vdum,vdum,
-     &     vdum,vdum,vext,velect,vdum, boxvch, lvol)
+      call sumup( ovrlap, v, vinter, vtail, vdum,vdum, vdum,vdum,vext,velect,vdum, boxvch, lvol)
       if ( ovrlap ) then
 !         write(iou,*) 'move rejected due to overlap in PRVOLUME'
          goto 500
@@ -417,8 +394,7 @@
       vextn    = vext  
       velectn  = velect
       v3n = v3garo
-      vboxn    = vboxo + (vintern-vintero) + (vextn-vexto) 
-     &     + (velectn-velecto) + (v3n-v3o)
+      vboxn    = vboxo + (vintern-vintero) + (vextn-vexto)  + (velectn-velecto) + (v3n-v3o)
 !      write (6,*) 'new  energy',  vboxn
 
       if ( lanes ) then
@@ -436,15 +412,11 @@
             call flucq(0,boxvch)
          end do
          
-         dele = (vbox(boxvch) - vboxo)+ express(boxvch)*(voln-volo) 
-     &        - ((nchbox(boxvch)+ghost_particles(boxvch))
-     &              * dlog(voln/volo) / beta )
+         dele = (vbox(boxvch) - vboxo)+ express(boxvch)*(voln-volo)  - ((nchbox(boxvch)+ghost_particles(boxvch)) * dlog(voln/volo) / beta )
 
       else
          
-         dele = ( vboxn - vboxo ) +  express(boxvch)*(voln-volo) 
-     &        - ((nchbox(boxvch)+ghost_particles(boxvch)) 
-     &              * dlog(voln/volo)/beta )
+         dele = ( vboxn - vboxo ) +  express(boxvch)*(voln-volo)  - ((nchbox(boxvch)+ghost_particles(boxvch))  * dlog(voln/volo)/beta )
       end if
 
 ! --- acceptance test

@@ -15,14 +15,10 @@
 !$$$      include 'control.inc'
 !$$$      include 'mpi.inc'
       integer(KIND=normal_int)::i,idi,tel,samp
-      real(KIND=double_precision)::errm,errt,err,res,rest,erra
-     &     ,xi,yi,zi,random,exzeof,exzeo
-     &     ,ebolt,bolt,boltf,eboltf
-     &     ,halfpx,halfmx,halfpy,halfmy,halfpz,halfmz
+      real(KIND=double_precision)::errm,errt,err,res,rest,erra ,xi,yi,zi,random,exzeof,exzeo ,ebolt,bolt,boltf,eboltf ,halfpx,halfmx,halfpy,halfmy,halfpz,halfmz
 
 !--- test accuracy
-      if (myid.eq.0) write(16,*) ' Program uses a grid of the
-     & zeolite lattice / --- accuracy test '
+      if (myid.eq.0) write(16,*) ' Program uses a grid of the zeolite lattice / --- accuracy test '
       samp=20 
       tel=0
       errm=0
@@ -33,8 +29,7 @@
       boltf=0
       eboltf=0
       do i=1,samp
-         if (myid.eq.0 .and. mod(i,5).eq.0) write(iou,*) 'test table '
-     &        ,i,' out of ',samp
+         if (myid.eq.0 .and. mod(i,5).eq.0) write(iou,*) 'test table ' ,i,' out of ',samp
          xi=random()*zunitx
          yi=random()*zunity
          zi=random()*zunitz
@@ -53,20 +48,13 @@
          halfmz=zunitz/2-zi
          if (halfmz<0) halfmz=halfmz+zunitz
          write(iou,'(A,3(F8.5,1X),A,G20.7)') 'U(',xi,yi,zi,')=',rest
-         write(iou,'(A,3(F8.5,1X),A,G20.7)') 'U(',zunitx-xi,halfpy,
-     &        zunitz-zi,')=',exzeof(zunitx-xi,halfpy,zunitz-zi,idi)
-         write(iou,'(A,3(F8.5,1X),A,G20.7)') 'U(',halfpx,yi
-     &        ,halfmz,')=',exzeof(halfpx,yi,halfmz,idi)
-         write(iou,'(A,3(F8.5,1X),A,G20.7)') 'U(',halfmx,halfpy,
-     &        halfpz,')=',exzeof(halfmx,halfpy,halfpz,idi)
-         write(iou,'(A,3(F8.5,1X),A,G20.7)') 'U(',halfmx,zunity-yi,
-     &        halfpz,')=',exzeof(halfmx,zunity-yi,halfpz,idi)
-         write(iou,'(A,3(F8.5,1X),A,G20.7)') 'U(',halfpx,halfmy,
-     &        halfmz,')=',exzeof(halfpx,halfmy,halfmz,idi)
-         write(iou,'(A,3(F8.5,1X),A,G20.7)') 'U(',zunitx-xi,zunity-yi
-     &        ,zunitz-zi,')=',exzeof(zunitx-xi,zunity-yi,zunitz-zi,idi)
-         write(iou,'(A,3(F8.5,1X),A,G20.7)') 'U(',xi,halfmy,
-     &        zi,')=',exzeof(xi,halfmy,zi,idi)
+         write(iou,'(A,3(F8.5,1X),A,G20.7)') 'U(',zunitx-xi,halfpy, zunitz-zi,')=',exzeof(zunitx-xi,halfpy,zunitz-zi,idi)
+         write(iou,'(A,3(F8.5,1X),A,G20.7)') 'U(',halfpx,yi ,halfmz,')=',exzeof(halfpx,yi,halfmz,idi)
+         write(iou,'(A,3(F8.5,1X),A,G20.7)') 'U(',halfmx,halfpy, halfpz,')=',exzeof(halfmx,halfpy,halfpz,idi)
+         write(iou,'(A,3(F8.5,1X),A,G20.7)') 'U(',halfmx,zunity-yi, halfpz,')=',exzeof(halfmx,zunity-yi,halfpz,idi)
+         write(iou,'(A,3(F8.5,1X),A,G20.7)') 'U(',halfpx,halfmy, halfmz,')=',exzeof(halfpx,halfmy,halfmz,idi)
+         write(iou,'(A,3(F8.5,1X),A,G20.7)') 'U(',zunitx-xi,zunity-yi ,zunitz-zi,')=',exzeof(zunitx-xi,zunity-yi,zunitz-zi,idi)
+         write(iou,'(A,3(F8.5,1X),A,G20.7)') 'U(',xi,halfmy, zi,')=',exzeof(xi,halfmy,zi,idi)
          write(iou,*) '------------------------'
          if (dexp(-res/300.).gt. 1.e-5) then
             tel=tel+1

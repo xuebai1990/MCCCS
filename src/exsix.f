@@ -20,8 +20,7 @@
       integer(KIND=normal_int)::ntij
 
       rij=dsqrt(rijsq)
-      exsix = aexsix(ntij)/(rijsq*rijsq*rijsq)
-     &     + bexsix(ntij)*dexp(cexsix(ntij)*rij)
+      exsix = aexsix(ntij)/(rijsq*rijsq*rijsq) + bexsix(ntij)*dexp(cexsix(ntij)*rij)
       if (lshift) exsix = exsix-sexsix(ntij)
       return
       end

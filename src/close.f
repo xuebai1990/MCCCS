@@ -30,9 +30,7 @@
 
       integer(KIND=normal_int)::iinit
 
-      real(KIND=double_precision)::x,y,z,rx,ry,rz,length,lengtha,lengthb
-     & ,xa,ya,za,theta,thetac,ux,uy,uz,bondl,avar,bvar,cvar ,rxa,rya,rza
-     & ,lengthc,angle,rxf,ryf,rzf,var,dvar,a,bb,c
+      real(KIND=double_precision)::x,y,z,rx,ry,rz,length,lengtha,lengthb ,xa,ya,za,theta,thetac,ux,uy,uz,bondl,avar,bvar,cvar ,rxa,rya,rza ,lengthc,angle,rxf,ryf,rzf,var,dvar,a,bb,c
 
       dimension rx(6),ry(6),rz(6),x(4),y(4),z(4),ux(3),uy(3),uz(3)
       dimension angle(3)
@@ -61,16 +59,12 @@
 
 
 !     --- determine lengths from all coordinates
-         lengtha = dsqrt( (rx(2)-rx(1))**2 + (ry(2)-ry(1))**2
-     &        + (rz(2)-rz(1))**2)
-         lengthb = dsqrt( (rx(2)-rx(3))**2 + (ry(2)-ry(3))**2
-     &        + (rz(2)-rz(3))**2)
-         lengthc = dsqrt( (rx(3)-rx(1))**2 + (ry(3)-ry(1))**2
-     &        + (rz(3)-rz(1))**2)
+         lengtha = dsqrt( (rx(2)-rx(1))**2 + (ry(2)-ry(1))**2 + (rz(2)-rz(1))**2)
+         lengthb = dsqrt( (rx(2)-rx(3))**2 + (ry(2)-ry(3))**2 + (rz(2)-rz(3))**2)
+         lengthc = dsqrt( (rx(3)-rx(1))**2 + (ry(3)-ry(1))**2 + (rz(3)-rz(1))**2)
       
 !     --- detemine the angle at 1
-         thetac = - 0.5d0 * ( lengthb**2 - lengtha**2 - lengthc**2 )
-     &        / ( lengtha * lengthc )
+         thetac = - 0.5d0 * ( lengthb**2 - lengtha**2 - lengthc**2 ) / ( lengtha * lengthc )
          theta = dacos(thetac)
 
 !     --- now lets determine the in-plane coordinates
@@ -82,9 +76,7 @@
          y(3) = lengthc * dsin( theta )
          
 !     --- determine the in-plane coordinates with the same length
-         ya = 0.5d0 * ( ( x(2)**2 - x(3)**2 - y(3)**2 )
-     &        / ( - y(3) ) + ( x(2)**2 * ( x(3) - x(2) ) ) 
-     &        / ( ( - y(3) ) * ( x(2) ) ) )
+         ya = 0.5d0 * ( ( x(2)**2 - x(3)**2 - y(3)**2 ) / ( - y(3) ) + ( x(2)**2 * ( x(3) - x(2) ) )  / ( ( - y(3) ) * ( x(2) ) ) )
          
          xa = 0.5d0 * x(2)
       
@@ -155,10 +147,8 @@
          
 !     --- with the two possibilities, determine which is closer to 3
          
-         lengtha = dsqrt((rx(3)-rx(5))**2 + (ry(3)-ry(5))**2
-     &        + (rz(3) - rz(5))**2)
-         lengthb = dsqrt((rx(3)-rx(6))**2 + (ry(3)-ry(6))**2
-     &        + (rz(3) - rz(6))**2)
+         lengtha = dsqrt((rx(3)-rx(5))**2 + (ry(3)-ry(5))**2 + (rz(3) - rz(5))**2)
+         lengthb = dsqrt((rx(3)-rx(6))**2 + (ry(3)-ry(6))**2 + (rz(3) - rz(6))**2)
          
          if (lengtha.lt.lengthb) then
 !     --- number 5 is right
@@ -279,21 +269,9 @@
          return
 
 
-         avar = dcos(angle(1))*(rx(2)*(rx(2)*rz(1) - rx(1)*rz(2))
-     &        + ry(2)*(ry(2)*rz(1) - ry(1)*rz(2)))
-     &        + dcos(angle(2))*(rx(1)*(rx(1)*rz(2) - rx(2)*rz(1))
-     &        + ry(1)*(ry(1)*rz(2) - ry(2)*rz(1)))
+         avar = dcos(angle(1))*(rx(2)*(rx(2)*rz(1) - rx(1)*rz(2)) + ry(2)*(ry(2)*rz(1) - ry(1)*rz(2))) + dcos(angle(2))*(rx(1)*(rx(1)*rz(2) - rx(2)*rz(1)) + ry(1)*(ry(1)*rz(2) - ry(2)*rz(1)))
       
-         var = rx(2)**2*(ry(1)**2 + rz(1)**2)
-     &        + ry(2)**2*(rx(1)**2 + rz(1)**2)
-     &        + rz(2)**2*(rx(1)**2 + ry(1)**2)
-     &        - 2.0d0*(rx(1)*rx(2)*ry(1)*ry(2)
-     &        + rx(1)*rx(2)*rz(1)*rz(2)
-     &        + ry(1)*ry(2)*rz(1)*rz(2))
-     &        - (rx(2)**2 + ry(2)**2 + rz(2)**2)*dcos(angle(1))**2
-     &        - (rx(1)**2 + ry(1)**2 + rz(1)**2)*dcos(angle(2))**2
-     &        + 2.0d0*(rx(1)*rx(2) + ry(1)*ry(2) + rz(1)*rz(2))
-     &        *dcos(angle(1))*dcos(angle(2))
+         var = rx(2)**2*(ry(1)**2 + rz(1)**2) + ry(2)**2*(rx(1)**2 + rz(1)**2) + rz(2)**2*(rx(1)**2 + ry(1)**2) - 2.0d0*(rx(1)*rx(2)*ry(1)*ry(2) + rx(1)*rx(2)*rz(1)*rz(2) + ry(1)*ry(2)*rz(1)*rz(2)) - (rx(2)**2 + ry(2)**2 + rz(2)**2)*dcos(angle(1))**2 - (rx(1)**2 + ry(1)**2 + rz(1)**2)*dcos(angle(2))**2 + 2.0d0*(rx(1)*rx(2) + ry(1)*ry(2) + rz(1)*rz(2)) *dcos(angle(1))*dcos(angle(2))
 
          if (var.lt.0) then
             var = abs(var)
@@ -304,10 +282,7 @@
 
          bvar = (rx(1)*ry(2) - rx(2)*ry(1))*dsqrt(var)
 
-         cvar = rx(2)**2*(ry(1)**2 + rz(1)**2)
-     &        + (ry(2)*rz(1) - ry(1)*rz(2))**2
-     &        - 2.0d0*rx(1)*rx(2)*(ry(1)*ry(2) + rz(1)*rz(2))
-     &        + rx(1)**2*(ry(2)**2 + rz(2)**2)
+         cvar = rx(2)**2*(ry(1)**2 + rz(1)**2) + (ry(2)*rz(1) - ry(1)*rz(2))**2 - 2.0d0*rx(1)*rx(2)*(ry(1)*ry(2) + rz(1)*rz(2)) + rx(1)**2*(ry(2)**2 + rz(2)**2)
 
          rz(3) = (avar + bvar) / cvar
          rz(4) = (avar - bvar) / cvar
@@ -319,10 +294,8 @@
          ry(3) = (rz(3)*avar + bvar) / cvar
          ry(4) = (rz(4)*avar + bvar) / cvar
 
-         rx(3) = (dcos(angle(1)) - ry(1)*ry(3) - rz(1)*rz(3))
-     &        / rx(1)
-         rx(4) = (dcos(angle(1)) - ry(1)*ry(4) - rz(1)*rz(4))
-     &        / rx(1)
+         rx(3) = (dcos(angle(1)) - ry(1)*ry(3) - rz(1)*rz(3)) / rx(1)
+         rx(4) = (dcos(angle(1)) - ry(1)*ry(4) - rz(1)*rz(4)) / rx(1)
                 
 
       end if

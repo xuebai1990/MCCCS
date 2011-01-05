@@ -1,5 +1,4 @@
-      subroutine geometry(lnew,iw,i,imolty,angstart,iuprev,glist
-     &     ,bondlen,bendang,phi,vvibtr,vbbtr, maxlen, wei_bend )
+      subroutine geometry(lnew,iw,i,imolty,angstart,iuprev,glist ,bondlen,bendang,phi,vvibtr,vbbtr, maxlen, wei_bend )
 
 !     ***********************************************************************
 !     ** determines the new geometry of the bond lengths and angles to be  **
@@ -35,8 +34,7 @@
 
       logical::lnew
       integer(KIND=normal_int)::iw,imolty,angstart,iuprev,glist,i
-      real(KIND=double_precision)::bondlen,bendang,phi,vvibtr,vbbtr
-     & ,maxlen
+      real(KIND=double_precision)::bondlen,bendang,phi,vvibtr,vbbtr ,maxlen
       real(KIND=double_precision)::wei_bend
 
       dimension glist(numax)
@@ -44,31 +42,25 @@
 
 !     --- local variables
       
-      integer(KIND=normal_int)::count,ntogrow,iugrow,iufrom,iv,juvib
-     & ,jtvib,iu2back,ib,iulast,type,aaa,iuone
+      integer(KIND=normal_int)::count,ntogrow,iugrow,iufrom,iv,juvib ,jtvib,iu2back,ib,iulast,type,aaa,iuone
 
-      real(KIND=double_precision)::equil,kforce,thetaone,thetatwo ,vvib
-     & ,length,angle,phione,phitwo,vangle,random,vphi
+      real(KIND=double_precision)::equil,kforce,thetaone,thetatwo ,vvib ,length,angle,phione,phitwo,vangle,random,vphi
 
 !     --- new variables
       integer(KIND=normal_int)::ibend,nchben_a,nchben_b,start,start_ang
-      real(KIND=double_precision)::bsum_try,rsint,ang_trial,bfactor,rbf
-     & ,bs
+      real(KIND=double_precision)::bsum_try,rsint,ang_trial,bfactor,rbf ,bs
 
       dimension ang_trial(nchbn_max),bfactor(nchbn_max)
 
 !     --- variables from geomold
-      real(KIND=double_precision)::rxui,ryui,rzui,rxuij,ryuij,rzuij
-     & ,xvecprev,yvecprev,zvecprev,distprev,xvecgrow ,yvecgrow,zvecgrow
-     & ,distgrow,anglec
+      real(KIND=double_precision)::rxui,ryui,rzui,rxuij,ryuij,rzuij ,xvecprev,yvecprev,zvecprev,distprev,xvecgrow ,yvecgrow,zvecgrow ,distgrow,anglec
       real(KIND=double_precision)::xub,yub,zub,dum,ux,uy,uz,alpha,gamma
       real(KIND=double_precision)::tabulated_vib, tabulated_bend
 
 ! Neeraj: Adding for the lookup table for CG model
 
       real(KIND=double_precision)::distgrow2
-      real(KIND=double_precision)::lengtha,lengthb,lengtha2,lengthb2,
-     & lengthc,lengthc2,lengthFP,lengthFP2
+      real(KIND=double_precision)::lengtha,lengthb,lengtha2,lengthb2, lengthc,lengthc2,lengthFP,lengthFP2
 
 !     --- assign nchben_a and ncben_b
       nchben_a = nchbna(imolty)
@@ -185,8 +177,7 @@
          xvecprev = rxu(i,iuprev) - rxui
          yvecprev = ryu(i,iuprev) - ryui
          zvecprev = rzu(i,iuprev) - rzui
-         distprev = dsqrt( xvecprev*xvecprev + yvecprev*yvecprev 
-     &        + zvecprev*zvecprev )
+         distprev = dsqrt( xvecprev*xvecprev + yvecprev*yvecprev  + zvecprev*zvecprev )
       end if
 
 !     --- initialize wei_bend
@@ -221,12 +212,10 @@
                distgrow = bondlen(count)
                distgrow2 = distgrow*distgrow 
 !              --- dot product divided by lengths gives cos(angle)
-               anglec = ( xvecprev*xvecgrow + yvecprev*yvecgrow 
-     &              + zvecprev*zvecgrow ) / (distprev*distgrow)
+               anglec = ( xvecprev*xvecgrow + yvecprev*yvecgrow  + zvecprev*zvecgrow ) / (distprev*distgrow)
                angle = dacos(anglec)
                if (L_bend_table) then
-                  lengthc2 = lengthFP2 + distgrow2 - 
-     &                       2.0d0*lengthFP*distgrow*anglec
+                  lengthc2 = lengthFP2 + distgrow2 -  2.0d0*lengthFP*distgrow*anglec
                   lengthc = dsqrt(lengthc2)
                   call lininter_bend(lengthc, tabulated_bend, type)
                   vangle = tabulated_bend
@@ -258,8 +247,7 @@
 
 !              --- calculate the bond angle energy
                if (L_bend_table) then
-                  lengthc2 = lengthFP2 + distgrow2 -
-     &                       2.0d0*lengthFP*distgrow*dcos(angle)
+                  lengthc2 = lengthFP2 + distgrow2 - 2.0d0*lengthFP*distgrow*dcos(angle)
                   lengthc = dsqrt(lengthc2)   
                   call lininter_bend(lengthc,tabulated_bend, type)
                   vangle = tabulated_bend
@@ -373,8 +361,7 @@
                   phione = phi(aaa)
                   thetaone = bendang(aaa)
                   thetatwo = bendang(count)
-                  call coneangle(thetaone,phione,thetatwo,phitwo
-     &                 ,angle)
+                  call coneangle(thetaone,phione,thetatwo,phitwo ,angle)
             
                   do ib = 1, inben(imolty,iugrow)
                      iulast = ijben2(imolty,iugrow,ib)
@@ -384,15 +371,12 @@
                            type = itben(imolty,iugrow,ib)
 !                          --- calculate the bond angle energy
                            if (L_bend_table) then
-                              lengthc2 = lengtha2 + lengthb2 - 
-     &                                 2.0d0*lengtha*lengthb*dcos(angle)
+                              lengthc2 = lengtha2 + lengthb2 -  2.0d0*lengtha*lengthb*dcos(angle)
                               lengthc = dsqrt(lengthc2)
-                              call lininter_bend(lengthc, 
-     &                             tabulated_bend, type)
+                              call lininter_bend(lengthc,  tabulated_bend, type)
                               vphi = vphi + tabulated_bend
                            else
-                              vphi = vphi + brbenk(type) 
-     &                             * (angle - brben(type))**2
+                              vphi = vphi + brbenk(type)  * (angle - brben(type))**2
                            end if
                         end if
                      end if
@@ -423,8 +407,7 @@
                phione = phi(aaa)
                thetaone = bendang(aaa)
                thetatwo = bendang(count)
-               call coneangle(thetaone,phione,thetatwo,phitwo
-     &              ,angle)
+               call coneangle(thetaone,phione,thetatwo,phitwo ,angle)
             
                do ib = 1, inben(imolty,iugrow)
                   iulast = ijben2(imolty,iugrow,ib)
@@ -434,15 +417,12 @@
                         type = itben(imolty,iugrow,ib)
 !                       --- calculate the bond angle energy
                         if (L_bend_table) then
-                           lengthc2 = lengtha2 + lengthb2 - 
-     &                                2.0d0*lengtha*lengthb*dcos(angle)
+                           lengthc2 = lengtha2 + lengthb2 -  2.0d0*lengtha*lengthb*dcos(angle)
                            lengthc = dsqrt(lengthc2) 
-                           call lininter_bend (lengthc, 
-     &                          tabulated_bend, type)
+                           call lininter_bend (lengthc,  tabulated_bend, type)
                            vphi = vphi + tabulated_bend
                         else
-                           vphi = vphi + brbenk(type) 
-     &                          * (angle - brben(type))**2
+                           vphi = vphi + brbenk(type)  * (angle - brben(type))**2
                         end if
                      end if
                   end if
@@ -517,8 +497,7 @@
       implicit none
       include 'common.inc'
 
-      real(KIND=double_precision)::equil, kforce, betaT, angle, vangle,
-     & rr, v1, v2,random
+      real(KIND=double_precision)::equil, kforce, betaT, angle, vangle, rr, v1, v2,random
 
 !      write(2,*) 'start BENDANGLE'
 
@@ -530,8 +509,7 @@
          if (rr .ge. 1.0d0 ) goto 80
          
 !        --- select angle from a gaussian distribution
-         angle = equil + v1*dsqrt( (-dlog(rr))
-     &        /( kforce*betaT*rr) )
+         angle = equil + v1*dsqrt( (-dlog(rr)) /( kforce*betaT*rr) )
          
          if (angle .le. 0.0d0 .or. angle .ge. 3.1415 ) then
             write(2,*) 'chose angle outside of 0,Pi in bendangle'

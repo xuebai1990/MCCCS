@@ -29,10 +29,7 @@
 !	coef3 = (sig/z)**4
 !	coef4 = sig2ij(ntij)**2/(3*delta*(z+0.61*delta)**3)
 	
-	vgs = twopi*rsol*epsij(ntij)*sig2ij(ntij)*delta
-     &		*(2.0/5.0*(sig/z)**10
-     &		-(sig/z)**4
-     &		-(sig2ij(ntij)**2/(3*delta*(z+0.61*delta)**3)))
+	vgs = twopi*rsol*epsij(ntij)*sig2ij(ntij)*delta 		*(2.0/5.0*(sig/z)**10 		-(sig/z)**4 		-(sig2ij(ntij)**2/(3*delta*(z+0.61*delta)**3)))
      
      	slitpore = vgs
 	end

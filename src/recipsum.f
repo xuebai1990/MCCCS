@@ -30,23 +30,15 @@
       integer(KIND=normal_int)::ibox,i,ii,imolty,ncount
 
 ! * from h-matrix formulation
-      integer(KIND=normal_int)::l,m,n,m_min,n_min,kmaxl
-     & ,kmaxm,kmaxn
+      integer(KIND=normal_int)::l,m,n,m_min,n_min,kmaxl ,kmaxm,kmaxn
 
-      real(KIND=double_precision)::alpsqr4,vol,ksqr,sumr,sumi,arg
-     & ,vrecip,bx1,by1,bz1
-     & ,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi
+      real(KIND=double_precision)::alpsqr4,vol,ksqr,sumr,sumi,arg ,vrecip,bx1,by1,bz1 ,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi
 !      real(KIND=double_precision)::sum_sumr,sum_sumi
 
 ! RP added for calculating time for communication step
       integer(KIND=normal_int)::mystart,myend,blocksize
-      integer(KIND=normal_int)::ncount_arr(numprocmax)
-     & ,ncount_displs(numprocmax)
-      real(KIND=double_precision)::sum_vrecip,kx_arr(vectormax)
-     & ,ky_arr(vectormax),kz_arr(vectormax),kx_one(vectormax)
-     & ,ky_one(vectormax),kz_one(vectormax),ssumi_arr(vectormax)
-     & ,prefact_arr(vectormax),ssumr_one(vectormax),ssumi_one(vectormax)
-     & ,prefact_one(vectormax),ssumr_arr(vectormax)
+      integer(KIND=normal_int)::ncount_arr(numprocmax) ,ncount_displs(numprocmax)
+      real(KIND=double_precision)::sum_vrecip,kx_arr(vectormax) ,ky_arr(vectormax),kz_arr(vectormax),kx_one(vectormax) ,ky_one(vectormax),kz_one(vectormax),ssumi_arr(vectormax) ,prefact_arr(vectormax),ssumr_one(vectormax),ssumi_one(vectormax) ,prefact_one(vectormax),ssumr_arr(vectormax)
  
 ! KM for MPI
       do i=1,numprocmax
@@ -89,12 +81,7 @@
     
       alpsqr4 = 4.0d0*calpi*calpi
          
-      vol = hmat(ibox,1)*
-     &     (hmat(ibox,5)*hmat(ibox,9) - hmat(ibox,8)*hmat(ibox,6))
-     &     + hmat(ibox,4)*
-     &     (hmat(ibox,8)*hmat(ibox,3) - hmat(ibox,2)*hmat(ibox,9))
-     &     + hmat(ibox,7)*
-     &     (hmat(ibox,2)*hmat(ibox,6) - hmat(ibox,5)*hmat(ibox,3))
+      vol = hmat(ibox,1)* (hmat(ibox,5)*hmat(ibox,9) - hmat(ibox,8)*hmat(ibox,6)) + hmat(ibox,4)* (hmat(ibox,8)*hmat(ibox,3) - hmat(ibox,2)*hmat(ibox,9)) + hmat(ibox,7)* (hmat(ibox,2)*hmat(ibox,6) - hmat(ibox,5)*hmat(ibox,3))
 
       vol = vol/(4.0d0*onepi)
 
@@ -124,24 +111,19 @@
                n_min = -kmaxn
             end if
             do n = n_min, kmaxn
-               kx1 = dble(l)*hmatik(1)+dble(m)*hmatik(2)+
-     &              dble(n)*hmatik(3)
-               ky1 = dble(l)*hmatik(4)+dble(m)*hmatik(5)+
-     &              dble(n)*hmatik(6)
-               kz1 = dble(l)*hmatik(7)+dble(m)*hmatik(8)+
-     &              dble(n)*hmatik(9)
+               kx1 = dble(l)*hmatik(1)+dble(m)*hmatik(2)+ dble(n)*hmatik(3)
+               ky1 = dble(l)*hmatik(4)+dble(m)*hmatik(5)+ dble(n)*hmatik(6)
+               kz1 = dble(l)*hmatik(7)+dble(m)*hmatik(8)+ dble(n)*hmatik(9)
                ksqr = kx1*kx1+ky1*ky1+kz1*kz1
 !               if ( ksqr .lt. hmaxsq ) then
 ! --- sometimes these are about equal, which can cause different
 ! --- behavior on 32 and 64 bit machines without this .and. statement
-               if ( ksqr .lt. hmaxsq .and.
-     &              abs(ksqr-hmaxsq) .gt. 1d-9 ) then
+               if ( ksqr .lt. hmaxsq .and. abs(ksqr-hmaxsq) .gt. 1d-9 ) then
                   ncount = ncount + 1
                   kx_arr(ncount) = kx1
                   ky_arr(ncount) = ky1
                   kz_arr(ncount) = kz1
-                  prefact_arr(ncount) =
-     &                 exp(-ksqr/alpsqr4)/(ksqr*vol)
+                  prefact_arr(ncount) = exp(-ksqr/alpsqr4)/(ksqr*vol)
 !     *** sum up q*cos and q*sin ***
                   sumr = 0.0d0
                   sumi = 0.0d0
@@ -151,8 +133,7 @@
                      if (.not.lelect(imolty).or.nboxi(i).ne.ibox ) cycle
                      do ii = 1,nunit(imolty)
                         if ( lqchg(ntype(imolty,ii)) ) then
-                           arg=kx1*rxu(i,ii)+ky1*ryu(i,ii)+kz1*rzu(i
-     &                          ,ii)
+                           arg=kx1*rxu(i,ii)+ky1*ryu(i,ii)+kz1*rzu(i ,ii)
                            sumr = sumr + cos(arg)*qqu(i,ii)
                            sumi = sumi + sin(arg)*qqu(i,ii)
                         end if
@@ -162,49 +143,29 @@
                   ssumr_arr(ncount) = sumr
                   ssumi_arr(ncount) = sumi
 ! *** Potential energy ***
-                  vrecip = vrecip + (sumr*sumr + sumi*sumi)
-     &                 * prefact_arr(ncount)
+                  vrecip = vrecip + (sumr*sumr + sumi*sumi) * prefact_arr(ncount)
                end if
             end do
          end do
       end do
     
-       CALL MPI_ALLREDUCE(vrecip,sum_vrecip,1,
-     &     MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,
-     &     ierr)
+       CALL MPI_ALLREDUCE(vrecip,sum_vrecip,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD, ierr)
  
       vrecip = sum_vrecip
 
-       CALL MPI_ALLGATHER(ncount,1,MPI_INTEGER,ncount_arr,
-     &       1,MPI_INTEGER,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLGATHER(ncount,1,MPI_INTEGER,ncount_arr, 1,MPI_INTEGER,MPI_COMM_WORLD,ierr)
 
        ncount_displs(1) = 0
        do i = 2,numprocs
            ncount_displs(i) = ncount_displs(i-1) + ncount_arr(i-1)
        end do
  
-      CALL MPI_ALLGATHERV(kx_arr,ncount,MPI_DOUBLE_PRECISION,kx_one,
-     &         ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION,
-     &         MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLGATHERV(ky_arr,ncount,MPI_DOUBLE_PRECISION,ky_one,
-     &        ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION,
-     &        MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLGATHERV(kz_arr,ncount,MPI_DOUBLE_PRECISION,
-     &       kz_one,
-     &       ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION,
-     &       MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLGATHERV(ssumr_arr,ncount,MPI_DOUBLE_PRECISION,
-     &          ssumr_one,
-     &      ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION,
-     &      MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLGATHERV(ssumi_arr,ncount,MPI_DOUBLE_PRECISION,
-     &          ssumi_one,
-     &      ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION,
-     &      MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLGATHERV(prefact_arr,ncount,MPI_DOUBLE_PRECISION,
-     &           prefact_one,
-     &      ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION,
-     &      MPI_COMM_WORLD,ierr)       
+      CALL MPI_ALLGATHERV(kx_arr,ncount,MPI_DOUBLE_PRECISION,kx_one, ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION, MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLGATHERV(ky_arr,ncount,MPI_DOUBLE_PRECISION,ky_one, ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION, MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLGATHERV(kz_arr,ncount,MPI_DOUBLE_PRECISION, kz_one, ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION, MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLGATHERV(ssumr_arr,ncount,MPI_DOUBLE_PRECISION, ssumr_one, ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION, MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLGATHERV(ssumi_arr,ncount,MPI_DOUBLE_PRECISION, ssumi_one, ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION, MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLGATHERV(prefact_arr,ncount,MPI_DOUBLE_PRECISION, prefact_one, ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION, MPI_COMM_WORLD,ierr)       
 
       ncount = 0
       do i = 1,numprocs
@@ -223,8 +184,7 @@
 !      write(iou,*) 'in recipsum:',ssumr(100,ibox),ibox
 ! *** safety check ***
 !      write(iou,*) 'A total of ',ncount,' vectors are used'
-      if ( ncount .gt. vectormax ) call cleanup
-     &     ('choose a larger vectormax')
+      if ( ncount .gt. vectormax ) call cleanup ('choose a larger vectormax')
 
       numvect(ibox) = ncount
       return

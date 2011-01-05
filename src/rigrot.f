@@ -31,16 +31,11 @@
 
       logical::lnew,ovrlap,lterm,ltors
 
-      integer(KIND=normal_int)::ibox,igrow,j,ip,iwalk,iunit,imolty
-     & ,iu,iskip
-      integer(KIND=normal_int)::ichoi,imol,istt,iuend,glist(numax)
-     & ,ntogrow,count
+      integer(KIND=normal_int)::ibox,igrow,j,ip,iwalk,iunit,imolty ,iu,iskip
+      integer(KIND=normal_int)::ichoi,imol,istt,iuend,glist(numax) ,ntogrow,count
 
-      real(KIND=double_precision)::rx,ry,rz,rxorig,ryorig,rzorig,rxnw
-     & ,rynw,rznw
-      real(KIND=double_precision)::xdgamma,ydgamma,zdgamma,xcosdg,xsindg
-     & ,ycosdg,ysindg,zcosdg,zsindg,rbf,rxur(numax),ryur(numax)
-     & ,rzur(numax),length
+      real(KIND=double_precision)::rx,ry,rz,rxorig,ryorig,rzorig,rxnw ,rynw,rznw
+      real(KIND=double_precision)::xdgamma,ydgamma,zdgamma,xcosdg,xsindg ,ycosdg,ysindg,zcosdg,zsindg,rbf,rxur(numax),ryur(numax) ,rzur(numax),length
       real(KIND=double_precision)::w,bsum,wadd,random,maxlen,bs
   
 ! ----------------------------------------------------------------------
@@ -86,8 +81,7 @@
       maxlen = 0.0d0
      
       do j = igrow+1, iunit
-         length = (rxur(j)-rxorig)**2+(ryur(j)-ryorig)**2
-     &        +(rzur(j)-rzorig)**2
+         length = (rxur(j)-rxorig)**2+(ryur(j)-ryorig)**2 +(rzur(j)-rzorig)**2
 
          if (length.gt.maxlen) maxlen = length
       end do
@@ -168,8 +162,7 @@
          lexist(j) = .false.
       end do
       
-      call boltz( lnew,.false.,ovrlap,iskip,imol,imolty,ibox
-     &     ,ichoi,igrow,ntogrow,glist,maxlen )
+      call boltz( lnew,.false.,ovrlap,iskip,imol,imolty,ibox ,ichoi,igrow,ntogrow,glist,maxlen )
 
       if (ovrlap) then
          lterm = .true.

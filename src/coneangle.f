@@ -24,9 +24,7 @@
       use util_timings
       implicit none
 !$$$      include 'control.inc'
-      real(KIND=double_precision)::thetaone, thetatwo, phione, phitwo,
-     & angle,sintheone,costheone,sinthetwo,costhetwo,sinphione,cosphione
-     & ,sinphitwo,cosphitwo,cosangle
+      real(KIND=double_precision)::thetaone, thetatwo, phione, phitwo, angle,sintheone,costheone,sinthetwo,costhetwo,sinphione,cosphione ,sinphitwo,cosphitwo,cosangle
 
       sintheone = dsin(thetaone)
       costheone = dcos(thetaone)
@@ -38,9 +36,7 @@
       cosphitwo = dcos(phitwo)
       
 
-      cosangle = sintheone*cosphione*sinthetwo*cosphitwo
-     &     + sintheone*sinphione*sinthetwo*sinphitwo
-     &     + costheone*costhetwo
+      cosangle = sintheone*cosphione*sinthetwo*cosphitwo + sintheone*sinphione*sinthetwo*sinphitwo + costheone*costhetwo
 
       angle = dacos(cosangle)
 

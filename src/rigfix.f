@@ -21,28 +21,14 @@
 
       logical::lnew,ovrlap,lterm,lovra,lfind,lshit
 
-      integer(KIND=normal_int)::iw,i,ibox,imolty,iufrom,iuprev,ntogrow
-     & ,count,iu,counta,ilist,ja,max,num,inum,j,ju,iv,nlist,ichoi,ichtor
-     & ,ip,itor,it,jut2,jut3,jut4,jttor,iwalk,glist,ifrom,inuma
+      integer(KIND=normal_int)::iw,i,ibox,imolty,iufrom,iuprev,ntogrow ,count,iu,counta,ilist,ja,max,num,inum,j,ju,iv,nlist,ichoi,ichtor ,ip,itor,it,jut2,jut3,jut4,jttor,iwalk,glist,ifrom,inuma
 
       parameter(max=10)
 
 
-      real(KIND=double_precision)::xub,yub,zub,lengtha,lengthb,dum,xfix
-     & ,yfix,zfix,phia,bendang,thetac,phidisp,phi,rlength,vdha
-     & ,vtor,vtorsion,phitors,bf_tor,random,ran_tor,bs,rxpa,rypa,rzpa
-     & ,bsuma,vtrya,vtrintraa,vtrexta,vtrelecta,vtrewalda,vtrorienta
-     & ,vtrintera,bsum,rbf,wrig,vtrelecta_intra,vtrelecta_inter
+      real(KIND=double_precision)::xub,yub,zub,lengtha,lengthb,dum,xfix ,yfix,zfix,phia,bendang,thetac,phidisp,phi,rlength,vdha ,vtor,vtorsion,phitors,bf_tor,random,ran_tor,bs,rxpa,rypa,rzpa ,bsuma,vtrya,vtrintraa,vtrexta,vtrelecta,vtrewalda,vtrorienta ,vtrintera,bsum,rbf,wrig,vtrelecta_intra,vtrelecta_inter
 
-      dimension ilist(numax),inum(max),xfix(numax),yfix(numax)
-     & ,zfix(numax),lfind(numax),phia(numax),bendang(numax)
-     & ,rlength(numax),vtorsion(nchtor_max),phitors(nchtor_max)
-     & ,bf_tor(nchtor_max),rxpa(numax,nchmax),rypa(numax,nchmax)
-     & ,rzpa(numax,nchmax),vtrelecta(nchmax),vtrewalda(nchmax)
-     & ,bsuma(nchmax),vtrya(nchmax),vtrintraa(nchmax)
-     & ,vtrorienta(nchmax),vtrexta(nchmax),glist(max) ,lovra(nchmax)
-     & ,vtrintera(nchmax),ifrom(numax),inuma(max)
-     & ,vtrelecta_intra(nchmax),vtrelecta_inter(nchmax)
+      dimension ilist(numax),inum(max),xfix(numax),yfix(numax) ,zfix(numax),lfind(numax),phia(numax),bendang(numax) ,rlength(numax),vtorsion(nchtor_max),phitors(nchtor_max) ,bf_tor(nchtor_max),rxpa(numax,nchmax),rypa(numax,nchmax) ,rzpa(numax,nchmax),vtrelecta(nchmax),vtrewalda(nchmax) ,bsuma(nchmax),vtrya(nchmax),vtrintraa(nchmax) ,vtrorienta(nchmax),vtrexta(nchmax),glist(max) ,lovra(nchmax) ,vtrintera(nchmax),ifrom(numax),inuma(max) ,vtrelecta_intra(nchmax),vtrelecta_inter(nchmax)
 !     ----------------------------------------------------------
 
 !      write(iou,*) 'START RIGFIX'
@@ -67,8 +53,7 @@
          yfix(iufrom) = ryu(i,iufrom) - ryu(i,iuprev)
          zfix(iufrom) = rzu(i,iufrom) - rzu(i,iuprev)
 
-         lengthb = dsqrt(xfix(iufrom)**2 + yfix(iufrom)**2 
-     &        + zfix(iufrom)**2)
+         lengthb = dsqrt(xfix(iufrom)**2 + yfix(iufrom)**2  + zfix(iufrom)**2)
 
          xub = xfix(iufrom) / lengthb
          yub = yfix(iufrom) / lengthb
@@ -84,13 +69,11 @@
             yfix(iu) = ryu(i,iu) - ryu(i,iufrom)
             zfix(iu) = rzu(i,iu) - rzu(i,iufrom)
             
-            lengtha = dsqrt(xfix(iu)**2 + yfix(iu)**2
-     &           + zfix(iu)**2)
+            lengtha = dsqrt(xfix(iu)**2 + yfix(iu)**2 + zfix(iu)**2)
                         
             rlength(iu) = lengtha
             
-            thetac = -(xfix(iu)*xfix(iufrom) + yfix(iu)*yfix(iufrom)
-     &           + zfix(iu)*zfix(iufrom)) / (lengtha*lengthb)
+            thetac = -(xfix(iu)*xfix(iufrom) + yfix(iu)*yfix(iufrom) + zfix(iu)*zfix(iufrom)) / (lengtha*lengthb)
             
             if (abs(thetac).gt.1.0d0) call cleanup('screwup in rigfix')
             
@@ -131,14 +114,11 @@
                   yfix(ju) = ryu(i,ju) - ryu(i,iufrom)
                   zfix(ju) = rzu(i,ju) - rzu(i,iufrom)
 
-                  lengtha = dsqrt(xfix(ju)**2 + yfix(ju)**2
-     &                 + zfix(ju)**2)
+                  lengtha = dsqrt(xfix(ju)**2 + yfix(ju)**2 + zfix(ju)**2)
 
                   rlength(ju) = lengtha
 
-                  thetac = -(xfix(ju)*xfix(iufrom) + yfix(ju)
-     &                 *yfix(iufrom) + zfix(ju)*zfix(iufrom))
-     &                 / (lengtha*lengthb)
+                  thetac = -(xfix(ju)*xfix(iufrom) + yfix(ju) *yfix(iufrom) + zfix(ju)*zfix(iufrom)) / (lengtha*lengthb)
                   
                   bendang(ju) = dacos(thetac)
 
@@ -146,8 +126,7 @@
                   yub = yfix(ju) / lengtha
                   zub = zfix(ju) / lengtha
 !     --- determine the phi value associated with this
-                  call cone(3,dum,dum,dum,bendang(ju)
-     &                 ,phia(ju),xub,yub,zub)
+                  call cone(3,dum,dum,dum,bendang(ju) ,phia(ju),xub,yub,zub)
 
                end if
             end do
@@ -206,8 +185,7 @@
                     
                      phi = phia(iu) + phidisp
 
-                     call cone(2,dum,dum,dum,bendang(iu),phi
-     &                    ,xub,yub,zub)
+                     call cone(2,dum,dum,dum,bendang(iu),phi ,xub,yub,zub)
 
                      lengtha = rlength(iu)
 
@@ -231,14 +209,11 @@
                      jut3 = ijtor3(imolty,iu,it)
                      jut4 = ijtor4(imolty,iu,it)
 
-                     if (jut2.eq.iufrom.and.jut3.eq.iuprev
-     &                    .and..not.lplace(imolty,jut4)) then
+                     if (jut2.eq.iufrom.and.jut3.eq.iuprev .and..not.lplace(imolty,jut4)) then
 !     --- check to see if jut4 exists
                         if (.not. lexist(jut4)) then
-                           write(iou,*) 'iu,jut2,jut3,jut4',iu
-     &                          ,jut2,jut3,jut4
-                           call cleanup('trouble, jut4 does not
-     &                                    exist in rigfix')
+                           write(iou,*) 'iu,jut2,jut3,jut4',iu ,jut2,jut3,jut4
+                           call cleanup('trouble, jut4 does not exist in rigfix')
                         end if
                         
                         jttor = ittor(imolty,iu,it)
@@ -281,8 +256,7 @@
                if (lnew .or. ip.ne.1) then
                   phi = phia(iu) + phidisp
                   
-                  call cone(2,dum,dum,dum,bendang(iu),phi
-     &                 ,xub,yub,zub)
+                  call cone(2,dum,dum,dum,bendang(iu),phi ,xub,yub,zub)
 
                   lengtha = rlength(iu)
                   
@@ -314,8 +288,7 @@
                if (lnew.or.ip.ne.1) then
                   phi = phia(iu) + phidisp
                   
-                  call cone(2,dum,dum,dum,bendang(iu),phi
-     &                 ,xub,yub,zub)
+                  call cone(2,dum,dum,dum,bendang(iu),phi ,xub,yub,zub)
                   
                   lengtha = rlength(iu)
 
@@ -371,8 +344,7 @@
          end do
 
 
-         call boltz(lnew,.false.,ovrlap,i,i,imolty,ibox,ichoi
-     &        ,iufrom,ntogrow,glist)
+         call boltz(lnew,.false.,ovrlap,i,i,imolty,ibox,ichoi ,iufrom,ntogrow,glist)
          
          if (ovrlap) then
             lterm = .true.
@@ -390,10 +362,8 @@
 	    vtrexta(ip)   = vtrexta(ip) + vtrext(ip)
 	    vtrintera(ip) = vtrintera(ip) + vtrinter(ip)
             vtrelecta(ip) =  vtrelecta(ip) + vtrelect(ip)
-            vtrelecta_intra(ip) =  vtrelecta_intra(ip) +
-     &                               vtrelect_intra(ip)
-            vtrelecta_inter(ip) =  vtrelecta_inter(ip) +
-     &                               vtrelect_inter(ip)
+            vtrelecta_intra(ip) =  vtrelecta_intra(ip) + vtrelect_intra(ip)
+            vtrelecta_inter(ip) =  vtrelecta_inter(ip) + vtrelect_inter(ip)
   
             vtrewalda(ip) = vtrewalda(ip) + vtrewald(ip)
             vtrorienta(ip) = vtrorienta(ip) + vtrorient(ip)
@@ -412,8 +382,7 @@
 
             glist(count) = iu
 
-            call boltz(lnew,.false.,ovrlap,i,i,imolty,ibox,ichoi
-     &           ,ifrom(counta),1,glist)
+            call boltz(lnew,.false.,ovrlap,i,i,imolty,ibox,ichoi ,ifrom(counta),1,glist)
 
             if (ovrlap) then
                lterm = .true.
@@ -431,10 +400,8 @@
                vtrexta(ip)   = vtrexta(ip) + vtrext(ip)
                vtrintera(ip) = vtrintera(ip) + vtrinter(ip)
                vtrelecta(ip) =  vtrelecta(ip) + vtrelect(ip)
-               vtrelecta_intra(ip) =  vtrelecta_intra(ip) +
-     &                                  vtrelect_intra(ip)
-               vtrelecta_inter(ip) =  vtrelecta_inter(ip) + 
-     &                                  vtrelect_inter(ip)
+               vtrelecta_intra(ip) =  vtrelecta_intra(ip) + vtrelect_intra(ip)
+               vtrelecta_inter(ip) =  vtrelecta_inter(ip) +  vtrelect_inter(ip)
                vtrewalda(ip) = vtrewalda(ip) + vtrewald(ip)
                vtrorienta(ip) = vtrorienta(ip) + vtrorient(ip)
             end do         
@@ -520,8 +487,7 @@
                zvec(iu,ju) = rzu(i,ju) - rzu(i,iu)
             end if
             
-            distij(iu,ju) = dsqrt(xvec(iu,ju)**2
-     &           + yvec(iu,ju)**2 + zvec(iu,ju)**2)
+            distij(iu,ju) = dsqrt(xvec(iu,ju)**2 + yvec(iu,ju)**2 + zvec(iu,ju)**2)
             
             distij(ju,iu) = distij(iu,ju)
             
@@ -555,8 +521,7 @@
                zvec(iu,ju) = rzu(i,ju) - rzu(i,iu)
             end if
             
-            distij(iu,ju) = dsqrt(xvec(iu,ju)**2
-     &           + yvec(iu,ju)**2 + zvec(iu,ju)**2)
+            distij(iu,ju) = dsqrt(xvec(iu,ju)**2 + yvec(iu,ju)**2 + zvec(iu,ju)**2)
             
             distij(ju,iu) = distij(iu,ju)
             

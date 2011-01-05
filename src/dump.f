@@ -43,10 +43,8 @@
          write(8,*) Armtrax, Armtray, Armtraz 
          do im=1,nbox
             do imolty=1,nmolty
-               write(8,*) rmtrax(imolty,im), rmtray(imolty,im)
-     &              , rmtraz(imolty,im)
-               write(8,*) rmrotx(imolty,im), rmroty(imolty,im)
-     &              , rmrotz(imolty,im)
+               write(8,*) rmtrax(imolty,im), rmtray(imolty,im) , rmtraz(imolty,im)
+               write(8,*) rmrotx(imolty,im), rmroty(imolty,im) , rmrotz(imolty,im)
             end do
          end do
          do im=1, nbox

@@ -35,31 +35,23 @@
 
       logical::lcoulo,lexplt,lqimol,lqjmol,lij2
       integer(KIND=normal_int)::ibox
-      integer(KIND=normal_int)::i,ii,j,jj,ntii,ntjj,ntij,imolty,jmolty
-     & ,iii,jjj,k
+      integer(KIND=normal_int)::i,ii,j,jj,ntii,ntjj,ntij,imolty,jmolty ,iii,jjj,k
  
       real(KIND=double_precision)::press,repress,erfunc
 
-      real(KIND=double_precision)::rxui,ryui,rzui,rxuij,ryuij,rzuij
-     & ,rijsq,rcutsq,sr2,sr6,rhosq,corp,rij,rs1,sr1,rs2,sr7,rs7,rs6
+      real(KIND=double_precision)::rxui,ryui,rzui,rxuij,ryuij,rzuij ,rijsq,rcutsq,sr2,sr6,rhosq,corp,rij,rs1,sr1,rs2,sr7,rs7,rs6
       real(KIND=double_precision)::srij
-      real(KIND=double_precision)::surf,pxx,pyy,pzz,rpxx,rpyy,rpzz,rpxy
-     & ,rpyx,rpxz,rpzx,rpyz,rpzy
+      real(KIND=double_precision)::surf,pxx,pyy,pzz,rpxx,rpyy,rpzz,rpxy ,rpyx,rpxz,rpzx,rpyz,rpzy
 
-      real(KIND=double_precision)::fxcmi,fycmi,fzcmi,fij,xcmi,ycmi,zcmi
-     & ,flj
+      real(KIND=double_precision)::fxcmi,fycmi,fzcmi,fij,xcmi,ycmi,zcmi ,flj
       real(KIND=double_precision)::rcm,rcmsq,rcmi
-      real(KIND=double_precision)::rbcut,qave, volsq,epsilon2,sigma2
-     & ,pwell,vol 
+      real(KIND=double_precision)::rbcut,qave, volsq,epsilon2,sigma2 ,pwell,vol 
 
       dimension lcoulo(numax,numax)
 
 ! RP added for MPI
-      real(KIND=double_precision)::pips12,pips13,pips21,pips23,pips31
-     & ,pips32
-      real(KIND=double_precision)::diff_pips12,diff_pips13,diff_pips21
-     & ,diff_pips23,diff_pips31,diff_pips32,diff_pxx,diff_pyy,diff_pzz
-     & ,sum_press
+      real(KIND=double_precision)::pips12,pips13,pips21,pips23,pips31 ,pips32
+      real(KIND=double_precision)::diff_pips12,diff_pips13,diff_pips21 ,diff_pips23,diff_pips31,diff_pips32,diff_pxx,diff_pyy,diff_pzz ,sum_press
 ! --------------------------------------------------------------------
       if ( lpbc ) call setpbc (ibox)
 
@@ -184,13 +176,9 @@
                         
                         ntjj = ntype(jmolty,jj)
                         if ( lij2 ) then
-                           if ( (.not. (lij(ntii) .and. lij(ntjj))) 
-     &                          .and. 
-     &                          (.not. (lqchg(ntii) .and. lqchg(ntjj)))) 
-     &                          goto 97
+                           if ( (.not. (lij(ntii) .and. lij(ntjj)))  .and.  (.not. (lqchg(ntii) .and. lqchg(ntjj))))  goto 97
                         else
-                           if (.not. (lqchg(ntii) .and. lqchg(ntjj)))
-     &                          goto 97
+                           if (.not. (lqchg(ntii) .and. lqchg(ntjj))) goto 97
                         end if
                         if ( lexpsix .or. lmmff ) then
                            ntij = (ntii+ntjj)/2
@@ -217,20 +205,13 @@
                         fij = 0.0d0
                         if ( lchgall ) then
                            if ( lewald ) then
-                              fij = fij - (2.0d0*calp(ibox)*
-     &                             dexp(-calp(ibox)*calp(ibox)
-     &                             *rijsq)/dsqrt(onepi)
-     &                             +erfunc(calp(ibox)*dsqrt(rijsq))/
-     &                             dsqrt(rijsq))*qqu(i,ii)*qqu(j,jj)*
-     &                             qqfact/rijsq
+                              fij = fij - (2.0d0*calp(ibox)* dexp(-calp(ibox)*calp(ibox) *rijsq)/dsqrt(onepi) +erfunc(calp(ibox)*dsqrt(rijsq))/ dsqrt(rijsq))*qqu(i,ii)*qqu(j,jj)* qqfact/rijsq
                            else
 ! -- KM 06/09/09
-                              fij = -(qqfact*qqu(i,ii)*qqu(j,jj)
-     &                             /dsqrt(rijsq))/rijsq
+                              fij = -(qqfact*qqu(i,ii)*qqu(j,jj) /dsqrt(rijsq))/rijsq
                            end if
 
-                        elseif ( lqimol .and. lqjmol .and. 
-     &                          lqchg(ntii) .and. lqchg(ntjj) ) then
+                        elseif ( lqimol .and. lqjmol .and.  lqchg(ntii) .and. lqchg(ntjj) ) then
                            
                            iii = leaderq(imolty,ii)
                            jjj = leaderq(jmolty,jj)
@@ -246,15 +227,9 @@
                            
                            if ( lcoulo(iii,jjj) ) then
                               if ( lewald ) then
-                                 fij = fij - (2.0d0*calp(ibox)*
-     &                                dexp(-calp(ibox)*calp(ibox)
-     &                                *rijsq)/dsqrt(onepi)
-     &                                +erfunc(calp(ibox)*dsqrt(rijsq))/
-     &                                dsqrt(rijsq))*qqu(i,ii)*qqu(j,jj)*
-     &                                qqfact/rijsq
+                                 fij = fij - (2.0d0*calp(ibox)* dexp(-calp(ibox)*calp(ibox) *rijsq)/dsqrt(onepi) +erfunc(calp(ibox)*dsqrt(rijsq))/ dsqrt(rijsq))*qqu(i,ii)*qqu(j,jj)* qqfact/rijsq
                               else
-                                 fij = -(qqfact*qqu(i,ii)*qqu(j,jj)
-     &                                /dsqrt(rijsq))/rijsq
+                                 fij = -(qqfact*qqu(i,ii)*qqu(j,jj) /dsqrt(rijsq))/rijsq
                               end if
                            end if
                         end if
@@ -262,10 +237,7 @@
                         if ( rijsq .lt. rcutsq .or. lijall) then
                            if ( lexpsix ) then
                               rij = dsqrt(rijsq)
-                              fij = fij + (-6.0d0*aexsix(ntij)/(rijsq
-     &                             *rijsq*rijsq) + bexsix(ntij)
-     &                             *cexsix(ntij)*rij*dexp( cexsix(ntij)
-     &				   *rij ))/rijsq
+                              fij = fij + (-6.0d0*aexsix(ntij)/(rijsq *rijsq*rijsq) + bexsix(ntij) *cexsix(ntij)*rij*dexp( cexsix(ntij) 				   *rij ))/rijsq
 !                              write(2,*) 'rij,fij,ntij',rij,fij,ntij
                            elseif ( lmmff ) then
                               rs2 = rijsq/(sigisq(ntij))
@@ -274,118 +246,79 @@
                               rs7 = rs1*rs6
                               sr1 = 1.07d0/(rs1+0.07d0)
                               sr7 = sr1**7.0d0
-                              fij = fij - 7.0d0*epsimmff(ntij)*rs1*sr7*(
-     &                           sr1*(1.12d0/(rs7+0.12d0)-2.0d0)/1.07d0+
-     &                           1.12d0*rs6/((rs7+0.12d0)*(rs7+0.12d0)))
-     &                             /rijsq
+                              fij = fij - 7.0d0*epsimmff(ntij)*rs1*sr7*( sr1*(1.12d0/(rs7+0.12d0)-2.0d0)/1.07d0+ 1.12d0*rs6/((rs7+0.12d0)*(rs7+0.12d0))) /rijsq
                            elseif (lninesix) then
                               rij = dsqrt(rijsq)
-                              fij = fij + ( 72.0d0*epsnx(ntij)/
-     &                            (rij*rzero(ntij)) ) * 
-     &                            (rzero(ntij)/rij)**7 *
-     &                            (1.0d0-(rzero(ntij)/rij)**3)
+                              fij = fij + ( 72.0d0*epsnx(ntij)/ (rij*rzero(ntij)) ) *  (rzero(ntij)/rij)**7 * (1.0d0-(rzero(ntij)/rij)**3)
                            elseif (lgenlj) then
-                              if ( lexpand(imolty)
-     &                             .and. lexpand(jmolty) ) then
-                                 sigma2=(sigma(imolty,ii)+
-     &                                sigma(jmolty,jj))/2.0d0
+                              if ( lexpand(imolty) .and. lexpand(jmolty) ) then
+                                 sigma2=(sigma(imolty,ii)+ sigma(jmolty,jj))/2.0d0
                                  sr2 = sigma2*sigma2/rijsq
-                                 epsilon2=dsqrt(epsilon(imolty,ii)
-     &                                *epsilon(jmolty,jj))
+                                 epsilon2=dsqrt(epsilon(imolty,ii) *epsilon(jmolty,jj))
                               elseif ( lexpand(imolty) ) then
-                                 sigma2=(sigma(imolty,ii)+
-     &                                sigi(ntjj))/2.0d0
+                                 sigma2=(sigma(imolty,ii)+ sigi(ntjj))/2.0d0
                                  sr2 = sigma2*sigma2/rijsq
-                                 epsilon2=dsqrt(epsilon(imolty,ii)
-     &                                *epsi(ntjj))
+                                 epsilon2=dsqrt(epsilon(imolty,ii) *epsi(ntjj))
                               elseif ( lexpand(jmolty) ) then
-                                 sigma2=(sigma(jmolty,jj)+
-     &                                sigi(ntii))/2.0d0
+                                 sigma2=(sigma(jmolty,jj)+ sigi(ntii))/2.0d0
                                  sr2 = sigma2*sigma2/rijsq
-                                 epsilon2=dsqrt(epsilon(jmolty,jj)
-     &                                *epsi(ntii))
+                                 epsilon2=dsqrt(epsilon(jmolty,jj) *epsi(ntii))
                               else
                                  rij = dsqrt(rijsq)
                                  sr2 = sig2ij(ntij) / rijsq
                                  epsilon2 = epsij(ntij)
                                  srij = dsqrt (sr2)
                               end if
-                              if ( (rij) .le. (rij*srij)*
-     &                             2.0d0**(2.0d0/n0) ) then
-                                 flj=-4.0d0*epsilon2*((n0*((srij)**n0))-
-     &                                ((n0/2.0d0)*((srij)**(n0/2.0d0))))
-     &                                /rijsq
+                              if ( (rij) .le. (rij*srij)* 2.0d0**(2.0d0/n0) ) then
+                                 flj=-4.0d0*epsilon2*((n0*((srij)**n0))- ((n0/2.0d0)*((srij)**(n0/2.0d0)))) /rijsq
                               else
-                                 flj =-epsilon2* ( ((2.0d0*n1) *
-     &                                ((srij) **(2.0d0*n1))*
-     &                                ( 2.0d0** ((4.0d0*n1)/n0)))-
-     &                                (n1*((srij)**(n1))*
-     &                                (2.0d0 ** ((2.0d0*n1/n0)+1.0d0))))
-     &                                /rijsq
+                                 flj =-epsilon2* ( ((2.0d0*n1) * ((srij) **(2.0d0*n1))* ( 2.0d0** ((4.0d0*n1)/n0)))- (n1*((srij)**(n1))* (2.0d0 ** ((2.0d0*n1/n0)+1.0d0)))) /rijsq
                               end if
                               fij = fij + flj
                            else
                               if ( lfepsi ) then
                                  sr2 = 1.0d0/rijsq
                                  sr6 = sr2 * sr2 * sr2
-                                 if ( (.not. lqchg(ntii)) .and. 
-     &                                (.not. lqchg(ntjj)) ) then
+                                 if ( (.not. lqchg(ntii)) .and.  (.not. lqchg(ntjj)) ) then
                                     if ( nunit(imolty) .eq. 4 ) then
 ! *** TIP-4P structure (temperary use ???)
                                        qave = (qqu(i,4)+qqu(j,4))/2.0d0
                                     else
-                                       qave = (qqu(i,4)+qqu(i,5)+
-     &                                      qqu(j,4)+qqu(j,5))*0.85d0
+                                       qave = (qqu(i,4)+qqu(i,5)+ qqu(j,4)+qqu(j,5))*0.85d0
                                     end if
                                  else
                                     qave = (qqu(i,ii)+qqu(j,jj))/2.0d0
                                  end if
 
-                                 if ( lexpand(imolty) 
-     &                                .and. lexpand(jmolty)) then
-                                    epsilon2=dsqrt(epsilon(imolty,ii)
-     &                                   *epsilon(jmolty,jj))
+                                 if ( lexpand(imolty)  .and. lexpand(jmolty)) then
+                                    epsilon2=dsqrt(epsilon(imolty,ii) *epsilon(jmolty,jj))
                                  elseif ( lexpand(imolty)) then
-                                    epsilon2=dsqrt(epsilon(imolty,ii)
-     &                                   *epsi(ntjj))
+                                    epsilon2=dsqrt(epsilon(imolty,ii) *epsi(ntjj))
                                  elseif ( lexpand(jmolty) ) then
-                                    epsilon2=dsqrt(epsilon(jmolty,jj)
-     &                                   *epsi(ntii))
+                                    epsilon2=dsqrt(epsilon(jmolty,jj) *epsi(ntii))
                                  else
                                     epsilon2=epsij(ntij)
                                  end if
-                                 flj = 48.0d0*epsilon2*
-     &                                sr6*(-sr6*(aslope*(qave-a0)*
-     &                                (qave-a0)+ashift)+0.5d0*
-     &                                (bslope*(qave-b0)*(qave-b0)+
-     &                                bshift)) / rijsq
+                                 flj = 48.0d0*epsilon2* sr6*(-sr6*(aslope*(qave-a0)* (qave-a0)+ashift)+0.5d0* (bslope*(qave-b0)*(qave-b0)+ bshift)) / rijsq
                               else
-                                 if ( lexpand(imolty) 
-     &                                .and. lexpand(jmolty) ) then
-                                    sigma2=(sigma(imolty,ii)+
-     &                                   sigma(jmolty,jj))/2.0d0
+                                 if ( lexpand(imolty)  .and. lexpand(jmolty) ) then
+                                    sigma2=(sigma(imolty,ii)+ sigma(jmolty,jj))/2.0d0
                                     sr2 = sigma2*sigma2/rijsq
-                                    epsilon2=dsqrt(epsilon(imolty,ii)
-     &                                   *epsilon(jmolty,jj))
+                                    epsilon2=dsqrt(epsilon(imolty,ii) *epsilon(jmolty,jj))
                                  elseif ( lexpand(imolty) ) then
-                                    sigma2=(sigma(imolty,ii)+
-     &                                   sigi(ntjj))/2.0d0
+                                    sigma2=(sigma(imolty,ii)+ sigi(ntjj))/2.0d0
                                     sr2 = sigma2*sigma2/rijsq
-                                    epsilon2=dsqrt(epsilon(imolty,ii)
-     &                                   *epsi(ntjj))
+                                    epsilon2=dsqrt(epsilon(imolty,ii) *epsi(ntjj))
                                  elseif ( lexpand(jmolty) ) then
-                                    sigma2=(sigma(jmolty,jj)+
-     &                                   sigi(ntii))/2.0d0
+                                    sigma2=(sigma(jmolty,jj)+ sigi(ntii))/2.0d0
                                     sr2 = sigma2*sigma2/rijsq
-                                    epsilon2=dsqrt(epsilon(jmolty,jj)
-     &                                   *epsi(ntii))
+                                    epsilon2=dsqrt(epsilon(jmolty,jj) *epsi(ntii))
                                  else
                                     sr2 = sig2ij(ntij) / rijsq
                                     epsilon2 = epsij(ntij)
                                  end if
                                  sr6 = sr2 * sr2 * sr2
-                                 flj = 48.0d0*sr6*(-sr6+0.5d0)
-     &                                *epsilon2 / rijsq
+                                 flj = 48.0d0*sr6*(-sr6+0.5d0) *epsilon2 / rijsq
                               end if
                               fij = fij + flj
                            end if
@@ -408,8 +341,7 @@
 
 !                  write(2,*) 'COM  ruij',rxuij,ryuij,rzuij
 
-                  press = press + 
-     &                 fxcmi*rxuij + fycmi*ryuij + fzcmi*rzuij
+                  press = press +  fxcmi*rxuij + fycmi*ryuij + fzcmi*rzuij
 
 ! * for surface tension                  
 ! * this is correct for the coulombic part and for LJ.  Note sign difference!
@@ -430,26 +362,16 @@
 
 ! RP for MPI
 
-       CALL MPI_ALLREDUCE(press,sum_press,1,
-     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLREDUCE(pxx,diff_pxx,1,
-     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLREDUCE(pyy,diff_pyy,1,
-     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLREDUCE(pzz,diff_pzz,1,
-     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLREDUCE(pips12,diff_pips12,1,
-     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLREDUCE(pips13,diff_pips13,1,
-     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLREDUCE(pips21,diff_pips21,1,
-     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLREDUCE(pips23,diff_pips23,1,
-     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLREDUCE(pips31,diff_pips31,1,
-     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLREDUCE(pips32,diff_pips32,1,
-     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLREDUCE(press,sum_press,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLREDUCE(pxx,diff_pxx,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLREDUCE(pyy,diff_pyy,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLREDUCE(pzz,diff_pzz,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLREDUCE(pips12,diff_pips12,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLREDUCE(pips13,diff_pips13,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLREDUCE(pips21,diff_pips21,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLREDUCE(pips23,diff_pips23,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLREDUCE(pips31,diff_pips31,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLREDUCE(pips32,diff_pips32,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
 
      
       press = sum_press
@@ -477,8 +399,7 @@
 ! *** Compute the reciprocal space contribution
 ! *** by using the thermodynamic definition
 ! *** 
-         call recippress(ibox,repress,rpxx,rpyy,rpzz,rpxy,rpyx,rpxz,
-     &                  rpzx,rpyz,rpzy)
+         call recippress(ibox,repress,rpxx,rpyy,rpzz,rpxy,rpyx,rpxz, rpzx,rpyz,rpzy)
          press = press - repress
 
          pxx = pxx + rpxx
@@ -535,8 +456,7 @@
                      rzuij = rzui-rzwell(j,imolty)
                      call mimage (rxuij,ryuij,rzuij,ibox)
                      rijsq = rxuij*rxuij+ryuij*ryuij+rzuij*rzuij
-                     fij = 2.0d0*awell(ii,k,imolty)*bwell*
-     &                    dexp(-bwell*rijsq)
+                     fij = 2.0d0*awell(ii,k,imolty)*bwell* dexp(-bwell*rijsq)
                      pwell = pwell+fij*rijsq
                      pwellips(1,1) = pwellips(1,1)+fij*rxuij*rxuij
                      pwellips(2,2) = pwellips(2,2)+fij*ryuij*ryuij
@@ -592,14 +512,10 @@
       elseif (lstageb) then
          press = etais*press+lambdais*pwell
       elseif (lstagec) then
-         press = (etais+(1.0d0-etais)*lambdais)*press
-     &           +(1.0d0-lambdais)*pwell
+         press = (etais+(1.0d0-etais)*lambdais)*press +(1.0d0-lambdais)*pwell
       end if
 
-      press = 1.380662d4 * ( ( (nchbox(ibox)+ ghost_particles(ibox))
-     &      / beta) -
-     &     ( press/3.0d0 ) ) / 
-     &     ( vol )
+      press = 1.380662d4 * ( ( (nchbox(ibox)+ ghost_particles(ibox)) / beta) - ( press/3.0d0 ) ) /  ( vol )
 
       surf = pzz - 0.5d0*(pxx + pyy)
 ! * divide by surface area and convert from K to put surf in mN/m 
@@ -614,8 +530,7 @@
          volsq = ( vol )**2
          do imolty=1, nmolty        
             do jmolty=1, nmolty  
-               rhosq = ncmt(ibox,imolty)*ncmt(ibox,jmolty)
-     &              / volsq
+               rhosq = ncmt(ibox,imolty)*ncmt(ibox,jmolty) / volsq
                press=press + 1.380662d4 * corp(imolty,jmolty,rhosq,ibox)
             end do
         end do

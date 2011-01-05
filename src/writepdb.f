@@ -29,8 +29,7 @@
          do ia=1,natom
             imm=parbox(im,ibox,1)
             iguest=iguest+1
-            write(48,'(a6,i5,1x,a4,14x,3f8.3)') "ATOM  ",iguest,atom,
-     &       rxu(imm,ia),ryu(imm,ia),rzu(imm,ia)
+            write(48,'(a6,i5,1x,a4,14x,3f8.3)') "ATOM  ",iguest,atom, rxu(imm,ia),ryu(imm,ia),rzu(imm,ia)
          end do
       end do
 

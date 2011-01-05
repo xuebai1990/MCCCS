@@ -8,8 +8,7 @@
       include 'common.inc'
       integer::narg,iarg
       character(LEN=default_path_length)::sarg,infile='topmon.inp'
-      logical::lrun=.true.,lsetinput=.false.,lversion=.false.,lusage
-     & =.false.
+      logical::lrun=.true.,lsetinput=.false.,lversion=.false.,lusage =.false.
 ! ----------------------------------------------------------------
 ! Parse the command line arguments
       narg=command_argument_count()
@@ -43,15 +42,11 @@
          iarg=iarg+1
       end do
 ! ----------------------------------------------------------------
-      if (lversion) write(*,'(A,/,A,/)') 'MCCCS topmon 2011-01-01'
-     & ,'branch: zeolite'
+      if (lversion) write(*,'(A,/,A,/)') 'MCCCS topmon 2011-01-01' ,'branch: zeolite'
 
       if (lusage) then
          call get_command_argument(0,sarg)
-         write(*,'(A,/,T4,A,/)') 'Usage: '//trim(sarg)//
-     &' [--version|-v] [--help|-h] [[--input|-i] /path/to/input/file]'
-     & ,'If the input file is the last argument, --input or -i can 
-     &be omitted'
+         write(*,'(A,/,T4,A,/)') 'Usage: '//trim(sarg)// ' [--version|-v] [--help|-h] [[--input|-i] /path/to/input/file]' ,'If the input file is the last argument, --input or -i can  be omitted'
       end if
 
       if (lrun) then

@@ -35,24 +35,17 @@
 
       logical::lempty,lterm
 
-      integer(KIND=normal_int)::type_a,type_b,from,prev,self,iboxnew
-     & ,iboxold,imolty,igrow,new,old,islen,ifirst,iprev,iii,j
-      integer(KIND=normal_int)::oldchain,newchain,oldunit,newunit
-     & ,iunit,iins
+      integer(KIND=normal_int)::type_a,type_b,from,prev,self,iboxnew ,iboxold,imolty,igrow,new,old,islen,ifirst,iprev,iii,j
+      integer(KIND=normal_int)::oldchain,newchain,oldunit,newunit ,iunit,iins
 
       integer(KIND=normal_int)::ic,ibox,icbu,jj,mm,imt,jmt,imolin,imolrm
-      integer(KIND=normal_int)::boxa,boxb,ipair,imolta,imoltb,iboxa
-     & ,iboxb,iboxal,iboxbl,iboxia,iboxib,iunita,iunitb,orgaia ,orgaib
-     & ,orgbia,orgbib,ipairb 
+      integer(KIND=normal_int)::boxa,boxb,ipair,imolta,imoltb,iboxa ,iboxb,iboxal,iboxbl,iboxia,iboxib,iunita,iunitb,orgaia ,orgaib ,orgbia,orgbib,ipairb 
 
-      real(KIND=double_precision)::random,tweight,tweiold,rxut,ryut,rzut
-     & ,dvol,vola,volb,rho,coru,dinsta,rpair
+      real(KIND=double_precision)::random,tweight,tweiold,rxut,ryut,rzut ,dvol,vola,volb,rho,coru,dinsta,rpair
 
-      real(KIND=double_precision)::vnbox,vninte,vnintr,vnvibb,vntgb
-     & ,vnextb,vnbend,vntail,vnelect,vnewald,wnlog,wolog,wdlog,wswat
+      real(KIND=double_precision)::vnbox,vninte,vnintr,vnvibb,vntgb ,vnextb,vnbend,vntail,vnelect,vnewald,wnlog,wolog,wdlog,wswat
          
-      real(KIND=double_precision)::v,vintra,vinter,vext,velect,vewald
-     & ,vdum,delen,deleo,dicount,vrecipn,vrecipo
+      real(KIND=double_precision)::v,vintra,vinter,vext,velect,vewald ,vdum,delen,deleo,dicount,vrecipn,vrecipo
 ! * additions from iswatch
 
       integer(KIND=normal_int)::izz,box,iboxi,bdmol_a,bdmol_b
@@ -68,9 +61,7 @@
 
       real(KIND=double_precision)::waddold,waddnew,vdum2
 
-      dimension vnbox(nbxmax),vninte(nbxmax),vnintr(nbxmax)
-     & ,vnvibb(nbxmax),vntgb(nbxmax),vnextb(nbxmax),vnbend(nbxmax)
-     & ,vntail(nbxmax),vnelect(nbxmax),vnewald(nbxmax)
+      dimension vnbox(nbxmax),vninte(nbxmax),vnintr(nbxmax) ,vnvibb(nbxmax),vntgb(nbxmax),vnextb(nbxmax),vnbend(nbxmax) ,vntail(nbxmax),vnelect(nbxmax),vnewald(nbxmax)
 
 ! --- JLR 11-24-09
       integer(KIND=normal_int)::icallrose
@@ -178,8 +169,7 @@
 
 ! *** box determinations ***
 
-         if ( (ncmt(boxa,imolta) .eq. 0) .or.
-     &        (ncmt(boxb,imoltb) .eq. 0) ) then
+         if ( (ncmt(boxa,imolta) .eq. 0) .or. (ncmt(boxb,imoltb) .eq. 0) ) then
             lempty = .true.
          else
 
@@ -203,8 +193,7 @@
 !     * imola is the overall molecule id number (runs from 1 to total #) *
            imola = parbox( moltaid, box, imolta) 
 
-           if (moltyp(imola) .ne. imolta) 
-     &                   write(iou,*) 'screwup in iswatch'
+           if (moltyp(imola) .ne. imolta)  write(iou,*) 'screwup in iswatch'
 
            iboxi = nboxi(imola)
 
@@ -215,8 +204,7 @@
            moltbid = idint(dble (ncmt(box,imoltb))*random()) + 1
            imolb = parbox( moltbid, box, imoltb) 
 
-           if (moltyp(imolb) .ne. imoltb) 
-     &                write(iou,*) 'screwup in iswatch'
+           if (moltyp(imolb) .ne. imoltb)  write(iou,*) 'screwup in iswatch'
            iboxi = nboxi(imolb)
 
            if (iboxi .ne. box) call cleanup('problem in iswatch')
@@ -227,8 +215,7 @@
 ! --- JLR 12-1-09 count the empty attempts
 !         if (lempty) return 
          if (lempty) then
-            bnswat_empty(iparty,ipairb) =
-     &           bnswat_empty(iparty,ipairb) + 1.0d0
+            bnswat_empty(iparty,ipairb) = bnswat_empty(iparty,ipairb) + 1.0d0
             return
          end if
 ! --- END JLR 12-1-09
@@ -420,24 +407,19 @@
 !cc--- not compute the vectors from ifirst in old position                                   
                if ( nsampos(iparty).lt.iunit) then
 
-                  if ( (rindex(imolty).eq.0) .or.
-     &                 (ifirst.lt.riutry(imolty,1))  ) then
+                  if ( (rindex(imolty).eq.0) .or. (ifirst.lt.riutry(imolty,1))  ) then
 
                      if (nsampos(iparty).ge.3) then
 
-                        call align_planes(iparty,self,other,
-     &                       s_type,o_type,rxnew,rynew,rznew)
+                        call align_planes(iparty,self,other, s_type,o_type,rxnew,rynew,rznew)
 
                      else
 
 !     --- calculate new vector from initial bead                                                    
                         do j = 1,iunit
-                           rxnew(j) = rxnew(ifirst)
-     &                          - (rxu(self,ifirst) - rxu(self,j))
-                           rynew(j) = rynew(ifirst)
-     &                          - (ryu(self,ifirst) - ryu(self,j))
-                           rznew(j) = rznew(ifirst)
-     &                          - (rzu(self,ifirst) - rzu(self,j))
+                           rxnew(j) = rxnew(ifirst) - (rxu(self,ifirst) - rxu(self,j))
+                           rynew(j) = rynew(ifirst) - (ryu(self,ifirst) - ryu(self,j))
+                           rznew(j) = rznew(ifirst) - (rzu(self,ifirst) - rzu(self,j))
                         end do
 
                      end if      !nsampos.eq.3
@@ -515,8 +497,7 @@
                   !molecule is all there
                   !don't regrow anything in rosenbluth  
                   icallrose = 4
-               elseif( (nsampos(iparty).ge.3)      .or.
-     &              (ifirst.ge.riutry(imolty,1) )) then
+               elseif( (nsampos(iparty).ge.3)      .or. (ifirst.ge.riutry(imolty,1) )) then
 !                 rigid part is grown, don't do rigrot in rosebluth 
                   icallrose = 3
                else
@@ -528,8 +509,7 @@
                icallrose = 2
             end if
 
-            call rosenbluth(.true.,lterm,self,self,imolty,islen
-     &           ,box ,igrow,waddnew,.false.,vdum2,icallrose)
+            call rosenbluth(.true.,lterm,self,self,imolty,islen ,box ,igrow,waddnew,.false.,vdum2,icallrose)
 ! ---END JLR 11-24-09
 
 !     --- propagate new rosenbluth weight
@@ -640,9 +620,7 @@
 !     *** get energy of configuration ***
 
             call ctrmas(.false.,box,self,8)
-            call energy (self,imolty, v, vintra,vinter,vext
-     &           ,velect,vewald,iii,box,1,iunit,.true.,lterm,.false.
-     &           ,vdum,.false.,.false.)
+            call energy (self,imolty, v, vintra,vinter,vext ,velect,vewald,iii,box,1,iunit,.true.,lterm,.false. ,vdum,.false.,.false.)
 
 !     *** return to normal ***
             if (ic .eq. 1) then
@@ -707,8 +685,7 @@
 !                 molecule is all there
 !                 don't regrow anything in rosenbluth 
                   icallrose = 4
-               elseif( (nsampos(iparty).ge.3)      .or.
-     &              (ifirst.ge.riutry(imolty,1)) ) then
+               elseif( (nsampos(iparty).ge.3)      .or. (ifirst.ge.riutry(imolty,1)) ) then
 !                 rigid part is grown, don't do rigrot in rosebluth 
                   icallrose = 3
                else
@@ -720,8 +697,7 @@
                icallrose = 2
             end if
 
-            call rosenbluth(.false.,lterm,self,self,imolty,
-     &           islen,box,igrow,waddold,.false.,vdum2,icallrose)
+            call rosenbluth(.false.,lterm,self,self,imolty, islen,box,igrow,waddold,.false.,vdum2,icallrose)
 ! --- END JLR 11-24-09
 
             if ( lterm ) then
@@ -760,17 +736,14 @@
 
 !     * get total energy *
 
-            call energy (self,imolty, v, vintra,vinter,vext,velect
-     &           ,vewald,iii,box, 1,iunit,.true.,lterm,.false.,vdum
-     &           ,.false.,.false.)
+            call energy (self,imolty, v, vintra,vinter,vext,velect ,vewald,iii,box, 1,iunit,.true.,lterm,.false.,vdum ,.false.,.false.)
 
             if (ic .eq. 1) then
 !     * return b to current box *
                nboxi(imolb) = thisbox
             end if
 
-            if (lterm) call cleanup('disaster ovrlap in old
-     &                          conf iSWATCH')
+            if (lterm) call cleanup('disaster ovrlap in old conf iSWATCH')
             deleo = v - ( voldt - (voldbvib + voldbb + voldtg) ) 
 
             tweiold = tweiold*dexp(-beta*deleo)
@@ -928,8 +901,7 @@
             call ctrmas(.false.,box,imolb,8)
             call ctrmas(.false.,box,imola,8)
 
-            if (licell .and. (box .eq. boxlink)) 
-     &           call cleanup('not yet implemented!')
+            if (licell .and. (box .eq. boxlink))  call cleanup('not yet implemented!')
 
 !     --- call nearest neighbor list
             if ( lneigh ) then
@@ -951,8 +923,7 @@
       else
 
 !     --- check if the particle types are in their boxes
-         if ( (ncmt(boxa,imolta) .eq. 0) .or. 
-     &        (ncmt(boxb,imoltb) .eq. 0) ) then
+         if ( (ncmt(boxa,imolta) .eq. 0) .or.  (ncmt(boxb,imoltb) .eq. 0) ) then
             lempty = .true.
 !     write(iou,*) 'one box out of swatch particle'
          else
@@ -1000,8 +971,7 @@
 ! --- JLR 12-1-09, Count the empty attempts
 !         if (lempty) return
          if (lempty) then
-            bnswat_empty(iparty,ipairb) =
-     &           bnswat_empty(iparty,ipairb) + 1.0d0
+            bnswat_empty(iparty,ipairb) = bnswat_empty(iparty,ipairb) + 1.0d0
             return
          end if
 ! --- END JLR 12-1-09 ---
@@ -1114,25 +1084,20 @@
 !cc---adding two if statements for rigid swaps
                if (nsampos(iparty).lt.iunit) then
 
-                  if ( (rindex(imolty).eq.0) .or.
-     &                 (ifirst.lt.riutry(imolty,1))  ) then
+                  if ( (rindex(imolty).eq.0) .or. (ifirst.lt.riutry(imolty,1))  ) then
 
                      if (nsampos(iparty).ge.3) then
 
-                        call align_planes(iparty,self,other,
-     &                       s_type,o_type,rxnew,rynew,rznew)
+                        call align_planes(iparty,self,other, s_type,o_type,rxnew,rynew,rznew)
 
                      else
 
 !     --- calculate new vector from initial bead
                         do j = 1,iunit
 
-                           rxnew(j) = rxnew(ifirst)
-     &                          - (rxu(self,ifirst) - rxu(self,j))
-                           rynew(j) = rynew(ifirst)
-     &                          - (ryu(self,ifirst) - ryu(self,j))
-                           rznew(j) = rznew(ifirst)
-     &                          - (rzu(self,ifirst) - rzu(self,j))
+                           rxnew(j) = rxnew(ifirst) - (rxu(self,ifirst) - rxu(self,j))
+                           rynew(j) = rynew(ifirst) - (ryu(self,ifirst) - ryu(self,j))
+                           rznew(j) = rznew(ifirst) - (rzu(self,ifirst) - rzu(self,j))
                            end do
 
                      end if      !nsampos.lt.3
@@ -1164,8 +1129,7 @@
                   !molecule is all there
                   !don't regrow anything in rosenbluth 
                   icallrose = 4
-               elseif( (nsampos(iparty).ge.3)      .or.
-     &              (ifirst.ge.riutry(imolty,1)) ) then
+               elseif( (nsampos(iparty).ge.3)      .or. (ifirst.ge.riutry(imolty,1)) ) then
 !                 rigid part is grown, don't do rigrot in rosebluth
                   icallrose = 3
                else
@@ -1178,8 +1142,7 @@
             end if
 
 
-            call rosenbluth(.true.,lterm,other,self,imolty,islen,
-     &           iboxnew,igrow,waddnew,.false.,vdum2,icallrose)
+            call rosenbluth(.true.,lterm,other,self,imolty,islen, iboxnew,igrow,waddnew,.false.,vdum2,icallrose)
 ! --- END JLR 11-24-09
 !        --- termination of cbmc attempt due to walk termination ---
             if ( lterm ) return
@@ -1246,9 +1209,7 @@
 !     and torsional type for those units swatched!!!!!!
 
             call ctrmas(.false.,iboxnew,other,8)
-            call energy (other,imolty, v, vintra,vinter,vext
-     &           ,velect,vewald,iii,iboxnew,1,iunit,.true.,lterm,.false.
-     &           ,vdum,.false.,.false.)
+            call energy (other,imolty, v, vintra,vinter,vext ,velect,vewald,iii,iboxnew,1,iunit,.true.,lterm,.false. ,vdum,.false.,.false.)
             
             if (lterm) then
 !     write(iou,*) 'other ',other,' self ',self
@@ -1289,8 +1250,7 @@
                   !molecule is all there
                   !don't regrow anything in rosenbluth
                   icallrose = 4
-               elseif( (nsampos(iparty).ge.3)      .or.
-     &              (ifirst.ge.riutry(imolty,1) )) then
+               elseif( (nsampos(iparty).ge.3)      .or. (ifirst.ge.riutry(imolty,1) )) then
 !                 rigid part is grown, don't do rigrot in rosebluth
                   icallrose = 3
                else
@@ -1302,8 +1262,7 @@
                icallrose = 2
             end if
 
-            call rosenbluth(.false.,lterm,self,self,imolty,
-     &           islen,iboxold,igrow,waddold,.false.,vdum2,icallrose)
+            call rosenbluth(.false.,lterm,self,self,imolty, islen,iboxold,igrow,waddold,.false.,vdum2,icallrose)
 ! --- END JLR 11-24-09
 
 !        --- termination of old walk due to problems generating orientations
@@ -1329,12 +1288,9 @@
 !     --- correct the acceptance rules 
 !     --- calculate the Full rcut site-site energy
 
-            call energy (self,imolty, v, vintra,vinter,vext,velect
-     &           ,vewald,iii,iboxold, 1,iunit,.true.,lterm,.false.,vdum
-     &           ,.false.,.false.)
+            call energy (self,imolty, v, vintra,vinter,vext,velect ,vewald,iii,iboxold, 1,iunit,.true.,lterm,.false.,vdum ,.false.,.false.)
 
-            if (lterm) call cleanup('disaster ovrlap in old
-     &                           conf SWATCH')
+            if (lterm) call cleanup('disaster ovrlap in old conf SWATCH')
             deleo = v - ( voldt - (voldbvib + voldbb + voldtg) ) 
             
             tweiold = tweiold*dexp(-beta*deleo)
@@ -1432,25 +1388,13 @@
 !     ---    add tail corrections
             if (lpbcz) then
                if (lsolid(boxa) .and. .not. lrect(boxa)) then
-                  vola = (hmat(boxa,1) * (hmat(boxa,5) * hmat(boxa,9) -
-     &                 hmat(boxa,8)*hmat(boxa,6))+
-     &                 hmat(boxa,4)*(hmat(boxa,8)
-     &                 * hmat(boxa,3)-hmat(boxa,2)*
-     &                 hmat(boxa,9))+hmat(boxa,7)
-     &                 * (hmat(boxa,2)*hmat(boxa,6)-
-     &                 hmat(boxa,5)*hmat(boxa,3)))
+                  vola = (hmat(boxa,1) * (hmat(boxa,5) * hmat(boxa,9) - hmat(boxa,8)*hmat(boxa,6))+ hmat(boxa,4)*(hmat(boxa,8) * hmat(boxa,3)-hmat(boxa,2)* hmat(boxa,9))+hmat(boxa,7) * (hmat(boxa,2)*hmat(boxa,6)- hmat(boxa,5)*hmat(boxa,3)))
                else
                   vola=boxlx(boxa)*boxly(boxa)*boxlz(boxa)
                end if
 
                if (lsolid(boxb) .and. .not. lrect(boxb)) then
-                  volb = (hmat(boxb,1) * (hmat(boxb,5) * hmat(boxb,9) -
-     &                 hmat(boxb,8)*hmat(boxb,6))+
-     &                 hmat(boxb,4)*(hmat(boxb,8)
-     &                 * hmat(boxb,3)-hmat(boxb,2)*
-     &                 hmat(boxb,9))+hmat(boxb,7)
-     &                 * (hmat(boxb,2)*hmat(boxb,6)-
-     &                 hmat(boxb,5)*hmat(boxb,3)))
+                  volb = (hmat(boxb,1) * (hmat(boxb,5) * hmat(boxb,9) - hmat(boxb,8)*hmat(boxb,6))+ hmat(boxb,4)*(hmat(boxb,8) * hmat(boxb,3)-hmat(boxb,2)* hmat(boxb,9))+hmat(boxb,7) * (hmat(boxb,2)*hmat(boxb,6)- hmat(boxb,5)*hmat(boxb,3)))
                else
                   volb=boxlx(boxb)*boxly(boxb)*boxlz(boxb)
                end if
@@ -1485,8 +1429,7 @@
                         dicount = ncmt(ibox,imt)
                         if ( imt .eq. imolin ) dicount = dicount + 1
                         if ( imt .eq. imolrm ) dicount = dicount - 1
-                        dinsta = dinsta + 
-     &                       dicount * coru(imt,jmt,rho,ibox)
+                        dinsta = dinsta +  dicount * coru(imt,jmt,rho,ibox)
                      end do
                   end do
 !$$$                  if (ibox .eq. 1 .and. lexzeo) then
@@ -1522,11 +1465,7 @@
 !     write(iou,*) '### underflow in wratio calculation ###'
             return
          end if
-         wswat = ( tweight / tweiold ) * ( dble(orgaia*orgbib) /
-     &        dble((orgbia+1)*(orgaib+1)) ) *
-     &        dexp(beta*(eta2(boxa,imolta)
-     &        +eta2(boxb,imoltb)-eta2(boxa,imoltb)
-     &        -eta2(boxb,imolta)))
+         wswat = ( tweight / tweiold ) * ( dble(orgaia*orgbib) / dble((orgbia+1)*(orgaib+1)) ) * dexp(beta*(eta2(boxa,imolta) +eta2(boxb,imoltb)-eta2(boxa,imoltb) -eta2(boxb,imolta)))
 
 !     write(iou,*) 'imolta,imoltb',imolta,imoltb
 !     write(iou,*) 'wswat,tweight,tweiold',wswat,tweight,tweiold
@@ -1584,8 +1523,7 @@
             call ctrmas(.false.,boxa,iboxb,8)
             call ctrmas(.false.,boxb,iboxa,8)
 
-            if (licell .and. (boxa .eq. boxlink .or. boxb .eq. boxlink))
-     &           call cleanup('not yet implemented!')
+            if (licell .and. (boxa .eq. boxlink .or. boxb .eq. boxlink)) call cleanup('not yet implemented!')
 
 !     --- call nearest neighbor list
             if ( lneigh ) then

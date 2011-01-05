@@ -30,18 +30,13 @@
 !$$$      include 'poten.inc'
       
       logical::linterqt,ovrlap
-      integer(KIND=normal_int)::i,ibox,iunit,j,imolty,icbu,mainunit
-     & ,ichoice,qunit,boxi,flagon
-      real(KIND=double_precision)::dchain,random,vnew,vold,deltv,deltvb
-     & ,velectn,velecto,vflucqn,vflucqo ,dispbig,displit,vintern,vintero
-     & ,vewaldn,vewaldo
+      integer(KIND=normal_int)::i,ibox,iunit,j,imolty,icbu,mainunit ,ichoice,qunit,boxi,flagon
+      real(KIND=double_precision)::dchain,random,vnew,vold,deltv,deltvb ,velectn,velecto,vflucqn,vflucqo ,dispbig,displit,vintern,vintero ,vewaldn,vewaldo
       real(KIND=double_precision)::qion(numax)
       real(KIND=double_precision)::vrecipn,vrecipo
       integer(KIND=normal_int)::maini,mainj,jchain
-      real(KIND=double_precision)::qionj(numax),vflucqjo,vflucqjn,corr
-     & ,rij,erfunc,rxuij,ryuij,rzuij,vdum,vewaldjn,vewaldjo
-      real(KIND=double_precision)::qoldj2,vnewi,velectni,vinterni,voldi,
-     & velectoi,vinteroi
+      real(KIND=double_precision)::qionj(numax),vflucqjo,vflucqjn,corr ,rij,erfunc,rxuij,ryuij,rzuij,vdum,vewaldjn,vewaldjo
+      real(KIND=double_precision)::qoldj2,vnewi,velectni,vinterni,voldi, velectoi,vinteroi
 
 ! --------------------------------------------------------------------
 
@@ -216,8 +211,7 @@
 ! *** for unit which is not a charge site
          if ( .not. lqchg(ntype(imolty,mainunit)) ) goto 32
          mainj = mainunit
-         corr = (qion(maini)-qionj(mainj))*dispbig 
-     &        - qion(maini)*qionj(mainj)
+         corr = (qion(maini)-qionj(mainj))*dispbig  - qion(maini)*qionj(mainj)
          qion(maini) = qion(maini) + dispbig
          qionj(mainj) = qionj(mainj) - dispbig
          corr = corr + qion(maini)*qionj(mainj)
@@ -276,9 +270,7 @@
          qoldj2 = qqu(jchain,mainj)
          qqu(jchain,mainj) = qionj(mainj)
 
-         call energy(i,imolty, vnew,vdum, vintern,vdum,velectn
-     &     ,vdum,flagon, ibox,maini, maini,.false.,ovrlap,.false.
-     &     ,vdum,.false.,.false.)
+         call energy(i,imolty, vnew,vdum, vintern,vdum,velectn ,vdum,flagon, ibox,maini, maini,.false.,ovrlap,.false. ,vdum,.false.,.false.)
          vnewi = vnew + vflucqn + vewaldn
          velectni = velectn + vewaldn
          vinterni = vintern
@@ -290,9 +282,7 @@
          rzuion(maini,flagon) = rzu(i,maini)
          qquion(maini,flagon) = qqu(i,maini)
 
-         call energy(i,imolty,vold,vdum,vintero,vdum,velecto
-     &        ,vdum,flagon,ibox,maini, maini,.false.,ovrlap,.false.
-     &        ,vdum,.false.,.false.)
+         call energy(i,imolty,vold,vdum,vintero,vdum,velecto ,vdum,flagon,ibox,maini, maini,.false.,ovrlap,.false. ,vdum,.false.,.false.)
          
          voldi = vold + vflucqo + vewaldo
          velectoi = velecto + vewaldo
@@ -309,9 +299,7 @@
          ryuion(mainj,flagon) = ryu(jchain,mainj)
          rzuion(mainj,flagon) = rzu(jchain,mainj)
          qquion(mainj,flagon) = qionj(mainj)
-         call energy(jchain,imolty, vnew,vdum, vintern,vdum,velectn
-     &     ,vdum,flagon, ibox,mainj, mainj,.false.,ovrlap,.false.
-     &     ,vdum,.false.,.false.)
+         call energy(jchain,imolty, vnew,vdum, vintern,vdum,velectn ,vdum,flagon, ibox,mainj, mainj,.false.,ovrlap,.false. ,vdum,.false.,.false.)
 
          vnew = vnew + vnewi
          velectn = velectn + velectni
@@ -325,9 +313,7 @@
          rzuion(mainj,flagon) = rzu(jchain,mainj)
          qquion(mainj,flagon) = qqu(jchain,mainj)
 
-         call energy(jchain,imolty, vold,vdum, vintero,vdum,velecto
-     &     ,vdum,flagon, ibox,mainj, mainj,.false.,ovrlap,.false.
-     &     ,vdum,.false.,.false.)
+         call energy(jchain,imolty, vold,vdum, vintero,vdum,velecto ,vdum,flagon, ibox,mainj, mainj,.false.,ovrlap,.false. ,vdum,.false.,.false.)
 
          vold = vold + voldi
          velecto = velecto + velectoi
@@ -366,18 +352,14 @@
 
 ! *** calculate the energy of i in the new configuration ***
          flagon = 2 
-         call energy(i,imolty, vnew,vdum, vintern,vdum,velectn
-     &        ,vdum,flagon, ibox,1, iunit,.false.,ovrlap,.false.
-     &        ,vdum,.false.,.false.)
+         call energy(i,imolty, vnew,vdum, vintern,vdum,velectn ,vdum,flagon, ibox,1, iunit,.false.,ovrlap,.false. ,vdum,.false.,.false.)
          if (ovrlap) return
          vnew = vnew + vflucqn + vewaldn
          velectn = velectn + vewaldn
 
 ! *** calculate the energy of i in the old configuration ***
          flagon = 1
-         call energy(i,imolty,vold,vdum,vintero,vdum,velecto
-     &        ,vdum,flagon,ibox,1, iunit,.false.,ovrlap,.false.
-     &        ,vdum,.false.,.false.)
+         call energy(i,imolty,vold,vdum,vintero,vdum,velecto ,vdum,flagon,ibox,1, iunit,.false.,ovrlap,.false. ,vdum,.false.,.false.)
          vold = vold + vflucqo + vewaldo
          velecto = velecto + vewaldo
 
@@ -419,8 +401,7 @@
 !      write(iou,*) 'this move has been accepted!!!'
       do j = 1,iunit
          qqu(i,j) = qion(j)
-         if ( linterqt ) 
-     &        qqu(jchain,j) = qionj(j)
+         if ( linterqt )  qqu(jchain,j) = qionj(j)
       end do
 ! --- update the reciprocal-space sum
       if ( lewald ) then

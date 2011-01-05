@@ -34,8 +34,7 @@
 !      write(6,*) aa,bb,ntij,qa,qb,gbeta(ntij),galpha(ntij),grho(ntij)
 !     H term
       do i=1,3
-         hterma =  
-     &        ga(ntij,i)/(1+dexp(gb(ntij,i)*(rij-gc(ntij,i))))
+         hterma =   ga(ntij,i)/(1+dexp(gb(ntij,i)*(rij-gc(ntij,i))))
 !         write(6,*) i,hterma,' (',ntij,')'
          hterm = hterm + hterma
       end do
@@ -44,9 +43,7 @@
 !      write(6,*) 'erfunc',coul*rij
       coul = coul * qqfact
 
-      garofalini = galpha(ntij)*dexp(-rij/grho(ntij))
-     &     + hterm 
-     &     + coul
+      garofalini = galpha(ntij)*dexp(-rij/grho(ntij)) + hterm  + coul
 
 !      write(6,*) 'i,j,v2',aa,bb,'H term:',hterm,' Coul term:'
 !     &     ,coul,' the rest:',garofalini-hterm-coul,

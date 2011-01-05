@@ -30,8 +30,7 @@
       if ( (rij) .le.(rij*srij)*2.0d0**(2.0d0/n0) ) then
          genlj = 4.0d0*epsilon2*(((srij)**n0)-((srij)**(n0/2.0d0)))
       else
-         genlj =epsilon2*(((2.0d0**((4.0d0*n1/n0)))*((srij)**
-     &  (2.0d0*n1)))-((2.0d0**((2.0d0*(n1/n0))+1.0d0))*((srij)**(n1))))
+         genlj =epsilon2*(((2.0d0**((4.0d0*n1/n0)))*((srij)** (2.0d0*n1)))-((2.0d0**((2.0d0*(n1/n0))+1.0d0))*((srij)**(n1))))
       end if
 
       

@@ -25,8 +25,7 @@
 !$$$      include 'tabulated.inc'
 
       integer(KIND=normal_int)::vibtype
-      real(KIND=double_precision)::length,bond,random,bf,vvib,betaT
-     & ,kvib,requil,tabulated_vib
+      real(KIND=double_precision)::length,bond,random,bf,vvib,betaT ,kvib,requil,tabulated_vib
 
       vvib = 0.0d0
 

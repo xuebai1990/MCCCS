@@ -28,12 +28,9 @@
             if ( nboxi(i) .eq. ibox ) then
                imolty = moltyp(i)
                do ii = 1,nunit(imolty)
-                  dipolex(ibox) = dipolex(ibox) 
-     &                 + qqu(i,ii)*rxu(i,ii)
-                  dipoley(ibox) = dipoley(ibox) 
-     &                 + qqu(i,ii)*ryu(i,ii)
-                  dipolez(ibox) = dipolez(ibox) 
-     &                 + qqu(i,ii)*rzu(i,ii)
+                  dipolex(ibox) = dipolex(ibox)  + qqu(i,ii)*rxu(i,ii)
+                  dipoley(ibox) = dipoley(ibox)  + qqu(i,ii)*ryu(i,ii)
+                  dipolez(ibox) = dipolez(ibox)  + qqu(i,ii)*rzu(i,ii)
                end do
             end if
          end do
@@ -49,12 +46,9 @@
             dipoz(zzz) = 0.0d0
             imolty = moltion(zzz)
             do i = 1,nunit(imolty)
-               dipox(zzz) = dipox(zzz) + 
-     &              qquion(i,zzz)*rxuion(i,zzz)
-               dipoy(zzz) = dipoy(zzz) +
-     &              qquion(i,zzz)*ryuion(i,zzz)
-               dipoz(zzz) = dipoz(zzz) +
-     &              qquion(i,zzz)*rzuion(i,zzz)
+               dipox(zzz) = dipox(zzz) +  qquion(i,zzz)*rxuion(i,zzz)
+               dipoy(zzz) = dipoy(zzz) + qquion(i,zzz)*ryuion(i,zzz)
+               dipoz(zzz) = dipoz(zzz) + qquion(i,zzz)*rzuion(i,zzz)
             end do
          end do
          dipolex(ibox) = dipolex(ibox) - dipox(1) + dipox(2) 

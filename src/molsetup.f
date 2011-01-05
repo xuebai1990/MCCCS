@@ -15,9 +15,7 @@
 !$$$      include 'coord.inc'
 !$$$      include 'connect.inc'
 
-      integer(KIND=normal_int)::i,j,k,n,iunit,imolty,dum,iu,countbend
-     & ,counttor,atype,btype,ctype,dtype,tortype,bendtype
-     & ,ju,ku,nu,vibtype,countvib
+      integer(KIND=normal_int)::i,j,k,n,iunit,imolty,dum,iu,countbend ,counttor,atype,btype,ctype,dtype,tortype,bendtype ,ju,ku,nu,vibtype,countvib
 
 !     ************************************************************
 
@@ -41,13 +39,11 @@
          write(iou,*) 'bead ',iu,' beadtype ',ntype(imolty,i)
 
          read(4,*) 
-         read(4,*) invib(imolty,i),(ijvib(imolty,i,j)
-     &        ,j=1,invib(imolty,i))
+         read(4,*) invib(imolty,i),(ijvib(imolty,i,j) ,j=1,invib(imolty,i))
 
          if (invib(imolty,i).gt.6) then
 
-            write(iou,*) 'imolty',imolty,'   i',i,'   invib'
-     &           ,invib(imolty,i)
+            write(iou,*) 'imolty',imolty,'   i',i,'   invib' ,invib(imolty,i)
             call cleanup('too many vibrations')
          end if
 
@@ -90,8 +86,7 @@
                   call bendcheck(2,atype,btype,ctype,bendtype)
 
                   if (bendtype.eq.0) then
-                     write(iou,*) 'atype,btype,ctype',atype
-     &                    ,btype,ctype
+                     write(iou,*) 'atype,btype,ctype',atype ,btype,ctype
                      call cleanup('screwup in bending angles')
                   end if
 
@@ -107,12 +102,10 @@
                         
                         dtype = ntype(imolty,nu)
 
-                        call torcheck(2,atype,btype,ctype,dtype
-     &                       ,tortype)
+                        call torcheck(2,atype,btype,ctype,dtype ,tortype)
 
                         if (tortype.eq.0) then
-                           write(iou,*) 'atype,btype,ctype,dtype',atype
-     &                          ,btype,ctype,dtype
+                           write(iou,*) 'atype,btype,ctype,dtype',atype ,btype,ctype,dtype
                            call cleanup('screwup in torsion angles')
                         end if
                         
@@ -154,8 +147,7 @@
 
       logical::lfinda,lfindb,lfound
 
-      integer(KIND=normal_int)::iinit,atype,btype,vibtype,nsite,isite
-     & ,vbtype,ntvib,n,i,ia,ib
+      integer(KIND=normal_int)::iinit,atype,btype,vibtype,nsite,isite ,vbtype,ntvib,n,i,ia,ib
 
       dimension nsite(20,2),isite(20,2,7),vbtype(20)
 
@@ -239,8 +231,7 @@
 
       logical::lfinda,lfindb,lfindc,lfound
 
-      integer(KIND=normal_int)::iinit,atype,btype,ctype,bendtype,nsite
-     & ,isite,bntype,ntbend,n,i,ia,ib,ic
+      integer(KIND=normal_int)::iinit,atype,btype,ctype,bendtype,nsite ,isite,bntype,ntbend,n,i,ia,ib,ic
 
       dimension nsite(20,3),isite(20,3,7),bntype(20)
       
@@ -343,8 +334,7 @@
 
       logical::lfinda,lfindb,lfindc,lfindd,lfound,lrev
 
-      integer(KIND=normal_int)::iinit,atype,btype,ctype,dtype,tortype
-     & ,isite,nsite,n,i,ia,ib,ic,id,trtype,nttor,ir
+      integer(KIND=normal_int)::iinit,atype,btype,ctype,dtype,tortype ,isite,nsite,n,i,ia,ib,ic,id,trtype,nttor,ir
 
 
       dimension trtype(35),nsite(35,7),isite(35,7,7)

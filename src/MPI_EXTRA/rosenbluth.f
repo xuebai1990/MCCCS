@@ -1,5 +1,4 @@
-      subroutine rosenbluth ( lnew,lterm,i,icharge,imolty,ifrom,ibox
-     &     ,igrow,wadd,lfixnow,cwtorf,movetype )
+      subroutine rosenbluth ( lnew,lterm,i,icharge,imolty,ifrom,ibox ,igrow,wadd,lfixnow,cwtorf,movetype )
  
 !    *******************************************************************
 !    **   performs a configurational bias move for branched molecules **
@@ -40,17 +39,14 @@
       logical::ovrlap,ltorsion,lfixnow,lfixed,lreturn
 
       integer(KIND=normal_int)::glist,iuprev,iufrom,ichoi,ntogrow,count
-      integer(KIND=normal_int)::iu,iv,iw,ju,ip,ichtor
-     &       ,it,jut2,jut3,jut4,jttor,iwalk,ivect
+      integer(KIND=normal_int)::iu,iv,iw,ju,ip,ichtor ,it,jut2,jut3,jut4,jttor,iwalk,ivect
       integer(KIND=normal_int)::angstart,toracc
       
       dimension glist(numax)
 
       real(KIND=double_precision)::dum,xub,yub,zub,length,lengtha,lengthb,wadd
 
-      real(KIND=double_precision)::vdha,x,y,z,maxlen,vorient,vtorf
-     &                ,xaa1,yaa1,zaa1,daa1,xa1a2,ya1a2,za1a2,da1a2
-     &                ,thetac,dot,rbf,bsum,bs,random,xcc,ycc,zcc,tcc
+      real(KIND=double_precision)::vdha,x,y,z,maxlen,vorient,vtorf ,xaa1,yaa1,zaa1,daa1,xa1a2,ya1a2,za1a2,da1a2 ,thetac,dot,rbf,bsum,bs,random,xcc,ycc,zcc,tcc
       real(KIND=double_precision)::vbbtr,vvibtr,vtorso,wei_vib,wbendv,dist
       real(KIND=double_precision)::bondlen,bendang,phi,phidisp,phinew,thetanew
       real(KIND=double_precision)::cwtorf,vfbbtr,vphi,theta,spltor,rm
@@ -59,34 +55,23 @@
      
 !     -- new stuff
       integer(KIND=normal_int)::itor,bin,counta,movetype,ku
-      real(KIND=double_precision)::bf_tor,vtorsion,phitors,ran_tor
-     &     ,wei_bend,jacobian,ctorf
-      dimension bf_tor(nchtor_max),vtorsion(nchtor_max)
-     &     ,phitors(nchtor_max),ctorf(nchmax,nchtor_max)
-      dimension toracc(nchmax)
-     &     ,vfbbtr(nchmax,nchtor_max)
+      real(KIND=double_precision)::bf_tor,vtorsion,phitors,ran_tor ,wei_bend,jacobian,ctorf
+      dimension bf_tor(nchtor_max),vtorsion(nchtor_max) ,phitors(nchtor_max),ctorf(nchmax,nchtor_max)
+      dimension toracc(nchmax) ,vfbbtr(nchmax,nchtor_max)
 ! RP added for MPI
 
       integer(KIND=normal_int)::my_start,my_end,loops_per_proc,scount,itorcount,countcount
       integer(KIND=normal_int)::rmnddr,myip,ipitor,ipcount
       real(KIND=double_precision)::my_ctorf,my_vfbbtr,my_rxp,my_ryp,my_rzp
-      real(KIND=double_precision)::rxp_one,ryp_one,rzp_one,ctorf_one,vfbbtr_one,
-     &   my_bsum_tor,my_vtgtr,my_toracc
-      dimension my_ctorf(nchmax*nchtor_max),
-     &    my_vfbbtr(nchmax*nchtor_max),
-     &    my_rxp(nchmax*numax),
-     &    my_ryp(nchmax*numax),my_rzp(nchmax*numax)
-      dimension rxp_one(nchmax*numax),ryp_one(nchmax*numax),
-     &   rzp_one(nchmax*numax),ctorf_one(nchmax*nchtor_max),
-     &   vfbbtr_one(nchmax*nchtor_max)
+      real(KIND=double_precision)::rxp_one,ryp_one,rzp_one,ctorf_one,vfbbtr_one, my_bsum_tor,my_vtgtr,my_toracc
+      dimension my_ctorf(nchmax*nchtor_max), my_vfbbtr(nchmax*nchtor_max), my_rxp(nchmax*numax), my_ryp(nchmax*numax),my_rzp(nchmax*numax)
+      dimension rxp_one(nchmax*numax),ryp_one(nchmax*numax), rzp_one(nchmax*numax),ctorf_one(nchmax*nchtor_max), vfbbtr_one(nchmax*nchtor_max)
       dimension my_toracc(nchmax),my_vtgtr(nchmax),my_bsum_tor(nchmax)
       integer(KIND=normal_int)::procid
       real(KIND=double_precision)::random_array
       dimension random_array(numprocmax)
       real(KIND=double_precision)::dummy_x,dummy_y,dummy_z
-      integer(KIND=normal_int)::ncount_arr(numprocmax),ncount_displs(numprocmax),
-     &          itorcount_arr(numprocmax),itorcount_displs(numprocmax),
-     &         countcount_arr(numprocmax),countcount_displs(numprocmax)
+      integer(KIND=normal_int)::ncount_arr(numprocmax),ncount_displs(numprocmax), itorcount_arr(numprocmax),itorcount_displs(numprocmax), countcount_arr(numprocmax),countcount_displs(numprocmax)
 ! ------------------------------------------------------------------
 
 !      write(iou,*) 'start ROSENBLUTH'
@@ -182,8 +167,7 @@
                   yvec(iu,ju) = ryu(i,ju) - ryu(i,iu)
                   zvec(iu,ju) = rzu(i,ju) - rzu(i,iu)
                end if
-               distij(iu,ju) = dsqrt( xvec(iu,ju)**2
-     &              + yvec(iu,ju)**2 + zvec(iu,ju)**2 )
+               distij(iu,ju) = dsqrt( xvec(iu,ju)**2 + yvec(iu,ju)**2 + zvec(iu,ju)**2 )
             end if
          end do
       end do 
@@ -207,9 +191,7 @@
                   do ja = 1, befnum(j)
                      if (iu.eq.ibef(j,ja)) then
 !     --- time to do final crankshaft move
-                        call safecbmc(3,lnew,i,iw,igrow,imolty
-     &                       ,count,x,y,z,vphi,vtorf,wbendv
-     &                       ,lterm,movetype)
+                        call safecbmc(3,lnew,i,iw,igrow,imolty ,count,x,y,z,vphi,vtorf,wbendv ,lterm,movetype)
 
                         if (lterm) then
                            return
@@ -236,8 +218,7 @@
          end if      
          
 !        --- perform the biased selection of bond angles and get lengths
-         call geometry(lnew,iw,i,imolty,angstart,iuprev,glist
-     &        ,bondlen,bendang,phi,vvibtr,vbbtr,maxlen,wei_bend )
+         call geometry(lnew,iw,i,imolty,angstart,iuprev,glist ,bondlen,bendang,phi,vvibtr,vbbtr,maxlen,wei_bend )
 
 !         write(iou,*) 'lnew, wei_bend',lnew,wei_bend
 
@@ -250,9 +231,7 @@
                   if (iu.eq.iwbef(j)) then
 !     --- lets setup for two beads to go
                      
-                     call safecbmc(1,lnew,i,iw,igrow,imolty
-     &                    ,count,x,y,z,vphi,vtorf,wbendv
-     &                    ,lterm,movetype)
+                     call safecbmc(1,lnew,i,iw,igrow,imolty ,count,x,y,z,vphi,vtorf,wbendv ,lterm,movetype)
                      wei_vib = wei_vib * wbendv
                      vvibtr = vvibtr + vphi
                      lwbef = .true.
@@ -350,8 +329,7 @@
                zub = zvec(iuprev,iufrom) / length
 
                call cone (1,xub,yub,zub,dum,dum,dum,dum,dum )
-               if (movetype.eq.2.and.lring(imolty)
-     &              .and.iw.eq.1) then
+               if (movetype.eq.2.and.lring(imolty) .and.iw.eq.1) then
                   ltorsion = .false.
                else
                   ltorsion = .true.
@@ -376,8 +354,7 @@
                   end do
 
 ! ------------------------------- 
-                  if ( (.not. lnew) .and. ip .eq. 1 
-     &                 .and. itor .eq. 1) then
+                  if ( (.not. lnew) .and. ip .eq. 1  .and. itor .eq. 1) then
 !                    --- old conformation - set phidisp to 0.0d0
                      phidisp = 0.0d0
                   else
@@ -406,8 +383,7 @@
                   do count = 1,ntogrow
                      iu = growlist(iw,count)
 
-                     if (movetype.eq.2.and
-     &                    .lring(imolty).and.iw.lt.3) then
+                     if (movetype.eq.2.and .lring(imolty).and.iw.lt.3) then
                         bf_tor(itor) = 1.0d0
                         goto 300
                      end if
@@ -415,8 +391,7 @@
                      do 299 it = 1, intor(imolty,iu)
                         jut2 = ijtor2(imolty,iu,it)
                         jut3 = ijtor3(imolty,iu,it)
-                        if ( jut2 .eq. iufrom .and. 
-     &                       jut3 .eq. iuprev) then
+                        if ( jut2 .eq. iufrom .and.  jut3 .eq. iuprev) then
                            jut4 = ijtor4(imolty,iu,it)
                            
 !                       --- jut4 must already exist or we made a big mistake
@@ -430,25 +405,18 @@
                            jttor = ittor(imolty,iu,it)
                            
 !                       --- calculate cross products d_a x d_a-1 
-                           xaa1 = yy(count) * zvec(jut3,jut2) 
-     &                          + zz(count) * yvec(jut2,jut3)
-                           yaa1 = zz(count) * xvec(jut3,jut2) 
-     &                          + xx(count) * zvec(jut2,jut3)
-                           zaa1 = xx(count) * yvec(jut3,jut2) 
-     &                          + yy(count) * xvec(jut2,jut3)
+                           xaa1 = yy(count) * zvec(jut3,jut2)  + zz(count) * yvec(jut2,jut3)
+                           yaa1 = zz(count) * xvec(jut3,jut2)  + xx(count) * zvec(jut2,jut3)
+                           zaa1 = xx(count) * yvec(jut3,jut2)  + yy(count) * xvec(jut2,jut3)
                            
 !                       --- calculate cross products d_a-1 x d_a-2
-                           xa1a2 = yvec(jut2,jut3) * zvec(jut3,jut4) -
-     &                          zvec(jut2,jut3) * yvec(jut3,jut4)
-                           ya1a2 = zvec(jut2,jut3) * xvec(jut3,jut4) -
-     &                          xvec(jut2,jut3) * zvec(jut3,jut4)
-                           za1a2 = xvec(jut2,jut3) * yvec(jut3,jut4) -
-     &                          yvec(jut2,jut3) * xvec(jut3,jut4)
+                           xa1a2 = yvec(jut2,jut3) * zvec(jut3,jut4) - zvec(jut2,jut3) * yvec(jut3,jut4)
+                           ya1a2 = zvec(jut2,jut3) * xvec(jut3,jut4) - xvec(jut2,jut3) * zvec(jut3,jut4)
+                           za1a2 = xvec(jut2,jut3) * yvec(jut3,jut4) - yvec(jut2,jut3) * xvec(jut3,jut4)
 
 !                       --- calculate lengths of cross products ***
                            daa1 = dsqrt ( xaa1**2 + yaa1**2 + zaa1**2 )
-                           da1a2 = dsqrt ( xa1a2**2 + ya1a2**2 
-     &                          + za1a2**2 )
+                           da1a2 = dsqrt ( xa1a2**2 + ya1a2**2  + za1a2**2 )
                            
 !                       --- calculate dot product of cross products ***
                            dot = xaa1*xa1a2 + yaa1*ya1a2 + zaa1*za1a2
@@ -463,9 +431,7 @@
                               ycc = zaa1*xa1a2 - xaa1*za1a2
                               zcc = xaa1*ya1a2 - yaa1*xa1a2
 !     *** calculate scalar triple product ***
-                              tcc = xcc*xvec(jut2,jut3)
-     &                             + ycc*yvec(jut2,jut3)
-     &                             + zcc*zvec(jut2,jut3)
+                              tcc = xcc*xvec(jut2,jut3) + ycc*yvec(jut2,jut3) + zcc*zvec(jut2,jut3)
                               theta = dacos(thetac)
                               if (tcc .lt. 0.0d0) theta = -theta
                               if (L_spline) then
@@ -526,18 +492,13 @@
 
 !                       --- determine special closing energies
                            
-                           call safecbmc(2,lnew,i,iw,igrow,imolty
-     &                          ,count,x,y,z,vphi,vtorf,wbendv
-     &                          ,lterm,movetype)
+                           call safecbmc(2,lnew,i,iw,igrow,imolty ,count,x,y,z,vphi,vtorf,wbendv ,lterm,movetype)
                        
-                           bf_tor(itor) = bf_tor(itor) * vtorf 
-     &                          * dexp( - beta * vphi )
+                           bf_tor(itor) = bf_tor(itor) * vtorf  * dexp( - beta * vphi )
 ! RP added for MPI
-                           my_ctorf(ipitor) = my_ctorf(ipitor)
-     &                          * vtorf
+                           my_ctorf(ipitor) = my_ctorf(ipitor) * vtorf
 
-                           my_vfbbtr(ipitor) =  my_vfbbtr(ipitor)
-     &                          + vphi
+                           my_vfbbtr(ipitor) =  my_vfbbtr(ipitor) + vphi
 
 
 !                           ctorf(ip,itor) = ctorf(ip,itor) 
@@ -548,15 +509,11 @@
                         else
                            do j = 1, fcount(iu)
                               ju = fclose(iu,j)
-                              dist = dsqrt((x-rxnew(ju))**2
-     &                             + (y-rynew(ju))**2
-     &                             + (z-rznew(ju))**2)
+                              dist = dsqrt((x-rxnew(ju))**2 + (y-rynew(ju))**2 + (z-rznew(ju))**2)
                               bin = anint(dist*10.0d0)
-                              bf_tor(itor) = bf_tor(itor)
-     &                             * probf(iu,ju,bin)
+                              bf_tor(itor) = bf_tor(itor) * probf(iu,ju,bin)
 ! RP added for MPI
-                              my_ctorf(ipitor) = my_ctorf(ipitor) *
-     &                             probf(iu,ju,bin)
+                              my_ctorf(ipitor) = my_ctorf(ipitor) * probf(iu,ju,bin)
                               
 !                              ctorf(ip,itor) = ctorf(ip,itor) * 
 !     &                             probf(iu,ju,bin)
@@ -565,16 +522,12 @@
                                  do counta = 1, pastnum(ju)
                                     ku = ipast(ju,counta)
                                     if (.not.lplace(imolty,ku)) then
-                                       dist = dsqrt((x-rxnew(ku))**2
-     &                                      + (y-rynew(ku))**2
-     &                                      + (z-rznew(ku))**2)
+                                       dist = dsqrt((x-rxnew(ku))**2 + (y-rynew(ku))**2 + (z-rznew(ku))**2)
                                        bin = anint(dist*10.0d0)
                                     
-                                       bf_tor(itor) = bf_tor(itor)
-     &                                      * probf(iu,ku,bin)
+                                       bf_tor(itor) = bf_tor(itor) * probf(iu,ku,bin)
 ! RP added for MPI
-                                     my_ctorf(ipitor)=my_ctorf(ipitor)*
-     &                                      probf(iu,ku,bin)
+                                     my_ctorf(ipitor)=my_ctorf(ipitor)* probf(iu,ku,bin)
 !                                       ctorf(ip,itor) = ctorf(ip,itor) * 
 !     &                                      probf(iu,ku,bin)   
                                     end if
@@ -590,18 +543,13 @@
 
 !                       --- determine special closing energies
                            
-                           call safecbmc(2,lnew,i,iw,igrow,imolty
-     &                          ,count,x,y,z,vphi,vtorf
-     &                          ,wbendv,lterm,movetype)
+                           call safecbmc(2,lnew,i,iw,igrow,imolty ,count,x,y,z,vphi,vtorf ,wbendv,lterm,movetype)
                            
-                           bf_tor(itor) = bf_tor(itor) * vtorf 
-     &                          * dexp( - beta * vphi )
+                           bf_tor(itor) = bf_tor(itor) * vtorf  * dexp( - beta * vphi )
 ! RP added for MPI
-                           my_ctorf(ipitor) = my_ctorf(ipitor)
-     &                          * vtorf
+                           my_ctorf(ipitor) = my_ctorf(ipitor) * vtorf
 
-                           my_vfbbtr(ipitor) =  my_vfbbtr(ipitor)
-     &                          + vphi
+                           my_vfbbtr(ipitor) =  my_vfbbtr(ipitor) + vphi
 
 !                           ctorf(ip,itor) = ctorf(ip,itor) 
 !     &                          * vtorf
@@ -612,16 +560,12 @@
                         if (fcount(iu).gt.0) then
                            do j = 1, fcount(iu)
                               ju = fclose(iu,j)
-                              dist = dsqrt((x-rxu(i,ju))**2
-     &                             + (y-ryu(i,ju))**2
-     &                             + (z-rzu(i,ju))**2)
+                              dist = dsqrt((x-rxu(i,ju))**2 + (y-ryu(i,ju))**2 + (z-rzu(i,ju))**2)
                               bin = anint(dist*10.0d0)
                               
-                              bf_tor(itor) = bf_tor(itor)
-     &                             * probf(ju,iu,bin)
+                              bf_tor(itor) = bf_tor(itor) * probf(ju,iu,bin)
 ! RP added for MPI
-                              my_ctorf(ipitor) = my_ctorf(ipitor) *
-     &                             probf(iu,ju,bin)
+                              my_ctorf(ipitor) = my_ctorf(ipitor) * probf(iu,ju,bin)
 !                              ctorf(ip,itor) = ctorf(ip,itor) * 
 !     &                             probf(iu,ju,bin)
                
@@ -629,16 +573,12 @@
                                  do counta = 1, pastnum(ju)
                                     ku = ipast(ju,counta)
                                     if (.not.lplace(imolty,ku)) then
-                                       dist = dsqrt((x-rxu(i,ku))**2
-     &                                      + (y-ryu(i,ku))**2
-     &                                      + (z-rzu(i,ku))**2)
+                                       dist = dsqrt((x-rxu(i,ku))**2 + (y-ryu(i,ku))**2 + (z-rzu(i,ku))**2)
                                        bin = anint(dist*10.0d0)
                                     
-                                       bf_tor(itor) = bf_tor(itor)
-     &                                      * probf(iu,ku,bin)
+                                       bf_tor(itor) = bf_tor(itor) * probf(iu,ku,bin)
 ! RP added for MPI
-                                    my_ctorf(ipitor)=my_ctorf(ipitor)*
-     &                                      probf(iu,ku,bin)
+                                    my_ctorf(ipitor)=my_ctorf(ipitor)* probf(iu,ku,bin)
 !                                       ctorf(ip,itor) = ctorf(ip,itor) * 
 !     &                                      probf(iu,ku,bin)   
                                     end if
@@ -792,12 +732,9 @@
       countcount = loops_per_proc*ntogrow
       scount = loops_per_proc
 
-       CALL MPI_ALLGATHER(loops_per_proc,1,MPI_INTEGER,ncount_arr,
-     &       1,MPI_INTEGER,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLGATHER(itorcount,1,MPI_INTEGER,itorcount_arr,
-     &       1,MPI_INTEGER,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLGATHER(countcount,1,MPI_INTEGER,countcount_arr,
-     &       1,MPI_INTEGER,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLGATHER(loops_per_proc,1,MPI_INTEGER,ncount_arr, 1,MPI_INTEGER,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLGATHER(itorcount,1,MPI_INTEGER,itorcount_arr, 1,MPI_INTEGER,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLGATHER(countcount,1,MPI_INTEGER,countcount_arr, 1,MPI_INTEGER,MPI_COMM_WORLD,ierr)
        ncount_displs(1) = 0
        itorcount_displs(1) = 0
        countcount_displs(1) = 0
@@ -808,37 +745,21 @@
        end do
 
 !----for variables effected in this sub-routine
-      call MPI_ALLGATHERV(my_ctorf,itorcount,MPI_DOUBLE_PRECISION,
-     &    ctorf_one,itorcount_arr,itorcount_displs
-     &    ,MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
+      call MPI_ALLGATHERV(my_ctorf,itorcount,MPI_DOUBLE_PRECISION, ctorf_one,itorcount_arr,itorcount_displs ,MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
 
-      call MPI_ALLGATHERV(my_vfbbtr,itorcount,MPI_DOUBLE_PRECISION,
-     &   vfbbtr_one,itorcount_arr,itorcount_displs
-     &   ,MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
+      call MPI_ALLGATHERV(my_vfbbtr,itorcount,MPI_DOUBLE_PRECISION, vfbbtr_one,itorcount_arr,itorcount_displs ,MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
 
-      call MPI_ALLGATHERV(my_bsum_tor,scount,MPI_DOUBLE_PRECISION,
-     &   bsum_tor,ncount_arr,ncount_displs
-     &   ,MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
+      call MPI_ALLGATHERV(my_bsum_tor,scount,MPI_DOUBLE_PRECISION, bsum_tor,ncount_arr,ncount_displs ,MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
 
-      call MPI_ALLGATHERV(my_vtgtr,scount,MPI_DOUBLE_PRECISION,
-     &   vtgtr,ncount_arr,ncount_displs
-     &   ,MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
+      call MPI_ALLGATHERV(my_vtgtr,scount,MPI_DOUBLE_PRECISION, vtgtr,ncount_arr,ncount_displs ,MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
 
-      call MPI_ALLGATHERV(my_toracc,scount,MPI_DOUBLE_PRECISION,
-     &   toracc,ncount_arr,ncount_displs
-     &   ,MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
+      call MPI_ALLGATHERV(my_toracc,scount,MPI_DOUBLE_PRECISION, toracc,ncount_arr,ncount_displs ,MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
 
-      call MPI_ALLGATHERV(my_rxp,countcount,MPI_DOUBLE_PRECISION,
-     &   rxp_one,countcount_arr,countcount_displs
-     &   ,MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
+      call MPI_ALLGATHERV(my_rxp,countcount,MPI_DOUBLE_PRECISION, rxp_one,countcount_arr,countcount_displs ,MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
 
-      call MPI_ALLGATHERV(my_ryp,countcount,MPI_DOUBLE_PRECISION,
-     &   ryp_one,countcount_arr,countcount_displs
-     &   ,MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
+      call MPI_ALLGATHERV(my_ryp,countcount,MPI_DOUBLE_PRECISION, ryp_one,countcount_arr,countcount_displs ,MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
 
-      call MPI_ALLGATHERV(my_rzp,countcount,MPI_DOUBLE_PRECISION,
-     &   rzp_one,countcount_arr,countcount_displs
-     &   ,MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
+      call MPI_ALLGATHERV(my_rzp,countcount,MPI_DOUBLE_PRECISION, rzp_one,countcount_arr,countcount_displs ,MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
 
 
        myip = 0
@@ -861,8 +782,7 @@
 
  250     continue
 
-         call boltz ( lnew,.false.,ovrlap,i,icharge,imolty,ibox,ichoi
-     &        ,iufrom ,ntogrow, glist, maxlen)
+         call boltz ( lnew,.false.,ovrlap,i,icharge,imolty,ibox,ichoi ,iufrom ,ntogrow, glist, maxlen)
 
          if ( ovrlap ) then
             lterm = .true.
@@ -908,8 +828,7 @@
          else
 !           --- old conformation, update weiold - include wei_bend
             weiold = weiold * bsum * wei_bend * wei_vib
-            if (weiold .lt. softlog) write(iou,*) 
-     &           '###old weight too low'
+            if (weiold .lt. softlog) write(iou,*)  '###old weight too low'
          end if
 
  180     continue
@@ -982,8 +901,7 @@
                   vvibtr = vvibtr + vtvib(iwalk)
                else
 
-                  if (.not.(movetype.eq.2.and.lring(imolty).and 
-     &                 .iw.eq.1)) then
+                  if (.not.(movetype.eq.2.and.lring(imolty).and  .iw.eq.1)) then
 
                      tac = toracc(iwalk)
                      cwtorf = cwtorf * ctorf(iwalk,tac)
@@ -993,8 +911,7 @@
             end if
 
 !           --- update new trial energies
-            vnewt     = vnewt     + vtry(iwalk)  
-     &           + vtgtr(iwalk) + vvibtr + vbbtr
+            vnewt     = vnewt     + vtry(iwalk)   + vtgtr(iwalk) + vvibtr + vbbtr
             vnewbvib  = vnewbvib  + vvibtr
             vnewbb    = vnewbb    + vbbtr
             vnewtg    = vnewtg    + vtgtr(iwalk)
@@ -1012,8 +929,7 @@
                   vvibtr = vvibtr + vtvib(1)
                else
                                     
-                  if (.not.(movetype.eq.2.and.lring(imolty).and 
-     &                 .iw.eq.1)) then
+                  if (.not.(movetype.eq.2.and.lring(imolty).and  .iw.eq.1)) then
                      
                      cwtorf = cwtorf * ctorf(1,1)
 
@@ -1025,8 +941,7 @@
             end if
 
 !            --- update old trail energies
-            voldt     = voldt     + vtry(1)  
-     &           + vtgtr(1) + vvibtr + vbbtr
+            voldt     = voldt     + vtry(1)   + vtgtr(1) + vvibtr + vbbtr
             voldbvib  = voldbvib  + vvibtr
             voldbb    = voldbb    + vbbtr
             voldtg    = voldtg    + vtgtr(1)
@@ -1063,8 +978,7 @@
                yvec(iu,iufrom) = ryu(i,iufrom) - ryu(i,iu)
                zvec(iu,iufrom) = rzu(i,iufrom) - rzu(i,iu)
             end if
-            distij(iu,iufrom) = dsqrt( xvec(iu,iufrom)**2
-     &           + yvec(iu,iufrom)**2 + zvec(iu,iufrom)**2 )
+            distij(iu,iufrom) = dsqrt( xvec(iu,iufrom)**2 + yvec(iu,iufrom)**2 + zvec(iu,iufrom)**2 )
             
             xvec(iufrom,iu) = - xvec(iu,iufrom)
             yvec(iufrom,iu) = - yvec(iu,iufrom)
@@ -1091,8 +1005,7 @@
                      yvec(ju,iu) = - yvec(iu,ju)
                      zvec(ju,iu) = - zvec(iu,ju)
                      
-                     distij(iu,ju) = dsqrt(xvec(iu,ju)**2
-     &                    + yvec(iu,ju)**2 + zvec(iu,ju)**2)
+                     distij(iu,ju) = dsqrt(xvec(iu,ju)**2 + yvec(iu,ju)**2 + zvec(iu,ju)**2)
                      distij(ju,iu) = distij(iu,ju)
                      
                        

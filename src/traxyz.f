@@ -36,9 +36,7 @@
       logical::lneighij
 
       integer(KIND=normal_int)::i,ibox,flagon,iunit,j,imolty,icbu,ic,ip
-      real(KIND=double_precision)::rx,ry,rz,dchain,ddx,ddy,ddz,random
-     & ,vnew,vold,vintran,vintrao,deltv,deltvb,disvsq,vintern,vintero
-     & ,vextn,vexto,rchain,velectn,velecto,vdum,vrecipo,vrecipn,v3n,v3o
+      real(KIND=double_precision)::rx,ry,rz,dchain,ddx,ddy,ddz,random ,vnew,vold,vintran,vintrao,deltv,deltvb,disvsq,vintern,vintero ,vextn,vexto,rchain,velectn,velecto,vdum,vrecipo,vrecipn,v3n,v3o
 
       logical::laccept
 
@@ -55,8 +53,7 @@
          end if
       end do
 
-      if ((lexpee).and.(imolty.ge.nmolty1))
-     &   imolty = ee_moltyp(mstate)
+      if ((lexpee).and.(imolty.ge.nmolty1)) imolty = ee_moltyp(mstate)
                                                                                 
       if (temtyp(imolty).eq.0) return
       
@@ -148,17 +145,13 @@
 
 !     *** calculate the energy of i in the new configuration ***
       flagon = 2 
-      call energy(i,imolty, vnew,vintran, vintern,vextn,velectn
-     &     ,vdum,flagon, ibox,1, iunit,.false.,ovrlap,.false.
-     &     ,vdum,.false.,.false.)
+      call energy(i,imolty, vnew,vintran, vintern,vextn,velectn ,vdum,flagon, ibox,1, iunit,.false.,ovrlap,.false. ,vdum,.false.,.false.)
       v3n=v3garo
       if (ovrlap) return
 
 ! *** calculate the energy of i in the old configuration ***
       flagon = 1
-      call energy(i,imolty,vold,vintrao,vintero,vexto,velecto
-     &     ,vdum,flagon,ibox,1, iunit,.false.,ovrlap,.false.
-     &     ,vdum,.false.,.false.)
+      call energy(i,imolty,vold,vintrao,vintero,vexto,velecto ,vdum,flagon,ibox,1, iunit,.false.,ovrlap,.false. ,vdum,.false.,.false.)
       v3o = v3garo
 
       if (ovrlap) then
@@ -193,9 +186,7 @@
 ! *** For ANES algorithm, do the Fluctuating charge moves.
 
       if ( lanes ) then
-         call anes(i,ibox,ibox,1,laccept,deltv,vintern,vintran,vextn,
-     &        velectn,vintero,vintrao,vexto,velecto,vdum,vdum,
-     &        vdum,vdum,.false.)
+         call anes(i,ibox,ibox,1,laccept,deltv,vintern,vintran,vextn, velectn,vintero,vintrao,vexto,velecto,vdum,vdum, vdum,vdum,.false.)
          if ( laccept ) then
             if (lx) bstrax(imolty,ibox) = bstrax(imolty,ibox) + 1.0d0
             if (ly) bstray(imolty,ibox) = bstray(imolty,ibox) + 1.0d0
@@ -261,15 +252,11 @@
 ! *** check for update of near neighbour bitmap ***
 ! *** check for headgroup ***
          disvec(1,i,1) = disvec(1,i,1) + rx
-         disvsq = disvec(1,i,1) * disvec(1,i,1) +
-     &        disvec(1,i,2) * disvec(1,i,2) +
-     &        disvec(1,i,3) * disvec(1,i,3)
+         disvsq = disvec(1,i,1) * disvec(1,i,1) + disvec(1,i,2) * disvec(1,i,2) + disvec(1,i,3) * disvec(1,i,3)
          if (disvsq .gt. upnnsq) call updnn( i )
 ! *** check for last unit ***
          disvec(2,i,1) = disvec(2,i,1) + rx
-         disvsq = disvec(2,i,1) * disvec(2,i,1) +
-     &        disvec(2,i,2) * disvec(2,i,2) +
-     &        disvec(2,i,3) * disvec(2,i,3)
+         disvsq = disvec(2,i,1) * disvec(2,i,1) + disvec(2,i,2) * disvec(2,i,2) + disvec(2,i,3) * disvec(2,i,3)
          if (disvsq .gt. upnnsq) call updnn( i )
       end if
 

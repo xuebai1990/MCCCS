@@ -1,6 +1,4 @@
-      subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran,
-     &     vextn,velectn,vintero,vintrao,vexto,velecto,vinsta,vremta,
-     &     vnewflucq,voldflucq,lswapinter)
+      subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn,vintero,vintrao,vexto,velecto,vinsta,vremta, vnewflucq,voldflucq,lswapinter)
 
 !    *********************************************************************
 !    ** optimize the electronic configuration for trans, rot, and swap  **
@@ -28,15 +26,8 @@
 !$$$      include 'system.inc'
 
       logical::laccept,lswapinter
-      integer(KIND=normal_int)::i,ibox,boxrem,mtype,imolty,iunit,ichoiq
-     & ,ip,ibox2,j
-      real(KIND=double_precision)::deltv,vintern,vintran,vextn,velectn
-     & ,vintero,vintrao,vexto,velecto,vinsta,vremta,vnewflucq,voldflucq
-     & ,vboxo(nbxmax),vinterbo(nbxmax),vintrabo(nbxmax),vextbo(nbxmax)
-     & ,velectbo(nbxmax),vflucqbo(nbxmax),vtailbo(nbxmax),vvibbo(nbxmax)
-     & ,vtgbo(nbxmax),vbendbo(nbxmax),rxuo(numax),ryuo(numax)
-     & ,rzuo(numax),xcmo,ycmo,zcmo,vdum,wratio,volins,volrem,deltvb
-     & ,random,vnewt2,voldt2
+      integer(KIND=normal_int)::i,ibox,boxrem,mtype,imolty,iunit,ichoiq ,ip,ibox2,j
+      real(KIND=double_precision)::deltv,vintern,vintran,vextn,velectn ,vintero,vintrao,vexto,velecto,vinsta,vremta,vnewflucq,voldflucq ,vboxo(nbxmax),vinterbo(nbxmax),vintrabo(nbxmax),vextbo(nbxmax) ,velectbo(nbxmax),vflucqbo(nbxmax),vtailbo(nbxmax),vvibbo(nbxmax) ,vtgbo(nbxmax),vbendbo(nbxmax),rxuo(numax),ryuo(numax) ,rzuo(numax),xcmo,ycmo,zcmo,vdum,wratio,volins,volrem,deltvb ,random,vnewt2,voldt2
       real(KIND=double_precision)::qquo(nmax,numax) 
 
 !      write(iou,*) 'START the optimization of the charge configuration'
@@ -110,8 +101,7 @@
          vtgb(boxrem)     = vtgb(boxrem)     - voldtg
          vextb(boxrem)    = vextb(boxrem)    - voldext
          vbendb(boxrem)   = vbendb(boxrem)   - voldbb
-         velectb(boxrem)  = velectb(boxrem)  - 
-     &        (voldelect+voldewald)
+         velectb(boxrem)  = velectb(boxrem)  -  (voldelect+voldewald)
          vflucqb(boxrem)  = vflucqb(boxrem)  - voldflucq
       else
 
@@ -162,18 +152,14 @@
          if ( lswapinter ) then
             if (lgibbs) then
 !     --- Note: acceptance based on only molecules of type imolty
-               wratio = ( weight / weiold ) *
-     &              ( volins * dble( ncmt(boxrem,imolty)+1 ) / 
-     &              ( volrem * dble( ncmt(ibox,imolty) ) ) )
+               wratio = ( weight / weiold ) * ( volins * dble( ncmt(boxrem,imolty)+1 ) /  ( volrem * dble( ncmt(ibox,imolty) ) ) )
             elseif (lgrand) then
                if (ibox.eq.1) then
 !           --- molecule added to box 1
-                  wratio = (weight /  weiold ) * 
-     &                 volins * B(imolty) / (ncmt(ibox,imolty)) 
+                  wratio = (weight /  weiold ) *  volins * B(imolty) / (ncmt(ibox,imolty)) 
                else
 !            --- molecule removed from box 1
-                  wratio = (weight /  weiold ) * 
-     &                 (ncmt(boxrem,imolty)+1)/ (B(imolty)*volrem) 
+                  wratio = (weight /  weiold ) *  (ncmt(boxrem,imolty)+1)/ (B(imolty)*volrem) 
                end if
             end if
          else

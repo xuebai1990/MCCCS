@@ -27,16 +27,11 @@
 
       logical::lpoly,lcone
 !     lpoly used to have a meaning in iclude files but does not any longer
-      integer(KIND=normal_int)::i,j,iunit,iutry,iincre,istart,iuend
-     & ,idiff,nrtc,iu,iulast,iuprev,iuppre,ivib,iben,itor,ibin,it
+      integer(KIND=normal_int)::i,j,iunit,iutry,iincre,istart,iuend ,idiff,nrtc,iu,iulast,iuprev,iuppre,ivib,iben,itor,ibin,it
 
-      real(KIND=double_precision)::xprev,yprev,zprev,dprev ,xpprev
-     & ,ypprev,zpprev,xa1a2,ya1a2,za1a2 ,da1a2,xub,yub,zub,va,vbba,vdha
-     & ,vtorso ,x,y,z,dlast,xi1,xi2, xisq,thetac,theta ,random,xaa1,yaa1
-     & ,zaa1,daa1,dot,bf,rij,dum
+      real(KIND=double_precision)::xprev,yprev,zprev,dprev ,xpprev ,ypprev,zpprev,xa1a2,ya1a2,za1a2 ,da1a2,xub,yub,zub,va,vbba,vdha ,vtorso ,x,y,z,dlast,xi1,xi2, xisq,thetac,theta ,random,xaa1,yaa1 ,zaa1,daa1,dot,bf,rij,dum
 
-      real(KIND=double_precision)::rxtmp(numax),rytmp(numax)
-     & ,rztmp(numax)
+      real(KIND=double_precision)::rxtmp(numax),rytmp(numax) ,rztmp(numax)
       real(KIND=double_precision)::nnrtab(nrtmax),hnrtab(nrtmax,nrtbin)
 
 !     lcone has no meaning any longer 2-16-98
@@ -156,8 +151,7 @@
             xi2 = ( 2.0d0 * random() ) - 1.0d0
             xisq = xi1**2 + xi2**2
             if ( xisq .lt. 1.0d0 ) then
-               if ( brvibk(1) .gt. 0.1d0 ) 
-     &              call cleanup('bond vibrations not implemented')
+               if ( brvibk(1) .gt. 0.1d0 )  call cleanup('bond vibrations not implemented')
                x = brvib(1) * 2.0d0 * xi1 * dsqrt( 1.0d0 - xisq )
                y = brvib(1) * 2.0d0 * xi2 * dsqrt( 1.0d0 - xisq )
                z = brvib(1) * ( 1.0d0 - 2.0d0 * xisq )
@@ -229,8 +223,7 @@
                   rij = dsqrt( x*x + y*y + z*z )
                   if ( rij .gt. dmrtab(idiff) ) then
                      write(iou,*) 'WARNING NRTAB: rij .gt. dmrtab'
-                     write(iou,*) 'idiff',idiff,
-     &                    'rij',rij,'dmrtab',dmrtab(idiff)
+                     write(iou,*) 'idiff',idiff, 'rij',rij,'dmrtab',dmrtab(idiff)
                   end if
                   ibin = idint( rij / dbrtab(idiff) ) + 1
                   if ( ibin .gt. nrtbin ) ibin = nrtbin

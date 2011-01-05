@@ -27,23 +27,14 @@
 
       logical::lnew,lterm,ovrlap
 
-      integer(KIND=normal_int)::i,j,imolty,count,counta,iu,ju,ku,jtvib
-     & ,start,iv,index,ivib,nchvib,ibend,ib,type,ip,ichoi
-     & ,niplace,iw,iufrom,it,jut2,jut3,jut4,jttor,ibox,glist,iwalk
-     & ,iuprev,list,nchben_a, nchben_b,max,iu2back
+      integer(KIND=normal_int)::i,j,imolty,count,counta,iu,ju,ku,jtvib ,start,iv,index,ivib,nchvib,ibend,ib,type,ip,ichoi ,niplace,iw,iufrom,it,jut2,jut3,jut4,jttor,ibox,glist,iwalk ,iuprev,list,nchben_a, nchben_b,max,iu2back
  
       parameter(max=numax)
 
-      real(KIND=double_precision)::wplace,equil,kforce,bsum_try,mincb
-     & ,delcb,ux,uy,uz,r,vvib,bfactor,third,random,length,bs,rbf,vvibtr
-     & ,wei_vib,bendang,vangle,vbbtr,angle,vphi,phione,thetac,rx,ry,rz
-     & ,rsint,dist,wei_bend,ang_trial,vctor,vdha,vbend,vtorsion
-     & ,bsum,alpha,gamma,dum,phi,thetaone,thetatwo,phitwo
+      real(KIND=double_precision)::wplace,equil,kforce,bsum_try,mincb ,delcb,ux,uy,uz,r,vvib,bfactor,third,random,length,bs,rbf,vvibtr ,wei_vib,bendang,vangle,vbbtr,angle,vphi,phione,thetac,rx,ry,rz ,rsint,dist,wei_bend,ang_trial,vctor,vdha,vbend,vtorsion ,bsum,alpha,gamma,dum,phi,thetaone,thetatwo,phitwo
       real(KIND=double_precision)::tabulated_vib
 
-      dimension r(nchbn_max),bfactor(nchbn_max) ,bendang(numax,numax)
-     & ,ang_trial(nchbn_max),dist(max) ,niplace(numax),vbend(nchmax)
-     & ,vtorsion(nchmax),phi(max) ,list(max),glist(max)
+      dimension r(nchbn_max),bfactor(nchbn_max) ,bendang(numax,numax) ,ang_trial(nchbn_max),dist(max) ,niplace(numax),vbend(nchmax) ,vtorsion(nchmax),phi(max) ,list(max),glist(max)
 
 !      write(iou,*) 'START PLACE'
 
@@ -77,8 +68,7 @@
 
             if (invib(imolty,iu).gt.1) then
                write(iou,*) 'iu,invib',iu,invib(imolty,iu)
-               call cleanup('invib can no be larger than one
-     &                     for hydrogen')
+               call cleanup('invib can no be larger than one for hydrogen')
             end if
 
 !     --- determine bond lengths
@@ -264,9 +254,7 @@
                         dist(1) = dsqrt(ux**2 + uy**2 + uz**2)
                         
 !     --- dot product divided by lengths gives cos(angle)
-                        thetac = -( ux*rx + uy*ry 
-     &                       + uz*rz ) 
-     &                       / (dist(1))
+                        thetac = -( ux*rx + uy*ry  + uz*rz )  / (dist(1))
                         angle = dacos(thetac)
                         
 !     --- compute the energy of this angle
@@ -362,8 +350,7 @@
                      thetaone = bendang(ku,iuprev)
                      
 
-                     call coneangle(thetaone,phione,thetatwo,phitwo
-     &                    ,angle)
+                     call coneangle(thetaone,phione,thetatwo,phitwo ,angle)
                      
                      do ib = 1, inben(imolty,iu)
                         iu2back = ijben3(imolty,iu,ib)
@@ -371,8 +358,7 @@
                         if (iu2back.eq.ku) then
                            type = itben(imolty,iu,ib)
 
-                           vphi = vphi + brbenk(type)
-     &                          * (angle - brben(type))**2
+                           vphi = vphi + brbenk(type) * (angle - brben(type))**2
 
                         end if
                      end do
@@ -396,15 +382,13 @@
                      phione = phi(j)
                      thetaone = bendang(ku,iuprev)
                                           
-                     call coneangle(thetaone,phione,thetatwo,phitwo
-     &                    ,angle)
+                     call coneangle(thetaone,phione,thetatwo,phitwo ,angle)
 
                      do ib = 1, inben(imolty,iu)
                         iu2back = ijben3(imolty,iu,ib)
                         if (iu2back.eq.ku) then
                            type = itben(imolty,iu,ib)
-                           vphi = vphi + brbenk(type) 
-     &                          * (angle - brben(type))**2
+                           vphi = vphi + brbenk(type)  * (angle - brben(type))**2
                         end if
                      end do
                   end do
@@ -462,8 +446,7 @@
                   if (niplace(jut4).lt.niplace(iu)) then
                         
                      if (.not. lexist(jut4)) then
-                        write(iou,*) 'jut4,jut3,jut2,iu',
-     &                       jut4,jut3,jut2,iu
+                        write(iou,*) 'jut4,jut3,jut2,iu', jut4,jut3,jut2,iu
                         call cleanup('trouble jut4 in place')
                      end if
                      
@@ -494,8 +477,7 @@
          end do
 
 !     --- now we calculate the nonbonded interactions
-         call boltz(lnew,.false., ovrlap,i,i,imolty,ibox,ichoi
-     &        ,iufrom,pnum(iw),glist,0._double_precision)
+         call boltz(lnew,.false., ovrlap,i,i,imolty,ibox,ichoi ,iufrom,pnum(iw),glist,0._double_precision)
 
          if (ovrlap) then
             lterm = .true.
@@ -539,8 +521,7 @@
 
          if (lnew) then
 
-            vnewt = vnewt + vbend(iwalk) + vtorsion(iwalk)
-     &           + vtrintra(iwalk)
+            vnewt = vnewt + vbend(iwalk) + vtorsion(iwalk) + vtrintra(iwalk)
             vnewbb    = vnewbb    + vbend(iwalk)
             vnewtg    = vnewtg    + vtorsion(iwalk)
             vnewext   = vnewext   + vtrext(iwalk)
@@ -549,8 +530,7 @@
             vnewelect = vnewelect + vtrelect(iwalk)
             vnewewald = vnewewald + vtrewald(iwalk)
          else
-            voldt = voldt + vbend(1) + vtorsion(1)
-     &           + vtrintra(1)
+            voldt = voldt + vbend(1) + vtorsion(1) + vtrintra(1)
             voldbb    = voldbb    + vbend(1)
             voldtg    = voldtg    + vtorsion(1)
             voldext   = voldext   + vtrext(1)
@@ -581,8 +561,7 @@
                yvec(iu,iufrom) = ryu(i,iufrom) - ryu(i,iu)
                zvec(iu,iufrom) = rzu(i,iufrom) - rzu(i,iu)
             end if
-            distij(iu,iufrom) = dsqrt( xvec(iu,iufrom)**2
-     &           + yvec(iu,iufrom)**2 + zvec(iu,iufrom)**2 )
+            distij(iu,iufrom) = dsqrt( xvec(iu,iufrom)**2 + yvec(iu,iufrom)**2 + zvec(iu,iufrom)**2 )
 
             xvec(iufrom,iu) = - xvec(iu,iufrom)
             yvec(iufrom,iu) = - yvec(iu,iufrom)

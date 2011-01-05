@@ -24,8 +24,7 @@
 
       integer(KIND=normal_int)::i,ibox,jmolty,j
 
-      real(KIND=double_precision)::rcutsq,rxuu1,ryuu1,rzuu1,rxuij,ryuij,rzuij
-     &     ,rijsq
+      real(KIND=double_precision)::rcutsq,rxuu1,ryuu1,rzuu1,rxuij,ryuij,rzuij ,rijsq
 
       rcutsq = rcut(ibox)*rcut(ibox)
 

@@ -26,8 +26,7 @@
 !$$$      include 'connect.inc'      
 
       integer(KIND=normal_int)::i,imolty,iunit,ii,jj,ntii,ntjj,ntij,ibox
-      real(KIND=double_precision)::vflucq,qion(numax),qqii,vewald,rxui
-     & ,ryui,rzui,rxuij,ryuij,rzuij,rij,erfunc
+      real(KIND=double_precision)::vflucq,qion(numax),qqii,vewald,rxui ,ryui,rzui,rxuij,ryuij,rzuij,rij,erfunc
       vflucq = 0.0d0
       vewald = 0.0d0
       imolty = moltyp(i)
@@ -45,8 +44,7 @@
          
          do jj = ii, iunit
             if ( ii .eq. jj ) then
-               vflucq = vflucq + xiq(ntii)*qqii
-     &              + jayself(ntii)*qqii*qqii
+               vflucq = vflucq + xiq(ntii)*qqii + jayself(ntii)*qqii*qqii
             else
                ntjj = ntype(imolty,jj)
                ntij = (ntii-1)*nntype + ntjj
@@ -70,15 +68,11 @@
                rxuij = rxui - rxu(i,jj)
                ryuij = ryui - ryu(i,jj)
                rzuij = rzui - rzu(i,jj)
-               rij = dsqrt(rxuij*rxuij + ryuij*ryuij
-     &              + rzuij*rzuij)
+               rij = dsqrt(rxuij*rxuij + ryuij*ryuij + rzuij*rzuij)
                if (.not.lqinclu(imolty,ii,jj)) then
-                   vewald = vewald + qqii*qion(jj)*
-     &              (erfunc(calp(ibox)*rij)-1.0d0)/rij
+                   vewald = vewald + qqii*qion(jj)* (erfunc(calp(ibox)*rij)-1.0d0)/rij
                else
-                   vewald = vewald + (1.0d0-qscale2(imolty,ii,jj))*qqii*
-     &                       qion(jj)*
-     &                       (erfunc(calp(ibox)*rij)-1.0d0)/rij
+                   vewald = vewald + (1.0d0-qscale2(imolty,ii,jj))*qqii* qion(jj)* (erfunc(calp(ibox)*rij)-1.0d0)/rij
                end if 
             end do
 ! --- self term in ewald sum ---

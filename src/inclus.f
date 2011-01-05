@@ -1,5 +1,4 @@
-      subroutine inclus( inclnum,inclmol,inclbead,inclsign,ncarbon,
-     &     ainclnum,ainclmol,ainclbead,a15t,ofscale,ofscale2)
+      subroutine inclus( inclnum,inclmol,inclbead,inclsign,ncarbon, ainclnum,ainclmol,ainclbead,a15t,ofscale,ofscale2)
 
       use global_data
       use var_type
@@ -19,8 +18,7 @@
 !$$$      include 'poten.inc'
 
       integer(KIND=normal_int)::m,n,nb,mb,imolty,ioffset
-      integer(KIND=normal_int)::inclnum,inclmol,inclbead,inclsign
-     & ,ncarbon
+      integer(KIND=normal_int)::inclnum,inclmol,inclbead,inclsign ,ncarbon
       integer(KIND=normal_int)::ainclnum,ainclmol,ainclbead,a15t
       dimension inclmol(ntmax*numax*numax),inclsign(ntmax*numax*numax)
       dimension inclbead(ntmax*numax*numax,2),ncarbon(ntmax)
@@ -68,10 +66,8 @@
             if (invib(imolty,m) .eq. 4) then
                do n = 1,4
                   do nb = 1,4
-                     linclu(imolty,ijvib(imolty,m,n)
-     &                    ,ijvib(imolty,m,nb))=.false.
-                     lqinclu(imolty,ijvib(imolty,m,n)
-     &                    ,ijvib(imolty,m,nb))=.false.
+                     linclu(imolty,ijvib(imolty,m,n) ,ijvib(imolty,m,nb))=.false.
+                     lqinclu(imolty,ijvib(imolty,m,n) ,ijvib(imolty,m,nb))=.false.
                   end do
                end do
             end if
@@ -182,8 +178,7 @@
 ! * exclude charge interactions if lqchg is false
          do m = 1,nunit(imolty)
             do n = m+1,nunit(imolty)
-               if (.not. lqchg(ntype(imolty,m)) .or.
-     &              .not. lqchg(ntype(imolty,n))) then
+               if (.not. lqchg(ntype(imolty,m)) .or. .not. lqchg(ntype(imolty,n))) then
                   lqinclu(imolty,m,n) = .false.
                   lqinclu(imolty,n,m) = .false.
                end if
@@ -247,8 +242,7 @@
             write(iou,*) 'CHARGE INCLUSION TABLE'
 
             do m = 1, nunit(imolty)
-               write(iou,*) m, 
-     &              (lqinclu(imolty,m,n),n=1,nunit(imolty))
+               write(iou,*) m,  (lqinclu(imolty,m,n),n=1,nunit(imolty))
             end do
 
 !  400  format (<nunit(imolty)> F5.2)
@@ -256,16 +250,14 @@
 	 
             write(iou,*) '1-4 LJ SCALING FACTORS'
             do m = 1, nunit(imolty)
-               write(iou,*) m, 
-     &              (ljscale(imolty,m,n),n=1,nunit(imolty))
+               write(iou,*) m,  (ljscale(imolty,m,n),n=1,nunit(imolty))
             end do
 ! 500  format (i5,<nunit(imolty)> F5.2)
 	 
             write(iou,*)
             write(iou,*) '1-4 CHARGE SCALING FACTORS'
             do m = 1, nunit(imolty)
-               write(iou,*) m, 
-     &              (qscale2(imolty,m,n),n=1,nunit(imolty))
+               write(iou,*) m,  (qscale2(imolty,m,n),n=1,nunit(imolty))
             end do
          end if
 ! 600  format (i5,<nunit(imolty)> F5.2)

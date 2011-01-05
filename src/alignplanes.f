@@ -1,5 +1,4 @@
-      subroutine align_planes(isplist,imol_b,imol_a,itype_b,itype_a,
-     &     xb,yb,zb)
+      subroutine align_planes(isplist,imol_b,imol_a,itype_b,itype_a, xb,yb,zb)
 
 !--- align_planes.f
 !
@@ -45,8 +44,7 @@
 !$$$      include 'swtcmove.inc'
 
 !     --- INPUT VARIABLES ---
-      integer(KIND=normal_int)::isplist, imol_b, imol_a, itype_b,
-     & itype_a
+      integer(KIND=normal_int)::isplist, imol_b, imol_a, itype_b, itype_a
    
 !     --- OUTPUT VARIABLES ---
       real(KIND=double_precision)::xb(numax), yb(numax), zb(numax)

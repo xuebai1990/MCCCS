@@ -104,8 +104,7 @@
       blow = bin
       bhigh = blow+1
 
-      if (bend(blow,bendtyp).gt. r.or.
-     &     bend(bhigh,bendtyp).lt.r) then
+      if (bend(blow,bendtyp).gt. r.or. bend(bhigh,bendtyp).lt.r) then
          write(2,*) 'problem in lininter_bend!'
          write(2,*) 'r', r, ' bendtyp', bendtyp
          write(2,*) 'blow ', blow, bend(blow, bendtyp),r
@@ -165,13 +164,11 @@
 !     select correct bin
 !     multiply by num_int_vdW - number of intervals per angstrom
       add1 = int(left*num_int_vdW(typi,typj))
-      bin = (xa-rvdW(1,typi,typj))*num_int_vdW(typi,typj) + 
-     &     1 + add1
+      bin = (xa-rvdW(1,typi,typj))*num_int_vdW(typi,typj) +  1 + add1
       low = bin
       high = low+1
 
-      if (rvdW(low,typi,typj).gt. r.or.rvdW(high,typi,typj)
-     &     .lt.r) then
+      if (rvdW(low,typi,typj).gt. r.or.rvdW(high,typi,typj) .lt.r) then
          write(2,*) 'problem in lininter_vdW!'
          write(2,*) 'r', r, ' typi', typi, ' typj ', typj
          write(2,*) 'low ', low, rvdW(low, typi, typj)
@@ -228,13 +225,11 @@
 !     select correct bin
 !     multiply by num_int_nonbond - number of intervals per angstrom
       add1 = int(left*num_int_elect(typi,typj))
-      bin = (xa-relect(1,typi,typj))*num_int_elect(typi,typj) + 
-     &     1 + add1
+      bin = (xa-relect(1,typi,typj))*num_int_elect(typi,typj) +  1 + add1
       low = bin
       high = low+1
 
-      if (relect(low,typi,typj).gt. r.or.relect(high,typi,typj)
-     &     .lt.r) then
+      if (relect(low,typi,typj).gt. r.or.relect(high,typi,typj) .lt.r) then
          write(2,*) 'problem in lininter_elect!'
          write(2,*) 'r', r, ' typi', typi, ' typj ', typj
          write(2,*) 'low ', low, relect(low, typi, typj)

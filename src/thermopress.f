@@ -32,16 +32,11 @@
       integer(KIND=normal_int)::ibox,ic,ncount
       real(KIND=double_precision)::dv,apress
       real(KIND=double_precision)::bxo(2),byo(2),bzo(2)
-      real(KIND=double_precision)::volo(2),vboxo(2),dfac(2),voln(2),
-     &                 vintero(2),vtailo(2),vexto(2),velecto(2)
-      real(KIND=double_precision)::kxo(vectormax,2),kyo(vectormax,2),
-     &                 kzo(vectormax,2),prefacto(vectormax,2)
-      real(KIND=double_precision)::vboxn(2),
-     &              vintern(2),vtailn(2),vextn(2),velectn(2)
-      real(KIND=double_precision)::rxuo(nmax,numax),ryuo(nmax,numax)
-     &                ,rzuo(nmax,numax)
-      real(KIND=double_precision)::volt,expdv,random,df,dx,dy,dz,v,dele,
-     &                 vinter,vtail,vext,vminim,vdum,velect
+      real(KIND=double_precision)::volo(2),vboxo(2),dfac(2),voln(2), vintero(2),vtailo(2),vexto(2),velecto(2)
+      real(KIND=double_precision)::kxo(vectormax,2),kyo(vectormax,2), kzo(vectormax,2),prefacto(vectormax,2)
+      real(KIND=double_precision)::vboxn(2), vintern(2),vtailn(2),vextn(2),velectn(2)
+      real(KIND=double_precision)::rxuo(nmax,numax),ryuo(nmax,numax) ,rzuo(nmax,numax)
+      real(KIND=double_precision)::volt,expdv,random,df,dx,dy,dz,v,dele, vinter,vtail,vext,vminim,vdum,velect
       real(KIND=double_precision)::xcmo,ycmo,zcmo
       dimension xcmo(nmax),ycmo(nmax),zcmo(nmax)
 
@@ -134,21 +129,15 @@
          
          lvol = .true.
          do 400 ibox = 1,2
-            call sumup( ovrlap, v, vinter,vtail, vdum,vdum,
-     &           vdum,vdum,vext,velect,vdum, ibox,lvol)
+            call sumup( ovrlap, v, vinter,vtail, vdum,vdum, vdum,vdum,vext,velect,vdum, ibox,lvol)
             if ( ovrlap ) goto 500
             vintern(ibox) = vinter
             vtailn(ibox)  = vtail
             vextn(ibox)   = vext  
             velectn(ibox) = velect
-            vboxn(ibox)   = vboxo(ibox) + 
-     &           (vintern(ibox)-vintero(ibox))
-     &           + (vextn(ibox)-vexto(ibox)) + 
-     &           (velectn(ibox)-velecto(ibox))
-            apress = dexp(-(vboxn(ibox)-vboxo(ibox))*beta)*
-     &           ((voln(ibox)/volo(ibox))**nchbox(ibox))
-            apresscum(ibox,itest) = apresscum(ibox,itest) 
-     &        + apress
+            vboxn(ibox)   = vboxo(ibox) +  (vintern(ibox)-vintero(ibox)) + (vextn(ibox)-vexto(ibox)) +  (velectn(ibox)-velecto(ibox))
+            apress = dexp(-(vboxn(ibox)-vboxo(ibox))*beta)* ((voln(ibox)/volo(ibox))**nchbox(ibox))
+            apresscum(ibox,itest) = apresscum(ibox,itest)  + apress
 
  400     continue
 ! --- restore old box lengths

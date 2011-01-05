@@ -31,13 +31,10 @@
 !$$$      include 'inputdata.inc'
 !$$$      include 'eepar.inc'
 
-      integer(KIND=normal_int)::i, imolty, ii, j, jmolty, jj, ntii, ntjj
-     & , ntij,nnn,nvirial,ip,itemp,iii
-      real(KIND=double_precision)::vinter,rminsq,rxui,ryui,rzui,rxuij
-     & ,ryuij,rzuij,rijsq,sr2, sr6 ,velect,mayer
+      integer(KIND=normal_int)::i, imolty, ii, j, jmolty, jj, ntii, ntjj , ntij,nnn,nvirial,ip,itemp,iii
+      real(KIND=double_precision)::vinter,rminsq,rxui,ryui,rzui,rxuij ,ryuij,rzuij,rijsq,sr2, sr6 ,velect,mayer
 
-      real(KIND=double_precision)::ljsami,ljpsur,ljmuir,xdiff,ydiff
-     & ,zdiff,dvircm,stepvir,exsix,starvir
+      real(KIND=double_precision)::ljsami,ljpsur,ljmuir,xdiff,ydiff ,zdiff,dvircm,stepvir,exsix,starvir
       real(KIND=double_precision)::binvir
       dimension binvir(maxvir,maxntemp),mayer(maxntemp)
 
@@ -46,16 +43,12 @@
 ! *** only use for polarizable models
       integer(KIND=normal_int)::chgmax
       parameter (chgmax=10)
-      integer(KIND=normal_int)::ip1,ip2,iunit,numchg
-     & ,mainsite(2,2),lam1,lam2
-      real(KIND=double_precision)::a(chgmax,chgmax),b2(chgmax,1)
-     & ,mainxiq(2,2)
+      integer(KIND=normal_int)::ip1,ip2,iunit,numchg ,mainsite(2,2),lam1,lam2
+      real(KIND=double_precision)::a(chgmax,chgmax),b2(chgmax,1) ,mainxiq(2,2)
 
-      real(KIND=double_precision)::consa1,consa2,consb1,consb2,selfadd1
-     & ,selfadd2,epsilon2,vmin
+      real(KIND=double_precision)::consa1,consa2,consb1,consb2,selfadd1 ,selfadd2,epsilon2,vmin
 
-      real(KIND=double_precision)::mass_t,binvir2(maxvir,maxntemp),
-     & factor,corr,vold,deri_u
+      real(KIND=double_precision)::mass_t,binvir2(maxvir,maxntemp), factor,corr,vold,deri_u
 
 ! --------------------------------------------------------------------
 
@@ -95,8 +88,7 @@
          mass_t = mass_t + mass(ntype(imolty,ii))
       end do
       mass_t = mass_t/1000d0
-      factor = -(6.6260755d-34)**2*6.0221367d23*1d20 / 
-     &     (24.0d0*onepi*mass_t*1.380658d-23*twopi)
+      factor = -(6.6260755d-34)**2*6.0221367d23*1d20 /  (24.0d0*onepi*mass_t*1.380658d-23*twopi)
 
       lqimol = lelect(imolty)
 
@@ -162,8 +154,7 @@
                ryuij = ryui - ryu(j,jj)
                rzuij = rzui - rzu(j,jj)
 
-               rijsq = (rxuij*rxuij)+(ryuij*ryuij)
-     &              + (rzuij*rzuij)
+               rijsq = (rxuij*rxuij)+(ryuij*ryuij) + (rzuij*rzuij)
                if ( lmatrix .and. lqchg(ntii) .and. lqchg(ntjj) ) then
                   a(ip1,ip2) = qqfact/dsqrt(rijsq)
                   a(ip2,ip1) = a(ip1,ip2)
@@ -184,8 +175,7 @@
                   else if (lshift) then
                      sr2 = sig2ij(ntij) / rijsq
                      sr6 = sr2 * sr2 * sr2
-                     vinter = vinter + 
-     &                    sr6*(sr6-1.0d0)*epsij(ntij)-ecut(ntij) 
+                     vinter = vinter +  sr6*(sr6-1.0d0)*epsij(ntij)-ecut(ntij) 
                   elseif ( lfepsi ) then
                      if ( lij(ntii) .and. lij(ntjj) ) then
                         sr6 = rijsq*rijsq*rijsq
@@ -196,14 +186,12 @@
                   else
                      sr2 = sig2ij(ntij) / rijsq
                      sr6 = sr2 * sr2 * sr2
-                     vinter = vinter + 
-     &                    sr6*(sr6-1.0d0)*epsij(ntij)
+                     vinter = vinter +  sr6*(sr6-1.0d0)*epsij(ntij)
                      
                   end if
                   
                   if ( lqimol .and. lqjmol .and. .not. lmatrix ) then
-                     velect = velect + qqfact*qqu(i,ii)*qqu(j,jj)
-     &                    /dsqrt(rijsq)
+                     velect = velect + qqfact*qqu(i,ii)*qqu(j,jj) /dsqrt(rijsq)
                   end if
                   
                end if
@@ -322,22 +310,18 @@
             do ip = 1, 2
                ii = mainsite(ip,1)
                if ( lfepsi ) then
-                  velect = velect-0.5d0*b2(ii,1)*(mainxiq(ip,1)
-     &                 +selfadd1)
+                  velect = velect-0.5d0*b2(ii,1)*(mainxiq(ip,1) +selfadd1)
 !                  write(21,*) b2(ii,1),mainxiq(ip,1)
-                  vinter = epsilon2*((aslope*a0*a0+ashift)/sr6
-     &                 -(bslope*b0*b0+bshift))/sr6
+                  vinter = epsilon2*((aslope*a0*a0+ashift)/sr6 -(bslope*b0*b0+bshift))/sr6
                else
                   velect = velect-0.5d0*b2(ii,1)*mainxiq(ip,1)
                end if
                if ( nunit(imolty) .eq. 5 ) then
                   ii = mainsite(ip,2)
                   if ( lfepsi ) then
-                     velect = velect-0.5d0*b2(ii,1)*(mainxiq(ip,2)
-     &                    +selfadd1)
+                     velect = velect-0.5d0*b2(ii,1)*(mainxiq(ip,2) +selfadd1)
 !                     write(21,*) b2(ii,1),mainxiq(ip,2)
-                     vinter = epsilon2*((aslope*a0*a0+ashift)/sr6
-     &                    -(bslope*b0*b0+bshift))/sr6
+                     vinter = epsilon2*((aslope*a0*a0+ashift)/sr6 -(bslope*b0*b0+bshift))/sr6
                   else
                      velect = velect-0.5d0*b2(ii,1)*mainxiq(ip,2)
                   end if
@@ -348,8 +332,7 @@
                vmin = velect + vinter*4.0d0
                write(11,*) 'vmin:',vmin
                do ii = 1, nunit(imolty)
-                  write(11,*) rxu(i,ii)+xdiff-dvircm,ryu(i,ii)+ydiff
-     &                 ,rzu(i,ii)+zdiff
+                  write(11,*) rxu(i,ii)+xdiff-dvircm,ryu(i,ii)+ydiff ,rzu(i,ii)+zdiff
                end do
                do ii = 1, nunit(imolty)
                   write(11,*) rxu(2,ii),ryu(2,ii),rzu(2,ii)
@@ -368,8 +351,7 @@
          else
             if (.not.lsami .and. .not.lexpsix) vinter = 4.0d0*vinter
             do itemp = 1,ntemp
-               mayer(itemp)
-     &              = dexp(-(vinter+velect)/virtemp(itemp))-1.0d0
+               mayer(itemp) = dexp(-(vinter+velect)/virtemp(itemp))-1.0d0
             end do
          end if
 !         write(iou,*) 'mayer',mayer
@@ -386,8 +368,7 @@
             vold = vinter + velect
          end if
          do itemp = 1, ntemp
-            binvir2(nnn,itemp) = binvir2(nnn,itemp) +
-     &           (mayer(itemp)+1.0d0)*corr/(virtemp(itemp)**3)
+            binvir2(nnn,itemp) = binvir2(nnn,itemp) + (mayer(itemp)+1.0d0)*corr/(virtemp(itemp)**3)
          end do
          dvircm = dvircm + stepvir
       end do

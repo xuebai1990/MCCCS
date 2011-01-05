@@ -41,18 +41,14 @@
       
       logical::lterm, ovrlap, ltors, lneighij,lfixnow
 
-      integer(KIND=normal_int)::i,j,k,iii,ibox,iunit,igrow,icbu,islen
-     & ,imolty,iutry
-      integer(KIND=normal_int)::istt,iett,nchp1,ic,total,bin
-     & ,count,findex,iw
+      integer(KIND=normal_int)::i,j,k,iii,ibox,iunit,igrow,icbu,islen ,imolty,iutry
+      integer(KIND=normal_int)::istt,iett,nchp1,ic,total,bin ,count,findex,iw
       integer(KIND=normal_int)::ddum,ip
 
       dimension ddum(27)
 
-      real(KIND=double_precision)::v,vintra,vinter,vext,velect,vewald
-     & ,vtorold,vtornew,delen,deleo,vdum,wplace,wrig
-      real(KIND=double_precision)::dchain,random,rchain,wnlog,wolog
-     & ,wdlog,wratio
+      real(KIND=double_precision)::v,vintra,vinter,vext,velect,vewald ,vtorold,vtornew,delen,deleo,vdum,wplace,wrig
+      real(KIND=double_precision)::dchain,random,rchain,wnlog,wolog ,wdlog,wratio
       real(KIND=double_precision)::vrecipn,vrecipo,cwtorfo,cwtorfn,x,y,z
 
 ! ------------------------------------------------------------------
@@ -67,8 +63,7 @@
          end if
       end do
 
-      if ((lexpee).and.(imolty.ge.nmolty1))
-     &   imolty = ee_moltyp(mstate)
+      if ((lexpee).and.(imolty.ge.nmolty1)) imolty = ee_moltyp(mstate)
                                                                                 
       if (temtyp(imolty).eq.0) return
 
@@ -130,8 +125,7 @@
 !      end if
 
 !     --- grow new chain conformation
-      call rosenbluth ( .true., lterm,i,i,imolty,islen,ibox,igrow
-     &     ,vdum,lfixnow,cwtorfn,1 )
+      call rosenbluth ( .true., lterm,i,i,imolty,islen,ibox,igrow ,vdum,lfixnow,cwtorfn,1 )
  
 ! --- termination of cbmc attempt due to walk termination ---
       if ( lterm ) then 
@@ -153,13 +147,11 @@
 
 
 !     --- grow old chain conformation
-      call rosenbluth ( .false.,lterm,i,i,imolty,islen,ibox,igrow
-     &     ,vdum,lfixnow,cwtorfo,1)
+      call rosenbluth ( .false.,lterm,i,i,imolty,islen,ibox,igrow ,vdum,lfixnow,cwtorfo,1)
 
 !     --- termination of old walk due to problems generating orientations
       if ( lterm ) then
-         write(iou,*) 'CONFIG:old growth rejected in box',ibox
-     &    ,' for moltyp',imolty
+         write(iou,*) 'CONFIG:old growth rejected in box',ibox ,' for moltyp',imolty
          return
       end if
 
@@ -185,8 +177,7 @@
 ! -----------------------------------------------------------------------------
 !     Begin DC-CBMC, Explicit Atom and Ewald-sum Corrections 
 
-      if ( ldual .or. lewald .or. iunit .ne. igrow 
-     &     .or. ((.not. lchgall) .and. lelect(imolty)) ) then
+      if ( ldual .or. lewald .or. iunit .ne. igrow  .or. ((.not. lchgall) .and. lelect(imolty)) ) then
 !     --- Put on hydrogens for explicit AA model for calculation of COM
 !     --- and assign all of the grown new and old beads to rxuion
 !     --- with old = 1, new = 2
@@ -232,8 +223,7 @@
          end if
       end if
 
-      if (ldual .or. ((.not. lchgall) .and. lelect(imolty))
-     &     .or. (lchgall .and. lewald .and. (.not. ldual))) then
+      if (ldual .or. ((.not. lchgall) .and. lelect(imolty)) .or. (lchgall .and. lewald .and. (.not. ldual))) then
          istt = 1
          iett = igrow
 
@@ -243,9 +233,7 @@
 !          iii = 1 old conformation
 !          iii = 2 new conformation
             
-            call energy (i,imolty,v,vintra,vinter,vext,velect
-     &           ,vewald,iii,ibox,istt,iett,.true.,ovrlap,
-     &           .false.,vdum,.false.,.false.)
+            call energy (i,imolty,v,vintra,vinter,vext,velect ,vewald,iii,ibox,istt,iett,.true.,ovrlap, .false.,vdum,.false.,.false.)
 
             if (ovrlap .and. (iii .eq. 1)) then
 !            if (ovrlap) then
@@ -254,8 +242,7 @@
             end if
 
             if (iii .eq. 2) then
-               delen = ( vnewinter + vnewext + vnewelect +
-     &              vnewewald + vnewintra) 
+               delen = ( vnewinter + vnewext + vnewelect + vnewewald + vnewintra) 
                if (lstagea) then
                   delen = (1.0d0-(1.0d0-etais)*lambdais)*delen
                elseif (lstageb) then
@@ -282,8 +269,7 @@
                vnewintra = vintra
                vnewewald = vewald
             else
-               deleo = ( voldinter + voldext + voldelect +
-     &              voldewald + voldintra) 
+               deleo = ( voldinter + voldext + voldelect + voldewald + voldintra) 
                if (lstagea) then
                   deleo = (1.0d0-(1.0d0-etais)*lambdais)*deleo
                elseif (lstageb) then
@@ -332,9 +318,7 @@
             end if
 
 ! Calculate the energy of the non-backbone beads 
-            call energy (i,imolty,v,vintra,vinter,vext,velect
-     &           ,vewald,iii,ibox,istt,iett, .true.,ovrlap
-     &           ,ltors,vtorold,.true.,.false.)
+            call energy (i,imolty,v,vintra,vinter,vext,velect ,vewald,iii,ibox,istt,iett, .true.,ovrlap ,ltors,vtorold,.true.,.false.)
 
             if (iii .eq. 2) then
                if (ovrlap) return
@@ -353,8 +337,7 @@
                vnewewald = vnewewald + vewald
             else
                if (ovrlap) then
-                  write(iou,*) 'ovrlap problem in old confomation',
-     &                 ' - CONFIG'
+                  write(iou,*) 'ovrlap problem in old confomation', ' - CONFIG'
                   return
                end if
                deleo = v + vtorold
@@ -414,8 +397,7 @@
  
       if (lfixnow) then
          wratio = weight * cwtorfo / ( weiold * cwtorfn)
-         fbscb(imolty,1,findex-1) = 
-     &        fbscb(imolty,1,findex-1) + 1.0d0
+         fbscb(imolty,1,findex-1) =  fbscb(imolty,1,findex-1) + 1.0d0
       else
          wratio = weight / weiold
          bscb(imolty,1,total) = bscb(imolty,1,total) + 1.0d0
@@ -425,8 +407,7 @@
 !         write(iou,*) 'CONFIG accepted',i,ibox
 !        --- we can now accept !!!!! ***
          if (lfixnow) then
-            fbscb(imolty,2,findex-1) = fbscb(imolty,2,findex-1) 
-     &           + 1.0d0
+            fbscb(imolty,2,findex-1) = fbscb(imolty,2,findex-1)  + 1.0d0
          else
             bscb(imolty,2,total) = bscb(imolty,2,total) + 1.0d0
          end if
@@ -439,8 +420,7 @@
          vtgb(ibox)    = vtgb(ibox)    + (vnewtg- voldtg)
          vextb(ibox)   = vextb(ibox)   + (vnewext - voldext)
          vbendb(ibox)  = vbendb(ibox)  + (vnewbb - voldbb)
-         velectb(ibox) = velectb(ibox) + (vnewelect - voldelect)
-     &        + (vnewewald - voldewald)
+         velectb(ibox) = velectb(ibox) + (vnewelect - voldelect) + (vnewewald - voldewald)
          vipswb(ibox) = vipswb(ibox) + (vipswn-vipswo)
          vwellipswb(ibox) = vwellipswb(ibox) + (vwellipswn-vwellipswo)
          vipsw = vipswb(ibox)

@@ -15,12 +15,9 @@
 !$$$      include 'coord.inc'
 !$$$      include 'system.inc'      
 
-      integer(KIND=normal_int)::i,j,k,n,ncellx,ncelly,ncellz,iinit,ibox
-     & ,linkdecode,imol,ic,cellinc(27),ia,ja,ka,ib,jb,kb,count,ncell
-     & ,ncello
+      integer(KIND=normal_int)::i,j,k,n,ncellx,ncelly,ncellz,iinit,ibox ,linkdecode,imol,ic,cellinc(27),ia,ja,ka,ib,jb,kb,count,ncell ,ncello
 
-      real(KIND=double_precision)::dcellx,dcelly,dcellz,rx,ry,rz,xcmi
-     & ,ycmi,zcmi
+      real(KIND=double_precision)::dcellx,dcelly,dcellz,rx,ry,rz,xcmi ,ycmi,zcmi
 
 !     *** rintramax is the maximum distance between endpoints 
 !     *** in a molecule
@@ -110,8 +107,7 @@
                nicell(ic) = nicell(ic) + 1
 
                if (nicell(ic).gt.cmaxa) then
-                  write(iou,*) 'nicell,cmaxa',nicell(ic)
-     &                 ,cmaxa
+                  write(iou,*) 'nicell,cmaxa',nicell(ic) ,cmaxa
                   call cleanup('nicell gt cmaxa')
                end if
 

@@ -33,12 +33,8 @@
 !$$$      include 'eepar.inc'
 
       logical::lx,ly,lz,ovrlap,lneighij
-      integer(KIND=normal_int)::i,ibox,flagon,iunit,j,imolty,iuroty,icbu
-     & ,ic,ip
-      real(KIND=double_precision)::rx,ry,rz,dchain,rchain,random,vnew
-     & ,vold,vintrao,dgamma,rxorig,ryorig,rzorig,rxnew2,rynew2,rznew2
-     & ,vintran,disvsq,deltv,deltvb,vintern,vintero,vextn,vexto,vdum
-     & ,velectn,velecto
+      integer(KIND=normal_int)::i,ibox,flagon,iunit,j,imolty,iuroty,icbu ,ic,ip
+      real(KIND=double_precision)::rx,ry,rz,dchain,rchain,random,vnew ,vold,vintrao,dgamma,rxorig,ryorig,rzorig,rxnew2,rynew2,rznew2 ,vintran,disvsq,deltv,deltvb,vintern,vintero,vextn,vexto,vdum ,velectn,velecto
 ! *** further variable definitions
       real(KIND=double_precision)::cosdg, sindg, rmrot
       real(KIND=double_precision)::vrecipn,vrecipo
@@ -83,8 +79,7 @@
             end if
          end do
 
-         if ((lexpee).and.(imolty.ge.nmolty1))
-     &      imolty = ee_moltyp(mstate)
+         if ((lexpee).and.(imolty.ge.nmolty1)) imolty = ee_moltyp(mstate)
                                                                                 
          if (temtyp(imolty).eq.0) return
          
@@ -212,19 +207,14 @@
 !  *** calculate the energy of i in the new configuration ***
 
       flagon = 2
-      call energy(i,imolty, vnew,vintran,vintern,vextn,velectn,vdum
-     &     ,flagon, ibox,1,iunit,.false.,ovrlap,.false.,vdum,
-     &     .false.,.false.)
+      call energy(i,imolty, vnew,vintran,vintern,vextn,velectn,vdum ,flagon, ibox,1,iunit,.false.,ovrlap,.false.,vdum, .false.,.false.)
       if (ovrlap) return
  
 ! *** calculate the energy of i in the old configuration ***
       flagon = 1
-      call energy(i,imolty, vold,vintrao,vintero,vexto,velecto,vdum
-     &     ,flagon,ibox, 1, iunit,.false.,ovrlap,.false.,vdum,
-     &     .false.,.false.)
+      call energy(i,imolty, vold,vintrao,vintero,vexto,velecto,vdum ,flagon,ibox, 1, iunit,.false.,ovrlap,.false.,vdum, .false.,.false.)
 
-      if (ovrlap) call cleanup('disaster- overlap for
-     &                      old conf in ROTXYZ')
+      if (ovrlap) call cleanup('disaster- overlap for old conf in ROTXYZ')
       if ( lewald .and. lelect(imolty) ) then
          call recip(ibox,vrecipn,vrecipo,1)
          velectn = velectn + vrecipn
@@ -253,9 +243,7 @@
 ! *** For ANES algorithm, do the Fluctuating charge moves.
 
       if ( lanes ) then
-         call anes(i,ibox,ibox,2,laccept,deltv,vintern,vintran,vextn,
-     &        velectn,vintero,vintrao,vexto,velecto,vdum,vdum,vdum,
-     &        vdum,.false.)
+         call anes(i,ibox,ibox,2,laccept,deltv,vintern,vintran,vextn, velectn,vintero,vintrao,vexto,velecto,vdum,vdum,vdum, vdum,.false.)
          if (laccept) then
             if (lx) bsrotx(imolty,ibox) = bsrotx(imolty,ibox) + 1.0d0
             if (ly) bsroty(imolty,ibox) = bsroty(imolty,ibox) + 1.0d0
@@ -315,17 +303,13 @@
          disvec(1,i,1) = disvec(1,i,1) + rxuion(1,2) - rxuion(1,1)
          disvec(1,i,2) = disvec(1,i,2) + ryuion(1,2) - ryuion(1,1)
          disvec(1,i,3) = disvec(1,i,3) + rzuion(1,2) - rzuion(1,1)
-         disvsq = disvec(1,i,1) * disvec(1,i,1) +
-     &        disvec(1,i,2) * disvec(1,i,2) +
-     &        disvec(1,i,3) * disvec(1,i,3)
+         disvsq = disvec(1,i,1) * disvec(1,i,1) + disvec(1,i,2) * disvec(1,i,2) + disvec(1,i,3) * disvec(1,i,3)
          if (disvsq .gt. upnnsq) call updnn( i )
 ! *** check for last unit ***
          disvec(2,i,1) = disvec(2,i,1)+rxuion(iunit,2)-rxuion(iunit,1)
          disvec(2,i,2) = disvec(2,i,2)+ryuion(iunit,2)-ryuion(iunit,1)
          disvec(2,i,3) = disvec(2,i,3)+rzuion(iunit,2)-rzuion(iunit,1)
-         disvsq = disvec(2,i,1) * disvec(2,i,1) +
-     &        disvec(2,i,2) * disvec(2,i,2) +
-     &        disvec(2,i,3) * disvec(2,i,3)
+         disvsq = disvec(2,i,1) * disvec(2,i,1) + disvec(2,i,2) * disvec(2,i,2) + disvec(2,i,3) * disvec(2,i,3)
          if (disvsq .gt. upnnsq) call updnn( i )
       end if
 

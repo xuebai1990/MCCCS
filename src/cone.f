@@ -36,9 +36,7 @@
       real(KIND=double_precision)::x,y,z,alpha,gamma,ux,uy,uz
 
 !     --- local variables
-      real(KIND=double_precision)::a11,a12,a13,a21,a22,a31,a32,a33
-     &     ,sinthe,costhe,sinpsi,cospsi,singamma,cosgamma
-     &     ,uxtemp,uytemp,uztemp,sinalph,cosalph
+      real(KIND=double_precision)::a11,a12,a13,a21,a22,a31,a32,a33 ,sinthe,costhe,sinpsi,cospsi,singamma,cosgamma ,uxtemp,uytemp,uztemp,sinalph,cosalph
       real(KIND=double_precision)::determ,arccos
       save a11,a12,a13,a21,a22,a31,a32,a33,cosalph,sinalph
 
@@ -109,20 +107,11 @@
 !        --- use cramer's rule where a23 has already been replaced with 0
 !        --- we don't need the uztemp so it is not computed
 
-         determ = 
-     &        ( a11*a22*a33
-     &        + a21*(a32*a13 - a12*a33)
-     &        - a31*a22*a13 )
+         determ =  ( a11*a22*a33 + a21*(a32*a13 - a12*a33) - a31*a22*a13 )
 
-         uxtemp =  
-     &        ( ux*a22*a33
-     &        + a21*(a32*uz - uy*a33)
-     &        - a31*a22*uz ) / determ
+         uxtemp =   ( ux*a22*a33 + a21*(a32*uz - uy*a33) - a31*a22*uz ) / determ
 
-         uytemp = 
-     &        ( a11*(uy*a33 - a32*uz)
-     &        + ux*(a32*a13 - a12*a33)
-     &        + a31*(a12*uz - uy*a13) ) / determ
+         uytemp =  ( a11*(uy*a33 - a32*uz) + ux*(a32*a13 - a12*a33) + a31*(a12*uz - uy*a13) ) / determ
 
          sinalph = dsin(alpha)
          singamma = uxtemp/sinalph

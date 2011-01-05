@@ -26,15 +26,11 @@
 !$$$      include 'mpi.inc'
 
       integer(KIND=normal_int)::ic,izz,ii,imolty,ibox,ncount,type
-      real(KIND=double_precision)::vrecipnew,vrecipold,sumr(2),sumi(2)
-     & ,arg       
+      real(KIND=double_precision)::vrecipnew,vrecipold,sumr(2),sumi(2) ,arg       
 ! RP added for MPI
       integer(KIND=normal_int)::mystart,myend,blocksize,i
-      real(KIND=double_precision)::ssumrn_arr(vectormax)
-     & ,ssumin_arr(vectormax),ssumrn_one(vectormax)
-     & ,ssumin_one(vectormax)
-      integer(KIND=normal_int)::countn,ncount_displs(numprocmax)
-     & ,ncount_arr(numprocmax)   
+      real(KIND=double_precision)::ssumrn_arr(vectormax) ,ssumin_arr(vectormax),ssumrn_one(vectormax) ,ssumin_one(vectormax)
+      integer(KIND=normal_int)::countn,ncount_displs(numprocmax) ,ncount_arr(numprocmax)   
     
 !      if (LSOLPAR.and.(ibox.eq.2))then
 !        return
@@ -83,13 +79,9 @@
                imolty = moltion(izz)
                do ii = 1, nunit(imolty)
                   if ( lqchg(ntype(imolty,ii)) ) then
-                     arg = kx(ic,ibox)*rxuion(ii,izz) +
-     &                    ky(ic,ibox)*ryuion(ii,izz) +
-     &                    kz(ic,ibox)*rzuion(ii,izz)
-                     sumr(izz) = sumr(izz) + 
-     &                    qquion(ii,izz)*dcos(arg)
-                     sumi(izz) = sumi(izz) + 
-     &                    qquion(ii,izz)*dsin(arg)
+                     arg = kx(ic,ibox)*rxuion(ii,izz) + ky(ic,ibox)*ryuion(ii,izz) + kz(ic,ibox)*rzuion(ii,izz)
+                     sumr(izz) = sumr(izz) +  qquion(ii,izz)*dcos(arg)
+                     sumi(izz) = sumi(izz) +  qquion(ii,izz)*dsin(arg)
                   end if
                end do
  20         continue
@@ -100,30 +92,21 @@
 
 
 ! RP added for MPI
-            ssumrn_arr(ic-mystart + 1) = ssumr(ic,ibox) - sumr(1)
-     &           + sumr(2)
-            ssumin_arr(ic-mystart + 1) = ssumi(ic,ibox) - sumi(1)
-     &           + sumi(2)
+            ssumrn_arr(ic-mystart + 1) = ssumr(ic,ibox) - sumr(1) + sumr(2)
+            ssumin_arr(ic-mystart + 1) = ssumi(ic,ibox) - sumi(1) + sumi(2)
 
  30      continue
         
-          CALL MPI_ALLGATHER(countn,1,MPI_INTEGER,ncount_arr,
-     &       1,MPI_INTEGER,MPI_COMM_WORLD,ierr)
+          CALL MPI_ALLGATHER(countn,1,MPI_INTEGER,ncount_arr, 1,MPI_INTEGER,MPI_COMM_WORLD,ierr)
          
          ncount_displs(1) = 0
          do i = 2,numprocs
            ncount_displs(i) = ncount_displs(i-1) + ncount_arr(i-1)    
          end do
 
-         CALL MPI_ALLGATHERV(ssumrn_arr,ncount_arr(myid + 1),
-     &     MPI_DOUBLE_PRECISION,
-     &     ssumrn_one,ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION,
-     &     MPI_COMM_WORLD,ierr)
+         CALL MPI_ALLGATHERV(ssumrn_arr,ncount_arr(myid + 1), MPI_DOUBLE_PRECISION, ssumrn_one,ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION, MPI_COMM_WORLD,ierr)
      
-        CALL MPI_ALLGATHERV(ssumin_arr,ncount_arr(myid+1),
-     &     MPI_DOUBLE_PRECISION,
-     &     ssumin_one,ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION,
-     &     MPI_COMM_WORLD,ierr)
+        CALL MPI_ALLGATHERV(ssumin_arr,ncount_arr(myid+1), MPI_DOUBLE_PRECISION, ssumin_one,ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION, MPI_COMM_WORLD,ierr)
      
        do i = 1,ncount
         ssumrn(i,ibox) = ssumrn_one(i)
@@ -133,12 +116,8 @@
          vrecipnew = 0.0d0
          vrecipold = 0.0d0
          do ic = 1,ncount
-            vrecipnew = vrecipnew + (ssumrn(ic,ibox)*
-     &           ssumrn(ic,ibox) + ssumin(ic,ibox)*
-     &           ssumin(ic,ibox))*prefact(ic,ibox)
-            vrecipold = vrecipold + (ssumr(ic,ibox)*
-     &           ssumr(ic,ibox) + ssumi(ic,ibox)*
-     &           ssumi(ic,ibox))*prefact(ic,ibox)
+            vrecipnew = vrecipnew + (ssumrn(ic,ibox)* ssumrn(ic,ibox) + ssumin(ic,ibox)* ssumin(ic,ibox))*prefact(ic,ibox)
+            vrecipold = vrecipold + (ssumr(ic,ibox)* ssumr(ic,ibox) + ssumi(ic,ibox)* ssumi(ic,ibox))*prefact(ic,ibox)
          end do
        
          vrecipnew = vrecipnew*qqfact

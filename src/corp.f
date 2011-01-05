@@ -25,8 +25,7 @@
 
       real(KIND=double_precision)::corp,rci3,rhosq, epsilon2, sigma2
       real(KIND=double_precision)::rci1
-      integer(KIND=normal_int)::imolty,jmolty,ii,jj, ntii, ntjj, ntij
-     & ,ibox
+      integer(KIND=normal_int)::imolty,jmolty,ii,jj, ntii, ntjj, ntij ,ibox
       corp = 0.0d0
 
       do ii = 1, nunit(imolty) 
@@ -40,22 +39,17 @@
                corp = corp + rhosq*consp(ntij)
             elseif (lmmff) then
                ntij = (ntii+ntjj)/2
-               corp = corp+((-2.0d0)/3.0d0)*onepi*rhosq*epsimmff(ntij)
-     &              *sigimmff(ntij)**3.0d0*corp_cons(ntij)
+               corp = corp+((-2.0d0)/3.0d0)*onepi*rhosq*epsimmff(ntij) *sigimmff(ntij)**3.0d0*corp_cons(ntij)
             elseif (lninesix) then
                ntij = (ntii-1)*nxatom + ntjj
-               corp = corp + 16.0d0 * onepi * epsnx(ntij) *
-     &            rhosq * rzero(ntij)**3 * 
-     &            (0.5d0*(rzero(ntij)/rcut(ibox))**6 - 
-     &            (rzero(ntij)/rcut(ibox))**3)
+               corp = corp + 16.0d0 * onepi * epsnx(ntij) * rhosq * rzero(ntij)**3 *  (0.5d0*(rzero(ntij)/rcut(ibox))**6 -  (rzero(ntij)/rcut(ibox))**3)
             elseif (lgenlj) then
                ntij = (ntii-1)*nntype + ntjj
                rci3 = sig2ij(ntij)**(3.0d0/2.0d0) / rcut(ibox)**3
                rci1 = rci3 **(1.0d0/3.0d0)
                if ( lexpand(imolty) .and. lexpand(jmolty) ) then
                   sigma2 = (sigma(imolty,ii)+sigma(jmolty,jj))**2/4.0d0
-                  epsilon2 = dsqrt(epsilon(imolty,ii)
-     &                 *epsilon(jmolty,jj))
+                  epsilon2 = dsqrt(epsilon(imolty,ii) *epsilon(jmolty,jj))
                elseif ( lexpand(imolty) ) then
                   sigma2 = (sigma(imolty,ii)+sigi(ntjj))**2/4.0d0
                   epsilon2 = dsqrt(epsilon(imolty,ii)*epsi(ntjj))
@@ -66,21 +60,14 @@
                   sigma2 = sig2ij(ntij)
                   epsilon2 = epsij(ntij)
                end if
-                 corp = corp
-     &  + (2.0d0/3.0d0) * onepi * epsilon2 * sigma2 ** (1.50d0)
-     &    * rhosq * n1 *
-     &   ( (( (2.0d0**((4.0d0*n1/n0)+1.0d0))/(2.0d0*n1-3.0d0)) *
-     & rci1 **(2.0d0*n1-3.0d0) ) -
-     &   ( ((2.0d0**((2.0d0*n1/n0)+1.0d0))/(n1-3.0d0))*
-     & rci1 **(n1-3.0d0) )  )
+                 corp = corp + (2.0d0/3.0d0) * onepi * epsilon2 * sigma2 ** (1.50d0) * rhosq * n1 * ( (( (2.0d0**((4.0d0*n1/n0)+1.0d0))/(2.0d0*n1-3.0d0)) * rci1 **(2.0d0*n1-3.0d0) ) - ( ((2.0d0**((2.0d0*n1/n0)+1.0d0))/(n1-3.0d0))* rci1 **(n1-3.0d0) )  )
             else
                ntij = (ntii-1)*nntype + ntjj
                
                rci3 = sig2ij(ntij)**(3.d0/2.d0) / rcut(ibox)**3 
                if ( lexpand(imolty) .and. lexpand(jmolty) ) then
                   sigma2 = (sigma(imolty,ii)+sigma(jmolty,jj))**2/4.0d0
-                  epsilon2 = dsqrt(epsilon(imolty,ii)*
-     &                 epsilon(jmolty,jj))
+                  epsilon2 = dsqrt(epsilon(imolty,ii)* epsilon(jmolty,jj))
                elseif ( lexpand(imolty) ) then
                   sigma2 = (sigma(imolty,ii)+sigi(ntjj))**2/4.0d0
                   epsilon2 = dsqrt(epsilon(imolty,ii)*epsi(ntjj))
@@ -91,9 +78,7 @@
                   sigma2 = sig2ij(ntij)
                   epsilon2 = epsij(ntij)
                end if
-               corp = corp + 
-     &          32.0d0 * onepi * epsilon2 * sigma2**(1.5d0)*
-     &          rhosq * ( rci3*rci3*rci3 / 9.0d0 - rci3 / 6.0d0 )
+               corp = corp +  32.0d0 * onepi * epsilon2 * sigma2**(1.5d0)* rhosq * ( rci3*rci3*rci3 / 9.0d0 - rci3 / 6.0d0 )
             end if
          end do
       end do

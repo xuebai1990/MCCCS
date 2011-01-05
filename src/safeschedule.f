@@ -59,23 +59,17 @@
 
       logical::lcount,lpick,lterm,lfixed,lfix,lfind
 
-      integer(KIND=normal_int)::igrow,imolty,count,counta,iw,ivib,iv,iu
-     & ,ju,iutry
-      integer(KIND=normal_int)::j,ja,kickout,invtry,index,fintnum,fint,k
-     & ,islen
-      integer(KIND=normal_int)::ffrom,fprev,flist,fnum,fnuma,findex
-     & ,countb,iv1
-      integer(KIND=normal_int)::movetype,fmaxgrow,kickouta,iufrom
-     & ,iuprev
+      integer(KIND=normal_int)::igrow,imolty,count,counta,iw,ivib,iv,iu ,ju,iutry
+      integer(KIND=normal_int)::j,ja,kickout,invtry,index,fintnum,fint,k ,islen
+      integer(KIND=normal_int)::ffrom,fprev,flist,fnum,fnuma,findex ,countb,iv1
+      integer(KIND=normal_int)::movetype,fmaxgrow,kickouta,iufrom ,iuprev
       integer(KIND=normal_int)::num,inum,inuma,max
 
       parameter(max=10)
 
       real(KIND=double_precision)::random
 
-      dimension fint(numax),ffrom(numax,max),fprev(numax,max)
-     & ,flist(numax,max,max),fnum(numax),fnuma(numax,max) ,lpick(numax)
-     & ,lfix(numax),inum(max),inuma(max),lfind(numax)
+      dimension fint(numax),ffrom(numax,max),fprev(numax,max) ,flist(numax,max,max),fnum(numax),fnuma(numax,max) ,lpick(numax) ,lfix(numax),inum(max),inuma(max),lfind(numax)
 
 !     --------------------------------------------------------------------
       
@@ -86,8 +80,7 @@
 !     --- set begining conditions
       if (movetype.eq.2) then
          if (.not.lring(imolty)) then
-            call cleanup('you can not use safecbmc for swap
-     &                unless it is a ring')
+            call cleanup('you can not use safecbmc for swap unless it is a ring')
          end if
          fmaxgrow = nunit(imolty)
       else
@@ -158,8 +151,7 @@
 ! --- OLD WAY   
 !         iutry = int( random() * dble(iring(imolty)) ) + 1
 ! --- NEW WAY - picks between icbsta and last unit of chain
-         iutry = int( random() * dble(iring(imolty)+icbsta(imolty)))+1
-     &        -icbsta(imolty)
+         iutry = int( random() * dble(iring(imolty)+icbsta(imolty)))+1 -icbsta(imolty)
 
 ! --- need the following of scheduler gets confused!
          if (lrplc(imolty)) then
@@ -208,8 +200,7 @@
 ! --- END JLR 11-11-09
 
 
-            if (fprev(1,1).gt.iring(imolty)
-     &           .or.lplace(imolty,fprev(1,1))) then
+            if (fprev(1,1).gt.iring(imolty) .or.lplace(imolty,fprev(1,1))) then
                kickout = kickout + 1
                goto 100
             end if
@@ -217,8 +208,7 @@
          ffrom(1,1) = iutry
          count = 0
          do iv = 1, invtry
-            if (iv.ne.ivib.and.
-     &           .not.lplace(imolty,ijvib(imolty,iutry,iv))) then
+            if (iv.ne.ivib.and. .not.lplace(imolty,ijvib(imolty,iutry,iv))) then
                count = count + 1
                flist(1,1,count) = ijvib(imolty,iutry,iv)
                lexshed(flist(1,1,count)) = .false.
@@ -241,13 +231,10 @@
                counta = 0
                lcount = .false.
                iu = flist(iw-1,j,ja)
-               if (.not. (lfix(iu).and.lfixed).and.
-     &              .not.lrigi(imolty,iu)) then
+               if (.not. (lfix(iu).and.lfixed).and. .not.lrigi(imolty,iu)) then
                   do iv = 1, invib(imolty,iu)
                      ju = ijvib(imolty,iu,iv)
-                     if (ju.ne.ffrom(iw-1,j).and.
-     &                    .not.(lplace(imolty,ju).and.
-     &                    iu.le.iring(imolty))) then
+                     if (ju.ne.ffrom(iw-1,j).and. .not.(lplace(imolty,ju).and. iu.le.iring(imolty))) then
                         if (lfixed) then
                            if (ju.gt.iring(imolty)) then
                               counta = counta + 1
@@ -366,8 +353,7 @@
       count = 0
       do j = 1, fnum(findex)
          do ja = 1, fnuma(findex,j)
-            if (flist(findex,j,ja).le.iring(imolty)
-     &           .and..not.lplace(imolty,flist(findex,j,ja))) then
+            if (flist(findex,j,ja).le.iring(imolty) .and..not.lplace(imolty,flist(findex,j,ja))) then
                count = count + 1
                iend(count) = flist(findex,j,ja)
                counta = 0
@@ -633,8 +619,7 @@
 !     ****** take out return for diagnostics ************
 
       do iw = 1, islen
-         write(iou,*) growfrom(iw),(growlist(iw,count),count=1
-     &        ,grownum(iw))
+         write(iou,*) growfrom(iw),(growlist(iw,count),count=1 ,grownum(iw))
 
       end do
 

@@ -1,5 +1,4 @@
-      subroutine safecbmc(iinit,lnew,i,iw,igrow,imolty,count
-     &     ,ux,uy,uz,vphi,vtor,wei_bv,lterm,movetype)
+      subroutine safecbmc(iinit,lnew,i,iw,igrow,imolty,count ,ux,uy,uz,vphi,vtor,wei_bv,lterm,movetype)
 
 !     **************************************************************
 !     **   Finshes the last two steps for Fixed Endpoint CBMC     **
@@ -36,40 +35,19 @@
 
       logical::lnew,lshit,lterm,ldo,lreturn
 
-      integer(KIND=normal_int)::igrow,imolty,count,counta,j,ja,ivib,iufrom,iuprev
-     &     ,iinit,iu,ju,ku,i,iv,juvib,jtvib,type,iu2,ib,iw,ntogrow
-     &     ,itor,ip,ichoi,ichtor,countb,bin,max,nu,iu1,dir,diracc
-     &     ,start,nchben_a,nchben_b,ibend,iopen,last,iclose,nchvib
+      integer(KIND=normal_int)::igrow,imolty,count,counta,j,ja,ivib,iufrom,iuprev ,iinit,iu,ju,ku,i,iv,juvib,jtvib,type,iu2,ib,iw,ntogrow ,itor,ip,ichoi,ichtor,countb,bin,max,nu,iu1,dir,diracc ,start,nchben_a,nchben_b,ibend,iopen,last,iclose,nchvib
 
       integer(KIND=normal_int)::jttor,it,jut2,jut3,jut4,movetype,lu,k,opencount
 
-      real(KIND=double_precision)::vdha,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2,dot
-     &     ,daa1,da1a2,phicrank,bf_tor,vtorsion,vbend,rbf
-     &     ,vtorso,ran_tor,bs,ang_bend,bfactor,bsum_bend,wei_bv
-     &     ,bsum_try,third,vibtr,lengthc
+      real(KIND=double_precision)::vdha,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2,dot ,daa1,da1a2,phicrank,bf_tor,vtorsion,vbend,rbf ,vtorso,ran_tor,bs,ang_bend,bfactor,bsum_bend,wei_bv ,bsum_try,third,vibtr,lengthc
 
 !     *** to conserve memory, max is the maximum number of endpoints
 !     *** possible in place of numax
       parameter(max=10)
 
-      real(KIND=double_precision)::flength,x,y,z,equil,kforce,length
-     &     ,vvib,equilb,kforceb,ux,uy,uz,hdist,lengtha,lengthb
-     &     ,vtor,vphi,thetac,angle,equila,kforcea,ovphi
-     &     ,alpha,twopi,phidisp,dum,random2,rxt,ryt,rzt
-     &     ,phiacc,rxa,rya,rza,angles,bangles,vctor
-     &     ,r,mincb,delcb,vkforce,vequil,vvibration,ovvib
+      real(KIND=double_precision)::flength,x,y,z,equil,kforce,length ,vvib,equilb,kforceb,ux,uy,uz,hdist,lengtha,lengthb ,vtor,vphi,thetac,angle,equila,kforcea,ovphi ,alpha,twopi,phidisp,dum,random2,rxt,ryt,rzt ,phiacc,rxa,rya,rza,angles,bangles,vctor ,r,mincb,delcb,vkforce,vequil,vvibration,ovvib
 
-      dimension flength(numax,numax),alpha(max,numax)
-     &     ,equilb(numax,numax),kforceb(numax,numax),equila(max)
-     &     ,rxa(max,max),rya(max,max),rza(max,max)
-     &     ,rxt(max),ryt(max),rzt(max),vbend(2*nchtor_max)
-     &     ,phicrank(2*nchtor_max,max),phiacc(max)
-     &     ,vtorsion(2*nchtor_max),bf_tor(2*nchtor_max)
-     &     ,dir(2*nchtor_max,max),diracc(max),kforcea(max)
-     &     ,bfactor(nchbn_max),ang_bend(nchbn_max),angles(3)
-     &     ,bangles(max,3),iopen(2),r(nchbn_max)
-     &     ,vkforce(numax,numax),vequil(numax,numax)
-     &     ,vvibration(2*nchtor_max)
+      dimension flength(numax,numax),alpha(max,numax) ,equilb(numax,numax),kforceb(numax,numax),equila(max) ,rxa(max,max),rya(max,max),rza(max,max) ,rxt(max),ryt(max),rzt(max),vbend(2*nchtor_max) ,phicrank(2*nchtor_max,max),phiacc(max) ,vtorsion(2*nchtor_max),bf_tor(2*nchtor_max) ,dir(2*nchtor_max,max),diracc(max),kforcea(max) ,bfactor(nchbn_max),ang_bend(nchbn_max),angles(3) ,bangles(max,3),iopen(2),r(nchbn_max) ,vkforce(numax,numax),vequil(numax,numax) ,vvibration(2*nchtor_max)
 
       save kforceb,equilb,flength,vequil,vkforce
 
@@ -186,8 +164,7 @@
                      else
                         if (lnew) then
 !     --- compute new bond length
-                           call bondlength(jtvib,equil,kforce,beta,
-     &                          length,vvib)
+                           call bondlength(jtvib,equil,kforce,beta, length,vvib)
                            flength(iu,ju) = length
 
                         else
@@ -279,8 +256,7 @@
                            
                            if (lnew) then
 !     --- compute new bond length
-                              call bondlength(jtvib,equil,kforce,beta
-     &                             ,length,vvib)
+                              call bondlength(jtvib,equil,kforce,beta ,length,vvib)
                               flength(ju,ku) = length
                            else
 !     --- compute old bond length
@@ -348,8 +324,7 @@
                   
                   hdist = dsqrt( x**2 + y**2 + z**2 )
 !     --- use law of cosines to calculate bond angle
-                  thetac = (lengtha**2 + lengthb**2 - hdist**2) / (2.0d0
-     &                 * lengtha * lengthb)
+                  thetac = (lengtha**2 + lengthb**2 - hdist**2) / (2.0d0 * lengtha * lengthb)
                   
 !     --- check to make sure this will give a number
                   
@@ -361,8 +336,7 @@
                   end if
                   angle = dacos(thetac)
                   
-                  ovphi = ovphi + kforceb(iufrom,ju) * (angle -
-     &                 equilb(iufrom,ju))**2
+                  ovphi = ovphi + kforceb(iufrom,ju) * (angle - equilb(iufrom,ju))**2
              
 !                  write(iou,*) iufrom,iu,ju,kforceb(iufrom,ju)*(angle
 !     &                 - equilb(iufrom,ju))**2
@@ -438,8 +412,7 @@
                   
 !     --- use law of cosines to calculate bond angle
 
-                  thetac = (lengtha**2 + lengthb**2 - hdist**2) / (2
-     &                 .0d0 * lengtha * lengthb)
+                  thetac = (lengtha**2 + lengthb**2 - hdist**2) / (2 .0d0 * lengtha * lengthb)
                   
 !     --- check to make sure this will give a number
 
@@ -450,8 +423,7 @@
                   end if
                   angle = dacos( thetac )
                   
-                  vphi = vphi + kforceb(iu,ku) * ( angle - equilb(iu,ku)
-     &                 )**2
+                  vphi = vphi + kforceb(iu,ku) * ( angle - equilb(iu,ku) )**2
                   
  175              continue
 
@@ -579,8 +551,7 @@
                      yvec(iufrom,ju) = ryu(i,ju) - ryu(i,iufrom)
                      zvec(iufrom,ju) = rzu(i,ju) - rzu(i,iufrom)
                   end if
-                  hdist = dsqrt( xvec(iufrom,ju)**2 + yvec(iufrom,ju)**2
-     &                 + zvec(iufrom,ju)**2 )
+                  hdist = dsqrt( xvec(iufrom,ju)**2 + yvec(iufrom,ju)**2 + zvec(iufrom,ju)**2 )
                   
 !     --- normalize these distances to one for cone
                   xvec(iufrom,ju) = xvec(iufrom,ju) / hdist
@@ -592,8 +563,7 @@
                   lengtha = flength(iufrom,iu) 
                   lengthb = flength(iu,ju)
                   
-                  thetac = (lengtha**2 + hdist**2 - lengthb**2) / (2.0d0
-     &                 * lengtha * hdist)
+                  thetac = (lengtha**2 + hdist**2 - lengthb**2) / (2.0d0 * lengtha * hdist)
                                     
                   if (abs(thetac).gt.1.0d0) then
                      vphi = 0
@@ -681,10 +651,8 @@
                       
                         do ivib = start, nchvib
                            
-                           r(ivib) = (mincb 
-     &                          + random2()*delcb)**third
-                           vvib = kforce * 
-     &                          ( r(ivib) - equil )**2
+                           r(ivib) = (mincb  + random2()*delcb)**third
+                           vvib = kforce *  ( r(ivib) - equil )**2
                            bfactor(ivib) = dexp(-beta*vvib)
                            bsum_try = bsum_try + bfactor(ivib)
                         end do
@@ -719,8 +687,7 @@
                         
                         if (lnew) then
 !     --- compute new bond length
-                           call bondlength(jtvib,equil,kforce,beta,
-     &                          length,vvib)
+                           call bondlength(jtvib,equil,kforce,beta, length,vvib)
                            flength(iufrom,iu) = length
                         else
 !     --- compute old bond length
@@ -742,13 +709,7 @@
                   lengtha = flength(iufrom,iu)
                   lengthb = distij(iufrom,iuprev)
                 
-                  thetac = -( (rxu(i,iu) - rxu(i,iufrom))
-     &                 * xvec(iuprev,iufrom) 
-     &                 + (ryu(i,iu) - ryu(i,iufrom))
-     &                 * yvec(iuprev,iufrom)
-     &                 + (rzu(i,iu) - rzu(i,iufrom))
-     &                 * zvec(iuprev,iufrom)) 
-     &                 / (lengtha*lengthb)
+                  thetac = -( (rxu(i,iu) - rxu(i,iufrom)) * xvec(iuprev,iufrom)  + (ryu(i,iu) - ryu(i,iufrom)) * yvec(iuprev,iufrom) + (rzu(i,iu) - rzu(i,iufrom)) * zvec(iuprev,iufrom))  / (lengtha*lengthb)
                   
                   angle = dacos(thetac)
                   vphi =  kforcea(count) * (angle-equila(count))**2
@@ -835,13 +796,7 @@
                         
                         lengthb = flength(iufrom,ju)
                         
-                        thetac = ( (rxu(i,ju) - rxu(i,iufrom))
-     &                       * (rxu(i,iu) - rxu(i,iufrom))
-     &                       + (ryu(i,ju) - ryu(i,iufrom))
-     &                       * (ryu(i,iu) - ryu(i,iufrom))
-     &                       + (rzu(i,ju) - rzu(i,iufrom))
-     &                       * (rzu(i,iu) - rzu(i,iufrom)))
-     &                       / (lengtha * lengthb)
+                        thetac = ( (rxu(i,ju) - rxu(i,iufrom)) * (rxu(i,iu) - rxu(i,iufrom)) + (ryu(i,ju) - ryu(i,iufrom)) * (ryu(i,iu) - ryu(i,iufrom)) + (rzu(i,ju) - rzu(i,iufrom)) * (rzu(i,iu) - rzu(i,iufrom))) / (lengtha * lengthb)
 
                         angle = dacos(thetac)
                         
@@ -881,8 +836,7 @@
                            bs = bs + bfactor(ibend)
                            if (rbf.lt.bs) then
                               bangles(count,2) = ang_bend(ibend)
-                              ovphi = ovphi 
-     &                             + dlog(bfactor(ibend))/(-beta)
+                              ovphi = ovphi  + dlog(bfactor(ibend))/(-beta)
 
 !                              write(iou,*) 'd',iu,iufrom,ju
 !     &                             ,dlog(bfactor(ibend))/(-beta)
@@ -923,13 +877,11 @@
                countb = 0
                lshit = .false.
 
-               if (lnew.and.ip.eq.19
-     &              .and.itor.eq.122) then
+               if (lnew.and.ip.eq.19 .and.itor.eq.122) then
                   lshit = .true.
                end if
 
-               if (.not.lnew
-     &              .and.ip.eq.1.and.itor.eq.1) then
+               if (.not.lnew .and.ip.eq.1.and.itor.eq.1) then
                   lshit = .true.
                end if
 
@@ -950,12 +902,10 @@
 !     --- set up cone     
 
                      ju = fclose(iu,1)
-                     call cone(1, xvec(iufrom,ju),yvec(iufrom,ju)
-     &                    ,zvec(iufrom,ju),dum,dum,dum,dum,dum)
+                     call cone(1, xvec(iufrom,ju),yvec(iufrom,ju) ,zvec(iufrom,ju),dum,dum,dum,dum,dum)
 
 !     --- determine phidisp
-                     if (.not.lnew.and.ip.eq.1.and
-     &                    .itor.eq.1) then
+                     if (.not.lnew.and.ip.eq.1.and .itor.eq.1) then
 !     --- give old unit vector for connection
                         xx(count) = rxu(i,iu) - rxu(i,iufrom)
                         yy(count) = ryu(i,iu) - ryu(i,iufrom)
@@ -968,8 +918,7 @@
                      else
                         phidisp = twopi*random2()
                            
-                        call cone(2,dum,dum,dum,alpha(count,ju)
-     &                       ,phidisp,x,y,z)
+                        call cone(2,dum,dum,dum,alpha(count,ju) ,phidisp,x,y,z)
                         
                         phicrank(itor,count) = phidisp  
                         
@@ -1047,9 +996,7 @@
                               
                            hdist = dsqrt( x**2 + y**2 + z**2 )
 !     --- use law of cosines to calculate bond angle
-                           thetac = (lengtha**2 + lengthb**2 
-     &                          - hdist**2)
-     &                          / (2.0d0 * lengtha * lengthb)
+                           thetac = (lengtha**2 + lengthb**2  - hdist**2) / (2.0d0 * lengtha * lengthb)
                            
 !     --- check to make sure this will give a number
                            
@@ -1062,8 +1009,7 @@
                            end if
                            angle = dacos(thetac)
                          
-                           vphi = vphi + kforceb(iufrom,ju) * (angle
-     &                          - equilb(iufrom,ju))**2
+                           vphi = vphi + kforceb(iufrom,ju) * (angle - equilb(iufrom,ju))**2
                            
 !                           if (lshit) then
 !                              write(iou,*) iufrom,iu,ju
@@ -1137,8 +1083,7 @@
                               angles(1) = bangles(count,1)
                               angles(2) = bangles(count,2)
 
-                              call close(3,rxt,ryt,rzt,dum
-     &                             ,angles,lterm)
+                              call close(3,rxt,ryt,rzt,dum ,angles,lterm)
 
                               if (lterm) then
                                  lterm = .false.
@@ -1195,8 +1140,7 @@
                            rzt(j+1) = rzu(i,ju)
                         end do
                                                       
-                        call close(1,rxt,ryt,rzt,flength(iufrom,iu)
-     &                       ,angles,lterm)
+                        call close(1,rxt,ryt,rzt,flength(iufrom,iu) ,angles,lterm)
 
                         if (lterm) then
                            return
@@ -1239,8 +1183,7 @@
                         
                      j = int(2.0d0 * random2()) + 1
 
-                     if (.not.lnew.and.ip.eq.1.and
-     &                    .itor.eq.1) then
+                     if (.not.lnew.and.ip.eq.1.and .itor.eq.1) then
 !     --- give old unit vector for connection
                         xx(count) = rxu(i,iu) - rxu(i,iufrom)
                         yy(count) = ryu(i,iu) - ryu(i,iufrom)
@@ -1295,15 +1238,11 @@
 !     --- first determine bending energy for iuprev-iufrom-iu
                   if (iuprev.ne.0) then
                      length = distij(iufrom,iuprev)
-                     thetac = -(xx(count)*xvec(iuprev,iufrom) 
-     &                    + yy(count)*yvec(iuprev,iufrom)
-     &                    + zz(count)*zvec(iuprev,iufrom)) 
-     &                    / (lengtha*length)
+                     thetac = -(xx(count)*xvec(iuprev,iufrom)  + yy(count)*yvec(iuprev,iufrom) + zz(count)*zvec(iuprev,iufrom))  / (lengtha*length)
                      
                      angle = dacos(thetac)
                      
-                     vphi = vphi + kforcea(count) * (angle-equila(count)
-     &                    )**2
+                     vphi = vphi + kforcea(count) * (angle-equila(count) )**2
 
 !                     if (lshit) then
 !                        write(iou,*) iu,iufrom,iuprev,kforcea(count)
@@ -1335,14 +1274,10 @@
                         do counta = 1, pastnum(ju)
                            ku = ipast(ju,counta)
                            length = distij(ju,ku)
-                           thetac = - (xvec(iu,ju) * xvec(ju,ku)
-     &                          + yvec(iu,ju) * yvec(ju,ku)
-     &                          + zvec(iu,ju) * zvec(ju,ku))
-     &                          / (length * lengthb)
+                           thetac = - (xvec(iu,ju) * xvec(ju,ku) + yvec(iu,ju) * yvec(ju,ku) + zvec(iu,ju) * zvec(ju,ku)) / (length * lengthb)
                            angle = dacos( thetac )
                           
-                           vphi = vphi + kforceb(iu,ku) * (angle
-     &                          -equilb(iu,ku))**2
+                           vphi = vphi + kforceb(iu,ku) * (angle -equilb(iu,ku))**2
                            
 !                           if (lshit) then
 !                              write(iou,*) iu,ju,ku
@@ -1387,8 +1322,7 @@
                            if (jut4.gt.iring(imolty)) then
                               goto 41
                            end if
-                           write(iou,*) 'jut4,jut3,jut2,iu',
-     &                          jut4,jut3,jut2,iu
+                           write(iou,*) 'jut4,jut3,jut2,iu', jut4,jut3,jut2,iu
                            call cleanup('trouble jut4 in crankshaft')
                         end if
                         jttor = ittor(imolty,iu,it)
@@ -1411,8 +1345,7 @@
                         jut3 = ijtor3(imolty,ju,it)
                         jut4 = ijtor4(imolty,ju,it)
 
-                        if (jut2.eq.iu.and.jut4.eq.iuprev)
-     &                       then
+                        if (jut2.eq.iu.and.jut4.eq.iuprev) then
 
                            jttor = ittor(imolty,ju,it)
 
@@ -1439,8 +1372,7 @@
 
 !     --- jut4 must already exist or we made a big mistake
                            if (.not. lexist(jut4)) then
-                              write(iou,*) 'jut4,jut3,jut2,iu',
-     &                             jut4,jut3,jut2,iu
+                              write(iou,*) 'jut4,jut3,jut2,iu', jut4,jut3,jut2,iu
                               call cleanup('trouble jut4 in crankshaft')
                            end if
 
@@ -1466,8 +1398,7 @@
                         jut3 = ijtor3(imolty,nu,it)
                         jut4 = ijtor4(imolty,nu,it)
 
-                        if (jut2.eq.ku.and.jut3.eq.ju.
-     &                       and.jut4.eq.iu) then
+                        if (jut2.eq.ku.and.jut3.eq.ju. and.jut4.eq.iu) then
                         
                            jttor = ittor(imolty,nu,it)
 
@@ -1505,24 +1436,17 @@
                            
                            lengthb = flength(iu,ku)
                            
-                           thetac = (xvec(iu,ju)*xvec(iu,ku)
-     &                          + yvec(iu,ju)*yvec(iu,ku)
-     &                          + zvec(iu,ju)*zvec(iu,ku))
-     &                          / (lengtha*lengthb)
+                           thetac = (xvec(iu,ju)*xvec(iu,ku) + yvec(iu,ju)*yvec(iu,ku) + zvec(iu,ju)*zvec(iu,ku)) / (lengtha*lengthb)
 
                            if (abs(thetac).gt.1) then
-                              write(iou,*) '*********************'
-     &                             ,'****************************'
-                              write(iou,*) iu,ku,xvec(iu,ku)
-     &                             ,yvec(iu,ku)
-     &                             ,zvec(iu,ku),lengthb
+                              write(iou,*) '*********************' ,'****************************'
+                              write(iou,*) iu,ku,xvec(iu,ku) ,yvec(iu,ku) ,zvec(iu,ku),lengthb
                               call cleanup('shitfuck')
                            end if
 
                            angle = dacos(thetac)
 
-                           vphi = vphi + kforceb(ju,ku)
-     &                          * (angle-equilb(ju,ku))**2
+                           vphi = vphi + kforceb(ju,ku) * (angle-equilb(ju,ku))**2
        
 !                           if (lshit) then
 !                              write(iou,*) ju,iu,ku,kforceb(ju,ku)
@@ -1543,26 +1467,17 @@
                      iu = growlist(iw,count)
                      do counta = count+1, ntogrow
                         ju = growlist(iw,counta)
-                        if (.not.((iopen(1).eq.count
-     &                       .or.iopen(1).eq.counta)
-     &                       .and.((iclose.eq.count.or
-     &                       .iclose.eq.counta)
-     &                       .or.iopen(2).eq.count
-     &                       .or.iopen(2).eq.counta))) then
+                        if (.not.((iopen(1).eq.count .or.iopen(1).eq.counta) .and.((iclose.eq.count.or .iclose.eq.counta) .or.iopen(2).eq.count .or.iopen(2).eq.counta))) then
 !     --- we already calculated these
                            
                            lengtha = flength(iufrom,iu)
                            lengthb = flength(iufrom,ju)
 
-                           thetac = (xx(count) * xx(counta)
-     &                          + yy(count) * yy(counta)
-     &                          + zz(count) * zz(counta)) / 
-     &                          (lengtha * lengthb)
+                           thetac = (xx(count) * xx(counta) + yy(count) * yy(counta) + zz(count) * zz(counta)) /  (lengtha * lengthb)
 
                            angle = dacos(thetac)
                            
-                           vphi = vphi + kforceb(iu,ju) * (angle
-     &                          -equilb(iu,ju))**2
+                           vphi = vphi + kforceb(iu,ju) * (angle -equilb(iu,ju))**2
                            
 !                           if (lshit) then
 !                              write(iou,*) iu,iufrom,ju,kforceb(iu,ju)
@@ -1628,21 +1543,16 @@
 
                if (.not.lnew.and.ip.eq.1) then
                   length = flength(iufrom,iu)   
-                  xx(count) = (rxu(i,iu) - rxu(i,iufrom))
-     &                 / length
-                  yy(count) = (ryu(i,iu) - ryu(i,iufrom))
-     &                 / length
-                  zz(count) = (rzu(i,iu) - rzu(i,iufrom))
-     &                 / length
+                  xx(count) = (rxu(i,iu) - rxu(i,iufrom)) / length
+                  yy(count) = (ryu(i,iu) - ryu(i,iufrom)) / length
+                  zz(count) = (rzu(i,iu) - rzu(i,iufrom)) / length
                else
                   if (fcount(iu).gt.0) then
                      ju = fclose(iu,1)
-                     call cone(1, xvec(iufrom,ju),yvec(iufrom,ju)
-     &                    ,zvec(iufrom,ju),dum,dum,dum,dum,dum)
+                     call cone(1, xvec(iufrom,ju),yvec(iufrom,ju) ,zvec(iufrom,ju),dum,dum,dum,dum,dum)
                      phidisp = phiacc(count)
                      
-                     call cone(2,dum,dum,dum,alpha(count,ju)
-     &                    ,phidisp,x,y,z)
+                     call cone(2,dum,dum,dum,alpha(count,ju) ,phidisp,x,y,z)
 
 !     --- store the unit vectors in xx, yy, zz
                      xx(count) = x
@@ -1721,8 +1631,7 @@
                            angles(1) = bangles(count,1)
                            angles(2) = bangles(count,2)
 
-                           call close(3,rxt,ryt,rzt,dum
-     &                          ,angles,lterm)
+                           call close(3,rxt,ryt,rzt,dum ,angles,lterm)
 
 
                            if (lterm) then

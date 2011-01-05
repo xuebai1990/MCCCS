@@ -22,15 +22,12 @@
 !$$$      include 'mpif.h'
 !$$$      include 'mpi.inc'
       integer(KIND=normal_int)::izeo,idi,idj,ntij,layer,ii,jj,kk,ibox=1
-      real(KIND=double_precision)::exzeof,xi,yi,zi,r2,rcutsq,xr,yr,zr
-     & ,r2i,r6,vljnew,vqnew,overflow=1.0d8,rminsq,r,recipzeo,erfunc,i,j
-     & ,k,sx,sy,sz
+      real(KIND=double_precision)::exzeof,xi,yi,zi,r2,rcutsq,xr,yr,zr ,r2i,r6,vljnew,vqnew,overflow=1.0d8,rminsq,r,recipzeo,erfunc,i,j ,k,sx,sy,sz
 
       exzeof=0.
       rminsq=rmin*rmin/4.
       
-       if (idi.eq.0.or.(.not.ltailc.and.lij(idi)).or.
-     & (.not.lewald.and.lqchg(idi))) then
+       if (idi.eq.0.or.(.not.ltailc.and.lij(idi)).or. (.not.lewald.and.lqchg(idi))) then
          vljnew=0.
          vqnew=0.
          rcutsq = rcut(ibox)*rcut(ibox)
@@ -65,8 +62,7 @@
                      r2i=sig2ij(ntij)/r2
                      r6=r2i*r2i*r2i
                      if (lshift) then     
-                        vljnew=vljnew+4.*(epsij(ntij)*(r6-1.0)*r6
-     &                   -ecut(ntij))
+                        vljnew=vljnew+4.*(epsij(ntij)*(r6-1.0)*r6 -ecut(ntij))
                      else
                         vljnew=vljnew+4.*epsij(ntij)*(r6-1.0)*r6
                      end if               
@@ -75,8 +71,7 @@
             end if
          end do
 
-         if (idi.eq.0) vqnew=vqnew+recipzeo(xi,yi,zi
-     &    ,1._double_precision)
+         if (idi.eq.0) vqnew=vqnew+recipzeo(xi,yi,zi ,1._double_precision)
 
          exzeof=vljnew+vqnew*qqfact
       end if
@@ -96,21 +91,13 @@
                   do ii=-layer,layer
                      do jj=-layer,layer
                         do kk=-layer,layer
-                           if (abs(ii).eq.layer .or. abs(jj).eq.layer
-     &                          .or.abs(kk).eq.layer) then
+                           if (abs(ii).eq.layer .or. abs(jj).eq.layer .or.abs(kk).eq.layer) then
 
-                              sx = zeox(izeo)*hmati(ibox,1)+zeoy(izeo)
-     &                             *hmati(ibox,4)+zeoz(izeo)*hmati(ibox
-     &                             ,7)+dble(ii-i)/nx
-                              sy = zeox(izeo)*hmati(ibox,2)+zeoy(izeo)
-     &                             *hmati(ibox,5)+zeoz(izeo)*hmati(ibox
-     &                             ,8)+dble(jj-j)/ny
-                              sz = zeox(izeo)*hmati(ibox,3)+zeoy(izeo)
-     &                             *hmati(ibox,6)+zeoz(izeo)*hmati(ibox
-     &                             ,9)+dble(kk-k)/nz
+                              sx = zeox(izeo)*hmati(ibox,1)+zeoy(izeo) *hmati(ibox,4)+zeoz(izeo)*hmati(ibox ,7)+dble(ii-i)/nx
+                              sy = zeox(izeo)*hmati(ibox,2)+zeoy(izeo) *hmati(ibox,5)+zeoz(izeo)*hmati(ibox ,8)+dble(jj-j)/ny
+                              sz = zeox(izeo)*hmati(ibox,3)+zeoy(izeo) *hmati(ibox,6)+zeoz(izeo)*hmati(ibox ,9)+dble(kk-k)/nz
 
-                              xr=sx*hmat(ibox,1)+sy*hmat(ibox,4)+sz
-     &                             *hmat(ibox,7)
+                              xr=sx*hmat(ibox,1)+sy*hmat(ibox,4)+sz *hmat(ibox,7)
                               yr=sy*hmat(ibox,5)+sz*hmat(ibox,8)
                               zr=sz*hmat(ibox,9)
 
@@ -122,11 +109,9 @@
                               r2i=sig2ij(ntij)/r2
                               r6=r2i*r2i*r2i
                               if (lshift) then
-                                 vljnew=vljnew+4.*(epsij(ntij)*(r6-1.0)
-     &                                *r6-ecut(ntij))
+                                 vljnew=vljnew+4.*(epsij(ntij)*(r6-1.0) *r6-ecut(ntij))
                               else
-                                 vljnew=vljnew+4.*epsij(ntij)*(r6-1.0)
-     &                                *r6
+                                 vljnew=vljnew+4.*epsij(ntij)*(r6-1.0) *r6
                               end if
                            end if
                         end do
@@ -170,8 +155,7 @@
 
 ! * from h-matrix formulation
       integer(KIND=normal_int)::l,m,n,m_min,n_min,kmaxl,kmaxm,kmaxn
-      real(KIND=double_precision)::alpsqr4,vol,ksqr,sum,arg,recipzeo,xi
-     & ,yi,zi,qi,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi
+      real(KIND=double_precision)::alpsqr4,vol,ksqr,sum,arg,recipzeo,xi ,yi,zi,qi,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi
 
 ! *** Set up the reciprocal space vectors ***
 
@@ -194,12 +178,7 @@
     
       alpsqr4 = 4.0d0*calpi*calpi
          
-      vol = hmat(ibox,1)*
-     &     (hmat(ibox,5)*hmat(ibox,9) - hmat(ibox,8)*hmat(ibox,6))
-     &     + hmat(ibox,4)*
-     &     (hmat(ibox,8)*hmat(ibox,3) - hmat(ibox,2)*hmat(ibox,9))
-     &     + hmat(ibox,7)*
-     &     (hmat(ibox,2)*hmat(ibox,6) - hmat(ibox,5)*hmat(ibox,3))
+      vol = hmat(ibox,1)* (hmat(ibox,5)*hmat(ibox,9) - hmat(ibox,8)*hmat(ibox,6)) + hmat(ibox,4)* (hmat(ibox,8)*hmat(ibox,3) - hmat(ibox,2)*hmat(ibox,9)) + hmat(ibox,7)* (hmat(ibox,2)*hmat(ibox,6) - hmat(ibox,5)*hmat(ibox,3))
 
       vol = vol/(8.0d0*onepi)
 
@@ -221,23 +200,18 @@
                n_min = -kmaxn
             end if
             do n = n_min, kmaxn
-               kx1 = dble(l)*hmatik(1)+dble(m)*hmatik(2)+
-     &              dble(n)*hmatik(3)
-               ky1 = dble(l)*hmatik(4)+dble(m)*hmatik(5)+
-     &              dble(n)*hmatik(6)
-               kz1 = dble(l)*hmatik(7)+dble(m)*hmatik(8)+
-     &              dble(n)*hmatik(9)
+               kx1 = dble(l)*hmatik(1)+dble(m)*hmatik(2)+ dble(n)*hmatik(3)
+               ky1 = dble(l)*hmatik(4)+dble(m)*hmatik(5)+ dble(n)*hmatik(6)
+               kz1 = dble(l)*hmatik(7)+dble(m)*hmatik(8)+ dble(n)*hmatik(9)
                ksqr = kx1*kx1+ky1*ky1+kz1*kz1
 !               if ( ksqr .lt. hmaxsq ) then
 ! --- sometimes these are about equal, which can cause different
 ! --- behavior on 32 and 64 bit machines without this .and. statement
-               if ( ksqr .lt. hmaxsq .and.
-     &              abs(ksqr-hmaxsq) .gt. 1d-9 ) then
+               if ( ksqr .lt. hmaxsq .and. abs(ksqr-hmaxsq) .gt. 1d-9 ) then
 !     *** sum up q*cos and q*sin ***
                   sum = 0.0d0
                   do i = 1,nzeo
-                     arg=kx1*(xi-zeox(i))+ky1*(yi-zeoy(i))+kz1*(zi
-     &                    -zeoz(i))
+                     arg=kx1*(xi-zeox(i))+ky1*(yi-zeoy(i))+kz1*(zi -zeoz(i))
                      sum=sum+qelect(idzeo(i))*cos(arg)
                   end do
                   recipzeo=recipzeo+sum*exp(-ksqr/alpsqr4)/ksqr

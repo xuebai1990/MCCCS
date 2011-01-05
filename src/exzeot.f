@@ -13,8 +13,7 @@
 !$$$      include 'grid.inc'
 !$$$      include 'zeolite.inc' 
       real(KIND=double_precision)::exzeot,xi,yi,zi,xr,yr,zr,dy
-      integer(KIND=normal_int)::m,idi,j0,j,jp,k,k0,kp,l,l0,lp,mt,mp,
-     &        pgrid
+      integer(KIND=normal_int)::m,idi,j0,j,jp,k,k0,kp,l,l0,lp,mt,mp, pgrid
       parameter (m=2,mt=2*m+1)
       real(KIND=double_precision)::yjtmp(mt),yktmp(mt),yltmp(mt)
       real(KIND=double_precision)::xt(mt),yt(mt),zt(mt)

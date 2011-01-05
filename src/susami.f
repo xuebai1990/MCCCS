@@ -20,8 +20,7 @@
 
       real(KIND=double_precision)::hsig,heps,tsig,teps
 
-      parameter ( hsig=4.220d0, heps=110.68816d0, 
-     &            tsig=3.527d0, teps=79.982210d0 )
+      parameter ( hsig=4.220d0, heps=110.68816d0,  tsig=3.527d0, teps=79.982210d0 )
 
       real(KIND=double_precision)::rcsami
       integer(KIND=normal_int)::ij
@@ -50,20 +49,12 @@
       eij(8)=teps
       eij(9)=teps
 
-      vsh(1)  = eij(1) *
-     &          ( ( 13.0d0 * (sij(1)/rcsami)**12 ) +
-     &            (  4.0d0 * (sij(1)/rcsami)**3  ) )
-      vsha(1) = eij(1) *
-     &          ( ( 12.0d0 * sij(1)**12 / rcsami**13 ) +
-     &            (  3.0d0 * sij(1)**3  / rcsami**4  ) )
+      vsh(1)  = eij(1) * ( ( 13.0d0 * (sij(1)/rcsami)**12 ) + (  4.0d0 * (sij(1)/rcsami)**3  ) )
+      vsha(1) = eij(1) * ( ( 12.0d0 * sij(1)**12 / rcsami**13 ) + (  3.0d0 * sij(1)**3  / rcsami**4  ) )
 
       do ij = 2, 9
-         vsh(ij)  = 4.0d0 * eij(ij) * 
-     &          ( ( 13.0d0 * (sij(ij)/rcsami)**12 ) -
-     &            (  7.0d0 * (sij(ij)/rcsami)**6  ) )
-         vsha(ij) = 4.0d0 * eij(ij) *
-     &          ( ( 12.0d0 * sij(ij)**12 / rcsami**13 ) -
-     &            (  6.0d0 * sij(ij)**6  / rcsami**7  ) )
+         vsh(ij)  = 4.0d0 * eij(ij) *  ( ( 13.0d0 * (sij(ij)/rcsami)**12 ) - (  7.0d0 * (sij(ij)/rcsami)**6  ) )
+         vsha(ij) = 4.0d0 * eij(ij) * ( ( 12.0d0 * sij(ij)**12 / rcsami**13 ) - (  6.0d0 * sij(ij)**6  / rcsami**7  ) )
       end do
 
 !      do ij = 1,9

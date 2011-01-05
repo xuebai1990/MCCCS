@@ -1,7 +1,4 @@
-      subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel
-     &       ,acdens,acmove,acnp,pres,nibox,nnn,nblock,lratio,lratv
-     &       ,lprint,lmv,lrsave,lblock,lratfix,lsolute,acsolpar,
-     &        acEnthalpy,acEnthalpy1)
+      subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove,acnp,pres,nibox,nnn,nblock,lratio,lratv ,lprint,lmv,lrsave,lblock,lratfix,lsolute,acsolpar, acEnthalpy,acEnthalpy1)
 
 ! -----------------------------------------------------------------
 ! subroutine monper
@@ -35,38 +32,24 @@
 !$$$      include 'poten.inc'
  
       integer(KIND=normal_int)::nummol,ntii
-      integer(KIND=normal_int)::nibox,im,nnn,ntot,nblock,imolty,m,mm,i,j
-     & ,jjtor,ibox,itype,itel,mnbox,zzz,steps,igrow,jmolty,jbox
-      integer(KIND=normal_int)::imend,bin,k,jjben,ip2,ip1,ip3,it
-     & ,ii,jj,ivib
-      logical::lratio,lratv,lprint,lmv,lrsave,lblock,lfq,lratfix
-     & ,lsolute,ovrlap
-      real(KIND=double_precision), dimension(nprop1,nbxmax,nbxmax)::
-     & acsolpar
-      real(KIND=double_precision), dimension(nbxmax):: acEnthalpy
-     & ,acEnthalpy1
-      real(KIND=double_precision)::dp,dpp,debroglie
-     & ,histrat
-      real(KIND=double_precision)::acv, molfra,acpres,acsurf,acvolume
-     & ,asetel,acdens,histtot,acmove,acnp,dvalue,dnchoi,dnchoi1,dnchoih
-     & ,dnunit,ratflcq,v,vintra,vinter,vext,velect,vewald,vtors,vtail
-     & ,rho,coru,thetac,vbend,rxvec,ryvec,rzvec,distanceij,theta,vtorso
-     & ,xaa1 ,yaa1,zaa1,xa1a2,ya1a2,za1a2,dot,daa1,da1a2
+      integer(KIND=normal_int)::nibox,im,nnn,ntot,nblock,imolty,m,mm,i,j ,jjtor,ibox,itype,itel,mnbox,zzz,steps,igrow,jmolty,jbox
+      integer(KIND=normal_int)::imend,bin,k,jjben,ip2,ip1,ip3,it ,ii,jj,ivib
+      logical::lratio,lratv,lprint,lmv,lrsave,lblock,lfq,lratfix ,lsolute,ovrlap
+      real(KIND=double_precision), dimension(nprop1,nbxmax,nbxmax):: acsolpar
+      real(KIND=double_precision), dimension(nbxmax):: acEnthalpy ,acEnthalpy1
+      real(KIND=double_precision)::dp,dpp,debroglie ,histrat
+      real(KIND=double_precision)::acv, molfra,acpres,acsurf,acvolume ,asetel,acdens,histtot,acmove,acnp,dvalue,dnchoi,dnchoi1,dnchoih ,dnunit,ratflcq,v,vintra,vinter,vext,velect,vewald,vtors,vtail ,rho,coru,thetac,vbend,rxvec,ryvec,rzvec,distanceij,theta,vtorso ,xaa1 ,yaa1,zaa1,xa1a2,ya1a2,za1a2,dot,daa1,da1a2
 
       real(KIND=double_precision)::xcc,ycc,zcc,tcc,spltor,rcutmin      
  
       dimension acv(nener,nbxmax),lratfix(ntmax)
       dimension mnbox(nbxmax,ntmax)
       dimension acpres(nbxmax),acsurf(nbxmax),acvolume(nbxmax)
-      dimension asetel(nbxmax,ntmax),acdens(nbxmax,ntmax)
-     & ,molfra(nbxmax,ntmax)
+      dimension asetel(nbxmax,ntmax),acdens(nbxmax,ntmax) ,molfra(nbxmax,ntmax)
       dimension lsolute(ntmax)
-      dimension rxvec(numax,numax),ryvec(numax,numax),rzvec(numax,numax)
-     & ,distanceij(numax,numax)
+      dimension rxvec(numax,numax),ryvec(numax,numax),rzvec(numax,numax) ,distanceij(numax,numax)
 
-      real(KIND=double_precision)::ratrax,ratray,ratraz,rttrax,rttray
-     & ,rttraz,rarotx,raroty,rarotz,rtrotx,rtroty,rtrotz,vol,ratvol
-     & ,temmass,dn,pres(nbxmax)
+      real(KIND=double_precision)::ratrax,ratray,ratraz,rttrax,rttray ,rttraz,rarotx,raroty,rarotz,rtrotx,rtroty,rtrotz,vol,ratvol ,temmass,dn,pres(nbxmax)
 ! -------------------------------------------------------------------
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
@@ -109,8 +92,7 @@
             
             if ( lneigh .and. Armtrax .ge. upnn) then
                Armtrax = upnn
-               write(iou,*) '### problem : for target accept ',
-     &              'ratio Armtrax should be smaller than upnn'
+               write(iou,*) '### problem : for target accept ', 'ratio Armtrax should be smaller than upnn'
             end if
          end if
 
@@ -133,8 +115,7 @@
 
             if ( lneigh .and. Armtray .ge. upnn) then
                Armtray = upnn
-               write(iou,*) '### problem : for target accept ',
-     &              'ratio Armtray should be smaller than upnn'
+               write(iou,*) '### problem : for target accept ', 'ratio Armtray should be smaller than upnn'
             end if
          end if
         
@@ -156,8 +137,7 @@
 
             if ( lneigh .and. Armtraz .ge. upnn) then
                Armtraz = upnn
-               write(iou,*) '### problem : for target accept ',
-     &              'ratio Armtraz should be smaller than upnn'
+               write(iou,*) '### problem : for target accept ', 'ratio Armtraz should be smaller than upnn'
             end if
          end if
  
@@ -192,8 +172,7 @@
 
                   if ( lneigh .and. rmtrax(imolty,im) .ge. upnn) then
                      rmtrax(imolty,im) = upnn
-                     write(iou,*) '### problem : for target accept '
-     &                    ,'ratio rmtrax should be smaller than upnn'
+                     write(iou,*) '### problem : for target accept ' ,'ratio rmtrax should be smaller than upnn'
                   end if
                end if
 
@@ -220,8 +199,7 @@
                   end if
                   if ( lneigh .and. rmtray(imolty,im) .ge. upnn) then
                      rmtray(imolty,im) = upnn
-                     write(iou,*) '### problem : for target accept '
-     &                    ,'ratio rmtray should be smaller than upnn'
+                     write(iou,*) '### problem : for target accept ' ,'ratio rmtray should be smaller than upnn'
                   end if
                end if
 
@@ -250,8 +228,7 @@
 !                 --- check neighbor list
                   if ( lneigh .and. rmtraz(imolty,im) .ge. upnn) then
                      rmtraz(imolty,im) = upnn
-                     write(iou,*) '### problem : for target accept '
-     &                    ,'ratio rmtraz should be smaller than upnn'
+                     write(iou,*) '### problem : for target accept ' ,'ratio rmtraz should be smaller than upnn'
                   end if
                end if
  
@@ -281,8 +258,7 @@
 !                 --- check neighbour list
                   if ( lneigh .and. rmrotx(imolty,im) .ge. upnndg) then
                      rmrotx(imolty,im) = upnndg
-                     write(iou,*) '### problem : for target accept '
-     &                    ,'ratio rmrotx should be smaller than upnndg'
+                     write(iou,*) '### problem : for target accept ' ,'ratio rmrotx should be smaller than upnndg'
                   end if
                end if
 
@@ -309,8 +285,7 @@
 !                 --- check neighbour list
                   if ( lneigh .and. rmroty(imolty,im) .ge. upnndg) then
                      rmroty(imolty,im) = upnndg
-                     write(iou,*) '### problem : for target accept'
-     &                    ,' ratio rmroty should be smaller than upnndg'
+                     write(iou,*) '### problem : for target accept' ,' ratio rmroty should be smaller than upnndg'
                   end if
                end if
                
@@ -337,8 +312,7 @@
 !                 --- check neighbour list
                   if ( lneigh .and. rmrotz(imolty,im) .ge. upnndg) then
                      rmrotz(imolty,im) = upnndg
-                     write(iou,*) '### problem : for target accept '
-     &                    ,'ratio rmrotz should be smaller than upnndg'
+                     write(iou,*) '### problem : for target accept ' ,'ratio rmrotz should be smaller than upnndg'
                   end if
                end if
 
@@ -346,15 +320,9 @@
 ! only processor 0 writes to output files (except for error messages)
                if (myid.eq.0) then
 ! *** write some ratio update information ***
-                  write(iou,"(' Type ',i1,' bn ',6(f7.0,1x))") imolty
-     &             ,bntrax(imolty,im),bntray(imolty,im), bntraz(imolty
-     &             ,im),bnrotx(imolty,im), bnroty(imolty,im)
-     &             ,bnrotz(imolty,im)
+                  write(iou,"(' Type ',i1,' bn ',6(f7.0,1x))") imolty ,bntrax(imolty,im),bntray(imolty,im), bntraz(imolty ,im),bnrotx(imolty,im), bnroty(imolty,im) ,bnrotz(imolty,im)
 !              write(iou,"(' ratio       ',6(f7.4,1x))") ratrax, ratray, ratraz,rarotx, raroty,rarotz
-                  write(iou,"(' max.displ.  ',6(f7.4,1x))")
-     &             rmtrax(imolty,im), rmtray(imolty,im), rmtraz(imolty
-     &             ,im), rmrotx(imolty,im), rmroty(imolty,im),
-     &             rmrotz(imolty,im)
+                  write(iou,"(' max.displ.  ',6(f7.4,1x))") rmtrax(imolty,im), rmtray(imolty,im), rmtraz(imolty ,im), rmrotx(imolty,im), rmroty(imolty,im), rmrotz(imolty,im)
                end if
 
                acntrax(imolty,im) = acntrax(imolty,im)+bntrax(imolty,im)
@@ -440,8 +408,7 @@
 !     *** normalize and multiply hist by its weighting using above condition
                   do bin = 1, maxbin
                      
-                     hist(j,k,bin) = hist(j,k,bin)*dble(histrat)
-     &                    / histtot
+                     hist(j,k,bin) = hist(j,k,bin)*dble(histrat) / histtot
                                          
 !     *** add weighed hist to hist
 
@@ -480,17 +447,12 @@
                         ryuion(j,1) = ryu(i,j)
                         rzuion(j,1) = rzu(i,j)
                         
-                        if (myid.eq.0) write(11,*) ntype(imolty,j)
-     &                       ,rxuion(j,1),ryuion(j,1),rzuion(j,1)
-     &                       ,qqu(j,1)
+                        if (myid.eq.0) write(11,*) ntype(imolty,j) ,rxuion(j,1),ryuion(j,1),rzuion(j,1) ,qqu(j,1)
 
                      end do
 
-                  call energy(i,imolty,v,vintra,vinter,vext,velect
-     &                 ,vewald,1,ibox,1,nunit(imolty),.true.,ovrlap
-     &                 ,.false.,vtors,.false.,.false.)
-                  if (ovrlap) write(iou,*) 
-     &                 '*** DISASTER, OVERLAP IN MONPER'
+                  call energy(i,imolty,v,vintra,vinter,vext,velect ,vewald,1,ibox,1,nunit(imolty),.true.,ovrlap ,.false.,vtors,.false.,.false.)
+                  if (ovrlap) write(iou,*)  '*** DISASTER, OVERLAP IN MONPER'
 
                   if (lsolid(ibox).and..not.lrect(ibox)) then
                      vol = cell_vol(ibox) 
@@ -501,11 +463,9 @@
                   vtail = 0.0d0
                   do jmolty = 1, nmolty
                      
-                     rho = ncmt(ibox,jmolty) / 
-     &                    ( boxlx(ibox)*boxly(ibox)*boxlz(ibox) )
+                     rho = ncmt(ibox,jmolty) /  ( boxlx(ibox)*boxly(ibox)*boxlz(ibox) )
                      
-                     vtail = vtail + ncmt(ibox,imolty)
-     &                    * coru(imolty,jmolty,rho,ibox)
+                     vtail = vtail + ncmt(ibox,imolty) * coru(imolty,jmolty,rho,ibox)
                   end do
 
 !     --- bending energy
@@ -515,8 +475,7 @@
                         rxvec(ii,jj) = rxu(i,jj) - rxu(i,ii)
                         ryvec(ii,jj) = ryu(i,jj) - ryu(i,ii)
                         rzvec(ii,jj) = rzu(i,jj) - rzu(i,ii)
-                        distanceij(ii,jj) = dsqrt(rxvec(ii,jj)**2
-     &                       + ryvec(ii,jj)**2 + rzvec(ii,jj)**2)
+                        distanceij(ii,jj) = dsqrt(rxvec(ii,jj)**2 + ryvec(ii,jj)**2 + rzvec(ii,jj)**2)
                         
                         rxvec(jj,ii)   = -rxvec(ii,jj)
                         ryvec(jj,ii)   = -ryvec(ii,jj)
@@ -535,16 +494,12 @@
                            it  = itben(imolty,j,jjben)
                            if (brbenk(it).gt.0.001d0) then
 
-                              thetac = ( rxvec(ip1,j)*rxvec(ip1,ip2) +
-     &                         ryvec(ip1,j)*ryvec(ip1,ip2) + rzvec(ip1
-     &                         ,j)*rzvec(ip1,ip2) ) / ( distanceij(ip1
-     &                         ,j)*distanceij(ip1,ip2) )
+                              thetac = ( rxvec(ip1,j)*rxvec(ip1,ip2) + ryvec(ip1,j)*ryvec(ip1,ip2) + rzvec(ip1 ,j)*rzvec(ip1,ip2) ) / ( distanceij(ip1 ,j)*distanceij(ip1,ip2) )
                               if ( thetac .ge. 1.0d0 ) thetac = 1.0d0
                               if ( thetac .le. -1.0d0 ) thetac = -1.0d0
                               
                               theta = dacos(thetac)
-                              vbend = vbend + 
-     &                             brbenk(it) * (theta-brben(it))**2
+                              vbend = vbend +  brbenk(it) * (theta-brben(it))**2
                            end if
 
                         end if
@@ -561,18 +516,12 @@
                            ip2 = ijtor3(imolty,j,jjtor)
                            it  = ittor(imolty,j,jjtor)
 !***  calculate cross products d_a x d_a-1 and d_a-1 x d_a-2 ***
-                           xaa1 = ryvec(ip1,j) * rzvec(ip2,ip1) +
-     &                          rzvec(ip1,j) * ryvec(ip1,ip2)
-                           yaa1 = rzvec(ip1,j) * rxvec(ip2,ip1) +
-     &                          rxvec(ip1,j) * rzvec(ip1,ip2)
-                           zaa1 = rxvec(ip1,j) * ryvec(ip2,ip1) +
-     &                          ryvec(ip1,j) * rxvec(ip1,ip2)
-                           xa1a2 = ryvec(ip1,ip2) * rzvec(ip2,ip3) +
-     &                          rzvec(ip1,ip2) * ryvec(ip3,ip2)
-                           ya1a2 = rzvec(ip1,ip2) * rxvec(ip2,ip3) +
-     &                          rxvec(ip1,ip2) * rzvec(ip3,ip2)
-                           za1a2 = rxvec(ip1,ip2) * ryvec(ip2,ip3) +
-     &                          ryvec(ip1,ip2) * rxvec(ip3,ip2)
+                           xaa1 = ryvec(ip1,j) * rzvec(ip2,ip1) + rzvec(ip1,j) * ryvec(ip1,ip2)
+                           yaa1 = rzvec(ip1,j) * rxvec(ip2,ip1) + rxvec(ip1,j) * rzvec(ip1,ip2)
+                           zaa1 = rxvec(ip1,j) * ryvec(ip2,ip1) + ryvec(ip1,j) * rxvec(ip1,ip2)
+                           xa1a2 = ryvec(ip1,ip2) * rzvec(ip2,ip3) + rzvec(ip1,ip2) * ryvec(ip3,ip2)
+                           ya1a2 = rzvec(ip1,ip2) * rxvec(ip2,ip3) + rxvec(ip1,ip2) * rzvec(ip3,ip2)
+                           za1a2 = rxvec(ip1,ip2) * ryvec(ip2,ip3) + ryvec(ip1,ip2) * rxvec(ip3,ip2)
 !     *** calculate lengths of cross products ***
                            daa1 = dsqrt(xaa1**2+yaa1**2+zaa1**2)
                            da1a2 = dsqrt(xa1a2**2+ya1a2**2+za1a2**2)
@@ -589,8 +538,7 @@
                               ycc = zaa1*xa1a2 - xaa1*za1a2
                               zcc = xaa1*ya1a2 - yaa1*xa1a2
 !     *** calculate scalar triple product ***
-                              tcc = xcc*rxvec(ip1,ip2)+ycc*ryvec(ip1
-     &                         ,ip2)+ zcc*rzvec(ip1,ip2)
+                              tcc = xcc*rxvec(ip1,ip2)+ycc*ryvec(ip1 ,ip2)+ zcc*rzvec(ip1,ip2)
                               theta = dacos(thetac)
                               if (tcc .lt. 0.0d0) theta = -theta
                               if (L_spline) then
@@ -608,17 +556,13 @@
                   end do
                  
                   solcount(ibox,imolty) = solcount(ibox,imolty) + 1
-                  avsolinter(ibox,imolty) = 
-     &                 avsolinter(ibox,imolty) + vinter / 2.0d0 + vtail
-                  avsolintra(ibox,imolty) = avsolintra(ibox,imolty) 
-     &                 + vintra 
+                  avsolinter(ibox,imolty) =  avsolinter(ibox,imolty) + vinter / 2.0d0 + vtail
+                  avsolintra(ibox,imolty) = avsolintra(ibox,imolty)  + vintra 
                   avsoltor(ibox,imolty) = avsoltor(ibox,imolty) + vtors
                   
-                  avsolbend(ibox,imolty) = avsolbend(ibox,imolty) 
-     &                 + vbend
+                  avsolbend(ibox,imolty) = avsolbend(ibox,imolty)  + vbend
 
-                  avsolelc(ibox,imolty) = avsolelc(ibox,imolty) 
-     &                 + velect + vewald
+                  avsolelc(ibox,imolty) = avsolelc(ibox,imolty)  + velect + vewald
 
                end do
 
@@ -661,14 +605,10 @@
                do ibox = 1, nbox
                   if (lsolid(ibox) .and. .not. lrect(ibox)) then
                      do j = 1,9
-                        write(iou,"(' h-matrix change:  bn =',f8.1,
-     &                   '   bs =',f8.1,'   max.displ. =',e12.5)")
-     &                   bnhmat(ibox,j),bshmat(ibox,j), rmhmat(ibox,j)
+                        write(iou,"(' h-matrix change:  bn =',f8.1, '   bs =',f8.1,'   max.displ. =',e12.5)") bnhmat(ibox,j),bshmat(ibox,j), rmhmat(ibox,j)
                      end do
                   else
-                     write(iou,"(' volume change:  bn =',f8.1,
-     &                '   bs =',f8.1,'   max.displ. =',e12.5)")
-     &                bnvol(ibox),bsvol(ibox),rmvol(ibox)
+                     write(iou,"(' volume change:  bn =',f8.1, '   bs =',f8.1,'   max.displ. =',e12.5)") bnvol(ibox),bsvol(ibox),rmvol(ibox)
                   end if
                end do
             end if	
@@ -698,14 +638,10 @@
       if ( lprint.and.myid.eq.0 ) then
 !     *** write out runtime information ***
          ntot = nnn + nnstep
-         write(iou,'(i6,i8,e12.4,f10.3,f12.1,15i4)') nnn,ntot,
-     &        vbox(1),boxlx(1),pres(1)
-     &        ,(ncmt(1,imolty),imolty=1,nmolty)
+         write(iou,'(i6,i8,e12.4,f10.3,f12.1,15i4)') nnn,ntot, vbox(1),boxlx(1),pres(1) ,(ncmt(1,imolty),imolty=1,nmolty)
          if ( lgibbs ) then
             do ibox = 2, nbox
-               write(iou,'(14x,e12.4,f10.3,f12.1,15i4)') 
-     &              vbox(ibox),boxlx(ibox),pres(ibox)
-     &              ,(ncmt(ibox,imolty),imolty=1,nmolty)
+               write(iou,'(14x,e12.4,f10.3,f12.1,15i4)')  vbox(ibox),boxlx(ibox),pres(ibox) ,(ncmt(ibox,imolty),imolty=1,nmolty)
             end do
          end if
       end if
@@ -725,11 +661,9 @@
          end do
          do m = 1, nchain
             imolty = moltyp(m)
-            write(10,'(4(1x,i5),3(1x,f16.6))') m, imolty, nunit(imolty),
-     &       nboxi(m),xcm(m),ycm(m),zcm(m)
+            write(10,'(4(1x,i5),3(1x,f16.6))') m, imolty, nunit(imolty), nboxi(m),xcm(m),ycm(m),zcm(m)
             do mm = 1, nunit(imolty)
-               write(10,'(4(1x,f14.6),i5)') rxu(m,mm), ryu(m,mm), rzu(m
-     &          ,mm), qqu(m,mm),ntype( imolty, mm )
+               write(10,'(4(1x,f14.6),i5)') rxu(m,mm), ryu(m,mm), rzu(m ,mm), qqu(m,mm),ntype( imolty, mm )
             end do
          end do
       end if
@@ -750,8 +684,7 @@
                  imolty = moltyp(i)
                  do ii = 1,nunit(imolty)
                     ntii = ntype(imolty,ii)
-                    write(210+ibox,'(a4,5x,3f15.4)') chemid(ntii),
-     &               rxu(i,ii), ryu(i,ii), rzu(i,ii)
+                    write(210+ibox,'(a4,5x,3f15.4)') chemid(ntii), rxu(i,ii), ryu(i,ii), rzu(i,ii)
                  end do
               end if
            end do
@@ -765,10 +698,8 @@
          write (88,*) Armtrax, Armtray, Armtraz 
          do im=1,nbox
             do imolty=1,nmolty
-               write (88,*) rmtrax(imolty,im), rmtray(imolty,im)
-     &              , rmtraz(imolty,im)
-               write (88,*) rmrotx(imolty,im), rmroty(imolty,im)
-     &              , rmrotz(imolty,im)
+               write (88,*) rmtrax(imolty,im), rmtray(imolty,im) , rmtraz(imolty,im)
+               write (88,*) rmrotx(imolty,im), rmroty(imolty,im) , rmrotz(imolty,im)
             end do
          end do
          do im=1,nbox
@@ -874,9 +805,7 @@
                dnunit = dble(steps)
                dnchoih = dble(nchoih(itype))
                debroglie = 17.458d0/( dsqrt(masst(itype)/beta ))
-               dpp = acchem(ibox,itype)/( dnchoih*
-     &              dnchoi1*(dnchoi**(dnunit))
-     &              *debroglie*debroglie*debroglie )
+               dpp = acchem(ibox,itype)/( dnchoih* dnchoi1*(dnchoi**(dnunit)) *debroglie*debroglie*debroglie )
                dvalue = bnchem(ibox,itype)
                call update(nblock,itel,ibox,dpp,dvalue)
             end do
@@ -916,8 +845,7 @@
          do ibox = 1,nibox-1
             do jbox = ibox+1,nibox 
                do i = 1,nprop1
-                  call update1(nblock,i,acsolpar(i,ibox,jbox),acnp,
-     &                         ibox,jbox)  
+                  call update1(nblock,i,acsolpar(i,ibox,jbox),acnp, ibox,jbox)  
                end do
             end do
          end do

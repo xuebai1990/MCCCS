@@ -39,20 +39,15 @@
       integer(KIND=normal_int)::istt,iett
       integer(KIND=normal_int)::ibranp(20),nbranp
 
-      integer(KIND=normal_int)::iu,iutry,iulast,iut,iub,icbu,islen,iins
-     &       ,iii,ibr,ibr1,j,jj,jj2,jj3,jj4,invtry,ibox,iunit
-     &       ,imolty,jmt,igrow
-      real(KIND=double_precision)::v,vintra,vinter,vext,velect,vtornew
-     & ,vtordum,delen,vewald
+      integer(KIND=normal_int)::iu,iutry,iulast,iut,iub,icbu,islen,iins ,iii,ibr,ibr1,j,jj,jj2,jj3,jj4,invtry,ibox,iunit ,imolty,jmt,igrow
+      real(KIND=double_precision)::v,vintra,vinter,vext,velect,vtornew ,vtordum,delen,vewald
 
 
       real(KIND=double_precision)::bsswap
       real(KIND=double_precision)::random,rdir,rbf,bsum
       real(KIND=double_precision)::waddnew
 
-      real(KIND=double_precision)::v1insext,v1ins,w1ins
-     &                ,v1insint
-     &                ,volins,rho,arg,coru,v1inselc
+      real(KIND=double_precision)::v1insext,v1ins,w1ins ,v1insint ,volins,rho,arg,coru,v1inselc
       dimension bsswap(ntmax,4)
 
 ! --------------------------------------------------------------------
@@ -111,8 +106,7 @@
          lbo = .true.
 
 ! --  insert the first atom
-         call boltz( lbo,iins,iins,imolty,igrow,ovrlap,boxins,.true.
-     &        ,0.0d0,0,ichoi)
+         call boltz( lbo,iins,iins,imolty,igrow,ovrlap,boxins,.true. ,0.0d0,0,ichoi)
          bnchem(boxins,imolty) = bnchem(boxins,imolty) + 1.0d0
          if ( ovrlap ) goto 500
 
@@ -405,8 +399,7 @@
                jj2 = ijtor2(imolty,iut,j)
                jj3 = ijtor3(imolty,iut,j)
                jj4 = ijtor4(imolty,iut,j)
-               if ( lexist(jj2) .and. lexist(jj3) 
-     &              .and. lexist(jj4) ) then
+               if ( lexist(jj2) .and. lexist(jj3)  .and. lexist(jj4) ) then
                   wschtor(iut,j) = .true.
                else
                   wschtor(iut,j) = .false.
@@ -441,13 +434,10 @@
 
             istt=1
             iett = igrow
-            call energy (iins,imolty, v, vintra,vinter,vext,velect
-     &           ,vewald,1, ibox, istt, iett, .false.,ovrlap,.false.
-     &           ,vtordum,.false.,.false.)
+            call energy (iins,imolty, v, vintra,vinter,vext,velect ,vewald,1, ibox, istt, iett, .false.,ovrlap,.false. ,vtordum,.false.,.false.)
             
             if (ovrlap) goto 500
-            delen = v - ( vnewintra + vnewinter + vnewext +vnewelect)
-     &           - v1ins
+            delen = v - ( vnewintra + vnewinter + vnewext +vnewelect) - v1ins
 
             waddnew = waddnew*dexp(-(beta*delen))
 
@@ -480,10 +470,7 @@
 ! Calculate the energy of the non-backbone beads 
             istt = igrow+1
             iett = iunit
-            call energy (iins,imolty,v, vintra,vinter,vext,velect
-     &           ,vewald,1
-     &           ,ibox,istt,iett, .true.,ovrlap,ltors,vtordum,
-     &           .true.,.false.)
+            call energy (iins,imolty,v, vintra,vinter,vext,velect ,vewald,1 ,ibox,istt,iett, .true.,ovrlap,ltors,vtordum, .true.,.false.)
             if (ovrlap) goto 500
             delen = v - vnewintra + vtornew
 
@@ -511,8 +498,7 @@
             volins=boxlx(boxins)*boxly(boxins)
          end if
 
-         arg = w1ins * waddnew * weight * volins 
-     &        / dble( ncmt(boxins,imolty)+1 )
+         arg = w1ins * waddnew * weight * volins  / dble( ncmt(boxins,imolty)+1 )
 
          if (ltailc) then
             do jmt = 1, nmolty

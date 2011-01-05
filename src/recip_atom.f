@@ -22,8 +22,7 @@
 !$$$      include 'ewaldsum.inc'
 !$$$      include 'poten.inc'
       integer(KIND=normal_int)::ic,izz,ii,imolty,ibox,ncount,type
-      real(KIND=double_precision)::vrecipnew,vrecipold,sumr(2),sumi(2)
-     & ,arg
+      real(KIND=double_precision)::vrecipnew,vrecipold,sumr(2),sumi(2) ,arg
 
       ncount = numvect(ibox)
 
@@ -52,29 +51,19 @@
                sumi(izz) = 0.0d0
                imolty = moltion(izz)
                   if ( lqchg(ntype(imolty,ii)) ) then
-                     arg = kx(ic,ibox)*rxuion(ii,izz) +
-     &                    ky(ic,ibox)*ryuion(ii,izz) +
-     &                    kz(ic,ibox)*rzuion(ii,izz)
-                     sumr(izz) = sumr(izz) + 
-     &                    qquion(ii,izz)*dcos(arg)
-                     sumi(izz) = sumi(izz) + 
-     &                    qquion(ii,izz)*dsin(arg)
+                     arg = kx(ic,ibox)*rxuion(ii,izz) + ky(ic,ibox)*ryuion(ii,izz) + kz(ic,ibox)*rzuion(ii,izz)
+                     sumr(izz) = sumr(izz) +  qquion(ii,izz)*dcos(arg)
+                     sumi(izz) = sumi(izz) +  qquion(ii,izz)*dsin(arg)
                   end if
  20         continue
-            ssumrn(ic,ibox) = ssumr(ic,ibox) - sumr(1)
-     &           + sumr(2)
-            ssumin(ic,ibox) = ssumi(ic,ibox) - sumi(1)
-     &           + sumi(2)
+            ssumrn(ic,ibox) = ssumr(ic,ibox) - sumr(1) + sumr(2)
+            ssumin(ic,ibox) = ssumi(ic,ibox) - sumi(1) + sumi(2)
  30      continue
          vrecipnew = 0.0d0
          vrecipold = 0.0d0
          do ic = 1,ncount
-            vrecipnew = vrecipnew + (ssumrn(ic,ibox)*
-     &           ssumrn(ic,ibox) + ssumin(ic,ibox)*
-     &           ssumin(ic,ibox))*prefact(ic,ibox)
-            vrecipold = vrecipold + (ssumr(ic,ibox)*
-     &           ssumr(ic,ibox) + ssumi(ic,ibox)*
-     &           ssumi(ic,ibox))*prefact(ic,ibox)
+            vrecipnew = vrecipnew + (ssumrn(ic,ibox)* ssumrn(ic,ibox) + ssumin(ic,ibox)* ssumin(ic,ibox))*prefact(ic,ibox)
+            vrecipold = vrecipold + (ssumr(ic,ibox)* ssumr(ic,ibox) + ssumi(ic,ibox)* ssumi(ic,ibox))*prefact(ic,ibox)
          end do
 
          vrecipnew = vrecipnew*qqfact

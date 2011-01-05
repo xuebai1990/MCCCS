@@ -24,16 +24,12 @@
 
       logical::lprint,lfind
       integer(KIND=normal_int)::random_index
-      integer(KIND=normal_int)::kickout,icbu,igrow,imolty,iutry,iut
-     & ,invtry,iu,ju
-      integer(KIND=normal_int)::ibead,count,ivib,idir,movetype,iprev
-     & ,itry,i,ib2
-      integer(KIND=normal_int)::temp_store,temp_count,izz,outer_sites
-     & ,index,outer_num,outer_prev,iufrom,outer_try
+      integer(KIND=normal_int)::kickout,icbu,igrow,imolty,iutry,iut ,invtry,iu,ju
+      integer(KIND=normal_int)::ibead,count,ivib,idir,movetype,iprev ,itry,i,ib2
+      integer(KIND=normal_int)::temp_store,temp_count,izz,outer_sites ,index,outer_num,outer_prev,iufrom,outer_try
       real(KIND=double_precision)::dbgrow,random
       parameter (lprint = .false.)
-      dimension temp_store(numax),outer_sites(numax),outer_prev(numax)
-     & ,lfind(numax)
+      dimension temp_store(numax),outer_sites(numax),outer_prev(numax) ,lfind(numax)
 ! ------------------------------------------------------------------
 
 !      write(iou,*) 'start SCHEDULE'
@@ -87,8 +83,7 @@
         
          if (lrig(imolty).and.(nrig(imolty).eq.0)) then
                         
-            ju = int(random() * dble(nrigmax(imolty) 
-     &           - nrigmin(imolty) + 1)) + nrigmin(imolty)
+            ju = int(random() * dble(nrigmax(imolty)  - nrigmin(imolty) + 1)) + nrigmin(imolty)
          end if
          
 
@@ -524,8 +519,7 @@
             write(iou,*) 'growprev(ibead)',growprev(ibead)
             write(iou,*) 'grownum(ibead)',grownum(ibead)
             do count = 1,grownum(ibead)
-               write(iou,*) 'count,growlist(ibead,count)',count
-     &              ,growlist(ibead,count)
+               write(iou,*) 'count,growlist(ibead,count)',count ,growlist(ibead,count)
             end do
          end do
          do iu = 1,igrow

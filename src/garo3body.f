@@ -42,10 +42,8 @@
             end if
             nta = 1
             ntb = 1
-            if ((dij(tri).gt.grij(ntang,1)).or.
-     &           (dik(tri).gt.grij(ntang,1))) then
-               if(lwrite)
-     &         write(30,*) '   catch distance Si-O-Si',dij(tri),dik(tri)
+            if ((dij(tri).gt.grij(ntang,1)).or. (dik(tri).gt.grij(ntang,1))) then
+               if(lwrite) write(30,*) '   catch distance Si-O-Si',dij(tri),dik(tri)
                goto 10
             end if
          else
@@ -57,19 +55,15 @@
             if(ntype(moltyp(j),1).eq.1) then
                nta = 1
                ntb = 2
-               if((dij(tri).gt.grij(4,nta)).or.
-     &              (dik(tri).gt.grij(4,ntb))) then
-                  if(lwrite)
-     &            write(30,*)'  catch distance Si-O-H',dij(tri),dik(tri)
+               if((dij(tri).gt.grij(4,nta)).or. (dik(tri).gt.grij(4,ntb))) then
+                  if(lwrite) write(30,*)'  catch distance Si-O-H',dij(tri),dik(tri)
                   goto 10
                end if
             else
                nta = 2
                ntb = 1
-               if((dij(tri).gt.grij(4,nta)).or.
-     &              (dik(tri).gt.grij(4,ntb))) then
-                  if(lwrite)
-     &           write(30,*) '  catch distance H-O-Si',dij(tri),dik(tri)
+               if((dij(tri).gt.grij(4,nta)).or. (dik(tri).gt.grij(4,ntb))) then
+                  if(lwrite) write(30,*) '  catch distance H-O-Si',dij(tri),dik(tri)
                   goto 10
                end if
             end if
@@ -78,25 +72,20 @@
 !         dij = dsqrt(dijsq(tri))
 !         dik = dsqrt(diksq(tri))
          
-         thetac = (dxij(tri)*dxik(tri)+dyij(tri)*dyik(tri)+
-     &        dzij(tri)*dzik(tri))/(dij(tri)*dik(tri))
+         thetac = (dxij(tri)*dxik(tri)+dyij(tri)*dyik(tri)+ dzij(tri)*dzik(tri))/(dij(tri)*dik(tri))
          if ( thetac .ge. 1.0d0 ) thetac = 1.0d0
          if ( thetac .le. -1.0d0 ) thetac = -1.0d0
          
          p = (thetac-gtheta(ntang))**2
-         g = dexp((ggamma(ntang,nta)/(dij(tri)-grij(ntang,nta))) +
-     &        (ggamma(ntang,ntb)/(dik(tri)-grij(ntang,ntb))))
+         g = dexp((ggamma(ntang,nta)/(dij(tri)-grij(ntang,nta))) + (ggamma(ntang,ntb)/(dik(tri)-grij(ntang,ntb))))
 
          vthreea = glambda(ntang)*p*g
          if(lwrite) then
 !            write(6,*) 'details:',ntang,' out of vthreebody',vthreea
 !            write(6,*) 'thetac',thetac,' gtheta',gtheta(ntang)
-            write(69,'(A11,I10,I10,I10,F15.6)') 'vthree jik',j,i,k
-     &       ,vthreea
-            write(69,'(A11,3F10.6,F25.6)') 'ij',dxij(tri),dyij(tri)
-     &       ,dzij(tri),dij(tri)
-            write(69,'(A11,3F10.6,F25.6)') 'ik',dxik(tri),dyik(tri)
-     &       ,dzik(tri),dik(tri)
+            write(69,'(A11,I10,I10,I10,F15.6)') 'vthree jik',j,i,k ,vthreea
+            write(69,'(A11,3F10.6,F25.6)') 'ij',dxij(tri),dyij(tri) ,dzij(tri),dij(tri)
+            write(69,'(A11,3F10.6,F25.6)') 'ik',dxik(tri),dyik(tri) ,dzik(tri),dik(tri)
 !               write(6,*) 'dij',dij(tri),' dik',dik(tri)
 !            write(6,*) 'g',g,' theta',p
 !            write(6,*)
@@ -202,17 +191,12 @@
 !$$$      include "garofalini.inc"
 !$$$      include "neigh.inc"
 
-      integer(KIND=normal_int)::i,j,k,m,imolty,jmolty,kmolty,mmolty
-     & ,atomj,atomk,atomm
-      integer(KIND=normal_int)::nta,ntb,ntang,cnt,ni(nmax),temp_cnt
-     & ,itemp,number(nmax)
-      integer(KIND=normal_int)::temp_nei(nmax),itype,jtype,ktype
-     & ,mtype
+      integer(KIND=normal_int)::i,j,k,m,imolty,jmolty,kmolty,mmolty ,atomj,atomk,atomm
+      integer(KIND=normal_int)::nta,ntb,ntang,cnt,ni(nmax),temp_cnt ,itemp,number(nmax)
+      integer(KIND=normal_int)::temp_nei(nmax),itype,jtype,ktype ,mtype
       logical::ltemp(nmax),lupdate,lwrite
-      real(KIND=double_precision)::vthree,vthreea,thetac,p,g,nrij(nmax),
-     & nxi(nmax),nyi(nmax),nzi(nmax)
-      real(KIND=double_precision)::temp_dist(nmax),temp_x(nmax)
-     & ,temp_y(nmax),temp_z(nmax)
+      real(KIND=double_precision)::vthree,vthreea,thetac,p,g,nrij(nmax), nxi(nmax),nyi(nmax),nzi(nmax)
+      real(KIND=double_precision)::temp_dist(nmax),temp_x(nmax) ,temp_y(nmax),temp_z(nmax)
 
       lwrite=.false.
 
@@ -268,8 +252,7 @@
 !     &                 i,atomk,ntang,' (',i,')'
                   nta = 1
                   ntb = 1
-                  if((nrij(j).gt.grij(ntang,1)).or.
-     &                 (nrij(k).gt.grij(ntang,1))) then
+                  if((nrij(j).gt.grij(ntang,1)).or. (nrij(k).gt.grij(ntang,1))) then
 !                      if(lwrite) write(6,*) 'skipped above'
                       goto 20
                    end if
@@ -280,8 +263,7 @@
                   if(jtype.eq.1) then
                      nta = 1
                      ntb = 2
-                     if((nrij(j).gt.grij(4,nta)).or.
-     &                    (nrij(k).gt.grij(4,ntb))) then
+                     if((nrij(j).gt.grij(4,nta)).or. (nrij(k).gt.grij(4,ntb))) then
 !                        if(lwrite) write(6,*) 'skipped above'
 !                        if(i.eq.18) 
 !     &                       write(6,*) 'catch distance Si-O-H',
@@ -291,8 +273,7 @@
                   else
                      nta = 2
                      ntb = 1
-                     if((nrij(j).gt.grij(4,nta)).or.
-     &                    (nrij(k).gt.grij(4,ntb))) then
+                     if((nrij(j).gt.grij(4,nta)).or. (nrij(k).gt.grij(4,ntb))) then
 !                        if(i.eq.18)
 !     &                       write(6,*) 'catch distance H-O-Si',
 !     &                       atomj,i,atomk,nrij(j),nrij(k)
@@ -301,14 +282,12 @@
                   end if
                end if
 
-               thetac = (nxi(j)*nxi(k)+nyi(j)*nyi(k)+
-     &              nzi(j)*nzi(k))/(nrij(j)*nrij(k))
+               thetac = (nxi(j)*nxi(k)+nyi(j)*nyi(k)+ nzi(j)*nzi(k))/(nrij(j)*nrij(k))
                if ( thetac .ge. 1.0d0 ) thetac = 1.0d0
                if ( thetac .le. -1.0d0 ) thetac = -1.0d0
                
                p = (thetac-gtheta(ntang))**2
-              g = dexp((ggamma(ntang,nta)/(nrij(j)-grij(ntang,nta))
-     &             )+(ggamma(ntang,ntb)/(nrij(k)-grij(ntang,ntb))))
+              g = dexp((ggamma(ntang,nta)/(nrij(j)-grij(ntang,nta)) )+(ggamma(ntang,ntb)/(nrij(k)-grij(ntang,ntb))))
                
                vthreea = glambda(ntang)*p*g
 
@@ -362,8 +341,7 @@
          if(jtype.ne.3.and..not.(itype.eq.3.and.jtype.eq.1)) then
             if(lwrite) then
                write(6,*) 
-            write(6,*) 'j',atomj,' neigh_cnt(j)',neigh_cnt(atomj),':',
-     &           (neighbor(m,atomj),m=1,neigh_cnt(atomj))
+            write(6,*) 'j',atomj,' neigh_cnt(j)',neigh_cnt(atomj),':', (neighbor(m,atomj),m=1,neigh_cnt(atomj))
             end if
             do 30 m = 1,neigh_cnt(atomj)
                atomm = neighbor(m,atomj)
@@ -381,8 +359,7 @@
 !     &                 atomj,atomm,ntang,' (',i,')'
                   nta = 1
                   ntb = 1
-                  if((nrij(j).gt.grij(ntang,1)) .or.
-     &                 (ndij(m,atomj).gt.grij(ntang,1))) goto 30
+                  if((nrij(j).gt.grij(ntang,1)) .or. (ndij(m,atomj).gt.grij(ntang,1))) goto 30
                else
                   ntang = 4
 !                  if(lwrite) write(6,*) 'ntang determination b:',i,
@@ -390,8 +367,7 @@
                   if(itype.eq.1) then
                      nta = 1
                      ntb = 2
-                     if((nrij(j).gt.grij(4,nta)).or.
-     &                    (ndij(m,atomj).gt.grij(4,ntb))) then
+                     if((nrij(j).gt.grij(4,nta)).or. (ndij(m,atomj).gt.grij(4,ntb))) then
 !                        if(lwrite) write(6,*) 'skipped above'
 !     & write(6,*) 'catch distance Si-O-H',nrij(j),ndij(m,atomj)
                         goto 30
@@ -399,8 +375,7 @@
                   else
                      nta = 2
                      ntb = 1
-                     if((nrij(j).gt.grij(4,nta)).or.
-     &                    (ndij(m,atomj).gt.grij(4,ntb))) then
+                     if((nrij(j).gt.grij(4,nta)).or. (ndij(m,atomj).gt.grij(4,ntb))) then
 !                        if(lwrite) write(6,*) 'skipped above'
 !     & write(6,*) 'catch distance H-O-Si',nrij(j),ndij(m,atomj)
                         goto 30
@@ -408,24 +383,19 @@
                   end if
                end if
 !     because the values saved are i-j not j-i must multiply all by -1 
-               thetac = ((-nxi(j))*nxij(m,atomj)+(-nyi(j))*
-     &              nyij(m,atomj)+(-nzi(j))*nzij(m,atomj))/
-     &              (nrij(j)*ndij(m,atomj))
+               thetac = ((-nxi(j))*nxij(m,atomj)+(-nyi(j))* nyij(m,atomj)+(-nzi(j))*nzij(m,atomj))/ (nrij(j)*ndij(m,atomj))
                if ( thetac .ge. 1.0d0 ) thetac = 1.0d0
                if ( thetac .le. -1.0d0 ) thetac = -1.0d0
                
                p = (thetac-gtheta(ntang))**2
-              g = dexp((ggamma(ntang,nta)/(nrij(j)-grij(ntang,nta))
-     &             )+(ggamma(ntang,ntb)/(ndij(m,atomj)-
-     &              grij(ntang,ntb))))
+              g = dexp((ggamma(ntang,nta)/(nrij(j)-grij(ntang,nta)) )+(ggamma(ntang,ntb)/(ndij(m,atomj)- grij(ntang,ntb))))
                
                vthreea = glambda(ntang)*p*g
 
                if(lwrite) then
 !                  write(6,*) 'details:',lupdate,' triad_en 2'
 !$$$                  write(6,*) 'thetac',thetac,' ntang',ntang
-                  write(6,'(A13,I5,I5,I5,F15.7)') 'vthree ijm',i,atomj
-     &             ,atomm,vthreea
+                  write(6,'(A13,I5,I5,I5,F15.7)') 'vthree ijm',i,atomj ,atomm,vthreea
 !$$$                  write(6,*) nxi(j),nyi(j),nzi(j)
 !$$$                  write(6,*) nxij(m,atomj),nyij(m,atomj),nzij(m,atomj)
 !$$$                  write(6,*) nrij(j),ndij(m,atomj)

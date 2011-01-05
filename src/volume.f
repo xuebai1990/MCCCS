@@ -36,23 +36,15 @@
       logical::ovrlap,lvol,lx,ly,lz,lncubic
       logical::la,lb,lc
 
-      integer(KIND=normal_int)::i,j,ibox,imolty,ic,ncount,boxa,boxb
-     & ,ipair,ipairb
+      integer(KIND=normal_int)::i,j,ibox,imolty,ic,ncount,boxa,boxb ,ipair,ipairb
       real(KIND=double_precision)::bxo(nbxmax),byo(nbxmax),bzo(nbxmax)
-      real(KIND=double_precision)::volo(nbxmax),vboxo(nbxmax)
-     & ,dfac(nbxmax),voln(nbxmax),vflucqo(nbxmax),vintero(nbxmax)
-     & ,vtailo(nbxmax),vexto(nbxmax),velecto(nbxmax)
-      real(KIND=double_precision)::kxo(vectormax,nbxmax),kyo(vectormax
-     & ,nbxmax),kzo(vectormax,nbxmax),prefacto(vectormax,nbxmax)
-      real(KIND=double_precision)::vboxn(nbxmax),vintern(nbxmax),
-     & vtailn(nbxmax),vextn(nbxmax),velectn(nbxmax)
-      real(KIND=double_precision)::rxuo(nmax,numax),ryuo(nmax,numax)
-     & ,rzuo(nmax,numax),qquo(nmax,numax)
-      real(KIND=double_precision)::volt,expdv,random,df,dx,dy,dz,v,dele,
-     & vinter,vtail,vext,vdum,velect
+      real(KIND=double_precision)::volo(nbxmax),vboxo(nbxmax) ,dfac(nbxmax),voln(nbxmax),vflucqo(nbxmax),vintero(nbxmax) ,vtailo(nbxmax),vexto(nbxmax),velecto(nbxmax)
+      real(KIND=double_precision)::kxo(vectormax,nbxmax),kyo(vectormax ,nbxmax),kzo(vectormax,nbxmax),prefacto(vectormax,nbxmax)
+      real(KIND=double_precision)::vboxn(nbxmax),vintern(nbxmax), vtailn(nbxmax),vextn(nbxmax),velectn(nbxmax)
+      real(KIND=double_precision)::rxuo(nmax,numax),ryuo(nmax,numax) ,rzuo(nmax,numax),qquo(nmax,numax)
+      real(KIND=double_precision)::volt,expdv,random,df,dx,dy,dz,v,dele, vinter,vtail,vext,vdum,velect
       real(KIND=double_precision)::vminim(nbxmax)
-      real(KIND=double_precision)::xcmo,ycmo,zcmo,calpo(nbxmax)
-     & ,numvecto(nbxmax)
+      real(KIND=double_precision)::xcmo,ycmo,zcmo,calpo(nbxmax) ,numvecto(nbxmax)
       real(KIND=double_precision)::rbcut(nbxmax),rbcuta,rbcutb,rpair,rm
       real(KIND=double_precision)::w(3),min_boxl
 
@@ -161,8 +153,7 @@
 
       if (lsolid(boxa) .and. .not. lrect(boxa)) then
          if (lsolid(boxb) .and. .not. lrect(boxb)) then
-            call cleanup('can not perform volume move between two non-re
-     &ctangular boxes')
+            call cleanup('can not perform volume move between two non-re ctangular boxes')
          end if
       end if
 
@@ -301,16 +292,14 @@
             hbox = boxa
             jbox = boxb
 
-            hmat(boxa,jhmat) = hmat(boxa,jhmat) + rmhmat(boxa,jhmat)*
-     &           ( 2.0d0*random() - 1.0d0 )
+            hmat(boxa,jhmat) = hmat(boxa,jhmat) + rmhmat(boxa,jhmat)* ( 2.0d0*random() - 1.0d0 )
             bnhmat(boxa,jhmat) = bnhmat(boxa,jhmat) + 1.0d0
 
          else
             hbox = boxb
             jbox = boxa
 
-            hmat(boxb,jhmat) = hmat(boxb,jhmat) + rmhmat(boxb,jhmat)*
-     &           ( 2.0d0*random() - 1.0d0 )
+            hmat(boxb,jhmat) = hmat(boxb,jhmat) + rmhmat(boxb,jhmat)* ( 2.0d0*random() - 1.0d0 )
             bnhmat(boxb,jhmat) = bnhmat(boxb,jhmat) + 1.0d0
 
          end if
@@ -326,12 +315,9 @@
          w(3) = min_width(hbox,3)
 
 
-         if (rbcut(hbox)/w(1) .gt. 0.5d0 .or.
-     &        rbcut(hbox)/w(2) .gt. 0.5d0 .or.
-     &        rbcut(hbox)/w(3) .gt. 0.5d0) then
+         if (rbcut(hbox)/w(1) .gt. 0.5d0 .or. rbcut(hbox)/w(2) .gt. 0.5d0 .or. rbcut(hbox)/w(3) .gt. 0.5d0) then
             write(iou,*) 'Problem with line 381 in volume.f'
-            write(iou,*) 'non-rectangular volume move rejected-',
-     &                 ' box width below cutoff size'
+            write(iou,*) 'non-rectangular volume move rejected-', ' box width below cutoff size'
             write(iou,*) 'w1:',w(1),'w2:',w(2),'w3:',w(3)
             hmat(hbox,jhmat) = hmato(jhmat)
             call dump
@@ -359,25 +345,19 @@
             imolty = moltyp(i)
             if (nboxi(i) .eq. hbox) then
                if ( lx ) then
-                  dx = sxcm(i)*(hmat(hbox,1)-hmato(1))+
-     &                 sycm(i)*(hmat(hbox,4)-hmato(4))+
-     &                 szcm(i)*(hmat(hbox,7)-hmato(7))
+                  dx = sxcm(i)*(hmat(hbox,1)-hmato(1))+ sycm(i)*(hmat(hbox,4)-hmato(4))+ szcm(i)*(hmat(hbox,7)-hmato(7))
                   xcm(i) = xcm(i) + dx
                   do j = 1, nunit(imolty)
                      rxu(i,j) = rxu(i,j) + dx
                   end do
                elseif ( ly ) then
-                  dy = sxcm(i)*(hmat(hbox,2)-hmato(2))+
-     &                 sycm(i)*(hmat(hbox,5)-hmato(5))+
-     &                 szcm(i)*(hmat(hbox,8)-hmato(8))
+                  dy = sxcm(i)*(hmat(hbox,2)-hmato(2))+ sycm(i)*(hmat(hbox,5)-hmato(5))+ szcm(i)*(hmat(hbox,8)-hmato(8))
                   ycm(i) = ycm(i) + dy
                   do j = 1, nunit(imolty)
                      ryu(i,j) = ryu(i,j) + dy
                   end do
                else
-                  dz = sxcm(i)*(hmat(hbox,3)-hmato(3))+
-     &                 sycm(i)*(hmat(hbox,6)-hmato(6))+
-     &                 szcm(i)*(hmat(hbox,9)-hmato(9))
+                  dz = sxcm(i)*(hmat(hbox,3)-hmato(3))+ sycm(i)*(hmat(hbox,6)-hmato(6))+ szcm(i)*(hmat(hbox,9)-hmato(9))
                   zcm(i) = zcm(i) + dz
                   do j = 1, nunit(imolty)
                      rzu(i,j) = rzu(i,j) + dz
@@ -404,8 +384,7 @@
       
         
 ! --- calculate new volume
-         expdv = dexp(dlog(volo(boxa)/volo(boxb))
-     &        + rmvol(ipairb)*(2.0d0*random()-1.0d0))
+         expdv = dexp(dlog(volo(boxa)/volo(boxb)) + rmvol(ipairb)*(2.0d0*random()-1.0d0))
          voln(boxa)= expdv*volt/(1+expdv)
          voln(boxb)= volt-voln(boxa)
          rbcut(boxa) = rcut(boxa)
@@ -461,16 +440,10 @@
 
          rbcuta = 2.0d0*rbcut(boxa)
          rbcutb = 2.0d0*rbcut(boxb)
-         if ( boxlx(boxa) .lt. rbcuta .or. 
-     &        boxly(boxa) .lt. rbcuta .or. 
-     &        (lpbcz .and. boxlz(boxa) .lt. rbcuta) .or.
-     &        boxlx(boxb) .lt. rbcutb .or. 
-     &        boxly(boxb) .lt. rbcutb .or. 
-     &        (lpbcz .and. boxlz(boxb) .lt. rbcutb) ) then
+         if ( boxlx(boxa) .lt. rbcuta .or.  boxly(boxa) .lt. rbcuta .or.  (lpbcz .and. boxlz(boxa) .lt. rbcuta) .or. boxlx(boxb) .lt. rbcutb .or.  boxly(boxb) .lt. rbcutb .or.  (lpbcz .and. boxlz(boxb) .lt. rbcutb) ) then
                         
             write(iou,*) 'Problem in line 552 of subroutine volume.f'
-            write(iou,*) 'A move was attempted that would lead to a 
-     & boxlength less than twice rcut'
+            write(iou,*) 'A move was attempted that would lead to a  boxlength less than twice rcut'
 
             boxlx(boxa) = bxo(boxa)
             boxlx(boxb) = bxo(boxb)
@@ -490,9 +463,7 @@
 ! *** calculate centre of mass and its displacement
 
 ! - WARNING
-         if ( .not. lfold ) 
-     &        call cleanup('volume move only correct with
-     &                  folded coordinates')
+         if ( .not. lfold )  call cleanup('volume move only correct with folded coordinates')
 
          do i = 1, nchain
 
@@ -552,15 +523,13 @@
       lvol = .true.
       if ( lchgall ) then
          if (lsolid(boxa).and.(.not.lrect(boxa))) then
-             min_boxl = min(min_width(boxa,1),min_width(boxa,2),
-     &                    min_width(boxa,3))
+             min_boxl = min(min_width(boxa,1),min_width(boxa,2), min_width(boxa,3))
          else
               min_boxl = min(boxlx(boxa),boxly(boxa),boxlz(boxa))
          end if
          calp(boxa) = kalp(boxa)/min_boxl
          if (lsolid(boxb).and.(.not.lrect(boxb))) then
-             min_boxl = min(min_width(boxb,1),min_width(boxb,2),
-     &                    min_width(boxb,3))
+             min_boxl = min(min_width(boxb,1),min_width(boxb,2), min_width(boxb,3))
          else
               min_boxl = min(boxlx(boxb),boxly(boxb),boxlz(boxb))
          end if
@@ -570,17 +539,14 @@
       do i = 1,2
          if ( i .eq. 1 ) ibox = boxa
          if ( i .eq. 2 ) ibox = boxb
-         call sumup( ovrlap, v, vinter,vtail, vdum,vdum,
-     &                  vdum,vdum,vext,velect,vdum, ibox, lvol)
+         call sumup( ovrlap, v, vinter,vtail, vdum,vdum, vdum,vdum,vext,velect,vdum, ibox, lvol)
          if ( ovrlap ) goto 500
          vintern(ibox) = vinter
          vtailn(ibox)  = vtail
          vextn(ibox)   = vext  
          velectn(ibox) = velect
          v3n(ibox) = v3garo
-         vboxn(ibox)   = vboxo(ibox) + (vintern(ibox)-vintero(ibox))
-     &       + (vextn(ibox)-vexto(ibox)) + (velectn(ibox)-velecto(ibox))
-     &        + (v3n(ibox)-v3o(ibox))
+         vboxn(ibox)   = vboxo(ibox) + (vintern(ibox)-vintero(ibox)) + (vextn(ibox)-vexto(ibox)) + (velectn(ibox)-velecto(ibox)) + (v3n(ibox)-v3o(ibox))
 !kea
       end do
 
@@ -594,38 +560,24 @@
 ! *** energy, coordinates and the ewald sum
 
             vbox(ibox) = vbox(ibox) + (vboxn(ibox) - vboxo(ibox)) 
-            vinterb(ibox)  = vinterb(ibox) + 
-     &           (vintern(ibox) - vintero(ibox))
+            vinterb(ibox)  = vinterb(ibox) +  (vintern(ibox) - vintero(ibox))
             vtailb(ibox) = vtailb(ibox) + (vtailn(ibox) - vtailo(ibox))
             vextb(ibox) = vextb(ibox) + (vextn(ibox) - vexto(ibox))
-            velectb(ibox) = velectb(ibox) + 
-     &           (velectn(ibox) - velecto(ibox))
+            velectb(ibox) = velectb(ibox) +  (velectn(ibox) - velecto(ibox))
             do ichoiq = 1,nchoiq(ibox)
                call flucq(0,ibox)
             end do
          end do
          
-         dele = (vbox(boxa) - vboxo(boxa))+( vbox(boxb)- vboxo(boxb))
-     &        - ((nchbox(boxa)+1+ghost_particles(boxa))
-     &        *dlog(voln(boxa)/volo(boxa))/beta)
-     &        - ((nchbox(boxb)+1+ghost_particles(boxb))
-     &        *dlog(voln(boxb)/volo(boxb))/beta)
+         dele = (vbox(boxa) - vboxo(boxa))+( vbox(boxb)- vboxo(boxb)) - ((nchbox(boxa)+1+ghost_particles(boxa)) *dlog(voln(boxa)/volo(boxa))/beta) - ((nchbox(boxb)+1+ghost_particles(boxb)) *dlog(voln(boxb)/volo(boxb))/beta)
 
       elseif (lncubic) then
 
-         dele = (vboxn(boxa)-vboxo(boxa)) + (vboxn(boxb)-vboxo(boxb))
-     &        - ((nchbox(boxa)+ghost_particles(boxa))
-     &        *dlog(voln(boxa)/volo(boxa))/beta)
-     &        - ((nchbox(boxb)+ghost_particles(boxb))
-     &        *dlog(voln(boxb)/volo(boxb))/beta)
+         dele = (vboxn(boxa)-vboxo(boxa)) + (vboxn(boxb)-vboxo(boxb)) - ((nchbox(boxa)+ghost_particles(boxa)) *dlog(voln(boxa)/volo(boxa))/beta) - ((nchbox(boxb)+ghost_particles(boxb)) *dlog(voln(boxb)/volo(boxb))/beta)
 
       else
          
-         dele = (vboxn(boxa)-vboxo(boxa)) + (vboxn(boxb)-vboxo(boxb))
-     &        - ((nchbox(boxa)+1+ghost_particles(boxa))
-     &        *dlog(voln(boxa)/volo(boxa))/beta)
-     &        - ((nchbox(boxb)+1+ghost_particles(boxb))
-     &        *dlog(voln(boxb)/volo(boxb))/beta)
+         dele = (vboxn(boxa)-vboxo(boxa)) + (vboxn(boxb)-vboxo(boxb)) - ((nchbox(boxa)+1+ghost_particles(boxa)) *dlog(voln(boxa)/volo(boxa))/beta) - ((nchbox(boxb)+1+ghost_particles(boxb)) *dlog(voln(boxb)/volo(boxb))/beta)
       end if
 
 ! --- acceptance test
@@ -656,8 +608,7 @@
           call ctrmas(.true.,boxa,0,5)
           call ctrmas(.true.,boxb,0,5)
 ! *** update linkcell, if applicable
-          if (licell .and. (boxa .eq. boxlink .or. boxb .eq. boxlink)) 
-     &         then
+          if (licell .and. (boxa .eq. boxlink .or. boxb .eq. boxlink))  then
              call linkcell(1,1,lddum,lddum,lddum,lddum2)
           end if
           return

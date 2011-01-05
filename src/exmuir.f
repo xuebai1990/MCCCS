@@ -37,19 +37,15 @@
          else
             if ( z .lt. zprmin ) then
                if ( ntj .eq. 2 ) then
-                  exmuir = betac2 / (1.0d0+(1.0d0-(z/alpha1))**tau1 ) +
-     &                     v2prmin
+                  exmuir = betac2 / (1.0d0+(1.0d0-(z/alpha1))**tau1 ) + v2prmin
                else
-                  exmuir = betac3 / (1.0d0+(1.0d0-(z/alpha1))**tau1 ) +
-     &                     v3prmin
+                  exmuir = betac3 / (1.0d0+(1.0d0-(z/alpha1))**tau1 ) + v3prmin
                end if
             else
                if ( ntj .eq. 2 ) then
-                  exmuir = betac2 / (1.0d0+(1.0d0-(z/alpha1))**tau1 ) +
-     &                     c9ch2 / z**9 -  c3ch2 / z**3
+                  exmuir = betac2 / (1.0d0+(1.0d0-(z/alpha1))**tau1 ) + c9ch2 / z**9 -  c3ch2 / z**3
                else
-                  exmuir = betac3 / (1.0d0+(1.0d0-(z/alpha1))**tau1 ) +
-     &            c9ch3 / z**9 -  c3ch3 / z**3
+                  exmuir = betac3 / (1.0d0+(1.0d0-(z/alpha1))**tau1 ) + c9ch3 / z**9 -  c3ch3 / z**3
                end if
             end if
          end if

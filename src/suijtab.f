@@ -28,8 +28,7 @@
       integer(KIND=normal_int)::i, j, ij, ji,ibox,nntype5,nmix,imix
       real(KIND=double_precision)::rzeronx(nxatom),epsilonnx(nxatom)
 
-      real(KIND=double_precision)::rcheck, sr2, sr6, adum, bdum, rs1,
-     & rs7, sr7,pi,djay,sigmaTmp,epsilonTmp,garofalini
+      real(KIND=double_precision)::rcheck, sr2, sr6, adum, bdum, rs1, rs7, sr7,pi,djay,sigmaTmp,epsilonTmp,garofalini
 
 ! ----------------------------------------------------------------
       do i = 1, nntype
@@ -84,8 +83,7 @@
        lqchg(1) = .true.
        qelect(1) = 4.0d0
        mass(1) = 28.09d0
-       ecut(1) = garofalini(rcut(1)*rcut(1),1,qelect(1),qelect(1)
-     &      ,1,1)
+       ecut(1) = garofalini(rcut(1)*rcut(1),1,qelect(1),qelect(1) ,1,1)
        chname(1) = ' Garo Si'
        chemid(1) = 'Si '
 
@@ -96,8 +94,7 @@
        lqchg(2) = .true.
        qelect(2) = -2.0d0
        mass(2) = 16.00d0
-       ecut(2) = garofalini(rcut(1)*rcut(1),2,qelect(2),qelect(2)
-     &      ,2,2)
+       ecut(2) = garofalini(rcut(1)*rcut(1),2,qelect(2),qelect(2) ,2,2)
        chname(2) = ' Garo O'
        chemid(2) = 'O  '
        
@@ -114,8 +111,7 @@
        lqchg(3) = .true.
        qelect(3) = 1.0d0
        mass(3) = 1.0078d0
-       ecut(3) = garofalini(rcut(1)*rcut(1),3,qelect(3),qelect(3)
-     &      ,3,3)
+       ecut(3) = garofalini(rcut(1)*rcut(1),3,qelect(3),qelect(3) ,3,3)
        chname(3) = ' Garo H'
        chemid(3) = 'H  '
        
@@ -123,8 +119,7 @@
        galpha(4) =  21457024.2d0
        grho(4) = 0.29d0
        gbeta(4) = 2.34d0
-       ecut(4) = garofalini(rcut(1)*rcut(1),4,qelect(1),qelect(2)
-     &      ,1,2)
+       ecut(4) = garofalini(rcut(1)*rcut(1),4,qelect(1),qelect(2) ,1,2)
        
 !     Si-H
        galpha(5) = 499842.9d0
@@ -133,8 +128,7 @@
        ga(5,1) = -33715.5d0
        gb(5,1) = 6.0d0 
        gc(5,1) = 2.2d0
-       ecut(5) = garofalini(rcut(1)*rcut(1),5,qelect(1),qelect(3)
-     &      ,1,3)
+       ecut(5) = garofalini(rcut(1)*rcut(1),5,qelect(1),qelect(3) ,1,3)
        
 !     0-H
        galpha(6) = 2886049.4d0
@@ -149,8 +143,7 @@
        ga(6,3) = -6038.7d0
        gb(6,3) = 5.0d0 
        gc(6,3) = 2.0d0
-       ecut(6) = garofalini(rcut(1)*rcut(1),6,qelect(2),qelect(3)
-     &      ,2,3)
+       ecut(6) = garofalini(rcut(1)*rcut(1),6,qelect(2),qelect(3) ,2,3)
        
 !     Si-O-Si
        glambda(1) = 21732.3d0
@@ -247,33 +240,20 @@
 
          if (lshift) then
             do i=1,natom
-               sexsix(i) = aexsix(i)*(rcut(1)**(-6))
-     &              + bexsix(i)*Exp(cexsix(i)*rcut(1))
+               sexsix(i) = aexsix(i)*(rcut(1)**(-6)) + bexsix(i)*Exp(cexsix(i)*rcut(1))
             end do
          else 
             do i=1,natom
-               consp(i) = (2.0d0/3.0d0)*pi*(2.0d0*aexsix(i)/(rcut(1)
-     &              *rcut(1)*rcut(1))+bexsix(i)*dexp(cexsix(i)*rcut(1))
-     &              *(-6.0d0/(cexsix(i)*cexsix(i)*cexsix(i))+6.0d0
-     &              *rcut(1)/(cexsix(i)*cexsix(i))-3.0d0*rcut(1)*
-     &              rcut(1)/
-     &              cexsix(i)+rcut(1)*rcut(1)*rcut(1)))
-               consu(i) = 2.0d0*pi*(aexsix(i)/(3.0d0*rcut(1)*rcut(1)*
-     &                     rcut(1))
-     &              +(-rcut(1)*rcut(1)+2.0d0*rcut(1)/cexsix(i)-2.0d0/
-     &                      (cexsix(i)*
-     &               cexsix(i)))*bexsix(i)*dexp(cexsix(i)*rcut(1))/
-     &               cexsix(i))
+               consp(i) = (2.0d0/3.0d0)*pi*(2.0d0*aexsix(i)/(rcut(1) *rcut(1)*rcut(1))+bexsix(i)*dexp(cexsix(i)*rcut(1)) *(-6.0d0/(cexsix(i)*cexsix(i)*cexsix(i))+6.0d0 *rcut(1)/(cexsix(i)*cexsix(i))-3.0d0*rcut(1)* rcut(1)/ cexsix(i)+rcut(1)*rcut(1)*rcut(1)))
+               consu(i) = 2.0d0*pi*(aexsix(i)/(3.0d0*rcut(1)*rcut(1)* rcut(1)) +(-rcut(1)*rcut(1)+2.0d0*rcut(1)/cexsix(i)-2.0d0/ (cexsix(i)* cexsix(i)))*bexsix(i)*dexp(cexsix(i)*rcut(1))/ cexsix(i))
             end do
 !            write(11,*) 'consp(i)',consp
 !            write(11,*) 'consu(i)',consu
          end if
 
-         write(iou,*) 
-     &        ' i   aexsix       bexsix      cexsix     sexsix'
+         write(iou,*)  ' i   aexsix       bexsix      cexsix     sexsix'
          do i = 1,natom
-            write(iou,'(i3,2x,4e12.4)')i,aexsix(i),bexsix(i)
-     &           ,cexsix(i),sexsix(i)
+            write(iou,'(i3,2x,4e12.4)')i,aexsix(i),bexsix(i) ,cexsix(i),sexsix(i)
          end do
 
          return
@@ -300,8 +280,7 @@
          ammff(1) = 3.890d0
          gmmff(1) = 1.282d0
          sigimmff(1) = ammff(1)*dsqrt(dsqrt(alphammff(1)))
-         epsimmff(1) = 45582.6d0*gmmff(1)*gmmff(1)*dsqrt(nmmff(1))
-     &        /(ammff(1)**6.0d0)
+         epsimmff(1) = 45582.6d0*gmmff(1)*gmmff(1)*dsqrt(nmmff(1)) /(ammff(1)**6.0d0)
 !         sigimmff(1) = 1.126763255691509d0
 !         epsimmff(1) = 0.9994354715851470d0
          sigisq(1) = sigimmff(1)*sigimmff(1)
@@ -314,18 +293,13 @@
          ammff(3) = 4.200d0
          gmmff(3) = 1.209d0
          sigimmff(3) = ammff(3)*dsqrt(dsqrt(alphammff(3)))
-         epsimmff(3) = 45582.6d0*gmmff(3)*gmmff(3)*dsqrt(nmmff(3))
-     &        /(ammff(3)**6.0d0)
+         epsimmff(3) = 45582.6d0*gmmff(3)*gmmff(3)*dsqrt(nmmff(3)) /(ammff(3)**6.0d0)
          sigisq(3) = sigimmff(3)*sigimmff(3)
          mass(3) = 1.0078d0
 
 ! --- C---H nonbonded interaction by using cominbination rule ***
-         sigimmff(2) = 0.5d0*(sigimmff(1)+sigimmff(3))*(1.0d0 + 
-     &        0.2d0*(1.0d0-dexp(-12.d0*(((sigimmff(1)-sigimmff(3))/
-     &        (sigimmff(3)+sigimmff(1)))**2.0d0))))
-         epsimmff(2) = 91165.1d0*gmmff(1)*gmmff(3)*alphammff(1)*
-     &        alphammff(3)/((dsqrt(alphammff(1)/nmmff(1))+
-     &        dsqrt(alphammff(3)/nmmff(3)))*(sigimmff(2)**6.0d0))
+         sigimmff(2) = 0.5d0*(sigimmff(1)+sigimmff(3))*(1.0d0 +  0.2d0*(1.0d0-dexp(-12.d0*(((sigimmff(1)-sigimmff(3))/ (sigimmff(3)+sigimmff(1)))**2.0d0))))
+         epsimmff(2) = 91165.1d0*gmmff(1)*gmmff(3)*alphammff(1)* alphammff(3)/((dsqrt(alphammff(1)/nmmff(1))+ dsqrt(alphammff(3)/nmmff(3)))*(sigimmff(2)**6.0d0))
          sigisq(2) = sigimmff(2)*sigimmff(2)
 
 
@@ -352,8 +326,7 @@
 
          write(iou,*) ' i   epsimmff     sigimmff   smmff'
          do i = 1,natom
-            write(iou,'(i3,2x,4e12.4)')i,epsimmff(i),sigimmff(i)
-     &           ,smmff(i)
+            write(iou,'(i3,2x,4e12.4)')i,epsimmff(i),sigimmff(i) ,smmff(i)
          end do
 
          return
@@ -427,9 +400,7 @@
                rzero(ij) = 0.5d0*(rzeronx(i) + rzeronx(j))
                epsnx(ij) = dsqrt(epsilonnx(i)*epsilonnx(j))
                if (lshift) then
-                  shiftnsix(ij) = 4.0d0*epsnx(ij)*(rzero(ij)
-     &                   /rcut(1))**6 *
-     &               (2.0d0*(rzero(ij)/rcut(1))**3 - 3.0d0) 
+                  shiftnsix(ij) = 4.0d0*epsnx(ij)*(rzero(ij) /rcut(1))**6 * (2.0d0*(rzero(ij)/rcut(1))**3 - 3.0d0) 
                end if
             end do
          end do
@@ -3661,8 +3632,7 @@
 ! --- Lorentz-Berthelot rules --- sig_ij = 0.5 [ sig_i + sig_j ]
                if ( lmixlb ) then
                   sig2ij(ij) =(adum* 0.5d0 * ( sigi(i) + sigi(j) ) )**2
-                  if ( sigi(i) .eq. 0.0d0 .or. sigi(j) .eq. 0.0d0 )
-     &                 sig2ij(ij) = 0.0d0
+                  if ( sigi(i) .eq. 0.0d0 .or. sigi(j) .eq. 0.0d0 ) sig2ij(ij) = 0.0d0
                   epsij(ij) = bdum*dsqrt( epsi(i) * epsi(j) )
                end if
 ! --- Jorgensen mixing rules --- sig_ij = [ sig_i * sig_j ]^(1/2)

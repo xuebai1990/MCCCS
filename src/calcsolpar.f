@@ -1,6 +1,4 @@
-      subroutine  calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ,
-     &  Heat_vapor_COUL, pdV, CED_T, CED_LJ,CED_COUL,HSP_T,HSP_LJ,
-     &  HSP_COUL,ibox,jbox)
+      subroutine  calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ, Heat_vapor_COUL, pdV, CED_T, CED_LJ,CED_COUL,HSP_T,HSP_LJ, HSP_COUL,ibox,jbox)
 ! ***********************************************************************************
 !  Written by Neeraj Rai. Date 08/22/2006
 
@@ -37,8 +35,7 @@
       real(KIND=double_precision),dimension(nbxmax)::mol_vol      
       real(KIND=double_precision),dimension(nbxmax)::pres
       real(KIND=double_precision)::enchg1, enchg2,enchg3
-      real(KIND=double_precision)::Heat_vapor_T, Heat_vapor_LJ,
-     & Heat_vapor_COUL
+      real(KIND=double_precision)::Heat_vapor_T, Heat_vapor_LJ, Heat_vapor_COUL
       real(KIND=double_precision)::CED_T, HSP_T, CED_LJ, HSP_LJ
       real(KIND=double_precision)::CED_COUL,HSP_COUL
       real(KIND=double_precision)::cal2joule, joule2cal
@@ -104,8 +101,7 @@
          Coul_energy_Liq = 0.0d0 
       else
          T_Energy_Liq = vbox(il)/temp_nmol(il)
-         LJ_Energy_Liq = (vinterb(il)+vintrab(il)+
-     &        vtailb(il))/temp_nmol(il)
+         LJ_Energy_Liq = (vinterb(il)+vintrab(il)+ vtailb(il))/temp_nmol(il)
          Coul_Energy_Liq = velectb(il)/temp_nmol(il)
       end if
       
@@ -115,31 +111,25 @@
          Coul_energy_Gas = 0.0d0
       else
          T_Energy_Gas = vbox(ig)/temp_nmol(ig)
-         LJ_Energy_Gas = (vinterb(ig)+vintrab(ig)+
-     &        vtailb(ig))/temp_nmol(ig)
+         LJ_Energy_Gas = (vinterb(ig)+vintrab(ig)+ vtailb(ig))/temp_nmol(ig)
          Coul_Energy_Gas = velectb(ig)/temp_nmol(ig)
       end if
       
       
-      enchg1 = 0.008314510d0*(T_Energy_Gas -
-     &     T_Energy_Liq)
+      enchg1 = 0.008314510d0*(T_Energy_Gas - T_Energy_Liq)
 
       pdV = pres(ig)*(mol_vol(ig)-mol_vol(il))*1.0d-6
       
-      Heat_vapor_T = enchg1 + pres(ig)*
-     &     (mol_vol(ig)-mol_vol(il))*1.0d-6
+      Heat_vapor_T = enchg1 + pres(ig)* (mol_vol(ig)-mol_vol(il))*1.0d-6
 !     write(iou,1505) il,ig,abs(enthchg1)
 !     -- This is inter+intra LJ
       enchg2 = 0.008314510d0*(LJ_Energy_Gas-LJ_Energy_Liq)
-      Heat_vapor_LJ = enchg2 + pres(ig)*
-     &     (mol_vol(ig)-mol_vol(il))*1.0d-6
+      Heat_vapor_LJ = enchg2 + pres(ig)* (mol_vol(ig)-mol_vol(il))*1.0d-6
 !     -- This is Coulomb part
       enchg3 = 0.008314510d0*(Coul_Energy_Gas-Coul_Energy_Liq)
-      Heat_vapor_COUL = enchg3 + pres(ig)*
-     &     (mol_vol(ig)-mol_vol(il))*1.0d-6
+      Heat_vapor_COUL = enchg3 + pres(ig)* (mol_vol(ig)-mol_vol(il))*1.0d-6
 !     -- Calculating Hildebrand solubility parameter (total)
-      CED_T = (abs(enchg1)*
-     &     1000.0d0*joule2cal)/mol_vol(il)
+      CED_T = (abs(enchg1)* 1000.0d0*joule2cal)/mol_vol(il)
       if (CED_T.lt.0.0d0) then
          HSP_T = 0.0
       else
@@ -147,8 +137,7 @@
       end if
 !     write(iou,1508) temp,HSP_TOTAL
 !     -- Calculating Hildebrand solubility parameter (LJ part)
-      CED_LJ = ((abs(enchg2))*1000.0d0*
-     &     joule2cal)/mol_vol(il)
+      CED_LJ = ((abs(enchg2))*1000.0d0* joule2cal)/mol_vol(il)
       if (CED_LJ.lt.0.0d0) then
          HSP_LJ =0.0d0
       else
@@ -156,8 +145,7 @@
       end if
 !     write(iou,1509) HSP_LJ
 !     -- Calculating Hildebrand solubility parameter (Coulomb part)
-      CED_COUL = (abs(enchg3)*
-     &     1000.0d0*joule2cal)/mol_vol(il)
+      CED_COUL = (abs(enchg3)* 1000.0d0*joule2cal)/mol_vol(il)
       if (CED_COUL.lt.0.0d0) then
          HSP_COUL=0.0d0
       else
