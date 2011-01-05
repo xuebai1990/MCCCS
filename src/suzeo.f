@@ -20,8 +20,7 @@
       integer(KIND=normal_int)::imol,iunit,igtype,idi,jerr,i,j,k, ngrxt
      & ,ngryt,ngrzt,ibox=1
       character(LEN=default_path_length)::filename
-      real(KIND=double_precision)::zunitxt,zunityt,zunitzt,exzeof,xi,yi
-     & ,zi
+      real(KIND=double_precision)::zunitxt,zunityt,zunitzt,exzeof
 
 ! === load force field
 !      call forcefield(rczeo)

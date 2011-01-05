@@ -46,27 +46,24 @@
 !$$$      include 'tabulated.inc'
  
       logical::ovrlap, lvol 
-      logical::lexplt,lqimol,lqjmol,lcoulo,lij2,liji,lqchgi,lexclude
+      logical::lexplt,lqimol,lqjmol,lcoulo,lij2,liji,lqchgi
       integer(KIND=normal_int)::i, imolty, ii, j, jmolty, jj, ntii, ntjj
-     & , ntij, iunit, ip1, ip2, ip3,ibox,nmcount,iii,jjj,ip,iivib, jjvib
-     & , jjben, jjtor, it, ntj,itype,k, mmm
+     & , ntij, iunit, ip1, ip2, ip3,ibox,nmcount,iii,jjj,iivib, jjvib
+     & , jjben, jjtor, it, ntj,k, mmm
       real(KIND=double_precision)::v, vinter, vintra, vtail, vvib, vbend
      & , vtg, vext,velect,vflucq,qqii,vtmp
       real(KIND=double_precision)::rcutsq,rminsq,rxui,ryui,rzui,rxuij
      & ,ryuij,rzuij,rijsq,sr2, sr6, rho, thetac, theta,xaa1, yaa1, zaa1,
-     & xa1a2, ya1a2, za1a2, daa1, da1a2, dot,vtorso, dzui, dz3, dz12,
-     & rhoz,xcc,ycc,zcc,tcc,spltor,mmff,rij,vrecipsum,erfunc,rbcut
+     & xa1a2, ya1a2, za1a2, daa1, da1a2, dot,vtorso, dzui, dz3, dz12
+     & ,xcc,ycc,zcc,tcc,spltor,mmff,rij,vrecipsum,erfunc,rbcut
      & ,ninesix,vwell, genlj
 ! tabulated potential variables
       real(KIND=double_precision)::tabulated_vib, tabulated_bend,
-     & tabulated_vdW,tabulated_elect, rbend, rbendsq
-
-      real(KIND=double_precision)::sx,sy,sz
+     & tabulated_vdW,tabulated_elect
 
 !      real(KIND=double_precision)::vtemp
-      real(KIND=double_precision)::vsc
 
-      real(KIND=double_precision)::coru,coruz,xcmi,ycmi,zcmi,rcmi,rcm
+      real(KIND=double_precision)::coru,xcmi,ycmi,zcmi,rcmi,rcm
      & ,rcmsq,qave,garofalini
       real(KIND=double_precision)::ljsami,ljpsur,ljmuir,exsami,exmuir
      & ,exzeo,exsix
@@ -75,7 +72,7 @@
      & ,rzvec(numax,numax),distanceij(numax,numax),epsilon2 ,sigma2,
      & distij2(numax,numax)
       real(KIND=double_precision)::slitpore, v_elect_field, field
-      dimension lcoulo(numax,numax),lexclude(nmax)
+      dimension lcoulo(numax,numax)
 ! Neeraj & RP for MPI
       real(KIND=double_precision)::sum_velect,sum_vinter,sum_vtail
      & ,sum_vintra,sum_vflucq,sum_vvib,sum_vbend,sum_vtg,sum_vext

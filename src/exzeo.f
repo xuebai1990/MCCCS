@@ -19,8 +19,8 @@
 !$$$      include 'cell.inc'
 !$$$      include 'poten.inc'
 !$$$      include 'grid.inc'
-      real(KIND=double_precision)::exzeo,xi,yi,zi,r2,xr,yr,zr,r2i,r6
-      integer(KIND=normal_int)::m,mt,mp,idi,idj,ntij,igtype,ibox=1
+      real(KIND=double_precision)::exzeo,xi,yi,zi,xr,yr,zr
+      integer(KIND=normal_int)::m,mt,mp,idi,igtype,ibox=1
       integer(KIND=normal_int)::j,j0,jp,k,k0,kp,l,l0,lp
       parameter (m=2,mt=2*m+1,mp=m+1)
       real(KIND=double_precision)::yjtmp(mt),yktmp(mt),yltmp(mt)

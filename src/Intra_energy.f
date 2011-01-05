@@ -35,36 +35,24 @@
 !$$$      include 'cell.inc'
 !$$$      include 'tabulated.inc'
 
-      logical::lqimol,lqjmol,lexplt,lcoulo,lfavor,lij2,liji,lqchgi
-      logical::lljii,ovrlap,ltors,lcharge_table,lt,lfound
+      logical::lfavor
+      logical::lljii,ovrlap,ltors,lcharge_table
 
-      integer(KIND=normal_int)::growii,growjj,k,cellinc,jcell,ic,nmole
-      integer(KIND=normal_int)::i,ibox, istart, iuend,ii,ntii,flagon,jjj
-     & ,iii,j,jj,ntjj,ntij,ntj,imolty,jmolty,ncell
-      integer(KIND=normal_int)::iivib,jjtor,ip1,ip2,ip3,it,nchp2
-     & ,acellinc
+      integer(KIND=normal_int)::i,ibox, istart, iuend,ii,j,jj,imolty
+      integer(KIND=normal_int)::iivib,jjtor,ip1,ip2,ip3,it,flagon
 
       integer(KIND=normal_int)::jjvib,jjben  
 
       real(KIND=double_precision)::vvib,vbend,vtg,theta
 
-      real(KIND=double_precision)::ljsami,ljpsur,ljmuir,v,vintra, vinter
-     & ,vext,rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq,ryuij,rzuij,sr2
-     & ,sr6,rij,rijsq,dzui,dz3,dz12,exgrph,exsami,exmuir,exzeo,vtors
-     & ,exsix,velect,vewald,mmff,rbcut,rvdwsq,rchgsq,ninesix, genlj
-      real(KIND=double_precision)::erfunc,qave
+      real(KIND=double_precision)::v,vintra, vinter ,vext,rcutsq,rminsq
+     & ,rxui,rzui,ryui,rcinsq ,vtors ,velect,vewald,rbcut
       real(KIND=double_precision)::rxvec,ryvec,rzvec,xaa1,yaa1,zaa1
      & ,xa1a2,ya1a2,za1a2,daa1,da1a2,dot,thetac,vtorso
-      real(KIND=double_precision)::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq
-     & ,epsilon2,sigma2
-      real(KIND=double_precision)::sx,sy,sz
-      real(KIND=double_precision)::slitpore	
       real(KIND=double_precision)::distanceij(numax,numax)
       real(KIND=double_precision)::xcc,ycc,zcc,tcc,spltor, tabulated_vib
 
       dimension rxvec(numax,numax),ryvec(numax,numax),rzvec(numax,numax)
-      dimension lcoulo(numax,numax),cellinc(cmax),jcell(nmax)
-      dimension acellinc(numax,27)
 
 ! --------------------------------------------------------------------
 

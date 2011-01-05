@@ -16,8 +16,8 @@
 !$$$      include 'connect.inc'
 
       integer(KIND=normal_int)::i,j,k,n,iunit,imolty,dum,iu,countbend
-     & ,counttor,atype,btype,ctype,dtype,tortype,ibend,bendtype,ntor
-     & ,itor,ju,ku,nu,type,sitelook,vibtype,countvib
+     & ,counttor,atype,btype,ctype,dtype,tortype,bendtype
+     & ,ju,ku,nu,vibtype,countvib
 
 !     ************************************************************
 

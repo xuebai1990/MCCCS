@@ -30,22 +30,16 @@
 !$$$      include 'poten.inc'
       
       logical::linterqt,ovrlap
-      integer(KIND=normal_int)::i,ibox,iunit,j,imolty,icbu,mainunit,ic
-     & ,ii,ncount,ichoiq,ichoice,qunit,boxi,flagon
+      integer(KIND=normal_int)::i,ibox,iunit,j,imolty,icbu,mainunit
+     & ,ichoice,qunit,boxi,flagon
       real(KIND=double_precision)::dchain,random,vnew,vold,deltv,deltvb
      & ,velectn,velecto,vflucqn,vflucqo ,dispbig,displit,vintern,vintero
      & ,vewaldn,vewaldo
-      real(KIND=double_precision)::qion
-      real(KIND=double_precision)::velectn_intra,velectn_inter
-     & ,velecto_intra,velecto_inter 
-      dimension qion(numax)
-      real(KIND=double_precision)::vrecipn,vrecipo,sumr,sumi,arg
-      dimension sumr(2),sumi(2)
-      
+      real(KIND=double_precision)::qion(numax)
+      real(KIND=double_precision)::vrecipn,vrecipo
       integer(KIND=normal_int)::maini,mainj,jchain
-      real(KIND=double_precision)::qionj(numax),vinterjo,vflucqjo
-     & ,velectjo,voldj,vinterjn,vflucqjn,velectjn,vnewj,corr,rij,erfunc
-     & ,rxuij,ryuij,rzuij,vdum,vewaldjn,vewaldjo
+      real(KIND=double_precision)::qionj(numax),vflucqjo,vflucqjn,corr
+     & ,rij,erfunc,rxuij,ryuij,rzuij,vdum,vewaldjn,vewaldjo
       real(KIND=double_precision)::qoldj2,vnewi,velectni,vinterni,voldi,
      & velectoi,vinteroi
 

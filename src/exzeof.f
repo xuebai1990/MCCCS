@@ -165,12 +165,10 @@
 !$$$      include 'mpif.h'
 !$$$      include 'mpi.inc'
 
-      integer(KIND=normal_int)::ibox=1,i,ii
+      integer(KIND=normal_int)::ibox=1,i
 
 ! * from h-matrix formulation
-      integer(KIND=normal_int)::l,m,n,m_min,m_max,n_min,n_max,kmaxl
-     & ,kmaxm,kmaxn
-      integer(KIND=normal_int)::mystart,myend,blocksize
+      integer(KIND=normal_int)::l,m,n,m_min,n_min,kmaxl,kmaxm,kmaxn
       real(KIND=double_precision)::alpsqr4,vol,ksqr,sum,arg,recipzeo,xi
      & ,yi,zi,qi,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi
 

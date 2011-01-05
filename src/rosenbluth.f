@@ -59,14 +59,14 @@
       real(KIND=double_precision)::dum,xub,yub,zub,length,lengtha
      & ,lengthb,wadd
 
-      real(KIND=double_precision)::vdha,x,y,z,maxlen,vorient,vtorf ,xaa1
+      real(KIND=double_precision)::vdha,x,y,z,maxlen,vtorf ,xaa1
      & ,yaa1,zaa1,daa1,xa1a2,ya1a2,za1a2,da1a2 ,thetac,dot,rbf,bsum,bs
      & ,random,xcc,ycc,zcc,tcc
       real(KIND=double_precision)::vbbtr,vvibtr,vtorso,wei_vib,wbendv
      & ,dist
       real(KIND=double_precision)::bondlen,bendang,phi,phidisp,phinew
      & ,thetanew
-      real(KIND=double_precision)::cwtorf,vfbbtr,vphi,theta,spltor,rm
+      real(KIND=double_precision)::cwtorf,vfbbtr,vphi,theta,spltor
 
       dimension bondlen(numax),bendang(numax),phi(numax)
      

@@ -52,7 +52,7 @@
       real(KIND=double_precision)::xb(numax), yb(numax), zb(numax)
 
 !     --- LOCAL VARIABLES ---
-      integer(KIND=normal_int)::i, imoltype_b, nunit_b, nunit_a
+      integer(KIND=normal_int)::i, imoltype_b, nunit_b
       integer(KIND=normal_int)::ia_bead1, ia_bead2, ia_bead3
       integer(KIND=normal_int)::ib_bead1, ib_bead2, ib_bead3
 
@@ -60,8 +60,8 @@
       real(KIND=double_precision)::xorigin, yorigin, zorigin
       real(KIND=double_precision)::xcross,  ycross,  zcross
       real(KIND=double_precision)::xtemp,   ytemp,   ztemp
-      real(KIND=double_precision)::dxa,     dya,     dza
-      real(KIND=double_precision)::dxb,     dyb,     dzb
+      real(KIND=double_precision)::dxa,     dya
+      real(KIND=double_precision)::dxb,     dyb
 
       real(KIND=double_precision)::rnorm, d
       real(KIND=double_precision)::gamma_a, gamma_b

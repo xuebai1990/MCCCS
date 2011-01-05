@@ -32,17 +32,13 @@
 !$$$!kea
 !$$$      include 'garofalini.inc'
 
-      logical::lx,ly,lz,ovrlap,idum,ddum
+      logical::lx,ly,lz,ovrlap,ddum(27)
+      logical::lneighij
 
-      logical::lneighij,lclu_cmp,lexclude(nmax)
-
-      integer(KIND=normal_int)::i,ibox,flagon,iunit,j,imolty,icbu,ncount
-     & ,ic,ip,k
+      integer(KIND=normal_int)::i,ibox,flagon,iunit,j,imolty,icbu,ic,ip
       real(KIND=double_precision)::rx,ry,rz,dchain,ddx,ddy,ddz,random
      & ,vnew,vold,vintran,vintrao,deltv,deltvb,disvsq,vintern,vintero
      & ,vextn,vexto,rchain,velectn,velecto,vdum,vrecipo,vrecipn,v3n,v3o
-     & ,velectn_intra,velectn_inter,velecto_intra,velecto_inter 
-      dimension ddum(27)
 
       logical::laccept
 

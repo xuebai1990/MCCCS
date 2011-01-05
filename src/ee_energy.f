@@ -34,7 +34,7 @@
 !$$$      include 'eepar.inc'
 
       logical::lqimol,lqjmol,lexplt,lcoulo,lfavor,lij2,liji,lqchgi
-      logical::lljii,ovrlap,ltors,lcharge_table,lt,lfound
+      logical::lljii,ovrlap,ltors,lcharge_table,lfound
 
       integer(KIND=normal_int)::growii,growjj,k,cellinc,jcell,ic,nmole
       integer(KIND=normal_int)::i,ibox, istart, iuend,ii,ntii,flagon,jjj

@@ -26,13 +26,13 @@
 
       logical::lhere(nmax)       
       integer(KIND=normal_int)::i,j,m,m1,m2,n,nn,ic,jc,kc,it,ip1,ip2,ip3
-     & ,ii,jj,iivib,jjben,jjtor,intemp,imol,nt,ibtype,imolty,ibuild
+     & ,ii,jj,iivib,jjben,jjtor,intemp,imol,ibtype,imolty,ibuild
      & ,rand_id,offset,count_chain
 
-      integer(KIND=normal_int)::iboxst,iboxed,ibox,pct,check,chktot
+      integer(KIND=normal_int)::iboxst,iboxed,ibox,check,chktot
       integer(KIND=normal_int)::mcmt(ntmax,nbxmax),pcmt(ntmax)
      & ,mcmtma(ntmax,nbxmax)
-      integer(KIND=normal_int)::unitc,ntii,ichain
+      integer(KIND=normal_int)::unitc,ntii
 
       integer(KIND=normal_int)::bmap(numax),imap(numax),zzz,prev,ifrom
      & ,nsave

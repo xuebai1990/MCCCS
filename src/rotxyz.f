@@ -32,14 +32,13 @@
 !$$$      include 'ipswpar.inc'
 !$$$      include 'eepar.inc'
 
-      logical::lx,ly,lz,ovrlap,lneighij,lclu_cmp,lexclude(nmax)
+      logical::lx,ly,lz,ovrlap,lneighij
       integer(KIND=normal_int)::i,ibox,flagon,iunit,j,imolty,iuroty,icbu
-     & ,ic,ip,k
+     & ,ic,ip
       real(KIND=double_precision)::rx,ry,rz,dchain,rchain,random,vnew
      & ,vold,vintrao,dgamma,rxorig,ryorig,rzorig,rxnew2,rynew2,rznew2
      & ,vintran,disvsq,deltv,deltvb,vintern,vintero,vextn,vexto,vdum
-     & ,velectn,velecto,velectn_intra,velectn_inter,velecto_intra
-     & ,velecto_inter
+     & ,velectn,velecto
 ! *** further variable definitions
       real(KIND=double_precision)::cosdg, sindg, rmrot
       real(KIND=double_precision)::vrecipn,vrecipo

@@ -23,7 +23,7 @@
  
       real(KIND=double_precision)::abx,aby,abz,bcx,bcy,bcz,cax,cay,caz
       real(KIND=double_precision)::elem(9),inv_vol,adj(9),cosa,cosb,cosg
-      integer(KIND=normal_int)::ibox,i,j
+      integer(KIND=normal_int)::ibox,i
 
       do i=1,9
          elem(i)=hmat(ibox,i)

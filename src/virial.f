@@ -46,13 +46,13 @@
 ! *** only use for polarizable models
       integer(KIND=normal_int)::chgmax
       parameter (chgmax=10)
-      integer(KIND=normal_int)::ip1,ip2,iunit,numchg,info,ipiv(chgmax)
+      integer(KIND=normal_int)::ip1,ip2,iunit,numchg
      & ,mainsite(2,2),lam1,lam2
       real(KIND=double_precision)::a(chgmax,chgmax),b2(chgmax,1)
      & ,mainxiq(2,2)
 
       real(KIND=double_precision)::consa1,consa2,consb1,consb2,selfadd1
-     & ,selfadd2,vtotal,epsilon2,vmin
+     & ,selfadd2,epsilon2,vmin
 
       real(KIND=double_precision)::mass_t,binvir2(maxvir,maxntemp),
      & factor,corr,vold,deri_u

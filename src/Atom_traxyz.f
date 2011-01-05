@@ -28,17 +28,16 @@
 !$$$      include 'bnbsma.inc'
 !$$$      include 'neigh.inc'
 
-      logical::lx,ly,lz,ovrlap,idum,ddum
+      logical::lx,ly,lz,ovrlap,ddum
 
-      logical::lneighij,lclu_cmp,lexclude(nmax)
+      logical::lneighij
 
-      integer(KIND=normal_int)::i,ibox,flagon,iunit,j,imolty,icbu,ncount
-     & ,ic,ip,k
+      integer(KIND=normal_int)::i,ibox,flagon,iunit,j,imolty,icbu
+     & ,ic,ip
       integer(KIND=normal_int)::pick_unit, pick_chain
-      real(KIND=double_precision)::rx,ry,rz,dchain,ddx,ddy,ddz,random
+      real(KIND=double_precision)::rx,ry,rz,dchain,random
      & ,vnew,vold,vintran,vintrao,deltv,deltvb,disvsq,vintern,vintero
      & ,vextn,vexto,rchain,velectn,velecto,vdum,vrecipo,vrecipn
-     & ,velectn_intra,velectn_inter,velecto_intra,velecto_inter
  
       real(KIND=double_precision)::vvibn,vbendn,vtgn,vvibo,vbendo,vtgo
 

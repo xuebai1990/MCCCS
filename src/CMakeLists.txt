@@ -25,7 +25,7 @@ if (Fortran_COMPILER_NAME STREQUAL "mpif90")
   # mpif90 wrapper
   #set (CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O3")
   set (CMAKE_Fortran_FLAGS_RELEASE "-ipo -O3 -no-prec-div -xHost")
-  set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g -traceback -check all -warn declarations -warn truncated_source -warn uncalled")
+  set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g -traceback -check all -warn all")
 elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
   # Intel Compiler for x86 architecture
   set (CMAKE_Fortran_FLAGS_RELEASE "-O2 -w90 -w95 -cm")

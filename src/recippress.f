@@ -35,7 +35,6 @@
      & ,pxz,pzx
 
 !----RP added for MPI
-      integer(KIND=normal_int)::blocksize,mystart,myend
       real(KIND=double_precision)::sum_repressx,sum_repressy
      & ,sum_repressz,sum_pxy,sum_pxz,sum_pyz
       real(KIND=double_precision)::sum_recipintra,sum_intraxx

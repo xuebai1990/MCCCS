@@ -1,5 +1,11 @@
       subroutine expand
 
+!    **********************************************************************
+!    ** make a transition of a selected molecule from state i to state j **
+!    ** in an expanded-ensemble sampling.                                **
+!    ** written on Aug. 4/99 by Bin Chen.                                **
+!    **********************************************************************
+      
       use global_data
       use var_type
       use const_phys
@@ -11,12 +17,6 @@
       implicit none
       include 'common.inc'
 
-!    **********************************************************************
-!    ** make a transition of a selected molecule from state i to state j **
-!    ** in an expanded-ensemble sampling.                                **
-!    ** written on Aug. 4/99 by Bin Chen.                                **
-!    **********************************************************************
-      
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'coord2.inc'
@@ -31,10 +31,9 @@
       integer(KIND=normal_int)::i,ibox,iunit,flagon,itype,j,imolty,icbu
      & ,ic,imt,jmt,itype2,disp
       real(KIND=double_precision)::dchain,random,vnew,vold ,vintran
-     & ,vintrao,deltv,deltvb,disvsq ,vintern,vintero,vextn,vexto,rchain
+     & ,vintrao,deltv,deltvb,vintern,vintero,vextn,vexto
      & ,velectn,velecto,vdum ,vrecipo,vrecipn,vexpta,vexptb,volume,rho
      & ,coru
-      logical::laccept
 
 !      write(iou,*) 'start expand-ensemble move'
 ! ***    select a chain at random ***

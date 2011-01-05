@@ -139,7 +139,7 @@
 !$$$      include "garofalini.inc"
 !$$$      include "neigh.inc"
 
-      integer(KIND=normal_int)::i,j,k,imolty,ptr,ptr2
+      integer(KIND=normal_int)::i,j,k,ptr,ptr2
 
 !      write(6,*) 'starting triad'
 
@@ -206,7 +206,7 @@
      & ,atomj,atomk,atomm
       integer(KIND=normal_int)::nta,ntb,ntang,cnt,ni(nmax),temp_cnt
      & ,itemp,number(nmax)
-      integer(KIND=normal_int)::temp_nei(nmax),nnn,itype,jtype,ktype
+      integer(KIND=normal_int)::temp_nei(nmax),itype,jtype,ktype
      & ,mtype
       logical::ltemp(nmax),lupdate,lwrite
       real(KIND=double_precision)::vthree,vthreea,thetac,p,g,nrij(nmax),

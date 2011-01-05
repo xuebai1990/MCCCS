@@ -36,7 +36,7 @@
 !$$$      include 'tabulated.inc'
 
       logical::lqimol,lqjmol,lexplt,lcoulo,lfavor,lij2,liji,lqchgi
-      logical::lljii,ovrlap,ltors,lcharge_table,lt,lfound
+      logical::lljii,ovrlap,ltors,lcharge_table,lfound
       logical::lmim
 
       integer(KIND=normal_int)::growii,growjj,k,cellinc,jcell,ic,nmole
@@ -58,7 +58,6 @@
      & ,xa1a2,ya1a2,za1a2,daa1,da1a2,dot,thetac,vtorso
       real(KIND=double_precision)::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq
      & ,epsilon2,sigma2
-      real(KIND=double_precision)::sx,sy,sz
       real(KIND=double_precision)::slitpore,v_elect_field
       real(KIND=double_precision)::distanceij(numax,numax)
       real(KIND=double_precision)::xcc,ycc,zcc,tcc,spltor

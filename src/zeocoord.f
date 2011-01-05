@@ -17,10 +17,8 @@
 !$$$      include 'system.inc'
 !$$$      include 'cell.inc'
 !$$$      include 'mpi.inc'
-      integer(KIND=normal_int)::count,frac,izeo,bonding(8),atomtype,ibox
-     & =1
-      real(KIND=double_precision)::wzeo,charge,alpha,betaang,gamma,sx,sy
-     & ,sz
+      integer(KIND=normal_int)::atomtype,count,frac,izeo,ibox=1
+      real(KIND=double_precision)::wzeo,alpha,betaang,gamma,sx,sy,sz
       character(LEN=4)::atom
 
       open (unit = 47, file = 'zeolite.cssr')
@@ -91,7 +89,7 @@
          else
             lunitcell(izeo)=.false.
          end if
-         idzeo(izeo)=atomtype(zntype,atom)
+         idzeo(izeo)=atomtype(atom)
 !         if (myid.eq.0) write(16,*) zeox(izeo),zeoy(izeo),
 !     &        zeoz(izeo),idzeo(izeo)
       end do

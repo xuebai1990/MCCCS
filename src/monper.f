@@ -37,7 +37,7 @@
       integer(KIND=normal_int)::nummol,ntii
       integer(KIND=normal_int)::nibox,im,nnn,ntot,nblock,imolty,m,mm,i,j
      & ,jjtor,ibox,itype,itel,mnbox,zzz,steps,igrow,jmolty,jbox
-      integer(KIND=normal_int)::imend,itemp,bin,k,jjben,ip2,ip1,ip3,it
+      integer(KIND=normal_int)::imend,bin,k,jjben,ip2,ip1,ip3,it
      & ,ii,jj,ivib
       logical::lratio,lratv,lprint,lmv,lrsave,lblock,lfq,lratfix
      & ,lsolute,ovrlap
@@ -45,14 +45,13 @@
      & acsolpar
       real(KIND=double_precision), dimension(nbxmax):: acEnthalpy
      & ,acEnthalpy1
-      real(KIND=double_precision)::press1,press2,dp,dpp,debroglie
+      real(KIND=double_precision)::dp,dpp,debroglie
      & ,histrat
       real(KIND=double_precision)::acv, molfra,acpres,acsurf,acvolume
      & ,asetel,acdens,histtot,acmove,acnp,dvalue,dnchoi,dnchoi1,dnchoih
      & ,dnunit,ratflcq,v,vintra,vinter,vext,velect,vewald,vtors,vtail
      & ,rho,coru,thetac,vbend,rxvec,ryvec,rzvec,distanceij,theta,vtorso
-     & ,xaa1 ,yaa1,zaa1,xa1a2,ya1a2,za1a2,dot,daa1,da1a2,velect_intra
-     & ,velect_inter
+     & ,xaa1 ,yaa1,zaa1,xa1a2,ya1a2,za1a2,dot,daa1,da1a2
 
       real(KIND=double_precision)::xcc,ycc,zcc,tcc,spltor,rcutmin      
  

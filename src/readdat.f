@@ -45,24 +45,22 @@
       real(KIND=double_precision)::random,rtest(10)
 
 ! -- variables for histograms	
-      integer(KIND=normal_int)::fname
-      character(LEN=default_path_length)::file_movie,file_run,ftemp
-     & ,fname2,file_dipole 
-      character(LEN=default_path_length)::fname4
+      character(LEN=default_path_length)::file_movie,file_run
+     & ,file_dipole 
       character(LEN=default_path_length)::fileout
  
       integer(KIND=normal_int)::temnc, imol, iutemp, imolty, itype,ipair
-     & ,bdum,bin,histtot
-      integer(KIND=normal_int)::idummy(ntmax), atemp 
+     & ,bdum,bin
+      integer(KIND=normal_int)::idummy(ntmax)
 
       integer(KIND=normal_int)::i,j,k,ncres, nmtres, iensem, inpbc,
      & nmcount
       integer(KIND=normal_int)::im,nures, ibox,  ij, tcount,ucheck
      & ,nnframe
       integer(KIND=normal_int)::nijspecial,ispecial,jspecial,ji,ii,jj
-     & ,nexclu,ndum,ntii
+     & ,nexclu,ndum
 
-      integer(KIND=normal_int)::izz,temphe,z,itemp,zzz
+      integer(KIND=normal_int)::izz,temphe,z,zzz
       integer(KIND=normal_int)::nvirial,k_max_l,k_max_m,k_max_n
       integer(KIND=normal_int)::inclnum,inclmol,inclbead,inclsign
      & ,ncarbon
@@ -74,13 +72,12 @@
       dimension ainclbead(ntmax*numax*numax,2)
       dimension a15t(ntmax*numax*numax)
 
-      real(KIND=double_precision)::starvir,stepvir,fqtemp,qbox,vol,v(3)
-     & ,w(3)
+      real(KIND=double_precision)::starvir,stepvir,fqtemp,qbox,w(3)
       real(KIND=double_precision)::debroglie, qtot,min_boxl
 
-      real(KIND=double_precision)::pie2,rcnnsq,umatch,aspecd,bspecd,dum
+      real(KIND=double_precision)::rcnnsq,umatch,aspecd,bspecd,dum
      & ,pm,pcumu
-      logical::lnrtab,lucall,lpolar,lqqelect,lee,lratfix,lreadq
+      logical::lucall,lpolar,lqqelect,lee,lratfix,lreadq
       logical::linit, lecho, lmixlb, lmixjo, lhere,lsetup,lsolute
       logical::lprint,lverbose,lxyz,lfound,ltab
 
@@ -111,10 +108,7 @@
 ! Conversion factor for Mpa to simulation unit
       real(KIND=double_precision)::MPa2SimUnits
 
-      character(LEN=default_string_length)::line
-
 ! KEA torsion variables
-      logical::Lttor,lspline,linter
       integer(KIND=normal_int)::mmm,ttor
 ! KM tabulated potential variables
       integer(KIND=normal_int)::tvib, tbend, iivdW,jjvdW, iielect,
@@ -210,20 +204,9 @@
 
 
 ! -- generate output file name
-! - create output file name
-!      fname = run_num
-
-! - use internal read/write to get integer number in character format
-!      write(ftemp,*) fname
-!      read(ftemp,*) fname2
-!      file_run = 'run'//fname2(1:len_trim(fname2))//suffix//'.dat' 
-!      file_movie = 'movie'//fname2(1:len_trim(fname2))//suffix//'.dat' 
-!      file_dipole='dipole'//fname2(1:len_trim(fname2))//suffix//'.dat'
       write(file_run,'("run",I1.1,A,".dat")') run_num,suffix
       write(file_movie,'("movie",I1.1,A,".dat")') run_num,suffix
       write(file_dipole,'("dipole",I1.1,A,".dat")') run_num,suffix
-      write(iou,'(3(A,1X))') trim(file_run),trim(file_movie)
-     & ,trim(file_dipole)
 
 ! KM ldielect writes to fort.27      
 !      if (ldielect) then
@@ -338,11 +321,6 @@
 
       if (L_movie_xyz) then
         do ibox = 1,nbox
-!          write(ftemp,*) ibox
-!          read(ftemp,*) fname4
-!          fileout = 'box'//fname4(1:len_trim(fname4))//'movie'//
-!     &               fname2(1:len_trim(fname2))
-!     &                         //suffix//'.xyz'
            write(fileout,'("box",I1.1,"movie",I1.1,A,".xyz")') ibox
      &      ,run_num,suffix
            if (myid.eq.0) then
@@ -380,15 +358,6 @@
             end if
          end if
       end if
-      
-! - create output file name
-!      fname = run_num
-
-! - use internal read/write to get integer number in character format
-!      write(ftemp,*) fname
-!      read(ftemp,*) fname2
-!      file_run = 'run'//fname2(1:len_trim(fname2))//suffix//'.dat' 
-!      file_movie = 'movie'//fname2(1:len_trim(fname2))//suffix//'.dat' 
 
 ! KM for MPI
 ! jobs stop in monola so that all processors die

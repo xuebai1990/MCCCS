@@ -44,10 +44,9 @@
       integer(KIND=normal_int)::jttor,it,jut2,jut3,jut4,movetype,lu,k
      & ,opencount
 
-      real(KIND=double_precision)::vdha,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2
-     & ,dot,daa1,da1a2,phicrank,bf_tor,vtorsion,vbend,rbf,vtorso,ran_tor
+      real(KIND=double_precision)::vdha
+     & ,phicrank,bf_tor,vtorsion,vbend,rbf,ran_tor
      & ,bs,ang_bend,bfactor,bsum_bend,wei_bv,bsum_try,third,vibtr
-     & ,lengthc
 
 !     *** to conserve memory, max is the maximum number of endpoints
 !     *** possible in place of numax

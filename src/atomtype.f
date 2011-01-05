@@ -1,4 +1,4 @@
-      function atomtype(ntype,atom)
+      function atomtype(atom)
 
       use global_data,only:ztype,znum
       use var_type
@@ -12,7 +12,7 @@
       include 'common.inc'
 !$$$      include 'zeopoten.inc'
       character(LEN=*)::atom
-      integer(KIND=normal_int)::ntype,atomtype
+      integer(KIND=normal_int)::atomtype
 
 !     Assigning id's to atomtypes
 

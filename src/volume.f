@@ -49,12 +49,12 @@
       real(KIND=double_precision)::rxuo(nmax,numax),ryuo(nmax,numax)
      & ,rzuo(nmax,numax),qquo(nmax,numax)
       real(KIND=double_precision)::volt,expdv,random,df,dx,dy,dz,v,dele,
-     & vinter,vtail,vext,boxlen,vdum,velect ,velect_intra,velect_inter
+     & vinter,vtail,vext,vdum,velect
       real(KIND=double_precision)::vminim(nbxmax)
       real(KIND=double_precision)::xcmo,ycmo,zcmo,calpo(nbxmax)
      & ,numvecto(nbxmax)
       real(KIND=double_precision)::rbcut(nbxmax),rbcuta,rbcutb,rpair,rm
-      real(KIND=double_precision)::w(3),vx,vy,vz,min_boxl
+      real(KIND=double_precision)::w(3),min_boxl
 
       dimension xcmo(nmax),ycmo(nmax),zcmo(nmax)
 
@@ -62,7 +62,6 @@
       integer(KIND=normal_int)::hbox,jbox,jhmat
       real(KIND=double_precision)::rbox,hmato(9),hmatio(9)
 
-      integer(KIND=normal_int)::idum
       real(KIND=double_precision)::lddum,lddum2(27)
 !kea
       real(KIND=double_precision)::v3n(nbxmax),v3o(nbxmax)

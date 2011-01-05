@@ -63,11 +63,10 @@
      & ,distgrow,anglec
       real(KIND=double_precision)::xub,yub,zub,dum,ux,uy,uz,alpha,gamma
       real(KIND=double_precision)::tabulated_vib, tabulated_bend
-      real(KIND=double_precision)::rbend, rbendsq
 
 ! Neeraj: Adding for the lookup table for CG model
 
-      real(KIND=double_precision)::distprev2,distgrow2
+      real(KIND=double_precision)::distgrow2
       real(KIND=double_precision)::lengtha,lengthb,lengtha2,lengthb2,
      & lengthc,lengthc2,lengthFP,lengthFP2
 
@@ -519,7 +518,7 @@
       include 'common.inc'
 
       real(KIND=double_precision)::equil, kforce, betaT, angle, vangle,
-     & rr, v1, v2,random, tabulated_bend
+     & rr, v1, v2,random
 
 !      write(2,*) 'start BENDANGLE'
 

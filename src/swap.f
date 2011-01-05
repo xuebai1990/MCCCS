@@ -43,18 +43,18 @@
       
       logical::ovrlap,lterm,lnew,lempty,ldone,ltors,lovrh,lfavor,
      & laccept,lswapinter,lrem_out,lins_in,lneighij,linsk_in, lremk_in
-     & ,lrem_clu,lins_clu,lfixnow
+     & ,lfixnow
 
      
       integer(KIND=normal_int)::boxins,boxrem,imol,ichoi,ip,iwalk,idum
      & ,iins1,imolty1
-      integer(KIND=normal_int)::istt,iett,ncount,itype,ipair,ipairb,beg
+      integer(KIND=normal_int)::istt,iett,itype,ipair,ipairb,beg
      & ,flagon
 
       integer(KIND=normal_int)::iutry,icbu,ifrom,irem,iins,glist,findex
      & ,iii,j,ibox,iunit,ic,pointp,imolty,imt,jmt,igrow ,pointp2,jins
      & ,jmolty,neighj_num,neighk_num ,joffset,koffset,kmolty,kins,target
-     & ,cnt_wf1 ,cnt_wf2,neigh_old,cnt_wra1,cnt_wra2,k
+     & ,cnt_wf1 ,cnt_wf2,neigh_old,cnt_wra1,cnt_wra2
 
       dimension glist(numax),cnt_wf1(0:6,0:6,4),cnt_wf2(0:6,0:6,4),
      & cnt_wra1(1000,4),cnt_wra2(1000,4)
@@ -66,7 +66,7 @@
       real(KIND=double_precision)::vnewflucq,voldflucq,qion,ctorfo
      & ,ctorfn
       dimension qion(numax)
-      real(KIND=double_precision)::rxuold,ryuold,rzuold,coruz
+      real(KIND=double_precision)::rxuold,ryuold,rzuold
       dimension rxuold(numax),ryuold(numax),rzuold(numax)
       real(KIND=double_precision)::bsswap,bnswap,bnswap_in,bnswap_out
       real(KIND=double_precision)::random,rmol,rbf,bsum

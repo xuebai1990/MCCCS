@@ -18,8 +18,8 @@
 !$$$      include 'external.inc'
 !$$$      include 'coord.inc'
 
-      real(KIND=double_precision)::v_elect_field, convert, rzfield, E
-      integer(KIND=normal_int)::i, j,ibox
+      real(KIND=double_precision)::v_elect_field,rzfield, E
+      integer(KIND=normal_int)::i,j
 
 
 ! ********************************************

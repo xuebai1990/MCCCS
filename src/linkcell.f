@@ -16,7 +16,7 @@
 !$$$      include 'system.inc'      
 
       integer(KIND=normal_int)::i,j,k,n,ncellx,ncelly,ncellz,iinit,ibox
-     & ,linkdecode,imolty,imol,ic,cellinc,ia,ja,ka,ib,jb,kb,count,ncell
+     & ,linkdecode,imol,ic,cellinc,ia,ja,ka,ib,jb,kb,count,ncell
      & ,ncello
 
       real(KIND=double_precision)::dcellx,dcelly,dcellz,rx,ry,rz,xcmi

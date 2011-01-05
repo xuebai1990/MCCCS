@@ -29,24 +29,20 @@
 !$$$      include 'conver.inc'
 !$$$      include 'ipswpar.inc'
 
-      logical::lnew,ovrlap,lovrr,lterm,ltors
+      logical::lnew,ovrlap,lterm,ltors
 
-      integer(KIND=normal_int)::i,ibox,igrow,iii,j,ip,iwalk,iunit,imolty
+      integer(KIND=normal_int)::ibox,igrow,j,ip,iwalk,iunit,imolty
      & ,iu,iskip
-      integer(KIND=normal_int)::ichoi,imol,istt,iuend,stch,glist,ntogrow
-     & ,count
+      integer(KIND=normal_int)::ichoi,imol,istt,iuend,glist(numax)
+     & ,ntogrow,count
 
       real(KIND=double_precision)::rx,ry,rz,rxorig,ryorig,rzorig,rxnw
      & ,rynw,rznw
       real(KIND=double_precision)::xdgamma,ydgamma,zdgamma,xcosdg,xsindg
-     & ,ycosdg,ysindg,zcosdg,zsindg,rbf,rxur,ryur,rzur,delo,length
-      real(KIND=double_precision)::delen,v,vtor,w,bsum,vdum,vintra
-     & ,vinter,velect,vewald,wadd,vext,random,maxlen,bs
+     & ,ycosdg,ysindg,zcosdg,zsindg,rbf,rxur(numax),ryur(numax)
+     & ,rzur(numax),length
+      real(KIND=double_precision)::w,bsum,wadd,random,maxlen,bs
   
-      dimension lovrr(nchmax),delen(nchmax),rxur(numax)
-      dimension rzur(numax),ryur(numax),glist(numax)
-     
-
 ! ----------------------------------------------------------------------
       
 !      write(iou,*) 'start RIGROT'

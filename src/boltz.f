@@ -51,35 +51,27 @@
 !$$$      include 'mpif.h'
 !$$$      include 'mpi.inc'
 
-      logical::lnew,ovrlap,lcmno,lfirst,lcompute,lcoulo
+      logical::lnew,ovrlap,lcmno(nmax),lfirst,lcompute
       logical::lqimol,lqjmol,liji,lqchgi
-      integer(KIND=normal_int)::ichoi,growjj,igrow,count,glist,icharge
-     & ,cnt,jcell,ic
+      integer(KIND=normal_int)::ichoi,growjj,igrow,count,glist(numax)
+     & ,icharge,cnt,jcell(nmax),ic
       integer(KIND=normal_int)::i,imolty,ibox,ntogrow,itrial,ntii,j,jj
-     & ,ntjj,ntij,iu,jmolty,jjj,iufrom,ii,bdmol_b,cellinc,k,nmole
-
-
+     & ,ntjj,ntij,iu,jmolty,iufrom,ii,cellinc(27),k,nmole
 !      integer(KIND=normal_int)::NRtype 
-
       real(KIND=double_precision)::ljsami,rminsq,rxui,sr6,ryui,rzui
      & ,rxuij,ryuij,rzuij,rij,rijsq,sr2,dzui,dz3,dz12 ,exzeo,exsami
      & ,exmuir,exgrph,ljpsur,ljmuir,exsix ,mmff,maxlen,rcm,rcmsq ,corr
      & ,erfunc,rcutmax,ninesix, genlj
       real(KIND=double_precision)::vinter,vintra,vext,velect,vewald,qave
      & ,epsilon2,sigma2,vwell,v,rcutsq,rcinsq
-
-      real(KIND=double_precision)::sx,sy,sz,v_elect_field, field
+      real(KIND=double_precision)::v_elect_field, field
       real(KIND=double_precision)::slitpore
-      	
-      dimension lcmno(nmax),lcoulo(numax,numax)
-      dimension glist(numax),cellinc(27),jcell(nmax)
-
       real(KIND=double_precision)::tabulated_bend, tabulated_vdW,
      & tabulated_elect
       integer(KIND=normal_int)::mmm
 
 !------------- RP added for MPI
-      integer(KIND=normal_int)::my_start,my_end,loops_per_proc,scount
+      integer(KIND=normal_int)::my_start,my_end,loops_per_proc
      & ,my_itrial
       real(KIND=double_precision)::my_vtry(nchmax),my_vtrintra(nchmax),
      & my_vtrext(nchmax),my_vtrinter(nchmax),my_vtrelect(nchmax)

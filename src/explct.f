@@ -23,13 +23,12 @@
 
 ! - arguments
       integer(KIND=normal_int)::ichain,nngrow,negrow,i,iplus,imins,nn,
-     & imolty,iben,iuend,ii,jj
+     & imolty,iuend,ii,jj
       real(KIND=double_precision)::vmethyl,ch,cc,cch,ca,ah,hch2,hk,ck
      & ,en0,aa1,b1,c1,dln1,a2,b2,c2,dln2,a3,b3,c3,x12,y12,z12,x32,y32
-     & ,z32,xa,ya,za,r,rx,ry,rz,dr,ven,random,prob,a4,b4,c4,rn,hch,coh
+     & ,z32,xa,ya,za,r,rx,ry,rz,dr,ven,random,prob,a4,b4,c4,rn,hch
      & ,ce,ratio
-      real(KIND=double_precision)::oa,hoh,hoh2,oh,ok,om,oc,v1,v2,alpha
-     & ,rr
+      real(KIND=double_precision)::oa,hoh,hoh2,oh,ok,om
       logical::lcrysl,londone,lswitch,lalkanol
 
 ! - find intramolecular structure 

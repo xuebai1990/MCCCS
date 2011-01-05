@@ -27,7 +27,7 @@
       integer(KIND=normal_int)::ibox, i,ii,imolty,iunit,j,stt,edd,mtype
      & ,iwarn,inboxx,inboxy,inboxz,iadjust,itype
       logical::lall,ldx,ldy,ldz,lintbx
-      real(KIND=double_precision)::rbx,rby,rbz,boxlen,dx,dy,dz,nxcm,nycm
+      real(KIND=double_precision)::rbx,rby,rbz,dx,dy,dz,nxcm,nycm
      & ,nzcm
       real(KIND=double_precision)::dmaxsq,rxuij,ryuij,rzuij,rijsq
 

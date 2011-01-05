@@ -37,7 +37,7 @@
 
       integer(KIND=normal_int)::type_a,type_b,from,prev,self,iboxnew
      & ,iboxold,imolty,igrow,new,old,islen,ifirst,iprev,iii,j
-      integer(KIND=normal_int)::oldchain,newchain,oldunit,newunit,ncount
+      integer(KIND=normal_int)::oldchain,newchain,oldunit,newunit
      & ,iunit,iins
 
       integer(KIND=normal_int)::ic,ibox,icbu,jj,mm,imt,jmt,imolin,imolrm
@@ -46,7 +46,7 @@
      & ,orgbia,orgbib,ipairb 
 
       real(KIND=double_precision)::random,tweight,tweiold,rxut,ryut,rzut
-     & ,dvol,vola,volb,rho,coru,coruz,dinsta,rpair
+     & ,dvol,vola,volb,rho,coru,dinsta,rpair
 
       real(KIND=double_precision)::vnbox,vninte,vnintr,vnvibb,vntgb
      & ,vnextb,vnbend,vntail,vnelect,vnewald,wnlog,wolog,wdlog,wswat
@@ -55,18 +55,13 @@
      & ,vdum,delen,deleo,dicount,vrecipn,vrecipo
 ! * additions from iswatch
 
-      integer(KIND=normal_int)::izz,zzz,box,iboxi,bdmol_a,bdmol_b
-      integer(KIND=normal_int)::imola,imolb,moltaid,moltbid,i,ii,iu
+      integer(KIND=normal_int)::izz,box,iboxi,bdmol_a,bdmol_b
+      integer(KIND=normal_int)::imola,imolb,moltaid,moltbid
 
       integer(KIND=normal_int)::s_type, o_type, thisbox, otherbox
 
       real(KIND=double_precision)::rx_1(numax),ry_1(numax),rz_1(numax)
-     & ,dummy
-
-!      dimension from(2),prev(2)
       dimension from(2*numax),prev(2*numax)
-
-!      dimension rxut(2,numax),ryut(2,numax),rzut(2,numax)
       dimension rxut(4,numax),ryut(4,numax),rzut(4,numax)
 
 ! * end additions

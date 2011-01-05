@@ -34,28 +34,24 @@
       logical::ovrlap,lvol,lx,ly,lz,la,lb,lc
 
       integer(KIND=normal_int)::i,j,imolty,ic,ncount,jhmat,numvecto
-      real(KIND=double_precision)::bxo,byo,bzo,hbxo,hbyo,hbzo
+      real(KIND=double_precision)::bxo,byo,bzo
       real(KIND=double_precision)::volo,vboxo,dfac, vintero,vtailo,vexto
      & ,velecto,vflucqo
       real(KIND=double_precision)::kxo(vectormax),kyo(vectormax),
      & kzo(vectormax),prefacto(vectormax)
       real(KIND=double_precision)::voln,vboxn, vintern,vtailn,vextn
-     & ,velectn,vflucqn
+     & ,velectn
       real(KIND=double_precision)::rxuo(nmax,numax),ryuo(nmax,numax)
      & ,rzuo(nmax,numax),qquo(nmax,numax)
-      real(KIND=double_precision)::random,df,dx0,dy0,dz0,dx,dy,dz,v,dele
-     & ,vdum,vinter,vtail,vext,vminim,velect,vflucq,velect_intra
-     & ,velect_inter
+      real(KIND=double_precision)::random,df,dx,dy,dz,v,dele
+     & ,vdum,vinter,vtail,vext,velect
       real(KIND=double_precision)::xcmo(nmax),ycmo(nmax),zcmo(nmax)
-     & ,calpo,xcmoi,ycmoi,zcmoi,xcmi,ycmi,zcmi,xcmj,ycmj,zcmj,rxuij
-     & ,ryuij,rzuij
+     & ,calpo
       real(KIND=double_precision)::rbcut,rbox
-      real(KIND=double_precision)::w(3),vx,vy,vz
+      real(KIND=double_precision)::w(3)
       integer(KIND=normal_int)::boxvch,ichoiq,ibox
       integer(KIND=normal_int)::neigho_cnt(nmax),neigho(100,nmax)
       real(KIND=double_precision)::hmato(9),hmatio(9)
-
-      integer(KIND=normal_int)::idum
       real(KIND=double_precision)::lddum,lddum2(27),min_boxl
 ! KEA
       real(KIND=double_precision)::v3o,v3n

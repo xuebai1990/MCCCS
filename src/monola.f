@@ -46,14 +46,13 @@
 ! -----------------------
 
 ! - variables added for GCMC histogram reweighting
-      integer(KIND=normal_int)::fmax,idum,nummol
+      integer(KIND=normal_int)::fmax,nummol
       parameter (fmax=1e6)
       character(LEN=default_path_length)::file_flt,file_hist
      & ,file_ndis(ntmax)
       character(LEN=default_path_length)::file_config,file_cell
-      character(LEN=default_path_length)::fname2,fname3,fname4,ftemp
       character(LEN=default_path_length)::fileout
-      integer(KIND=normal_int)::fname,ntii,findpos
+      integer(KIND=normal_int)::ntii
       integer(KIND=normal_int)::imax,itmax
       integer(KIND=normal_int)::n,nconfig,nentry,nminp(ntmax)
      & ,nmaxp(ntmax)
@@ -69,12 +68,12 @@
       integer(KIND=normal_int)::im,mnbox,i,j,inb,nblock,ibox,jbox,nend
      & ,nnn,ii,itemp,itype,itype2,intg,imolty,ilunit,nbl,itel,ig,il
      & ,ucheck,jbox_max,k,histtot,Temp_nmol
-      integer(KIND=normal_int)::nvirial,zzz,steps,igrow,ddum,total
+      integer(KIND=normal_int)::nvirial,zzz,steps,igrow,ddum
       real(KIND=double_precision)::starvir,stepvir,starviro
       real(KIND=double_precision)::acv,acvsq,aflv,acpres,acnp,acmove
      & ,acsurf,acboxl,acboxa,asetel,acdens,acnbox,dsq,v,vinter,vtail
-     & ,vend,vintra,vvib,vbend,vtg,vext,vstart,press1,press2,dsq1,velect
-     & ,vflucq,boxlen,acnbox2,pres(nbxmax),surf,acvolume
+     & ,vend,vintra,vvib,vbend,vtg,vext,vstart,press1,dsq1,velect
+     & ,vflucq,acnbox2,pres(nbxmax),surf,acvolume
       real(KIND=double_precision)::rm,random,temvol,setx,sety,setz,setel
      & ,pscb1,pscb2,ratvol,avv,temacd,temspd,dblock,dbl1 ,sterr,stdev
      & ,errme
@@ -98,17 +97,12 @@
       
   
       real(KIND=double_precision)::binvir,binvir2,inside,bvirial
-      real(KIND=double_precision)::enchg1,enthchg1,srand
-      real(KIND=double_precision)::enchg2,enthchg2
-      real(KIND=double_precision)::enchg3,enthchg3
       real(KIND=double_precision)::cal2joule, joule2cal
       real(KIND=double_precision)::HSP_T, HSP_LJ, HSP_COUL 
       real(KIND=double_precision)::CED_T, CED_LJ, CED_COUL
       real(KIND=double_precision)::Heat_vapor_T,Heat_vapor_LJ
      & ,Heat_vapor_COUL   
-      real(KIND=double_precision)::Heat_vapor_EXT, Ext_Energy_Liq,
-     & Ext_Energy_Gas
-      real(KIND=double_precision)::DeltaU_Ext, pdV 
+      real(KIND=double_precision)::pdV 
 
       real(KIND=double_precision), dimension(nprop1,nbxmax
      & ,nbxmax)::stdev1,sterr1,errme1       
@@ -127,7 +121,7 @@
      &     acdens(nbxmax,ntmax),molfra(nbxmax,ntmax)
       real(KIND=double_precision)::molvol(nbxmax),speden(nbxmax)
       real(KIND=double_precision)::flucmom(nbxmax),flucmom2(nbxmax)
-     & ,flucev(nbxmax),flucv(nbxmax),dielect,acvol(nbxmax)
+     & ,dielect,acvol(nbxmax)
      & ,acvolsq(nbxmax)
 ! --- dimension statements for block averages ---
       character(LEN=default_string_length)::vname(nener)
@@ -144,9 +138,6 @@
       integer(KIND=normal_int)::bin,cnt_wf1(0:6,0:6,4),cnt_wf2(0:6,0:6
      & ,4),cnt_wra1(1000,4),cnt_wra2(1000,4)
       real(KIND=double_precision)::binstep,profile(1000)
-
-! KEA
-      integer(KIND=normal_int)::ttor
 
 ! -------------------------------------------------------------------
 
@@ -231,8 +222,6 @@ c only one processor at a time reads and writes data from files
       enth      = ' Enthalpy Inst. Press '
       enth1     = ' Enthalpy Ext.  Press '
 
-!      fname = run_num
-!      write(6,*) 'fname ', fname
 ! --  SETTING UP ARRAYS  FOR ANALYSYS PURPOSE
 
 !--- JLR 11-11-09
@@ -265,15 +254,9 @@ c only one processor at a time reads and writes data from files
       if (lexpee.and.lmipsw)
      &     call cleanup('not for BOTH lexpee AND lmipsw')
       
-! - use internal read/write to get integer number in character format
-!      write(ftemp,*) fname
-!      read(ftemp,*) fname2
-
 ! KM for MPI
 ! only processor 0 opens files     
       if (myid.eq.0) then 
-!         file_cell =
-!     &        'cell_param'//fname2(1:len_trim(fname2))//suffix//'.dat'
          write(file_cell,'("cell_param",I1.1,A,".dat")') run_num,suffix
          open(unit=13,file=file_cell, status='unknown')
          close(unit=13)
@@ -284,20 +267,11 @@ c only one processor at a time reads and writes data from files
 ! will need to check this file I/O if want to run grand canonical in parallel
       if(lgrand) then
          if (myid.eq.0) then
-!            file_flt =
-!     &           'nfl'//fname2(1:len_trim(fname2))//suffix//'.dat'
-!            file_hist =
-!     &           'his'//fname2(1:len_trim(fname2))//suffix//'.dat'
             write(file_flt,'("nfl",I1.1,A,".dat")') run_num,suffix
             write(file_hist,'("his",I1.1,A,".dat")') run_num,suffix
 
 
             do i=1,nmolty
-!               write(ftemp,*) i
-!               read(ftemp,*) fname3
-!               file_ndis(i) = 'n'//fname3(1:len_trim(fname3))
-!     &              //'dis'//fname2(1:len_trim(fname2)) 
-!     &              //suffix//'.dat'
                write(file_ndis(i),'("n",I2.2,"dis",I1.1,A,".dat")')
      &          i,run_num,suffix
 
@@ -784,27 +758,27 @@ c only one processor at a time reads and writes data from files
                do itype=1,nmolty
                   Temp_nmol =   Temp_nmol + ncmt(ibox,itype)
                end do
-               Temp_Energy  = (vbox(ibox)/Temp_nmol)*0.00831451d0 ! kJ/mol
+               Temp_Energy  = (vbox(ibox)/Temp_nmol)*0.00831451d0
                acvkjmol(1,ibox) = acvkjmol(1,ibox) + Temp_Energy
-               Temp_Energy  = (vinterb(ibox)/Temp_nmol)*0.00831451d0 ! kJ/mol
+               Temp_Energy  = (vinterb(ibox)/Temp_nmol)*0.00831451d0
                acvkjmol(2,ibox) = acvkjmol(2,ibox) + Temp_Energy
-               Temp_Energy  = (vbendb(ibox)/Temp_nmol)*0.00831451d0 ! kJ/mol
+               Temp_Energy  = (vbendb(ibox)/Temp_nmol)*0.00831451d0
                acvkjmol(3,ibox) = acvkjmol(3,ibox) + Temp_Energy
-               Temp_Energy  = (vtgb(ibox)/Temp_nmol)*0.00831451d0 ! kJ/mol
+               Temp_Energy  = (vtgb(ibox)/Temp_nmol)*0.00831451d0
                acvkjmol(4,ibox) = acvkjmol(4,ibox) + Temp_Energy
-               Temp_Energy  = (vintrab(ibox)/Temp_nmol)*0.00831451d0 ! kJ/mol
+               Temp_Energy  = (vintrab(ibox)/Temp_nmol)*0.00831451d0
                acvkjmol(5,ibox) = acvkjmol(5,ibox) + Temp_Energy
-               Temp_Energy  = (vextb(ibox)/Temp_nmol)*0.00831451d0 ! kJ/mol
+               Temp_Energy  = (vextb(ibox)/Temp_nmol)*0.00831451d0
                acvkjmol(6,ibox) = acvkjmol(6,ibox) + Temp_Energy
-               Temp_Energy  = (vvibb(ibox)/Temp_nmol)*0.00831451d0 ! kJ/mol
+               Temp_Energy  = (vvibb(ibox)/Temp_nmol)*0.00831451d0
                acvkjmol(7,ibox) = acvkjmol(7,ibox) + Temp_Energy
-               Temp_Energy  = (velectb(ibox)/Temp_nmol)*0.00831451d0 ! kJ/mol
+               Temp_Energy  = (velectb(ibox)/Temp_nmol)*0.00831451d0
                acvkjmol(8,ibox) = acvkjmol(8,ibox) + Temp_Energy
-               Temp_Energy  = (vtailb(ibox)/Temp_nmol)*0.00831451d0 ! kJ/mol
+               Temp_Energy  = (vtailb(ibox)/Temp_nmol)*0.00831451d0
                acvkjmol(9,ibox) = acvkjmol(9,ibox) + Temp_Energy
-               Temp_Energy  = (vflucqb(ibox)/Temp_nmol)*0.00831451d0 ! kJ/mol
+               Temp_Energy  = (vflucqb(ibox)/Temp_nmol)*0.00831451d0
                acvkjmol(10,ibox) = acvkjmol(10,ibox) + Temp_Energy
-               Temp_Energy  = (v3garob(ibox)/Temp_nmol)*0.00831451d0 ! kJ/mol
+               Temp_Energy  = (v3garob(ibox)/Temp_nmol)*0.00831451d0
                acvkjmol(17,ibox) = acvkjmol(17,ibox) + Temp_Energy
 
                if ( lnpt ) then
@@ -1007,12 +981,13 @@ c only one processor at a time reads and writes data from files
                do itype=1,nmolty
                   Temp_nmol =   Temp_nmol + ncmt(ibox,itype)
                end do
-               Temp_Mol_Vol = temvol/Temp_nmol*0.6022d-06 ! m3/mol
-               Temp_Energy  = (vbox(ibox)/Temp_nmol)*0.00831451d0 ! kJ/mol
+! Volume in m3/mol, energies in kJ/mol
+               Temp_Mol_Vol = temvol/Temp_nmol*0.6022d-06
+               Temp_Energy  = (vbox(ibox)/Temp_nmol)*0.00831451d0
                acEnthalpy(ibox) = acEnthalpy(ibox) + Temp_Energy +
-     &                       pres(ibox)*Temp_Mol_Vol     !kJ/mol
+     &                       pres(ibox)*Temp_Mol_Vol
                acEnthalpy1(ibox) = acEnthalpy1(ibox) + Temp_Energy +
-     &                       (express(ibox)/7.2429d-5)*Temp_Mol_Vol     !kJ/mol   
+     &                       (express(ibox)/7.2429d-5)*Temp_Mol_Vol
             end do
 
 ! --- cannot calculate a heat of vaporization for only one box,
@@ -1675,11 +1650,6 @@ c only one processor at a time reads and writes data from files
 
 ! ** write out the final configuration for each box, Added by Neeraj 06/26/2006 3M ***
          do ibox = 1,nbox
-!            write(ftemp,*) ibox
-!            read(ftemp,*) fname4
-!            fileout = 'box'//fname4(1:len_trim(fname4))//'config'//
-!     &           fname2(1:len_trim(fname2))
-!     &           //suffix//'.xyz'
             write(fileout,'("box",I1.1,"config",I1.1,A,".xyz")') ibox
      &       ,run_num,suffix
             open (unit=200+ibox,FILE=fileout,status="unknown")
@@ -1708,8 +1678,6 @@ c only one processor at a time reads and writes data from files
          
 ! ** write out the final configuration from the run ***
          
-!         file_config = 'config'//fname2(1:len_trim(fname2))
-!     &        //suffix//'.dat'
          write(file_config,'("config",I1.1,A,".dat")') run_num,suffix
          open(8, file=file_config)
          

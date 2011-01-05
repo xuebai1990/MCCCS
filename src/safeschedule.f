@@ -65,13 +65,13 @@
      & ,islen
       integer(KIND=normal_int)::ffrom,fprev,flist,fnum,fnuma,findex
      & ,countb,iv1
-      integer(KIND=normal_int)::movetype,fmaxgrow,ku,kickouta,iufrom
+      integer(KIND=normal_int)::movetype,fmaxgrow,kickouta,iufrom
      & ,iuprev
       integer(KIND=normal_int)::num,inum,inuma,max
 
       parameter(max=10)
 
-      real(KIND=double_precision)::random,rbf
+      real(KIND=double_precision)::random
 
       dimension fint(numax),ffrom(numax,max),fprev(numax,max)
      & ,flist(numax,max,max),fnum(numax),fnuma(numax,max) ,lpick(numax)

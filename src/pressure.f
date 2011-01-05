@@ -34,7 +34,7 @@
 !$$$      include 'cell.inc'
 
       logical::lcoulo,lexplt,lqimol,lqjmol,lij2
-      integer(KIND=normal_int)::ibox,itype
+      integer(KIND=normal_int)::ibox
       integer(KIND=normal_int)::i,ii,j,jj,ntii,ntjj,ntij,imolty,jmolty
      & ,iii,jjj,k
  
@@ -43,14 +43,14 @@
       real(KIND=double_precision)::rxui,ryui,rzui,rxuij,ryuij,rzuij
      & ,rijsq,rcutsq,sr2,sr6,rhosq,corp,rij,rs1,sr1,rs2,sr7,rs7,rs6
       real(KIND=double_precision)::srij
-      real(KIND=double_precision)::surf,pxx,pyy,pzz,rpxx,rpyy,rpzz,pxy
-     & ,pyx,pxz,pzx,pyz,pzy,rpxy,rpyx,rpxz,rpzx,rpyz,rpzy
+      real(KIND=double_precision)::surf,pxx,pyy,pzz,rpxx,rpyy,rpzz,rpxy
+     & ,rpyx,rpxz,rpzx,rpyz,rpzy
 
       real(KIND=double_precision)::fxcmi,fycmi,fzcmi,fij,xcmi,ycmi,zcmi
      & ,flj
       real(KIND=double_precision)::rcm,rcmsq,rcmi
-      real(KIND=double_precision)::rvdwsq,rchgsq,rbcut,qave, volsq
-     & ,epsilon2,sigma2,pwell,vol 
+      real(KIND=double_precision)::rbcut,qave, volsq,epsilon2,sigma2
+     & ,pwell,vol 
 
       dimension lcoulo(numax,numax)
 

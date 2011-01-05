@@ -41,8 +41,7 @@
 !$$$      include 'garofalini.inc'
 !$$$      include 'tabulated.inc'
       logical::lqimol,lqjmol,lexplt,lcoulo,lfavor,lij2,liji,lqchgi
-      logical::lljii,ovrlap,ltors,lcharge_table,lt,lfound
-      logical::lmim
+      logical::lljii,ovrlap,ltors,lcharge_table,lfound
 
       integer(KIND=normal_int)::growii,growjj,k,cellinc,jcell,ic,nmole
       integer(KIND=normal_int)::i,ibox, istart, iuend,ii,ntii,flagon,jjj
@@ -60,8 +59,7 @@
       real(KIND=double_precision)::xcc,ycc,zcc,tcc,theta,spltor
       real(KIND=double_precision)::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq
      & ,epsilon2,sigma2
-      real(KIND=double_precision)::sx,sy,sz
-      real(KIND=double_precision)::slitpore,mlen2,v_elect_field, field
+      real(KIND=double_precision)::slitpore,v_elect_field, field
 
       dimension rxvec(numax,numax),ryvec(numax,numax),rzvec(numax,numax)
       dimension lcoulo(numax,numax),cellinc(cmax),jcell(nmax)

@@ -14,8 +14,8 @@
 !$$$      include 'conver.inc'
 !$$$      include 'control.inc'
 
-      integer(KIND=normal_int)::ttyp,klo,khi,k,xa,bin,addl
-      real(KIND=double_precision)::theta,spltor,thetarem,tordiff,torstep
+      integer(KIND=normal_int)::ttyp,klo,khi,xa,bin,addl
+      real(KIND=double_precision)::theta,spltor,thetarem
      & ,left
 
 ! Routine to calculate torsion potential using linear interpolation between 2 points
@@ -185,8 +185,8 @@
 
 !      integer(KIND=normal_int)::n
 !      real(KIND=double_precision)::x,y,xa(n),y2a(n),ya(n)
-      integer(KIND=normal_int)::k, khi,klo,points,jttor,tortyp,xa
-      real(KIND=double_precision)::a,bb,h,x,y,vtorso,vtorsoa
+      integer(KIND=normal_int)::khi,klo,points,tortyp,xa
+      real(KIND=double_precision)::a,bb,h,x,y
 
       points = splpnts(tortyp)
 

@@ -27,16 +27,15 @@
 !$$$      include 'mpif.h'
 !$$$      include 'mpi.inc'
 
-      integer(KIND=normal_int)::ibox,nkx,nky,nkz ,nkx_min,nkx_max
-     & ,nky_min,nky_max,nkz_min,nkz_max ,i,ii,imolty,kmax1,ncount
+      integer(KIND=normal_int)::ibox,i,ii,imolty,ncount
 
 ! * from h-matrix formulation
-      integer(KIND=normal_int)::l,m,n,m_min,m_max,n_min,n_max,kmaxl
+      integer(KIND=normal_int)::l,m,n,m_min,n_min,kmaxl
      & ,kmaxm,kmaxn
 
-      real(KIND=double_precision)::alpsqr4,vol,ksqr,sumr,sumi,arg,boxlen
-     & ,vrecip,bx1,by1,bz1,bmin,xratio,yratio,zratio,constx,consty
-     & ,constz,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi
+      real(KIND=double_precision)::alpsqr4,vol,ksqr,sumr,sumi,arg
+     & ,vrecip,bx1,by1,bz1
+     & ,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi
 !      real(KIND=double_precision)::sum_sumr,sum_sumi
 
 ! RP added for calculating time for communication step

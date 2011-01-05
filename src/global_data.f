@@ -805,7 +805,8 @@
 
 ! NEIGH.INC
 
-      logical::lnn(1,1),lneighbor !	lnn(1,1):replace the 1s with nmax to use neighbor list
+! lnn(1,1):replace the 1s with nmax to use neighbor list
+      logical::lnn(1,1),lneighbor
       integer(KIND=normal_int)::maxneigh
       parameter (maxneigh = 20)
       integer(KIND=normal_int)::neighbor(maxneigh,nmax),neigh_cnt(nmax)
@@ -825,7 +826,8 @@
 
 ! NEIGH2.INC
 
-      real(KIND=double_precision)::disvec(2,1,3) ! disvec(2,1,3):replace the 1 with nmax to use neighbor lists
+! disvec(2,1,3):replace the 1 with nmax to use neighbor lists
+      real(KIND=double_precision)::disvec(2,1,3)
 !      common /nn1/ disvec
 
 ! ENSEMBLE.INC
