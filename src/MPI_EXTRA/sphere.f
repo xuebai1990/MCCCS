@@ -38,7 +38,7 @@
       use util_timings
       implicit none
       include 'common.inc'
-      integer(KIND=int)::ii
+      integer(KIND=normal_int)::ii
       real(KIND=double_precision)::random2, x, y, z
       real(KIND=double_precision)::xi1,xi2,xisq
 

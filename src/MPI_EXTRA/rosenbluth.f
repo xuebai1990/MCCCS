@@ -33,16 +33,16 @@
 
 !     --- variables passed to the subroutine
       logical::lnew,lterm,lwbef
-      integer(KIND=int)::i,j,ja,icharge,imolty,ifrom,ibox,igrow,tac
+      integer(KIND=normal_int)::i,j,ja,icharge,imolty,ifrom,ibox,igrow,tac
 
 !     --- local variables
       
       logical::ovrlap,ltorsion,lfixnow,lfixed,lreturn
 
-      integer(KIND=int)::glist,iuprev,iufrom,ichoi,ntogrow,count
-      integer(KIND=int)::iu,iv,iw,ju,ip,ichtor
+      integer(KIND=normal_int)::glist,iuprev,iufrom,ichoi,ntogrow,count
+      integer(KIND=normal_int)::iu,iv,iw,ju,ip,ichtor
      &       ,it,jut2,jut3,jut4,jttor,iwalk,ivect
-      integer(KIND=int)::angstart,toracc
+      integer(KIND=normal_int)::angstart,toracc
       
       dimension glist(numax)
 
@@ -58,7 +58,7 @@
       dimension bondlen(numax),bendang(numax),phi(numax)
      
 !     -- new stuff
-      integer(KIND=int)::itor,bin,counta,movetype,ku
+      integer(KIND=normal_int)::itor,bin,counta,movetype,ku
       real(KIND=double_precision)::bf_tor,vtorsion,phitors,ran_tor
      &     ,wei_bend,jacobian,ctorf
       dimension bf_tor(nchtor_max),vtorsion(nchtor_max)
@@ -67,8 +67,8 @@
      &     ,vfbbtr(nchmax,nchtor_max)
 ! RP added for MPI
 
-      integer(KIND=int)::my_start,my_end,loops_per_proc,scount,itorcount,countcount
-      integer(KIND=int)::rmnddr,myip,ipitor,ipcount
+      integer(KIND=normal_int)::my_start,my_end,loops_per_proc,scount,itorcount,countcount
+      integer(KIND=normal_int)::rmnddr,myip,ipitor,ipcount
       real(KIND=double_precision)::my_ctorf,my_vfbbtr,my_rxp,my_ryp,my_rzp
       real(KIND=double_precision)::rxp_one,ryp_one,rzp_one,ctorf_one,vfbbtr_one,
      &   my_bsum_tor,my_vtgtr,my_toracc
@@ -80,11 +80,11 @@
      &   rzp_one(nchmax*numax),ctorf_one(nchmax*nchtor_max),
      &   vfbbtr_one(nchmax*nchtor_max)
       dimension my_toracc(nchmax),my_vtgtr(nchmax),my_bsum_tor(nchmax)
-      integer(KIND=int)::procid
+      integer(KIND=normal_int)::procid
       real(KIND=double_precision)::random_array
       dimension random_array(numprocmax)
       real(KIND=double_precision)::dummy_x,dummy_y,dummy_z
-      integer(KIND=int)::ncount_arr(numprocmax),ncount_displs(numprocmax),
+      integer(KIND=normal_int)::ncount_arr(numprocmax),ncount_displs(numprocmax),
      &          itorcount_arr(numprocmax),itorcount_displs(numprocmax),
      &         countcount_arr(numprocmax),countcount_displs(numprocmax)
 ! ------------------------------------------------------------------

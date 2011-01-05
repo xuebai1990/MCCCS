@@ -61,7 +61,7 @@
 !      include 'mpif.h'
 !      include 'mpi.inc'
 
-      integer(KIND=int)::nIA , nIC , nISEED , nM1
+      integer(KIND=normal_int)::nIA , nIC , nISEED , nM1
       real(KIND=double_precision)::nRANDx , nRM
       PARAMETER (nM1=714025,nIA=1366,nIC=150889,nRM=1.D+0/nM1)
 !
@@ -86,7 +86,7 @@
       use util_timings
       implicit none
       include 'common.inc'
-      integer(KIND=int)::nISEED
+      integer(KIND=normal_int)::nISEED
 
       CALL nRSTART(nISEED)
       RETURN
@@ -112,7 +112,7 @@
 !      include 'mpi.inc'
 
       real(KIND=double_precision)::nCarry , nran , nRANDx , nSeed
-      integer(KIND=int)::ni , nI24 , nIseed , nISEEDA , nJ24
+      integer(KIND=normal_int)::ni , nI24 , nIseed , nISEEDA , nJ24
       COMMON /nRANDM/ nSeed(24) , nCarry , nI24 , nJ24 , nIseed
 
       nI24 = 24
@@ -153,7 +153,7 @@
       implicit none
       include 'common.inc'
       real(KIND=double_precision)::nCarry , nRCARRY , nSeed , nTWOM24,nTWOP24,nuni
-      integer(KIND=int)::nI24 , nIseed , nJ24
+      integer(KIND=normal_int)::nI24 , nIseed , nJ24
       PARAMETER (nTWOP24=16777216.D+0,nTWOM24=1.D+0/nTWOP24)
       COMMON /nRANDM/ nSeed(24) , nCarry , nI24 , nJ24 , nIseed
 !

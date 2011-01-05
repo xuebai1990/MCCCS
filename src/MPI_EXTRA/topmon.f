@@ -34,12 +34,12 @@
       implicit none
       include 'common.inc'
 
-      integer(KIND=int)::i,seed
+      integer(KIND=normal_int)::i,seed
       real(KIND=double_precision)::random,rtest
       dimension rtest(10)
       character::*50 fileout
 ! --- RP added for MPI for random2.f
-      integer(KIND=int)::nseed
+      integer(KIND=normal_int)::nseed
       real(KIND=double_precision)::random2,nrtest
       dimension nrtest(10)
       character::*50 nfileout
