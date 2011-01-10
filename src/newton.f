@@ -15,7 +15,7 @@
        include 'common.inc'
   
        integer(KIND=normal_int)::i,maxiter
-       real(KIND=double_precision)::x_in,x_out,erfunc
+       real(KIND=double_precision)::x_in,x_out
        real(KIND=double_precision)::root(11),sqrtpi,deno
 
        parameter (maxiter = 10)

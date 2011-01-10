@@ -1,25 +1,25 @@
 seed
 44
-iou
-2
+iounit lecho lverbose run_num  suffix
+2  .true. .true. 1       a
+lnpt   lgibbs lgrand   lanes  lvirial lmipsw  lexpee
+.true. .true. .false. .false. .false. .false. .false.
+lijall lchgall lewald ldielect ltailc lshift
+.false. .false. .true. .false. .false. .false.
 L_add N_add  N_box2add N_moltyp2add
 .false. 9000    2         3
 L_sub N_sub  N_box2sub N_moltyp2sub
 .false. 200     2         3
-lecho lverbose
- .true. .true.
-l_Coul_CBMC
-.true.
+l_Coul_CBMC lcutcm ldual lneigh
+.true.      .true. .true. .false.
 Number of unit cells in each of a,b, and c directions
 1. 1. 1.
-run_num suffix
-1       a
 nstep   lstep  lpresim iupdatefix
 750     .false.  .false.  100
-L_tor_table L_spline  L_linear
-.false.   .false.     .false.
-L_vib_table L_bend_table L_vdW_table L_elect_table
-.false. .false. .false. .false.
+lslit lexzeo lzgrid lelect_field ljoe lsami lmuir lpsurf lgraphite lcorreg llj lexpsix lmmff lninesix lgenlj lgaro lionic
+.false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .true.
+L_tor_table L_spline L_linear L_vib_table L_bend_table L_vdW_table L_elect_table
+.false.   .false.     .false. .false. .false. .false. .false.
 nbox
 3
 express(ibox=1,nbox)[MPa]
@@ -34,7 +34,7 @@ ianalyze nbin  lrdf  lintra   lstretch  lgvst   lbend   lete   lrhoz bin_width
 1000000    1  .false. .false.  .false.  .false.
 .false. .false. .false.  0.1
 iprint imv iratio iblock  idiele   L_movie_xyz  iheatcapacity
-1000   200  100  1000   3000000       .false. 100000000
+1000   200    100 1000   3000000       .false. 100000000
 boxlx   boxly    boxlz   lsolid   lrect   kalp   rcutchg  rcutnn - box 1
 20.0d0  25.98d0  90.0d0  .false.  .true.  0.321d0  9.99d0  0.0d0 
 boxlx   boxly    boxlz   lsolid   lrect   kalp   rcutchg  rcutnn - box 2
@@ -51,8 +51,8 @@ moltyp
 1	1	1	1	1	
 1	1	1	1	1 	
 1	1	1	1
-lmixlb lmixjo
- .true. .false.
+lmixlb lmixjo ltab
+ .true. .false. .false.
 nijspecial
 0
 ispec   jspec   aspec   bspec
@@ -3718,8 +3718,8 @@ rmrotx rmroty rmrotz
 0.4d0   0.4d0   0.4d0
 tatra tarot
 0.5d0   0.5d0
-linit   lnewtab lreadq
-.false. .false. .false.
+linit lreadq
+.false. .false.
 lbranch 
 .false.  .false.  .false.  .false.  .false. 
 .false.  .false.  .true.   .true.   .true.
@@ -4764,5 +4764,4 @@ lrplc
 .false. .false. .false. .false. .false.
 .false. .false. .false. .false. .false.
 .false. .false. .false. .false. 
-
 

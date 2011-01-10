@@ -42,11 +42,11 @@
       vhigh = vlow+1
 
       if (vib(vlow,vibtyp).gt. len.or.vib(vhigh,vibtyp).lt.len) then
-         write(2,*) 'problem in lininter_vib!'
-         write(2,*) 'len', len, ' vibtyp', vibtyp
-         write(2,*) 'vlow ', vlow, vib(vlow, vibtyp),len
-         write(2,*) 'vhigh ', vhigh, vib(vhigh, vibtyp), len
-         write(2,*)
+         write(iou,*) 'problem in lininter_vib!'
+         write(iou,*) 'len', len, ' vibtyp', vibtyp
+         write(iou,*) 'vlow ', vlow, vib(vlow, vibtyp),len
+         write(iou,*) 'vhigh ', vhigh, vib(vhigh, vibtyp), len
+         write(iou,*)
       end if
 
       lenrem=len-vib(vlow, vibtyp)
@@ -105,11 +105,11 @@
       bhigh = blow+1
 
       if (bend(blow,bendtyp).gt. r.or. bend(bhigh,bendtyp).lt.r) then
-         write(2,*) 'problem in lininter_bend!'
-         write(2,*) 'r', r, ' bendtyp', bendtyp
-         write(2,*) 'blow ', blow, bend(blow, bendtyp),r
-         write(2,*) 'bhigh ', bhigh, bend(bhigh, bendtyp), r
-         write(2,*)
+         write(iou,*) 'problem in lininter_bend!'
+         write(iou,*) 'r', r, ' bendtyp', bendtyp
+         write(iou,*) 'blow ', blow, bend(blow, bendtyp),r
+         write(iou,*) 'bhigh ', bhigh, bend(bhigh, bendtyp), r
+         write(iou,*)
       end if
 
       rem=r-bend(blow, bendtyp)
@@ -117,7 +117,7 @@
 
       tabulated_bend=rem*benddiff(blow,bendtyp)
       tabulated_bend=tabulated_bend+tabbend(blow,bendtyp)
-!      write(2,*) 'tabulated_bend ', tabulated_bend
+!      write(iou,*) 'tabulated_bend ', tabulated_bend
 
       return
       end
@@ -169,11 +169,11 @@
       high = low+1
 
       if (rvdW(low,typi,typj).gt. r.or.rvdW(high,typi,typj) .lt.r) then
-         write(2,*) 'problem in lininter_vdW!'
-         write(2,*) 'r', r, ' typi', typi, ' typj ', typj
-         write(2,*) 'low ', low, rvdW(low, typi, typj)
-         write(2,*) 'high ', high, rvdW(high, typi, typj)
-         write(2,*)
+         write(iou,*) 'problem in lininter_vdW!'
+         write(iou,*) 'r', r, ' typi', typi, ' typj ', typj
+         write(iou,*) 'low ', low, rvdW(low, typi, typj)
+         write(iou,*) 'high ', high, rvdW(high, typi, typj)
+         write(iou,*)
       end if
 
       rem=r-rvdW(low, typi, typj)
@@ -230,11 +230,11 @@
       high = low+1
 
       if (relect(low,typi,typj).gt. r.or.relect(high,typi,typj) .lt.r) then
-         write(2,*) 'problem in lininter_elect!'
-         write(2,*) 'r', r, ' typi', typi, ' typj ', typj
-         write(2,*) 'low ', low, relect(low, typi, typj)
-         write(2,*) 'high ', high, relect(high, typi, typj)
-         write(2,*)
+         write(iou,*) 'problem in lininter_elect!'
+         write(iou,*) 'r', r, ' typi', typi, ' typj ', typj
+         write(iou,*) 'low ', low, relect(low, typi, typj)
+         write(iou,*) 'high ', high, relect(high, typi, typj)
+         write(iou,*)
       end if
 
       rem=r-relect(low, typi, typj)

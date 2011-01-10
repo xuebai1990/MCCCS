@@ -1,0 +1,29 @@
+#!/bin/bash -l
+#PBS -l nodes=1:ppn=1,pmem=1gb,walltime=24:00:00
+#PBS -N name
+#PBS -m ae
+#PBS -e stderr
+#PBS -o stdout
+###PBS -q devel
+
+PROG=/home/it2/baip/MCCCS/zeolite/topmon
+DATA=/path/to/data
+FILELOG=log
+cd $DATA
+
+#for FCUR in melt cool volume equil1;do
+#    echo "$FCUR: " >> $FILELOG
+#    [ -e "fort.4.$FCUR" ] && cp -f "fort.4.$FCUR" fort.4
+    /usr/bin/time -ao $FILELOG mpirun -np 1 $PROG || exit -1
+#    cp -f config1a.dat fort.77
+#    mv -f run1a.dat "run.$FCUR"
+#    mv -f config1a.dat "config.$FCUR"
+#    mv -f movie1a.dat "movie.$FCUR"
+#    mv -f fort.12 "fort12.$FCUR"
+#    for j in 1 2 3;do
+#        mv -f "box${j}config1a.xyz" "box${j}config.$FCUR"
+#        mv -f "box${j}movie1a.xyz" "box${j}movie.$FCUR"
+#    done
+#done
+
+exit 0

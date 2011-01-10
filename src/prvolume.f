@@ -151,7 +151,7 @@
       end if
       do i = 1, nchain
 ! ----- Check if the chain i is in the correct box
-         if (nboxi(i). eq. boxvch) then
+         if (nboxi(i).eq. boxvch) then
 
             imolty = moltyp(i)
             xcmo(i) = xcm(i)
@@ -395,7 +395,7 @@
       velectn  = velect
       v3n = v3garo
       vboxn    = vboxo + (vintern-vintero) + (vextn-vexto)  + (velectn-velecto) + (v3n-v3o)
-!      write (6,*) 'new  energy',  vboxn
+!      write(iou,*) 'new  energy',  vboxn
 
       if ( lanes ) then
 ! *** for ANES algorithm, optimize the charge configuration         
@@ -422,10 +422,10 @@
 ! --- acceptance test
 
 !--- check problem--
-!      write (6,*) 'length of box',      boxlx(boxvch)
-!      write (6,*) 'change of  vol',     voln - volo
-!      write (6,*) 'change of  energy',  vboxn, vboxo
-!      write (6,*) 'dele',     dele
+!      write(iou,*) 'length of box',      boxlx(boxvch)
+!      write(iou,*) 'change of  vol',     voln - volo
+!      write(iou,*) 'change of  energy',  vboxn, vboxo
+!      write(iou,*) 'dele',     dele
 
 
       if (random() .lt. dexp(-(beta*dele)) ) then

@@ -35,7 +35,7 @@
       real(KIND=double_precision)::qion(numax)
       real(KIND=double_precision)::vrecipn,vrecipo
       integer(KIND=normal_int)::maini,mainj,jchain
-      real(KIND=double_precision)::qionj(numax),vflucqjo,vflucqjn,corr ,rij,erfunc,rxuij,ryuij,rzuij,vdum,vewaldjn,vewaldjo
+      real(KIND=double_precision)::qionj(numax),vflucqjo,vflucqjn,corr,rij,rxuij,ryuij,rzuij,vdum,vewaldjn,vewaldjo
       real(KIND=double_precision)::qoldj2,vnewi,velectni,vinterni,voldi, velectoi,vinteroi
 
 ! --------------------------------------------------------------------

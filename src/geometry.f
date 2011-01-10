@@ -499,7 +499,7 @@
 
       real(KIND=double_precision)::equil, kforce, betaT, angle, vangle, rr, v1, v2,random
 
-!      write(2,*) 'start BENDANGLE'
+!      write(iou,*) 'start BENDANGLE'
 
       if ( kforce .gt. 0.1d0 ) then
 !        --- find a vector inside the unit sphere
@@ -512,7 +512,7 @@
          angle = equil + v1*dsqrt( (-dlog(rr)) /( kforce*betaT*rr) )
          
          if (angle .le. 0.0d0 .or. angle .ge. 3.1415 ) then
-            write(2,*) 'chose angle outside of 0,Pi in bendangle'
+            write(iou,*) 'chose angle outside of 0,Pi in bendangle'
             goto 80
          end if
 
@@ -529,7 +529,7 @@
          vangle = 0.0d0
       end if
 
-!      write(2,*) 'end BENDANGLE'
+!      write(iou,*) 'end BENDANGLE'
 
       return
       end

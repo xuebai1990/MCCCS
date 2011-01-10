@@ -37,7 +37,7 @@
 
       integer(KIND=normal_int)::i,j,im,imolty,ibox
 
-      open (unit=8, file="final-config")
+      open (8, file="final-config")
       write(8,*) tmcc
       if ( tmcc .gt. 0 ) then
          write(8,*) Armtrax, Armtray, Armtraz 

@@ -350,7 +350,7 @@
 
 
       else
-         write(6,*) 'you picked a non-defined torsional type'
+         write(iou,*) 'you picked a non-defined torsional type'
          call cleanup('')
       end if
 

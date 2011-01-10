@@ -142,8 +142,7 @@
          end if
 !     write(iou,*) 'boxins:',boxins,'boxrem:',boxrem
          if ( .not. (lgibbs .or. lgrand) .and. lswapinter ) then
-            call cleanup('no interbox swap if not gibbs/grand ensemble!'
-     $           )
+            call cleanup('no interbox swap if not gibbs/grand ensemble!')
          end if
 
 ! *** select a chain in BOXREM at random ***
@@ -189,8 +188,7 @@
 
          if (.not. lempty) bnswap(imolty,ipairb,boxins)  = bnswap(imolty,ipairb,boxins) + 1.0d0
 
-         bsswap(imolty,ipairb,boxins)=bsswap(imolty,ipairb,boxins)+1
-     $        .0d0
+         bsswap(imolty,ipairb,boxins)=bsswap(imolty,ipairb,boxins)+1.0d0
       end if
       
 !     *** store number of units in iunit ***

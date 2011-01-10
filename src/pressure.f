@@ -37,7 +37,7 @@
       integer(KIND=normal_int)::ibox
       integer(KIND=normal_int)::i,ii,j,jj,ntii,ntjj,ntij,imolty,jmolty ,iii,jjj,k
  
-      real(KIND=double_precision)::press,repress,erfunc
+      real(KIND=double_precision)::press,repress
 
       real(KIND=double_precision)::rxui,ryui,rzui,rxuij,ryuij,rzuij ,rijsq,rcutsq,sr2,sr6,rhosq,corp,rij,rs1,sr1,rs2,sr7,rs7,rs6
       real(KIND=double_precision)::srij
@@ -197,7 +197,7 @@
 ! *** minimum image the pair separations ***
                         if ( lpbc ) call mimage (rxuij,ryuij,rzuij,ibox)
 
-!     write(2,*) 'bead ruij',rxuij,ryuij,rzuij
+!     write(iou,*) 'bead ruij',rxuij,ryuij,rzuij
                         
                         rijsq = rxuij*rxuij+ryuij*ryuij+rzuij*rzuij
                         
@@ -238,7 +238,7 @@
                            if ( lexpsix ) then
                               rij = dsqrt(rijsq)
                               fij = fij + (-6.0d0*aexsix(ntij)/(rijsq *rijsq*rijsq) + bexsix(ntij) *cexsix(ntij)*rij*dexp( cexsix(ntij) 				   *rij ))/rijsq
-!                              write(2,*) 'rij,fij,ntij',rij,fij,ntij
+!                              write(iou,*) 'rij,fij,ntij',rij,fij,ntij
                            elseif ( lmmff ) then
                               rs2 = rijsq/(sigisq(ntij))
                               rs1 = dsqrt(rs2)
@@ -339,7 +339,7 @@
 ! *** minimum image the pair separations ***
                   if ( lpbc ) call mimage (rxuij,ryuij,rzuij,ibox)
 
-!                  write(2,*) 'COM  ruij',rxuij,ryuij,rzuij
+!                  write(iou,*) 'COM  ruij',rxuij,ryuij,rzuij
 
                   press = press +  fxcmi*rxuij + fycmi*ryuij + fzcmi*rzuij
 
@@ -386,7 +386,7 @@
       pips(3,2) = diff_pips32
  
 !      if(myid .eq. 0)then
-!        write(6,*)'press=',press,'pxx=',pxx,'pyy=',pyy
+!        write(iou,*)'press=',press,'pxx=',pxx,'pyy=',pyy
 !     &   ,'pzz=',pzz,'pips(1,2)',pips(1,2),'pips(1,3)=',pips(1,3)
 !     &   ,'pips(2,1)=',pips(2,1),'pips(2,3)=',pips(2,3),'pips(3,1)=',
 !     &   pips(3,1),'pips(3,2)=',pips(3,2)

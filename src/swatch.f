@@ -944,7 +944,7 @@
             if (iboxib .ne. boxb) call cleanup('problem in swatch')
 
 !cc--!!!JLR - for test write coordinates of a and b                                              
-!            open(unit=91,file='a_init.xyz',status='unknown')                                 
+!            open(91,file='a_init.xyz',status='unknown')                                 
 !            write(91,*) nunit(imolta)                                                        
 !            write(91,*)                                                                      
 !            do izz = 1,nunit(imolta)                                                          
@@ -952,7 +952,7 @@
 !     &              rzu(iboxa,izz)                                                            
 !            end do                                                                            
 !            close(91)                                                                        
-!            open(unit=92,file='b_init.xyz',status='unknown')                                 
+!            open(92,file='b_init.xyz',status='unknown')                                 
 !            write(92,*) nunit(imoltb)                                                        
 !            write(92,*)                                                                      
 !            do izz = 1,nunit(imoltb)                                                          
@@ -1532,14 +1532,14 @@
             end if
 
 !cc--!!!JLR - for test 2 write final coordinates of a and b                                      
-!         open(unit=93,file='a_final.xyz',status='unknown')                                   
+!         open(93,file='a_final.xyz',status='unknown')                                   
 !         write(93,*) iunita                                                                  
 !         write(93,*)                                                                         
 !         do izz = 1,iunita                                                                    
 !            write(93,*) 'C ', rxu(iboxa,izz),ryu(iboxa,izz),rzu(iboxa,izz)                      
 !         end do                                                                               
 !                                                                                             
-!         open(unit=93,file='b_final.xyz',status='unknown')                                   
+!         open(93,file='b_final.xyz',status='unknown')                                   
 !         write(93,*) iunitb                                                                  
 !         write(93,*)                                                                         
 !         do izz = 1,iunitb                                                                    

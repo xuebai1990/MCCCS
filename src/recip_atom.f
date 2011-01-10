@@ -33,11 +33,11 @@
 ! *** old conformation izz = 1 (which is 0 for swap inserted molecule)
 ! *** new conformation izz = 2 (which is 0 for swap removed molecule)
 
-!         write(6,*) 'in recip:',moltion(1),moltion(2)
+!         write(iou,*) 'in recip:',moltion(1),moltion(2)
 !         do izz = 1,2
 !            imolty = moltion(izz)
 !            do ii = 1, nunit(imolty)
-!               write(6,*) rxuion(ii,izz),ryuion(ii,izz),rzuion(ii,izz),
+!               write(iou,*) rxuion(ii,izz),ryuion(ii,izz),rzuion(ii,izz),
 !     &              qquion(ii,izz)
 !            end do
 !         end do
@@ -98,7 +98,7 @@
 
       end if
 
-!      write(6,*) 'in recip:',ssumr(100,ibox),ibox,ssumrn(100,ibox)
+!      write(iou,*) 'in recip:',ssumr(100,ibox),ibox,ssumrn(100,ibox)
 
       return 
       end

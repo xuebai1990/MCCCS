@@ -1,25 +1,25 @@
 mseed      #input file for 256 m-NT/n-decane NVT 1 box
 0
-io unit
-2
+iounit lecho lverbose run_num  suffix
+2 .true.  .true. 1    a 
+lnpt   lgibbs lgrand   lanes  lvirial lmipsw  lexpee
+.false. .false. .false. .false. .false. .false. .false.
+lijall lchgall lewald ldielect ltailc lshift
+.false. .false. .true. .false. .true. .false.
 L_add N_add  N_box2add N_moltyp2add
 .false. 9000    2         3
 L_sub N_sub  N_box2sub N_moltyp2sub
 .false. 200     2         3
-lecho lverbose
-.true.  .true.
-L_Coul_CBMC
-.true.
+l_Coul_CBMC lcutcm ldual lneigh
+.true.      .true. .true. .false.
 Number of unit cells in each of a,b, and c directions
 5. 5. 6.
-run_num  suff
-1    a 
 nstep lstep   lpresim iupdatefix  
 5000  .false. .false. 10  
-L_tor_table L_spline  L_linear
-.false.   .false.     .false.
-L_vib_table L_bend_table L_vdW_table L_elect_table
-.false.     .false.      .false.    .false.
+lslit lexzeo lzgrid lelect_field ljoe lsami lmuir lpsurf lgraphite lcorreg llj lexpsix lmmff lninesix lgenlj lgaro lionic
+.false. .false. .false. .true. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false.
+L_tor_table L_spline L_linear L_vib_table L_bend_table L_vdW_table L_elect_table
+.false.   .false.     .false. .false.     .false.      .false.    .false.
 nbox
 1
 express(ibox=1,nbox)[MPa]
@@ -31,7 +31,7 @@ L_Ewald_Auto
 temp     fqtemp  Elect_field(ibox=1,nbox)
 298.15d0   5.0d0  0.009d0 
 ianalyze nbin lrdf lintra lstretch lgvst lbend lete lrhoz bin_width
-100000    1 .true. .false. .false. .false. .false. .false. .false.   0.02
+100000    250 .true. .false. .false. .false. .false. .false. .false.   0.02
 iprint imv  iratio iblock idiele  L_movie_xyz iheatcapacity
 500  500  500  500   100000    .false.   1000000
 boxlx   boxly  boxlz     lsolid lrect  kalp  rcut    rcutnn - for box 1  
@@ -40,8 +40,8 @@ nchain nmolty
 256    2    
 temtyp      
 52  204
-lmixlb lmixjo  
-.true. .false.
+lmixlb lmixjo  ltab
+.true. .false. .false.
 nijspecial  
 0    
 ispec jspec aspec bspec
@@ -148,7 +148,7 @@ bending
 3
 6 5 72
 8 9 72
-8 13 72 
+8 13 72
 torsion
 0
 unit ntype leaderq Tr-UA C (aro)
@@ -218,7 +218,7 @@ nunit nugrow ncarbon nmaxcbmc iurot lelect  lflucq  lqtrans lexpand lavbmc1 lavb
 maxgrow lring   lrigid  lrig    lsetup  isolute eta
 1       .false. .false. .false. .false. 10000   0.0d0 0.0d0
 lq14scale qscale
-.false. 0.5d
+.false. 0.5d0
 unit ntype leaderq  Tr-UA CH3 alkane
 1    4   1
 vibration
@@ -357,8 +357,8 @@ rmrotx rmroty rmrotz
 0.4d0  0.4d0  0.4d0    
 tatra tarot    
 0.5d0 0.5d0
-linit   lnewtab lreadq    
-.false. .false. .false.
+linit   lreadq    
+.false. .false.
 lbranch   
 .true. .false.   
 ininch(1) ininch(2) etc.  
@@ -448,4 +448,3 @@ ltwice
 .false.
 lrplc
 .false.  .false.
-

@@ -1,4 +1,4 @@
-      subroutine molsetup(imolty)
+      subroutine molsetup(io_input,imolty)
 
       use global_data
       use var_type
@@ -14,8 +14,8 @@
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'connect.inc'
-
-      integer(KIND=normal_int)::i,j,k,n,iunit,imolty,dum,iu,countbend ,counttor,atype,btype,ctype,dtype,tortype,bendtype ,ju,ku,nu,vibtype,countvib
+      integer,intent(in)::io_input,imolty
+      integer(KIND=normal_int)::i,j,k,n,iunit,dum,iu,countbend,counttor,atype,btype,ctype,dtype,tortype,bendtype ,ju,ku,nu,vibtype,countvib
 
 !     ************************************************************
 
@@ -31,15 +31,15 @@
 
       do i = 1, iunit
 
-         read(4,*)
-         read(4,*) iu,ntype(imolty,i)
+         read(io_input,*)
+         read(io_input,*) iu,ntype(imolty,i)
          
          masst(imolty) = masst(imolty) + mass(ntype(imolty,i))
 
          write(iou,*) 'bead ',iu,' beadtype ',ntype(imolty,i)
 
-         read(4,*) 
-         read(4,*) invib(imolty,i),(ijvib(imolty,i,j) ,j=1,invib(imolty,i))
+         read(io_input,*) 
+         read(io_input,*) invib(imolty,i),(ijvib(imolty,i,j) ,j=1,invib(imolty,i))
 
          if (invib(imolty,i).gt.6) then
 

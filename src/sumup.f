@@ -15,6 +15,7 @@
       use util_string
       use util_files
       use util_timings
+      use zeolite
       implicit none
       include 'common.inc'
 
@@ -48,14 +49,14 @@
       logical::lexplt,lqimol,lqjmol,lcoulo,lij2,liji,lqchgi
       integer(KIND=normal_int)::i, imolty, ii, j, jmolty, jj, ntii, ntjj , ntij, iunit, ip1, ip2, ip3,ibox,nmcount,iii,jjj,iivib, jjvib , jjben, jjtor, it, ntj,k, mmm
       real(KIND=double_precision)::v, vinter, vintra, vtail, vvib, vbend , vtg, vext,velect,vflucq,qqii,vtmp
-      real(KIND=double_precision)::rcutsq,rminsq,rxui,ryui,rzui,rxuij ,ryuij,rzuij,rijsq,sr2, sr6, rho, thetac, theta,xaa1, yaa1, zaa1, xa1a2, ya1a2, za1a2, daa1, da1a2, dot,vtorso, dzui, dz3, dz12 ,xcc,ycc,zcc,tcc,spltor,mmff,rij,vrecipsum,erfunc,rbcut ,ninesix,vwell, genlj
+      real(KIND=double_precision)::rcutsq,rminsq,rxui,ryui,rzui,rxuij ,ryuij,rzuij,rijsq,sr2, sr6, rho, thetac, theta,xaa1, yaa1, zaa1, xa1a2, ya1a2, za1a2, daa1, da1a2, dot,vtorso, dzui, dz3, dz12 ,xcc,ycc,zcc,tcc,spltor,mmff,rij,vrecipsum,rbcut,ninesix,vwell, genlj
 ! tabulated potential variables
       real(KIND=double_precision)::tabulated_vib, tabulated_bend, tabulated_vdW,tabulated_elect
 
 !      real(KIND=double_precision)::vtemp
 
       real(KIND=double_precision)::coru,xcmi,ycmi,zcmi,rcmi,rcm ,rcmsq,qave,garofalini
-      real(KIND=double_precision)::ljsami,ljpsur,ljmuir,exsami,exmuir ,exzeo,exsix
+      real(KIND=double_precision)::ljsami,ljpsur,ljmuir,exsami,exmuir,exsix
       real(KIND=double_precision)::exgrph,vintera,velecta,vol
       real(KIND=double_precision)::rxvec(numax,numax),ryvec(numax,numax) ,rzvec(numax,numax),distanceij(numax,numax),epsilon2 ,sigma2, distij2(numax,numax)
       real(KIND=double_precision)::slitpore, v_elect_field, field
@@ -827,7 +828,7 @@
 !       write(iou,*) '== After Intra  === velect is:',velect*qqfact
 !       write(iou,*) 'vintra ', vintra
 !       write(iou,*) 'vinter ', vinter
-!       write(6,*) 'test', vintra
+!       write(iou,*) 'test', vintra
 
          if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff  .and. .not. lgenlj .and. .not. lninesix .and..not.lgaro .and..not.L_vdW_table) then
             vintra = 4.0d0 * vintra
@@ -928,10 +929,10 @@
                   do jjvib = 1, invib(imolty,j)
                      ip1 = ijvib(imolty,j,jjvib)
                      it  = itvib(imolty,j,jjvib)
-                     if ( ip1. lt. j .and. L_vib_table) then
+                     if ( ip1.lt. j .and. L_vib_table) then
                         call lininter_vib(distanceij(ip1,j),  tabulated_vib, it)
                         vvib = vvib + tabulated_vib
-!                         write(2,*) 'TABULATED VVIB: ', tabulated_vib, 
+!                         write(iou,*) 'TABULATED VVIB: ', tabulated_vib, 
 !     &                        distanceij(ip1,j), ip1, j
                      end if
                      if ( ip1 .lt. j .and..not.L_vib_table) vvib = vvib + brvibk(it) * (distanceij(ip1,j) - brvib(it))**2
@@ -1186,11 +1187,11 @@
 
 ! ----------------------------------------------------------------------------
 
-!      write(6,*) 'self,corr:',
+!      write(iou,*) 'self,corr:',
 !     &     (velect-vrecipsum/qqfact)*qqfact
-!      write(6,*) 'vsc, new self cor:',vsc*qqfact
-!      write(6,*) 'recip space part :',vrecipsum
-!      write(6,*) 'sc and recip:',vsc*qqfact + vrecipsum
+!      write(iou,*) 'vsc, new self cor:',vsc*qqfact
+!      write(iou,*) 'recip space part :',vrecipsum
+!      write(iou,*) 'sc and recip:',vsc*qqfact + vrecipsum
       
       if (.not.L_elect_table) then
          velect = velect*qqfact

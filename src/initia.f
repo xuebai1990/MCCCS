@@ -1,18 +1,12 @@
-      subroutine initia
+      subroutine initia(file_struct)
 
       use global_data
       use var_type
       use const_phys
       use const_math
-      use util_math
-      use util_string
       use util_files
-      use util_timings
       implicit none
-      include 'common.inc'
-
 !$$$      include 'mpi.inc'
-!$$$      include 'mpif.h'
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'system.inc'
@@ -23,9 +17,9 @@
 !$$$      include 'connect.inc'
 !$$$      include 'cbmc.inc'
 
-
-      logical::lhere(nmax)       
-      integer(KIND=normal_int)::i,j,m,m1,m2,n,nn,ic,jc,kc,it,ip1,ip2,ip3 ,ii,jj,iivib,jjben,jjtor,intemp,imol,ibtype,imolty,ibuild ,rand_id,offset,count_chain
+      character(len=*),intent(in)::file_struct
+      logical::lhere(nmax)
+      integer(KIND=normal_int)::io_struct,jerr,i,j,m,m1,m2,n,nn,ic,jc,kc,it,ip1,ip2,ip3 ,ii,jj,iivib,jjben,jjtor,intemp,imol,ibtype,imolty,ibuild ,rand_id,offset,count_chain
 
       integer(KIND=normal_int)::iboxst,iboxed,ibox,check,chktot
       integer(KIND=normal_int)::mcmt(ntmax,nbxmax),pcmt(ntmax) ,mcmtma(ntmax,nbxmax)
@@ -164,16 +158,20 @@
 ! *** calculate coordinates ***
 
 !     read sample structure from unit 78 -
-      open(unit=78,FILE='input_struc.xyz',status="unknown")
+      io_struct=get_iounit()
+      open(unit=io_struct,access='sequential',action='readwrite',file=file_struct,form='formatted',iostat=jerr,status='unknown')
+      if (jerr.ne.0) then
+         call cleanup('cannot open input file')
+      end if
 
       do i = 1, nmolty         
          lgrown(i) = .false.
          if ( lbranch(i) ) then
-            read(78,*)
+            read(io_struct,*)
             do m = 1, nunit(i)
-               read(78,*) samx(i,m), samy(i,m), samz(i,m)
+               read(io_struct,*) samx(i,m), samy(i,m), samz(i,m)
             end do
-         elseif ( .not. lbranch(i)) then
+         else if ( .not. lbranch(i)) then
 ! * if lbranch is false but the molecule is not linear attempt
 ! * to grow it with cbmc
             lgrow = .false.
@@ -233,7 +231,7 @@
          end if
       end do
 
-      close(unit=78)
+      close(io_struct)
 
       do i = 1,nmolty
          if (lgrown(i)) then
@@ -269,7 +267,7 @@
                     end if 
                  end do
  20              continue
-!             write(6,*) count_chain, rand_id,moltyp(rand_id) 
+!             write(iou,*) count_chain, rand_id,moltyp(rand_id) 
               else
                  goto 18
               end if

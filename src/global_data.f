@@ -23,7 +23,6 @@
       integer(KIND=normal_int)::nmax,numax,ntmax,nntype,nvmax,nbxmax ,npamax,npabmax,maxbin,cmax,cmaxa,tor_bin_max,nbinmax_ete,smax
       integer(KIND=normal_int)::vectormax,maxvir,maxntemp,nchmax ,nchtor_max,nchbn_max
       integer(KIND=normal_int)::ntdifmx,nbinmx,angle_max,ang_bin_max ,tor_max,iou
-
 !      common /iounit/ iou
 ! --------------------------------------------------------------
 ! *******************************
@@ -33,29 +32,29 @@
 !    then a NPT volume move is used to equilibrate with a pressure bath
 !    (implies cubic simulation boxes)
 !    else an NVT simulation is performed
-      parameter (lnpt = .true.)
+!      parameter (lnpt = .true.)
 ! if LGIBBS=.TRUE..
 !    then a Gibbs-ensemble simulation is performed
 !    (implies cubic simulation boxes)
-      parameter (lgibbs = .true.)
+!      parameter (lgibbs = .true.)
 ! if LGRAND=.TRUE.
 !    then simulation is performed in the grand-canonical ensemble
-      parameter (lgrand = .false.)
+!      parameter (lgrand = .false.)
 ! if LANES=.TRUE.
 !    then simulation is performed in the adiabatic nuclear and electronic
 !    sampling technique for polarizable force fields
-      parameter (lanes = .false.)
+!      parameter (lanes = .false.)
 ! if LVIRIAL=.TRUE.
 !    then one chain will be simulated in each box independently and
 !    the second viral coefficient will be calculated for their
 !    interactions at a series of distances along the x-axis
-      parameter (lvirial = .false.)
+!      parameter (lvirial = .false.)
 ! if lmipsw is true, then thermodynamic integration is performed
 ! for the phases, fort.35 must be supplied if so
-      parameter (lmipsw = .false.)
+!      parameter (lmipsw = .false.)
 ! if lexpee is true, then expanded esnemble is performed
 ! for the phases, fort.44 must be supplied if so
-      parameter (lexpee = .false.)
+!      parameter (lexpee = .false.)
 ! ******************************************
 ! *** PARAMETERS FOR BOUNDARY CONDITIONS ***
 ! ******************************************
@@ -81,20 +80,20 @@
 !    then all i-j-interactions are considered (no potential cut-off)
 !    must set lcutcm and ltailc to false for lijall = true
 !    * check top of sumup.f if lijall = true and lchgall is false
-      parameter (lijall = .false.)
+!      parameter (lijall = .false.)
 ! if LCHGALL= .TRUE.
 !    then all the electrostatic interaction are considered
-      parameter (lchgall = .false.)
+!      parameter (lchgall = .false.)
 ! if LCUTCM=.TRUE. then a cutoff of the centers of mass will be used
 ! with a value of rcmu as calculated in ctrmas
-      parameter (lcutcm = .true.)
+!      parameter (lcutcm = .true.)
 ! if LEWALD=.TRUE. then ewald-sum will be used to calculate the
 ! electrostatic interactions.
-      parameter (lewald = .true.)
+!      parameter (lewald = .true.)
 ! if LDIELECT=.TRUE. then dielectric constant will be calculated and
 ! LEWALD must be .TRUE.
 ! Correct only in NVT ensemble
-      parameter (ldielect = .false.)
+!      parameter (ldielect = .false.)
 ! ********************************************
 ! *** PARAMETERS FOR CBMC-PSEUDO-POTENTIAL ***
 ! ********************************************
@@ -102,69 +101,69 @@
 ! only go out to a radius of rcutin and then will be corrected to the
 ! full rcut at the end.  This is Dual Cutoff Configurational-bias Monte
 ! Carlo (DC-CBMC)
-      parameter (ldual = .true.)
+!      parameter (ldual = .true.)
 
 ! ********************************************
 ! ***   PARAMETER FOR LENNARD-JONES 12-6   ***
 !*********************************************
 ! This is only used if you are using regular lj potential ie without shifting or modifying
 ! it in any other way.
-      parameter (llj = .false.)
+!      parameter (llj = .false.)
 ! ********************************************
 ! *** PARAMETERS FOR EXP-6 POTENTIAL       ***
 ! ********************************************
 ! if LEXPSIX=.TRUE. exp-6 potential will be used instead of lennard jones
-      parameter (lexpsix = .false.)
+!      parameter (lexpsix = .false.)
 ! ***************************************************
 ! *** PARAMETERS FOR BUFFERED 14-7 POTENTIAL      ***
 ! ***************************************************
 ! if LMMFF=.TRUE. buffered 14-7 potential will be used.
-      parameter (lmmff = .false.)
+!      parameter (lmmff = .false.)
 ! ************************************
 ! *** PARAMETERS FOR 9-6 POTENTIAL ***
 ! ************************************
 ! if LNINESIX=.TRUE. then the 9-6 potential will be used.
-      parameter (lninesix = .false.)
+!      parameter (lninesix = .false.)
 ! *****************************************************
 ! *** PARAMETERS FOR GENERALIZED LJ POTENTIAL      ***
 ! *****************************************************
 ! if LGENLJ=.TRUE. then the the Generalized lennard jones
 ! potential will be used.
-      parameter (lgenlj=.false.)
+!      parameter (lgenlj=.false.)
 ! ********************************************
 ! *** PARAMETERS FOR GAROFALINI POTENTIAL  ***
 ! ********************************************
 ! if LGARO=.TRUE. garofalini potential will be used instead of lennard jones
-      parameter (lgaro = .false.)
+!      parameter (lgaro = .false.)
 ! ********************************************
 ! *** PARAMETER FOR IONIC SYSTEMS  ***
 ! ********************************************
 ! if LIONIC=.TRUE. System contains charged species, so system may not neutral
-      parameter (lionic = .false.)
+!      parameter (lionic = .false.)
 ! ***************************************
 ! *** PARAMETERS FOR TAIL CORRECTIONS ***
 ! ***************************************
 ! if LTAILC=.TRUE. tail corrections are added
 !    (WARNING:  .lsami. in external.inc switches an intrinsic
 !               tailcorrection on)
-      parameter (ltailc = .true.)
+!      parameter (ltailc = .true.)
 ! truncated and shifted potentials
-      parameter (lshift = .false.)
+!      parameter (lshift = .false.)
 ! ***************************************
 ! *** PARAMETERS OF NEIGHBOR LIST     ***
 ! ***************************************
 ! if LNIEGH=.TRUE. the nearest neighbor list will be used with a
 ! value of rcutnn specified by fort.4
-      parameter (lneigh = .false.)
+!      parameter (lneigh = .false.)
 ! ***************************************
 ! ** DIMENSIONS FOR ARRAYS             **
 ! ***************************************
 ! - nmax = maximum number of chains +2
       parameter (nmax = 5000)
 ! - numax = maximum number of units
-      parameter (numax = 12)
+      parameter (numax = 35)
 ! - ntmax = maximum number of types of chains
-      parameter (ntmax = 10)
+      parameter (ntmax = 35)
 ! - smax = max no. of mstates
       parameter (smax = 35)
 ! - nbxmax = maximum number of boxes
@@ -174,7 +173,7 @@
 ! - nvmax = maximum number of bond vibration and bending constants
       parameter (nvmax = 300)
 ! - npamax = maximum number of pairs to switch or swatch
-      parameter (npamax = 10)
+      parameter (npamax = 40)
 ! - npabmax = maximum number of box pairs (for swatch and swap)
       parameter (npabmax = 3)
 ! - maxvir = maximum number of bins for the 2nd virial coefficient
@@ -226,7 +225,6 @@
        parameter(nbinmax_ete=2)
 
 ! EXTERNAL.INC
-
       real(KIND=double_precision)::alpha1,alpha2,beta1,beta2
       real(KIND=double_precision)::a1,delta,rsol
       integer(KIND=normal_int)::ntsubst
@@ -235,13 +233,13 @@
       logical::lslit
       logical::lcorreg,lelect_field
 !  external electric field
-      parameter (lelect_field=.false.)
+!      parameter (lelect_field=.false.)
 ! surfaces:
-      parameter (ljoe=.false.,lsami=.false.,lmuir=.false.)
-      parameter (lslit = .false.)
-      parameter (lpsurf=.false.)
-      parameter (lgraphite=.false.)
-      parameter (lcorreg = .false.)
+!      parameter (ljoe=.false.,lsami=.false.,lmuir=.false.)
+!      parameter (lslit = .false.)
+!      parameter (lpsurf=.false.)
+!      parameter (lgraphite=.false.)
+!      parameter (lcorreg = .false.)
 ! Graphite surface
 ! -- a1, delta are in Angstroms
 ! -- rsol [=] 1/A^3
@@ -250,7 +248,7 @@
       parameter (ntsubst = 190)
       parameter (rsol = 0.114d0)
 ! zeolites:
-      parameter (lexzeo=.true.,lzgrid=.true.)
+!      parameter (lexzeo=.true.,lzgrid=.true.)
 ! Joe Hautman's parameters are read from standard input:
 !               to be used with ljoe = .true.
 ! Sami's parameters: to be used with lsami = .true. AND lmuir = .true.
@@ -258,38 +256,12 @@
 ! parameters for zeolites are read in subroutine SUZEO
 ! AT PRESENT no parameters for polymeric surfactants (see LJPSUR)
 
-! ZEOLITE.INC
-
-      integer(KIND=normal_int),parameter::nzeomax=57600
-      integer(KIND=normal_int)::idzeo(nzeomax),nzeo,nx,ny,nz
-      logical::lunitcell(nzeomax)
-      real(KIND=double_precision)::zeox(nzeomax),zeoy(nzeomax) ,zeoz(nzeomax),zeorx,zeory,zeorz,zunitx,zunity,zunitz
-
-!      common/zeolit/zeox,zeoy,zeoz,idzeo,lunitcell,nzeo
-!      common/box  /zeorx,zeory,zeorz,zunitx,zunity,zunitz,nx,ny,nz
-
-! ZEOPOTEN.INC
-
-!      real(KIND=double_precision)::zeps(zntype,zntype),zsig2(zntype,zntype),zrc2(zntype,zntype),zencut(zntype,zntype)
-      integer(KIND=normal_int),parameter::zntype=2,gntypemax=32
-      integer(KIND=normal_int)::gntype,gtable(0:gntypemax),ztype(zntype) ,znum(zntype)
-!      common/forces/gtable,znum,ztype,gntype,zeps,zsig2,zrc2,zencut
-
-! GRID.INC
-      integer(KIND=normal_int)::ngrx,ngry,ngrz,maxp,nlayermax
-      real(KIND=double_precision),allocatable::egrid(:,:,:,:)
-      real(KIND=double_precision)::dgrx,dgry,dgrz,dgr
-      parameter (maxp=10,dgr=0.2)
-!      common/gridd/dgrx,dgry,dgrz,egrid,ngrx,ngry,ngrz
-
 ! MPI.INC
-
       integer(KIND=normal_int)::myid,numprocs,ierr
       integer(KIND=normal_int),parameter::numprocmax=32
 !      common /mpivar/ myid,numprocs,ierr
 
 ! CBMC.INC
-
       logical::lovr(nchmax),lexist(numax),lexshed(numax),llplace(ntmax) ,lpnow(numax),llrig,lsave(numax),lrplc(ntmax)
 
 ! *** adding this for iswatch move ***
@@ -325,7 +297,6 @@
 !     &   ,pnum,pprev
 
 ! POTEN.INC
-
       logical::lspecial,lqchg,lij,lpl,lq14scale
       logical::L_Coul_CBMC
       logical::L_tor_table, L_spline, L_linear
@@ -334,9 +305,8 @@
       real(KIND=double_precision)::xiq,jayq,jayself,fqegp(ntmax),a15(2) ,qscale,qelect
       real(KIND=double_precision)::ljscale,qscale2
       real(KIND=double_precision)::n0,n1
-
-      dimension extc12(nntype), extc3(nntype), extz0(nntype) ,xiq(nntype),jayself(nntype),lqchg(0:nntype) ,lij(0:nntype)
-      dimension sig2ij(nntype*nntype), epsij(nntype*nntype), ecut(nntype*nntype), jayq(nntype*nntype), epsilon(2,numax),sigma(2,numax),epsi(nntype), sigi(nntype),q1(nntype),qelect(nntype)
+      dimension extc12(nntype), extc3(nntype), extz0(nntype) ,xiq(0:nntype),jayself(nntype),lqchg(0:nntype),lij(0:nntype)
+      dimension sig2ij(nntype*nntype), epsij(nntype*nntype), ecut(nntype*nntype), jayq(nntype*nntype),epsilon(2,numax),sigma(2,numax),epsi(0:nntype), sigi(0:nntype),q1(nntype),qelect(0:nntype)
       dimension aspecial(nntype*nntype),bspecial(nntype*nntype) ,lspecial(nntype*nntype),lpl(nntype)
       dimension ljscale(ntmax,numax,numax),qscale2(ntmax,numax,numax)
       dimension lq14scale(ntmax),qscale(ntmax)
@@ -359,7 +329,6 @@
 !      common /etects/ L_Coul_CBMC,L_tor_table, L_spline, L_linear
 
 ! COORD.INC
-
       logical::lelect,lflucq,lqtrans,lexpand,lpresim,lring,lrigid,lplace ,lrig,lrigi,lchiral,licell
       integer(KIND=normal_int)::nbox,nchain,nmolty,moltyp,nunit,nugrow ,ntype,nchbox,ncmt,ncmt2,iring,nrig,irig,frig,counthist,counttot ,boxlink
       integer(KIND=normal_int)::nboxi, eetype, parbox,iurot,iupdatefix ,nrigmin,nrigmax
@@ -381,11 +350,10 @@
       dimension qqu(nmax,numax), Elect_field(nbxmax)
       dimension nchbox(nbxmax),ncmt(nbxmax,ntmax) ,ncmt2(nbxmax,ntmax,20),eta(nbxmax,ntmax,20)
       dimension parall(ntmax,nmax),temtyp(ntmax)
-      dimension mass(nntype),masst(ntmax),parbox(nmax,nbxmax,ntmax)
+      dimension mass(0:nntype),masst(ntmax),parbox(nmax,nbxmax,ntmax)
       dimension xcm(nmax),ycm(nmax),zcm(nmax),exp_c(nmax) ,eta2(nbxmax,ntmax),sxcm(nmax),sycm(nmax),szcm(nmax)
       dimension riutry(ntmax,3),rindex(ntmax),lrigid(ntmax),lrig(ntmax) ,lrigi(ntmax,numax),lchiral(ntmax,numax),lring(ntmax)
-      dimension chname(nntype), chemid(nntype)
-
+      dimension chname(0:nntype), chemid(nntype)
 !      common /ncnunt/ moltyp,nunit,nugrow,ntype,parbox,boxlink
 !      common /ccord1/ probf, hist,rxu, ryu, rzu, qqu, rcmu, Elect_field
 !      common /ccord2/ nboxi,eetype,iurot,nchbox,ncmt,ncmt2
@@ -402,18 +370,15 @@
 !      common /ccord5/ irotbd,nrotbd
 
 ! COORD2.INC
-
       integer(KIND=normal_int)::moltion(2)
       real(KIND=double_precision)::rxuion(numax,2),ryuion(numax,2) ,rzuion(numax,2),qquion(numax,2),exp_cion(2)
 !      common /coord2/ rxuion,ryuion,rzuion,
 !     &                qquion,moltion,exp_cion
 
 ! CONNECT.INC
-
       logical::linclu(ntmax,numax,numax),lqinclu(ntmax,numax,numax) ,lainclu(ntmax,numax,numax),lexclu(ntmax,numax,ntmax,numax) ,wschvib(numax,6),wschben(numax,12),wschtor(numax,12)
       integer(KIND=normal_int)::invib(ntmax,numax),itvib(ntmax,numax,6) ,ijvib(ntmax,numax,6),inben(ntmax,numax),itben(ntmax,numax,12) ,ijben2(ntmax,numax,12),ijben3(ntmax,numax,12),intor(ntmax,numax) ,ittor(ntmax,numax,12),ijtor2(ntmax,numax,12),ijtor3(ntmax,numax ,12),ijtor4(ntmax,numax,12),wsched(numax)
       real(KIND=double_precision)::brvib(nvmax),brvibk(nvmax) ,brvibmin(60),brvibmax(60),brben(nvmax),brbenk(nvmax)
-
 !      common /connev/ brvib,brvibk,brvibmin
 !     &   ,brvibmax
 !     &   ,itvib,ijvib
@@ -432,7 +397,6 @@
 !      common /exclud/ lexclu
 
 ! EWALDSUM.INC
-
       logical::L_Ewald_Auto
       integer(KIND=normal_int)::kmax,numvect
 ! - kalp, a parameter to control the real::space sum
@@ -444,7 +408,6 @@
 ! - calp = kalp / boxlen
       dimension kx(vectormax,nbxmax),ky(vectormax,nbxmax), kz(vectormax,nbxmax),prefact(vectormax,nbxmax), ssumr(vectormax,nbxmax),ssumi(vectormax,nbxmax), ssumrn(vectormax,nbxmax),ssumin(vectormax,nbxmax), calp(nbxmax),kmax(nbxmax),kalp(nbxmax), ssumro(vectormax,nbxmax),ssumio(vectormax,nbxmax)
       dimension dipolex(nbxmax),dipoley(nbxmax),dipolez(nbxmax)
-
 !      common /ewaldl/ L_Ewald_Auto
 !      common /numvect/ numvect,kmax
 !      common /vector/ kx,ky,kz
@@ -455,7 +418,6 @@
 !     &                  dipolezo
 
 ! FEPSI.INC
-
       logical::lfepsi
       real(KIND=double_precision)::aslope,bslope,ashift,bshift,a0,b0
 
@@ -642,24 +604,20 @@
 !      common /fdata/ favor,favor2
 
 ! QQLIST.INC
-
       integer(KIND=normal_int)::leaderq
       dimension leaderq(ntmax,numax)
 !      common /qleader/ leaderq
 
 ! CLUSTERBIAS.INC
-
       logical::lbias(ntmax),lavbmc1(ntmax),lavbmc2(ntmax),lavbmc3(ntmax)
       real(KIND=double_precision)::rbsmax,rbsmin,vol_eff,pmbias(ntmax) ,pmbsmt(ntmax),pmbias2(ntmax)
 !      common /cbiasa/ lbias,lavbmc1,lavbmc2,lavbmc3
 !      common /cbiasb/ rbsmax,rbsmin,vol_eff,pmbias,pmbias2,pmbsmt
 
 ! NSIX.INC
-
 ! ***************************************************
 ! * stores interaction parameters for 9-6 potential *
 ! ***************************************************
-
       integer(KIND=normal_int)::nxatom
       parameter (nxatom=5)
       real(KIND=double_precision)::rzero(nxatom*nxatom),epsnx(nxatom *nxatom)
@@ -667,12 +625,10 @@
 !      common /formic/ rzero,epsnx,shiftnsix
 
 ! PEBOCO.INC
-
       real(KIND=double_precision)::bx,by,bz,hbx,hby,hbz,bxi,byi,bzi
 !      common /peboco/ bx,by,bz,hbx,hby,hbz,bxi,byi,bzi
 
 ! CELL.INC
-
       real(KIND=double_precision)::hmat(nbxmax,9),hmati(nbxmax,9)
       real(KIND=double_precision)::cell_length(nbxmax,3) ,min_width(nbxmax,3)
       real(KIND=double_precision)::cell_vol(nbxmax)
@@ -681,12 +637,10 @@
 !      common /cellb/ cell_length,min_width,cell_vol,cell_ang
 
 ! CONVER.INC
-
 !      real(KIND=double_precision)::raddeg, degrad ,twopi, onepi,eXV_to_K
 !      common /convrs/ raddeg, degrad, twopi, onepi,eXV_to_K
 
 ! TABULATED.INC
-
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !cccc  for use with tabulated potentials
 !cccc  if you are not using a tabulated potential,
@@ -696,7 +650,6 @@
 !cccc  num_int_elect(150,150), tabelect(1500,150,150), etc.
 !cccc  KM 2009
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-
       integer(KIND=normal_int)::vibsplits(150), bendsplits(150),ntabvib ,ntabbend
       integer(KIND=normal_int)::vdWsplits(150,150), ntabvdW
       integer(KIND=normal_int)::electsplits(1500,1500), ntabelect
@@ -707,7 +660,6 @@
       real(KIND=double_precision)::relect(1500,150,150), tabelect(1500 ,150,150)
       real(KIND=double_precision)::vibdiff(1500,150), benddiff(1500,150) ,vdWdiff(1500,150,150), electdiff(1500,150,150)
       logical::L_vib_table, L_bend_table, L_vdW_table, L_elect_table
-
 !      common /tabulated/ vib, tabvib, bend, tabbend, rvdW,
 !     & 	 tabvdW, relect, tabelect, vibdiff, benddiff, vdWdiff,
 !     &   electdiff, electsplits, ntabelect, num_int_elect,
@@ -717,13 +669,11 @@
 !     &   L_elect_table
 
 ! SYSTEM.INC
-
       logical::lsolid(nbxmax),lrect(nbxmax),ltwice(nbxmax) ,lideal(nbxmax)
       integer(KIND=normal_int)::icell,nicell,iucell,solcount
       real(KIND=double_precision)::boxlx(nbxmax), boxly(nbxmax), boxlz(nbxmax), rcut(nbxmax), rmin,rcutnn(nbxmax), softcut,softlog ,rcutin,avsolinter,avsolintra,avsolbend,avsoltor,avsolelc
       dimension icell(nmax),nicell(cmax),iucell(cmax,cmaxa) ,solcount(nbxmax,ntmax)
       dimension avsolinter(nbxmax,ntmax),avsolintra(nbxmax,ntmax) ,avsolbend(nbxmax,ntmax),avsoltor(nbxmax,ntmax) ,avsolelc(nbxmax,ntmax)
-
 !      common /boxpha/ lsolid,lrect,ltwice
 !      common /boxdim/ boxlx,boxly,boxlz,
 !     &                 rcut,rcutnn,lideal
@@ -733,7 +683,6 @@
 !      common /linkc/ icell,nicell,iucell
 
 ! NEIGH.INC
-
 ! lnn(1,1):replace the 1s with nmax to use neighbor list
       logical::lnn(1,1),lneighbor
       integer(KIND=normal_int)::maxneigh
@@ -748,13 +697,11 @@
 !      common /nn7/ ndijo,nxijo,nyijo,nzijo,neigh_o,neighboro
 
 ! NEIGH2.INC
-
 ! disvec(2,1,3):replace the 1 with nmax to use neighbor lists
       real(KIND=double_precision)::disvec(2,1,3)
 !      common /nn1/ disvec
 
 ! ENSEMBLE.INC
-
       real(KIND=double_precision)::vbox(nbxmax),wbox(nbxmax) ,vinterb(nbxmax),vtailb(nbxmax),vintrab(nbxmax),vvibb(nbxmax) ,vbendb(nbxmax),vtgb(nbxmax),vextb(nbxmax), velectb(nbxmax) ,vflucqb(nbxmax),v3garob(nbxmax)
 !      real(KIND=double_precision)::velectb_intra(nbxmax), velectb_inter(nbxmax)
 !      common /vwbox/  vbox,wbox,vinterb
@@ -764,7 +711,6 @@
 !      common /vabox/ velectb_intra,velectb_inter
 
 ! INPUTDATA.INC
-
       logical::lstop, ldie
       logical::lrdf,lintra,lstretch,lgvst,lbend,lete, lrhoz
       logical::L_movie_xyz
@@ -777,12 +723,9 @@
       integer(KIND=normal_int)::ianalyze,nbin,tmcc
       integer(KIND=normal_int)::nequil,ninstf,ninsth,ndumph
       integer(KIND=normal_int)::nstep, iprint, imv, iratio, iblock, idiele,isolute,iratv,iratp,irsave,nnstep,nchoiq,numcoeff,rmexpc ,nswapb,box1,box2,nvolb,box5,box6,ntemp, iheatcapacity
-
       real(KIND=double_precision)::Armtrax,Armtray,Armtraz
       real(KIND=double_precision)::Num_cell_a, Num_cell_b, Num_cell_c
-
       real(KIND=double_precision)::pmcb, pmtra, temp, express, ewald_precision ,rmtrax,rmtray, rmtraz, rmrotx, rmroty, rmrotz ,rmflcq,taflcq,fqbeta,tatra, tarot,pmvolx,pmvoly ,pmvol, pmswap ,rmvol, rmhmat, tavol,pmfix ,upnn, upnnsq, upnndg, B, pmswmt ,pmiswat,pmisatc ,pmswat,pmsatc,pmcbmt,pmtrmt,pmromt ,pmvlmt ,pmall,pmflcq, pmfqmt,pmexpc,pmeemt ,pmswapb,pmvolb,virtemp ,bin_width,pm_atom_tra ,pmexpc1
-
       dimension pmswmt(ntmax),pmcbmt(ntmax) ,pmtrmt(ntmax),pmromt(ntmax) ,pmall(ntmax),pmfqmt(ntmax),pmeemt(ntmax) ,rmexpc(ntmax) ,pmswapb(ntmax,npabmax) ,box1(ntmax,npabmax),box2(ntmax,npabmax) ,box5(nbxmax),box6(nbxmax),pmvolb(nbxmax)
       dimension nchoiq(nbxmax),nswapb(ntmax)
       dimension pmsatc(npamax),pmisatc(npamax)
@@ -794,7 +737,6 @@
       dimension rmvol(nbxmax),rmhmat(nbxmax,9)
       dimension rmtrax(ntmax,nbxmax),rmtray(ntmax,nbxmax) ,rmtraz(ntmax,nbxmax),rmrotx(ntmax,nbxmax) ,rmroty(ntmax,nbxmax),rmrotz(ntmax,nbxmax)
       dimension rmflcq(ntmax,nbxmax)
-
 !      common /indata/ nstep,iprint,imv,iratio,iblock, idiele, isolute
 !     &   ,iratv,iratp,irsave,nnstep,lstop,nchoiq,numcoeff,ldie
 !     &   ,rmexpc,nswapb,box1,box2,nvolb,box5,box6,ntemp,tmcc
@@ -818,18 +760,15 @@
 !      common /heatcap/ iheatcapacity
 
 ! BNBSMA.INC
-
       real(KIND=double_precision)::bsvol,bnvol,bntrax,bntray,bntraz ,bshmat,bstrax,bstray,bstraz,bnrotx,bnroty,bnrotz,bnhmat,bsrotx ,bsroty,bsrotz,bnflcq,bsflcq,bnexpc,bsexpc,bnflcq2,bsflcq2
       real(KIND=double_precision)::Abntrax,Abntray,Abntraz, Abstrax,Abstray,Abstraz
-
-      dimension bsvol(nbxmax), bnvol(nbxmax),bshmat(nbxmax,9), 	        bnhmat(nbxmax,9)
+      dimension bsvol(nbxmax), bnvol(nbxmax),bshmat(nbxmax,9), bnhmat(nbxmax,9)
       dimension bntrax(ntmax,nbxmax),bntray(ntmax,nbxmax), bntraz(ntmax,nbxmax)
       dimension bstrax(ntmax,nbxmax),bstray(ntmax,nbxmax), bstraz(ntmax,nbxmax)
       dimension bnrotx(ntmax,nbxmax),bnroty(ntmax,nbxmax), bnrotz(ntmax,nbxmax)
       dimension bsrotx(ntmax,nbxmax),bsroty(ntmax,nbxmax), bsrotz(ntmax,nbxmax)
       dimension bnexpc(ntmax,nbxmax),bsexpc(ntmax,nbxmax)
       dimension bnflcq(ntmax,nbxmax),bsflcq(ntmax,nbxmax), bnflcq2(ntmax,nbxmax),bsflcq2(ntmax,nbxmax)
-
 !      common /bvolum/ bnvol,bsvol,bshmat,bnhmat
 !      common /btrans/ bntrax,bntray,bntraz,bstrax,bstray,bstraz
 !      common /brotat/ bnrotx,bnroty,bnrotz,bsrotx,bsroty,bsrotz
@@ -838,13 +777,10 @@
 !     &          Abstray,Abstraz
 
 ! SWTCMOVE.INC
-
       integer(KIND=normal_int)::nswaty,nswatb,gswatc,nswach
       integer(KIND=normal_int)::nsampos,splist,nswtcb,box3,box4,ncut
-
       real(KIND=double_precision)::bnswat,bniswat,pmswtcb
       real(KIND=double_precision)::bnswat_empty
-
       dimension nswach(npamax),nsampos(npamax)
       dimension nswatb(npamax,npabmax)
       dimension bnswat(npamax,npabmax),ncut(npamax,2)
@@ -854,7 +790,6 @@
       dimension box3(npamax,npabmax)
       dimension box4(npamax,npabmax)
       dimension bnswat_empty(npamax,npabmax)
-
 !      common /swtcma/ nswaty,nswtcb
 !      common /swtcmb/ nswach,nsampos
 !      common /swtcmc/ box3,box4,bnswat,bnswat_empty,nswatb
@@ -862,13 +797,10 @@
 !      common /swtcme/ pmswtcb
 
 ! ROSEN.INC
-
       integer(KIND=normal_int)::growfrom,growprev,growlist,grownum
       dimension growfrom(numax),growprev(numax),grownum(numax)
       dimension growlist(numax,numax)
-
       real(KIND=double_precision)::weight,  weiold, voldt,voldbb,voldtg ,voldext,voldintra,voldinter,voldbvib,voldelect,voldewald,vnewt ,vnewbb,vnewtg,vnewext,vnewintra,vnewbvib,vnewinter,vnewelect ,vnewewald,vneworient,vnewinterr,vnewextr,vnewelectr,voldinterr ,voldextr,voldelectr,voldorient
-
 !      common /rosena/ growfrom,growprev,growlist,grownum
 !      common /rosenb/ weight,  weiold, voldt,voldbb,voldtg,voldext
 !     &     ,voldintra,voldinter,voldbvib,voldelect,voldewald
@@ -878,16 +810,11 @@
 !     &     ,voldextr,vneworient,voldorient
 
 ! IPSWPAR.INC
-
       integer(KIND=normal_int)::nw,nwell,iratipsw
       parameter (nw = 4000)
-
       real(KIND=double_precision)::dvdl,acdvdl,acipsw,vipsw,pipsw ,vwellipsw,pwellipsw,vwellipswb,vipswb,etais,lambdais,rxwell ,rywell,rzwell,awell,bwell,vipswo,vipswn,vwellipswo,vwellipswn ,lena,lenc,pwellips,pips,dhmat,sxwell,sywell,szwell,vwellipswot ,vwellipswnt,vipswnt,vipswot
-
       logical::lwell,lstagea,lstageb,lstagec
-
-      dimension vipswb(nbxmax),vwellipswb(nbxmax),rxwell(nw,ntmax) ,rywell(nw,ntmax) ,rzwell(nw,ntmax),pwellips(3,3),pips(3,3),nwell(ntmax) ,lwell(ntmax),awell(numax,numax,ntmax),dhmat(3,3) ,sxwell(nw,ntmax),sywell(nw,ntmax),szwell(nw,ntmax) ,vwellipswot(nchmax),vwellipswnt(nchmax) ,vipswot(nchmax),vipswnt(nchmax)
-
+      dimension vipswb(nbxmax),vwellipswb(nbxmax),rxwell(nw,ntmax) ,rywell(nw,ntmax) ,rzwell(nw,ntmax),pwellips(3,3),pips(3,3),nwell(ntmax) ,lwell(ntmax),awell(numax,numax,ntmax),dhmat(3,3),sxwell(nw,ntmax),sywell(nw,ntmax),szwell(nw,ntmax) ,vwellipswot(nchmax),vwellipswnt(nchmax) ,vipswot(nchmax),vipswnt(nchmax)
 !      common /paripsw1/ dvdl,acdvdl,acipsw,vipsw,pipsw,vwellipsw
 !     &   ,pwellips,pips,dhmat,sxwell,sywell,szwell
 !     &   ,vwellipswot,vwellipswnt,vipswnt,vipswot
@@ -899,24 +826,19 @@
 !      common /paripsw4/ lwell,lstagea,lstageb,lstagec
 
 ! EEPAR.INC
-
       logical::leemove,lmstate, leeacc
       integer(KIND=normal_int)::fmstate,sstate1,sstate2,mstate,nstate ,ee_moltyp,box_state,eepointp,eeirem,boxrem1,boxins1,ee_prob ,nmolty1
       real(KIND=double_precision)::wee_ratio,psi,ee_qqu,um_markov ,eeratio,rminee
-
       dimension psi(smax),ee_qqu(numax,smax),box_state(smax) ,ee_moltyp(smax),um_markov(smax,smax),ee_prob(smax) ,rminee(nntype*nntype)
-
 !      common /expepar/ rminee,ee_qqu,psi,wee_ratio,lmstate,leemove
 !     &      ,fmstate,sstate1,sstate2,mstate,nstate,ee_moltyp,box_state
 !     &      ,eepointp,eeirem,boxrem1,boxins1,leeacc,um_markov,eeratio
 !     &      ,ee_prob,nmolty1
 
 ! BLKAVG.INC
-
       integer(KIND=normal_int)::nener,nprop,blockm
       real(KIND=double_precision)::naccu,nccold,accum,bccold,aver,baver ,acsvol,acnvol,acshmat,acnhmat
 ! ** Neeraj adding for solubility parameter and heat of vaporization
-
       real(KIND=double_precision)::naccu1,nccold1,accum1,bccold1,aver1 ,baver1
       integer(KIND=normal_int)::nprop1
       parameter (nener=18,nprop=4+nener+(4*ntmax)+3,blockm=100)
@@ -926,12 +848,9 @@
       dimension aver(nprop,nbxmax), baver(nprop,nbxmax,blockm)
       dimension acsvol(nbxmax),acnvol(nbxmax)
       dimension acshmat(nbxmax,9),acnhmat(nbxmax,9)
-
       dimension naccu1(nprop1,nbxmax,nbxmax), nccold1(nprop1,nbxmax,nbxmax), aver1(nprop1,nbxmax,nbxmax)
       dimension accum1(nprop1,nbxmax,nbxmax), bccold1(nprop1,nbxmax,nbxmax), baver1(nprop1,nbxmax,nbxmax,blockm)
-
       double precision, dimension (ntmax,nbxmax) :: acntray,acntrax, acntraz,acnrotx,acnroty,acnrotz,acstrax,acstray,acstraz, acsrotx,acsroty,acsrotz
-
 !      common /bokavg/ baver,naccu,nccold,accum,bccold,aver,acsvol
 !     &                ,acnvol,acshmat,acnhmat
 !      common /blkavg/ baver1,naccu1,nccold1,accum1,bccold1,aver1
@@ -940,15 +859,10 @@
 !     &     acsrotz
 
 ! FIX.INC
-
       integer(KIND=normal_int)::  iend,ipast,endnum,pastnum,fclose ,fcount,iwbef,ibef,befnum,wbefnum,nextnum,inext
-
       logical::lcrank
-
       real(KIND=double_precision)::xx,yy,zz,xvec,yvec,zvec,distij,vtgtr ,vtbend,bsum_tor,vtvib
-
       dimension iend(numax),ipast(numax,numax) ,pastnum(numax) ,fclose(numax,numax) ,fcount(numax),iwbef(numax),ibef(numax ,numax) ,befnum(numax),xx(numax),yy(numax),zz(numax) ,xvec(numax ,numax),yvec(numax,numax) ,zvec(numax,numax),distij(numax,numax) ,nextnum(numax),inext(numax,numax),vtvib(nchmax) ,vtgtr(nchmax) ,vtbend(nchmax),bsum_tor(nchmax)
-
 !      common /fecba/ iend,ipast,endnum,pastnum,fclose,fcount
 !     &   ,befnum,wbefnum,iwbef,ibef,nextnum
 !     &   ,inext,lcrank
@@ -956,21 +870,17 @@
 !     &   ,bsum_tor,vtvib
 
 ! BOLTZMANN.INC
-
       real(KIND=double_precision)::rxi1,ryi1,rzi1,vi1,wi1,vext1,velect1
 !      common /boltzm/ rxi1,ryi1,rzi1,vi1,wi1,vext1,velect1
 
 ! EXPSIX.INC
-
       integer(KIND=normal_int)::natom
       parameter (natom = 3)
       real(KIND=double_precision)::aexsix,bexsix,cexsix,sexsix,consp ,consu
       dimension aexsix(natom),bexsix(natom),cexsix(natom) ,sexsix(natom),consu(natom),consp(natom)
-
 !      common /stuff/ aexsix,bexsix,cexsix,sexsix,consu,consp
 
 ! MERCK.INC
-
       integer(KIND=normal_int)::natomtyp
       parameter (natomtyp = 3)
       real(KIND=double_precision)::epsimmff,sigimmff,smmff,sigisq,ammff ,nmmff
@@ -983,7 +893,6 @@
 !     &   ,alphammff,gmmff,coru_cons,corp_cons
 
 ! INPAR.INC
-
       logical::lbranch
       integer(KIND=normal_int)::ininch,inix, iniy, iniz, inirot, inimix
       real(KIND=double_precision)::zshift, dshift
@@ -995,18 +904,12 @@
 !     &               ,ininch,lbranch
 
 ! GAROFALINI.INC
-
       integer(KIND=normal_int)::pair_max
       parameter(pair_max=50000)
-
       real(KIND=double_precision)::galpha(6),grho(6),gbeta(6),ga(6,3), 	 gb(6,3),gc(6,3),glambda(4),grij(4,2),ggamma(4,2), gtheta(4),grijsq(4,2)
-
       real(KIND=double_precision)::dxij(pair_max),dyij(pair_max), 	 dzij(pair_max),dij(pair_max),dik(pair_max),dxik(pair_max) ,dyik(pair_max),dzik(pair_max)
-
       integer(KIND=normal_int)::itr1(pair_max),itr2(pair_max) ,itr3(pair_max),ntr,tagged
-
       real(KIND=double_precision)::v3garo
-
 !      common /garo/ ga,gb,gc,ggamma,grij,galpha,grho,gbeta,
 !     &              glambda,gtheta,grijsq,tagged
 !      common /Ddist/ dij,dxij,dyij,dzij,dik,dxik,dyik,dzik
@@ -1014,48 +917,36 @@
 !      common /garoenrgy/ v3garo
 
 ! EXTERNALMUIR.INC
-
       real(KIND=double_precision)::sigpri,c9ch2,c3ch2,c9ch3,c3ch3 ,zprmin,v2prmin,v3prmin,betac2,betac3
 !      common /constmuir/ sigpri,c9ch2,c3ch2,c9ch3,c3ch3
 !     &                ,zprmin,v2prmin,v3prmin,betac2,betac3
 
 ! EXPAND.INC
-
       real(KIND=double_precision)::epsil(ntmax,numax,100),sigm(ntmax ,numax,100)
       real(KIND=double_precision)::qcharge(ntmax,numax,100)
 !      common /expand2/ epsil,sigm,qcharge
 
 ! LJSAMIPARA.INC
-
       real(KIND=double_precision)::sij(9), eij(9), vsh(9), vsha(9)
 !      common /ljspar/ sij,eij,vsh,vsha
 
 ! TORSION.INC
-
 	integer(KIND=normal_int)::splpnts(10),nttor
 	real(KIND=double_precision)::deg(1500,2),tabtorso(1500,2) ,torderiv2(1500,2)
 	real(KIND=double_precision)::tordif(1500,2)
-
 !	common /torsion/ deg,tabtorso,torderiv2,tordif,splpnts,nttor
 
 ! NRTAB.INC
-
       integer(KIND=normal_int)::nrtcon,nrtmax,nrtbin
 ! - parameters currently set low to minimize storage
       parameter(nrtcon=50,nrtmax=10,nrtbin=10)
-
       real(KIND=double_precision)::dmrtab(nrtmax),dbrtab(nrtmax), wnrtab(nrtmax,nrtbin)
-
 !      common /nrtabc/ dmrtab,dbrtab,wnrtab
 
 ! CONTORSION.INC
-
       integer(KIND=normal_int)::ntormax
       parameter (ntormax=700)
       real(KIND=double_precision)::vtt0(ntormax),vtt1(ntormax) ,vtt2(ntormax),vtt3(ntormax),vtt4(ntormax),vtt5(ntormax) ,vtt6(ntormax),vtt7(ntormax),vtt8(ntormax),vtt9(ntormax)
-!      common /contor/ vtt0,vtt1,vtt2,
-!     &		      vtt3,vtt4,vtt5,
-!     &		      vtt6,vtt7,vtt8,
-!     &                vtt9
+!      common /contor/ vtt0,vtt1,vtt2, vtt3,vtt4,vtt5,vtt6,vtt7,vtt8, vtt9
 
       end module global_data

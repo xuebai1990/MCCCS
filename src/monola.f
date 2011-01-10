@@ -1,4 +1,4 @@
-      subroutine monola(infile)
+      subroutine monola(file_in)
 
 ! -----------------------------------------------------------------
 ! subroutine monola
@@ -44,7 +44,7 @@
 !$$$      include 'torsion.inc'
 !$$$      include 'garofalini.inc'
 ! -----------------------
-      character(LEN=*),intent(in)::infile
+      character(LEN=*),intent(in)::file_in
 ! - variables added for GCMC histogram reweighting
       integer(KIND=normal_int)::fmax,nummol
       parameter (fmax=1e6)
@@ -147,11 +147,11 @@
 
 ! --------------------------------------
 
-c KM for MPI
-c only one processor at a time reads and writes data from files
+! KM for MPI
+! only one processor at a time reads and writes data from files
       do i=1,numprocs
          if (myid.eq.i-1) then
-            call readdat(infile,lucall,ucheck,nvirial,starvir,stepvir)
+            call readdat(file_in,lucall,ucheck,nvirial,starvir,stepvir)
          endif
          call MPI_BARRIER(MPI_COMM_WORLD,ierr)
       enddo
@@ -217,7 +217,7 @@ c only one processor at a time reads and writes data from files
           lstagec = .false.
       end if 
       
-!      write(6,*) 'lexpee ', lexpee
+!      write(iou,*) 'lexpee ', lexpee
 
 ! --- set up expanded ensemble stuff
       if (lexpee) call eesetup
@@ -228,8 +228,8 @@ c only one processor at a time reads and writes data from files
 ! only processor 0 opens files     
       if (myid.eq.0) then 
          write(file_cell,'("cell_param",I1.1,A,".dat")') run_num,suffix
-         open(unit=13,file=file_cell, status='unknown')
-         close(unit=13)
+         open(13,file=file_cell, status='unknown')
+         close(13)
       end if
       
 ! - setup files for histogram reweighting
@@ -246,12 +246,12 @@ c only one processor at a time reads and writes data from files
 
             end do
 
-            open(unit=50, file = file_flt, status='unknown')  
-            close(unit=50)
+            open(50, file = file_flt, status='unknown')  
+            close(50)
          
-            open(unit=51,file=file_hist,status='unknown')
+            open(51,file=file_hist,status='unknown')
             write(51,'(f8.4,2x,i5,2x,g15.5,3f12.3)')  temp, nmolty, (temp*log(B(i)),i=1,nmolty), boxlx(1), boxly(1), boxlz(1)         
-            close(unit=51)
+            close(51)
          end if
 
 ! --- extra zero accumulator for grand-canonical ensemble
@@ -573,7 +573,7 @@ c only one processor at a time reads and writes data from files
 !            write(iou,*) 'nstep',(nnn-1)*nchain+ii
 ! ***       select a move-type at random ***
             rm = random()
-
+!            write(iou,*) 'tmcc, random: ',tmcc,rm
 ! ###       special ensemble dependent moves ###
             if  (rm .le. pmvol) then
 !           ---  volume move ---
@@ -621,11 +621,11 @@ c only one processor at a time reads and writes data from files
 !           --- translational move in x,y, or z direction ---
                  rm = 3.0d0 * random()
                  if ( rm .le. 1.0d0 ) then
-                    call traxyz (.true.,.false.,.false.)	
+                    call traxyz(.true.,.false.,.false.)	
                  elseif ( rm .le. 2.0d0 ) then
-                     call traxyz (.false.,.true.,.false.)
+                     call traxyz(.false.,.true.,.false.)
                  else
-                     call traxyz (.false.,.false.,.true.)
+                     call traxyz(.false.,.false.,.true.)
                  end if
             else
 !           --- rotation around x,y, or z axis move --
@@ -804,7 +804,7 @@ c only one processor at a time reads and writes data from files
 ! check this if want to run grand canonical
                if (mod(nconfig,ninstf).eq.0.and.myid.eq.0) then 
 
-	         open(unit=50, file = file_flt, status='old',  					position='append')
+	         open(50, file = file_flt, status='old',  					position='append')
      
 !	         write(50, '(i10,5x,i7,5x,g15.6)') nconfig, 
 !     +			  (ncmt(ibox,i), i=1,nmolty),vhist
@@ -812,7 +812,7 @@ c only one processor at a time reads and writes data from files
 ! Formatting removed until I can figure out how to get <n>i7
 ! to work
 	         write(50, * ) nconfig,  			  (ncmt(ibox,i), i=1,nmolty),vhist
-	         close(unit=50)
+	         close(50)
 	      end if
 	   	    
 	      if(mod(nconfig,ninsth).eq.0.and.nconfig.gt.nequil) then
@@ -833,19 +833,19 @@ c only one processor at a time reads and writes data from files
 	      end if
 
 	      if (mod(nconfig,ndumph).eq.0.and.myid.eq.0) then
-	         open(unit=51,file = file_hist,status='old', 	    	      position='append') 
+	         open(51,file = file_hist,status='old', 	    	      position='append') 
                  do i=1,nentry 
 		    write(51, * )  		      (ncmt_list(i,imolty), imolty=1,nmolty),  					eng_list(i)     
 		 end do
-		 close(unit=51)
+		 close(51)
 		 nentry = 0
 
 		 do imolty=1,nmolty
-		   open(unit=52, file=file_ndis(imolty), status='unknown')
+		   open(52, file=file_ndis(imolty), status='unknown')
 		      do n=nminp(imolty),nmaxp(imolty)
 		         write(52,*) n,ndist(n,imolty)
 		      end do
-		      close(unit=52)
+		      close(52)
 		 end do
 	      end if
 	 end if
@@ -864,9 +864,9 @@ c only one processor at a time reads and writes data from files
                   if (lsolid(ibox) .and. .not. lrect(ibox).and. myid.eq.0) then
                      write(12,'(7e13.5,15i5)') hmat(ibox,1) ,hmat(ibox,4),hmat(ibox,5) ,hmat(ibox,7),hmat(ibox,8) ,hmat(ibox,9),vbox(ibox), (ncmt(ibox,itype),itype=1,nmolty)
                      
-                     open(unit=13,file = file_cell,status='old', position='append')
+                     open(13,file = file_cell,status='old', position='append')
                      write(13,'(i8,6f12.4)') nnn+nnstep, cell_length(ibox,1)/Num_cell_a, cell_length(ibox,2)/Num_cell_b, cell_length(ibox,3)/Num_cell_c, cell_ang(ibox,1)*180.0d0/onepi, cell_ang(ibox,2)*180.0d0/onepi, cell_ang(ibox,3)*180.0d0/onepi
-                     close(unit=13)
+                     close(13)
 
 !                     write(13,'(i8,3f12.4)') nnn,cell_ang(ibox,1)
 !     +                        , cell_ang(ibox,2),cell_ang(ibox,3)
@@ -927,7 +927,7 @@ c only one processor at a time reads and writes data from files
             if(lgibbs) then
                do ibox = 1,nbox-1
                   do jbox = ibox+1,nbox
-!                     WRITE(6,*) 'ieouwfe ',ibox,jbox
+!                     WRITE(IOU,*) 'ieouwfe ',ibox,jbox
                      call calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ, Heat_vapor_COUL,pdV, CED_T,CED_LJ,CED_COUL, HSP_T,HSP_LJ, HSP_COUL,ibox,jbox)
 
 ! --- Heat of vaporization            
@@ -943,7 +943,7 @@ c only one processor at a time reads and writes data from files
 !                     acsolpar(10,ibox,jbox) = 
 !     &                    acsolpar(10,ibox,jbox)+DeltaU_Ext
                      acsolpar(11,ibox,jbox) = acsolpar(11,ibox,jbox)+pdV
-                  end do  
+                  end do
                end do
             end if
          end if
@@ -1026,7 +1026,7 @@ c only one processor at a time reads and writes data from files
          ltfix    = .false.
          
          do imolty = 1, nmolty
-            if (pmfix(imolty).gt.0.0001d0.and .mod(nnn,iupdatefix).eq.0) then
+            if (pmfix(imolty).gt.0.0001d0 .and. mod(nnn,iupdatefix).eq.0) then
                ltfix = .true.
                lratfix(imolty) = .true.
             else
@@ -1526,7 +1526,7 @@ c only one processor at a time reads and writes data from files
 ! ** write out the final configuration for each box, Added by Neeraj 06/26/2006 3M ***
          do ibox = 1,nbox
             write(fileout,'("box",I1.1,"config",I1.1,A,".xyz")') ibox ,run_num,suffix
-            open (unit=200+ibox,FILE=fileout,status="unknown")
+            open (200+ibox,FILE=fileout,status="unknown")
             
             nummol = 0
             do i = 1,nchain
@@ -2151,13 +2151,11 @@ c only one processor at a time reads and writes data from files
          end if
          if (L_movie_xyz) then
             do ibox=1,nbox
-               close (unit=210+ibox)
+               close (210+ibox)
             end do
          end if
-
+         write(iou,*) 'Program ended at ',time_date_str()
       end if  ! end if myid. eq. 0
-
-
 
  1012 format(3(1x,f10.6),2i5)
 

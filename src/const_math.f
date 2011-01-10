@@ -1,10 +1,10 @@
-      module const_math
-      use var_type, only: double_precision
-      implicit none
-      save
-      real(KIND=double_precision),parameter::onepi =3.14159265358979323846264338_double_precision ,twopi=6.28318530717958647692528677_double_precision
+module const_math
+  use var_type, only: double_precision
+  implicit none
+  private
+  real(KIND=double_precision),parameter,public::onepi=3.1415926535897932384626433832795028841971693993751058209749_double_precision,twopi=6.2831853071795864769252867665590057683943387987502116419498_double_precision,fourpi=12.566370614359172953850573533118011536788677597500423283899_double_precision
 
-      real(KIND=double_precision),parameter::raddeg =180.0_double_precision/onepi,degrad=onepi/180.0_double_precision
-
-      real(KIND=double_precision),parameter::eps=1.0_double_precision
-      end module const_math
+  real(KIND=double_precision),parameter,public::raddeg=180.0_double_precision/onepi,degrad=onepi/180.0_double_precision
+  
+  real(KIND=double_precision),parameter,public::eps=epsilon(1.0_double_precision)
+end module const_math

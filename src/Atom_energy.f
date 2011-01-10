@@ -12,6 +12,7 @@
       use util_string
       use util_files
       use util_timings
+      use zeolite
       implicit none
       include 'common.inc'
 
@@ -45,10 +46,10 @@
 
       real(KIND=double_precision)::vvib,vbend,vtg,theta,mlen2
 
-      real(KIND=double_precision)::ljsami,ljpsur,ljmuir,v,vintra, vinter ,vext,rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq,ryuij,rzuij,sr2 ,sr6,rij,rijsq,dzui,dz3,dz12,exgrph,exsami,exmuir,exzeo,vtors ,exsix,velect,vewald,mmff,rbcut,ninesix, genlj
-      real(KIND=double_precision)::erfunc,qave
+      real(KIND=double_precision)::ljsami,ljpsur,ljmuir,v,vintra, vinter ,vext,rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq,ryuij,rzuij,sr2 ,sr6,rij,rijsq,dzui,dz3,dz12,exgrph,exsami,exmuir,vtors ,exsix,velect,vewald,mmff,rbcut,ninesix, genlj
+      real(KIND=double_precision)::qave
       real(KIND=double_precision)::rxvec,ryvec,rzvec,xaa1,yaa1,zaa1 ,xa1a2,ya1a2,za1a2,daa1,da1a2,dot,thetac,vtorso
-      real(KIND=double_precision)::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq ,epsilon2,sigma2
+      real(KIND=double_precision)::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq,epsilon2,sigma2
       real(KIND=double_precision)::slitpore,v_elect_field
       real(KIND=double_precision)::distanceij(numax,numax)
       real(KIND=double_precision)::xcc,ycc,zcc,tcc,spltor

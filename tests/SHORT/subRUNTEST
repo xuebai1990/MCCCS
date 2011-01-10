@@ -1,9 +1,0 @@
-#!/bin/bash
-#PBS -l nodes=1,walltime=12:00:00
-#PBS -N RUNTEST
-
-cd /mnt/home/katie/MCCCS-HD/TEST_SUITE/SHORT
-
-/mnt/home/katie/MCCCS-HD/TEST_SUITE/SHORT/RUNTEST.pl
-
-exit 0

@@ -12,6 +12,7 @@
       use util_string
       use util_files
       use util_timings
+      use zeolite
       implicit none
       include 'common.inc'
 
@@ -38,8 +39,8 @@
       integer(KIND=normal_int)::i,ibox, istart, iuend,ii,ntii,flagon,jjj ,iii,j,jj,ntjj,ntij,ntj,imolty,jmolty,ncell
       integer(KIND=normal_int)::iivib,jjtor,ip1,ip2,ip3,it,nchp2 ,acellinc,kmolty
 
-      real(KIND=double_precision)::ljsami,ljpsur,ljmuir,v,vintra, vinter ,vext,rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq,ryuij,rzuij,sr2 ,sr6,rij,rijsq,dzui,dz3,dz12,exgrph,exsami,exmuir,exzeo,vtors ,exsix,velect,vewald,mmff,rbcut,ninesix,vharo,genlj
-      real(KIND=double_precision)::erfunc,qave,rho,vol,vtail
+      real(KIND=double_precision)::ljsami,ljpsur,ljmuir,v,vintra, vinter ,vext,rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq,ryuij,rzuij,sr2 ,sr6,rij,rijsq,dzui,dz3,dz12,exgrph,exsami,exmuir,vtors ,exsix,velect,vewald,mmff,rbcut,ninesix,vharo,genlj
+      real(KIND=double_precision)::qave,rho,vol,vtail
       real(KIND=double_precision)::rxvec,ryvec,rzvec,xaa1,yaa1,zaa1 ,xa1a2,ya1a2,za1a2,daa1,da1a2,dot,thetac,vtorso,coru
       real(KIND=double_precision)::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq ,epsilon2,sigma2
 

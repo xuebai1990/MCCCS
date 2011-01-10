@@ -332,7 +332,7 @@
                   do count = 1,ntogrow
                      iu = growlist(iw,count)
 
-                     if (movetype.eq.2.and .lring(imolty).and.iw.lt.3) then
+                     if (movetype.eq.2 .and.lring(imolty).and.iw.lt.3) then
                         bf_tor(itor) = 1.0d0
                         goto 300
                      end if
@@ -716,7 +716,7 @@
                   vvibtr = vvibtr + vtvib(iwalk)
                else
 
-                  if (.not.(movetype.eq.2.and.lring(imolty).and  .iw.eq.1)) then
+                  if (.not.(movetype.eq.2.and.lring(imolty).and.iw.eq.1)) then
 
                      tac = toracc(iwalk)
                      cwtorf = cwtorf * ctorf(iwalk,tac)
@@ -744,7 +744,7 @@
                   vvibtr = vvibtr + vtvib(1)
                else
                                     
-                  if (.not.(movetype.eq.2.and.lring(imolty).and  .iw.eq.1)) then
+                  if (.not.(movetype.eq.2.and.lring(imolty).and.iw.eq.1)) then
                      
                      cwtorf = cwtorf * ctorf(1,1)
 

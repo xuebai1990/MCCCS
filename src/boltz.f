@@ -26,6 +26,7 @@
       use util_string
       use util_files
       use util_timings
+      use zeolite
       implicit none
       include 'common.inc'
 
@@ -55,7 +56,7 @@
       integer(KIND=normal_int)::ichoi,growjj,igrow,count,glist(numax) ,icharge,cnt,jcell(nmax),ic
       integer(KIND=normal_int)::i,imolty,ibox,ntogrow,itrial,ntii,j,jj ,ntjj,ntij,iu,jmolty,iufrom,ii,cellinc(27),k,nmole
 !      integer(KIND=normal_int)::NRtype 
-      real(KIND=double_precision)::ljsami,rminsq,rxui,sr6,ryui,rzui ,rxuij,ryuij,rzuij,rij,rijsq,sr2,dzui,dz3,dz12 ,exzeo,exsami ,exmuir,exgrph,ljpsur,ljmuir,exsix ,mmff,maxlen,rcm,rcmsq ,corr ,erfunc,rcutmax,ninesix, genlj
+      real(KIND=double_precision)::ljsami,rminsq,rxui,sr6,ryui,rzui ,rxuij,ryuij,rzuij,rij,rijsq,sr2,dzui,dz3,dz12,exsami ,exmuir,exgrph,ljpsur,ljmuir,exsix ,mmff,maxlen,rcm,rcmsq,corr,rcutmax,ninesix, genlj
       real(KIND=double_precision)::vinter,vintra,vext,velect,vewald,qave ,epsilon2,sigma2,vwell,v,rcutsq,rcinsq
       real(KIND=double_precision)::v_elect_field, field
       real(KIND=double_precision)::slitpore
@@ -172,7 +173,7 @@
       end if
 
 ! RP added for MPI
-!      write(6,*)'170: boltz my_start=',my_start,'my_end=',my_end
+!      write(iou,*)'170: boltz my_start=',my_start,'my_end=',my_end
 !     &    ,'ichoi=',ichoi,'loops_per_proc=',loops_per_proc,'myid=',myid
 !
       my_itrial  = 0
@@ -884,7 +885,7 @@
       call MPI_ALLGATHERV(my_bfac, loops_per_proc,  MPI_DOUBLE_PRECISION, bfac, ncount_arr, ncount_displs, MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
 
 !       do my_itrial=my_start,my_end
-!        write(6,*)"938:boltz my_bfac(",my_itrial,")=",my_bfac(my_itrial)
+!        write(iou,*)"938:boltz my_bfac(",my_itrial,")=",my_bfac(my_itrial)
 !     &      ,'myid=',myid
 !       end do
 

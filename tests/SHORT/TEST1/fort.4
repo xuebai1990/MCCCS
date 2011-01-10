@@ -1,25 +1,25 @@
 mseed          ##### input file for 2-hydroxyethyl acrylate NpT 1 box
 0
-io unit
-2
+iounit lecho lverbose run_num  suffix
+2 .true.  .true. 1   a 
+lnpt   lgibbs lgrand   lanes  lvirial lmipsw  lexpee
+.true. .false. .false. .false. .false. .false. .false.
+lijall lchgall lewald ldielect ltailc lshift
+.false. .false. .true. .false. .true. .false.
 L_add N_add  N_box2add N_moltyp2add
 .false. 9000    2         3
 L_sub N_sub  N_box2sub N_moltyp2sub
 .false. 200     2         3
-lecho lverbose
-.true.  .true.
-l_Coul_CBMC
-.true.
+l_Coul_CBMC lcutcm ldual lneigh
+.true.      .true. .true. .false.
 Number of unit cells in each of a,b, and c directions
 5. 5. 6.
-run_num  suff
-1   a 
 nstep   lstep   lpresim iupdatefix
 10  .false.  .false. 100
-L_tor_table L_spline  L_linear
-.false.   .false.     .false.
-L_vib_table L_bend_table L_vdW_table L_elect_table
-.false.     .false.     .false.     .false.
+lslit lexzeo lzgrid lelect_field ljoe lsami lmuir lpsurf lgraphite lcorreg llj lexpsix lmmff lninesix lgenlj lgaro lionic
+.false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false.
+L_tor_table L_spline L_linear L_vib_table L_bend_table L_vdW_table L_elect_table
+.false.   .false.     .false. .false.     .false.     .false.     .false.
 nbox
 1
 express(ibox=1,nbox)[MPa]
@@ -33,15 +33,15 @@ temp     fqtemp  Elect_field(ibox=1,nbox)
 ianal  nbin  lrdf  lintra  lstretch  lgvst  lbend lete  lrhoz bin_width
 50000  250   .true. .false. .false.  .false. .false. .false. .false. 0.2
 iprint imv iratio iblock  idiele  L_movie_xyz iheatcapacity 
-5   500  5000000   5  1   .false.  1000000
+5   500  500   5  1   .false.  1000000
 boxlx   boxly  boxlz     lsolid lrect  kalp  rcut   rcutnn - for box 1  
 46.0d0  46.0d0 46.0d0 .false. .false. 0.25d0 14.0d0 0.0 
 nchain nmolty
 300   1
 moltyp
 300
-lmixlb lmixjo
-.true. .false.
+lmixlb lmixjo  ltab
+.true. .false. .false.
 nijspecial
 0
 ispec   jspec   aspec   bspec
@@ -182,8 +182,8 @@ rmrotx rmroty rmrotz
 0.4d0   0.4d0   0.4d0
 tatra tarot
 0.5d0   0.5d0
-linit   lnewtab lreadq  
-.false. .false. .false.  
+linit   lreadq  
+.false. .false.  
 lbranch 
 .false. 
 ininch(1)
@@ -191,7 +191,7 @@ ininch(1)
 inix(1) iniy(1) iniz(1) inirot inimix zshift dshift nchoiq - box 1
 7       7       7       0      1      0.0    3.28    1
 rmvol tavol iratv iratp rmflcq taflcq
-1.0d3 0.40d0 5000000  10 0.1d0  0.95d0
+1.0d3 0.40d0 500  10 0.1d0  0.95d0
 pmvol   pmvlmt
 0.0008d0 1.0d0 1.0d0
         nvolb pmvolb

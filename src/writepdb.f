@@ -18,7 +18,7 @@
       integer(KIND=normal_int)::im,ia,nmol,natom,iguest,imm,ibox
       character(LEN=4)::atom
 
-      open(unit=48, file='system.pdb', form='formatted')
+      open(48, file='system.pdb', form='formatted')
       rewind(48)
       write(iou,*) 'most likely does not work as before 9-3-96'
       write(iou,"(/,' WRITING GUEST ATOMS TO FILE system.pdb')")

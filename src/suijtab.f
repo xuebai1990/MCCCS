@@ -1,4 +1,4 @@
-      subroutine suijtab(lmixlb,lmixjo,ltab)
+      subroutine suijtab(file_ff,lmixlb,lmixjo,ltab)
 
       use global_data
       use var_type
@@ -24,8 +24,9 @@
 !$$$      include 'garofalini.inc'
 !$$$      include 'conver.inc'
 
-      logical::lmixlb, lmixjo,ltab
-      integer(KIND=normal_int)::i, j, ij, ji,ibox,nntype5,nmix,imix
+      character(LEN=*),intent(in)::file_ff
+      logical,intent(in)::lmixlb,lmixjo,ltab
+      integer(KIND=normal_int)::io_ff,jerr,i,j,ij,ji,ibox,nntype5,nmix,imix
       real(KIND=double_precision)::rzeronx(nxatom),epsilonnx(nxatom)
 
       real(KIND=double_precision)::rcheck, sr2, sr6, adum, bdum, rs1, rs7, sr7,pi,djay,sigmaTmp,epsilonTmp,garofalini
@@ -333,7 +334,7 @@
 
       end if
 
-      do i = 1, nntype
+      do i = 0,nntype
          sigi(i) = 0.0d0
          epsi(i) = 0.0d0
          mass(i) = 0.0d0
@@ -2055,7 +2056,7 @@
 !----[Si]-O-Si
        sigi(177) = 0.0d0
        epsi(177) = 0.0d0
-       mass(177) = 28.0d0      
+       mass(177) = 28.0899d0      
        qelect(177) =1.216d0
        lqchg(177) = .true.
        lij(177) = .false.
@@ -2065,7 +2066,7 @@
 !----Si-[O]-Si
        sigi(178) = 3.35d0
        epsi(178) = 70.0d0
-       mass(178) = 16.0d0      
+       mass(178) = 15.9994d0      
        qelect(178) =-0.608d0
        lqchg(178) = .true.
        lij(178) = .true.
@@ -3581,14 +3582,18 @@
       jayq(ij) = 112537.0d0
 
       if (ltab) then
-         open(5,file='lj.poten')
-         read(5,*)
-         read(5,*) nntype5
-         read(5,*)
+         io_ff=get_iounit()
+         open(unit=io_ff,access='sequential',action='read',file=file_ff,form='formatted',iostat=jerr,status='old')
+         if (jerr.ne.0) then
+            call cleanup('cannot open force field file')
+         end if
+
+         read(io_ff,*)
+         read(io_ff,*) nntype5
+         read(io_ff,*)
          do j=1,nntype5
-            read(5,*) i,sigi(i),epsi(i),qelect(i)
-!         read(5,'(I,4F,2A)') i,sigi(i),epsi(i),qelect(i),mass(i)
-!     &        ,chemid(i),chname(i)
+            read(io_ff,*) i,sigi(i),epsi(i),qelect(i),mass(i)
+!         read(io_ff,'(I,4F,2A)') i,sigi(i),epsi(i),qelect(i),mass(i),chemid(i),chname(i)
             if (qelect(i).ne.0) then
                lqchg(i)=.true.
             else
@@ -3652,11 +3657,11 @@
       end if
 
       if (ltab) then
-         read(5,*)
-         read(5,*) nmix 
-         read(5,*)
+         read(io_ff,*)
+         read(io_ff,*) nmix 
+         read(io_ff,*)
          do imix=1,nmix
-            read(5,*) i,j,sigmaTmp,epsilonTmp
+            read(io_ff,*) i,j,sigmaTmp,epsilonTmp
             ij=(i-1)*nntype+j
             sig2ij(ij)=sigmaTmp*sigmaTmp
             sig2ij((j-1)*nntype+i)=sig2ij(ij)
@@ -3669,7 +3674,7 @@
                ecut((j-1)*nntype+i)=ecut(ij)
             end if
          end do
-         close(5)
+         close(io_ff)
       end if
 
       return

@@ -103,7 +103,7 @@
                       if (L_vib_table) then
                          call lininter_vib(distanceij(ip1,j),  tabulated_vib, it)
                          vvib = vvib + tabulated_vib
-!                         write(2,*) 'INTRA_ENERGY VVIB: ', 
+!                         write(iou,*) 'INTRA_ENERGY VVIB: ', 
 !     &                        tabulated_vib
                       end if
                       if ( ip1 .lt. j .and..not.L_vib_table) vvib = vvib + brvibk(it)*( distanceij(ip1,j)-brvib(it) ) **2

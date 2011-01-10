@@ -322,7 +322,7 @@
 ! *** write some ratio update information ***
                   write(iou,"(' Type ',i1,' bn ',6(f7.0,1x))") imolty ,bntrax(imolty,im),bntray(imolty,im), bntraz(imolty ,im),bnrotx(imolty,im), bnroty(imolty,im) ,bnrotz(imolty,im)
 !              write(iou,"(' ratio       ',6(f7.4,1x))") ratrax, ratray, ratraz,rarotx, raroty,rarotz
-                  write(iou,"(' max.displ.  ',6(f7.4,1x))") rmtrax(imolty,im), rmtray(imolty,im), rmtraz(imolty ,im), rmrotx(imolty,im), rmroty(imolty,im), rmrotz(imolty,im)
+                  write(iou,"(' max.displ.  ',6(f9.4,1x))") rmtrax(imolty,im), rmtray(imolty,im), rmtraz(imolty ,im), rmrotx(imolty,im), rmroty(imolty,im), rmrotz(imolty,im)
                end if
 
                acntrax(imolty,im) = acntrax(imolty,im)+bntrax(imolty,im)
@@ -693,7 +693,7 @@
 
       if ( lrsave .and.myid.eq.0) then
 !     *** write out the restart configurations to SAFETY-file ***
-         open(unit=88,file="save-config")
+         open(88,file="save-config")
          write (88,*) nnn + nnstep
          write (88,*) Armtrax, Armtray, Armtraz 
          do im=1,nbox

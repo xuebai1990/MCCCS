@@ -347,7 +347,7 @@
 !CC --- FINALLY WE ARE DONE
 
 !     Write a check
-!      open(unit=90, file='align.xyz',status='unknown')
+!      open(90, file='align.xyz',status='unknown')
 !      nunit_a = nunit(moltyp(imol_a))
 !      write(90,*) nunit_a+nunit_b
 !      write(90,*) 'Plane Alignment Test'

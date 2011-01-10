@@ -410,7 +410,7 @@
                   
 !     --- use law of cosines to calculate bond angle
 
-                  thetac = (lengtha**2 + lengthb**2 - hdist**2) / (2 .0d0 * lengtha * lengthb)
+                  thetac = (lengtha**2 + lengthb**2 - hdist**2) / (2.0d0 * lengtha * lengthb)
                   
 !     --- check to make sure this will give a number
 
@@ -902,7 +902,7 @@
                      call cone(1, xvec(iufrom,ju),yvec(iufrom,ju) ,zvec(iufrom,ju),dum,dum,dum,dum,dum)
 
 !     --- determine phidisp
-                     if (.not.lnew.and.ip.eq.1.and .itor.eq.1) then
+                     if (.not.lnew.and.ip.eq.1.and.itor.eq.1) then
 !     --- give old unit vector for connection
                         xx(count) = rxu(i,iu) - rxu(i,iufrom)
                         yy(count) = ryu(i,iu) - ryu(i,iufrom)
@@ -1180,7 +1180,7 @@
                         
                      j = int(2.0d0 * random()) + 1
 
-                     if (.not.lnew.and.ip.eq.1.and .itor.eq.1) then
+                     if (.not.lnew.and.ip.eq.1.and.itor.eq.1) then
 !     --- give old unit vector for connection
                         xx(count) = rxu(i,iu) - rxu(i,iufrom)
                         yy(count) = ryu(i,iu) - ryu(i,iufrom)
@@ -1395,7 +1395,7 @@
                         jut3 = ijtor3(imolty,nu,it)
                         jut4 = ijtor4(imolty,nu,it)
 
-                        if (jut2.eq.ku.and.jut3.eq.ju. and.jut4.eq.iu) then
+                        if (jut2.eq.ku.and.jut3.eq.ju.and.jut4.eq.iu) then
                         
                            jttor = ittor(imolty,nu,it)
 
@@ -1464,7 +1464,7 @@
                      iu = growlist(iw,count)
                      do counta = count+1, ntogrow
                         ju = growlist(iw,counta)
-                        if (.not.((iopen(1).eq.count .or.iopen(1).eq.counta) .and.((iclose.eq.count.or .iclose.eq.counta) .or.iopen(2).eq.count .or.iopen(2).eq.counta))) then
+                        if (.not.((iopen(1).eq.count .or.iopen(1).eq.counta) .and.((iclose.eq.count.or.iclose.eq.counta) .or.iopen(2).eq.count .or.iopen(2).eq.counta))) then
 !     --- we already calculated these
                            
                            lengtha = flength(iufrom,iu)
