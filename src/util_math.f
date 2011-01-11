@@ -44,7 +44,7 @@ contains
     real(KIND=double_precision)::dy,den,dif,dift,ho,hp,w,c(nmax),d(nmax)
     ns=1
     dif=abs(x-xa(1))
-    do  i=1,n
+    do i=1,n
        dift=abs(x-xa(i))
        if (dift.lt.dif) then
           ns=i
@@ -75,7 +75,6 @@ contains
     end do
     return
     end subroutine polint
-
 
 !      subroutine coordinate_transform(x,y,z,invh,sx,sy,sz)
 !      real(KIND=double_precision),intent(in)::x,y,z,invhmat

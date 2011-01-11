@@ -1083,7 +1083,7 @@
 		  
                      if( lgraphite ) then
 			ntij = (ntj-1)*nntype + ntsubst
-			vext = vext + exgrph(rxu(i,j),ryu(i,j), 				      rzu(i,j),ntij)
+			vext = vext + exgrph(rxu(i,j),ryu(i,j),rzu(i,j),ntij)
                      end if
                      
                      if ( lsami )  vext = vext + exsami(rzu(i,j),ntj)

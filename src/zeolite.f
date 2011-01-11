@@ -211,17 +211,18 @@ module zeolite
                do i=0,ngrx-1
                   do j=0,ngry-1
                      do k=0,ngrz-1
-                        if (i.gt.oldi.or.(i.eq.oldi.and.j.ge.oldj)) egrid(i,j,k,igtype)=exzeof(dble(i)/ngrx ,dble(j)/ngry,dble(k)/ngrz,idi)
+                        if (i.gt.oldi.or.(i.eq.oldi.and.j.ge.oldj)) egrid(i,j,k,igtype)=exzeof(dble(i)/ngrx,dble(j)/ngry,dble(k)/ngrz,idi)
                         if (myid.eq.0) write(io_ztb) egrid(i,j,k,igtype)
                      end do
                   end do
                end do
-               if (myid.eq.0) write(iou,*) 'maxlayer = ',nlayermax
+               if (myid.eq.0.and.ltailc) write(iou,*) 'maxlayer = ',nlayermax
 !     call ztest(idi)
             end if
 
-            if (idi.ne.0.and.lewald.and.lqchg(idi)) egrid(:,:,:,igtype) =egrid(:,:,:,igtype)+qelect(idi)*egrid(:,:,:,0)
-
+            if (idi.ne.0.and.lewald.and.lqchg(idi)) then
+               where (egrid(:,:,:,igtype).lt.overflow) egrid(:,:,:,igtype)=egrid(:,:,:,igtype)+qelect(idi)*egrid(:,:,:,0)
+            end if
             if (myid.eq.0) then
                close(io_ztb)
             end if
@@ -241,7 +242,7 @@ module zeolite
 
       exzeof=0.
       
-      if (idi.eq.0.or.(.not.ltailc.and.lij(idi)).or. (.not.lewald.and.lqchg(idi))) then
+      if (idi.eq.0.or.(.not.ltailc).or.(.not.lewald.and.lqchg(idi))) then
          vljnew=0.
          vqnew=0.
          rcutsq = rcut(ibox)*rcut(ibox)
@@ -281,7 +282,7 @@ module zeolite
                         vljnew=vljnew+4.*(epsij(ntij)*(r6-1.0)*r6-ecut(ntij))
                      else
                         vljnew=vljnew+4.*epsij(ntij)*(r6-1.0)*r6
-                     end if               
+                     end if
                   end if
                end if
             end if
@@ -294,7 +295,7 @@ module zeolite
 
 ! Calculate the Lennard-Jones interactions, include as many layers
 ! of neighboring unit cells as needed for the specified precision
-      if (idi.ne.0.and.ltailc.and.lij(idi)) then
+      if (idi.ne.0.and.ltailc) then
          vljnew=require_precision+1.
          layer=0
          do while (abs(vljnew).gt.require_precision)
@@ -302,18 +303,18 @@ module zeolite
             vljnew=0.
             do izeo=1,nzeo
                idj=ztype(idzeo(izeo))
-               if (lunitcell(izeo).and.lij(idj)) then
+               if (lunitcell(izeo)) then
                   ntij = (idi - 1) * nntype + idj
                   do ii=-layer,layer
                      do jj=-layer,layer
                         do kk=-layer,layer
                            if (abs(ii).eq.layer .or. abs(jj).eq.layer .or.abs(kk).eq.layer) then
 
-                              sx = zeox(izeo)*hmati(ibox,1)+zeoy(izeo) *hmati(ibox,4)+zeoz(izeo)*hmati(ibox ,7)+dble(ii-i)/nx
-                              sy = zeox(izeo)*hmati(ibox,2)+zeoy(izeo) *hmati(ibox,5)+zeoz(izeo)*hmati(ibox ,8)+dble(jj-j)/ny
-                              sz = zeox(izeo)*hmati(ibox,3)+zeoy(izeo) *hmati(ibox,6)+zeoz(izeo)*hmati(ibox ,9)+dble(kk-k)/nz
+                              sx = zeox(izeo)*hmati(ibox,1)+zeoy(izeo)*hmati(ibox,4)+zeoz(izeo)*hmati(ibox,7)+dble(ii-i)/nx
+                              sy = zeox(izeo)*hmati(ibox,2)+zeoy(izeo)*hmati(ibox,5)+zeoz(izeo)*hmati(ibox,8)+dble(jj-j)/ny
+                              sz = zeox(izeo)*hmati(ibox,3)+zeoy(izeo)*hmati(ibox,6)+zeoz(izeo)*hmati(ibox,9)+dble(kk-k)/nz
 
-                              xr=sx*hmat(ibox,1)+sy*hmat(ibox,4)+sz *hmat(ibox,7)
+                              xr=sx*hmat(ibox,1)+sy*hmat(ibox,4)+sz*hmat(ibox,7)
                               yr=sy*hmat(ibox,5)+sz*hmat(ibox,8)
                               zr=sz*hmat(ibox,9)
 
@@ -322,12 +323,14 @@ module zeolite
                                  exzeof=overflow
                                  return
                               end if
-                              r2i=sig2ij(ntij)/r2
-                              r6=r2i*r2i*r2i
-                              if (lshift) then
-                                 vljnew=vljnew+4.*(epsij(ntij)*(r6-1.0)*r6-ecut(ntij))
-                              else
-                                 vljnew=vljnew+4.*epsij(ntij)*(r6-1.0)*r6
+                              if (lij(idi).and.lij(idj)) then
+                                 r2i=sig2ij(ntij)/r2
+                                 r6=r2i*r2i*r2i
+                                 if (lshift) then
+                                    vljnew=vljnew+4.*(epsij(ntij)*(r6-1.0)*r6-ecut(ntij))
+                                 else
+                                    vljnew=vljnew+4.*epsij(ntij)*(r6-1.0)*r6
+                                 end if
                               end if
                            end if
                         end do
@@ -421,13 +424,22 @@ module zeolite
       real(KIND=double_precision),intent(in)::xi,yi,zi
       integer(KIND=normal_int),intent(in)::idi
 
-      integer(KIND=normal_int),parameter::m=2,mt=2*m+1,mp=m+1
+      integer(KIND=normal_int),parameter::m=2,mt=2*m+1,mst=-m
       integer(KIND=normal_int)::j,j0,jp,k,k0,kp,l,l0,lp,igtype
-      real(KIND=double_precision)::yjtmp(mt),yktmp(mt),yltmp(mt)
-      real(KIND=double_precision)::xt(mt),yt(mt),zt(mt),sx,sy,sz,xr,yr,zr
+      real(KIND=double_precision)::yjtmp(mst:m),yktmp(mst:m),yltmp(mst:m)
+      real(KIND=double_precision)::xt(mst:m),yt(mst:m),zt(mst:m),sx,sy,sz,xr,yr,zr
       
+! --- determine cell parameters
+      sx=(xi*hmati(ibox,1)+yi*hmati(ibox,4)+zi*hmati(ibox,7))*nx
+      sy=(xi*hmati(ibox,2)+yi*hmati(ibox,5)+zi*hmati(ibox,8))*ny
+      sz=(xi*hmati(ibox,3)+yi*hmati(ibox,6)+zi*hmati(ibox,9))*nz
+      sx=sx-floor(sx)
+      sy=sy-floor(sy)
+      sz=sz-floor(sz)
+
       if (.not.lzgrid) then
-! to be implemented
+         exzeo=exzeof(sx,sy,sz,idi)
+         if (lewald.and.lqchg(idi)) exzeo=exzeo+exzeof(sx,sy,sz,0)*qelect(idi)
       else
 !     calculation using a grid
 !         write(iou,*) 'entering exzeo. xi yi zi idi',xi,yi,zi,idi
@@ -439,14 +451,7 @@ module zeolite
             call cleanup('exzeo: no such bead type')
          end if
          
-! --- determine cell parameters
-         sx=(xi*hmati(ibox,1)+yi*hmati(ibox,4)+zi*hmati(ibox,7))*nx
-         sy=(xi*hmati(ibox,2)+yi*hmati(ibox,5)+zi*hmati(ibox,8))*ny
-         sz=(xi*hmati(ibox,3)+yi*hmati(ibox,6)+zi*hmati(ibox,9))*nz
-         sx=sx-floor(sx)
-         sy=sy-floor(sy)
-         sz=sz-floor(sz)
-         xr=sx*hmat(ibox,1)/nx+sy*hmat(ibox,4)/ny+sz *hmat(ibox,7)/nz
+         xr=sx*hmat(ibox,1)/nx+sy*hmat(ibox,4)/ny+sz*hmat(ibox,7)/nz
          yr=sy*hmat(ibox,5)/ny+sz*hmat(ibox,8)/nz
          zr=sz*hmat(ibox,9)/nz
          j = sx*ngrx
@@ -459,31 +464,31 @@ module zeolite
 ! --     block m*m*m centered around: j,k,l
 ! ---  set up hulp array: (allow for going beyond unit cell
 !      for polynom fitting)
-         do l0=-m,m
+         do l0=mst,m
             lp=l+l0
             sz=dble(lp)/ngrz/nz
 ! ---    store x,y,z values around xi,yi,zi in arrays
-            zt(l0+mp)=sz*hmat(ibox,9)
+            zt(l0)=sz*hmat(ibox,9)
             if (lp.lt.0)    lp=lp+ngrz
             if (lp.ge.ngrz) lp=lp-ngrz
-            do k0=-m,m
+            do k0=mst,m
 	       kp=k+k0
                sy=dble(kp)/ngry/ny
-               yt(k0+mp)=sy*hmat(ibox,5)+sz*hmat(ibox,8)
+               yt(k0)=sy*hmat(ibox,5)+sz*hmat(ibox,8)
 	       if (kp.lt.0)    kp=kp+ngry
 	       if (kp.ge.ngry) kp=kp-ngry
-               do j0=-m,m
+               do j0=mst,m
                   jp=j+j0
                   sx=dble(jp)/ngrx/nx
-                  xt(j0+mp)=sx*hmat(ibox,1)+sy*hmat(ibox,4)+sz*hmat(ibox ,7)
+                  xt(j0)=sx*hmat(ibox,1)+sy*hmat(ibox,4)+sz*hmat(ibox ,7)
                   if (jp.lt.0)    jp=jp+ngrx
                   if (jp.ge.ngrx) jp=jp-ngrx
-                  yjtmp(j0+mp)=egrid(jp,kp,lp,igtype)
-                  if (yjtmp(j0+mp).ge.exzeo) return
+                  yjtmp(j0)=egrid(jp,kp,lp,igtype)
+                  if (yjtmp(j0).ge.exzeo) return
                end do
-               call polint(xt,yjtmp,mt,xr,yktmp(k0+mp))
+               call polint(xt,yjtmp,mt,xr,yktmp(k0))
 	    end do
-            call polint(yt,yktmp,mt,yr,yltmp(l0+mp))
+            call polint(yt,yktmp,mt,yr,yltmp(l0))
          end do
          call polint(zt,yltmp,mt,zr,exzeo)
       end if
