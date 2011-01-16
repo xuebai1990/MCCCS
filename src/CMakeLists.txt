@@ -1,7 +1,7 @@
 # CMake project file for MCCCS Topmon
 
 cmake_minimum_required (VERSION 2.6)
-set(CMAKE_Fortran_COMPILER "mpif90")
+set (CMAKE_Fortran_COMPILER "mpif90")
 project (topmon)
 enable_language (Fortran)
 
@@ -15,7 +15,7 @@ endif (NOT CMAKE_BUILD_TYPE)
 # default installation
 get_filename_component (default_prefix ".." ABSOLUTE)
 set (CMAKE_INSTALL_PREFIX ${default_prefix} CACHE STRING
-      "Choose the installation directory; by default it installs in the topmon directory."
+      "Choose the installation directory; by default it installs in the current directory."
       FORCE)
 
 # FFLAGS depend on the compiler
@@ -24,8 +24,8 @@ get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 if (Fortran_COMPILER_NAME STREQUAL "mpif90")
   # mpif90 wrapper
   #set (CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O3")
-  set (CMAKE_Fortran_FLAGS_RELEASE "-ipo -O3 -no-prec-div -xHost -nofixed")
-  set (CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g -nofixed -traceback -check all -warn unused -warn declarations -warn truncated_source -warn uncalled -warn ignore_loc")
+  set (CMAKE_Fortran_FLAGS_RELEASE "-free -fpp -O3 -xHost -ipo -no-prec-div")
+  set (CMAKE_Fortran_FLAGS_DEBUG   "-free -fpp -O0 -g -traceback -check all -warn unused -warn declarations -warn truncated_source -warn uncalled -warn ignore_loc -D__DEBUG__")
 elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
   # Intel Compiler for x86 architecture
   set (CMAKE_Fortran_FLAGS_RELEASE "-O2 -w90 -w95 -cm")
