@@ -221,13 +221,7 @@ module zeolite
             end if
 
             if (idi.ne.0.and.lewald.and.lqchg(idi)) then
-#ifdef __DEBUG__
-                  write(iou,*) 'igtype:',igtype,egrid(59,14,76,igtype),egrid(59,14,76,0)
-#endif
                where (egrid(:,:,:,igtype).lt.overflow) egrid(:,:,:,igtype)=egrid(:,:,:,igtype)+qelect(idi)*egrid(:,:,:,0)
-#ifdef __DEBUG__
-                  write(iou,*) 'igtype:',igtype,egrid(59,14,76,igtype),egrid(59,14,76,0)
-#endif
             end if
             if (myid.eq.0) then
                close(io_ztb)
@@ -461,7 +455,7 @@ module zeolite
          j = sx*ngrx
          k = sy*ngry
          l = sz*ngrz
-#ifdef __DEBUG__
+#ifdef __DEBUG__EXZEO
          write(iou,*) 'In ',__FILE__,':xi yi zi idi j k l=',xi,yi,zi,idi,j,k,l
 #endif
 
@@ -494,17 +488,17 @@ module zeolite
                   if (yjtmp(j0).ge.exzeo) return
                end do
                call polint(xt,yjtmp,mt,xr,yktmp(k0))
-#ifdef __DEBUG__
+#ifdef __DEBUG__EXZEO
                   write(iou,*) 'yktmp:',yktmp(k0),'yjtmp:',yjtmp
 #endif
 	    end do
             call polint(yt,yktmp,mt,yr,yltmp(l0))
-#ifdef __DEBUG__
+#ifdef __DEBUG__EXZEO
                   write(iou,*) 'yltmp:',yltmp(l0),'yktmp:',yktmp
 #endif
          end do
          call polint(zt,yltmp,mt,zr,exzeo)
-#ifdef __DEBUG__
+#ifdef __DEBUG__EXZEO
                   write(iou,*) 'exzeo:',exzeo,'yltmp:',yltmp
 #endif
       end if
