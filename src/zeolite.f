@@ -221,7 +221,13 @@ module zeolite
             end if
 
             if (idi.ne.0.and.lewald.and.lqchg(idi)) then
+#ifdef __DEBUG__
+                  write(iou,*) 'igtype:',igtype,egrid(59,14,76,igtype),egrid(59,14,76,0)
+#endif
                where (egrid(:,:,:,igtype).lt.overflow) egrid(:,:,:,igtype)=egrid(:,:,:,igtype)+qelect(idi)*egrid(:,:,:,0)
+#ifdef __DEBUG__
+                  write(iou,*) 'igtype:',igtype,egrid(59,14,76,igtype),egrid(59,14,76,0)
+#endif
             end if
             if (myid.eq.0) then
                close(io_ztb)
@@ -442,8 +448,6 @@ module zeolite
          if (lewald.and.lqchg(idi)) exzeo=exzeo+exzeof(sx,sy,sz,0)*qelect(idi)
       else
 !     calculation using a grid
-!         write(iou,*) 'entering exzeo. xi yi zi idi',xi,yi,zi,idi
-
          do igtype=1,gntype
             if (gtable(igtype).eq.idi) exit
          end do
@@ -457,6 +461,9 @@ module zeolite
          j = sx*ngrx
          k = sy*ngry
          l = sz*ngrz
+#ifdef __DEBUG__
+         write(iou,*) 'In ',__FILE__,':xi yi zi idi j k l=',xi,yi,zi,idi,j,k,l
+#endif
 
 ! ---    test if in the reasonable regime
          exzeo=upperlimit
@@ -487,10 +494,19 @@ module zeolite
                   if (yjtmp(j0).ge.exzeo) return
                end do
                call polint(xt,yjtmp,mt,xr,yktmp(k0))
+#ifdef __DEBUG__
+                  write(iou,*) 'yktmp:',yktmp(k0),'yjtmp:',yjtmp
+#endif
 	    end do
             call polint(yt,yktmp,mt,yr,yltmp(l0))
+#ifdef __DEBUG__
+                  write(iou,*) 'yltmp:',yltmp(l0),'yktmp:',yktmp
+#endif
          end do
          call polint(zt,yltmp,mt,zr,exzeo)
+#ifdef __DEBUG__
+                  write(iou,*) 'exzeo:',exzeo,'yltmp:',yltmp
+#endif
       end if
       return
     end function exzeo

@@ -17,7 +17,9 @@
       iarg=1
       do while (iarg.le.narg)
          call get_command_argument(iarg,sarg)
+#ifdef __DEBUG__
          print *,iarg,trim(sarg)
+#endif
          select case(sarg)
          case('--version','-v')
             lversion=.true.
