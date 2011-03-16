@@ -650,15 +650,15 @@
 !cccc  num_int_elect(150,150), tabelect(1500,150,150), etc.
 !cccc  KM 2009
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-      integer(KIND=normal_int)::vibsplits(150), bendsplits(150),ntabvib ,ntabbend
-      integer(KIND=normal_int)::vdWsplits(150,150), ntabvdW
-      integer(KIND=normal_int)::electsplits(1500,1500), ntabelect
-      integer(KIND=normal_int)::num_int_vib(150), num_int_bend(150), 	num_int_vdW(150,150), num_int_elect(150,150)
-      real(KIND=double_precision)::vib(1500,150), tabvib(1500,150)
-      real(KIND=double_precision)::bend(1500,150), tabbend(1500,150)
-      real(KIND=double_precision)::rvdW(1500,150,150), tabvdW(1500,150 ,150)
-      real(KIND=double_precision)::relect(1500,150,150), tabelect(1500 ,150,150)
-      real(KIND=double_precision)::vibdiff(1500,150), benddiff(1500,150) ,vdWdiff(1500,150,150), electdiff(1500,150,150)
+      integer(KIND=normal_int)::vibsplits(1), bendsplits(1),ntabvib ,ntabbend
+      integer(KIND=normal_int)::vdWsplits(1,1), ntabvdW
+      integer(KIND=normal_int)::electsplits(10,10), ntabelect
+      integer(KIND=normal_int)::num_int_vib(1), num_int_bend(1), 	num_int_vdW(1,1), num_int_elect(1,1)
+      real(KIND=double_precision)::vib(10,1), tabvib(10,1)
+      real(KIND=double_precision)::bend(10,1), tabbend(10,1)
+      real(KIND=double_precision)::rvdW(10,1,1), tabvdW(10,1 ,1)
+      real(KIND=double_precision)::relect(10,1,1), tabelect(10 ,1,1)
+      real(KIND=double_precision)::vibdiff(10,1), benddiff(10,1) ,vdWdiff(10,1,1), electdiff(10,1,1)
       logical::L_vib_table, L_bend_table, L_vdW_table, L_elect_table
 !      common /tabulated/ vib, tabvib, bend, tabbend, rvdW,
 !     & 	 tabvdW, relect, tabelect, vibdiff, benddiff, vdWdiff,
@@ -667,6 +667,12 @@
 !     &   ntabvdW, num_int_vib, num_int_bend, num_int_vdW
 !      common /ltab/ L_vib_table, L_bend_table, L_vdW_table,
 !     &   L_elect_table
+
+! TORSION.INC
+	integer(KIND=normal_int)::splpnts(10),nttor
+	real(KIND=double_precision)::deg(10,2),tabtorso(10,2) ,torderiv2(10,2)
+	real(KIND=double_precision)::tordif(10,2)
+!	common /torsion/ deg,tabtorso,torderiv2,tordif,splpnts,nttor
 
 ! SYSTEM.INC
       logical::lsolid(nbxmax),lrect(nbxmax),ltwice(nbxmax) ,lideal(nbxmax)
@@ -929,12 +935,6 @@
 ! LJSAMIPARA.INC
       real(KIND=double_precision)::sij(9), eij(9), vsh(9), vsha(9)
 !      common /ljspar/ sij,eij,vsh,vsha
-
-! TORSION.INC
-	integer(KIND=normal_int)::splpnts(10),nttor
-	real(KIND=double_precision)::deg(1500,2),tabtorso(1500,2) ,torderiv2(1500,2)
-	real(KIND=double_precision)::tordif(1500,2)
-!	common /torsion/ deg,tabtorso,torderiv2,tordif,splpnts,nttor
 
 ! NRTAB.INC
       integer(KIND=normal_int)::nrtcon,nrtmax,nrtbin
