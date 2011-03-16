@@ -63,43 +63,43 @@
       iboxst = 1
       iboxed = nbox
 
-         chktot = 0
+      chktot = 0
 
-         do i = 1,nmolty
-            check(i) = 0
-            do j = 1, nbox
-               nchbox(j) = nchbox(j) + ininch(i,j)
-               check(i)= check(i) + ininch(i,j) 
-            end do
-
-            chktot = chktot + check(i)
+      do i = 1,nmolty
+         check(i) = 0
+         do j = 1, nbox
+            nchbox(j) = nchbox(j) + ininch(i,j)
+            check(i)= check(i) + ininch(i,j) 
          end do
 
-         if ( chktot .ne. nchain ) then
+         chktot = chktot + check(i)
+      end do
+
+      if ( chktot .ne. nchain ) then
+         write(iou,*) 'inconsistant number of chains in INITIA'
+         do j = 1,nbox
+            write(iou,*) 'ininch',j,(ininch(i,j),i=1,nmolty)
+         end do
+         write(iou,*) 'nchain',nchain
+         call cleanup('')
+      end if
+
+      do i = 1, nmolty
+         if ( temtyp(i) .ne. check(i) ) then
             write(iou,*) 'inconsistant number of chains in INITIA'
-            do j = 1,nbox
-               write(iou,*) 'ininch',j,(ininch(i,j),i=1,nmolty)
-            end do
-            write(iou,*) 'nchain',nchain
+            write(iou,*) 'moltyp',i,(ininch(i,j),j=1,nbox)
+            write(iou,*) 'temtyp:',temtyp(i)
             call cleanup('')
          end if
-         
-         do i = 1, nmolty
-            if ( temtyp(i) .ne. check(i) ) then
-               write(iou,*) 'inconsistant number of chains in INITIA'
-               write(iou,*) 'moltyp',i,(ininch(i,j),j=1,nbox)
-               write(iou,*) 'temtyp:',temtyp(i)
-               call cleanup('')
-            end if            
-         end do
+      end do
 
-         do i = iboxst,iboxed
-            unitc = inix(i)*iniy(i)*iniz(i)
-            if ( nchbox(i) .gt. unitc ) then
-               write(iou,*) 'unit cell too small in box',i
-               call cleanup('')
-            end if
-         end do
+      do i = iboxst,iboxed
+         unitc = inix(i)*iniy(i)*iniz(i)
+         if ( nchbox(i) .gt. unitc ) then
+            write(iou,*) 'unit cell too small in box',i
+            call cleanup('')
+         end if
+      end do
          
          
 ! -----------------------------------------------------------------------------
@@ -171,13 +171,14 @@
             do m = 1, nunit(i)
                read(io_struct,*) samx(i,m), samy(i,m), samz(i,m)
             end do
-         else if ( .not. lbranch(i)) then
+         else
 ! * if lbranch is false but the molecule is not linear attempt
 ! * to grow it with cbmc
             lgrow = .false.
             do m = 1,nunit(i)
                if (invib(i,m) .gt. 2) then
                   lgrow = .true.
+                  exit
                end if
             end do
             if (lgrow) then
@@ -187,8 +188,7 @@
                end if
 
                if (nunit(i) .ne. nugrow(i)) then
-                  write(iou,*) 'Cant grow molecule.  Please', ' provide a structure via fort.78'
-                  call cleanup('')
+                  call cleanup('Cant grow molecule.  Please', ' provide a structure via '//file_struct)
                end if
 ! * put the first bead at the origin
                rxnew(1) = 0.0d0
@@ -208,7 +208,7 @@
 
                nchain = 1
 
-               call rosenbluth( .true.,lterm,1,1,i,ifrom ,1,nugrow(i),ddum,.false.,ddum,2 )
+               call rosenbluth( .true.,lterm,1,1,i,ifrom ,2,nugrow(i),ddum,.false.,ddum,2 )
 
                if (lterm) then
                   write(iou,*) 'error in initia growing molecule'
@@ -247,57 +247,49 @@
 
       count_chain = 0 
       offset = 0
-
-      do ibox = iboxst,iboxed
-         if(nmolty .gt. 1) then
-           if(inimix(ibox).eq.0) then
-              if (ibox.eq.1) then
-                 offset = 0
-              else
-                 offset = offset+nchbox(ibox-1)
-              end if
- 18           rand_id = idint(dble(nchbox(ibox))*random())+ 1 + offset
-              if (.not.lhere(rand_id)) then
-                 count_chain = count_chain + 1
-                 lhere(rand_id) = .true.
-                 do imolty = 1,nmolty  
-                    if (count_chain.le.(mcmtma(imolty,ibox)+offset)) then
-                       moltyp(rand_id) = imolty     
-                       goto 20 
-                    end if 
-                 end do
- 20              continue
-!             write(iou,*) count_chain, rand_id,moltyp(rand_id) 
-              else
-                 goto 18
-              end if
-              if (count_chain.lt.(nchbox(ibox)+offset)) then
-                 goto 18
-              end if 
-           end if
-         end if
-      end do   
-
-
+      ibox=1
+      if(nmolty .gt. 1.and.inimix(ibox).eq.0) then
+         do ibox = iboxst,iboxed
+            if (ibox.eq.1) then
+               offset = 0
+            else
+               offset = offset+nchbox(ibox-1)
+            end if
+            do while (count_chain.lt.(nchbox(ibox)+offset))
+               rand_id = idint(dble(nchbox(ibox))*random())+ 1 + offset
+               if (.not.lhere(rand_id)) then
+                  count_chain = count_chain + 1
+                  lhere(rand_id) = .true.
+                  do imolty = 1,nmolty  
+                     if (count_chain.le.(mcmtma(imolty,ibox)+offset)) then
+                        moltyp(rand_id) = imolty     
+                        exit
+                     end if
+                  end do
+                  !             write(iou,*) count_chain, rand_id,moltyp(rand_id) 
+               end if
+            end do
+         end do
+      end if
       nn = 0
 
-      do 102 ibox = iboxst,iboxed
+      do_ibox:do ibox = iboxst,iboxed
          do imol = 1,nmolty
             pcmt(imol) = 0
          end do
 
          n = 0
 
-         do 101 kc = 0, iniz(ibox)-1
+         do kc = 0, iniz(ibox)-1
             if ( mod(kc,2) .eq. 0) then
                xshift = 0.0d0
             else
                xshift = dshift(ibox)
             end if
             
-            do 100 ic = 0, inix(ibox)-1
+            do ic = 0, inix(ibox)-1
                
-               do 99 jc = 0, iniy(ibox)-1
+               do jc = 0, iniy(ibox)-1
 
                   if ( mod(jc,2) .eq. 0) then
                      dic = 0.0d0
@@ -314,7 +306,7 @@
                      rzu(nn,1) = dble(kc) * uz(ibox) + zshift(ibox)
                      nboxi(nn) = ibox
                   else
-                     goto 102
+                     cycle do_ibox
                   end if
                   
 !                  write(iou,*) 'nn',nn
@@ -522,7 +514,7 @@
 ! *** end linear determination
 ! ****************************
 !                  write(iou,*) 'ibuild',ibuild
-                  do 98 m = 2, ibuild
+                  do m = 2, ibuild
                      
                      m1 = m - 1
                      m2 = m - 2
@@ -589,12 +581,12 @@
                         rzu(nn,m) = rzu(nn,m1) + znext
                      end if
                 
- 98               continue
+                  end do
 
- 99            continue
- 100        continue
- 101     continue
- 102  continue
+               end do
+            end do
+         end do
+      end do do_ibox
 ! -----------------------------------------------------
 
 ! *** check initial structure ***
