@@ -2,7 +2,7 @@ module util_string
   implicit none
   private
   public::uppercase,lowercase,is_whitespace,str_trim,str_comp,str_search,remove_word,str_compress,typo_match,glob_match
-  CHARACTER(LEN=1),PARAMETER::whitespace(2)=(/" ",CHAR(9)/),backslash='\\',star='*',question='?'
+  CHARACTER(LEN=1),PARAMETER::whitespace(3)=(/" ",CHAR(9),CHAR(11)/),backslash='\\',star='*',question='?'
 contains
 
 ! *****************************************************************************
@@ -44,12 +44,11 @@ contains
 !> \par History
 !>      02.2008 created, AK
 ! *****************************************************************************
-  FUNCTION is_whitespace(testchar) RESULT(resval)
+  LOGICAL FUNCTION is_whitespace(testchar)
     CHARACTER(LEN=1), INTENT(IN)             :: testchar
-    LOGICAL                                  :: resval
 
-    resval=.FALSE.
-    IF (ANY(whitespace==testchar)) resval = .TRUE.
+    is_whitespace=.FALSE.
+    IF (ANY(whitespace==testchar)) is_whitespace = .TRUE.
   END FUNCTION is_whitespace
 
 ! *****************************************************************************
@@ -63,7 +62,7 @@ contains
     ia = 1
     ib = LEN_TRIM(string)
     IF (ib>0) THEN
-       DO WHILE (string(ia:ia)==' ')
+       DO WHILE (is_whitespace(string(ia:ia)))
           ia = ia + 1
        END DO
     END IF

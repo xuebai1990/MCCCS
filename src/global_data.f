@@ -404,7 +404,7 @@
 ! - numvect, the total number of reciprocal vectors
       dimension numvect(nbxmax)
       real(KIND=double_precision)::kx,ky,kz,prefact,ssumr,ssumi,ssumrn ,ssumin,ssumro,ssumio
-      real(KIND=double_precision)::sself,correct,kalp,calp,dipolex ,dipoley,dipolez,dipolexo,dipoleyo,dipolezo
+      real(KIND=double_precision),target::sself,correct,kalp,calp,dipolex ,dipoley,dipolez,dipolexo,dipoleyo,dipolezo
 ! - calp = kalp / boxlen
       dimension kx(vectormax,nbxmax),ky(vectormax,nbxmax), kz(vectormax,nbxmax),prefact(vectormax,nbxmax), ssumr(vectormax,nbxmax),ssumi(vectormax,nbxmax), ssumrn(vectormax,nbxmax),ssumin(vectormax,nbxmax), calp(nbxmax),kmax(nbxmax),kalp(nbxmax), ssumro(vectormax,nbxmax),ssumio(vectormax,nbxmax)
       dimension dipolex(nbxmax),dipoley(nbxmax),dipolez(nbxmax)
@@ -629,10 +629,7 @@
 !      common /peboco/ bx,by,bz,hbx,hby,hbz,bxi,byi,bzi
 
 ! CELL.INC
-      real(KIND=double_precision)::hmat(nbxmax,9),hmati(nbxmax,9)
-      real(KIND=double_precision)::cell_length(nbxmax,3) ,min_width(nbxmax,3)
-      real(KIND=double_precision)::cell_vol(nbxmax)
-      real(KIND=double_precision)::cell_ang(nbxmax,3)
+      real(KIND=double_precision),target::hmat(nbxmax,9),hmati(nbxmax,9),cell_length(nbxmax,3),min_width(nbxmax,3),cell_vol(nbxmax),cell_ang(nbxmax,3)
 !      common /cella/ hmat,hmati
 !      common /cellb/ cell_length,min_width,cell_vol,cell_ang
 
@@ -675,9 +672,10 @@
 !	common /torsion/ deg,tabtorso,torderiv2,tordif,splpnts,nttor
 
 ! SYSTEM.INC
-      logical::lsolid(nbxmax),lrect(nbxmax),ltwice(nbxmax) ,lideal(nbxmax)
+      logical,target::lsolid(nbxmax),lrect(nbxmax),ltwice(nbxmax) ,lideal(nbxmax)
       integer(KIND=normal_int)::icell,nicell,iucell,solcount
-      real(KIND=double_precision)::boxlx(nbxmax), boxly(nbxmax), boxlz(nbxmax), rcut(nbxmax), rmin,rcutnn(nbxmax), softcut,softlog ,rcutin,avsolinter,avsolintra,avsolbend,avsoltor,avsolelc
+      real(KIND=double_precision),target::boxlx(nbxmax), boxly(nbxmax), boxlz(nbxmax), rcut(nbxmax)
+      real(KIND=double_precision)::rmin,rcutnn(nbxmax), softcut,softlog ,rcutin,avsolinter,avsolintra,avsolbend,avsoltor,avsolelc
       dimension icell(nmax),nicell(cmax),iucell(cmax,cmaxa) ,solcount(nbxmax,ntmax)
       dimension avsolinter(nbxmax,ntmax),avsolintra(nbxmax,ntmax) ,avsolbend(nbxmax,ntmax),avsoltor(nbxmax,ntmax) ,avsolelc(nbxmax,ntmax)
 !      common /boxpha/ lsolid,lrect,ltwice

@@ -12,5 +12,9 @@ module var_type
   
   integer,parameter::default_string_length=128
   integer,parameter::default_path_length=256
+
+  type RealPtr
+     real(KIND=double_precision),pointer::val
+  end type RealPtr
   
 end module var_type

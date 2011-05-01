@@ -1,16 +1,15 @@
-      subroutine cleanup(msg)
-      use global_data,only:iou,ierr
-      use util_timings
-      implicit none
-      include 'common.inc'
-!$$$      include 'control.inc'
-!$$$      include 'mpi.inc'
-      character(LEN=*)::msg
+subroutine cleanup(msg)
+  use global_data,only:iou,ierr
+  implicit none
+  include 'common.inc'
+  !$$$      include 'control.inc'
+  !$$$      include 'mpi.inc'
+  character(LEN=*),intent(in)::msg
 
-      call MPI_FINALIZE(ierr)
+  call MPI_FINALIZE(ierr)
 
-      write(iou,*) msg
+  write(iou,*) msg
 
-      stop
+  stop
 
-      end
+end subroutine cleanup
