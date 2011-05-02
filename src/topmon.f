@@ -1,11 +1,12 @@
       program topmon
 
       use global_data,only:ierr,myid,numprocs
+      use global_data,only:ierr,myid,numprocs,thread_id,thread_num,thread_num_max,thread_num_proc
       use var_type,only:normal_int,default_path_length
       use util_timings,only:time_init
       implicit none
       include 'common.inc'
-      integer(KIND=normal_int)::narg,iarg
+      integer(KIND=normal_int)::narg,iarg,jerr
       character(LEN=default_path_length)::sarg,file_in='topmon.inp'
       logical::lrun=.true.,lsetinput=.false.,lversion=.false.,lusage =.false.
 ! ----------------------------------------------------------------
@@ -27,6 +28,23 @@
          case('--help','-h')
             lusage=.true.
             lrun=.false.
+         case('--thread','-t')
+            iarg=iarg+1
+            if (iarg.gt.narg) then
+               lusage=.true.
+               lrun=.false.
+               exit
+            end if
+            call get_command_argument(iarg,sarg)
+            read(sarg,*,iostat=jerr) thread_num
+            if (jerr.ne.0) then
+               lusage=.true.
+               lrun=.false.
+               exit
+            end if
+!$          thread_num_max=omp_get_max_threads()
+!$          if (thread_num.gt.thread_num_max) thread_num=thread_num_max
+!$          call omp_set_num_threads(thread_num)
          case('--input','-i')
             iarg=iarg+1
             if (iarg.gt.narg) then
@@ -50,7 +68,7 @@
 
       if (lusage) then
          call get_command_argument(0,sarg)
-         write(*,'(A,/,T4,A,/)') 'Usage: '//trim(sarg)// ' [--version|-v] [--help|-h] [[--input|-i] /path/to/input/file]','If the input file is the last argument, --input or -i can  be omitted'
+         write(*,'(A,/,T4,A,/,T4,A,/)') 'Usage: '//trim(sarg)// ' [--version|-v] [--help|-h] [(--threads|-t) number_of_threads_per_processor]','[(--input|-i) /path/to/input/file]','If the input file is the last argument, --input or -i can  be omitted'
       end if
 
       if (lrun) then

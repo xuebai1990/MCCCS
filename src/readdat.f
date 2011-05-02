@@ -42,7 +42,7 @@
 !$$$      include 'tabulated.inc'
 
       character(LEN=*),intent(in)::file_in
-      character(LEN=default_path_length)::file_movie,file_run ,file_dipole,fileout,file_input,file_restart,file_struct,file_ff,file_zeocoord
+      character(LEN=default_path_length)::file_movie,file_run ,file_dipole,fileout,file_input,file_restart,file_struct,file_ff,file_zeocoord,file_ztb
       integer(KIND=normal_int)::io_input,io_restart,jerr
       logical::lfile_given
       integer(KIND=normal_int)::seed
@@ -182,6 +182,14 @@
          file_zeocoord='zeolite.cssr'
       end if
 
+      read(io_input,*)
+      read(io_input,*) lfile_given
+      if (lfile_given) then
+         read(io_input,*) file_ztb
+      else
+         file_ztb='zeolite.ztb'
+      end if
+
       close(io_input)
 
 ! -------------------------------------------------------------------
@@ -190,6 +198,7 @@
       if (jerr.ne.0) then
          call cleanup('cannot open main input file')
       end if
+
       read(io_input,*)
       read(io_input,*) seed
 ! --- initialize random number generator 
@@ -264,6 +273,7 @@
          if (lverbose) then
             write(iou,*) 'Program started at ',time_date_str()
             write(iou,*) 'Number of processors: ', numprocs
+            write(iou,*) thread_num,' threads per processor'
             write(iou,*) 'Random number seed: ',seed
             write(iou,*) 'L_Coul_CBMC:',L_Coul_CBMC 
             write(iou,*) 'Number of unit cells in a dir = ', Num_cell_a
@@ -2682,7 +2692,7 @@
 ! -------------------------------------------------------------------
 ! *** read/produce initial/starting configuration ***
 ! *** zeolite external potential
-      if ( lexzeo ) call suzeo()
+      if ( lexzeo ) call suzeo(file_ztb)
 
 ! ----------------------------------------------------------------      
  

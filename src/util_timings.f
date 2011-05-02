@@ -26,12 +26,14 @@ contains
 ! processes
 !    call cpu_time(time_start)
     time_start=MPI_WTIME()
+!!$   time_start=omp_get_wtime()
   end subroutine time_init
 
   function time_now()
     real(kind=double_precision)::time_now
 !    call cpu_time(time_now)
     time_now=MPI_WTIME()
+!!$   time_now=omp_get_wtime()
     time_now=time_now-time_start
   end function time_now
 

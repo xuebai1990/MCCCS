@@ -24,8 +24,8 @@ get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 if (Fortran_COMPILER_NAME STREQUAL "mpif90")
   # mpif90 wrapper
   #set (CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O3")
-  set (CMAKE_Fortran_FLAGS_RELEASE "-free -fpp -O3 -xHost -ipo -no-prec-div")
-  set (CMAKE_Fortran_FLAGS_DEBUG   "-free -fpp -O0 -g -traceback -check all -warn unused -warn declarations -warn truncated_source -warn uncalled -warn ignore_loc -D__DEBUG__")
+  set (CMAKE_Fortran_FLAGS_RELEASE "-openmp -free -fpp -O3 -xHost -ipo -no-prec-div")
+  set (CMAKE_Fortran_FLAGS_DEBUG   "-openmp -free -fpp -O0 -g -traceback -check all -warn unused -warn declarations -warn truncated_source -warn uncalled -warn ignore_loc -D__DEBUG__")
 elseif (Fortran_COMPILER_NAME STREQUAL "ifort")
   # Intel Compiler for x86 architecture
   set (CMAKE_Fortran_FLAGS_RELEASE "-O2 -w90 -w95 -cm")

@@ -256,6 +256,9 @@
 ! parameters for zeolites are read in subroutine SUZEO
 ! AT PRESENT no parameters for polymeric surfactants (see LJPSUR)
 
+! OPENMP.inc
+      integer(KIND=normal_int)::thread_id,thread_num,thread_num_max,thread_num_proc
+
 ! MPI.INC
       integer(KIND=normal_int)::myid,numprocs,ierr
       integer(KIND=normal_int),parameter::numprocmax=32

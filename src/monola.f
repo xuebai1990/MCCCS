@@ -155,7 +155,6 @@
          endif
          call MPI_BARRIER(MPI_COMM_WORLD,ierr)
       enddo
-
 ! KM for MPI
 ! program will hang if stop called from readdat
 ! set ldie in readdat and have all processors call cleanup('') here
