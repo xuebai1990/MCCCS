@@ -1,9 +1,23 @@
 module util_string
   implicit none
   private
-  public::uppercase,lowercase,is_whitespace,str_trim,str_comp,str_search,remove_word,str_compress,typo_match,glob_match
-  CHARACTER(LEN=1),PARAMETER::whitespace(3)=(/" ",CHAR(9),CHAR(11)/),backslash='\\',star='*',question='?'
+  public::splitAndGetNext,uppercase,lowercase,is_whitespace,str_trim,str_comp,str_search,remove_word,str_compress,typo_match,glob_match,is_blank_line
+  CHARACTER,PARAMETER::whitespace*3=" "//CHAR(9)//CHAR(11),commentChar(3)=(/"#","!","%"/),backslash='\\',star='*',question='?'
 contains
+
+  subroutine splitAndGetNext(string,ia,ib)
+    CHARACTER(LEN=*), INTENT(IN)             :: string
+    INTEGER, INTENT(OUT)                     :: ia, ib
+
+    ia = VERIFY(string,whitespace)
+    if (ia.eq.0) then
+       ib =0
+    else
+       ib = SCAN(string(ia+1:),whitespace) + ia - 1
+    end if
+    if (ib.lt.ia) ib=LEN(string)
+
+  end subroutine splitAndGetNext
 
 ! *****************************************************************************
 !> \brief   Convert all lower case characters in a string to upper case.
@@ -48,8 +62,27 @@ contains
     CHARACTER(LEN=1), INTENT(IN)             :: testchar
 
     is_whitespace=.FALSE.
-    IF (ANY(whitespace==testchar)) is_whitespace = .TRUE.
+    IF (INDEX(whitespace,testchar).gt.0) is_whitespace = .TRUE.
   END FUNCTION is_whitespace
+
+! *****************************************************************************
+!> \brief returns .true. if the line is a comment line or an empty line
+! *****************************************************************************
+  LOGICAL FUNCTION is_blank_line(line,skipComment)
+    CHARACTER(LEN=*), INTENT(IN)             :: line
+    logical,intent(in)                       :: skipComment
+    INTEGER                                  :: ia,ib
+
+    call str_trim(line,ia,ib)
+    if (ia.eq.0) then
+       is_blank_line=.true.
+    else if (skipComment.and.any(commentChar==line(ia:ia))) then
+       is_blank_line=.true.
+    else
+       is_blank_line=.false.
+    end if
+
+  END FUNCTION is_blank_line
 
 ! *****************************************************************************
 ! Return ia, ib, such that string(ia:ib) has no leading or
@@ -59,13 +92,8 @@ contains
     CHARACTER(LEN=*), INTENT(IN)             :: string
     INTEGER, INTENT(OUT)                     :: ia, ib
 
-    ia = 1
-    ib = LEN_TRIM(string)
-    IF (ib>0) THEN
-       DO WHILE (is_whitespace(string(ia:ia)))
-          ia = ia + 1
-       END DO
-    END IF
+    ia = VERIFY(string,whitespace)
+    ib = VERIFY(string,whitespace,.true.)
 
   END SUBROUTINE str_trim
 
