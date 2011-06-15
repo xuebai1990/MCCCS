@@ -229,7 +229,7 @@
       read(io_input,*)
       read(io_input,*) lnpt,lgibbs,lgrand,lanes,lvirial,lmipsw,lexpee
       read(io_input,*) 
-      read(io_input,*) lijall,lchgall,lewald,ldielect,ltailc,lshift
+      read(io_input,*) lijall,lchgall,lewald,ldielect,ltailc,lshift,ltailcZeo
 
 ! *** To add or remove helium atoms
       read(io_input,*)

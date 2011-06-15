@@ -17,7 +17,7 @@
       logical::lexpsix,lmmff
       logical::lninesix,lgaro,lionic
       logical::lgenlj
-      logical::ltailc,lshift
+      logical::ltailc,lshift,ltailcZeo
       logical::lneigh,lvirial
       logical::lcutcm,ldual
       integer(KIND=normal_int)::nmax,numax,ntmax,nntype,nvmax,nbxmax ,npamax,npabmax,maxbin,cmax,cmaxa,tor_bin_max,nbinmax_ete,smax

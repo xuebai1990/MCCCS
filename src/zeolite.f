@@ -124,8 +124,8 @@ contains
     character(LEN=default_path_length),intent(in)::file_ztb
     character(LEN=default_string_length)::atom
     integer(KIND=normal_int)::io_ztb,igtype,idi,idj,jerr,sw,i,j,k,oldi,oldj,oldk,ngridtmp(3),zntypetmp
-    real(KIND=double_precision)::wzeo,zunittmp(3),zangtmp(3)
-    logical::lewaldtmp,ltailctmp,lshifttmp
+    real(KIND=double_precision)::wzeo,zunittmp(3),zangtmp(3),rcuttmp,rci3,rci9,rho
+    logical::lewaldtmp,ltailczeotmp,lshifttmp
 
     !     === Calculate zeolite density
     wzeo=dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype)))
@@ -154,7 +154,7 @@ contains
        if (jerr.eq.0) then
           ! --- read zeolite table from disk
           if (myid.eq.0) write(iou,*) 'read in tabulated potential'
-          read(io_ztb) zunittmp,zangtmp,ngridtmp,zntypetmp,lewaldtmp,ltailctmp,lshifttmp
+          read(io_ztb) zunittmp,zangtmp,ngridtmp,zntypetmp,lewaldtmp,ltailczeotmp,lshifttmp,rcuttmp
           if (ANY(abs(zunittmp-zunit%boxl).gt.eps).or.ANY(ngridtmp.ne.zunit%ngrid).or.(zntypetmp.ne.ztype%ntype)) call cleanup('problem 1 in zeolite potential table')
           do igtype=1,ztype%ntype
              read(io_ztb) atom
@@ -169,19 +169,19 @@ contains
                    do igtype=1,ztype%ntype
                       do sw=1,3
                          read(io_ztb,end=100) zgrid(sw,igtype,i,j,k)
-                         if (abs(zgrid(sw,igtype,i,j,k)-1.0e+8_double_precision).lt.1e-4) zgrid(sw,igtype,i,j,k)=overlapValue
                       end do
                    end do
                 end do
              end do
           end do
 !           if (myid.eq.0) then
+!              rcuttmp=10.0d0
 !              close(io_ztb)
 !              open(unit=io_ztb,access='sequential',action='write',file=file_ztb,form='binary',iostat=jerr,status='unknown')
 !              if (jerr.ne.0) then
 !                 call cleanup('cannot create file for tabulated potential')
 !              end if
-!              write(io_ztb) zunittmp,zangtmp,ngridtmp,zntypetmp,lewaldtmp,ltailctmp,lshifttmp
+!              write(io_ztb) zunittmp,zangtmp,ngridtmp,zntypetmp,lewaldtmp,ltailczeotmp,lshifttmp,rcuttmp
 !              do igtype=1,ztype%ntype
 !                 write(io_ztb) ztype%name(igtype)
 !              end do
@@ -192,8 +192,9 @@ contains
           oldj=0
           oldk=0
           lewaldtmp=lewald
-          ltailctmp=ltailc
+          ltailczeotmp=ltailcZeo
           lshifttmp=lshift
+          rcuttmp=zcell%cut
        end if
 
 100    if (jerr.eq.0.and.(sw.le.3..or.igtype.le.ztype%ntype.or.i.lt.zunit%ngrid(1).or.j.lt.zunit%ngrid(2).or.k.lt.zunit%ngrid(3))) then
@@ -213,7 +214,7 @@ contains
              if (jerr.ne.0) then
                 call cleanup('cannot create file for tabulated potential')
              end if
-             write(io_ztb) zunit%boxl,zcell%ang(1)%val,zcell%ang(2)%val,zcell%ang(3)%val,zunit%ngrid,ztype%ntype,lewald,ltailc,lshift
+             write(io_ztb) zunit%boxl,zcell%ang(1)%val,zcell%ang(2)%val,zcell%ang(3)%val,zunit%ngrid,ztype%ntype,lewald,ltailcZeo,lshift,zcell%cut
              do igtype=1,ztype%ntype
                 write(io_ztb) ztype%name(igtype)
              end do
@@ -233,22 +234,30 @@ contains
              end do
           end do
           write(iou,*) 'time 2:',time_now()
-          if (myid.eq.0.and.ltailc) write(iou,*) 'maxlayer = ',nlayermax
+          if (myid.eq.0.and.ltailcZeo) write(iou,*) 'maxlayer = ',nlayermax
           ! call ztest(idi)
        end if
 
-       do i=1,zpot%ntype
-          where(zgrid(1,1,:,:,:).lt.overlapValue)
-             egrid(:,:,:,i)=0.
-          elsewhere
-             egrid(:,:,:,i)=overlapValue
-          end where
-          idi=zpot%table(i)
-          if (lij(idi).or.lqchg(idi)) then
-             do j=1,ztype%ntype
-                idj=ztype%type(j)
+       if (ltailczeo.and..not.ltailcZeotmp) then
+          rci3=1./rcuttmp**3
+          rci9=4e8*rci3**3
+          rci3=2e4*rci3
+       end if
+
+       egrid=0.
+       forall(k=0:zunit%ngrid(3)-1,j=0:zunit%ngrid(2)-1,i=0:zunit%ngrid(1)-1,zgrid(1,1,i,j,k).ge.overlapValue) egrid(i,j,k,:)=overlapValue
+
+       do j=1,ztype%ntype
+          idj=ztype%type(j)
+          if (lij(idj).or.lqchg(idj)) then
+             rho=ztype%num(j)/zcell%vol
+             do i=1,zpot%ntype
+                idi=zpot%table(i)
                 if (lij(idj).and.lij(idi)) then
                    where(egrid(:,:,:,i).lt.overlapValue) egrid(:,:,:,i)=egrid(:,:,:,i)+zgrid(1,j,:,:,:)*zpot%param(1,j,i)-zgrid(2,j,:,:,:)*zpot%param(2,j,i)
+                   if (ltailczeo.and..not.ltailcZeotmp) then
+                      where(egrid(:,:,:,i).lt.overlapValue) egrid(:,:,:,i)=egrid(:,:,:,i)+twopi*rho*(rci9*zpot%param(1,j,i)/9-rci3*zpot%param(2,j,i)/3)
+                   end if
                 end if
                 if (lqchg(idj).and.lqchg(idi)) then
                    where(egrid(:,:,:,i).lt.overlapValue) egrid(:,:,:,i)=egrid(:,:,:,i)+qqfact*qelect(idi)*qelect(idj)*zgrid(3,j,:,:,:)
@@ -260,7 +269,7 @@ contains
        deallocate(lunitcell,zgrid,zeo%bead,ztype%type,ztype%num,ztype%radiisq,ztype%name,zpot%param)
        if (myid.eq.0) then
           close(io_ztb)
-          write(iou,*) 'tabulated potential: lewald[',lewaldtmp,'] ltailc[',ltailctmp,'] lshift[',lshifttmp,']'
+          write(iou,*) 'tabulated potential: lewald[',lewaldtmp,'] ltailc[',ltailcZeotmp,'] lshift[',lshifttmp,'] rcut[',rcuttmp,'] ltailcZeo[',ltailcZeo,']'
        end if
     end if
 
@@ -281,7 +290,7 @@ contains
     vbc=2e4/rcutsq**3
     vac=vbc*vbc
 
-    if (lewald.or.(.not.ltailc)) then
+    if (lewald.or.(.not.ltailcZeo)) then
        ! further scale i,j,k with respect to the whole cell
        !!!
        scoord(1)=dble(i)/zunit%dup(1)
@@ -299,7 +308,7 @@ contains
              tab=overlapValue
              return
           elseif (r2 .lt. rcutsq) then
-             if (.not.ltailc) then
+             if (.not.ltailcZeo) then
                 vb=2e4/r2**3
                 if (lshift) then
                    tab(2,iztype)=tab(2,iztype)+vb-vbc
@@ -324,7 +333,7 @@ contains
 
     ! Calculate the Lennard-Jones interactions, include as many layers
     ! of neighboring unit cells as needed for the specified precision
-    if (ltailc) then
+    if (ltailcZeo) then
        layer=0
        do
           vnew=0.
