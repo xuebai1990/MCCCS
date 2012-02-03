@@ -32,7 +32,7 @@ c *** end add ***
       double precision bncb,bscb,rxp,ryp,rzp,rxnew,rynew,rznew
      +   ,bnregr,bsregr,bfac,bsswat,bsiswat,fbncb,fbscb
      +   ,vtry,vtrext,vtrintra,vtrinter,vtrelect,vtrewald
-     +   ,vtrorient
+     +   ,vtrorient,vtrelect_intra,vtrelect_inter
       integer nchoi1,nchoi,icbdir,icbsta,nmaxcbmc,nchoih,nchtor
      &  ,nchbna,nchbnb,nrigi,nchoir,rlist,rfrom,rprev,rnum
       double precision acchem, bnchem
@@ -48,7 +48,8 @@ c *** end add ***
       common /bbias/  bfac(nchmax), vtry(nchmax),vtrinter(nchmax)
      &   ,vtrext(nchmax),vtrintra(nchmax)
      &   ,vtrelect(nchmax),vtrewald(nchmax),lovr(nchmax)
-     &   ,vtrorient(nchmax)
+     &   ,vtrorient(nchmax),vtrelect_intra(nchmax),
+     &    vtrelect_inter(nchmax)
       common /xyzp/   lexist,lexshed,rxp(numax,nchmax)
      &   ,ryp(numax,nchmax), rzp(numax,nchmax)
      &   ,liswinc,liswatch,iparty,other,llplace

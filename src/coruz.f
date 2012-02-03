@@ -1,4 +1,4 @@
-      function coruz(iunit,rho)
+      function coruz(iunit,rho,ibox)
 
 c coruz
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -33,14 +33,14 @@ c ***************************************************
       include 'system.inc'
       include 'zeopoten.inc'
       double precision coruz,eps,rci3,rho
-      integer iunit
+      integer iunit,ibox
 c --- note works only for alkanes!!!
       if (iunit.ne.1) then
         eps=zeps(1,4)+(iunit-2)*zeps(2,4)+zeps(3,4)
       else
         eps=zeps(1,4)
       endif
-      rci3=zsig2(1,4)**(3.d0/2.d0)/rcut**3 
+      rci3=zsig2(1,4)**(3.d0/2.d0)/rcut(ibox)**3 
       coruz=8.*onepi*eps*rho*(rci3*rci3*rci3/9.-rci3/3.)
       return
       end

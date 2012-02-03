@@ -43,6 +43,8 @@ c
       include 'ewaldsum.inc'
       include 'neigh.inc'
       include 'cell.inc'
+ckea
+      include 'garofalini.inc'
 
       logical ovrlap,lvol,lx,ly,lz,la,lb,lc
 
@@ -58,6 +60,7 @@ c
      &                ,rzuo(nmax,numax),qquo(nmax,numax)
       double precision random,df,dx0,dy0,dz0,dx,dy,dz,v,dele,vdum
      &                 ,vinter,vtail,vext,vminim,velect,vflucq
+     &                 ,velect_intra,velect_inter
       double precision xcmo(nmax),ycmo(nmax),zcmo(nmax),calpo
      &                 ,xcmoi,ycmoi,zcmoi,xcmi,ycmi,zcmi
      &                 ,xcmj,ycmj,zcmj,rxuij,ryuij,rzuij
@@ -68,13 +71,21 @@ c
       double precision hmato(9),hmatio(9)
 
       integer idum
-      double precision lddum,lddum2(27)
+      double precision lddum,lddum2(27),min_boxl
+c KEA
+      double precision v3o,v3n
 
 C --------------------------------------------------------------------
 
-c      write(6,*) 'start VOLUME of LNPTGIBBS'
+c      write(2,*) 'start VOLUME of LNPTGIBBS'
 
 c     Select a box at  random to change the volume of box
+
+
+      lx = .false.
+      ly = .false.
+      lz = .false.
+
 
       rbox = random()
       do ibox = 1,nbox
@@ -83,10 +94,6 @@ c     Select a box at  random to change the volume of box
             goto 99
          endif
       enddo
-
-      lx = .false.
-      ly = .false.
-      lz = .false.
 
       
  99   bnvol(boxvch) = bnvol(boxvch) + 1.0d0
@@ -123,11 +130,7 @@ c---- in the box of volume change ----
       if ( lpbcz ) bzo = boxlz(boxvch)
 
       if (lsolid(boxvch) .and. .not. lrect(boxvch)) then
-         volo = (hmat(boxvch,1) * (hmat(boxvch,5) * hmat(boxvch,9) -
-     +        hmat(boxvch,8) * hmat(boxvch,6)) + hmat(boxvch,4)
-     +        * (hmat(boxvch,8) * hmat(boxvch,3) - hmat(boxvch,2)
-     +        * hmat(boxvch,9)) + hmat(boxvch,7) * (hmat(boxvch,2)
-     +        * hmat(boxvch,6) - hmat(boxvch,5)*hmat(boxvch,3)))
+         volo = cell_vol(boxvch)
       else
          if ( lpbcz ) then
             volo   = bxo*byo*bzo
@@ -142,6 +145,21 @@ c---- in the box of volume change ----
       vexto    = vextb(boxvch)
       velecto  = velectb(boxvch)
       vflucqo = vflucqb(boxvch)
+ckea
+      v3o = v3garob(boxvch)
+c --- store neighbor list for garofalini --- KEA
+      if (lgaro) then
+         do i=1,nchain
+            neigh_o(i) = neigh_cnt(i)
+            do j=1,neigh_o(i)
+               neighboro(j,i) = neighbor(j,i)
+               ndijo(j,i) = ndij(j,i)
+               nxijo(j,i) = nxij(j,i)
+               nyijo(j,i) = nyij(j,i)
+               nzijo(j,i) = nzij(j,i)
+            enddo
+         enddo
+      endif
 
 c --- store old k vectors and reciprocal sum
       if ( lewald ) then
@@ -228,81 +246,30 @@ c *** select one of the cell edge
          hmat(boxvch,jhmat) = hmat(boxvch,jhmat) + rmhmat(boxvch,jhmat)*
      +        ( 2.0d0*random() - 1.0d0 )
          bnhmat(boxvch,jhmat) = bnhmat(boxvch,jhmat) + 1.0d0
+          
+         call matops(boxvch)
+            
+         voln = cell_vol(boxvch)
 
-         voln = (hmat(boxvch,1) * (hmat(boxvch,5) * hmat(boxvch,9) -
-     +        hmat(boxvch,8) * hmat(boxvch,6)) + hmat(boxvch,4)
-     +        * (hmat(boxvch,8) * hmat(boxvch,3) - hmat(boxvch,2)
-     +        * hmat(boxvch,9)) + hmat(boxvch,7) * (hmat(boxvch,2)
-     +        * hmat(boxvch,6) - hmat(boxvch,5)*hmat(boxvch,3)))
+         w(1) = min_width(boxvch,1)
+         w(2) = min_width(boxvch,2)
+         w(3) = min_width(boxvch,3)
 
-c * calculate new boxwidths, compare to cutoff
-c * v = u2 x u3                     
-         vx = hmat(boxvch,5)*hmat(boxvch,9) - 
-     &        hmat(boxvch,6)*hmat(boxvch,8)
-         vy = hmat(boxvch,6)*hmat(boxvch,7) - 
-     &        hmat(boxvch,4)*hmat(boxvch,9)
-         vz = hmat(boxvch,4)*hmat(boxvch,8) - 
-     &        hmat(boxvch,5)*hmat(boxvch,7)
-         
-         w(1) = voln / dsqrt(vx**2 + vy**2 + vz**2)
-         
-c * v = u3 x u1                     
-         vx = hmat(boxvch,8)*hmat(boxvch,3) - 
-     &        hmat(boxvch,9)*hmat(boxvch,2)
-         vy = hmat(boxvch,9)*hmat(boxvch,1) - 
-     &        hmat(boxvch,7)*hmat(boxvch,3)
-         vz = hmat(boxvch,7)*hmat(boxvch,2) - 
-     &        hmat(boxvch,8)*hmat(boxvch,1)
-         
-         w(2) = voln / dsqrt(vx**2 + vy**2 + vz**2)
-
-c * v = u1 x u2
-         vx = hmat(boxvch,2)*hmat(boxvch,6) - 
-     &        hmat(boxvch,3)*hmat(boxvch,5)
-         vy = hmat(boxvch,3)*hmat(boxvch,4) - 
-     &        hmat(boxvch,1)*hmat(boxvch,6)
-         vz = hmat(boxvch,1)*hmat(boxvch,5) - 
-     &        hmat(boxvch,2)*hmat(boxvch,4)
-         
-         w(3) = voln / dsqrt(vx**2 + vy**2 + vz**2)
-
-         if ( rcut .gt. rcutchg(boxvch) .or. lchgall ) then
-            rbcut = rcut
-         else
-            rbcut = rcutchg(boxvch)
-         endif
+         rbcut = rcut(boxvch)
 
          if (rbcut/w(1) .gt. 0.5d0 .or.
      &        rbcut/w(2) .gt. 0.5d0 .or.
      &        rbcut/w(3) .gt. 0.5d0) then
-            write(6,*) 'Problem with line 275 prvolume.f'
-            write(6,*) 'non-rectangular prvolume move rejected-',
+            write(2,*) 'Problem with line 275 prvolume.f'
+            write(2,*) 'non-rectangular prvolume move rejected-',
      & ' box width below cutoff size'
-            write(6,*) 'w1:',w(1),'w2:',w(2),'w3:',w(3)
+            write(2,*) 'w1:',w(1),'w2:',w(2),'w3:',w(3)
             hmat(boxvch,jhmat) = hmato(jhmat)
             call dump
             stop
 c            goto 500
          endif
 
-         hmati(boxvch,1) = (hmat(boxvch,5)*hmat(boxvch,9)
-     &        -hmat(boxvch,8)*hmat(boxvch,6))/voln
-         hmati(boxvch,5) = (hmat(boxvch,1)*hmat(boxvch,9)
-     &        -hmat(boxvch,7)*hmat(boxvch,3))/voln
-         hmati(boxvch,9) = (hmat(boxvch,1)*hmat(boxvch,5)
-     &        -hmat(boxvch,4)*hmat(boxvch,2))/voln
-         hmati(boxvch,4) = (hmat(boxvch,7)*hmat(boxvch,6)
-     &        -hmat(boxvch,4)*hmat(boxvch,9))/voln
-         hmati(boxvch,2) = (hmat(boxvch,3)*hmat(boxvch,8)
-     &        -hmat(boxvch,2)*hmat(boxvch,9))/voln
-         hmati(boxvch,7) = (hmat(boxvch,4)*hmat(boxvch,8)
-     &        -hmat(boxvch,7)*hmat(boxvch,5))/voln
-         hmati(boxvch,3) = (hmat(boxvch,2)*hmat(boxvch,6)
-     &        -hmat(boxvch,3)*hmat(boxvch,5))/voln
-         hmati(boxvch,8) = (hmat(boxvch,7)*hmat(boxvch,2)
-     &        -hmat(boxvch,8)*hmat(boxvch,1))/voln
-         hmati(boxvch,6) = (hmat(boxvch,3)*hmat(boxvch,4)
-     &        -hmat(boxvch,6)*hmat(boxvch,1))/voln
 
 c *** determine the displacement of the COM
          do i = 1,nchain
@@ -341,11 +308,7 @@ c *** determine the displacement of the COM
 c --- calculate new volume         
          voln = volo +
      +        rmvol(boxvch) * ( 2.0d0*random() - 1.0d0 )
-         if ( rcut .gt. rcutchg(boxvch) .or. .not. lewald ) then
-            rbcut = rcut
-         else
-            rbcut = rcutchg(boxvch)
-         endif
+         rbcut = rcut(boxvch)
          if ( lpbcz ) then
             if (lsolid(boxvch).and.lrect(boxvch)) then
 c *** volume move independently in x, y, z directions
@@ -360,7 +323,7 @@ c            vminim = rbcut**(2.0d0)
          endif
 
 c         if ( voln .lt. vminim ) then
-c            write(6,*) 'prvolume move rejected - below cut-off size' 
+c            write(2,*) 'prvolume move rejected - below cut-off size' 
 c            return
 c         endif
 
@@ -387,9 +350,9 @@ c         endif
             if ( lpbcz ) then
                boxlz(boxvch) = bzo
             endif
-            write(6,*) 'boxvch',boxvch
-            write(6,*) 'Problem in line 381 of subroutine prvolume.f'
-            write(6,*) 'A move was attempted that would lead to a 
+            write(2,*) 'boxvch',boxvch
+            write(2,*) 'Problem in line 381 of subroutine prvolume.f'
+            write(2,*) 'A move was attempted that would lead to a 
      & boxlength less than twice rcut'
             call dump
             stop
@@ -452,13 +415,19 @@ c ----- Check if the chain i is in the correct box
       endif
 
       lvol = .true.
-      if ( lchgall )
-     +     calp(boxvch) = kalp(boxvch)/boxlx(boxvch)
-
+      if ( lchgall ) then
+           if (lsolid(boxvch).and.(.not.lrect(boxvch))) then
+             min_boxl = min(min_width(boxvch,1),min_width(boxvch,2),
+     &                    min_width(boxvch,3))
+           else
+              min_boxl = min(boxlx(boxvch),boxly(boxvch),boxlz(boxvch))
+           endif
+           calp(boxvch) = kalp(boxvch)/boxlx(boxvch)
+      endif    
       call sumup( ovrlap, v, vinter, vtail, vdum,vdum,
-     +     vdum,vdum,vext,velect,vdum, boxvch, lvol )
+     +     vdum,vdum,vext,velect,vdum, boxvch, lvol)
       if ( ovrlap ) then
-c         write(6,*) 'move rejected due to overlap in PRVOLUME'
+c         write(2,*) 'move rejected due to overlap in PRVOLUME'
          goto 500
       endif
 
@@ -466,8 +435,9 @@ c         write(6,*) 'move rejected due to overlap in PRVOLUME'
       vtailn   = vtail
       vextn    = vext  
       velectn  = velect
+      v3n = v3garo
       vboxn    = vboxo + (vintern-vintero) + (vextn-vexto) 
-     &     + (velectn-velecto) 
+     &     + (velectn-velecto) + (v3n-v3o)
 c      write (6,*) 'new  energy',  vboxn
 
       if ( lanes ) then
@@ -485,13 +455,15 @@ c *** energy, coordinates and the ewald sum
             call flucq(0,boxvch)
          enddo
          
-         dele = (vbox(boxvch) - vboxo)+ express * ( voln - volo ) 
-     +        - (nchbox(boxvch) * dlog(voln/volo) / beta )
+         dele = (vbox(boxvch) - vboxo)+ express(boxvch)*(voln-volo) 
+     +        - ((nchbox(boxvch)+ghost_particles(boxvch))
+     +              * dlog(voln/volo) / beta )
 
       else
          
-         dele = ( vboxn - vboxo ) +  express * ( voln - volo ) 
-     +        - (nchbox(boxvch) * dlog(voln/volo)/beta )
+         dele = ( vboxn - vboxo ) +  express(boxvch)*(voln-volo) 
+     +        - ((nchbox(boxvch)+ghost_particles(boxvch)) 
+     +              * dlog(voln/volo)/beta )
       endif
 
 c --- acceptance test
@@ -516,6 +488,7 @@ c --      accepted
              vtailb(boxvch)  = vtailb(boxvch) + (vtailn-vtailo)
              vextb(boxvch)   = vextb(boxvch) + (vextn-vexto)  
              velectb(boxvch) = velectb(boxvch) + (velectn-velecto)
+             v3garob(boxvch) = v3garob(boxvch) + (v3n-v3o)
           endif
 c ---     update centers of mass
           call ctrmas(.true.,boxvch,0,5)
@@ -532,8 +505,8 @@ c --- re store old box lengths, energy, configuration etc
       if ( lsolid(boxvch) .and. .not. lrect( boxvch)) then
          do i = 1,9
             hmat(boxvch,i) = hmato(i)
-            hmati(boxvch,i) = hmatio(i)
          enddo
+         call matops(boxvch)  
       else
          boxlx(boxvch)   = bxo
          boxly(boxvch)   = byo
@@ -545,11 +518,27 @@ c --- re store old box lengths, energy, configuration etc
       vextb(boxvch) = vexto
       velectb(boxvch) = velecto
       vflucqb(boxvch) = vflucqo
+      v3garob(boxvch) = v3o
+
+c --- restore old neighbor list for garofalini --- KEA
+      if (lgaro) then
+         do i=1,nchain
+            neigh_cnt(i) = neigh_o(i)
+            do j=1,neigh_cnt(i)
+               neighbor(j,i) = neighboro(j,i)
+               ndij(j,i) = ndijo(j,i)
+               nxij(j,i) = nxijo(j,i)
+               nyij(j,i) = nyijo(j,i)
+               nzij(j,i) = nzijo(j,i)
+            enddo
+         enddo
+      endif
+
       if ( lewald ) then
 c --- restore old k vectors and reciprocal sum and calp
          calp(boxvch) = calpo
 c         if (numvect(boxvch) .ne. numvecto) then
-c            write(6,*) '### numvect changing in prvol'
+c            write(2,*) '### numvect changing in prvol'
 c         endif
          numvect(boxvch) = numvecto
          ncount = numvect(boxvch)
@@ -583,7 +572,7 @@ c ----- Check if the chain i is in the correct box
          endif
       enddo
 
-c      write(6,*) 'end VOLUME of LNPTGIBBS'
+c      write(2,*) 'end VOLUME of LNPTGIBBS'
 
       return
       end

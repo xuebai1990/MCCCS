@@ -63,7 +63,7 @@ c     **           -- Uses CDCBMC to grow them --              **
 c     ***********************************************************
 
 
-c      write(6,*) 'START PLACE'
+c      write(2,*) 'START PLACE'
 
 
       nchvib = nchbna(imolty)
@@ -95,7 +95,7 @@ c      write(6,*) 'START PLACE'
             iu = iplace(iw,count)
 
             if (invib(imolty,iu).gt.1) then
-               write(6,*) 'iu,invib',iu,invib(imolty,iu)
+               write(2,*) 'iu,invib',iu,invib(imolty,iu)
                stop 'invib can no be larger than one for hydrogen'
             endif
 
@@ -105,7 +105,7 @@ c     --- determine bond lengths
             ju = ijvib(imolty,iu,iv)
 
             if (iufrom.ne.ju) then
-               write(6,*) 'iu,ju,iufrom',iu,ju,iufrom
+               write(2,*) 'iu,ju,iufrom',iu,ju,iufrom
                stop 'ju not equal to iufrom'
             endif
 
@@ -252,7 +252,7 @@ c     --- determine angle with iuprev
                   if (ku.eq.pprev(iw)) then
 
                      if (ju.ne.ijben2(imolty,iu,ib)) then
-                        write(6,*) 'ju,ijben2',ju,ijben2(imolty,iu,ib)
+                        write(2,*) 'ju,ijben2',ju,ijben2(imolty,iu,ib)
                         stop 'ju not equal to ijben2 in place'
                      endif
 
@@ -470,7 +470,7 @@ c     --- now to calculate all torsions
                   if (niplace(jut4).lt.niplace(iu)) then
                         
                      if (.not. lexist(jut4)) then
-                        write(6,*) 'jut4,jut3,jut2,iu',
+                        write(2,*) 'jut4,jut3,jut2,iu',
      &                       jut4,jut3,jut2,iu
                         stop 'trouble jut4 in place'
                      endif
@@ -565,6 +565,7 @@ c     --- update new rosenbluth weight + vibrations
             voldintra = voldintra + vtrintra(1)
             voldinter = voldinter + vtrinter(1)
             voldelect = voldelect + vtrelect(1)
+
             voldewald = voldewald + vtrewald(1)
          endif
 
@@ -598,7 +599,7 @@ c     --- update new rosenbluth weight + vibrations
          enddo
       enddo
 
-c      write(6,*) 'END PLACE'
+c      write(2,*) 'END PLACE'
       
       return
       end

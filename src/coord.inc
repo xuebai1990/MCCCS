@@ -29,8 +29,9 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       integer parall,temtyp,riutry,rindex,prior,maxgrow
       double precision rxu, ryu, rzu, mass, masst, beta,xcm,ycm,zcm
      &  ,exp_c,eta,eta2,sxcm,sycm,szcm
-      double precision qqu,rcmu,rintramax,hist,probf
+      double precision qqu,rcmu,rintramax,hist,probf,Elect_field
       character*18 chname
+      character*4 chemid
       dimension lelect(ntmax),lflucq(ntmax),lqtrans(ntmax)
      &  ,lexpand(ntmax),lplace(ntmax,nntype)
       dimension maxgrow(ntmax),probf(30,30,maxbin)
@@ -51,10 +52,10 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
      &  ,eta2(nbxmax,ntmax),sxcm(nmax),sycm(nmax),szcm(nmax)
       dimension riutry(ntmax,3),rindex(ntmax),lrigid(ntmax),lrig(ntmax)
      &  ,lrigi(ntmax,numax),lchiral(ntmax,numax),lring(ntmax)
-      dimension chname(nntype)
+      dimension chname(nntype), chemid(nntype)
 
       common /ncnunt/ moltyp,nunit,nugrow,ntype,parbox,boxlink
-      common /ccord1/ probf, hist,rxu, ryu, rzu, qqu, rcmu
+      common /ccord1/ probf, hist,rxu, ryu, rzu, qqu, rcmu, Elect_field
       common /ccord2/ nboxi,eetype,iurot,nchbox,ncmt,ncmt2
      &  ,parall,temtyp,licell,rintramax
       common /ccord3/ nbox,nchain,nmolty,nrigmin,nrigmax
@@ -67,7 +68,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       common /histfix/ counthist,counttot,iupdatefix,maxgrow,iring
       common /rigidstuff/ riutry,rindex,nrig,irig,frig
 
-      common /verbose/ chname
+      common /verbose/ chname, chemid
 
 
 

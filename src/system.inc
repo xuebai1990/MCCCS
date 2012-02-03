@@ -24,7 +24,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       logical lsolid,lrect
       integer icell,nicell,iucell,solcount
       double precision boxlx, boxly, boxlz, rcut, rmin
-     +   ,rcutnn, softcut,softlog,rcutin,rcutchg
+     +   ,rcutnn, softcut,softlog,rcutin
      +   ,avsolinter,avsolintra,avsolbend,avsoltor,avsolelc
       dimension icell(nmax),nicell(cmax),iucell(cmax,cmaxa)
      +   ,solcount(nbxmax,ntmax)
@@ -34,10 +34,10 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       common /boxpha/ lsolid(nbxmax),lrect(nbxmax)
       common /boxdim/ boxlx(nbxmax),boxly(nbxmax),boxlz(nbxmax),
-     +                 rcutchg(nbxmax)
+     +                 rcut(nbxmax),rcutnn(nbxmax)
 
       common /solav/ avsolinter,avsolintra,avsolbend,avsoltor,avsolelc
-      common /input1/ rcut, rmin, rcutnn, softcut,softlog
+      common /input1/ rmin, softcut,softlog
      &  ,rcutin,solcount
 
       common /linkc/ icell,nicell,iucell

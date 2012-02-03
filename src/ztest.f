@@ -62,21 +62,21 @@ c---  test accuracy
             err=abs((res-rest)/res)
             if (err.gt.0.03) then
                print*,' warning err. interp.larger than 3% '
-               print*,sngl(err),sngl(res),sngl(rest)
+               print*,err,res,rest
             endif
             if (erra.lt.abs(res-rest)) erra=abs(res-rest)
             errt=errt+err
             if (errm.lt.err) errm=err
          endif
       enddo
-      write(6,*) ' test over : ',samp,tel, ' random positions '
-      write(6,*) ' average error : ',sngl(errt/tel)
-      write(6,*) ' maximum error : ',sngl(errm)
-      write(6,*) ' maximum ab.er.: ',sngl(erra)
-      write(6,*) ' Boltz avera energy (table): ',sngl(ebolt/bolt)
-      write(6,*) ' Boltz avera energy (full ): ',sngl(eboltf/boltf)
-      write(6,*) ' ---------------------------- '
-      write(6,*) 
+      write(2,*) ' test over : ',samp,tel, ' random positions '
+      write(2,*) ' average error : ',errt/tel
+      write(2,*) ' maximum error : ',errm
+      write(2,*) ' maximum ab.er.: ',erra
+      write(2,*) ' Boltz avera energy (table): ',ebolt/bolt
+      write(2,*) ' Boltz avera energy (full ): ',eboltf/boltf
+      write(2,*) ' ---------------------------- '
+      write(2,*) 
 
       return
       end

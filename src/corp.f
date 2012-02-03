@@ -1,4 +1,4 @@
-      function corp(imolty,jmolty,rhosq)
+      function corp(imolty,jmolty,rhosq,ibox)
 
 c corp 
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -38,7 +38,7 @@ c ************************************
       include 'nsix.inc'
 
       double precision corp,rci3,rhosq, epsilon2, sigma2
-      integer imolty,jmolty,ii,jj, ntii, ntjj, ntij
+      integer imolty,jmolty,ii,jj, ntii, ntjj, ntij,ibox
       corp = 0.0d0
 
       do ii = 1, nunit(imolty) 
@@ -58,11 +58,12 @@ c ************************************
                ntij = (ntii-1)*nxatom + ntjj
                corp = corp + 16.0d0 * onepi * epsnx(ntij) *
      &            rhosq * rzero(ntij)**3 * 
-     &            (0.5d0*(rzero(ntij)/rcut)**6 - (rzero(ntij)/rcut)**3)
+     &            (0.5d0*(rzero(ntij)/rcut(ibox))**6 - 
+     &            (rzero(ntij)/rcut(ibox))**3)
             else
                ntij = (ntii-1)*nntype + ntjj
                
-               rci3 = sig2ij(ntij)**(3.d0/2.d0) / rcut**3 
+               rci3 = sig2ij(ntij)**(3.d0/2.d0) / rcut(ibox)**3 
                if ( lexpand(imolty) .and. lexpand(jmolty) ) then
                   sigma2 = (sigma(imolty,ii)+sigma(jmolty,jj))**2/4.0d0
                   epsilon2 = dsqrt(epsilon(imolty,ii)*

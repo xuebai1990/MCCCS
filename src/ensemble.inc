@@ -22,9 +22,10 @@ c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       double precision vbox,wbox,vinterb,vtailb,vintrab,vvibb,vbendb
-     +   ,vtgb, vextb, velectb,vflucqb
+     +   ,vtgb, vextb, velectb,vflucqb,v3garob
+c      double precision velectb_intra, velectb_inter
       common /vwbox/  vbox(nbxmax),wbox(nbxmax),vinterb(nbxmax)
      +   ,vtailb(nbxmax),vintrab(nbxmax),vvibb(nbxmax)
      +   ,vbendb(nbxmax),vtgb(nbxmax),vextb(nbxmax)
-     &   ,velectb(nbxmax),vflucqb(nbxmax)
-
+     &   ,velectb(nbxmax),vflucqb(nbxmax),v3garob(nbxmax)
+c      common /vabox/ velectb_intra(nbxmax),velectb_inter(nbxmax)

@@ -41,7 +41,7 @@ c     **************************************************************
       double precision rcutsq,rxuu1,ryuu1,rzuu1,rxuij,ryuij,rzuij
      &     ,rijsq
 
-      rcutsq = rcutchg(ibox)*rcutchg(ibox)
+      rcutsq = rcut(ibox)*rcut(ibox)
 
       if ( lpbc ) call setpbc(ibox)
 

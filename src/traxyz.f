@@ -41,6 +41,10 @@ c    *******************************************************************
       include 'inputdata.inc'
       include 'bnbsma.inc'
       include 'neigh.inc'
+      include 'ipswpar.inc'
+      include 'eepar.inc'
+ckea
+      include 'garofalini.inc'
 
       logical lx,ly,lz,ovrlap,idum,ddum
 
@@ -51,15 +55,15 @@ c    *******************************************************************
      +                 ,vintran,vintrao,deltv,deltvb,disvsq
      +                 ,vintern,vintero,vextn,vexto,rchain
      &                 ,velectn,velecto,vdum
-     &                 ,vrecipo,vrecipn   
-      
+     &                 ,vrecipo,vrecipn,v3n,v3o   
+     & ,velectn_intra,velectn_inter,velecto_intra,velecto_inter 
       dimension ddum(27)
 
       logical laccept
 
 C --------------------------------------------------------------------
 
-c      write(6,*) 'start TRAXYZ'
+c      write(2,*) 'start TRAXYZ'
       ovrlap = .false.
 c     ***    select a chain at random ***
       rchain  = random()
@@ -69,6 +73,11 @@ c     ***    select a chain at random ***
             rchain = 2.0d0
          endif
       enddo
+
+      if ((lexpee).and.(imolty.ge.nmolty1))
+     &   imolty = ee_moltyp(mstate)
+                                                                                
+      if (temtyp(imolty).eq.0) return
       
       if (lgrand) then
 c ---    select a chain at random in box 1!
@@ -82,7 +91,7 @@ c         (in box 2 is an ideal gas!)
          endif
          i = idint( dble(ncmt(1,imolty))*random() ) + 1
          i = parbox(i,1,imolty)
-         if ( moltyp(i) .ne. imolty ) write(6,*) 'screwup traxyz'
+         if ( moltyp(i) .ne. imolty ) write(2,*) 'screwup traxyz'
 
 
       else
@@ -156,11 +165,12 @@ c *** move i ***
       enddo
       moltion(2) = imolty
 
-c  *** calculate the energy of i in the new configuration ***
+c     *** calculate the energy of i in the new configuration ***
       flagon = 2 
-       call energy(i,imolty, vnew,vintran, vintern,vextn,velectn
+      call energy(i,imolty, vnew,vintran, vintern,vextn,velectn
      &     ,vdum,flagon, ibox,1, iunit,.false.,ovrlap,.false.
      &     ,vdum,.false.,.false.)
+      v3n=v3garo
       if (ovrlap) return
 
 c *** calculate the energy of i in the old configuration ***
@@ -168,6 +178,7 @@ c *** calculate the energy of i in the old configuration ***
       call energy(i,imolty,vold,vintrao,vintero,vexto,velecto
      &     ,vdum,flagon,ibox,1, iunit,.false.,ovrlap,.false.
      &     ,vdum,.false.,.false.)
+      v3o = v3garo
 
       if (ovrlap) stop 'disaster ovrlap in old conf of TRAXYZ'
       
@@ -175,6 +186,18 @@ c *** calculate the energy of i in the old configuration ***
          call recip(ibox,vrecipn,vrecipo,1)
          velectn = velectn + vrecipn
          velecto = velecto + vrecipo
+         vipswn = vipswn + vrecipn
+         vipswo = vipswo + vrecipo
+         if (lstagea) then
+            vrecipn    =   (1.0d0-(1.0d0-etais)*lambdais)*vrecipn
+            vrecipo    =   (1.0d0-(1.0d0-etais)*lambdais)*vrecipo
+         elseif (lstageb) then
+            vrecipn =  etais*vrecipn
+            vrecipo =  etais*vrecipo
+         elseif (lstagec) then
+            vrecipn =  (etais+(1.0d0-etais)*lambdais)*vrecipn
+            vrecipo =  (etais+(1.0d0-etais)*lambdais)*vrecipo
+         endif
          vnew = vnew + vrecipn
          vold = vold + vrecipo
       endif
@@ -182,6 +205,7 @@ c *** check for acceptance ***
  
       deltv  = vnew - vold
       deltvb = beta * deltv
+
 
 c *** For ANES algorithm, do the Fluctuating charge moves.
 
@@ -208,12 +232,18 @@ c        --- move rejected
          return
       endif
 
-c      write(6,*) 'TRAXYZ accepted i',i
+c      write(2,*) 'TRAXYZ accepted i',i
+
       vbox(ibox)     = vbox(ibox) + deltv
       vinterb(ibox)  = vinterb(ibox) + (vintern - vintero)
       vintrab(ibox)  = vintrab(ibox) + (vintran - vintrao)
       vextb(ibox)    = vextb(ibox)   + (vextn   - vexto)
       velectb(ibox)   = velectb(ibox)  + (velectn - velecto)
+      vipswb(ibox) = vipswb(ibox) + (vipswn-vipswo)
+      vwellipswb(ibox) = vwellipswb(ibox) + (vwellipswn-vwellipswo)
+      vipsw = vipswb(ibox)
+      vwellipsw = vwellipswb(ibox)
+      v3garob(ibox) = v3garob(ibox) + (v3n-v3o)
       
       do j = 1,iunit
          if (lx) rxu(i,j) = rxuion(j,2)
@@ -224,10 +254,11 @@ c      write(6,*) 'TRAXYZ accepted i',i
       if (lewald .and. lelect(imolty)) then
 c *** update reciprocal-space sum
          call recip(ibox,vdum,vdum,2)
-         if ( ldielect ) then
+      endif
+
+      if ( ldielect ) then
 c *** update the dipole term
-            call dipole(ibox,1)
-         endif
+         call dipole(ibox,1)
       endif
 
 c *** update chain center of mass
@@ -259,14 +290,18 @@ c *** check for last unit ***
          if (disvsq .gt. upnnsq) call updnn( i )
       endif
 
-      if ( lneighbor ) then
+      if ( lneighbor .or. lgaro) then
          
          do 10 ic = 1, neigh_cnt(i)
             j = neighbor(ic,i)
-c            write(6,*) ic,i,'j:',j
+c            write(2,*) ic,i,'j:',j
             do ip = 1,neigh_cnt(j)
                if ( neighbor(ip,j) .eq. i ) then
                   neighbor(ip,j)=neighbor(neigh_cnt(j),j)
+                  ndij(ip,j) = ndij(neigh_cnt(j),j)
+                  nxij(ip,j) = nxij(neigh_cnt(j),j)
+                  nyij(ip,j) = nyij(neigh_cnt(j),j)
+                  nzij(ip,j) = nzij(neigh_cnt(j),j)
                   neigh_cnt(j) = neigh_cnt(j)-1
                   goto 10
                endif
@@ -276,6 +311,10 @@ c            write(6,*) ic,i,'j:',j
          do ic = 1,neigh_icnt
             j = neighi(ic)
             neighbor(ic,i)=j
+            ndij(ic,i) = ndiji(ic)
+            nxij(ic,i) = nxiji(ic)
+            nyij(ic,i) = nyiji(ic)
+            nzij(ic,i) = nziji(ic)
             lneighij = .false.
             do ip = 1,neigh_cnt(j)
                if ( neighbor(ip,j) .eq. i ) then
@@ -285,11 +324,15 @@ c            write(6,*) ic,i,'j:',j
             if ( .not. lneighij ) then
                neigh_cnt(j) = neigh_cnt(j)+1
                neighbor(neigh_cnt(j),j) = i
+               ndij(neigh_cnt(j),j) = ndiji(ic)
+               nxij(neigh_cnt(j),j) = -nxiji(ic)
+               nyij(neigh_cnt(j),j) = -nyiji(ic)
+               nzij(neigh_cnt(j),j) = -nziji(ic)
             endif
          enddo
       endif
 
-c      write(6,*) 'end TRAXYZ',i
+c      write(2,*) 'end TRAXYZ',i
 
       return
       end

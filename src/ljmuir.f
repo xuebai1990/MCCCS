@@ -44,12 +44,12 @@ c      parameter (epshead=27.67204d0,sighead=4.22d0)
 
 C --------------------------------------------------------------------
 
-c       write(6,*) 'sig2ij',sig2ij
-c       write(6,*) 'epsij',epsij
+c       write(2,*) 'sig2ij',sig2ij
+c       write(2,*) 'epsij',epsij
 
       if ( ntij .eq. 1 ) then
          sr = sighead / dsqrt( rijsq )
-c       write(6,*) 'sr',sr,'v',4.0d0*epshead*sr**3*(sr**9+1.0d0)
+c       write(2,*) 'sr',sr,'v',4.0d0*epshead*sr**3*(sr**9+1.0d0)
          ljmuir = epshead * sr**3 * ( sr**9 + 1.0d0 )
       else
          sr2 = sig2ij(ntij) / rijsq

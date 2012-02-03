@@ -25,7 +25,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 C -----------------------------------------------------------------
 C subroutine dump
-C dumps the final configuration before stopping the program
+C dumps the final configuration before stopping the program (Neeraj).
 C -----------------------------------------------------------------
 
       implicit none
@@ -54,6 +54,7 @@ C -----------------------------------------------------------------
       open (unit=8, file="final-config",status="unknown")
       write(8,*) tmcc
       if ( tmcc .gt. 0 ) then
+         write(8,*) Armtrax, Armtray, Armtraz 
          do im=1,nbox
             do imolty=1,nmolty
                write(8,*) rmtrax(imolty,im), rmtray(imolty,im)

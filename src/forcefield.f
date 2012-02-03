@@ -82,12 +82,12 @@ c
 c === calculate cutt-off of the potential
 c
       if (lshift) then
-        write(6,102)
+        write(2,102)
         do itype = 1,zntype
           zencut(itype,idz)=4.*zeps(itype,idz)*
      +         ( (zsig2(itype,idz)/zrc2(itype,idz))**6
      +          -(zsig2(itype,idz)/zrc2(itype,idz))**3)
-          write(6,103) itype,zencut(itype,idz)
+          write(2,103) itype,zencut(itype,idz)
         enddo
       endif     
 

@@ -60,7 +60,7 @@ c     if iinit=3 it finds a vector connected two others given
 c     *******************************************************
 
 
-c      write(6,*) 'START CLOSE iinit=',iinit
+c      write(2,*) 'START CLOSE iinit=',iinit
 
 
       if (iinit.ne.3) then
@@ -228,7 +228,7 @@ c     --- for four bead closes, only one of these will work
             z(2) = rzf - rz(2)
             lengthb = dsqrt(x(2)**2 + y(2)**2 + z(2)**2)
 
-            write(6,*) lengtha,lengthb,bondl
+            write(2,*) lengtha,lengthb,bondl
 
             
             if ((lengtha-bondl).lt.(lengthb-bondl)) then
@@ -339,7 +339,7 @@ c            return
 
       endif
 
-c      write(6,*) 'END CLOSE iinit=',iinit
+c      write(2,*) 'END CLOSE iinit=',iinit
       
 c     ---------------------------------------------------------------
 

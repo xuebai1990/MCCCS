@@ -446,8 +446,8 @@ c     --- define iwbef and ibef
          wbefnum = count
       endif
       
-c      write(6,*) '**********************************'
-c      write(6,*) iutry,ivib,findex,fprev(1,1)
+c      write(2,*) '**********************************'
+c      write(2,*) iutry,ivib,findex,fprev(1,1)
 
 
 c     --- set up place move logic -----------
@@ -600,7 +600,7 @@ c     --- cycle through the rest of the rigid beads to set lexshed to false
                enddo
             enddo
             if (ja.gt.10) then
-               write(6,*) 'ja',ja
+               write(2,*) 'ja',ja
                stop 'need to set max greater in safeschedule'
             endif
 
@@ -622,21 +622,21 @@ c     --- cycle through the rest of the rigid beads to set lexshed to false
 c     ****** take out return for diagnostics ************
 
       do iw = 1, islen
-         write(6,*) growfrom(iw),(growlist(iw,count),count=1
+         write(2,*) growfrom(iw),(growlist(iw,count),count=1
      &        ,grownum(iw))
 
       enddo
 
-      write(6,*) '---------------------------------------------'
+      write(2,*) '---------------------------------------------'
 
       do iw = 1, nplace
-         write(6,*) pfrom(iw),(iplace(iw,count),count=1,pnum(iw))
+         write(2,*) pfrom(iw),(iplace(iw,count),count=1,pnum(iw))
       enddo
 
-      write(6,*) '--------------------------------------------'
+      write(2,*) '--------------------------------------------'
 
       do iw = 1, nrigi
-         write(6,*) rfrom(iw),(rlist(iw,count),count=1,rnum(iw))
+         write(2,*) rfrom(iw),(rlist(iw,count),count=1,rnum(iw))
       enddo
       
       stop

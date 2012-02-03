@@ -1,5 +1,5 @@
       subroutine inclus( inclnum,inclmol,inclbead,inclsign,ncarbon,
-     &     ainclnum,ainclmol,ainclbead,a15t)
+     &     ainclnum,ainclmol,ainclbead,a15t,ofscale,ofscale2)
 
 c inclus
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -39,8 +39,15 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       dimension ainclmol(ntmax*numax*numax)
       dimension ainclbead(ntmax*numax*numax,2)
       dimension a15t(ntmax*numax*numax)
+      
+c -- variables added (3/24/05) for variable 1-4 interactions 	
+      double precision ofscale,ofscale2
+      dimension ofscale(ntmax*numax*numax),ofscale2(ntmax*numax*numax)
 
 c ----------------------------------------------------------------
+
+!c !!!!This is modified to work only for TATB NR-2007!!!
+
 
 c - triple loop over all types of molecules -
       do imolty = 1, nmolty
@@ -48,9 +55,11 @@ c - triple loop over all types of molecules -
          do m = 1, nunit(imolty)
             do n = 1, nunit(imolty)
                linclu(imolty,m,n) = .true.
-               lqinclu(imolty,m,n) = .true.
-c * by default, don't want any 1-5 r^12 interactions
+               lqinclu(imolty,m,n) = .true.	      
+c * by default, dont want any 1-5 r^12 interactions
                lainclu(imolty,m,n) = .false.
+	       ljscale(imolty,m,n) = 1.0
+	       qscale2(imolty,m,n) = 1.0
             enddo
          enddo
          
@@ -89,9 +98,12 @@ c - exclude all third-nearest neighbor bonded beads (torsions) -
             do n = 1, intor(imolty,m)
                nb = ijtor4(imolty,m,n)
                linclu(imolty,m,nb) = .false.
-c * don't set lqinclu since we want 1-4 interactions, unless q14scale is zero
-               if (qscale .lt. 0.001d0) then
+c * dont set lqinclu since we want 1-4 interactions, unless 1q14scale is F
+               if (.not.lq14scale(imolty)) then
                   lqinclu(imolty,m,nb) = .false.
+               else
+                  qscale2(imolty,m,nb) = qscale(imolty) 
+                  qscale2(imolty,nb,m) = qscale(imolty)
                endif
             enddo
 
@@ -107,13 +119,17 @@ c     - include or exclude additional beads accoring to incl
                   linclu(imolty,nb,m) = .true.
                   lqinclu(imolty,m,nb) = .true.
                   lqinclu(imolty,nb,m) = .true.
+		  ljscale(imolty,m,nb) = ofscale(n)
+		  ljscale(imolty,nb,m) = ofscale(n)
+		  qscale2(imolty,m,nb) = ofscale2(n)
+		  qscale2(imolty,nb,m) = ofscale2(n)
                elseif (inclsign(n) .eq. -1 ) then
                   linclu(imolty,m,nb) = .false.
                   linclu(imolty,nb,m) = .false.
                   lqinclu(imolty,m,nb) = .false.
                   lqinclu(imolty,nb,m) = .false.
                else
-                  write(6,*) 'INCLUS: n,inclsign(n)',n,inclsign(n)
+                  write(2,*) 'INCLUS: n,inclsign(n)',n,inclsign(n)
                   stop 'inclusign must be 1 or -1'
                endif
             endif
@@ -204,8 +220,10 @@ c * self consistency check *
             enddo
          enddo
 
+!! Removing this part for TATB (NR-2007)
+
          if (lrigid(imolty)) then
-c - don't include rigid beads
+c - dont include rigid beads
 
 c - there will be no intramolecular forces between rigid beads
 c - or beads connected one away from a rigid bead          
@@ -228,32 +246,51 @@ c - or beads connected one away from a rigid bead
             enddo
          endif
 
-         write(6,*) 
-         write(6,*) 'INCLUSION TABLE'
+         write(2,*) 
+         write(2,*) 'INCLUSION TABLE'
 
          do m = 1, nunit(imolty)
-            write(6,*) m, (linclu(imolty,m,n),n=1,nunit(imolty))
+            write(2,*) m, (linclu(imolty,m,n),n=1,nunit(imolty))
          enddo
-         write(6,*) 
+         write(2,*) 
 
-         write(6,*) 
-         write(6,*) 'CHARGE INCLUSION TABLE'
+         write(2,*) 
+         write(2,*) 'CHARGE INCLUSION TABLE'
 
          do m = 1, nunit(imolty)
-            write(6,*) m, (lqinclu(imolty,m,n),n=1,nunit(imolty))
+            write(2,*) m, 
+     &        (lqinclu(imolty,m,n),n=1,nunit(imolty))
          enddo
-         write(6,*) 
+
+c  400  format (<nunit(imolty)> F5.2)
+         write(2,*) 
+	 
+	 write(2,*) '1-4 LJ SCALING FACTORS'
+	 do m = 1, nunit(imolty)
+            write(2,500) m, 
+     &    (ljscale(imolty,m,n),n=1,nunit(imolty))
+         enddo
+ 500  format (i5,<nunit(imolty)> F5.2)
+
+	 
+	 write(2,*)
+	 write(2,*) '1-4 CHARGE SCALING FACTORS'
+	 do m = 1, nunit(imolty)
+            write(2,600) m, 
+     &			(qscale2(imolty,m,n),n=1,nunit(imolty))
+         enddo
+ 600  format (i5,<nunit(imolty)> F5.2)
 
 c * not really that important to write out
-c         write(6,*) 
-c         write(6,*) '1-5 OH INTERACTION TABLE'
+c         write(2,*) 
+c         write(2,*) '1-5 OH INTERACTION TABLE'
 c         do m = 1, nunit(imolty)
-c            write(6,*) m, (lainclu(imolty,m,n),n=1,nunit(imolty))
+c            write(2,*) m, (lainclu(imolty,m,n),n=1,nunit(imolty))
 c         enddo
-c         write(6,*) 
+c         write(2,*) 
 
       enddo
-c      write(6,*) 'finished inclus'
+c      write(2,*) 'finished inclus'
       return
       end
 

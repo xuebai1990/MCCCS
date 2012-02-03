@@ -22,4 +22,8 @@ c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       double precision hmat(nbxmax,9),hmati(nbxmax,9)
-      common /cell/ hmat,hmati
+      double precision cell_length(nbxmax,3),min_width(nbxmax,3)
+      double precision cell_vol(nbxmax) 
+      double precision cell_ang(nbxmax,3)
+      common /cella/ hmat,hmati
+      common /cellb/ cell_length,min_width,cell_vol,cell_ang

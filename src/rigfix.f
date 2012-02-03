@@ -47,7 +47,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
      &     ,vtorsion,phitors,bf_tor,random,ran_tor,bs,rxpa,rypa,rzpa
      &     ,bsuma,vtrya,vtrintraa,vtrexta,vtrelecta,vtrewalda
      &     ,vtrorienta,vtrintera,bsum,rbf,wrig
-
+     &     ,vtrelecta_intra,vtrelecta_inter
 
       dimension ilist(numax),inum(max),xfix(numax),yfix(numax)
      &     ,zfix(numax),lfind(numax),phia(numax),bendang(numax)
@@ -57,10 +57,10 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
      &     ,bsuma(nchmax),vtrya(nchmax),vtrintraa(nchmax)
      &     ,vtrorienta(nchmax),vtrexta(nchmax),glist(max)
      &     ,lovra(nchmax),vtrintera(nchmax),ifrom(numax),inuma(max)
-
+     &     ,vtrelecta_intra(nchmax),vtrelecta_inter(nchmax)
 c     ----------------------------------------------------------
 
-c      write(6,*) 'START RIGFIX'
+c      write(2,*) 'START RIGFIX'
 
       twopi = dacos(-1.0d0) * 2.0d0
       wrig = 1.0d0
@@ -251,7 +251,7 @@ c     --- let's set up cone for the new configuration
      &                    .and..not.lplace(imolty,jut4)) then
 c     --- check to see if jut4 exists
                         if (.not. lexist(jut4)) then
-                           write(6,*) 'iu,jut2,jut3,jut4',iu
+                           write(2,*) 'iu,jut2,jut3,jut4',iu
      &                          ,jut2,jut3,jut4
                            stop 'trouble, jut4 does not exist in rigfix'
                         endif
@@ -368,6 +368,8 @@ c     --- initialize rosenbluth weight
             vtrexta(ip)   = 0.0d0
             vtrintera(ip) = 0.0d0
             vtrelecta(ip) =  0.0d0
+            vtrelecta_intra(ip) =  0.0d0
+            vtrelecta_inter(ip) =  0.0d0
             vtrewalda(ip) = 0.0d0
             vtrorienta(ip) = 0.0d0
          enddo
@@ -403,6 +405,11 @@ c     --- propagate rosenbluth weigth and energies
 	    vtrexta(ip)   = vtrexta(ip) + vtrext(ip)
 	    vtrintera(ip) = vtrintera(ip) + vtrinter(ip)
             vtrelecta(ip) =  vtrelecta(ip) + vtrelect(ip)
+            vtrelecta_intra(ip) =  vtrelecta_intra(ip) +
+     &                               vtrelect_intra(ip)
+            vtrelecta_inter(ip) =  vtrelecta_inter(ip) +
+     &                               vtrelect_inter(ip)
+  
             vtrewalda(ip) = vtrewalda(ip) + vtrewald(ip)
             vtrorienta(ip) = vtrorienta(ip) + vtrorient(ip)
          enddo
@@ -439,6 +446,10 @@ c     --- propagate rosenbluth weigth and energies
                vtrexta(ip)   = vtrexta(ip) + vtrext(ip)
                vtrintera(ip) = vtrintera(ip) + vtrinter(ip)
                vtrelecta(ip) =  vtrelecta(ip) + vtrelect(ip)
+               vtrelecta_intra(ip) =  vtrelecta_intra(ip) +
+     &                                  vtrelect_intra(ip)
+               vtrelecta_inter(ip) =  vtrelecta_inter(ip) + 
+     &                                  vtrelect_inter(ip)
                vtrewalda(ip) = vtrewalda(ip) + vtrewald(ip)
                vtrorienta(ip) = vtrorienta(ip) + vtrorient(ip)
             enddo         
@@ -476,7 +487,7 @@ c     --- add up rosenbluth weight
             wrig = wrig * bsum
             if (wrig .lt. softlog) then
                lterm = .true.
-               write(6,*) 'RIGFIX OLD REJECTED'
+               write(2,*) 'RIGFIX OLD REJECTED'
                return
             endif
          endif
@@ -571,7 +582,7 @@ c     --- now we must add up energies and record new positions
          enddo
       enddo
 
-c      write(6,*) 'END RIGFIX'
+c      write(2,*) 'END RIGFIX'
         
       return
       end

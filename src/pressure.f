@@ -44,10 +44,12 @@ c *** common blocks ***
       include 'fepsi.inc'
       include 'qqlist.inc'
       include 'nsix.inc'
+      include 'ipswpar.inc'
+      include 'cell.inc'
 
       logical lcoulo,lexplt,lqimol,lqjmol,lij2
       integer ibox,itype
-      integer i,ii,j,jj,ntii,ntjj,ntij,imolty,jmolty,iii,jjj
+      integer i,ii,j,jj,ntii,ntjj,ntij,imolty,jmolty,iii,jjj,k
  
       double precision press,repress,erfunc
 
@@ -55,36 +57,46 @@ c *** common blocks ***
      +                 rcutsq,sr2,sr6,rhosq,corp,rij,rs1,
      +                 sr1,rs2,sr7,rs7,rs6
 
-      double precision surf,pxx,pyy,pzz,rpxx,rpyy,rpzz
+      double precision surf,pxx,pyy,pzz,rpxx,rpyy,rpzz,pxy,pyx
+     &                ,pxz,pzx,pyz,pzy,rpxy,rpyx,rpxz,rpzx,rpyz,rpzy
 
       double precision fxcmi,fycmi,fzcmi,fij,xcmi,ycmi,zcmi,flj
       double precision rcm,rcmsq,rcmi
       double precision rvdwsq,rchgsq,rbcut,qave,
-     &     volsq,epsilon2,sigma2 
+     &     volsq,epsilon2,sigma2,pwell,vol 
 
       dimension lcoulo(numax,numax)
 C --------------------------------------------------------------------
       if ( lpbc ) call setpbc (ibox)
 
-      rvdwsq = rcut * rcut
-      rchgsq = rcutchg(ibox) * rcutchg(ibox)
-
-      if ( rvdwsq .gt. rchgsq .or. lchgall ) then
-         rcutsq = rvdwsq
-         rbcut = rcut
-      else
-         rbcut = rcutchg(ibox)
-         rcutsq = rchgsq
-      endif
+      rcutsq = rcut(ibox) * rcut(ibox)
+      rbcut  = rcut(ibox)
 
       press = 0.0d0
       pxx = 0.0d0
       pyy = 0.0d0
       pzz = 0.0d0
 
+      do i = 1, 3
+         do j = 1, 3
+            pips(i,j) = 0.0d0
+         enddo
+      enddo
+
 C *******************************
 C *** INTERCHAIN INTERACTIONS ***
 C *******************************
+
+      
+
+c      if(LSOLPAR.and.(ibox.eq.2)) then
+c         press= 1.380662d4 * ( ( nchbox(ibox) / beta) -
+c     +     ( press/3.0d0 ) ) /
+c     +     ( boxlx(ibox)*boxly(ibox)*boxlz(ibox) )
+c         surf = 0.0d0
+c         return
+c      endif
+
 
 c --- loop over all chains i 
       do 100 i = 1, nchain - 1
@@ -179,7 +191,7 @@ c --- loop over all beads jj of chain j
 c *** minimum image the pair separations ***
                         if ( lpbc ) call mimage (rxuij,ryuij,rzuij,ibox)
 
-c     write(6,*) 'bead ruij',rxuij,ryuij,rzuij
+c     write(2,*) 'bead ruij',rxuij,ryuij,rzuij
                         
                         rijsq = rxuij*rxuij+ryuij*ryuij+rzuij*rzuij
                         
@@ -202,7 +214,7 @@ c --- compute whether the charged groups will interact & fij
                             
                            if ( ii .eq. iii .and. jj .eq. jjj ) then
 c --- set up the charge-interaction table
-                              if ( rijsq .lt. rchgsq ) then
+                              if ( rijsq .lt. rcutsq ) then
                                  lcoulo(ii,jj) = .true.
                               else
                                  lcoulo(ii,jj) = .false.
@@ -224,14 +236,14 @@ c --- set up the charge-interaction table
                            endif
                         endif
 
-                        if ( rijsq .lt. rvdwsq .or. lijall) then
+                        if ( rijsq .lt. rcutsq .or. lijall) then
                            if ( lexpsix ) then
                               rij = dsqrt(rijsq)
                               fij = fij + (-6.0d0*aexsix(ntij)/(rijsq
      &                             *rijsq*rijsq) + bexsix(ntij)
      &                             *cexsix(ntij)*rij*dexp( cexsix(ntij)
      &				   *rij ))/rijsq
-c                              write(6,*) 'rij,fij,ntij',rij,fij,ntij
+c                              write(2,*) 'rij,fij,ntij',rij,fij,ntij
                            elseif ( lmmff ) then
                               rs2 = rijsq/(sigisq(ntij))
                               rs1 = dsqrt(rs2)
@@ -331,7 +343,7 @@ c --- calculate distance between c-o-m ---
 c *** minimum image the pair separations ***
                   if ( lpbc ) call mimage (rxuij,ryuij,rzuij,ibox)
 
-c                  write(6,*) 'COM  ruij',rxuij,ryuij,rzuij
+c                  write(2,*) 'COM  ruij',rxuij,ryuij,rzuij
 
                   press = press + 
      +                 fxcmi*rxuij + fycmi*ryuij + fzcmi*rzuij
@@ -341,6 +353,12 @@ c * this is correct for the coulombic part and for LJ.  Note sign difference!
                   pxx = pxx - fxcmi*rxuij
                   pyy = pyy - fycmi*ryuij
                   pzz = pzz - fzcmi*rzuij
+                  pips(1,2) = pips(1,2) - rxuij*fycmi
+                  pips(1,3) = pips(1,3) - rxuij*fzcmi
+                  pips(2,1) = pips(2,1) - ryuij*fxcmi
+                  pips(2,3) = pips(2,3) - ryuij*fzcmi
+                  pips(3,1) = pips(3,1) - rzuij*fxcmi
+                  pips(3,2) = pips(3,2) - rzuij*fycmi
                   
                endif
 
@@ -358,16 +376,27 @@ c ################################################################
 c *** Compute the reciprocal space contribution
 c *** by using the thermodynamic definition
 c *** 
-         call recippress(ibox,repress,rpxx,rpyy,rpzz)
+         call recippress(ibox,repress,rpxx,rpyy,rpzz,rpxy,rpyx,rpxz,
+     &                  rpzx,rpyz,rpzy)
          press = press - repress
 
          pxx = pxx + rpxx
          pyy = pyy + rpyy
          pzz = pzz + rpzz
+         pips(1,2) = pips(1,2) + qqfact*rpxy
+         pips(1,3) = pips(1,3) + qqfact*rpxz
+         pips(2,1) = pips(2,1) + qqfact*rpyx
+         pips(2,3) = pips(2,3) + qqfact*rpyz
+         pips(3,1) = pips(3,1) + qqfact*rpzx
+         pips(3,2) = pips(3,2) + qqfact*rpzy
 
       endif
+      pips(1,1) = pxx
+      pips(2,2) = pyy
+      pips(3,3) = pzz
 
-      press = 1.380662d4 * ( ( nchbox(ibox) / beta) -
+      press = 1.380662d4 * ( ( (nchbox(ibox)+ ghost_particles(ibox))
+     +      / beta) -
      +     ( press/3.0d0 ) ) / 
      +     ( boxlx(ibox)*boxly(ibox)*boxlz(ibox) )
 c      write (6,*) ' press' , press
@@ -380,12 +409,16 @@ c----check pressure tail correction
 
       if (ltailc) then
 c --     add tail corrections for the Lennard-Jones energy
+
+c --     Not adding tail correction for the ghost particles
+c --     as they are ideal (no interaction) Neeraj.
+
          volsq = ( boxlx(ibox) * boxly(ibox) * boxlz(ibox) )**2
          do imolty=1, nmolty        
             do jmolty=1, nmolty  
                rhosq = ncmt(ibox,imolty)*ncmt(ibox,jmolty)
      +              / volsq
-               press=press + 1.380662d4 * corp(imolty,jmolty,rhosq)
+               press=press + 1.380662d4 * corp(imolty,jmolty,rhosq,ibox)
             enddo
         enddo
       endif

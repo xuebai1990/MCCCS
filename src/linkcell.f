@@ -42,7 +42,9 @@ c     *** in a molecule
 
       save dcellx,dcelly,dcellz,ncellx,ncelly,ncellz,ncello
       
-c      write(6,*) 'START LINKCELL IINIT=',iinit
+c      write(2,*) 'START LINKCELL IINIT=',iinit
+
+       
 
       if (iinit.eq.1) then
 c     --- we will set up or update our cell sizes
@@ -55,9 +57,9 @@ c * called from monola
          endif
 
 c     --- determine dcell
-c         write(6,*) 'linkcell used',rcut,rintramax
+c         write(2,*) 'linkcell used',rcut,rintramax
 
-         dcellx = rcut + rintramax
+         dcellx = rcut(ibox) + rintramax
          dcelly = dcellx
          dcellz = dcellx
 
@@ -73,24 +75,25 @@ c     --- make dcells larger so each each cell is the same size
          dcellz = boxlz(ibox) / dble(ncellz)
 
 c     --- now reweight ncell one more time
+
          ncellx = anint( boxlx(ibox) / dcellx ) 
          ncelly = anint( boxly(ibox) / dcelly ) 
          ncellz = anint( boxlz(ibox) / dcellz ) 
 
          ncell = ncellx * ncelly * ncellz
-
+ 
          if (ncell .ne. ncello) then
             if (imol .eq. 0) then
-               write(6,*) 'number of linkcells set to',ncell
+               write(2,*) 'number of linkcells set to',ncell
             else
-               write(6,*) 'number of linkcells changed to',ncell
+               write(2,*) 'number of linkcells changed to',ncell
             endif
          endif
 
          ncello = ncell
 
          if (ncell.gt.cmax) then
-            write(6,*) 'ncell,cmax',ncell,cmax
+            write(2,*) 'ncell,cmax',ncell,cmax
             stop 'ncell greater than cmax in linkcell'
          endif
          
@@ -112,8 +115,9 @@ c     --- assign molecules to cells
             
                ic = linkdecode(i,j,k,ncellx,ncelly,ncellz)
 
+
                if (ic.gt.cmax) then
-                  write(6,*) 'ic,cmax',ic,cmax
+                  write(2,*) 'ic,cmax',ic,cmax
                   stop 'ic gt cmax'
                endif
 
@@ -121,7 +125,7 @@ c     --- assign molecules to cells
                nicell(ic) = nicell(ic) + 1
 
                if (nicell(ic).gt.cmaxa) then
-                  write(6,*) 'nicell,cmaxa',nicell(ic)
+                  write(2,*) 'nicell,cmaxa',nicell(ic)
      &                 ,cmaxa
                   stop 'nicell gt cmaxa'
                endif
@@ -225,7 +229,7 @@ c     --- we will determine the cell neighbors
          enddo
       endif
 
-c      write(6,*) 'END LINKCELL IINIT=',iinit
+c      write(2,*) 'END LINKCELL IINIT=',iinit
 
       return
       end

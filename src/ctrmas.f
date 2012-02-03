@@ -137,7 +137,7 @@ c ----- Determine new center of mass for chain i
                szcm(i) = sz
                if ( ldx .or. ldy .or. ldz ) then
                   if ( mtype .eq. 5 ) then
-                     write(6,*) 'sx, sy, sz:',sx,sy,sz
+                     write(2,*) 'sx, sy, sz:',sx,sy,sz
                   endif
                   nxcm2 = sx*hmat(ibox,1)+sy*hmat(ibox,4)
      &                 +sz*hmat(ibox,7)
@@ -243,19 +243,19 @@ c ----- Determine new center of mass for chain i
 
             if( ldx .or. ldy .or. ldz ) then
                if ( (iadjust .ge. iwarn) ) then
-                  if (mtype .eq. 1) write(6,*) 'translational move'
-                  if (mtype .eq. 2) write(6,*) 'rotational move'
-                  if (mtype .eq. 3) write(6,*) 'swap move'
-                  if (mtype .eq. 4) write(6,*) 'switch move'
-                  if (mtype .eq. 5) write(6,*) 'volume move'
-                  if (mtype .eq. 6) write(6,*) 'readdat move'
-                  if (mtype .eq. 7) write(6,*) 'config move'
-                  if (mtype .eq. 8) write(6,*) 'swatch move'
-                  if (mtype .eq. 9) write(6,*) 'energy call'
-                  write(6,*) 'ibox,i,iunit,boxlen',ibox,i,iunit,bx,by,bz
+                  if (mtype .eq. 1) write(2,*) 'translational move'
+                  if (mtype .eq. 2) write(2,*) 'rotational move'
+                  if (mtype .eq. 3) write(2,*) 'swap move'
+                  if (mtype .eq. 4) write(2,*) 'switch move'
+                  if (mtype .eq. 5) write(2,*) 'volume move'
+                  if (mtype .eq. 6) write(2,*) 'readdat move'
+                  if (mtype .eq. 7) write(2,*) 'config move'
+                  if (mtype .eq. 8) write(2,*) 'swatch move'
+                  if (mtype .eq. 9) write(2,*) 'energy call'
+                  write(2,*) 'ibox,i,iunit,boxlen',ibox,i,iunit,bx,by,bz
                   lintbx = .true.
-                  write(6,*) 'nxcm,nycm,nzcm',nxcm,nycm,nzcm
-                  write(6,*) 'dx,dy,dz',dx,dy,dz
+                  write(2,*) 'nxcm,nycm,nzcm',nxcm,nycm,nzcm
+                  write(2,*) 'dx,dy,dz',dx,dy,dz
                   if (iwarn .ne. 0) stop
                endif
                iadjust = iadjust + 1
@@ -280,12 +280,12 @@ c     --- minimum image the ctrmas pair separations ---
                   
                   if ( rijsq .gt. dmaxsq ) dmaxsq = rijsq
                enddo                  
-               rcmu(i) = dsqrt(dmaxsq)+ 1.0d-5
-c               write(6,*) 'rcmu(i)',rcmu(i)
+               rcmu(i) = dsqrt(dmaxsq)+ 1.0d-10
+c               write(2,*) 'rcmu(i)',rcmu(i)
             endif
                   
          else
-            if (.not. lall) write(6,*)'prob with box in ctrmas'
+            if (.not. lall) write(2,*)'prob with box in ctrmas'
          endif
       enddo
 

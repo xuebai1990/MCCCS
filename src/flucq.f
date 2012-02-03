@@ -50,7 +50,8 @@ c    *******************************************************************
      &  ,velectn,velecto,vflucqn,vflucqo
      &  ,dispbig,displit,vintern,vintero,vewaldn,vewaldo
       double precision qion
-
+      double precision velectn_intra,velectn_inter,velecto_intra,
+     &  velecto_inter 
       dimension qion(numax)
       double precision vrecipn,vrecipo,sumr,sumi,arg
       dimension sumr(2),sumi(2)
@@ -64,7 +65,7 @@ c    *******************************************************************
 
 C --------------------------------------------------------------------
 
-c      write(6,*) 'start FLUCQ'
+c      write(2,*) 'start FLUCQ'
 c ***    select a chain at random ***
       dchain  = random()
       do icbu = 1,nmolty
@@ -84,7 +85,7 @@ c         (in box 2 is an ideal gas!)
          endif
          i = dint( dble(ncmt(1,imolty))*random() ) + 1
          i = parbox(i,1,imolty)
-         if ( moltyp(i) .ne. imolty ) write(6,*) 'screwup'
+         if ( moltyp(i) .ne. imolty ) write(2,*) 'screwup'
 
       elseif ( lanes ) then
 
@@ -140,7 +141,7 @@ c     (in box 2 is an ideal gas!)
             endif
             jchain = dint( dble(ncmt(1,imolty))*random() ) + 1
             jchain = parbox(jchain,1,imolty)
-            if ( moltyp(jchain) .ne. imolty ) write(6,*) 'screwup'
+            if ( moltyp(jchain) .ne. imolty ) write(2,*) 'screwup'
 
          elseif ( lanes ) then
 
@@ -419,7 +420,7 @@ c --- use the thermostat temperature instead of real temp
       deltvb = fqbeta * deltv
 
 c      if ( deltv .lt. -100.0d0) then
-c         write(6,*) i,favor(i),deltv
+c         write(2,*) i,favor(i),deltv
 c      endif 
       if ( deltvb .gt. (2.3d0*softcut) ) return
 
@@ -435,7 +436,7 @@ c        accept move
       velectb(ibox)  = velectb(ibox)  + (velectn - velecto)
       vflucqb(ibox)  = vflucqb(ibox) + (vflucqn - vflucqo)
       vinterb(ibox) = vinterb(ibox) + (vintern - vintero)
-c      write(6,*) 'this move has been accepted!!!'
+c      write(2,*) 'this move has been accepted!!!'
       do j = 1,iunit
          qqu(i,j) = qion(j)
          if ( linterqt ) 
@@ -443,15 +444,18 @@ c      write(6,*) 'this move has been accepted!!!'
       enddo
 c --- update the reciprocal-space sum
       if ( lewald ) then
-         if ( ldielect ) then
-            call dipole(ibox,1)
-         endif
          call recip(ibox,vdum,vdum,2)
       endif
 
+      if ( ldielect ) then
+          call dipole(ibox,1)
+      endif
+ 
+
+
       bsflcq(imolty,ibox) = bsflcq(imolty,ibox) + 1.0d0
 
-c      write(6,*) 'end FLUCQ'
+c      write(2,*) 'end FLUCQ'
 
       return
       end

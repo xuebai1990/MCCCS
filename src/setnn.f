@@ -52,7 +52,7 @@ c    *******************************************************************
 
 C -----------------------------------------------------------------------------
  
-      rcnnsq = rcutnn**2
+      rcnnsq = rcutnn(ibox)**2
 
       if ( lpbc ) call setpbc (ibox)
 
@@ -121,13 +121,13 @@ c *** set displacementvectors to zero ***
 1099     continue
 1100  continue
  
-c      write(6,*) '@@@ control setnn @@@'
+c      write(2,*) '@@@ control setnn @@@'
 c      do 2000 i = 1, nchain
-c         write(6,*) 'lnn', i, '   ', (lnn(i,j),j=1,nchain)
+c         write(2,*) 'lnn', i, '   ', (lnn(i,j),j=1,nchain)
 c2000  continue
  
-      write(6,*)
-      write(6,*) 'neighbour table created by SETNN'
+      write(2,*)
+      write(2,*) 'neighbour table created by SETNN'
 
       return
       end

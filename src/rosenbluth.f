@@ -40,6 +40,7 @@ c    *******************************************************************
       include 'rosen.inc' 
       include 'connect.inc'
       include 'fix.inc'
+      include 'ipswpar.inc'
 
 c     --- variables passed to the subroutine
       logical lnew,lterm,lwbef
@@ -47,7 +48,7 @@ c     --- variables passed to the subroutine
 
 c     --- local variables
       
-      logical ovrlap,ltorsion,lfixnow,lfixed
+      logical ovrlap,ltorsion,lfixnow,lfixed,lreturn
 
       integer glist,iuprev,iufrom,ichoi,ntogrow,count
       integer iu,iv,iw,ju,ip,ichtor
@@ -60,10 +61,10 @@ c     --- local variables
 
       double precision vdha,x,y,z,maxlen,vorient,vtorf
      &                ,xaa1,yaa1,zaa1,daa1,xa1a2,ya1a2,za1a2,da1a2
-     &                ,thetac,dot,rbf,bsum,bs,random
+     &                ,thetac,dot,rbf,bsum,bs,random,xcc,ycc,zcc,tcc
       double precision vbbtr,vvibtr,vtorso,wei_vib,wbendv,dist
       double precision bondlen,bendang,phi,phidisp,phinew,thetanew
-      double precision cwtorf,vfbbtr,vphi
+      double precision cwtorf,vfbbtr,vphi,theta,spltor,rm
 
       dimension bondlen(numax),bendang(numax),phi(numax)
      
@@ -79,7 +80,7 @@ c     -- new stuff
 
 c ------------------------------------------------------------------
 
-c      write(6,*) 'start ROSENBLUTH'
+c      write(2,*) 'start ROSENBLUTH'
       lterm = .false.
       cwtorf = 1.0d0
       wei_vib = 1.0d0
@@ -102,6 +103,8 @@ c        --- set total energy of trial configuration to zero ***
          vnewinter = 0.0d0
          vnewelect = 0.0d0
          vnewewald = 0.0d0
+         vipswn = 0.0d0
+         vwellipswn = 0.0d0
       else
 c        --- old conformation
 c        --- set the initial weight of the old configuration to unity ***
@@ -116,6 +119,8 @@ c        --- set total energy of trial configuration to zero ***
          voldinter = 0.0d0
          voldelect = 0.0d0
          voldewald = 0.0d0
+         vipswo = 0.0d0
+         vwellipswo = 0.0d0
       endif
 
 c     --- for rigid molecules
@@ -176,7 +181,6 @@ c        --- set vibration and bending energies for this growth to 0.0
                   do ja = 1, befnum(j)
                      if (iu.eq.ibef(j,ja)) then
 c     --- time to do final crankshaft move
-
                         call safecbmc(3,lnew,i,iw,igrow,imolty
      &                       ,count,x,y,z,vphi,vtorf,wbendv
      &                       ,lterm,movetype)
@@ -209,7 +213,7 @@ c        --- perform the biased selection of bond angles and get lengths
          call geometry(lnew,iw,i,imolty,angstart,iuprev,glist
      &        ,bondlen,bendang,phi,vvibtr,vbbtr,maxlen,wei_bend )
 
-c         write(6,*) 'lnew, wei_bend',lnew,wei_bend
+c         write(2,*) 'lnew, wei_bend',lnew,wei_bend
 
 c     --- for lfixnow check if there are two beads to go
 
@@ -219,6 +223,7 @@ c     --- for lfixnow check if there are two beads to go
                do j = 1, wbefnum
                   if (iu.eq.iwbef(j)) then
 c     --- lets setup for two beads to go
+                     
                      call safecbmc(1,lnew,i,iw,igrow,imolty
      &                    ,count,x,y,z,vphi,vtorf,wbendv
      &                    ,lterm,movetype)
@@ -240,8 +245,11 @@ c        -- select nchoi trial positions based only on torsions
          do ip = 1,ichoi
             ivect = 0
 
+            lreturn = .false.
+ 205        continue
+            
 c           --- set up the cone based on iuprev (could be grown if no prev)
-            if ( growprev(iw) .eq. 0 ) then
+            if ( .not.lreturn.and.growprev(iw) .eq. 0 ) then
 c              --- calculate random vector on the unit sphere for the first bead
                count = 1
                if ( (.not. lnew) .and. ip .eq. 1 ) then
@@ -274,14 +282,15 @@ c                 ---set up the cone
 
                if (lrigid(imolty)) then
                   growprev(iw)=riutry(imolty,iw)+1
+                  lreturn = .true.
                   goto 205
                endif
 
                ltorsion = .false.
-
+               
             else
 c              --- set up the cone based on iuprev and iufrom
- 205           length = distij(iuprev,iufrom)
+               length = distij(iuprev,iufrom)
                xub = xvec(iuprev,iufrom) / length 
                yub = yvec(iuprev,iufrom) / length
                zub = zvec(iuprev,iufrom) / length
@@ -348,7 +357,7 @@ c                       --- jut4 must already exist or we made a big mistake
                            if ( .not. lexist(jut4) )  then
 c * allow regrowth where one torsion may already exist and one may not
                               goto 299
-c                              write(6,*) 'jut4,jut3,jut2,iu',
+c                              write(2,*) 'jut4,jut3,jut2,iu',
 c     &                             jut4,jut3,jut2,iu
 c                              stop 'trouble jut4'
                            endif
@@ -378,9 +387,33 @@ c                       --- calculate lengths of cross products ***
 c                       --- calculate dot product of cross products ***
                            dot = xaa1*xa1a2 + yaa1*ya1a2 + zaa1*za1a2
                            thetac = - (dot / ( daa1 * da1a2 ))
-                       
+                           if (thetac.gt.1.0d0) thetac=1.0d0
+                           if (thetac.lt.-1.0d0) thetac=-1.0d0
+
+c     KEA -- added for extending range to +/- 180
+                           if (L_tor_table) then
+c     *** calculate cross product of cross products ***
+                              xcc = yaa1*za1a2 - zaa1*ya1a2
+                              ycc = zaa1*xa1a2 - xaa1*za1a2
+                              zcc = xaa1*ya1a2 - yaa1*xa1a2
+c     *** calculate scalar triple product ***
+                              tcc = xcc*xvec(jut2,jut3)
+     &                             + ycc*yvec(jut2,jut3)
+     &                             + zcc*zvec(jut2,jut3)
+                              theta = dacos(thetac)
+                              if (tcc .lt. 0.0d0) theta = -theta
+                              if (L_spline) then
+                                 call splint(theta,spltor,jttor)
+                              elseif(L_linear) then
+                                 call lininter(theta,spltor,jttor)
+                              endif
+
 c                       --- add torsion energy to vdha
-                           vdha = vdha + vtorso( thetac, jttor )
+                              vdha = vdha + spltor
+                           else
+c                       --- add torsion energy to vdha
+                              vdha = vdha + vtorso( thetac, jttor )
+                           endif
                         endif
 
 c                     enddo
@@ -423,6 +456,7 @@ c                 --- for safecbmc add extra weight to assure closure
                         if (lwbef) then
 
 c                       --- determine special closing energies
+                           
                            call safecbmc(2,lnew,i,iw,igrow,imolty
      &                          ,count,x,y,z,vphi,vtorf,wbendv
      &                          ,lterm,movetype)
@@ -658,7 +692,7 @@ c                    --- select ip position ---
          else
 c           --- old conformation, update weiold - include wei_bend
             weiold = weiold * bsum * wei_bend * wei_vib
-            if (weiold .lt. softlog) write(6,*) '###old weight too low'
+            if (weiold .lt. softlog) write(2,*) '###old weight too low'
          endif
 
  180     continue
@@ -752,6 +786,8 @@ c           --- update new trial energies
             vnewinter = vnewinter + vtrinter(iwalk)
             vnewelect = vnewelect + vtrelect(iwalk)
             vnewewald = vnewewald + vtrewald(iwalk)
+            vipswn = vipswn+vipswnt(iwalk)
+            vwellipswn = vwellipswn+vwellipswnt(iwalk)
          else
             if (lfixnow) then
                if (lfixed) then
@@ -781,8 +817,9 @@ c            --- update old trail energies
             voldintra = voldintra + vtrintra(1)
             voldinter = voldinter + vtrinter(1)
             voldelect = voldelect + vtrelect(1)
-            
             voldewald = voldewald + vtrewald(1)
+            vipswo = vipswo+vipswot(1)
+            vwellipswo = vwellipswo+vwellipswot(1)
          endif
 
          do count = 1,ntogrow
@@ -854,7 +891,7 @@ c * end of loop over trial units *
 c ********************************
  200  continue
 
-c      write(6,*) 'end ROSENBLUTH'
+c      write(2,*) 'end ROSENBLUTH'
 
 c ------------------------------------------------------------------
 

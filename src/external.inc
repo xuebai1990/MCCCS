@@ -26,9 +26,13 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       integer ntsubst
       integer tau1,tau2
       logical ljoe,lsami,lexzeo,lpsurf,lzgrid,lmuir,lgraphite
-      logical lcorreg
+      logical lslit
+      logical lcorreg,lelect_field
+c  external electric field
+      parameter (lelect_field=.false.)
 c surfaces:
       parameter (ljoe=.false.,lsami=.false.,lmuir=.false.)
+      parameter (lslit = .false.)
       parameter (lpsurf=.false.)
       parameter (lgraphite=.false.)
       parameter (lcorreg = .false.)
@@ -37,9 +41,9 @@ c Graphite surface
 c -- a1, delta are in Angstroms
 c -- rsol [=] 1/A^3
       parameter (a1 = 2.460d0)
-      parameter (delta = 3.35d0)
+      parameter (delta = 3.40d0)
       parameter (ntsubst = 190)
-      parameter (rsol = 0.1139168d0)
+      parameter (rsol = 0.114d0)
 c zeolites: 
       parameter (lexzeo=.false.,lzgrid=.false.)
 c Joe Hautman's parameters are read from standard input:

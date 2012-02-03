@@ -1,5 +1,6 @@
       subroutine sumup( ovrlap, v, vinter,vtail,vintra,vvib,
-     +                  vbend,vtg,vext,velect,vflucq,ibox, lvol)
+     +                  vbend,vtg,vext,velect,vflucq,ibox,lvol)
+                       
 
 c sumup     
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -50,8 +51,12 @@ c *** common blocks ***
       include 'cell.inc'
       include 'nsix.inc'
       include 'peboco.inc'     
+      include 'ipswpar.inc'
+      include 'eepar.inc'
+ckea include for garofalini potential
+      include 'garofalini.inc'
  
-      logical ovrlap, lvol
+      logical ovrlap, lvol 
       logical lexplt,lqimol,lqjmol,lcoulo,lij2,liji,lqchgi,lexclude
       integer i, imolty, ii, j, jmolty, jj, ntii, ntjj, ntij, iunit
      +     , ip1, ip2, ip3,ibox,nmcount,iii,jjj,ip
@@ -61,9 +66,9 @@ c *** common blocks ***
       double precision rcutsq,rminsq,rxui,ryui,rzui,rxuij,ryuij,rzuij
      &       ,rijsq,sr2, sr6, rho, thetac, theta 
      +     ,xaa1, yaa1, zaa1, xa1a2, ya1a2, za1a2, daa1, da1a2, dot
-     +     ,vtorso, dzui, dz3, dz12, rhoz
+     +     ,vtorso, dzui, dz3, dz12, rhoz,xcc,ycc,zcc,tcc,spltor
      +     ,mmff,rij,vrecipsum,erfunc
-     +     ,rvdwsq,rchgsq,rbcut,ninesix
+     +     ,rbcut,ninesix,vwell
 
       double precision sx,sy,sz
 
@@ -76,28 +81,19 @@ c      double precision vtemp
       double precision xvec(numax,numax),yvec(numax,numax)
      +                ,zvec(numax,numax),distij(numax,numax),epsilon2
      +                ,sigma2
-
+      double precision slitpore, v_elect_field
       dimension lcoulo(numax,numax),lexclude(nmax)
 c --------------------------------------------------------------------
       vintera = 0.0d0
       velecta = 0.0d0
 
-c      write(6,*) 'start SUMUP'
+c      write(2,*) 'start SUMUP'
       ovrlap = .false.
 
       if ( lpbc ) call setpbc (ibox)
 
-      rvdwsq = rcut * rcut
-      rchgsq = rcutchg(ibox)*rcutchg(ibox)
-
-c     * rcutsq is not currently used
-      if ( rvdwsq .gt. rchgsq .or. lchgall ) then
-         rcutsq = rvdwsq
-         rbcut = rcut
-      else
-         rcutsq = rchgsq
-         rbcut = rcutchg(ibox) 
-      endif
+      rcutsq = rcut(ibox) * rcut(ibox)
+      rbcut = rcut(ibox)
 
       rminsq = rmin * rmin
 
@@ -111,6 +107,8 @@ c     * rcutsq is not currently used
       vext = 0.0d0
       velect = 0.0d0
       vflucq = 0.0d0
+ckea - 3body garofalini term
+      v3garo = 0.0d0
 
 c *** check the molecule count ***
       nmcount = 0
@@ -121,7 +119,7 @@ c *** check the molecule count ***
          neigh_cnt(i) = 0
       enddo
       if ( nmcount .ne. nchbox(ibox) ) then
-         write(6,*) 'SUMUP: nmcount ne nchbox', nmcount, nchbox
+         write(2,*) 'SUMUP: nmcount ne nchbox', nmcount, nchbox
          stop
       endif
  
@@ -133,7 +131,7 @@ C *******************************
 
 c --- loop over all chains i 
 c --- not if lgrand and ibox =2
-      if (.not.(lgrand.and.ibox.eq.2)) then
+      if (.not.(lgrand.and.(ibox.eq.2))) then
        do 100 i = 1, nchain - 1
  
 c ### check if i is in relevant box ###
@@ -171,93 +169,10 @@ c                     --- check if ctrmas within rcmsq
                       ryuij = ycmi - ycm(j)
                       rzuij = zcmi - zcm(j)
 c                     --- minimum image the ctrmas pair separations
-c                      if ( lpbc ) call mimage ( rxuij,ryuij,rzuij,ibox )
-                      if ( lpbc ) then 
-ccccccccccccccccccccccccccccccccccccc
-                         if (lsolid(ibox) .and. .not. lrect(ibox)) then
-c     ******************
-c     *** Collin's Code:
-c     *** non-rectangular box
-                            sx = rxuij*hmati(ibox,1)+ryuij*hmati(ibox
-     &                           ,4)  +rzuij*hmati(ibox,7)
-                            sy = rxuij*hmati(ibox,2)+ryuij*hmati(ibox
-     &                           ,5)  +rzuij*hmati(ibox,8)
-                            sz = rxuij*hmati(ibox,3)+ryuij*hmati(ibox
-     &                           ,6)  +rzuij*hmati(ibox,9)
-                            
-                            if ( sx .gt. 0.5d0 ) then
-                               sx = sx-1d0
-                            elseif ( sx .lt. -0.5d0 ) then
-                               sx = sx+1d0
-                            endif
-                            if ( sy .gt. 0.5d0 ) then
-                               sy = sy-1d0
-                            elseif ( sy .lt. -0.5d0 ) then
-                               sy = sy+1d0
-                            endif
-                            if ( sz .gt. 0.5d0 ) then
-                               sz = sz-1d0
-                            elseif ( sz .lt. -0.5d0 ) then
-                               sz = sz+1d0
-                            endif
-                            rxuij = sx*hmat(ibox,1)+sy*hmat(ibox,4)+
-     &                           sz*hmat(ibox,7)
-                            ryuij = sx*hmat(ibox,2)+sy*hmat(ibox,5)+
-     &                           sz*hmat(ibox,8)
-                            rzuij = sx*hmat(ibox,3)+sy*hmat(ibox,6)+
-     &                           sz*hmat(ibox,9)
-                            
-                         else
-                            
-                               if ( lpbcx ) then
-                                  if ( lfold ) then
-                                     if ( rxuij .gt. hbx ) then
-                                        rxuij=rxuij-bx
-                                     else
-                                        if (rxuij.lt.-hbx) rxuij=rxuij+
-     &                                       bx
-                                     endif
-                                  else
-                                     rxuij = rxuij - bx*dint(rxuij*bxi+
-     &                                    dsign(0.5d0,rxuij))
-                                  endif
-                               endif
-                               
-                               if ( lpbcy ) then
-                                  if ( lfold ) then
-                                     if ( ryuij .gt. hby ) then
-                                        ryuij=ryuij-by
-                                     else
-                                        if (ryuij.lt.-hby) ryuij=ryuij+
-     &                                       by
-                                     endif
-                                  else
-                                     ryuij = ryuij - by*dint(ryuij*byi+
-     &                                    dsign(0.5d0,ryuij))
-                                  endif
-                               endif
-                               
-                               if ( lpbcz ) then
-                                  if ( lfold ) then
-                                     if (rzuij.gt.hbz) then
-                                        rzuij=rzuij-bz
-                                     else
-                                        if (rzuij.lt.-hbz) rzuij=rzuij+
-     &                                       bz
-                                     endif
-                                  else
-                                     rzuij = rzuij - bz*dint(rzuij*bzi+
-     &                                    dsign(0.5d0,rzuij))
-                                  endif
-                               endif
-                            endif
-                            
-                            
-                         endif
-                         
-cccccccccccccccccccccccccccccccccccc
+                      if ( lpbc ) call mimage ( rxuij,ryuij,rzuij,ibox )
 
                       rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
+                      rij  = dsqrt(rijsq)
                       rcm = rbcut + rcmi + rcmu(j)
                       rcmsq = rcm*rcm
 
@@ -307,134 +222,55 @@ c --- check exclusion table
                             ntij = (ntii+ntjj)/2
                          elseif (lninesix) then
                             ntij = (ntii-1)*nxatom + ntjj
+c KEA garofalini
+                         elseif (lgaro) then
+                            if (ntii.eq.ntjj) then
+                               ntij = ntii
+                            else
+                               ntij = ntii+ntjj+1
+                            endif
                          else
                             ntij = (ntii-1)*nntype + ntjj
                          endif
+                         if (lexpee) rminsq = rminee(ntij)*rminee(ntij)
                          
                          rxuij = rxui - rxu(j,jj)
                          ryuij = ryui - ryu(j,jj)
                          rzuij = rzui - rzu(j,jj)
 c *** minimum image the pair separations ***
-c                         if (lpbc) call mimage (rxuij,ryuij,rzuij,ibox)
-                         if (lpbc) then 
-ccccccccccccccccccccccccccccccccccccc
-                            
-                            if (lsolid(ibox) .and. .not. lrect(ibox))
-     &                           then
-c     ******************
-c     *** Collin's Code:
-c     *** non-rectangular box
-                               sx = rxuij*hmati(ibox,1)+ryuij*hmati(ibox
-     &                              ,4)  +rzuij*hmati(ibox,7)
-                               sy = rxuij*hmati(ibox,2)+ryuij*hmati(ibox
-     &                              ,5)  +rzuij*hmati(ibox,8)
-                               sz = rxuij*hmati(ibox,3)+ryuij*hmati(ibox
-     &                              ,6)  +rzuij*hmati(ibox,9)
-                            
-                               if ( sx .gt. 0.5d0 ) then
-                                  sx = sx-1d0
-                               elseif ( sx .lt. -0.5d0 ) then
-                                  sx = sx+1d0
-                               endif
-                               if ( sy .gt. 0.5d0 ) then
-                                  sy = sy-1d0
-                               elseif ( sy .lt. -0.5d0 ) then
-                                  sy = sy+1d0
-                               endif
-                               if ( sz .gt. 0.5d0 ) then
-                                  sz = sz-1d0
-                               elseif ( sz .lt. -0.5d0 ) then
-                                  sz = sz+1d0
-                               endif
-                               rxuij = sx*hmat(ibox,1)+sy*hmat(ibox,4)+
-     &                              sz*hmat(ibox,7)
-                               ryuij = sx*hmat(ibox,2)+sy*hmat(ibox,5)+
-     &                              sz*hmat(ibox,8)
-                               rzuij = sx*hmat(ibox,3)+sy*hmat(ibox,6)+
-     &                              sz*hmat(ibox,9)
-                               
-                                              
-                            else
-                               
-                               if ( lpbcx ) then
-                                  if ( lfold ) then
-                                     if ( rxuij .gt. hbx ) then
-                                        rxuij=rxuij-bx
-                                     else
-                                        if (rxuij.lt.-hbx) rxuij=rxuij+
-     &                                       bx
-                                     endif
-                                  else
-                                     rxuij = rxuij - bx*dint(rxuij*bxi+
-     &                                    dsign(0.5d0,rxuij))
-                                  endif
-                               endif
-                            
-                               if ( lpbcy ) then
-                                  if ( lfold ) then
-                                     if ( ryuij .gt. hby ) then
-                                        ryuij=ryuij-by
-                                     else
-                                        if (ryuij.lt.-hby) ryuij=ryuij+
-     &                                       by
-                                     endif
-                                  else
-                                     ryuij = ryuij - by*dint(ryuij*byi+
-     &                                    dsign(0.5d0,ryuij))
-                                  endif
-                               endif
-                               
-                               if ( lpbcz ) then
-                                  if ( lfold ) then
-                                     if (rzuij.gt.hbz) then
-                                        rzuij=rzuij-bz
-                                     else
-                                        if (rzuij.lt.-hbz) rzuij=rzuij+
-     &                                       bz
-                                     endif
-                                  else
-                                     rzuij = rzuij - bz*dint(rzuij*bzi+
-     &                                    dsign(0.5d0,rzuij))
-                                  endif
-                               endif
-                            endif
-                            
-                            
-                         endif
-
-
-cccccccccccccccccccccccccccccccccccc
+                         if (lpbc) call mimage (rxuij,ryuij,rzuij,ibox)
 
                          rijsq = (rxuij*rxuij)+(ryuij*ryuij)
      &                        + (rzuij*rzuij)
+                         rij   = dsqrt(rijsq)
                          
 c                           if ( i .eq. 12 .and. ii .eq. 6 .and.
 c     &                        j .eq. 95 .and. jj .eq. 1 ) then
-c                           write(6,*) 'CONTROL CONTROL CONTROL'
-c                           write(6,*) 'box',ibox,nboxi(i),nboxi(j)
-c                           write(6,*) 'i xyz',rxui,ryui,rzui
-c                           write(6,*) 'j xyz',rxu(j,jj),ryu(j,jj),
+c                           write(2,*) 'CONTROL CONTROL CONTROL'
+c                           write(2,*) 'box',ibox,nboxi(i),nboxi(j)
+c                           write(2,*) 'i xyz',rxui,ryui,rzui
+c                           write(2,*) 'j xyz',rxu(j,jj),ryu(j,jj),
 c     &                          rzu(j,jj)
-c                           write(6,*) 'r*uij',rxuij,ryuij,rzuij
-c                           write(6,*) 'dist2',rijsq
-c                           write(6,*) 'distance', dsqrt(rijsq)
+c                           write(2,*) 'r*uij',rxuij,ryuij,rzuij
+c                           write(2,*) 'dist2',rijsq
+c                           write(2,*) 'distance', dsqrt(rijsq)
 c                        endif
 
                          if ( rijsq .lt. rminsq .and. .not.
      &                        (lexpand(imolty) .or. 
      &                        lexpand(jmolty))) then
                             if ( .not. lvol ) then
-                               write(6,*) 'overlap inter'
-                               write(6,*) 'rijsq rminsq', rijsq, rminsq
-                               write(6,*) 'i ii', i, ii
-                               write(6,*) 'i-pos', rxui,ryui,rzui
-                               write(6,*) 'j jj', j, jj
-                               write(6,*) 'j-pos', 
+                               write(2,*) 'overlap inter'
+                               write(2,*) 'rijsq rminsq', rijsq, rminsq
+                               write(2,*) 'i ii', i, ii
+                               write(2,*) 'i-pos', rxui,ryui,rzui
+                               write(2,*) 'j jj', j, jj
+                               write(2,*) 'j-pos', 
      &                              rxu(j,jj),ryu(j,jj),rzu(j,jj)
                             endif
                             ovrlap = .true.
                             return
-                         elseif ( rijsq .lt. rvdwsq .or. lijall) then
+                         elseif ( rijsq .lt. rcutsq .or. lijall) then
                             if (llj.and.(.not.(lexpand(imolty).or.
      &                           lexpand(jmolty)))) then
                                if ( lij(ntii) .and. lij(ntjj) ) then
@@ -456,6 +292,13 @@ c                        endif
                                vinter = vinter + ljmuir(rijsq,ntij)
                             elseif ( lpsurf ) then
                                vinter = vinter + ljpsur(rijsq,ntij)
+c KEA garofalini potential
+                            elseif ( lgaro) then
+                               vinter = vinter + garofalini(rijsq,ntij
+     &                              ,qqu(i,ii),qqu(j,jj),i,j)
+                               if(lshift) then
+                                  vintera = vintera-ecut(ntij)
+                               endif
                             else if (lshift) then
                                sr2 = sig2ij(ntij) / rijsq
                                sr6 = sr2 * sr2 * sr2
@@ -528,56 +371,52 @@ c *** TIP-4P structure (temperary use ???)
                                   vinter = vinter 
      &                                 + sr6*(sr6-1.0d0)*epsilon2
                                endif
-                               
                             endif
-
                          endif
 
-                         if ( lchgall.and. lqchg(ntii) 
+! charge interactions
+ckea - skip for garofalini; included in vinter
+                         if(lgaro) then
+                         elseif ( lchgall.and. lqchg(ntii) 
      &                        .and. lqchg(ntjj)) then
                             if ( lewald ) then
                                velect = velect + qqu(i,ii)*qqu(j,jj)*
-     &                              erfunc(calp(ibox)*dsqrt(rijsq))/
-     &                              dsqrt(rijsq)
-
+     &                              erfunc(calp(ibox)*rij)/
+     &                              rij
                             else
                                velect = velect + qqu(i,ii)*qqu(j,jj)/
-     &                              dsqrt(rijsq)
+     &                              rij
                             endif
-                         
                          elseif ( lqimol .and. lqjmol .and. 
      &                           lqchgi .and. lqchg(ntjj) ) then
 
-c --- All-Atom charges (charge-group look-up table)
-
-                            iii = leaderq(imolty,ii)
-                            jjj = leaderq(jmolty,jj)
-
-                            if ( iii .eq. ii .and. jjj .eq. jj )then
-c --- set up the table
-                               if ( rijsq .lt. rchgsq ) then
-                                  lcoulo(iii,jjj) = .true.
-                               else
-                                  lcoulo(iii,jjj) = .false.
-                               endif
-                            endif
-
-                            if ( lcoulo(iii,jjj) ) then
-                               if ( lewald ) then
-
+                            if (lewald) then               
+                               if (rijsq.lt.rcutsq) then
                                   velect = velect + qqu(i,ii)*
-     &                                 qqu(j,jj)*erfunc(calp(ibox)*
-     &                                 dsqrt(rijsq))/dsqrt(rijsq)
-                                  
-                               else
-
-                                  velect = velect + qqu(i,ii)
-     &                                 *qqu(j,jj)/dsqrt(rijsq)
+     &                                  qqu(j,jj)*erfunc(calp(ibox)*
+     &                                 rij)/rij
                                endif
+                            else
+c --- All-Atom charges (charge-group look-up table)
+                              iii = leaderq(imolty,ii)
+                              jjj = leaderq(jmolty,jj)
+                              if ( iii .eq. ii .and. jjj .eq. jj )then
+c --- set up the table
+                                if ( rijsq .lt. rcutsq ) then
+                                   lcoulo(iii,jjj) = .true.
+                                else
+                                   lcoulo(iii,jjj) = .false.
+                                endif
+                              endif
+                              if ( lcoulo(iii,jjj) ) then
+                                  velect = velect + qqu(i,ii)
+     &                                 *qqu(j,jj)/rij
+                              endif
                             endif
-                            
                          endif
-                         
+
+! End inter-charge loop
+
                          if ( lneighbor .and. ii .eq. 1 .and. 
      &                        jj .eq. 1 .and. rijsq .lt. rbsmax**2 
      &                        .and. rijsq .gt. rbsmin**2 ) then
@@ -590,10 +429,28 @@ c                            neighbor(neigh_cnt(j,imolty),j,imolty)=i
                             neighbor(neigh_cnt(i),i)=j
                             neigh_cnt(j)=neigh_cnt(j)+1
                             neighbor(neigh_cnt(j),j)=i
+                         elseif(lgaro) then
+                            if((ntij.eq.4.and.rijsq.lt.grijsq(2,1)).or.
+     &                           (ntij.eq.6.and.rijsq.lt.grijsq(3,1)))
+     &                           then
+                               write(64,*) 'neighbor',i,' (',
+     &                              neigh_cnt(i)+1,')',j,' (',
+     &                              neigh_cnt(j)+1,')'
+                               neigh_cnt(i)=neigh_cnt(i)+1
+                               neighbor(neigh_cnt(i),i)=j
+                               neigh_cnt(j)=neigh_cnt(j)+1
+                               neighbor(neigh_cnt(j),j)=i
+                               ndij(neigh_cnt(i),i) = rij
+                             ndij(neigh_cnt(j),j) = ndij(neigh_cnt(i),i)
+                               nxij(neigh_cnt(i),i) = rxuij
+                               nyij(neigh_cnt(i),i) = ryuij
+                               nzij(neigh_cnt(i),i) = rzuij
+                               nxij(neigh_cnt(j),j) = -rxuij
+                               nyij(neigh_cnt(j),j) = -ryuij
+                               nzij(neigh_cnt(j),j) = -rzuij
+                            endif
                          endif
-                         
  97                   continue
-
                    enddo
                 endif
  99          continue
@@ -601,18 +458,22 @@ c                            neighbor(neigh_cnt(j,imolty),j,imolty)=i
 
  100   continue
        if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff 
-     &      .and. .not. lninesix ) then 
+     &      .and. .not. lninesix .and..not.lgaro) then 
               vinter = 4.0d0 * vinter
        endif
-c       write(6,*) 'ltailc',ltailc
+
+c KEA garofalini 3 body potential
+         if (lgaro) then
+            call triad
+            call vthreebody(v3garo)
+         endif
+
+
+c       write(2,*) 'ltailc',ltailc
        if (ltailc) then
 c--     add tail corrections for the Lennard-Jones energy
           if ( lsolid(ibox) .and. .not. lrect(ibox) ) then
-             vol = (hmat(ibox,1) * (hmat(ibox,5) * hmat(ibox,9) -
-     &            hmat(ibox,8) * hmat(ibox,6)) + hmat(ibox,4)
-     &            * (hmat(ibox,8) * hmat(ibox,3) - hmat(ibox,2)
-     &            * hmat(ibox,9)) + hmat(ibox,7) * (hmat(ibox,2)
-     &            * hmat(ibox,6) - hmat(ibox,5)*hmat(ibox,3)))
+             vol = cell_vol(ibox)
           else
              vol = boxlx(ibox)*boxly(ibox)*boxlz(ibox)
           endif
@@ -622,43 +483,42 @@ c                rho = ncmt(ibox,jmolty) /
 c     &               ( boxlx(ibox)*boxly(ibox)*boxlz(ibox) )
                 rho = ncmt(ibox,jmolty) / vol
                 vtail = vtail + 
-     &               ncmt(ibox,imolty) * coru(imolty,jmolty,rho)
-c                write(6,*) 'vtail',vtail
+     &               ncmt(ibox,imolty) * coru(imolty,jmolty,rho,ibox)
+c                write(2,*) 'vtail',vtail
              enddo
           enddo
 c-----
+  
           vinter = vinter + vtail
 c----
        endif
       endif
 
-c$$$      write(6,*)
-c$$$      write(6,*) '+++++++'
+c$$$      write(2,*)
+c$$$      write(2,*) '+++++++'
 c$$$      vtemp = velect
-c$$$      write(6,*) 'direct space part:',velect*qqfact
+c$$$      write(2,*) 'direct space part:',velect*qqfact
+
+      if ( ldielect ) then
+           call dipole(ibox,0)
+      endif
 
       if ( lewald ) then
          call recipsum(ibox,vrecipsum)
 c---- update self terms and correction terms
-c         sself = 0.0d0
-c         correct = 0.0d0
+         sself = 0.0d0
+         correct = 0.0d0
 c * combine to reduce numerical error
-         vsc = 0.0d0
-         if ( ldielect ) then
-            call dipole(ibox,0)
-         endif
+c         vsc = 0.0d0
          do i = 1,nchain
             if (nboxi(i) .eq. ibox) then
                imolty = moltyp(i)
                do ii = 1,nunit(imolty)
-c * correct but numerically inprecise
-c                  sself = sself + qqu(i,ii)*qqu(i,ii)
+                  sself = sself + qqu(i,ii)*qqu(i,ii)
 c * 1.772.. is the square root of pi
-                  vsc = vsc - qqu(i,ii)*qqu(i,ii)*
-     &                 calp(ibox)/1.772453851d0
-
+c                  vsc = vsc - qqu(i,ii)*qqu(i,ii)*
+c     &                 calp(ibox)/1.772453851d0
                   do jj = ii+1,nunit(imolty)
-
 c * correct should only be calculated if ii and jj should NOT interact,
 c * so only calculating it if lqinclu is false
 c                    * this part is 1,2 and 1,3
@@ -668,26 +528,23 @@ c                    * this part is 1,2 and 1,3
                         rzuij = rzu(i,ii) - rzu(i,jj)
                         rij = dsqrt(rxuij*rxuij + ryuij*ryuij + 
      &                       rzuij*rzuij)
-c                        correct = correct + qqu(i,ii)*qqu(i,jj)*
+                        correct = correct + qqu(i,ii)*qqu(i,jj)*
+     &                            (erfunc(calp(ibox)*rij)-1.0d0)/rij
+c                        vsc = vsc + qqu(i,ii)*qqu(i,jj)*
 c     &                       (erfunc(calp(ibox)*rij)-1.0d0)/rij
-                        vsc = vsc + qqu(i,ii)*qqu(i,jj)*
-     &                       (erfunc(calp(ibox)*rij)-1.0d0)/rij
-
-c                    * this part is 1,4 which we want to scale by qscale
-c                    * qscale = 0 means no 1,4 charge interaction
-                     elseif (lqinclu(imolty,ii,jj) .and. 
-     &                       (.not. linclu(imolty,ii,jj))) then
+                     elseif (lqinclu(imolty,ii,jj)) then
                         rxuij = rxu(i,ii) - rxu(i,jj)
                         ryuij = ryu(i,ii) - ryu(i,jj)
                         rzuij = rzu(i,ii) - rzu(i,jj)
                         rij = dsqrt(rxuij*rxuij + ryuij*ryuij + 
      &                       rzuij*rzuij)
-c                        correct = correct + 
-c     &                       (1.0d0 - qscale)*qqu(i,ii)*qqu(i,jj)*
+                        correct=correct+(1.0d0 - qscale2(imolty,ii,jj))
+     &                           *qqu(i,ii)*qqu(i,jj)*
+     &                           (erfunc(calp(ibox)*rij)-1.0d0)/rij
+c                        vsc = vsc +
+c     &                       (1.0d0 - qscale2(imolty,ii,jj))*qqu(i,ii)
+c     *                             *qqu(i,jj)*
 c     &                       (erfunc(calp(ibox)*rij)-1.0d0)/rij
-                        vsc = vsc + 
-     &                       (1.0d0 - qscale)*qqu(i,ii)*qqu(i,jj)*
-     &                       (erfunc(calp(ibox)*rij)-1.0d0)/rij
                      endif
                   enddo
                enddo
@@ -696,20 +553,20 @@ c     &                       (erfunc(calp(ibox)*rij)-1.0d0)/rij
 c            vdipole = (dipolex*dipolex+dipoley*dipoley+
 c     &           dipolez*dipolez)*(2.0d0*onepi)/(3.0d0*
 c     &           boxlx(ibox)**3.0d0)
-c            write(6,*) dipolex,dipoley,dipolez
+c            write(2,*) dipolex,dipoley,dipolez
 
-c * old correct way but numerically inprecise
-c         sself = -sself*calp(ibox)/dsqrt(onepi)
-c         velect = velect + sself + correct + vrecipsum/qqfact
-         velect = velect + vsc + vrecipsum/qqfact
+         sself = -sself*calp(ibox)/dsqrt(onepi)
+         velect = velect + sself + correct + vrecipsum/qqfact
+
+C         velect = velect + vsc + vrecipsum/qqfact
 
       endif
 
 c$$$c at this point velect contains all intermolecular charge interactions,
 c$$$c plus the ewald self term and intramolecular corrections 
 c$$$
-c       write(6,*)
-c       write(6,*) '== After Inter === velect is:',velect*qqfact
+c       write(2,*)
+c       write(2,*) '== After Inter === velect is:',velect*qqfact
 c$$$
 c$$$       vtemp = velect
 
@@ -721,25 +578,25 @@ c * have to recalculate ewald terms if volume changes
 C *******************************
 C *** INTRACHAIN INTERACTIONS ***
 C *******************************
-c         write(6,*) 'starting intrachain'
+c         write(2,*) 'starting intrachain'
 c --- loop over all chains i 
-c         write(6,*) 'nchain',nchain
+c         write(2,*) 'nchain',nchain
          do i = 1, nchain
 
 c            lcoulo(1,5) = .false.
 
 
 c ### check if i is in relevant box ###
-c          write(6,*) 'nboxi(i),i,ibox',nboxi(i),i,ibox
+c          write(2,*) 'nboxi(i),i,ibox',nboxi(i),i,ibox
             if ( nboxi(i) .eq. ibox ) then
 
                imolty = moltyp(i)
-c             write(6,*) 'imolty',imolty
+c             write(2,*) 'imolty',imolty
 
-c             write(6,*) 'nunit(imolty)',nunit(imolty)
+c             write(2,*) 'nunit(imolty)',nunit(imolty)
                do ii = 1, nunit(imolty)-1
 
-c                write(6,*) 'ntype(imolty,ii),ii',ntype(imolty,ii),ii
+c                write(2,*) 'ntype(imolty,ii),ii',ntype(imolty,ii),ii
 
                   ntii = ntype(imolty,ii)
 
@@ -753,7 +610,7 @@ c                write(6,*) 'ntype(imolty,ii),ii',ntype(imolty,ii),ii
      &                  lqinclu(imolty,ii,jj)) then
 
                       ntjj = ntype(imolty,jj)
-c                    write(6,*) 'sumup interaction',ii,jj
+c                    write(2,*) 'sumup interaction',ii,jj
                       if (lexpsix .or. lmmff) then
                          ntij = (ntii+ntjj)/2
                       elseif (lninesix) then
@@ -761,29 +618,30 @@ c                    write(6,*) 'sumup interaction',ii,jj
                       else
                          ntij = (ntii-1)*nntype + ntjj
                       endif
+                      if (lexpee) rminsq = rminee(ntij)*rminee(ntij)
 
                       rxuij = rxu(i,ii) - rxu(i,jj)
                       ryuij = ryu(i,ii) - ryu(i,jj)
                       rzuij = rzu(i,ii) - rzu(i,jj)
 
                       rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-                     
+                      rij  = dsqrt(rijsq) 
                       if (linclu(imolty,ii,jj)) then
 
                        if ( rijsq .lt. rminsq .and. 
      &                      .not. lexpand(imolty)) then
                           if ( .not. lvol ) then
-                             write(6,*) 'overlap intra'
-                             write(6,*) 'rijsq rminsq', rijsq, rminsq
-                             write(6,*) 'i ii', i, ii
-                             write(6,*) 'i-pos', rxui,ryui,rzui
-                             write(6,*) 'jj', jj
-                             write(6,*) 'j-pos'
+                             write(2,*) 'overlap intra'
+                             write(2,*) 'rijsq rminsq', rijsq, rminsq
+                             write(2,*) 'i ii', i, ii
+                             write(2,*) 'i-pos', rxui,ryui,rzui
+                             write(2,*) 'jj', jj
+                             write(2,*) 'j-pos'
      +                             ,rxu(i,jj),ryu(i,jj),rzu(i,jj)
                           endif
                           ovrlap = .true.
                           return
-                       elseif ( rijsq .lt. rvdwsq .or. lijall) then
+                       elseif ( rijsq .lt. rcutsq .or. lijall) then
                         
                           if (llj.and.(.not.(lexpand(imolty)
      &                         ))) then
@@ -792,6 +650,7 @@ c                    write(6,*) 'sumup interaction',ii,jj
                              sr6 = sr2 * sr2 * sr2
                              vintra = vintra 
      &                            + sr6*(sr6-1.0d0)*epsilon2
+     &				    *ljscale(imolty,ii,jj)
                              
                              if (lainclu(imolty,ii,jj)) then
                                 vintra = vintra + 0.25d0 * 
@@ -815,7 +674,8 @@ c                    write(6,*) 'sumup interaction',ii,jj
                              sr2 = sig2ij(ntij) / rijsq
                              sr6 = sr2 * sr2 * sr2
                              vintra = vintra + 
-     +                           sr6*(sr6-1.0d0)*epsij(ntij)-ecut(ntij) 
+     +                       (sr6*(sr6-1.0d0)*epsij(ntij)-ecut(ntij))
+     +				  *ljscale(imolty,ii,jj) 
                           else
                              if ( lexpand(imolty) ) then
                                 sigma2=(sigma(imolty,ii)+
@@ -829,7 +689,7 @@ c                    write(6,*) 'sumup interaction',ii,jj
                              endif
                              sr6 = sr2 * sr2 * sr2
                              vintra = vintra + sr6*(sr6-1.0d0)
-     &                            *epsilon2
+     &                            *epsilon2*ljscale(imolty,ii,jj)
 
 c * OH 1-5 interaction
                              if (lainclu(imolty,ii,jj)) then
@@ -844,108 +704,60 @@ c * OH 1-5 interaction
                       endif
 
 c * calculate intramolecular charge interaction
+
                       if ( lchgall .and. lqchg(ntii)
      &                     .and. lqchg(ntjj)) then
-                         if ( lewald ) then
-
-                            if (lqinclu(imolty,ii,jj)) then
-c                               write(6,*) 'sumup including ii,jj:',ii,jj
-c     &                              ,qqfact*qqu(i,ii)*qqu(i,jj)*
-c     &                              erfunc(calp(ibox)*dsqrt(rijsq))/
-c     &                              dsqrt(rijsq)
-
-c                              * 1,5 and beyond, full interaction
-                               if (linclu(imolty,ii,jj)) then
-                                  velect = velect + qqu(i,ii)*qqu(i,jj)*
-     &                                 erfunc(calp(ibox)*dsqrt(rijsq))/
-     &                                 dsqrt(rijsq)
-c                              * 1,4 which we scale by qscale
-                               else
-                                  velect = velect + qscale*qqu(i,ii)*
-     &                                 qqu(i,jj)*erfunc(calp(ibox)*
-     &                                 dsqrt(rijsq))/dsqrt(rijsq)
-                               endif
-                            endif
-
-                         else
-
-                            if (lqinclu(imolty,ii,jj)) then
-c                              * 1,5 and beyond, full interaction
-                               if (linclu(imolty,ii,jj)) then
-                                  velect = velect + qqu(i,ii)*qqu(i,jj)/
-     &                                 dsqrt(rijsq)
-                               else
-c                              * 1,4 which we scale by qscale
-                                  velect = velect + qscale*qqu(i,ii)*
-     &                                 qqu(i,jj)/dsqrt(rijsq)
-                               endif
-                            endif
-
+                         if (lqinclu(imolty,ii,jj)) then
+                             if ( lewald ) then
+                                 velect = velect + qscale2(imolty,ii,jj)
+     &                                   * qqu(i,ii)*qqu(i,jj)*
+     &                                 erfunc(calp(ibox)*rij)/
+     &                                 rij
+                             else
+                                  velect = velect + 
+     &                              qscale2(imolty,ii,jj)*qqu(i,ii)*
+     &                                 qqu(i,jj)/rij
+                             endif
                          endif
-
+ 
                       elseif ( lelect(imolty) .and.
      &                        (lqchg(ntii) .and. lqchg(ntjj)) ) then
-
+                         if (lewald) then
+                             if (lqinclu(imolty,ii,jj).and.
+     &                            (rijsq.lt.rcutsq)) then
+                                 velect = velect +
+     &                              qscale2(imolty,ii,jj)*qqu(i,ii)*
+     &                              qqu(i,jj)*erfunc(calp(ibox)*
+     &                              rij)/rij
+                             endif 
+                         else
 c --- All-Atom charges (charge-group look-up table)
-                         iii = leaderq(imolty,ii)
-                         jjj = leaderq(imolty,jj)
-
-                         if ( iii .eq. ii .and. jjj .eq. jj ) then
+                            iii = leaderq(imolty,ii)
+                            jjj = leaderq(imolty,jj)
+                            if ( iii .eq. ii .and. jjj .eq. jj ) then
 c --- set up the table for neutral groups
-                            if ( rijsq .lt. rchgsq ) then
-                               lcoulo(iii,jjj) = .true.
-                            else
-                               lcoulo(iii,jjj) = .false.
-                            endif
-                         endif
-
-c *** set up table for neighboring groups- make sure they interact when 
-c *** leaderqs are only 2 bonds apart.
-                         if (.not. lqinclu(imolty,iii,jjj)) then
-                            lcoulo(iii,jjj)  = .true.
-                         endif
-
-c                         if (ibox .eq. 2) then
-c                            write(6,*) 'ii,iii,jj,jjj',ii,iii,jj,jjj,
-c     &                           lcoulo(iii,jjj),dsqrt(rijsq),
-c     &                           dsqrt(rchgsq)
-c                         endif
-
-                         if ( lcoulo(iii,jjj) ) then
-
-                            if (lqinclu(imolty,ii,jj)) then
-                               if (linclu(imolty,ii,jj)) then
-c                              * 1,5 and beyond, full interaction 
-                                  if ( lewald ) then
-                                     velect = velect + qqu(i,ii)*
-     &                                    qqu(i,jj)*erfunc(calp(ibox)*
-     &                                    dsqrt(rijsq))/dsqrt(rijsq)
-                                  else
-                                     velect = velect + qqu(i,ii)
-     &                                    *qqu(i,jj)/dsqrt(rijsq)
-                                  endif
+                               if ( rijsq .lt. rcutsq ) then
+                                  lcoulo(iii,jjj) = .true.
                                else
-c                              * 1,4 which we scale by qscale
-                                  if ( lewald ) then
-                                     velect = velect + qscale*qqu(i,ii)*
-     &                                    qqu(i,jj)*erfunc(calp(ibox)*
-     &                                    dsqrt(rijsq))/dsqrt(rijsq)
-                                  else
-                                     velect = velect + qscale*qqu(i,ii)
-     &                                    *qqu(i,jj)/dsqrt(rijsq)
-                                  endif
+                                  lcoulo(iii,jjj) = .false.
                                endif
                             endif
-
+c *** set up table for neighboring groups- make sure they interact when 
+c *** leaderqs are only 2 bonds apart.
+                            if (.not. lqinclu(imolty,iii,jjj)) then
+                               lcoulo(iii,jjj)  = .true.
+                            endif
+                            if ( lcoulo(iii,jjj) ) then
+                               if (lqinclu(imolty,ii,jj)) then
+                                    velect = velect + 
+     &                               qscale2(imolty,ii,jj)*qqu(i,ii)
+     &                               *qqu(i,jj)/rij
+                               endif
+                            endif
                          endif
-
                       endif
-c end intramolecular charge interaction
-c                        write(6,*) 'rijsq',rijsq,ii,jj,
-c     &                     epsij(ntij),sig2ij(ntij)
-c                        write(6,*) 'intra',sr6*(sr6-1.0d0)*epsij(ntij)
-c     &                       ,'vintra',vintra
                    endif
+c end intramolecular charge
                 enddo
              enddo
           endif
@@ -953,11 +765,11 @@ c     &                       ,'vintra',vintra
 
 c$$$       vtemp = velect - vtemp
 c$$$
-c$$$c       write(6,*) '== Intra Velect ===',vtemp*qqfact
-c$$$c       write(6,*) '== After Intra  === velect is:',velect*qqfact
+c$$$c       write(2,*) '== Intra Velect ===',vtemp*qqfact
+c$$$c       write(2,*) '== After Intra  === velect is:',velect*qqfact
 
        if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff 
-     &      .and. .not. lninesix ) then
+     &      .and. .not. lninesix .and..not.lgaro) then
                vintra = 4.0d0 * vintra
        endif
  
@@ -1041,7 +853,7 @@ c                  --- account for explct atoms in opposite direction
              enddo
             
 c - stretching -
-             if ( brvibk(1) .gt. 0.01d0 .or. lninesix) then
+c             if ( brvibk(1) .gt. 0.01d0 .or. lninesix) then
                 do j = 2, nunit(imolty)
                    do jjvib = 1, invib(imolty,j)
                       ip1 = ijvib(imolty,j,jjvib)
@@ -1050,11 +862,11 @@ c - stretching -
      +             brvibk(it) * ( distij(ip1,j) - brvib(it) )**2
                    enddo
                 enddo
-             endif
+c             endif
 
 c - bending -
 c ### molecule with bond bending 
-             do j = 3, nunit(imolty)
+             do j = 2, nunit(imolty)
                 do jjben = 1, inben(imolty,j)
                    ip2 = ijben3(imolty,j,jjben)
                    if ( ip2 .lt. j ) then
@@ -1071,8 +883,8 @@ c ### molecule with bond bending
                       vbend = vbend + 
      +                     brbenk(it) * (theta-brben(it))**2
 
-c                      write(6,*) 'ip2,ip1,j',ip2,ip1,j
-c                      write(6,*) 'bend energy, theta '
+c                      write(2,*) 'ip2,ip1,j',ip2,ip1,j
+c                      write(2,*) 'bend energy, theta '
 c     &                     ,brbenk(it) * (theta-brben(it))**2,theta
                    endif
                 enddo
@@ -1080,7 +892,7 @@ c     &                     ,brbenk(it) * (theta-brben(it))**2,theta
 
 c - torsions -
 c ### molecule with dihedral potenials ###
-             do j = 4, nunit(imolty)
+             do j = 2, nunit(imolty)
                 do jjtor = 1, intor(imolty,j)
                    ip3 = ijtor4(imolty,j,jjtor)
                    if ( ip3 .lt. j ) then
@@ -1107,8 +919,33 @@ c *** calculate dot product of cross products ***
                       dot = xaa1*xa1a2 + yaa1*ya1a2 + zaa1*za1a2
                       thetac = - dot / ( daa1 * da1a2 )
 
-                      vtg = vtg + vtorso( thetac, it )
-c                      write(6,*) 'vtg:',vtg,it
+                      if (thetac.gt.1.0d0) thetac=1.0d0
+                      if (thetac.lt.-1.0d0) thetac=-1.0d0
+c     KEA -- added for extending range to +/- 180
+c     and for asymmetric potentials
+                      if (L_tor_table) then
+c     *** calculate cross product of cross products ***
+                         xcc = yaa1*za1a2 - zaa1*ya1a2
+                         ycc = zaa1*xa1a2 - xaa1*za1a2
+                         zcc = xaa1*ya1a2 - yaa1*xa1a2
+c     *** calculate scalar triple product ***
+                         tcc = xcc*xvec(ip1,ip2) + ycc*yvec(ip1,ip2)
+     &                        + zcc*zvec(ip1,ip2)
+                         theta = dacos (thetac)
+
+                         if (tcc .lt. 0.0d0) theta = -theta
+                         if (L_spline) then
+                            call splint(theta,spltor,it)
+                         elseif(L_linear) then
+                            call lininter(theta,spltor,it)
+                         endif
+
+                         vtg = vtg+spltor
+                      else
+c                     write(6,*) 'vtorso',
+c     &                        dacos(thetac)*raddeg,vtorso(thetac,it)
+                         vtg = vtg + vtorso( thetac, it )
+                      endif
                    endif
                 enddo
              enddo
@@ -1124,8 +961,11 @@ C ***************************************************************
  
 c --- not if lgrand and ibox =2
 c      if (.not.(lgrand.and.ibox.eq.2)) then
+c --- for adsorption isotherms, don't calculate energy w/surface
+c --- in box 2
+      if ( .not. (lslit.and.ibox.eq.2)) then
       if ( ljoe .or. lsami .or. lmuir .or. 
-     +               lexzeo .or. lgraphite ) then
+     +               lexzeo .or. lgraphite .or. lslit ) then
          do i = 1, nchain
 
 c ### check if i is in relevant box ###
@@ -1145,10 +985,19 @@ c ### check if i is in relevant box ###
                      endif
                   endif
 		  
+		  if (lslit) then
+	             ntij = (ntj-1)*nntype + ntsubst
+c -- calculate interaction with surface at the bottom of the box		  		  
+		     vext = vext + slitpore(rzu(i,j),ntij)
+c -- calculate interaction with the surface at the top of the box
+		     dzui = boxlz(ibox)-rzu(i,j)
+		     vext = vext +slitpore(dzui,ntij)
+	          endif  
+		  
 		  if( lgraphite ) then
 			ntij = (ntj-1)*nntype + ntsubst
-c			vext = vext + exgrph(rxu(i,j),ryu(i,j),
-c     &				      rzu(i,j),ntij)
+			vext = vext + exgrph(rxu(i,j),ryu(i,j),
+     &				      rzu(i,j),ntij)
 	       	  endif
 
                   if ( lsami ) 
@@ -1161,51 +1010,132 @@ c     &				      rzu(i,j),ntij)
                enddo
             endif
          enddo
-c      endif
+      endif
       if (ltailc .and. lexzeo) then
 c     ---    add tailcorrections for the zeolite
          rhoz=nzeo/(zeorx*zeory*zeorz)
-         vext=vext+nchbox(ibox)*coruz(iunit,rhoz)
+         vext=vext+nchbox(ibox)*coruz(iunit,rhoz,ibox)
       endif
       endif
+
+c **********************************************************************
+c *** calculation of interaction energy with external electric field ***
+c *** added 06/24/07 by KM
+c **********************************************************************
+
+      if (lelect_field) then
+         do i = 1, nchain
+           if(lelect(moltyp(i))) then
+              do j = 1,nunit(moltyp(i)) 
+                 vext = vext + v_elect_field(i,j,rzu(i,j))
+              enddo
+           endif 
+         enddo
+         vext = vext * eXV_to_K 
+      endif  
+
+c --------------------------------------------------------------------
+c calculation of additional gaussian potential needed in thermodynamic
+c integration in stages b and c
+c --------------------------------------------------------------------
+      vwell = 0.0d0
+                                                                                
+      if (lmipsw) then
+         do i = 1, nchain
+            imolty = moltyp(i)
+            if (lwell(imolty)) then
+            rxui = xcm(i)
+            ryui = ycm(i)
+            rzui = zcm(i)
+            do j = 1, nwell(imolty)*nunit(imolty)
+               k = j-int(j/nunit(imolty))*nunit(imolty)
+               if (k.eq.0) k = nunit(imolty)
+               rxuij = rxui-rxwell(j,imolty)
+               ryuij = ryui-rywell(j,imolty)
+               rzuij = rzui-rzwell(j,imolty)
+               call mimage(rxuij,ryuij,rzuij,ibox)
+               rijsq = rxuij*rxuij+ryuij*ryuij+rzuij*rzuij
+               rcm = rcut(ibox)+rcmu(i)
+               rcmsq = rcm*rcm
+               if (rijsq.lt.rcmsq) then
+               do ii = 1, nunit(imolty)
+                  if (awell(ii,k,imolty).lt.1.0d-6) goto 666
+                  rxui = rxu(i,ii)
+                  ryui = ryu(i,ii)
+                  rzui = rzu(i,ii)
+                  rxuij = rxui-rxwell(j,imolty)
+                  ryuij = ryui-rywell(j,imolty)
+                  rzuij = rzui-rzwell(j,imolty)
+                  call mimage(rxuij,ryuij,rzuij,ibox)
+                  rijsq = rxuij*rxuij+ryuij*ryuij+rzuij*rzuij
+                  vwell = vwell-awell(ii,k,imolty)*dexp(-bwell*rijsq)
+ 666           enddo
+               endif
+            enddo
+            endif
+         enddo
+      endif
+
 C ----------------------------------------------------------------------------
 
-c$$$      write(6,*) 'self,corr:',
-c$$$     &     (velect-vtemp-vrecipsum/qqfact)*qqfact
-c      write(6,*) 'vsc, new self cor:',vsc*qqfact
-c      write(6,*) 'recip space part :',vrecipsum
-c$$$      write(6,*) 'sc and recip:',vsc*qqfact + vrecipsum
+!      write(6,*) 'self,corr:',
+!     &     (velect-vrecipsum/qqfact)*qqfact
+!      write(6,*) 'vsc, new self cor:',vsc*qqfact
+!      write(6,*) 'recip space part :',vrecipsum
+!      write(6,*) 'sc and recip:',vsc*qqfact + vrecipsum
+      
 
-      velect = qqfact*velect 
-      v = vinter + vintra + vvib + vbend + vtg + vext + velect 
-     &     + vflucq
+      velect = velect*qqfact
+
+ 
+c      velect = qqfact*velect 
+
+      v = vinter + vintra + vext + velect + vflucq + v3garo
+     
+!      write(2,*) 'v in sumup',v
+                                                                                
+      vipsw = v
+      vwellipsw = vwell
+                                                                                
+      if (lstagea) then
+         v = (1.0d0-lambdais*(1.0d0-etais))*v
+      elseif (lstageb) then
+         v = etais*v+lambdais*vwell
+      elseif (lstagec) then
+         v = (etais+(1.0d0-etais)*lambdais)*v+(1.0d0-lambdais)*vwell
+      endif
+                                                                                
+      v = v + vvib + vbend + vtg
 
       if ( .not. lvol ) then
-         write(6,*)
-         write(6,*) 'sumup control'
-         write(6,*) 'number of chains', nmcount
+         write(2,*)
+         write(2,*) 'sumup control'
+         write(2,*) 'number of chains', nmcount
          do i = 1, nmolty
-            write(6,*) 'number of chains of type',i,ncmt(ibox,i)
+            write(2,*) 'number of chains of type',i,ncmt(ibox,i)
          enddo
-         write(6,*) 'inter lj energy ', vinter
-         write(6,*) 'intra lj energy ', vintra
-	 if (ltailc) write(6,*)
+         write(2,*) 'inter lj energy ', vinter
+         write(2,*) 'intra lj energy ', vintra
+         if (ltailc) write(2,*)
      +              'Tail correction ', vtail
      
-	 if (ltailc.and.lexzeo) write(6,*)
-     +              'Tail corr. zeol', nchbox(ibox)*coruz(iunit,rhoz) 
-         write(6,*) 'bond vibration  ', vvib
-         write(6,*) 'bond bending    ', vbend
-         write(6,*) 'torsional       ', vtg
-         write(6,*) 'external surf.  ', vext
-         write(6,*) 'coulombic energy', velect
-c         write(6,*) 'exact energy    ',
+         if (ltailc.and.lexzeo) write(2,*)
+     +              'Tail corr. zeol', nchbox(ibox)*coruz(iunit,rhoz,
+     +                                 ibox) 
+         write(2,*) 'bond vibration  ', vvib
+         write(2,*) 'bond bending    ', vbend
+         write(2,*) 'torsional       ', vtg
+         write(2,*) 'external field/surface  ', vext
+         write(2,*) 'coulombic energy', velect
+c         write(2,*) 'exact energy    ',
 c     +        1.74756*1.67*831.441/3.292796
-         write(6,*) 'fluc Q energy   ', vflucq
-         write(6,*) 'total energy    ', v
+         write(2,*) 'fluc Q energy   ', vflucq
+         write(2,*) 'well energy     ', vwellipsw
+         if(lgaro) write(2,*) '3-body garo     ', v3garo
+         write(2,*) 'total energy    ', v
       endif
 
-c      write(6,*) 'end SUMUP'
+c      write(2,*) 'end SUMUP'
 
       return
       end

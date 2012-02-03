@@ -49,10 +49,9 @@ c    **********************************************************************
      +                 ,vintern,vintero,vextn,vexto,rchain
      &                 ,velectn,velecto,vdum
      &                 ,vrecipo,vrecipn,vexpta,vexptb,volume,rho,coru
-      
       logical laccept
 
-c      write(6,*) 'start expand-ensemble move'
+c      write(2,*) 'start expand-ensemble move'
 c ***    select a chain at random ***
       dchain  = random()
       do icbu = 1,nmolty
@@ -74,7 +73,7 @@ c         (in box 2 is an ideal gas!)
          endif
          i = dint( dble(ncmt(1,imolty))*random() ) + 1
          i = parbox(i,1,imolty)
-         if ( moltyp(i) .ne. imolty ) write(6,*) 'screwup'
+         if ( moltyp(i) .ne. imolty ) write(2,*) 'screwup'
 
       else
 
@@ -132,7 +131,7 @@ c     Start of intermolecular tail correction for new
             do jmt = 1, nmolty
                rho = dble(ncmt(ibox,jmt))/volume
                vexpta = vexpta +
-     &              dble( ncmt(ibox,imt) ) * coru(imt,jmt,rho)
+     &              dble( ncmt(ibox,imt) ) * coru(imt,jmt,rho,ibox)
             enddo
          enddo
          vnew = vnew + vexpta
@@ -158,7 +157,7 @@ c     Start of intermolecular tail correction for old
             do jmt = 1, nmolty
                rho = ncmt(ibox,jmt) / volume
                vexptb = vexptb + 
-     &              dble(ncmt(ibox,imt)) * coru(imt,jmt,rho)
+     &              dble(ncmt(ibox,imt)) * coru(imt,jmt,rho,ibox)
             enddo
          enddo
          vold = vold + vexptb
@@ -195,7 +194,7 @@ c        --- move rejected
          return
       endif
 
-c      write(6,*) 'expanded move accepted i',i,exp_cion(2)
+c      write(2,*) 'expanded move accepted i',i,exp_cion(2)
       vbox(ibox)     = vbox(ibox) + vnew - vold
       vinterb(ibox)  = vinterb(ibox) + (vintern - vintero)
       vintrab(ibox)  = vintrab(ibox) + (vintran - vintrao)
@@ -217,15 +216,15 @@ c      write(6,*) 'expanded move accepted i',i,exp_cion(2)
       if (lewald) then
 c *** update reciprocal-space sum
          call recip(ibox,vdum,vdum,2)
-         if ( ldielect ) then
-c *** update the dipole term
-            call dipole(ibox,1)
-         endif
+      endif
+
+      if (ldielect) then
+          call dipole(ibox,1)
       endif
 
       bsexpc(imolty,ibox) = bsexpc(imolty,ibox) + 1.0d0
 
-c      write(6,*) 'end expand-ensemble move'
+c      write(2,*) 'end expand-ensemble move'
 
       return
       end

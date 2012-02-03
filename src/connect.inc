@@ -26,20 +26,20 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
      +   ,intor,ittor,ijtor2,ijtor3,ijtor4
      +   ,wsched
       double precision brvib,brvibk,brvibmin,brvibmax,brben,brbenk
-
+      
       common /connev/ brvib(nvmax),brvibk(nvmax),brvibmin(60)
      &   ,brvibmax(60)
      +   ,itvib(ntmax,numax,6),ijvib(ntmax,numax,6)
      +   ,invib(ntmax,numax)
       common /conneb/ brben(nvmax),brbenk(nvmax)
-     +   ,itben(ntmax,numax,10),ijben2(ntmax,numax,10)
-     +   ,ijben3(ntmax,numax,10)
+     +   ,itben(ntmax,numax,12),ijben2(ntmax,numax,12)
+     +   ,ijben3(ntmax,numax,12)
      +   ,inben(ntmax,numax)
-      common /connet/ ittor(ntmax,numax,10),ijtor2(ntmax,numax,10)
-     +   ,ijtor3(ntmax,numax,10),ijtor4(ntmax,numax,10)
+      common /connet/ ittor(ntmax,numax,12),ijtor2(ntmax,numax,12)
+     +   ,ijtor3(ntmax,numax,12),ijtor4(ntmax,numax,12)
      +   ,intor(ntmax,numax)
       common /conneg/ wsched(numax),wschvib(numax,6)
-     +    ,wschben(numax,10),wschtor(numax,10)
+     +    ,wschben(numax,12),wschtor(numax,12)
       common /includ/ linclu(ntmax,numax,numax)
      &    ,lqinclu(ntmax,numax,numax),lainclu(ntmax,numax,numax)
       common /exclud/ lexclu(ntmax,numax,ntmax,numax)

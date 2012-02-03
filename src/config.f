@@ -50,6 +50,8 @@ c    *******************************************************************
       include 'ewaldsum.inc'
       include 'poten.inc'
       include 'neigh.inc'
+      include 'ipswpar.inc'
+      include 'eepar.inc'
       
       logical lterm, ovrlap, ltors, lneighij,lfixnow
 
@@ -62,14 +64,14 @@ c    *******************************************************************
 
       double precision v,vintra,vinter,vext,velect,vewald,vtorold
      & ,vtornew,delen,deleo,vdum,tofo,wplace,wrig,vorient
-
+     & ,velect_intra,velect_inter
       double precision dchain,random,rchain,wnlog,wolog,wdlog,wratio
 
       double precision vrecipn,vrecipo,cwtorfo,cwtorfn,x,y,z
 
 c ------------------------------------------------------------------
 
-c      write(6,*) 'start CONFIG'
+c      write(2,*) 'start CONFIG'
 c ***    select a chain at random ***
       rchain  = random()
       do icbu = 1,nmolty
@@ -78,6 +80,11 @@ c ***    select a chain at random ***
             rchain = 2.0d0
          endif
       enddo
+
+      if ((lexpee).and.(imolty.ge.nmolty1))
+     &   imolty = ee_moltyp(mstate)
+                                                                                
+      if (temtyp(imolty).eq.0) return
 
 c     *** determine whether to use fecbmc or not ***
       if (random().lt.pmfix(imolty)) then
@@ -88,11 +95,11 @@ c     *** determine whether to use fecbmc or not ***
 
       if (lgrand) then
 c ---    select a chain in box 1
-c         write(6,*) 'counters not implemented properly for grand'
+c         write(2,*) 'counters not implemented properly for grand'
          if (ncmt(1,imolty).eq.0) return
          i = idint( dble(ncmt(1,imolty))*random() ) + 1
          i = parbox(i,1,imolty)
-         if ( moltyp(i) .ne. imolty ) write(6,*) 'screwup config'
+         if ( moltyp(i) .ne. imolty ) write(2,*) 'screwup config'
          ibox=1
       else 
          dchain = dble(temtyp(imolty))
@@ -142,7 +149,7 @@ c     --- grow new chain conformation
  
 c --- termination of cbmc attempt due to walk termination ---
       if ( lterm ) then 
-c        write(6,*) 'termination of growth',i
+c        write(2,*) 'termination of growth',i
         return
       endif
 
@@ -165,14 +172,14 @@ c     --- grow old chain conformation
 
 c     --- termination of old walk due to problems generating orientations
       if ( lterm ) then
-         write(6,*) 'CONFIG: old growth rejected'
+         write(2,*) 'CONFIG: old growth rejected'
          return
       endif
 
       if (llrig) then
          call rigfix(.false.,i,ibox,imolty,lterm,wrig)
          if ( lterm ) then
-            write(6,*) 'CONFIG: old rigid fix rejected'
+            write(2,*) 'CONFIG: old rigid fix rejected'
             return
          endif
          weiold = weiold * wrig
@@ -182,7 +189,7 @@ c     --- termination of old walk due to problems generating orientations
          call place(.false.,lterm,i,imolty,ibox,islen,wplace)
          
          if ( lterm ) then
-            write(6,*) 'CONFIG: old hydrogen placement rejected'
+            write(2,*) 'CONFIG: old hydrogen placement rejected'
             return
          endif
          weiold = weiold * wplace 
@@ -255,13 +262,21 @@ c          iii = 2 new conformation
 
             if (ovrlap .and. (iii .eq. 1)) then
 c            if (ovrlap) then
-               write(6,*) 'disaster: overlap in old conf config',i
+               write(2,*) 'disaster: overlap in old conf config',i
                stop
             endif
 
             if (iii .eq. 2) then
-               delen = v - ( vnewinter + vnewext + vnewelect +
+               delen = ( vnewinter + vnewext + vnewelect +
      &              vnewewald + vnewintra) 
+               if (lstagea) then
+                  delen = (1.0d0-(1.0d0-etais)*lambdais)*delen
+               elseif (lstageb) then
+                  delen = etais*delen
+               elseif (lstagec) then
+                  delen = (etais+(1.0d0-etais)*lambdais)*delen
+               endif
+               delen = v - delen
                weight    = weight*dexp(-(beta*delen))
                vnewt     = vnewt + delen
                vnewinter = vinter
@@ -270,8 +285,16 @@ c            if (ovrlap) then
                vnewintra = vintra
                vnewewald = vewald
             else
-               deleo = v - ( voldinter + voldext + voldelect +
+               deleo = ( voldinter + voldext + voldelect +
      &              voldewald + voldintra) 
+               if (lstagea) then
+                  deleo = (1.0d0-(1.0d0-etais)*lambdais)*deleo
+               elseif (lstageb) then
+                  deleo = etais*deleo
+               elseif (lstagec) then
+                  deleo = (etais+(1.0d0-etais)*lambdais)*deleo
+               endif
+               deleo = v - deleo
                weiold    = weiold*dexp(-(beta*deleo))
                voldt     = voldt + deleo
                voldinter = vinter
@@ -310,7 +333,7 @@ c Calculate the energy of the non-backbone beads
                if (ovrlap) return
                delen = v + vtornew
                if ( delen*beta .gt. (2.3d0*softcut) ) then
-c                  write(6,*) '##softcut in config caught explicit atoms'
+c                  write(2,*) '##softcut in config caught explicit atoms'
                   return
                endif
                weight = weight*dexp(-(beta*delen))
@@ -323,13 +346,13 @@ c                  write(6,*) '##softcut in config caught explicit atoms'
                vnewewald = vnewewald + vewald
             else
                if (ovrlap) then
-                  write(6,*) 'ovrlap problem in old confomation -CONFIG'
+                  write(2,*) 'ovrlap problem in old confomation -CONFIG'
                   return
                endif
                deleo = v + vtorold
                weiold = weiold*dexp(-(beta*deleo))
                if ( weiold .lt. softlog ) then
-                  write(6,*) '##old weight for explicit too low'
+                  write(2,*) '##old weight for explicit too low'
                endif
                voldt     = voldt + deleo
                voldintra = voldintra + vintra
@@ -348,10 +371,22 @@ c        --- rxuion: 1= old configuration; 2= new configuration
          call recip(ibox,vrecipn,vrecipo,1)
          delen = vrecipn
          deleo = vrecipo
-         weight = weight * dexp(-(beta*vrecipn))
-         weiold = weiold * dexp(-(beta*vrecipo))
          vnewelect = vnewelect + vrecipn
          voldelect = voldelect + vrecipo
+         vipswn = vipswn + vrecipn
+         vipswo = vipswo + vrecipo
+         if (lstagea) then
+            vrecipn = (1.0d0-(1.0d0-etais)*lambdais)*vrecipn
+            vrecipo = (1.0d0-(1.0d0-etais)*lambdais)*vrecipo
+         elseif (lstageb) then
+            vrecipn = etais*vrecipn
+            vrecipo = etais*vrecipo
+         elseif (lstagec) then
+            vrecipn = (etais+(1.0d0-etais)*lambdais)*vrecipn
+            vrecipo = (etais+(1.0d0-etais)*lambdais)*vrecipo
+         endif
+         weight = weight * dexp(-(beta*vrecipn))
+         weiold = weiold * dexp(-(beta*vrecipo))
          vnewt = vnewt + vrecipn
          voldt = voldt + vrecipo
       endif
@@ -361,11 +396,11 @@ c     End of DC-CBMC, Explicit Atom and Ewald-sum Corrections
 c *** check for acceptance of trial configuration ***
       wnlog = dlog10 ( weight )
       wolog = dlog10 ( weiold )
-c      write(6,*) 'weight:',weight
-c      write(6,*) 'weiold:',weiold
+c      write(2,*) 'weight:',weight
+c      write(2,*) 'weiold:',weiold
       wdlog = wnlog - wolog
       if ( wdlog .lt. -softcut ) then
-c         write(6,*) 'cbmc softcut',i
+c         write(2,*) 'cbmc softcut',i
          return
       endif
  
@@ -379,7 +414,7 @@ c         write(6,*) 'cbmc softcut',i
       endif
 
       if ( random() .le. wratio ) then
-c         write(6,*) 'CONFIG accepted',i,ibox
+c         write(2,*) 'CONFIG accepted',i,ibox
 c        --- we can now accept !!!!! ***
          if (lfixnow) then
             fbscb(imolty,2,findex-1) = fbscb(imolty,2,findex-1) 
@@ -398,7 +433,10 @@ c        --- we can now accept !!!!! ***
          vbendb(ibox)  = vbendb(ibox)  + (vnewbb - voldbb)
          velectb(ibox) = velectb(ibox) + (vnewelect - voldelect)
      &        + (vnewewald - voldewald)
-
+         vipswb(ibox) = vipswb(ibox) + (vipswn-vipswo)
+         vwellipswb(ibox) = vwellipswb(ibox) + (vwellipswn-vwellipswo)
+         vipsw = vipswb(ibox)
+         vwellipsw = vwellipswb(ibox)
          do ic = 1, igrow
             rxu(i,ic) = rxnew(ic)
             ryu(i,ic) = rynew(ic)
@@ -414,6 +452,10 @@ c        --- we can now accept !!!!! ***
 c *** update reciprocal-space sum
             call recip(ibox,vdum,vdum,2)
          endif
+
+         if (ldielect) then
+            call dipole(ibox,1)
+         endif  
 
 c ***    update center of mass
          call ctrmas(.false.,ibox,i,7)
@@ -480,7 +522,7 @@ c     --- record bond distances for presimulation and reweighting
        endif
          
 c -----------------------------------------------------------------
-c       write(6,*) 'end CONFIG'
+c       write(2,*) 'end CONFIG'
        return
        end
 

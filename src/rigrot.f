@@ -42,6 +42,7 @@ c     &*&*&*&*&*&*&*&*&*&*&*&* IMPORTANT *&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&
       include 'rosen.inc'
       include 'system.inc'
       include 'conver.inc'
+      include 'ipswpar.inc'
 
       logical lnew,ovrlap,lovrr,lterm,ltors
 
@@ -60,7 +61,7 @@ c     &*&*&*&*&*&*&*&*&*&*&*&* IMPORTANT *&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&
 
 c ----------------------------------------------------------------------
       
-c      write(6,*) 'start RIGROT'
+c      write(2,*) 'start RIGROT'
      
 c     --- initialize conformation energies and weight
 
@@ -72,7 +73,8 @@ c     --- initialize conformation energies and weight
       igrow = riutry(imolty,1) 
       istt = igrow + 1 
       iend = iunit
-            
+
+        
       if (lnew) then
          rxorig = rxnew(igrow)
          ryorig = rynew(igrow)
@@ -166,8 +168,14 @@ c     --- rotate around all axis
       enddo         
    
       ntogrow = iunit-igrow
-      count = 0
       
+      count = 0
+      do j=1,igrow-1
+          lexist(j) = .false.
+      enddo
+
+!      write(6,*) 'igrow',igrow
+ 
       lexist(igrow) = .true.
      
       do j = igrow+1, iunit
@@ -217,7 +225,7 @@ c     --- select ip position
       else
          iwalk = 1
          if ( wadd .lt. softlog ) then
-            write(6,*) '###old rigrot weight too low'
+            write(2,*) '###old rigrot weight too low'
          endif
       endif
       
@@ -225,16 +233,24 @@ c     --- select ip position
          vnewt = vnewt + vtry(iwalk)
          vnewext = vnewext + vtrext(iwalk)
          vnewinter = vnewinter + vtrinter(iwalk)
+!         vnewintra = vnewintra + vtrintra(iwalk)
          vnewelect = vnewelect + vtrelect(iwalk)
          vnewewald = vnewewald + vtrewald(iwalk)
+         vipswn = vipswn+vipswnt(iwalk)
+         vwellipswn = vwellipswn+vwellipswnt(iwalk)
       else
          voldt = voldt + vtry(iwalk)
          voldext = voldext + vtrext(iwalk)
          voldinter = voldinter + vtrinter(iwalk)
+!         voldintra = voldintra + vtrintra(iwalk)
          voldelect = voldelect + vtrelect(iwalk)
          voldewald = voldewald + vtrewald(iwalk)
+         vipswo = vipswo+vipswot(iwalk)
+         vwellipswo = vwellipswo+vwellipswot(iwalk)
       endif
-         
+     
+!	write(6,*) 'vtry', vtry(iwalk),iwalk
+    
       do j = 1, ntogrow
          iu = glist(j)
          if (lnew) then
@@ -245,7 +261,7 @@ c     --- select ip position
       enddo
 
 
-c      write(6,*) 'end RIGROT'
+c      write(2,*) 'end RIGROT'
  
       return
       end

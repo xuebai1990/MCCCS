@@ -1,6 +1,7 @@
       subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel
      &       ,acdens,acmove,acnp,pres,nibox,nnn,nblock,lratio,lratv
-     &       ,lprint,lmv,lrsave,lblock,lratfix,lsolute)
+     &       ,lprint,lmv,lrsave,lblock,lratfix,lsolute,acsolpar,
+     &        acEnthalpy,acEnthalpy1)
 
 c monper
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -43,20 +44,26 @@ C -----------------------------------------------------------------
       include 'connect.inc'
       include 'coord2.inc'
       include 'cell.inc'
+      include 'poten.inc'
       
+      integer nummol,ntii
       integer nibox,im,nnn,ntot,nblock,imolty,m,mm,i,j,jjtor
-     &     ,ibox,itype,itel,mnbox,zz,steps,igrow,jmolty
+     &     ,ibox,itype,itel,mnbox,zz,steps,igrow,jmolty,jbox
       integer imend,itemp,bin,k,jjben,ip2,ip1,ip3,it,ii,jj,ivib
       logical lratio,lratv,lprint,lmv,lrsave,lblock,lfq,lratfix
      &     ,lsolute,ovrlap
-
+      double precision, dimension(nprop1,nbxmax,nbxmax):: acsolpar
+      double precision, dimension(nbxmax):: acEnthalpy,acEnthalpy1
       double precision press1,press2,dp,dpp,debroglie,histrat
       double precision acv, molfra,acpres,acsurf,acvolume,asetel,acdens
      & ,histtot,acmove,acnp,dvalue,dnchoi,dnchoi1,dnchoih,dnunit,ratflcq
      & ,v,vintra,vinter,vext,velect,vewald,vtors,vtail,rho,coru
      & ,thetac,vbend,xvec,yvec,zvec,distij,theta,vtorso
      & ,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2,dot,daa1,da1a2
+     & ,velect_intra,velect_inter
 
+      double precision xcc,ycc,zcc,tcc,spltor,rcutmin      
+ 
       dimension acv(nener,nbxmax),lratfix(ntmax)
       dimension mnbox(nbxmax,ntmax)
       dimension acpres(nbxmax),acsurf(nbxmax),acvolume(nbxmax)
@@ -71,14 +78,99 @@ C -----------------------------------------------------------------
      & ,ratvol,temmass,dn,pres(nbxmax)
 C -------------------------------------------------------------------
 
-c      write(6,*) 'begin MONPER'
+c      write(2,*) 'begin MONPER'
 c *** perform periodic operations  ***
  
+c *** Deciding the minimum rcut for atom displacement. As we
+c *** would have strecthing potential, this ought to be much
+c *** smaller than the rcutmin
+
+      rcutmin = 1.0d10
+
+      do  im = 1,nbox
+          if (rcutmin.gt.rcut(im)) then
+             rcutmin = rcut(im)
+          endif
+      enddo
+
+
       if ( lratio ) then
-c *** adjust maximum translational displacement ***
+c *** adjust the atomic displacements
+       if ( Abntrax .gt. 0.5d0 ) then
+           ratrax = Abstrax / Abntrax
+           rttrax = Armtrax * ratrax / tatra
+           if ( rttrax .gt. 2.0d0 * rcutmin ) then
+c --- maximum translational displacement
+               Armtrax = 2.0d0*rcutmin
+
+           elseif (rttrax .lt. 1.0d-10 ) then
+c --- ratio must have been zero, so divide by 10
+               Armtrax = Armtrax/10.0d0
+
+           else
+c --- accept new ratio
+               Armtrax = rttrax
+           endif
+
+           if ( lneigh .and. Armtrax .ge. upnn) then
+               Armtrax = upnn
+               write(2,*) '### problem : for target accept ratio',
+     +               ' Armtrax should be smaller than upnn'
+           endif
+       endif
+
+
+       if ( Abntray .gt. 0.5d0 ) then
+           ratray = Abstray / Abntray
+           rttray = Armtray * ratray / tatra
+           if ( rttray .gt. 2.0d0 * rcutmin ) then
+c --- maximum translational displacement
+               Armtray = 2.0d0*rcutmin
+
+           elseif (rttray .lt. 1.0d-10 ) then
+c --- ratio must have been zero, so divide by 10
+               Armtray = Armtray/10.0d0
+
+           else
+c --- accept new ratio
+               Armtray = rttray
+           endif
+
+           if ( lneigh .and. Armtray .ge. upnn) then
+               Armtray = upnn
+               write(2,*) '### problem : for target accept ratio',
+     +               ' Armtray should be smaller than upnn'
+           endif
+       endif
+          
+       if ( Abntraz .gt. 0.5d0 ) then
+           ratraz = Abstraz / Abntraz
+           rttraz = Armtraz * ratraz / tatra
+           if ( rttraz .gt. 2.0d0 * rcutin ) then
+c --- maximum translational displacement
+               Armtraz = 2.0d0*rcutin
+
+           elseif (rttraz .lt. 1.0d-10 ) then
+c --- ratio must have been zero, so divide by 10
+               Armtraz = Armtraz/10.0d0
+
+           else
+c --- accept new ratio
+               Armtraz = rttraz
+           endif
+
+           if ( lneigh .and. Armtraz .ge. upnn) then
+               Armtraz = upnn
+               write(2,*) '### problem : for target accept ratio',
+     +               ' Armtraz should be smaller than upnn'
+           endif
+       endif
+ 
+
+c *** adjust maximum translational displacement for COM***
          imend = nbox
          do im=1,imend
-            write(6,*) 'Box ',im
+            write(2,*) 'Box ',im
             do imolty = 1,nmolty
 c              --- rmtrax
 c              --- check whether any x translations have been done for 
@@ -89,9 +181,9 @@ c                 --- compute possible new ratio
                   ratrax = bstrax(imolty,im) / bntrax(imolty,im)
                   rttrax = rmtrax(imolty,im) * ratrax / tatra
 
-                  if ( rttrax .gt. 2.0d0 * rcut ) then 
+                  if ( rttrax .gt. 2.0d0 * rcut(im)) then 
 c                    --- maximum translational displacement
-                     rmtrax(imolty,im) = 2.0d0*rcut
+                     rmtrax(imolty,im) = 2.0d0*rcut(im)
 
                   elseif (rttrax .lt. 1.0d-10 ) then  
 c                    --- ratio must have been zero, so divide by 10
@@ -104,7 +196,7 @@ c                    --- accept new ratio
 
                   if ( lneigh .and. rmtrax(imolty,im) .ge. upnn) then
                      rmtrax(imolty,im) = upnn
-                     write(6,*) '### problem : for target accept ratio',
+                     write(2,*) '### problem : for target accept ratio',
      +                    ' rmtrax should be smaller than upnn'
                   endif
                endif
@@ -119,9 +211,9 @@ c                 --- compute possiblt new ratio
                   ratray = bstray(imolty,im) / bntray(imolty,im)
                   rttray = rmtray(imolty,im) * ratray / tatra
 
-                  if ( rttray .gt. 2.0d0*rcut ) then 
+                  if ( rttray .gt. 2.0d0*rcut(im) ) then 
 c                    --- maximum translational displacement
-                     rmtray(imolty,im) = 2.0d0*rcut
+                     rmtray(imolty,im) = 2.0d0*rcut(im)
                      
                   elseif (rttray .eq. 0.0d0) then  
 c                    --- ratio must have been zero, divide old by 10
@@ -132,7 +224,7 @@ c                    --- accept new ratio
                   endif
                   if ( lneigh .and. rmtray(imolty,im) .ge. upnn) then
                      rmtray(imolty,im) = upnn
-                     write(6,*) '### problem : for target accept ratio',
+                     write(2,*) '### problem : for target accept ratio',
      +                    ' rmtray should be smaller than upnn'
                   endif
                endif
@@ -147,9 +239,9 @@ c                 --- compute possible new ratio
                   ratraz = bstraz(imolty,im) / bntraz(imolty,im)
                   rttraz = rmtraz(imolty,im) * ratraz / tatra
 
-                  if ( rttraz .gt. 2.0d0*rcut ) then 
+                  if ( rttraz .gt. 2.0d0*rcut(im) ) then 
 c                    --- maximum translational displacement
-                     rmtraz(imolty,im) = 2.0d0*rcut
+                     rmtraz(imolty,im) = 2.0d0*rcut(im)
 
                   elseif ( rttraz .lt. 1.0d-10 ) then  
 c                    --- ratio must have been zero, divide old by 10
@@ -162,7 +254,7 @@ c                    --- accept new ratio
 c                 --- check neighbor list
                   if ( lneigh .and. rmtraz(imolty,im) .ge. upnn) then
                      rmtraz(imolty,im) = upnn
-                     write(6,*) '### problem : for target accept ratio',
+                     write(2,*) '### problem : for target accept ratio',
      +                    ' rmtraz should be smaller than upnn'
                   endif
                endif
@@ -193,7 +285,7 @@ c                    --- accept trial ratio
 c                 --- check neighbour list
                   if ( lneigh .and. rmrotx(imolty,im) .ge. upnndg) then
                      rmrotx(imolty,im) = upnndg
-                     write(6,*) '### problem : for target accept ratio',
+                     write(2,*) '### problem : for target accept ratio',
      +                    ' rmrotx should be smaller than upnndg'
                   endif
                endif
@@ -221,7 +313,7 @@ c                    --- accept trial ratio
 c                 --- check neighbour list
                   if ( lneigh .and. rmroty(imolty,im) .ge. upnndg) then
                      rmroty(imolty,im) = upnndg
-                     write(6,*) '### problem : for target accept ratio',
+                     write(2,*) '### problem : for target accept ratio',
      +                    ' rmroty should be smaller than upnndg'
                   endif
                endif
@@ -249,17 +341,17 @@ c                    --- accept trial ratio
 c                 --- check neighbour list
                   if ( lneigh .and. rmrotz(imolty,im) .ge. upnndg) then
                      rmrotz(imolty,im) = upnndg
-                     write(6,*) '### problem : for target accept ratio',
+                     write(2,*) '### problem : for target accept ratio',
      +                    ' rmrotz should be smaller than upnndg'
                   endif
                endif
 
 c *** write some ratio update information ***
-               write(6,57) imolty,bntrax(imolty,im),bntray(imolty,im)
+               write(2,57) imolty,bntrax(imolty,im),bntray(imolty,im)
      &              , bntraz(imolty,im), bnrotx(imolty,im)
      &              , bnroty(imolty,im), bnrotz(imolty,im)
-c              write(6,58) ratrax, ratray, ratraz,rarotx, raroty,rarotz
-               write(6,59) rmtrax(imolty,im), rmtray(imolty,im)
+c              write(2,58) ratrax, ratray, ratraz,rarotx, raroty,rarotz
+               write(2,59) rmtrax(imolty,im), rmtray(imolty,im)
      &              , rmtraz(imolty,im), rmrotx(imolty,im)
      &              , rmroty(imolty,im), rmrotz(imolty,im)
                
@@ -305,9 +397,9 @@ c              --- rezero flcq
          enddo
          if ( lfq ) then
 c           --- write out information about fluctuating charge success
-            write(6,*) 'Box:   rmflcq for moltyps'
+            write(2,*) 'Box:   rmflcq for moltyps'
             do im =1,imend
-               write(6,*) im,(rmflcq(i,im),i=1,nmolty)
+               write(2,*) im,(rmflcq(i,im),i=1,nmolty)
             enddo
          endif
          
@@ -384,18 +476,11 @@ c     --- set coords for energy and write out conformations
      &                 ,vewald,1,ibox,1,nunit(imolty),.true.,ovrlap
      &                 ,.false.,vtors,.false.,.false.)
                   
-                  if (ovrlap) write(6,*) 
+                  if (ovrlap) write(2,*) 
      &                 '*** DISASTER, OVERLAP IN MONPER'
 
                   if (lsolid(ibox).and..not.lrect(ibox)) then
-                     vol = (hmat(ibox,1) * (hmat(ibox,5)
-     +                    * hmat(ibox,9) - hmat(ibox,8)
-     +                    * hmat(ibox,6)) + hmat(ibox,4)
-     +                    * (hmat(ibox,8) * hmat(ibox,3)
-     +                    - hmat(ibox,2) * hmat(ibox,9))
-     +                    + hmat(ibox,7) * (hmat(ibox,2)
-     +                    * hmat(ibox,6) - hmat(ibox,5)
-     +                    *hmat(ibox,3)))
+                     vol = cell_vol(ibox) 
 
                   endif
 
@@ -407,7 +492,7 @@ c     --- tail corrections
      &                    ( boxlx(ibox)*boxly(ibox)*boxlz(ibox) )
                      
                      vtail = vtail + ncmt(ibox,imolty)
-     &                    * coru(imolty,jmolty,rho)
+     &                    * coru(imolty,jmolty,rho,ibox)
                   enddo
 
 c     --- bending energy
@@ -481,8 +566,30 @@ c     *** calculate lengths of cross products ***
 c     *** calculate dot product of cross products ***
                            dot = xaa1*xa1a2 + yaa1*ya1a2 + zaa1*za1a2
                            thetac = - dot / ( daa1 * da1a2 )
-                           
-                           vtors = vtors + vtorso( thetac, it )
+
+                           if (thetac.gt.1.0d0) thetac=1.0d0
+                           if (thetac.lt.-1.0d0) thetac=-1.0d0
+c     KEA -- added for extending range to +/- 180
+                           if (L_tor_table) then
+c     *** calculate cross product of cross products ***
+                              xcc = yaa1*za1a2 - zaa1*ya1a2
+                              ycc = zaa1*xa1a2 - xaa1*za1a2
+                              zcc = xaa1*ya1a2 - yaa1*xa1a2
+c     *** calculate scalar triple product ***
+                              tcc = xcc*xvec(ip1,ip2)+ycc*yvec(ip1,ip2)
+     &                             + zcc*zvec(ip1,ip2)
+                              theta = dacos(thetac)
+                              if (tcc .lt. 0.0d0) theta = -theta
+                              if (L_spline) then
+                                 call splint(theta,spltor,it)
+                              elseif(L_linear) then
+                                 call lininter(theta,spltor,it)
+                              endif
+
+                              vtors = vtors + spltor
+                           else
+                              vtors = vtors + vtorso( thetac, it )
+                           endif
                         endif
                      enddo
                   enddo
@@ -539,11 +646,11 @@ c     *** adjust maximum volume displacement ***
             do ibox = 1, nbox
                if (lsolid(ibox) .and. .not. lrect(ibox)) then
                   do j = 1,9
-                     write(6,56) bnhmat(ibox,j),bshmat(ibox,j),
+                     write(2,56) bnhmat(ibox,j),bshmat(ibox,j),
      &                    rmhmat(ibox,j)
                   enddo
                else
-                  write(6,60) bnvol(ibox),bsvol(ibox),rmvol(ibox)
+                  write(2,60) bnvol(ibox),bsvol(ibox),rmvol(ibox)
                endif
             enddo
 
@@ -575,12 +682,12 @@ c     *** adjust maximum volume displacement ***
       if ( lprint ) then
 c     *** write out runtime information ***
          ntot = nnn + nnstep
-         write(6,'(i6,i8,e12.4,f10.3,f12.1,15i4)') nnn,ntot,
+         write(2,'(i6,i8,e12.4,f10.3,f12.1,15i4)') nnn,ntot,
      +        vbox(1),boxlx(1),pres(1)
      +        ,(ncmt(1,imolty),imolty=1,nmolty)
          if ( lgibbs ) then
             do ibox = 2, nbox
-               write(6,'(14x,e12.4,f10.3,f12.1,15i4)') 
+               write(2,'(14x,e12.4,f10.3,f12.1,15i4)') 
      +              vbox(ibox),boxlx(ibox),pres(ibox)
      +              ,(ncmt(ibox,imolty),imolty=1,nmolty)
             enddo
@@ -608,14 +715,40 @@ c     *** write out the movie configurations ***
      &              , qqu(m,mm),ntype( imolty, mm )
             enddo
          enddo
- 1012    format(4(1x,f10.6),i5)
- 1015    format(4(1x,i5),3(1x,f10.6))
+ 1012    format(4(1x,f14.6),i5)
+ 1015    format(4(1x,i5),3(1x,f16.6))
       endif
+
+      if ( lmv .and. L_movie_xyz) then
+         do ibox = 1,nbox
+           nummol = 0
+           do i = 1,nchain
+              if (nboxi(i).eq.ibox) then
+                  nummol = nummol + nunit(moltyp(i))
+              endif
+           enddo
+           write(210+ibox,*) nummol
+           write(210+ibox,*)
+           do i = 1,nchain
+              if(nboxi(i).eq.ibox) then
+                 imolty = moltyp(i)
+                 do ii = 1,nunit(imolty)
+                    ntii = ntype(imolty,ii)
+                    write(210+ibox,'(a4,5x,3f15.4)') chemid(ntii),
+     &               rxu(i,ii), ryu(i,ii), rzu(i,ii)
+                 enddo
+              endif
+           enddo
+         enddo
+      endif
+
+
 
       if ( lrsave ) then
 c     *** write out the restart configurations to SAFETY-file ***
          open(unit=88,file="save-config",status='unknown')
          write (88,*) nnn + nnstep
+         write (88,*) Armtrax, Armtray, Armtraz 
          do im=1,nbox
             do imolty=1,nmolty
                write (88,*) rmtrax(imolty,im), rmtray(imolty,im)
@@ -673,6 +806,8 @@ c 1+(2+nener)          to (2+nener) +  nmolty = chemical potential
 c 1+(2+nener)+  nmolty to (2+nener) +2*nmolty = square-end-to-end-length
 c 1+(2+nener)+2*nmolty to (2+nener) +3*nmolty = number density
 c 1+(2+nener)+3*nmolty to (2+nener) +4*nmolty = mol fraction
+c 4+nener+4*nmolty+1                      = Enthalpy
+c ---------------------------------------------------------
 
 c - specific density
             if ( lpbcz ) then
@@ -716,7 +851,7 @@ c                 --- determine how many steps it takes to grow the
 c                 --- molecule not counting the first inserted bead
                igrow = nugrow(itype)
 c --- need the first schedule call for rigid molecules, else it will seg fault
-               if (lrigid(imolty))then
+               if (lrigid(itype))then
                   call schedule(igrow,itype,steps,1,0,4)
                else
                   call schedule(igrow,itype,steps,1,0,2)
@@ -754,12 +889,25 @@ c - mol fraction
                itel = (2 + nener) + (3*nmolty) + itype
                dpp = molfra(ibox,itype)
                call update(nblock,itel,ibox,dpp,acmove)
-               
             enddo
-            
+
+c - Enthalpy
+            itel = 4+nener+4*nmolty+1
+!            write(2,*) acEnthalpy(ibox)
+            call update(nblock,itel,ibox,acEnthalpy(ibox),acnp)
+            itel = 4+nener+4*nmolty+2
+            call update(nblock,itel,ibox,acEnthalpy1(ibox),acnp)
+         enddo
+         do ibox = 1,nibox-1
+            do jbox = ibox+1,nibox 
+               do i = 1,nprop1
+                  call update1(nblock,i,acsolpar(i,ibox,jbox),acnp,
+     ^                         ibox,jbox)  
+               enddo
+            enddo
          enddo
       endif
       
-c      write(6,*) 'end MONPER'
+c      write(2,*) 'end MONPER'
       return
       end

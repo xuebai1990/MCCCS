@@ -38,6 +38,11 @@ c    *********************************************************************
       include 'ewaldsum.inc'
       include 'poten.inc'
 
+!      if (LSOLPAR.and.(ibox.eq.2))then
+!        return
+!      endif
+ 
+
       ncount = numvect(ibox)
 
       if ( type .eq. 1 ) then
@@ -47,11 +52,11 @@ c *** rotation, swap, flucq, and swatch.
 c *** old conformation zz = 1 (which is 0 for swap inserted molecule)
 c *** new conformation zz = 2 (which is 0 for swap removed molecule)
 
-c         write(6,*) 'in recip:',moltion(1),moltion(2)
+c         write(2,*) 'in recip:',moltion(1),moltion(2)
 c         do zz = 1,2
 c            imolty = moltion(zz)
 c            do ii = 1, nunit(imolty)
-c               write(6,*) rxuion(ii,zz),ryuion(ii,zz),rzuion(ii,zz),
+c               write(2,*) rxuion(ii,zz),ryuion(ii,zz),rzuion(ii,zz),
 c     &              qquion(ii,zz)
 c            enddo
 c         enddo
@@ -124,7 +129,7 @@ c *** restore the reciprocal space k vectors
 
       endif
 
-c      write(6,*) 'in recip:',ssumr(100,ibox),ibox,ssumrn(100,ibox)
+c      write(2,*) 'in recip:',ssumr(100,ibox),ibox,ssumrn(100,ibox)
 
       return 
       end

@@ -150,7 +150,7 @@ c --- store old k vectors and reciprocal sum
          lvol = .true.
          do 400 ibox = 1,2
             call sumup( ovrlap, v, vinter,vtail, vdum,vdum,
-     +           vdum,vdum,vext,velect,vdum, ibox, lvol )
+     +           vdum,vdum,vext,velect,vdum, ibox,lvol)
             if ( ovrlap ) goto 500
             vintern(ibox) = vinter
             vtailn(ibox)  = vtail

@@ -26,6 +26,9 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
      &  ,bsrotx,bsroty,bsrotz,bnflcq,bsflcq,bnexpc,bsexpc
      &  ,bnflcq2,bsflcq2
 
+       double precision Abntrax,Abntray,Abntraz,   
+     &                  Abstrax,Abstray,Abstraz
+
       dimension bsvol(nbxmax), bnvol(nbxmax),bshmat(nbxmax,9),
      &	        bnhmat(nbxmax,9)
       dimension bntrax(ntmax,nbxmax),bntray(ntmax,nbxmax),
@@ -40,7 +43,10 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       dimension bnflcq(ntmax,nbxmax),bsflcq(ntmax,nbxmax),
      &          bnflcq2(ntmax,nbxmax),bsflcq2(ntmax,nbxmax)
 
+
       common /bvolum/ bnvol,bsvol,bshmat,bnhmat
       common /btrans/ bntrax,bntray,bntraz,bstrax,bstray,bstraz
       common /brotat/ bnrotx,bnroty,bnrotz,bsrotx,bsroty,bsrotz
       common /bflucq/ bnflcq,bsflcq,bnexpc,bsexpc,bnflcq2,bsflcq2
+      common /atomtra/ Abntrax,Abntray,Abntraz,Abstrax,
+     &          Abstray,Abstraz  

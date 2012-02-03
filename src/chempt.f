@@ -71,7 +71,7 @@ c    ********************************************************************
 
 C --------------------------------------------------------------------
 
-c      write(6,*) 'start CHEMP'
+c      write(2,*) 'start CHEMP'
 
 c *** store number of units in iunit and igrow ***
       iunit = nunit(imolty)
@@ -198,7 +198,7 @@ c --- all branches will be regrown - starting at the lowest/highest ---
                iincre = 1
             endif
             if ( iincre .eq. -1 ) then
-               write(6,*) 'imolty,iutry,invtry',imolty,iutry,invtry
+               write(2,*) 'imolty,iutry,invtry',imolty,iutry,invtry
                iut = ijvib(imolty,iutry,invtry)
                do iii = invtry-1, 1, -1
                   nbranp = nbranp + 1
@@ -303,9 +303,9 @@ c --- iulast is the last unit in the walkschedule ---
 
 c --- find trial segment with highest index ---
  31         iulast = wsched(islen)
-            write(6,*) '*************'
-            write(6,*) 'iulast',iulast
-            write(6,*) 'ibranp', (ibranp(iu),iu=1,nbranp)
+            write(2,*) '*************'
+            write(2,*) 'iulast',iulast
+            write(2,*) 'ibranp', (ibranp(iu),iu=1,nbranp)
             iut = 0
             iutry = 0
             do iu = invib(imolty,iulast), 1, -1
@@ -468,7 +468,7 @@ c           iii=1 new conformation
             vnewt     = vnewt + delen
             vnewinter = vinter - v1insint
             vnewext   = vext - v1insext
-            vnewelect = velect -v1inselc
+            vnewelect = velect - v1inselc
          endif
 c     End DC-CBMC Corrections for NEW configuration
 
@@ -535,7 +535,7 @@ c     add in the contribution from the first bead
                else
                   rho = dble(ncmt(boxins,jmt))/volins
                endif
-               arg=arg*dexp(-(beta*2.0d0*coru(imolty,jmt,rho)))
+               arg=arg*dexp(-(beta*2.0d0*coru(imolty,jmt,rho,boxins)))
             enddo
          endif
 
@@ -545,7 +545,7 @@ c     add in the contribution from the first bead
  500  continue
 
 
-c       write(6,*) 'end CHEMPT'
+c       write(2,*) 'end CHEMPT'
 
       return
       end

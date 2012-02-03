@@ -55,7 +55,7 @@ c     --- local variables
       double precision determ,arccos
       save a11,a12,a13,a21,a22,a31,a32,a33,cosalph,sinalph
 
-c      write(6,*) 'start CONE'
+c      write(2,*) 'start CONE'
 
       if ( iinit .eq. 1 ) then      
 c       --- setup the unit cone
@@ -146,11 +146,11 @@ c        --- now need to find the gamma on [-Pi,Pi] that satisfies cos and sin
          if ( singamma .lt. 0.0d0 ) gamma = -gamma
 
       else
-         write(6,*) 'iinit ',iinit
+         write(2,*) 'iinit ',iinit
          stop 'non valid iinit in cone.f'
       endif
       
-c      write(6,*) 'finish CONE'
+c      write(2,*) 'finish CONE'
 
       return
       end

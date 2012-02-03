@@ -37,7 +37,7 @@ c *** common blocks ***
 
 C -----------------------------------------------------------------------------
  
-      rcnnsq = rcutnn**2
+      rcnnsq = rcutnn(ibox)**2
 
       if ( lpbc ) call setpbc (ibox)
 
@@ -95,8 +95,8 @@ c *** set displacementvectors to zero ***
          disvec(2,i,j) = 0.0d0
  1099 continue
  
-c      write(6,*) '@@@ control updnn @@@'
-c      write(6,*) 'lnn', i, '   ', (lnn(i,j),j=1,nchain)
+c      write(2,*) '@@@ control updnn @@@'
+c      write(2,*) 'lnn', i, '   ', (lnn(i,j),j=1,nchain)
 
       return
       end

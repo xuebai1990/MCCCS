@@ -31,7 +31,6 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
      +     ,vnewinter,vnewelect,vnewewald,vneworient
      +     ,vnewinterr,vnewextr,vnewelectr,voldinterr
      +     ,voldextr,voldelectr,voldorient
-
       common /rosena/ growfrom,growprev,growlist,grownum
 
       common /rosenb/ weight,  weiold, voldt,voldbb,voldtg,voldext

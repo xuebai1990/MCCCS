@@ -48,7 +48,7 @@ c     iinit = 3  does final crankshaft move
       include 'rosen.inc'
       include 'cbmc.inc'
 
-      logical lnew,lshit,lterm,ldo
+      logical lnew,lshit,lterm,ldo,lreturn
 
       integer igrow,imolty,count,counta,j,ja,ivib,iufrom,iuprev
      +     ,iinit,iu,ju,ku,i,iv,juvib,jtvib,type,iu2,ib,iw,ntogrow
@@ -89,28 +89,33 @@ c     *** possible in place of numax
 
 c     ---------------------------------------------------------------
     
-c      write(6,*) 'START SAFECMBC ',iinit,'!'
-        
+c      write(2,*) 'START SAFECMBC ',iinit,'!'
+c      print*,'iinit',iinit,'iw',iw,'igrow',igrow,'count',count
       vphi = 0.0d0
       ovphi = 0.0d0
       wei_bv = 1.0d0
-      if (iinit.eq.1.or.lcrank) then
+      
+      lreturn = .false.
+      
+ 400  continue
+      
+      if (iinit.eq.1.or.(.not.lreturn.and.lcrank)) then
          
          third = 1.0d0 / 3.0d0
          nchvib = nchbna(imolty)
          ntogrow = grownum(iw)
-
+         
          if (lcrank) then
             ntogrow = 1
          else
             ntogrow = grownum(iw)
          endif
-
+         
 c     *** lets first determine our bond distances ***
 
 c     --- find vibrations for iu - ibef
-         do count = 1, ntogrow
-
+         do 155 count = 1, ntogrow
+            
             ja = 0
             
             if (lcrank) then
@@ -126,6 +131,10 @@ c     --- ja defines iwbef in counter
                   ja = j
                endif
             enddo
+            
+c     --- we do not close with this bead
+            if (ja.eq.0) goto 155
+            
             do iv = 1, invib(imolty,iu)
                juvib = ijvib(imolty,iu,iv)
                do counta = 1, befnum(ja)
@@ -152,17 +161,15 @@ c     we will use flexible bond lengths
                         else
                            start = 1
                         endif
-                      
+                        
                         do ivib = start, nchvib
                            
-                           r(ivib) = (mincb 
-     &                          + random()*delcb)**third
-                           vvib = kforce * 
-     &                          ( r(ivib) - equil )**2
+                           r(ivib) = (mincb + random()*delcb)**third
+                           vvib = kforce * ( r(ivib) - equil )**2
                            bfactor(ivib) = dexp(-beta*vvib)
                            bsum_try = bsum_try + bfactor(ivib)
                         enddo
-                         
+                        
                         if (lnew) then
 c     --- select one of the trial sites via vias
                            rbf = random()*bsum_try
@@ -192,7 +199,7 @@ c     --- propogate rosenbluth weight
                         if (lnew) then
 c     --- compute new bond length
                            call bondlength(jtvib,equil,kforce,beta,
-     &                          length,vvib)
+     $                          length,vvib)
                            flength(iu,ju) = length
 
                         else
@@ -200,150 +207,142 @@ c     --- compute old bond length
                            x = rxu(i,ju) - rxu(i,iu)
                            y = ryu(i,ju) - ryu(i,iu)
                            z = rzu(i,ju) - rzu(i,iu)
-                           flength(iu,ju) 
-     &                          = dsqrt(x**2.0d0+y**2.0d0+z**2.0d0)
+                           flength(iu,ju) = dsqrt(x**2+y**2+z**2)
                         endif
                      endif 
                   endif
                enddo
             enddo
-               
-            if (ja.gt.0) then
+            
 c     --- find vibrations for ibef - iend
-               do counta = 1, befnum(ja)
-                  ju = ibef(ja,counta)
-                  do iv = 1, invib(imolty,ju)
-                     juvib = ijvib(imolty,ju,iv)
-                     do j = 1, fcount(ju)
-                        ku = fclose(ju,j)
-                        if (juvib.eq.ku) then
-                           jtvib = itvib(imolty,ju,iv)
-                           equil = brvib(jtvib)
-                           kforce = brvibk(jtvib)
-                           if (kforce.gt.0.1d0) then
+            do counta = 1, befnum(ja)
+               ju = ibef(ja,counta)
+               do iv = 1, invib(imolty,ju)
+                  juvib = ijvib(imolty,ju,iv)
+                  do j = 1, fcount(ju)
+                     ku = fclose(ju,j)
+                     if (juvib.eq.ku) then
+                        jtvib = itvib(imolty,ju,iv)
+                        equil = brvib(jtvib)
+                        kforce = brvibk(jtvib)
+                        if (kforce.gt.0.1d0) then
 c     --- we have flexible bond lengths
                               
-                              bsum_try = 0.0d0
-                              mincb = brvibmin(jtvib)**3
-                              delcb = brvibmax(jtvib)**3 - mincb
+                           bsum_try = 0.0d0
+                           mincb = brvibmin(jtvib)**3
+                           delcb = brvibmax(jtvib)**3 - mincb
                            
-                              if (j.gt.1) then
-                                 vequil(ju,ku) = equil
-                                 vkforce(ju,ku) = kforce
-                                 goto 112
-                              endif
+                           if (j.gt.1) then
+                              vequil(ju,ku) = equil
+                              vkforce(ju,ku) = kforce
+                              goto 112
+                           endif
                               
-                              if (.not.lnew) then
-                                 x = rxu(i,ku) - rxu(i,ju)
-                                 y = ryu(i,ku) - ryu(i,ju)
-                                 z = rzu(i,ku) - rzu(i,ju)
-                                 r(1) = dsqrt(x**2 + y**2 + z**2)
-                                 vvib = kforce * ( r(1) - equil )**2
-                                 bfactor(1) = dexp(-beta*vvib)
-                                 bsum_try = bsum_try + bfactor(1)
-                                 start = 2
-                              else
-                                 start = 1
-                              endif
+                           if (.not.lnew) then
+                              x = rxu(i,ku) - rxu(i,ju)
+                              y = ryu(i,ku) - ryu(i,ju)
+                              z = rzu(i,ku) - rzu(i,ju)
+                              r(1) = dsqrt(x**2 + y**2 + z**2)
+                              vvib = kforce * ( r(1) - equil )**2
+                              bfactor(1) = dexp(-beta*vvib)
+                              bsum_try = bsum_try + bfactor(1)
+                              start = 2
+                           else
+                              start = 1
+                           endif
                            
-                              do ivib = start, nchvib
+                           do ivib = start, nchvib
                               
-                                 r(ivib) = (mincb 
-     &                                + random()*delcb)**third
-                                 vvib = kforce 
-     &                                * ( r(ivib) - equil )**2
-                                 bfactor(ivib) = dexp(-beta*vvib)
-                                 bsum_try = bsum_try + bfactor(ivib)
-                              enddo
-                              
-                              if (lnew) then
+                              r(ivib) = (mincb + random()*delcb)**third
+                              vvib = kforce * ( r(ivib) - equil )**2
+                              bfactor(ivib) = dexp(-beta*vvib)
+                              bsum_try = bsum_try + bfactor(ivib)
+                           enddo
+                           
+                           if (lnew) then
 c     --- select one of the trial sites via vias
-                                 rbf = random()*bsum_try
-                                 bs = 0.0d0
-                                 do ivib = 1, nchvib
-                                    bs = bs + bfactor(ivib)
-                                    if (rbf .lt. bs ) then
-                                       flength(ju,ku) = r(ivib)
-                                       vvib = dlog(bfactor(ivib))
-     &                                      /(-beta)
-                                       goto 6
-                                    endif
-                                 enddo
- 6                               continue
-                              else
+                              rbf = random()*bsum_try
+                              bs = 0.0d0
+                              do ivib = 1, nchvib
+                                 bs = bs + bfactor(ivib)
+                                 if (rbf .lt. bs ) then
+                                    flength(ju,ku) = r(ivib)
+                                    vvib = dlog(bfactor(ivib)) /(-beta)
+                                    goto 6
+                                 endif
+                              enddo
+ 6                            continue
+                           else
 c     --- select old conformation
-                                 flength(ju,ku) = r(1)
-                                 vvib = dlog(bfactor(1))/(-beta)
-
-                              endif
+                              flength(ju,ku) = r(1)
+                              vvib = dlog(bfactor(1))/(-beta)
+                              
+                           endif
                            
 c     --- add up vibrational energy
-                              vphi = vphi + vvib
+                           vphi = vphi + vvib
                            
 c     --- propogate rosenbluth weight
-                              wei_bv = wei_bv * bsum_try/dble(nchvib)
+                           wei_bv = wei_bv * bsum_try/dble(nchvib)
                         
- 112                          continue
-   
-                           else
+ 112                       continue
                            
-                              if (lnew) then
+                        else
+                           
+                           if (lnew) then
 c     --- compute new bond length
-                                 call bondlength(jtvib,equil,kforce,beta
-     &                                ,length,vvib)
-                                 flength(ju,ku) = length
-                              else
+                              call bondlength(jtvib,equil,kforce,beta
+     &                             ,length,vvib)
+                              flength(ju,ku) = length
+                           else
 c     --- compute old bond length
-                                 x = rxu(i,ku) - rxu(i,ju)
-                                 y = ryu(i,ku) - ryu(i,ju)
-                                 z = rzu(i,ku) - rzu(i,ju)
+                              x = rxu(i,ku) - rxu(i,ju)
+                              y = ryu(i,ku) - ryu(i,ju)
+                              z = rzu(i,ku) - rzu(i,ju)
                               
-                                 flength(ju,ku) 
-     &                                = dsqrt(x**2.0d0 + y**2.0d0 
-     &                                + z**2.0d0)
+                              flength(ju,ku) = dsqrt(x**2 + y**2 + z**2)
                               
-                              endif
                            endif
                         endif
-                     enddo
+                     endif
                   enddo
                enddo
+            enddo
             
 c        --- determine angles for iwbef-ibef-iend
 
-               if (lcrank) then
-                  do ib = 1, inben(imolty,iu)
-                     iu2 = ijben3(imolty,iu,ib)
-                     type = itben(imolty,iu,ib)
-                     do counta = 1, grownum(iw)
-                        ju = growlist(iw,counta)
-                        if (fcount(ju).ne.0) then
-                           do j = 1, fcount(ju)
-                              ku = fclose(ju,j)
-                              if (ku.eq.iu2) then
-                                 equilb(iu,ku) = brben(type)
-                                 kforceb(iu,ku) = brbenk(type)
-                              endif
-                           enddo
-                        endif
-                     enddo
+            if (lcrank) then
+               do ib = 1, inben(imolty,iu)
+                  iu2 = ijben3(imolty,iu,ib)
+                  type = itben(imolty,iu,ib)
+                  do counta = 1, grownum(iw)
+                     ju = growlist(iw,counta)
+                     if (fcount(ju).ne.0) then
+                        do j = 1, fcount(ju)
+                           ku = fclose(ju,j)
+                           if (ku.eq.iu2) then
+                              equilb(iu,ku) = brben(type)
+                              kforceb(iu,ku) = brbenk(type)
+                           endif
+                        enddo
+                     endif
                   enddo
-               else
-                  do ib = 1, inben(imolty,iu)
-                     iu2 = ijben3(imolty,iu,ib)
-                     type = itben(imolty,iu,ib)
-                     do j = 1, fcount(iu)
-                        ju = fclose(iu,j)
-                        if (ju.eq.iu2) then
-                           equilb(iu,ju) = brben(type)
-                           kforceb(iu,ju) = brbenk(type)
-                        endif
-                     enddo
+               enddo
+            else
+               do ib = 1, inben(imolty,iu)
+                  iu2 = ijben3(imolty,iu,ib)
+                  type = itben(imolty,iu,ib)
+                  do j = 1, fcount(iu)
+                     ju = fclose(iu,j)
+                     if (ju.eq.iu2) then
+                        equilb(iu,ju) = brben(type)
+                        kforceb(iu,ju) = brbenk(type)
+                     endif
                   enddo
-               endif
+               enddo
             endif
-         enddo
- 
+ 155     continue
+      
          if (lcrank) then
 c     --- we need to calculate the new angle
             iufrom = growfrom(iw)
@@ -361,8 +360,8 @@ c     --- we need to calculate the new angle
                   
                   hdist = dsqrt( x**2 + y**2 + z**2 )
 c     --- use law of cosines to calculate bond angle
-                  thetac = (lengtha**2 + lengthb**2 - hdist**2)
-     &                 / (2.0d0 * lengtha * lengthb)
+                  thetac = (lengtha**2 + lengthb**2 - hdist**2) / (2.0d0
+     $                 * lengtha * lengthb)
                   
 c     --- check to make sure this will give a number
                   
@@ -374,20 +373,22 @@ c     --- check to make sure this will give a number
                   endif
                   angle = dacos(thetac)
                   
-                  ovphi = ovphi + kforceb(iufrom,ju) * (angle
-     &                 - equilb(iufrom,ju))**2
+                  ovphi = ovphi + kforceb(iufrom,ju) * (angle -
+     $                 equilb(iufrom,ju))**2
              
-c                  write(6,*) iufrom,iu,ju,kforceb(iufrom,ju)*(angle
+c                  write(2,*) iufrom,iu,ju,kforceb(iufrom,ju)*(angle
 c     &                 - equilb(iufrom,ju))**2
      
                   wei_bv = wei_bv * dexp( - beta * ovphi )
                endif
             enddo
             vibtr= vphi
+            
+            lreturn = .true.
             goto 400
          endif
 
-c ********************************************************************
+c     ********************************************************************
       elseif (iinit.eq.2.or.iinit.eq.4) then
 c     --- lets determine closing energy for this bead alone
          lshit = .false.
@@ -449,8 +450,8 @@ c     --- we can calculate an angle here
                   
 c     --- use law of cosines to calculate bond angle
 
-                  thetac = (lengtha**2.0d0 + lengthb**2.0d0
-     &                 - hdist**2.0d0) / (2.0d0 * lengtha * lengthb)
+                  thetac = (lengtha**2 + lengthb**2 - hdist**2) / (2
+     $                 .0d0 * lengtha * lengthb)
                   
 c     --- check to make sure this will give a number
 
@@ -461,8 +462,8 @@ c     --- check to make sure this will give a number
                   endif
                   angle = dacos( thetac )
                   
-                  vphi = vphi + kforceb(iu,ku) * ( angle 
-     &                 - equilb(iu,ku))**2.0d0
+                  vphi = vphi + kforceb(iu,ku) * ( angle - equilb(iu,ku)
+     $                 )**2
                   
  175              continue
 
@@ -485,7 +486,7 @@ c     --- determine torsion interaction with growpast if it exists
                         y = ryu(i,nu) - uy
                         z = rzu(i,nu) - uz
                      endif
-                     hdist = dsqrt( x**2.0d0 + y**2.0d0 + z**2.0d0 )
+                     hdist = dsqrt( x**2 + y**2 + z**2 )
                      bin = anint( hdist * 10.0d0 )
                      vtor = vtor * probf(iu,nu,bin)
                      
@@ -496,7 +497,7 @@ c     --- determine torsion interaction with growpast if it exists
                               if (movetype.eq.2.and.lnew) then
                                  x = rxnew(lu) - ux
                                  y = rynew(lu) - uy
-                                 z = rznew(lu) - uz                           
+                                 z = rznew(lu) - uz 
                               else
                                  x = rxu(i,lu) - ux
                                  y = ryu(i,lu) - uy
@@ -515,8 +516,7 @@ c     --- determine torsion interaction with growpast if it exists
 
 c *********************************************************************
       else
- 400     continue
-
+ 
 c     --- CRANKSHAFT MOVE
          ntogrow = grownum(iw)
          iufrom = growfrom(iw)
@@ -550,7 +550,7 @@ c     --- determine angles for iu - iend - ipast if they exist
                               goto 125
                            endif
                         enddo
-                        write(6,*) 'iu,ju,ku',iu,ju,ku
+                        write(2,*) 'iu,ju,ku',iu,ju,ku
                         stop 'no bond angle for these'
  125                    continue
                         
@@ -591,9 +591,8 @@ c     *** count is iu count, and ju is iend bead
                      yvec(iufrom,ju) = ryu(i,ju) - ryu(i,iufrom)
                      zvec(iufrom,ju) = rzu(i,ju) - rzu(i,iufrom)
                   endif
-                  hdist = dsqrt( xvec(iufrom,ju)**2.0d0 
-     &                 + yvec(iufrom,ju)**2.0d0
-     &                 + zvec(iufrom,ju)**2.0d0 )
+                  hdist = dsqrt( xvec(iufrom,ju)**2 + yvec(iufrom,ju)**2
+     $                 + zvec(iufrom,ju)**2 )
                   
 c     --- normalize these distances to one for cone
                   xvec(iufrom,ju) = xvec(iufrom,ju) / hdist
@@ -605,9 +604,8 @@ c     *** count is iu count, and ju is iend bead
                   lengtha = flength(iufrom,iu) 
                   lengthb = flength(iu,ju)
                   
-                  thetac = (lengtha**2.0d0 + hdist**2.0d0 
-     &                 - lengthb**2.0d0)
-     &                 / (2.0d0 * lengtha * hdist)
+                  thetac = (lengtha**2 + hdist**2 - lengthb**2) / (2.0d0
+     $                 * lengtha * hdist)
                                     
                   if (abs(thetac).gt.1.0d0) then
                      vphi = 0
@@ -741,8 +739,7 @@ c     --- compute old bond length
                            x = rxu(i,iufrom) - rxu(i,iu)
                            y = ryu(i,iufrom) - ryu(i,iu)
                            z = rzu(i,iufrom) - rzu(i,iu)
-                           flength(iufrom,iu) 
-     &                          = dsqrt(x**2.0d0+y**2.0d0+z**2.0d0)
+                           flength(iufrom,iu) = dsqrt(x**2+y**2+z**2)
                            
                         endif
                      endif
@@ -766,10 +763,9 @@ c     --- find bond angles
      &                 / (lengtha*lengthb)
                   
                   angle = dacos(thetac)
-                  vphi =  kforcea(count) 
-     &                 * (angle-equila(count))**2.0d0
+                  vphi =  kforcea(count) * (angle-equila(count))**2
          
-c                  write(6,*) 'b',iu,iufrom,iuprev,vphi
+c                  write(2,*) 'b',iu,iufrom,iuprev,vphi
 
 
                   ang_bend(1) = angle
@@ -789,8 +785,7 @@ c     --- choose angle uniformly on sin(angle)
                   ang_bend(ibend) = angle
 
 c     --- find bend energy
-                  vphi = kforcea(count) 
-     &                 * (angle-equila(count))**2.0d0
+                  vphi = kforcea(count) * (angle-equila(count))**2
                   bfactor(ibend) = dexp(-beta*vphi)
                   bsum_bend = bsum_bend + bfactor(ibend)
                enddo
@@ -806,7 +801,7 @@ c     --- select one of the trial sites at random
                         ovphi = ovphi + dlog(bfactor(ibend))/(-beta)
 
 
-c                        write(6,*) 'c',iu,iufrom,iuprev
+c                        write(2,*) 'c',iu,iufrom,iuprev
 c     &                       ,dlog(bfactor(ibend))/(-beta)
 
                         goto 10
@@ -862,10 +857,10 @@ c     --- we want the angle with the closing bead
 
                         angle = dacos(thetac)
                         
-                        vphi = kforceb(iu,ju) 
-     &                       * (angle-equilb(iu,ju))**2.0d0     
+                        vphi = kforceb(iu,ju) * (angle-equilb(iu,ju))**2
                         
-c                        write(6,*) 'd',iu,iufrom,ju,vphi
+                        
+c                        write(2,*) 'd',iu,iufrom,ju,vphi
 
                         ang_bend(1) = angle
                         bfactor(1) = dexp( -beta*vphi )
@@ -884,8 +879,7 @@ c     --- choose angle uniformly on sin(angle)
                         ang_bend(ibend) = angle
                         
 c     --- find bend energy
-                        vphi = kforceb(iu,ju) 
-     &                       * (angle-equilb(iu,ju))**2.0d0
+                        vphi = kforceb(iu,ju) * (angle-equilb(iu,ju))**2
                         
                         bfactor(ibend) = dexp(-beta*vphi)
                         bsum_bend = bsum_bend + bfactor(ibend)
@@ -902,7 +896,7 @@ c     --- select one of the trial sites at random
                               ovphi = ovphi 
      &                             + dlog(bfactor(ibend))/(-beta)
 
-c                              write(6,*) 'd',iu,iufrom,ju
+c                              write(2,*) 'd',iu,iufrom,ju
 c     &                             ,dlog(bfactor(ibend))/(-beta)
 
                               goto 20
@@ -1084,7 +1078,7 @@ c     --- check to make sure this will give a number
      &                          - equilb(iufrom,ju))**2
                            
 c                           if (lshit) then
-c                              write(6,*) iufrom,iu,ju
+c                              write(2,*) iufrom,iu,ju
 c     &                             ,kforceb(iufrom,ju) 
 c     &                             * (angle
 c     &                          - equilb(iufrom,ju))**2
@@ -1320,12 +1314,12 @@ c     --- first determine bending energy for iuprev-iufrom-iu
                      
                      angle = dacos(thetac)
                      
-                     vphi = vphi + kforcea(count)
-     &                    * (angle-equila(count))**2.0d0
+                     vphi = vphi + kforcea(count) * (angle-equila(count)
+     $                    )**2
 
 c                     if (lshit) then
-c                        write(6,*) iu,iufrom,iuprev,kforcea(count)
-c     &                       * (angle-equila(count))**2.0d0
+c                        write(2,*) iu,iufrom,iuprev,kforcea(count)
+c     &                       * (angle-equila(count))**2
 c                     endif
                   endif
 
@@ -1359,13 +1353,13 @@ c     --- now determine bending energy for iu-iend-ipast if it exists
      &                          / (length * lengthb)
                            angle = dacos( thetac )
                           
-                           vphi = vphi + kforceb(iu,ku)
-     &                          * (angle-equilb(iu,ku))**2.0d0
+                           vphi = vphi + kforceb(iu,ku) * (angle
+     $                          -equilb(iu,ku))**2
                            
 c                           if (lshit) then
-c                              write(6,*) iu,ju,ku
+c                              write(2,*) iu,ju,ku
 c     &                             ,kforceb(iu,ku)
-c     &                          * (angle-equilb(iu,ku))**2.0d0
+c     &                          * (angle-equilb(iu,ku))**2
 c                           endif
                         enddo
                      endif
@@ -1405,7 +1399,7 @@ c     --- jut4 must already exist or we made a big mistake
                            if (jut4.gt.iring(imolty)) then
                               goto 41
                            endif
-                           write(6,*) 'jut4,jut3,jut2,iu',
+                           write(2,*) 'jut4,jut3,jut2,iu',
      &                          jut4,jut3,jut2,iu
                            stop 'trouble jut4 in crankshaft'
                         endif
@@ -1457,7 +1451,7 @@ c     --- calculate torsions for ipast-iend-iu-
 
 c     --- jut4 must already exist or we made a big mistake
                            if (.not. lexist(jut4)) then
-                              write(6,*) 'jut4,jut3,jut2,iu',
+                              write(2,*) 'jut4,jut3,jut2,iu',
      &                             jut4,jut3,jut2,iu
                               stop 'trouble jut4 in crankshaft'
                            endif
@@ -1529,9 +1523,9 @@ c     --- determine angles for iend - iu - iend
      &                          / (lengtha*lengthb)
 
                            if (abs(thetac).gt.1) then
-                              write(6,*) '*********************'
+                              write(2,*) '*********************'
      &                             ,'****************************'
-                              write(6,*) iu,ku,xvec(iu,ku)
+                              write(2,*) iu,ku,xvec(iu,ku)
      &                             ,yvec(iu,ku)
      &                             ,zvec(iu,ku),lengthb
                               stop 'shitfuck'
@@ -1543,7 +1537,7 @@ c     --- determine angles for iend - iu - iend
      &                          * (angle-equilb(ju,ku))**2
        
 c                           if (lshit) then
-c                              write(6,*) ju,iu,ku,kforceb(ju,ku)
+c                              write(2,*) ju,iu,ku,kforceb(ju,ku)
 c     &                          * (angle-equilb(ju,ku))**2
 c                           endif
                            
@@ -1579,11 +1573,11 @@ c     --- we already calculated these
 
                            angle = dacos(thetac)
                            
-                           vphi = vphi + kforceb(iu,ju)
-     &                          * (angle-equilb(iu,ju))**2.0d0
+                           vphi = vphi + kforceb(iu,ju) * (angle
+     $                          -equilb(iu,ju))**2
                            
 c                           if (lshit) then
-c                              write(6,*) iu,iufrom,ju,kforceb(iu,ju)
+c                              write(2,*) iu,iufrom,ju,kforceb(iu,ju)
 c     &                          * (angle-equilb(iu,ju))**2.0d0
 c                           endif
                         endif
@@ -1803,7 +1797,7 @@ c     --- use old coordinates
          endif
       endif
      
-c      write(6,*) 'END SAFECMBC ',iinit,'!'
+c      write(2,*) 'END SAFECMBC ',iinit,'!'
       return 
 
       end

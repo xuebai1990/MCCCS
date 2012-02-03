@@ -1,4 +1,4 @@
-      function coru(imolty,jmolty,rho)
+      function coru(imolty,jmolty,rho,ibox)
 
 c coru
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -38,7 +38,7 @@ c **********************************
       include 'nsix.inc'
 
       double precision coru,rci3,rho,epsilon2,sigma2
-      integer imolty,jmolty,ii,jj, ntii, ntjj, ntij
+      integer imolty,jmolty,ii,jj, ntii, ntjj, ntij,ibox
 
       coru = 0.0d0
 
@@ -57,11 +57,11 @@ c **********************************
             elseif (lninesix) then
                ntij = (ntii-1)*nxatom + ntjj
                coru = coru + 8.0d0*onepi*rho*epsnx(ntij)*
-     &            rzero(ntij)**3*(rzero(ntij)/rcut)**3*
-     &            ((rzero(ntij)/rcut)**3/3.0d0 - 1.0d0) 
+     &            rzero(ntij)**3*(rzero(ntij)/rcut(ibox))**3*
+     &            ((rzero(ntij)/rcut(ibox))**3/3.0d0 - 1.0d0) 
             else
                ntij = (ntii-1)*nntype + ntjj
-               rci3 = sig2ij(ntij)**(3.0d0/2.0d0) / rcut**3
+               rci3 = sig2ij(ntij)**(3.0d0/2.0d0) / rcut(ibox)**3
                if ( lexpand(imolty) .and. lexpand(jmolty) ) then
                   sigma2 = (sigma(imolty,ii)+sigma(jmolty,jj))**2/4.0d0
                   epsilon2 = dsqrt(epsilon(imolty,ii)

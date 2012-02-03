@@ -82,7 +82,7 @@ C --------------------------------------------------------------------
       enddo
 
 c      do ij = 1,9
-c         write(6,*) 'ij',ij,'vsh',(vsh(ij)/80.0d0),
+c         write(2,*) 'ij',ij,'vsh',(vsh(ij)/80.0d0),
 c     +                      'vsha',(vsha(ij)/80.0d0),
 c     +                      'eij',(eij(ij)/80.0d0)
 c      enddo

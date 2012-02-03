@@ -1,5 +1,5 @@
-      subroutine recippress(ibox,repress,pxx,pyy,pzz)
-
+      subroutine recippress(ibox,repress,pxx,pyy,pzz,pxy,pyx,pxz,pzx,
+     &                      pyz,pzy)
 c recippress
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff, 
@@ -34,21 +34,36 @@ c    ********************************************************************
       include 'control.inc'
       include 'ewaldsum.inc'
       include 'coord.inc'
+      include 'poten.inc'
       integer ncount,ibox,i,ii,imolty
       double precision factor,repress,repressx,repressy,repressz
      &     ,recipintra,piix,piiy,piiz,xcmi,ycmi,zcmi,arg
 
-      double precision pxx,pyy,pzz,intraxx,intrayy,intrazz
+      double precision pxx,pyy,pzz,intraxx,intrayy,intrazz,intraxy
+     &     ,intraxz,intrazy,intrayz,intrayx,intrazx,pxy,pyx,pyz,pzy
+     &     ,pxz,pzx
 
-      repress = 0.0d0
+      repress  = 0.0d0
       repressx = 0.0d0
       repressy = 0.0d0
       repressz = 0.0d0
       recipintra = 0.0d0
+      pxy = 0.0d0
+      pxz = 0.0d0
+      pyx = 0.0d0
+      pyz = 0.0d0
+      pzx = 0.0d0
+      pzy = 0.0d0
 
       intraxx = 0.0d0
       intrayy = 0.0d0
       intrazz = 0.0d0
+      intraxy = 0.0d0
+      intrazy = 0.0d0
+      intraxz = 0.0d0
+      intrazx = 0.0d0
+      intrayz = 0.0d0
+      intrayx = 0.0d0
 
       do ncount = 1,numvect(ibox)
          factor = prefact(ncount,ibox)*(ssumr(ncount,ibox)*
@@ -66,12 +81,27 @@ c    ********************************************************************
      &        *calp(ibox)) + 1.0d0/(kx(ncount,ibox)*kx(ncount,ibox)+
      &        ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)*
      &        kz(ncount,ibox)))*2.0d0*kz(ncount,ibox)*kz(ncount,ibox))
+         pxy = pxy + factor*(0.0d0 - (1.0d0/(4.0d0*calp(ibox)
+     &        *calp(ibox)) + 1.0d0/(kx(ncount,ibox)*kx(ncount,ibox)+
+     &        ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)*
+     &        kz(ncount,ibox)))*2.0d0*kx(ncount,ibox)*ky(ncount,ibox))
+         pxz = pxz + factor*(0.0d0 - (1.0d0/(4.0d0*calp(ibox)
+     &        *calp(ibox)) + 1.0d0/(kx(ncount,ibox)*kx(ncount,ibox)+
+     &        ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)*
+     &        kz(ncount,ibox)))*2.0d0*kx(ncount,ibox)*kz(ncount,ibox))
+         pyz = pyz + factor*(0.0d0 - (1.0d0/(4.0d0*calp(ibox)
+     &        *calp(ibox)) + 1.0d0/(kx(ncount,ibox)*kx(ncount,ibox)+
+     &        ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)*
+     &        kz(ncount,ibox)))*2.0d0*ky(ncount,ibox)*kz(ncount,ibox))
       enddo
       repress = repressx + repressy + repressz
 c * keep x,y,z separate for surface tension calculation
       pxx = repressx
       pyy = repressy
       pzz = repressz
+      pyx = pxy
+      pzx = pxz
+      pzy = pyz
 
 c --- the intramolecular part should be substracted
       do 10 i = 1, nchain
@@ -110,18 +140,31 @@ c * keep x,y and z separate for surface tension calculation
                   intraxx = intraxx + factor*(kx(ncount,ibox)*piix)
                   intrayy = intrayy + factor*(ky(ncount,ibox)*piiy)
                   intrazz = intrazz + factor*(kz(ncount,ibox)*piiz)
+                  intraxy = intraxy + factor*(kx(ncount,ibox)*piiy)
+                  intraxz = intraxz + factor*(kx(ncount,ibox)*piiz)
+                  intrayx = intrayx + factor*(ky(ncount,ibox)*piix)
+                  intrayz = intrayz + factor*(ky(ncount,ibox)*piiz)
+                  intrazx = intrazx + factor*(kz(ncount,ibox)*piix)
+                  intrazy = intrazy + factor*(kz(ncount,ibox)*piiy)
 
                enddo
             enddo
          endif
  10   continue
-      repress = repress + recipintra
+      repress = (repress + recipintra)*qqfact
       
-      pxx = pxx + intraxx
-      pyy = pyy + intrayy
-      pzz = pzz + intrazz
+      pxx = (pxx + intraxx)*qqfact
+      pyy = (pyy + intrayy)*qqfact
+      pzz = (pzz + intrazz)*qqfact
 
-c      write(6,*) 'internal part:',intraxx,intrayy,intrazz
+      pxy = pxy + intraxy
+      pyx = pyx + intrayx
+      pxz = pxz + intraxz
+      pzx = pzx + intrazx
+      pyz = pyz + intrayz
+      pzy = pzy + intrazy
+
+c      write(2,*) 'internal part:',intraxx,intrayy,intrazz
       
       return
       end

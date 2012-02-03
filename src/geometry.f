@@ -78,7 +78,7 @@ c     --- assign nchben_a and ncben_b
       nchben_a = nchbna(imolty)
       nchben_b = nchbnb(imolty)
 
-c      write(6,*) 'START GEOMETRY'
+c      write(2,*) 'START GEOMETRY'
 
 c     --- initialize trial energies
       vvibtr = 0.0d0
@@ -413,7 +413,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c     --- End Bond angle biased selection ---           c 
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-c      write(6,*) 'FINISH GEOMETRY'
+c      write(2,*) 'FINISH GEOMETRY'
 
       return
       end
@@ -454,7 +454,7 @@ c     *************************************************************
       double precision equil, kforce, beta, angle, vangle, rr, v1, v2
      &     ,random
 
-c      write(6,*) 'start BENDANGLE'
+c      write(2,*) 'start BENDANGLE'
 
       if ( kforce .gt. 0.1d0 ) then
 c        --- find a vector inside the unit sphere
@@ -468,7 +468,7 @@ c        --- select angle from a gaussian distribution
      &        /( kforce*beta*rr) )
          
          if (angle .le. 0.0d0 .or. angle .ge. 3.1415 ) then
-            write(6,*) 'chose angle outside of 0,Pi in bendangle'
+            write(2,*) 'chose angle outside of 0,Pi in bendangle'
             goto 80
          endif
 
@@ -481,7 +481,7 @@ c        --- fixed bond angle
          vangle = 0.0d0
       endif
 
-c      write(6,*) 'end BENDANGLE'
+c      write(2,*) 'end BENDANGLE'
 
       return
       end

@@ -21,16 +21,16 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      logical lgibbs,lgrand,lnpt,lanes,llj
+      logical lgibbs,lgrand,lnpt,lanes,llj,lmipsw,lexpee
       logical lpbc,lpbcx,lpbcy,lpbcz,lfold,lijall,lewald
       logical lchgall,ldielect
       logical lexpsix,lmmff 
-      logical lninesix
+      logical lninesix,lgaro
       logical ltailc,lshift
       logical lneigh,lvirial
       logical lcutcm,ldual
       integer nmax,numax,ntmax,nntype,nvmax,nbxmax,npamax,npabmax
-     & ,maxbin,cmax,cmaxa,tor_bin_max,nbinmax_ete
+     & ,maxbin,cmax,cmaxa,tor_bin_max,nbinmax_ete,smax
       integer vectormax,maxvir,maxntemp,nchmax,nchtor_max,nchbn_max
       integer ntdifmx,nbinmx,angle_max,ang_bin_max,tor_max	
 c --------------------------------------------------------------
@@ -58,6 +58,12 @@ c    then one chain will be simulated in each box independently and
 c    the second viral coefficient will be calculated for their 
 c    interactions at a series of distances along the x-axis
       parameter (lvirial = .false.)
+c if lmipsw is true, then thermodynamic integration is performed
+c for the phases, fort.35 must be supplied if so
+      parameter (lmipsw = .false.)
+c if lexpee is true, then expanded esnemble is performed
+c for the phases, fort.44 must be supplied if so
+      parameter (lexpee = .false.)
 c ******************************************
 c *** PARAMETERS FOR BOUNDARY CONDITIONS ***
 c ******************************************
@@ -86,15 +92,16 @@ c    * check top of sumup.f if lijall = true and lchgall is false
       parameter (lijall = .false.)
 c if LCHGALL= .TRUE.
 c    then all the electrostatic interaction are considered 
-      parameter (lchgall = .true.)
+      parameter (lchgall = .false.)
 C if LCUTCM=.TRUE. then a cutoff of the centers of mass will be used
 c with a value of rcmu as calculated in ctrmas
       parameter (lcutcm = .true.)
 c if LEWALD=.TRUE. then ewald-sum will be used to calculate the
 c electrostatic interactions.
-      parameter (lewald = .true.)
+      parameter (lewald = .false.)
 c if LDIELECT=.TRUE. then dielectric constant will be calculated and
 c LEWALD must be .TRUE.
+c Correct only in NVT ensemble
       parameter (ldielect = .false.)
 c ********************************************
 c *** PARAMETERS FOR CBMC-PSEUDO-POTENTIAL ***
@@ -108,7 +115,9 @@ c Carlo (DC-CBMC)
 c ********************************************
 c ***   PARAMETER FOR LENNARD-JONES 12-6   ***
 c*********************************************
-      parameter (llj = .true.)
+C This is only used if you are using regular lj potential ie without shifting or modifying 
+C it in any other way. 
+      parameter (llj = .false.)
 c ********************************************
 c *** PARAMETERS FOR EXP-6 POTENTIAL       ***
 c ********************************************
@@ -124,6 +133,11 @@ c *** PARAMETERS FOR 9-6 POTENTIAL ***
 c ************************************
 c if LNINESIX=.TRUE. then the 9-6 potential will be used.
       parameter (lninesix = .false.)
+c ********************************************
+c *** PARAMETERS FOR GAROFALINI POTENTIAL  ***
+c ********************************************
+c if LGARO=.TRUE. garofalini potential will be used instead of leonard jones
+      parameter (lgaro = .false.)
 c ***************************************
 c *** PARAMETERS FOR TAIL CORRECTIONS ***
 c ***************************************
@@ -143,17 +157,19 @@ c ***************************************
 c ** DIMENSIONS FOR ARRAYS             **
 c ***************************************
 c - nmax = maximum number of chains +2
-      parameter (nmax = 700)
+      parameter (nmax = 2512)
 c - numax = maximum number of units
-      parameter (numax = 30)
+      parameter (numax = 26)
 c - ntmax = maximum number of types of chains
       parameter (ntmax = 3)
+c - smax = max no. of mstates
+      parameter (smax = 35)
 c - nbxmax = maximum number of boxes
-      parameter (nbxmax = 2) 
+      parameter (nbxmax = 3) 
 c - nntype = number of types of beads
-      parameter (nntype = 200)
+      parameter (nntype = 350)
 c - nvmax = maximum number of bond vibration and bending constants
-      parameter (nvmax = 100)
+      parameter (nvmax = 300)
 c - npamax = maximum number of pairs to switch or swatch
       parameter (npamax = 20)
 c - npabmax = maximum number of box pairs (for swatch and swap) 
@@ -167,12 +183,12 @@ c - nchbn_max = maxium number of choices for bending CBMC growth
 c - nchtor_max = maximum number of choices for torsion CBMC growth
       parameter (nchtor_max = 200)
 c - vectormax = the maximum number of reciprocal vectors for Ewald sum
-      parameter (vectormax=10000) 
+      parameter (vectormax=20000) 
 
 c ****************************************
 c *** SAFECBMC max number of bins        ***
 c ****************************************
-      parameter (maxbin = 201)
+      parameter (maxbin = 251)
 
 c *************************************************************
 c *** cmax is the max number of cells for the linkcell list ***
@@ -189,20 +205,19 @@ C*************************************************************
 
 C NTDIFMX = max number of diff beads in simulation
 
-	parameter(ntdifmx=10)	
+	parameter(ntdifmx=30)	
 
 C NBINMX = max number of bins for histograms
 
-	parameter(nbinmx=200)
-
+	parameter(nbinmx=251)
 
 C THESE ARE FOR ANGLE AND TORSIONAL DISTRIBUTION
 
-        parameter(angle_max=50)
-	parameter(ang_bin_max=360)
-	parameter(tor_bin_max=360)
-        parameter(tor_max=4)
+        parameter(angle_max=2)
+	parameter(ang_bin_max=2)
+	parameter(tor_bin_max=2)
+        parameter(tor_max=2)
 
 C  For end to end vector calculation 
 
-       parameter(nbinmax_ete=2000)
+       parameter(nbinmax_ete=251)

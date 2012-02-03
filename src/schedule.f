@@ -37,17 +37,18 @@ c     *******************************************************************
       include 'inputdata.inc'
 
       logical lprint,lfind
+      integer random_index
       integer kickout,icbu,igrow,imolty,iutry,iut,invtry,iu,ju
       integer ibead,count,ivib,idir,movetype,iprev,itry,i,ib2
       integer temp_store,temp_count,zz,outer_sites,index,outer_num
      &     ,outer_prev,iufrom,outer_try
       double precision dbgrow,random
-      parameter (lprint = .false.)
+      parameter (lprint = .true.)
       dimension temp_store(numax),outer_sites(numax),outer_prev(numax)
      &     ,lfind(numax)
 c ------------------------------------------------------------------
 
-c      write(6,*) 'start SCHEDULE'
+c      write(2,*) 'start SCHEDULE'
 
 c     DECODER for the new growth logic
 c     lexshed is true if the bead exists at that time of the growth 
@@ -80,7 +81,9 @@ c     --- initialize lexshed so all beads currently exist
  
 c        -- select the first bead to grow from
          if (lrigid(imolty)) then
-            iutry = riutry(imolty,1)
+! N.R. Randomly select one of the grow points
+            random_index = int(dble(rindex(imolty))*random()+1)
+            iutry = riutry(imolty,random_index)
          elseif ( lrig(imolty).and.nrig(imolty).gt.0 ) then
             dbgrow = random()*dble(nrig(imolty)) + 1.0d0
             iutry = irig(imolty,int(dbgrow))
@@ -101,8 +104,8 @@ c        -- select the first bead to grow from
          endif
          
 
-c         write(6,*) '********************************************'
-c         write(6,*) 'iutry',iutry
+c         write(2,*) '********************************************'
+c         write(2,*) 'iutry',iutry
 
          idir = icbdir(imolty)
          growfrom(1) = iutry
@@ -193,8 +196,8 @@ c              --- we regrew all branches, no previous bead
                endif
             elseif ( invtry - count .ne. 1 ) then
 c              --- problem in logic, should only be one nongrown bead
-               write(6,*) 'invtry,count',invtry,count
-               write(6,*) 'igrow,imolty',igrow,imolty
+               write(2,*) 'invtry,count',invtry,count
+               write(2,*) 'igrow,imolty',igrow,imolty
                stop 'logic problem in schedule'
             endif
          endif   
@@ -307,15 +310,12 @@ c        --- grow all non-rigid beads from the rigid part
                invtry = invib(imolty,riutry(imolty,i)) - 1
                grownum(i) = invtry 
                growfrom(i) = riutry(imolty,i)
-c  
-c               growprev(i) = 0
 
+c        ---  for rigid molecules, have rigid vib last
                growprev(i)=ijvib(imolty,growfrom(i),invtry+1) 
 
-c        --- for rigid molecules, have rigid vib last
                do ivib = 1, invtry
                   iut = ijvib(imolty,riutry(imolty,i),ivib)
-
 c         --- grow these branches
                   temp_count = temp_count + 1
                   temp_store(temp_count) = iut
@@ -328,7 +328,7 @@ c                 --- choose grow bead randomly from temp_store
                   itry = int ( dble(zz) * random() ) + 1
                   iut = temp_store(itry)
                   count = count + 1
-                  growlist(index,count) = iut
+                  growlist(i,count) = iut
                   lexshed(iut) = .false.
 
 c                 --- update temp_store for next iteration
@@ -336,6 +336,7 @@ c                 --- update temp_store for next iteration
                enddo
             enddo
          endif
+
 
 c        --- end part that is specific for rigid molecules
       elseif (movetype .eq. 5) then
@@ -382,7 +383,7 @@ c * end iswatch stuff *
       else
 
 c        --- non-existant move type
-         write(6,*) 'schedule movetype ',movetype
+         write(2,*) 'schedule movetype ',movetype
          stop 'non-valid move type'
       endif
 
@@ -394,7 +395,7 @@ c     from here on down config, swap, and swatch are the same
 c     OLD METHOD - not fully random - removed 6-13-98
 
 c      if ( .false. ) then 
-c         write(6,*) 'old method'
+c         write(2,*) 'old method'
 c      ibead = 0
 c      index = 0
 c 50   if ( index .lt. islen ) then
@@ -523,20 +524,20 @@ c           --- end of while loop 70
       endif
 
       if ( lprint ) then
-         write(6,*) 'movetype',movetype
-         write(6,*) 'index',index
+         write(2,*) 'movetype',movetype
+         write(2,*) 'index',index
          do ibead = 1,index
-            write(6,*) 'ibead',ibead
-            write(6,*) 'growfrom(ibead)',growfrom(ibead)
-            write(6,*) 'growprev(ibead)',growprev(ibead)
-            write(6,*) 'grownum(ibead)',grownum(ibead)
+            write(2,*) 'ibead',ibead
+            write(2,*) 'growfrom(ibead)',growfrom(ibead)
+            write(2,*) 'growprev(ibead)',growprev(ibead)
+            write(2,*) 'grownum(ibead)',grownum(ibead)
             do count = 1,grownum(ibead)
-               write(6,*) 'count,growlist(ibead,count)',count
+               write(2,*) 'count,growlist(ibead,count)',count
      &              ,growlist(ibead,count)
             enddo
          enddo
          do iu = 1,igrow
-            write(6,*) 'iu,lexshed(iu)',iu,lexshed(iu)
+            write(2,*) 'iu,lexshed(iu)',iu,lexshed(iu)
          enddo
       endif
 
@@ -599,7 +600,7 @@ c     --- cycle through the rest of the rigid beads
       
 
 
-c      write(6,*) 'end SCHEDULE'
+c      write(2,*) 'end SCHEDULE'
   
       return
       end

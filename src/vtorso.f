@@ -35,7 +35,28 @@ c *** common blocks ***
 
 c ----------------------------------------------------------------
 
-      if ( itype .ge. 1 .and. itype .le. 7) then
+      if ((itype.ge.200).and.(itype.le.202)) then
+        if (thetac.gt.1.0d0) thetac = 1.0d0
+         if (thetac.lt.-1.0d0) thetac = -1.0d0
+         theta = dacos(thetac)
+         vtorso = vtt0(itype)*(1.0d0-dcos(2.0d0*theta))
+
+      elseif ((itype.ge.100).and.(itype.le.140)) then
+         if (thetac.gt.1.d0) thetac=1.0d0
+         if (thetac.lt.-1.d0) thetac=-1.0d0
+         theta=dacos(thetac)+onepi
+         vtorso =  vtt0(itype) + vtt1(itype)*dcos(1.0d0*theta)+
+     &             vtt2(itype)*dcos(2.0d0*theta)+
+     &             vtt3(itype)*dcos(3.0d0*theta)+
+     &             vtt4(itype)*dcos(4.0d0*theta)+
+     &             vtt5(itype)*dcos(5.0d0*theta)+
+     &             vtt6(itype)*dcos(6.0d0*theta)+
+     &             vtt7(itype)*dcos(7.0d0*theta)+
+     &             vtt8(itype)*dcos(8.0d0*theta)+
+     &             vtt9(itype)*dcos(9.0d0*theta)
+ 
+
+      elseif ( itype .ge. 1 .and. itype .le. 7) then
 c - parameters for linear and branched alkane molecules - ALKANE CURRENTLY USED
 c - 5 + 6 parameters for alcohols
 c - Jorgensen potential
@@ -68,7 +89,7 @@ c extra displacement is to get the curve above zero
      &        -(14168.0d0)*tac5
      &        +(9213.7d0)*tac6
      &        +(4123.7d0)*tac7
-c         write(6,*) 'thetac,vtorso',thetac,vtorsoAK
+c         write(2,*) 'thetac,vtorso',thetac,vtorsoAK
 c - Roethlisberger torsional potential for linear perfluorocarbon
 c - PERFLUOROCARBON no longer USED
 c         if (thetac.gt.1.d0) thetac=1.0d0
@@ -251,6 +272,160 @@ c * formic acid H-C-O-H torsion from llnl 4/6/04 jms
 c same convention as topmon
 c backwards!         vtorso = 1258.0d0*(1.0d0 + dcos(theta))
          vtorso = 2576.5d0*(1.0d0 - dcos(2.0d0*theta))
+
+      elseif (itype .gt. 32 .and. itype .lt. 36) then
+c -- torsion from Neimark DMMP JPCA v108, 1435 (2004)
+         if (thetac.gt.1.0d0) thetac = 1.0d0
+         if (thetac.lt.-1.0d0) thetac=-1.0d0
+c -- pi added to torsion because the topmon code is backwards.  Trans
+c -- configuration is defined as 0.	 
+	 theta=dacos(thetac)+onepi
+         vtorso = vtt0(itype)*(1+cos(theta))
+     &        + vtt1(itype)*(1+cos(2.*theta))
+     &        + vtt2(itype)*(1+cos(3.*theta))
+     &        + vtt3(itype)*(1+cos(4.*theta))
+     &        + vtt4(itype)*(1+cos(5.*theta))
+     &        + vtt5(itype)*(1+cos(6.*theta))
+    
+      elseif(((itype.ge.36).and.(itype.le.37)).or.(itype.eq.40)) then
+          if (thetac.gt.1.0d0) thetac = 1.0d0
+          if (thetac.lt.-1.0d0) thetac=-1.0d0
+          theta=dacos(thetac)+onepi
+          vtorso =   vtt0(itype)
+     &             + vtt1(itype)*(1.0d0-dcos(theta))
+     &             + vtt2(itype)*(1.0d0+dcos(theta*2.0d0))
+     &             + vtt3(itype)*(1.0d0-dcos(theta*3.0d0))
+
+      elseif (itype .eq. 38 .or. itype .eq. 44) then
+         if (thetac.gt.1.0d0) thetac = 1.0d0
+         if (thetac.lt.-1.0d0) thetac=-1.0d0
+         theta=dacos(thetac)+onepi
+         vtorso = vtt0(itype)
+     &        + vtt1(itype)*(cos(theta))
+     &        + vtt2(itype)*(cos(2.*theta))
+     &        + vtt3(itype)*(cos(3.*theta))
+     &        + vtt4(itype)*(cos(4.*theta))
+     &        + vtt5(itype)*(cos(5.*theta))
+     &        + vtt6(itype)*(cos(6.*theta))
+     &        + vtt7(itype)*(cos(7.*theta))
+     &        + vtt8(itype)*(cos(8.*theta))
+     &        + vtt9(itype)*(cos(9.*theta))
+
+      elseif (itype .eq. 39) then
+         if (thetac.gt.1.0d0) thetac = 1.0d0
+         if (thetac.lt.-1.0d0) thetac=-1.0d0
+         theta=dacos(thetac)+onepi
+         vtorso = vtt0(itype)
+     &        + vtt1(itype)*(1+cos(theta))
+     &        + vtt2(itype)*(1+cos(2.*theta))
+     &        + vtt3(itype)*(1+cos(3.*theta))
+     &        + vtt4(itype)*(1+cos(4.*theta))
+     &        + vtt5(itype)*(1+cos(5.*theta))
+     &        + vtt6(itype)*(1+cos(6.*theta))
+
+
+      elseif(itype.eq.101) then
+          if (thetac.gt.1.0d0) thetac = 1.0d0
+          if (thetac.lt.-1.0d0) thetac=-1.0d0
+          theta=dacos(thetac)+onepi
+          vtorso =   vtt0(itype)
+     &             + vtt1(itype)*(1.0d0-dcos(theta))
+     &             + vtt2(itype)*(1.0d0+dcos(theta*2.0d0))
+     &             + vtt3(itype)*(1.0d0-dcos(theta*3.0d0))
+ 
+      elseif(itype.eq.103) then
+          if (thetac.gt.1.0d0) thetac = 1.0d0
+          if (thetac.lt.-1.0d0) thetac=-1.0d0
+          theta=dacos(thetac)+onepi
+          vtorso =   vtt0(itype)
+     &             + vtt1(itype)*dcos(theta)
+     &             + vtt2(itype)*dcos(theta*2.0d0)
+     &             + vtt3(itype)*dcos(theta*3.0d0)
+     &             + vtt4(itype)*dcos(theta*4.0d0)
+     &             + vtt5(itype)*dcos(theta*5.0d0)
+     &             + vtt6(itype)*dcos(theta*6.0d0)
+     &             + vtt7(itype)*dcos(theta*7.0d0)
+     &             + vtt8(itype)*dcos(theta*8.0d0)
+     &             + vtt9(itype)*dcos(theta*9.0d0)
+   
+
+
+      elseif(itype.eq.144) then
+          if (thetac.gt.1.0d0) thetac = 1.0d0
+          if (thetac.lt.-1.0d0) thetac=-1.0d0
+          theta=dacos(thetac)+onepi
+          vtorso =   vtt0(itype)
+     &             + vtt1(itype)*(1.0d0-dcos(theta))
+     &             + vtt2(itype)*(1.0d0+dcos(theta*2.0d0))
+     &             + vtt3(itype)*(1.0d0-dcos(theta*3.0d0))
+     &             + vtt4(itype)*(1.0d0+dcos(theta*4.0d0))              
+
+
+      elseif(itype.eq.145) then
+          if (thetac.gt.1.0d0) thetac = 1.0d0
+          if (thetac.lt.-1.0d0) thetac=-1.0d0
+          theta=dacos(thetac)+onepi
+          vtorso =   vtt0(itype)
+     &             + vtt1(itype)*dcos(theta)
+     &             + vtt2(itype)*dcos(theta*2.0d0)
+     &             + vtt3(itype)*dcos(theta*3.0d0)
+     &             + vtt4(itype)*dcos(theta*4.0d0)
+     &             + vtt5(itype)*dcos(theta*5.0d0)
+     &             + vtt6(itype)*dcos(theta*6.0d0)
+     &             + vtt7(itype)*dcos(theta*7.0d0) 
+
+      elseif(itype.eq.146) then
+          if (thetac.gt.1.0d0) thetac = 1.0d0
+          if (thetac.lt.-1.0d0) thetac=-1.0d0
+          theta=dacos(thetac)+onepi
+          vtorso =   vtt0(itype)
+     &             + vtt1(itype)*dcos(theta)
+     &             + vtt2(itype)*dcos(theta*2.0d0)
+     &             + vtt3(itype)*dcos(theta*3.0d0)
+     &             + vtt4(itype)*dcos(theta*4.0d0)
+     &             + vtt5(itype)*dcos(theta*5.0d0)
+     &             + vtt6(itype)*dcos(theta*6.0d0)
+
+
+      elseif(itype.eq.45 .or. itype.eq.46) then
+          if (thetac.gt.1.0d0) thetac = 1.0d0
+          if (thetac.lt.-1.0d0) thetac=-1.0d0
+          theta=dacos(thetac)+onepi
+          vtorso =   vtt0(itype)
+     &             + vtt1(itype)*dcos(theta)
+     &             + vtt2(itype)*dcos(theta*2.0d0)
+     &             + vtt3(itype)*dcos(theta*3.0d0)
+
+
+      elseif((itype.ge.51).and.(itype.le.52)) then
+          if (thetac.gt.1.0d0) thetac = 1.0d0
+          if (thetac.lt.-1.0d0) thetac=-1.0d0
+c -- pi added to torsion because the topmon code is backwards.  Trans
+c -- configuration is defined as 0.
+          theta=dacos(thetac)+onepi
+          vtorso =   vtt0(itype)
+     &             + vtt1(itype)*(1.0d0+dcos(theta))
+     &             + vtt2(itype)*(1.0d0-dcos(theta*2.0d0))
+     &             + vtt3(itype)*(1.0d0+dcos(theta*3.0d0))
+
+
+      elseif ( itype .ge. 60 .and. itype .le. 70) then
+
+c --- OPLS SEVEN PARAMETER FIT
+
+         if (thetac.gt.1.0d0) thetac = 1.0d0
+         if (thetac.lt.-1.0d0) thetac=-1.0d0
+
+         theta = dacos(thetac)
+
+         vtorso = vtt0(itype) + vtt1(itype)*thetac
+     &        + vtt2(itype)*dcos(theta*2.0d0)
+     &        + vtt3(itype)*dcos(theta*3.0d0)
+     &        + vtt4(itype)*dcos(theta*4.0d0)
+     &        + vtt5(itype)*dcos(theta*5.0d0)
+     &        + vtt6(itype)*dcos(theta*6.0d0)
+
+
 
       else
          stop 'you picked a non-defined torsional type'

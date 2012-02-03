@@ -44,6 +44,8 @@ c *** common blocks ***
       include 'inputdata.inc'
       include 'bnbsma.inc'
       include 'neigh.inc'
+      include 'ipswpar.inc'
+      include 'eepar.inc'
 
       logical lx,ly,lz,ovrlap,lneighij,lclu_cmp,lexclude(nmax)
       integer i,ibox,flagon,iunit,j,imolty,iuroty,icbu,ic,ip,k
@@ -52,6 +54,7 @@ c *** common blocks ***
      +                ,rxnew2,rynew2,rznew2,vintran,disvsq,deltv
      +                ,deltvb,vintern,vintero,vextn,vexto,vdum
      &                ,velectn,velecto
+     & ,velectn_intra,velectn_inter,velecto_intra,velecto_inter
 c *** further variable definitions
       double precision cosdg, sindg, rmrot
       double precision vrecipn,vrecipo
@@ -61,7 +64,7 @@ c *** further variable definitions
 
 C --------------------------------------------------------------------
 
-c      write(6,*) 'start ROTXYZ'
+c      write(2,*) 'start ROTXYZ'
       ovrlap = .false.
       if (lgrand) then
 c ---    select a chain at random in box 1!
@@ -95,6 +98,11 @@ c ***    select a chain type at random ***
                rchain = 2.0d0
             endif
          enddo
+
+         if ((lexpee).and.(imolty.ge.nmolty1))
+     &      imolty = ee_moltyp(mstate)
+                                                                                
+         if (temtyp(imolty).eq.0) return
          
          dchain = dble(temtyp(imolty))
          i = int( dchain*random() + 1 )
@@ -148,9 +156,9 @@ c *** Use iurot for rotation
          rzorig = rzuion(iuroty,1)
       endif
 
-c      write(6,*) 'before rotating'
-c      write(6,*) xcm(i),ycm(i),zcm(i)
-c      write(6,*) rxu(i,1),ryu(i,1),rzu(i,1)
+c      write(2,*) 'before rotating'
+c      write(2,*) xcm(i),ycm(i),zcm(i)
+c      write(2,*) rxu(i,1),ryu(i,1),rzu(i,1)
 
 
       if (lx) then 
@@ -222,6 +230,18 @@ c *** calculate the energy of i in the old configuration ***
          call recip(ibox,vrecipn,vrecipo,1)
          velectn = velectn + vrecipn
          velecto = velecto + vrecipo
+         vipswn = vipswn + vrecipn
+         vipswo = vipswo + vrecipo
+         if (lstagea) then
+           vrecipn  =  (1.0d0-(1.0d0-etais)*lambdais)*vrecipn
+           vrecipo  =  (1.0d0-(1.0d0-etais)*lambdais)*vrecipo
+         elseif (lstageb) then
+           vrecipn  =  etais*vrecipn
+           vrecipo  =  etais*vrecipo
+         elseif (lstagec) then
+           vrecipn  =  (etais+(1.0d0-etais)*lambdais)*vrecipn
+           vrecipo  =  (etais+(1.0d0-etais)*lambdais)*vrecipo
+         endif
          vnew = vnew + vrecipn
          vold = vold + vrecipo
       endif
@@ -256,12 +276,16 @@ c        --- move rejected
          return
       endif
 
-c      write(6,*) 'ROTXYZ accepted',i
+c      write(2,*) 'ROTXYZ accepted',i
       vbox(ibox) = vbox(ibox) + deltv
       vinterb(ibox)  = vinterb(ibox) + (vintern -  vintero)
       vintrab(ibox)  = vintrab(ibox) + (vintran - vintrao)
       vextb(ibox)    = vextb(ibox)   + (vextn-vexto)
       velectb(ibox)  = velectb(ibox) + (velectn-velecto)
+      vipswb(ibox) = vipswb(ibox) + (vipswn-vipswo)
+      vwellipswb(ibox) = vwellipswb(ibox) + (vwellipswn-vwellipswo)
+      vipsw = vipswb(ibox)
+      vwellipsw = vwellipswb(ibox)
  
       do j = 1, iunit
          rxu(i,j) = rxuion(j,2)
@@ -272,10 +296,12 @@ c      write(6,*) 'ROTXYZ accepted',i
       if (lewald .and. lelect(imolty)) then
 c *** update reciprocal-space sum
          call recip(ibox,vdum,vdum,2)
-         if ( ldielect ) then
-            call dipole(ibox,1)
-         endif
       endif
+ 
+      if ( ldielect ) then
+           call dipole(ibox,1)
+      endif
+ 
 
 c *** update center of mass
       call ctrmas(.false.,ibox,i,2)
@@ -305,7 +331,7 @@ c *** check for last unit ***
       endif
 
       if ( lneighbor ) then
-c         write(6,*) 'in rotxyz:',i,neigh_cnt(i)
+c         write(2,*) 'in rotxyz:',i,neigh_cnt(i)
          do 11 ic = 1, neigh_cnt(i)
             j = neighbor(ic,i)
             do ip = 1,neigh_cnt(j)
@@ -333,7 +359,7 @@ c         write(6,*) 'in rotxyz:',i,neigh_cnt(i)
          enddo
       endif
  
-c      write(6,*) 'end ROTXYZ'
+c      write(2,*) 'end ROTXYZ'
 
       return
       end

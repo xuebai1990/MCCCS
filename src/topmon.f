@@ -28,11 +28,17 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       integer i,seed
       double precision random,rtest
       dimension rtest(10)
+      character *50 fileout
+
 
 c ----------------------------------------------------------------
 
       read(4,*)
       read(4,*) seed
+
+      fileout = 'Nrandomtest.dat'
+
+      open(unit=71,FILE=fileout,status="unknown") 
 
 c      seed = 0
 
@@ -50,10 +56,11 @@ c --- print 10 random numbers for control ---
       do i=1,10
          rtest(i) = random()
       enddo
-      write(6,1000) (rtest(i),i=1,5)
-      write(6,1000) (rtest(i),i=6,10)
+      write(71,1000) (rtest(i),i=1,5)
+      write(71,1000) (rtest(i),i=6,10)
  1000 format(2x,5f10.6)
 
+      close(71)
 c --- call main program
       call monola
 

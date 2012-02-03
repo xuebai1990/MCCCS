@@ -44,6 +44,7 @@ c *** common blocks ***
       include 'connect.inc'
       include 'fepsi.inc'
       include 'inputdata.inc'
+      include 'eepar.inc'
 
       integer i, imolty, ii, j, jmolty, jj, ntii, ntjj, ntij
      +     ,nnn,nvirial,ip,itemp,iii
@@ -72,8 +73,8 @@ c *** only use for polarizable models
 
 C --------------------------------------------------------------------
 
-c      write(6,*) 'start VIRIAL'
-c      write(6,*) 'binvir',binvir
+c      write(2,*) 'start VIRIAL'
+c      write(2,*) 'binvir',binvir
       rminsq = rmin * rmin
       vmin = -2000.0d0
 
@@ -167,6 +168,7 @@ c     --- check exclusion table
                else
                   ntij = (ntii-1)*nntype + ntjj
                endif
+               if (lexpee) rminsq = rminee(ntij)*rminee(ntij)
                
                rxuij = rxui - rxu(j,jj)
                ryuij = ryui - ryu(j,jj)
@@ -382,8 +384,8 @@ c            write(11,*) 'energy:',velect+vinter*4.0d0
      &              = dexp(-(vinter+velect)/virtemp(itemp))-1.0d0
             enddo
          endif
-c         write(6,*) 'mayer',mayer
-c         write(6,*) 'nnn',nnn
+c         write(2,*) 'mayer',mayer
+c         write(2,*) 'nnn',nnn
          do itemp = 1,ntemp
             binvir(nnn,itemp) = binvir(nnn,itemp) + mayer(itemp)
          enddo
@@ -405,9 +407,9 @@ c         write(6,*) 'nnn',nnn
 
 c ################################################################
 
-c      write(6,*) 'binvir',binvir
+c      write(2,*) 'binvir',binvir
 
-c      write(6,*) 'end VIRIAL'
+c      write(2,*) 'end VIRIAL'
 
       return
       end

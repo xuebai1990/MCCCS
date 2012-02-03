@@ -64,7 +64,7 @@ c      for polynom fitting)
       do i=-maxp,ngrz+maxp-1
          zzz(i)=i*dgrz
       enddo
-      write(6,1000) ngrid,ngrx,dgrx,ngry,dgry,ngrz,dgrz
+      write(2,1000) ngrid,ngrx,dgrx,ngry,dgry,ngrz,dgrz
 c --- calculate interactions on grid
       idi=1
       xi=-dgrx
@@ -79,7 +79,7 @@ c --- calculate interactions on grid
 	       egrid(pgrid(i,j,k,ngrx,ngry))=sngl(exzeof(xi,yi,zi,idi))
 	    enddo
 	 enddo
-         write(6,*) 'Ztable: done ',i+1,' out of ',ngrx
+         write(2,*) 'Ztable: done ',i+1,' out of ',ngrx
       enddo
 c--   write table to disk
       call rwztab(1) 

@@ -53,7 +53,7 @@ c     ************************************************************
          
          masst(imolty) = masst(imolty) + mass(ntype(imolty,i))
 
-         write(6,*) 'bead ',iu,' beadtype ',ntype(imolty,i)
+         write(2,*) 'bead ',iu,' beadtype ',ntype(imolty,i)
 
          read(4,*) 
          read(4,*) invib(imolty,i),(ijvib(imolty,i,j)
@@ -61,7 +61,7 @@ c     ************************************************************
 
          if (invib(imolty,i).gt.6) then
 
-            write(6,*) 'imolty',imolty,'   i',i,'   invib'
+            write(2,*) 'imolty',imolty,'   i',i,'   invib'
      &           ,invib(imolty,i)
             stop 'too many vibrations'
          endif
@@ -85,7 +85,7 @@ c     ************************************************************
             call vibcheck(2,atype,btype,vibtype)
             
             if (vibtype.eq.0) then
-               write(6,*) 'atype,btype',atype,btype
+               write(2,*) 'atype,btype',atype,btype
                stop 'screwup in vibrations'
             endif
                         
@@ -105,7 +105,7 @@ c     ************************************************************
                   call bendcheck(2,atype,btype,ctype,bendtype)
 
                   if (bendtype.eq.0) then
-                     write(6,*) 'atype,btype,ctype',atype
+                     write(2,*) 'atype,btype,ctype',atype
      &                    ,btype,ctype
                      stop 'screwup in bending angles'
                   endif
@@ -126,7 +126,7 @@ c     ************************************************************
      &                       ,tortype)
 
                         if (tortype.eq.0) then
-                           write(6,*) 'atype,btype,ctype,dtype',atype
+                           write(2,*) 'atype,btype,ctype,dtype',atype
      &                          ,btype,ctype,dtype
                            stop 'screwup in torsion angles'
                         endif
@@ -473,7 +473,7 @@ c     *************************************************************
  
            if (lfinda.and.lfindb.and.lfindc.and.lfindd) then
               if (lfound) then
-                 write(6,*) 'a,b,c,d',atype,btype,ctype,dtype
+                 write(2,*) 'a,b,c,d',atype,btype,ctype,dtype
                  stop 'torsion type not distinguishable'
               endif
               
