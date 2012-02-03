@@ -4,9 +4,9 @@
 
 ### Intel Compiler for x86 architecture
 #COMPFLAGS     = -O2 -w90 -w95 -cm -p #-check_bounds# -g
-COMPFLAGS     = -O2 -w90 -w95 -cm #-check_bounds# -g
+COMPFLAGS     =  -O2 -w90 -w95 -cm -p#-check_bounds# -g
 ## only for debugging
-##COMPFLAGS     = -w90 -w95 -cm -CB -CU -g
+#COMPFLAGS     = -w90 -w95 -cm -CB -CU -g
 LD	      = ifc
 LDS 	      = ifc -c $(COMPFLAGS)
 LDFLAGS	      = -static $(COMPFLAGS)
@@ -15,12 +15,12 @@ LDFLAGS	      = -static $(COMPFLAGS)
 #COMPFLAGS     = -O2 -tpp2 -w90 -w95 -cm
 # only for debugging
 #COMPFLAGS     = -w90 -w95 -cm -CB -CU -g
-#LD            = efc
-#LDS           = efc -c $(COMPFLAGS)
+#LD            = ifort
+#LDS           = ifort -c $(COMPFLAGS)
 #LDFLAGS       = -static $(COMPFLAGS)
 
 ### GNU Compiler
-#COMPFLAGS     = -O2 -pg #-check_bounds# -g
+#COMPFLAGS     =  -pg #-check_bounds# -g
 #COMPFLAGS     = -O3 -fomit-frame-pointer -finline-functions -ffast-math -mcpu=i686 -march=i686
 #LD	      = g77
 #LDS 	      = g77 -c $(COMPFLAGS)
@@ -54,7 +54,8 @@ LINTLIBS      =
 
 MAKEFILE      = Makefile
 
-OBJS	      = atomtype.o \
+OBJS	      = analysis.o \
+		atomtype.o \
 		anes.o \
 		boltz.o \
 		bondlength.o \
@@ -69,6 +70,7 @@ OBJS	      = atomtype.o \
 		coruz.o \
 		ctrmas.o \
 		dipole.o \
+		dump.o \
 		energy.o \
 		erfunc.o \
 		expand.o \
@@ -139,7 +141,8 @@ PROGRAM       = topmon4
 
 SHELL	      = /bin/sh
 
-SRCS	     =  atomtype.f \
+SRCS	     =  analysis.f \
+		atomtype.f \
 		anes.f \
 		angle.f \
 		boltz.f \
@@ -155,6 +158,7 @@ SRCS	     =  atomtype.f \
 		coruz.f \
 		ctrmas.f \
 		dipole.f \
+		dump.f \
 		energy.f \
 		erfunc.f \
 		expand.f \
@@ -229,14 +233,17 @@ $(PROGRAM):     $(OBJS) $(LIBS) $(MAKEFILE)
 		@echo "done"
 
 ###
+analysis.o: control.inc coord.inc  inputdata.inc connect.inc gor.inc \
+	system.inc cell.inc analysis.f
+	$(LDS) analysis.f
 atomtype.o: atomtype.f
 	$(LDS) atomtype.f
 anes.o: control.inc coord.inc coord2.inc ensemble.inc rosen.inc \
 	inputdata.inc system.inc anes.f
 	$(LDS) anes.f
 boltz.o: boltz.f control.inc coord.inc system.inc poten.inc neigh.inc \
-	cbmc.inc external.inc connect.inc ewaldsum.inc \
-	fepsi.inc qqlist.inc nsix.inc boltz.f
+	cbmc.inc external.inc connect.inc ewaldsum.inc cell.inc \
+	peboco.inc fepsi.inc qqlist.inc nsix.inc boltz.f
 	$(LDS) boltz.f
 bondlength.o: bondlength.f
 	$(LDS) bondlength.f
@@ -265,8 +272,13 @@ ctrmas.o: control.inc coord.inc system.inc cell.inc ctrmas.f
 	$(LDS) ctrmas.f
 dipole.o: control.inc coord.inc coord2.inc ewaldsum.inc dipole.f
 	$(LDS) dipole.f
+dump.o: control.inc coord.inc poten.inc system.inc ensemble.inc cbmc.inc \
+	conver.inc inpar.inc external.inc zeolite.inc \
+	inputdata.inc blkavg.inc bnbsma.inc swtcmove.inc ewaldsum.inc \
+	cell.inc gor.inc dump.f
+	$(LDS) dump.f
 energy.o: control.inc coord.inc system.inc neigh.inc poten.inc coord2.inc \
-	external.inc connect.inc ewaldsum.inc fepsi.inc qqlist.inc nsix.inc energy.f
+	external.inc connect.inc ewaldsum.inc fepsi.inc qqlist.inc nsix.inc 	peboco.inc cell.inc energy.f
 	$(LDS) energy.f
 erfunc.o: erfunc.f
 	$(LDS) erfunc.f
@@ -319,7 +331,7 @@ molsetup.o: control.inc coord.inc connect.inc molsetup.f
 monola.o: control.inc coord.inc poten.inc system.inc ensemble.inc cbmc.inc \
 	conver.inc inpar.inc external.inc zeolite.inc \
 	inputdata.inc blkavg.inc bnbsma.inc swtcmove.inc ewaldsum.inc \
-	cell.inc monola.f
+	cell.inc gor.inc monola.f
 	$(LDS) monola.f
 monper.o: control.inc coord.inc system.inc ensemble.inc cbmc.inc \
 	inputdata.inc blkavg.inc bnbsma.inc connect.inc coord2.inc cell.inc \
@@ -347,7 +359,7 @@ readdat.o: control.inc coord.inc cbmc.inc system.inc conver.inc poten.inc \
 	inpar.inc external.inc externalmuir.inc zeolite.inc\
 	nrtab.inc connect.inc inputdata.inc ewaldsum.inc \
 	swtcmove.inc fepsi.inc expand.inc qqlist.inc clusterbias.inc \
-	cell.inc readdat.f
+	cell.inc gor.inc readdat.f
 	$(LDS) readdat.f
 rigfix.o: control.inc coord.inc cbmc.inc rosen.inc fix.inc connect.inc \
 	system.inc rigfix.f 
@@ -391,7 +403,7 @@ suijtab.o: control.inc coord.inc external.inc poten.inc system.inc \
 	$(LDS) suijtab.f
 sumup.o: coord.inc system.inc poten.inc conver.inc control.inc \
 	external.inc zeolite.inc connect.inc inputdata.inc fepsi.inc\
-        inputdata.inc qqlist.inc cell.inc nsix.inc sumup.f
+        inputdata.inc qqlist.inc cell.inc nsix.inc peboco.inc sumup.f
 	$(LDS) sumup.f
 susami.o: external.inc ljsamipara.inc susami.f
 	$(LDS) susami.f

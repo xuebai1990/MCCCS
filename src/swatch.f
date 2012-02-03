@@ -865,7 +865,7 @@ c     *** update center of mass
             call ctrmas(.false.,box,imolb,8)
             call ctrmas(.false.,box,imola,8)
 
-            if (licell .and. box .eq. boxlink) 
+            if (licell .and. (box .eq. boxlink)) 
      &           stop 'not yet implemented!'
 
 c     --- call nearest neighbor list

@@ -22,9 +22,10 @@ c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       logical lspecial,lqchg,lij,lpl
+      integer a15type	
       double precision sig2ij,epsij,epsilon,sigma,epsi,sigi,ecut
      +   ,extc12, extc3, extz0,aspecial,bspecial,q1
-      double precision qqfact,xiq,jayq,jayself,fqegp,a15,a15type
+      double precision qqfact,xiq,jayq,jayself,fqegp,a15
      &   ,qscale
       dimension fqegp(ntmax),a15(2),a15type(ntmax,numax,numax)
       dimension extc12(nntype), extc3(nntype), extz0(nntype)

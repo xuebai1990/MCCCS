@@ -195,13 +195,16 @@ c     --- time to do final crankshaft move
                            glist(counta) = growlist(iw,counta)
                         enddo
                         ichoi = nchoi(imolty)
+c     --- sometimes this loop makes the code skip geometry, which sets this
+c     --- maxlen (the maximum bond length that CBMC will try to grow)
+                        maxlen=2.0d0
                         goto 250
                      endif
                   enddo
                enddo
             enddo
          endif      
-
+         
 c        --- perform the biased selection of bond angles and get lengths
          call geometry(lnew,iw,i,imolty,angstart,iuprev,glist
      &        ,bondlen,bendang,phi,vvibtr,vbbtr,maxlen,wei_bend )

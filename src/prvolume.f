@@ -83,6 +83,11 @@ c     Select a box at  random to change the volume of box
             goto 99
          endif
       enddo
+
+      lx = .false.
+      ly = .false.
+      lz = .false.
+
       
  99   bnvol(boxvch) = bnvol(boxvch) + 1.0d0
 
@@ -270,9 +275,14 @@ c * v = u1 x u2
          if (rbcut/w(1) .gt. 0.5d0 .or.
      &        rbcut/w(2) .gt. 0.5d0 .or.
      &        rbcut/w(3) .gt. 0.5d0) then
+            write(6,*) 'Problem with line 275 prvolume.f'
             write(6,*) 'non-rectangular prvolume move rejected-',
-     &           ' box width below cutoff size'
-            goto 500
+     & ' box width below cutoff size'
+            write(6,*) 'w1:',w(1),'w2:',w(2),'w3:',w(3)
+            hmat(boxvch,jhmat) = hmato(jhmat)
+            call dump
+            stop
+c            goto 500
          endif
 
          hmati(boxvch,1) = (hmat(boxvch,5)*hmat(boxvch,9)
@@ -337,7 +347,7 @@ c --- calculate new volume
             rbcut = rcutchg(boxvch)
          endif
          if ( lpbcz ) then
-            if (lrect(boxvch)) then
+            if (lsolid(boxvch).and.lrect(boxvch)) then
 c *** volume move independently in x, y, z directions
                dfac=voln/volo
             else
@@ -354,7 +364,7 @@ c            write(6,*) 'prvolume move rejected - below cut-off size'
 c            return
 c         endif
 
-         if ( lrect(boxvch) ) then
+         if ( lsolid(boxvch).and.lrect(boxvch) ) then
             if (lx) boxlx(boxvch) = boxlx(boxvch) * dfac
             if (ly) boxly(boxvch) = boxly(boxvch) * dfac
             if (lz) boxlz(boxvch) = boxlz(boxvch) * dfac
@@ -366,6 +376,9 @@ c         endif
             endif
          endif
 
+
+         rbcut = 2.0d0*rbcut
+
          if (boxlx(boxvch) .lt. rbcut .or.
      &        boxly(boxvch) .lt. rbcut .or.
      &        (lpbcz .and. boxlz(boxvch) .lt. rbcut) ) then
@@ -375,8 +388,11 @@ c         endif
                boxlz(boxvch) = bzo
             endif
             write(6,*) 'boxvch',boxvch
-            write(6,*) 'prvolume move rejected - below cut-off size'
-
+            write(6,*) 'Problem in line 381 of subroutine prvolume.f'
+            write(6,*) 'A move was attempted that would lead to a 
+     & boxlength less than twice rcut'
+            call dump
+            stop
             return
          endif
 
@@ -395,7 +411,7 @@ c - WARNING
 c ----- Check if the chain i is in the correct box
             if (nboxi(i) .eq. boxvch) then
             
-               if (lrect(boxvch)) then
+               if (lsolid(boxvch).and.lrect(boxvch)) then
                   if ( lx ) then
                      dx = xcm(i) * df
                      xcm(i) = xcm(i) + dx
@@ -504,7 +520,7 @@ c --      accepted
 c ---     update centers of mass
           call ctrmas(.true.,boxvch,0,5)
 c *** update linkcell, if applicable
-          if (licell .and. boxvch .eq. boxlink) then
+          if (licell .and. (boxvch .eq. boxlink)) then
              call linkcell(1,1,lddum,lddum,lddum,lddum2)
           endif
           return

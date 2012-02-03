@@ -418,7 +418,7 @@ c *** update reciprocal-space sum
 c ***    update center of mass
          call ctrmas(.false.,ibox,i,7)
 c *** update linkcell, if applicable
-         if ( licell .and. ibox.eq.boxlink) then
+         if ( licell .and. (ibox.eq.boxlink)) then
             call linkcell(2,i,vdum,vdum,vdum,ddum)
          endif
 

@@ -196,7 +196,7 @@ c * to grow it with cbmc
                write(6,*) 'growing a sample structure with CBMC'
 
                if (nunit(i) .ne. nugrow(i)) then
-                  write(6,*) 'Can\'t grow molecule.  Please',
+                  write(6,*) 'Cant grow molecule.  Please',
      &                 ' provide a structure via fort.78'
                   stop
                endif

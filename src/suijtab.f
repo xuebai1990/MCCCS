@@ -680,15 +680,16 @@ c --- OPLS-UA sp2 hybrid [CH] group JACS 106, 6638-6646 (1984)
 c * AROMATICS
 
 c --- TraPPE-UA [CH] benzene carbon
-c *** maybe these three are for UA 9-site model?!?!?!?!?
-c      sigi(56) = 3.74d0
-c      epsi(56) = 48.0d0
-c      mass(56) = 13.0191d0
+c *** maybe these three are for UA 9-site model
+       sigi(56) = 3.74d0
+       epsi(56) = 48.0d0
+       mass(56) = 13.0191d0
+       chname(56) = ' Tr-UA CH benzene9'
 c * published CH(aro) for TraPPE-UA 6-site
-      sigi(56) = 3.695d0
-      epsi(56) = 50.5d0
-      mass(56) = 13.0191d0
-      chname(56) = ' Tr-UA CH benzene6'
+c      sigi(56) = 3.695d0
+c      epsi(56) = 50.5d0
+c      mass(56) = 13.0191d0
+c      chname(56) = ' Tr-UA CH benzene6'
 
 c --- TraPPE-UA middle benzene site
       sigi(57) = 0.0d0
@@ -1675,7 +1676,7 @@ c --- Charmm C' (carboxylic head group carbon)
       sigi(170) = 3.6170d0
       epsi(170) = 74.4770d0
       mass(170) = 0.003d0
-      chname(170) = ' CHARMM C\' ???    '
+      chname(170) = ' CHARMM C ???    '
 
 
 c * ALL-ATOM NITRILES
@@ -1709,6 +1710,12 @@ c --- TraPPE-AA acetonitrile methyl hydrogen C[H3]-C=-N
       epsi(174) = epsi(27)
       mass(174) = mass(27)
       chname(174) = ' Tr-AA [H]3C-C=-N '
+
+
+
+
+
+
 
 c * LEFTOVER PIECES
 

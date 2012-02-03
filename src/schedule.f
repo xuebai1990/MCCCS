@@ -307,7 +307,11 @@ c        --- grow all non-rigid beads from the rigid part
                invtry = invib(imolty,riutry(imolty,i)) - 1
                grownum(i) = invtry 
                growfrom(i) = riutry(imolty,i)
-               growprev(i) = 0
+c  
+c               growprev(i) = 0
+
+               growprev(i)=ijvib(imolty,growfrom(i),invtry+1) 
+
 c        --- for rigid molecules, have rigid vib last
                do ivib = 1, invtry
                   iut = ijvib(imolty,riutry(imolty,i),ivib)

@@ -45,6 +45,8 @@ c *** common blocks ***
       include 'qqlist.inc'
       include 'clusterbias.inc'
       include 'nsix.inc'
+      include 'peboco.inc'
+      include 'cell.inc'
 
       logical lqimol,lqjmol,lexplt,lcoulo,lfavor,lij2,liji,lqchgi
       logical lljii,ovrlap,ltors,lcharge_table,lt,lfound
@@ -63,6 +65,8 @@ c *** common blocks ***
       double precision xvec,yvec,zvec,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2
      &     ,daa1,da1a2,dot,thetac,vtorso
       double precision xcmi,ycmi,zcmi,rcmi,rcm,rcmsq,epsilon2,sigma2
+      double precision sx,sy,sz
+
 
       dimension xvec(numax,numax),yvec(numax,numax),zvec(numax,numax)
       dimension lcoulo(numax,numax),cellinc(cmax),jcell(nmax)
@@ -130,7 +134,7 @@ c         write(6,*) 'rcmi:',rcmi
          lij2 = .true.
       endif
 
-      if (licell.and.ibox.eq.boxlink) then
+      if (licell.and.(ibox.eq.boxlink)) then
          do ii = istart, iend
 
             rxui = rxuion(ii,flagon)
@@ -227,7 +231,7 @@ c     --- loop over all chains except i - not for grand can. with ibox=2 !
       if (.not.(lgrand.and.(ibox.eq.2))) then    
          do 98 k = 1, nmole
 
-            if (licell.and.ibox.eq.boxlink) then
+            if (licell.and.(ibox.eq.boxlink)) then
                j = jcell(k)
             else
                j = k
@@ -250,7 +254,97 @@ c              --- check if ctrmas within rcmsq
                   ryuij = ycmi - ycm(j)
                   rzuij = zcmi - zcm(j)
 c              --- minimum image the ctrmas pair separations ***
-                  if ( lpbc ) call mimage (rxuij,ryuij,rzuij,ibox)
+c                  if ( lpbc ) call mimage (rxuij,ryuij,rzuij,ibox)
+cccccccccccccccccccccccccccccccccccccccccccccc
+                  if (lpbc) then 
+ccccccccccccccccccccccccccccccccccccc
+                     
+                     if (lsolid(ibox) .and. .not. lrect(ibox))
+     &                    then
+c     ******************
+c     *** Collin's Code:
+c     *** non-rectangular box
+                        sx = rxuij*hmati(ibox,1)+ryuij*hmati(ibox
+     &                       ,4)  +rzuij*hmati(ibox,7)
+                        sy = rxuij*hmati(ibox,2)+ryuij*hmati(ibox
+     &                       ,5)  +rzuij*hmati(ibox,8)
+                        sz = rxuij*hmati(ibox,3)+ryuij*hmati(ibox
+     &                       ,6)  +rzuij*hmati(ibox,9)
+                        
+                        if ( sx .gt. 0.5d0 ) then
+                           sx = sx-1d0
+                        elseif ( sx .lt. -0.5d0 ) then
+                           sx = sx+1d0
+                        endif
+                        if ( sy .gt. 0.5d0 ) then
+                           sy = sy-1d0
+                        elseif ( sy .lt. -0.5d0 ) then
+                           sy = sy+1d0
+                        endif
+                        if ( sz .gt. 0.5d0 ) then
+                           sz = sz-1d0
+                        elseif ( sz .lt. -0.5d0 ) then
+                           sz = sz+1d0
+                        endif
+                        rxuij = sx*hmat(ibox,1)+sy*hmat(ibox,4)+
+     &                       sz*hmat(ibox,7)
+                        ryuij = sx*hmat(ibox,2)+sy*hmat(ibox,5)+
+     &                       sz*hmat(ibox,8)
+                        rzuij = sx*hmat(ibox,3)+sy*hmat(ibox,6)+
+     &                       sz*hmat(ibox,9)
+                                                                        
+                     else
+                        
+                        if ( lpbcx ) then
+                           if ( lfold ) then
+                              if ( rxuij .gt. hbx ) then
+                                 rxuij=rxuij-bx
+                              else
+                                 if (rxuij.lt.-hbx) rxuij=rxuij+
+     &                                bx
+                              endif
+                           else
+                              rxuij = rxuij - bx*dint(rxuij*bxi+
+     &                             dsign(0.5d0,rxuij))
+                           endif
+                        endif
+                        
+                        if ( lpbcy ) then
+                           if ( lfold ) then
+                              if ( ryuij .gt. hby ) then
+                                 ryuij=ryuij-by
+                              else
+                                 if (ryuij.lt.-hby) ryuij=ryuij+
+     &                                by
+                              endif
+                           else
+                              ryuij = ryuij - by*dint(ryuij*byi+
+     &                             dsign(0.5d0,ryuij))
+                           endif
+                        endif
+                        
+                        if ( lpbcz ) then
+                           if ( lfold ) then
+                              if (rzuij.gt.hbz) then
+                                 rzuij=rzuij-bz
+                              else
+                                 if (rzuij.lt.-hbz) rzuij=rzuij+
+     &                                bz
+                              endif
+                           else
+                              rzuij = rzuij - bz*dint(rzuij*bzi+
+     &                             dsign(0.5d0,rzuij))
+                           endif
+                        endif
+                     endif
+                     
+                     
+                  endif
+                  
+                  
+
+cccccccccccccccccccccccccccccccccccccccccc
+
                   rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
                   rcm = rbcut + rcmi + rcmu(j)
                   rcmsq = rcm*rcm
@@ -280,8 +374,101 @@ c --- called from CBMC and must set up charge-interaction table ---
                            rxuij = rxuion(ii,flagon) - rxu(j,jj)
                            ryuij = ryuion(ii,flagon) - ryu(j,jj)
                            rzuij = rzuion(ii,flagon) - rzu(j,jj)
-                           if ( lpbc ) 
-     &                          call mimage(rxuij,ryuij,rzuij,ibox)
+c                           if ( lpbc ) 
+c     &                          call mimage(rxuij,ryuij,rzuij,ibox)
+
+
+cccccccccccccccccccccccccccccccccccccccccc
+
+                           if (lpbc) then 
+ccccccccccccccccccccccccccccccccccccc
+                              
+                              if (lsolid(ibox) .and. .not. lrect(ibox))
+     &                             then
+c     ******************
+c     *** Collin's Code:
+c     *** non-rectangular box
+                                 sx = rxuij*hmati(ibox,1)+ryuij*hmati
+     &                                (ibox,4)  +rzuij*hmati(ibox,7)
+                                 sy = rxuij*hmati(ibox,2)+ryuij*hmati
+     &                                (ibox,5)  +rzuij*hmati(ibox,8)
+                                 sz = rxuij*hmati(ibox,3)+ryuij*hmati
+     &                                (ibox,6)  +rzuij*hmati(ibox,9)
+                                 
+                                 if ( sx .gt. 0.5d0 ) then
+                                    sx = sx-1d0
+                                 elseif ( sx .lt. -0.5d0 ) then
+                                    sx = sx+1d0
+                                 endif
+                                 if ( sy .gt. 0.5d0 ) then
+                                    sy = sy-1d0
+                                 elseif ( sy .lt. -0.5d0 ) then
+                                    sy = sy+1d0
+                                 endif
+                                 if ( sz .gt. 0.5d0 ) then
+                                    sz = sz-1d0
+                                 elseif ( sz .lt. -0.5d0 ) then
+                                    sz = sz+1d0
+                                 endif
+                                 rxuij = sx*hmat(ibox,1)+sy*hmat(ibox,4)
+     &                                + sz*hmat(ibox,7)
+                                 ryuij = sx*hmat(ibox,2)+sy*hmat(ibox,5)
+     &                                + sz*hmat(ibox,8)
+                                 rzuij = sx*hmat(ibox,3)+sy*hmat(ibox,6)
+     &                                +sz*hmat(ibox,9)
+                                 
+                              else
+                                 
+                                 if ( lpbcx ) then
+                                    if ( lfold ) then
+                                       if ( rxuij .gt. hbx ) then
+                                          rxuij=rxuij-bx
+                                       else
+                                          if (rxuij.lt.-hbx) rxuij=rxuij
+     &                                         +  bx
+                                       endif
+                                    else
+                                       rxuij = rxuij - bx*dint(rxuij*bxi
+     &                                      + dsign(0.5d0,rxuij))
+                                    endif
+                                 endif
+                                 
+                                 if ( lpbcy ) then
+                                    if ( lfold ) then
+                                       if ( ryuij .gt. hby ) then
+                                          ryuij=ryuij-by
+                                       else
+                                          if (ryuij.lt.-hby) ryuij=ryuij
+     &                                         + by
+                                       endif
+                                    else
+                                       ryuij = ryuij - by*dint(ryuij*byi
+     &                                      +dsign(0.5d0,ryuij))
+                                    endif
+                                 endif
+                                 
+                                 if ( lpbcz ) then
+                                    if ( lfold ) then
+                                       if (rzuij.gt.hbz) then
+                                          rzuij=rzuij-bz
+                                       else
+                                          if (rzuij.lt.-hbz) rzuij=rzuij
+     &                                         + bz
+                                       endif
+                                    else
+                                       rzuij = rzuij - bz*dint(rzuij*bzi
+     &                                      +dsign(0.5d0,rzuij))
+                                    endif
+                                 endif
+                              endif
+                              
+                              
+                           endif
+                           
+                           
+                           
+
+ccccccccccccccccccccccccccccccccccccccccc
                            rijsq = rxuij*rxuij + ryuij*ryuij 
      +                          + rzuij*rzuij
                            if ((rijsq .lt. rchgsq) .or. lijall) then
@@ -331,8 +518,103 @@ c                    --- check exclusion table
                      rzuij = rzui - rzu(j,jj)
                    
 c *** minimum image the pair separations ***
-                     if ( lpbc ) call mimage ( rxuij,ryuij,rzuij,ibox)
+c                     if ( lpbc ) call mimage ( rxuij,ryuij,rzuij,ibox)
                    
+cccccccccccccccccccccccccccccccc
+                     
+                     if (lpbc) then 
+ccccccccccccccccccccccccccccccccccccc
+                        
+                        if (lsolid(ibox) .and. .not. lrect(ibox))
+     &                       then
+c     ******************
+c     *** Collin's Code:
+c     *** non-rectangular box
+                           sx = rxuij*hmati(ibox,1)+ryuij*hmati
+     &                          (ibox,4)  +rzuij*hmati(ibox,7)
+                           sy = rxuij*hmati(ibox,2)+ryuij*hmati
+     &                          (ibox,5)  +rzuij*hmati(ibox,8)
+                           sz = rxuij*hmati(ibox,3)+ryuij*hmati
+     &                          (ibox,6)  +rzuij*hmati(ibox,9)
+                           
+                           if ( sx .gt. 0.5d0 ) then
+                              sx = sx-1d0
+                           elseif ( sx .lt. -0.5d0 ) then
+                              sx = sx+1d0
+                           endif
+                           if ( sy .gt. 0.5d0 ) then
+                              sy = sy-1d0
+                           elseif ( sy .lt. -0.5d0 ) then
+                              sy = sy+1d0
+                           endif
+                           if ( sz .gt. 0.5d0 ) then
+                              sz = sz-1d0
+                           elseif ( sz .lt. -0.5d0 ) then
+                              sz = sz+1d0
+                           endif
+                           rxuij = sx*hmat(ibox,1)+sy*hmat(ibox,4)
+     &                          + sz*hmat(ibox,7)
+                           ryuij = sx*hmat(ibox,2)+sy*hmat(ibox,5)
+     &                                + sz*hmat(ibox,8)
+                           rzuij = sx*hmat(ibox,3)+sy*hmat(ibox,6)
+     &                          +sz*hmat(ibox,9)
+                           
+                        else
+                           
+                           if ( lpbcx ) then
+                              if ( lfold ) then
+                                 if ( rxuij .gt. hbx ) then
+                                    rxuij=rxuij-bx
+                                 else
+                                    if (rxuij.lt.-hbx) rxuij=rxuij
+     &                                   +  bx
+                                 endif
+                              else
+                                 rxuij = rxuij - bx*dint(rxuij*bxi
+     &                                + dsign(0.5d0,rxuij))
+                              endif
+                           endif
+                           
+                           if ( lpbcy ) then
+                              if ( lfold ) then
+                                 if ( ryuij .gt. hby ) then
+                                    ryuij=ryuij-by
+                                 else
+                                    if (ryuij.lt.-hby) ryuij=ryuij
+     &                                   + by
+                                 endif
+                              else
+                                 ryuij = ryuij - by*dint(ryuij*byi
+     &                                +dsign(0.5d0,ryuij))
+                              endif
+                           endif
+                           
+                           if ( lpbcz ) then
+                              if ( lfold ) then
+                                 if (rzuij.gt.hbz) then
+                                    rzuij=rzuij-bz
+                                 else
+                                    if (rzuij.lt.-hbz) rzuij=rzuij
+     &                                   + bz
+                                 endif
+                              else
+                                 rzuij = rzuij - bz*dint(rzuij*bzi
+     &                                +dsign(0.5d0,rzuij))
+                              endif
+                           endif
+                        endif
+                        
+                        
+                     endif
+                     
+                     
+                     
+                                 
+                     
+                     
+                     
+cccccccccccccccccccccccccccccccc
+                     
                      rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
                    
                      if ( rijsq .lt. rminsq .and. .not. 
@@ -346,7 +628,16 @@ c                        write(6,*) 'distance', dsqrt(rijsq)
                         return
                      endif
                      if ( (rijsq .lt. rvdwsq) .or. lijall) then
-                        if ( lsami ) then
+                        if (llj.and.(.not.(lexpand(imolty).or.
+     &                       lexpand(jmolty)))) then
+                           if ( lij(ntii) .and. lij(ntjj) ) then
+                              sr2 = sig2ij(ntij) / rijsq
+                              epsilon2=epsij(ntij)
+                              sr6 = sr2 * sr2 * sr2
+                              vinter = vinter 
+     &                             + sr6*(sr6-1.0d0)*epsilon2
+                           endif
+                        elseif ( lsami ) then
                            vinter = vinter + ljsami(rijsq,ntij)
                         elseif (lexpsix) then
                            vinter = vinter + exsix(rijsq,ntij)
@@ -618,15 +909,29 @@ c * calculation of other non-bonded interactions
             if ( linclu(imolty,ii,jj) ) then
 
                if (lljii) then
-
+                  
                   if ( rijsq .lt. rminsq .and. .not. 
      &                 lexpand(imolty)) then
                      ovrlap = .true.
                 
-c                     write(6,*) 'intra ovrlap:',ii,jj
+c     write(6,*) 'intra ovrlap:',ii,jj
                      return
                   elseif ( rijsq .lt. rvdwsq .or. lijall) then
-                     if ( lsami ) then
+                     if (llj.and.(.not.(lexpand(imolty)
+     &                    ))) then
+                        sr2 = sig2ij(ntij) / rijsq
+                        epsilon2=epsij(ntij)
+                        sr6 = sr2 * sr2 * sr2
+                        vintra = vintra 
+     &                       + sr6*(sr6-1.0d0)*epsilon2
+                        
+c     * OH 1-5 interaction
+                        if (lainclu(imolty,ii,jj)) then
+                           vintra = vintra + 0.25d0 * 
+     &                          a15(a15type(imolty,ii,jj)) /
+     &                          ((rijsq**2)*(rijsq**2)*(rijsq**2))
+                        endif
+                     elseif ( lsami ) then
                         vintra = vintra + ljsami(rijsq,ntij)
                      elseif (lexpsix) then
                         vintra = vintra + exsix(rijsq,ntij)
@@ -801,6 +1106,13 @@ C ----------------------------------------------------------------------------
 
 c     note that vintra is only computed when the flag lljii is true
       v = vinter + vext + vintra + velect + vewald 
+      
+C  NEERAJ: Debugging start
+
+c      write(6,*) 'vinter:',vinter,'vext:',vext,'vintra:',vintra,'velect'
+c     & ,velect,'vewald:'vewald
+
+C  NEERAJ: DEbugging end
 
 c      write(6,*) 'end ENERGY'
 

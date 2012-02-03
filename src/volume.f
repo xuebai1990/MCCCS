@@ -97,6 +97,10 @@ c *** select pair of boxes to do the volume move
 
       bnvol(ipairb) = bnvol(ipairb) + 1.0d0
 
+      lx = .false.
+      ly = .false.
+      lz = .false.
+
       if ( lsolid(boxa) ) then
 c *** volume move independently in x, y, z directions
 c * changing to only move in z direction:
@@ -130,7 +134,6 @@ c            lz(boxa) = .true.
             enddo
          endif
       endif
-      
       if ( lsolid(boxb) ) then
 c *** volume move independently in x, y, z directions
 c * changing to only move in z direction:
@@ -263,6 +266,9 @@ c$$$            endif
 
       enddo
 
+
+c      write(6,*) 'before lncubic', lx,ly,lz
+
 c --- calculate total volume
       volt = volo(boxa) + volo(boxb)
 
@@ -375,9 +381,14 @@ c * v = u1 x u2
          if (rbcut(hbox)/w(1) .gt. 0.5d0 .or.
      &        rbcut(hbox)/w(2) .gt. 0.5d0 .or.
      &        rbcut(hbox)/w(3) .gt. 0.5d0) then
+            write(6,*) 'Problem with line 381 in volume.f'
             write(6,*) 'non-rectangular volume move rejected-',
-     &           ' box width below cutoff size'
-            goto 500
+     &' box width below cutoff size'
+            write(6,*) 'w1:',w(1),'w2:',w(2),'w3:',w(3)
+            hmat(hbox,jhmat) = hmato(jhmat)
+            call dump
+            stop
+c            goto 500
          endif
 
          voln(jbox) = volt-voln(hbox)
@@ -407,6 +418,13 @@ c * v = u1 x u2
          hmati(hbox,6) = (hmat(hbox,3)*hmat(hbox,4)-hmat(hbox,6)
      &        *hmat(hbox,1))/voln(hbox)
 c *** determine the displacement of the COM
+        
+         df=(voln(jbox)/volo(jbox))**(1.0d0/3.0d0)
+         boxlx(jbox) = boxlx(jbox)*df
+         boxly(jbox) = boxly(jbox)*df
+         boxlz(jbox) = boxlz(jbox)*df
+         df = df - 1.0d0
+
          do i = 1,nchain
             imolty = moltyp(i)
             if (nboxi(i) .eq. hbox) then
@@ -436,11 +454,6 @@ c *** determine the displacement of the COM
                   enddo
                endif
             elseif (nboxi(i) .eq. jbox) then
-               df=(voln(jbox)/volo(jbox))**(1.0d0/3.0d0)
-               boxlx(jbox) = boxlx(jbox)*df
-               boxly(jbox) = boxly(jbox)*df
-               boxlz(jbox) = boxlz(jbox)*df
-               df = df - 1.0d0
                dx = xcm(i) * df
                dy = ycm(i) * df
                if ( lpbcz ) dz = zcm(i) * df
@@ -458,7 +471,8 @@ c *** determine the displacement of the COM
          enddo
 
       else
-
+      
+        
 c --- calculate new volume
          expdv = dexp(dlog(volo(boxa)/volo(boxb))
      +        + rmvol(ipairb)*(2.0d0*random()-1.0d0))
@@ -476,16 +490,16 @@ c --- calculate new volume
          endif
          
          if ( lpbcz ) then
-c            if ( lsolid(boxa) ) then
-            if ( lrect(boxa) ) then
+
+            if ( lsolid(boxa).and.lrect(boxa) ) then
 c *** volume move independently in x, y, z directions
                dfac(boxa)=voln(boxa)/volo(boxa)
             else
                dfac(boxa)= (voln(boxa)/volo(boxa))**(1.0d0/3.0d0)
             endif
          
-c            if ( lsolid(boxb) ) then
-            if ( lrect(boxb) ) then
+
+            if ( lsolid(boxb).and.lrect(boxb) ) then
 c *** volume move independently in x, y, z directions
                dfac(boxb)=voln(boxb)/volo(boxb)
             else
@@ -498,32 +512,20 @@ c *** volume move independently in x, y, z directions
             vminim(boxb) = (2.0d0*rbcut(boxb))**(2.0d0)
          endif
          
-c         if ( lsolid(boxa) ) then
-         if ( lrect(boxa) ) then
-c            if (lx(boxa)) boxlx(boxa) = boxlx(boxa) * dfac(boxa)
-c            if (ly(boxa)) boxly(boxa) = boxly(boxa) * dfac(boxa)
-c            if (lz(boxa)) boxlz(boxa) = boxlz(boxa) * dfac(boxa)
+         if ( lsolid(boxa).and. lrect(boxa) ) then
             if (lx) boxlx(boxa) = boxlx(boxa) * dfac(boxa)
             if (ly) boxly(boxa) = boxly(boxa) * dfac(boxa)
             if (lz) boxlz(boxa) = boxlz(boxa) * dfac(boxa)
          else
+            
             boxlx(boxa) = boxlx(boxa) * dfac(boxa)
             boxly(boxa) = boxly(boxa) * dfac(boxa)
             if ( lpbcz ) then
                boxlz(boxa) = boxlz(boxa) * dfac(boxa)
             endif
          endif
-         if ( voln(boxa) .lt. vminim(boxa) .or. 
-     &        voln(boxb) .lt. vminim(boxb)  ) then
-            write(6,*) 'volume move rejected - below cuttoff size' 
-            return
-         endif
 
-c         if ( lsolid(boxb) ) then
-         if ( lrect(boxb) ) then
-c            if (lx(boxb)) boxlx(boxb) = boxlx(boxb) * dfac(boxb)
-c            if (ly(boxb)) boxly(boxb) = boxly(boxb) * dfac(boxb)
-c            if (lz(boxb)) boxlz(boxb) = boxlz(boxb) * dfac(boxb)
+         if ( lsolid(boxb).and.lrect(boxb) ) then
             if (lx) boxlx(boxb) = boxlx(boxb) * dfac(boxb)
             if (ly) boxly(boxb) = boxly(boxb) * dfac(boxb)
             if (lz) boxlz(boxb) = boxlz(boxb) * dfac(boxb)
@@ -543,6 +545,11 @@ c            if (lz(boxb)) boxlz(boxb) = boxlz(boxb) * dfac(boxb)
      &        boxlx(boxb) .lt. rbcutb .or. 
      &        boxly(boxb) .lt. rbcutb .or. 
      &        (lpbcz .and. boxlz(boxb) .lt. rbcutb) ) then
+                        
+            write(6,*) 'Problem in line 552 of subroutine volume.f'
+            write(6,*) 'A move was attempted that would lead to a 
+     & boxlength less than twice rcut'
+
             boxlx(boxa) = bxo(boxa)
             boxlx(boxb) = bxo(boxb)
             boxly(boxa) = byo(boxa)
@@ -551,9 +558,11 @@ c            if (lz(boxb)) boxlz(boxb) = boxlz(boxb) * dfac(boxb)
                boxlz(boxa) = bzo(boxa)
                boxlz(boxb) = bzo(boxb)
             endif
-c     write(6,*) 'volume move rejected - below cuttoff size'        
+            call dump 
+            stop
             return
          endif
+
 
 c *** determine new positions of the molecules
 c *** calculate centre of mass and its displacement
@@ -567,13 +576,13 @@ c - WARNING
             ibox = nboxi(i)
 
             if ( ibox .eq. boxa .or. ibox .eq. boxb ) then
-
+               
                imolty = moltyp(i)
                df = dfac(ibox) - 1.0d0
-            
-c               if ( lsolid(ibox) ) then
-               if ( lrect(ibox) ) then
-c                  if ( lx(ibox) ) then
+               
+c     if ( lsolid(ibox) ) then
+               if ( lsolid(ibox).and.lrect(ibox) ) then
+c     if ( lx(ibox) ) then
                   if ( lx ) then
                      dx = xcm(i) * df
                      xcm(i) = xcm(i) + dx
@@ -581,7 +590,7 @@ c                  if ( lx(ibox) ) then
                         rxu(i,j) = rxu(i,j) + dx
                      enddo
                   endif
-c                  if ( ly(ibox) ) then
+c     if ( ly(ibox) ) then
                   if ( ly ) then
                      dy = ycm(i) * df
                      ycm(i) = ycm(i) + dy
@@ -589,7 +598,7 @@ c                  if ( ly(ibox) ) then
                         ryu(i,j) = ryu(i,j) + dy
                      enddo
                   endif
-c                  if ( lz(ibox) ) then
+c     if ( lz(ibox) ) then
                   if ( lz ) then
                      dz = zcm(i) * df
                      zcm(i) = zcm(i) + dz
@@ -701,7 +710,7 @@ c --      update centers of mass
           call ctrmas(.true.,boxa,0,5)
           call ctrmas(.true.,boxb,0,5)
 c *** update linkcell, if applicable
-          if (licell .and. boxa .eq. boxlink .or. boxb .eq. boxlink) 
+          if (licell .and. (boxa .eq. boxlink .or. boxb .eq. boxlink)) 
      &         then
              call linkcell(1,1,lddum,lddum,lddum,lddum2)
           endif
@@ -787,7 +796,7 @@ c$$$            endif
       enddo
 
 c      write(6,*) 'end VOLUME'
-
+      call dump
 
       return
       end

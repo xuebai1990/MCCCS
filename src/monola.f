@@ -163,6 +163,11 @@ C -------------------------------------------------------------------
       vname(9)  = ' Tail  LJ    '
       vname(10) = ' Fluc Q      '
 
+C$$$  SETTING UP ARRAYS N ALL FOR ANALYSYS PURPOSE
+
+       call analysis(0)
+
+
 c *** set up initial linkcell
       if (licell) then
          call linkcell(1,0,vdum,vdum,vdum,ddum)
@@ -440,6 +445,8 @@ c *******************************************************************
       do 100 nnn = 1, nstep
          do 99 ii = 1, nchain 
 
+            tmcc = nnstep + nnn - 1
+
 c           write(6,*) 'nstep',(nnn-1)*nchain+ii
 c ***       select a move-type at random ***
             rm = random()
@@ -450,7 +457,7 @@ c           ---  volume move ---
                if ( lnpt ) then
                   call prvolume  
                else    
-                  call volume 
+                  call volume
                endif
 
             elseif (rm .le. pmswat) then
@@ -461,6 +468,7 @@ c           --- CBMC switch move ---
 c           --- swap move for linear and branched molecules ---
                call swap(bsswap,bnswap,bnswap_in,bnswap_out,
      &              cnt_wf1,cnt_wf2,cnt_wra1,cnt_wra2,qelect)
+               
             elseif ( rm .le. pmcb ) then
 c           --- configurational bias move ---
                call config
@@ -477,11 +485,11 @@ c           --- expanded-ensemble move ---
 c           --- translational move in x,y, or z direction ---
                rm = 3.0d0 * random()
                if ( rm .le. 1.0d0 ) then
-		  call traxyz (.true.,.false.,.false.)
+                  call traxyz (.true.,.false.,.false.)	
                elseif ( rm .le. 2.0d0 ) then
-		  call traxyz (.false.,.true.,.false.)
+                  call traxyz (.false.,.true.,.false.)
                else
-		  call traxyz (.false.,.false.,.true.)
+                  call traxyz (.false.,.false.,.true.)
                endif
 
             else
@@ -495,11 +503,11 @@ c           --- rotation around x,y, or z axis move --
                   call rotxyz(.false.,.false.,.true.)
                endif
             endif
-
+            
             acmove = acmove + 1.0d0
 c ***       calculate instantaneous values ***
 c ***       accumulate averages ***
-
+            
 	    do ibox=1,nbox
                do itype = 1, nmolty
                   acnbox(ibox,itype) = acnbox(ibox,itype) + 
@@ -790,6 +798,10 @@ c              write(6,*) 'control pressure', press1
             lrsave = .true.
          endif
  
+	 if(mod(nnn,ianalyze).eq.0) then
+	    call analysis(1)
+         endif  
+
          do intg = 1, nchain
             ibox = nboxi(intg)
             imolty = moltyp(intg)
@@ -1209,8 +1221,8 @@ c     *** put new distribution back into a file
 c ** write out the final configuration from the run ***
 c        file_config = 'config'//run_num(1:len_trim(run_num))
 c     +                        //suffix//'.dat'
-c        open(8, file=file_config,status='unknown')
-
+      open(unit=8, file="final-config",status="unknown")
+      
       write(8,*) nend
       if ( nend .gt. 0 ) then
          do im=1,nbox
@@ -1253,7 +1265,7 @@ c        open(8, file=file_config,status='unknown')
             write(8,*) rxu(i,j), ryu(i,j), rzu(i,j), qqu(i,j)
  899     continue
  900  continue
-c	close(8)
+	close(8)
 c *** calculate and write out running averages ***
       do ibox=1,nbox
 c - energies
@@ -1714,6 +1726,8 @@ c ---    write block averages  ---
         enddo
         
       endif
+
+      call analysis(2) 	
  
  1012 format(3(1x,f10.6),2i5)
 

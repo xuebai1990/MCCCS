@@ -48,15 +48,16 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'neigh.inc'
       include 'cell.inc'
       include 'nsix.inc'
+      include 'gor.inc'
 
       integer temnc, imol, iutemp, imolty, itype,ipair,bdum,bin,histtot
-      integer idummy(ntmax)
+      integer idummy(ntmax), atemp 
 
       integer i,j,k,ncres, nmtres, iensem, inpbc, nmcount
-      integer im,nures, ibox, nframe, ij, tcount,ucheck
+      integer im,nures, ibox,  ij, tcount,ucheck,nnframe
       integer nijspecial,ispecial,jspecial,ji,ii,jj,nexclu,ndum,ntii
 
-      integer nhere,zz,temphe,z,itemp,zzz
+      integer zz,temphe,z,itemp,zzz
       integer nvirial
       integer inclnum,inclmol,inclbead,inclsign,ncarbon
       dimension inclmol(ntmax*numax*numax),inclsign(ntmax*numax*numax)
@@ -115,6 +116,7 @@ c *** read echoing and long output flags
       read(4,*)
       read(4,*) lecho,lverbose
 
+
 c - read run information
       read(4,*)
       read(4,*) nstep, lstop, lpresim, iupdatefix
@@ -141,6 +143,28 @@ c - read run information
             write(6,*) 'fluctuating charge temperature:',fqtemp,' K'
          else 
             write(6,*) temp, express, fqtemp
+         endif
+      endif
+
+C$$   read the analysis information
+      read(4,*)
+      read(4,*)ianalyze,nbin,lrdf,lintra,lstretch,lgvst,lbend,lete,
+     &           lrhoz,bin_width
+      if (lecho) then
+         if(lverbose) then
+            write(6,*) 'ianalyze:', ianalyze
+	    write(6,*) 'nbin', nbin
+            write(6,*) 'lrdf:',lrdf
+            write(6,*) 'lintra:',lintra
+            write(6,*) 'lstretch:', lstretch
+            write(6,*) 'lgvst:' ,lgvst
+            write(6,*) 'lbend:' ,lbend
+            write(6,*) 'lete:' ,lete
+            write(6,*) 'lrhoz:', lrhoz 
+            write(6,*) 'bin_width:' ,bin_width
+         else
+            write(6,*) ianalyze,nbin,lrdf,lintra,lstretch,lgvst,lbend
+     &    ,lete, lrhoz, bin_width  
          endif
       endif
 
@@ -282,7 +306,7 @@ c      endif
 
       read(4,*)
       read(4,*) lmixlb, lmixjo
-      if (lmixlb .and. lmixjo) stop 'can\'t use both combining rules!'
+      if (lmixlb .and. lmixjo) stop 'cant use both combining rules!'
       if ( lecho ) then
          if (lverbose) then
             if (lmixlb) then
@@ -957,17 +981,17 @@ c           --- bead number
             
             read(4,*)
             read(4,*) (( gswatc(i,j,k), k=1,2*ncut(i,j) ), j=1,2 )
-            if (lecho) then
-               if (lverbose) then
-                  do zz = 1,ncut(i,j)
-                     write(6,*) '   grow from and prev for ncut',zz,':',
-     &                    (gswatc(i,j,zz),j=1,2)
-                  enddo
-               else 
-                  write(6,*) 'gswatc',(( gswatc(i,j,k), 
-     &                 k=1,2*ncut(i,j) ), j=1,2 )
-               endif
-            endif
+!!            if (lecho) then
+!!               if (lverbose) then
+!!                  do zz = 1,ncut(i,j)
+!!                     write(6,*) '   grow from and prev for ncut',zz,':',
+!!     &                    (gswatc(i,j,zz),j=1,2)
+!!                  enddo
+!!               else 
+!!                  write(6,*) 'gswatc',(( gswatc(i,j,k), 
+!!     &                 k=1,2*ncut(i,j) ), j=1,2 )
+!!               endif
+!!            endif
 
             read(4,*) 
             read(4,*) nswtcb(i), (pmswtcb(i,ipair), ipair=1,nswtcb(i))
@@ -1439,6 +1463,26 @@ c -   read information for virial coefficient calculation
          endif
       endif
 
+      nhere = 0
+      do zz=1,nntype
+         if ( lhere(zz) ) then
+             nhere = nhere + 1
+             temphe(nhere) = zz
+             beadtyp(nhere)=zz
+         endif
+      enddo
+
+
+      do zz = 1,nhere 
+          atemp = temphe(zz)
+          decode(atemp) = zz
+c	  print*, 'readdat'
+c	  print*, 'atemp=',atemp, 'decode=',decode(atemp)
+
+      enddo
+
+
+
 C -------------------------------------------------------------------
  
 c *** restart saver
@@ -1762,6 +1806,17 @@ c * v = u1 x u2
                      write(6,1104) ibox,
      &                    boxlx(ibox),boxly(ibox),boxlz(ibox)
 
+                     do i = 1, nbox
+                          if( (rcut/boxlx(i) .gt. 0.5d0).or.
+     &                      (rcut/boxly(i) .gt. 0.5d0).or.
+     &                      (rcut/boxlz(i) .gt. 0.5d0)) then
+                             write(6,*) 'rcut > 0.5*boxlx'
+                             stop
+                          endif
+                     enddo
+   
+
+
                   endif
 
                enddo
@@ -2040,18 +2095,19 @@ c * check that rintramax is really valid
       endif
 
 c * calculate number of frames *
-      nframe = nstep / imv
+      nnframe = nstep / imv
  
 c *** write out movie-header ***
-      if ( nframe .ne. 0 ) then
-         write(10,*) nframe,nchain,nmolty,(rcut,ibox=1,nbox)
+      if ( nnframe .ne. 0 ) then
+         write(10,*) nnframe,nchain,nmolty,(rcut,ibox=1,nbox)
          nhere = 0
          do zz=1,nntype
             if ( lhere(zz) ) then
                nhere = nhere + 1
                temphe(nhere) = zz
-            endif
+              endif
          enddo
+
          write(10,*) nhere,(temphe(zz),zz=1,nhere)
          
          do imolty = 1,nmolty

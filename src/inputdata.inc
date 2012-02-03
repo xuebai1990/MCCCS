@@ -22,8 +22,10 @@ c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       logical lstop
+      logical lrdf,lintra,lstretch,lgvst,lbend,lete, lrhoz
       character*1 suffix
       character*3 run_num
+      integer ianalyze,nbin,tmcc
       integer nequil,ninstf,ninsth,ndumph
       integer nstep, iprint, imv, iratio, iblock, idiele, isolute
      &       ,iratv,iratp,irsave,nnstep,nchoiq,numcoeff,rmexpc
@@ -35,7 +37,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
      &                ,upnn, upnnsq, upnndg, B, pmswmt,pmiswat,pmisatc
      &                ,pmswat,pmsatc,pmcbmt,pmtrmt,pmromt
      &                ,pmvlmt,pmall,pmflcq, pmfqmt,pmexpc,pmeemt
-     &                ,pmswapb,pmvolb,virtemp
+     &                ,pmswapb,pmvolb,virtemp,bin_width
       dimension pmswmt(ntmax),pmcbmt(ntmax)
      & ,pmtrmt(ntmax),pmromt(ntmax)
      & ,pmall(ntmax),pmfqmt(ntmax),pmeemt(ntmax)
@@ -55,7 +57,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       dimension rmflcq(ntmax,nbxmax)
       common /indata/ nstep,iprint,imv,iratio,iblock, idiele, isolute
      &   ,iratv,iratp,irsave,nnstep,lstop,nchoiq,numcoeff
-     &   ,rmexpc,nswapb,box1,box2,nvolb,box5,box6,ntemp
+     &   ,rmexpc,nswapb,box1,box2,nvolb,box5,box6,ntemp,tmcc
       common /indatc/ pmswmt,pmcbmt,pmtrmt,pmromt
      &   ,pmfqmt,pmexpc,pmeemt,pmfix
      &   ,pmall,pmsatc,pmisatc,pmswat,pmiswat,pmcb,pmflcq
@@ -63,6 +65,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       common /indatb/ rmvol,rmtrax,rmtray,rmtraz,rmrotx,rmroty,rmrotz
      &         ,rmflcq,temp,express,tatra, tarot,tavol,taflcq,fqbeta
-     &         ,upnn, upnnsq, upnndg, B,rmhmat,pmvolx,pmvoly
+     &         ,upnn, upnnsq, upnndg, B,rmhmat,pmvolx,pmvoly,bin_width
 
-
+      common /indatd/ ianalyze,lrdf,lintra,lstretch,lgvst,lbend
+     &         ,nbin,lete,lrhoz

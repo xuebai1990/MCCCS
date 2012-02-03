@@ -123,7 +123,11 @@ c *** generate the reciprocal-space
                kz1 = dble(l)*hmatik(7)+dble(m)*hmatik(8)+
      &              dble(n)*hmatik(9)
                ksqr = kx1*kx1+ky1*ky1+kz1*kz1
-               if ( ksqr .lt. hmaxsq ) then
+c               if ( ksqr .lt. hmaxsq ) then
+c --- sometimes these are about equal, which can cause different
+c --- behavior on 32 and 64 bit machines without this .and. statement
+               if ( ksqr .lt. hmaxsq .and.
+     &              abs(ksqr-hmaxsq) .gt. 1d-9 ) then
                   ncount = ncount + 1
                   kx(ncount,ibox) = kx1
                   ky(ncount,ibox) = ky1

@@ -754,7 +754,11 @@ c               write(6,*) rxu(idum,j),ryu(idum,j),rzu(idum,j)
       endif
       
 c     --- Begin DC-CBMC Corrections for NEW configuration
-      if (ldual .or. ((.not. lchgall) .and. lelect(imolty))) then 
+c      if (ldual .or. ((.not. lchgall) .and. lelect(imolty))) then 
+
+      if (ldual .or. ((.not. lchgall) .and. lelect(imolty))
+     &     .or. (lchgall .and. lewald .and. (.not. ldual))) then
+
 c     calculate the true site-site energy
          istt = 1
          iett = igrow
@@ -771,7 +775,7 @@ c v1insewd, vnewewald and vnewintra now accounted for in v from energy
 c$$$         delen = v - ( vnewinter + vnewext +vnewelect) 
 c$$$     &        - (v1ins - v1insewd)
          delen = v - ( vnewinter + vnewext +vnewelect + vnewintra
-     &        + vnewewald + v1ins) + (vewald-v1insewd - vnewewald)
+     &        + vnewewald + v1ins) 
          waddnew = waddnew*dexp(-beta*delen)
          vnewt     = vnewt + delen
          vnewinter = vinter - v1insint
@@ -1011,9 +1015,11 @@ c         write(6,*) 'no molecule in BOXREM'
 c *** select a position of the first/starting unit at RANDOM ***
 c *** and calculate the boltzmann weight                     ***
 c *** for the chain to be REMOVED                           ***
-      rxp(1,1) = rxu(irem,1)
-      ryp(1,1) = ryu(irem,1)
-      rzp(1,1) = rzu(irem,1)
+
+      rxp(1,1) = rxu(irem,beg)
+      ryp(1,1) = ryu(irem,beg)
+      rzp(1,1) = rzu(irem,beg)
+
       ichoi = nchoi1(imolty)
 
       if ( .not. lswapinter ) then
@@ -1250,7 +1256,13 @@ c     --- 1 = old conformation
       endif
 
 c     Begin Correction for DC-CBMC for OLD configuration
-      if (ldual .or. ((.not. lchgall) .and. lelect(imolty)) ) then 
+c      if (ldual .or. ((.not. lchgall) .and. lelect(imolty)) ) then 
+
+
+      if (ldual .or. ((.not. lchgall) .and. lelect(imolty))
+     &     .or. (lchgall .and. lewald .and. (.not. ldual))) then
+
+
 c     --- correct the acceptance rules 
 c     --- calculate the Full rcut site-site energy
          istt=1
@@ -1265,7 +1277,7 @@ c v now includes vnewintra,v1remewd and voldewald, take out
 c$$$         deleo = v - ( voldinter + voldext +voldelect) 
 c$$$     &        - (v1rem - v1remewd)
          deleo = v - ( voldinter + voldext +voldelect + voldintra 
-     &        + voldewald + v1rem) + (vewald - v1remewd - voldewald)
+     &        + voldewald + v1rem) 
          waddold = waddold*dexp(-beta*deleo)
          voldt     = voldt + deleo
          voldinter = vinter - v1remint
@@ -1680,8 +1692,8 @@ c *** update reciprocal-space sum
 c ---    update center of mass
          call ctrmas(.false.,boxins,irem,3)
 c *** update linkcell, if applicable
-         if ( licell .and. boxins .eq. boxlink .or. boxrem .eq. boxlink) 
-     &        then
+         if ( licell .and. (boxins .eq. boxlink) .or. (boxrem .eq.  
+     &        boxlink)) then
             call linkcell(2,irem,vdum,vdum,vdum,ddum)
          endif
          

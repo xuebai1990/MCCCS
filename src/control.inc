@@ -21,7 +21,7 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      logical lgibbs,lgrand,lnpt,lanes
+      logical lgibbs,lgrand,lnpt,lanes,llj
       logical lpbc,lpbcx,lpbcy,lpbcz,lfold,lijall,lewald
       logical lchgall,ldielect
       logical lexpsix,lmmff 
@@ -30,8 +30,9 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       logical lneigh,lvirial
       logical lcutcm,ldual
       integer nmax,numax,ntmax,nntype,nvmax,nbxmax,npamax,npabmax
-     & ,maxbin,cmax,cmaxa
+     & ,maxbin,cmax,cmaxa,tor_bin_max,nbinmax_ete
       integer vectormax,maxvir,maxntemp,nchmax,nchtor_max,nchbn_max
+      integer ntdifmx,nbinmx,angle_max,ang_bin_max,tor_max	
 c --------------------------------------------------------------
 c *******************************
 c *** PARAMETERS FOR ENSEMBLE ***
@@ -44,7 +45,7 @@ c    else an NVT simulation is performed
 c if LGIBBS=.TRUE.. 
 c    then a Gibbs-ensemble simulation is performed
 c    (implies cubic simulation boxes)
-      parameter (lgibbs = .false.)
+      parameter (lgibbs = .true.)
 c if LGRAND=.TRUE. 
 c    then simulation is performed in the grand-canonical ensemble
       parameter (lgrand = .false.)
@@ -103,6 +104,11 @@ c only go out to a radius of rcutin and then will be corrected to the
 c full rcut at the end.  This is Dual Cutoff Configurational-bias Monte 
 c Carlo (DC-CBMC)
       parameter (ldual = .true.) 
+
+c ********************************************
+c ***   PARAMETER FOR LENNARD-JONES 12-6   ***
+c*********************************************
+      parameter (llj = .true.)
 c ********************************************
 c *** PARAMETERS FOR EXP-6 POTENTIAL       ***
 c ********************************************
@@ -124,7 +130,7 @@ c ***************************************
 c if LTAILC=.TRUE. tail corrections are added
 c    (WARNING:  .lsami. in external.inc switches an intrinsic
 c               tailcorrection on)
-      parameter (ltailc = .false.)
+      parameter (ltailc = .true.)
 c truncated and shifted potentials
       parameter (lshift = .false.)
 c ***************************************
@@ -137,13 +143,13 @@ c ***************************************
 c ** DIMENSIONS FOR ARRAYS             **
 c ***************************************
 c - nmax = maximum number of chains +2
-      parameter (nmax = 320)
+      parameter (nmax = 700)
 c - numax = maximum number of units
       parameter (numax = 30)
 c - ntmax = maximum number of types of chains
-      parameter (ntmax = 11)
+      parameter (ntmax = 3)
 c - nbxmax = maximum number of boxes
-      parameter (nbxmax = 3) 
+      parameter (nbxmax = 2) 
 c - nntype = number of types of beads
       parameter (nntype = 200)
 c - nvmax = maximum number of bond vibration and bending constants
@@ -161,7 +167,7 @@ c - nchbn_max = maxium number of choices for bending CBMC growth
 c - nchtor_max = maximum number of choices for torsion CBMC growth
       parameter (nchtor_max = 200)
 c - vectormax = the maximum number of reciprocal vectors for Ewald sum
-      parameter (vectormax=1000) 
+      parameter (vectormax=10000) 
 
 c ****************************************
 c *** SAFECBMC max number of bins        ***
@@ -175,3 +181,28 @@ c *************************************************************
       parameter (cmax = 1000)
       parameter (cmaxa = 100)
 
+c*************************************************************
+C***
+C***      FOR ANALYSIS PART
+C***
+C*************************************************************
+
+C NTDIFMX = max number of diff beads in simulation
+
+	parameter(ntdifmx=10)	
+
+C NBINMX = max number of bins for histograms
+
+	parameter(nbinmx=200)
+
+
+C THESE ARE FOR ANGLE AND TORSIONAL DISTRIBUTION
+
+        parameter(angle_max=50)
+	parameter(ang_bin_max=360)
+	parameter(tor_bin_max=360)
+        parameter(tor_max=4)
+
+C  For end to end vector calculation 
+
+       parameter(nbinmax_ete=2000)

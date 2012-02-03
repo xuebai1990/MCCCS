@@ -35,68 +35,6 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c ----------------------------------------------------------------
 
       if (lsolid(ibox) .and. .not. lrect(ibox)) then
-c$$$
-c$$$c ***********************
-c$$$c Sophia's (Bin's?) code
-c$$$c *** non-rectangular box
-c$$$         hsx = 0.5d0*hmat(1)
-c$$$         hsy = 0.5d0*hmat(5)
-c$$$         hsz = 0.5d0*hmat(9)
-c$$$         sx = rxuij*hmati(1)+ryuij*hmati(4)+rzuij*hmati(7)
-c$$$         sy = rxuij*hmati(2)+ryuij*hmati(5)+rzuij*hmati(8)
-c$$$         sz = rxuij*hmati(3)+ryuij*hmati(6)+rzuij*hmati(9)
-c$$$
-c$$$c         print*,rxuij,ryuij,rzuij
-c$$$
-c$$$         if ( rzuij .gt. hsz ) then
-c$$$            rzuij=rzuij-hmat(9)
-c$$$            sz=sz-1d0
-c$$$            if ( rzuij .gt. hsz ) then
-c$$$               rzuij=rzuij-hmat(9)
-c$$$               sz=sz-1d0
-c$$$            endif
-c$$$         elseif ( rzuij .lt. -hsz ) then
-c$$$            rzuij=rzuij+hmat(9)
-c$$$            sz=sz+1d0
-c$$$            if ( rzuij .lt. -hsz ) then
-c$$$               rzuij=rzuij+hmat(9)
-c$$$               sz=sz+1d0
-c$$$            endif
-c$$$         endif
-c$$$
-c$$$         ryuij=sy*hmat(5)+sz*hmat(8)
-c$$$         if ( ryuij .gt. hsy ) then
-c$$$            ryuij=ryuij-hmat(5)
-c$$$            sy=sy-1d0
-c$$$            if ( ryuij .gt. hsy ) then
-c$$$               ryuij=ryuij-hmat(5)
-c$$$               sy=sy-1d0
-c$$$            endif
-c$$$         elseif ( ryuij .lt. -hsy ) then
-c$$$            ryuij=ryuij+hmat(5)
-c$$$            sy=sy+1d0
-c$$$            if ( ryuij .lt. -hsy ) then
-c$$$               ryuij=ryuij+hmat(5)
-c$$$               sy=sy+1d0
-c$$$            endif
-c$$$         endif
-c$$$
-c$$$         rxuij=sx*hmat(1)+sy*hmat(4)+sz*hmat(7)
-c$$$         if ( rxuij .gt. hsx ) then
-c$$$            rxuij=rxuij-hmat(1)
-c$$$            if ( rxuij .gt. hsx ) then
-c$$$               rxuij=rxuij-hmat(1)
-c$$$            endif
-c$$$         elseif ( rxuij .lt. -hsx ) then
-c$$$            rxuij=rxuij+hmat(1)
-c$$$            if ( rxuij .lt. -hsx ) then
-c$$$               rxuij=rxuij+hmat(1)
-c$$$            endif
-c$$$         endif
-c$$$
-c$$$         return
-
-
 c ******************
 c *** Collin's Code:
 c *** non-rectangular box
@@ -122,9 +60,6 @@ c *** non-rectangular box
          elseif ( sz .lt. -0.5d0 ) then
             sz = sz+1d0
          endif
-c         sx = sx-nint(sx)
-c         sy = sy-nint(sy)
-c         sz = sz-nint(sz)
          rxuij = sx*hmat(ibox,1)+sy*hmat(ibox,4)+sz*hmat(ibox,7)
          ryuij = sx*hmat(ibox,2)+sy*hmat(ibox,5)+sz*hmat(ibox,8)
          rzuij = sx*hmat(ibox,3)+sy*hmat(ibox,6)+sz*hmat(ibox,9)
@@ -141,7 +76,6 @@ c         sz = sz-nint(sz)
                   if (rxuij.lt.-hbx) rxuij=rxuij+bx
                endif
             else
-c            rxuij = rxuij - bx*anint(rxuij*bxi)
                rxuij = rxuij - bx*dint(rxuij*bxi+dsign(0.5d0,rxuij))
             endif
          endif
@@ -154,7 +88,6 @@ c            rxuij = rxuij - bx*anint(rxuij*bxi)
                   if (ryuij.lt.-hby) ryuij=ryuij+by
                endif
             else
-c            ryuij  = ryuij - by*anint(ryuij*byi)
                ryuij = ryuij - by*dint(ryuij*byi+dsign(0.5d0,ryuij))
             endif
          endif
@@ -167,7 +100,6 @@ c            ryuij  = ryuij - by*anint(ryuij*byi)
                   if (rzuij.lt.-hbz) rzuij=rzuij+bz
                endif
             else
-c            rzuij  = rzuij - bz*anint(rzuij*bzi)
                rzuij = rzuij - bz*dint(rzuij*bzi+dsign(0.5d0,rzuij))
             endif
          endif
@@ -176,6 +108,6 @@ c            rzuij  = rzuij - bz*anint(rzuij*bzi)
          
       endif
 
-      write(6,*) rxuij,ryuij,rzuij,ibox
+c      write(6,*) rxuij,ryuij,rzuij,ibox
 
       end

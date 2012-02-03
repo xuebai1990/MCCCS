@@ -614,7 +614,7 @@ c     *** write out the movie configurations ***
 
       if ( lrsave ) then
 c     *** write out the restart configurations to SAFETY-file ***
-         open(unit=88,status='unknown')
+         open(unit=88,file="save-config",status='unknown')
          write (88,*) nnn + nnstep
          do im=1,nbox
             do imolty=1,nmolty
@@ -715,7 +715,12 @@ c - chemical potential
 c                 --- determine how many steps it takes to grow the 
 c                 --- molecule not counting the first inserted bead
                igrow = nugrow(itype)
-               call schedule(igrow,itype,steps,1,0,2)
+c --- need the first schedule call for rigid molecules, else it will seg fault
+               if (lrigid(imolty))then
+                  call schedule(igrow,itype,steps,1,0,4)
+               else
+                  call schedule(igrow,itype,steps,1,0,2)
+               endif
                dnunit = dble(steps)
                dnchoih = dble(nchoih(itype))
                debroglie = 17.458d0/( dsqrt(masst(itype)/beta ))

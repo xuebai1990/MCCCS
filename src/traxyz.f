@@ -231,13 +231,14 @@ c *** update the dipole term
       endif
 
 c *** update chain center of mass
+
       call ctrmas(.false.,ibox,i,1)
 
       if (lx) bstrax(imolty,ibox) = bstrax(imolty,ibox) + 1.0d0
       if (ly) bstray(imolty,ibox) = bstray(imolty,ibox) + 1.0d0
       if (lz) bstraz(imolty,ibox) = bstraz(imolty,ibox) + 1.0d0
 
-      if ( licell .and. ibox.eq.boxlink) then
+      if ( licell .and. (ibox.eq.boxlink)) then
 c     --- update linkcell list
          call linkcell(2,i,vdum,vdum,vdum,ddum)
       endif
