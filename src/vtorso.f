@@ -273,7 +273,40 @@ c same convention as topmon
 c backwards!         vtorso = 1258.0d0*(1.0d0 + dcos(theta))
          vtorso = 2576.5d0*(1.0d0 - dcos(2.0d0*theta))
 
-      elseif (itype .gt. 32 .and. itype .lt. 36) then
+cc - added 7/12/06 C-C-N-O torsion for nitro group also #61
+         elseif (itype .eq.32) then
+            if (thetac .gt. 1.0d0) thetac = 1.0d0
+            if (thetac .lt. -1.0d0) thetac = -1.0d0
+
+            theta = dacos(thetac)
+            vtorso = 69.2d0 - 41.4d0*dcos(theta)-14.5d0*dcos(2*theta) - 
+     &           19.1d0*dcos(3*theta) + 8.03d0*dcos(4*theta) - 
+     &           2.91d0*dcos(5*theta) + 0.95d0*dcos(6*theta)
+
+cc - added 1/29/07 for N-C-C-C torsion also #70
+            elseif (itype .eq. 33) then
+               if (thetac .gt. 1.0d0) thetac = 1.0d0
+               if (thetac .lt. -1.0d0) thetac = -1.0d0
+               theta = dacos(thetac)
+               vtorso = 438.0d0 + 481.0*dcos(theta) + 
+     &              150.0d0*dcos(2*theta) - 115*dcos(3*theta) - 
+     &              0.57*dcos(4*theta) + 0.8*cos(5*theta) - 
+     &              0.01*dcos(6*theta)
+
+cc - added 06/27/07 for acrylates
+            elseif (itype .ge. 34 .and. itype.le. 46) then
+               if (thetac .gt. 1.0d0) thetac = 1.0d0
+               if (thetac .lt. -1.0d0) thetac = -1.0d0
+
+               theta = dacos(thetac) + onepi
+
+               vtorso = vtt0(itype) + vtt1(itype)*dcos(theta) +
+     &              vtt2(itype)*dcos(2.0d0*theta) + 
+     &              vtt3(itype)*dcos(3.0d0*theta) + 
+     &              vtt4(itype)*dcos(4.0d0*theta)
+
+
+      elseif (itype .ge. 48 .and. itype .le. 50) then
 c -- torsion from Neimark DMMP JPCA v108, 1435 (2004)
          if (thetac.gt.1.0d0) thetac = 1.0d0
          if (thetac.lt.-1.0d0) thetac=-1.0d0
@@ -287,7 +320,7 @@ c -- configuration is defined as 0.
      &        + vtt4(itype)*(1+cos(5.*theta))
      &        + vtt5(itype)*(1+cos(6.*theta))
     
-      elseif(((itype.ge.36).and.(itype.le.37)).or.(itype.eq.40)) then
+      elseif(((itype.ge.51).and.(itype.le.52)).or.(itype.eq.56)) then
           if (thetac.gt.1.0d0) thetac = 1.0d0
           if (thetac.lt.-1.0d0) thetac=-1.0d0
           theta=dacos(thetac)+onepi
@@ -296,7 +329,7 @@ c -- configuration is defined as 0.
      &             + vtt2(itype)*(1.0d0+dcos(theta*2.0d0))
      &             + vtt3(itype)*(1.0d0-dcos(theta*3.0d0))
 
-      elseif (itype .eq. 38 .or. itype .eq. 44) then
+      elseif (itype .eq. 53 .or. itype .eq. 55) then
          if (thetac.gt.1.0d0) thetac = 1.0d0
          if (thetac.lt.-1.0d0) thetac=-1.0d0
          theta=dacos(thetac)+onepi
@@ -311,7 +344,7 @@ c -- configuration is defined as 0.
      &        + vtt8(itype)*(cos(8.*theta))
      &        + vtt9(itype)*(cos(9.*theta))
 
-      elseif (itype .eq. 39) then
+      elseif (itype .eq. 54) then
          if (thetac.gt.1.0d0) thetac = 1.0d0
          if (thetac.lt.-1.0d0) thetac=-1.0d0
          theta=dacos(thetac)+onepi
@@ -387,7 +420,7 @@ c -- configuration is defined as 0.
      &             + vtt6(itype)*dcos(theta*6.0d0)
 
 
-      elseif(itype.eq.45 .or. itype.eq.46) then
+      elseif(itype.eq.60 .or. itype.eq.61) then
           if (thetac.gt.1.0d0) thetac = 1.0d0
           if (thetac.lt.-1.0d0) thetac=-1.0d0
           theta=dacos(thetac)+onepi
@@ -397,7 +430,7 @@ c -- configuration is defined as 0.
      &             + vtt3(itype)*dcos(theta*3.0d0)
 
 
-      elseif((itype.ge.51).and.(itype.le.52)) then
+      elseif((itype.ge.65).and.(itype.le.66)) then
           if (thetac.gt.1.0d0) thetac = 1.0d0
           if (thetac.lt.-1.0d0) thetac=-1.0d0
 c -- pi added to torsion because the topmon code is backwards.  Trans
@@ -409,7 +442,7 @@ c -- configuration is defined as 0.
      &             + vtt3(itype)*(1.0d0+dcos(theta*3.0d0))
 
 
-      elseif ( itype .ge. 60 .and. itype .le. 70) then
+      elseif ( itype .ge. 70 .and. itype .le. 80) then
 
 c --- OPLS SEVEN PARAMETER FIT
 
@@ -428,7 +461,8 @@ c --- OPLS SEVEN PARAMETER FIT
 
 
       else
-         stop 'you picked a non-defined torsional type'
+         write(6,*) 'you picked a non-defined torsional type'
+         stop
       endif
 
       return

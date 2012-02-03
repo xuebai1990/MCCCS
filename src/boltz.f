@@ -68,7 +68,7 @@ c    *******************************************************************
       double precision vinter,vintra,vext,velect,vewald,qave,
      &     epsilon2,sigma2,vwell,v,rcutsq,rcinsq
 
-      double precision sx,sy,sz,v_elect_field
+      double precision sx,sy,sz,v_elect_field, field
       double precision slitpore
       	
       dimension lcmno(nmax),lcoulo(numax,numax)
@@ -88,6 +88,7 @@ c      lcompute = .false.
 c     --- determine the potential cutoffs
 
       rcutsq = rcut(ibox)*rcut(ibox)
+      field = Elect_field(ibox)
       
       if ( ldual ) then
 c        --- use rcutin for both types of interactions (except intra)
@@ -406,9 +407,11 @@ c
         end if
 
 c     grand-canonical: if ibox = 2 (ideal gas box) only intra-chain
-         
-         if ( .not. ((lgrand .and. ibox .eq. 2))) then 
-
+c --- JLR 11-24-09 don't compute if lideal          
+c         if ( .not. ((lgrand .and. ibox .eq. 2))) then 
+         if ( .not. (lgrand .and. ibox .eq. 2) 
+     &       .and. .not.lideal(ibox) ) then
+c --- END JLR 11-24-09
             if (licell.and.(ibox.eq.boxlink)) then
 c     --- we only use count = 1, the rest should be taken care of
 c     --- in rintramax
@@ -778,13 +781,15 @@ c -- calculate interaction with the surface at the top of the box
 
          if (lelect_field) then
              if(lelect(moltyp(i))) then
-                do count = 1,ntogrow
-                rzui = rzp(count,itrial)
-                vext = vext + v_elect_field(i,count,rzui)
-                enddo
-                vext = vext * eXV_to_K
+                if (nboxi(i).eq.ibox) then
+                   do count = 1,ntogrow
+                      rzui = rzp(count,itrial)
+                      vext = vext + v_elect_field(i,count,rzui,field)
+                   enddo
+                endif
              endif
-         endif 
+             vext = vext * eXV_to_K
+          endif 
          
 c --------------------------------------------------------------------------
 c well potential for thermodynamic integration stages b and c
@@ -861,6 +866,7 @@ C *********************************************
                v = (etais+(1.0d0-etais)*lambdais)*v+
      &                         (1.0d0-lambdais)*vwell
             endif
+
             vtry(itrial) = v
             vtrintra(itrial) = vintra
             vtrext(itrial)   = vext
@@ -884,7 +890,6 @@ c     write(iou,*) 'caught by softcut',vtry(itrial)*beta
                bfac(itrial) = dexp ( -(vtry(itrial)*beta) )
             endif
          endif
-
  20   continue
 
 

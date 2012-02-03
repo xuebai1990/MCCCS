@@ -29,7 +29,7 @@ c ** Neeraj adding for solubility parameter and heat of vaporization
       double precision naccu1,nccold1,accum1,bccold1,aver1,baver1
       integer nprop1
       parameter (nener=18,nprop=4+nener+(4*ntmax)+3,blockm=100)
-      parameter (nprop1=9)
+      parameter (nprop1=11)
       dimension naccu(nprop,nbxmax),nccold(nprop,nbxmax)
       dimension accum(nprop,nbxmax),bccold(nprop,nbxmax)
       dimension aver(nprop,nbxmax), baver(nprop,nbxmax,blockm)

@@ -277,6 +277,16 @@ c            if (ovrlap) then
                   delen = (etais+(1.0d0-etais)*lambdais)*delen
                endif
                delen = v - delen
+c --- JLR 11-19-09 Commenting this out, it makes no sense and gives me an energy error!!!
+
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM   this may not exactly right, but for
+c!!!! numerical reasons I think we need it 
+c               IF(delen*beta .LT. -2.3d0*softcut) THEN
+c                  delen=-2.3d0*softcut/beta
+c               ELSEIF(delen*beta .GT. 2.3d0*softcut) THEN
+c                  delen=2.3d0*softcut
+c               ENDIF
+c --- END JLR 11-19-09
                weight    = weight*dexp(-(beta*delen))
                vnewt     = vnewt + delen
                vnewinter = vinter
@@ -295,6 +305,16 @@ c            if (ovrlap) then
                   deleo = (etais+(1.0d0-etais)*lambdais)*deleo
                endif
                deleo = v - deleo
+c --- JLR 11-19-09 Commenting this out, it gives me energy error!!!
+
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM   this may not exactly right, but for
+c!!!! numerical reasons I think we need it 
+c               IF(deleo*beta .LT. -2.3d0*softcut) THEN
+c                  deleo=-2.3d0*softcut/beta
+c               ELSEIF(deleo*beta .GT. 2.3d0*softcut) THEN
+c                  deleo=2.3d0*softcut
+c               ENDIF
+c --- END JLR 11-19-09
                weiold    = weiold*dexp(-(beta*deleo))
                voldt     = voldt + deleo
                voldinter = vinter

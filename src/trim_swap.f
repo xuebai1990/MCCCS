@@ -111,7 +111,7 @@ c    ********************************************************************
 
 C --------------------------------------------------------------------
 
-c      write(iou,*) 'START SWAP'
+c      write(iou,*) 'START TRIM_SWAP'
 c      write(11,*) '1:',neigh_cnt(18)
 
       lempty = .false.
@@ -322,7 +322,7 @@ c     --- select ip position ---
       v1insewd = vtrewald(iwalk)
 
 
-!      write(6,*)'vtry(iwalk)vtrext(iwalk)vtrinter(iwalk)vtrelect(iwalk)'
+!      write(iou,*)'vtry(iwalk)vtrext(iwalk)vtrinter(iwalk)vtrelect(iwalk)'
 !     & ,vtry(iwalk),vtrext(iwalk),vtrinter(iwalk),vtrelect(iwalk),
 !     & vtrewald(iwalk)
 
@@ -389,7 +389,7 @@ c      if (ldual .or. ((.not. lchgall) .and. lelect(imolty))) then
 c     calculate the true site-site energy
          istt = 1
          iett = igrow
-!         write(6,*) igrow
+!         write(iou,*) igrow
          
          call energy (iins,imolty, v, vintra,vinter,vext
      &        ,velect,vewald,iii,ibox, istt, iett, .true.,ovrlap
@@ -781,9 +781,9 @@ c         total_NBE = vintran+velectn+vewaldn+vtgn+vbendn+vvibn
           vtgn      = 0.0d0
           vbendn    = 0.0d0
           vvibn     = 0.0d0
-!         write(6,*) vintran,velectn,vewaldn       
+!         write(iou,*) vintran,velectn,vewaldn       
 
-!         write(6,*) 'irem', irem  
+!         write(iou,*) 'irem', irem  
 
 c ---    update energies:
 

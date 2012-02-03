@@ -86,6 +86,11 @@ c * end additions
       dimension vnbox(nbxmax),vninte(nbxmax),vnintr(nbxmax)
      &  ,vnvibb(nbxmax),vntgb(nbxmax),vnextb(nbxmax),vnbend(nbxmax)
      &  ,vntail(nbxmax),vnelect(nbxmax),vnewald(nbxmax)
+
+c --- JLR 11-24-09
+      integer icallrose
+c --- END JLR 11-24-09
+
 c +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 c      write(iou,*) 'start SWATCH'
@@ -234,7 +239,15 @@ c     *** get particle of type b ***
 c     *** add one attempt to the count for iparty
 c$$$  bniswat(iparty,box) = bniswat(iparty,box) + 1.0d0   
          bnswat(iparty,ipairb) = bnswat(iparty,ipairb) + 1.0d0   
-         if (lempty) return 
+c --- JLR 12-1-09 count the empty attempts
+c         if (lempty) return 
+         if (lempty) then
+            bnswat_empty(iparty,ipairb) =
+     &           bnswat_empty(iparty,ipairb) + 1.0d0
+            return
+         endif
+c --- END JLR 12-1-09
+
 c     * write out the molecule numbers of the pair *
 c     write(iou,*) imola,imolb
 
@@ -416,23 +429,42 @@ c        --- set up growth schedule
 c     --- lrigid add on 
 
             if (lrigid(imolty)) then
-c     --- calculate new vector from initial bead
+ccc--- JLR 11-24-09
+ccc--- adding some if statements for rigid swaps:
+ccc--- if we have swapped the whole rigid part we will 
+ccc--- not compute the vectors from ifirst in old position                                   
+               if ( nsampos(iparty).lt.iunit) then
 
-               do j = 1,iunit
-                  rxnew(j) = rxnew(ifirst) 
-     &                 - (rxu(self,ifirst) - rxu(self,j))
-                  rynew(j) = rynew(ifirst) 
-     &                 - (ryu(self,ifirst) - ryu(self,j))
-                  rznew(j) = rznew(ifirst) 
-     &                 - (rzu(self,ifirst) - rzu(self,j))
-               enddo
+                  if ( (rindex(imolty).eq.0) .or.
+     &                 (ifirst.lt.riutry(imolty,1))  ) then
 
+                     if (nsampos(iparty).ge.3) then
+
+                        call align_planes(iparty,self,other,
+     &                       s_type,o_type,rxnew,rynew,rznew)
+
+                     else
+
+c     --- calculate new vector from initial bead                                                    
+                        do j = 1,iunit
+                           rxnew(j) = rxnew(ifirst)
+     &                          - (rxu(self,ifirst) - rxu(self,j))
+                           rynew(j) = rynew(ifirst)
+     &                          - (ryu(self,ifirst) - ryu(self,j))
+                           rznew(j) = rznew(ifirst)
+     &                          - (rzu(self,ifirst) - rzu(self,j))
+                        enddo
+
+                     endif      !nsampos.eq.3                                                       
+                  endif         !ifirst.lt.riutry...                                                
+               endif            !nsampos.lt.iunit                                                   
                call schedule(igrow,imolty,islen,ifirst,iprev,4)
+ccc---END JLR 11-24-09
             else
                call schedule(igrow,imolty,islen,ifirst,iprev,3)
             endif
 
-c * I wonder if this works with lrigid?
+c * I wonder if this works with lrigid?                                                             
             if (ncut(iparty,s_type) .gt. 1) then
                do zz = 2,ncut(iparty,s_type)
                   ifirst = from(s_type+2*(zz-1))
@@ -442,6 +474,8 @@ c * I wonder if this works with lrigid?
 
                enddo
             endif
+
+
 
 c     *********** Commenting out for new combined code JMS 6-20-00 *****
 c     *** Call qqcheck to setup the group based qq cutoff ***
@@ -488,12 +522,30 @@ c     --- changing for lrigid to include waddnew
             waddnew = 1.0d0
 
 c     --- grow new chain conformation
-            call rosenbluth(.true.,lterm,self,self,imolty,islen,box
-     &           ,igrow,waddnew,.false.,vdum2,2)
-         
-c$$$            call rosenbluth (.true.,lterm,self,self,imolty
-c$$$     &           ,islen,box,igrow,dummy,.false.,dummy,2)
-c$$$
+c --- JLR 11-24-09
+c --- Different logic/calls to rosenbluth for rigid molecules 
+            if (lrigid(imolty)) then
+
+               if(nsampos(iparty).ge.iunit) then
+                  !molecule is all there                                                      
+                  !don't regrow anything in rosenbluth  
+                  icallrose = 4
+               elseif( (nsampos(iparty).ge.3)      .or.
+     &              (ifirst.ge.riutry(imolty,1) )) then
+c                 rigid part is grown, don't do rigrot in rosebluth 
+                  icallrose = 3
+               else
+c                 rigid part is not grown, do rigrot  
+                  icallrose = 2
+               endif
+            else
+c              flexible molecule call rosenbluth in normal fashion  
+               icallrose = 2
+            endif
+
+            call rosenbluth(.true.,lterm,self,self,imolty,islen
+     &           ,box ,igrow,waddnew,.false.,vdum2,icallrose)
+c ---END JLR 11-24-09
 
 c     --- propagate new rosenbluth weight
             tweight = tweight*weight*waddnew
@@ -602,6 +654,7 @@ c     * for the energy of b's new position (second time around)
 
 c     *** get energy of configuration ***
 
+            call ctrmas(.false.,box,self,8)
             call energy (self,imolty, v, vintra,vinter,vext
      &           ,velect,vewald,iii,box,1,iunit,.true.,lterm,.false.
      &           ,vdum,.false.,.false.)
@@ -662,11 +715,29 @@ c     --- lrigid add on
             waddold = 1.0d0
 
 c        --- grow old chain conformation
-            call rosenbluth(.false.,lterm,self,self,imolty,islen,box
-     &           ,igrow,waddold,.false.,vdum2,2)
+c --- JLR 11-24-09
+            if (lrigid(imolty)) then
 
-c$$$            call rosenbluth (.false.,lterm,self,self,imolty
-c$$$     &           ,islen,box,igrow,dummy,.false.,dummy,2)
+               if(nsampos(iparty).ge.iunit) then
+c                 molecule is all there
+c                 don't regrow anything in rosenbluth 
+                  icallrose = 4
+               elseif( (nsampos(iparty).ge.3)      .or.
+     &              (ifirst.ge.riutry(imolty,1)) ) then
+c                 rigid part is grown, don't do rigrot in rosebluth 
+                  icallrose = 3
+               else
+c                 rigid part is not grown, do rigrot
+                  icallrose = 2
+               endif
+            else
+c              flexible molecule call rosenbluth in normal fashion
+               icallrose = 2
+            endif
+
+            call rosenbluth(.false.,lterm,self,self,imolty,
+     &           islen,box,igrow,waddold,.false.,vdum2,icallrose)
+c --- END JLR 11-24-09
 
             if ( lterm ) then
 c     *** termination of old walk due to problems generating orientations ***
@@ -914,13 +985,40 @@ c     ---get particle from box b
             if ( moltyp(iboxb) .ne. imoltb ) write(iou,*) 'screwup'
             iboxib = nboxi(iboxb)
             if (iboxib .ne. boxb) stop 'problem in swatch'
+
+ccc--!!!JLR - for test write coordinates of a and b                                              
+c            open(unit=91,file='a_init.xyz',status='unknown')                                 
+c            write(91,*) nunit(imolta)                                                        
+c            write(91,*)                                                                      
+c            do zz = 1,nunit(imolta)                                                          
+c               write(91,*) 'C ', rxu(iboxa,zz),ryu(iboxa,zz),                                
+c     &              rzu(iboxa,zz)                                                            
+c            enddo                                                                            
+c            close(91)                                                                        
+c            open(unit=92,file='b_init.xyz',status='unknown')                                 
+c            write(92,*) nunit(imoltb)                                                        
+c            write(92,*)                                                                      
+c            do zz = 1,nunit(imoltb)                                                          
+c               write(92,*) 'O ', rxu(iboxb,zz),ryu(iboxb,zz),                                
+c     &              rzu(iboxb,zz)                                                            
+c            enddo                                                                            
+c            close(92)                                                                        
+ccc--!!!JLR - end of coordinate test            
+
          endif
 
 c     ---add one attempt to the count for iparty
 c     write(iou,*) 'iparty:',iparty,'boxa:',boxa
          bnswat(iparty,ipairb) = bnswat(iparty,ipairb) + 1.0d0
 
-         if (lempty) return
+c --- JLR 12-1-09, Count the empty attempts
+c         if (lempty) return
+         if (lempty) then
+            bnswat_empty(iparty,ipairb) =
+     &           bnswat_empty(iparty,ipairb) + 1.0d0
+            return
+         endif
+c --- END JLR 12-1-09 ---
 
 c$$$c     --- assign from and prev for each moltyp
 c$$$         from(1) = gswatc(iparty,type_a,1) 
@@ -1026,22 +1124,39 @@ c        --- set up growth schedule
 c --- rigid molecule add on
 
             if (lrigid(imolty)) then
+ccc--- JLR 11-24-09
+ccc---adding two if statements for rigid swaps
+               if (nsampos(iparty).lt.iunit) then
+
+                  if ( (rindex(imolty).eq.0) .or.
+     &                 (ifirst.lt.riutry(imolty,1))  ) then
+
+                     if (nsampos(iparty).ge.3) then
+
+                        call align_planes(iparty,self,other,
+     &                       s_type,o_type,rxnew,rynew,rznew)
+
+                     else
+
 c     --- calculate new vector from initial bead
+                        do j = 1,iunit
 
-               do j = 1,iunit
-               
-                  rxnew(j) = rxnew(ifirst) 
-     &                 - (rxu(self,ifirst) - rxu(self,j))
-                  rynew(j) = rynew(ifirst) 
-     &                 - (ryu(self,ifirst) - ryu(self,j))
-                  rznew(j) = rznew(ifirst) 
-     &                 - (rzu(self,ifirst) - rzu(self,j))
-               enddo
+                           rxnew(j) = rxnew(ifirst)
+     &                          - (rxu(self,ifirst) - rxu(self,j))
+                           rynew(j) = rynew(ifirst)
+     &                          - (ryu(self,ifirst) - ryu(self,j))
+                           rznew(j) = rznew(ifirst)
+     &                          - (rzu(self,ifirst) - rzu(self,j))
+                           enddo
 
+                     endif      !nsampos.lt.3
+                  endif         !ifirst.lt.riutry...
+               endif            !nsampos.lt.iunit 
                call schedule(igrow,imolty,islen,ifirst,iprev,4)
+ccc---END JLR 11-24-09
             else
                call schedule(igrow,imolty,islen,ifirst,iprev,3)
-            endif
+            endif !lrigid
          
 c           --- Adding in multiple end regrowths
 
@@ -1056,14 +1171,30 @@ c           --- Adding in multiple end regrowths
             endif
 
             waddnew = 1.0d0
+c --- JLR 11-24-09 New stuff for rigid swatch
+            if (lrigid(imolty)) then
 
-c        --- grow new chain conformation
-            call rosenbluth(.true.,lterm,other,self,imolty,islen,iboxnew
-     &           ,igrow,waddnew,.false.,vdum2,2)
-         
-c$$$            call rosenbluth(.true.,lterm,other,self,imolty,islen,iboxnew
-c$$$     &           ,igrow,dummy,.false.,dummy,2)
+               if(nsampos(iparty).ge.iunit) then
+                  !molecule is all there
+                  !don't regrow anything in rosenbluth 
+                  icallrose = 4
+               elseif( (nsampos(iparty).ge.3)      .or.
+     &              (ifirst.ge.riutry(imolty,1)) ) then
+c                 rigid part is grown, don't do rigrot in rosebluth
+                  icallrose = 3
+               else
+c                 rigid part is not grown, do rigrot
+                  icallrose = 2
+               endif
+            else
+c              flexible molecule call rosenbluth in normal fashion
+               icallrose = 2
+            endif
 
+
+            call rosenbluth(.true.,lterm,other,self,imolty,islen,
+     &           iboxnew,igrow,waddnew,.false.,vdum2,icallrose)
+c --- END JLR 11-24-09
 c        --- termination of cbmc attempt due to walk termination ---
             if ( lterm ) return
 
@@ -1128,6 +1259,7 @@ c     --- calculate the true site-site energy
 c     ??? energy problem for cases which involve the change of the bending type
 c     and torsional type for those units swatched!!!!!!
 
+            call ctrmas(.false.,iboxnew,other,8)
             call energy (other,imolty, v, vintra,vinter,vext
      &           ,velect,vewald,iii,iboxnew,1,iunit,.true.,lterm,.false.
      &           ,vdum,.false.,.false.)
@@ -1164,11 +1296,29 @@ c --- rigid add on
             waddold = 1.0d0
 
 c        --- grow old chain conformation
-            call rosenbluth(.false.,lterm,self,self,imolty,islen,iboxold
-     &           ,igrow,waddold,.false.,vdum2,2)
+c --- JLR 11-24-09 New stuff for rigid swatch
+            if (lrigid(imolty)) then
 
-c$$$            call rosenbluth(.false.,lterm,self,self,imolty,islen,iboxold
-c$$$     &           ,igrow,dummy,.false.,dummy,2)
+               if(nsampos(iparty).ge.iunit) then
+                  !molecule is all there
+                  !don't regrow anything in rosenbluth
+                  icallrose = 4
+               elseif( (nsampos(iparty).ge.3)      .or.
+     &              (ifirst.ge.riutry(imolty,1) )) then
+c                 rigid part is grown, don't do rigrot in rosebluth
+                  icallrose = 3
+               else
+c                 rigid part is not grown, do rigrot
+                  icallrose = 2
+               endif
+            else
+c              flexible molecule call rosenbluth in normal fashion
+               icallrose = 2
+            endif
+
+            call rosenbluth(.false.,lterm,self,self,imolty,
+     &           islen,iboxold,igrow,waddold,.false.,vdum2,icallrose)
+c --- END JLR 11-24-09
 
 c        --- termination of old walk due to problems generating orientations
             if ( lterm ) then
@@ -1336,22 +1486,29 @@ c     - for new BOXINS with inserted particle
                   dvol   = volb
                   imolrm = imoltb
                endif
-               do imt = 1, nmolty
-                  do jmt = 1, nmolty
+c --- JLR 11-24-09 don't do tail corrections for ideal box
+               if (.not.lideal(ibox)) then 
+                  do imt = 1, nmolty
+                     do jmt = 1, nmolty
 c     --- new logic for tail correction (same answer) MGM 3-25-98
-                     rho = dble( ncmt(ibox,jmt) )
-                     if ( jmt .eq. imolin ) rho = rho + 1.0d0
-                     if ( jmt .eq. imolrm ) rho = rho - 1.0d0
+                        rho = dble( ncmt(ibox,jmt) )
+                        if ( jmt .eq. imolin ) rho = rho + 1.0d0
+                        if ( jmt .eq. imolrm ) rho = rho - 1.0d0
 
-                     rho = rho / dvol
+                        rho = rho / dvol
 
-                     dicount = ncmt(ibox,imt)
-                     if ( imt .eq. imolin ) dicount = dicount + 1
-                     if ( imt .eq. imolrm ) dicount = dicount - 1
+                        dicount = ncmt(ibox,imt)
+                        if ( imt .eq. imolin ) dicount = dicount + 1
+                        if ( imt .eq. imolrm ) dicount = dicount - 1
 
-                     dinsta = dinsta + dicount * coru(imt,jmt,rho,ibox)
+                        dinsta = dinsta + 
+     &                       dicount * coru(imt,jmt,rho,ibox)
+                     enddo
                   enddo
-               enddo
+               else
+                  dinsta = 0.0d0
+               endif
+c --- END JLR 11-24-09              
                dinsta = dinsta - vtailb( ibox )
 
                tweight=tweight*dexp(-beta*dinsta)
@@ -1440,6 +1597,24 @@ c     --- call nearest neighbor list
                call updnn( iboxa )
                call updnn( iboxb )
             endif
+
+ccc--!!!JLR - for test 2 write final coordinates of a and b                                      
+c         open(unit=93,file='a_final.xyz',status='unknown')                                   
+c         write(93,*) iunita                                                                  
+c         write(93,*)                                                                         
+c         do zz = 1,iunita                                                                    
+c            write(93,*) 'C ', rxu(iboxa,zz),ryu(iboxa,zz),rzu(iboxa,zz)                      
+c         enddo                                                                               
+c                                                                                             
+c         open(unit=93,file='b_final.xyz',status='unknown')                                   
+c         write(93,*) iunitb                                                                  
+c         write(93,*)                                                                         
+c         do zz = 1,iunitb                                                                    
+c            write(93,*) 'C ', rxu(iboxb,zz),ryu(iboxb,zz),rzu(iboxb,zz)                      
+c         enddo                                                                               
+c         STOP 'END OF SWATCH TEST'                                                           
+ccc--!!!JLR - end of coordinate test         
+
          endif
 c -----------------------------------------------------------------
 

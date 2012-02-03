@@ -141,7 +141,27 @@ c            rzuij  = rzuij - bz*anint(rzuij*bzi)
                rzuij = rzuij - bz*dint(rzuij*bzi+dsign(0.5d0,rzuij))
             endif
          endif
+
+c --- JLR 11-17-09
+c --- for orginal RPLC setup, mimage must be applied twice or energy errors can result 
+c --- this may be removed in future if larger system size is used!!!
+         if (ltwice(ibox)) then !everthing is folded again
+            if ( rxuij .gt. hbx ) then
+               rxuij=rxuij-bx
+            else
+               if (rxuij.lt.-hbx) rxuij=rxuij+bx
+            endif
+            if ( ryuij .gt. hby ) then
+               ryuij=ryuij-by
+            else
+               if (ryuij.lt.-hby) ryuij=ryuij+by
+            endif
+         endif
+c --- END JLR 11-17-09
+
       endif
+
+
       return
       end
 

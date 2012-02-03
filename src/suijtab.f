@@ -990,7 +990,7 @@ c --- TraPPE-UA alkanol hydrogen [H]-O
 c --- TraPPE-UA alkanol oxygen H-[O]-CHx
       sigi(62) = 3.02d0
       epsi(62) = 93.0d0
-      mass(62) = 16.00d0
+      mass(62) = 15.999d0
       qelect(62) = -0.700d0
       lqchg(62) = .true.
       chname(62) = ' Tr-UA O alkanol  '
@@ -1530,6 +1530,7 @@ c --- TIP-4P water model --- [O] site
 c      sigi(114) = 3.15365d0
       sigi(114) = 3.154d0
       epsi(114) = 78.0d0
+      qelect(114) = 0.0d0
 c the following value was listed under tip-4p water oxygen as well (type 152)
 c      epsi(114) = 57.91d0
       mass(114) = 15.999d0
@@ -2185,7 +2186,7 @@ C   12 site benzene model with hydrogen at the normal position
       sigi(185) = 3.60d0
       epsi(185) = 30.7d0
       mass(185) = 12.011d0
-      qelect(185) = -0.09d0
+      qelect(185) = -0.095d0
       lqchg(185) = .true.
       lij(185) = .true.
       chname(185) = 'C Trappe AA benzene  '
@@ -2196,236 +2197,178 @@ C   benzene 12 site model
       sigi(186) = 2.36d0
       epsi(186) = 25.44d0
       mass(186) = 1.0079d0
-      qelect(186) = 0.09d0
+      qelect(186) = 0.095d0
       lqchg(186) = .true.
       lij(186) = .true.
       chname(186) = 'H Trappe AA benzene  '
       chemid(186)  = 'H  '
 
+c ---- added 7/12/06 for nitrotoluene
 
-c -- Chlorobenzene parameters all atom
-
-      sigi(190) = 3.60
-      epsi(190) = 30.7
-      mass(190) = 12.011d0
-      qelect(190) = -0.11d0
-      lqchg(190) = .true.
-      lij(190) = .true.
-      chname(190) = 'C1 Chlorobenzene AA'
-      chemid(190)  = 'C  '
-
-      sigi(191) = 3.600d0
-      epsi(191) = 30.7d0
-      mass(191) =  12.011d0
-      qelect(191) = -0.07d0
-      lqchg(191) = .true.
-      lij(191) = .true.
-      chname(191) = 'C2 Chlorobenzene AA'
-      chemid(191)  = 'C  '
-
-      sigi(192) = 3.600d0
-      epsi(192) = 30.70d0
-      mass(192) = 12.011d0
-      qelect(192) = -0.11d0
-      lqchg(192) = .true.
-      lij(192) = .true.
-      chname(192) = 'C3 Chlorobenzene AA'
-      chemid(192)  = 'C  '
-
-      sigi(193) = 3.600d0
-      epsi(193) = 30.70d0
-      mass(193) = 12.011d0
-      qelect(193) = -0.055d0
-      lqchg(193) = .true.
-      lij(193) = .true.
-      chname(193) = 'C4 Chlorobenzene AA'
-      chemid(193)  = 'C  '
-
-      sigi(194) = 3.600d0
-      epsi(194) = 30.7d0
-      mass(194) = 12.011d0
-      qelect(194) = 0.06d0
-      lqchg(194) = .true.
-      lij(194) = .true.
-      chname(194) = 'C5 Chlorobenzene AA'
-      chemid(194)  = 'C  '
-
-      sigi(195) = 3.60d0
-      epsi(195) = 30.70d0
-      mass(195) = 12.011d0
-      qelect(195) = -0.055d0
-      lqchg(195) = .true.
-      lij(195) = .true.
-      chname(195) = 'C6 Chlorobenzene AA'
-      chemid(195)  = 'C  '
-
-      sigi(196) = 2.36d0
-      epsi(196) = 25.44d0
-      mass(196) = 1.0079d0
-      qelect(196) = 0.1d0
+c -- TraPPE-UA [C] alpha aro carbon for nitro
+      sigi(196) = 4.50d0
+      epsi(196) = 15.0d0
+      mass(196) = 12.011d0
       lqchg(196) = .true.
-      lij(196) = .true.
-      chname(196) = 'H7 Chlorobenzene AA'
-      chemid(196)  = 'H  '
+      qelect(196) = 0.14d0
+      chname(196) = ' Tr-UA C aro nitro '
+      chemid(196) = 'c  '
 
-      sigi(197) = 2.36d0
-      epsi(197) = 25.44d0
-      mass(197) = 1.0079d0
-      qelect(197) = 0.09d0
+c -- TraPPE-UA [N] nitro
+      sigi(197) = 3.31d0
+      epsi(197) = 40.0d0
+      mass(197) = 14.007d0
       lqchg(197) = .true.
-      lij(197) = .true.
-      chname(197) = 'H8 Chlorobenzene AA'
-      chemid(197)  = 'H  '
+      qelect(197) = 0.82d0
+      chname(197) = 'Tr-UA N nitro '
+      chemid(197) = 'N  '
 
-      sigi(198) = 2.360d0
-      epsi(198) = 25.44d0
-      mass(198) = 1.0079d0
-      qelect(198) = 0.1d0
+c -- TraPPE-UA [O] nitro
+      sigi(198) = 2.90d0
+      epsi(198) = 80.0d0
+      mass(198) = 15.999d0
       lqchg(198) = .true.
-      lij(198) = .true.
-      chname(198) = 'H9 Chlorobenzene AA'
-      chemid(198)  = 'H  '
+      qelect(198) = -0.48d0
+      chname(198) = 'Tr-UA O nitro '
+      chemid(198) = 'O  '
 
-      sigi(199) = 2.36d0
-      epsi(199) = 25.44d0
-      mass(199) = 1.0079d0
-      qelect(199) = 0.09d0
-      lqchg(199) = .true.
-      lij(199) = .true.
-      chname(199) = 'H10 Chlorobenzene AA'
-      chemid(199)  = 'H  '
-
-      sigi(200) = 2.36d0
-      epsi(200) = 25.44d0
-      mass(200) = 1.0079d0
-      qelect(200) = 0.09d0
-      lqchg(200) = .true.
-      lij(200) = .true.
-      chname(200) = 'H11 Chlorobenzene AA'
-      chemid(200)  = 'H  '
-
-      sigi(201) = 3.5d0
-      epsi(201) = 158.0d0
-      mass(201) = 35.4527d0
-      qelect(201) = -0.13d0
-      lqchg(201) = .true.
-      lij(201) = .true.
-      chname(201) = 'Cl12 Chlorobenzene AA'
-      chemid(201)  = 'Cl '
-
-   
-c -- O-dichlorobenznene
+c --- TraPPE-UA [CH] benzene9 carbon also #56
+      sigi(199) = 3.74d0
+      epsi(199) = 48.0d0
+      mass(199) = 13.0191d0
+c * published CH(aro) for TraPPE-UA 6-site
+c      sigi(56) = 3.695d0
+c      epsi(56) = 50.5d0
+c      mass(56) = 13.0191d0
+      chname(199) = ' Tr-UA CH benzene9'
+      chemid(199)  = 'C  '
 
 
-      sigi(202) = 3.60d0
-      epsi(202) = 30.7d0
-      mass(202) = 12.011d0
-      qelect(202) = -0.11d0
-      lqchg(202) = .true.
-      lij(202) = .true.
-      chname(202) = 'C1 OChlorobenzene AA'
-      chemid(202)  = 'C  '
+c --- JLR 12-1-09 parameters for gradually growing in benzene
+       sigi(203) = 1.6d0
+       epsi(203) = 20.0d0
+       mass(203) = 13.091d0
+       lqchg(203) = .false.
+       lij(203) = .true.
+       chname(203) = 'stage 1 benzene'
 
-      sigi(203) = 3.600d0
-      epsi(203) = 30.7d0
-      mass(203) =  12.011d0
-      qelect(203) = -0.08d0
-      lqchg(203) = .true.
-      lij(203) = .true.
-      chname(203) = 'C2 OChlorobenzene AA'
-      chemid(203)  = 'C  '
+       sigi(204) = 2.1d0
+       epsi(204) = 30.0d0
+       mass(204) = 13.091d0
+       lqchg(204) = .false.
+       lij(204) = .true.
+       chname(204) = 'stage 2 benzene'
 
-      sigi(204) = 3.600d0
-      epsi(204) = 30.70d0
-      mass(204) = 12.011d0
-      qelect(204) = 0.08d0
-      lqchg(204) = .true.
-      lij(204) = .true.
-      chname(204) = 'C3 OChlorobenzene AA'
-      chemid(204)  = 'C  '
+       sigi(205) = 2.5d0
+       epsi(205) = 37.0d0
+       mass(205) = 13.091d0
+       lqchg(205) = .false.
+       lij(205) = .true.
+       chname(205) = 'stage 3 benzene'
 
-      sigi(205) = 3.600d0
-      epsi(205) = 30.70d0
-      mass(205) = 12.011d0
-      qelect(205) = 0.08d0
-      lqchg(205) = .true.
-      lij(205) = .true.
-      chname(205) = 'C4 OChlorobenzene AA'
-      chemid(205)  = 'C  '
+       sigi(206) = 2.9d0
+       epsi(206) = 42.0d0
+       mass(206) = 13.091d0
+       lqchg(206) = .false.
+       lij(206) = .true.
+       chname(206) = 'stage 4 benzene'
 
-      sigi(206) = 3.600d0
-      epsi(206) = 30.7d0
-      mass(206) = 12.011d0
-      qelect(206) = -0.08d0
-      lqchg(206) = .true.
-      lij(206) = .true.
-      chname(206) = 'C5 OChlorobenzene AA'
-      chemid(206)  = 'C  '
+       sigi(207) = 3.3d0
+       epsi(207) = 46.0d0
+       mass(207) = 13.091d0
+       lqchg(207) = .false.
+       lij(207) = .true.
+       chname(207) = 'stage 5 benzene'
+c --- END JLR 12-1-09 ---
 
-      sigi(207) = 3.60d0
-      epsi(207) = 30.70d0
-      mass(207) = 12.011d0
-      qelect(207) = -0.11d0
-      lqchg(207) = .true.
-      lij(207) = .true.
-      chname(207) = 'C6 OChlorobenzene AA'
-      chemid(207)  = 'C  '
+c - parameters for acrylates
+c -- some are already listed; listed twice for convenience during fitting
 
-      sigi(208) = 2.36d0
-      epsi(208) = 25.44d0
-      mass(208) = 1.0079d0
-      qelect(208) = 0.11d0
-      lqchg(208) = .true.
-      lij(208) = .true.
-      chname(208) = 'H7 OChlorobenzene AA'
-      chemid(208)  = 'H  '
-
-      sigi(209) = 2.36d0
-      epsi(209) = 25.44d0
-      mass(209) = 1.0079d0
-      qelect(209) = 0.10d0
-      lqchg(209) = .true.
-      lij(209) = .true.
-      chname(209) = 'H8 OChlorobenzene AA'
-      chemid(209)  = 'H  '
-
-      sigi(210) = 2.360d0
-      epsi(210) = 25.44d0
-      mass(210) = 1.0079d0
-      qelect(210) = 0.1d0
-      lqchg(210) = .true.
+c --- methyl group attached to ether oxygen (TraPPE 6) #72
+      sigi(210) = 3.75d0
+      epsi(210) = 98.0d0
+      mass(210) = 15.0347d0
+      qelect(210) = 0.25d0
       lij(210) = .true.
-      chname(210) = 'H9 OChlorobenzene AA'
-      chemid(210)  = 'H  '
+      lqchg(210) = .true.
+      chname(210) = 'Tr-UA ether CH3'
+      chemid(210) = 'C  '
 
-      sigi(211) = 2.36d0
-      epsi(211) = 25.44d0
-      mass(211) = 1.0079d0
-      qelect(211) = 0.11d0
-      lqchg(211) = .true.
+c --- ether oxygen #71
+      sigi(211) = 2.80d0
+      epsi(211) = 55.0d0
+      mass(211) = 15.999d0
+      qelect(211) = -0.25d0
       lij(211) = .true.
-      chname(211) = 'H10 OChlorobenzene AA'
-      chemid(211)  = 'H  '
+      lqchg(211) = .true.
+      chname(211) = 'Tr-UA ether O'
+      chemid(211) = 'O  '
 
-      sigi(212) = 3.5d0
-      epsi(212) = 158.0d0
-      mass(212) = 35.4527d0
-      qelect(212) = -0.1d0
-      lqchg(212) = .true.
+c --  ketone with CM4 charge
+      sigi(212) = 3.82d0
+      epsi(212) = 40.0d0
+      mass(212) = 12.011d0
+      qelect(212) = 0.4d0
       lij(212) = .true.
-      chname(212) = 'Cl11 OChlorobenzene AA'
-      chemid(212)  = 'Cl '
+      lqchg(212) = .true.
+      chname(212) = 'carbonyl C'
+      chemid(212) = 'C  '
 
-      sigi(213) = 3.5d0
-      epsi(213) = 158.0d0
-      mass(213) = 35.4527d0
-      qelect(213) = -0.1d0
-      lqchg(213) = .true.
+c --- C=O oxygen CM4 charge
+      sigi(213) = 3.05d0
+      epsi(213) = 79.0d0
+      mass(213) = 15.999d0
+      qelect(213) = -0.4d0
       lij(213) = .true.
-      chname(213) = 'Cl12 OChlorobenzene AA'
-      chemid(213)  = 'Cl '
+      lqchg(213) = .true.
+      chname(213) = 'C=O oxygen'
+      chemid(213) = 'O  '
 
+c -- TraPPE-UA sp2 butadiene
+      sigi(214) = 3.71d0
+      epsi(214) = 52.0d0
+      mass(214) = 13.0191d0
+      qelect(214) = 0.0d0
+      lij(214) = .true.
+      lqchg(214) = .true.
+      chname(214) = 'Tr-UA sp2 CH w/charge'
+      chemid(214) = 'C  '
+      
+c --  TraPPE-UA sp2 CH2 #51
+      sigi(215) = 3.675d0
+      epsi(215) = 85.0d0
+      mass(215) = 14.0268d0
+      qelect(215) = 0.0d0
+      lij(215) = .true.
+      lqchg(215) = .true.
+      chname(215) = 'Tr-UA sp2 CH2'
+      chemid(215) = 'C  '
 
+c --  TraPPE-UA methyl CH3 #4
+      sigi(216) = 3.75d0
+      epsi(216) = 98.0d0
+      mass(216) = 15.0347d0
+      lij(216) = .true.
+      chname(216) = 'Tr-UA CH3'
+      chemid(216) = 'C  '
+
+c --  TraPPE-UA C(sp2)
+      sigi(217) = 3.85d0
+      epsi(217) = 22.0d0
+      mass(217) = 12.011d0
+      lij(217) = .true.
+      chname(217) = 'Tr-UA sp2 C'
+      chemid(217) = 'C  '
+
+c --  TraPPE-UA CH2-(ether O) with different charge
+      sigi(218) = 3.95d0
+      epsi(218) = 46.0d0
+      mass(218) = 14.0268d0
+      qelect(218) = 0.25d0
+      lij(218) = .true.
+      lqchg(218) = .true.
+      chname(218) = 'Tr-UA ether CH2'
+      chemid(218) = 'C  '
 
 c -- parameters for primary amines
 
@@ -2464,20 +2407,12 @@ c     *** 1st degree *****
       sigi(221) = 3.34d0
       epsi(221) = 111.0d0
       qelect(221) = -0.892d0
-c     ******************************
-
-
-
-c     ***********************
-
-
       mass(221) = 14.00674d0
       lqchg(221) = .true.
       lij(221) = .true.
       chname(221) = 'TraPPE-AA H Amine'
       chemid(221)  = 'N   '
         
-
 
 c -- [C(methylene)]-N-H2
       sigi(222) = sigi(24)
@@ -2743,116 +2678,826 @@ c -- [H]-O in ethanol
       chname(290) = 'H in OH'
       chemid(290) ='H  '
 
+C   EH m-nitrotoluene 4/2/09 KM
+c -- #299-312 charge model 1
+c --  simply combine H and C charges for CH3
+c -- #313-319 charge model 2
+c --  adjust CH3 and ring carbon charges
+c --  to recover the CM4 dipole moment
+
+c -- TraPPE-EH [O1] nitro m
+c -- from TraPPE 10 
+      sigi(299) = 2.70d0
+      epsi(299) = 42.0d0
+      mass(299) = 15.999d0
+      qelect(299) = -0.202d0
+      lqchg(299) = .true.
+      lij(299) = .true.
+      chname(299) = 'O in NO2'
+      chemid(299 ) ='O  '
+
+c -- TraPPE-EH [O2] nitro m
+c -- from TraPPE 10 
+      sigi(300) = 2.70d0
+      epsi(300) = 42.0d0
+      mass(300) = 15.999d0
+      qelect(300) = -0.196d0
+      lqchg(300) = .true.
+      lij(300) = .true.
+      chname(300) = 'O in NO2'
+      chemid(300) ='O  '
+
+c -- TraPPE-EH [N] nitro m
+c -- from TraPPE 10 
+      sigi(301) = 2.90d0
+      epsi(301) = 30.0d0
+      mass(301) = 14.007d0
+      qelect(301) = 0.038d0
+      lqchg(301) = .true.
+      lij(301) = .true.
+      chname(301) = 'N in NO2'
+      chemid(301) ='N  '
+
+c -- TraPPE-EH [C] aro alpha nitro m
+c -- from TraPPE 9
+c -- nothing special about alpha to nitro?
+      sigi(302) = 3.60d0
+      epsi(302) = 30.70d0
+      mass(302) = 12.011d0
+      qelect(302) = 0.096d0
+      lqchg(302) = .true.
+      lij(302) = .true.
+      chname(302) = 'C aro'
+      chemid(302) ='C  '
+
+c -- TraPPE-EH [C] aro m
+c -- from TraPPE 9
+      sigi(303) = sigi(302)
+      epsi(303) = epsi(302)
+      mass(303) = mass(302)
+      qelect(303) = -0.053d0
+      lqchg(303) = .true.
+      lij(303) = .true.
+      chname(303) = 'C aro'
+      chemid(303) ='C  '
+
+c -- TraPPE-EH [C] aro m
+c -- from TraPPE 9
+      sigi(304) = sigi(302)
+      epsi(304) = epsi(302)
+      mass(304) = mass(302)
+      qelect(304) = -0.059d0
+      lqchg(304) = .true.
+      lij(304) = .true.
+      chname(304) = 'C aro'
+      chemid(304) ='C  '
+
+c -- TraPPE-EH [C] aro m
+c -- from TraPPE 9
+      sigi(305) = sigi(302)
+      epsi(305) = epsi(302)
+      mass(305) = mass(302)
+      qelect(305) = -0.048d0
+      lqchg(305) = .true.
+      lij(305) = .true.
+      chname(305) = 'C aro'
+      chemid(305) ='C  '
+
+c -- TraPPE-EH [C] aro alpha CH3 m
+c -- from TraPPE 9
+      sigi(306) = sigi(302)
+      epsi(306) = epsi(302)
+      mass(306) = mass(302)
+      qelect(306) = -0.015d0
+      lqchg(306) = .true.
+      lij(306) = .true.
+      chname(306) = 'C aro'
+      chemid(306) ='C  '
+
+c -- TraPPE-EH [C] aro m
+c -- from TraPPE 9
+      sigi(307) = sigi(302)
+      epsi(307) = epsi(302)
+      mass(307) = mass(302)
+      qelect(307) = -0.057d0
+      lqchg(307) = .true.
+      lij(307) = .true.
+      chname(307) = 'C aro'
+      chemid(307) ='C  '
+
+c -- TraPPE-EH [H] aro m
+c -- from TraPPE 9
+      sigi(308) = 2.36d0
+      epsi(308) = 25.45d0
+      mass(308) = 1.008d0
+      qelect(308) = 0.086d0
+      lqchg(308) = .true.
+      lij(308) = .true.
+      chname(308) = 'H aro'
+      chemid(308) ='H  '
+
+c -- TraPPE-EH [H] aro m
+c -- from TraPPE 9
+      sigi(309) = 2.36d0
+      epsi(309) = 25.45d0
+      mass(309) = 1.008d0
+      qelect(309) = 0.10d0
+      lqchg(309) = .true.
+      lij(309) = .true.
+      chname(309) = 'H aro'
+      chemid(309) ='H  '
+
+c -- TraPPE-EH [H] aro m
+c -- from TraPPE 9
+      sigi(310) = 2.36d0
+      epsi(310) = 25.45d0
+      mass(310) = 1.008d0
+      qelect(310) = 0.106d0
+      lqchg(310) = .true.
+      lij(310) = .true.
+      chname(310) = 'H aro'
+      chemid(310) ='H  '
+
+c -- TraPPE-EH [H] aro m
+c -- from TraPPE 9
+      sigi(311) = 2.36d0
+      epsi(311) = 25.45d0
+      mass(311) = 1.008d0
+      qelect(311) = 0.10d0
+      lqchg(311) = .true.
+      lij(311) = .true.
+      chname(311) = 'H aro'
+      chemid(311) ='H  '
+
+c -- TraPPE-UA CH3 for toluene m
+      sigi(312) = sigi(4)
+      epsi(312) = epsi(4)
+      mass(312) = mass(4)
+      qelect(312) = 0.104d0
+      lqchg(312) = .true.
+      lij(312) = .true.
+      chname(312) = 'CH3 '
+      chemid(312) ='C  '
+
+
+c -- charge model 2
+
+c -- TraPPE-EH [C] aro alpha nitro m
+c -- from TraPPE 9
+c -- nothing special about alpha to nitro?
+      sigi(313) = 3.60d0
+      epsi(313) = 30.70d0
+      mass(313) = 12.011d0
+      qelect(313) = 0.089d0
+      lqchg(313) = .true.
+      lij(313) = .true.
+      chname(313) = 'C aro'
+      chemid(313) ='C  '
+
+c -- TraPPE-EH [C] aro m
+c -- from TraPPE 9
+      sigi(314) = sigi(302)
+      epsi(314) = epsi(302)
+      mass(314) = mass(302)
+      qelect(314) = -0.060d0
+      lqchg(314) = .true.
+      lij(314) = .true.
+      chname(314) = 'C aro'
+      chemid(314) ='C  '
+
+c -- TraPPE-EH [C] aro m
+c -- from TraPPE 9
+      sigi(315) = sigi(302)
+      epsi(315) = epsi(302)
+      mass(315) = mass(302)
+      qelect(315) = -0.066d0
+      lqchg(315) = .true.
+      lij(315) = .true.
+      chname(315) = 'C aro'
+      chemid(315) ='C  '
+
+c -- TraPPE-EH [C] aro m
+c -- from TraPPE 9
+      sigi(316) = sigi(302)
+      epsi(316) = epsi(302)
+      mass(316) = mass(302)
+      qelect(316) = -0.054d0
+      lqchg(316) = .true.
+      lij(316) = .true.
+      chname(316) = 'C aro'
+      chemid(316) ='C  '
+
+c -- TraPPE-EH [C] aro alpha CH3 m
+c -- from TraPPE 9
+      sigi(317) = sigi(302)
+      epsi(317) = epsi(302)
+      mass(317) = mass(302)
+      qelect(317) = -0.022d0
+      lqchg(317) = .true.
+      lij(317) = .true.
+      chname(317) = 'C aro'
+      chemid(317) ='C  '
+
+c -- TraPPE-EH [C] aro m
+c -- from TraPPE 9
+      sigi(318) = sigi(302)
+      epsi(318) = epsi(302)
+      mass(318) = mass(302)
+      qelect(318) = -0.064d0
+      lqchg(318) = .true.
+      lij(318) = .true.
+      chname(318) = 'C aro'
+      chemid(318) ='C  '
+
+c -- TraPPE-UA CH3 for toluene m
+      sigi(340) = sigi(4)
+      epsi(340) = epsi(4)
+      mass(340) = mass(4)
+      qelect(340) = 0.145d0
+      lqchg(340) = .true.
+      lij(340) = .true.
+      chname(340) = 'CH3 '
+      chemid(340) ='C  '
+
+C   EH o-nitrotoluene 4/2/09 KM
+c -- #319-332 charge model 1
+c --  simply combine H and C charges for CH3
+c -- #333-339 charge model 2
+c --  adjust CH3 and ring carbon charges
+c --  to recover the CM4 dipole moment
+
+c -- TraPPE-EH [O1] nitro o
+c -- from TraPPE 10 
+      sigi(319) = 2.70d0
+      epsi(319) = 42.0d0
+      mass(319) = 15.999d0
+      qelect(319) = -0.173d0
+      lqchg(319) = .true.
+      lij(319) = .true.
+      chname(319) = 'O in NO2'
+      chemid(319) ='O  '
+
+c -- TraPPE-EH [O2] nitro o
+c -- from TraPPE 10 
+      sigi(320) = 2.70d0
+      epsi(320) = 42.0d0
+      mass(320) = 15.999d0
+      qelect(320) = -0.192d0
+      lqchg(320) = .true.
+      lij(320) = .true.
+      chname(320) = 'O in NO2'
+      chemid(320) ='O  '
+
+c -- TraPPE-EH [N] nitro o
+c -- from TraPPE 10 
+      sigi(321) = 2.90d0
+      epsi(321) = 30.0d0
+      mass(321) = 14.007d0
+      qelect(321) = 0.029d0
+      lqchg(321) = .true.
+      lij(321) = .true.
+      chname(321) = 'N in NO2'
+      chemid(321) ='N  '
+
+c -- TraPPE-EH [C] aro alpha nitro o
+c -- from TraPPE 9
+c -- nothing special about alpha to nitro?
+      sigi(322) = 3.60d0
+      epsi(322) = 30.70d0
+      mass(322) = 12.011d0
+      qelect(322) = 0.059d0
+      lqchg(322) = .true.
+      lij(322) = .true.
+      chname(322) = 'C aro'
+      chemid(322) ='C  '
+
+c -- TraPPE-EH [C] aro o
+c -- from TraPPE 9
+      sigi(323) = sigi(302)
+      epsi(323) = epsi(302)
+      mass(323) = mass(302)
+      qelect(323) = -0.051d0
+      lqchg(323) = .true.
+      lij(323) = .true.
+      chname(323) = 'C aro'
+      chemid(323) ='C  '
+
+c -- TraPPE-EH [C] aro o
+c -- from TraPPE 9
+      sigi(324) = sigi(302)
+      epsi(324) = epsi(302)
+      mass(324) = mass(302)
+      qelect(324) = -0.071d0
+      lqchg(324) = .true.
+      lij(324) = .true.
+      chname(324) = 'C aro'
+      chemid(324) ='C  '
+
+c -- TraPPE-EH [C] aro o
+c -- from TraPPE 9
+      sigi(325) = sigi(302)
+      epsi(325) = epsi(302)
+      mass(325) = mass(302)
+      qelect(325) = -0.026d0
+      lqchg(325) = .true.
+      lij(325) = .true.
+      chname(325) = 'C aro'
+      chemid(325) ='C  '
+
+c -- TraPPE-EH [C] aro CH3 o
+c -- from TraPPE 9
+      sigi(326) = sigi(302)
+      epsi(326) = epsi(302)
+      mass(326) = mass(302)
+      qelect(326) = -0.074d0
+      lqchg(326) = .true.
+      lij(326) = .true.
+      chname(326) = 'C aro'
+      chemid(326) ='C  '
+
+c -- TraPPE-EH [C] aro alpha CH3 o
+c -- from TraPPE 9
+      sigi(327) = sigi(302)
+      epsi(327) = epsi(302)
+      mass(327) = mass(302)
+      qelect(327) = 0.003d0
+      lqchg(327) = .true.
+      lij(327) = .true.
+      chname(327) = 'C aro'
+      chemid(327) ='C  '
+
+c -- TraPPE-EH [H] aro o
+c -- from TraPPE 9
+      sigi(328) = 2.36d0
+      epsi(328) = 25.45d0
+      mass(328) = 1.008d0
+      qelect(328) = 0.095d0
+      lqchg(328) = .true.
+      lij(328) = .true.
+      chname(328) = 'H aro'
+      chemid(328) ='H  '
+
+c -- TraPPE-EH [H] aro o
+c -- from TraPPE 9
+      sigi(329) = 2.36d0
+      epsi(329) = 25.45d0
+      mass(329) = 1.008d0
+      qelect(329) = 0.109d0
+      lqchg(329) = .true.
+      lij(329) = .true.
+      chname(329) = 'H aro'
+      chemid(329) ='H  '
+
+c -- TraPPE-EH [H] aro o
+c -- from TraPPE 9
+      sigi(330) = 2.36d0
+      epsi(330) = 25.45d0
+      mass(330) = 1.008d0
+      qelect(330) = 0.105d0
+      lqchg(330) = .true.
+      lij(330) = .true.
+      chname(330) = 'H aro'
+      chemid(330) ='H  '
+
+c -- TraPPE-EH [H] aro o
+c -- from TraPPE 9
+      sigi(331) = 2.36d0
+      epsi(331) = 25.45d0
+      mass(331) = 1.008d0
+      qelect(331) = 0.099d0
+      lqchg(331) = .true.
+      lij(331) = .true.
+      chname(331) = 'H aro'
+      chemid(331) ='H  '
+
+c -- TraPPE-UA CH3 for toluene o
+      sigi(332) = sigi(4)
+      epsi(332) = epsi(4)
+      mass(332) = mass(4)
+      qelect(332) = 0.088d0
+      lqchg(332) = .true.
+      lij(332) = .true.
+      chname(332) = 'CH3 '
+      chemid(332) ='C  '
+
+c -- charge model 2 
+
+c -- TraPPE-EH [C] aro alpha nitro o
+c -- from TraPPE 9
+c -- nothing special about alpha to nitro?
+      sigi(333) = 3.60d0
+      epsi(333) = 30.70d0
+      mass(333) = 12.011d0
+      qelect(333) = 0.0535d0
+      lqchg(333) = .true.
+      lij(333) = .true.
+      chname(333) = 'C aro'
+      chemid(333) ='C  '
+
+c -- TraPPE-EH [C] aro o
+c -- from TraPPE 9
+      sigi(334) = sigi(302)
+      epsi(334) = epsi(302)
+      mass(334) = mass(302)
+      qelect(334) = -0.0565d0
+      lqchg(334) = .true.
+      lij(334) = .true.
+      chname(334) = 'C aro'
+      chemid(334) ='C  '
+
+c -- TraPPE-EH [C] aro o
+c -- from TraPPE 9
+      sigi(335) = sigi(302)
+      epsi(335) = epsi(302)
+      mass(335) = mass(302)
+      qelect(335) = -0.0765d0
+      lqchg(335) = .true.
+      lij(335) = .true.
+      chname(335) = 'C aro'
+      chemid(335) ='C  '
+
+c -- TraPPE-EH [C] aro o
+c -- from TraPPE 9
+      sigi(336) = sigi(302)
+      epsi(336) = epsi(302)
+      mass(336) = mass(302)
+      qelect(336) = -0.0315d0
+      lqchg(336) = .true.
+      lij(336) = .true.
+      chname(336) = 'C aro'
+      chemid(336) ='C  '
+
+c -- TraPPE-EH [C] aro CH3 o
+c -- from TraPPE 9
+      sigi(337) = sigi(302)
+      epsi(337) = epsi(302)
+      mass(337) = mass(302)
+      qelect(337) = -0.0795d0
+      lqchg(337) = .true.
+      lij(337) = .true.
+      chname(337) = 'C aro'
+      chemid(337) ='C  '
+
+c -- TraPPE-EH [C] aro alpha CH3 o
+c -- from TraPPE 9
+      sigi(338) = sigi(302)
+      epsi(338) = epsi(302)
+      mass(338) = mass(302)
+      qelect(338) = -0.0025d0
+      lqchg(338) = .true.
+      lij(338) = .true.
+      chname(338) = 'C aro'
+      chemid(338) ='C  '
+
+c -- TraPPE-UA CH3 for toluene o
+      sigi(339) = sigi(4)
+      epsi(339) = epsi(4)
+      mass(339) = mass(4)
+      qelect(339) = 0.121d0
+      lqchg(339) = .true.
+      lij(339) = .true.
+      chname(339) = 'CH3 '
+      chemid(339) ='C  '
+
+
+
+
+
+
+
+
+
+
+
+
+c -- Chlorobenzene parameters all atom
+
+      sigi(341) = 3.60
+      epsi(341) = 30.7
+      mass(341) = 12.011d0
+      qelect(341) = -0.11d0
+      lqchg(341) = .true.
+      lij(341) = .true.
+      chname(341) = 'C1 Chlorobenzene AA'
+      chemid(341)  = 'C  '
+
+      sigi(342) = 3.600d0
+      epsi(342) = 30.7d0
+      mass(342) =  12.011d0
+      qelect(342) = -0.07d0
+      lqchg(342) = .true.
+      lij(342) = .true.
+      chname(342) = 'C2 Chlorobenzene AA'
+      chemid(342)  = 'C  '
+
+      sigi(343) = 3.600d0
+      epsi(343) = 30.70d0
+      mass(343) = 12.011d0
+      qelect(343) = -0.11d0
+      lqchg(343) = .true.
+      lij(343) = .true.
+      chname(343) = 'C3 Chlorobenzene AA'
+      chemid(343)  = 'C  '
+
+      sigi(344) = 3.600d0
+      epsi(344) = 30.70d0
+      mass(344) = 12.011d0
+      qelect(344) = -0.055d0
+      lqchg(344) = .true.
+      lij(344) = .true.
+      chname(344) = 'C4 Chlorobenzene AA'
+      chemid(344)  = 'C  '
+
+      sigi(345) = 3.600d0
+      epsi(345) = 30.7d0
+      mass(345) = 12.011d0
+      qelect(345) = 0.06d0
+      lqchg(345) = .true.
+      lij(345) = .true.
+      chname(345) = 'C5 Chlorobenzene AA'
+      chemid(345)  = 'C  '
+
+      sigi(346) = 3.60d0
+      epsi(346) = 30.70d0
+      mass(346) = 12.011d0
+      qelect(346) = -0.055d0
+      lqchg(346) = .true.
+      lij(346) = .true.
+      chname(346) = 'C6 Chlorobenzene AA'
+      chemid(346)  = 'C  '
+
+      sigi(347) = 2.36d0
+      epsi(347) = 25.44d0
+      mass(347) = 1.0079d0
+      qelect(347) = 0.1d0
+      lqchg(347) = .true.
+      lij(347) = .true.
+      chname(347) = 'H7 Chlorobenzene AA'
+      chemid(347)  = 'H  '
+
+      sigi(348) = 2.36d0
+      epsi(348) = 25.44d0
+      mass(348) = 1.0079d0
+      qelect(348) = 0.09d0
+      lqchg(348) = .true.
+      lij(348) = .true.
+      chname(349) = 'H8 Chlorobenzene AA'
+      chemid(349)  = 'H  '
+
+      sigi(350) = 2.360d0
+      epsi(350) = 25.44d0
+      mass(350) = 1.0079d0
+      qelect(350) = 0.1d0
+      lqchg(350) = .true.
+      lij(350) = .true.
+      chname(351) = 'H9 Chlorobenzene AA'
+      chemid(351)  = 'H  '
+
+      sigi(352) = 2.36d0
+      epsi(352) = 25.44d0
+      mass(352) = 1.0079d0
+      qelect(353) = 0.09d0
+      lqchg(353) = .true.
+      lij(353) = .true.
+      chname(353) = 'H10 Chlorobenzene AA'
+      chemid(353)  = 'H  '
+
+      sigi(354) = 2.36d0
+      epsi(354) = 25.44d0
+      mass(354) = 1.0079d0
+      qelect(354) = 0.09d0
+      lqchg(354) = .true.
+      lij(354) = .true.
+      chname(354) = 'H11 Chlorobenzene AA'
+      chemid(354)  = 'H  '
+
+      sigi(355) = 3.5d0
+      epsi(355) = 158.0d0
+      mass(355) = 35.4527d0
+      qelect(355) = -0.13d0
+      lqchg(355) = .true.
+      lij(355) = .true.
+      chname(355) = 'Cl12 Chlorobenzene AA'
+      chemid(355)  = 'Cl '
+
+   
+c -- O-dichlorobenznene
+
+
+      sigi(356) = 3.60d0
+      epsi(356) = 30.7d0
+      mass(356) = 12.011d0
+      qelect(356) = -0.11d0
+      lqchg(356) = .true.
+      lij(356) = .true.
+      chname(356) = 'C1 OChlorobenzene AA'
+      chemid(356)  = 'C  '
+
+      sigi(357) = 3.600d0
+      epsi(357) = 30.7d0
+      mass(357) =  12.011d0
+      qelect(357) = -0.08d0
+      lqchg(357) = .true.
+      lij(357) = .true.
+      chname(357) = 'C2 OChlorobenzene AA'
+      chemid(357)  = 'C  '
+
+      sigi(358) = 3.600d0
+      epsi(358) = 30.70d0
+      mass(358) = 12.011d0
+      qelect(358) = 0.08d0
+      lqchg(358) = .true.
+      lij(358) = .true.
+      chname(358) = 'C3 OChlorobenzene AA'
+      chemid(358)  = 'C  '
+
+      sigi(359) = 3.600d0
+      epsi(359) = 30.70d0
+      mass(359) = 12.011d0
+      qelect(359) = 0.08d0
+      lqchg(359) = .true.
+      lij(359) = .true.
+      chname(359) = 'C4 OChlorobenzene AA'
+      chemid(359)  = 'C  '
+
+      sigi(360) = 3.600d0
+      epsi(360) = 30.7d0
+      mass(360) = 12.011d0
+      qelect(360) = -0.08d0
+      lqchg(360) = .true.
+      lij(360) = .true.
+      chname(360) = 'C5 OChlorobenzene AA'
+      chemid(360)  = 'C  '
+
+      sigi(361) = 3.60d0
+      epsi(361) = 30.70d0
+      mass(361) = 12.011d0
+      qelect(361) = -0.11d0
+      lqchg(361) = .true.
+      lij(361) = .true.
+      chname(361) = 'C6 OChlorobenzene AA'
+      chemid(361)  = 'C  '
+
+      sigi(362) = 2.36d0
+      epsi(362) = 25.44d0
+      mass(362) = 1.0079d0
+      qelect(362) = 0.11d0
+      lqchg(362) = .true.
+      lij(362) = .true.
+      chname(362) = 'H7 OChlorobenzene AA'
+      chemid(362)  = 'H  '
+
+      sigi(363) = 2.36d0
+      epsi(363) = 25.44d0
+      mass(363) = 1.0079d0
+      qelect(363) = 0.10d0
+      lqchg(363) = .true.
+      lij(363) = .true.
+      chname(363) = 'H8 OChlorobenzene AA'
+      chemid(363)  = 'H  '
+
+      sigi(364) = 2.360d0
+      epsi(364) = 25.44d0
+      mass(364) = 1.0079d0
+      qelect(364) = 0.1d0
+      lqchg(364) = .true.
+      lij(364) = .true.
+      chname(364) = 'H9 OChlorobenzene AA'
+      chemid(364)  = 'H  '
+
+      sigi(365) = 2.36d0
+      epsi(365) = 25.44d0
+      mass(365) = 1.0079d0
+      qelect(365) = 0.11d0
+      lqchg(365) = .true.
+      lij(365) = .true.
+      chname(365) = 'H10 OChlorobenzene AA'
+      chemid(365)  = 'H  '
+
+      sigi(366) = 3.5d0
+      epsi(366) = 158.0d0
+      mass(366) = 35.4527d0
+      qelect(366) = -0.1d0
+      lqchg(366) = .true.
+      lij(366) = .true.
+      chname(366) = 'Cl11 OChlorobenzene AA'
+      chemid(366)  = 'Cl '
+
+      sigi(367) = 3.5d0
+      epsi(367) = 158.0d0
+      mass(367) = 35.4527d0
+      qelect(367) = -0.1d0
+      lqchg(367) = .true.
+      lij(367) = .true.
+      chname(367) = 'Cl12 OChlorobenzene AA'
+      chemid(367)  = 'Cl '
 
 c --Adding for ethylene and propylene carbonate
       
 c -- [CH2]-O-
 
-      sigi(300) = sigi(5) 
-      epsi(300) = epsi(5)
-      mass(300) = mass(5)
-      qelect(300) = 0.25d0
-      lqchg(300) = .true.
-      lij(300) = .true.
-      chname(300) = 'Ch2 ether'
-      chemid(300) ='C  '
+      sigi(370) = sigi(5) 
+      epsi(370) = epsi(5)
+      mass(370) = mass(5)
+      qelect(370) = 0.25d0
+      lqchg(370) = .true.
+      lij(370) = .true.
+      chname(370) = 'Ch2 ether'
+      chemid(370) ='C  '
 
 c -- CH2-[O]-
 
-      sigi(301) = 2.85d0
-      epsi(301) = 55.0d0
-      mass(301) = 15.9998d0
-      qelect(301) = -0.50d0
-      lqchg(301) = .true.
-      lij(301) = .true.
-      chname(301) = 'O ether'
-      chemid(301) ='O  '
+      sigi(371) = 2.85d0
+      epsi(371) = 55.0d0
+      mass(371) = 15.9998d0
+      qelect(371) = -0.50d0
+      lqchg(371) = .true.
+      lij(371) = .true.
+      chname(371) = 'O ether'
+      chemid(371) ='O  '
 
 c -- CH2-O-[C]=O
 
-      sigi(302) = 3.1d0
-      epsi(302) = 35.0d0
-      mass(302) = 12.011d0
-      qelect(302) = 1.150d0
-      lqchg(302) = .true.
-      lij(302) = .true.
-      chname(302) = 'C carbonate'
-      chemid(302) ='C  '
-
+      sigi(372) = 3.1d0
+      epsi(372) = 35.0d0
+      mass(372) = 12.011d0
+      qelect(372) = 1.150d0
+      lqchg(372) = .true.
+      lij(372) = .true.
+      chname(372) = 'C carbonate'
+      chemid(372) ='C  '
 
 c -- CH2-O-C=[O]
 
-      sigi(303) = 3.04d0
-      epsi(303) = 85.0d0
-      mass(303) = 15.9998d0
-      qelect(303) = -0.65d0
-      lqchg(303) = .true.
-      lij(303) = .true.
-      chname(303) = 'O ketone'
-      chemid(303) ='O  '
-
+      sigi(373) = 3.04d0
+      epsi(373) = 85.0d0
+      mass(373) = 15.9998d0
+      qelect(373) = -0.65d0
+      lqchg(373) = .true.
+      lij(373) = .true.
+      chname(373) = 'O ketone'
+      chemid(373) ='O  '
 
 C TATB JCP 2004 120 7059
 c -- [C]-NO2
-      sigi(310) = 3.60d0
-      epsi(310) = 30.7d0
-      mass(310) = 12.011d0
-      qelect(310) = -0.242d0
-      lqchg(310) = .true.
-      lij(310) = .true.
-      chname(310) = 'C in TATB'
-      chemid(310) ='C  '
+      sigi(380) = 3.60d0
+      epsi(380) = 30.7d0
+      mass(380) = 12.011d0
+      qelect(380) = -0.242d0
+      lqchg(380) = .true.
+      lij(380) = .true.
+      chname(380) = 'C in TATB'
+      chemid(380) ='C  '
 
 c -- [C]-NH2
-      sigi(311) = 3.60d0
-      epsi(311) = 30.70d0
-      mass(311) = 12.011d0
-      qelect(311) = 0.408d0
-      lqchg(311) = .true.
-      lij(311) = .true.
-      chname(311) = 'C in TATB'
-      chemid(311) ='C  '
+      sigi(381) = 3.60d0
+      epsi(381) = 30.70d0
+      mass(381) = 12.011d0
+      qelect(381) = 0.408d0
+      lqchg(381) = .true.
+      lij(381) = .true.
+      chname(381) = 'C in TATB'
+      chemid(381) ='C  '
 
 c -- [N]-O2 Nitro group
-      sigi(312) = 2.55d0
-      epsi(312) = 65.0d0
-      mass(312) = 14.00747d0
-      qelect(312) = 0.008d0
-      lqchg(312) = .true.
-      lij(312) = .true.
-      chname(312) = 'N in TATB'
-      chemid(312) ='N  '
+      sigi(382) = 2.90d0
+      epsi(382) = 30.0d0
+      mass(382) = 14.00747d0
+      qelect(382) = 0.008d0
+      lqchg(382) = .true.
+      lij(382) = .true.
+      chname(382) = 'N in TATB'
+      chemid(382) ='N  '
 
 c -- [N]-H2 Nitro group
-      sigi(313) = 3.25d0
-      epsi(313) = 160.0d0
-      mass(313) = 14.00747d0
-      qelect(313) = -0.738d0
-      lqchg(313) = .true.
-      lij(313) = .true.
-      chname(313) = 'N in TATB'
-      chemid(313) ='N  '
+      sigi(383) = 3.25d0
+      epsi(383) = 160.0d0
+      mass(383) = 14.00747d0
+      qelect(383) = -0.738d0
+      lqchg(383) = .true.
+      lij(383) = .true.
+      chname(383) = 'N in TATB'
+      chemid(383) ='N  '
 
 cc -- [O]- Nitro group
-      sigi(314) = 2.90d0
-      epsi(314) = 80.0d0
-      mass(314) = 15.9998d0
-      qelect(314) = -0.104d0
-      lqchg(314) = .true.
-      lij(314) = .true.
-      chname(314) = 'O in TATB'
-      chemid(314) ='O  '
+      sigi(384) = 2.70d0
+      epsi(384) = 42.0d0
+      mass(384) = 15.9998d0
+      qelect(384) = -0.104d0
+      lqchg(384) = .true.
+      lij(384) = .true.
+      chname(384) = 'O in TATB'
+      chemid(384) ='O  '
 
 c -- [H]- Nitro group
-      sigi(315) = 0.50d0
-      epsi(315) = 12.0d0
-      mass(315) = 1.0079d0
-      qelect(315) = 0.386d0
-      lqchg(315) = .true.
-      lij(315) = .true.
-      chname(315) = 'H in TATB'
-      chemid(315) ='H  '
-
+      sigi(385) = 0.50d0
+      epsi(385) = 12.0d0
+      mass(385) = 1.0079d0
+      qelect(385) = 0.386d0
+      lqchg(385) = .true.
+      lij(385) = .true.
+      chname(385) = 'H in TATB'
+      chemid(385) ='H  '
 
 
 c  LEFTOVER PIECES

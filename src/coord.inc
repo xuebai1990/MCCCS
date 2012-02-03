@@ -45,7 +45,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       dimension iurot(ntmax)
       dimension nrotbd(ntmax),irotbd(numax,ntmax),pmrotbd(numax,ntmax)
       dimension rxu(nmax,numax), ryu(nmax,numax), rzu(nmax,numax)
-      dimension qqu(nmax,numax)
+      dimension qqu(nmax,numax), Elect_field(nbxmax)
       dimension nchbox(nbxmax),ncmt(nbxmax,ntmax)
      &  ,ncmt2(nbxmax,ntmax,20),eta(nbxmax,ntmax,20)
       dimension parall(ntmax,nmax),temtyp(ntmax)

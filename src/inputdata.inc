@@ -21,7 +21,7 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      logical lstop
+      logical lstop, ldie
       logical lrdf,lintra,lstretch,lgvst,lbend,lete, lrhoz
       logical L_movie_xyz
       character*1 suffix
@@ -69,7 +69,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
      &   ,rmroty(ntmax,nbxmax),rmrotz(ntmax,nbxmax)
       dimension rmflcq(ntmax,nbxmax)
       common /indata/ nstep,iprint,imv,iratio,iblock, idiele, isolute
-     &   ,iratv,iratp,irsave,nnstep,lstop,nchoiq,numcoeff
+     &   ,iratv,iratp,irsave,nnstep,lstop,nchoiq,numcoeff,ldie
      &   ,rmexpc,nswapb,box1,box2,nvolb,box5,box6,ntemp,tmcc
       common /indatc/ pmswmt,pmcbmt,pmtrmt,pmromt
      &   ,pmfqmt,pmexpc,pmeemt,pmfix,pmexpc1

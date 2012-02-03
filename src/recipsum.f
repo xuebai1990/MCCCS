@@ -161,7 +161,11 @@ c *** Potential energy ***
 c      write(iou,*) 'in recipsum:',ssumr(100,ibox),ibox
 c *** safety check ***
 c      write(iou,*) 'A total of ',ncount,' vectors are used'
-      if ( ncount .gt. vectormax ) stop 'choose a larger vectormax'
+      if ( ncount .gt. vectormax ) then
+         write(iou,*)  'choose a larger vectormax'
+         stop
+      endif
+
       numvect(ibox) = ncount
          
       return

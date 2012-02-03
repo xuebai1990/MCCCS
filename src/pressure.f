@@ -268,45 +268,45 @@ c                              write(iou,*) 'rij,fij,ntij',rij,fij,ntij
      &                            (rzero(ntij)/rij)**7 *
      &                            (1.0d0-(rzero(ntij)/rij)**3)
                            elseif (lgenlj) then
-                                 if ( lexpand(imolty)
-     &                                .and. lexpand(jmolty) ) then
-                                    sigma2=(sigma(imolty,ii)+
-     &                                   sigma(jmolty,jj))/2.0d0
-                                    sr2 = sigma2*sigma2/rijsq
-                                    epsilon2=dsqrt(epsilon(imolty,ii)
-     &                                   *epsilon(jmolty,jj))
-                                 elseif ( lexpand(imolty) ) then
-                                    sigma2=(sigma(imolty,ii)+
-     &                                   sigi(ntjj))/2.0d0
-                                    sr2 = sigma2*sigma2/rijsq
-                                    epsilon2=dsqrt(epsilon(imolty,ii)
-     &                                   *epsi(ntjj))
-                                 elseif ( lexpand(jmolty) ) then
-                                    sigma2=(sigma(jmolty,jj)+
-     &                                   sigi(ntii))/2.0d0
-                                    sr2 = sigma2*sigma2/rijsq
-                                    epsilon2=dsqrt(epsilon(jmolty,jj)
-     &                                   *epsi(ntii))
-                                 else
-                                    rij = dsqrt(rijsq)
-                                    sr2 = sig2ij(ntij) / rijsq
-                                    epsilon2 = epsij(ntij)
-                                    srij = dsqrt (sr2)
-                                 endif
-             if ( (rij) .le. (rij*srij)*2.0d0**(2.0d0/n0) ) then
-              flj=-4.0d0*epsilon2* ( (n0*((srij)**n0))-
-     &        ((n0/2.0d0)*((srij)**(n0/2.0d0))))/rijsq
-c           write(2,*) 'First if',i,j,rijsq,flj
-                               else
-                             flj =-epsilon2* ( ((2.0d0*n1) *
-     &                         ((srij) **(2.0d0*n1))*
-     &                         ( 2.0d0** ((4.0d0*n1)/n0)))-
-     &                         (n1*((srij)**(n1))*
-     &                         (2.0d0 ** ((2.0d0*n1/n0)+1.0d0))))
-     &                          /rijsq
-c           write(2,*) 'Second if',i,j,rijsq,flj
-             endif
-                        fij = fij + flj
+                              if ( lexpand(imolty)
+     &                             .and. lexpand(jmolty) ) then
+                                 sigma2=(sigma(imolty,ii)+
+     &                                sigma(jmolty,jj))/2.0d0
+                                 sr2 = sigma2*sigma2/rijsq
+                                 epsilon2=dsqrt(epsilon(imolty,ii)
+     &                                *epsilon(jmolty,jj))
+                              elseif ( lexpand(imolty) ) then
+                                 sigma2=(sigma(imolty,ii)+
+     &                                sigi(ntjj))/2.0d0
+                                 sr2 = sigma2*sigma2/rijsq
+                                 epsilon2=dsqrt(epsilon(imolty,ii)
+     &                                *epsi(ntjj))
+                              elseif ( lexpand(jmolty) ) then
+                                 sigma2=(sigma(jmolty,jj)+
+     &                                sigi(ntii))/2.0d0
+                                 sr2 = sigma2*sigma2/rijsq
+                                 epsilon2=dsqrt(epsilon(jmolty,jj)
+     &                                *epsi(ntii))
+                              else
+                                 rij = dsqrt(rijsq)
+                                 sr2 = sig2ij(ntij) / rijsq
+                                 epsilon2 = epsij(ntij)
+                                 srij = dsqrt (sr2)
+                              endif
+                              if ( (rij) .le. (rij*srij)*
+     &                             2.0d0**(2.0d0/n0) ) then
+                                 flj=-4.0d0*epsilon2*((n0*((srij)**n0))-
+     &                                ((n0/2.0d0)*((srij)**(n0/2.0d0))))
+     &                                /rijsq
+                              else
+                                 flj =-epsilon2* ( ((2.0d0*n1) *
+     &                                ((srij) **(2.0d0*n1))*
+     &                                ( 2.0d0** ((4.0d0*n1)/n0)))-
+     &                                (n1*((srij)**(n1))*
+     &                                (2.0d0 ** ((2.0d0*n1/n0)+1.0d0))))
+     &                                /rijsq
+                              endif
+                              fij = fij + flj
                            else
                               if ( lfepsi ) then
                                  sr2 = 1.0d0/rijsq
@@ -411,6 +411,7 @@ c * this is correct for the coulombic part and for LJ.  Note sign difference!
          endif
  100  continue
 
+      
 c ################################################################
 
       if ( lewald ) then
@@ -511,19 +512,19 @@ c ***
 ! So that it could be included in the scaled version for
 ! thermodynamic integration
 
-      if (ltailc) then
-c --     add tail corrections for the Lennard-Jones energy
-c --     Not adding tail correction for the ghost particles
-c --     as they are ideal (no interaction) Neeraj.
-         volsq = ( vol )**2
-         do imolty=1, nmolty
-            do jmolty=1, nmolty
-               rhosq = ncmt(ibox,imolty)*ncmt(ibox,jmolty)
-     +              / volsq
-               press=press + 1.380662d4 * corp(imolty,jmolty,rhosq,ibox)
-            enddo
-        enddo
-      endif
+c$$$      if (ltailc) then
+c$$$c --     add tail corrections for the Lennard-Jones energy
+c$$$c --     Not adding tail correction for the ghost particles
+c$$$c --     as they are ideal (no interaction) Neeraj.
+c$$$         volsq = ( vol )**2
+c$$$         do imolty=1, nmolty
+c$$$            do jmolty=1, nmolty
+c$$$               rhosq = ncmt(ibox,imolty)*ncmt(ibox,jmolty)
+c$$$     +              / volsq
+c$$$               press=press + 1.380662d4 * corp(imolty,jmolty,rhosq,ibox)
+c$$$            enddo
+c$$$        enddo
+c$$$      endif
 
       if (lstagea) then
          press = (1.0d0-lambdais*(1.0d0-etais))*press
@@ -539,13 +540,25 @@ c --     as they are ideal (no interaction) Neeraj.
      +      / beta) -
      +     ( press/3.0d0 ) ) / 
      +     ( vol )
-c      write (6,*) ' press' , press
 
       surf = pzz - 0.5d0*(pxx + pyy)
 c * divide by surface area and convert from K to put surf in mN/m 
       surf = 1.380658d0*surf / (2.0d0*boxlx(ibox)*boxly(ibox))
 
-c      write (6,*) ' press tail' ,  press
+      if (ltailc) then
+c --     add tail corrections for the Lennard-Jones energy
+c --     Not adding tail correction for the ghost particles
+c --     as they are ideal (no interaction) Neeraj.
+         volsq = ( vol )**2
+         do imolty=1, nmolty
+            do jmolty=1, nmolty
+               rhosq = ncmt(ibox,imolty)*ncmt(ibox,jmolty)
+     +              / volsq
+               press=press + 1.380662d4 * corp(imolty,jmolty,rhosq,ibox)
+            enddo
+        enddo
+      endif
+c      write (iou,*) ' press tail' ,  press
 
       return
       end

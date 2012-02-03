@@ -48,7 +48,8 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'neigh.inc'
       include 'cell.inc'
       include 'nsix.inc'
-      include 'gor.inc'
+c KM remove analysis
+c      include 'gor.inc'
       include 'torsion.inc'
       include 'tabulated.inc'
  
@@ -111,12 +112,14 @@ c      dimension temx(nmax,numax),temy(nmax,numax),temz(nmax,numax)
 c Conversion factor for Mpa to simulation unit
       double precision MPa2SimUnits
 
+      character(100) line
 
 c KEA torsion variables
       Logical Lttor,lspline,linter
       integer mmm,ttor
 c KM tabulated potential variables
       integer tvib, tbend, iivdW,jjvdW, iielect, jjelect
+      integer nhere
 
 c -- reads input data and initializes the positions
 c
@@ -141,8 +144,8 @@ c *** set input arrays to zero ***
       enddo
 
       lee = .false.
-      qtot = 0.0d0 
-
+      qtot = 0.0d0
+ 
 c *** Output unit (if 2, write to runXX.dat file; if 6, write to stdout/screen; outherwise, user designate a file to which to write) KEA 6/3/09 (defined in control.inc)
       read(4,*)
       read(4,*) iou
@@ -240,15 +243,15 @@ c - use internal read/write to get integer number in character format
       read(4,*) L_Ewald_Auto
 
       read(4,*)
-      read(4,*) temp, fqtemp,Elect_field
+      read(4,*) temp, fqtemp,(Elect_field(ibox),ibox=1,nbox)
       if ( lecho ) then
          if (lverbose) then
             write(iou,*) 'temperature:',temp,' K'
             write(iou,*) 'external pressure:',express(1:nbox),' MPa'
             write(iou,*) 'Ghost particles: ',ghost_particles(1:nbox)
             write(iou,*) 'fluctuating charge temperature:',fqtemp,' K'
-            write(iou,*) 'Electric field in z direction:',Elect_field,
-     &           ' V/A'
+            write(iou,*) 'Electric field in z direction:',
+     &           Elect_field(1:nbox),' V/A'
          else 
             write(iou,*) temp, (express(ibox),ibox=1,nbox), fqtemp,
      &           Elect_field
@@ -353,8 +356,10 @@ c      file_run = 'run'//fname2(1:len_trim(fname2))//suffix//'.dat'
 c      file_movie = 'movie'//fname2(1:len_trim(fname2))//suffix//'.dat' 
 
 
-      if (dint(dble(nstep)/dble(iblock)) .gt. 100) 
-     &     stop 'too many blocks'
+      if (dint(dble(nstep)/dble(iblock)) .gt. 100) then
+         write(iou,*) 'too many blocks'
+         stop
+      endif
 
 c - read system information
 
@@ -388,8 +393,14 @@ c - read system information
 
       read(4,*) 
       read(4,*) nchain, nmolty
-      if ( nmolty .gt. ntmax ) stop 'nmolty gt ntmax' 
-      if ( nchain .gt. nmax-2 ) stop 'nchain gt nmax-2'
+      if ( nmolty .gt. ntmax ) then
+         write(iou,*) 'nmolty gt ntmax'
+         stop
+      endif
+      if ( nchain .gt. nmax-2 ) then
+         write(iou,*) 'nchain gt nmax-2'
+         stop
+      endif
       if ( lecho ) then
          if (lverbose) then
             write(iou,*) 'number of chains:',nchain
@@ -451,7 +462,7 @@ c      if ( lecho ) write(iou,*) 'moltyp',(moltyp(i),i=1,nchain)
 
       read(4,*)
       read(4,*) lmixlb, lmixjo
-      if (lmixlb .and. lmixjo) stop 'cant use both combining rules!'
+      if (lmixlb .and. lmixjo) stop 'cannot use both combining rules!'
       if ( lecho ) then
          if (lverbose) then
             if (lmixlb) then
@@ -523,6 +534,8 @@ c --- read special combining rule information
             write(iou,*) 'rcut > 0.5*boxlx'
             stop
          endif
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
+         call setpbc(i)
       enddo
 
       softlog = 10.0d0**(-softcut)
@@ -603,7 +616,10 @@ c     - number of flexible parts
          endif   
          
 
-         if ( nunit(imol) .gt. numax ) stop 'nunit gt numax'
+         if ( nunit(imol) .gt. numax ) then
+            write(iou,*) 'nunit gt numax'
+            stop
+         endif
          if ( lflucq(imol)
      &        .and. (.not. lelect(imol) ) )
      &        stop 'lelect must be true if flucq is true' 
@@ -685,6 +701,10 @@ c - linear/branched chain with connectivity table -
             read(4,*)
             if ( lelect(imol) .and. .not. lchgall ) then
                read(4,*) j, ntype(imol,i), leaderq(imol,i)
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
+c for other potentials, sigi isn't defined, so I added this if/else statement
+c maybe should have a switch for every potential flag as a check?
+               IF(llj)THEN
                if(sigi(ntype(imol,i)).lt.1d-06.and.epsi(ntype(imol,i))
      &          .lt.1d-06.and.abs(qelect(ntype(imol,i))).lt.1d-06) then
                   write(iou,*)
@@ -693,6 +713,11 @@ c - linear/branched chain with connectivity table -
      &           'is defined'
                  stop 'problem in suijtab, see the output' 
                endif
+               ELSE
+                  write(iou,*) 
+     &                 'Confirm that your parameters are defined.'
+               ENDIF
+
                if ( lecho ) 
      &              write(iou,*) '   bead ',j,' beadtype ',ntype(imol,i)
      &              ,' charge leader ',leaderq(imol,i)
@@ -947,7 +972,7 @@ c            endif
 
 c -- Neeraj Adding molecule neutrality check
 ckea skip if lgaro
-      if((.not.lgaro).or.(.not.lionic)) then
+      if(.not.(lgaro .or.lionic)) then
          do i=1,nmolty
             qtot =0.0d0
             do j = 1,nunit(i)
@@ -1212,13 +1237,16 @@ c - read linkcell information
          endif
       endif
 
-      if (lsolid(boxlink).and.(.not.lrect(boxlink))) then
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
+      IF(boxlink .LE. nbxmax)THEN
+         if (lsolid(boxlink).and.(.not.lrect(boxlink))) then
 
-          write(iou,*) 
+             write(iou,*) 
      &        'Linkcell not implemented for nonrectangular boxes'  
-          stop  
+             stop  
 
-      endif
+         endif
+      ENDIF
 
 
 c -- read the atomic displacements
@@ -2005,24 +2033,47 @@ c -   read information for virial coefficient calculation
          endif
       endif
 
-      nhere = 0
-      do zz=1,nntype
-         if ( lhere(zz) ) then
-             nhere = nhere + 1
-             temphe(nhere) = zz
-             beadtyp(nhere)=zz
+c --- JLR 11-11-09 
+c --- reading in extra variables for RPLC simulations
+c --- if lideal=.true. then intermolecular interactions are not computed    
+c --- if ltwice=.true. then mimage is applied twice  
+c --- if lrplc=.true. there are some special rules in CBMC for how to grow chains  
+      read(4,*)
+      read(4,*) (lideal(i),i=1,nbox)  
+      write(iou,*) 'lideal: ', (lideal(i),i=1,nbox)  
+      do i = 1,nbox 
+         if (lideal(i) .and. lexpee) then
+            write(iou,*) 'cannot have lideal and lexpee both true'
+            write(iou,*) 'If you want this you will have change code'
+            stop 
          endif
       enddo
+      read(4,*)
+      read(4,*) (ltwice(i),i=1,nbox)  
+      write(iou,*) 'ltwice: ', (ltwice(i),i=1,nbox)  
+      read(4,*)
+      read(4,*) (lrplc(i),i=1,nmolty)
+      write(iou,*) 'lrplc: ', (lrplc(i),i=1,nmolty)
+c --- END JLR 11-11-09                         
 
-
-      do zz = 1,nhere 
-          atemp = temphe(zz)
-          decode(atemp) = zz
-c	  print*, 'readdat'
-c	  print*, 'atemp=',atemp, 'decode=',decode(atemp)
-
-      enddo
-
+c--- JLR 11-11-09
+c--- skip this part if analysis will not be done (if ianalyze .gt. nstep)
+c KM remove analysis
+c      if (ianalyze.lt.nstep) then
+c         nhere = 0
+c         do zz=1,nntype
+c            if ( lhere(zz) ) then
+c               nhere = nhere + 1
+c               temphe(nhere) = zz
+c               beadtyp(nhere)=zz
+c            endif
+c         enddo
+c         do zz = 1,nhere 
+c            atemp = temphe(zz)
+c            decode(atemp) = zz
+c         enddo
+c      endif
+c --- END JLR 11-11-09
 
 
 C -------------------------------------------------------------------
@@ -2203,6 +2254,9 @@ c ---     volume ideal gas box is set arbitry large!
          call initia(qelect)
          nnstep = 0
       else
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM needed for long input records, like
+c nboxi and moltyp for a lot of molecules
+         OPEN(77,FILE='fort.77',RECL=4096)
          read (77,*) nnstep
          read(77,*) Armtrax, Armtray, Armtraz
          do im = 1,nbox
@@ -2530,7 +2584,12 @@ c *** if not lchgall, calp(1) & calp(2) are fixed
                if ( calp(ibox)*rcut(ibox) .lt. 3.2d0 ) then
                   write(iou,*) 'Warning, kalp too small in box',ibox
                   write(iou,*) ibox,calp(ibox),rcut(ibox)
-                  stop 'kalp is too small, set to 3.2/rcutchg'
+ccc --- JLR 11-24-09  
+ccc --- you may want a smaller kalp, e.g. when comparing to previous work
+ccc --- This does not need to be a stop  
+c                  stop 'kalp is too small, set to 3.2/rcutchg'
+                  write(iou,*) 'kalp is too small, set to 3.2/rcutchg'
+ccc --- END JLR 11-24-09
                endif
             endif
          enddo
@@ -2781,8 +2840,11 @@ c * write out connectivity and bonded interactions
       endif
 
 c * write out non-bonded interaction table
+
       write(iou,*)
-      if ((.not. lexpsix) .and. (.not. lmmff)) then
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
+c added a flag for lgaro...need to add for all potentials, probably
+      if ((.not. lexpsix) .and. (.not. lmmff) .and. (.not. lgaro))then
          if (lninesix) then
             write(iou,*)
      & '     i   j    r_0,ij     epsij         q0(i)          q0(j)'
@@ -2877,7 +2939,9 @@ c *** write input data to unit 6 for control ***
       write(iou,*)
       write(iou,*) 'temperature:                    ', temp
       write(iou,*)
-      write(iou,*) 'ex-pressure:                    ', express
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
+      write(iou,*) 'ex-pressure:                    ', 
+     &     (express(ibox),ibox=1,nbox)
       write(iou,*)
 
 

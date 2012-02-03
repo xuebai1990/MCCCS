@@ -81,6 +81,7 @@ c     -- new stuff
 c ------------------------------------------------------------------
 
 c      write(iou,*) 'start ROSENBLUTH'
+
       lterm = .false.
       cwtorf = 1.0d0
       wei_vib = 1.0d0
@@ -124,16 +125,32 @@ c        --- set total energy of trial configuration to zero ***
       endif
 
 c     --- for rigid molecules
+
+c --- JLR 11-14-09 modifying for calls from swatch for rigid molecules
+ccc      we don't want to do rigrot for rigid swatch when nsampos .ge. 3 
       if (lrigid(imolty).and.movetype.ne.1) then
-         call rigrot( lnew,lterm,i,icharge,imolty,ibox,wadd )
-         
+         wadd = 1.0d0
+         if (movetype.eq.2) then
+            call rigrot( lnew,lterm,i,icharge,imolty,ibox,wadd )
+         endif
+
          if (rindex(imolty).eq.0) then
             return
          endif
+
+c         if (movetype.eq.4) then
+c            return
+c         endif
+
          if (lterm) then
             return
          endif
+
       endif
+
+ccc    Swatch and swap the same from here change imovetype to 2
+      if (movetype.gt.2) movetype=2
+ccc --- END JLR 11-24-09   
 
 c     --- set lexist to lexshed
       do iu = 1,igrow

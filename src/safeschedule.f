@@ -164,7 +164,23 @@ c     --- find iutry
          fnum(1) = 1
          fnuma(1,1) = invtry
       else
-         iutry = int( random() * dble(iring(imolty)) ) + 1
+c--- JLR 11-11-09
+c--- factoring in icbsta for safecbmc 
+
+c --- OLD WAY   
+c         iutry = int( random() * dble(iring(imolty)) ) + 1
+c --- NEW WAY - picks between icbsta and last unit of chain
+         iutry = int( random() * dble(iring(imolty)+icbsta(imolty)))+1
+     &        -icbsta(imolty)
+
+c --- need the following of scheduler gets confused!
+         if (lrplc(imolty)) then
+            if(iutry .eq.7 .or. iutry .eq.8) then 
+               iutry=5
+            endif
+            if (iutry.eq.5.and.lcrank) goto 100
+         endif
+c --- END JLR 11-11-09
 
 c     *************************
 c         iutry = 1
@@ -189,13 +205,20 @@ c     --- we will let regular cbmc handle the end points
             ivib = 0
          else
 c     --- at a branch point, decide which way not to grow
-            ivib = int(random() * dble(invtry)) + 1
-
+c --- JLR 11-11-09
+c --- adding statements so we don't get messed up at the branch point in ODS chains 
+c            ivib = int(random() * dble(invtry)) + 1
+ 13         ivib = int(random() * dble(invtry)) + 1
 c     ********************************
 c            ivib = 2
 c     *******************************
 
             fprev(1,1) = ijvib(imolty,iutry,ivib)
+            if (lrplc(imolty)) then
+               if (icbdir(imolty).eq.1.and.fprev(1,1).gt.iutry) goto 13
+            endif
+c --- END JLR 11-11-09
+
 
             if (fprev(1,1).gt.iring(imolty)
      &           .or.lplace(imolty,fprev(1,1))) then

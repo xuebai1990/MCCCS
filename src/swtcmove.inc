@@ -25,6 +25,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       integer nsampos,splist,nswtcb,box3,box4,ncut
 
       double precision bnswat,bniswat,pmswtcb
+      double precision bnswat_empty	
 
       dimension nswach(npamax),nsampos(npamax)
       dimension nswatb(npamax,npabmax)
@@ -34,9 +35,10 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       dimension pmswtcb(npamax,npabmax)
       dimension box3(npamax,npabmax)
       dimension box4(npamax,npabmax)
+      dimension bnswat_empty(npamax,npabmax)
 
       common /swtcma/ nswaty,nswtcb
       common /swtcmb/ nswach,nsampos
-      common /swtcmc/ nswatb,bnswat,box3,box4
+      common /swtcmc/ nswatb,bnswat,box3,box4,bnswat_empty
       common /swtcmd/ gswatc,splist,ncut
       common /swtcme/ pmswtcb

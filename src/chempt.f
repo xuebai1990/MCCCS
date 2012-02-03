@@ -71,7 +71,7 @@ c    ********************************************************************
 
 C --------------------------------------------------------------------
 
-c      write(2,*) 'start CHEMP'
+c      write(iou,*) 'start CHEMP'
 
 c *** store number of units in iunit and igrow ***
       iunit = nunit(imolty)

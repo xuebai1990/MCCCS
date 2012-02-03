@@ -1,6 +1,6 @@
       subroutine  calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ,
-     &  Heat_vapor_COUL, CED_T, CED_LJ,CED_COUL,HSP_T,HSP_LJ,HSP_COUL,
-     &  ibox,jbox)
+     &  Heat_vapor_COUL, pdV, CED_T, CED_LJ,CED_COUL,HSP_T,HSP_LJ,
+     &  HSP_COUL,ibox,jbox)
 c ***********************************************************************************
 c  Written by Neeraj Rai. Date 08/22/2006
 
@@ -33,6 +33,7 @@ c ******************************************************************************
       double precision CED_T, HSP_T, CED_LJ, HSP_LJ
       double precision CED_COUL,HSP_COUL
       double precision cal2joule, joule2cal
+      double precision pdV
 
       double precision T_Energy_Liq, T_Energy_Gas
       double precision LJ_Energy_Liq, LJ_Energy_Gas
@@ -113,12 +114,14 @@ c     -- This is total energy
       
       enchg1 = 0.008314510d0*(T_Energy_Gas -
      &     T_Energy_Liq)
+
+      pdV = pres(ig)*(mol_vol(ig)-mol_vol(il))*1.0d-6
       
       Heat_vapor_T = enchg1 + pres(ig)*
      &     (mol_vol(ig)-mol_vol(il))*1.0d-6
 c     write(iou,1505) il,ig,abs(enthchg1)
 c     -- This is inter+intra LJ
-      enchg2 = 0.008314510d0*(LJ_Energy_Gas-LJ_energy_Liq)
+      enchg2 = 0.008314510d0*(LJ_Energy_Gas-LJ_Energy_Liq)
       Heat_vapor_LJ = enchg2 + pres(ig)*
      &     (mol_vol(ig)-mol_vol(il))*1.0d-6
 c     -- This is Coulomb part

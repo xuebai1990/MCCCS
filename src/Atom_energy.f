@@ -239,8 +239,11 @@ c         endif
       endif
 
 c     --- loop over all chains except i - not for grand can. with ibox=2 !
-       
-      if (.not.(lgrand.and.(ibox.eq.2))) then
+c --- JLR 11-24-09    Don't compute if box is ideal   
+c      if (.not.(lgrand.and.(ibox.eq.2))) then
+      if (.not.(lgrand.and.(ibox.eq.2)) .and. 
+     &     .not.(lideal(ibox)) ) then    
+c --- END JLR 11-24-09
          do 98 k = 1, nmole
 
             if (licell.and.(ibox.eq.boxlink)) then

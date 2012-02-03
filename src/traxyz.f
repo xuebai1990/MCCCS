@@ -180,8 +180,11 @@ c *** calculate the energy of i in the old configuration ***
      &     ,vdum,.false.,.false.)
       v3o = v3garo
 
-      if (ovrlap) stop 'disaster ovrlap in old conf of TRAXYZ'
-      
+      if (ovrlap) then
+         write(iou,*) 'disaster ovrlap in old conf of TRAXYZ'
+         stop
+      endif
+
       if ( lewald .and. lelect(imolty) ) then
          call recip(ibox,vrecipn,vrecipo,1)
          velectn = velectn + vrecipn

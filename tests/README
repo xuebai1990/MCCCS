@@ -1,0 +1,35 @@
+To run the test suite:
+	Type in the full path of your code directory at the top of compile.pl and RUNTEST.pl ($CODE_DIR = <full path>)
+	Run compile.pl to compile the code with the various flags set for all necessary ensembles
+	Run RUNTEST.pl to actually run the test simulations
+	For the parallel version, specify the number of processors by changing $num_proc (TEST5 always runs on 1 processor)
+	Check DIFF to see the differences between the test simulations and previous (correct) simulations (prev.out)
+	If any of the tests need to be changed, make sure the names of the executables in compile.pl
+	and RUNTEST.pl are correct
+	When the code is compiled using ifort with options -O3 -no-prec-div -ipo on metropolis1 or Calhoun, the
+	tests in the SHORT directory are designed to take less than 15 seconds on 1 processor and the
+	tests in the LONG directory are designed to take about 1 hour
+
+TEST1:  hydroxyethyl acrylate, NpT ensemble
+	see K. A. Maerzke, N. E. Schultz, R. B. Ross, and J. I. Siepmann, J. Phys. Chem. B 113, 6415-6425 (2009)
+TEST2:  electric field in NVT ensemble (52 mNT, 204 n-decane)
+	see K. A. Maerzke and J. I. Siepmann, J. Phys. Chem. B 113 (2009)
+TEST3:  tabulated electrostatic potential (NpT SPCE)
+	see upcoming coarse-grain water paper or S. Izvekov, J. M. J. Swanson, and G. A. Voth, 
+	J. Phys. Chem. B 112, 4711-4724 (2008).
+TEST4:  1,2-butanediol, NVT-Gibbs ensemble
+	see M. S. Kelkar, J. L. Rafferty, J. I. Siepmann, and E. J. Maginn, Fluid Phase Equil. 260, 218-231 (2007)
+TEST5:  SiO2/H2O mixture with the Garofalini potential
+	WILL NOT RUN ON MORE THAN 1 PROCESSOR!!
+	see K. E. Anderson, M. M. Hirshmann, and J. I. Siepmann, J. Phys. Chem. B 112, 13005-13014 (2008)
+TEST6:  TIP4P, NVT-Gibbs ensemble
+	see M. Lisal, I. Nezbeda, and W. R. Smith, J. Phys. Chem. B 108, 7412-7414 (2004)
+	or C. Vega, J. L. F. Abascal, and I. Nezbeda, J. Chem. Phys. 125, 034503 (2006) 	
+TEST7:  RPLC with PAHs
+	see J. L. Rafferty, J. I. Siepmann, and M. R. Schure, Anal. Chem., submitted for publication (2009)
+TEST8:  n-octane, NVT-Gibbs ensemble, initializes the system
+        see M. G. Martin and J. I. Siepmann, J. Phys. Chem. B, 102, 2569-2577 (1998)
+TEST9:  solid TATB, NpT ensemble
+	see N. Rai, D. Bhatt, J. I. Siepmann, and L. E. Fried, J. Chem. Phys., 129, 194510 (2008) 
+
+

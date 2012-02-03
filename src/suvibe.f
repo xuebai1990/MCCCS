@@ -277,6 +277,61 @@ c --- O-H bond length in 9-6 formic acid model
       brvib(55) = 1.038d0
       brvibk(55) = 317466.8d0
 
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c -- added 7/12/06 for nitro group and rigid aromatic ring
+
+c -- C-N bond length for nitro
+      brvib(56) = 1.49d0
+      brvibk(56) = 0.0d0
+
+c -- N-O bond length for nitro
+      brvib(57) = 1.225d0
+      brvibk(57) = 0.0d0
+
+c -- center-pi site, 9 site benzene
+      brvib(58) = 0.785d0
+      brvibk(58) = 0.0d0
+
+c -- C4-C5 oNT
+      brvib(59) = 1.396d0
+      brvibk(59) = 0.0d0
+
+c -- C4-C9 oNT
+      brvib(60) = 1.4075d0
+      brvibk(60) = 0.0d0
+
+c -- C4-C5 mNT
+      brvib(61) = 1.3908d0
+      brvibk(61) = 0.0d0
+
+c -- C4-C9 mNT
+      brvib(62) = 1.3927d0
+      brvibk(62) = 0.0d0
+
+c -- N-O1 oNT
+      brvib(63) = 1.2271d0
+      brvibk(63) = 0.0d0
+
+c -- N-O2 oNT
+      brvib(64) = 1.2272d0
+      brvibk(64) = 0.0d0
+
+c -- N-O1 mNT
+      brvib(65) = 1.2265d0
+      brvibk(65) = 0.0d0
+
+c -- N-O2 mNT
+      brvib(66) = 1.2263d0
+      brvibk(66) = 0.0d0
+
+c -- C4-N oNT
+      brvib(67) = 1.4692d0
+      brvibk(67) = 0.0d0
+
+c -- C4-N mNT
+      brvib(68) = 1.4699d0
+      brvibk(68) = 0.0d0
+
 c -- bond lengths for Neimark DMMP JPCA v108, 1435 (2004)
 
 c  -- P=O
@@ -294,6 +349,7 @@ c -- P-O(CH3)
 c -- O-CH3
       brvib(73) = 1.418d0
       brvibk(73) = 0.0d0
+
 c -- end parameters for Neimark DMMP
 
 
@@ -316,6 +372,33 @@ c -- C-Cl bond for Chloroflouroalkanes
       brvib(83) = 1.754
       brvibk(83) = 0.0d0
 
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c - parameters for acrylates
+c - some values already listed elsewhere - will fix that later
+
+c - bond length for CHx-O(ether) bonds
+      brvib(100) = 1.41d0
+      brvibk(100) = 0.0d0
+
+c - bond length for O(ether)-C(carbonyl) bonds
+      brvib(101) = 1.344d0
+      brvibk(101) = 0.0d0
+
+c - bond length for C=O for carboylate esters
+      brvib(102) = 1.20d0
+      brvibk(102) = 0.0d0
+
+c - bond length for C-CH bonds
+      brvib(103) = 1.52d0
+      brvibk(103) = 0.0d0
+
+c - bond length for C=C bonds
+      brvib(104) = 1.33d0
+      brvibk(104) = 0.0d0
+      
+c - bond length for CHx-CHy bonds (#1)
+      brvib(105) = 1.54d0
+      brvibk(105) = 0.0d0
 
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c - test parameters for coarse-grain model
@@ -325,6 +408,16 @@ c - test parameters for coarse-grain model
       brben(110) = 150.0d0
       brbenk(110) = 1.0d-12
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+
+c--- JLR 11-11-09
+c--- adding vibrational parameters for RPLC simulation
+c --- Si-O in silica
+      brvib(111) = 1.61d0
+      brvibk(111) = 0.0d0
+c --- Si-CHx in alkylsilane
+      brvib(112) = 1.90d0
+      brvibk(112) = 0.0d0
+c--- END JLR 11-11-09
 
 c * unused 
 c
@@ -676,6 +769,22 @@ c --- C-O-H bend in 9-6 formic acid model
       brben(69) = 103.0d0
       brbenk(69) = 26670.0d0
       
+c --  C-N-O bond angle for nitro (UA)
+      brben(70) = 111.5d0
+      brbenk(70) = 40284.0d0
+
+c -- O-N-O for nitro (UA + EH/TATB)
+      brben(71) = 125.0d0
+      brbenk(71) = 40284.0d0
+
+c -- CH(aro)-CH(aro)-[CH(aro) or CHx]
+      brben(72) = 120.0d0
+      brbenk(72) = 0.0d0
+
+c --  C-N-O bond angle for nitro (EH/TATB)
+      brben(73) = 117.7d0
+      brbenk(73) = 40284.0d0
+
 c -- Parameters for DMMP (bending constants are not correct)
 c --  O=P-O     
       brben(78) = 114.2d0
@@ -749,53 +858,76 @@ c -- Cl-C-F CF2Cl2
       brben(96) = 107.80
       brbenk(96) = 37725.0d0 
 
+c - parameters for acrylates
+
+c - bond angle for CHx-O-C
+      brben(100) = 115.0d0
+      brbenk(100) = 31250.0d0
+   
+c - bond angle for O-C=O
+cc      brben(101) = 125.0d0
+cc      brbenk(101) = 62500.0d0
+      brben(101) = 123.0d0
+      brbenk(101) = 20150.0d0
+
+c - bond angle for O-CHx-CHy
+      brben(102) = 111.0d0
+      brbenk(102) = 17650.0d0
+
+c - bond angle for O=C-CHx (carboxylic acids)
+      brben(103) = 126.0d0
+      brbenk(103) = 20150.0d0
+
+c - bond angle for C-CH=CH2, C-C=CH2, and CHx-C(sp2)-CHx
+      brben(104) = 119.7d0
+      brbenk(104) = 35210.0d0
 
 
 c -- TraPPE-7 Bending parameters Collin's part added by Neeraj
 
 c -- C-N-0 in nitro
-      brben(101) = 111.5d0
-      brbenk(101) = 40284.0d0
+      brben(105) = 111.5d0
+      brbenk(105) = 40284.0d0
 
 c -- C-C-N in nitro
-      brben(102) = 111.1d0
-      brbenk(102) = 31724.0d0
+      brben(106) = 111.1d0
+      brbenk(106) = 31724.0d0
 
 c -- H-C-N in nitro
-      brben(103) = 105.0d0
-      brbenk(103) = 17624.0d0
+      brben(107) = 105.0d0
+      brbenk(107) = 17624.0d0
 
 c -- O-N-O in nitro
-      brben(104) = 125.0d0
-      brbenk(104) = 40284.0d0
+      brben(108) = 125.0d0
+      brbenk(108) = 40284.0d0
 
 c --- H - C - O in alcohols and ethers H-C-N and C-N-H for amines
-      brben(105) = 109.5d0
-      brbenk(105) = 17624.39d0
+      brben(109) = 109.5d0
+      brbenk(109) = 17624.39d0
 
 c --- H-N-H for amine
-      brben(106) = 106.4d0
-      brbenk(106) = 21955.0d0
+      brben(110) = 106.4d0
+      brbenk(110) = 21955.0d0
 
 c --- C - N - C for amine and O - C - H for alkanol
-      brben(107) = 109.5d0
-      brbenk(107) = 25178.0d0
+      brben(111) = 109.5d0
+      brbenk(111) = 25178.0d0
 
 c --- amine C-C-N
-      brben(108) = 109.47d0
-      brbenk(108) = 28300.0d0
+      brben(112) = 109.47d0
+      brbenk(112) = 28300.0d0
 
 c --- OPLS C - C - Cl
-      brben(109) =  111.7d0
-      brbenk(109) = 39276.9d0
+      brben(113) =  111.7d0
+      brbenk(113) = 39276.9d0
 
 c --- OPLS H - C - Cl
-c      brben(110) = 114.20d0
-c      brbenk(110) = 35248.5d0
+c      brben(114) = 114.20d0
+c      brbenk(114) = 35248.5d0
 
 c -- OPLS H-C-O in alcohols
-      brben(111) = 109.5d0
-      brbenk(111) = 17605d0 
+      brben(115) = 109.5d0
+      brbenk(115) = 17605d0 
 
 c --Begin TATB
 c -- C--C--N TATB
@@ -815,6 +947,11 @@ c -- H--N--H TATB
       brbenk(153) = 0.5d0*100.0d0*503.25
 c -- END TATTB
 
+c --- JLR 11-11-09
+c --- Silica Si-O-Si
+      brben(154) = 147.0d0
+      brbenk(154) = 20.0d0*1000.0d0/1.9872
+c --- END JLR 11-11-09
 
       do i = 1, nvmax
          brben(i) = brben(i) * 8.0d0 * datan(1.0d0) / 360.0d0
@@ -888,283 +1025,377 @@ c *** this is torsional type 25.
 
 c *** type 27 is O-C-C-O
 
+c - torsional parameters for acrylates
+
+c - CHx-O-C=O
+      vtt0(34) = 1820.74d0
+      vtt1(34) = -417.41d0
+      vtt2(34) = -1373.14d0
+      vtt3(34) = -30.19d0
+      vtt4(34) = 0.0d0
+
+c - CH2=CH-C-O
+      vtt0(35) = 823.03d0
+      vtt1(35) = 47.91d0
+      vtt2(35) = -773.13d0
+      vtt3(35) = 1.99d0
+      vtt4(35) = 0.0d0
+
+c - CHx-O-C-CHy(sp2)
+      vtt0(36) = 1820.74d0
+      vtt1(36) = 417.41d0
+      vtt2(36) = -1373.14d0
+      vtt3(36) = 30.19d0
+      vtt4(36) = 0.0d0
+
+c - CH2=C-CH=O
+      vtt0(37) = 823.03d0
+      vtt1(37) = -47.91d0
+      vtt2(37) = -773.13d0
+      vtt3(37) = -1.99 d0
+      vtt4(37) = 0.0d0
+
+c - O=C-C(sp2)-CHx(sp3)
+      vtt0(38) = 195.185d0
+      vtt1(38) = -149.30d0
+      vtt2(38) = 164.38d0
+      vtt3(38) = 24.12d0
+      vtt4(38) = 28.45d0
+
+c - O-C(carbonyl)-C(sp2)-CHx(sp3)
+      vtt0(39) =195.185d0
+      vtt1(39) = 149.30d0
+      vtt2(39) = 164.38d0
+      vtt3(39) = -24.12d0
+      vtt4(39) = 28.45d0
+
+c - CHx-CHy-O-C(carbonyl)
+      vtt0(40) = 2029.99d0
+      vtt1(40) = -751.83d0
+      vtt2(40) = -538.95d0
+      vtt3(40) = -22.10d0
+      vtt4(40) = -51.27d0
+
+c - CH2=CH-CH=CH2 potential for butadiene
+      vtt0(41) = 2034.577d0
+      vtt1(41) = 531.571d0
+      vtt2(41) = -1239.35d0
+      vtt3(41) = 460.038d0
+      vtt4(41) = 196.382d0
+
+c - O=CH-CH-CH3 torsion for 2-methyl propanal
+      vtt0(42) = 1063.29d0
+      vtt1(42) = -736.9d0
+      vtt2(42) = 57.84d0
+      vtt3(42) = -293.23d0
+      vtt4(42) = 0.0d0
+
+c - O-CH2-CH2-CHx torsion for ether/acrylate w/long side chain (new functional form)
+      vtt0(43) = 893.21d0
+      vtt1(43) = 176.62d0
+      vtt2(43) = 53.34d0
+      vtt3(43) = 769.93d0
+      vtt4(43) = 0.0d0
+
+c - H-O-CH2-CH2 torsion from TraPPE 5 alcohols (new functional form)
+      vtt0(44) = 368.58d0
+      vtt1(44) = 209.8d0
+      vtt2(44) = 29.17d0
+      vtt3(44) = 187.93d0
+      vtt4(44) = 0.0d0
+
+c - O-CH2-CH2-O from TraPPE 6 glycols for HEA (new functional form)
+      vtt0(45) = 1258.09d0
+      vtt1(45) = 0.0d0
+      vtt2(45) = 251.62d0
+      vtt3(45) = 1006.47d0
+      vtt4(45) = 0.0d0
+
+c - CH2=CH-C(sp2)-CH3 potential for isoprene
+      vtt0(46) = 1861.286d0
+      vtt1(46) = -349.966d0
+      vtt2(46) = -1048.70d0
+      vtt3(46) = -580.535d0
+      vtt4(46) = 117.915d0
+
+
 c -- Torsional parameters for Neimark DMMP.  Six parameter
 c -- torsional function
 c -- CH3-P-O-CH3
-        vtt0(33) = 33.80d0
-        vtt1(33) = 317.0d0
-        vtt2(33) = 38.0d0 
-        vtt3(33) = -29.35d0
-        vtt4(33) = 37.0d0
-        vtt5(33) = -3.0d0
+        vtt0(48) = 33.80d0
+        vtt1(48) = 317.0d0
+        vtt2(48) = 38.0d0 
+        vtt3(48) = -29.35d0
+        vtt4(48) = 37.0d0
+        vtt5(48) = -3.0d0
 c -- O=P-O-CH3
-        vtt0(34) = 0.0d0
-        vtt1(34) = 0.0d0
-        vtt2(34) = 50.5d0 
-        vtt3(34) = 0.0d0
-        vtt4(34) = 0.0d0
-        vtt5(34) = 0.0d0
+        vtt0(49) = 0.0d0
+        vtt1(49) = 0.0d0
+        vtt2(49) = 50.5d0 
+        vtt3(49) = 0.0d0
+        vtt4(49) = 0.0d0
+        vtt5(49) = 0.0d0
 c -- O-P-O-CH3
-        vtt0(35) = 0.0d0
-        vtt1(35) = 480.0d0
-        vtt2(35) = 252.6d0 
-        vtt3(35) = 0.0d0
-        vtt4(35) = 0.0d0
-        vtt5(35) = 0.0d0
+        vtt0(50) = 0.0d0
+        vtt1(50) = 480.0d0
+        vtt2(50) = 252.6d0 
+        vtt3(50) = 0.0d0
+        vtt4(50) = 0.0d0
+        vtt5(50) = 0.0d0
 
 c *** Starting  fluorocarbons: Fit by Neeraj 6/24/2006 MP2/6-311+G**.
 c *** All atom forcefield
 
 c -- F-C-C-F
-        vtt0(36) = 2543.43d0
-        vtt1(36) = 1.25603d0
-        vtt2(36) = -8.58713d0
-        vtt3(36) = -1261.59
+        vtt0(51) = 2543.43d0
+        vtt1(51) = 1.25603d0
+        vtt2(51) = -8.58713d0
+        vtt3(51) = -1261.59
 
 c -- F-C-C-C
-        vtt0(37)  = 1985.58d0
-        vtt1(37)  = -0.18585d0
-        vtt2(37)  = 4.07924d0
-        vtt3(37)  = -992.516d0
+        vtt0(52)  = 1985.58d0
+        vtt1(52)  = -0.18585d0
+        vtt2(52)  = 4.07924d0
+        vtt3(52)  = -992.516d0
 
 c -- CF-CF-CF-CF Fitted for perfluoropentane
-        vtt0(38)   = 1124.71
-        vtt1(38)   = 849.824
-        vtt2(38)   = 331.375
-        vtt3(38)   = 908.94
-        vtt4(38)   = 434.207
-        vtt5(38)   = 201.725
-        vtt6(38)   = 127.14
-        vtt7(38)   = -163.547
-        vtt8(38)   = 46.9091
-        vtt9(38)   = 60.7336
+        vtt0(53)   = 1124.71
+        vtt1(53)   = 849.824
+        vtt2(53)   = 331.375
+        vtt3(53)   = 908.94
+        vtt4(53)   = 434.207
+        vtt5(53)   = 201.725
+        vtt6(53)   = 127.14
+        vtt7(53)   = -163.547
+        vtt8(53)   = 46.9091
+        vtt9(53)   = 60.7336
 
 c -- H-C-C-F
-        vtt0(39)  = 819.016
-        vtt1(39)  = -6.14744
-        vtt2(39)  = -43.9376
-        vtt3(39)  = 895.398
-        vtt4(39)  = 42.3686
-        vtt5(39)  = -16.1043
-        vtt6(39)  = 87.2734
+        vtt0(54)  = 819.016
+        vtt1(54)  = -6.14744
+        vtt2(54)  = -43.9376
+        vtt3(54)  = 895.398
+        vtt4(54)  = 42.3686
+        vtt5(54)  = -16.1043
+        vtt6(54)  = 87.2734
 
 
 c -- CF-CF-CF-CF for flourobutane
-        vtt0(44)   = 1231.36d0 
-        vtt1(44)   = 972.012d0
-        vtt2(44)   = 365.577
-        vtt3(44)   = 981.158
-        vtt4(44)   = 364.393
-        vtt5(44)   = 226.897
-        vtt6(44)   = 121.712
-        vtt7(44)   = -123.205
-        vtt8(44)   = 28.2703
-        vtt9(44)   = 44.6317
+        vtt0(55)   = 1231.36d0 
+        vtt1(55)   = 972.012d0
+        vtt2(55)   = 365.577
+        vtt3(55)   = 981.158
+        vtt4(55)   = 364.393
+        vtt5(55)   = 226.897
+        vtt6(55)   = 121.712
+        vtt7(55)   = -123.205
+        vtt8(55)   = 28.2703
+        vtt9(55)   = 44.6317
        
 C -- Available for other Fluororcarbon. They have been shifted down 101 102 etc...
 c -- Ethane H-C-C-H vtorso=a0+a1*(1-cosx)+a2*(1+cos2x)+a3*(1-cos3x)
-        vtt0(40) = 1521.29d0
-        vtt1(40) = -0.135221d0
-        vtt2(40) = -0.545298d0
-        vtt3(40) = -765.161d0
+        vtt0(56) = 1521.29d0
+        vtt1(56) = -0.135221d0
+        vtt2(56) = -0.545298d0
+        vtt3(56) = -765.161d0
 
 c -- Ethanol H-O-C-C vtorso=a0+a1*(1-cosx)+a2*(1+cos2x)+a3*(1-cos3x)+a4*(1+cos4x)
-        vtt0(41) = 639.492d0
-        vtt1(41) = -101.095d0
-        vtt2(41) = 10.2389d0
-        vtt3(41) = -321.075d0
-        vtt4(41) = 89.8948d0
+        vtt0(57) = 639.492d0
+        vtt1(57) = -101.095d0
+        vtt2(57) = 10.2389d0
+        vtt3(57) = -321.075d0
+        vtt4(57) = 89.8948d0
 
 c -- Ethanol H-O-C-H vtorso=a0+a1*cosx+a2*cos2x+a3*cos3x+a4*cos4x+a5*cos5x+a6*cos6x+a7*cos7x
-        vtt0(42) = 262.743 
-        vtt1(42) = -72.2022
-        vtt2(42) = 25.3956
-        vtt3(42) = 261.653
-        vtt4(42) = -38.3658 
-        vtt5(42) =  42.3685
-        vtt6(42) = 7.93367
-        vtt7(42) = 15.1805
+        vtt0(58) = 262.743 
+        vtt1(58) = -72.2022
+        vtt2(58) = 25.3956
+        vtt3(58) = 261.653
+        vtt4(58) = -38.3658 
+        vtt5(58) =  42.3685
+        vtt6(58) = 7.93367
+        vtt7(58) = 15.1805
 
 c-- Ethanol O-C-C-H vtorso=a0+a1*cosx+a2*cos2x+a3*cos3x+a4*cos4x+a5*cos5x+a6*cos6x
-        vtt0(43) = 853.463 
-        vtt1(43) = 11.4499
-        vtt2(43) = -12.8932
-        vtt3(43) = 887.455
-        vtt4(43) = 12.9193
-        vtt5(43) = -10.5521
-        vtt6(43) = 35.1449
+        vtt0(59) = 853.463 
+        vtt1(59) = 11.4499
+        vtt2(59) = -12.8932
+        vtt3(59) = 887.455
+        vtt4(59) = 12.9193
+        vtt5(59) = -10.5521
+        vtt6(59) = 35.1449
 
 c - type 44 is under type 39
 
 
 c -Hydrofluoroethers F-C-O-C vtorso=a0+a1*cosx+a2*cos(2*x)=a3*cos(3*x)
-       vtt0(45) = 804.608 
-       vtt1(45) = -6.3210
-       vtt2(45) = 9.1809
-       vtt3(45) = 785.878
-
+       vtt0(60) = 804.608 
+       vtt1(60) = -6.3210
+       vtt2(60) = 9.1809
+       vtt3(60) = 785.878
+ 
 c -Hydrofluoroethers H-C-O-C vtorso=a0+a1*cosx+a2*cos(2*x)+a3*cos(3*x)
-       vtt0(46) = 327.282d0
-       vtt1(46) = 5.29603d0
-       vtt2(46) = 9.29972d0
-       vtt3(46) = 324.084d0
-
+       vtt0(61) = 327.282d0
+       vtt1(61) = 5.29603d0
+       vtt2(61) = 9.29972d0
+       vtt3(61) = 324.084d0
+   
 c - Hydrofluoroethers F-C-C-O vtorso = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x) + a5*c
 c os(5*x)
-        vtt0(47) = 1738.42d0 
-        vtt1(47) = -462.352d0
-        vtt2(47) =  9.39616d0
-        vtt3(47) =  1086.9d0
-        vtt4(47) = 238.459d0
-        vtt5(47) =  40.9771d0
-
+        vtt0(62) = 1738.42d0 
+        vtt1(62) = -462.352d0
+        vtt2(62) =  9.39616d0
+        vtt3(62) =  1086.9d0
+        vtt4(62) = 238.459d0
+        vtt5(62) =  40.9771d0
+      
 c - Hydrofluorethers C-O-C-C vtorso = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x) + a4*cos(4*x) + a5
 c *cos(5*x) + a6*cos(6*x) + a7*cos(7*x
-        vtt0(48) = 1207.59d0
-        vtt1(48) = 1146.14d0
-        vtt2(48) = 90.5438d0
-        vtt3(48) = 252.856d0
-        vtt4(48) = 306.492d0
-        vtt5(48) = 101.542d0
-        vtt6(48) = 14.9379d0
-        vtt7(48) = -104.586d0
-
+        vtt0(63) = 1207.59d0
+        vtt1(63) = 1146.14d0
+        vtt2(63) = 90.5438d0
+        vtt3(63) = 252.856d0
+        vtt4(63) = 306.492d0
+        vtt5(63) = 101.542d0
+        vtt6(63) = 14.9379d0
+        vtt7(63) = -104.586d0
+      
 c - Hydrofluorethers H-C-C-O vtorso = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x) + a4*cos(4*x) + a5
 c *cos(5*x) + a6*cos(6*x) + a7*cos(7*x)
-        vtt0(49) = 1434.36d0
-        vtt1(49) = -56.6214d0
-        vtt2(49) = 76.6241d0
-        vtt3(49) = 767.995d0
-        vtt4(49) = 360.543d0
-        vtt5(49) = 307.889d0
-        vtt6(49) = 555.559d0
-        vtt7(49) = 354.076d0
+        vtt0(64) = 1434.36d0
+        vtt1(64) = -56.6214d0
+        vtt2(64) = 76.6241d0
+        vtt3(64) = 767.995d0
+        vtt4(64) = 360.543d0
+        vtt5(64) = 307.889d0
+        vtt6(64) = 555.559d0
+        vtt7(64) = 354.076d0
 
 c *** Ketones Jeff's Email
 
 c --- Ch3-C(=O)-CH2-CH2
-        vtt0(51) = -17.26d0
-        vtt1(51) = 752.6d0
-        vtt2(51) = 14.89d0
-        vtt3(51) = 282.1d0
+        vtt0(65) = -17.26d0
+        vtt1(65) = 752.6d0
+        vtt2(65) = 14.89d0
+        vtt3(65) = 282.1d0
  
 c --- O=CH2-CH2-CHx: Fit by me (Jeff) to HF/3-21G ab initio data
 
-        vtt0(52) = 2035.5876d0
-        vtt1(52) = -736.8992d0
-        vtt2(52) = 57.8440d0
-        vtt3(52) = -293.229d0
+        vtt0(66) = 2035.5876d0
+        vtt1(66) = -736.8992d0
+        vtt2(66) = 57.8440d0
+        vtt3(66) = -293.229d0
 
 
 c -- From TraPPE-7 Added by Neeraj for amines and nitro
 c *** 60 through 70 fit by the BEST TORSIONAL FITTING PROGRAM EVER!
 
 c - torsional parameters for nitro H-C-C-N fit to OPLS
-      vtt0(60) = 165.24d0
-      vtt1(60) = -219.263d0
-      vtt2(60) = 63.667d0
-      vtt3(60) = 4.98368d0
-      vtt4(60) = 8.18974d0
-      vtt5(60) = -2.63063d0
-      vtt6(60) = 0.78009d0
+      vtt0(70) = 165.24d0
+      vtt1(70) = -219.263d0
+      vtt2(70) = 63.667d0
+      vtt3(70) = 4.98368d0
+      vtt4(70) = 8.18974d0
+      vtt5(70) = -2.63063d0
+      vtt6(70) = 0.78009d0
 
 c - torsional parameters for nitro C-C-N-O fit to OPLS
-      vtt0(61) = 69.1666d0
-      vtt1(61) = -41.3563d0
-      vtt2(61) = -14.5474d0
-      vtt3(61) = -19.1091d0
-      vtt4(61) = 8.02837d0
-      vtt5(61) = -2.91134d0
-      vtt6(61) = 0.954035d0
+      vtt0(71) = 69.1666d0
+      vtt1(71) = -41.3563d0
+      vtt2(71) = -14.5474d0
+      vtt3(71) = -19.1091d0
+      vtt4(71) = 8.02837d0
+      vtt5(71) = -2.91134d0
+      vtt6(71) = 0.954035d0
 
 c - torsional parameters for nitro H-C-N-O fit to OPLS
-      vtt0(62) = 75.4217d0
-      vtt1(62) = -40.797d0
-      vtt2(62) = 80.445d0
-      vtt3(62) = -41.0586d0
-      vtt4(62) = 16.0442d0
-      vtt5(62) = -5.44169d0
-      vtt6(62) = 1.67867d0
+      vtt0(72) = 75.4217d0
+      vtt1(72) = -40.797d0
+      vtt2(72) = 80.445d0
+      vtt3(72) = -41.0586d0
+      vtt4(72) = 16.0442d0
+      vtt5(72) = -5.44169d0
+      vtt6(72) = 1.67867d0
 
 c - torsional parameters for ether H-C-O-H fit to OPLS
-      vtt0(63) = 192.557d0
-      vtt1(63) = -88.3325d0
-      vtt2(63) = 10.2361d0
-      vtt3(63) = -114.617d0
-      vtt4(63) = 0.177971d0
-      vtt5(63) = -0.0247285d0
-      vtt6(63) = 0.00349949d0
+      vtt0(73) = 192.557d0
+      vtt1(73) = -88.3325d0
+      vtt2(73) = 10.2361d0
+      vtt3(73) = -114.617d0
+      vtt4(73) = 0.177971d0
+      vtt5(73) = -0.0247285d0
+      vtt6(73) = 0.00349949d0
 
 c - torsional parameters for alkanol and ether H-C-C-O OPLS
-      vtt0(64) = 215.758d0
-      vtt1(64) = 94.6829d0
-      vtt2(64) = 40.9651d0
-      vtt3(64) = -144.295d0
-      vtt4(64) = 10.7712d0
-      vtt5(64) = -3.6513d0
-      vtt6(64) = 1.11172d0
+      vtt0(74) = 215.758d0
+      vtt1(74) = 94.6829d0
+      vtt2(74) = 40.9651d0
+      vtt3(74) = -144.295d0
+      vtt4(74) = 10.7712d0
+      vtt5(74) = -3.6513d0
+      vtt6(74) = 1.11172d0
 
 c - torsional parameters for alkanol H-C-O-C fit to OPLS
-      vtt0(65) = 351.912d0
-      vtt1(65) = -289.934d0
-      vtt2(65) = 195.209d0
-      vtt3(65) = -284.436d0
-      vtt4(65) = 37.1459d0
-      vtt5(65) = -13.173d0
-      vtt6(65) = 4.28713d0
+      vtt0(75) = 351.912d0
+      vtt1(75) = -289.934d0
+      vtt2(75) = 195.209d0
+      vtt3(75) = -284.436d0
+      vtt4(75) = 37.1459d0
+      vtt5(75) = -13.173d0
+      vtt6(75) = 4.28713d0
 
 c - torisonal parameters for amine H-C-N-H
-      vtt0(66) = 198.768d0
-      vtt1(66) = -109.123d0
-      vtt2(66) = 12.4603d0
-      vtt3(66) = -102.29d0
-      vtt4(66) = 0.210352d0
-      vtt5(66) = -0.0287978d0
-      vtt6(66) = 0.00401613
+      vtt0(76) = 198.768d0
+      vtt1(76) = -109.123d0
+      vtt2(76) = 12.4603d0
+      vtt3(76) = -102.29d0
+      vtt4(76) = 0.210352d0
+      vtt5(76) = -0.0287978d0
+      vtt6(76) = 0.00401613
 
 c - torisonal parameters for amine H-C-N-C
-      vtt0(67) = 173.871d0
-      vtt1(67) = -36.9908d0
-      vtt2(67) = 4.69016d0
-      vtt3(67) = -141.655d0
-      vtt4(67) = 0.0976006d0
-      vtt5(67) = -0.0148358d0
-      vtt6(67) = 0.0022968d0
+      vtt0(77) = 173.871d0
+      vtt1(77) = -36.9908d0
+      vtt2(77) = 4.69016d0
+      vtt3(77) = -141.655d0
+      vtt4(7) = 0.0976006d0
+      vtt5(77) = -0.0148358d0
+      vtt6(77) = 0.0022968d0
 
 c - torisonal parameters for amine H-N-C-C
-      vtt0(68) = 189.877d0
-      vtt1(68) =47.8376d0
-      vtt2(68) =104.991d0
-      vtt3(68) =-105.243d0
-      vtt4(68) = 0.0d0
-      vtt5(68) = 0.0d0
-      vtt6(68) = 0.0d0
+      vtt0(78) = 189.877d0
+      vtt1(78) =47.8376d0
+      vtt2(78) =104.991d0
+      vtt3(78) =-105.243d0
+      vtt4(78) = 0.0d0
+      vtt5(78) = 0.0d0
+      vtt6(78) = 0.0d0
 
 c - torisonal parameters for amine C-N-C-C
-      vtt0(69) = 1466.12d0
-      vtt1(69) = -2188.07d0
-      vtt2(69) = 1380.77d0
-      vtt3(69) = -889.694d0
-      vtt4(69) = 329.24d0
-      vtt5(69) = -136.897d0
-      vtt6(69) = 52.6532d0
+      vtt0(79) = 1466.12d0
+      vtt1(79) = -2188.07d0
+      vtt2(79) = 1380.77d0
+      vtt3(79) = -889.694d0
+      vtt4(79) = 329.24d0
+      vtt5(79) = -136.897d0
+      vtt6(79) = 52.6532d0
 
-c      vtt0(69) = 864.411d0
-c      vtt1(69) = -1029.11d0
-c      vtt2(69) = 718.434d0
-c      vtt3(69) = -43.7331d0
-c      vtt4(69) = 8.24626d0
-c      vtt5(69) = -1.59901d0
-c      vtt6(69) = 0.315767d0
+c      vtt0(79) = 864.411d0
+c      vtt1(79) = -1029.11d0
+c      vtt2(79) = 718.434d0
+c      vtt3(79) = -43.7331d0
+c      vtt4(79) = 8.24626d0
+c      vtt5(79) = -1.59901d0
+c      vtt6(79) = 0.315767d0
 
 c - torisonal parameters for amine H-C-C-N same as C-C-C-N
-      vtt0(70) = 438.11d0
-      vtt1(70) = 480.681d0
-      vtt2(70) = 150.364d0
-      vtt3(70) = -115.192d0
-      vtt4(70) = -0.566972d0
-      vtt5(70) = 0.0847927d0
-      vtt6(70) = -0.0129149d0
+      vtt0(80) = 438.11d0
+      vtt1(80) = 480.681d0
+      vtt2(80) = 150.364d0
+      vtt3(80) = -115.192d0
+      vtt4(80) = -0.566972d0
+      vtt5(80) = 0.0847927d0
+      vtt6(80) = -0.0129149d0
 
 c -- Starting methyl, dimethyl, diethyl acetamide torsions
 c -- Mp2/6-311+g**//HF/6-311+g**

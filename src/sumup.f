@@ -85,7 +85,7 @@ c      double precision vtemp
       double precision xvec(numax,numax),yvec(numax,numax)
      +                ,zvec(numax,numax),distij(numax,numax),epsilon2
      +                ,sigma2, distij2(numax,numax)
-      double precision slitpore, v_elect_field
+      double precision slitpore, v_elect_field, field
       dimension lcoulo(numax,numax),lexclude(nmax)
 c --------------------------------------------------------------------
       vintera = 0.0d0
@@ -98,6 +98,7 @@ c      write(iou,*) 'start SUMUP'
 
       rcutsq = rcut(ibox) * rcut(ibox)
       rbcut = rcut(ibox)
+      field = Elect_field(ibox)
 
       rminsq = rmin * rmin
 
@@ -135,7 +136,11 @@ C *******************************
 
 c --- loop over all chains i 
 c --- not if lgrand and ibox =2
-      if (.not.(lgrand.and.(ibox.eq.2))) then
+c --- JLR 11-24-09 don't loop if box is ideal
+c      if (.not.(lgrand.and.(ibox.eq.2))) then
+      if (.not.(lgrand.and.ibox.eq.2) .and.
+     &  .not.lideal(ibox) ) then
+c --- END JLR 11-24-09
        do 100 i = 1, nchain - 1
  
 c ### check if i is in relevant box ###
@@ -555,6 +560,9 @@ c                    * this part is 1,2 and 1,3
                         rxuij = rxu(i,ii) - rxu(i,jj)
                         ryuij = ryu(i,ii) - ryu(i,jj)
                         rzuij = rzu(i,ii) - rzu(i,jj)
+c --- JLR 11-17-09  need call to mimage for intrachain
+                        if (lpbc) call mimage ( rxuij,ryuij,rzuij,ibox )
+c --- END JLR 11-17-09
                         rij = dsqrt(rxuij*rxuij + ryuij*ryuij + 
      &                       rzuij*rzuij)
                         correct = correct + qqu(i,ii)*qqu(i,jj)*
@@ -565,6 +573,9 @@ c     &                       (erfunc(calp(ibox)*rij)-1.0d0)/rij
                         rxuij = rxu(i,ii) - rxu(i,jj)
                         ryuij = ryu(i,ii) - ryu(i,jj)
                         rzuij = rzu(i,ii) - rzu(i,jj)
+c --- JLR 11-17-09  need call to mimage for intrachain
+                        if (lpbc) call mimage ( rxuij,ryuij,rzuij,ibox )
+c --- END JLR 11-17-09
                         rij = dsqrt(rxuij*rxuij + ryuij*ryuij + 
      &                       rzuij*rzuij)
                         correct=correct+(1.0d0 - qscale2(imolty,ii,jj))
@@ -654,7 +665,9 @@ c                    write(iou,*) 'sumup interaction',ii,jj
                       rxuij = rxu(i,ii) - rxu(i,jj)
                       ryuij = ryu(i,ii) - ryu(i,jj)
                       rzuij = rzu(i,ii) - rzu(i,jj)
-
+c --- JLR 11-17-09  need call to mimage for intrachain
+                      if (lpbc) call mimage ( rxuij,ryuij,rzuij,ibox )
+c --- END JLR 11-17-09
                       rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
                       rij  = dsqrt(rijsq) 
                       if (linclu(imolty,ii,jj)) then
@@ -969,9 +982,10 @@ c$$$                      else
      +                        brbenk(it) * (theta-brben(it))**2
 c                      endif
 
-c                      write(iou,*) 'ip2,ip1,j',ip2,ip1,j
-c                      write(iou,*) 'bend energy, theta '
-c     &                     ,brbenk(it) * (theta-brben(it))**2,theta
+c                        write(iou,*) 'j,ip1,ip2, it',j,ip1,ip2, it
+c                        write(iou,*) 'bend energy, theta '
+c     &                       ,brbenk(it) * (theta-brben(it))**2,theta
+
                    endif
                 enddo
              enddo
@@ -1028,8 +1042,6 @@ c     *** calculate scalar triple product ***
 
                          vtg = vtg+spltor
                       else
-c                     write(6,*) 'vtorso',
-c     &                        dacos(thetac)*raddeg,vtorso(thetac,it)
                          vtg = vtg + vtorso( thetac, it )
                       endif
                    endif
@@ -1114,7 +1126,7 @@ c **********************************************************************
            if (nboxi(i).eq.ibox) then
               if(lelect(moltyp(i))) then
                  do j = 1,nunit(moltyp(i)) 
-                    vext = vext + v_elect_field(i,j,rzu(i,j))
+                    vext = vext + v_elect_field(i,j,rzu(i,j),field)
                  enddo
               endif 
            endif 
@@ -1166,11 +1178,11 @@ c --------------------------------------------------------------------
 
 C ----------------------------------------------------------------------------
 
-!      write(6,*) 'self,corr:',
+!      write(iou,*) 'self,corr:',
 !     &     (velect-vrecipsum/qqfact)*qqfact
-!      write(6,*) 'vsc, new self cor:',vsc*qqfact
-!      write(6,*) 'recip space part :',vrecipsum
-!      write(6,*) 'sc and recip:',vsc*qqfact + vrecipsum
+!      write(iou,*) 'vsc, new self cor:',vsc*qqfact
+!      write(iou,*) 'recip space part :',vrecipsum
+!      write(iou,*) 'sc and recip:',vsc*qqfact + vrecipsum
       
       if (.not.L_elect_table) then
          velect = velect*qqfact

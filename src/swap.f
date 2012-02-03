@@ -133,7 +133,7 @@ c      write(11,*) '1:',neigh_cnt(18)
          else
             lswapinter = .true.
          endif
-c       write(6,*) 'ee val', imolty, irem, pointp, boxrem, boxins
+c       write(iou,*) 'ee val', imolty, irem, pointp, boxrem, boxins
          goto 300
       endif
                                                                                 
@@ -180,9 +180,11 @@ c ---    select a box given in pmswatyp
          lswapinter = .true.
       endif
 c      write(iou,*) 'boxins:',boxins,'boxrem:',boxrem
-      if ( .not. (lgibbs .or. lgrand) .and. lswapinter ) 
-     &     stop 'no interbox swap if not gibbs/grand ensemble!'
-         
+      if ( .not. (lgibbs .or. lgrand) .and. lswapinter ) then
+         write(iou,*) 'no interbox swap if not gibbs/grand ensemble!'
+         stop
+      endif
+
 c *** select a chain in BOXREM at random ***
 
       if ( ncmt(boxrem,imolty) .eq. 0 ) then
@@ -209,7 +211,10 @@ c *** sub-regions defined by Vin
          if ( moltyp(irem) .ne. imolty ) 
      &       write(iou,*) 'screwup swap, irem:',irem,moltyp(irem),imolty
          ibox = nboxi(irem)
-         if ( ibox .ne. boxrem ) stop 'problem in swap'
+         if ( ibox .ne. boxrem ) then
+            write(iou,*) 'problem in swap'
+            stop
+         endif
       endif
 
 c$$$      write(iou,*) 'particle ',irem,' is being removed, imolty is:',
@@ -318,8 +323,9 @@ c ??? what shall we do now?
             if ( moltyp(jins) .ne. jmolty ) 
      &           write(iou,*) 'screwup swap, jins:'
      &           ,jins,moltyp(jins),jmolty
-            if ( nboxi(jins) .ne. boxins ) 
-     &           stop 'problem in swap with jins'
+            if ( nboxi(jins) .ne. boxins ) then 
+               write(iou,*) 'problem in swap with jins'
+            endif
          endif
 
          if ( lavbmc3(imolty) ) then
@@ -372,8 +378,10 @@ c               enddo
                if ( moltyp(kins) .ne. kmolty ) 
      &              write(iou,*) 'screwup swap, kins:'
      &              ,kins,moltyp(kins),kmolty
-               if ( nboxi(kins) .ne. boxins ) 
-     &              stop 'problem in swap with kins'
+               if ( nboxi(kins) .ne. boxins ) then 
+                  write(iou,*) 'problem in swap with kins'
+                  stop
+               endif
             endif
             neighk_num = neigh_cnt(kins)
                   
@@ -429,7 +437,10 @@ c *** out -> j case
      &              write(iou,*) 'screwup swap1, irem:',irem,
      &              moltyp(irem),imolty
                ibox = nboxi(irem)
-               if ( ibox .ne. boxrem ) stop 'problem in swap'
+               if ( ibox .ne. boxrem ) then
+                  write(iou,*) 'problem in swap'
+                  stop
+               endif
                iins = irem
                lremk_in = .false.
    
@@ -510,7 +521,10 @@ c                  write(iou,*) 'jins,irem:',jins,irem,neighj_num
      &                 write(iou,*) 'screwup swap2, irem:',irem,
      &                 moltyp(irem),imolty,neighj_num,pointp,jins
                   ibox = nboxi(irem)
-                  if ( ibox .ne. boxrem ) stop 'problem in swap'
+                  if ( ibox .ne. boxrem ) then
+                     write(iou,*) 'problem in swap'
+                     stop
+                  endif
                   iins = irem
                endif
                lrem_out = .false.
@@ -722,11 +736,12 @@ c     --- select ip position ---
             endif
          enddo
          write(iou,*) 'w1ins:',w1ins,'rbf:',rbf
-         stop 'big time screwup -- w1ins'
+         write(iou,*) 'big time screwup -- w1ins'
+         stop
       else
          iwalk = 1
       endif
-      
+
  180  v1ins =  vtry(iwalk)  
       v1insext = vtrext(iwalk)
       v1insint = vtrinter(iwalk)
@@ -822,7 +837,7 @@ c      if (ldual .or. ((.not. lchgall) .and. lelect(imolty))) then
 c     calculate the true site-site energy
          istt = 1
          iett = igrow
-!         write(6,*) igrow
+!         write(iou,*) igrow
          
          call energy (iins,imolty, v, vintra,vinter,vext
      &        ,velect,vewald,iii,ibox, istt, iett, .true.,ovrlap
@@ -830,7 +845,8 @@ c     calculate the true site-site energy
          
          if (ovrlap) then
             write(iou,*) 'iins',iins,'irem',irem
-            stop 'strange screwup in DC-CBMC swap'
+            write(iou,*) 'strange screwup in DC-CBMC swap'
+            stop
          endif
 c v1insewd, vnewewald and vnewintra now accounted for in v from energy
 c$$$         delen = v - ( vnewinter + vnewext +vnewelect) 
@@ -931,7 +947,8 @@ c        --- check for termination of walk
                   endif
                endif
             enddo
-            stop 'screw up in explicit hydrogen'
+            write(iou,*) 'screw up in explicit hydrogen'
+            stop
          else
             iwalk = 1
          endif
@@ -1002,7 +1019,10 @@ c     End Fluctuating Charge corrections for NEW configuration
 
 c     Begin Tail corrections for BOXINS with inserted particle
 
-      if (ltailc .and. lswapinter) then
+c --- JLR 11-24-09 don't compute tail correction if lideal(boxins)
+c      if (ltailc .and. lswapinter) then
+      if (ltailc .and. lswapinter .and. .not. lideal(boxins) ) then
+c --- END JLR 11-24-09
          vinsta = 0.0d0
          do imt = 1, nmolty
             do jmt = 1, nmolty
@@ -1347,7 +1367,10 @@ c     --- calculate the Full rcut site-site energy
      &        ,vewald,iii, boxrem, istt, iett, .true.,ovrlap
      &        ,.false.,vtorold,.false.,lfavor)
             
-         if (ovrlap) stop 'disaster ovrlap in old conf SWAP'
+         if (ovrlap) then
+            write(iou,*) 'disaster ovrlap in old conf SWAP'
+            stop
+         endif
 c v now includes vnewintra,v1remewd and voldewald, take out
 c$$$         deleo = v - ( voldinter + voldext +voldelect) 
 c$$$     &        - (v1rem - v1remewd)
@@ -1380,7 +1403,10 @@ c        --- iii=1 old conformation
      &        ,.true.,lfavor)
 
 c         if (irem .eq. 118)  write(iou,*) 'for old',vinter
-         if (ovrlap) stop 'disaster ovrlap in old conf SWAP'
+         if (ovrlap) then
+            write(iou,*) 'disaster ovrlap in old conf SWAP'
+            stop
+         endif
          deleo = v + vtorold
          voldt     = voldt + deleo
          voldintra = voldintra + vintra
@@ -1488,8 +1514,10 @@ c     End Fluctuating Charge corrections for OLD configuration
       endif
       
 c     Start of intermolecular tail correction for boxrem
-
-      if (ltailc .and. lswapinter) then
+c --- JLR 11-24-09 don't compute tail correction if lideal(boxrem)
+c      if (ltailc .and. lswapinter) then
+      if (ltailc .and. lswapinter .and. .not.lideal(boxrem) ) then
+c --- END JLR 11-24-09
 c     --- BOXREM without removed particle
          vremta = 0.0d0
          do imt = 1, nmolty
@@ -1730,9 +1758,9 @@ c---update the position, it will be used to get the bonded energy
          endif
 c         total_NBE = vintran+velectn+vewaldn+vtgn+vbendn+vvibn 
           total_NBE = vtgn+vbendn+vvibn
-!         write(6,*) vintran,velectn,vewaldn       
+!         write(iou,*) vintran,velectn,vewaldn       
 
-!         write(6,*) 'irem', irem  
+!         write(iou,*) 'irem', irem  
 
 c ---    update energies:
 
@@ -1826,6 +1854,14 @@ c *** update linkcell, if applicable
          endif
          
 c         write(iou,*) 'lneighbor:',lneighbor
+
+c KM for HD, 01/2010
+c for computing dielectric constant with swap/AVBMC moves
+c unclear as yet if this is correct!         
+         if (ldielect) then
+c *** update dipole term
+            call dipole(ibox,1)
+         endif
 
          if ( lneigh ) call updnn( irem )
          if ( lneighbor ) then

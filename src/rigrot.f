@@ -174,7 +174,7 @@ c     --- rotate around all axis
           lexist(j) = .false.
       enddo
 
-!      write(6,*) 'igrow',igrow
+!      write(iou,*) 'igrow',igrow
  
       lexist(igrow) = .true.
      
@@ -218,7 +218,8 @@ c     --- select ip position
                endif
             endif
          enddo
-         stop 'screwup in rigrot'
+         write(iou,*) 'screwup in rigrot'
+         stop 
  15      continue
             
          
@@ -249,7 +250,7 @@ c     --- select ip position
          vwellipswo = vwellipswo+vwellipswot(iwalk)
       endif
      
-!	write(6,*) 'vtry', vtry(iwalk),iwalk
+!	write(iou,*) 'vtry', vtry(iwalk),iwalk
     
       do j = 1, ntogrow
          iu = glist(j)

@@ -21,7 +21,7 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      logical lsolid,lrect
+      logical lsolid,lrect,ltwice,lideal
       integer icell,nicell,iucell,solcount
       double precision boxlx, boxly, boxlz, rcut, rmin
      +   ,rcutnn, softcut,softlog,rcutin
@@ -32,9 +32,9 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
      +   ,avsolbend(nbxmax,ntmax),avsoltor(nbxmax,ntmax)
      +   ,avsolelc(nbxmax,ntmax)
 
-      common /boxpha/ lsolid(nbxmax),lrect(nbxmax)
+      common /boxpha/ lsolid(nbxmax),lrect(nbxmax),ltwice(nbxmax)
       common /boxdim/ boxlx(nbxmax),boxly(nbxmax),boxlz(nbxmax),
-     +                 rcut(nbxmax),rcutnn(nbxmax)
+     +                 rcut(nbxmax),rcutnn(nbxmax),lideal(nbxmax)
 
       common /solav/ avsolinter,avsolintra,avsolbend,avsoltor,avsolelc
       common /input1/ rmin, softcut,softlog

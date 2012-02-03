@@ -9,14 +9,15 @@
 ## only for debugging
 #COMPFLAGS     = -w90 -w95 -cm -CB -CU -g
 
-COMPFLAGS     =  -O2 -w90 -w95 -cm -p
-#COMPFLAGS     =  -O3 -no-prec-div -ipo #-p  #-ipo
+#COMPFLAGS     =  -O2 -w90 -w95 #-cm -p
+COMPFLAGS     =  -O3 -no-prec-div -ipo #-p  #-ipo
+#COMPFLAGS     =  -O3 -no-prec-div -check bounds 
 LD            = ifort
 LDS           = ifort -c $(COMPFLAGS)
 LDFLAGS       = -static $(COMPFLAGS)
 
 ### NAG Compiler for OSX
-#COMPFLAGS     = -O1 -gline -f77 -mismatch_all
+#COMPFLAGS     = -O0 -gline -f77 -mismatch_all -C=all -C=undefined -nan
 ## only for debugging
 #COMPFLAGS     = -O2 
 #LD            = f95
@@ -57,6 +58,13 @@ LDFLAGS       = -static $(COMPFLAGS)
 #LDS           = xlf -c $(COMPFLAGS)
 #LDFLAGS	      = $(COMPFLAGS)
 
+### GNU Compiler
+#COMPFLAGS     =  -fbounds-check -g
+#COMPFLAGS     = -O3 #-fomit-frame-pointer -finline-functions -ffast-math #-fbounds-check #-mcpu=i686 -march=i686# 
+#LD	      = g77
+#LDS 	      = g77 -c $(COMPFLAGS)
+#LDFLAGS	      = $(COMPFLAGS)
+
 #############################
 ### End compiler definitions 
 #############################
@@ -69,7 +77,7 @@ MAKEFILE      = Makefile
 
 OBJS	      = Atom_traxyz.o \
 		Atom_energy.o \
-		analysis.o \
+		alignplanes.o \
 		atomtype.o \
 		anes.o \
 		boltz.o \
@@ -102,6 +110,7 @@ OBJS	      = Atom_traxyz.o \
 		geometry.o \
 		inclus.o \
 		initia.o \
+		init_vars.o \
 		linkcell.o \
 		ljmuir.o \
 		ljpsur.o \
@@ -178,7 +187,7 @@ SHELL	      = /bin/sh
 
 SRCS	     =  Atom_traxyz.f \
 		Atom_energy.f \
-		analysis.f \
+		alignplanes.f \
 		atomtype.f \
 		anes.f \
 		boltz.f \
@@ -210,6 +219,7 @@ SRCS	     =  Atom_traxyz.f \
 		forcefield.f \
 		geometry.f \
 		initia.f \
+		init_vars.f \
 		inclus.f \
 		linkcell.f \
 		ljmuir.f \
@@ -296,9 +306,8 @@ Atom_energy.o: control.inc coord.inc system.inc neigh.inc poten.inc coord2.inc \
         external.inc connect.inc ewaldsum.inc fepsi.inc qqlist.inc nsix.inc \
         peboco.inc cell.inc conver.inc Atom_energy.f
 	$(LDS) Atom_energy.f
-analysis.o: control.inc coord.inc  inputdata.inc connect.inc gor.inc \
-	system.inc cell.inc analysis.f
-	$(LDS) analysis.f
+alignplanes.o: control.inc conver.inc coord.inc swtcmove.inc alignplanes.f
+	$(LDS) alignplanes.f
 atomtype.o: atomtype.f
 	$(LDS) atomtype.f
 anes.o: control.inc coord.inc coord2.inc ensemble.inc rosen.inc \
@@ -380,6 +389,13 @@ inclus.o: control.inc coord.inc connect.inc inclus.f
 initia.o: control.inc coord.inc system.inc poten.inc conver.inc inpar.inc \
 	ensemble.inc connect.inc cbmc.inc initia.f
 	$(LDS) initia.f
+init_vars.o: control.inc coord.inc system.inc poten.inc conver.inc inpar.inc \
+	external.inc zeolite.inc connect.inc ewaldsum.inc fepsi.inc \
+	inputdata.inc qqlist.inc clusterbias.inc neigh.inc cell.inc nsix.inc \
+	peboco.inc ipswpar.inc eepar.inc garofalini.inc tabulated.inc \
+	cbmc.inc gor.inc blkavg.inc \
+	init_vars.f
+	$(LDS) init_vars.f
 linkcell.o: control.inc coord.inc system.inc linkcell.f
 	$(LDS) linkcell.f
 ljmuir.o: control.inc coord.inc poten.inc ljmuir.f

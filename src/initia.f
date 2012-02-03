@@ -287,7 +287,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                     endif 
                  enddo
  20              continue
-!             write(6,*) count_chain, rand_id,moltyp(rand_id) 
+!             write(iou,*) count_chain, rand_id,moltyp(rand_id) 
               else
                  goto 18
               endif

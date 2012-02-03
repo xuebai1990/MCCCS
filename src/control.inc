@@ -33,7 +33,8 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       integer nmax,numax,ntmax,nntype,nvmax,nbxmax,npamax,npabmax
      & ,maxbin,cmax,cmaxa,tor_bin_max,nbinmax_ete,smax
       integer vectormax,maxvir,maxntemp,nchmax,nchtor_max,nchbn_max
-      integer ntdifmx,nbinmx,angle_max,ang_bin_max,tor_max,iou
+c      integer ntdifmx,nbinmx,angle_max,ang_bin_max,tor_max
+      integer iou     
 
       common /iounit/ iou	
 c --------------------------------------------------------------
@@ -44,11 +45,11 @@ c if LNPT=.TRUE..
 c    then a NPT volume move is used to equilibrate with a pressure bath
 c    (implies cubic simulation boxes)
 c    else an NVT simulation is performed 
-      parameter (lnpt = .true.)
+      parameter (lnpt = .false.)
 c if LGIBBS=.TRUE.. 
 c    then a Gibbs-ensemble simulation is performed
 c    (implies cubic simulation boxes)
-      parameter (lgibbs = .false.)
+      parameter (lgibbs = .true.)
 c if LGRAND=.TRUE. 
 c    then simulation is performed in the grand-canonical ensemble
       parameter (lgrand = .false.)
@@ -124,7 +125,7 @@ C it in any other way.
 c ********************************************
 c *** PARAMETERS FOR EXP-6 POTENTIAL       ***
 c ********************************************
-c if LEXPSIX=.TRUE. exp-6 potential will be used instead of leonard jones
+c if LEXPSIX=.TRUE. exp-6 potential will be used instead of lennard jones
       parameter (lexpsix = .false.)
 c ***************************************************
 c *** PARAMETERS FOR BUFFERED 14-7 POTENTIAL      ***
@@ -145,7 +146,7 @@ c potential will be used.
 c ********************************************
 c *** PARAMETERS FOR GAROFALINI POTENTIAL  ***
 c ********************************************
-c if LGARO=.TRUE. garofalini potential will be used instead of leonard jones
+c if LGARO=.TRUE. garofalini potential will be used instead of lennard jones
       parameter (lgaro = .false.)
 c ********************************************
 c *** PARAMETER FOR IONIC SYSTEMS  ***
@@ -171,21 +172,21 @@ c ***************************************
 c ** DIMENSIONS FOR ARRAYS             **
 c ***************************************
 c - nmax = maximum number of chains +2
-      parameter (nmax = 1512)
+      parameter (nmax = 2002)
 c - numax = maximum number of units
-      parameter (numax = 50)
+      parameter (numax = 30)
 c - ntmax = maximum number of types of chains
-      parameter (ntmax = 3)
+      parameter (ntmax = 50)
 c - smax = max no. of mstates
       parameter (smax = 35)
 c - nbxmax = maximum number of boxes
       parameter (nbxmax = 3) 
 c - nntype = number of types of beads
-      parameter (nntype = 350)
+      parameter (nntype = 450)
 c - nvmax = maximum number of bond vibration and bending constants
       parameter (nvmax = 300)
 c - npamax = maximum number of pairs to switch or swatch
-      parameter (npamax = 20)
+      parameter (npamax = 40)
 c - npabmax = maximum number of box pairs (for swatch and swap) 
       parameter (npabmax = 3)
 c - maxvir = maximum number of bins for the 2nd virial coefficient
@@ -197,12 +198,12 @@ c - nchbn_max = maxium number of choices for bending CBMC growth
 c - nchtor_max = maximum number of choices for torsion CBMC growth
       parameter (nchtor_max = 200)
 c - vectormax = the maximum number of reciprocal vectors for Ewald sum
-      parameter (vectormax=20000) 
+      parameter (vectormax=100000) 
 
 c ****************************************
 c *** SAFECBMC max number of bins        ***
 c ****************************************
-      parameter (maxbin = 251)
+      parameter (maxbin = 201)
 
 c *************************************************************
 c *** cmax is the max number of cells for the linkcell list ***
@@ -219,19 +220,19 @@ C*************************************************************
 
 C NTDIFMX = max number of diff beads in simulation
 
-	parameter(ntdifmx=30)	
+c	parameter(ntdifmx=30)	
 
 C NBINMX = max number of bins for histograms
 
-	parameter(nbinmx=251)
+c	parameter(nbinmx=1)
 
 C THESE ARE FOR ANGLE AND TORSIONAL DISTRIBUTION
 
-        parameter(angle_max=2)
-	parameter(ang_bin_max=2)
-	parameter(tor_bin_max=2)
-        parameter(tor_max=2)
+c        parameter(angle_max=2)
+c	parameter(ang_bin_max=2)
+c	parameter(tor_bin_max=2)
+c        parameter(tor_max=2)
 
 C  For end to end vector calculation 
 
-       parameter(nbinmax_ete=251)
+c        parameter(nbinmax_ete=2)

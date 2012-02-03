@@ -427,6 +427,10 @@ c      endif
 c     --- set up list of "outer" beads that have further growth sites
 c     --- this method implemented 6-13-98
 
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
+c ibead should be set here, otherwise it's not initialized below
+      ibead=0
+
       if ( index .gt. 0 ) then
          ibead = 0
          outer_num = 0

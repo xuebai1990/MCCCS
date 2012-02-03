@@ -35,6 +35,7 @@ c    ********************************************************************
       include 'ewaldsum.inc'
       include 'coord.inc'
       include 'poten.inc'
+
       integer ncount,ibox,i,ii,imolty
       double precision factor,repress,repressx,repressy,repressz
      &     ,recipintra,piix,piiy,piiz,xcmi,ycmi,zcmi,arg

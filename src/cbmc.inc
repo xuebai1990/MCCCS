@@ -21,7 +21,7 @@ c 59 Temple Place - Suite 330
 c Boston, MA  02111-1307, USA.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      logical lovr,lexist,lexshed,llplace,lpnow,llrig,lsave
+      logical lovr,lexist,lexshed,llplace,lpnow,llrig,lsave,lrplc
 
 c *** adding this for iswatch move ***
       logical liswinc, liswatch
@@ -44,7 +44,7 @@ c *** end add ***
       common /cbpara/ nchoi1(ntmax),nchoi(ntmax),icbdir(ntmax)
      &   ,icbsta(ntmax),nmaxcbmc(ntmax),nchoih(ntmax)
      &   ,nchtor(ntmax),nchbna(ntmax),nchbnb(ntmax)
-     &   ,nchoir(ntmax)
+     &   ,nchoir(ntmax),lrplc(ntmax)
       common /bbias/  bfac(nchmax), vtry(nchmax),vtrinter(nchmax)
      &   ,vtrext(nchmax),vtrintra(nchmax)
      &   ,vtrelect(nchmax),vtrewald(nchmax),lovr(nchmax)

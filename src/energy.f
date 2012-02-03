@@ -74,7 +74,7 @@ ckea include for garofalini 3 body term
       double precision xcc,ycc,zcc,tcc,theta,spltor
       double precision xcmi,ycmi,zcmi,rcmi,rcm,rcmsq,epsilon2,sigma2
       double precision sx,sy,sz
-      double precision slitpore,mlen2,v_elect_field
+      double precision slitpore,mlen2,v_elect_field, field
 
       dimension xvec(numax,numax),yvec(numax,numax),zvec(numax,numax)
       dimension lcoulo(numax,numax),cellinc(cmax),jcell(nmax)
@@ -96,6 +96,8 @@ c      write(iou,*) 'start ENERGY'
       rcutsq = rcut(ibox) * rcut(ibox)
 
       rbcut = rcut(ibox)
+
+      field = Elect_field(ibox)
 
       if (ldual) rcinsq = rcutin*rcutin
 
@@ -246,7 +248,11 @@ c         endif
       endif
 
 c     --- loop over all chains except i - not for grand can. with ibox=2 !
-      if (.not.(lgrand.and.(ibox.eq.2))) then
+c --- JLR 11-24-09  also don't loop if box is ideal gas
+c      if (.not.(lgrand.and.(ibox.eq.2))) then
+      if (.not.(lgrand.and.(ibox.eq.2)) .and. 
+     &     .not.(lideal(ibox)) ) then    
+c --- END JLR 11-24-09
          do 98 k = 1, nmole
 
             if (licell.and.(ibox.eq.boxlink)) then
@@ -606,14 +612,16 @@ c for the explicit atom placement models
 C *******************************
 C *** INTRACHAIN INTERACTIONS ***
 C *******************************
-      
+
+c --- JLR 11-19-09 commenting this out, alway do mimage for intrachain      
 c *** for expanded ensemble
-      lmim = .false. 
-      nchp2=nchain+2
-      mlen2 = rcmu(nchp2)*2d0 
-      if ( mlen2>boxlx(ibox) .or. mlen2>boxly(ibox) .or.
-     $     mlen2>boxlz(ibox)) lmim = .true.
-   
+c      lmim = .false. 
+c      nchp2=nchain+2
+c      mlen2 = rcmu(nchp2)*2d0 
+c      if ( mlen2>boxlx(ibox) .or. mlen2>boxly(ibox) .or.
+c     $     mlen2>boxlz(ibox)) lmim = .true.
+c --- END JLR 11-19-09 
+  
 c --- calculate intramolecular energy correction for chain i 
       do ii = istart, iend
          ntii = ntype(imolty,ii)
@@ -635,7 +643,10 @@ c --- calculate intramolecular energy correction for chain i
             rxuij = rxuion(ii,flagon) - rxuion(jj,flagon)
             ryuij = ryuion(ii,flagon) - ryuion(jj,flagon)
             rzuij = rzuion(ii,flagon) - rzuion(jj,flagon)
-            if (lpbc .and. lmim) call mimage( rxuij,ryuij,rzuij,ibox)
+c --- JLR 11-19-09 always do mimage for intrachain
+c            if (lpbc .and. lmim) call mimage( rxuij,ryuij,rzuij,ibox)
+            if (lpbc) call mimage( rxuij,ryuij,rzuij,ibox)
+c --- END JLR 11-19-09 
             rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
             rij = dsqrt(rijsq)
 c * calculation of intramolecular electrostatics
@@ -873,15 +884,18 @@ c *** added 06/24/07 by KM
 c ********************************************************************
       if(lelect_field) then
         if(lelect(moltyp(i))) then
-           do j = 1,nunit(moltyp(i))
-             vext = vext + v_elect_field(i,j,rzuion(j,flagon))
-           enddo
-           vext = vext * eXV_to_K
+           if (nboxi(i).eq.ibox) then
+              do j = 1,nunit(moltyp(i))
+                 vext = vext + v_elect_field(i,j,rzuion(j,flagon),
+     &                field)
+              enddo
+           endif
         endif
+        vext = vext * eXV_to_K
       endif
 
 c *********************************************************************
-c *** calculation of torsion energy for explicit atom methy groups ****
+c *** calculation of torsion energy for explicit atom methyl groups ****
 c *********************************************************************
 
       if ( ltors ) then

@@ -110,7 +110,9 @@ c - variables added for GCMC histogram reweighting
       double precision cal2joule, joule2cal
       double precision HSP_T, HSP_LJ, HSP_COUL 
       double precision CED_T, CED_LJ, CED_COUL
-      double precision Heat_vapor_T,Heat_vapor_LJ,Heat_vapor_COUL    
+      double precision Heat_vapor_T,Heat_vapor_LJ,Heat_vapor_COUL   
+      double precision Heat_vapor_EXT, Ext_Energy_Liq, Ext_Energy_Gas
+      double precision DeltaU_Ext, pdV 
 
       double precision, dimension(nprop1,nbxmax,nbxmax)::stdev1,
      &                     sterr1,errme1       
@@ -155,6 +157,9 @@ c KEA
 
 C -------------------------------------------------------------------
 
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
+      call init_vars
+
       cal2joule = 4.184d0
       joule2cal = 1.0d0/cal2joule 
 
@@ -186,11 +191,11 @@ C -------------------------------------------------------------------
      &     ,stepvir,qelect)
 
 c kea don't stop for lgaro
-      if (lchgall .and. (.not. lewald).and.(.not.lgaro)) then
-         write(iou,*) 'lchgall is true and lewald is false.',
-     &        ' Not checked for accuracy!'
-         stop
-      endif
+c      if (lchgall .and. (.not. lewald).and.(.not.lgaro)) then
+c         write(iou,*) 'lchgall is true and lewald is false.',
+c     &        ' Not checked for accuracy!'
+c         stop
+c      endif
 
       vname(1)  = ' Total energy'
       vname(2)  = ' Inter LJ    '
@@ -208,8 +213,13 @@ c kea don't stop for lgaro
 	fname = run_num
 c --  SETTING UP ARRAYS  FOR ANALYSYS PURPOSE
 
-       call analysis(0)
-
+c--- JLR 11-11-09
+c--- do not call analysis if you set ianalyze to be greater than number of cycles 
+c KM remove analysis
+c       if (ianalyze.le.nstep) then
+c          call analysis(0)
+c       endif
+c--- END JLR 11-11-09
 
 c --  set up initial linkcell
       if (licell) then
@@ -284,7 +294,7 @@ c --- extra zero accumulator for grand-canonical ensemble
 
 c *** zero accumulators ***
 
-      do i = 1,9
+      do i = 1,11
         do ibox = 1,nbox-1
            do jbox = ibox+1, nbox
                 acsolpar(i,ibox,jbox)=0.0d0
@@ -310,18 +320,20 @@ c *** zero accumulators ***
             avsoltor(i,j) = 0.0d0
             avsolelc(i,j) = 0.0d0
 
-            acntrax(i,j) = 0.d0
-            acntray(i,j) = 0.d0
-            acntraz(i,j) = 0.d0
-            acnrotx(i,j) = 0.d0
-            acnroty(i,j) = 0.d0
-            acnrotz(i,j) = 0.d0
-            acstrax(i,j) = 0.d0
-            acstray(i,j) = 0.d0
-            acstraz(i,j) = 0.d0
-            acsrotx(i,j) = 0.d0
-            acsroty(i,j) = 0.d0
-            acsrotz(i,j) = 0.d0
+c!!!!!!!!!!!!!!!!!!!!!!!!!! MJM     someone reversed these indices
+c!!!!!!!!!!!!!!!!!!!!!!!!!  acntrax(ntmax,nbxmax) in blkavg.inc
+            acntrax(j,i) = 0.d0
+            acntray(j,i) = 0.d0
+            acntraz(j,i) = 0.d0
+            acnrotx(j,i) = 0.d0
+            acnroty(j,i) = 0.d0
+            acnrotz(j,i) = 0.d0
+            acstrax(j,i) = 0.d0
+            acstray(j,i) = 0.d0
+            acstraz(j,i) = 0.d0
+            acsrotx(j,i) = 0.d0
+            acsroty(j,i) = 0.d0
+            acsrotz(j,i) = 0.d0
             
          enddo
          acpres(i) = 0.0d0
@@ -444,6 +456,15 @@ c *** For the atom displacements
       enddo
 
 c *** temporary accumulators for conf.bias performance ***
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
+      DO imolty=1,ntmax
+         DO j=1,npabmax
+            DO ibox=1,nbxmax*2
+               bnswap(imolty,j,ibox)=0.0d0
+               bsswap(imolty,j,ibox)=0.0d0
+            ENDDO
+         ENDDO
+      ENDDO
       do i = 1, nmolty
          do j = 1,nswapb(i)
             do ibox = 1, 2*nbox
@@ -469,6 +490,7 @@ c     --- accumulators for swatch performance
          do j = 1,nswtcb(i)
             bnswat(i,j) = 0.0d0
             bsswat(i,j) = 0.0d0
+            bnswat_empty(i,j) = 0.0d0
          enddo
       enddo
 c     --- accumulators for fluctuating charge performance
@@ -587,16 +609,13 @@ c           ---  volume move ---
             elseif (rm .le. pmswat) then
 c           --- CBMC switch move ---
                call swatch
-
             elseif ( rm .le. pmswap ) then
 c           --- swap move for linear and branched molecules ---
                call swap(bsswap,bnswap,bnswap_in,bnswap_out,
      &              cnt_wf1,cnt_wf2,cnt_wra1,cnt_wra2,qelect)
-               
             elseif ( rm .le. pmcb ) then
 c           --- configurational bias move ---
                call config
-
             elseif ( rm .le. pmflcq ) then
 c           --- displacement of fluctuating charges ---
                call flucq(2,0)
@@ -914,7 +933,8 @@ c               enddo
          endif
 
          if (lucall) then
-            stop 'not recently checked for accuracy'
+            write(iou,*) 'not recently checked for accuracy'
+            stop
 c            do j = 1,nmolty
 c               if ( ucheck(j) .gt. 0 ) then
 c                  call chempt(bsswap,j,ucheck(j),qelect)
@@ -954,10 +974,13 @@ c --- defined if nbox == 1
             if(lgibbs) then
                do ibox = 1,nbox-1
                   do jbox = ibox+1,nbox
+c                     WRITE(iou,*) 'ieouwfe ',ibox,jbox
+c                     DeltaU_Ext=0.0d0
+c                     pdV=0.0d0
                        call calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ,
-     &                      Heat_vapor_COUL,CED_T,CED_LJ,CED_COUL,
-     &                      HSP_T,HSP_LJ,
-     &                      HSP_COUL,ibox,jbox)
+     &                      Heat_vapor_COUL,pdV, CED_T,CED_LJ,CED_COUL,
+     &                      HSP_T,HSP_LJ, HSP_COUL,ibox,jbox)
+
 c --- Heat of vaporization            
                             acsolpar(1,ibox,jbox)=
      &                            acsolpar(1,ibox,jbox)+Heat_vapor_T
@@ -977,6 +1000,10 @@ c --- Heat of vaporization
      &                            acsolpar(8,ibox,jbox)+HSP_LJ
                             acsolpar(9,ibox,jbox)=
      &                            acsolpar(9,ibox,jbox)+HSP_COUL 
+c                            acsolpar(10,ibox,jbox) = 
+c     &                           acsolpar(10,ibox,jbox)+DeltaU_Ext
+                            acsolpar(11,ibox,jbox) =
+     &                           acsolpar(11,ibox,jbox)+pdV
                   enddo  
                enddo
             endif
@@ -1027,9 +1054,13 @@ c *** Add a call for subroutine to compute the
             lrsave = .true.
          endif
  
-	 if(mod(nnn,ianalyze).eq.0) then
-	    call analysis(1)
-         endif  
+c--- JLR 11-11-09
+c--- do not call analysis if ianalyze is greater than number of cycles
+c KM remove analysis
+c	 if(mod(nnn,ianalyze).eq.0) then
+c	    call analysis(1)
+c         endif  
+c--- END JLR 11-11-09
 
          do intg = 1, nchain
             ibox = nboxi(intg)
@@ -1389,11 +1420,14 @@ c *** write some information about volume performance ***
          write(iou,*) 'pair typ =',i
          write(iou,*) 'moltyps = ',nswatb(i,1),' and',nswatb(i,2)
          do j = 1, nswtcb(i)
+c --- JLR 12-1-09 changing to exclude empty box attempts from swatch rate 
             write(iou,62) box3(i,j),box4(i,j),
-     &           bnswat(i,j),bsswat(i,j)
+     &           bnswat(i,j),bnswat(i,j)-bnswat_empty(i,j),bsswat(i,j)
             if (bnswat(i,j) .gt. 0.5d0 ) then
-               write(iou,65) 100.0d0 * bsswat(i,j)/bnswat(i,j)
+               write(iou,65) 100.0d0 * bsswat(i,j)/
+     &              (bnswat(i,j)-bnswat_empty(i,j))
             endif
+c --- EN JLR 12-1-09
          enddo
       enddo
 
@@ -1428,8 +1462,13 @@ c *** write some information about volume performance ***
 
  61   format(' attempts =',f8.1,'   ratio =',f6.3,
      +      '   max.displ. =',e10.4)
- 62   format('between box ',i2,'and ',i2,
-     +     ' attempts =',f9.1,'   accepted =',f8.1) 
+c --- JLR 12-1-09
+c62   format('between box ',i2,'and ',i2,
+c     +     ' attempts =',f9.1,'   accepted =',f8.1) 
+ 62      format('between box ',i2,' and ',i2,
+     +     '   uattempts =',f12.1,   '  attempts =',f9.1,
+     +     '  accepted =',f8.1)
+c --- END JLR 12-1-09
  63   format(' suc.growth % =',f7.3,'   accepted % =',f7.3)
  65   format(' accepted % =',f7.3)
  66   format('between box ',i2,' and ',i2,' into box',i2,
@@ -1507,8 +1546,8 @@ c---need to check
 	     write(iou,*) ' Fluc Q en.: ',vflucq,vflucqb(ibox)
 	 endif
          if ( abs(v3garo - v3garob(ibox) ) .gt.0.001) then
-            write(6,*) '### problem ###'
-            write(6,*) ' 3-body en.: ',v3garo,v3garob(ibox)
+            write(iou,*) '### problem ###'
+            write(iou,*) ' 3-body en.: ',v3garo,v3garob(ibox)
          endif
          if ( ldielect ) then
             if ( abs(dipolexo - dipolex(ibox)) .gt. 0.0001) then
@@ -2065,6 +2104,11 @@ c - write out the heat of vaporization and solubility parameters
      &                 stdev1(2,ibox,jbox),errme1(2,ibox,jbox)
                write(iou,1510) ibox,jbox,aver1(3,ibox,jbox),
      &                 stdev1(3,ibox,jbox),errme1(3,ibox,jbox)
+c               write(iou,1518) ibox,jbox,aver1(10,ibox,jbox),
+c     &                 stdev1(10,ibox,jbox), errme1(10,ibox,jbox)
+               write(iou,1519) ibox,jbox,aver1(11,ibox,jbox),
+     &                 stdev1(11,ibox,jbox), errme1(11,ibox,jbox) 
+
                write(iou,1511) ibox,jbox,aver1(4,ibox,jbox),
      &                 stdev1(4,ibox,jbox),errme1(4,ibox,jbox)
                write(iou,1512) ibox,jbox,aver1(5,ibox,jbox),
@@ -2275,7 +2319,10 @@ c -- 06/08/09 KM
         
       endif
 
-      call analysis(2) 	
+c KM remove analysis
+c      if (ianalyze.le.nstep) then
+c         call analysis(2) 	
+c      endif
 
 c --- ee prob
       IF(lexpee) then                                
@@ -2353,9 +2400,9 @@ c     & 3('       Box ',i1))
 
  1508 format(' H_vap      [kJ/mol] btwn box   ',i4,' and',i4, ' =',
      & 3f15.4)
- 1509 format(' H_vap LJ   [kJ/mol] btwn box   ',i4,' and',i4, ' =',
+ 1509 format(' H_vap LJ  [kJ/mol] btwn box   ',i4,' and',i4, ' =',
      & 3f15.4)
- 1510 format(' H_vap Coul [kJ/mol] btwn box   ',i4,' and',i4, ' =',
+ 1510 format(' H_vap Coul [kJ/mol] btwn box  ',i4,' and',i4, ' =',
      & 3f15.4)
  1511 format(' CED [cal/cc]   btwn box        ',i4,' and',i4, ' =',
      & 3f15.4)
@@ -2370,6 +2417,10 @@ c     & 3('       Box ',i1))
  1516 format(' HSP_Cou[(cal/cc)^1/2] btwn box ',i4,' and',i4, ' =',
      & 3f15.4)
 
+c 1518 format(' DeltaU Ext [kJ/mol] btwn box   ',i4,' and',i4, ' =',
+c     & 3f15.4)
+ 1519 format(' pdV        [kJ/mol] btwn box   ',i4,' and',i4, ' =',
+     & 3f15.4)
 
  1517 format(a15,'[kJ/mol] for box',i3,' =',3(f12.4))
  1601 format(i5,1x,i10)

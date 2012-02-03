@@ -78,6 +78,10 @@ C -----------------------------------------------------------------
      & ,ratvol,temmass,dn,pres(nbxmax)
 C -------------------------------------------------------------------
 
+c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
+      DO im=1,nbxmax
+         pres(im)=0.0d0
+      ENDDO
 c      write(iou,*) 'begin MONPER'
 c *** perform periodic operations  ***
  
@@ -775,7 +779,8 @@ c     *** write out the restart configurations to SAFETY-file ***
             write (88,*) (rmflcq(i,im),i=1,nmolty)
          enddo
          if ( lgibbs .or. lgrand .or. lnpt) then
-            write (88,*) rmvol
+c KM 01/10
+            write (88,*) (rmvol(ibox),ibox=1,nbox)
             do im = 1,nbox
 
                if (lsolid(im) .and. .not. lrect(im)) then

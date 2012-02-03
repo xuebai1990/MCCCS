@@ -1,0 +1,15 @@
+#!/bin/bash -l
+
+# REQUEST THE DESIRED NUMBER OF NODES
+
+#PBS -l walltime=12:00:00,mem=2gb,nodes=1:ppn=8
+#PBS -l naccesspolicy=singlejob
+#PBS -m ae
+
+# enter full path here.
+
+cd /scratch2/maerzkek/MCCCS-2010-SERIAL/TEST_SUITE/LONG/
+
+/scratch2/maerzkek/MCCCS-2010-SERIAL/TEST_SUTIE/LONG/RUNTEST.pl  
+
+exit
