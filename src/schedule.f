@@ -43,7 +43,7 @@ c     *******************************************************************
       integer temp_store,temp_count,zz,outer_sites,index,outer_num
      &     ,outer_prev,iufrom,outer_try
       double precision dbgrow,random
-      parameter (lprint = .true.)
+      parameter (lprint = .false.)
       dimension temp_store(numax),outer_sites(numax),outer_prev(numax)
      &     ,lfind(numax)
 c ------------------------------------------------------------------

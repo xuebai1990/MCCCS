@@ -361,12 +361,8 @@ c * this is correct for the coulombic part and for LJ.  Note sign difference!
                   pips(3,2) = pips(3,2) - rzuij*fycmi
                   
                endif
-
  99         continue
-
-
          endif
-
  100  continue
 
 c ################################################################
@@ -383,6 +379,7 @@ c ***
          pxx = pxx + rpxx
          pyy = pyy + rpyy
          pzz = pzz + rpzz
+
          pips(1,2) = pips(1,2) + qqfact*rpxy
          pips(1,3) = pips(1,3) + qqfact*rpxz
          pips(2,1) = pips(2,1) + qqfact*rpyx
@@ -391,37 +388,116 @@ c ***
          pips(3,2) = pips(3,2) + qqfact*rpzy
 
       endif
+
       pips(1,1) = pxx
       pips(2,2) = pyy
       pips(3,3) = pzz
 
-      press = 1.380662d4 * ( ( (nchbox(ibox)+ ghost_particles(ibox))
-     +      / beta) -
-     +     ( press/3.0d0 ) ) / 
-     +     ( boxlx(ibox)*boxly(ibox)*boxlz(ibox) )
-c      write (6,*) ' press' , press
+! Compute the Gaussian well contribution to the pressure
+      pwell = 0.0d0
+      do i = 1,3
+         do j = 1,3
+             pwellips(i,j) = 0.0d0
+         enddo
+      enddo
 
-      surf = pzz - 0.5d0*(pxx + pyy)
-c * divide by surface area and convert from K to put surf in mN/m 
-      surf = 1.380658d0*surf / (2.0d0*boxlx(ibox)*boxly(ibox))
+      do i = 1,nchain
+         imolty = moltyp(i)
+         if (lwell(imolty)) then
+         rxui = xcm(i)
+         ryui = ycm(i)
+         rzui = zcm(i)
+         do j = 1, nwell(imolty)*nunit(imolty)
+            k = j - int(j/nunit(imolty))*nunit(imolty)
+            if (k.eq.0) k = nunit(imolty)
+            rxuij = rxui-rxwell(j,imolty)
+            ryuij = ryui-rywell(j,imolty)
+            rzuij = rzui-rzwell(j,imolty)
+            call mimage (rxuij,ryuij,rzuij,ibox)
+            rijsq = rxuij*rxuij+ryuij*ryuij+rzuij*rzuij
+            rcm = rcut(ibox)+rcmu(i)
+            rcmsq = rcm*rcm
+            if (rijsq.lt.rcmsq) then
+            do ii = 1, nunit(imolty)
+               if (awell(ii,k,imolty).lt.1.0d-6) goto 666
+               rxui = rxu(i,ii)
+               ryui = ryu(i,ii)
+               rzui = rzu(i,ii)
+               rxuij = rxui-rxwell(j,imolty)
+               ryuij = ryui-rywell(j,imolty)
+               rzuij = rzui-rzwell(j,imolty)
+               call mimage (rxuij,ryuij,rzuij,ibox)
+               rijsq = rxuij*rxuij+ryuij*ryuij+rzuij*rzuij
+               fij = 2.0d0*awell(ii,k,imolty)*bwell*dexp(-bwell*rijsq)
+               pwell = pwell+fij*rijsq
+               pwellips(1,1) = pwellips(1,1)+fij*rxuij*rxuij
+               pwellips(2,2) = pwellips(2,2)+fij*ryuij*ryuij
+               pwellips(3,3) = pwellips(3,3)+fij*rzuij*rzuij
+               pwellips(1,2) = pwellips(1,2)+fij*rxuij*ryuij
+               pwellips(1,3) = pwellips(1,3)+fij*rxuij*rzuij
+               pwellips(2,3) = pwellips(2,3)+fij*ryuij*rzuij
+ 666        enddo
+            endif
+         enddo
+         endif
+      enddo
+      pwellips(2,1) = pwellips(1,2)
+      pwellips(3,1) = pwellips(1,3)
+      pwellips(3,2) = pwellips(2,3)
 
-c----check pressure tail correction
+      if (lsolid(ibox).and.(.not.lrect(ibox))) then
+         vol = cell_vol(ibox) 
+      else
+         vol = boxlx(ibox)*boxly(ibox)*boxlz(ibox)
+      endif
+     
+      pipsw = -(press/3.0d0)/vol
+      pwellipsw = -(pwell/3.0d0)/vol
+
+      do i = 1, 3
+         do j = 1, 3
+            pips(i,j) = pips(i,j)/vol
+            pwellips(i,j) = -pwellips(i,j)/vol
+         enddo
+      enddo
+
+! Chainging the order of calculation of tail correction
+! So that it could be included in the scaled version for
+! thermodynamic integration
 
       if (ltailc) then
 c --     add tail corrections for the Lennard-Jones energy
-
 c --     Not adding tail correction for the ghost particles
 c --     as they are ideal (no interaction) Neeraj.
-
-         volsq = ( boxlx(ibox) * boxly(ibox) * boxlz(ibox) )**2
-         do imolty=1, nmolty        
-            do jmolty=1, nmolty  
+         volsq = ( vol )**2
+         do imolty=1, nmolty
+            do jmolty=1, nmolty
                rhosq = ncmt(ibox,imolty)*ncmt(ibox,jmolty)
      +              / volsq
                press=press + 1.380662d4 * corp(imolty,jmolty,rhosq,ibox)
             enddo
         enddo
       endif
+
+      if (lstagea) then
+         press = (1.0d0-lambdais*(1.0d0-etais))*press
+      elseif (lstageb) then
+         press = etais*press+lambdais*pwell
+      elseif (lstagec) then
+         press = (etais+(1.0d0-etais)*lambdais)*press
+     &           +(1.0d0-lambdais)*pwell
+      endif
+
+
+      press = 1.380662d4 * ( ( (nchbox(ibox)+ ghost_particles(ibox))
+     +      / beta) -
+     +     ( press/3.0d0 ) ) / 
+     +     ( vol )
+c      write (6,*) ' press' , press
+
+      surf = pzz - 0.5d0*(pxx + pyy)
+c * divide by surface area and convert from K to put surf in mN/m 
+      surf = 1.380658d0*surf / (2.0d0*boxlx(ibox)*boxly(ibox))
 
 c      write (6,*) ' press tail' ,  press
 

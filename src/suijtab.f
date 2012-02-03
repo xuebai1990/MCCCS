@@ -1613,16 +1613,16 @@ c --- Fixed Charge Water lone pair [L] site
 c * NOBLE GASES, CARBON MONOXIDE, CARBON DIOXIDE, NITROGEN, OXYGEN, HF
 
 c --- TraPPE Helium (7-18-97 MGM)
-c      sigi(124) = 3.11d0
-c      epsi(124) = 4.0d0
+      sigi(124) = 3.11d0
+      epsi(124) = 4.0d0
 c      sigi(124) = 3.065d0 used in JACS paper 1997
 c      epsi(124) = 3.95d0
       mass(124) = 4.0026d0
 c      sigi(124) = 2.556d0
 c      epsi(124) = 10.2d0
 c      mass(124) = 4.00d0
-      sigi(124) = 0.0d0
-      epsi(124) = 0.0d0
+c      sigi(124) = 0.0d0
+c      epsi(124) = 0.0d0
       chname(124) = ' TraPPE helium    '
       chemid(124)  = 'HE '
 

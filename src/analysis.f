@@ -671,10 +671,6 @@ c *** minimum image the pair separations ***
                               ruijsq = rxuij*rxuij + ryuij*ryuij 
      &                             + rzuij*rzuij
 
-                              if (ruijsq.lt.1.4399d0) then
-                                 write(2,*)i,ii,j,jj
-                                 stop 'distance smaller than rcut'
-                              endif
                               if (ruijsq .lt. rcutsq) then
                                  ruij = dsqrt(ruijsq)
 

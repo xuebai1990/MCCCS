@@ -21,11 +21,7 @@ c
             dvdl = -3.0d0*vol/boxlx(ibox)*(lenc-lena)*(etais*pipsw
      &              +lambdais*pwellipsw)+vwellipsw
          elseif (lsolid(ibox).and.(.not.lrect(ibox))) then
-            vol = (hmat(ibox,1) * (hmat(ibox,5) * hmat(ibox,9) -
-     +        hmat(ibox,8) * hmat(ibox,6)) + hmat(ibox,4)
-     +        * (hmat(ibox,8) * hmat(ibox,3) - hmat(ibox,2)
-     +        * hmat(ibox,9)) + hmat(ibox,7) * (hmat(ibox,2)
-     +        * hmat(ibox,6) - hmat(ibox,5)*hmat(ibox,3)))
+            vol = cell_vol(ibox) 
             hmats(1,1) = hmat(ibox,1)
             hmats(1,2) = hmat(ibox,4)
             hmats(1,3) = hmat(ibox,7)

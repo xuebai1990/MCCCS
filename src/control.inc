@@ -41,11 +41,11 @@ c if LNPT=.TRUE..
 c    then a NPT volume move is used to equilibrate with a pressure bath
 c    (implies cubic simulation boxes)
 c    else an NVT simulation is performed 
-      parameter (lnpt = .false.)
+      parameter (lnpt = .true.)
 c if LGIBBS=.TRUE.. 
 c    then a Gibbs-ensemble simulation is performed
 c    (implies cubic simulation boxes)
-      parameter (lgibbs = .true.)
+      parameter (lgibbs = .false.)
 c if LGRAND=.TRUE. 
 c    then simulation is performed in the grand-canonical ensemble
       parameter (lgrand = .false.)
@@ -98,7 +98,7 @@ c with a value of rcmu as calculated in ctrmas
       parameter (lcutcm = .true.)
 c if LEWALD=.TRUE. then ewald-sum will be used to calculate the
 c electrostatic interactions.
-      parameter (lewald = .false.)
+      parameter (lewald = .true.)
 c if LDIELECT=.TRUE. then dielectric constant will be calculated and
 c LEWALD must be .TRUE.
 c Correct only in NVT ensemble
@@ -157,9 +157,9 @@ c ***************************************
 c ** DIMENSIONS FOR ARRAYS             **
 c ***************************************
 c - nmax = maximum number of chains +2
-      parameter (nmax = 2512)
+      parameter (nmax = 1512)
 c - numax = maximum number of units
-      parameter (numax = 26)
+      parameter (numax = 50)
 c - ntmax = maximum number of types of chains
       parameter (ntmax = 3)
 c - smax = max no. of mstates
