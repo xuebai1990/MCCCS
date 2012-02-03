@@ -89,12 +89,20 @@ c - variables added for GCMC histogram reweighting
      &  ,pscb1,pscb2,ratvol,avv,temacd,temspd,dblock,dbl1
      &  ,sterr,stdev,errme,qelect
       double precision bsswap,bnswap,ostwald,stdost,dummy,debroglie
-     &  ,bnswap_in,bnswap_out
+     &  ,bnswap_in,bnswap_out, acvkjmol(nener,nbxmax)
 
       double precision, dimension(nprop1,nbxmax,nbxmax)::acsolpar
  
-      double precision, dimension(nbxmax)::acEnthalpy,acEnthalpy1  
+      double precision, dimension(nbxmax)::acEnthalpy,acEnthalpy1
 
+      double precision :: enthalpy,enthalpy2,sigma2Hsimulation
+      double precision :: inst_enth, inst_enth2, tmp,sigma2H,Cp
+
+      double precision :: ennergy,ennergy2,sigma2Esimulation
+      double precision :: inst_energy, inst_energy2, sigma2E,Cv
+
+      
+  
       double precision binvir,binvir2,inside,bvirial
       double precision enchg1,enthchg1,srand
       double precision enchg2,enthchg2
@@ -174,15 +182,15 @@ C -------------------------------------------------------------------
 
       liswatch = .false.
 
+      call readdat(lucall,ucheck,nvirial,starvir
+     &     ,stepvir,qelect)
+
 c kea don't stop for lgaro
       if (lchgall .and. (.not. lewald).and.(.not.lgaro)) then
-         write(2,*) 'lchgall is true and lewald is false.',
+         write(iou,*) 'lchgall is true and lewald is false.',
      &        ' Not checked for accuracy!'
          stop
       endif
-
-      call readdat(lucall,ucheck,nvirial,starvir
-     &     ,stepvir,qelect)
 
       vname(1)  = ' Total energy'
       vname(2)  = ' Inter LJ    '
@@ -288,6 +296,7 @@ c *** zero accumulators ***
          do j=1,nener
             acv(j,i) = 0.0d0
             acvsq(j,i) = 0.0d0
+            acvkjmol(j,i) = 0.0d0
 	 enddo
          aflv(i) = 0.0d0
          do j = 1, nmolty
@@ -300,6 +309,19 @@ c *** zero accumulators ***
             avsolbend(i,j) = 0.0d0
             avsoltor(i,j) = 0.0d0
             avsolelc(i,j) = 0.0d0
+
+            acntrax(i,j) = 0.d0
+            acntray(i,j) = 0.d0
+            acntraz(i,j) = 0.d0
+            acnrotx(i,j) = 0.d0
+            acnroty(i,j) = 0.d0
+            acnrotz(i,j) = 0.d0
+            acstrax(i,j) = 0.d0
+            acstray(i,j) = 0.d0
+            acstraz(i,j) = 0.d0
+            acsrotx(i,j) = 0.d0
+            acsroty(i,j) = 0.d0
+            acsrotz(i,j) = 0.d0
             
          enddo
          acpres(i) = 0.0d0
@@ -307,6 +329,11 @@ c *** zero accumulators ***
          acEnthalpy(i) = 0.0d0
          acEnthalpy1(i) = 0.0d0
       enddo
+
+      inst_enth = 0.0d0
+      inst_enth2 = 0.0d0
+      inst_energy = 0.0d0
+      inst_energy2 = 0.0d0     
 
       acnp = 0.0d0
       do ibox = 1, nbox
@@ -480,7 +507,7 @@ c --- accumulators for block averages ---
 C -----------------------------------------------------------------
 
       if (lneighbor) then
-         do i = 1,100
+         do i = 1,maxneigh
             do ii = 1,nmax
                neighbor(i,ii) = 0
             enddo
@@ -507,26 +534,26 @@ ckea
           v3garob(ibox) = v3garo
 
           if( ovrlap ) then
-             write(2,*) ' overlap in initial configuration '
+             write(iou,*) ' overlap in initial configuration '
              stop
           endif
 	  vstart(ibox) = vbox(ibox)
-          write(2,*)
-          write(2,*) 'box  ',ibox,' initial v   = ', vbox(ibox)
+          write(iou,*)
+          write(iou,*) 'box  ',ibox,' initial v   = ', vbox(ibox)
 	  if ( lneigh ) then
 c ***        call for initial set-up of the near-neighbour bitmap ***
              call setnn (ibox)
 	   endif
 c *** calculate initial pressure ***
          call pressure ( press1, surf, ibox )
-         write(2,74) ibox, surf
-         write(2,64) ibox, press1
+         write(iou,74) ibox, surf
+         write(iou,64) ibox, press1
       enddo
 
-      write(2,*)
-      write(2,*) '+++++ start of markov chain +++++'
-      write(2,*)
-      write(2,*) 
+      write(iou,*)
+      write(iou,*) '+++++ start of markov chain +++++'
+      write(iou,*)
+      write(iou,*) 
      & 'Cycle   Total   Energy    Boxlength   Pressure  Molecules'
 c     set up info at beginning of fort.12 for analysis
       write(12,*) nstep,nmolty,(masst(i),i=1,nmolty)
@@ -544,7 +571,7 @@ c *******************************************************************
 
             tmcc = nnstep + nnn - 1
 
-c           write(2,*) 'nstep',(nnn-1)*nchain+ii
+c           write(iou,*) 'nstep',(nnn-1)*nchain+ii
 c ***       select a move-type at random ***
             rm = random()
 
@@ -637,9 +664,9 @@ c ***       accumulate averages ***
                         acnbox2(ibox,itype,itype2) = 
      &                       acnbox2(ibox,itype,itype2) +
      &                       dble(ncmt2(ibox,itype,itype2))
-c                        write(2,*) '1:',acnbox2(ibox,itype,itype2)
+c                        write(iou,*) '1:',acnbox2(ibox,itype,itype2)
                      enddo
-c                     write(2,*) '2:', acnbox(ibox,itype)
+c                     write(iou,*) '2:', acnbox(ibox,itype)
                   endif
                enddo
 
@@ -667,6 +694,7 @@ c KEA added 17 for v3garo
                acv(17,ibox)    = acv(17,ibox) + v3garob(ibox)
                acvsq(17,ibox)  = acvsq(17,ibox) + v3garob(ibox)**2
 
+c leftover from Bin, not currently used
                 if ( ldielect ) then
                   acv(11,ibox) = acv(11,ibox)+dipolex(ibox)
                   acvsq(11,ibox) = acvsq(11,ibox)+dipolex(ibox)**2
@@ -690,6 +718,34 @@ c KEA added 17 for v3garo
                      temvol = boxlx(ibox)*boxly(ibox)
                   endif
                endif
+
+c KMB/KEA Energy in kJ/mol
+               Temp_nmol = 0
+               do itype=1,nmolty
+                  Temp_nmol =   Temp_nmol + ncmt(ibox,itype)
+               enddo
+               Temp_Energy  = (vbox(ibox)/Temp_nmol)*0.00831451d0 ! kJ/mol
+               acvkjmol(1,ibox) = acvkjmol(1,ibox) + Temp_Energy
+               Temp_Energy  = (vinterb(ibox)/Temp_nmol)*0.00831451d0 ! kJ/mol
+               acvkjmol(2,ibox) = acvkjmol(2,ibox) + Temp_Energy
+               Temp_Energy  = (vbendb(ibox)/Temp_nmol)*0.00831451d0 ! kJ/mol
+               acvkjmol(3,ibox) = acvkjmol(3,ibox) + Temp_Energy
+               Temp_Energy  = (vtgb(ibox)/Temp_nmol)*0.00831451d0 ! kJ/mol
+               acvkjmol(4,ibox) = acvkjmol(4,ibox) + Temp_Energy
+               Temp_Energy  = (vintrab(ibox)/Temp_nmol)*0.00831451d0 ! kJ/mol
+               acvkjmol(5,ibox) = acvkjmol(5,ibox) + Temp_Energy
+               Temp_Energy  = (vextb(ibox)/Temp_nmol)*0.00831451d0 ! kJ/mol
+               acvkjmol(6,ibox) = acvkjmol(6,ibox) + Temp_Energy
+               Temp_Energy  = (vvibb(ibox)/Temp_nmol)*0.00831451d0 ! kJ/mol
+               acvkjmol(7,ibox) = acvkjmol(7,ibox) + Temp_Energy
+               Temp_Energy  = (velectb(ibox)/Temp_nmol)*0.00831451d0 ! kJ/mol
+               acvkjmol(8,ibox) = acvkjmol(8,ibox) + Temp_Energy
+               Temp_Energy  = (vtailb(ibox)/Temp_nmol)*0.00831451d0 ! kJ/mol
+               acvkjmol(9,ibox) = acvkjmol(9,ibox) + Temp_Energy
+               Temp_Energy  = (vflucqb(ibox)/Temp_nmol)*0.00831451d0 ! kJ/mol
+               acvkjmol(10,ibox) = acvkjmol(10,ibox) + Temp_Energy
+               Temp_Energy  = (v3garob(ibox)/Temp_nmol)*0.00831451d0 ! kJ/mol
+               acvkjmol(17,ibox) = acvkjmol(17,ibox) + Temp_Energy
 
                if ( lnpt ) then
 c                  acv(16,ibox) = acv(16,ibox) + vbox(ibox)*boxlx(ibox)
@@ -735,6 +791,24 @@ c     &                 *boxly(ibox)*boxlz(ibox)
 c *************************************************************
 c ** ends loop over chains                                   **
 c *************************************************************
+
+        If  ( lnpt.and..not.lgibbs ) then
+            ibox = 1
+            tmp= vbox(ibox) + express(ibox) * ( boxlx(ibox)*boxly(ibox)
+     +        * boxlz(ibox))
+!         write(49,*) nnn, tmp
+         inst_enth=inst_enth+ tmp
+         inst_enth2=inst_enth2+(tmp*tmp)
+         endif
+
+         If  (.not. lnpt .and..not.lgibbs ) then
+            ibox = 1
+            tmp= vbox(ibox) 
+!         write(49,*) nnn, tmp
+         inst_energy=inst_energy + tmp
+         inst_energy2=inst_energy2+ (tmp*tmp)
+         endif
+
 
 c - collect histogram data (added 8/30/99)
             if(lgrand) then
@@ -853,7 +927,7 @@ c *** calculate pressure ***
             acnp = acnp + 1.0d0
             do ibox = 1, nbox
                call pressure ( press1, surf, ibox )
-c              write(2,*) 'control pressure', press1
+c              write(iou,*) 'control pressure', press1
                pres(ibox) = press1
                acpres(ibox) = acpres(ibox) + press1
                acsurf(ibox) = acsurf(ibox) + surf
@@ -1005,6 +1079,7 @@ c            endif
      &       ,lprint,lmv,lrsave,lblock,lratfix,lsolute,acsolpar,
      &        acEnthalpy,acEnthalpy1)
          endif
+c     not currently used
          if ( ldielect .and. (mod(nnn,idiele) .eq. 0)) then
             dielect = acvsq(14,ibox)/acmove
 
@@ -1034,10 +1109,10 @@ c *** output the fluctuation information
             endif
          endif
          
+c - set idiele = 1 to print every cycle
          if ( ldielect .and. mod(nnn,idiele) .eq. 0 ) then
             do ibox = 1,nbox
-                write(17,'(2I8,3f16.8)') nnn,ibox,dipolex(ibox),
-     &        dipoley(ibox),dipolez(ibox)
+                write(27,*) dipolex(ibox),dipoley(ibox),dipolez(ibox)
             enddo
          endif
 
@@ -1054,6 +1129,34 @@ c                  profile(bin) = profile(bin)+1.0d0/temvol
 c               endif
 c            endif
 c         enddo
+
+c--Residual Heat capacity ---
+        if(mod(nnn,iheatcapacity) .eq. 0) then
+
+          if(lnpt.and..not.lgibbs) then
+          enthalpy= inst_enth/(dble(nchain*nnn))
+          enthalpy2= inst_enth2/(dble(nchain*nnn))
+          sigma2Hsimulation=(enthalpy2)-(enthalpy*enthalpy)
+          sigma2H=sigma2Hsimulation*(6.022d23)*((1.38066d-23)**2) /
+     &      (dble(nchain))!(J2/mol)
+         Cp=sigma2H/((1.38066d-23)*(temp**2))
+          write(56,'(I12,F18.6,F18.2,F18.6)')nnn,Cp,enthalpy2,
+     &      enthalpy
+          
+       
+          elseif( .not.lnpt .and..not.lgibbs) then
+          ennergy= inst_energy/(dble(nchain*nnn))
+          ennergy2= inst_energy2/(dble(nchain*nnn))
+          sigma2Esimulation=(ennergy2)-(ennergy*ennergy)
+          sigma2E=sigma2Esimulation*(6.022d23)*((1.38066d-23)**2) /
+     &      (dble(nchain))!(J2/mol)
+         Cv=sigma2E/((1.38066d-23)*(temp**2))
+          write(55,'(I12,F18.6,F18.2,F18.6)')nnn,Cv,ennergy2,
+     &      ennergy
+          endif
+       endif
+
+
 
 100   continue
 
@@ -1104,29 +1207,107 @@ c *******************************************************************
       if (lneighbor) then
          write(21,*) 'ii:',ii,(neigh_cnt(i),i=1,nchain)
       endif
-      write(2,*)
-      write(2,*) '+++++ end of markov chain +++++'
+      write(iou,*)
+      write(iou,*) '+++++ end of markov chain +++++'
  
+c *** write some information about translations and rotations
+      write(iou,*)
+      write(iou,*) '### Translations ###'
+      write(iou,*)
+      do ibox = 1,nbox
+         do i=1,nmolty
+            write(iou,*) 'molecule typ =',i,' in box',ibox
+            acntrax(i,ibox) = acntrax(i,ibox) + bntrax(i,ibox)
+            acstrax(i,ibox) = acstrax(i,ibox) + bstrax(i,ibox)
+            if ( acntrax(i,ibox) .ne. 0.0d0 ) then
+               ratvol = acstrax(i,ibox) / acntrax(i,ibox)
+            else
+               ratvol = 0.0d0
+            endif
+            write(iou,71) acntrax(i,ibox),ratvol,rmtrax(i,ibox)
+
+            acntray(i,ibox) = acntray(i,ibox) + bntray(i,ibox)
+            acstray(i,ibox) = acstray(i,ibox) + bstray(i,ibox)
+            if ( acntray(i,ibox) .ne. 0.0d0 ) then
+               ratvol = acstray(i,ibox) / acntray(i,ibox)
+            else
+               ratvol = 0.0d0
+            endif
+            write(iou,72) acntray(i,ibox),ratvol,rmtray(i,ibox)
+
+            acntraz(i,ibox) = acntraz(i,ibox) + bntraz(i,ibox)
+            acstraz(i,ibox) = acstraz(i,ibox) + bstraz(i,ibox)
+            if ( acntraz(i,ibox) .ne. 0.0d0 ) then
+               ratvol = acstraz(i,ibox) / acntraz(i,ibox)
+            else
+               ratvol = 0.0d0
+            endif
+            write(iou,73) acntraz(i,ibox),ratvol,rmtraz(i,ibox)
+            write(iou,*)
+
+         enddo
+      enddo
+
+      write(iou,*) '### Rotations ###'
+      write(iou,*)
+      do ibox = 1,nbox
+         do i=1,nmolty
+            write(iou,*) 'molecule typ =',i,' in box',ibox
+            acnrotx(i,ibox) = acnrotx(i,ibox) + bnrotx(i,ibox)
+            acsrotx(i,ibox) = acsrotx(i,ibox) + bsrotx(i,ibox)
+            if ( acnrotx(i,ibox) .ne. 0.0d0 ) then
+               ratvol = acsrotx(i,ibox) / acnrotx(i,ibox)
+            else
+               ratvol = 0.0d0
+            endif
+            write(iou,71) acnrotx(i,ibox),ratvol,rmrotx(i,ibox)
+
+            acnroty(i,ibox) = acnroty(i,ibox) + bnroty(i,ibox)
+            acsroty(i,ibox) = acsroty(i,ibox) + bsroty(i,ibox)
+            if ( acnroty(i,ibox) .ne. 0.0d0 ) then
+               ratvol = acsroty(i,ibox) / acnroty(i,ibox)
+            else
+               ratvol = 0.0d0
+            endif
+            write(iou,72) acnroty(i,ibox),ratvol,rmroty(i,ibox)
+
+            acnrotz(i,ibox) = acnrotz(i,ibox) + bnrotz(i,ibox)
+            acsrotz(i,ibox) = acsrotz(i,ibox) + bsrotz(i,ibox)
+            if ( acnrotz(i,ibox) .ne. 0.0d0 ) then
+               ratvol = acsrotz(i,ibox) / acnrotz(i,ibox)
+            else
+               ratvol = 0.0d0
+            endif
+            write(iou,73) acnrotz(i,ibox),ratvol,rmrotz(i,ibox)
+            write(iou,*)
+         enddo
+      enddo
+ 71   format(' x-dir: attempts =',F10.1,'   ratio =',f6.3,
+     +      '   max.displ. =',e10.4)
+ 72   format(' y-dir: attempts =',F10.1,'   ratio =',f6.3,
+     +      '   max.displ. =',e10.4)
+ 73   format(' z-dir: attempts =',F10.1,'   ratio =',f6.3,
+     +      '   max.displ. =',e10.4)
 c *** write some information about config performance ***
       if ( pmcb .gt. 0.0d0 ) then
-         write(2,*)
-         write(2,*) '### Configurational-bias ###'
-         write(2,*)
+         write(iou,*)
+         write(iou,*) '### Configurational-bias ###'
+         write(iou,*)
          do i = 1, nmolty
-            write(2,*) 'molecule typ =',i
-            write(2,*) '    length  attempts  succ.growth  accepted   ',
-     +           '%su.gr.    %accep.'
+            write(iou,*) 'molecule typ =',i
+            write(iou,*) '    length  attempts  succ.growth  accepted'
+     +           ,'   %su.gr.    %accep.'
             do inb = 1, nunit(i)
                if ( bncb(i,inb) .gt. 0.0d0 ) then
                   pscb1 = bscb(i,1,inb) * 100.0d0 / bncb(i,inb)
                   pscb2 = bscb(i,2,inb) * 100.0d0 / bncb(i,inb)
-                  write(2,'(i9,3f10.1,2f10.2)') inb, bncb(i,inb),
+                  write(iou,'(i9,3f10.1,2f10.2)') inb, bncb(i,inb),
      +                 bscb(i,1,inb), bscb(i,2,inb), pscb1, pscb2
                endif
             enddo
             if (pmfix(i).gt.0.0d0) then
-               write(2,*) ' SAFE-CBMC move '
-               write(2,*) '    length  attempts  succ.growth  ',
+               write(iou,*) ' SAFE-CBMC move '
+               write(iou,*) '    length  attempts  succ.growth  ',
      +              'accepted   %su.gr.    %accep.'               
                do inb = 1, nunit(i)
                   if (fbncb(i,inb) .gt. 0.0d0 ) then
@@ -1134,29 +1315,29 @@ c *** write some information about config performance ***
      +                    / fbncb(i,inb)
                      pscb2 = fbscb(i,2,inb) * 100.0d0 
      +                    / fbncb(i,inb)
-                     write(2,'(i9,3f10.1,2f10.2)') inb, fbncb(i,inb),
+                     write(iou,'(i9,3f10.1,2f10.2)') inb, fbncb(i,inb),
      +                    fbscb(i,1,inb), fbscb(i,2,inb)
      +                    , pscb1, pscb2
                   endif
                enddo
             endif
          enddo
-         write(2,*)
+         write(iou,*)
       endif
 c *** write some information about volume performance ***
       if ( lgibbs .or. lnpt) then
-         write(2,*)
-         write(2,*) '### Volume change       ###'
+         write(iou,*)
+         write(iou,*) '### Volume change       ###'
          do ibox = 1,nbox
             if (lsolid(ibox) .and. .not. lrect(ibox)) then
                do j = 1,9
                   acnhmat(ibox,j) = acnhmat(ibox,j) + bnhmat(ibox,j)
                   acshmat(ibox,j) = acshmat(ibox,j) + bshmat(ibox,j)
                   if ( acshmat(ibox,j) .gt. 0.5d0) then
-                     write(2,70) acnhmat(ibox,j),
+                     write(iou,70) acnhmat(ibox,j),
      &                    acshmat(ibox,j)/acnhmat(ibox,j),rmhmat(ibox,j)
                   else
-                     write(2,70) acnhmat(ibox,j),0.0d0,rmhmat(ibox,j)
+                     write(iou,70) acnhmat(ibox,j),0.0d0,rmhmat(ibox,j)
                   endif
                enddo
             else
@@ -1167,15 +1348,15 @@ c *** write some information about volume performance ***
                else
                   ratvol = 0.0d0
                endif
-               write(2,61) acnvol(ibox),ratvol,rmvol(ibox)
+               write(iou,61) acnvol(ibox),ratvol,rmvol(ibox)
             endif
          enddo
       endif
-      write(2,*)  
-      write(2,*) '### Molecule swap       ###'
-      write(2,*)
+      write(iou,*)  
+      write(iou,*) '### Molecule swap       ###'
+      write(iou,*)
       do i = 1, nmolty
-         write(2,*) 'molecule typ =',i
+         write(iou,*) 'molecule typ =',i
          do j=1,nswapb(i)
             if ( box1(i,j) .eq. box2(i,j) ) then
                jbox_max = 1
@@ -1185,7 +1366,7 @@ c *** write some information about volume performance ***
             do jbox = 1,jbox_max
                if ( jbox .eq. 1 ) ibox = box1(i,j)
                if ( jbox .eq. 2 ) ibox = box2(i,j)
-               write(2,66) box1(i,j),box2(i,j),ibox,
+               write(iou,66) box1(i,j),box2(i,j),ibox,
      &              bsswap(i,j,ibox),bnswap(i,j,ibox),
      &              bnswap(i,j,ibox+nbox)
                if (bnswap(i,j,ibox) .gt. 0.5d0) then
@@ -1193,53 +1374,53 @@ c *** write some information about volume performance ***
      &                 100.0d0/bsswap(i,j,ibox)
                   bnswap(i,j,ibox) = bnswap(i,j,ibox+nbox)*
      &                 100.0d0/bnswap(i,j,ibox)
-                  write(2,63) bsswap(i,j,ibox),bnswap(i,j,ibox)
+                  write(iou,63) bsswap(i,j,ibox),bnswap(i,j,ibox)
                endif
             enddo
          enddo
-         write(2,68) bnswap_in(i,1), bnswap_in(i,2)
-         write(2,69) bnswap_out(i,1), bnswap_out(i,2)
+         write(iou,68) bnswap_in(i,1), bnswap_in(i,2)
+         write(iou,69) bnswap_out(i,1), bnswap_out(i,2)
       enddo
 
-      write(2,*)
-      write(2,*) '### Molecule swatch     ###'
-      write(2,*)
+      write(iou,*)
+      write(iou,*) '### Molecule swatch     ###'
+      write(iou,*)
       do i = 1, nswaty
-         write(2,*) 'pair typ =',i
-         write(2,*) 'moltyps = ',nswatb(i,1),' and',nswatb(i,2)
+         write(iou,*) 'pair typ =',i
+         write(iou,*) 'moltyps = ',nswatb(i,1),' and',nswatb(i,2)
          do j = 1, nswtcb(i)
-            write(2,62) box3(i,j),box4(i,j),
+            write(iou,62) box3(i,j),box4(i,j),
      &           bnswat(i,j),bsswat(i,j)
             if (bnswat(i,j) .gt. 0.5d0 ) then
-               write(2,65) 100.0d0 * bsswat(i,j)/bnswat(i,j)
+               write(iou,65) 100.0d0 * bsswat(i,j)/bnswat(i,j)
             endif
          enddo
       enddo
 
-      write(2,*)
-      write(2,*)    '### Charge Fluctuation  ###'
-      write(2,*)
+      write(iou,*)
+      write(iou,*)    '### Charge Fluctuation  ###'
+      write(iou,*)
       
       do i = 1, nmolty
          do j = 1,nbox
             bnflcq2(i,j) = bnflcq2(i,j) + bnflcq(i,j) 
             bsflcq2(i,j) = bsflcq2(i,j) + bsflcq(i,j) 
             if (bnflcq2(i,j) .gt. 0.5d0) then
-               write(2,*) 'molecule typ =',i,'  box =',j
+               write(iou,*) 'molecule typ =',i,'  box =',j
                bsflcq2(i,j) = bsflcq2(i,j)/bnflcq2(i,j)
-               write(2,61) bnflcq2(i,j),bsflcq2(i,j),rmflcq(i,j)
+               write(iou,61) bnflcq2(i,j),bsflcq2(i,j),rmflcq(i,j)
             endif
          enddo
       enddo
 
-      write(2,*) 
-      write(2,*)    '### Expanded Ensemble Move  ###'
-      write(2,*) 
+      write(iou,*) 
+      write(iou,*)    '### Expanded Ensemble Move  ###'
+      write(iou,*) 
       do i = 1, nmolty
          do j = 1,nbox
             if (lexpand(i) .and. bnexpc(i,j) .gt. 0.5) then
-               write(2,*) 'molecule typ =',i,'  box =',j
-               write(2,67) bnexpc(i,j),bsexpc(i,j),
+               write(iou,*) 'molecule typ =',i,'  box =',j
+               write(iou,67) bnexpc(i,j),bsexpc(i,j),
      &              bsexpc(i,j)/bnexpc(i,j)
             endif
          enddo
@@ -1282,48 +1463,48 @@ c *** store old dipole moment
 c---need to check
 
          if ( abs(v - vbox(ibox)) .gt. 0.0001) then
-            write(2,*) '### problem with energy ###  box ',ibox
-	    write(2,*) ' Total energy: ',v,vbox(ibox),v-vbox(ibox)
+            write(iou,*) '### problem with energy ###  box ',ibox
+	    write(iou,*) ' Total energy: ',v,vbox(ibox),v-vbox(ibox)
 	 endif
          if ( abs(vinter - vinterb(ibox)) .gt. 0.000001) then
-             write(2,*) '### problem  ###'
-	     write(2,*) ' Inter mol.en.: ',vinter,vinterb(ibox)
+             write(iou,*) '### problem  ###'
+	     write(iou,*) ' Inter mol.en.: ',vinter,vinterb(ibox)
              if (lsolid(ibox) .and. .not. lrect(ibox)) then
-                write(2,*) 'You might check the cutoff wrt box widths'
-                write(2,*) 'Normal PBC might be failing'
+                write(iou,*) 'You might check the cutoff wrt box widths'
+                write(iou,*) 'Normal PBC might be failing'
              endif
 	 endif
          if ( abs(vtail - vtailb(ibox)) .gt. 0.000001) then
-             write(2,*) '### problem  ###'
-	     write(2,*) ' Tail corr.en.: ',vtail,vtailb(ibox)
+             write(iou,*) '### problem  ###'
+	     write(iou,*) ' Tail corr.en.: ',vtail,vtailb(ibox)
 	 endif
          if ( abs(vintra - vintrab(ibox)) .gt. 0.000001) then
-             write(2,*) '### problem  ###'
-	     write(2,*) ' Intra mol.en.: ',vintra,vintrab(ibox)
+             write(iou,*) '### problem  ###'
+	     write(iou,*) ' Intra mol.en.: ',vintra,vintrab(ibox)
 	 endif
          if ( abs(vvib - vvibb(ibox)) .gt. 0.001) then
-             write(2,*) '### problem  ###'
-	     write(2,*) ' bond vib. en.: ',vvib,vvibb(ibox)
+             write(iou,*) '### problem  ###'
+	     write(iou,*) ' bond vib. en.: ',vvib,vvibb(ibox)
 	 endif
          if ( abs(vbend - vbendb(ibox)) .gt. 0.001) then
-             write(2,*) '### problem  ###'
-	     write(2,*) ' Bond ben.en.: ',vbend,vbendb(ibox)
+             write(iou,*) '### problem  ###'
+	     write(iou,*) ' Bond ben.en.: ',vbend,vbendb(ibox)
 	 endif
          if ( abs(vtg - vtgb(ibox)) .gt. 0.001) then
-             write(2,*) '### problem  ###'
-	     write(2,*) ' Torsion.en.: ',vtg,vtgb(ibox)
+             write(iou,*) '### problem  ###'
+	     write(iou,*) ' Torsion.en.: ',vtg,vtgb(ibox)
 	 endif
          if ( abs(vext - vextb(ibox)) .gt. 0.0001) then
-             write(2,*) '### problem  ###'
-	     write(2,*) ' Externa.en.: ',vext,vextb(ibox)
+             write(iou,*) '### problem  ###'
+	     write(iou,*) ' Externa.en.: ',vext,vextb(ibox)
 	 endif
          if ( abs(velect - velectb(ibox)) .gt. 0.000001) then
-             write(2,*) '### problem  ###'
-	     write(2,*) ' Coulomb.en.: ',velect,velectb(ibox)
+             write(iou,*) '### problem  ###'
+	     write(iou,*) ' Coulomb.en.: ',velect,velectb(ibox)
 	 endif
          if ( abs(vflucq - vflucqb(ibox)) .gt. 0.0001) then
-             write(2,*) '### problem  ###'
-	     write(2,*) ' Fluc Q en.: ',vflucq,vflucqb(ibox)
+             write(iou,*) '### problem  ###'
+	     write(iou,*) ' Fluc Q en.: ',vflucq,vflucqb(ibox)
 	 endif
          if ( abs(v3garo - v3garob(ibox) ) .gt.0.001) then
             write(6,*) '### problem ###'
@@ -1331,22 +1512,22 @@ c---need to check
          endif
          if ( ldielect ) then
             if ( abs(dipolexo - dipolex(ibox)) .gt. 0.0001) then
-               write(2,*) '### problem  ###'
-               write(2,*) ' Dipole X: ',dipolexo,dipolex(ibox)
+               write(iou,*) '### problem  ###'
+               write(iou,*) ' Dipole X: ',dipolexo,dipolex(ibox)
             endif
          endif
          if (lmipsw) then
             if (abs(vwellipsw-vwellipswb(ibox)).gt.0.001) then
-                write(2,*) '### problem  ###'
-                write(2,*) ' well en.: ',vwellipsw,vwellipswb(ibox)
+                write(iou,*) '### problem  ###'
+                write(iou,*) ' well en.: ',vwellipsw,vwellipswb(ibox)
             endif
          endif
       enddo
-      write(2,*)
-      write(2,1501) (vstart(i) ,i=1,nbox)
-      write(2,1502) (vend(i)   ,i=1,nbox)
-      write(2,1504) (vbox(i)   ,i=1,nbox)
-      write(2,*)
+      write(iou,*)
+      write(iou,1501) (vstart(i) ,i=1,nbox)
+      write(iou,1502) (vend(i)   ,i=1,nbox)
+      write(iou,1504) (vbox(i)   ,i=1,nbox)
+      write(iou,*)
 
 c     ** normalize and write out presim results in fort.22 **
 
@@ -1450,17 +1631,17 @@ c ** write out the final configuration from the run ***
          do im=1, nbox
             write (8,*) (rmflcq(i,im),i=1,nmolty)
          enddo
-         if ( lgibbs .or. lgrand .or. lnpt ) then
-            write(8,*) (rmvol(ibox),ibox=1,nbox)
-            do ibox = 1,nbox
-               if (lsolid(ibox) .and. .not. lrect(ibox)) then
-                  write(8,*) (rmhmat(ibox,i),i=1,9)
-                  write(8,*) (hmat(ibox,i),i=1,9)
-               else
-                  write(8,*) boxlx(ibox),boxly(ibox),boxlz(ibox)
-               endif
-            enddo
-         endif
+c -- changed formatting so fort.77 same for all ensembles
+c -- 06/08/09 KM
+         write(8,*) (rmvol(ibox),ibox=1,nbox)
+         do ibox = 1,nbox
+            if (lsolid(ibox) .and. .not. lrect(ibox)) then
+               write(8,*) (rmhmat(ibox,i),i=1,9)
+               write(8,*) (hmat(ibox,i),i=1,9)
+            else
+               write(8,*) boxlx(ibox),boxly(ibox),boxlz(ibox)
+            endif
+         enddo
       endif
   
       if (L_add) then
@@ -1555,6 +1736,7 @@ c - energies
          do j=1,nener
             avv(j,ibox)   = acv(j,ibox) / acmove
             acvsq(j,ibox) = (acvsq(j,ibox)/acmove) - avv(j,ibox) ** 2
+            acvkjmol(j,ibox) = acvkjmol(j,ibox)/acmove
 	 enddo
          if ( ldielect ) then
             flucmom(ibox) = acvsq(14,ibox)-avv(15,ibox)*avv(15,ibox)
@@ -1678,39 +1860,39 @@ c              --- not counting the first inserted bead
          if (acvsq(1,ibox) .gt. 0.0d0) aflv(ibox) =dsqrt(acvsq(1,ibox))
       enddo
 
-      write(2,1215) ('       Box ',i,i=1,nbox) 
-      write(2,*)
-      write(2,1209) (acpres(i) ,i=1,nbox)
-      write(2,1212) ((acpres(i)*7.2429d-5),i=1,nbox)
-      write(2,1216) (acsurf(i) ,i=1,nbox)
+      write(iou,1215) ('       Box ',i,i=1,nbox) 
+      write(iou,*)
+      write(iou,1209) (acpres(i) ,i=1,nbox)
+      write(iou,1212) ((acpres(i)*7.2429d-5),i=1,nbox)
+      write(iou,1216) (acsurf(i) ,i=1,nbox)
       do itype = 1, nmolty
-         write(2,1210) itype, (acchem(i,itype) ,i=1,nbox)
+         write(iou,1210) itype, (acchem(i,itype) ,i=1,nbox)
       enddo
-      write(2,*)
+      write(iou,*)
 
       do i = 1,3
-         write(2,1202) (acboxl(ibox,i) ,ibox=1,nbox)
+         write(iou,1202) (acboxl(ibox,i) ,ibox=1,nbox)
       enddo
 
       do ibox = 1, nbox
          if ( lsolid(ibox) .and. .not. lrect(ibox) ) then
             do i = 1,3
-               write(2,1200) acboxa(ibox,i)*180.0d0/onepi
+               write(iou,1200) acboxa(ibox,i)*180.0d0/onepi
             enddo
          endif
       enddo
 
       do itype = 1, nmolty
-         write(2,1201) itype, (acnbox(i,itype) ,i=1,nbox)
+         write(iou,1201) itype, (acnbox(i,itype) ,i=1,nbox)
       enddo
       if ( lpbcz ) then
-         write(2,1204) (molvol(i) ,i=1,nbox)
-         write(2,1205) (speden(i) ,i=1,nbox)
+         write(iou,1204) (molvol(i) ,i=1,nbox)
+         write(iou,1205) (speden(i) ,i=1,nbox)
          do itype = 1, nmolty
-            write(2,1203) itype, (acdens(i,itype) ,i=1,nbox)
+            write(iou,1203) itype, (acdens(i,itype) ,i=1,nbox)
             if ( lexpand(itype) ) then
                do itype2 = 1, numcoeff(itype) 
-                  write(2,1503) itype, itype2,acdens(itype,itype)*
+                  write(iou,1503) itype, itype2,acdens(itype,itype)*
      &                 acnbox2(itype,itype,itype2)/(acnbox(itype,itype)
      &                 *acmove),acnbox2(itype,itype,itype2)/
      &                 (acnbox(itype,itype)*acmove)
@@ -1718,33 +1900,26 @@ c              --- not counting the first inserted bead
             endif
          enddo
       else
-         write(2,1214) (molvol(i), i=1,nbox)
+         write(iou,1214) (molvol(i), i=1,nbox)
          do itype = 1, nmolty
-            write(2,1213) itype, (acdens(i,itype), i=1,nbox)
+            write(iou,1213) itype, (acdens(i,itype), i=1,nbox)
          enddo
       endif
       do itype = 1, nmolty
-         write(2,1211) itype, (molfra(i,itype), i=1,nbox)
+         write(iou,1211) itype, (molfra(i,itype), i=1,nbox)
       enddo
       do itype = 1, nmolty
-         write(2,1208) itype, (asetel(i,itype) ,i=1,nbox)
+         write(iou,1208) itype, (asetel(i,itype) ,i=1,nbox)
       enddo
-      write(2,*)
+      write(iou,*)
       do j=1,10
 c *** only 1 to 10 is the energy information         
-         if ( lgibbs .and. .not. lnpt ) then
-            write(2,1206) vname(j),(avv(j,i), 
-c     +           0.00831451d0*avv(j,i)/acnbox(i,1),i=1,nbox)
-     +           0.00831451d0*avv(j,i),i=1,nbox)
-         else
-            write(2,1206) vname(j),(avv(j,i), 
-     +           0.008314510*avv(j,i),i=1,nbox)
-         endif
+         write(iou,1206) vname(j),avv(j,1:nbox),acvkjmol(j,1:nbox) 
       enddo
       
-      write(2,*)
-      write(2,1207) (aflv(i) ,i=1,nbox)
-      write(2,*)
+      write(iou,*)
+      write(iou,1207) (aflv(i) ,i=1,nbox)
+      write(iou,*)
 
 c ---   Output 2nd virial coefficient data
  2000 if (lvirial) then
@@ -1778,10 +1953,10 @@ c            write(47,*) starvir,bvirial
             starvir = starvir + stepvir
             bvirial = bvirial + 0.5d0*inside
             
-            write(2,*) 'At temperature of',virtemp(itemp)
-            write(2,*) 'bvirial ',
+            write(iou,*) 'At temperature of',virtemp(itemp)
+            write(iou,*) 'bvirial ',
      &           -(twopi*stepvir*bvirial),' [A^3 / molecule]'
-            write(2,*) 'bvirial ',-0.602d0*twopi*
+            write(iou,*) 'bvirial ',-0.602d0*twopi*
      &           stepvir*bvirial,' [cm^3 / mole]'
 
 c            if ( lvirial2 ) then
@@ -1794,9 +1969,9 @@ c            if ( lvirial2 ) then
                   starvir = starvir + stepvir
                enddo
                bvirial = -(twopi*stepvir*bvirial)
-               write(2,*) 'With quantum correction:'
-               write(2,*) 'bvirial ',bvirial,' [A^3 / molecule]'
-               write(2,*) 'bvirial ',0.602d0*bvirial,' [cm^3 / mole]' 
+               write(iou,*) 'With quantum correction:'
+               write(iou,*) 'bvirial ',bvirial,' [A^3 / molecule]'
+               write(iou,*) 'bvirial ',0.602d0*bvirial,' [cm^3 / mole]' 
 c            endif
          enddo
          
@@ -1804,20 +1979,20 @@ c            endif
 
 
 c - solute values
-      write(2,*) 'type  box     vinter      vintra      vtor',
+      write(iou,*) 'type  box     vinter      vintra      vtor',
      &     '        vbend       vtail'
             
       do itype = 1, nmolty
          do ibox = 1, nbox
             if (solcount(ibox,itype).gt.0) then
-               write(2,1372) itype,ibox,avsolinter(ibox,itype)
+               write(iou,1372) itype,ibox,avsolinter(ibox,itype)
      &              /solcount(ibox,itype),avsolintra(ibox,itype)
      &              /solcount(ibox,itype),avsoltor(ibox,itype)
      &              /solcount(ibox,itype),avsolbend(ibox,itype)
      &              /solcount(ibox,itype),avsolelc(ibox,itype)
      &              /solcount(ibox,itype)
             else
-               write(2,1372) itype,ibox,0.0,0.0,0.0,0.0,0.0
+               write(iou,1372) itype,ibox,0.0,0.0,0.0,0.0,0.0
             endif              
          enddo
       enddo
@@ -1834,8 +2009,6 @@ c -      global averages -
                else
                   aver(i,j) = accum(i,j) / naccu(i,j)
                  
-                  write(2,*) aver(i,j), accum(i,j) ,naccu(i,j) 
-
                endif
             enddo
          enddo
@@ -1886,23 +2059,23 @@ c -      global averages -
 c - write out the heat of vaporization and solubility parameters
          do ibox = 1,nbox-1
             do jbox = ibox+1,nbox 
-               write(2,1508) ibox,jbox,aver1(1,ibox,jbox),
+               write(iou,1508) ibox,jbox,aver1(1,ibox,jbox),
      &                 stdev1(1,ibox,jbox),errme1(1,ibox,jbox)
-               write(2,1509) ibox,jbox,aver1(2,ibox,jbox),
+               write(iou,1509) ibox,jbox,aver1(2,ibox,jbox),
      &                 stdev1(2,ibox,jbox),errme1(2,ibox,jbox)
-               write(2,1510) ibox,jbox,aver1(3,ibox,jbox),
+               write(iou,1510) ibox,jbox,aver1(3,ibox,jbox),
      &                 stdev1(3,ibox,jbox),errme1(3,ibox,jbox)
-               write(2,1511) ibox,jbox,aver1(4,ibox,jbox),
+               write(iou,1511) ibox,jbox,aver1(4,ibox,jbox),
      &                 stdev1(4,ibox,jbox),errme1(4,ibox,jbox)
-               write(2,1512) ibox,jbox,aver1(5,ibox,jbox),
+               write(iou,1512) ibox,jbox,aver1(5,ibox,jbox),
      &                 stdev1(5,ibox,jbox),errme1(5,ibox,jbox)
-               write(2,1513) ibox,jbox,aver1(6,ibox,jbox),
+               write(iou,1513) ibox,jbox,aver1(6,ibox,jbox),
      &                 stdev1(6,ibox,jbox),errme1(6,ibox,jbox)
-               write(2,1514) ibox,jbox,aver1(7,ibox,jbox),
+               write(iou,1514) ibox,jbox,aver1(7,ibox,jbox),
      &                 stdev1(7,ibox,jbox),errme1(7,ibox,jbox)
-               write(2,1515) ibox,jbox,aver1(8,ibox,jbox),
+               write(iou,1515) ibox,jbox,aver1(8,ibox,jbox),
      &                 stdev1(8,ibox,jbox),errme1(8,ibox,jbox)
-               write(2,1516) ibox,jbox,aver1(9,ibox,jbox),
+               write(iou,1516) ibox,jbox,aver1(9,ibox,jbox),
      &                 stdev1(9,ibox,jbox),errme1(9,ibox,jbox)
             enddo
          enddo
@@ -1910,62 +2083,92 @@ c - write out the heat of vaporization and solubility parameters
 
 c - specific density
          do ibox = 1, nbox
-            write(2,1331) ibox,aver(1,ibox),stdev(1,ibox),errme(1,ibox)
+            write(iou,1331) ibox,aver(1,ibox),stdev(1,ibox),
+     &           errme(1,ibox)
          enddo
 
 c * system volume
          itel = 4 + nener + 4*nmolty
          do ibox = 1, nbox
-            write(2,1343) ibox,
+            write(iou,1343) ibox,
      &           aver(itel,ibox),stdev(itel,ibox),errme(itel,ibox)
          enddo
 
 c - pressure
          do ibox = 1, nbox
-            write(2,1341) ibox,aver(2,ibox),stdev(2,ibox),errme(2,ibox)
+            write(iou,1341) ibox,aver(2,ibox),stdev(2,ibox),
+     &           errme(2,ibox)
          enddo
 
 c - surface tension
          itel = 2+nener+ 4*nmolty+1
          do ibox = 1, nbox
-            write(2,1342) ibox,
+            write(iou,1342) ibox,
      &           aver(itel,ibox),stdev(itel,ibox),errme(itel,ibox)
          enddo
 
-         write(2,*)
+         write(iou,*) 
 c - energies
+c         write(iou,*) 'average value', 'STD', 'SEM'
          do ibox = 1, nbox
            do j=3,2+10
 c *** only 1 to 10 is the energy information
-	      write(2,1311) vname(j-2),ibox,aver(j,ibox),
+	      write(iou,1311) vname(j-2),ibox,aver(j,ibox),
      +              stdev(j,ibox),errme(j,ibox)
            enddo
         enddo
       
-        write(2,*)
+        write(iou,*)
 
 c-- Enthalpy
         do ibox = 1,nbox
           j = 4+nener +4*nmolty + 1
-          write(2, 1517) enth, ibox, aver(j,ibox),
+          write(iou, 1517) enth, ibox, aver(j,ibox),
      +          stdev(j,ibox),errme(j,ibox)
           j = 4+nener + 4*nmolty + 2
-          write(2,1517) enth1,ibox,aver(j,ibox),
+          write(iou,1517) enth1,ibox,aver(j,ibox),
      +          stdev(j,ibox),errme(j,ibox)
         enddo 
-        write(2,*)
+        write(iou,*)
+
+c--Residual Heat capacity --- 
+
+        if(lnpt.and..not.lgibbs) then
+        inst_enth= inst_enth/(dble(nchain*nstep))
+        inst_enth2= inst_enth2/(dble(nchain*nstep))
+        sigma2Hsimulation=((inst_enth2)- (inst_enth*inst_enth))
+        sigma2H=sigma2Hsimulation*(6.022d23)*((1.38066d-23)**2) /
+     &      (dble(nchain))!(J2/mol) 
+        Cp=sigma2H/((1.38066d-23)*(temp**2))
+        write(iou,*) 'Cp residual(J/Kmol) =', Cp 
+        write(iou,*) ' H2=', inst_enth2
+        write(iou,*)  ' H=', inst_enth
+        endif
+
+        if( .not. lnpt .and..not.lgibbs) then
+        inst_energy= inst_energy/(dble(nchain*nstep))
+        inst_energy2= inst_energy2/(dble(nchain*nstep))
+        sigma2Esimulation=((inst_energy2)- (inst_energy*inst_energy))
+        sigma2E=sigma2Esimulation*(6.022d23)*((1.38066d-23)**2) /
+     &      (dble(nchain))!(J2/mol) 
+        Cv=sigma2E/((1.38066d-23)*(temp**2))
+        write(iou,*) 'Cv residual(J/Kmol) =', Cv
+        write(iou,*) ' E2=', inst_energy2
+        write(iou,*) ' E=', inst_energy
+        endif
+
 
 c - chemical potential
         do itype = 1, nmolty
            itel = (2+nener) + itype
            do ibox = 1, nbox
               if ( aver(itel,ibox) .ne. 0.0d0 ) then
-                 write(2,1351) itype,ibox,
+                 write(iou,1351) itype,ibox,
      +                ((-1.0d0)/beta)*dlog(aver(itel,ibox)),
      +                (1.0d0/beta)*stdev(itel,ibox)/aver(itel,ibox),
      +                (1.0d0/beta)*errme(itel,ibox)/aver(itel,ibox)
               else
-                 write(2,1351) itype,ibox,0.0d0,0.0d0,0.0d0
+                 write(iou,1351) itype,ibox,0.0d0,0.0d0,0.0d0
               endif
            enddo
         enddo
@@ -1974,7 +2177,7 @@ c - square end-to-end length
         do itype = 1, nmolty
            itel = (2+nener) + nmolty + itype
            do ibox = 1, nbox
-              write(2,1321) itype,ibox,aver(itel,ibox)
+              write(iou,1321) itype,ibox,aver(itel,ibox)
      &         ,stdev(itel,ibox),errme(itel,ibox)
            enddo
         enddo
@@ -1984,10 +2187,10 @@ c - number density
            itel = (2+nener) + 2 * nmolty + itype
            do ibox = 1, nbox
               if ( lpbcz ) then
-                 write(2,1361) itype,ibox,1.0d3*aver(itel,ibox)
+                 write(iou,1361) itype,ibox,1.0d3*aver(itel,ibox)
      +                ,1.0d3*stdev(itel,ibox),1.0d3*errme(itel,ibox)
               else
-                 write(2,1361) itype,ibox,1.0d2*aver(itel,ibox)
+                 write(iou,1361) itype,ibox,1.0d2*aver(itel,ibox)
      +                ,1.0d2*stdev(itel,ibox),1.0d2*errme(itel,ibox)
               endif
               if ( lexpand(itype) .and. 
@@ -1995,7 +2198,7 @@ c - number density
                  do itype2 = 1, numcoeff(itype) 
                     molfrac = acnbox2(ibox,itype,itype2)
      &                   /(acmove*acnbox(ibox,itype))
-                    write(2,1366) itype,itype2,1.0d3*aver(itel,ibox)*
+                    write(iou,1366) itype,itype2,1.0d3*aver(itel,ibox)*
      &                   molfrac,molfrac
                  enddo
               endif
@@ -2006,8 +2209,8 @@ c - molfraction
         do itype = 1, nmolty
            itel = (2+nener) + 3 * nmolty + itype
            do ibox = 1, nbox
-              write(2,1371) itype,ibox,aver(itel,ibox),stdev(itel,ibox),
-     +             errme(itel,ibox)
+              write(iou,1371) itype,ibox,aver(itel,ibox),
+     +             stdev(itel,ibox),errme(itel,ibox)
            enddo
         enddo
 
@@ -2037,8 +2240,8 @@ c                    write(43,*) nunit(itype),
 c     &                   -(gconst*log(ostwald)) + (eta2(ig,itype) 
 c     &                   - eta2(il,itype)) / 120.27167
 c     &                   ,gconst*stdost/ostwald
-                    write(2,1506) itype,ig,il,ostwald,stdost
-                    write(2,1507) itype,ig,il,
+                    write(iou,1506) itype,ig,il,ostwald,stdost
+                    write(iou,1507) itype,ig,il,
      &                   -(gconst*log(ostwald)) + (eta2(ig,itype) 
      &                   - eta2(il,itype)) / 120.27167
      &                   ,gconst*stdost/ostwald
@@ -2047,27 +2250,25 @@ c     &                   ,gconst*stdost/ostwald
            enddo
         endif
 
-        write(2,*)
+        write(iou,*)
 
 c ---    write block averages  ---
-        write(2,*)
-        write(2,*) '-----block averages ------'
+        write(iou,*)
+        write(iou,*) '-----block averages ------'
         do ibox=1,nbox
-           write(2,1403) ibox
+           write(iou,1403) ibox
            do nbl = 1, nblock
-              if (lgibbs .or. lgrand .or. lnpt ) then
-                 write(2,1402) nbl,baver(3,ibox,nbl),baver(1,ibox,nbl),
-     &                baver(2,ibox,nbl),baver(3+nener+4*nmolty,ibox,nbl)
-     &                ,(baver(2+nener+3*nmolty+zz,ibox,nbl),zz=1,nmolty)
-              else
-                 write(2,1402) nbl,baver(3,ibox,nbl)
-              endif
+c -- changed so output the same for all ensembles
+c -- 06/08/09 KM
+              write(iou,1402) nbl,baver(3,ibox,nbl),baver(1,ibox,nbl)
+     &             ,baver(2,ibox,nbl),baver(3+nener+4*nmolty,ibox,nbl)
+     &             ,(baver(2+nener+3*nmolty+zz,ibox,nbl),zz=1,nmolty)
            enddo
            if (lmipsw) then
-              write(2,*) 'lambdais', lambdais
-              write(2,*) 'maginn interphase switch integrand'
+              write(iou,*) 'lambdais', lambdais
+              write(iou,*) 'maginn interphase switch integrand'
               do nbl = 1, nblock
-                 write(2,*) nbl,baver(nprop,ibox,nbl)
+                 write(iou,*) nbl,baver(nprop,ibox,nbl)
               enddo
            endif
         enddo
@@ -2078,10 +2279,10 @@ c ---    write block averages  ---
 
 c --- ee prob
       IF(lexpee) then                                
-         write(2,*)
-         write(2,*) 'probability of each mstate in ee'
+         write(iou,*)
+         write(iou,*) 'probability of each mstate in ee'
          do nnn = 1, fmstate
-            write(2,1601) nnn,ee_prob(nnn)
+            write(iou,1601) nnn,ee_prob(nnn)
          enddo
       endif
       if (L_movie_xyz) then
@@ -2108,7 +2309,7 @@ c --- ee prob
  1213 format(' number density of type     ',i4,' [chain/nm^2] =',3f12.6)
  1214 format(' area per chain                     [A^2/chain] =',3f12.4)
  1205 format(' specific density                    [g/cm^3] =',3f12.6)
- 1206 format(a15,'[K and (kJ/mol)] =',3(f14.2,f12.2))
+ 1206 format(a15,'[K per system and kJ/mol per chain] =',3(f14.2,f12.2))
  1207 format(' fluctuation in <vtot>                          =',3f12.2)
  1208 format(' mean sete length of type   ',i4,'        [A^2] =',3f12.3)
  1209 format(' pressure                               [kPa] =',3f12.2)

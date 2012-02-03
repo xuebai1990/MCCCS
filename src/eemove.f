@@ -79,11 +79,11 @@ c choose nstate, given mstate
          endif
       endif
 
-c	write(2,*) 'typ', mstate, ee_moltyp(mstate),eepointp,
+c	write(iou,*) 'typ', mstate, ee_moltyp(mstate),eepointp,
 c     &   box_state(mstate), ncmt(box_state(mstate),ee_moltyp(mstate))
 
       if (ncmt(box_state(mstate),ee_moltyp(mstate)).eq.0) then
-         write(2,*)'problem: mstate, but no molecule in mstate',mstate
+         write(iou,*)'problem: mstate, but no molecule in mstate',mstate
          stop
       endif
 
@@ -93,8 +93,8 @@ c --- is 'swap', other is usual ee
       wee_ratio = dexp(psi(nstate)-psi(mstate))*
      &      um_markov(nstate,mstate)/um_markov(mstate,nstate)
 
-c	write(2,*) 'mstate', mstate, ee_moltyp(mstate)
-c	write(2,*) 'nstate', nstate, ee_moltyp(nstate)
+c	write(iou,*) 'mstate', mstate, ee_moltyp(mstate)
+c	write(iou,*) 'nstate', nstate, ee_moltyp(nstate)
 
       if ((mstate.eq.sstate1.and.nstate.eq.sstate2).or.
      &    (mstate.eq.sstate2.and.nstate.eq.sstate1)) then
@@ -103,7 +103,7 @@ c	write(2,*) 'nstate', nstate, ee_moltyp(nstate)
          boxins1 = box_state(nstate)
 
          eeirem = parbox(eepointp,boxrem1,ee_moltyp(mstate))
-c	write(2,*) 'eeirem', eeirem, eepointp
+c	write(iou,*) 'eeirem', eeirem, eepointp
 
          call swap(dum,dum,dum,dum,dum,dum,dum,dum,dum)
 
@@ -115,7 +115,7 @@ c --- energy for the new state
 
          ibox = box_state(mstate)
          eeirem = parbox(eepointp,ibox,ee_moltyp(mstate))
-c	write(2,*) 'eeirem1', eeirem, eepointp
+c	write(iou,*) 'eeirem1', eeirem, eepointp
          imolty = ee_moltyp(nstate)
 
          iunit = nunit(imolty)
@@ -152,9 +152,9 @@ c --- energy for the old state
 c         call energy(eeirem,imolty,vold,vintrao,vintero,vexto,velecto
 c     &               ,vewaldo,1,ibox,1,iunit,.false.,ovrlap
 c     &               ,.false.,dum,.false.,.false.)
-c	write(2,*) vnew,vold
+c	write(iou,*) vnew,vold
          if (ovrlap) then
-            write(2,*) 'disaster ovrlap in old conf eemove'
+            write(iou,*) 'disaster ovrlap in old conf eemove'
             stop
          endif
 
@@ -185,14 +185,14 @@ c --- update new
 
          imolty1 = ee_moltyp(nstate)
          parbox(ncmt(ibox,imolty1)+1,ibox,imolty1) = eeirem
-c	write(2,*) 'update new', eepointp,ibox,imolty1,
+c	write(iou,*) 'update new', eepointp,ibox,imolty1,
 c     &          parbox(eepointp,ibox,imolty1),
 c     &          parbox(eepointp,ibox,imolty)
 
          parbox(eepointp,ibox,imolty) =
      &      parbox(ncmt(ibox,imolty),ibox,imolty)
 
-c	write(2,*) 'update new1', imolty,parbox(eepointp,ibox,imolty),
+c	write(iou,*) 'update new1', imolty,parbox(eepointp,ibox,imolty),
 c     &              ncmt(ibox,imolty)
 
          parbox(ncmt(ibox,imolty),ibox,imolty) = 0
@@ -206,7 +206,7 @@ c     &              ncmt(ibox,imolty)
          vextb(ibox) = vextb(ibox) + (vextn-vexto)
          vtailb(ibox) = vtailb(ibox) + (vtailn-vtailo)
          velectb(ibox) = velectb(ibox) + (velectn-velecto)
-c	write(2,*) vtailn,vtailo,vintern,vintero
+c	write(iou,*) vtailn,vtailo,vintern,vintero
 
 c --- update reciprocal space term
 
@@ -220,18 +220,18 @@ c	ovr = .true.
 
       temtyp(ee_moltyp(mstate)) = temtyp(ee_moltyp(mstate)) - 1
       temtyp(ee_moltyp(nstate)) = temtyp(ee_moltyp(nstate)) + 1
-c	write(2,*) 'ttym', mstate,ee_moltyp(mstate),
+c	write(iou,*) 'ttym', mstate,ee_moltyp(mstate),
 c     &               temtyp(ee_moltyp(mstate))
-c	write(2,*) 'ttyn', nstate,ee_moltyp(nstate),
+c	write(iou,*) 'ttyn', nstate,ee_moltyp(nstate),
 c     &               temtyp(ee_moltyp(nstate))
       mstate = nstate
 
-c	write(2,*) 'eemove eeirem', eeirem
+c	write(iou,*) 'eemove eeirem', eeirem
       moltyp(eeirem) = ee_moltyp(nstate)
       do i = 1, nunit(ee_moltyp(nstate))
          qqu(eeirem,i) = ee_qqu(i,nstate)
-c	write(2,*) 'charges', qqu(eeirem,i)
-c	write(2,*) 'charges1'
+c	write(iou,*) 'charges', qqu(eeirem,i)
+c	write(iou,*) 'charges1'
       enddo
 
       if (mstate.eq.1.or.mstate.eq.fmstate) then
@@ -251,16 +251,16 @@ c --- update parall (since one molecule has changed its state/type)
          parall(i,idummy(i)) = j
       enddo
 
-c	write(2,*) 'accept', eepointp, mstate, nstate, eeirem, boxins1
-c	write(2,*)'accept1',parbox(eepointp,boxins1,ee_moltyp(nstate))
-c	write(2,*) '1line', leemove,lmstate,leeacc
-c	write(2,*) '2line', fmstate,sstate1,sstate2,wee_ratio,eeratio
-c	write(2,*) '3line',(ee_moltyp(i), i = 1, fmstate)
-c	write(2,*) '4line',(box_state(i), i = 1, fmstate)
-c	write(2,*) '5line',(psi(i), i = 1, fmstate)
-c	write(2,*) '6line',(ee_qqu(1,i), i = 1, fmstate)
-c	write(2,*) '7line',(um_markov(i,i+1),i = 1,fmstate-1)
-c	write(2,*) '8line',(um_markov(i,i-1),i = 2,fmstate)
+c	write(iou,*) 'accept', eepointp, mstate, nstate, eeirem, boxins1
+c	write(iou,*)'accept1',parbox(eepointp,boxins1,ee_moltyp(nstate))
+c	write(iou,*) '1line', leemove,lmstate,leeacc
+c	write(iou,*) '2line', fmstate,sstate1,sstate2,wee_ratio,eeratio
+c	write(iou,*) '3line',(ee_moltyp(i), i = 1, fmstate)
+c	write(iou,*) '4line',(box_state(i), i = 1, fmstate)
+c	write(iou,*) '5line',(psi(i), i = 1, fmstate)
+c	write(iou,*) '6line',(ee_qqu(1,i), i = 1, fmstate)
+c	write(iou,*) '7line',(um_markov(i,i+1),i = 1,fmstate-1)
+c	write(iou,*) '8line',(um_markov(i,i-1),i = 2,fmstate)
 
  100    continue
         leemove = .false.

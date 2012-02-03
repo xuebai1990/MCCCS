@@ -53,7 +53,7 @@ c    *********************************************************************
      &     vnewt2,voldt2
       double precision qquo(nmax,numax) 
 
-c      write(2,*) 'START the optimization of the charge configuration'
+c      write(iou,*) 'START the optimization of the charge configuration'
 
       imolty = moltyp(i)
       iunit = nunit(imolty)
@@ -270,7 +270,7 @@ c *** restore old dipole moment
          endif
       endif    
 
-c      write(2,*) 'END the optimization of the charge configuration'
+c      write(iou,*) 'END the optimization of the charge configuration'
 
       return         
       end

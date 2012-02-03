@@ -25,14 +25,17 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       logical lpbc,lpbcx,lpbcy,lpbcz,lfold,lijall,lewald
       logical lchgall,ldielect
       logical lexpsix,lmmff 
-      logical lninesix,lgaro
+      logical lninesix,lgaro,lionic
+      logical lgenlj
       logical ltailc,lshift
       logical lneigh,lvirial
       logical lcutcm,ldual
       integer nmax,numax,ntmax,nntype,nvmax,nbxmax,npamax,npabmax
      & ,maxbin,cmax,cmaxa,tor_bin_max,nbinmax_ete,smax
       integer vectormax,maxvir,maxntemp,nchmax,nchtor_max,nchbn_max
-      integer ntdifmx,nbinmx,angle_max,ang_bin_max,tor_max	
+      integer ntdifmx,nbinmx,angle_max,ang_bin_max,tor_max,iou
+
+      common /iounit/ iou	
 c --------------------------------------------------------------
 c *******************************
 c *** PARAMETERS FOR ENSEMBLE ***
@@ -87,7 +90,7 @@ c *** PARAMETERS FOR INTERACTION CUT-OFFS  ***
 c ********************************************
 c if LIJALL = .TRUE.
 c    then all i-j-interactions are considered (no potential cut-off)
-c    must set lallcm and ltailc to false for lijall = true
+c    must set lcutcm and ltailc to false for lijall = true
 c    * check top of sumup.f if lijall = true and lchgall is false
       parameter (lijall = .false.)
 c if LCHGALL= .TRUE.
@@ -133,11 +136,22 @@ c *** PARAMETERS FOR 9-6 POTENTIAL ***
 c ************************************
 c if LNINESIX=.TRUE. then the 9-6 potential will be used.
       parameter (lninesix = .false.)
+c *****************************************************
+c *** PARAMETERS FOR GENERALIZED LJ POTENTIAL      ***
+c *****************************************************
+c if LGENLJ=.TRUE. then the the Generalized lennard jones
+c potential will be used.
+      parameter (lgenlj=.false.)
 c ********************************************
 c *** PARAMETERS FOR GAROFALINI POTENTIAL  ***
 c ********************************************
 c if LGARO=.TRUE. garofalini potential will be used instead of leonard jones
       parameter (lgaro = .false.)
+c ********************************************
+c *** PARAMETER FOR IONIC SYSTEMS  ***
+c ********************************************
+c if LIONIC=.TRUE. System contains charged species, so system may not neutral
+      parameter (lionic = .false.)
 c ***************************************
 c *** PARAMETERS FOR TAIL CORRECTIONS ***
 c ***************************************

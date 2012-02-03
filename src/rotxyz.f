@@ -64,7 +64,7 @@ c *** further variable definitions
 
 C --------------------------------------------------------------------
 
-c      write(2,*) 'start ROTXYZ'
+c      write(iou,*) 'start ROTXYZ'
       ovrlap = .false.
       if (lgrand) then
 c ---    select a chain at random in box 1!
@@ -112,6 +112,20 @@ c ***    select a chain type at random ***
          iuroty = iurot(imolty)
       endif
 
+ckea 6/4/09 -- for multiple rotation centers
+      if(iuroty.lt.0) then
+         if(nrotbd(imolty).gt.1) then
+            rchain = random()
+            do icbu = 1,nrotbd(imolty)
+               if( rchain .lt. pmrotbd(icbu,imolty)) then
+                  iuroty = irotbd(icbu,imolty)
+               endif
+            enddo
+         else
+            iuroty = irotbd(1,imolty)
+         endif
+      endif
+
 c *** store number of units of i in iunit ***
       iunit = nunit(imolty)
 
@@ -156,9 +170,9 @@ c *** Use iurot for rotation
          rzorig = rzuion(iuroty,1)
       endif
 
-c      write(2,*) 'before rotating'
-c      write(2,*) xcm(i),ycm(i),zcm(i)
-c      write(2,*) rxu(i,1),ryu(i,1),rzu(i,1)
+c      write(iou,*) 'before rotating'
+c      write(iou,*) xcm(i),ycm(i),zcm(i)
+c      write(iou,*) rxu(i,1),ryu(i,1),rzu(i,1)
 
 
       if (lx) then 
@@ -276,7 +290,7 @@ c        --- move rejected
          return
       endif
 
-c      write(2,*) 'ROTXYZ accepted',i
+c      write(iou,*) 'ROTXYZ accepted',i
       vbox(ibox) = vbox(ibox) + deltv
       vinterb(ibox)  = vinterb(ibox) + (vintern -  vintero)
       vintrab(ibox)  = vintrab(ibox) + (vintran - vintrao)
@@ -331,7 +345,7 @@ c *** check for last unit ***
       endif
 
       if ( lneighbor ) then
-c         write(2,*) 'in rotxyz:',i,neigh_cnt(i)
+c         write(iou,*) 'in rotxyz:',i,neigh_cnt(i)
          do 11 ic = 1, neigh_cnt(i)
             j = neighbor(ic,i)
             do ip = 1,neigh_cnt(j)
@@ -359,7 +373,7 @@ c         write(2,*) 'in rotxyz:',i,neigh_cnt(i)
          enddo
       endif
  
-c      write(2,*) 'end ROTXYZ'
+c      write(iou,*) 'end ROTXYZ'
 
       return
       end

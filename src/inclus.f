@@ -129,7 +129,7 @@ c     - include or exclude additional beads accoring to incl
                   lqinclu(imolty,m,nb) = .false.
                   lqinclu(imolty,nb,m) = .false.
                else
-                  write(2,*) 'INCLUS: n,inclsign(n)',n,inclsign(n)
+                  write(iou,*) 'INCLUS: n,inclsign(n)',n,inclsign(n)
                   stop 'inclusign must be 1 or -1'
                endif
             endif
@@ -246,51 +246,50 @@ c - or beads connected one away from a rigid bead
             enddo
          endif
 
-         write(2,*) 
-         write(2,*) 'INCLUSION TABLE'
+         write(iou,*) 
+         write(iou,*) 'INCLUSION TABLE'
 
          do m = 1, nunit(imolty)
-            write(2,*) m, (linclu(imolty,m,n),n=1,nunit(imolty))
+            write(iou,*) m, (linclu(imolty,m,n),n=1,nunit(imolty))
          enddo
-         write(2,*) 
+         write(iou,*) 
 
-         write(2,*) 
-         write(2,*) 'CHARGE INCLUSION TABLE'
+         write(iou,*) 
+         write(iou,*) 'CHARGE INCLUSION TABLE'
 
          do m = 1, nunit(imolty)
-            write(2,*) m, 
+            write(iou,*) m, 
      &        (lqinclu(imolty,m,n),n=1,nunit(imolty))
          enddo
 
 c  400  format (<nunit(imolty)> F5.2)
-         write(2,*) 
+         write(iou,*) 
 	 
-	 write(2,*) '1-4 LJ SCALING FACTORS'
+	 write(iou,*) '1-4 LJ SCALING FACTORS'
 	 do m = 1, nunit(imolty)
-            write(2,500) m, 
+            write(iou,*) m, 
      &    (ljscale(imolty,m,n),n=1,nunit(imolty))
          enddo
- 500  format (i5,<nunit(imolty)> F5.2)
-
+c 500  format (i5,<nunit(imolty)> F5.2)
 	 
-	 write(2,*)
-	 write(2,*) '1-4 CHARGE SCALING FACTORS'
+	 write(iou,*)
+	 write(iou,*) '1-4 CHARGE SCALING FACTORS'
 	 do m = 1, nunit(imolty)
-            write(2,600) m, 
+            write(iou,*) m, 
      &			(qscale2(imolty,m,n),n=1,nunit(imolty))
          enddo
- 600  format (i5,<nunit(imolty)> F5.2)
+c 600  format (i5,<nunit(imolty)> F5.2)
 
 c * not really that important to write out
-c         write(2,*) 
-c         write(2,*) '1-5 OH INTERACTION TABLE'
+c         write(iou,*) 
+c         write(iou,*) '1-5 OH INTERACTION TABLE'
 c         do m = 1, nunit(imolty)
-c            write(2,*) m, (lainclu(imolty,m,n),n=1,nunit(imolty))
+c            write(iou,*) m, (lainclu(imolty,m,n),n=1,nunit(imolty))
 c         enddo
-c         write(2,*) 
+c         write(iou,*) 
 
       enddo
-c      write(2,*) 'finished inclus'
+c      write(iou,*) 'finished inclus'
       return
       end
 

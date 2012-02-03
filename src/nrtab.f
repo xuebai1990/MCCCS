@@ -211,7 +211,7 @@ c *** calculate dot product of cross products ***
             va = vbba + vdha
             bf = dexp ( -(va * beta) )
             if ( random() .ge. bf ) go to 108 
-c            write(2,*) 'new ip', ip, '   va', va
+c            write(iou,*) 'new ip', ip, '   va', va
 
          else
 c *** poly-bead molecule ***
@@ -242,8 +242,8 @@ c ***************************
                   z = rznew(i) - rznew(j)
                   rij = dsqrt( x*x + y*y + z*z )
                   if ( rij .gt. dmrtab(idiff) ) then
-                     write(2,*) 'WARNING NRTAB: rij .gt. dmrtab'
-                     write(2,*) 'idiff',idiff,
+                     write(iou,*) 'WARNING NRTAB: rij .gt. dmrtab'
+                     write(iou,*) 'idiff',idiff,
      &                    'rij',rij,'dmrtab',dmrtab(idiff)
                   endif
                   ibin = idint( rij / dbrtab(idiff) ) + 1
@@ -251,10 +251,10 @@ c ***************************
                   hnrtab(idiff,ibin) = hnrtab(idiff,ibin) + 1
 
                   if ( idiff .le. 3 .and. ibin .eq. 1 ) then
-                     write(2,*) 'nrtc',nrtc,'i',i,'j',j
-                     write(2,*) 'ri',rxnew(i),rynew(i),rznew(i)
-                     write(2,*) 'rj',rxnew(j),rynew(j),rznew(j)
-                     write(2,*) 'rij',rij
+                     write(iou,*) 'nrtc',nrtc,'i',i,'j',j
+                     write(iou,*) 'ri',rxnew(i),rynew(i),rznew(i)
+                     write(iou,*) 'rj',rxnew(j),rynew(j),rznew(j)
+                     write(iou,*) 'rij',rij
                   endif
 
                endif

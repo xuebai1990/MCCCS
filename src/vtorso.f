@@ -89,7 +89,7 @@ c extra displacement is to get the curve above zero
      &        -(14168.0d0)*tac5
      &        +(9213.7d0)*tac6
      &        +(4123.7d0)*tac7
-c         write(2,*) 'thetac,vtorso',thetac,vtorsoAK
+c         write(iou,*) 'thetac,vtorso',thetac,vtorsoAK
 c - Roethlisberger torsional potential for linear perfluorocarbon
 c - PERFLUOROCARBON no longer USED
 c         if (thetac.gt.1.d0) thetac=1.0d0

@@ -95,8 +95,8 @@ c *** set displacementvectors to zero ***
          disvec(2,i,j) = 0.0d0
  1099 continue
  
-c      write(2,*) '@@@ control updnn @@@'
-c      write(2,*) 'lnn', i, '   ', (lnn(i,j),j=1,nchain)
+c      write(iou,*) '@@@ control updnn @@@'
+c      write(iou,*) 'lnn', i, '   ', (lnn(i,j),j=1,nchain)
 
       return
       end

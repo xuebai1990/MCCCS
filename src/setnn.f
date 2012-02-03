@@ -121,13 +121,13 @@ c *** set displacementvectors to zero ***
 1099     continue
 1100  continue
  
-c      write(2,*) '@@@ control setnn @@@'
+c      write(iou,*) '@@@ control setnn @@@'
 c      do 2000 i = 1, nchain
-c         write(2,*) 'lnn', i, '   ', (lnn(i,j),j=1,nchain)
+c         write(iou,*) 'lnn', i, '   ', (lnn(i,j),j=1,nchain)
 c2000  continue
  
-      write(2,*)
-      write(2,*) 'neighbour table created by SETNN'
+      write(iou,*)
+      write(iou,*) 'neighbour table created by SETNN'
 
       return
       end

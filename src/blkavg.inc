@@ -23,7 +23,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       integer nener,nprop,blockm
       double precision naccu,nccold,accum,bccold,aver,baver
-     &                ,acsvol,acnvol,acshmat,acnhmat
+     &     ,acsvol,acnvol,acshmat,acnhmat
 c ** Neeraj adding for solubility parameter and heat of vaporization
 
       double precision naccu1,nccold1,accum1,bccold1,aver1,baver1
@@ -42,8 +42,14 @@ c ** Neeraj adding for solubility parameter and heat of vaporization
      &  bccold1(nprop1,nbxmax,nbxmax), 
      &  baver1(nprop1,nbxmax,nbxmax,blockm)
 
-
+      double precision, dimension (ntmax,nbxmax) :: acntray,acntrax,
+     &     acntraz,acnrotx,acnroty,acnrotz,acstrax,acstray,acstraz,
+     &     acsrotx,acsroty,acsrotz
 
       common /bokavg/ baver,naccu,nccold,accum,bccold,aver,acsvol
      &                ,acnvol,acshmat,acnhmat
       common /blkavg/ baver1,naccu1,nccold1,accum1,bccold1,aver1
+
+      common /trarotavg/ acntrax,acntray,acntraz,acnrotx,acnroty,
+     &     acnrotz,acstrax,acstray,acstraz,acsrotx,acsroty,
+     &     acsrotz

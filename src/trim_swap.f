@@ -111,7 +111,7 @@ c    ********************************************************************
 
 C --------------------------------------------------------------------
 
-c      write(2,*) 'START SWAP'
+c      write(iou,*) 'START SWAP'
 c      write(11,*) '1:',neigh_cnt(18)
 
       lempty = .false.
@@ -157,7 +157,7 @@ c ---    select a box given in pmswatyp
       else
          lswapinter = .true.
       endif
-c      write(2,*) 'boxins:',boxins,'boxrem:',boxrem
+c      write(iou,*) 'boxins:',boxins,'boxrem:',boxrem
       if ( .not. (lgibbs .or. lgrand) .and. lswapinter ) 
      &     stop 'no interbox swap if not gibbs/grand ensemble!'
          
@@ -175,19 +175,19 @@ c *** sub-regions defined by Vin
          pointp = idint( dble(ncmt(boxrem,imolty))*random() ) + 1
          irem = parbox(pointp,boxrem,imolty)
          if ( moltyp(irem) .ne. imolty ) 
-     &        write(2,*) 'screwup swap, irem:',irem,moltyp(irem),imolty
+     &       write(iou,*) 'screwup swap, irem:',irem,moltyp(irem),imolty
          ibox = nboxi(irem)
          if ( ibox .ne. boxrem ) stop 'problem in swap'
       endif
 
-c$$$      write(2,*) 'particle ',irem,' is being removed, imolty is:',
+c$$$      write(iou,*) 'particle ',irem,' is being removed, imolty is:',
 c$$$     &     imolty,' and the box is:',boxrem
 
 
 c ===>  for both gibbs and grand-canonical we have:
 c --- insert a chain in box: boxins 
 c --- remove one in box: boxrem
-c      write(2,*) 'boxrem',boxrem,' imolty',imolty,' lempty',lempty
+c      write(iou,*) 'boxrem',boxrem,' imolty',imolty,' lempty',lempty
 c     bnswap(imolty,X) decoder X = 1 is # attempts into box 1
 c      X = 2 is # attempts into box 2 X=3 is success into box 1
 c      X = 4 is success into box 2
@@ -291,7 +291,7 @@ c     *** and calculate the correct weight for the trial walk           ***
       
 c     --- check for termination of walk ---
       if ( w1ins .lt. softlog ) then
-         write(2,*) 'caught in swap'
+         write(iou,*) 'caught in swap'
          return
       endif
 
@@ -309,7 +309,7 @@ c     --- select ip position ---
                endif
             endif
          enddo
-         write(2,*) 'w1ins:',w1ins,'rbf:',rbf
+         write(iou,*) 'w1ins:',w1ins,'rbf:',rbf
          stop 'big time screwup -- w1ins'
       else
          iwalk = 1
@@ -396,7 +396,7 @@ c     calculate the true site-site energy
      &        ,.false.,vdum,.false.,lfavor)
          
          if (ovrlap) then
-            write(2,*) 'iins',iins,'irem',irem
+            write(iou,*) 'iins',iins,'irem',irem
             stop 'strange screwup in DC-CBMC swap'
          endif
 c v1insewd, vnewewald and vnewintra now accounted for in v from energy
@@ -494,9 +494,9 @@ C     Compute weights for the molecule to be removed from boxrem
 
 c *** check that there is at least one molecule in BOXREM ***
       if ( lempty ) then
-c         write(2,*) 'no molecule in BOXREM'
+c         write(iou,*) 'no molecule in BOXREM'
          if (lgrand) then
-	    if (boxrem.eq.2) write(2,*) ' ERROR ***** array too low !'
+	    if (boxrem.eq.2) write(iou,*) ' ERROR ***** array too low !'
          endif
          return
       endif
@@ -550,7 +550,7 @@ c *** calculate the boltzmann weight of first bead          ***
      &     ,1,glist,0.0d0)
 
       if ( ovrlap ) then
-         write(2,*) 'disaster: overlap for 1st bead in SWAP'
+         write(iou,*) 'disaster: overlap for 1st bead in SWAP'
       endif
 c *** calculate the correct weight for the  old  walk ***
 
@@ -561,7 +561,7 @@ c *** calculate the correct weight for the  old  walk ***
 
 c --- check for termination of walk ---
       if ( w1rem .lt. softlog ) then 
-         write(2,*) ' run problem : soft overlap in old'
+         write(iou,*) ' run problem : soft overlap in old'
       endif
 
       v1rem = vtry(1)
@@ -578,7 +578,7 @@ c     --- call rosenbluth for old conformation
      &     ,boxrem,igrow,waddold,lfixnow,ctorfo,2 )
 
       if ( lterm ) then 
-         write(2,*) 'SWAP: rosenbluth old rejected'
+         write(iou,*) 'SWAP: rosenbluth old rejected'
          return
       endif
 
@@ -713,7 +713,7 @@ c     --- Add contributions of the first bead and additional beads:
       wdlog = wnlog - wolog
       
       if ( wdlog .lt. -softcut ) then
-c         write(2,*) '### underflow in wratio calculation ###'
+c         write(iou,*) '### underflow in wratio calculation ###'
          return
       endif
 
@@ -746,7 +746,7 @@ c              --- molecule removed from box 1
 c         wratio = 1.0   
 
       if ( random() .le. wratio ) then
-c         write(2,*) 'SWAP MOVE ACCEPTED',irem
+c         write(iou,*) 'SWAP MOVE ACCEPTED',irem
 c *** we can now accept !!!!! ***
          bnswap(imolty,ipairb,boxins+nbox) = 
      &        bnswap(imolty,ipairb,boxins+nbox) + 1.0d0
@@ -863,7 +863,7 @@ c *** update linkcell, if applicable
             call linkcell(2,irem,vdum,vdum,vdum,ddum)
          endif
          
-c         write(2,*) 'lneighbor:',lneighbor
+c         write(iou,*) 'lneighbor:',lneighbor
 
          if ( lneigh ) call updnn( irem )
          if ( lneighbor ) then
@@ -884,7 +884,7 @@ c         write(2,*) 'lneighbor:',lneighbor
                enddo
  10         continue
             neigh_cnt(irem) = neigh_icnt
-c            write(2,*) 'irem:',irem,neigh_icnt
+c            write(iou,*) 'irem:',irem,neigh_icnt
             do ic = 1,neigh_icnt
                j = neighi(ic)
                neighbor(ic,irem)=j
@@ -901,7 +901,7 @@ c            write(2,*) 'irem:',irem,neigh_icnt
             enddo
          endif
 
-c         write(2,*) irem,'end SWAP'
+c         write(iou,*) irem,'end SWAP'
 
       endif
  

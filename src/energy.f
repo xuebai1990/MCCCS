@@ -52,13 +52,14 @@ c *** common blocks ***
       include 'conver.inc'
 ckea include for garofalini 3 body term
       include 'garofalini.inc'
+      include 'tabulated.inc'
 
       logical lqimol,lqjmol,lexplt,lcoulo,lfavor,lij2,liji,lqchgi
       logical lljii,ovrlap,ltors,lcharge_table,lt,lfound
       logical lmim
 
       integer growii,growjj,k,cellinc,jcell,ic,nmole
-      integer i,ibox, istart, iend,ii,ntii,flagon,jjj,iii
+      integer i,ibox, istart, iend,ii,ntii,flagon,jjj,iii,mmm
      +       ,j,jj,ntjj,ntij,ntj,imolty,jmolty,ncell
       integer iivib,jjtor,ip1,ip2,ip3,it,nchp2,acellinc
 
@@ -66,7 +67,7 @@ ckea include for garofalini 3 body term
      +                ,rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq
      +                ,ryuij,rzuij,sr2,sr6,rij,rijsq,dzui,dz3,dz12
      +                ,exgrph,exsami,exmuir,exzeo,vtors,exsix,velect
-     +                ,vewald,mmff,rbcut,ninesix
+     +                ,vewald,mmff,rbcut,ninesix, genlj
       double precision erfunc,qave
       double precision xvec,yvec,zvec,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2
      &     ,daa1,da1a2,dot,thetac,vtorso,vwell
@@ -82,10 +83,12 @@ c KEA
       integer neigh_j,neighj(maxneigh)
       double precision ndijj(maxneigh),nxijj(maxneigh),
      &     nyijj(maxneigh),nzijj(maxneigh)
+c KM
+      double precision tabulated_vdW, tabulated_bend, tabulated_elect
 
 C --------------------------------------------------------------------
 
-c      write(2,*) 'start ENERGY'
+c      write(iou,*) 'start ENERGY'
       if ( lpbc ) call setpbc (ibox)
 
 !      lljii = .false.
@@ -144,7 +147,7 @@ c --- calculate the center of mass of chain i and give it a dummy #
          ycmi = ycm(nchp2)
          zcmi = zcm(nchp2)
          rcmi = rcmu(nchp2)
-c         write(2,*) 'rcmi:',rcmi
+c         write(iou,*) 'rcmi:',rcmi
       else
          lij2 = .true.
       endif
@@ -347,6 +350,8 @@ c                    --- check exclusion table
                         ntij = (ntii+ntjj)/2
                      elseif (lninesix) then
                         ntij = (ntii-1)*nxatom + ntjj
+                     elseif (lgenlj) then
+                        ntij = (ntii-1)*nntype + ntjj
 ckea
                      elseif (lgaro) then
                         if(ntii.eq.ntjj) then
@@ -371,16 +376,21 @@ c *** minimum image the pair separations ***
                      if ( rijsq .lt. rminsq .and. .not. 
      &                    (lexpand(imolty) .or. lexpand(jmolty))) then
                         ovrlap = .true.
-c                        write(2,*) 'inter ovrlap:',i,j
-c                        write(2,*) 'i xyz',rxui,ryui,rzui
-c                        write(2,*) 'j xyz',rxu(j,jj),ryu(j,jj),rzu(j,jj) 
-c                        write(2,*) 'ii:',ii,'jj:',jj
-c                        write(2,*) 'distance', dsqrt(rijsq)
+c                        write(iou,*) 'inter ovrlap:',i,j
+c                        write(iou,*) 'i xyz',rxui,ryui,rzui
+c                        write(iou,*) 'j xyz',rxu(j,jj),ryu(j,jj),rzu(j,jj) 
+c                        write(iou,*) 'ii:',ii,'jj:',jj
+c                        write(iou,*) 'distance', dsqrt(rijsq)
                         return
                      endif
                      if ( (rijsq .lt. rcutsq) .or. lijall) then
+                        if (L_vdW_table.and.(.not.(lexpand(imolty)
+     &                       .or.lexpand(jmolty)))) then
+                           call lininter_vdW(rij, tabulated_vdW,
+     &                          ntii, ntjj) 
+                           vinter = vinter + tabulated_vdW
 
-                        if (llj.and.(.not.(lexpand(imolty).or.
+                        elseif (llj.and.(.not.(lexpand(imolty).or.
      &                       lexpand(jmolty)))) then
                            if ( lij(ntii) .and. lij(ntjj) ) then
                               sr2 = sig2ij(ntij) / rijsq
@@ -397,6 +407,11 @@ c                        write(2,*) 'distance', dsqrt(rijsq)
                            vinter = vinter + mmff(rijsq,ntij)
                         elseif (lninesix) then
                            vinter = vinter + ninesix(rijsq,ntij)
+c generalized lennard jones potential
+                        elseif ( lgenlj ) then
+                           sr2 = sig2ij(ntij) / rijsq
+                           epsilon2=epsij(ntij)
+                           vinter = vinter + genlj(rijsq,sr2,epsilon2)
                         elseif ( lmuir ) then
                            vinter = vinter + ljmuir(rijsq,ntij)
                         elseif ( lpsurf ) then
@@ -518,8 +533,15 @@ c --- set up the charge-interaction table
                            endif
 
                            if ( lcoulo(iii,jjj) ) then
-                              velect = velect + qquion(ii,flagon)
-     &                             *qqu(j,jj)/rij
+                              if (L_elect_table) then
+                                 call lininter_elect(rij, 
+     &                                tabulated_elect, ntii, ntjj)
+                                 velect = velect + qquion(ii,flagon)*
+     &                                qqu(j,jj)*tabulated_elect
+                              else
+                                 velect = velect + qquion(ii,flagon)
+     &                                *qqu(j,jj)/rij
+                              endif
                            endif
                         endif
                      endif
@@ -560,7 +582,8 @@ c                           neighi1(neigh_icnt1(jmolty),jmolty)=j
       endif
 
       if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff
-     &       .and. .not. lninesix .and..not.lgaro) then
+     & .and. .not. lgenlj .and. .not. lninesix .and..not.lgaro
+     &     .and..not.L_vdW_table) then
          vinter = 4.0d0 * vinter
       endif
 
@@ -603,6 +626,8 @@ c --- calculate intramolecular energy correction for chain i
                ntij = (ntii+ntjj)/2
             elseif (lninesix) then
                ntij = (ntii-1)*nxatom + ntjj
+            elseif (lgenlj) then
+               ntij = (ntii-1)*nntype + ntjj
             else
                ntij = (ntii-1)*nntype + ntjj
             endif
@@ -651,9 +676,17 @@ c *** leaderqs are only 2 bonds apart.
                        lcoulo(iii,jjj)  = .true.
                     endif
                     if ( lcoulo(iii,jjj) ) then
-                           velect = velect + qscale2(imolty,ii,jj)*
-     &                             qquion(ii,flagon)
-     &                          *qquion(jj,flagon)/rij
+                       if (L_elect_table) then
+                          call lininter_elect(rij,tabulated_elect,
+     &                         ntii, ntjj)
+                          velect = velect + qscale2(imolty,ii,jj)*
+     &                         qquion(ii,flagon)*qquion(jj,flagon)*
+     &                         tabulated_elect
+                       else
+                          velect = velect + qscale2(imolty,ii,jj)*
+     &                         qquion(ii,flagon)
+     &                         *qquion(jj,flagon)/rij
+                       endif
                     endif
                   endif
                endif
@@ -666,10 +699,28 @@ c * calculation of other non-bonded interactions
                   if ( rijsq .lt. rminsq .and. .not. 
      &                 lexpand(imolty)) then
                      ovrlap = .true.
-c     write(2,*) 'intra ovrlap:',ii,jj
+c     write(iou,*) 'intra ovrlap:',ii,jj
                      return
                   elseif ( rijsq .lt. rcutsq .or. lijall) then
-                     if (llj.and.(.not.(lexpand(imolty)
+                     if (L_vdW_table.or.L_bend_table.and.
+     &                    (.not.(lexpand(imolty)))) then
+
+                        do mmm=1,inben(imolty,ii)
+                           if (ijben3(imolty,ii,mmm).eq.jj) then
+                              
+                              call lininter_bend(rij,
+     &                             tabulated_bend, 
+     &                             itben(imolty,ii,mmm))
+                              vintra = vintra + tabulated_bend
+                              
+                              goto 96
+                           endif
+                        enddo
+
+
+                        call lininter_vdW(rij,tabulated_vdW,ntii,ntjj)
+                        vintra = vintra + tabulated_vdW
+                     elseif (llj.and.(.not.(lexpand(imolty)
      &                    ))) then
                         sr2 = sig2ij(ntij) / rijsq
                         epsilon2=epsij(ntij)
@@ -692,6 +743,10 @@ c     * OH 1-5 interaction
                         vintra = vintra + mmff(rijsq,ntij)
                      elseif (lninesix) then
                         vintra = vintra + ninesix(rijsq,ntij)
+                     elseif (lgenlj) then
+                        sr2 = sig2ij(ntij) / rijsq
+                        epsilon2=epsij(ntij)
+                        vintra = vintra + genlj (rijsq,sr2,epsilon2)
                      elseif ( lmuir ) then
                         vintra = vintra + ljmuir(rijsq,ntij)
                      elseif ( lpsurf ) then
@@ -730,7 +785,7 @@ c * OH 1-5 interaction
 
             endif
 
-            if (lewald ) then
+ 96         if (lewald ) then
 c     compute the ewald intramolecular (self and correction) terms for 
 c     the interactions of the placed atoms with themselves, and with the
 c     rest of their own molecule, if there's no interaction
@@ -757,7 +812,8 @@ c              * 1,4 interaction which we scale by qscale
          vewald = sself + correct  
       endif
       if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff 
-     &      .and. .not. lninesix ) then 
+     & .and. .not. lgenlj  .and. .not. lninesix
+     & .and..not.L_vdW_table) then 
            vintra = 4.0d0 * vintra 
       endif
 
@@ -936,19 +992,21 @@ c --------------------------------------------------------------------------
 
 C ----------------------------------------------------------------------------
      
-      velect = velect*qqfact
-      vewald = vewald*qqfact
+      if (.not.L_elect_table) then
+         velect = velect*qqfact
+         vewald = vewald*qqfact
+      endif
 
  
 c     note that vintra is only computed when the flag lljii is true
       v = vinter + vext + vintra + velect + vewald + v3garo
 
 
-c      write(2,*) 'vinter:',vinter,'vext:',vext,'vintra:',vintra,'velect'
+c      write(iou,*) 'vinter:',vinter,'vext:',vext,'vintra:',vintra,'velect'
 c     & ,velect,'vewald:',vewald,'v'
 
 
-c      write(2,*) 'v :', v
+c      write(iou,*) 'v :', v
 
       if (flagon.eq.1) then
          vipswo = v
@@ -971,9 +1029,9 @@ c      write(2,*) 'v :', v
          endif 
       endif 
 
-c      write(2,*) 'v :', v
+c      write(iou,*) 'v :', v
 
-c      write(2,*) 'end ENERGY'
+c      write(iou,*) 'end ENERGY'
 
       return
       end

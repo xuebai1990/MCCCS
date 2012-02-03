@@ -116,7 +116,7 @@ c     -- This is total energy
       
       Heat_vapor_T = enchg1 + pres(ig)*
      &     (mol_vol(ig)-mol_vol(il))*1.0d-6
-c     write(2,1505) il,ig,abs(enthchg1)
+c     write(iou,1505) il,ig,abs(enthchg1)
 c     -- This is inter+intra LJ
       enchg2 = 0.008314510d0*(LJ_Energy_Gas-LJ_energy_Liq)
       Heat_vapor_LJ = enchg2 + pres(ig)*
@@ -133,7 +133,7 @@ c     -- Calculating Hildebrand solubility parameter (total)
       else
          HSP_T = sqrt(CED_T)
       endif
-c     write(2,1508) temp,HSP_TOTAL
+c     write(iou,1508) temp,HSP_TOTAL
 c     -- Calculating Hildebrand solubility parameter (LJ part)
       CED_LJ = ((abs(enchg2))*1000.0d0*
      &     joule2cal)/mol_vol(il)
@@ -142,7 +142,7 @@ c     -- Calculating Hildebrand solubility parameter (LJ part)
       else
          HSP_LJ = sqrt(CED_LJ)
       endif
-c     write(2,1509) HSP_LJ
+c     write(iou,1509) HSP_LJ
 c     -- Calculating Hildebrand solubility parameter (Coulomb part)
       CED_COUL = (abs(enchg3)*
      &     1000.0d0*joule2cal)/mol_vol(il)

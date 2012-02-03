@@ -25,7 +25,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       double precision galpha(6),grho(6),gbeta(6),ga(6,3),
      &	 gb(6,3),gc(6,3),glambda(4),grij(4,2),ggamma(4,2),
-     &   gtheta(4),grijsq(4,2),pener,pdis
+     &   gtheta(4),grijsq(4,2)
 
       double precision dxij(pair_max),dyij(pair_max),
      &	 dzij(pair_max),dij(pair_max),dik(pair_max),dxik(pair_max)

@@ -80,7 +80,7 @@ c     -- new stuff
 
 c ------------------------------------------------------------------
 
-c      write(2,*) 'start ROSENBLUTH'
+c      write(iou,*) 'start ROSENBLUTH'
       lterm = .false.
       cwtorf = 1.0d0
       wei_vib = 1.0d0
@@ -213,7 +213,7 @@ c        --- perform the biased selection of bond angles and get lengths
          call geometry(lnew,iw,i,imolty,angstart,iuprev,glist
      &        ,bondlen,bendang,phi,vvibtr,vbbtr,maxlen,wei_bend )
 
-c         write(2,*) 'lnew, wei_bend',lnew,wei_bend
+c         write(iou,*) 'lnew, wei_bend',lnew,wei_bend
 
 c     --- for lfixnow check if there are two beads to go
 
@@ -357,7 +357,7 @@ c                       --- jut4 must already exist or we made a big mistake
                            if ( .not. lexist(jut4) )  then
 c * allow regrowth where one torsion may already exist and one may not
                               goto 299
-c                              write(2,*) 'jut4,jut3,jut2,iu',
+c                              write(iou,*) 'jut4,jut3,jut2,iu',
 c     &                             jut4,jut3,jut2,iu
 c                              stop 'trouble jut4'
                            endif
@@ -692,7 +692,8 @@ c                    --- select ip position ---
          else
 c           --- old conformation, update weiold - include wei_bend
             weiold = weiold * bsum * wei_bend * wei_vib
-            if (weiold .lt. softlog) write(2,*) '###old weight too low'
+            if (weiold .lt. softlog) write(iou,*) 
+     &           '###old weight too low'
          endif
 
  180     continue
@@ -891,7 +892,7 @@ c * end of loop over trial units *
 c ********************************
  200  continue
 
-c      write(2,*) 'end ROSENBLUTH'
+c      write(iou,*) 'end ROSENBLUTH'
 
 c ------------------------------------------------------------------
 

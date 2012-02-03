@@ -83,7 +83,7 @@ ckea
 
 C --------------------------------------------------------------------
 
-c      write(2,*) 'start VOLUME'
+c      write(iou,*) 'start VOLUME'
 
 c *** select pair of boxes to do the volume move
       if ( nvolb .gt. 1 ) then
@@ -176,7 +176,7 @@ c            lz(boxb) = .true.
 
       if (lsolid(boxa) .and. .not. lrect(boxa)) then
          if (lsolid(boxb) .and. .not. lrect(boxb)) then
-            write(2,*) 'can not perform volume move between',
+            write(iou,*) 'can not perform volume move between',
      &           ' two non-rectangular boxes'
             stop
          endif
@@ -261,7 +261,7 @@ c --- store old k vectors and reciprocal sum
       enddo
 
 
-c      write(2,*) 'before lncubic', lx,ly,lz
+c      write(iou,*) 'before lncubic', lx,ly,lz
 
 c --- calculate total volume
       volt = volo(boxa) + volo(boxb)
@@ -345,10 +345,10 @@ c *** select one of the cell edge
          if (rbcut(hbox)/w(1) .gt. 0.5d0 .or.
      &        rbcut(hbox)/w(2) .gt. 0.5d0 .or.
      &        rbcut(hbox)/w(3) .gt. 0.5d0) then
-            write(2,*) 'Problem with line 381 in volume.f'
-            write(2,*) 'non-rectangular volume move rejected-',
+            write(iou,*) 'Problem with line 381 in volume.f'
+            write(iou,*) 'non-rectangular volume move rejected-',
      &                 ' box width below cutoff size'
-            write(2,*) 'w1:',w(1),'w2:',w(2),'w3:',w(3)
+            write(iou,*) 'w1:',w(1),'w2:',w(2),'w3:',w(3)
             hmat(hbox,jhmat) = hmato(jhmat)
             call dump
             stop
@@ -484,8 +484,8 @@ c *** volume move independently in x, y, z directions
      &        boxly(boxb) .lt. rbcutb .or. 
      &        (lpbcz .and. boxlz(boxb) .lt. rbcutb) ) then
                         
-            write(2,*) 'Problem in line 552 of subroutine volume.f'
-            write(2,*) 'A move was attempted that would lead to a 
+            write(iou,*) 'Problem in line 552 of subroutine volume.f'
+            write(iou,*) 'A move was attempted that would lead to a 
      & boxlength less than twice rcut'
 
             boxlx(boxa) = bxo(boxa)
@@ -645,7 +645,7 @@ c *** energy, coordinates and the ewald sum
 
 c --- acceptance test
 
-c      write(2,*) 'dele',dele
+c      write(iou,*) 'dele',dele
       if (random() .lt. dexp(-beta*dele) ) then
 c --      accepted
          if ( lncubic ) then
@@ -747,7 +747,7 @@ c --- restore old neighbor list for garofalini --- KEA
          endif
       enddo
 
-c      write(2,*) 'end VOLUME'
+c      write(iou,*) 'end VOLUME'
 c      call dump
 
       return

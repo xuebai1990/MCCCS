@@ -47,6 +47,7 @@ c *** common blocks ***
       include 'nsix.inc'
       include 'peboco.inc'
       include 'cell.inc'
+      include 'tabulated.inc'
 
       logical lqimol,lqjmol,lexplt,lcoulo,lfavor,lij2,liji,lqchgi
       logical lljii,ovrlap,ltors,lcharge_table,lt,lfound
@@ -64,7 +65,7 @@ c *** common blocks ***
      +                ,rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq
      +                ,ryuij,rzuij,sr2,sr6,rij,rijsq,dzui,dz3,dz12
      +                ,exgrph,exsami,exmuir,exzeo,vtors,exsix,velect
-     +                ,vewald,mmff,rbcut,rvdwsq,rchgsq,ninesix
+     +                ,vewald,mmff,rbcut,rvdwsq,rchgsq,ninesix, genlj
       double precision erfunc,qave
       double precision xvec,yvec,zvec,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2
      &     ,daa1,da1a2,dot,thetac,vtorso
@@ -72,7 +73,7 @@ c *** common blocks ***
       double precision sx,sy,sz
       double precision slitpore	
       double precision distij(numax,numax)
-      double precision xcc,ycc,zcc,tcc,spltor
+      double precision xcc,ycc,zcc,tcc,spltor, tabulated_vib
 
       dimension xvec(numax,numax),yvec(numax,numax),zvec(numax,numax)
       dimension lcoulo(numax,numax),cellinc(cmax),jcell(nmax)
@@ -80,7 +81,7 @@ c *** common blocks ***
 
 C --------------------------------------------------------------------
 
-c      write(2,*) 'start ENERGY'
+c      write(iou,*) 'start ENERGY'
       if ( lpbc ) call setpbc (ibox)
 
       rcutsq = rcut(ibox) * rcut(ibox)
@@ -124,13 +125,20 @@ c                  --- account for explct atoms in opposite direction
              enddo
 
 c - stretching -
-c             if ( brvibk(1) .gt. 0.01d0 .or. lninesix) then
+c             if ( brvibk(1) .gt. 0.01d0 .or. lninesix  ) then
                 do j = 2, nunit(imolty)
                    do jjvib = 1, invib(imolty,j)
                       ip1 = ijvib(imolty,j,jjvib)
                       it  = itvib(imolty,j,jjvib)
-                      if ( ip1 .lt. j ) vvib = vvib +
-     +             brvibk(it) * ( distij(ip1,j) - brvib(it) )**2
+                      if (L_vib_table) then
+                         call lininter_vib(distij(ip1,j), 
+     &                        tabulated_vib, it)
+                         vvib = vvib + tabulated_vib
+c                         write(2,*) 'INTRA_ENERGY VVIB: ', 
+c     &                        tabulated_vib
+                      endif
+                      if ( ip1 .lt. j .and..not.L_vib_table) vvib = vvib
+     +                 + brvibk(it) * ( distij(ip1,j) - brvib(it) )**2
                    enddo
                 enddo
 c             endif
@@ -155,8 +163,8 @@ c ### molecule with bond bending
                       vbend = vbend +
      +                     brbenk(it) * (theta-brben(it))**2
 
-c                      write(2,*) 'ip2,ip1,j',ip2,ip1,j
-c                      write(2,*) 'bend energy, theta '
+c                      write(iou,*) 'ip2,ip1,j',ip2,ip1,j
+c                      write(iou,*) 'bend energy, theta '
 c     &                     ,brbenk(it) * (theta-brben(it))**2,theta
                    endif
                 enddo
@@ -230,12 +238,12 @@ c     note that vintra is only computed when the flag lljii is true
       v = vinter + vext + vintra + velect + vewald + vvib + vbend + vtg 
 C  NEERAJ: Debugging start
 
-c      write(2,*) 'vinter:',vinter,'vext:',vext,'vintra:',vintra,'velect'
+c      write(iou,*) 'vinter:',vinter,'vext:',vext,'vintra:',vintra,'velect'
 c     & ,velect,'vewald:'vewald
 
 C  NEERAJ: DEbugging end
 
-c      write(2,*) 'end ENERGY'
+c      write(iou,*) 'end ENERGY'
 
       return
       end

@@ -35,7 +35,7 @@ c
          endif
       enddo 
       if (nw.lt.tnw) then
-         write(2,*) 'increase nw in ipswpar to ', tnw
+         write(iou,*) 'increase nw in ipswpar to ', tnw
          stop
       endif
       read(35,*)
@@ -81,16 +81,16 @@ c
                if (dabs(hmat(ibox,i)-hm(i)).gt.1.0d-6) lhm = .true.
             enddo
             if (lhm) then
-               write(2,*) 'enter correct hmat'
-               write(2,*) hm(1),hm(2),hm(3)
-               write(2,*) hm(4),hm(5),hm(6)
-               write(2,*) hm(7),hm(8),hm(9)
+               write(iou,*) 'enter correct hmat'
+               write(iou,*) hm(1),hm(2),hm(3)
+               write(iou,*) hm(4),hm(5),hm(6)
+               write(iou,*) hm(7),hm(8),hm(9)
                stop
             endif
          elseif (.not.lsolid(ibox)) then
             lx = (1.0d0-lambdais)*lena+lambdais*lenc
             if (dabs(boxlx(1)-lx).gt.1.0d-6) then
-               write(2,*) 'input correct boxl', lx
+               write(iou,*) 'input correct boxl', lx
                stop
             endif
          endif
@@ -102,16 +102,16 @@ c
                if (dabs(hmat(ibox,i)-hmata(i)).gt.1.0d-6) lhm = .true.
             enddo
             if (lhm) then
-               write(2,*) 'enter correct hmat'
-               write(2,*) hmata(1),hmata(2),hmata(3)
-               write(2,*) hmata(4),hmata(5),hmata(6)
-               write(2,*) hmata(7),hmata(8),hmata(9)
+               write(iou,*) 'enter correct hmat'
+               write(iou,*) hmata(1),hmata(2),hmata(3)
+               write(iou,*) hmata(4),hmata(5),hmata(6)
+               write(iou,*) hmata(7),hmata(8),hmata(9)
                stop
             endif
-c	write(2,*) boxlx(1),lena
+c	write(iou,*) boxlx(1),lena
          elseif (.not.lsolid(ibox)) then
             if (dabs(boxlx(1)-lena).gt.1.0d-6) then
-               write(2,*) 'input correct boxl', lena
+               write(iou,*) 'input correct boxl', lena
                stop
             endif
          endif
@@ -123,15 +123,15 @@ c	write(2,*) boxlx(1),lena
                if (dabs(hmat(ibox,i)-hmatc(i)).gt.1.0d-6) lhm = .true.
             enddo
             if (lhm) then
-               write(2,*) 'enter correct hmat'
-               write(2,*) hmatc(1),hmatc(2),hmatc(3)
-               write(2,*) hmatc(4),hmatc(5),hmatc(6)
-               write(2,*) hmatc(7),hmatc(8),hmatc(9)
+               write(iou,*) 'enter correct hmat'
+               write(iou,*) hmatc(1),hmatc(2),hmatc(3)
+               write(iou,*) hmatc(4),hmatc(5),hmatc(6)
+               write(iou,*) hmatc(7),hmatc(8),hmatc(9)
                stop
             endif
          elseif (.not.lsolid(ibox)) then
             if (dabs(boxlx(1)-lenc).gt.1.0d-6) then
-               write(2,*) 'input correct boxl', lenc
+               write(iou,*) 'input correct boxl', lenc
                stop
             endif
          endif
@@ -159,19 +159,19 @@ c	write(2,*) boxlx(1),lena
          endif
       enddo
       if (lmipsw) then
-         write(2,*) '*****************************************'
-         write(2,*) 'Some parameters used for interphase switch'
-         write(2,*) 'moltyp, lwell, and nwell'
+         write(iou,*) '*****************************************'
+         write(iou,*) 'Some parameters used for interphase switch'
+         write(iou,*) 'moltyp, lwell, and nwell'
          do i = 1, nmolty
             if (lwell(i)) then
-               write(2,*) i, lwell(i), nwell(i)
+               write(iou,*) i, lwell(i), nwell(i)
             else
-               write(2,*) i, lwell(i), 'not defined'
+               write(iou,*) i, lwell(i), 'not defined'
             endif 
          enddo
-         write(2,*) 'lstagea,lstageb,lstagec', lstagea,lstageb,lstagec
-         write(2,*) 'etais, lambdais', etais,lambdais
-         write(2,*) '*****************************************'
+         write(iou,*) 'lstagea,lstageb,lstagec', lstagea,lstageb,lstagec
+         write(iou,*) 'etais, lambdais', etais,lambdais
+         write(iou,*) '*****************************************'
       else
          lstagea = .false.
          lstageb = .false.

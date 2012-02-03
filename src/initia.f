@@ -78,9 +78,9 @@ c *** common blocks ***
 
 C --------------------------------------------------------------------
 
-      write(2,*) 
-      write(2,*) 'subroutine initia'
-      write(2,*) 
+      write(iou,*) 
+      write(iou,*) 'subroutine initia'
+      write(iou,*) 
 
 
 c     --- initialize nchbox ---
@@ -104,19 +104,19 @@ c     --- initialize nchbox ---
          enddo
 
          if ( chktot .ne. nchain ) then
-            write(2,*) 'inconsistant number of chains in INITIA'
+            write(iou,*) 'inconsistant number of chains in INITIA'
             do j = 1,nbox
-               write(2,*) 'ininch',j,(ininch(i,j),i=1,nmolty)
+               write(iou,*) 'ininch',j,(ininch(i,j),i=1,nmolty)
             enddo
-            write(2,*) 'nchain',nchain
+            write(iou,*) 'nchain',nchain
             stop
          endif
          
          do i = 1, nmolty
             if ( temtyp(i) .ne. check(i) ) then
-               write(2,*) 'inconsistant number of chains in INITIA'
-               write(2,*) 'moltyp',i,(ininch(i,j),j=1,nbox)
-               write(2,*) 'temtyp:',temtyp(i)
+               write(iou,*) 'inconsistant number of chains in INITIA'
+               write(iou,*) 'moltyp',i,(ininch(i,j),j=1,nbox)
+               write(iou,*) 'temtyp:',temtyp(i)
                stop
             endif            
          enddo
@@ -124,7 +124,7 @@ c     --- initialize nchbox ---
          do i = iboxst,iboxed
             unitc = inix(i)*iniy(i)*iniz(i)
             if ( nchbox(i) .gt. unitc ) then
-               write(2,*) 'unit cell too small in box',i
+               write(iou,*) 'unit cell too small in box',i
                stop
             endif
          enddo
@@ -136,10 +136,10 @@ c *** calculation of unit cell dimensions ***
          ux(i) = boxlx(i) / dble(inix(i)) 
          uy(i) = boxly(i) / dble(iniy(i))
          uz(i) = boxlz(i) / dble(iniz(i))
-         write(2,*) 'box',i
-         write(2,*) 'ini',inix(i),iniy(i),iniz(i)
-         write(2,*) 'box',boxlx(i),boxly(i),boxlz(i)
-         write(2,*) 'uni',ux(i),uy(i),uz(i)
+         write(iou,*) 'box',i
+         write(iou,*) 'ini',inix(i),iniy(i),iniz(i)
+         write(iou,*) 'box',boxlx(i),boxly(i),boxlz(i)
+         write(iou,*) 'uni',ux(i),uy(i),uz(i)
       enddo
 
 c - count number of molecules of each type -
@@ -150,12 +150,13 @@ c - count number of molecules of each type -
       do i=1,nchain
          imolty = moltyp(i)
          mcmt(imolty,1) = mcmt(imolty,1) + 1
+         lhere(i) = .false.
       enddo
 
       do i = 1,nmolty
          if ( mcmt(i,1) .ne. check(i) ) then
-            write(2,*) 'inconsistant number of type in INITIA'
-            write(2,*) 'mcmt(i,total),check(i)',mcmt(i,1),check(i)
+            write(iou,*) 'inconsistant number of type in INITIA'
+            write(iou,*) 'mcmt(i,total),check(i)',mcmt(i,1),check(i)
             stop
          endif
       enddo
@@ -173,8 +174,8 @@ c - count number of molecules of each type -
          enddo
       enddo
 
-      write(2,*) 'nmolty',nmolty
-      write(2,*) '   mcmt',((mcmt(i,ibox),i=1,nmolty),ibox=1,nbox)
+      write(iou,*) 'nmolty',nmolty
+      write(iou,*) '   mcmt',((mcmt(i,ibox),i=1,nmolty),ibox=1,nbox)
 
 c *****************************
 c *** calculate coordinates ***
@@ -200,10 +201,10 @@ c * to grow it with cbmc
             enddo
             if (lgrow) then
 
-               write(2,*) 'growing a sample structure with CBMC'
+               write(iou,*) 'growing a sample structure with CBMC'
 
                if (nunit(i) .ne. nugrow(i)) then
-                  write(2,*) 'Cant grow molecule.  Please',
+                  write(iou,*) 'Cant grow molecule.  Please',
      &                 ' provide a structure via fort.78'
                   stop
                endif
@@ -229,8 +230,8 @@ c * actually grow the structure
      &              ,1,nugrow(i),ddum,.false.,ddum,2 )
 
                if (lterm) then
-                  write(2,*) 'error in initia growing molecule'
-                  write(2,*) 'maybe increasing nchoi would help?'
+                  write(iou,*) 'error in initia growing molecule'
+                  write(iou,*) 'maybe increasing nchoi would help?'
                   stop
                endif
 
@@ -336,8 +337,8 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                      goto 102
                   endif
                   
-c                  write(2,*) 'nn',nn
-c                  write(2,*) 'ic',ic,'   jc',jc,'   kc',kc
+c                  write(iou,*) 'nn',nn
+c                  write(iou,*) 'ic',ic,'   jc',jc,'   kc',kc
                   
 c     - inimix > 0 : take molecules in order (first type I etc.)
 c     - inimix < 0 : take molecules in alternating order
@@ -371,7 +372,7 @@ c     - inimix < 0 : take molecules in alternating order
 
                   ncmt(ibox,intemp) = ncmt(ibox,intemp) + 1
                   
-c                  write(2,*) 'intemp', intemp     
+c                  write(iou,*) 'intemp', intemp     
 
                   if ( lbranch(intemp) ) then
                      ibuild = nunit(intemp)
@@ -422,7 +423,7 @@ c * first find the end with the lowest number
                               zzz = m
                            endif
                         elseif (invib(intemp,m) .gt. 2) then
-                           write(2,*) 'initia only works for linear',
+                           write(iou,*) 'initia only works for linear',
      &                          ' molecules!  Maybe you should make',
      &                          ' a fort.78 file and use lbranch?'
                            stop
@@ -483,7 +484,7 @@ c * now we need to loop over all the other beads:
                               ibtype = itben(intemp,bmap(m2),1)
                               angnew = brben(ibtype) - angold
                            endif 
-c     write(2,*) 'angold',angold*raddeg,
+c     write(iou,*) 'angold',angold*raddeg,
 c     +                       '   angnew',angnew*raddeg
                            angold = angnew
                            
@@ -497,7 +498,7 @@ c * need to search for proper bond length
 
                            ztemp(m) = dsin(angnew) * brvib(ibtype)
                            xynext = dcos(angnew) * brvib(ibtype)
-c                           write(2,*) 'znext',znext,'   xynext',xynext
+c                           write(iou,*) 'znext',znext,'   xynext',xynext
                         else
 c * need to search for proper bond length
                            do zzz = 1,invib(intemp,bmap(m))
@@ -544,12 +545,12 @@ c * translate so that first bead number is at origin
                   endif
 c *** end linear determination
 c ****************************
-c                  write(2,*) 'ibuild',ibuild
+c                  write(iou,*) 'ibuild',ibuild
                   do 98 m = 2, ibuild
                      
                      m1 = m - 1
                      m2 = m - 2
-c                     write(2,*) 'intemp',intemp 
+c                     write(iou,*) 'intemp',intemp 
                      if ( lbranch(intemp) ) then
 c     - branched molecule with sample structure -
                         xnext = samx(intemp,m) -samx(intemp,m1)
@@ -583,14 +584,14 @@ c$$$                           else
 c$$$                              ibtype = itben(intemp,m2,1)
 c$$$                              angnew = brben(ibtype) - angold
 c$$$                           endif 
-c$$$c     write(2,*) 'angold',angold*raddeg,
+c$$$c     write(iou,*) 'angold',angold*raddeg,
 c$$$c     +                       '   angnew',angnew*raddeg
 c$$$                           angold = angnew
 c$$$                           
 c$$$                           ibtype = itvib(intemp,m,1)
 c$$$                           znext = dsin(angnew) * brvib(ibtype)
 c$$$                           xynext = dcos(angnew) * brvib(ibtype)
-c$$$c                           write(2,*) 'znext',znext,'   xynext',xynext
+c$$$c                           write(iou,*) 'znext',znext,'   xynext',xynext
 c$$$                        else
 c$$$                           ibtype = itvib(intemp,m,1)
 c$$$                           znext = brvib(ibtype)
@@ -631,7 +632,7 @@ c *** check initial structure ***
       do 200 n = 1, nn
 
          imolty = moltyp(n)
-c         write(2,*) 'n',n,'   imolty',imolty
+c         write(iou,*) 'n',n,'   imolty',imolty
 
             
          if ( lbranch(imolty) ) then
@@ -646,7 +647,7 @@ c - that have an end-bead with an index smaller than the current bead
                rzui=rzu(n,ii)
 
                if ( n .eq. 1 .or. m .eq. 1 )
-     &              write(2,1002) n,ii,rxui,ryui,rzui,nboxi(n)
+     &              write(iou,1002) n,ii,rxui,ryui,rzui,nboxi(n)
                do iivib = 1, invib(1,ii)
                   jj = ijvib(1,ii,iivib)
                   xvec(ii,jj) = rxu(n,jj) - rxui
@@ -669,7 +670,7 @@ c                 --- account for explct atoms in opposite direction
 c - vibrations -
                do iivib = 1, invib(1,j)
                   jj = ijvib(1,j,iivib)
-                  if ( n .eq. 1 ) write(2,1003) j,jj,distij(j,jj)
+                  if ( n .eq. 1 ) write(iou,1003) j,jj,distij(j,jj)
                enddo
 
 c - bending -
@@ -685,10 +686,10 @@ c - bending -
                   vbend = brbenk(it) * (theta-brben(it))**2
                   aben = aben + vbend
 c                  if ( n .eq. 1 ) then
-c                  write(2,*) 'theta',theta,'vbend',vbend
-c                  write(2,*) 'brben',brben(it),'brbenk',brbenk(it)
+c                  write(iou,*) 'theta',theta,'vbend',vbend
+c                  write(iou,*) 'brben',brben(it),'brbenk',brbenk(it)
 c                  endif
-                  if ( n .eq. 1 ) write(2,1004) j,ip1,ip2,it,
+                  if ( n .eq. 1 ) write(iou,1004) j,ip1,ip2,it,
      &                 theta*raddeg,vbend
                enddo
 
@@ -744,8 +745,8 @@ c     *** calculate scalar triple product ***
                   endif
 
                   ator = ator + vtg
-c                  if ( n .eq. 1 ) write(2,*) 'thetac',thetac,'vtg',vtg
-                  if ( n .eq. 1 ) write(2,1005) j,ip1,ip2,ip3,it,
+c                  if ( n .eq. 1 ) write(iou,*) 'thetac',thetac,'vtg',vtg
+                  if ( n .eq. 1 ) write(iou,1005) j,ip1,ip2,ip3,it,
      &                 dacos(thetac)*raddeg,vtg
                enddo
             enddo
@@ -779,10 +780,10 @@ c ---
                endif
 
 c               if ( n .eq. 1 .or. m .eq. 1 )
-c     &              write(2,1001) n,m,rxu(n,m),ryu(n,m),rzu(n,m),
+c     &              write(iou,1001) n,m,rxu(n,m),ryu(n,m),rzu(n,m),
 c     &                            blen,bang,nboxi(n)
 
-c               write(2,1001) n,m,rxu(n,m),ryu(n,m),rzu(n,m),
+c               write(iou,1001) n,m,rxu(n,m),ryu(n,m),rzu(n,m),
 c     &                            blen,bang,nboxi(n)
 
  199        continue
@@ -807,7 +808,7 @@ c     --- set up intial charges on the atoms
       enddo
 
 
-      write(2,*) 'aben',aben/2.0d0,'ator',ator/2.0d0
+      write(iou,*) 'aben',aben/2.0d0,'ator',ator/2.0d0
 
  1001 format(2i4,5f9.3,i6)
  1002 format('coord. unit:   ',2i4,3f9.3,i6)

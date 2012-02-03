@@ -127,7 +127,6 @@ c**************************************************************************
 c      write(6,*) 'starting triad'
 
       ntr = 0
-      pdis = 1.0d0
 
       do  10 i=1,nchain
 c         imolty = moltyp(i)
@@ -147,16 +146,16 @@ c                  write(6,*) 'ndists:',ndij(ptr,i),ndij(ptr2,i)
                   itr2(ntr) = j
                   itr3(ntr) = k
 
-                  dij(ntr) = ndij(ptr,i)/pdis
-                  dik(ntr) = ndij(ptr2,i)/pdis
+                  dij(ntr) = ndij(ptr,i)
+                  dik(ntr) = ndij(ptr2,i)
 
-                  dxij(ntr) = nxij(ptr,i)/pdis
-                  dyij(ntr) = nyij(ptr,i)/pdis
-                  dzij(ntr) = nzij(ptr,i)/pdis
+                  dxij(ntr) = nxij(ptr,i)
+                  dyij(ntr) = nyij(ptr,i)
+                  dzij(ntr) = nzij(ptr,i)
                   
-                  dxik(ntr) = nxij(ptr2,i)/pdis
-                  dyik(ntr) = nyij(ptr2,i)/pdis
-                  dzik(ntr) = nzij(ptr2,i)/pdis
+                  dxik(ntr) = nxij(ptr2,i)
+                  dyik(ntr) = nyij(ptr2,i)
+                  dzik(ntr) = nzij(ptr2,i)
  40            continue
  30         continue
 c 20      continue
@@ -186,7 +185,6 @@ c      write(6,*) 'end triad'
       double precision temp_dist(nmax),temp_x(nmax),temp_y(nmax),
      &     temp_z(nmax)
 
-      pdis = 1.0d0 
       lwrite=.false.
 
 
@@ -241,8 +239,8 @@ c                  if(lwrite) write(6,*) 'ntang determination a:',atomj,
 c     &                 i,atomk,ntang,' (',i,')'
                   nta = 1
                   ntb = 1
-                  if((nrij(j)/pdis.gt.grij(ntang,1)).or.
-     &                 (nrij(k)/pdis.gt.grij(ntang,1))) then
+                  if((nrij(j).gt.grij(ntang,1)).or.
+     &                 (nrij(k).gt.grij(ntang,1))) then
 c                      if(lwrite) write(6,*) 'skipped above'
                       goto 20
                    endif
@@ -253,8 +251,8 @@ c     &                 i,atomk,ntang,' (',i,')'
                   if(jtype.eq.1) then
                      nta = 1
                      ntb = 2
-                     if((nrij(j)/pdis.gt.grij(4,nta)).or.
-     &                    (nrij(k)/pdis.gt.grij(4,ntb))) then
+                     if((nrij(j).gt.grij(4,nta)).or.
+     &                    (nrij(k).gt.grij(4,ntb))) then
 c                        if(lwrite) write(6,*) 'skipped above'
 c                        if(i.eq.18) 
 c     &                       write(6,*) 'catch distance Si-O-H',
@@ -264,8 +262,8 @@ c     &                       atomj,i,atomk,nrij(j),nrij(k)
                   else
                      nta = 2
                      ntb = 1
-                     if((nrij(j)/pdis.gt.grij(4,nta)).or.
-     &                    (nrij(k)/pdis.gt.grij(4,ntb))) then
+                     if((nrij(j).gt.grij(4,nta)).or.
+     &                    (nrij(k).gt.grij(4,ntb))) then
 c                        if(i.eq.18)
 c     &                       write(6,*) 'catch distance H-O-Si',
 c     &                       atomj,i,atomk,nrij(j),nrij(k)
@@ -280,8 +278,8 @@ c     &                       atomj,i,atomk,nrij(j),nrij(k)
                if ( thetac .le. -1.0d0 ) thetac = -1.0d0
                
                p = (thetac-gtheta(ntang))**2
-              g = dexp((ggamma(ntang,nta)/(nrij(j)/pdis-grij(ntang,nta))
-     &             )+(ggamma(ntang,ntb)/(nrij(k)/pdis-grij(ntang,ntb))))
+              g = dexp((ggamma(ntang,nta)/(nrij(j)-grij(ntang,nta))
+     &             )+(ggamma(ntang,ntb)/(nrij(k)-grij(ntang,ntb))))
                
                vthreea = glambda(ntang)*p*g
 
@@ -354,8 +352,8 @@ c                  if(lwrite) write(6,*) 'ntang determination b:',i,
 c     &                 atomj,atomm,ntang,' (',i,')'
                   nta = 1
                   ntb = 1
-                  if((nrij(j)/pdis.gt.grij(ntang,1)) .or.
-     &                 (ndij(m,atomj)/pdis.gt.grij(ntang,1))) goto 30
+                  if((nrij(j).gt.grij(ntang,1)) .or.
+     &                 (ndij(m,atomj).gt.grij(ntang,1))) goto 30
                else
                   ntang = 4
 c                  if(lwrite) write(6,*) 'ntang determination b:',i,
@@ -363,8 +361,8 @@ c     &                 atomj,atomm,ntang,' (',i,')'
                   if(itype.eq.1) then
                      nta = 1
                      ntb = 2
-                     if((nrij(j)/pdis.gt.grij(4,nta)).or.
-     &                    (ndij(m,atomj)/pdis.gt.grij(4,ntb))) then
+                     if((nrij(j).gt.grij(4,nta)).or.
+     &                    (ndij(m,atomj).gt.grij(4,ntb))) then
 c                        if(lwrite) write(6,*) 'skipped above'
 c     & write(6,*) 'catch distance Si-O-H',nrij(j),ndij(m,atomj)
                         goto 30
@@ -372,8 +370,8 @@ c     & write(6,*) 'catch distance Si-O-H',nrij(j),ndij(m,atomj)
                   else
                      nta = 2
                      ntb = 1
-                     if((nrij(j)/pdis.gt.grij(4,nta)).or.
-     &                    (ndij(m,atomj)/pdis.gt.grij(4,ntb))) then
+                     if((nrij(j).gt.grij(4,nta)).or.
+     &                    (ndij(m,atomj).gt.grij(4,ntb))) then
 c                        if(lwrite) write(6,*) 'skipped above'
 c     & write(6,*) 'catch distance H-O-Si',nrij(j),ndij(m,atomj)
                         goto 30
@@ -388,8 +386,8 @@ c     because the values saved are i-j not j-i must multiply all by -1
                if ( thetac .le. -1.0d0 ) thetac = -1.0d0
                
                p = (thetac-gtheta(ntang))**2
-              g = dexp((ggamma(ntang,nta)/(nrij(j)/pdis-grij(ntang,nta))
-     &             )+(ggamma(ntang,ntb)/(ndij(m,atomj)/pdis-
+              g = dexp((ggamma(ntang,nta)/(nrij(j)-grij(ntang,nta))
+     &             )+(ggamma(ntang,ntb)/(ndij(m,atomj)-
      &              grij(ntang,ntb))))
                
                vthreea = glambda(ntang)*p*g

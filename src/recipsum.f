@@ -158,9 +158,9 @@ c *** Potential energy ***
          enddo
       enddo
       vrecip = vrecip*qqfact
-c      write(2,*) 'in recipsum:',ssumr(100,ibox),ibox
+c      write(iou,*) 'in recipsum:',ssumr(100,ibox),ibox
 c *** safety check ***
-c      write(2,*) 'A total of ',ncount,' vectors are used'
+c      write(iou,*) 'A total of ',ncount,' vectors are used'
       if ( ncount .gt. vectormax ) stop 'choose a larger vectormax'
       numvect(ibox) = ncount
          

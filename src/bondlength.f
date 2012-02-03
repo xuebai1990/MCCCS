@@ -36,9 +36,11 @@ c     **************************************************************
 
       implicit none
 
+      include 'tabulated.inc'
+
       integer vibtype
       double precision length, bond, random, bf, vvib, beta, kvib
-     &     , requil
+     &     , requil, tabulated_vib
 
       vvib = 0.0d0
 
@@ -57,6 +59,28 @@ c     --- correct for the bond energy
          bf = dexp ( -(vvib * beta) )
          if ( random() .ge. bf ) goto 107
          length = bond
+
+c  --- tabulated bond stretching potential
+c  --- added 12/02/08 by KM
+      elseif (L_vib_table) then
+c     --- random bond length from Boltzmann distribution ---
+c     ---  +/- 25% of equilibrium bond length
+ 108     bond = (0.5d0*random()+0.75d0)
+         
+c     --- correct for jacobian by dividing by the max^3
+c     --- 1.953125  = (1.25)^3, the equilibrium bond length cancels out
+         bf = bond*bond*bond/(1.953125d0)
+         if ( random() .ge. bf ) goto 108
+         
+         bond = bond * requil
+         call lininter_vib(bond, tabulated_vib, vibtype)
+         vvib=tabulated_vib
+
+         bf = dexp ( -(vvib * beta) )
+         
+         if ( random() .ge. bf ) goto 108
+         length = bond
+
       else
 c     --- fixed bond length
          length = requil

@@ -9,8 +9,8 @@
 ## only for debugging
 #COMPFLAGS     = -w90 -w95 -cm -CB -CU -g
 
-#COMPFLAGS     =  -O2 -w90 -w95 -cm -p
-COMPFLAGS     =  -O3 -no-prec-div -ipo #-p  #-ipo
+COMPFLAGS     =  -O2 -w90 -w95 -cm -p
+#COMPFLAGS     =  -O3 -no-prec-div -ipo #-p  #-ipo
 LD            = ifort
 LDS           = ifort -c $(COMPFLAGS)
 LDFLAGS       = -static $(COMPFLAGS)
@@ -114,6 +114,7 @@ OBJS	      = Atom_traxyz.o \
 		monola.o \
 		monper.o \
                 ninesix.o \
+                genlj.o \
 		nrtab.o \
 		place.o \
 		pgrid.o \
@@ -168,9 +169,10 @@ OBJS	      = Atom_traxyz.o \
 		v_elect_field.o \
 		torsion.o \
 		garofalini.o \
-		garo3body.o
+		garo3body.o \
+                tabulated.o
 
-PROGRAM       = topmon4 
+PROGRAM       = topmon4
 
 SHELL	      = /bin/sh
 
@@ -179,7 +181,6 @@ SRCS	     =  Atom_traxyz.f \
 		analysis.f \
 		atomtype.f \
 		anes.f \
-		angle.f \
 		boltz.f \
 		bondlength.f \
 		calcsolpar.f \
@@ -222,6 +223,7 @@ SRCS	     =  Atom_traxyz.f \
 		monola.f \
 		monper.f \
                 ninesix.f \
+                genlj.f \
 		nrtab.f \
 		pgrid.f \
 		place.f \
@@ -276,7 +278,8 @@ SRCS	     =  Atom_traxyz.f \
 		v_elect_field.f \
 		torsion.f \
 		garofalini.f \
-		garo3body.f
+		garo3body.f \
+                tabulated.f
 
 all:		$(PROGRAM)
 
@@ -303,22 +306,23 @@ anes.o: control.inc coord.inc coord2.inc ensemble.inc rosen.inc \
 	$(LDS) anes.f
 boltz.o: boltz.f control.inc coord.inc system.inc poten.inc neigh.inc \
 	cbmc.inc external.inc connect.inc ewaldsum.inc cell.inc \
-	peboco.inc fepsi.inc qqlist.inc nsix.inc ipswpar.inc eepar.inc conver.inc boltz.f
+	peboco.inc fepsi.inc qqlist.inc nsix.inc ipswpar.inc eepar.inc conver.inc \
+        tabulated.inc boltz.f
 	$(LDS) boltz.f
-bondlength.o: bondlength.f
+bondlength.o: bondlength.f tabulated.inc bondlength.f
 	$(LDS) bondlength.f
 calcsolpar.o: calcsolpar.f control.inc inputdata.inc blkavg.inc coord.inc \
 	ensemble.inc system.inc cell.inc calcsolpar.f 
 	$(LDS) calcsolpar.f
 calctor.o: control.inc fix.inc calctor.f
 	$(LDS) calctor.f
-charge.o: control.inc coord.inc poten.inc conver.inc ewaldsum.inc charge.f
+charge.o: control.inc coord.inc poten.inc conver.inc ewaldsum.inc connect.inc charge.f
 	$(LDS) charge.f
-close.o : close.f
+close.o: control.inc close.f
 	$(LDS) close.f
-cone.o: conver.inc cone.f
+cone.o: control.inc conver.inc cone.f
 	$(LDS) cone.f
-coneangle.o: coneangle.f
+coneangle.o: control.inc coneangle.f
 	$(LDS) coneangle.f
 config.o: control.inc coord.inc coord2.inc system.inc ensemble.inc cbmc.inc \
 	rosen.inc inputdata.inc ewaldsum.inc poten.inc ipswpar.inc \
@@ -342,7 +346,7 @@ dump.o: control.inc coord.inc poten.inc system.inc ensemble.inc cbmc.inc \
 	cell.inc gor.inc dump.f
 	$(LDS) dump.f
 energy.o: control.inc coord.inc system.inc neigh.inc poten.inc coord2.inc \
-	external.inc connect.inc ewaldsum.inc fepsi.inc qqlist.inc nsix.inc 	peboco.inc cell.inc ipswpar.inc eepar.inc conver.inc garofalini.inc energy.f
+	external.inc connect.inc ewaldsum.inc fepsi.inc qqlist.inc nsix.inc peboco.inc cell.inc ipswpar.inc eepar.inc conver.inc garofalini.inc tabulated.inc energy.f
 	$(LDS) energy.f
 erfunc.o: erfunc.f
 	$(LDS) erfunc.f
@@ -367,7 +371,7 @@ flucq.o: control.inc coord.inc coord2.inc ensemble.inc system.inc \
 	inputdata.inc bnbsma.inc ewaldsum.inc fepsi.inc poten.inc flucq.f
 	$(LDS) flucq.f
 geometry.o: control.inc coord.inc connect.inc conver.inc \
-	rosen.inc cbmc.inc geometry.f
+	rosen.inc cbmc.inc tabulated.inc geometry.f
 	$(LDS) geometry.f
 forcefield.o: zeolite.inc zeopoten.inc control.inc forcefield.f
 	$(LDS) forcefield.f
@@ -405,6 +409,8 @@ monper.o: control.inc coord.inc system.inc ensemble.inc cbmc.inc \
 	$(LDS) monper.f
 ninesix.o: control.inc nsix.inc ninesix.f
 	$(LDS) ninesix.f
+genlj.o: control.inc poten.inc genlj.f
+	$(LDS) genlj.f
 nrtab.o: control.inc coord.inc poten.inc connect.inc nrtab.inc nrtab.f
 	$(LDS) nrtab.f
 place.o: control.inc coord.inc cbmc.inc connect.inc fix.inc system.inc \
@@ -425,7 +431,7 @@ readdat.o: control.inc coord.inc cbmc.inc system.inc conver.inc poten.inc \
 	inpar.inc external.inc externalmuir.inc zeolite.inc\
 	nrtab.inc connect.inc inputdata.inc ewaldsum.inc \
 	swtcmove.inc fepsi.inc expand.inc qqlist.inc clusterbias.inc \
-	cell.inc gor.inc garofalini.inc conver.inc readdat.f
+	cell.inc gor.inc garofalini.inc conver.inc tabulated.inc readdat.f
 	$(LDS) readdat.f
 rigfix.o: control.inc coord.inc cbmc.inc rosen.inc fix.inc connect.inc \
 	system.inc rigfix.f 
@@ -450,7 +456,7 @@ rotxyz.o: coord.inc coord2.inc ensemble.inc neigh2.inc system.inc \
 	control.inc inputdata.inc bnbsma.inc fepsi.inc ipswpar.inc \
 	eepar.inc rotxyz.f 
 	$(LDS) rotxyz.f
-rwztab.o: grid.inc zeolite.inc rwztab.f
+rwztab.o: control.inc grid.inc zeolite.inc rwztab.f
 	$(LDS) rwztab.f
 safecbmc.o: coord.inc control.inc fix.inc connect.inc rosen.inc cbmc.inc \
 	safecbmc.f
@@ -475,7 +481,7 @@ suijtab.o: control.inc coord.inc external.inc poten.inc system.inc \
 sumup.o: coord.inc system.inc poten.inc conver.inc control.inc \
 	external.inc zeolite.inc connect.inc inputdata.inc fepsi.inc\
         inputdata.inc qqlist.inc cell.inc nsix.inc peboco.inc ipswpar.inc \
-	eepar.inc garofalini.inc sumup.f
+	eepar.inc garofalini.inc tabulated.inc sumup.f
 	$(LDS) sumup.f
 susami.o: external.inc ljsamipara.inc susami.f
 	$(LDS) susami.f
@@ -521,9 +527,9 @@ writepdb.o: control.inc zeolite.inc coord.inc writepdb.f
 	$(LDS) writepdb.f
 zeocoord.o: zeolite.inc zeopoten.inc zeocoord.f
 	$(LDS) zeocoord.f
-ztab.o: grid.inc zeolite.inc ztab.f
+ztab.o: grid.inc zeolite.inc control.inc ztab.f
 	$(LDS) ztab.f
-ztest.o: grid.inc zeolite.inc ztest.f
+ztest.o: grid.inc zeolite.inc control.inc ztest.f
 	$(LDS) ztest.f
 Intra_energy.o: control.inc coord.inc system.inc neigh.inc poten.inc coord2.inc \
 	external.inc connect.inc ewaldsum.inc fepsi.inc qqlist.inc nsix.inc Intra_energy.f
@@ -549,12 +555,14 @@ ee_recip.o: control.inc coord.inc coord2.inc ewaldsum.inc poten.inc ee_recip.f
 	$(LDS) ee_recip.f
 v_elect_field.o: control.inc external.inc coord.inc v_elect_field.f
 	$(LDS) v_elect_field.f
-torsion.o:  torsion.inc conver.inc torsion.f
+torsion.o:  torsion.inc conver.inc control.inc torsion.f
 	$(LDS) torsion.f
 garofalini.o: control.inc garofalini.inc poten.inc garofalini.f
 	$(LDS) garofalini.f
 garo3body.o: control.inc coord.inc garofalini.inc neigh.inc garo3body.f
 	$(LDS) garo3body.f
+tabulated.o:  tabulated.inc conver.inc tabulated.f
+	$(LDS) tabulated.f
 
 ##### remove object files
 clean:

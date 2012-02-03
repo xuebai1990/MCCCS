@@ -88,7 +88,7 @@ c * end additions
      &  ,vntail(nbxmax),vnelect(nbxmax),vnewald(nbxmax)
 c +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-c      write(2,*) 'start SWATCH'
+c      write(iou,*) 'start SWATCH'
 
       lempty = .false.
 c     ---randomly select chains to switch between boxa boxb
@@ -153,7 +153,7 @@ c ****************************************************************
 c * liswatch prevents non-grown beads from being included in 
 c * the new growth in boltz.f
 
-c      write(2,*) 'start iSWATCH'
+c      write(iou,*) 'start iSWATCH'
 
 c$$$c *** randomly select chains to switch ***
 c$$$c *** select a pair type to switch *** 
@@ -214,7 +214,7 @@ c     * imola is the overall molecule id number (runs from 1 to total #) *
            imola = parbox( moltaid, box, imolta) 
 
            if (moltyp(imola) .ne. imolta) 
-     &                   write(2,*) 'screwup in iswatch'
+     &                   write(iou,*) 'screwup in iswatch'
 
            iboxi = nboxi(imola)
 
@@ -226,7 +226,7 @@ c     *** get particle of type b ***
            imolb = parbox( moltbid, box, imoltb) 
 
            if (moltyp(imolb) .ne. imoltb) 
-     &                write(2,*) 'screwup in iswatch'
+     &                write(iou,*) 'screwup in iswatch'
            iboxi = nboxi(imolb)
 
            if (iboxi .ne. box) stop 'problem in iswatch'
@@ -236,7 +236,7 @@ c$$$  bniswat(iparty,box) = bniswat(iparty,box) + 1.0d0
          bnswat(iparty,ipairb) = bnswat(iparty,ipairb) + 1.0d0   
          if (lempty) return 
 c     * write out the molecule numbers of the pair *
-c     write(2,*) imola,imolb
+c     write(iou,*) imola,imolb
 
 c     ***************************
 c     *** Begin Growth Setups ***
@@ -258,20 +258,20 @@ c     *** assign from and prev for each moltyp
 
          enddo
 
-c$$$         write(2,*) 'mol a'
+c$$$         write(iou,*) 'mol a'
 c$$$  
 c$$$         do zz = 1,ncut(type_a)
-c$$$            write(2,*) zz,'from',from(type_a+2*(zz-1)),' prev',
+c$$$            write(iou,*) zz,'from',from(type_a+2*(zz-1)),' prev',
 c$$$     &        prev(type_a+2*(zz-1))
 c$$$         enddo
 c$$$  
-c$$$         write(2,*) 'mol b'
+c$$$         write(iou,*) 'mol b'
 c$$$  
-c$$$         write(2,*) gswatc(iparty,type_b,3),gswatc(iparty,type_b,4)
-c$$$         write(2,*) from(3),prev(3),type_b
+c$$$         write(iou,*) gswatc(iparty,type_b,3),gswatc(iparty,type_b,4)
+c$$$         write(iou,*) from(3),prev(3),type_b
 c$$$  
 c$$$         do zz = 1,ncut(type_b)
-c$$$            write(2,*) zz,'from',from(type_b+2*(zz-1)),' prev',
+c$$$            write(iou,*) zz,'from',from(type_b+2*(zz-1)),' prev',
 c$$$     &        prev(type_b+2*(zz-1))
 c$$$         enddo
 c$$$         
@@ -359,7 +359,7 @@ c     * assign growth schedule for molecule b *
 
             liswinc(zz,imolty) = lexshed(zz)
 
-c     write(2,*) zz, liswinc(zz,imolty)
+c     write(iou,*) zz, liswinc(zz,imolty)
             
          enddo
 
@@ -525,12 +525,12 @@ c     * moving molecules back *
 
             if ( lterm ) then
 c     *** termination of cbmc attempt due to walk termination ***
-c     write(2,*) 'iSWATCH:new growth rejected',ic
+c     write(iou,*) 'iSWATCH:new growth rejected',ic
 c * reset liswatch
                liswatch = .false.
                return
             else
-c     write(2,*) 'iSWATCH:new growth accepted',ic
+c     write(iou,*) 'iSWATCH:new growth accepted',ic
             endif
 
 c     *** save the new coordinates ***
@@ -624,7 +624,7 @@ c     * return a to position 1 *
             endif
             
             if (lterm) then
-               write(2,*) 'other ',other,' self ',self,ic
+               write(iou,*) 'other ',other,' self ',self,ic
                stop 'interesting screwup in CBMC iswatch'
             endif
 
@@ -670,12 +670,12 @@ c$$$     &           ,islen,box,igrow,dummy,.false.,dummy,2)
 
             if ( lterm ) then
 c     *** termination of old walk due to problems generating orientations ***
-c     write(2,*) 'iSWATCH:old growth rejected',ic
+c     write(iou,*) 'iSWATCH:old growth rejected',ic
 c * reset liswatch
                liswatch = .false.
                return
             else 
-c     write(2,*) 'iSWATCH:old growth accepted',ic
+c     write(iou,*) 'iSWATCH:old growth accepted',ic
             endif
 
 c        --- propagate old rosenbluth weight
@@ -824,7 +824,7 @@ c     *************************
          wolog = dlog10( tweiold )
          wdlog = wnlog - wolog
          if ( wdlog .lt. -softcut ) then
-c     write(2,*) '### underflow in wratio calculation ###'
+c     write(iou,*) '### underflow in wratio calculation ###'
             call recip(box,vdum,vdum,4)
             return
          endif
@@ -834,7 +834,7 @@ c     write(2,*) '### underflow in wratio calculation ###'
          if ( random() .le. wswat ) then
 c     *** we can now accept !!!!! ***
             bsswat(iparty,ipairb) = bsswat(iparty,ipairb) + 1.0d0
-c     write(2,*) 'SWATCH ACCEPTED',imola,imolb
+c     write(iou,*) 'SWATCH ACCEPTED',imola,imolb
 
             vbox(box)     = vbox(box)    + vnbox(box)
             vinterb(box)  = vinterb(box) + vninte(box)
@@ -851,16 +851,16 @@ c     *** assign new geometries ***
                rxu(imola,ic) = rxut(1,ic)
                ryu(imola,ic) = ryut(1,ic)
                rzu(imola,ic) = rzut(1,ic)
-c     write(2,*) 'imola:',imola
-c     write(2,*) rxu(imola,ic),ryu(imola,ic),rzu(imola,ic)
+c     write(iou,*) 'imola:',imola
+c     write(iou,*) rxu(imola,ic),ryu(imola,ic),rzu(imola,ic)
             enddo
 
             do ic = 1,iunitb
                rxu(imolb,ic) = rxut(2,ic)
                ryu(imolb,ic) = ryut(2,ic)
                rzu(imolb,ic) = rzut(2,ic)
-c     write(2,*) 'imolb:',imolb
-c     write(2,*) rxu(imolb,ic),ryu(imolb,ic),rzu(imolb,ic)
+c     write(iou,*) 'imolb:',imolb
+c     write(iou,*) rxu(imolb,ic),ryu(imolb,ic),rzu(imolb,ic)
             enddo
             if ( lewald ) then
 c     -- update reciprocal-space sum
@@ -897,13 +897,13 @@ c     --- check if the particle types are in their boxes
          if ( (ncmt(boxa,imolta) .eq. 0) .or. 
      &        (ncmt(boxb,imoltb) .eq. 0) ) then
             lempty = .true.
-c     write(2,*) 'one box out of swatch particle'
+c     write(iou,*) 'one box out of swatch particle'
          else
 c     ---get particle from box a
 
             iboxal = idint( dble(ncmt(boxa,imolta))*random() ) + 1
             iboxa = parbox(iboxal,boxa,imolta)
-            if ( moltyp(iboxa) .ne. imolta ) write(2,*) 'screwup'
+            if ( moltyp(iboxa) .ne. imolta ) write(iou,*) 'screwup'
             iboxia = nboxi(iboxa)
             if (iboxia .ne. boxa) stop 'problem in swatch'
 
@@ -911,13 +911,13 @@ c     ---get particle from box b
 
             iboxbl = idint( dble(ncmt(boxb,imoltb))*random() ) + 1
             iboxb = parbox(iboxbl,boxb,imoltb)
-            if ( moltyp(iboxb) .ne. imoltb ) write(2,*) 'screwup'
+            if ( moltyp(iboxb) .ne. imoltb ) write(iou,*) 'screwup'
             iboxib = nboxi(iboxb)
             if (iboxib .ne. boxb) stop 'problem in swatch'
          endif
 
 c     ---add one attempt to the count for iparty
-c     write(2,*) 'iparty:',iparty,'boxa:',boxa
+c     write(iou,*) 'iparty:',iparty,'boxa:',boxa
          bnswat(iparty,ipairb) = bnswat(iparty,ipairb) + 1.0d0
 
          if (lempty) return
@@ -1073,16 +1073,16 @@ c        --- propagate new rosenbluth weight
 c --- end rigid add on 
 
 c     --- save the new coordinates
-c     write(2,*) 'new:',moltyp(self),iunit
+c     write(iou,*) 'new:',moltyp(self),iunit
             do jj = 1,igrow
                rxut(ic,jj) = rxnew(jj)
                ryut(ic,jj) = rynew(jj)
                rzut(ic,jj) = rznew(jj)
-c     write(2,*) rxnew(jj),rynew(jj),rznew(jj)
+c     write(iou,*) rxnew(jj),rynew(jj),rznew(jj)
             enddo
-c     write(2,*) 'old:',moltyp(other),nunit(moltyp(other))
+c     write(iou,*) 'old:',moltyp(other),nunit(moltyp(other))
 c     do jj = 1,nunit(moltyp(other))
-c     write(2,*) rxu(other,jj),ryu(other,jj),rzu(other,jj)
+c     write(iou,*) rxu(other,jj),ryu(other,jj),rzu(other,jj)
 c     enddo
 
 c     --- Corrections for switched beads, and DC-CBMC
@@ -1117,7 +1117,7 @@ c     --- use phony number iins and call explct to add constrained hydrogens
                   rxut(ic,j) = rxu(iins,j)
                   ryut(ic,j) = ryu(iins,j)
                   rzut(ic,j) = rzu(iins,j)
-c     write(2,*) 'new:',rxut(ic,j),ryut(ic,j),rzut(ic,j)
+c     write(iou,*) 'new:',rxut(ic,j),ryut(ic,j),rzut(ic,j)
                enddo
             endif
 
@@ -1133,7 +1133,7 @@ c     and torsional type for those units swatched!!!!!!
      &           ,vdum,.false.,.false.)
             
             if (lterm) then
-c     write(2,*) 'other ',other,' self ',self
+c     write(iou,*) 'other ',other,' self ',self
 c     stop 'interesting screwup in CBMC swatch'
                return
             endif
@@ -1172,7 +1172,7 @@ c$$$     &           ,igrow,dummy,.false.,dummy,2)
 
 c        --- termination of old walk due to problems generating orientations
             if ( lterm ) then
-               write(2,*) 'SWATCH: old growth rejected'
+               write(iou,*) 'SWATCH: old growth rejected'
                return
             endif
 
@@ -1367,7 +1367,7 @@ c     --- new logic for tail correction (same answer) MGM 3-25-98
          wolog = dlog10( tweiold )
          wdlog = wnlog - wolog
          if ( wdlog .lt. -softcut ) then
-c     write(2,*) '### underflow in wratio calculation ###'
+c     write(iou,*) '### underflow in wratio calculation ###'
             return
          endif
          wswat = ( tweight / tweiold ) * ( dble(orgaia*orgbib) /
@@ -1376,12 +1376,12 @@ c     write(2,*) '### underflow in wratio calculation ###'
      &        +eta2(boxb,imoltb)-eta2(boxa,imoltb)
      &        -eta2(boxb,imolta)))
 
-c     write(2,*) 'imolta,imoltb',imolta,imoltb
-c     write(2,*) 'wswat,tweight,tweiold',wswat,tweight,tweiold
+c     write(iou,*) 'imolta,imoltb',imolta,imoltb
+c     write(iou,*) 'wswat,tweight,tweiold',wswat,tweight,tweiold
          if ( random() .le. wswat ) then
 c     *** we can now accept !!!!! ***
             bsswat(iparty,ipairb) = bsswat(iparty,ipairb) + 1.0d0
-c     write(2,*) 'SWATCH ACCEPTED',iboxa,iboxb
+c     write(iou,*) 'SWATCH ACCEPTED',iboxa,iboxb
             do jj = 1,2
                if ( jj .eq. 1 ) ic = boxa
                if ( jj .eq. 2 ) ic = boxb
@@ -1445,7 +1445,7 @@ c -----------------------------------------------------------------
 
       endif
 
-c      write(2,*) 'end SWATCH'
+c      write(iou,*) 'end SWATCH'
 
       return
       end

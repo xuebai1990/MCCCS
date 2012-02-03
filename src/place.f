@@ -32,6 +32,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'fix.inc'
       include 'system.inc'
       include 'rosen.inc'
+      include 'tabulated.inc'
 
       logical lnew,lterm,ovrlap
 
@@ -49,7 +50,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
      &     ,wei_bend,ang_trial,angles,vctor,vdha
      &     ,vbend,vtorsion,bsum,alpha,gamma,twopi,dum,phi,thetaone
      &     ,thetatwo,phitwo
-
+      double precision tabulated_vib
 
       dimension r(nchbn_max),bfactor(nchbn_max)
      &     ,bendang(numax,numax),ang_trial(nchbn_max),dist(max)
@@ -63,7 +64,7 @@ c     **           -- Uses CDCBMC to grow them --              **
 c     ***********************************************************
 
 
-c      write(2,*) 'START PLACE'
+c      write(iou,*) 'START PLACE'
 
 
       nchvib = nchbna(imolty)
@@ -95,7 +96,7 @@ c      write(2,*) 'START PLACE'
             iu = iplace(iw,count)
 
             if (invib(imolty,iu).gt.1) then
-               write(2,*) 'iu,invib',iu,invib(imolty,iu)
+               write(iou,*) 'iu,invib',iu,invib(imolty,iu)
                stop 'invib can no be larger than one for hydrogen'
             endif
 
@@ -105,7 +106,7 @@ c     --- determine bond lengths
             ju = ijvib(imolty,iu,iv)
 
             if (iufrom.ne.ju) then
-               write(2,*) 'iu,ju,iufrom',iu,ju,iufrom
+               write(iou,*) 'iu,ju,iufrom',iu,ju,iufrom
                stop 'ju not equal to iufrom'
             endif
 
@@ -125,7 +126,12 @@ c     --- we will use flexible bond lengths
                   uy = ryu(i,ju) - ryu(i,iu)
                   uz = rzu(i,ju) - rzu(i,iu)
                   r(1) = dsqrt(ux**2 + uy**2 + uz**2)
-                  vvib = kforce * (r(1) - equil)**2
+                  if (L_vib_table) then
+                     call lininter_vib(r(1), tabulated_vib, jtvib)
+                     vvib = tabulated_vib
+                   else
+                     vvib = kforce * (r(1) - equil)**2
+                  endif
                   bfactor(1) = dexp(-beta*vvib)
                   bsum_try = bsum_try + bfactor(1)
                   start = 2
@@ -135,7 +141,12 @@ c     --- we will use flexible bond lengths
                
                do ivib = start, nchvib
                   r(ivib) = (mincb + random()*delcb)**third
-                  vvib = kforce * ( r(ivib) - equil )**2
+                  if (L_vib_table) then
+                     call lininter_vib(r(ivib), tabulated_vib, jtvib)
+                     vvib = tabulated_vib
+                  else
+                     vvib = kforce * ( r(ivib) - equil )**2
+                  endif
                   bfactor(ivib) = dexp(-beta*vvib)
                   bsum_try = bsum_try + bfactor(ivib)
                enddo
@@ -252,7 +263,7 @@ c     --- determine angle with iuprev
                   if (ku.eq.pprev(iw)) then
 
                      if (ju.ne.ijben2(imolty,iu,ib)) then
-                        write(2,*) 'ju,ijben2',ju,ijben2(imolty,iu,ib)
+                        write(iou,*) 'ju,ijben2',ju,ijben2(imolty,iu,ib)
                         stop 'ju not equal to ijben2 in place'
                      endif
 
@@ -470,7 +481,7 @@ c     --- now to calculate all torsions
                   if (niplace(jut4).lt.niplace(iu)) then
                         
                      if (.not. lexist(jut4)) then
-                        write(2,*) 'jut4,jut3,jut2,iu',
+                        write(iou,*) 'jut4,jut3,jut2,iu',
      &                       jut4,jut3,jut2,iu
                         stop 'trouble jut4 in place'
                      endif
@@ -599,7 +610,7 @@ c     --- update new rosenbluth weight + vibrations
          enddo
       enddo
 
-c      write(2,*) 'END PLACE'
+c      write(iou,*) 'END PLACE'
       
       return
       end

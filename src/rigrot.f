@@ -61,7 +61,7 @@ c     &*&*&*&*&*&*&*&*&*&*&*&* IMPORTANT *&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&
 
 c ----------------------------------------------------------------------
       
-c      write(2,*) 'start RIGROT'
+c      write(iou,*) 'start RIGROT'
      
 c     --- initialize conformation energies and weight
 
@@ -225,7 +225,7 @@ c     --- select ip position
       else
          iwalk = 1
          if ( wadd .lt. softlog ) then
-            write(2,*) '###old rigrot weight too low'
+            write(iou,*) '###old rigrot weight too low'
          endif
       endif
       
@@ -261,7 +261,7 @@ c     --- select ip position
       enddo
 
 
-c      write(2,*) 'end RIGROT'
+c      write(iou,*) 'end RIGROT'
  
       return
       end

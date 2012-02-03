@@ -3,6 +3,7 @@
       implicit none
       include 'torsion.inc'
       include 'conver.inc'
+      include 'control.inc'
 
       integer ttyp,klo,khi,k,xa,bin,addl
       double precision theta,spltor,thetarem,tordiff,torstep,left
@@ -17,30 +18,30 @@ c Requires a file (fort.40) running from -180 to 180 in 1/4 degree intervals
 
       xa=idint(theta)
       left=(theta-xa)
-c      write(2,*) 'left',left
+c      write(iou,*) 'left',left
 
 c     selecting bin of correct degree
       addl = idint(left*4)
       bin = (xa-deg(1,ttyp))*4 + 1 + addl
       if (theta .lt. 0.0d0.and.theta.ge.-180.0d0) then
-c         write(2,*) 'negative bin',bin
+c         write(iou,*) 'negative bin',bin
          khi = bin
          klo = khi-1
       elseif (theta .ge. 0.0d0.and.theta.le.180.0d0) then
-c         write(2,*) 'positive bin',bin
+c         write(iou,*) 'positive bin',bin
          klo = bin
          khi = klo+1
       else
-         write(2,*) 'Error in lininter.f - theta',theta
+         write(iou,*) 'Error in lininter.f - theta',theta
       endif
 
-c      write(2,*) 'klo,khi',klo,deg(klo,ttyp),khi,deg(khi,ttyp)
+c      write(iou,*) 'klo,khi',klo,deg(klo,ttyp),khi,deg(khi,ttyp)
 c check
       if(deg(klo,ttyp).gt.theta.or.deg(khi,ttyp).lt.theta) then
-          write(2,*) 'problem below'
-          write(2,*) 'theta',theta,' ttyp',ttyp
-          write(2,*) 'klo',klo,deg(klo,ttyp),'khi',khi,deg(khi,ttyp)
-          write(2,*)
+          write(iou,*) 'problem below'
+          write(iou,*) 'theta',theta,' ttyp',ttyp
+          write(iou,*) 'klo',klo,deg(klo,ttyp),'khi',khi,deg(khi,ttyp)
+          write(iou,*)
        endif
 
       thetarem=theta-deg(klo,ttyp)
@@ -60,6 +61,7 @@ c      tordiff=tabtorso(khi,ttyp)-tabtorso(klo,ttyp)
       implicit none
 
       include 'torsion.inc'
+      include 'control.inc'
       
 c      integer n,nmax
 c      double precision yp1,ypn,x(n),y(n),y2(n)
@@ -86,7 +88,7 @@ c (Extra 15 degrees on each side required so that second derivatives are reasona
 c     by the time the degrees of interest are reached.)
       points=splpnts(tortyp)
 
-      write(2,*) 'beginning of spline',splpnts(tortyp),yp1,ypn
+      write(iou,*) 'beginning of spline',splpnts(tortyp),yp1,ypn
 
       if (yp1.gt.0.99d30) then
          torderiv2(1,tortyp) = 0.0d0
@@ -156,6 +158,7 @@ c     xa = deg, ya = tabtorso, y2a = torderiv2, n = points
 
       include 'torsion.inc'
       include 'conver.inc'
+      include 'control.inc'
       integer k, khi,klo,points,jttor,tortyp,xa
       double precision a,b,h,x,y,vtorso,vtorsoa
 
@@ -177,11 +180,11 @@ c Below is correct for tabulated data from -195 to 195 degrees
          khi=xa+1
       endif
 
-c      write(2,*) 'klo,khi',deg(klo,tortyp),deg(khi,tortyp)
+c      write(iou,*) 'klo,khi',deg(klo,tortyp),deg(khi,tortyp)
 
       h = deg(khi,tortyp)-deg(klo,tortyp)
      
-      if (dabs(h).lt.1.0d-8) write(2,*) 'bad deg input in splint',h,
+      if (dabs(h).lt.1.0d-8) write(iou,*) 'bad deg input in splint',h,
      +     khi,deg(khi,tortyp),klo,deg(klo,tortyp)
       a = (deg(khi,tortyp)-x)/h
       b = (x-deg(klo,tortyp))/h
@@ -189,7 +192,7 @@ c      write(2,*) 'klo,khi',deg(klo,tortyp),deg(khi,tortyp)
      +     ((a**3-a)*torderiv2(klo,tortyp)+(b**3-b)*
      +     torderiv2(khi,tortyp))*(h**2)/6.0d0
 
-c      write(2,*) x,y,tortyp
+c      write(iou,*) x,y,tortyp
 
       return
       end

@@ -44,7 +44,18 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
      +   ,lspecial(nntype*nntype),lpl(nntype)
       
       dimension ljscale(ntmax,numax,numax),qscale2(ntmax,numax,numax)
-      dimension lq14scale(ntmax),qscale(ntmax) 
+      dimension lq14scale(ntmax),qscale(ntmax)
+      double precision n0,n1
+
+c ***********************************************************
+c *** parameters for Generalized Lennard Jones Potential  ***
+c repulsive part
+      parameter(n0=12.0d0)
+c   attractive part
+      parameter(n1=6.0d0)  
+c ****  Ref:  J. Chem. Phys. 120, 4994 (2004)         ****
+c ***********************************************************
+ 
 c *** common blocks *** 
       common /ljpot/ sig2ij,epsij,ecut,epsilon,sigma,epsi,sigi
      &   ,q1,qscale,a15,a15type

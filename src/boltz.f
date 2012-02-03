@@ -49,6 +49,7 @@ c    *******************************************************************
       include 'ipswpar.inc'
       include 'eepar.inc'
       include 'conver.inc'
+      include 'tabulated.inc'
 
       logical lnew,ovrlap,lcmno,lfirst,lcompute,lcoulo
       logical lqimol,lqjmol,liji,lqchgi
@@ -63,7 +64,7 @@ c    *******************************************************************
      +     ,rxuij,ryuij,rzuij,rij,rijsq,sr2,dzui,dz3,dz12
      +     ,exzeo,exsami,exmuir,exgrph,ljpsur,ljmuir,exsix
      +     ,mmff,maxlen,rcm,rcmsq
-     +     ,corr,erfunc,rcutmax,ninesix
+     +     ,corr,erfunc,rcutmax,ninesix, genlj
       double precision vinter,vintra,vext,velect,vewald,qave,
      &     epsilon2,sigma2,vwell,v,rcutsq,rcinsq
 
@@ -73,9 +74,12 @@ c    *******************************************************************
       dimension lcmno(nmax),lcoulo(numax,numax)
       dimension glist(numax),cellinc(27),jcell(nmax)
 
+      double precision tabulated_bend, tabulated_vdW, tabulated_elect
+      integer mmm
+
 c ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
       
-c      write(2,*) 'start BOLTZ'
+c      write(iou,*) 'start BOLTZ'
 
 c      lcompute = .false.
 
@@ -190,6 +194,8 @@ c                 --- assign bead type for ii,iu, and the cross term
                      ntij = (ntii+ntjj)/2
                   elseif (lninesix) then
                      ntij = (ntii-1)*nxatom + ntjj
+                  elseif (lgenlj) then
+                     ntij = (ntii-1)*nntype + ntjj
                   else
                      ntij = (ntii-1)*nntype + ntjj
                   endif
@@ -216,10 +222,29 @@ c                    --- use old chain coordinates
                      if ( rijsq .lt. rminsq .and. 
      &                    .not. lexpand(imolty) ) then
                         lovr(itrial) = .true.
-c                     write(2,*) 'intra overlap'
+c                     write(iou,*) 'intra overlap'
                         goto 19
                      elseif ( rijsq .lt. rcutsq .or. lijall) then
-                        if (llj.and.(.not.(lexpand(imolty)
+                        if (L_vdW_table.or. L_bend_table.and.
+     &                       (.not.lexpand(imolty))) then
+
+                           do mmm=1,inben(imolty,ii)
+                              if (ijben3(imolty,ii,mmm).eq.jj) then
+                                 
+                                 call lininter_bend(rij,
+     &                                tabulated_bend, 
+     &                                itben(imolty,ii,mmm))
+                                 vintra = vintra + tabulated_bend
+                                 
+                                 goto 96
+                              endif
+                           enddo
+
+                           call lininter_vdW(rij, 
+     &                          tabulated_vdW, ntii, ntjj)
+                           vintra = vintra + tabulated_vdW
+
+                        elseif (llj.and.(.not.(lexpand(imolty)
      &                       ))) then
                            sr2 = sig2ij(ntij) / rijsq
                            epsilon2=epsij(ntij)
@@ -241,6 +266,10 @@ c * OH 1-5 interaction
                            vintra = vintra + mmff(rijsq,ntij)
                         elseif (lninesix) then
                            vintra = vintra + ninesix(rijsq,ntij)
+                        elseif (lgenlj) then
+                           sr2 = sig2ij(ntij) / rijsq
+                           epsilon2=epsij(ntij)
+                           vintra = vintra + genlj(rijsq,sr2,epsilon2)
                         elseif ( lmuir ) then
                            vintra = vintra + ljmuir(rijsq,ntij)
                         elseif ( lpsurf ) then
@@ -278,7 +307,7 @@ c * OH 1-5 interaction
 
 c intramolecular charge interaction 
 c                    --- compute velect (coulomb and ewald)
-                  if (L_Coul_CBMC) then
+ 96               if (L_Coul_CBMC) then
                   if ( lelect(imolty) .and.
      &                 lqinclu(imolty,ii,iu)) then
 
@@ -293,7 +322,13 @@ c *** later by calling energy subroutine.
      &                    lcompute = .true.
 c     --- if lcompute then compute the electrostatic energy 
                         if ( lcompute ) then
-                           if (lewald) then
+                           if (L_elect_table) then
+                              call lininter_elect(rij, 
+     &                             tabulated_elect, ntii, ntjj)
+                              velect = velect + qscale2(imolty,ii,iu)*
+     &                             qqu(icharge,ii)*
+     &                             qqu(icharge,iu)*tabulated_elect
+                           elseif (lewald) then
 c                          --- compute real space term of vewald
                               velect = velect + 
      &                          qscale2(imolty,ii,iu)*qqu(icharge,ii)
@@ -362,7 +397,8 @@ c     --- ewald sum correction term
          endif
  
          if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff 
-     &         .and. .not. lninesix ) then 
+     & .and. .not. lgenlj .and. .not. lninesix
+     & .and..not.L_vdW_table.and..not.L_bend_table) then 
                  vintra = 4.0d0 * vintra
          endif
  
@@ -499,7 +535,7 @@ c *** is there a way to pull this out of the loops? ***
                      if ( liswatch ) then
                         if (j .eq. other) then
                               if ( .not. liswinc(jj,jmolty) ) then
-c                                 write(2,*) 'iSwatch-skipping:',jj
+c                                 write(iou,*) 'iSwatch-skipping:',jj
                                  goto 97
                               endif
                         endif
@@ -509,12 +545,15 @@ c *** end iswatch add-on ***
                      ntjj = ntype(jmolty,jj)
                      if ( (.not. (liji .and. lij(ntjj))) 
      &                    .and. 
-     &                    (.not. (lqchgi .and. lqchg(ntjj)))) 
+     &                    (.not. (lqchgi .and. lqchg(ntjj)))
+     &                    .and..not.L_vdW_table) 
      &                    goto 97
                      if (lexpsix .or. lmmff) then
                         ntij = (ntii+ntjj)/2
                      elseif (lninesix) then
                         ntij = (ntii-1)*nxatom + ntjj
+                     elseif (lgenlj) then
+                        ntij = (ntii-1)*nntype + ntjj
                      else
                         ntij = (ntii-1)*nntype + ntjj
                      endif
@@ -532,11 +571,17 @@ c                    --- compute vinter (ex. lennard-jones)
                      if ( rijsq .lt. rminsq .and. .not. 
      &                    (lexpand(imolty) .or. lexpand(jmolty))) then
                         lovr(itrial) = .true.
-c                        write(2,*) 'j:',j,jj
-c                        write(2,*) 'rjsq:',rijsq,rminsq
+c                        write(iou,*) 'j:',j,jj
+c                        write(iou,*) 'rjsq:',rijsq,rminsq
                         goto 19
                      elseif (rijsq .lt. rcinsq .or. lijall) then
-                        if (llj.and.(.not.(lexpand(imolty).or.
+                        if (L_vdW_table.and.(.not.
+     &                       (lexpand(imolty).or.lexpand(jmolty))))
+     &                       then
+                           call lininter_vdW(rij, 
+     &                          tabulated_vdW, ntii, ntjj)
+                           vinter = vinter + tabulated_vdW
+                        elseif (llj.and.(.not.(lexpand(imolty).or.
      &                       lexpand(jmolty)))) then
                            if ( lij(ntii) .and. lij(ntjj) ) then
                               sr2 = sig2ij(ntij) / rijsq
@@ -553,6 +598,10 @@ c                        write(2,*) 'rjsq:',rijsq,rminsq
                            vinter = vinter + mmff(rijsq,ntij)
                         elseif (lninesix) then
                            vinter = vinter + ninesix(rijsq,ntij)
+                        elseif (lgenlj) then
+                           sr2 = sig2ij(ntij) / rijsq
+                           epsilon2=epsij(ntij)
+                           vinter = vinter + genlj(rijsq,sr2,epsilon2)
                         elseif ( lmuir ) then
                            vinter = vinter + ljmuir(rijsq,ntij)
                         elseif ( lpsurf ) then
@@ -643,7 +692,12 @@ c *** later by calling energy subroutine.
      &                       lcompute = .true.
 c     --- if lcompute then compute the electrostatic energy 
                         if ( lcompute ) then
-                           if (lewald) then
+                           if (L_elect_table) then
+                              call lininter_elect(rij, 
+     &                             tabulated_elect, ntii, ntjj)
+                              velect = velect + qqu(icharge,ii)*
+     &                             qqu(j,jj)*tabulated_elect
+                           elseif (lewald) then
 c                             --- compute real space term of velect
                               velect = velect + qqu(icharge,ii)
      &                             *qqu(j,jj)*
@@ -665,7 +719,8 @@ c                             --- compute all electrostatic interactions
  98      continue
          
          if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff 
-     &         .and. .not. lninesix ) then
+     &   .and. .not. lgenlj   .and. .not. lninesix
+     &   .and..not.L_vdW_table ) then
                  vinter = 4.0d0 * vinter
          endif
       end if         
@@ -725,7 +780,7 @@ c -- calculate interaction with the surface at the top of the box
              if(lelect(moltyp(i))) then
                 do count = 1,ntogrow
                 rzui = rzp(count,itrial)
-                vext = vext + v_elect_field(i,j,rzui)
+                vext = vext + v_elect_field(i,count,rzui)
                 enddo
                 vext = vext * eXV_to_K
              endif
@@ -785,8 +840,10 @@ C *********************************************
  19      if ( lovr(itrial) ) then
             bfac(itrial) = 0.0d0
          else
-            velect = velect*qqfact
-            vewald = vewald*qqfact
+            if (.not.L_elect_table) then
+               velect = velect*qqfact
+               vewald = vewald*qqfact
+            endif
             v = vinter+vintra+vext+velect+vewald
             if (.not.lnew) then
                vipswot(itrial) = v
@@ -816,11 +873,11 @@ C *********************************************
 
 
             if ( ( vtry(itrial) * beta ) .gt. (2.3d0*softcut) ) then
-c     write(2,*) 'caught by softcut',vtry(itrial)*beta
+c     write(iou,*) 'caught by softcut',vtry(itrial)*beta
                lovr(itrial) = .true.
                bfac(itrial) = 0.0d0
             elseif ( ( vtry(itrial) * beta ) .lt. -2.303d0*308 ) then
-               write(2,*) '### warning: weight too big out of range'
+               write(iou,*) '### warning: weight too big out of range'
                lovr(itrial) = .true.
                bfac(itrial) = 0.0d0
             else
@@ -838,7 +895,7 @@ c ----------------------------------------------------------------------------
          if ( .not. lovr(itrial)) ovrlap = .false.
       enddo
 
-c      write(2,*) 'end BOLTZ'
+c      write(iou,*) 'end BOLTZ'
 
       return
 

@@ -89,7 +89,7 @@ c     *** possible in place of numax
 
 c     ---------------------------------------------------------------
     
-c      write(2,*) 'START SAFECMBC ',iinit,'!'
+c      write(iou,*) 'START SAFECMBC ',iinit,'!'
 c      print*,'iinit',iinit,'iw',iw,'igrow',igrow,'count',count
       vphi = 0.0d0
       ovphi = 0.0d0
@@ -376,7 +376,7 @@ c     --- check to make sure this will give a number
                   ovphi = ovphi + kforceb(iufrom,ju) * (angle -
      $                 equilb(iufrom,ju))**2
              
-c                  write(2,*) iufrom,iu,ju,kforceb(iufrom,ju)*(angle
+c                  write(iou,*) iufrom,iu,ju,kforceb(iufrom,ju)*(angle
 c     &                 - equilb(iufrom,ju))**2
      
                   wei_bv = wei_bv * dexp( - beta * ovphi )
@@ -550,7 +550,7 @@ c     --- determine angles for iu - iend - ipast if they exist
                               goto 125
                            endif
                         enddo
-                        write(2,*) 'iu,ju,ku',iu,ju,ku
+                        write(iou,*) 'iu,ju,ku',iu,ju,ku
                         stop 'no bond angle for these'
  125                    continue
                         
@@ -765,7 +765,7 @@ c     --- find bond angles
                   angle = dacos(thetac)
                   vphi =  kforcea(count) * (angle-equila(count))**2
          
-c                  write(2,*) 'b',iu,iufrom,iuprev,vphi
+c                  write(iou,*) 'b',iu,iufrom,iuprev,vphi
 
 
                   ang_bend(1) = angle
@@ -801,7 +801,7 @@ c     --- select one of the trial sites at random
                         ovphi = ovphi + dlog(bfactor(ibend))/(-beta)
 
 
-c                        write(2,*) 'c',iu,iufrom,iuprev
+c                        write(iou,*) 'c',iu,iufrom,iuprev
 c     &                       ,dlog(bfactor(ibend))/(-beta)
 
                         goto 10
@@ -860,7 +860,7 @@ c     --- we want the angle with the closing bead
                         vphi = kforceb(iu,ju) * (angle-equilb(iu,ju))**2
                         
                         
-c                        write(2,*) 'd',iu,iufrom,ju,vphi
+c                        write(iou,*) 'd',iu,iufrom,ju,vphi
 
                         ang_bend(1) = angle
                         bfactor(1) = dexp( -beta*vphi )
@@ -896,7 +896,7 @@ c     --- select one of the trial sites at random
                               ovphi = ovphi 
      &                             + dlog(bfactor(ibend))/(-beta)
 
-c                              write(2,*) 'd',iu,iufrom,ju
+c                              write(iou,*) 'd',iu,iufrom,ju
 c     &                             ,dlog(bfactor(ibend))/(-beta)
 
                               goto 20
@@ -1078,7 +1078,7 @@ c     --- check to make sure this will give a number
      &                          - equilb(iufrom,ju))**2
                            
 c                           if (lshit) then
-c                              write(2,*) iufrom,iu,ju
+c                              write(iou,*) iufrom,iu,ju
 c     &                             ,kforceb(iufrom,ju) 
 c     &                             * (angle
 c     &                          - equilb(iufrom,ju))**2
@@ -1318,7 +1318,7 @@ c     --- first determine bending energy for iuprev-iufrom-iu
      $                    )**2
 
 c                     if (lshit) then
-c                        write(2,*) iu,iufrom,iuprev,kforcea(count)
+c                        write(iou,*) iu,iufrom,iuprev,kforcea(count)
 c     &                       * (angle-equila(count))**2
 c                     endif
                   endif
@@ -1357,7 +1357,7 @@ c     --- now determine bending energy for iu-iend-ipast if it exists
      $                          -equilb(iu,ku))**2
                            
 c                           if (lshit) then
-c                              write(2,*) iu,ju,ku
+c                              write(iou,*) iu,ju,ku
 c     &                             ,kforceb(iu,ku)
 c     &                          * (angle-equilb(iu,ku))**2
 c                           endif
@@ -1399,7 +1399,7 @@ c     --- jut4 must already exist or we made a big mistake
                            if (jut4.gt.iring(imolty)) then
                               goto 41
                            endif
-                           write(2,*) 'jut4,jut3,jut2,iu',
+                           write(iou,*) 'jut4,jut3,jut2,iu',
      &                          jut4,jut3,jut2,iu
                            stop 'trouble jut4 in crankshaft'
                         endif
@@ -1451,7 +1451,7 @@ c     --- calculate torsions for ipast-iend-iu-
 
 c     --- jut4 must already exist or we made a big mistake
                            if (.not. lexist(jut4)) then
-                              write(2,*) 'jut4,jut3,jut2,iu',
+                              write(iou,*) 'jut4,jut3,jut2,iu',
      &                             jut4,jut3,jut2,iu
                               stop 'trouble jut4 in crankshaft'
                            endif
@@ -1523,9 +1523,9 @@ c     --- determine angles for iend - iu - iend
      &                          / (lengtha*lengthb)
 
                            if (abs(thetac).gt.1) then
-                              write(2,*) '*********************'
+                              write(iou,*) '*********************'
      &                             ,'****************************'
-                              write(2,*) iu,ku,xvec(iu,ku)
+                              write(iou,*) iu,ku,xvec(iu,ku)
      &                             ,yvec(iu,ku)
      &                             ,zvec(iu,ku),lengthb
                               stop 'shitfuck'
@@ -1537,7 +1537,7 @@ c     --- determine angles for iend - iu - iend
      &                          * (angle-equilb(ju,ku))**2
        
 c                           if (lshit) then
-c                              write(2,*) ju,iu,ku,kforceb(ju,ku)
+c                              write(iou,*) ju,iu,ku,kforceb(ju,ku)
 c     &                          * (angle-equilb(ju,ku))**2
 c                           endif
                            
@@ -1577,7 +1577,7 @@ c     --- we already calculated these
      $                          -equilb(iu,ju))**2
                            
 c                           if (lshit) then
-c                              write(2,*) iu,iufrom,ju,kforceb(iu,ju)
+c                              write(iou,*) iu,iufrom,ju,kforceb(iu,ju)
 c     &                          * (angle-equilb(iu,ju))**2.0d0
 c                           endif
                         endif
@@ -1797,7 +1797,7 @@ c     --- use old coordinates
          endif
       endif
      
-c      write(2,*) 'END SAFECMBC ',iinit,'!'
+c      write(iou,*) 'END SAFECMBC ',iinit,'!'
       return 
 
       end

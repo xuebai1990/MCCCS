@@ -26,6 +26,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c   read/write zeolite table from/to disk
       implicit none
       integer iswitc
+      include 'control.inc'
       include 'grid.inc'
       include 'zeolite.inc'
       if (iswitc.eq.0) then
@@ -34,7 +35,7 @@ c ---    read zeolite table from disk
      +         ,zunitxi,zunityi,zunitzi,factx,facty,factz
      +         ,xzz,yzz,zzz
      +         ,egrid 
-         write(2,1000) dgrx,ngrx,dgry,ngry,dgrz,ngrz,zunitx,zunity
+         write(iou,1000) dgrx,ngrx,dgry,ngry,dgrz,ngrz,zunitx,zunity
      +                ,zunitz
          rewind(91)         
       else

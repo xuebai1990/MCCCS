@@ -71,7 +71,7 @@ c    *******************************************************************
 
 c ------------------------------------------------------------------
 
-c      write(2,*) 'start CONFIG'
+c      write(iou,*) 'start CONFIG'
 c ***    select a chain at random ***
       rchain  = random()
       do icbu = 1,nmolty
@@ -95,11 +95,11 @@ c     *** determine whether to use fecbmc or not ***
 
       if (lgrand) then
 c ---    select a chain in box 1
-c         write(2,*) 'counters not implemented properly for grand'
+c         write(iou,*) 'counters not implemented properly for grand'
          if (ncmt(1,imolty).eq.0) return
          i = idint( dble(ncmt(1,imolty))*random() ) + 1
          i = parbox(i,1,imolty)
-         if ( moltyp(i) .ne. imolty ) write(2,*) 'screwup config'
+         if ( moltyp(i) .ne. imolty ) write(iou,*) 'screwup config'
          ibox=1
       else 
          dchain = dble(temtyp(imolty))
@@ -149,7 +149,7 @@ c     --- grow new chain conformation
  
 c --- termination of cbmc attempt due to walk termination ---
       if ( lterm ) then 
-c        write(2,*) 'termination of growth',i
+c        write(iou,*) 'termination of growth',i
         return
       endif
 
@@ -172,14 +172,14 @@ c     --- grow old chain conformation
 
 c     --- termination of old walk due to problems generating orientations
       if ( lterm ) then
-         write(2,*) 'CONFIG: old growth rejected'
+         write(iou,*) 'CONFIG: old growth rejected'
          return
       endif
 
       if (llrig) then
          call rigfix(.false.,i,ibox,imolty,lterm,wrig)
          if ( lterm ) then
-            write(2,*) 'CONFIG: old rigid fix rejected'
+            write(iou,*) 'CONFIG: old rigid fix rejected'
             return
          endif
          weiold = weiold * wrig
@@ -189,7 +189,7 @@ c     --- termination of old walk due to problems generating orientations
          call place(.false.,lterm,i,imolty,ibox,islen,wplace)
          
          if ( lterm ) then
-            write(2,*) 'CONFIG: old hydrogen placement rejected'
+            write(iou,*) 'CONFIG: old hydrogen placement rejected'
             return
          endif
          weiold = weiold * wplace 
@@ -262,7 +262,7 @@ c          iii = 2 new conformation
 
             if (ovrlap .and. (iii .eq. 1)) then
 c            if (ovrlap) then
-               write(2,*) 'disaster: overlap in old conf config',i
+               write(iou,*) 'disaster: overlap in old conf config',i
                stop
             endif
 
@@ -333,7 +333,7 @@ c Calculate the energy of the non-backbone beads
                if (ovrlap) return
                delen = v + vtornew
                if ( delen*beta .gt. (2.3d0*softcut) ) then
-c                  write(2,*) '##softcut in config caught explicit atoms'
+c                  write(iou,*) '##softcut in config caught explicit atoms'
                   return
                endif
                weight = weight*dexp(-(beta*delen))
@@ -346,13 +346,14 @@ c                  write(2,*) '##softcut in config caught explicit atoms'
                vnewewald = vnewewald + vewald
             else
                if (ovrlap) then
-                  write(2,*) 'ovrlap problem in old confomation -CONFIG'
+                  write(iou,*) 'ovrlap problem in old confomation',
+     &                 ' - CONFIG'
                   return
                endif
                deleo = v + vtorold
                weiold = weiold*dexp(-(beta*deleo))
                if ( weiold .lt. softlog ) then
-                  write(2,*) '##old weight for explicit too low'
+                  write(iou,*) '##old weight for explicit too low'
                endif
                voldt     = voldt + deleo
                voldintra = voldintra + vintra
@@ -396,11 +397,11 @@ c     End of DC-CBMC, Explicit Atom and Ewald-sum Corrections
 c *** check for acceptance of trial configuration ***
       wnlog = dlog10 ( weight )
       wolog = dlog10 ( weiold )
-c      write(2,*) 'weight:',weight
-c      write(2,*) 'weiold:',weiold
+c      write(iou,*) 'weight:',weight
+c      write(iou,*) 'weiold:',weiold
       wdlog = wnlog - wolog
       if ( wdlog .lt. -softcut ) then
-c         write(2,*) 'cbmc softcut',i
+c         write(iou,*) 'cbmc softcut',i
          return
       endif
  
@@ -414,7 +415,7 @@ c         write(2,*) 'cbmc softcut',i
       endif
 
       if ( random() .le. wratio ) then
-c         write(2,*) 'CONFIG accepted',i,ibox
+c         write(iou,*) 'CONFIG accepted',i,ibox
 c        --- we can now accept !!!!! ***
          if (lfixnow) then
             fbscb(imolty,2,findex-1) = fbscb(imolty,2,findex-1) 
@@ -522,7 +523,7 @@ c     --- record bond distances for presimulation and reweighting
        endif
          
 c -----------------------------------------------------------------
-c       write(2,*) 'end CONFIG'
+c       write(iou,*) 'end CONFIG'
        return
        end
 

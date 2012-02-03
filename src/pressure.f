@@ -56,7 +56,7 @@ c *** common blocks ***
       double precision rxui,ryui,rzui,rxuij,ryuij,rzuij,rijsq,
      +                 rcutsq,sr2,sr6,rhosq,corp,rij,rs1,
      +                 sr1,rs2,sr7,rs7,rs6
-
+      double precision srij
       double precision surf,pxx,pyy,pzz,rpxx,rpyy,rpzz,pxy,pyx
      &                ,pxz,pzx,pyz,pzy,rpxy,rpyx,rpxz,rpzx,rpyz,rpzy
 
@@ -180,6 +180,8 @@ c --- loop over all beads jj of chain j
                            ntij = (ntii+ntjj)/2
                         elseif (lninesix) then
                            ntij = (ntii-1)*nxatom + ntjj
+                        elseif (lgenlj) then
+                           ntij = (ntii-1)*nntype + ntjj
                         else
                            ntij = (ntii-1)*nntype + ntjj
                         endif
@@ -191,7 +193,7 @@ c --- loop over all beads jj of chain j
 c *** minimum image the pair separations ***
                         if ( lpbc ) call mimage (rxuij,ryuij,rzuij,ibox)
 
-c     write(2,*) 'bead ruij',rxuij,ryuij,rzuij
+c     write(iou,*) 'bead ruij',rxuij,ryuij,rzuij
                         
                         rijsq = rxuij*rxuij+ryuij*ryuij+rzuij*rzuij
                         
@@ -205,6 +207,10 @@ c --- compute whether the charged groups will interact & fij
      &                             +erfunc(calp(ibox)*dsqrt(rijsq))/
      &                             dsqrt(rijsq))*qqu(i,ii)*qqu(j,jj)*
      &                             qqfact/rijsq
+                           else
+c -- KM 06/09/09
+                              fij = -(qqfact*qqu(i,ii)*qqu(j,jj)
+     &                             /dsqrt(rijsq))/rijsq
                            endif
                         elseif ( lqimol .and. lqjmol .and. 
      &                          lqchg(ntii) .and. lqchg(ntjj) ) then
@@ -243,7 +249,7 @@ c --- set up the charge-interaction table
      &                             *rijsq*rijsq) + bexsix(ntij)
      &                             *cexsix(ntij)*rij*dexp( cexsix(ntij)
      &				   *rij ))/rijsq
-c                              write(2,*) 'rij,fij,ntij',rij,fij,ntij
+c                              write(iou,*) 'rij,fij,ntij',rij,fij,ntij
                            elseif ( lmmff ) then
                               rs2 = rijsq/(sigisq(ntij))
                               rs1 = dsqrt(rs2)
@@ -261,6 +267,46 @@ c                              write(2,*) 'rij,fij,ntij',rij,fij,ntij
      &                            (rij*rzero(ntij)) ) * 
      &                            (rzero(ntij)/rij)**7 *
      &                            (1.0d0-(rzero(ntij)/rij)**3)
+                           elseif (lgenlj) then
+                                 if ( lexpand(imolty)
+     &                                .and. lexpand(jmolty) ) then
+                                    sigma2=(sigma(imolty,ii)+
+     &                                   sigma(jmolty,jj))/2.0d0
+                                    sr2 = sigma2*sigma2/rijsq
+                                    epsilon2=dsqrt(epsilon(imolty,ii)
+     &                                   *epsilon(jmolty,jj))
+                                 elseif ( lexpand(imolty) ) then
+                                    sigma2=(sigma(imolty,ii)+
+     &                                   sigi(ntjj))/2.0d0
+                                    sr2 = sigma2*sigma2/rijsq
+                                    epsilon2=dsqrt(epsilon(imolty,ii)
+     &                                   *epsi(ntjj))
+                                 elseif ( lexpand(jmolty) ) then
+                                    sigma2=(sigma(jmolty,jj)+
+     &                                   sigi(ntii))/2.0d0
+                                    sr2 = sigma2*sigma2/rijsq
+                                    epsilon2=dsqrt(epsilon(jmolty,jj)
+     &                                   *epsi(ntii))
+                                 else
+                                    rij = dsqrt(rijsq)
+                                    sr2 = sig2ij(ntij) / rijsq
+                                    epsilon2 = epsij(ntij)
+                                    srij = dsqrt (sr2)
+                                 endif
+             if ( (rij) .le. (rij*srij)*2.0d0**(2.0d0/n0) ) then
+              flj=-4.0d0*epsilon2* ( (n0*((srij)**n0))-
+     &        ((n0/2.0d0)*((srij)**(n0/2.0d0))))/rijsq
+c           write(2,*) 'First if',i,j,rijsq,flj
+                               else
+                             flj =-epsilon2* ( ((2.0d0*n1) *
+     &                         ((srij) **(2.0d0*n1))*
+     &                         ( 2.0d0** ((4.0d0*n1)/n0)))-
+     &                         (n1*((srij)**(n1))*
+     &                         (2.0d0 ** ((2.0d0*n1/n0)+1.0d0))))
+     &                          /rijsq
+c           write(2,*) 'Second if',i,j,rijsq,flj
+             endif
+                        fij = fij + flj
                            else
                               if ( lfepsi ) then
                                  sr2 = 1.0d0/rijsq
@@ -343,7 +389,7 @@ c --- calculate distance between c-o-m ---
 c *** minimum image the pair separations ***
                   if ( lpbc ) call mimage (rxuij,ryuij,rzuij,ibox)
 
-c                  write(2,*) 'COM  ruij',rxuij,ryuij,rzuij
+c                  write(iou,*) 'COM  ruij',rxuij,ryuij,rzuij
 
                   press = press + 
      +                 fxcmi*rxuij + fycmi*ryuij + fzcmi*rzuij

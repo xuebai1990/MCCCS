@@ -63,6 +63,9 @@ c     ************************************************************
          if (mtype .eq. 1 .and. 
      &        (lsolid(ibox) .and. .not. lrect(ibox))) then
             iwarn = 2
+         elseif(mtype.eq.2) then
+! kea 6/3/09 --- necessary for non-COM rotations
+            iwarn = 2
          else
             iwarn = 1
          endif
@@ -137,7 +140,7 @@ c ----- Determine new center of mass for chain i
                szcm(i) = sz
                if ( ldx .or. ldy .or. ldz ) then
                   if ( mtype .eq. 5 ) then
-                     write(2,*) 'sx, sy, sz:',sx,sy,sz
+                     write(iou,*) 'sx, sy, sz:',sx,sy,sz
                   endif
                   nxcm2 = sx*hmat(ibox,1)+sy*hmat(ibox,4)
      &                 +sz*hmat(ibox,7)
@@ -243,19 +246,20 @@ c ----- Determine new center of mass for chain i
 
             if( ldx .or. ldy .or. ldz ) then
                if ( (iadjust .ge. iwarn) ) then
-                  if (mtype .eq. 1) write(2,*) 'translational move'
-                  if (mtype .eq. 2) write(2,*) 'rotational move'
-                  if (mtype .eq. 3) write(2,*) 'swap move'
-                  if (mtype .eq. 4) write(2,*) 'switch move'
-                  if (mtype .eq. 5) write(2,*) 'volume move'
-                  if (mtype .eq. 6) write(2,*) 'readdat move'
-                  if (mtype .eq. 7) write(2,*) 'config move'
-                  if (mtype .eq. 8) write(2,*) 'swatch move'
-                  if (mtype .eq. 9) write(2,*) 'energy call'
-                  write(2,*) 'ibox,i,iunit,boxlen',ibox,i,iunit,bx,by,bz
+                  if (mtype .eq. 1) write(iou,*) 'translational move'
+                  if (mtype .eq. 2) write(iou,*) 'rotational move'
+                  if (mtype .eq. 3) write(iou,*) 'swap move'
+                  if (mtype .eq. 4) write(iou,*) 'switch move'
+                  if (mtype .eq. 5) write(iou,*) 'volume move'
+                  if (mtype .eq. 6) write(iou,*) 'readdat move'
+                  if (mtype .eq. 7) write(iou,*) 'config move'
+                  if (mtype .eq. 8) write(iou,*) 'swatch move'
+                  if (mtype .eq. 9) write(iou,*) 'energy call'
+                  write(iou,*) 'ibox,i,iunit,boxlen',ibox,i,iunit,bx,
+     &                 by,bz
                   lintbx = .true.
-                  write(2,*) 'nxcm,nycm,nzcm',nxcm,nycm,nzcm
-                  write(2,*) 'dx,dy,dz',dx,dy,dz
+                  write(iou,*) 'nxcm,nycm,nzcm',nxcm,nycm,nzcm
+                  write(iou,*) 'dx,dy,dz',dx,dy,dz
                   if (iwarn .ne. 0) stop
                endif
                iadjust = iadjust + 1
@@ -281,11 +285,11 @@ c     --- minimum image the ctrmas pair separations ---
                   if ( rijsq .gt. dmaxsq ) dmaxsq = rijsq
                enddo                  
                rcmu(i) = dsqrt(dmaxsq)+ 1.0d-10
-c               write(2,*) 'rcmu(i)',rcmu(i)
+c               write(iou,*) 'rcmu(i)',rcmu(i)
             endif
                   
          else
-            if (.not. lall) write(2,*)'prob with box in ctrmas'
+            if (.not. lall) write(iou,*)'prob with box in ctrmas'
          endif
       enddo
 

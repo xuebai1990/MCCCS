@@ -112,7 +112,7 @@ c    ********************************************************************
 
 C --------------------------------------------------------------------
 
-c      write(2,*) 'START SWAP'
+c      write(iou,*) 'START SWAP'
 c      write(11,*) '1:',neigh_cnt(18)
 
       lempty = .false.
@@ -179,7 +179,7 @@ c ---    select a box given in pmswatyp
       else
          lswapinter = .true.
       endif
-c      write(2,*) 'boxins:',boxins,'boxrem:',boxrem
+c      write(iou,*) 'boxins:',boxins,'boxrem:',boxrem
       if ( .not. (lgibbs .or. lgrand) .and. lswapinter ) 
      &     stop 'no interbox swap if not gibbs/grand ensemble!'
          
@@ -207,19 +207,19 @@ c *** sub-regions defined by Vin
 
          irem = parbox(pointp,boxrem,imolty)
          if ( moltyp(irem) .ne. imolty ) 
-     &        write(2,*) 'screwup swap, irem:',irem,moltyp(irem),imolty
+     &       write(iou,*) 'screwup swap, irem:',irem,moltyp(irem),imolty
          ibox = nboxi(irem)
          if ( ibox .ne. boxrem ) stop 'problem in swap'
       endif
 
-c$$$      write(2,*) 'particle ',irem,' is being removed, imolty is:',
+c$$$      write(iou,*) 'particle ',irem,' is being removed, imolty is:',
 c$$$     &     imolty,' and the box is:',boxrem
 
 
 c ===>  for both gibbs and grand-canonical we have:
 c --- insert a chain in box: boxins 
 c --- remove one in box: boxrem
-c      write(2,*) 'boxrem',boxrem,' imolty',imolty,' lempty',lempty
+c      write(iou,*) 'boxrem',boxrem,' imolty',imolty,' lempty',lempty
 c     bnswap(imolty,X) decoder X = 1 is # attempts into box 1
 c      X = 2 is # attempts into box 2 X=3 is success into box 1
 c      X = 4 is success into box 2
@@ -286,7 +286,7 @@ c *** for the chain to be INSERTED                           ***
       if ( .not. lswapinter .and. lbias(imolty)) then
 
          if (boxins .ne. boxrem) then
-            write(2,*) 'avbmc, boxins, boxrem:',boxins,boxrem
+            write(iou,*) 'avbmc, boxins, boxrem:',boxins,boxrem
             stop
          endif
          
@@ -316,7 +316,7 @@ c ??? what shall we do now?
             jins = parbox(pointp2,boxins,jmolty)
             if ( jins .eq. iins ) goto 111
             if ( moltyp(jins) .ne. jmolty ) 
-     &           write(2,*) 'screwup swap, jins:'
+     &           write(iou,*) 'screwup swap, jins:'
      &           ,jins,moltyp(jins),jmolty
             if ( nboxi(jins) .ne. boxins ) 
      &           stop 'problem in swap with jins'
@@ -370,7 +370,7 @@ c               enddo
                if ( rijsq .lt. (2.0d0*rbsmax)**2 ) goto 112
 
                if ( moltyp(kins) .ne. kmolty ) 
-     &              write(2,*) 'screwup swap, kins:'
+     &              write(iou,*) 'screwup swap, kins:'
      &              ,kins,moltyp(kins),kmolty
                if ( nboxi(kins) .ne. boxins ) 
      &              stop 'problem in swap with kins'
@@ -426,7 +426,7 @@ c *** out -> j case
      &              goto 119
 
                if ( moltyp(irem) .ne. imolty ) 
-     &              write(2,*) 'screwup swap1, irem:',irem,
+     &              write(iou,*) 'screwup swap1, irem:',irem,
      &              moltyp(irem),imolty
                ibox = nboxi(irem)
                if ( ibox .ne. boxrem ) stop 'problem in swap'
@@ -450,7 +450,7 @@ c ??? what shall we do now?
                else
  113              pointp=idint(dble(neighk_num)*random())+1
 c                  irem = neighbor(pointp,kins,imolty)
-c                  write(2,*) 'kins,irem:',kins,irem,neighk_num
+c                  write(iou,*) 'kins,irem:',kins,irem,neighk_num
                    irem = neighbor(pointp,kins)
                    if ( irem .eq. jins ) goto 113
                    iins = irem
@@ -460,8 +460,8 @@ c                  write(2,*) 'kins,irem:',kins,irem,neighk_num
 
             endif               
             
-c            write(2,*) 'move in'
-c            write(2,*) '3:',wbias_rem,boxlx(boxins),vol_eff
+c            write(iou,*) 'move in'
+c            write(iou,*) '3:',wbias_rem,boxlx(boxins),vol_eff
             
             do icbu = 1,ichoi
 c *** choose a random association distance
@@ -503,11 +503,11 @@ c ??? what shall we do now?
                else
  114              pointp=idint(dble(neighj_num)*random())+1
 c                  irem = neighbor(pointp,jins,imolty)
-c                  write(2,*) 'jins,irem:',jins,irem,neighj_num
+c                  write(iou,*) 'jins,irem:',jins,irem,neighj_num
                   irem = neighbor(pointp,jins)
                   if ( irem .eq. kins ) goto 114
                   if ( moltyp(irem) .ne. imolty ) 
-     &                 write(2,*) 'screwup swap2, irem:',irem,
+     &                 write(iou,*) 'screwup swap2, irem:',irem,
      &                 moltyp(irem),imolty,neighj_num,pointp,jins
                   ibox = nboxi(irem)
                   if ( ibox .ne. boxrem ) stop 'problem in swap'
@@ -517,8 +517,8 @@ c                  write(2,*) 'jins,irem:',jins,irem,neighj_num
                lremk_in = .false.
 
             endif
-c            write(2,*) 'move out'
-c            write(2,*) '4:',wbias_rem,boxlx(boxins),vol_eff
+c            write(iou,*) 'move out'
+c            write(iou,*) '4:',wbias_rem,boxlx(boxins),vol_eff
             
 
             if ( lavbmc3(imolty) .and. 
@@ -702,7 +702,7 @@ c     *** and calculate the correct weight for the trial walk           ***
       
 c     --- check for termination of walk ---
       if ( w1ins .lt. softlog ) then
-         write(2,*) 'caught in swap'
+         write(iou,*) 'caught in swap'
          return
       endif
       
@@ -721,7 +721,7 @@ c     --- select ip position ---
                endif
             endif
          enddo
-         write(2,*) 'w1ins:',w1ins,'rbf:',rbf
+         write(iou,*) 'w1ins:',w1ins,'rbf:',rbf
          stop 'big time screwup -- w1ins'
       else
          iwalk = 1
@@ -795,7 +795,7 @@ c     --- with rxuion: new = 2
                rxu(idum,j) = rxnew(j)
                ryu(idum,j) = rynew(j)
                rzu(idum,j) = rznew(j)
-c               write(2,*) rxu(idum,j),ryu(idum,j),rzu(idum,j)
+c               write(iou,*) rxu(idum,j),ryu(idum,j),rzu(idum,j)
             enddo
             moltyp(idum) = imolty
             call explct(idum,vtornew,.false.,.false.)
@@ -804,7 +804,7 @@ c               write(2,*) rxu(idum,j),ryu(idum,j),rzu(idum,j)
                ryuion(j,iii) = ryu(idum,j)
                rzuion(j,iii) = rzu(idum,j)
                qquion(j,iii) = qqu(iins,j)
-c               write(2,*) rxu(idum,j),ryu(idum,j),rzu(idum,j)
+c               write(iou,*) rxu(idum,j),ryu(idum,j),rzu(idum,j)
             enddo
          endif
          moltion(iii) = imolty
@@ -829,7 +829,7 @@ c     calculate the true site-site energy
      &        ,.false.,vdum,.false.,lfavor)
          
          if (ovrlap) then
-            write(2,*) 'iins',iins,'irem',irem
+            write(iou,*) 'iins',iins,'irem',irem
             stop 'strange screwup in DC-CBMC swap'
          endif
 c v1insewd, vnewewald and vnewintra now accounted for in v from energy
@@ -890,9 +890,9 @@ c ??? problem here on calculation of favor and favor2 when ichoi > 1
      &           ,vewald
      &           ,iii,ibox,istt,iett, .true.,ovrlap,ltors,vdum
      &           ,.true.,lfavor)
-c            write(2,*) 'ovrlap:',ovrlap
+c            write(iou,*) 'ovrlap:',ovrlap
             
-c            if ( iins .eq. 118) write(2,*) 'vinter:',vinter
+c            if ( iins .eq. 118) write(iou,*) 'vinter:',vinter
 
             if (ovrlap) then
                lovrh(ip) = .true.
@@ -1046,7 +1046,7 @@ c            endif
 c            dtest = dtest + 2.0d0*coru(imolty,jmt,rho)
 c            arg=arg*dexp(-beta*2.0d0*coru(imolty,jmt,rho))
 c         enddo
-c         write(2,*) 'dtest',dtest
+c         write(iou,*) 'dtest',dtest
       else
          vinsta = 0.0d0
       endif
@@ -1077,9 +1077,9 @@ C     Compute weights for the molecule to be removed from boxrem
 
 c *** check that there is at least one molecule in BOXREM ***
       if ( lempty ) then
-c         write(2,*) 'no molecule in BOXREM'
+c         write(iou,*) 'no molecule in BOXREM'
          if (lgrand) then
-	    if (boxrem.eq.2) write(2,*) ' ERROR ***** array too low !'
+	    if (boxrem.eq.2) write(iou,*) ' ERROR ***** array too low !'
          endif
          return
       endif
@@ -1104,7 +1104,7 @@ c * second AVMBC part *
 c *********************
 
          if (boxins .ne. boxrem) then
-            write(2,*) 'avbmc, boxins, boxrem:',boxins,boxrem
+            write(iou,*) 'avbmc, boxins, boxrem:',boxins,boxrem
             stop
          endif
          
@@ -1136,8 +1136,8 @@ c *** out-> j case
                if (lavbmc2(imolty) .or. lavbmc3(imolty) ) 
      &              wbias_ins=wbias_ins/dble(neighj_num+1)
 
-c            write(2,*) 'originally out'
-c            write(2,*) '1:',wbias_ins,boxlx(boxins),vol_eff
+c            write(iou,*) 'originally out'
+c            write(iou,*) '1:',wbias_ins,boxlx(boxins),vol_eff
 
                do icbu = 2,ichoi
  232              rxp(1,icbu) = boxlx(boxins) * random()
@@ -1199,8 +1199,8 @@ c *** j -> out case
                   endif
                endif
               
-c            write(2,*) 'originally in'
-c            write(2,*) '2:',wbias_ins,boxlx(boxins),vol_eff
+c            write(iou,*) 'originally in'
+c            write(iou,*) '2:',wbias_ins,boxlx(boxins),vol_eff
 
                do icbu = 2,ichoi
 c *** choose a random association distance
@@ -1285,7 +1285,7 @@ c *** calculate the boltzmann weight of first bead          ***
      &     ,1,glist,0.0d0)
 
       if ( ovrlap ) then
-         write(2,*) 'disaster: overlap for 1st bead in SWAP'
+         write(iou,*) 'disaster: overlap for 1st bead in SWAP'
       endif
 c *** calculate the correct weight for the  old  walk ***
 
@@ -1296,7 +1296,7 @@ c *** calculate the correct weight for the  old  walk ***
 
 c --- check for termination of walk ---
       if ( w1rem .lt. softlog ) then 
-         write(2,*) ' run problem : soft overlap in old'
+         write(iou,*) ' run problem : soft overlap in old'
       endif
 
       v1rem = vtry(1)
@@ -1313,7 +1313,7 @@ c     --- call rosenbluth for old conformation
      &     ,boxrem,igrow,waddold,lfixnow,ctorfo,2 )
 
       if ( lterm ) then 
-         write(2,*) 'SWAP: rosenbluth old rejected'
+         write(iou,*) 'SWAP: rosenbluth old rejected'
          return
       endif
 
@@ -1379,7 +1379,7 @@ c        --- iii=1 old conformation
      &        ,iii,ibox,istt,iett,.true.,ovrlap,ltors,vtorold
      &        ,.true.,lfavor)
 
-c         if (irem .eq. 118)  write(2,*) 'for old',vinter
+c         if (irem .eq. 118)  write(iou,*) 'for old',vinter
          if (ovrlap) stop 'disaster ovrlap in old conf SWAP'
          deleo = v + vtorold
          voldt     = voldt + deleo
@@ -1546,7 +1546,7 @@ c     --- Add contributions of the first bead and additional beads:
       wdlog = wnlog - wolog
       
       if ( wdlog .lt. -softcut ) then
-c         write(2,*) '### underflow in wratio calculation ###'
+c         write(iou,*) '### underflow in wratio calculation ###'
          return
       endif
 
@@ -1661,9 +1661,9 @@ c              --- molecule removed from box 1
                   ip =4
                endif
             endif
-c         write(2,*) neigh_old,neigh_icnt,ip
+c         write(iou,*) neigh_old,neigh_icnt,ip
 c            if ( .not. lins_in .and. neigh_old .eq. 0 ) then
-c               write(2,*) '####error:',irem,jins
+c               write(iou,*) '####error:',irem,jins
 c            endif
             cnt_wf1(neigh_old,neigh_icnt,ip)
      &           = cnt_wf1(neigh_old,neigh_icnt,ip)+1
@@ -1691,7 +1691,7 @@ c            endif
 c         wratio = 1.0   
 
       if ( random() .le. wratio ) then
-c         write(2,*) 'SWAP MOVE ACCEPTED',irem
+c         write(iou,*) 'SWAP MOVE ACCEPTED',irem
 c *** we can now accept !!!!! ***
          if ((.not.leemove).and.(.not.lexpee)) then
             bnswap(imolty,ipairb,boxins+nbox) = 
@@ -1825,7 +1825,7 @@ c *** update linkcell, if applicable
             call linkcell(2,irem,vdum,vdum,vdum,ddum)
          endif
          
-c         write(2,*) 'lneighbor:',lneighbor
+c         write(iou,*) 'lneighbor:',lneighbor
 
          if ( lneigh ) call updnn( irem )
          if ( lneighbor ) then
@@ -1846,7 +1846,7 @@ c         write(2,*) 'lneighbor:',lneighbor
                enddo
  10         continue
             neigh_cnt(irem) = neigh_icnt
-c            write(2,*) 'irem:',irem,neigh_icnt
+c            write(iou,*) 'irem:',irem,neigh_icnt
             do ic = 1,neigh_icnt
                j = neighi(ic)
                neighbor(ic,irem)=j
@@ -1863,7 +1863,7 @@ c            write(2,*) 'irem:',irem,neigh_icnt
             enddo
          endif
 
-c         write(2,*) irem,'end SWAP'
+c         write(iou,*) irem,'end SWAP'
 
       endif
  

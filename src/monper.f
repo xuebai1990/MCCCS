@@ -78,7 +78,7 @@ C -----------------------------------------------------------------
      & ,ratvol,temmass,dn,pres(nbxmax)
 C -------------------------------------------------------------------
 
-c      write(2,*) 'begin MONPER'
+c      write(iou,*) 'begin MONPER'
 c *** perform periodic operations  ***
  
 c *** Deciding the minimum rcut for atom displacement. As we
@@ -114,8 +114,8 @@ c --- accept new ratio
 
            if ( lneigh .and. Armtrax .ge. upnn) then
                Armtrax = upnn
-               write(2,*) '### problem : for target accept ratio',
-     +               ' Armtrax should be smaller than upnn'
+               write(iou,*) '### problem : for target accept ',
+     +               'ratio Armtrax should be smaller than upnn'
            endif
        endif
 
@@ -138,8 +138,8 @@ c --- accept new ratio
 
            if ( lneigh .and. Armtray .ge. upnn) then
                Armtray = upnn
-               write(2,*) '### problem : for target accept ratio',
-     +               ' Armtray should be smaller than upnn'
+               write(iou,*) '### problem : for target accept ',
+     +               'ratio Armtray should be smaller than upnn'
            endif
        endif
           
@@ -161,8 +161,8 @@ c --- accept new ratio
 
            if ( lneigh .and. Armtraz .ge. upnn) then
                Armtraz = upnn
-               write(2,*) '### problem : for target accept ratio',
-     +               ' Armtraz should be smaller than upnn'
+               write(iou,*) '### problem : for target accept ',
+     +               'ratio Armtraz should be smaller than upnn'
            endif
        endif
  
@@ -170,7 +170,7 @@ c --- accept new ratio
 c *** adjust maximum translational displacement for COM***
          imend = nbox
          do im=1,imend
-            write(2,*) 'Box ',im
+            write(iou,*) 'Box ',im
             do imolty = 1,nmolty
 c              --- rmtrax
 c              --- check whether any x translations have been done for 
@@ -196,8 +196,8 @@ c                    --- accept new ratio
 
                   if ( lneigh .and. rmtrax(imolty,im) .ge. upnn) then
                      rmtrax(imolty,im) = upnn
-                     write(2,*) '### problem : for target accept ratio',
-     +                    ' rmtrax should be smaller than upnn'
+                     write(iou,*) '### problem : for target accept '
+     +                    ,'ratio rmtrax should be smaller than upnn'
                   endif
                endif
 
@@ -224,8 +224,8 @@ c                    --- accept new ratio
                   endif
                   if ( lneigh .and. rmtray(imolty,im) .ge. upnn) then
                      rmtray(imolty,im) = upnn
-                     write(2,*) '### problem : for target accept ratio',
-     +                    ' rmtray should be smaller than upnn'
+                     write(iou,*) '### problem : for target accept '
+     +                    ,'ratio rmtray should be smaller than upnn'
                   endif
                endif
 
@@ -254,8 +254,8 @@ c                    --- accept new ratio
 c                 --- check neighbor list
                   if ( lneigh .and. rmtraz(imolty,im) .ge. upnn) then
                      rmtraz(imolty,im) = upnn
-                     write(2,*) '### problem : for target accept ratio',
-     +                    ' rmtraz should be smaller than upnn'
+                     write(iou,*) '### problem : for target accept '
+     +                    ,'ratio rmtraz should be smaller than upnn'
                   endif
                endif
  
@@ -285,8 +285,8 @@ c                    --- accept trial ratio
 c                 --- check neighbour list
                   if ( lneigh .and. rmrotx(imolty,im) .ge. upnndg) then
                      rmrotx(imolty,im) = upnndg
-                     write(2,*) '### problem : for target accept ratio',
-     +                    ' rmrotx should be smaller than upnndg'
+                     write(iou,*) '### problem : for target accept '
+     +                    ,'ratio rmrotx should be smaller than upnndg'
                   endif
                endif
 
@@ -313,8 +313,8 @@ c                    --- accept trial ratio
 c                 --- check neighbour list
                   if ( lneigh .and. rmroty(imolty,im) .ge. upnndg) then
                      rmroty(imolty,im) = upnndg
-                     write(2,*) '### problem : for target accept ratio',
-     +                    ' rmroty should be smaller than upnndg'
+                     write(iou,*) '### problem : for target accept'
+     +                    ,' ratio rmroty should be smaller than upnndg'
                   endif
                endif
                
@@ -341,17 +341,17 @@ c                    --- accept trial ratio
 c                 --- check neighbour list
                   if ( lneigh .and. rmrotz(imolty,im) .ge. upnndg) then
                      rmrotz(imolty,im) = upnndg
-                     write(2,*) '### problem : for target accept ratio',
-     +                    ' rmrotz should be smaller than upnndg'
+                     write(iou,*) '### problem : for target accept '
+     +                    ,'ratio rmrotz should be smaller than upnndg'
                   endif
                endif
 
 c *** write some ratio update information ***
-               write(2,57) imolty,bntrax(imolty,im),bntray(imolty,im)
+               write(iou,57) imolty,bntrax(imolty,im),bntray(imolty,im)
      &              , bntraz(imolty,im), bnrotx(imolty,im)
      &              , bnroty(imolty,im), bnrotz(imolty,im)
-c              write(2,58) ratrax, ratray, ratraz,rarotx, raroty,rarotz
-               write(2,59) rmtrax(imolty,im), rmtray(imolty,im)
+c              write(iou,58) ratrax, ratray, ratraz,rarotx, raroty,rarotz
+               write(iou,59) rmtrax(imolty,im), rmtray(imolty,im)
      &              , rmtraz(imolty,im), rmrotx(imolty,im)
      &              , rmroty(imolty,im), rmrotz(imolty,im)
                
@@ -359,6 +359,20 @@ c              write(2,58) ratrax, ratray, ratraz,rarotx, raroty,rarotz
 c     58            format(' ratio       ',6(f7.4,1x))
  59            format(' max.displ.  ',6(f7.4,1x))
                
+               acntrax(imolty,im) = acntrax(imolty,im)+bntrax(imolty,im)
+               acntray(imolty,im) = acntray(imolty,im)+bntray(imolty,im)
+               acntraz(imolty,im) = acntraz(imolty,im)+bntraz(imolty,im)
+               acstrax(imolty,im) = acstrax(imolty,im)+bstrax(imolty,im)
+               acstray(imolty,im) = acstray(imolty,im)+bstray(imolty,im)
+               acstraz(imolty,im) = acstraz(imolty,im)+bstraz(imolty,im)
+
+               acnrotx(imolty,im) = acnrotx(imolty,im)+bnrotx(imolty,im)
+               acnroty(imolty,im) = acnroty(imolty,im)+bnroty(imolty,im)
+               acnrotz(imolty,im) = acnrotz(imolty,im)+bnrotz(imolty,im)
+               acsrotx(imolty,im) = acsrotx(imolty,im)+bsrotx(imolty,im)
+               acsroty(imolty,im) = acsroty(imolty,im)+bsroty(imolty,im)
+               acsrotz(imolty,im) = acsrotz(imolty,im)+bsrotz(imolty,im)
+
                bstrax(imolty,im) = 0.0d0
                bstray(imolty,im) = 0.0d0
                bstraz(imolty,im) = 0.0d0
@@ -397,9 +411,9 @@ c              --- rezero flcq
          enddo
          if ( lfq ) then
 c           --- write out information about fluctuating charge success
-            write(2,*) 'Box:   rmflcq for moltyps'
+            write(iou,*) 'Box:   rmflcq for moltyps'
             do im =1,imend
-               write(2,*) im,(rmflcq(i,im),i=1,nmolty)
+               write(iou,*) im,(rmflcq(i,im),i=1,nmolty)
             enddo
          endif
          
@@ -476,7 +490,7 @@ c     --- set coords for energy and write out conformations
      &                 ,vewald,1,ibox,1,nunit(imolty),.true.,ovrlap
      &                 ,.false.,vtors,.false.,.false.)
                   
-                  if (ovrlap) write(2,*) 
+                  if (ovrlap) write(iou,*) 
      &                 '*** DISASTER, OVERLAP IN MONPER'
 
                   if (lsolid(ibox).and..not.lrect(ibox)) then
@@ -646,11 +660,11 @@ c     *** adjust maximum volume displacement ***
             do ibox = 1, nbox
                if (lsolid(ibox) .and. .not. lrect(ibox)) then
                   do j = 1,9
-                     write(2,56) bnhmat(ibox,j),bshmat(ibox,j),
+                     write(iou,56) bnhmat(ibox,j),bshmat(ibox,j),
      &                    rmhmat(ibox,j)
                   enddo
                else
-                  write(2,60) bnvol(ibox),bsvol(ibox),rmvol(ibox)
+                  write(iou,60) bnvol(ibox),bsvol(ibox),rmvol(ibox)
                endif
             enddo
 
@@ -682,12 +696,12 @@ c     *** adjust maximum volume displacement ***
       if ( lprint ) then
 c     *** write out runtime information ***
          ntot = nnn + nnstep
-         write(2,'(i6,i8,e12.4,f10.3,f12.1,15i4)') nnn,ntot,
+         write(iou,'(i6,i8,e12.4,f10.3,f12.1,15i4)') nnn,ntot,
      +        vbox(1),boxlx(1),pres(1)
      +        ,(ncmt(1,imolty),imolty=1,nmolty)
          if ( lgibbs ) then
             do ibox = 2, nbox
-               write(2,'(14x,e12.4,f10.3,f12.1,15i4)') 
+               write(iou,'(14x,e12.4,f10.3,f12.1,15i4)') 
      +              vbox(ibox),boxlx(ibox),pres(ibox)
      +              ,(ncmt(ibox,imolty),imolty=1,nmolty)
             enddo
@@ -893,7 +907,7 @@ c - mol fraction
 
 c - Enthalpy
             itel = 4+nener+4*nmolty+1
-!            write(2,*) acEnthalpy(ibox)
+!            write(iou,*) acEnthalpy(ibox)
             call update(nblock,itel,ibox,acEnthalpy(ibox),acnp)
             itel = 4+nener+4*nmolty+2
             call update(nblock,itel,ibox,acEnthalpy1(ibox),acnp)
@@ -908,6 +922,6 @@ c - Enthalpy
          enddo
       endif
       
-c      write(2,*) 'end MONPER'
+c      write(iou,*) 'end MONPER'
       return
       end

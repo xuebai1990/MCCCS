@@ -92,10 +92,6 @@ c     h3(rij rik thetajik) = lambda exp[(gamma/(rij-rij*))+(gamma/(rik-rik*))]*
 c             [cos(theta)-cos(theta*)]**2     for rij<rij* and rik<rik*
 c                          = 0 otherwise
 
-c energy conversion
-         pener = 4.3597482d-11
-c old distance conversion
-         pdis = 1.0d0
 c conversion for coulomb potential (incl C/e, m-->A, J-->K, 4pi epsi naught)
        qqfact = 1.67125d5
 c qqfact for bohr/hartree - from pot_KAng.f code
@@ -104,125 +100,112 @@ c         qqfact = 0.99865377d0
 c     Parameters (galpha,grho,gbeta,ga,gb,gc; lambda,grij,ggamma,gtheta)
 c     Si-Si
        galpha(1) = 13597175.7d0
-c     galpha(1) = 0.18770d-8/pener
-       grho(1) = 0.29d0/pdis
-       gbeta(1) = 2.29d0/pdis
+       grho(1) = 0.29d0
+       gbeta(1) = 2.29d0
        lqchg(1) = .true.
        qelect(1) = 4.0d0
        mass(1) = 28.09d0
        ecut(1) = garofalini(rcut(1)*rcut(1),1,qelect(1),qelect(1)
      &      ,1,1)
        chname(1) = ' Garo Si'
+       chemid(1) = 'Si '
 
 c     O-O
        galpha(2) = 5251972.5d0
-c     galpha(2) = 0.07250d-8/pener
-       grho(2) = 0.29d0/pdis
-       gbeta(2) = 2.34d0/pdis
+       grho(2) = 0.29d0
+       gbeta(2) = 2.34d0
        lqchg(2) = .true.
        qelect(2) = -2.0d0
        mass(2) = 16.00d0
        ecut(2) = garofalini(rcut(1)*rcut(1),2,qelect(2),qelect(2)
      &      ,2,2)
        chname(2) = ' Garo O'
+       chemid(2) = 'O  '
        
 c     H-H
        galpha(3) = 246299.4d0
-c     galpha(3) = 0.00340d-8/pener
-       grho(3) = 0.35d0/pdis
-       gbeta(3) = 2.1d0/pdis
+       grho(3) = 0.35d0
+       gbeta(3) = 2.1d0
        ga(3,1) = -38243.8d0
-c     ga(3,1) = -5.2793d-12/pener
-       gb(3,1) = 6.0d0*pdis
-       gc(3,1) = 1.51d0/pdis
+       gb(3,1) = 6.0d0 
+       gc(3,1) = 1.51d0
        ga(3,2) = 2515.9d0
-c     ga(3,2) = 0.3473d-12/pener
-       gb(3,2) = 2.0d0*pdis
-       gc(3,2) = 2.42d0/pdis
+       gb(3,2) = 2.0d0 
+       gc(3,2) = 2.42d0
        lqchg(3) = .true.
        qelect(3) = 1.0d0
        mass(3) = 1.0078d0
        ecut(3) = garofalini(rcut(1)*rcut(1),3,qelect(3),qelect(3)
      &      ,3,3)
        chname(3) = ' Garo H'
+       chemid(3) = 'H  '
        
 c     Si-O
        galpha(4) =  21457024.2d0
-c     galpha(4) =  0.29620d-8/pener
-       grho(4) = 0.29d0/pdis
-       gbeta(4) = 2.34d0/pdis
+       grho(4) = 0.29d0
+       gbeta(4) = 2.34d0
        ecut(4) = garofalini(rcut(1)*rcut(1),4,qelect(1),qelect(2)
      &      ,1,2)
        
 c     Si-H
        galpha(5) = 499842.9d0
-c     galpha(5) = 0.00690d-8/pener
-       grho(5) = 0.29d0/pdis
-       gbeta(5) = 2.31d0/pdis
+       grho(5) = 0.29d0
+       gbeta(5) = 2.31d0
        ga(5,1) = -33715.5d0
-c     ga(5,1) = -4.6542d-12/pener
-       gb(5,1) = 6.0d0*pdis
-       gc(5,1) = 2.2d0/pdis
+       gb(5,1) = 6.0d0 
+       gc(5,1) = 2.2d0
        ecut(5) = garofalini(rcut(1)*rcut(1),5,qelect(1),qelect(3)
      &      ,1,3)
        
 c     0-H
        galpha(6) = 2886049.4d0
-c     galpha(6) = 0.03984d-8/pener
-       grho(6) = 0.29d0/pdis
-       gbeta(6) = 2.26d0/pdis
+       grho(6) = 0.29d0
+       gbeta(6) = 2.26d0
        ga(6,1) = -15096.7d0
-c     ga(6,1) = -2.0840d-12/pener
-       gb(6,1) = 15.0d0*pdis
-       gc(6,1) = 1.05d0/pdis
+       gb(6,1) = 15.0d0 
+       gc(6,1) = 1.05d0
        ga(6,2) = 55353.6d0
-c     ga(6,2) = 7.6412d-12/pener
-       gb(6,2) = 3.2d0*pdis
-       gc(6,2) = 1.50d0/pdis
+       gb(6,2) = 3.2d0 
+       gc(6,2) = 1.50d0
        ga(6,3) = -6038.7d0
-c     ga(6,3) = -0.8336d-12/pener
-       gb(6,3) = 5.0d0*pdis
-       gc(6,3) = 2.0d0/pdis
+       gb(6,3) = 5.0d0 
+       gc(6,3) = 2.0d0
        ecut(6) = garofalini(rcut(1)*rcut(1),6,qelect(2),qelect(3)
      &      ,2,3)
        
 c     Si-O-Si
        glambda(1) = 21732.3d0
-c     glambda(1) = 0.3d-11/pener
-       ggamma(1,1) = 2.0d0/pdis
-       grij(1,1) = 2.6d0/pdis
+       ggamma(1,1) = 2.0d0
+       grij(1,1) = 2.6d0
        grijsq(1,1) = grij(1,1)*grij(1,1)
        gtheta(1) = dcos(109.5d0*degrad)
        
 c     O-Si-O
        glambda(2) = 1376379.0d0
-c     glambda(2) = 19.0d-11/pener
-       ggamma(2,1) = 2.8d0/pdis
-       grij(2,1) = 3.0d0/pdis
+       ggamma(2,1) = 2.8d0
+       grij(2,1) = 3.0d0
        grijsq(2,1) = grij(2,1)*grij(2,1)
        gtheta(2) = dcos(109.5d0*degrad)
        
 c     H-O-H
        glambda(3) = 2535435.0d0
-c     glambda(3) = 35.0d-11/pener
-       ggamma(3,1) = 1.3d0/pdis
-       grij(3,1) = 1.6d0/pdis
+       ggamma(3,1) = 1.3d0
+       grij(3,1) = 1.6d0
        grijsq(3,1) = grij(3,1)*grij(3,1)
        gtheta(3) = dcos(104.5d0*degrad)
        
 c     Si-O-H
        glambda(4) = 362205.0d0
-c     glambda(4) = 5.0d-11/pener
-       ggamma(4,1) = 2.0d0/pdis
-       ggamma(4,2) = 1.2d0/pdis
+       ggamma(4,1) = 2.0d0
+       ggamma(4,2) = 1.2d0
        grij(4,1) = grij(1,1)
-       grij(4,2) = 1.5d0/pdis
+       grij(4,2) = 1.5d0
        grijsq(4,1) = grij(4,1)*grij(4,1)
        grijsq(4,2) = grij(4,2)*grij(4,2)
        gtheta(4) = dcos(109.5d0*degrad)
        
        do i=1,6
-          write(2,*) 'garo ecut',i,ecut(i)
+          write(iou,*) 'garo ecut',i,ecut(i)
        enddo
        return
 
@@ -307,10 +290,10 @@ c            write(11,*) 'consp(i)',consp
 c            write(11,*) 'consu(i)',consu
          endif
 
-         write(2,*) 
+         write(iou,*) 
      &        ' i   aexsix       bexsix      cexsix     sexsix'
          do i = 1,natom
-            write(2,'(i3,2x,4e12.4)')i,aexsix(i),bexsix(i)
+            write(iou,'(i3,2x,4e12.4)')i,aexsix(i),bexsix(i)
      &           ,cexsix(i),sexsix(i)
          enddo
 
@@ -388,9 +371,9 @@ c            corp_cons(1) = 4.0098456560842058E-02
             corp_cons(3) = 5.7576802340310304d-02
          endif
 
-         write(2,*) ' i   epsimmff     sigimmff   smmff'
+         write(iou,*) ' i   epsimmff     sigimmff   smmff'
          do i = 1,natom
-            write(2,'(i3,2x,4e12.4)')i,epsimmff(i),sigimmff(i)
+            write(iou,'(i3,2x,4e12.4)')i,epsimmff(i),sigimmff(i)
      &           ,smmff(i)
          enddo
 
@@ -551,7 +534,23 @@ c --- TraPPE-UA [C] (quaternary)
       mass(7) = 12.011d0
       chname(7) = ' Tr-UA C   alkane '
       chemid(7)  = 'C  '
+cccccccccccccccccccccccccccccccccccccccccccccccc
+c --- coarse-grain end segment (CH3+CH2+CH2)
+c --- sigi and epsi don't matter, just need to
+c --- be read in so readdat doesn't get confused
+      sigi(40) = 3.75d0
+      epsi(40) = 98.0d0
+      mass(40) = 43.0883d0
+      chname(40) = ' Tr-UA CH3 alkane '
+      chemid(40)  = 'C  '
 
+c --- coarse-grain middle segement (CH2+CH2+CH2)
+      sigi(50) = 3.95d0
+      epsi(50) = 46.0d0
+      mass(50) = 42.0804d0
+      chname(50) = ' Tr-UA CH2 alkane '
+      chemid(50)  = 'C  '
+cccccccccccccccccccccccccccccccccccccccccccccccc
 
 c --- OPLS-UA ethane methyl [CH3] sp3
       sigi(8) = 3.775d0
@@ -801,96 +800,96 @@ c --- Teja heptane at 450 K [CH3-(CH2)5-CH3]
 
 c * PERFLUOROALKANES
 
-c --- perfluoromethane [CF4] 
-      sigi(40) = 4.13d0
-c      sigi(40) = 4.18d0 (fit for critical density)
-      epsi(40) = 172.95d0
-      mass(40) = 88.003d0
-      chname(40) = ' UA CF4           '
-      chemid(40)  = 'C  '
-
-c --- Bin's perfluoromethane [CF4] 
-      sigi(41) = 4.15d0
-      epsi(41) = 175.4d0
-      mass(41) = 88.003d0
-      chname(41) = ' Bin UA CF4       '
-      chemid(41)  = 'C  '
-
-c --- TraPPE-UA (ilja email 4-14-99) [CF3] group
-      sigi(42) = 4.36d0
-      epsi(42) = 87.0d0
-      mass(42) = 69.0065d0
-      chname(42) = ' TrUA CF3 Ilja    '
-      chemid(42)  = 'C  '
-
-c --- [CF3] group iterb      
-      sigi(43) = 4.35d0
-      epsi(43) = 87.0d0
-      mass(43) = 69.006d0
-      chname(43) = ' UA CF3 iterb     '
-      chemid(43)  = 'C  '
-
-c --- TraPPE-UA (ilja email 4-14-99) [CF2] group
-      sigi(44) = 4.73d0
-      epsi(44) = 27.5d0
-      mass(44) = 50.0081d0
-      chname(44) = ' TrUA CF2 Ilja    '
-      chemid(44)  = 'C  '
-
-
-c --- Amber-AA for [C]F4 carbon (JCC 13(1992) P963)
-      sigi(45) = 3.82d0/(2.0d0**(1.0d0/6.0d0))
-      epsi(45) = 55.05d0
-      mass(45) = 12.011d0
-      qelect(45) = -0.756d0
-      lqchg(45) = .true.
-      chname(45) = ' AmberAA [C]F4    '
-      chemid(45)  = 'C  '
-
-c --- Amber-AA for C[F]4 fluorine (JCC 13(1992) P963)
-      sigi(46) = 3.50d0/(2.0d0**(1.0d0/6.0d0))
-      epsi(46) = 30.70d0
-      mass(46) = 18.9984d0
-      qelect(46) = 0.189d0
-      lqchg(46) = .true.
-      chname(46) = ' AmberAA C[F]4    '
-      chemid(46)  = 'F  '
-
-c --- AA for [C]F4 carbon (Surface Science 367(1996) P177)
-      sigi(47) = 3.35d0
-      epsi(47) = 32.73d0
-      mass(47) = 12.011d0
-c      qelect(47) = -0.808d0
-      chname(47) = ' SurfSciAA [C]F4  '
-      chemid(47)  = 'C  '
-
-c --- AA for C[F]4 fluorine (Surface Science 367(1996) P177)
-c      sigi(48) = 2.95d0
-c      epsi(48) = 37.0d0
-      sigi(48) = 2.90d0
-      epsi(48) = 34.3d0
-      mass(48) = 18.9984d0
-c      qelect(48) = 0.202d0
-      chname(48) = ' SurfSciAA C[F]4  '
-      chemid(48)  = 'F  '
-
-c --- AA for [C]F4 carbon (Nose and Klein J.Chem.Phys. 78(1983) 6928)
-c      sigi(49) = 3.35d0
-c      epsi(49) = 37.00d0
-      sigi(49) = 3.35d0
-      epsi(49) = 26.00d0
-      mass(49) = 12.011d0
-c      qelect(49) = -0.896d0
-      chname(49) = ' NoseKleinAA [C]F4'
-      chemid(49)  = 'C  '
-
-c --- AA for C[F]4 fluorine (Nose and Klein J.Chem.Phys. 78(1983) 6928)
-      sigi(50) = 2.95d0
-      epsi(50) = 38.50d0
-      mass(50) = 18.9984d0
-c      qelect(50) = 0.224d0
-      chname(50) = ' NoseKleinAA C[F]4'
-      chemid(50)  = 'F  '
+c$$$c --- perfluoromethane [CF4] 
+c$$$      sigi(40) = 4.13d0
+c$$$c      sigi(40) = 4.18d0 (fit for critical density)
+c$$$      epsi(40) = 172.95d0
+c$$$      mass(40) = 88.003d0
+c$$$      chname(40) = ' UA CF4           '
+c$$$      chemid(40)  = 'C  '
+c$$$
+c$$$c --- Bin's perfluoromethane [CF4] 
+c$$$      sigi(41) = 4.15d0
+c$$$      epsi(41) = 175.4d0
+c$$$      mass(41) = 88.003d0
+c$$$      chname(41) = ' Bin UA CF4       '
+c$$$      chemid(41)  = 'C  '
+c$$$
+c$$$c --- TraPPE-UA (ilja email 4-14-99) [CF3] group
+c$$$      sigi(42) = 4.36d0
+c$$$      epsi(42) = 87.0d0
+c$$$      mass(42) = 69.0065d0
+c$$$      chname(42) = ' TrUA CF3 Ilja    '
+c$$$      chemid(42)  = 'C  '
+c$$$
+c$$$c --- [CF3] group iterb      
+c$$$      sigi(43) = 4.35d0
+c$$$      epsi(43) = 87.0d0
+c$$$      mass(43) = 69.006d0
+c$$$      chname(43) = ' UA CF3 iterb     '
+c$$$      chemid(43)  = 'C  '
+c$$$
+c$$$c --- TraPPE-UA (ilja email 4-14-99) [CF2] group
+c$$$      sigi(44) = 4.73d0
+c$$$      epsi(44) = 27.5d0
+c$$$      mass(44) = 50.0081d0
+c$$$      chname(44) = ' TrUA CF2 Ilja    '
+c$$$      chemid(44)  = 'C  '
+c$$$
+c$$$
+c$$$c --- Amber-AA for [C]F4 carbon (JCC 13(1992) P963)
+c$$$      sigi(45) = 3.82d0/(2.0d0**(1.0d0/6.0d0))
+c$$$      epsi(45) = 55.05d0
+c$$$      mass(45) = 12.011d0
+c$$$      qelect(45) = -0.756d0
+c$$$      lqchg(45) = .true.
+c$$$      chname(45) = ' AmberAA [C]F4    '
+c$$$      chemid(45)  = 'C  '
+c$$$
+c$$$c --- Amber-AA for C[F]4 fluorine (JCC 13(1992) P963)
+c$$$      sigi(46) = 3.50d0/(2.0d0**(1.0d0/6.0d0))
+c$$$      epsi(46) = 30.70d0
+c$$$      mass(46) = 18.9984d0
+c$$$      qelect(46) = 0.189d0
+c$$$      lqchg(46) = .true.
+c$$$      chname(46) = ' AmberAA C[F]4    '
+c$$$      chemid(46)  = 'F  '
+c$$$
+c$$$c --- AA for [C]F4 carbon (Surface Science 367(1996) P177)
+c$$$      sigi(47) = 3.35d0
+c$$$      epsi(47) = 32.73d0
+c$$$      mass(47) = 12.011d0
+c$$$c      qelect(47) = -0.808d0
+c$$$      chname(47) = ' SurfSciAA [C]F4  '
+c$$$      chemid(47)  = 'C  '
+c$$$
+c$$$c --- AA for C[F]4 fluorine (Surface Science 367(1996) P177)
+c$$$c      sigi(48) = 2.95d0
+c$$$c      epsi(48) = 37.0d0
+c$$$      sigi(48) = 2.90d0
+c$$$      epsi(48) = 34.3d0
+c$$$      mass(48) = 18.9984d0
+c$$$c      qelect(48) = 0.202d0
+c$$$      chname(48) = ' SurfSciAA C[F]4  '
+c$$$      chemid(48)  = 'F  '
+c$$$
+c$$$c --- AA for [C]F4 carbon (Nose and Klein J.Chem.Phys. 78(1983) 6928)
+c$$$c      sigi(49) = 3.35d0
+c$$$c      epsi(49) = 37.00d0
+c$$$      sigi(49) = 3.35d0
+c$$$      epsi(49) = 26.00d0
+c$$$      mass(49) = 12.011d0
+c$$$c      qelect(49) = -0.896d0
+c$$$      chname(49) = ' NoseKleinAA [C]F4'
+c$$$      chemid(49)  = 'C  '
+c$$$
+c$$$c --- AA for C[F]4 fluorine (Nose and Klein J.Chem.Phys. 78(1983) 6928)
+c$$$      sigi(50) = 2.95d0
+c$$$      epsi(50) = 38.50d0
+c$$$      mass(50) = 18.9984d0
+c$$$c      qelect(50) = 0.224d0
+c$$$      chname(50) = ' NoseKleinAA C[F]4'
+c$$$      chemid(50)  = 'F  '
 
 c * ALKENES
 
@@ -1427,7 +1426,7 @@ c --- OPLS-AA (1995) carboxylic acid carbon  [C](=O)-O-H
       sigi(106) = 3.75d0
       epsi(106) = 52.9d0
       mass(106) = 12.011d0
-      qelect(106) = 0.51d0
+      qelect(106) = 0.52d0
       lqchg(106) = .true.
       chname(106) = ' OPLSAA [C]OOH acd'
       chemid(106)  = 'C  '
@@ -1452,6 +1451,23 @@ c --- SPC/E hydrogen [H] (simple point charge Enhanced water hydrogen)
       chname(108) = ' SPC/E H water    '
       chemid(108)  = 'H  '
 
+c$$$c --- TIP3P oxygen [O] 
+c$$$      sigi(47) = 3.1506d0
+c$$$      epsi(47) = 76.54d0
+c$$$      mass(47) = 16.000d0
+c$$$      qelect(47) = -0.834d0
+c$$$      lqchg(47) = .true.
+c$$$      chname(47) = ' TIP3P O water    '
+c$$$      chemid(47)  = 'O  '
+c$$$
+c$$$c --- TIP3P hydrogen [H] 
+c$$$      sigi(48) = 0.0d0
+c$$$      epsi(48) = 0.0d0
+c$$$      mass(48) = 1.0079d0
+c$$$      qelect(48) = 0.417d0      
+c$$$      lqchg(48) = .true.
+c$$$      chname(48) = ' TIP3P H water    '
+c$$$      chemid(48)  = 'H  '
 
 c --- SPC-FQ oxygen [O]   S.W. Rick et al JCP 101 (7), 1 1994 6141
       sigi(109) = 3.176
@@ -2974,7 +2990,7 @@ c *** convert input data to program units ***
          call susami
          rcheck = 2.5d0 * 3.527d0
          if ( rcut(1) .ne. rcheck ) then
-            write(2,*) 'WARNING ### rcut set to 2.5sigma for SAMI'
+            write(iou,*) 'WARNING ### rcut set to 2.5sigma for SAMI'
             rcut(1) = rcheck
          endif
       else
@@ -2984,7 +3000,7 @@ c *** calculate square sigmas and epsilons for lj-energy subroutines ***
             do j = 1, nntype
                ij = (i-1)*nntype + j
                if ( lspecial(ij) ) then
-                  write(2,*) 'ij,lspecial(ij)',ij,lspecial(ij)
+                  write(iou,*) 'ij,lspecial(ij)',ij,lspecial(ij)
                   adum = aspecial(ij)
                   bdum = bspecial(ij)
                else

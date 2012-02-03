@@ -42,7 +42,7 @@ c     *** in a molecule
 
       save dcellx,dcelly,dcellz,ncellx,ncelly,ncellz,ncello
       
-c      write(2,*) 'START LINKCELL IINIT=',iinit
+c      write(iou,*) 'START LINKCELL IINIT=',iinit
 
        
 
@@ -57,7 +57,7 @@ c * called from monola
          endif
 
 c     --- determine dcell
-c         write(2,*) 'linkcell used',rcut,rintramax
+c         write(iou,*) 'linkcell used',rcut,rintramax
 
          dcellx = rcut(ibox) + rintramax
          dcelly = dcellx
@@ -84,16 +84,16 @@ c     --- now reweight ncell one more time
  
          if (ncell .ne. ncello) then
             if (imol .eq. 0) then
-               write(2,*) 'number of linkcells set to',ncell
+               write(iou,*) 'number of linkcells set to',ncell
             else
-               write(2,*) 'number of linkcells changed to',ncell
+               write(iou,*) 'number of linkcells changed to',ncell
             endif
          endif
 
          ncello = ncell
 
          if (ncell.gt.cmax) then
-            write(2,*) 'ncell,cmax',ncell,cmax
+            write(iou,*) 'ncell,cmax',ncell,cmax
             stop 'ncell greater than cmax in linkcell'
          endif
          
@@ -117,7 +117,7 @@ c     --- assign molecules to cells
 
 
                if (ic.gt.cmax) then
-                  write(2,*) 'ic,cmax',ic,cmax
+                  write(iou,*) 'ic,cmax',ic,cmax
                   stop 'ic gt cmax'
                endif
 
@@ -125,7 +125,7 @@ c     --- assign molecules to cells
                nicell(ic) = nicell(ic) + 1
 
                if (nicell(ic).gt.cmaxa) then
-                  write(2,*) 'nicell,cmaxa',nicell(ic)
+                  write(iou,*) 'nicell,cmaxa',nicell(ic)
      &                 ,cmaxa
                   stop 'nicell gt cmaxa'
                endif
@@ -229,7 +229,7 @@ c     --- we will determine the cell neighbors
          enddo
       endif
 
-c      write(2,*) 'END LINKCELL IINIT=',iinit
+c      write(iou,*) 'END LINKCELL IINIT=',iinit
 
       return
       end

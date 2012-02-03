@@ -34,7 +34,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       integer nequil,ninstf,ninsth,ndumph
       integer nstep, iprint, imv, iratio, iblock, idiele, isolute
      &       ,iratv,iratp,irsave,nnstep,nchoiq,numcoeff,rmexpc
-     &       ,nswapb,box1,box2,nvolb,box5,box6,ntemp
+     &       ,nswapb,box1,box2,nvolb,box5,box6,ntemp, iheatcapacity
 
       double precision Armtrax,Armtray,Armtraz
       double precision Num_cell_a, Num_cell_b, Num_cell_c
@@ -90,3 +90,4 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       common /atomdisp/ Armtrax,Armtray,Armtraz,Num_cell_a, 
      &                  Num_cell_b, Num_cell_c
       common /ghost/ ghost_particles
+      common /heatcap/ iheatcapacity

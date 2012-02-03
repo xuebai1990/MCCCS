@@ -38,6 +38,8 @@ c     **************************************************************
 
       implicit none
 
+      include 'control.inc'
+
       logical lterm
 
       integer n,iinit
@@ -60,7 +62,7 @@ c     if iinit=3 it finds a vector connected two others given
 c     *******************************************************
 
 
-c      write(2,*) 'START CLOSE iinit=',iinit
+c      write(iou,*) 'START CLOSE iinit=',iinit
 
 
       if (iinit.ne.3) then
@@ -228,7 +230,7 @@ c     --- for four bead closes, only one of these will work
             z(2) = rzf - rz(2)
             lengthb = dsqrt(x(2)**2 + y(2)**2 + z(2)**2)
 
-            write(2,*) lengtha,lengthb,bondl
+            write(iou,*) lengtha,lengthb,bondl
 
             
             if ((lengtha-bondl).lt.(lengthb-bondl)) then
@@ -339,7 +341,7 @@ c            return
 
       endif
 
-c      write(2,*) 'END CLOSE iinit=',iinit
+c      write(iou,*) 'END CLOSE iinit=',iinit
       
 c     ---------------------------------------------------------------
 

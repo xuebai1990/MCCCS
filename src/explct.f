@@ -573,7 +573,7 @@ c     ------H-atoms ------
                if (rn.gt.prob) goto 101
             endif
 c     rgr = r*180.0d0/onepi
-c     write(2,*) 'final Ryckaert angle: ',rgr
+c     write(iou,*) 'final Ryckaert angle: ',rgr
             vmethyl = vmethyl + ven
             do i = 1,3
                a4 = ah*a3*dcos(r+onepi) + ah*a1*dsin(r+onepi)
@@ -707,7 +707,7 @@ c     ------ point A' is opposite to point A ------
                if (rn.gt.prob) goto 100
             endif
 c     rgr = r*180.0d0/onepi
-c      write(2,*) 'final Ryckaert angle: ',rgr
+c      write(iou,*) 'final Ryckaert angle: ',rgr
             vmethyl = vmethyl + ven
 
             do i = 4,6

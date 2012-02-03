@@ -42,6 +42,7 @@ c     * last modified 02-12-2001 by M.G. Martin                        *
 c     ******************************************************************
       implicit none
 
+      include 'control.inc'
       include 'conver.inc'
 
 c     --- variables passed to/from the subroutine
@@ -55,7 +56,7 @@ c     --- local variables
       double precision determ,arccos
       save a11,a12,a13,a21,a22,a31,a32,a33,cosalph,sinalph
 
-c      write(2,*) 'start CONE'
+c      write(iou,*) 'start CONE'
 
       if ( iinit .eq. 1 ) then      
 c       --- setup the unit cone
@@ -146,11 +147,11 @@ c        --- now need to find the gamma on [-Pi,Pi] that satisfies cos and sin
          if ( singamma .lt. 0.0d0 ) gamma = -gamma
 
       else
-         write(2,*) 'iinit ',iinit
+         write(iou,*) 'iinit ',iinit
          stop 'non valid iinit in cone.f'
       endif
       
-c      write(2,*) 'finish CONE'
+c      write(iou,*) 'finish CONE'
 
       return
       end

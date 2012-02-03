@@ -38,6 +38,7 @@ c     ** M.G. Martin 2-4-98                                           **
 c     ******************************************************************
 
       implicit none
+      include 'control.inc'
       double precision thetaone, thetatwo, phione, phitwo, angle
      &     ,sintheone,costheone,sinthetwo,costhetwo
      &     ,sinphione,cosphione,sinphitwo,cosphitwo,cosangle

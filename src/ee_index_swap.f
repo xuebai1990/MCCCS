@@ -19,7 +19,7 @@ c --- move involves a permutation factor
       imolty = ee_moltyp(mstate)
       ibox = box_state(1)
       ibox1 = box_state(fmstate)
-c	write(2,*) 'index swap old', mstate, eepointp, box_state(mstate),
+c	write(iou,*) 'index swap old', mstate, eepointp, box_state(mstate),
 c     &             ncmt(box_state(mstate),imolty)
       if (mstate.eq.1) then
          if (random().le.0.5d0) then
@@ -30,7 +30,7 @@ c     &             ncmt(box_state(mstate),imolty)
             if (random().le.accr) then
                mstate = fmstate
                eepointp = idint(dble(ncmt(ibox1,imolty))*random())+1
-c	write(2,*) 'mstate,nstate', 1, 6, accr
+c	write(iou,*) 'mstate,nstate', 1, 6, accr
             endif
          endif
       elseif (mstate.eq.fmstate) then
@@ -43,13 +43,13 @@ c	write(2,*) 'mstate,nstate', 1, 6, accr
                mstate = 1
                eepointp = idint(dble(ncmt(ibox,imolty))*random())+1
             endif
-c	write(2,*) 'mstate,nstate', 6, 1, accr
+c	write(iou,*) 'mstate,nstate', 6, 1, accr
          endif
       endif      
 
-c	write(2,*) ibox, ibox1,parbox(eepointp,ibox,imolty)
+c	write(iou,*) ibox, ibox1,parbox(eepointp,ibox,imolty)
 c     &    ,parbox(eepointp,ibox1,imolty)
-c	write(2,*) 'index swap new', mstate, eepointp, box_state(mstate),
+c	write(iou,*) 'index swap new', mstate, eepointp, box_state(mstate),
 c     &             ncmt(box_state(mstate),imolty)
 
       return

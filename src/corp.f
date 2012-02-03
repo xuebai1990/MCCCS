@@ -38,6 +38,7 @@ c ************************************
       include 'nsix.inc'
 
       double precision corp,rci3,rhosq, epsilon2, sigma2
+      double precision rci1
       integer imolty,jmolty,ii,jj, ntii, ntjj, ntij,ibox
       corp = 0.0d0
 
@@ -60,6 +61,31 @@ c ************************************
      &            rhosq * rzero(ntij)**3 * 
      &            (0.5d0*(rzero(ntij)/rcut(ibox))**6 - 
      &            (rzero(ntij)/rcut(ibox))**3)
+            elseif (lgenlj) then
+               ntij = (ntii-1)*nntype + ntjj
+               rci3 = sig2ij(ntij)**(3.0d0/2.0d0) / rcut(ibox)**3
+               rci1 = rci3 **(1.0d0/3.0d0)
+               if ( lexpand(imolty) .and. lexpand(jmolty) ) then
+                  sigma2 = (sigma(imolty,ii)+sigma(jmolty,jj))**2/4.0d0
+                  epsilon2 = dsqrt(epsilon(imolty,ii)
+     &                 *epsilon(jmolty,jj))
+               elseif ( lexpand(imolty) ) then
+                  sigma2 = (sigma(imolty,ii)+sigi(ntjj))**2/4.0d0
+                  epsilon2 = dsqrt(epsilon(imolty,ii)*epsi(ntjj))
+               elseif ( lexpand(jmolty) ) then
+                  sigma2 = (sigma(jmolty,jj)+sigi(ntii))**2/4.0d0
+                  epsilon2 = dsqrt(epsilon(jmolty,jj)*epsi(ntii))
+               else
+                  sigma2 = sig2ij(ntij)
+                  epsilon2 = epsij(ntij)
+               endif
+                 corp = corp
+     &  + (2.0d0/3.0d0) * onepi * epsilon2 * sigma2 ** (1.50d0)
+     &    * rhosq * n1 *
+     &   ( (( (2.0d0**((4.0d0*n1/n0)+1.0d0))/(2.0d0*n1-3.0d0)) *
+     & rci1 **(2.0d0*n1-3.0d0) ) -
+     &   ( ((2.0d0**((2.0d0*n1/n0)+1.0d0))/(n1-3.0d0))*
+     & rci1 **(n1-3.0d0) )  )
             else
                ntij = (ntii-1)*nntype + ntjj
                

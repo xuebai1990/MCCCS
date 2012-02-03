@@ -60,7 +60,7 @@ c *** common blocks ***
      +                ,rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq
      +                ,ryuij,rzuij,sr2,sr6,rij,rijsq,dzui,dz3,dz12
      +                ,exgrph,exsami,exmuir,exzeo,vtors,exsix,velect
-     +                ,vewald,mmff,rbcut,ninesix,vharo
+     +                ,vewald,mmff,rbcut,ninesix,vharo,genlj
       double precision erfunc,qave,rho,vol,vtail
       double precision xvec,yvec,zvec,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2
      &     ,daa1,da1a2,dot,thetac,vtorso,coru
@@ -72,7 +72,7 @@ c *** common blocks ***
 
 C --------------------------------------------------------------------
 
-c      write(2,*) 'start ENERGY'
+c      write(iou,*) 'start ENERGY'
       if ( lpbc ) call setpbc (ibox)
 
       rcutsq = rcut(ibox) * rcut(ibox)
@@ -114,7 +114,7 @@ c --- calculate the center of mass of chain i and give it a dummy #
             rxu(nchp2,ii) = rxuion(ii,flagon) 
             ryu(nchp2,ii) = ryuion(ii,flagon) 
             rzu(nchp2,ii) = rzuion(ii,flagon) 
-c	write(2,*) ii,flagon,rxu(nchp2,ii),ryu(nchp2,ii),rzu(nchp2,ii)
+c	write(iou,*) ii,flagon,rxu(nchp2,ii),ryu(nchp2,ii),rzu(nchp2,ii)
          enddo
          nboxi(nchp2) = ibox
          moltyp(nchp2) = imolty
@@ -123,7 +123,7 @@ c	write(2,*) ii,flagon,rxu(nchp2,ii),ryu(nchp2,ii),rzu(nchp2,ii)
          ycmi = ycm(nchp2)
          zcmi = zcm(nchp2)
          rcmi = rcmu(nchp2)
-c         write(2,*) 'rcmi:',rcmi
+c         write(iou,*) 'rcmi:',rcmi
       else
          lij2 = .true.
       endif
@@ -320,6 +320,8 @@ c                    --- check exclusion table
                         ntij = (ntii+ntjj)/2
                      elseif (lninesix) then
                         ntij = (ntii-1)*nxatom + ntjj
+                     elseif (lgenlj) then
+                        ntij = (ntii-1)*nntype + ntjj 
                      else
                         ntij = (ntii-1)*nntype + ntjj
                      endif
@@ -338,11 +340,11 @@ c *** minimum image the pair separations ***
      &                    (lexpand(imolty) .or. lexpand(jmolty))) then
                         ovrlap = .true.
 c	if (leemove) then
-c                        write(2,*) 'inter ovrlap:',i,j
-c                        write(2,*) 'i xyz',rxui,ryui,rzui
-c                        write(2,*) 'j xyz',rxu(j,jj),ryu(j,jj),rzu(j,jj) 
-c                        write(2,*) 'ii:',ii,'jj:',jj
-c                        write(2,*) 'distance', dsqrt(rijsq)
+c                        write(iou,*) 'inter ovrlap:',i,j
+c                        write(iou,*) 'i xyz',rxui,ryui,rzui
+c                        write(iou,*) 'j xyz',rxu(j,jj),ryu(j,jj),rzu(j,jj) 
+c                        write(iou,*) 'ii:',ii,'jj:',jj
+c                        write(iou,*) 'distance', dsqrt(rijsq)
 c	endif
                         return
                      endif
@@ -355,6 +357,10 @@ c	endif
                            vinter = vinter + mmff(rijsq,ntij)
                         elseif (lninesix) then
                            vinter = vinter + ninesix(rijsq,ntij)
+                        elseif (lgenlj) then
+                           sr2 = sig2ij(ntij) / rijsq
+                           epsilon2=epsij(ntij)
+                           vinter = vinter + genlj(rijsq,sr2,epsilon2)
                         elseif ( lmuir ) then
                            vinter = vinter + ljmuir(rijsq,ntij)
                         elseif ( lpsurf ) then
@@ -490,7 +496,7 @@ c *** ring and the positive H in e.g. phenol
       endif
 
       if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff
-     &       .and. .not. lninesix ) then
+     & .and. .not. lgenlj .and. .not. lninesix ) then
          vinter = 4.0d0 * vinter
       endif
       vinter = vinter+vharo
@@ -521,6 +527,8 @@ c --- calculate intramolecular energy correction for chain i
                ntij = (ntii+ntjj)/2
             elseif (lninesix) then
                ntij = (ntii-1)*nxatom + ntjj
+            elseif (lgenlj) then
+               ntij = (ntii-1)*nntype + ntjj
             else
                ntij = (ntii-1)*nntype + ntjj
             endif
@@ -539,7 +547,7 @@ c * calculation of intramolecular electrostatics
      &              .and. lqchg(ntjj) ) then
                   if ( lewald ) then
 
-c                        write(2,*) 'energy including ii,jj',ii,jj,
+c                        write(iou,*) 'energy including ii,jj',ii,jj,
 c     &                       qqfact*qquion(ii,flagon)*qquion(jj,flagon)
 c     &                       *erfunc(calp(ibox)*dsqrt(rijsq))
 c     &                       /dsqrt(rijsq)
@@ -633,7 +641,7 @@ c * calculation of other non-bonded interactions
      &                 lexpand(imolty)) then
                      ovrlap = .true.
                 
-c                     write(2,*) 'intra ovrlap:',ii,jj
+c                     write(iou,*) 'intra ovrlap:',ii,jj
                      return
                   elseif ( rijsq .lt. rcutsq .or. lijall) then
                      if ( lsami ) then
@@ -644,6 +652,10 @@ c                     write(2,*) 'intra ovrlap:',ii,jj
                         vintra = vintra + mmff(rijsq,ntij)
                      elseif (lninesix) then
                         vintra = vintra + ninesix(rijsq,ntij)
+                     elseif (lgenlj) then
+                        sr2 = sig2ij(ntij) / rijsq
+                        epsilon2=epsij(ntij)
+                        vintra = vintra + genlj(rijsq,sr2,epsilon2)
                      elseif ( lmuir ) then
                         vintra = vintra + ljmuir(rijsq,ntij)
                      elseif ( lpsurf ) then
@@ -707,7 +719,7 @@ c           -- self interaction term, 1.772 is sqrt of pi
          endif
       enddo
       if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff 
-     &      .and. .not. lninesix ) then 
+     & .and. .not. lgenlj  .and. .not. lninesix ) then 
            vintra = 4.0d0 * vintra 
       endif
 
@@ -730,7 +742,7 @@ c     &               ( boxlx(ibox)*boxly(ibox)*boxlz(ibox) )
                    rho = ncmt(ibox,jmolty) / vol
                    vtail = vtail +
      &               ncmt(ibox,kmolty) * coru(kmolty,jmolty,rho,ibox)
-c                write(2,*) 'vtail',vtail
+c                write(iou,*) 'vtail',vtail
                 else
                    if (jmolty.eq.ee_moltyp(mstate)) then
                       rho = (ncmt(ibox,jmolty)-1) / vol
@@ -861,7 +873,7 @@ C ----------------------------------------------------------------------------
 c     note that vintra is only computed when the flag lljii is true
       v = vinter + vext + vintra + velect + vewald 
 
-c      write(2,*) 'end ENERGY'
+c      write(iou,*) 'end ENERGY'
 
       return
       end

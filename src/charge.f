@@ -37,6 +37,7 @@ c    *******************************************************************
       include 'poten.inc'
       include 'conver.inc'
       include 'ewaldsum.inc'
+      include 'connect.inc'      
 
       integer i,imolty,iunit,ii,jj,ntii,ntjj,ntij,ibox
       double precision vflucq,qion(numax),qqii,vewald,rxui,ryui,rzui,
@@ -85,8 +86,14 @@ c              --- correction term in ewald sum
                rzuij = rzui - rzu(i,jj)
                rij = dsqrt(rxuij*rxuij + ryuij*ryuij
      &              + rzuij*rzuij)
-               vewald = vewald + qqii*qion(jj)*
+               if (.not.lqinclu(imolty,ii,jj)) then
+                   vewald = vewald + qqii*qion(jj)*
      &              (erfunc(calp(ibox)*rij)-1.0d0)/rij
+               else
+                   vewald = vewald + (1.0d0-qscale2(imolty,ii,jj))*qqii*
+     &                       qion(jj)*
+     &                       (erfunc(calp(ibox)*rij)-1.0d0)/rij
+               endif 
             enddo
 c --- self term in ewald sum ---
             vewald = vewald - qqii*qqii*calp(ibox)/dsqrt(onepi)

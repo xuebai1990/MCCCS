@@ -73,8 +73,8 @@ c *** only use for polarizable models
 
 C --------------------------------------------------------------------
 
-c      write(2,*) 'start VIRIAL'
-c      write(2,*) 'binvir',binvir
+c      write(iou,*) 'start VIRIAL'
+c      write(iou,*) 'binvir',binvir
       rminsq = rmin * rmin
       vmin = -2000.0d0
 
@@ -384,8 +384,8 @@ c            write(11,*) 'energy:',velect+vinter*4.0d0
      &              = dexp(-(vinter+velect)/virtemp(itemp))-1.0d0
             enddo
          endif
-c         write(2,*) 'mayer',mayer
-c         write(2,*) 'nnn',nnn
+c         write(iou,*) 'mayer',mayer
+c         write(iou,*) 'nnn',nnn
          do itemp = 1,ntemp
             binvir(nnn,itemp) = binvir(nnn,itemp) + mayer(itemp)
          enddo
@@ -407,9 +407,9 @@ c         write(2,*) 'nnn',nnn
 
 c ################################################################
 
-c      write(2,*) 'binvir',binvir
+c      write(iou,*) 'binvir',binvir
 
-c      write(2,*) 'end VIRIAL'
+c      write(iou,*) 'end VIRIAL'
 
       return
       end

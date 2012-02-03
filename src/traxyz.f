@@ -63,7 +63,7 @@ ckea
 
 C --------------------------------------------------------------------
 
-c      write(2,*) 'start TRAXYZ'
+c      write(iou,*) 'start TRAXYZ'
       ovrlap = .false.
 c     ***    select a chain at random ***
       rchain  = random()
@@ -91,7 +91,7 @@ c         (in box 2 is an ideal gas!)
          endif
          i = idint( dble(ncmt(1,imolty))*random() ) + 1
          i = parbox(i,1,imolty)
-         if ( moltyp(i) .ne. imolty ) write(2,*) 'screwup traxyz'
+         if ( moltyp(i) .ne. imolty ) write(iou,*) 'screwup traxyz'
 
 
       else
@@ -232,7 +232,7 @@ c        --- move rejected
          return
       endif
 
-c      write(2,*) 'TRAXYZ accepted i',i
+c      write(iou,*) 'TRAXYZ accepted i',i
 
       vbox(ibox)     = vbox(ibox) + deltv
       vinterb(ibox)  = vinterb(ibox) + (vintern - vintero)
@@ -294,7 +294,7 @@ c *** check for last unit ***
          
          do 10 ic = 1, neigh_cnt(i)
             j = neighbor(ic,i)
-c            write(2,*) ic,i,'j:',j
+c            write(iou,*) ic,i,'j:',j
             do ip = 1,neigh_cnt(j)
                if ( neighbor(ip,j) .eq. i ) then
                   neighbor(ip,j)=neighbor(neigh_cnt(j),j)
@@ -332,7 +332,7 @@ c            write(2,*) ic,i,'j:',j
          enddo
       endif
 
-c      write(2,*) 'end TRAXYZ',i
+c      write(iou,*) 'end TRAXYZ',i
 
       return
       end

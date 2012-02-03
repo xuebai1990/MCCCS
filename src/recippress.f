@@ -164,7 +164,7 @@ c * keep x,y and z separate for surface tension calculation
       pyz = pyz + intrayz
       pzy = pzy + intrazy
 
-c      write(2,*) 'internal part:',intraxx,intrayy,intrazz
+c      write(iou,*) 'internal part:',intraxx,intrayy,intrazz
       
       return
       end

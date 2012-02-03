@@ -34,8 +34,8 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       open(unit=48, file='system.pdb', form='formatted')
       rewind(48)
-      write(2,*) 'most likely does not work as before 9-3-96'
-      write(2,100)
+      write(iou,*) 'most likely does not work as before 9-3-96'
+      write(iou,100)
 
       atom = 'C   '
       iguest=0 

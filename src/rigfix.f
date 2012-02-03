@@ -60,7 +60,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
      &     ,vtrelecta_intra(nchmax),vtrelecta_inter(nchmax)
 c     ----------------------------------------------------------
 
-c      write(2,*) 'START RIGFIX'
+c      write(iou,*) 'START RIGFIX'
 
       twopi = dacos(-1.0d0) * 2.0d0
       wrig = 1.0d0
@@ -251,7 +251,7 @@ c     --- let's set up cone for the new configuration
      &                    .and..not.lplace(imolty,jut4)) then
 c     --- check to see if jut4 exists
                         if (.not. lexist(jut4)) then
-                           write(2,*) 'iu,jut2,jut3,jut4',iu
+                           write(iou,*) 'iu,jut2,jut3,jut4',iu
      &                          ,jut2,jut3,jut4
                            stop 'trouble, jut4 does not exist in rigfix'
                         endif
@@ -487,7 +487,7 @@ c     --- add up rosenbluth weight
             wrig = wrig * bsum
             if (wrig .lt. softlog) then
                lterm = .true.
-               write(2,*) 'RIGFIX OLD REJECTED'
+               write(iou,*) 'RIGFIX OLD REJECTED'
                return
             endif
          endif
@@ -582,7 +582,7 @@ c     --- now we must add up energies and record new positions
          enddo
       enddo
 
-c      write(2,*) 'END RIGFIX'
+c      write(iou,*) 'END RIGFIX'
         
       return
       end

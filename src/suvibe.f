@@ -316,6 +316,16 @@ c -- C-Cl bond for Chloroflouroalkanes
       brvib(83) = 1.754
       brvibk(83) = 0.0d0
 
+
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c - test parameters for coarse-grain model
+      brvib(110) = 3.25d0
+      brvibk(110) = 0.0d0
+
+      brben(110) = 150.0d0
+      brbenk(110) = 1.0d-12
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+
 c * unused 
 c
 c * methanol O-H from H2 parameter set from Monica's dissertation *
@@ -347,7 +357,7 @@ c ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 c - TraPPE-UA bond angle for alkane segment centered at methylene (CH2 sp3)-
       brben(1) = 114.0d0
-c     write(2,*) '***** brben', brben(1) * raddeg
+c     write(iou,*) '***** brben', brben(1) * raddeg
       brbenk(1) = 31250.0d0
 
 c - TraPPE-UA bond angle for alkane segment centered at ternary (CH sp3)-
@@ -780,8 +790,8 @@ c --- OPLS C - C - Cl
       brbenk(109) = 39276.9d0
 
 c --- OPLS H - C - Cl
-      brben(110) = 114.20d0
-      brbenk(110) = 35248.5d0
+c      brben(110) = 114.20d0
+c      brbenk(110) = 35248.5d0
 
 c -- OPLS H-C-O in alcohols
       brben(111) = 109.5d0

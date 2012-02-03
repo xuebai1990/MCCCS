@@ -77,7 +77,7 @@ c KEA
 
 C --------------------------------------------------------------------
 
-c      write(2,*) 'start VOLUME of LNPTGIBBS'
+c      write(iou,*) 'start VOLUME of LNPTGIBBS'
 
 c     Select a box at  random to change the volume of box
 
@@ -260,10 +260,10 @@ c *** select one of the cell edge
          if (rbcut/w(1) .gt. 0.5d0 .or.
      &        rbcut/w(2) .gt. 0.5d0 .or.
      &        rbcut/w(3) .gt. 0.5d0) then
-            write(2,*) 'Problem with line 275 prvolume.f'
-            write(2,*) 'non-rectangular prvolume move rejected-',
+            write(iou,*) 'Problem with line 275 prvolume.f'
+            write(iou,*) 'non-rectangular prvolume move rejected-',
      & ' box width below cutoff size'
-            write(2,*) 'w1:',w(1),'w2:',w(2),'w3:',w(3)
+            write(iou,*) 'w1:',w(1),'w2:',w(2),'w3:',w(3)
             hmat(boxvch,jhmat) = hmato(jhmat)
             call dump
             stop
@@ -323,7 +323,7 @@ c            vminim = rbcut**(2.0d0)
          endif
 
 c         if ( voln .lt. vminim ) then
-c            write(2,*) 'prvolume move rejected - below cut-off size' 
+c            write(iou,*) 'prvolume move rejected - below cut-off size' 
 c            return
 c         endif
 
@@ -350,9 +350,9 @@ c         endif
             if ( lpbcz ) then
                boxlz(boxvch) = bzo
             endif
-            write(2,*) 'boxvch',boxvch
-            write(2,*) 'Problem in line 381 of subroutine prvolume.f'
-            write(2,*) 'A move was attempted that would lead to a 
+            write(iou,*) 'boxvch',boxvch
+            write(iou,*) 'Problem in line 381 of subroutine prvolume.f'
+            write(iou,*) 'A move was attempted that would lead to a 
      & boxlength less than twice rcut'
             call dump
             stop
@@ -427,7 +427,7 @@ c ----- Check if the chain i is in the correct box
       call sumup( ovrlap, v, vinter, vtail, vdum,vdum,
      +     vdum,vdum,vext,velect,vdum, boxvch, lvol)
       if ( ovrlap ) then
-c         write(2,*) 'move rejected due to overlap in PRVOLUME'
+c         write(iou,*) 'move rejected due to overlap in PRVOLUME'
          goto 500
       endif
 
@@ -538,7 +538,7 @@ c --- restore old neighbor list for garofalini --- KEA
 c --- restore old k vectors and reciprocal sum and calp
          calp(boxvch) = calpo
 c         if (numvect(boxvch) .ne. numvecto) then
-c            write(2,*) '### numvect changing in prvol'
+c            write(iou,*) '### numvect changing in prvol'
 c         endif
          numvect(boxvch) = numvecto
          ncount = numvect(boxvch)
@@ -572,7 +572,7 @@ c ----- Check if the chain i is in the correct box
          endif
       enddo
 
-c      write(2,*) 'end VOLUME of LNPTGIBBS'
+c      write(iou,*) 'end VOLUME of LNPTGIBBS'
 
       return
       end

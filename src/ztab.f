@@ -26,6 +26,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       implicit none
       include 'grid.inc'
       include 'zeolite.inc'
+      include 'control.inc'
       integer i,j,k,pgrid,idi,ngrid
       double precision xi,yi,zi,exzeof,dgr
 c make a tabulated potential of the zeolite
@@ -64,7 +65,7 @@ c      for polynom fitting)
       do i=-maxp,ngrz+maxp-1
          zzz(i)=i*dgrz
       enddo
-      write(2,1000) ngrid,ngrx,dgrx,ngry,dgry,ngrz,dgrz
+      write(iou,1000) ngrid,ngrx,dgrx,ngry,dgry,ngrz,dgrz
 c --- calculate interactions on grid
       idi=1
       xi=-dgrx
@@ -79,7 +80,7 @@ c --- calculate interactions on grid
 	       egrid(pgrid(i,j,k,ngrx,ngry))=sngl(exzeof(xi,yi,zi,idi))
 	    enddo
 	 enddo
-         write(2,*) 'Ztable: done ',i+1,' out of ',ngrx
+         write(iou,*) 'Ztable: done ',i+1,' out of ',ngrx
       enddo
 c--   write table to disk
       call rwztab(1) 

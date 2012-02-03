@@ -26,6 +26,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       implicit none
       include 'grid.inc'
       include 'zeolite.inc'
+      include 'control.inc'
       integer i,idi,tel
       double precision errm,errt,err,res,rest,erra
       integer samp
@@ -69,14 +70,14 @@ c---  test accuracy
             if (errm.lt.err) errm=err
          endif
       enddo
-      write(2,*) ' test over : ',samp,tel, ' random positions '
-      write(2,*) ' average error : ',errt/tel
-      write(2,*) ' maximum error : ',errm
-      write(2,*) ' maximum ab.er.: ',erra
-      write(2,*) ' Boltz avera energy (table): ',ebolt/bolt
-      write(2,*) ' Boltz avera energy (full ): ',eboltf/boltf
-      write(2,*) ' ---------------------------- '
-      write(2,*) 
+      write(iou,*) ' test over : ',samp,tel, ' random positions '
+      write(iou,*) ' average error : ',errt/tel
+      write(iou,*) ' maximum error : ',errm
+      write(iou,*) ' maximum ab.er.: ',erra
+      write(iou,*) ' Boltz avera energy (table): ',ebolt/bolt
+      write(iou,*) ' Boltz avera energy (full ): ',eboltf/boltf
+      write(iou,*) ' ---------------------------- '
+      write(iou,*) 
 
       return
       end

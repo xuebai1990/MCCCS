@@ -65,7 +65,7 @@ c    *******************************************************************
 
 C --------------------------------------------------------------------
 
-c      write(2,*) 'start TRAXYZ'
+c      write(iou,*) 'start TRAXYZ'
       ovrlap = .false.
 c     ***    select a chain at random ***
       rchain  = random()
@@ -89,7 +89,7 @@ c         (in box 2 is an ideal gas!)
          pick_chain = idint( dble(ncmt(1,imolty))*random() ) + 1
          pick_chain = parbox(pick_chain,1,imolty)
          if ( moltyp(pick_chain) .ne. imolty ) 
-     &           write(2,*) 'screwup traxyz'
+     &           write(iou,*) 'screwup traxyz'
 
 
       else
@@ -107,7 +107,7 @@ c *** store number of units of i in iunit ***
 
       pick_unit = int(dble(iunit*random()) + 1 )
 
-c      write(2,*) pick_unit, imolty, pick_chain
+c      write(iou,*) pick_unit, imolty, pick_chain
 
       i = pick_chain 
 
@@ -210,7 +210,7 @@ c        --- move rejected
          return
       endif
 
-c      write(2,*) 'TRAXYZ accepted i',i
+c      write(iou,*) 'TRAXYZ accepted i',i
       vbox(ibox)     = vbox(ibox) + deltv
       vinterb(ibox)  = vinterb(ibox) + (vintern - vintero)
       vintrab(ibox)  = vintrab(ibox) + (vintran - vintrao)
@@ -270,7 +270,7 @@ c *** check for last unit ***
          
          do 10 ic = 1, neigh_cnt(i)
             j = neighbor(ic,i)
-c            write(2,*) ic,i,'j:',j
+c            write(iou,*) ic,i,'j:',j
             do ip = 1,neigh_cnt(j)
                if ( neighbor(ip,j) .eq. i ) then
                   neighbor(ip,j)=neighbor(neigh_cnt(j),j)
@@ -296,7 +296,7 @@ c            write(2,*) ic,i,'j:',j
          enddo
       endif
 
-c      write(2,*) 'end TRAXYZ',i
+c      write(iou,*) 'end TRAXYZ',i
 
       return
       end

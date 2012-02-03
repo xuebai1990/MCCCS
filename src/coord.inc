@@ -26,9 +26,10 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       integer nbox,nchain,nmolty,moltyp,nunit,nugrow,ntype,nchbox,ncmt
      &  ,ncmt2,iring,nrig,irig,frig,counthist,counttot,boxlink
       integer nboxi, eetype, parbox,iurot,iupdatefix,nrigmin,nrigmax
-      integer parall,temtyp,riutry,rindex,prior,maxgrow
+      integer parall,temtyp,riutry,rindex,prior,maxgrow,nrotbd,irotbd
       double precision rxu, ryu, rzu, mass, masst, beta,xcm,ycm,zcm
      &  ,exp_c,eta,eta2,sxcm,sycm,szcm
+      double precision pmrotbd
       double precision qqu,rcmu,rintramax,hist,probf,Elect_field
       character*18 chname
       character*4 chemid
@@ -42,6 +43,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       dimension ntype(ntmax,numax)
       dimension nboxi(nmax),eetype(ntmax),rcmu(nmax)
       dimension iurot(ntmax)
+      dimension nrotbd(ntmax),irotbd(numax,ntmax),pmrotbd(numax,ntmax)
       dimension rxu(nmax,numax), ryu(nmax,numax), rzu(nmax,numax)
       dimension qqu(nmax,numax)
       dimension nchbox(nbxmax),ncmt(nbxmax,ntmax)
@@ -70,5 +72,6 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       common /verbose/ chname, chemid
 
-
+      common /ccord4/ pmrotbd
+      common /ccord5/ irotbd,nrotbd
 

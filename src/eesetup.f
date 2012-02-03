@@ -24,10 +24,10 @@ c --- initialize a few things
 
       leemove = .false.
       if ((pmexpc1.gt.1.0d-6).and.(.not.lexpee)) then
-         write(2,*) 'pmexp nonzero but no lexpee?'
+         write(iou,*) 'pmexp nonzero but no lexpee?'
          stop
       elseif ((pmexpc1.lt.1.0d-6).and.lexpee) then
-         write(2,*) 'pmexp zero but lexpee?'
+         write(iou,*) 'pmexp zero but lexpee?'
          stop
       endif
 
@@ -98,11 +98,13 @@ c --- is more or less arbitrary - but is consistent.
                      ntij = (ntii+ntjj)/2
                   elseif (lninesix) then
                      ntij = (ntii-1)*nxatom+ntjj
+                  elseif (lgenlj) then
+                     ntij = (ntii-1)*nntype+ntjj
                   else
                      ntij = (ntii-1)*nntype+ntjj
                   endif
                   rminee(ntij) = rmin
-c	write(2,*) i,ii,j,jj,rminee(ntij)
+c	write(iou,*) i,ii,j,jj,rminee(ntij)
                enddo
             enddo
          enddo
@@ -120,6 +122,9 @@ c	write(2,*) i,ii,j,jj,rminee(ntij)
                   elseif (lninesix) then
                      ntij = (ntii-1)*nxatom+ntjj
                      ntijs = (ntii-1)*nxatom+ntjjs
+                  elseif (lgenlj) then
+                     ntij = (ntii-1)*nntype+ntjj
+                     ntijs = (ntii-1)*nntype+ntjjs
                   else
                      ntij = (ntii-1)*nntype+ntjj
                      ntijs = (ntii-1)*nntype+ntjjs
@@ -135,9 +140,9 @@ c	write(2,*) i,ii,j,jj,rminee(ntij)
                   else
                      rminee(ntij) = 0.0d0
                   endif
-c	write(2,*) i,ii,j,jj,rminee(ntij)
-c	write(2,*) 'nt', ntii,ntjj,ntij,ntjjs,ntijs
-c	write(2,*) 'eps', sig2ij(ntij),sig2ij(ntijs),epsij(ntij),
+c	write(iou,*) i,ii,j,jj,rminee(ntij)
+c	write(iou,*) 'nt', ntii,ntjj,ntij,ntjjs,ntijs
+c	write(iou,*) 'eps', sig2ij(ntij),sig2ij(ntijs),epsij(ntij),
 c     &              epsij(ntijs),qelect(ntii),qelect(ntjj)
                enddo
             enddo
@@ -156,6 +161,9 @@ c     &              epsij(ntijs),qelect(ntii),qelect(ntjj)
                   elseif (lninesix) then
                      ntij = (ntii-1)*nxatom+ntjj
                      ntijs = (ntjjs-1)*nxatom+ntjj
+                  elseif (lgenlj) then
+                     ntij = (ntii-1)*nntype+ntjj
+                     ntijs = (ntii-1)*nntype+ntjjs
                   else
                      ntij = (ntii-1)*nntype+ntjj
                      ntijs = (ntjjs-1)*nntype+ntjj
@@ -171,9 +179,9 @@ c     &              epsij(ntijs),qelect(ntii),qelect(ntjj)
                   else
                      rminee(ntij) = 0.0d0
                   endif
-c	write(2,*) i,ii,j,jj,rminee(ntij)
-c	write(2,*) 'nt', ntii,ntjj,ntij,ntjjs,ntijs
-c	write(2,*) 'eps', sig2ij(ntij),sig2ij(ntijs),epsij(ntij),
+c	write(iou,*) i,ii,j,jj,rminee(ntij)
+c	write(iou,*) 'nt', ntii,ntjj,ntij,ntjjs,ntijs
+c	write(iou,*) 'eps', sig2ij(ntij),sig2ij(ntijs),epsij(ntij),
 c     &              epsij(ntijs)
                enddo
             enddo
@@ -191,6 +199,9 @@ c     &              epsij(ntijs)
                elseif (lninesix) then
                   ntij = (ntii-1)*nxatom+ntjj
                   ntijs = (ntii-1)*nxatom+ntjjs
+               elseif (lgenlj) then
+                  ntij = (ntii-1)*nntype+ntjj
+                  ntijs = (ntii-1)*nntype+ntjjs
                else
                   ntij = (ntii-1)*nntype+ntjj
                   ntijs = (ntii-1)*nntype+ntjjs
@@ -206,12 +217,12 @@ c     &              epsij(ntijs)
                else
                   rminee(ntij) = 0.0d0
                endif
-c	write(2,*) i,ii,i,jj,rminee(ntij)
+c	write(iou,*) i,ii,i,jj,rminee(ntij)
             enddo
          enddo
       enddo
 
-c	write(2,*) 'enumerate'
+c	write(iou,*) 'enumerate'
 c	do i = 1, nmolty
 c	do ii = 1, nunit(i)
 c	ntii = ntype(i,ii)
@@ -219,7 +230,7 @@ c	do j = 1, nmolty
 c	do jj = 1, nunit(j)
 c	ntjj = ntype(j,jj)
 c                  ntij = (ntii-1)*nntype+ntjj
-c	write(2,999) i,ii,j,jj,rminee(ntij),epsij(ntij),sig2ij(ntij)
+c	write(iou,999) i,ii,j,jj,rminee(ntij),epsij(ntij),sig2ij(ntij)
 c	enddo
 c	enddo
 c	enddo
@@ -235,11 +246,11 @@ c      ee_moltyp(fmstate) = imolty
       do i = 1, nunit(imolty)
          do m = 1, fmstate
             ee_qqu(i,m) = qelect(ntype(nmolty1+m-1,i))
-c	write(2,*) i,m,ee_qqu(i,m)
+c	write(iou,*) i,m,ee_qqu(i,m)
          enddo
 c         ee_qqu(i,fmstate) = qelect(ntype(imolty,i))
-c	write(2,*) i,1,ee_qqu(i,1)
-c	write(2,*) i,fmstate,ee_qqu(i,fmstate)
+c	write(iou,*) i,1,ee_qqu(i,1)
+c	write(iou,*) i,fmstate,ee_qqu(i,fmstate)
       enddo
 
 c --- associate a box with each state (convention: box 2 with states
@@ -279,20 +290,20 @@ c      elseif (dble(ncmt(box_state(2),imolty)).gt.0) then
 c         eepointp = idint(dble(ncmt(box_state(2),imolty))*random())+1
 c         mstate = fmstate
 c      else
-c         write(2,*)'the type is in neither box, imolty:',imolty
+c         write(iou,*)'the type is in neither box, imolty:',imolty
 c         stop
 c      endif
 c      lmstate = .true.
-c	write(2,*) 'starting point', eepointp, mstate
+c	write(iou,*) 'starting point', eepointp, mstate
 
 c --- probability accumulators
 
-c	write(2,*) 'prob check start'
+c	write(iou,*) 'prob check start'
       do m = 1, fmstate
          ee_prob(m) = 0
-c	write(2,*) m, ee_prob(m)
+c	write(iou,*) m, ee_prob(m)
       enddo
-c	write(2,*) 'prob check end'
+c	write(iou,*) 'prob check end'
 
  999	format(4(i4,1x),3(1x,e17.8))
       return
