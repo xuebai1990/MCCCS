@@ -1,0 +1,68 @@
+c INPUTDATA.INC
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c Copyright (C) 1999-2004 Bin Chen, Marcus Martin, Jeff Potoff,
+c John Stubbs, and Collin Wick and Ilja Siepmann
+c
+c This program is free software; you can redistribute it and/or
+c modify it under the terms of the GNU General Public License
+c as published by the Free Software Foundation; either version 2
+c of the License, or (at your option) any later version.
+c
+c This program is distributed in the hope that it will be useful,
+c but WITHOUT ANY WARRANTY; without even the implied warranty of
+c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+c GNU General Public License for more details.
+c
+c You should have received a copy of the GNU General Public License
+c along with this program; if not, write to
+c
+c Free Software Foundation, Inc.
+c 59 Temple Place - Suite 330
+c Boston, MA  02111-1307, USA.
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+
+      logical lstop
+      character*1 suffix
+      character*3 run_num
+      integer nequil,ninstf,ninsth,ndumph
+      integer nstep, iprint, imv, iratio, iblock, idiele, isolute
+     &       ,iratv,iratp,irsave,nnstep,nchoiq,numcoeff,rmexpc
+     &       ,nswapb,box1,box2,nvolb,box5,box6,ntemp
+      double precision pmcb, pmtra, temp, express
+     &                ,rmtrax, rmtray, rmtraz, rmrotx, rmroty, rmrotz
+     &                ,rmflcq,taflcq,fqbeta,tatra, tarot,pmvolx,pmvoly
+     &                ,pmvol, pmswap,rmvol, rmhmat, tavol,pmfix
+     &                ,upnn, upnnsq, upnndg, B, pmswmt,pmiswat,pmisatc
+     &                ,pmswat,pmsatc,pmcbmt,pmtrmt,pmromt
+     &                ,pmvlmt,pmall,pmflcq, pmfqmt,pmexpc,pmeemt
+     &                ,pmswapb,pmvolb,virtemp
+      dimension pmswmt(ntmax),pmcbmt(ntmax)
+     & ,pmtrmt(ntmax),pmromt(ntmax)
+     & ,pmall(ntmax),pmfqmt(ntmax),pmeemt(ntmax)
+     & ,rmexpc(ntmax),pmswapb(ntmax,npabmax)
+     & ,box1(ntmax,npabmax),box2(ntmax,npabmax)
+     & ,box5(nbxmax),box6(nbxmax),pmvolb(nbxmax)
+      dimension nchoiq(nbxmax),nswapb(ntmax)
+      dimension pmsatc(npamax),pmisatc(npamax)
+      dimension pmvlmt(nbxmax),virtemp(maxntemp)
+      dimension numcoeff(ntmax),pmfix(ntmax)
+      dimension B(ntmax),isolute(ntmax)
+
+      dimension rmvol(nbxmax),rmhmat(nbxmax,9)
+      dimension rmtrax(ntmax,nbxmax),rmtray(ntmax,nbxmax)
+     &   ,rmtraz(ntmax,nbxmax),rmrotx(ntmax,nbxmax)
+     &   ,rmroty(ntmax,nbxmax),rmrotz(ntmax,nbxmax)
+      dimension rmflcq(ntmax,nbxmax)
+      common /indata/ nstep,iprint,imv,iratio,iblock, idiele, isolute
+     &   ,iratv,iratp,irsave,nnstep,lstop,nchoiq,numcoeff
+     &   ,rmexpc,nswapb,box1,box2,nvolb,box5,box6,ntemp
+      common /indatc/ pmswmt,pmcbmt,pmtrmt,pmromt
+     &   ,pmfqmt,pmexpc,pmeemt,pmfix
+     &   ,pmall,pmsatc,pmisatc,pmswat,pmiswat,pmcb,pmflcq
+     &   ,pmvlmt,pmtra,pmvol,pmswap,pmswapb,pmvolb,virtemp
+
+      common /indatb/ rmvol,rmtrax,rmtray,rmtraz,rmrotx,rmroty,rmrotz
+     &         ,rmflcq,temp,express,tatra, tarot,tavol,taflcq,fqbeta
+     &         ,upnn, upnnsq, upnndg, B,rmhmat,pmvolx,pmvoly
+
+
