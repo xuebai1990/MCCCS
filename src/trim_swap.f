@@ -322,7 +322,7 @@ c     --- select ip position ---
       v1insewd = vtrewald(iwalk)
 
 
-!      write(iou,*)'vtry(iwalk)vtrext(iwalk)vtrinter(iwalk)vtrelect(iwalk)'
+!      write(6,*)'vtry(iwalk)vtrext(iwalk)vtrinter(iwalk)vtrelect(iwalk)'
 !     & ,vtry(iwalk),vtrext(iwalk),vtrinter(iwalk),vtrelect(iwalk),
 !     & vtrewald(iwalk)
 
@@ -389,7 +389,7 @@ c      if (ldual .or. ((.not. lchgall) .and. lelect(imolty))) then
 c     calculate the true site-site energy
          istt = 1
          iett = igrow
-!         write(iou,*) igrow
+!         write(6,*) igrow
          
          call energy (iins,imolty, v, vintra,vinter,vext
      &        ,velect,vewald,iii,ibox, istt, iett, .true.,ovrlap
@@ -781,9 +781,9 @@ c         total_NBE = vintran+velectn+vewaldn+vtgn+vbendn+vvibn
           vtgn      = 0.0d0
           vbendn    = 0.0d0
           vvibn     = 0.0d0
-!         write(iou,*) vintran,velectn,vewaldn       
+!         write(6,*) vintran,velectn,vewaldn       
 
-!         write(iou,*) 'irem', irem  
+!         write(6,*) 'irem', irem  
 
 c ---    update energies:
 

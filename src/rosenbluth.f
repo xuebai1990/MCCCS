@@ -264,7 +264,6 @@ c        -- select nchoi trial positions based only on torsions
 
             lreturn = .false.
  205        continue
-            
 c           --- set up the cone based on iuprev (could be grown if no prev)
             if ( .not.lreturn.and.growprev(iw) .eq. 0 ) then
 c              --- calculate random vector on the unit sphere for the first bead
@@ -311,7 +310,6 @@ c              --- set up the cone based on iuprev and iufrom
                xub = xvec(iuprev,iufrom) / length 
                yub = yvec(iuprev,iufrom) / length
                zub = zvec(iuprev,iufrom) / length
-
                call cone (1,xub,yub,zub,dum,dum,dum,dum,dum )
                if (movetype.eq.2.and.lring(imolty)
      &              .and.iw.eq.1) then
@@ -609,7 +607,6 @@ c              --- divide bsum by ichtor
                bsum_tor(ip) = bsum_tor(ip) / dble(ichtor)
                
             else
-
 c              --- no torsion energy, choose phidisp at random (except old)
                if ( (.not. lnew) .and. ip .eq. 1 ) then
 c                 --- old conformation - set phidisp to 0.0d0
@@ -664,7 +661,7 @@ c                 --- use old coordinates
 c       --- now that we have the trial site need to compute non-bonded energy
 
  250     continue
-
+         
          call boltz ( lnew,.false.,ovrlap,i,icharge,imolty,ibox,ichoi
      &        ,iufrom ,ntogrow, glist, maxlen)
 

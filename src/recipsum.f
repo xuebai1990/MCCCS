@@ -31,6 +31,16 @@ c    ** moves, written in 1998 by Bin Chen.                             **
 c    ** rewritten in 2001 by Bin Chen.                                  **
 c    ** rewritten again, probably by Bin.                               **
 c    *********************************************************************
+      include 'control.inc'
+      include 'system.inc'
+      include 'coord.inc'
+      include 'ewaldsum.inc'
+      include 'poten.inc'
+      include 'conver.inc'
+      include 'cell.inc'
+c RP added for MPI
+      include 'mpif.h'
+      include 'mpi.inc'
 
       integer ibox,nkx,nky,nkz
      &     ,nkx_min,nkx_max,nky_min,nky_max,nkz_min,nkz_max
@@ -42,14 +52,25 @@ c * from h-matrix formulation
       double precision alpsqr4,vol,ksqr,sumr,sumi,arg,boxlen,vrecip,
      &     bx1,by1,bz1,bmin,xratio,yratio,zratio,
      &     constx,consty,constz,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi
+!      double precision sum_sumr,sum_sumi
 
-      include 'control.inc'
-      include 'system.inc'
-      include 'coord.inc'
-      include 'ewaldsum.inc'
-      include 'poten.inc'
-      include 'conver.inc'
-      include 'cell.inc'
+c RP added for calculating time for communication step
+      integer mystart,myend,blocksize
+      integer ncount_arr(numprocmax),ncount_displs(numprocmax)
+      double precision sum_vrecip,kx_arr(vectormax),ky_arr(vectormax),
+     &   kz_arr(vectormax),kx_one(vectormax),ky_one(vectormax),
+     &   kz_one(vectormax),
+     &   ssumi_arr(vectormax),prefact_arr(vectormax),
+     &   ssumr_one(vectormax),
+     &   ssumi_one(vectormax),prefact_one(vectormax),
+     &   ssumr_arr(vectormax)
+ 
+c KM for MPI
+      do i=1,numprocmax
+         ncount_displs(i) = 0
+         ncount_arr(i) = 0
+      enddo
+      
 
 c *** Set up the reciprocal space vectors ***
 
@@ -95,11 +116,19 @@ c *** Set up the reciprocal space vectors ***
       vol = vol/(4.0d0*onepi)
 
       hmaxsq = alpsqr4*onepi*onepi
-         
+c RP added for MPI        
+       blocksize = kmaxl/numprocs
+       
+       mystart = myid * blocksize
+       if(myid .eq. (numprocs-1))then
+         myend = kmaxl
+       else 
+         myend = (myid + 1) * blocksize - 1
+       endif
 c *** generate the reciprocal-space 
-
-      do l = 0,kmaxl
-         if ( l .eq. 0 ) then
+      do l = mystart,myend
+!      do l = 0,kmaxl 
+        if ( l .eq. 0 ) then
             m_min = 0
          else
             m_min = -kmaxm
@@ -124,14 +153,15 @@ c --- behavior on 32 and 64 bit machines without this .and. statement
                if ( ksqr .lt. hmaxsq .and.
      &              abs(ksqr-hmaxsq) .gt. 1d-9 ) then
                   ncount = ncount + 1
-                  kx(ncount,ibox) = kx1
-                  ky(ncount,ibox) = ky1
-                  kz(ncount,ibox) = kz1
-                  prefact(ncount,ibox) =
+                  kx_arr(ncount) = kx1
+                  ky_arr(ncount) = ky1
+                  kz_arr(ncount) = kz1
+                  prefact_arr(ncount) =
      &                 dexp(-ksqr/alpsqr4)/(ksqr*vol)
 c     *** sum up q*cos and q*sin ***
                   sumr = 0.0d0
                   sumi = 0.0d0
+!                  do 10 i = myid+1,nchain,numprocs
                   do 10 i = 1,nchain
                      imolty = moltyp(i)
                      if ( .not. lelect(imolty) ) goto 10
@@ -147,29 +177,77 @@ c     *** sum up q*cos and q*sin ***
                         enddo
                      endif
  10               continue
-                  ssumr(ncount,ibox) = sumr
-                  ssumi(ncount,ibox) = sumi
+
+                  ssumr_arr(ncount) = sumr
+                  ssumi_arr(ncount) = sumi
 c *** Potential energy ***
                   vrecip = vrecip + (sumr*sumr + sumi*sumi)
-     &                 * prefact(ncount,ibox)
-
+     &                 * prefact_arr(ncount)
                endif
             enddo
          enddo
       enddo
+    
+       CALL MPI_ALLREDUCE(vrecip,sum_vrecip,1,
+     &     MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,
+     &     ierr)
+ 
+      vrecip = sum_vrecip
+
+       CALL MPI_ALLGATHER(ncount,1,MPI_INTEGER,ncount_arr,
+     &       1,MPI_INTEGER,MPI_COMM_WORLD,ierr)
+
+       ncount_displs(1) = 0
+       do i = 2,numprocs
+           ncount_displs(i) = ncount_displs(i-1) + ncount_arr(i-1)
+       enddo
+ 
+      CALL MPI_ALLGATHERV(kx_arr,ncount,MPI_DOUBLE_PRECISION,kx_one,
+     &         ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION,
+     &         MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLGATHERV(ky_arr,ncount,MPI_DOUBLE_PRECISION,ky_one,
+     &        ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION,
+     &        MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLGATHERV(kz_arr,ncount,MPI_DOUBLE_PRECISION,
+     &       kz_one,
+     &       ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION,
+     &       MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLGATHERV(ssumr_arr,ncount,MPI_DOUBLE_PRECISION,
+     &          ssumr_one,
+     &      ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION,
+     &      MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLGATHERV(ssumi_arr,ncount,MPI_DOUBLE_PRECISION,
+     &          ssumi_one,
+     &      ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION,
+     &      MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLGATHERV(prefact_arr,ncount,MPI_DOUBLE_PRECISION,
+     &           prefact_one,
+     &      ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION,
+     &      MPI_COMM_WORLD,ierr)       
+
+      ncount = 0
+      do i = 1,numprocs
+        ncount = ncount + ncount_arr(i)
+       enddo
+      do i = 1, ncount
+        kx(i,ibox) = kx_one(i)
+        ky(i,ibox) = ky_one(i)
+        kz(i,ibox) = kz_one(i)
+        ssumr(i,ibox) = ssumr_one(i)
+        ssumi(i,ibox) = ssumi_one(i)
+        prefact(i,ibox) = prefact_one(i)
+      enddo
+
       vrecip = vrecip*qqfact
 c      write(iou,*) 'in recipsum:',ssumr(100,ibox),ibox
 c *** safety check ***
 c      write(iou,*) 'A total of ',ncount,' vectors are used'
       if ( ncount .gt. vectormax ) then
-         write(iou,*)  'choose a larger vectormax'
+         write(iou,*) 'choose a larger vectormax'
          stop
       endif
 
       numvect(ibox) = ncount
-         
       return
 
       end
-
-

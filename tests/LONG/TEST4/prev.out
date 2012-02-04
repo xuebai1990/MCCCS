@@ -1,3 +1,4 @@
+ Number of processors:            8
  L_Coul_CBMC: T
  Number of unit cells in a dir =    5.00000000000000     
  Number of unit cells in b dir =    5.00000000000000     
@@ -13,7 +14,7 @@
  L_bend_table: F
  L_vdW_table: F
  L_elect_table: F
- number of boxes in the system:           2
+ number of boxes      in the system:           2
  temperature:   573.000000000000       K
  external pressure:  0.100000000000000       0.100000000000000       MPa
  Ghost particles:            0           0
@@ -85,7 +86,6 @@
     bead            1  beadtype            4  charge leader            1
        bead           1  bonded to bead           2
           bond type:  1 bond length:    1.540 k/2:      0.0
-           1
        bead   1 bending interaction through   2 with bead   3
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead  1            torsional interact  2 and  3 with bead  4 of torsional type:   2
@@ -95,7 +95,6 @@
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead           2  bonded to bead           3
           bond type:  1 bond length:    1.540 k/2:      0.0
-           2
        bead   2 bending interaction through   3 with bead   4
           bend type:  2 bend angle :  112.000 k/2:  31250.0
        bead   2 bending interaction through   3 with bead   7
@@ -109,7 +108,6 @@
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead           3  bonded to bead           7
           bond type: 30 bond length:    1.430 k/2:      0.0
-           3
        bead   3 bending interaction through   2 with bead   1
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead   3 bending interaction through   4 with bead   5
@@ -122,7 +120,6 @@
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead           4  bonded to bead           5
           bond type: 30 bond length:    1.430 k/2:      0.0
-           3
        bead   4 bending interaction through   3 with bead   2
           bend type:  2 bend angle :  112.000 k/2:  31250.0
        bead   4 bending interaction through   5 with bead   6
@@ -136,7 +133,6 @@
           bond type: 30 bond length:    1.430 k/2:      0.0
        bead           5  bonded to bead           6
           bond type: 29 bond length:    0.945 k/2:      0.0
-           1
        bead   5 bending interaction through   4 with bead   3
           bend type: 36 bend angle :  109.470 k/2:  25200.0
        bead  5            torsional interact  4 and  3 with bead  2 of torsional type:   2
@@ -144,7 +140,6 @@
     bead            6  beadtype           61  charge leader            5
        bead           6  bonded to bead           5
           bond type: 29 bond length:    0.945 k/2:      0.0
-           1
        bead   6 bending interaction through   5 with bead   4
           bend type: 35 bend angle :  108.500 k/2:  27720.0
        bead  6            torsional interact  5 and  4 with bead  3 of torsional type:   5
@@ -153,7 +148,6 @@
           bond type: 30 bond length:    1.430 k/2:      0.0
        bead           7  bonded to bead           8
           bond type: 29 bond length:    0.945 k/2:      0.0
-           2
        bead   7 bending interaction through   3 with bead   2
           bend type: 36 bend angle :  109.470 k/2:  25200.0
        bead   7 bending interaction through   3 with bead   4
@@ -163,7 +157,6 @@
     bead            8  beadtype           61  charge leader            5
        bead           8  bonded to bead           7
           bond type: 29 bond length:    0.945 k/2:      0.0
-           1
        bead   8 bending interaction through   7 with bead   3
           bend type: 35 bend angle :  108.500 k/2:  27720.0
        bead  8            torsional interact  7 and  3 with bead  2 of torsional type:   7
@@ -250,8 +243,8 @@
  translation move  :   30.00 %
  rotation move     :   35.00 %
  
- 
  Fraction of atom translations move  0.000000000000000E+000
+ 
  molecule type :           1   
       nchoi1   :          10  
       nchoi    :           8  
@@ -357,16 +350,16 @@
  in y-direction
  in z-direction
            3 -dimensional periodic box
- particle coordinates are folded into central box
+ particle coordinates are folded            into central box
  additional (COM) cutoff on computed rcmu
  Dual Cutoff Configurational-bias Monte Carlo
- CBMC simultaneously grows all beads conected to the same bead
+ CBMC simultaneously grows all beads conected to the         same bead
  with bond angles generated from Gaussian distribution
  Program will call Explct.f if needed
  Lennard-Jones potential for bead-bead
  with additional tail corrections
  Coulombic inter- and intramolecular interactions
- Ewald-sum will be used to calculate Coulombic interactions
+ Ewald-sum will be used to calculate Coulombic         interactions
  
  MOLECULAR MASS:   90.1212000000000     
  new maximum displacements read from restart-file
@@ -508,12 +501,12 @@
  bond bending       374521.494420587     
  torsional          287898.493307283     
  external          0.000000000000000E+000
- coulombic energy  -1028586.52710457     
+ coulombic energy  -1028586.52710459     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -603640.934851635     
+ total energy      -603640.934851657     
  
- box             1  initial v   =   -603640.934851635     
+ box             1  initial v   =   -603640.934851657     
  surf. tension :   box 1 =     -14.00221
  pressure check:   box 1 =       8646.86
  
@@ -527,22 +520,35 @@
  bond bending       22419.5400653022     
  torsional          25694.6709460617     
  external          0.000000000000000E+000
- coulombic energy  -40717.6707070866     
+ coulombic energy  -40717.6707070864     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy       16029.0222843416     
+ total energy       16029.0222843417     
  
- box             2  initial v   =    16029.0222843416     
+ box             2  initial v   =    16029.0222843417     
  surf. tension :   box 2 =       0.15457
  pressure check:   box 2 =       1208.06
  
  +++++ start of markov chain +++++
  
  Cycle   Total   Energy    Boxlength   Pressure  Molecules
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
    200   35460 -0.6488E+06    33.352         0.0 186
                 0.8507E+04    42.966         0.0  14
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
    400   35660 -0.5925E+06    33.806         0.0 183
                 0.2133E+05    42.687         0.0  17
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
  Box            1
  Type 1 bn   9135.   9203.   9172.  10791.  10846.  10865.
  max.displ.   0.6327  0.6277  0.5969  0.3582  0.3666  0.3589
@@ -551,10 +557,21 @@
  max.displ.  28.0000 28.0000 28.0000  3.1415  3.1415  3.1415
  volume change:  bn =  9864.0   bs =  4144.0   max.displ. = 0.41367E-01
  volume change:  bn =     0.0   bs =     0.0   max.displ. = 0.10000E-02
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
    600   35860 -0.5755E+06    33.810         0.0 181
                 0.2272E+05    42.685         0.0  19
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
    800   36060 -0.5754E+06    33.664         0.0 179
                 0.1778E+05    42.775         0.0  21
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
  Box            1
  Type 1 bn   8963.   9127.   9080.  10505.  10367.  10419.
  max.displ.   0.6375  0.6330  0.6301  0.3635  0.3761  0.3697
@@ -565,10 +582,20 @@
  volume change:  bn =     0.0   bs =     0.0   max.displ. = 0.10000E-02
   1000   36260 -0.6027E+06    33.609         0.0 181
                 0.5879E+04    42.809         0.0  19
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
   1200   36460 -0.5233E+06    33.783         0.0 179
                 0.3173E+04    42.701         0.0  21
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
   1400   36660 -0.5736E+06    33.865         0.0 180
                 0.2221E+05    42.650         0.0  20
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
  Box            1
  Type 1 bn   9001.   8872.   9067.  10430.  10583.  10517.
  max.displ.   0.6345  0.6468  0.6472  0.3667  0.3858  0.3778
@@ -577,10 +604,19 @@
  max.displ.  27.3777 26.7350 27.4905  3.1415  3.1415  3.1415
  volume change:  bn =  9995.0   bs =  4111.0   max.displ. = 0.43095E-01
  volume change:  bn =     0.0   bs =     0.0   max.displ. = 0.10000E-02
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
   1600   36860 -0.6018E+06    34.635         0.0 187
                 0.1030E+05    42.148         0.0  13
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
   1800   37060 -0.6311E+06    34.243         0.0 184
                 0.1809E+05    42.408         0.0  16
+ ### underflow in wratio calculation ###
+ ### underflow in wratio calculation ###
  Box            1
  Type 1 bn   9378.   9201.   9279.  10783.  10715.  10978.
  max.displ.   0.6380  0.6360  0.6235  0.3730  0.3752  0.3725
@@ -660,36 +696,36 @@ between box  1 and  2   uattempts =         0.0  attempts =      0.0  accepted =
  sumup control
  number of chains         187
  number of chains of type           1         187
- inter lj energy   -344996.694515343     
- intra lj energy    99993.7481904140     
- Tail correction   -13092.9069475387     
+ inter lj energy   -344996.694515367     
+ intra lj energy    99993.7481904141     
+ Tail correction   -13092.9069475385     
  bond vibration    0.000000000000000E+000
  bond bending       382802.754819278     
- torsional          293115.627912113     
+ torsional          293115.627912117     
  external          0.000000000000000E+000
- coulombic energy  -1036509.44011945     
+ coulombic energy  -1036509.44011950     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -605594.003712983     
+ total energy      -605594.003713059     
  
  sumup control
  number of chains          13
  number of chains of type           1          13
- inter lj energy   -1780.95277260866     
- intra lj energy    6551.14245205748     
- Tail correction   -31.1529832519599     
+ inter lj energy   -1780.95277260831     
+ intra lj energy    6551.14245205730     
+ Tail correction   -31.1529832519592     
  bond vibration    0.000000000000000E+000
- bond bending       25077.1029313665     
- torsional          18110.8931277347     
+ bond bending       25077.1029313662     
+ torsional          18110.8931277348     
  external          0.000000000000000E+000
- coulombic energy  -40821.3310883459     
+ coulombic energy  -40821.3310883429     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy       7136.85465020418     
+ total energy       7136.85465020704     
  
- vstart       =      -603640.9348516349        16029.0222843416
- vend         =      -605594.0037129830         7136.8546502042
- vbox         =      -605594.0037130741         7136.8546501966
+ vstart       =      -603640.9348516574        16029.0222843417
+ vend         =      -605594.0037130592         7136.8546502070
+ vbox         =      -605594.0037130214         7136.8546502154
  
  Averages and fluctuations                            Box 1       Box 2
  

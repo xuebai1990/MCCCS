@@ -1,3 +1,4 @@
+ Number of processors:            1
  L_Coul_CBMC: T
  Number of unit cells in a dir =    5.00000000000000     
  Number of unit cells in b dir =    5.00000000000000     
@@ -13,7 +14,7 @@
  L_bend_table: F
  L_vdW_table: F
  L_elect_table: F
- number of boxes in the system:           1
+ number of boxes      in the system:           1
  temperature:   295.000000000000       K
  external pressure:  0.100000000000000       MPa
  Ghost particles:            0
@@ -72,78 +73,30 @@
     lq14scale: F
     qscale:  0.000000000000000E+000
     energy offset for box           1 :  0.000000000000000E+000  K
- Confirm that your parameters are defined.
     bead            1  beadtype          380  charge leader            1
-           0
- Confirm that your parameters are defined.
     bead            2  beadtype          381  charge leader            2
-           0
- Confirm that your parameters are defined.
     bead            3  beadtype          380  charge leader            3
-           0
- Confirm that your parameters are defined.
     bead            4  beadtype          381  charge leader            4
-           0
- Confirm that your parameters are defined.
     bead            5  beadtype          380  charge leader            5
-           0
- Confirm that your parameters are defined.
     bead            6  beadtype          381  charge leader            6
-           0
- Confirm that your parameters are defined.
     bead            7  beadtype          385  charge leader            7
-           0
- Confirm that your parameters are defined.
     bead            8  beadtype          385  charge leader            8
-           0
- Confirm that your parameters are defined.
     bead            9  beadtype          385  charge leader            9
-           0
- Confirm that your parameters are defined.
     bead           10  beadtype          385  charge leader           10
-           0
- Confirm that your parameters are defined.
     bead           11  beadtype          385  charge leader           11
-           0
- Confirm that your parameters are defined.
     bead           12  beadtype          385  charge leader           12
-           0
- Confirm that your parameters are defined.
     bead           13  beadtype          382  charge leader           13
-           0
- Confirm that your parameters are defined.
     bead           14  beadtype          383  charge leader           14
-           0
- Confirm that your parameters are defined.
     bead           15  beadtype          382  charge leader           15
-           0
- Confirm that your parameters are defined.
     bead           16  beadtype          383  charge leader           16
-           0
- Confirm that your parameters are defined.
     bead           17  beadtype          382  charge leader           17
-           0
- Confirm that your parameters are defined.
     bead           18  beadtype          383  charge leader           18
-           0
- Confirm that your parameters are defined.
     bead           19  beadtype          384  charge leader           19
-           0
- Confirm that your parameters are defined.
     bead           20  beadtype          384  charge leader           20
-           0
- Confirm that your parameters are defined.
     bead           21  beadtype          384  charge leader           21
-           0
- Confirm that your parameters are defined.
     bead           22  beadtype          384  charge leader           22
-           0
- Confirm that your parameters are defined.
     bead           23  beadtype          384  charge leader           23
-           0
- Confirm that your parameters are defined.
     bead           24  beadtype          384  charge leader           24
-           0
  licell: F
  rintramax:  0.000000000000000E+000  A
  boxlink:           2
@@ -215,8 +168,8 @@
  translation move  :   54.85 %
  rotation move     :   45.00 %
  
- 
  Fraction of atom translations move  0.000000000000000E+000
+ 
  molecule type :           1   
       nchoi1   :          15  
       nchoi    :          10  
@@ -734,15 +687,15 @@
  in y-direction
  in z-direction
            3 -dimensional periodic box
- particle coordinates are folded into central box
+ particle coordinates are folded            into central box
  Dual Cutoff Configurational-bias Monte Carlo
- CBMC simultaneously grows all beads conected to the same bead
+ CBMC simultaneously grows all beads conected to the         same bead
  with bond angles generated from Gaussian distribution
  Program will call Explct.f if needed
  Lennard-Jones potential for bead-bead
  with additional tail corrections
  Coulombic inter- and intramolecular interactions
- Ewald-sum will be used to calculate Coulombic interactions
+ Ewald-sum will be used to calculate Coulombic         interactions
  
  MOLECULAR MASS:   258.157020000000     
  new maximum displacements read from restart-file
@@ -848,7 +801,7 @@ cell angle gamma:       120.341
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -541975.153309750     
+ coulombic energy  -541975.153309754     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
  total energy      -3897940.32481485     
@@ -923,14 +876,14 @@ between box  1 and  2   uattempts =         0.0  attempts =      0.0  accepted =
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -540497.224800354     
+ coulombic energy  -540497.224800359     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
  total energy      -3893589.58694352     
  
- vstart       =     -3897940.3248148486
- vend         =     -3893589.5869435184
- vbox         =     -3893589.5869431342
+ vstart       =     -3897940.3248148533
+ vend         =     -3893589.5869435230
+ vbox         =     -3893589.5869431435
  
  Averages and fluctuations                            Box 1
  
@@ -986,9 +939,9 @@ between box  1 and  2   uattempts =         0.0  attempts =      0.0  accepted =
  Enthalpy Inst.[kJ/mol] for box  1 =   -107.4159      1.8327      1.0581
  Enthalpy Ext. [kJ/mol] for box  1 =   -108.0570      0.0497      0.0287
  
- Cp residual(J/Kmol) =   14.1174417777436     
+ Cp residual(J/Kmol) =   14.1174417764996     
   H2=   15200496665965.8     
-  H=  -3898775.74840709     
+  H=  -3898775.74840710     
  chemical potential  itype   1 box   1 =        0.000       0.000       0.000
  mean sete length    itype   1 box   1 =       17.634       0.000       0.000
  number density      itype   1 box   1 =  0.45067E+01 0.31465E-02 0.18166E-02

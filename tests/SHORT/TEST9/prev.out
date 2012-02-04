@@ -1,3 +1,4 @@
+ Number of processors:            4
  L_Coul_CBMC: T
  Number of unit cells in a dir =    5.00000000000000     
  Number of unit cells in b dir =    5.00000000000000     
@@ -13,7 +14,7 @@
  L_bend_table: F
  L_vdW_table: F
  L_elect_table: F
- number of boxes in the system:           1
+ number of boxes      in the system:           1
  temperature:   295.000000000000       K
  external pressure:  0.100000000000000       MPa
  Ghost particles:            0
@@ -73,53 +74,29 @@
     qscale:  0.000000000000000E+000
     energy offset for box           1 :  0.000000000000000E+000  K
     bead            1  beadtype          380  charge leader            1
-           0
     bead            2  beadtype          381  charge leader            2
-           0
     bead            3  beadtype          380  charge leader            3
-           0
     bead            4  beadtype          381  charge leader            4
-           0
     bead            5  beadtype          380  charge leader            5
-           0
     bead            6  beadtype          381  charge leader            6
-           0
     bead            7  beadtype          385  charge leader            7
-           0
     bead            8  beadtype          385  charge leader            8
-           0
     bead            9  beadtype          385  charge leader            9
-           0
     bead           10  beadtype          385  charge leader           10
-           0
     bead           11  beadtype          385  charge leader           11
-           0
     bead           12  beadtype          385  charge leader           12
-           0
     bead           13  beadtype          382  charge leader           13
-           0
     bead           14  beadtype          383  charge leader           14
-           0
     bead           15  beadtype          382  charge leader           15
-           0
     bead           16  beadtype          383  charge leader           16
-           0
     bead           17  beadtype          382  charge leader           17
-           0
     bead           18  beadtype          383  charge leader           18
-           0
     bead           19  beadtype          384  charge leader           19
-           0
     bead           20  beadtype          384  charge leader           20
-           0
     bead           21  beadtype          384  charge leader           21
-           0
     bead           22  beadtype          384  charge leader           22
-           0
     bead           23  beadtype          384  charge leader           23
-           0
     bead           24  beadtype          384  charge leader           24
-           0
  licell: F
  rintramax:  0.000000000000000E+000  A
  boxlink:           2
@@ -191,8 +168,8 @@
  translation move  :   54.85 %
  rotation move     :   45.00 %
  
- 
  Fraction of atom translations move  0.000000000000000E+000
+ 
  molecule type :           1   
       nchoi1   :          15  
       nchoi    :          10  
@@ -710,15 +687,15 @@
  in y-direction
  in z-direction
            3 -dimensional periodic box
- particle coordinates are folded into central box
+ particle coordinates are folded            into central box
  Dual Cutoff Configurational-bias Monte Carlo
- CBMC simultaneously grows all beads conected to the same bead
+ CBMC simultaneously grows all beads conected to the         same bead
  with bond angles generated from Gaussian distribution
  Program will call Explct.f if needed
  Lennard-Jones potential for bead-bead
  with additional tail corrections
  Coulombic inter- and intramolecular interactions
- Ewald-sum will be used to calculate Coulombic interactions
+ Ewald-sum will be used to calculate Coulombic         interactions
  
  MOLECULAR MASS:   258.157020000000     
  new maximum displacements read from restart-file
@@ -817,19 +794,19 @@ cell angle gamma:       120.341
  sumup control
  number of chains         300
  number of chains of type           1         300
- inter lj energy   -3355965.17150510     
+ inter lj energy   -3355965.17150513     
  intra lj energy   0.000000000000000E+000
  Tail correction   -68741.0663068097     
  bond vibration    0.000000000000000E+000
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -541975.153309759     
+ coulombic energy  -541975.153310405     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -3897940.32481486     
+ total energy      -3897940.32481553     
  
- box             1  initial v   =   -3897940.32481486     
+ box             1  initial v   =   -3897940.32481553     
  surf. tension :   box 1 =      58.46741
  pressure check:   box 1 =      -7800.16
  
@@ -888,21 +865,21 @@ between box  1 and  2   uattempts =         0.0  attempts =      0.0  accepted =
  sumup control
  number of chains         300
  number of chains of type           1         300
- inter lj energy   -3359969.40580866     
+ inter lj energy   -3359969.40580868     
  intra lj energy   0.000000000000000E+000
  Tail correction   -68741.0663068097     
  bond vibration    0.000000000000000E+000
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -541944.192100086     
+ coulombic energy  -541944.192100748     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -3901913.59790875     
+ total energy      -3901913.59790942     
  
- vstart       =     -3897940.3248148579
- vend         =     -3901913.5979087492
- vbox         =     -3901913.5979087669
+ vstart       =     -3897940.3248155336
+ vend         =     -3901913.5979094235
+ vbox         =     -3901913.5979094468
  
  Averages and fluctuations                            Box 1
  

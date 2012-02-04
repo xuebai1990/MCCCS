@@ -50,7 +50,7 @@ c *** common blocks ***
       include 'ipswpar.inc'
       include 'eepar.inc'
       include 'cbmc.inc'
-c KM remove analysis
+c KM 01/10 remove analysis
 c      include 'gor.inc'
       include 'blkavg.inc'
 c kea include for garofalini potential

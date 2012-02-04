@@ -50,6 +50,9 @@ c    *******************************************************************
       include 'eepar.inc'
       include 'conver.inc'
       include 'tabulated.inc'
+c RP added for MPI
+      include 'mpif.h'
+      include 'mpi.inc'
 
       logical lnew,ovrlap,lcmno,lfirst,lcompute,lcoulo
       logical lqimol,lqjmol,liji,lqchgi
@@ -77,6 +80,15 @@ c    *******************************************************************
       double precision tabulated_bend, tabulated_vdW, tabulated_elect
       integer mmm
 
+c------------- RP added for MPI
+      integer my_start,my_end,loops_per_proc,scount,my_itrial
+      double precision my_vtry(nchmax),my_vtrintra(nchmax),
+     &   my_vtrext(nchmax),my_vtrinter(nchmax),my_vtrelect(nchmax)
+     &   ,my_vtrewald(nchmax),my_bfac(nchmax),my_vipswot(nchmax)
+     & ,my_vwellipswot(nchmax),my_vipswnt(nchmax),my_vwellipswnt(nchmax)
+      logical my_lovr(nchmax)
+      integer ncount_arr(numprocmax+1),ncount_displs(numprocmax+1)
+c ------------------------------------------
 c ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
       
 c      write(iou,*) 'start BOLTZ'
@@ -89,7 +101,30 @@ c     --- determine the potential cutoffs
 
       rcutsq = rcut(ibox)*rcut(ibox)
       field = Elect_field(ibox)
+
+c KM
+c initialize variables
+      do j=1,ichoi
+         my_lovr(j) = .false.
+         lovr(j) = .false.
+         my_vtry(j) = 0.0d0
+         my_vtrintra(j) = 0.0d0
+         my_vtrelect(j) = 0.0d0
+         my_vtrext(j) = 0.0d0
+         my_vtrinter(j) = 0.0d0
+         my_vtrewald(j) = 0.0d0
+         my_bfac(j) = 0.0d0
+         my_vipswot(j) = 0.0d0
+         my_vwellipswot(j) = 0.0d0
+         my_vipswnt(j) = 0.0d0
+         my_vwellipswnt(j) = 0.0d0
+      enddo
+      do j=1,numprocs
+         ncount_arr(j) = 0
+         ncount_displs(j) = 0
+      enddo
       
+
       if ( ldual ) then
 c        --- use rcutin for both types of interactions (except intra)
          rcinsq = rcutin*rcutin
@@ -146,8 +181,28 @@ c                --- minimum image the pseudo-ctrmas pair separation
          enddo
       endif
 
-      do 20 itrial = 1, ichoi
-         lovr(itrial) = .false.
+c RP added for MPI
+
+      loops_per_proc = ichoi/numprocs
+
+      my_start = (myid*loops_per_proc)+1
+      if(myid .eq. (numprocs-1))then
+        my_end = ichoi
+      else
+         my_end   = (myid + 1)*loops_per_proc
+      endif
+
+c RP added for MPI
+c      write(6,*)'170: boltz my_start=',my_start,'my_end=',my_end
+c     &    ,'ichoi=',ichoi,'loops_per_proc=',loops_per_proc,'myid=',myid
+c
+      my_itrial  = 0
+c      do 20 itrial = 1, ichoi
+      do 20 itrial = my_start,my_end
+         my_itrial  = my_itrial + 1
+         my_lovr(my_itrial) = .false.
+       
+c         lovr(itrial) = .false.
          vinter = 0.0d0
          vintra = 0.0d0
          vext = 0.0d0
@@ -222,7 +277,9 @@ c                    --- use old chain coordinates
                   if ( linclu(imolty,ii,iu) ) then
                      if ( rijsq .lt. rminsq .and. 
      &                    .not. lexpand(imolty) ) then
-                        lovr(itrial) = .true.
+c RP added for MPI
+                        my_lovr(my_itrial) = .true.
+
 c                     write(iou,*) 'intra overlap'
                         goto 19
                      elseif ( rijsq .lt. rcutsq .or. lijall) then
@@ -573,7 +630,7 @@ c                    --- minimum image the pair separations ***
 c                    --- compute vinter (ex. lennard-jones)
                      if ( rijsq .lt. rminsq .and. .not. 
      &                    (lexpand(imolty) .or. lexpand(jmolty))) then
-                        lovr(itrial) = .true.
+                        my_lovr(my_itrial) = .true.
 c                        write(iou,*) 'j:',j,jj
 c                        write(iou,*) 'rjsq:',rijsq,rminsq
                         goto 19
@@ -779,17 +836,19 @@ c -- calculate interaction with the surface at the top of the box
 	 endif
 
 
-         if (lelect_field) then
-             if(lelect(moltyp(i))) then
-                if (nboxi(i).eq.ibox) then
-                   do count = 1,ntogrow
-                      rzui = rzp(count,itrial)
-                      vext = vext + v_elect_field(i,count,rzui,field)
-                   enddo
-                endif
-             endif
-             vext = vext * eXV_to_K
-          endif 
+         if (.not.ldual) then
+            if (lelect_field) then
+               if(lelect(moltyp(i))) then
+                  if (nboxi(i).eq.ibox) then
+                     do count = 1,ntogrow
+                        rzui = rzp(count,itrial)
+                        vext = vext + v_elect_field(i,count,rzui,field)
+                     enddo
+                  endif
+               endif
+               vext = vext * eXV_to_K
+            endif 
+         endif
          
 c --------------------------------------------------------------------------
 c well potential for thermodynamic integration stages b and c
@@ -842,8 +901,10 @@ C *********************************************
 !         else
 !             write(23,*) 'called from rigrot'
 !         endif 
- 19      if ( lovr(itrial) ) then
-            bfac(itrial) = 0.0d0
+
+
+ 19      if ( my_lovr(my_itrial) ) then
+            my_bfac(my_itrial) = 0.0d0
          else
             if (.not.L_elect_table) then
                velect = velect*qqfact
@@ -851,11 +912,11 @@ C *********************************************
             endif
             v = vinter+vintra+vext+velect+vewald
             if (.not.lnew) then
-               vipswot(itrial) = v
-               vwellipswot(itrial) = vwell
+               my_vipswot(my_itrial) = v
+               my_vwellipswot(my_itrial) = vwell
             else
-               vipswnt(itrial) = v
-               vwellipswnt(itrial) = vwell
+               my_vipswnt(my_itrial) = v
+               my_vwellipswnt(my_itrial) = vwell
             endif
                                                                                 
             if (lstagea) then
@@ -867,38 +928,105 @@ C *********************************************
      &                         (1.0d0-lambdais)*vwell
             endif
 
-            vtry(itrial) = v
-            vtrintra(itrial) = vintra
-            vtrext(itrial)   = vext
-            vtrinter(itrial) = vinter
-            vtrelect(itrial) = velect
-            vtrewald(itrial) = vewald
+            my_vtry(my_itrial) = v
+            my_vtrintra(my_itrial) = vintra
+            my_vtrext(my_itrial)   = vext
+            my_vtrinter(my_itrial) = vinter
+            my_vtrelect(my_itrial) = velect
+            my_vtrewald(my_itrial) = vewald
 !            write(23,*) 'itrial' ,itrial
 !            write(23,*) vtry(itrial), vtrintra(itrial), vtrext(itrial),
 !     &       vtrinter(itrial),vtrelect(itrial), vtrewald(itrial)
 
 
-            if ( ( vtry(itrial) * beta ) .gt. (2.3d0*softcut) ) then
-c     write(iou,*) 'caught by softcut',vtry(itrial)*beta
-               lovr(itrial) = .true.
-               bfac(itrial) = 0.0d0
-            elseif ( ( vtry(itrial) * beta ) .lt. -2.303d0*308 ) then
-               write(iou,*) '### warning: weight too big out of range'
-               lovr(itrial) = .true.
-               bfac(itrial) = 0.0d0
+            if ((my_vtry(my_itrial)*beta).gt.(2.3d0*softcut))then
+c               write(iou,*) 'caught by softcut',vtry(itrial)*beta
+               my_lovr(my_itrial) = .true.
+               my_bfac(my_itrial) = 0.0d0
+            elseif((my_vtry(my_itrial)*beta).lt.-2.303d0*308)then
+c               write(iou,*) '### warning: weight too big out of range'
+               my_lovr(my_itrial) = .true.
+               my_bfac(my_itrial) = 0.0d0
             else
-               bfac(itrial) = dexp ( -(vtry(itrial)*beta) )
+               my_bfac(my_itrial) = dexp ( -(my_vtry(my_itrial)*beta) )
             endif
          endif
  20   continue
 
+c      scount = loops_per_proc
+       loops_per_proc = (my_end-my_start) + 1
 
+       CALL MPI_ALLGATHER(loops_per_proc,1,MPI_INTEGER,ncount_arr,
+     &       1,MPI_INTEGER,MPI_COMM_WORLD,ierr)
+       ncount_displs(1) = 0
 
-c ----------------------------------------------------------------------------
+c KM for MPI
+c cannot loop over i, must use j
+c i is an argument to the boltz subroutine!
+       do j = 2,numprocs
+           ncount_displs(j) = ncount_displs(j-1) + ncount_arr(j-1)
+       enddo
+
+      call MPI_ALLGATHERV(my_lovr,loops_per_proc,MPI_LOGICAL
+     &     ,lovr,ncount_arr,ncount_displs,
+     &     MPI_LOGICAL,MPI_COMM_WORLD,ierr)
+
       ovrlap = .true.
       do itrial = 1, ichoi
          if ( .not. lovr(itrial)) ovrlap = .false.
       enddo
+
+      call MPI_ALLGATHERV(my_vtry, loops_per_proc,
+     &     MPI_DOUBLE_PRECISION, vtry, ncount_arr, ncount_displs,
+     &     MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
+
+      call MPI_ALLGATHERV(my_vtrintra, loops_per_proc,
+     &     MPI_DOUBLE_PRECISION, vtrintra, ncount_arr, ncount_displs,
+     &     MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
+
+      call MPI_ALLGATHERV(my_vtrext,loops_per_proc,
+     &     MPI_DOUBLE_PRECISION, vtrext, ncount_arr, ncount_displs,
+     &     MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
+
+      call MPI_ALLGATHERV(my_vtrinter, loops_per_proc,
+     &     MPI_DOUBLE_PRECISION, vtrinter, ncount_arr, ncount_displs,
+     &     MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
+
+      call MPI_ALLGATHERV(my_vtrelect,loops_per_proc,
+     &     MPI_DOUBLE_PRECISION, vtrelect, ncount_arr, ncount_displs,
+     &     MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
+
+      call MPI_ALLGATHERV(my_vtrewald, loops_per_proc,
+     &     MPI_DOUBLE_PRECISION, vtrewald, ncount_arr, ncount_displs,
+     &     MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
+
+      call MPI_ALLGATHERV(my_bfac, loops_per_proc, 
+     &     MPI_DOUBLE_PRECISION, bfac, ncount_arr, ncount_displs,
+     &     MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
+
+c       do my_itrial=my_start,my_end
+c        write(6,*)"938:boltz my_bfac(",my_itrial,")=",my_bfac(my_itrial)
+c     &      ,'myid=',myid
+c       enddo
+
+      call MPI_ALLGATHERV(my_vipswot, loops_per_proc,
+     &     MPI_DOUBLE_PRECISION, vipswot, ncount_arr, ncount_displs,
+     &     MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
+
+      call MPI_ALLGATHERV(my_vwellipswot, loops_per_proc,
+     &     MPI_DOUBLE_PRECISION, vwellipswot, ncount_arr, ncount_displs,
+     &     MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
+
+      call MPI_ALLGATHERV(my_vipswnt, loops_per_proc,
+     &     MPI_DOUBLE_PRECISION, vipswnt, ncount_arr, ncount_displs,
+     &     MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
+
+      call MPI_ALLGATHERV(my_vwellipswnt, loops_per_proc,
+     &     MPI_DOUBLE_PRECISION, vwellipswnt, ncount_arr, ncount_displs,
+     &     MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,ierr)
+
+c ----------------------------------------------------------------------------
+
 
 c      write(iou,*) 'end BOLTZ'
 

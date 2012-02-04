@@ -30,6 +30,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       include 'coord.inc'
       include 'connect.inc'
       include 'poten.inc'
+      include 'mpi.inc'
 
       integer m,n,nb,mb,imolty,ioffset
       integer inclnum,inclmol,inclbead,inclsign,ncarbon
@@ -246,38 +247,40 @@ c - or beads connected one away from a rigid bead
             enddo
          endif
 
-         write(iou,*) 
-         write(iou,*) 'INCLUSION TABLE'
+         if (myid.eq.0) then
+            write(iou,*) 
+            write(iou,*) 'INCLUSION TABLE'
 
-         do m = 1, nunit(imolty)
-            write(iou,*) m, (linclu(imolty,m,n),n=1,nunit(imolty))
-         enddo
-         write(iou,*) 
+            do m = 1, nunit(imolty)
+               write(iou,*) m, (linclu(imolty,m,n),n=1,nunit(imolty))
+            enddo
+            write(iou,*) 
 
-         write(iou,*) 
-         write(iou,*) 'CHARGE INCLUSION TABLE'
+            write(iou,*) 
+            write(iou,*) 'CHARGE INCLUSION TABLE'
 
-         do m = 1, nunit(imolty)
-            write(iou,*) m, 
-     &        (lqinclu(imolty,m,n),n=1,nunit(imolty))
-         enddo
+            do m = 1, nunit(imolty)
+               write(iou,*) m, 
+     &              (lqinclu(imolty,m,n),n=1,nunit(imolty))
+            enddo
 
 c  400  format (<nunit(imolty)> F5.2)
-         write(iou,*) 
+            write(iou,*) 
 	 
-	 write(iou,*) '1-4 LJ SCALING FACTORS'
-	 do m = 1, nunit(imolty)
-            write(iou,*) m, 
-     &    (ljscale(imolty,m,n),n=1,nunit(imolty))
-         enddo
+            write(iou,*) '1-4 LJ SCALING FACTORS'
+            do m = 1, nunit(imolty)
+               write(iou,*) m, 
+     &              (ljscale(imolty,m,n),n=1,nunit(imolty))
+            enddo
 c 500  format (i5,<nunit(imolty)> F5.2)
 	 
-	 write(iou,*)
-	 write(iou,*) '1-4 CHARGE SCALING FACTORS'
-	 do m = 1, nunit(imolty)
-            write(iou,*) m, 
-     &			(qscale2(imolty,m,n),n=1,nunit(imolty))
-         enddo
+            write(iou,*)
+            write(iou,*) '1-4 CHARGE SCALING FACTORS'
+            do m = 1, nunit(imolty)
+               write(iou,*) m, 
+     &              (qscale2(imolty,m,n),n=1,nunit(imolty))
+            enddo
+         endif
 c 600  format (i5,<nunit(imolty)> F5.2)
 
 c * not really that important to write out

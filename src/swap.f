@@ -174,6 +174,7 @@ c ---    select a box given in pmswatyp
          boxins=box2(imolty,ipairb)
          boxrem=box1(imolty,ipairb)
       endif
+
       if ( boxins .eq. boxrem ) then
          lswapinter = .false.
       else
@@ -208,6 +209,7 @@ c *** sub-regions defined by Vin
          endif
 
          irem = parbox(pointp,boxrem,imolty)
+
          if ( moltyp(irem) .ne. imolty ) 
      &       write(iou,*) 'screwup swap, irem:',irem,moltyp(irem),imolty
          ibox = nboxi(irem)
@@ -610,11 +612,10 @@ c * end first Avbmc calcs *
 c *************************
 
       else
-
          if (lsolid(boxins) .and. .not. lrect(boxins)) then
             ibox = boxins
             do icbu = 1,ichoi
-
+               
 c$$$               if (lbnow.and.boxins.eq.boxsite) then
 c$$$                  x = random()
 c$$$                  y = random()
@@ -648,17 +649,17 @@ c$$$                  rzp(1,icbu) = rzu(jins,1) + z
 c$$$
 c$$$               else
 
-                  sx = random()
-                  sy = random()
-                  sz = random()
-
-                  rxp(1,icbu) = sx*hmat(ibox,1)+sy*hmat(ibox,4)
-     &                 +sz*hmat(ibox,7)
-                  ryp(1,icbu) = sx*hmat(ibox,2)+sy*hmat(ibox,5)
-     &                 +sz*hmat(ibox,8)
-                  rzp(1,icbu) = sx*hmat(ibox,3)+sy*hmat(ibox,6)
-     &                 +sz*hmat(ibox,9)
-
+               sx = random()
+               sy = random()
+               sz = random()
+               
+               rxp(1,icbu) = sx*hmat(ibox,1)+sy*hmat(ibox,4)
+     &              +sz*hmat(ibox,7)
+               ryp(1,icbu) = sx*hmat(ibox,2)+sy*hmat(ibox,5)
+     &              +sz*hmat(ibox,8)
+               rzp(1,icbu) = sx*hmat(ibox,3)+sy*hmat(ibox,6)
+     &              +sz*hmat(ibox,9)
+               
 c$$$               endif
             enddo
 
@@ -720,7 +721,6 @@ c     --- check for termination of walk ---
          return
       endif
       
-
 c     --- select one position at random ---
       if ( ichoi .gt. 1 ) then
          rbf = w1ins * random()
@@ -747,6 +747,8 @@ c     --- select ip position ---
       v1insint = vtrinter(iwalk)
       v1inselc = vtrelect(iwalk)
       v1insewd = vtrewald(iwalk)
+c KM
+c      if (myid.eq.0) write(iou,*) 'vtry swap ', iwalk, vtry(iwalk)
 
 c      neigh_icnt = ntr_icnt(iwalk)
 c      do ip = 1,neigh_icnt
@@ -1333,7 +1335,7 @@ c     --- call rosenbluth for old conformation
      &     ,boxrem,igrow,waddold,lfixnow,ctorfo,2 )
 
       if ( lterm ) then 
-         write(iou,*) 'SWAP: rosenbluth old rejected'
+c         write(iou,*) 'SWAP: rosenbluth old rejected'
          return
       endif
 
@@ -1723,7 +1725,7 @@ c         write(iou,*) 'SWAP MOVE ACCEPTED',irem
 c *** we can now accept !!!!! ***
          if ((.not.leemove).and.(.not.lexpee)) then
             bnswap(imolty,ipairb,boxins+nbox) = 
-     &        bnswap(imolty,ipairb,boxins+nbox) + 1.0d0
+     &           bnswap(imolty,ipairb,boxins+nbox) + 1.0d0
          endif
          if ( .not. lswapinter .and. lbias(imolty) ) then
             if ( lrem_out .and. lins_in ) then
@@ -1732,7 +1734,7 @@ c *** we can now accept !!!!! ***
                bnswap_out(imolty,2) = bnswap_out(imolty,2) + 1.0d0
             endif
          endif
-
+         
 c---update the position, it will be used to get the bonded energy
          do ic = 1,igrow
             rxu(irem,ic) = rxnew(ic)
@@ -1745,19 +1747,19 @@ c---update the position, it will be used to get the bonded energy
             ryu(irem,ic) = ryuion(ic,2)
             rzu(irem,ic) = rzuion(ic,2)
          enddo
-
+         
          vvibn  = 0.0d0
          vbendn = 0.0d0
          vtgn   = 0.0d0
          
          if (lrigid(imolty).and.(pm_atom_tra.gt.0.000001)) then 
-           call Intra_energy(irem,imolty, vdum ,vintran, vdum,vdum,
-     &       velectn,vewaldn,flagon, boxins, 1, iunit,.true.,ovrlap,
-     &       .false.
-     &       ,vdum,.false.,.false.,vvibn,vbendn,vtgn) 
+            call Intra_energy(irem,imolty, vdum ,vintran, vdum,vdum,
+     &           velectn,vewaldn,flagon, boxins, 1, iunit,.true.,ovrlap,
+     &           .false.
+     &           ,vdum,.false.,.false.,vvibn,vbendn,vtgn) 
          endif
 c         total_NBE = vintran+velectn+vewaldn+vtgn+vbendn+vvibn 
-          total_NBE = vtgn+vbendn+vvibn
+         total_NBE = vtgn+vbendn+vvibn
 !         write(iou,*) vintran,velectn,vewaldn       
 
 !         write(iou,*) 'irem', irem  
@@ -1774,7 +1776,7 @@ c ---    update energies:
 	 vbendb(boxrem)   = vbendb(boxrem)   - voldbb - vbendn
          velectb(boxrem)  = velectb(boxrem)  - (voldelect+voldewald)
          vflucqb(boxrem)  = vflucqb(boxrem)  - voldflucq
-	
+         
  
          vbox(boxins)     = vbox(boxins)     + vnewt + total_NBE
 	 vinterb(boxins)  = vinterb(boxins)  + vnewinter
@@ -1786,35 +1788,34 @@ c ---    update energies:
 	 vbendb(boxins)   = vbendb(boxins)   + vnewbb + vbendn
          velectb(boxins)  = velectb(boxins)  + (vnewelect+vnewewald)
          vflucqb(boxins)  = vflucqb(boxins)  + vnewflucq
-
+         
 c ---    update book keeping
 
          if ( lswapinter ) then
             nboxi(irem) = boxins
-         
             if ((.not.leemove).and.(.not.lexpee)) then
                parbox(ncmt(boxins,imolty)+1,boxins,imolty)= irem
-                parbox(pointp,boxrem,imolty)=
-     &           parbox(ncmt(boxrem,imolty),boxrem,imolty)
+               parbox(pointp,boxrem,imolty)=
+     &              parbox(ncmt(boxrem,imolty),boxrem,imolty)
                parbox(ncmt(boxrem,imolty),boxrem,imolty)=0
-            
+               
                nchbox(boxins) = nchbox(boxins) + 1
                nchbox(boxrem) = nchbox(boxrem) - 1
                ncmt(boxins,imolty) = ncmt(boxins,imolty) + 1
                ncmt(boxrem,imolty) = ncmt(boxrem,imolty) - 1
             else
                parbox(ncmt(boxins,imolty1)+1,boxins,imolty1)= irem
-                parbox(pointp,boxrem,imolty)=
-     &           parbox(ncmt(boxrem,imolty),boxrem,imolty)
+               parbox(pointp,boxrem,imolty)=
+     &              parbox(ncmt(boxrem,imolty),boxrem,imolty)
                parbox(ncmt(boxrem,imolty),boxrem,imolty)=0
-            
+               
                nchbox(boxins) = nchbox(boxins) + 1
                nchbox(boxrem) = nchbox(boxrem) - 1
                ncmt(boxins,imolty1) = ncmt(boxins,imolty1) + 1
                ncmt(boxrem,imolty) = ncmt(boxrem,imolty) - 1
                eepointp = ncmt(boxins,imolty1)
             endif
-
+            
             if ( lexpand(imolty) ) then
                itype = eetype(imolty)
                ncmt2(boxins,imolty,itype) = 
@@ -1823,7 +1824,7 @@ c ---    update book keeping
      &              ncmt2(boxrem,imolty,itype) + 1
             endif
          endif
-
+         
 !         do ic = 1,igrow
 !            rxu(irem,ic) = rxnew(ic)
 !            ryu(irem,ic) = rynew(ic)
@@ -1844,7 +1845,7 @@ c *** update reciprocal-space sum
                call recip(boxins,vdum,vdum,2)
             endif
          endif
-
+         
 c ---    update center of mass
          call ctrmas(.false.,boxins,irem,3)
 c *** update linkcell, if applicable
@@ -1852,8 +1853,7 @@ c *** update linkcell, if applicable
      &        boxlink))) then
             call linkcell(2,irem,vdum,vdum,vdum,ddum)
          endif
-         
-c         write(iou,*) 'lneighbor:',lneighbor
+
 
 c KM for HD, 01/2010
 c for computing dielectric constant with swap/AVBMC moves
@@ -1870,7 +1870,7 @@ c *** update dipole term
                cnt_wf2(neigh_old,neigh_icnt,ip)
      &              = cnt_wf2(neigh_old,neigh_icnt,ip)+1
             endif
-
+            
             do 10 ic = 1, neigh_old
                j = neighbor(ic,irem)
                do ip = 1,neigh_cnt(j)
@@ -1898,12 +1898,11 @@ c            write(iou,*) 'irem:',irem,neigh_icnt
                endif
             enddo
          endif
-
+         
 c         write(iou,*) irem,'end SWAP'
-
       endif
- 
+      
 c -----------------------------------------------------------------
       return
       end
-
+      

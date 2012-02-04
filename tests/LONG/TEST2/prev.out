@@ -1,3 +1,4 @@
+ Number of processors:            8
  L_Coul_CBMC: T
  Number of unit cells in a dir =    5.00000000000000     
  Number of unit cells in b dir =    5.00000000000000     
@@ -13,7 +14,7 @@
  L_bend_table: F
  L_vdW_table: F
  L_elect_table: F
- number of boxes in the system:           1
+ number of boxes      in the system:           1
  temperature:   298.150000000000       K
  external pressure:  0.100000000000000       MPa
  Ghost particles:            0
@@ -77,7 +78,6 @@
     bead            1  beadtype          198  charge leader            1
        bead           1  bonded to bead           3
           bond type: 57 bond length:    1.225 k/2:      0.0
-           2
        bead   1 bending interaction through   3 with bead   4
           bend type: 70 bend angle :  111.500 k/2:  40284.0
        bead   1 bending interaction through   3 with bead   2
@@ -87,7 +87,6 @@
     bead            2  beadtype          198  charge leader            2
        bead           2  bonded to bead           3
           bond type: 57 bond length:    1.225 k/2:      0.0
-           2
        bead   2 bending interaction through   3 with bead   4
           bend type: 70 bend angle :  111.500 k/2:  40284.0
        bead   2 bending interaction through   3 with bead   1
@@ -101,7 +100,6 @@
           bond type: 57 bond length:    1.225 k/2:      0.0
        bead           3  bonded to bead           4
           bond type: 56 bond length:    1.490 k/2:      0.0
-           2
        bead   3 bending interaction through   4 with bead   5
           bend type: 72 bend angle :  120.000 k/2:      0.0
        bead   3 bending interaction through   4 with bead   9
@@ -113,7 +111,6 @@
           bond type: 47 bond length:    1.400 k/2:      0.0
        bead           4  bonded to bead           9
           bond type: 47 bond length:    1.400 k/2:      0.0
-           4
        bead   4 bending interaction through   3 with bead   1
           bend type: 70 bend angle :  111.500 k/2:  40284.0
        bead   4 bending interaction through   3 with bead   2
@@ -127,7 +124,6 @@
           bond type: 47 bond length:    1.400 k/2:      0.0
        bead           5  bonded to bead           6
           bond type: 47 bond length:    1.400 k/2:      0.0
-           3
        bead   5 bending interaction through   4 with bead   3
           bend type: 72 bend angle :  120.000 k/2:      0.0
        bead   5 bending interaction through   4 with bead   9
@@ -141,7 +137,6 @@
           bond type: 47 bond length:    1.400 k/2:      0.0
        bead           6  bonded to bead           7
           bond type: 47 bond length:    1.400 k/2:      0.0
-           2
        bead   6 bending interaction through   5 with bead   4
           bend type: 72 bend angle :  120.000 k/2:      0.0
        bead   6 bending interaction through   7 with bead   8
@@ -151,7 +146,6 @@
           bond type: 47 bond length:    1.400 k/2:      0.0
        bead           7  bonded to bead           8
           bond type: 47 bond length:    1.400 k/2:      0.0
-           3
        bead   7 bending interaction through   6 with bead   5
           bend type: 72 bend angle :  120.000 k/2:      0.0
        bead   7 bending interaction through   8 with bead   9
@@ -165,7 +159,6 @@
           bond type: 47 bond length:    1.400 k/2:      0.0
        bead           8  bonded to bead          13
           bond type:  1 bond length:    1.540 k/2:      0.0
-           2
        bead   8 bending interaction through   9 with bead   4
           bend type: 72 bend angle :  120.000 k/2:      0.0
        bead   8 bending interaction through   7 with bead   6
@@ -175,7 +168,6 @@
           bond type: 47 bond length:    1.400 k/2:      0.0
        bead           9  bonded to bead           4
           bond type: 47 bond length:    1.400 k/2:      0.0
-           0
        bead  9            torsional interact  4 and  3 with bead  1 of torsional type:  32
        bead  9            torsional interact  4 and  3 with bead  2 of torsional type:  32
     bead           10  beadtype           57  charge leader           10
@@ -183,19 +175,15 @@
           bond type: 58 bond length:    0.785 k/2:      0.0
        bead          10  bonded to bead          12
           bond type: 58 bond length:    0.785 k/2:      0.0
-           0
     bead           11  beadtype           58  charge leader           11
        bead          11  bonded to bead          10
           bond type: 58 bond length:    0.785 k/2:      0.0
-           0
     bead           12  beadtype           58  charge leader           12
        bead          12  bonded to bead          10
           bond type: 58 bond length:    0.785 k/2:      0.0
-           0
     bead           13  beadtype            4  charge leader           13
        bead          13  bonded to bead           8
           bond type:  1 bond length:    1.540 k/2:      0.0
-           0
  molecule type:           2
     number of units:          10
     number of units for CBMC growth:          10
@@ -217,7 +205,6 @@
     bead            1  beadtype            4  Tr-UA CH3 alkane 
        bead           1  bonded to bead           2
           bond type:  1 bond length:    1.540 k/2:      0.0
-           1
        bead   1 bending interaction through   2 with bead   3
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead  1            torsional interact  2 and  3 with bead  4 of torsional type:   1
@@ -226,7 +213,6 @@
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead           2  bonded to bead           3
           bond type:  1 bond length:    1.540 k/2:      0.0
-           1
        bead   2 bending interaction through   3 with bead   4
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead  2            torsional interact  3 and  4 with bead  5 of torsional type:   1
@@ -235,7 +221,6 @@
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead           3  bonded to bead           4
           bond type:  1 bond length:    1.540 k/2:      0.0
-           2
        bead   3 bending interaction through   2 with bead   1
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead   3 bending interaction through   4 with bead   5
@@ -246,7 +231,6 @@
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead           4  bonded to bead           5
           bond type:  1 bond length:    1.540 k/2:      0.0
-           2
        bead   4 bending interaction through   3 with bead   2
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead   4 bending interaction through   5 with bead   6
@@ -258,7 +242,6 @@
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead           5  bonded to bead           6
           bond type:  1 bond length:    1.540 k/2:      0.0
-           2
        bead   5 bending interaction through   4 with bead   3
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead   5 bending interaction through   6 with bead   7
@@ -270,7 +253,6 @@
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead           6  bonded to bead           7
           bond type:  1 bond length:    1.540 k/2:      0.0
-           2
        bead   6 bending interaction through   5 with bead   4
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead   6 bending interaction through   7 with bead   8
@@ -282,7 +264,6 @@
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead           7  bonded to bead           8
           bond type:  1 bond length:    1.540 k/2:      0.0
-           2
        bead   7 bending interaction through   6 with bead   5
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead   7 bending interaction through   8 with bead   9
@@ -294,7 +275,6 @@
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead           8  bonded to bead           9
           bond type:  1 bond length:    1.540 k/2:      0.0
-           2
        bead   8 bending interaction through   7 with bead   6
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead   8 bending interaction through   9 with bead  10
@@ -305,14 +285,12 @@
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead           9  bonded to bead          10
           bond type:  1 bond length:    1.540 k/2:      0.0
-           1
        bead   9 bending interaction through   8 with bead   7
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead  9            torsional interact  8 and  7 with bead  6 of torsional type:   1
     bead           10  beadtype            4  Tr-UA CH3 alkane 
        bead          10  bonded to bead           9
           bond type:  1 bond length:    1.540 k/2:      0.0
-           1
        bead  10 bending interaction through   9 with bead   8
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead 10            torsional interact  9 and  8 with bead  7 of torsional type:   1
@@ -400,8 +378,8 @@
  translation move  :   35.00 %
  rotation move     :   35.00 %
  
- 
  Fraction of atom translations move  0.000000000000000E+000
+ 
  molecule type :           1              2   
       nchoi1   :          10            10  
       nchoi    :           8             8  
@@ -708,16 +686,16 @@
  in y-direction
  in z-direction
            3 -dimensional periodic box
- particle coordinates are folded into central box
+ particle coordinates are folded            into central box
  additional (COM) cutoff on computed rcmu
  Dual Cutoff Configurational-bias Monte Carlo
- CBMC simultaneously grows all beads conected to the same bead
+ CBMC simultaneously grows all beads conected to the         same bead
  with bond angles generated from Gaussian distribution
  Program will call Explct.f if needed
  Lennard-Jones potential for bead-bead
  with additional tail corrections
  Coulombic inter- and intramolecular interactions
- Ewald-sum will be used to calculate Coulombic interactions
+ Ewald-sum will be used to calculate Coulombic         interactions
  
  MOLECULAR MASS:   137.138100000000        142.283800000000     
  new maximum displacements read from restart-file
@@ -949,19 +927,19 @@
  number of chains         256
  number of chains of type           1          52
  number of chains of type           2         204
- inter lj energy   -1349538.39469023     
- intra lj energy   -77233.1378939768     
+ inter lj energy   -1349538.39469024     
+ intra lj energy   -77233.1378939767     
  Tail correction   -45641.0958611112     
  bond vibration    0.000000000000000E+000
- bond bending       8456269.70522316     
+ bond bending       8456269.70522317     
  torsional          414177.104673605     
- external           95.9713996320011     
- coulombic energy  -449634.535711871     
+ external           95.9713996320012     
+ coulombic energy  -449634.535711924     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy       6994136.71300032     
+ total energy       6994136.71300028     
  
- box             1  initial v   =    6994136.71300032     
+ box             1  initial v   =    6994136.71300028     
  surf. tension :   box 1 =      25.71890
  pressure check:   box 1 =     -23856.79
  
@@ -1102,20 +1080,20 @@ between box  1 and  2   uattempts =         0.0  attempts =      0.0  accepted =
  number of chains of type           1          52
  number of chains of type           2         204
  inter lj energy   -1334666.50950581     
- intra lj energy   -78758.1426774787     
+ intra lj energy   -78758.1426774786     
  Tail correction   -45641.0958611112     
  bond vibration    0.000000000000000E+000
  bond bending       8442644.28479262     
  torsional          421627.602465905     
- external          -16.8097497408144     
- coulombic energy  -453032.313741313     
+ external          -16.8097497408157     
+ coulombic energy  -453032.313741359     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy       6997798.11158418     
+ total energy       6997798.11158414     
  
- vstart       =      6994136.7130003190
- vend         =      6997798.1115841828
- vbox         =      6997798.1115845880
+ vstart       =      6994136.7130002752
+ vend         =      6997798.1115841400
+ vbox         =      6997798.1115845665
  
  Averages and fluctuations                            Box 1
  
@@ -1174,9 +1152,9 @@ between box  1 and  2   uattempts =         0.0  attempts =      0.0  accepted =
  Enthalpy Inst.[kJ/mol] for box  1 =    225.7277      0.7341      0.2447
  Enthalpy Ext. [kJ/mol] for box  1 =    227.5578      0.2219      0.0740
  
- Cv residual(J/Kmol) =   80.1199908495095     
-  E2=   49081888395561.1     
-  E=   7005831.07871289     
+ Cv residual(J/Kmol) =   80.1199908637813     
+  E2=   49081888395560.2     
+  E=   7005831.07871283     
  chemical potential  itype   1 box   1 =        0.000       0.000       0.000
  chemical potential  itype   2 box   1 =        0.000       0.000       0.000
  mean sete length    itype   1 box   1 =       30.870       0.025       0.008

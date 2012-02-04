@@ -32,7 +32,7 @@ temp     fqtemp  Elect_field(ibox=1,nbox)
 3440.0d0   5.0d0  0.0d0 0.0d0
 ianalyze nbin lrdf lintra lstretch lgvst lbend lete lrhoz bin_width
 100000    1 .true. .false. .false. .false. .false. .false. .false.   0.02
-iprint imv  iratio iblock idiele  L_movie_xyz iheatcapacity
+iprint imv  iratio iblock idiele  L_movie_xyziheatcapacity
 1200   1200   500  1200   100000    .false.   1000000
 boxlx   boxly  boxlz     lsolid lrect  kalp  rcut    rcutnn - for box 1  
 40.0d0  40.0d0 40.0d0 .false. .false. 0.25d0 14.0d0  0.0d0
@@ -51,9 +51,9 @@ ispec jspec aspec bspec
 rmin  softcut rcutin rbsmax rbsmin 
 1.2d0 100.0d0 5.0d0  3.5d0  2.5d0 
 nunit nugrow ncarbon nmaxcbmc iurot lelect  lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-8     8      8      8        0     .false. .false. .false. .false.  .false. .false. .false. 0.0d0
+8     8      8      8        0     .false. .false. .false. .false. .false. .false. .false. 0.0d0
 maxgrow lring   lrigid  lrig    lsetup  isolute eta
-8       .false. .false. .false. .false. 10000   0.0d0 0.0d0
+8       .false. .false. .false. .false. 1000000   0.0d0 0.0d0
 lq14scale qscale
 .true. 0.5d0
 unit ntype leaderq  Tr-UA CH3 alkane

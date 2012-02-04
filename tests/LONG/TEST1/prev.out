@@ -1,3 +1,4 @@
+ Number of processors:            8
  L_Coul_CBMC: T
  Number of unit cells in a dir =    5.00000000000000     
  Number of unit cells in b dir =    5.00000000000000     
@@ -13,7 +14,7 @@
  L_bend_table: F
  L_vdW_table: F
  L_elect_table: F
- number of boxes in the system:           1
+ number of boxes      in the system:           1
  temperature:   298.150000000000       K
  external pressure:  0.100000000000000       MPa
  Ghost particles:            0
@@ -80,7 +81,6 @@
           bond type:102 bond length:    1.200 k/2:      0.0
        bead           1  bonded to bead           3
           bond type:103 bond length:    1.520 k/2:      0.0
-           2
        bead   1 bending interaction through   2 with bead   6
           bend type:100 bend angle :  115.000 k/2:  31250.0
        bead   1 bending interaction through   3 with bead   5
@@ -91,7 +91,6 @@
           bond type:101 bond length:    1.344 k/2:      0.0
        bead           2  bonded to bead           6
           bond type:100 bond length:    1.410 k/2:      0.0
-           3
        bead   2 bending interaction through   1 with bead   3
           bend type:102 bend angle :  111.000 k/2:  17650.0
        bead   2 bending interaction through   1 with bead   4
@@ -105,7 +104,6 @@
           bond type:103 bond length:    1.520 k/2:      0.0
        bead           3  bonded to bead           5
           bond type:104 bond length:    1.330 k/2:      0.0
-           2
        bead   3 bending interaction through   1 with bead   4
           bend type:103 bend angle :  126.000 k/2:  20150.0
        bead   3 bending interaction through   1 with bead   2
@@ -114,7 +112,6 @@
     bead            4  beadtype          213  charge leader            4
        bead           4  bonded to bead           1
           bond type:102 bond length:    1.200 k/2:      0.0
-           2
        bead   4 bending interaction through   1 with bead   2
           bend type:101 bend angle :  123.000 k/2:  20150.0
        bead   4 bending interaction through   1 with bead   3
@@ -124,7 +121,6 @@
     bead            5  beadtype          215  charge leader            5
        bead           5  bonded to bead           3
           bond type:104 bond length:    1.330 k/2:      0.0
-           1
        bead   5 bending interaction through   3 with bead   1
           bend type:104 bend angle :  119.700 k/2:  35210.0
        bead  5            torsional interact  3 and  1 with bead  2 of torsional type:  35
@@ -134,7 +130,6 @@
           bond type:100 bond length:    1.410 k/2:      0.0
        bead           6  bonded to bead           7
           bond type:  1 bond length:    1.540 k/2:      0.0
-           2
        bead   6 bending interaction through   2 with bead   1
           bend type:100 bend angle :  115.000 k/2:  31250.0
        bead   6 bending interaction through   7 with bead   8
@@ -147,7 +142,6 @@
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead           7  bonded to bead           8
           bond type: 30 bond length:    1.430 k/2:      0.0
-           2
        bead   7 bending interaction through   6 with bead   2
           bend type:102 bend angle :  111.000 k/2:  17650.0
        bead   7 bending interaction through   8 with bead   9
@@ -158,14 +152,12 @@
           bond type: 30 bond length:    1.430 k/2:      0.0
        bead           8  bonded to bead           9
           bond type: 29 bond length:    0.945 k/2:      0.0
-           1
        bead   8 bending interaction through   7 with bead   6
           bend type: 36 bend angle :  109.470 k/2:  25200.0
        bead  8            torsional interact  7 and  6 with bead  2 of torsional type:  45
     bead            9  beadtype           61  charge leader            9
        bead           9  bonded to bead           8
           bond type: 29 bond length:    0.945 k/2:      0.0
-           1
        bead   9 bending interaction through   8 with bead   7
           bend type: 35 bend angle :  108.500 k/2:  27720.0
        bead  9            torsional interact  8 and  7 with bead  6 of torsional type:  44
@@ -238,8 +230,8 @@
  translation move  :   35.00 %
  rotation move     :   35.00 %
  
- 
  Fraction of atom translations move  0.000000000000000E+000
+ 
  molecule type :           1   
       nchoi1   :          20  
       nchoi    :          16  
@@ -369,16 +361,16 @@
  in y-direction
  in z-direction
            3 -dimensional periodic box
- particle coordinates are folded into central box
+ particle coordinates are folded            into central box
  additional (COM) cutoff on computed rcmu
  Dual Cutoff Configurational-bias Monte Carlo
- CBMC simultaneously grows all beads conected to the same bead
+ CBMC simultaneously grows all beads conected to the         same bead
  with bond angles generated from Gaussian distribution
  Program will call Explct.f if needed
  Lennard-Jones potential for bead-bead
  with additional tail corrections
  Coulombic inter- and intramolecular interactions
- Ewald-sum will be used to calculate Coulombic interactions
+ Ewald-sum will be used to calculate Coulombic         interactions
  
  MOLECULAR MASS:   116.115400000000     
  new maximum displacements read from restart-file
@@ -550,15 +542,15 @@
  intra lj energy   -39079.7197222186     
  Tail correction   -37709.2573216958     
  bond vibration    0.000000000000000E+000
- bond bending       343800.041328878     
+ bond bending       343800.041328877     
  torsional          1061216.10486417     
  external          0.000000000000000E+000
- coulombic energy  -2265390.71420607     
+ coulombic energy  -2265390.71420598     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -2118009.78477079     
+ total energy      -2118009.78477072     
  
- box             1  initial v   =   -2118009.78477079     
+ box             1  initial v   =   -2118009.78477072     
  surf. tension :   box 1 =     -57.33046
  pressure check:   box 1 =     -38706.50
  
@@ -657,21 +649,21 @@ between box  1 and  2   uattempts =         0.0  attempts =      0.0  accepted =
  sumup control
  number of chains         300
  number of chains of type           1         300
- inter lj energy   -1209686.17823890     
- intra lj energy   -30191.4766898300     
- Tail correction   -37871.4230764480     
+ inter lj energy   -1209686.17823888     
+ intra lj energy   -30191.4766898278     
+ Tail correction   -37871.4230764482     
  bond vibration    0.000000000000000E+000
- bond bending       318611.437475714     
+ bond bending       318611.437475715     
  torsional          1051698.08317046     
  external          0.000000000000000E+000
- coulombic energy  -2253286.03983664     
+ coulombic energy  -2253286.03983659     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -2122854.17411920     
+ total energy      -2122854.17411912     
  
- vstart       =     -2118009.7847707933
- vend         =     -2122854.1741192006
- vbox         =     -2122854.1741193212
+ vstart       =     -2118009.7847707160
+ vend         =     -2122854.1741191181
+ vbox         =     -2122854.1741190762
  
  Averages and fluctuations                            Box 1
  
@@ -724,9 +716,9 @@ between box  1 and  2   uattempts =         0.0  attempts =      0.0  accepted =
  Enthalpy Inst.[kJ/mol] for box  1 =    -57.8633      0.5230      0.1743
  Enthalpy Ext. [kJ/mol] for box  1 =    -58.2331      0.3120      0.1040
  
- Cp residual(J/Kmol) =   76.6975292957533     
-  H2=   4414884272701.08     
-  H=  -2101104.05911561     
+ Cp residual(J/Kmol) =   76.6975292750497     
+  H2=   4414884272700.51     
+  H=  -2101104.05911549     
  chemical potential  itype   1 box   1 =        0.000       0.000       0.000
  mean sete length    itype   1 box   1 =       18.697       0.074       0.025
  number density      itype   1 box   1 =  0.55683E+01 0.19009E-01 0.63362E-02

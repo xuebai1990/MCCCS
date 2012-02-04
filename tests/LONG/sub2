@@ -1,0 +1,11 @@
+#!/bin/bash -l
+
+module load intel
+module unload vmpi/pathscale
+module load ompi/intel
+
+cd /scratch2/maerzkek/MCCCS-PARALLEL-BOLTZ/TEST_SUITE/LONG/TEST2
+
+mpirun -np 4 /scratch2/maerzkek/MCCCS-PARALLEL-BOLTZ/NVTfield  
+
+exit 0

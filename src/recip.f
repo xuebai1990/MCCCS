@@ -37,14 +37,27 @@ c    *********************************************************************
       include 'coord2.inc'
       include 'ewaldsum.inc'
       include 'poten.inc'
-
+c RP added for MPI     
+      include 'mpif.h'
+      include 'mpi.inc'
+       
+c RP added for MPI
+      integer mystart,myend,blocksize,i
+      double precision ssumrn_arr(vectormax),ssumin_arr(vectormax),
+     &      ssumrn_one(vectormax),ssumin_one(vectormax)
+      integer countn,ncount_displs(numprocmax),ncount_arr(numprocmax)   
+    
 !      if (LSOLPAR.and.(ibox.eq.2))then
 !        return
 !      endif
- 
+
+c KM for MPI
+      do i=1,numprocmax
+         ncount_displs(i) = 0
+         ncount_arr(i) = 0
+      enddo
 
       ncount = numvect(ibox)
-
       if ( type .eq. 1 ) then
          
 c *** recalculate the reciprocal space part for one-particle move, translation,
@@ -60,8 +73,18 @@ c               write(iou,*) rxuion(ii,zz),ryuion(ii,zz),rzuion(ii,zz),
 c     &              qquion(ii,zz)
 c            enddo
 c         enddo
-
-         do 30 ic = 1, ncount
+      
+c RP added for MPI
+         blocksize = ncount/numprocs
+         mystart = myid * blocksize + 1
+         if(myid .eq. (numprocs-1))then
+            myend = ncount
+         else 
+            myend = (myid + 1) * blocksize
+         endif
+         countn = myend - mystart + 1
+         do 30 ic = mystart,myend
+!         do 30 ic = 1,ncount
             do 20 zz = 1,2
 c --- zz = 1: old configuration 
 c --- zz = 2: new configuration
@@ -81,11 +104,43 @@ c --- zz = 2: new configuration
                   endif
                enddo
  20         continue
-            ssumrn(ic,ibox) = ssumr(ic,ibox) - sumr(1)
+!          ssumrn(ic,ibox) = ssumr(ic,ibox) - sumr(1)
+!     &           + sumr(2)
+!            ssumin(ic,ibox) = ssumi(ic,ibox) - sumi(1)
+!     &           + sumi(2)
+
+
+c RP added for MPI
+            ssumrn_arr(ic-mystart + 1) = ssumr(ic,ibox) - sumr(1)
      &           + sumr(2)
-            ssumin(ic,ibox) = ssumi(ic,ibox) - sumi(1)
+            ssumin_arr(ic-mystart + 1) = ssumi(ic,ibox) - sumi(1)
      &           + sumi(2)
+
  30      continue
+        
+          CALL MPI_ALLGATHER(countn,1,MPI_INTEGER,ncount_arr,
+     &       1,MPI_INTEGER,MPI_COMM_WORLD,ierr)
+         
+         ncount_displs(1) = 0
+         do i = 2,numprocs
+           ncount_displs(i) = ncount_displs(i-1) + ncount_arr(i-1)    
+         enddo
+
+         CALL MPI_ALLGATHERV(ssumrn_arr,ncount_arr(myid + 1),
+     &     MPI_DOUBLE_PRECISION,
+     &     ssumrn_one,ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION,
+     &     MPI_COMM_WORLD,ierr)
+     
+        CALL MPI_ALLGATHERV(ssumin_arr,ncount_arr(myid+1),
+     &     MPI_DOUBLE_PRECISION,
+     &     ssumin_one,ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION,
+     &     MPI_COMM_WORLD,ierr)
+     
+       do i = 1,ncount
+        ssumrn(i,ibox) = ssumrn_one(i)
+        ssumin(i,ibox) = ssumin_one(i)
+      enddo
+c----------------------------------------------------------------------    
          vrecipnew = 0.0d0
          vrecipold = 0.0d0
          do ic = 1,ncount
@@ -96,7 +151,7 @@ c --- zz = 2: new configuration
      &           ssumr(ic,ibox) + ssumi(ic,ibox)*
      &           ssumi(ic,ibox))*prefact(ic,ibox)
          enddo
-
+       
          vrecipnew = vrecipnew*qqfact
          vrecipold = vrecipold*qqfact
 

@@ -35,6 +35,9 @@ c    ********************************************************************
       include 'ewaldsum.inc'
       include 'coord.inc'
       include 'poten.inc'
+c ---RP added for MPI
+      include 'mpi.inc'
+      include 'mpif.h'
 
       integer ncount,ibox,i,ii,imolty
       double precision factor,repress,repressx,repressy,repressz
@@ -43,6 +46,14 @@ c    ********************************************************************
       double precision pxx,pyy,pzz,intraxx,intrayy,intrazz,intraxy
      &     ,intraxz,intrazy,intrayz,intrayx,intrazx,pxy,pyx,pyz,pzy
      &     ,pxz,pzx
+
+c----RP added for MPI
+      integer blocksize,mystart,myend
+      double precision sum_repressx,sum_repressy,sum_repressz,
+     &   sum_pxy,sum_pxz,sum_pyz
+      double precision sum_recipintra,sum_intraxx,sum_intrayy,
+     & sum_intrazz,sum_intraxy,sum_intrazy,sum_intraxz,sum_intrayz,
+     & sum_intrazx,sum_intrayx
 
       repress  = 0.0d0
       repressx = 0.0d0
@@ -66,7 +77,27 @@ c    ********************************************************************
       intrayz = 0.0d0
       intrayx = 0.0d0
 
-      do ncount = 1,numvect(ibox)
+c KM for MPI
+      sum_repressx = 0.0d0
+      sum_repressy = 0.0d0
+      sum_repressz = 0.0d0
+      sum_pxy = 0.0d0
+      sum_pxz = 0.0d0
+      sum_pyz = 0.0d0
+      sum_recipintra = 0.0d0
+      sum_intraxx = 0.0d0
+      sum_intrayy = 0.0d0
+      sum_intrazz = 0.0d0
+      sum_intraxy = 0.0d0
+      sum_intrazy = 0.0d0
+      sum_intraxz = 0.0d0
+      sum_intrayz = 0.0d0
+      sum_intrazx = 0.0d0
+      sum_intrayx = 0.0d0
+
+c RP for MPI
+      do ncount = myid+1,numvect(ibox),numprocs
+!      do ncount = 1, numvect(ibox)
          factor = prefact(ncount,ibox)*(ssumr(ncount,ibox)*
      &        ssumr(ncount,ibox) + ssumi(ncount,ibox)*
      &        ssumi(ncount,ibox))
@@ -94,7 +125,30 @@ c    ********************************************************************
      &        *calp(ibox)) + 1.0d0/(kx(ncount,ibox)*kx(ncount,ibox)+
      &        ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)*
      &        kz(ncount,ibox)))*2.0d0*ky(ncount,ibox)*kz(ncount,ibox))
-      enddo
+      
+       enddo
+
+c -- RP added for MPI
+       CALL MPI_ALLREDUCE(repressx,sum_repressx,1,
+     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLREDUCE(repressy,sum_repressy,1,
+     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLREDUCE(repressz,sum_repressz,1,
+     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLREDUCE(pxy,sum_pxy,1,
+     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLREDUCE(pxz,sum_pxz,1,
+     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLREDUCE(pyz,sum_pyz,1,
+     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+
+      repressx = sum_repressx
+      repressy = sum_repressy
+      repressz = sum_repressz
+      pxy = sum_pxy
+      pxz = sum_pxz
+      pyz = sum_pyz
+
       repress = repressx + repressy + repressz
 c * keep x,y,z separate for surface tension calculation
       pxx = repressx
@@ -105,7 +159,8 @@ c * keep x,y,z separate for surface tension calculation
       pzy = pyz
 
 c --- the intramolecular part should be substracted
-      do 10 i = 1, nchain
+c RP for MPI
+      do 10 i = myid+1, nchain, numprocs
 c ### check if i is in relevant box ###
          if ( nboxi(i) .eq. ibox ) then
 
@@ -152,6 +207,39 @@ c * keep x,y and z separate for surface tension calculation
             enddo
          endif
  10   continue
+ 
+       CALL MPI_ALLREDUCE(recipintra,sum_recipintra,1,
+     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLREDUCE(intraxx,sum_intraxx,1,
+     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLREDUCE(intrayy,sum_intrayy,1,
+     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLREDUCE(intrazz,sum_intrazz,1,
+     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLREDUCE(intraxy,sum_intraxy,1,
+     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLREDUCE(intraxz,sum_intraxz,1,
+     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLREDUCE(intrayx,sum_intrayx,1,
+     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLREDUCE(intrayz,sum_intrayz,1,
+     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLREDUCE(intrazx,sum_intrazx,1,
+     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+       CALL MPI_ALLREDUCE(intrazy,sum_intrazy,1,
+     &    MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+ 
+      recipintra = sum_recipintra
+      intraxx = sum_intraxx
+      intrayy = sum_intrayy
+      intrazz = sum_intrazz
+      intraxy = sum_intraxy
+      intraxz = sum_intraxz
+      intrayx = sum_intrayx
+      intrayz = sum_intrayz
+      intrazx = sum_intrazx
+      intrazy = sum_intrazy
+
       repress = (repress + recipintra)*qqfact
       
       pxx = (pxx + intraxx)*qqfact
@@ -169,6 +257,3 @@ c      write(iou,*) 'internal part:',intraxx,intrayy,intrazz
       
       return
       end
-
-
-

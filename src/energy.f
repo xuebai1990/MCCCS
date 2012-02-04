@@ -53,7 +53,9 @@ c *** common blocks ***
 ckea include for garofalini 3 body term
       include 'garofalini.inc'
       include 'tabulated.inc'
-
+c RP added for MPI
+      include 'mpif.h'
+      include 'mpi.inc'
       logical lqimol,lqjmol,lexplt,lcoulo,lfavor,lij2,liji,lqchgi
       logical lljii,ovrlap,ltors,lcharge_table,lt,lfound
       logical lmim
@@ -85,7 +87,9 @@ c KEA
      &     nyijj(maxneigh),nzijj(maxneigh)
 c KM
       double precision tabulated_vdW, tabulated_bend, tabulated_elect
-
+c Neeraj & RP added for MPI
+      double precision sum_velect, sum_vinter
+      logical all_ovrlap
 C --------------------------------------------------------------------
 
 c      write(iou,*) 'start ENERGY'
@@ -103,6 +107,11 @@ c      write(iou,*) 'start ENERGY'
 
       rminsq = rmin * rmin
 
+c KM for MPI
+      all_ovrlap = .false.
+      sum_velect = 0.0d0
+      sum_vinter = 0.0d0
+
       v = 0.0d0
       vinter = 0.0d0
       vintra = 0.0d0
@@ -111,6 +120,7 @@ c      write(iou,*) 'start ENERGY'
       vewald = 0.0d0
       vtors = 0.0d0
       ovrlap = .false.
+      all_ovrlap = .false.
       sself  = 0.0d0
       correct = 0.0d0     
 ckea
@@ -253,7 +263,9 @@ c      if (.not.(lgrand.and.(ibox.eq.2))) then
       if (.not.(lgrand.and.(ibox.eq.2)) .and. 
      &     .not.(lideal(ibox)) ) then    
 c --- END JLR 11-24-09
-         do 98 k = 1, nmole
+c RP added for MPI
+      do 98 k = myid+1, nmole,numprocs
+c         do 98 k = 1, nmole
 
             if (licell.and.(ibox.eq.boxlink)) then
                j = jcell(k)
@@ -382,12 +394,14 @@ c *** minimum image the pair separations ***
                      if ( rijsq .lt. rminsq .and. .not. 
      &                    (lexpand(imolty) .or. lexpand(jmolty))) then
                         ovrlap = .true.
-c                        write(iou,*) 'inter ovrlap:',i,j
+c                        write(iou,*) 'inter ovrlap:',i,j, myid
 c                        write(iou,*) 'i xyz',rxui,ryui,rzui
 c                        write(iou,*) 'j xyz',rxu(j,jj),ryu(j,jj),rzu(j,jj) 
 c                        write(iou,*) 'ii:',ii,'jj:',jj
 c                        write(iou,*) 'distance', dsqrt(rijsq)
-                        return
+c RP added for MPI
+c                        return
+                        goto 99
                      endif
                      if ( (rijsq .lt. rcutsq) .or. lijall) then
                         if (L_vdW_table.and.(.not.(lexpand(imolty)
@@ -551,7 +565,7 @@ c --- set up the charge-interaction table
                            endif
                         endif
                      endif
-
+c KM lneighbor and lgaro does not work in parallel
                      if ( lneighbor .and. ii .eq. 1 .and. 
      &                    jj .eq. 1 .and. flagon .eq. 2
      &                    .and. rijsq .lt. rbsmax**2 
@@ -586,6 +600,36 @@ c                           neighi1(neigh_icnt1(jmolty),jmolty)=j
            endif
  98      continue
       endif
+
+c RP added for MPI
+c----- Returning from ovrlap--------------
+
+ 99   continue
+
+c KM don't check overlap until after allreduce
+c      if(ovrlap .eq. .true.)then
+c         write(iou,*)'576: in energy ovrlap=',ovrlap,'myid=',myid
+c      endif
+c -----------------------------------------
+
+      CALL MPI_ALLREDUCE(ovrlap,all_ovrlap,1,MPI_LOGICAL,MPI_LOR,
+     &          MPI_COMM_WORLD,ierr)
+
+       ovrlap = all_ovrlap
+      if(ovrlap)then
+c            write(iou,*)'630 in energy ovrlap=',ovrlap,'myid=',myid
+          return 
+      endif
+
+      CALL MPI_ALLREDUCE(vinter, sum_vinter,1,MPI_DOUBLE_PRECISION,
+     &          MPI_SUM,MPI_COMM_WORLD,ierr)
+
+      CALL MPI_ALLREDUCE(velect, sum_velect,1,MPI_DOUBLE_PRECISION,
+     &          MPI_SUM,MPI_COMM_WORLD,ierr)
+
+      velect = sum_velect
+      vinter = sum_vinter
+c -----------------------------------------------
 
       if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff
      & .and. .not. lgenlj .and. .not. lninesix .and..not.lgaro
@@ -1020,8 +1064,6 @@ c      write(iou,*) 'vinter:',vinter,'vext:',vext,'vintra:',vintra,'velect'
 c     & ,velect,'vewald:',vewald,'v'
 
 
-c      write(iou,*) 'v :', v
-
       if (flagon.eq.1) then
          vipswo = v
          vwellipswo = vwell
@@ -1029,9 +1071,6 @@ c      write(iou,*) 'v :', v
          vipswn = v
          vwellipswn = vwell
       endif
-
-
-
 
       if (lmipsw) then                                                
          if (lstagea) then

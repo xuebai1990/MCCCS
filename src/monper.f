@@ -45,7 +45,8 @@ C -----------------------------------------------------------------
       include 'coord2.inc'
       include 'cell.inc'
       include 'poten.inc'
-      
+      include 'mpi.inc'
+ 
       integer nummol,ntii
       integer nibox,im,nnn,ntot,nblock,imolty,m,mm,i,j,jjtor
      &     ,ibox,itype,itel,mnbox,zz,steps,igrow,jmolty,jbox
@@ -100,81 +101,82 @@ c *** smaller than the rcutmin
 
       if ( lratio ) then
 c *** adjust the atomic displacements
-       if ( Abntrax .gt. 0.5d0 ) then
-           ratrax = Abstrax / Abntrax
-           rttrax = Armtrax * ratrax / tatra
-           if ( rttrax .gt. 2.0d0 * rcutmin ) then
+         if ( Abntrax .gt. 0.5d0 ) then
+            ratrax = Abstrax / Abntrax
+            rttrax = Armtrax * ratrax / tatra
+            if ( rttrax .gt. 2.0d0 * rcutmin ) then
 c --- maximum translational displacement
                Armtrax = 2.0d0*rcutmin
 
-           elseif (rttrax .lt. 1.0d-10 ) then
+            elseif (rttrax .lt. 1.0d-10 ) then
 c --- ratio must have been zero, so divide by 10
                Armtrax = Armtrax/10.0d0
-
-           else
+               
+            else
 c --- accept new ratio
                Armtrax = rttrax
-           endif
-
-           if ( lneigh .and. Armtrax .ge. upnn) then
+            endif
+            
+            if ( lneigh .and. Armtrax .ge. upnn) then
                Armtrax = upnn
                write(iou,*) '### problem : for target accept ',
-     +               'ratio Armtrax should be smaller than upnn'
-           endif
-       endif
+     +              'ratio Armtrax should be smaller than upnn'
+            endif
+         endif
 
 
-       if ( Abntray .gt. 0.5d0 ) then
-           ratray = Abstray / Abntray
-           rttray = Armtray * ratray / tatra
-           if ( rttray .gt. 2.0d0 * rcutmin ) then
+         if ( Abntray .gt. 0.5d0 ) then
+            ratray = Abstray / Abntray
+            rttray = Armtray * ratray / tatra
+            if ( rttray .gt. 2.0d0 * rcutmin ) then
 c --- maximum translational displacement
                Armtray = 2.0d0*rcutmin
 
-           elseif (rttray .lt. 1.0d-10 ) then
+            elseif (rttray .lt. 1.0d-10 ) then
 c --- ratio must have been zero, so divide by 10
                Armtray = Armtray/10.0d0
 
-           else
+            else
 c --- accept new ratio
                Armtray = rttray
-           endif
+            endif
 
-           if ( lneigh .and. Armtray .ge. upnn) then
+            if ( lneigh .and. Armtray .ge. upnn) then
                Armtray = upnn
                write(iou,*) '### problem : for target accept ',
-     +               'ratio Armtray should be smaller than upnn'
-           endif
-       endif
-          
-       if ( Abntraz .gt. 0.5d0 ) then
-           ratraz = Abstraz / Abntraz
-           rttraz = Armtraz * ratraz / tatra
-           if ( rttraz .gt. 2.0d0 * rcutin ) then
+     +              'ratio Armtray should be smaller than upnn'
+            endif
+         endif
+        
+         if ( Abntraz .gt. 0.5d0 ) then
+            ratraz = Abstraz / Abntraz
+            rttraz = Armtraz * ratraz / tatra
+            if ( rttraz .gt. 2.0d0 * rcutin ) then
 c --- maximum translational displacement
                Armtraz = 2.0d0*rcutin
 
-           elseif (rttraz .lt. 1.0d-10 ) then
+            elseif (rttraz .lt. 1.0d-10 ) then
 c --- ratio must have been zero, so divide by 10
                Armtraz = Armtraz/10.0d0
 
-           else
+            else
 c --- accept new ratio
                Armtraz = rttraz
-           endif
+            endif
 
-           if ( lneigh .and. Armtraz .ge. upnn) then
+            if ( lneigh .and. Armtraz .ge. upnn) then
                Armtraz = upnn
                write(iou,*) '### problem : for target accept ',
-     +               'ratio Armtraz should be smaller than upnn'
-           endif
-       endif
+     +              'ratio Armtraz should be smaller than upnn'
+            endif
+         endif
  
-
 c *** adjust maximum translational displacement for COM***
          imend = nbox
          do im=1,imend
-            write(iou,*) 'Box ',im
+            if (myid.eq.0) then
+               write(iou,*) 'Box ',im
+            endif
             do imolty = 1,nmolty
 c              --- rmtrax
 c              --- check whether any x translations have been done for 
@@ -188,7 +190,7 @@ c                 --- compute possible new ratio
                   if ( rttrax .gt. 2.0d0 * rcut(im)) then 
 c                    --- maximum translational displacement
                      rmtrax(imolty,im) = 2.0d0*rcut(im)
-
+                     
                   elseif (rttrax .lt. 1.0d-10 ) then  
 c                    --- ratio must have been zero, so divide by 10
                      rmtrax(imolty,im) = rmtrax(imolty,im)/10.0d0
@@ -350,15 +352,20 @@ c                 --- check neighbour list
                   endif
                endif
 
+c KM for MPI
+c only processor 0 writes to output files (except for error messages)
+               if (myid.eq.0) then
 c *** write some ratio update information ***
-               write(iou,57) imolty,bntrax(imolty,im),bntray(imolty,im)
-     &              , bntraz(imolty,im), bnrotx(imolty,im)
-     &              , bnroty(imolty,im), bnrotz(imolty,im)
+                  write(iou,57) imolty,bntrax(imolty,im),
+     &                 bntray(imolty,im), bntraz(imolty,im), 
+     &                 bnrotx(imolty,im), bnroty(imolty,im), 
+     &                 bnrotz(imolty,im)
 c              write(iou,58) ratrax, ratray, ratraz,rarotx, raroty,rarotz
-               write(iou,59) rmtrax(imolty,im), rmtray(imolty,im)
-     &              , rmtraz(imolty,im), rmrotx(imolty,im)
-     &              , rmroty(imolty,im), rmrotz(imolty,im)
-               
+                  write(iou,59) rmtrax(imolty,im), rmtray(imolty,im)
+     &                 , rmtraz(imolty,im), rmrotx(imolty,im)
+     &                 , rmroty(imolty,im), rmrotz(imolty,im)
+               endif
+
  57            format(' Type ',i1,' bn ',6(f7.0,1x))
 c     58            format(' ratio       ',6(f7.4,1x))
  59            format(' max.displ.  ',6(f7.4,1x))
@@ -413,7 +420,7 @@ c              --- rezero flcq
                bnflcq(i,im) = 0.0d0
             enddo
          enddo
-         if ( lfq ) then
+         if ( lfq.and.myid.eq.0 ) then
 c           --- write out information about fluctuating charge success
             write(iou,*) 'Box:   rmflcq for moltyps'
             do im =1,imend
@@ -421,7 +428,7 @@ c           --- write out information about fluctuating charge success
             enddo
          endif
          
-      endif
+      endif  ! end if (lratio)
 
       do imolty = 1, nmolty
          if (lratfix(imolty)) then
@@ -468,32 +475,33 @@ c     *** renormalize new distribution
                enddo
             enddo
          endif
-      
+
+c KM for MPI
+c only do anything for lsolute if monper is not called from readdat (nnn.ne.0)
 c     *** calculate energy and write out movie for lsolute
-         if (lsolute(imolty)) then
+         if (lsolute(imolty).and.nnn.ne.0) then
             do ibox = 1, nbox
                do k = 1, ncmt(ibox,imolty)
                   i = parbox(k,ibox,imolty)
 
 c     --- set coords for energy and write out conformations
 
-                  write(11,*) imolty,ibox,nunit(imolty)
+                  if (myid.eq.0) write(11,*) imolty,ibox,nunit(imolty)
 
-                  do j = 1, nunit(imolty)
-                     rxuion(j,1) = rxu(i,j)                     
-                     ryuion(j,1) = ryu(i,j)
-                     rzuion(j,1) = rzu(i,j)
+                     do j = 1, nunit(imolty)
+                        rxuion(j,1) = rxu(i,j)                     
+                        ryuion(j,1) = ryu(i,j)
+                        rzuion(j,1) = rzu(i,j)
+                        
+                        if (myid.eq.0) write(11,*) ntype(imolty,j)
+     &                       ,rxuion(j,1),ryuion(j,1),rzuion(j,1)
+     &                       ,qqu(j,1)
 
-                     write(11,*) ntype(imolty,j)
-     &                    ,rxuion(j,1),ryuion(j,1),rzuion(j,1)
-     &                    ,qqu(j,1)
-
-                  enddo
+                     enddo
 
                   call energy(i,imolty,v,vintra,vinter,vext,velect
      &                 ,vewald,1,ibox,1,nunit(imolty),.true.,ovrlap
      &                 ,.false.,vtors,.false.,.false.)
-                  
                   if (ovrlap) write(iou,*) 
      &                 '*** DISASTER, OVERLAP IN MONPER'
 
@@ -661,16 +669,19 @@ c     *** adjust maximum volume displacement ***
 
             enddo
 
-            do ibox = 1, nbox
-               if (lsolid(ibox) .and. .not. lrect(ibox)) then
-                  do j = 1,9
-                     write(iou,56) bnhmat(ibox,j),bshmat(ibox,j),
-     &                    rmhmat(ibox,j)
-                  enddo
-               else
-                  write(iou,60) bnvol(ibox),bsvol(ibox),rmvol(ibox)
-               endif
-            enddo
+c KM for MPI            
+            if (myid.eq.0) then
+               do ibox = 1, nbox
+                  if (lsolid(ibox) .and. .not. lrect(ibox)) then
+                     do j = 1,9
+                        write(iou,56) bnhmat(ibox,j),bshmat(ibox,j),
+     &                       rmhmat(ibox,j)
+                     enddo
+                  else
+                     write(iou,60) bnvol(ibox),bsvol(ibox),rmvol(ibox)
+                  endif
+               enddo
+            endif	
 
             do ibox = 1, nbox
 
@@ -697,7 +708,9 @@ c     *** adjust maximum volume displacement ***
      +        '   bs =',f8.1,'   max.displ. =',e12.5)
       endif
 
-      if ( lprint ) then
+c KM for MPI
+
+      if ( lprint.and.myid.eq.0 ) then
 c     *** write out runtime information ***
          ntot = nnn + nnstep
          write(iou,'(i6,i8,e12.4,f10.3,f12.1,15i4)') nnn,ntot,
@@ -711,8 +724,9 @@ c     *** write out runtime information ***
             enddo
          endif
       endif
-      
-      if ( lmv ) then
+
+c KM for MPI      
+      if ( lmv .and.myid.eq.0) then
 c     *** write out the movie configurations ***
          write(10,*) nnn
          do ibox = 1, nbox
@@ -737,7 +751,8 @@ c     *** write out the movie configurations ***
  1015    format(4(1x,i5),3(1x,f16.6))
       endif
 
-      if ( lmv .and. L_movie_xyz) then
+c KM for MPI
+      if ( lmv .and. L_movie_xyz.and.myid.eq.0) then
          do ibox = 1,nbox
            nummol = 0
            do i = 1,nchain
@@ -760,9 +775,7 @@ c     *** write out the movie configurations ***
          enddo
       endif
 
-
-
-      if ( lrsave ) then
+      if ( lrsave .and.myid.eq.0) then
 c     *** write out the restart configurations to SAFETY-file ***
          open(unit=88,file="save-config",status='unknown')
          write (88,*) nnn + nnstep
@@ -779,7 +792,7 @@ c     *** write out the restart configurations to SAFETY-file ***
             write (88,*) (rmflcq(i,im),i=1,nmolty)
          enddo
          if ( lgibbs .or. lgrand .or. lnpt) then
-c KM 01/10
+c KM 01/10 
             write (88,*) (rmvol(ibox),ibox=1,nbox)
             do im = 1,nbox
 

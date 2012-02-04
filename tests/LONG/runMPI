@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# determine the nodes (node-id) allocated by the resource manager
+tr '\012' ' '  < NODES > tmp5
+
+read NODE1 NODE1 NODE1 NODE1 NODE1 NODE1 NODE1 NODE1 NODE2 NODE2 NODE2 NODE2 NODE2 NODE2 NODE2 NODE2 NODE3 NODE3 NODE3 NODE3 NODE3 NODE3 NODE3 NODE3 NODE4 NODE4 NODE4 NODE4 NODE4 NODE4 NODE4 NODE4 NODE5 NODE5 NODE5 NODE5 NODE5 NODE5 NODE5 NODE5< tmp5 
+
+# run the jobs on each of the nodes
+# Note: jobs need to be submitted in the backgroud 
+# else the script will wait for this command return with
+# job status, complete or otherwise
+
+# Run job(s) on other nodes
+ssh $NODE2 /home/xe1/maerzkek/MCCCS-2010-PARALLEL/TEST_SUITE/LONG/sub3 & 
+ssh $NODE2 /home/xe1/maerzkek/MCCCS-2010-PARALLEL/TEST_SUITE/LONG/sub4 &
+
+# Run job(s) on other nodes
+ssh $NODE3 /home/xe1/maerzkek/MCCCS-2010-PARALLEL/TEST_SUITE/LONG/sub5 &
+ssh $NODE3 /home/xe1/maerzkek/MCCCS-2010-PARALLEL/TEST_SUITE/LONG/sub6 &
+
+# Run job(s) on other nodes
+ssh $NODE4 /home/xe1/maerzkek/MCCCS-2010-PARALLEL/TEST_SUITE/LONG/sub7 &
+ssh $NODE4 /home/xe1/maerzkek/MCCCS-2010-PARALLEL/TEST_SUITE/LONG/sub8 &
+
+# Run job(s) on other nodes
+ssh $NODE5 /home/xe1/maerzkek/MCCCS-2010-PARALLEL/TEST_SUITE/LONG/sub9 &
+
+# Run the job(s) on current node
+/home/xe1/maerzkek/MCCCS-2010-PARALLEL/TEST_SUITE/LONG/sub1 &
+/home/xe1/maerzkek/MCCCS-2010-PARALLEL/TEST_SUITE/LONG/sub2 &
+
+# wait until all jobs have finished
+wait
+
+# Clean other nodes once jobs are completed.
+# Safety check to make sure all jobs have finished 
+ssh $NODE2 /home/xe1/maerzkek/MCCCS-2010-PARALLEL/TEST_SUITE/LONG/cleanup3.sh
+ssh $NODE2 /home/xe1/maerzkek/MCCCS-2010-PARALLEL/TEST_SUITE/LONG/cleanup4.sh
+ssh $NODE3 /home/xe1/maerzkek/MCCCS-2010-PARALLEL/TEST_SUITE/LONG/cleanup5.sh
+ssh $NODE3 /home/xe1/maerzkek/MCCCS-2010-PARALLEL/TEST_SUITE/LONG/cleanup6.sh
+ssh $NODE4 /home/xe1/maerzkek/MCCCS-2010-PARALLEL/TEST_SUITE/LONG/cleanup7.sh
+ssh $NODE4 /home/xe1/maerzkek/MCCCS-2010-PARALLEL/TEST_SUITE/LONG/cleanup8.sh
+ssh $NODE5 /home/xe1/maerzkek/MCCCS-2010-PARALLEL/TEST_SUITE/LONG/cleanup9.sh
+
+exit 0
+

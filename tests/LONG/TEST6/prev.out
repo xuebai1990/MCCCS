@@ -1,3 +1,4 @@
+ Number of processors:            8
  L_Coul_CBMC: T
  Number of unit cells in a dir =    5.00000000000000     
  Number of unit cells in b dir =    5.00000000000000     
@@ -13,7 +14,7 @@
  L_bend_table: F
  L_vdW_table: F
  L_elect_table: F
- number of boxes in the system:           2
+ number of boxes      in the system:           2
  temperature:   450.000000000000       K
  external pressure:  0.100000000000000       0.100000000000000       MPa
  Ghost particles:            0           0
@@ -87,17 +88,13 @@
           bond type: 18 bond length:    0.957 k/2:      0.0
        bead           1  bonded to bead           3
           bond type: 18 bond length:    0.957 k/2:      0.0
-           0
     bead            2  beadtype          115  charge leader            2
        bead           2  bonded to bead           1
           bond type: 18 bond length:    0.957 k/2:      0.0
-           0
     bead            3  beadtype          115  charge leader            2
        bead           3  bonded to bead           1
           bond type: 18 bond length:    0.957 k/2:      0.0
-           0
     bead            4  beadtype          116  charge leader            2
-           0
  licell: F
  rintramax:  0.000000000000000E+000  A
  boxlink:           1
@@ -180,8 +177,8 @@
  translation move  :   49.72 %
  rotation move     :   49.72 %
  
- 
  Fraction of atom translations move  0.000000000000000E+000
+ 
  molecule type :           1   
       nchoi1   :          15  
       nchoi    :           8  
@@ -243,16 +240,16 @@
  in y-direction
  in z-direction
            3 -dimensional periodic box
- particle coordinates are folded into central box
+ particle coordinates are folded            into central box
  additional (COM) cutoff on computed rcmu
  Dual Cutoff Configurational-bias Monte Carlo
- CBMC simultaneously grows all beads conected to the same bead
+ CBMC simultaneously grows all beads conected to the         same bead
  with bond angles generated from Gaussian distribution
  Program will call Explct.f if needed
  Lennard-Jones potential for bead-bead
  with additional tail corrections
  Coulombic inter- and intramolecular interactions
- Ewald-sum will be used to calculate Coulombic interactions
+ Ewald-sum will be used to calculate Coulombic         interactions
  
  MOLECULAR MASS:   18.0148000000000     
  new maximum displacements read from restart-file
@@ -322,38 +319,38 @@
  sumup control
  number of chains         867
  number of chains of type           1         867
- inter lj energy    453757.117240683     
+ inter lj energy    453757.117240678     
  intra lj energy   0.000000000000000E+000
  Tail correction   -5694.81670937465     
  bond vibration    0.000000000000000E+000
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -3849283.34217672     
+ coulombic energy  -3849283.34217571     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -3395526.22493604     
+ total energy      -3395526.22493503     
  
- box             1  initial v   =   -3395526.22493604     
+ box             1  initial v   =   -3395526.22493503     
  surf. tension :   box 1 =     -32.76560
  pressure check:   box 1 =     -22276.67
  
  sumup control
  number of chains         133
  number of chains of type           1         133
- inter lj energy    6966.23339409258     
+ inter lj energy    6966.23339409256     
  intra lj energy   0.000000000000000E+000
  Tail correction  -0.675802664689419     
  bond vibration    0.000000000000000E+000
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -53003.1039105268     
+ coulombic energy  -53003.1039105321     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -46036.8705164342     
+ total energy      -46036.8705164396     
  
- box             2  initial v   =   -46036.8705164342     
+ box             2  initial v   =   -46036.8705164396     
  surf. tension :   box 2 =       1.12800
  pressure check:   box 2 =       1195.04
  
@@ -362,6 +359,7 @@
  Cycle   Total   Energy    Boxlength   Pressure  Molecules
    400  150400 -0.3376E+07    31.628         0.0 867
                -0.5390E+05    80.059         0.0 133
+ ### underflow in wratio calculation ###
  Box            1
  Type 1 bn  72104.  72105.  71889.  72103.  71521.  72384.
  max.displ.   0.5216  0.5205  0.5164  0.6314  0.6362  0.6276
@@ -422,8 +420,10 @@
  max.displ.  64.0000 64.0000 64.0000  3.1415  3.1415  3.1415
  volume change:  bn =   128.0   bs =    50.0   max.displ. = 0.20237E-01
  volume change:  bn =     0.0   bs =     0.0   max.displ. = 0.10000E-02
+ ### underflow in wratio calculation ###
   3200  153200 -0.3400E+07    31.258         0.0 870
                -0.3805E+05    80.116         0.0 130
+ ### underflow in wratio calculation ###
  Box            1
  Type 1 bn  72133.  72613.  72749.  72350.  72377.  72320.
  max.displ.   0.5165  0.5223  0.5150  0.6373  0.6313  0.6360
@@ -501,36 +501,36 @@ between box  1 and  2   uattempts =         0.0  attempts =      0.0  accepted =
  sumup control
  number of chains         871
  number of chains of type           1         871
- inter lj energy    499654.344779354     
+ inter lj energy    499654.344779334     
  intra lj energy   0.000000000000000E+000
- Tail correction   -5833.71562440014     
+ Tail correction   -5833.71562440012     
  bond vibration    0.000000000000000E+000
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -3925040.16155037     
+ coulombic energy  -3925040.16154953     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -3425385.81677102     
+ total energy      -3425385.81677020     
  
  sumup control
  number of chains         129
  number of chains of type           1         129
- inter lj energy    11902.1950861572     
+ inter lj energy    11902.1950862081     
  intra lj energy   0.000000000000000E+000
- Tail correction  -0.635198767101778     
+ Tail correction  -0.635198767101784     
  bond vibration    0.000000000000000E+000
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -65485.5446151313     
+ coulombic energy  -65485.5446151618     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -53583.3495289741     
+ total energy      -53583.3495289538     
  
- vstart       =     -3395526.2249360369       -46036.8705164342
- vend         =     -3425385.8167710155       -53583.3495289741
- vbox         =     -3425385.8167706472       -53583.3495289754
+ vstart       =     -3395526.2249350287       -46036.8705164396
+ vend         =     -3425385.8167701969       -53583.3495289538
+ vbox         =     -3425385.8167698346       -53583.3495289568
  
  Averages and fluctuations                            Box 1       Box 2
  

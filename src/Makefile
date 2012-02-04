@@ -12,9 +12,9 @@
 #COMPFLAGS     =  -O2 -w90 -w95 #-cm -p
 COMPFLAGS     =  -O3 -no-prec-div -ipo #-p  #-ipo
 #COMPFLAGS     =  -O3 -no-prec-div -check bounds 
-LD            = ifort
-LDS           = ifort -c $(COMPFLAGS)
-LDFLAGS       = -static $(COMPFLAGS)
+LD            = mpif90 -g 
+LDS           = mpif90 -c -g $(COMPFLAGS)
+LDFLAGS       = -i-dynamic $(COMPFLAGS)
 
 ### NAG Compiler for OSX
 #COMPFLAGS     = -O0 -gline -f77 -mismatch_all -C=all -C=undefined -nan
@@ -316,7 +316,7 @@ anes.o: control.inc coord.inc coord2.inc ensemble.inc rosen.inc \
 boltz.o: boltz.f control.inc coord.inc system.inc poten.inc neigh.inc \
 	cbmc.inc external.inc connect.inc ewaldsum.inc cell.inc \
 	peboco.inc fepsi.inc qqlist.inc nsix.inc ipswpar.inc eepar.inc conver.inc \
-        tabulated.inc boltz.f
+        tabulated.inc mpi.inc boltz.f
 	$(LDS) boltz.f
 bondlength.o: bondlength.f tabulated.inc bondlength.f
 	$(LDS) bondlength.f
@@ -355,7 +355,9 @@ dump.o: control.inc coord.inc poten.inc system.inc ensemble.inc cbmc.inc \
 	cell.inc gor.inc dump.f
 	$(LDS) dump.f
 energy.o: control.inc coord.inc system.inc neigh.inc poten.inc coord2.inc \
-	external.inc connect.inc ewaldsum.inc fepsi.inc qqlist.inc nsix.inc peboco.inc cell.inc ipswpar.inc eepar.inc conver.inc garofalini.inc tabulated.inc energy.f
+	external.inc connect.inc ewaldsum.inc fepsi.inc qqlist.inc nsix.inc \
+	peboco.inc cell.inc ipswpar.inc eepar.inc conver.inc garofalini.inc \
+	tabulated.inc mpi.inc energy.f
 	$(LDS) energy.f
 erfunc.o: erfunc.f
 	$(LDS) erfunc.f
@@ -384,10 +386,10 @@ geometry.o: control.inc coord.inc connect.inc conver.inc \
 	$(LDS) geometry.f
 forcefield.o: zeolite.inc zeopoten.inc control.inc forcefield.f
 	$(LDS) forcefield.f
-inclus.o: control.inc coord.inc connect.inc inclus.f
+inclus.o: control.inc coord.inc connect.inc poten.inc mpi.inc inclus.f
 	$(LDS) inclus.f
 initia.o: control.inc coord.inc system.inc poten.inc conver.inc inpar.inc \
-	ensemble.inc connect.inc cbmc.inc initia.f
+	ensemble.inc connect.inc cbmc.inc mpi.inc initia.f
 	$(LDS) initia.f
 init_vars.o: control.inc coord.inc system.inc poten.inc conver.inc inpar.inc \
 	external.inc zeolite.inc connect.inc ewaldsum.inc fepsi.inc \
@@ -417,11 +419,11 @@ molsetup.o: control.inc coord.inc connect.inc molsetup.f
 monola.o: control.inc coord.inc poten.inc system.inc ensemble.inc cbmc.inc \
 	conver.inc inpar.inc external.inc zeolite.inc \
 	inputdata.inc blkavg.inc bnbsma.inc swtcmove.inc ewaldsum.inc \
-	cell.inc gor.inc ipswpar.inc eepar.inc monola.f
+	cell.inc gor.inc ipswpar.inc eepar.inc mpi.inc monola.f
 	$(LDS) monola.f
 monper.o: control.inc coord.inc system.inc ensemble.inc cbmc.inc \
 	inputdata.inc blkavg.inc bnbsma.inc connect.inc coord2.inc cell.inc \
-	ipswpar.inc poten.inc monper.f
+	ipswpar.inc poten.inc mpi.inc monper.f
 	$(LDS) monper.f
 ninesix.o: control.inc nsix.inc ninesix.f
 	$(LDS) ninesix.f
@@ -436,7 +438,7 @@ pgrid.o: pgrid.f
 	$(LDS) pgrid.f
 pressure.o: control.inc coord.inc system.inc poten.inc expsix.inc \
 	merck.inc connect.inc ewaldsum.inc conver.inc \
-	inputdata.inc fepsi.inc qqlist.inc ipswpar.inc pressure.f
+	inputdata.inc fepsi.inc qqlist.inc ipswpar.inc mpi.inc pressure.f
 	$(LDS) pressure.f
 prvolume.o: control.inc coord.inc ensemble.inc system.inc \
 	    inputdata.inc  bnbsma.inc ewaldsum.inc cell.inc garofalini.inc prvolume.f
@@ -447,7 +449,7 @@ readdat.o: control.inc coord.inc cbmc.inc system.inc conver.inc poten.inc \
 	inpar.inc external.inc externalmuir.inc zeolite.inc\
 	nrtab.inc connect.inc inputdata.inc ewaldsum.inc \
 	swtcmove.inc fepsi.inc expand.inc qqlist.inc clusterbias.inc \
-	cell.inc gor.inc garofalini.inc conver.inc tabulated.inc readdat.f
+	cell.inc gor.inc garofalini.inc conver.inc tabulated.inc mpi.inc readdat.f
 	$(LDS) readdat.f
 rigfix.o: control.inc coord.inc cbmc.inc rosen.inc fix.inc connect.inc \
 	system.inc rigfix.f 
@@ -455,14 +457,14 @@ rigfix.o: control.inc coord.inc cbmc.inc rosen.inc fix.inc connect.inc \
 rigrot.o: control.inc cbmc.inc coord.inc coord2.inc rosen.inc \
 	system.inc ipswpar.inc rigrot.f
 	$(LDS) rigrot.f
-recip.o: control.inc coord.inc coord2.inc ewaldsum.inc poten.inc recip.f
+recip.o: control.inc coord.inc coord2.inc ewaldsum.inc poten.inc mpi.inc recip.f
 	$(LDS) recip.f
 recip_atom.o: control.inc coord.inc coord2.inc ewaldsum.inc poten.inc recip_atom.f
 	 $(LDS) recip_atom.f
-recippress.o: control.inc ewaldsum.inc coord.inc recippress.f
+recippress.o: control.inc ewaldsum.inc coord.inc mpi.inc recippress.f
 	$(LDS) recippress.f
-recipsum.o: control.inc system.inc coord.inc ewaldsum.inc poten.inc \
-	conver.inc cell.inc recipsum.f
+recipsum.o: control.inc system.inc coord.inc ewaldsum.inc poten.inc conver.inc \
+	cell.inc mpi.inc recipsum.f
 	$(LDS) recipsum.f
 rosenbluth.o: coord.inc system.inc ensemble.inc poten.inc conver.inc \
 	cbmc.inc rosen.inc control.inc connect.inc fix.inc \
@@ -497,7 +499,7 @@ suijtab.o: control.inc coord.inc external.inc poten.inc system.inc \
 sumup.o: coord.inc system.inc poten.inc conver.inc control.inc \
 	external.inc zeolite.inc connect.inc inputdata.inc fepsi.inc\
         inputdata.inc qqlist.inc cell.inc nsix.inc peboco.inc ipswpar.inc \
-	eepar.inc garofalini.inc tabulated.inc sumup.f
+	eepar.inc garofalini.inc tabulated.inc mpi.inc sumup.f
 	$(LDS) sumup.f
 susami.o: external.inc ljsamipara.inc susami.f
 	$(LDS) susami.f

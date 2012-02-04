@@ -23,7 +23,7 @@ c ********************************************
 
       v_elect_field = -E*rzfield*qqu(i,j)  
       
-c      write(iou,*) 'E ', E, ' exfield ', exfield
+c      write(6,*) 'E ', E, ' exfield ', exfield
 
       return
       end

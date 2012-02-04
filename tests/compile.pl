@@ -4,7 +4,7 @@
 
 #use Shell qw(make);
 
-my $CODE_DIR = '/home/katie/MCCCS-2010-SERIAL';
+my $CODE_DIR = '/scratch2/maerzkek/MCCCS-2010-PARALLEL';
 chomp(my $WORK_DIR = `pwd`);
 
 chdir $CODE_DIR;

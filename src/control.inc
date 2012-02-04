@@ -33,8 +33,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       integer nmax,numax,ntmax,nntype,nvmax,nbxmax,npamax,npabmax
      & ,maxbin,cmax,cmaxa,tor_bin_max,nbinmax_ete,smax
       integer vectormax,maxvir,maxntemp,nchmax,nchtor_max,nchbn_max
-c      integer ntdifmx,nbinmx,angle_max,ang_bin_max,tor_max
-      integer iou     
+      integer ntdifmx,nbinmx,angle_max,ang_bin_max,tor_max,iou
 
       common /iounit/ iou	
 c --------------------------------------------------------------
@@ -172,7 +171,7 @@ c ***************************************
 c ** DIMENSIONS FOR ARRAYS             **
 c ***************************************
 c - nmax = maximum number of chains +2
-      parameter (nmax = 2002)
+      parameter (nmax = 2000)
 c - numax = maximum number of units
       parameter (numax = 30)
 c - ntmax = maximum number of types of chains
@@ -220,19 +219,19 @@ C*************************************************************
 
 C NTDIFMX = max number of diff beads in simulation
 
-c	parameter(ntdifmx=30)	
+	parameter(ntdifmx=2)	
 
 C NBINMX = max number of bins for histograms
 
-c	parameter(nbinmx=1)
+	parameter(nbinmx=2)
 
 C THESE ARE FOR ANGLE AND TORSIONAL DISTRIBUTION
 
-c        parameter(angle_max=2)
-c	parameter(ang_bin_max=2)
-c	parameter(tor_bin_max=2)
-c        parameter(tor_max=2)
+        parameter(angle_max=2)
+	parameter(ang_bin_max=2)
+	parameter(tor_bin_max=2)
+        parameter(tor_max=2)
 
 C  For end to end vector calculation 
 
-c        parameter(nbinmax_ete=2)
+       parameter(nbinmax_ete=2)

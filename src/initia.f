@@ -35,6 +35,7 @@ c *** common blocks ***
       include 'ensemble.inc' 
       include 'connect.inc'
       include 'cbmc.inc'
+      include 'mpi.inc'
 
 
       logical lhere(nmax)       
@@ -77,11 +78,11 @@ c *** common blocks ***
       dimension check(ntmax)
 
 C --------------------------------------------------------------------
-
-      write(iou,*) 
-      write(iou,*) 'subroutine initia'
-      write(iou,*) 
-
+      if (myid.eq.0) then
+         write(iou,*) 
+         write(iou,*) 'subroutine initia'
+         write(iou,*) 
+      endif
 
 c     --- initialize nchbox ---
       do i=1,nbox
@@ -128,7 +129,8 @@ c     --- initialize nchbox ---
                stop
             endif
          enddo
-
+         
+         
 C -----------------------------------------------------------------------------
  
 c *** calculation of unit cell dimensions ***
@@ -136,10 +138,12 @@ c *** calculation of unit cell dimensions ***
          ux(i) = boxlx(i) / dble(inix(i)) 
          uy(i) = boxly(i) / dble(iniy(i))
          uz(i) = boxlz(i) / dble(iniz(i))
-         write(iou,*) 'box',i
-         write(iou,*) 'ini',inix(i),iniy(i),iniz(i)
-         write(iou,*) 'box',boxlx(i),boxly(i),boxlz(i)
-         write(iou,*) 'uni',ux(i),uy(i),uz(i)
+         if (myid.eq.0) then
+            write(iou,*) 'box',i
+            write(iou,*) 'ini',inix(i),iniy(i),iniz(i)
+            write(iou,*) 'box',boxlx(i),boxly(i),boxlz(i)
+            write(iou,*) 'uni',ux(i),uy(i),uz(i)
+         endif
       enddo
 
 c - count number of molecules of each type -
@@ -174,8 +178,10 @@ c - count number of molecules of each type -
          enddo
       enddo
 
-      write(iou,*) 'nmolty',nmolty
-      write(iou,*) '   mcmt',((mcmt(i,ibox),i=1,nmolty),ibox=1,nbox)
+      if (myid.eq.0) then
+         write(iou,*) 'nmolty',nmolty
+         write(iou,*) '   mcmt',((mcmt(i,ibox),i=1,nmolty),ibox=1,nbox)
+      endif
 
 c *****************************
 c *** calculate coordinates ***
@@ -201,7 +207,9 @@ c * to grow it with cbmc
             enddo
             if (lgrow) then
 
-               write(iou,*) 'growing a sample structure with CBMC'
+               if (myid.eq.0) then
+                  write(iou,*) 'growing a sample structure with CBMC'
+               endif
 
                if (nunit(i) .ne. nugrow(i)) then
                   write(iou,*) 'Cant grow molecule.  Please',
@@ -287,7 +295,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                     endif 
                  enddo
  20              continue
-!             write(iou,*) count_chain, rand_id,moltyp(rand_id) 
+!             write(6,*) count_chain, rand_id,moltyp(rand_id) 
               else
                  goto 18
               endif
@@ -807,8 +815,9 @@ c     --- set up intial charges on the atoms
          enddo
       enddo
 
-
-      write(iou,*) 'aben',aben/2.0d0,'ator',ator/2.0d0
+      if (myid.eq.0) then
+         write(iou,*) 'aben',aben/2.0d0,'ator',ator/2.0d0
+      endif
 
  1001 format(2i4,5f9.3,i6)
  1002 format('coord. unit:   ',2i4,3f9.3,i6)

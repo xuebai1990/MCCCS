@@ -3,10 +3,11 @@
 # run code in directorites TEST1, TEST2, ... TESTN
 
 # enter full path for code directory
-my $CODE_DIR = '/scratch2/maerzkek/MCCCS-2010-SERIAL';
+my $CODE_DIR = '/scratch2/maerzkek/MCCCS-PARALLEL-BOLTZ';
 # enter number of TEST directories
 my $NUM_TESTS = 9;
-
+# enter number of processors to use for parallel tests
+my $num_proc = 4;
 # change this if want to run script from other directory
 chomp(my $WORK_DIR = `pwd`);
 my @TEST_DIR;
@@ -22,24 +23,23 @@ for ($i=1;$i<=$NUM_TESTS;$i++){
 # assign proper executable to each TEST_DIR
 
 # TEST1 = NpT
-$EX[1] = $CODE_DIR . "/NpTewald";
+$EX[1] = "mpirun -np $num_proc ". $CODE_DIR . "/NpTewald";
 # TEST2 = NVT field
-$EX[2] = $CODE_DIR . "/NVTfield";
+$EX[2] = "mpirun -np $num_proc ". $CODE_DIR . "/NVTfield";
 # TEST3 = NpT tab
-$EX[3] = $CODE_DIR . "/NpTtab";
+$EX[3] = "mpirun -np $num_proc ". $CODE_DIR . "/NpTtab";
 # TEST4 = NVT-Gibbs ewald (1,2 butanediol)
-$EX[4] = $CODE_DIR . "/NVT-Gibbs";
-# TEST5 = NpT garofalini
-$EX[5] = $CODE_DIR . "/NpTgaro";
+$EX[4] = "mpirun -np $num_proc ". $CODE_DIR . "/NVT-Gibbs";
+# TEST5 = NpT garofalini - only runs on 1 processor!!
+$EX[5] = "mpirun -np 1 ". $CODE_DIR . "/NpTgaro";
 # TEST6 = NVT-Gibbs ewald (TIP4P)
-$EX[6] = $CODE_DIR . "/NVT-Gibbs";
+$EX[6] = "mpirun -np $num_proc ". $CODE_DIR . "/NVT-Gibbs";
 # TEST7 = RPLC (RPLC)
-$EX[7] = $CODE_DIR . "/RPLC";
+$EX[7] = "mpirun -np $num_proc ". $CODE_DIR . "/RPLC";
 # TEST8 = NVT-Gibbs no ewald (n-octane)
-$EX[8] = $CODE_DIR . "/NVT-Gibbs-noq";
-# TEST9 = NpT solid TATB
-$EX[9] = $CODE_DIR . "/NpTsolid";
-
+$EX[8] = "mpirun -np $num_proc ". $CODE_DIR . "/NVT-Gibbs-noq";
+# TEST9 = NpT solid (TATB)
+$EX[9] = "mpirun -np $num_proc ". $CODE_DIR . "/NpTsolid";
 
 # remove existing DIFF file, if it exists
 unlink "$diff_file";
