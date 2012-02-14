@@ -76,7 +76,7 @@
       end
 
 !-----------------------------------------------------------------------
-!> \brief Generates a random number on [0,1]-real-interval
+!> \brief Generates a random number on [0,1)-real-interval
 !-----------------------------------------------------------------------
       double precision function random()
       integer N,M
@@ -126,7 +126,9 @@
       else
          random=dble(y)
       end if
-! Divide by 2^32-1
-      random=random/4294967295.d0
+! Divide by 2^32-1, for [0,1]-real-interval
+!      random=random/4294967295.d0
+! Divide by 2^32, for [0,1)-real-interval
+      random=random/4294967296.d0
       return
       end
