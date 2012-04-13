@@ -316,6 +316,8 @@
                   end if
                end if
 
+               call averageMaximumDisplacement()
+
 ! KM for MPI
 ! only processor 0 writes to output files (except for error messages)
                if (myid.eq.0) then
@@ -854,3 +856,31 @@
 !      write(iou,*) 'end MONPER'
       return
       end
+
+      subroutine averageMaximumDisplacement
+        use global_data
+        implicit none
+        include 'common.inc'
+        
+        integer::ibox,imol
+
+        do ibox=1,nbox
+           if (numberDimensionIsIsotropic(ibox).eq.3) then
+              do imol=1,nmolty
+                 rmtrax(imol,ibox)=(rmtrax(imol,ibox)+rmtray(imol,ibox)+rmtraz(imol,ibox))/3
+                 rmtray(imol,ibox)=rmtrax(imol,ibox)
+                 rmtraz(imol,ibox)=rmtrax(imol,ibox)
+                 rmrotx(imol,ibox)=(rmrotx(imol,ibox)+rmroty(imol,ibox)+rmrotz(imol,ibox))/3
+                 rmroty(imol,ibox)=rmrotx(imol,ibox)
+                 rmrotz(imol,ibox)=rmrotx(imol,ibox)
+              end do
+           else if (numberDimensionIsIsotropic(ibox).eq.2) then
+              do imol=1,nmolty
+                 rmtrax(imol,ibox)=(rmtrax(imol,ibox)+rmtray(imol,ibox))/2
+                 rmtray(imol,ibox)=rmtrax(imol,ibox)
+                 rmrotx(imol,ibox)=(rmrotx(imol,ibox)+rmroty(imol,ibox))/2
+                 rmroty(imol,ibox)=rmrotx(imol,ibox)
+              end do
+           end if
+        end do
+      end subroutine averageMaximumDisplacement

@@ -676,7 +676,7 @@
 
 ! SYSTEM.INC
       logical,target::lsolid(nbxmax),lrect(nbxmax),ltwice(nbxmax) ,lideal(nbxmax)
-      integer(KIND=normal_int)::icell,nicell,iucell,solcount
+      integer(KIND=normal_int)::icell,nicell,iucell,solcount,numberDimensionIsIsotropic(nbxmax)
       real(KIND=double_precision),target::boxlx(nbxmax), boxly(nbxmax), boxlz(nbxmax), rcut(nbxmax)
       real(KIND=double_precision)::rmin,rcutnn(nbxmax), softcut,softlog ,rcutin,avsolinter,avsolintra,avsolbend,avsoltor,avsolelc
       dimension icell(nmax),nicell(cmax),iucell(cmax,cmaxa) ,solcount(nbxmax,ntmax)

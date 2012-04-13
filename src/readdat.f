@@ -414,7 +414,7 @@
 ! - read system information
       do i = 1,nbox
          read(io_input,*)
-         read(io_input,*) boxlx(i),boxly(i),boxlz(i),lsolid(i),lrect(i), kalp(i),rcut(i),rcutnn(i)
+         read(io_input,*) boxlx(i),boxly(i),boxlz(i),lsolid(i),lrect(i), kalp(i),rcut(i),rcutnn(i),numberDimensionIsIsotropic(i)
          if (i.eq.1 .and. lexzeo) then
 ! === load positions of zeolite atoms
             call zeocoord(file_zeocoord,lhere)
@@ -2290,15 +2290,9 @@
                read(io_restart,*) rmrotx(imol,im), rmroty(imol,im) , rmrotz(imol,im)
             end do
          end do
-!     For production (iratio > nstep), set max disp to average
-         if (iratio.gt.nstep) then
-               rmtrax(1:nmolty,1:nbox)=(rmtrax(1:nmolty,1:nbox)+ rmtray(1:nmolty,1:nbox)+rmtraz(1:nmolty,1:nbox))/3
-               rmtray(1:nmolty,1:nbox)=rmtray(1:nmolty,1:nbox)
-               rmtraz(1:nmolty,1:nbox)=rmtraz(1:nmolty,1:nbox)
-               rmrotx(1:nmolty,1:nbox)=(rmrotx(1:nmolty,1:nbox)+ rmroty(1:nmolty,1:nbox)+rmrotz(1:nmolty,1:nbox))/3
-               rmroty(1:nmolty,1:nbox)=rmroty(1:nmolty,1:nbox)
-               rmrotz(1:nmolty,1:nbox)=rmrotx(1:nmolty,1:nbox)
-         end if
+
+         call averageMaximumDisplacement()
+
          if (myid.eq.0) then 
             write(iou,*)  'new maximum displacements read from restart-file'
             do im = 1,nbox
