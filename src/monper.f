@@ -596,6 +596,9 @@
                         rmvol(ibox) = rmvol(ibox) * 0.1d0
                      else
                         rmvol(ibox) = rmvol(ibox) * ratvol / tavol
+                        if (rmvol(ibox).gt.(0.10d0*boxlx(ibox)*boxly(ibox)*boxlz(ibox))) then
+                           rmvol(ibox)=0.1d0*(boxlx(ibox)*boxly(ibox)*boxlz(ibox))
+                        endif
                      end if
                   end if
                end if
