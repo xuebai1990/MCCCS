@@ -50,11 +50,15 @@
       real(KIND=double_precision)::v,vintra,vinter,vext,velect,vewald ,vtorold,vtornew,delen,deleo,vdum,wplace,wrig
       real(KIND=double_precision)::dchain,random,rchain,wnlog,wolog ,wdlog,wratio
       real(KIND=double_precision)::vrecipn,vrecipo,cwtorfo,cwtorfn,x,y,z
+      real(KIND=double_precision)::vnew,vold
 
 ! ------------------------------------------------------------------
 
 !      write(iou,*) 'start CONFIG'
 ! ***    select a chain at random ***
+      vnew=0.
+      vold=0.
+
       rchain  = random()
       do icbu = 1,nmolty
          if ( rchain .lt. pmcbmt(icbu) ) then
@@ -235,6 +239,11 @@
             
             call energy (i,imolty,v,vintra,vinter,vext,velect ,vewald,iii,ibox,istt,iett,.true.,ovrlap, .false.,vdum,.false.,.false.)
 
+!            write(98,*) '------------ ',iii
+!            write(98,*) v,vintra,vinter,vext,velect,vewald
+!            write(98,*) '------------ new ',iii
+!            write(98,*) vnewintra,vnewinter,vnewext,vnewelect,vnewewald
+
             if (ovrlap .and. (iii .eq. 1)) then
 !            if (ovrlap) then
                write(iou,*) 'disaster: overlap in old conf config',i
@@ -261,7 +270,8 @@
 !                  delen=2.3d0*softcut
 !               end if
 ! --- END JLR 11-19-09
-               weight    = weight*dexp(-(beta*delen))
+!               weight    = weight*dexp(-(beta*delen))
+               vnew= delen
                vnewt     = vnewt + delen
                vnewinter = vinter
                vnewext   = vext
@@ -288,7 +298,8 @@
 !                  deleo=2.3d0*softcut
 !               end if
 ! --- END JLR 11-19-09
-               weiold    = weiold*dexp(-(beta*deleo))
+!               weiold    = weiold*dexp(-(beta*deleo))
+               vold = deleo
                voldt     = voldt + deleo
                voldinter = vinter
                voldext   = vext
@@ -391,7 +402,7 @@
 !      write(iou,*) 'weiold:',weiold
       wdlog = wnlog - wolog
       if ( wdlog .lt. -softcut ) then
-!         write(iou,*) 'cbmc softcut',i
+!         write(99,*) 'cbmc softcut',i
          return
       end if
  
@@ -400,8 +411,13 @@
          fbscb(imolty,1,findex-1) =  fbscb(imolty,1,findex-1) + 1.0d0
       else
          wratio = weight / weiold
+!         write(99,*) weight,weiold
          bscb(imolty,1,total) = bscb(imolty,1,total) + 1.0d0
       end if
+
+!      write(99,*) wratio
+      wratio=wratio*dexp(beta*(vold-vnew))
+!      write(99,*) wratio,vold,vnew
 
       if ( random() .le. wratio ) then
 !         write(iou,*) 'CONFIG accepted',i,ibox
