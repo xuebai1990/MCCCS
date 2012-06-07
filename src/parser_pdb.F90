@@ -32,7 +32,7 @@ MODULE parser_pdb
   use sim_zeolite,only:ZeoliteUnitCellGridType,ZeoliteBeadType,setUpAtom,setUpCellStruct
   IMPLICIT NONE
   PRIVATE
-  PUBLIC :: readPDB !,writePDB
+  PUBLIC :: readPDB,writePDB
 
 CONTAINS
 
@@ -120,91 +120,35 @@ CONTAINS
   END SUBROUTINE readPDB
 
 ! *****************************************************************************
-!   SUBROUTINE writePDB ()
-  
-!     INTEGER, INTENT(IN)                      :: file_unit
-!     TYPE(topology_parameters_type)           :: topology
-!     TYPE(section_vals_type), POINTER         :: subsys_section
-!     TYPE(cp_error_type), INTENT(inout)       :: error
+  SUBROUTINE writePDB (filePDB,iBox)
+    use global_data
+    character(LEN=*),intent(in)::filePDB
+    integer,intent(in)::iBox
 
-!     CHARACTER(len=*), PARAMETER :: routineN = 'write_coordinate_pdb', &
-!       routineP = moduleN//':'//routineN
+    INTEGER::IOPDB,jerr,iChain,iUnit,iAtom,iType
 
-!     CHARACTER(LEN=default_string_length)     :: line, my_tag1, my_tag2, &
-!                                                 my_tag3, my_tag4, record
-!     INTEGER                                  :: handle, i, id1, id2, idres, &
-!                                                 iw, natom
-!     LOGICAL                                  :: ldum
-!     TYPE(atom_info_type), POINTER            :: atom_info
-!     TYPE(cp_logger_type), POINTER            :: logger
-!     TYPE(section_vals_type), POINTER         :: print_key
+    if (myid.ne.0) return
 
-!     NULLIFY(logger)
-!     logger => cp_error_get_logger(error)
-!     iw = cp_print_key_unit_nr(logger,subsys_section,"PRINT%TOPOLOGY_INFO/PDB_INFO",&
-!          extension=".subsysLog",error=error)    
-!     print_key => section_vals_get_subs_vals(subsys_section,"TOPOLOGY%DUMP_PDB",error=error) 
-!     CALL timeset(routineN,handle)
+    IOPDB=get_iounit()
+    open(unit=IOPDB,access='sequential',action='write',file=filePDB,form='formatted',iostat=jerr,status='unknown')
+    if (jerr.ne.0) then
+       call cleanup('cannot open file for writing (PDB)')
+    end if
 
-!     atom_info => topology%atom_info
-!     record = cp_print_key_generate_filename(logger,print_key,&
-!          extension=".pdb",my_local=.FALSE.,error=error)
+    WRITE(IOPDB,'(A6,3(F9.3),3(F7.2),1X,A10)') "CRYST1",boxlx(ibox),boxly(ibox),boxlz(ibox),cell_ang(ibox,1),cell_ang(ibox,2),cell_ang(ibox,3),"P1        "
 
-!     IF(iw>0) WRITE(iw,*) "    Writing out PDB file ",TRIM(record)
+    iAtom=0
+    DO iChain=1,nChain
+       IF (nboxi(iChain).ne.iBox) CYCLE
+       iType=molTyp(iChain)
+       DO iUnit=1,nUnit(iType)
+          iAtom=iAtom+1
+          WRITE(IOPDB,'(A6,I5,1X,A4,1X,I3,2X,I4,4X,3(F8.3),2(F6.2),10X,A2)') "ATOM  ",iAtom,ADJUSTL(chemId(nType(iType,iUnit))),iType,iChain,rxu(iChain,iUnit),ryu(iChain,iUnit),rzu(iChain,iUnit),1.0,0.0,ADJUSTL(chemId(nType(iType,iUnit)))
+       END DO
+    END DO
 
-!     natom = topology%natoms
-!     idres = 0
-!     id1   = 0
-!     id2   = 0
-!     DO i=1,natom
+    WRITE(IOPDB,'(A3,/,A3)') "TER","END"
 
-!        IF (topology%para_res) THEN
-!           idres = atom_info%label_resid(i)
-!        ELSE
-!           IF((id1/=atom_info%map_mol_num(i)).OR.(id2/=atom_info%map_mol_typ(i))) THEN
-!              idres = idres + 1
-!              id1 = atom_info%map_mol_num(i)
-!              id2 = atom_info%map_mol_typ(i)
-!           END IF
-!        END IF
-
-!        line = ""
-!        my_tag1 = atom_info%label_atmname(i); ldum=qmmm_ff_precond_only_qm(my_tag1)
-!        my_tag2 = atom_info%label_resname(i); ldum=qmmm_ff_precond_only_qm(my_tag2)
-!        my_tag3 = atom_info%label_molname(i); ldum=qmmm_ff_precond_only_qm(my_tag3)
-!        my_tag4 = atom_info%element(i)      ; ldum=qmmm_ff_precond_only_qm(my_tag4)
-!        WRITE(line(1 : 6),'(A6)')"ATOM  "
-!        WRITE(line(7 :11),'(I5)')i
-!        WRITE(line(13:16),'(A4)')ADJUSTL(my_tag1(1:4))
-!        WRITE(line(18:20),'(A3)')TRIM(my_tag2)
-!        WRITE(line(23:26),'(I4)')idres
-!        WRITE(line(31:38),'(F8.3)')atom_info%r(1,i)*angstrom
-!        WRITE(line(39:46),'(F8.3)')atom_info%r(2,i)*angstrom
-!        WRITE(line(47:54),'(F8.3)')atom_info%r(3,i)*angstrom
-!        IF (ASSOCIATED(atom_info%occup)) THEN
-!           WRITE(line(55:60),'(F6.2)') atom_info%occup(i)
-!        ELSE
-!           WRITE(line(55:60),'(F6.2)') 0.0_dp
-!        ENDIF
-!        IF (ASSOCIATED(atom_info%beta)) THEN
-!            WRITE(line(61:66),'(F6.2)') atom_info%beta(i)
-!        ELSE
-!            WRITE(line(61:66),'(F6.2)') 0.0_dp
-!        ENDIF
-!        WRITE(line(73:76),'(A4)')TRIM(my_tag3)
-!        WRITE(line(77:78),'(A2)')TRIM(my_tag4)
-
-!        WRITE(file_unit,"(A)")line
-!     END DO
-!     WRITE(file_unit,"(A3)")"END"
-
-!     IF(iw>0) WRITE(iw,*) "  Exiting write_coordinate_pdb"
-
-!     CALL cp_print_key_finished_output(iw,logger,subsys_section,&
-!          "PRINT%TOPOLOGY_INFO/PDB_INFO",error=error)
-
-!     CALL timestop(handle)
-
-!   END SUBROUTINE writePDB
+  END SUBROUTINE writePDB
 
 END MODULE parser_pdb

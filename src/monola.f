@@ -1380,10 +1380,10 @@
  68     format('number of times move in: ', f12.1,  '  accepted=',f8.1)
  69     format('number of times move out: ', f12.1,  '  accepted=',f8.1)
  70     format(' h-matrix attempts =',f8.1,'   ratio =',f6.3, '   max.displ. =',e11.4)
-        if (lexzeo) then
+!        if (lexzeo) then
 !        --- write end-conf to picture file
-           call writepdb(ncmt(1,1),nunit(1),1)
-        end if
+!           call writepdb(ncmt(1,1),nunit(1),1)
+!        end if
 ! *** checks final value of the potential energy is consistent ***
 
       end if  ! end if (myid.eq.0)
