@@ -3592,7 +3592,7 @@
          read(io_ff,*) nntype5
          read(io_ff,*)
          do j=1,nntype5
-            read(io_ff,*) i,sigi(i),epsi(i),qelect(i),mass(i)
+            read(io_ff,*) i,sigi(i),epsi(i),qelect(i),mass(i),chemid(i)
 !         read(io_ff,'(I,4F,2A)') i,sigi(i),epsi(i),qelect(i),mass(i),chemid(i),chname(i)
             if (qelect(i).ne.0) then
                lqchg(i)=.true.
