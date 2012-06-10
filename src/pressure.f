@@ -203,32 +203,32 @@
                         
 ! --- compute whether the charged groups will interact & fij
                         fij = 0.0d0
-                        if ( lchgall ) then
-                           if ( lewald ) then
-                              fij = fij - (2.0d0*calp(ibox)* dexp(-calp(ibox)*calp(ibox) *rijsq)/dsqrt(onepi) +erfunc(calp(ibox)*dsqrt(rijsq))/ dsqrt(rijsq))*qqu(i,ii)*qqu(j,jj)* qqfact/rijsq
-                           else
-! -- KM 06/09/09
-                              fij = -(qqfact*qqu(i,ii)*qqu(j,jj) /dsqrt(rijsq))/rijsq
-                           end if
-
-                        elseif ( lqimol .and. lqjmol .and.  lqchg(ntii) .and. lqchg(ntjj) ) then
-                           
-                           iii = leaderq(imolty,ii)
-                           jjj = leaderq(jmolty,jj)
-                            
-                           if ( ii .eq. iii .and. jj .eq. jjj ) then
-! --- set up the charge-interaction table
-                              if ( rijsq .lt. rcutsq ) then
-                                 lcoulo(ii,jj) = .true.
-                              else
-                                 lcoulo(ii,jj) = .false.
-                              end if
-                           end if
-                           
-                           if ( lcoulo(iii,jjj) ) then
+                        if ( lqimol .and. lqjmol .and. lqchg(ntii) .and. lqchg(ntjj) ) then
+                           if ( lchgall ) then
                               if ( lewald ) then
                                  fij = fij - (2.0d0*calp(ibox)* dexp(-calp(ibox)*calp(ibox) *rijsq)/dsqrt(onepi) +erfunc(calp(ibox)*dsqrt(rijsq))/ dsqrt(rijsq))*qqu(i,ii)*qqu(j,jj)* qqfact/rijsq
                               else
+! -- KM 06/09/09
+                                 fij = -(qqfact*qqu(i,ii)*qqu(j,jj) /dsqrt(rijsq))/rijsq
+                              end if
+                           else if (lewald) then
+                              if ( rijsq .lt. rcutsq ) then
+                                 fij = fij - (2.0d0*calp(ibox)* dexp(-calp(ibox)*calp(ibox) *rijsq)/dsqrt(onepi) +erfunc(calp(ibox)*dsqrt(rijsq))/ dsqrt(rijsq))*qqu(i,ii)*qqu(j,jj)* qqfact/rijsq
+                              end if
+                           else
+                              iii = leaderq(imolty,ii)
+                              jjj = leaderq(jmolty,jj)
+                            
+                              if ( ii .eq. iii .and. jj .eq. jjj ) then
+! --- set up the charge-interaction table
+                                 if ( rijsq .lt. rcutsq ) then
+                                    lcoulo(ii,jj) = .true.
+                                 else
+                                    lcoulo(ii,jj) = .false.
+                                 end if
+                              end if
+                           
+                              if ( lcoulo(iii,jjj) ) then
                                  fij = -(qqfact*qqu(i,ii)*qqu(j,jj) /dsqrt(rijsq))/rijsq
                               end if
                            end if
@@ -523,7 +523,8 @@
 
 !----check pressure tail correction
 
-      if (ltailc) then
+! Tail correction and impulsive force contribution to pressure
+      if (ltailc.or.(.not.lshift.and.numberDimensionIsIsotropic(ibox).eq.3)) then
 ! --     add tail corrections for the Lennard-Jones energy
 ! --     Not adding tail correction for the ghost particles
 ! --     as they are ideal (no interaction) Neeraj.

@@ -1,3 +1,6 @@
+!> \brief Impulsive force and tail corrections to pressure
+!>
+!> @todo Impulsive force correction only done for LJ 12-6 potential
       function corp(imolty,jmolty,rhosq,ibox)
 
 ! ************************************
@@ -34,16 +37,16 @@
          do jj = 1, nunit(jmolty) 
             ntjj = ntype(jmolty,jj)
 
-            if (lexpsix) then
+            if (lexpsix .and. ltailc) then
                ntij = (ntii+ntjj)/2
-               corp = corp + rhosq*consp(ntij)
-            elseif (lmmff) then
+               corp = corp + consp(ntij)
+            elseif (lmmff .and. ltailc) then
                ntij = (ntii+ntjj)/2
-               corp = corp+((-2.0d0)/3.0d0)*onepi*rhosq*epsimmff(ntij) *sigimmff(ntij)**3.0d0*corp_cons(ntij)
-            elseif (lninesix) then
+               corp = corp+((-2.0d0)/3.0d0)*onepi*epsimmff(ntij)*sigimmff(ntij)**3.0d0*corp_cons(ntij)
+            elseif (lninesix .and. ltailc) then
                ntij = (ntii-1)*nxatom + ntjj
-               corp = corp + 16.0d0 * onepi * epsnx(ntij) * rhosq * rzero(ntij)**3 *  (0.5d0*(rzero(ntij)/rcut(ibox))**6 -  (rzero(ntij)/rcut(ibox))**3)
-            elseif (lgenlj) then
+               corp = corp + 16.0d0 * onepi * epsnx(ntij) * rzero(ntij)**3 * (0.5d0*(rzero(ntij)/rcut(ibox))**6 - (rzero(ntij)/rcut(ibox))**3)
+            elseif (lgenlj .and. ltailc) then
                ntij = (ntii-1)*nntype + ntjj
                rci3 = sig2ij(ntij)**(3.0d0/2.0d0) / rcut(ibox)**3
                rci1 = rci3 **(1.0d0/3.0d0)
@@ -60,11 +63,10 @@
                   sigma2 = sig2ij(ntij)
                   epsilon2 = epsij(ntij)
                end if
-                 corp = corp + (2.0d0/3.0d0) * onepi * epsilon2 * sigma2 ** (1.50d0) * rhosq * n1 * ( (( (2.0d0**((4.0d0*n1/n0)+1.0d0))/(2.0d0*n1-3.0d0)) * rci1 **(2.0d0*n1-3.0d0) ) - ( ((2.0d0**((2.0d0*n1/n0)+1.0d0))/(n1-3.0d0))* rci1 **(n1-3.0d0) )  )
-            else
+                 corp = corp + (2.0d0/3.0d0) * onepi * epsilon2 * sigma2 ** (1.50d0) * n1 * ( (( (2.0d0**((4.0d0*n1/n0)+1.0d0))/(2.0d0*n1-3.0d0)) * rci1 **(2.0d0*n1-3.0d0) ) - ( ((2.0d0**((2.0d0*n1/n0)+1.0d0))/(n1-3.0d0))* rci1 **(n1-3.0d0) )  )
+            else if (.not.(lexpsix.or.lmmff.or.lninesix.or.lgenlj)) then
                ntij = (ntii-1)*nntype + ntjj
                
-               rci3 = sig2ij(ntij)**(3.d0/2.d0) / rcut(ibox)**3 
                if ( lexpand(imolty) .and. lexpand(jmolty) ) then
                   sigma2 = (sigma(imolty,ii)+sigma(jmolty,jj))**2/4.0d0
                   epsilon2 = dsqrt(epsilon(imolty,ii)* epsilon(jmolty,jj))
@@ -78,10 +80,17 @@
                   sigma2 = sig2ij(ntij)
                   epsilon2 = epsij(ntij)
                end if
-               corp = corp +  32.0d0 * onepi * epsilon2 * sigma2**(1.5d0)* rhosq * ( rci3*rci3*rci3 / 9.0d0 - rci3 / 6.0d0 )
+               rci3 = (dsqrt(sigma2)/rcut(ibox))**3 
+               if (ltailc) then ! both impulsive force and tail corrections 
+                  corp = corp+8.0d0*onepi*epsilon2*sigma2**(1.5d0)*(rci3*rci3*rci3*7.0d0/9.0d0-rci3)
+               else ! only impulsive force corrections 
+                  corp=corp+(8.0d0/3.0d0)*onepi*epsilon2*sigma2**(1.5d0)*(rci3*rci3*rci3 - rci3)
+               end if
             end if
          end do
       end do
+
+      corp=corp*rhosq
 
       return
       end
