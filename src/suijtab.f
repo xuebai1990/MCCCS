@@ -181,85 +181,7 @@
           write(iou,*) 'garo ecut',i,ecut(i)
        end do
        return
-
-      elseif(lexpsix) then
-! --- Keep the rcut same for each box
-         do ibox = 2,nbox
-           if (dabs(rcut(1)-rcut(ibox)).gt.1.0d-10) then
-              call cleanup('Keep rcut for each box same')
-           end if
-         end do
-
-         do i = 1,natom
-            aexsix(i) = 0.0d0
-            bexsix(i) = 0.0d0
-            cexsix(i) = 0.0d0
-            qelect(i) = 0.0d0
-            xiq(i) = 0.0d0
-            lqchg(i) = .false.
-            lij(i) = .true.     
-         end do
-! --- Explicit atom carbon Williams Exp-6 potential
-! --- J.Chem.Phys 47 11 4680 (1967) paramter set IV
-! --- note that the combination of C--H has to be the average of C 
-!      and H the way it is set up in the energy subroutines
-! --- natom is set in expsix.inc
-!     U(r) = A*r^(-6) + B*exp[C*r]
-
-! --- C---C nonbonded interaction
-!         aexsix(1) = -2.858d5
-!         bexsix(1) = 4.208d7
-!         cexsix(1) = -3.60d0
-!         aexsix(1) = -2.541d5
-!         bexsix(1) = 3.115d7
-!         cexsix(1) = -3.60d0
-!         mass(1) = 12.011d0
-!         aexsix(1) = -4.0d0
-!         bexsix(1) = 1.0d0/dexp(-12.0d0)
-!         cexsix(1) = -12.0d0/(2.0d0 ** (1.0d0/6.0d0))
-         aexsix(1) = -0.590759e6
-         bexsix(1) = 0.281431e9
-         cexsix(1) = -0.396875e1
-         mass(1) = 39.948d0
-
-! --- C---H nonbonded interaction
-!         aexsix(2) = -6.290d4
-!         bexsix(2) = 4.411d6
-!         cexsix(2) = -3.67d0
-         aexsix(2) = -6.441d4
-         bexsix(2) = 5.5355d6
-         cexsix(2) = -3.67d0
-
-! --- H---H nonbonded interaction
-!         aexsix(3) = -1.374d4
-!         bexsix(3) = 1.335d6
-!         cexsix(3) = -3.74d0
-         aexsix(3) = -1.6254d4
-         bexsix(3) = 1.323d6
-         cexsix(3) = -3.74d0
-         mass(3) = 1.0079d0
-
-         if (lshift) then
-            do i=1,natom
-               sexsix(i) = aexsix(i)*(rcut(1)**(-6)) + bexsix(i)*Exp(cexsix(i)*rcut(1))
-            end do
-         else 
-            do i=1,natom
-               consp(i) = (2.0d0/3.0d0)*pi*(2.0d0*aexsix(i)/(rcut(1) *rcut(1)*rcut(1))+bexsix(i)*dexp(cexsix(i)*rcut(1)) *(-6.0d0/(cexsix(i)*cexsix(i)*cexsix(i))+6.0d0 *rcut(1)/(cexsix(i)*cexsix(i))-3.0d0*rcut(1)* rcut(1)/ cexsix(i)+rcut(1)*rcut(1)*rcut(1)))
-               consu(i) = 2.0d0*pi*(aexsix(i)/(3.0d0*rcut(1)*rcut(1)* rcut(1)) +(-rcut(1)*rcut(1)+2.0d0*rcut(1)/cexsix(i)-2.0d0/ (cexsix(i)* cexsix(i)))*bexsix(i)*dexp(cexsix(i)*rcut(1))/ cexsix(i))
-            end do
-!            write(11,*) 'consp(i)',consp
-!            write(11,*) 'consu(i)',consu
-         end if
-
-         write(iou,*)  ' i   aexsix       bexsix      cexsix     sexsix'
-         do i = 1,natom
-            write(iou,'(i3,2x,4e12.4)')i,aexsix(i),bexsix(i) ,cexsix(i),sexsix(i)
-         end do
-
-         return
-
-      end if
+    end if
 
       if (lmmff) then
 ! --- Keep the rcut same for each box
@@ -3580,6 +3502,76 @@
       j = 29
       ij = (i-1)*nntype + j
       jayq(ij) = 112537.0d0
+
+      if(lexpsix) then
+! --- Keep the rcut same for each box
+         do ibox = 2,nbox
+           if (dabs(rcut(1)-rcut(ibox)).gt.1.0d-10) then
+              call cleanup('Keep rcut for each box same')
+           end if
+         end do
+
+         do i = 1,natom
+            aexsix(i) = 0.0d0
+            bexsix(i) = 0.0d0
+            cexsix(i) = 0.0d0
+            qelect(i) = 0.0d0
+            xiq(i) = 0.0d0
+            lqchg(i) = .false.
+            lij(i) = .true.     
+         end do
+! --- Explicit atom carbon Williams Exp-6 potential
+! --- J.Chem.Phys 47 11 4680 (1967) paramter set IV
+! --- note that the combination of C--H has to be the average of C 
+!      and H the way it is set up in the energy subroutines
+! --- natom is set in expsix.inc
+!     U(r) = A*r^(-6) + B*exp[C*r]
+
+! --- O--- nonbonded interaction
+! -- BKS [O]
+         qelect(1) = -1.2
+         lqchg(1) = .true.
+         aexsix(1) = -175.0000d0*1.602177d-19/1.3806503d-23
+         bexsix(1) = 1388.7730d0*1.602177d-19/1.3806503d-23
+         cexsix(1) = -2.76000d0
+         mass(1) = 15.9994
+
+! --- O---Si nonbonded interaction
+         aexsix(2) = -133.5381d0*1.602177d-19/1.3806503d-23
+         bexsix(2) = 18003.7572d0*1.602177d-19/1.3806503d-23
+         cexsix(2) = -4.87318d0
+         lqchg(2) = .true.
+
+! --- Si---Si nonbonded interaction
+! -- BKS [Si]
+         qelect(3) = 2.4
+         lqchg(3) = .true.
+         aexsix(3) = 0.
+         bexsix(3) = 0.
+         cexsix(3) = 0.
+         mass(3) = 28.0899
+
+         if (lshift) then
+            do i=1,natom
+               sexsix(i) = aexsix(i)*(rcut(1)**(-6)) + bexsix(i)*Exp(cexsix(i)*rcut(1))
+            end do
+         else 
+            do i=1,natom
+               consp(i) = (2.0d0/3.0d0)*pi*(2.0d0*aexsix(i)/(rcut(1) *rcut(1)*rcut(1))+bexsix(i)*dexp(cexsix(i)*rcut(1)) *(-6.0d0/(cexsix(i)*cexsix(i)*cexsix(i))+6.0d0 *rcut(1)/(cexsix(i)*cexsix(i))-3.0d0*rcut(1)* rcut(1)/ cexsix(i)+rcut(1)*rcut(1)*rcut(1)))
+               consu(i) = 2.0d0*pi*(aexsix(i)/(3.0d0*rcut(1)*rcut(1)* rcut(1)) +(-rcut(1)*rcut(1)+2.0d0*rcut(1)/cexsix(i)-2.0d0/ (cexsix(i)* cexsix(i)))*bexsix(i)*dexp(cexsix(i)*rcut(1))/ cexsix(i))
+            end do
+!            write(11,*) 'consp(i)',consp
+!            write(11,*) 'consu(i)',consu
+         end if
+
+         write(iou,*)  ' i   aexsix       bexsix      cexsix     sexsix'
+         do i = 1,natom
+            write(iou,'(i3,2x,4e12.4)')i,aexsix(i),bexsix(i) ,cexsix(i),sexsix(i)
+         end do
+
+         return
+
+      end if
 
       if (ltab) then
          io_ff=get_iounit()
