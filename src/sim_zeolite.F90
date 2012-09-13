@@ -66,11 +66,16 @@ CONTAINS
     zcell%hmat(1,1)%val=zcell%boxl(1)%val
     zcell%hmat(2,1)%val=0.
     zcell%hmat(3,1)%val=0.
+    !bi
     zcell%hmat(1,2)%val=zcell%boxl(2)%val*cos(zcell%ang(3)%val)
+    !bj
     zcell%hmat(2,2)%val=zcell%boxl(2)%val*sin(zcell%ang(3)%val)
     zcell%hmat(3,2)%val=0.
+    !ci
     zcell%hmat(1,3)%val=zcell%boxl(3)%val*cos(zcell%ang(2)%val)
+    !(b*c*cos(alpha)-bi*ci)/bj
     zcell%hmat(2,3)%val=zcell%boxl(3)%val*sqrt(cos(zcell%ang(2)%val)**2*cos(zcell%ang(3)%val)**2+cos(zcell%ang(1)%val)**2-2*cos(zcell%ang(1)%val)*cos(zcell%ang(2)%val)*cos(zcell%ang(3)%val))/sin(zcell%ang(3)%val)
+    !sqrt(c**2-ci**2-cj**2)
     zcell%hmat(3,3)%val=zcell%boxl(3)%val*sqrt(1-cos(zcell%ang(1)%val)**2-cos(zcell%ang(2)%val)**2-cos(zcell%ang(3)%val)**2+2*cos(zcell%ang(1)%val)*cos(zcell%ang(2)%val)*cos(zcell%ang(3)%val))/sin(zcell%ang(3)%val)
 
 ! there might be numeric errors in the above trigonometric calculations

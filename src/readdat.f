@@ -42,9 +42,10 @@
 !$$$      include 'tabulated.inc'
 
       character(LEN=*),intent(in)::file_in
-      character(LEN=default_path_length)::file_movie,file_run ,file_dipole,fileout,file_input,file_restart,file_struct,file_ff,file_zeocoord,file_ztb
+      character(LEN=default_path_length)::file_movie,file_run ,file_dipole,fileout,file_input='fort.4',file_restart='fort.77',file_struct='input_struc.xyz'
+
+      namelist /io/ file_input,file_restart,file_struct
       integer(KIND=normal_int)::io_input,io_restart,jerr
-      logical::lfile_given
       integer(KIND=normal_int)::seed
 !      real(KIND=double_precision)::random,rtest(10)
 
@@ -74,7 +75,7 @@
       real(KIND=double_precision)::rcnnsq,umatch,aspecd,bspecd,dum ,pm,pcumu
       logical::lucall,lpolar,lqqelect,lee,lratfix,lreadq
       logical::linit, lecho, lmixlb, lmixjo, lhere,lsetup,lsolute
-      logical::lprint,lverbose,lxyz,lfound,ltab
+      logical::lprint,lverbose,lxyz,lfound
 
       dimension lratfix(ntmax)
       dimension qbox(nbxmax)
@@ -142,54 +143,11 @@
          call cleanup('cannot open input file')
       end if
 
-      read(io_input,*)
-      read(io_input,*) lfile_given
-      if (lfile_given) then
-         read(io_input,*) file_input
-      else
-         file_input='fort.4'
+      read(UNIT=io_input,NML=io,iostat=jerr)
+      if (jerr.ne.0.and.jerr.ne.-1) then
+         write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+         call cleanup('reading namelist: io')
       end if
-
-      read(io_input,*)
-      read(io_input,*) lfile_given
-      if (lfile_given) then
-         read(io_input,*) file_restart
-      else
-         file_restart='fort.77'
-      end if
-
-      read(io_input,*)
-      read(io_input,*) lfile_given
-      if (lfile_given) then
-         read(io_input,*) file_struct
-      else
-         file_struct='input_struc.xyz'
-      end if
-
-      read(io_input,*)
-      read(io_input,*) lfile_given
-      if (lfile_given) then
-         read(io_input,*) file_ff
-      else
-         file_ff='lj.poten'
-      end if
-
-      read(io_input,*)
-      read(io_input,*) lfile_given
-      if (lfile_given) then
-         read(io_input,*) file_zeocoord
-      else
-         file_zeocoord='zeolite.cssr'
-      end if
-
-      read(io_input,*)
-      read(io_input,*) lfile_given
-      if (lfile_given) then
-         read(io_input,*) file_ztb
-      else
-         file_ztb='zeolite.ztb'
-      end if
-
       close(io_input)
 
 ! -------------------------------------------------------------------
@@ -417,7 +375,7 @@
          read(io_input,*) boxlx(i),boxly(i),boxlz(i),lsolid(i),lrect(i), kalp(i),rcut(i),rcutnn(i),numberDimensionIsIsotropic(i)
          if (i.eq.1 .and. lexzeo) then
 ! === load positions of zeolite atoms
-            call zeocoord(file_zeocoord,lhere)
+            call zeocoord(file_in,lhere)
             if (myid.eq.0) write(iou,*) ' note zeolite determines  the box size !'
          end if
 
@@ -513,7 +471,7 @@
       end if
 
       read(io_input,*)
-      read(io_input,*) lmixlb, lmixjo, ltab
+      read(io_input,*) lmixlb, lmixjo
       if (lmixlb .and. lmixjo) then
          write(iou,*) 'cant use both combining rules!'
          ldie = .true.
@@ -526,9 +484,9 @@
             else
                write(iou,*) 'Jorgensen combining rules apply'
             end if
-            write(iou,*) '   lmixlb:',lmixlb,' lmixjo:',lmixjo,' ltab:' ,ltab
+            write(iou,*) '   lmixlb:',lmixlb,' lmixjo:',lmixjo
          else 
-            write(iou,*) lmixlb,lmixjo,ltab
+            write(iou,*) lmixlb,lmixjo
          end if
       end if
 ! --- read special combining rule information
@@ -593,10 +551,8 @@
       softlog = 10.0d0**(-softcut)
       vol_eff = (4.0d0/3.0d0)*onepi* (rbsmax*rbsmax*rbsmax-rbsmin*rbsmin*rbsmin)
 
-! - set up the strectching and bending constants
-      call suvibe
 ! - set up the forcefield and the masses
-      call suijtab(file_ff,lmixlb,lmixjo,ltab)
+      call suijtab(file_in,lmixlb,lmixjo)
      
 ! - read bead potential information
       do imol = 1, nmolty
@@ -2542,6 +2498,7 @@
 
           do i = 1,nbxmax
             if ( dabs(qbox(i)) .gt. 1d-6 ) then
+               if (i.eq.1.and.lexzeo) cycle
                write(iou,*) 'box',i,' has a net charge of',qbox(i)
                ldie = .true.
                return
@@ -2686,7 +2643,7 @@
 ! -------------------------------------------------------------------
 ! *** read/produce initial/starting configuration ***
 ! *** zeolite external potential
-      if ( lexzeo ) call suzeo(file_ztb)
+      if ( lexzeo ) call suzeo(lhere)
 
 ! ----------------------------------------------------------------      
  

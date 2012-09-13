@@ -1,4 +1,4 @@
-      subroutine suijtab(file_ff,lmixlb,lmixjo,ltab)
+      subroutine suijtab(file_ff,lmixlb,lmixjo)
 
       use global_data
       use var_type
@@ -24,9 +24,10 @@
 !$$$      include 'garofalini.inc'
 !$$$      include 'conver.inc'
 
-      character(LEN=*),intent(in)::file_ff
-      logical,intent(in)::lmixlb,lmixjo,ltab
-      integer(KIND=normal_int)::io_ff,jerr,i,j,ij,ji,ibox,nntype5,nmix,imix
+      character(LEN=*),INTENT(IN)::file_ff
+      character(LEN=default_string_length)::line_in
+      logical,intent(in)::lmixlb,lmixjo
+      integer(KIND=normal_int)::io_ff,jerr,i,j,ij,ji,ibox,nbead,nmix,imix,dum
       real(KIND=double_precision)::rzeronx(nxatom),epsilonnx(nxatom)
 
       real(KIND=double_precision)::rcheck, sr2, sr6, adum, bdum, rs1, rs7, sr7,pi,djay,sigmaTmp,epsilonTmp,garofalini
@@ -3573,31 +3574,43 @@
 
       end if
 
-      if (ltab) then
-         io_ff=get_iounit()
-         open(unit=io_ff,access='sequential',action='read',file=file_ff,form='formatted',iostat=jerr,status='old')
-         if (jerr.ne.0) then
-            call cleanup('cannot open force field file')
-         end if
+     io_ff=get_iounit()
+     open(unit=io_ff,access='sequential',action='read',file=file_ff,form='formatted',iostat=jerr,status='old')
+     if (jerr.ne.0) then
+        call cleanup('cannot open forcefield input file')
+     end if
 
-         read(io_ff,*)
-         read(io_ff,*) nntype5
-         read(io_ff,*)
-         do j=1,nntype5
-            read(io_ff,*) i,sigi(i),epsi(i),qelect(i),mass(i),chemid(i)
-!         read(io_ff,'(I,4F,2A)') i,sigi(i),epsi(i),qelect(i),mass(i),chemid(i),chname(i)
-            if (qelect(i).ne.0) then
-               lqchg(i)=.true.
-            else
-               lqchg(i)=.false.
-            end if
-            if (sigi(i).eq.0 .and. epsi(i).eq.0) then
-               lij(i)=.false. 
-            else
-               lij(i)=.true.
-            end if
-         end do
-      end if
+! Looking for section ATOMS
+     CYCLE_READ_ATOMS:DO
+        call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
+        if (jerr.ne.0) then
+           exit cycle_read_atoms
+        end if
+
+        if (UPPERCASE(line_in(1:5)).eq.'ATOMS') then               
+             read(line_in(6:),*) nbead
+             do j=1,nbead
+                call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
+                if (jerr.ne.0) then
+                   write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+                   call cleanup('Reading section ATOMS')
+                end if
+                read(line_in,*) i,dum,sigi(i),epsi(i),qelect(i),mass(i),chemid(i)
+                !read(line_in,'(I,4F,2A)') i,sigi(i),epsi(i),qelect(i),mass(i),chemid(i),chname(i)
+                if (qelect(i).ne.0) then
+                   lqchg(i)=.true.
+                else
+                   lqchg(i)=.false.
+                end if
+                if (sigi(i).eq.0 .and. epsi(i).eq.0) then
+                   lij(i)=.false. 
+                else
+                   lij(i)=.true.
+                end if
+             end do               
+             exit cycle_read_atoms
+        end if
+     END DO CYCLE_READ_ATOMS
 
 ! *** convert input data to program units ***
       if ( lsami ) then
@@ -3648,26 +3661,43 @@
          end do
       end if
 
-      if (ltab) then
-         read(io_ff,*)
-         read(io_ff,*) nmix 
-         read(io_ff,*)
-         do imix=1,nmix
-            read(io_ff,*) i,j,sigmaTmp,epsilonTmp
-            ij=(i-1)*nntype+j
-            sig2ij(ij)=sigmaTmp*sigmaTmp
-            sig2ij((j-1)*nntype+i)=sig2ij(ij)
-            epsij(ij)=epsilonTmp
-            epsij((j-1)*nntype+i)=epsilonTmp
-            if (lshift) then
-               sr2 = sig2ij(ij) / (rcut(1)*rcut(1))
-               sr6 = sr2 * sr2 * sr2
-               ecut(ij)= sr6*(sr6-1.0d0)*epsij(ij)
-               ecut((j-1)*nntype+i)=ecut(ij)
-            end if
-         end do
-         close(io_ff)
-      end if
+! Looking for section NONBOND
+     REWIND(io_ff)
+     CYCLE_READ_NONBOND:DO
+        call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
+        if (jerr.ne.0) then
+           exit cycle_read_nonbond
+        end if
+
+        if (UPPERCASE(line_in(1:7)).eq.'NONBOND') then               
+           read(line_in(8:),*) nmix
+           do imix=1,nmix
+              call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
+              if (jerr.ne.0) then
+                 write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+                 call cleanup('Reading section NONBOND')
+              end if
+              read(line_in,*) i,j,dum,sigmaTmp,epsilonTmp
+              ij=(i-1)*nntype+j
+              sig2ij(ij)=sigmaTmp*sigmaTmp
+              sig2ij((j-1)*nntype+i)=sig2ij(ij)
+              epsij(ij)=epsilonTmp
+              epsij((j-1)*nntype+i)=epsilonTmp
+              if (lshift) then
+                 sr2 = sig2ij(ij) / (rcut(1)*rcut(1))
+                 sr6 = sr2 * sr2 * sr2
+                 ecut(ij)= sr6*(sr6-1.0d0)*epsij(ij)
+                 ecut((j-1)*nntype+i)=ecut(ij)
+              end if
+           end do
+           exit cycle_read_nonbond
+        end if
+     END DO CYCLE_READ_NONBOND
+
+! - set up the strectching and bending constants
+     call suvibe(io_ff)
+
+     close(io_ff)
 
       return
       end

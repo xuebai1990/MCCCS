@@ -23,15 +23,19 @@ module zeolite
   integer,parameter::boxZeo=1
 
   logical,allocatable::lunitcell(:)
-  integer(KIND=normal_int)::nlayermax
+  logical::ltestztb=.false.,lpore_volume=.false.,lsurface_area=.false.
+  integer(KIND=normal_int)::nlayermax,volume_probe=124,volume_nsample=20,area_probe=124,area_nsample=100
   real(KIND=double_precision),allocatable::zgrid(:,:,:,:,:),egrid(:,:,:,:)
+  character(LEN=default_path_length)::file_zeocoord='zeolite.cssr',file_ztb='zeolite.ztb'
+
+  namelist /zeolite_in/ file_zeocoord,file_ztb,ltestztb,lpore_volume,volume_probe,volume_nsample,lsurface_area,area_probe,area_nsample
 
   type(MoleculeType)::zeo
   type(ZeoliteBeadType)::ztype
   type(CellMaskType)::zcell ! the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
   type(ZeoliteUnitCellGridType)::zunit
   type(ZeolitePotentialType)::zpot
-  
+
 contains
 ! Interface to old code using mask data types
   subroutine initZeo()
@@ -57,9 +61,24 @@ contains
     end do
   end subroutine initZeo
 
-  subroutine zeocoord(file_zeocoord,lhere)
-    character(LEN=*),intent(in)::file_zeocoord
-    logical,intent(out)::lhere(:)
+  subroutine zeocoord(file_in,lhere)
+    character(LEN=*),intent(in)::file_in
+    logical,intent(inout)::lhere(:)
+
+    integer(KIND=normal_int)::io_input,jerr
+
+    io_input=get_iounit()
+    open(unit=io_input,access='sequential',action='read',file=file_in,form='formatted',iostat=jerr,status='old')
+    if (jerr.ne.0) then
+       call cleanup('cannot open zeolite input file')
+    end if
+
+    read(UNIT=io_input,NML=zeolite_in,iostat=jerr)
+    if (jerr.ne.0) then
+       write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+       call cleanup('reading namelist: zeolite_in')
+    end if
+    close(io_input)
 
     call initZeo()
 
@@ -73,11 +92,26 @@ contains
 
   end subroutine zeocoord
 
-  subroutine addAllBeadTypes()
+  subroutine addAllBeadTypes(lhere)
+    logical,intent(inout)::lhere(:)
     integer::imol,iunit,igtype,i,idi,idj,ntij,jerr,list(nntype)
     real(KIND=double_precision)::sig6
 
     ! find all bead types and store them in an array
+    if (lpore_volume) then
+       nmolty=nmolty+1
+       nunit(nmolty)=1
+       ntype(nmolty,1)=volume_probe
+       lhere(volume_probe)=.true.
+    end if
+
+    if (lsurface_area) then
+       nmolty=nmolty+1
+       nunit(nmolty)=1
+       ntype(nmolty,1)=area_probe
+       lhere(area_probe)=.true.
+    end if
+
     zpot%ntype=0
     do imol=1,nmolty
        do iunit=1,nunit(imol)
@@ -89,8 +123,11 @@ contains
              list(igtype)=ntype(imol,iunit)
           end if
        end do
-    end do    
-    
+    end do
+
+    if (lpore_volume) nmolty=nmolty-1
+    if (lsurface_area) nmolty=nmolty-1
+
     allocate(zgrid(3,ztype%ntype,0:zunit%ngrid(1)-1,0:zunit%ngrid(2)-1,0:zunit%ngrid(3)-1),egrid(0:zunit%ngrid(1)-1,0:zunit%ngrid(2)-1,0:zunit%ngrid(3)-1,zpot%ntype),zpot%param(3,ztype%ntype,zpot%ntype),zpot%table(zpot%ntype),stat=jerr)
     if (jerr.ne.0) call cleanup('addAllBeadTypes: allocation failed')
 
@@ -120,8 +157,8 @@ contains
     zpot%param(1:2,:,:)=4.*zpot%param(1:2,:,:)
   end subroutine addAllBeadTypes
 
-  subroutine suzeo(file_ztb)
-    character(LEN=default_path_length),intent(in)::file_ztb
+  subroutine suzeo(lhere)
+    logical,intent(inout)::lhere(:)
     character(LEN=default_string_length)::atom
     integer(KIND=normal_int)::io_ztb,igtype,idi,idj,jerr,sw,i,j,k,oldi,oldj,oldk,ngridtmp(3),zntypetmp
     real(KIND=double_precision)::wzeo,zunittmp(3),zangtmp(3),rcuttmp,rci3,rci9,rho
@@ -136,15 +173,17 @@ contains
                               ,' number of atomtypes in the lattice= ',i10,/&
                               ,' number of zeolite atoms           = ',i10,/&
                               ,' mass zeolite                      = ',e12.5,' grams',/ &
-                              ,' one adsorbed molecule in sim box  = ',e12.5 ,' mmol/gram',/&
+                              ,' one adsorbed molecule in sim box  = ',e12.5 ,' mol/kg',/&
                               ,' Size unit-cell zeolite: ',f7.4,' x ',f7.4,' x ',f7.4,/&
                               ,'         x-dir           : ',i12,'  size: ',f7.4,/&
                               ,'         y-dir           : ',i12,'  size: ',f7.4,/&
-                              ,'         z-dir           : ',i12,'  size: ',f7.4,/)") (trim(ztype%name(i)),ztype%num(i),i=1,ztype%ntype),zcell%vol,ztype%ntype,zeo%nbead,wzeo/6.023e23,1000.0/wzeo,zunit%boxl(1),zunit%boxl(2),zunit%boxl(3),zunit%ngrid(1),zunit%boxl(1)/zunit%ngrid(1),zunit%ngrid(2),zunit%boxl(2)/zunit%ngrid(2),zunit%ngrid(3),zunit%boxl(3)/zunit%ngrid(3)
+                              ,'         z-dir           : ',i12,'  size: ',f7.4,/)") (trim(ztype%name(i)),ztype%num(i),i=1,ztype%ntype),zcell%vol,ztype%ntype,zeo%nbead,wzeo/6.023d23,1000.0/wzeo,zunit%boxl(1),zunit%boxl(2),zunit%boxl(3),zunit%ngrid(1),zunit%boxl(1)/zunit%ngrid(1),zunit%ngrid(2),zunit%boxl(2)/zunit%ngrid(2),zunit%ngrid(3),zunit%boxl(3)/zunit%ngrid(3)
+
+    if (lsurface_area) call zsurface()
 
     ! === tabulation of the zeolite potential
     if (lzgrid) then
-       call addAllBeadTypes()
+       call addAllBeadTypes(lhere)
        call setpbc(boxZeo)
 
        nlayermax=0
@@ -153,7 +192,7 @@ contains
        open(unit=io_ztb,access='sequential',action='read',file=file_ztb,form='binary',iostat=jerr, status='old')
        if (jerr.eq.0) then
           ! --- read zeolite table from disk
-          if (myid.eq.0) write(iou,*) 'read in tabulated potential'
+          if (myid.eq.0) write(iou,'(A,/)') 'read in tabulated potential'
           read(io_ztb) zunittmp,zangtmp,ngridtmp,zntypetmp,lewaldtmp,ltailczeotmp,lshifttmp,rcuttmp
           if (ANY(abs(zunittmp-zunit%boxl).gt.eps).or.ANY(ngridtmp.ne.zunit%ngrid).or.(zntypetmp.ne.ztype%ntype)) call cleanup('problem 1 in zeolite potential table')
           do igtype=1,ztype%ntype
@@ -227,7 +266,7 @@ contains
 !$omp do
                 do i=0,zunit%ngrid(1)-1
                    ! pass to exzeof arguments in fractional coordinates with respect to the unit cell
-                   if (k.gt.oldk.or.(k.eq.oldk.and.j.ge.oldj)) call exzeof(zgrid(:,:,i,j,k),dble(i)/zunit%ngrid(1),dble(j)/zunit%ngrid(2),dble(k)/zunit%ngrid(3),ztype%ntype)
+                   if (k.gt.oldk.or.(k.eq.oldk.and.j.ge.oldj)) call exzeof(zgrid(:,:,i,j,k),dble(i)/zunit%ngrid(1),dble(j)/zunit%ngrid(2),dble(k)/zunit%ngrid(3))
                 end do
 !$omp end parallel
                 if (myid.eq.0) write(io_ztb) zgrid(:,:,:,j,k)
@@ -235,7 +274,6 @@ contains
           end do
           write(iou,*) 'time 2:',time_now()
           if (myid.eq.0.and.ltailcZeo) write(iou,*) 'maxlayer = ',nlayermax
-          ! call ztest(idi)
        end if
 
        if (ltailczeo.and..not.ltailcZeotmp) then
@@ -266,10 +304,12 @@ contains
           end if
        end do
 
+       if (ltestztb.or.lpore_volume) call ztest()
+
        deallocate(lunitcell,zgrid,zeo%bead,ztype%type,ztype%num,ztype%radiisq,ztype%name,zpot%param)
        if (myid.eq.0) then
           close(io_ztb)
-          write(iou,*) 'tabulated potential: lewald[',lewaldtmp,'] ltailc[',ltailcZeotmp,'] lshift[',lshifttmp,'] rcut[',rcuttmp,'] ltailcZeo[',ltailcZeo,']'
+          write(iou,'(4(A,L),A,G,A,/)') 'tabulated potential: lewald[',lewaldtmp,'] ltailc[',ltailcZeotmp,'] lshift[',lshifttmp,'] ltailcZeo[',ltailcZeo,'] rcut[',rcuttmp,']'
        end if
     end if
 
@@ -277,13 +317,12 @@ contains
 
 ! arguments i,j,k are in fractional coordinates with respect to the unit cell
 ! U_LJ = A/r^12 + B/r^6, scale A by 4*10^8, B by 2*10^4 to reduce round-off error
-  subroutine exzeof(tab,i,j,k,zntype)
-    integer,intent(in)::zntype
-    real(KIND=double_precision),intent(out)::tab(3,zntype)
+  subroutine exzeof(tab,i,j,k)
+    real(KIND=double_precision),intent(out)::tab(3,ztype%ntype)
     real(KIND=double_precision),intent(in)::i,j,k
 
     integer(KIND=normal_int)::izeo,layer,ii,jj,kk,iztype
-    real(KIND=double_precision)::rcutsq,vac,vbc,vb,r,scoord(3),ri(3),dr(3),r2,vnew(2,zntype)
+    real(KIND=double_precision)::rcutsq,vac,vbc,vb,r,scoord(3),ri(3),dr(3),r2,vnew(2,ztype%ntype)
 
     tab=0.
     rcutsq = zcell%cut*zcell%cut
@@ -327,7 +366,7 @@ contains
           end if
        end do
 
-       if (lewald) call recipzeo(tab(3,:),ri,zntype)
+       if (lewald) call recipzeo(tab(3,:),ri)
 
     end if
 
@@ -378,14 +417,13 @@ contains
     end if
 
   end subroutine exzeof
- 
-  subroutine recipzeo(tab,ri,zntype)
-    integer,intent(in)::zntype
-    real(KIND=double_precision),intent(out)::tab(zntype)
+
+  subroutine recipzeo(tab,ri)
+    real(KIND=double_precision),intent(out)::tab(ztype%ntype)
     real(KIND=double_precision),intent(in)::ri(3)
 
     integer(KIND=normal_int)::kmax(3),i,j,l,m,n,kmin(2:3)
-    real(KIND=double_precision)::hmatik(3,3),ki(3),alpsqr4,hmaxsq,ksqr,arg,sums(zntype),vrecipz(zntype)
+    real(KIND=double_precision)::hmatik(3,3),ki(3),alpsqr4,hmaxsq,ksqr,arg,sums(ztype%ntype),vrecipz(ztype%ntype)
 
     ! *** Set up the reciprocal space vectors ***
     vrecipz = 0.0E+0_double_precision
@@ -401,7 +439,7 @@ contains
 
     ! *** generate the reciprocal-space
     ! here -kmax(1),-kmax(1)+1,...,-1 are skipped, so no need to divide by 2 for the prefactor
-    do l = 0,kmax(1) 
+    do l = 0,kmax(1)
        if ( l .eq. 0 ) then
           kmin(2) = 0
        else
@@ -437,14 +475,29 @@ contains
 
   end subroutine recipzeo
 
-  function exzeo(xi,yi,zi,idi)
+  function exzeo(xi,yi,zi,idi,ignoreTable)
     real(KIND=double_precision)::exzeo
     real(KIND=double_precision),intent(in)::xi,yi,zi
     integer(KIND=normal_int),intent(in)::idi
+    logical,intent(in),optional::ignoreTable
 
+    logical::lignore
     integer(KIND=normal_int),parameter::m=2,mt=2*m+1,mst=-m
-    integer(KIND=normal_int)::j,j0,jp,k,k0,kp,l,l0,lp,igtype
-    real(KIND=double_precision)::yjtmp(mst:m),yktmp(mst:m),yltmp(mst:m),xt(mst:m),yt(mst:m),zt(mst:m),scoord(3),r(3)
+    integer(KIND=normal_int)::j,j0,jp,k,k0,kp,l,l0,lp,igtype,idj
+    real(KIND=double_precision)::yjtmp(mst:m),yktmp(mst:m),yltmp(mst:m),xt(mst:m),yt(mst:m),zt(mst:m),scoord(3),r(3),tab(3,ztype%ntype),rci3,rci9,rho
+
+    do igtype=1,zpot%ntype
+       if (zpot%table(igtype).eq.idi) exit
+    end do
+    if (igtype.gt.zpot%ntype) then
+       call cleanup('exzeo: no such bead type')
+    end if
+
+    if (present(ignoreTable)) then
+       lignore=ignoreTable
+    else
+       lignore=.false.
+    end if
 
     ! --- fold coordinates into the unit cell, result in fractional coordinates
     !!!
@@ -454,27 +507,20 @@ contains
     scoord(1)=scoord(1)-floor(scoord(1))
     scoord(2)=scoord(2)-floor(scoord(2))
     scoord(3)=scoord(3)-floor(scoord(3))
+    ! get the Cartesian coordinates of the point in the unit cell
+    r(1)=scoord(1)*zunit%hmat(1,1)+scoord(2)*zunit%hmat(1,2)+scoord(3)*zunit%hmat(1,3)
+    r(2)=scoord(2)*zunit%hmat(2,2)+scoord(3)*zunit%hmat(2,3)
+    r(3)=scoord(3)*zunit%hmat(3,3)
+    ! get the index of the grid that the point resides in
+    j = scoord(1)*zunit%ngrid(1)
+    k = scoord(2)*zunit%ngrid(2)
+    l = scoord(3)*zunit%ngrid(3)
 
-    if (lzgrid) then
+    exzeo=upperLimit
+    if (.not.lignore.and.lzgrid) then
        ! calculation using a grid
-       do igtype=1,zpot%ntype
-          if (zpot%table(igtype).eq.idi) exit
-       end do
-       if (igtype.gt.zpot%ntype) then
-          call cleanup('exzeo: no such bead type')
-       end if
-
-       ! get the Cartesian coordinates of the point in the unit cell
-       r(1)=scoord(1)*zunit%hmat(1,1)+scoord(2)*zunit%hmat(1,2)+scoord(3)*zunit%hmat(1,3)
-       r(2)=scoord(2)*zunit%hmat(2,2)+scoord(3)*zunit%hmat(2,3)
-       r(3)=scoord(3)*zunit%hmat(3,3)
-       ! get the index of the grid that the point resides in
-       j = scoord(1)*zunit%ngrid(1)
-       k = scoord(2)*zunit%ngrid(2)
-       l = scoord(3)*zunit%ngrid(3)
 
        ! --- test if in the reasonable regime
-       exzeo=upperLimit
        if (egrid(j,k,l,igtype).ge.upperLimit) return
        ! ---  block m*m*m centered around: j,k,l
        ! ---  set up hulp array: (allow for going beyond unit cell
@@ -506,8 +552,181 @@ contains
           call polint(yt,yktmp,mt,r(2),yltmp(l0))
        end do
        call polint(zt,yltmp,mt,r(3),exzeo)
+    else
+       ! calculating interaction energy with the zeolite framework explicitly
+       call exzeof(tab,scoord(1),scoord(2),scoord(3))
+       if (tab(1,1).ge.upperLimit) return
+
+       if (ltailc) then
+          rci3=1./zcell%cut**3
+          rci9=4e8*rci3**3
+          rci3=2e4*rci3
+       end if
+
+       exzeo=0.0d0
+       do j=1,ztype%ntype
+          idj=ztype%type(j)
+          if (lij(idj).or.lqchg(idj)) then
+             rho=ztype%num(j)/zcell%vol
+             if (lij(idj).and.lij(idi)) then
+                exzeo=exzeo+tab(1,j)*zpot%param(1,j,igtype)-tab(2,j)*zpot%param(2,j,igtype)
+                if (ltailc) then
+                   exzeo=exzeo+twopi*rho*(rci9*zpot%param(1,j,igtype)/9-rci3*zpot%param(2,j,igtype)/3)
+                end if
+             end if
+             if (lqchg(idj).and.lqchg(idi)) then
+                exzeo=exzeo+qqfact*qelect(idi)*qelect(idj)*tab(3,j)
+            end if
+          end if
+       end do
     end if
 
   end function exzeo
+
+!> \brief Test accuracy of tabulated zeolite potential and calculate void volume
+!>
+!> See O. Talu and A.L. Myers, "Molecular simulation of adsorption: Gibbs dividing surface and comparison with experiment", AICHE J., 47(5), 1160-1168 (2001).
+  subroutine ztest()
+!$$$      include 'grid.inc'
+!$$$      include 'zeolite.inc'
+!$$$      include 'control.inc'
+!$$$      include 'mpi.inc'
+    integer(KIND=normal_int)::i,tel
+    real(KIND=double_precision)::errTot,errRel,errAbs,err,BoltTabulated,eBoltTabulated,BoltExplicit,eBoltExplicit,xi,yi,zi,Utabulated,Uexplicit,weight,random
+
+!--- test accuracy
+    if (myid.eq.0) write(iou,'(A,/,A)') ' Test accuracy of tabulated zeolite potential & Calculate void volume',' -------------------------------------------------'
+    tel=0
+    errTot=0
+    errRel=0
+    errAbs=0
+    BoltTabulated=0
+    eBoltTabulated=0
+    BoltExplicit=0
+    eBoltExplicit=0
+    do i=1,volume_nsample
+       xi=random()*zunit%boxl(1)
+       yi=random()*zunit%boxl(2)
+       zi=random()*zunit%boxl(3)
+       Utabulated=exzeo(xi,yi,zi,volume_probe)
+       if (ltestztb) then
+          Uexplicit=exzeo(xi,yi,zi,volume_probe,ignoreTable=.true.)
+       else
+          Uexplicit=Utabulated
+       end if
+       weight=dexp(-Utabulated*beta)
+       if (weight.gt.1.0d-5) then
+          tel=tel+1
+          BoltTabulated=BoltTabulated+weight
+          eBoltTabulated=eBoltTabulated+Utabulated*weight
+          weight=dexp(-Uexplicit*beta)
+          BoltExplicit=BoltExplicit+weight
+          eBoltExplicit=eBoltExplicit+Uexplicit*weight
+          err=abs(Uexplicit-Utabulated)
+          if (errAbs.lt.err) errAbs=err
+          err=abs(err/Uexplicit)
+          if (errRel.lt.err) errRel=err
+          errTot=errTot+err
+          if (myid.eq.0 .and. err.gt.3.0d-2) then
+             write(iou,'("WARNING: interpolation error at (",3(F8.5,1X),")=",G20.7," > 3%")') xi,yi,zi,err
+             write(iou,*) Utabulated,Uexplicit
+          end if
+       end if
+    end do
+
+    if (myid.eq.0) then
+       write(iou,'(A,I,A,I,A)') ' test over ',tel,' out of ',volume_nsample,' random positions '
+       write(iou,'(A,G)') ' average error: ',errTot/tel
+       write(iou,'(A,G)') ' maximum relative error: ',errRel
+       write(iou,'(A,G)') ' maximum absolute error [K]: ',errAbs
+       write(iou,'(A,G,A,G,A)') ' void fraction: ',BoltTabulated/volume_nsample, '(tabulated), ',BoltExplicit/volume_nsample,'(explicit)'
+       write(iou,'(A,G,A,G,A)') ' void volume in [Angstrom^3]: ',BoltTabulated*zcell%vol/volume_nsample, '(tabulated), ',BoltExplicit*zcell%vol/volume_nsample,'(explicit)'
+       write(iou,'(A,G,A,G,A)') ' void volume in [cm^3/g]: ',BoltTabulated*zcell%vol/volume_nsample*6.023d-1/dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype))), '(tabulated), ',BoltExplicit*zcell%vol/volume_nsample*6.023d-1/dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype))),'(explicit)'
+       write(iou,'(A,G,A,G,A)') ' Boltzmann averaged energy in [K]: ',eBoltTabulated/BoltTabulated,'(tabulated), ',eBoltExplicit/BoltExplicit,'(explicit)'
+       write(iou,*)
+    end if
+
+    return
+  end subroutine ztest
+
+!> \brief Calculate geometric surface area
+!>
+!> See
+!> 1. O.K. Farha, A.O. Yazaydin, I. Eryazici, C.D. Malliakas, B.G. Hauser, M.G. Kanatzidis, S.T. Nguyen, R.Q. Snurr, and J.T. Hupp, "De novo synthesis of a metal-organic framework material featuring ultra-high surface area and gas storage capacities", Nature Chem., xx(x), xxx-xxx (2010).
+!> 2. T. Duren, L. Sarkisov, O.M. Yaghi, and R.Q. Snurr, "Design of New Materials for Methane Storage", Langmuir, 20(7), 2683-2689 (2004).
+!> 3. K.S. Walton and R.Q. Snurr, "Applicability of the BET method for determining surface areas of microporous metal-organic frameworks", J. Am. Chem. Soc., 129(27), 8552-8556 (2007).
+!> 4. T. Duren, F. Millange, G. Ferey, K.S. Walton, and R.Q. Snurr, "Calculating geometric surface areas as a characterization tool for metal-organic frameworks", J. Phys. Chem., 111(42), 15350-15356 (2007).
+!> 5. T. Duren, Y.S. Bae, and R.Q. Snurr, "Using molecular simulation to characterise metal-organic frameworks for adsorption applications", Chem. Soc. Rev., 38(5), 1237-1247 (2009).
+!> 6. Y.S. Bae, A.O. Yazaydin, and R.Q. Snurr, "Evaluation of the BET method for determining surface areas of MOFs and zeolites that contain ultra-micropores", Langmuir, 26(8), 5475-5483 (2010).
+  subroutine zsurface()
+    integer(KIND=normal_int)::i,j,k,ntij,ncount
+    real(kind=double_precision)::random,stotal,phi,theta,sigij,rsq,scoord(3),coord(3),sdr(3),dr(3)
+    real(kind=double_precision),allocatable::position(:,:)
+
+    Write(iou,'(A,/,A)') 'Calculate geometric accessible surface area',' -------------------------------------------------'
+
+    allocate(position(3,zeo%nbead))
+
+    DO i=1, zeo%nbead
+       if (.not.lunitcell(i)) cycle
+       call absoluteToFractional(scoord,zeo%bead(i)%coord,zcell)
+       position(:,i)=scoord*zunit%dup
+       if (ANY(position(:,i).ge.1)) then
+          write(iou,'(3A,I6)') 'Error in ',TRIM(__FILE__),':',__LINE__
+          write(iou,*) i,position(:,i),scoord,zunit%dup
+          call cleanup('')
+       end if
+    END DO
+
+
+    stotal=0.0d0
+    Do i=1,zeo%nbead ! Loop over all framework atoms
+       if (.not.lunitcell(i)) cycle
+       ntij = (area_probe-1)*nntype + ztype%type(zeo%bead(i)%type)
+       sigij=sqrt(sig2ij(ntij))
+
+       ncount=0
+       Do j=1,area_nsample ! Number of trial positions around each framework atom
+          ! Generate random vector of length 1 on unit spheres
+          ! See http://mathworld.wolfram.com/SpherePointPicking.html for further explanations
+          phi = random()*twopi
+          coord(3)=1-random()*2.0d0
+          theta = acos(coord(3))
+          coord(1)=sin(theta)*cos(phi)
+          coord(2)=sin(theta)*sin(phi)
+
+          ! Make this vector of length (sigma_atom+sigma_probe)/2.0 and centered at particle i
+          coord=coord*sigij+zeo%bead(i)%coord
+          CALL foldToUnitCell(coord,zunit,scoord)
+
+          ! Check for overlap
+          Do k=1,zeo%nbead
+             if(.not.lunitcell(k).or.k.eq.i) cycle
+             sdr = scoord - position(:,k)
+             sdr = sdr - int(2.0*sdr) ! apply PBC
+
+             call fractionalToAbsolute(dr,sdr/zunit%dup,zcell)
+             rsq=dot_product(dr,dr)
+             ntij = (area_probe-1)*nntype + ztype%type(zeo%bead(k)%type)
+             If(rsq.lt.0.998001d0*sig2ij(ntij)) exit
+          End Do
+
+          If (k.le.zeo%nbead) cycle
+          ncount=ncount+1
+       End Do
+
+       ! Surface area for sphere i in real units [Angstrom^2]
+       stotal=stotal+sigij**2*real(ncount)/real(area_nsample)
+    End Do
+
+    ! Report results
+    stotal=stotal*fourpi*product(zunit%dup)
+    Write(iou,'(A,F12.2)') ' Total surface area in [Angstroms^2]: ', stotal
+    Write(iou,'(A,F12.2)') ' Total surface area per volume in [m^2/cm^3]: ',stotal/zcell%vol*1.0d4
+    Write(iou,'(A,F12.2,/)') ' Total surface area per volume in [m^2/g]: ', stotal*6.023d3/dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype)))
+
+    deallocate(position)
+
+  end subroutine zsurface
 
 end module zeolite

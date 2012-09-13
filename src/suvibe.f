@@ -1,4 +1,4 @@
-      subroutine suvibe
+      subroutine suvibe(io_ff)
 
       use global_data
       use var_type
@@ -17,7 +17,8 @@
 !$$$      include 'conver.inc'
 !$$$      include 'contorsion.inc'
 
-      integer(KIND=normal_int)::i
+      integer(KIND=normal_int)::io_ff,i,j,n,jerr,dum
+      character(LEN=default_string_length)::line_in
 
 ! ----------------------------------------------------------------
 
@@ -431,6 +432,27 @@
        brvib(124) = 1.0d0
        brvibk(124) = 0.5d0*700.0d0*503.25
 
+! Looking for section BONDS
+     REWIND(io_ff)
+     CYCLE_READ_BONDS:DO
+        call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
+        if (jerr.ne.0) then
+           exit cycle_read_bonds
+        end if
+
+        if (UPPERCASE(line_in(1:5)).eq.'BONDS') then               
+             read(line_in(6:),*) n
+             do j=1,n
+                call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
+                if (jerr.ne.0) then
+                   write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+                   call cleanup('Reading section BONDS')
+                end if
+                read(line_in,*) i,dum,brvib(i),brvibk(i)
+             end do
+             exit cycle_read_bonds
+        end if
+     END DO CYCLE_READ_BONDS
 
 ! ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -938,6 +960,28 @@
       brben(154) = 147.0d0
       brbenk(154) = 20.0d0*1000.0d0/1.9872
 ! --- END JLR 11-11-09
+
+! Looking for section ANGLES
+     REWIND(io_ff)
+     CYCLE_READ_ANGLES:DO
+        call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
+        if (jerr.ne.0) then
+           exit cycle_read_angles
+        end if
+
+        if (UPPERCASE(line_in(1:6)).eq.'ANGLES') then               
+             read(line_in(7:),*) n
+             do j=1,n
+                call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
+                if (jerr.ne.0) then
+                   write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+                   call cleanup('Reading section ANGLES')
+                end if
+                read(line_in,*) i,dum,brben(i),brbenk(i)
+             end do
+             exit cycle_read_angles
+        end if
+     END DO CYCLE_READ_ANGLES
 
       do i = 1, nvmax
          brben(i) = brben(i) * 8.0d0 * datan(1.0d0) / 360.0d0
@@ -1740,6 +1784,28 @@
 
 !    C--C--C--C, C--C--C--N, N--C--C--N
        vtt0(202) = 0.5d0*25.0d0*503.25d0
+
+! Looking for section DIHEDRALS
+     REWIND(io_ff)
+     CYCLE_READ_DIHEDRALS:DO
+        call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
+        if (jerr.ne.0) then
+           exit cycle_read_dihedrals
+        end if
+
+        if (UPPERCASE(line_in(1:9)).eq.'DIHEDRALS') then               
+           read(line_in(10:),*) n
+           do j=1,n
+              call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
+              if (jerr.ne.0) then
+                 write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+                 call cleanup('Reading section DIHEDRALS')
+              end if
+              read(line_in,*) i,dum,vtt0(i),vtt1(i),vtt2(i),vtt3(i)
+           end do
+           exit cycle_read_dihedrals
+        end if
+     END DO CYCLE_READ_DIHEDRALS
 
       return
       end
