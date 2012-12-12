@@ -13,6 +13,8 @@
       use util_files
       use util_timings
       use zeolite
+      use three_body,only:hasThreeBody,U3MolSys
+      use four_body,only:hasFourBody,U4MolSys
       implicit none
       include 'common.inc'
 
@@ -565,6 +567,9 @@
             call triad_en(i,v3garo,neigh_j,neighj,ndijj,nxijj,nyijj, nzijj,.false.)
          end if
       end if
+
+      if (hasThreeBody) vinter=vinter+U3MolSys(i,istart,iuend,flagon)
+      if (hasFourBody) vinter=vinter+U4MolSys(i,istart,iuend,flagon)
 
 ! ################################################################
 

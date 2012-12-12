@@ -1,7 +1,8 @@
 module util_string
+  use var_type,only:default_string_length
   implicit none
   private
-  public::splitAndGetNext,uppercase,lowercase,is_whitespace,str_trim,str_comp,str_search,remove_word,str_compress,typo_match,glob_match,is_blank_line
+  public::splitAndGetNext,integer_to_string,uppercase,lowercase,is_whitespace,str_trim,str_comp,str_search,remove_word,str_compress,typo_match,glob_match,is_blank_line
   CHARACTER,PARAMETER::whitespace*3=" "//CHAR(9)//CHAR(11),commentChar(3)=(/"#","!","%"/),backslash='\\',star='*',question='?'
 contains
 
@@ -18,6 +19,16 @@ contains
     if (ib.lt.ia) ib=LEN(string)
 
   end subroutine splitAndGetNext
+
+! *****************************************************************************
+!> \brief   Return a string representing the integer number
+! *****************************************************************************
+  FUNCTION integer_to_string(number) RESULT(string)
+    INTEGER, INTENT(IN)                      :: number
+    CHARACTER(LEN=default_string_length)     :: string
+
+    WRITE (UNIT=string,FMT='(I0)') number
+  END FUNCTION  integer_to_string
 
 ! *****************************************************************************
 !> \brief   Convert all lower case characters in a string to upper case.

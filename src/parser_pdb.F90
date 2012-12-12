@@ -2,28 +2,34 @@ MODULE parser_pdb
 ! *****************************************************************************
 !> \brief Handles PDB (Protein Data Bank) files
 !> 
-!> PDB Format Description Version 2.2 from http://www.rcsb.org
-!> COLUMNS       DATA TYPE       FIELD         DEFINITION
-!> 
-!>  1 -  6       Record name     "ATOM  "
-!>  7 - 11       Integer         serial        Atom serial number.
-!> 13 - 16       Atom            name          Atom name.
-!> 17            Character       altLoc        Alternate location indicator.
-!> 18 - 20       Residue name    resName       Residue name.
-!> 22            Character       chainID       Chain identifier.
-!> 23 - 26       Integer         resSeq        Residue sequence number.
-!> 27            AChar           iCode         Code for insertion of residues.
-!> 31 - 38       Real(8.3)       x             Orthogonal coordinates for X in
-!>                                             Angstroms.
-!> 39 - 46       Real(8.3)       y             Orthogonal coordinates for Y in
-!>                                             Angstroms.
-!> 47 - 54       Real(8.3)       z             Orthogonal coordinates for Z in
-!>                                             Angstroms.
-!> 55 - 60       Real(6.2)       occupancy     Occupancy.
-!> 61 - 66       Real(6.2)       tempFactor    Temperature factor.
-!> 73 - 76       LString(4)      segID         Segment identifier, left-justified.
-!> 77 - 78       LString(2)      element       Element symbol, right-justified.
-!> 79 - 80       LString(2)      charge        Charge on the atom.
+!> Protein Data Bank Contents Guide:
+!> Atomic Coordinate Entry Format Version 3.3 (July, 2011)
+!>   http://www.wwpdb.org/documentation/format33/v3.3.html
+!>
+!> COLUMNS        DATA  TYPE    FIELD        DEFINITION
+!> -------------------------------------------------------------------------------------
+!>  1 -  6        Record name   "ATOM  "
+!>  7 - 11        Integer       serial       Atom serial number.
+!> 13 - 16        Atom          name         Atom name.
+!> 17             Character     altLoc       Alternate location indicator.
+!> 18 - 20        Residue name  resName      Residue name.
+!> 22             Character     chainID      Chain identifier.
+!> 23 - 26        Integer       resSeq       Residue sequence number.
+!> 27             AChar         iCode        Code for insertion of residues.
+!> 31 - 38        Real(8.3)     x            Orthogonal coordinates for X in Angstroms.
+!> 39 - 46        Real(8.3)     y            Orthogonal coordinates for Y in Angstroms.
+!> 47 - 54        Real(8.3)     z            Orthogonal coordinates for Z in Angstroms.
+!> 55 - 60        Real(6.2)     occupancy    Occupancy.
+!> 61 - 66        Real(6.2)     tempFactor   Temperature factor.
+!> 77 - 78        LString(2)    element      Element symbol, right-justified.
+!> 79 - 80        LString(2)    charge       Charge on the atom.
+!> -------------------------------------------------------------------------------------
+!>  1 -  6        Record name    "CONECT"
+!>  7 - 11        Integer        serial       Atom serial number
+!> 12 - 16        Integer        serial       Serial number of bonded atom
+!> 17 - 21        Integer        serial       Serial number of bonded atom
+!> 22 - 26        Integer        serial       Serial number of bonded atom
+!> 27 - 31        Integer        serial       Serial number of bonded atom
 ! *****************************************************************************
   use var_type,only:double_precision,default_string_length
   use util_files,only:get_iounit,readLine

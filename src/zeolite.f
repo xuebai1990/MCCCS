@@ -74,7 +74,7 @@ contains
     end if
 
     read(UNIT=io_input,NML=zeolite_in,iostat=jerr)
-    if (jerr.ne.0) then
+    if (jerr.ne.0.and.jerr.ne.-1) then
        write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
        call cleanup('reading namelist: zeolite_in')
     end if

@@ -7,6 +7,8 @@
       use util_string
       use util_files
       use util_timings
+      use util_memory
+      use util_search
       implicit none
       save
 
@@ -950,4 +952,10 @@
       real(KIND=double_precision)::vtt0(ntormax),vtt1(ntormax) ,vtt2(ntormax),vtt3(ntormax),vtt4(ntormax),vtt5(ntormax) ,vtt6(ntormax),vtt7(ntormax),vtt8(ntormax),vtt9(ntormax)
 !      common /contor/ vtt0,vtt1,vtt2, vtt3,vtt4,vtt5,vtt6,vtt7,vtt8, vtt9
 
-      end module global_data
+      type(LookupTable)::atoms !,bonds,angles,dihedrals
+
+    CONTAINS
+      subroutine checkAtom()
+        if (.not.allocated(atoms%list)) call cleanup(TRIM(__FILE__)//integer_to_string(__LINE__)//": ATOMS section has not been defined!")
+      end subroutine checkAtom
+    end module global_data

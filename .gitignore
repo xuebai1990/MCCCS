@@ -1,0 +1,8 @@
+*.[oa]
+*.so*
+a.out
+*.exe
+*.class
+*.pyc
+TAGS
+.DS_Store

@@ -16,6 +16,8 @@
       use util_files
       use util_timings
       use zeolite
+      use three_body,only:hasThreeBody,U3System
+      use four_body,only:hasFourBody,U4System
       implicit none
       include 'common.inc'
 
@@ -481,6 +483,8 @@
             call vthreebody(v3garo)
          end if
          
+         if (hasThreeBody) vinter=vinter+U3System(ibox)
+         if (hasFourBody) vinter=vinter+U4System(ibox)
          
          if (ltailc) then
 !--     add tail corrections for the Lennard-Jones energy

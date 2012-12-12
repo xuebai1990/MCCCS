@@ -8,6 +8,8 @@
       use util_string
       use util_files
       use util_timings
+      use three_body,only:buildTripletTable
+      use four_body,only:buildQuadrupletTable
       use zeolite
       implicit none
       include 'common.inc'
@@ -148,6 +150,7 @@
          write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
          call cleanup('reading namelist: io')
       end if
+
       close(io_input)
 
 ! -------------------------------------------------------------------
@@ -421,6 +424,9 @@
             write(iou,*) nchain, nmolty
          end if
       end if
+
+      Call initiateTable(atoms,nmolty)
+
       read(io_input,*)
       read(io_input,*) (temtyp(i),i=1,nmolty)
       if ( lecho.and.myid.eq.0 ) then
@@ -699,6 +705,7 @@
             read(io_input,*)
             if ( lelect(imol) .and. .not. lchgall ) then
                read(io_input,*) j, ntype(imol,i), leaderq(imol,i)
+               ndum=addToTable(atoms,ntype(imol,i),expand=.true.)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
 ! for other potentials, sigi isn't defined, so I added this if/else statement
 ! maybe should have a switch for every potential flag as a check?
@@ -2644,7 +2651,8 @@
 ! *** read/produce initial/starting configuration ***
 ! *** zeolite external potential
       if ( lexzeo ) call suzeo(lhere)
-
+      call buildTripletTable(file_in)
+      call buildQuadrupletTable(file_in)
 ! ----------------------------------------------------------------      
  
 ! - reordering of numbers for charmm
