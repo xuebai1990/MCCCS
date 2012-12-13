@@ -5,14 +5,16 @@
 ! corresponding bead types in suijtab. can only do EE if the number
 ! of beads between states remain constant.
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
       use util_timings
+      use transfer_swap,only:swap
       implicit none
       include 'common.inc'
       
@@ -66,7 +68,7 @@
 
       if (ncmt(box_state(mstate),ee_moltyp(mstate)).eq.0) then
          write(iou,*)'problem: mstate, but no molecule in mstate',mstate
-         call cleanup('')
+         call err_exit('')
       end if
 
 ! --- type of move depending upon mstate and nstate. one type of move
@@ -85,7 +87,7 @@
          eeirem = parbox(eepointp,boxrem1,ee_moltyp(mstate))
 !	write(iou,*) 'eeirem', eeirem, eepointp
 
-         call swap(dum,dum,dum,dum,dum,dum,dum,dum,dum)
+         call swap
 
          if (.not.leeacc) goto 100
 
@@ -131,7 +133,7 @@
 !	write(iou,*) vnew,vold
          if (ovrlap) then
             write(iou,*) 'disaster ovrlap in old conf eemove'
-            call cleanup('')
+            call err_exit('')
          end if
 
          if (lewald.and.(lelect(moltion(2)).or.lelect(moltion(1))))then

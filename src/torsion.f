@@ -1,6 +1,6 @@
       subroutine lininter(theta,spltor,ttyp)
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
@@ -67,7 +67,7 @@
 
       subroutine spline(yp1,ypn,tortyp)
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
@@ -156,7 +156,7 @@
 !     spline, and given a value of x, this routine returns a cubic-spline
 !     interpolated value of y.
 !     xa = deg, ya = tabtorso, y2a = torderiv2, n = points
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math

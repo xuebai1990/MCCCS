@@ -12,7 +12,7 @@
 !     ** last modified by Neeraj Rai on 12/23/2008 for CG models           **
 !     ***********************************************************************
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
@@ -486,7 +486,7 @@
 !     *** M.G. Martin                                           ***
 !     *************************************************************
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math

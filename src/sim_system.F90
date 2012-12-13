@@ -1,16 +1,16 @@
-      module global_data
-
-      use var_type
-      use const_phys
-      use const_math
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
-      use util_memory
-      use util_search
-      implicit none
-      save
+module sim_system
+  use var_type
+  use const_phys
+  use const_math
+  use util_runtime,only:err_exit
+  use util_math
+  use util_string
+  use util_files
+  use util_timings
+  use util_memory
+  use util_search
+  implicit none
+  save
 
 ! CONTROL.INC
       logical::lgibbs,lgrand,lnpt,lanes,llj,lmipsw,lexpee
@@ -24,7 +24,9 @@
       logical::lcutcm,ldual
       integer(KIND=normal_int)::nmax,numax,ntmax,nntype,nvmax,nbxmax ,npamax,npabmax,maxbin,cmax,cmaxa,tor_bin_max,nbinmax_ete,smax
       integer(KIND=normal_int)::vectormax,maxvir,maxntemp,nchmax ,nchtor_max,nchbn_max
-      integer(KIND=normal_int)::ntdifmx,nbinmx,angle_max,ang_bin_max ,tor_max,iou
+      integer(KIND=normal_int)::ntdifmx,nbinmx,angle_max,ang_bin_max,tor_max,iou=6
+      character(LEN=default_path_length)::file_input='fort.4',file_restart='fort.77',file_struct='input_struc.xyz',file_run='run1a.dat',file_movie='movie1a.dat',file_dipole='dipole1a.dat'
+      namelist /io/ file_input,file_restart,file_struct,file_run,file_movie,file_dipole,iou
 !      common /iounit/ iou
 ! --------------------------------------------------------------
 ! *******************************
@@ -161,7 +163,7 @@
 ! ** DIMENSIONS FOR ARRAYS             **
 ! ***************************************
 ! - nmax = maximum number of chains +2
-      parameter (nmax = 5000)
+      parameter (nmax = 7000)
 ! - numax = maximum number of units
       parameter (numax = 35)
 ! - ntmax = maximum number of types of chains
@@ -335,7 +337,7 @@
 
 ! COORD.INC
       logical::lelect,lflucq,lqtrans,lexpand,lpresim,lring,lrigid,lplace ,lrig,lrigi,lchiral,licell
-      integer(KIND=normal_int)::nbox,nchain,nmolty,moltyp,nunit,nugrow ,ntype,nchbox,ncmt,ncmt2,iring,nrig,irig,frig,counthist,counttot ,boxlink
+      integer(KIND=normal_int)::nbox=1,nchain=4,nmolty=1,moltyp,nunit,nugrow ,ntype,nchbox,ncmt,ncmt2,iring,nrig,irig,frig,counthist,counttot ,boxlink
       integer(KIND=normal_int)::nboxi, eetype, parbox,iurot,iupdatefix ,nrigmin,nrigmax
       integer(KIND=normal_int)::parall,temtyp,riutry,rindex,prior ,maxgrow,nrotbd,irotbd
       real(KIND=double_precision)::rxu, ryu, rzu, mass, masst, beta,xcm ,ycm,zcm,exp_c,eta,eta2,sxcm,sycm,szcm
@@ -614,8 +616,7 @@
 !      common /qleader/ leaderq
 
 ! CLUSTERBIAS.INC
-      logical::lbias(ntmax),lavbmc1(ntmax),lavbmc2(ntmax),lavbmc3(ntmax)
-      real(KIND=double_precision)::rbsmax,rbsmin,vol_eff,pmbias(ntmax) ,pmbsmt(ntmax),pmbias2(ntmax)
+      real(KIND=double_precision)::rbsmax,rbsmin,vol_eff,pmbias(ntmax),pmbsmt(ntmax),pmbias2(ntmax)
 !      common /cbiasa/ lbias,lavbmc1,lavbmc2,lavbmc3
 !      common /cbiasb/ rbsmax,rbsmin,vol_eff,pmbias,pmbias2,pmbsmt
 
@@ -952,10 +953,42 @@
       real(KIND=double_precision)::vtt0(ntormax),vtt1(ntormax) ,vtt2(ntormax),vtt3(ntormax),vtt4(ntormax),vtt5(ntormax) ,vtt6(ntormax),vtt7(ntormax),vtt8(ntormax),vtt9(ntormax)
 !      common /contor/ vtt0,vtt1,vtt2, vtt3,vtt4,vtt5,vtt6,vtt7,vtt8, vtt9
 
+      namelist /system/nchain,nmolty,nbox
+
       type(LookupTable)::atoms !,bonds,angles,dihedrals
 
-    CONTAINS
-      subroutine checkAtom()
-        if (.not.allocated(atoms%list)) call cleanup(TRIM(__FILE__)//integer_to_string(__LINE__)//": ATOMS section has not been defined!")
-      end subroutine checkAtom
-    end module global_data
+CONTAINS
+  subroutine read_system(io_input)
+    integer,intent(in)::io_input
+    integer::jerr
+
+    read(UNIT=io_input,NML=io,iostat=jerr)
+    if (jerr.ne.0.and.jerr.ne.-1) then
+       write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+       call err_exit('reading namelist: io')
+    end if
+
+    rewind(io_input)
+    read(UNIT=io_input,NML=system,iostat=jerr)
+    if (jerr.ne.0.and.jerr.ne.-1) then
+       write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+       call err_exit('reading namelist: system')
+    end if
+    nchain=nchain+2
+
+    if (iou.eq.5) then
+       call err_exit('unit 5 is for standard input')
+    else if(iou.ne.6.and.iou.ne.0.and.myid.eq.0) then
+       iou=get_iounit()
+       open(unit=iou,access='sequential',action='write',file=file_run,form='formatted',iostat=jerr,status='unknown')  
+       if (jerr.ne.0) then
+          call err_exit('cannot open output file '//file_run)
+       end if
+    end if
+
+  end subroutine read_system
+
+  subroutine checkAtom()
+    if (.not.allocated(atoms%list)) call err_exit(TRIM(__FILE__)//integer_to_string(__LINE__)//": ATOMS section has not been defined!")
+  end subroutine checkAtom
+end module sim_system

@@ -9,10 +9,11 @@
 !    ** Marcus Martin 1-15-97                                         **
 !    *******************************************************************
  
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -67,7 +68,7 @@
 
       if ( nboxi(1) .eq. nboxi(2) ) then
          write(iou,*) 'particles found in same box'
-         call cleanup('')
+         call err_exit('')
       end if
  
 ! ################################################################

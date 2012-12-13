@@ -12,7 +12,7 @@
 !ccc  KM 12/02/08
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
@@ -75,7 +75,7 @@
 !ccc  KM 12/03/08
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
@@ -139,7 +139,7 @@
 !ccc  KM 12/03/08
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
@@ -200,7 +200,7 @@
 !ccc  KM 04/23/09
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math

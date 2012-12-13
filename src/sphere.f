@@ -5,10 +5,11 @@
 !     **  M. G. Martin   2-3-98                                ***
 !     ************************************************************
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -32,7 +33,7 @@
          end if
       end do
 
-      call cleanup('exceeded 100 tries to get a vector in sphere')
+      call err_exit('exceeded 100 tries to get a vector in sphere')
 
       end
 

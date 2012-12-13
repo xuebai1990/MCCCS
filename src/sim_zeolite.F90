@@ -1,7 +1,8 @@
 MODULE sim_zeolite
-  use global_data,only:myid,iou
+  use sim_system,only:myid,iou
   use var_type,only:double_precision,default_string_length
   use const_math,only:onepi
+  use util_runtime,only:err_exit
   use util_string,only:str_search
   use sim_cell
   use sim_particle
@@ -110,7 +111,7 @@ CONTAINS
     end if
 
     pos=str_search(ztype%name,ztype%ntype,atom)
-    if (pos.eq.0) call cleanup('** setUpAtom: unknown atomtype **')
+    if (pos.eq.0) call err_exit('** setUpAtom: unknown atomtype **')
 
     zeo%bead(i)%type=pos
 

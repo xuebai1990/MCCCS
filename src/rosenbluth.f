@@ -16,10 +16,11 @@
 !     cwtorf:
 !     movetype:
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -349,7 +350,7 @@
                               goto 299
 !                              write(iou,*) 'jut4,jut3,jut2,iu',
 !     &                             jut4,jut3,jut2,iu
-!                              call cleanup('trouble jut4')
+!                              call err_exit('trouble jut4')
                            end if
                            jttor = ittor(imolty,iu,it)
                            

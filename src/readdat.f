@@ -1,9 +1,10 @@
       subroutine readdat(file_in,lucall,ucheck,nvirial,starvir,stepvir)
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -11,6 +12,8 @@
       use three_body,only:buildTripletTable
       use four_body,only:buildQuadrupletTable
       use zeolite
+      use transfer_shared,only:read_transfer
+      use transfer_swap,only:lbias,lavbmc1,lavbmc2,lavbmc3
       implicit none
       include 'common.inc'
 !$$$      include 'mpi.inc'
@@ -44,9 +47,7 @@
 !$$$      include 'tabulated.inc'
 
       character(LEN=*),intent(in)::file_in
-      character(LEN=default_path_length)::file_movie,file_run ,file_dipole,fileout,file_input='fort.4',file_restart='fort.77',file_struct='input_struc.xyz'
-
-      namelist /io/ file_input,file_restart,file_struct
+      character(LEN=default_path_length)::fileout
       integer(KIND=normal_int)::io_input,io_restart,jerr
       integer(KIND=normal_int)::seed
 !      real(KIND=double_precision)::random,rtest(10)
@@ -142,22 +143,17 @@
       io_input=get_iounit()
       open(unit=io_input,access='sequential',action='read',file=file_in,form='formatted',iostat=jerr,status='old')
       if (jerr.ne.0) then
-         call cleanup('cannot open input file')
+         call err_exit('cannot open input file')
       end if
-
-      read(UNIT=io_input,NML=io,iostat=jerr)
-      if (jerr.ne.0.and.jerr.ne.-1) then
-         write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-         call cleanup('reading namelist: io')
-      end if
-
+      call read_system(io_input)
+      call read_transfer(io_input)
       close(io_input)
 
 ! -------------------------------------------------------------------
       io_input=get_iounit()
       open(unit=io_input,access='sequential',action='read',file=file_input,form='formatted',iostat=jerr,status='old')
       if (jerr.ne.0) then
-         call cleanup('cannot open main input file')
+         call err_exit('cannot open main input file')
       end if
 
       read(io_input,*)
@@ -186,7 +182,7 @@
 ! *** user designate a file to which to write) KEA 6/3/09 (defined in control.inc)
 ! *** read echoing and long output flags
       read(io_input,*)
-      read(io_input,*) iou,lecho,lverbose,run_num,suffix
+      read(io_input,*) ndum,lecho,lverbose,run_num,suffix
       read(io_input,*)
       read(io_input,*) lnpt,lgibbs,lgrand,lanes,lvirial,lmipsw,lexpee
       read(io_input,*) 
@@ -213,21 +209,12 @@
       read(io_input,*)
       read(io_input,*) L_tor_table,L_spline,L_linear,L_vib_table,L_bend_table,L_vdW_table,L_elect_table
 
-! -- generate output file name
-      write(file_run,'("run",I1.1,A,".dat")') run_num,suffix
-      write(file_movie,'("movie",I1.1,A,".dat")') run_num,suffix
-      write(file_dipole,'("dipole",I1.1,A,".dat")') run_num,suffix
-
 ! KM ldielect writes to fort.27      
 !      if (ldielect) then
 !        open(17,file=file_dipole,status='unknown')  
 !        write(17,*) '# step  ibox   dipole_x   dipole_y   dipole_z'
 !      end if
 
-! kea 6/3/09 -- only open runXX.dat if io=2
-      if(iou.eq.2.and.myid.eq.0) then
-         open(2,file=file_run,status='unknown')  
-      end if  
 ! KM for MPI
 ! only processor 0 writes data  
       if ( lecho.and.myid.eq.0) then
@@ -563,7 +550,7 @@
 ! - read bead potential information
       do imol = 1, nmolty
          read(io_input,*) 
-         read(io_input,*) nunit(imol),nugrow(imol),ncarbon(imol),nmaxcbmc(imol) , iurot(imol),lelect(imol),lflucq(imol),lqtrans(imol) ,lexpand(imol),lavbmc1(imol),lavbmc2(imol),lavbmc3(imol) ,fqegp(imol)
+         read(io_input,*) nunit(imol),nugrow(imol),ncarbon(imol),nmaxcbmc(imol) , iurot(imol),lelect(imol),lflucq(imol),lqtrans(imol),lexpand(imol),lavbmc1(imol),lavbmc2(imol),lavbmc3(imol) ,fqegp(imol)
          read(io_input,*)
          read(io_input,*) maxgrow(imol),lring(imol),lrigid(imol) ,lrig(imol),lsetup,isolute(imol),(eta2(i,imol), i=1,nbox)
 
@@ -650,12 +637,11 @@
             lbias(imol) = .true.
          end if
 
-! *** choose only one from the three AVBMC algorithms
-
+         ! *** choose only one from the three AVBMC algorithms
          if ( lavbmc1(imol) ) then
             lavbmc2(imol) = .false.
             lavbmc3(imol) = .false.
-         elseif ( lavbmc2(imol) ) then
+         else if ( lavbmc2(imol) ) then
             lavbmc3(imol) = .false.
          end if
 
@@ -2145,7 +2131,7 @@
                ldie = .true.
                return
             end if
-!         if ( lchgall ) call cleanup('cannot have lchgall with lcutcm')
+!         if ( lchgall ) call err_exit('cannot have lchgall with lcutcm')
          end if
          if ( ldual ) then
             write(iou,*) 'Dual Cutoff Configurational-bias Monte Carlo'
@@ -2235,7 +2221,7 @@
       end if
 
       if ( linit ) then
-         call initia(file_struct)
+         call initia
          nnstep = 0
       else
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM needed for long input records, like
@@ -2243,7 +2229,7 @@
          io_restart=get_iounit()
          open(unit=io_restart,access='sequential',action='read',file=file_restart,form='formatted',iostat=jerr,recl=4096,status='old')
          if (jerr.ne.0) then
-            call cleanup('cannot open main restart file')
+            call err_exit('cannot open main restart file')
          end if
          read(io_restart,*) nnstep
          read(io_restart,*) Armtrax, Armtray, Armtraz
@@ -2392,7 +2378,7 @@
 !               write(iou,*)
 !     +           'conflicting information in restart and control files'
 !               write(iou,*) 'unit',i,'nunit',nunit(i),'nures',nures(i)
-!               call cleanup('')
+!               call err_exit('')
 !            end if
 !         end do
 !         write(iou,*) 'ncres',ncres,'   nmtres',nmtres
@@ -2579,8 +2565,8 @@
                   write(iou,*) ibox,calp(ibox),rcut(ibox)
 !cc --- JLR 11-24-09  
 !cc --- you may want a smaller kalp, e.g. when comparing to previous work
-!cc --- This does not need to be a call cleanup('')  
-!                  call cleanup('kalp is too small, set to 3.2/rcutchg')
+!cc --- This does not need to be a call err_exit('')  
+!                  call err_exit('kalp is too small, set to 3.2/rcutchg')
                   write(iou,*) 'kalp is too small, set to 3.2/rcutchg'
 !cc --- END JLR 11-24-09
                end if

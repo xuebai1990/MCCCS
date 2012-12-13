@@ -5,7 +5,7 @@
 !     ***  exp-6 potential modified using articles in suijtab    ***
 !     ***  parameters are defined in suijtab.f  KE ANDERSON      ***
 !     **************************************************************
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math

@@ -11,21 +11,21 @@
        ub2 = MIN(ub2_new,ub2_old)
 
        ALLOCATE (work(lb1:ub1,lb2:ub2),STAT=istat)
-       IF (istat /= 0) CALL cleanup(TRIM(__FILE__)//":"//integer_to_string(__LINE__))
+       IF (istat /= 0) CALL err_exit(TRIM(__FILE__)//":"//integer_to_string(__LINE__))
 
        work(lb1:ub1,lb2:ub2) = p(lb1:ub1,lb2:ub2)
 
        DEALLOCATE(p,STAT=istat)
-       IF (istat /= 0) CALL cleanup(TRIM(__FILE__)//":"//integer_to_string(__LINE__))
+       IF (istat /= 0) CALL err_exit(TRIM(__FILE__)//":"//integer_to_string(__LINE__))
     END IF
 
     ALLOCATE(p(lb1_new:ub1_new,lb2_new:ub2_new),STAT=istat)
-    IF (istat /= 0) CALL cleanup(TRIM(__FILE__)//":"//integer_to_string(__LINE__))
+    IF (istat /= 0) CALL err_exit(TRIM(__FILE__)//":"//integer_to_string(__LINE__))
 
     p(:,:) = 0.
 
     IF (ALLOCATED(p).AND.ALLOCATED(work)) THEN
        p(lb1:ub1,lb2:ub2) = work(lb1:ub1,lb2:ub2)
        DEALLOCATE (work,STAT=istat)
-       IF (istat /= 0) CALL cleanup(TRIM(__FILE__)//":"//integer_to_string(__LINE__))
+       IF (istat /= 0) CALL err_exit(TRIM(__FILE__)//":"//integer_to_string(__LINE__))
     END IF

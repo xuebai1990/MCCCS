@@ -1,9 +1,10 @@
       subroutine molsetup(io_input,imolty)
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -44,7 +45,7 @@
          if (invib(imolty,i).gt.6) then
 
             write(iou,*) 'imolty',imolty,'   i',i,'   invib' ,invib(imolty,i)
-            call cleanup('too many vibrations')
+            call err_exit('too many vibrations')
          end if
 
       end do
@@ -67,7 +68,7 @@
             
             if (vibtype.eq.0) then
                write(iou,*) 'atype,btype',atype,btype
-               call cleanup('screwup in vibrations')
+               call err_exit('screwup in vibrations')
             end if
                         
             countvib = countvib + 1
@@ -87,7 +88,7 @@
 
                   if (bendtype.eq.0) then
                      write(iou,*) 'atype,btype,ctype',atype ,btype,ctype
-                     call cleanup('screwup in bending angles')
+                     call err_exit('screwup in bending angles')
                   end if
 
                   countbend = countbend + 1
@@ -106,7 +107,7 @@
 
                         if (tortype.eq.0) then
                            write(iou,*) 'atype,btype,ctype,dtype',atype ,btype,ctype,dtype
-                           call cleanup('screwup in torsion angles')
+                           call err_exit('screwup in torsion angles')
                         end if
                         
                         counttor = counttor + 1
@@ -143,6 +144,7 @@
       subroutine vibcheck(iinit,atype,btype,vibtype)
 
       use var_type
+      use util_runtime,only:err_exit
       implicit none
 
       logical::lfinda,lfindb,lfound
@@ -210,7 +212,7 @@
             
             if (lfinda.and.lfindb) then
                if (lfound) then
-                  call cleanup('vibration type not distinguishable')
+                  call err_exit('vibration type not distinguishable')
                end if
                vibtype = vbtype(n)
                lfound = .true.
@@ -227,6 +229,7 @@
       subroutine bendcheck(iinit,atype,btype,ctype,bendtype)
 
       use var_type
+      use util_runtime,only:err_exit
       implicit none
 
       logical::lfinda,lfindb,lfindc,lfound
@@ -307,7 +310,7 @@
 
             if (lfinda.and.lfindb.and.lfindc) then
                if (lfound) then
-                  call cleanup('bend type not distinguishable')
+                  call err_exit('bend type not distinguishable')
                end if
                bendtype = bntype(n)
                lfound = .true.
@@ -328,7 +331,8 @@
 
       subroutine torcheck(iinit,atype,btype,ctype,dtype,tortype)
 
-      use global_data,only:iou
+      use sim_system,only:iou
+      use util_runtime,only:err_exit
       use var_type
       implicit none
 
@@ -458,7 +462,7 @@
            if (lfinda.and.lfindb.and.lfindc.and.lfindd) then
               if (lfound) then
                  write(iou,*) 'a,b,c,d',atype,btype,ctype,dtype
-                 call cleanup('torsion type not distinguishable')
+                 call err_exit('torsion type not distinguishable')
               end if
               
               tortype = trtype(n)

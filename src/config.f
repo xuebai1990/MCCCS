@@ -14,10 +14,11 @@
 !    **    bscb ( 2,inb ).                                            **
 !    *******************************************************************
  
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -91,7 +92,7 @@
          i = int( dchain*random() + 1 )
          i = parall(imolty,i)
          ibox = nboxi(i)
-         if ( moltyp(i) .ne. imolty ) call cleanup('screwup config')
+         if ( moltyp(i) .ne. imolty ) call err_exit('screwup config')
       end if
 
 ! *** store number of units in iunit and # to be grown in igrow ***
@@ -247,7 +248,7 @@
             if (ovrlap .and. (iii .eq. 1)) then
 !            if (ovrlap) then
                write(iou,*) 'disaster: overlap in old conf config',i
-               call cleanup('')
+               call err_exit('')
             end if
 
             if (iii .eq. 2) then

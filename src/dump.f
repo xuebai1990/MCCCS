@@ -5,7 +5,7 @@
 ! dumps the final configuration before stopping the program (Neeraj).
 ! -----------------------------------------------------------------
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math

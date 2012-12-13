@@ -5,10 +5,11 @@
 !     **           -- Uses CDCBMC to grow them --              **
 !     ***********************************************************
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -68,7 +69,7 @@
 
             if (invib(imolty,iu).gt.1) then
                write(iou,*) 'iu,invib',iu,invib(imolty,iu)
-               call cleanup('invib can no be larger than one for hydrogen')
+               call err_exit('invib can no be larger than one for hydrogen')
             end if
 
 !     --- determine bond lengths
@@ -78,7 +79,7 @@
 
             if (iufrom.ne.ju) then
                write(iou,*) 'iu,ju,iufrom',iu,ju,iufrom
-               call cleanup('ju not equal to iufrom')
+               call err_exit('ju not equal to iufrom')
             end if
 
             jtvib = itvib(imolty,iu,iv)
@@ -235,7 +236,7 @@
 
                      if (ju.ne.ijben2(imolty,iu,ib)) then
                         write(iou,*) 'ju,ijben2',ju,ijben2(imolty,iu,ib)
-                        call cleanup('ju not equal to ijben2 in place')
+                        call err_exit('ju not equal to ijben2 in place')
                      end if
 
                      type = itben(imolty,iu,ib)
@@ -447,7 +448,7 @@
                         
                      if (.not. lexist(jut4)) then
                         write(iou,*) 'jut4,jut3,jut2,iu', jut4,jut3,jut2,iu
-                        call cleanup('trouble jut4 in place')
+                        call err_exit('trouble jut4 in place')
                      end if
                      
                      jttor = ittor(imolty,iu,it)
@@ -514,7 +515,7 @@
                end if
             end do
 
-            call cleanup('BIG TIME SCREWUP IN PLACE')
+            call err_exit('BIG TIME SCREWUP IN PLACE')
 
          end if
  20      continue

@@ -5,7 +5,7 @@
 !    *** Matt McGrath, October 1, 2009                               ***
 !    *******************************************************************
  
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
@@ -89,7 +89,6 @@
          llplace(imolty)=.FALSE.
          lwell(imolty)=.FALSE.
          nrig(imolty)=0
-         lbias(imolty)=.false.
       end do
 
       DO iunit=1,numax

@@ -3,7 +3,7 @@
 ! **  calculates interaction of molecule i with an external field E  ***
 ! **  added 06/24/07 by KM                                           ***
 ! **********************************************************************
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math

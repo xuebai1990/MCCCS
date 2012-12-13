@@ -1,7 +1,7 @@
       program topmon
 
-      use global_data,only:ierr,myid,numprocs
-      use global_data,only:ierr,myid,numprocs,thread_id,thread_num,thread_num_max,thread_num_proc
+      use sim_system,only:ierr,myid,numprocs
+      use sim_system,only:ierr,myid,numprocs,thread_id,thread_num,thread_num_max,thread_num_proc
       use var_type,only:normal_int,default_path_length
       use util_timings,only:time_init
       implicit none

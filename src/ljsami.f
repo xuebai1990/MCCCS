@@ -4,7 +4,7 @@
 !    ** calculates SAMI's LJ and 12+3 energy for a bead.    **
 !    *********************************************************
  
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math

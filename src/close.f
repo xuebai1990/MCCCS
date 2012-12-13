@@ -13,7 +13,7 @@
 !     **            on December 1999, BUT IT DOES WORK            **
 !     **************************************************************
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math

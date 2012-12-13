@@ -8,10 +8,11 @@
 !     ** the particle number.                                   **
 !     ************************************************************
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -237,7 +238,7 @@
                   lintbx = .true.
                   write(iou,*) 'nxcm,nycm,nzcm',nxcm,nycm,nzcm
                   write(iou,*) 'dx,dy,dz',dx,dy,dz
-                  if (iwarn .ne. 0) call cleanup('')
+                  if (iwarn .ne. 0) call err_exit('')
                end if
                iadjust = iadjust + 1
                goto 25

@@ -17,6 +17,7 @@ MODULE fparser
   !
   !------- -------- --------- --------- --------- --------- --------- --------- -------
   USE var_type,                           ONLY: rn => double_precision
+  USE util_runtime,                       ONLY: err_exit
 
   IMPLICIT NONE
   !------- -------- --------- --------- --------- --------- --------- --------- -------
@@ -215,7 +216,7 @@ CONTAINS
              IF (MOD(Comp(i)%Stack(SP),REAL(ipow,KIND=rn))==0.0_rn) THEN
                 Comp(i)%Stack(SP-1)=Comp(i)%Stack(SP-1)**ipow
              ELSE
-                CALL cleanup("evalf","Error: Negative floating-point value raised to a real power!")
+                CALL err_exit("evalf: Negative floating-point value raised to a real power!")
              END IF
           ELSE
              Comp(i)%Stack(SP-1)=Comp(i)%Stack(SP-1)**Comp(i)%Stack(SP)
@@ -944,7 +945,7 @@ CONTAINS
           IF(ABS(a(i,i)-a(i-1,i-1)).GE.safe*err)RETURN
        END DO
     ELSE
-       CALL cleanup("evalfd","Error: DX provided equals zero!!")
+       CALL err_exit("evalfd: DX provided equals zero!!")
     END IF
     vals(ipar)=xval
   END FUNCTION evalfd

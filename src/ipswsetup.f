@@ -2,10 +2,11 @@
 !
 ! setup maginns interphase switch
 !
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -26,8 +27,8 @@
       logical::lhm,llwell
 
       ibox = 1
-      if (lmipsw.and.(nbox.gt.1)) call cleanup('ipsw only for 1 box')
-      if (lmipsw.and.lnpt.and.pmvol.gt.1.0d-7) call cleanup('ipsw only for NVT')
+      if (lmipsw.and.(nbox.gt.1)) call err_exit('ipsw only for 1 box')
+      if (lmipsw.and.lnpt.and.pmvol.gt.1.0d-7) call err_exit('ipsw only for NVT')
       read(35,*)
       read(35,*) (lwell(i),i=1,nmolty)
       read(35,*)
@@ -45,29 +46,29 @@
       end do 
       if (nw.lt.tnw) then
          write(iou,*) 'increase nw in ipswpar to ', tnw
-         call cleanup('')
+         call err_exit('')
       end if
       read(35,*)
       read(35,*) bwell
       read(35,*)
       read(35,*) lstagea, lstageb, lstagec
       if (lmipsw) then
-         if ((.not.lstagea).and.(.not.lstageb).and.(.not.lstagec)) call cleanup('one stage must be true')
+         if ((.not.lstagea).and.(.not.lstageb).and.(.not.lstagec)) call err_exit('one stage must be true')
       end if
-      if (llwell.and.lstagea) call cleanup('ipsw well NOT for stage a')
+      if (llwell.and.lstagea) call err_exit('ipsw well NOT for stage a')
       if (lstagea) then
-         if (lstageb.or.lstagec) call cleanup('only one lstage must be true')
+         if (lstageb.or.lstagec) call err_exit('only one lstage must be true')
       end if
       if (lstageb) then
-         if (lstagea.or.lstagec) call cleanup('only one lstage must be true')
+         if (lstagea.or.lstagec) call err_exit('only one lstage must be true')
       end if
       if (lstagec) then
-         if (lstagea.or.lstageb) call cleanup('only one lstage must be true')
+         if (lstagea.or.lstageb) call err_exit('only one lstage must be true')
       end if
       read(35,*)
       read(35,*) etais, lambdais
-      if ((lambdais.le.-1.0d-6).or.(lambdais.ge.1.000001)) call cleanup('lambdais must be between 0 and 1')
-      if ((etais.le.-1.0d-6).or.(etais.ge.1.000001)) call cleanup('etais must be between 0 and 1')
+      if ((lambdais.le.-1.0d-6).or.(lambdais.ge.1.000001)) call err_exit('lambdais must be between 0 and 1')
+      if ((etais.le.-1.0d-6).or.(etais.ge.1.000001)) call err_exit('etais must be between 0 and 1')
       read(35,*)
       if (lsolid(ibox).and.(.not.lrect(ibox))) then
          read(35,*) hmata(1),hmata(2),hmata(3)
@@ -91,13 +92,13 @@
                write(iou,*) hm(1),hm(2),hm(3)
                write(iou,*) hm(4),hm(5),hm(6)
                write(iou,*) hm(7),hm(8),hm(9)
-               call cleanup('')
+               call err_exit('')
             end if
          elseif (.not.lsolid(ibox)) then
             lx = (1.0d0-lambdais)*lena+lambdais*lenc
             if (dabs(boxlx(1)-lx).gt.1.0d-6) then
                write(iou,*) 'input correct boxl', lx
-               call cleanup('')
+               call err_exit('')
             end if
          end if
       end if
@@ -112,13 +113,13 @@
                write(iou,*) hmata(1),hmata(2),hmata(3)
                write(iou,*) hmata(4),hmata(5),hmata(6)
                write(iou,*) hmata(7),hmata(8),hmata(9)
-               call cleanup('')
+               call err_exit('')
             end if
 !	write(iou,*) boxlx(1),lena
          elseif (.not.lsolid(ibox)) then
             if (dabs(boxlx(1)-lena).gt.1.0d-6) then
                write(iou,*) 'input correct boxl', lena
-               call cleanup('')
+               call err_exit('')
             end if
          end if
       end if
@@ -133,12 +134,12 @@
                write(iou,*) hmatc(1),hmatc(2),hmatc(3)
                write(iou,*) hmatc(4),hmatc(5),hmatc(6)
                write(iou,*) hmatc(7),hmatc(8),hmatc(9)
-               call cleanup('')
+               call err_exit('')
             end if
          elseif (.not.lsolid(ibox)) then
             if (dabs(boxlx(1)-lenc).gt.1.0d-6) then
                write(iou,*) 'input correct boxl', lenc
-               call cleanup('')
+               call err_exit('')
             end if
          end if
       end if
@@ -154,7 +155,7 @@
       read(35,*)
       read(35,*) iratipsw
       if (lmipsw.and.lstageb) then
-         if (mod(iratipsw,iratp).ne.0) call cleanup('iratipsw must be integer multiple of iratp if lstageb is true')
+         if (mod(iratipsw,iratp).ne.0) call err_exit('iratipsw must be integer multiple of iratp if lstageb is true')
       end if
       do i = 1, nmolty
          if (lwell(i)) then

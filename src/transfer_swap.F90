@@ -1,4 +1,26 @@
-      subroutine swap(bsswap,bnswap,bnswap_in,bnswap_out,cnt_wf1, cnt_wf2,cnt_wra1,cnt_wra2)
+module transfer_swap
+  use sim_system
+  use var_type
+  use const_phys
+  use const_math
+  use util_runtime,only:err_exit
+  use util_math
+  use util_string
+  use util_files
+  use util_timings
+  use transfer_shared,only:lopt_bias,update_bias
+  implicit none
+  include 'common.inc'
+  private
+  save
+  public::swap,init_swap,cnt,output_swap_stats,lbias,lavbmc1,lavbmc2,lavbmc3
+
+  real(KIND=double_precision)::bsswap(ntmax,npabmax,nbxmax*2), bnswap(ntmax,npabmax,nbxmax*2),bnswap_in(ntmax,2), bnswap_out(ntmax,2)
+  integer(KIND=normal_int)::cnt_wf1(0:6,0:6,4),cnt_wf2(0:6,0:6,4),cnt_wra1(1000,4),cnt_wra2(1000,4)
+! CLUSTERBIAS.INC
+  logical::lbias(ntmax),lavbmc1(ntmax),lavbmc2(ntmax),lavbmc3(ntmax)
+contains
+  subroutine swap
       
 !    ********************************************************************
 !    ** removes a molecule from one box and inserts it into the other  **
@@ -8,16 +30,6 @@
 !    ** 9-18-97                                                        ** 
 !    ********************************************************************
  
-      use global_data
-      use var_type
-      use const_phys
-      use const_math
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
-      implicit none
-      include 'common.inc'
       
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
@@ -46,9 +58,9 @@
       integer(KIND=normal_int)::boxins,boxrem,imol,ichoi,ip,iwalk,idum ,iins1,imolty1
       integer(KIND=normal_int)::istt,iett,itype,ipair,ipairb,beg ,flagon
 
-      integer(KIND=normal_int)::iutry,icbu,ifrom,irem,iins,glist,findex ,iii,j,ibox,iunit,ic,pointp,imolty,imt,jmt,igrow ,pointp2,jins ,jmolty,neighj_num,neighk_num ,joffset,koffset,kmolty,kins,target ,cnt_wf1 ,cnt_wf2,neigh_old,cnt_wra1,cnt_wra2
+      integer(KIND=normal_int)::iutry,icbu,ifrom,irem,iins,glist,findex ,iii,j,ibox,iunit,ic,pointp,imolty,imt,jmt,igrow ,pointp2,jins ,jmolty,neighj_num,neighk_num ,joffset,koffset,kmolty,kins,target,neigh_old
 
-      dimension glist(numax),cnt_wf1(0:6,0:6,4),cnt_wf2(0:6,0:6,4), cnt_wra1(1000,4),cnt_wra2(1000,4)
+      dimension glist(numax)
 
       real(KIND=double_precision)::sx,sy,sz,ddum(27)
 
@@ -57,7 +69,6 @@
       dimension qion(numax)
       real(KIND=double_precision)::rxuold,ryuold,rzuold
       dimension rxuold(numax),ryuold(numax),rzuold(numax)
-      real(KIND=double_precision)::bsswap,bnswap,bnswap_in,bnswap_out
       real(KIND=double_precision)::random,rmol,rbf,bsum
       real(KIND=double_precision)::waddnew,waddold
 
@@ -66,7 +77,6 @@
 
       real(KIND=double_precision)::v1insext,v1remext,v1ins,w1ins,v1rem ,w1rem,v1insint,v1remint,v1insewd,v1remewd,wnlog,wolog,wdlog ,wratio,vinsta,vremta,volins,volrem,rho,arg,coru,v1inselc ,v1remelc
       real(KIND=double_precision)::rvol,x,y,z,rijsq,wbias_ins,wbias_rem ,r,xi1,xi2,xisq
-      dimension bsswap(ntmax,npabmax,nbxmax*2), bnswap(ntmax,npabmax ,nbxmax*2),bnswap_in(ntmax,2), bnswap_out(ntmax,2)
       real(KIND=double_precision)::vrecipn,vrecipo,vdum,whins,whrem
       real(KIND=double_precision)::rxuh,ryuh,rzuh,delenh,vtrhext ,vtrhintra,vtrhinter,vtrhelect,vtrhewald,vtrhtg,bfach
      
@@ -142,7 +152,7 @@
          end if
 !     write(iou,*) 'boxins:',boxins,'boxrem:',boxrem
          if ( .not. (lgibbs .or. lgrand) .and. lswapinter ) then
-            call cleanup('no interbox swap if not gibbs/grand ensemble!')
+            call err_exit('no interbox swap if not gibbs/grand ensemble!')
          end if
 
 ! *** select a chain in BOXREM at random ***
@@ -169,7 +179,7 @@
             if ( moltyp(irem) .ne. imolty ) write(iou,*) 'screwup swap, irem:',irem,moltyp(irem),imolty
             ibox = nboxi(irem)
             if ( ibox .ne. boxrem ) then
-               call cleanup('problem in swap')
+               call err_exit('problem in swap')
             end if
          end if
 
@@ -246,7 +256,7 @@
 
          if (boxins .ne. boxrem) then
             write(iou,*) 'avbmc, boxins, boxrem:',boxins,boxrem
-            call cleanup('')
+            call err_exit('')
          end if
          
 ! *********************
@@ -325,7 +335,7 @@
 
                if ( moltyp(kins) .ne. kmolty )  write(iou,*) 'screwup swap, kins:' ,kins,moltyp(kins),kmolty
                if ( nboxi(kins) .ne. boxins ) then 
-                  call cleanup('problem in swap with kins')
+                  call err_exit('problem in swap with kins')
                end if
             end if
             neighk_num = neigh_cnt(kins)
@@ -379,7 +389,7 @@
                ibox = nboxi(irem)
                if ( ibox .ne. boxrem ) then
                   write(iou,*) 'problem in swap'
-                  call cleanup('')
+                  call err_exit('')
                end if
                iins = irem
                lremk_in = .false.
@@ -458,7 +468,7 @@
                   ibox = nboxi(irem)
                   if ( ibox .ne. boxrem ) then
                      write(iou,*) 'problem in swap'
-                     call cleanup('')
+                     call err_exit('')
                   end if
                   iins = irem
                end if
@@ -659,7 +669,7 @@
          end do
          if (ip.gt.ichoi) then
             write(iou,*) 'w1ins:',w1ins,'rbf:',rbf
-            call cleanup('big time screwup -- w1ins')
+            call err_exit('big time screwup -- w1ins')
          end if
       else
          iwalk = 1
@@ -762,7 +772,7 @@
          
          if (ovrlap) then
             write(iou,*) 'iins',iins,'irem',irem
-            call cleanup('strange screwup in DC-CBMC swap')
+            call err_exit('strange screwup in DC-CBMC swap')
          end if
 ! v1insewd, vnewewald and vnewintra now accounted for in v from energy
 !$$$         delen = v - ( vnewinter + vnewext +vnewelect) 
@@ -860,7 +870,7 @@
                end if
             end do
             write(iou,*) 'screw up in explicit hydrogen'
-            call cleanup('')
+            call err_exit('')
          else
             iwalk = 1
          end if
@@ -1044,7 +1054,7 @@
 
          if (boxins .ne. boxrem) then
             write(iou,*) 'avbmc, boxins, boxrem:',boxins,boxrem
-            call cleanup('')
+            call err_exit('')
          end if
          
          if ( lbias(imolty) ) then
@@ -1269,7 +1279,7 @@
             
          if (ovrlap) then
             write(iou,*) 'disaster ovrlap in old conf SWAP'
-            call cleanup('')
+            call err_exit('')
          end if
 ! v now includes vnewintra,v1remewd and voldewald, take out
 !$$$         deleo = v - ( voldinter + voldext +voldelect) 
@@ -1301,7 +1311,7 @@
 !         if (irem .eq. 118)  write(iou,*) 'for old',vinter
          if (ovrlap) then
             write(iou,*) 'disaster ovrlap in old conf SWAP'
-            call cleanup('')
+            call err_exit('')
          end if
          deleo = v + vtorold
          voldt     = voldt + deleo
@@ -1606,7 +1616,7 @@
          wratio = wratio * ctorfo / ctorfn
       end if
        
-!         wratio = 1.0   
+      if (lopt_bias(imolty)) call update_bias(log(wratio*2.0)/beta,boxrem,boxins,imolty)
 
       if ( random() .le. wratio ) then
 !         write(iou,*) 'SWAP MOVE ACCEPTED',irem
@@ -1651,25 +1661,25 @@
 ! ---    update energies:
 
          vbox(boxrem)     = vbox(boxrem)     - voldt - total_NBE
-	 vinterb(boxrem)  = vinterb(boxrem)  - voldinter
+         vinterb(boxrem)  = vinterb(boxrem)  - voldinter
          vtailb(boxrem)   = vtailb(boxrem)   - vremta
-	 vintrab(boxrem)  = vintrab(boxrem)  - voldintra
-	 vvibb(boxrem)    = vvibb(boxrem)    - voldbvib - vvibn
-	 vtgb(boxrem)     = vtgb(boxrem)     - voldtg - vtgn
-	 vextb(boxrem)    = vextb(boxrem)    - voldext
-	 vbendb(boxrem)   = vbendb(boxrem)   - voldbb - vbendn
+         vintrab(boxrem)  = vintrab(boxrem)  - voldintra
+         vvibb(boxrem)    = vvibb(boxrem)    - voldbvib - vvibn
+         vtgb(boxrem)     = vtgb(boxrem)     - voldtg - vtgn
+         vextb(boxrem)    = vextb(boxrem)    - voldext
+         vbendb(boxrem)   = vbendb(boxrem)   - voldbb - vbendn
          velectb(boxrem)  = velectb(boxrem)  - (voldelect+voldewald)
          vflucqb(boxrem)  = vflucqb(boxrem)  - voldflucq
          
  
          vbox(boxins)     = vbox(boxins)     + vnewt + total_NBE
-	 vinterb(boxins)  = vinterb(boxins)  + vnewinter
-	 vtailb(boxins)   = vtailb(boxins)   + vinsta
-	 vintrab(boxins)  = vintrab(boxins)  + vnewintra
-	 vvibb(boxins)    =  vvibb(boxins)   + vnewbvib + vvibn
-	 vtgb(boxins)     = vtgb(boxins)     + vnewtg + vtgn
-	 vextb(boxins)    = vextb(boxins)    + vnewext
-	 vbendb(boxins)   = vbendb(boxins)   + vnewbb + vbendn
+         vinterb(boxins)  = vinterb(boxins)  + vnewinter
+         vtailb(boxins)   = vtailb(boxins)   + vinsta
+         vintrab(boxins)  = vintrab(boxins)  + vnewintra
+         vvibb(boxins)    =  vvibb(boxins)   + vnewbvib + vvibn
+         vtgb(boxins)     = vtgb(boxins)     + vnewtg + vtgn
+         vextb(boxins)    = vextb(boxins)    + vnewext
+         vbendb(boxins)   = vbendb(boxins)   + vnewbb + vbendn
          velectb(boxins)  = velectb(boxins)  + (vnewelect+vnewewald)
          vflucqb(boxins)  = vflucqb(boxins)  + vnewflucq
          
@@ -1782,5 +1792,82 @@
       
 ! -----------------------------------------------------------------
       return
-      end
-      
+  end subroutine swap
+
+  subroutine init_swap
+    bnswap=0.0_double_precision
+    bsswap=0.0_double_precision
+    bnswap_in=0.0_double_precision
+    bnswap_out=0.0_double_precision
+    cnt_wf1=0
+    cnt_wf2=0
+    cnt_wra1=0
+    cnt_wra2=0
+  end subroutine init_swap
+
+  subroutine output_swap_stats(io_output)
+    integer,intent(in)::io_output
+    integer::i,j,ibox,jbox,jbox_max
+
+    write(io_output,*)  
+    write(io_output,*) '### Molecule swap       ###'
+    write(io_output,*)
+    do i = 1, nmolty
+       write(io_output,*) 'molecule typ =',i
+       do j=1,nswapb(i)
+          if ( box1(i,j) .eq. box2(i,j) ) then
+             jbox_max = 1
+          else
+             jbox_max = 2
+          end if
+          do jbox = 1,jbox_max
+             if ( jbox .eq. 1 ) ibox = box1(i,j)
+             if ( jbox .eq. 2 ) ibox = box2(i,j)
+             write(io_output,"('between box ',i2,' and ',i2,' into box',i2, '   uattempts =',f12.1,' attempts =',f9.1 ,'   accepted =',f8.1)") box1(i,j),box2(i,j),ibox, bsswap(i,j,ibox),bnswap(i,j,ibox), bnswap(i,j,ibox+nbox)
+             if (bnswap(i,j,ibox) .gt. 0.5d0) then
+                bsswap(i,j,ibox) = bsswap(i,j,ibox+nbox)* 100.0d0/bsswap(i,j,ibox)
+                bnswap(i,j,ibox) = bnswap(i,j,ibox+nbox)* 100.0d0/bnswap(i,j,ibox)
+                write(io_output,"(' suc.growth % =',f7.3,'   accepted % =',f7.3)") bsswap(i,j,ibox),bnswap(i,j,ibox)
+             end if
+          end do
+       end do
+       write(io_output,"('number of times move in: ', f12.1,  '  accepted=',f8.1)") bnswap_in(i,1), bnswap_in(i,2)
+       write(io_output,"('number of times move out: ', f12.1,  '  accepted=',f8.1)") bnswap_out(i,1), bnswap_out(i,2)
+    end do
+  end subroutine output_swap_stats
+
+  subroutine cnt
+    logical::lpr
+    integer::i,j,nnn
+
+    lpr = .false.
+    do i = 1,ntmax
+       if (lbias(i)) then
+          lpr = .true.
+       end if
+    end do
+
+    if (lpr.and.myid.eq.0) then
+       do nnn = 1,4
+          write(31,*)
+          write(31,*) 'nnn:',nnn
+          do i = 0,6
+             do j = 0,6
+                if (cnt_wf1(i,j,nnn) .gt. 0 ) then
+                   write(31,*) i,j,cnt_wf1(i,j,nnn),cnt_wf2(i,j,nnn)
+                end if
+             end do
+          end do
+          write(32,*) 
+          write(32,*) 'nnn:', nnn
+          write(33,*)
+          write(33,*) 'nnn:', nnn
+
+          do i = 1,1000
+             if ( cnt_wra1(i,nnn) .gt. 0 )  write(32,*) (dble(i)-0.5d0)* 0.1d0-95.0d0,cnt_wra1(i,nnn)
+             if ( cnt_wra2(i,nnn) .gt. 0 )  write(33,*) (dble(i)-0.5d0)* 0.1d0-95.0d0,cnt_wra2(i,nnn)
+          end do
+       end do
+    end if
+  end subroutine cnt
+end module transfer_swap

@@ -1,8 +1,9 @@
 module zeolite
-  use global_data
+  use sim_system
   use var_type
   use const_math
   use const_phys
+  use util_runtime,only:err_exit
   use util_math
   use util_timings, only: time_now
   use util_files
@@ -70,13 +71,13 @@ contains
     io_input=get_iounit()
     open(unit=io_input,access='sequential',action='read',file=file_in,form='formatted',iostat=jerr,status='old')
     if (jerr.ne.0) then
-       call cleanup('cannot open zeolite input file')
+       call err_exit('cannot open zeolite input file')
     end if
 
     read(UNIT=io_input,NML=zeolite_in,iostat=jerr)
     if (jerr.ne.0.and.jerr.ne.-1) then
        write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-       call cleanup('reading namelist: zeolite_in')
+       call err_exit('reading namelist: zeolite_in')
     end if
     close(io_input)
 
@@ -129,7 +130,7 @@ contains
     if (lsurface_area) nmolty=nmolty-1
 
     allocate(zgrid(3,ztype%ntype,0:zunit%ngrid(1)-1,0:zunit%ngrid(2)-1,0:zunit%ngrid(3)-1),egrid(0:zunit%ngrid(1)-1,0:zunit%ngrid(2)-1,0:zunit%ngrid(3)-1,zpot%ntype),zpot%param(3,ztype%ntype,zpot%ntype),zpot%table(zpot%ntype),stat=jerr)
-    if (jerr.ne.0) call cleanup('addAllBeadTypes: allocation failed')
+    if (jerr.ne.0) call err_exit('addAllBeadTypes: allocation failed')
 
     do igtype=1,zpot%ntype
        idi=list(igtype)
@@ -194,12 +195,12 @@ contains
           ! --- read zeolite table from disk
           if (myid.eq.0) write(iou,'(A,/)') 'read in tabulated potential'
           read(io_ztb) zunittmp,zangtmp,ngridtmp,zntypetmp,lewaldtmp,ltailczeotmp,lshifttmp,rcuttmp
-          if (ANY(abs(zunittmp-zunit%boxl).gt.eps).or.ANY(ngridtmp.ne.zunit%ngrid).or.(zntypetmp.ne.ztype%ntype)) call cleanup('problem 1 in zeolite potential table')
+          if (ANY(abs(zunittmp-zunit%boxl).gt.eps).or.ANY(ngridtmp.ne.zunit%ngrid).or.(zntypetmp.ne.ztype%ntype)) call err_exit('problem 1 in zeolite potential table')
           do igtype=1,ztype%ntype
              read(io_ztb) atom
              if (trim(ztype%name(igtype))/=trim(atom)) then
                 write(iou,*) igtype,' atom should be ',trim(atom)
-                call cleanup('problem 2 in zeolite potential table')
+                call err_exit('problem 2 in zeolite potential table')
              end if
           end do
           do k=0,zunit%ngrid(3)-1
@@ -218,7 +219,7 @@ contains
 !              close(io_ztb)
 !              open(unit=io_ztb,access='sequential',action='write',file=file_ztb,form='binary',iostat=jerr,status='unknown')
 !              if (jerr.ne.0) then
-!                 call cleanup('cannot create file for tabulated potential')
+!                 call err_exit('cannot create file for tabulated potential')
 !              end if
 !              write(io_ztb) zunittmp,zangtmp,ngridtmp,zntypetmp,lewaldtmp,ltailczeotmp,lshifttmp,rcuttmp
 !              do igtype=1,ztype%ntype
@@ -251,7 +252,7 @@ contains
              write(iou,*) 'make tabulated potential'
              open(unit=io_ztb,access='sequential',action='write',file=file_ztb,form='binary',iostat=jerr,status='unknown')
              if (jerr.ne.0) then
-                call cleanup('cannot create file for tabulated potential')
+                call err_exit('cannot create file for tabulated potential')
              end if
              write(io_ztb) zunit%boxl,zcell%ang(1)%val,zcell%ang(2)%val,zcell%ang(3)%val,zunit%ngrid,ztype%ntype,lewald,ltailcZeo,lshift,zcell%cut
              do igtype=1,ztype%ntype
@@ -490,7 +491,7 @@ contains
        if (zpot%table(igtype).eq.idi) exit
     end do
     if (igtype.gt.zpot%ntype) then
-       call cleanup('exzeo: no such bead type')
+       call err_exit('exzeo: no such bead type')
     end if
 
     if (present(ignoreTable)) then
@@ -674,7 +675,7 @@ contains
        if (ANY(position(:,i).ge.1)) then
           write(iou,'(3A,I6)') 'Error in ',TRIM(__FILE__),':',__LINE__
           write(iou,*) i,position(:,i),scoord,zunit%dup
-          call cleanup('')
+          call err_exit('')
        end if
     END DO
 

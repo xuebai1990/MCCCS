@@ -1,4 +1,22 @@
-      subroutine swatch 
+module transfer_swatch
+  use sim_system
+  use var_type
+  use const_phys
+  use const_math
+  use util_runtime,only:err_exit
+  use util_math
+  use util_string
+  use util_files
+  use util_timings
+  use transfer_shared,only:lopt_bias,update_bias
+  implicit none
+  include 'common.inc'
+  private
+  save
+  public::swatch
+
+contains
+  subroutine swatch 
 
 !      **********************************************************
 !    *** Added intrabox move for two particles within one box   ***
@@ -7,17 +25,6 @@
 !    *** several critical bug fixes as well.                    ***
 !    ***                                     9-25-02 JMS        ***
 !      **********************************************************
- 
-      use global_data
-      use var_type
-      use const_phys
-      use const_math
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
-      implicit none
-      include 'common.inc'
  
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
@@ -197,7 +204,7 @@
 
            iboxi = nboxi(imola)
 
-           if (iboxi .ne. box) call cleanup('problem in iswatch')
+           if (iboxi .ne. box) call err_exit('problem in iswatch')
 
 !     *** get particle of type b ***
 
@@ -207,7 +214,7 @@
            if (moltyp(imolb) .ne. imoltb)  write(iou,*) 'screwup in iswatch'
            iboxi = nboxi(imolb)
 
-           if (iboxi .ne. box) call cleanup('problem in iswatch')
+           if (iboxi .ne. box) call err_exit('problem in iswatch')
          end if  
 !     *** add one attempt to the count for iparty
 !$$$  bniswat(iparty,box) = bniswat(iparty,box) + 1.0d0   
@@ -260,7 +267,7 @@
 !$$$     &        prev(type_b+2*(izz-1))
 !$$$         end do
 !$$$         
-!$$$         call cleanup('')
+!$$$         call err_exit('')
       
 !     *** store number of units in iunita and iunitb
          iunita = nunit(imolta)
@@ -641,7 +648,7 @@
             
             if (lterm) then
                write(iou,*) 'other ',other,' self ',self,ic
-               call cleanup('interesting screwup in CBMC iswatch')
+               call err_exit('interesting screwup in CBMC iswatch')
             end if
 
 !     *** add on the changes in energy ***
@@ -743,7 +750,7 @@
                nboxi(imolb) = thisbox
             end if
 
-            if (lterm) call cleanup('disaster ovrlap in old conf iSWATCH')
+            if (lterm) call err_exit('disaster ovrlap in old conf iSWATCH')
             deleo = v - ( voldt - (voldbvib + voldbb + voldtg) ) 
 
             tweiold = tweiold*dexp(-beta*deleo)
@@ -901,7 +908,7 @@
             call ctrmas(.false.,box,imolb,8)
             call ctrmas(.false.,box,imola,8)
 
-            if (licell .and. (box .eq. boxlink))  call cleanup('not yet implemented!')
+            if (licell .and. (box .eq. boxlink))  call err_exit('not yet implemented!')
 
 !     --- call nearest neighbor list
             if ( lneigh ) then
@@ -933,7 +940,7 @@
             iboxa = parbox(iboxal,boxa,imolta)
             if ( moltyp(iboxa) .ne. imolta ) write(iou,*) 'screwup'
             iboxia = nboxi(iboxa)
-            if (iboxia .ne. boxa) call cleanup('problem in swatch')
+            if (iboxia .ne. boxa) call err_exit('problem in swatch')
 
 !     ---get particle from box b
 
@@ -941,7 +948,7 @@
             iboxb = parbox(iboxbl,boxb,imoltb)
             if ( moltyp(iboxb) .ne. imoltb ) write(iou,*) 'screwup'
             iboxib = nboxi(iboxb)
-            if (iboxib .ne. boxb) call cleanup('problem in swatch')
+            if (iboxib .ne. boxb) call err_exit('problem in swatch')
 
 !cc--!!!JLR - for test write coordinates of a and b                                              
 !            open(91,file='a_init.xyz',status='unknown')                                 
@@ -1213,7 +1220,7 @@
             
             if (lterm) then
 !     write(iou,*) 'other ',other,' self ',self
-!     call cleanup('interesting screwup in CBMC swatch')
+!     call err_exit('interesting screwup in CBMC swatch')
                return
             end if
             delen = v - ( vnewt - (vnewbvib + vnewbb + vnewtg )) 
@@ -1290,7 +1297,7 @@
 
             call energy (self,imolty, v, vintra,vinter,vext,velect ,vewald,iii,iboxold, 1,iunit,.true.,lterm,.false.,vdum ,.false.,.false.)
 
-            if (lterm) call cleanup('disaster ovrlap in old conf SWATCH')
+            if (lterm) call err_exit('disaster ovrlap in old conf SWATCH')
             deleo = v - ( voldt - (voldbvib + voldbb + voldtg) ) 
             
             tweiold = tweiold*dexp(-beta*deleo)
@@ -1467,6 +1474,9 @@
          end if
          wswat = ( tweight / tweiold ) * ( dble(orgaia*orgbib) / dble((orgbia+1)*(orgaib+1)) ) * dexp(beta*(eta2(boxa,imolta) +eta2(boxb,imoltb)-eta2(boxa,imoltb) -eta2(boxb,imolta)))
 
+         if (lopt_bias(imolta)) call update_bias(log(wswat*2.0)/beta/2.0,boxa,boxb,imolta)
+         if (lopt_bias(imoltb)) call update_bias(log(wswat*2.0)/beta/2.0,boxb,boxa,imoltb)
+
 !     write(iou,*) 'imolta,imoltb',imolta,imoltb
 !     write(iou,*) 'wswat,tweight,tweiold',wswat,tweight,tweiold
          if ( random() .le. wswat ) then
@@ -1523,7 +1533,7 @@
             call ctrmas(.false.,boxa,iboxb,8)
             call ctrmas(.false.,boxb,iboxa,8)
 
-            if (licell .and. (boxa .eq. boxlink .or. boxb .eq. boxlink)) call cleanup('not yet implemented!')
+            if (licell .and. (boxa .eq. boxlink .or. boxb .eq. boxlink)) call err_exit('not yet implemented!')
 
 !     --- call nearest neighbor list
             if ( lneigh ) then
@@ -1545,7 +1555,7 @@
 !         do izz = 1,iunitb                                                                    
 !            write(93,*) 'C ', rxu(iboxb,izz),ryu(iboxb,izz),rzu(iboxb,izz)                      
 !         end do                                                                               
-!         call cleanup('END OF SWATCH TEST')                                                           
+!         call err_exit('END OF SWATCH TEST')                                                           
 !cc--!!!JLR - end of coordinate test         
 
          end if
@@ -1556,7 +1566,8 @@
 !      write(iou,*) 'end SWATCH'
 
       return
-      end
+  end subroutine swatch
+end module transfer_swatch
 
 
 

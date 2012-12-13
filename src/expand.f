@@ -6,10 +6,11 @@
 !    ** written on Aug. 4/99 by Bin Chen.                                **
 !    **********************************************************************
       
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -40,7 +41,7 @@
             dchain = 2.0d0
          end if
       end do
-      if ( .not. lexpand(imolty) )  call cleanup('wrong type of molecule for the ES-move')
+      if ( .not. lexpand(imolty) )  call err_exit('wrong type of molecule for the ES-move')
 
       if (lgrand) then
 ! ---    select a chain at random in box 1!
@@ -139,7 +140,7 @@
 
       bnexpc(imolty,ibox) = bnexpc(imolty,ibox) + 1.0d0
 
-      if (ovrlap) call cleanup('disaster ovrlap in old conf of TRAXYZ')
+      if (ovrlap) call err_exit('disaster ovrlap in old conf of TRAXYZ')
       
       if ( lewald ) then
          call recip(ibox,vrecipn,vrecipo,1)

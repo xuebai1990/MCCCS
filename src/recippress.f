@@ -1,6 +1,6 @@
       subroutine recippress(ibox,repress,pxx,pyy,pzz,pxy,pyx,pxz,pzx, pyz,pzy)
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math

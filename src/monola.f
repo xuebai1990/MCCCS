@@ -8,14 +8,18 @@
 ! - starts and controls the simulation
 ! -----------------------------------------------------------------
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
       use util_timings
+      use transfer_shared,only:opt_bias,lopt_bias,freq_opt_bias
+      use transfer_swap,only:swap,init_swap,cnt,output_swap_stats
+      use transfer_swatch,only:swatch
       implicit none
       include 'common.inc'
 !$$$      include 'mpi.inc'
@@ -67,7 +71,7 @@
       real(KIND=double_precision)::starvir,stepvir,starviro
       real(KIND=double_precision)::acv,acvsq,aflv,acpres,acnp,acmove ,acsurf,acboxl,acboxa,asetel,acdens,acnbox,dsq,v,vinter,vtail ,vend,vintra,vvib,vbend,vtg,vext,vstart,press1,dsq1,velect ,vflucq,acnbox2,pres(nbxmax),surf,acvolume
       real(KIND=double_precision)::rm,random,temvol,setx,sety,setz,setel ,pscb1,pscb2,ratvol,avv,temacd,temspd,dblock,dbl1 ,sterr,stdev ,errme
-      real(KIND=double_precision)::bsswap,bnswap,ostwald,stdost,dummy ,debroglie,bnswap_in,bnswap_out, acvkjmol(nener,nbxmax)
+      real(KIND=double_precision)::ostwald,stdost,dummy ,debroglie, acvkjmol(nener,nbxmax)
 
       real(KIND=double_precision), dimension(nprop1,nbxmax ,nbxmax)::acsolpar
  
@@ -95,7 +99,6 @@
       dimension acboxl(nbxmax,3),acboxa(nbxmax,3),acpres(nbxmax)
       dimension acsurf(nbxmax),acvolume(nbxmax)
       dimension acnbox(nbxmax,ntmax),acnbox2(nbxmax,ntmax,20)
-      dimension bsswap(ntmax,npabmax,nbxmax*2), bnswap(ntmax,npabmax,nbxmax*2),bnswap_in(ntmax,2), bnswap_out(ntmax,2)
       real(KIND=double_precision)::molfra,molfrac,gconst,vdum
       dimension mnbox(nbxmax,ntmax),asetel(nbxmax,ntmax), acdens(nbxmax,ntmax),molfra(nbxmax,ntmax)
       real(KIND=double_precision)::molvol(nbxmax),speden(nbxmax)
@@ -105,12 +108,12 @@
       dimension dsq(nprop,nbxmax), stdev(nprop,nbxmax), dsq1(nprop1 ,nbxmax,nbxmax), sterr(nprop,nbxmax),errme(nprop,nbxmax)
       dimension ucheck(ntmax),ddum(27)
 
-      logical::ovrlap,lratio,lratv,lprint,lmv,lrsave,lblock,lucall ,lvirial2,ltfix,lratfix,ltsolute,lsolute,lpr
+      logical::ovrlap,lratio,lratv,lprint,lmv,lrsave,lblock,lucall ,lvirial2,ltfix,lratfix,ltsolute,lsolute
 
       dimension lratfix(ntmax),lsolute(ntmax)
       character(LEN=default_string_length)::enth,enth1
 
-      integer(KIND=normal_int)::bin,cnt_wf1(0:6,0:6,4),cnt_wf2(0:6,0:6 ,4),cnt_wra1(1000,4),cnt_wra2(1000,4)
+      integer(KIND=normal_int)::bin
       real(KIND=double_precision)::binstep,profile(1000)
 
 ! -------------------------------------------------------------------
@@ -123,20 +126,6 @@
 
       do bin = 1,1000
          profile(bin) = 0.0d0
-      end do
-      do i = 0,6
-         do j = 0,6
-            do nnn = 1,4
-               cnt_wf1(i,j,nnn) = 0
-               cnt_wf2(i,j,nnn) = 0
-            end do
-         end do
-      end do
-      do i = 1,1000
-         do j = 1,4
-            cnt_wra1(i,j) = 0
-            cnt_wra2(i,j) = 0
-         end do
       end do
       binstep = 0.05d0
 
@@ -157,26 +146,26 @@
       enddo
 ! KM for MPI
 ! program will hang if stop called from readdat
-! set ldie in readdat and have all processors call cleanup('') here
-      if (ldie) call cleanup('')
+! set ldie in readdat and have all processors call err_exit('') here
+      if (ldie) call err_exit('')
 
 
 ! KM for MPI
 ! check that if lneigh or lgaro numprocs .eq. 1
       if (lneigh.and.numprocs.ne.1) then
          write(iou,*) 'Cannot run on more than 1 processor with  neighbor list!!'
-         call cleanup('')
+         call err_exit('')
       end if
       if (lgaro.and.numprocs.ne.1) then
          write(iou,*) 'Cannot run on more than 1 processor with  lgaro = .true.!!'
-         call cleanup('')
+         call err_exit('')
       end if
 
-! kea don't call cleanup('') for lgaro
+! kea don't call err_exit('') for lgaro
 !      if (lchgall .and. (.not. lewald).and.(.not.lgaro)) then
 !         write(iou,*) 'lchgall is true and lewald is false.',
 !     &        ' Not checked for accuracy!'
-!         call cleanup('')
+!         call err_exit('')
 !      end if
 
       vname(1)  = ' Total energy'
@@ -221,7 +210,7 @@
 ! --- set up expanded ensemble stuff
       if (lexpee) call eesetup
 
-      if (lexpee.and.lmipsw) call cleanup('not for BOTH lexpee AND lmipsw')
+      if (lexpee.and.lmipsw) call err_exit('not for BOTH lexpee AND lmipsw')
       
 ! KM for MPI
 ! only processor 0 opens files     
@@ -429,25 +418,8 @@
 
 ! *** temporary accumulators for conf.bias performance ***
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
-      DO imolty=1,ntmax
-         DO j=1,npabmax
-            DO ibox=1,nbxmax*2
-               bnswap(imolty,j,ibox)=0.0d0
-               bsswap(imolty,j,ibox)=0.0d0
-            end do
-         end do
-      end do
+      call init_swap
       do i = 1, nmolty
-         do j = 1,nswapb(i)
-            do ibox = 1, 2*nbox
-               bsswap(i,j,ibox) = 0.0d0
-               bnswap(i,j,ibox) = 0.0d0
-            end do
-         end do
-         bnswap_in(i,1) = 0.0d0
-         bnswap_out(i,1) = 0.0d0
-         bnswap_in(i,2) = 0.0d0
-         bnswap_out(i,2) = 0.0d0
          bsregr(i,1) = 0.0d0
          bsregr(i,2) = 0.0d0
          bnregr(i) = 0.0d0 
@@ -528,7 +500,7 @@
          v3garob(ibox) = v3garo
          
          if( ovrlap ) then
-            call cleanup('overlap in initial configuration')
+            call err_exit('overlap in initial configuration')
          end if
          vstart(ibox) = vbox(ibox)
          if (myid.eq.0) then
@@ -587,7 +559,7 @@
                call swatch
             else if ( rm .le. pmswap ) then
 !           --- swap move for linear and branched molecules ---
-               call swap(bsswap,bnswap,bnswap_in,bnswap_out, cnt_wf1,cnt_wf2,cnt_wra1,cnt_wra2)
+               call swap
             else if ( rm .le. pmcb ) then
 !           --- configurational bias move ---
                call config
@@ -803,51 +775,51 @@
 ! check this if want to run grand canonical
                if (mod(nconfig,ninstf).eq.0.and.myid.eq.0) then 
 
-	         open(50, file = file_flt, status='old',  					position='append')
-     
-!	         write(50, '(i10,5x,i7,5x,g15.6)') nconfig, 
-!     +			  (ncmt(ibox,i), i=1,nmolty),vhist
+                  open(50, file = file_flt, status='old', position='append')
 
-! Formatting removed until I can figure out how to get <n>i7
-! to work
-	         write(50, * ) nconfig,  			  (ncmt(ibox,i), i=1,nmolty),vhist
-	         close(50)
-	      end if
-	   	    
-	      if(mod(nconfig,ninsth).eq.0.and.nconfig.gt.nequil) then
+                  !	         write(50, '(i10,5x,i7,5x,g15.6)') nconfig, 
+                  !     +			  (ncmt(ibox,i), i=1,nmolty),vhist
 
-	      do imolty = 1, nmolty
-	         nminp(imolty) = min(nminp(imolty),ncmt(ibox,imolty))
-		 nmaxp(imolty) = max(nmaxp(imolty),ncmt(ibox,imolty))
-	      end do
-                 nentry = nentry + 1
+                  ! Formatting removed until I can figure out how to get <n>i7
+                  ! to work
+                  write(50, * ) nconfig,  			  (ncmt(ibox,i), i=1,nmolty),vhist
+                  close(50)
+               end if
+               
+               if(mod(nconfig,ninsth).eq.0.and.nconfig.gt.nequil) then
 
-	         do imolty=1,nmolty
-                    ncmt_list(nentry,imolty) = ncmt(ibox,imolty)
-		    ndist(ncmt(ibox,imolty),imolty) =  	   	    ndist(ncmt(ibox,imolty),imolty) + 1
-		 end do
+                  do imolty = 1, nmolty
+                     nminp(imolty) = min(nminp(imolty),ncmt(ibox,imolty))
+                     nmaxp(imolty) = max(nmaxp(imolty),ncmt(ibox,imolty))
+                  end do
+                  nentry = nentry + 1
 
-		 eng_list(nentry) = vhist
-			 			
-	      end if
+                  do imolty=1,nmolty
+                     ncmt_list(nentry,imolty) = ncmt(ibox,imolty)
+                     ndist(ncmt(ibox,imolty),imolty) =  	   	    ndist(ncmt(ibox,imolty),imolty) + 1
+                  end do
 
-	      if (mod(nconfig,ndumph).eq.0.and.myid.eq.0) then
-	         open(51,file = file_hist,status='old', 	    	      position='append') 
-                 do i=1,nentry 
-		    write(51, * )  		      (ncmt_list(i,imolty), imolty=1,nmolty),  					eng_list(i)     
-		 end do
-		 close(51)
-		 nentry = 0
+                  eng_list(nentry) = vhist
 
-		 do imolty=1,nmolty
-		   open(52, file=file_ndis(imolty), status='unknown')
-		      do n=nminp(imolty),nmaxp(imolty)
-		         write(52,*) n,ndist(n,imolty)
-		      end do
-		      close(52)
-		 end do
-	      end if
-	 end if
+               end if
+
+               if (mod(nconfig,ndumph).eq.0.and.myid.eq.0) then
+                  open(51,file = file_hist,status='old', position='append') 
+                  do i=1,nentry 
+                     write(51, * ) (ncmt_list(i,imolty), imolty=1,nmolty), eng_list(i)     
+                  end do
+                  close(51)
+                  nentry = 0
+
+                  do imolty=1,nmolty
+                     open(52, file=file_ndis(imolty), status='unknown')
+                     do n=nminp(imolty),nmaxp(imolty)
+                        write(52,*) n,ndist(n,imolty)
+                     end do
+                     close(52)
+                  end do
+               end if
+            end if
 
 99       continue
 
@@ -856,6 +828,10 @@
 ! *************************************************************
 
 ! *** perform periodic operations  ***
+
+         if (any(lopt_bias).and.mod(nnn,freq_opt_bias).eq.0) then
+            call opt_bias
+         end if
  
          if ( lgibbs .or. lnpt .and. (.not. lvirial) ) then
             do ibox = 1,nbox
@@ -887,7 +863,7 @@
          end if
 
          if (lucall) then
-            call cleanup('not recently checked for accuracy')
+            call err_exit('not recently checked for accuracy')
 !            do j = 1,nmolty
 !               if ( ucheck(j) .gt. 0 ) then
 !                  call chempt(bsswap,j,ucheck(j))
@@ -1121,36 +1097,7 @@
 ! *******************************************************************
 ! ** ends the loop over cycles                                     **
 ! *******************************************************************
-
-      lpr = .false.
-      do i = 1,ntmax
-         if (lbias(i)) then
-            lpr = .true.
-         end if
-      end do
-
-      if (lpr.and.myid.eq.0) then
-         do nnn = 1,4
-            write(31,*)
-            write(31,*) 'nnn:',nnn
-            do i = 0,6
-               do j = 0,6
-                  if (cnt_wf1(i,j,nnn) .gt. 0 ) then
-                     write(31,*) i,j,cnt_wf1(i,j,nnn),cnt_wf2(i,j,nnn)
-                  end if
-               end do
-            end do
-            write(32,*) 
-            write(32,*) 'nnn:', nnn
-            write(33,*)
-            write(33,*) 'nnn:', nnn
-            
-            do i = 1,1000
-               if ( cnt_wra1(i,nnn) .gt. 0 )  write(32,*) (dble(i)-0.5d0)* 0.1d0-95.0d0,cnt_wra1(i,nnn)
-               if ( cnt_wra2(i,nnn) .gt. 0 )  write(33,*) (dble(i)-0.5d0)* 0.1d0-95.0d0,cnt_wra2(i,nnn)
-            end do
-         end do
-      end if
+       call cnt
 
 !      do bin = 1,1000
 !         write(26,*) binstep*(dble(bin)-0.5d0),profile(bin)/nstep
@@ -1296,31 +1243,8 @@
               end if
            end do
         end if
-        write(iou,*)  
-        write(iou,*) '### Molecule swap       ###'
-        write(iou,*)
-        do i = 1, nmolty
-           write(iou,*) 'molecule typ =',i
-           do j=1,nswapb(i)
-              if ( box1(i,j) .eq. box2(i,j) ) then
-                 jbox_max = 1
-              else
-                 jbox_max = 2
-              end if
-              do jbox = 1,jbox_max
-                 if ( jbox .eq. 1 ) ibox = box1(i,j)
-                 if ( jbox .eq. 2 ) ibox = box2(i,j)
-                 write(iou,66) box1(i,j),box2(i,j),ibox, bsswap(i,j,ibox),bnswap(i,j,ibox), bnswap(i,j,ibox+nbox)
-                 if (bnswap(i,j,ibox) .gt. 0.5d0) then
-                    bsswap(i,j,ibox) = bsswap(i,j,ibox+nbox)* 100.0d0/bsswap(i,j,ibox)
-                    bnswap(i,j,ibox) = bnswap(i,j,ibox+nbox)* 100.0d0/bnswap(i,j,ibox)
-                    write(iou,63) bsswap(i,j,ibox),bnswap(i,j,ibox)
-                 end if
-              end do
-           end do
-           write(iou,68) bnswap_in(i,1), bnswap_in(i,2)
-           write(iou,69) bnswap_out(i,1), bnswap_out(i,2)
-        end do
+
+        call output_swap_stats(iou)
 
         write(iou,*)
         write(iou,*) '### Molecule swatch     ###'
@@ -1338,7 +1262,15 @@
            end do
         end do
 
-        write(iou,*)
+        write(iou,"(/,'New Biasing Potential')")
+        do i=1,nmolty
+           write(iou,"(/,'molecule ',I2,': ',\)") i
+           do j=1,nbox
+              write(iou,"(G16.9,1X,\)") eta2(j,i)
+           end do
+        end do
+
+        write(iou,"(/,/)")
         write(iou,*)    '### Charge Fluctuation  ###'
         write(iou,*)
       
@@ -1372,13 +1304,9 @@
 !     +     ' attempts =',f9.1,'   accepted =',f8.1) 
  62     format('between box ',i2,' and ',i2, '   uattempts =',f12.1,   '  attempts =',f9.1, '  accepted =',f8.1)
 ! --- END JLR 12-1-09
- 63     format(' suc.growth % =',f7.3,'   accepted % =',f7.3)
  65     format(' accepted % =',f7.3)
- 66     format('between box ',i2,' and ',i2,' into box',i2, '   uattempts =',f12.1,' attempts =',f9.1 ,'   accepted =',f8.1)
  67     format(' attempts =',f8.1,'   accepted =',f8.1, ' accepted % =',f7.3)
         
- 68     format('number of times move in: ', f12.1,  '  accepted=',f8.1)
- 69     format('number of times move out: ', f12.1,  '  accepted=',f8.1)
  70     format(' h-matrix attempts =',f8.1,'   ratio =',f6.3, '   max.displ. =',e11.4)
 !        if (lexzeo) then
 !        --- write end-conf to picture file

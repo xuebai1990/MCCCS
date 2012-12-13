@@ -4,10 +4,11 @@
 !     ** computes the growth shedule for CBMC type moves               **
 !     *******************************************************************
 !     movetype=1: called from config.f
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -61,7 +62,7 @@
             lexshed(iu) = .true.
          end do
 
-         if ( kickout .eq. 50 ) call cleanup('kickout is 50')
+         if ( kickout .eq. 50 ) call err_exit('kickout is 50')
  
 !        -- select the first bead to grow from
          if (lrigid(imolty)) then
@@ -97,7 +98,7 @@
 
          if ( invtry .eq. 0 ) then
 !           --- problem, cannot do config move on a 1 bead molecule
-            call cleanup('cannot do CBMC on a one grow unit molecule')
+            call err_exit('cannot do CBMC on a one grow unit molecule')
 
          elseif ( invtry .eq. 1 ) then
 !           --- regrow entire molecule, check nmaxcbmc
@@ -181,7 +182,7 @@
 !              --- problem in logic, should only be one nongrown bead
                write(iou,*) 'invtry,count',invtry,count
                write(iou,*) 'igrow,imolty',igrow,imolty
-               call cleanup('logic problem in schedule')
+               call err_exit('logic problem in schedule')
             end if
          end if   
 
@@ -367,7 +368,7 @@
 
 !        --- non-existant move type
          write(iou,*) 'schedule movetype ',movetype
-         call cleanup('non-valid move type')
+         call err_exit('non-valid move type')
       end if
 
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc

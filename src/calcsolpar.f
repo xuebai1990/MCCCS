@@ -11,7 +11,7 @@
 ! If you have more than two boxes then there are couple changes that need to be done
 ! in order for this subroutine to work. nprop in blkavg.inc needs to be set properly
 ! ************************************************************************************
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math

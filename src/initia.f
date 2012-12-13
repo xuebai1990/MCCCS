@@ -1,9 +1,10 @@
-      subroutine initia(file_struct)
+      subroutine initia
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_files
       implicit none
 !$$$      include 'mpi.inc'
@@ -17,7 +18,6 @@
 !$$$      include 'connect.inc'
 !$$$      include 'cbmc.inc'
 
-      character(len=*),intent(in)::file_struct
       logical::lhere(nmax)
       integer(KIND=normal_int)::io_struct,jerr,i,j,m,m1,m2,n,nn,ic,jc,kc,it,ip1,ip2,ip3 ,ii,jj,iivib,jjben,jjtor,intemp,imol,ibtype,imolty,ibuild ,rand_id,offset,count_chain
 
@@ -81,7 +81,7 @@
             write(iou,*) 'ininch',j,(ininch(i,j),i=1,nmolty)
          end do
          write(iou,*) 'nchain',nchain
-         call cleanup('')
+         call err_exit('')
       end if
 
       do i = 1, nmolty
@@ -89,7 +89,7 @@
             write(iou,*) 'inconsistant number of chains in INITIA'
             write(iou,*) 'moltyp',i,(ininch(i,j),j=1,nbox)
             write(iou,*) 'temtyp:',temtyp(i)
-            call cleanup('')
+            call err_exit('')
          end if
       end do
 
@@ -97,7 +97,7 @@
          unitc = inix(i)*iniy(i)*iniz(i)
          if ( nchbox(i) .gt. unitc ) then
             write(iou,*) 'unit cell too small in box',i
-            call cleanup('')
+            call err_exit('')
          end if
       end do
          
@@ -132,7 +132,7 @@
          if ( mcmt(i,1) .ne. check(i) ) then
             write(iou,*) 'inconsistant number of type in INITIA'
             write(iou,*) 'mcmt(i,total),check(i)',mcmt(i,1),check(i)
-            call cleanup('')
+            call err_exit('')
          end if
       end do
 
@@ -161,7 +161,7 @@
       io_struct=get_iounit()
       open(unit=io_struct,access='sequential',action='readwrite',file=file_struct,form='formatted',iostat=jerr,status='unknown')
       if (jerr.ne.0) then
-         call cleanup('cannot open input file')
+         call err_exit('cannot open input file')
       end if
 
       do i = 1, nmolty         
@@ -188,7 +188,7 @@
                end if
 
                if (nunit(i) .ne. nugrow(i)) then
-                  call cleanup('Cant grow molecule.  Please', ' provide a structure via '//file_struct)
+                  call err_exit('Cant grow molecule.  Please provide a structure via '//file_struct)
                end if
 ! * put the first bead at the origin
                rxnew(1) = 0.0d0
@@ -213,7 +213,7 @@
                if (lterm) then
                   write(iou,*) 'error in initia growing molecule'
                   write(iou,*) 'maybe increasing nchoi would help?'
-                  call cleanup('')
+                  call err_exit('')
                end if
 
 ! * return the value of nchain
@@ -397,7 +397,7 @@
                            end if
                         elseif (invib(intemp,m) .gt. 2) then
                            write(iou,*) 'initia only works for linear', ' molecules!  Maybe you should make', ' a fort.78 file and use lbranch?'
-                           call cleanup('')
+                           call err_exit('')
                         end if
                      end do
 

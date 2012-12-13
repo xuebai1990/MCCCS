@@ -5,7 +5,7 @@
 !   ***  parameters defined in suijtab.f          Bin Chen         *** 
 !   ******************************************************************
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math

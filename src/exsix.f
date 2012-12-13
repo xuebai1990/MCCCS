@@ -4,7 +4,7 @@
 !     ***  calculates the energy using the exp-6 potential       ***
 !     ***  parameters defined in suijtab.f  M.G. Martin          ***
 !     **************************************************************
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math

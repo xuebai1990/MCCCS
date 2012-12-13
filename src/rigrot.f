@@ -9,10 +9,11 @@
 !             All Rigid Molecules Should Come After Riutry
 !     &*&*&*&*&*&*&*&*&*&*&*&* IMPORTANT *&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -196,7 +197,7 @@
             end if
          end do
          write(iou,*) 'screwup in rigrot'
-         call cleanup('screwup in rigrot')
+         call err_exit('screwup in rigrot')
  15      continue
             
          

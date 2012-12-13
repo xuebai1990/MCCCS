@@ -1,9 +1,10 @@
       subroutine suijtab(file_ff,lmixlb,lmixjo)
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -42,7 +43,7 @@
       if(lshift) then
          do ibox = 2,nbox
            if (dabs(rcut(1)-rcut(ibox)).gt.1.0d-10) then
-               call cleanup('Keep rcut for each box same')
+               call err_exit('Keep rcut for each box same')
            end if
          end do
       end if
@@ -188,7 +189,7 @@
 ! --- Keep the rcut same for each box
       do ibox = 2,nbox
          if (dabs(rcut(1)-rcut(ibox)).gt.1.0d-10) then
-            call cleanup('Keep rcut for each box same')
+            call err_exit('Keep rcut for each box same')
          end if
       end do
 ! --- Merk Molecular Force Field (MMFF)
@@ -272,7 +273,7 @@
 ! * special potential for all-atom formic acid from llnl 4/6/04 jms 
       do ibox = 2,nbox
          if (dabs(rcut(1)-rcut(ibox)).gt.1.0d-10) then
-            call cleanup('Keep rcut for each box same')
+            call err_exit('Keep rcut for each box same')
          end if
       end do
 
@@ -3508,7 +3509,7 @@
 ! --- Keep the rcut same for each box
          do ibox = 2,nbox
            if (dabs(rcut(1)-rcut(ibox)).gt.1.0d-10) then
-              call cleanup('Keep rcut for each box same')
+              call err_exit('Keep rcut for each box same')
            end if
          end do
 
@@ -3577,7 +3578,7 @@
      io_ff=get_iounit()
      open(unit=io_ff,access='sequential',action='read',file=file_ff,form='formatted',iostat=jerr,status='old')
      if (jerr.ne.0) then
-        call cleanup('cannot open forcefield input file')
+        call err_exit('cannot open forcefield input file')
      end if
 
 ! Looking for section ATOMS
@@ -3593,7 +3594,7 @@
                 call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
                 if (jerr.ne.0) then
                    write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-                   call cleanup('Reading section ATOMS')
+                   call err_exit('Reading section ATOMS')
                 end if
                 read(line_in,*) i,dum,sigi(i),epsi(i),qelect(i),mass(i),chemid(i)
                 !read(line_in,'(I,4F,2A)') i,sigi(i),epsi(i),qelect(i),mass(i),chemid(i),chname(i)
@@ -3616,7 +3617,7 @@
       if ( lsami ) then
          do ibox = 2,nbox
             if (dabs(rcut(1)-rcut(ibox)).gt.1.0d-10) then
-               call cleanup('Keep rcut for each box same')
+               call err_exit('Keep rcut for each box same')
             end if
          end do
          call susami
@@ -3675,7 +3676,7 @@
               call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
               if (jerr.ne.0) then
                  write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-                 call cleanup('Reading section NONBOND')
+                 call err_exit('Reading section NONBOND')
               end if
               read(line_in,*) i,j,dum,sigmaTmp,epsilonTmp
               ij=(i-1)*nntype+j

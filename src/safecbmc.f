@@ -15,10 +15,11 @@
 !     iinit = 3  does final crankshaft move
 
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -509,7 +510,7 @@
                            end if
                         end do
                         write(iou,*) 'iu,ju,ku',iu,ju,ku
-                        call cleanup('no bond angle for these')
+                        call err_exit('no bond angle for these')
  125                    continue
                         
                         if (pastnum(ju).gt.1) then
@@ -1320,7 +1321,7 @@
                               goto 41
                            end if
                            write(iou,*) 'jut4,jut3,jut2,iu', jut4,jut3,jut2,iu
-                           call cleanup('trouble jut4 in crankshaft')
+                           call err_exit('trouble jut4 in crankshaft')
                         end if
                         jttor = ittor(imolty,iu,it)
 
@@ -1370,7 +1371,7 @@
 !     --- jut4 must already exist or we made a big mistake
                            if (.not. lexist(jut4)) then
                               write(iou,*) 'jut4,jut3,jut2,iu', jut4,jut3,jut2,iu
-                              call cleanup('trouble jut4 in crankshaft')
+                              call err_exit('trouble jut4 in crankshaft')
                            end if
 
                            jttor = ittor(imolty,ku,it)
@@ -1438,7 +1439,7 @@
                            if (abs(thetac).gt.1) then
                               write(iou,*) '*********************' ,'****************************'
                               write(iou,*) iu,ku,xvec(iu,ku) ,yvec(iu,ku) ,zvec(iu,ku),lengthb
-                              call cleanup('shitfuck')
+                              call err_exit('shitfuck')
                            end if
 
                            angle = dacos(thetac)
@@ -1560,7 +1561,7 @@
 
 !                     j = diracc(count)
 
-!                     if (ip.gt.1.and..not.lnew) call cleanup('')
+!                     if (ip.gt.1.and..not.lnew) call err_exit('')
 
 !                     if (lnew) then
 !                        xx(count) = rxa(count,j) - rxnew(iufrom)  

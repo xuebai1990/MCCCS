@@ -2,7 +2,7 @@
 
 ! - calculates the energy of a bead with a graphite surface
 
-        use global_data
+        use sim_system
         use var_type
         use const_math
         use util_math

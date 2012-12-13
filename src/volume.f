@@ -9,10 +9,11 @@
 ! --- perform change of the volume: random walk in ln(vol)
 !
  
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -153,7 +154,7 @@
 
       if (lsolid(boxa) .and. .not. lrect(boxa)) then
          if (lsolid(boxb) .and. .not. lrect(boxb)) then
-            call cleanup('can not perform volume move between two non-re ctangular boxes')
+            call err_exit('can not perform volume move between two non-re ctangular boxes')
          end if
       end if
 
@@ -321,7 +322,7 @@
             write(iou,*) 'w1:',w(1),'w2:',w(2),'w3:',w(3)
             hmat(hbox,jhmat) = hmato(jhmat)
             call dump
-            call cleanup('')
+            call err_exit('')
 !            goto 500
          end if
 
@@ -454,7 +455,7 @@
                boxlz(boxb) = bzo(boxb)
             end if
             call dump 
-            call cleanup('')
+            call err_exit('')
             return
          end if
 
@@ -463,7 +464,7 @@
 ! *** calculate centre of mass and its displacement
 
 ! - WARNING
-         if ( .not. lfold )  call cleanup('volume move only correct with folded coordinates')
+         if ( .not. lfold )  call err_exit('volume move only correct with folded coordinates')
 
          do i = 1, nchain
 

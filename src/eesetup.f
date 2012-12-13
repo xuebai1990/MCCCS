@@ -2,10 +2,11 @@
 !
 ! sets up EE. contains some EE stuff, see eemove.f for more details
 !
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -29,10 +30,10 @@
       leemove = .false.
       if ((pmexpc1.gt.1.0d-6).and.(.not.lexpee)) then
          write(iou,*) 'pmexp nonzero but no lexpee?'
-         call cleanup('')
+         call err_exit('')
       elseif ((pmexpc1.lt.1.0d-6).and.lexpee) then
          write(iou,*) 'pmexp zero but lexpee?'
-         call cleanup('')
+         call err_exit('')
       end if
 
 ! --- read necessary stuff
@@ -50,7 +51,7 @@
       read(44,*)
       read(44,*) fmstate
 
-      if (fmstate.lt.3) call cleanup('EE when no intermediate state')
+      if (fmstate.lt.3) call err_exit('EE when no intermediate state')
 
 ! --- weight (psi) associated with each state
       read(44,*)
@@ -60,7 +61,7 @@
 ! --- sstate2-1
       read(44,*)
       read(44,*) sstate1, sstate2
-      if (sstate1.ne.(sstate2-1)) call cleanup('choose sstates in order')
+      if (sstate1.ne.(sstate2-1)) call err_exit('choose sstates in order')
 
 ! --- once an ee move is performed, the prob that it will be
 ! --- ee_index_swap move (keep is quite low)
@@ -75,13 +76,13 @@
       cnt = 0
       do i = nmolty1, nmolty
          if (temtyp(i).gt.0) then
-            if (temtyp(i).ne.1) call cleanup('ee must be on one molecule only')
+            if (temtyp(i).ne.1) call err_exit('ee must be on one molecule only')
             isv = i
             cnt = cnt+1
          end if
       end do
-      if (cnt.gt.1) call cleanup('only one state should be present in ee')
-      if ((nmolty1+mstate-1).ne.isv) call cleanup('initial mstate inconsistent with temtyp')
+      if (cnt.gt.1) call err_exit('only one state should be present in ee')
+      if ((nmolty1+mstate-1).ne.isv) call err_exit('initial mstate inconsistent with temtyp')
       if ((mstate.eq.1).or.(mstate.eq.fmstate)) lmstate = .true.
 
 ! --- setup rminee for each unit. for fully grown units (same as in
@@ -226,7 +227,7 @@
 !	end do
 !	end do
 !	end do
-!	call cleanup('')
+!	call err_exit('')
 
 ! --- associate moltyp with mstate
 
@@ -282,7 +283,7 @@
 !         mstate = fmstate
 !      else
 !         write(iou,*)'the type is in neither box, imolty:',imolty
-!         call cleanup('')
+!         call err_exit('')
 !      end if
 !      lmstate = .true.
 !	write(iou,*) 'starting point', eepointp, mstate

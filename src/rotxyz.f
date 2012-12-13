@@ -9,10 +9,11 @@
 !    ** and rotates the molecule around this axis by dgamma radians.  **
 !    ** the maximum angular displacement is dgamax.                   **
 !    *******************************************************************
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -214,7 +215,7 @@
       flagon = 1
       call energy(i,imolty, vold,vintrao,vintero,vexto,velecto,vdum ,flagon,ibox, 1, iunit,.false.,ovrlap,.false.,vdum, .false.,.false.)
 
-      if (ovrlap) call cleanup('disaster- overlap for old conf in ROTXYZ')
+      if (ovrlap) call err_exit('disaster- overlap for old conf in ROTXYZ')
       if ( lewald .and. lelect(imolty) ) then
          call recip(ibox,vrecipn,vrecipo,1)
          velectn = velectn + vrecipn

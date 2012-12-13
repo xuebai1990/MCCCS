@@ -3,7 +3,7 @@
 !  --  This subroutine calcultes the roots of non-linear equation using 
 !  --  Newton-Raphson method.
 
-       use global_data
+       use sim_system
        use var_type
        use const_phys
        use const_math

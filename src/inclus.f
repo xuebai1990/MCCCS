@@ -1,9 +1,10 @@
       subroutine inclus( inclnum,inclmol,inclbead,inclsign,ncarbon, ainclnum,ainclmol,ainclbead,a15t,ofscale,ofscale2)
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -114,7 +115,7 @@
                   lqinclu(imolty,nb,m) = .false.
                else
                   write(iou,*) 'INCLUS: n,inclsign(n)',n,inclsign(n)
-                  call cleanup('inclusign must be 1 or -1')
+                  call err_exit('inclusign must be 1 or -1')
                end if
             end if
 

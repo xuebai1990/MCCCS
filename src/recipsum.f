@@ -5,10 +5,11 @@
 !    ** rewritten in 2001 by Bin Chen.                                  **
 !    ** rewritten again, probably by Bin.                               **
 !    *********************************************************************
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -184,7 +185,7 @@
 !      write(iou,*) 'in recipsum:',ssumr(100,ibox),ibox
 ! *** safety check ***
 !      write(iou,*) 'A total of ',ncount,' vectors are used'
-      if ( ncount .gt. vectormax ) call cleanup ('choose a larger vectormax')
+      if ( ncount .gt. vectormax ) call err_exit ('choose a larger vectormax')
 
       numvect(ibox) = ncount
       return

@@ -1,4 +1,5 @@
 module util_search
+  use util_runtime,only:err_exit
   use util_memory,only:reallocate
   use util_string,only:integer_to_string
   implicit none
@@ -22,7 +23,7 @@ CONTAINS
 
     table%size=0
     allocate(table%list(1:initialSize),stat=jerr)
-    if (jerr.ne.0) call cleanup(TRIM(__FILE__)//":"//integer_to_string(__LINE__))
+    if (jerr.ne.0) call err_exit(TRIM(__FILE__)//":"//integer_to_string(__LINE__))
   end subroutine initiateTable
 
   !> \brief Add item to table, ignore if exist, increase table size by 2 if table is full and expand is set to .true., signal an error otherwise
@@ -50,7 +51,7 @@ CONTAINS
           if (lexpand) then
              call reallocate(table%list,1,2*size(table%list))
           else
-             call cleanup(TRIM(__FILE__)//":"//integer_to_string(__LINE__))
+             call err_exit(TRIM(__FILE__)//":"//integer_to_string(__LINE__))
           end if
        end if
        table%size=i

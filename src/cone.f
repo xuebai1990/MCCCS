@@ -17,10 +17,11 @@
 !     * originally written prior to 1995                               *
 !     * last modified 02-12-2001 by M.G. Martin                        *
 !     ******************************************************************
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -123,7 +124,7 @@
 
       else
          write(iou,*) 'iinit ',iinit
-         call cleanup('non valid iinit in cone.f')
+         call err_exit('non valid iinit in cone.f')
       end if
       
 !      write(iou,*) 'finish CONE'
@@ -140,7 +141,7 @@
 !     * originally written 02-12-2001 by M.G. Martin                   *
 !     * last modified 02-12-2001 by M.G. Martin                        *
 !     ******************************************************************
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math

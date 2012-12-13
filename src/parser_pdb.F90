@@ -32,6 +32,7 @@ MODULE parser_pdb
 !> 27 - 31        Integer        serial       Serial number of bonded atom
 ! *****************************************************************************
   use var_type,only:double_precision,default_string_length
+  use util_runtime,only:err_exit
   use util_files,only:get_iounit,readLine
   use sim_cell
   use sim_particle
@@ -59,19 +60,19 @@ CONTAINS
     IOPDB=get_iounit()
     open(unit=IOPDB,access='sequential',action='read',file=filePDB,form='formatted',iostat=jerr,status='old')
     if (jerr.ne.0) then
-       call cleanup('cannot open zeolite PDB file')
+       call err_exit('cannot open zeolite PDB file')
     end if
     
     CALL readLine(IOPDB,line,.false.,jerr)
-    IF(jerr.ne.0) call cleanup('wrong PDB file format')
+    IF(jerr.ne.0) call err_exit('wrong PDB file format')
 
     read(line(2:),*) zeo%nbead,zunit%dup(1),zunit%dup(2),zunit%dup(3),ztype%ntype
     allocate(zeo%bead(zeo%nbead),lunitcell(zeo%nbead),ztype%name(ztype%ntype),ztype%radiisq(ztype%ntype),ztype%type(ztype%ntype),ztype%num(ztype%ntype),stat=jerr)
-    if (jerr.ne.0) call cleanup('readPDB: allocation failed')
+    if (jerr.ne.0) call err_exit('readPDB: allocation failed')
 
     do i=1,ztype%ntype
        CALL readLine(IOPDB,line,.false.,jerr)
-       IF(jerr.ne.0) call cleanup('wrong PDB file format')
+       IF(jerr.ne.0) call err_exit('wrong PDB file format')
        read(line(2:),*) ztype%name(i),ztype%type(i),ztype%radiisq(i)
        lhere(ztype%type(i))=.true.
        ztype%radiisq(i)=ztype%radiisq(i)*ztype%radiisq(i)
@@ -90,7 +91,7 @@ CONTAINS
           call setUpCellStruct(zcell,zunit)
           uninitialized=.false.
        CASE ("ATOM","HETATM")
-          if (uninitialized) call cleanup('PDB: CRYST1 needs to be defined before ATOM')
+          if (uninitialized) call err_exit('PDB: CRYST1 needs to be defined before ATOM')
           i = i + 1
           READ(line(13:16),*) atomname
           READ(line(18:20),*,IOSTAT=jerr) resName
@@ -121,13 +122,13 @@ CONTAINS
        END SELECT
     END DO
 
-    if (i.ne.zeo%nbead) call cleanup('PDB: Number of atoms incorrect')
+    if (i.ne.zeo%nbead) call err_exit('PDB: Number of atoms incorrect')
     
   END SUBROUTINE readPDB
 
 ! *****************************************************************************
   SUBROUTINE writePDB (filePDB,iBox)
-    use global_data
+    use sim_system
     character(LEN=*),intent(in)::filePDB
     integer,intent(in)::iBox
 
@@ -138,7 +139,7 @@ CONTAINS
     IOPDB=get_iounit()
     open(unit=IOPDB,access='sequential',action='write',file=filePDB,form='formatted',iostat=jerr,status='unknown')
     if (jerr.ne.0) then
-       call cleanup('cannot open file for writing (PDB)')
+       call err_exit('cannot open file for writing (PDB)')
     end if
 
     WRITE(IOPDB,'(A6,3(F9.3),3(F7.2),1X,A10)') "CRYST1",boxlx(ibox),boxly(ibox),boxlz(ibox),cell_ang(ibox,1),cell_ang(ibox,2),cell_ang(ibox,3),"P1        "

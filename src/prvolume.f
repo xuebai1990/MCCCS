@@ -8,10 +8,11 @@
 !
 ! --- perform change of the volume: random walk in ln(vol)
  
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -237,7 +238,7 @@
             write(iou,*) 'w1:',w(1),'w2:',w(2),'w3:',w(3)
             hmat(boxvch,jhmat) = hmato(jhmat)
             call dump
-            call cleanup('')
+            call err_exit('')
 !            goto 500
          end if
 
@@ -316,7 +317,7 @@
             write(iou,*) 'Problem in line 381 of subroutine prvolume.f'
             write(iou,*) 'A move was attempted that would lead to a  boxlength less than twice rcut'
             call dump
-            call cleanup('')
+            call err_exit('')
             return
          end if
 
@@ -324,7 +325,7 @@
 ! *** calculate centre of mass and its displacement
 
 ! - WARNING
-         if ( .not. lfold ) call cleanup('volume move only correct with folded coordinates')
+         if ( .not. lfold ) call err_exit('volume move only correct with folded coordinates')
 
          df = dfac - 1.0d0
 

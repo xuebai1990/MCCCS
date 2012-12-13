@@ -1,9 +1,10 @@
       subroutine rigfix(lnew,i,ibox,imolty,lterm,wrig)
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -75,7 +76,7 @@
             
             thetac = -(xfix(iu)*xfix(iufrom) + yfix(iu)*yfix(iufrom) + zfix(iu)*zfix(iufrom)) / (lengtha*lengthb)
             
-            if (abs(thetac).gt.1.0d0) call cleanup('screwup in rigfix')
+            if (abs(thetac).gt.1.0d0) call err_exit('screwup in rigfix')
             
             bendang(iu) = dacos(thetac)
             
@@ -213,7 +214,7 @@
 !     --- check to see if jut4 exists
                         if (.not. lexist(jut4)) then
                            write(iou,*) 'iu,jut2,jut3,jut4',iu ,jut2,jut3,jut4
-                           call cleanup('trouble, jut4 does not exist in rigfix')
+                           call err_exit('trouble, jut4 does not exist in rigfix')
                         end if
                         
                         jttor = ittor(imolty,iu,it)

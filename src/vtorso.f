@@ -1,9 +1,10 @@
       function vtorso( thetac, itype )
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -32,7 +33,7 @@
          vtorso =  vtt0(itype) + vtt1(itype)*dcos(1.0d0*theta)+ vtt2(itype)*dcos(2.0d0*theta)+ vtt3(itype)*dcos(3.0d0*theta)+ vtt4(itype)*dcos(4.0d0*theta)+ vtt5(itype)*dcos(5.0d0*theta)+ vtt6(itype)*dcos(6.0d0*theta)+ vtt7(itype)*dcos(7.0d0*theta)+ vtt8(itype)*dcos(8.0d0*theta)+ vtt9(itype)*dcos(9.0d0*theta)
  
 
-      elseif ( itype .ge. 1 .and. itype .le. 7) then
+      elseif ( itype .ge. 1 .and. itype .le. 99) then
 ! - parameters for linear and branched alkane molecules - ALKANE CURRENTLY USED
 ! - 5 + 6 parameters for alcohols
 ! - Jorgensen potential
@@ -351,7 +352,7 @@
 
       else
          write(iou,*) 'you picked a non-defined torsional type'
-         call cleanup('')
+         call err_exit('')
       end if
 
       return

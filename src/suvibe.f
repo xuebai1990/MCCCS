@@ -1,9 +1,10 @@
       subroutine suvibe(io_ff)
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -446,7 +447,7 @@
                 call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
                 if (jerr.ne.0) then
                    write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-                   call cleanup('Reading section BONDS')
+                   call err_exit('Reading section BONDS')
                 end if
                 read(line_in,*) i,dum,brvib(i),brvibk(i)
              end do
@@ -975,7 +976,7 @@
                 call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
                 if (jerr.ne.0) then
                    write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-                   call cleanup('Reading section ANGLES')
+                   call err_exit('Reading section ANGLES')
                 end if
                 read(line_in,*) i,dum,brben(i),brbenk(i)
              end do
@@ -1799,7 +1800,7 @@
               call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
               if (jerr.ne.0) then
                  write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-                 call cleanup('Reading section DIHEDRALS')
+                 call err_exit('Reading section DIHEDRALS')
               end if
               read(line_in,*) i,dum,vtt0(i),vtt1(i),vtt2(i),vtt3(i)
            end do

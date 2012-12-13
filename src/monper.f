@@ -5,7 +5,7 @@
 ! performs periodic updates and block averages
 ! -----------------------------------------------------------------
  
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
@@ -861,7 +861,7 @@
       end
 
       subroutine averageMaximumDisplacement
-        use global_data
+        use sim_system
         implicit none
         include 'common.inc'
         

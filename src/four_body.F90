@@ -1,5 +1,6 @@
 MODULE four_body
-  use global_data
+  use sim_system
+  use util_runtime,only:err_exit
   use util_search
   use var_type,only:double_precision,default_string_length
   use util_files,only:readLine
@@ -24,7 +25,7 @@ CONTAINS
     integer::jerr
 
     allocate(quadruplets(0:8,1:nchain,1:nbox),coeffs(1:5,1:nEntries),nQuadruplets(1:nbox),qtype(1:nEntries),STAT=jerr)
-    if (jerr.ne.0) CALL cleanup(TRIM(__FILE__)//":"//integer_to_string(__LINE__))
+    if (jerr.ne.0) CALL err_exit(TRIM(__FILE__)//":"//integer_to_string(__LINE__))
     call initiateTable(fourbodies,nEntries)
     hasFourBody=.true.
   end subroutine initiateFourBody
@@ -59,13 +60,13 @@ CONTAINS
     io_ff=get_iounit()
     open(unit=io_ff,access='sequential',action='read',file=file_ff,form='formatted',iostat=jerr,status='old')
     if (jerr.ne.0) then
-       call cleanup('cannot open four_body input file')
+       call err_exit('cannot open four_body input file')
     end if
 
     read(UNIT=io_ff,NML=fourbody,iostat=jerr)
     if (jerr.ne.0.and.jerr.ne.-1) then
        write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-       call cleanup('reading namelist: fourbody')
+       call err_exit('reading namelist: fourbody')
     end if
 
 ! Looking for section FOURBODY
@@ -108,10 +109,10 @@ CONTAINS
     if (.not.lbuild_quadruplet_table) then
        open(unit=io_quadruplets,access='sequential',action='read',file=file_quadruplets,form='formatted',iostat=jerr,status='old')
        if (jerr.ne.0) then
-          call cleanup('cannot read quadruplets file')
+          call err_exit('cannot read quadruplets file')
        end if
        read(io_quadruplets,*) nboxtmp,nQuadruplets
-       if (nbox.ne.nboxtmp) call cleanup('quadruplets file not generated with current input')
+       if (nbox.ne.nboxtmp) call err_exit('quadruplets file not generated with current input')
        write(*,*) nbox,nQuadruplets
        do ibox=1,nbox
           read(io_quadruplets,*) quadruplets(:,1:nQuadruplets(ibox),ibox)
@@ -180,7 +181,7 @@ CONTAINS
 
        open(unit=io_quadruplets,access='sequential',action='write',file=file_quadruplets,form='formatted',iostat=jerr,status='unknown')
        if (jerr.ne.0) then
-          call cleanup('cannot open quadruplets file')
+          call err_exit('cannot open quadruplets file')
        end if
        write(io_quadruplets,*) nbox,nQuadruplets
        do ibox=1,nbox

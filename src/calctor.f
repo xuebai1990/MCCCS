@@ -1,6 +1,6 @@
       subroutine calctor(iu1,iu2,iu3,iu4,jttor,vtor)
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math

@@ -4,7 +4,7 @@
 !    ** calculates the pressure for a configuration.    **
 !    *****************************************************
  
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math

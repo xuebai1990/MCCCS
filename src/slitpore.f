@@ -2,7 +2,7 @@
 ! -- calculates the surface energy of a bend with a featureless
 ! -- graphite surface
 
-	use global_data
+	use sim_system
 	use var_type
 	use const_phys
 	use const_math

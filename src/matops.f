@@ -6,10 +6,11 @@
 !     non cubic simulation cell
 !     Written by Neeraj Rai (in Merck Apr 2005)
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -56,7 +57,7 @@
       cell_vol(ibox) = elem(1)*bcx+elem(2)*bcy+elem(3)*bcz
       
       if(abs(cell_vol(ibox)).lt.1D-16) then 
-         call cleanup('Volume of cell negligible, check input H matrix')
+         call err_exit('Volume of cell negligible, check input H matrix')
       end if
               
       inv_vol = 1.0d0/cell_vol(ibox) 

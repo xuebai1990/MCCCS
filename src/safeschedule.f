@@ -36,10 +36,11 @@
 !     **  COLLIN = MASTER of the known universe                          **
 !     *********************************************************************
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -80,7 +81,7 @@
 !     --- set begining conditions
       if (movetype.eq.2) then
          if (.not.lring(imolty)) then
-            call cleanup('you can not use safecbmc for swap unless it is a ring')
+            call err_exit('you can not use safecbmc for swap unless it is a ring')
          end if
          fmaxgrow = nunit(imolty)
       else
@@ -98,7 +99,7 @@
          lfix(j) = .false.
       end do
       
-      if (kickouta.eq.5) call cleanup('')
+      if (kickouta.eq.5) call err_exit('')
 
       if (movetype.eq.2) then
          findex = fmaxgrow
@@ -123,7 +124,7 @@
       end do
 
       if (kickout.gt.250) then
-         call cleanup('SAFESCHEDULE KICKED YOU OUT')
+         call err_exit('SAFESCHEDULE KICKED YOU OUT')
       end if
  
 !     --- find iutry 
@@ -133,7 +134,7 @@
          invtry = invib(imolty,iutry) - 1
 
          if (invtry.lt.1) then
-            call cleanup('You need a ring to do this')
+            call err_exit('You need a ring to do this')
          end if
 
          ffrom(1,1) = iutry
@@ -173,7 +174,7 @@
 
          invtry = invib(imolty,iutry)
          if (invtry.eq.0) then
-            call cleanup('cant do safecbmc on single bead')
+            call err_exit('cant do safecbmc on single bead')
          elseif(invtry.eq.1) then
 !     --- At the end point of a molecule
 
@@ -317,7 +318,7 @@
             do ja = 1, fnuma(iw,j)
  115           continue
                if (kickout.gt.150) then
-                  call cleanup('Randomizer in FECMBC kicked you out')
+                  call err_exit('Randomizer in FECMBC kicked you out')
                end if
 !     --- this is the only random part
                counta = int(random() * dble(fnuma(iw,j))) + 1
@@ -546,7 +547,7 @@
                end do
 
                if (ja.eq.0) then
-                  call cleanup('PROBLEM WITH RIG LOGIC IN SAFESCHEDULE')
+                  call err_exit('PROBLEM WITH RIG LOGIC IN SAFESCHEDULE')
                else
                   rnum(counta) = ja
                end if
@@ -598,7 +599,7 @@
             end do
             if (ja.gt.10) then
                write(iou,*) 'ja',ja
-               call cleanup('need to set max greater in safeschedule')
+               call err_exit('need to set max greater in safeschedule')
             end if
 
             num = ja
@@ -635,7 +636,7 @@
          write(iou,*) rfrom(iw),(rlist(iw,count),count=1,rnum(iw))
       end do
       
-      call cleanup('')
+      call err_exit('')
             
 !     ***************************************************
 

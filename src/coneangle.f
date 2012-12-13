@@ -14,7 +14,7 @@
 !     ** M.G. Martin 2-4-98                                           **
 !     ******************************************************************
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math

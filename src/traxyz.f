@@ -7,10 +7,11 @@
 !    ** The attempts are stored in bntrax(yz)                         **
 !    *******************************************************************
  
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -155,7 +156,7 @@
       v3o = v3garo
 
       if (ovrlap) then
-         call cleanup('disaster ovrlap in old conf of TRAXYZ')
+         call err_exit('disaster ovrlap in old conf of TRAXYZ')
       end if
 
       if ( lewald .and. lelect(imolty) ) then

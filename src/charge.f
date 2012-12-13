@@ -7,7 +7,7 @@
 !    ** rewritten by Bin Chen 6-25-99                                 **
 !    *******************************************************************
  
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math

@@ -1,7 +1,7 @@
       subroutine vthreebody(vthree)
 
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
@@ -112,7 +112,7 @@
 !**************************************************************************
       subroutine triad
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
@@ -175,7 +175,7 @@
 !******************************************************************
       subroutine triad_en(i,vthree,cnt,ni,nrij,nxi,nyi,nzi,lupdate)
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math

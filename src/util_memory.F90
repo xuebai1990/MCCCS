@@ -1,6 +1,7 @@
 module util_memory
   use var_type,only:double_precision
   use util_string,only:integer_to_string
+  use util_runtime,only:err_exit
   implicit none
   private
   public::reallocate

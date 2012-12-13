@@ -1,9 +1,10 @@
       subroutine linkcell(iinit,imol,xcmi,ycmi,zcmi,cellinc)
 
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -76,7 +77,7 @@
 
          if (ncell.gt.cmax) then
             write(iou,*) 'ncell,cmax',ncell,cmax
-            call cleanup('ncell greater than cmax in linkcell')
+            call err_exit('ncell greater than cmax in linkcell')
          end if
          
          do n = 1, ncell
@@ -100,7 +101,7 @@
 
                if (ic.gt.cmax) then
                   write(iou,*) 'ic,cmax',ic,cmax
-                  call cleanup('ic gt cmax')
+                  call err_exit('ic gt cmax')
                end if
 
                icell(n) = ic
@@ -108,7 +109,7 @@
 
                if (nicell(ic).gt.cmaxa) then
                   write(iou,*) 'nicell,cmaxa',nicell(ic) ,cmaxa
-                  call cleanup('nicell gt cmaxa')
+                  call err_exit('nicell gt cmaxa')
                end if
 
                iucell(ic,nicell(ic)) = n
@@ -134,7 +135,7 @@
                end if               
             end do
          
-            call cleanup('screwup for iinit = 2 for linkcell')
+            call err_exit('screwup for iinit = 2 for linkcell')
  100        continue
             icell(imol) = 0
          end if
@@ -154,7 +155,7 @@
 
             nicell(ic) = nicell(ic) + 1
          
-            if (nicell(ic).gt.cmaxa) call cleanup('nicell too big')
+            if (nicell(ic).gt.cmaxa) call err_exit('nicell too big')
 
             iucell(ic,nicell(ic)) = imol
 
@@ -221,7 +222,7 @@
 
       function linkdecode(i,j,k,ncellx,ncelly,ncellz)
             
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math

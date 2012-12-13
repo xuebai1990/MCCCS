@@ -7,10 +7,11 @@
 !    ** The attempts are stored in Abntrax(yz)                         **
 !    *******************************************************************
  
-      use global_data
+      use sim_system
       use var_type
       use const_phys
       use const_math
+      use util_runtime,only:err_exit
       use util_math
       use util_string
       use util_files
@@ -145,7 +146,7 @@
       flagon = 1
       call Atom_energy(i,imolty,vold,vintrao,vintero,vexto,velecto ,vewaldo,flagon,ibox,pick_unit, pick_unit,.true.,ovrlap, .false. ,vdum,.false.,.false.,vvibo,vbendo,vtgo)
 
-      if (ovrlap) call cleanup('disaster ovrlap in old conf of TRAXYZ')
+      if (ovrlap) call err_exit('disaster ovrlap in old conf of TRAXYZ')
       
       if ( lewald .and. lelect(imolty) ) then
          call recip_atom(ibox,vrecipn,vrecipo,1,pick_unit)
