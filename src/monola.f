@@ -837,7 +837,7 @@
             do ibox = 1,nbox
                if ( lpbcz ) then
                   if (lsolid(ibox) .and. .not. lrect(ibox).and. myid.eq.0) then
-                     write(12,'(7e13.5,15i5)') hmat(ibox,1) ,hmat(ibox,4),hmat(ibox,5) ,hmat(ibox,7),hmat(ibox,8) ,hmat(ibox,9),vbox(ibox), (ncmt(ibox,itype),itype=1,nmolty)
+                     write(12,'(7e13.5,<nmolty>i5)') hmat(ibox,1) ,hmat(ibox,4),hmat(ibox,5) ,hmat(ibox,7),hmat(ibox,8) ,hmat(ibox,9),vbox(ibox), (ncmt(ibox,itype),itype=1,nmolty)
                      
                      open(13,file = file_cell,status='old', position='append')
                      write(13,'(i8,6f12.4)') nnn+nnstep, cell_length(ibox,1)/Num_cell_a, cell_length(ibox,2)/Num_cell_b, cell_length(ibox,3)/Num_cell_c, cell_ang(ibox,1)*180.0d0/onepi, cell_ang(ibox,2)*180.0d0/onepi, cell_ang(ibox,3)*180.0d0/onepi
@@ -848,14 +848,14 @@
                   else
 !                  do ibox = 1, nbox
                      if (myid.eq.0) then
-                        write(12,'(4e13.5,15i5)')boxlx(ibox),boxly(ibox) ,boxlz(ibox),vbox(ibox), (ncmt(ibox,itype),itype=1,nmolty)
+                        write(12,'(4e13.5,<nmolty>i5)')boxlx(ibox),boxly(ibox) ,boxlz(ibox),vbox(ibox), (ncmt(ibox,itype),itype=1,nmolty)
                      end if
 !                  end do
                   end if
                else
 !               do ibox = 1, nbox
                   if (myid.eq.0) then
-                     write(12,'(2e12.5,15i4)') boxlx(ibox)*boxly(ibox) ,vbox(ibox),(ncmt(ibox,itype),itype=1,nmolty)
+                     write(12,'(2e12.5,<nmolty>i4)') boxlx(ibox)*boxly(ibox) ,vbox(ibox),(ncmt(ibox,itype),itype=1,nmolty)
                   end if
 !               end do
                end if
@@ -2116,7 +2116,7 @@
  1311 format(a15 ,' box ',i3, ' = ',3e14.5)
  1321 format(' mean sete length    itype ',i3,' box ',i3, ' = ',3f12.3)
  1331 format(' specific density    box ',i3, ' = ',3e12.5)
- 1341 format(' pressure            box ',i3, ' = ',3f12.2)
+ 1341 format(' pressure            box ',i3, ' = ',3g12.5)
  1342 format(' surface tension     box ',i3, ' = ',3f12.5)
  1343 format(' system volume       box ',i3, ' = ',3e12.5)
  1351 format(' chemical potential  itype ',i3,' box ',i3, ' = ',3f12.3)
