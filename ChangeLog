@@ -1,37 +1,40 @@
 obsolete:
-analysis.f
-atomtype.f
-chempt.f
-coruz.f
-exzeo.f
-exzeof.f
-exzeot.f
-forcefield.f
-jtrim.f
-mbessel.f
-nrtab.f
-pgrid.f
-qqcheck.f
-readRES.f
-suzeo.f
-test1.f
-testupdate.f
-thermopress.f
-trim_swap.f
-zeocoord.f
-beaddat.inc
-gor.inc
+	analysis.f
+	atomtype.f
+	chempt.f
+	coruz.f
+	exzeo.f
+	exzeof.f
+	exzeot.f
+	forcefield.f
+	jtrim.f
+	mbessel.f
+	mimage.f
+	nrtab.f
+	pgrid.f
+	qqcheck.f
+	readRES.f
+	setpbc.f
+	suzeo.f
+	test1.f
+	testupdate.f
+	thermopress.f
+	trim_swap.f
+	zeocoord.f
+	beaddat.inc
+	gor.inc
 	
 added:
-global_data.f
-var_type.f
-const_phys.f
-const_math.f
-util_math.f
-util_string.f
-util_files.f
-util_timings.f
-zeolite.f
+	global_data.f
+	var_type.f
+	const_phys.f
+	const_math.f
+	util_math.f
+	util_string.f
+	util_files.f
+	util_timings.f
+	pbc.f
+	zeolite.f
 
 changes:
 	Automatically set translational and rotational maximum displacements to be the average of those in x-, y-, z- directions if iratio is greater than nstep (most likely production runs)

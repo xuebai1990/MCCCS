@@ -1,5 +1,9 @@
- Program started at 2011-01-08 06:37:59.655
+ lopt_bias:  F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F
+ F
+ freq_opt_bias:     10000000
+ Program started at 2012-12-20 19:18:29.472
  Number of processors:            1
+           0  threads per processor
  Random number seed:            0
  L_Coul_CBMC: T
  Number of unit cells in a dir =    5.00000000000000     
@@ -50,7 +54,7 @@
  number of molecule types:           1
  number of chains of molecule type           1 :         300
  Lorentz-Berthelot combining rules apply
-    lmixlb: T  lmixjo: F  ltab: F
+    lmixlb: T  lmixjo: F
  number of special combining parameters:           0
  minimum cutoff (rmin):   1.20000000000000       A
  softcut:   100.000000000000     
@@ -802,37 +806,37 @@ cell angle gamma:       120.341
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -542380.823334683     
+ coulombic energy  -542380.823334681     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
  total energy      -3898345.99483978     
  
  box             1  initial v   =   -3898345.99483978     
  surf. tension :   box 1 =      58.92130
- pressure check:   box 1 =      -8010.10
+ pressure check:   box 1 =     -22255.98
  
  +++++ start of markov chain +++++
  
  Cycle   Total   Energy    Boxlength   Pressure  Molecules
  Box            1
- Type 1 bn     44.     63.     51.     54.     44.     44.
- max.displ.     0.2966    0.3419    0.2134    0.0888    0.0994    0.0936
+ Type  1 bn     50.     60.     62.     41.     39.     46.
+ max.displ.     0.3203    0.2135    0.2058    0.1169    0.1121    0.1159
  
  +++++ end of markov chain +++++
  
  ### Translations ###
  
  molecule typ =           1  in box           1
- x-dir: attempts =      44.0   ratio = 0.500   max.displ. = 0.2966E+00
- y-dir: attempts =      63.0   ratio = 0.587   max.displ. = 0.3419E+00
- z-dir: attempts =      51.0   ratio = 0.569   max.displ. = 0.2134E+00
+ x-dir: attempts =      50.0   ratio = 0.540   max.displ. = 0.3203E+00
+ y-dir: attempts =      60.0   ratio = 0.367   max.displ. = 0.2135E+00
+ z-dir: attempts =      62.0   ratio = 0.548   max.displ. = 0.2058E+00
  
  ### Rotations ###
  
  molecule typ =           1  in box           1
- x-dir: attempts =      54.0   ratio = 0.426   max.displ. = 0.8878E-01
- y-dir: attempts =      44.0   ratio = 0.477   max.displ. = 0.9937E-01
- z-dir: attempts =      44.0   ratio = 0.386   max.displ. = 0.9363E-01
+ x-dir: attempts =      41.0   ratio = 0.561   max.displ. = 0.1169E+00
+ y-dir: attempts =      39.0   ratio = 0.538   max.displ. = 0.1121E+00
+ z-dir: attempts =      46.0   ratio = 0.478   max.displ. = 0.1159E+00
  
  
  ### Volume change       ###
@@ -842,9 +846,9 @@ cell angle gamma:       120.341
  h-matrix attempts =     0.0   ratio = 0.000   max.displ. = 0.2467E+00
  h-matrix attempts =     0.0   ratio = 0.000   max.displ. = 0.1507E+00
  h-matrix attempts =     0.0   ratio = 0.000   max.displ. = 0.1000E-02
- h-matrix attempts =     0.0   ratio = 0.000   max.displ. = 0.6501E+00
+ h-matrix attempts =     1.0   ratio = 1.000   max.displ. = 0.6501E+00
  h-matrix attempts =     0.0   ratio = 0.000   max.displ. = 0.7925E+00
- h-matrix attempts =     0.0   ratio = 0.000   max.displ. = 0.1891E+00
+ h-matrix attempts =     1.0   ratio = 0.000   max.displ. = 0.1891E+00
  
  ### Molecule swap       ###
  
@@ -859,7 +863,12 @@ number of times move out:          0.0  accepted=     0.0
  pair typ =           1
  moltyps =            2  and           3
 between box  1 and  2   uattempts =         0.0  attempts =      0.0  accepted =     0.0
- 
+
+New Biasing Potential
+
+molecule  1:   0.00000000    
+
+
  ### Charge Fluctuation  ###
  
  
@@ -869,21 +878,21 @@ between box  1 and  2   uattempts =         0.0  attempts =      0.0  accepted =
  sumup control
  number of chains         300
  number of chains of type           1         300
- inter lj energy   -3361121.54442794     
+ inter lj energy   -3356779.72765732     
  intra lj energy   0.000000000000000E+000
  Tail correction   -68741.0663068097     
  bond vibration    0.000000000000000E+000
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -542482.793065751     
+ coulombic energy  -542979.792057570     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -3903604.33749370     
+ total energy      -3899759.51971489     
  
- vstart       =     -3898345.9948397819
- vend         =     -3903604.3374936953
- vbox         =     -3903604.3374937582
+ vstart       =     -3898345.9948397800
+ vend         =     -3899759.5197148924
+ vbox         =     -3899759.5197148426
  
  Averages and fluctuations                            Box 1
  
@@ -894,9 +903,9 @@ between box  1 and  2   uattempts =         0.0  attempts =      0.0  accepted =
  
  boxlength                                [A] =      45.303
  boxlength                                [A] =      45.201
- boxlength                                [A] =      40.944
- box angle                                deg =     110.785
- box angle                                deg =      87.786
+ boxlength                                [A] =      40.943
+ box angle                                deg =     110.764
+ box angle                                deg =      87.826
  box angle                                deg =     120.341
  no. of chains of type         1              =     300.000
  molar volume                      [cm^3/mol] =     133.718
@@ -905,19 +914,19 @@ between box  1 and  2   uattempts =         0.0  attempts =      0.0  accepted =
  molfraction of type           1              =   1.0000000
  mean sete length of type      1        [A^2] =      17.634
  
- Total energy  [K per system and kJ/mol per chain] =   -3901252.75     -108.12
- Inter LJ      [K per system and kJ/mol per chain] =   -3358706.50      -93.09
+ Total energy  [K per system and kJ/mol per chain] =   -3898703.10     -108.05
+ Inter LJ      [K per system and kJ/mol per chain] =   -3356387.48      -93.02
  Bond bending  [K per system and kJ/mol per chain] =          0.00        0.00
  Torsion       [K per system and kJ/mol per chain] =          0.00        0.00
  Intra LJ      [K per system and kJ/mol per chain] =          0.00        0.00
  External pot  [K per system and kJ/mol per chain] =          0.00        0.00
  Stretch       [K per system and kJ/mol per chain] =          0.00        0.00
- Coulomb       [K per system and kJ/mol per chain] =    -542546.25      -15.04
+ Coulomb       [K per system and kJ/mol per chain] =    -542315.61      -15.03
  Tail  LJ      [K per system and kJ/mol per chain] =     -68741.07       -1.91
  Fluc Q        [K per system and kJ/mol per chain] =          0.00        0.00
  
- fluctuation in <vtot>                          =     1907.88
+ fluctuation in <vtot>                          =      664.35
  
  type  box     vinter      vintra      vtor        vbend       vtail
     1    1     0.00000     0.00000     0.00000     0.00000     0.00000
- Program ended at 2011-01-08 06:38:08.579
+ Program ended at 2012-12-20 19:18:41.026

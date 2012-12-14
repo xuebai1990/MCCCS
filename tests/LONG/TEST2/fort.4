@@ -4,8 +4,8 @@ iounit lecho lverbose run_num  suffix
 2 .true.  .true. 1    a 
 lnpt   lgibbs lgrand   lanes  lvirial lmipsw  lexpee
 .false. .false. .false. .false. .false. .false. .false.
-lijall lchgall lewald ldielect ltailc lshift
-.false. .false. .true. .false. .true. .false.
+lijall lchgall lewald ldielect ltailc lshift ltailcZeo
+.false. .false. .true. .false. .true. .false. .true.
 L_add N_add  N_box2add N_moltyp2add
 .false. 9000    2         3
 L_sub N_sub  N_box2sub N_moltyp2sub
@@ -34,8 +34,8 @@ ianalyze nbin lrdf lintra lstretch lgvst lbend lete lrhoz bin_width
 100000    250 .true. .false. .false. .false. .false. .false. .false.   0.02
 iprint imv  iratio iblock idiele  L_movie_xyz iheatcapacity
 500  500  500  500   100000    .false.   1000000
-boxlx   boxly  boxlz     lsolid lrect  kalp  rcut    rcutnn - for box 1  
-42.386d0  42.386d0 42.386d0 .false. .false. 0.25d0 14.0d0  0.0d0
+boxlx   boxly  boxlz     lsolid lrect  kalp  rcut    rcutnn numberDimensionIsIsotropic - for box 1  
+42.386d0  42.386d0 42.386d0 .false. .false. 0.25d0 14.0d0  0.0d0 0
 nchain nmolty  
 256    2    
 temtyp      

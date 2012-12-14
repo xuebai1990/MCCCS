@@ -8,3 +8,66 @@ Extra pair potential definitions
 .false.
 Zeolite lattice
 .false.
+Zeolite tabulated potential
+.false.
+
+ &io
+    file_input='fort.4'
+    file_restart='fort.77'
+    file_struct='input_struc.xyz'
+ /
+
+ &system
+    nchain=1810
+    nmolty=35
+    nbox=3
+ /
+
+ &transfer
+    lopt_bias(1)=F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F
+    freq_opt_bias=10000000
+ /
+
+ &eemc
+    file_eemc='fort.44'
+ /
+
+ &zeolite_in
+    file_zeocoord='zeolite.cssr'
+    file_ztb='zeolite.ztb'  
+    ltestztb=F
+    lpore_volume=F
+    volume_probe=124
+    volume_nsample=4000000
+    lsurface_area=F
+    area_probe=124
+    area_nsample=5000
+ /
+
+ATOMS 0
+!i type(i) sigi(i) epsi(i) q(i) mass(i) chemid(i) chname(i) [Angstrom, Kelvin, a.u.]; type 1: Lennard-Jones
+END ATOMS
+
+NONBOND 0
+!i j type(ij) sigi(ij) epsi(ij) [Angstrom, Kelvin, a.u.]; type 1: Lennard-Jones
+END NONBOND
+
+BONDS 0
+!i type(i) brvib(i) brvibk(i) [Angstrom]; type 1: U = brvibk * ( r_ij - brvib ) ^ 2
+END BONDS
+
+ANGLES 0
+!i type(i) brben(i) brbenk(i) [degree]; type 1: U = brbenk * ( theta_ijk - brben ) ^ 2 [radian]
+END ANGLES
+
+DIHEDRALS 0
+!i type(i) vtt0(i) vtt1(i) vtt2(i) vtt3(i); !!!check vtorso.f, calctor.f!!!
+END DIHEDRALS
+
+THREEBODY 0
+!atom1 atom2 atom3 type cutoffLJ cutoffCoul coeffs; atom1<=atom3, angles in degree
+END THREEBODY
+
+FOURBODY 0
+!atom1 atom2 atom3 atom4 type cutoffLJ cutoffCoul coeffs; atom2<atom3 or atom1<=atom4 if atom2=atom3, angles in degree
+END FOURBODY

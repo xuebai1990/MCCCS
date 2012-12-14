@@ -22,8 +22,9 @@ contains
   subroutine time_init()
 ! subroutine cpu_time(real time) is available in Fortran 95
 ! and later, while double precision function MPI_WTIME() is
-! available using MPI, whether or not running with multiple
-! processes
+! available using MPI, double precision function
+! OMP_GET_WTIME() is available with OpenMP, whether or not
+! the program is running with multiple processes or threads
 !    call cpu_time(time_start)
     time_start=MPI_WTIME()
 !!$   time_start=omp_get_wtime()

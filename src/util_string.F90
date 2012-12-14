@@ -2,7 +2,7 @@ module util_string
   use var_type,only:default_string_length
   implicit none
   private
-  public::splitAndGetNext,integer_to_string,uppercase,lowercase,is_whitespace,str_trim,str_comp,str_search,remove_word,str_compress,typo_match,glob_match,is_blank_line
+  public::splitAndGetNext,integer_to_string,real_to_string,uppercase,lowercase,is_whitespace,str_trim,str_comp,str_search,remove_word,str_compress,typo_match,glob_match,is_blank_line
   CHARACTER,PARAMETER::whitespace*3=" "//CHAR(9)//CHAR(11),commentChar(3)=(/"#","!","%"/),backslash='\\',star='*',question='?'
 contains
 
@@ -22,18 +22,29 @@ contains
 
 ! *****************************************************************************
 !> \brief   Return a string representing the integer number
+!>          The WRITE statement will return an error message, if the number of
+!>          digits of the integer number is larger than the length of the
+!>          supplied string.  
 ! *****************************************************************************
-  FUNCTION integer_to_string(number) RESULT(string)
-    INTEGER, INTENT(IN)                      :: number
-    CHARACTER(LEN=default_string_length)     :: string
+  PURE FUNCTION integer_to_string(number) RESULT(string)
+    INTEGER,INTENT(IN)::number
+    CHARACTER(LEN=default_string_length)::string
 
-    WRITE (UNIT=string,FMT='(I0)') number
+    WRITE(UNIT=string,FMT='(I10)') number
   END FUNCTION  integer_to_string
+
+! *****************************************************************************
+  pure Function real_to_string(number) RESULT(string)
+    REAL,INTENT(IN)::number
+    CHARACTER(LEN=default_string_length)::string
+
+    WRITE(UNIT=string,FMT='(G16.9)') number
+  END Function real_to_string
 
 ! *****************************************************************************
 !> \brief   Convert all lower case characters in a string to upper case.
 ! *****************************************************************************
-  function uppercase(string)
+  pure function uppercase(string)
     CHARACTER(LEN=*),INTENT(IN)::string
     character(len=len_trim(string))::uppercase
     INTEGER                                  :: i, iascii
@@ -49,7 +60,7 @@ contains
   END function uppercase
 
 ! *****************************************************************************
-  function lowercase(string)
+  pure function lowercase(string)
     CHARACTER(LEN=*),INTENT(IN)::string
     character(len=len_trim(string))::lowercase
     INTEGER                                  :: i, iascii
@@ -69,7 +80,7 @@ contains
 !> \par History
 !>      02.2008 created, AK
 ! *****************************************************************************
-  LOGICAL FUNCTION is_whitespace(testchar)
+  PURE LOGICAL FUNCTION is_whitespace(testchar)
     CHARACTER(LEN=1), INTENT(IN)             :: testchar
 
     is_whitespace=.FALSE.
@@ -99,7 +110,7 @@ contains
 ! Return ia, ib, such that string(ia:ib) has no leading or
 ! trailing spaces
 ! *****************************************************************************
-  SUBROUTINE str_trim(string,ia,ib)
+  PURE SUBROUTINE str_trim(string,ia,ib)
     CHARACTER(LEN=*), INTENT(IN)             :: string
     INTEGER, INTENT(OUT)                     :: ia, ib
 
@@ -112,7 +123,7 @@ contains
 ! Compare two strings ignoring the leading or trailing
 ! spaces. .true. if str1==str2, .false. otherwise
 ! *****************************************************************************
-  FUNCTION str_comp(str1,str2) RESULT (equal)
+  PURE FUNCTION str_comp(str1,str2) RESULT (equal)
     CHARACTER(LEN=*), INTENT(IN)             :: str1, str2
     LOGICAL                                  :: equal
 
@@ -131,7 +142,7 @@ contains
 ! Return the index, pos, of str2 in str1(1:n), which
 ! contains an array of strings, using str_comp(str1,str2)
 ! *****************************************************************************
-  FUNCTION str_search(str1,n,str2) RESULT (pos)
+  PURE FUNCTION str_search(str1,n,str2) RESULT (pos)
     CHARACTER(LEN=*), INTENT(IN)             :: str1(:)
     INTEGER, INTENT(IN)                      :: n
     CHARACTER(LEN=*), INTENT(IN)             :: str2
@@ -152,7 +163,7 @@ contains
 !> \brief   remove a word from a string (words are separated by white spaces)
 !> \version 1.0
 ! *****************************************************************************
-  SUBROUTINE remove_word(string)
+  PURE SUBROUTINE remove_word(string)
     CHARACTER(LEN=*), INTENT(INOUT)          :: string
 
     INTEGER                                  :: i
@@ -177,7 +188,7 @@ contains
 !> \date    23.06.1998
 !> \version 1.0
 ! *****************************************************************************
-  SUBROUTINE str_compress(string,full)
+  PURE SUBROUTINE str_compress(string,full)
     CHARACTER(LEN=*), INTENT(INOUT)          :: string
     LOGICAL, INTENT(IN), OPTIONAL            :: full
 
@@ -217,7 +228,7 @@ contains
 !> \date    19.10.2000
 !> \version 1.0
 ! *****************************************************************************
-  SUBROUTINE ascii_to_string(nascii,string)
+  PURE SUBROUTINE ascii_to_string(nascii,string)
     INTEGER, DIMENSION(:), INTENT(IN)        :: nascii
     CHARACTER(LEN=*), INTENT(OUT)            :: string
 
@@ -241,7 +252,7 @@ contains
 !> \date    19.10.2000
 !> \version 1.0
 ! *****************************************************************************
-  SUBROUTINE string_to_ascii(string,nascii)
+  PURE SUBROUTINE string_to_ascii(string,nascii)
     CHARACTER(LEN=*), INTENT(IN)             :: string
     INTEGER, DIMENSION(:), INTENT(OUT)       :: nascii
 
@@ -263,7 +274,7 @@ contains
 !> \par History
 !>      02.2006 created [Joost VandeVondele]
 ! *****************************************************************************
-  FUNCTION typo_match(string,typo_string) RESULT(match)
+  PURE FUNCTION typo_match(string,typo_string) RESULT(match)
     CHARACTER(LEN=*), INTENT(IN)             :: string, typo_string
     INTEGER                                  :: match
 
@@ -330,7 +341,7 @@ contains
 !     Trailing blanks are ignored
 !
 ! *****************************************************************************
-RECURSIVE FUNCTION glob_match( string, pattern ) RESULT(match)
+  PURE RECURSIVE FUNCTION glob_match( string, pattern ) RESULT(match)
     CHARACTER(len=*), INTENT(in)             :: string, pattern
     LOGICAL                                  :: match
 

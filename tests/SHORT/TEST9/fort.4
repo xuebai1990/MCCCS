@@ -4,8 +4,8 @@ iounit lecho lverbose run_num  suffix
 2 .true.  .true. 1   a 
 lnpt   lgibbs lgrand   lanes  lvirial lmipsw  lexpee
 .true. .false. .false. .false. .false. .false. .false.
-lijall lchgall lewald ldielect ltailc lshift
-.false. .false. .true. .false. .true. .false.
+lijall lchgall lewald ldielect ltailc lshift ltailcZeo
+.false. .false. .true. .false. .true. .false. .true.
 L_add N_add  N_box2add N_moltyp2add
 .false. 9000    2         3
 L_sub N_sub  N_box2sub N_moltyp2sub
@@ -35,7 +35,7 @@ ianal  nbin  lrdf  lintra  lstretch  lgvst  lbend lete  lrhoz bin_width
 iprint imv iratio iblock  idiele L_movei_xyz iheatcapacity
 100   5000  1   100  1  .false.  5000
 boxlx   boxly  boxlz   lsolid  lrect   kalp   rcutchg - for box 1
-35.50d0 35.50d0  35.50d0 .true. .false.   0.24  14.0d0  0.0d0
+35.50d0 35.50d0  35.50d0 .true. .false.   0.24  14.0d0  0.0d0 0
 nchain nmolty
 300   1
 moltyp

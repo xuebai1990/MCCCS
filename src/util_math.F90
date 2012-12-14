@@ -5,8 +5,8 @@ module util_math
   private
   public::erfunc,mbessel,polint
 contains
-! complementary error function
-  function erfunc(x)
+!> \brief complementary error function
+  pure function erfunc(x)
     real(KIND=double_precision)::erfunc
     real(KIND=double_precision),intent(in)::x
 
@@ -19,7 +19,7 @@ contains
     return
   end function erfunc
 
-  function mbessel(z,nu)
+  pure function mbessel(z,nu)
     real(KIND=double_precision)::mbessel
     real(KIND=double_precision),intent(in)::z,nu
         
@@ -34,7 +34,7 @@ contains
   end function mbessel
 
 !  (C) Copr. 1986-92 Numerical Recipes Software +3Y.
-  subroutine polint(xa,ya,n,x,y)
+  pure subroutine polint(xa,ya,n,x,y)
     real(KIND=double_precision),intent(in)::xa(n),ya(n),x
     integer(KIND=normal_int),intent(in)::n
     real(KIND=double_precision),intent(out)::y
@@ -74,7 +74,7 @@ contains
        y=y+dy
     end do
     return
-    end subroutine polint
+  end subroutine polint
 
 !      subroutine coordinate_transform(x,y,z,invh,sx,sy,sz)
 !      real(KIND=double_precision),intent(in)::x,y,z,invhmat
