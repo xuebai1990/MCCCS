@@ -1,60 +1,95 @@
-.SUFFIXES = .f
-.f.o:
-	$(F77COMPILE) -c $<
+# Load the automatically generated dependency file
+include make.depend
 
+noinst_PROGRAMS = topmon
 # ls *.f | awk '{ printf("%s ", $1) }' > tmp and paste the contents of tmp to XXX_SOURCES
-# INCLUDES = -I../basic
-# lib_LIBRARIES = util.a
-# include_HEADERS = util.h
-# util_a_SOURCES = util.f
-# check_PROGRAMS = test1 test2 test3
-# TESTS = $(check_PROGRAMS)
-# LDADD = liblin.a ../blas1/libblas1.a ../mathutil/libmathutil.a $(FLIBS) -lm
-# test1_SOURCES = test1.cc f2c-main.cc
-# test2_SOURCES = test2.cc f2c-main.cc  
-# test3_SOURCES = test3.cc f2c-main.cc
-bin_PROGRAMS = topmon
-topmon_SOURCES = Atom_energy.f Atom_traxyz.f Intra_energy.f alignplanes.f analysis.f anes.f atomtype.f boltz.f bondlength.f calcsolpar.f calctor.f charge.f chempt.f cleanup.f close.f cone.f coneangle.f config.f corp.f coru.f coruz.f ctrmas.f deriv.f dipole.f dump.f ee_energy.f ee_index_swap.f ee_recip.f eemove.f eesetup.f energy.f erfunc.f exgrph.f exmuir.f expand.f explct.f exsami.f exsix.f exzeo.f exzeof.f flucq.f garo3body.f garofalini.f genlj.f geometry.f grid.f inclus.f init_vars.f initia.f ipswsetup.f jtrim.f linkcell.f ljmuir.f ljpsur.f ljsami.f matops.f mbessel.f mimage.f mmff.f molsetup.f monola.f monper.f newton.f ninesix.f nrtab.f pgrid.f place.f pressure.f prvolume.f random.f readdat.f recip.f recip_atom.f recippress.f recipsum.f rigfix.f rigrot.f rosenbluth.f rotxyz.f safecbmc.f safeschedule.f schedule.f setnn.f setpbc.f slitpore.f sphere.f suijtab.f sumup.f susami.f suvibe.f suzeo.f swap.f swatch.f tabulated.f test1.f testupdate.f topmon.f torsion.f traxyz.f trim_swap.f update.f update1.f updnn.f v_elect_field.f virial.f volume.f vtorso.f writepdb.f zeocoord.f ztest.f 
-EXTRA_DIST = reconf configure
-# SUBDIRS = MANUAL TEST_SUITE MPI_SCRIPTS MPI_EXTRA
+topmon_SOURCES = topmon.f global_data.f var_type.f const_phys.f const_math.f util_math.f util_string.f util_files.f util_timings.f Atom_energy.f Atom_traxyz.f Intra_energy.f alignplanes.f anes.f boltz.f bondlength.f calcsolpar.f calctor.f charge.f cleanup.f close.f cone.f coneangle.f config.f corp.f coru.f ctrmas.f deriv.f dipole.f dump.f ee_energy.f ee_index_swap.f ee_recip.f eemove.f eesetup.f energy.f exgrph.f exmuir.f expand.f explct.f exsami.f exsix.f flucq.f garo3body.f garofalini.f genlj.f geometry.f inclus.f init_vars.f initia.f ipswsetup.f linkcell.f ljmuir.f ljpsur.f ljsami.f matops.f mmff.f molsetup.f monola.f monper.f newton.f ninesix.f pbc.f place.f pressure.f prvolume.f random.f readdat.f recip.f recip_atom.f recippress.f recipsum.f rigfix.f rigrot.f rosenbluth.f rotxyz.f safecbmc.f safeschedule.f schedule.f setnn.f slitpore.f sphere.f suijtab.f sumup.f susami.f suvibe.f swap.f swatch.f tabulated.f torsion.f traxyz.f update.f update1.f updnn.f v_elect_field.f virial.f volume.f vtorso.f writepdb.f zeolite.f common.inc
 
-#########################
-### Compiler definitions
-#########################
+# most fortran compilers can directly preprocess c-like directives: use
+# 	$(MPIF90) $(F90FLAGS) -c $<
+# if explicit preprocessing by the C preprocessor is needed, use:
+# 	$(CPP) $(CPPFLAGS) $< -o $*.F90 
+#	$(MPIF90) $(F90FLAGS) -c $*.F90 -o $*.o
+# remember the tabulator in the first column !!!
 
-### Intel Compiler for x86 architecture (ifort,mpif90)
-#AM_FFLAGS     =  -O2 -w90 -w95 -cm
-## only for debugging
-#AM_FFLAGS     = -w90 -w95 -cm -CB -CU -p -g -check_bounds -check all -traceback
-## for MPI
-AM_FFLAGS     =  -ipo -O3 -no-prec-div -xHost 
+.f.o:
+	@f90rule@
 
-### NAG Compiler for OSX (f95)
-#AM_FFLAGS     = -O0 -gline -f77 -mismatch_all -C=all -C=undefined -nan
-## only for debugging
-#AM_FFLAGS     = -O2
+mostlyclean-generic:
+	-rm -f *.mod
 
-### SGI Altix: Intel Compiler for ia64 architecture (ifort)
-#AM_FFLAGS     = -O2 -tpp2 -w90 -w95 -cm
-# only for debugging
-#AM_FFLAGS     =  -check all -traceback -w90 -w95 -cm -CB -CU -g
+# DFLAGS  = precompilation options (possible arguments to -D and -U)
+#           used by the C compiler and preprocessor
+# FDFLAGS = as DFLAGS, for the f90 compiler
+# With the exception of IBM xlf, FDFLAGS = $(DFLAGS)
+# For IBM xlf, FDFLAGS is the same as DFLAGS with separating commas 
 
-### GNU Compiler (g95,gfortran,g77)
-#AM_FFLAGS     = -O3 -fomit-frame-pointer -finline-functions -ffast-math #-mcpu=i686 -march=i686 
-## only for debugging
-#AM_FFLAGS     =  -ftrace=full -pg -fbounds-check
+DFLAGS         = @dflags@
+FDFLAGS        = @fdflags@
 
-### Portland Compiler for x86 architecture (pgf95)
-#AM_FFLAGS     =  -O2 -tp k8-64 -Mvect=sse
-## only for debugging
-#AM_FFLAGS     =  -tp k8-64 -Mbounds -g -Mchkptr -check_bounds
+# IFLAGS = how to locate directories where files to be included are
+# In most cases, IFLAGS = -I../include
 
-### SGI Compiler for Origin (f77)
-#AM_FFLAGS     = -O2 #-march=opteron #-mips4 -r12000 #-check_bounds -g
+IFLAGS         = @iflags@
 
-### IBM AIX Compiler for SP (xlf)
-#AM_FFLAGS     = -O3 -qstrict -bmaxdata:2000000000 #-check_bounds -g
+# MOD_FLAGS = flag used by f90 compiler to locate modules
+# Each Makefile defines the list of needed modules in MODFLAGS
 
-#############################
-### End compiler definitions 
-#############################
+MOD_FLAG      = @imod@
+
+# Compilers: fortran-90, fortran-77, C
+# If a parallel compilation is desired, MPIF90 should be a fortran-90 
+# compiler that produces executables for parallel execution using MPI
+# (such as for instance mpif90, mpf90, mpxlf90,...);
+# otherwise, an ordinary fortran-90 compiler (f90, g95, xlf90, ifort,...)
+# If you have a parallel machine but no suitable candidate for MPIF90,
+# try to specify the directory containing "mpif.h" in IFLAGS
+# and to specify the location of MPI libraries in MPI_LIBS
+
+MPIF90         = @mpif90@
+F90            = $(MPIF90)
+CC             = @cc@
+F77            = $(MPIF90)
+
+# C preprocessor and preprocessing flags - for explicit preprocessing, 
+# if needed (see the compilation rules above)
+# preprocessing flags must include DFLAGS and IFLAGS
+
+CPP            = @cpp@
+CPPFLAGS       = @cppflags@ $(DFLAGS) $(IFLAGS)
+
+# compiler flags: C, F90, F77
+# F90 flags must include MODFLAGS, IFLAGS, and FDFLAGS with appropriate syntax
+
+CFLAGS         = @cflags@ $(DFLAGS) $(IFLAGS)
+F90FLAGS       = @f90flags@ @pre_fdflags@$(FDFLAGS) $(IFLAGS) $(MODFLAGS)
+FFLAGS         = @fflags@
+
+# compiler flags without optimization for fortran-77
+# the latter is NEEDED to properly compile dlamch.f, used by lapack
+
+FFLAGS_NOOPT   = @fflags_noopt@
+
+# Linker, linker-specific flags (if any)
+# Typically LD coincides with F90 or MPIF90, LD_LIBS is empty
+
+LD             = @ld@
+LDFLAGS        = @ldflags@
+LD_LIBS        = @ld_libs@
+
+# For parallel execution, the correct path to MPI libraries must
+# be specified in MPI_LIBS (except for IBM if you use mpxlf)
+
+MPI_LIBS       = @mpi_libs@
+
+# ar command and flags - for most architectures: AR = ar, ARFLAGS = ruv
+
+AR             = @ar@
+ARFLAGS        = @arflags@
+
+# ranlib command. If ranlib is not needed (it isn't in most cases) use
+# RANLIB = echo
+
+RANLIB         = @ranlib@
+
+LIBS           = $(MPI_LIBS) $(LD_LIBS)

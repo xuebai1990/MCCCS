@@ -1,0 +1,1837 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+% Copyright (C) 2004 Bin Chen, Marcus Martin, Jeff Potoff, John Stubbs, 
+% Collin Wick, Nikolay Zhuravlev, and Ilja Siepmann
+%
+% This program is free software; you can redistribute it and/or
+% modify it under the terms of the GNU General Public License
+% as published by the Free Software Foundation; either version 2
+% of the License, or (at your option) any later version.
+%
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with this program; if not, write to the Free Software
+% Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% To create a PostScript or PDF file from this source file, first 
+% process it with LaTeX, then convert to ps or pdf:
+%
+% latex manual.tex
+% dvips -P pdf -t letter -f manual.dvi -o manual.ps
+% ps2pdf manual.ps manual.pdf
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Document history:
+%
+% -original README file by NDZ 03/12/02
+% -rewritten and converted to LaTeX by JMS 12/11/03
+% -updated by JMS 2/26/04, 4/21/04
+% -updated by NR 2/11/04
+% -updated by KMB 01/10 -- version 2.2
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LaTeX controls: 
+% {article}, {report}, {book}, {letter} = classes
+% in [] formatting- font size, paper size... columns
+\documentclass[12pt,letterpaper]{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% If figures are required
+%\usepackage{epsf}
+%\usepackage{epsfig}
+
+%%% I don't like the default paper size
+% somehow even this screws up
+%\setlength{\oddsidemargin}{0in}
+%\setlength{\textwidth}{6.5in}
+%\setlength{\textheight}{9.0in}
+% online answer
+%http://www.rpi.edu/dept/acs/rpinfo/common/Computing/Consulting/Software/LaTeX/Hints/Margins.html
+\topmargin=-.5in     % topmargin is 1/2 inch (note negative value)
+\oddsidemargin=0in   % left margin is 1 inch on right-hand pages
+\evensidemargin=0in  % same for left-hand pages in twosided document
+\textwidth=6.5in     % leaves 1 inch for the right margin
+\textheight=9in      % 9 inches reserved for the text.
+
+\begin{document}
+
+\parskip=6pt plus 1pt minus 1pt
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%                       TITLE PAGE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\centerline{\bf \Huge MC$^3$S}
+
+\vskip 24pt
+
+\centerline{\bf \LARGE Monte Carlo for Complex Chemical Systems}
+
+\vskip 24pt
+
+%\centerline{\bf \Large Manual, Version 2.1}
+\centerline{\bf \Large User Manual}
+
+\vskip 24pt
+
+\centerline{\bf \Large Version 2.2}
+
+\vskip 36pt
+
+\centerline{\large January 2010}
+
+\eject
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%                       BODY OF TEXT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% possible subdivisions
+%
+% \section{}
+% \subsection{}
+% \subsubsection{}
+% \paragraph{}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\noindent This manual is intended to explain the variables necessary for
+simulations carried out in the canonical ($NVT$), isobaric-isothermal
+($NpT$), $NVT$-Gibbs or $NpT$-Gibbs ensemble.
+Simulations in the grand canonical ($\mu VT$) ensemble are possible but not discussed.  
+The Lennard-Jones 12-6 potential is assumed for non-bonded interactions.
+Other functional forms, such as exponential-6, 9-6 or mmff, have been implemented
+but should be considered non-generalized and used with caution.
+
+%\section{New features in version 2.1}
+%\begin{itemize}
+%\item Automatic assignment of Ewald parameters and rcutchg, if requested
+%\item Thermodynamic integration
+%\item Expanded ensemble
+%\item Addition of external electric field
+%\item Calculation of solubility parameter, cohesive energy density, and heat of vaporization
+%\item Ability to use atom displacement 
+%\item rigid swaps for fully flexible molecules
+%\item Torsion potential using tabulated torsional potential
+%\item Modifying the energy subroutines so that it doesn't use the neutral charge groups for Ewald summation
+%\item Ability to not use Coulombic part in boltzmann weights
+%\item Ability to use different pressures in different boxes, input pressure in MPa instead of simulation units
+%\item Ability to use ghost ideal particles in the simulation, a number of particle offset, to prevent unnecessary memory usage  
+%\item Better way of excluding and including intra-molecular interactions
+%\item Bug fixes  
+%\item System charge neutrality check at an appropriate place
+%\item Extensive checks for the correctness of the fortran.4 input files for the molecule description part. Points the user where to look for a possible error while specifying LJ, stretch, bend, and torsion 
+%\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{New Features in MCCCS}
+\begin{itemize}
+\item Addition of tabulated potentials
+\item Addition of multiple-center rotations with {\bf iurot}
+\item Addition of variables for RPLC simulations
+\item Minor changes to the structure of the {\bf fort.4} input file
+\item Introduction of the parallel version of the code
+\item Introduction of the test suite
+\end{itemize}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Revising the Code}
+For clarity and to assist future users, please bracket all changes to the code with the following lines:
+\begin{itemize}
+\item c --- [\textit{your initials}] (\textit{date})
+\item c --- [\textit{explain what changes were made or the purpose of the new code}]
+\item {\textit{new or revised code here}}
+\item c --- END [\textit{your initials}] (\textit{date})
+\end{itemize}
+
+\noindent Please note that both the serial and parallel versions of the code contain a subdirectory called {\bf TEST\_SUITE}.
+This test suite may be used to check for errors after revising the code.  See the {\bf README} file located within {\bf TEST\_SUITE} 
+for more information.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Compiling and Running the Code}
+\label{compile}
+\noindent The many files that comprise the MCCCS code are located in directories titled 
+{\bf MCCCS-2010-SERIAL} and {\bf MCCCS-2010-PARALLEL} and are available for download on the internal group website.
+It is necessary to set up all requisite input files and compile the code prior to running a simulation.
+
+\noindent Before compiling the code, check to ensure that all logical parameters in {\textbf{control.inc}} conform 
+to the desired system.  Changes in any {\textbf{.inc}} file will not take effect until the code is (re)compiled.  
+If desired, change the name of the executable in {\textbf{Makefile}} before compiling.
+To compile the code, choose the appropriate compiler in {\textbf{Makefile}} and 
+execute the command {\textbf{make}} while in the directory that contains the MCCCS code.  
+To completely rebuild the code from the source, execute {\textbf{make clean}} followed by {\textbf{make}}.
+
+\noindent Sample input files are located within the {\bf TEST\_SUITE} sub-directory.
+The input file(s) ({\bf fort.4} and possibly others) should be placed in a different directory from the code. 
+After setting all necessary variables in {\textbf{fort.4}} and verifying that any other necessary input files are
+included, navigate to the MCCCS directory and type the name of the executable (given in {\bf Makefile}) to run the code.
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Input File: {\textbf{fort.4}}}
+
+\noindent This is the main input file for a simulation.  It contains information about the system to be simulated,
+including the number and type of molecules, how these molecules are to be modeled and what type of
+moves will be utilized.  An error from the {\textbf{readdat.f}} file often indicates a problem in the {\textbf{fort.4}} input file.
+Note that most variables, even if they are not used in a particular simulation, must be present in {\bf fort.4} at all times;
+however, there are a few variables that must be removed depending on the setting of other variables.  
+This manual specifies those variables that are sometimes removed; if not specified, assume that a particular variable 
+must be included in {\bf fort.4}.
+
+\subsection{System Specification}
+
+\noindent{\textbf{seed:}} Initializes the random number generator with an
+integer seed value. If the seed stays the same, the program will
+always generate the same sequence of pseudo-random numbers, which is useful for
+debugging.  Change the seed to any other integer to generate a different sequence.  
+
+\noindent{\textbf{iounit:}} Set to 2 to print to a file.  Set to 6 to print to the screen.
+
+\noindent{\bf{L\_add:}} Used to add particles to the system to increase a box to the desired size.
+The particles may be ghost atoms, helium atoms, L-J particles or any other particles with a single interaction site.
+May be used instead of manually adding particles to the fort.77 file.  If true, {\textbf{L\_add}} adds particles
+to the system.  Usually false.
+
+\noindent{\bf{N\_add:}} The number of particles to be added to the system. 
+
+\noindent{\bf{N\_box2add:}} The box to which the particles will be added.
+
+\noindent{\bf{N\_moltyp2add:}} The molecule type of the added particles.  The particles must have a 
+single interaction site.
+
+\noindent{\bf{L\_sub:}} Used to remove particles from the system to decrease a box to the desired size.
+The particles may be ghost atoms, helium atoms, L-J particles or any other particles with a single interaction site.
+May be used instead of manually removing particles from the fort.77 file.  If true, {\textbf{L\_sub}} removes particles
+from the system.  Usually false.
+
+\noindent{\bf{N\_sub:}} The number of particles to be subtracted from the system.
+
+\noindent{\bf{N\_box2sub:}}  The box from which the particles will be subtracted.
+
+\noindent{\bf{N\_moltyp2sub:}} The molecule type of the subtracted particles.
+The particles must have a single interaction site.
+
+\noindent{\textbf {lecho:}} Echos the data read in by {\textbf {readdat.f}} to the
+standard output. Should be set to true.
+
+\noindent{\textbf {lverbose:}} Yields verbose output of the input variables if true.
+
+\noindent{\bf{l\_Coul\_CBMC:}} If true, uses the Coulombic energy during the Boltzmann weight calculation.
+Normally true.
+
+\noindent{\bf{Num\_cell\_a:}} The number of unit cells in the {\bf a} direction for solid simulations.
+
+\noindent{\bf{Num\_cell\_b:}} The number of unit cells in the {\bf b} direction for solid simulations.
+
+\noindent{\bf{Num\_cell\_c:}} The number of unit cells in the {\bf c} direction for solid simulations.
+
+\noindent{\bf run\_num, suff:} The run number and suffix are included as identifiers in the names of the output files.
+In this manual, references to files such as {\bf config\#\#.dat} indicate a file whose name includes the {\bf run\_num} and {\bf suff}.
+
+\noindent{\textbf{nstep:}} The number of Monte Carlo cycles (steps) to run the simulation.
+
+\noindent{\textbf {lstep:}} If true, {\textbf{nstep}} refers to MC steps.  If false, {\textbf{nstep}} refers to cycles.  
+This statement controls all references to ``cycles'' or ``steps'' and should be false unless debugging.
+
+\noindent{\textbf {lpresim:}} If true, runs a presimulation to generate the SAFE-CBMC probabilities.  
+There must be only one particle in the simulation and {\textbf {pmfix}} must be set to 0.  If SAFE-CBMC
+probabilities are required for multiple particle types, run a presimulation for each particle type and 
+combine the probabilities in the {\textbf{fort.23}} file before beginning the simulation with multiple types of particles.
+
+\noindent{\textbf {iupdatefix:}} Specifies how often the SAFE-CBMC probabilities should be updated.
+
+\noindent{\bf{L\_tor\_table:}} For the torsional potential. If true, uses tabulated potentials instead of 
+the regular functional form.
+
+\noindent{\bf{L\_spline:}} Set to true for spline interpolation of the torsional potential. 
+It has no meaning if {\textbf{L\_tor\_table}} is false.
+
+\noindent{\bf{L\_linear:}} Set to true for linear interpolation of the torsional potential.
+It has no meaning if {\textbf{L\_tor\_table}} is false.
+
+\noindent{\textbf{L\_vib\_table:}} Turns on tabulated vibrations.  Requires {\textbf{fort.41}}.
+All equilibrium bond lengths must be listed in {\textbf{suvibe.f}} and all force constants must be set to zero.
+
+\noindent{\textbf{L\_bend\_table:}} Turns on tabulated 1-3 bending.  Requires {\textbf{fort.42}}. 
+1-3 interactions must be specifically included (see \textbf{internal 1-4}).
+
+\noindent{\textbf{L\_vdW\_table:}} Turns on the tabulated van der Waals potential.  Requires {\textbf{fort.43}}.  
+All bead types must be included in {\textbf{suijtab.f}}.
+
+\noindent{\textbf{L\_elect\_table:}} Turns on tabulated electrostrostatics.  Requires {\textbf{fort.44}}.  
+All bead types must be included in {\textbf{suijtab.f}}.  
+Currently, the tabulated potential is multiplied by the partial atomic charges within the code, 
+which works nicely with Greg Voth's force-matched potential, but this may change.
+
+\noindent{\textbf {nbox:}} The number of simulation boxes.
+Note that some variables, including {\textbf {boxlx, boxly, boxlz, lsolid, lrect, kalp, rcutchg}} and {\textbf{rcutnn}}, 
+must be specified for each box.
+
+\noindent{\textbf {express:}} The external pressure, in MPa, for each box in an $NpT$ or $NpT$-Gibbs ensemble simulation.
+
+\noindent{\textbf{ghost\_particles:}} The number of ideal gas particles offset for each box.  
+Usually set to zero.  There must be {\textbf{nbox}} values.  
+The offset particles do not interact with the system via the interaction potential;
+rather, they contribute only to the ideal gas part of, for example, pressure.
+Offset particles can be used when an ideal or near-ideal gas is needed as a reference state to compute,
+for example, the free energy of transfer of a particle molecule between an ideal gas and water.
+
+\noindent{\bf{L\_Ewald\_Auto:}} For the automatic assignment of Ewald parameters.  
+If true, the code will generate {\textbf{kalp(ibox)}} and {\textbf{rcutchg(ibox)}} based on the
+system size.  {\textbf{kalp}} is calculated by dividing 3.2 by {\textbf{rcut}}.  
+This is the standard method but always check for convergence of the Ewald summation.
+Remember to set {\textbf{lewald}} in {\textbf{control.inc}} to true to turn on the Ewald summation.
+
+\noindent{\textbf {temp:}} The temperature in K.  
+	
+\noindent{\textbf {fqtemp:}} The fluctuating charge temperature, in K, for
+simulations using the ANES-MC or polarizable models.
+
+\noindent{\textbf{Elect\_field:}} The electric field strength, in units of V/\AA, for each simulation box.  The electric 
+field is applied in the $z$-direction.  Note that {\textbf{lelect\_field}} must be set to true in {\textbf{external.inc}}.
+
+\noindent{\textbf{ianalyze:}} The analysis subroutine is called every {\textbf{inanalyze}} cycles. 
+Could be a number smaller than {\textbf{imv}} to yield better statistics.
+
+\noindent{\textbf{nbin:}} The number of bins for the radial distribution function calculation. 
+A value of 200 should be adequate for most purposes.
+
+\noindent{\textbf{lrdf:}} If true, the radial distribution function (rdf) will be calculated.
+
+\noindent{\textbf{lintra:}} If true, intramolecular distances will be included in the rdf.
+
+\noindent{\textbf{lstretch:}} If true, the bond stretch distribution will be calculated.
+
+\noindent{\textbf{lgvst:}} If true, {\textit{gauche}} versus {\textit{trans}} statistics will be calculated.
+
+\noindent{\textbf{lbend:}} If true, the bending distribution will be analyzed.
+
+\noindent{\textbf{lete:}} If true, the end-to-end distribution of flexible chains will be calculated.  
+Flexible chains should be numbered so that the first bead is at one end of the chain and the last
+bead is at the other end.
+
+\noindent{\textbf{lrhoz:}} If true, Z profiles (for solid slabs or self-assembled monolayers) will be calculated.
+%KMB-removed: For solid-vapor simulations, the solid box must be at the center of the simulation cell.
+
+\noindent{\textbf{bin\_width:}} Specifies the bin width for the end-to-end distribution and density profile. 
+A value of 0.2 is adequate for most purposes.
+
+\noindent{\textbf {iprint:}} The simulation status will be printed every {\textbf{iprint}} cycles (steps).
+Can be used to track the progress of a simulation as it is running.
+A useful value yields 10-20 outputs per simulation.
+
+\noindent{\textbf {imv:}} The system configuration is sent to the movie file, {\textbf{movie\#\#.dat}},
+every {\textbf{imv}} cycles (steps).  
+As this is used for subsequent analysis, it is important to have reasonably statistically independent results.
+Larger values of {\textbf{imv}} (for example, greater than 500) will yield results that are less correlated
+(more statistically independent).
+
+\noindent{\textbf {iratio:}} The maximum translation and rotation values are updated
+every {\textbf{iratio}} cycles (steps).
+Smaller values (approximately 250-500) are acceptable for equilibration.
+For production, {\textbf{iratio}} must be greater than {\textbf{nstep}} to avoid violating microscopic reversibility.
+
+\noindent{\textbf {iblock:}} Indicates the number of cycles (steps) to be independently averaged 
+when calculating properties such as $p$, $\rho$ or molefraction.
+At least 1000 cycles per block is a good value.
+A constant drift in the block average of a given property (for instance, steadily decreasing energy values) 
+indicates that the system is not yet equilibrated.
+
+\noindent{\textbf {idiele:}} 
+For dielectric constant calculations, the system dipole is calculated every {\textbf{idiele}} cycles (steps)
+and the $x$, $y$ and $z$ components are written to {\textbf{fort.27}}.
+The dielectric constant needs to be calculated separately using {\textbf{fort.27}} 
+(see description of {\textbf{fort.27}} in section \ref{output}).
+For single-component $NpT$ simulations, {\textbf{idiele}} also controls the frequency of the output volume 
+and energy statistics as output in {\textbf {fort.14}} through {\textbf {fort.19}}.  
+
+\noindent{\textbf{L\_movie\_xyz:}} Yields a single movie file in xyz format if true.
+
+\noindent{\textbf{iheatcapacity:}} If {\textbf{iheatcapacity}} is less than {\textbf{nstep}} and {\textbf{lnpt}}, which is in {\textbf{control.inc}}, 
+is false, then {\textbf{fort.55}} contains the following averages: $<E>$ and $<E^2>$.
+If {\textbf{iheatcapacity}} is less than {\textbf{nstep}} and {\textbf{lnpt}}, which is in {\textbf{control.inc}}, 
+is true, then {\textbf{fort.56}} contains the following averages: $<H>$ and $<H^2>$.
+
+\noindent Note that the next eight variables ({\textbf{boxlx}} through {\textbf{rcutnn}}) must be included for each box in the system.  All eight variables for the first box should be listed first, followed by sets of these eight variables for subsequent boxes, if applicable.
+
+\noindent{\textbf {boxlx, boxly, boxlz:}} Specifies the $x, y$ and $z$
+dimensions, in \AA, of the simulation box.  Used only for initialization.
+Note that the box length must be greater than twice the cutoff ({\bf rcut}).  If, for example, {\bf rcut} is 14~\AA, it is a good idea to
+start with a box length of slightly more than 2{\bf rcut} (for example, 32~\AA) to ensure no volume moves that would reduce the box
+length to less than 28~\AA will be attempted.  If such a move is attempted, the simulation will be aborted.
+
+\noindent{\textbf {lsolid:}} If true, the $x, y$ and $z$ box lengths can vary independently. 
+Only to be used if the box can withstand anisotropic stressors ({\textit{i.e.}}, if the box is crystalline). 
+
+\noindent{\textbf{lrect:}} If {\textbf {lsolid}} and {\textbf{lrect}} are both true, then the cell will remain rectangular ({\textit{i.e.,}} the axes will remain mutually perpendicular).  This variable has no effect if {\textbf {lsolid}} is false.  
+Note that in the case of a non-cubic, non-rectangular system, {\textbf{linit}} must be false and the system must start from a {\textbf{fort.77}} file.
+
+\noindent{\textbf {kalp:}} This is the Ewald sum convergence parameter.  
+It will be calculated automatically as 3.2 divided by {\textbf{rcut}} 
+if {\textbf{L\_Ewald\_Auto}} (described above) is true.
+If {\textbf{L\_Ewald\_Auto}} is false, the value of the Ewald sum convergence parameters will be taken from this variable.
+If all charge interactions are being calculated ({\textit{i.e.,}} if {\textbf {lchgall}} in {\textbf{control.inc}} is true), 
+then {\textbf{kalp}} should be greater than or equal to 5.6.  
+If a charge cutoff is being used ({\textit{i.e.,}} if {\textbf {lchgall}} is false), 
+then {\textbf{kalp}} should be greater than or equal to 3.2 divided by {\textbf{rcut}}.
+Verification of the convergence of the Ewald sum is highly recommended.
+
+% removed from code
+%\noindent{\bf kmax} Specifies the magnitude of the largest reciprocal
+%space lattice vector ($\vec{k}$) to use in the calculation of the Ewald sum.
+
+\noindent{\textbf {rcut:}} This is the cutoff of the Lennard-Jones potential.  
+Interactions beyond {\textbf{rcut}} are not calculated.
+A smaller value might be used for equilibration than production.  
+The TraPPE force field uses a 14~{\AA}-cutoff.
+In the simulation of a large vapor box with the Ewald sum, it is efficient to set 
+{\textbf{rcut}} to be 40\% of {\textbf{boxlx}}.  This reduces the size of {\textbf{kalp}},
+which in turn reduces the number of vectors required (controlled by {\textbf{vectormax}}
+in {\textbf{control.inc}}).
+
+\noindent{\textbf {rcutnn:}} The nearest neighbor bead-bead cutoff for the neighbor
+list.  Not normally used.
+
+\noindent{\textbf {nchain:}} The total number of molecules in the simulation.
+
+\noindent{\textbf {nmolty:}} The number of different molecule types in the
+simulation.
+
+\noindent{\textbf {moltyp:}} The number of molecules of each type.  
+Note that there must be \textbf{nmolty} values. 
+
+\noindent{\textbf {lmixlb:}} If true, the Lorentz-Berthelot combining rules
+for the Lennard-Jones potential will be used.  These are the rules used by the 
+TraPPE force field and what should be used by default.
+
+\noindent{\textbf {lmixjo:}} If true, the Jorgensen combining rules for the 
+for the Lennard-Jones potential will be used.  These are the rules used by the
+OPLS force field.
+
+\noindent{\textbf {nijspecial:}} This variable specifies whether to adjust the combining rules by a scaling parameter.
+{\textbf{nijspecial}} lists the number of special L-J interactions.
+If {\textbf{nijspecial}} is 0 then no scale parameter is used and {\textbf {ispec, jspec, aspec}} and {\textbf {bspec}} are ignored.
+If {\textbf{nijspecial}} is 1 or greater, {\textbf{aspec}} and {\textbf{bspec}} modify the combining rules using $\sigma_{ij}={\textbf{aspec}}\cdot\sigma_{ij}$ and $\epsilon_{ij}={\textbf{bspec}}\cdot\epsilon_{ij}$.  
+
+\noindent{\textbf {ispec, jspec:}} Specifies which parameters (as listed in {\textbf {suijtab.f}}) 
+should be modified by the scale factors {\textbf{aspec}} and {\textbf{bspec}}.
+Used only if {\textbf{nijspecial}} is greater than or equal to 1.
+
+\noindent{\textbf {aspec, bspec:}} The scale factors used to modify the parameters denoted by {\textbf{ispec}} and {\textbf{jspec}}.
+{\textbf{aspec}} modifies the combined $\sigma_{ij}$ value.
+{\textbf{bspec}} modifies the combined $\epsilon_{ij}$ value.
+Used only if {\textbf{nijspecial}} is greater than or equal to 1.
+
+\noindent{\textbf {rmin:}} The minimum cutoff for atom-atom distances.  Any move
+that would bring atoms closer than this distance will be automatically rejected.  
+In theory {\textbf{rmin}} can be set to any value as long as $g(r)$ is zero up to that distance.  
+A smaller value, even 0~{\AA}, may be used for equilibration than production.
+A good value for a system that contains hydrogen bonds is 1.2~{\AA}.
+A good value for a system without hydrogen bonding is $0.7\sigma$.
+
+\noindent{\textbf{softcut:}} The upper bound on numbers of which to take the negative exponential.  
+Used to rule out events with low probability.
+100.0 is a reasonable value.
+
+\noindent{\textbf {rcutin:}} Specifies the inner cutoff for dual-cutoff CBMC.
+During CBMC growths, only intermolecular interactions between atoms within {\textbf{rcutin}}
+of one another are calculated.  
+Smaller values of {\textbf{rcutin}} will require less computer time
+while larger values will have higher acceptance rates. 
+Typical values are between 5 and 9~{\AA}. 
+
+\noindent{\textbf {rbsmax, rbsmin:}} Specifies the maximum and minimum radii of the
+``in'' region during an AVBMC move.  
+These values are dependent on the type of molecule.
+Typical values for an alcohol may be 5~{\AA} and 3~{\AA}, respectively.
+
+\subsection{Molecule Specification}
+Each type of molecule must have its own specification section in which the
+connectivity and potential parameters are specified.  
+Note that a ``bead'' is one unit of a molecule.  It may contain a single atom or a group of atoms.  
+For example, in a united atom model, a $CH_x$ group is considered to be a single bead.
+
+\noindent Certain types of molecules should be numbered in specific ways to avoid errors or to increase efficiency.
+In a partially rigid molecule, the flexible part must be numbered first.  For example, only the nitro group in nitrotoluene is flexible. 
+The two oxygen beads are given numbers 1 and 2 and the nitrogen atom is assigned bead number 3.  
+There is one growpoint at bead number 3.
+
+\noindent For branched molecules, it is often best to start numbering at the most highly branched site. 
+For example, for methyl acrylate, the carbonyl carbon should be bead number 1 and the beads to which 
+it is bonded should be numbers 2, 3 and 4.
+
+\subsubsection{Molecule Parameters}
+
+\noindent{\textbf {nunit:}} The number of beads in the molecule.
+
+\noindent{\textbf {nugrow:}} The maximum number of beads to regrow with CBMC.
+Should be equal to {\textbf {nunit}} unless {\textbf {explct.f}} is used.
+
+\noindent{\textbf {ncarbon:}} For the explicit hydrogen model, the number of
+carbon atoms present.  This allows for a simplified setup of the exclusion table.  
+Note that these atoms should be listed first in the molecule specification section 
+of the {\textbf{fort.4}} file.  
+{\textbf{ncarbon}} should be equal to {\textbf{nunit}} for all other models.
+
+\noindent{\textbf {maxcbmc:}} The maximum number of beads that are allowed to grow
+with CBMC.  Should be equal to {\textbf {nugrow}}.
+
+\noindent{\textbf {iurot:}} For a single rotation center, {\bf iurot} specifies the bead around which to perform rotations.
+0 specifies the center of mass and should be used as the default.
+For multiple rotation centers, set {\bf iurot} $< 0$ and add values for \textbf {nrotbd}, \textbf {irotbd} and \textbf {pmrotbd}
+immediately after all of the variables in section \ref{avbmc_vars} (immediately after {\bf pmbias2}).
+If {\bf iurot} $\ge$ 0, then these three variables are not included. 
+
+\noindent{\textbf {lelect:}} If true, the molecule contains one or more charged sites.
+
+\noindent{\textbf {lflucq:}} If true, the charge(s) on molecules of this type may fluctuate.
+Only for polarizable models.
+
+\noindent{\textbf {lqtrans:}} If true, intermolecular charge transfers 
+for molecules of this type are allowed.
+For polarizable molecules.
+
+\noindent{\textbf {lexpand:}} If true, this molecule will be treated with the expanded ensemble.
+The default setting is false.
+
+\noindent{\textbf {lavbmc1, lavbmc2, lavbmc3:}} Logical variables to specify which of the three types
+of AVBMC moves to perform on this molecule.
+Used only if the intrabox swap move is specified (see {\textbf{pmswap}}).
+
+\noindent{\textbf {fqegp:}} Specifies an energy offset in the fluctuating
+charge coulombic energy.  Only for polarizable models.
+
+\noindent{\textbf {maxgrow:}} The maximum number of interior segments to consider
+in a SAFE-CBMC regrowth (see {\textbf {pmfix}}).
+
+\noindent{\textbf {lring:}} Specifies whether the molecule is a flexible ring
+that should be regrown with SAFE-CBMC during a swap move.  If true,
+{\textbf {iring}} must be specified on the following line.
+
+\noindent{\textbf {lrigid:}} If true, part or all of this molecule should be treated as a rigid body.
+Note that if {\textbf{lrigid}} is true, {\textbf{growpoints}} must be included.  
+If {\textbf{lrigid}} is false, {\textbf{growpoints}} must not be included.
+Typically {\textbf{lrigid}} and {\textbf{lbranch}} (see below) are both true or both false.
+
+\noindent{\textbf {lrig:}} If true, rigid segments should be grown from non-rigid segments 
+during SAFE-CBMC.  The default setting is false.
+If true, additional variables must be specified after this line.
+
+\noindent{\textbf {nrig:}} Only included if {\textbf{lrig}} is true.
+If {\textbf{nrig}} is less than or equal to 0, the site from which to grow the rigid sites will be chosen randomly.
+If {\textbf{nrig}} is greater than 0, {\textbf{nrig}} specifies the number of specific points to be kept rigid during
+a SAFE-CBMC growth.
+
+\noindent{\textbf {irig:}} Only included if {\textbf{lrig}} is true and 
+if {\textbf{nrig}} is greater than 0.
+Specifies the site from which the rigid part will be grown.
+Must be {\textbf{nrig}} pairs of {\textbf{irig}} and {\textbf{frig}}.
+
+\noindent{\textbf {frig:}} Only included if {\textbf{lrig}} is true and 
+if {\textbf{nrig}} is greater than 0.
+Specifies the site prior to {\textbf{irig}}.  The site denoted by 
+{\textbf{frig}} is not kept rigid.
+Must be {\textbf{nrig}} pairs of {\textbf{irig}} and {\textbf{frig}}.
+
+\noindent{\textbf {nrigmin:}} Only included if {\textbf{lrig}} is true and 
+if {\textbf{nrig}} is less than or equal to 0.
+This variable denotes the minimum amount of the chain to keep rigid.
+
+\noindent{\textbf {nrigmax:}} Only included if {\textbf{lrig}} is true and 
+if {\textbf{nrig}} is less than or equal to 0.
+This variable denotes the maximum amount of the chain to keep rigid.
+
+\noindent{\textbf {lsetup:}} If true, try to automatically setup the bead-bead
+potential types.  Only for linear molecules.  Experimental.  Use with caution.
+
+\noindent{\textbf {isolute:}} Specifies how often to write the configuration of this molecule 
+to the {\textbf{fort.11}} for later analysis.
+Identical to {\textbf{imov}} but specific to this type of molecule.
+Unless specifically needed, a value larger than {\textbf {ncycles}} is recommended.
+
+\noindent{\textbf {eta:}} Specifies any additional potential energy to be added 
+uniformly to each molecule of this type in a particular simulation box.  Usually 0.
+There must be one value for each simulation box.
+
+\noindent{\textbf{lq14scale:}} If true, 1-4 charge-charge interactions need to calculated. 
+Usually true for the TraPPE force field.  True for acrylates and diols.
+
+\noindent{\textbf{qscale:}} If {\textbf{lq14scale}} is true, {\textbf{qscale}} gives the scaling factor
+for the 1-4 charge-charge interactions.  Generally 0.5.
+
+\noindent{\textbf{growpoints:}} Specifies the number of sites in a partially rigid molecule 
+from which CBMC growths should be attempted.  
+Only needed if {\textbf{lrigid}} is set to true. 
+Note that an error will occur if {\textbf{growpoints}} is included while {\textbf{lrigid}} is false.
+If non-zero, {\textbf{growpoints}} must be followed by the unit numbers
+of the growth sites with one site listed per line.
+
+\subsubsection{Bead Specification and Connectivity}
+\label{beadspec}
+The variables in this section must be included for each bead in the molecule.
+
+\noindent{\textbf {unit:}} The bead number.
+
+\noindent{\textbf {ntype:}} This value specifies the interaction parameters of this
+particular bead as given in the file {\textbf{suijtab.f}} (see section \ref{suijtab} below).
+
+\noindent{\textbf {leaderq:}} This value specifies a neutral charge group of which {\textbf{unit}} is a part.  
+It is used only if {\textbf{lchgall}} is false.
+It should be set to the lowest unit number in the neutral charge group 
+or otherwise to {\textbf{unit}}.
+
+\noindent{\textbf {vibration:}} This section specifies the bonds formed by this bead.
+The first line is the number of bonds and is followed by one line for each bond
+that contains two values: first the unit number to which {\textbf{unit}} is bonded 
+and then the bond type as given by the {\textbf{suvibe.f}} file.
+
+\noindent{\textbf {bending:}} This section specifies the bond-bending
+interactions that include {\textbf{nunit}}.  The organization of this section is similar 
+to the structure of {\textbf{vibration}}:
+the first line specifies the number of bond-bending interactions and 
+the following lines specify the two other units involved in the bend (the unit closest to {\textbf{unit}} 
+should be listed first) followed by the bend type as given by the {\textbf{suvibe.f}} file.
+
+\noindent{\textbf {torsion:}} This section specifies the torsional interactions 
+that include {\textbf{nunit}}.  The organization of this section is similar 
+to the structure of {\textbf{vibration}} and {\textbf{bending}}:
+the first line specifies the number of torsional interactions and 
+the following lines specify the three other units involved in the torsion 
+in order of decreasing proximity to {\textbf{unit}} followed by the torsion type given by
+the {\textbf{suvibe.f}} file.
+
+\subsubsection{AVBMC Variables}
+\label{avbmc_vars}
+
+If AVBMC moves are to be performed (that is, if {\textbf{lavbmc1}}, {\textbf{lavbmc2}},
+or {\textbf{lavbmc3}} is true), the variables listed in this section must be included immediately after {\bf torsion}.
+
+\noindent{\textbf {pmbias:}} This value specifies to probability with which an 
+``out to in'' move is attempted.  The probability of an ``in to out'' move is then given by 
+$1 - {\textbf{pmbias}}$.
+
+\noindent{\textbf {pmbsmt:}} This variable gives the probability with which the target site 
+is a particular molecule type of AVBMC 2 and 3 moves.
+There must be one value for each molecule type.
+
+\noindent{\textbf {pmbias2:}} This value gives the probability in an AVBMC 3 move
+that a molecule is taken from the ``out'' region and moved to a target side.  If the molecule is not taken
+from the ``out'' region, it is removed from another cluster.
+
+\subsubsection{Additional {\bf iurot} Information}
+If {\bf iurot} is less than 0, the following three variables must be in the {\bf fort.4} input file.
+If {\bf iurot} is greater than or equal to 0, these variables are not included.
+
+\noindent{\textbf {nrotbd:}} The number of rotation centers.
+
+\noindent{\textbf {irotbd:}} The unit numbers of the rotation centers.  0 denotes the center of mass.
+There must be {\bf nrotbd} values.
+
+\noindent{\textbf {pmrotbd:}} The probability to rotate around each center.
+There must be {\bf nrotbd} values.
+
+\subsection{Simulation Box and Move Probability Setup}
+
+\noindent{\textbf {licell:}} If true, a link cell list will be used to increase efficiency.  
+This variable should be used only for very large systems and only if 
+{\textbf{rcut}} is less than $0.25~{\textbf{boxlx}}$.
+
+\noindent{\textbf {rintramax:}} Specifies the maximum distance between the ends of a molecule 
+for use in the link cell list.  One value only (for the largest molecule in the system).
+Originally for $CO_2$.
+
+\noindent{\textbf {boxlink:}} Specifies which simulation box to treat with a
+link cell list.
+
+\noindent{\textbf {Armtrax, Armtray, Armtraz:}} The initial maximum translational
+displacements, in {\AA}, for all beads in the $x, y$ and $z$ directions.
+Used to change the conformation and center of mass of a molecule 
+by moving individual bead(s) of that molecule.  Only for flexible molecules.
+
+\noindent{\textbf {rmtrax, rmtray, rmtraz:}} The initial maximum translational
+displacements, in {\AA}, for all molecules in the $x, y$ and $z$ directions.  
+Only used if {\textbf {linit}} is true.
+If {\textbf{linit}} is false, this information is read from the {\textbf{ fort.77} }file.
+
+\noindent{\textbf {rmrotx, rmroty, rmrotz:}} The initial maximum rotational
+displacements, in radians, for all molecule types around the $x, y$ and $z$ axes.
+Only used if {\textbf {linit}} is true.
+If {\textbf{linit}} is false, this information is read from the {\textbf{ fort.77} }file.
+
+\noindent{\textbf{tatra:}} The target acceptance ratio for translational moves.
+0.5 is a good value.  {\textbf{tatra}} is changed every {\textbf {iratio}} cycles (steps).
+
+\noindent{\textbf {tarot:}} The target acceptance ratio for rotational moves.
+0.5 is a good value.  {\textbf{tarot}} is changed every {\textbf {iratio}} cycles (steps).
+
+\noindent{\textbf{linit:}} If true, the simulation will be initialized.
+This variable should be true for the initial run and false for all subsequent runs.  
+Note that a {\textbf{fort.77}} input file is required if {\textbf{linit}} is false.
+
+\noindent{\textbf {lnewtab:}} If {\textbf{lnewtab}} is true, a new table of the potential function
+will be created for zeolite calculations.  This variable is normally false.
+
+\noindent{\textbf {lreadq:}} If {\textbf{lreadq}} is true, the bead charge values will be read from the
+{\textbf{fort.77}} file.  If false, the charges will be taken from {\textbf{suijtab.f}}.
+This is used only for fluctuating charge models.
+
+% input structure changed
+%\noindent{\bf a15} Value for the repulsive potential between alcohol
+%hydrogens and intramolecular oxygens 4 bonds away.  Should be $4\times
+%10^7$ for an ether oxygen and $7.5\times 10^7$ for an alcohol oxygen.
+%Potential controlled by {\bf oh 1-5 interaction}, see below.
+
+\noindent{\textbf{lbranch:}} If true, the structure of a molecule must be read from 
+{\textbf{input\_struc.xyz}}.  If false, the structure can be grown with CBMC and 
+{\textbf{input\_struc.xyz}} is not required.
+Note that one value is required for each molecule type.  This variable is usually false
+unless CBMC cannot grow a particular molecule type.
+Typically {\textbf{lrigid}} (see above) and {\textbf{lbranch}} are both true or both false.
+
+\noindent Note: \textbf{inich} through \textbf{nchoiq} must be specified for each box in the system.
+This information is used only for initialization ({\textit{i.e.}}, if {\textbf{linit}} is true).  
+Even if {\textbf{linit}} is false, however, these variables must be included.
+
+\noindent{\textbf {inich:}} The inital number of molecules of each type in this box.  
+There must be {\textbf{nmolty}} values.
+
+\noindent{\textbf {inix, iniy, iniz:}} Integer numbers of how many molecules
+should be placed along the $x, y$ and $z$ directions, respectively, in the initial
+lattice.  If the box is cubic, these three values should be relatively close to one another.
+
+\noindent{\textbf {inirot:}} This value specifies the initial rotation along the $z$ axis of each new atom.
+This applies only to linear molecules and influences the torsional angle.
+If {\textbf{inirot}} is 0 then each atom is randomly rotated.  If {\textbf{inirot}} is greater than 0, 
+each atom is uniformly rotated by {\textbf{inirot}} degrees.  
+If {\textbf{inirot}} is less than 0, the atoms are alternatively rotated in the $z$ direction by {$\mathbf {\pm}$ \textbf{inirot}}.  
+
+\noindent{\textbf {inimix:}} For mixture simulations, this variable specifies the order
+in which to select molecules for the initial lattice. 
+If {\textbf{inimix}} is 0, molecules are placed randomly.
+If {\textbf{inimix}} is greater than 0, molecules are placed in order by type.
+If {\textbf{inimix}} is less than 0, molecules are placed in alternating order by type.
+
+\noindent{\textbf {zshift:}} This value specifies a uniform shift in the $z$ direction so
+that terminal beads have a certain $z$ coordinate.  Used only for monolayer calculations.
+{\textbf{zshift}} should be 0 otherwise.
+
+\noindent{\textbf {dshift:}} This value specifies the amount, in {\AA}, to stagger each row in the $x$
+direction of the initial lattice.  
+Optimal spacing can be achieved by setting this value to half of the spacing between molecules,
+which can be calculated dividing {\textbf {boxlx}} by {\textbf {inix}}.
+
+% HD 
+% I observed that sometimes the above statement leads to errors in ctrmas. 
+%                  write(iou,*) 'nxcm,nycm,nzcm',nxcm,nycm,nzcm
+%                  write(iou,*) 'dx,dy,dz',dx,dy,dz
+%                  if (iwarn .ne. 0) stop
+
+
+
+\noindent{\textbf {nchoiq:}} This variable specifies the number of times to call {\textbf
+{flucq.f}} to optimize the fluctuating charge models in this box and is used only for
+polarizable models.
+
+\noindent{\textbf {rmvol:}} This value specifies the initial volume displacement. 
+For an $NpT$ simulation a value of $10^3$ is appropriate, while $10^{-3}$ is a good choice
+for an $NVT$ simulation.
+The difference is due to different units for the two ensembles.
+% One may discuss how rmvol is related to the system size.
+
+
+\noindent{\textbf {tavol:}} Specifies the target acceptance rate for volume
+moves.  Reasonable values for equilibration and production might be 0.4 and 0.5, 
+respectively.
+
+\noindent{\textbf {iratv:}} The maximum volume displacement will be adjusted every 
+{\textbf{iratv}} cycles.  {\textbf{iratv}} is analogous to {\textbf {iratio}}, which controls how often
+the maximum translation and rotation displacements are adjusted.
+As mentioned for {\textbf{iratio}}, smaller values such as 250-500 are acceptable for
+equilibration. 
+Note that {\textbf{iratv}} must be greater than {\textbf{nstep}} for production to avoid
+violating microscopic reversibility.
+
+\noindent{\textbf {iratp:}} The pressure is calculated every {\textbf{iratp}} cycles.
+As calculating the pressure is somewhat computationally
+intense, this typically should be set to 5 or greater.  A good value is perhaps 10.
+
+\noindent{\textbf {rmflcq}} Specifies the maximum fluctuating charge displacement.  
+For polarizable models only.
+
+\noindent{\textbf {taflcq}} Specifies the target acceptance rate for fluctuating charge moves.  
+For polarizable models only.
+
+\subsubsection{Monte Carlo Move Probabilities}
+The simulation will carry out {\textbf {ncycles}} cycles.  Available move types include
+volume, swatch, swap, CBMC, fluctuating charge, expanded ensemble, translations and rotations;
+the corresponding probability for each move type is given by 
+{\textbf{pmvol, pmswat, pmswap, pmcb, pmflcq, pmexpc,}} and {\textbf {pmtra}}, respectively.
+Move probabilities are given cumulatively.  For example, if ${\textbf{pmvol}} = 0.10$ and
+${\textbf{pmswat}} = 0.25$, there is a $10\%$ chance of choosing a volume move and a $25\%-10\% = 15\%$ 
+chance of choosing a swatch move.
+Since the move probabilities are given cumulatively, the probability for a rotation move is simply $1 - {\textbf{pmtra}}$.
+Sub-move probabilities, such as on which box to perform a volume move, are also cumulative.
+
+\noindent{\textbf{pmvol:}} Specifies the probability to perform a volume
+move.  Typically start around 0.001 during equilibration and adjust until 
+there is approximately one accepted volume move every 10 cycles.
+
+\noindent{\textbf {pmvlmt:}} The probability to perform a volume move on each box.
+Must be one probability for each simulation box.
+
+\noindent{\textbf {nvolb:} For the $NVT$-Gibbs ensemble, the number of pairs of
+boxes on which to perform volume exchange moves.
+
+\noindent{\textbf {pmvolb:}} The probability to perform a volume exchange on
+each pair of boxes in an $NVT$-Gibbs ensemble.  Must be {\textbf {nvolb}}
+values.
+
+\noindent{\textbf {box5, box6:}} Specifies a pair of boxes for volume
+exchange.  Must be one line for each pair specified in {\textbf {nvolb}}.
+Not used if the simulation is in the $NVT$, $NpT$ or $NpT$-Gibbs ensemble.
+
+\noindent{\textbf {pmvolx, pmvoly:}} These values are required when at least one of the
+simulation boxes is non-cubic.  These values set the (cumulative) probabilities
+to do moves in the $x$ and $y$ directions, with the $z$ probability
+being 1 - {\textbf {pmvoly}}.
+Note that these values must not be included if the system is cubic.
+
+\noindent{\textbf {pmswat:}} Specifies the probability to perform a swatch
+(CBMC identity exchange) move.
+
+\noindent{\textbf {nswaty:}} The number of pairs of molecule types to perform
+swatch moves on.
+
+\noindent{\textbf {nswatb:}} Specifies molecule types for the pairs in the
+swatch move.  Must be {\textbf {nswaty}} pairs listed.
+
+\noindent{\textbf {pmsatc:}} Once a swatch move is being performed, this
+specifies the probability to perform it on a particular pair.  Must be
+{\textbf nswaty} values.
+
+\noindent{\textbf {nsampos:}} Specifies the number of beads that can be left
+in the same positions.  {\textbf {nsampos, ncut, splist, gswatc, nswtcb,
+pmswtcb,}} and {\textbf {box\_pair}} must be specified for each pair of
+molecule types given by {\textbf {nswaty}}.
+
+\noindent{\textbf {2xncut:}} Number of CBMC growth sites the structure given by
+{\textbf nsampos} has to grow back the whole molecule.
+
+\noindent{\textbf {splist:}} Specifies the pair(s) of beads to be kept in the
+same position.  Must be {\textbf {nsampos:}} pairs.
+
+\noindent{\textbf {gswatc 2x(ifrom, iprev):}} For both molecule types, the
+bead to be grown from and the previous bead must be specified.  These
+will almost always be beads listed in {\textbf {splist}}.
+
+\noindent{\textbf {nswtcb:}} Number of different box pairs to attempt swatch
+moves between.
+
+\noindent{\textbf {pmswtcb:}} Probabilities to pick a particular box pair for
+a swatch move.  Must be {\textbf {nswtcb}} values.
+
+\noindent{\textbf {box\_numbers:}} Specifies the box pairs that this swatch move
+should be attempted between.  Note that this can also list the same
+box twice, in which case the move is performed inside a single box.
+
+\noindent{\textbf {pmswap:}} Specifies the probability to perform a swap
+move in which a molecule is removed from one simulation box and placed 
+in another box by growing it with CBMC.  It may be efficient to have approximately
+one accepted swap move per every ten cycles.
+
+\noindent{\textbf {pmswmt:}} This specifies the probability to swap a molecule of 
+a particular type.  There must be {\textbf{nmolty}} values.
+
+\noindent Note that {\textbf{nswapb, pmswapb, box1}} and {\textbf{box2}} must be
+repeated {\textbf{nmolty}} times, one for each type of molecule.
+
+\noindent{\textbf {nswapb:}} The number of box pairs on which to perform a swap
+move on a certain type of molecule.  
+
+\noindent{\textbf {pmswapb:}} The probability to perform a swap move on a
+particular pair of boxes.  Must be {\textbf {nswapb}} values.
+
+\noindent{\textbf {box1, box2:}} Specifies the box pairs on which to perform a swap
+move for this molecule type.  If {\textbf{box1}} and {\textbf{box2}} denote the same box, 
+an AVBMC move will be performed, provided {\textbf {lavbmc1, lavbmc2}} 
+or {\textbf {lavbmc3}} has been set to true.
+
+\noindent{{\textbf {pmcb:}} Specifies the probability to perform a configurational-bias 
+Monte Carlo (CBMC) move, which involves regrowing a random segment of a molecule 
+in a new configuration in a position near its original position.  
+Typically approximately one-third of the moves in a flexible system are CBMC moves.  
+If dual-cutoff CBMC is desired, remember to set {\textbf{ldual}} in {\textbf{control.inc}} to true
+(see {\textbf{control.inc}} for more information).
+
+\noindent{\textbf {pmcbmt:}} When a CBMC move is being performed, 
+{\textbf{pmcbmt}} specifies the probability to choose a particular molecule type.  
+There must be {\textbf{nmolty}} values.
+
+\noindent{\textbf {pmall:}} The probability that a particular molecule type
+should try to regrow itself in its entirety when a CBMC move is
+performed.  Usually set to zero.  Must be {\textbf{nmolty}} values.
+
+\noindent{\textbf {pmfix:}} Once a molecule has been chosen for a CBMC move,
+{\textbf{pmfix}} specifies the probability to perform a SAFE-CBMC
+move.  Usually 0 unless the molecule is large or a flexible ring.  
+Must be {\textbf{nmolty}} values.
+SAFE-CBMC moves require the {\textbf{fort.23}} input file, which can be generated via a
+presimulation (see {\textbf{lpresim}} above).
+
+\noindent{\textbf {pmflcq:}} Specifies the probability to perform a
+fluctuating charge move.  For polarizable models only.
+
+\noindent{\textbf {pmfqmt:}} Once a fluctuating charge move has been selected, 
+{\textbf{pmfqmt}} specifies the probability to carry it out on a
+particular molecule type.  Must be {\textbf{nmolty}} values.
+
+\noindent{\textbf {pmexpc:}} Specifies the probability to perform an
+expanded ensemble move that changes a molecule's interaction
+parameters.
+
+\noindent{\textbf {pmeemt:}} Once an expanded ensemble move has been selected, 
+{\textbf{pmeemt}} specifies the probability to carry it out on a
+particular molecule type.  Must be {\textbf{nmolty}} values.
+
+\noindent{\textbf{pmexpc1:}} The probability for new expanded ensemble 
+({\textit{i.e.}, to change the identity of the molecule).
+
+\noindent{\bf{pm\_atom\_tra:}} The probability to translate individual atoms.
+Used only in special cases. Usually 0.0d0.
+
+\noindent{\textbf {pmtra:}} Specifies the probability to perform a
+translation move that changes the position of a molecule.  
+Usually approximately one-third of the total moves are translation
+moves.
+
+\noindent{\textbf {pmtrmt:}} After a translation move has been selected,
+{\textbf{pmtrmt}} specifies the probability to carry it out on a particular molecule
+type.  Must be {\textbf{nmolty}} values.
+
+\noindent Note that, although not specified, the fraction of rotation moves is equal to 
+$1 - {\textbf{pmtra}}$.
+
+\noindent{\textbf {pmromt:}} After a rotation move has been selected,
+{\textbf{pmromt}} specifies the probability to carry it out on a particular molecule
+type.  There must be {\textbf{nmolty}} values.
+
+\noindent{\textbf{nchoi1:}} Specifies the number of randomly chosen
+positions to consider during a trial insertion of the first bead during a CBMC
+swap move.  10 is a reasonable number.  
+Increasing {\textbf{nchoi1}} increases the computer time but also increases
+the acceptance rate of the swap move.
+There must be {\textbf{nmolty}} values.
+
+\noindent{\textbf {nchoi:}} Specifies the number of randomly chosen positions
+to consider during all CBMC regrowths.  A larger value takes longer
+but increases the acceptance rate.  8 is a reasonable value.  
+There must be {\textbf{nmolty}} values.
+Note that {\textbf{nchoi} controls both swap and CBMC moves, while 
+{\textbf{nchoi1} controls only swap moves.
+
+\noindent{\textbf {nchoir:}} Specifies the number of rotations to consider
+for the swap move of a rigid molecule.  
+Only used if {\textbf{lrigid}} is true for this molecule.  
+There must be {\textbf{nmolty}} values.
+
+\noindent{\textbf {nchoih:}} Specifies the number of explicit hydrogen states
+to consider during a CBMC regrowth.  The value only changes the rotation of the 
+methyl group.  Unused for other molecules. There must be one value
+of {\textbf {nchoih}} for each molecule type.
+
+\noindent{\textbf {nchoitor:}} Specifies the number of torsional angles to
+consider during a CBMC regrowth.  100 is a good choice.  Larger takes
+longer but increases acceptance rates.  There must be one value of
+{\textbf {nchoitor}} for each molecule type.
+
+\noindent{\textbf {nchbna, nchbnb:}} Specifies the number of bend angles to
+consider during a CBMC regrowth.  1000 is a good choice.  
+There must be one value of {\textbf {nchbna}} and one value of {\textbf{nchbnb}} 
+for each molecule type.
+{\textbf {nchbnb}} is only used for branched molecules because, in order to grow two branches 
+at once, it might be necessary to consider more possibilities to find a good bend angle.
+
+\noindent{\textbf {icbdir:}} Specifies whether a CBMC growth should go
+in only one direction.  The usual value, 0, indicates no preference.
+1 indicates that CBMC growths are considered only for increasing unit numbers.
+There must be {\textbf{nmolty}} values.
+
+\noindent{\textbf {icbsta:}} Specifies the starting unit for a CBMC growth.
+If a consistent starting point is desired for a CBMC move, 
+{\textbf {icbsta}} will specify the unit number.  
+For example, +5 indicates that CBMC growths should always start at bead number 5.
+A value of -5 indicates that the growth should start at
+a random position between bead 5 and the highest numbered bead
+(this is useful when one end of the chain is rigid and tethered to a surface). 
+{\textbf{icbsta} is usually set to 0, which means there is no preferred starting point.
+If not set to 0, make sure that the absolute value of {\textbf{icbsta}} +
+{\textbf{nugrow}} is equal to {\textbf{nunit}} + 1 for consistency. 
+There must be {\textbf{nmolty}} values of {\textbf {icbsta}}. 
+
+\subsection{Other Variables}
+
+\noindent{\textbf {exclusion:}} Specifies whether or not to exclude any
+intermolecular interactions.  
+If no interactions are to be excluded, {\textbf{exclusion}} should be 0 
+and the following line will be ignored (it may be blank or not).
+Otherwise an integer value should be used to indicate the number of pairs
+of exclusions.  For each value, there must be one additional line
+specifying the molecule type and unit and the molecule type and unit
+from with it should be excluded from interacting.
+
+\noindent{\textbf {internal 1-4:}} By default, Lennard-Jones interactions are
+considered only if beads are seperated by four or more bonds and
+coulombic interactions are considered past three bonds with 1-4
+interactions scaled by {\textbf{q14scale}.  {\textbf{internal 1-4}} is an integer variable
+equal to the desired number of exceptions to this rule.
+If there are no exceptions, {\textbf{internal 1-4}} should be 0 and the following line 
+will be ignored (it may be blank or not).
+If non-zero, there must be that many lines following, 
+each of which gives the molecule type, the two bead numbers to
+change the rule for, +1 or -1 (for turning the interaction on or off,
+respectively), the factor to scale the L-J interaction by and the
+factor by which to scale the coulombic interaction.  
+
+\noindent{\textbf{oh 1-5 interaction:}} Specifies whether any additional
+repulsive interactions should be computed for hydroxyl hydrogen
+intramolecular oxygen pairs separated by 4 bonds.  
+If there are no additional interactions, {\textbf {oh 1-5 interaction}} should be 0 and the
+following line will be ignored (it may be blank or not).
+Otherwise the first number is the quantity of interactions, followed by one line for
+each interaction that gives the molecule type, bead numbers and the a15 value,
+which is 1 is for an ether oxygen or 2 is for an alcohol oxygen.
+
+\noindent{\textbf {lucall:}} If true, the chemical potential is calculated independently.
+Usually false since the chemical potential is determined automatically by the swap move.
+
+\noindent{\textbf {ucheck:}} If {\textbf {lucall}} is true, {\textbf{ucheck}} indicates for which 
+molecule types the chemical potential should be calculated.  A value of 0 means the chemical potential
+will not be calculated.  A value greater than 0 means the chemical potential will be calculated.
+There must be {\textbf{nmolty}} values.
+
+\noindent{\textbf {nvirial:}} If {\textbf {lvirial}} (in {\textbf{control.inc}}) is true,
+then the second virial coefficient will be calculated for a molecule.
+{\textbf {nvirial}} determines the number of configurations to consider
+at each step.  This is a specialized simulation and not for the
+general case.
+
+\noindent{\textbf{start, step:}} If the second virial coefficient is being
+calculated, these determine the starting center of mass distance and
+step size, in {\AA}.
+
+\noindent{\textbf{lideal:}} If true, the box is treated as an ideal gas.  
+The must be {\textbf{nbox}} values.  If true, then pair interactions are not computed
+in the {\bf sumup.f, energy.f, boltz.f} or {\bf atom\_energy.f} subroutines.  In addition, tail corrections
+are not calculated (this is accounted for in the {\bf sumup.f, swap.f} and {\bf swatch.f} subroutines).
+When {\bf lideal} is true, {\bf kalp} for the corresponding box should be small ({\it e.g.}, 1.0d-8) so that
+the reciprocal space portion of the Ewald sum is negligible.  There must be {\bf nbox} values.
+
+\noindent{\textbf{ltwice:}} If true, the minimum image convention
+is applied twice.  Necessary for the smaller (4x6; 20x26~{\AA})
+RPLC set-up.  There must be {\textbf{nbox}} values.   
+
+\noindent{\textbf{lrplc:}} If true, there are special directions for SAFE-CBMC.
+Needed for ODS chains in RPLC simulations.
+There must be {\textbf{nmolty}} values.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Input and Output Files}
+
+\subsection{Input Files}
+
+\noindent{\bf fort.4}
+As detailed above, this is the input file that determines of what the system is comprised, how long to run the simulation and what kinds of moves to attempt.  An error from the {\textbf{readdat}} file typically indicates a problem with the {\textbf{fort.4}} input file.
+The {\textbf{fort.4}} file must be included in all simulations.  
+
+\noindent{\bf fort.77}
+This is the restart file and must be present for all simulations in which {\textbf{linit}} 
+(in {\bf fort.4}) is false. 
+To continue a simulation, copy the final configuration file from the previous run, {\bf config\#\#.dat}, to {\bf fort.77}.
+The following list includes, in order, the information that is contained in {\bf fort.77}.  
+Multiple values listed on a single line (for example, the maximum rotational values in the $x$, $y$ and $z$ directions) 
+are separated by spaces, not commas or any other characters. 
+\begin{center}
+\begin{tabular}{| l |}
+\hline
+total number of cycles for which the simulation has run \\ \hline
+max atomic displacements in the $x$, $y$ and $z$ directions  \\ \hline
+max translational values in the $x$, $y$ and $z$ directions for molecules of type 1 in box 1 \\ \hline 
+max rotational values in the $x$, $y$ and $z$ directions for molecules of type 1 in box 1 \\ \hline
+max translational values in the $x$, $y$ and $z$ directions for molecules of type 2 in box 1 \\ \hline
+max rotational values in the $x$, $y$ and $z$ directions for molecules of type 2 in box 1 \\ \hline
+  . . . \\ \hline
+max translation values in the $x$, $y$ and $z$ directions for molecules of type {\bf nmolty} in box 1 \\ \hline
+max rotation values in the $x$, $y$ and $z$ directions for molecules of type {\bf nmolty} in box 1 \\ \hline
+  . . . \\ \hline
+max translation values in the $x$, $y$ and $z$ directions for molecules of type {\bf nmolty} in box {\bf nbox} \\ \hline
+max rotation values in the $x$, $y$ and $z$ directions for molecules of type {\bf nmolty} in box {\bf nbox} \\ \hline
+fluctuating charges for molecule types 1 through {\bf nmolty} in box 1 \\ \hline
+  . . . \\ \hline
+fluctuating charges for molecule types 1 through {\bf nmolty} in box {\bf nbox} \\ \hline
+max volume displacements for boxes 1 through {\bf nbox} \\ \hline
+$x$, $y$ and $z$ lengths of box 1  \\ \hline
+  . . . \\ \hline
+$x$, $y$ and $z$ lengths of box {\bf nbox} \\ \hline
+total number of molecules in the simulation ({\bf nchain}) \\ \hline
+number of types of molecules ({\bf nmolty}) \\ \hline
+number of units for each molecule type ({\bf nmolty} values) \\ \hline
+molecule type of each chain ({\bf nchain} values) \\ \hline
+box number of each chain ({\bf nchain} values) \\ \hline
+$x$, $y$ and $z$ coordinates and the charge, $q$, of molecule 1 \\ \hline
+$x$, $y$ and $z$ coordinates and the charge, $q$, of molecule 2 \\ \hline
+  . . . \\ \hline
+$x$, $y$ and $z$ coordinates and the charge, $q$, of molecule {\bf nchain} \\ 
+  \hline
+\end{tabular}
+\end{center}
+
+\noindent{\bf control.inc}
+This file is located in the MCCCS directory with the other code files, so technically it is not an input file.    
+It is important, however, to check all parameters in {\bf control.inc} prior to running a simulation.  
+Individual parameters are explained within {\bf control.inc}.
+Remember that changes in any {\bf .inc} file do not take place until the code is recompiled (see section \ref{compile}).
+Array dimensions are also set in {\bf control.inc}; thus, an ``array out of bounds'' error may require changing the array dimensions and recompiling the code.
+
+\noindent{\bf input\_struc.xyz}
+Only necessary if {\bf lbranch} in {\textbf{fort.4}} is true for any molecule.  If so, this is where the structure of the molecule is specified.  
+
+\noindent{\bf fort.7}
+Only necessary for expanded ensemble calculations. 
+This file holds the current values of the Lennard-Jones parameters.
+
+\noindent{\bf fort.23}
+Only necessary if a SAFE-CBMC simulation is being performed. 
+This file contains the probability histograms used in that algorithm.  
+To adapt the probabilities, the final histograms that are given in the {\bf
+fort.21} output file should be copied to {\bf fort.23} before continuing the simulation.  
+
+\noindent The following four files are for simulations with tabulated potentials.  Note that the {\bf suijtab} identification numbers of the
+molecules must be less than 150 or the array sizes in {\bf tabulated.inc} must be increased.
+
+\noindent \textbf{fort.41:}  Tabulated vibrational potentials.  List the number of vibrational potentials, the 
+vibration number fromm suvibe.f, the number of points per angstrom and the tabulated potential
+starting at 0.0.  Repeat the last three points for each vibrational potential.  Separate the different
+potentials with a line consisting of '1000 1000'.
+
+\noindent \textbf{fort.42:}  Tabulated 1-3 nonbonded 'bending' potentials.  List the number of bending potentials, the bend number fromm suvibe.f, the number of points per angstrom and the tabulated potential
+starting at 0.0.  Repeat the last three points for each 1-3 potential.  Separate the different potentials
+with a line consisting of '1000 1000'.
+The tabulated bending is calculated using distances, not angles, so the 1-3 interactions
+must be included (see \textbf{internal 1-4}).
+
+\noindent \textbf{fort.43:}  Tabulated van der Waals potentials.  List the number of vdW potentials, the 
+bead numbers from suijtab.f (e.g., 114 115), the number of points per angstrom and the tabulated potential
+starting at 0.0.  Repeat the last three points for each interaction (e.g., list both 114 115 and 115 114).  
+Separate the different potentials with a line consisting of '1000 1000'.
+
+\noindent \textbf{fort.44:}  Tabulated electrostatic potentials.  List the number of electrostatic potentials, the 
+bead numbers fromm suijtab.f (\textit{e.g.}, 114 115), the number of points per angstrom and the tabulated potential starting at 0.0.  Repeat the last three points for each interaction (e.g., list both 114 115 and 115 114).  
+Separate the different potentials with a line consisting of '1000 1000.'  Currently, this is designed to
+work with Greg Voth's tabulated force-matched/coarse-grained potential, so each potential in fort.44 is the same.
+The tabulated potentials are then multiplied by the partial atomic charges within the code.
+
+\noindent{\bf fort.61, fort.62, fort.63}
+The vibration, bending and torsion libraries for the molecule builder.
+Experimental - use with caution.
+
+\subsubsection{Retired Input Files}
+
+\noindent{\bf fort.25}
+Only for use in zeolite calculations, this file stores the Lennard-Jones force field.
+
+\noindent{\bf fort.91}
+Only for use in zeolite calculations, this file stores the tabulated zeolite potential energy.
+
+\subsection{Output Files}
+\label{output}
+
+Note that the two characters included in the names of many of the output files (denoted here as \#\#)
+are the {\bf run\_num} and {\bf suff} from the {\bf fort.4} input file.
+
+\noindent{\bf run\#\#.dat:} The majority of the information about the simulation including 
+the fraction of accepted moves and the calculated energies and densities is written to {\bf run\#\#.dat}.  
+
+\noindent{\bf config\#\#.dat}
+The final configuration of the system as well as the maximum displacements and box lengths 
+are contained in this file, which is also known as the restart file.  Its format is identical to the format of the
+{\bf fort.77} input file.  To continue a simulation, this file should be copied to {\bf fort.77}.
+
+\noindent{\bf movie\#\#.dat} 
+The movie file which holds the configurations of the system as output
+every {\bf imov} cycles.  Used to determine the radial distribution
+functions, $g(r)$ among other things.  Formerly called {\bf fort.10}.
+
+\noindent{\bf fort.11}
+The {\bf isolute} movie file output every {\bf isolute} cycles.  
+Used to obtain more frequent information about a particular molecule in the simulation 
+({\it e.g.}, the solute molecules in a chromatography simulation).
+
+\noindent{\bf fort.12}
+Contains the box lengths, total energy and number of each molecule
+type for each box, output every cycle.  Useful for many things.
+
+\noindent{\bf fort.13}
+If there is a non-cubic, non-rectangular box in the simulation, this
+file will contain the angles between cell vectors, written out every
+cycle.
+
+\noindent{\bf box\#config\#\#.xyz} Lists the xyz coordinates and identifies the molecule type of each molecule
+in the system.  In a format for VMD to visualize.
+
+\noindent{\bf {cell\_param\#\#.dat}} Holds the cell lengths and cell angles for every cycle.  Only written when
+{\bf lsolid} is true.
+
+\noindent{\bf fort.14, fort.15, fort.16, fort.17, fort.18}
+If the simulation is of a single molecule type and {\bf idiele} is
+less than {\bf nstep}, then these 5 files will contain averages
+related to the dielectric constant. {\bf fort.14} and {\bf fort.15}
+will have
+$$
+{{4\pi} \over {3Vk_{\rm B}T}} {1 \over 4\pi\epsilon_0} 
+\langle {\bf M}^2\rangle 
+\hskip 20pt {\rm and} \hskip 20pt
+{{4\pi} \over {3Vk_{\rm B}T} }{1 \over 4\pi\epsilon_0} 
+(\langle {\bf M}^2\rangle - 
+\langle {\bf M}_x\rangle^2 - 
+\langle{\bf M}_y\rangle^2 - 
+\langle{\bf M}_z\rangle^2 )
+$$ 
+respectively, where {\bf M} is the total dipole moment of the box and
+{\bf M}$_x$, {\bf M}$_y$, and {\bf M}$_z$ its $x, y$ and $z$
+components.  Both quantities are unitless.  Note that Allen \&
+Tildesley relate the dielectric constant of the system $\epsilon$, to
+these quantities {\sl plus} 1.  {\bf fort.16, fort.17}, and {\bf
+fort.18} will contain $\langle{\bf M}_x\rangle, \langle{\bf
+M}_y\rangle,$ and $\langle{\bf M}_z\rangle$, respectively, in units of
+$e$~{\AA}.
+
+\noindent{\bf fort.14, fort.15, fort.16, fort.17, fort.18, fort.19}
+If the simulation is of a single molecule type, {\bf idiele} is less
+than {\bf nstep} and {\bf lnpt} is true, then these 6 files will
+contain the following averages: $\langle V\rangle, \langle V^2
+\rangle, \langle U \rangle, \langle U^2\rangle, \langle V
+\rangle\langle U \rangle,$ and $\langle VU \rangle - \langle V \rangle
+\langle U \rangle$ where $V$ is the box volume and $U$ is the total
+energy, for each box.  This is in addition to the dipole moment
+information contained in {\bf fort.14}-{\bf 18} (see above).
+
+\noindent{\bf fort.21}
+The final SAFE-CBMC probability histograms are contained in this file,
+if the SAFE-CBMC algorithm is used.  Can be used to start a simulation
+with the new histograms by copying to {\bf fort.23}.
+
+\noindent \textbf{fort.27:} For dielectric constants.
+For an $NVT$ simulation with ldielect=.true., fort.27 contains the x, y, and z components
+of the system dipole moment in units of $e \AA$.  The quantities may be used to calculate the 
+dielectric constant according to
+\begin{equation}
+\epsilon = 1 + \frac{1}{4\pi\epsilon_0} \frac{4 \pi}{3VT} \left ( \langle \mu^2 \rangle - \langle \mu_x^2 \rangle
+ \langle \mu_y^2 \rangle - \langle \mu_z^2 \rangle \right )
+\end{equation}
+(See Allen and Tildesley, page 161.)
+
+\noindent{\bf fort.31, fort.32, fort.33}
+If the AVBMC algorithm is used, these files will contain the cluster statistics and energy ratios,
+which are output every cycle.
+
+\noindent{\bf fort.55, fort.56}
+If {\textbf{iheatcapacity}} in {\bf fort.4} is less than {\textbf{nstep}} and {\textbf{lnpt}}, which is in {\textbf{control.inc}}, 
+is false, then {\textbf{fort.55}} contains the following averages: $<E>$ and $<E^2>$.
+If {\textbf{iheatcapacity}} in {\bf fort.4} is less than {\textbf{nstep}} and {\textbf{lnpt}}, which is in {\textbf{control.inc}}, 
+is true, then {\textbf{fort.56}} contains the following averages: $<H>$ and $<H^2>$.
+
+\noindent{\bf save-config}
+Like the {\bf final-config} restart file but output every {{\bf{nstep}}/10}
+if {\bf{nstep}} is greater than 100 MC cycles otherwise it is not
+written. Useful if a simulation ends unexpectedly so that
+progress up to that point can be kept, in which case it should be
+copied to the next input configuration file, {\bf fort.77}.
+
+\noindent{\bf end2end\_box1, end2end\_box2, end2end\_box3} These files contain the end to
+end vector distribution for box 1, box 2 and box 3 respectively. If the box is not present
+in simulation then that particular file will be empty.
+
+\noindent{\bf rhoz\_box1, rhoz\_box2, rhoz\_box3} These files contain the $z$ density profiles 
+for the respective boxes.
+
+\noindent{\bf comrhoz\_box1, comrhoz\_box2, comrhoz\_box3} These files contain
+center of mass z density profile for the respective boxes.
+
+\noindent{\bf beadrdf\_box1, beadrdf\_box2, beadrdf\_box3} These files contain
+bead-bead readial distribution functions for the the respective boxes.
+
+\noindent{\bf comrdf\_box1, comrdf\_box2, comrdf\_box3} These files contain
+center of mass readial distribution functions for the the respective boxes.
+
+\noindent{\bf beadnum\_box1, beadnum\_box2, beadnum\_box3} These files contain
+bead-bead number integrals for the the respective boxes.
+
+\noindent{\bf comnum\_box1, comnum\_box2, comnum\_box3} These files contain
+center of mass number integrals for the the respective boxes.
+
+\noindent{\bf bendang\_dist\_box1, bendang\_dist\_box2,
+bendang\_dist\_box3 } These files contain bending angle distribution
+for the respective boxes.
+
+\noindent{\bf tors\_frac\_box1, tors\_frac\_box2,
+tors\_frac\_box3 } These files contain torsion fractions
+for the respective boxes.
+
+\noindent{\bf torsprob\_box1, torsprob\_box2, torsprob\_box3 } These
+files contain torsion angle probabilty distribution vs number of
+defects per chain, for the respective boxes.
+
+\noindent{\bf Gauchedefects\_box1, Gauchedefects\_box2,
+Gauchedefects\_box3 } These files contain fraction gauche defects versus
+torsion for the respective boxes.
+
+\noindent{\bf pattern\_box1, pattern\_box2, pattern\_box3 } These
+files contain pattern of g+, trans, g- for the respective
+boxes. Transform first number into base 3 to get the pattern of gauche
+defects where -1=g+, 0 = trans, 1=g+.
+
+\noindent{\bf decoder } This file contains decoder information for
+the gauche defect pattern.
+
+\noindent{\bf Nrandomtest.dat} Contains 10 numbers generated by the 
+random number generator. 
+
+\section{Notes on File Management}
+\noindent Here are some basic guidelines about file management. 
+To prevent output files from being overwritten, change the {\bf run\_num} and/or
+the {\bf suff} in {\bf fort.4}.  Note that output files whose titles do not contain {\bf run\_num}
+and {\bf suff} will be overwritten during each new run.  Copy them to other files to avoid this.
+
+\subsection{Force Field Development} If one is developing a force
+field for a particular molecule then it is important to keep the
+output file (for example, {\bf \% topmon $>$ prod}, where prod is the
+output file). It is not necessary to keep all other fort.* output
+files but for {\bf final-config} , {\bf fort.77}, {\bf fort.4} to
+start the new trial. If you believe that you have parameters that are
+close to the desired value then you should carry out each simulation
+in a separate directory say T1, T2 (trial 1, trial2) etc and keep all
+the files for future reference. It is also a good idea to have a
+README file that has some basic iformation as to what is there in that
+particular directory.
+ 
+\subsection{Application-Oriented Simulations} If the objective of
+the simulation is to to provide microscopic understanding of the
+system then you should {\bf save all the files} of your simulation. You
+might want to create new directory for different simulation runs and
+copy the old files to files with names appended by date or any other
+way you want to identify them.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\section{MCCCS Files}
+%\noindent The following list includes a brief description of the files included in the MCCCS code.  
+%%all .f files first, then .inc files?
+%%list "calls" and "called by"??????
+
+%\subsection{.f files}
+
+%\noindent{\textbf {alignplanes:}} Designed for swatching rigid planar PAH molecules (and possibly other rigid molecules) 
+
+%\noindent{\textbf {analysis:}} Analyzes the simulation on the fly.  Calls {\bf mimage}.  Not currently used due to a high 
+
+%\noindent{\textbf {anes:}} Optimizes the electronic configuration for translation, rotation and swap moves and accepts or rejects the 
+%combined move.  Calls {\bf recip}, {\bf dipole}, {\bf ctrmas}, {\bf flucq}
+
+%\noindent{\textbf {atomtype:}} Assigns identifications to atom types.
+
+%\noindent{\textbf {boltz:}} Calculates the potential energy and Boltzmann factor for {\bf ichoi} trial positions.  Calls {\bf setpbc}, {\bf mimage}, {\bf lininter\_bend}, {\bf lininter\_vdW}, {\bf lininter\_elect} and {\bf linkcell}.
+
+%\noindent{\textbf {bondlength:}} Computes the bond length for a given vibration type.  Calls {\bf lininter\_vib}.
+
+%\noindent{\textbf {calcsolpar:}} Calculates the heat of vaporization and the solubility parameter.
+
+%\noindent{\textbf {calctor:}} ???  Calls {\bf splint} and {\bf lininter}.
+
+%\noindent{\textbf {charge:}} Calculates the intramolecular polarization energies for fluctuating charge moves.
+
+%\noindent{\textbf {chempt:}} Ghost insertion (using CBMC insertion techniques) of molecule into boxes to compute chemical potential.  Calls {\bf boltz}, {\bf energy}, {\bf explct}
+
+%\noindent{\textbf {close:}} Takes three of four points and determines a point that is a specified length from each point.  Can also find a unit vector connected to two other unit vectors with all of the angles between them given.
+
+%\noindent{\textbf {cone:}} Sets up the rotation matrix for the cone.  (more?)
+
+%\noindent{\textbf {coneangle:}} Takes two unit vectors in spherical coordinates and computes the angle between them.
+
+%\noindent{\textbf {config:}} Performs a length-conserving configurational bias move for linear, branched, anisotropic and explicit atom molecules.  Calls {\bf safeschedule}, {\bf schedule}, {\bf rosenbluth}, {\bf rigfix}, {\bf place}, {\bf explct}, {\bf energy}, {\bf recip}, {\bf dipole}, {\bf ctrmas}, {\bf linkcell} and {\bf updnn}.
+
+%\noindent{\textbf {corp:}} Tail corrections in pressure.
+
+%\noindent{\textbf {coru:}} Tail corrections in energy.
+
+%\noindent{\textbf {coruz:}}
+
+%
+%\section{{\bf Suijtab.f}}
+%\label{suijtab}
+%{\bf suijtab.f} is a file located in the MCCCS directory that contains parameters for
+%each Lennard-Jones site.  This information is transferred to {\bf fort.4} via an identification number 
+
+%\noindent The following information is included for each site.
+
+%\noindent \begin{itemize}
+%\item {\bf sigi:} The L-J $\sigma$ parameter in \AA. 
+%\item {\bf epsi:} The L-J $\epsilon$ parameter in K. 
+%\item {\bf mass:} The total molecular mass of the site.
+%\item {\bf qelect:} The partial charge in e.  Not included if neutral.
+%\item {\bf lij:} A logical variable      Not included if neutral.
+%\item {\bf lqchg:} A logical variable    Not included if neutral.
+%\item {\bf chname:} A descriptive name for the site.
+%\item {\bf chemid:} A single-letter description.  Used when visualizing the system in VMD.
+%\end{itemize}
+
+%\noindent To add a new site to the code, please use a number greater than 400 and email the updated {\bf suijtab.f} file to the entire group.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Example Simulation} 
+
+\noindent Consider the calculation of the vapor-liquid coexistence curve
+for methanol.  To do this, we will use the $NVT$-Gibbs ensemble to
+determine the saturated liquid and vapor densities for a range of
+subcritical temperatures.  Determining the vapor pressures will also
+allow us to predict the normal boiling point.
+
+\subsection{Initialization: Melting and Cooling}
+
+\noindent First we specify the connectivity and force field parameters
+in a {\bf fort.4} file.  Since we are starting from scratch ({\it i.e.}, we do not have
+a {\bf fort.77} restart file), we set {\bf linit} to true in {\bf fort.4}.  
+In this case, the box lengths for both simulation boxes
+will be read from {\bf fort.4} and we try to pick densities that
+correspond roughly to a liquid and a vapor.  We place between 10 and 33\%
+of the molecules in the vapor box.  For example, if we are simulating 300 molecules
+({\bf nchain} = 300), then we might put 50 molecules in the vapor phase and use 29~{\AA} 
+and 38~{\AA} as box lengths for the liquid and vapor phases, which
+correspond to 0.55 and 0.048~g~cm$^{-3}$, respectively.
+%
+\noindent Split up the attempted Monte Carlo move probabilities so that we
+perform {\sl no} volume moves ({\bf pmvol} = 0) and evenly divide the
+probability into CBMC, translation and rotation by setting {\bf pmcb}
+= 0.33 and {\bf pmtra} = 0.67 and leaving all other probabilities at
+zero.  Since we want to ``melt'' this structure away from the initial lattice,
+we run approximately 2000 cycles at a high temperature ({\it e.g.}, 2000 K)
+to create a disordered system.  For this process, a potential cutoff of 9~{\AA} is sufficient.  
+
+\noindent Once this is done, we don't want to initialize the system again, so we set
+{\bf linit} to false and copy {\bf config\#\#.dat} to {\bf fort.77}.  At
+this point, we want to ``cool'' the simulation, so we leave the cutoff
+and probabilities the same and change the temperature to around 90\%
+of the critical temperature (for example, 475 K) and then run for at least
+5000 cycles.  If we set {\bf iblock} to 1000, at the end of the
+output file we will see 5 values of the energy (among other things)
+averaged over 1000 cycles each, and we can get a feel for how the energy is
+changing.  It will likely be fairly steady after 2000 to 3000 cycles.
+
+\subsection{Further Equilibration}
+
+\noindent Now that we have brought the system to a temperature for which
+we want an accurate value of the saturated densities, we further equilibrate the system.
+Since we want to equilibrate density and chemical potential, we need to add volume and swap moves, respectively.  We also want a more accurate
+calculation of the potential energy, so we set ({\bf rcut}) to
+14~{\AA}.  Don't forget to copy {\bf config\#\#.dat} to {\bf fort.77} for each
+new simulation.
+
+\noindent We want one accepted volume move for every ten
+cycles, so we set {\bf pmvol} to 0.2 / $N_{\rm molecules}$ as
+we will be going for a target acceptance ratio of 50\% for volume
+moves ({\bf tavol} = 0.5).  We set {\bf iratv} so that the maximum volume
+displacement is allowed to change, for example, once every 250 cycles.  
+Now we want some swap moves too, so we set {\bf pmswap} = 0.01 and run
+the simulation for 10000 cycles.  Like the volume move, we want one
+accepted every 10 cycles, but we have no target acceptance ratio, so
+we have to see by trial and error what value of {\bf pmswap} is
+appropriate.  
+
+\noindent For the stated probabilities, here's a sample of the output
+file as it pertains to the swap move:
+
+{\bf
+\begin{tabbing}
+\#\#\# Molecule swap       \#\#\# \\
+\\
+ molecule typ =   \hskip 24pt        1 \\
+between \= box  1 and  2 into box 1\\
+   \> uattempts =    14021.0 attempts = 14021.0   accepted =   254.0\\
+ suc.growth \% = 99.501   accepted \% =  1.812\\
+between box  1 and  2 into box 2\\
+   \>   uattempts =    13851.0 attempts = 13851.0   accepted =    275.0\\
+ suc.growth \% =100.000   accepted \% =  1.985\\
+%number of times move in:          0.0  accepted=     0.0\\
+%number of times move out:          0.0  accepted=     0.0\\
+\end{tabbing}
+}
+
+\noindent Because we ran 10000 cycles, we had $10000 / (254 + 275)
+\approx 19 $ cycles between swap moves.  Since we want that to be
+closer to 10, we increase {\bf pmswap} to $0.01 \times {19 \over
+10} = 0.019$ for the next simulation.  Note that since there is an
+overall flux of molecules from the liquid to the vapor box, the
+simulation has not reached equilibrium.
+
+\subsection{Production}
+\noindent Once we have stable vapor and liquid phases in our simulation,
+it is time to begin production.  At this point, we
+should know that we will have one accepted volume move and one accepted
+swap move every 10 cycles.  We set {\bf iratio} and {\bf iratv} to a value greater than or equal to {\bf
+nstep}.  If these two values change during the production period, it would
+violate the principle of microscopic reversibility.  
+In addition, it is good practice to set the maximum $x$, $y$ and $z$ translational
+displacements in the {\bf fort.77} file to the average of these three values.  The same should
+be done for the rotational displacements.
+
+\noindent We can start calculating the pressure more frequently now,
+but it is still a fairly expensive calculation, so we set {\bf iratp} to
+perhaps 5, which will calculate the pressure every 5 cycles.  
+The pressure of a liquid is very noisy, and the standard
+deviation can be larger than the actual value!  
+So in a case such as this ($NVT$-Gibbs ensemble) we say that the pressure between the two boxes
+is equilibrated due to the volume moves, and we simply read the pressure from the vapor box.
+
+\subsection{Simulations at Lower Temperatures}
+\noindent When we have a decent result for 475 K, we start thinking about
+calculating another state point at a lower temperature.  To map out
+the coexistence curve we might go down in 50~K increments to 275~K.
+We could go to lower temperatures but these simulations will take longer to equilibrate.  
+
+\noindent To keep the files separate, make a directory for each
+temperature.  Copy in the {\bf fort.4} and {\bf fort.77} files. 
+Remember to change the temperature in the copied {\bf fort.4} file.  We
+will again have to equilibrate our simulation before we begin
+collecting data.  This is done mainly via volume and swap moves, as the
+vapor (and to a lesser extent, the liquid) density generally has a strong
+temperature dependence, especially near the critical point.  Also, according to the 
+lever rule, the relative proportions of molecules in the
+vapor and liquid boxes will change (this is the same phenomena, just
+expressed differently).  Thus if we hold our box sizes equal,
+lowering the temperature will cause molecules to move from the vapor box to the liquid box.  
+The number of accepted swap moves also will decrease since it becomes more difficult 
+to swap at lower temperatures.  We should adjust {\bf pmswap} to bring the number back up to one
+accepted move per 10 cycles.  
+
+\noindent To ensure that we keep around 50 molecules in the vapor
+phase, we will have to rescale the vapor box lengths.  
+Compare the current number of molecules in the
+vapor phase with the target amount.  Say that after 10000 cycles at
+425 K we have 12 molecules in the vapor phase.  We have ${{50}
+\over {12}} \approx 4$ times too few molecules, so we want to increase
+the volume by a factor of 4.  Since $V=L^3$, we need to uniformly
+increase each box length ($L$) by $4^{1/3}$ or 1.587.  After the desired box length
+is determined, we edit the restart file, {\bf fort.77}, to reflect this.  
+Note that changing the values in {\bf fort.4} will have no effect on the simulation
+if {\bf linit} is set to false!  
+Now we equilibrate again and check to ensure that the vapor phase contains close to 50 molecules.  
+From here, we start a production run to collect data at 425 K.  We repeat this process for 375 K, 325 K, {\it etc}.  
+At some point, the amount of accepted swaps will become so low
+that it will not be possible to have one accepted per every 10 cycles.  
+At this point we can increase the number of trial positions investigated by increasing {\bf
+nchoi1} and {\bf nchoi}; however, this is at an increased computational cost.  At
+275 K, we might have to live with, for example, only one accepted per 20 cycles.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Thermodynamic Integration in Stages} 
+See Maginn's paper for the details of this method.  In Topmon, here are the
+changes. There is a new logical variable called lmipsw in control.inc.
+If true, it does the thermodynamic integration (either use NVT or use
+NPT with zero percant volume move - hence NVT). Will fail for
+any other ensemble. And, only checked for one component systems.
+
+\noindent  No change in fort.4 - the input file is unaffected by the thermodynamic
+integration part. However, using lmipsw requires one new file called
+fort.35. The file is as follows -\\
+1. {\bf lwell} - set to true if stages b and c are done, false in case of stage a.
+For a definition of stages, see Maginn's paper.\\
+2. {\bf awell(i,j)} - input the strength of the external well in K in a
+ matrix notation (interaction of i molecule site with j lattice site). \\
+3. {\bf bwell} - parameter for gaussian well width - 0.5 might be a good
+ number. \\
+4. {\bf lstagea}, {\bf lstageb}, or {\bf lstagec} - make one of them true.\\
+5. {\bf etais}, {\bf lamdbais} - the final weak potential, and value of {\bf lambda} for
+ that stage (see the paper).\\ 
+6. box length - specify the boxlength at the beginning of stagea and
+ the end of stagec (full stages) in hmatrix notation if lsolid is true
+ and lrect is false. If lsolid is false, use the box length of the two
+ cubic boxes. Cannot mix cubic/noncubic boxes - best is to use 
+ hmatrix notation. \\
+7. {\bf iratipsw} - the number of cycles in which the integrand is updated.
+ If lstageb is true, make sure that this is an integral multiple
+ of iratp.\\
+8. reduced coordinates of all the lattice sites.
+
+\section{New Expanded Ensemble}
+\noindent It does work for changing the identity of one molecule (e.g., from ideal
+to a full molecule). e.g., for growing a solute molecule in solvent
+in a one-box NPT or NVT ensemble. It may work for Gibbs (swapping
+that molecule in one of its identities to the other box and then
+growing it) - but not extensively tested recently. This part of the
+code requires one change to the input in fort.4 - a variable
+called pmexpc1 - the probabiliity of doing the new expanded ensemble
+move. Other than that, there is a variable called lexpee in control.inc.
+If this logical variable is true, then expanded ensmble is done and another
+input file called fort.45 is required. Also there is a smax variable -
+maximum number of stages that intialize the arrays.
+
+\noindent  The input file is as follows - \\
+1. {\bf imolty} on which ee is performed - molecule type.
+For example imolty = 1 is for the solvent, imolty = 2 is for the
+solute particles
+already in the solution, and imolty = 3 is the solute particle that we
+will try to grow in the solution for this simulation. \\
+2. {\bf nmolty1}: number of actual types of molecules in the simulation.
+In the above example - it is 3 (1 solvent, 1 solute molecules in full
+form, and 1 solute molecule that will go through stages). \\
+3. final state: {\bf fmstate} - the final state of the growing molecule (when
+it is fully grown). This determines the number of molecule types that are
+needed in fort.4. In the above example, it is fmstate+2. Each fmstate
+stages have one molecule type each, and one for the solvent, and one
+for the already present solutes.\\
+4. weights associated with each stage: fmstate values. Could start with
+all zero and then optimize it so that all stages are visited with
+reasonable frequency.\\
+5. {\bf sstate1} and {\bf sstate2}: In case expanded Gibbs ensemble is performed,
+the interdiate stages when the growing molecule is transferred
+from one box (sstate1) to the other (sstate2). Should be consequitive numbers.
+In case NPT or NVT expanded ensemble - make these numbers greater than
+fmstate (need to adjust smax in control such that these numbers are
+less than smax). \\
+6. {\bf eeratio}: In case of expanded Gibbs ensemble, the probability of
+ exchanging the tagged particle (that is undergoing ee) at its
+end stages (full molecules in either box) with an untagged solute particle.
+For example, if stage 1 is in box 1 and stage 10 in box 2 - and
+at both these stages the tagged molecule is full molecule (just in different
+boxes) - then there should be a way to make another solute molecule
+tagged (otherwise only one molecule will switch between boxes).
+In case of NPT or NVT EE, make eeratio to be less than 0. \\
+7. {\bf mstate}: the current stage of the tagged molecule.
+
+\section{Additions for Dipole Moment and Electric Field}
+\noindent \textbf{dipole.dat} For an NVT simulation with \textbf{ldielect} equal to true, dipole.dat contains the $x$, $y$ and $z$ components of the dipole moment ($\mu_x$, $\mu_y$, and $\mu_z$) in units of $e $ \AA.  These quantities may be used to calculate the dielectric constant using the following equation:
+\begin{equation} 
+\epsilon = 1 + \frac{1}{4 \pi \epsilon_0} \frac{4 \pi}{3 V T} \left ( \langle \mu^2 \rangle -
+ \langle \mu_x \rangle^2  - \langle \mu_y \rangle^2 - \langle \mu_z \rangle^2 \right )
+\end{equation}
+see Allen and Tildesley, page 161.
+
+\noindent {\textbf{lelect\_field}} must be set to true in order
+for the electric field calculation to be turned on.
+
+\noindent  In fort.4:
+
+\noindent {\textbf{Elect\_field:}} the electric field strength, in units of V/\AA.  The electric field is applied in the
+$z$-direction. (this appears in fort.4 after fqtemp)
+
+\noindent In order to calculate the interaction with an electric field, a new function (exfield) is called in sumup,
+energy, and boltz.  exfield.f calculates the interaction with an electric field, given by:
+\begin{eqnarray*}
+U_{\textrm{field}} & = & -\mu \cdot E \\
+& = & -q * r_z * E
+\end{eqnarray*}
+
+
+
+%\vfill \eject
+
+%
+%\section{Example {\bf fort.4} File}
+
+%This is for an $NVT$ Gibbs Ensemble simulation of 500 united-atom
+%ethane molecules at 175~K.  Note that since this is a two site model,
+%most of the moves go into translating and rotating the molecules.
+%Also, many variables must be specified even though they won't be used
+%during the simulation, such as {\bf express}.  This is because {\bf
+%readdat.f} expects those variables to be there for reading in,
+%regardless of whether they're used or not.  $\Rightarrow$ denotes a
+%continuation of what should be a single line broken up here to fit on
+%the page.
+
+%{\bf
+%\begin{tabbing}
+%seed\\
+%0\\
+%lecho \hskip 6pt \= lverbose \\
+%.true. \> .false. \\
+%nstep \hskip 6pt \=  lstep \hskip 10pt \=  lpresim \= iupdatefix\\
+%10000 \> .false. \> .false. \> 10\\
+%temp   \hskip 20pt \=  express \hskip 20pt \=      fqtemp  \\
+%175.0d0 \>  0.007243d0 \>  5.0d0  \\
+%ianalyze \= nbin \= lrdf \hskip 10pt \= lintra \hskip 6pt \= lstretch \= lgvst \hskip 6pt \= lbend \hskip 6pt \= lete \hskip 6pt\= lrhoz \hskip 6pt \= bin\_width\\
+%100 \> 200  \> .true. \> .false. \> .false. \> .true. \> .false. \> .true. \> .true. \>   0.02\\
+%iprint \= imv \hskip 8pt \= iratio \= iblock \=  idiele \\
+%1000 \>  1000 \> 1000 \> 1000  \>   10000 \\
+%nbox\\
+%2\\
+%boxlx \= boxly \= boxlz \= lsolid \hskip 6pt \= lrect \hskip 12pt \= kalp \hskip 10pt \= rcutchg - for box 1\\
+%30    \>   30  \>  30   \> .false.           \> .false.           \>  5.0d0           \> 14.0d0\\
+%boxlx \> boxly \> boxlz \> lsolid            \> lrect             \>  kalp            \> rcutchg - for box 2\\
+%100   \>   100 \>  100  \> .false.           \> .false.           \>  5.0d0           \>  14.0d0\\
+%nchain \= nmolty\\
+%500 \>   1\\
+%moltyp\\
+%500\\
+%lmixlb \hskip 6pt \= lmixjo\\
+%.true. \> .false.\\
+%nijspecial\\
+%0\\
+%ispec  \= jspec \=  aspec \=  bspec\\
+%1  \>     2   \>    1.0d0 \>  1.0d0\\
+%rmin  \hskip 12pt \=  rcut  \hskip 12pt  \=  rcutnn \hskip 4pt \= softcut \hskip 4pt \=  rcutin \= rbsmax \= rbsmin \\
+%1.4d0 \>  14.0d0 \> 0.0d0  \>  100.0d0 \>  5.0d0 \> 5.0d0 \> 3.0d0 \\
+%5%\end{tabbing}
+%\vfill \eject
+%\begin{tabbing}
+%nunit \= nugrow \= ncarbon \= maxcbmc \= iurot \= lelect \= lflucq \= lqtrans \= lexpand \= lavbmc1 \= $\Rightarrow$ \\ 
+%\centerline{\hfill lavbmc2 \hskip 6pt lavbmc3 fqegp}\\
+%2  \>   2  \>    2   \>    2   \>    0  \>   .false. \> .false. \> .false. \> .false. \> .false. \> $\Rightarrow$ \\ 
+%\centerline{\hfill .false. .false. 0.0d0}\\
+%\end{tabbing}
+%\vfill \eject
+%\begin{tabbing}
+%maxgrow \= lring \hskip 6pt \=  lrigid \hskip 6pt \= lrig   \hskip 12pt \=  lsetup \hskip 6pt \= isolute \= eta\\
+% 1   \>  .false.\> .false.\> .false. \> .false. \>10000 \> 0.0d0 0.0d0\\
+%unit \= ntype  \= leaderq [CH3] ethane \\
+%1  \>  4  \>   1\\
+%vibration\\
+%1\\
+%2   1\\
+%bending\\
+%0\\
+%torsion\\
+%0\\
+%unit \> ntype \> leaderq [CH3]\\
+%2  \>  4  \>   1\\
+%vibration\\
+%1\\
+%1   1\\
+%bending\\
+%0\\
+%torsion\\
+%0\\
+%licell \= rintramax \= boxlink \\
+%.false. \> \hskip 6pt 0.0d0 \>  1\\
+%rmtrax \= rmtray \= rmtraz\\
+%0.3d0 \>  0.3d0 \>  0.3d0\\
+%rmrotx \>rmroty \> rmrotz\\
+%0.4d0 \>  0.4d0 \>  0.4d0\\
+%tatra \> tarot\\
+%0.5d0 \>  0.5d0\\
+%linit  \hskip 10pt \= lnewtab \hskip 6pt \= lreadq \hskip 6pt \= q14scale \\
+%.false. \> .false. \> .false. \> 0.5d0 \\
+%lbranch \\
+%.false.\\
+%inich(1)\\
+%400\\
+%inix(1) \= iniy(1) \= iniz(1) \= inirot \= inimix \= zshift \= dshift \= nchoiq - box 1\\
+%10 \>     10   \>   10  \>     0   \>   1   \>   0.0  \>   2.0 \>   1\\
+%inich(2)\\
+%100\\
+%inix(2)\> iniy(2)\> iniz(2)\> inirot\> inimix\> zshift\> dshift\> nchoiq - box 2\\
+%7  \>     7    \>   7    \>   0   \>   1   \>   0.0 \>   2.0  \>  1\\
+%rmvol \hskip 6pt \= tavol \= iratv \= iratp \=  rmflcq \= taflcq\\
+%1.0d-5 \> 0.5d0 \>  2500 \> 5   \>  0.1d0 \> 0.95d0
+%\end{tabbing}
+
+%\vfill \eject
+
+%\begin{tabbing}
+%pmvol \hskip 18pt \=  pmvlmt\\
+%0.0004d0  \> 1.0d0 1.0d0\\
+%     \>   nvolb \= pmvolb\\
+%     \>   1   \>  1.0d0\\
+%     \>   box5 \> box6\\
+%     \>   1  \>  2\\
+%pmswat \> nswaty \\
+%0.0d0  \> 1      \\
+%      \>  nswatb\\
+%      \>  1 2 \\
+%      \>  pmsatc\\
+%      \>  1.0d0 \\
+%      \>  nsampos, 2xncut\\
+%      \>  1  1 1\\
+%      \>  nsplist\\
+%      \>  1 1\\
+%      \>    gswatc 2x(ifrom, iprev)\\
+%      \>    1 0 1 0 \\
+%      \>    nswtcb \= pmswtcb\\
+%      \>    1      \> 1.0d0\\
+%      \>    box\_pair 2x\\
+%      \>    1      2 \\
+%pmswap \= pmswmt\\
+%0.05d0 \> 1.0d0 \\
+%\>    nswapb \= pmswapb\\
+%\>    1   \>   1.0d0\\
+%\>    box1\> box2\\
+%\>    1   \>   2 \\
+%pmcb  \>  pmcbmt \\
+%0.0d0 \>  1.0d0\\
+%      \>  pmall\\
+%      \>  0.0d0\\
+%      \>  pmfix\\
+%      \>  0.0d0 \\
+%pmflcq \> pmfqmt\\
+%0.0d0  \> 1.0d0\\
+%pmexpc \> pmeemt\\
+%0.0d0  \> 1.0d0\\
+%pmtra  \> pmtrmt \\         
+%0.58d0 \>  1.0d0\\
+%     \>   pmromt  \\
+%     \>   1.0d0
+%\end{tabbing}
+
+%\vfill \eject
+
+%\begin{tabbing}
+%nchoi1 nchoi nchoir nchoih nchoitor \\
+%10\\
+%8 \\
+%1\\
+%1 \\
+%100\\
+%nchbna \= nchbnb\\
+%1000  \> 1000 \\
+%icbdir \>icbsta\\ 
+%0  \> 0\\
+%exclusion\\
+%0\\
+%1 1 1 1\\
+%internal 1-4\\
+%0\\
+%1 2 5 0 \\
+%oh 1-5 interaction\\
+%0\\
+%1 2 5 1\\
+%lucall\\
+%.false.\\
+%ucheck\\
+%0\\
+%nviral \= start \= step\\
+%0    \>   0.0d0 \> 0.0d0
+%\end{tabbing}
+%\vskip -14pt
+%}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%                       END OF THE DOCUMENT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
+
+
+
+
+   
+
+
+
