@@ -11,7 +11,7 @@ directives={"clean":0,"test":1,"synopsis":0,"upcase-keywords":0
 
 directiveRe=re.compile(r"--(no-)?(clean|test|synopsis|upcase-keywords|prettify-cvs|replace|normalize-use)$")
 
-descStr=("Usage: "+sys.argv[0]+"""
+descStr=("Usage: "+os.path.basename(sys.argv[0])+"""
   [--[no-]clean] [--[no-]test] [--help]
   [--[no-]synopsis] [--[no-]upcase-keywords] [--[no-]prettify-cvs]
   [--[no-]replace] [--[no-]normalize-use]

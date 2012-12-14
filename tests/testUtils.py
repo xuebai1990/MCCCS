@@ -19,8 +19,8 @@ class simpleRunTest(unittest.TestCase):
         self.outputFile="run1a.dat"
 
     def setUp(self):
-        if not os.access(os.path.join(self.testRoot,".."),os.W_OK):
-            os.mkdir(os.path.join(self.testRoot,".."))
+        if not os.access(os.path.abspath(os.path.join(self.testRoot,"..")),os.W_OK):
+            os.mkdir(os.path.abspath(os.path.join(self.testRoot,"..")))
         #if not os.path.exists(self.testRoot):
         #    os.mkdir(self.testRoot)
         commands.getoutput('cp -a "'+os.path.join(self.srcRoot,"tests","SHORT",self.testName)+'" '+self.testRoot)
@@ -55,7 +55,7 @@ class simpleRunTest(unittest.TestCase):
                 diffVal=0
                 print 'no generic output for this test'
 
-            if diffVal>1.0e-6:
+            if diffVal>1.0e-9:
                 if arch_spec_test=="succeded":
                     print "** generic output to be updated? Too different from validated output"
                     print self.id(),"diff=",str(diffVal),'see',diffs.name

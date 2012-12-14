@@ -3,7 +3,7 @@
 import sys,traceback,re
 
 def compareNr(n1,n2):
-  return abs(n1-n2) # /max(abs(n1),abs(n2))
+  return abs(n1-n2)/max(abs(n1),abs(n2))
 
 def diffLine(str1,str2,incomparable_val=1):
     """retuns the difference between two strings, parsing numbers and confronting them."""
@@ -26,11 +26,11 @@ def diffLine(str1,str2,incomparable_val=1):
     return distance
 
 def getLine(file,lineNr):
-  bannerRe=re.compile(r" Program started| Program ended")
+  bannerRe=re.compile(r"Program started|Program ended|Number of processors|threads per processor")
   line=file.readline()
   if line!="":
     lineNr=lineNr+1
-  if bannerRe.match(line) is not None:
+  if bannerRe.search(line) is not None:
     (line,lineNr)=getLine(file,lineNr)
   return (line,lineNr)
 
@@ -59,10 +59,10 @@ def compareFiles(file1,file2,logFile=sys.stdout,epsilon=0.0):
 
 if __name__ == '__main__':
     if len(sys.argv)<3 or len(sys.argv)>4:
-      print "Usage: ", sys.argv[0]," file1 file2 [epsilon]"
+      print "Usage: ", os.path.basename(sys.argv[0])," file1 file2 [epsilon]"
     else:
         file1=open(sys.argv[1],"r")
         file2=open(sys.argv[2],"r")
-        epsilon=0.0
         if len(sys.argv)==4: epsilon=float(sys.argv[3])
+        else: epsilon=0.0
         print "distance=",compareFiles(file1,file2,epsilon,sys.stdout)

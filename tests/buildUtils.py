@@ -27,7 +27,7 @@ def build(srcRoot,buildType="",buildDir=None,clean=None,logFilePath=None):
         makeCmd=os.path.expanduser("~/cmake/bin/cmake")
     else:
         makeCmd="cmake"
-    pipe=os.popen("{ { "+makeCmd+os.path.abspath(srcRoot,'src')+"; } 2>&1 ; } >>"+logFilePath)
+    pipe=os.popen("{ { "+makeCmd+' '+os.path.abspath(os.path.join(srcRoot,'src'))+"; } 2>&1 ; } >>"+logFilePath)
     if (pipe.close()):
         logFile=open(logFilePath,'a')
         logFile.write("\n+++ ERROR, cmake "+buildType+" FAILED! +++\n")
@@ -184,3 +184,17 @@ def prettify(srcRoot,buildType="",logDirPath=None,mainLog=sys.stdout,
     # (use command.getoutput intread of os.rename?)
     time.sleep(3.0)
 
+if __name__ == '__main__':
+    if len(sys.argv)>2:
+      print "Usage: ", os.path.basename(sys.argv[0])," [build type]"
+    else:
+        if len(sys.argv)==2: buildType=sys.argv[1]
+        else: buildType=''
+
+    SrcRoot=os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]),".."))
+    BuildRoot="build-"+time.strftime("%y%m%d-%H:%M")
+    print "BuildRoot:",os.path.join(SrcRoot,BuildRoot)
+    if not os.path.exists(os.path.join(SrcRoot,BuildRoot)):
+        os.mkdir(os.path.join(SrcRoot,BuildRoot))
+
+    build(srcRoot=SrcRoot,buildType=buildType,buildDir=BuildDir)
