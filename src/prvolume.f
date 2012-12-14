@@ -53,7 +53,7 @@
 
 ! --------------------------------------------------------------------
 
-!      write(iou,*) 'start VOLUME of LNPTGIBBS'
+!      write(io_output,*) 'start VOLUME of LNPTGIBBS'
 
 !     Select a box at  random to change the volume of box
 
@@ -81,7 +81,7 @@
             lx = .true.
             ly = .false.
             lz = .false.
-         elseif ( rbox .le. pmvoly ) then
+         else if ( rbox .le. pmvoly ) then
             lx = .false.
             ly = .true.
             lz = .false.
@@ -181,7 +181,7 @@
                la = .true. 
                lb = .false.
                lc = .false.
-            elseif (rbox .le. 2.0d0 ) then
+            else if (rbox .le. 2.0d0 ) then
                la = .false.
                lb = .true.
                lc = .false.
@@ -190,7 +190,7 @@
                lb = .false.
                lc = .true.
             end if
-         elseif ( ly ) then
+         else if ( ly ) then
             la = .false.
             if ( rbox .le. 1.5d0 ) then
                lb = .true.
@@ -209,11 +209,11 @@
             if ( lx ) jhmat = 1
             if ( ly ) jhmat = 2
             if ( lz ) jhmat = 3
-         elseif ( lb ) then
+         else if ( lb ) then
             if ( lx ) jhmat = 4
             if ( ly ) jhmat = 5
             if ( lz ) jhmat = 6
-         elseif ( lc ) then
+         else if ( lc ) then
             if ( lx ) jhmat = 7
             if ( ly ) jhmat = 8
             if ( lz ) jhmat = 9
@@ -233,9 +233,9 @@
          rbcut = rcut(boxvch)
 
          if (rbcut/w(1) .gt. 0.5d0 .or. rbcut/w(2) .gt. 0.5d0 .or. rbcut/w(3) .gt. 0.5d0) then
-            write(iou,*) 'Problem with line 275 prvolume.f'
-            write(iou,*) 'non-rectangular prvolume move rejected-', ' box width below cutoff size'
-            write(iou,*) 'w1:',w(1),'w2:',w(2),'w3:',w(3)
+            write(io_output,*) 'Problem with line 275 prvolume.f'
+            write(io_output,*) 'non-rectangular prvolume move rejected-', ' box width below cutoff size'
+            write(io_output,*) 'w1:',w(1),'w2:',w(2),'w3:',w(3)
             hmat(boxvch,jhmat) = hmato(jhmat)
             call dump
             call err_exit('')
@@ -253,7 +253,7 @@
                   do j = 1, nunit(imolty)
                      rxu(i,j) = rxu(i,j) + dx
                   end do
-               elseif ( ly ) then
+               else if ( ly ) then
                   dy = sxcm(i)*(hmat(boxvch,2)-hmato(2))+ sycm(i)*(hmat(boxvch,5)-hmato(5))+ szcm(i)*(hmat(boxvch,8)-hmato(8))
                   ycm(i) = ycm(i) + dy
                   do j = 1, nunit(imolty)
@@ -288,7 +288,7 @@
          end if
 
 !         if ( voln .lt. vminim ) then
-!            write(iou,*) 'prvolume move rejected - below cut-off size' 
+!            write(io_output,*) 'prvolume move rejected - below cut-off size' 
 !            return
 !         end if
 
@@ -313,9 +313,9 @@
             if ( lpbcz ) then
                boxlz(boxvch) = bzo
             end if
-            write(iou,*) 'boxvch',boxvch
-            write(iou,*) 'Problem in line 381 of subroutine prvolume.f'
-            write(iou,*) 'A move was attempted that would lead to a  boxlength less than twice rcut'
+            write(io_output,*) 'boxvch',boxvch
+            write(io_output,*) 'Problem in line 381 of subroutine prvolume.f'
+            write(io_output,*) 'A move was attempted that would lead to a  boxlength less than twice rcut'
             call dump
             call err_exit('')
             return
@@ -386,7 +386,7 @@
       end if    
       call sumup( ovrlap, v, vinter, vtail, vdum,vdum, vdum,vdum,vext,velect,vdum, boxvch, lvol)
       if ( ovrlap ) then
-!         write(iou,*) 'move rejected due to overlap in PRVOLUME'
+!         write(io_output,*) 'move rejected due to overlap in PRVOLUME'
          goto 500
       end if
 
@@ -396,7 +396,7 @@
       velectn  = velect
       v3n = v3garo
       vboxn    = vboxo + (vintern-vintero) + (vextn-vexto)  + (velectn-velecto) + (v3n-v3o)
-!      write(iou,*) 'new  energy',  vboxn
+!      write(io_output,*) 'new  energy',  vboxn
 
       if ( lanes ) then
 ! *** for ANES algorithm, optimize the charge configuration         
@@ -423,10 +423,10 @@
 ! --- acceptance test
 
 !--- check problem--
-!      write(iou,*) 'length of box',      boxlx(boxvch)
-!      write(iou,*) 'change of  vol',     voln - volo
-!      write(iou,*) 'change of  energy',  vboxn, vboxo
-!      write(iou,*) 'dele',     dele
+!      write(io_output,*) 'length of box',      boxlx(boxvch)
+!      write(io_output,*) 'change of  vol',     voln - volo
+!      write(io_output,*) 'change of  energy',  vboxn, vboxo
+!      write(io_output,*) 'dele',     dele
 
 
       if (random() .lt. dexp(-(beta*dele)) ) then
@@ -492,7 +492,7 @@
 ! --- restore old k vectors and reciprocal sum and calp
          calp(boxvch) = calpo
 !         if (numvect(boxvch) .ne. numvecto) then
-!            write(iou,*) '### numvect changing in prvol'
+!            write(io_output,*) '### numvect changing in prvol'
 !         end if
          numvect(boxvch) = numvecto
          ncount = numvect(boxvch)
@@ -526,7 +526,7 @@
          end if
       end do
 
-!      write(iou,*) 'end VOLUME of LNPTGIBBS'
+!      write(io_output,*) 'end VOLUME of LNPTGIBBS'
 
       return
       end

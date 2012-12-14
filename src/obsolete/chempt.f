@@ -52,7 +52,7 @@
 
 ! --------------------------------------------------------------------
 
-!      write(iou,*) 'start CHEMP'
+!      write(io_output,*) 'start CHEMP'
 
 ! *** store number of units in iunit and igrow ***
       iunit = nunit(imolty)
@@ -158,7 +158,7 @@
 ! --- Bead 1 is the only bead to be grown ---
             islen = 0
             goto 100
-         elseif ( invtry .eq. 1 ) then
+         else if ( invtry .eq. 1 ) then
 ! --- Bead 1 is an endpoint ---
             nbranp = 0
             iincre = 1
@@ -178,7 +178,7 @@
                iincre = 1
             end if
             if ( iincre .eq. -1 ) then
-               write(iou,*) 'imolty,iutry,invtry',imolty,iutry,invtry
+               write(io_output,*) 'imolty,iutry,invtry',imolty,iutry,invtry
                iut = ijvib(imolty,iutry,invtry)
                do iii = invtry-1, 1, -1
                   nbranp = nbranp + 1
@@ -283,9 +283,9 @@
 
 ! --- find trial segment with highest index ---
  31         iulast = wsched(islen)
-            write(iou,*) '*************'
-            write(iou,*) 'iulast',iulast
-            write(iou,*) 'ibranp', (ibranp(iu),iu=1,nbranp)
+            write(io_output,*) '*************'
+            write(io_output,*) 'iulast',iulast
+            write(io_output,*) 'ibranp', (ibranp(iu),iu=1,nbranp)
             iut = 0
             iutry = 0
             do iu = invib(imolty,iulast), 1, -1
@@ -517,7 +517,7 @@
  500  continue
 
 
-!       write(iou,*) 'end CHEMPT'
+!       write(io_output,*) 'end CHEMPT'
 
       return
       end

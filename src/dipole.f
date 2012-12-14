@@ -35,7 +35,7 @@
             end if
          end do
 
-      elseif(mtype .eq. 1 ) then
+      else if(mtype .eq. 1 ) then
          
 ! *** calculate the dipole moment after the traslation, rotation and 
 ! *** charge move
@@ -55,7 +55,7 @@
          dipoley(ibox) = dipoley(ibox) - dipoy(1) + dipoy(2)
          dipolez(ibox) = dipolez(ibox) - dipoz(1) + dipoz(2)
 
-      elseif(mtype .eq. 2) then
+      else if(mtype .eq. 2) then
 
 ! *** store the old dipole moment
 
@@ -63,7 +63,7 @@
          dipoleyo = dipoley(ibox)
          dipolezo = dipolez(ibox)
          
-      elseif(mtype .eq. 3) then
+      else if(mtype .eq. 3) then
 
 ! *** restore the old dipole moment
 

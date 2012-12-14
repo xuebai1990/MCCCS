@@ -58,7 +58,7 @@
       end do
 
 !      do ij = 1,9
-!         write(iou,*) 'ij',ij,'vsh',(vsh(ij)/80.0d0),
+!         write(io_output,*) 'ij',ij,'vsh',(vsh(ij)/80.0d0),
 !     +                      'vsha',(vsha(ij)/80.0d0),
 !     +                      'eij',(eij(ij)/80.0d0)
 !      end do

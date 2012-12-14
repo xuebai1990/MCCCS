@@ -182,9 +182,9 @@
                         end if
                         if ( lexpsix .or. lmmff ) then
                            ntij = (ntii+ntjj)/2
-                        elseif (lninesix) then
+                        else if (lninesix) then
                            ntij = (ntii-1)*nxatom + ntjj
-                        elseif (lgenlj) then
+                        else if (lgenlj) then
                            ntij = (ntii-1)*nntype + ntjj
                         else
                            ntij = (ntii-1)*nntype + ntjj
@@ -197,7 +197,7 @@
 ! *** minimum image the pair separations ***
                         if ( lpbc ) call mimage (rxuij,ryuij,rzuij,ibox)
 
-!     write(iou,*) 'bead ruij',rxuij,ryuij,rzuij
+!     write(io_output,*) 'bead ruij',rxuij,ryuij,rzuij
                         
                         rijsq = rxuij*rxuij+ryuij*ryuij+rzuij*rzuij
                         
@@ -238,8 +238,8 @@
                            if ( lexpsix ) then
                               rij = dsqrt(rijsq)
                               fij = fij + (-6.0d0*aexsix(ntij)/(rijsq *rijsq*rijsq) + bexsix(ntij) *cexsix(ntij)*rij*dexp( cexsix(ntij) 				   *rij ))/rijsq
-!                              write(iou,*) 'rij,fij,ntij',rij,fij,ntij
-                           elseif ( lmmff ) then
+!                              write(io_output,*) 'rij,fij,ntij',rij,fij,ntij
+                           else if ( lmmff ) then
                               rs2 = rijsq/(sigisq(ntij))
                               rs1 = dsqrt(rs2)
                               rs6 = rs2*rs2*rs2
@@ -247,19 +247,19 @@
                               sr1 = 1.07d0/(rs1+0.07d0)
                               sr7 = sr1**7.0d0
                               fij = fij - 7.0d0*epsimmff(ntij)*rs1*sr7*( sr1*(1.12d0/(rs7+0.12d0)-2.0d0)/1.07d0+ 1.12d0*rs6/((rs7+0.12d0)*(rs7+0.12d0))) /rijsq
-                           elseif (lninesix) then
+                           else if (lninesix) then
                               rij = dsqrt(rijsq)
                               fij = fij + ( 72.0d0*epsnx(ntij)/ (rij*rzero(ntij)) ) *  (rzero(ntij)/rij)**7 * (1.0d0-(rzero(ntij)/rij)**3)
-                           elseif (lgenlj) then
+                           else if (lgenlj) then
                               if ( lexpand(imolty) .and. lexpand(jmolty) ) then
                                  sigma2=(sigma(imolty,ii)+ sigma(jmolty,jj))/2.0d0
                                  sr2 = sigma2*sigma2/rijsq
                                  epsilon2=dsqrt(epsilon(imolty,ii) *epsilon(jmolty,jj))
-                              elseif ( lexpand(imolty) ) then
+                              else if ( lexpand(imolty) ) then
                                  sigma2=(sigma(imolty,ii)+ sigi(ntjj))/2.0d0
                                  sr2 = sigma2*sigma2/rijsq
                                  epsilon2=dsqrt(epsilon(imolty,ii) *epsi(ntjj))
-                              elseif ( lexpand(jmolty) ) then
+                              else if ( lexpand(jmolty) ) then
                                  sigma2=(sigma(jmolty,jj)+ sigi(ntii))/2.0d0
                                  sr2 = sigma2*sigma2/rijsq
                                  epsilon2=dsqrt(epsilon(jmolty,jj) *epsi(ntii))
@@ -292,9 +292,9 @@
 
                                  if ( lexpand(imolty)  .and. lexpand(jmolty)) then
                                     epsilon2=dsqrt(epsilon(imolty,ii) *epsilon(jmolty,jj))
-                                 elseif ( lexpand(imolty)) then
+                                 else if ( lexpand(imolty)) then
                                     epsilon2=dsqrt(epsilon(imolty,ii) *epsi(ntjj))
-                                 elseif ( lexpand(jmolty) ) then
+                                 else if ( lexpand(jmolty) ) then
                                     epsilon2=dsqrt(epsilon(jmolty,jj) *epsi(ntii))
                                  else
                                     epsilon2=epsij(ntij)
@@ -305,11 +305,11 @@
                                     sigma2=(sigma(imolty,ii)+ sigma(jmolty,jj))/2.0d0
                                     sr2 = sigma2*sigma2/rijsq
                                     epsilon2=dsqrt(epsilon(imolty,ii) *epsilon(jmolty,jj))
-                                 elseif ( lexpand(imolty) ) then
+                                 else if ( lexpand(imolty) ) then
                                     sigma2=(sigma(imolty,ii)+ sigi(ntjj))/2.0d0
                                     sr2 = sigma2*sigma2/rijsq
                                     epsilon2=dsqrt(epsilon(imolty,ii) *epsi(ntjj))
-                                 elseif ( lexpand(jmolty) ) then
+                                 else if ( lexpand(jmolty) ) then
                                     sigma2=(sigma(jmolty,jj)+ sigi(ntii))/2.0d0
                                     sr2 = sigma2*sigma2/rijsq
                                     epsilon2=dsqrt(epsilon(jmolty,jj) *epsi(ntii))
@@ -339,7 +339,7 @@
 ! *** minimum image the pair separations ***
                   if ( lpbc ) call mimage (rxuij,ryuij,rzuij,ibox)
 
-!                  write(iou,*) 'COM  ruij',rxuij,ryuij,rzuij
+!                  write(io_output,*) 'COM  ruij',rxuij,ryuij,rzuij
 
                   press = press +  fxcmi*rxuij + fycmi*ryuij + fzcmi*rzuij
 
@@ -386,7 +386,7 @@
       pips(3,2) = diff_pips32
  
 !      if(myid .eq. 0)then
-!        write(iou,*)'press=',press,'pxx=',pxx,'pyy=',pyy
+!        write(io_output,*)'press=',press,'pxx=',pxx,'pyy=',pyy
 !     &   ,'pzz=',pzz,'pips(1,2)',pips(1,2),'pips(1,3)=',pips(1,3)
 !     &   ,'pips(2,1)=',pips(2,1),'pips(2,3)=',pips(2,3),'pips(3,1)=',
 !     &   pips(3,1),'pips(3,2)=',pips(3,2)
@@ -509,9 +509,9 @@
 
       if (lstagea) then
          press = (1.0d0-lambdais*(1.0d0-etais))*press
-      elseif (lstageb) then
+      else if (lstageb) then
          press = etais*press+lambdais*pwell
-      elseif (lstagec) then
+      else if (lstagec) then
          press = (etais+(1.0d0-etais)*lambdais)*press +(1.0d0-lambdais)*pwell
       end if
 
@@ -536,7 +536,7 @@
             end do
         end do
       end if
-!      write (iou,*) ' press tail' ,  press
+!      write (io_output,*) ' press tail' ,  press
 
       return
       end

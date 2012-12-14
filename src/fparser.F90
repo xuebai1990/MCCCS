@@ -207,7 +207,7 @@ CONTAINS
        CASE   (cAdd); Comp(i)%Stack(SP-1)=Comp(i)%Stack(SP-1)+Comp(i)%Stack(SP); SP=SP-1
        CASE   (cSub); Comp(i)%Stack(SP-1)=Comp(i)%Stack(SP-1)-Comp(i)%Stack(SP); SP=SP-1
        CASE   (cMul); Comp(i)%Stack(SP-1)=Comp(i)%Stack(SP-1)*Comp(i)%Stack(SP); SP=SP-1
-       CASE   (cDiv); IF (Comp(i)%Stack(SP)==0._rn) THEN; EvalErrType=1; res=zero; RETURN; ENDIF
+       CASE   (cDiv); IF (Comp(i)%Stack(SP)==0._rn) THEN; EvalErrType=1; res=zero; RETURN; end if
                       Comp(i)%Stack(SP-1)=Comp(i)%Stack(SP-1)/Comp(i)%Stack(SP); SP=SP-1
        CASE   (cPow)
           ! Fixing for possible Negative floating-point value raised to a real power
@@ -224,11 +224,11 @@ CONTAINS
           SP=SP-1
        CASE   (cAbs); Comp(i)%Stack(SP)=ABS(Comp(i)%Stack(SP))
        CASE   (cExp); Comp(i)%Stack(SP)=EXP(Comp(i)%Stack(SP))
-       CASE (cLog10); IF (Comp(i)%Stack(SP)<=0._rn) THEN; EvalErrType=3; res=zero; RETURN; ENDIF
+       CASE (cLog10); IF (Comp(i)%Stack(SP)<=0._rn) THEN; EvalErrType=3; res=zero; RETURN; end if
                       Comp(i)%Stack(SP)=LOG10(Comp(i)%Stack(SP))
-       CASE   (cLog); IF (Comp(i)%Stack(SP)<=0._rn) THEN; EvalErrType=3; res=zero; RETURN; ENDIF
+       CASE   (cLog); IF (Comp(i)%Stack(SP)<=0._rn) THEN; EvalErrType=3; res=zero; RETURN; end if
                       Comp(i)%Stack(SP)=LOG(Comp(i)%Stack(SP))
-       CASE  (cSqrt); IF (Comp(i)%Stack(SP)<0._rn) THEN; EvalErrType=3; res=zero; RETURN; ENDIF
+       CASE  (cSqrt); IF (Comp(i)%Stack(SP)<0._rn) THEN; EvalErrType=3; res=zero; RETURN; end if
                       Comp(i)%Stack(SP)=SQRT(Comp(i)%Stack(SP))
        CASE  (cSinh); Comp(i)%Stack(SP)=SINH(Comp(i)%Stack(SP))
        CASE  (cCosh); Comp(i)%Stack(SP)=COSH(Comp(i)%Stack(SP))
@@ -237,10 +237,10 @@ CONTAINS
        CASE   (cCos); Comp(i)%Stack(SP)=COS(Comp(i)%Stack(SP))
        CASE   (cTan); Comp(i)%Stack(SP)=TAN(Comp(i)%Stack(SP))
        CASE  (cAsin); IF ((Comp(i)%Stack(SP)<-1._rn).OR.(Comp(i)%Stack(SP)>1._rn)) THEN
-                      EvalErrType=4; res=zero; RETURN; ENDIF
+                      EvalErrType=4; res=zero; RETURN; end if
                       Comp(i)%Stack(SP)=ASIN(Comp(i)%Stack(SP))
        CASE  (cAcos); IF ((Comp(i)%Stack(SP)<-1._rn).OR.(Comp(i)%Stack(SP)>1._rn)) THEN
-                      EvalErrType=4; res=zero; RETURN; ENDIF
+                      EvalErrType=4; res=zero; RETURN; end if
                       Comp(i)%Stack(SP)=ACOS(Comp(i)%Stack(SP))
        CASE  (cAtan); Comp(i)%Stack(SP)=ATAN(Comp(i)%Stack(SP))
        CASE  DEFAULT; SP=SP+1; Comp(i)%Stack(SP)=Val(Comp(i)%ByteCode(IP)-VarBegin+1)
@@ -355,7 +355,7 @@ CONTAINS
        msg = ''
     ELSE
        msg = m(EvalErrType)
-    ENDIF
+    end if
   END FUNCTION EvalErrMsg
   !
 ! *****************************************************************************
@@ -376,7 +376,7 @@ CONTAINS
        WRITE(*,*) '*** Error in syntax of function string: '//Msg
     ELSE
        WRITE(*,*) '*** Error in syntax of function string:'
-    ENDIF
+    end if
     WRITE(*,*)
     WRITE(*,'(A)') ' '//FuncStr
     DO k=1,ipos(j)
@@ -623,7 +623,7 @@ CONTAINS
        DO j=b+1,e-1
           IF     (F(j:j) == '(') THEN
              k = k+1
-          ELSEIF (F(j:j) == ')') THEN
+          else if (F(j:j) == ')') THEN
              k = k-1
           END IF
           IF (k < 0) EXIT
@@ -661,11 +661,11 @@ CONTAINS
 !      WRITE(*,*)'1. F(b:e) = "+..."'
        CALL CompileSubstr (i, F, b+1, e, Var)
        RETURN
-    ELSEIF (CompletelyEnclosed (F, b, e)) THEN               ! Case 2: F(b:e) = '(...)'
+    else if (CompletelyEnclosed (F, b, e)) THEN               ! Case 2: F(b:e) = '(...)'
 !      WRITE(*,*)'2. F(b:e) = "(...)"'
        CALL CompileSubstr (i, F, b+1, e-1, Var)
        RETURN
-    ELSEIF (SCAN(F(b:b),calpha) > 0) THEN        
+    else if (SCAN(F(b:b),calpha) > 0) THEN        
        n = MathFunctionIndex (F(b:e))
        IF (n > 0) THEN
           b2 = b+INDEX(F(b:e),'(')-1
@@ -676,13 +676,13 @@ CONTAINS
              RETURN
           END IF
        END IF
-    ELSEIF (F(b:b) == '-') THEN
+    else if (F(b:b) == '-') THEN
        IF (CompletelyEnclosed (F, b+1, e)) THEN              ! Case 4: F(b:e) = '-(...)'
 !         WRITE(*,*)'4. F(b:e) = "-(...)"'
           CALL CompileSubstr (i, F, b+2, e-1, Var)
           CALL AddCompiledByte (i, cNeg)
           RETURN
-       ELSEIF (SCAN(F(b+1:b+1),calpha) > 0) THEN
+       else if (SCAN(F(b+1:b+1),calpha) > 0) THEN
           n = MathFunctionIndex (F(b+1:e))
           IF (n > 0) THEN
              b2 = b+INDEX(F(b+1:e),'(')
@@ -694,7 +694,7 @@ CONTAINS
                 RETURN
              END IF
           END IF
-       ENDIF
+       end if
     END IF
     !----- -------- --------- --------- --------- --------- --------- --------- -------
     ! Check for operator in substring: check only base level (k=0), exclude expr. in ()
@@ -704,7 +704,7 @@ CONTAINS
        DO j=e,b,-1
           IF     (F(j:j) == ')') THEN
              k = k+1
-          ELSEIF (F(j:j) == '(') THEN
+          else if (F(j:j) == '(') THEN
              k = k-1
           END IF
           IF (k == 0 .AND. F(j:j) == Ops(io) .AND. IsBinaryOp (j, F)) THEN
@@ -760,9 +760,9 @@ CONTAINS
     IF (F(j:j) == '+' .OR. F(j:j) == '-') THEN               ! Plus or minus sign:
        IF (j == 1) THEN                                      ! - leading unary operator ?
           res = .FALSE.
-       ELSEIF (SCAN(F(j-1:j-1),'+-*/^(') > 0) THEN           ! - other unary operator ?
+       else if (SCAN(F(j-1:j-1),'+-*/^(') > 0) THEN           ! - other unary operator ?
           res = .FALSE.
-       ELSEIF (SCAN(F(j+1:j+1),'0123456789') > 0 .AND. &     ! - in exponent of real number ?
+       else if (SCAN(F(j+1:j+1),'0123456789') > 0 .AND. &     ! - in exponent of real number ?
                SCAN(F(j-1:j-1),'eEdD')       > 0) THEN
           Dflag=.FALSE.; Pflag=.FALSE.
           k = j-1
@@ -770,12 +770,12 @@ CONTAINS
              k = k-1
              IF     (SCAN(F(k:k),'0123456789') > 0) THEN
                 Dflag=.TRUE.
-             ELSEIF (F(k:k) == '.') THEN
+             else if (F(k:k) == '.') THEN
                 IF (Pflag) THEN
                    EXIT                                      !   * EXIT: 2nd appearance of '.'
                 ELSE
                    Pflag=.TRUE.                              !   * mark 1st appearance of '.'
-                ENDIF
+                end if
              ELSE
                 EXIT                                         !   * all other characters
              END IF
@@ -826,24 +826,24 @@ CONTAINS
        CASE ('+','-')                                        ! Permitted only
           IF     (Bflag) THEN           
              InMan=.TRUE.; Bflag=.FALSE.                     ! - at beginning of mantissa
-          ELSEIF (Eflag) THEN               
+          else if (Eflag) THEN               
              InExp=.TRUE.; Eflag=.FALSE.                     ! - at beginning of exponent
           ELSE
              EXIT                                            ! - otherwise STOP
-          ENDIF
+          end if
        CASE ('0':'9')                                        ! Mark
           IF     (Bflag) THEN           
              InMan=.TRUE.; Bflag=.FALSE.                     ! - beginning of mantissa
-          ELSEIF (Eflag) THEN               
+          else if (Eflag) THEN               
              InExp=.TRUE.; Eflag=.FALSE.                     ! - beginning of exponent
-          ENDIF
+          end if
           IF (InMan) DInMan=.TRUE.                           ! Mantissa contains digit
           IF (InExp) DInExp=.TRUE.                           ! Exponent contains digit
        CASE ('.')
           IF     (Bflag) THEN
              Pflag=.TRUE.                                    ! - mark 1st appearance of '.'
              InMan=.TRUE.; Bflag=.FALSE.                     !   mark beginning of mantissa
-          ELSEIF (InMan .AND..NOT.Pflag) THEN
+          else if (InMan .AND..NOT.Pflag) THEN
              Pflag=.TRUE.                                    ! - mark 1st appearance of '.'
           ELSE
              EXIT                                            ! - otherwise STOP
@@ -853,7 +853,7 @@ CONTAINS
              Eflag=.TRUE.; InMan=.FALSE.                     ! - following mantissa
           ELSE
              EXIT                                            ! - otherwise STOP
-          ENDIF
+          end if
        CASE DEFAULT
           EXIT                                               ! STOP at all other characters
        END SELECT
@@ -940,7 +940,7 @@ CONTAINS
              IF (errt.LE.err) THEN
                 err=errt
                 derivative=a(j,i)
-             ENDIF
+             end if
           END DO
           IF(ABS(a(i,i)-a(i-1,i-1)).GE.safe*err)RETURN
        END DO

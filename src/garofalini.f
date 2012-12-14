@@ -24,33 +24,33 @@
       real(KIND=double_precision)::hterma,garofalini
       integer(KIND=normal_int)::ntij,aa,bb,i
 
-!      write(iou,*) 'input',rijsq,ntij,qa,qb
+!      write(io_output,*) 'input',rijsq,ntij,qa,qb
       rij = dsqrt(rijsq)
       hterm = 0.0d0
       coul = 0.0d0
       garofalini = 0.0d0
 
 
-!      write(iou,*) aa,bb,ntij,qa,qb,gbeta(ntij),galpha(ntij),grho(ntij)
+!      write(io_output,*) aa,bb,ntij,qa,qb,gbeta(ntij),galpha(ntij),grho(ntij)
 !     H term
       do i=1,3
          hterma =   ga(ntij,i)/(1+dexp(gb(ntij,i)*(rij-gc(ntij,i))))
-!         write(iou,*) i,hterma,' (',ntij,')'
+!         write(io_output,*) i,hterma,' (',ntij,')'
          hterm = hterm + hterma
       end do
 
       coul = qa*qb*erfunc(rij/gbeta(ntij))/rij
-!      write(iou,*) 'erfunc',coul*rij
+!      write(io_output,*) 'erfunc',coul*rij
       coul = coul * qqfact
 
       garofalini = galpha(ntij)*dexp(-rij/grho(ntij)) + hterm  + coul
 
-!      write(iou,*) 'i,j,v2',aa,bb,'H term:',hterm,' Coul term:'
+!      write(io_output,*) 'i,j,v2',aa,bb,'H term:',hterm,' Coul term:'
 !     &     ,coul,' the rest:',garofalini-hterm-coul,
 !     &     ' Total:',garofalini
-!      write(iou,*) '                     ',rij
+!      write(io_output,*) '                     ',rij
 
-!      write(iou,*) 'leaving garofalini'
+!      write(io_output,*) 'leaving garofalini'
 
       return
       end

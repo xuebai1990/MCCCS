@@ -28,7 +28,7 @@
       imolty = ee_moltyp(mstate)
       ibox = box_state(1)
       ibox1 = box_state(fmstate)
-!	write(iou,*) 'index swap old', mstate, eepointp, box_state(mstate),
+!	write(io_output,*) 'index swap old', mstate, eepointp, box_state(mstate),
 !     &             ncmt(box_state(mstate),imolty)
       if (mstate.eq.1) then
          if (random().le.0.5d0) then
@@ -38,10 +38,10 @@
             if (random().le.accr) then
                mstate = fmstate
                eepointp = idint(dble(ncmt(ibox1,imolty))*random())+1
-!	write(iou,*) 'mstate,nstate', 1, 6, accr
+!	write(io_output,*) 'mstate,nstate', 1, 6, accr
             end if
          end if
-      elseif (mstate.eq.fmstate) then
+      else if (mstate.eq.fmstate) then
          if (random().le.0.5d0) then
             eepointp = idint(dble(ncmt(ibox1,imolty))*random())+1
          else
@@ -50,13 +50,13 @@
                mstate = 1
                eepointp = idint(dble(ncmt(ibox,imolty))*random())+1
             end if
-!	write(iou,*) 'mstate,nstate', 6, 1, accr
+!	write(io_output,*) 'mstate,nstate', 6, 1, accr
          end if
       end if      
 
-!	write(iou,*) ibox, ibox1,parbox(eepointp,ibox,imolty)
+!	write(io_output,*) ibox, ibox1,parbox(eepointp,ibox,imolty)
 !     &    ,parbox(eepointp,ibox1,imolty)
-!	write(iou,*) 'index swap new', mstate, eepointp, box_state(mstate),
+!	write(io_output,*) 'index swap new', mstate, eepointp, box_state(mstate),
 !     &             ncmt(box_state(mstate),imolty)
 
       return

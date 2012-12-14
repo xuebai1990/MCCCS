@@ -173,7 +173,7 @@
          end do
       end do
 
-!      write(iou,*) ' press tail' ,  press
+!      write(io_output,*) ' press tail' ,  press
 
       return
       end

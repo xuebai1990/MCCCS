@@ -50,7 +50,7 @@
 
 ! --------------------------------------------------------------------
 
-!      write(iou,*) 'start ENERGY'
+!      write(io_output,*) 'start ENERGY'
       if ( lpbc ) call setpbc (ibox)
 
       rcutsq = rcut(ibox) * rcut(ibox)
@@ -92,7 +92,7 @@
             rxu(nchp2,ii) = rxuion(ii,flagon) 
             ryu(nchp2,ii) = ryuion(ii,flagon) 
             rzu(nchp2,ii) = rzuion(ii,flagon) 
-!	write(iou,*) ii,flagon,rxu(nchp2,ii),ryu(nchp2,ii),rzu(nchp2,ii)
+!	write(io_output,*) ii,flagon,rxu(nchp2,ii),ryu(nchp2,ii),rzu(nchp2,ii)
          end do
          nboxi(nchp2) = ibox
          moltyp(nchp2) = imolty
@@ -101,7 +101,7 @@
          ycmi = ycm(nchp2)
          zcmi = zcm(nchp2)
          rcmi = rcmu(nchp2)
-!         write(iou,*) 'rcmi:',rcmi
+!         write(io_output,*) 'rcmi:',rcmi
       else
          lij2 = .true.
       end if
@@ -116,19 +116,19 @@
 !     --- check perodic boundaries
             if (rxui.gt.boxlx(ibox)) then
                rxui = rxui - boxlx(ibox)
-            elseif (rxui.lt.0) then
+            else if (rxui.lt.0) then
                rxui = rxui + boxlx(ibox)
             end if
 
             if (ryui.gt.boxly(ibox)) then
                ryui = ryui - boxly(ibox)
-            elseif (ryui.lt.0) then
+            else if (ryui.lt.0) then
                ryui = ryui + boxly(ibox)
             end if
 
             if (rzui.gt.boxlz(ibox)) then
                rzui = rzui - boxlz(ibox)
-            elseif (rzui.lt.0) then
+            else if (rzui.lt.0) then
                rzui = rzui + boxlz(ibox)
             end if
                         
@@ -290,9 +290,9 @@
                      end if
                      if ( lexpsix .or. lmmff ) then
                         ntij = (ntii+ntjj)/2
-                     elseif (lninesix) then
+                     else if (lninesix) then
                         ntij = (ntii-1)*nxatom + ntjj
-                     elseif (lgenlj) then
+                     else if (lgenlj) then
                         ntij = (ntii-1)*nntype + ntjj 
                      else
                         ntij = (ntii-1)*nntype + ntjj
@@ -311,36 +311,36 @@
                      if ( rijsq .lt. rminsq .and. .not.  (lexpand(imolty) .or. lexpand(jmolty))) then
                         ovrlap = .true.
 !	if (leemove) then
-!                        write(iou,*) 'inter ovrlap:',i,j
-!                        write(iou,*) 'i xyz',rxui,ryui,rzui
-!                        write(iou,*) 'j xyz',rxu(j,jj),ryu(j,jj),rzu(j,jj) 
-!                        write(iou,*) 'ii:',ii,'jj:',jj
-!                        write(iou,*) 'distance', dsqrt(rijsq)
+!                        write(io_output,*) 'inter ovrlap:',i,j
+!                        write(io_output,*) 'i xyz',rxui,ryui,rzui
+!                        write(io_output,*) 'j xyz',rxu(j,jj),ryu(j,jj),rzu(j,jj) 
+!                        write(io_output,*) 'ii:',ii,'jj:',jj
+!                        write(io_output,*) 'distance', dsqrt(rijsq)
 !	end if
                         return
                      end if
                      if ( (rijsq .lt. rcutsq) .or. lijall) then
                         if ( lsami ) then
                            vinter = vinter + ljsami(rijsq,ntij)
-                        elseif (lexpsix) then
+                        else if (lexpsix) then
                            vinter = vinter + exsix(rijsq,ntij)
-                        elseif (lmmff) then
+                        else if (lmmff) then
                            vinter = vinter + mmff(rijsq,ntij)
-                        elseif (lninesix) then
+                        else if (lninesix) then
                            vinter = vinter + ninesix(rijsq,ntij)
-                        elseif (lgenlj) then
+                        else if (lgenlj) then
                            sr2 = sig2ij(ntij) / rijsq
                            epsilon2=epsij(ntij)
                            vinter = vinter + genlj(rijsq,sr2,epsilon2)
-                        elseif ( lmuir ) then
+                        else if ( lmuir ) then
                            vinter = vinter + ljmuir(rijsq,ntij)
-                        elseif ( lpsurf ) then
+                        else if ( lpsurf ) then
                            vinter = vinter + ljpsur(rijsq,ntij)
                         else if (lshift) then
                            sr2 = sig2ij(ntij) / rijsq
                            sr6 = sr2 * sr2 * sr2
                            vinter = vinter + sr6*(sr6-1.0d0) *epsij(ntij)-ecut(ntij) 
-                        elseif ( lij(ntii) .and. lij(ntjj) ) then
+                        else if ( lij(ntii) .and. lij(ntjj) ) then
                            if ( lfepsi ) then
                               sr6 = rijsq*rijsq*rijsq
                               if ( (.not. lqchg(ntii)) .and.  (.not. lqchg(ntjj)) ) then
@@ -355,9 +355,9 @@
                               end if
                               if ( lexpand(imolty)  .and. lexpand(jmolty)) then
                                  epsilon2=dsqrt(epsilon(imolty,ii)* epsilon(jmolty,jj))
-                              elseif (lexpand(imolty)) then
+                              else if (lexpand(imolty)) then
                                  epsilon2=dsqrt(epsilon(imolty,ii) *epsi(ntjj))
-                              elseif ( lexpand(jmolty) ) then
+                              else if ( lexpand(jmolty) ) then
                                  epsilon2=dsqrt(epsi(ntii)* epsilon(jmolty,jj))
                               else
                                  epsilon2 = epsij(ntij)
@@ -368,11 +368,11 @@
                                  sigma2=(sigma(imolty,ii)+ sigma(jmolty,jj))/2.0d0
                                  sr2 = sigma2*sigma2/rijsq
                                  epsilon2=dsqrt(epsilon(imolty,ii)* epsilon(jmolty,jj))
-                              elseif ( lexpand(imolty) ) then
+                              else if ( lexpand(imolty) ) then
                                  sigma2=(sigma(imolty,ii)+ sigi(ntjj))/2.0d0
                                  sr2 = sigma2*sigma2/rijsq
                                  epsilon2=dsqrt(epsilon(imolty,ii)* epsi(ntjj))
-                              elseif ( lexpand(jmolty) ) then
+                              else if ( lexpand(jmolty) ) then
                                  sigma2=(sigma(jmolty,jj)+ sigi(ntii))/2.0d0
                                  sr2 = sigma2*sigma2/rijsq
                                  epsilon2=dsqrt(epsi(ntii)* epsilon(jmolty,jj))
@@ -394,7 +394,7 @@
                         else
                            velect = velect + qquion(ii,flagon) *qqu(j,jj)/dsqrt(rijsq)
                         end if
-                     elseif ( lqimol .and. lqjmol .and. lqchg(ntii)  .and. lqchg(ntjj) ) then
+                     else if ( lqimol .and. lqjmol .and. lqchg(ntii)  .and. lqchg(ntjj) ) then
 
                         iii = leaderq(imolty,ii)
                         jjj = leaderq(jmolty,jj)
@@ -462,9 +462,9 @@
             ntjj = ntype(imolty,jj)
             if ( lexpsix .or. lmmff ) then
                ntij = (ntii+ntjj)/2
-            elseif (lninesix) then
+            else if (lninesix) then
                ntij = (ntii-1)*nxatom + ntjj
-            elseif (lgenlj) then
+            else if (lgenlj) then
                ntij = (ntii-1)*nntype + ntjj
             else
                ntij = (ntii-1)*nntype + ntjj
@@ -483,7 +483,7 @@
                if ( lchgall .and. lqchg(ntii) .and. lqchg(ntjj) ) then
                   if ( lewald ) then
 
-!                        write(iou,*) 'energy including ii,jj',ii,jj,
+!                        write(io_output,*) 'energy including ii,jj',ii,jj,
 !     &                       qqfact*qquion(ii,flagon)*qquion(jj,flagon)
 !     &                       *erfunc(calp(ibox)*dsqrt(rijsq))
 !     &                       /dsqrt(rijsq)
@@ -505,7 +505,7 @@
                      end if
                   end if
 
-               elseif ( lqimol .and. lqchg(ntii) .and. lqchg(ntjj) ) then
+               else if ( lqimol .and. lqchg(ntii) .and. lqchg(ntjj) ) then
 
                   iii = leaderq(imolty,ii)
                   jjj = leaderq(imolty,jj)
@@ -558,24 +558,24 @@
                   if ( rijsq .lt. rminsq .and. .not.  lexpand(imolty)) then
                      ovrlap = .true.
                 
-!                     write(iou,*) 'intra ovrlap:',ii,jj
+!                     write(io_output,*) 'intra ovrlap:',ii,jj
                      return
-                  elseif ( rijsq .lt. rcutsq .or. lijall) then
+                  else if ( rijsq .lt. rcutsq .or. lijall) then
                      if ( lsami ) then
                         vintra = vintra + ljsami(rijsq,ntij)
-                     elseif (lexpsix) then
+                     else if (lexpsix) then
                         vintra = vintra + exsix(rijsq,ntij)
-                     elseif (lmmff) then
+                     else if (lmmff) then
                         vintra = vintra + mmff(rijsq,ntij)
-                     elseif (lninesix) then
+                     else if (lninesix) then
                         vintra = vintra + ninesix(rijsq,ntij)
-                     elseif (lgenlj) then
+                     else if (lgenlj) then
                         sr2 = sig2ij(ntij) / rijsq
                         epsilon2=epsij(ntij)
                         vintra = vintra + genlj(rijsq,sr2,epsilon2)
-                     elseif ( lmuir ) then
+                     else if ( lmuir ) then
                         vintra = vintra + ljmuir(rijsq,ntij)
-                     elseif ( lpsurf ) then
+                     else if ( lpsurf ) then
                         vintra = vintra + ljpsur(rijsq,ntij)
                      else if (lshift) then
                         sr2 = sig2ij(ntij) / rijsq
@@ -613,7 +613,7 @@
                if (.not. lqinclu(imolty,ii,jj)) then
                   vewald = vewald + qquion(ii,flagon)*qquion(jj,flagon)* (erfunc(calp(ibox)*rij)-1.0d0)/rij
 !              * 1,4 interaction which we scale by qscale2(imolty,ii,jj)
-               elseif (lqinclu(imolty,ii,jj) .and.  (.not. linclu(imolty,ii,jj))) then
+               else if (lqinclu(imolty,ii,jj) .and.  (.not. linclu(imolty,ii,jj))) then
                   vewald = vewald + (1.0d0-qscale2(imolty,ii,jj))* qquion(ii,flagon)* qquion(jj,flagon)* (erfunc(calp(ibox)*rij)-1.0d0)/rij
                end if
             end if
@@ -641,18 +641,18 @@
                 if (flagon.eq.1) then
                    rho = ncmt(ibox,jmolty) / vol
                    vtail = vtail + ncmt(ibox,kmolty) * coru(kmolty,jmolty,rho,ibox)
-!                write(iou,*) 'vtail',vtail
+!                write(io_output,*) 'vtail',vtail
                 else
                    if (jmolty.eq.ee_moltyp(mstate)) then
                       rho = (ncmt(ibox,jmolty)-1) / vol
-                   elseif (jmolty.eq.imolty) then
+                   else if (jmolty.eq.imolty) then
                       rho = (ncmt(ibox,jmolty)+1) / vol
                    else
                       rho = ncmt(ibox,jmolty) / vol
                    end if
                    if (kmolty.eq.imolty) then
                       vtail = vtail + (ncmt(ibox,kmolty)+1) * coru(kmolty,jmolty,rho ,ibox)
-                   elseif (kmolty.eq.ee_moltyp(mstate)) then
+                   else if (kmolty.eq.ee_moltyp(mstate)) then
                       vtail = vtail + (ncmt(ibox,kmolty)-1) * coru(kmolty,jmolty,rho ,ibox)
                    else
                       vtail = vtail + ncmt(ibox,kmolty) * coru(kmolty,jmolty,rho,ibox)
@@ -757,7 +757,7 @@
 !     note that vintra is only computed when the flag lljii is true
       v = vinter + vext + vintra + velect + vewald 
 
-!      write(iou,*) 'end ENERGY'
+!      write(io_output,*) 'end ENERGY'
 
       return
       end

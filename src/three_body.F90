@@ -62,7 +62,7 @@ CONTAINS
 
     read(UNIT=io_ff,NML=threebody,iostat=jerr)
     if (jerr.ne.0.and.jerr.ne.-1) then
-       write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
        call err_exit('reading namelist: threebody')
     end if
 
@@ -113,7 +113,7 @@ CONTAINS
        do ibox=1,nbox
           read(io_triplets,*) triplets(:,1:nTriplets(ibox),ibox)
        end do
-       write(iou,*) 'Get ',nTriplets,' triplets'
+       write(io_output,*) 'Get ',nTriplets,' triplets'
     else
        nAtomType=atoms%size
        do ibox=1,nbox

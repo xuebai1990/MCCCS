@@ -48,13 +48,13 @@
 
          if (mtype .eq. 1 .and.  (lsolid(ibox) .and. .not. lrect(ibox))) then
             iwarn = 2
-         elseif(mtype.eq.2) then
+         else if(mtype.eq.2) then
 ! kea 6/3/09 --- necessary for non-COM rotations
             iwarn = 2
          else
             iwarn = 1
          end if
-      elseif ( mtype .eq. 6 ) then
+      else if ( mtype .eq. 6 ) then
          iwarn = 0
       else
          iwarn = 2
@@ -98,21 +98,21 @@
                if ( sx .lt. -1.0d-10 ) then
                   sx = sx + 1.0d0
                   ldx = .true.
-               elseif( sx .gt. 1d0 ) then
+               else if( sx .gt. 1d0 ) then
                   sx = sx - 1.0d0
                   ldx = .true.
                end if
                if ( sy .lt. -1.0d-10 ) then
                   sy = sy + 1.0d0
                   ldy = .true.
-               elseif( sy .gt. 1d0 ) then
+               else if( sy .gt. 1d0 ) then
                   sy = sy - 1.0d0
                   ldy = .true.
                end if
                if ( sz .lt. -1.0d-10 ) then
                   sz = sz + 1.0d0
                   ldz = .true.
-               elseif( sz .gt. 1d0 ) then
+               else if( sz .gt. 1d0 ) then
                   sz = sz - 1.0d0
                   ldz = .true.
                end if
@@ -122,7 +122,7 @@
                szcm(i) = sz
                if ( ldx .or. ldy .or. ldz ) then
                   if ( mtype .eq. 5 ) then
-                     write(iou,*) 'sx, sy, sz:',sx,sy,sz
+                     write(io_output,*) 'sx, sy, sz:',sx,sy,sz
                   end if
                   nxcm2 = sx*hmat(ibox,1)+sy*hmat(ibox,4) +sz*hmat(ibox,7)
                   nycm2 = sx*hmat(ibox,2)+sy*hmat(ibox,5) +sz*hmat(ibox,8)
@@ -146,14 +146,14 @@
                   if ( nxcm .gt. rbx ) then
                      inboxx = idint(nxcm/rbx)
                      ldx = .true.
-                  elseif ( nxcm .lt. -1.0d-10 ) then
+                  else if ( nxcm .lt. -1.0d-10 ) then
                      inboxx = idint(nxcm/rbx) - 1
                      ldx = .true.
                   end if
                   if ( nycm .gt. rby ) then
                      inboxy = idint(nycm/rby)
                      ldy = .true.
-                  elseif( nycm .lt. -1.0d-10 )then
+                  else if( nycm .lt. -1.0d-10 )then
                      inboxy = idint(nycm/rby) - 1
                      ldy = .true.
                   end if
@@ -161,7 +161,7 @@
                      if ( nzcm .gt. rbz ) then
                         inboxz = idint(nzcm/rbz)
                         ldz = .true.
-                     elseif( nzcm .lt. -1.0d-10 ) then
+                     else if( nzcm .lt. -1.0d-10 ) then
                         inboxz = idint(nzcm/rbz) - 1
                         ldz = .true.
                      end if
@@ -179,7 +179,7 @@
                   if (nxcm .lt. -1.0d-10) then
                      dx = rbx
                      ldx = .true.
-                  elseif (nxcm .gt. rbx) then
+                  else if (nxcm .gt. rbx) then
                      dx = -rbx
                      ldx = .true.
                   end if
@@ -187,7 +187,7 @@
                   if (nycm .lt. -1.0d-10) then
                      dy = rby
                      ldy = .true.
-                  elseif (nycm .gt. rby) then
+                  else if (nycm .gt. rby) then
                      dy = -rby
                      ldy = .true.
                   end if
@@ -196,7 +196,7 @@
                      if (nzcm .lt. -1.0d-10) then
                         dz = rbz
                         ldz = .true.
-                     elseif (nzcm .gt. rbz) then
+                     else if (nzcm .gt. rbz) then
                         dz = -rbz
                         ldz = .true.
                      end if
@@ -225,19 +225,19 @@
 
             if( ldx .or. ldy .or. ldz ) then
                if ( (iadjust .ge. iwarn) ) then
-                  if (mtype .eq. 1) write(iou,*) 'translational move'
-                  if (mtype .eq. 2) write(iou,*) 'rotational move'
-                  if (mtype .eq. 3) write(iou,*) 'swap move'
-                  if (mtype .eq. 4) write(iou,*) 'switch move'
-                  if (mtype .eq. 5) write(iou,*) 'volume move'
-                  if (mtype .eq. 6) write(iou,*) 'readdat move'
-                  if (mtype .eq. 7) write(iou,*) 'config move'
-                  if (mtype .eq. 8) write(iou,*) 'swatch move'
-                  if (mtype .eq. 9) write(iou,*) 'energy call'
-                  write(iou,*) 'ibox,i,iunit,boxlen',ibox,i,iunit,rbx, rby,rbz
+                  if (mtype .eq. 1) write(io_output,*) 'translational move'
+                  if (mtype .eq. 2) write(io_output,*) 'rotational move'
+                  if (mtype .eq. 3) write(io_output,*) 'swap move'
+                  if (mtype .eq. 4) write(io_output,*) 'switch move'
+                  if (mtype .eq. 5) write(io_output,*) 'volume move'
+                  if (mtype .eq. 6) write(io_output,*) 'readdat move'
+                  if (mtype .eq. 7) write(io_output,*) 'config move'
+                  if (mtype .eq. 8) write(io_output,*) 'swatch move'
+                  if (mtype .eq. 9) write(io_output,*) 'energy call'
+                  write(io_output,*) 'ibox,i,iunit,boxlen',ibox,i,iunit,rbx, rby,rbz
                   lintbx = .true.
-                  write(iou,*) 'nxcm,nycm,nzcm',nxcm,nycm,nzcm
-                  write(iou,*) 'dx,dy,dz',dx,dy,dz
+                  write(io_output,*) 'nxcm,nycm,nzcm',nxcm,nycm,nzcm
+                  write(io_output,*) 'dx,dy,dz',dx,dy,dz
                   if (iwarn .ne. 0) call err_exit('')
                end if
                iadjust = iadjust + 1
@@ -263,11 +263,11 @@
                   if ( rijsq .gt. dmaxsq ) dmaxsq = rijsq
                end do                  
                rcmu(i) = dsqrt(dmaxsq)+ 1.0d-10
-!               write(iou,*) 'rcmu(i)',rcmu(i)
+!               write(io_output,*) 'rcmu(i)',rcmu(i)
             end if
                   
          else
-            if (.not. lall) write(iou,*)'prob with box in ctrmas'
+            if (.not. lall) write(io_output,*)'prob with box in ctrmas'
          end if
       end do
 

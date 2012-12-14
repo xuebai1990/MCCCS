@@ -33,7 +33,7 @@
       dimension temp_store(numax),outer_sites(numax),outer_prev(numax) ,lfind(numax)
 ! ------------------------------------------------------------------
 
-!      write(iou,*) 'start SCHEDULE'
+!      write(io_output,*) 'start SCHEDULE'
 
 !     DECODER for the new growth logic
 !     lexshed is true if the bead exists at that time of the growth 
@@ -88,8 +88,8 @@
          end if
          
 
-!         write(iou,*) '********************************************'
-!         write(iou,*) 'iutry',iutry
+!         write(io_output,*) '********************************************'
+!         write(io_output,*) 'iutry',iutry
 
          idir = icbdir(imolty)
          growfrom(1) = iutry
@@ -100,7 +100,7 @@
 !           --- problem, cannot do config move on a 1 bead molecule
             call err_exit('cannot do CBMC on a one grow unit molecule')
 
-         elseif ( invtry .eq. 1 ) then
+         else if ( invtry .eq. 1 ) then
 !           --- regrow entire molecule, check nmaxcbmc
             if ( nmaxcbmc(imolty) .lt. igrow - 1 ) then
                kickout = kickout + 1
@@ -180,14 +180,14 @@
                end if
             else if ( invtry - count .ne. 1 ) then
 !              --- problem in logic, should only be one nongrown bead
-               write(iou,*) 'invtry,count',invtry,count
-               write(iou,*) 'igrow,imolty',igrow,imolty
+               write(io_output,*) 'invtry,count',invtry,count
+               write(io_output,*) 'igrow,imolty',igrow,imolty
                call err_exit('logic problem in schedule')
             end if
          end if   
 
 !     ---end the part that is specific for config
-      elseif ( movetype .eq. 2 ) then
+      else if ( movetype .eq. 2 ) then
 !     --- begin the part that is specific for swap
 !        --- iutry is the first bead inserted - need to grow its neighbors
          do iu = 1,igrow
@@ -229,7 +229,7 @@
 
 !        ---end the part that is specific for swap
 
-      elseif ( movetype .eq. 3 ) then
+      else if ( movetype .eq. 3 ) then
          do iu = 1,igrow
             lexshed(iu) = .true.
          end do
@@ -276,7 +276,7 @@
          end if
 !        --- end part that is specific for swatch
          
-      elseif ( movetype .eq. 4 ) then
+      else if ( movetype .eq. 4 ) then
          do iu = 1,igrow
             lexshed(iu) = .true.
          end do
@@ -323,7 +323,7 @@
 
 
 !        --- end part that is specific for rigid molecules
-      elseif (movetype .eq. 5) then
+      else if (movetype .eq. 5) then
          if ( iutry .eq. 0 ) then
 !           --- no beads to be regrown via cbmc
             return
@@ -367,7 +367,7 @@
       else
 
 !        --- non-existant move type
-         write(iou,*) 'schedule movetype ',movetype
+         write(io_output,*) 'schedule movetype ',movetype
          call err_exit('non-valid move type')
       end if
 
@@ -379,7 +379,7 @@
 !     OLD METHOD - not fully random - removed 6-13-98
 
 !      if ( .false. ) then 
-!         write(iou,*) 'old method'
+!         write(io_output,*) 'old method'
 !      ibead = 0
 !      index = 0
 ! 50   if ( index .lt. islen ) then
@@ -512,19 +512,19 @@
       end if
 
       if ( lprint ) then
-         write(iou,*) 'movetype',movetype
-         write(iou,*) 'index',index
+         write(io_output,*) 'movetype',movetype
+         write(io_output,*) 'index',index
          do ibead = 1,index
-            write(iou,*) 'ibead',ibead
-            write(iou,*) 'growfrom(ibead)',growfrom(ibead)
-            write(iou,*) 'growprev(ibead)',growprev(ibead)
-            write(iou,*) 'grownum(ibead)',grownum(ibead)
+            write(io_output,*) 'ibead',ibead
+            write(io_output,*) 'growfrom(ibead)',growfrom(ibead)
+            write(io_output,*) 'growprev(ibead)',growprev(ibead)
+            write(io_output,*) 'grownum(ibead)',grownum(ibead)
             do count = 1,grownum(ibead)
-               write(iou,*) 'count,growlist(ibead,count)',count ,growlist(ibead,count)
+               write(io_output,*) 'count,growlist(ibead,count)',count ,growlist(ibead,count)
             end do
          end do
          do iu = 1,igrow
-            write(iou,*) 'iu,lexshed(iu)',iu,lexshed(iu)
+            write(io_output,*) 'iu,lexshed(iu)',iu,lexshed(iu)
          end do
       end if
 
@@ -587,7 +587,7 @@
       
 
 
-!      write(iou,*) 'end SCHEDULE'
+!      write(io_output,*) 'end SCHEDULE'
   
       return
       end

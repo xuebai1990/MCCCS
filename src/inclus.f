@@ -108,13 +108,13 @@
 		  ljscale(imolty,nb,m) = ofscale(n)
 		  qscale2(imolty,m,nb) = ofscale2(n)
 		  qscale2(imolty,nb,m) = ofscale2(n)
-               elseif (inclsign(n) .eq. -1 ) then
+               else if (inclsign(n) .eq. -1 ) then
                   linclu(imolty,m,nb) = .false.
                   linclu(imolty,nb,m) = .false.
                   lqinclu(imolty,m,nb) = .false.
                   lqinclu(imolty,nb,m) = .false.
                else
-                  write(iou,*) 'INCLUS: n,inclsign(n)',n,inclsign(n)
+                  write(io_output,*) 'INCLUS: n,inclsign(n)',n,inclsign(n)
                   call err_exit('inclusign must be 1 or -1')
                end if
             end if
@@ -231,48 +231,48 @@
          end if
 
          if (myid.eq.0) then
-            write(iou,*) 
-            write(iou,*) 'INCLUSION TABLE'
+            write(io_output,*) 
+            write(io_output,*) 'INCLUSION TABLE'
 
             do m = 1, nunit(imolty)
-               write(iou,*) m, (linclu(imolty,m,n),n=1,nunit(imolty))
+               write(io_output,*) m, (linclu(imolty,m,n),n=1,nunit(imolty))
             end do
-            write(iou,*) 
+            write(io_output,*) 
 
-            write(iou,*) 
-            write(iou,*) 'CHARGE INCLUSION TABLE'
+            write(io_output,*) 
+            write(io_output,*) 'CHARGE INCLUSION TABLE'
 
             do m = 1, nunit(imolty)
-               write(iou,*) m,  (lqinclu(imolty,m,n),n=1,nunit(imolty))
+               write(io_output,*) m,  (lqinclu(imolty,m,n),n=1,nunit(imolty))
             end do
 
 !  400  format (<nunit(imolty)> F5.2)
-            write(iou,*) 
+            write(io_output,*) 
 	 
-            write(iou,*) '1-4 LJ SCALING FACTORS'
+            write(io_output,*) '1-4 LJ SCALING FACTORS'
             do m = 1, nunit(imolty)
-               write(iou,*) m,  (ljscale(imolty,m,n),n=1,nunit(imolty))
+               write(io_output,*) m,  (ljscale(imolty,m,n),n=1,nunit(imolty))
             end do
 ! 500  format (i5,<nunit(imolty)> F5.2)
 	 
-            write(iou,*)
-            write(iou,*) '1-4 CHARGE SCALING FACTORS'
+            write(io_output,*)
+            write(io_output,*) '1-4 CHARGE SCALING FACTORS'
             do m = 1, nunit(imolty)
-               write(iou,*) m,  (qscale2(imolty,m,n),n=1,nunit(imolty))
+               write(io_output,*) m,  (qscale2(imolty,m,n),n=1,nunit(imolty))
             end do
          end if
 ! 600  format (i5,<nunit(imolty)> F5.2)
 
 ! * not really that important to write out
-!         write(iou,*) 
-!         write(iou,*) '1-5 OH INTERACTION TABLE'
+!         write(io_output,*) 
+!         write(io_output,*) '1-5 OH INTERACTION TABLE'
 !         do m = 1, nunit(imolty)
-!            write(iou,*) m, (lainclu(imolty,m,n),n=1,nunit(imolty))
+!            write(io_output,*) m, (lainclu(imolty,m,n),n=1,nunit(imolty))
 !         end do
-!         write(iou,*) 
+!         write(io_output,*) 
 
       end do
-!      write(iou,*) 'finished inclus'
+!      write(io_output,*) 'finished inclus'
       return
       end
 

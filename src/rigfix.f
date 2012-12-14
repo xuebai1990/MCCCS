@@ -32,7 +32,7 @@
       dimension ilist(numax),inum(max),xfix(numax),yfix(numax) ,zfix(numax),lfind(numax),phia(numax),bendang(numax) ,rlength(numax),vtorsion(nchtor_max),phitors(nchtor_max) ,bf_tor(nchtor_max),rxpa(numax,nchmax),rypa(numax,nchmax) ,rzpa(numax,nchmax),vtrelecta(nchmax),vtrewalda(nchmax) ,bsuma(nchmax),vtrya(nchmax),vtrintraa(nchmax) ,vtrorienta(nchmax),vtrexta(nchmax),glist(max) ,lovra(nchmax) ,vtrintera(nchmax),ifrom(numax),inuma(max) ,vtrelecta_intra(nchmax),vtrelecta_inter(nchmax)
 !     ----------------------------------------------------------
 
-!      write(iou,*) 'START RIGFIX'
+!      write(io_output,*) 'START RIGFIX'
 
       wrig = 1.0d0
       do j = 1, nunit(imolty)
@@ -213,7 +213,7 @@
                      if (jut2.eq.iufrom.and.jut3.eq.iuprev .and..not.lplace(imolty,jut4)) then
 !     --- check to see if jut4 exists
                         if (.not. lexist(jut4)) then
-                           write(iou,*) 'iu,jut2,jut3,jut4',iu ,jut2,jut3,jut4
+                           write(io_output,*) 'iu,jut2,jut3,jut4',iu ,jut2,jut3,jut4
                            call err_exit('trouble, jut4 does not exist in rigfix')
                         end if
                         
@@ -440,7 +440,7 @@
             wrig = wrig * bsum
             if (wrig .lt. softlog) then
                lterm = .true.
-               write(iou,*) 'RIGFIX OLD REJECTED'
+               write(io_output,*) 'RIGFIX OLD REJECTED'
                return
             end if
          end if
@@ -533,7 +533,7 @@
          end do
       end do
 
-!      write(iou,*) 'END RIGFIX'
+!      write(io_output,*) 'END RIGFIX'
         
       return
       end

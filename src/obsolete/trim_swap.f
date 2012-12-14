@@ -77,7 +77,7 @@
 
 ! --------------------------------------------------------------------
 
-!      write(iou,*) 'START TRIM_SWAP'
+!      write(io_output,*) 'START TRIM_SWAP'
 !      write(11,*) '1:',neigh_cnt(18)
 
       lempty = .false.
@@ -123,7 +123,7 @@
       else
          lswapinter = .true.
       end if
-!      write(iou,*) 'boxins:',boxins,'boxrem:',boxrem
+!      write(io_output,*) 'boxins:',boxins,'boxrem:',boxrem
       if ( .not. (lgibbs .or. lgrand) .and. lswapinter )  call cleanup('no interbox swap if not gibbs/grand ensemble!')
          
 ! *** select a chain in BOXREM at random ***
@@ -131,26 +131,26 @@
       if ( ncmt(boxrem,imolty) .eq. 0 ) then
          lempty = .true.
          if ( .not. lswapinter .or. lrigid(imolty) ) return
-      elseif ( lswapinter .or. lavbmc1(imolty) .and. .not.   (lavbmc2(imolty) .or. lavbmc3(imolty)) ) then
+      else if ( lswapinter .or. lavbmc1(imolty) .and. .not.   (lavbmc2(imolty) .or. lavbmc3(imolty)) ) then
 
 ! *** for the advanced AVBMC algorithm, this particle will be selected in
 ! *** sub-regions defined by Vin
 
          pointp = idint( dble(ncmt(boxrem,imolty))*random() ) + 1
          irem = parbox(pointp,boxrem,imolty)
-         if ( moltyp(irem) .ne. imolty )  write(iou,*) 'screwup swap, irem:',irem,moltyp(irem),imolty
+         if ( moltyp(irem) .ne. imolty )  write(io_output,*) 'screwup swap, irem:',irem,moltyp(irem),imolty
          ibox = nboxi(irem)
          if ( ibox .ne. boxrem ) call cleanup('problem in swap')
       end if
 
-!$$$      write(iou,*) 'particle ',irem,' is being removed, imolty is:',
+!$$$      write(io_output,*) 'particle ',irem,' is being removed, imolty is:',
 !$$$     &     imolty,' and the box is:',boxrem
 
 
 ! ===>  for both gibbs and grand-canonical we have:
 ! --- insert a chain in box: boxins 
 ! --- remove one in box: boxrem
-!      write(iou,*) 'boxrem',boxrem,' imolty',imolty,' lempty',lempty
+!      write(io_output,*) 'boxrem',boxrem,' imolty',imolty,' lempty',lempty
 !     bnswap(imolty,X) decoder X = 1 is # attempts into box 1
 !      X = 2 is # attempts into box 2 X=3 is success into box 1
 !      X = 4 is success into box 2
@@ -176,7 +176,7 @@
                qqu(iins,icbu) = qqu(irem,icbu)
             end do
          end if
-      elseif ( lavbmc2(imolty) .or. lavbmc3(imolty) ) then
+      else if ( lavbmc2(imolty) .or. lavbmc3(imolty) ) then
          iins = 0
       else
          iins = irem
@@ -249,7 +249,7 @@
       
 !     --- check for termination of walk ---
       if ( w1ins .lt. softlog ) then
-         write(iou,*) 'caught in swap'
+         write(io_output,*) 'caught in swap'
          return
       end if
 
@@ -267,7 +267,7 @@
                end if
             end if
          end do
-         write(iou,*) 'w1ins:',w1ins,'rbf:',rbf
+         write(io_output,*) 'w1ins:',w1ins,'rbf:',rbf
          call cleanup('big time screwup -- w1ins')
       else
          iwalk = 1
@@ -280,7 +280,7 @@
       v1insewd = vtrewald(iwalk)
 
 
-!      write(iou,*)'vtry(iwalk)vtrext(iwalk)vtrinter(iwalk)vtrelect(iwalk)'
+!      write(io_output,*)'vtry(iwalk)vtrext(iwalk)vtrinter(iwalk)vtrelect(iwalk)'
 !     & ,vtry(iwalk),vtrext(iwalk),vtrinter(iwalk),vtrelect(iwalk),
 !     & vtrewald(iwalk)
 
@@ -298,7 +298,7 @@
             qqu(iins,j) = qqu(irem,j)
          end do
          call schedule(igrow,imolty,ifrom,iutry,0,4)
-      elseif (lring(imolty)) then
+      else if (lring(imolty)) then
          lfixnow = .true.
          call safeschedule(igrow,imolty,ifrom,iutry,findex,2)
       else
@@ -341,12 +341,12 @@
 !     calculate the true site-site energy
          istt = 1
          iett = igrow
-!         write(iou,*) igrow
+!         write(io_output,*) igrow
          
          call energy (iins,imolty, v, vintra,vinter,vext ,velect,vewald,iii,ibox, istt, iett, .true.,ovrlap ,.false.,vdum,.false.,lfavor)
          
          if (ovrlap) then
-            write(iou,*) 'iins',iins,'irem',irem
+            write(io_output,*) 'iins',iins,'irem',irem
             call cleanup('strange screwup in DC-CBMC swap')
          end if
 ! v1insewd, vnewewald and vnewintra now accounted for in v from energy
@@ -437,9 +437,9 @@
 
 ! *** check that there is at least one molecule in BOXREM ***
       if ( lempty ) then
-!         write(iou,*) 'no molecule in BOXREM'
+!         write(io_output,*) 'no molecule in BOXREM'
          if (lgrand) then
-	    if (boxrem.eq.2) write(iou,*) ' ERROR ***** array too low !'
+	    if (boxrem.eq.2) write(io_output,*) ' ERROR ***** array too low !'
          end if
          return
       end if
@@ -489,7 +489,7 @@
       call boltz(lnew,.true.,ovrlap,irem,irem,imolty,boxrem,ichoi,idum ,1,glist,0.0d0)
 
       if ( ovrlap ) then
-         write(iou,*) 'disaster: overlap for 1st bead in SWAP'
+         write(io_output,*) 'disaster: overlap for 1st bead in SWAP'
       end if
 ! *** calculate the correct weight for the  old  walk ***
 
@@ -500,7 +500,7 @@
 
 ! --- check for termination of walk ---
       if ( w1rem .lt. softlog ) then 
-         write(iou,*) ' run problem : soft overlap in old'
+         write(io_output,*) ' run problem : soft overlap in old'
       end if
 
       v1rem = vtry(1)
@@ -516,7 +516,7 @@
       call rosenbluth(.false.,lterm,irem,irem,imolty,ifrom ,boxrem,igrow,waddold,lfixnow,ctorfo,2 )
 
       if ( lterm ) then 
-         write(iou,*) 'SWAP: rosenbluth old rejected'
+         write(io_output,*) 'SWAP: rosenbluth old rejected'
          return
       end if
 
@@ -642,7 +642,7 @@
       wdlog = wnlog - wolog
       
       if ( wdlog .lt. -softcut ) then
-!         write(iou,*) '### underflow in wratio calculation ###'
+!         write(io_output,*) '### underflow in wratio calculation ###'
          return
       end if
 
@@ -669,13 +669,13 @@
 !         wratio = 1.0   
 
       if ( random() .le. wratio ) then
-!         write(iou,*) 'SWAP MOVE ACCEPTED',irem
+!         write(io_output,*) 'SWAP MOVE ACCEPTED',irem
 ! *** we can now accept !!!!! ***
          bnswap(imolty,ipairb,boxins+nbox) =  bnswap(imolty,ipairb,boxins+nbox) + 1.0d0
          if ( .not. lswapinter .and. lbias(imolty) ) then
             if ( lrem_out .and. lins_in ) then
                bnswap_in(imolty,2) = bnswap_in(imolty,2) + 1.0d0
-            elseif ( (.not. lrem_out) .and. (.not. lins_in ) ) then
+            else if ( (.not. lrem_out) .and. (.not. lins_in ) ) then
                bnswap_out(imolty,2) = bnswap_out(imolty,2) + 1.0d0
             end if
          end if
@@ -703,9 +703,9 @@
           vtgn      = 0.0d0
           vbendn    = 0.0d0
           vvibn     = 0.0d0
-!         write(iou,*) vintran,velectn,vewaldn       
+!         write(io_output,*) vintran,velectn,vewaldn       
 
-!         write(iou,*) 'irem', irem  
+!         write(io_output,*) 'irem', irem  
 
 ! ---    update energies:
 
@@ -781,7 +781,7 @@
             call linkcell(2,irem,vdum,vdum,vdum,ddum)
          end if
          
-!         write(iou,*) 'lneighbor:',lneighbor
+!         write(io_output,*) 'lneighbor:',lneighbor
 
          if ( lneigh ) call updnn( irem )
          if ( lneighbor ) then
@@ -801,7 +801,7 @@
                end do
  10         continue
             neigh_cnt(irem) = neigh_icnt
-!            write(iou,*) 'irem:',irem,neigh_icnt
+!            write(io_output,*) 'irem:',irem,neigh_icnt
             do ic = 1,neigh_icnt
                j = neighi(ic)
                neighbor(ic,irem)=j
@@ -818,7 +818,7 @@
             end do
          end if
 
-!         write(iou,*) irem,'end SWAP'
+!         write(io_output,*) irem,'end SWAP'
 
       end if
  

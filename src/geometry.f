@@ -66,7 +66,7 @@
       nchben_a = nchbna(imolty)
       nchben_b = nchbnb(imolty)
 
-!      write(iou,*) 'START GEOMETRY'
+!      write(io_output,*) 'START GEOMETRY'
 
 !     --- initialize trial energies
       vvibtr = 0.0d0
@@ -468,7 +468,7 @@
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !     --- End Bond angle biased selection ---           c 
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-!      write(iou,*) 'FINISH GEOMETRY'
+!      write(io_output,*) 'FINISH GEOMETRY'
 
       return
       end
@@ -499,7 +499,7 @@
 
       real(KIND=double_precision)::equil, kforce, betaT, angle, vangle, rr, v1, v2,random
 
-!      write(iou,*) 'start BENDANGLE'
+!      write(io_output,*) 'start BENDANGLE'
 
       if ( kforce .gt. 0.1d0 ) then
 !        --- find a vector inside the unit sphere
@@ -512,7 +512,7 @@
          angle = equil + v1*dsqrt( (-dlog(rr)) /( kforce*betaT*rr) )
          
          if (angle .le. 0.0d0 .or. angle .ge. 3.1415 ) then
-            write(iou,*) 'chose angle outside of 0,Pi in bendangle'
+            write(io_output,*) 'chose angle outside of 0,Pi in bendangle'
             goto 80
          end if
 
@@ -529,7 +529,7 @@
          vangle = 0.0d0
       end if
 
-!      write(iou,*) 'end BENDANGLE'
+!      write(io_output,*) 'end BENDANGLE'
 
       return
       end

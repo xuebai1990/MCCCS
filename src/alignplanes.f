@@ -67,7 +67,7 @@
 
       
 
-!      write(iou,*) 'BEGIN align_planes'
+!      write(io_output,*) 'BEGIN align_planes'
 
       imoltype_b = moltyp(imol_b)
       nunit_b = nunit(imoltype_b)
@@ -358,7 +358,7 @@
 !         write(90,*) 'O ',xb(i),yb(i),zb(i)
 !      end do
 !      close(90)
-!      write(iou,*) 'END align_planes'
+!      write(io_output,*) 'END align_planes'
 
       return
 

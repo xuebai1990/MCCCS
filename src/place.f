@@ -37,7 +37,7 @@
 
       dimension r(nchbn_max),bfactor(nchbn_max) ,bendang(numax,numax) ,ang_trial(nchbn_max),dist(max) ,niplace(numax),vbend(nchmax) ,vtorsion(nchmax),phi(max) ,list(max),glist(max)
 
-!      write(iou,*) 'START PLACE'
+!      write(io_output,*) 'START PLACE'
 
 
       nchvib = nchbna(imolty)
@@ -68,7 +68,7 @@
             iu = iplace(iw,count)
 
             if (invib(imolty,iu).gt.1) then
-               write(iou,*) 'iu,invib',iu,invib(imolty,iu)
+               write(io_output,*) 'iu,invib',iu,invib(imolty,iu)
                call err_exit('invib can no be larger than one for hydrogen')
             end if
 
@@ -78,7 +78,7 @@
             ju = ijvib(imolty,iu,iv)
 
             if (iufrom.ne.ju) then
-               write(iou,*) 'iu,ju,iufrom',iu,ju,iufrom
+               write(io_output,*) 'iu,ju,iufrom',iu,ju,iufrom
                call err_exit('ju not equal to iufrom')
             end if
 
@@ -235,7 +235,7 @@
                   if (ku.eq.pprev(iw)) then
 
                      if (ju.ne.ijben2(imolty,iu,ib)) then
-                        write(iou,*) 'ju,ijben2',ju,ijben2(imolty,iu,ib)
+                        write(io_output,*) 'ju,ijben2',ju,ijben2(imolty,iu,ib)
                         call err_exit('ju not equal to ijben2 in place')
                      end if
 
@@ -447,7 +447,7 @@
                   if (niplace(jut4).lt.niplace(iu)) then
                         
                      if (.not. lexist(jut4)) then
-                        write(iou,*) 'jut4,jut3,jut2,iu', jut4,jut3,jut2,iu
+                        write(io_output,*) 'jut4,jut3,jut2,iu', jut4,jut3,jut2,iu
                         call err_exit('trouble jut4 in place')
                      end if
                      
@@ -571,7 +571,7 @@
          end do
       end do
 
-!      write(iou,*) 'END PLACE'
+!      write(io_output,*) 'END PLACE'
       
       return
       end

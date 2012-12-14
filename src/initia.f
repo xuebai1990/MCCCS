@@ -50,9 +50,9 @@
 
 ! --------------------------------------------------------------------
       if (myid.eq.0) then
-         write(iou,*) 
-         write(iou,*) 'subroutine initia'
-         write(iou,*) 
+         write(io_output,*) 
+         write(io_output,*) 'subroutine initia'
+         write(io_output,*) 
       end if
 
 !     --- initialize nchbox ---
@@ -76,19 +76,19 @@
       end do
 
       if ( chktot .ne. nchain ) then
-         write(iou,*) 'inconsistant number of chains in INITIA'
+         write(io_output,*) 'inconsistant number of chains in INITIA'
          do j = 1,nbox
-            write(iou,*) 'ininch',j,(ininch(i,j),i=1,nmolty)
+            write(io_output,*) 'ininch',j,(ininch(i,j),i=1,nmolty)
          end do
-         write(iou,*) 'nchain',nchain
+         write(io_output,*) 'nchain',nchain
          call err_exit('')
       end if
 
       do i = 1, nmolty
          if ( temtyp(i) .ne. check(i) ) then
-            write(iou,*) 'inconsistant number of chains in INITIA'
-            write(iou,*) 'moltyp',i,(ininch(i,j),j=1,nbox)
-            write(iou,*) 'temtyp:',temtyp(i)
+            write(io_output,*) 'inconsistant number of chains in INITIA'
+            write(io_output,*) 'moltyp',i,(ininch(i,j),j=1,nbox)
+            write(io_output,*) 'temtyp:',temtyp(i)
             call err_exit('')
          end if
       end do
@@ -96,7 +96,7 @@
       do i = iboxst,iboxed
          unitc = inix(i)*iniy(i)*iniz(i)
          if ( nchbox(i) .gt. unitc ) then
-            write(iou,*) 'unit cell too small in box',i
+            write(io_output,*) 'unit cell too small in box',i
             call err_exit('')
          end if
       end do
@@ -110,10 +110,10 @@
          uy(i) = boxly(i) / dble(iniy(i))
          uz(i) = boxlz(i) / dble(iniz(i))
          if (myid.eq.0) then
-            write(iou,*) 'box',i
-            write(iou,*) 'ini',inix(i),iniy(i),iniz(i)
-            write(iou,*) 'box',boxlx(i),boxly(i),boxlz(i)
-            write(iou,*) 'uni',ux(i),uy(i),uz(i)
+            write(io_output,*) 'box',i
+            write(io_output,*) 'ini',inix(i),iniy(i),iniz(i)
+            write(io_output,*) 'box',boxlx(i),boxly(i),boxlz(i)
+            write(io_output,*) 'uni',ux(i),uy(i),uz(i)
          end if
       end do
 
@@ -130,8 +130,8 @@
 
       do i = 1,nmolty
          if ( mcmt(i,1) .ne. check(i) ) then
-            write(iou,*) 'inconsistant number of type in INITIA'
-            write(iou,*) 'mcmt(i,total),check(i)',mcmt(i,1),check(i)
+            write(io_output,*) 'inconsistant number of type in INITIA'
+            write(io_output,*) 'mcmt(i,total),check(i)',mcmt(i,1),check(i)
             call err_exit('')
          end if
       end do
@@ -150,8 +150,8 @@
       end do
 
       if (myid.eq.0) then
-         write(iou,*) 'nmolty',nmolty
-         write(iou,*) '   mcmt',((mcmt(i,ibox),i=1,nmolty),ibox=1,nbox)
+         write(io_output,*) 'nmolty',nmolty
+         write(io_output,*) '   mcmt',((mcmt(i,ibox),i=1,nmolty),ibox=1,nbox)
       end if
 
 ! *****************************
@@ -184,7 +184,7 @@
             if (lgrow) then
 
                if (myid.eq.0) then
-                  write(iou,*) 'growing a sample structure with CBMC'
+                  write(io_output,*) 'growing a sample structure with CBMC'
                end if
 
                if (nunit(i) .ne. nugrow(i)) then
@@ -211,8 +211,8 @@
                call rosenbluth( .true.,lterm,1,1,i,ifrom ,2,nugrow(i),ddum,.false.,ddum,2 )
 
                if (lterm) then
-                  write(iou,*) 'error in initia growing molecule'
-                  write(iou,*) 'maybe increasing nchoi would help?'
+                  write(io_output,*) 'error in initia growing molecule'
+                  write(io_output,*) 'maybe increasing nchoi would help?'
                   call err_exit('')
                end if
 
@@ -266,7 +266,7 @@
                         exit
                      end if
                   end do
-                  !             write(iou,*) count_chain, rand_id,moltyp(rand_id) 
+                  !             write(io_output,*) count_chain, rand_id,moltyp(rand_id) 
                end if
             end do
          end do
@@ -309,8 +309,8 @@
                      cycle do_ibox
                   end if
                   
-!                  write(iou,*) 'nn',nn
-!                  write(iou,*) 'ic',ic,'   jc',jc,'   kc',kc
+!                  write(io_output,*) 'nn',nn
+!                  write(io_output,*) 'ic',ic,'   jc',jc,'   kc',kc
                   
 !     - inimix > 0 : take molecules in order (first type I etc.)
 !     - inimix < 0 : take molecules in alternating order
@@ -323,7 +323,7 @@
                               exit
                            end if
                         end do
-                     elseif ( inimix(ibox) .lt. 0 ) then
+                     else if ( inimix(ibox) .lt. 0 ) then
 !     This is not right. It doesn't consider the number of molecules of each type in the box.
 !                        do imol = 1, nmolty
 !                           nt = n - imol
@@ -345,7 +345,7 @@
 
                   ncmt(ibox,intemp) = ncmt(ibox,intemp) + 1
                   
-!                  write(iou,*) 'intemp', intemp     
+!                  write(io_output,*) 'intemp', intemp     
 
                   if ( lbranch(intemp) ) then
                      ibuild = nunit(intemp)
@@ -395,8 +395,8 @@
                            if (m .le. zzz) then
                               zzz = m
                            end if
-                        elseif (invib(intemp,m) .gt. 2) then
-                           write(iou,*) 'initia only works for linear', ' molecules!  Maybe you should make', ' a fort.78 file and use lbranch?'
+                        else if (invib(intemp,m) .gt. 2) then
+                           write(io_output,*) 'initia only works for linear', ' molecules!  Maybe you should make', ' a fort.78 file and use lbranch?'
                            call err_exit('')
                         end if
                      end do
@@ -433,7 +433,7 @@
 
                         if ( inirot(ibox) .eq. 0 ) then
                            rot = random() * 360.0d0 * degrad
-                        elseif ( inirot(ibox) .gt. 0 ) then
+                        else if ( inirot(ibox) .gt. 0 ) then
                            rot = dble(inirot(ibox)) * degrad
                         else
                            if ( mod(jc,2) .eq. 0 ) then
@@ -454,7 +454,7 @@
                               ibtype = itben(intemp,bmap(m2),1)
                               angnew = brben(ibtype) - angold
                            end if 
-!     write(iou,*) 'angold',angold*raddeg,
+!     write(io_output,*) 'angold',angold*raddeg,
 !     +                       '   angnew',angnew*raddeg
                            angold = angnew
                            
@@ -467,7 +467,7 @@
 
                            ztemp(m) = dsin(angnew) * brvib(ibtype)
                            xynext = dcos(angnew) * brvib(ibtype)
-!                           write(iou,*) 'znext',znext,'   xynext',xynext
+!                           write(io_output,*) 'znext',znext,'   xynext',xynext
                         else
 ! * need to search for proper bond length
                            do zzz = 1,invib(intemp,bmap(m))
@@ -513,12 +513,12 @@
                   end if
 ! *** end linear determination
 ! ****************************
-!                  write(iou,*) 'ibuild',ibuild
+!                  write(io_output,*) 'ibuild',ibuild
                   do m = 2, ibuild
                      
                      m1 = m - 1
                      m2 = m - 2
-!                     write(iou,*) 'intemp',intemp 
+!                     write(io_output,*) 'intemp',intemp 
                      if ( lbranch(intemp) ) then
 !     - branched molecule with sample structure -
                         xnext = samx(intemp,m) -samx(intemp,m1)
@@ -532,7 +532,7 @@
 !$$$c     - alkane type molecule -
 !$$$                        if ( inirot(ibox) .eq. 0 ) then
 !$$$                           rot = random() * 360.0d0 * degrad
-!$$$                        elseif ( inirot(ibox) .gt. 0 ) then
+!$$$                        else if ( inirot(ibox) .gt. 0 ) then
 !$$$                           rot = dble(inirot(ibox)) * degrad
 !$$$                        else
 !$$$                           if ( mod(jc,2) .eq. 0 ) then
@@ -552,14 +552,14 @@
 !$$$                              ibtype = itben(intemp,m2,1)
 !$$$                              angnew = brben(ibtype) - angold
 !$$$                           end if 
-!$$$c     write(iou,*) 'angold',angold*raddeg,
+!$$$c     write(io_output,*) 'angold',angold*raddeg,
 !$$$c     +                       '   angnew',angnew*raddeg
 !$$$                           angold = angnew
 !$$$                           
 !$$$                           ibtype = itvib(intemp,m,1)
 !$$$                           znext = dsin(angnew) * brvib(ibtype)
 !$$$                           xynext = dcos(angnew) * brvib(ibtype)
-!$$$c                           write(iou,*) 'znext',znext,'   xynext',xynext
+!$$$c                           write(io_output,*) 'znext',znext,'   xynext',xynext
 !$$$                        else
 !$$$                           ibtype = itvib(intemp,m,1)
 !$$$                           znext = brvib(ibtype)
@@ -600,7 +600,7 @@
       do n = 1, nn
 
          imolty = moltyp(n)
-!         write(iou,*) 'n',n,'   imolty',imolty
+!         write(io_output,*) 'n',n,'   imolty',imolty
 
             
          if ( lbranch(imolty) ) then
@@ -614,7 +614,7 @@
                ryui=ryu(n,ii)
                rzui=rzu(n,ii)
 
-               if ( n .eq. 1 .or. m .eq. 1 ) write(iou," ('coord. unit:   ',2i4,3f9.3,i6)") n,ii,rxui,ryui,rzui ,nboxi(n)
+               if ( n .eq. 1 .or. m .eq. 1 ) write(io_output," ('coord. unit:   ',2i4,3f9.3,i6)") n,ii,rxui,ryui,rzui ,nboxi(n)
                do iivib = 1, invib(1,ii)
                   jj = ijvib(1,ii,iivib)
                   rxvec(ii,jj) = rxu(n,jj) - rxui
@@ -636,7 +636,7 @@
 ! - vibrations -
                do iivib = 1, invib(1,j)
                   jj = ijvib(1,j,iivib)
-                  if ( n .eq. 1 ) write(iou,"('bond with units:',2i3 ,'   length:',f9.4)") j,jj,distanceij(j,jj)
+                  if ( n .eq. 1 ) write(io_output,"('bond with units:',2i3 ,'   length:',f9.4)") j,jj,distanceij(j,jj)
                end do
 
 ! - bending -
@@ -649,10 +649,10 @@
                   vbend = brbenk(it) * (theta-brben(it))**2
                   aben = aben + vbend
 !                  if ( n .eq. 1 ) then
-!                  write(iou,*) 'theta',theta,'vbend',vbend
-!                  write(iou,*) 'brben',brben(it),'brbenk',brbenk(it)
+!                  write(io_output,*) 'theta',theta,'vbend',vbend
+!                  write(io_output,*) 'brben',brben(it),'brbenk',brbenk(it)
 !                  end if
-                  if ( n .eq. 1 ) write(iou,"('bend with units:',3i3 ,'   type:',i3,'   angle:',f9.4,f9.2)") j,ip1,ip2,it ,theta*raddeg,vbend
+                  if ( n .eq. 1 ) write(io_output,"('bend with units:',3i3 ,'   type:',i3,'   angle:',f9.4,f9.2)") j,ip1,ip2,it ,theta*raddeg,vbend
                end do
 
 ! - torsions -
@@ -700,8 +700,8 @@
                   end if
 
                   ator = ator + vtg
-!                  if ( n .eq. 1 ) write(iou,*) 'thetac',thetac,'vtg',vtg
-                  if ( n .eq. 1 ) write(iou,"('tors with units:',4i3 ,'   type:',i3,'   angle:',f9.4,f9.2)") j,ip1,ip2,ip3 ,it,dacos(thetac)*raddeg,vtg
+!                  if ( n .eq. 1 ) write(io_output,*) 'thetac',thetac,'vtg',vtg
+                  if ( n .eq. 1 ) write(io_output,"('tors with units:',4i3 ,'   type:',i3,'   angle:',f9.4,f9.2)") j,ip1,ip2,ip3 ,it,dacos(thetac)*raddeg,vtg
                end do
             end do
 
@@ -734,10 +734,10 @@
                end if
 
 !               if ( n .eq. 1 .or. m .eq. 1 )
-!     &              write(iou,'(2i4,5f9.3,i6)') n,m,rxu(n,m),ryu(n,m),rzu(n,m),
+!     &              write(io_output,'(2i4,5f9.3,i6)') n,m,rxu(n,m),ryu(n,m),rzu(n,m),
 !     &                            blen,bang,nboxi(n)
 
-!               write(iou,'(2i4,5f9.3,i6)') n,m,rxu(n,m),ryu(n,m),rzu(n,m),
+!               write(io_output,'(2i4,5f9.3,i6)') n,m,rxu(n,m),ryu(n,m),rzu(n,m),
 !     &                            blen,bang,nboxi(n)
 
             end do
@@ -761,7 +761,7 @@
       end do
 
       if (myid.eq.0) then
-         write(iou,*) 'aben',aben/2.0d0,'ator',ator/2.0d0
+         write(io_output,*) 'aben',aben/2.0d0,'ator',ator/2.0d0
       end if
 
       return

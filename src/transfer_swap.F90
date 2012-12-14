@@ -87,7 +87,7 @@ contains
 
 ! --------------------------------------------------------------------
 
-!      write(iou,*) 'START SWAP'
+!      write(io_output,*) 'START SWAP'
 !      write(11,*) '1:',neigh_cnt(18)
 
       lempty = .false.
@@ -108,7 +108,7 @@ contains
          else
             lswapinter = .true.
          end if
-!       write(iou,*) 'ee val', imolty, irem, pointp, boxrem, boxins
+!       write(io_output,*) 'ee val', imolty, irem, pointp, boxrem, boxins
       else
          wee_ratio = 1.0d0
    
@@ -150,7 +150,7 @@ contains
          else
             lswapinter = .true.
          end if
-!     write(iou,*) 'boxins:',boxins,'boxrem:',boxrem
+!     write(io_output,*) 'boxins:',boxins,'boxrem:',boxrem
          if ( .not. (lgibbs .or. lgrand) .and. lswapinter ) then
             call err_exit('no interbox swap if not gibbs/grand ensemble!')
          end if
@@ -176,21 +176,21 @@ contains
 
             irem = parbox(pointp,boxrem,imolty)
 
-            if ( moltyp(irem) .ne. imolty ) write(iou,*) 'screwup swap, irem:',irem,moltyp(irem),imolty
+            if ( moltyp(irem) .ne. imolty ) write(io_output,*) 'screwup swap, irem:',irem,moltyp(irem),imolty
             ibox = nboxi(irem)
             if ( ibox .ne. boxrem ) then
                call err_exit('problem in swap')
             end if
          end if
 
-!$$$      write(iou,*) 'particle ',irem,' is being removed, imolty is:',
+!$$$      write(io_output,*) 'particle ',irem,' is being removed, imolty is:',
 !$$$     &     imolty,' and the box is:',boxrem
 
 
 ! ===>  for both gibbs and grand-canonical we have:
 ! --- insert a chain in box: boxins 
 ! --- remove one in box: boxrem
-!      write(iou,*) 'boxrem',boxrem,' imolty',imolty,' lempty',lempty
+!      write(io_output,*) 'boxrem',boxrem,' imolty',imolty,' lempty',lempty
 !     bnswap(imolty,X) decoder X = 1 is # attempts into box 1
 !      X = 2 is # attempts into box 2 X=3 is success into box 1
 !      X = 4 is success into box 2
@@ -255,7 +255,7 @@ contains
       if ( .not. lswapinter .and. lbias(imolty)) then
 
          if (boxins .ne. boxrem) then
-            write(iou,*) 'avbmc, boxins, boxrem:',boxins,boxrem
+            write(io_output,*) 'avbmc, boxins, boxrem:',boxins,boxrem
             call err_exit('')
          end if
          
@@ -283,9 +283,9 @@ contains
  111        pointp2=idint( dble(ncmt(boxins,jmolty))*random())+1
             jins = parbox(pointp2,boxins,jmolty)
             if ( jins .eq. iins ) goto 111
-            if ( moltyp(jins) .ne. jmolty )  write(iou,*) 'screwup swap, jins:' ,jins,moltyp(jins),jmolty
+            if ( moltyp(jins) .ne. jmolty )  write(io_output,*) 'screwup swap, jins:' ,jins,moltyp(jins),jmolty
             if ( nboxi(jins) .ne. boxins ) then 
-               write(iou,*) 'problem in swap with jins'
+               write(io_output,*) 'problem in swap with jins'
             end if
          end if
 
@@ -333,7 +333,7 @@ contains
                rijsq = x*x + y*y + z*z
                if ( rijsq .lt. (2.0d0*rbsmax)**2 ) goto 112
 
-               if ( moltyp(kins) .ne. kmolty )  write(iou,*) 'screwup swap, kins:' ,kins,moltyp(kins),kmolty
+               if ( moltyp(kins) .ne. kmolty )  write(io_output,*) 'screwup swap, kins:' ,kins,moltyp(kins),kmolty
                if ( nboxi(kins) .ne. boxins ) then 
                   call err_exit('problem in swap with kins')
                end if
@@ -385,16 +385,16 @@ contains
                rijsq = x*x + y*y + z*z
                if ( rijsq .lt. rbsmax**2 .and. rijsq .gt. rbsmin**2)  goto 119
 
-               if ( moltyp(irem) .ne. imolty )  write(iou,*) 'screwup swap1, irem:',irem, moltyp(irem),imolty
+               if ( moltyp(irem) .ne. imolty )  write(io_output,*) 'screwup swap1, irem:',irem, moltyp(irem),imolty
                ibox = nboxi(irem)
                if ( ibox .ne. boxrem ) then
-                  write(iou,*) 'problem in swap'
+                  write(io_output,*) 'problem in swap'
                   call err_exit('')
                end if
                iins = irem
                lremk_in = .false.
    
-            elseif ( lavbmc3(imolty) ) then
+            else if ( lavbmc3(imolty) ) then
                
 ! *** select a particle in the region bounded by kins and move this particle
 ! *** into the in region defined by the particle jins's bonding region
@@ -410,7 +410,7 @@ contains
                else
  113              pointp=idint(dble(neighk_num)*random())+1
 !                  irem = neighbor(pointp,kins,imolty)
-!                  write(iou,*) 'kins,irem:',kins,irem,neighk_num
+!                  write(io_output,*) 'kins,irem:',kins,irem,neighk_num
                    irem = neighbor(pointp,kins)
                    if ( irem .eq. jins ) goto 113
                    iins = irem
@@ -420,8 +420,8 @@ contains
 
             end if               
             
-!            write(iou,*) 'move in'
-!            write(iou,*) '3:',wbias_rem,boxlx(boxins),vol_eff
+!            write(io_output,*) 'move in'
+!            write(io_output,*) '3:',wbias_rem,boxlx(boxins),vol_eff
             
             do icbu = 1,ichoi
 ! *** choose a random association distance
@@ -461,13 +461,13 @@ contains
                else
  114              pointp=idint(dble(neighj_num)*random())+1
 !                  irem = neighbor(pointp,jins,imolty)
-!                  write(iou,*) 'jins,irem:',jins,irem,neighj_num
+!                  write(io_output,*) 'jins,irem:',jins,irem,neighj_num
                   irem = neighbor(pointp,jins)
                   if ( irem .eq. kins ) goto 114
-                  if ( moltyp(irem) .ne. imolty )  write(iou,*) 'screwup swap2, irem:',irem, moltyp(irem),imolty,neighj_num,pointp,jins
+                  if ( moltyp(irem) .ne. imolty )  write(io_output,*) 'screwup swap2, irem:',irem, moltyp(irem),imolty,neighj_num,pointp,jins
                   ibox = nboxi(irem)
                   if ( ibox .ne. boxrem ) then
-                     write(iou,*) 'problem in swap'
+                     write(io_output,*) 'problem in swap'
                      call err_exit('')
                   end if
                   iins = irem
@@ -476,8 +476,8 @@ contains
                lremk_in = .false.
 
             end if
-!            write(iou,*) 'move out'
-!            write(iou,*) '4:',wbias_rem,boxlx(boxins),vol_eff
+!            write(io_output,*) 'move out'
+!            write(io_output,*) '4:',wbias_rem,boxlx(boxins),vol_eff
             
 
             if ( lavbmc3(imolty) .and.  random() .lt. pmbias2(imolty) ) then
@@ -649,7 +649,7 @@ contains
       
 !     --- check for termination of walk ---
       if ( w1ins .lt. softlog ) then
-         write(iou,*) 'caught in swap'
+         write(io_output,*) 'caught in swap'
          return
       end if
       
@@ -668,7 +668,7 @@ contains
             end if
          end do
          if (ip.gt.ichoi) then
-            write(iou,*) 'w1ins:',w1ins,'rbf:',rbf
+            write(io_output,*) 'w1ins:',w1ins,'rbf:',rbf
             call err_exit('big time screwup -- w1ins')
          end if
       else
@@ -681,7 +681,7 @@ contains
       v1inselc = vtrelect(iwalk)
       v1insewd = vtrewald(iwalk)
 ! KM
-!      if (myid.eq.0) write(iou,*) 'vtry swap ', iwalk, vtry(iwalk)
+!      if (myid.eq.0) write(io_output,*) 'vtry swap ', iwalk, vtry(iwalk)
 
 !      neigh_icnt = ntr_icnt(iwalk)
 !      do ip = 1,neigh_icnt
@@ -705,7 +705,7 @@ contains
             end if
          end do
          call schedule(igrow,imolty,ifrom,iutry,0,4)
-      elseif (lring(imolty)) then
+      else if (lring(imolty)) then
          lfixnow = .true.
          call safeschedule(igrow,imolty,ifrom,iutry,findex,2)
       else
@@ -740,7 +740,7 @@ contains
                rxu(idum,j) = rxnew(j)
                ryu(idum,j) = rynew(j)
                rzu(idum,j) = rznew(j)
-!               write(iou,*) rxu(idum,j),ryu(idum,j),rzu(idum,j)
+!               write(io_output,*) rxu(idum,j),ryu(idum,j),rzu(idum,j)
             end do
             moltyp(idum) = imolty
             call explct(idum,vtornew,.false.,.false.)
@@ -749,7 +749,7 @@ contains
                ryuion(j,iii) = ryu(idum,j)
                rzuion(j,iii) = rzu(idum,j)
                qquion(j,iii) = qqu(iins,j)
-!               write(iou,*) rxu(idum,j),ryu(idum,j),rzu(idum,j)
+!               write(io_output,*) rxu(idum,j),ryu(idum,j),rzu(idum,j)
             end do
          end if
          moltion(iii) = imolty
@@ -766,12 +766,12 @@ contains
 !     calculate the true site-site energy
          istt = 1
          iett = igrow
-!         write(iou,*) igrow
+!         write(io_output,*) igrow
          
          call energy (iins,imolty, v, vintra,vinter,vext ,velect,vewald,iii,ibox, istt, iett, .true.,ovrlap ,.false.,vdum,.false.,lfavor)
          
          if (ovrlap) then
-            write(iou,*) 'iins',iins,'irem',irem
+            write(io_output,*) 'iins',iins,'irem',irem
             call err_exit('strange screwup in DC-CBMC swap')
          end if
 ! v1insewd, vnewewald and vnewintra now accounted for in v from energy
@@ -828,9 +828,9 @@ contains
 ! ??? problem here on calculation of favor and favor2 when ichoi > 1
 
             call energy (iins,imolty,v, vintra,vinter,vext,velect ,vewald ,iii,ibox,istt,iett, .true.,ovrlap,ltors,vdum ,.true.,lfavor)
-!            write(iou,*) 'ovrlap:',ovrlap
+!            write(io_output,*) 'ovrlap:',ovrlap
             
-!            if ( iins .eq. 118) write(iou,*) 'vinter:',vinter
+!            if ( iins .eq. 118) write(io_output,*) 'vinter:',vinter
 
             if (ovrlap) then
                lovrh(ip) = .true.
@@ -869,7 +869,7 @@ contains
                   end if
                end if
             end do
-            write(iou,*) 'screw up in explicit hydrogen'
+            write(io_output,*) 'screw up in explicit hydrogen'
             call err_exit('')
          else
             iwalk = 1
@@ -997,7 +997,7 @@ contains
 !            dtest = dtest + 2.0d0*coru(imolty,jmt,rho)
 !            arg=arg*dexp(-beta*2.0d0*coru(imolty,jmt,rho))
 !         end do
-!         write(iou,*) 'dtest',dtest
+!         write(io_output,*) 'dtest',dtest
       else
          vinsta = 0.0d0
       end if
@@ -1026,9 +1026,9 @@ contains
 
 ! *** check that there is at least one molecule in BOXREM ***
       if ( lempty ) then
-!         write(iou,*) 'no molecule in BOXREM'
+!         write(io_output,*) 'no molecule in BOXREM'
          if (lgrand) then
-	    if (boxrem.eq.2) write(iou,*) ' ERROR ***** array too low !'
+	    if (boxrem.eq.2) write(io_output,*) ' ERROR ***** array too low !'
          end if
          return
       end if
@@ -1053,7 +1053,7 @@ contains
 ! *********************
 
          if (boxins .ne. boxrem) then
-            write(iou,*) 'avbmc, boxins, boxrem:',boxins,boxrem
+            write(io_output,*) 'avbmc, boxins, boxrem:',boxins,boxrem
             call err_exit('')
          end if
          
@@ -1081,8 +1081,8 @@ contains
 
                if (lavbmc2(imolty) .or. lavbmc3(imolty) )  wbias_ins=wbias_ins/dble(neighj_num+1)
 
-!            write(iou,*) 'originally out'
-!            write(iou,*) '1:',wbias_ins,boxlx(boxins),vol_eff
+!            write(io_output,*) 'originally out'
+!            write(io_output,*) '1:',wbias_ins,boxlx(boxins),vol_eff
 
                do icbu = 2,ichoi
  232              rxp(1,icbu) = boxlx(boxins) * random()
@@ -1139,8 +1139,8 @@ contains
                   end if
                end if
               
-!            write(iou,*) 'originally in'
-!            write(iou,*) '2:',wbias_ins,boxlx(boxins),vol_eff
+!            write(io_output,*) 'originally in'
+!            write(io_output,*) '2:',wbias_ins,boxlx(boxins),vol_eff
 
                do icbu = 2,ichoi
 ! *** choose a random association distance
@@ -1207,7 +1207,7 @@ contains
       if ( .not. lswapinter .and. lbias(imolty) ) then
          if ( lrem_out .and. lins_in ) then
             bnswap_in(imolty,1) = bnswap_in(imolty,1) + 1.0d0
-         elseif ( (.not. lrem_out) .and. (.not. lins_in ) ) then
+         else if ( (.not. lrem_out) .and. (.not. lins_in ) ) then
             bnswap_out(imolty,1) = bnswap_out(imolty,1) + 1.0d0
          end if
       end if
@@ -1220,7 +1220,7 @@ contains
       call boltz(lnew,.true.,ovrlap,irem,irem,imolty,boxrem,ichoi,idum ,1,glist,0.0d0)
 
       if ( ovrlap ) then
-         write(iou,*) 'SWAP:1st bead overlap in rembox',boxrem ,' for moltyp',imolty
+         write(io_output,*) 'SWAP:1st bead overlap in rembox',boxrem ,' for moltyp',imolty
       end if
 ! *** calculate the correct weight for the  old  walk ***
 
@@ -1231,7 +1231,7 @@ contains
 
 ! --- check for termination of walk ---
       if ( w1rem .lt. softlog ) then 
-         write(iou,*) 'SWAP:soft overlap in rembox',boxrem,' for moltyp' ,imolty
+         write(io_output,*) 'SWAP:soft overlap in rembox',boxrem,' for moltyp' ,imolty
       end if
 
       v1rem = vtry(1)
@@ -1247,7 +1247,7 @@ contains
       call rosenbluth(.false.,lterm,irem,irem,imolty,ifrom ,boxrem,igrow,waddold,lfixnow,ctorfo,2 )
 
       if ( lterm ) then 
-!         write(iou,*) 'SWAP: rosenbluth old rejected'
+!         write(io_output,*) 'SWAP: rosenbluth old rejected'
          return
       end if
 
@@ -1278,7 +1278,7 @@ contains
          call energy (irem,imolty, v, vintra,vinter,vext,velect ,vewald,iii, boxrem, istt, iett, .true.,ovrlap ,.false.,vtorold,.false.,lfavor)
             
          if (ovrlap) then
-            write(iou,*) 'disaster ovrlap in old conf SWAP'
+            write(io_output,*) 'disaster ovrlap in old conf SWAP'
             call err_exit('')
          end if
 ! v now includes vnewintra,v1remewd and voldewald, take out
@@ -1308,9 +1308,9 @@ contains
          
          call energy (irem,imolty,v, vintra,vinter,vext,velect ,vewald ,iii,ibox,istt,iett,.true.,ovrlap,ltors,vtorold ,.true.,lfavor)
 
-!         if (irem .eq. 118)  write(iou,*) 'for old',vinter
+!         if (irem .eq. 118)  write(io_output,*) 'for old',vinter
          if (ovrlap) then
-            write(iou,*) 'disaster ovrlap in old conf SWAP'
+            write(io_output,*) 'disaster ovrlap in old conf SWAP'
             call err_exit('')
          end if
          deleo = v + vtorold
@@ -1488,7 +1488,7 @@ contains
       wdlog = wnlog - wolog
       
       if ( wdlog .lt. -softcut ) then
-!         write(iou,*) '### underflow in wratio calculation ###'
+!         write(io_output,*) '### underflow in wratio calculation ###'
          return
       end if
 
@@ -1520,7 +1520,7 @@ contains
          if ( laccept ) then
             bnswap(imolty,ipairb,boxins+nbox)= bnswap(imolty,ipairb,boxins+nbox)+1.0d0
 
-         elseif ( lswapinter ) then
+         else if ( lswapinter ) then
             nboxi(irem) = boxrem            
             parbox(ncmt(boxrem,imolty)+1,boxrem,imolty)=irem
             parbox(ncmt(boxins,imolty),boxins,imolty)=0
@@ -1571,7 +1571,7 @@ contains
                      ip = 4
                   end if
                end if
-            elseif ( lavbmc2(imolty) ) then
+            else if ( lavbmc2(imolty) ) then
                if ( lins_in ) then
                   ip = 1
                else
@@ -1584,15 +1584,15 @@ contains
                   else
                      ip = 2
                   end if
-               elseif ( linsk_in ) then
+               else if ( linsk_in ) then
                   ip =3
                else
                   ip =4
                end if
             end if
-!         write(iou,*) neigh_old,neigh_icnt,ip
+!         write(io_output,*) neigh_old,neigh_icnt,ip
 !            if ( .not. lins_in .and. neigh_old .eq. 0 ) then
-!               write(iou,*) '####error:',irem,jins
+!               write(io_output,*) '####error:',irem,jins
 !            end if
             cnt_wf1(neigh_old,neigh_icnt,ip) = cnt_wf1(neigh_old,neigh_icnt,ip)+1
             if (neigh_old .eq. 0 .and. neigh_icnt .eq. 1) then
@@ -1601,7 +1601,7 @@ contains
                if ( ic .lt. 1 ) ic = 1
                if ( ic .gt. 1000 ) ic = 1000
                cnt_wra1(ic,ip) = cnt_wra1(ic,ip) + 1
-            elseif (neigh_old .eq. 1 .and. neigh_icnt .eq. 0) then
+            else if (neigh_old .eq. 1 .and. neigh_icnt .eq. 0) then
                wdlog = dlog10 (wratio)
                ic = dint((wdlog+95.0d0)/0.1d0) + 1
                if ( ic .lt. 1 ) ic = 1
@@ -1619,7 +1619,7 @@ contains
       if (lopt_bias(imolty)) call update_bias(log(wratio*2.0)/beta,boxrem,boxins,imolty)
 
       if ( random() .le. wratio ) then
-!         write(iou,*) 'SWAP MOVE ACCEPTED',irem
+!         write(io_output,*) 'SWAP MOVE ACCEPTED',irem
 ! *** we can now accept !!!!! ***
          if ((.not.leemove).and.(.not.lexpee)) then
             bnswap(imolty,ipairb,boxins+nbox) =  bnswap(imolty,ipairb,boxins+nbox) + 1.0d0
@@ -1627,7 +1627,7 @@ contains
          if ( .not. lswapinter .and. lbias(imolty) ) then
             if ( lrem_out .and. lins_in ) then
                bnswap_in(imolty,2) = bnswap_in(imolty,2) + 1.0d0
-            elseif ( (.not. lrem_out) .and. (.not. lins_in ) ) then
+            else if ( (.not. lrem_out) .and. (.not. lins_in ) ) then
                bnswap_out(imolty,2) = bnswap_out(imolty,2) + 1.0d0
             end if
          end if
@@ -1654,9 +1654,9 @@ contains
          end if
 !         total_NBE = vintran+velectn+vewaldn+vtgn+vbendn+vvibn 
          total_NBE = vtgn+vbendn+vvibn
-!         write(iou,*) vintran,velectn,vewaldn       
+!         write(io_output,*) vintran,velectn,vewaldn       
 
-!         write(iou,*) 'irem', irem  
+!         write(io_output,*) 'irem', irem  
 
 ! ---    update energies:
 
@@ -1770,7 +1770,7 @@ contains
                end do
             end do
             neigh_cnt(irem) = neigh_icnt
-!            write(iou,*) 'irem:',irem,neigh_icnt
+!            write(io_output,*) 'irem:',irem,neigh_icnt
             do ic = 1,neigh_icnt
                j = neighi(ic)
                neighbor(ic,irem)=j
@@ -1787,7 +1787,7 @@ contains
             end do
          end if
          
-!         write(iou,*) irem,'end SWAP'
+!         write(io_output,*) irem,'end SWAP'
       end if
       
 ! -----------------------------------------------------------------

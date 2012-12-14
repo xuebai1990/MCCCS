@@ -26,7 +26,7 @@
 
 ! ---     first block
 
-!         write(iou,*) 'acmove', acmove       
+!         write(io_output,*) 'acmove', acmove       
   
          dn = acmove
          dp = value
@@ -42,7 +42,7 @@
       else      
 
 ! ---   other blocks
-!         write(iou,*) 'acmove', acmove
+!         write(io_output,*) 'acmove', acmove
          dn = acmove - nccold(ipos,ibox)
          dp = value - bccold(ipos,ibox)
          if ( dn .lt. 0.5d0 ) then

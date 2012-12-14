@@ -180,7 +180,7 @@
        gtheta(4) = dcos(109.5d0*degrad)
        
        do i=1,6
-          write(iou,*) 'garo ecut',i,ecut(i)
+          write(io_output,*) 'garo ecut',i,ecut(i)
        end do
        return
     end if
@@ -249,9 +249,9 @@
             corp_cons(3) = 5.7576802340310304d-02
          end if
 
-         write(iou,*) ' i   epsimmff     sigimmff   smmff'
+         write(io_output,*) ' i   epsimmff     sigimmff   smmff'
          do i = 1,natom
-            write(iou,'(i3,2x,4e12.4)')i,epsimmff(i),sigimmff(i) ,smmff(i)
+            write(io_output,'(i3,2x,4e12.4)')i,epsimmff(i),sigimmff(i) ,smmff(i)
          end do
 
          return
@@ -3566,9 +3566,9 @@
 !            write(11,*) 'consu(i)',consu
          end if
 
-         write(iou,*)  ' i   aexsix       bexsix      cexsix     sexsix'
+         write(io_output,*)  ' i   aexsix       bexsix      cexsix     sexsix'
          do i = 1,natom
-            write(iou,'(i3,2x,4e12.4)')i,aexsix(i),bexsix(i) ,cexsix(i),sexsix(i)
+            write(io_output,'(i3,2x,4e12.4)')i,aexsix(i),bexsix(i) ,cexsix(i),sexsix(i)
          end do
 
          return
@@ -3593,7 +3593,7 @@
              do j=1,nbead
                 call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
                 if (jerr.ne.0) then
-                   write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+                   write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
                    call err_exit('Reading section ATOMS')
                 end if
                 read(line_in,*) i,dum,sigi(i),epsi(i),qelect(i),mass(i),chemid(i)
@@ -3623,7 +3623,7 @@
          call susami
          rcheck = 2.5d0 * 3.527d0
          if ( rcut(1) .ne. rcheck ) then
-            write(iou,*) 'WARNING ### rcut set to 2.5sigma for SAMI'
+            write(io_output,*) 'WARNING ### rcut set to 2.5sigma for SAMI'
             rcut(1) = rcheck
          end if
       else
@@ -3633,7 +3633,7 @@
             do j = 1, nntype
                ij = (i-1)*nntype + j
                if ( lspecial(ij) ) then
-                  write(iou,*) 'ij,lspecial(ij)',ij,lspecial(ij)
+                  write(io_output,*) 'ij,lspecial(ij)',ij,lspecial(ij)
                   adum = aspecial(ij)
                   bdum = bspecial(ij)
                else
@@ -3675,7 +3675,7 @@
            do imix=1,nmix
               call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
               if (jerr.ne.0) then
-                 write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+                 write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
                  call err_exit('Reading section NONBOND')
               end if
               read(line_in,*) i,j,dum,sigmaTmp,epsilonTmp

@@ -81,16 +81,16 @@
 
          vthreea = glambda(ntang)*p*g
          if(lwrite) then
-!            write(iou,*) 'details:',ntang,' out of vthreebody',vthreea
-!            write(iou,*) 'thetac',thetac,' gtheta',gtheta(ntang)
+!            write(io_output,*) 'details:',ntang,' out of vthreebody',vthreea
+!            write(io_output,*) 'thetac',thetac,' gtheta',gtheta(ntang)
             write(69,'(A11,I10,I10,I10,F15.6)') 'vthree jik',j,i,k ,vthreea
             write(69,'(A11,3F10.6,F25.6)') 'ij',dxij(tri),dyij(tri) ,dzij(tri),dij(tri)
             write(69,'(A11,3F10.6,F25.6)') 'ik',dxik(tri),dyik(tri) ,dzik(tri),dik(tri)
-!               write(iou,*) 'dij',dij(tri),' dik',dik(tri)
-!            write(iou,*) 'g',g,' theta',p
-!            write(iou,*)
+!               write(io_output,*) 'dij',dij(tri),' dik',dik(tri)
+!            write(io_output,*) 'g',g,' theta',p
+!            write(io_output,*)
          end if
-!         write(iou,*) j,i,k,'out of vthreebody',vthreea
+!         write(io_output,*) j,i,k,'out of vthreebody',vthreea
          
          vthree = vthree + vthreea
  10   continue
@@ -103,7 +103,7 @@
       end do
       ntr = 0
 
-!      write(iou,*) 'end Vthreebody'
+!      write(io_output,*) 'end Vthreebody'
 
       return
       end
@@ -130,14 +130,14 @@
 
       integer(KIND=normal_int)::i,j,k,ptr,ptr2
 
-!      write(iou,*) 'starting triad'
+!      write(io_output,*) 'starting triad'
 
       ntr = 0
 
       do  10 i=1,nchain
 !         imolty = moltyp(i)
 !         do 20 ii=1,nunit(imolty)
-!         write(iou,*) 'from triad, neigh_cnt(i)',i,neigh_cnt(i)
+!         write(io_output,*) 'from triad, neigh_cnt(i)',i,neigh_cnt(i)
             do 30 ptr = 1,neigh_cnt(i)-1
 
                j = neighbor(ptr,i)
@@ -146,7 +146,7 @@
                   k = neighbor(ptr2,i)
                   ntr = ntr + 1
 !                  write(65,*) 'triad',ntr,':',j,i,k
-!                  write(iou,*) 'ndists:',ndij(ptr,i),ndij(ptr2,i)
+!                  write(io_output,*) 'ndists:',ndij(ptr,i),ndij(ptr2,i)
 
                   itr1(ntr) = i
                   itr2(ntr) = j
@@ -167,7 +167,7 @@
 ! 20      continue
  10   continue
 
-!      write(iou,*) 'end triad'
+!      write(io_output,*) 'end triad'
 
       return
       end
@@ -219,8 +219,8 @@
       imolty = moltyp(i)
       itype = ntype(imolty,1)
 !      if(i.eq.18) then
-!         write(iou,*) 
-!         write(iou,*) 'neigh_icnt',cnt,':',(ni(j),j=1,cnt)
+!         write(io_output,*) 
+!         write(io_output,*) 'neigh_icnt',cnt,':',(ni(j),j=1,cnt)
 !      end if
       do 10 j = 1,cnt
          atomj = ni(j)
@@ -248,25 +248,25 @@
 !     determine type
                if(jtype.eq.ktype) then 
                   ntang = jtype
-!                  if(lwrite) write(iou,*) 'ntang determination a:',atomj,
+!                  if(lwrite) write(io_output,*) 'ntang determination a:',atomj,
 !     &                 i,atomk,ntang,' (',i,')'
                   nta = 1
                   ntb = 1
                   if((nrij(j).gt.grij(ntang,1)).or. (nrij(k).gt.grij(ntang,1))) then
-!                      if(lwrite) write(iou,*) 'skipped above'
+!                      if(lwrite) write(io_output,*) 'skipped above'
                       goto 20
                    end if
                else
                   ntang = 4
-!                  if(lwrite) write(iou,*) 'ntang determination a:',atomj,
+!                  if(lwrite) write(io_output,*) 'ntang determination a:',atomj,
 !     &                 i,atomk,ntang,' (',i,')'
                   if(jtype.eq.1) then
                      nta = 1
                      ntb = 2
                      if((nrij(j).gt.grij(4,nta)).or. (nrij(k).gt.grij(4,ntb))) then
-!                        if(lwrite) write(iou,*) 'skipped above'
+!                        if(lwrite) write(io_output,*) 'skipped above'
 !                        if(i.eq.18) 
-!     &                       write(iou,*) 'catch distance Si-O-H',
+!     &                       write(io_output,*) 'catch distance Si-O-H',
 !     &                       atomj,i,atomk,nrij(j),nrij(k)
                         goto 20
                      end if
@@ -275,7 +275,7 @@
                      ntb = 1
                      if((nrij(j).gt.grij(4,nta)).or. (nrij(k).gt.grij(4,ntb))) then
 !                        if(i.eq.18)
-!     &                       write(iou,*) 'catch distance H-O-Si',
+!     &                       write(io_output,*) 'catch distance H-O-Si',
 !     &                       atomj,i,atomk,nrij(j),nrij(k)
                         goto 20
                      end if
@@ -292,14 +292,14 @@
                vthreea = glambda(ntang)*p*g
 
                if(lwrite) then
-!                  write(iou,*) 'details:',lupdate,' out of triad_en 1'
-!$$$                  write(iou,*) 'thetac',thetac
-                  write(iou,*) 'vthree jik',atomj,i,atomk,vthreea
-!$$$                  write(iou,*) nxi(j),nyi(j),nzi(j)
-!$$$                  write(iou,*) nxi(k),nyi(k),nzi(k)
-!$$$                  write(iou,*) nrij(j),nrij(k)
-!                  write(iou,*) g,thetac,p
-!$$$                  write(iou,*) 
+!                  write(io_output,*) 'details:',lupdate,' out of triad_en 1'
+!$$$                  write(io_output,*) 'thetac',thetac
+                  write(io_output,*) 'vthree jik',atomj,i,atomk,vthreea
+!$$$                  write(io_output,*) nxi(j),nyi(j),nzi(j)
+!$$$                  write(io_output,*) nxi(k),nyi(k),nzi(k)
+!$$$                  write(io_output,*) nrij(j),nrij(k)
+!                  write(io_output,*) g,thetac,p
+!$$$                  write(io_output,*) 
                end if
          
                vthree = vthree + vthreea
@@ -313,9 +313,9 @@
                   temp_y(temp_cnt) = nyiji(j)
                   temp_z(temp_cnt) = nziji(j)
                   if(lwrite) then
-                     write(iou,*) 'temps a',temp_cnt,temp_nei(temp_cnt)
-           write(iou,*) temp_x(temp_cnt),temp_y(temp_cnt),temp_z(temp_cnt)
-                  write(iou,*) 
+                     write(io_output,*) 'temps a',temp_cnt,temp_nei(temp_cnt)
+           write(io_output,*) temp_x(temp_cnt),temp_y(temp_cnt),temp_z(temp_cnt)
+                  write(io_output,*) 
                   end if
                   ltemp(j) = .true.
                end if
@@ -328,9 +328,9 @@
                   temp_y(temp_cnt) = nyiji(k)
                   temp_z(temp_cnt) = nziji(k)
                   if(lwrite) then
-                     write(iou,*) 'temps b',temp_cnt,temp_nei(temp_cnt)
-           write(iou,*) temp_x(temp_cnt),temp_y(temp_cnt),temp_z(temp_cnt)
-                  write(iou,*) 
+                     write(io_output,*) 'temps b',temp_cnt,temp_nei(temp_cnt)
+           write(io_output,*) temp_x(temp_cnt),temp_y(temp_cnt),temp_z(temp_cnt)
+                  write(io_output,*) 
                   end if
                   ltemp(k) = .true.
                end if
@@ -340,8 +340,8 @@
 !     now starting loop to check i-j-m pairs
          if(jtype.ne.3.and..not.(itype.eq.3.and.jtype.eq.1)) then
             if(lwrite) then
-               write(iou,*) 
-            write(iou,*) 'j',atomj,' neigh_cnt(j)',neigh_cnt(atomj),':', (neighbor(m,atomj),m=1,neigh_cnt(atomj))
+               write(io_output,*) 
+            write(io_output,*) 'j',atomj,' neigh_cnt(j)',neigh_cnt(atomj),':', (neighbor(m,atomj),m=1,neigh_cnt(atomj))
             end if
             do 30 m = 1,neigh_cnt(atomj)
                atomm = neighbor(m,atomj)
@@ -355,29 +355,29 @@
 !     determine type
                if(itype.eq.mtype) then 
                   ntang = mtype
-!                  if(lwrite) write(iou,*) 'ntang determination b:',i,
+!                  if(lwrite) write(io_output,*) 'ntang determination b:',i,
 !     &                 atomj,atomm,ntang,' (',i,')'
                   nta = 1
                   ntb = 1
                   if((nrij(j).gt.grij(ntang,1)) .or. (ndij(m,atomj).gt.grij(ntang,1))) goto 30
                else
                   ntang = 4
-!                  if(lwrite) write(iou,*) 'ntang determination b:',i,
+!                  if(lwrite) write(io_output,*) 'ntang determination b:',i,
 !     &                 atomj,atomm,ntang,' (',i,')'
                   if(itype.eq.1) then
                      nta = 1
                      ntb = 2
                      if((nrij(j).gt.grij(4,nta)).or. (ndij(m,atomj).gt.grij(4,ntb))) then
-!                        if(lwrite) write(iou,*) 'skipped above'
-!     & write(iou,*) 'catch distance Si-O-H',nrij(j),ndij(m,atomj)
+!                        if(lwrite) write(io_output,*) 'skipped above'
+!     & write(io_output,*) 'catch distance Si-O-H',nrij(j),ndij(m,atomj)
                         goto 30
                      end if
                   else
                      nta = 2
                      ntb = 1
                      if((nrij(j).gt.grij(4,nta)).or. (ndij(m,atomj).gt.grij(4,ntb))) then
-!                        if(lwrite) write(iou,*) 'skipped above'
-!     & write(iou,*) 'catch distance H-O-Si',nrij(j),ndij(m,atomj)
+!                        if(lwrite) write(io_output,*) 'skipped above'
+!     & write(io_output,*) 'catch distance H-O-Si',nrij(j),ndij(m,atomj)
                         goto 30
                      end if
                   end if
@@ -393,14 +393,14 @@
                vthreea = glambda(ntang)*p*g
 
                if(lwrite) then
-!                  write(iou,*) 'details:',lupdate,' triad_en 2'
-!$$$                  write(iou,*) 'thetac',thetac,' ntang',ntang
-                  write(iou,'(A13,I5,I5,I5,F15.7)') 'vthree ijm',i,atomj ,atomm,vthreea
-!$$$                  write(iou,*) nxi(j),nyi(j),nzi(j)
-!$$$                  write(iou,*) nxij(m,atomj),nyij(m,atomj),nzij(m,atomj)
-!$$$                  write(iou,*) nrij(j),ndij(m,atomj)
-!                  write(iou,*) g,p
-!$$$                  write(iou,*)
+!                  write(io_output,*) 'details:',lupdate,' triad_en 2'
+!$$$                  write(io_output,*) 'thetac',thetac,' ntang',ntang
+                  write(io_output,'(A13,I5,I5,I5,F15.7)') 'vthree ijm',i,atomj ,atomm,vthreea
+!$$$                  write(io_output,*) nxi(j),nyi(j),nzi(j)
+!$$$                  write(io_output,*) nxij(m,atomj),nyij(m,atomj),nzij(m,atomj)
+!$$$                  write(io_output,*) nrij(j),ndij(m,atomj)
+!                  write(io_output,*) g,p
+!$$$                  write(io_output,*)
                end if
               vthree = vthree + vthreea
 ! actual neighbor counter
@@ -414,9 +414,9 @@
                   temp_z(temp_cnt) = nziji(j)
                   ltemp(j) = .true.
                   if(lwrite) then
-                  write(iou,*) 'temps ijm',temp_cnt,temp_nei(temp_cnt)
-           write(iou,*) temp_x(temp_cnt),temp_y(temp_cnt),temp_z(temp_cnt)
-                  write(iou,*) 
+                  write(io_output,*) 'temps ijm',temp_cnt,temp_nei(temp_cnt)
+           write(io_output,*) temp_x(temp_cnt),temp_y(temp_cnt),temp_z(temp_cnt)
+                  write(io_output,*) 
                 end if
                end if
 
@@ -427,9 +427,9 @@
 !     updating actual neighbors
 !      if(lupdate) then
 !         if(i.eq.18) then
-!            write(iou,*) 'updating actual neighbors',temp_cnt
+!            write(io_output,*) 'updating actual neighbors',temp_cnt
 !            do itemp = 1,temp_cnt
-!               write(iou,*) 'temp_cnt number',itemp,number(itemp),
+!               write(io_output,*) 'temp_cnt number',itemp,number(itemp),
 !     &              neighi(number(itemp))
 !            end do
 !         end if
@@ -442,11 +442,11 @@
 !            nziji(itemp) = temp_z(itemp)
 !         end do
 !         do itemp = 1,neigh_icnt
-!            write(iou,*) 'neigh_icnt number',itemp,neighi(itemp)
-!            write(iou,*) 'dists',nxiji(itemp),nyiji(itemp),nziji(itemp)
+!            write(io_output,*) 'neigh_icnt number',itemp,neighi(itemp)
+!            write(io_output,*) 'dists',nxiji(itemp),nyiji(itemp),nziji(itemp)
 !         end do
 !      end if
-      if(lwrite) write(iou,*) 'triad_en vthree',vthree
+      if(lwrite) write(io_output,*) 'triad_en vthree',vthree
 
       return
       end

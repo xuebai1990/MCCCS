@@ -33,11 +33,11 @@
 ! *** old conformation izz = 1 (which is 0 for swap inserted molecule)
 ! *** new conformation izz = 2 (which is 0 for swap removed molecule)
 
-!         write(iou,*) 'in recip:',moltion(1),moltion(2)
+!         write(io_output,*) 'in recip:',moltion(1),moltion(2)
 !         do izz = 1,2
 !            imolty = moltion(izz)
 !            do ii = 1, nunit(imolty)
-!               write(iou,*) rxuion(ii,izz),ryuion(ii,izz),rzuion(ii,izz),
+!               write(io_output,*) rxuion(ii,izz),ryuion(ii,izz),rzuion(ii,izz),
 !     &              qquion(ii,izz)
 !            end do
 !         end do
@@ -69,7 +69,7 @@
          vrecipnew = vrecipnew*qqfact
          vrecipold = vrecipold*qqfact
 
-      elseif (type .eq. 2) then
+      else if (type .eq. 2) then
 
 ! *** update the reciprocal space k vectors
 
@@ -78,7 +78,7 @@
             ssumi(ic,ibox) = ssumin(ic,ibox)
          end do
 
-      elseif (type .eq. 3) then
+      else if (type .eq. 3) then
 
 ! *** store the reciprocal space k vectors         
          
@@ -87,7 +87,7 @@
             ssumio(ic,ibox) = ssumi(ic,ibox)
          end do
 
-      elseif (type .eq. 4) then
+      else if (type .eq. 4) then
 
 ! *** restore the reciprocal space k vectors         
          
@@ -98,7 +98,7 @@
 
       end if
 
-!      write(iou,*) 'in recip:',ssumr(100,ibox),ibox,ssumrn(100,ibox)
+!      write(io_output,*) 'in recip:',ssumr(100,ibox),ibox,ssumrn(100,ibox)
 
       return 
       end

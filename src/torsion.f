@@ -27,30 +27,30 @@
 
       xa=idint(theta)
       left=(theta-xa)
-!      write(iou,*) 'left',left
+!      write(io_output,*) 'left',left
 
 !     selecting bin of correct degree
       addl = idint(left*4)
       bin = (xa-deg(1,ttyp))*4 + 1 + addl
       if (theta .lt. 0.0d0.and.theta.ge.-180.0d0) then
-!         write(iou,*) 'negative bin',bin
+!         write(io_output,*) 'negative bin',bin
          khi = bin
          klo = khi-1
-      elseif (theta .ge. 0.0d0.and.theta.le.180.0d0) then
-!         write(iou,*) 'positive bin',bin
+      else if (theta .ge. 0.0d0.and.theta.le.180.0d0) then
+!         write(io_output,*) 'positive bin',bin
          klo = bin
          khi = klo+1
       else
-         write(iou,*) 'Error in lininter.f - theta',theta
+         write(io_output,*) 'Error in lininter.f - theta',theta
       end if
 
-!      write(iou,*) 'klo,khi',klo,deg(klo,ttyp),khi,deg(khi,ttyp)
+!      write(io_output,*) 'klo,khi',klo,deg(klo,ttyp),khi,deg(khi,ttyp)
 ! check
       if(deg(klo,ttyp).gt.theta.or.deg(khi,ttyp).lt.theta) then
-          write(iou,*) 'problem below'
-          write(iou,*) 'theta',theta,' ttyp',ttyp
-          write(iou,*) 'klo',klo,deg(klo,ttyp),'khi',khi,deg(khi,ttyp)
-          write(iou,*)
+          write(io_output,*) 'problem below'
+          write(io_output,*) 'theta',theta,' ttyp',ttyp
+          write(io_output,*) 'klo',klo,deg(klo,ttyp),'khi',khi,deg(khi,ttyp)
+          write(io_output,*)
        end if
 
       thetarem=theta-deg(klo,ttyp)
@@ -106,7 +106,7 @@
 !     by the time the degrees of interest are reached.)
       points=splpnts(tortyp)
 
-      write(iou,*) 'beginning of spline',splpnts(tortyp),yp1,ypn
+      write(io_output,*) 'beginning of spline',splpnts(tortyp),yp1,ypn
 
       if (yp1.gt.0.99d30) then
          torderiv2(1,tortyp) = 0.0d0
@@ -189,21 +189,21 @@
       if (x.lt.0.0d0) then
          klo=xa-1
          khi=xa
-      elseif (xa.ge.0.0d0) then
+      else if (xa.ge.0.0d0) then
          klo=xa
          khi=xa+1
       end if
 
-!      write(iou,*) 'klo,khi',deg(klo,tortyp),deg(khi,tortyp)
+!      write(io_output,*) 'klo,khi',deg(klo,tortyp),deg(khi,tortyp)
 
       h = deg(khi,tortyp)-deg(klo,tortyp)
      
-      if (dabs(h).lt.1.0d-8) write(iou,*) 'bad deg input in splint',h, khi,deg(khi,tortyp),klo,deg(klo,tortyp)
+      if (dabs(h).lt.1.0d-8) write(io_output,*) 'bad deg input in splint',h, khi,deg(khi,tortyp),klo,deg(klo,tortyp)
       a = (deg(khi,tortyp)-x)/h
       bb = (x-deg(klo,tortyp))/h
       y = a*tabtorso(klo,tortyp)+bb*tabtorso(khi,tortyp)+ ((a**3-a)*torderiv2(klo,tortyp)+(bb**3-bb)* torderiv2(khi,tortyp))*(h**2)/6.0d0
 
-!      write(iou,*) x,y,tortyp
+!      write(io_output,*) x,y,tortyp
 
       return
       end

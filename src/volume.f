@@ -61,7 +61,7 @@
 
 ! --------------------------------------------------------------------
 
-!      write(iou,*) 'start VOLUME'
+!      write(io_output,*) 'start VOLUME'
 
 ! *** select pair of boxes to do the volume move
       if ( nvolb .gt. 1 ) then
@@ -96,7 +96,7 @@
             lx = .true.
             ly = .false.
             lz = .false.
-         elseif ( rm .le. pmvoly ) then
+         else if ( rm .le. pmvoly ) then
 !            lx(boxa) = .false.
 !            ly(boxa) = .true.
 !            lz(boxa) = .false.
@@ -129,7 +129,7 @@
             lx = .true.
             ly = .false.
             lz = .false.
-         elseif ( rm .le. pmvoly ) then
+         else if ( rm .le. pmvoly ) then
 !            lx(boxb) = .false.
 !            ly(boxb) = .true.
 !            lz(boxb) = .false.
@@ -237,7 +237,7 @@
       end do
 
 
-!      write(iou,*) 'before lncubic', lx,ly,lz
+!      write(io_output,*) 'before lncubic', lx,ly,lz
 
 ! --- calculate total volume
       volt = volo(boxa) + volo(boxb)
@@ -251,7 +251,7 @@
                la = .true.
                lb = .false.
                lc = .false.
-            elseif (rbox .le. 2.0d0 ) then
+            else if (rbox .le. 2.0d0 ) then
                la = .false.
                lb = .true.
                lc = .false.
@@ -260,7 +260,7 @@
                lb = .false.
                lc = .true.
             end if
-         elseif ( ly ) then
+         else if ( ly ) then
             la = .false.
             if ( rbox .le. 1.5d0 ) then
                lb = .true.
@@ -279,11 +279,11 @@
             if ( lx ) jhmat = 1
             if ( ly ) jhmat = 2
             if ( lz ) jhmat = 3
-         elseif ( lb ) then
+         else if ( lb ) then
             if ( lx ) jhmat = 4
             if ( ly ) jhmat = 5
             if ( lz ) jhmat = 6
-         elseif ( lc ) then
+         else if ( lc ) then
             if ( lx ) jhmat = 7
             if ( ly ) jhmat = 8
             if ( lz ) jhmat = 9
@@ -317,9 +317,9 @@
 
 
          if (rbcut(hbox)/w(1) .gt. 0.5d0 .or. rbcut(hbox)/w(2) .gt. 0.5d0 .or. rbcut(hbox)/w(3) .gt. 0.5d0) then
-            write(iou,*) 'Problem with line 381 in volume.f'
-            write(iou,*) 'non-rectangular volume move rejected-', ' box width below cutoff size'
-            write(iou,*) 'w1:',w(1),'w2:',w(2),'w3:',w(3)
+            write(io_output,*) 'Problem with line 381 in volume.f'
+            write(io_output,*) 'non-rectangular volume move rejected-', ' box width below cutoff size'
+            write(io_output,*) 'w1:',w(1),'w2:',w(2),'w3:',w(3)
             hmat(hbox,jhmat) = hmato(jhmat)
             call dump
             call err_exit('')
@@ -351,7 +351,7 @@
                   do j = 1, nunit(imolty)
                      rxu(i,j) = rxu(i,j) + dx
                   end do
-               elseif ( ly ) then
+               else if ( ly ) then
                   dy = sxcm(i)*(hmat(hbox,2)-hmato(2))+ sycm(i)*(hmat(hbox,5)-hmato(5))+ szcm(i)*(hmat(hbox,8)-hmato(8))
                   ycm(i) = ycm(i) + dy
                   do j = 1, nunit(imolty)
@@ -364,7 +364,7 @@
                      rzu(i,j) = rzu(i,j) + dz
                   end do
                end if
-            elseif (nboxi(i) .eq. jbox) then
+            else if (nboxi(i) .eq. jbox) then
                dx = xcm(i) * df
                dy = ycm(i) * df
                if ( lpbcz ) dz = zcm(i) * df
@@ -443,8 +443,8 @@
          rbcutb = 2.0d0*rbcut(boxb)
          if ( boxlx(boxa) .lt. rbcuta .or.  boxly(boxa) .lt. rbcuta .or.  (lpbcz .and. boxlz(boxa) .lt. rbcuta) .or. boxlx(boxb) .lt. rbcutb .or.  boxly(boxb) .lt. rbcutb .or.  (lpbcz .and. boxlz(boxb) .lt. rbcutb) ) then
                         
-            write(iou,*) 'Problem in line 552 of subroutine volume.f'
-            write(iou,*) 'A move was attempted that would lead to a  boxlength less than twice rcut'
+            write(io_output,*) 'Problem in line 552 of subroutine volume.f'
+            write(io_output,*) 'A move was attempted that would lead to a  boxlength less than twice rcut'
 
             boxlx(boxa) = bxo(boxa)
             boxlx(boxb) = bxo(boxb)
@@ -572,7 +572,7 @@
          
          dele = (vbox(boxa) - vboxo(boxa))+( vbox(boxb)- vboxo(boxb)) - ((nchbox(boxa)+1+ghost_particles(boxa)) *dlog(voln(boxa)/volo(boxa))/beta) - ((nchbox(boxb)+1+ghost_particles(boxb)) *dlog(voln(boxb)/volo(boxb))/beta)
 
-      elseif (lncubic) then
+      else if (lncubic) then
 
          dele = (vboxn(boxa)-vboxo(boxa)) + (vboxn(boxb)-vboxo(boxb)) - ((nchbox(boxa)+ghost_particles(boxa)) *dlog(voln(boxa)/volo(boxa))/beta) - ((nchbox(boxb)+ghost_particles(boxb)) *dlog(voln(boxb)/volo(boxb))/beta)
 
@@ -583,7 +583,7 @@
 
 ! --- acceptance test
 
-!      write(iou,*) 'dele',dele
+!      write(io_output,*) 'dele',dele
       if (random() .lt. dexp(-beta*dele) ) then
 ! --      accepted
          if ( lncubic ) then
@@ -684,7 +684,7 @@
          end if
       end do
 
-!      write(iou,*) 'end VOLUME'
+!      write(io_output,*) 'end VOLUME'
 !      call dump
 
       return

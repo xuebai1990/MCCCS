@@ -45,7 +45,7 @@
          end if
       end do 
       if (nw.lt.tnw) then
-         write(iou,*) 'increase nw in ipswpar to ', tnw
+         write(io_output,*) 'increase nw in ipswpar to ', tnw
          call err_exit('')
       end if
       read(35,*)
@@ -77,7 +77,7 @@
          read(35,*) hmatc(1),hmatc(2),hmatc(3)
          read(35,*) hmatc(4),hmatc(5),hmatc(6)
          read(35,*) hmatc(7),hmatc(8),hmatc(9)
-      elseif (.not.lsolid(ibox).and.(.not.lrect(ibox))) then
+      else if (.not.lsolid(ibox).and.(.not.lrect(ibox))) then
          read(35,*) lena, lenc
       end if
       if (lmipsw.and.lstageb) then
@@ -88,16 +88,16 @@
                if (dabs(hmat(ibox,i)-hm(i)).gt.1.0d-6) lhm = .true.
             end do
             if (lhm) then
-               write(iou,*) 'enter correct hmat'
-               write(iou,*) hm(1),hm(2),hm(3)
-               write(iou,*) hm(4),hm(5),hm(6)
-               write(iou,*) hm(7),hm(8),hm(9)
+               write(io_output,*) 'enter correct hmat'
+               write(io_output,*) hm(1),hm(2),hm(3)
+               write(io_output,*) hm(4),hm(5),hm(6)
+               write(io_output,*) hm(7),hm(8),hm(9)
                call err_exit('')
             end if
-         elseif (.not.lsolid(ibox)) then
+         else if (.not.lsolid(ibox)) then
             lx = (1.0d0-lambdais)*lena+lambdais*lenc
             if (dabs(boxlx(1)-lx).gt.1.0d-6) then
-               write(iou,*) 'input correct boxl', lx
+               write(io_output,*) 'input correct boxl', lx
                call err_exit('')
             end if
          end if
@@ -109,16 +109,16 @@
                if (dabs(hmat(ibox,i)-hmata(i)).gt.1.0d-6) lhm = .true.
             end do
             if (lhm) then
-               write(iou,*) 'enter correct hmat'
-               write(iou,*) hmata(1),hmata(2),hmata(3)
-               write(iou,*) hmata(4),hmata(5),hmata(6)
-               write(iou,*) hmata(7),hmata(8),hmata(9)
+               write(io_output,*) 'enter correct hmat'
+               write(io_output,*) hmata(1),hmata(2),hmata(3)
+               write(io_output,*) hmata(4),hmata(5),hmata(6)
+               write(io_output,*) hmata(7),hmata(8),hmata(9)
                call err_exit('')
             end if
-!	write(iou,*) boxlx(1),lena
-         elseif (.not.lsolid(ibox)) then
+!	write(io_output,*) boxlx(1),lena
+         else if (.not.lsolid(ibox)) then
             if (dabs(boxlx(1)-lena).gt.1.0d-6) then
-               write(iou,*) 'input correct boxl', lena
+               write(io_output,*) 'input correct boxl', lena
                call err_exit('')
             end if
          end if
@@ -130,15 +130,15 @@
                if (dabs(hmat(ibox,i)-hmatc(i)).gt.1.0d-6) lhm = .true.
             end do
             if (lhm) then
-               write(iou,*) 'enter correct hmat'
-               write(iou,*) hmatc(1),hmatc(2),hmatc(3)
-               write(iou,*) hmatc(4),hmatc(5),hmatc(6)
-               write(iou,*) hmatc(7),hmatc(8),hmatc(9)
+               write(io_output,*) 'enter correct hmat'
+               write(io_output,*) hmatc(1),hmatc(2),hmatc(3)
+               write(io_output,*) hmatc(4),hmatc(5),hmatc(6)
+               write(io_output,*) hmatc(7),hmatc(8),hmatc(9)
                call err_exit('')
             end if
-         elseif (.not.lsolid(ibox)) then
+         else if (.not.lsolid(ibox)) then
             if (dabs(boxlx(1)-lenc).gt.1.0d-6) then
-               write(iou,*) 'input correct boxl', lenc
+               write(io_output,*) 'input correct boxl', lenc
                call err_exit('')
             end if
          end if
@@ -165,19 +165,19 @@
          end if
       end do
       if (lmipsw) then
-         write(iou,*) '*****************************************'
-         write(iou,*) 'Some parameters used for interphase switch'
-         write(iou,*) 'moltyp, lwell, and nwell'
+         write(io_output,*) '*****************************************'
+         write(io_output,*) 'Some parameters used for interphase switch'
+         write(io_output,*) 'moltyp, lwell, and nwell'
          do i = 1, nmolty
             if (lwell(i)) then
-               write(iou,*) i, lwell(i), nwell(i)
+               write(io_output,*) i, lwell(i), nwell(i)
             else
-               write(iou,*) i, lwell(i), 'not defined'
+               write(io_output,*) i, lwell(i), 'not defined'
             end if 
          end do
-         write(iou,*) 'lstagea,lstageb,lstagec', lstagea,lstageb,lstagec
-         write(iou,*) 'etais, lambdais', etais,lambdais
-         write(iou,*) '*****************************************'
+         write(io_output,*) 'lstagea,lstageb,lstagec', lstagea,lstageb,lstagec
+         write(io_output,*) 'etais, lambdais', etais,lambdais
+         write(io_output,*) '*****************************************'
       else
          lstagea = .false.
          lstageb = .false.

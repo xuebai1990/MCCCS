@@ -52,7 +52,7 @@
 
 ! --------------------------------------------------------------------
 
-!      write(iou,*) 'start ENERGY'
+!      write(io_output,*) 'start ENERGY'
       if ( lpbc ) call setpbc (ibox)
 
       rcutsq = rcut(ibox) * rcut(ibox)
@@ -103,7 +103,7 @@
                       if (L_vib_table) then
                          call lininter_vib(distanceij(ip1,j),  tabulated_vib, it)
                          vvib = vvib + tabulated_vib
-!                         write(iou,*) 'INTRA_ENERGY VVIB: ', 
+!                         write(io_output,*) 'INTRA_ENERGY VVIB: ', 
 !     &                        tabulated_vib
                       end if
                       if ( ip1 .lt. j .and..not.L_vib_table) vvib = vvib + brvibk(it)*( distanceij(ip1,j)-brvib(it) ) **2
@@ -127,8 +127,8 @@
                       theta = dacos(thetac)
                       vbend = vbend + brbenk(it) * (theta-brben(it))**2
 
-!                      write(iou,*) 'ip2,ip1,j',ip2,ip1,j
-!                      write(iou,*) 'bend energy, theta '
+!                      write(io_output,*) 'ip2,ip1,j',ip2,ip1,j
+!                      write(io_output,*) 'bend energy, theta '
 !     &                     ,brbenk(it) * (theta-brben(it))**2,theta
                    end if
                 end do
@@ -169,7 +169,7 @@
                        if (tcc .lt. 0.0d0) theta = -theta
                        if (L_spline) then
                           call splint(theta,spltor,it)
-                       elseif(L_linear) then
+                       else if(L_linear) then
                           call lininter(theta,spltor,it)
                        end if
                        vtg = vtg + spltor
@@ -195,12 +195,12 @@
       v = vinter + vext + vintra + velect + vewald + vvib + vbend + vtg 
 !  NEERAJ: Debugging start
 
-!      write(iou,*) 'vinter:',vinter,'vext:',vext,'vintra:',vintra,'velect'
+!      write(io_output,*) 'vinter:',vinter,'vext:',vext,'vintra:',vintra,'velect'
 !     & ,velect,'vewald:'vewald
 
 !  NEERAJ: DEbugging end
 
-!      write(iou,*) 'end ENERGY'
+!      write(io_output,*) 'end ENERGY'
 
       return
       end

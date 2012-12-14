@@ -29,12 +29,12 @@
 
 ! --------------------------------------------------------------------
 
-!       write(iou,*) 'sig2ij',sig2ij
-!       write(iou,*) 'epsij',epsij
+!       write(io_output,*) 'sig2ij',sig2ij
+!       write(io_output,*) 'epsij',epsij
 
       if ( ntij .eq. 1 ) then
          sr = sighead / dsqrt( rijsq )
-!       write(iou,*) 'sr',sr,'v',4.0d0*epshead*sr**3*(sr**9+1.0d0)
+!       write(io_output,*) 'sr',sr,'v',4.0d0*epshead*sr**3*(sr**9+1.0d0)
          ljmuir = epshead * sr**3 * ( sr**9 + 1.0d0 )
       else
          sr2 = sig2ij(ntij) / rijsq

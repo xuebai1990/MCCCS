@@ -29,10 +29,10 @@
 
       leemove = .false.
       if ((pmexpc1.gt.1.0d-6).and.(.not.lexpee)) then
-         write(iou,*) 'pmexp nonzero but no lexpee?'
+         write(io_output,*) 'pmexp nonzero but no lexpee?'
          call err_exit('')
-      elseif ((pmexpc1.lt.1.0d-6).and.lexpee) then
-         write(iou,*) 'pmexp zero but lexpee?'
+      else if ((pmexpc1.lt.1.0d-6).and.lexpee) then
+         write(io_output,*) 'pmexp zero but lexpee?'
          call err_exit('')
       end if
 
@@ -100,15 +100,15 @@
                   ntjj = ntype(j,jj)
                   if (lexpsix.or.lmmff) then
                      ntij = (ntii+ntjj)/2
-                  elseif (lninesix) then
+                  else if (lninesix) then
                      ntij = (ntii-1)*nxatom+ntjj
-                  elseif (lgenlj) then
+                  else if (lgenlj) then
                      ntij = (ntii-1)*nntype+ntjj
                   else
                      ntij = (ntii-1)*nntype+ntjj
                   end if
                   rminee(ntij) = rmin
-!	write(iou,*) i,ii,j,jj,rminee(ntij)
+!	write(io_output,*) i,ii,j,jj,rminee(ntij)
                end do
             end do
          end do
@@ -123,10 +123,10 @@
                   if (lexpsix.or.lmmff) then
                      ntij = (ntii+ntjj)/2
                      ntijs = (ntii+ntjjs)/2
-                  elseif (lninesix) then
+                  else if (lninesix) then
                      ntij = (ntii-1)*nxatom+ntjj
                      ntijs = (ntii-1)*nxatom+ntjjs
-                  elseif (lgenlj) then
+                  else if (lgenlj) then
                      ntij = (ntii-1)*nntype+ntjj
                      ntijs = (ntii-1)*nntype+ntjjs
                   else
@@ -135,14 +135,14 @@
                   end if
                   if (epsij(ntijs).ge.1.0d-6.and.sig2ij(ntijs).ge. 1.0d-6) then
                      rminee(ntij) = (epsij(ntij)/epsij(ntijs))** (1.0d0/12.0d0)*dsqrt(sig2ij(ntij)/sig2ij(ntijs))* rmin
-                  elseif ((dabs(qelect(ntii)*qelect(ntjj))) .ge.1.0d-6) then
+                  else if ((dabs(qelect(ntii)*qelect(ntjj))) .ge.1.0d-6) then
                      rminee(ntij) = rmin
                   else
                      rminee(ntij) = 0.0d0
                   end if
-!	write(iou,*) i,ii,j,jj,rminee(ntij)
-!	write(iou,*) 'nt', ntii,ntjj,ntij,ntjjs,ntijs
-!	write(iou,*) 'eps', sig2ij(ntij),sig2ij(ntijs),epsij(ntij),
+!	write(io_output,*) i,ii,j,jj,rminee(ntij)
+!	write(io_output,*) 'nt', ntii,ntjj,ntij,ntjjs,ntijs
+!	write(io_output,*) 'eps', sig2ij(ntij),sig2ij(ntijs),epsij(ntij),
 !     &              epsij(ntijs),qelect(ntii),qelect(ntjj)
                end do
             end do
@@ -158,10 +158,10 @@
                   if (lexpsix.or.lmmff) then
                      ntij = (ntii+ntjj)/2
                      ntijs = (ntjjs+ntjj)/2
-                  elseif (lninesix) then
+                  else if (lninesix) then
                      ntij = (ntii-1)*nxatom+ntjj
                      ntijs = (ntjjs-1)*nxatom+ntjj
-                  elseif (lgenlj) then
+                  else if (lgenlj) then
                      ntij = (ntii-1)*nntype+ntjj
                      ntijs = (ntii-1)*nntype+ntjjs
                   else
@@ -170,14 +170,14 @@
                   end if
                   if (epsij(ntijs).ge.1.0d-6.and.sig2ij(ntijs).ge. 1.0d-6) then
                      rminee(ntij) = (epsij(ntij)/epsij(ntijs))** (1.0d0/12.0d0)*dsqrt(sig2ij(ntij)/sig2ij(ntijs))* rmin
-                  elseif ((dabs(qelect(ntii)*qelect(ntjj))) .ge.1.0d-6) then
+                  else if ((dabs(qelect(ntii)*qelect(ntjj))) .ge.1.0d-6) then
                      rminee(ntij) = rmin
                   else
                      rminee(ntij) = 0.0d0
                   end if
-!	write(iou,*) i,ii,j,jj,rminee(ntij)
-!	write(iou,*) 'nt', ntii,ntjj,ntij,ntjjs,ntijs
-!	write(iou,*) 'eps', sig2ij(ntij),sig2ij(ntijs),epsij(ntij),
+!	write(io_output,*) i,ii,j,jj,rminee(ntij)
+!	write(io_output,*) 'nt', ntii,ntjj,ntij,ntjjs,ntijs
+!	write(io_output,*) 'eps', sig2ij(ntij),sig2ij(ntijs),epsij(ntij),
 !     &              epsij(ntijs)
                end do
             end do
@@ -192,10 +192,10 @@
                if (lexpsix.or.lmmff) then
                   ntij = (ntii+ntjj)/2
                   ntijs = (ntii+ntjjs)/2
-               elseif (lninesix) then
+               else if (lninesix) then
                   ntij = (ntii-1)*nxatom+ntjj
                   ntijs = (ntii-1)*nxatom+ntjjs
-               elseif (lgenlj) then
+               else if (lgenlj) then
                   ntij = (ntii-1)*nntype+ntjj
                   ntijs = (ntii-1)*nntype+ntjjs
                else
@@ -204,17 +204,17 @@
                end if
                if (epsij(ntijs).ge.1.0d-6.and.sig2ij(ntijs).ge. 1.0d-6) then
                   rminee(ntij) = (epsij(ntij)/epsij(ntijs))** (1.0d0/12.0d0)*dsqrt(sig2ij(ntij)/sig2ij(ntijs))* rmin
-               elseif ((dabs(qelect(ntii)*qelect(ntjj))) .ge.1.0d-6) then
+               else if ((dabs(qelect(ntii)*qelect(ntjj))) .ge.1.0d-6) then
                   rminee(ntij) = rmin
                else
                   rminee(ntij) = 0.0d0
                end if
-!	write(iou,*) i,ii,i,jj,rminee(ntij)
+!	write(io_output,*) i,ii,i,jj,rminee(ntij)
             end do
          end do
       end do
 
-!	write(iou,*) 'enumerate'
+!	write(io_output,*) 'enumerate'
 !	do i = 1, nmolty
 !	do ii = 1, nunit(i)
 !	ntii = ntype(i,ii)
@@ -222,7 +222,7 @@
 !	do jj = 1, nunit(j)
 !	ntjj = ntype(j,jj)
 !                  ntij = (ntii-1)*nntype+ntjj
-!	write(iou,'(4(i4,1x),3(1x,e17.8))') i,ii,j,jj,rminee(ntij),epsij(ntij),sig2ij(ntij)
+!	write(io_output,'(4(i4,1x),3(1x,e17.8))') i,ii,j,jj,rminee(ntij),epsij(ntij),sig2ij(ntij)
 !	end do
 !	end do
 !	end do
@@ -238,11 +238,11 @@
       do i = 1, nunit(imolty)
          do m = 1, fmstate
             ee_qqu(i,m) = qelect(ntype(nmolty1+m-1,i))
-!	write(iou,*) i,m,ee_qqu(i,m)
+!	write(io_output,*) i,m,ee_qqu(i,m)
          end do
 !         ee_qqu(i,fmstate) = qelect(ntype(imolty,i))
-!	write(iou,*) i,1,ee_qqu(i,1)
-!	write(iou,*) i,fmstate,ee_qqu(i,fmstate)
+!	write(io_output,*) i,1,ee_qqu(i,1)
+!	write(io_output,*) i,fmstate,ee_qqu(i,fmstate)
       end do
 
 ! --- associate a box with each state (convention: box 2 with states
@@ -278,24 +278,24 @@
 !      if (dble(ncmt(box_state(1),imolty)).gt.0) then
 !         eepointp = idint(dble(ncmt(box_state(1),imolty))*random())+1
 !         mstate = 1
-!      elseif (dble(ncmt(box_state(2),imolty)).gt.0) then
+!      else if (dble(ncmt(box_state(2),imolty)).gt.0) then
 !         eepointp = idint(dble(ncmt(box_state(2),imolty))*random())+1
 !         mstate = fmstate
 !      else
-!         write(iou,*)'the type is in neither box, imolty:',imolty
+!         write(io_output,*)'the type is in neither box, imolty:',imolty
 !         call err_exit('')
 !      end if
 !      lmstate = .true.
-!	write(iou,*) 'starting point', eepointp, mstate
+!	write(io_output,*) 'starting point', eepointp, mstate
 
 ! --- probability accumulators
 
-!	write(iou,*) 'prob check start'
+!	write(io_output,*) 'prob check start'
       do m = 1, fmstate
          ee_prob(m) = 0
-!	write(iou,*) m, ee_prob(m)
+!	write(io_output,*) m, ee_prob(m)
       end do
-!	write(iou,*) 'prob check end'
+!	write(io_output,*) 'prob check end'
 
       return
       end

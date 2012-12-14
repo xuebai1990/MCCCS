@@ -182,9 +182,9 @@
       end do
 
       vrecip = vrecip*qqfact
-!      write(iou,*) 'in recipsum:',ssumr(100,ibox),ibox
+!      write(io_output,*) 'in recipsum:',ssumr(100,ibox),ibox
 ! *** safety check ***
-!      write(iou,*) 'A total of ',ncount,' vectors are used'
+!      write(io_output,*) 'A total of ',ncount,' vectors are used'
       if ( ncount .gt. vectormax ) call err_exit ('choose a larger vectormax')
 
       numvect(ibox) = ncount

@@ -45,7 +45,7 @@
 
 ! --------------------------------------------------------------------
 
-!      write(iou,*) 'start ROTXYZ'
+!      write(io_output,*) 'start ROTXYZ'
       ovrlap = .false.
       if (lgrand) then
 ! ---    select a chain at random in box 1!
@@ -150,9 +150,9 @@
          rzorig = rzuion(iuroty,1)
       end if
 
-!      write(iou,*) 'before rotating'
-!      write(iou,*) xcm(i),ycm(i),zcm(i)
-!      write(iou,*) rxu(i,1),ryu(i,1),rzu(i,1)
+!      write(io_output,*) 'before rotating'
+!      write(io_output,*) xcm(i),ycm(i),zcm(i)
+!      write(io_output,*) rxu(i,1),ryu(i,1),rzu(i,1)
 
 
       if (lx) then 
@@ -225,10 +225,10 @@
          if (lstagea) then
            vrecipn  =  (1.0d0-(1.0d0-etais)*lambdais)*vrecipn
            vrecipo  =  (1.0d0-(1.0d0-etais)*lambdais)*vrecipo
-         elseif (lstageb) then
+         else if (lstageb) then
            vrecipn  =  etais*vrecipn
            vrecipo  =  etais*vrecipo
-         elseif (lstagec) then
+         else if (lstagec) then
            vrecipn  =  (etais+(1.0d0-etais)*lambdais)*vrecipn
            vrecipo  =  (etais+(1.0d0-etais)*lambdais)*vrecipo
          end if
@@ -257,14 +257,14 @@
 
       if ( deltv .le. 0.0d0 ) then
 !        --- move accepted
-      elseif ( dexp(-deltvb) .gt. random() ) then
+      else if ( dexp(-deltvb) .gt. random() ) then
 !        --- move accepted
       else
 !        --- move rejected
          return
       end if
 
-!      write(iou,*) 'ROTXYZ accepted',i
+!      write(io_output,*) 'ROTXYZ accepted',i
       vbox(ibox) = vbox(ibox) + deltv
       vinterb(ibox)  = vinterb(ibox) + (vintern -  vintero)
       vintrab(ibox)  = vintrab(ibox) + (vintran - vintrao)
@@ -315,7 +315,7 @@
       end if
 
       if ( lneighbor ) then
-!         write(iou,*) 'in rotxyz:',i,neigh_cnt(i)
+!         write(io_output,*) 'in rotxyz:',i,neigh_cnt(i)
          do 11 ic = 1, neigh_cnt(i)
             j = neighbor(ic,i)
             do ip = 1,neigh_cnt(j)
@@ -343,7 +343,7 @@
          end do
       end if
  
-!      write(iou,*) 'end ROTXYZ'
+!      write(io_output,*) 'end ROTXYZ'
 
       return
       end

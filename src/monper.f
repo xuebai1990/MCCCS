@@ -56,7 +56,7 @@
       DO im=1,nbxmax
          pres(im)=0.0d0
       end do
-!      write(iou,*) 'begin MONPER'
+!      write(io_output,*) 'begin MONPER'
 ! *** perform periodic operations  ***
  
 ! *** Deciding the minimum rcut for atom displacement. As we
@@ -81,7 +81,7 @@
 ! --- maximum translational displacement
                Armtrax = 2.0d0*rcutmin
 
-            elseif (rttrax .lt. 1.0d-10 ) then
+            else if (rttrax .lt. 1.0d-10 ) then
 ! --- ratio must have been zero, so divide by 10
                Armtrax = Armtrax/10.0d0
                
@@ -92,7 +92,7 @@
             
             if ( lneigh .and. Armtrax .ge. upnn) then
                Armtrax = upnn
-               write(iou,*) '### problem : for target accept ', 'ratio Armtrax should be smaller than upnn'
+               write(io_output,*) '### problem : for target accept ', 'ratio Armtrax should be smaller than upnn'
             end if
          end if
 
@@ -104,7 +104,7 @@
 ! --- maximum translational displacement
                Armtray = 2.0d0*rcutmin
 
-            elseif (rttray .lt. 1.0d-10 ) then
+            else if (rttray .lt. 1.0d-10 ) then
 ! --- ratio must have been zero, so divide by 10
                Armtray = Armtray/10.0d0
 
@@ -115,7 +115,7 @@
 
             if ( lneigh .and. Armtray .ge. upnn) then
                Armtray = upnn
-               write(iou,*) '### problem : for target accept ', 'ratio Armtray should be smaller than upnn'
+               write(io_output,*) '### problem : for target accept ', 'ratio Armtray should be smaller than upnn'
             end if
          end if
         
@@ -126,7 +126,7 @@
 ! --- maximum translational displacement
                Armtraz = 2.0d0*rcutin
 
-            elseif (rttraz .lt. 1.0d-10 ) then
+            else if (rttraz .lt. 1.0d-10 ) then
 ! --- ratio must have been zero, so divide by 10
                Armtraz = Armtraz/10.0d0
 
@@ -137,7 +137,7 @@
 
             if ( lneigh .and. Armtraz .ge. upnn) then
                Armtraz = upnn
-               write(iou,*) '### problem : for target accept ', 'ratio Armtraz should be smaller than upnn'
+               write(io_output,*) '### problem : for target accept ', 'ratio Armtraz should be smaller than upnn'
             end if
          end if
  
@@ -145,7 +145,7 @@
          imend = nbox
          do im=1,imend
             if (myid.eq.0) then
-               write(iou,*) 'Box ',im
+               write(io_output,*) 'Box ',im
             end if
             do imolty = 1,nmolty
 !              --- rmtrax
@@ -161,7 +161,7 @@
 !                    --- maximum translational displacement
                      rmtrax(imolty,im) = 2.0d0*rcut(im)
                      
-                  elseif (rttrax .lt. 1.0d-10 ) then  
+                  else if (rttrax .lt. 1.0d-10 ) then  
 !                    --- ratio must have been zero, so divide by 10
                      rmtrax(imolty,im) = rmtrax(imolty,im)/10.0d0
                      
@@ -172,7 +172,7 @@
 
                   if ( lneigh .and. rmtrax(imolty,im) .ge. upnn) then
                      rmtrax(imolty,im) = upnn
-                     write(iou,*) '### problem : for target accept ' ,'ratio rmtrax should be smaller than upnn'
+                     write(io_output,*) '### problem : for target accept ' ,'ratio rmtrax should be smaller than upnn'
                   end if
                end if
 
@@ -190,7 +190,7 @@
 !                    --- maximum translational displacement
                      rmtray(imolty,im) = 2.0d0*rcut(im)
                      
-                  elseif (rttray .eq. 0.0d0) then  
+                  else if (rttray .eq. 0.0d0) then  
 !                    --- ratio must have been zero, divide old by 10
                      rmtray(imolty,im) = rmtray(imolty,im)/10.0d0
                   else 
@@ -199,7 +199,7 @@
                   end if
                   if ( lneigh .and. rmtray(imolty,im) .ge. upnn) then
                      rmtray(imolty,im) = upnn
-                     write(iou,*) '### problem : for target accept ' ,'ratio rmtray should be smaller than upnn'
+                     write(io_output,*) '### problem : for target accept ' ,'ratio rmtray should be smaller than upnn'
                   end if
                end if
 
@@ -217,7 +217,7 @@
 !                    --- maximum translational displacement
                      rmtraz(imolty,im) = 2.0d0*rcut(im)
 
-                  elseif ( rttraz .lt. 1.0d-10 ) then  
+                  else if ( rttraz .lt. 1.0d-10 ) then  
 !                    --- ratio must have been zero, divide old by 10
                      rmtraz(imolty,im) = rmtraz(imolty,im)/10.0d0
 
@@ -228,7 +228,7 @@
 !                 --- check neighbor list
                   if ( lneigh .and. rmtraz(imolty,im) .ge. upnn) then
                      rmtraz(imolty,im) = upnn
-                     write(iou,*) '### problem : for target accept ' ,'ratio rmtraz should be smaller than upnn'
+                     write(io_output,*) '### problem : for target accept ' ,'ratio rmtraz should be smaller than upnn'
                   end if
                end if
  
@@ -246,7 +246,7 @@
 !                    --- ratio was zero, divide old by 10
                      rmrotx(imolty,im) = rmrotx(imolty,im)/10.d0
 
-                  elseif (rtrotx .gt. 3.1415d0) then
+                  else if (rtrotx .gt. 3.1415d0) then
 !                    --- maximum rotational displacement
                      rmrotx(imolty,im) = 3.1415d0
 
@@ -258,7 +258,7 @@
 !                 --- check neighbour list
                   if ( lneigh .and. rmrotx(imolty,im) .ge. upnndg) then
                      rmrotx(imolty,im) = upnndg
-                     write(iou,*) '### problem : for target accept ' ,'ratio rmrotx should be smaller than upnndg'
+                     write(io_output,*) '### problem : for target accept ' ,'ratio rmrotx should be smaller than upnndg'
                   end if
                end if
 
@@ -274,7 +274,7 @@
                   if ( rtroty .lt. 1.0d-10)  then
 !                    --- ratio was zero, divide old by 10
                      rmroty(imolty,im) = rmroty(imolty,im)/10.0d0
-                  elseif (rtroty .gt. 3.1415d0) then
+                  else if (rtroty .gt. 3.1415d0) then
 !                    --- maximum rotational displacement
                      rmroty(imolty,im) = 3.1415d0
                   else
@@ -285,7 +285,7 @@
 !                 --- check neighbour list
                   if ( lneigh .and. rmroty(imolty,im) .ge. upnndg) then
                      rmroty(imolty,im) = upnndg
-                     write(iou,*) '### problem : for target accept' ,' ratio rmroty should be smaller than upnndg'
+                     write(io_output,*) '### problem : for target accept' ,' ratio rmroty should be smaller than upnndg'
                   end if
                end if
                
@@ -302,7 +302,7 @@
                   if (rtrotz .eq. 0.0d0)  then
 !                    --- ratio was zero, divide old by 10
                      rmrotz(imolty,im) = rmrotz(imolty,im)/10.0d0
-                  elseif (rtrotz .gt. 3.1415d0) then
+                  else if (rtrotz .gt. 3.1415d0) then
 !                    --- maximum rotational displacement
                      rmrotz(imolty,im) = 3.1415d0
                   else
@@ -312,7 +312,7 @@
 !                 --- check neighbour list
                   if ( lneigh .and. rmrotz(imolty,im) .ge. upnndg) then
                      rmrotz(imolty,im) = upnndg
-                     write(iou,*) '### problem : for target accept ' ,'ratio rmrotz should be smaller than upnndg'
+                     write(io_output,*) '### problem : for target accept ' ,'ratio rmrotz should be smaller than upnndg'
                   end if
                end if
 
@@ -322,9 +322,9 @@
 ! only processor 0 writes to output files (except for error messages)
                if (myid.eq.0) then
 ! *** write some ratio update information ***
-                  write(iou,"(' Type ',i1,' bn ',6(f7.0,1x))") imolty ,bntrax(imolty,im),bntray(imolty,im), bntraz(imolty ,im),bnrotx(imolty,im), bnroty(imolty,im) ,bnrotz(imolty,im)
-!              write(iou,"(' ratio       ',6(f7.4,1x))") ratrax, ratray, ratraz,rarotx, raroty,rarotz
-                  write(iou,"(' max.displ.  ',6(f9.4,1x))") rmtrax(imolty,im), rmtray(imolty,im), rmtraz(imolty ,im), rmrotx(imolty,im), rmroty(imolty,im), rmrotz(imolty,im)
+                  write(io_output,"(' Type ',i1,' bn ',6(f7.0,1x))") imolty ,bntrax(imolty,im),bntray(imolty,im), bntraz(imolty ,im),bnrotx(imolty,im), bnroty(imolty,im) ,bnrotz(imolty,im)
+!              write(io_output,"(' ratio       ',6(f7.4,1x))") ratrax, ratray, ratraz,rarotx, raroty,rarotz
+                  write(io_output,"(' max.displ.  ',6(f9.4,1x))") rmtrax(imolty,im), rmtray(imolty,im), rmtraz(imolty ,im), rmrotx(imolty,im), rmroty(imolty,im), rmrotz(imolty,im)
                end if
 
                acntrax(imolty,im) = acntrax(imolty,im)+bntrax(imolty,im)
@@ -379,9 +379,9 @@
          end do
          if ( lfq.and.myid.eq.0 ) then
 !           --- write out information about fluctuating charge success
-            write(iou,*) 'Box:   rmflcq for moltyps'
+            write(io_output,*) 'Box:   rmflcq for moltyps'
             do im =1,imend
-               write(iou,*) im,(rmflcq(i,im),i=1,nmolty)
+               write(io_output,*) im,(rmflcq(i,im),i=1,nmolty)
             end do
          end if
          
@@ -454,7 +454,7 @@
                      end do
 
                   call energy(i,imolty,v,vintra,vinter,vext,velect ,vewald,1,ibox,1,nunit(imolty),.true.,ovrlap ,.false.,vtors,.false.,.false.)
-                  if (ovrlap) write(iou,*)  '*** DISASTER, OVERLAP IN MONPER'
+                  if (ovrlap) write(io_output,*)  '*** DISASTER, OVERLAP IN MONPER'
 
                   if (lsolid(ibox).and..not.lrect(ibox)) then
                      vol = cell_vol(ibox) 
@@ -545,7 +545,7 @@
                               if (tcc .lt. 0.0d0) theta = -theta
                               if (L_spline) then
                                  call splint(theta,spltor,it)
-                              elseif(L_linear) then
+                              else if(L_linear) then
                                  call lininter(theta,spltor,it)
                               end if
 
@@ -598,7 +598,7 @@
                         rmvol(ibox) = rmvol(ibox) * ratvol / tavol
                         if (rmvol(ibox).gt.(0.10d0*boxlx(ibox)*boxly(ibox)*boxlz(ibox))) then
                            rmvol(ibox)=0.1d0*(boxlx(ibox)*boxly(ibox)*boxlz(ibox))
-                        endif
+                        end if
                      end if
                   end if
                end if
@@ -610,10 +610,10 @@
                do ibox = 1, nbox
                   if (lsolid(ibox) .and. .not. lrect(ibox)) then
                      do j = 1,9
-                        write(iou,"(' h-matrix change:  bn =',f8.1, '   bs =',f8.1,'   max.displ. =',e12.5)") bnhmat(ibox,j),bshmat(ibox,j), rmhmat(ibox,j)
+                        write(io_output,"(' h-matrix change:  bn =',f8.1, '   bs =',f8.1,'   max.displ. =',e12.5)") bnhmat(ibox,j),bshmat(ibox,j), rmhmat(ibox,j)
                      end do
                   else
-                     write(iou,"(' volume change:  bn =',f8.1, '   bs =',f8.1,'   max.displ. =',e12.5)") bnvol(ibox),bsvol(ibox),rmvol(ibox)
+                     write(io_output,"(' volume change:  bn =',f8.1, '   bs =',f8.1,'   max.displ. =',e12.5)") bnvol(ibox),bsvol(ibox),rmvol(ibox)
                   end if
                end do
             end if	
@@ -643,10 +643,10 @@
       if ( lprint.and.myid.eq.0 ) then
 !     *** write out runtime information ***
          ntot = nnn + nnstep
-         write(iou,'(i6,i8,e12.4,f10.3,f12.1,15i4)') nnn,ntot, vbox(1),boxlx(1),pres(1) ,(ncmt(1,imolty),imolty=1,nmolty)
+         write(io_output,'(i6,i8,e12.4,f10.3,f12.1,15i4)') nnn,ntot, vbox(1),boxlx(1),pres(1) ,(ncmt(1,imolty),imolty=1,nmolty)
          if ( lgibbs ) then
             do ibox = 2, nbox
-               write(iou,'(14x,e12.4,f10.3,f12.1,15i4)')  vbox(ibox),boxlx(ibox),pres(ibox) ,(ncmt(ibox,imolty),imolty=1,nmolty)
+               write(io_output,'(14x,e12.4,f10.3,f12.1,15i4)')  vbox(ibox),boxlx(ibox),pres(ibox) ,(ncmt(ibox,imolty),imolty=1,nmolty)
             end do
          end if
       end if
@@ -842,7 +842,7 @@
 
 ! - Enthalpy
             itel = 4+nener+4*nmolty+1
-!            write(iou,*) acEnthalpy(ibox)
+!            write(io_output,*) acEnthalpy(ibox)
             call update(nblock,itel,ibox,acEnthalpy(ibox),acnp)
             itel = 4+nener+4*nmolty+2
             call update(nblock,itel,ibox,acEnthalpy1(ibox),acnp)
@@ -856,7 +856,7 @@
          end do
       end if
       
-!      write(iou,*) 'end MONPER'
+!      write(io_output,*) 'end MONPER'
       return
       end
 

@@ -41,7 +41,7 @@
   
 ! ----------------------------------------------------------------------
       
-!      write(iou,*) 'start RIGROT'
+!      write(io_output,*) 'start RIGROT'
      
 !     --- initialize conformation energies and weight
 
@@ -153,7 +153,7 @@
           lexist(j) = .false.
       end do
 
-!      write(iou,*) 'igrow',igrow
+!      write(io_output,*) 'igrow',igrow
  
       lexist(igrow) = .true.
      
@@ -196,7 +196,7 @@
                end if
             end if
          end do
-         write(iou,*) 'screwup in rigrot'
+         write(io_output,*) 'screwup in rigrot'
          call err_exit('screwup in rigrot')
  15      continue
             
@@ -204,7 +204,7 @@
       else
          iwalk = 1
          if ( wadd .lt. softlog ) then
-            write(iou,*) '###old rigrot weight too low'
+            write(io_output,*) '###old rigrot weight too low'
          end if
       end if
       
@@ -228,7 +228,7 @@
          vwellipswo = vwellipswo+vwellipswot(iwalk)
       end if
      
-!	write(iou,*) 'vtry', vtry(iwalk),iwalk
+!	write(io_output,*) 'vtry', vtry(iwalk),iwalk
     
       do j = 1, ntogrow
          iu = glist(j)
@@ -240,7 +240,7 @@
       end do
 
 
-!      write(iou,*) 'end RIGROT'
+!      write(io_output,*) 'end RIGROT'
  
       return
       end

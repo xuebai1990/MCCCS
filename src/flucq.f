@@ -40,7 +40,7 @@
 
 ! --------------------------------------------------------------------
 
-!      write(iou,*) 'start FLUCQ'
+!      write(io_output,*) 'start FLUCQ'
 ! ***    select a chain at random ***
       dchain  = random()
       do icbu = 1,nmolty
@@ -60,9 +60,9 @@
          end if
          i = dint( dble(ncmt(1,imolty))*random() ) + 1
          i = parbox(i,1,imolty)
-         if ( moltyp(i) .ne. imolty ) write(iou,*) 'screwup'
+         if ( moltyp(i) .ne. imolty ) write(io_output,*) 'screwup'
 
-      elseif ( lanes ) then
+      else if ( lanes ) then
 
          if ( ichoice .eq. -1 ) then
 ! *** equal probability charge moves in two boxes (for swap)
@@ -72,7 +72,7 @@
             i = parall(imolty,i)
             if ( random() .gt. favor(i)) goto 77
             ibox = nboxi(i)
-         elseif ( ichoice .eq. -2 ) then
+         else if ( ichoice .eq. -2 ) then
 ! *** equal probability charge moves in two boxes (for swap)
 ! *** preferential charge moves according to favor2
             dchain = dble(temtyp(imolty))
@@ -80,14 +80,14 @@
             i = parall(imolty,i)
             if ( random() .gt. favor2(i)) goto 66
             ibox = nboxi(i)
-         elseif ( ichoice .eq. 0 ) then
+         else if ( ichoice .eq. 0 ) then
 ! *** equal probability charge moves in separate box (for trans,rot)
  88         dchain = dble(temtyp(imolty))
             i = int( dchain*random() ) + 1
             i = parall(imolty,i)
             ibox = nboxi(i)
             if ( ibox .ne. boxi ) goto 88
-         elseif (ichoice .eq. 2) then
+         else if (ichoice .eq. 2) then
             dchain = dble(temtyp(imolty))
             i = int( dchain*random() ) + 1
             i = parall(imolty,i)
@@ -116,9 +116,9 @@
             end if
             jchain = dint( dble(ncmt(1,imolty))*random() ) + 1
             jchain = parbox(jchain,1,imolty)
-            if ( moltyp(jchain) .ne. imolty ) write(iou,*) 'screwup'
+            if ( moltyp(jchain) .ne. imolty ) write(io_output,*) 'screwup'
 
-         elseif ( lanes ) then
+         else if ( lanes ) then
 
             if ( ichoice .eq. -1 ) then
 ! *** equal probability charge moves in two boxes (for swap)
@@ -128,7 +128,7 @@
                jchain = parall(imolty,jchain)
                if ( random() .gt. favor(jchain)) goto 70
                if ( nboxi(jchain) .ne. ibox ) goto 70 
-            elseif ( ichoice .eq. -2 ) then
+            else if ( ichoice .eq. -2 ) then
 ! *** equal probability charge moves in two boxes (for swap)
 ! *** preferential charge moves according to favor
                dchain = dble(temtyp(imolty))
@@ -136,13 +136,13 @@
                jchain = parall(imolty,jchain)
                if ( random() .gt. favor2(jchain)) goto 60
                if ( nboxi(jchain) .ne. ibox ) goto 60
-            elseif ( ichoice .eq. 0 ) then
+            else if ( ichoice .eq. 0 ) then
 ! *** equal probability charge moves in separate box (for trans,rot)
  80            dchain = dble(temtyp(imolty))
                jchain = int( dchain*random() ) + 1
                jchain = parall(imolty,jchain)
                if ( nboxi(jchain) .ne. boxi ) goto 80
-            elseif (ichoice .eq. 2) then
+            else if (ichoice .eq. 2) then
  90            dchain = dble(temtyp(imolty))
                jchain = int( dchain*random() ) + 1
                jchain = parall(imolty,jchain)
@@ -233,7 +233,7 @@
          do j = 1, iunit
             if ( j .eq. mainunit ) then
                qion(j) = qion(j) + dispbig
-            elseif ( lqchg(ntype(imolty,j)) ) then
+            else if ( lqchg(ntype(imolty,j)) ) then
                qion(j) = qion(j) + displit
             end if
             rxuion(j,1) = rxu(i,j)
@@ -382,13 +382,13 @@
       deltvb = fqbeta * deltv
 
 !      if ( deltv .lt. -100.0d0) then
-!         write(iou,*) i,favor(i),deltv
+!         write(io_output,*) i,favor(i),deltv
 !      end if 
       if ( deltvb .gt. (2.3d0*softcut) ) return
 
       if ( deltv .le. 0.0d0 ) then
 !        accept move
-      elseif ( dexp(-deltvb) .gt. random() ) then
+      else if ( dexp(-deltvb) .gt. random() ) then
 !        accept move
       else
          return
@@ -398,7 +398,7 @@
       velectb(ibox)  = velectb(ibox)  + (velectn - velecto)
       vflucqb(ibox)  = vflucqb(ibox) + (vflucqn - vflucqo)
       vinterb(ibox) = vinterb(ibox) + (vintern - vintero)
-!      write(iou,*) 'this move has been accepted!!!'
+!      write(io_output,*) 'this move has been accepted!!!'
       do j = 1,iunit
          qqu(i,j) = qion(j)
          if ( linterqt )  qqu(jchain,j) = qionj(j)
@@ -416,7 +416,7 @@
 
       bsflcq(imolty,ibox) = bsflcq(imolty,ibox) + 1.0d0
 
-!      write(iou,*) 'end FLUCQ'
+!      write(io_output,*) 'end FLUCQ'
 
       return
       end

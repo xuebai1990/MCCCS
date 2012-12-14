@@ -54,7 +54,7 @@
 
 !     ---------------------------------------------------------------
     
-!      write(iou,*) 'START SAFECMBC ',iinit,'!'
+!      write(io_output,*) 'START SAFECMBC ',iinit,'!'
 !      print*,'iinit',iinit,'iw',iw,'igrow',igrow,'count',count
       vphi = 0.0d0
       ovphi = 0.0d0
@@ -337,7 +337,7 @@
                   
                   ovphi = ovphi + kforceb(iufrom,ju) * (angle - equilb(iufrom,ju))**2
              
-!                  write(iou,*) iufrom,iu,ju,kforceb(iufrom,ju)*(angle
+!                  write(io_output,*) iufrom,iu,ju,kforceb(iufrom,ju)*(angle
 !     &                 - equilb(iufrom,ju))**2
      
                   wei_bv = wei_bv * dexp( - beta * ovphi )
@@ -350,7 +350,7 @@
          end if
 
 !     ********************************************************************
-      elseif (iinit.eq.2.or.iinit.eq.4) then
+      else if (iinit.eq.2.or.iinit.eq.4) then
 !     --- lets determine closing energy for this bead alone
          lshit = .false.
 
@@ -509,7 +509,7 @@
                               goto 125
                            end if
                         end do
-                        write(iou,*) 'iu,ju,ku',iu,ju,ku
+                        write(io_output,*) 'iu,ju,ku',iu,ju,ku
                         call err_exit('no bond angle for these')
  125                    continue
                         
@@ -713,7 +713,7 @@
                   angle = dacos(thetac)
                   vphi =  kforcea(count) * (angle-equila(count))**2
          
-!                  write(iou,*) 'b',iu,iufrom,iuprev,vphi
+!                  write(io_output,*) 'b',iu,iufrom,iuprev,vphi
 
 
                   ang_bend(1) = angle
@@ -749,7 +749,7 @@
                         ovphi = ovphi + dlog(bfactor(ibend))/(-beta)
 
 
-!                        write(iou,*) 'c',iu,iufrom,iuprev
+!                        write(io_output,*) 'c',iu,iufrom,iuprev
 !     &                       ,dlog(bfactor(ibend))/(-beta)
 
                         goto 10
@@ -784,7 +784,7 @@
 !     --- we want the angle with the closing bead
                         if (fcount(ju).eq.0) then
                            goto 25
-                        elseif (iclose.ne.0) then
+                        else if (iclose.ne.0) then
                            goto 25
                         else
                            iclose = counta
@@ -802,7 +802,7 @@
                         vphi = kforceb(iu,ju) * (angle-equilb(iu,ju))**2
                         
                         
-!                        write(iou,*) 'd',iu,iufrom,ju,vphi
+!                        write(io_output,*) 'd',iu,iufrom,ju,vphi
 
                         ang_bend(1) = angle
                         bfactor(1) = dexp( -beta*vphi )
@@ -837,7 +837,7 @@
                               bangles(count,2) = ang_bend(ibend)
                               ovphi = ovphi  + dlog(bfactor(ibend))/(-beta)
 
-!                              write(iou,*) 'd',iu,iufrom,ju
+!                              write(io_output,*) 'd',iu,iufrom,ju
 !     &                             ,dlog(bfactor(ibend))/(-beta)
 
                               goto 20
@@ -1010,7 +1010,7 @@
                            vphi = vphi + kforceb(iufrom,ju) * (angle - equilb(iufrom,ju))**2
                            
 !                           if (lshit) then
-!                              write(iou,*) iufrom,iu,ju
+!                              write(io_output,*) iufrom,iu,ju
 !     &                             ,kforceb(iufrom,ju) 
 !     &                             * (angle
 !     &                          - equilb(iufrom,ju))**2
@@ -1020,7 +1020,7 @@
                            
                      end if
                      
-                  elseif (fcount(iu).eq.0) then
+                  else if (fcount(iu).eq.0) then
                      
 !     --- we use the angle with the closed bond
                      if (.not.ldo) then
@@ -1028,11 +1028,11 @@
                         countb = countb + 1
                         iopen(countb) = count
                         goto 40
-                     elseif (countb.eq.1.and.iopen(1).ne.count) then
+                     else if (countb.eq.1.and.iopen(1).ne.count) then
                         countb = countb + 1
                         iopen(countb) = count
                         goto 40
-                     elseif (countb.eq.2) then
+                     else if (countb.eq.2) then
                         countb = countb + 1
                      else
                         ldo = .false.
@@ -1054,13 +1054,13 @@
                                     if (iopen(2).eq.counta) then
                                        goto 35
                                     end if
-                                 elseif (countb.eq.4) then
+                                 else if (countb.eq.4) then
 !     --- we want the angle with the open bead
                                     if (iopen(1).ne.counta) then
                                        goto 35
                                     end if
                                  end if
-                              elseif(iclose.ne.counta) then
+                              else if(iclose.ne.counta) then
                                  goto 35
                               end if                                 
                               ju = growlist(iw,counta)
@@ -1243,7 +1243,7 @@
                      vphi = vphi + kforcea(count) * (angle-equila(count) )**2
 
 !                     if (lshit) then
-!                        write(iou,*) iu,iufrom,iuprev,kforcea(count)
+!                        write(io_output,*) iu,iufrom,iuprev,kforcea(count)
 !     &                       * (angle-equila(count))**2
 !                     end if
                   end if
@@ -1278,7 +1278,7 @@
                            vphi = vphi + kforceb(iu,ku) * (angle -equilb(iu,ku))**2
                            
 !                           if (lshit) then
-!                              write(iou,*) iu,ju,ku
+!                              write(io_output,*) iu,ju,ku
 !     &                             ,kforceb(iu,ku)
 !     &                          * (angle-equilb(iu,ku))**2
 !                           end if
@@ -1320,7 +1320,7 @@
                            if (jut4.gt.iring(imolty)) then
                               goto 41
                            end if
-                           write(iou,*) 'jut4,jut3,jut2,iu', jut4,jut3,jut2,iu
+                           write(io_output,*) 'jut4,jut3,jut2,iu', jut4,jut3,jut2,iu
                            call err_exit('trouble jut4 in crankshaft')
                         end if
                         jttor = ittor(imolty,iu,it)
@@ -1370,7 +1370,7 @@
 
 !     --- jut4 must already exist or we made a big mistake
                            if (.not. lexist(jut4)) then
-                              write(iou,*) 'jut4,jut3,jut2,iu', jut4,jut3,jut2,iu
+                              write(io_output,*) 'jut4,jut3,jut2,iu', jut4,jut3,jut2,iu
                               call err_exit('trouble jut4 in crankshaft')
                            end if
 
@@ -1437,8 +1437,8 @@
                            thetac = (xvec(iu,ju)*xvec(iu,ku) + yvec(iu,ju)*yvec(iu,ku) + zvec(iu,ju)*zvec(iu,ku)) / (lengtha*lengthb)
 
                            if (abs(thetac).gt.1) then
-                              write(iou,*) '*********************' ,'****************************'
-                              write(iou,*) iu,ku,xvec(iu,ku) ,yvec(iu,ku) ,zvec(iu,ku),lengthb
+                              write(io_output,*) '*********************' ,'****************************'
+                              write(io_output,*) iu,ku,xvec(iu,ku) ,yvec(iu,ku) ,zvec(iu,ku),lengthb
                               call err_exit('shitfuck')
                            end if
 
@@ -1447,7 +1447,7 @@
                            vphi = vphi + kforceb(ju,ku) * (angle-equilb(ju,ku))**2
        
 !                           if (lshit) then
-!                              write(iou,*) ju,iu,ku,kforceb(ju,ku)
+!                              write(io_output,*) ju,iu,ku,kforceb(ju,ku)
 !     &                          * (angle-equilb(ju,ku))**2
 !                           end if
                            
@@ -1478,7 +1478,7 @@
                            vphi = vphi + kforceb(iu,ju) * (angle -equilb(iu,ju))**2
                            
 !                           if (lshit) then
-!                              write(iou,*) iu,iufrom,ju,kforceb(iu,ju)
+!                              write(io_output,*) iu,iufrom,ju,kforceb(iu,ju)
 !     &                          * (angle-equilb(iu,ju))**2.0d0
 !                           end if
                         end if
@@ -1557,7 +1557,7 @@
                      yy(count) = y
                      zz(count) = z
 
-!                  elseif (fcount(iu).gt.1) then
+!                  else if (fcount(iu).gt.1) then
 
 !                     j = diracc(count)
 
@@ -1584,11 +1584,11 @@
                         countb = countb + 1
                         iopen(countb) = count
                         goto 70
-                     elseif (countb.eq.1.and.iopen(1).ne.count) then
+                     else if (countb.eq.1.and.iopen(1).ne.count) then
                         countb = countb + 1
                         iopen(countb) = count
                         goto 70
-                     elseif (countb.eq.2) then
+                     else if (countb.eq.2) then
                         countb = countb + 1
                      else
                         ldo = .false.
@@ -1605,14 +1605,14 @@
                                  if (iopen(2).eq.counta) then
                                     goto 65
                                  end if
-                              elseif (countb.eq.4) then
+                              else if (countb.eq.4) then
 !     --- we want the angle with the open bead
 
                                  if (iopen(1).ne.counta) then
                                     goto 65
                                  end if
                               end if
-                           elseif(iclose.ne.counta) then
+                           else if(iclose.ne.counta) then
                               goto 65
                            end if
 
@@ -1692,7 +1692,7 @@
          end if
       end if
      
-!      write(iou,*) 'END SAFECMBC ',iinit,'!'
+!      write(io_output,*) 'END SAFECMBC ',iinit,'!'
       return 
 
       end

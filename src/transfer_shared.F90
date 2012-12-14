@@ -18,7 +18,7 @@ contains
 
     allocate(u_bias_diff(nbox,nmolty),num_update_bias(nbox,nmolty),lopt_bias(nmolty),stat=jerr)
     if (jerr.ne.0) then
-       write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
        call err_exit('read_transfer: memory allocation')
     end if
 
@@ -29,12 +29,12 @@ contains
     rewind(io_input)
     read(UNIT=io_input,NML=transfer,iostat=jerr)
     if (jerr.ne.0.and.jerr.ne.-1) then
-       write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
        call err_exit('reading namelist: transfer')
     end if
 
-    write(iou,*) 'lopt_bias: ',lopt_bias
-    write(iou,*) 'freq_opt_bias: ',freq_opt_bias
+    write(io_output,*) 'lopt_bias: ',lopt_bias
+    write(io_output,*) 'freq_opt_bias: ',freq_opt_bias
 
   end subroutine read_transfer
 

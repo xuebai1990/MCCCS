@@ -62,7 +62,7 @@
             rzu(ichain,4) = rzu(ichain,1) + om*c1/dr
             return
             
-         elseif ( nngrow .eq. 1 ) then
+         else if ( nngrow .eq. 1 ) then
 
             if ( itvib(imolty,nngrow+1,1) .eq.  itvib(imolty,nngrow+2,1) ) then
                oh = brvib(itvib(imolty,nngrow+1,1))
@@ -161,7 +161,7 @@
             end if 
          end if
          
-      elseif ( nunit(imolty) .eq. 5 .or. nunit(imolty) .eq. 7 .or. nunit(imolty) .eq. 9 ) then
+      else if ( nunit(imolty) .eq. 5 .or. nunit(imolty) .eq. 7 .or. nunit(imolty) .eq. 9 ) then
          
 
 ! - Methane case or other rigid molecule with 5 units
@@ -233,7 +233,7 @@
             rxu(ichain,5) = rxu(ichain,4) - 1.54d0*a3
             ryu(ichain,5) = ryu(ichain,4) - 1.54d0*b3
             rzu(ichain,5) = rzu(ichain,4) - 1.54d0*c3
-         elseif ( nugrow(imolty) .eq. 2) then
+         else if ( nugrow(imolty) .eq. 2) then
             
             ca = ch*dcos(onepi-hch)
             ah = ch*dsin(onepi-hch)
@@ -314,7 +314,7 @@
 
 ! - KEEP THE OLD CONFIGURATION in SWITCH MOVE
 
-            elseif ( lswitch ) then
+            else if ( lswitch ) then
 !               if (imolty .eq. 1) then
 !                  ratio = brvib(itvib(1,nngrow+1,1))
 !     &                 /brvib(itvib(2,nngrow+1,1))
@@ -512,7 +512,7 @@
                if (rn.gt.prob) goto 101
             end if
 !     rgr = r*180.0d0/onepi
-!     write(iou,*) 'final Ryckaert angle: ',rgr
+!     write(io_output,*) 'final Ryckaert angle: ',rgr
             vmethyl = vmethyl + ven
             do i = 1,3
                a4 = ah*a3*dcos(r+onepi) + ah*aa1*dsin(r+onepi)
@@ -646,7 +646,7 @@
                if (rn.gt.prob) goto 100
             end if
 !     rgr = r*180.0d0/onepi
-!      write(iou,*) 'final Ryckaert angle: ',rgr
+!      write(io_output,*) 'final Ryckaert angle: ',rgr
             vmethyl = vmethyl + ven
 
             do i = 4,6

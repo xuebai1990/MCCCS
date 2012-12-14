@@ -97,7 +97,7 @@
 !     
       if(initialized.ne.DONE)then
          call RANSET(21641)
-      endif
+      end if
 !     First generates a random number on [0,0xffffffff]-interval
       if(mti.ge.N)then
          do 100 kk=0,N-M-1
@@ -111,7 +111,7 @@
          y=ior(iand(mt(N-1),UPPER_MASK),iand(mt(0),LOWER_MASK))
          mt(kk)=ieor(ieor(mt(M-1),ishft(y,-1)),mag01(iand(y,1)))
          mti=0
-      endif
+      end if
 !     
       y=mt(mti)
       mti=mti+1

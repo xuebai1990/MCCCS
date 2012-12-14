@@ -37,17 +37,17 @@
 
 !         if ( sx .gt. 0.5d0 ) then
 !            sx = sx-1d0
-!         elseif ( sx .lt. -0.5d0 ) then
+!         else if ( sx .lt. -0.5d0 ) then
 !            sx = sx+1d0
 !         end if
 !         if ( sy .gt. 0.5d0 ) then
 !            sy = sy-1d0
-!         elseif ( sy .lt. -0.5d0 ) then
+!         else if ( sy .lt. -0.5d0 ) then
 !            sy = sy+1d0
 !         end if
 !         if ( sz .gt. 0.5d0 ) then
 !            sz = sz-1d0
-!         elseif ( sz .lt. -0.5d0 ) then
+!         else if ( sz .lt. -0.5d0 ) then
 !            sz = sz+1d0
 !         end if
 !         sx = sx-nint(sx)
@@ -70,7 +70,7 @@
                rzuij=rzuij-hmat(ibox,9)
                sz=sz-1d0
             end if
-         elseif ( rzuij .lt. -hsz ) then
+         else if ( rzuij .lt. -hsz ) then
             rzuij=rzuij+hmat(ibox,9)
             sz=sz+1d0
             if ( rzuij .lt. -hsz ) then
@@ -87,7 +87,7 @@
                ryuij=ryuij-hmat(ibox,5)
                sy=sy-1d0
             end if
-         elseif ( ryuij .lt. -hsy ) then
+         else if ( ryuij .lt. -hsy ) then
             ryuij=ryuij+hmat(ibox,5)
             sy=sy+1d0
             if ( ryuij .lt. -hsy ) then
@@ -102,7 +102,7 @@
             if ( rxuij .gt. hsx ) then
                rxuij=rxuij-hmat(ibox,1)
             end if
-         elseif ( rxuij .lt. -hsx ) then
+         else if ( rxuij .lt. -hsx ) then
             rxuij=rxuij+hmat(ibox,1)
             if ( rxuij .lt. -hsx ) then
                rxuij=rxuij+hmat(ibox,1)

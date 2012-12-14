@@ -219,11 +219,11 @@
        gtheta(4) = dcos(109.5d0*degrad)
        
        do i=1,6
-          write(iou,*) 'garo ecut',i,ecut(i)
+          write(io_output,*) 'garo ecut',i,ecut(i)
        end do
        return
 
-      elseif(lexpsix) then
+      else if(lexpsix) then
 ! --- Keep the rcut same for each box
          do ibox = 2,nbox
            if (dabs(rcut(1)-rcut(ibox)).gt.1.0d-10) then
@@ -304,10 +304,10 @@
 !            write(11,*) 'consu(i)',consu
          end if
 
-         write(iou,*) 
+         write(io_output,*) 
      &        ' i   aexsix       bexsix      cexsix     sexsix'
          do i = 1,natom
-            write(iou,'(i3,2x,4e12.4)')i,aexsix(i),bexsix(i)
+            write(io_output,'(i3,2x,4e12.4)')i,aexsix(i),bexsix(i)
      &           ,cexsix(i),sexsix(i)
          end do
 
@@ -385,9 +385,9 @@
             corp_cons(3) = 5.7576802340310304d-02
          end if
 
-         write(iou,*) ' i   epsimmff     sigimmff   smmff'
+         write(io_output,*) ' i   epsimmff     sigimmff   smmff'
          do i = 1,natom
-            write(iou,'(i3,2x,4e12.4)')i,epsimmff(i),sigimmff(i)
+            write(io_output,'(i3,2x,4e12.4)')i,epsimmff(i),sigimmff(i)
      &           ,smmff(i)
          end do
 
@@ -610,7 +610,7 @@
          call susami
          rcheck = 2.5d0 * 3.527d0
          if ( rcut(1) .ne. rcheck ) then
-            write(iou,*) 'WARNING ### rcut set to 2.5sigma for SAMI'
+            write(io_output,*) 'WARNING ### rcut set to 2.5sigma for SAMI'
             rcut(1) = rcheck
          end if
       else
@@ -620,7 +620,7 @@
             do j = 1, nntype
                ij = (i-1)*nntype + j
                if ( lspecial(ij) ) then
-                  write(iou,*) 'ij,lspecial(ij)',ij,lspecial(ij)
+                  write(io_output,*) 'ij,lspecial(ij)',ij,lspecial(ij)
                   adum = aspecial(ij)
                   bdum = bspecial(ij)
                else

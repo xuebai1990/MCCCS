@@ -103,13 +103,13 @@
 1099     continue
 1100  continue
  
-!      write(iou,*) '@@@ control setnn @@@'
+!      write(io_output,*) '@@@ control setnn @@@'
 !      do 2000 i = 1, nchain
-!         write(iou,*) 'lnn', i, '   ', (lnn(i,j),j=1,nchain)
+!         write(io_output,*) 'lnn', i, '   ', (lnn(i,j),j=1,nchain)
 !2000  continue
  
-      write(iou,*)
-      write(iou,*) 'neighbour table created by SETNN'
+      write(io_output,*)
+      write(io_output,*) 'neighbour table created by SETNN'
 
       return
       end

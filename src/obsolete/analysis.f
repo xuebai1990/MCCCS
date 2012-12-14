@@ -89,12 +89,12 @@
       if(switch.eq.0) then
 
       if(nhere.gt.ntdifmx) then
-        write(iou,*) 'nhere greater than ntdifmax', nhere, ntdifmx
+        write(io_output,*) 'nhere greater than ntdifmax', nhere, ntdifmx
         call cleanup('choose a larger ntdifmx in control.inc')
       end if
  
       if(nbin.gt.nbinmx) then
-         write(iou,*) 'number of bins "nbin" .gt. nbinmx', nbin, nbinmx
+         write(io_output,*) 'number of bins "nbin" .gt. nbinmx', nbin, nbinmx
          call cleanup('choose a larger nbinmx in control.inc')
        end if  
       
@@ -118,22 +118,22 @@
 !  THIS PART SHOULD GO TO READDAT
 
 !      if (lcharge) then
-!         write(iou,*) 'input minimum charge for dist (qmin)'
+!         write(io_output,*) 'input minimum charge for dist (qmin)'
 !         read(5,*) qmin
-!         write(iou,*) 'input maximum charge for dist (qmax)'
+!         write(io_output,*) 'input maximum charge for dist (qmax)'
 !         read(5,*) qmax
-!         write(iou,*) 'input qbins must be less than',qbinmax
+!         write(io_output,*) 'input qbins must be less than',qbinmax
 !         read(5,*) qbins
 !         if ( qmax .lt. qmin ) call cleanup('qmax cannont be less than qmin')
 !         qdiff = qmax - qmin
 !         qstep = qdiff/dble(qbins)
-!         write(iou,*) 'input additional disp for charges (0.0 for none)'
+!         write(io_output,*) 'input additional disp for charges (0.0 for none)'
 !         read(5,*) qdisp
 !      end if
-!      write(iou,*) 'do you want the average dipole moments?'
+!      write(io_output,*) 'do you want the average dipole moments?'
 !      read(5,*) ldipole
 !      if ( ldipole ) then
-!         write(iou,*) 'number of blocks for dipole?'
+!         write(io_output,*) 'number of blocks for dipole?'
 !         read(5,*) qblock
 !      end if
 !************************************************************************
@@ -158,8 +158,8 @@
          do imolty=1,nmolty
             i = (dint((max_length(imolty))/bin_width)+1) 
             if(i.gt.nbinmax_ete) then
-	       write(iou,*) 'Stopped in Analysis end-to-end dist calc'
-               write(iou,*) 'number of bins greater than nbinmax_ete',i, nbinmax_ete
+	       write(io_output,*) 'Stopped in Analysis end-to-end dist calc'
+               write(io_output,*) 'number of bins greater than nbinmax_ete',i, nbinmax_ete
                call cleanup('choose larger nbinmax_ete in control.inc')
             end if 
          end do
@@ -191,8 +191,8 @@
          do kk=1,nbox
             i=(dint(boxlz(kk)/bin_width)+1)
             if(i.gt.nbinmax_ete) then
-               write(iou,*) 'Stopped in Analysis Z profile calculation'  
-               write(iou,*) 'number of bins greater than nbinmax_ete',i, nbinmax_ete
+               write(io_output,*) 'Stopped in Analysis Z profile calculation'  
+               write(io_output,*) 'number of bins greater than nbinmax_ete',i, nbinmax_ete
                call cleanup('choose larger nbinmax_ete in control.inc')
             end if
          end do 
@@ -236,7 +236,7 @@
             end do
             angle_num(imolty) = bend
             if(bend.gt.angle_max) then
-               write(iou,*) 'number of bends greater than angle_max', 'molecule type', imolty,' bends', bend   
+               write(io_output,*) 'number of bends greater than angle_max', 'molecule type', imolty,' bends', bend   
                call cleanup('choose a larger angle_max in control.inc')
             end if
          end do
@@ -266,7 +266,7 @@
             end do
             tor_num(imolty) = torsion
             if(torsion.gt.tor_max) then
-               write(iou,*) 'number of torsions greater than tor_max', 'molecule type', imolty,'torsions', torsion
+               write(io_output,*) 'number of torsions greater than tor_max', 'molecule type', imolty,'torsions', torsion
                call cleanup('choose a larger tor_max in control.inc*** requires memory 3**torsion so choose it equal to torsions')
              end if
          end do
@@ -422,8 +422,8 @@
 !                     do ii = 1,nunit(imolty)
 !                        qdummy = qqu(i,ii)
 !                        if ( qdummy .lt. qmin .or. qdummy .gt. qmax) then
-!                           write(iou,*) 'q value out of range'
-!                           write(iou,*) 'frame,i,ii,q',k,i,ii,qdummy
+!                           write(io_output,*) 'q value out of range'
+!                           write(io_output,*) 'frame,i,ii,q',k,i,ii,qdummy
 !                           call cleanup('q value out of range')
 !                        end if
 !                        qdummy = qdummy - qmin
@@ -703,7 +703,7 @@
                         if ( ntii .eq. ntjj ) then
                            if ( cmolec(ii,kk) .lt. nskip ) then
                               lskip = .true.
-                           elseif ( numxx .lt. 0.5d0 ) then
+                           else if ( numxx .lt. 0.5d0 ) then
                               lskip =.true.
                            end if
                         else
@@ -827,7 +827,7 @@
                      if ( cmolec(ii,kk) .lt. nskip ) then
                         lskip = .true.
                      end if
-                  elseif ( cmolec(ii,kk)*cmolec(jj,kk)  .lt. 0.5d0 .or. numxx*numyy  .lt. 0.5d0) then
+                  else if ( cmolec(ii,kk)*cmolec(jj,kk)  .lt. 0.5d0 .or. numxx*numyy  .lt. 0.5d0) then
                      lskip = .true.
                   end if
                            
@@ -912,11 +912,11 @@
                         if(abs(theta).lt.0.000001) then
                             theta =0.0d0
                         end if
-!                        write(iou,*) 'value of theta',theta
+!                        write(io_output,*) 'value of theta',theta
                         angle_avg(kk,imolty,bend) =  angle_avg(kk,imolty,bend) + theta
                         bin = dint(dble(theta)/dble(ang_bin_size))+1
 	                if (bin.lt.0) then
-                            write(iou,*) 'theta, ang_bin_size, bin',theta, ang_bin_size, bin
+                            write(io_output,*) 'theta, ang_bin_size, bin',theta, ang_bin_size, bin
                             bin=1
 		        end if
                         angle_bin(kk,imolty,bend,bin) =  angle_bin(kk,imolty,bend,bin) + 1.0d0
@@ -974,7 +974,7 @@
                            gaudef = gaudef + 1
                            bg_minus(kk,imolty,torsion) =  bg_minus(kk,imolty,torsion) + 1.0d0
                            dum = dum + 0 * 3**(torsion-1)
-                        elseif ( theta .lt. 60.0d0 ) then
+                        else if ( theta .lt. 60.0d0 ) then
 !                          --- trans
                            trans(kk,imolty) = trans(kk,imolty)+1.0d0
                            btrans(kk,imolty,torsion) =  btrans(kk,imolty,torsion) + 1.0d0
@@ -1112,10 +1112,10 @@
          end do
          
 
-!         write(iou,*)
-!         write(iou,*) 'bead bead radial distribution functions in *gor*'
-!         write(iou,*)
-!         write(iou,*) 'avg. number of beads vs. shell size in *num*'
+!         write(io_output,*)
+!         write(io_output,*) 'bead bead radial distribution functions in *gor*'
+!         write(io_output,*)
+!         write(io_output,*) 'avg. number of beads vs. shell size in *num*'
          
 !         print*, 'nhere', nhere
          
@@ -1164,10 +1164,10 @@
                             write(110+kk,*)
                       end if
                       
-                   elseif( aframe .lt. -0.5d0 ) then
-                      write(iou,*) 'aframe',aframe
-                      write(iou,*) 'nframe',nframe
-                      write(iou,*) 'nnone(kk,ntij),kk,ntij', nnone(kk,ntij),kk,ntij
+                   else if( aframe .lt. -0.5d0 ) then
+                      write(io_output,*) 'aframe',aframe
+                      write(io_output,*) 'nframe',nframe
+                      write(io_output,*) 'nnone(kk,ntij),kk,ntij', nnone(kk,ntij),kk,ntij
                       call cleanup('srewup aframe')
                      end if
                    end if
@@ -1216,10 +1216,10 @@
 	            end do
                     write(113+kk,*)
                   end if    
-               elseif( aframe .lt. -0.5d0 ) then
-                  write(iou,*) 'aframe',aframe
-                  write(iou,*) 'nframe',nframe
-                  write(iou,*) 'comnone(kk,ntij),kk,ntij', comnone(kk,ntij),kk,ntij
+               else if( aframe .lt. -0.5d0 ) then
+                  write(io_output,*) 'aframe',aframe
+                  write(io_output,*) 'nframe',nframe
+                  write(io_output,*) 'comnone(kk,ntij),kk,ntij', comnone(kk,ntij),kk,ntij
                   call cleanup('srewup aframe')
                end if
             end do
@@ -1241,7 +1241,7 @@
       end if 
 
 !      if ( lcharge ) then
-!         write(iou,*) 'charge distributions in fort.35+box'
+!         write(io_output,*) 'charge distributions in fort.35+box'
 !         do kk = 1, nbox
 !            do imol = 1,nmolty
 !               do iunit = 1,nunit(imolty)
@@ -1274,20 +1274,20 @@
 !      if ( ldipole ) then
 !         diconv = (1.602d-19)/((1d10)*(3.336d-30))
 !         do kk = 1, nbox
-!            write(iou,*) 'Dipoles [e A], [D] in Box',kk
+!            write(io_output,*) 'Dipoles [e A], [D] in Box',kk
 !            do imol = 1,nmolty
 !               if ( dicount(imol,kk) .gt. 0.5d0 ) then
 !                  dipole(imol,kk) = dipole(imol,kk)/dicount(imol,kk)
 !               end if
-!               write(iou,*) 'Moltyp,dipole',imolty
+!               write(io_output,*) 'Moltyp,dipole',imolty
 !     &              ,dipole(imol,kk),dipole(imol,kk)*diconv
 !            end do
 !         end do
 !
 !         if ( block .gt. 1 ) then
-!            write(iou,*) 'Number of blocks input and used',block,nblock
+!            write(io_output,*) 'Number of blocks input and used',block,nblock
 !            do kk = 1,nbox
-!               write(iou,*) 'Box     Moltyp   Dipole [D]   Std dev [D]'
+!               write(io_output,*) 'Box     Moltyp   Dipole [D]   Std dev [D]'
 !               do imol = 1,nmolty
 !                  avera = 0.0d0
 !                  do k=1,nblock
@@ -1301,7 +1301,7 @@
 !                  stddev = dsqrt( stddev/dble(nblock-1) )
 !                  stddev = stddev*diconv
 !                  avera = avera*diconv
-!                  write(iou,'(i3,4x,i3,4x,2f10.4)') kk,imol,avera,stddev
+!                  write(io_output,'(i3,4x,i3,4x,2f10.4)') kk,imol,avera,stddev
 !               end do
 !            end do
 !         end if
@@ -1336,7 +1336,7 @@
 !                    --- output the average angle to the screen
                      value = angle_avg(kk,imolty,bend)/total
                      degree = value*180.0d0/onepi
-                     write(iou,*)  'Moltyp ',imolty,' angle ' ,angle_1(imolty,bend),angle_2(imolty,bend) ,angle_3(imolty,bend),' average ',degree
+                     write(io_output,*)  'Moltyp ',imolty,' angle ' ,angle_1(imolty,bend),angle_2(imolty,bend) ,angle_3(imolty,bend),' average ',degree
                      
                   end if
                end do
@@ -1361,7 +1361,7 @@
 
 
 !     output the gauch versus trans data for each moltype
-         write(iou,*) 'moltyp  box  trans      g+        g-       g frac'
+         write(io_output,*) 'moltyp  box  trans      g+        g-       g frac'
          do kk  = 1,nbox
             do imolty = 1,nmolty
                write(130+kk,*) 'Moltype ',imolty
@@ -1372,10 +1372,10 @@
                   ratio = gaudef/(trans(kk,imolty)+gaudef)
                else
 !                  ratio = 0.0d0
-                  write(iou,*) 'ratio not defined'
+                  write(io_output,*) 'ratio not defined'
                end if
                
-               write(iou,'(i3,5x,i3,3(2x,e8.2),f8.4)')imolty,kk ,trans(kk ,imolty),g_plus(kk,imolty),g_minus(kk,imolty),ratio
+               write(io_output,'(i3,5x,i3,3(2x,e8.2),f8.4)')imolty,kk ,trans(kk ,imolty),g_plus(kk,imolty),g_minus(kk,imolty),ratio
 
                do torsion = 1,tor_num(imolty)
                   total = bg_plus(kk,imolty,torsion) +  bg_minus(kk,imolty,torsion) + btrans(kk,imolty,torsion)
@@ -1408,14 +1408,14 @@
          close(135)
          close(136)
 
-!         write(iou,*)
-!         write(iou,*) 'gauch fraction vs. torsion in fort.90+box'
-!         write(iou,*)
-!         write(iou,*) 'torsion angle distribution in fort.95+box'
-!         write(iou,*)
-!         write(iou,*) 'probabiltiy vs. number of defects per chain'
-!         write(iou,*) 'shown in fort.5*'
-!         write(iou,*)
+!         write(io_output,*)
+!         write(io_output,*) 'gauch fraction vs. torsion in fort.90+box'
+!         write(io_output,*)
+!         write(io_output,*) 'torsion angle distribution in fort.95+box'
+!         write(io_output,*)
+!         write(io_output,*) 'probabiltiy vs. number of defects per chain'
+!         write(io_output,*) 'shown in fort.5*'
+!         write(io_output,*)
          
          do i=1,nbox
              write(ftemp,*) i
@@ -1488,13 +1488,13 @@
 !         close(126)
 !         close(127)
 
-!         write(iou,*) 'patterns of gauch defects in fort.2*'
-!         write(iou,*) 'transform first number into base 3 to get the'
-!         write(iou,*) 'pattern of gauch defects where -1=g-, 0=trans 1=g+'
-!         write(iou,*)
-!         write(iou,*) 'the maximum rcut value that could be used is'
-!         write(iou,*) boxmin
-!         write(iou,*)
+!         write(io_output,*) 'patterns of gauch defects in fort.2*'
+!         write(io_output,*) 'transform first number into base 3 to get the'
+!         write(io_output,*) 'pattern of gauch defects where -1=g-, 0=trans 1=g+'
+!         write(io_output,*)
+!         write(io_output,*) 'the maximum rcut value that could be used is'
+!         write(io_output,*) boxmin
+!         write(io_output,*)
          
 
       end if

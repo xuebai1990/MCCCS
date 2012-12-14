@@ -1,5 +1,5 @@
 MODULE sim_zeolite
-  use sim_system,only:myid,iou
+  use sim_system,only:myid,io_output
   use var_type,only:double_precision,default_string_length
   use const_math,only:onepi
   use util_runtime,only:err_exit
@@ -39,7 +39,7 @@ CONTAINS
 
     integer::i,j
 
-    if (myid.eq.0) write(iou,"(/,' READING ZEOLITE LATTICE FROM FILE zeolite.cssr:',/&
+    if (myid.eq.0) write(io_output,"(/,' READING ZEOLITE LATTICE FROM FILE zeolite.cssr:',/&
                                 ,' --------------------------------------------------',/&
                                 ,' box dimensions                    = ',3f10.3,' Angstrom',/&
                                 ,' box angles                        = ',3f10.3,' degrees',/&

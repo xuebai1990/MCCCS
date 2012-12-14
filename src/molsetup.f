@@ -37,14 +37,14 @@
          
          masst(imolty) = masst(imolty) + mass(ntype(imolty,i))
 
-         write(iou,*) 'bead ',iu,' beadtype ',ntype(imolty,i)
+         write(io_output,*) 'bead ',iu,' beadtype ',ntype(imolty,i)
 
          read(io_input,*) 
          read(io_input,*) invib(imolty,i),(ijvib(imolty,i,j) ,j=1,invib(imolty,i))
 
          if (invib(imolty,i).gt.6) then
 
-            write(iou,*) 'imolty',imolty,'   i',i,'   invib' ,invib(imolty,i)
+            write(io_output,*) 'imolty',imolty,'   i',i,'   invib' ,invib(imolty,i)
             call err_exit('too many vibrations')
          end if
 
@@ -67,7 +67,7 @@
             call vibcheck(2,atype,btype,vibtype)
             
             if (vibtype.eq.0) then
-               write(iou,*) 'atype,btype',atype,btype
+               write(io_output,*) 'atype,btype',atype,btype
                call err_exit('screwup in vibrations')
             end if
                         
@@ -87,7 +87,7 @@
                   call bendcheck(2,atype,btype,ctype,bendtype)
 
                   if (bendtype.eq.0) then
-                     write(iou,*) 'atype,btype,ctype',atype ,btype,ctype
+                     write(io_output,*) 'atype,btype,ctype',atype ,btype,ctype
                      call err_exit('screwup in bending angles')
                   end if
 
@@ -106,7 +106,7 @@
                         call torcheck(2,atype,btype,ctype,dtype ,tortype)
 
                         if (tortype.eq.0) then
-                           write(iou,*) 'atype,btype,ctype,dtype',atype ,btype,ctype,dtype
+                           write(io_output,*) 'atype,btype,ctype,dtype',atype ,btype,ctype,dtype
                            call err_exit('screwup in torsion angles')
                         end if
                         
@@ -184,7 +184,7 @@
                   lfinda = .true.
                   ia = i
                   goto 105
-               elseif (btype.eq.isite(n,1,i)) then
+               else if (btype.eq.isite(n,1,i)) then
                   lfindb = .true.
                   ia = i
                   goto 105
@@ -200,7 +200,7 @@
                      ib = i
                      goto 110
                   end if
-               elseif (lfindb) then
+               else if (lfindb) then
                   if (atype.eq.isite(n,2,i)) then
                      lfinda = .true.
                      ib = i
@@ -270,7 +270,7 @@
                   lfinda = .true.
                   ia = i
                   goto 105
-               elseif (ctype.eq.isite(n,1,i)) then
+               else if (ctype.eq.isite(n,1,i)) then
                   lfindc = .true.
                   ia = i
                   goto 105
@@ -297,7 +297,7 @@
                      ic = i
                      goto 115
                   end if
-               elseif (lfindc) then
+               else if (lfindc) then
                   if (atype.eq.isite(n,3,i)) then
                      lfinda = .true.
                      ic = i
@@ -331,7 +331,7 @@
 
       subroutine torcheck(iinit,atype,btype,ctype,dtype,tortype)
 
-      use sim_system,only:iou
+      use sim_system,only:io_output
       use util_runtime,only:err_exit
       use var_type
       implicit none
@@ -375,7 +375,7 @@
                   lfinda = .true.
                   ia = i
                   goto 104
-               elseif (dtype.eq.isite(n,1,i)) then
+               else if (dtype.eq.isite(n,1,i)) then
                   lfindd = .true.
                   ia = i
                   goto 104
@@ -391,7 +391,7 @@
                      ir = i
                      goto 105
                   end if
-               elseif (lfindd) then
+               else if (lfindd) then
                   if (atype.eq.isite(n,4,i)) then
                      lrev = .true.
                      ir = i
@@ -409,7 +409,7 @@
                      ib = i
                      goto 110
                   end if
-               elseif (lfindd) then
+               else if (lfindd) then
                   if (ctype.eq.isite(n,2,i)) then
                      lfindc = .true.
                      ib = i
@@ -428,7 +428,7 @@
                      ic = i
                      goto 115
                   end if
-               elseif (lfindc) then
+               else if (lfindc) then
                   if (btype.eq.isite(n,3,i)) then
                      lfindb = .true.
                      ic = i
@@ -448,7 +448,7 @@
                     id = i
                     goto 120
                  end if
-              elseif (lfindd) then
+              else if (lfindd) then
                  if (atype.eq.isite(n,4,i)) then
                     lfinda = .true.
                     id = i
@@ -461,20 +461,20 @@
  
            if (lfinda.and.lfindb.and.lfindc.and.lfindd) then
               if (lfound) then
-                 write(iou,*) 'a,b,c,d',atype,btype,ctype,dtype
+                 write(io_output,*) 'a,b,c,d',atype,btype,ctype,dtype
                  call err_exit('torsion type not distinguishable')
               end if
               
               tortype = trtype(n)
               lfound = .true.
               
-           elseif (lrev) then
+           else if (lrev) then
               lrev = .false.
               if (lfinda) then
                  lfinda = .false.
                  lfindd = .true.
                  id = ir
-              elseif (lfindd) then
+              else if (lfindd) then
                  lfindd = .false.
                  lfinda = .true.
                  ia = ir

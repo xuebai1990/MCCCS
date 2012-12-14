@@ -446,7 +446,7 @@
              do j=1,n
                 call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
                 if (jerr.ne.0) then
-                   write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+                   write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
                    call err_exit('Reading section BONDS')
                 end if
                 read(line_in,*) i,dum,brvib(i),brvibk(i)
@@ -459,7 +459,7 @@
 
 ! - TraPPE-UA bond angle for alkane segment centered at methylene (CH2 sp3)-
       brben(1) = 114.0d0
-!     write(iou,*) '***** brben', brben(1) * raddeg
+!     write(io_output,*) '***** brben', brben(1) * raddeg
       brbenk(1) = 31250.0d0
 
 ! - TraPPE-UA bond angle for alkane segment centered at ternary (CH sp3)-
@@ -975,7 +975,7 @@
              do j=1,n
                 call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
                 if (jerr.ne.0) then
-                   write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+                   write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
                    call err_exit('Reading section ANGLES')
                 end if
                 read(line_in,*) i,dum,brben(i),brbenk(i)
@@ -1799,7 +1799,7 @@
            do j=1,n
               call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
               if (jerr.ne.0) then
-                 write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+                 write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
                  call err_exit('Reading section DIHEDRALS')
               end if
               read(line_in,*) i,dum,vtt0(i),vtt1(i),vtt2(i),vtt3(i)

@@ -77,8 +77,8 @@
          disvec(2,i,j) = 0.0d0
  1099 continue
  
-!      write(iou,*) '@@@ control updnn @@@'
-!      write(iou,*) 'lnn', i, '   ', (lnn(i,j),j=1,nchain)
+!      write(io_output,*) '@@@ control updnn @@@'
+!      write(io_output,*) 'lnn', i, '   ', (lnn(i,j),j=1,nchain)
 
       return
       end

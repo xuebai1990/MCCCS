@@ -41,7 +41,7 @@
       real(KIND=double_precision)::determ,arccos
       save a11,a12,a13,a21,a22,a31,a32,a33,cosalph,sinalph
 
-!      write(iou,*) 'start CONE'
+!      write(io_output,*) 'start CONE'
 
       if ( iinit .eq. 1 ) then      
 !       --- setup the unit cone
@@ -90,7 +90,7 @@
         a32 = y
         a33 = z
 
-      elseif ( iinit .eq. 2 ) then
+      else if ( iinit .eq. 2 ) then
 !        --- find the vector on a cone:
 !        --- alpha is the angle with the cone axis (theta)
          sinalph = dsin(alpha)
@@ -103,7 +103,7 @@
          uy = a12*uxtemp + a22*uytemp + a32*uztemp
          uz = a13*uxtemp +              a33*uztemp
 
-      elseif ( iinit .eq. 3 ) then
+      else if ( iinit .eq. 3 ) then
 !        --- find gamma for a given unit vector on the cone
 !        --- use cramer's rule where a23 has already been replaced with 0
 !        --- we don't need the uztemp so it is not computed
@@ -123,11 +123,11 @@
          if ( singamma .lt. 0.0d0 ) gamma = -gamma
 
       else
-         write(iou,*) 'iinit ',iinit
+         write(io_output,*) 'iinit ',iinit
          call err_exit('non valid iinit in cone.f')
       end if
       
-!      write(iou,*) 'finish CONE'
+!      write(io_output,*) 'finish CONE'
 
       return
       end
@@ -163,7 +163,7 @@
 
       if ( value .gt. 1.0d0 ) then
          arccos = 0.0d0
-      elseif ( value .lt. -1.0d0 ) then
+      else if ( value .lt. -1.0d0 ) then
          arccos = onepi
       else
          arccos = dacos(value)

@@ -175,7 +175,7 @@
          invtry = invib(imolty,iutry)
          if (invtry.eq.0) then
             call err_exit('cant do safecbmc on single bead')
-         elseif(invtry.eq.1) then
+         else if(invtry.eq.1) then
 !     --- At the end point of a molecule
 
 !     --- we will let regular cbmc handle the end points
@@ -444,8 +444,8 @@
          wbefnum = count
       end if
       
-!      write(iou,*) '**********************************'
-!      write(iou,*) iutry,ivib,findex,fprev(1,1)
+!      write(io_output,*) '**********************************'
+!      write(io_output,*) iutry,ivib,findex,fprev(1,1)
 
 
 !     --- set up place move logic -----------
@@ -598,7 +598,7 @@
                end do
             end do
             if (ja.gt.10) then
-               write(iou,*) 'ja',ja
+               write(io_output,*) 'ja',ja
                call err_exit('need to set max greater in safeschedule')
             end if
 
@@ -620,20 +620,20 @@
 !     ****** take out return for diagnostics ************
 
       do iw = 1, islen
-         write(iou,*) growfrom(iw),(growlist(iw,count),count=1 ,grownum(iw))
+         write(io_output,*) growfrom(iw),(growlist(iw,count),count=1 ,grownum(iw))
 
       end do
 
-      write(iou,*) '---------------------------------------------'
+      write(io_output,*) '---------------------------------------------'
 
       do iw = 1, nplace
-         write(iou,*) pfrom(iw),(iplace(iw,count),count=1,pnum(iw))
+         write(io_output,*) pfrom(iw),(iplace(iw,count),count=1,pnum(iw))
       end do
 
-      write(iou,*) '--------------------------------------------'
+      write(io_output,*) '--------------------------------------------'
 
       do iw = 1, nrigi
-         write(iou,*) rfrom(iw),(rlist(iw,count),count=1,rnum(iw))
+         write(io_output,*) rfrom(iw),(rlist(iw,count),count=1,rnum(iw))
       end do
       
       call err_exit('')

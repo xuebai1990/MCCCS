@@ -213,19 +213,19 @@
 ! KM for MPI
 ! check that if lneigh or lgaro numprocs .eq. 1
       if (lneigh.and.numprocs.ne.1) then
-         write(iou,*) 'Cannot run on more than 1 processor with 
+         write(io_output,*) 'Cannot run on more than 1 processor with 
      &        neighbor list!!'
          call cleanup('')
       end if
       if (lgaro.and.numprocs.ne.1) then
-         write(iou,*) 'Cannot run on more than 1 processor with 
+         write(io_output,*) 'Cannot run on more than 1 processor with 
      &        lgaro = .true.!!'
          call cleanup('')
       end if
 
 ! kea don't call cleanup('') for lgaro
 !      if (lchgall .and. (.not. lewald).and.(.not.lgaro)) then
-!         write(iou,*) 'lchgall is true and lewald is false.',
+!         write(io_output,*) 'lchgall is true and lewald is false.',
 !     &        ' Not checked for accuracy!'
 !         call cleanup('')
 !      end if
@@ -594,13 +594,13 @@
          v3garob(ibox) = v3garo
          
          if( ovrlap ) then
-            write(iou,*) ' overlap in initial configuration '
+            write(io_output,*) ' overlap in initial configuration '
             call cleanup('')
          end if
          vstart(ibox) = vbox(ibox)
          if (myid.eq.0) then
-            write(iou,*)
-            write(iou,*) 'box  ',ibox,' initial v   = ', vbox(ibox)
+            write(io_output,*)
+            write(io_output,*) 'box  ',ibox,' initial v   = ', vbox(ibox)
          end if
          if ( lneigh ) then
 ! ***        call for initial set-up of the near-neighbour bitmap ***
@@ -609,16 +609,16 @@
 ! *** calculate initial pressure ***
          call pressure ( press1, surf, ibox )
          if (myid.eq.0) then
-            write(iou,74) ibox, surf
-            write(iou,64) ibox, press1
+            write(io_output,74) ibox, surf
+            write(io_output,64) ibox, press1
          end if
       end do
 
       if (myid.eq.0) then
-         write(iou,*)
-         write(iou,*) '+++++ start of markov chain +++++'
-         write(iou,*)
-         write(iou,*) 
+         write(io_output,*)
+         write(io_output,*) '+++++ start of markov chain +++++'
+         write(io_output,*)
+         write(io_output,*) 
      &      'Cycle   Total   Energy    Boxlength   Pressure  Molecules'
 !     set up info at beginning of fort.12 for analysis
          write(12,*) nstep,nmolty,(masst(i),i=1,nmolty)
@@ -637,7 +637,7 @@
 
             tmcc = nnstep + nnn - 1
             
-!            write(iou,*) 'nstep',(nnn-1)*nchain+ii
+!            write(io_output,*) 'nstep',(nnn-1)*nchain+ii
 ! ***       select a move-type at random ***
             rm = random()
 
@@ -650,25 +650,25 @@
                   call volume
                end if
 
-            elseif (rm .le. pmswat) then
+            else if (rm .le. pmswat) then
 !           --- CBMC switch move ---
                call swatch
-            elseif ( rm .le. pmswap ) then
+            else if ( rm .le. pmswap ) then
 !           --- swap move for linear and branched molecules ---
                call swap(bsswap,bnswap,bnswap_in,bnswap_out,
      &              cnt_wf1,cnt_wf2,cnt_wra1,cnt_wra2)
-            elseif ( rm .le. pmcb ) then
+            else if ( rm .le. pmcb ) then
 !           --- configurational bias move ---
                call config
-            elseif ( rm .le. pmflcq ) then
+            else if ( rm .le. pmflcq ) then
 !           --- displacement of fluctuating charges ---
                call flucq(2,0)
 
-            elseif (rm .le. pmexpc ) then
+            else if (rm .le. pmexpc ) then
 !           --- expanded-ensemble move ---
                call expand
 
-            elseif (rm .le. pmexpc1 ) then
+            else if (rm .le. pmexpc1 ) then
 !           --- new expanded-ensemble move ---
 !               call expand
                if (random().le.eeratio) then
@@ -676,21 +676,21 @@
                else
                   call eemove
                end if
-            elseif ( rm .le. pm_atom_tra) then
+            else if ( rm .le. pm_atom_tra) then
                rm = 3.0d0 * random()
                  if ( rm .le. 1.0d0 ) then
                      call Atom_traxyz (.true.,.false.,.false.)
-                 elseif ( rm .le. 2.0d0 ) then
+                 else if ( rm .le. 2.0d0 ) then
                      call Atom_traxyz (.false.,.true.,.false.)
                  else
                      call Atom_traxyz (.false.,.false.,.true.)
                  end if
-            elseif ( rm .le. pmtra ) then
+            else if ( rm .le. pmtra ) then
 !           --- translational move in x,y, or z direction ---
                  rm = 3.0d0 * random()
                  if ( rm .le. 1.0d0 ) then
                     call traxyz (.true.,.false.,.false.)	
-                 elseif ( rm .le. 2.0d0 ) then
+                 else if ( rm .le. 2.0d0 ) then
                      call traxyz (.false.,.true.,.false.)
                  else
                      call traxyz (.false.,.false.,.true.)
@@ -700,7 +700,7 @@
                rm = 3.0d0 * random()
                if ( rm .le. 1.0d0 ) then
                   call rotxyz(.true.,.false.,.false.)
-               elseif ( rm .le. 2.0d0 ) then
+               else if ( rm .le. 2.0d0 ) then
                   call rotxyz(.false.,.true.,.false.)
                else
                   call rotxyz(.false.,.false.,.true.)
@@ -730,9 +730,9 @@
                         acnbox2(ibox,itype,itype2) = 
      &                       acnbox2(ibox,itype,itype2) +
      &                       dble(ncmt2(ibox,itype,itype2))
-!                        write(iou,*) '1:',acnbox2(ibox,itype,itype2)
+!                        write(io_output,*) '1:',acnbox2(ibox,itype,itype2)
                      end do
-!                     write(iou,*) '2:', acnbox(ibox,itype)
+!                     write(io_output,*) '2:', acnbox(ibox,itype)
                   end if
                end do
 
@@ -987,7 +987,7 @@
          end if
 
          if (lucall) then
-            write(iou,*) 'not recently checked for accuracy'
+            write(io_output,*) 'not recently checked for accuracy'
             call cleanup('')
 !            do j = 1,nmolty
 !               if ( ucheck(j) .gt. 0 ) then
@@ -1001,7 +1001,7 @@
             acnp = acnp + 1.0d0
             do ibox = 1, nbox
                call pressure ( press1, surf, ibox )
-!              write(iou,*) 'control pressure', press1
+!              write(io_output,*) 'control pressure', press1
                pres(ibox) = press1
                acpres(ibox) = acpres(ibox) + press1
                acsurf(ibox) = acsurf(ibox) + surf
@@ -1229,7 +1229,7 @@
      &               enthalpy
              end if
        
-          elseif( .not.lnpt .and..not.lgibbs) then
+          else if( .not.lnpt .and..not.lgibbs) then
              ennergy= inst_energy/(dble(nchain*nnn))
              ennergy2= inst_energy2/(dble(nchain*nnn))
              sigma2Esimulation=(ennergy2)-(ennergy*ennergy)
@@ -1294,16 +1294,16 @@
          write(21,*) 'ii:',ii,(neigh_cnt(i),i=1,nchain)
       end if
       if (myid.eq.0) then
-         write(iou,*)
-         write(iou,*) '+++++ end of markov chain +++++'
+         write(io_output,*)
+         write(io_output,*) '+++++ end of markov chain +++++'
  
 ! *** write some information about translations and rotations
-         write(iou,*)
-         write(iou,*) '### Translations ###'
-         write(iou,*)
+         write(io_output,*)
+         write(io_output,*) '### Translations ###'
+         write(io_output,*)
          do ibox = 1,nbox
             do i=1,nmolty
-               write(iou,*) 'molecule typ =',i,' in box',ibox
+               write(io_output,*) 'molecule typ =',i,' in box',ibox
                acntrax(i,ibox) = acntrax(i,ibox) + bntrax(i,ibox)
                acstrax(i,ibox) = acstrax(i,ibox) + bstrax(i,ibox)
                if ( acntrax(i,ibox) .ne. 0.0d0 ) then
@@ -1311,7 +1311,7 @@
                else
                   ratvol = 0.0d0
                end if
-               write(iou,71) acntrax(i,ibox),ratvol,rmtrax(i,ibox)
+               write(io_output,71) acntrax(i,ibox),ratvol,rmtrax(i,ibox)
                
                acntray(i,ibox) = acntray(i,ibox) + bntray(i,ibox)
                acstray(i,ibox) = acstray(i,ibox) + bstray(i,ibox)
@@ -1320,7 +1320,7 @@
                else
                   ratvol = 0.0d0
                end if
-               write(iou,72) acntray(i,ibox),ratvol,rmtray(i,ibox)
+               write(io_output,72) acntray(i,ibox),ratvol,rmtray(i,ibox)
                
                acntraz(i,ibox) = acntraz(i,ibox) + bntraz(i,ibox)
                acstraz(i,ibox) = acstraz(i,ibox) + bstraz(i,ibox)
@@ -1329,17 +1329,17 @@
                else
                   ratvol = 0.0d0
                end if
-               write(iou,73) acntraz(i,ibox),ratvol,rmtraz(i,ibox)
-               write(iou,*)
+               write(io_output,73) acntraz(i,ibox),ratvol,rmtraz(i,ibox)
+               write(io_output,*)
                
             end do
          end do
          
-         write(iou,*) '### Rotations ###'
-         write(iou,*)
+         write(io_output,*) '### Rotations ###'
+         write(io_output,*)
          do ibox = 1,nbox
             do i=1,nmolty
-               write(iou,*) 'molecule typ =',i,' in box',ibox
+               write(io_output,*) 'molecule typ =',i,' in box',ibox
                acnrotx(i,ibox) = acnrotx(i,ibox) + bnrotx(i,ibox)
                acsrotx(i,ibox) = acsrotx(i,ibox) + bsrotx(i,ibox)
                if ( acnrotx(i,ibox) .ne. 0.0d0 ) then
@@ -1347,7 +1347,7 @@
                else
                   ratvol = 0.0d0
                end if
-               write(iou,71) acnrotx(i,ibox),ratvol,rmrotx(i,ibox)
+               write(io_output,71) acnrotx(i,ibox),ratvol,rmrotx(i,ibox)
                
                acnroty(i,ibox) = acnroty(i,ibox) + bnroty(i,ibox)
                acsroty(i,ibox) = acsroty(i,ibox) + bsroty(i,ibox)
@@ -1356,7 +1356,7 @@
                else
                   ratvol = 0.0d0
                end if
-               write(iou,72) acnroty(i,ibox),ratvol,rmroty(i,ibox)
+               write(io_output,72) acnroty(i,ibox),ratvol,rmroty(i,ibox)
                
                acnrotz(i,ibox) = acnrotz(i,ibox) + bnrotz(i,ibox)
                acsrotz(i,ibox) = acsrotz(i,ibox) + bsrotz(i,ibox)
@@ -1365,8 +1365,8 @@
                else
                   ratvol = 0.0d0
                end if
-               write(iou,73) acnrotz(i,ibox),ratvol,rmrotz(i,ibox)
-               write(iou,*)
+               write(io_output,73) acnrotz(i,ibox),ratvol,rmrotz(i,ibox)
+               write(io_output,*)
             end do
          end do
  71      format(' x-dir: attempts =',F10.1,'   ratio =',f6.3,
@@ -1377,24 +1377,24 @@
      &        '   max.displ. =',e11.4)
 ! *** write some information about config performance ***
          if ( pmcb .gt. 0.0d0 ) then
-            write(iou,*)
-            write(iou,*) '### Configurational-bias ###'
-            write(iou,*)
+            write(io_output,*)
+            write(io_output,*) '### Configurational-bias ###'
+            write(io_output,*)
             do i = 1, nmolty
-               write(iou,*) 'molecule typ =',i
-              write(iou,*) '    length  attempts  succ.growth  accepted'
+               write(io_output,*) 'molecule typ =',i
+              write(io_output,*) '    length  attempts  succ.growth  accepted'
      &              ,'   %su.gr.    %accep.'
               do inb = 1, nunit(i)
                  if ( bncb(i,inb) .gt. 0.0d0 ) then
                     pscb1 = bscb(i,1,inb) * 100.0d0 / bncb(i,inb)
                     pscb2 = bscb(i,2,inb) * 100.0d0 / bncb(i,inb)
-                    write(iou,'(i9,3f10.1,2f10.2)') inb, bncb(i,inb),
+                    write(io_output,'(i9,3f10.1,2f10.2)') inb, bncb(i,inb),
      &                   bscb(i,1,inb), bscb(i,2,inb), pscb1, pscb2
                  end if
               end do
               if (pmfix(i).gt.0.0d0) then
-                 write(iou,*) ' SAFE-CBMC move '
-                 write(iou,*) '    length  attempts  succ.growth  ',
+                 write(io_output,*) ' SAFE-CBMC move '
+                 write(io_output,*) '    length  attempts  succ.growth  ',
      &                'accepted   %su.gr.    %accep.'               
                  do inb = 1, nunit(i)
                     if (fbncb(i,inb) .gt. 0.0d0 ) then
@@ -1402,29 +1402,29 @@
      &                      / fbncb(i,inb)
                        pscb2 = fbscb(i,2,inb) * 100.0d0 
      &                      / fbncb(i,inb)
-                       write(iou,'(i9,3f10.1,2f10.2)') inb,fbncb(i,inb),
+                       write(io_output,'(i9,3f10.1,2f10.2)') inb,fbncb(i,inb),
      &                      fbscb(i,1,inb), fbscb(i,2,inb)
      &                      , pscb1, pscb2
                     end if
                  end do
               end if
            end do
-           write(iou,*)
+           write(io_output,*)
         end if
 ! *** write some information about volume performance ***
         if ( lgibbs .or. lnpt) then
-           write(iou,*)
-           write(iou,*) '### Volume change       ###'
+           write(io_output,*)
+           write(io_output,*) '### Volume change       ###'
            do ibox = 1,nbox
               if (lsolid(ibox) .and. .not. lrect(ibox)) then
                  do j = 1,9
                     acnhmat(ibox,j) = acnhmat(ibox,j) + bnhmat(ibox,j)
                     acshmat(ibox,j) = acshmat(ibox,j) + bshmat(ibox,j)
                     if ( acshmat(ibox,j) .gt. 0.5d0) then
-                       write(iou,70) acnhmat(ibox,j),
+                       write(io_output,70) acnhmat(ibox,j),
      &                    acshmat(ibox,j)/acnhmat(ibox,j),rmhmat(ibox,j)
                     else
-                       write(iou,70)acnhmat(ibox,j),0.0d0,rmhmat(ibox,j)
+                       write(io_output,70)acnhmat(ibox,j),0.0d0,rmhmat(ibox,j)
                     end if
                  end do
               else
@@ -1435,15 +1435,15 @@
                  else
                     ratvol = 0.0d0
                  end if
-                 write(iou,61) acnvol(ibox),ratvol,rmvol(ibox)
+                 write(io_output,61) acnvol(ibox),ratvol,rmvol(ibox)
               end if
            end do
         end if
-        write(iou,*)  
-        write(iou,*) '### Molecule swap       ###'
-        write(iou,*)
+        write(io_output,*)  
+        write(io_output,*) '### Molecule swap       ###'
+        write(io_output,*)
         do i = 1, nmolty
-           write(iou,*) 'molecule typ =',i
+           write(io_output,*) 'molecule typ =',i
            do j=1,nswapb(i)
               if ( box1(i,j) .eq. box2(i,j) ) then
                  jbox_max = 1
@@ -1453,7 +1453,7 @@
               do jbox = 1,jbox_max
                  if ( jbox .eq. 1 ) ibox = box1(i,j)
                  if ( jbox .eq. 2 ) ibox = box2(i,j)
-                 write(iou,66) box1(i,j),box2(i,j),ibox,
+                 write(io_output,66) box1(i,j),box2(i,j),ibox,
      &                bsswap(i,j,ibox),bnswap(i,j,ibox),
      &                bnswap(i,j,ibox+nbox)
                  if (bnswap(i,j,ibox) .gt. 0.5d0) then
@@ -1461,56 +1461,56 @@
      &                   100.0d0/bsswap(i,j,ibox)
                     bnswap(i,j,ibox) = bnswap(i,j,ibox+nbox)*
      &                   100.0d0/bnswap(i,j,ibox)
-                    write(iou,63) bsswap(i,j,ibox),bnswap(i,j,ibox)
+                    write(io_output,63) bsswap(i,j,ibox),bnswap(i,j,ibox)
                  end if
               end do
            end do
-           write(iou,68) bnswap_in(i,1), bnswap_in(i,2)
-           write(iou,69) bnswap_out(i,1), bnswap_out(i,2)
+           write(io_output,68) bnswap_in(i,1), bnswap_in(i,2)
+           write(io_output,69) bnswap_out(i,1), bnswap_out(i,2)
         end do
 
-        write(iou,*)
-        write(iou,*) '### Molecule swatch     ###'
-        write(iou,*)
+        write(io_output,*)
+        write(io_output,*) '### Molecule swatch     ###'
+        write(io_output,*)
         do i = 1, nswaty
-           write(iou,*) 'pair typ =',i
-           write(iou,*) 'moltyps = ',nswatb(i,1),' and',nswatb(i,2)
+           write(io_output,*) 'pair typ =',i
+           write(io_output,*) 'moltyps = ',nswatb(i,1),' and',nswatb(i,2)
            do j = 1, nswtcb(i)
 ! --- JLR 12-1-09 changing to exclude empty box attempts from swatch rate 
-              write(iou,62) box3(i,j),box4(i,j),
+              write(io_output,62) box3(i,j),box4(i,j),
      &             bnswat(i,j),bnswat(i,j)-bnswat_empty(i,j),bsswat(i,j)
               if (bnswat(i,j) .gt. 0.5d0 ) then
-                 write(iou,65) 100.0d0 * bsswat(i,j)/
+                 write(io_output,65) 100.0d0 * bsswat(i,j)/
      &                (bnswat(i,j)-bnswat_empty(i,j))
               end if
 ! --- EN JLR 12-1-09
            end do
         end do
 
-        write(iou,*)
-        write(iou,*)    '### Charge Fluctuation  ###'
-        write(iou,*)
+        write(io_output,*)
+        write(io_output,*)    '### Charge Fluctuation  ###'
+        write(io_output,*)
       
         do i = 1, nmolty
            do j = 1,nbox
               bnflcq2(i,j) = bnflcq2(i,j) + bnflcq(i,j) 
               bsflcq2(i,j) = bsflcq2(i,j) + bsflcq(i,j) 
               if (bnflcq2(i,j) .gt. 0.5d0) then
-                 write(iou,*) 'molecule typ =',i,'  box =',j
+                 write(io_output,*) 'molecule typ =',i,'  box =',j
                  bsflcq2(i,j) = bsflcq2(i,j)/bnflcq2(i,j)
-                 write(iou,61) bnflcq2(i,j),bsflcq2(i,j),rmflcq(i,j)
+                 write(io_output,61) bnflcq2(i,j),bsflcq2(i,j),rmflcq(i,j)
               end if
            end do
         end do
 
-        write(iou,*) 
-        write(iou,*)    '### Expanded Ensemble Move  ###'
-        write(iou,*) 
+        write(io_output,*) 
+        write(io_output,*)    '### Expanded Ensemble Move  ###'
+        write(io_output,*) 
         do i = 1, nmolty
            do j = 1,nbox
               if (lexpand(i) .and. bnexpc(i,j) .gt. 0.5) then
-                 write(iou,*) 'molecule typ =',i,'  box =',j
-                 write(iou,67) bnexpc(i,j),bsexpc(i,j),
+                 write(io_output,*) 'molecule typ =',i,'  box =',j
+                 write(io_output,67) bnexpc(i,j),bsexpc(i,j),
      &                bsexpc(i,j)/bnexpc(i,j)
               end if
            end do
@@ -1561,63 +1561,63 @@
 !---need to check
          if (myid.eq.0) then
             if ( abs(v - vbox(ibox)) .gt. 0.0001) then
-               write(iou,*) '### problem with energy ###  box ',ibox
-               write(iou,*) ' Total energy: ',v,vbox(ibox),v-vbox(ibox)
+               write(io_output,*) '### problem with energy ###  box ',ibox
+               write(io_output,*) ' Total energy: ',v,vbox(ibox),v-vbox(ibox)
             end if
             if ( abs(vinter - vinterb(ibox)) .gt. 0.000001) then
-               write(iou,*) '### problem  ###'
-               write(iou,*) ' Inter mol.en.: ',vinter,vinterb(ibox)
+               write(io_output,*) '### problem  ###'
+               write(io_output,*) ' Inter mol.en.: ',vinter,vinterb(ibox)
                if (lsolid(ibox) .and. .not. lrect(ibox)) then
-                 write(iou,*)'You might check the cutoff wrt box widths'
-                 write(iou,*) 'Normal PBC might be failing'
+                 write(io_output,*)'You might check the cutoff wrt box widths'
+                 write(io_output,*) 'Normal PBC might be failing'
                end if
             end if
             if ( abs(vtail - vtailb(ibox)) .gt. 0.000001) then
-               write(iou,*) '### problem  ###'
-               write(iou,*) ' Tail corr.en.: ',vtail,vtailb(ibox)
+               write(io_output,*) '### problem  ###'
+               write(io_output,*) ' Tail corr.en.: ',vtail,vtailb(ibox)
             end if
             if ( abs(vintra - vintrab(ibox)) .gt. 0.000001) then
-               write(iou,*) '### problem  ###'
-               write(iou,*) ' Intra mol.en.: ',vintra,vintrab(ibox)
+               write(io_output,*) '### problem  ###'
+               write(io_output,*) ' Intra mol.en.: ',vintra,vintrab(ibox)
             end if
             if ( abs(vvib - vvibb(ibox)) .gt. 0.001) then
-               write(iou,*) '### problem  ###'
-               write(iou,*) ' bond vib. en.: ',vvib,vvibb(ibox)
+               write(io_output,*) '### problem  ###'
+               write(io_output,*) ' bond vib. en.: ',vvib,vvibb(ibox)
             end if
             if ( abs(vbend - vbendb(ibox)) .gt. 0.001) then
-               write(iou,*) '### problem  ###'
-               write(iou,*) ' Bond ben.en.: ',vbend,vbendb(ibox)
+               write(io_output,*) '### problem  ###'
+               write(io_output,*) ' Bond ben.en.: ',vbend,vbendb(ibox)
             end if
             if ( abs(vtg - vtgb(ibox)) .gt. 0.001) then
-               write(iou,*) '### problem  ###'
-               write(iou,*) ' Torsion.en.: ',vtg,vtgb(ibox)
+               write(io_output,*) '### problem  ###'
+               write(io_output,*) ' Torsion.en.: ',vtg,vtgb(ibox)
             end if
             if ( abs(vext - vextb(ibox)) .gt. 0.0001) then
-               write(iou,*) '### problem  ###'
-               write(iou,*) ' Externa.en.: ',vext,vextb(ibox)
+               write(io_output,*) '### problem  ###'
+               write(io_output,*) ' Externa.en.: ',vext,vextb(ibox)
             end if
             if ( abs(velect - velectb(ibox)) .gt. 0.000001) then
-               write(iou,*) '### problem  ###'
-               write(iou,*) ' Coulomb.en.: ',velect,velectb(ibox)
+               write(io_output,*) '### problem  ###'
+               write(io_output,*) ' Coulomb.en.: ',velect,velectb(ibox)
             end if
             if ( abs(vflucq - vflucqb(ibox)) .gt. 0.0001) then
-               write(iou,*) '### problem  ###'
-               write(iou,*) ' Fluc Q en.: ',vflucq,vflucqb(ibox)
+               write(io_output,*) '### problem  ###'
+               write(io_output,*) ' Fluc Q en.: ',vflucq,vflucqb(ibox)
             end if
             if ( abs(v3garo - v3garob(ibox) ) .gt.0.001) then
-               write(iou,*) '### problem ###'
-               write(iou,*) ' 3-body en.: ',v3garo,v3garob(ibox)
+               write(io_output,*) '### problem ###'
+               write(io_output,*) ' 3-body en.: ',v3garo,v3garob(ibox)
             end if
             if ( ldielect ) then
                if ( abs(dipolexo - dipolex(ibox)) .gt. 0.0001) then
-                  write(iou,*) '### problem  ###'
-                  write(iou,*) ' Dipole X: ',dipolexo,dipolex(ibox)
+                  write(io_output,*) '### problem  ###'
+                  write(io_output,*) ' Dipole X: ',dipolexo,dipolex(ibox)
                end if
             end if
             if (lmipsw) then
                if (abs(vwellipsw-vwellipswb(ibox)).gt.0.001) then
-                  write(iou,*) '### problem  ###'
-                  write(iou,*) ' well en.: ',vwellipsw,vwellipswb(ibox)
+                  write(io_output,*) '### problem  ###'
+                  write(io_output,*) ' well en.: ',vwellipsw,vwellipswb(ibox)
                end if
             end if
          end if  ! end if myid.eq.0
@@ -1627,11 +1627,11 @@
 ! only processor 0 needs to calculate and write out averages, final config, etc
 
       if (myid.eq.0) then
-         write(iou,*)
-         write(iou,1501) (vstart(i) ,i=1,nbox)
-         write(iou,1502) (vend(i)   ,i=1,nbox)
-         write(iou,1504) (vbox(i)   ,i=1,nbox)
-         write(iou,*)
+         write(io_output,*)
+         write(io_output,1501) (vstart(i) ,i=1,nbox)
+         write(io_output,1502) (vend(i)   ,i=1,nbox)
+         write(io_output,1504) (vbox(i)   ,i=1,nbox)
+         write(io_output,*)
             
 !     ** normalize and write out presim results in fort.22 **
           
@@ -1775,7 +1775,7 @@
                end do
             end do 
             
-         elseif(L_sub) then
+         else if(L_sub) then
             point_of_start = 0
             do i =1,N_moltyp2sub
                point_of_start=point_of_start+temtyp(i)
@@ -1963,39 +1963,39 @@
             if (acvsq(1,ibox).gt.0.0d0) aflv(ibox)=dsqrt(acvsq(1,ibox))
          end do
 
-         write(iou,1215) ('       Box ',i,i=1,nbox) 
-         write(iou,*)
-         write(iou,1209) (acpres(i) ,i=1,nbox)
-         write(iou,1212) ((acpres(i)*7.2429d-5),i=1,nbox)
-         write(iou,1216) (acsurf(i) ,i=1,nbox)
+         write(io_output,1215) ('       Box ',i,i=1,nbox) 
+         write(io_output,*)
+         write(io_output,1209) (acpres(i) ,i=1,nbox)
+         write(io_output,1212) ((acpres(i)*7.2429d-5),i=1,nbox)
+         write(io_output,1216) (acsurf(i) ,i=1,nbox)
          do itype = 1, nmolty
-            write(iou,1210) itype, (acchem(i,itype) ,i=1,nbox)
+            write(io_output,1210) itype, (acchem(i,itype) ,i=1,nbox)
          end do
-         write(iou,*)
+         write(io_output,*)
          
          do i = 1,3
-            write(iou,1202) (acboxl(ibox,i) ,ibox=1,nbox)
+            write(io_output,1202) (acboxl(ibox,i) ,ibox=1,nbox)
          end do
 
          do ibox = 1, nbox
             if ( lsolid(ibox) .and. .not. lrect(ibox) ) then
                do i = 1,3
-                  write(iou,1200) acboxa(ibox,i)*180.0d0/onepi
+                  write(io_output,1200) acboxa(ibox,i)*180.0d0/onepi
                end do
             end if
          end do
       
          do itype = 1, nmolty
-            write(iou,1201) itype, (acnbox(i,itype) ,i=1,nbox)
+            write(io_output,1201) itype, (acnbox(i,itype) ,i=1,nbox)
          end do
          if ( lpbcz ) then
-            write(iou,1204) (molvol(i) ,i=1,nbox)
-            write(iou,1205) (speden(i) ,i=1,nbox)
+            write(io_output,1204) (molvol(i) ,i=1,nbox)
+            write(io_output,1205) (speden(i) ,i=1,nbox)
             do itype = 1, nmolty
-               write(iou,1203) itype, (acdens(i,itype) ,i=1,nbox)
+               write(io_output,1203) itype, (acdens(i,itype) ,i=1,nbox)
                if ( lexpand(itype) ) then
                   do itype2 = 1, numcoeff(itype) 
-                     write(iou,1503) itype, itype2,acdens(itype,itype)*
+                     write(io_output,1503) itype, itype2,acdens(itype,itype)*
      &                    acnbox2(itype,itype,itype2)/
      &                    (acnbox(itype,itype)*acmove),
      &                    acnbox2(itype,itype,itype2)/
@@ -2004,26 +2004,26 @@
                end if
             end do
          else
-            write(iou,1214) (molvol(i), i=1,nbox)
+            write(io_output,1214) (molvol(i), i=1,nbox)
             do itype = 1, nmolty
-               write(iou,1213) itype, (acdens(i,itype), i=1,nbox)
+               write(io_output,1213) itype, (acdens(i,itype), i=1,nbox)
             end do
          end if
          do itype = 1, nmolty
-            write(iou,1211) itype, (molfra(i,itype), i=1,nbox)
+            write(io_output,1211) itype, (molfra(i,itype), i=1,nbox)
          end do
          do itype = 1, nmolty
-            write(iou,1208) itype, (asetel(i,itype) ,i=1,nbox)
+            write(io_output,1208) itype, (asetel(i,itype) ,i=1,nbox)
          end do
-         write(iou,*)
+         write(io_output,*)
          do j=1,10
 ! *** only 1 to 10 is the energy information         
-            write(iou,1206) vname(j),avv(j,1:nbox),acvkjmol(j,1:nbox) 
+            write(io_output,1206) vname(j),avv(j,1:nbox),acvkjmol(j,1:nbox) 
          end do
          
-         write(iou,*)
-         write(iou,1207) (aflv(i) ,i=1,nbox)
-         write(iou,*)
+         write(io_output,*)
+         write(io_output,1207) (aflv(i) ,i=1,nbox)
+         write(io_output,*)
       
 ! ---   Output 2nd virial coefficient data
  2000    if (lvirial) then
@@ -2057,10 +2057,10 @@
                starvir = starvir + stepvir
                bvirial = bvirial + 0.5d0*inside
           
-               write(iou,*) 'At temperature of',virtemp(itemp)
-               write(iou,*) 'bvirial ',
+               write(io_output,*) 'At temperature of',virtemp(itemp)
+               write(io_output,*) 'bvirial ',
      &              -(twopi*stepvir*bvirial),' [A^3 / molecule]'
-               write(iou,*) 'bvirial ',-0.602d0*twopi*
+               write(io_output,*) 'bvirial ',-0.602d0*twopi*
      &              stepvir*bvirial,' [cm^3 / mole]'
 
 !            if ( lvirial2 ) then
@@ -2073,27 +2073,27 @@
                   starvir = starvir + stepvir
                end do
                bvirial = -(twopi*stepvir*bvirial)
-               write(iou,*) 'With quantum correction:'
-               write(iou,*) 'bvirial ',bvirial,' [A^3 / molecule]'
-               write(iou,*) 'bvirial ',0.602d0*bvirial,' [cm^3 / mole]'
+               write(io_output,*) 'With quantum correction:'
+               write(io_output,*) 'bvirial ',bvirial,' [A^3 / molecule]'
+               write(io_output,*) 'bvirial ',0.602d0*bvirial,' [cm^3 / mole]'
             end do
          end if
 
 ! - solute values
-         write(iou,*) 'type  box     vinter      vintra      vtor',
+         write(io_output,*) 'type  box     vinter      vintra      vtor',
      &        '        vbend       vtail'
             
          do itype = 1, nmolty
             do ibox = 1, nbox
                if (solcount(ibox,itype).gt.0) then
-                  write(iou,1372) itype,ibox,avsolinter(ibox,itype)
+                  write(io_output,1372) itype,ibox,avsolinter(ibox,itype)
      &                 /solcount(ibox,itype),avsolintra(ibox,itype)
      &                 /solcount(ibox,itype),avsoltor(ibox,itype)
      &                 /solcount(ibox,itype),avsolbend(ibox,itype)
      &                 /solcount(ibox,itype),avsolelc(ibox,itype)
      &                 /solcount(ibox,itype)
                else
-                  write(iou,1372) itype,ibox,0.0,0.0,0.0,0.0,0.0
+                  write(io_output,1372) itype,ibox,0.0,0.0,0.0,0.0,0.0
                end if              
             end do
          end do
@@ -2160,28 +2160,28 @@
 ! - write out the heat of vaporization and solubility parameters
             do ibox = 1,nbox-1
                do jbox = ibox+1,nbox 
-                  write(iou,1508) ibox,jbox,aver1(1,ibox,jbox),
+                  write(io_output,1508) ibox,jbox,aver1(1,ibox,jbox),
      &                 stdev1(1,ibox,jbox),errme1(1,ibox,jbox)
-                  write(iou,1509) ibox,jbox,aver1(2,ibox,jbox),
+                  write(io_output,1509) ibox,jbox,aver1(2,ibox,jbox),
      &                 stdev1(2,ibox,jbox),errme1(2,ibox,jbox)
-                  write(iou,1510) ibox,jbox,aver1(3,ibox,jbox),
+                  write(io_output,1510) ibox,jbox,aver1(3,ibox,jbox),
      &                 stdev1(3,ibox,jbox),errme1(3,ibox,jbox)
-!               write(iou,1518) ibox,jbox,aver1(10,ibox,jbox),
+!               write(io_output,1518) ibox,jbox,aver1(10,ibox,jbox),
 !     &                 stdev1(10,ibox,jbox), errme1(10,ibox,jbox)
-                  write(iou,1519) ibox,jbox,aver1(11,ibox,jbox),
+                  write(io_output,1519) ibox,jbox,aver1(11,ibox,jbox),
      &                 stdev1(11,ibox,jbox), errme1(11,ibox,jbox) 
 
-                  write(iou,1511) ibox,jbox,aver1(4,ibox,jbox),
+                  write(io_output,1511) ibox,jbox,aver1(4,ibox,jbox),
      &                 stdev1(4,ibox,jbox),errme1(4,ibox,jbox)
-                  write(iou,1512) ibox,jbox,aver1(5,ibox,jbox),
+                  write(io_output,1512) ibox,jbox,aver1(5,ibox,jbox),
      &                 stdev1(5,ibox,jbox),errme1(5,ibox,jbox)
-                  write(iou,1513) ibox,jbox,aver1(6,ibox,jbox),
+                  write(io_output,1513) ibox,jbox,aver1(6,ibox,jbox),
      &                 stdev1(6,ibox,jbox),errme1(6,ibox,jbox)
-                  write(iou,1514) ibox,jbox,aver1(7,ibox,jbox),
+                  write(io_output,1514) ibox,jbox,aver1(7,ibox,jbox),
      &                 stdev1(7,ibox,jbox),errme1(7,ibox,jbox)
-                  write(iou,1515) ibox,jbox,aver1(8,ibox,jbox),
+                  write(io_output,1515) ibox,jbox,aver1(8,ibox,jbox),
      &                 stdev1(8,ibox,jbox),errme1(8,ibox,jbox)
-                  write(iou,1516) ibox,jbox,aver1(9,ibox,jbox),
+                  write(io_output,1516) ibox,jbox,aver1(9,ibox,jbox),
      &                 stdev1(9,ibox,jbox),errme1(9,ibox,jbox)
                end do
             end do
@@ -2189,53 +2189,53 @@
 
 ! - specific density
             do ibox = 1, nbox
-               write(iou,1331) ibox,aver(1,ibox),stdev(1,ibox),
+               write(io_output,1331) ibox,aver(1,ibox),stdev(1,ibox),
      &              errme(1,ibox)
             end do
             
 ! * system volume
             itel = 4 + nener + 4*nmolty
             do ibox = 1, nbox
-               write(iou,1343) ibox,
+               write(io_output,1343) ibox,
      &              aver(itel,ibox),stdev(itel,ibox),errme(itel,ibox)
             end do
             
 ! - pressure
             do ibox = 1, nbox
-               write(iou,1341) ibox,aver(2,ibox),stdev(2,ibox),
+               write(io_output,1341) ibox,aver(2,ibox),stdev(2,ibox),
      &              errme(2,ibox)
             end do
 
 ! - surface tension
             itel = 2+nener+ 4*nmolty+1
             do ibox = 1, nbox
-               write(iou,1342) ibox,
+               write(io_output,1342) ibox,
      &              aver(itel,ibox),stdev(itel,ibox),errme(itel,ibox)
             end do
 
-            write(iou,*) 
+            write(io_output,*) 
 ! - energies
-!         write(iou,*) 'average value', 'STD', 'SEM'
+!         write(io_output,*) 'average value', 'STD', 'SEM'
             do ibox = 1, nbox
                do j=3,2+10
 ! *** only 1 to 10 is the energy information
-                  write(iou,1311) vname(j-2),ibox,aver(j,ibox),
+                  write(io_output,1311) vname(j-2),ibox,aver(j,ibox),
      &                 stdev(j,ibox),errme(j,ibox)
                end do
             end do
       
-            write(iou,*)
+            write(io_output,*)
 
 !-- Enthalpy
             do ibox = 1,nbox
                j = 4+nener +4*nmolty + 1
-               write(iou, 1517) enth, ibox, aver(j,ibox),
+               write(io_output, 1517) enth, ibox, aver(j,ibox),
      &              stdev(j,ibox),errme(j,ibox)
                j = 4+nener + 4*nmolty + 2
-               write(iou,1517) enth1,ibox,aver(j,ibox),
+               write(io_output,1517) enth1,ibox,aver(j,ibox),
      &              stdev(j,ibox),errme(j,ibox)
             end do 
-            write(iou,*)
+            write(io_output,*)
 
 !--Residual Heat capacity --- 
 
@@ -2246,9 +2246,9 @@
                sigma2H=sigma2Hsimulation*(6.022d23)*((1.38066d-23)**2) /
      &              (dble(nchain)) !(J2/mol) 
                Cp=sigma2H/((1.38066d-23)*(temp**2))
-               write(iou,*) 'Cp residual(J/Kmol) =', Cp 
-               write(iou,*) ' H2=', inst_enth2
-               write(iou,*)  ' H=', inst_enth
+               write(io_output,*) 'Cp residual(J/Kmol) =', Cp 
+               write(io_output,*) ' H2=', inst_enth2
+               write(io_output,*)  ' H=', inst_enth
             end if
 
             if( .not. lnpt .and..not.lgibbs) then
@@ -2259,9 +2259,9 @@
                sigma2E=sigma2Esimulation*(6.022d23)*((1.38066d-23)**2) /
      &              (dble(nchain)) !(J2/mol) 
                Cv=sigma2E/((1.38066d-23)*(temp**2))
-               write(iou,*) 'Cv residual(J/Kmol) =', Cv
-               write(iou,*) ' E2=', inst_energy2
-               write(iou,*) ' E=', inst_energy
+               write(io_output,*) 'Cv residual(J/Kmol) =', Cv
+               write(io_output,*) ' E2=', inst_energy2
+               write(io_output,*) ' E=', inst_energy
             end if
 
 
@@ -2270,12 +2270,12 @@
                itel = (2+nener) + itype
                do ibox = 1, nbox
                   if ( aver(itel,ibox) .ne. 0.0d0 ) then
-                     write(iou,1351) itype,ibox,
+                     write(io_output,1351) itype,ibox,
      &                    ((-1.0d0)/beta)*dlog(aver(itel,ibox)),
      &                    (1.0d0/beta)*stdev(itel,ibox)/aver(itel,ibox),
      &                    (1.0d0/beta)*errme(itel,ibox)/aver(itel,ibox)
                   else
-                     write(iou,1351) itype,ibox,0.0d0,0.0d0,0.0d0
+                     write(io_output,1351) itype,ibox,0.0d0,0.0d0,0.0d0
                   end if
                end do
             end do
@@ -2284,7 +2284,7 @@
             do itype = 1, nmolty
                itel = (2+nener) + nmolty + itype
                do ibox = 1, nbox
-                  write(iou,1321) itype,ibox,aver(itel,ibox)
+                  write(io_output,1321) itype,ibox,aver(itel,ibox)
      &                 ,stdev(itel,ibox),errme(itel,ibox)
                end do
             end do
@@ -2294,10 +2294,10 @@
                itel = (2+nener) + 2 * nmolty + itype
                do ibox = 1, nbox
                   if ( lpbcz ) then
-                     write(iou,1361) itype,ibox,1.0d3*aver(itel,ibox)
+                     write(io_output,1361) itype,ibox,1.0d3*aver(itel,ibox)
      &                    ,1.0d3*stdev(itel,ibox),1.0d3*errme(itel,ibox)
                   else
-                     write(iou,1361) itype,ibox,1.0d2*aver(itel,ibox)
+                     write(io_output,1361) itype,ibox,1.0d2*aver(itel,ibox)
      &                    ,1.0d2*stdev(itel,ibox),1.0d2*errme(itel,ibox)
                   end if
                   if ( lexpand(itype) .and. 
@@ -2305,7 +2305,7 @@
                      do itype2 = 1, numcoeff(itype) 
                         molfrac = acnbox2(ibox,itype,itype2)
      &                       /(acmove*acnbox(ibox,itype))
-                        write(iou,1366) itype,itype2,1.0d3*
+                        write(io_output,1366) itype,itype2,1.0d3*
      &                       aver(itel,ibox)*molfrac,molfrac
                      end do
                   end if
@@ -2316,7 +2316,7 @@
             do itype = 1, nmolty
                itel = (2+nener) + 3 * nmolty + itype
                do ibox = 1, nbox
-                  write(iou,1371) itype,ibox,aver(itel,ibox),
+                  write(io_output,1371) itype,ibox,aver(itel,ibox),
      &                 stdev(itel,ibox),errme(itel,ibox)
                end do
             end do
@@ -2347,8 +2347,8 @@
 !     &                   -(gconst*log(ostwald)) + (eta2(ig,itype) 
 !     &                   - eta2(il,itype)) / 120.27167
 !     &                   ,gconst*stdost/ostwald
-                        write(iou,1506) itype,ig,il,ostwald,stdost
-                        write(iou,1507) itype,ig,il,
+                        write(io_output,1506) itype,ig,il,ostwald,stdost
+                        write(io_output,1507) itype,ig,il,
      &                       -(gconst*log(ostwald)) + (eta2(ig,itype) 
      &                       - eta2(il,itype)) / 120.27167
      &                       ,gconst*stdost/ostwald
@@ -2357,26 +2357,26 @@
                end do
             end if
 
-            write(iou,*)
+            write(io_output,*)
 
 ! ---    write block averages  ---
-            write(iou,*)
-            write(iou,*) '-----block averages ------'
+            write(io_output,*)
+            write(io_output,*) '-----block averages ------'
             do ibox=1,nbox
-               write(iou,1403) ibox
+               write(io_output,1403) ibox
                do nbl = 1, nblock
 ! -- changed so output the same for all ensembles
 ! -- 06/08/09 KM
-                  write(iou,1402) nbl,baver(3,ibox,nbl),
+                  write(io_output,1402) nbl,baver(3,ibox,nbl),
      &                 baver(1,ibox,nbl),baver(2,ibox,nbl),
      &                 baver(3+nener+4*nmolty,ibox,nbl),
      &                 (baver(2+nener+3*nmolty+zz,ibox,nbl),zz=1,nmolty)
                end do
                if (lmipsw) then
-                  write(iou,*) 'lambdais', lambdais
-                  write(iou,*) 'maginn interphase switch integrand'
+                  write(io_output,*) 'lambdais', lambdais
+                  write(io_output,*) 'maginn interphase switch integrand'
                   do nbl = 1, nblock
-                     write(iou,*) nbl,baver(nprop,ibox,nbl)
+                     write(io_output,*) nbl,baver(nprop,ibox,nbl)
                   end do
                end if
             end do
@@ -2390,10 +2390,10 @@
 
 ! --- ee prob
          IF(lexpee) then                                
-            write(iou,*)
-            write(iou,*) 'probability of each mstate in ee'
+            write(io_output,*)
+            write(io_output,*) 'probability of each mstate in ee'
             do nnn = 1, fmstate
-               write(iou,1601) nnn,ee_prob(nnn)
+               write(io_output,1601) nnn,ee_prob(nnn)
             end do
          end if
          if (L_movie_xyz) then

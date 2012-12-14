@@ -74,7 +74,7 @@
       integer(KIND=normal_int)::ncount_arr(numprocmax),ncount_displs(numprocmax), itorcount_arr(numprocmax),itorcount_displs(numprocmax), countcount_arr(numprocmax),countcount_displs(numprocmax)
 ! ------------------------------------------------------------------
 
-!      write(iou,*) 'start ROSENBLUTH'
+!      write(io_output,*) 'start ROSENBLUTH'
 
       lterm = .false.
       cwtorf = 1.0d0
@@ -220,7 +220,7 @@
 !        --- perform the biased selection of bond angles and get lengths
          call geometry(lnew,iw,i,imolty,angstart,iuprev,glist ,bondlen,bendang,phi,vvibtr,vbbtr,maxlen,wei_bend )
 
-!         write(iou,*) 'lnew, wei_bend',lnew,wei_bend
+!         write(io_output,*) 'lnew, wei_bend',lnew,wei_bend
 
 !     --- for lfixnow check if there are two beads to go
 
@@ -398,7 +398,7 @@
                            if ( .not. lexist(jut4) )  then
 ! * allow regrowth where one torsion may already exist and one may not
                               goto 299
-!                              write(iou,*) 'jut4,jut3,jut2,iu',
+!                              write(io_output,*) 'jut4,jut3,jut2,iu',
 !     &                             jut4,jut3,jut2,iu
 !                              call cleanup('trouble jut4')
                            end if
@@ -436,7 +436,7 @@
                               if (tcc .lt. 0.0d0) theta = -theta
                               if (L_spline) then
                                  call splint(theta,spltor,jttor)
-                              elseif(L_linear) then
+                              else if(L_linear) then
                                  call lininter(theta,spltor,jttor)
                               end if
 
@@ -828,7 +828,7 @@
          else
 !           --- old conformation, update weiold - include wei_bend
             weiold = weiold * bsum * wei_bend * wei_vib
-            if (weiold .lt. softlog) write(iou,*)  '###old weight too low'
+            if (weiold .lt. softlog) write(io_output,*)  '###old weight too low'
          end if
 
  180     continue
@@ -1021,7 +1021,7 @@
 ! ********************************
  200  continue
 
-!      write(iou,*) 'end ROSENBLUTH'
+!      write(io_output,*) 'end ROSENBLUTH'
 
 ! ------------------------------------------------------------------
 

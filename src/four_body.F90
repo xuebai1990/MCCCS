@@ -65,7 +65,7 @@ CONTAINS
 
     read(UNIT=io_ff,NML=fourbody,iostat=jerr)
     if (jerr.ne.0.and.jerr.ne.-1) then
-       write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
        call err_exit('reading namelist: fourbody')
     end if
 
@@ -118,7 +118,7 @@ CONTAINS
           read(io_quadruplets,*) quadruplets(:,1:nQuadruplets(ibox),ibox)
           write(*,*) quadruplets(:,1:nQuadruplets(ibox),ibox)
        end do
-       write(iou,*) 'Get ',nQuadruplets,' quadruplets'
+       write(io_output,*) 'Get ',nQuadruplets,' quadruplets'
     else
        nAtomType=atoms%size
        do ibox=1,nbox

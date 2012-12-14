@@ -277,7 +277,7 @@ contains
        kind=question 
     ELSE
        kind=star
-    ENDIF
+    end if
     DO i=1,LEN_TRIM(typo_string)
        DO j=i,LEN_TRIM(typo_string)
           tmp=typo_string
@@ -285,13 +285,13 @@ contains
           tmp(j:j)=kind
           IF (i==j .AND. LEN_TRIM(tmp)>2 ) tmp(i:i)=star
           IF (glob_match(string=string,pattern=tmp)) match=match+1
-       ENDDO
-    ENDDO
+       end do
+    end do
     IF (LEN_TRIM(string).LE.4) THEN
        kind=question 
     ELSE
        kind=star
-    ENDIF
+    end if
     DO i=1,LEN_TRIM(string)
        DO j=i,LEN_TRIM(string)
           tmp2=string
@@ -299,8 +299,8 @@ contains
           tmp2(j:j)=kind
           IF (i==j .AND. LEN_TRIM(tmp2)>2 ) tmp2(i:i)=star
           IF (glob_match(string=typo_string,pattern=tmp2)) match=match+1
-       ENDDO
-    ENDDO
+       end do
+    end do
 
   END FUNCTION typo_match
 
@@ -368,7 +368,7 @@ RECURSIVE FUNCTION glob_match( string, pattern ) RESULT(match)
         END SELECT
 
         p = p + 1
-    ENDDO
+    end do
 
     !
     ! Now look for the literal string (if any!)
@@ -387,10 +387,10 @@ RECURSIVE FUNCTION glob_match( string, pattern ) RESULT(match)
                 IF ( string(start:MIN(strim,start+ll-1)) == literal(1:ll) ) THEN
                     start = start + ll
                     match = glob_match( string(start:), pattern(p:) )
-                ENDIF
-            ENDIF
-        ENDIF
-    ENDIF
+                end if
+            end if
+        end if
+    end if
 
     IF ( method == 1 ) THEN
         !
@@ -406,13 +406,13 @@ RECURSIVE FUNCTION glob_match( string, pattern ) RESULT(match)
                     match = glob_match( string(start:), pattern(p:) )
                     IF ( match ) THEN
                         EXIT
-                    ENDIF
-                ENDIF
+                    end if
+                end if
 
                 start = start + 1
-            ENDDO
-        ENDIF
-    ENDIF
+            end do
+        end if
+    end if
 
     IF ( method == 2 .AND. ll > 0 ) THEN
         !
@@ -420,8 +420,8 @@ RECURSIVE FUNCTION glob_match( string, pattern ) RESULT(match)
         !
         IF ( string(start:MIN(strim,start+ll-1)) == literal(1:ll) ) THEN
             match = glob_match( string(start+ll:), pattern(p:) )
-        ENDIF
-    ENDIF
+        end if
+    end if
     RETURN
 END FUNCTION glob_match
 

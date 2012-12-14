@@ -30,7 +30,7 @@
       real(KIND=double_precision)::deltv,vintern,vintran,vextn,velectn ,vintero,vintrao,vexto,velecto,vinsta,vremta,vnewflucq,voldflucq ,vboxo(nbxmax),vinterbo(nbxmax),vintrabo(nbxmax),vextbo(nbxmax) ,velectbo(nbxmax),vflucqbo(nbxmax),vtailbo(nbxmax),vvibbo(nbxmax) ,vtgbo(nbxmax),vbendbo(nbxmax),rxuo(numax),ryuo(numax) ,rzuo(numax),xcmo,ycmo,zcmo,vdum,wratio,volins,volrem,deltvb ,random,vnewt2,voldt2
       real(KIND=double_precision)::qquo(nmax,numax) 
 
-!      write(iou,*) 'START the optimization of the charge configuration'
+!      write(io_output,*) 'START the optimization of the charge configuration'
 
       imolty = moltyp(i)
       iunit = nunit(imolty)
@@ -153,7 +153,7 @@
             if (lgibbs) then
 !     --- Note: acceptance based on only molecules of type imolty
                wratio = ( weight / weiold ) * ( volins * dble( ncmt(boxrem,imolty)+1 ) /  ( volrem * dble( ncmt(ibox,imolty) ) ) )
-            elseif (lgrand) then
+            else if (lgrand) then
                if (ibox.eq.1) then
 !           --- molecule added to box 1
                   wratio = (weight /  weiold ) *  volins * B(imolty) / (ncmt(ibox,imolty)) 
@@ -187,9 +187,9 @@
          deltvb = beta * deltv
          if ( deltvb .gt. (2.3d0*softcut) ) then
             laccept = .false.
-         elseif ( deltv .le. 0.0d0 ) then
+         else if ( deltv .le. 0.0d0 ) then
             laccept = .true.
-         elseif ( dexp(-deltvb) .gt. random() ) then
+         else if ( dexp(-deltvb) .gt. random() ) then
             laccept = .true.
          else
             laccept = .false.
@@ -242,7 +242,7 @@
          end if
       end if    
 
-!      write(iou,*) 'END the optimization of the charge configuration'
+!      write(io_output,*) 'END the optimization of the charge configuration'
 
       return         
       end

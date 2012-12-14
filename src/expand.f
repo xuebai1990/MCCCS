@@ -32,7 +32,7 @@
       integer(KIND=normal_int)::i,ibox,iunit,flagon,itype,j,imolty,icbu ,ic,imt,jmt,itype2,disp
       real(KIND=double_precision)::dchain,random,vnew,vold ,vintran ,vintrao,deltv,deltvb,vintern,vintero,vextn,vexto ,velectn,velecto,vdum ,vrecipo,vrecipn,vexpta,vexptb,volume,rho ,coru
 
-!      write(iou,*) 'start expand-ensemble move'
+!      write(io_output,*) 'start expand-ensemble move'
 ! ***    select a chain at random ***
       dchain  = random()
       do icbu = 1,nmolty
@@ -53,7 +53,7 @@
          end if
          i = dint( dble(ncmt(1,imolty))*random() ) + 1
          i = parbox(i,1,imolty)
-         if ( moltyp(i) .ne. imolty ) write(iou,*) 'screwup'
+         if ( moltyp(i) .ne. imolty ) write(io_output,*) 'screwup'
 
       else
 
@@ -159,14 +159,14 @@
 
       if ( deltv .le. 0.0d0 ) then
 !        --- accept move
-      elseif ( dexp(-deltvb) .gt. random() ) then
+      else if ( dexp(-deltvb) .gt. random() ) then
 !        --- accept move
       else
 !        --- move rejected
          return
       end if
 
-!      write(iou,*) 'expanded move accepted i',i,exp_cion(2)
+!      write(io_output,*) 'expanded move accepted i',i,exp_cion(2)
       vbox(ibox)     = vbox(ibox) + vnew - vold
       vinterb(ibox)  = vinterb(ibox) + (vintern - vintero)
       vintrab(ibox)  = vintrab(ibox) + (vintran - vintrao)
@@ -195,7 +195,7 @@
 
       bsexpc(imolty,ibox) = bsexpc(imolty,ibox) + 1.0d0
 
-!      write(iou,*) 'end expand-ensemble move'
+!      write(io_output,*) 'end expand-ensemble move'
 
       return
       end

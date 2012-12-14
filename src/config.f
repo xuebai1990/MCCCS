@@ -55,7 +55,7 @@
 
 ! ------------------------------------------------------------------
 
-!      write(iou,*) 'start CONFIG'
+!      write(io_output,*) 'start CONFIG'
 ! ***    select a chain at random ***
       vnew=0.
       vold=0.
@@ -81,11 +81,11 @@
 
       if (lgrand) then
 ! ---    select a chain in box 1
-!         write(iou,*) 'counters not implemented properly for grand'
+!         write(io_output,*) 'counters not implemented properly for grand'
          if (ncmt(1,imolty).eq.0) return
          i = idint( dble(ncmt(1,imolty))*random() ) + 1
          i = parbox(i,1,imolty)
-         if ( moltyp(i) .ne. imolty ) write(iou,*) 'screwup config'
+         if ( moltyp(i) .ne. imolty ) write(io_output,*) 'screwup config'
          ibox=1
       else 
          dchain = dble(temtyp(imolty))
@@ -134,7 +134,7 @@
  
 ! --- termination of cbmc attempt due to walk termination ---
       if ( lterm ) then 
-!        write(iou,*) 'termination of growth',i
+!        write(io_output,*) 'termination of growth',i
         return
       end if
 
@@ -156,14 +156,14 @@
 
 !     --- termination of old walk due to problems generating orientations
       if ( lterm ) then
-         write(iou,*) 'CONFIG:old growth rejected in box',ibox ,' for moltyp',imolty
+         write(io_output,*) 'CONFIG:old growth rejected in box',ibox ,' for moltyp',imolty
          return
       end if
 
       if (llrig) then
          call rigfix(.false.,i,ibox,imolty,lterm,wrig)
          if ( lterm ) then
-            write(iou,*) 'CONFIG: old rigid fix rejected'
+            write(io_output,*) 'CONFIG: old rigid fix rejected'
             return
          end if
          weiold = weiold * wrig
@@ -173,7 +173,7 @@
          call place(.false.,lterm,i,imolty,ibox,islen,wplace)
          
          if ( lterm ) then
-            write(iou,*) 'CONFIG: old hydrogen placement rejected'
+            write(io_output,*) 'CONFIG: old hydrogen placement rejected'
             return
          end if
          weiold = weiold * wplace 
@@ -247,7 +247,7 @@
 
             if (ovrlap .and. (iii .eq. 1)) then
 !            if (ovrlap) then
-               write(iou,*) 'disaster: overlap in old conf config',i
+               write(io_output,*) 'disaster: overlap in old conf config',i
                call err_exit('')
             end if
 
@@ -255,9 +255,9 @@
                delen = ( vnewinter + vnewext + vnewelect + vnewewald + vnewintra) 
                if (lstagea) then
                   delen = (1.0d0-(1.0d0-etais)*lambdais)*delen
-               elseif (lstageb) then
+               else if (lstageb) then
                   delen = etais*delen
-               elseif (lstagec) then
+               else if (lstagec) then
                   delen = (etais+(1.0d0-etais)*lambdais)*delen
                end if
                delen = v - delen
@@ -267,7 +267,7 @@
 !!!!! numerical reasons I think we need it 
 !               IF(delen*beta .LT. -2.3d0*softcut) THEN
 !                  delen=-2.3d0*softcut/beta
-!               ELSEIF(delen*beta .GT. 2.3d0*softcut) THEN
+!               else if(delen*beta .GT. 2.3d0*softcut) THEN
 !                  delen=2.3d0*softcut
 !               end if
 ! --- END JLR 11-19-09
@@ -283,9 +283,9 @@
                deleo = ( voldinter + voldext + voldelect + voldewald + voldintra) 
                if (lstagea) then
                   deleo = (1.0d0-(1.0d0-etais)*lambdais)*deleo
-               elseif (lstageb) then
+               else if (lstageb) then
                   deleo = etais*deleo
-               elseif (lstagec) then
+               else if (lstagec) then
                   deleo = (etais+(1.0d0-etais)*lambdais)*deleo
                end if
                deleo = v - deleo
@@ -295,7 +295,7 @@
 !!!!! numerical reasons I think we need it 
 !               IF(deleo*beta .LT. -2.3d0*softcut) THEN
 !                  deleo=-2.3d0*softcut/beta
-!               ELSEIF(deleo*beta .GT. 2.3d0*softcut) THEN
+!               else if(deleo*beta .GT. 2.3d0*softcut) THEN
 !                  deleo=2.3d0*softcut
 !               end if
 ! --- END JLR 11-19-09
@@ -336,7 +336,7 @@
                if (ovrlap) return
                delen = v + vtornew
                if ( delen*beta .gt. (2.3d0*softcut) ) then
-!                  write(iou,*) '##softcut in config caught explicit atoms'
+!                  write(io_output,*) '##softcut in config caught explicit atoms'
                   return
                end if
                weight = weight*dexp(-(beta*delen))
@@ -349,13 +349,13 @@
                vnewewald = vnewewald + vewald
             else
                if (ovrlap) then
-                  write(iou,*) 'ovrlap problem in old confomation', ' - CONFIG'
+                  write(io_output,*) 'ovrlap problem in old confomation', ' - CONFIG'
                   return
                end if
                deleo = v + vtorold
                weiold = weiold*dexp(-(beta*deleo))
                if ( weiold .lt. softlog ) then
-                  write(iou,*) '##old weight for explicit too low'
+                  write(io_output,*) '##old weight for explicit too low'
                end if
                voldt     = voldt + deleo
                voldintra = voldintra + vintra
@@ -381,10 +381,10 @@
          if (lstagea) then
             vrecipn = (1.0d0-(1.0d0-etais)*lambdais)*vrecipn
             vrecipo = (1.0d0-(1.0d0-etais)*lambdais)*vrecipo
-         elseif (lstageb) then
+         else if (lstageb) then
             vrecipn = etais*vrecipn
             vrecipo = etais*vrecipo
-         elseif (lstagec) then
+         else if (lstagec) then
             vrecipn = (etais+(1.0d0-etais)*lambdais)*vrecipn
             vrecipo = (etais+(1.0d0-etais)*lambdais)*vrecipo
          end if
@@ -399,8 +399,8 @@
 ! *** check for acceptance of trial configuration ***
       wnlog = dlog10 ( weight )
       wolog = dlog10 ( weiold )
-!      write(iou,*) 'weight:',weight
-!      write(iou,*) 'weiold:',weiold
+!      write(io_output,*) 'weight:',weight
+!      write(io_output,*) 'weiold:',weiold
       wdlog = wnlog - wolog
       if ( wdlog .lt. -softcut ) then
 !         write(99,*) 'cbmc softcut',i
@@ -421,7 +421,7 @@
 !      write(99,*) wratio,vold,vnew
 
       if ( random() .le. wratio ) then
-!         write(iou,*) 'CONFIG accepted',i,ibox
+!         write(io_output,*) 'CONFIG accepted',i,ibox
 !        --- we can now accept !!!!! ***
          if (lfixnow) then
             fbscb(imolty,2,findex-1) = fbscb(imolty,2,findex-1)  + 1.0d0
@@ -526,7 +526,7 @@
        end if
          
 ! -----------------------------------------------------------------
-!       write(iou,*) 'end CONFIG'
+!       write(io_output,*) 'end CONFIG'
        return
        end
 

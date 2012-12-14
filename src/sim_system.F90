@@ -24,10 +24,10 @@ module sim_system
       logical::lcutcm,ldual
       integer(KIND=normal_int)::nmax,numax,ntmax,nntype,nvmax,nbxmax ,npamax,npabmax,maxbin,cmax,cmaxa,tor_bin_max,nbinmax_ete,smax
       integer(KIND=normal_int)::vectormax,maxvir,maxntemp,nchmax ,nchtor_max,nchbn_max
-      integer(KIND=normal_int)::ntdifmx,nbinmx,angle_max,ang_bin_max,tor_max,iou=6
+      integer(KIND=normal_int)::ntdifmx,nbinmx,angle_max,ang_bin_max,tor_max,io_output=6
       character(LEN=default_path_length)::file_input='fort.4',file_restart='fort.77',file_struct='input_struc.xyz',file_run='run1a.dat',file_movie='movie1a.dat',file_dipole='dipole1a.dat'
-      namelist /io/ file_input,file_restart,file_struct,file_run,file_movie,file_dipole,iou
-!      common /iounit/ iou
+      namelist /io/ file_input,file_restart,file_struct,file_run,file_movie,file_dipole,io_output
+!      common /iounit/ io_output
 ! --------------------------------------------------------------
 ! *******************************
 ! *** PARAMETERS FOR ENSEMBLE ***
@@ -964,23 +964,23 @@ CONTAINS
 
     read(UNIT=io_input,NML=io,iostat=jerr)
     if (jerr.ne.0.and.jerr.ne.-1) then
-       write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
        call err_exit('reading namelist: io')
     end if
 
     rewind(io_input)
     read(UNIT=io_input,NML=system,iostat=jerr)
     if (jerr.ne.0.and.jerr.ne.-1) then
-       write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
        call err_exit('reading namelist: system')
     end if
     nchain=nchain+2
 
-    if (iou.eq.5) then
+    if (io_output.eq.5) then
        call err_exit('unit 5 is for standard input')
-    else if(iou.ne.6.and.iou.ne.0.and.myid.eq.0) then
-       iou=get_iounit()
-       open(unit=iou,access='sequential',action='write',file=file_run,form='formatted',iostat=jerr,status='unknown')  
+    else if(io_output.ne.6.and.io_output.ne.0.and.myid.eq.0) then
+       io_output=get_iounit()
+       open(unit=io_output,access='sequential',action='write',file=file_run,form='formatted',iostat=jerr,status='unknown')  
        if (jerr.ne.0) then
           call err_exit('cannot open output file '//file_run)
        end if

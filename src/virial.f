@@ -53,8 +53,8 @@
 
 ! --------------------------------------------------------------------
 
-!      write(iou,*) 'start VIRIAL'
-!      write(iou,*) 'binvir',binvir
+!      write(io_output,*) 'start VIRIAL'
+!      write(io_output,*) 'binvir',binvir
       rminsq = rmin * rmin
       vmin = -2000.0d0
 
@@ -67,7 +67,7 @@
       
 
       if ( nboxi(1) .eq. nboxi(2) ) then
-         write(iou,*) 'particles found in same box'
+         write(io_output,*) 'particles found in same box'
          call err_exit('')
       end if
  
@@ -167,17 +167,17 @@
                else
                   if ( lsami ) then
                      vinter = vinter + ljsami(rijsq,ntij)
-                  elseif (lexpsix) then
+                  else if (lexpsix) then
                      vinter = vinter + exsix(rijsq,ntij)
-                  elseif ( lmuir ) then
+                  else if ( lmuir ) then
                      vinter = vinter + ljmuir(rijsq,ntij)
-                  elseif ( lpsurf ) then
+                  else if ( lpsurf ) then
                      vinter = vinter + ljpsur(rijsq,ntij)
                   else if (lshift) then
                      sr2 = sig2ij(ntij) / rijsq
                      sr6 = sr2 * sr2 * sr2
                      vinter = vinter +  sr6*(sr6-1.0d0)*epsij(ntij)-ecut(ntij) 
-                  elseif ( lfepsi ) then
+                  else if ( lfepsi ) then
                      if ( lij(ntii) .and. lij(ntjj) ) then
                         sr6 = rijsq*rijsq*rijsq
                         epsilon2 = epsij(ntij)
@@ -218,7 +218,7 @@
                      if ( dabs(xiq(ntii)) .gt. 1.0d-10 ) then
                         if ( iii .eq. 1 ) then
                            iii = 2
-                        elseif ( iii .eq. 2 ) then
+                        else if ( iii .eq. 2 ) then
                            iii = 1
                         end if
                         mainsite(ip,iii) = ip1
@@ -355,8 +355,8 @@
                mayer(itemp) = dexp(-(vinter+velect)/virtemp(itemp))-1.0d0
             end do
          end if
-!         write(iou,*) 'mayer',mayer
-!         write(iou,*) 'nnn',nnn
+!         write(io_output,*) 'mayer',mayer
+!         write(io_output,*) 'nnn',nnn
          do itemp = 1,ntemp
             binvir(nnn,itemp) = binvir(nnn,itemp) + mayer(itemp)
          end do
@@ -377,9 +377,9 @@
 
 ! ################################################################
 
-!      write(iou,*) 'binvir',binvir
+!      write(io_output,*) 'binvir',binvir
 
-!      write(iou,*) 'end VIRIAL'
+!      write(io_output,*) 'end VIRIAL'
 
       return
       end

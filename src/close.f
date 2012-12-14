@@ -46,7 +46,7 @@
 !     *******************************************************
 
 
-!      write(iou,*) 'START CLOSE iinit=',iinit
+!      write(io_output,*) 'START CLOSE iinit=',iinit
 
 
       if (iinit.ne.3) then
@@ -206,7 +206,7 @@
             z(2) = rzf - rz(2)
             lengthb = dsqrt(x(2)**2 + y(2)**2 + z(2)**2)
 
-            write(iou,*) lengtha,lengthb,bondl
+            write(io_output,*) lengtha,lengthb,bondl
 
             
             if ((lengtha-bondl).lt.(lengthb-bondl)) then
@@ -300,7 +300,7 @@
 
       end if
 
-!      write(iou,*) 'END CLOSE iinit=',iinit
+!      write(io_output,*) 'END CLOSE iinit=',iinit
       
 !     ---------------------------------------------------------------
 

@@ -190,7 +190,7 @@
       pyz = pyz + intrayz
       pzy = pzy + intrazy
 
-!      write(iou,*) 'internal part:',intraxx,intrayy,intrazz
+!      write(io_output,*) 'internal part:',intraxx,intrayy,intrazz
       
       return
       end

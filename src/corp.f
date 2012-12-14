@@ -40,23 +40,23 @@
             if (lexpsix .and. ltailc) then
                ntij = (ntii+ntjj)/2
                corp = corp + consp(ntij)
-            elseif (lmmff .and. ltailc) then
+            else if (lmmff .and. ltailc) then
                ntij = (ntii+ntjj)/2
                corp = corp+((-2.0d0)/3.0d0)*onepi*epsimmff(ntij)*sigimmff(ntij)**3.0d0*corp_cons(ntij)
-            elseif (lninesix .and. ltailc) then
+            else if (lninesix .and. ltailc) then
                ntij = (ntii-1)*nxatom + ntjj
                corp = corp + 16.0d0 * onepi * epsnx(ntij) * rzero(ntij)**3 * (0.5d0*(rzero(ntij)/rcut(ibox))**6 - (rzero(ntij)/rcut(ibox))**3)
-            elseif (lgenlj .and. ltailc) then
+            else if (lgenlj .and. ltailc) then
                ntij = (ntii-1)*nntype + ntjj
                rci3 = sig2ij(ntij)**(3.0d0/2.0d0) / rcut(ibox)**3
                rci1 = rci3 **(1.0d0/3.0d0)
                if ( lexpand(imolty) .and. lexpand(jmolty) ) then
                   sigma2 = (sigma(imolty,ii)+sigma(jmolty,jj))**2/4.0d0
                   epsilon2 = dsqrt(epsilon(imolty,ii) *epsilon(jmolty,jj))
-               elseif ( lexpand(imolty) ) then
+               else if ( lexpand(imolty) ) then
                   sigma2 = (sigma(imolty,ii)+sigi(ntjj))**2/4.0d0
                   epsilon2 = dsqrt(epsilon(imolty,ii)*epsi(ntjj))
-               elseif ( lexpand(jmolty) ) then
+               else if ( lexpand(jmolty) ) then
                   sigma2 = (sigma(jmolty,jj)+sigi(ntii))**2/4.0d0
                   epsilon2 = dsqrt(epsilon(jmolty,jj)*epsi(ntii))
                else
@@ -70,10 +70,10 @@
                if ( lexpand(imolty) .and. lexpand(jmolty) ) then
                   sigma2 = (sigma(imolty,ii)+sigma(jmolty,jj))**2/4.0d0
                   epsilon2 = dsqrt(epsilon(imolty,ii)* epsilon(jmolty,jj))
-               elseif ( lexpand(imolty) ) then
+               else if ( lexpand(imolty) ) then
                   sigma2 = (sigma(imolty,ii)+sigi(ntjj))**2/4.0d0
                   epsilon2 = dsqrt(epsilon(imolty,ii)*epsi(ntjj))
-               elseif ( lexpand(jmolty) ) then
+               else if ( lexpand(jmolty) ) then
                   sigma2 = (sigma(jmolty,jj)+sigi(ntii))**2/4.0d0
                   epsilon2 = dsqrt(epsilon(jmolty,jj)*epsi(ntii))
                else

@@ -191,7 +191,7 @@
             va = vbba + vdha
             bf = dexp ( -(va * beta) )
             if ( random() .ge. bf ) go to 108 
-!            write(iou,*) 'new ip', ip, '   va', va
+!            write(io_output,*) 'new ip', ip, '   va', va
 
          else
 ! *** poly-bead molecule ***
@@ -222,18 +222,18 @@
                   z = rztmp(i) - rztmp(j)
                   rij = dsqrt( x*x + y*y + z*z )
                   if ( rij .gt. dmrtab(idiff) ) then
-                     write(iou,*) 'WARNING NRTAB: rij .gt. dmrtab'
-                     write(iou,*) 'idiff',idiff, 'rij',rij,'dmrtab',dmrtab(idiff)
+                     write(io_output,*) 'WARNING NRTAB: rij .gt. dmrtab'
+                     write(io_output,*) 'idiff',idiff, 'rij',rij,'dmrtab',dmrtab(idiff)
                   end if
                   ibin = idint( rij / dbrtab(idiff) ) + 1
                   if ( ibin .gt. nrtbin ) ibin = nrtbin
                   hnrtab(idiff,ibin) = hnrtab(idiff,ibin) + 1
 
                   if ( idiff .le. 3 .and. ibin .eq. 1 ) then
-                     write(iou,*) 'nrtc',nrtc,'i',i,'j',j
-                     write(iou,*) 'ri',rxtmp(i),rytmp(i),rztmp(i)
-                     write(iou,*) 'rj',rxtmp(j),rytmp(j),rztmp(j)
-                     write(iou,*) 'rij',rij
+                     write(io_output,*) 'nrtc',nrtc,'i',i,'j',j
+                     write(io_output,*) 'ri',rxtmp(i),rytmp(i),rztmp(i)
+                     write(io_output,*) 'rj',rxtmp(j),rytmp(j),rztmp(j)
+                     write(io_output,*) 'rij',rij
                   end if
 
                end if

@@ -25,7 +25,7 @@
 
       save dcellx,dcelly,dcellz,ncellx,ncelly,ncellz,ncello
       
-!      write(iou,*) 'START LINKCELL IINIT=',iinit
+!      write(io_output,*) 'START LINKCELL IINIT=',iinit
 
        
 
@@ -40,7 +40,7 @@
          end if
 
 !     --- determine dcell
-!         write(iou,*) 'linkcell used',rcut,rintramax
+!         write(io_output,*) 'linkcell used',rcut,rintramax
 
          dcellx = rcut(ibox) + rintramax
          dcelly = dcellx
@@ -67,16 +67,16 @@
  
          if (ncell .ne. ncello) then
             if (imol .eq. 0) then
-               write(iou,*) 'number of linkcells set to',ncell
+               write(io_output,*) 'number of linkcells set to',ncell
             else
-               write(iou,*) 'number of linkcells changed to',ncell
+               write(io_output,*) 'number of linkcells changed to',ncell
             end if
          end if
 
          ncello = ncell
 
          if (ncell.gt.cmax) then
-            write(iou,*) 'ncell,cmax',ncell,cmax
+            write(io_output,*) 'ncell,cmax',ncell,cmax
             call err_exit('ncell greater than cmax in linkcell')
          end if
          
@@ -100,7 +100,7 @@
 
 
                if (ic.gt.cmax) then
-                  write(iou,*) 'ic,cmax',ic,cmax
+                  write(io_output,*) 'ic,cmax',ic,cmax
                   call err_exit('ic gt cmax')
                end if
 
@@ -108,7 +108,7 @@
                nicell(ic) = nicell(ic) + 1
 
                if (nicell(ic).gt.cmaxa) then
-                  write(iou,*) 'nicell,cmaxa',nicell(ic) ,cmaxa
+                  write(io_output,*) 'nicell,cmaxa',nicell(ic) ,cmaxa
                   call err_exit('nicell gt cmaxa')
                end if
 
@@ -118,7 +118,7 @@
             end if
          end do
 
-      elseif (iinit.eq.2) then
+      else if (iinit.eq.2) then
 !     --- we will update our cell's occupants
 
          ic = icell(imol)
@@ -178,7 +178,7 @@
                do ka = k-1, k+1
                   if (ia.gt.ncellx) then
                      ib = ia - ncellx
-                  elseif (ia.lt.1) then
+                  else if (ia.lt.1) then
                      ib = ia + ncellx
                   else
                      ib = ia
@@ -186,7 +186,7 @@
 
                   if (ja.gt.ncelly) then
                      jb = ja - ncelly
-                  elseif (ja.lt.1) then
+                  else if (ja.lt.1) then
                      jb = ja + ncelly
                   else
                      jb = ja
@@ -194,7 +194,7 @@
 
                   if (ka.gt.ncellz) then
                      kb = ka - ncellz
-                  elseif (ka.lt.1) then
+                  else if (ka.lt.1) then
                      kb = ka + ncellz
                   else
                      kb = ka
@@ -211,7 +211,7 @@
          end do
       end if
 
-!      write(iou,*) 'END LINKCELL IINIT=',iinit
+!      write(io_output,*) 'END LINKCELL IINIT=',iinit
 
       return
       end

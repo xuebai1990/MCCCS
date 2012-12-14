@@ -24,11 +24,11 @@
 
       if (lstagea) then
          dvdl = -(1.0d0-etais)*vipsw
-      elseif (lstageb) then
+      else if (lstageb) then
          if (.not.lsolid(ibox)) then
             vol = boxlx(ibox)*boxly(ibox)*boxlz(ibox)
             dvdl = -3.0d0*vol/boxlx(ibox)*(lenc-lena)*(etais*pipsw +lambdais*pwellipsw)+vwellipsw
-         elseif (lsolid(ibox).and.(.not.lrect(ibox))) then
+         else if (lsolid(ibox).and.(.not.lrect(ibox))) then
             vol = cell_vol(ibox) 
             hmats(1,1) = hmat(ibox,1)
             hmats(1,2) = hmat(ibox,4)
@@ -53,9 +53,9 @@
                do j = 1, 3
                   do k = 1, 3
                      dvdl = dvdl - hmatsi(j,k)*dhmat(i,j)* (etais*pips(i,k)+lambdais*pwellips(i,k))
-!	write(iou,*) i,j,pips(i,j),pwellips(i,j)
+!	write(io_output,*) i,j,pips(i,j),pwellips(i,j)
                   end do
-!	write(iou,*) i,j,pips(i,j)
+!	write(io_output,*) i,j,pips(i,j)
                end do
             end do
             dvdl = vol*dvdl+vwellipsw
@@ -64,7 +64,7 @@
          dvdl = (1.0d0-etais)*vipsw-vwellipsw
       end if
 
-!	write(iou,*) 'deriv', dvdl,vwellipsw,pipsw,pwellipsw,vol
+!	write(io_output,*) 'deriv', dvdl,vwellipsw,pipsw,pwellipsw,vol
 
       return
       end

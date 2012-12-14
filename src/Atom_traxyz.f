@@ -47,7 +47,7 @@
 
 ! --------------------------------------------------------------------
 
-!      write(iou,*) 'start TRAXYZ'
+!      write(io_output,*) 'start TRAXYZ'
       ovrlap = .false.
 !     ***    select a chain at random ***
       rchain  = random()
@@ -70,7 +70,7 @@
          end if
          pick_chain = idint( dble(ncmt(1,imolty))*random() ) + 1
          pick_chain = parbox(pick_chain,1,imolty)
-         if ( moltyp(pick_chain) .ne. imolty )  write(iou,*) 'screwup traxyz'
+         if ( moltyp(pick_chain) .ne. imolty )  write(io_output,*) 'screwup traxyz'
 
 
       else
@@ -88,7 +88,7 @@
 
       pick_unit = int(dble(iunit*random()) + 1 )
 
-!      write(iou,*) pick_unit, imolty, pick_chain
+!      write(io_output,*) pick_unit, imolty, pick_chain
 
       i = pick_chain 
 
@@ -176,14 +176,14 @@
 
       if ( deltv .le. 0.0d0 ) then
 !        --- accept move
-      elseif ( dexp(-deltvb) .gt. random() ) then
+      else if ( dexp(-deltvb) .gt. random() ) then
 !        --- accept move
       else
 !        --- move rejected
          return
       end if
 
-!      write(iou,*) 'TRAXYZ accepted i',i
+!      write(io_output,*) 'TRAXYZ accepted i',i
       vbox(ibox)     = vbox(ibox) + deltv
       vinterb(ibox)  = vinterb(ibox) + (vintern - vintero)
       vintrab(ibox)  = vintrab(ibox) + (vintran - vintrao)
@@ -239,7 +239,7 @@
          
          do 10 ic = 1, neigh_cnt(i)
             j = neighbor(ic,i)
-!            write(iou,*) ic,i,'j:',j
+!            write(io_output,*) ic,i,'j:',j
             do ip = 1,neigh_cnt(j)
                if ( neighbor(ip,j) .eq. i ) then
                   neighbor(ip,j)=neighbor(neigh_cnt(j),j)
@@ -265,7 +265,7 @@
          end do
       end if
 
-!      write(iou,*) 'end TRAXYZ',i
+!      write(io_output,*) 'end TRAXYZ',i
 
       return
       end

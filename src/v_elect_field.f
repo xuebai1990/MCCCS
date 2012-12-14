@@ -31,7 +31,7 @@
 
       v_elect_field = -E*rzfield*qqu(i,j)  
       
-!      write(iou,*) 'E ', E, ' exfield ', exfield
+!      write(io_output,*) 'E ', E, ' exfield ', exfield
 
       return
       end

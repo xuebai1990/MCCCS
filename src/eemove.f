@@ -53,7 +53,7 @@
 
       if (mstate.eq.1) then
          nstate = mstate + 1
-      elseif (mstate.eq.fmstate) then
+      else if (mstate.eq.fmstate) then
          nstate = mstate - 1
       else
          if (random().le.0.5d0) then
@@ -63,11 +63,11 @@
          end if
       end if
 
-!	write(iou,*) 'typ', mstate, ee_moltyp(mstate),eepointp,
+!	write(io_output,*) 'typ', mstate, ee_moltyp(mstate),eepointp,
 !     &   box_state(mstate), ncmt(box_state(mstate),ee_moltyp(mstate))
 
       if (ncmt(box_state(mstate),ee_moltyp(mstate)).eq.0) then
-         write(iou,*)'problem: mstate, but no molecule in mstate',mstate
+         write(io_output,*)'problem: mstate, but no molecule in mstate',mstate
          call err_exit('')
       end if
 
@@ -76,8 +76,8 @@
 
       wee_ratio = dexp(psi(nstate)-psi(mstate))* um_markov(nstate,mstate)/um_markov(mstate,nstate)
 
-!	write(iou,*) 'mstate', mstate, ee_moltyp(mstate)
-!	write(iou,*) 'nstate', nstate, ee_moltyp(nstate)
+!	write(io_output,*) 'mstate', mstate, ee_moltyp(mstate)
+!	write(io_output,*) 'nstate', nstate, ee_moltyp(nstate)
 
       if ((mstate.eq.sstate1.and.nstate.eq.sstate2).or. (mstate.eq.sstate2.and.nstate.eq.sstate1)) then
 
@@ -85,7 +85,7 @@
          boxins1 = box_state(nstate)
 
          eeirem = parbox(eepointp,boxrem1,ee_moltyp(mstate))
-!	write(iou,*) 'eeirem', eeirem, eepointp
+!	write(io_output,*) 'eeirem', eeirem, eepointp
 
          call swap
 
@@ -97,7 +97,7 @@
 
          ibox = box_state(mstate)
          eeirem = parbox(eepointp,ibox,ee_moltyp(mstate))
-!	write(iou,*) 'eeirem1', eeirem, eepointp
+!	write(io_output,*) 'eeirem1', eeirem, eepointp
          imolty = ee_moltyp(nstate)
 
          iunit = nunit(imolty)
@@ -130,9 +130,9 @@
 !         call energy(eeirem,imolty,vold,vintrao,vintero,vexto,velecto
 !     &               ,vewaldo,1,ibox,1,iunit,.false.,ovrlap
 !     &               ,.false.,dum,.false.,.false.)
-!	write(iou,*) vnew,vold
+!	write(io_output,*) vnew,vold
          if (ovrlap) then
-            write(iou,*) 'disaster ovrlap in old conf eemove'
+            write(io_output,*) 'disaster ovrlap in old conf eemove'
             call err_exit('')
          end if
 
@@ -152,7 +152,7 @@
 
          if ((deltvb-dlog(wee_ratio)).le.0.0d0) then
 !           --- accept move
-         elseif (wdeltvb.gt.random()) then
+         else if (wdeltvb.gt.random()) then
 !           --- accept move
          else
 !           --- reject move
@@ -163,13 +163,13 @@
 
          imolty1 = ee_moltyp(nstate)
          parbox(ncmt(ibox,imolty1)+1,ibox,imolty1) = eeirem
-!	write(iou,*) 'update new', eepointp,ibox,imolty1,
+!	write(io_output,*) 'update new', eepointp,ibox,imolty1,
 !     &          parbox(eepointp,ibox,imolty1),
 !     &          parbox(eepointp,ibox,imolty)
 
          parbox(eepointp,ibox,imolty) = parbox(ncmt(ibox,imolty),ibox,imolty)
 
-!	write(iou,*) 'update new1', imolty,parbox(eepointp,ibox,imolty),
+!	write(io_output,*) 'update new1', imolty,parbox(eepointp,ibox,imolty),
 !     &              ncmt(ibox,imolty)
 
          parbox(ncmt(ibox,imolty),ibox,imolty) = 0
@@ -183,7 +183,7 @@
          vextb(ibox) = vextb(ibox) + (vextn-vexto)
          vtailb(ibox) = vtailb(ibox) + (vtailn-vtailo)
          velectb(ibox) = velectb(ibox) + (velectn-velecto)
-!	write(iou,*) vtailn,vtailo,vintern,vintero
+!	write(io_output,*) vtailn,vtailo,vintern,vintero
 
 ! --- update reciprocal space term
 
@@ -197,18 +197,18 @@
 
       temtyp(ee_moltyp(mstate)) = temtyp(ee_moltyp(mstate)) - 1
       temtyp(ee_moltyp(nstate)) = temtyp(ee_moltyp(nstate)) + 1
-!	write(iou,*) 'ttym', mstate,ee_moltyp(mstate),
+!	write(io_output,*) 'ttym', mstate,ee_moltyp(mstate),
 !     &               temtyp(ee_moltyp(mstate))
-!	write(iou,*) 'ttyn', nstate,ee_moltyp(nstate),
+!	write(io_output,*) 'ttyn', nstate,ee_moltyp(nstate),
 !     &               temtyp(ee_moltyp(nstate))
       mstate = nstate
 
-!	write(iou,*) 'eemove eeirem', eeirem
+!	write(io_output,*) 'eemove eeirem', eeirem
       moltyp(eeirem) = ee_moltyp(nstate)
       do i = 1, nunit(ee_moltyp(nstate))
          qqu(eeirem,i) = ee_qqu(i,nstate)
-!	write(iou,*) 'charges', qqu(eeirem,i)
-!	write(iou,*) 'charges1'
+!	write(io_output,*) 'charges', qqu(eeirem,i)
+!	write(io_output,*) 'charges1'
       end do
 
       if (mstate.eq.1.or.mstate.eq.fmstate) then
@@ -228,16 +228,16 @@
          parall(i,idummy(i)) = j
       end do
 
-!	write(iou,*) 'accept', eepointp, mstate, nstate, eeirem, boxins1
-!	write(iou,*)'accept1',parbox(eepointp,boxins1,ee_moltyp(nstate))
-!	write(iou,*) '1line', leemove,lmstate,leeacc
-!	write(iou,*) '2line', fmstate,sstate1,sstate2,wee_ratio,eeratio
-!	write(iou,*) '3line',(ee_moltyp(i), i = 1, fmstate)
-!	write(iou,*) '4line',(box_state(i), i = 1, fmstate)
-!	write(iou,*) '5line',(psi(i), i = 1, fmstate)
-!	write(iou,*) '6line',(ee_qqu(1,i), i = 1, fmstate)
-!	write(iou,*) '7line',(um_markov(i,i+1),i = 1,fmstate-1)
-!	write(iou,*) '8line',(um_markov(i,i-1),i = 2,fmstate)
+!	write(io_output,*) 'accept', eepointp, mstate, nstate, eeirem, boxins1
+!	write(io_output,*)'accept1',parbox(eepointp,boxins1,ee_moltyp(nstate))
+!	write(io_output,*) '1line', leemove,lmstate,leeacc
+!	write(io_output,*) '2line', fmstate,sstate1,sstate2,wee_ratio,eeratio
+!	write(io_output,*) '3line',(ee_moltyp(i), i = 1, fmstate)
+!	write(io_output,*) '4line',(box_state(i), i = 1, fmstate)
+!	write(io_output,*) '5line',(psi(i), i = 1, fmstate)
+!	write(io_output,*) '6line',(ee_qqu(1,i), i = 1, fmstate)
+!	write(io_output,*) '7line',(um_markov(i,i+1),i = 1,fmstate-1)
+!	write(io_output,*) '8line',(um_markov(i,i-1),i = 2,fmstate)
 
  100    continue
         leemove = .false.

@@ -62,10 +62,10 @@
 ! === calculate cutt-off of the potential
 !
       if (lshift) then
-        write(iou,*) ' Value at cut-off distance '
+        write(io_output,*) ' Value at cut-off distance '
         do itype = 1,zntype
           zencut(itype,idz)=4.*zeps(itype,idz)* ( (zsig2(itype,idz)/zrc2(itype,idz))**6 -(zsig2(itype,idz)/zrc2(itype,idz))**3)
-          write(iou,"('    interaction ',i3, '   : ',f8.2,'[K]')") itype ,zencut(itype,idz)
+          write(io_output,"('    interaction ',i3, '   : ',f8.2,'[K]')") itype ,zencut(itype,idz)
         end do
       end if     
 

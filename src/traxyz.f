@@ -43,7 +43,7 @@
 
 ! --------------------------------------------------------------------
 
-!      write(iou,*) 'start TRAXYZ'
+!      write(io_output,*) 'start TRAXYZ'
       ovrlap = .false.
 !     ***    select a chain at random ***
       rchain  = random()
@@ -70,7 +70,7 @@
          end if
          i = idint( dble(ncmt(1,imolty))*random() ) + 1
          i = parbox(i,1,imolty)
-         if ( moltyp(i) .ne. imolty ) write(iou,*) 'screwup traxyz'
+         if ( moltyp(i) .ne. imolty ) write(io_output,*) 'screwup traxyz'
 
 
       else
@@ -168,10 +168,10 @@
          if (lstagea) then
             vrecipn    =   (1.0d0-(1.0d0-etais)*lambdais)*vrecipn
             vrecipo    =   (1.0d0-(1.0d0-etais)*lambdais)*vrecipo
-         elseif (lstageb) then
+         else if (lstageb) then
             vrecipn =  etais*vrecipn
             vrecipo =  etais*vrecipo
-         elseif (lstagec) then
+         else if (lstagec) then
             vrecipn =  (etais+(1.0d0-etais)*lambdais)*vrecipn
             vrecipo =  (etais+(1.0d0-etais)*lambdais)*vrecipo
          end if
@@ -200,14 +200,14 @@
 
       if ( deltv .le. 0.0d0 ) then
 !        --- accept move
-      elseif ( dexp(-deltvb) .gt. random() ) then
+      else if ( dexp(-deltvb) .gt. random() ) then
 !        --- accept move
       else
 !        --- move rejected
          return
       end if
 
-!      write(iou,*) 'TRAXYZ accepted i',i
+!      write(io_output,*) 'TRAXYZ accepted i',i
 
       vbox(ibox)     = vbox(ibox) + deltv
       vinterb(ibox)  = vinterb(ibox) + (vintern - vintero)
@@ -265,7 +265,7 @@
          
          do ic = 1, neigh_cnt(i)
             j = neighbor(ic,i)
-!            write(iou,*) ic,i,'j:',j
+!            write(io_output,*) ic,i,'j:',j
             do ip = 1,neigh_cnt(j)
                if ( neighbor(ip,j) .eq. i ) then
                   neighbor(ip,j)=neighbor(neigh_cnt(j),j)
@@ -303,7 +303,7 @@
          end do
       end if
 
-!      write(iou,*) 'end TRAXYZ',i
+!      write(io_output,*) 'end TRAXYZ',i
 
       return
       end

@@ -47,7 +47,7 @@
 
 !  --- tabulated bond stretching potential
 !  --- added 12/02/08 by KM
-      elseif (L_vib_table) then
+      else if (L_vib_table) then
 !     --- random bond length from Boltzmann distribution ---
 !     ---  +/- 25% of equilibrium bond length
  108     bond = (0.5d0*random()+0.75d0)

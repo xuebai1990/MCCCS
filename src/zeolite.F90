@@ -76,7 +76,7 @@ contains
 
     read(UNIT=io_input,NML=zeolite_in,iostat=jerr)
     if (jerr.ne.0.and.jerr.ne.-1) then
-       write(iou,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
        call err_exit('reading namelist: zeolite_in')
     end if
     close(io_input)
@@ -167,7 +167,7 @@ contains
 
     !     === Calculate zeolite density
     wzeo=dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype)))
-    if (myid.eq.0) write(iou,"(' Tabulated zeolite potential: ',/&
+    if (myid.eq.0) write(io_output,"(' Tabulated zeolite potential: ',/&
                               ,' --------------------------------------------------',/&
                               ,<ztype%ntype>(' number of ',A,':',I5,3X),/&
                               ,' simulation volume                 = ', f10.1, 20x,' Angst**3',/&
@@ -193,13 +193,13 @@ contains
        open(unit=io_ztb,access='sequential',action='read',file=file_ztb,form='binary',iostat=jerr, status='old')
        if (jerr.eq.0) then
           ! --- read zeolite table from disk
-          if (myid.eq.0) write(iou,'(A,/)') 'read in tabulated potential'
+          if (myid.eq.0) write(io_output,'(A,/)') 'read in tabulated potential'
           read(io_ztb) zunittmp,zangtmp,ngridtmp,zntypetmp,lewaldtmp,ltailczeotmp,lshifttmp,rcuttmp
           if (ANY(abs(zunittmp-zunit%boxl).gt.eps).or.ANY(ngridtmp.ne.zunit%ngrid).or.(zntypetmp.ne.ztype%ntype)) call err_exit('problem 1 in zeolite potential table')
           do igtype=1,ztype%ntype
              read(io_ztb) atom
              if (trim(ztype%name(igtype))/=trim(atom)) then
-                write(iou,*) igtype,' atom should be ',trim(atom)
+                write(io_output,*) igtype,' atom should be ',trim(atom)
                 call err_exit('problem 2 in zeolite potential table')
              end if
           end do
@@ -243,13 +243,13 @@ contains
           oldk=k
           jerr=1
           close(io_ztb)
-          write(iou,*) sw,igtype,oldi,oldj,oldk
+          write(io_output,*) sw,igtype,oldi,oldj,oldk
        end if
 
        if (jerr.ne.0) then
           ! make a tabulated potential of the zeolite
           if (myid.eq.0) then
-             write(iou,*) 'make tabulated potential'
+             write(io_output,*) 'make tabulated potential'
              open(unit=io_ztb,access='sequential',action='write',file=file_ztb,form='binary',iostat=jerr,status='unknown')
              if (jerr.ne.0) then
                 call err_exit('cannot create file for tabulated potential')
@@ -259,7 +259,7 @@ contains
                 write(io_ztb) ztype%name(igtype)
              end do
           end if
-          write(iou,*) 'time 1:',time_now()
+          write(io_output,*) 'time 1:',time_now()
           do k=0,zunit%ngrid(3)-1
              do j=0,zunit%ngrid(2)-1
 !$omp parallel &
@@ -273,8 +273,8 @@ contains
                 if (myid.eq.0) write(io_ztb) zgrid(:,:,:,j,k)
              end do
           end do
-          write(iou,*) 'time 2:',time_now()
-          if (myid.eq.0.and.ltailcZeo) write(iou,*) 'maxlayer = ',nlayermax
+          write(io_output,*) 'time 2:',time_now()
+          if (myid.eq.0.and.ltailcZeo) write(io_output,*) 'maxlayer = ',nlayermax
        end if
 
        if (ltailczeo.and..not.ltailcZeotmp) then
@@ -310,7 +310,7 @@ contains
        deallocate(lunitcell,zgrid,zeo%bead,ztype%type,ztype%num,ztype%radiisq,ztype%name,zpot%param)
        if (myid.eq.0) then
           close(io_ztb)
-          write(iou,'(4(A,L),A,G,A,/)') 'tabulated potential: lewald[',lewaldtmp,'] ltailc[',ltailcZeotmp,'] lshift[',lshifttmp,'] ltailcZeo[',ltailcZeo,'] rcut[',rcuttmp,']'
+          write(io_output,'(4(A,L),A,G,A,/)') 'tabulated potential: lewald[',lewaldtmp,'] ltailc[',ltailcZeotmp,'] lshift[',lshifttmp,'] ltailcZeo[',ltailcZeo,'] rcut[',rcuttmp,']'
        end if
     end if
 
@@ -347,7 +347,7 @@ contains
           if (r2.le.ztype%radiisq(iztype)) then
              tab=overlapValue
              return
-          elseif (r2 .lt. rcutsq) then
+          else if (r2 .lt. rcutsq) then
              if (.not.ltailcZeo) then
                 vb=2e4/r2**3
                 if (lshift) then
@@ -596,7 +596,7 @@ contains
     real(KIND=double_precision)::errTot,errRel,errAbs,err,BoltTabulated,eBoltTabulated,BoltExplicit,eBoltExplicit,xi,yi,zi,Utabulated,Uexplicit,weight,random
 
 !--- test accuracy
-    if (myid.eq.0) write(iou,'(A,/,A)') ' Test accuracy of tabulated zeolite potential & Calculate void volume',' -------------------------------------------------'
+    if (myid.eq.0) write(io_output,'(A,/,A)') ' Test accuracy of tabulated zeolite potential & Calculate void volume',' -------------------------------------------------'
     tel=0
     errTot=0
     errRel=0
@@ -629,22 +629,22 @@ contains
           if (errRel.lt.err) errRel=err
           errTot=errTot+err
           if (myid.eq.0 .and. err.gt.3.0d-2) then
-             write(iou,'("WARNING: interpolation error at (",3(F8.5,1X),")=",G20.7," > 3%")') xi,yi,zi,err
-             write(iou,*) Utabulated,Uexplicit
+             write(io_output,'("WARNING: interpolation error at (",3(F8.5,1X),")=",G20.7," > 3%")') xi,yi,zi,err
+             write(io_output,*) Utabulated,Uexplicit
           end if
        end if
     end do
 
     if (myid.eq.0) then
-       write(iou,'(A,I,A,I,A)') ' test over ',tel,' out of ',volume_nsample,' random positions '
-       write(iou,'(A,G)') ' average error: ',errTot/tel
-       write(iou,'(A,G)') ' maximum relative error: ',errRel
-       write(iou,'(A,G)') ' maximum absolute error [K]: ',errAbs
-       write(iou,'(A,G,A,G,A)') ' void fraction: ',BoltTabulated/volume_nsample, '(tabulated), ',BoltExplicit/volume_nsample,'(explicit)'
-       write(iou,'(A,G,A,G,A)') ' void volume in [Angstrom^3]: ',BoltTabulated*zcell%vol/volume_nsample, '(tabulated), ',BoltExplicit*zcell%vol/volume_nsample,'(explicit)'
-       write(iou,'(A,G,A,G,A)') ' void volume in [cm^3/g]: ',BoltTabulated*zcell%vol/volume_nsample*6.023d-1/dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype))), '(tabulated), ',BoltExplicit*zcell%vol/volume_nsample*6.023d-1/dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype))),'(explicit)'
-       write(iou,'(A,G,A,G,A)') ' Boltzmann averaged energy in [K]: ',eBoltTabulated/BoltTabulated,'(tabulated), ',eBoltExplicit/BoltExplicit,'(explicit)'
-       write(iou,*)
+       write(io_output,'(A,I,A,I,A)') ' test over ',tel,' out of ',volume_nsample,' random positions '
+       write(io_output,'(A,G)') ' average error: ',errTot/tel
+       write(io_output,'(A,G)') ' maximum relative error: ',errRel
+       write(io_output,'(A,G)') ' maximum absolute error [K]: ',errAbs
+       write(io_output,'(A,G,A,G,A)') ' void fraction: ',BoltTabulated/volume_nsample, '(tabulated), ',BoltExplicit/volume_nsample,'(explicit)'
+       write(io_output,'(A,G,A,G,A)') ' void volume in [Angstrom^3]: ',BoltTabulated*zcell%vol/volume_nsample, '(tabulated), ',BoltExplicit*zcell%vol/volume_nsample,'(explicit)'
+       write(io_output,'(A,G,A,G,A)') ' void volume in [cm^3/g]: ',BoltTabulated*zcell%vol/volume_nsample*6.023d-1/dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype))), '(tabulated), ',BoltExplicit*zcell%vol/volume_nsample*6.023d-1/dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype))),'(explicit)'
+       write(io_output,'(A,G,A,G,A)') ' Boltzmann averaged energy in [K]: ',eBoltTabulated/BoltTabulated,'(tabulated), ',eBoltExplicit/BoltExplicit,'(explicit)'
+       write(io_output,*)
     end if
 
     return
@@ -664,7 +664,7 @@ contains
     real(kind=double_precision)::random,stotal,phi,theta,sigij,rsq,scoord(3),coord(3),sdr(3),dr(3)
     real(kind=double_precision),allocatable::position(:,:)
 
-    Write(iou,'(A,/,A)') 'Calculate geometric accessible surface area',' -------------------------------------------------'
+    Write(io_output,'(A,/,A)') 'Calculate geometric accessible surface area',' -------------------------------------------------'
 
     allocate(position(3,zeo%nbead))
 
@@ -673,8 +673,8 @@ contains
        call absoluteToFractional(scoord,zeo%bead(i)%coord,zcell)
        position(:,i)=scoord*zunit%dup
        if (ANY(position(:,i).ge.1)) then
-          write(iou,'(3A,I6)') 'Error in ',TRIM(__FILE__),':',__LINE__
-          write(iou,*) i,position(:,i),scoord,zunit%dup
+          write(io_output,'(3A,I6)') 'Error in ',TRIM(__FILE__),':',__LINE__
+          write(io_output,*) i,position(:,i),scoord,zunit%dup
           call err_exit('')
        end if
     END DO
@@ -722,9 +722,9 @@ contains
 
     ! Report results
     stotal=stotal*fourpi*product(zunit%dup)
-    Write(iou,'(A,F12.2)') ' Total surface area in [Angstroms^2]: ', stotal
-    Write(iou,'(A,F12.2)') ' Total surface area per volume in [m^2/cm^3]: ',stotal/zcell%vol*1.0d4
-    Write(iou,'(A,F12.2,/)') ' Total surface area per volume in [m^2/g]: ', stotal*6.023d3/dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype)))
+    Write(io_output,'(A,F12.2)') ' Total surface area in [Angstroms^2]: ', stotal
+    Write(io_output,'(A,F12.2)') ' Total surface area per volume in [m^2/cm^3]: ',stotal/zcell%vol*1.0d4
+    Write(io_output,'(A,F12.2,/)') ' Total surface area per volume in [m^2/g]: ', stotal*6.023d3/dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype)))
 
     deallocate(position)
 
