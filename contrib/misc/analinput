@@ -1,0 +1,30 @@
+Input file for molfrac analysis
+Number of files:
+1
+List of filenames (must be correct number of files!):
+fort.10.prod1-1
+Number of simulation boxes:
+2
+Binwidth for each box (one per line):
+0.02 
+0.05
+Type of RDF/NUM - atom1, atom2 - use beadtype numbers from suijtab.f
+For reference 206=mNT,207=oNT,208=C10,203=LJmNT,204=LJoNT,205=LJC10
+114,114
+Calculate dipole vector angles? .true. or .false.
+.true.
+Which molecule type? i.e. 1 or 2?
+1
+Beadtype number from suijtab.f
+114
+interval 1 (i.e. first solvation shell from RDF)
+3.8
+interval 2 (i.e. second solvation shell)
+5.9
+Binwidth for angle distributions (just one)
+0.05
+Calculate average dipole moment? .true. or .false.
+.true.
+Which molecule type? i.e. 1 or 2?
+1
+

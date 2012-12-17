@@ -1,0 +1,11 @@
+temperature
+298.15
+boxlength
+39.0
+istep
+100
+applied electric field? .true. or .false.
+.false.
+field strength (V/A)
+0.0
+

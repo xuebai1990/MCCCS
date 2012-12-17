@@ -1,0 +1,72 @@
+! unit ntype leaderq
+1    4     1
+! vibration
+1
+2 1
+! bending
+1
+2 3 1
+! torsion
+1
+2 3 4 1
+! unit ntype leaderq
+2    5     2
+! vibration
+2
+3 1
+1 1
+! bending
+1
+3 4 1
+! torsion
+1
+3 4 5 1
+! unit ntype leaderq
+3    5     3
+! vibration
+2
+4 1
+2 1
+! bending
+2
+2 1 1
+4 5 1
+! torsion
+1
+4 5 6 1
+! unit ntype leaderq
+4    5     4
+! vibration
+2
+5 1
+3 1
+! bending
+2
+5 6 1
+3 2 1
+! torsion
+1
+3 2 1 1
+! unit ntype leaderq
+5    5     5
+! vibration
+2
+6 1
+4 1
+! bending
+1
+4 3 1
+! torsion
+1
+4 3 2 1
+! unit ntype leaderq
+6    4     6
+! vibration
+1
+5 1
+! bending
+1
+5 4 1
+! torsion
+1
+5 4 3 1

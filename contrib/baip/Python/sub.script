@@ -1,0 +1,46 @@
+#!/bin/bash -l
+#PBS -l nodes=1:ppn=1,walltime=24:00:00
+#>>> "name" is what will be shown in the queuing system
+#   (such as the output from qstat or showq)
+#PBS -N name
+#PBS -e stderr-$PBS_JOBID
+#PBS -o stdout-$PBS_JOBID
+###PBS -q devel
+
+#>>> "PROG" points to the executable
+PROG=$HOME/path/to/topmon
+#>>> "DATA" points to the directory containing the input
+#   files. If you plan to submit this file from this directory,
+#   $PBS_O_WORKDIR can be used.
+DATA=/path/to/data
+FILELOG=log
+cd $DATA
+
+#>>> Load any necessary modules. This is not needed if you have
+#   placed it in the ~/.bashrc file.
+#module load intel/12.1 ompi/1.4.4/intel mkl/10.2.7.041
+ 
+#>>> "FCUR" loops over a sequence of strings representing
+#   different phases of the simulation. If there is a corresponding
+#   fort.4.$FCUR file, it will be copied to fort.4 to be
+#   used as the input file; otherwise the existing fort.4
+#   file will be used.
+for FCUR in melt cool volume equil1;do
+    echo "$FCUR: " >> $FILELOG
+    [ -e "fort.4.$FCUR" ] && cp -f "fort.4.$FCUR" fort.4
+    /usr/bin/time -ao $FILELOG $PROG || exit -1
+    cp -f config1a.dat fort.77
+    [ -e fort.21 ] && cp -f fort.21 fort.23
+    mv -f run1a.dat "run.$FCUR"
+    mv -f config1a.dat "config.$FCUR"
+    mv -f movie1a.dat "movie.$FCUR"
+    mv -f fort.12 "fort12.$FCUR"
+    [ -e fort.21 ] && mv -f fort.21 "fort21.$FCUR"
+    [ -e cell_param1a.dat ] && mv -f cell_param1a.dat "cellparam.$FCUR"
+    for j in 1 2 3;do
+        [ -e "box${j}config1a.xyz" ] && mv -f "box${j}config1a.xyz" "box${j}config.$FCUR"
+        [ -e "box${j}movie1a.xyz" ] && mv -f "box${j}movie1a.xyz" "box${j}movie.$FCUR"
+    done
+done
+
+exit 0

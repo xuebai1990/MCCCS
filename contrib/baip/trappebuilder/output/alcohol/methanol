@@ -1,0 +1,30 @@
+! unit ntype leaderq
+1    62    1
+! stretching
+2
+2 29
+3 30
+! bending
+0
+! torsion
+0
+! unit ntype leaderq
+2    61    2
+! stretching
+1
+1 29
+! bending
+1
+1 3 35
+! torsion
+0
+! unit ntype leaderq
+3    63    3
+! stretching
+1
+1 30
+! bending
+1
+1 2 35
+! torsion
+0

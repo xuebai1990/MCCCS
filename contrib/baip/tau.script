@@ -1,0 +1,10 @@
+#!/bin/sh
+
+export TAU_MAKEFILE=/home/siepmann/baip/tools/tau-2.22.1/build/x86_64/lib/Makefile.tau-icpc-papi-mpi-pdt
+export TAU_OPTIONS="-optVerbose -optRevert -optKeepFiles -optPreProcess -optTauSelectFile=\"/home/siepmann/baip/MCCCS/test/runs/TEST4/mpi-np4/select.tau\""
+#export TAU_MAKEFILE=/home/siepmann/baip/tools/tau-2.22.1/build/x86_64/lib/Makefile.tau-phase-icpc-papi-mpi-pdt
+#-optPdtGnuFortranParser
+#-optPdtCleanscapeParser
+#-optCompInst
+#-optPDTInst
+#static phase name="MC_kernel" file="monola.f" line=413 to line=955

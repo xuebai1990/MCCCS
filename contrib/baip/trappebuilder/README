@@ -1,0 +1,3 @@
+To use the molecule builder, you need to have a file defining the force field (UA-TraPPE) and an input file describing the molecule (see examples in the input sub-directory).
+
+Compile the code using "javac trappebuilder.java" (you may need to load a JAVA module first in cluster environment) and run with "java trappebuilder UA-TraPPE input/alcohol/methanol output/alcohol/methanol".

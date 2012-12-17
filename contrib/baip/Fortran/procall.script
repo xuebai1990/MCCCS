@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+ANALYSIS=/path/to/analysis/code
+
+#Loop over (change into) a bunch of directories named as xxxK/y.yyy_z,
+#and call analysis.script and average.script for analyzing and averaging
+find -E `pwd` -type d -regex ".*[0-9\.]+K/[0-9\.]+_[0-9]+$" | while read directory
+do
+    cd $directory
+    echo $(pwd)
+    #16 independent simulations in RUN1, RUN2, ..., RUN16 (some can be missing)
+    #Each directory contains movie.prod1 to movie.prod30 (some can be missing)
+    $ANALYSIS/analysis.script 1 16 prod 1 30
+    #There are 13 output files from the analysis step needed to average
+    $ANALYSIS/average.script 1 16 1 30 13
+done

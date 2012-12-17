@@ -1,0 +1,49 @@
+atomtype
+1 1 3 3 1 2 #C3
+2 2 1 1 1 #N
+3 3 1 #H2
+4 4 5 5 6 #Ca1
+5 5 4 5 8 #Ca2
+6 6 4 7 7 #C2
+7 7 6 #O
+8 8 5 #Ha
+9 9 #Zn
+
+stretching
+9 9 1 9 #Zn-Zn
+7 6 1 4 #O-C2
+6 4 1 3 #C2-Ca1
+4 5 1 1 #Ca1-Ca2
+5 5 1 2 #Ca2-Ca2
+5 8 1 5 #Ca2-Ha
+2 1 1 7 #N-C3
+1 3 1 8 #C3-H2
+1 1 1 6 #C3-C3
+
+bending
+7 6 7 4 #O-C2-O
+7 6 4 2 #O-C2-Ca1
+6 4 5 5 #C2-Ca1-Ca2
+4 5 8 3 #Ca1-Ca2-Ha
+5 5 8 6 #Ca2-Ca2-Ha
+4 5 5 1 #Ca1-Ca2-Ca2
+5 4 5 7 #Ca2-Ca1-Ca2
+1 1 2 8 #C3-C3-N
+1 2 1 9 #C3-N-C3
+3 1 3 10 #H2-C3-H2 #3 1 3 13 #H2-C3-H2
+3 1 2 11 #H2-C3-N
+1 1 3 12 #C3-C3-H2
+
+torsion
+8 5 5 8 4 #Ha-Ca2-Ca2-Ha
+4 5 5 4 1 #Ca1-Ca2-Ca2-Ca1
+5 4 5 5 2 #Ca2-Ca1-Ca2-Ca2
+4 5 5 8 3 #Ca1-Ca2-Ca2-Ha
+8 5 4 6 5 #Ha-Ca2-Ca1-C2
+5 4 6 7 6 #Ca2-Ca1-C2-O
+5 5 4 6 7 #Ca2-Ca2-Ca1-C2
+3 1 1 3 8 #H2-C3-C3-H2
+2 1 1 3 9 #N-C3-C3-H2
+2 1 1 2 10 #N-C3-C3-N
+1 2 1 3 11 #C3-N-C3-H2
+1 1 2 1 12 #C3-C3-N-C3 #13 #C3-C3-N-C3 #4 7 6 7 14 #Ca1-O-C2-O #15 #C1-Ca2-Ca2-Ha #6 5 4 5 16 #C2-Ca2-Ca1-Ca2

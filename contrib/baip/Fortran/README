@@ -1,0 +1,11 @@
+The main driver is analysis.F90, which calls global.F90 to read the movie file, reads control parameters from analysis.cfg (the sample input is for water), and calls hbond.F90 and/or rdf.F90 to perform relevant analysis.
+
+Compile the program with "gfortran -ffree-line-length-none -O3 -o analysis.exe global.F90 hbond.F90 rdf.F90 analysis.F90" (if the movie file to be analyzed was generated in the old format, add "-DOLD_CODE" to the option strings).
+
+To perform analysis, cd to the directory containing your output files, make a link to a production movie file you want to analyze (such as "ln -sf movie.prod1 fort.10"), make a link to the config file (such as "ln -sf /path/to/analysis.cfg ."), and run the analysis code (/path/to/analysis.exe).
+------------------------------------------------------------
+average.F90 is used to average results (of successive runs and/or independent simulations) generated using the analysis programs. Please see the top of the file for a brief description of its usage.
+------------------------------------------------------------
+The entire post-analysis process can be automated using shell scripts if the directory containing the simulation data is reasonably well organized, such as one like projectX/temperature1/pressure3/RUN5, etc., where RUN5 contains all production output for the 5th independent run.
+
+Change directory to projectX and run procall.script, which will call analysis.script and average.script in each directory that contains RUNxx, and generate the final output in the RESULT directory.

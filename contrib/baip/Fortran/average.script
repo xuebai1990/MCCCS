@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+
+echo ""
+echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+echo "|     AVERAGE PROGRAM DRIVING SCRIPT      |"
+echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+echo ""
+
+#where the directory containing the analysis program is
+ANALYSIS=/path/to/analysis/code
+
+#start and end number of the independent simulations
+run_start=$1
+run_end=$2
+#start and end number for the data sets to average
+file_start=$3
+file_end=$4
+#directory name to hold results
+result=RESULT
+#number of output files
+nfile=$5
+
+#names of analysis output files
+file[1]=hbond
+file[2]=nint1-1-114-1-114
+file[3]=nint2-1-114-1-114
+file[4]=nint3-1-114-1-114
+file[5]=rdf1-1-114-1-114
+file[6]=rdf2-1-114-1-114
+file[7]=rdf3-1-114-1-114
+file[8]=nint1-1-1
+file[9]=nint2-1-1
+file[10]=nint3-1-1
+file[11]=rdf1-1-1
+file[12]=rdf2-1-1
+file[13]=rdf3-1-1
+#########
+
+[ -e "$result" ] || mkdir "$result"
+[ -d "$result" ] || exit -1
+
+for ((ifile=1; ifile <= nfile; ifile++))
+do ###LOOP OVER FILES
+    echo "-------------------${file[ifile]}-------------------"
+
+    rm -f $result/average.cfg.tmp
+
+    for ((irun=run_start, nrun=0; irun<=run_end; irun++))
+    do ###LOOP OVER RUNS
+        [ -d "RUN$irun" ] || [ -d "RUN$irun-failed" ] || break
+        [ ! -d "RUN$irun" ] && continue
+        ((nrun++))
+        echo "##### $nrun: RUN$irun #####"
+        cd "RUN$irun"
+
+        rm -f average.cfg.tmp
+
+        for ((iset=file_start, nset=0; iset<=file_end; iset++))
+        do ###LOOP OVER DATA SETS
+            [ -e "${file[ifile]}_$iset.dat" ] || continue
+            ((nset++))
+            echo "${file[ifile]}_$iset.dat" >> "average.cfg.tmp"
+        done ###LOOP OVER DATA SETS
+
+        echo "nset = $nset"
+        echo  $nset > average.cfg
+        isetcount=101
+        cat average.cfg.tmp | while read fname
+        do ###LOOP OVER DATA SETS
+            echo "ln -sf RUN$irun/$fname fort.$isetcount"
+            ln -sf $fname "fort.$isetcount"
+            echo `wc -l "fort.$isetcount"` >> average.cfg
+            ((isetcount++))
+        done ###LOOP OVER DATA SETS
+        "$ANALYSIS/average.exe"
+        echo "mv -f plotavg.xy ../$result/${file[ifile]}_$irun.dat"
+        mv -f plotavg.xy "../$result/${file[ifile]}_$irun.dat"
+        echo "${file[ifile]}_$irun.dat" >> "../$result/average.cfg.tmp"
+        rm -f average.cfg* fort.???
+        cd ../
+    done ###LOOP OVER RUNS
+
+    echo "##### $result #####"
+    cd $result
+    echo "nrun = $nrun"
+    echo $nrun > average.cfg
+    iruncount=101
+    cat average.cfg.tmp | while read fname
+    do ###LOOP OVER RUNS
+        ln -sf $fname "fort.$iruncount"
+        echo `wc -l "fort.$iruncount"` >> average.cfg
+        ((iruncount++))
+    done
+    "$ANALYSIS/average.exe"
+    echo "mv -f plotavg.xy ${file[ifile]}.dat"
+    mv -f plotavg.xy "${file[ifile]}.dat"
+    rm -f average.cfg* fort.10?
+    cd ..
+done ###LOOP OVER RUNS
+
+echo ""
+echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+echo "| FINISHED RUNNING AVERAGE IN ALL DIRECTORIES  |"
+echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+echo ""
+
+###END OF SCRIPT

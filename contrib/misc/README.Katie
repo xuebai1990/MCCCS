@@ -1,0 +1,26 @@
+Directories FIT and BOILING_POINT (untar the tar files) contain old group analysis programs.
+fit.f calculates the critical point.  It reads in fort.11.  
+antoine.f calculates the boiling point.  It reads in fort.50.
+To use Clausius-Clapeyron, say 'no' to antoine, 'yes' to Clausius-Clapeyron,
+and input the pressure (in the same units you used in fort.50).  
+You can ignore the questions about the critical point if you don't need the
+critical pressure. 
+
+anal10.f is an old group analysis program for RDFs and things.  
+
+rdfv6.f is my rdf program.  Its a modified version of an rdf program
+I got from Becky several years ago.  It will read in rdfinput.
+The fort.10 file names I have listed are movie files (the movie
+file used to be fort.10).  The program will ask you for your
+beadtype numbers, and will automatically generate filenames for you
+as long as those beadtypes are listed in the 'atom' array towards
+the top of the program.
+
+dielectv4.f is my dielectric constant program.  It reads in
+fort.27 (x, y, z components of the system dipole moment) and dielectinput.
+
+molefrac-analysisv4.f is my LMFE analysis code.  It also calculates
+COM RDFs and NIs.  It reads in analinput.  The code is a bit of a mess,
+but it works.
+
+
