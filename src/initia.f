@@ -1,12 +1,11 @@
-      subroutine initia
-
-      use sim_system
-      use var_type
-      use const_phys
-      use const_math
-      use util_runtime,only:err_exit
-      use util_files
-      implicit none
+subroutine initia
+  use const_math,only:degrad,raddeg
+  use util_random,only:random
+  use util_runtime,only:err_exit
+  use sim_system
+  use energy_intramolecular,only:vtorso,splint,lininter
+  use moves_cbmc,only:rosenbluth,schedule,explct
+  implicit none
 !$$$      include 'mpi.inc'
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
@@ -19,31 +18,31 @@
 !$$$      include 'cbmc.inc'
 
       logical::lhere(nmax)
-      integer(KIND=normal_int)::io_struct,jerr,i,j,m,m1,m2,n,nn,ic,jc,kc,it,ip1,ip2,ip3 ,ii,jj,iivib,jjben,jjtor,intemp,imol,ibtype,imolty,ibuild ,rand_id,offset,count_chain
+      integer::io_struct,jerr,i,j,m,m1,m2,n,nn,ic,jc,kc,it,ip1,ip2,ip3 ,ii,jj,iivib,jjben,jjtor,intemp,imol,ibtype,imolty,ibuild ,rand_id,offset,count_chain
 
-      integer(KIND=normal_int)::iboxst,iboxed,ibox,check,chktot
-      integer(KIND=normal_int)::mcmt(ntmax,nbxmax),pcmt(ntmax) ,mcmtma(ntmax,nbxmax)
-      integer(KIND=normal_int)::unitc,ntii
+      integer::iboxst,iboxed,ibox,check,chktot
+      integer::mcmt(ntmax,nbxmax),pcmt(ntmax) ,mcmtma(ntmax,nbxmax)
+      integer::unitc,ntii
 
-      integer(KIND=normal_int)::bmap(numax),imap(numax),zzz,prev,ifrom ,nsave
+      integer::bmap(numax),imap(numax),zzz,prev,ifrom ,nsave
       logical::lacc(numax),lgrow,lterm,lgrown(ntmax)
 
-      real(KIND=double_precision)::xtemp(numax),ytemp(numax) ,ztemp(numax)
-      real(KIND=double_precision)::ddum
+      real::xtemp(numax),ytemp(numax) ,ztemp(numax)
+      real::ddum
 
-      real(KIND=double_precision)::ux,uy,uz,xshift,dic ,xnext,ynext ,znext,xynext,angold,angnew,rot ,x1,y1,z1,d1,x2,y2,z2,d2,bang ,blen,random
+      real::ux,uy,uz,xshift,dic ,xnext,ynext ,znext,xynext,angold,angnew,rot ,x1,y1,z1,d1,x2,y2,z2,d2,bang,blen
 
-      real(KIND=double_precision)::rxui,ryui,rzui,xaa1,yaa1,zaa1,daa1 ,xa1a2,ya1a2,za1a2,da1a2 
+      real::rxui,ryui,rzui,xaa1,yaa1,zaa1,daa1 ,xa1a2,ya1a2,za1a2,da1a2 
 
-      real(KIND=double_precision)::xcc,ycc,zcc,tcc,spltor
+      real::xcc,ycc,zcc,tcc,spltor
 
-      real(KIND=double_precision)::vtorso,vbend,vtg,thetac,theta,dot ,aben,ator
+      real::vbend,vtg,thetac,theta,dot ,aben,ator
 
-      real(KIND=double_precision)::rxvec(numax,numax),ryvec(numax,numax) ,rzvec(numax,numax),distanceij(numax,numax)
+      real::rxvec(numax,numax),ryvec(numax,numax) ,rzvec(numax,numax),distanceij(numax,numax)
 
-      real(KIND=double_precision)::samx(ntmax,numax),samy(ntmax,numax) ,samz(ntmax,numax)
+      real::samx(ntmax,numax),samy(ntmax,numax) ,samz(ntmax,numax)
 
-      real(KIND=double_precision)::vdummy
+      real::vdummy
 
       dimension ux(nbxmax),uy(nbxmax),uz(nbxmax)
       dimension check(ntmax)

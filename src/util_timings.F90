@@ -1,9 +1,8 @@
 module util_timings
-  use var_type,only:double_precision
   implicit none
   private
   public::time_date_str,time_init,time_now
-  real(kind=double_precision),save::time_start
+  real,save::time_start
   include 'common.inc'
 
 contains
@@ -31,7 +30,7 @@ contains
   end subroutine time_init
 
   function time_now()
-    real(kind=double_precision)::time_now
+    real::time_now
 !    call cpu_time(time_now)
     time_now=MPI_WTIME()
 !!$   time_now=omp_get_wtime()

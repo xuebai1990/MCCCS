@@ -1,28 +1,30 @@
-      subroutine pressure ( press, surf, ibox )
+MODULE prop_pressure
+  use const_math,only:onepi
+  use const_phys,only:qqfact
+  use util_math,only:erfunc
+  use sim_system
+  use sim_cell
+  use energy_kspace,only:recippress,calp
+  use energy_pairwise
+  implicit none
+  include 'common.inc'
+  private
+  save
+  public::pressure
 
+contains
 !    *****************************************************
 !    ** calculates the pressure for a configuration.    **
 !    *****************************************************
- 
-      use sim_system
-      use var_type
-      use const_phys
-      use const_math
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
-      implicit none
-      include 'common.inc'
- 
+  subroutine pressure( press, surf, ibox )
 !$$$      include 'mpi.inc'
 !$$$      include 'mpif.h'
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'system.inc'
-!$$$      include 'poten.inc' 
+!$$$      include 'poten.inc'
 !$$$      include 'expsix.inc'
-!$$$      include 'merck.inc' 
+!$$$      include 'merck.inc'
 !$$$      include 'connect.inc'
 !$$$      include 'ewaldsum.inc'
 !$$$      include 'conver.inc'
@@ -34,24 +36,24 @@
 !$$$      include 'cell.inc'
 
       logical::lcoulo,lexplt,lqimol,lqjmol,lij2
-      integer(KIND=normal_int)::ibox
-      integer(KIND=normal_int)::i,ii,j,jj,ntii,ntjj,ntij,imolty,jmolty ,iii,jjj,k
- 
-      real(KIND=double_precision)::press,repress
+      integer::ibox
+      integer::i,ii,j,jj,ntii,ntjj,ntij,imolty,jmolty ,iii,jjj,k
 
-      real(KIND=double_precision)::rxui,ryui,rzui,rxuij,ryuij,rzuij ,rijsq,rcutsq,sr2,sr6,rhosq,corp,rij,rs1,sr1,rs2,sr7,rs7,rs6
-      real(KIND=double_precision)::srij
-      real(KIND=double_precision)::surf,pxx,pyy,pzz,rpxx,rpyy,rpzz,rpxy ,rpyx,rpxz,rpzx,rpyz,rpzy
+      real::press,repress
 
-      real(KIND=double_precision)::fxcmi,fycmi,fzcmi,fij,xcmi,ycmi,zcmi ,flj
-      real(KIND=double_precision)::rcm,rcmsq,rcmi
-      real(KIND=double_precision)::rbcut,qave, volsq,epsilon2,sigma2 ,pwell,vol 
+      real::rxui,ryui,rzui,rxuij,ryuij,rzuij ,rijsq,rcutsq,sr2,sr6,rhosq,rij,rs1,sr1,rs2,sr7,rs7,rs6
+      real::srij
+      real::surf,pxx,pyy,pzz,rpxx,rpyy,rpzz,rpxy ,rpyx,rpxz,rpzx,rpyz,rpzy
+
+      real::fxcmi,fycmi,fzcmi,fij,xcmi,ycmi,zcmi ,flj
+      real::rcm,rcmsq,rcmi
+      real::rbcut,qave, volsq,epsilon2,sigma2 ,pwell,vol
 
       dimension lcoulo(numax,numax)
 
 ! RP added for MPI
-      real(KIND=double_precision)::pips12,pips13,pips21,pips23,pips31 ,pips32
-      real(KIND=double_precision)::diff_pips12,diff_pips13,diff_pips21 ,diff_pips23,diff_pips31,diff_pips32,diff_pxx,diff_pyy,diff_pzz ,sum_press
+      real::pips12,pips13,pips21,pips23,pips31 ,pips32
+      real::diff_pips12,diff_pips13,diff_pips21 ,diff_pips23,diff_pips31,diff_pips32,diff_pxx,diff_pyy,diff_pzz ,sum_press
 ! --------------------------------------------------------------------
       if ( lpbc ) call setpbc (ibox)
 
@@ -94,7 +96,7 @@
 ! *** INTERCHAIN INTERACTIONS ***
 ! *******************************
 
-      
+
 
 !      if(LSOLPAR.and.(ibox.eq.2)) then
 !         press= 1.380662d4 * ( ( nchbox(ibox) / beta) -
@@ -105,10 +107,10 @@
 !      end if
 
 
-! --- loop over all chains i 
+! --- loop over all chains i
 ! RP added for MPI
       do 100 i = myid+1, nchain - 1,numprocs
-!      do 100 i = 1, nchain - 1 
+!      do 100 i = 1, nchain - 1
 ! ### check if i is in relevant box ###
          if ( nboxi(i) .eq. ibox ) then
 
@@ -128,12 +130,12 @@
                lij2 = .true.
             end if
 
-! --- loop over all chains j with j>i 
+! --- loop over all chains j with j>i
             do 99 j = i + 1, nchain
-               
+
 ! ### check for simulation box ###
                if ( nboxi(j) .eq. ibox ) then
-                  
+
                   jmolty = moltyp(j)
                   lqjmol = lelect(jmolty)
                   fxcmi = 0.0d0
@@ -162,7 +164,7 @@
                   end if
 
 
-! --- loop over all beads ii of chain i 
+! --- loop over all beads ii of chain i
  108              do 98 ii = 1, nunit(imolty)
 
                      ntii = ntype(imolty,ii)
@@ -171,9 +173,9 @@
                      ryui = ryu(i,ii)
                      rzui = rzu(i,ii)
 
-! --- loop over all beads jj of chain j 
+! --- loop over all beads jj of chain j
                      do 97 jj = 1, nunit(jmolty)
-                        
+
                         ntjj = ntype(jmolty,jj)
                         if ( lij2 ) then
                            if ( (.not. (lij(ntii) .and. lij(ntjj)))  .and.  (.not. (lqchg(ntii) .and. lqchg(ntjj))))  goto 97
@@ -198,9 +200,9 @@
                         if ( lpbc ) call mimage (rxuij,ryuij,rzuij,ibox)
 
 !     write(io_output,*) 'bead ruij',rxuij,ryuij,rzuij
-                        
+
                         rijsq = rxuij*rxuij+ryuij*ryuij+rzuij*rzuij
-                        
+
 ! --- compute whether the charged groups will interact & fij
                         fij = 0.0d0
                         if ( lqimol .and. lqjmol .and. lqchg(ntii) .and. lqchg(ntjj) ) then
@@ -218,7 +220,7 @@
                            else
                               iii = leaderq(imolty,ii)
                               jjj = leaderq(jmolty,jj)
-                            
+
                               if ( ii .eq. iii .and. jj .eq. jjj ) then
 ! --- set up the charge-interaction table
                                  if ( rijsq .lt. rcutsq ) then
@@ -227,7 +229,7 @@
                                     lcoulo(ii,jj) = .false.
                                  end if
                               end if
-                           
+
                               if ( lcoulo(iii,jjj) ) then
                                  fij = -(qqfact*qqu(i,ii)*qqu(j,jj) /dsqrt(rijsq))/rijsq
                               end if
@@ -323,11 +325,11 @@
                               fij = fij + flj
                            end if
                         end if
-                        fxcmi = fxcmi + fij * rxuij 
-                        fycmi = fycmi + fij * ryuij 
-                        fzcmi = fzcmi + fij * rzuij 
+                        fxcmi = fxcmi + fij * rxuij
+                        fycmi = fycmi + fij * ryuij
+                        fzcmi = fzcmi + fij * rzuij
  97                  continue
-                      
+
  98               continue
 
 
@@ -343,7 +345,7 @@
 
                   press = press +  fxcmi*rxuij + fycmi*ryuij + fzcmi*rzuij
 
-! * for surface tension                  
+! * for surface tension
 ! * this is correct for the coulombic part and for LJ.  Note sign difference!
                   pxx = pxx - fxcmi*rxuij
                   pyy = pyy - fycmi*ryuij
@@ -354,7 +356,7 @@
                   pips23 = pips23 - ryuij*fzcmi
                   pips31 = pips31 - rzuij*fxcmi
                   pips32 = pips32 - rzuij*fycmi
-                  
+
                end if
  99         continue
          end if
@@ -373,7 +375,7 @@
        CALL MPI_ALLREDUCE(pips31,diff_pips31,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
        CALL MPI_ALLREDUCE(pips32,diff_pips32,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
 
-     
+
       press = sum_press
       pxx = diff_pxx
       pyy = diff_pyy
@@ -384,7 +386,7 @@
       pips(2,3) = diff_pips23
       pips(3,1) = diff_pips31
       pips(3,2) = diff_pips32
- 
+
 !      if(myid .eq. 0)then
 !        write(io_output,*)'press=',press,'pxx=',pxx,'pyy=',pyy
 !     &   ,'pzz=',pzz,'pips(1,2)',pips(1,2),'pips(1,3)=',pips(1,3)
@@ -398,7 +400,7 @@
 
 ! *** Compute the reciprocal space contribution
 ! *** by using the thermodynamic definition
-! *** 
+! ***
          call recippress(ibox,repress,rpxx,rpyy,rpzz,rpxy,rpyx,rpxz, rpzx,rpyz,rpzy)
          press = press - repress
 
@@ -474,11 +476,11 @@
       pwellips(3,2) = pwellips(2,3)
 
       if (lsolid(ibox).and.(.not.lrect(ibox))) then
-         vol = cell_vol(ibox) 
+         vol = cell_vol(ibox)
       else
          vol = boxlx(ibox)*boxly(ibox)*boxlz(ibox)
       end if
-     
+
       pipsw = -(press/3.0d0)/vol
       pwellipsw = -(pwell/3.0d0)/vol
 
@@ -518,7 +520,7 @@
       press = 1.380662d4 * ( ( (nchbox(ibox)+ ghost_particles(ibox)) / beta) - ( press/3.0d0 ) ) /  ( vol )
 
       surf = pzz - 0.5d0*(pxx + pyy)
-! * divide by surface area and convert from K to put surf in mN/m 
+! * divide by surface area and convert from K to put surf in mN/m
       surf = 1.380658d0*surf / (2.0d0*boxlx(ibox)*boxly(ibox))
 
 !----check pressure tail correction
@@ -529,8 +531,8 @@
 ! --     Not adding tail correction for the ghost particles
 ! --     as they are ideal (no interaction) Neeraj.
          volsq = ( vol )**2
-         do imolty=1, nmolty        
-            do jmolty=1, nmolty  
+         do imolty=1, nmolty
+            do jmolty=1, nmolty
                rhosq = ncmt(ibox,imolty)*ncmt(ibox,jmolty) / volsq
                press=press + 1.380662d4 * corp(imolty,jmolty,rhosq,ibox)
             end do
@@ -539,15 +541,90 @@
 !      write (io_output,*) ' press tail' ,  press
 
       return
-      end
+  end subroutine pressure
 
+!> \brief Impulsive force and tail corrections to pressure
+!>
+!> @todo Impulsive force correction only done for LJ 12-6 potential
+  function corp(imolty,jmolty,rhosq,ibox)
+! ************************************
+! *** tail-corrections in pressure ***
+! ************************************
+!$$$      include 'control.inc'
+!$$$      include 'coord.inc'
+!$$$      include 'conver.inc'
+!$$$      include 'poten.inc'
+!$$$      include 'system.inc'
+!$$$      include 'expsix.inc'
+!$$$      include 'merck.inc'
+!$$$      include 'nsix.inc'
 
+      real::corp,rci3,rhosq, epsilon2, sigma2
+      real::rci1
+      integer::imolty,jmolty,ii,jj, ntii, ntjj, ntij ,ibox
+      corp = 0.0d0
 
+      do ii = 1, nunit(imolty)
+         ntii = ntype(imolty,ii)
 
+         do jj = 1, nunit(jmolty)
+            ntjj = ntype(jmolty,jj)
 
+            if (lexpsix .and. ltailc) then
+               ntij = (ntii+ntjj)/2
+               corp = corp + consp(ntij)
+            else if (lmmff .and. ltailc) then
+               ntij = (ntii+ntjj)/2
+               corp = corp+((-2.0d0)/3.0d0)*onepi*epsimmff(ntij)*sigimmff(ntij)**3.0d0*corp_cons(ntij)
+            else if (lninesix .and. ltailc) then
+               ntij = (ntii-1)*nxatom + ntjj
+               corp = corp + 16.0d0 * onepi * epsnx(ntij) * rzero(ntij)**3 * (0.5d0*(rzero(ntij)/rcut(ibox))**6 - (rzero(ntij)/rcut(ibox))**3)
+            else if (lgenlj .and. ltailc) then
+               ntij = (ntii-1)*nntype + ntjj
+               rci3 = sig2ij(ntij)**(3.0d0/2.0d0) / rcut(ibox)**3
+               rci1 = rci3 **(1.0d0/3.0d0)
+               if ( lexpand(imolty) .and. lexpand(jmolty) ) then
+                  sigma2 = (sigma(imolty,ii)+sigma(jmolty,jj))**2/4.0d0
+                  epsilon2 = dsqrt(epsilon(imolty,ii) *epsilon(jmolty,jj))
+               else if ( lexpand(imolty) ) then
+                  sigma2 = (sigma(imolty,ii)+sigi(ntjj))**2/4.0d0
+                  epsilon2 = dsqrt(epsilon(imolty,ii)*epsi(ntjj))
+               else if ( lexpand(jmolty) ) then
+                  sigma2 = (sigma(jmolty,jj)+sigi(ntii))**2/4.0d0
+                  epsilon2 = dsqrt(epsilon(jmolty,jj)*epsi(ntii))
+               else
+                  sigma2 = sig2ij(ntij)
+                  epsilon2 = epsij(ntij)
+               end if
+                 corp = corp + (2.0d0/3.0d0) * onepi * epsilon2 * sigma2 ** (1.50d0) * n1 * ( (( (2.0d0**((4.0d0*n1/n0)+1.0d0))/(2.0d0*n1-3.0d0)) * rci1 **(2.0d0*n1-3.0d0) ) - ( ((2.0d0**((2.0d0*n1/n0)+1.0d0))/(n1-3.0d0))* rci1 **(n1-3.0d0) )  )
+            else if (.not.(lexpsix.or.lmmff.or.lninesix.or.lgenlj)) then
+               ntij = (ntii-1)*nntype + ntjj
 
+               if ( lexpand(imolty) .and. lexpand(jmolty) ) then
+                  sigma2 = (sigma(imolty,ii)+sigma(jmolty,jj))**2/4.0d0
+                  epsilon2 = dsqrt(epsilon(imolty,ii)* epsilon(jmolty,jj))
+               else if ( lexpand(imolty) ) then
+                  sigma2 = (sigma(imolty,ii)+sigi(ntjj))**2/4.0d0
+                  epsilon2 = dsqrt(epsilon(imolty,ii)*epsi(ntjj))
+               else if ( lexpand(jmolty) ) then
+                  sigma2 = (sigma(jmolty,jj)+sigi(ntii))**2/4.0d0
+                  epsilon2 = dsqrt(epsilon(jmolty,jj)*epsi(ntii))
+               else
+                  sigma2 = sig2ij(ntij)
+                  epsilon2 = epsij(ntij)
+               end if
+               rci3 = (dsqrt(sigma2)/rcut(ibox))**3
+               if (ltailc) then ! both impulsive force and tail corrections
+                  corp = corp+8.0d0*onepi*epsilon2*sigma2**(1.5d0)*(rci3*rci3*rci3*7.0d0/9.0d0-rci3)
+               else ! only impulsive force corrections
+                  corp=corp+(8.0d0/3.0d0)*onepi*epsilon2*sigma2**(1.5d0)*(rci3*rci3*rci3 - rci3)
+               end if
+            end if
+         end do
+      end do
 
+      corp=corp*rhosq
 
-
-
-
+      return
+  end function corp
+end MODULE prop_pressure

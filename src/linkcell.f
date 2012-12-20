@@ -1,24 +1,15 @@
       subroutine linkcell(iinit,imol,xcmi,ycmi,zcmi,cellinc)
-
-      use sim_system
-      use var_type
-      use const_phys
-      use const_math
       use util_runtime,only:err_exit
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
+      use sim_system
       implicit none
-      include 'common.inc'
 
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'system.inc'      
 
-      integer(KIND=normal_int)::i,j,k,n,ncellx,ncelly,ncellz,iinit,ibox ,linkdecode,imol,ic,cellinc(27),ia,ja,ka,ib,jb,kb,count,ncell ,ncello
+      integer::i,j,k,n,ncellx,ncelly,ncellz,iinit,ibox ,linkdecode,imol,ic,cellinc(27),ia,ja,ka,ib,jb,kb,count,ncell ,ncello
 
-      real(KIND=double_precision)::dcellx,dcelly,dcellz,rx,ry,rz,xcmi ,ycmi,zcmi
+      real::dcellx,dcelly,dcellz,rx,ry,rz,xcmi ,ycmi,zcmi
 
 !     *** rintramax is the maximum distance between endpoints 
 !     *** in a molecule
@@ -214,26 +205,17 @@
 !      write(io_output,*) 'END LINKCELL IINIT=',iinit
 
       return
-      end
+    end subroutine linkcell
 
 
 
 
 
       function linkdecode(i,j,k,ncellx,ncelly,ncellz)
-            
       use sim_system
-      use var_type
-      use const_phys
-      use const_math
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
       implicit none
-      include 'common.inc'
       
-      integer(KIND=normal_int)::i,j,k,ncellx,ncelly,ncellz,linkdecode
+      integer::i,j,k,ncellx,ncelly,ncellz,linkdecode
       
 !     *** decodes x,y,z to a single number
 
@@ -241,7 +223,7 @@
 
       return
       
-      end
+    end function linkdecode
       
 
 

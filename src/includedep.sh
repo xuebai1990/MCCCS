@@ -13,7 +13,7 @@ if test "$sources" = " " ; then exit ; fi
 
 # files that may be included
 # extra directories may be specified on the command line
-includes=`echo *.h *.inc`
+includes=`echo ./*.h ./*.inc`
 for dir in $*
 do
     includes="$includes `echo $dir/*.h`"
@@ -26,11 +26,11 @@ sed 's/[^ ]*\*\.h//g
 # create list of include dependencies
 # each line is of the form:
 # file_name.o : @include_file.h@
-egrep '^ *# *include *"' $sources |  # look for #include "..." statements
+egrep "^ *include *['\"]" $sources |  # look for #include "..." statements
 #                                    #   ignore #include <...> ones
-sed 's/f:/o /
-     s/# *include *//
-     s/\"/ /g' |                     # replace extension, insert space
+sed "s/f:/o /
+     s/ *include *//
+     s/['\"]/ /g" |                     # replace extension, insert space
 #                                    #   remove '# include' statements
 #                                    #   remove quotes 
 awk '{print $1 " : @" $2 "@"}' |     # create dependency entry

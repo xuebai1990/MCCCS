@@ -1,5 +1,3 @@
-       subroutine ctrmas ( lall, ibox, j, mtype)
-
 !     ************************************************************
 !     ** finds the center of mass of a chain and returns it to  **
 !     ** the periodic box if it has left the box.  lall controls**
@@ -7,30 +5,23 @@
 !     ** entire box. ibox is the box of the particle and j is   **
 !     ** the particle number.                                   **
 !     ************************************************************
-
-      use sim_system
-      use var_type
-      use const_phys
-      use const_math
+      subroutine ctrmas ( lall, ibox, j, mtype)
       use util_runtime,only:err_exit
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
+      use sim_system
+      use sim_cell
       implicit none
-      include 'common.inc'
 
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'system.inc'
 !$$$      include 'cell.inc'
 
-      integer(KIND=normal_int)::ibox, i,ii,imolty,iunit,j,stt,edd,mtype ,iwarn,inboxx,inboxy,inboxz,iadjust,itype
+      integer::ibox, i,ii,imolty,iunit,j,stt,edd,mtype ,iwarn,inboxx,inboxy,inboxz,iadjust,itype
       logical::lall,ldx,ldy,ldz,lintbx
-      real(KIND=double_precision)::rbx,rby,rbz,dx,dy,dz,nxcm,nycm ,nzcm
-      real(KIND=double_precision)::dmaxsq,rxuij,ryuij,rzuij,rijsq
+      real::rbx,rby,rbz,dx,dy,dz,nxcm,nycm ,nzcm
+      real::dmaxsq,rxuij,ryuij,rzuij,rijsq
 
-      real(KIND=double_precision)::sx,sy,sz,nxcm2,nycm2,nzcm2
+      real::sx,sy,sz,nxcm2,nycm2,nzcm2
 
       rbx = boxlx(ibox)
       rby = boxly(ibox)

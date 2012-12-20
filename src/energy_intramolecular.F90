@@ -1,24 +1,49 @@
-      subroutine suvibe(io_ff)
+MODULE energy_intramolecular
+  use var_type,only:default_string_length
+  use const_math,only:onepi,twopi,raddeg
+  use util_runtime,only:err_exit
+  use util_string,only:uppercase,integer_to_string
+  use util_files,only:readLine
+  use sim_system,only:io_output,brvib,brvibk,brben,brbenk,nvmax,myid,L_spline,L_linear
+  implicit none
+  private
+  save
+  public::suvibe,vtorso,calctor,lininter_vib,lininter_bend,lininter,splint,read_tor_table,read_vib_table,read_bend_table
 
-      use sim_system
-      use var_type
-      use const_phys
-      use const_math
-      use util_runtime,only:err_exit
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
-      implicit none
-      include 'common.inc'
+! CONTORSION.INC
+  integer::ntormax
+  parameter (ntormax=700)
+  real::vtt0(ntormax),vtt1(ntormax) ,vtt2(ntormax),vtt3(ntormax),vtt4(ntormax),vtt5(ntormax) ,vtt6(ntormax),vtt7(ntormax),vtt8(ntormax),vtt9(ntormax)
 
+! TABULATED.INC
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!cccc  for use with tabulated potentials
+!cccc  if you are not using a tabulated potential,
+!cccc  reduce the size of the arrays!!!
+!cccc  to pass the test suite, arrays for tabulated electrostatics
+!cccc  need to be sufficiently large
+!cccc  num_int_elect(150,150), tabelect(1500,150,150), etc.
+!cccc  KM 2009
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+  integer::ntabvib,num_int_vib(1),vibsplits(1)
+  real::vib(10,1),tabvib(10,1),vibdiff(10,1)
+
+  integer::ntabbend,num_int_bend(1),bendsplits(1)
+  real::bend(10,1),tabbend(10,1),benddiff(10,1)
+
+! TORSION.INC
+  integer::splpnts(10),nttor
+  real::deg(10,2),tabtorso(10,2),torderiv2(10,2),tordif(10,2)
+
+contains
+  subroutine suvibe(io_ff)
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'connect.inc'
 !$$$      include 'conver.inc'
 !$$$      include 'contorsion.inc'
 
-      integer(KIND=normal_int)::io_ff,i,j,n,jerr,dum
+      integer::io_ff,i,j,n,jerr,dum
       character(LEN=default_string_length)::line_in
 
 ! ----------------------------------------------------------------
@@ -44,11 +69,11 @@
       brvib(4) = 1.50d0
       brvibk(4) = 0.0d0
 
-! - fixed bond length for H-C bond Williams 
+! - fixed bond length for H-C bond Williams
       brvib(5) = 1.04d0
       brvibk(5) = 0.0d0
 
-! - fixed bond length for C-C bond Williams, also Freire UA C-C, OPLS-UA 
+! - fixed bond length for C-C bond Williams, also Freire UA C-C, OPLS-UA
       brvib(6) = 1.53d0
       brvibk(6) = 0.0d0
 
@@ -93,11 +118,11 @@
       brvib(16) = 0.96d0
       brvibk(16) = 0.0d0
 
-! - fixed bond length for C-O bonds in alkanol 
+! - fixed bond length for C-O bonds in alkanol
       brvib(17) = 1.41d0
       brvibk(17) = 0.0d0
 
-! - fixed bond length for H-O bonds in water 
+! - fixed bond length for H-O bonds in water
       brvib(18) = 0.9572d0
       brvibk(18) = 0.0d0
 
@@ -187,7 +212,7 @@
 ! --- C=O bond length in carboxylic acid (OPLS)
       brvib(36) = 1.214d0
       brvibk(36) = 0.0d0
-      
+
 ! -- C-O in carboxylic acids
       brvib(37) = 1.364d0
       brvibk(37) = 0.0d0
@@ -383,7 +408,7 @@
 ! - bond length for C=C bonds
       brvib(104) = 1.33d0
       brvibk(104) = 0.0d0
-      
+
 ! - bond length for CHx-CHy bonds (#1)
       brvib(105) = 1.54d0
       brvibk(105) = 0.0d0
@@ -407,7 +432,7 @@
       brvibk(112) = 0.0d0
 !--- END JLR 11-11-09
 
-! * unused 
+! * unused
 !
 ! * methanol O-H from H2 parameter set from Monica's dissertation *
 !      brvib() = 1.0285d0
@@ -441,7 +466,7 @@
            exit cycle_read_bonds
         end if
 
-        if (UPPERCASE(line_in(1:5)).eq.'BONDS') then               
+        if (UPPERCASE(line_in(1:5)).eq.'BONDS') then
              read(line_in(6:),*) n
              do j=1,n
                 call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
@@ -468,7 +493,7 @@
       brbenk(2) = 31250.0d0
 
 ! - TraPPE-UA bond angle for alkane segment centered at quaternary (C sp3)-
-! - basically the same as used by Freire for neopentane and 
+! - basically the same as used by Freire for neopentane and
 !                                        2,3-dimethylbutane
       brben(3) = 109.47d0
       brbenk(3) = 31250.0d0
@@ -482,7 +507,7 @@
       brben(5) = 127.4d0
       brbenk(5) = 31250.0d0
 
-! - bond angle for H-C[methyl]-C[methylene] Ryckaert 
+! - bond angle for H-C[methyl]-C[methylene] Ryckaert
       brben(6) = 112.49d0
       brbenk(6) = 0.0d0
 
@@ -492,7 +517,7 @@
 
 ! - bond angle for H-C[methylene]-H Ryckaert
       brben(8) = 106.0d0
-      brbenk(8) = 0.0d0 
+      brbenk(8) = 0.0d0
 
 ! - bond angle for C-C=O (in carboxylic headgroup) - taken from Charmm
 !      brben(10) = 120.0d0
@@ -585,7 +610,7 @@
 !   Cornell et al JACS 117 19 5179-5197 1995
 !   and from OPLS-AA JACS 118 45 11225-11236 (1996)
 
-! - bond angle for C-C=O H3C-COOH  AMBER 
+! - bond angle for C-C=O H3C-COOH  AMBER
       brben(31) = 120.4d0
       brbenk(31) = 4.03d4
 
@@ -596,7 +621,7 @@
 ! - bond angle for H3C--C--OH (carboxyllic acid) OPLS-AA 1995
       brben(33) = 108.0d0
       brbenk(33) = 3.53d4
- 
+
 ! - bond angle for O==C--OH (carboxyllic acid) OPLS-AA 1995
       brben(34) = 121.0d0
       brbenk(34) = 4.03d4
@@ -664,7 +689,7 @@
       brben(45) = 108.0d0
       brbenk(45) = 25200.0d0
 
-! - bond angle for C-O-H in alkanol 
+! - bond angle for C-O-H in alkanol
 ! - Monica's Alcohol Fixed bond angle
       brben(46) = 108.5d0
       brbenk(46) = 0.0d0
@@ -672,12 +697,12 @@
 !      brben(46) = 108.63d0
 !      brbenk(46) = 0.0d0
 
-! - bond angle for O-C-C in alkanol 
+! - bond angle for O-C-C in alkanol
 ! - Monica's Alcohol Fixed bond angle
       brben(47) = 108.0d0
       brbenk(47) = 0.0d0
 
-! - bond angle for C-C-C in alkanol 
+! - bond angle for C-C-C in alkanol
 ! - Monica's Alcohol Fixed bond angle
       brben(48) = 112.0d0
       brbenk(48) = 0.0d0
@@ -693,12 +718,12 @@
 ! - bond angle for O=C-O for ester
       brben(51) = 125d0
       brbenk(51) = 31250d0
- 
+
 ! - bond angle for C-C=O in carboxylic acids
       brben(52) = 126.0d0
 !      brbenk(52) = 31250.0d0
       brbenk(52) = brbenk(31)
-      
+
 ! - bond angle for C-C-O in carboxylic acids
       brben(53) = 111.0d0
 !      brbenk(53) = 31250.0d0
@@ -733,7 +758,7 @@
 ! -- H-N-H in amines (TraPPE-7)
       brben(59) = 106.4d0
       brbenk(59) = 21955.0d0
- 
+
 ! -- C-N-C in amines (TraPPE-7)
       brben(60) = 109.5d0
       brbenk(60) = 25178.0d0
@@ -745,12 +770,12 @@
 
 ! -- Ch3-C-CH3 in ketones
       brben(62) = 117.2d0
-      brbenk(62) = 31250.0d0 
+      brbenk(62) = 31250.0d0
 !        brbenk(62) = 0.0d0
 
 ! -- C-S-H in thiols
       brben(63) = 96.0d0
-      brbenk(63) = 31250.0d0 
+      brbenk(63) = 31250.0d0
 
 ! -- C-S-C in sulfides
       brben(64) = 99.0d0
@@ -777,7 +802,7 @@
 ! --- C-O-H bend in 9-6 formic acid model
       brben(69) = 103.0d0
       brbenk(69) = 26670.0d0
-      
+
 ! --  C-N-O bond angle for nitro (UA)
       brben(70) = 111.5d0
       brbenk(70) = 40284.0d0
@@ -795,7 +820,7 @@
       brbenk(73) = 40284.0d0
 
 ! -- Parameters for DMMP (bending constants are not correct)
-! --  O=P-O     
+! --  O=P-O
       brben(78) = 114.2d0
       brbenk(78) = 31250.0d0
 ! -- O=P-CH3
@@ -809,7 +834,7 @@
       brbenk(81) = 31250.0d0
 ! -- O-P-O in DMMP
       brben(82) = 159.0d0
-      brbenk(82) = 31250.0d0	
+      brbenk(82) = 31250.0d0
 !-  C(aro)-C(aro)-C(aro)
       brben(83) = 120.0d0
       brbenk(83) = 0.0d0
@@ -817,7 +842,7 @@
 ! -- BEGIN parameters for Neimark DMMP
 ! -- O=P-CH3
       brben(84) = 116.3d0
-      brbenk(84) = 40293.0d0 
+      brbenk(84) = 40293.0d0
 
 ! -- O=P-O
       brben(85) = 116.5d0
@@ -847,7 +872,7 @@
       brbenk(91) = 25150.0d0
 
 ! -- H-C-F (OPLS)
- 
+
       brben(92)  = 107.0d0
       brbenk(92) = 20120.0d0
 
@@ -865,14 +890,14 @@
 
 ! -- Cl-C-F CF2Cl2
       brben(96) = 107.80
-      brbenk(96) = 37725.0d0 
+      brbenk(96) = 37725.0d0
 
 ! - parameters for acrylates
 
 ! - bond angle for CHx-O-C
       brben(100) = 115.0d0
       brbenk(100) = 31250.0d0
-   
+
 ! - bond angle for O-C=O
 !c      brben(101) = 125.0d0
 !c      brbenk(101) = 62500.0d0
@@ -936,7 +961,7 @@
 
 ! -- OPLS H-C-O in alcohols
       brben(115) = 109.5d0
-      brbenk(115) = 17605d0 
+      brbenk(115) = 17605d0
 
 ! --Begin TATB
 ! -- C--C--N TATB
@@ -970,7 +995,7 @@
            exit cycle_read_angles
         end if
 
-        if (UPPERCASE(line_in(1:6)).eq.'ANGLES') then               
+        if (UPPERCASE(line_in(1:6)).eq.'ANGLES') then
              read(line_in(7:),*) n
              do j=1,n
                 call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
@@ -997,7 +1022,7 @@
       vtt3(1) = 791.32d0
 
 ! - TraPPE-UA alkane torsional parameters for segment containing a ternary -
-! - carbon CH midsegment split OPLS torsion 
+! - carbon CH midsegment split OPLS torsion
 ! - Siepmann et al Mol Phys 1997, 90, 687-693
 !      vtt0(2) =  0.0d0
       vtt0(2) = -251.06d0
@@ -1155,21 +1180,21 @@
 ! -- CH3-P-O-CH3
         vtt0(48) = 33.80d0
         vtt1(48) = 317.0d0
-        vtt2(48) = 38.0d0 
+        vtt2(48) = 38.0d0
         vtt3(48) = -29.35d0
         vtt4(48) = 37.0d0
         vtt5(48) = -3.0d0
 ! -- O=P-O-CH3
         vtt0(49) = 0.0d0
         vtt1(49) = 0.0d0
-        vtt2(49) = 50.5d0 
+        vtt2(49) = 50.5d0
         vtt3(49) = 0.0d0
         vtt4(49) = 0.0d0
         vtt5(49) = 0.0d0
 ! -- O-P-O-CH3
         vtt0(50) = 0.0d0
         vtt1(50) = 480.0d0
-        vtt2(50) = 252.6d0 
+        vtt2(50) = 252.6d0
         vtt3(50) = 0.0d0
         vtt4(50) = 0.0d0
         vtt5(50) = 0.0d0
@@ -1212,7 +1237,7 @@
 
 
 ! -- CF-CF-CF-CF for flourobutane
-        vtt0(55)   = 1231.36d0 
+        vtt0(55)   = 1231.36d0
         vtt1(55)   = 972.012d0
         vtt2(55)   = 365.577
         vtt3(55)   = 981.158
@@ -1222,7 +1247,7 @@
         vtt7(55)   = -123.205
         vtt8(55)   = 28.2703
         vtt9(55)   = 44.6317
-       
+
 ! -- Available for other Fluororcarbon. They have been shifted down 101 102 etc...
 ! -- Ethane H-C-C-H vtorso=a0+a1*(1-cosx)+a2*(1+cos2x)+a3*(1-cos3x)
         vtt0(56) = 1521.29d0
@@ -1238,17 +1263,17 @@
         vtt4(57) = 89.8948d0
 
 ! -- Ethanol H-O-C-H vtorso=a0+a1*cosx+a2*cos2x+a3*cos3x+a4*cos4x+a5*cos5x+a6*cos6x+a7*cos7x
-        vtt0(58) = 262.743 
+        vtt0(58) = 262.743
         vtt1(58) = -72.2022
         vtt2(58) = 25.3956
         vtt3(58) = 261.653
-        vtt4(58) = -38.3658 
+        vtt4(58) = -38.3658
         vtt5(58) =  42.3685
         vtt6(58) = 7.93367
         vtt7(58) = 15.1805
 
 !-- Ethanol O-C-C-H vtorso=a0+a1*cosx+a2*cos2x+a3*cos3x+a4*cos4x+a5*cos5x+a6*cos6x
-        vtt0(59) = 853.463 
+        vtt0(59) = 853.463
         vtt1(59) = 11.4499
         vtt2(59) = -12.8932
         vtt3(59) = 887.455
@@ -1260,26 +1285,26 @@
 
 
 ! -Hydrofluoroethers F-C-O-C vtorso=a0+a1*cosx+a2*cos(2*x)=a3*cos(3*x)
-       vtt0(60) = 804.608 
+       vtt0(60) = 804.608
        vtt1(60) = -6.3210
        vtt2(60) = 9.1809
        vtt3(60) = 785.878
- 
+
 ! -Hydrofluoroethers H-C-O-C vtorso=a0+a1*cosx+a2*cos(2*x)+a3*cos(3*x)
        vtt0(61) = 327.282d0
        vtt1(61) = 5.29603d0
        vtt2(61) = 9.29972d0
        vtt3(61) = 324.084d0
-   
+
 ! - Hydrofluoroethers F-C-C-O vtorso = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x) + a5*c
 ! os(5*x)
-        vtt0(62) = 1738.42d0 
+        vtt0(62) = 1738.42d0
         vtt1(62) = -462.352d0
         vtt2(62) =  9.39616d0
         vtt3(62) =  1086.9d0
         vtt4(62) = 238.459d0
         vtt5(62) =  40.9771d0
-      
+
 ! - Hydrofluorethers C-O-C-C vtorso = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x) + a4*cos(4*x) + a5
 ! *cos(5*x) + a6*cos(6*x) + a7*cos(7*x
         vtt0(63) = 1207.59d0
@@ -1290,7 +1315,7 @@
         vtt5(63) = 101.542d0
         vtt6(63) = 14.9379d0
         vtt7(63) = -104.586d0
-      
+
 ! - Hydrofluorethers H-C-C-O vtorso = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x) + a4*cos(4*x) + a5
 ! *cos(5*x) + a6*cos(6*x) + a7*cos(7*x)
         vtt0(64) = 1434.36d0
@@ -1309,7 +1334,7 @@
         vtt1(65) = 752.6d0
         vtt2(65) = 14.89d0
         vtt3(65) = 282.1d0
- 
+
 ! --- O=CH2-CH2-CHx: Fit by me (Jeff) to HF/3-21G ab initio data
 
         vtt0(66) = 2035.5876d0
@@ -1435,13 +1460,13 @@
 
 ! -- All atom alkane. This torsion is fit to the C5H12.
 
-! -- torsion H-C3-C2-C2 (Linear Alkanes) vtorso=a0 + a3*cos(3x)       
+! -- torsion H-C3-C2-C2 (Linear Alkanes) vtorso=a0 + a3*cos(3x)
         vtt0(100) = 750.517d0+22.0d0
         vtt1(100) = 0.0d0
         vtt2(100) = 0.0d0
         vtt3(100) = 772.345d0
         vtt4(100) = 0.0d0
-        vtt5(100) = 0.0d0 
+        vtt5(100) = 0.0d0
         vtt6(100) = 0.0d0
         vtt7(100) = 0.0d0
         vtt8(100) = 0.0d0
@@ -1543,7 +1568,7 @@
         vtt7(110) = 0.0d0
         vtt8(110) = 0.0d0
         vtt9(110) = 0.0d0
- 
+
 ! -- MP2/6-311+G** H-C2-C2-H
 ! -- y = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)+a5*cos(5*x)+a6*cos(6*x)
         vtt0(111) = 952.756+17
@@ -1556,7 +1581,7 @@
         vtt7(111) = 0.0d0
         vtt8(111) = 0.0d0
         vtt9(111) = 0.0d0
- 
+
 ! MP2/6-311+G** H-C2-C2-C2
 ! y = a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)+a5*cos(5*x)+a6*cos(6*x)
         vtt0(112) = 759.436+3
@@ -1580,7 +1605,7 @@
         vtt6(113) = 180.745
         vtt7(113) = 0.0d0
         vtt8(113) = 0.0d0
-        vtt9(113) = 0.0d0  
+        vtt9(113) = 0.0d0
 
 
 ! Type 114   H-C3-C1-H
@@ -1595,7 +1620,7 @@
         vtt8(114) = 0.0d0
         vtt9(114) = 0.0d0
 
-! Type 115   H-C1-C1-H 
+! Type 115   H-C1-C1-H
 
 
 ! Type 116   H-C3-C1-C*
@@ -1609,7 +1634,7 @@
         vtt7(116) = 0.0d0
         vtt8(116) = 0.0d0
         vtt9(116) = 0.0d0
- 
+
 
 ! Type 117   H-C2-C1-C*
         vtt0(117) = 1079.02+30
@@ -1647,7 +1672,7 @@
         vtt6(119) = 117.262
         vtt7(119) = 0.0d0
         vtt8(119) = 0.0d0
-        vtt9(119) = 0.0d0 
+        vtt9(119) = 0.0d0
 
 ! Type 120   H-C1-C1-C*
 
@@ -1673,7 +1698,7 @@
         vtt3(131) = 540.275
         vtt4(131) = 743.347
         vtt5(131) = -228.483
-        vtt6(131) = 0.0d0 
+        vtt6(131) = 0.0d0
         vtt7(131) = 0.0d0
         vtt8(131) = 0.0d0
         vtt9(131) = 0.0d0
@@ -1705,7 +1730,7 @@
         vtt6(133) = -188.234
         vtt7(133) = 114.007
         vtt8(133) = 114.365
-        vtt9(133) = 0.0d0 
+        vtt9(133) = 0.0d0
 
 !  H-C-N-C(=O)
 
@@ -1733,7 +1758,7 @@
         vtt7(135) = 0.0d0
         vtt8(135) = 0.0d0
         vtt9(135) = 0.0d0
- 
+
 ! C-N-C(=O)-O
 
 ! y= a0+a1*cos(x)+a2*cos(2*x)+a3*cos(3*x)+a4*cos(4*x)+a5*cos(5*x)+a6*cos(6*x)+a7* cos(7*x)+a8*cos(8*x)+a9*cos(9*x)
@@ -1794,7 +1819,7 @@
            exit cycle_read_dihedrals
         end if
 
-        if (UPPERCASE(line_in(1:9)).eq.'DIHEDRALS') then               
+        if (UPPERCASE(line_in(1:9)).eq.'DIHEDRALS') then
            read(line_in(10:),*) n
            do j=1,n
               call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
@@ -1809,9 +1834,771 @@
      END DO CYCLE_READ_DIHEDRALS
 
       return
-      end
+  end subroutine suvibe
+
+  function vtorso( thetac, itype )
+!$$$      include 'conver.inc'
+!$$$      include 'contorsion.inc'
+
+      integer::itype
+      real::vtorso, thetac, theta
+      real::tac2,tac3,tac4,tac5,tac6,tac7
+! ----------------------------------------------------------------
+
+      if ((itype.ge.200).and.(itype.le.202)) then
+        if (thetac.gt.1.0d0) thetac = 1.0d0
+         if (thetac.lt.-1.0d0) thetac = -1.0d0
+         theta = dacos(thetac)
+         vtorso = vtt0(itype)*(1.0d0-dcos(2.0d0*theta))
+
+      else if ((itype.ge.100).and.(itype.le.140)) then
+         if (thetac.gt.1.d0) thetac=1.0d0
+         if (thetac.lt.-1.d0) thetac=-1.0d0
+         theta=dacos(thetac)+onepi
+         vtorso =  vtt0(itype) + vtt1(itype)*dcos(1.0d0*theta)+ vtt2(itype)*dcos(2.0d0*theta)+ vtt3(itype)*dcos(3.0d0*theta)+ vtt4(itype)*dcos(4.0d0*theta)+ vtt5(itype)*dcos(5.0d0*theta)+ vtt6(itype)*dcos(6.0d0*theta)+ vtt7(itype)*dcos(7.0d0*theta)+ vtt8(itype)*dcos(8.0d0*theta)+ vtt9(itype)*dcos(9.0d0*theta)
+
+
+      else if ( itype .ge. 1 .and. itype .le. 99) then
+! - parameters for linear and branched alkane molecules - ALKANE CURRENTLY USED
+! - 5 + 6 parameters for alcohols
+! - Jorgensen potential
+         if (thetac.gt.1.d0) thetac=1.0d0
+         if (thetac.lt.-1.d0) thetac=-1.0d0
+         theta=dacos(thetac)+onepi
+! --- remember: 1 + cos( theta+onepi ) = 1 - cos( theta )
+         vtorso = vtt0(itype) + vtt1(itype)*(1.0d0-thetac) + vtt2(itype)*(1.d0-dcos(2.d0*theta)) + vtt3(itype)*(1.d0+dcos(3.d0*theta))
+      else if ( itype .eq. 0) then
+! -- type 1 torsion from Dubbeldam D., Calero S., Vlugt T.J.H., Krishna R., Maesen T.L.M., Smit B., J Phys Chem B 2004 108 12301
+         if (thetac.gt.1.d0) thetac=1.0d0
+         if (thetac.lt.-1.d0) thetac=-1.0d0
+         tac2 = thetac*thetac
+         tac3 = tac2*thetac
+         tac4 = tac3*thetac
+         tac5 = tac4*thetac
+         vtorso = 1204.654 +1947.740*thetac -357.845*tac2 -1944.666*tac3 +715.690*tac4 -1565.572*tac5
+      else if ( itype .eq. 8 ) then
+! - Cummings torsional potential
+! - PERFLUOROCARBON CURRENTLY USED starting 10-1-97
+         if (thetac.gt.1.d0) thetac=1.0d0
+         if (thetac.lt.-1.d0) thetac=-1.0d0
+
+         tac2 = thetac*thetac
+         tac3 = tac2*thetac
+         tac4 = tac3*thetac
+         tac5 = tac4*thetac
+         tac6 = tac5*thetac
+         tac7 = tac6*thetac
+! extra displacement is to get the curve above zero
+         vtorso = 595.4d0 + 345.0d0 -(282.7d0)*thetac  +(1355.2d0)*tac2  +(6800d0)*tac3 -(7875.3d0)*tac4 -(14168.0d0)*tac5 +(9213.7d0)*tac6 +(4123.7d0)*tac7
+!         write(io_output,*) 'thetac,vtorso',thetac,vtorsoAK
+! - Roethlisberger torsional potential for linear perfluorocarbon
+! - PERFLUOROCARBON no longer USED
+!         if (thetac.gt.1.d0) thetac=1.0d0
+!         if (thetac.lt.-1.d0) thetac=-1.0d0
+!         theta=dacos(thetac)
+!         vtorso = - 269.5616d0 + 503.6229d0*(1.0d0-thetac)
+!     &            + 679.921d0*(1.0d0-(dcos(3.0d0*theta)))
+!     &            + 3.0085d0*(1.0d0-thetac)**5
+!     &            + 420.5883d0*dexp(-30.0d0*theta**2)
+
+      else if ( itype .eq. 9 ) then
+!  Toxvaerd II Torsion potential parms:  to be used for anisotropic alkanes
+!  JCP 94, 5650-54 (1991)
+         vtorso = 1037.76d0 + 2426.07d0*thetac + 81.64d0*thetac**2 -3129.46d0*thetac**3 -163.28d0*thetac**4 -252.73d0*thetac**5
+!      else if ( itype .ge. 1 .and. itype .le. 3 ) then
+! - parameters for improper torsion in carboxylic headgroup
+! - C'-C2-O-O'
+!         if (thetac.gt.1.d0) thetac=1.0d0
+!         if (thetac.lt.-1.d0) thetac=-1.0d0
+!         theta=dacos(thetac)+onepi
+!         vtorso = vtt2(itype)*(1.d00-dcos(2.d00*theta))
+      else if ( itype .eq. 10 ) then
+!        --- dummy torsion just to set up inclusion table right
+         vtorso = 0.0d0
+
+      else if ( itype .eq. 11 .or. itype .eq. 12) then
+! - parameters for trans and conformations of double bonds
+! - derived by Marcus Martin using data from pcmodel for butene
+!   trans torsion paramter 4-14-99 MGM
+
+         if (thetac .gt. 1.0d0) then
+            theta = 0.0d0
+         else if (thetac .lt. -1.0d0) then
+            theta = onepi
+         else
+            theta = dacos(thetac)
+         end if
+
+         vtorso = vtt0(itype)*(theta - vtt1(itype) )**2.0d0
+
+      else if ( itype .eq. 13 ) then
+!   acetic acid torsional potential H3C--C--O--H
+!   modified from J Phys Chem 94, 1683-1686 1990
+!   had to divide the potential by 2 and did a bit of trig.
+         vtorso = 630.0d0*(1.0d0 - thetac)  + 1562.4d0*(1.0d0 - thetac*thetac)
+
+      else if ( itype .eq. 14 ) then
+!   acetic acid torsional potential  O==C--O--H
+!   modified from J Phys Chem 94, 1683-1686 1990
+!   had to divide the potential by 2 and did a bit of trig.
+         vtorso = 630.0d0*(1.0d0 + thetac)  + 1562.4d0*(1.0d0 - thetac*thetac)
+
+      else if ( itype .eq. 15 ) then
+! - Rice torsional potential for linear perfluorocarbons - OLD-FASHIONED
+         if (thetac.gt.1.d0) thetac=1.0d0
+         if (thetac.lt.-1.d0) thetac=-1.0d0
+         theta=dacos(thetac)
+         vtorso = 1784.2812d0 + 1357.1705d0*thetac - 1444.08d0*thetac**2 + 1176.6605d0*thetac**3 + 2888.1600d0*thetac**4  - 7166.9209d0*thetac**5 + 1684.7600d0*dexp(-12.7176d0*theta**2)
+
+      else if ( itype .eq. 16 ) then
+! - normal parameters for linear molecules - OLD-FASHIONED ALKANE
+! - Ryckaert-Bellemans potential
+         vtorso = 1116.0d0 + 1462.0d0*thetac - 1578.0d0*thetac**2 - 368.1d0*thetac**3 + 3156.1d0*thetac**4 - 3788.0d0*thetac**5
+
+      else if ( itype .eq. 19 ) then
+! --- methyl group rotations explicit  H-C-C-H McQuarrie
+         if (thetac.gt.1.d0) thetac=1.0d0
+         if (thetac.lt.-1.d0) thetac=-1.0d0
+         theta=dacos(thetac)
+         vtorso = 716.77d0*(1.0d0-dcos(3.0d0*theta))
+
+      else if (itype .eq. 20) then
+! --   methyl group rotation explicit hydrogen model Scott+Scheraga
+         if (thetac.gt.1.d0) thetac=1.0d0
+         if (thetac.lt.-1.d0) thetac=-1.0d0
+         theta=dacos(thetac)
+         vtorso = 853.93d0*(1.0d0-dcos(3.0d0*theta))
+      else if (itype .eq. 21) then
+! --   methyl group rotation explicit hydrogen model Scott+Scheraga
+! --   designed to be used with fully flexible (ie divided by 3)
+         if (thetac.gt.1.d0) thetac=1.0d0
+         if (thetac.lt.-1.d0) thetac=-1.0d0
+         theta=dacos(thetac)
+         vtorso = 284.64d0*(1.0d0-dcos(3.0d0*theta))
+      else if ( itype .eq. 22) then
+! --   torsional motion about the central C-O in ester
+         if (thetac.gt.1.d0) thetac=1.0d0
+         if (thetac.lt.-1.d0) thetac=-1.0d0
+         theta=dacos(thetac)+onepi
+         vtorso = 1253.07*(1.0d0-thetac) +  1560.08*(1.0d0-dcos(2.0d0*theta))
+
+      else if ( itype .eq. 23) then
+! - Jorgensen potential for segment containing a (H-)-O-C-(CH3)_3 OPLS
+         if (thetac.gt.1.d0) thetac=1.0d0
+         if (thetac.lt.-1.d0) thetac=-1.0d0
+         theta=dacos(thetac)+onepi
+! --- remember: 1 + cos( theta+onepi ) = 1 - cos( theta )
+         vtorso = 163.56d0*(1.d00+dcos(3.d0*theta))
+
+      else if ( itype .eq. 24) then
+         vtorso = 0.0d0
+
+      else if ( itype .eq. 25) then
+! *** OPLS C-C-O-C for ether paper JCC 1990
+         if (thetac.gt.1.d0) thetac=1.0d0
+         if (thetac.lt.-1.d0) thetac=-1.0d0
+         theta=dacos(thetac)+onepi
+         vtorso = 725.35d0*(1.d0 + dcos(theta)) - 163.75d0*(1.d0 - dcos(2.d0*theta)) + 558.2d0*(1.d0 + dcos(3.d0*theta))
+
+      else if (itype .eq. 26) then
+! --   for sp3 carbon to aromatic bond
+         if (thetac.gt.1.0d0) thetac = 1.0d0
+         if (thetac.lt.-1.0d0) thetac=-1.0d0
+         theta=dacos(thetac)
+         vtorso = 1344.0d0*(1.0d0-dcos(2.0d0*theta+dacos(-1.0d0)))
+      else if ( itype .eq. 27 ) then
+! *** ethylene glycol O-C-C-O torsional potential from Hayashi et al,
+! * J. Chem. Soc. Faraday Trans. 1995, 91(1), 31-39.
+
+         if (thetac .gt. 1.0d0) thetac=1.0d0
+         if (thetac .lt. -1.0d0) thetac=-1.0d0
+
+!         theta = dacos(thetac)
+
+         vtorso = -123.4d0 -2341.2d0*thetac +1728.3d0*thetac**2 +10788.3d0*thetac**3 -1155.2d0*thetac**4  -8896.9d0*thetac**5
+
+      else if ( itype .eq. 28 ) then
+! *** polyethylene O-C-C-O torsional potential from amber, testing
+! * JMS 7/21/03
+
+         if (thetac .gt. 1.0d0) thetac=1.0d0
+         if (thetac .lt. -1.0d0) thetac=-1.0d0
+
+         theta=dacos(thetac)+onepi
+
+!         vtorso = 251.619d0*(1.d0 + dcos(2.d0*theta)) +
+!     &        1006.475d0*(1.d0 + dcos(3.d0*theta))
+
+         vtorso = 503.24d0 - 251.62d0*(1.d0 - dcos(2.d0*theta)) + 1006.47d0*(1.d0 + dcos(3.d0*theta))
+
+      else if ( itype .eq. 29 ) then
+! *** polyethylene O-C-C-O torsional potential from Collin, based on Grant Smith's, testing
+! * JMS 11/24/03
+
+         if (thetac .gt. 1.0d0) thetac=1.0d0
+         if (thetac .lt. -1.0d0) thetac=-1.0d0
+
+         theta = dacos(thetac)
+         vtorso = 0.5d0 * ( 950.0d0 *(1.0d0-dcos(theta)) +  950.0d0 * (1.0d0 - dcos( 2.0d0 * (theta+0.25d0*twopi))))
+
+      else if (itype .eq. 30) then
+! * formic acid O=C-O-H torsion from llnl 4/6/04 jms
+         if (thetac .gt. 1.0d0) thetac = 1.0d0
+         if (thetac .lt. -1.0d0) thetac = -1.0d0
+
+! same convention as topmon
+! backwards!         vtorso = 2576.5d0*(1.0d0 - dcos(2.0d0*theta))
+         vtorso = 1258.0d0*(1.0d0 + dcos(theta))
+
+      else if (itype .eq. 31) then
+! * formic acid H-C-O-H torsion from llnl 4/6/04 jms
+         if (thetac .gt. 1.0d0) thetac = 1.0d0
+         if (thetac .lt. -1.0d0) thetac = -1.0d0
+
+! same convention as topmon
+! backwards!         vtorso = 1258.0d0*(1.0d0 + dcos(theta))
+         vtorso = 2576.5d0*(1.0d0 - dcos(2.0d0*theta))
+
+!c - added 7/12/06 C-C-N-O torsion for nitro group also #61
+         else if (itype .eq.32) then
+            if (thetac .gt. 1.0d0) thetac = 1.0d0
+            if (thetac .lt. -1.0d0) thetac = -1.0d0
+
+            theta = dacos(thetac)
+            vtorso = 69.2d0 - 41.4d0*dcos(theta)-14.5d0*dcos(2*theta) -  19.1d0*dcos(3*theta) + 8.03d0*dcos(4*theta) -  2.91d0*dcos(5*theta) + 0.95d0*dcos(6*theta)
+
+!c - added 1/29/07 for N-C-C-C torsion also #70
+            else if (itype .eq. 33) then
+               if (thetac .gt. 1.0d0) thetac = 1.0d0
+               if (thetac .lt. -1.0d0) thetac = -1.0d0
+               theta = dacos(thetac)
+               vtorso = 438.0d0 + 481.0*dcos(theta) +  150.0d0*dcos(2*theta) - 115*dcos(3*theta) -  0.57*dcos(4*theta) + 0.8*cos(5*theta) -  0.01*dcos(6*theta)
+
+!c - added 06/27/07 for acrylates
+            else if (itype .ge. 34 .and. itype.le. 46) then
+               if (thetac .gt. 1.0d0) thetac = 1.0d0
+               if (thetac .lt. -1.0d0) thetac = -1.0d0
+
+               theta = dacos(thetac) + onepi
+
+               vtorso = vtt0(itype) + vtt1(itype)*dcos(theta) + vtt2(itype)*dcos(2.0d0*theta) +  vtt3(itype)*dcos(3.0d0*theta) +  vtt4(itype)*dcos(4.0d0*theta)
+
+
+      else if (itype .ge. 48 .and. itype .le. 50) then
+! -- torsion from Neimark DMMP JPCA v108, 1435 (2004)
+         if (thetac.gt.1.0d0) thetac = 1.0d0
+         if (thetac.lt.-1.0d0) thetac=-1.0d0
+! -- pi added to torsion because the topmon code is backwards.  Trans
+! -- configuration is defined as 0.
+	 theta=dacos(thetac)+onepi
+         vtorso = vtt0(itype)*(1+cos(theta)) + vtt1(itype)*(1+cos(2.*theta)) + vtt2(itype)*(1+cos(3.*theta)) + vtt3(itype)*(1+cos(4.*theta)) + vtt4(itype)*(1+cos(5.*theta)) + vtt5(itype)*(1+cos(6.*theta))
+
+      else if(((itype.ge.51).and.(itype.le.52)).or.(itype.eq.56)) then
+          if (thetac.gt.1.0d0) thetac = 1.0d0
+          if (thetac.lt.-1.0d0) thetac=-1.0d0
+          theta=dacos(thetac)+onepi
+          vtorso =   vtt0(itype) + vtt1(itype)*(1.0d0-dcos(theta)) + vtt2(itype)*(1.0d0+dcos(theta*2.0d0)) + vtt3(itype)*(1.0d0-dcos(theta*3.0d0))
+
+      else if (itype .eq. 53 .or. itype .eq. 55) then
+         if (thetac.gt.1.0d0) thetac = 1.0d0
+         if (thetac.lt.-1.0d0) thetac=-1.0d0
+         theta=dacos(thetac)+onepi
+         vtorso = vtt0(itype) + vtt1(itype)*(cos(theta)) + vtt2(itype)*(cos(2.*theta)) + vtt3(itype)*(cos(3.*theta)) + vtt4(itype)*(cos(4.*theta)) + vtt5(itype)*(cos(5.*theta)) + vtt6(itype)*(cos(6.*theta)) + vtt7(itype)*(cos(7.*theta)) + vtt8(itype)*(cos(8.*theta)) + vtt9(itype)*(cos(9.*theta))
+
+      else if (itype .eq. 54) then
+         if (thetac.gt.1.0d0) thetac = 1.0d0
+         if (thetac.lt.-1.0d0) thetac=-1.0d0
+         theta=dacos(thetac)+onepi
+         vtorso = vtt0(itype) + vtt1(itype)*(1+cos(theta)) + vtt2(itype)*(1+cos(2.*theta)) + vtt3(itype)*(1+cos(3.*theta)) + vtt4(itype)*(1+cos(4.*theta)) + vtt5(itype)*(1+cos(5.*theta)) + vtt6(itype)*(1+cos(6.*theta))
+
+
+      else if(itype.eq.101) then
+          if (thetac.gt.1.0d0) thetac = 1.0d0
+          if (thetac.lt.-1.0d0) thetac=-1.0d0
+          theta=dacos(thetac)+onepi
+          vtorso =   vtt0(itype) + vtt1(itype)*(1.0d0-dcos(theta)) + vtt2(itype)*(1.0d0+dcos(theta*2.0d0)) + vtt3(itype)*(1.0d0-dcos(theta*3.0d0))
+
+      else if(itype.eq.103) then
+          if (thetac.gt.1.0d0) thetac = 1.0d0
+          if (thetac.lt.-1.0d0) thetac=-1.0d0
+          theta=dacos(thetac)+onepi
+          vtorso =   vtt0(itype) + vtt1(itype)*dcos(theta) + vtt2(itype)*dcos(theta*2.0d0) + vtt3(itype)*dcos(theta*3.0d0) + vtt4(itype)*dcos(theta*4.0d0) + vtt5(itype)*dcos(theta*5.0d0) + vtt6(itype)*dcos(theta*6.0d0) + vtt7(itype)*dcos(theta*7.0d0) + vtt8(itype)*dcos(theta*8.0d0) + vtt9(itype)*dcos(theta*9.0d0)
 
 
 
+      else if(itype.eq.144) then
+          if (thetac.gt.1.0d0) thetac = 1.0d0
+          if (thetac.lt.-1.0d0) thetac=-1.0d0
+          theta=dacos(thetac)+onepi
+          vtorso =   vtt0(itype) + vtt1(itype)*(1.0d0-dcos(theta)) + vtt2(itype)*(1.0d0+dcos(theta*2.0d0)) + vtt3(itype)*(1.0d0-dcos(theta*3.0d0)) + vtt4(itype)*(1.0d0+dcos(theta*4.0d0))
 
 
+      else if(itype.eq.145) then
+          if (thetac.gt.1.0d0) thetac = 1.0d0
+          if (thetac.lt.-1.0d0) thetac=-1.0d0
+          theta=dacos(thetac)+onepi
+          vtorso =   vtt0(itype) + vtt1(itype)*dcos(theta) + vtt2(itype)*dcos(theta*2.0d0) + vtt3(itype)*dcos(theta*3.0d0) + vtt4(itype)*dcos(theta*4.0d0) + vtt5(itype)*dcos(theta*5.0d0) + vtt6(itype)*dcos(theta*6.0d0) + vtt7(itype)*dcos(theta*7.0d0)
+
+      else if(itype.eq.146) then
+          if (thetac.gt.1.0d0) thetac = 1.0d0
+          if (thetac.lt.-1.0d0) thetac=-1.0d0
+          theta=dacos(thetac)+onepi
+          vtorso =   vtt0(itype) + vtt1(itype)*dcos(theta) + vtt2(itype)*dcos(theta*2.0d0) + vtt3(itype)*dcos(theta*3.0d0) + vtt4(itype)*dcos(theta*4.0d0) + vtt5(itype)*dcos(theta*5.0d0) + vtt6(itype)*dcos(theta*6.0d0)
+
+
+      else if(itype.eq.60 .or. itype.eq.61) then
+          if (thetac.gt.1.0d0) thetac = 1.0d0
+          if (thetac.lt.-1.0d0) thetac=-1.0d0
+          theta=dacos(thetac)+onepi
+          vtorso =   vtt0(itype) + vtt1(itype)*dcos(theta) + vtt2(itype)*dcos(theta*2.0d0) + vtt3(itype)*dcos(theta*3.0d0)
+
+
+      else if((itype.ge.65).and.(itype.le.66)) then
+          if (thetac.gt.1.0d0) thetac = 1.0d0
+          if (thetac.lt.-1.0d0) thetac=-1.0d0
+! -- pi added to torsion because the topmon code is backwards.  Trans
+! -- configuration is defined as 0.
+          theta=dacos(thetac)+onepi
+          vtorso =   vtt0(itype) + vtt1(itype)*(1.0d0+dcos(theta)) + vtt2(itype)*(1.0d0-dcos(theta*2.0d0)) + vtt3(itype)*(1.0d0+dcos(theta*3.0d0))
+
+
+      else if ( itype .ge. 70 .and. itype .le. 80) then
+
+! --- OPLS SEVEN PARAMETER FIT
+
+         if (thetac.gt.1.0d0) thetac = 1.0d0
+         if (thetac.lt.-1.0d0) thetac=-1.0d0
+
+         theta = dacos(thetac)
+
+         vtorso = vtt0(itype) + vtt1(itype)*thetac + vtt2(itype)*dcos(theta*2.0d0) + vtt3(itype)*dcos(theta*3.0d0) + vtt4(itype)*dcos(theta*4.0d0) + vtt5(itype)*dcos(theta*5.0d0) + vtt6(itype)*dcos(theta*6.0d0)
+
+
+
+      else
+         write(io_output,*) 'you picked a non-defined torsional type'
+         call err_exit('')
+      end if
+
+      return
+  end function vtorso
+
+  subroutine calctor(iu1,iu2,iu3,iu4,jttor,vtor)
+    use sim_system,only:xvec,yvec,zvec
+!$$$      include 'control.inc'
+!$$$      include 'fix.inc'
+
+      integer::iu1,iu2,iu3,iu4,jttor
+
+      real::thetac,xaa1,yaa1,zaa1,xa1a2,ya1a2 ,za1a2,daa1,da1a2,dot,vtor,tcc,xcc,ycc,zcc,theta,spltor
+
+!     --- calculate cross products d_a x d_a-1
+      xaa1 = yvec(iu2,iu1) * zvec(iu3,iu2) + zvec(iu2,iu1) * yvec(iu2,iu3)
+      yaa1 = zvec(iu2,iu1) * xvec(iu3,iu2)  + xvec(iu2,iu1) * zvec(iu2,iu3)
+      zaa1 = xvec(iu2,iu1) * yvec(iu3,iu2)  + yvec(iu2,iu1) * xvec(iu2,iu3)
+
+!     --- calculate cross products d_a-1 x d_a-2
+      xa1a2 = yvec(iu2,iu3) * zvec(iu3,iu4) - zvec(iu2,iu3) * yvec(iu3,iu4)
+      ya1a2 = zvec(iu2,iu3) * xvec(iu3,iu4) - xvec(iu2,iu3) * zvec(iu3,iu4)
+      za1a2 = xvec(iu2,iu3) * yvec(iu3,iu4) - yvec(iu2,iu3) * xvec(iu3,iu4)
+
+!     --- calculate lengths of cross products ***
+      daa1 = dsqrt ( xaa1**2 + yaa1**2 + zaa1**2 )
+      da1a2 = dsqrt ( xa1a2**2 + ya1a2**2  + za1a2**2 )
+
+! ----Addition for table look up for Torsion potential
+!     --- calculate dot product of cross products ***
+      dot = xaa1*xa1a2 + yaa1*ya1a2 + zaa1*za1a2
+      thetac = - (dot / ( daa1 * da1a2 ))
+
+      if (thetac.gt.1.0d0) thetac=1.0d0
+      if (thetac.lt.-1.0d0) thetac=-1.0d0
+!     KEA -- added for extending range to +/- 180 and additional defns of torsions
+!     if torsion type is greater than 50, call spline program to use table of torsion
+!     potentials and fit from these. Especially useful for asymmetric potentials
+
+      if (jttor .ge. 50) then
+!     *** calculate cross product of cross products ***
+         xcc = yaa1*za1a2 - zaa1*ya1a2
+         ycc = zaa1*xa1a2 - xaa1*za1a2
+         zcc = xaa1*ya1a2 - yaa1*xa1a2
+!     *** calculate scalar triple product ***
+         tcc = xcc*xvec(iu2,iu3) + ycc*yvec(iu2,iu3) + zcc*zvec(iu2,iu3)
+!     determine angle between -180 and 180, not 0 to 180
+         theta = dacos(thetac)
+         if (tcc .lt. 0.0d0) theta = -theta
+
+         if (jttor.lt.100) then
+            call splint(theta,spltor,jttor)
+         else
+            call lininter(theta,spltor,jttor)
+         end if
+         vtor = spltor
+
+      else
+         vtor = vtorso(thetac,jttor)
+      end if
+
+      return
+  end subroutine calctor
+
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!ccc  calculates vibrational potential using linear interpolation
+!ccc  between two points
+!ccc  must specify equilibrium bond length in suvibe, force
+!ccc  constant must be zero
+!ccc  requires a file (fort.41) that starts with 0.0 (not 0.5)
+!ccc  fort.41: number of tabulated potentials, potential number from
+!ccc  suvibe, number of points per angstrom, tabulated potential
+!ccc  (repeat last three parts for each additional potential)
+!ccc  KM 12/02/08
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+  subroutine lininter_vib(len, tabulated_vib, vibtyp)
+!$$$      include 'tabulated.inc'
+!$$$      include 'conver.inc'
+
+      integer::vibtyp, vlow, vhigh, xa, bin, add1
+      real::len, tabulated_vib, left, lenrem
+
+      vlow=1
+      vhigh=vibsplits(vibtyp)
+
+      xa = int(len)
+      left = len-xa
+
+!     select correct bin
+!     multiply by num_int_vib - number of intervals per angstrom
+      add1 = int(left*num_int_vib(vibtyp))
+      bin = (xa-vib(1,vibtyp))*num_int_vib(vibtyp) + 1 + add1
+      vlow = bin
+      vhigh = vlow+1
+
+      if (vib(vlow,vibtyp).gt. len.or.vib(vhigh,vibtyp).lt.len) then
+         write(io_output,*) 'problem in lininter_vib!'
+         write(io_output,*) 'len', len, ' vibtyp', vibtyp
+         write(io_output,*) 'vlow ', vlow, vib(vlow, vibtyp),len
+         write(io_output,*) 'vhigh ', vhigh, vib(vhigh, vibtyp), len
+         write(io_output,*)
+      end if
+
+      lenrem=len-vib(vlow, vibtyp)
+      lenrem=lenrem*dble(num_int_vib(vibtyp))
+
+      tabulated_vib=lenrem*vibdiff(vlow,vibtyp)
+      tabulated_vib=tabulated_vib+tabvib(vlow,vibtyp)
+
+      return
+  end subroutine lininter_vib
+
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!ccc  calculates 1-3 nonbonded 'bending' potential using linear
+!ccc  interpolation between two points
+!ccc  must include 1-3 interactions
+!ccc  must specify equilibrium angle in suvibe, force constant
+!ccc  must be very small but non-zero
+!ccc  requires a file (fort.42) with distances in A
+!ccc  fort.42: number of tabulated potentials, potential number from
+!ccc  suvibe, number of points per degree, tabulated potential
+!ccc  (repeat last three parts for each additional potential,
+!ccc   separated by 1000 1000)
+!ccc  make sure potential does not go up to infinity!
+!ccc  KM 12/03/08
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+  subroutine lininter_bend(r, tabulated_bend, bendtyp)
+!$$$      include 'tabulated.inc'
+!$$$      include 'conver.inc'
+
+      integer::bendtyp, blow, bhigh, xa, bin, add1
+      real::r, tabulated_bend, left, rem
+
+      blow=1
+      bhigh=bendsplits(bendtyp)
+
+      xa = int(r)
+      left = r-xa
+
+!     select correct bin
+!     multiply by num_int_bend - number of intervals per A
+      add1 = int(left*num_int_bend(bendtyp))
+      bin = (xa-bend(1,bendtyp))*num_int_bend(bendtyp) + 1 + add1
+      blow = bin
+      bhigh = blow+1
+
+      if (bend(blow,bendtyp).gt. r.or. bend(bhigh,bendtyp).lt.r) then
+         write(io_output,*) 'problem in lininter_bend!'
+         write(io_output,*) 'r', r, ' bendtyp', bendtyp
+         write(io_output,*) 'blow ', blow, bend(blow, bendtyp),r
+         write(io_output,*) 'bhigh ', bhigh, bend(bhigh, bendtyp), r
+         write(io_output,*)
+      end if
+
+      rem=r-bend(blow, bendtyp)
+      rem=rem*dble(num_int_bend(bendtyp))
+
+      tabulated_bend=rem*benddiff(blow,bendtyp)
+      tabulated_bend=tabulated_bend+tabbend(blow,bendtyp)
+!      write(io_output,*) 'tabulated_bend ', tabulated_bend
+
+      return
+  end subroutine lininter_bend
+
+  subroutine lininter(theta,spltor,ttyp)
+!$$$      include 'torsion.inc'
+!$$$      include 'conver.inc'
+!$$$      include 'control.inc'
+
+      integer::ttyp,klo,khi,xa,bin,addl
+      real::theta,spltor,thetarem ,left
+
+! Routine to calculate torsion potential using linear interpolation between 2 points
+! Requires a file (fort.40) running from -180 to 180 in 1/4 degree intervals
+
+      theta=raddeg*theta
+
+      klo=1
+      khi=splpnts(ttyp)
+
+      xa=idint(theta)
+      left=(theta-xa)
+!      write(io_output,*) 'left',left
+
+!     selecting bin of correct degree
+      addl = idint(left*4)
+      bin = (xa-deg(1,ttyp))*4 + 1 + addl
+      if (theta .lt. 0.0d0.and.theta.ge.-180.0d0) then
+!         write(io_output,*) 'negative bin',bin
+         khi = bin
+         klo = khi-1
+      else if (theta .ge. 0.0d0.and.theta.le.180.0d0) then
+!         write(io_output,*) 'positive bin',bin
+         klo = bin
+         khi = klo+1
+      else
+         write(io_output,*) 'Error in lininter.f - theta',theta
+      end if
+
+!      write(io_output,*) 'klo,khi',klo,deg(klo,ttyp),khi,deg(khi,ttyp)
+! check
+      if(deg(klo,ttyp).gt.theta.or.deg(khi,ttyp).lt.theta) then
+          write(io_output,*) 'problem below'
+          write(io_output,*) 'theta',theta,' ttyp',ttyp
+          write(io_output,*) 'klo',klo,deg(klo,ttyp),'khi',khi,deg(khi,ttyp)
+          write(io_output,*)
+       end if
+
+      thetarem=theta-deg(klo,ttyp)
+      thetarem=thetarem*4.0d0
+
+!      tordiff=tabtorso(khi,ttyp)-tabtorso(klo,ttyp)
+      spltor=thetarem*tordif(klo,ttyp)
+      spltor=spltor+tabtorso(klo,ttyp)
+
+      return
+  end subroutine lininter
+
+  subroutine spline(yp1,ypn,tortyp)
+!$$$      include 'torsion.inc'
+!$$$      include 'control.inc'
+
+!      integer::n,nmax
+!      real::yp1,ypn,x(n),y(n),y2(n)
+!      parameter (nmax=500)
+
+!     Numerical recipes, 2nd ed, 1992. - cubic spline
+!     Given arrays x(1:n) and y(1:n) containing a tabulated function, ie
+!     y(i) = f(x(i)) with x ascending in order, and given values yp1 and ypn
+!     for the first derivative of the interpolating function at the point 1
+!     and n, respectively, this routine returns an array y2(1:n) of length n
+!     which contains the second derivatives of the interpolating function at
+!     the tabulated points x(i). If yp1 and/or ypn are equal to 1E30 or more,
+!     the routine is signaled to set the corresponding boundary condition for
+!     a natural spline, with zero second derivative on that boundary
+!     nmax = largest value of n
+!     x=deg y=tabtorso y2=torderiv2 n=points
+
+      integer::i,k,points,tortyp
+      real::p,qn,sig,un,u(500,10),yp1,ypn
+
+! Routine sets up derivatives for use with spline interpolations
+! Requires file (fort.40) running from -195 to 195 in degree steps
+! (Extra 15 degrees on each side required so that second derivatives are reasonable
+!     by the time the degrees of interest are reached.)
+      points=splpnts(tortyp)
+
+      write(io_output,*) 'beginning of spline',splpnts(tortyp),yp1,ypn
+
+      if (yp1.gt.0.99d30) then
+         torderiv2(1,tortyp) = 0.0d0
+         u(1,tortyp) = 0.0d0
+
+      else
+         torderiv2(1,tortyp) = -0.5d0
+         u(1,tortyp) = (3.0d0/(deg(2,tortyp)-deg(1,tortyp)))* ((tabtorso(2,tortyp)-tabtorso(1,tortyp))/ (deg(2,tortyp)-deg(1,tortyp))-yp1)
+
+      end if
+
+      do i = 2,points-1
+         sig = (deg(i,tortyp)-deg(i-1,tortyp))/ (deg(i+1,tortyp)-deg(i-1,tortyp))
+         p = sig*torderiv2(i-1,tortyp)+2.0d0
+         torderiv2(i,tortyp) = (sig-1.0d0)/p
+         u(i,tortyp) = (6.0d0*((tabtorso(i+1,tortyp)-tabtorso(i,tortyp)) /(deg(i+1,tortyp)-deg(i,tortyp))-(tabtorso(i,tortyp)- tabtorso(i-1,tortyp))/(deg(i,tortyp)-deg(i-1,tortyp)))/ (deg(i+1,tortyp)-deg(i-1,tortyp))-sig*u(i-1,tortyp))/p
+      end do
+
+
+      if (ypn .gt. 0.99d30) then
+         qn = 0.0d0
+         un = 0.0d0
+
+      else
+         qn = 0.5d0
+         un = (3.0d0/(deg(points,tortyp)-deg(points-1,tortyp)))* (ypn-(tabtorso(points,tortyp)-tabtorso(points-1,tortyp)) /(deg(points,tortyp)-deg(points-1,tortyp)))
+
+      end if
+
+      torderiv2(points,tortyp) = (un-qn*u(points-1,tortyp))/ (qn*torderiv2(points-1,tortyp)+1.0d0)
+      do k = points-1, 1, -1
+         torderiv2(k,tortyp) = torderiv2(k,tortyp)*torderiv2(k+1,tortyp) +u(k,tortyp)
+      end do
+
+      do i=1,points
+         write(55,*) deg(i,tortyp),tabtorso(i,tortyp), torderiv2(i,tortyp)
+      end do
+
+      return
+  end subroutine spline
+
+!     From Numerical recipes, 2nd ed, 1992. - spline interpolation
+!     Given the arrays xa(1:n) and ya(1:n) of length n, which tabulate a
+!     function and given the array y2a(1:n), which is from the ouput of
+!     spline, and given a value of x, this routine returns a cubic-spline
+!     interpolated value of y.
+!     xa = deg, ya = tabtorso, y2a = torderiv2, n = points
+  subroutine splint(x,y,tortyp)
+!$$$      include 'torsion.inc'
+!$$$      include 'conver.inc'
+!$$$      include 'control.inc'
+
+!      integer::n
+!      real::x,y,xa(n),y2a(n),ya(n)
+      integer::khi,klo,points,tortyp,xa
+      real::a,bb,h,x,y
+
+      points = splpnts(tortyp)
+
+      klo = 1
+      khi = points
+
+      x=x*raddeg
+
+! Below is correct for tabulated data from -195 to 195 degrees
+      xa=int(x)+197
+
+      if (x.lt.0.0d0) then
+         klo=xa-1
+         khi=xa
+      else if (xa.ge.0.0d0) then
+         klo=xa
+         khi=xa+1
+      end if
+
+!      write(io_output,*) 'klo,khi',deg(klo,tortyp),deg(khi,tortyp)
+
+      h = deg(khi,tortyp)-deg(klo,tortyp)
+
+      if (dabs(h).lt.1.0d-8) write(io_output,*) 'bad deg input in splint',h, khi,deg(khi,tortyp),klo,deg(klo,tortyp)
+      a = (deg(khi,tortyp)-x)/h
+      bb = (x-deg(klo,tortyp))/h
+      y = a*tabtorso(klo,tortyp)+bb*tabtorso(khi,tortyp)+ ((a**3-a)*torderiv2(klo,tortyp)+(bb**3-bb)* torderiv2(khi,tortyp))*(h**2)/6.0d0
+
+!      write(io_output,*) x,y,tortyp
+
+      return
+  end subroutine splint
+
+!   KEA - read in tabulated torsion potentials and set up derivatives
+!         for spline interpolation if L_tor_table
+  subroutine read_tor_table(io_output)
+    integer,intent(in)::io_output
+    integer::mmm,ttor,i
+
+    read(40,*) nttor
+    write(io_output,*)
+    ! write(io_output,*) 'in spline read loop, nttor',nttor
+    do mmm = 1,nttor
+       read(40,*) ttor
+       i=1
+10     read(40,*,end=11) deg(i,ttor),tabtorso(i,ttor)
+       if(deg(i,ttor).eq.1000) goto 11
+       if (myid.eq.0) then
+          write(56,*) i,deg(i,ttor),tabtorso(i,ttor)
+       end if
+       i=i+1
+       goto 10
+11     splpnts(ttor)=i-1
+       if (L_spline) then
+          if (myid.eq.0) write(io_output,*) 'using spline interpolation'
+          call spline(1.0d31,1.0d32,ttor)
+       else if (L_linear) then
+          if (myid.eq.0) write(io_output,*) 'using linear interpolation'
+          do i=1,splpnts(ttor)-1
+             tordif(i,ttor) = tabtorso(i+1,ttor)-tabtorso(i,ttor)
+          end do
+       end if
+    end do
+    close(40)
+  end subroutine read_tor_table
+
+!   KM 12/02/08 - read in tabulated vibrational potential
+!   and set up linear interpolation
+  subroutine read_vib_table(io_output)
+    integer,intent(in)::io_output
+    integer::mmm,tvib,i
+
+    read(41,*) ntabvib
+    write(io_output,*)
+    mmm=1
+    do mmm=1,ntabvib
+       read(41,*) tvib
+       read(41,*) num_int_vib(tvib)
+       i=1
+12     read(41,*,end=13) vib(i,tvib), tabvib(i,tvib)
+       if (vib(i,tvib).eq.1000) goto 13
+       ! write(57,*) i, vib(i,tvib),tabvib(i,tvib)
+       i=i+1
+       goto 12
+13     vibsplits(tvib)=i-1
+       if (myid.eq.0)  write(io_output,*) 'using linear interpolation  for vibrations'
+       do i=1,vibsplits(tvib)-1
+          vibdiff(i,tvib)=tabvib(i+1,tvib)-tabvib(i,tvib)
+       end do
+    end do
+    close(41)
+  end subroutine read_vib_table
+
+!   KM 12/02/08 - read in tabulated 1-3 nonbonded 'bending' potential
+!   and set up linear interpolation
+  subroutine read_bend_table(io_output)
+    integer,intent(in)::io_output
+    integer::mmm,tbend,i
+
+    read(42,*) ntabbend
+    write(io_output,*)
+    mmm=1
+    do mmm=1,ntabbend
+       read(42,*) tbend
+       read(42,*) num_int_bend(tbend)
+       i=1
+14     read(42,*,end=15) bend(i,tbend), tabbend(i,tbend)
+       if (bend(i,tbend).eq.1000) goto 15
+       !write(58,*) i, bend(i,tbend),tabbend(i,tbend)
+       i=i+1
+       goto 14
+15     bendsplits(tbend)=i-1
+       if (myid.eq.0) write(io_output,*) 'using linear interpolation for1-3 nonbonded bending'
+       do i=1,bendsplits(tbend)-1
+          benddiff(i,tbend)=tabbend(i+1,tbend)-tabbend(i,tbend)
+       end do
+    end do
+    close(42)
+  end subroutine read_bend_table
+end MODULE energy_intramolecular

@@ -1,4 +1,3 @@
-      subroutine  calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ, Heat_vapor_COUL, pdV, CED_T, CED_LJ,CED_COUL,HSP_T,HSP_LJ, HSP_COUL,ibox,jbox)
 ! ***********************************************************************************
 !  Written by Neeraj Rai. Date 08/22/2006
 
@@ -11,17 +10,11 @@
 ! If you have more than two boxes then there are couple changes that need to be done
 ! in order for this subroutine to work. nprop in blkavg.inc needs to be set properly
 ! ************************************************************************************
-      use sim_system
-      use var_type
-      use const_phys
-      use const_math
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
-      implicit none
-      include 'common.inc'
-
+subroutine  calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ, Heat_vapor_COUL, pdV, CED_T, CED_LJ,CED_COUL,HSP_T,HSP_LJ, HSP_COUL,ibox,jbox)
+  use const_phys,only:joule2cal,cal2joule
+  use sim_system
+  use sim_cell
+  implicit none
 !$$$      include 'control.inc'
 !$$$      include 'inputdata.inc'
 !$$$      include 'blkavg.inc'
@@ -30,25 +23,20 @@
 !$$$      include 'system.inc'
 !$$$      include 'cell.inc'
 
-      integer(KIND=normal_int)::ibox, jbox, ig, il, imolty
-      integer(KIND=normal_int),dimension(nbxmax):: temp_nmol,box_volume
-      real(KIND=double_precision),dimension(nbxmax)::mol_vol      
-      real(KIND=double_precision),dimension(nbxmax)::pres
-      real(KIND=double_precision)::enchg1, enchg2,enchg3
-      real(KIND=double_precision)::Heat_vapor_T, Heat_vapor_LJ, Heat_vapor_COUL
-      real(KIND=double_precision)::CED_T, HSP_T, CED_LJ, HSP_LJ
-      real(KIND=double_precision)::CED_COUL,HSP_COUL
-      real(KIND=double_precision)::cal2joule, joule2cal
-      real(KIND=double_precision)::pdV
+      integer::ibox, jbox, ig, il, imolty
+      integer,dimension(nbxmax):: temp_nmol,box_volume
+      real,dimension(nbxmax)::mol_vol      
+      real,dimension(nbxmax)::pres
+      real::enchg1, enchg2,enchg3
+      real::Heat_vapor_T, Heat_vapor_LJ, Heat_vapor_COUL
+      real::CED_T, HSP_T, CED_LJ, HSP_LJ
+      real::CED_COUL,HSP_COUL
+      real::pdV
 
-      real(KIND=double_precision)::T_Energy_Liq, T_Energy_Gas
-      real(KIND=double_precision)::LJ_Energy_Liq, LJ_Energy_Gas
-      real(KIND=double_precision)::Coul_Energy_Liq, Coul_Energy_Gas
+      real::T_Energy_Liq, T_Energy_Gas
+      real::LJ_Energy_Liq, LJ_Energy_Gas
+      real::Coul_Energy_Liq, Coul_Energy_Gas
 
-
-!     -- This is different than the conventional 4.184
-      cal2joule = 4.184d0
-      joule2cal = 1.0d0/cal2joule
 
       temp_nmol(ibox) = 0
 

@@ -1,9 +1,9 @@
 MODULE sim_zeolite
-  use sim_system,only:myid,io_output
   use var_type,only:double_precision,default_string_length
   use const_math,only:onepi
   use util_runtime,only:err_exit
   use util_string,only:str_search
+  use sim_system,only:myid,io_output
   use sim_cell
   use sim_particle
   implicit none
@@ -12,24 +12,24 @@ MODULE sim_zeolite
 
   type ZeoliteUnitCellGridType
      integer::dup(3),ngrid(3) ! dup(:) how many times the unit cell is replicated to form the simulation cell, ngrid(:) number of grid points in each direction
-     real(KIND=double_precision)::boxl(3),hmat(3,3),hmati(3,3) ! boxl(:) unit cell length parameters, the angles are the same as for the simulation cell
+     real::boxl(3),hmat(3,3),hmati(3,3) ! boxl(:) unit cell length parameters, the angles are the same as for the simulation cell
   end type ZeoliteUnitCellGridType
 
   type ZeoliteBeadType
      integer::ntype ! number of framework atom types
      integer,allocatable::type(:),num(:) ! index (as in suijtab) and number of atoms of each type
-     real(KIND=double_precision),allocatable::radiisq(:) ! square of protective radii of each type
+     real,allocatable::radiisq(:) ! square of protective radii of each type
      character(LEN=default_string_length),allocatable::name(:) ! chemical name of each type
   end type ZeoliteBeadType
 
   type ZeolitePotentialType
      integer::ntype ! number of guest bead types present
      integer,allocatable::table(:) ! bead type of each bead
-     real(KIND=double_precision),allocatable::param(:,:,:) ! param(1,i,j)=A=4 eps sig^12, param(2,i,j)=B=4 eps sig^6
+     real,allocatable::param(:,:,:) ! param(1,i,j)=A=4 eps sig^12, param(2,i,j)=B=4 eps sig^6
   end type ZeolitePotentialType
 
   integer,parameter::boxZeo=1
-  real(KIND=double_precision),parameter::eps=1.0E-4_double_precision,dgr=0.2_double_precision
+  real,parameter::eps=1.0E-4_double_precision,dgr=0.2_double_precision
 
 CONTAINS
 
@@ -100,7 +100,7 @@ CONTAINS
     type(CellMaskType),intent(inout)::zcell ! the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
     type(ZeoliteUnitCellGridType),intent(in)::zunit
     integer::pos
-    real(KIND=double_precision)::scoord(3)
+    real::scoord(3)
 
     CALL foldToCenterCell(zeo%bead(i)%coord,zcell,scoord)
 
@@ -120,10 +120,10 @@ CONTAINS
   end subroutine setUpAtom
 
   subroutine foldToCenterCell(coord,zcell,scoord)
-    real(KIND=double_precision),intent(inout)::coord(3)
+    real,intent(inout)::coord(3)
     type(CellMaskType),intent(in)::zcell ! the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
-    real(KIND=double_precision),intent(out)::scoord(3)
-    
+    real,intent(out)::scoord(3)
+
     scoord(1) = coord(1)*zcell%hmati(1,1)%val+coord(2)*zcell%hmati(1,2)%val+coord(3)*zcell%hmati(1,3)%val
     scoord(2) = coord(1)*zcell%hmati(2,1)%val+coord(2)*zcell%hmati(2,2)%val+coord(3)*zcell%hmati(2,3)%val
     scoord(3) = coord(1)*zcell%hmati(3,1)%val+coord(2)*zcell%hmati(3,2)%val+coord(3)*zcell%hmati(3,3)%val
@@ -134,10 +134,10 @@ CONTAINS
   end subroutine foldToCenterCell
 
   subroutine foldToUnitCell(coord,zunit,scoord)
-    real(KIND=double_precision),intent(inout)::coord(3)
+    real,intent(inout)::coord(3)
     type(ZeoliteUnitCellGridType),intent(in)::zunit
-    real(KIND=double_precision),intent(out)::scoord(3)
-    
+    real,intent(out)::scoord(3)
+
     scoord(1) = coord(1)*zunit%hmati(1,1)+coord(2)*zunit%hmati(1,2)+coord(3)*zunit%hmati(1,3)
     scoord(2) = coord(1)*zunit%hmati(2,1)+coord(2)*zunit%hmati(2,2)+coord(3)*zunit%hmati(2,3)
     scoord(3) = coord(1)*zunit%hmati(3,1)+coord(2)*zunit%hmati(3,2)+coord(3)*zunit%hmati(3,3)
@@ -148,20 +148,20 @@ CONTAINS
   end subroutine foldToUnitCell
 
   subroutine fractionalToAbsolute(newcoord,oldcoord,zcell)
-    real(KIND=double_precision),intent(in)::oldcoord(3)
+    real,intent(in)::oldcoord(3)
     type(CellMaskType),intent(in)::zcell ! the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
-    real(KIND=double_precision),intent(out)::newcoord(3)
-    
+    real,intent(out)::newcoord(3)
+
     newcoord(1)=oldcoord(1)*zcell%hmat(1,1)%val+oldcoord(2)*zcell%hmat(1,2)%val+oldcoord(3)*zcell%hmat(1,3)%val
     newcoord(2)=oldcoord(2)*zcell%hmat(2,2)%val+oldcoord(3)*zcell%hmat(2,3)%val
     newcoord(3)=oldcoord(3)*zcell%hmat(3,3)%val
   end subroutine fractionalToAbsolute
 
   subroutine absoluteToFractional(newcoord,oldcoord,zcell)
-    real(KIND=double_precision),intent(in)::oldcoord(3)
+    real,intent(in)::oldcoord(3)
     type(CellMaskType),intent(in)::zcell ! the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
-    real(KIND=double_precision),intent(out)::newcoord(3)
-    
+    real,intent(out)::newcoord(3)
+
     newcoord(1) = oldcoord(1)*zcell%hmati(1,1)%val+oldcoord(2)*zcell%hmati(1,2)%val+oldcoord(3)*zcell%hmati(1,3)%val
     newcoord(2) = oldcoord(1)*zcell%hmati(2,1)%val+oldcoord(2)*zcell%hmati(2,2)%val+oldcoord(3)*zcell%hmati(2,3)%val
     newcoord(3) = oldcoord(1)*zcell%hmati(3,1)%val+oldcoord(2)*zcell%hmati(3,2)%val+oldcoord(3)*zcell%hmati(3,3)%val

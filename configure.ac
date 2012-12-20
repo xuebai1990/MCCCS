@@ -3,7 +3,7 @@ AC_INIT([topmon],[0.1],[siepmanngroup@gmail.com])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/topmon.f])
 
-AC_ARG_ENABLE(mpi, 
+AC_ARG_ENABLE(mpi,
    [AS_HELP_STRING([--enable-mpi],
        [compile with mpi if possible (default: yes)])],
    [set_use_mpi=1
@@ -14,7 +14,7 @@ AC_ARG_ENABLE(mpi,
    fi],
    [set_use_mpi=0 use_mpi=1])
 
-AC_ARG_ENABLE(openmp, 
+AC_ARG_ENABLE(openmp,
    [AS_HELP_STRING([--enable-openmp],
        [compile with openmp if possible (default: yes)])],
    [if   test "$enableval" = "yes" ; then
@@ -25,7 +25,7 @@ AC_ARG_ENABLE(openmp,
    [use_openmp=1])
 
 # debug flags are implemented only for a few cases
-AC_ARG_ENABLE(debug, 
+AC_ARG_ENABLE(debug,
    [AS_HELP_STRING([--enable-debug],
        [compile with debug flags "-g" (default: no)])],
    [if   test "$enableval" = "yes" ; then
@@ -35,7 +35,7 @@ AC_ARG_ENABLE(debug,
    fi],
    [use_debug=0])
 
-topdir=$TOPDIR     # current directory 
+topdir=$TOPDIR     # current directory
 arch=$ARCH         # see below for recognized architectures, plus
                    # "ppc64-mn" for MareNostrum IBM parallel machine
 env_cc=$CC         # C compiler (must be in the execution path)
@@ -66,7 +66,7 @@ AC_CANONICAL_BUILD
 # interactively is disabled: on those systems, AC_PROG_F77 and AC_PROG_CC
 # would fail because they can't run the compiled executables.
 # to work around that, let's pretend we are cross-compiling even if we aren't
-# !!! this relies on undocumented Autoconf behavior !!! 
+# !!! this relies on undocumented Autoconf behavior !!!
 
 # This is used to distinguish between true and fake cross compilation
 # (only on NEC SX8 actually)
@@ -141,7 +141,7 @@ necsx )
 	try_f90="sxf90"
 	try_ar="sxar"
 	try_arflags="rv"
-        try_dflags='-D__SX6 ' 
+        try_dflags='-D__SX6 '
 # default for Nec: no parallel unless explicitly required
         if test "$set_use_mpi" -ne 1 ; then use_mpi=0 ; fi
 	;;
@@ -176,7 +176,7 @@ AC_PROG_F77($f90)
 f90=$F77
 
 # check parallel Fortran 90 compiler
-if test "$use_mpi" -eq 0 ; 
+if test "$use_mpi" -eq 0 ;
 then
 	mpif90=$f90
 else
@@ -188,7 +188,7 @@ else
 fi
 
 # check which compiler does mpif90 wrap
- 
+
 case "$arch" in
 	ia32 | ia64 | x86_64 | mac686 )
 	echo $ECHO_N "checking version of $mpif90... $ECHO_C"
@@ -368,7 +368,7 @@ ia32:path* | ia64:path* | x86_64:path* )
     if test "$use_debug" -eq 1; then
 	try_fflags="-ftrace=full -pg -fbounds-check"
     else
-	try_fflags="-O3 -fomit-frame-pointer -finline-functions -ffast-math" #-mcpu=i686 -march=i686 
+	try_fflags="-O3 -fomit-frame-pointer -finline-functions -ffast-math" #-mcpu=i686 -march=i686
     fi
 	try_f90flags="\$(FFLAGS)"
 	try_fflags_noopt="-O0 -cpp"
@@ -379,7 +379,7 @@ ia32:path* | ia64:path* | x86_64:path* )
     if test "$use_debug" -eq 1; then
 	try_fflags="-ftrace=full -pg -fbounds-check"
     else
-	try_fflags="-O3 -fomit-frame-pointer -finline-functions -ffast-math" #-mcpu=i686 -march=i686 
+	try_fflags="-O3 -fomit-frame-pointer -finline-functions -ffast-math" #-mcpu=i686 -march=i686
     fi
 	try_fflags_openmp="-fopenmp"
 	try_f90flags="\$(FFLAGS) -x f95-cpp-input"
@@ -521,13 +521,13 @@ ppc64-mn:* )
 ### SGI Compiler for Origin (f77)
 #try_fflags     = -O2 #-march=opteron #-mips4 -r12000 #-check_bounds -g
 #############################
-### End compiler definitions 
+### End compiler definitions
 #############################
 esac
 
-if test "$use_openmp" -eq 1 ; then 
+if test "$use_openmp" -eq 1 ; then
   try_fflags="$try_fflags $try_fflags_openmp"
-  try_ldlags="$try_ldlags $try_ldlags_openmp" 
+  try_ldlags="$try_ldlags $try_ldlags_openmp"
 fi
 
 if test "$fflags" = ""   ; then fflags=$try_fflags     ; fi
@@ -699,7 +699,7 @@ fi
 # MacOs work around for ranlib
 if test "$arch" == "mac686"
 then
- if test "$ranlib" == "ranlib" 
+ if test "$ranlib" == "ranlib"
  then
   ranlib="ranlib -c"
  fi
@@ -707,10 +707,10 @@ fi
 
 echo setting RANLIB... $ranlib
 
-if test "$mpi_libs" != "" ; then 
+if test "$mpi_libs" != "" ; then
    mpi_line="MPI_LIBS=$mpi_libs"
-else 
-   mpi_line="@delete@" 
+else
+   mpi_line="@delete@"
 fi
 
 if test "$use_mpi" -ne 0

@@ -1,5 +1,5 @@
 MODULE parser_cssr
-  use var_type,only:double_precision,default_string_length
+  use var_type,only:default_string_length
   use util_runtime,only:err_exit
   use util_files,only:get_iounit
   use sim_cell
@@ -60,7 +60,7 @@ CONTAINS
 !     end do
 
     close(IOCSSR)
-    
+
   END SUBROUTINE readCSSR
 
 END MODULE parser_cssr

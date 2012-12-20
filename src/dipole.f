@@ -1,21 +1,12 @@
       subroutine dipole(ibox,mtype)
-
       use sim_system
-      use var_type
-      use const_phys
-      use const_math
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
       implicit none
-      include 'common.inc'
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'coord2.inc'
 !$$$      include 'ewaldsum.inc'
-      integer(KIND=normal_int)::ibox,mtype,i,imolty,zzz,ii
-      real(KIND=double_precision)::dipox(2),dipoy(2),dipoz(2)
+      integer::ibox,mtype,i,imolty,zzz,ii
+      real::dipox(2),dipoy(2),dipoz(2)
       
       if ( mtype .eq. 0 ) then
 ! in sumup, initiliaze dipole to be 0 and then sum up all the dipoles

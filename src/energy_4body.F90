@@ -1,18 +1,23 @@
-MODULE four_body
-  use sim_system
+MODULE energy_4body
+  use var_type,only:default_string_length
+  use const_math,only:degrad
   use util_runtime,only:err_exit
-  use util_search
-  use var_type,only:double_precision,default_string_length
+  use util_string,only:uppercase
   use util_files,only:readLine
+  use util_memory,only:reallocate
+  use util_search
+  use sim_system
+  use sim_cell
   implicit none
   private
+  save
   public::hasFourBody,U4System,U4MolSys,buildQuadrupletTable
 
   integer,parameter::nparam(1)=(/5/)
   character(LEN=default_path_length)::file_quadruplets='quadruplets.lst'
   logical::hasFourBody=.false.,hasTable=.true.,lbuild_quadruplet_table=.true.
   namelist /fourbody/ file_quadruplets,lbuild_quadruplet_table
-  real(KIND=double_precision),allocatable::coeffs(:,:) !< coeffs(i,j): j = quadruplet type, i = 1(LJ cutoff**2)/2(Coulomb cutoff**2)/3(1st coefficient)/4/etc.; j = atom2*nAtomType**3+atom3*nAtomType**2+atom1*nAtomType+atom4 (atom2<atom3 or atom1<=atom4 if atom2==atom3)
+  real,allocatable::coeffs(:,:) !< coeffs(i,j): j = quadruplet type, i = 1(LJ cutoff**2)/2(Coulomb cutoff**2)/3(1st coefficient)/4/etc.; j = atom2*nAtomType**3+atom3*nAtomType**2+atom1*nAtomType+atom4 (atom2<atom3 or atom1<=atom4 if atom2==atom3)
 !< Or, atom4=mod(itype,nAtomType), atom1=mod((itype-atom4)/nAtomType,nAtomType), atom3=(itype-atom4-atom1*nAtomType)/nAtomType**2, atom2=(itype-atom4-atom1*nAtomType-atom3*nAtomType**2)/nAtomType**3
   integer,allocatable::nQuadruplets(:),qtype(:)& !<functional type
    ,quadruplets(:,:,:) !< quadruplet(i,j,k): k = box #, j = j-th quadruplet, i = 0(type)/1(1st molecule)/2/3/4/5(unit in 1st molecule)/6/7/8
@@ -99,7 +104,7 @@ CONTAINS
   subroutine buildQuadrupletTable(file_ff)
     character(LEN=*),INTENT(IN)::file_ff
     integer::ibox,lchain,clchain,crchain,rchain,lmolty,clmolty,crmolty,rmolty,lunit,clunit,crunit,runit,nAtomType,itype,io_quadruplets,nboxtmp,jerr
-    real(KIND=double_precision)::ar(3),br(3)
+    real::ar(3),br(3)
 
     !write(*,*) 'buildQuadrupletTable'
     call readFourBody(file_ff)
@@ -194,10 +199,10 @@ CONTAINS
 !> \brief Return the angle between vector a, b in radians
 !>
   function bondAngle(a,b,positive)
-    real(KIND=double_precision)::bondAngle
-    real(KIND=double_precision),intent(in)::a(3),b(3)
+    real::bondAngle
+    real,intent(in)::a(3),b(3)
     logical,intent(in),optional::positive !< whether to return positive angles only, default: .false. [in]
-    
+
     bondAngle=acos(dot_product(a,b)/sqrt(dot_product(a,a)*dot_product(b,b)))
 
     if (present(positive)) then
@@ -208,8 +213,8 @@ CONTAINS
 
   function U4(ar,br,type)
     integer,intent(in)::type
-    real(KIND=double_precision)::U4
-    real(KIND=double_precision),intent(in)::ar(3),br(3)
+    real::U4
+    real,intent(in)::ar(3),br(3)
 
     if (qtype(type).eq.1) then
        U4=coeffs(4,type)*(bondAngle(ar,br)-coeffs(3,type))**2
@@ -217,10 +222,10 @@ CONTAINS
   end function U4
 
   function U4System(ibox)
-    real(KIND=double_precision)::U4System
+    real::U4System
     integer,intent(in)::ibox
     integer::type,i
-    real(KIND=double_precision)::ar(3),br(3)
+    real::ar(3),br(3)
 
     if (lpbc) call setpbc(ibox)
 
@@ -239,15 +244,15 @@ CONTAINS
          end if
          type=quadruplets(0,i,ibox)
          U4System=U4System+U4(ar,br,type)
-       end do       
-    end if    
+       end do
+    end if
   end function U4System
 
   function U4MolSys(ichain,istart,iuend,flagon)
-    real(KIND=double_precision)::U4MolSys
+    real::U4MolSys
     integer,intent(in)::ichain,istart,iuend,flagon
     integer::type,i,ibox,iunit
-    real(KIND=double_precision)::ar(3),br(3)
+    real::ar(3),br(3)
 
     ibox=nboxi(ichain)
     U4MolSys=0.
@@ -290,7 +295,7 @@ CONTAINS
          end if
          type=quadruplets(0,i,ibox)
          U4MolSys=U4MolSys+U4(ar,br,type)
-       end do       
+       end do
     end if
   end function U4MolSys
-end MODULE four_body
+end MODULE energy_4body

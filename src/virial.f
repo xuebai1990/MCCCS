@@ -1,5 +1,3 @@
-      subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
-
 !    *******************************************************************
 !    ** computes the 2nd virial coefficient                           **
 !    ** B2(T) = -2Pi Int 0toInf [ Exp[-beta*u(r)] -1] r^2 dr          **
@@ -8,18 +6,14 @@
 !    ** + 1/2( <Exp[-beta*u(r1)]-1> r1 + <Exp[-beta*u(rn)]-1> rn      **
 !    ** Marcus Martin 1-15-97                                         **
 !    *******************************************************************
- 
-      use sim_system
-      use var_type
-      use const_phys
-      use const_math
-      use util_runtime,only:err_exit
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
-      implicit none
-      include 'common.inc'
+subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
+  use const_math,only:onepi,twopi
+  use const_phys,only:qqfact
+  use util_runtime,only:err_exit
+  use sim_system
+  use energy_pairwise,only:exsix,ljpsur
+  use energy_sami,only:ljsami,ljmuir
+  implicit none
 
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
@@ -32,24 +26,24 @@
 !$$$      include 'inputdata.inc'
 !$$$      include 'eepar.inc'
 
-      integer(KIND=normal_int)::i, imolty, ii, j, jmolty, jj, ntii, ntjj , ntij,nnn,nvirial,ip,itemp,iii
-      real(KIND=double_precision)::vinter,rminsq,rxui,ryui,rzui,rxuij ,ryuij,rzuij,rijsq,sr2, sr6 ,velect,mayer
+      integer::i, imolty, ii, j, jmolty, jj, ntii, ntjj , ntij,nnn,nvirial,ip,itemp,iii
+      real::vinter,rminsq,rxui,ryui,rzui,rxuij ,ryuij,rzuij,rijsq,sr2, sr6 ,velect,mayer
 
-      real(KIND=double_precision)::ljsami,ljpsur,ljmuir,xdiff,ydiff ,zdiff,dvircm,stepvir,exsix,starvir
-      real(KIND=double_precision)::binvir
+      real::xdiff,ydiff ,zdiff,dvircm,stepvir,starvir
+      real::binvir
       dimension binvir(maxvir,maxntemp),mayer(maxntemp)
 
       logical::ovrlap,lqimol,lqjmol,lmatrix
   
 ! *** only use for polarizable models
-      integer(KIND=normal_int)::chgmax
+      integer::chgmax
       parameter (chgmax=10)
-      integer(KIND=normal_int)::ip1,ip2,iunit,numchg ,mainsite(2,2),lam1,lam2
-      real(KIND=double_precision)::a(chgmax,chgmax),b2(chgmax,1) ,mainxiq(2,2)
+      integer::ip1,ip2,iunit,numchg ,mainsite(2,2),lam1,lam2
+      real::a(chgmax,chgmax),b2(chgmax,1) ,mainxiq(2,2)
 
-      real(KIND=double_precision)::consa1,consa2,consb1,consb2,selfadd1 ,selfadd2,epsilon2,vmin
+      real::consa1,consa2,consb1,consb2,selfadd1 ,selfadd2,epsilon2,vmin
 
-      real(KIND=double_precision)::mass_t,binvir2(maxvir,maxntemp), factor,corr,vold,deri_u
+      real::mass_t,binvir2(maxvir,maxntemp), factor,corr,vold,deri_u
 
 ! --------------------------------------------------------------------
 

@@ -1,26 +1,19 @@
-      subroutine deriv(ibox)
 !
 ! calculate integrand in maginns interphase switch
 !
+      subroutine deriv(ibox)
       use sim_system
-      use var_type
-      use const_phys
-      use const_math
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
+      use sim_cell
       implicit none
-      include 'common.inc'
 !$$$      include 'control.inc'
 !$$$      include 'system.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'ipswpar.inc'
 !$$$      include 'cell.inc'
 
-      integer(KIND=normal_int)::ibox,i,j,k
+      integer::ibox,i,j,k
 
-      real(KIND=double_precision)::vol,hmats(3,3),hmatsi(3,3)
+      real::vol,hmats(3,3),hmatsi(3,3)
 
       if (lstagea) then
          dvdl = -(1.0d0-etais)*vipsw

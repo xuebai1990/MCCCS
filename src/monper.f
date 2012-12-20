@@ -1,20 +1,16 @@
-      subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove,acnp,pres,nibox,nnn,nblock,lratio,lratv ,lprint,lmv,lrsave,lblock,lratfix,lsolute,acsolpar, acEnthalpy,acEnthalpy1)
-
 ! -----------------------------------------------------------------
 ! subroutine monper
 ! performs periodic updates and block averages
 ! -----------------------------------------------------------------
- 
+      subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove,acnp,pres,nibox,nnn,nblock,lratio,lratv ,lprint,lmv,lrsave,lblock,lratfix,lsolute,acsolpar, acEnthalpy,acEnthalpy1)
       use sim_system
-      use var_type
-      use const_phys
-      use const_math
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
+      use sim_cell
+      use energy_intramolecular,only:vtorso,splint,lininter
+      use energy_pairwise,only:energy,coru
+      use moves_simple
+      use moves_cbmc,only:schedule
+      use transfer_swap,only:acchem,bnchem
       implicit none
-      include 'common.inc'
 
 !$$$      include 'mpi.inc'
 !$$$      include 'mpif.h'
@@ -31,16 +27,16 @@
 !$$$      include 'cell.inc'
 !$$$      include 'poten.inc'
  
-      integer(KIND=normal_int)::nummol,ntii
-      integer(KIND=normal_int)::nibox,im,nnn,ntot,nblock,imolty,m,mm,i,j ,jjtor,ibox,itype,itel,mnbox,zzz,steps,igrow,jmolty,jbox
-      integer(KIND=normal_int)::imend,bin,k,jjben,ip2,ip1,ip3,it ,ii,jj,ivib
+      integer::nummol,ntii
+      integer::nibox,im,nnn,ntot,nblock,imolty,m,mm,i,j ,jjtor,ibox,itype,itel,mnbox,zzz,steps,igrow,jmolty,jbox
+      integer::imend,bin,k,jjben,ip2,ip1,ip3,it ,ii,jj,ivib
       logical::lratio,lratv,lprint,lmv,lrsave,lblock,lfq,lratfix ,lsolute,ovrlap
-      real(KIND=double_precision), dimension(nprop1,nbxmax,nbxmax):: acsolpar
-      real(KIND=double_precision), dimension(nbxmax):: acEnthalpy ,acEnthalpy1
-      real(KIND=double_precision)::dp,dpp,debroglie ,histrat
-      real(KIND=double_precision)::acv, molfra,acpres,acsurf,acvolume ,asetel,acdens,histtot,acmove,acnp,dvalue,dnchoi,dnchoi1,dnchoih ,dnunit,ratflcq,v,vintra,vinter,vext,velect,vewald,vtors,vtail ,rho,coru,thetac,vbend,rxvec,ryvec,rzvec,distanceij,theta,vtorso ,xaa1 ,yaa1,zaa1,xa1a2,ya1a2,za1a2,dot,daa1,da1a2
+      real, dimension(nprop1,nbxmax,nbxmax):: acsolpar
+      real, dimension(nbxmax):: acEnthalpy ,acEnthalpy1
+      real::dp,dpp,debroglie ,histrat
+      real::acv, molfra,acpres,acsurf,acvolume ,asetel,acdens,histtot,acmove,acnp,dvalue,dnchoi,dnchoi1,dnchoih ,dnunit,ratflcq,v,vintra,vinter,vext,velect,vewald,vtors,vtail ,rho,thetac,vbend,rxvec,ryvec,rzvec,distanceij,theta,xaa1 ,yaa1,zaa1,xa1a2,ya1a2,za1a2,dot,daa1,da1a2
 
-      real(KIND=double_precision)::xcc,ycc,zcc,tcc,spltor,rcutmin      
+      real::xcc,ycc,zcc,tcc,spltor,rcutmin      
  
       dimension acv(nener,nbxmax),lratfix(ntmax)
       dimension mnbox(nbxmax,ntmax)
@@ -49,7 +45,7 @@
       dimension lsolute(ntmax)
       dimension rxvec(numax,numax),ryvec(numax,numax),rzvec(numax,numax) ,distanceij(numax,numax)
 
-      real(KIND=double_precision)::ratrax,ratray,ratraz,rttrax,rttray ,rttraz,rarotx,raroty,rarotz,rtrotx,rtroty,rtrotz,vol,ratvol ,temmass,dn,pres(nbxmax)
+      real::ratrax,ratray,ratraz,rttrax,rttray ,rttraz,rarotx,raroty,rarotz,rtrotx,rtroty,rtrotz,vol,ratvol ,temmass,dn,pres(nbxmax)
 ! -------------------------------------------------------------------
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
@@ -863,7 +859,6 @@
       subroutine averageMaximumDisplacement
         use sim_system
         implicit none
-        include 'common.inc'
         
         integer::ibox,imol
 

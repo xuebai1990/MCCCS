@@ -1,18 +1,11 @@
-      subroutine ipswsetup
 !
 ! setup maginns interphase switch
 !
-      use sim_system
-      use var_type
-      use const_phys
-      use const_math
+      subroutine ipswsetup
       use util_runtime,only:err_exit
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
+      use sim_system
+      use sim_cell
       implicit none
-      include 'common.inc'
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'ipswpar.inc'
@@ -20,9 +13,9 @@
 !$$$      include 'system.inc'
 !$$$      include 'cell.inc'
 
-      integer(KIND=normal_int)::i,j,k,tnw,ibox
+      integer::i,j,k,tnw,ibox
 
-      real(KIND=double_precision)::lx,hmata(9),hmatc(9),hm(9)
+      real::lx,hmata(9),hmatc(9),hm(9)
 
       logical::lhm,llwell
 

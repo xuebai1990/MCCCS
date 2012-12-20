@@ -8,7 +8,7 @@ topmon_SOURCES = topmon.f global_data.f var_type.f const_phys.f const_math.f uti
 # most fortran compilers can directly preprocess c-like directives: use
 # 	$(MPIF90) $(F90FLAGS) -c $<
 # if explicit preprocessing by the C preprocessor is needed, use:
-# 	$(CPP) $(CPPFLAGS) $< -o $*.F90 
+# 	$(CPP) $(CPPFLAGS) $< -o $*.F90
 #	$(MPIF90) $(F90FLAGS) -c $*.F90 -o $*.o
 # remember the tabulator in the first column !!!
 
@@ -22,7 +22,7 @@ mostlyclean-generic:
 #           used by the C compiler and preprocessor
 # FDFLAGS = as DFLAGS, for the f90 compiler
 # With the exception of IBM xlf, FDFLAGS = $(DFLAGS)
-# For IBM xlf, FDFLAGS is the same as DFLAGS with separating commas 
+# For IBM xlf, FDFLAGS is the same as DFLAGS with separating commas
 
 DFLAGS         = @dflags@
 FDFLAGS        = @fdflags@
@@ -38,7 +38,7 @@ IFLAGS         = @iflags@
 MOD_FLAG      = @imod@
 
 # Compilers: fortran-90, fortran-77, C
-# If a parallel compilation is desired, MPIF90 should be a fortran-90 
+# If a parallel compilation is desired, MPIF90 should be a fortran-90
 # compiler that produces executables for parallel execution using MPI
 # (such as for instance mpif90, mpf90, mpxlf90,...);
 # otherwise, an ordinary fortran-90 compiler (f90, g95, xlf90, ifort,...)
@@ -51,7 +51,7 @@ F90            = $(MPIF90)
 CC             = @cc@
 F77            = $(MPIF90)
 
-# C preprocessor and preprocessing flags - for explicit preprocessing, 
+# C preprocessor and preprocessing flags - for explicit preprocessing,
 # if needed (see the compilation rules above)
 # preprocessing flags must include DFLAGS and IFLAGS
 

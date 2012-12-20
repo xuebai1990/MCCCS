@@ -1,32 +1,31 @@
 module zeolite
-  use sim_system
-  use var_type
-  use const_math
-  use const_phys
+  use const_math,only:eps,onepi,twopi,fourpi
+  use const_phys,only:qqfact
+  use util_math,only:erfunc
   use util_runtime,only:err_exit
-  use util_math
   use util_timings, only: time_now
-  use util_files
-  use util_string
+  use util_files,only:get_iounit
+  use sim_system
   use sim_cell
   use sim_particle
   use sim_zeolite
   use parser_pdb
   use parser_cssr
   use parser_cif
+  use energy_kspace,only:calp
   implicit none
   include 'common.inc'
   private
   save
   public::zeocoord,suzeo,exzeo
 
-  real(KIND=double_precision),parameter::requiredPrecision=1.0E-2_double_precision,overlapValue=1.0E+20_double_precision,upperLimit=1.0E+7_double_precision
+  real,parameter::requiredPrecision=1.0E-2_double_precision,overlapValue=1.0E+20_double_precision,upperLimit=1.0E+7_double_precision
   integer,parameter::boxZeo=1
 
   logical,allocatable::lunitcell(:)
   logical::ltestztb=.false.,lpore_volume=.false.,lsurface_area=.false.
-  integer(KIND=normal_int)::nlayermax,volume_probe=124,volume_nsample=20,area_probe=124,area_nsample=100
-  real(KIND=double_precision),allocatable::zgrid(:,:,:,:,:),egrid(:,:,:,:)
+  integer::nlayermax,volume_probe=124,volume_nsample=20,area_probe=124,area_nsample=100
+  real,allocatable::zgrid(:,:,:,:,:),egrid(:,:,:,:)
   character(LEN=default_path_length)::file_zeocoord='zeolite.cssr',file_ztb='zeolite.ztb'
 
   namelist /zeolite_in/ file_zeocoord,file_ztb,ltestztb,lpore_volume,volume_probe,volume_nsample,lsurface_area,area_probe,area_nsample
@@ -66,7 +65,7 @@ contains
     character(LEN=*),intent(in)::file_in
     logical,intent(inout)::lhere(:)
 
-    integer(KIND=normal_int)::io_input,jerr
+    integer::io_input,jerr
 
     io_input=get_iounit()
     open(unit=io_input,access='sequential',action='read',file=file_in,form='formatted',iostat=jerr,status='old')
@@ -96,7 +95,7 @@ contains
   subroutine addAllBeadTypes(lhere)
     logical,intent(inout)::lhere(:)
     integer::imol,iunit,igtype,i,idi,idj,ntij,jerr,list(nntype)
-    real(KIND=double_precision)::sig6
+    real::sig6
 
     ! find all bead types and store them in an array
     if (lpore_volume) then
@@ -161,8 +160,8 @@ contains
   subroutine suzeo(lhere)
     logical,intent(inout)::lhere(:)
     character(LEN=default_string_length)::atom
-    integer(KIND=normal_int)::io_ztb,igtype,idi,idj,jerr,sw,i,j,k,oldi,oldj,oldk,ngridtmp(3),zntypetmp
-    real(KIND=double_precision)::wzeo,zunittmp(3),zangtmp(3),rcuttmp,rci3,rci9,rho
+    integer::io_ztb,igtype,idi,idj,jerr,sw,i,j,k,oldi,oldj,oldk,ngridtmp(3),zntypetmp
+    real::wzeo,zunittmp(3),zangtmp(3),rcuttmp,rci3,rci9,rho
     logical::lewaldtmp,ltailczeotmp,lshifttmp
 
     !     === Calculate zeolite density
@@ -319,11 +318,11 @@ contains
 ! arguments i,j,k are in fractional coordinates with respect to the unit cell
 ! U_LJ = A/r^12 + B/r^6, scale A by 4*10^8, B by 2*10^4 to reduce round-off error
   subroutine exzeof(tab,i,j,k)
-    real(KIND=double_precision),intent(out)::tab(3,ztype%ntype)
-    real(KIND=double_precision),intent(in)::i,j,k
+    real,intent(out)::tab(3,ztype%ntype)
+    real,intent(in)::i,j,k
 
-    integer(KIND=normal_int)::izeo,layer,ii,jj,kk,iztype
-    real(KIND=double_precision)::rcutsq,vac,vbc,vb,r,scoord(3),ri(3),dr(3),r2,vnew(2,ztype%ntype)
+    integer::izeo,layer,ii,jj,kk,iztype
+    real::rcutsq,vac,vbc,vb,r,scoord(3),ri(3),dr(3),r2,vnew(2,ztype%ntype)
 
     tab=0.
     rcutsq = zcell%cut*zcell%cut
@@ -420,11 +419,11 @@ contains
   end subroutine exzeof
 
   subroutine recipzeo(tab,ri)
-    real(KIND=double_precision),intent(out)::tab(ztype%ntype)
-    real(KIND=double_precision),intent(in)::ri(3)
+    real,intent(out)::tab(ztype%ntype)
+    real,intent(in)::ri(3)
 
-    integer(KIND=normal_int)::kmax(3),i,j,l,m,n,kmin(2:3)
-    real(KIND=double_precision)::hmatik(3,3),ki(3),alpsqr4,hmaxsq,ksqr,arg,sums(ztype%ntype),vrecipz(ztype%ntype)
+    integer::kmax(3),i,j,l,m,n,kmin(2:3)
+    real::hmatik(3,3),ki(3),alpsqr4,hmaxsq,ksqr,arg,sums(ztype%ntype),vrecipz(ztype%ntype)
 
     ! *** Set up the reciprocal space vectors ***
     vrecipz = 0.0E+0_double_precision
@@ -477,15 +476,16 @@ contains
   end subroutine recipzeo
 
   function exzeo(xi,yi,zi,idi,ignoreTable)
-    real(KIND=double_precision)::exzeo
-    real(KIND=double_precision),intent(in)::xi,yi,zi
-    integer(KIND=normal_int),intent(in)::idi
+    use util_math,only:polint
+    real::exzeo
+    real,intent(in)::xi,yi,zi
+    integer,intent(in)::idi
     logical,intent(in),optional::ignoreTable
 
     logical::lignore
-    integer(KIND=normal_int),parameter::m=2,mt=2*m+1,mst=-m
-    integer(KIND=normal_int)::j,j0,jp,k,k0,kp,l,l0,lp,igtype,idj
-    real(KIND=double_precision)::yjtmp(mst:m),yktmp(mst:m),yltmp(mst:m),xt(mst:m),yt(mst:m),zt(mst:m),scoord(3),r(3),tab(3,ztype%ntype),rci3,rci9,rho
+    integer,parameter::m=2,mt=2*m+1,mst=-m
+    integer::j,j0,jp,k,k0,kp,l,l0,lp,igtype,idj
+    real::yjtmp(mst:m),yktmp(mst:m),yltmp(mst:m),xt(mst:m),yt(mst:m),zt(mst:m),scoord(3),r(3),tab(3,ztype%ntype),rci3,rci9,rho
 
     do igtype=1,zpot%ntype
        if (zpot%table(igtype).eq.idi) exit
@@ -588,12 +588,13 @@ contains
 !>
 !> See O. Talu and A.L. Myers, "Molecular simulation of adsorption: Gibbs dividing surface and comparison with experiment", AICHE J., 47(5), 1160-1168 (2001).
   subroutine ztest()
+    use util_random,only:random
 !$$$      include 'grid.inc'
 !$$$      include 'zeolite.inc'
 !$$$      include 'control.inc'
 !$$$      include 'mpi.inc'
-    integer(KIND=normal_int)::i,tel
-    real(KIND=double_precision)::errTot,errRel,errAbs,err,BoltTabulated,eBoltTabulated,BoltExplicit,eBoltExplicit,xi,yi,zi,Utabulated,Uexplicit,weight,random
+    integer::i,tel
+    real::errTot,errRel,errAbs,err,BoltTabulated,eBoltTabulated,BoltExplicit,eBoltExplicit,xi,yi,zi,Utabulated,Uexplicit,weight
 
 !--- test accuracy
     if (myid.eq.0) write(io_output,'(A,/,A)') ' Test accuracy of tabulated zeolite potential & Calculate void volume',' -------------------------------------------------'
@@ -660,9 +661,10 @@ contains
 !> 5. T. Duren, Y.S. Bae, and R.Q. Snurr, "Using molecular simulation to characterise metal-organic frameworks for adsorption applications", Chem. Soc. Rev., 38(5), 1237-1247 (2009).
 !> 6. Y.S. Bae, A.O. Yazaydin, and R.Q. Snurr, "Evaluation of the BET method for determining surface areas of MOFs and zeolites that contain ultra-micropores", Langmuir, 26(8), 5475-5483 (2010).
   subroutine zsurface()
-    integer(KIND=normal_int)::i,j,k,ntij,ncount
-    real(kind=double_precision)::random,stotal,phi,theta,sigij,rsq,scoord(3),coord(3),sdr(3),dr(3)
-    real(kind=double_precision),allocatable::position(:,:)
+    use util_random,only:random,sphere
+    integer::i,j,k,ntij,ncount
+    real::stotal,sigij,rsq,scoord(3),coord(3),sdr(3),dr(3)
+    real,allocatable::position(:,:)
 
     Write(io_output,'(A,/,A)') 'Calculate geometric accessible surface area',' -------------------------------------------------'
 
@@ -688,13 +690,7 @@ contains
 
        ncount=0
        Do j=1,area_nsample ! Number of trial positions around each framework atom
-          ! Generate random vector of length 1 on unit spheres
-          ! See http://mathworld.wolfram.com/SpherePointPicking.html for further explanations
-          phi = random()*twopi
-          coord(3)=1-random()*2.0d0
-          theta = acos(coord(3))
-          coord(1)=sin(theta)*cos(phi)
-          coord(2)=sin(theta)*sin(phi)
+          call sphere(coord(1),coord(2),coord(3))
 
           ! Make this vector of length (sigma_atom+sigma_probe)/2.0 and centered at particle i
           coord=coord*sigij+zeo%bead(i)%coord

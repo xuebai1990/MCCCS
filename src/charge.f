@@ -1,22 +1,16 @@
-      subroutine charge ( i, qion, vflucq, vewald )    
-
 !    *******************************************************************
 !    ** calculates the intramolcular polarization energies            **
 !    ** for fluctuating charge moves                                  **
 !    ** written by Marcus G. Martin 9-16-97                           **
 !    ** rewritten by Bin Chen 6-25-99                                 **
 !    *******************************************************************
- 
-      use sim_system
-      use var_type
-      use const_phys
-      use const_math
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
-      implicit none
-      include 'common.inc'
+subroutine charge( i, qion, vflucq, vewald )
+  use const_math,only:onepi
+  use const_phys,only:qqfact
+  use util_math,only:erfunc
+  use sim_system
+  use energy_kspace,only:calp
+  implicit none
 
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
@@ -25,8 +19,8 @@
 !$$$      include 'ewaldsum.inc'
 !$$$      include 'connect.inc'      
 
-      integer(KIND=normal_int)::i,imolty,iunit,ii,jj,ntii,ntjj,ntij,ibox
-      real(KIND=double_precision)::vflucq,qion(numax),qqii,vewald,rxui ,ryui,rzui,rxuij,ryuij,rzuij,rij
+      integer::i,imolty,iunit,ii,jj,ntii,ntjj,ntij,ibox
+      real::vflucq,qion(numax),qqii,vewald,rxui ,ryui,rzui,rxuij,ryuij,rzuij,rij
       vflucq = 0.0d0
       vewald = 0.0d0
       imolty = moltyp(i)

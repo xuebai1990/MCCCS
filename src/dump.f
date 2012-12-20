@@ -1,20 +1,11 @@
-      subroutine dump  
-
 ! -----------------------------------------------------------------
 ! subroutine dump
 ! dumps the final configuration before stopping the program (Neeraj).
 ! -----------------------------------------------------------------
-
+      subroutine dump  
       use sim_system
-      use var_type
-      use const_phys
-      use const_math
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
+      use sim_cell
       implicit none
-      include 'common.inc'
 
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'      
@@ -35,7 +26,7 @@
 !$$$      include 'clusterbias.inc'
 !$$$      include 'cell.inc'
 
-      integer(KIND=normal_int)::i,j,im,imolty,ibox
+      integer::i,j,im,imolty,ibox
 
       open (8, file="final-config")
       write(8,*) tmcc

@@ -1,5 +1,3 @@
-      subroutine align_planes(isplist,imol_b,imol_a,itype_b,itype_a, xb,yb,zb)
-
 !--- align_planes.f
 !
 !  designed with swatching rigid planar PAH molecules in mind
@@ -26,44 +24,36 @@
 ! --  a subscripts refer to molecule that exists, the "other"
 ! --  b subscripts refer to molecule that being swatched in, the "self"
 !
-
-
-      use sim_system
-      use var_type
-      use const_phys
-      use const_math
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
-      implicit none
-      include 'common.inc' 
+subroutine align_planes(isplist,imol_b,imol_a,itype_b,itype_a,xb,yb,zb)
+  use const_math,only:onepi,twopi
+  use sim_system
+  implicit none
 !$$$      include 'control.inc'
 !$$$      include 'conver.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'swtcmove.inc'
 
 !     --- INPUT VARIABLES ---
-      integer(KIND=normal_int)::isplist, imol_b, imol_a, itype_b, itype_a
+      integer::isplist, imol_b, imol_a, itype_b, itype_a
    
 !     --- OUTPUT VARIABLES ---
-      real(KIND=double_precision)::xb(numax), yb(numax), zb(numax)
+      real::xb(numax), yb(numax), zb(numax)
 
 !     --- LOCAL VARIABLES ---
-      integer(KIND=normal_int)::i, imoltype_b, nunit_b
-      integer(KIND=normal_int)::ia_bead1, ia_bead2, ia_bead3
-      integer(KIND=normal_int)::ib_bead1, ib_bead2, ib_bead3
+      integer::i, imoltype_b, nunit_b
+      integer::ia_bead1, ia_bead2, ia_bead3
+      integer::ib_bead1, ib_bead2, ib_bead3
 
-      real(KIND=double_precision)::xa(3),   ya(3),   za(3)
-      real(KIND=double_precision)::xorigin, yorigin, zorigin
-      real(KIND=double_precision)::xcross,  ycross,  zcross
-      real(KIND=double_precision)::xtemp,   ytemp,   ztemp
-      real(KIND=double_precision)::dxa,     dya
-      real(KIND=double_precision)::dxb,     dyb
+      real::xa(3),   ya(3),   za(3)
+      real::xorigin, yorigin, zorigin
+      real::xcross,  ycross,  zcross
+      real::xtemp,   ytemp,   ztemp
+      real::dxa,     dya
+      real::dxb,     dyb
 
-      real(KIND=double_precision)::rnorm, d
-      real(KIND=double_precision)::gamma_a, gamma_b
-      real(KIND=double_precision)::theta, cos_theta, sin_theta
+      real::rnorm, d
+      real::gamma_a, gamma_b
+      real::theta, cos_theta, sin_theta
 
       
 

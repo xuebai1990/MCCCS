@@ -1,22 +1,14 @@
       subroutine updnn( i, ibox )
-
       use sim_system
-      use var_type
-      use const_phys
-      use const_math
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
+      use sim_cell,only:setpbc,mimage
       implicit none
-      include 'common.inc'
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'system.inc'
 !$$$      include 'neigh.inc'
 !$$$      include 'neigh2.inc'
-      integer(KIND=normal_int)::i,j,ii,jj,ibox
-      real(KIND=double_precision)::rxui,ryui,rzui,rxuij,ryuij,rzuij ,rijsq,rcnnsq
+      integer::i,j,ii,jj,ibox
+      real::rxui,ryui,rzui,rxuij,ryuij,rzuij ,rijsq,rcnnsq
 ! -----------------------------------------------------------------------------
  
       rcnnsq = rcutnn(ibox)**2

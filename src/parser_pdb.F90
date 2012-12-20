@@ -1,7 +1,7 @@
 MODULE parser_pdb
 ! *****************************************************************************
 !> \brief Handles PDB (Protein Data Bank) files
-!> 
+!>
 !> Protein Data Bank Contents Guide:
 !> Atomic Coordinate Entry Format Version 3.3 (July, 2011)
 !>   http://www.wwpdb.org/documentation/format33/v3.3.html
@@ -31,7 +31,7 @@ MODULE parser_pdb
 !> 22 - 26        Integer        serial       Serial number of bonded atom
 !> 27 - 31        Integer        serial       Serial number of bonded atom
 ! *****************************************************************************
-  use var_type,only:double_precision,default_string_length
+  use var_type,only:default_string_length
   use util_runtime,only:err_exit
   use util_files,only:get_iounit,readLine
   use sim_cell
@@ -55,14 +55,14 @@ CONTAINS
     INTEGER::IOPDB,jerr,i,resID
     CHARACTER(LEN=default_string_length)::line,atomName,resName,molName,elem
     logical::uninitialized
-    real(KIND=double_precision)::occup,beta
+    real::occup,beta
 
     IOPDB=get_iounit()
     open(unit=IOPDB,access='sequential',action='read',file=filePDB,form='formatted',iostat=jerr,status='old')
     if (jerr.ne.0) then
        call err_exit('cannot open zeolite PDB file')
     end if
-    
+
     CALL readLine(IOPDB,line,.false.,jerr)
     IF(jerr.ne.0) call err_exit('wrong PDB file format')
 
@@ -78,7 +78,7 @@ CONTAINS
        ztype%radiisq(i)=ztype%radiisq(i)*ztype%radiisq(i)
        ztype%num(i)=0
     end do
-    
+
     uninitialized=.true.
     i=0
     DO
@@ -123,7 +123,7 @@ CONTAINS
     END DO
 
     if (i.ne.zeo%nbead) call err_exit('PDB: Number of atoms incorrect')
-    
+
   END SUBROUTINE readPDB
 
 ! *****************************************************************************

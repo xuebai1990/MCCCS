@@ -1,22 +1,18 @@
-      subroutine flucq (ichoice,boxi)
-
 !    *******************************************************************
 !    ** select one (or two in charge transfer) molecule and displace  **
 !    ** the charge magnitude of charge sites on selected molecule(s)  **
 !    ** according to charge nutrality and preferential strategy.      **
 !    ** rewritten by Bin Chen at 6-25-99.                             **
 !    *******************************************************************
- 
-      use sim_system
-      use var_type
-      use const_phys
-      use const_math
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
-      implicit none
-      include 'common.inc'
+subroutine flucq (ichoice,boxi)
+  use const_phys,only:qqfact
+  use util_math,only:erfunc
+  use util_random,only:random
+  use sim_system
+  use sim_cell,only:mimage
+  use energy_kspace,only:recip,calp
+  use energy_pairwise,only:energy
+  implicit none
 
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
@@ -30,13 +26,13 @@
 !$$$      include 'poten.inc'
       
       logical::linterqt,ovrlap
-      integer(KIND=normal_int)::i,ibox,iunit,j,imolty,icbu,mainunit ,ichoice,qunit,boxi,flagon
-      real(KIND=double_precision)::dchain,random,vnew,vold,deltv,deltvb ,velectn,velecto,vflucqn,vflucqo ,dispbig,displit,vintern,vintero ,vewaldn,vewaldo
-      real(KIND=double_precision)::qion(numax)
-      real(KIND=double_precision)::vrecipn,vrecipo
-      integer(KIND=normal_int)::maini,mainj,jchain
-      real(KIND=double_precision)::qionj(numax),vflucqjo,vflucqjn,corr,rij,rxuij,ryuij,rzuij,vdum,vewaldjn,vewaldjo
-      real(KIND=double_precision)::qoldj2,vnewi,velectni,vinterni,voldi, velectoi,vinteroi
+      integer::i,ibox,iunit,j,imolty,icbu,mainunit ,ichoice,qunit,boxi,flagon
+      real::dchain,vnew,vold,deltv,deltvb ,velectn,velecto,vflucqn,vflucqo ,dispbig,displit,vintern,vintero ,vewaldn,vewaldo
+      real::qion(numax)
+      real::vrecipn,vrecipo
+      integer::maini,mainj,jchain
+      real::qionj(numax),vflucqjo,vflucqjn,corr,rij,rxuij,ryuij,rzuij,vdum,vewaldjn,vewaldjo
+      real::qoldj2,vnewi,velectni,vinterni,voldi, velectoi,vinteroi
 
 ! --------------------------------------------------------------------
 

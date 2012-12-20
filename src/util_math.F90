@@ -1,5 +1,4 @@
 module util_math
-  use var_type,only:normal_int,double_precision
   use const_math,only:onepi
   implicit none
   private
@@ -7,11 +6,11 @@ module util_math
 contains
 !> \brief complementary error function
   pure function erfunc(x)
-    real(KIND=double_precision)::erfunc
-    real(KIND=double_precision),intent(in)::x
+    real::erfunc
+    real,intent(in)::x
 
-    real(KIND=double_precision),parameter::p=0.3275911d0,a1=0.254829592d0,a2=-0.284496736d0,a3=1.421413741d0,a4=-1.453152027d0,a5=1.061405429d0
-    real(KIND=double_precision)::tt,eee
+    real,parameter::p=0.3275911d0,a1=0.254829592d0,a2=-0.284496736d0,a3=1.421413741d0,a4=-1.453152027d0,a5=1.061405429d0
+    real::tt,eee
 
     eee = dexp(-x*x)
     tt = 1.0d0/(1.0d0 + p*x)
@@ -20,28 +19,24 @@ contains
   end function erfunc
 
   pure function mbessel(z,nu)
-    real(KIND=double_precision)::mbessel
-    real(KIND=double_precision),intent(in)::z,nu
-        
-!       mbessel = sqrt(onepi/(2.0d0*z))*exp(-z)*
-!     +         (1.0d0 + (4.0d0*nu**2-1)/(8.0d0*z) +
-!     +         (4.0d0*nu**2-1)*(4.0d0*nu**2-9.0d0)/(2.0d0*64.0d0*z**2))
+    real::mbessel
+    real,intent(in)::z,nu
 
-! -- simple form     
+! -- simple form
     mbessel = sqrt(onepi/(2.0d0*z))*exp(-z)
-!     +         (1.0d0 + (4.0d0*nu**2-1)/(8.0d0*z) +
-!     +         (4.0d0*nu**2-1)*(4.0d0*nu**2-9.0d0)/(2.0d0*64.0d0*z**2))
+!     &         *(1.0d0 + (4.0d0*nu**2-1)/(8.0d0*z) +
+!     &         (4.0d0*nu**2-1)*(4.0d0*nu**2-9.0d0)/(2.0d0*64.0d0*z**2))
   end function mbessel
 
 !  (C) Copr. 1986-92 Numerical Recipes Software +3Y.
   pure subroutine polint(xa,ya,n,x,y)
-    real(KIND=double_precision),intent(in)::xa(n),ya(n),x
-    integer(KIND=normal_int),intent(in)::n
-    real(KIND=double_precision),intent(out)::y
+    real,intent(in)::xa(n),ya(n),x
+    integer,intent(in)::n
+    real,intent(out)::y
 
-    integer(KIND=normal_int),parameter::nmax=10
-    integer(KIND=normal_int)::i,m,ns
-    real(KIND=double_precision)::dy,den,dif,dift,ho,hp,w,c(nmax),d(nmax)
+    integer,parameter::nmax=10
+    integer::i,m,ns
+    real::dy,den,dif,dift,ho,hp,w,c(nmax),d(nmax)
     ns=1
     dif=abs(x-xa(1))
     do i=1,n
@@ -77,8 +72,8 @@ contains
   end subroutine polint
 
 !      subroutine coordinate_transform(x,y,z,invh,sx,sy,sz)
-!      real(KIND=double_precision),intent(in)::x,y,z,invhmat
-!      real(KIND=double_precision),intent(out)::sx,sy,sz
-    
+!      real,intent(in)::x,y,z,invhmat
+!      real,intent(out)::sx,sy,sz
+
 !      end subroutine coordinate_transform
 end module util_math

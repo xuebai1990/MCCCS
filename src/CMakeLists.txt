@@ -22,8 +22,8 @@ get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 
 if (Fortran_COMPILER_NAME MATCHES "mpif90*")
   # mpif90 wrapper
-  set (CMAKE_Fortran_FLAGS_RELEASE "-free -fpp -O3 -xHost -ipo -no-prec-div")
-  set (CMAKE_Fortran_FLAGS_DEBUG   "-free -fpp -O0 -g -traceback -check all -warn unused -warn declarations -warn truncated_source -warn uncalled -warn ignore_loc -D__DEBUG__")
+  set (CMAKE_Fortran_FLAGS_RELEASE "-free -fpp -O3 -xHost -ipo -no-prec-div -integer-size 32 -real-size 64")
+  set (CMAKE_Fortran_FLAGS_DEBUG   "-free -fpp -O0 -integer-size 32 -real-size 64 -g -traceback -check all -warn unused -warn declarations -warn truncated_source -warn uncalled -warn ignore_loc -D__DEBUG__")
 elseif (Fortran_COMPILER_NAME MATCHES "ifort*")
   # Intel Compiler for x86 architecture
   set (CMAKE_Fortran_FLAGS_RELEASE "-free -fpp -O3 -xHost -ipo -no-prec-div")
@@ -74,7 +74,7 @@ endif (Fortran_COMPILER_NAME MATCHES "mpif90*")
 #include_directories(${MPI_Fortran_INCLUDE_PATH})
 
 # build executables
-set (NMPROGRAMS "var_type.F90" "const_math.F90" "const_phys.F90" "util_math.F90" "util_string.F90" "util_files.F90" "util_timings.F90" "util_memory.F90" "util_runtime.F90" "util_search.F90" "sim_system.F90" "sim_cell.F90" "sim_particle.F90" "sim_zeolite.F90" "fparser.F90" "parser_cif.F90" "parser_pdb.F90" "parser_cssr.F90" "zeolite.F90" "three_body.F90" "four_body.F90" "transfer_shared.F90" "transfer_swap.F90" "transfer_swatch.F90" "topmon.F90" "Atom_energy.f" "Atom_traxyz.f" "Intra_energy.f" "alignplanes.f" "anes.f" "boltz.f" "bondlength.f" "calcsolpar.f" "calctor.f" "charge.f" "close.f" "cone.f" "coneangle.f" "config.f" "corp.f" "coru.f" "ctrmas.f" "deriv.f" "dipole.f" "dump.f" "ee_energy.f" "ee_index_swap.f" "ee_recip.f" "eemove.f" "eesetup.f" "energy.f" "exgrph.f" "exmuir.f" "expand.f" "explct.f" "exsami.f" "exsix.f" "flucq.f" "garo3body.f" "garofalini.f" "genlj.f" "geometry.f" "inclus.f" "init_vars.f" "initia.f" "ipswsetup.f" "linkcell.f" "ljmuir.f" "ljpsur.f" "ljsami.f" "matops.f" "mimage.f" "mmff.f" "molsetup.f" "monola.f" "monper.f" "ninesix.f" "place.f" "pressure.f" "prvolume.f" "random.f" "readdat.f" "recip.f" "recip_atom.f" "recippress.f" "recipsum.f" "rigfix.f" "rigrot.f" "rosenbluth.f" "rotxyz.f" "safecbmc.f" "safeschedule.f" "schedule.f" "setnn.f" "setpbc.f" "slitpore.f" "sphere.f" "suijtab.f" "sumup.f" "susami.f" "suvibe.f" "tabulated.f" "torsion.f" "traxyz.f" "update.f" "update1.f" "updnn.f" "v_elect_field.f" "virial.f" "volume.f" "vtorso.f")
+set (NMPROGRAMS "var_type.F90" "const_math.F90" "const_phys.F90" "util_math.F90" "util_random.F90" "util_string.F90" "util_files.F90" "util_timings.F90" "util_memory.F90" "util_runtime.F90" "util_search.F90" "sim_system.F90" "sim_cell.F90" "sim_particle.F90" "sim_zeolite.F90" "fparser.F90" "parser_cif.F90" "parser_pdb.F90" "parser_cssr.F90" "zeolite.F90" "energy_kspace.F90" "energy_intramolecular.F90" "energy_external.F90" "energy_pairwise.F90" "energy_sami.F90" "energy_garofalini.F90" "energy_3body.F90" "energy_4body.F90" "moves_simple.F90" "moves_cbmc.F90" "moves_ee.F90" "transfer_shared.F90" "transfer_swap.F90" "transfer_swatch.F90" "prop_pressure.F90" "topmon.F90" "alignplanes.f" "anes.f" "calcsolpar.f" "charge.f" "ctrmas.f" "deriv.f" "dipole.f" "dump.f" "flucq.f" "inclus.f" "initia.f" "ipswsetup.f" "linkcell.f" "molsetup.f" "monola.f" "monper.f" "readdat.f" "setnn.f" "update.f" "update1.f" "updnn.f" "virial.f")
 set (EXECUTABLES "topmon")
 set (SCRIPTS "reconf")
 
@@ -96,7 +96,7 @@ add_executable (topmon ${NMPROGRAMS})
 #endif()
 
 # install executables and scripts
-install (TARGETS ${EXECUTABLES} 
+install (TARGETS ${EXECUTABLES}
          RUNTIME DESTINATION "bin")
 install (PROGRAMS ${SCRIPTS}
-         DESTINATION "bin") 
+         DESTINATION "bin")

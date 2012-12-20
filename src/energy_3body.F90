@@ -1,18 +1,23 @@
-MODULE three_body
-  use sim_system
+MODULE energy_3body
+  use var_type,only:default_string_length
+  use const_math,only:degrad
   use util_runtime,only:err_exit
-  use util_search
-  use var_type,only:double_precision,default_string_length
+  use util_string,only:uppercase
   use util_files,only:readLine
+  use util_memory,only:reallocate
+  use util_search
+  use sim_system
+  use sim_cell
   implicit none
   private
+  save
   public::hasThreeBody,U3System,U3MolSys,buildTripletTable
 
   integer,parameter::nparam(1)=(/4/)
   character(LEN=default_path_length)::file_triplets='triplets.lst'
   logical::hasThreeBody=.false.,hasTable=.true.,lbuild_triplet_table=.true.
   namelist /threebody/ file_triplets,lbuild_triplet_table
-  real(KIND=double_precision),allocatable::coeffs(:,:) !< coeffs(i,j): j = triplet type, i = 1(LJ cutoff**2)/2(Coulomb cutoff**2)/3(1st coefficient)/4/etc.; j = atom2*nAtomType**2+atom1*nAtomType+atom3 (atom1<=atom3)
+  real,allocatable::coeffs(:,:) !< coeffs(i,j): j = triplet type, i = 1(LJ cutoff**2)/2(Coulomb cutoff**2)/3(1st coefficient)/4/etc.; j = atom2*nAtomType**2+atom1*nAtomType+atom3 (atom1<=atom3)
 !< Or, atom3=mod(itype,nAtomType), atom1=mod((itype-atom3)/nAtomType,nAtomType), atom2=(itype-atom3-atom1*nAtomType)/nAtomType**2
   integer,allocatable::nTriplets(:),ttype(:)& !<functional type
    ,triplets(:,:,:) !< triplet(i,j,k): k = box #, j = j-th triplet, i = 0(type)/1(1st molecule)/2/3/4(unit in 1st molecule)/5/6
@@ -96,7 +101,7 @@ CONTAINS
   subroutine buildTripletTable(file_ff)
     character(LEN=*),INTENT(IN)::file_ff
     integer::ibox,lchain,cchain,rchain,lmolty,cmolty,rmolty,lunit,cunit,runit,nAtomType,itype,io_triplets,nboxtmp,jerr
-    real(KIND=double_precision)::ar(3),br(3)
+    real::ar(3),br(3)
 
     !write(*,*) 'buildTripletTable'
     call readThreeBody(file_ff)
@@ -181,10 +186,10 @@ CONTAINS
 !> \brief Return the angle between vector a, b in radians
 !>
   function bondAngle(a,b,positive)
-    real(KIND=double_precision)::bondAngle
-    real(KIND=double_precision),intent(in)::a(3),b(3)
+    real::bondAngle
+    real,intent(in)::a(3),b(3)
     logical,intent(in),optional::positive !< whether to return positive angles only, default: .false. [in]
-    
+
     bondAngle=acos(dot_product(a,b)/sqrt(dot_product(a,a)*dot_product(b,b)))
 
     if (present(positive)) then
@@ -195,8 +200,8 @@ CONTAINS
 
   function U3(ar,br,type)
     integer,intent(in)::type
-    real(KIND=double_precision)::U3
-    real(KIND=double_precision),intent(in)::ar(3),br(3)
+    real::U3
+    real,intent(in)::ar(3),br(3)
 
     if (ttype(type).eq.1) then
        U3=coeffs(4,type)*(bondAngle(ar,br)-coeffs(3,type))**2
@@ -204,10 +209,10 @@ CONTAINS
   end function U3
 
   function U3System(ibox)
-    real(KIND=double_precision)::U3System
+    real::U3System
     integer,intent(in)::ibox
     integer::type,i
-    real(KIND=double_precision)::ar(3),br(3)
+    real::ar(3),br(3)
 
     if (lpbc) call setpbc(ibox)
 
@@ -226,15 +231,15 @@ CONTAINS
          end if
          type=triplets(0,i,ibox)
          U3System=U3System+U3(ar,br,type)
-       end do       
-    end if    
+       end do
+    end if
   end function U3System
 
   function U3MolSys(ichain,istart,iuend,flagon)
-    real(KIND=double_precision)::U3MolSys
+    real::U3MolSys
     integer,intent(in)::ichain,istart,iuend,flagon
     integer::type,i,ibox,iunit
-    real(KIND=double_precision)::ar(3),br(3)
+    real::ar(3),br(3)
 
     ibox=nboxi(ichain)
     U3MolSys=0.
@@ -277,7 +282,7 @@ CONTAINS
          end if
          type=triplets(0,i,ibox)
          U3MolSys=U3MolSys+U3(ar,br,type)
-       end do       
+       end do
     end if
   end function U3MolSys
-end MODULE three_body
+end MODULE energy_3body

@@ -6,7 +6,7 @@ module transfer_shared
   save
   public::read_transfer,update_bias,opt_bias,lopt_bias,freq_opt_bias
 
-  real(KIND=double_precision),allocatable::u_bias_diff(:,:) !<u_bias_diff(i,j) is the bias potential difference that should be applied to box i to achieve equal distribution of particles of type j
+  real,allocatable::u_bias_diff(:,:) !<u_bias_diff(i,j) is the bias potential difference that should be applied to box i to achieve equal distribution of particles of type j
   integer,allocatable::num_update_bias(:,:)
   logical,allocatable::lopt_bias(:)
   integer::freq_opt_bias=500
@@ -39,7 +39,7 @@ contains
   end subroutine read_transfer
 
   subroutine update_bias(u_diff,boxrem,boxins,imolty)
-    real(KIND=double_precision),intent(in)::u_diff
+    real,intent(in)::u_diff
     integer,intent(in)::boxrem,boxins,imolty
 
     u_bias_diff(boxins,imolty)=(u_bias_diff(boxins,imolty)*num_update_bias(boxins,imolty)+u_diff/2.0)/real(num_update_bias(boxins,imolty)+1.0)

@@ -1,22 +1,13 @@
       subroutine molsetup(io_input,imolty)
-
-      use sim_system
-      use var_type
-      use const_phys
-      use const_math
       use util_runtime,only:err_exit
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
+      use sim_system
       implicit none
-      include 'common.inc'
 
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'connect.inc'
       integer,intent(in)::io_input,imolty
-      integer(KIND=normal_int)::i,j,k,n,iunit,dum,iu,countbend,counttor,atype,btype,ctype,dtype,tortype,bendtype ,ju,ku,nu,vibtype,countvib
+      integer::i,j,k,n,iunit,dum,iu,countbend,counttor,atype,btype,ctype,dtype,tortype,bendtype ,ju,ku,nu,vibtype,countvib
 
 !     ************************************************************
 
@@ -149,7 +140,7 @@
 
       logical::lfinda,lfindb,lfound
 
-      integer(KIND=normal_int)::iinit,atype,btype,vibtype,nsite,isite ,vbtype,ntvib,n,i,ia,ib
+      integer::iinit,atype,btype,vibtype,nsite,isite ,vbtype,ntvib,n,i,ia,ib
 
       dimension nsite(20,2),isite(20,2,7),vbtype(20)
 
@@ -234,7 +225,7 @@
 
       logical::lfinda,lfindb,lfindc,lfound
 
-      integer(KIND=normal_int)::iinit,atype,btype,ctype,bendtype,nsite ,isite,bntype,ntbend,n,i,ia,ib,ic
+      integer::iinit,atype,btype,ctype,bendtype,nsite ,isite,bntype,ntbend,n,i,ia,ib,ic
 
       dimension nsite(20,3),isite(20,3,7),bntype(20)
       
@@ -338,7 +329,7 @@
 
       logical::lfinda,lfindb,lfindc,lfindd,lfound,lrev
 
-      integer(KIND=normal_int)::iinit,atype,btype,ctype,dtype,tortype ,isite,nsite,n,i,ia,ib,ic,id,trtype,nttor,ir
+      integer::iinit,atype,btype,ctype,dtype,tortype ,isite,nsite,n,i,ia,ib,ic,id,trtype,nttor,ir
 
 
       dimension trtype(35),nsite(35,7),isite(35,7,7)

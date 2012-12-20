@@ -27,7 +27,7 @@ MODULE parser_cif
   PRIVATE
   PUBLIC::readCIF
   integer,parameter::boxZeo=1
-  real(KIND=double_precision),parameter::eps=1.0E-4_double_precision
+  real,parameter::eps=1.0E-4_double_precision
 
 CONTAINS
 
@@ -47,7 +47,7 @@ CONTAINS
     integer,parameter::maxNumField=20,maxNumSymmOp=50
     INTEGER::IOCIF,jerr,i,uninitialized,ia,ib,ic,id,nAtom,nField,nSymm,Field(maxNumField)
     CHARACTER(LEN=default_string_length)::line,atom,SymmOp(maxNumSymmOp,3)
-    real(KIND=double_precision)::scoord(3),tmpcoord(3),coord(3),dr(3)
+    real::scoord(3),tmpcoord(3),coord(3),dr(3)
 
     IOCIF=get_iounit()
     open(unit=IOCIF,access='sequential',action='read',file=fileCIF,form='formatted',iostat=jerr,status='old')
@@ -70,7 +70,7 @@ CONTAINS
        ztype%radiisq(i)=ztype%radiisq(i)*ztype%radiisq(i)
        ztype%num(i)=0
     end do
-    
+
     uninitialized=7
     DO
        CALL readLine(IOCIF,line,.true.,jerr)
@@ -137,7 +137,7 @@ CONTAINS
              END IF
              CALL readLine(IOCIF,line,.true.,jerr)
              if (jerr.ne.0) then
-                EXIT       
+                EXIT
              else if (index(line,'_atom_site_').eq.0) then
                 exit
              end if
@@ -192,7 +192,7 @@ CONTAINS
                 DO ib = 1, i
                    dr  = coord-zeo%bead(ib)%coord
                    call mimage(dr(1),dr(2),dr(3),boxZeo)
-                   IF (DOT_PRODUCT(dr,dr)<=eps) THEN 
+                   IF (DOT_PRODUCT(dr,dr)<=eps) THEN
                       EXIT
                    END IF
                 END DO
@@ -245,7 +245,7 @@ CONTAINS
 ! *****************************************************************************
   SUBROUTINE getReal(line,val,err)
     CHARACTER(LEN=*),intent(in)::line
-    REAL(KIND=double_precision),intent(out)::val
+    REAL,intent(out)::val
     INTEGER,INTENT(out)::err
     INTEGER::ib
 

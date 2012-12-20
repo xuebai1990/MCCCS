@@ -1,22 +1,14 @@
-      subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn,vintero,vintrao,vexto,velecto,vinsta,vremta, vnewflucq,voldflucq,lswapinter)
-
 !    *********************************************************************
 !    ** optimize the electronic configuration for trans, rot, and swap  **
 !    ** (config, swatch in the future) moves and accept/reject the      **
 !    ** combined move.                                                  **
 !    ** written on June 25/99 by Bin Chen.                              **
 !    *********************************************************************
-
-      use sim_system
-      use var_type
-      use const_phys
-      use const_math
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
-      implicit none
-      include 'common.inc'
+subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn,vintero,vintrao,vexto,velecto,vinsta,vremta, vnewflucq,voldflucq,lswapinter)
+  use util_random,only:random
+  use sim_system
+  use energy_kspace,only:recip
+  implicit none
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'coord2.inc'
@@ -26,9 +18,9 @@
 !$$$      include 'system.inc'
 
       logical::laccept,lswapinter
-      integer(KIND=normal_int)::i,ibox,boxrem,mtype,imolty,iunit,ichoiq ,ip,ibox2,j
-      real(KIND=double_precision)::deltv,vintern,vintran,vextn,velectn ,vintero,vintrao,vexto,velecto,vinsta,vremta,vnewflucq,voldflucq ,vboxo(nbxmax),vinterbo(nbxmax),vintrabo(nbxmax),vextbo(nbxmax) ,velectbo(nbxmax),vflucqbo(nbxmax),vtailbo(nbxmax),vvibbo(nbxmax) ,vtgbo(nbxmax),vbendbo(nbxmax),rxuo(numax),ryuo(numax) ,rzuo(numax),xcmo,ycmo,zcmo,vdum,wratio,volins,volrem,deltvb ,random,vnewt2,voldt2
-      real(KIND=double_precision)::qquo(nmax,numax) 
+      integer::i,ibox,boxrem,mtype,imolty,iunit,ichoiq ,ip,ibox2,j
+      real::deltv,vintern,vintran,vextn,velectn ,vintero,vintrao,vexto,velecto,vinsta,vremta,vnewflucq,voldflucq ,vboxo(nbxmax),vinterbo(nbxmax),vintrabo(nbxmax),vextbo(nbxmax) ,velectbo(nbxmax),vflucqbo(nbxmax),vtailbo(nbxmax),vvibbo(nbxmax) ,vtgbo(nbxmax),vbendbo(nbxmax),rxuo(numax),ryuo(numax) ,rzuo(numax),xcmo,ycmo,zcmo,vdum,wratio,volins,volrem,deltvb,vnewt2,voldt2
+      real::qquo(nmax,numax) 
 
 !      write(io_output,*) 'START the optimization of the charge configuration'
 

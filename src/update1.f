@@ -1,26 +1,17 @@
-      subroutine update1(nblock,ipos,value,acmove,ibox,jbox)
-
 !
 ! *** this subroutine updates the block averages
 !
+      subroutine update1(nblock,ipos,value,acmove,ibox,jbox)
       use sim_system
-      use var_type
-      use const_phys
-      use const_math
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
       implicit none
-      include 'common.inc'      
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'system.inc'
 !$$$      include 'neigh.inc'
 !$$$      include 'neigh2.inc'
 !$$$      include 'blkavg.inc'
-      integer(KIND=normal_int)::nblock,ipos,ibox,jbox
-      real(KIND=double_precision)::acmove,dp,dn,value
+      integer::nblock,ipos,ibox,jbox
+      real::acmove,dp,dn,value
       
       if (nblock.eq.1) then
 

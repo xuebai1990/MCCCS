@@ -1,23 +1,72 @@
-      subroutine vthreebody(vthree)
+MODULE energy_garofalini
+  use const_phys,only:qqfact
+  use util_math,only:erfunc
+  use sim_system
+  implicit none
+  private
+  save
+  public::garofalini,vthreebody,triad,triad_en
+
+! GAROFALINI.INC
+  integer::pair_max
+  parameter(pair_max=50000)
+  real,public::galpha(6),grho(6),gbeta(6),ga(6,3),gb(6,3),gc(6,3),glambda(4),grij(4,2),ggamma(4,2),gtheta(4),grijsq(4,2)
+  real::dxij(pair_max),dyij(pair_max),dzij(pair_max),dij(pair_max),dik(pair_max),dxik(pair_max),dyik(pair_max),dzik(pair_max)
+  integer::itr1(pair_max),itr2(pair_max),itr3(pair_max),ntr
+
+contains
+!     **************************************************************
+!     ***  calculates the energy using the garofalini (SiO2/H2O) ***
+!     ***  exp-6 potential modified using articles in suijtab    ***
+!     ***  parameters are defined in suijtab.f  KE ANDERSON      ***
+!     **************************************************************
+  function garofalini(rijsq,ntij,qa,qb,aa,bb)
+!$$$      include 'control.inc'
+!$$$      include 'garofalini.inc'
+!$$$      include 'poten.inc'
+
+      real::rijsq,rij,hterm,coul,qa,qb
+      real::hterma,garofalini
+      integer::ntij,aa,bb,i
+
+!      write(io_output,*) 'input',rijsq,ntij,qa,qb
+      rij = dsqrt(rijsq)
+      hterm = 0.0d0
+      coul = 0.0d0
+      garofalini = 0.0d0
 
 
-      use sim_system
-      use var_type
-      use const_phys
-      use const_math
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
-      implicit none
-      include 'common.inc'
+!      write(io_output,*) aa,bb,ntij,qa,qb,gbeta(ntij),galpha(ntij),grho(ntij)
+!     H term
+      do i=1,3
+         hterma =   ga(ntij,i)/(1+dexp(gb(ntij,i)*(rij-gc(ntij,i))))
+!         write(io_output,*) i,hterma,' (',ntij,')'
+         hterm = hterm + hterma
+      end do
 
+      coul = qa*qb*erfunc(rij/gbeta(ntij))/rij
+!      write(io_output,*) 'erfunc',coul*rij
+      coul = coul * qqfact
+
+      garofalini = galpha(ntij)*dexp(-rij/grho(ntij)) + hterm  + coul
+
+!      write(io_output,*) 'i,j,v2',aa,bb,'H term:',hterm,' Coul term:'
+!     &     ,coul,' the rest:',garofalini-hterm-coul,
+!     &     ' Total:',garofalini
+!      write(io_output,*) '                     ',rij
+
+!      write(io_output,*) 'leaving garofalini'
+
+      return
+  end function garofalini
+
+  subroutine vthreebody(vthree)
 !$$$      include "control.inc"
 !$$$      include "coord.inc"
 !$$$      include 'garofalini.inc'
 
-      integer(KIND=normal_int)::ntang,nta,ntb,tri,i,j,k
-      real(KIND=double_precision)::vthree,vthreea,thetac,g,p
+      integer::ntang,nta,ntb,tri,i,j,k
+      real::vthree,vthreea,thetac,g,p
       logical::lwrite
 
       vthreea = 0.0d0
@@ -30,11 +79,11 @@
          i = itr1(tri)
          j = itr2(tri)
          k = itr3(tri)
-         
+
 !     skip if i (central atom) is hydrogen
          if(ntype(moltyp(i),1).eq.3) goto 10
 !     determine type
-         if(ntype(moltyp(j),1).eq.ntype(moltyp(k),1)) then 
+         if(ntype(moltyp(j),1).eq.ntype(moltyp(k),1)) then
             ntang = ntype(moltyp(j),1)
             if(lwrite) then
 !             write(30,*) 'ntang determination:',j,i,k,ntype(moltyp(j),1)
@@ -68,14 +117,14 @@
                end if
             end if
          end if
-         
+
 !         dij = dsqrt(dijsq(tri))
 !         dik = dsqrt(diksq(tri))
-         
+
          thetac = (dxij(tri)*dxik(tri)+dyij(tri)*dyik(tri)+ dzij(tri)*dzik(tri))/(dij(tri)*dik(tri))
          if ( thetac .ge. 1.0d0 ) thetac = 1.0d0
          if ( thetac .le. -1.0d0 ) thetac = -1.0d0
-         
+
          p = (thetac-gtheta(ntang))**2
          g = dexp((ggamma(ntang,nta)/(dij(tri)-grij(ntang,nta))) + (ggamma(ntang,ntb)/(dik(tri)-grij(ntang,ntb))))
 
@@ -91,7 +140,7 @@
 !            write(io_output,*)
          end if
 !         write(io_output,*) j,i,k,'out of vthreebody',vthreea
-         
+
          vthree = vthree + vthreea
  10   continue
 
@@ -106,29 +155,16 @@
 !      write(io_output,*) 'end Vthreebody'
 
       return
-      end
-
+  end subroutine vthreebody
 
 !**************************************************************************
-      subroutine triad
-
-      use sim_system
-      use var_type
-      use const_phys
-      use const_math
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
-      implicit none
-      include 'common.inc'
-
+  subroutine triad
 !$$$      include "control.inc"
 !$$$      include "coord.inc"
 !$$$      include "garofalini.inc"
 !$$$      include "neigh.inc"
 
-      integer(KIND=normal_int)::i,j,k,ptr,ptr2
+      integer::i,j,k,ptr,ptr2
 
 !      write(io_output,*) 'starting triad'
 
@@ -158,7 +194,7 @@
                   dxij(ntr) = nxij(ptr,i)
                   dyij(ntr) = nyij(ptr,i)
                   dzij(ntr) = nzij(ptr,i)
-                  
+
                   dxik(ntr) = nxij(ptr2,i)
                   dyik(ntr) = nyij(ptr2,i)
                   dzik(ntr) = nzij(ptr2,i)
@@ -170,33 +206,21 @@
 !      write(io_output,*) 'end triad'
 
       return
-      end
+  end subroutine triad
 
 !******************************************************************
-      subroutine triad_en(i,vthree,cnt,ni,nrij,nxi,nyi,nzi,lupdate)
-
-      use sim_system
-      use var_type
-      use const_phys
-      use const_math
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
-      implicit none
-      include 'common.inc'
-
+  subroutine triad_en(i,vthree,cnt,ni,nrij,nxi,nyi,nzi,lupdate)
 !$$$      include "control.inc"
 !$$$      include "coord.inc"
 !$$$      include "garofalini.inc"
 !$$$      include "neigh.inc"
 
-      integer(KIND=normal_int)::i,j,k,m,imolty,jmolty,kmolty,mmolty ,atomj,atomk,atomm
-      integer(KIND=normal_int)::nta,ntb,ntang,cnt,ni(nmax),temp_cnt ,itemp,number(nmax)
-      integer(KIND=normal_int)::temp_nei(nmax),itype,jtype,ktype ,mtype
+      integer::i,j,k,m,imolty,jmolty,kmolty,mmolty,atomj,atomk,atomm
+      integer::nta,ntb,ntang,cnt,ni(maxneigh),temp_cnt,itemp,number(nmax)
+      integer::temp_nei(nmax),itype,jtype,ktype ,mtype
       logical::ltemp(nmax),lupdate,lwrite
-      real(KIND=double_precision)::vthree,vthreea,thetac,p,g,nrij(nmax), nxi(nmax),nyi(nmax),nzi(nmax)
-      real(KIND=double_precision)::temp_dist(nmax),temp_x(nmax) ,temp_y(nmax),temp_z(nmax)
+      real::vthree,vthreea,thetac,p,g,nrij(maxneigh),nxi(maxneigh),nyi(maxneigh),nzi(maxneigh)
+      real::temp_dist(nmax),temp_x(nmax),temp_y(nmax),temp_z(nmax)
 
       lwrite=.false.
 
@@ -219,7 +243,7 @@
       imolty = moltyp(i)
       itype = ntype(imolty,1)
 !      if(i.eq.18) then
-!         write(io_output,*) 
+!         write(io_output,*)
 !         write(io_output,*) 'neigh_icnt',cnt,':',(ni(j),j=1,cnt)
 !      end if
       do 10 j = 1,cnt
@@ -244,9 +268,9 @@
 
                if(ktype.eq.itype) goto 20
                if(ktype.eq.3.and.itype.eq.1) goto 20
-            
+
 !     determine type
-               if(jtype.eq.ktype) then 
+               if(jtype.eq.ktype) then
                   ntang = jtype
 !                  if(lwrite) write(io_output,*) 'ntang determination a:',atomj,
 !     &                 i,atomk,ntang,' (',i,')'
@@ -265,7 +289,7 @@
                      ntb = 2
                      if((nrij(j).gt.grij(4,nta)).or. (nrij(k).gt.grij(4,ntb))) then
 !                        if(lwrite) write(io_output,*) 'skipped above'
-!                        if(i.eq.18) 
+!                        if(i.eq.18)
 !     &                       write(io_output,*) 'catch distance Si-O-H',
 !     &                       atomj,i,atomk,nrij(j),nrij(k)
                         goto 20
@@ -285,10 +309,10 @@
                thetac = (nxi(j)*nxi(k)+nyi(j)*nyi(k)+ nzi(j)*nzi(k))/(nrij(j)*nrij(k))
                if ( thetac .ge. 1.0d0 ) thetac = 1.0d0
                if ( thetac .le. -1.0d0 ) thetac = -1.0d0
-               
+
                p = (thetac-gtheta(ntang))**2
               g = dexp((ggamma(ntang,nta)/(nrij(j)-grij(ntang,nta)) )+(ggamma(ntang,ntb)/(nrij(k)-grij(ntang,ntb))))
-               
+
                vthreea = glambda(ntang)*p*g
 
                if(lwrite) then
@@ -299,9 +323,9 @@
 !$$$                  write(io_output,*) nxi(k),nyi(k),nzi(k)
 !$$$                  write(io_output,*) nrij(j),nrij(k)
 !                  write(io_output,*) g,thetac,p
-!$$$                  write(io_output,*) 
+!$$$                  write(io_output,*)
                end if
-         
+
                vthree = vthree + vthreea
 ! actual neighbor counter
                if(.not.ltemp(j).and.lupdate) then
@@ -315,7 +339,7 @@
                   if(lwrite) then
                      write(io_output,*) 'temps a',temp_cnt,temp_nei(temp_cnt)
            write(io_output,*) temp_x(temp_cnt),temp_y(temp_cnt),temp_z(temp_cnt)
-                  write(io_output,*) 
+                  write(io_output,*)
                   end if
                   ltemp(j) = .true.
                end if
@@ -330,7 +354,7 @@
                   if(lwrite) then
                      write(io_output,*) 'temps b',temp_cnt,temp_nei(temp_cnt)
            write(io_output,*) temp_x(temp_cnt),temp_y(temp_cnt),temp_z(temp_cnt)
-                  write(io_output,*) 
+                  write(io_output,*)
                   end if
                   ltemp(k) = .true.
                end if
@@ -340,7 +364,7 @@
 !     now starting loop to check i-j-m pairs
          if(jtype.ne.3.and..not.(itype.eq.3.and.jtype.eq.1)) then
             if(lwrite) then
-               write(io_output,*) 
+               write(io_output,*)
             write(io_output,*) 'j',atomj,' neigh_cnt(j)',neigh_cnt(atomj),':', (neighbor(m,atomj),m=1,neigh_cnt(atomj))
             end if
             do 30 m = 1,neigh_cnt(atomj)
@@ -353,7 +377,7 @@
                if(atomm.eq.i) goto 30
 
 !     determine type
-               if(itype.eq.mtype) then 
+               if(itype.eq.mtype) then
                   ntang = mtype
 !                  if(lwrite) write(io_output,*) 'ntang determination b:',i,
 !     &                 atomj,atomm,ntang,' (',i,')'
@@ -382,14 +406,14 @@
                      end if
                   end if
                end if
-!     because the values saved are i-j not j-i must multiply all by -1 
+!     because the values saved are i-j not j-i must multiply all by -1
                thetac = ((-nxi(j))*nxij(m,atomj)+(-nyi(j))* nyij(m,atomj)+(-nzi(j))*nzij(m,atomj))/ (nrij(j)*ndij(m,atomj))
                if ( thetac .ge. 1.0d0 ) thetac = 1.0d0
                if ( thetac .le. -1.0d0 ) thetac = -1.0d0
-               
+
                p = (thetac-gtheta(ntang))**2
               g = dexp((ggamma(ntang,nta)/(nrij(j)-grij(ntang,nta)) )+(ggamma(ntang,ntb)/(ndij(m,atomj)- grij(ntang,ntb))))
-               
+
                vthreea = glambda(ntang)*p*g
 
                if(lwrite) then
@@ -416,7 +440,7 @@
                   if(lwrite) then
                   write(io_output,*) 'temps ijm',temp_cnt,temp_nei(temp_cnt)
            write(io_output,*) temp_x(temp_cnt),temp_y(temp_cnt),temp_z(temp_cnt)
-                  write(io_output,*) 
+                  write(io_output,*)
                 end if
                end if
 
@@ -449,4 +473,5 @@
       if(lwrite) write(io_output,*) 'triad_en vthree',vthree
 
       return
-      end
+  end subroutine triad_en
+end MODULE energy_garofalini

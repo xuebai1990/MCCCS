@@ -1,26 +1,16 @@
       subroutine inclus( inclnum,inclmol,inclbead,inclsign,ncarbon, ainclnum,ainclmol,ainclbead,a15t,ofscale,ofscale2)
-
-      use sim_system
-      use var_type
-      use const_phys
-      use const_math
       use util_runtime,only:err_exit
-      use util_math
-      use util_string
-      use util_files
-      use util_timings
+      use sim_system
       implicit none
-      include 'common.inc'
 
-!$$$      include 'common.inc'
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'connect.inc'
 !$$$      include 'poten.inc'
 
-      integer(KIND=normal_int)::m,n,nb,mb,imolty,ioffset
-      integer(KIND=normal_int)::inclnum,inclmol,inclbead,inclsign ,ncarbon
-      integer(KIND=normal_int)::ainclnum,ainclmol,ainclbead,a15t
+      integer::m,n,nb,mb,imolty,ioffset
+      integer::inclnum,inclmol,inclbead,inclsign ,ncarbon
+      integer::ainclnum,ainclmol,ainclbead,a15t
       dimension inclmol(ntmax*numax*numax),inclsign(ntmax*numax*numax)
       dimension inclbead(ntmax*numax*numax,2),ncarbon(ntmax)
       dimension ainclmol(ntmax*numax*numax)
@@ -28,7 +18,7 @@
       dimension a15t(ntmax*numax*numax)
       
 ! -- variables added (3/24/05) for variable 1-4 interactions 	
-      real(KIND=double_precision)::ofscale,ofscale2
+      real::ofscale,ofscale2
       dimension ofscale(ntmax*numax*numax),ofscale2(ntmax*numax*numax)
 
 ! ----------------------------------------------------------------

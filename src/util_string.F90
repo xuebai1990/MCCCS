@@ -24,7 +24,7 @@ contains
 !> \brief   Return a string representing the integer number
 !>          The WRITE statement will return an error message, if the number of
 !>          digits of the integer number is larger than the length of the
-!>          supplied string.  
+!>          supplied string.
 ! *****************************************************************************
   PURE FUNCTION integer_to_string(number) RESULT(string)
     INTEGER,INTENT(IN)::number
@@ -183,7 +183,7 @@ contains
 
 ! *****************************************************************************
 !> \brief   Eliminate multiple space characters in a string.
-!>          If full is .TRUE., then all spaces are eliminated.  
+!>          If full is .TRUE., then all spaces are eliminated.
 !> \author  MK
 !> \date    23.06.1998
 !> \version 1.0
@@ -223,7 +223,7 @@ contains
 
 ! *****************************************************************************
 !> \brief Convert a sequence of integer numbers (ASCII code) to a string.
-!>         Blanks are inserted for invalid ASCII code numbers.  
+!>         Blanks are inserted for invalid ASCII code numbers.
 !> \author  MK
 !> \date    19.10.2000
 !> \version 1.0
@@ -285,7 +285,7 @@ contains
 
     match=0
     IF (LEN_TRIM(typo_string).LE.4) THEN
-       kind=question 
+       kind=question
     ELSE
        kind=star
     end if
@@ -299,7 +299,7 @@ contains
        end do
     end do
     IF (LEN_TRIM(string).LE.4) THEN
-       kind=question 
+       kind=question
     ELSE
        kind=star
     end if

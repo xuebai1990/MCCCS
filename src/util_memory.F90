@@ -1,5 +1,4 @@
 module util_memory
-  use var_type,only:double_precision
   use util_string,only:integer_to_string
   use util_runtime,only:err_exit
   implicit none
@@ -93,42 +92,42 @@ contains
   END subroutine reallocate_i5
 
   SUBROUTINE reallocate_r1(p,lb1_new,ub1_new)
-    real(KIND=double_precision),ALLOCATABLE,INTENT(INOUT)::p(:)
+    real,ALLOCATABLE,INTENT(INOUT)::p(:)
     INTEGER,INTENT(IN)::lb1_new,ub1_new
 
-    REAL(KIND=double_precision),ALLOCATABLE::work(:)
+    REAL,ALLOCATABLE::work(:)
 #include "reallocate_1.F90"
   END subroutine reallocate_r1
 
   SUBROUTINE reallocate_r2(p,lb1_new,ub1_new,lb2_new,ub2_new)
-    real(KIND=double_precision),ALLOCATABLE,INTENT(INOUT)::p(:,:)
+    real,ALLOCATABLE,INTENT(INOUT)::p(:,:)
     INTEGER,INTENT(IN)::lb1_new,ub1_new,lb2_new,ub2_new
 
-    REAL(KIND=double_precision),ALLOCATABLE::work(:,:)
+    REAL,ALLOCATABLE::work(:,:)
 #include "reallocate_2.F90"
   END subroutine reallocate_r2
 
   SUBROUTINE reallocate_r3(p,lb1_new,ub1_new,lb2_new,ub2_new,lb3_new,ub3_new)
-    real(KIND=double_precision),ALLOCATABLE,INTENT(INOUT)::p(:,:,:)
+    real,ALLOCATABLE,INTENT(INOUT)::p(:,:,:)
     INTEGER,INTENT(IN)::lb1_new,ub1_new,lb2_new,ub2_new,lb3_new,ub3_new
 
-    REAL(KIND=double_precision),ALLOCATABLE::work(:,:,:)
+    REAL,ALLOCATABLE::work(:,:,:)
 #include "reallocate_3.F90"
   END subroutine reallocate_r3
 
   SUBROUTINE reallocate_r4(p,lb1_new,ub1_new,lb2_new,ub2_new,lb3_new,ub3_new,lb4_new,ub4_new)
-    real(KIND=double_precision),ALLOCATABLE,INTENT(INOUT)::p(:,:,:,:)
+    real,ALLOCATABLE,INTENT(INOUT)::p(:,:,:,:)
     INTEGER,INTENT(IN)::lb1_new,ub1_new,lb2_new,ub2_new,lb3_new,ub3_new,lb4_new,ub4_new
 
-    REAL(KIND=double_precision),ALLOCATABLE::work(:,:,:,:)
+    REAL,ALLOCATABLE::work(:,:,:,:)
 #include "reallocate_4.F90"
   END subroutine reallocate_r4
 
   SUBROUTINE reallocate_r5(p,lb1_new,ub1_new,lb2_new,ub2_new,lb3_new,ub3_new,lb4_new,ub4_new,lb5_new,ub5_new)
-    real(KIND=double_precision),ALLOCATABLE,INTENT(INOUT)::p(:,:,:,:,:)
+    real,ALLOCATABLE,INTENT(INOUT)::p(:,:,:,:,:)
     INTEGER,INTENT(IN)::lb1_new,ub1_new,lb2_new,ub2_new,lb3_new,ub3_new,lb4_new,ub4_new,lb5_new,ub5_new
 
-    REAL(KIND=double_precision),ALLOCATABLE::work(:,:,:,:,:)
+    REAL,ALLOCATABLE::work(:,:,:,:,:)
 #include "reallocate_5.F90"
   END subroutine reallocate_r5
 
