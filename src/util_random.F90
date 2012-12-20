@@ -5,8 +5,9 @@
 !> Translated to Fortran 77 by Tsuyoshi TADA. (2005-12-19)
 !> Modified for use in topmon by Peng Bai. (2012-02-11)
 module util_random
-  use util_runtime,only:err_exit
+  use var_type,only:double_precision
   use const_math,only:twopi
+  use util_runtime,only:err_exit
   implicit none
   private
   save
@@ -171,4 +172,31 @@ contains
     call err_exit('exceeded 100 tries to get a vector in sphere')
 #endif
   end subroutine sphere
+
+!> \brief Generate a normal deviate
+!>
+!> \param mu mean
+!> \param sig standard deviation
+!>
+!> Leva's ratio-of-uniforms method; See $7.3.9 of Numerical Recipes (3rd ed.)
+!> Note that algorithms in P347 of Allen & Tildesley, G.4 Generating non-uniform
+!> distributions, are inferior in either speed, accuracy, or both
+  function gaussian(mu,sig) result(gau)
+    real,intent(in)::mu,sig
+    real::gau
+
+    real::u,v,x,y,q
+
+    do
+       u=random()
+       v=1.7156_double_precision*(random()-0.5_double_precision)
+       x=u-0.449871_double_precision
+       y=abs(v)+0.386595_double_precision
+       q=x*x+y*(0.19600_double_precision*y-0.25472_double_precision*x)
+       if (q.le.0.27597) exit
+       if (q.le.0.27846 .and. v*v.le.-4.0_double_precision*log(u)*u*u) exit
+    end do
+    gau=mu+sig*v/u
+  end function gaussian
+
 end module util_random

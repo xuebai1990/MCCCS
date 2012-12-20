@@ -2682,9 +2682,9 @@ contains
 !     --- random bond length from Boltzmann distribution ---
  107     bond = (0.2d0*random()+0.9d0)
 
-!     --- correct for jacobian by dividing by the max^3
-!     --- 1.331  = (1.1)^3, the equilibrium bond length cancels out
-         bf = bond*bond*bond/(1.331d0)
+!     --- correct for jacobian by dividing by the max^2
+!     --- 1.21  = (1.1)^2, the equilibrium bond length cancels out
+         bf = bond*bond*bond/(1.21d0)
          if ( random() .ge. bf ) goto 107
          bond = bond * requil
 
@@ -2701,9 +2701,9 @@ contains
 !     ---  +/- 25% of equilibrium bond length
  108     bond = (0.5d0*random()+0.75d0)
 
-!     --- correct for jacobian by dividing by the max^3
-!     --- 1.953125  = (1.25)^3, the equilibrium bond length cancels out
-         bf = bond*bond*bond/(1.953125d0)
+!     --- correct for jacobian by dividing by the max^2
+!     --- 1.5625  = (1.25)^2, the equilibrium bond length cancels out
+         bf = bond*bond*bond/(1.5625d0)
          if ( random() .ge. bf ) goto 108
 
          bond = bond * requil
