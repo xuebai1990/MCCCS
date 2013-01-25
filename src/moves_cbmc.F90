@@ -37,6 +37,7 @@ contains
 !    **    bscb ( 2,inb ).                                            **
 !    *******************************************************************
   subroutine config
+    use sim_cell,only:update_linked_cell
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'coord2.inc'
@@ -479,7 +480,7 @@ contains
          call ctrmas(.false.,ibox,i,7)
 ! *** update linkcell, if applicable
          if ( licell .and. (ibox.eq.boxlink)) then
-            call linkcell(2,i,vdum,vdum,vdum,ddum)
+            call update_linked_cell(i)
          end if
 
 ! ***    update the neighbour map ***

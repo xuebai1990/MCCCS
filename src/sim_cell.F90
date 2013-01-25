@@ -1,10 +1,11 @@
 MODULE sim_cell
   use var_type,only:RealPtr
-  use sim_system,only:nbxmax
+  use util_runtime,only:err_exit
+  use sim_system,only:nmax,nbxmax
   implicit none
   private
   save
-  public::CellType,CellMaskType,matops,setpbc,mimage
+  public::CellType,CellMaskType,matops,setpbc,mimage,build_linked_cell,update_linked_cell,get_cell_neighbors
 
   type CellType
      logical::ortho,solid ! ortho=.true. if the simulation box is orthorhombic
@@ -26,6 +27,11 @@ MODULE sim_cell
 ! PEBOCO.INC
   real::bx,by,bz,hbx,hby,hbz,bxi,byi,bzi
 
+  integer,parameter::cmax = 1000& !< cmax is the max number of cells for the linkcell list
+   ,cmaxa = 100 !< cmaxa is the max number of molecules per cell
+  real::dcellx,dcelly,dcellz
+  integer::icell(nmax),nicell(cmax),iucell(cmax,cmaxa),ncellx,ncelly,ncellz
+
 contains
 !> \brief Calculates for non cubic simulation cell:
 !>       boxlengths: cell_length,
@@ -34,7 +40,6 @@ contains
 !>       inverse H matrix
 !> \author Neeraj Rai (in Merck Apr 2005)
   subroutine matops(ibox)
-    use util_runtime,only:err_exit
     use sim_system,only:boxlx,boxly,boxlz
     integer,intent(in)::ibox
     real::abx,aby,abz,bcx,bcy,bcz,cax,cay,caz
@@ -320,4 +325,205 @@ contains
     end if
     return
   end subroutine mimage
+
+!> \brief Decodes x,y,z to a single number
+!DEC$ ATTRIBUTES FORCEINLINE :: linkdecode
+  pure function linkdecode(i,j,k,ncellx,ncelly,ncellz)
+    integer::linkdecode
+    integer,intent(in)::i,j,k,ncellx,ncelly,ncellz
+
+    linkdecode = (i-1)*ncelly*ncellz + (j-1)*ncellz + k
+  end function linkdecode
+
+!> \brief Set up or update linked cell list
+  subroutine build_linked_cell()
+    use sim_system,only:xcm,ycm,zcm,boxlink,rintramax,rcut,boxlx,boxly,boxlz,io_output,nchain,nboxi
+    real::rx,ry,rz
+    integer::ibox,ncell,n,i,j,k,ic
+    integer,save::ncello=0
+
+    ibox = boxlink
+
+!     --- determine dcell
+!         write(io_output,*) 'linkcell used',rcut,rintramax
+!   *** rintramax is the maximum distance between endpoints in a molecule
+    dcellx = rcut(ibox) + rintramax
+
+!     --- find hypothetical ncell
+    ncellx = int( boxlx(ibox) / dcellx ) 
+    ncelly = int( boxly(ibox) / dcellx ) 
+    ncellz = int( boxlz(ibox) / dcellx )
+         
+!     --- make dcells larger so each each cell is the same size
+    dcellx = boxlx(ibox) / dble(ncellx)
+    dcelly = boxly(ibox) / dble(ncelly)
+    dcellz = boxlz(ibox) / dble(ncellz)
+
+!     --- now reweight ncell one more time
+    ncellx = anint( boxlx(ibox) / dcellx ) 
+    ncelly = anint( boxly(ibox) / dcelly ) 
+    ncellz = anint( boxlz(ibox) / dcellz ) 
+
+    ncell = ncellx * ncelly * ncellz
+ 
+    if (ncell .ne. ncello) then
+       if (ncello .eq. 0) then
+          write(io_output,*) 'number of linkcells set to',ncell
+       else
+          write(io_output,*) 'number of linkcells changed to',ncell
+       end if
+    end if
+
+    ncello = ncell
+
+    if (ncell.gt.cmax) then
+       write(io_output,*) 'ncell,cmax',ncell,cmax
+       call err_exit('ncell greater than cmax in linkcell')
+    end if
+         
+    do n = 1, ncell
+       nicell(n) = 0
+    end do
+
+!   --- assign molecules to cells
+    do n = 1, nchain
+       if (nboxi(n).eq.boxlink) then
+          i = int(xcm(n) / dcellx) + 1
+          j = int(ycm(n) / dcelly) + 1
+          k = int(zcm(n) / dcellz) + 1
+          ic = linkdecode(i,j,k,ncellx,ncelly,ncellz)
+
+          if (ic.gt.cmax) then
+             write(io_output,*) 'ic,cmax',ic,cmax
+             call err_exit('ic gt cmax')
+          end if
+
+          icell(n) = ic
+          nicell(ic) = nicell(ic) + 1
+
+          if (nicell(ic).gt.cmaxa) then
+             write(io_output,*) 'nicell,cmaxa',nicell(ic) ,cmaxa
+             call err_exit('nicell gt cmaxa')
+          end if
+
+          iucell(ic,nicell(ic)) = n
+       else
+          icell(n) = 0
+       end if
+    end do
+  end subroutine build_linked_cell
+
+!> \brief Update cell's occupants
+  subroutine update_linked_cell(imol)
+    use sim_system,only:xcm,ycm,zcm,nboxi,boxlink
+    integer,intent(in)::imol
+    integer::ic,ico,i,j,k,n
+
+    if (nboxi(imol).eq.boxlink) then
+       i = int(xcm(imol) / dcellx) + 1
+       j = int(ycm(imol) / dcelly) + 1
+       k = int(zcm(imol) / dcellz) + 1
+       ic = linkdecode(i,j,k,ncellx,ncelly,ncellz)
+    else
+       ic=0
+    end if
+
+    ico=icell(imol)
+    if (ic.ne.ico) then
+       if (ico.gt.0) then
+!          --- first remove our molecule
+          do n = 1, nicell(ico) 
+             if (iucell(ico,n).eq.imol) then
+!                --- replace removed occupant with last occupant and erase last spot
+                iucell(ico,n) = iucell(ico,nicell(ico))
+                iucell(ico,nicell(ico)) = 0
+                exit
+             end if
+          end do
+
+          if (n.gt.nicell(ico)) then
+             call err_exit('screwup for iinit = 2 for linkcell')
+          else
+             nicell(ico) = nicell(ico) - 1
+          end if
+       end if
+
+       if (ic.gt.0) then
+!         --- now we will add the molecule 
+          icell(imol) = ic
+          nicell(ic) = nicell(ic) + 1
+          if (nicell(ic).gt.cmaxa) call err_exit('nicell too big')
+          iucell(ic,nicell(ic)) = imol
+       end if
+    end if
+  end subroutine update_linked_cell
+
+!> \brief Determine the cell neighbors
+  subroutine get_cell_neighbors(xcmi,ycmi,zcmi,ibox,jcell,nmole)
+    use sim_system,only:boxlx,boxly,boxlz
+    integer,intent(in)::ibox
+    real,intent(inout)::xcmi,ycmi,zcmi
+    integer,intent(out)::jcell(nmax),nmole
+    integer::i,j,k,ia,ja,ka,ib,jb,kb,ic,n
+
+!   --- check perodic boundaries
+    if (xcmi.gt.boxlx(ibox)) then
+       xcmi = xcmi - boxlx(ibox)
+    else if (xcmi.lt.0) then
+       xcmi = xcmi + boxlx(ibox)
+    end if
+
+    if (ycmi.gt.boxly(ibox)) then
+       ycmi = ycmi - boxly(ibox)
+    else if (ycmi.lt.0) then
+       ycmi = ycmi + boxly(ibox)
+    end if
+
+    if (zcmi.gt.boxlz(ibox)) then
+       zcmi = zcmi - boxlz(ibox)
+    else if (zcmi.lt.0) then
+       zcmi = zcmi + boxlz(ibox)
+    end if
+         
+    i = int(xcmi / dcellx) + 1
+    j = int(ycmi / dcelly) + 1
+    k = int(zcmi / dcellz) + 1
+
+    nmole = 0
+    do ia = i-1, i+1
+       do ja = j-1, j+1
+          do ka = k-1, k+1
+             if (ia.gt.ncellx) then
+                ib = ia - ncellx
+             else if (ia.lt.1) then
+                ib = ia + ncellx
+             else
+                ib = ia
+             end if
+
+             if (ja.gt.ncelly) then
+                jb = ja - ncelly
+             else if (ja.lt.1) then
+                jb = ja + ncelly
+             else
+                jb = ja
+             end if
+
+             if (ka.gt.ncellz) then
+                kb = ka - ncellz
+             else if (ka.lt.1) then
+                kb = ka + ncellz
+             else
+                kb = ka
+             end if
+
+             ic = linkdecode(ib,jb,kb,ncellx,ncelly,ncellz)
+             do n = 1, nicell(ic)
+                nmole = nmole + 1
+                jcell(nmole) = iucell(ic,n)
+             end do
+          end do
+       end do
+    end do
+  end subroutine get_cell_neighbors
 end MODULE sim_cell

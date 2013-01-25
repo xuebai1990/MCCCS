@@ -110,8 +110,6 @@ module sim_system
    ,nchbn_max=2000& !< nchbn_max = maxium number of choices for bending CBMC growth
    ,nchtor_max = 200& !< nchtor_max = maximum number of choices for torsion CBMC growth
    ,maxbin = 201& !< SAFECBMC max number of bins
-   ,cmax = 1000& !< cmax is the max number of cells for the linkcell list
-   ,cmaxa = 100& !< cmaxa is the max number of molecules per cell
    ,maxneigh = 20
 !*************************************************************
 !***
@@ -259,10 +257,9 @@ module sim_system
   real::brvib(nvmax),brvibk(nvmax),brvibmin(60),brvibmax(60),brben(nvmax),brbenk(nvmax)
 
 ! SYSTEM.INC
-  integer::icell,nicell,iucell,solcount
+  integer::solcount(nbxmax,ntmax)
   real::avsolinter,avsolintra,avsolbend,avsoltor,avsolelc
-  dimension icell(nmax),nicell(cmax),iucell(cmax,cmaxa) ,solcount(nbxmax,ntmax)
-  dimension avsolinter(nbxmax,ntmax),avsolintra(nbxmax,ntmax) ,avsolbend(nbxmax,ntmax),avsoltor(nbxmax,ntmax) ,avsolelc(nbxmax,ntmax)
+  dimension avsolinter(nbxmax,ntmax),avsolintra(nbxmax,ntmax),avsolbend(nbxmax,ntmax),avsoltor(nbxmax,ntmax) ,avsolelc(nbxmax,ntmax)
 
 ! NEIGH.INC
 ! lnn(1,1):replace the 1s with nmax to use neighbor list

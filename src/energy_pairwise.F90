@@ -823,16 +823,15 @@ contains
       logical::lqimol,lqjmol,lexplt,lcoulo,lfavor,lij2,liji,lqchgi
       logical::lljii,ovrlap,ltors,lcharge_table,lfound,lAtom_traxyz
 
-      integer::growii,growjj,k,cellinc,jcell,ic,nmole
-      integer::i,ibox,istart,iuend,ii,ntii,flagon,jjj,iii,mmm,j,jj,ntjj,ntij,ntj,imolty,jmolty,ncell,jjend
-      integer::nchp2,acellinc
+      integer::growii,growjj,k,jcell(nmax),nmole
+      integer::i,ibox,istart,iuend,ii,ntii,flagon,jjj,iii,mmm,j,jj,ntjj,ntij,ntj,imolty,jmolty,jjend
+      integer::nchp2
 
       real::v,vintra,vinter,vext,rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq,ryuij,rzuij,rij,rijsq,vtors,velect,vewald,rbcut,calpi
       real::vwell
       real::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq
 
-      dimension lcoulo(numax,numax),cellinc(cmax),jcell(nmax)
-      dimension acellinc(numax,27)
+      dimension lcoulo(numax,numax)
 ! KEA
       integer::neigh_j,neighj(maxneigh)
       real::ndijj(maxneigh),nxijj(maxneigh),nyijj(maxneigh),nzijj(maxneigh)
@@ -911,92 +910,11 @@ contains
       end if
 
       if (licell.and.(ibox.eq.boxlink)) then
-         do ii = istart, iuend
-            rxui = rxuion(ii,flagon)
-            ryui = ryuion(ii,flagon)
-            rzui = rzuion(ii,flagon)
-
-!     --- check perodic boundaries
-            if (rxui.gt.boxlx(ibox)) then
-               rxui = rxui - boxlx(ibox)
-            else if (rxui.lt.0) then
-               rxui = rxui + boxlx(ibox)
-            end if
-
-            if (ryui.gt.boxly(ibox)) then
-               ryui = ryui - boxly(ibox)
-            else if (ryui.lt.0) then
-               ryui = ryui + boxly(ibox)
-            end if
-
-            if (rzui.gt.boxlz(ibox)) then
-               rzui = rzui - boxlz(ibox)
-            else if (rzui.lt.0) then
-               rzui = rzui + boxlz(ibox)
-            end if
-
-            call linkcell(3,i,rxui,ryui,rzui,cellinc)
-
-            do j = 1, 27
-               acellinc(ii,j) = cellinc(j)
-            end do
-         end do
-
-         ncell = 0
-
-         do j = 1, 27
-            ncell = ncell + 1
-            cellinc(j) = acellinc(1,j)
-         end do
-
-         if (abs(iuend-istart).gt.0) then
-            do ii = istart+1, iuend
-
-               do j = 1, 27
-
-                  ic = acellinc(ii,j)
-
-                  lfound = .false.
-                  do jj = 1, ncell
-
-                     if (ic.eq.cellinc(jj)) then
-                        lfound = .true.
-                        exit
-                     end if
-
-                  end do
-
-                  if (.not.lfound) then
-                     ncell = ncell + 1
-                     cellinc(ncell) = ic
-                  end if
-               end do
-            end do
-         end if
-
-!         lt = .true.
-         nmole = 0
-         do j = 1, ncell
-            ic = cellinc(j)
-
-            do k = 1, nicell(ic)
-
-               nmole = nmole + 1
-               jcell(nmole) = iucell(ic,k)
-
-! *** what is this??? always compute interactions with chain number 1?
-! solute? lt = solute? removing...
-!               if (jcell(nmole).eq.1) then
-!                  lt = .false.
-!               end if
-
-            end do
-         end do
-
-!         if (lt) then
-!            nmole = nmole + 1
-!            jcell(nmole) = 1
-!         end if
+         ii=1
+         rxui = rxuion(ii,flagon)
+         ryui = ryuion(ii,flagon)
+         rzui = rzuion(ii,flagon)
+         call get_cell_neighbors(rxui,ryui,rzui,ibox,jcell,nmole)
       else
          nmole = nchain
       end if
@@ -1421,8 +1339,8 @@ contains
 
       logical::lnew,ovrlap,lcmno(nmax),lfirst,lcompute
       logical::lqimol,lqjmol,liji,lqchgi
-      integer::ichoi,growjj,igrow,count,glist(numax),icharge,cnt,jcell(nmax),ic
-      integer::i,imolty,ibox,ntogrow,itrial,ntii,j,jj ,ntjj,ntij,iu,jmolty,iufrom,ii,cellinc(27),k,nmole
+      integer::ichoi,growjj,igrow,count,glist(numax),icharge,cnt,jcell(nmax)
+      integer::i,imolty,ibox,ntogrow,itrial,ntii,j,jj ,ntjj,ntij,iu,jmolty,iufrom,ii,k,nmole
 !      integer::NRtype
       real::rminsq,rxui,ryui,rzui,rxuij,ryuij,rzuij,rij,rijsq,maxlen,rcm,rcmsq,corr,rcutmax
       real::vinter,vintra,vext,velect,vewald,vwell,v,rcutsq,rcinsq
@@ -1682,41 +1600,12 @@ contains
 ! --- END JLR 11-24-09
             if (licell.and.(ibox.eq.boxlink)) then
 !     --- we only use count = 1, the rest should be taken care of
-!     --- in rintramax
+!     --- with rintramax
                count = 1
                rxui = rxp(count,itrial)
                ryui = ryp(count,itrial)
                rzui = rzp(count,itrial)
-
-!     --- check perodic boundaries
-               if (rxui.gt.boxlx(ibox)) then
-                  rxui = rxui - boxlx(ibox)
-               else if (rxui.lt.0) then
-                  rxui = rxui + boxlx(ibox)
-               end if
-
-               if (ryui.gt.boxly(ibox)) then
-                  ryui = ryui - boxly(ibox)
-               else if (ryui.lt.0) then
-                  ryui = ryui + boxly(ibox)
-               end if
-
-               if (rzui.gt.boxlz(ibox)) then
-                  rzui = rzui - boxlz(ibox)
-               else if (rzui.lt.0) then
-                  rzui = rzui + boxlz(ibox)
-               end if
-
-               call linkcell(3,i,rxui,ryui,rzui,cellinc)
-
-               nmole = 0
-               do j = 1, 27
-                  ic = cellinc(j)
-                  do k = 1, nicell(ic)
-                     nmole = nmole + 1
-                     jcell(nmole) = iucell(ic,k)
-                  end do
-               end do
+               call get_cell_neighbors(rxui,ryui,rzui,ibox,jcell,nmole)
             else
                nmole = nchain
             end if

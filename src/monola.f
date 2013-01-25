@@ -236,7 +236,7 @@ subroutine monola(file_in)
 
 ! --  set up initial linkcell
       if (licell) then
-         call linkcell(1,0,vdum,vdum,vdum,ddum)
+         call build_linked_cell()
       end if
 
 ! --- set up thermodynamic integration stuff

@@ -19,6 +19,7 @@ contains
 !    ** The attempts are stored in bntrax(yz)                         **
 !    *******************************************************************
   subroutine traxyz (lx,ly,lz )
+    use sim_cell,only:update_linked_cell
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'coord2.inc'
@@ -248,7 +249,7 @@ contains
 
       if ( licell .and. (ibox.eq.boxlink)) then
 !     --- update linkcell list
-         call linkcell(2,i,vdum,vdum,vdum,ddum)
+         call update_linked_cell(i)
       end if
 
       if ( lneigh ) then
@@ -660,8 +661,9 @@ contains
 !    ** The attempts are stored in Abntrax(yz)                         **
 !    *******************************************************************
     subroutine Atom_traxyz (lx,ly,lz )
-       use energy_kspace,only:recip_atom
-       use energy_intramolecular,only:U_bonded
+      use sim_cell,only:update_linked_cell
+      use energy_kspace,only:recip_atom
+      use energy_intramolecular,only:U_bonded
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'coord2.inc'
@@ -864,7 +866,7 @@ contains
 
       if ( licell .and. (ibox.eq.boxlink)) then
 !     --- update linkcell list
-         call linkcell(2,i,vdum,vdum,vdum,ddum)
+         call update_linked_cell(i)
       end if
 
       if ( lneigh ) then
@@ -1504,8 +1506,8 @@ contains
           call ctrmas(.true.,boxa,0,5)
           call ctrmas(.true.,boxb,0,5)
 ! *** update linkcell, if applicable
-          if (licell .and. (boxa .eq. boxlink .or. boxb .eq. boxlink))  then
-             call linkcell(1,1,lddum,lddum,lddum,lddum2)
+          if (licell .and. (boxa .eq. boxlink .or. boxb .eq. boxlink)) then
+             call build_linked_cell()
           end if
           return
       end if
@@ -2005,7 +2007,7 @@ contains
           call ctrmas(.true.,boxvch,0,5)
 ! *** update linkcell, if applicable
           if (licell .and. (boxvch .eq. boxlink)) then
-             call linkcell(1,1,lddum,lddum,lddum,lddum2)
+             call build_linked_cell()
           end if
           return
       end if

@@ -1730,8 +1730,8 @@ contains
 ! ---    update center of mass
          call ctrmas(.false.,boxins,irem,3)
 ! *** update linkcell, if applicable
-         if ( licell .and. ((boxins .eq. boxlink) .or. (boxrem .eq.   boxlink))) then
-            call linkcell(2,irem,vdum,vdum,vdum,ddum)
+         if ( licell .and. ((boxins .eq. boxlink) .or. (boxrem .eq. boxlink))) then
+            call update_linked_cell(irem)
          end if
 
 
