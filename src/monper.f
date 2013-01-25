@@ -449,7 +449,7 @@
 
                      end do
 
-                  call energy(i,imolty,v,vintra,vinter,vext,velect ,vewald,1,ibox,1,nunit(imolty),.true.,ovrlap ,.false.,vtors,.false.,.false.)
+                  call energy(i,imolty,v,vintra,vinter,vext,velect ,vewald,1,ibox,1,nunit(imolty),.true.,ovrlap ,.false.,vtors,.false.,.false.,.false.)
                   if (ovrlap) write(io_output,*)  '*** DISASTER, OVERLAP IN MONPER'
 
                   if (lsolid(ibox).and..not.lrect(ibox)) then

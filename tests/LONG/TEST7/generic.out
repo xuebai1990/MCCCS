@@ -13137,6 +13137,12 @@ between box  1 and  3   uattempts =      6061.0  attempts =    104.0  accepted =
 between box  1 and  3   uattempts =      6051.0  attempts =     45.0  accepted =    11.0
  accepted % = 24.444
  
+ ### Charge Fluctuation  ###
+ 
+ 
+ ### Expanded Ensemble Move  ###
+ 
+ 
 New Biasing Potential
 
 molecule  1:  -1500.00000     -1500.00000      0.00000000    
@@ -13174,13 +13180,6 @@ molecule 32:   0.00000000      0.00000000     -5370.00000
 molecule 33:   0.00000000      0.00000000     -4000.00000    
 molecule 34:   0.00000000      0.00000000     -3330.00000    
 
-
- ### Charge Fluctuation  ###
- 
- 
- ### Expanded Ensemble Move  ###
- 
- 
  sumup control
  number of chains         862
  number of chains of type           1          85

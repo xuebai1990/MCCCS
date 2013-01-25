@@ -5,7 +5,7 @@ MODULE energy_external
   implicit none
   private
   save
-  public::slitpore,exgrph,v_elect_field,ntsubst
+  public::U_ext
 
 ! EXTERNAL.INC
   real::a1,delta,rsol
@@ -136,4 +136,60 @@ contains
 
       return
   end function v_elect_field
+
+  function U_ext(ibox,i,j,ntj)
+    use const_phys,only:eXV_to_K
+    use sim_system,only:rxu,ryu,rzu,nntype,extc12,extc3,extz0,lelect_field,Elect_field,ljoe,lslit,lgraphite,lsami,lmuir,lexzeo,io_output,nchain,boxlz
+    use energy_sami,only:exsami,exmuir
+    use zeolite
+    real::U_ext
+    integer,intent(in)::ibox,i,j,ntj
+    integer::ntij
+    real::dzui,dz3,dz12,vtmp
+
+    U_ext=0.0d0
+
+! **********************************************************************
+! *** calculation of interaction energy with external electric field ***
+! *** added 06/24/07 by KM
+! **********************************************************************
+    if (lelect_field) then
+       U_ext = U_ext + v_elect_field(i,j,rzu(i,j),Elect_field(ibox)) * eXV_to_K
+    end if
+
+    if (ibox.ne.1) return
+
+    if ( ljoe ) then
+       if ( extc12(ntj) .gt. 0.1d0 ) then
+          dzui = rzu(i,j) - extz0(ntj)
+          dz3  = dzui * dzui * dzui
+          dz12 = dz3**4
+          U_ext = U_ext +  (extc12(ntj)/dz12) - (extc3(ntj)/dz3)
+       end if
+    end if
+
+    if (lslit) then
+       ! -- Carbon slitpore
+       ntij = (ntj-1)*nntype + ntsubst
+       ! -- calculate interaction with surface at the bottom of the box
+       U_ext = U_ext + slitpore(rzu(i,j),ntij)
+       ! -- calculate interaction with the surface at the top of the box
+       dzui = boxlz(ibox)-rzu(i,j)
+       U_ext = U_ext +slitpore(dzui,ntij)
+    end if
+
+    if( lgraphite ) then
+       ntij = (ntj-1)*nntype + ntsubst
+       U_ext = U_ext + exgrph(rxu(i,j),ryu(i,j),rzu(i,j),ntij)
+    end if
+
+    if ( lsami )  U_ext = U_ext + exsami(rzu(i,j),ntj)
+    if ( lmuir )  U_ext = U_ext + exmuir(rzu(i,j),ntj)
+    if ( lexzeo ) then
+       vtmp=exzeo(rxu(i,j),ryu(i,j),rzu(i,j),ntj)
+       if (i.le.nchain.and.abs(vtmp).gt.1d5) write(io_output,*) i,j,rxu(i,j),ryu(i,j),rzu(i,j),vtmp
+       U_ext = U_ext + vtmp
+    end if
+
+  end function U_ext
 end MODULE energy_external

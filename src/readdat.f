@@ -2243,8 +2243,8 @@ subroutine readdat(file_in,lucall,ucheck,nvirial,starvir,stepvir)
                   itype = eetype(imolty)
                   ncmt2(ibox,imolty,itype) =  ncmt2(ibox,imolty,itype) + 1
                   do j = 1,nunit(imolty)
-                     sigma(imolty,j) = sigm(imolty,j,itype)
-                     epsilon(imolty,j) = epsil(imolty,j,itype)
+                     sigma_f(imolty,j) = sigm(imolty,j,itype)
+                     epsilon_f(imolty,j) = epsil(imolty,j,itype)
                   end do
                end if
             else

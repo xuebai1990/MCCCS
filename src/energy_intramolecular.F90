@@ -4,16 +4,16 @@ MODULE energy_intramolecular
   use util_runtime,only:err_exit
   use util_string,only:uppercase,integer_to_string
   use util_files,only:readLine
-  use sim_system,only:io_output,brvib,brvibk,brben,brbenk,nvmax,myid,L_spline,L_linear
+  use sim_system,only:io_output,brvib,brvibk,brben,brbenk,nvmax,myid,L_spline,L_linear,numax
   implicit none
   private
   save
-  public::suvibe,vtorso,calctor,lininter_vib,lininter_bend,lininter,splint,read_tor_table,read_vib_table,read_bend_table
+  public::suvibe,vtorso,calctor,lininter_vib,lininter_bend,lininter,splint,read_tor_table,read_vib_table,read_bend_table,U_torsion,U_bonded
 
 ! CONTORSION.INC
   integer::ntormax
   parameter (ntormax=700)
-  real::vtt0(ntormax),vtt1(ntormax) ,vtt2(ntormax),vtt3(ntormax),vtt4(ntormax),vtt5(ntormax) ,vtt6(ntormax),vtt7(ntormax),vtt8(ntormax),vtt9(ntormax)
+  real::vtt0(ntormax),vtt1(ntormax),vtt2(ntormax),vtt3(ntormax),vtt4(ntormax),vtt5(ntormax) ,vtt6(ntormax),vtt7(ntormax),vtt8(ntormax),vtt9(ntormax)
 
 ! TABULATED.INC
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -35,6 +35,7 @@ MODULE energy_intramolecular
   integer::splpnts(10),nttor
   real::deg(10,2),tabtorso(10,2),torderiv2(10,2),tordif(10,2)
 
+  real::rxvec(numax,numax),ryvec(numax,numax),rzvec(numax,numax),distij2(numax,numax),distanceij(numax,numax)
 contains
   subroutine suvibe(io_ff)
 !$$$      include 'control.inc'
@@ -2601,4 +2602,164 @@ contains
     end do
     close(42)
   end subroutine read_bend_table
+
+! - branched and linear molecules with connectivity table -
+! - go through entire chain -
+! - calculate all bonds vectors and lengths
+!DEC$ ATTRIBUTES FORCEINLINE :: calc_connectivity
+  subroutine calc_connectivity(i,imolty)
+    use sim_system,only:nunit,nugrow,rxu,ryu,rzu,ijvib,invib
+    integer,intent(in)::i,imolty
+
+    real::rxui,ryui,rzui
+    integer::ii,iivib,jj
+
+    do ii = 1, nunit(imolty)
+       rxui=rxu(i,ii)
+       ryui=ryu(i,ii)
+       rzui=rzu(i,ii)
+       do iivib = 1, invib(imolty,ii)
+          jj = ijvib(imolty,ii,iivib)
+          rxvec(ii,jj) = rxu(i,jj) - rxui
+          ryvec(ii,jj) = ryu(i,jj) - ryui
+          rzvec(ii,jj) = rzu(i,jj) - rzui
+          distij2(ii,jj) = ( rxvec(ii,jj)**2 + ryvec(ii,jj)**2 + rzvec(ii,jj)**2 )
+          distanceij(ii,jj) = dsqrt(distij2(ii,jj))
+
+          if ( nunit(imolty) .ne. nugrow(imolty) )then
+!            --- account for explct atoms in opposite direction
+             rxvec(jj,ii)   = -rxvec(ii,jj)
+             ryvec(jj,ii)   = -ryvec(ii,jj)
+             rzvec(jj,ii)   = -rzvec(ii,jj)
+             distanceij(jj,ii) = distanceij(ii,jj)
+          end if
+       end do
+    end do
+  end subroutine calc_connectivity
+
+!DEC$ ATTRIBUTES FORCEINLINE :: U_torsion
+  function U_torsion(i,imolty,ist,lupdate_connectivity) result(vtg)
+    use sim_system,only:nunit,intor,ittor,ijtor2,ijtor3,ijtor4,L_tor_table
+    real::vtg
+    integer,intent(in)::i,imolty,ist
+    logical,intent(in)::lupdate_connectivity
+
+    integer::j,jjtor,ip1,ip2,ip3,it
+    real::thetac,theta,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2,daa1,da1a2,dot,xcc,ycc,zcc,tcc,spltor
+    
+    if (lupdate_connectivity) call calc_connectivity(i,imolty)
+
+    vtg=0.0d0
+    do j = ist, nunit(imolty)
+       do jjtor = 1, intor(imolty,j)
+          ip3 = ijtor4(imolty,j,jjtor)
+          if ( ip3 .lt. j ) then
+             ip1 = ijtor2(imolty,j,jjtor)
+             ip2 = ijtor3(imolty,j,jjtor)
+             it  = ittor(imolty,j,jjtor)
+!*** calculate cross products d_a x d_a-1 and d_a-1 x d_a-2 ***
+             xaa1 = ryvec(ip1,j) * rzvec(ip2,ip1) + rzvec(ip1,j) * ryvec(ip1,ip2)
+             yaa1 = rzvec(ip1,j) * rxvec(ip2,ip1) + rxvec(ip1,j) * rzvec(ip1,ip2)
+             zaa1 = rxvec(ip1,j) * ryvec(ip2,ip1) + ryvec(ip1,j) * rxvec(ip1,ip2)
+             xa1a2 = ryvec(ip1,ip2) * rzvec(ip2,ip3) + rzvec(ip1,ip2) * ryvec(ip3,ip2)
+             ya1a2 = rzvec(ip1,ip2) * rxvec(ip2,ip3) + rxvec(ip1,ip2) * rzvec(ip3,ip2)
+             za1a2 = rxvec(ip1,ip2) * ryvec(ip2,ip3) + ryvec(ip1,ip2) * rxvec(ip3,ip2)
+! *** calculate lengths of cross products ***
+             daa1 = dsqrt(xaa1**2+yaa1**2+zaa1**2)
+             da1a2 = dsqrt(xa1a2**2+ya1a2**2+za1a2**2)
+! *** calculate dot product of cross products ***
+             dot = xaa1*xa1a2 + yaa1*ya1a2 + zaa1*za1a2
+             thetac = - dot / ( daa1 * da1a2 )
+!     KEA -- added for extending range to +/- 180
+!     and for asymmetric potentials
+             if (thetac.gt.1.0d0) thetac=1.0d0
+             if (thetac.lt.-1.0d0) thetac=-1.0d0
+
+             if (L_tor_table) then
+!     *** calculate cross product of cross products ***
+                xcc = yaa1*za1a2 - zaa1*ya1a2
+                ycc = zaa1*xa1a2 - xaa1*za1a2
+                zcc = xaa1*ya1a2 - yaa1*xa1a2
+!     *** calculate scalar triple product ***
+                tcc = xcc*rxvec(ip1,ip2) + ycc*ryvec(ip1,ip2) + zcc*rzvec(ip1,ip2)
+                theta = dacos (thetac)
+                if (tcc .lt. 0.0d0) theta = -theta
+                if (L_spline) then
+                   call splint(theta,spltor,it)
+                else if(L_linear) then
+                   call lininter(theta,spltor,it)
+                end if
+                vtg = vtg+spltor
+             else
+                vtg = vtg + vtorso( thetac, it )
+             end if
+          end if
+       end do
+    end do
+  end function U_torsion
+
+! - calculate all stretching, bending, and torsional potentials
+! - that have an end-bead with an index smaller than the current bead
+!DEC$ ATTRIBUTES FORCEINLINE :: U_bonded
+  subroutine U_bonded(i,imolty,vvib,vbend,vtg)
+    use sim_system,only:nunit,invib,itvib,ijvib,inben,itben,ijben2,ijben3,L_vib_table
+    real,intent(out)::vvib,vbend,vtg
+    integer,intent(in)::i,imolty
+
+    real::tabulated_vib,theta,thetac
+    integer::j,jjvib,ip1,ip2,it,jjben
+
+    call calc_connectivity(i,imolty)
+
+! - stretching -
+    vvib=0.0d0
+    do j = 2, nunit(imolty)
+       do jjvib = 1, invib(imolty,j)
+          ip1 = ijvib(imolty,j,jjvib)
+          it  = itvib(imolty,j,jjvib)
+          if ( ip1.lt. j .and. L_vib_table) then
+             call lininter_vib(distanceij(ip1,j),  tabulated_vib, it)
+             vvib = vvib + tabulated_vib
+!             write(io_output,*) 'TABULATED VVIB: ', tabulated_vib,
+!   &         distanceij(ip1,j), ip1, j
+          end if
+          if ( ip1 .lt. j .and..not.L_vib_table) vvib = vvib + brvibk(it) * (distanceij(ip1,j) - brvib(it))**2
+       end do
+    end do
+
+! - bending -
+! ### molecule with bond bending
+    vbend=0.0d0
+    do j = 2, nunit(imolty)
+       do jjben = 1, inben(imolty,j)
+          ip2 = ijben3(imolty,j,jjben)
+          if ( ip2 .lt. j ) then
+             ip1 = ijben2(imolty,j,jjben)
+             it  = itben(imolty,j,jjben)
+             thetac = ( rxvec(ip1,j)*rxvec(ip1,ip2) + ryvec(ip1,j)*ryvec(ip1,ip2) + rzvec(ip1,j)*rzvec(ip1,ip2) ) / ( distanceij(ip1,j)*distanceij(ip1,ip2) )
+             if ( thetac .ge. 1.0d0 ) thetac = 1.0d0
+             if ( thetac .le. -1.0d0 ) thetac = -1.0d0
+
+             theta = dacos(thetac)
+
+             ! if (L_bend_table) then
+             !    rbendsq=distij2(ip1,j)+distij2(ip1,ip2)-2.0d0*distanceij(ip1,j)*distanceij(ip1,ip2)*thetac
+             !    rbend = dsqrt(rbendsq)
+             !    call lininter_bend(rbend, tabulated_bend, it)
+             !    vbend = vbend + tabulated_bend
+             ! else
+             vbend = vbend +  brbenk(it) * (theta-brben(it))**2
+             ! end if
+
+!             write(io_output,*) 'j,ip1,ip2, it',j,ip1,ip2, it
+!             write(io_output,*) 'bend energy, theta ',brbenk(it) * (theta-brben(it))**2,theta
+          end if
+       end do
+    end do
+
+! - torsions -
+! ### molecule with dihedral potenials ###
+    vtg=U_torsion(i,imolty,2,.false.)
+
+  end subroutine U_bonded
 end MODULE energy_intramolecular

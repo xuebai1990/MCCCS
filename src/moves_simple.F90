@@ -148,13 +148,13 @@ contains
 
 !     *** calculate the energy of i in the new configuration ***
       flagon = 2
-      call energy(i,imolty, vnew,vintran, vintern,vextn,velectn ,vdum,flagon, ibox,1, iunit,.false.,ovrlap,.false. ,vdum,.false.,.false.)
+      call energy(i,imolty, vnew,vintran, vintern,vextn,velectn ,vdum,flagon, ibox,1, iunit,.false.,ovrlap,.false. ,vdum,.false.,.false.,.false.)
       v3n=v3garo
       if (ovrlap) return
 
 ! *** calculate the energy of i in the old configuration ***
       flagon = 1
-      call energy(i,imolty,vold,vintrao,vintero,vexto,velecto ,vdum,flagon,ibox,1, iunit,.false.,ovrlap,.false. ,vdum,.false.,.false.)
+      call energy(i,imolty,vold,vintrao,vintero,vexto,velecto ,vdum,flagon,ibox,1, iunit,.false.,ovrlap,.false. ,vdum,.false.,.false.,.false.)
       v3o = v3garo
 
       if (ovrlap) then
@@ -511,12 +511,12 @@ contains
 !  *** calculate the energy of i in the new configuration ***
 
       flagon = 2
-      call energy(i,imolty, vnew,vintran,vintern,vextn,velectn,vdum ,flagon, ibox,1,iunit,.false.,ovrlap,.false.,vdum, .false.,.false.)
+      call energy(i,imolty, vnew,vintran,vintern,vextn,velectn,vdum ,flagon, ibox,1,iunit,.false.,ovrlap,.false.,vdum, .false.,.false.,.false.)
       if (ovrlap) return
 
 ! *** calculate the energy of i in the old configuration ***
       flagon = 1
-      call energy(i,imolty, vold,vintrao,vintero,vexto,velecto,vdum ,flagon,ibox, 1, iunit,.false.,ovrlap,.false.,vdum, .false.,.false.)
+      call energy(i,imolty, vold,vintrao,vintero,vexto,velecto,vdum ,flagon,ibox, 1, iunit,.false.,ovrlap,.false.,vdum, .false.,.false.,.false.)
 
       if (ovrlap) call err_exit('disaster- overlap for old conf in ROTXYZ')
       if ( lewald .and. lelect(imolty) ) then
@@ -661,7 +661,7 @@ contains
 !    *******************************************************************
     subroutine Atom_traxyz (lx,ly,lz )
        use energy_kspace,only:recip_atom
-       use energy_pairwise,only:Atom_energy
+       use energy_intramolecular,only:U_bonded
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'coord2.inc'
@@ -782,14 +782,15 @@ contains
 
 !  *** calculate the energy of i in the new configuration ***
       flagon = 2
-       call Atom_energy(i,imolty, vnew,vintran, vintern,vextn,velectn ,vewaldn,flagon, ibox,pick_unit, pick_unit,.true.,ovrlap, .false. ,vdum,.false.,.false.,vvibn,vbendn,vtgn)
+      call energy(i,imolty,vnew,vintran,vintern,vextn,velectn,vewaldn,flagon,ibox,pick_unit, pick_unit,.true.,ovrlap,.false.,vdum,.false.,.false.,.true.)
       if (ovrlap) return
+      call U_bonded(i,imolty,vvibn,vbendn,vtgn)
 
 ! *** calculate the energy of i in the old configuration ***
       flagon = 1
-      call Atom_energy(i,imolty,vold,vintrao,vintero,vexto,velecto ,vewaldo,flagon,ibox,pick_unit, pick_unit,.true.,ovrlap, .false. ,vdum,.false.,.false.,vvibo,vbendo,vtgo)
-
-      if (ovrlap) call err_exit('disaster ovrlap in old conf of TRAXYZ')
+      call energy(i,imolty,vold,vintrao,vintero,vexto,velecto,vewaldo,flagon,ibox,pick_unit, pick_unit,.true.,ovrlap,.false.,vdum,.false.,.false.,.true.)
+      if (ovrlap) call err_exit('disaster ovrlap in old conf of ATOM_TRAXYZ')
+      call U_bonded(i,imolty,vvibo,vbendo,vtgo)
 
       if ( lewald .and. lelect(imolty) ) then
          call recip_atom(ibox,vrecipn,vrecipo,1,pick_unit)

@@ -194,7 +194,6 @@ contains
         prefact(i,ibox) = prefact_one(i)
       end do
 
-      vrecip = vrecip*qqfact
 !      write(io_output,*) 'in recipsum:',ssumr(100,ibox),ibox
 ! *** safety check ***
 !      write(io_output,*) 'A total of ',ncount,' vectors are used'

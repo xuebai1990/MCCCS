@@ -212,12 +212,12 @@ module sim_system
   logical::lspecial,lqchg,lij,lovr(nchmax),lexist(numax)
   real::dipolex(nbxmax),dipoley(nbxmax),dipolez(nbxmax),dipolexo,dipoleyo,dipolezo
   integer::a15type(ntmax,numax,numax)
-  real::sig2ij,epsij,epsilon,sigma,epsi,sigi,ecut,extc12, extc3, extz0,aspecial,bspecial,q1
+  real::sig2ij,epsij,epsilon_f(2,numax),sigma_f(2,numax),epsi,sigi,ecut,extc12,extc3,extz0,aspecial,bspecial,q1
   real::xiq,jayq,jayself,a15(2),qelect,vtry(nchmax),vtrext(nchmax),vtrintra(nchmax),vtrinter(nchmax),vtrelect(nchmax),vtrewald(nchmax),vtrorient(nchmax),vtrelect_intra(nchmax),vtrelect_inter(nchmax),bfac(nchmax)
   real::ljscale,qscale2
   real::v3garo,rminee(nntype*nntype),rxp(numax,nchmax),ryp(numax,nchmax),rzp(numax,nchmax)
   dimension extc12(nntype),extc3(nntype),extz0(nntype),xiq(0:nntype),jayself(nntype),lqchg(0:nntype),lij(0:nntype)
-  dimension sig2ij(nntype*nntype),epsij(nntype*nntype),ecut(nntype*nntype),jayq(nntype*nntype),epsilon(2,numax),sigma(2,numax),epsi(0:nntype),sigi(0:nntype),q1(nntype),qelect(0:nntype)
+  dimension sig2ij(nntype*nntype),epsij(nntype*nntype),ecut(nntype*nntype),jayq(nntype*nntype),epsi(0:nntype),sigi(0:nntype),q1(nntype),qelect(0:nntype)
   dimension aspecial(nntype*nntype),bspecial(nntype*nntype),lspecial(nntype*nntype)
   dimension ljscale(ntmax,numax,numax),qscale2(ntmax,numax,numax)
 

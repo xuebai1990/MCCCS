@@ -251,7 +251,7 @@ contains
 !          iii = 1 old conformation
 !          iii = 2 new conformation
 
-            call energy (i,imolty,v,vintra,vinter,vext,velect ,vewald,iii,ibox,istt,iett,.true.,ovrlap, .false.,vdum,.false.,.false.)
+            call energy(i,imolty,v,vintra,vinter,vext,velect ,vewald,iii,ibox,istt,iett,.true.,ovrlap, .false.,vdum,.false.,.false.,.false.)
 
 !            write(98,*) '------------ ',iii
 !            write(98,*) v,vintra,vinter,vext,velect,vewald
@@ -343,7 +343,7 @@ contains
             end if
 
 ! Calculate the energy of the non-backbone beads
-            call energy (i,imolty,v,vintra,vinter,vext,velect ,vewald,iii,ibox,istt,iett, .true.,ovrlap ,ltors,vtorold,.true.,.false.)
+            call energy(i,imolty,v,vintra,vinter,vext,velect ,vewald,iii,ibox,istt,iett, .true.,ovrlap ,ltors,vtorold,.true.,.false.,.false.)
 
             if (iii .eq. 2) then
                if (ovrlap) return

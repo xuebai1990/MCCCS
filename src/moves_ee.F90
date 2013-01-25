@@ -310,7 +310,6 @@ contains
   subroutine eemove
       use transfer_swap,only:swap
       use sim_cell
-      use energy_pairwise,only:ee_energy
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'conver.inc'
@@ -402,12 +401,13 @@ contains
          end do
 
          moltion(1) = imolty
-         call ee_energy(eeirem,imolty,vnew,vintran,vintern,vextn,velectn ,vewaldn,vtailn,2,ibox,1,iunit,.false.,ovrlap ,.false.,dum,.false.,.false.)
-!         call energy(eeirem,imolty,vnew,vintran,vintern,vextn,velectn
-!     &               ,vewaldn,2,ibox,1,iunit,.false.,ovrlap
-!     &               ,.false.,dum,.false.,.false.)
-
+         call energy(eeirem,imolty,vnew,vintran,vintern,vextn,velectn,vewaldn,2,ibox,1,iunit,.false.,ovrlap,.false.,dum,.false.,.false.,.false.)
          if (ovrlap) goto 100
+         if (ltailc) then
+!-----   add tail corrections for the Lennard-Jones energy
+            vtailn=ee_coru(ibox,imolty,2)
+            vintern = vintern + vtailn
+         end if
 
 ! --- energy for the old state
 
@@ -419,14 +419,14 @@ contains
             qquion(i,1) = qqu(eeirem,i)
          end do
          moltion(2) = imolty
-         call ee_energy(eeirem,imolty,vold,vintrao,vintero,vexto,velecto ,vewaldo,vtailo,1,ibox,1,iunit,.false.,ovrlap ,.false.,dum,.false.,.false.)
-!         call energy(eeirem,imolty,vold,vintrao,vintero,vexto,velecto
-!     &               ,vewaldo,1,ibox,1,iunit,.false.,ovrlap
-!     &               ,.false.,dum,.false.,.false.)
-!	write(io_output,*) vnew,vold
+         call energy(eeirem,imolty,vold,vintrao,vintero,vexto,velecto,vewaldo,1,ibox,1,iunit,.false.,ovrlap,.false.,dum,.false.,.false.,.false.)
          if (ovrlap) then
-            write(io_output,*) 'disaster ovrlap in old conf eemove'
-            call err_exit('')
+            call err_exit('disaster ovrlap in old conf eemove')
+         end if
+         if (ltailc) then
+!-----   add tail corrections for the Lennard-Jones energy
+            vtailo=ee_coru(ibox,imolty,1)
+            vintero = vintero + vtailo
          end if
 
          if (lewald.and.(lelect(moltion(2)).or.lelect(moltion(1))))then
@@ -671,10 +671,10 @@ contains
 
       flagon = 2
       do j = 1,iunit
-         epsilon(imolty,j) = epsil(imolty,j,itype)
-         sigma(imolty,j) = sigm(imolty,j,itype)
+         epsilon_f(imolty,j) = epsil(imolty,j,itype)
+         sigma_f(imolty,j) = sigm(imolty,j,itype)
       end do
-      call energy(i,imolty, vnew,vintran, vintern,vextn,velectn ,vdum,flagon, ibox,1, iunit,.false.,ovrlap,.false. ,vdum,.false.,.false.)
+      call energy(i,imolty, vnew,vintran, vintern,vextn,velectn ,vdum,flagon, ibox,1, iunit,.false.,ovrlap,.false. ,vdum,.false.,.false.,.false.)
       if (ovrlap) return
 
 !     Start of intermolecular tail correction for new
@@ -698,10 +698,10 @@ contains
 ! *** calculate the energy of i in the old configuration ***
       flagon = 1
       do j = 1, iunit
-         epsilon(imolty,j) = epsil(imolty,j,eetype(imolty))
-         sigma(imolty,j) = sigm(imolty,j,eetype(imolty))
+         epsilon_f(imolty,j) = epsil(imolty,j,eetype(imolty))
+         sigma_f(imolty,j) = sigm(imolty,j,eetype(imolty))
       end do
-      call energy(i,imolty,vold,vintrao,vintero,vexto,velecto ,vdum,flagon,ibox,1, iunit,.false.,ovrlap,.false. ,vdum,.false.,.false.)
+      call energy(i,imolty,vold,vintrao,vintero,vexto,velecto ,vdum,flagon,ibox,1, iunit,.false.,ovrlap,.false. ,vdum,.false.,.false.,.false.)
 
 
 !     Start of intermolecular tail correction for old
@@ -760,8 +760,8 @@ contains
       eetype(imolty) = itype
       do j = 1,iunit
          qqu(i,j) = qquion(j,2)
-         epsilon(imolty,j) = epsil(imolty,j,itype)
-         sigma(imolty,j) = sigm(imolty,j,itype)
+         epsilon_f(imolty,j) = epsil(imolty,j,itype)
+         sigma_f(imolty,j) = sigm(imolty,j,itype)
       end do
 
 
@@ -827,4 +827,50 @@ contains
        end do
     end do
   end subroutine output_ee_stats
+
+!DEC$ ATTRIBUTES FORCEINLINE :: ee_coru
+  function ee_coru(ibox,imolty,flagon) result(vtail)
+    use sim_cell,only:cell_vol
+    use energy_pairwise,only:coru
+    real::vtail
+    integer,intent(in)::ibox,imolty,flagon
+
+    real::vol,rho
+    integer::kmolty,jmolty
+
+    vtail=0.0d0
+
+    if ( lsolid(ibox) .and. .not. lrect(ibox) ) then
+       vol = cell_vol(ibox)
+    else
+       vol = boxlx(ibox)*boxly(ibox)*boxlz(ibox)
+    end if
+    do kmolty = 1, nmolty
+       do jmolty = 1, nmolty
+!                rho = ncmt(ibox,jmolty) /
+!     &               ( boxlx(ibox)*boxly(ibox)*boxlz(ibox) )
+          if (flagon.eq.1) then
+             rho = ncmt(ibox,jmolty) / vol
+             vtail = vtail + ncmt(ibox,kmolty) * coru(kmolty,jmolty,rho,ibox)
+!                write(io_output,*) 'vtail',vtail
+          else
+             if (jmolty.eq.ee_moltyp(mstate)) then
+                rho = (ncmt(ibox,jmolty)-1) / vol
+             else if (jmolty.eq.imolty) then
+                rho = (ncmt(ibox,jmolty)+1) / vol
+             else
+                rho = ncmt(ibox,jmolty) / vol
+             end if
+             if (kmolty.eq.imolty) then
+                vtail = vtail + (ncmt(ibox,kmolty)+1) * coru(kmolty,jmolty,rho ,ibox)
+             else if (kmolty.eq.ee_moltyp(mstate)) then
+                vtail = vtail + (ncmt(ibox,kmolty)-1) * coru(kmolty,jmolty,rho ,ibox)
+             else
+                vtail = vtail + ncmt(ibox,kmolty) * coru(kmolty,jmolty,rho,ibox)
+             end if
+          end if
+       end do
+    end do
+
+  end function ee_coru
 end MODULE moves_ee

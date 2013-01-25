@@ -254,17 +254,17 @@ contains
                               fij = fij + ( 72.0d0*epsnx(ntij)/ (rij*rzero(ntij)) ) *  (rzero(ntij)/rij)**7 * (1.0d0-(rzero(ntij)/rij)**3)
                            else if (lgenlj) then
                               if ( lexpand(imolty) .and. lexpand(jmolty) ) then
-                                 sigma2=(sigma(imolty,ii)+ sigma(jmolty,jj))/2.0d0
+                                 sigma2=(sigma_f(imolty,ii)+ sigma_f(jmolty,jj))/2.0d0
                                  sr2 = sigma2*sigma2/rijsq
-                                 epsilon2=dsqrt(epsilon(imolty,ii) *epsilon(jmolty,jj))
+                                 epsilon2=dsqrt(epsilon_f(imolty,ii) *epsilon_f(jmolty,jj))
                               else if ( lexpand(imolty) ) then
-                                 sigma2=(sigma(imolty,ii)+ sigi(ntjj))/2.0d0
+                                 sigma2=(sigma_f(imolty,ii)+ sigi(ntjj))/2.0d0
                                  sr2 = sigma2*sigma2/rijsq
-                                 epsilon2=dsqrt(epsilon(imolty,ii) *epsi(ntjj))
+                                 epsilon2=dsqrt(epsilon_f(imolty,ii) *epsi(ntjj))
                               else if ( lexpand(jmolty) ) then
-                                 sigma2=(sigma(jmolty,jj)+ sigi(ntii))/2.0d0
+                                 sigma2=(sigma_f(jmolty,jj)+ sigi(ntii))/2.0d0
                                  sr2 = sigma2*sigma2/rijsq
-                                 epsilon2=dsqrt(epsilon(jmolty,jj) *epsi(ntii))
+                                 epsilon2=dsqrt(epsilon_f(jmolty,jj) *epsi(ntii))
                               else
                                  rij = dsqrt(rijsq)
                                  sr2 = sig2ij(ntij) / rijsq
@@ -293,28 +293,28 @@ contains
                                  end if
 
                                  if ( lexpand(imolty)  .and. lexpand(jmolty)) then
-                                    epsilon2=dsqrt(epsilon(imolty,ii) *epsilon(jmolty,jj))
+                                    epsilon2=dsqrt(epsilon_f(imolty,ii) *epsilon_f(jmolty,jj))
                                  else if ( lexpand(imolty)) then
-                                    epsilon2=dsqrt(epsilon(imolty,ii) *epsi(ntjj))
+                                    epsilon2=dsqrt(epsilon_f(imolty,ii) *epsi(ntjj))
                                  else if ( lexpand(jmolty) ) then
-                                    epsilon2=dsqrt(epsilon(jmolty,jj) *epsi(ntii))
+                                    epsilon2=dsqrt(epsilon_f(jmolty,jj) *epsi(ntii))
                                  else
                                     epsilon2=epsij(ntij)
                                  end if
                                  flj = 48.0d0*epsilon2* sr6*(-sr6*(aslope*(qave-a0)* (qave-a0)+ashift)+0.5d0* (bslope*(qave-b0)*(qave-b0)+ bshift)) / rijsq
                               else
                                  if ( lexpand(imolty)  .and. lexpand(jmolty) ) then
-                                    sigma2=(sigma(imolty,ii)+ sigma(jmolty,jj))/2.0d0
+                                    sigma2=(sigma_f(imolty,ii)+ sigma_f(jmolty,jj))/2.0d0
                                     sr2 = sigma2*sigma2/rijsq
-                                    epsilon2=dsqrt(epsilon(imolty,ii) *epsilon(jmolty,jj))
+                                    epsilon2=dsqrt(epsilon_f(imolty,ii) *epsilon_f(jmolty,jj))
                                  else if ( lexpand(imolty) ) then
-                                    sigma2=(sigma(imolty,ii)+ sigi(ntjj))/2.0d0
+                                    sigma2=(sigma_f(imolty,ii)+ sigi(ntjj))/2.0d0
                                     sr2 = sigma2*sigma2/rijsq
-                                    epsilon2=dsqrt(epsilon(imolty,ii) *epsi(ntjj))
+                                    epsilon2=dsqrt(epsilon_f(imolty,ii) *epsi(ntjj))
                                  else if ( lexpand(jmolty) ) then
-                                    sigma2=(sigma(jmolty,jj)+ sigi(ntii))/2.0d0
+                                    sigma2=(sigma_f(jmolty,jj)+ sigi(ntii))/2.0d0
                                     sr2 = sigma2*sigma2/rijsq
-                                    epsilon2=dsqrt(epsilon(jmolty,jj) *epsi(ntii))
+                                    epsilon2=dsqrt(epsilon_f(jmolty,jj) *epsi(ntii))
                                  else
                                     sr2 = sig2ij(ntij) / rijsq
                                     epsilon2 = epsij(ntij)
@@ -584,14 +584,14 @@ contains
                rci3 = sig2ij(ntij)**(3.0d0/2.0d0) / rcut(ibox)**3
                rci1 = rci3 **(1.0d0/3.0d0)
                if ( lexpand(imolty) .and. lexpand(jmolty) ) then
-                  sigma2 = (sigma(imolty,ii)+sigma(jmolty,jj))**2/4.0d0
-                  epsilon2 = dsqrt(epsilon(imolty,ii) *epsilon(jmolty,jj))
+                  sigma2 = (sigma_f(imolty,ii)+sigma_f(jmolty,jj))**2/4.0d0
+                  epsilon2 = dsqrt(epsilon_f(imolty,ii) *epsilon_f(jmolty,jj))
                else if ( lexpand(imolty) ) then
-                  sigma2 = (sigma(imolty,ii)+sigi(ntjj))**2/4.0d0
-                  epsilon2 = dsqrt(epsilon(imolty,ii)*epsi(ntjj))
+                  sigma2 = (sigma_f(imolty,ii)+sigi(ntjj))**2/4.0d0
+                  epsilon2 = dsqrt(epsilon_f(imolty,ii)*epsi(ntjj))
                else if ( lexpand(jmolty) ) then
-                  sigma2 = (sigma(jmolty,jj)+sigi(ntii))**2/4.0d0
-                  epsilon2 = dsqrt(epsilon(jmolty,jj)*epsi(ntii))
+                  sigma2 = (sigma_f(jmolty,jj)+sigi(ntii))**2/4.0d0
+                  epsilon2 = dsqrt(epsilon_f(jmolty,jj)*epsi(ntii))
                else
                   sigma2 = sig2ij(ntij)
                   epsilon2 = epsij(ntij)
@@ -601,14 +601,14 @@ contains
                ntij = (ntii-1)*nntype + ntjj
 
                if ( lexpand(imolty) .and. lexpand(jmolty) ) then
-                  sigma2 = (sigma(imolty,ii)+sigma(jmolty,jj))**2/4.0d0
-                  epsilon2 = dsqrt(epsilon(imolty,ii)* epsilon(jmolty,jj))
+                  sigma2 = (sigma_f(imolty,ii)+sigma_f(jmolty,jj))**2/4.0d0
+                  epsilon2 = dsqrt(epsilon_f(imolty,ii)* epsilon_f(jmolty,jj))
                else if ( lexpand(imolty) ) then
-                  sigma2 = (sigma(imolty,ii)+sigi(ntjj))**2/4.0d0
-                  epsilon2 = dsqrt(epsilon(imolty,ii)*epsi(ntjj))
+                  sigma2 = (sigma_f(imolty,ii)+sigi(ntjj))**2/4.0d0
+                  epsilon2 = dsqrt(epsilon_f(imolty,ii)*epsi(ntjj))
                else if ( lexpand(jmolty) ) then
-                  sigma2 = (sigma(jmolty,jj)+sigi(ntii))**2/4.0d0
-                  epsilon2 = dsqrt(epsilon(jmolty,jj)*epsi(ntii))
+                  sigma2 = (sigma_f(jmolty,jj)+sigi(ntii))**2/4.0d0
+                  epsilon2 = dsqrt(epsilon_f(jmolty,jj)*epsi(ntii))
                else
                   sigma2 = sig2ij(ntij)
                   epsilon2 = epsij(ntij)

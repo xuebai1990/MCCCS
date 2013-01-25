@@ -4,7 +4,8 @@ module transfer_swap
   use sim_system
   use sim_cell
   use energy_kspace,only:recip
-  use energy_pairwise,only:energy,boltz,Intra_energy,coru
+  use energy_pairwise,only:energy,boltz,coru
+  use energy_intramolecular,only:U_bonded
   use moves_cbmc,only:rosenbluth,schedule,explct,safeschedule
   use transfer_shared,only:lopt_bias,update_bias
   implicit none
@@ -762,7 +763,7 @@ contains
          iett = igrow
 !         write(io_output,*) igrow
 
-         call energy (iins,imolty, v, vintra,vinter,vext ,velect,vewald,iii,ibox, istt, iett, .true.,ovrlap ,.false.,vdum,.false.,lfavor)
+         call energy(iins,imolty, v, vintra,vinter,vext ,velect,vewald,iii,ibox, istt, iett, .true.,ovrlap ,.false.,vdum,.false.,lfavor,.false.)
 
          if (ovrlap) then
             write(io_output,*) 'iins',iins,'irem',irem
@@ -821,7 +822,7 @@ contains
 
 ! ??? problem here on calculation of favor and favor2 when ichoi > 1
 
-            call energy (iins,imolty,v, vintra,vinter,vext,velect ,vewald ,iii,ibox,istt,iett, .true.,ovrlap,ltors,vdum ,.true.,lfavor)
+            call energy(iins,imolty,v, vintra,vinter,vext,velect ,vewald ,iii,ibox,istt,iett, .true.,ovrlap,ltors,vdum ,.true.,lfavor,.false.)
 !            write(io_output,*) 'ovrlap:',ovrlap
 
 !            if ( iins .eq. 118) write(io_output,*) 'vinter:',vinter
@@ -1269,7 +1270,7 @@ contains
          istt=1
          iett = igrow
 
-         call energy (irem,imolty, v, vintra,vinter,vext,velect ,vewald,iii, boxrem, istt, iett, .true.,ovrlap ,.false.,vtorold,.false.,lfavor)
+         call energy(irem,imolty, v, vintra,vinter,vext,velect ,vewald,iii, boxrem, istt, iett, .true.,ovrlap ,.false.,vtorold,.false.,lfavor,.false.)
 
          if (ovrlap) then
             write(io_output,*) 'disaster ovrlap in old conf SWAP'
@@ -1300,7 +1301,7 @@ contains
          istt = igrow + 1
          iett = iunit
 
-         call energy (irem,imolty,v, vintra,vinter,vext,velect ,vewald ,iii,ibox,istt,iett,.true.,ovrlap,ltors,vtorold ,.true.,lfavor)
+         call energy(irem,imolty,v, vintra,vinter,vext,velect ,vewald ,iii,ibox,istt,iett,.true.,ovrlap,ltors,vtorold ,.true.,lfavor,.false.)
 
 !         if (irem .eq. 118)  write(io_output,*) 'for old',vinter
          if (ovrlap) then
@@ -1340,7 +1341,7 @@ contains
 
 ! ??? problem here on calculation of favor and favor2
 
-               call energy (irem,imolty,v, vintra,vinter,vext ,velect ,vewald,iii,ibox,istt,iett, .true.,ovrlap,ltors ,vdum,.true.,lfavor)
+               call energy(irem,imolty,v, vintra,vinter,vext ,velect ,vewald,iii,ibox,istt,iett, .true.,ovrlap,ltors ,vdum,.true.,lfavor,.false.)
 
                deleo = v + vtorold
                if ( .not. ovrlap ) then
@@ -1639,12 +1640,8 @@ contains
             rzu(irem,ic) = rzuion(ic,2)
          end do
 
-         vvibn  = 0.0d0
-         vbendn = 0.0d0
-         vtgn   = 0.0d0
-
          if (lrigid(imolty).and.(pm_atom_tra.gt.0.000001)) then
-            call Intra_energy(irem,imolty, vdum ,vintran, vdum,vdum, velectn,vewaldn,flagon, boxins, 1, iunit,.true.,ovrlap, .false. ,vdum,.false.,.false.,vvibn,vbendn,vtgn)
+            call U_bonded(irem,imolty,vvibn,vbendn,vtgn)
          end if
 !         total_NBE = vintran+velectn+vewaldn+vtgn+vbendn+vvibn
          total_NBE = vtgn+vbendn+vvibn

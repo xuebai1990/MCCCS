@@ -649,17 +649,16 @@ number of times move out:          0.0  accepted=     0.0
  moltyps =            2  and           3
 between box  1 and  2   uattempts =         0.0  attempts =      0.0  accepted =     0.0
  
-New Biasing Potential
-
-molecule  1:   0.00000000      0.00000000    
-
-
  ### Charge Fluctuation  ###
  
  
  ### Expanded Ensemble Move  ###
  
  
+New Biasing Potential
+
+molecule  1:   0.00000000      0.00000000    
+
  sumup control
  number of chains         182
  number of chains of type           1         182

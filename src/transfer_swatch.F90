@@ -624,7 +624,7 @@ contains
 !     *** get energy of configuration ***
 
             call ctrmas(.false.,box,self,8)
-            call energy (self,imolty, v, vintra,vinter,vext ,velect,vewald,iii,box,1,iunit,.true.,lterm,.false. ,vdum,.false.,.false.)
+            call energy(self,imolty, v, vintra,vinter,vext ,velect,vewald,iii,box,1,iunit,.true.,lterm,.false. ,vdum,.false.,.false.,.false.)
 
 !     *** return to normal ***
             if (ic .eq. 1) then
@@ -740,7 +740,7 @@ contains
 
 !     * get total energy *
 
-            call energy (self,imolty, v, vintra,vinter,vext,velect ,vewald,iii,box, 1,iunit,.true.,lterm,.false.,vdum ,.false.,.false.)
+            call energy(self,imolty, v, vintra,vinter,vext,velect ,vewald,iii,box, 1,iunit,.true.,lterm,.false.,vdum ,.false.,.false.,.false.)
 
             if (ic .eq. 1) then
 !     * return b to current box *
@@ -1213,7 +1213,7 @@ contains
 !     and torsional type for those units swatched!!!!!!
 
             call ctrmas(.false.,iboxnew,other,8)
-            call energy (other,imolty, v, vintra,vinter,vext ,velect,vewald,iii,iboxnew,1,iunit,.true.,lterm,.false. ,vdum,.false.,.false.)
+            call energy(other,imolty, v, vintra,vinter,vext ,velect,vewald,iii,iboxnew,1,iunit,.true.,lterm,.false. ,vdum,.false.,.false.,.false.)
 
             if (lterm) then
 !     write(io_output,*) 'other ',other,' self ',self
@@ -1292,7 +1292,7 @@ contains
 !     --- correct the acceptance rules
 !     --- calculate the Full rcut site-site energy
 
-            call energy (self,imolty, v, vintra,vinter,vext,velect ,vewald,iii,iboxold, 1,iunit,.true.,lterm,.false.,vdum ,.false.,.false.)
+            call energy(self,imolty, v, vintra,vinter,vext,velect ,vewald,iii,iboxold, 1,iunit,.true.,lterm,.false.,vdum ,.false.,.false.,.false.)
 
             if (lterm) call err_exit('disaster ovrlap in old conf SWATCH')
             deleo = v - ( voldt - (voldbvib + voldbb + voldtg) )
