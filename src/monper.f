@@ -5,7 +5,8 @@
       subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove,acnp,pres,nibox,nnn,nblock,lratio,lratv ,lprint,lmv,lrsave,lblock,lratfix,lsolute,acsolpar, acEnthalpy,acEnthalpy1)
       use sim_system
       use sim_cell
-      use energy_intramolecular,only:vtorso,splint,lininter
+      use energy_intramolecular,only:vtorso,inter_tor
+      use sim_particle,only:check_neighbor_list
       use energy_pairwise,only:energy,coru
       use moves_simple
       use moves_cbmc,only:schedule
@@ -36,7 +37,7 @@
       real::dp,dpp,debroglie ,histrat
       real::acv, molfra,acpres,acsurf,acvolume ,asetel,acdens,histtot,acmove,acnp,dvalue,dnchoi,dnchoi1,dnchoih ,dnunit,ratflcq,v,vintra,vinter,vext,velect,vewald,vtors,vtail ,rho,thetac,vbend,rxvec,ryvec,rzvec,distanceij,theta,xaa1 ,yaa1,zaa1,xa1a2,ya1a2,za1a2,dot,daa1,da1a2
 
-      real::xcc,ycc,zcc,tcc,spltor,rcutmin      
+      real::xcc,ycc,zcc,tcc,rcutmin
  
       dimension acv(nener,nbxmax),lratfix(ntmax)
       dimension mnbox(nbxmax,ntmax)
@@ -85,13 +86,7 @@
 ! --- accept new ratio
                Armtrax = rttrax
             end if
-            
-            if ( lneigh .and. Armtrax .ge. upnn) then
-               Armtrax = upnn
-               write(io_output,*) '### problem : for target accept ', 'ratio Armtrax should be smaller than upnn'
-            end if
          end if
-
 
          if ( Abntray .gt. 0.5d0 ) then
             ratray = Abstray / Abntray
@@ -107,11 +102,6 @@
             else
 ! --- accept new ratio
                Armtray = rttray
-            end if
-
-            if ( lneigh .and. Armtray .ge. upnn) then
-               Armtray = upnn
-               write(io_output,*) '### problem : for target accept ', 'ratio Armtray should be smaller than upnn'
             end if
          end if
         
@@ -129,11 +119,6 @@
             else
 ! --- accept new ratio
                Armtraz = rttraz
-            end if
-
-            if ( lneigh .and. Armtraz .ge. upnn) then
-               Armtraz = upnn
-               write(io_output,*) '### problem : for target accept ', 'ratio Armtraz should be smaller than upnn'
             end if
          end if
  
@@ -165,11 +150,6 @@
 !                    --- accept new ratio
                      rmtrax(imolty,im) = rttrax
                   end if
-
-                  if ( lneigh .and. rmtrax(imolty,im) .ge. upnn) then
-                     rmtrax(imolty,im) = upnn
-                     write(io_output,*) '### problem : for target accept ' ,'ratio rmtrax should be smaller than upnn'
-                  end if
                end if
 
 !              --- rmtray
@@ -192,10 +172,6 @@
                   else 
 !                    --- accept new ratio
                      rmtray(imolty,im) = rttray
-                  end if
-                  if ( lneigh .and. rmtray(imolty,im) .ge. upnn) then
-                     rmtray(imolty,im) = upnn
-                     write(io_output,*) '### problem : for target accept ' ,'ratio rmtray should be smaller than upnn'
                   end if
                end if
 
@@ -221,11 +197,6 @@
 !                    --- accept new ratio
                      rmtraz(imolty,im) = rttraz
                   end if
-!                 --- check neighbor list
-                  if ( lneigh .and. rmtraz(imolty,im) .ge. upnn) then
-                     rmtraz(imolty,im) = upnn
-                     write(io_output,*) '### problem : for target accept ' ,'ratio rmtraz should be smaller than upnn'
-                  end if
                end if
  
 !              --- rmrotx
@@ -250,12 +221,6 @@
 !                    --- accept trial ratio
                      rmrotx(imolty,im) = rtrotx
                   end if
-
-!                 --- check neighbour list
-                  if ( lneigh .and. rmrotx(imolty,im) .ge. upnndg) then
-                     rmrotx(imolty,im) = upnndg
-                     write(io_output,*) '### problem : for target accept ' ,'ratio rmrotx should be smaller than upnndg'
-                  end if
                end if
 
 !              --- rmroty
@@ -276,12 +241,6 @@
                   else
 !                    --- accept trial ratio
                      rmroty(imolty,im) = rtroty
-                  end if
-
-!                 --- check neighbour list
-                  if ( lneigh .and. rmroty(imolty,im) .ge. upnndg) then
-                     rmroty(imolty,im) = upnndg
-                     write(io_output,*) '### problem : for target accept' ,' ratio rmroty should be smaller than upnndg'
                   end if
                end if
                
@@ -305,14 +264,10 @@
 !                    --- accept trial ratio
                      rmrotz(imolty,im) = rtrotz
                   end if
-!                 --- check neighbour list
-                  if ( lneigh .and. rmrotz(imolty,im) .ge. upnndg) then
-                     rmrotz(imolty,im) = upnndg
-                     write(io_output,*) '### problem : for target accept ' ,'ratio rmrotz should be smaller than upnndg'
-                  end if
                end if
 
-               call averageMaximumDisplacement()
+               if (lneigh) call check_neighbor_list(im,imolty)
+               call averageMaximumDisplacement(im,imolty)
 
 ! KM for MPI
 ! only processor 0 writes to output files (except for error messages)
@@ -539,13 +494,7 @@
                               tcc = xcc*rxvec(ip1,ip2)+ycc*ryvec(ip1 ,ip2)+ zcc*rzvec(ip1,ip2)
                               theta = dacos(thetac)
                               if (tcc .lt. 0.0d0) theta = -theta
-                              if (L_spline) then
-                                 call splint(theta,spltor,it)
-                              else if(L_linear) then
-                                 call lininter(theta,spltor,it)
-                              end if
-
-                              vtors = vtors + spltor
+                              vtors = vtors + inter_tor(theta,it)
                            else
                               vtors = vtors + vtorso( thetac, it )
                            end if
@@ -856,29 +805,22 @@
       return
       end
 
-      subroutine averageMaximumDisplacement
+      subroutine averageMaximumDisplacement(ibox,imol)
         use sim_system
         implicit none
-        
-        integer::ibox,imol
+        integer,intent(in)::ibox,imol
 
-        do ibox=1,nbox
-           if (numberDimensionIsIsotropic(ibox).eq.3) then
-              do imol=1,nmolty
-                 rmtrax(imol,ibox)=(rmtrax(imol,ibox)+rmtray(imol,ibox)+rmtraz(imol,ibox))/3
-                 rmtray(imol,ibox)=rmtrax(imol,ibox)
-                 rmtraz(imol,ibox)=rmtrax(imol,ibox)
-                 rmrotx(imol,ibox)=(rmrotx(imol,ibox)+rmroty(imol,ibox)+rmrotz(imol,ibox))/3
-                 rmroty(imol,ibox)=rmrotx(imol,ibox)
-                 rmrotz(imol,ibox)=rmrotx(imol,ibox)
-              end do
-           else if (numberDimensionIsIsotropic(ibox).eq.2) then
-              do imol=1,nmolty
-                 rmtrax(imol,ibox)=(rmtrax(imol,ibox)+rmtray(imol,ibox))/2
-                 rmtray(imol,ibox)=rmtrax(imol,ibox)
-                 rmrotx(imol,ibox)=(rmrotx(imol,ibox)+rmroty(imol,ibox))/2
-                 rmroty(imol,ibox)=rmrotx(imol,ibox)
-              end do
-           end if
-        end do
+        if (numberDimensionIsIsotropic(ibox).eq.3) then
+           rmtrax(imol,ibox)=(rmtrax(imol,ibox)+rmtray(imol,ibox)+rmtraz(imol,ibox))/3
+           rmtray(imol,ibox)=rmtrax(imol,ibox)
+           rmtraz(imol,ibox)=rmtrax(imol,ibox)
+           rmrotx(imol,ibox)=(rmrotx(imol,ibox)+rmroty(imol,ibox)+rmrotz(imol,ibox))/3
+           rmroty(imol,ibox)=rmrotx(imol,ibox)
+           rmrotz(imol,ibox)=rmrotx(imol,ibox)
+        else if (numberDimensionIsIsotropic(ibox).eq.2) then
+           rmtrax(imol,ibox)=(rmtrax(imol,ibox)+rmtray(imol,ibox))/2
+           rmtray(imol,ibox)=rmtrax(imol,ibox)
+           rmrotx(imol,ibox)=(rmrotx(imol,ibox)+rmroty(imol,ibox))/2
+           rmroty(imol,ibox)=rmrotx(imol,ibox)
+        end if
       end subroutine averageMaximumDisplacement

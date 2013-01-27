@@ -36,7 +36,7 @@ CONTAINS
 
   integer function idx(beadtype)
     integer,intent(in)::beadtype(3)
-    integer::atomIdx(3),nAtomType,itype,i
+    integer::atomIdx(3),nAtomType,i
 
     do i=1,3
        atomIdx(i)=indexOf(atoms,beadtype(i))
@@ -84,8 +84,11 @@ CONTAINS
              call initiateThreeBody(nEntries)
              threebodies%size=nEntries
           end if
-          do i=1,nEntries
+          i=0
+          do
              call readLine(io_ff,line,skipComment=.true.,iostat=jerr)
+             if (UPPERCASE(line(1:13)).eq.'END THREEBODY') exit
+             i=i+1
              read(line,*) beadtype,ttype(i),coeffs(1:nparam(ttype(i)),i)
              threebodies%list(i)=idx(beadtype)
              write(*,*) threebodies%list(i),ttype(i),coeffs(:,i)
@@ -93,6 +96,9 @@ CONTAINS
              coeffs(2,i)=coeffs(2,i)**2 !cutoffCoul
              coeffs(3,i)=coeffs(3,i)*degrad !degree to radians
           end do
+          if (i.ne.nEntries) then
+             call err_exit('readThreeBody: the number of entries is incorrect!')
+          end if
        end if
     END DO
     close(io_ff)

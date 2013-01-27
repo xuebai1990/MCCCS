@@ -3,7 +3,7 @@ subroutine initia
   use util_random,only:random
   use util_runtime,only:err_exit
   use sim_system
-  use energy_intramolecular,only:vtorso,splint,lininter
+  use energy_intramolecular,only:vtorso,inter_tor
   use moves_cbmc,only:rosenbluth,schedule,explct
   implicit none
 !$$$      include 'mpi.inc'
@@ -34,7 +34,7 @@ subroutine initia
 
       real::rxui,ryui,rzui,xaa1,yaa1,zaa1,daa1 ,xa1a2,ya1a2,za1a2,da1a2 
 
-      real::xcc,ycc,zcc,tcc,spltor
+      real::xcc,ycc,zcc,tcc
 
       real::vbend,vtg,thetac,theta,dot ,aben,ator
 
@@ -687,13 +687,7 @@ subroutine initia
                      theta=dacos(thetac)
 
                      if (tcc .lt. 0.0d0) theta = -theta
-                     if (it.le.600) then
-                        call splint(theta,spltor,it)
-                     else
-                        call lininter(theta,spltor,it)
-                     end if
-
-                     vtg=spltor
+                     vtg=inter_tor(theta,it)
                   else
                      vtg = vtorso (thetac,it)
                   end if

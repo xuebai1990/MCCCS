@@ -10,8 +10,8 @@ subroutine readdat(file_in,lucall,ucheck,nvirial,starvir,stepvir)
   use sim_cell
   use zeolite
   use energy_kspace,only:calp
-  use energy_intramolecular,only:read_tor_table,read_vib_table,read_bend_table
-  use energy_pairwise,only:suijtab,read_vdW_table,read_elect_table,rzero,epsnx
+  use energy_intramolecular,only:init_tabulated_potential_bonded
+  use energy_pairwise,only:suijtab,init_tabulated_potential_pair,rzero,epsnx
   use energy_3body,only:buildTripletTable
   use energy_4body,only:buildQuadrupletTable
   use energy_sami
@@ -41,7 +41,7 @@ subroutine readdat(file_in,lucall,ucheck,nvirial,starvir,stepvir)
       integer::nvirial
       real::starvir,stepvir
 
-      real::rcnnsq,umatch,dum ,pm,pcumu,qbox,w(3)
+      real::dum,pm,pcumu,qbox,w(3)
       integer::ndum,ij,ji,ii,jj
       logical::lsolute(ntmax),lhere(nntype)
 
@@ -74,10 +74,6 @@ subroutine readdat(file_in,lucall,ucheck,nvirial,starvir,stepvir)
 !      dimension temx(nmax,numax),temy(nmax,numax),temz(nmax,numax)
       dimension k_max_l(nbxmax),k_max_m(nbxmax),k_max_n(nbxmax)
 
-! KEA torsion variables
-      integer::mmm,ttor
-! KM tabulated potential variables
-      integer::tvib, tbend
 ! KM variable added when analysis removed
       integer::nhere
 
@@ -953,25 +949,9 @@ subroutine readdat(file_in,lucall,ucheck,nvirial,starvir,stepvir)
 
       call read_expand()
 
-      if (L_tor_table) then
-         call read_tor_table(io_output)
-      end if
+      call init_tabulated_potential_bonded()
 
-      if (L_vib_table) then
-         call read_vib_table(io_output)
-      end if
-
-      if (L_bend_table) then
-         call read_bend_table(io_output)
-      end if
-
-      if (L_vdW_table) then
-         call read_vdW_table(io_output)
-      end if
-
-      if (L_elect_table) then
-         call read_elect_table(io_output)
-      end if
+      call init_tabulated_potential_pair()
 
 ! -- check whether there is a polarizable molecule
 
@@ -2041,9 +2021,8 @@ subroutine readdat(file_in,lucall,ucheck,nvirial,starvir,stepvir)
                read(io_restart,*) rmtrax(imol,im), rmtray(imol,im) , rmtraz(imol,im)
                read(io_restart,*) rmrotx(imol,im), rmroty(imol,im) , rmrotz(imol,im)
             end do
+            call averageMaximumDisplacement(im,imol)
          end do
-
-         call averageMaximumDisplacement()
 
          if (myid.eq.0) then
             write(io_output,*)  'new maximum displacements read from restart-file'
@@ -2638,61 +2617,6 @@ subroutine readdat(file_in,lucall,ucheck,nvirial,starvir,stepvir)
          end if
       end if
 
-      if ( lneigh ) then
-! *** If using neighbour list make sure the rcut & rcutnn is the same
-! *** for all the boxes
-         do ibox = 2,nbox
-            if ((dabs(rcut(1)-rcut(ibox)).gt.1.0d-10).and. (dabs(rcutnn(1)-rcut(ibox)).gt.1.0d-10)) then
-               write(io_output,*) 'Keep rcut and rcutnn for all the  boxes same'
-               ldie = .true.
-               return
-            end if
-         end do
-
-! *** calculate squares of nn-radius and max. update displacement ***
-         rcnnsq = rcutnn(1) * rcutnn(1)
-         upnn = ( rcutnn(1) - rcut(1) ) / 3.0d0
-         upnnsq = upnn * upnn
-
-! *** calculate max. angular displacement that doesn't violate upnn ***
-! *** calculate max. all-trans chain length ( umatch ) ***
-         umatch = 0.0d0
-         do j = 1, nunit(1) - 1
-            umatch = umatch + brvib(1)
-         end do
-         upnndg = asin( upnn / umatch )
-
-        do im=1,2
-           do imol=1,nmolty
-              if ( rmtrax(imol,im) .gt. upnn ) then
-                 write(io_output,*) ' rmtrax greater than upnn',im,imol
-                 rmtrax(imol,im) = upnn
-              end if
-              if ( rmtray(imol,im) .gt. upnn ) then
-                 write(io_output,*) ' rmtray greater than upnn',im,imol
-                 rmtray(imol,im) = upnn
-              end if
-              if ( rmtraz(imol,im) .gt. upnn ) then
-                 write(io_output,*) ' rmtraz greater than upnn',im,imol
-                 rmtraz(imol,im) = upnn
-              end if
-
-              if ( rmrotx(imol,im) .gt. upnndg ) then
-                 write(io_output,*) ' rmrotx greater than upnndg',im,imol
-                 rmrotx(imol,im) = upnndg
-              end if
-              if ( rmroty(imol,im) .gt. upnndg ) then
-                 write(io_output,*) ' rmroty greater than upnndg',im,imol
-                 rmroty(imol,im) = upnndg
-              end if
-              if ( rmrotz(imol,im) .gt. upnndg ) then
-                 write(io_output,*) ' rmrotz greater than upnndg',im,imol
-                 rmrotz(imol,im) = upnndg
-              end if
-           end do
-        end do
-      end if
-
 ! *** write input data to unit 6 for control ***
       if (myid.eq.0) then
          write(io_output,*)
@@ -2705,17 +2629,6 @@ subroutine readdat(file_in,lucall,ucheck,nvirial,starvir,stepvir)
          write(io_output,*) 'ex-pressure:                    ',  (express(ibox),ibox=1,nbox)
          write(io_output,*)
       end if
-
-
-! -------------------------------------------------------------------
-
-      do i = 1,nbox
-         if ( rcut(i) .ge. rcutnn(i) .and. lneigh ) then
-            write(io_output,*) ' rcut greater equal rcutnn for box',i
-            ldie = .true.
-            return
-         end if
-      end do
 
       return
       end

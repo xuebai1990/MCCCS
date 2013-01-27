@@ -8,7 +8,7 @@ MODULE energy_pairwise
   use sim_system
   use sim_cell
   use energy_kspace,only:calp,sself,correct
-  use energy_intramolecular,only:vtorso,lininter_vib,lininter_bend,lininter,splint
+  use energy_intramolecular,only:vtorso,lininter_bend,inter_tor
   use energy_external,only:U_ext
   use energy_sami,only:ljsami,ljmuir
   use energy_garofalini
@@ -18,13 +18,11 @@ MODULE energy_pairwise
   include 'common.inc'
   private
   save
-  public::sumup,energy,boltz,coru,suijtab,exsix,ljpsur,read_vdW_table,read_elect_table
+  public::sumup,energy,boltz,coru,suijtab,exsix,ljpsur,init_tabulated_potential_pair
 
-  integer::ntabvdW,num_int_vdW(1,1),vdWsplits(1,1)
-  real::rvdW(10,1,1),tabvdW(10,1,1),vdWdiff(10,1,1)
-
-  integer::ntabelect,num_int_elect(1,1),electsplits(10,10)
-  real::relect(10,1,1),tabelect(10,1,1),electdiff(10,1,1)
+  integer,allocatable::vdWsplits(:,:),electsplits(:,:)
+  real,allocatable::rvdW(:,:,:),tabvdW(:,:,:),relect(:,:,:),tabelect(:,:,:)
+  integer::ntabvdW,ntabelect
 
 ! EXPSIX.INC
   real,public::aexsix,bexsix,cexsix,sexsix,consp,consu
@@ -95,9 +93,6 @@ contains
       integer::i,imolty,ii,j,jmolty,jj,ntii,ntjj,ntij,iunit,ibox,nmcount,ntj,k,mmm
       real::v,vinter,vintra,vtail,vvib,vbend,vtg,vext,velect,vflucq,qqii
       real::rcutsq,rminsq,rxui,ryui,rzui,rxuij,ryuij,rzuij,rijsq,rho,rij,vrecipsum,rbcut,vwell,calpi
-! tabulated potential variables
-      real::tabulated_bend,tabulated_vdW,tabulated_elect
-
 !      real::vtemp
 
       real::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq
@@ -525,8 +520,7 @@ contains
                               if (L_bend_table) then
                                  do mmm=1,inben(imolty,ii)
                                     if (ijben3(imolty,ii,mmm).eq.jj)then
-                                       call lininter_bend(rij,tabulated_bend,itben(imolty,ii,mmm))
-                                       vintra = vintra + tabulated_bend
+                                       vintra = vintra + lininter_bend(rij,itben(imolty,ii,mmm))
                                        goto 94
                                     end if
                                  end do
@@ -793,6 +787,7 @@ contains
 !    lfavor:
 !    *******************************************************************
   subroutine energy(i,imolty,v,vintra,vinter,vext,velect,vewald,flagon,ibox,istart,iuend,lljii,ovrlap,ltors,vtors,lcharge_table,lfavor,lAtom_traxyz)
+    use sim_particle,only:lnn
     use energy_intramolecular,only:U_torsion
     use energy_3body,only:U3MolSys
     use energy_4body,only:U4MolSys
@@ -821,7 +816,7 @@ contains
 !$$$      include 'garofalini.inc'
 !$$$      include 'tabulated.inc'
       logical::lqimol,lqjmol,lexplt,lcoulo,lfavor,lij2,liji,lqchgi
-      logical::lljii,ovrlap,ltors,lcharge_table,lfound,lAtom_traxyz
+      logical::lljii,ovrlap,ltors,lcharge_table,lAtom_traxyz
 
       integer::growii,growjj,k,jcell(nmax),nmole
       integer::i,ibox,istart,iuend,ii,ntii,flagon,jjj,iii,mmm,j,jj,ntjj,ntij,ntj,imolty,jmolty,jjend
@@ -835,8 +830,6 @@ contains
 ! KEA
       integer::neigh_j,neighj(maxneigh)
       real::ndijj(maxneigh),nxijj(maxneigh),nyijj(maxneigh),nzijj(maxneigh)
-! KM
-      real::tabulated_vdW, tabulated_bend, tabulated_elect
 ! Neeraj & RP added for MPI
       real::sum_velect, sum_vinter
       logical::all_ovrlap
@@ -1170,8 +1163,7 @@ contains
                      if (L_bend_table) then
                         do mmm=1,inben(imolty,ii)
                            if (ijben3(imolty,ii,mmm).eq.jj) then
-                              call lininter_bend(rij, tabulated_bend,  itben(imolty,ii,mmm))
-                              vintra = vintra + tabulated_bend
+                              vintra = vintra + lininter_bend(rij,itben(imolty,ii,mmm))
                               goto 96
                            end if
                         end do
@@ -1316,6 +1308,7 @@ contains
 !     maxlen: maximum possible length of grown chain
 !    *******************************************************************
   subroutine boltz(lnew,lfirst,ovrlap,i,icharge,imolty,ibox,ichoi,iufrom,ntogrow,glist,maxlen)
+    use sim_particle,only:lnn
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'system.inc'
@@ -1337,14 +1330,13 @@ contains
 !$$$      include 'mpif.h'
 !$$$      include 'mpi.inc'
 
-      logical::lnew,ovrlap,lcmno(nmax),lfirst,lcompute
+      logical::lnew,ovrlap,lcmno(nmax),lfirst
       logical::lqimol,lqjmol,liji,lqchgi
       integer::ichoi,growjj,igrow,count,glist(numax),icharge,cnt,jcell(nmax)
       integer::i,imolty,ibox,ntogrow,itrial,ntii,j,jj ,ntjj,ntij,iu,jmolty,iufrom,ii,k,nmole
 !      integer::NRtype
       real::rminsq,rxui,ryui,rzui,rxuij,ryuij,rzuij,rij,rijsq,maxlen,rcm,rcmsq,corr,rcutmax
       real::vinter,vintra,vext,velect,vewald,vwell,v,rcutsq,rcinsq
-      real::tabulated_bend,tabulated_vdW,tabulated_elect
       integer::mmm
 
 !------------- RP added for MPI
@@ -1523,8 +1515,7 @@ contains
                            if (L_bend_table) then
                               do mmm=1,inben(imolty,ii)
                                  if (ijben3(imolty,ii,mmm).eq.iu) then
-                                    call lininter_bend(rij,tabulated_bend,itben(imolty,ii,mmm))
-                                    vintra = vintra + tabulated_bend
+                                    vintra = vintra + lininter_bend(rij,itben(imolty,ii,mmm))
                                     goto 96
                                  end if
                               end do
@@ -1543,8 +1534,7 @@ contains
 ! *** group but on its own distance in SC, but should be corrected
 ! *** later by calling energy subroutine.
                         if (L_elect_table) then
-                           call lininter_elect(rij,tabulated_elect,ntii,ntjj)
-                           velect = velect + qscale2(imolty,ii,iu)*qqu(icharge,ii)*qqu(icharge,iu)*tabulated_elect
+                           velect = velect + qscale2(imolty,ii,iu)*qqu(icharge,ii)*qqu(icharge,iu)*lininter_elect(rij,ntii,ntjj)
                         else if (lewald) then
 !                          --- compute real space term of vewald
                            velect = velect + qscale2(imolty,ii,iu)*qqu(icharge,ii)*qqu(icharge,iu)*erfunc(calp(ibox)*rij)/ rij
@@ -1709,8 +1699,7 @@ contains
 ! *** group but on its own distance in SC, but should be corrected
 ! *** later by calling energy subroutine.
                         if (L_elect_table) then
-                           call lininter_elect(rij,tabulated_elect,ntii,ntjj)
-                           velect = velect + qqu(icharge,ii)*qqu(j,jj)*tabulated_elect
+                           velect = velect + qqu(icharge,ii)*qqu(j,jj)*lininter_elect(rij,ntii,ntjj)
                         else if (lewald) then
 !                          --- compute real space term of velect
                            velect = velect + qqu(icharge,ii)*qqu(j,jj)*erfunc(calp(ibox)*rij)/rij
@@ -1985,17 +1974,15 @@ contains
       character(LEN=*),INTENT(IN)::file_ff
       character(LEN=default_string_length)::line_in
       logical,intent(in)::lmixlb,lmixjo
-      integer::io_ff,jerr,i,j,ij,ji,ibox,nbead,nmix,imix,dum
+      integer::io_ff,jerr,i,j,ij,ji,ibox,nbead,nmix,dum
       real::rzeronx(nxatom),epsilonnx(nxatom)
 
-      real::rcheck, sr2, sr6, adum, bdum, rs1, rs7, sr7,pi,djay,sigmaTmp,epsilonTmp
+      real::rcheck, sr2, sr6, adum, bdum, rs1, rs7, sr7,djay,sigmaTmp,epsilonTmp
 
 ! ----------------------------------------------------------------
       do i = 1, nntype
          lpl(i) = .false.
       end do
-
-      pi = 4.0d0*datan(1.0d0)
 
       if(lshift) then
          do ibox = 2,nbox
@@ -2044,7 +2031,7 @@ contains
        qelect(1) = 4.0d0
        mass(1) = 28.09d0
        ecut(1) = garofalini(rcut(1)*rcut(1),1,qelect(1),qelect(1) ,1,1)
-       chname(1) = ' Garo Si'
+       chname(1) = 'Garo Si'
        chemid(1) = 'Si '
 
 !     O-O
@@ -2055,7 +2042,7 @@ contains
        qelect(2) = -2.0d0
        mass(2) = 16.00d0
        ecut(2) = garofalini(rcut(1)*rcut(1),2,qelect(2),qelect(2) ,2,2)
-       chname(2) = ' Garo O'
+       chname(2) = 'Garo O'
        chemid(2) = 'O  '
 
 !     H-H
@@ -2072,7 +2059,7 @@ contains
        qelect(3) = 1.0d0
        mass(3) = 1.0078d0
        ecut(3) = garofalini(rcut(1)*rcut(1),3,qelect(3),qelect(3) ,3,3)
-       chname(3) = ' Garo H'
+       chname(3) = 'Garo H'
        chemid(3) = 'H  '
 
 !     Si-O
@@ -2241,7 +2228,7 @@ contains
          qelect(1) = 0.44469d0
          lqchg(1) = .true.
          mass(1) = 12.011d0
-         chname(1) = ' 9-6 formic acid C'
+         chname(1) = '9-6 formic acid C'
 
 ! *** hydroxyl oxygen site H-C(=O)-[O]H
          rzeronx(2) = 3.5694293136d0
@@ -2249,7 +2236,7 @@ contains
          qelect(2) = -0.55296d0
          lqchg(2) = .true.
          mass(2) = 15.9996d0
-         chname(2) = ' 9-6 formic acid O'
+         chname(2) = '9-6 formic acid O'
 
 ! *** carbonyl oxygen site H-C[=O]-OH
          rzeronx(3) = 3.0014635172d0
@@ -2257,7 +2244,7 @@ contains
          qelect(3) = -0.43236d0
          lqchg(3) = .true.
          mass(3) = 15.9996d0
-         chname(3) = ' 9-6 formic acid=O'
+         chname(3) = '9-6 formic acid=O'
 
 ! *** hydrogen site [H]-C(=O)-OH
          rzeronx(4) = 0.8979696387d0
@@ -2265,7 +2252,7 @@ contains
          qelect(4) = 0.10732d0
          lqchg(4) = .true.
          mass(4) = 1.00794d0
-         chname(4) = ' 9-6 formic acid H'
+         chname(4) = '9-6 formic acid H'
 
 ! *** acidic hydrogen site H-C(=O)-O[H]
          rzeronx(5) = 1.115727276d0
@@ -2273,7 +2260,7 @@ contains
          qelect(5) = 0.43331d0
          lqchg(5) = .true.
          mass(5) = 1.00794d0
-         chname(5) = ' 9-6 formic acidOH'
+         chname(5) = '9-6 formic acidOH'
 
 ! * calculate all site-site parameters via Lorentz-Berthelot rules
          do i = 1,nxatom
@@ -2319,14 +2306,14 @@ contains
       sigi(1) = 3.93d0
       epsi(1) = 114.0d0
       mass(1) = 15.0347d0
-      chname(1) = ' SKS-UA CH3 alkane'
+      chname(1) = 'SKS-UA CH3 alkane'
       chemid(1)  = 'C  '
 
 ! --- SKS-UA methylene group [CH2]
       sigi(2) = 3.93d0
       epsi(2) = 47.0d0
       mass(2) = 14.0268d0
-      chname(2) = ' SKS-UA CH2 alkane'
+      chname(2) = 'SKS-UA CH2 alkane'
       chemid(2)  = 'C  '
 
 
@@ -2334,35 +2321,35 @@ contains
       sigi(3) = 3.73d0
       epsi(3) = 148.0d0
       mass(3) = 16.043d0
-      chname(3) = ' Tr-UA CH4 alkane '
+      chname(3) = 'Tr-UA CH4 alkane '
       chemid(3)  = 'C  '
 
 ! --- TraPPE-UA Methyl [CH3] sp3 (J. Phys. Chem.) (primary)
       sigi(4) = 3.75d0
       epsi(4) = 98.0d0
       mass(4) = 15.0347d0
-      chname(4) = ' Tr-UA CH3 alkane '
+      chname(4) = 'Tr-UA CH3 alkane '
       chemid(4)  = 'C  '
 
 ! --- TraPPE-UA Methylene [CH2] sp3 (secondary)
       sigi(5) = 3.95d0
       epsi(5) = 46.0d0
       mass(5) = 14.0268d0
-      chname(5) = ' Tr-UA CH2 alkane '
+      chname(5) = 'Tr-UA CH2 alkane '
       chemid(5)  = 'C  '
 
 ! --- TraPPE-UA Methine [CH] sp3 (ternary)
       sigi(6) = 4.68d0
       epsi(6) = 10.0d0
       mass(6) = 13.0191d0
-      chname(6) = ' Tr-UA CH  alkane '
+      chname(6) = 'Tr-UA CH  alkane '
       chemid(6)  = 'C  '
 
 ! --- TraPPE-UA [C] (quaternary)
       sigi(7) = 6.4d0
       epsi(7) = 0.5d0
       mass(7) = 12.011d0
-      chname(7) = ' Tr-UA C   alkane '
+      chname(7) = 'Tr-UA C   alkane '
       chemid(7)  = 'C  '
 !ccccccccccccccccccccccccccccccccccccccccccccccc
 ! --- coarse-grain end segment (CH3+CH2+CH2)
@@ -2371,14 +2358,14 @@ contains
       sigi(40) = 3.75d0
       epsi(40) = 98.0d0
       mass(40) = 43.0883d0
-      chname(40) = ' Tr-UA CH3 alkane '
+      chname(40) = 'Tr-UA CH3 alkane '
       chemid(40)  = 'C  '
 
 ! --- coarse-grain middle segement (CH2+CH2+CH2)
       sigi(50) = 3.95d0
       epsi(50) = 46.0d0
       mass(50) = 42.0804d0
-      chname(50) = ' Tr-UA CH2 alkane '
+      chname(50) = 'Tr-UA CH2 alkane '
       chemid(50)  = 'C  '
 !ccccccccccccccccccccccccccccccccccccccccccccccc
 
@@ -2386,35 +2373,35 @@ contains
       sigi(8) = 3.775d0
       epsi(8) = 104.1d0
       mass(8) = 15.0347d0
-      chname(8) = ' OPLSUA CH3 ethane'
+      chname(8) = 'OPLSUA CH3 ethane'
       chemid(8)  = 'C  '
 
 ! --- OPLS-UA butane methyl [CH3] sp3
       sigi(9) = 3.905d0
       epsi(9) = 88.1d0
       mass(9) = 15.0347d0
-      chname(9) = ' OPLSUA CH3 butane'
+      chname(9) = 'OPLSUA CH3 butane'
       chemid(9)  = 'C  '
 
 ! --- OPLS-UA methylene [CH2] sp3
       sigi(10) = 3.905d0
       epsi(10) = 59.4d0
       mass(10) = 14.0268d0
-      chname(10) = ' OPLSUA CH2 alkane'
+      chname(10) = 'OPLSUA CH2 alkane'
       chemid(10)  = 'C  '
 
 ! --- OPLS-UA Methine [CH] (ternary) CARBON GROUP Jorgensen
       sigi(11) = 3.85d0
       epsi(11) = 32.0d0
       mass(11) = 13.0191d0
-      chname(11) = ' OPLSUA CH alkane '
+      chname(11) = 'OPLSUA CH alkane '
       chemid(11)  = 'C  '
 
 ! --- OPLS [C]  (quaternary) CARBON GROUP Jorgensen
       sigi(12) = 3.85d0
       epsi(12) = 25.0d0
       mass(12) = 12.0113d0
-      chname(12) = ' OPLSUA C  alkane '
+      chname(12) = 'OPLSUA C  alkane '
       chemid(12)  = 'C  '
 
 
@@ -2422,35 +2409,35 @@ contains
       sigi(13) = 4.10d0
       epsi(13) = 140.0d0
       mass(13) = 16.043d0
-      chname(13) = ' FreireUA CH4     '
+      chname(13) = 'FreireUA CH4     '
       chemid(13)  = 'C  '
 
 ! --- UA Methyl [CH3] Freire Mol. Phys. 91, (2), 189-201 (1997)
       sigi(14) = 4.02d0
       epsi(14) = 96.0d0
       mass(14) = 15.0347d0
-      chname(14) = ' FreireUA CH3 alkn'
+      chname(14) = 'FreireUA CH3 alkn'
       chemid(14)  = 'C  '
 
 ! --- UA Methylene [CH2] Freire Mol. Phys. 91, (2), 189-201 (1997)
       sigi(15) = 3.72d0
       epsi(15) = 57.0d0
       mass(15) = 14.0268d0
-      chname(15) = ' FreireUA CH2 alkn'
+      chname(15) = 'FreireUA CH2 alkn'
       chemid(15)  = 'C  '
 
 ! --- UA Methine [CH] Freire Mol. Phys. 91, (2), 189-201 (1997)
       sigi(16) = 3.36d0
       epsi(16) = 36d0
       mass(16) = 13.019d0
-      chname(16) = ' FreireUA CH alkn '
+      chname(16) = 'FreireUA CH alkn '
       chemid(16)  = 'C  '
 
 ! --- UA Quaternary [C] Freire Mol. Phys. 91, (2), 189-201 (1997)
       sigi(17) = 2.44d0
       epsi(17) = 9.0d0
       mass(17) = 12.011d0
-      chname(17) = ' FreireUA C alkane'
+      chname(17) = 'FreireUA C alkane'
       chemid(17)  = 'C  '
 
 
@@ -2458,28 +2445,28 @@ contains
       sigi(18) = 3.77d0
       epsi(18) = 98.1d0
       mass(18) = 15.0347d0
-      chname(18) = ' MPhysUA CH3 alkM '
+      chname(18) = 'MPhysUA CH3 alkM '
       chemid(18)  = 'C  '
 
 ! --- Mol. Phys. UA METHYL-BRANCH Methyl [CH3] no tail correction
       sigi(19) = 3.93d0
       epsi(19) = 78.0d0
       mass(19) = 15.0347d0
-      chname(19) = ' MPhysUA CH3 alkMB'
+      chname(19) = 'MPhysUA CH3 alkMB'
       chemid(19)  = 'C  '
 
 ! --- Mol. Phys. UA ETHYL-BRANCH Methyl [CH3] no tail correction
       sigi(20) = 3.93d0
       epsi(20) = 95.0d0
       mass(20) = 15.0347d0
-      chname(20) = ' MPhysUA CH3 alkEB'
+      chname(20) = 'MPhysUA CH3 alkEB'
       chemid(20)  = 'C  '
 
 ! --- Mol. Phys. UA Methine [CH] sp3 (ternary)
       sigi(21) = 4.10d0
       epsi(21) = 12.0d0
       mass(21) = 13.0191d0
-      chname(21) = ' MPhysUA CH alkane'
+      chname(21) = 'MPhysUA CH alkane'
       chemid(21)  = 'C  '
 
 
@@ -2487,35 +2474,35 @@ contains
       sigi(22) = 3.31d0
       epsi(22) = 0.01d0
       mass(22) = 12.011d0
-      chname(22) = ' Tr-AA [C]H4 alkan'
+      chname(22) = 'Tr-AA [C]H4 alkan'
       chemid(22)  = 'C  '
 
 ! --- TraPPE-AA for alkane methyl [C]-H3 carbon
       sigi(23) = 3.30d0
       epsi(23) = 4.0d0
       mass(23) = 12.011d0
-      chname(23) = ' Tr-AA [C]H3 alkan'
+      chname(23) = 'Tr-AA [C]H3 alkan'
       chemid(23)  = 'C  '
 
 ! --- TraPPE-AA for alkane methylene [C]-H2 carbon
       sigi(24) = 3.65d0
       epsi(24) = 5.0d0
       mass(24) = 12.011d0
-      chname(24) = ' Tr-AA [C]H2 alkan'
+      chname(24) = 'Tr-AA [C]H2 alkan'
       chemid(24)  = 'C  '
 
 ! --- (TraPPE?)-AA for alkane methine [C]-H carbon
       sigi(25) = 4.0d0
       epsi(25) = 2.0d0
       mass(25) = 12.011d0
-      chname(25) = ' Tr-AA [C]H alkane'
+      chname(25) = 'Tr-AA [C]H alkane'
       chemid(25)  = 'C  '
 
 ! --- (TraPPE?)-AA for alkane quaternary [C] carbon
       sigi(26) = 4.35d0
       epsi(26) = 1.0d0
       mass(26) = 12.011d0
-      chname(26) = ' Tr-AA C quat alkn'
+      chname(26) = 'Tr-AA C quat alkn'
       chemid(26)  = 'C  '
 
 ! --- TraPPE-AA for alkane carbon-hydrogen sigma bond H[-]C
@@ -2523,7 +2510,7 @@ contains
       epsi(27) = 15.3d0
 !      mass(27) = 0.0d0
       mass(27) = 1.0079d0
-      chname(27) = ' Tr-AA H alkane   '
+      chname(27) = 'Tr-AA H alkane   '
       chemid(27)  = 'H  '
 
 
@@ -2536,7 +2523,7 @@ contains
       lqchg(28) = .true.
       jayself(28) = 0.5d0*117403d0
       xiq(28) = 9449.3d0
-      chname(28) = ' Tr C CH4 chg pol '
+      chname(28) = 'Tr C CH4 chg pol '
       chemid(28)  = 'C  '
 
 ! --- Methane hydrogen charged with polarizibility
@@ -2548,7 +2535,7 @@ contains
       jayself(29) = 0.5d0*177700d0
       xiq(29) = 0.0d0
       lij(29) = .false.
-      chname(29) = ' Tr H CH4 chg pol '
+      chname(29) = 'Tr H CH4 chg pol '
       chemid(29)  = 'H  '
 
 
@@ -2558,7 +2545,7 @@ contains
       mass(30) = 12.011d0
       qelect(30) = -0.12d0
       lqchg(30) = .true.
-      chname(30) = ' OPLSAA [C]H2 alkn'
+      chname(30) = 'OPLSAA [C]H2 alkn'
       chemid(30)  = 'C  '
 
 ! --- OPLS AA for alkane hydrogen
@@ -2567,7 +2554,7 @@ contains
       mass(31) = 1.0078d0
       qelect(31) = 0.06d0
       lqchg(31) = .true.
-      chname(31) = ' OPLSAA H  alkane '
+      chname(31) = 'OPLSAA H  alkane '
       chemid(31)  = 'H  '
 
 
@@ -2575,21 +2562,21 @@ contains
       sigi(32) = 3.367d0
       epsi(32) = 48.8d0
       mass(32) = 12.011d0
-      chname(32) = ' TildAA [C]H3 alkn'
+      chname(32) = 'TildAA [C]H3 alkn'
       chemid(32)  = 'C  '
 
 ! --- Tildesly explicit atom methylene [C]-H2 carbon
       sigi(33) = 3.367d0
       epsi(33) = 48.8d0
       mass(33) = 12.011d0
-      chname(33) = ' TildAA [C]H2 alkn'
+      chname(33) = 'TildAA [C]H2 alkn'
       chemid(33)  = 'C  '
 
 ! --- Tildesly explicit atom [H] hydrogen
       sigi(34) = 2.908d0
       epsi(34) = 6.84d0
       mass(34) = 1.0079d0
-      chname(34) = ' TildAA H alkane  '
+      chname(34) = 'TildAA H alkane  '
       chemid(34)  = 'H  '
 
 
@@ -2597,35 +2584,35 @@ contains
       sigi(35) = 4.25d0
       epsi(35) = 236.0d0
       mass(35) = 30.070d0
-      chname(35) = ' LJ ethane C2H6   '
+      chname(35) = 'LJ ethane C2H6   '
       chemid(35)  = 'C  '
 
 ! --- Lennard-Jonesium heptane [CH3-(CH2)5-CH3]
       sigi(36) = 6.08d0
       epsi(36) = 418.0d0
       mass(36) = 100.203d0
-      chname(36) = ' LJ heptane C7H16 '
+      chname(36) = 'LJ heptane C7H16 '
       chemid(36)  = 'C  '
 
 ! --- SPECIAL LJ CHAIN fit to give phase diagram of octane J Phys Chem 98?
       sigi(37) = 2.91d0
       epsi(37) = 236.0d0
       mass(37) = 14.0268d0
-      chname(37) = ' LJ CH2 octane fit'
+      chname(37) = 'LJ CH2 octane fit'
       chemid(37)  = 'C  '
 
 ! --- Teja heptane at 366 K [CH3-(CH2)5-CH3]
       sigi(38) = 6.0471d0
       epsi(38) = 484.76d0
       mass(38) = 100.203d0
-      chname(38) = ' Teja heptane 366K'
+      chname(38) = 'Teja heptane 366K'
       chemid(38)  = 'C  '
 
 ! --- Teja heptane at 450 K [CH3-(CH2)5-CH3]
       sigi(39) = 6.0471d0
       epsi(39) = 456.82d0
       mass(39) = 100.203d0
-      chname(39) = ' Teja heptane 450K'
+      chname(39) = 'Teja heptane 450K'
       chemid(39)  = 'C  '
 
 ! * PERFLUOROALKANES
@@ -2635,35 +2622,35 @@ contains
 !$$$c      sigi(40) = 4.18d0 (fit for critical density)
 !$$$      epsi(40) = 172.95d0
 !$$$      mass(40) = 88.003d0
-!$$$      chname(40) = ' UA CF4           '
+!$$$      chname(40) = 'UA CF4           '
 !$$$      chemid(40)  = 'C  '
 !$$$
 !$$$c --- Bin's perfluoromethane [CF4]
 !$$$      sigi(41) = 4.15d0
 !$$$      epsi(41) = 175.4d0
 !$$$      mass(41) = 88.003d0
-!$$$      chname(41) = ' Bin UA CF4       '
+!$$$      chname(41) = 'Bin UA CF4       '
 !$$$      chemid(41)  = 'C  '
 !$$$
 !$$$c --- TraPPE-UA (ilja email 4-14-99) [CF3] group
 !$$$      sigi(42) = 4.36d0
 !$$$      epsi(42) = 87.0d0
 !$$$      mass(42) = 69.0065d0
-!$$$      chname(42) = ' TrUA CF3 Ilja    '
+!$$$      chname(42) = 'TrUA CF3 Ilja    '
 !$$$      chemid(42)  = 'C  '
 !$$$
 !$$$c --- [CF3] group iterb
 !$$$      sigi(43) = 4.35d0
 !$$$      epsi(43) = 87.0d0
 !$$$      mass(43) = 69.006d0
-!$$$      chname(43) = ' UA CF3 iterb     '
+!$$$      chname(43) = 'UA CF3 iterb     '
 !$$$      chemid(43)  = 'C  '
 !$$$
 !$$$c --- TraPPE-UA (ilja email 4-14-99) [CF2] group
 !$$$      sigi(44) = 4.73d0
 !$$$      epsi(44) = 27.5d0
 !$$$      mass(44) = 50.0081d0
-!$$$      chname(44) = ' TrUA CF2 Ilja    '
+!$$$      chname(44) = 'TrUA CF2 Ilja    '
 !$$$      chemid(44)  = 'C  '
 !$$$
 !$$$
@@ -2673,7 +2660,7 @@ contains
 !$$$      mass(45) = 12.011d0
 !$$$      qelect(45) = -0.756d0
 !$$$      lqchg(45) = .true.
-!$$$      chname(45) = ' AmberAA [C]F4    '
+!$$$      chname(45) = 'AmberAA [C]F4    '
 !$$$      chemid(45)  = 'C  '
 !$$$
 !$$$c --- Amber-AA for C[F]4 fluorine (JCC 13(1992) P963)
@@ -2682,7 +2669,7 @@ contains
 !$$$      mass(46) = 18.9984d0
 !$$$      qelect(46) = 0.189d0
 !$$$      lqchg(46) = .true.
-!$$$      chname(46) = ' AmberAA C[F]4    '
+!$$$      chname(46) = 'AmberAA C[F]4    '
 !$$$      chemid(46)  = 'F  '
 !$$$
 !$$$c --- AA for [C]F4 carbon (Surface Science 367(1996) P177)
@@ -2690,7 +2677,7 @@ contains
 !$$$      epsi(47) = 32.73d0
 !$$$      mass(47) = 12.011d0
 !$$$c      qelect(47) = -0.808d0
-!$$$      chname(47) = ' SurfSciAA [C]F4  '
+!$$$      chname(47) = 'SurfSciAA [C]F4  '
 !$$$      chemid(47)  = 'C  '
 !$$$
 !$$$c --- AA for C[F]4 fluorine (Surface Science 367(1996) P177)
@@ -2700,7 +2687,7 @@ contains
 !$$$      epsi(48) = 34.3d0
 !$$$      mass(48) = 18.9984d0
 !$$$c      qelect(48) = 0.202d0
-!$$$      chname(48) = ' SurfSciAA C[F]4  '
+!$$$      chname(48) = 'SurfSciAA C[F]4  '
 !$$$      chemid(48)  = 'F  '
 !$$$
 !$$$c --- AA for [C]F4 carbon (Nose and Klein J.Chem.Phys. 78(1983) 6928)
@@ -2710,7 +2697,7 @@ contains
 !$$$      epsi(49) = 26.00d0
 !$$$      mass(49) = 12.011d0
 !$$$c      qelect(49) = -0.896d0
-!$$$      chname(49) = ' NoseKleinAA [C]F4'
+!$$$      chname(49) = 'NoseKleinAA [C]F4'
 !$$$      chemid(49)  = 'C  '
 !$$$
 !$$$c --- AA for C[F]4 fluorine (Nose and Klein J.Chem.Phys. 78(1983) 6928)
@@ -2718,7 +2705,7 @@ contains
 !$$$      epsi(50) = 38.50d0
 !$$$      mass(50) = 18.9984d0
 !$$$c      qelect(50) = 0.224d0
-!$$$      chname(50) = ' NoseKleinAA C[F]4'
+!$$$      chname(50) = 'NoseKleinAA C[F]4'
 !$$$      chemid(50)  = 'F  '
 
 ! * ALKENES
@@ -2727,21 +2714,21 @@ contains
       sigi(51) = 3.675d0
       epsi(51) = 85.0d0
       mass(51) = 14.0269d0
-      chname(51) = ' Tr-UA CH2 alkene '
+      chname(51) = 'Tr-UA CH2 alkene '
       chemid(51)  = 'C  '
 
 ! --- TraPPE-UA [CH] sp2 alkene Try 3B 04-15-99 MGM
       sigi(52) = 3.73d0
       epsi(52) = 47.0d0
       mass(52) = 13.0191d0
-      chname(52) = ' Tr-UA CH alkene  '
+      chname(52) = 'Tr-UA CH alkene  '
       chemid(52)  = 'C  '
 
 ! --- TraPPE-UA [C] sp2 Try A 04-15-99 MGM
       sigi(53) = 3.85d0
       epsi(53) = 20.0d0
       mass(53) = 12.011d0
-      chname(53) = ' Tr-UA C alkene   '
+      chname(53) = 'Tr-UA C alkene   '
       chemid(53)  = 'C  '
 
 
@@ -2749,14 +2736,14 @@ contains
       sigi(54) = 3.85d0
       epsi(54) = 70.43d0
       mass(54) = 14.0269d0
-      chname(54) = ' OPLSAA CH2 sp2   '
+      chname(54) = 'OPLSAA CH2 sp2   '
       chemid(54)  = 'C  '
 
 ! --- OPLS-UA sp2 hybrid [CH] group JACS 106, 6638-6646 (1984)
       sigi(55) = 3.800d0
       epsi(55) = 57.85d0
       mass(55) = 13.0191d0
-      chname(55) = ' OPLSAA CH sp2    '
+      chname(55) = 'OPLSAA CH sp2    '
       chemid(55)  = 'C  '
 
 ! * AROMATICS
@@ -2770,7 +2757,7 @@ contains
 !      sigi(56) = 3.695d0
 !      epsi(56) = 50.5d0
 !      mass(56) = 13.0191d0
-      chname(56) = ' Tr-UA CH benzene6'
+      chname(56) = 'Tr-UA CH benzene6'
       chemid(56)  = 'C  '
 
 ! --- TraPPE-UA middle benzene site
@@ -2779,7 +2766,7 @@ contains
       mass(57) = 0.0d0
       lqchg(57) = .true.
       qelect(57) = 2.42d0
-      chname(57) = ' Tr-UA mid-q benz9'
+      chname(57) = 'Tr-UA mid-q benz9'
       chemid(57)  = 'H  '
 
 ! --- TraPPE-UA pi electron benzene site
@@ -2788,21 +2775,21 @@ contains
       mass(58) = 0.0d0
       lqchg(58) = .true.
       qelect(58) = -1.21d0
-      chname(58) = ' Tr-UA pi-q benz9 '
+      chname(58) = 'Tr-UA pi-q benz9 '
       chemid(58)  = 'H  '
 
 ! --- TraPPE-UA [C] tertiary aromatic carbon for toluene
       sigi(59) = 3.88d0
       epsi(59) = 21.0d0
       mass(59) = 12.011d0
-      chname(59) = ' Tr-UA C arom tolu'
+      chname(59) = 'Tr-UA C arom tolu'
       chemid(59)  = 'C  '
 
 ! --- TraPPE-UA [C] tertiary aromatic carbon for napthalene
       sigi(60) = 3.70d0
       epsi(60) = 30.0d0
       mass(60) = 12.011d0
-      chname(60) = ' Tr-UA C arom naph'
+      chname(60) = 'Tr-UA C arom naph'
       chemid(60)  = 'C  '
 
 ! * ALCOHOLS
@@ -2814,7 +2801,7 @@ contains
       qelect(61) = 0.435d0
       lij(61) = .false.
       lqchg(61) = .true.
-      chname(61) = ' Tr-UA H alkanol  '
+      chname(61) = 'Tr-UA H alkanol  '
       chemid(61)  = 'H  '
 
 ! --- TraPPE-UA alkanol oxygen H-[O]-CHx
@@ -2823,7 +2810,7 @@ contains
       mass(62) = 15.999d0
       qelect(62) = -0.700d0
       lqchg(62) = .true.
-      chname(62) = ' Tr-UA O alkanol  '
+      chname(62) = 'Tr-UA O alkanol  '
       chemid(62)  = 'O  '
 
 ! --- TraPPE-UA methanol methyl [CH3]-OH
@@ -2832,7 +2819,7 @@ contains
       mass(63) = mass(4)
       qelect(63) = 0.265d0
       lqchg(63) = .true.
-      chname(63) = ' Tr-UA CH3 alkanol'
+      chname(63) = 'Tr-UA CH3 alkanol'
       chemid(63)  = 'C  '
 
 ! --- TraPPE-UA alkanol methylene [CH2]-OH
@@ -2841,7 +2828,7 @@ contains
       mass(64) = mass(5)
       qelect(64) = 0.265d0
       lqchg(64) = .true.
-      chname(64) = ' Tr-UA CH2 alkanol'
+      chname(64) = 'Tr-UA CH2 alkanol'
       chemid(64)  = 'C  '
 
 ! --- TraPPE-UA alkanol methine [CH]-OH (from Bin 6-20-00)
@@ -2850,7 +2837,7 @@ contains
       mass(65) = mass(6)
       qelect(65) = 0.265d0
       lqchg(65) = .true.
-      chname(65) = ' Tr-UA CH alkanol '
+      chname(65) = 'Tr-UA CH alkanol '
       chemid(65)  = 'C  '
 
 ! --- TraPPE-UA alkanol quaternary carbon [C]-OH (from Bin 6-20-00)
@@ -2859,7 +2846,7 @@ contains
       mass(66) = mass(7)
       qelect(66) = 0.265d0
       lqchg(66) = .true.
-      chname(66) = ' Tr-UA C alkanol  '
+      chname(66) = 'Tr-UA C alkanol  '
       chemid(66)  = 'C  '
 
 
@@ -2870,7 +2857,7 @@ contains
       qelect(67) = 0.435d0
       lij(67) = .false.
       lqchg(67) = .true.
-      chname(67) = ' OPLSUA H alkanol '
+      chname(67) = 'OPLSUA H alkanol '
       chemid(67)  = 'H  '
 
 ! --- OPLS-UA alkanol oxygen H-[O]-CHx
@@ -2879,7 +2866,7 @@ contains
       mass(68) = 15.999d0
       qelect(68) = -0.700d0
       lqchg(68) = .true.
-      chname(68) = ' OPLSUA O alkanol '
+      chname(68) = 'OPLSUA O alkanol '
       chemid(68)  = 'O  '
 
 ! --- OPLS-UA alkanol methyl [CH3]-OH
@@ -2888,7 +2875,7 @@ contains
       mass(69) = mass(8)
       qelect(69) = 0.265d0
       lqchg(69) = .true.
-      chname(69) = ' OPLSUA CH3 alknol'
+      chname(69) = 'OPLSUA CH3 alknol'
       chemid(69)  = 'C  '
 
 ! --- OPLS-UA alkanol methylene [CH2]-OH
@@ -2897,7 +2884,7 @@ contains
       mass(70) = mass(10)
       qelect(70) = 0.265d0
       lqchg(70) = .true.
-      chname(70) = ' OPLSUA CH2 alknol'
+      chname(70) = 'OPLSUA CH2 alknol'
       chemid(70)  = 'C  '
 
 ! * ETHERS
@@ -2908,7 +2895,7 @@ contains
       mass(71) = 16.00d0
       qelect(71) = -0.50d0
       lqchg(71) = .true.
-      chname(71) = ' Tr-UA O ether    '
+      chname(71) = 'Tr-UA O ether    '
       chemid(71)  = 'O  '
 
 ! --- TraPPE-UA ether methyl [CH3]-O
@@ -2917,7 +2904,7 @@ contains
       mass(72) = mass(4)
       qelect(72) = 0.25d0
       lqchg(72) = .true.
-      chname(72) = ' Tr-UA CH3 ether  '
+      chname(72) = 'Tr-UA CH3 ether  '
       chemid(72)  = 'C  '
 
 ! --- TraPPE-UA ether methylene [CH2]-O
@@ -2926,7 +2913,7 @@ contains
       mass(73) = mass(5)
       qelect(73) = 0.25d0
       lqchg(73) = .true.
-      chname(73) = ' Tr-UA CH2 ether  '
+      chname(73) = 'Tr-UA CH2 ether  '
       chemid(73)  = 'C  '
 
 ! --- TraPPE-UA ether methine [CH]-O
@@ -2935,7 +2922,7 @@ contains
       mass(74) = mass(65)
       qelect(74) = 0.25d0
       lqchg(74) = .true.
-      chname(74) = ' Tr-UA CH ether   '
+      chname(74) = 'Tr-UA CH ether   '
       chemid(74)  = 'C  '
 
 ! --- TraPPE-UA ether quaternary carbon [C]-O
@@ -2944,7 +2931,7 @@ contains
       mass(75) = mass(66)
       qelect(75) = 0.25d0
       lqchg(75) = .true.
-      chname(75) = ' Tr-UA C ether    '
+      chname(75) = 'Tr-UA C ether    '
       chemid(75)  = 'C  '
 
 ! --- TraPPE-UA Block copolymer ether oxygen next to carbonyl CH2-[O]-C=O
@@ -2953,7 +2940,7 @@ contains
       mass(76) = 16.00d0
       qelect(76) = -0.25d0
       lqchg(76) = .true.
-      chname(76) = ' Tr-UA O carbonate'
+      chname(76) = 'Tr-UA O carbonate'
       chemid(76)  = 'O  '
 
 ! --- TraPPE-UA Block copolymer methylene O=C-O-[CH2]
@@ -2962,7 +2949,7 @@ contains
       mass(77) = mass(5)
       qelect(77) = 0.30d0
       lqchg(77) = .true.
-      chname(77) = ' Tr-UA CH2 carbnat'
+      chname(77) = 'Tr-UA CH2 carbnat'
       chemid(77)  = 'C  '
 
 
@@ -2972,7 +2959,7 @@ contains
       mass(78) = 15.999d0
       qelect(78) = -0.50d0
       lqchg(78) = .true.
-      chname(78) = ' OPLSUA O ether   '
+      chname(78) = 'OPLSUA O ether   '
       chemid(78)  = 'O  '
 
 ! --- OPLS-UA ether methyl [CH3]-O (JCC 1990 vol 11, iss 8 958-971)
@@ -2981,14 +2968,14 @@ contains
       mass(79) = 15.0347d0
       qelect(79) = 0.25d0
       lqchg(79) = .true.
-      chname(79) = ' OPLSUA [CH3]-O   '
+      chname(79) = 'OPLSUA [CH3]-O   '
       chemid(79)  = 'C  '
 
 ! --- OPLS-UA ether methyl [CH3]-CH2-O (JCC 1990 vol 11, iss 8 958-971)
       sigi(80) = 3.905d0
       epsi(80) = 88.06d0
       mass(80) = 15.0347d0
-      chname(80) = ' OPLSUA [CH3]CH2-O'
+      chname(80) = 'OPLSUA [CH3]CH2-O'
       chemid(80)  = 'C  '
 
 ! --- OPLS-UA ether methylene [CH2]-O (JCC 1990 vol 11, iss 8 958-971)
@@ -2997,14 +2984,14 @@ contains
       mass(81) = 14.0268d0
       qelect(81) = 0.25d0
       lqchg(81) = .true.
-      chname(81) = ' OPLSUA [CH2]-O   '
+      chname(81) = 'OPLSUA [CH2]-O   '
       chemid(81)  = 'C  '
 
 ! --- OPLS-UA THF methylene [CH2]-CH2-O (JCC 1990 vol 11, iss 8 958-971)
       sigi(82) = 3.905d0
       epsi(82) = 59.38d0
       mass(82) = 14.0268d0
-      chname(82) = ' OPLSUA [CH2]CH2-O'
+      chname(82) = 'OPLSUA [CH2]CH2-O'
       chemid(82)  = 'C  '
 
 ! * KETONES, ALDEHYDES AND ESTERS
@@ -3021,7 +3008,7 @@ contains
       mass(83) = 12.011d0
       qelect(83) = +0.424d0
       lqchg(83) = .true.
-      chname(83) = ' Tr-UA [C]=O keton'
+      chname(83) = 'Tr-UA [C]=O keton'
       chemid(83)  = 'C  '
 
 !$$$c --- (TraPPE?)-UA ketone oxygen C=[O] (jpotoff 12/17/99 + OPLS JPC v94 p 1683 1990)
@@ -3036,7 +3023,7 @@ contains
       mass(84) = 15.999d0
       qelect(84) = -0.424d0
       lqchg(84) = .true.
-      chname(84) = ' Tr-UA C=[O] keton'
+      chname(84) = 'Tr-UA C=[O] keton'
       chemid(84)  = 'O  '
 
 !$$$c --- (TraPPE?)-UA aldehyde carbon [CH]=O  (jpotoff 12/13/99 + OPLS JPC v94 p1683 1990)
@@ -3051,7 +3038,7 @@ contains
       mass(85) = 13.019d0
       qelect(85) = +0.424d0
       lqchg(85) = .true.
-      chname(85) = ' Tr-UA [CH]=O alde'
+      chname(85) = 'Tr-UA [CH]=O alde'
       chemid(85)  = 'C  '
 
 ! --- TraPPE-UA ester methylene group [CH2]-C=O
@@ -3060,7 +3047,7 @@ contains
       qelect(86) = 0.05d0
       mass(86) = mass(5)
       lqchg(86) = .true.
-      chname(86) = ' Tr-UA [CH2]-C=O e'
+      chname(86) = 'Tr-UA [CH2]-C=O e'
       chemid(86)  = 'C  '
 
 ! --- TraPPE-UA ester methylene group C(=O)O-[CH2]
@@ -3069,7 +3056,7 @@ contains
       qelect(87) = 0.25d0
       mass(87) = mass(5)
       lqchg(87) = .true.
-      chname(87) = ' Tr-UA COO-[CH2] e'
+      chname(87) = 'Tr-UA COO-[CH2] e'
       chemid(87)  = 'C  '
 
 ! --- TraPPE-UA ester oxygen C(=O)-[O]-CHx (uses TraPPE alcohol O)
@@ -3078,7 +3065,7 @@ contains
       qelect(88) = -0.40d0
       mass(88) = mass(62)
       lqchg(88) = .true.
-      chname(88) = ' Tr-UA CO[O]-CHx e'
+      chname(88) = 'Tr-UA CO[O]-CHx e'
       chemid(88)  = 'O  '
 
 ! --- TraPPE-UA ester oxygen in carbonyl C=[O] (uses TraPPE CO2 O)
@@ -3087,7 +3074,7 @@ contains
       qelect(89) = -0.45d0
       mass(89) = 15.999d0
       lqchg(89) = .true.
-      chname(89) = ' Tr-UA C=[O] ester'
+      chname(89) = 'Tr-UA C=[O] ester'
       chemid(89)  = 'O  '
 
 ! --- TraPPE-UA ester carbon in carbonyl [C]=O
@@ -3096,7 +3083,7 @@ contains
       qelect(90) = 0.55d0
       mass(90) = 12.011d0
       lqchg(90) = .true.
-      chname(90) = ' Tr-UA [C]=O ester'
+      chname(90) = 'Tr-UA [C]=O ester'
       chemid(90)  = 'O  '
 
 ! * CARBOXYLIC ACIDS
@@ -3156,7 +3143,7 @@ contains
       mass(95) = 15.999d0
       qelect(95) = -0.424d0
       lqchg(95) = .true.
-      chname(95) = ' Tr-UA C[O]OH acid'
+      chname(95) = 'Tr-UA C[O]OH acid'
       chemid(95)  = 'O  '
 
 ! --- TraPPE-UA iterB carbonyl carbon  [C](=O)-O-H
@@ -3165,7 +3152,7 @@ contains
       mass(96) = 12.011d0
       qelect(96) = 0.424d0
       lqchg(96) = .true.
-      chname(96) = ' Tr-UA [C]OOH acid'
+      chname(96) = 'Tr-UA [C]OOH acid'
       chemid(96)  = 'C  '
 
 ! --- TraPPE-UA carboxylic acid hydrogen C(=O)-O-[H] (JPC v95 p. 3315, 1991)
@@ -3175,7 +3162,7 @@ contains
       qelect(97) = 0.30d0
       lij(97) = .false.
       lqchg(97) = .true.
-      chname(97) = ' Tr-UA COO[H] acid'
+      chname(97) = 'Tr-UA COO[H] acid'
       chemid(97)  = 'H  '
 
 ! --- TraPPE-UA carboxylic acid oxygen C(=O)-[O]-H
@@ -3184,7 +3171,7 @@ contains
       mass(98) = 16.00d0
       qelect(98) = -0.30d0
       lqchg(98) = .true.
-      chname(98) = ' Tr-UA CO[O]H acid'
+      chname(98) = 'Tr-UA CO[O]H acid'
       chemid(98)  = 'O  '
 
 
@@ -3194,7 +3181,7 @@ contains
       mass(99) = 15.0347d0
       qelect(99) = 0.080d0
       lqchg(99) = .true.
-      chname(99) = ' OPLSUA CH3 acid? '
+      chname(99) = 'OPLSUA CH3 acid? '
       chemid(99)  = 'C  '
 
 ! --- OPLS-UA (1990) carboxylic acid carbon [C](=O)-O-H
@@ -3203,7 +3190,7 @@ contains
       mass(100) = 12.011d0
       qelect(100) = 0.55d0
       lqchg(100) = .true.
-      chname(100) = ' OPLSUA [C]OOH acd'
+      chname(100) = 'OPLSUA [C]OOH acd'
       chemid(100)  = 'C  '
 
 ! --- OPLS-UA (1990) carboxylic acid oxygen C(=O)-[O]-H
@@ -3212,7 +3199,7 @@ contains
       mass(101) = 15.999d0
       qelect(101) = -0.58d0
       lqchg(101) = .true.
-      chname(101) = ' OPLSUA CO[O]H acd'
+      chname(101) = 'OPLSUA CO[O]H acd'
       chemid(101)  = 'O  '
 
 ! --- OPLS-UA (1990) carbonyl oxygen  C[=O]
@@ -3221,7 +3208,7 @@ contains
       mass(102) = 15.999d0
       qelect(102) = -0.5d0
       lqchg(102) = .true.
-      chname(102) = ' OPLSUA C[O]OH acd'
+      chname(102) = 'OPLSUA C[O]OH acd'
       chemid(102)  = 'O  '
 
 ! --- OPLS-UA (1990) and OPLS-AA (1995) carboxylic acid hydrogen C(=O)-O-[H]
@@ -3231,7 +3218,7 @@ contains
       qelect(103) = 0.45d0
       lij(103) = .false.
       lqchg(103) = .true.
-      chname(103) = ' OPLSUA COO[H] acd'
+      chname(103) = 'OPLSUA COO[H] acd'
       chemid(103)  = 'H  '
 
 ! --- OPLS-AA (1995) carboxylic acid carbonyl oxygen  C[=O]-O-H
@@ -3240,7 +3227,7 @@ contains
       mass(104) = 15.999d0
       qelect(104) = -0.440d0
       lqchg(104) = .true.
-      chname(104) = ' OPLSAA C[O]OH acd'
+      chname(104) = 'OPLSAA C[O]OH acd'
       chemid(104)  = 'O  '
 
 ! --- OPLS-AA (1995) carboxylic acid oxygen C(=O)-[O]-H
@@ -3249,7 +3236,7 @@ contains
       mass(105) = 15.999d0
       qelect(105) = -0.53d0
       lqchg(105) = .true.
-      chname(105) = ' OPLSAA CO[O]H acd'
+      chname(105) = 'OPLSAA CO[O]H acd'
       chemid(105)  = 'O  '
 
 ! --- OPLS-AA (1995) carboxylic acid carbon  [C](=O)-O-H
@@ -3258,7 +3245,7 @@ contains
       mass(106) = 12.011d0
       qelect(106) = 0.52d0
       lqchg(106) = .true.
-      chname(106) = ' OPLSAA [C]OOH acd'
+      chname(106) = 'OPLSAA [C]OOH acd'
       chemid(106)  = 'C  '
 
 ! * WATER
@@ -3269,7 +3256,7 @@ contains
       mass(107) = 16.000d0
       qelect(107) = -0.8476d0
       lqchg(107) = .true.
-      chname(107) = ' SPC/E O water    '
+      chname(107) = 'SPC/E O water    '
       chemid(107)  = 'O  '
 
 ! --- SPC/E hydrogen [H] (simple point charge Enhanced water hydrogen)
@@ -3278,7 +3265,7 @@ contains
       mass(108) = 1.0079d0
       qelect(108) = 0.4238d0
       lqchg(108) = .true.
-      chname(108) = ' SPC/E H water    '
+      chname(108) = 'SPC/E H water    '
       chemid(108)  = 'H  '
 
 !$$$c --- TIP3P oxygen [O]
@@ -3287,7 +3274,7 @@ contains
 !$$$      mass(47) = 16.000d0
 !$$$      qelect(47) = -0.834d0
 !$$$      lqchg(47) = .true.
-!$$$      chname(47) = ' TIP3P O water    '
+!$$$      chname(47) = 'TIP3P O water    '
 !$$$      chemid(47)  = 'O  '
 !$$$
 !$$$c --- TIP3P hydrogen [H]
@@ -3296,7 +3283,7 @@ contains
 !$$$      mass(48) = 1.0079d0
 !$$$      qelect(48) = 0.417d0
 !$$$      lqchg(48) = .true.
-!$$$      chname(48) = ' TIP3P H water    '
+!$$$      chname(48) = 'TIP3P H water    '
 !$$$      chemid(48)  = 'H  '
 
 ! --- SPC-FQ oxygen [O]   S.W. Rick et al JCP 101 (7), 1 1994 6141
@@ -3307,7 +3294,7 @@ contains
       lqchg(109) = .true.
       xiq(109) = 36899.0d0
       jayself(109) = (0.5d0)*(503.2d0)*(367.0d0)
-      chname(109) = ' SPC-FQ O water   '
+      chname(109) = 'SPC-FQ O water   '
       chemid(109)  = '0  '
 
 ! --- SPC-FQ hydrogen [H] S.W. Rick et al JCP 101 (7), 1 1994 6141
@@ -3319,7 +3306,7 @@ contains
       lqchg(110) = .true.
       xiq(110) = 0.0d0
       jayself(110) = (0.5d0)*(503.2d0)*(392.2d0)
-      chname(110) = ' SPC-FQ H water   '
+      chname(110) = 'SPC-FQ H water   '
       chemid(110)  = 'H  '
 
 
@@ -3328,7 +3315,7 @@ contains
       epsi(111) = 144.1d0
 !      epsi(111) = 105.0d0
       mass(111) = 15.999d0
-      chname(111) = ' TIP4P-FQ O water '
+      chname(111) = 'TIP4P-FQ O water '
       chemid(111)  = 'O  '
 
 ! --- TIP4P-FQ Hydrogen [H] S.W. Rick et al JCP 101 (7), 1 1994 6141
@@ -3340,7 +3327,7 @@ contains
       lqchg(112) = .true.
       xiq(112) = 0.0d0
       jayself(112) = (0.5d0)*(503.2d0)*(353.0d0)
-      chname(112) = ' TIP4P-FQ H water '
+      chname(112) = 'TIP4P-FQ H water '
       chemid(112)  = 'H  '
 
 ! --- TIP4P-FQ Charge [Q] S.W. Rick et al JCP 101 (7), 1 1994 6141
@@ -3352,7 +3339,7 @@ contains
       lqchg(113) = .true.
       xiq(113) = 34464.0d0
       jayself(113) = (0.5d0)*(503.2d0)*(371.6d0)
-      chname(113) = ' TIP4P-FQ M water '
+      chname(113) = 'TIP4P-FQ M water '
       chemid(113)  = 'M  '
 
 
@@ -3364,7 +3351,7 @@ contains
 ! the following value was listed under tip-4p water oxygen as well (type 152)
 !      epsi(114) = 57.91d0
       mass(114) = 15.999d0
-      chname(114) = ' TIP4P O water    '
+      chname(114) = 'TIP4P O water    '
       chemid(114)  = 'O  '
 
 ! --- TIP-4P water model --- [H] site
@@ -3374,7 +3361,7 @@ contains
       qelect(115) = 0.52d0
       lij(115) = .false.
       lqchg(115) = .true.
-      chname(115) = ' TIP4P H water    '
+      chname(115) = 'TIP4P H water    '
       chemid(115)  = 'H  '
 
 ! --- TIP-4P water model --- [M] site
@@ -3384,7 +3371,7 @@ contains
       qelect(116) = -1.04d0
       lij(116) = .false.
       lqchg(116) = .true.
-      chname(116) = ' TIP4P M water    '
+      chname(116) = 'TIP4P M water    '
       chemid(116)  = 'M  '
 
 
@@ -3395,7 +3382,7 @@ contains
       qelect(117) = 0.0d0
       lij(117) = .true.
       lqchg(117) = .false.
-      chname(117) = ' TIP5P O water    '
+      chname(117) = 'TIP5P O water    '
       chemid(117)  = 'O  '
 
 ! --- TIP5P hydrogen [H]
@@ -3405,7 +3392,7 @@ contains
       qelect(118) = 0.241d0
       lij(118) = .false.
       lqchg(118) = .true.
-      chname(118) = ' TIP5P H water    '
+      chname(118) = 'TIP5P H water    '
       chemid(118)  = 'H  '
 
 ! --- TIP5P lone-pair [L]
@@ -3415,7 +3402,7 @@ contains
       qelect(119) = -0.241d0
       lij(119) = .false.
       lqchg(119) = .true.
-      chname(119) = ' TIP5P L water    '
+      chname(119) = 'TIP5P L water    '
       chemid(119)  = 'L  '
 
 
@@ -3425,7 +3412,7 @@ contains
       mass(120) = 15.999d0
       qelect(120) = 6.0d0
       lqchg(120) = .true.
-      chname(120) = ' FixedQ O water   '
+      chname(120) = 'FixedQ O water   '
       chemid(120)  = 'O  '
 
 ! --- Fixed Charge Water hydrogen [H] site
@@ -3435,7 +3422,7 @@ contains
       qelect(121) = 1.0d0
       lij(121) = .false.
       lqchg(121) = .true.
-      chname(121) = ' FixedQ H water   '
+      chname(121) = 'FixedQ H water   '
       chemid(121)  = 'H  '
 
 ! --- Fixed Charge Water carbon-oxygen bond site (???hydrogen-oxygen bond???)
@@ -3444,7 +3431,7 @@ contains
       mass(122) = 0.0d0
       qelect(122) = -2.16d0
       lqchg(122) = .true.
-      chname(122) = ' FixedQ bond water'
+      chname(122) = 'FixedQ bond water'
       chemid(122)  = 'M  '
 
 ! --- Fixed Charge Water lone pair [L] site
@@ -3454,7 +3441,7 @@ contains
       qelect(123) = -1.84d0
       lij(123) = .false.
       lqchg(123) = .true.
-      chname(123) = ' FixedQ L water   '
+      chname(123) = 'FixedQ L water   '
       chemid(123)  = 'M  '
 
 ! * NOBLE GASES, CARBON MONOXIDE, CARBON DIOXIDE, NITROGEN, OXYGEN, HF
@@ -3470,21 +3457,21 @@ contains
 !      mass(124) = 4.00d0
 !      sigi(124) = 0.0d0
 !      epsi(124) = 0.0d0
-      chname(124) = ' TraPPE helium    '
+      chname(124) = 'TraPPE helium    '
       chemid(124)  = 'HE '
 
 ! --- TraPPE Argon (7-18-97 MGM)
       sigi(125) = 3.390d0
       epsi(125) = 116.0d0
       mass(125) = 39.948d0
-      chname(125) = ' TraPPE argon     '
+      chname(125) = 'TraPPE argon     '
       chemid(125)  = 'Ar '
 
 ! --- Krypton
       sigi(126) = 3.607d0
       epsi(126) = 161.0d0
       mass(126) = 83.80d0
-      chname(126) = ' TraPPE? krypton  '
+      chname(126) = 'TraPPE? krypton  '
       chemid(126)  = 'Kr '
 
 
@@ -3494,7 +3481,7 @@ contains
       mass(127) = 12.011d0
       qelect(127) = -0.019d0
       lqchg(127) = .true.
-      chname(127) = ' carbon monoxide C'
+      chname(127) = 'carbon monoxide C'
       chemid(127)  = 'C  '
 
 ! --- oxygen in carbon monoxide C=-[O]
@@ -3503,7 +3490,7 @@ contains
       mass(128) = 15.999d0
       qelect(128) = 0.019d0
       lqchg(128) = .true.
-      chname(128) = ' carbon monoxide O'
+      chname(128) = 'carbon monoxide O'
       chemid(128)  = 'O  '
 
 
@@ -3513,7 +3500,7 @@ contains
       mass(129) = 12.011d0
       qelect(129) = 0.70d0
       lqchg(129) = .true.
-      chname(129) = ' TraPPE C in CO2  '
+      chname(129) = 'TraPPE C in CO2  '
       chemid(129)  = 'C  '
 
 ! --- Jeff's Amazing TraPPE CO2 model oxygen C[O]2 (jpotoff 12/13/99)
@@ -3522,7 +3509,7 @@ contains
       mass(130) = 15.999d0
       qelect(130) = -0.350d0
       lqchg(130) = .true.
-      chname(130) = ' TraPPE O in CO2  '
+      chname(130) = 'TraPPE O in CO2  '
       chemid(130)  = 'O  '
 
 
@@ -3535,7 +3522,7 @@ contains
 !      xiq(131) = (503.2d0)*123.2d0
       xiq(131) = 0.0d0
       jayself(131) = (0.5d0)*(503.2d0)*(233.5d0)
-      chname(131) = ' Tr-FQ C in CO2   '
+      chname(131) = 'Tr-FQ C in CO2   '
       chemid(131)  = 'C  '
 
 ! --- TraPPE carbon dioxide oxygen in C[O]2-fq (jpotoff 2/15/00)
@@ -3547,7 +3534,7 @@ contains
 !      xiq(132) = (503.2d0)*201.56d0
       xiq(132) = 39430.75d0
       jayself(132) = (0.5d0)*(503.2d0)*(308.17d0)
-      chname(132) = ' Tr-FQ O in CO2   '
+      chname(132) = 'Tr-FQ O in CO2   '
       chemid(132)  = 'O  '
 
 
@@ -3557,7 +3544,7 @@ contains
       mass(133) = 14.00674d0
       qelect(133) = -0.50d0
       lqchg(133) = .true.
-      chname(133) = ' TraPPE N in N2   '
+      chname(133) = 'TraPPE N in N2   '
       chemid(133)  = 'N  '
 
 ! --- TraPPE nitrogen COM charge cite for N2 (jpotoff 12/21/99)
@@ -3567,7 +3554,7 @@ contains
       qelect(134) = 1.0d0
       lij(134) = .false.
       lqchg(134) = .true.
-      chname(134) = ' TraPPE COM in N2 '
+      chname(134) = 'TraPPE COM in N2 '
       chemid(134)  = 'M  '
 
 
@@ -3575,7 +3562,7 @@ contains
       sigi(135) = 3.31d0
       epsi(135) = 37.3d0
       mass(135) = 14.00674d0
-      chname(135) = ' Tild. N in N2    '
+      chname(135) = 'Tild. N in N2    '
       chemid(135)  = 'N  '
 
 
@@ -3583,7 +3570,7 @@ contains
       sigi(136) = 3.07d0
       epsi(136) = 49.0d0
       mass(136) = 15.999d0
-      chname(136) = ' TraPPE O in O2   '
+      chname(136) = 'TraPPE O in O2   '
       chemid(136)  = 'O  '
 
 
@@ -3593,7 +3580,7 @@ contains
       mass(137) = 18.9984d0
       qelect(137) = 0.725d0
       lqchg(137) = .true.
-      chname(137) = ' OPLS F in HMF    '
+      chname(137) = 'OPLS F in HMF    '
       chemid(137)  = 'F  '
 
 ! --- OPLS HF hydrogen [H]-M-F
@@ -3603,7 +3590,7 @@ contains
       qelect(138) = 0.725d0
       lij(138) = .false.
       lqchg(138) = .true.
-      chname(138) = ' OPLS H in HMF    '
+      chname(138) = 'OPLS H in HMF    '
       chemid(138)  = 'H  '
 
 ! --- OPLS HF M site H-[M]-F
@@ -3613,7 +3600,7 @@ contains
       qelect(139) = -1.45d0
       lij(139) = .false.
       lqchg(139) = .true.
-      chname(139) = ' OPLS M in HMF    '
+      chname(139) = 'OPLS M in HMF    '
       chemid(139)  = 'M '
 
 ! * THIOLS, THIOETHERS
@@ -3625,7 +3612,7 @@ contains
       qelect(140) = 0.235d0
       lqchg(140) = .true.
       chemid(140)  = 'C  '
-      chname(140) = ' Tr-UA CH3 thioeth'
+      chname(140) = 'Tr-UA CH3 thioeth'
 
 ! --- TraPPE-UA dimethyl sulfide sulfur CH3-[S]-CH3
 !     (1/25/00, based on JPC v90, p6379, 1986)
@@ -3634,7 +3621,7 @@ contains
       mass(141) = 32.07d0
       qelect(141) = -0.47d0
       lqchg(141) = .true.
-      chname(141) = ' Tr-UA S thioether'
+      chname(141) = 'Tr-UA S thioether'
       chemid(141)  = 'S  '
 
 ! --- TraPPE-UA methyl group [CH3]-S-H
@@ -3643,7 +3630,7 @@ contains
       mass(142) = mass(4)
       qelect(142) = 0.18d0
       lqchg(142) = .true.
-      chname(142) = ' Tr-UA CH3 thiol  '
+      chname(142) = 'Tr-UA CH3 thiol  '
       chemid(142)  = 'C  '
 
 ! --- TraPPE-UA sulfur CH3-[S]-H
@@ -3653,7 +3640,7 @@ contains
       mass(143) = 32.07d0
       qelect(143) = -0.45d0
       lqchg(143) = .true.
-      chname(143) = ' Tr-UA S thiol    '
+      chname(143) = 'Tr-UA S thiol    '
       chemid(143)  = 'S  '
 
 ! --- TraPPE-UA hydrogen CH3-S-[H]
@@ -3663,7 +3650,7 @@ contains
       qelect(144) = 0.27d0
       lij(144) = .false.
       lqchg(144) = .true.
-      chname(144) = ' Tr-UA H thiol    '
+      chname(144) = 'Tr-UA H thiol    '
       chemid(144)  = 'H  '
 
 ! --- TraPPE-UA methylene group CH3-[CH2]-S-H
@@ -3672,7 +3659,7 @@ contains
       mass(145) = mass(5)
       qelect(145) = 0.18d0
       lqchg(145) = .true.
-      chname(145) = ' Tr-UA CH2 thiol  '
+      chname(145) = 'Tr-UA CH2 thiol  '
       chemid(145)  = 'C  '
 
 ! * AMINES
@@ -3685,7 +3672,7 @@ contains
       qelect(146) = 0.275d0
       lij(146) = .false.
       lqchg(146) = .true.
-      chname(146) = ' Tr-UA CH3-N[H]2  '
+      chname(146) = 'Tr-UA CH3-N[H]2  '
       chemid(146)  = 'H  '
 
 ! --- TraPPE-UA methyl amine nitrogen CH3-[N]-H2
@@ -3694,7 +3681,7 @@ contains
       mass(147) = 14.00674d0
       qelect(147) = -0.65d0
       lqchg(147) = .true.
-      chname(147) = ' Tr-UA CH3-[N]H2  '
+      chname(147) = 'Tr-UA CH3-[N]H2  '
       chemid(147)  = 'N  '
 
 ! --- TraPPE-UA methyl amine methyl [CH3]-N-H2
@@ -3703,7 +3690,7 @@ contains
       mass(148) = mass(4)
       qelect(148) = 0.10d0
       lqchg(148) = .true.
-      chname(148) = ' Tr-UA [CH3]-NH2  '
+      chname(148) = 'Tr-UA [CH3]-NH2  '
       chemid(148)  = 'C  '
 
 ! --- TraPPE-UA dimethyl amine nitrogen CH3-[N]-CH3-H
@@ -3712,7 +3699,7 @@ contains
       mass(149) = 14.00674d0
       qelect(149) = -0.75d0
       lqchg(149) = .true.
-      chname(149) = ' Tr-UA (CH3)2[N]H '
+      chname(149) = 'Tr-UA (CH3)2[N]H '
       chemid(149)  = 'N  '
 
 ! --- TraPPE-UA trimethyl amine nitrogen CH3-[N]-CH3-CH3
@@ -3721,7 +3708,7 @@ contains
       mass(150) = 14.00674d0
       qelect(150) = -0.60d0
       lqchg(150) = .true.
-      chname(150) = ' Tr-UA (CH3)3[N]  '
+      chname(150) = 'Tr-UA (CH3)3[N]  '
       chemid(150)  = 'N  '
 
 ! * NITRILES
@@ -3732,7 +3719,7 @@ contains
       mass(151) = 14.007d0
       qelect(151) = -0.398d0
       lqchg(151) = .true.
-      chname(151) = ' Tr-UA N nitrile  '
+      chname(151) = 'Tr-UA N nitrile  '
       chemid(151)  = 'N  '
 
 ! --- TraPPE-UA nitrile carbon [C]=-N
@@ -3741,7 +3728,7 @@ contains
       mass(152) = 12.011d0
       qelect(152) = 0.129d0
       lqchg(152) = .true.
-      chname(152) = ' Tr-UA C nitrile  '
+      chname(152) = 'Tr-UA C nitrile  '
       chemid(152)  = 'C  '
 
 ! --- TraPPE hydrogen cyanide hydrogen [H]-C=-N
@@ -3752,7 +3739,7 @@ contains
       qelect(153) = 0.269d0
       lij(153) = .false.
       lqchg(153) = .true.
-      chname(153) = ' Tr-UA H in HCN   '
+      chname(153) = 'Tr-UA H in HCN   '
       chemid(153)  = 'H  '
 
 ! --- TraPPE-UA acetonitrile methyl [CH3]-C=-N
@@ -3761,7 +3748,7 @@ contains
       mass(154) = mass(4)
       qelect(154) = 0.269d0
       lqchg(154) = .true.
-      chname(154) = ' Tr-UA CH3 nitrile'
+      chname(154) = 'Tr-UA CH3 nitrile'
       chemid(154)  = 'C  '
 
 ! --- TraPPE-UA alkyl nitrile methylene R-[CH2]-C=-N
@@ -3770,7 +3757,7 @@ contains
       mass(155) = mass(5)
       qelect(155) = 0.269d0
       lqchg(155) = .true.
-      chname(155) = ' Tr-UA CH2 nitrile'
+      chname(155) = 'Tr-UA CH2 nitrile'
       chemid(155)  = 'C  '
 
 
@@ -3780,7 +3767,7 @@ contains
       mass(156) = 14.007d0
       qelect(156) = -0.430d0
       lqchg(156) = .true.
-      chname(156) = ' OPLSUA N nitrile '
+      chname(156) = 'OPLSUA N nitrile '
       chemid(156)  = 'N  '
 
 ! --- OPLS-UA nitrile carbon R-[C]=-N
@@ -3789,7 +3776,7 @@ contains
       mass(157) = 12.011d0
       qelect(157) = 0.280d0
       lqchg(157) = .true.
-      chname(157) = ' OPLSUA C nitrile '
+      chname(157) = 'OPLSUA C nitrile '
       chemid(157)  = 'C  '
 
 ! --- OPLS-UA acetonitrile methyl [CH3]-C=-N
@@ -3798,7 +3785,7 @@ contains
       mass(158) = 15.035d0
       qelect(158) = 0.15d0
       lqchg(158) = .true.
-      chname(158) = ' OPLSUA CH3 nitril'
+      chname(158) = 'OPLSUA CH3 nitril'
       chemid(158)  = 'C  '
 
 
@@ -3808,7 +3795,7 @@ contains
       mass(159) = 14.007d0
       qelect(159) = -0.398d0
       lqchg(159) = .true.
-      chname(159) = ' McDUA N nitrile  '
+      chname(159) = 'McDUA N nitrile  '
       chemid(159)  = 'N  '
 
 ! --- McDonald UA nitrile carbon R-[C]=-N
@@ -3817,7 +3804,7 @@ contains
       mass(160) = 12.011d0
       qelect(160) = 0.129d0
       lqchg(160) = .true.
-      chname(160) = ' McDUA C nitrile  '
+      chname(160) = 'McDUA C nitrile  '
       chemid(160)  = 'C  '
 
 ! --- McDonald UA acetonitrile methyl [CH3]-C=-N
@@ -3826,7 +3813,7 @@ contains
       mass(161) = 15.035d0
       qelect(161) = 0.269d0
       lqchg(161) = .true.
-      chname(161) = ' McDUA CH3 nitrile'
+      chname(161) = 'McDUA CH3 nitrile'
       chemid(161)  = 'C  '
 
 ! * CHARMM
@@ -3835,14 +3822,14 @@ contains
       sigi(162) = 3.8754d0
       epsi(162) = 19.6257d0
       mass(162) = 0.003d0
-      chname(162) = ' CHARMM C2 ???    '
+      chname(162) = 'CHARMM C2 ???    '
       chemid(162)  =  'C  '
 
 ! --- Charmm H (hydrogen)
       sigi(163) = 2.4500d0
       epsi(163) = 19.1225d0
       mass(163) = 1.0078d0
-      chname(163) = ' CHARMM H  ???    '
+      chname(163) = 'CHARMM H  ???    '
       chemid(163)  = 'H  '
 
 ! --- Charmm O (bound with 2 single bonds)
@@ -3850,48 +3837,48 @@ contains
       epsi(164) = 114.7348d0
       mass(164) = 16.00d0
       chemid(164)  = 'O  '
-      chname(164) = ' CHARMM O sp3 ??? '
+      chname(164) = 'CHARMM O sp3 ??? '
 
 ! --- Charmm P
       sigi(165) = 3.7418d0
       epsi(165) = 100.6446d0
       mass(165) = 0.003d0
-      chname(165) = ' CHARMM P ???     '
+      chname(165) = 'CHARMM P ???     '
       chemid(165)  = 'P  '
 
 ! --- Charmm O' (bound with a double bond)
       sigi(166) = 2.8598d0
       epsi(166) = 114.7348d0
       mass(166) = 16.00d0
-      chname(166) = ' CHARMM P ???     '
+      chname(166) = 'CHARMM P ???     '
       chemid(166)  = 'O  '
 
 ! --- Charmm N3 (tertiary ammonia)
       sigi(167) = 3.5012d0
       epsi(167) = 84.0382d0
       mass(167) = 0.003d0
-      chname(167) = ' CHARMM P ???     '
+      chname(167) = 'CHARMM P ???     '
       chemid(167)  = 'N  '
 
 ! --- Charmm C3 (methyl group carbon)
       sigi(168) = 3.8754d0
       epsi(168) = 19.6257d0
       mass(168) = 0.003d0
-      chname(168) = ' CHARMM C3 ???    '
+      chname(168) = 'CHARMM C3 ???    '
       chemid(168)  = 'C  '
 
 ! --- Charmm C1 (ternary carbon)
       sigi(169) = 3.8754d0
       epsi(169) = 19.6257d0
       mass(169) = 0.003d0
-      chname(169) = ' CHARMM C1 ???    '
+      chname(169) = 'CHARMM C1 ???    '
       chemid(169)  = 'C  '
 
 ! --- Charmm C' (carboxylic head group carbon)
       sigi(170) = 3.6170d0
       epsi(170) = 74.4770d0
       mass(170) = 0.003d0
-      chname(170) = ' CHARMM C ???    '
+      chname(170) = 'CHARMM C ???    '
       chemid(170)  = 'C  '
 
 
@@ -3903,7 +3890,7 @@ contains
       mass(171) = 14.007d0
       qelect(171) = -0.398d0
       lqchg(171) = .true.
-      chname(171) = ' Tr-AA N nitrile  '
+      chname(171) = 'Tr-AA N nitrile  '
       chemid(171)  = 'N  '
 
 ! --- TraPPE-AA nitrile carbon [C]=-N
@@ -3912,7 +3899,7 @@ contains
       mass(172) = 12.011d0
       qelect(172) = 0.129d0
       lqchg(172) = .true.
-      chname(172) = ' Tr-AA C nitrile  '
+      chname(172) = 'Tr-AA C nitrile  '
       chemid(172)  = 'C  '
 
 ! --- TraPPE-AA acetonitrile methyl carbon H3[C]-C=-N
@@ -3921,14 +3908,14 @@ contains
       mass(173) = 12.011d0
       qelect(173) = 0.269d0
       lqchg(173) = .true.
-      chname(173) = ' Tr-AA H3[C]-C=-N '
+      chname(173) = 'Tr-AA H3[C]-C=-N '
       chemid(173)  = 'C  '
 
 ! --- TraPPE-AA acetonitrile methyl hydrogen C[H3]-C=-N
       sigi(174) = sigi(27)
       epsi(174) = epsi(27)
       mass(174) = mass(27)
-      chname(174) = ' Tr-AA [H]3C-C=-N '
+      chname(174) = 'Tr-AA [H]3C-C=-N '
       chemid(174)  = 'H  '
 
 
@@ -3941,7 +3928,7 @@ contains
        qelect(177) =1.216d0
        lqchg(177) = .true.
        lij(177) = .false.
-       chname(177) = ' [Si]-O-Si '
+       chname(177) = '[Si]-O-Si '
       chemid(177)  = 'Si '
 
 !----Si-[O]-Si
@@ -3951,7 +3938,7 @@ contains
        qelect(178) =-0.608d0
        lqchg(178) = .true.
        lij(178) = .true.
-       chname(178) = ' Si-[O]-Si '
+       chname(178) = 'Si-[O]-Si '
       chemid(178)  = 'O  '
 
 !----O-[Si]-CH2
@@ -3961,7 +3948,7 @@ contains
        qelect(179) = 0.304d0
        lqchg(179) = .true.
        lij(179) = .true.
-       chname(179) = ' O-[Si]-CH2 '
+       chname(179) = 'O-[Si]-CH2 '
       chemid(179)  = 'Si '
 
 !---- [CH3]-Si-O
@@ -3981,7 +3968,7 @@ contains
        qelect(181) =0.0d0
        lqchg(181) = .false.
        lij(181) = .true.
-       chname(181) = ' [CH2]-Si-O '
+       chname(181) = '[CH2]-Si-O '
       chemid(181)  = 'C  '
 
 !-- [Si] in SiO2 substrate
@@ -3991,7 +3978,7 @@ contains
        qelect(182) =1.216d0
        lqchg(182) = .true.
        lij(182) = .false.
-       chname(182) = ' [Si] in SiO2 substrate '
+       chname(182) = '[Si] in SiO2 substrate '
       chemid(182)  = 'Si '
 
 !---  silanol oxygen H-[O]-Si
@@ -4001,7 +3988,7 @@ contains
        qelect(183) = -0.739d0
        lqchg(183) = .true.
        lij(183) = .true.
-       chname(183) = ' H-[O]-Si '
+       chname(183) = 'H-[O]-Si '
       chemid(183)  = 'O  '
 
 !---  fullerene [C]
@@ -4037,7 +4024,7 @@ contains
       sigi(190) = 3.0d0
       epsi(190) = 93.53d0
       mass(190) = 15.999d0
-      chname(190) = ' silicalite-1 O '
+      chname(190) = 'silicalite-1 O '
       chemid(190) = 'O  '
 
 ! ---- added 7/12/06 for nitrotoluene
@@ -4048,7 +4035,7 @@ contains
       mass(196) = 12.011d0
       lqchg(196) = .true.
       qelect(196) = 0.14d0
-      chname(196) = ' Tr-UA C aro nitro '
+      chname(196) = 'Tr-UA C aro nitro '
       chemid(196) = 'c  '
 
 ! -- TraPPE-UA [N] nitro
@@ -4077,9 +4064,8 @@ contains
 !      sigi(56) = 3.695d0
 !      epsi(56) = 50.5d0
 !      mass(56) = 13.0191d0
-      chname(199) = ' Tr-UA CH benzene9'
+      chname(199) = 'Tr-UA CH benzene9'
       chemid(199)  = 'C  '
-
 
 ! --- JLR 12-1-09 parameters for gradually growing in benzene
        sigi(203) = 1.6d0
@@ -4088,6 +4074,7 @@ contains
        lqchg(203) = .false.
        lij(203) = .true.
        chname(203) = 'stage 1 benzene'
+       chemid(203) = 'C6H6'
 
        sigi(204) = 2.1d0
        epsi(204) = 30.0d0
@@ -4095,6 +4082,7 @@ contains
        lqchg(204) = .false.
        lij(204) = .true.
        chname(204) = 'stage 2 benzene'
+       chemid(204) = 'C6H6'
 
        sigi(205) = 2.5d0
        epsi(205) = 37.0d0
@@ -4102,6 +4090,7 @@ contains
        lqchg(205) = .false.
        lij(205) = .true.
        chname(205) = 'stage 3 benzene'
+       chemid(205) = 'C6H6'
 
        sigi(206) = 2.9d0
        epsi(206) = 42.0d0
@@ -4109,6 +4098,7 @@ contains
        lqchg(206) = .false.
        lij(206) = .true.
        chname(206) = 'stage 4 benzene'
+       chemid(206) = 'C6H6'
 
        sigi(207) = 3.3d0
        epsi(207) = 46.0d0
@@ -4116,6 +4106,7 @@ contains
        lqchg(207) = .false.
        lij(207) = .true.
        chname(207) = 'stage 5 benzene'
+       chemid(207) = 'C6H6'
 ! --- END JLR 12-1-09 ---
 
 ! - parameters for acrylates
@@ -4289,7 +4280,7 @@ contains
       mass(230) = 15.999d0
       qelect(230) = -0.45d0
       lqchg(230) = .true.
-      chname(230) = ' Tr-UA C[O]OH acid'
+      chname(230) = 'Tr-UA C[O]OH acid'
       chemid(230)  = 'O  '
 
 ! --- TraPPE-UA iterB carbonyl carbon  [C](=O)-O-H
@@ -4298,7 +4289,7 @@ contains
       mass(231) = 12.011d0
       qelect(231) = 0.42d0
       lqchg(231) = .true.
-      chname(231) = ' Tr-UA [C]OOH acid'
+      chname(231) = 'Tr-UA [C]OOH acid'
       chemid(231)  = 'C  '
 
 ! --- TraPPE-UA carboxylic acid hydrogen C(=O)-O-[H] (JPC v95 p. 3315, 1991)
@@ -4308,7 +4299,7 @@ contains
       qelect(232) = 0.37d0
       lij(232) = .false.
       lqchg(232) = .true.
-      chname(232) = ' Tr-UA COO[H] acid'
+      chname(232) = 'Tr-UA COO[H] acid'
       chemid(232)  = 'H  '
 
 ! --- TraPPE-UA carboxylic acid oxygen C(=O)-[O]-H
@@ -4317,7 +4308,7 @@ contains
       mass(233) = 16.00d0
       qelect(233) = -0.46d0
       lqchg(233) = .true.
-      chname(233) = ' Tr-UA CO[O]H acid'
+      chname(233) = 'Tr-UA CO[O]H acid'
       chemid(233)  = 'O  '
 
 ! --- TraPPE-UA carboxylic acid oxygen [CH3]-C(=O)-O-H
@@ -4326,7 +4317,7 @@ contains
       mass(234) = mass(4)
       qelect(234) = 0.12d0
       lqchg(234) = .true.
-      chname(234) = ' Tr-UA CO[O]H acid'
+      chname(234) = 'Tr-UA CO[O]H acid'
       chemid(234)  = 'C  '
 
 ! --- TraPPE-UA carboxylic acid oxygen [CH2-C(=O)-O-H
@@ -4335,7 +4326,7 @@ contains
       mass(235) = mass(5)
       qelect(235) = 0.12d0
       lqchg(235) = .true.
-      chname(235) = ' Tr-UA CO[O]H acid'
+      chname(235) = 'Tr-UA CO[O]H acid'
       chemid(235)  = 'C  '
 
 
@@ -5078,8 +5069,8 @@ contains
       qelect(348) = 0.09d0
       lqchg(348) = .true.
       lij(348) = .true.
-      chname(349) = 'H8 Chlorobenzene AA'
-      chemid(349)  = 'H  '
+      chname(348) = 'H8 Chlorobenzene AA'
+      chemid(348)  = 'H  '
 
       sigi(350) = 2.360d0
       epsi(350) = 25.44d0
@@ -5087,17 +5078,17 @@ contains
       qelect(350) = 0.1d0
       lqchg(350) = .true.
       lij(350) = .true.
-      chname(351) = 'H9 Chlorobenzene AA'
-      chemid(351)  = 'H  '
+      chname(350) = 'H9 Chlorobenzene AA'
+      chemid(350)  = 'H  '
 
       sigi(352) = 2.36d0
       epsi(352) = 25.44d0
       mass(352) = 1.0079d0
-      qelect(353) = 0.09d0
-      lqchg(353) = .true.
-      lij(353) = .true.
-      chname(353) = 'H10 Chlorobenzene AA'
-      chemid(353)  = 'H  '
+      qelect(352) = 0.09d0
+      lqchg(352) = .true.
+      lij(352) = .true.
+      chname(352) = 'H10 Chlorobenzene AA'
+      chemid(352)  = 'H  '
 
       sigi(354) = 2.36d0
       epsi(354) = 25.44d0
@@ -5336,6 +5327,11 @@ contains
       chname(385) = 'H in TATB'
       chemid(385) ='H  '
 
+     !  do j=1,nntype
+     !    if (sigi(j).ne.0.or.epsi(j).ne.0.or.mass(j).ne.0.or.qelect(j).ne.0) then
+     !       write(104,'(I3,1X,I1,1X,F8.5,1X,F9.4,1X,F7.4,1X,F11.7,1X,A,1X,A)') j,1,sigi(j),epsi(j),qelect(j),mass(j),trim(chemid(j)),'#'//trim(chname(j))
+     !    end if
+     ! end do
 
 !  LEFTOVER PIECES
 
@@ -5516,8 +5512,8 @@ contains
             end do
          else
             do i=1,natom
-               consp(i) = (2.0d0/3.0d0)*pi*(2.0d0*aexsix(i)/(rcut(1) *rcut(1)*rcut(1))+bexsix(i)*dexp(cexsix(i)*rcut(1)) *(-6.0d0/(cexsix(i)*cexsix(i)*cexsix(i))+6.0d0 *rcut(1)/(cexsix(i)*cexsix(i))-3.0d0*rcut(1)* rcut(1)/ cexsix(i)+rcut(1)*rcut(1)*rcut(1)))
-               consu(i) = 2.0d0*pi*(aexsix(i)/(3.0d0*rcut(1)*rcut(1)* rcut(1)) +(-rcut(1)*rcut(1)+2.0d0*rcut(1)/cexsix(i)-2.0d0/ (cexsix(i)* cexsix(i)))*bexsix(i)*dexp(cexsix(i)*rcut(1))/ cexsix(i))
+               consp(i) = (2.0d0/3.0d0)*onepi*(2.0d0*aexsix(i)/(rcut(1) *rcut(1)*rcut(1))+bexsix(i)*dexp(cexsix(i)*rcut(1)) *(-6.0d0/(cexsix(i)*cexsix(i)*cexsix(i))+6.0d0 *rcut(1)/(cexsix(i)*cexsix(i))-3.0d0*rcut(1)* rcut(1)/ cexsix(i)+rcut(1)*rcut(1)*rcut(1)))
+               consu(i) = 2.0d0*onepi*(aexsix(i)/(3.0d0*rcut(1)*rcut(1)* rcut(1)) +(-rcut(1)*rcut(1)+2.0d0*rcut(1)/cexsix(i)-2.0d0/ (cexsix(i)* cexsix(i)))*bexsix(i)*dexp(cexsix(i)*rcut(1))/ cexsix(i))
             end do
 !            write(11,*) 'consp(i)',consp
 !            write(11,*) 'consu(i)',consu
@@ -5546,13 +5542,15 @@ contains
         end if
 
         if (UPPERCASE(line_in(1:5)).eq.'ATOMS') then
-             read(line_in(6:),*) nbead
-             do j=1,nbead
+             nbead=0
+             do
                 call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
                 if (jerr.ne.0) then
                    write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
                    call err_exit('Reading section ATOMS')
                 end if
+                if (UPPERCASE(line_in(1:9)).eq.'END ATOMS') exit
+                nbead=nbead+1
                 read(line_in,*) i,dum,sigi(i),epsi(i),qelect(i),mass(i),chemid(i)
                 !read(line_in,'(I,4F,2A)') i,sigi(i),epsi(i),qelect(i),mass(i),chemid(i),chname(i)
                 if (qelect(i).ne.0) then
@@ -5628,13 +5626,15 @@ contains
         end if
 
         if (UPPERCASE(line_in(1:7)).eq.'NONBOND') then
-           read(line_in(8:),*) nmix
-           do imix=1,nmix
+           nmix=0
+           do
               call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
               if (jerr.ne.0) then
                  write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
                  call err_exit('Reading section NONBOND')
               end if
+              if (UPPERCASE(line_in(1:11)).eq.'END NONBOND') exit
+              nmix=nmix+1
               read(line_in,*) i,j,dum,sigmaTmp,epsilonTmp
               ij=(i-1)*nntype+j
               sig2ij(ij)=sigmaTmp*sigmaTmp
@@ -5657,107 +5657,54 @@ contains
 
      close(io_ff)
 
-      return
+     return
   end subroutine suijtab
 
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-!ccc  calculates nonbonding van der Waals potential using linear
-!ccc  interpolation between two points
-!ccc  requires a file (fort.43)
-!ccc  fort.43: number of tabulated potentials, potential number,
-!ccc  number of points per angstrom, tabulated potential
-!ccc  (repeat last three parts for each additional potential)
-!ccc  for unlike interactions, list 1-2 and 2-1
-!ccc  separate potentials with 1000
-!ccc  make sure potential does not go up to infinity!
-!ccc  bead type numbers should be defined in suijtab, but it doesn't
-!ccc  matter what they are (the parameters aren't used)
-!ccc  KM 12/03/08
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-  subroutine lininter_vdW(r, tabulated_vdW, typi, typj)
-!$$$      include 'tabulated.inc'
-!$$$      include 'conver.inc'
+  function lininter_vdW(r,typio,typjo) result(tabulated_vdW)
+    use util_math,only:polint
+    use util_search,only:indexOf,LOCATE
+    real::tabulated_vdW
+    real,intent(in)::r
+    integer,intent(in)::typio,typjo
+    integer::typi,typj,low,high
 
-      integer::typi, typj, low, high, xa, bin, add1
-      real::r,  tabulated_vdW, left, rem
+    typi=indexOf(atoms,typio)
+    typj=indexOf(atoms,typjo)
+    low=locate(rvdW(:,typi,typj),vdWsplits(typi,typj),r,2)
+    high=low+1
+    if (rvdW(low,typi,typj).gt.r.or.rvdW(high,typi,typj).lt.r) then
+       write(io_output,*) 'problem in lininter_vdW!'
+       write(io_output,*) 'r', r, ' typi', typio, ' typj ', typjo
+       write(io_output,*) 'low ', low, rvdW(low, typi, typj)
+       write(io_output,*) 'high ', high, rvdW(high, typi, typj)
+       write(io_output,*)
+    end if
+    call polint(rvdW(low:high,typi,typj),tabvdW(low:high,typi,typj),2,r,tabulated_vdW)
+    return
+  end function lininter_vdW
 
-      low=1
-      high=vdWsplits(typi, typj)
+  function lininter_elect(r,typio,typjo) result(tabulated_elect)
+    use util_math,only:polint
+    use util_search,only:indexOf,LOCATE
+    real::tabulated_elect
+    real,intent(in)::r
+    integer,intent(in)::typio,typjo
+    integer::typi,typj,low,high
 
-      xa = int(r)
-      left = r-xa
-
-!     select correct bin
-!     multiply by num_int_vdW - number of intervals per angstrom
-      add1 = int(left*num_int_vdW(typi,typj))
-      bin = (xa-rvdW(1,typi,typj))*num_int_vdW(typi,typj) +  1 + add1
-      low = bin
-      high = low+1
-
-      if (rvdW(low,typi,typj).gt. r.or.rvdW(high,typi,typj) .lt.r) then
-         write(io_output,*) 'problem in lininter_vdW!'
-         write(io_output,*) 'r', r, ' typi', typi, ' typj ', typj
-         write(io_output,*) 'low ', low, rvdW(low, typi, typj)
-         write(io_output,*) 'high ', high, rvdW(high, typi, typj)
-         write(io_output,*)
-      end if
-
-      rem=r-rvdW(low, typi, typj)
-      rem=rem*dble(num_int_vdW(typi,typj))
-
-      tabulated_vdW=rem*vdWdiff(low,typi, typj)
-      tabulated_vdW=tabulated_vdW+tabvdW(low,typi, typj)
-
-      return
-  end subroutine lininter_vdW
-
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-!ccc  calculates electrostatic potential using linear interpolation
-!ccc  between two points
-!ccc  requires a file (fort.44)
-!ccc  fort.44: number of tabulated potentials, potential number,
-!ccc  number of points per angstrom, tabulated potential
-!ccc  (repeat last three parts for each additional potential)
-!ccc  for unlike interactions, list 1-2 and 2-1
-!ccc  separate potentials with 1000
-!ccc  KM 04/23/09
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-  subroutine lininter_elect(r, tabulated_elect, typi, typj)
-!$$$      include 'tabulated.inc'
-!$$$      include 'conver.inc'
-
-      integer::typi, typj, low, high, xa, bin, add1
-      real::r,  tabulated_elect, left, rem
-
-      low=1
-      high=electsplits(typi, typj)
-
-      xa = int(r)
-      left = r-xa
-
-!     select correct bin
-!     multiply by num_int_nonbond - number of intervals per angstrom
-      add1 = int(left*num_int_elect(typi,typj))
-      bin = (xa-relect(1,typi,typj))*num_int_elect(typi,typj) +  1 + add1
-      low = bin
-      high = low+1
-
-      if (relect(low,typi,typj).gt. r.or.relect(high,typi,typj) .lt.r) then
-         write(io_output,*) 'problem in lininter_elect!'
-         write(io_output,*) 'r', r, ' typi', typi, ' typj ', typj
-         write(io_output,*) 'low ', low, relect(low, typi, typj)
-         write(io_output,*) 'high ', high, relect(high, typi, typj)
-         write(io_output,*)
-      end if
-
-      rem=r-relect(low, typi, typj)
-      rem=rem*dble(num_int_elect(typi,typj))
-
-      tabulated_elect=rem*electdiff(low,typi, typj)
-      tabulated_elect=tabulated_elect+tabelect(low,typi, typj)
-
-      return
-  end subroutine lininter_elect
+    typi=indexOf(atoms,typio)
+    typj=indexOf(atoms,typjo)
+    low=locate(relect(:,typi,typj),electsplits(typi,typj),r,2)
+    high=low+1
+    if (relect(low,typi,typj).gt.r.or.relect(high,typi,typj).lt.r) then
+       write(io_output,*) 'problem in lininter_elect!'
+       write(io_output,*) 'r', r, ' typi', typio, ' typj ', typjo
+       write(io_output,*) 'low ', low, relect(low, typi, typj)
+       write(io_output,*) 'high ', high, relect(high, typi, typj)
+       write(io_output,*)
+    end if
+    call polint(relect(low:high,typi,typj),tabelect(low:high,typi,typj),2,r,tabulated_elect)
+    return
+  end function lininter_elect
 
 !     **************************************************************
 !     ***  calculates the energy using the exp-6 potential       ***
@@ -5892,66 +5839,6 @@ contains
       return
   end function mmff
 
-!   KM 12/02/08 - read in tabulated nonbonded potential
-!   and set up linear interpolation
-  subroutine read_vdW_table(io_output)
-    integer,intent(in)::io_output
-    integer::mmm,i,iivdW,jjvdW
-
-    read(43,*) ntabvdW
-    write(io_output,*)
-    mmm=1
-    do mmm=1,ntabvdW
-       !            iinvdW and jjvdW are bead types
-       read(43,*) iivdW, jjvdW
-       read(43,*) num_int_vdW(iivdW,jjvdW)
-       i=1
-16     read(43,*,end=17) rvdW(i,iivdW,jjvdW),  tabvdW(i,iivdW,jjvdW)
-       if (rvdW(i,iivdW,jjvdW).eq.1000) goto 17
-       !             write(59,*) i, rvdW(i,iivdW,jjvdW),
-       !     &            tabvdW(i,iivdW,jjvdW)
-       i=i+1
-       goto 16
-17     vdWsplits(iivdW,jjvdW)=i-1
-       if (myid.eq.0) write(io_output,*) 'using linear interpolation for nonbonded van der Waals interactions'
-       do i=1,vdWsplits(iivdW,jjvdW)-1
-          vdWdiff(i,iivdW,jjvdW)= tabvdW(i+1,iivdW,jjvdW)- tabvdW(i,iivdW,jjvdW)
-       end do
-    end do
-    close(43)
-  end subroutine read_vdW_table
-
-!   KM 04/23/09 - read in tabulated electrostatic potential
-!   and set up linear interpolation
-  subroutine read_elect_table(io_output)
-    integer,intent(in)::io_output
-    integer::mmm,i,iielect,jjelect
-
-    read(44,*) ntabelect
-    write(io_output,*)
-    mmm=1
-    do mmm=1,ntabelect
-       !            iielect and jjelect are bead types
-       read(44,*) iielect, jjelect
-       !             write(59,*) iielect,jjelect
-       read(44,*) num_int_elect(iielect,jjelect)
-       !             write(59,*) num_int_elect(iielect,jjelect)
-       i=1
-18     read(44,*,end=19) relect(i,iielect,jjelect),tabelect(i,iielect,jjelect)
-       !             write(59,*) relect(i,iielect,jjelect),
-       !     &            tabelect(i,iielect,jjelect)
-       if (relect(i,iielect,jjelect).eq.1000) goto 19
-       i=i+1
-       goto 18
-19     electsplits(iielect,jjelect)=i-1
-       if (myid.eq.0) write(io_output,*) 'using linear interpolation for electrostatic interactions'
-       do i=1,electsplits(iielect,jjelect)-1
-          electdiff(i,iielect,jjelect)= tabelect(i+1,iielect,jjelect)- tabelect(i,iielect,jjelect)
-       end do
-    end do
-    close(44)
-  end subroutine read_elect_table
-
 !DEC$ ATTRIBUTES FORCEINLINE :: type_2body
   function type_2body(ntii,ntjj)
     integer::type_2body
@@ -5984,7 +5871,7 @@ contains
 
     U2=0.0d0
     if (L_vdW_table) then
-       call lininter_vdW(rij,U2,ntii,ntjj)
+       U2=lininter_vdW(rij,ntii,ntjj)
     else if ( lsami ) then
        U2=ljsami(rijsq,ntij)
     else if (lexpsix) then
@@ -6091,8 +5978,7 @@ contains
           end if
           if (lchgall.or.lcoulo(iii,jjj) ) then
              if (L_elect_table) then
-                call lininter_elect(rij,Q2,ntii,ntjj)
-                Q2=qqu(i,ii)*qqu(j,jj)*Q2
+                Q2=qqu(i,ii)*qqu(j,jj)*lininter_elect(rij,ntii,ntjj)
              else
                 Q2=qqu(i,ii)*qqu(j,jj)/rij
              end if
@@ -6102,4 +5988,90 @@ contains
        end if
     end if
   end function Q2
+
+!> \brief Read in tabulated potential for nonbonded pair interactions (vdW and elect) and set up linear interpolation
+  subroutine read_tabulated_potential_pair(file_tab,ntab,r,tab,splits,lists)
+    use util_search,only:addToTable
+    use util_memory,only:reallocate
+    use util_files,only:get_iounit
+    character(len=*),intent(in)::file_tab
+    integer,intent(out)::ntab
+    integer,allocatable,intent(inout)::splits(:,:)
+    real,allocatable,intent(inout)::r(:,:,:),tab(:,:,:)
+    type(LookupTable),intent(inout)::lists
+
+    integer::io_tab,mmm,ii,jj,i,jerr
+
+    io_tab=get_iounit()
+    open(unit=io_tab,access='sequential',action='read',file=file_tab,form='formatted',iostat=jerr,status='old')
+    if (jerr.ne.0) then
+       call err_exit('cannot open tabulated potential file: '//file_tab)
+    end if
+
+    read(io_tab,*) ntab
+    do mmm=1,ntab
+       ! ii and jj are bead types
+       read(io_tab,*) ii, jj
+       ii=addToTable(lists,ii,expand=.true.)
+       jj=addToTable(lists,jj,expand=.true.)
+       if (ii.gt.size(splits,1).or.jj.gt.size(splits,1)) then
+          call reallocate(splits,1,2*size(splits,1),1,2*size(splits,2))
+          call reallocate(r,1,size(r,1),1,2*size(r,2),1,2*size(r,3))
+          call reallocate(tab,1,size(tab,1),1,2*size(tab,2),1,2*size(tab,3))
+       end if
+       i=1
+       do
+          if (i.gt.size(r,1)) then
+             call reallocate(r,1,2*size(r,1),1,size(r,2),1,size(r,3))
+             call reallocate(tab,1,2*size(tab,1),1,size(tab,2),1,size(tab,3))
+          end if
+          read(io_tab,*,end=17) r(i,ii,jj),  tab(i,ii,jj)
+          if (r(i,ii,jj).eq.1000) exit
+          ! write(io_tab+10,*) i,r(i,ii,jj),tab(i,ii,jj)
+          i=i+1
+       end do
+17     splits(ii,jj)=i-1
+    end do
+    close(io_tab)
+  end subroutine read_tabulated_potential_pair
+
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!ccc  Calculates nonbonding van der Waals and electrostatic potential
+!ccc  using linear interpolation between two points
+!ccc  requires file: fort.43 -- vdW, fort.44 -- Q
+!ccc    fort.43: number of tabulated potentials, potential number,
+!ccc  number of points per angstrom, tabulated potential
+!ccc  (repeat last three parts for each additional potential)
+!ccc  for unlike interactions, list 1-2 and 2-1
+!ccc  separate potentials with 1000
+!ccc  make sure potential does not go up to infinity!
+!ccc  bead type numbers should be defined in suijtab, but it doesn't
+!ccc  matter what they are (the parameters aren't used)
+!ccc  KM 12/03/08
+!ccc    fort.44: number of tabulated potentials, potential number,
+!ccc  number of points per angstrom, tabulated potential
+!ccc  (repeat last three parts for each additional potential)
+!ccc  for unlike interactions, list 1-2 and 2-1
+!ccc  separate potentials with 1000
+!ccc  KM 04/23/09
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+  subroutine init_tabulated_potential_pair()
+    use sim_system,only:L_vdW_table,L_elect_table
+    integer,parameter::initial_size=10,grid_size=1500
+    integer::jerr
+
+    if (L_vdW_table) then
+       allocate(vdWsplits(1:initial_size,1:initial_size),rvdW(1:grid_size,1:initial_size,1:initial_size),tabvdW(1:grid_size,1:initial_size,1:initial_size),stat=jerr)
+       if (jerr.ne.0) call err_exit('init_tabulated_potential_pair: allocation failed for vdW_table')
+       call read_tabulated_potential_pair('fort.43',ntabvdW,rvdW,tabvdW,vdWsplits,atoms)
+       if (myid.eq.0) write(io_output,*) 'using linear interpolation for nonbonded van der Waals interactions'
+    end if
+
+    if (L_elect_table) then
+       allocate(electsplits(1:initial_size,1:initial_size),relect(1:grid_size,1:initial_size,1:initial_size),tabelect(1:grid_size,1:initial_size,1:initial_size),stat=jerr)
+       if (jerr.ne.0) call err_exit('init_tabulated_potential_pair: allocation failed for elect_table')
+       call read_tabulated_potential_pair('fort.44',ntabelect,relect,tabelect,electsplits,atoms)
+       if (myid.eq.0) write(io_output,*) 'using linear interpolation for electrostatic interactions'
+    end if
+  end subroutine init_tabulated_potential_pair
 end MODULE energy_pairwise

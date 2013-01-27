@@ -23,6 +23,7 @@ contains
 !    ***                                     9-25-02 JMS        ***
 !      **********************************************************
   subroutine swatch
+    use sim_particle,only:update_neighbor_list
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'coord2.inc'
@@ -909,8 +910,8 @@ contains
 
 !     --- call nearest neighbor list
             if ( lneigh ) then
-               call updnn( imola )
-               call updnn( imolb )
+               call update_neighbor_list(imola,0.,0.,0.,.true.)
+               call update_neighbor_list(imolb,0.,0.,0.,.true.)
             end if
          else
 !     *** recover the reciprocal space vectors
@@ -1534,8 +1535,8 @@ contains
 
 !     --- call nearest neighbor list
             if ( lneigh ) then
-               call updnn( iboxa )
-               call updnn( iboxb )
+               call update_neighbor_list(iboxa,0.,0.,0.,.true.)
+               call update_neighbor_list(iboxb,0.,0.,0.,.true.)
             end if
 
 !cc--!!!JLR - for test 2 write final coordinates of a and b

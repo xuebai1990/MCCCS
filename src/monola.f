@@ -10,6 +10,7 @@ subroutine monola(file_in)
   use util_random,only:random
   use util_runtime,only:err_exit
   use util_timings,only:time_date_str
+  use sim_particle,only:init_neighbor_list
   use sim_system
   use sim_cell
   use energy_pairwise,only:sumup
@@ -66,8 +67,8 @@ subroutine monola(file_in)
 
       integer::point_of_start, point_to_end
 
-      integer::im,mnbox,i,j,inb,nblock,ibox,jbox,nend ,nnn,ii,itemp,itype,itype2,intg,imolty,ilunit,nbl,itel,ig,il,ucheck,jbox_max,k,histtot,Temp_nmol
-      integer::nvirial,zzz,steps,igrow,ddum
+      integer::im,mnbox,i,j,nblock,ibox,jbox,nend ,nnn,ii,itemp,itype,itype2,intg,imolty,ilunit,nbl,itel,ig,il,ucheck,k,histtot,Temp_nmol
+      integer::nvirial,zzz,steps,igrow
       real::starvir,stepvir,starviro
       real::acv,acvsq,aflv,acpres,acnp,acmove ,acsurf,acboxl,acboxa,asetel,acdens,acnbox,dsq,v,vinter,vtail ,vend,vintra,vvib,vbend,vtg,vext,vstart,press1,dsq1,velect ,vflucq,acnbox2,pres(nbxmax),surf,acvolume
       real::rm,temvol,setx,sety,setz,setel,avv,temacd,temspd,dblock,dbl1 ,sterr,stdev ,errme
@@ -96,14 +97,14 @@ subroutine monola(file_in)
       dimension acboxl(nbxmax,3),acboxa(nbxmax,3),acpres(nbxmax)
       dimension acsurf(nbxmax),acvolume(nbxmax)
       dimension acnbox(nbxmax,ntmax),acnbox2(nbxmax,ntmax,20)
-      real::molfra,molfrac,gconst,vdum
+      real::molfra,molfrac,gconst
       dimension mnbox(nbxmax,ntmax),asetel(nbxmax,ntmax), acdens(nbxmax,ntmax),molfra(nbxmax,ntmax)
       real::molvol(nbxmax),speden(nbxmax)
       real::flucmom(nbxmax),flucmom2(nbxmax) ,dielect,acvol(nbxmax) ,acvolsq(nbxmax)
 ! --- dimension statements for block averages ---
       character(LEN=default_string_length)::vname(nener)
       dimension dsq(nprop,nbxmax), stdev(nprop,nbxmax), dsq1(nprop1 ,nbxmax,nbxmax), sterr(nprop,nbxmax),errme(nprop,nbxmax)
-      dimension ucheck(ntmax),ddum(27)
+      dimension ucheck(ntmax)
 
       logical::ovrlap,lratio,lratv,lprint,lmv,lrsave,lblock,lucall ,lvirial2,ltfix,lratfix,ltsolute,lsolute
 
@@ -155,7 +156,6 @@ subroutine monola(file_in)
          lsolid(ibox)=.FALSE.
          lrect(ibox)=.FALSE.
       end do
-      upnn=0.0d0
 
       DO imolty=1,ntmax
          llplace(imolty)=.FALSE.
@@ -192,35 +192,21 @@ subroutine monola(file_in)
 ! set ldie in readdat and have all processors call err_exit('') here
       if (ldie) call err_exit('')
 
-
 ! KM for MPI
 ! check that if lneigh or lgaro numprocs .eq. 1
       if (lneigh.and.numprocs.ne.1) then
-         write(io_output,*) 'Cannot run on more than 1 processor with  neighbor list!!'
-         call err_exit('')
+         call err_exit('Cannot run on more than 1 processor with neighbor list!!')
       end if
       if (lgaro.and.numprocs.ne.1) then
-         write(io_output,*) 'Cannot run on more than 1 processor with  lgaro = .true.!!'
-         call err_exit('')
+         call err_exit('Cannot run on more than 1 processor with lgaro = .true.!!')
       end if
 
-! kea don't call err_exit('') for lgaro
+! kea don't stop for lgaro
 !      if (lchgall .and. (.not. lewald).and.(.not.lgaro)) then
-!         write(io_output,*) 'lchgall is true and lewald is false.',
-!     &        ' Not checked for accuracy!'
-!         call err_exit('')
+!         call err_exit('lchgall is true and lewald is false. Not checked for accuracy!')
 !      end if
 
-      vname(1)  = ' Total energy'
-      vname(2)  = ' Inter LJ    '
-      vname(3)  = ' Bond bending'
-      vname(4)  = ' Torsion     '
-      vname(5)  = ' Intra LJ    '
-      vname(6)  = ' External pot'
-      vname(7)  = ' Stretch     '
-      vname(8)  = ' Coulomb     '
-      vname(9)  = ' Tail  LJ    '
-      vname(10) = ' Fluc Q      '
+      vname(1:10)=(/' Total energy',' Inter LJ    ',' Bond bending',' Torsion     ',' Intra LJ    ',' External pot',' Stretch     ',' Coulomb     ',' Tail  LJ    ',' Fluc Q      '/)
       enth      = ' Enthalpy Inst. Press '
       enth1     = ' Enthalpy Ext.  Press '
 
@@ -239,6 +225,11 @@ subroutine monola(file_in)
          call build_linked_cell()
       end if
 
+      if ( lneigh ) then
+! ***    call for initial set-up of the near-neighbour bitmap ***
+         call init_neighbor_list()
+      end if
+
 ! --- set up thermodynamic integration stuff
       if (lmipsw) call ipswsetup
 
@@ -248,12 +239,11 @@ subroutine monola(file_in)
           lstagec = .false.
       end if
 
-!      write(io_output,*) 'lexpee ', lexpee
-
 ! --- set up expanded ensemble stuff
-      if (lexpee) call eesetup
-
-      if (lexpee.and.lmipsw) call err_exit('not for BOTH lexpee AND lmipsw')
+      if (lexpee) then
+         call eesetup
+         if (lmipsw) call err_exit('not for BOTH lexpee AND lmipsw')
+      end if
 
 ! KM for MPI
 ! only processor 0 opens files
@@ -271,10 +261,8 @@ subroutine monola(file_in)
             write(file_flt,'("nfl",I1.1,A,".dat")') run_num,suffix
             write(file_hist,'("his",I1.1,A,".dat")') run_num,suffix
 
-
             do i=1,nmolty
                write(file_ndis(i),'("n",I2.2,"dis",I1.1,A,".dat")') i,run_num,suffix
-
             end do
 
             open(50, file = file_flt, status='unknown')
@@ -286,7 +274,6 @@ subroutine monola(file_in)
          end if
 
 ! --- extra zero accumulator for grand-canonical ensemble
-
          nentry = 0
          nconfig = 0
          do itmax = 1,ntmax
@@ -296,14 +283,13 @@ subroutine monola(file_in)
                ndist(imax,itmax) = 0
             end do
          end do
-
       end if
 
 ! *** zero accumulators ***
       do i = 1,11
         do ibox = 1,nbox-1
            do jbox = ibox+1, nbox
-                acsolpar(i,ibox,jbox)=0.0d0
+              acsolpar(i,ibox,jbox)=0.0d0
            end do
         end do
       end do
@@ -468,10 +454,6 @@ subroutine monola(file_in)
             write(io_output,*)
             write(io_output,*) 'box  ',ibox,' initial v   = ', vbox(ibox)
          end if
-         if ( lneigh ) then
-! ***        call for initial set-up of the near-neighbour bitmap ***
-            call setnn (ibox)
-         end if
 ! *** calculate initial pressure ***
          call pressure( press1, surf, ibox )
          if (myid.eq.0) then
@@ -494,7 +476,7 @@ subroutine monola(file_in)
 
       nend = nnstep + nstep
       if (lneighbor) then
-         write(21,*) 'ii:',ii,(neigh_cnt(i),i=1,nchain)
+         write(21,*) 'ii:',nnstep,(neigh_cnt(i),i=1,nchain)
       end if
 
       do 100 nnn = 1, nstep
@@ -1067,7 +1049,7 @@ subroutine monola(file_in)
   101 continue
 
       if (lneighbor) then
-         write(21,*) 'ii:',ii,(neigh_cnt(i),i=1,nchain)
+         write(21,*) 'ii:',tmcc,(neigh_cnt(i),i=1,nchain)
       end if
       if (myid.eq.0) then
          write(io_output,*)

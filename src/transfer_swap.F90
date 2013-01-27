@@ -26,6 +26,7 @@ contains
 !    ** 9-18-97                                                        **
 !    ********************************************************************
   subroutine swap
+    use sim_particle,only:update_neighbor_list
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'conver.inc'
@@ -51,13 +52,13 @@ contains
 
 
       integer::boxins,boxrem,imol,ichoi,ip,iwalk,idum ,iins1,imolty1
-      integer::istt,iett,itype,ipair,ipairb,beg ,flagon
+      integer::istt,iett,itype,ipair,ipairb,beg
 
       integer::iutry,icbu,ifrom,irem,iins,glist,findex ,iii,j,ibox,iunit,ic,pointp,imolty,imt,jmt,igrow ,pointp2,jins ,jmolty,neighj_num,neighk_num ,joffset,koffset,kmolty,kins,target,neigh_old
 
       dimension glist(numax)
 
-      real::sx,sy,sz,ddum(27)
+      real::sx,sy,sz
 
       real::v,vintra,vinter,vext,velect,vtorold ,vtornew,vewald,vflucq,delen,deleo,rpair
       real::vnewflucq,voldflucq,qion,ctorfo ,ctorfn
@@ -67,7 +68,7 @@ contains
       real::rmol,rbf,bsum
       real::waddnew,waddold
 
-      real::total_NBE,vintran,velectn,vewaldn ,vtgn
+      real::total_NBE,vtgn
       real::vbendn,vvibn
 
       real::v1insext,v1remext,v1ins,w1ins,v1rem ,w1rem,v1insint,v1remint,v1insewd,v1remewd,wnlog,wolog,wdlog ,wratio,vinsta,vremta,volins,volrem,rho,arg,v1inselc,v1remelc
@@ -1743,7 +1744,7 @@ contains
             call dipole(ibox,1)
          end if
 
-         if ( lneigh ) call updnn( irem )
+         if ( lneigh ) call update_neighbor_list(irem,0.,0.,0.,.true.)
          if ( lneighbor ) then
             neigh_old = neigh_cnt(irem)
             if ( neigh_old .le. 6 .and. neigh_icnt .le. 6 ) then

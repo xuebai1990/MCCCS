@@ -2,38 +2,24 @@ MODULE energy_intramolecular
   use var_type,only:default_string_length
   use const_math,only:onepi,twopi,raddeg
   use util_runtime,only:err_exit
+  use util_memory,only:reallocate
   use util_string,only:uppercase,integer_to_string
   use util_files,only:readLine
+  use util_search,only:LookupTable,initiateTable,addToTable
   use sim_system,only:io_output,brvib,brvibk,brben,brbenk,nvmax,myid,L_spline,L_linear,numax
   implicit none
   private
   save
-  public::suvibe,vtorso,calctor,lininter_vib,lininter_bend,lininter,splint,read_tor_table,read_vib_table,read_bend_table,U_torsion,U_bonded
+  public::suvibe,vtorso,calctor,lininter_vib,lininter_bend,inter_tor,init_tabulated_potential_bonded,U_torsion,U_bonded
 
 ! CONTORSION.INC
-  integer::ntormax
-  parameter (ntormax=700)
+  integer,parameter::ntormax=700,num_tabulated_point=1500
   real::vtt0(ntormax),vtt1(ntormax),vtt2(ntormax),vtt3(ntormax),vtt4(ntormax),vtt5(ntormax) ,vtt6(ntormax),vtt7(ntormax),vtt8(ntormax),vtt9(ntormax)
 
-! TABULATED.INC
-!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-!cccc  for use with tabulated potentials
-!cccc  if you are not using a tabulated potential,
-!cccc  reduce the size of the arrays!!!
-!cccc  to pass the test suite, arrays for tabulated electrostatics
-!cccc  need to be sufficiently large
-!cccc  num_int_elect(150,150), tabelect(1500,150,150), etc.
-!cccc  KM 2009
-!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-  integer::ntabvib,num_int_vib(1),vibsplits(1)
-  real::vib(10,1),tabvib(10,1),vibdiff(10,1)
-
-  integer::ntabbend,num_int_bend(1),bendsplits(1)
-  real::bend(10,1),tabbend(10,1),benddiff(10,1)
-
-! TORSION.INC
-  integer::splpnts(10),nttor
-  real::deg(10,2),tabtorso(10,2),torderiv2(10,2),tordif(10,2)
+  integer,allocatable::vibsplits(:),bendsplits(:),splpnts(:)
+  real,allocatable::vib(:,:),tabvib(:,:),bend(:,:),tabbend(:,:),deg(:,:),tabtorso(:,:),torderiv2(:,:)
+  integer::ntabvib,ntabbend,nttor
+  type(LookupTable)::bonds,angles,dihedrals
 
   real::rxvec(numax,numax),ryvec(numax,numax),rzvec(numax,numax),distij2(numax,numax),distanceij(numax,numax)
 contains
@@ -468,19 +454,26 @@ contains
         end if
 
         if (UPPERCASE(line_in(1:5)).eq.'BONDS') then
-             read(line_in(6:),*) n
-             do j=1,n
+             n=0
+             do
                 call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
                 if (jerr.ne.0) then
                    write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
                    call err_exit('Reading section BONDS')
                 end if
+                if (UPPERCASE(line_in(1:9)).eq.'END BONDS') exit
+                n=n+1
                 read(line_in,*) i,dum,brvib(i),brvibk(i)
              end do
              exit cycle_read_bonds
         end if
      END DO CYCLE_READ_BONDS
 
+     ! do j=1,nvmax
+     !    if (brvib(j).gt.0) then
+     !       write(101,'(I3,1X,I1,1X,F7.5,1X,G13.6)') j,1,brvib(j),brvibk(j)
+     !    end if
+     ! end do
 ! ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ! - TraPPE-UA bond angle for alkane segment centered at methylene (CH2 sp3)-
@@ -997,22 +990,30 @@ contains
         end if
 
         if (UPPERCASE(line_in(1:6)).eq.'ANGLES') then
-             read(line_in(7:),*) n
-             do j=1,n
+             n=0
+             do
                 call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
                 if (jerr.ne.0) then
                    write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
                    call err_exit('Reading section ANGLES')
                 end if
+                if (UPPERCASE(line_in(1:10)).eq.'END ANGLES') exit
+                n=n+1
                 read(line_in,*) i,dum,brben(i),brbenk(i)
              end do
              exit cycle_read_angles
         end if
      END DO CYCLE_READ_ANGLES
 
-      do i = 1, nvmax
-         brben(i) = brben(i) * 8.0d0 * datan(1.0d0) / 360.0d0
-      end do
+     ! do j=1,nvmax
+     !    if (brben(j).ne.0) then
+     !       write(102,'(I3,1X,I1,1X,F8.4,1X,G13.6)') j,1,brben(j),brbenk(j)
+     !    end if
+     ! end do
+
+     do i = 1, nvmax
+        brben(i) = brben(i) * onepi / 180.0d0
+     end do
 ! ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ! - TraPPE-UA alkane torsional parameters for linear segment -
@@ -1821,18 +1822,26 @@ contains
         end if
 
         if (UPPERCASE(line_in(1:9)).eq.'DIHEDRALS') then
-           read(line_in(10:),*) n
-           do j=1,n
+           n=0
+           do
               call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
               if (jerr.ne.0) then
                  write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
                  call err_exit('Reading section DIHEDRALS')
               end if
+              if (UPPERCASE(line_in(1:13)).eq.'END DIHEDRALS') exit
+              n=n+1
               read(line_in,*) i,dum,vtt0(i),vtt1(i),vtt2(i),vtt3(i)
            end do
            exit cycle_read_dihedrals
         end if
      END DO CYCLE_READ_DIHEDRALS
+
+     ! do j=1,ntormax
+     !    if (vtt0(j).ne.0.or.vtt1(j).ne.0.or.vtt2(j).ne.0.or.vtt3(j).ne.0.or.vtt4(j).ne.0.or.vtt5(j).ne.0.or.vtt6(j).ne.0.or.vtt7(j).ne.0.or.vtt8(j).ne.0.or.vtt9(j).ne.0) then
+     !       write(103,'(I3,1X,I1,10(1X,F13.7))') j,1,vtt0(j),vtt1(j),vtt2(j),vtt3(j),vtt4(j),vtt5(j),vtt6(j),vtt7(j),vtt8(j),vtt9(j)
+     !    end if
+     ! end do
 
       return
   end subroutine suvibe
@@ -2184,6 +2193,7 @@ contains
       return
   end function vtorso
 
+!DEC$ ATTRIBUTES FORCEINLINE :: calctor
   subroutine calctor(iu1,iu2,iu3,iu4,jttor,vtor)
     use sim_system,only:xvec,yvec,zvec
 !$$$      include 'control.inc'
@@ -2191,7 +2201,7 @@ contains
 
       integer::iu1,iu2,iu3,iu4,jttor
 
-      real::thetac,xaa1,yaa1,zaa1,xa1a2,ya1a2 ,za1a2,daa1,da1a2,dot,vtor,tcc,xcc,ycc,zcc,theta,spltor
+      real::thetac,xaa1,yaa1,zaa1,xa1a2,ya1a2 ,za1a2,daa1,da1a2,dot,vtor,tcc,xcc,ycc,zcc,theta
 
 !     --- calculate cross products d_a x d_a-1
       xaa1 = yvec(iu2,iu1) * zvec(iu3,iu2) + zvec(iu2,iu1) * yvec(iu2,iu3)
@@ -2228,14 +2238,7 @@ contains
 !     determine angle between -180 and 180, not 0 to 180
          theta = dacos(thetac)
          if (tcc .lt. 0.0d0) theta = -theta
-
-         if (jttor.lt.100) then
-            call splint(theta,spltor,jttor)
-         else
-            call lininter(theta,spltor,jttor)
-         end if
-         vtor = spltor
-
+         vtor = inter_tor(theta,jttor)
       else
          vtor = vtorso(thetac,jttor)
       end if
@@ -2243,365 +2246,77 @@ contains
       return
   end subroutine calctor
 
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-!ccc  calculates vibrational potential using linear interpolation
-!ccc  between two points
-!ccc  must specify equilibrium bond length in suvibe, force
-!ccc  constant must be zero
-!ccc  requires a file (fort.41) that starts with 0.0 (not 0.5)
-!ccc  fort.41: number of tabulated potentials, potential number from
-!ccc  suvibe, number of points per angstrom, tabulated potential
-!ccc  (repeat last three parts for each additional potential)
-!ccc  KM 12/02/08
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-  subroutine lininter_vib(len, tabulated_vib, vibtyp)
-!$$$      include 'tabulated.inc'
-!$$$      include 'conver.inc'
+  function lininter_vib(r,typo) result(tabulated_vib)
+    use util_math,only:polint
+    use util_search,only:indexOf,LOCATE
+    real::tabulated_vib
+    real,intent(in)::r
+    integer,intent(in)::typo
+    integer::typ,low,high
 
-      integer::vibtyp, vlow, vhigh, xa, bin, add1
-      real::len, tabulated_vib, left, lenrem
+    typ=indexOf(bonds,typo)
+    low=locate(vib(:,typ),vibsplits(typ),r,2)
+    high=low+1
+    if (vib(low,typ).gt.r.or.vib(high,typ).lt.r) then
+       write(io_output,*) 'problem in lininter_vib!'
+       write(io_output,*) 'len', r, ' vibtyp', typo
+       write(io_output,*) 'low ', low, vib(low, typ)
+       write(io_output,*) 'high ',high, vib(high, typ)
+       write(io_output,*)
+    end if
+    call polint(vib(low:high,typ),tabvib(low:high,typ),2,r,tabulated_vib)
+    return
+  end function lininter_vib
 
-      vlow=1
-      vhigh=vibsplits(vibtyp)
+  function lininter_bend(r,typo) result(tabulated_bend)
+    use util_math,only:polint
+    use util_search,only:indexOf,LOCATE
+    real::tabulated_bend
+    real,intent(in)::r
+    integer,intent(in)::typo
+    integer::typ,low,high
 
-      xa = int(len)
-      left = len-xa
+    typ=indexOf(angles,typo)
+    low=locate(bend(:,typ),bendsplits(typ),r,2)
+    high=low+1
+    if (bend(low,typ).gt.r.or.bend(high,typ).lt.r) then
+       write(io_output,*) 'problem in lininter_bend!'
+       write(io_output,*) 'r', r, ' bendtyp', typo
+       write(io_output,*) 'low ', low, bend(low, typ)
+       write(io_output,*) 'high ',high, bend(high, typ)
+       write(io_output,*)
+    end if
+    call polint(bend(low:high,typ),tabbend(low:high,typ),2,r,tabulated_bend)
+    return
+  end function lininter_bend
 
-!     select correct bin
-!     multiply by num_int_vib - number of intervals per angstrom
-      add1 = int(left*num_int_vib(vibtyp))
-      bin = (xa-vib(1,vibtyp))*num_int_vib(vibtyp) + 1 + add1
-      vlow = bin
-      vhigh = vlow+1
+  function inter_tor(thetarad,typo) result(tabulated_tor)
+    use util_math,only:polint,splint
+    use util_search,only:indexOf,LOCATE
+    real::tabulated_tor
+    real,intent(in)::thetarad
+    integer,intent(in)::typo
+    real::theta
+    integer::typ,low,high
 
-      if (vib(vlow,vibtyp).gt. len.or.vib(vhigh,vibtyp).lt.len) then
-         write(io_output,*) 'problem in lininter_vib!'
-         write(io_output,*) 'len', len, ' vibtyp', vibtyp
-         write(io_output,*) 'vlow ', vlow, vib(vlow, vibtyp),len
-         write(io_output,*) 'vhigh ', vhigh, vib(vhigh, vibtyp), len
-         write(io_output,*)
-      end if
-
-      lenrem=len-vib(vlow, vibtyp)
-      lenrem=lenrem*dble(num_int_vib(vibtyp))
-
-      tabulated_vib=lenrem*vibdiff(vlow,vibtyp)
-      tabulated_vib=tabulated_vib+tabvib(vlow,vibtyp)
-
-      return
-  end subroutine lininter_vib
-
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-!ccc  calculates 1-3 nonbonded 'bending' potential using linear
-!ccc  interpolation between two points
-!ccc  must include 1-3 interactions
-!ccc  must specify equilibrium angle in suvibe, force constant
-!ccc  must be very small but non-zero
-!ccc  requires a file (fort.42) with distances in A
-!ccc  fort.42: number of tabulated potentials, potential number from
-!ccc  suvibe, number of points per degree, tabulated potential
-!ccc  (repeat last three parts for each additional potential,
-!ccc   separated by 1000 1000)
-!ccc  make sure potential does not go up to infinity!
-!ccc  KM 12/03/08
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-  subroutine lininter_bend(r, tabulated_bend, bendtyp)
-!$$$      include 'tabulated.inc'
-!$$$      include 'conver.inc'
-
-      integer::bendtyp, blow, bhigh, xa, bin, add1
-      real::r, tabulated_bend, left, rem
-
-      blow=1
-      bhigh=bendsplits(bendtyp)
-
-      xa = int(r)
-      left = r-xa
-
-!     select correct bin
-!     multiply by num_int_bend - number of intervals per A
-      add1 = int(left*num_int_bend(bendtyp))
-      bin = (xa-bend(1,bendtyp))*num_int_bend(bendtyp) + 1 + add1
-      blow = bin
-      bhigh = blow+1
-
-      if (bend(blow,bendtyp).gt. r.or. bend(bhigh,bendtyp).lt.r) then
-         write(io_output,*) 'problem in lininter_bend!'
-         write(io_output,*) 'r', r, ' bendtyp', bendtyp
-         write(io_output,*) 'blow ', blow, bend(blow, bendtyp),r
-         write(io_output,*) 'bhigh ', bhigh, bend(bhigh, bendtyp), r
-         write(io_output,*)
-      end if
-
-      rem=r-bend(blow, bendtyp)
-      rem=rem*dble(num_int_bend(bendtyp))
-
-      tabulated_bend=rem*benddiff(blow,bendtyp)
-      tabulated_bend=tabulated_bend+tabbend(blow,bendtyp)
-!      write(io_output,*) 'tabulated_bend ', tabulated_bend
-
-      return
-  end subroutine lininter_bend
-
-  subroutine lininter(theta,spltor,ttyp)
-!$$$      include 'torsion.inc'
-!$$$      include 'conver.inc'
-!$$$      include 'control.inc'
-
-      integer::ttyp,klo,khi,xa,bin,addl
-      real::theta,spltor,thetarem ,left
-
-! Routine to calculate torsion potential using linear interpolation between 2 points
-! Requires a file (fort.40) running from -180 to 180 in 1/4 degree intervals
-
-      theta=raddeg*theta
-
-      klo=1
-      khi=splpnts(ttyp)
-
-      xa=idint(theta)
-      left=(theta-xa)
-!      write(io_output,*) 'left',left
-
-!     selecting bin of correct degree
-      addl = idint(left*4)
-      bin = (xa-deg(1,ttyp))*4 + 1 + addl
-      if (theta .lt. 0.0d0.and.theta.ge.-180.0d0) then
-!         write(io_output,*) 'negative bin',bin
-         khi = bin
-         klo = khi-1
-      else if (theta .ge. 0.0d0.and.theta.le.180.0d0) then
-!         write(io_output,*) 'positive bin',bin
-         klo = bin
-         khi = klo+1
-      else
-         write(io_output,*) 'Error in lininter.f - theta',theta
-      end if
-
-!      write(io_output,*) 'klo,khi',klo,deg(klo,ttyp),khi,deg(khi,ttyp)
-! check
-      if(deg(klo,ttyp).gt.theta.or.deg(khi,ttyp).lt.theta) then
-          write(io_output,*) 'problem below'
-          write(io_output,*) 'theta',theta,' ttyp',ttyp
-          write(io_output,*) 'klo',klo,deg(klo,ttyp),'khi',khi,deg(khi,ttyp)
+    typ=indexOf(angles,typo)
+    theta=raddeg*thetarad
+    if (L_spline) then
+       call splint(deg(:,typ),tabtorso(:,typ),torderiv2(:,typ),splpnts(typ),theta,tabulated_tor)
+    else if (L_linear) then
+       low=locate(deg(:,typ),splpnts(typ),theta,2)
+       high=low+1
+       if (deg(low,typ).gt.theta.or.deg(high,typ).lt.theta) then
+          write(io_output,*) 'problem in inter_tor_linear!'
+          write(io_output,*) 'theta ',thetarad, ' [rad], ',theta, ' [deg]. tortyp', typo
+          write(io_output,*) 'low ', low, deg(low, typ)
+          write(io_output,*) 'high ',high, deg(high, typ)
           write(io_output,*)
        end if
-
-      thetarem=theta-deg(klo,ttyp)
-      thetarem=thetarem*4.0d0
-
-!      tordiff=tabtorso(khi,ttyp)-tabtorso(klo,ttyp)
-      spltor=thetarem*tordif(klo,ttyp)
-      spltor=spltor+tabtorso(klo,ttyp)
-
-      return
-  end subroutine lininter
-
-  subroutine spline(yp1,ypn,tortyp)
-!$$$      include 'torsion.inc'
-!$$$      include 'control.inc'
-
-!      integer::n,nmax
-!      real::yp1,ypn,x(n),y(n),y2(n)
-!      parameter (nmax=500)
-
-!     Numerical recipes, 2nd ed, 1992. - cubic spline
-!     Given arrays x(1:n) and y(1:n) containing a tabulated function, ie
-!     y(i) = f(x(i)) with x ascending in order, and given values yp1 and ypn
-!     for the first derivative of the interpolating function at the point 1
-!     and n, respectively, this routine returns an array y2(1:n) of length n
-!     which contains the second derivatives of the interpolating function at
-!     the tabulated points x(i). If yp1 and/or ypn are equal to 1E30 or more,
-!     the routine is signaled to set the corresponding boundary condition for
-!     a natural spline, with zero second derivative on that boundary
-!     nmax = largest value of n
-!     x=deg y=tabtorso y2=torderiv2 n=points
-
-      integer::i,k,points,tortyp
-      real::p,qn,sig,un,u(500,10),yp1,ypn
-
-! Routine sets up derivatives for use with spline interpolations
-! Requires file (fort.40) running from -195 to 195 in degree steps
-! (Extra 15 degrees on each side required so that second derivatives are reasonable
-!     by the time the degrees of interest are reached.)
-      points=splpnts(tortyp)
-
-      write(io_output,*) 'beginning of spline',splpnts(tortyp),yp1,ypn
-
-      if (yp1.gt.0.99d30) then
-         torderiv2(1,tortyp) = 0.0d0
-         u(1,tortyp) = 0.0d0
-
-      else
-         torderiv2(1,tortyp) = -0.5d0
-         u(1,tortyp) = (3.0d0/(deg(2,tortyp)-deg(1,tortyp)))* ((tabtorso(2,tortyp)-tabtorso(1,tortyp))/ (deg(2,tortyp)-deg(1,tortyp))-yp1)
-
-      end if
-
-      do i = 2,points-1
-         sig = (deg(i,tortyp)-deg(i-1,tortyp))/ (deg(i+1,tortyp)-deg(i-1,tortyp))
-         p = sig*torderiv2(i-1,tortyp)+2.0d0
-         torderiv2(i,tortyp) = (sig-1.0d0)/p
-         u(i,tortyp) = (6.0d0*((tabtorso(i+1,tortyp)-tabtorso(i,tortyp)) /(deg(i+1,tortyp)-deg(i,tortyp))-(tabtorso(i,tortyp)- tabtorso(i-1,tortyp))/(deg(i,tortyp)-deg(i-1,tortyp)))/ (deg(i+1,tortyp)-deg(i-1,tortyp))-sig*u(i-1,tortyp))/p
-      end do
-
-
-      if (ypn .gt. 0.99d30) then
-         qn = 0.0d0
-         un = 0.0d0
-
-      else
-         qn = 0.5d0
-         un = (3.0d0/(deg(points,tortyp)-deg(points-1,tortyp)))* (ypn-(tabtorso(points,tortyp)-tabtorso(points-1,tortyp)) /(deg(points,tortyp)-deg(points-1,tortyp)))
-
-      end if
-
-      torderiv2(points,tortyp) = (un-qn*u(points-1,tortyp))/ (qn*torderiv2(points-1,tortyp)+1.0d0)
-      do k = points-1, 1, -1
-         torderiv2(k,tortyp) = torderiv2(k,tortyp)*torderiv2(k+1,tortyp) +u(k,tortyp)
-      end do
-
-      do i=1,points
-         write(55,*) deg(i,tortyp),tabtorso(i,tortyp), torderiv2(i,tortyp)
-      end do
-
-      return
-  end subroutine spline
-
-!     From Numerical recipes, 2nd ed, 1992. - spline interpolation
-!     Given the arrays xa(1:n) and ya(1:n) of length n, which tabulate a
-!     function and given the array y2a(1:n), which is from the ouput of
-!     spline, and given a value of x, this routine returns a cubic-spline
-!     interpolated value of y.
-!     xa = deg, ya = tabtorso, y2a = torderiv2, n = points
-  subroutine splint(x,y,tortyp)
-!$$$      include 'torsion.inc'
-!$$$      include 'conver.inc'
-!$$$      include 'control.inc'
-
-!      integer::n
-!      real::x,y,xa(n),y2a(n),ya(n)
-      integer::khi,klo,points,tortyp,xa
-      real::a,bb,h,x,y
-
-      points = splpnts(tortyp)
-
-      klo = 1
-      khi = points
-
-      x=x*raddeg
-
-! Below is correct for tabulated data from -195 to 195 degrees
-      xa=int(x)+197
-
-      if (x.lt.0.0d0) then
-         klo=xa-1
-         khi=xa
-      else if (xa.ge.0.0d0) then
-         klo=xa
-         khi=xa+1
-      end if
-
-!      write(io_output,*) 'klo,khi',deg(klo,tortyp),deg(khi,tortyp)
-
-      h = deg(khi,tortyp)-deg(klo,tortyp)
-
-      if (dabs(h).lt.1.0d-8) write(io_output,*) 'bad deg input in splint',h, khi,deg(khi,tortyp),klo,deg(klo,tortyp)
-      a = (deg(khi,tortyp)-x)/h
-      bb = (x-deg(klo,tortyp))/h
-      y = a*tabtorso(klo,tortyp)+bb*tabtorso(khi,tortyp)+ ((a**3-a)*torderiv2(klo,tortyp)+(bb**3-bb)* torderiv2(khi,tortyp))*(h**2)/6.0d0
-
-!      write(io_output,*) x,y,tortyp
-
-      return
-  end subroutine splint
-
-!   KEA - read in tabulated torsion potentials and set up derivatives
-!         for spline interpolation if L_tor_table
-  subroutine read_tor_table(io_output)
-    integer,intent(in)::io_output
-    integer::mmm,ttor,i
-
-    read(40,*) nttor
-    write(io_output,*)
-    ! write(io_output,*) 'in spline read loop, nttor',nttor
-    do mmm = 1,nttor
-       read(40,*) ttor
-       i=1
-10     read(40,*,end=11) deg(i,ttor),tabtorso(i,ttor)
-       if(deg(i,ttor).eq.1000) goto 11
-       if (myid.eq.0) then
-          write(56,*) i,deg(i,ttor),tabtorso(i,ttor)
-       end if
-       i=i+1
-       goto 10
-11     splpnts(ttor)=i-1
-       if (L_spline) then
-          if (myid.eq.0) write(io_output,*) 'using spline interpolation'
-          call spline(1.0d31,1.0d32,ttor)
-       else if (L_linear) then
-          if (myid.eq.0) write(io_output,*) 'using linear interpolation'
-          do i=1,splpnts(ttor)-1
-             tordif(i,ttor) = tabtorso(i+1,ttor)-tabtorso(i,ttor)
-          end do
-       end if
-    end do
-    close(40)
-  end subroutine read_tor_table
-
-!   KM 12/02/08 - read in tabulated vibrational potential
-!   and set up linear interpolation
-  subroutine read_vib_table(io_output)
-    integer,intent(in)::io_output
-    integer::mmm,tvib,i
-
-    read(41,*) ntabvib
-    write(io_output,*)
-    mmm=1
-    do mmm=1,ntabvib
-       read(41,*) tvib
-       read(41,*) num_int_vib(tvib)
-       i=1
-12     read(41,*,end=13) vib(i,tvib), tabvib(i,tvib)
-       if (vib(i,tvib).eq.1000) goto 13
-       ! write(57,*) i, vib(i,tvib),tabvib(i,tvib)
-       i=i+1
-       goto 12
-13     vibsplits(tvib)=i-1
-       if (myid.eq.0)  write(io_output,*) 'using linear interpolation  for vibrations'
-       do i=1,vibsplits(tvib)-1
-          vibdiff(i,tvib)=tabvib(i+1,tvib)-tabvib(i,tvib)
-       end do
-    end do
-    close(41)
-  end subroutine read_vib_table
-
-!   KM 12/02/08 - read in tabulated 1-3 nonbonded 'bending' potential
-!   and set up linear interpolation
-  subroutine read_bend_table(io_output)
-    integer,intent(in)::io_output
-    integer::mmm,tbend,i
-
-    read(42,*) ntabbend
-    write(io_output,*)
-    mmm=1
-    do mmm=1,ntabbend
-       read(42,*) tbend
-       read(42,*) num_int_bend(tbend)
-       i=1
-14     read(42,*,end=15) bend(i,tbend), tabbend(i,tbend)
-       if (bend(i,tbend).eq.1000) goto 15
-       !write(58,*) i, bend(i,tbend),tabbend(i,tbend)
-       i=i+1
-       goto 14
-15     bendsplits(tbend)=i-1
-       if (myid.eq.0) write(io_output,*) 'using linear interpolation for1-3 nonbonded bending'
-       do i=1,bendsplits(tbend)-1
-          benddiff(i,tbend)=tabbend(i+1,tbend)-tabbend(i,tbend)
-       end do
-    end do
-    close(42)
-  end subroutine read_bend_table
+       call polint(deg(low:high,typ),tabtorso(low:high,typ),2,theta,tabulated_tor)
+    end if
+    return
+  end function inter_tor
 
 ! - branched and linear molecules with connectivity table -
 ! - go through entire chain -
@@ -2645,7 +2360,7 @@ contains
     logical,intent(in)::lupdate_connectivity
 
     integer::j,jjtor,ip1,ip2,ip3,it
-    real::thetac,theta,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2,daa1,da1a2,dot,xcc,ycc,zcc,tcc,spltor
+    real::thetac,theta,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2,daa1,da1a2,dot,xcc,ycc,zcc,tcc
     
     if (lupdate_connectivity) call calc_connectivity(i,imolty)
 
@@ -2684,14 +2399,9 @@ contains
                 tcc = xcc*rxvec(ip1,ip2) + ycc*ryvec(ip1,ip2) + zcc*rzvec(ip1,ip2)
                 theta = dacos (thetac)
                 if (tcc .lt. 0.0d0) theta = -theta
-                if (L_spline) then
-                   call splint(theta,spltor,it)
-                else if(L_linear) then
-                   call lininter(theta,spltor,it)
-                end if
-                vtg = vtg+spltor
+                vtg = vtg+inter_tor(theta,it)
              else
-                vtg = vtg + vtorso( thetac, it )
+                vtg = vtg + vtorso( thetac,it)
              end if
           end if
        end do
@@ -2706,7 +2416,7 @@ contains
     real,intent(out)::vvib,vbend,vtg
     integer,intent(in)::i,imolty
 
-    real::tabulated_vib,theta,thetac
+    real::theta,thetac
     integer::j,jjvib,ip1,ip2,it,jjben
 
     call calc_connectivity(i,imolty)
@@ -2718,8 +2428,7 @@ contains
           ip1 = ijvib(imolty,j,jjvib)
           it  = itvib(imolty,j,jjvib)
           if ( ip1.lt. j .and. L_vib_table) then
-             call lininter_vib(distanceij(ip1,j),  tabulated_vib, it)
-             vvib = vvib + tabulated_vib
+             vvib = vvib + lininter_vib(distanceij(ip1,j),it)
 !             write(io_output,*) 'TABULATED VVIB: ', tabulated_vib,
 !   &         distanceij(ip1,j), ip1, j
           end if
@@ -2745,8 +2454,7 @@ contains
              ! if (L_bend_table) then
              !    rbendsq=distij2(ip1,j)+distij2(ip1,ip2)-2.0d0*distanceij(ip1,j)*distanceij(ip1,ip2)*thetac
              !    rbend = dsqrt(rbendsq)
-             !    call lininter_bend(rbend, tabulated_bend, it)
-             !    vbend = vbend + tabulated_bend
+             !    vbend = vbend + lininter_bend(rbend,it)
              ! else
              vbend = vbend +  brbenk(it) * (theta-brben(it))**2
              ! end if
@@ -2762,4 +2470,111 @@ contains
     vtg=U_torsion(i,imolty,2,.false.)
 
   end subroutine U_bonded
+
+!> \brief Read in tabulated potential for bonded interactions (stretching, bending, and torsion) and set up linear interpolation
+  subroutine read_tabulated_potential_bonded(file_tab,ntab,r,tab,splits,lists)
+    use util_files,only:get_iounit
+    character(LEN=*),intent(in)::file_tab
+    integer,intent(out)::ntab
+    integer,allocatable,intent(inout)::splits(:)
+    real,allocatable,intent(inout)::r(:,:),tab(:,:)
+    type(LookupTable),intent(inout)::lists
+
+    integer::io_tab,mmm,t,i,jerr
+
+    io_tab=get_iounit()
+    open(unit=io_tab,access='sequential',action='read',file=file_tab,form='formatted',iostat=jerr,status='old')
+    if (jerr.ne.0) then
+       call err_exit('cannot open tabulated potential file: '//file_tab)
+    end if
+
+    read(io_tab,*) ntab
+    do mmm=1,ntab
+       read(io_tab,*) t
+       t=addToTable(lists,t,expand=.true.)
+       if (t.gt.size(splits)) then
+          call reallocate(splits,1,2*size(splits))
+          call reallocate(r,1,size(r,1),1,2*size(r,2))
+          call reallocate(tab,1,size(tab,1),1,2*size(tab,2))
+       end if
+       i=1
+       do
+          if (i.gt.size(r,1)) then
+             call reallocate(r,1,2*size(r,1),1,size(r,2))
+             call reallocate(tab,1,2*size(tab,1),1,size(tab,2))
+          end if
+          read(io_tab,*,end=100) r(i,t), tab(i,t)
+          if (r(i,t).eq.1000) exit
+          ! write(io_tab+10,*) i,v(i,t),tab(i,t)
+          i=i+1
+       end do
+100    splits(t)=i-1
+    end do
+    close(io_tab)
+  end subroutine read_tabulated_potential_bonded
+
+! L_spline: Requires file (fort.40) running from -195 to 195 in degree steps
+! (Extra 15 degrees on each side required so that second derivatives are
+! reasonable for the degrees of interest)
+! L_linear: Requires a file (fort.40) running from -180 to 180 in 1/4 degree intervals
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!ccc  Calculates vibrational and 1-3 nonbonded 'bending' potential
+!ccc  using linear interpolation between two points
+!ccc    must specify equilibrium bond length in suvibe, force
+!ccc  constant must be zero
+!ccc  requires a file (fort.41) that starts with 0.0 (not 0.5)
+!ccc  fort.41: number of tabulated potentials, potential number from
+!ccc  suvibe, number of points per angstrom, tabulated potential
+!ccc  (repeat last three parts for each additional potential)
+!ccc  KM 12/02/08
+!ccc    must include 1-3 interactions
+!ccc  must specify equilibrium angle in suvibe, force constant
+!ccc  must be very small but non-zero
+!ccc  requires a file (fort.42) with distances in A
+!ccc  fort.42: number of tabulated potentials, potential number from
+!ccc  suvibe, number of points per degree, tabulated potential
+!ccc  (repeat last three parts for each additional potential,
+!ccc   separated by 1000 1000)
+!ccc  make sure potential does not go up to infinity!
+!ccc  KM 12/03/08
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+  subroutine init_tabulated_potential_bonded()
+    use util_math,only:spline
+    use sim_system,only:L_tor_table,L_vib_table,L_bend_table
+    integer,parameter::initial_size=10,grid_size=1500
+    integer::jerr,ttor
+
+    if (L_tor_table) then
+       call initiateTable(dihedrals,initial_size)
+       allocate(splpnts(1:initial_size),deg(1:grid_size,1:initial_size),tabtorso(1:grid_size,1:initial_size),stat=jerr)
+       if (jerr.ne.0) call err_exit('init_tabulated_potential_bonded: allocation failed for vib_table 1')
+       call read_tabulated_potential_bonded('fort.40',nttor,deg,tabtorso,splpnts,dihedrals)
+       if (L_spline) then
+          if (myid.eq.0) write(io_output,*) 'using spline interpolation'
+          allocate(torderiv2(1:grid_size,1:initial_size),stat=jerr)
+          if (jerr.ne.0) call err_exit('init_tabulated_potential_bonded: allocation failed for tor_table 2')
+          do ttor=1,nttor
+             call spline(deg(:,ttor),tabtorso(:,ttor),splpnts(ttor),1.0d31,1.0d31,torderiv2(:,ttor))
+          end do
+       else if (L_linear) then
+          if (myid.eq.0) write(io_output,*) 'using linear interpolation'
+       end if
+    end if
+
+    if (L_vib_table) then
+       call initiateTable(bonds,initial_size)
+       allocate(vibsplits(1:initial_size),vib(1:grid_size,1:initial_size),tabvib(1:grid_size,1:initial_size),stat=jerr)
+       if (jerr.ne.0) call err_exit('init_tabulated_potential_bonded: allocation failed for vib_table')
+       call read_tabulated_potential_bonded('fort.41',ntabvib,vib,tabvib,vibsplits,bonds)
+       if (myid.eq.0)  write(io_output,'(/,A)') 'using linear interpolation for vibrations'
+    end if
+
+    if (L_bend_table) then
+       call initiateTable(angles,initial_size)
+       allocate(bendsplits(1:initial_size),bend(1:grid_size,1:initial_size),tabbend(1:grid_size,1:initial_size),stat=jerr)
+       if (jerr.ne.0) call err_exit('init_tabulated_potential_bonded: allocation failed for bend_table')
+       call read_tabulated_potential_bonded('fort.42',ntabbend,bend,tabbend,bendsplits,angles)
+       if (myid.eq.0) write(io_output,*) 'using linear interpolation for 1-3 nonbonded bending'
+    end if
+  end subroutine init_tabulated_potential_bonded
 end MODULE energy_intramolecular

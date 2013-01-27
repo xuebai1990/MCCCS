@@ -6,7 +6,7 @@ MODULE moves_cbmc
   use sim_system
   use energy_kspace,only:recip
   use energy_pairwise,only:energy,boltz
-  use energy_intramolecular,only:lininter_vib,lininter_bend,lininter,splint
+  use energy_intramolecular,only:lininter_vib,lininter_bend,inter_tor
   implicit none
   private
   save
@@ -37,6 +37,7 @@ contains
 !    **    bscb ( 2,inb ).                                            **
 !    *******************************************************************
   subroutine config
+    use sim_particle,only:update_neighbor_list
     use sim_cell,only:update_linked_cell
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
@@ -56,9 +57,7 @@ contains
 
       integer::i,j,k,iii,ibox,iunit,igrow,icbu,islen ,imolty,iutry
       integer::istt,iett,nchp1,ic,total,bin ,count,findex,iw
-      integer::ddum,ip
-
-      dimension ddum(27)
+      integer::ip
 
       real::v,vintra,vinter,vext,velect,vewald ,vtorold,vtornew,delen,deleo,vdum,wplace,wrig
       real::dchain,rchain,wnlog,wolog ,wdlog,wratio
@@ -484,7 +483,7 @@ contains
          end if
 
 ! ***    update the neighbour map ***
-         if ( lneigh ) call updnn( i )
+         if ( lneigh ) call update_neighbor_list(i,0.,0.,0.,.true.)
 
          if ( lneighbor ) then
             do ic = 1, neigh_cnt(i)
@@ -591,7 +590,7 @@ contains
       real::vdha,x,y,z,maxlen,vtorf ,xaa1 ,yaa1,zaa1,daa1,xa1a2,ya1a2,za1a2,da1a2 ,thetac,dot,rbf,bsum,bs,xcc,ycc,zcc,tcc
       real::vbbtr,vvibtr,wei_vib,wbendv ,dist
       real::bondlen,bendang,phi,phidisp,phinew ,thetanew
-      real::cwtorf,vfbbtr,vphi,theta,spltor
+      real::cwtorf,vfbbtr,vphi,theta
 
       dimension bondlen(numax),bendang(numax),phi(numax)
 
@@ -922,14 +921,8 @@ contains
                               tcc = xcc*xvec(jut2,jut3) + ycc*yvec(jut2,jut3) + zcc*zvec(jut2,jut3)
                               theta = dacos(thetac)
                               if (tcc .lt. 0.0d0) theta = -theta
-                              if (L_spline) then
-                                 call splint(theta,spltor,jttor)
-                              else if(L_linear) then
-                                 call lininter(theta,spltor,jttor)
-                              end if
-
 !                       --- add torsion energy to vdha
-                              vdha = vdha + spltor
+                              vdha = vdha + inter_tor(theta,jttor)
                            else
 !                       --- add torsion energy to vdha
                               vdha = vdha + vtorso( thetac, jttor )
@@ -2014,7 +2007,6 @@ contains
 !     --- variables from geomold
       real::rxui,ryui,rzui,rxuij,ryuij,rzuij ,xvecprev,yvecprev,zvecprev,distprev,xvecgrow ,yvecgrow,zvecgrow ,distgrow,anglec
       real::xub,yub,zub,dum,ux,uy,uz,alpha,gamma
-      real::tabulated_vib, tabulated_bend
 
 ! Neeraj: Adding for the lookup table for CG model
 
@@ -2077,8 +2069,7 @@ contains
 !           --- compute vibration energy
 
             if (L_vib_table) then
-               call lininter_vib(length,tabulated_vib, jtvib)
-               vvib = tabulated_vib
+               vvib = lininter_vib(length,jtvib)
             else
                equil = brvib(jtvib)
                kforce = brvibk(jtvib)
@@ -2176,8 +2167,7 @@ contains
                if (L_bend_table) then
                   lengthc2 = lengthFP2 + distgrow2 -  2.0d0*lengthFP*distgrow*anglec
                   lengthc = dsqrt(lengthc2)
-                  call lininter_bend(lengthc, tabulated_bend, type)
-                  vangle = tabulated_bend
+                  vangle = lininter_bend(lengthc,type)
                 else
                   vangle = kforce * (angle - equil)**2
                end if
@@ -2208,8 +2198,7 @@ contains
                if (L_bend_table) then
                   lengthc2 = lengthFP2 + distgrow2 - 2.0d0*lengthFP*distgrow*dcos(angle)
                   lengthc = dsqrt(lengthc2)
-                  call lininter_bend(lengthc,tabulated_bend, type)
-                  vangle = tabulated_bend
+                  vangle = lininter_bend(lengthc,type)
                else
                   vangle = kforce * (angle - equil)**2
                end if
@@ -2332,8 +2321,7 @@ contains
                            if (L_bend_table) then
                               lengthc2 = lengtha2 + lengthb2 -  2.0d0*lengtha*lengthb*dcos(angle)
                               lengthc = dsqrt(lengthc2)
-                              call lininter_bend(lengthc,  tabulated_bend, type)
-                              vphi = vphi + tabulated_bend
+                              vphi = vphi + lininter_bend(lengthc,type)
                            else
                               vphi = vphi + brbenk(type)  * (angle - brben(type))**2
                            end if
@@ -2378,8 +2366,7 @@ contains
                         if (L_bend_table) then
                            lengthc2 = lengtha2 + lengthb2 -  2.0d0*lengtha*lengthb*dcos(angle)
                            lengthc = dsqrt(lengthc2)
-                           call lininter_bend (lengthc,  tabulated_bend, type)
-                           vphi = vphi + tabulated_bend
+                           vphi = vphi + lininter_bend (lengthc,type)
                         else
                            vphi = vphi + brbenk(type)  * (angle - brben(type))**2
                         end if
@@ -2675,7 +2662,7 @@ contains
 !$$$      include 'tabulated.inc'
 
       integer::vibtype
-      real::length,bond,bf,vvib,betaT ,kvib,requil,tabulated_vib
+      real::length,bond,bf,vvib,betaT,kvib,requil
 
       vvib = 0.0d0
 
@@ -2708,8 +2695,7 @@ contains
          if ( random() .ge. bf ) goto 108
 
          bond = bond * requil
-         call lininter_vib(bond, tabulated_vib, vibtype)
-         vvib=tabulated_vib
+         vvib=lininter_vib(bond,vibtype)
 
          bf = dexp ( -(vvib * betaT) )
 
@@ -3633,7 +3619,6 @@ contains
       parameter(max=numax)
 
       real::wplace,equil,kforce,bsum_try,mincb ,delcb,ux,uy,uz,r,vvib,bfactor,third,length,bs,rbf,vvibtr ,wei_vib,bendang,vangle,vbbtr,angle,vphi,phione,thetac,rx,ry,rz ,rsint,dist,wei_bend,ang_trial,vctor,vdha,vbend,vtorsion ,bsum,alpha,gamma,dum,phi,thetaone,thetatwo,phitwo
-      real::tabulated_vib
 
       dimension r(nchbn_max),bfactor(nchbn_max) ,bendang(numax,numax) ,ang_trial(nchbn_max),dist(max) ,niplace(numax),vbend(nchmax) ,vtorsion(nchmax),phi(max) ,list(max),glist(max)
 
@@ -3699,8 +3684,7 @@ contains
                   uz = rzu(i,ju) - rzu(i,iu)
                   r(1) = dsqrt(ux**2 + uy**2 + uz**2)
                   if (L_vib_table) then
-                     call lininter_vib(r(1), tabulated_vib, jtvib)
-                     vvib = tabulated_vib
+                     vvib = lininter_vib(r(1),jtvib)
                    else
                      vvib = kforce * (r(1) - equil)**2
                   end if
@@ -3714,8 +3698,7 @@ contains
                do ivib = start, nchvib
                   r(ivib) = (mincb + random()*delcb)**third
                   if (L_vib_table) then
-                     call lininter_vib(r(ivib), tabulated_vib, jtvib)
-                     vvib = tabulated_vib
+                     vvib = lininter_vib(r(ivib),jtvib)
                   else
                      vvib = kforce * ( r(ivib) - equil )**2
                   end if

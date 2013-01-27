@@ -193,10 +193,9 @@ module sim_system
   real::beta,fqbeta,mass(0:nntype),masst(ntmax),hist(30,30,maxbin)
   integer::moltyp(nmax),tmcc
   logical::lrigi(ntmax,numax),lpl(nntype),lneighbor
-
   integer::nchbox,ncmt,ncmt2,counthist,nrigi,rlist(numax ,numax),rfrom(numax),rprev(numax),rnum(numax)
   integer::irsave,nnstep,rmexpc
-  real::rmhmat,upnn,upnnsq,upnndg,pmiswat,pmisatc
+  real::rmhmat,pmiswat,pmisatc
   dimension rmexpc(ntmax)
   dimension pmisatc(npamax)
   dimension rmhmat(nbxmax,9)
@@ -262,14 +261,8 @@ module sim_system
   dimension avsolinter(nbxmax,ntmax),avsolintra(nbxmax,ntmax),avsolbend(nbxmax,ntmax),avsoltor(nbxmax,ntmax) ,avsolelc(nbxmax,ntmax)
 
 ! NEIGH.INC
-! lnn(1,1):replace the 1s with nmax to use neighbor list
-  logical::lnn(1,1)
-  integer::neighbor(maxneigh,nmax),neigh_cnt(nmax) ,neigh_icnt,neighi(maxneigh),neighboro(maxneigh,nmax) ,neigh_o(nmax)
+  integer::neighbor(maxneigh,nmax),neigh_cnt(nmax),neigh_icnt,neighi(maxneigh),neighboro(maxneigh,nmax),neigh_o(nmax)
   real::ndij(maxneigh,nmax),nxij(maxneigh,nmax),nyij(maxneigh,nmax),nxijo(maxneigh,nmax),nzij(maxneigh ,nmax),ndiji(maxneigh),nxiji(maxneigh),nyiji(maxneigh),nziji(maxneigh),ndijo(maxneigh,nmax),nyijo(maxneigh,nmax),nzijo(maxneigh,nmax)
-
-! NEIGH2.INC
-! disvec(2,1,3):replace the 1 with nmax to use neighbor lists
-  real::disvec(2,1,3)
 
 ! ENSEMBLE.INC
   real::vbox(nbxmax),wbox(nbxmax) ,vinterb(nbxmax),vtailb(nbxmax),vintrab(nbxmax),vvibb(nbxmax) ,vbendb(nbxmax),vtgb(nbxmax),vextb(nbxmax), velectb(nbxmax) ,vflucqb(nbxmax),v3garob(nbxmax)
@@ -496,7 +489,7 @@ module sim_system
 
   namelist /system/nchain,nmolty,nbox
 
-  type(LookupTable)::atoms !,bonds,angles,dihedrals
+  type(LookupTable)::atoms
 
 CONTAINS
   subroutine read_system(io_input)

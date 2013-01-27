@@ -338,7 +338,6 @@ contains
 !> \brief Set up or update linked cell list
   subroutine build_linked_cell()
     use sim_system,only:xcm,ycm,zcm,boxlink,rintramax,rcut,boxlx,boxly,boxlz,io_output,nchain,nboxi
-    real::rx,ry,rz
     integer::ibox,ncell,n,i,j,k,ic
     integer,save::ncello=0
 

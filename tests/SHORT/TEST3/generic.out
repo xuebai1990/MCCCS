@@ -93,9 +93,6 @@
           bond type: 25 bond length:    1.000 k/2:      0.0
  
  using linear interpolation for electrostatic interactions
- using linear interpolation for electrostatic interactions
- using linear interpolation for electrostatic interactions
- using linear interpolation for electrostatic interactions
  licell: F
  rintramax:  0.000000000000000E+000  A
  boxlink:           4

@@ -37,7 +37,7 @@ CONTAINS
 
   integer function idx(beadtype)
     integer,intent(in)::beadtype(4)
-    integer::atomIdx(4),nAtomType,itype,i
+    integer::atomIdx(4),nAtomType,i
 
     do i=1,4
        atomIdx(i)=indexOf(atoms,beadtype(i))
@@ -87,8 +87,11 @@ CONTAINS
              call initiateFourBody(nEntries)
              fourbodies%size=nEntries
           end if
-          do i=1,nEntries
+          i=0
+          do
              call readLine(io_ff,line,skipComment=.true.,iostat=jerr)
+             if (UPPERCASE(line(1:12)).eq.'END FOURBODY') exit
+             i=i+1
              read(line,*) beadtype,qtype(i),coeffs(1:nparam(qtype(i)),i)
              fourbodies%list(i)=idx(beadtype)
              write(*,*) fourbodies%list(i),qtype(i),coeffs(:,i)
@@ -96,6 +99,9 @@ CONTAINS
              coeffs(2,i)=coeffs(2,i)**2 !cutoffCoul
              coeffs(3,i)=coeffs(3,i)*degrad !degree to radians
           end do
+          if (i.ne.nEntries) then
+             call err_exit('readFourBody: the number of entries is incorrect!')
+          end if
        end if
     END DO
     close(io_ff)

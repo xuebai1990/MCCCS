@@ -18,7 +18,8 @@ contains
 !    ** number of successful trial moves is stored in bstrax(yz).     **
 !    ** The attempts are stored in bntrax(yz)                         **
 !    *******************************************************************
-  subroutine traxyz (lx,ly,lz )
+  subroutine traxyz (lx,ly,lz)
+    use sim_particle,only:update_neighbor_list
     use sim_cell,only:update_linked_cell
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
@@ -34,11 +35,11 @@ contains
 !$$$!kea
 !$$$      include 'garofalini.inc'
 
-      logical::lx,ly,lz,ovrlap,ddum(27)
+      logical::lx,ly,lz,ovrlap
       logical::lneighij
 
       integer::i,ibox,flagon,iunit,j,imolty,icbu,ic,ip
-      real::rx,ry,rz,dchain,ddx,ddy,ddz,vnew,vold,vintran,vintrao,deltv,deltvb,disvsq,vintern,vintero ,vextn,vexto,rchain,velectn,velecto,vdum,vrecipo,vrecipn,v3n,v3o
+      real::rx,ry,rz,dchain,ddx,ddy,ddz,vnew,vold,vintran,vintrao,deltv,deltvb,vintern,vintero ,vextn,vexto,rchain,velectn,velecto,vdum,vrecipo,vrecipn,v3n,v3o
 
       logical::laccept
 
@@ -253,15 +254,7 @@ contains
       end if
 
       if ( lneigh ) then
-! *** check for update of near neighbour bitmap ***
-! *** check for headgroup ***
-         disvec(1,i,1) = disvec(1,i,1) + rx
-         disvsq = disvec(1,i,1) * disvec(1,i,1) + disvec(1,i,2) * disvec(1,i,2) + disvec(1,i,3) * disvec(1,i,3)
-         if (disvsq .gt. upnnsq) call updnn( i )
-! *** check for last unit ***
-         disvec(2,i,1) = disvec(2,i,1) + rx
-         disvsq = disvec(2,i,1) * disvec(2,i,1) + disvec(2,i,2) * disvec(2,i,2) + disvec(2,i,3) * disvec(2,i,3)
-         if (disvsq .gt. upnnsq) call updnn( i )
+         call update_neighbor_list(i,rx,ry,rz,.false.)
       end if
 
       if ( lneighbor .or. lgaro) then
@@ -323,6 +316,7 @@ contains
 !    ** the maximum angular displacement is dgamax.                   **
 !    *******************************************************************
     subroutine rotxyz (lx,ly,lz )
+      use sim_particle,only:update_neighbor_list
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'coord2.inc'
@@ -337,7 +331,7 @@ contains
 
       logical::lx,ly,lz,ovrlap,lneighij
       integer::i,ibox,flagon,iunit,j,imolty,iuroty,icbu ,ic,ip
-      real::rx,ry,rz,dchain,rchain,vnew,vold,vintrao,dgamma,rxorig,ryorig,rzorig,rxnew2,rynew2,rznew2,vintran,disvsq,deltv,deltvb,vintern,vintero,vextn,vexto,vdum ,velectn,velecto
+      real::rx,ry,rz,dchain,rchain,vnew,vold,vintrao,dgamma,rxorig,ryorig,rzorig,rxnew2,rynew2,rznew2,vintran,deltv,deltvb,vintern,vintero,vextn,vexto,vdum ,velectn,velecto
 ! *** further variable definitions
       real::cosdg, sindg, rmrot
       real::vrecipn,vrecipo
@@ -603,19 +597,8 @@ contains
       if (lz) bsrotz(imolty,ibox) = bsrotz(imolty,ibox) + 1.0d0
 
       if ( lneigh ) then
-! *** check for update of near neighbour bitmap ***
-! *** check for headgroup ***
-         disvec(1,i,1) = disvec(1,i,1) + rxuion(1,2) - rxuion(1,1)
-         disvec(1,i,2) = disvec(1,i,2) + ryuion(1,2) - ryuion(1,1)
-         disvec(1,i,3) = disvec(1,i,3) + rzuion(1,2) - rzuion(1,1)
-         disvsq = disvec(1,i,1) * disvec(1,i,1) + disvec(1,i,2) * disvec(1,i,2) + disvec(1,i,3) * disvec(1,i,3)
-         if (disvsq .gt. upnnsq) call updnn( i )
-! *** check for last unit ***
-         disvec(2,i,1) = disvec(2,i,1)+rxuion(iunit,2)-rxuion(iunit,1)
-         disvec(2,i,2) = disvec(2,i,2)+ryuion(iunit,2)-ryuion(iunit,1)
-         disvec(2,i,3) = disvec(2,i,3)+rzuion(iunit,2)-rzuion(iunit,1)
-         disvsq = disvec(2,i,1) * disvec(2,i,1) + disvec(2,i,2) * disvec(2,i,2) + disvec(2,i,3) * disvec(2,i,3)
-         if (disvsq .gt. upnnsq) call updnn( i )
+         call update_neighbor_list(i,rxuion(1,2) - rxuion(1,1),ryuion(1,2) - ryuion(1,1),rzuion(1,2) - rzuion(1,1),.false.)
+         call update_neighbor_list(i,rxuion(iunit,2) - rxuion(iunit,1),ryuion(iunit,2) - ryuion(iunit,1),rzuion(iunit,2) - rzuion(iunit,1),.false.)
       end if
 
       if ( lneighbor ) then
@@ -661,6 +644,7 @@ contains
 !    ** The attempts are stored in Abntrax(yz)                         **
 !    *******************************************************************
     subroutine Atom_traxyz (lx,ly,lz )
+      use sim_particle,only:update_neighbor_list
       use sim_cell,only:update_linked_cell
       use energy_kspace,only:recip_atom
       use energy_intramolecular,only:U_bonded
@@ -674,19 +658,17 @@ contains
 !$$$      include 'bnbsma.inc'
 !$$$      include 'neigh.inc'
 
-      logical::lx,ly,lz,ovrlap,ddum
+      logical::lx,ly,lz,ovrlap
 
       logical::lneighij
 
       integer::i,ibox,flagon,iunit,j,imolty,icbu ,ic,ip
       integer::pick_unit, pick_chain
-      real::rx,ry,rz,dchain,vnew,vold,vintran,vintrao,deltv,deltvb,disvsq,vintern,vintero ,vextn,vexto,rchain,velectn,velecto,vdum,vrecipo,vrecipn
+      real::rx,ry,rz,dchain,vnew,vold,vintran,vintrao,deltv,deltvb,vintern,vintero ,vextn,vexto,rchain,velectn,velecto,vdum,vrecipo,vrecipn
 
       real::vvibn,vbendn,vtgn,vvibo,vbendo,vtgo
 
       real::vewaldn, vewaldo
-
-      dimension ddum(27)
 
       logical::laccept
 
@@ -870,15 +852,7 @@ contains
       end if
 
       if ( lneigh ) then
-! *** check for update of near neighbour bitmap ***
-! *** check for headgroup ***
-         disvec(1,i,1) = disvec(1,i,1) + rx
-         disvsq = disvec(1,i,1) * disvec(1,i,1) + disvec(1,i,2) * disvec(1,i,2) + disvec(1,i,3) * disvec(1,i,3)
-         if (disvsq .gt. upnnsq) call updnn( i )
-! *** check for last unit ***
-         disvec(2,i,1) = disvec(2,i,1) + rx
-         disvsq = disvec(2,i,1) * disvec(2,i,1) + disvec(2,i,2) * disvec(2,i,2) + disvec(2,i,3) * disvec(2,i,3)
-         if (disvsq .gt. upnnsq) call updnn( i )
+         call update_neighbor_list(i,rx,ry,rz,.false.)
       end if
 
       if ( lneighbor ) then
@@ -925,6 +899,7 @@ contains
 ! --- perform change of the volume: random walk in ln(vol)
 !
     subroutine volume
+      use sim_particle,only:rebuild_neighbor_list
       use sim_cell
       use energy_pairwise,only:sumup
       use energy_kspace,only:calp,save_kvector,restore_kvector
@@ -944,7 +919,7 @@ contains
       logical::ovrlap,lvol,lx,ly,lz,lncubic
       logical::la,lb,lc
 
-      integer::i,j,ibox,imolty,ic,boxa,boxb ,ipair,ipairb
+      integer::i,j,ibox,imolty,boxa,boxb,ipair,ipairb
       real::bxo(nbxmax),byo(nbxmax),bzo(nbxmax)
       real::volo(nbxmax),vboxo(nbxmax) ,dfac(nbxmax),voln(nbxmax),vflucqo(nbxmax),vintero(nbxmax) ,vtailo(nbxmax),vexto(nbxmax),velecto(nbxmax)
       real::vboxn(nbxmax),vintern(nbxmax), vtailn(nbxmax),vextn(nbxmax),velectn(nbxmax)
@@ -961,7 +936,6 @@ contains
       integer::hbox,jbox,jhmat
       real::rbox,hmato(9),hmatio(9)
 
-      real::lddum,lddum2(27)
 !kea
       real::v3n(nbxmax),v3o(nbxmax)
 
@@ -1509,6 +1483,10 @@ contains
           if (licell .and. (boxa .eq. boxlink .or. boxb .eq. boxlink)) then
              call build_linked_cell()
           end if
+          if (lneigh) then
+             call rebuild_neighbor_list(boxa)
+             call rebuild_neighbor_list(boxb)
+          end if
           return
       end if
 ! ---     rejected
@@ -1583,6 +1561,7 @@ contains
 ! --- perform change of the volume: random walk in ln(vol)
 !
     subroutine prvolume
+      use sim_particle,only:rebuild_neighbor_list
       use sim_cell
       use energy_pairwise,only:sumup
       use energy_kspace,only:calp,save_kvector,restore_kvector
@@ -1600,7 +1579,7 @@ contains
 
       logical::ovrlap,lvol,lx,ly,lz,la,lb,lc
 
-      integer::i,j,imolty,ic,jhmat
+      integer::i,j,imolty,jhmat
       real::bxo,byo,bzo
       real::volo,vboxo,dfac, vintero,vtailo,vexto ,velecto,vflucqo
       real::voln,vboxn, vintern,vtailn,vextn ,velectn
@@ -1609,10 +1588,10 @@ contains
       real::xcmo(nmax),ycmo(nmax),zcmo(nmax)
       real::rbcut,rbox
       real::w(3)
-      integer::boxvch,ichoiq,ibox,lddum2(27)
+      integer::boxvch,ichoiq,ibox
       integer::neigho_cnt(nmax),neigho(100,nmax)
       real::hmato(9),hmatio(9)
-      real::lddum,min_boxl
+      real::min_boxl
 ! KEA
       real::v3o,v3n
 
@@ -2008,6 +1987,9 @@ contains
 ! *** update linkcell, if applicable
           if (licell .and. (boxvch .eq. boxlink)) then
              call build_linked_cell()
+          end if
+          if (lneigh) then
+             call rebuild_neighbor_list(boxvch)
           end if
           return
       end if
