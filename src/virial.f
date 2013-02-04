@@ -11,7 +11,7 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
   use const_phys,only:qqfact
   use util_runtime,only:err_exit
   use sim_system
-  use energy_pairwise,only:exsix,ljpsur
+  use energy_pairwise,only:exsix,ljpsur,type_2body
   use energy_sami,only:ljsami,ljmuir
   implicit none
 
@@ -118,7 +118,6 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
 ! --- loop over all beads ii of chain i
          ip1 = 0
          do 99 ii = 1, nunit(imolty) 
-
             ntii = ntype(imolty,ii)
             if ( lqchg(ntii) ) ip1 = ip1 + 1
             rxui = rxu(i,ii)  + xdiff - dvircm
@@ -134,15 +133,11 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
             do 97 jj = 1, nunit(jmolty) 
 !     --- check exclusion table
                if ( lexclu(imolty,ii,jmolty,jj) ) goto 97
-               
                ntjj = ntype(jmolty,jj)
                if ( lqchg(ntjj) ) ip2 = ip2 + 1
                
-               if (lexpsix) then
-                  ntij = (ntii+ntjj)/2
-               else
-                  ntij = (ntii-1)*nntype + ntjj
-               end if
+               ntij = type_2body(ntii,ntjj)
+
                if (lexpee) rminsq = rminee(ntij)*rminee(ntij)
                
                rxuij = rxui - rxu(j,jj)

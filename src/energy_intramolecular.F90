@@ -10,7 +10,7 @@ MODULE energy_intramolecular
   implicit none
   private
   save
-  public::suvibe,vtorso,calctor,lininter_vib,lininter_bend,inter_tor,init_tabulated_potential_bonded,U_torsion,U_bonded
+  public::suvibe,vtorso,lininter_vib,lininter_bend,init_tabulated_potential_bonded,U_torsion,U_bonded
 
 ! CONTORSION.INC
   integer,parameter::ntormax=700,num_tabulated_point=1500
@@ -1846,60 +1846,51 @@ contains
       return
   end subroutine suvibe
 
-  function vtorso( thetac, itype )
-!$$$      include 'conver.inc'
-!$$$      include 'contorsion.inc'
+  function vtorso(xvec1,yvec1,zvec1,xvec2,yvec2,zvec2,xvec3,yvec3,zvec3,itype)
+    use sim_system,only:L_tor_table
+    real::vtorso
+    real,intent(in)::xvec1,yvec1,zvec1,xvec2,yvec2,zvec2,xvec3,yvec3,zvec3
+    integer,intent(in)::itype
+    real::thetac,theta,tac2,tac3,tac4,tac5,tac6,tac7
 
-      integer::itype
-      real::vtorso, thetac, theta
-      real::tac2,tac3,tac4,tac5,tac6,tac7
-! ----------------------------------------------------------------
+    if (L_tor_table) then
+       call dihedral_angle(xvec1,yvec1,zvec1,xvec2,yvec2,zvec2,xvec3,yvec3,zvec3,thetac,theta,.true.)
+       vtorso=inter_tor(theta,itype)
+       return
+    end if
 
-      if ((itype.ge.200).and.(itype.le.202)) then
-        if (thetac.gt.1.0d0) thetac = 1.0d0
-         if (thetac.lt.-1.0d0) thetac = -1.0d0
-         theta = dacos(thetac)
-         vtorso = vtt0(itype)*(1.0d0-dcos(2.0d0*theta))
+    call dihedral_angle(xvec1,yvec1,zvec1,xvec2,yvec2,zvec2,xvec3,yvec3,zvec3,thetac,theta)
 
-      else if ((itype.ge.100).and.(itype.le.140)) then
-         if (thetac.gt.1.d0) thetac=1.0d0
-         if (thetac.lt.-1.d0) thetac=-1.0d0
-         theta=dacos(thetac)+onepi
-         vtorso =  vtt0(itype) + vtt1(itype)*dcos(1.0d0*theta)+ vtt2(itype)*dcos(2.0d0*theta)+ vtt3(itype)*dcos(3.0d0*theta)+ vtt4(itype)*dcos(4.0d0*theta)+ vtt5(itype)*dcos(5.0d0*theta)+ vtt6(itype)*dcos(6.0d0*theta)+ vtt7(itype)*dcos(7.0d0*theta)+ vtt8(itype)*dcos(8.0d0*theta)+ vtt9(itype)*dcos(9.0d0*theta)
-
-
-      else if ( itype .ge. 1 .and. itype .le. 99) then
+    if ((itype.ge.200).and.(itype.le.202)) then
+       vtorso = vtt0(itype)*(1.0d0-dcos(2.0d0*theta))
+    else if ((itype.ge.100).and.(itype.le.140)) then
+       theta=theta+onepi
+       vtorso =  vtt0(itype) + vtt1(itype)*dcos(1.0d0*theta)+ vtt2(itype)*dcos(2.0d0*theta)+ vtt3(itype)*dcos(3.0d0*theta)+ vtt4(itype)*dcos(4.0d0*theta)+ vtt5(itype)*dcos(5.0d0*theta)+ vtt6(itype)*dcos(6.0d0*theta)+ vtt7(itype)*dcos(7.0d0*theta)+ vtt8(itype)*dcos(8.0d0*theta)+ vtt9(itype)*dcos(9.0d0*theta)
+    else if ( itype .ge. 1 .and. itype .le. 99) then
 ! - parameters for linear and branched alkane molecules - ALKANE CURRENTLY USED
 ! - 5 + 6 parameters for alcohols
 ! - Jorgensen potential
-         if (thetac.gt.1.d0) thetac=1.0d0
-         if (thetac.lt.-1.d0) thetac=-1.0d0
-         theta=dacos(thetac)+onepi
+       theta=theta+onepi
 ! --- remember: 1 + cos( theta+onepi ) = 1 - cos( theta )
-         vtorso = vtt0(itype) + vtt1(itype)*(1.0d0-thetac) + vtt2(itype)*(1.d0-dcos(2.d0*theta)) + vtt3(itype)*(1.d0+dcos(3.d0*theta))
-      else if ( itype .eq. 0) then
+       vtorso = vtt0(itype) + vtt1(itype)*(1.0d0-thetac) + vtt2(itype)*(1.d0-dcos(2.d0*theta)) + vtt3(itype)*(1.d0+dcos(3.d0*theta))
+    else if ( itype .eq. 0) then
 ! -- type 1 torsion from Dubbeldam D., Calero S., Vlugt T.J.H., Krishna R., Maesen T.L.M., Smit B., J Phys Chem B 2004 108 12301
-         if (thetac.gt.1.d0) thetac=1.0d0
-         if (thetac.lt.-1.d0) thetac=-1.0d0
-         tac2 = thetac*thetac
-         tac3 = tac2*thetac
-         tac4 = tac3*thetac
-         tac5 = tac4*thetac
-         vtorso = 1204.654 +1947.740*thetac -357.845*tac2 -1944.666*tac3 +715.690*tac4 -1565.572*tac5
-      else if ( itype .eq. 8 ) then
+       tac2 = thetac*thetac
+       tac3 = tac2*thetac
+       tac4 = tac3*thetac
+       tac5 = tac4*thetac
+       vtorso = 1204.654 +1947.740*thetac -357.845*tac2 -1944.666*tac3 +715.690*tac4 -1565.572*tac5
+    else if ( itype .eq. 8 ) then
 ! - Cummings torsional potential
 ! - PERFLUOROCARBON CURRENTLY USED starting 10-1-97
-         if (thetac.gt.1.d0) thetac=1.0d0
-         if (thetac.lt.-1.d0) thetac=-1.0d0
-
-         tac2 = thetac*thetac
-         tac3 = tac2*thetac
-         tac4 = tac3*thetac
-         tac5 = tac4*thetac
-         tac6 = tac5*thetac
-         tac7 = tac6*thetac
+       tac2 = thetac*thetac
+       tac3 = tac2*thetac
+       tac4 = tac3*thetac
+       tac5 = tac4*thetac
+       tac6 = tac5*thetac
+       tac7 = tac6*thetac
 ! extra displacement is to get the curve above zero
-         vtorso = 595.4d0 + 345.0d0 -(282.7d0)*thetac  +(1355.2d0)*tac2  +(6800d0)*tac3 -(7875.3d0)*tac4 -(14168.0d0)*tac5 +(9213.7d0)*tac6 +(4123.7d0)*tac7
+       vtorso = 595.4d0 + 345.0d0 -(282.7d0)*thetac  +(1355.2d0)*tac2  +(6800d0)*tac3 -(7875.3d0)*tac4 -(14168.0d0)*tac5 +(9213.7d0)*tac6 +(4123.7d0)*tac7
 !         write(io_output,*) 'thetac,vtorso',thetac,vtorsoAK
 ! - Roethlisberger torsional potential for linear perfluorocarbon
 ! - PERFLUOROCARBON no longer USED
@@ -1910,11 +1901,10 @@ contains
 !     &            + 679.921d0*(1.0d0-(dcos(3.0d0*theta)))
 !     &            + 3.0085d0*(1.0d0-thetac)**5
 !     &            + 420.5883d0*dexp(-30.0d0*theta**2)
-
-      else if ( itype .eq. 9 ) then
+    else if ( itype .eq. 9 ) then
 !  Toxvaerd II Torsion potential parms:  to be used for anisotropic alkanes
 !  JCP 94, 5650-54 (1991)
-         vtorso = 1037.76d0 + 2426.07d0*thetac + 81.64d0*thetac**2 -3129.46d0*thetac**3 -163.28d0*thetac**4 -252.73d0*thetac**5
+       vtorso = 1037.76d0 + 2426.07d0*thetac + 81.64d0*thetac**2 -3129.46d0*thetac**3 -163.28d0*thetac**4 -252.73d0*thetac**5
 !      else if ( itype .ge. 1 .and. itype .le. 3 ) then
 ! - parameters for improper torsion in carboxylic headgroup
 ! - C'-C2-O-O'
@@ -1922,329 +1912,191 @@ contains
 !         if (thetac.lt.-1.d0) thetac=-1.0d0
 !         theta=dacos(thetac)+onepi
 !         vtorso = vtt2(itype)*(1.d00-dcos(2.d00*theta))
-      else if ( itype .eq. 10 ) then
+    else if ( itype .eq. 10 ) then
 !        --- dummy torsion just to set up inclusion table right
-         vtorso = 0.0d0
-
-      else if ( itype .eq. 11 .or. itype .eq. 12) then
+       vtorso = 0.0d0
+    else if ( itype .eq. 11 .or. itype .eq. 12) then
 ! - parameters for trans and conformations of double bonds
 ! - derived by Marcus Martin using data from pcmodel for butene
 !   trans torsion paramter 4-14-99 MGM
-
-         if (thetac .gt. 1.0d0) then
-            theta = 0.0d0
-         else if (thetac .lt. -1.0d0) then
-            theta = onepi
-         else
-            theta = dacos(thetac)
-         end if
-
-         vtorso = vtt0(itype)*(theta - vtt1(itype) )**2.0d0
-
-      else if ( itype .eq. 13 ) then
+       vtorso = vtt0(itype)*(theta - vtt1(itype) )**2.0d0
+    else if ( itype .eq. 13 ) then
 !   acetic acid torsional potential H3C--C--O--H
 !   modified from J Phys Chem 94, 1683-1686 1990
 !   had to divide the potential by 2 and did a bit of trig.
-         vtorso = 630.0d0*(1.0d0 - thetac)  + 1562.4d0*(1.0d0 - thetac*thetac)
-
-      else if ( itype .eq. 14 ) then
+       vtorso = 630.0d0*(1.0d0 - thetac)  + 1562.4d0*(1.0d0 - thetac*thetac)
+    else if ( itype .eq. 14 ) then
 !   acetic acid torsional potential  O==C--O--H
 !   modified from J Phys Chem 94, 1683-1686 1990
 !   had to divide the potential by 2 and did a bit of trig.
-         vtorso = 630.0d0*(1.0d0 + thetac)  + 1562.4d0*(1.0d0 - thetac*thetac)
-
-      else if ( itype .eq. 15 ) then
+       vtorso = 630.0d0*(1.0d0 + thetac)  + 1562.4d0*(1.0d0 - thetac*thetac)
+    else if ( itype .eq. 15 ) then
 ! - Rice torsional potential for linear perfluorocarbons - OLD-FASHIONED
-         if (thetac.gt.1.d0) thetac=1.0d0
-         if (thetac.lt.-1.d0) thetac=-1.0d0
-         theta=dacos(thetac)
-         vtorso = 1784.2812d0 + 1357.1705d0*thetac - 1444.08d0*thetac**2 + 1176.6605d0*thetac**3 + 2888.1600d0*thetac**4  - 7166.9209d0*thetac**5 + 1684.7600d0*dexp(-12.7176d0*theta**2)
-
-      else if ( itype .eq. 16 ) then
+       vtorso = 1784.2812d0 + 1357.1705d0*thetac - 1444.08d0*thetac**2 + 1176.6605d0*thetac**3 + 2888.1600d0*thetac**4  - 7166.9209d0*thetac**5 + 1684.7600d0*dexp(-12.7176d0*theta**2)
+    else if ( itype .eq. 16 ) then
 ! - normal parameters for linear molecules - OLD-FASHIONED ALKANE
 ! - Ryckaert-Bellemans potential
-         vtorso = 1116.0d0 + 1462.0d0*thetac - 1578.0d0*thetac**2 - 368.1d0*thetac**3 + 3156.1d0*thetac**4 - 3788.0d0*thetac**5
-
-      else if ( itype .eq. 19 ) then
+       vtorso = 1116.0d0 + 1462.0d0*thetac - 1578.0d0*thetac**2 - 368.1d0*thetac**3 + 3156.1d0*thetac**4 - 3788.0d0*thetac**5
+    else if ( itype .eq. 19 ) then
 ! --- methyl group rotations explicit  H-C-C-H McQuarrie
-         if (thetac.gt.1.d0) thetac=1.0d0
-         if (thetac.lt.-1.d0) thetac=-1.0d0
-         theta=dacos(thetac)
-         vtorso = 716.77d0*(1.0d0-dcos(3.0d0*theta))
-
-      else if (itype .eq. 20) then
+       vtorso = 716.77d0*(1.0d0-dcos(3.0d0*theta))
+    else if (itype .eq. 20) then
 ! --   methyl group rotation explicit hydrogen model Scott+Scheraga
-         if (thetac.gt.1.d0) thetac=1.0d0
-         if (thetac.lt.-1.d0) thetac=-1.0d0
-         theta=dacos(thetac)
-         vtorso = 853.93d0*(1.0d0-dcos(3.0d0*theta))
-      else if (itype .eq. 21) then
+       vtorso = 853.93d0*(1.0d0-dcos(3.0d0*theta))
+    else if (itype .eq. 21) then
 ! --   methyl group rotation explicit hydrogen model Scott+Scheraga
 ! --   designed to be used with fully flexible (ie divided by 3)
-         if (thetac.gt.1.d0) thetac=1.0d0
-         if (thetac.lt.-1.d0) thetac=-1.0d0
-         theta=dacos(thetac)
-         vtorso = 284.64d0*(1.0d0-dcos(3.0d0*theta))
-      else if ( itype .eq. 22) then
+       vtorso = 284.64d0*(1.0d0-dcos(3.0d0*theta))
+    else if ( itype .eq. 22) then
 ! --   torsional motion about the central C-O in ester
-         if (thetac.gt.1.d0) thetac=1.0d0
-         if (thetac.lt.-1.d0) thetac=-1.0d0
-         theta=dacos(thetac)+onepi
-         vtorso = 1253.07*(1.0d0-thetac) +  1560.08*(1.0d0-dcos(2.0d0*theta))
-
-      else if ( itype .eq. 23) then
+       theta=theta+onepi
+       vtorso = 1253.07*(1.0d0-thetac) +  1560.08*(1.0d0-dcos(2.0d0*theta))
+    else if ( itype .eq. 23) then
 ! - Jorgensen potential for segment containing a (H-)-O-C-(CH3)_3 OPLS
-         if (thetac.gt.1.d0) thetac=1.0d0
-         if (thetac.lt.-1.d0) thetac=-1.0d0
-         theta=dacos(thetac)+onepi
+       theta=theta+onepi
 ! --- remember: 1 + cos( theta+onepi ) = 1 - cos( theta )
-         vtorso = 163.56d0*(1.d00+dcos(3.d0*theta))
-
-      else if ( itype .eq. 24) then
-         vtorso = 0.0d0
-
-      else if ( itype .eq. 25) then
+       vtorso = 163.56d0*(1.d00+dcos(3.d0*theta))
+    else if ( itype .eq. 24) then
+       vtorso = 0.0d0
+    else if ( itype .eq. 25) then
 ! *** OPLS C-C-O-C for ether paper JCC 1990
-         if (thetac.gt.1.d0) thetac=1.0d0
-         if (thetac.lt.-1.d0) thetac=-1.0d0
-         theta=dacos(thetac)+onepi
-         vtorso = 725.35d0*(1.d0 + dcos(theta)) - 163.75d0*(1.d0 - dcos(2.d0*theta)) + 558.2d0*(1.d0 + dcos(3.d0*theta))
-
-      else if (itype .eq. 26) then
+       theta=theta+onepi
+       vtorso = 725.35d0*(1.d0 + dcos(theta)) - 163.75d0*(1.d0 - dcos(2.d0*theta)) + 558.2d0*(1.d0 + dcos(3.d0*theta))
+    else if (itype .eq. 26) then
 ! --   for sp3 carbon to aromatic bond
-         if (thetac.gt.1.0d0) thetac = 1.0d0
-         if (thetac.lt.-1.0d0) thetac=-1.0d0
-         theta=dacos(thetac)
-         vtorso = 1344.0d0*(1.0d0-dcos(2.0d0*theta+dacos(-1.0d0)))
-      else if ( itype .eq. 27 ) then
+       vtorso = 1344.0d0*(1.0d0-dcos(2.0d0*theta+dacos(-1.0d0)))
+    else if ( itype .eq. 27 ) then
 ! *** ethylene glycol O-C-C-O torsional potential from Hayashi et al,
 ! * J. Chem. Soc. Faraday Trans. 1995, 91(1), 31-39.
-
-         if (thetac .gt. 1.0d0) thetac=1.0d0
-         if (thetac .lt. -1.0d0) thetac=-1.0d0
-
-!         theta = dacos(thetac)
-
-         vtorso = -123.4d0 -2341.2d0*thetac +1728.3d0*thetac**2 +10788.3d0*thetac**3 -1155.2d0*thetac**4  -8896.9d0*thetac**5
-
-      else if ( itype .eq. 28 ) then
+       vtorso = -123.4d0 -2341.2d0*thetac +1728.3d0*thetac**2 +10788.3d0*thetac**3 -1155.2d0*thetac**4  -8896.9d0*thetac**5
+    else if ( itype .eq. 28 ) then
 ! *** polyethylene O-C-C-O torsional potential from amber, testing
 ! * JMS 7/21/03
-
-         if (thetac .gt. 1.0d0) thetac=1.0d0
-         if (thetac .lt. -1.0d0) thetac=-1.0d0
-
-         theta=dacos(thetac)+onepi
-
+       theta=theta+onepi
 !         vtorso = 251.619d0*(1.d0 + dcos(2.d0*theta)) +
 !     &        1006.475d0*(1.d0 + dcos(3.d0*theta))
-
-         vtorso = 503.24d0 - 251.62d0*(1.d0 - dcos(2.d0*theta)) + 1006.47d0*(1.d0 + dcos(3.d0*theta))
-
-      else if ( itype .eq. 29 ) then
+       vtorso = 503.24d0 - 251.62d0*(1.d0 - dcos(2.d0*theta)) + 1006.47d0*(1.d0 + dcos(3.d0*theta))
+    else if ( itype .eq. 29 ) then
 ! *** polyethylene O-C-C-O torsional potential from Collin, based on Grant Smith's, testing
 ! * JMS 11/24/03
-
-         if (thetac .gt. 1.0d0) thetac=1.0d0
-         if (thetac .lt. -1.0d0) thetac=-1.0d0
-
-         theta = dacos(thetac)
-         vtorso = 0.5d0 * ( 950.0d0 *(1.0d0-dcos(theta)) +  950.0d0 * (1.0d0 - dcos( 2.0d0 * (theta+0.25d0*twopi))))
-
-      else if (itype .eq. 30) then
+       vtorso = 0.5d0 * ( 950.0d0 *(1.0d0-dcos(theta)) +  950.0d0 * (1.0d0 - dcos( 2.0d0 * (theta+0.25d0*twopi))))
+    else if (itype .eq. 30) then
 ! * formic acid O=C-O-H torsion from llnl 4/6/04 jms
-         if (thetac .gt. 1.0d0) thetac = 1.0d0
-         if (thetac .lt. -1.0d0) thetac = -1.0d0
-
 ! same convention as topmon
 ! backwards!         vtorso = 2576.5d0*(1.0d0 - dcos(2.0d0*theta))
-         vtorso = 1258.0d0*(1.0d0 + dcos(theta))
-
-      else if (itype .eq. 31) then
+       vtorso = 1258.0d0*(1.0d0 + dcos(theta))
+    else if (itype .eq. 31) then
 ! * formic acid H-C-O-H torsion from llnl 4/6/04 jms
-         if (thetac .gt. 1.0d0) thetac = 1.0d0
-         if (thetac .lt. -1.0d0) thetac = -1.0d0
-
 ! same convention as topmon
 ! backwards!         vtorso = 1258.0d0*(1.0d0 + dcos(theta))
-         vtorso = 2576.5d0*(1.0d0 - dcos(2.0d0*theta))
-
+       vtorso = 2576.5d0*(1.0d0 - dcos(2.0d0*theta))
 !c - added 7/12/06 C-C-N-O torsion for nitro group also #61
-         else if (itype .eq.32) then
-            if (thetac .gt. 1.0d0) thetac = 1.0d0
-            if (thetac .lt. -1.0d0) thetac = -1.0d0
-
-            theta = dacos(thetac)
-            vtorso = 69.2d0 - 41.4d0*dcos(theta)-14.5d0*dcos(2*theta) -  19.1d0*dcos(3*theta) + 8.03d0*dcos(4*theta) -  2.91d0*dcos(5*theta) + 0.95d0*dcos(6*theta)
-
+    else if (itype .eq.32) then
+       vtorso = 69.2d0 - 41.4d0*dcos(theta)-14.5d0*dcos(2*theta) -  19.1d0*dcos(3*theta) + 8.03d0*dcos(4*theta) -  2.91d0*dcos(5*theta) + 0.95d0*dcos(6*theta)
 !c - added 1/29/07 for N-C-C-C torsion also #70
-            else if (itype .eq. 33) then
-               if (thetac .gt. 1.0d0) thetac = 1.0d0
-               if (thetac .lt. -1.0d0) thetac = -1.0d0
-               theta = dacos(thetac)
-               vtorso = 438.0d0 + 481.0*dcos(theta) +  150.0d0*dcos(2*theta) - 115*dcos(3*theta) -  0.57*dcos(4*theta) + 0.8*cos(5*theta) -  0.01*dcos(6*theta)
-
+    else if (itype .eq. 33) then
+       vtorso = 438.0d0 + 481.0*dcos(theta) +  150.0d0*dcos(2*theta) - 115*dcos(3*theta) -  0.57*dcos(4*theta) + 0.8*cos(5*theta) -  0.01*dcos(6*theta)
 !c - added 06/27/07 for acrylates
-            else if (itype .ge. 34 .and. itype.le. 46) then
-               if (thetac .gt. 1.0d0) thetac = 1.0d0
-               if (thetac .lt. -1.0d0) thetac = -1.0d0
-
-               theta = dacos(thetac) + onepi
-
-               vtorso = vtt0(itype) + vtt1(itype)*dcos(theta) + vtt2(itype)*dcos(2.0d0*theta) +  vtt3(itype)*dcos(3.0d0*theta) +  vtt4(itype)*dcos(4.0d0*theta)
-
-
-      else if (itype .ge. 48 .and. itype .le. 50) then
+    else if (itype .ge. 34 .and. itype.le. 46) then
+       theta = theta + onepi
+       vtorso = vtt0(itype) + vtt1(itype)*dcos(theta) + vtt2(itype)*dcos(2.0d0*theta) +  vtt3(itype)*dcos(3.0d0*theta) +  vtt4(itype)*dcos(4.0d0*theta)
+    else if (itype .ge. 48 .and. itype .le. 50) then
 ! -- torsion from Neimark DMMP JPCA v108, 1435 (2004)
-         if (thetac.gt.1.0d0) thetac = 1.0d0
-         if (thetac.lt.-1.0d0) thetac=-1.0d0
 ! -- pi added to torsion because the topmon code is backwards.  Trans
 ! -- configuration is defined as 0.
-	 theta=dacos(thetac)+onepi
-         vtorso = vtt0(itype)*(1+cos(theta)) + vtt1(itype)*(1+cos(2.*theta)) + vtt2(itype)*(1+cos(3.*theta)) + vtt3(itype)*(1+cos(4.*theta)) + vtt4(itype)*(1+cos(5.*theta)) + vtt5(itype)*(1+cos(6.*theta))
-
-      else if(((itype.ge.51).and.(itype.le.52)).or.(itype.eq.56)) then
-          if (thetac.gt.1.0d0) thetac = 1.0d0
-          if (thetac.lt.-1.0d0) thetac=-1.0d0
-          theta=dacos(thetac)+onepi
-          vtorso =   vtt0(itype) + vtt1(itype)*(1.0d0-dcos(theta)) + vtt2(itype)*(1.0d0+dcos(theta*2.0d0)) + vtt3(itype)*(1.0d0-dcos(theta*3.0d0))
-
-      else if (itype .eq. 53 .or. itype .eq. 55) then
-         if (thetac.gt.1.0d0) thetac = 1.0d0
-         if (thetac.lt.-1.0d0) thetac=-1.0d0
-         theta=dacos(thetac)+onepi
-         vtorso = vtt0(itype) + vtt1(itype)*(cos(theta)) + vtt2(itype)*(cos(2.*theta)) + vtt3(itype)*(cos(3.*theta)) + vtt4(itype)*(cos(4.*theta)) + vtt5(itype)*(cos(5.*theta)) + vtt6(itype)*(cos(6.*theta)) + vtt7(itype)*(cos(7.*theta)) + vtt8(itype)*(cos(8.*theta)) + vtt9(itype)*(cos(9.*theta))
-
-      else if (itype .eq. 54) then
-         if (thetac.gt.1.0d0) thetac = 1.0d0
-         if (thetac.lt.-1.0d0) thetac=-1.0d0
-         theta=dacos(thetac)+onepi
-         vtorso = vtt0(itype) + vtt1(itype)*(1+cos(theta)) + vtt2(itype)*(1+cos(2.*theta)) + vtt3(itype)*(1+cos(3.*theta)) + vtt4(itype)*(1+cos(4.*theta)) + vtt5(itype)*(1+cos(5.*theta)) + vtt6(itype)*(1+cos(6.*theta))
-
-
-      else if(itype.eq.101) then
-          if (thetac.gt.1.0d0) thetac = 1.0d0
-          if (thetac.lt.-1.0d0) thetac=-1.0d0
-          theta=dacos(thetac)+onepi
-          vtorso =   vtt0(itype) + vtt1(itype)*(1.0d0-dcos(theta)) + vtt2(itype)*(1.0d0+dcos(theta*2.0d0)) + vtt3(itype)*(1.0d0-dcos(theta*3.0d0))
-
-      else if(itype.eq.103) then
-          if (thetac.gt.1.0d0) thetac = 1.0d0
-          if (thetac.lt.-1.0d0) thetac=-1.0d0
-          theta=dacos(thetac)+onepi
-          vtorso =   vtt0(itype) + vtt1(itype)*dcos(theta) + vtt2(itype)*dcos(theta*2.0d0) + vtt3(itype)*dcos(theta*3.0d0) + vtt4(itype)*dcos(theta*4.0d0) + vtt5(itype)*dcos(theta*5.0d0) + vtt6(itype)*dcos(theta*6.0d0) + vtt7(itype)*dcos(theta*7.0d0) + vtt8(itype)*dcos(theta*8.0d0) + vtt9(itype)*dcos(theta*9.0d0)
-
-
-
-      else if(itype.eq.144) then
-          if (thetac.gt.1.0d0) thetac = 1.0d0
-          if (thetac.lt.-1.0d0) thetac=-1.0d0
-          theta=dacos(thetac)+onepi
-          vtorso =   vtt0(itype) + vtt1(itype)*(1.0d0-dcos(theta)) + vtt2(itype)*(1.0d0+dcos(theta*2.0d0)) + vtt3(itype)*(1.0d0-dcos(theta*3.0d0)) + vtt4(itype)*(1.0d0+dcos(theta*4.0d0))
-
-
-      else if(itype.eq.145) then
-          if (thetac.gt.1.0d0) thetac = 1.0d0
-          if (thetac.lt.-1.0d0) thetac=-1.0d0
-          theta=dacos(thetac)+onepi
-          vtorso =   vtt0(itype) + vtt1(itype)*dcos(theta) + vtt2(itype)*dcos(theta*2.0d0) + vtt3(itype)*dcos(theta*3.0d0) + vtt4(itype)*dcos(theta*4.0d0) + vtt5(itype)*dcos(theta*5.0d0) + vtt6(itype)*dcos(theta*6.0d0) + vtt7(itype)*dcos(theta*7.0d0)
-
-      else if(itype.eq.146) then
-          if (thetac.gt.1.0d0) thetac = 1.0d0
-          if (thetac.lt.-1.0d0) thetac=-1.0d0
-          theta=dacos(thetac)+onepi
-          vtorso =   vtt0(itype) + vtt1(itype)*dcos(theta) + vtt2(itype)*dcos(theta*2.0d0) + vtt3(itype)*dcos(theta*3.0d0) + vtt4(itype)*dcos(theta*4.0d0) + vtt5(itype)*dcos(theta*5.0d0) + vtt6(itype)*dcos(theta*6.0d0)
-
-
-      else if(itype.eq.60 .or. itype.eq.61) then
-          if (thetac.gt.1.0d0) thetac = 1.0d0
-          if (thetac.lt.-1.0d0) thetac=-1.0d0
-          theta=dacos(thetac)+onepi
-          vtorso =   vtt0(itype) + vtt1(itype)*dcos(theta) + vtt2(itype)*dcos(theta*2.0d0) + vtt3(itype)*dcos(theta*3.0d0)
-
-
-      else if((itype.ge.65).and.(itype.le.66)) then
-          if (thetac.gt.1.0d0) thetac = 1.0d0
-          if (thetac.lt.-1.0d0) thetac=-1.0d0
+       theta=theta+onepi
+       vtorso = vtt0(itype)*(1+cos(theta)) + vtt1(itype)*(1+cos(2.*theta)) + vtt2(itype)*(1+cos(3.*theta)) + vtt3(itype)*(1+cos(4.*theta)) + vtt4(itype)*(1+cos(5.*theta)) + vtt5(itype)*(1+cos(6.*theta))
+    else if(((itype.ge.51).and.(itype.le.52)).or.(itype.eq.56)) then
+       theta=theta+onepi
+       vtorso =   vtt0(itype) + vtt1(itype)*(1.0d0-dcos(theta)) + vtt2(itype)*(1.0d0+dcos(theta*2.0d0)) + vtt3(itype)*(1.0d0-dcos(theta*3.0d0))
+    else if (itype .eq. 53 .or. itype .eq. 55) then
+       theta=theta+onepi
+       vtorso = vtt0(itype) + vtt1(itype)*(cos(theta)) + vtt2(itype)*(cos(2.*theta)) + vtt3(itype)*(cos(3.*theta)) + vtt4(itype)*(cos(4.*theta)) + vtt5(itype)*(cos(5.*theta)) + vtt6(itype)*(cos(6.*theta)) + vtt7(itype)*(cos(7.*theta)) + vtt8(itype)*(cos(8.*theta)) + vtt9(itype)*(cos(9.*theta))
+    else if (itype .eq. 54) then
+       theta=theta+onepi
+       vtorso = vtt0(itype) + vtt1(itype)*(1+cos(theta)) + vtt2(itype)*(1+cos(2.*theta)) + vtt3(itype)*(1+cos(3.*theta)) + vtt4(itype)*(1+cos(4.*theta)) + vtt5(itype)*(1+cos(5.*theta)) + vtt6(itype)*(1+cos(6.*theta))
+    else if(itype.eq.101) then
+       theta=theta+onepi
+       vtorso =   vtt0(itype) + vtt1(itype)*(1.0d0-dcos(theta)) + vtt2(itype)*(1.0d0+dcos(theta*2.0d0)) + vtt3(itype)*(1.0d0-dcos(theta*3.0d0))
+    else if(itype.eq.103) then
+       theta=theta+onepi
+       vtorso =   vtt0(itype) + vtt1(itype)*dcos(theta) + vtt2(itype)*dcos(theta*2.0d0) + vtt3(itype)*dcos(theta*3.0d0) + vtt4(itype)*dcos(theta*4.0d0) + vtt5(itype)*dcos(theta*5.0d0) + vtt6(itype)*dcos(theta*6.0d0) + vtt7(itype)*dcos(theta*7.0d0) + vtt8(itype)*dcos(theta*8.0d0) + vtt9(itype)*dcos(theta*9.0d0)
+    else if(itype.eq.144) then
+       theta=theta+onepi
+       vtorso =   vtt0(itype) + vtt1(itype)*(1.0d0-dcos(theta)) + vtt2(itype)*(1.0d0+dcos(theta*2.0d0)) + vtt3(itype)*(1.0d0-dcos(theta*3.0d0)) + vtt4(itype)*(1.0d0+dcos(theta*4.0d0))
+    else if(itype.eq.145) then
+       theta=theta+onepi
+       vtorso =   vtt0(itype) + vtt1(itype)*dcos(theta) + vtt2(itype)*dcos(theta*2.0d0) + vtt3(itype)*dcos(theta*3.0d0) + vtt4(itype)*dcos(theta*4.0d0) + vtt5(itype)*dcos(theta*5.0d0) + vtt6(itype)*dcos(theta*6.0d0) + vtt7(itype)*dcos(theta*7.0d0)
+    else if(itype.eq.146) then
+       theta=theta+onepi
+       vtorso = vtt0(itype) + vtt1(itype)*dcos(theta) + vtt2(itype)*dcos(theta*2.0d0) + vtt3(itype)*dcos(theta*3.0d0) + vtt4(itype)*dcos(theta*4.0d0) + vtt5(itype)*dcos(theta*5.0d0) + vtt6(itype)*dcos(theta*6.0d0)
+    else if(itype.eq.60 .or. itype.eq.61) then
+       theta=theta+onepi
+       vtorso = vtt0(itype) + vtt1(itype)*dcos(theta) + vtt2(itype)*dcos(theta*2.0d0) + vtt3(itype)*dcos(theta*3.0d0)
+    else if((itype.ge.65).and.(itype.le.66)) then
 ! -- pi added to torsion because the topmon code is backwards.  Trans
 ! -- configuration is defined as 0.
-          theta=dacos(thetac)+onepi
-          vtorso =   vtt0(itype) + vtt1(itype)*(1.0d0+dcos(theta)) + vtt2(itype)*(1.0d0-dcos(theta*2.0d0)) + vtt3(itype)*(1.0d0+dcos(theta*3.0d0))
-
-
-      else if ( itype .ge. 70 .and. itype .le. 80) then
-
+       theta=theta+onepi
+       vtorso =   vtt0(itype) + vtt1(itype)*(1.0d0+dcos(theta)) + vtt2(itype)*(1.0d0-dcos(theta*2.0d0)) + vtt3(itype)*(1.0d0+dcos(theta*3.0d0))
+    else if ( itype .ge. 70 .and. itype .le. 80) then
 ! --- OPLS SEVEN PARAMETER FIT
+       vtorso = vtt0(itype) + vtt1(itype)*thetac + vtt2(itype)*dcos(theta*2.0d0) + vtt3(itype)*dcos(theta*3.0d0) + vtt4(itype)*dcos(theta*4.0d0) + vtt5(itype)*dcos(theta*5.0d0) + vtt6(itype)*dcos(theta*6.0d0)
+    else
+       call err_exit('you picked a non-defined torsional type')
+    end if
 
-         if (thetac.gt.1.0d0) thetac = 1.0d0
-         if (thetac.lt.-1.0d0) thetac=-1.0d0
-
-         theta = dacos(thetac)
-
-         vtorso = vtt0(itype) + vtt1(itype)*thetac + vtt2(itype)*dcos(theta*2.0d0) + vtt3(itype)*dcos(theta*3.0d0) + vtt4(itype)*dcos(theta*4.0d0) + vtt5(itype)*dcos(theta*5.0d0) + vtt6(itype)*dcos(theta*6.0d0)
-
-
-
-      else
-         write(io_output,*) 'you picked a non-defined torsional type'
-         call err_exit('')
-      end if
-
-      return
+    return
   end function vtorso
 
+!> \brief Calculate the dihedral angle and its cosine
+!>
+!> The dihedral is formed between vectors (1,2), (2,3), and (3,4) using polymer convention (trans is 0 degree)
 !DEC$ ATTRIBUTES FORCEINLINE :: calctor
-  subroutine calctor(iu1,iu2,iu3,iu4,jttor,vtor)
-    use sim_system,only:xvec,yvec,zvec
-!$$$      include 'control.inc'
-!$$$      include 'fix.inc'
+  subroutine dihedral_angle(xvec1,yvec1,zvec1,xvec2,yvec2,zvec2,xvec3,yvec3,zvec3,thetac,theta,extended)
+    real,intent(in)::xvec1,yvec1,zvec1,xvec2,yvec2,zvec2,xvec3,yvec3,zvec3
+    real,intent(out)::thetac,theta
+    logical,intent(in),optional::extended !< whether to extend the dihedral angle to the range of -180 -- +180 degree
 
-      integer::iu1,iu2,iu3,iu4,jttor
+    real::x12,y12,z12,x23,y23,z23,d12,d23,dot,tcc,xcc,ycc,zcc
 
-      real::thetac,xaa1,yaa1,zaa1,xa1a2,ya1a2 ,za1a2,daa1,da1a2,dot,vtor,tcc,xcc,ycc,zcc,theta
+!   --- calculate cross products d_a x d_a-1
+    x12 = yvec1 * zvec2 - zvec1 * yvec2
+    y12 = zvec1 * xvec2 - xvec1 * zvec2
+    z12 = xvec1 * yvec2 - yvec1 * xvec2
 
-!     --- calculate cross products d_a x d_a-1
-      xaa1 = yvec(iu2,iu1) * zvec(iu3,iu2) + zvec(iu2,iu1) * yvec(iu2,iu3)
-      yaa1 = zvec(iu2,iu1) * xvec(iu3,iu2)  + xvec(iu2,iu1) * zvec(iu2,iu3)
-      zaa1 = xvec(iu2,iu1) * yvec(iu3,iu2)  + yvec(iu2,iu1) * xvec(iu2,iu3)
+!   --- calculate cross products d_a-1 x d_a-2
+    x23 = yvec2 * zvec3 - zvec2 * yvec3
+    y23 = zvec2 * xvec3 - xvec2 * zvec3
+    z23 = xvec2 * yvec3 - yvec2 * xvec3
 
-!     --- calculate cross products d_a-1 x d_a-2
-      xa1a2 = yvec(iu2,iu3) * zvec(iu3,iu4) - zvec(iu2,iu3) * yvec(iu3,iu4)
-      ya1a2 = zvec(iu2,iu3) * xvec(iu3,iu4) - xvec(iu2,iu3) * zvec(iu3,iu4)
-      za1a2 = xvec(iu2,iu3) * yvec(iu3,iu4) - yvec(iu2,iu3) * xvec(iu3,iu4)
-
-!     --- calculate lengths of cross products ***
-      daa1 = dsqrt ( xaa1**2 + yaa1**2 + zaa1**2 )
-      da1a2 = dsqrt ( xa1a2**2 + ya1a2**2  + za1a2**2 )
+!   --- calculate lengths of cross products ***
+    d12 = dsqrt ( x12*x12 + y12*y12 + z12*z12 )
+    d23 = dsqrt ( x23*x23 + y23*y23 + z23*z23 )
 
 ! ----Addition for table look up for Torsion potential
-!     --- calculate dot product of cross products ***
-      dot = xaa1*xa1a2 + yaa1*ya1a2 + zaa1*za1a2
-      thetac = - (dot / ( daa1 * da1a2 ))
+!   --- calculate dot product of cross products ***
+    dot = x12*x23 + y12*y23 + z12*z23
+    thetac = - (dot / ( d12 * d23 ))
 
-      if (thetac.gt.1.0d0) thetac=1.0d0
-      if (thetac.lt.-1.0d0) thetac=-1.0d0
-!     KEA -- added for extending range to +/- 180 and additional defns of torsions
-!     if torsion type is greater than 50, call spline program to use table of torsion
-!     potentials and fit from these. Especially useful for asymmetric potentials
+    if (thetac.gt.1.0d0) thetac=1.0d0
+    if (thetac.lt.-1.0d0) thetac=-1.0d0
+    theta = dacos(thetac)
 
-      if (jttor .ge. 50) then
+    if (present(extended)) then
+       if (extended) then
 !     *** calculate cross product of cross products ***
-         xcc = yaa1*za1a2 - zaa1*ya1a2
-         ycc = zaa1*xa1a2 - xaa1*za1a2
-         zcc = xaa1*ya1a2 - yaa1*xa1a2
+          xcc = y12*z23 - z12*y23
+          ycc = z12*x23 - x12*z23
+          zcc = x12*y23 - y12*x23
 !     *** calculate scalar triple product ***
-         tcc = xcc*xvec(iu2,iu3) + ycc*yvec(iu2,iu3) + zcc*zvec(iu2,iu3)
+          tcc = xcc*xvec2 + ycc*yvec2 + zcc*zvec2
 !     determine angle between -180 and 180, not 0 to 180
-         theta = dacos(thetac)
-         if (tcc .lt. 0.0d0) theta = -theta
-         vtor = inter_tor(theta,jttor)
-      else
-         vtor = vtorso(thetac,jttor)
-      end if
+          if (tcc .lt. 0.0d0) theta = -theta
+       end if
+    end if
 
-      return
-  end subroutine calctor
+    return
+  end subroutine dihedral_angle
 
   function lininter_vib(r,typo) result(tabulated_vib)
     use util_math,only:polint
@@ -2359,8 +2211,7 @@ contains
     integer,intent(in)::i,imolty,ist
     logical,intent(in)::lupdate_connectivity
 
-    integer::j,jjtor,ip1,ip2,ip3,it
-    real::thetac,theta,xaa1,yaa1,zaa1,xa1a2,ya1a2,za1a2,daa1,da1a2,dot,xcc,ycc,zcc,tcc
+    integer::j,jjtor,ip1,ip2,ip3
     
     if (lupdate_connectivity) call calc_connectivity(i,imolty)
 
@@ -2371,38 +2222,7 @@ contains
           if ( ip3 .lt. j ) then
              ip1 = ijtor2(imolty,j,jjtor)
              ip2 = ijtor3(imolty,j,jjtor)
-             it  = ittor(imolty,j,jjtor)
-!*** calculate cross products d_a x d_a-1 and d_a-1 x d_a-2 ***
-             xaa1 = ryvec(ip1,j) * rzvec(ip2,ip1) + rzvec(ip1,j) * ryvec(ip1,ip2)
-             yaa1 = rzvec(ip1,j) * rxvec(ip2,ip1) + rxvec(ip1,j) * rzvec(ip1,ip2)
-             zaa1 = rxvec(ip1,j) * ryvec(ip2,ip1) + ryvec(ip1,j) * rxvec(ip1,ip2)
-             xa1a2 = ryvec(ip1,ip2) * rzvec(ip2,ip3) + rzvec(ip1,ip2) * ryvec(ip3,ip2)
-             ya1a2 = rzvec(ip1,ip2) * rxvec(ip2,ip3) + rxvec(ip1,ip2) * rzvec(ip3,ip2)
-             za1a2 = rxvec(ip1,ip2) * ryvec(ip2,ip3) + ryvec(ip1,ip2) * rxvec(ip3,ip2)
-! *** calculate lengths of cross products ***
-             daa1 = dsqrt(xaa1**2+yaa1**2+zaa1**2)
-             da1a2 = dsqrt(xa1a2**2+ya1a2**2+za1a2**2)
-! *** calculate dot product of cross products ***
-             dot = xaa1*xa1a2 + yaa1*ya1a2 + zaa1*za1a2
-             thetac = - dot / ( daa1 * da1a2 )
-!     KEA -- added for extending range to +/- 180
-!     and for asymmetric potentials
-             if (thetac.gt.1.0d0) thetac=1.0d0
-             if (thetac.lt.-1.0d0) thetac=-1.0d0
-
-             if (L_tor_table) then
-!     *** calculate cross product of cross products ***
-                xcc = yaa1*za1a2 - zaa1*ya1a2
-                ycc = zaa1*xa1a2 - xaa1*za1a2
-                zcc = xaa1*ya1a2 - yaa1*xa1a2
-!     *** calculate scalar triple product ***
-                tcc = xcc*rxvec(ip1,ip2) + ycc*ryvec(ip1,ip2) + zcc*rzvec(ip1,ip2)
-                theta = dacos (thetac)
-                if (tcc .lt. 0.0d0) theta = -theta
-                vtg = vtg+inter_tor(theta,it)
-             else
-                vtg = vtg + vtorso( thetac,it)
-             end if
+             vtg = vtg + vtorso(rxvec(j,ip1),ryvec(j,ip1),rzvec(j,ip1),rxvec(ip1,ip2),ryvec(ip1,ip2),rzvec(ip1,ip2),rxvec(ip2,ip3),ryvec(ip2,ip3),rzvec(ip2,ip3),ittor(imolty,j,jjtor))
           end if
        end do
     end do

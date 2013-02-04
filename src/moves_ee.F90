@@ -17,6 +17,7 @@ MODULE moves_ee
 contains
 !> \brief sets up EE. contains some EE stuff, see eemove.f for more details
   subroutine eesetup
+    use energy_pairwise,only:type_2body
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'coord2.inc'
@@ -101,15 +102,7 @@ contains
             do j = 1, nmolty1-1
                do jj = 1, nunit(j)
                   ntjj = ntype(j,jj)
-                  if (lexpsix.or.lmmff) then
-                     ntij = (ntii+ntjj)/2
-                  else if (lninesix) then
-                     ntij = (ntii-1)*nxatom+ntjj
-                  else if (lgenlj) then
-                     ntij = (ntii-1)*nntype+ntjj
-                  else
-                     ntij = (ntii-1)*nntype+ntjj
-                  end if
+                  ntij=type_2body(ntii,ntjj)
                   rminee(ntij) = rmin
 !	write(io_output,*) i,ii,j,jj,rminee(ntij)
                end do
@@ -123,19 +116,8 @@ contains
                do jj = 1, nunit(j)
                   ntjj = ntype(j,jj)
                   ntjjs = ntype(nmolty,jj)
-                  if (lexpsix.or.lmmff) then
-                     ntij = (ntii+ntjj)/2
-                     ntijs = (ntii+ntjjs)/2
-                  else if (lninesix) then
-                     ntij = (ntii-1)*nxatom+ntjj
-                     ntijs = (ntii-1)*nxatom+ntjjs
-                  else if (lgenlj) then
-                     ntij = (ntii-1)*nntype+ntjj
-                     ntijs = (ntii-1)*nntype+ntjjs
-                  else
-                     ntij = (ntii-1)*nntype+ntjj
-                     ntijs = (ntii-1)*nntype+ntjjs
-                  end if
+                  ntij=type_2body(ntii,ntjj)
+                  ntijs=type_2body(ntii,ntjjs)
                   if (epsij(ntijs).ge.1.0d-6.and.sig2ij(ntijs).ge. 1.0d-6) then
                      rminee(ntij) = (epsij(ntij)/epsij(ntijs))** (1.0d0/12.0d0)*dsqrt(sig2ij(ntij)/sig2ij(ntijs))* rmin
                   else if ((dabs(qelect(ntii)*qelect(ntjj))) .ge.1.0d-6) then
@@ -158,19 +140,8 @@ contains
             do j = 1, nmolty1-1
                do jj = 1, nunit(j)
                   ntjj = ntype(j,jj)
-                  if (lexpsix.or.lmmff) then
-                     ntij = (ntii+ntjj)/2
-                     ntijs = (ntjjs+ntjj)/2
-                  else if (lninesix) then
-                     ntij = (ntii-1)*nxatom+ntjj
-                     ntijs = (ntjjs-1)*nxatom+ntjj
-                  else if (lgenlj) then
-                     ntij = (ntii-1)*nntype+ntjj
-                     ntijs = (ntii-1)*nntype+ntjjs
-                  else
-                     ntij = (ntii-1)*nntype+ntjj
-                     ntijs = (ntjjs-1)*nntype+ntjj
-                  end if
+                  ntij=type_2body(ntii,ntjj)
+                  ntijs=type_2body(ntjjs,ntjj)
                   if (epsij(ntijs).ge.1.0d-6.and.sig2ij(ntijs).ge. 1.0d-6) then
                      rminee(ntij) = (epsij(ntij)/epsij(ntijs))** (1.0d0/12.0d0)*dsqrt(sig2ij(ntij)/sig2ij(ntijs))* rmin
                   else if ((dabs(qelect(ntii)*qelect(ntjj))) .ge.1.0d-6) then
@@ -192,19 +163,8 @@ contains
             do jj = 1, nunit(i)
                ntjj = ntype(i,jj)
                ntjjs = ntype(nmolty,jj)
-               if (lexpsix.or.lmmff) then
-                  ntij = (ntii+ntjj)/2
-                  ntijs = (ntii+ntjjs)/2
-               else if (lninesix) then
-                  ntij = (ntii-1)*nxatom+ntjj
-                  ntijs = (ntii-1)*nxatom+ntjjs
-               else if (lgenlj) then
-                  ntij = (ntii-1)*nntype+ntjj
-                  ntijs = (ntii-1)*nntype+ntjjs
-               else
-                  ntij = (ntii-1)*nntype+ntjj
-                  ntijs = (ntii-1)*nntype+ntjjs
-               end if
+               ntij=type_2body(ntii,ntjj)
+               ntijs=type_2body(ntii,ntjjs)
                if (epsij(ntijs).ge.1.0d-6.and.sig2ij(ntijs).ge. 1.0d-6) then
                   rminee(ntij) = (epsij(ntij)/epsij(ntijs))** (1.0d0/12.0d0)*dsqrt(sig2ij(ntij)/sig2ij(ntijs))* rmin
                else if ((dabs(qelect(ntii)*qelect(ntjj))) .ge.1.0d-6) then
@@ -784,26 +744,28 @@ contains
   subroutine read_expand
     use util_runtime,only:err_exit
     integer::imol,j,ii
-    if ( lexpand(imol) ) then
-       if ( temtyp(imol) .gt. 1 ) then
-          call err_exit('Only one molecule of this type is allowed!')
+    do imol=1,nmolty
+       if ( lexpand(imol) ) then
+          if ( temtyp(imol) .gt. 1 ) then
+             call err_exit('Only one molecule of this type is allowed!')
+          end if
+          read(7,*)
+          read(7,*) numcoeff(imol)
+          do j = 1,numcoeff(imol)
+             read(7,*)
+             read(7,*) (epsil(imol,ii,j),ii=1,nunit(imol))
+             write(io_output,*) 'itype:',j
+             write(io_output,*) (epsil(imol,ii,j),ii=1,nunit(imol))
+             read(7,*) (sigm(imol,ii,j),ii=1,nunit(imol))
+             write(io_output,*) (sigm(imol,ii,j),ii=1,nunit(imol))
+             read(7,*) (qcharge(imol,ii,j),ii=1,nunit(imol))
+             write(io_output,*) (qcharge(imol,ii,j),ii=1,nunit(imol))
+             read(7,*)
+             read(7,*) (eta(ii,imol,j),ii=1,2)
+             write(io_output,*) 'eta:',(eta(ii,imol,j),ii=1,2)
+          end do
        end if
-       read(7,*)
-       read(7,*) numcoeff(imol)
-       do j = 1,numcoeff(imol)
-          read(7,*)
-          read(7,*) (epsil(imol,ii,j),ii=1,nunit(imol))
-          write(io_output,*) 'itype:',j
-          write(io_output,*) (epsil(imol,ii,j),ii=1,nunit(imol))
-          read(7,*) (sigm(imol,ii,j),ii=1,nunit(imol))
-          write(io_output,*) (sigm(imol,ii,j),ii=1,nunit(imol))
-          read(7,*) (qcharge(imol,ii,j),ii=1,nunit(imol))
-          write(io_output,*) (qcharge(imol,ii,j),ii=1,nunit(imol))
-          read(7,*)
-          read(7,*) (eta(ii,imol,j),ii=1,2)
-          write(io_output,*) 'eta:',(eta(ii,imol,j),ii=1,2)
-       end do
-    end if
+    end do
   end subroutine read_expand
 
   subroutine init_ee

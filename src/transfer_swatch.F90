@@ -218,7 +218,6 @@ contains
 !$$$  bniswat(iparty,box) = bniswat(iparty,box) + 1.0d0
          bnswat(iparty,ipairb) = bnswat(iparty,ipairb) + 1.0d0
 ! --- JLR 12-1-09 count the empty attempts
-!         if (lempty) return
          if (lempty) then
             bnswat_empty(iparty,ipairb) = bnswat_empty(iparty,ipairb) + 1.0d0
             return
@@ -779,7 +778,7 @@ contains
 !     *****************************
 
 !     --- Perform the Ewald sum reciprical space corrections
-         if ( lewald ) then
+         if (lewald.and..not.lideal(box)) then
 !     --- added into tweight even though it really contains new-old
 
 !     *** store the reciprocal space vector
@@ -858,7 +857,7 @@ contains
          wnlog = dlog10( tweight )
          wolog = dlog10( tweiold )
          wdlog = wnlog - wolog
-         if ( wdlog .lt. -softcut ) then
+         if (wdlog.lt.-softcut.and..not.lideal(box)) then
 !     write(io_output,*) '### underflow in wratio calculation ###'
             call recip(box,vdum,vdum,4)
             return
@@ -897,9 +896,9 @@ contains
 !     write(io_output,*) 'imolb:',imolb
 !     write(io_output,*) rxu(imolb,ic),ryu(imolb,ic),rzu(imolb,ic)
             end do
-            if ( lewald ) then
+            if (lewald.and..not.lideal(box)) then
 !     -- update reciprocal-space sum
-               call recip(iboxi,vdum,vdum,2)
+               call recip(box,vdum,vdum,2)
             end if
 
 !     *** update center of mass
@@ -913,12 +912,10 @@ contains
                call update_neighbor_list(imola,0.,0.,0.,.true.)
                call update_neighbor_list(imolb,0.,0.,0.,.true.)
             end if
-         else
+         else if (lewald.and..not.lideal(box)) then
 !     *** recover the reciprocal space vectors
 !     if the move is not accepted ***
-
             call recip(box,vdum,vdum,4)
-
          end if
 
 ! ****************************************************************
@@ -1326,64 +1323,66 @@ contains
          if ( lewald ) then
 !     --- added into tweight even though it really contains new-old
 !     --- Box A
-            oldchain = iboxa
-            newchain = iboxb
-            oldunit = nunit(imolta)
-            newunit = nunit(imoltb)
+            if (.not.lideal(iboxia)) then
+               oldchain = iboxa
+               newchain = iboxb
+               oldunit = nunit(imolta)
+               newunit = nunit(imoltb)
 
-            do j = 1,oldunit
-               rxuion(j,1) = rxu(oldchain,j)
-               ryuion(j,1) = ryu(oldchain,j)
-               rzuion(j,1) = rzu(oldchain,j)
-               qquion(j,1) = qqu(oldchain,j)
-            end do
-            moltion(1) = imolta
-            do j = 1,newunit
-               rxuion(j,2) = rxut(2,j)
-               ryuion(j,2) = ryut(2,j)
-               rzuion(j,2) = rzut(2,j)
-               qquion(j,2) = qqu(newchain,j)
-            end do
-            moltion(2) = imoltb
+               do j = 1,oldunit
+                  rxuion(j,1) = rxu(oldchain,j)
+                  ryuion(j,1) = ryu(oldchain,j)
+                  rzuion(j,1) = rzu(oldchain,j)
+                  qquion(j,1) = qqu(oldchain,j)
+               end do
+               moltion(1) = imolta
+               do j = 1,newunit
+                  rxuion(j,2) = rxut(2,j)
+                  ryuion(j,2) = ryut(2,j)
+                  rzuion(j,2) = rzut(2,j)
+                  qquion(j,2) = qqu(newchain,j)
+               end do
+               moltion(2) = imoltb
 
-            call recip(iboxia,vrecipn,vrecipo,1)
+               call recip(iboxia,vrecipn,vrecipo,1)
 
-            delen = vrecipn - vrecipo
+               delen = vrecipn - vrecipo
 
-            tweight = tweight * dexp(-beta*delen)
+               tweight = tweight * dexp(-beta*delen)
 
-            vnewald(iboxia) = vnewald(iboxia) + delen
-            vnbox(iboxia) = vnbox(iboxia) + delen
-
+               vnewald(iboxia) = vnewald(iboxia) + delen
+               vnbox(iboxia) = vnbox(iboxia) + delen
+            end if
+            if (.not.lideal(iboxib)) then
 !     --- Box B
-            oldchain = iboxb
-            newchain = iboxa
-            oldunit = nunit(imoltb)
-            newunit = nunit(imolta)
+               oldchain = iboxb
+               newchain = iboxa
+               oldunit = nunit(imoltb)
+               newunit = nunit(imolta)
 
-            do j = 1,oldunit
-               rxuion(j,1) = rxu(oldchain,j)
-               ryuion(j,1) = ryu(oldchain,j)
-               rzuion(j,1) = rzu(oldchain,j)
-               qquion(j,1) = qqu(oldchain,j)
-            end do
-            moltion(1) = imoltb
-            do j = 1,newunit
-               rxuion(j,2) = rxut(1,j)
-               ryuion(j,2) = ryut(1,j)
-               rzuion(j,2) = rzut(1,j)
-               qquion(j,2) = qqu(newchain,j)
-            end do
-            moltion(2) = imolta
+               do j = 1,oldunit
+                  rxuion(j,1) = rxu(oldchain,j)
+                  ryuion(j,1) = ryu(oldchain,j)
+                  rzuion(j,1) = rzu(oldchain,j)
+                  qquion(j,1) = qqu(oldchain,j)
+               end do
+               moltion(1) = imoltb
+               do j = 1,newunit
+                  rxuion(j,2) = rxut(1,j)
+                  ryuion(j,2) = ryut(1,j)
+                  rzuion(j,2) = rzut(1,j)
+                  qquion(j,2) = qqu(newchain,j)
+               end do
+               moltion(2) = imolta
 
-            call recip(iboxib,vrecipn,vrecipo,1)
+               call recip(iboxib,vrecipn,vrecipo,1)
 
-            delen = vrecipn - vrecipo
-            tweight = tweight * dexp(-beta*delen)
+               delen = vrecipn - vrecipo
+               tweight = tweight * dexp(-beta*delen)
 
-            vnewald(iboxib) = vnewald(iboxib) + delen
-            vnbox(iboxib) = vnbox(iboxib) + delen
-
+               vnewald(iboxib) = vnewald(iboxib) + delen
+               vnbox(iboxib) = vnbox(iboxib) + delen
+            end if
          end if
 !     End Ewald-sum Corrections
 
@@ -1523,8 +1522,8 @@ contains
             end do
             if ( lewald ) then
 !     -- update reciprocal-space sum
-               call recip(boxa,vdum,vdum,2)
-               call recip(boxb,vdum,vdum,2)
+               if (.not.lideal(boxa)) call recip(boxa,vdum,vdum,2)
+               if (.not.lideal(boxb)) call recip(boxb,vdum,vdum,2)
             end if
 
 !     ---update center of mass

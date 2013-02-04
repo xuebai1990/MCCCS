@@ -5,7 +5,7 @@
       subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove,acnp,pres,nibox,nnn,nblock,lratio,lratv ,lprint,lmv,lrsave,lblock,lratfix,lsolute,acsolpar, acEnthalpy,acEnthalpy1)
       use sim_system
       use sim_cell
-      use energy_intramolecular,only:vtorso,inter_tor
+      use energy_intramolecular,only:U_bonded
       use sim_particle,only:check_neighbor_list
       use energy_pairwise,only:energy,coru
       use moves_simple
@@ -29,22 +29,19 @@
 !$$$      include 'poten.inc'
  
       integer::nummol,ntii
-      integer::nibox,im,nnn,ntot,nblock,imolty,m,mm,i,j ,jjtor,ibox,itype,itel,mnbox,zzz,steps,igrow,jmolty,jbox
-      integer::imend,bin,k,jjben,ip2,ip1,ip3,it ,ii,jj,ivib
+      integer::nibox,im,nnn,ntot,nblock,imolty,m,mm,i,j,ibox,itype,itel,mnbox,zzz,steps,igrow,jmolty,jbox
+      integer::imend,bin,k,ii
       logical::lratio,lratv,lprint,lmv,lrsave,lblock,lfq,lratfix ,lsolute,ovrlap
       real, dimension(nprop1,nbxmax,nbxmax):: acsolpar
       real, dimension(nbxmax):: acEnthalpy ,acEnthalpy1
       real::dp,dpp,debroglie ,histrat
-      real::acv, molfra,acpres,acsurf,acvolume ,asetel,acdens,histtot,acmove,acnp,dvalue,dnchoi,dnchoi1,dnchoih ,dnunit,ratflcq,v,vintra,vinter,vext,velect,vewald,vtors,vtail ,rho,thetac,vbend,rxvec,ryvec,rzvec,distanceij,theta,xaa1 ,yaa1,zaa1,xa1a2,ya1a2,za1a2,dot,daa1,da1a2
-
-      real::xcc,ycc,zcc,tcc,rcutmin
+      real::acv, molfra,acpres,acsurf,acvolume,asetel,acdens,histtot,acmove,acnp,dvalue,dnchoi,dnchoi1,dnchoih ,dnunit,ratflcq,v,vintra,vinter,vext,velect,vewald,vtors,vtail,rho,vbend,rcutmin,vvib
  
       dimension acv(nener,nbxmax),lratfix(ntmax)
       dimension mnbox(nbxmax,ntmax)
       dimension acpres(nbxmax),acsurf(nbxmax),acvolume(nbxmax)
       dimension asetel(nbxmax,ntmax),acdens(nbxmax,ntmax) ,molfra(nbxmax,ntmax)
       dimension lsolute(ntmax)
-      dimension rxvec(numax,numax),ryvec(numax,numax),rzvec(numax,numax) ,distanceij(numax,numax)
 
       real::ratrax,ratray,ratraz,rttrax,rttray ,rttraz,rarotx,raroty,rarotz,rtrotx,rtroty,rtrotz,vol,ratvol ,temmass,dn,pres(nbxmax)
 ! -------------------------------------------------------------------
@@ -390,125 +387,39 @@
             do ibox = 1, nbox
                do k = 1, ncmt(ibox,imolty)
                   i = parbox(k,ibox,imolty)
-
 !     --- set coords for energy and write out conformations
-
                   if (myid.eq.0) write(11,*) imolty,ibox,nunit(imolty)
-
                      do j = 1, nunit(imolty)
                         rxuion(j,1) = rxu(i,j)                     
                         ryuion(j,1) = ryu(i,j)
                         rzuion(j,1) = rzu(i,j)
-                        
                         if (myid.eq.0) write(11,*) ntype(imolty,j) ,rxuion(j,1),ryuion(j,1),rzuion(j,1) ,qqu(j,1)
-
                      end do
 
                   call energy(i,imolty,v,vintra,vinter,vext,velect ,vewald,1,ibox,1,nunit(imolty),.true.,ovrlap ,.false.,vtors,.false.,.false.,.false.)
                   if (ovrlap) write(io_output,*)  '*** DISASTER, OVERLAP IN MONPER'
 
-                  if (lsolid(ibox).and..not.lrect(ibox)) then
-                     vol = cell_vol(ibox) 
-
+                  if (ltailc) then
+!     --- tail corrections
+                     if (lsolid(ibox).and..not.lrect(ibox)) then
+                        vol = cell_vol(ibox) 
+                     else
+                        vol = boxlx(ibox)*boxly(ibox)*boxlz(ibox)
+                     end if
+                     vtail = 0.0d0
+                     do jmolty = 1, nmolty
+                        rho = ncmt(ibox,jmolty) / vol
+                        vtail = vtail + ncmt(ibox,imolty) * coru(imolty,jmolty,rho,ibox)
+                     end do
                   end if
 
-!     --- tail corrections
-                  vtail = 0.0d0
-                  do jmolty = 1, nmolty
-                     
-                     rho = ncmt(ibox,jmolty) /  ( boxlx(ibox)*boxly(ibox)*boxlz(ibox) )
-                     
-                     vtail = vtail + ncmt(ibox,imolty) * coru(imolty,jmolty,rho,ibox)
-                  end do
-
-!     --- bending energy
-                  do ii = 1, nunit(imolty)
-                     do ivib = 1, invib(imolty,ii)
-                        jj = ijvib(imolty,ii,ivib)
-                        rxvec(ii,jj) = rxu(i,jj) - rxu(i,ii)
-                        ryvec(ii,jj) = ryu(i,jj) - ryu(i,ii)
-                        rzvec(ii,jj) = rzu(i,jj) - rzu(i,ii)
-                        distanceij(ii,jj) = dsqrt(rxvec(ii,jj)**2 + ryvec(ii,jj)**2 + rzvec(ii,jj)**2)
-                        
-                        rxvec(jj,ii)   = -rxvec(ii,jj)
-                        ryvec(jj,ii)   = -ryvec(ii,jj)
-                        rzvec(jj,ii)   = -rzvec(ii,jj)
-                        distanceij(jj,ii) = distanceij(ii,jj)
-                     end do
-                  end do
-                     
-                  vbend = 0.0d0
-
-                  do j = 3, nunit(imolty)
-                     do jjben = 1, inben(imolty,j)
-                        ip2 = ijben3(imolty,j,jjben)
-                        if ( ip2 .lt. j ) then
-                           ip1 = ijben2(imolty,j,jjben)
-                           it  = itben(imolty,j,jjben)
-                           if (brbenk(it).gt.0.001d0) then
-
-                              thetac = ( rxvec(ip1,j)*rxvec(ip1,ip2) + ryvec(ip1,j)*ryvec(ip1,ip2) + rzvec(ip1 ,j)*rzvec(ip1,ip2) ) / ( distanceij(ip1 ,j)*distanceij(ip1,ip2) )
-                              if ( thetac .ge. 1.0d0 ) thetac = 1.0d0
-                              if ( thetac .le. -1.0d0 ) thetac = -1.0d0
-                              
-                              theta = dacos(thetac)
-                              vbend = vbend +  brbenk(it) * (theta-brben(it))**2
-                           end if
-
-                        end if
-                     end do
-                  end do
-
-!     --- torsional energy
-                  vtors = 0.0d0
-                  do j = 4, nunit(imolty)
-                     do jjtor = 1, intor(imolty,j)
-                        ip3 = ijtor4(imolty,j,jjtor)
-                        if ( ip3 .lt. j ) then
-                           ip1 = ijtor2(imolty,j,jjtor)
-                           ip2 = ijtor3(imolty,j,jjtor)
-                           it  = ittor(imolty,j,jjtor)
-!***  calculate cross products d_a x d_a-1 and d_a-1 x d_a-2 ***
-                           xaa1 = ryvec(ip1,j) * rzvec(ip2,ip1) + rzvec(ip1,j) * ryvec(ip1,ip2)
-                           yaa1 = rzvec(ip1,j) * rxvec(ip2,ip1) + rxvec(ip1,j) * rzvec(ip1,ip2)
-                           zaa1 = rxvec(ip1,j) * ryvec(ip2,ip1) + ryvec(ip1,j) * rxvec(ip1,ip2)
-                           xa1a2 = ryvec(ip1,ip2) * rzvec(ip2,ip3) + rzvec(ip1,ip2) * ryvec(ip3,ip2)
-                           ya1a2 = rzvec(ip1,ip2) * rxvec(ip2,ip3) + rxvec(ip1,ip2) * rzvec(ip3,ip2)
-                           za1a2 = rxvec(ip1,ip2) * ryvec(ip2,ip3) + ryvec(ip1,ip2) * rxvec(ip3,ip2)
-!     *** calculate lengths of cross products ***
-                           daa1 = dsqrt(xaa1**2+yaa1**2+zaa1**2)
-                           da1a2 = dsqrt(xa1a2**2+ya1a2**2+za1a2**2)
-!     *** calculate dot product of cross products ***
-                           dot = xaa1*xa1a2 + yaa1*ya1a2 + zaa1*za1a2
-                           thetac = - dot / ( daa1 * da1a2 )
-
-                           if (thetac.gt.1.0d0) thetac=1.0d0
-                           if (thetac.lt.-1.0d0) thetac=-1.0d0
-!     KEA -- added for extending range to +/- 180
-                           if (L_tor_table) then
-!     *** calculate cross product of cross products ***
-                              xcc = yaa1*za1a2 - zaa1*ya1a2
-                              ycc = zaa1*xa1a2 - xaa1*za1a2
-                              zcc = xaa1*ya1a2 - yaa1*xa1a2
-!     *** calculate scalar triple product ***
-                              tcc = xcc*rxvec(ip1,ip2)+ycc*ryvec(ip1 ,ip2)+ zcc*rzvec(ip1,ip2)
-                              theta = dacos(thetac)
-                              if (tcc .lt. 0.0d0) theta = -theta
-                              vtors = vtors + inter_tor(theta,it)
-                           else
-                              vtors = vtors + vtorso( thetac, it )
-                           end if
-                        end if
-                     end do
-                  end do
+                  call U_bonded(i,imolty,vvib,vbend,vtors)
                  
                   solcount(ibox,imolty) = solcount(ibox,imolty) + 1
                   avsolinter(ibox,imolty) =  avsolinter(ibox,imolty) + vinter / 2.0d0 + vtail
                   avsolintra(ibox,imolty) = avsolintra(ibox,imolty)  + vintra 
                   avsoltor(ibox,imolty) = avsoltor(ibox,imolty) + vtors
-                  
                   avsolbend(ibox,imolty) = avsolbend(ibox,imolty)  + vbend
-
                   avsolelc(ibox,imolty) = avsolelc(ibox,imolty)  + velect + vewald
 
                end do

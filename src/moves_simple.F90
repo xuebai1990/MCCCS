@@ -163,7 +163,7 @@ contains
          call err_exit('disaster ovrlap in old conf of TRAXYZ')
       end if
 
-      if ( lewald .and. lelect(imolty) ) then
+      if (lewald.and.lelect(imolty).and..not.lideal(ibox)) then
          call recip(ibox,vrecipn,vrecipo,1)
          velectn = velectn + vrecipn
          velecto = velecto + vrecipo
@@ -230,7 +230,7 @@ contains
          if (lz) rzu(i,j) = rzuion(j,2)
       end do
 
-      if (lewald .and. lelect(imolty)) then
+      if (lewald.and.lelect(imolty).and..not.lideal(ibox)) then
 ! *** update reciprocal-space sum
          call recip(ibox,vdum,vdum,2)
       end if
@@ -514,7 +514,7 @@ contains
       call energy(i,imolty, vold,vintrao,vintero,vexto,velecto,vdum ,flagon,ibox, 1, iunit,.false.,ovrlap,.false.,vdum, .false.,.false.,.false.)
 
       if (ovrlap) call err_exit('disaster- overlap for old conf in ROTXYZ')
-      if ( lewald .and. lelect(imolty) ) then
+      if (lewald.and.lelect(imolty).and..not.lideal(ibox)) then
          call recip(ibox,vrecipn,vrecipo,1)
          velectn = velectn + vrecipn
          velecto = velecto + vrecipo
@@ -579,7 +579,7 @@ contains
          rzu(i,j) = rzuion(j,2)
       end do
 
-      if (lewald .and. lelect(imolty)) then
+      if (lewald.and.lelect(imolty).and..not.lideal(ibox)) then
 ! *** update reciprocal-space sum
          call recip(ibox,vdum,vdum,2)
       end if

@@ -865,8 +865,7 @@ contains
                   end if
                end if
             end do
-            write(io_output,*) 'screw up in explicit hydrogen'
-            call err_exit('')
+            call err_exit('screw up in explicit hydrogen')
          else
             iwalk = 1
          end if
@@ -890,7 +889,7 @@ contains
 
 !     Begin Ewald-sum Corrections
 
-      if ( lewald ) then
+      if (lewald.and..not.lideal(boxins)) then
 ! --- reciprocal space sum
 ! --- prepare qquion(jj,1) etc
          moltion(1) = imolty
@@ -938,8 +937,7 @@ contains
 !     Begin Tail corrections for BOXINS with inserted particle
 
 ! --- JLR 11-24-09 don't compute tail correction if lideal(boxins)
-!      if (ltailc .and. lswapinter) then
-      if (ltailc .and. lswapinter .and. .not. lideal(boxins) ) then
+      if (ltailc.and.lswapinter.and..not.lideal(boxins)) then
 ! --- END JLR 11-24-09
          vinsta = 0.0d0
          do jmt = 1, nmolty
@@ -1251,6 +1249,7 @@ contains
 !     --- store the old grown beads and explict placed beads positions
 !     --- 1 = old conformation
          iii = 1
+         moltion(1) = imolty
          do j = 1,iunit
             rxuion(j,1) = rxu(irem,j)
             ryuion(j,1) = ryu(irem,j)
@@ -1364,12 +1363,10 @@ contains
 
          waddold = waddold*whrem
       end if
-
 !     End Correction for Explicit Atom for OLD configuration
 
 !     Begin Ewald-sum Corrections for OLD configuration
-
-      if ( lewald ) then
+      if (lewald.and..not.lideal(boxrem)) then
 ! --- reciprocal space sum on r*uion
 ! --- prepare qquion(jj,1) etc
          if ( lswapinter ) then
@@ -1414,8 +1411,7 @@ contains
 
 !     Start of intermolecular tail correction for boxrem
 ! --- JLR 11-24-09 don't compute tail correction if lideal(boxrem)
-!      if (ltailc .and. lswapinter) then
-      if (ltailc .and. lswapinter .and. .not.lideal(boxrem) ) then
+      if (ltailc.and.lswapinter.and..not.lideal(boxrem)) then
 ! --- END JLR 11-24-09
 !     --- BOXREM without removed particle
          vremta = 0.0d0
@@ -1721,9 +1717,9 @@ contains
          if ( lewald ) then
 ! *** update reciprocal-space sum
             if ( lswapinter ) then
-               call recip(boxins,vdum,vdum,2)
-               call recip(boxrem,vdum,vdum,2)
-            else
+               if (.not.lideal(boxins)) call recip(boxins,vdum,vdum,2)
+               if (.not.lideal(boxrem)) call recip(boxrem,vdum,vdum,2)
+            else if (.not.lideal(boxins)) then
                call recip(boxins,vdum,vdum,2)
             end if
          end if

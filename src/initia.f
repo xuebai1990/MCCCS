@@ -3,7 +3,7 @@ subroutine initia
   use util_random,only:random
   use util_runtime,only:err_exit
   use sim_system
-  use energy_intramolecular,only:vtorso,inter_tor
+  use energy_intramolecular,only:vtorso
   use moves_cbmc,only:rosenbluth,schedule,explct
   implicit none
 !$$$      include 'mpi.inc'
@@ -18,29 +18,27 @@ subroutine initia
 !$$$      include 'cbmc.inc'
 
       logical::lhere(nmax)
-      integer::io_struct,jerr,i,j,m,m1,m2,n,nn,ic,jc,kc,it,ip1,ip2,ip3 ,ii,jj,iivib,jjben,jjtor,intemp,imol,ibtype,imolty,ibuild ,rand_id,offset,count_chain
+      integer::io_struct,jerr,i,j,m,m1,m2,n,nn,ic,jc,kc,it,ip1,ip2,ip3 ,ii,jj,iivib,jjben,jjtor,intemp,imol,ibtype,imolty,ibuild,rand_id,offset,count_chain
 
       integer::iboxst,iboxed,ibox,check,chktot
-      integer::mcmt(ntmax,nbxmax),pcmt(ntmax) ,mcmtma(ntmax,nbxmax)
+      integer::mcmt(ntmax,nbxmax),pcmt(ntmax),mcmtma(ntmax,nbxmax)
       integer::unitc,ntii
 
-      integer::bmap(numax),imap(numax),zzz,prev,ifrom ,nsave
+      integer::bmap(numax),imap(numax),zzz,prev,ifrom,nsave
       logical::lacc(numax),lgrow,lterm,lgrown(ntmax)
 
-      real::xtemp(numax),ytemp(numax) ,ztemp(numax)
+      real::xtemp(numax),ytemp(numax),ztemp(numax)
       real::ddum
 
-      real::ux,uy,uz,xshift,dic ,xnext,ynext ,znext,xynext,angold,angnew,rot ,x1,y1,z1,d1,x2,y2,z2,d2,bang,blen
+      real::ux,uy,uz,xshift,dic,xnext,ynext,znext,xynext,angold,angnew,rot,x1,y1,z1,d1,x2,y2,z2,d2,bang,blen
 
-      real::rxui,ryui,rzui,xaa1,yaa1,zaa1,daa1 ,xa1a2,ya1a2,za1a2,da1a2 
+      real::rxui,ryui,rzui 
 
-      real::xcc,ycc,zcc,tcc
+      real::vbend,vtg,thetac,theta,aben,ator
 
-      real::vbend,vtg,thetac,theta,dot ,aben,ator
+      real::rxvec(numax,numax),ryvec(numax,numax),rzvec(numax,numax),distanceij(numax,numax)
 
-      real::rxvec(numax,numax),ryvec(numax,numax) ,rzvec(numax,numax),distanceij(numax,numax)
-
-      real::samx(ntmax,numax),samy(ntmax,numax) ,samz(ntmax,numax)
+      real::samx(ntmax,numax),samy(ntmax,numax),samz(ntmax,numax)
 
       real::vdummy
 
@@ -207,12 +205,10 @@ subroutine initia
 
                nchain = 1
 
-               call rosenbluth( .true.,lterm,1,1,i,ifrom ,2,nugrow(i),ddum,.false.,ddum,2 )
+               call rosenbluth(.true.,lterm,1,1,i,ifrom ,2,nugrow(i),ddum,.false.,ddum,2 )
 
                if (lterm) then
-                  write(io_output,*) 'error in initia growing molecule'
-                  write(io_output,*) 'maybe increasing nchoi would help?'
-                  call err_exit('')
+                  call err_exit('Error in initia growing molecule: maybe increasing nchoi would help?')
                end if
 
 ! * return the value of nchain
@@ -395,8 +391,7 @@ subroutine initia
                               zzz = m
                            end if
                         else if (invib(intemp,m) .gt. 2) then
-                           write(io_output,*) 'initia only works for linear', ' molecules!  Maybe you should make', ' a fort.78 file and use lbranch?'
-                           call err_exit('')
+                           call err_exit('initia only works for linear molecules! Maybe you should make a fort.78 file and use lbranch?')
                         end if
                      end do
 
@@ -589,18 +584,12 @@ subroutine initia
 ! -----------------------------------------------------
 
 ! *** check initial structure ***
-
-      nn = nchain
-      if (lgrand) nn=nchain
-
       aben = 0.0d0
       ator = 0.0d0
 
-      do n = 1, nn
-
+      do n = 1, nchain
          imolty = moltyp(n)
 !         write(io_output,*) 'n',n,'   imolty',imolty
-
             
          if ( lbranch(imolty) ) then
 ! - branched molecule with connectivity table -
@@ -660,41 +649,9 @@ subroutine initia
                   ip1 = ijtor2(imolty,j,jjtor)
                   ip2 = ijtor3(imolty,j,jjtor)
                   it  = ittor(imolty,j,jjtor)
-! *** calculate cross products d_a x d_a-1 and d_a-1 x d_a-2 ***
-                  xaa1 = ryvec(ip1,j) * rzvec(ip2,ip1) + rzvec(ip1,j) * ryvec(ip1,ip2)
-                  yaa1 = rzvec(ip1,j) * rxvec(ip2,ip1) + rxvec(ip1,j) * rzvec(ip1,ip2)
-                  zaa1 = rxvec(ip1,j) * ryvec(ip2,ip1) + ryvec(ip1,j) * rxvec(ip1,ip2)
-                  xa1a2 = ryvec(ip1,ip2) * rzvec(ip2,ip3) + rzvec(ip1,ip2) * ryvec(ip3,ip2)
-                  ya1a2 = rzvec(ip1,ip2) * rxvec(ip2,ip3) + rxvec(ip1,ip2) * rzvec(ip3,ip2)
-                  za1a2 = rxvec(ip1,ip2) * ryvec(ip2,ip3) + ryvec(ip1,ip2) * rxvec(ip3,ip2)
-! *** calculate lengths of cross products ***
-                  daa1 = dsqrt(xaa1**2+yaa1**2+zaa1**2)
-                  da1a2 = dsqrt(xa1a2**2+ya1a2**2+za1a2**2)
-! *** calculate dot product of cross products ***
-                  dot = xaa1*xa1a2 + yaa1*ya1a2 + zaa1*za1a2
-                  thetac = -(dot / ( daa1 * da1a2 ))
-                  if (thetac.gt.1.0d0) thetac=1.0d0
-                  if (thetac.lt.-1.0d0) thetac=-1.0d0
-
-!     KEA -- added for extending range to +/- 180
-                  if (it .ge. 500) then
-!     *** calculate cross product of cross products ***
-                     xcc = yaa1*za1a2 - zaa1*ya1a2
-                     ycc = zaa1*xa1a2 - xaa1*za1a2
-                     zcc = xaa1*ya1a2 - yaa1*xa1a2
-!     *** calculate scalar triple product ***
-                     tcc = xcc*rxvec(ip1,ip2) + ycc*ryvec(ip1,ip2) + zcc*rzvec(ip1,ip2)
-                     theta=dacos(thetac)
-
-                     if (tcc .lt. 0.0d0) theta = -theta
-                     vtg=inter_tor(theta,it)
-                  else
-                     vtg = vtorso (thetac,it)
-                  end if
-
+                  vtg = vtorso(rxvec(j,ip1),ryvec(j,ip1),rzvec(j,ip1),rxvec(ip1,ip2),ryvec(ip1,ip2),rzvec(ip1,ip2),rxvec(ip2,ip3),ryvec(ip2,ip3),rzvec(ip2,ip3),it)
                   ator = ator + vtg
-!                  if ( n .eq. 1 ) write(io_output,*) 'thetac',thetac,'vtg',vtg
-                  if ( n .eq. 1 ) write(io_output,"('tors with units:',4i3 ,'   type:',i3,'   angle:',f9.4,f9.2)") j,ip1,ip2,ip3 ,it,dacos(thetac)*raddeg,vtg
+                  if ( n .eq. 1 ) write(io_output,"('tors with units:',4i3 ,'   type:',i3,'   angle:',f9.4,f9.2)") j,ip1,ip2,ip3,it,dacos(thetac)*raddeg,vtg
                end do
             end do
 

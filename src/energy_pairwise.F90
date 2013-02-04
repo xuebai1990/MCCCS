@@ -8,7 +8,7 @@ MODULE energy_pairwise
   use sim_system
   use sim_cell
   use energy_kspace,only:calp,sself,correct
-  use energy_intramolecular,only:vtorso,lininter_bend,inter_tor
+  use energy_intramolecular,only:lininter_bend
   use energy_external,only:U_ext
   use energy_sami,only:ljsami,ljmuir
   use energy_garofalini
@@ -18,7 +18,7 @@ MODULE energy_pairwise
   include 'common.inc'
   private
   save
-  public::sumup,energy,boltz,coru,suijtab,exsix,ljpsur,init_tabulated_potential_pair
+  public::sumup,energy,boltz,coru,suijtab,exsix,ljpsur,init_tabulated_potential_pair,type_2body
 
   integer,allocatable::vdWsplits(:,:),electsplits(:,:)
   real,allocatable::rvdW(:,:,:),tabvdW(:,:,:),relect(:,:,:),tabelect(:,:,:)
@@ -390,7 +390,7 @@ contains
          call dipole(ibox,0)
       end if
 
-      if ( lewald ) then
+      if (lewald.and..not.lideal(ibox)) then
          call recipsum(ibox,vrecipsum)
 !---- update self terms and correction terms
          sself = 0.0d0
@@ -1090,7 +1090,7 @@ contains
       end if
 
 !kea - garo: add three body loop for intermolecular interactions
-      if (lgaro) then
+      if (lgaro.and..not.lideal(ibox)) then
          if(flagon.eq.2) then
             call triad_en(i,v3garo,neigh_icnt,neighi,ndiji,nxiji,nyiji,nziji,.true.)
          else if(flagon.eq.1) then
@@ -1174,7 +1174,7 @@ contains
                end if
             end if
 
- 96         if (lewald ) then
+ 96         if (lewald.and..not.lideal(ibox)) then
 !     compute the ewald intramolecular (self and correction) terms for
 !     the interactions of the placed atoms with themselves, and with the
 !     rest of their own molecule, if there's no interaction
@@ -1187,11 +1187,11 @@ contains
                end if
             end if
          end do
-         if ( lewald ) then
+         if (lewald.and..not.lideal(ibox)) then
             sself = sself + qquion(ii,flagon)*qquion(ii,flagon)
          end if
       end do
-      if (lewald) then
+      if (lewald.and..not.lideal(ibox)) then
          sself = -sself * calpi/sqrtpi
          vewald = sself + correct
       end if
@@ -1456,7 +1456,7 @@ contains
          vewald = 0.0d0
 
 ! -- Only if L_Coul_CBMC is true, then compute electrostatic interactions/corrections
-         if(L_Coul_CBMC.and.lewald) then
+         if(L_Coul_CBMC.and.lewald.and..not.lideal(ibox)) then
             do count = 1,ntogrow
                ii = glist(count)
 !              -- This part does not change for fixed charge moves, but is
@@ -1555,7 +1555,7 @@ contains
                end do
             end do
 !!?? double Ewald correction??
-            if (L_Coul_CBMC.and.lewald .and. ntogrow .gt. 1) then
+            if (L_Coul_CBMC.and.lewald.and.ntogrow.gt.1.and..not.lideal(ibox)) then
 !          --- ewald sum correction term for interactions of the
 !          --- growing beads with each other
 ! * this is 1-3, so don't need to consult lqinclu
@@ -1678,7 +1678,7 @@ contains
                      ryuij = ryui - ryu(j,jj)
                      rzuij = rzui - rzu(j,jj)
 !                    --- minimum image the pair separations ***
-                     if ( lpbc ) call mimage ( rxuij,ryuij,rzuij,ibox )
+                     if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
                      rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
                      rij   = dsqrt(rijsq)
 !                    --- compute vinter (eg. lennard-jones)
@@ -1897,23 +1897,18 @@ contains
       integer::imolty,jmolty,ii,jj, ntii, ntjj, ntij ,ibox
 
       coru = 0.0d0
-
       do ii = 1, nunit(imolty)
          ntii = ntype(imolty,ii)
-
          do jj = 1, nunit(jmolty)
             ntjj = ntype(jmolty,jj)
+            ntij = type_2body(ntii,ntjj)
             if (lexpsix) then
-               ntij = (ntii+ntjj)/2
                coru = coru + rho*consu(ntij)
             else if (lmmff) then
-               ntij = (ntii+ntjj)/2
                coru = coru + rho * epsimmff(ntij) * coru_cons(ntij) * sigimmff(ntij)**3.0d0*twopi
             else if (lninesix) then
-               ntij = (ntii-1)*nxatom + ntjj
                coru = coru + 8.0d0*onepi*rho*epsnx(ntij)* rzero(ntij)**3*(rzero(ntij)/rcut(ibox))**3* ((rzero(ntij)/rcut(ibox))**3/3.0d0 - 1.0d0)
             else if (lgenlj) then
-               ntij = (ntii-1)*nntype + ntjj
                rci3 = sig2ij(ntij)**(3.0d0/2.0d0) / rcut(ibox)**3
                rci1 = rci3 **(1.0d0/3.0d0)
 
@@ -1933,7 +1928,6 @@ contains
                coru = coru + 2.0d0 * onepi * epsilon2 * sigma2 ** (1.50d0) * rho * (  (( (2.0d0**(4.0d0*n1/n0))/(2.0d0*n1-3.0d0)) * rci1 **(2.0d0*n1-3.0d0) ) - ( (2.0d0**((2.0d0*n1/n0)+1.0d0))/(n1-3.0d0)) * rci1 **(n1-3.0d0) )
 
             else
-               ntij = (ntii-1)*nntype + ntjj
                rci3 = sig2ij(ntij)**(3.0d0/2.0d0) / rcut(ibox)**3
                if ( lexpand(imolty) .and. lexpand(jmolty) ) then
                   sigma2 = (sigma_f(imolty,ii)+sigma_f(jmolty,jj))**2/4.0d0

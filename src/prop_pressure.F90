@@ -182,15 +182,7 @@ contains
                         else
                            if (.not. (lqchg(ntii) .and. lqchg(ntjj))) goto 97
                         end if
-                        if ( lexpsix .or. lmmff ) then
-                           ntij = (ntii+ntjj)/2
-                        else if (lninesix) then
-                           ntij = (ntii-1)*nxatom + ntjj
-                        else if (lgenlj) then
-                           ntij = (ntii-1)*nntype + ntjj
-                        else
-                           ntij = (ntii-1)*nntype + ntjj
-                        end if
+                        ntij=type_2body(ntii,ntjj)
 
                         rxuij = rxui - rxu(j,jj)
                         ryuij = ryui - ryu(j,jj)
@@ -562,25 +554,20 @@ contains
       real::corp,rci3,rhosq, epsilon2, sigma2
       real::rci1
       integer::imolty,jmolty,ii,jj, ntii, ntjj, ntij ,ibox
-      corp = 0.0d0
 
+      corp = 0.0d0
       do ii = 1, nunit(imolty)
          ntii = ntype(imolty,ii)
-
          do jj = 1, nunit(jmolty)
             ntjj = ntype(jmolty,jj)
-
+            ntij=type_2body(ntii,ntjj)
             if (lexpsix .and. ltailc) then
-               ntij = (ntii+ntjj)/2
                corp = corp + consp(ntij)
             else if (lmmff .and. ltailc) then
-               ntij = (ntii+ntjj)/2
                corp = corp+((-2.0d0)/3.0d0)*onepi*epsimmff(ntij)*sigimmff(ntij)**3.0d0*corp_cons(ntij)
             else if (lninesix .and. ltailc) then
-               ntij = (ntii-1)*nxatom + ntjj
                corp = corp + 16.0d0 * onepi * epsnx(ntij) * rzero(ntij)**3 * (0.5d0*(rzero(ntij)/rcut(ibox))**6 - (rzero(ntij)/rcut(ibox))**3)
             else if (lgenlj .and. ltailc) then
-               ntij = (ntii-1)*nntype + ntjj
                rci3 = sig2ij(ntij)**(3.0d0/2.0d0) / rcut(ibox)**3
                rci1 = rci3 **(1.0d0/3.0d0)
                if ( lexpand(imolty) .and. lexpand(jmolty) ) then
@@ -598,8 +585,6 @@ contains
                end if
                  corp = corp + (2.0d0/3.0d0) * onepi * epsilon2 * sigma2 ** (1.50d0) * n1 * ( (( (2.0d0**((4.0d0*n1/n0)+1.0d0))/(2.0d0*n1-3.0d0)) * rci1 **(2.0d0*n1-3.0d0) ) - ( ((2.0d0**((2.0d0*n1/n0)+1.0d0))/(n1-3.0d0))* rci1 **(n1-3.0d0) )  )
             else if (.not.(lexpsix.or.lmmff.or.lninesix.or.lgenlj)) then
-               ntij = (ntii-1)*nntype + ntjj
-
                if ( lexpand(imolty) .and. lexpand(jmolty) ) then
                   sigma2 = (sigma_f(imolty,ii)+sigma_f(jmolty,jj))**2/4.0d0
                   epsilon2 = dsqrt(epsilon_f(imolty,ii)* epsilon_f(jmolty,jj))

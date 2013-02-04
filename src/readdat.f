@@ -946,7 +946,6 @@ subroutine readdat(file_in,lucall,ucheck,nvirial,starvir,stepvir)
             end if
          end if
       end do
-
       call read_expand()
 
       call init_tabulated_potential_bonded()

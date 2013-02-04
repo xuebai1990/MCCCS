@@ -6,7 +6,7 @@ MODULE moves_cbmc
   use sim_system
   use energy_kspace,only:recip
   use energy_pairwise,only:energy,boltz
-  use energy_intramolecular,only:lininter_vib,lininter_bend,inter_tor
+  use energy_intramolecular,only:lininter_vib,lininter_bend,vtorso
   implicit none
   private
   save
@@ -381,7 +381,7 @@ contains
          end do
       end if
 
-      if ( lewald .and. lelect(imolty) ) then
+      if (lewald.and.lelect(imolty).and..not.lideal(ibox)) then
 !        --- reciprocal space sum ---
 !        --- rxuion: 1= old configuration; 2= new configuration
          call recip(ibox,vrecipn,vrecipo,1)
@@ -466,7 +466,7 @@ contains
             rzu(i,ic)  = rzuion(ic,2)
          end do
 
-         if ( lewald .and. lelect(imolty) ) then
+         if (lewald.and.lelect(imolty).and..not.lideal(ibox)) then
 ! *** update reciprocal-space sum
             call recip(ibox,vdum,vdum,2)
          end if
@@ -560,9 +560,8 @@ contains
 !     lfixnow:
 !     cwtorf:
 !     movetype:
-  subroutine rosenbluth ( lnew,lterm,i,icharge,imolty,ifrom,ibox ,igrow,wadd,lfixnow,cwtorf,movetype )
+  subroutine rosenbluth(lnew,lterm,i,icharge,imolty,ifrom,ibox ,igrow,wadd,lfixnow,cwtorf,movetype )
     use util_random,only:sphere
-    use energy_intramolecular,only:vtorso
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'system.inc'
@@ -583,14 +582,14 @@ contains
 
       logical::ovrlap,ltorsion,lfixnow,lfixed,lreturn
 
-      integer::glist(numax),iuprev,iufrom,ichoi,ntogrow ,count
-      integer::iu,iv,iw,ju,ip,ichtor ,it,jut2,jut3,jut4 ,jttor,iwalk,ivect
+      integer::glist(numax),iuprev,iufrom,ichoi,ntogrow,count
+      integer::iu,iv,iw,ju,ip,ichtor,it,jut2,jut3,jut4,iwalk,ivect
       integer::angstart,toracc
       real::dum,xub,yub,zub,length,lengtha ,lengthb,wadd
-      real::vdha,x,y,z,maxlen,vtorf ,xaa1 ,yaa1,zaa1,daa1,xa1a2,ya1a2,za1a2,da1a2 ,thetac,dot,rbf,bsum,bs,xcc,ycc,zcc,tcc
-      real::vbbtr,vvibtr,wei_vib,wbendv ,dist
+      real::vdha,x,y,z,maxlen,vtorf,rbf,bsum,bs
+      real::vbbtr,vvibtr,wei_vib,wbendv,dist
       real::bondlen,bendang,phi,phidisp,phinew ,thetanew
-      real::cwtorf,vfbbtr,vphi,theta
+      real::cwtorf,vfbbtr,vphi
 
       dimension bondlen(numax),bendang(numax),phi(numax)
 
@@ -720,7 +719,7 @@ contains
                   do ja = 1, befnum(j)
                      if (iu.eq.ibef(j,ja)) then
 !     --- time to do final crankshaft move
-                        call safecbmc(3,lnew,i,iw,igrow,imolty ,count,x,y,z,vphi,vtorf,wbendv ,lterm,movetype)
+                        call safecbmc(3,lnew,i,iw,igrow,imolty,count,x,y,z,vphi,vtorf,wbendv ,lterm,movetype)
 
                         if (lterm) then
                            return
@@ -810,7 +809,7 @@ contains
                   xub = -x
                   yub = -y
                   zub = -z
-                  call cone (1,xub,yub,zub,dum,dum,dum,dum,dum )
+                  call cone(1,xub,yub,zub,dum,dum,dum,dum,dum)
                end if
 
                if (lrigid(imolty)) then
@@ -827,8 +826,8 @@ contains
                xub = xvec(iuprev,iufrom) / length
                yub = yvec(iuprev,iufrom) / length
                zub = zvec(iuprev,iufrom) / length
-               call cone (1,xub,yub,zub,dum,dum,dum,dum,dum )
-               if (movetype.eq.2.and.lring(imolty) .and.iw.eq.1) then
+               call cone(1,xub,yub,zub,dum,dum,dum,dum,dum)
+               if (movetype.eq.2.and.lring(imolty).and.iw.eq.1) then
                   ltorsion = .false.
                else
                   ltorsion = .true.
@@ -889,46 +888,8 @@ contains
 !     &                             jut4,jut3,jut2,iu
 !                              call err_exit('trouble jut4')
                            end if
-                           jttor = ittor(imolty,iu,it)
-
-!                       --- calculate cross products d_a x d_a-1
-                           xaa1 = yy(count) * zvec(jut3,jut2)  + zz(count) * yvec(jut2,jut3)
-                           yaa1 = zz(count) * xvec(jut3,jut2)  + xx(count) * zvec(jut2,jut3)
-                           zaa1 = xx(count) * yvec(jut3,jut2)  + yy(count) * xvec(jut2,jut3)
-
-!                       --- calculate cross products d_a-1 x d_a-2
-                           xa1a2 = yvec(jut2,jut3) * zvec(jut3,jut4) - zvec(jut2,jut3) * yvec(jut3,jut4)
-                           ya1a2 = zvec(jut2,jut3) * xvec(jut3,jut4) - xvec(jut2,jut3) * zvec(jut3,jut4)
-                           za1a2 = xvec(jut2,jut3) * yvec(jut3,jut4) - yvec(jut2,jut3) * xvec(jut3,jut4)
-
-!                       --- calculate lengths of cross products ***
-                           daa1 = dsqrt ( xaa1**2 + yaa1**2 + zaa1**2 )
-                           da1a2 = dsqrt ( xa1a2**2 + ya1a2**2  + za1a2**2 )
-
-!                       --- calculate dot product of cross products ***
-                           dot = xaa1*xa1a2 + yaa1*ya1a2 + zaa1*za1a2
-                           thetac = - (dot / ( daa1 * da1a2 ))
-                           if (thetac.gt.1.0d0) thetac=1.0d0
-                           if (thetac.lt.-1.0d0) thetac=-1.0d0
-
-!     KEA -- added for extending range to +/- 180
-                           if (L_tor_table) then
-!     *** calculate cross product of cross products ***
-                              xcc = yaa1*za1a2 - zaa1*ya1a2
-                              ycc = zaa1*xa1a2 - xaa1*za1a2
-                              zcc = xaa1*ya1a2 - yaa1*xa1a2
-!     *** calculate scalar triple product ***
-                              tcc = xcc*xvec(jut2,jut3) + ycc*yvec(jut2,jut3) + zcc*zvec(jut2,jut3)
-                              theta = dacos(thetac)
-                              if (tcc .lt. 0.0d0) theta = -theta
-!                       --- add torsion energy to vdha
-                              vdha = vdha + inter_tor(theta,jttor)
-                           else
-!                       --- add torsion energy to vdha
-                              vdha = vdha + vtorso( thetac, jttor )
-                           end if
+                           vdha = vdha + vtorso(xvec(jut4,jut3),yvec(jut4,jut3),zvec(jut4,jut3),xvec(jut3,jut2),yvec(jut3,jut2),zvec(jut3,jut2),xx(count),yy(count),zz(count),ittor(imolty,iu,it))
                         end if
-
 !                     end do
  299                 continue
 
@@ -1354,9 +1315,6 @@ contains
 
                      distij(iu,ju) = dsqrt(xvec(iu,ju)**2 + yvec(iu,ju)**2 + zvec(iu,ju)**2)
                      distij(ju,iu) = distij(iu,ju)
-
-
-
                   end do
                end if
 
@@ -3602,7 +3560,6 @@ contains
 !     **           -- Uses CDCBMC to grow them --              **
 !     ***********************************************************
   subroutine place(lnew,lterm,i,imolty,ibox,index,wplace)
-      use energy_intramolecular,only:calctor
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'cbmc.inc'
@@ -3614,11 +3571,11 @@ contains
 
       logical::lnew,lterm,ovrlap
 
-      integer::i,j,imolty,count,counta,iu,ju,ku,jtvib ,start,iv,index,ivib,nchvib,ibend,ib,type,ip,ichoi ,niplace,iw,iufrom,it,jut2,jut3,jut4,jttor,ibox,glist,iwalk ,iuprev,list,nchben_a, nchben_b,max,iu2back
+      integer::i,j,imolty,count,counta,iu,ju,ku,jtvib ,start,iv,index,ivib,nchvib,ibend,ib,type,ip,ichoi,niplace,iw,iufrom,it,jut2,jut3,jut4,ibox,glist,iwalk,iuprev,list,nchben_a,nchben_b,max,iu2back
 
       parameter(max=numax)
 
-      real::wplace,equil,kforce,bsum_try,mincb ,delcb,ux,uy,uz,r,vvib,bfactor,third,length,bs,rbf,vvibtr ,wei_vib,bendang,vangle,vbbtr,angle,vphi,phione,thetac,rx,ry,rz ,rsint,dist,wei_bend,ang_trial,vctor,vdha,vbend,vtorsion ,bsum,alpha,gamma,dum,phi,thetaone,thetatwo,phitwo
+      real::wplace,equil,kforce,bsum_try,mincb ,delcb,ux,uy,uz,r,vvib,bfactor,third,length,bs,rbf,vvibtr ,wei_vib,bendang,vangle,vbbtr,angle,vphi,phione,thetac,rx,ry,rz ,rsint,dist,wei_bend,ang_trial,vdha,vbend,vtorsion ,bsum,alpha,gamma,dum,phi,thetaone,thetatwo,phitwo
 
       dimension r(nchbn_max),bfactor(nchbn_max) ,bendang(numax,numax) ,ang_trial(nchbn_max),dist(max) ,niplace(numax),vbend(nchmax) ,vtorsion(nchmax),phi(max) ,list(max),glist(max)
 
@@ -4034,10 +3991,7 @@ contains
                         call err_exit('trouble jut4 in place')
                      end if
 
-                     jttor = ittor(imolty,iu,it)
-
-                     call calctor(iu,jut2,jut3,jut4,jttor,vctor)
-                     vdha = vdha + vctor
+                     vdha = vdha + vtorso(xvec(iu,jut2),yvec(iu,jut2),zvec(iu,jut2),xvec(jut2,jut3),yvec(jut2,jut3),zvec(jut2,jut3),xvec(jut3,jut4),yvec(jut3,jut4),zvec(jut3,jut4),ittor(imolty,iu,it))
                   end if
                end do
             end do
@@ -4061,7 +4015,7 @@ contains
          end do
 
 !     --- now we calculate the nonbonded interactions
-         call boltz(lnew,.false., ovrlap,i,i,imolty,ibox,ichoi ,iufrom,pnum(iw),glist,0._double_precision)
+         call boltz(lnew,.false.,ovrlap,i,i,imolty,ibox,ichoi,iufrom,pnum(iw),glist,0._double_precision)
 
          if (ovrlap) then
             lterm = .true.
@@ -4173,7 +4127,6 @@ contains
 !     iinit = 2  calculates closing probabilities
 !     iinit = 3  does final crankshaft move
   subroutine safecbmc(iinit,lnew,i,iw,igrow,imolty,count,ux,uy,uz,vphi,vtor,wei_bv,lterm,movetype)
-      use energy_intramolecular,only:calctor
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'connect.inc'
@@ -4183,17 +4136,17 @@ contains
 
       logical::lnew,lshit,lterm,ldo,lreturn
 
-      integer::igrow,imolty,count,counta,j,ja,ivib ,iufrom,iuprev,iinit,iu,ju,ku,i,iv,juvib,jtvib,type,iu2,ib,iw ,ntogrow,itor,ip,ichoi,ichtor,countb,bin,max,nu,iu1,dir,diracc ,start,nchben_a,nchben_b,ibend,iopen,last,iclose,nchvib
+      integer::igrow,imolty,count,counta,j,ja,ivib,iufrom,iuprev,iinit,iu,ju,ku,i,iv,juvib,jtvib,type,iu2,ib,iw,ntogrow,itor,ip,ichoi,ichtor,countb,bin,max,nu,iu1,dir,diracc,start,nchben_a,nchben_b,ibend,iopen,last,iclose,nchvib
 
-      integer::jttor,it,jut2,jut3,jut4,movetype,lu,k ,opencount
+      integer::it,jut2,jut3,jut4,movetype,lu,k,opencount
 
-      real::vdha ,phicrank,bf_tor,vtorsion,vbend,rbf,ran_tor ,bs,ang_bend,bfactor,bsum_bend,wei_bv,bsum_try,third,vibtr
+      real::vdha,phicrank,bf_tor,vtorsion,vbend,rbf,ran_tor,bs,ang_bend,bfactor,bsum_bend,wei_bv,bsum_try,third,vibtr
 
 !     *** to conserve memory, max is the maximum number of endpoints
 !     *** possible in place of numax
       parameter(max=10)
 
-      real::flength,x,y,z,equil,kforce,length ,vvib,equilb,kforceb,ux,uy,uz,hdist,lengtha,lengthb ,vtor,vphi ,thetac,angle,equila,kforcea,ovphi ,alpha,phidisp,dum,rxt ,ryt,rzt ,phiacc,rxa,rya,rza,angles,bangles,vctor ,r,mincb,delcb ,vkforce,vequil,vvibration,ovvib
+      real::flength,x,y,z,equil,kforce,length,vvib,equilb,kforceb,ux,uy,uz,hdist,lengtha,lengthb,vtor,vphi,thetac,angle,equila,kforcea,ovphi,alpha,phidisp,dum,rxt,ryt,rzt,phiacc,rxa,rya,rza,angles,bangles,r,mincb,delcb ,vkforce,vequil,vvibration,ovvib
 
       dimension flength(numax,numax),alpha(max,numax) ,equilb(numax ,numax),kforceb(numax,numax),equila(max) ,rxa(max,max),rya(max ,max),rza(max,max) ,rxt(max),ryt(max),rzt(max),vbend(2 *nchtor_max) ,phicrank(2*nchtor_max,max),phiacc(max) ,vtorsion(2 *nchtor_max),bf_tor(2*nchtor_max) ,dir(2*nchtor_max,max) ,diracc(max),kforcea(max) ,bfactor(nchbn_max),ang_bend(nchbn_max) ,angles(3) ,bangles(max,3),iopen(2),r(nchbn_max) ,vkforce(numax ,numax),vequil(numax,numax) ,vvibration(2*nchtor_max)
 
@@ -5470,11 +5423,8 @@ contains
                            write(io_output,*) 'jut4,jut3,jut2,iu', jut4,jut3,jut2,iu
                            call err_exit('trouble jut4 in crankshaft')
                         end if
-                        jttor = ittor(imolty,iu,it)
 
-                        call calctor(iu,jut2,jut3,jut4,jttor,vctor)
-
-                        vdha = vdha + vctor
+                        vdha = vdha + vtorso(xvec(iu,jut2),yvec(iu,jut2),zvec(iu,jut2),xvec(jut2,jut3),yvec(jut2,jut3),zvec(jut2,jut3),xvec(jut3,jut4),yvec(jut3,jut4),zvec(jut3,jut4),ittor(imolty,iu,it))
 
  41                     continue
 
@@ -5491,13 +5441,8 @@ contains
                         jut4 = ijtor4(imolty,ju,it)
 
                         if (jut2.eq.iu.and.jut4.eq.iuprev) then
-
-                           jttor = ittor(imolty,ju,it)
-
-                           call calctor(ju,jut2,jut3,jut4,jttor,vctor)
-
 !                       --- add torsion energy to vdha
-                           vdha = vdha + vctor
+                           vdha = vdha + vtorso(xvec(ju,jut2),yvec(ju,jut2),zvec(ju,jut2),xvec(jut2,jut3),yvec(jut2,jut3),zvec(jut2,jut3),xvec(jut3,jut4),yvec(jut3,jut4),zvec(jut3,jut4),ittor(imolty,ju,it))
                         end if
                      end do
 
@@ -5521,13 +5466,8 @@ contains
                               call err_exit('trouble jut4 in crankshaft')
                            end if
 
-                           jttor = ittor(imolty,ku,it)
-
-
-                           call calctor(ku,jut2,jut3,jut4,jttor,vctor)
-
 !                       --- add torsion energy to vdha
-                           vdha = vdha + vctor
+                           vdha = vdha + vtorso(xvec(ku,jut2),yvec(ku,jut2),zvec(ku,jut2),xvec(jut2,jut3),yvec(jut2,jut3),zvec(jut2,jut3),xvec(jut3,jut4),yvec(jut3,jut4),zvec(jut3,jut4),ittor(imolty,ku,it))
  42                        continue
                         end if
                      end do
@@ -5544,14 +5484,8 @@ contains
                         jut4 = ijtor4(imolty,nu,it)
 
                         if (jut2.eq.ku.and.jut3.eq.ju.and.jut4.eq.iu) then
-
-                           jttor = ittor(imolty,nu,it)
-
-                           call calctor(nu,jut2,jut3,jut4,jttor,vctor)
-
 !                       --- add torsion energy to vdha
-                           vdha = vdha + vctor
-
+                           vdha = vdha + vtorso(xvec(nu,jut2),yvec(nu,jut2),zvec(nu,jut2),xvec(jut2,jut3),yvec(jut2,jut3),zvec(jut2,jut3),xvec(jut3,jut4),yvec(jut3,jut4),zvec(jut3,jut4),ittor(imolty,nu,it))
                         end if
                      end do
                   end do
@@ -6769,7 +6703,6 @@ contains
   end subroutine close
 
   subroutine rigfix(lnew,i,ibox,imolty,lterm,wrig)
-      use energy_intramolecular,only:calctor
 !$$$      include 'control.inc'
 !$$$      include 'coord.inc'
 !$$$      include 'cbmc.inc'
@@ -6780,12 +6713,12 @@ contains
 
       logical::lnew,ovrlap,lterm,lovra,lfind,lshit
 
-      integer::iw,i,ibox,imolty,iufrom,iuprev,ntogrow ,count,iu,counta,ilist,ja,max,num,inum,j,ju,iv,nlist,ichoi,ichtor ,ip,itor,it,jut2,jut3,jut4,jttor,iwalk,glist,ifrom,inuma
+      integer::iw,i,ibox,imolty,iufrom,iuprev,ntogrow,count,iu,counta,ilist,ja,max,num,inum,j,ju,iv,nlist,ichoi,ichtor,ip,itor,it,jut2,jut3,jut4,iwalk,glist,ifrom,inuma
 
       parameter(max=10)
 
 
-      real::xub,yub,zub,lengtha,lengthb,dum,xfix ,yfix,zfix,phia,bendang,thetac,phidisp,phi,rlength,vdha ,vtor,vtorsion,phitors,bf_tor,ran_tor,bs,rxpa,rypa,rzpa ,bsuma,vtrya,vtrintraa,vtrexta,vtrelecta,vtrewalda,vtrorienta ,vtrintera,bsum,rbf,wrig,vtrelecta_intra,vtrelecta_inter
+      real::xub,yub,zub,lengtha,lengthb,dum,xfix ,yfix,zfix,phia,bendang,thetac,phidisp,phi,rlength,vdha,vtorsion,phitors,bf_tor,ran_tor,bs,rxpa,rypa,rzpa,bsuma,vtrya,vtrintraa,vtrexta,vtrelecta,vtrewalda,vtrorienta ,vtrintera,bsum,rbf,wrig,vtrelecta_intra,vtrelecta_inter
 
       dimension ilist(numax),inum(max),xfix(numax),yfix(numax) ,zfix(numax),lfind(numax),phia(numax),bendang(numax) ,rlength(numax),vtorsion(nchtor_max),phitors(nchtor_max) ,bf_tor(nchtor_max),rxpa(numax,nchmax),rypa(numax,nchmax) ,rzpa(numax,nchmax),vtrelecta(nchmax),vtrewalda(nchmax) ,bsuma(nchmax),vtrya(nchmax),vtrintraa(nchmax) ,vtrorienta(nchmax),vtrexta(nchmax),glist(numax) ,lovra(nchmax) ,vtrintera(nchmax),ifrom(numax),inuma(max) ,vtrelecta_intra(nchmax),vtrelecta_inter(nchmax)
 !     ----------------------------------------------------------
@@ -6974,11 +6907,7 @@ contains
                            write(io_output,*) 'iu,jut2,jut3,jut4',iu ,jut2,jut3,jut4
                            call err_exit('trouble, jut4 does not exist in rigfix')
                         end if
-
-                        jttor = ittor(imolty,iu,it)
-
-                        call calctor(iu,jut2,jut3,jut4,jttor,vtor)
-                        vdha = vdha + vtor
+                        vdha = vdha + vtorso(xvec(iu,jut2),yvec(iu,jut2),zvec(iu,jut2),xvec(jut2,jut3),yvec(jut2,jut3),zvec(jut2,jut3),xvec(jut3,jut4),yvec(jut3,jut4),zvec(jut3,jut4),ittor(imolty,iu,it))
                      end if
                   end do
                end do
