@@ -1,7 +1,4 @@
- lopt_bias:  F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F
- F
- freq_opt_bias:     10000000
- Program started at 2012-12-20 19:17:19.246
+ Program started at 2013-02-20 21:19:01.730
  Number of processors:            1
            0  threads per processor
  Random number seed:            0
@@ -59,6 +56,8 @@
     lrect: F
  neighbor list cutoff (rcutnn):  0.000000000000000E+000 A
     rcut:   14.0000000000000      A
+ lopt_bias:  F
+ freq_opt_bias:          500
  number of chains:         200
  number of molecule types:           1
  number of chains of molecule type           1 :         200
@@ -509,9 +508,9 @@
  coulombic energy  -1029356.42719971     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -604410.834946777     
+ total energy      -604410.834946775     
  
- box             1  initial v   =   -604410.834946777     
+ box             1  initial v   =   -604410.834946775     
  surf. tension :   box 1 =     -13.93898
  pressure check:   box 1 =       3553.60
  
@@ -525,7 +524,7 @@
  bond bending       22419.5400653022     
  torsional          25694.6709460617     
  external          0.000000000000000E+000
- coulombic energy  -40748.1480055199     
+ coulombic energy  -40748.1480055198     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
  total energy       15998.5449859083     
@@ -604,17 +603,17 @@ number of times move out:          0.0  accepted=     0.0
  pair typ =           1
  moltyps =            2  and           3
 between box  1 and  2   uattempts =         0.0  attempts =      0.0  accepted =     0.0
-
+ 
  ### Charge Fluctuation  ###
  
  
  ### Expanded Ensemble Move  ###
  
- 
+
 New Biasing Potential
 
-molecule  1:   0.00000000      0.00000000    
-
+molecule  1:   0.00000000      0.00000000     
+ 
  sumup control
  number of chains         186
  number of chains of type           1         186
@@ -634,20 +633,20 @@ molecule  1:   0.00000000      0.00000000
  number of chains          14
  number of chains of type           1          14
  inter lj energy   -1227.70400711985     
- intra lj energy    9643.81486653258     
+ intra lj energy    9643.81486653259     
  Tail correction   -35.7688385331865     
  bond vibration    0.000000000000000E+000
- bond bending       22860.7744031366     
+ bond bending       22860.7744031365     
  torsional          29474.6655738782     
  external          0.000000000000000E+000
- coulombic energy  -41184.4517242599     
+ coulombic energy  -41184.4517242600     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy       19567.0991121675     
+ total energy       19567.0991121674     
  
- vstart       =      -604410.8349467767        15998.5449859083
- vend         =      -596747.1673044406        19567.0991121675
- vbox         =      -596747.1673044403        19567.0991121678
+ vstart       =      -604410.8349467748        15998.5449859083
+ vend         =      -596747.1673044410        19567.0991121674
+ vbox         =      -596747.1673044406        19567.0991121678
  
  Averages and fluctuations                            Box 1       Box 2
  
@@ -682,4 +681,4 @@ molecule  1:   0.00000000      0.00000000
  type  box     vinter      vintra      vtor        vbend       vtail
     1    1     0.00000     0.00000     0.00000     0.00000     0.00000
     1    2     0.00000     0.00000     0.00000     0.00000     0.00000
- Program ended at 2012-12-20 19:17:27.126
+ Program ended at 2013-02-20 21:19:18.094

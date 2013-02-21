@@ -2,22 +2,21 @@ MODULE energy_kspace
   use const_math,only:onepi,twopi
   use const_phys,only:qqfact
   use util_runtime,only:err_exit
-  use sim_system,only:nbxmax,lsolid,lrect,boxlx,boxly,boxlz,nchain,moltyp,lelect,nboxi,ntype,lqchg,rxu,ryu,rzu,qqu,myid,numprocmax,moltion,nunit,numprocs,ierr,rxuion,ryuion,rzuion,qquion,xcm,ycm,zcm
+  use sim_system,only:lsolid,lrect,boxlx,boxly,boxlz,nchain,moltyp,lelect,nboxi,ntype,lqchg,rxu,ryu,rzu,qqu,myid,numprocmax,moltion,nunit,numprocs,ierr,rxuion,ryuion,rzuion,qquion,xcm,ycm,zcm
   use sim_cell
   implicit none
   include 'common.inc'
   private
   save
-  public::recipsum,recip,recip_atom,ee_recip,recippress,calp,sself,correct,save_kvector,restore_kvector
+  public::recipsum,recip,recip_atom,ee_recip,recippress,calp,sself,correct,save_kvector,restore_kvector,allocate_kspace
 
 ! EWALDSUM.INC
 ! - vectormax = the maximum number of reciprocal vectors for Ewald sum
   integer,parameter::vectormax=100000
-  integer::numvect(nbxmax),numvecto(nbxmax)
-  real,dimension(vectormax,nbxmax)::kx,ky,kz,prefact,ssumr,ssumi,ssumrn,ssumin,ssumro,ssumio
-  real::kxo(vectormax,nbxmax),kyo(vectormax,nbxmax),kzo(vectormax,nbxmax),prefacto(vectormax,nbxmax)
-  real,target::calp(nbxmax)
-  real::sself,correct,calpo(nbxmax)
+  integer,allocatable::numvect(:),numvecto(:)
+  real,allocatable::kx(:,:),ky(:,:),kz(:,:),prefact(:,:),ssumr(:,:),ssumi(:,:),ssumrn(:,:),ssumin(:,:),ssumro(:,:),ssumio(:,:),kxo(:,:),kyo(:,:),kzo(:,:),prefacto(:,:),calpo(:)
+  real,allocatable,target::calp(:)
+  real::sself,correct
 ! - numvect, the total number of reciprocal vectors
 ! - kalp, a parameter to control the real space sum
 ! - calp = kalp / boxlen
@@ -30,16 +29,6 @@ contains
 !    ** rewritten again, probably by Bin.                               **
 !    *********************************************************************
   subroutine recipsum(ibox,vrecip)
-!$$$      include 'control.inc'
-!$$$      include 'system.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'ewaldsum.inc'
-!$$$      include 'poten.inc'
-!$$$      include 'conver.inc'
-!$$$      include 'cell.inc'
-!$$$! RP added for MPI
-!$$$      include 'mpif.h'
-!$$$      include 'mpi.inc'
 
       integer::ibox,i,ii,imolty,ncount
 
@@ -210,14 +199,6 @@ contains
 !    ** rewritten on June 25/99 by Bin Chen.                            **
 !    *********************************************************************
   subroutine recip(ibox,vrecipnew,vrecipold,type)
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'coord2.inc'
-!$$$      include 'ewaldsum.inc'
-!$$$      include 'poten.inc'
-!$$$! RP added for MPI
-!$$$      include 'mpif.h'
-!$$$      include 'mpi.inc'
 
       integer::ic,izz,ii,imolty,ibox,ncount,type
       real::vrecipnew,vrecipold,sumr(2),sumi(2) ,arg
@@ -388,11 +369,6 @@ contains
 !    ** rewritten on June 25/99 by Bin Chen.                            **
 !    *********************************************************************
   subroutine recip_atom(ibox,vrecipnew,vrecipold,type,ii)
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'coord2.inc'
-!$$$      include 'ewaldsum.inc'
-!$$$      include 'poten.inc'
       integer::ic,izz,ii,imolty,ibox,ncount,type
       real::vrecipnew,vrecipold,sumr(2),sumi(2) ,arg
 
@@ -481,11 +457,6 @@ contains
 !    ** rewritten on June 25/99 by Bin Chen.                            **
 !    *********************************************************************
   subroutine ee_recip(ibox,vrecipnew,vrecipold,type)
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'coord2.inc'
-!$$$      include 'ewaldsum.inc'
-!$$$      include 'poten.inc'
       integer::ic,zzz,ii,imolty,ibox,ncount,type
       real::vrecipnew,vrecipold,sumr(2),sumi(2) ,arg
 
@@ -577,13 +548,6 @@ contains
 !    ** modified to calculate surface tension, 11/24/03 JMS            **
 !    ********************************************************************
   subroutine recippress(ibox,repress,pxx,pyy,pzz,pxy,pyx,pxz,pzx, pyz,pzy)
-!$$$      include 'control.inc'
-!$$$      include 'ewaldsum.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'poten.inc'
-!$$$! ---RP added for MPI
-!$$$      include 'mpi.inc'
-!$$$      include 'mpif.h'
 
       integer::ncount,ibox,i,ii,imolty
       real::factor,repress,repressx,repressy ,repressz,recipintra,piix,piiy,piiz,xcmi,ycmi,zcmi,arg
@@ -754,4 +718,14 @@ contains
 
       return
   end subroutine recippress
+
+  subroutine allocate_kspace()
+    use sim_system,only:nbxmax,io_output
+    integer::jerr
+    allocate(kx(vectormax,nbxmax),ky(vectormax,nbxmax),kz(vectormax,nbxmax),prefact(vectormax,nbxmax),ssumr(vectormax,nbxmax),ssumi(vectormax,nbxmax),ssumrn(vectormax,nbxmax),ssumin(vectormax,nbxmax),ssumro(vectormax,nbxmax),ssumio(vectormax,nbxmax),kxo(vectormax,nbxmax),kyo(vectormax,nbxmax),kzo(vectormax,nbxmax),prefacto(vectormax,nbxmax),calpo(nbxmax),calp(nbxmax),numvect(nbxmax),numvecto(nbxmax),stat=jerr)
+    if (jerr.ne.0) then
+       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+       call err_exit('allocate_kspace: allocation failed')
+    end if
+  end subroutine allocate_kspace
 end MODULE energy_kspace

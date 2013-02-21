@@ -18,8 +18,6 @@ contains
 !    ** Set-Up SAMI's potentials. **
 !    *******************************
   subroutine susami
-!$$$      include 'external.inc'
-!$$$      include 'ljsamipara.inc'
 
       real::hsig,heps,tsig,teps
 
@@ -76,8 +74,6 @@ contains
 !    ** calculates SAMI's LJ and 12+3 energy for a bead.    **
 !    *********************************************************
   function ljsami( rijsq, ntij )
-!$$$      include 'external.inc'
-!$$$      include 'ljsamipara.inc'
 
       real::ljsami, rijsq, rij, sr
       integer::ntij
@@ -102,7 +98,6 @@ contains
 !    ** calculates the SAMI's external energy for a bead.    **
 !    **********************************************************
   function exsami( z, ntj )
-!$$$      include 'external.inc'
 
       real::exsami, z
       integer::ntj
@@ -134,9 +129,6 @@ contains
 !    **            and normal LJ energy for tail    **
 !    *************************************************
   function ljmuir ( rijsq, ntij )
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'poten.inc'
 
       real::ljmuir, rijsq, sr, sr2, sr6, epshead, sighead
       integer::ntij
@@ -173,8 +165,6 @@ contains
 !    ** calculates the lmuir external energy for a bead.    **
 !    *********************************************************
   function exmuir( z, ntj )
-!$$$      include 'external.inc'
-!$$$      include 'externalmuir.inc'
 
       real::exmuir, z
       integer::ntj

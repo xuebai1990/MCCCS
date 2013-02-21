@@ -9,13 +9,6 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
   use sim_system
   use energy_kspace,only:recip
   implicit none
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'coord2.inc'
-!$$$      include 'ensemble.inc'
-!$$$      include 'rosen.inc'
-!$$$      include 'inputdata.inc'
-!$$$      include 'system.inc'
 
       logical::laccept,lswapinter
       integer::i,ibox,boxrem,mtype,imolty,iunit,ichoiq ,ip,ibox2,j

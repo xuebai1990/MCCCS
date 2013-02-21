@@ -9,7 +9,7 @@ MODULE moves_simple
   save
   public::traxyz,rotxyz,Atom_traxyz,volume,prvolume,init_moves_simple,output_translation_rotation_stats,output_volume_stats
 
-  real,public::acntrax(ntmax,nbxmax),acntray(ntmax,nbxmax),acntraz(ntmax,nbxmax),acnrotx(ntmax,nbxmax),acnroty(ntmax,nbxmax),acnrotz(ntmax,nbxmax),acstrax(ntmax,nbxmax),acstray(ntmax,nbxmax),acstraz(ntmax,nbxmax),acsrotx(ntmax,nbxmax),acsroty(ntmax,nbxmax),acsrotz(ntmax,nbxmax),bntrax(ntmax,nbxmax),bntray(ntmax,nbxmax),bntraz(ntmax,nbxmax),bstrax(ntmax,nbxmax),bstray(ntmax,nbxmax),bstraz(ntmax,nbxmax),bnrotx(ntmax,nbxmax),bnroty(ntmax,nbxmax),bnrotz(ntmax,nbxmax),bsrotx(ntmax,nbxmax),bsroty(ntmax,nbxmax),bsrotz(ntmax,nbxmax),acsvol(nbxmax),acnvol(nbxmax),acshmat(nbxmax,9),acnhmat(nbxmax,9),bsvol(nbxmax),bnvol(nbxmax),bshmat(nbxmax,9),bnhmat(nbxmax,9)
+  real,allocatable,public::acntrax(:,:),acntray(:,:),acntraz(:,:),acnrotx(:,:),acnroty(:,:),acnrotz(:,:),acstrax(:,:),acstray(:,:),acstraz(:,:),acsrotx(:,:),acsroty(:,:),acsrotz(:,:),bntrax(:,:),bntray(:,:),bntraz(:,:),bstrax(:,:),bstray(:,:),bstraz(:,:),bnrotx(:,:),bnroty(:,:),bnrotz(:,:),bsrotx(:,:),bsroty(:,:),bsrotz(:,:),acsvol(:),acnvol(:),acshmat(:,:),acnhmat(:,:),bsvol(:),bnvol(:),bshmat(:,:),bnhmat(:,:)
 
 contains
 !    *******************************************************************
@@ -21,19 +21,6 @@ contains
   subroutine traxyz (lx,ly,lz)
     use sim_particle,only:update_neighbor_list
     use sim_cell,only:update_linked_cell
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'coord2.inc'
-!$$$      include 'ensemble.inc'
-!$$$      include 'neigh2.inc'
-!$$$      include 'system.inc'
-!$$$      include 'inputdata.inc'
-!$$$      include 'bnbsma.inc'
-!$$$      include 'neigh.inc'
-!$$$      include 'ipswpar.inc'
-!$$$      include 'eepar.inc'
-!$$$!kea
-!$$$      include 'garofalini.inc'
 
       logical::lx,ly,lz,ovrlap
       logical::lneighij
@@ -317,17 +304,6 @@ contains
 !    *******************************************************************
     subroutine rotxyz (lx,ly,lz )
       use sim_particle,only:update_neighbor_list
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'coord2.inc'
-!$$$      include 'ensemble.inc'
-!$$$      include 'neigh2.inc'
-!$$$      include 'system.inc'
-!$$$      include 'inputdata.inc'
-!$$$      include 'bnbsma.inc'
-!$$$      include 'neigh.inc'
-!$$$      include 'ipswpar.inc'
-!$$$      include 'eepar.inc'
 
       logical::lx,ly,lz,ovrlap,lneighij
       integer::i,ibox,flagon,iunit,j,imolty,iuroty,icbu ,ic,ip
@@ -648,15 +624,6 @@ contains
       use sim_cell,only:update_linked_cell
       use energy_kspace,only:recip_atom
       use energy_intramolecular,only:U_bonded
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'coord2.inc'
-!$$$      include 'ensemble.inc'
-!$$$      include 'neigh2.inc'
-!$$$      include 'system.inc'
-!$$$      include 'inputdata.inc'
-!$$$      include 'bnbsma.inc'
-!$$$      include 'neigh.inc'
 
       logical::lx,ly,lz,ovrlap
 
@@ -903,17 +870,6 @@ contains
       use sim_cell
       use energy_pairwise,only:sumup
       use energy_kspace,only:calp,save_kvector,restore_kvector
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'ensemble.inc'
-!$$$      include 'system.inc'
-!$$$      include 'inputdata.inc'
-!$$$      include 'bnbsma.inc'
-!$$$      include 'ewaldsum.inc'
-!$$$      include 'cell.inc'
-!$$$!kea
-!$$$      include 'garofalini.inc'
-!$$$      include 'neigh.inc'
 
 !      logical::ovrlap,lvol,lx(nbxmax),ly(nbxmax),lz(nbxmax),lncubic
       logical::ovrlap,lvol,lx,ly,lz,lncubic
@@ -921,10 +877,10 @@ contains
 
       integer::i,j,ibox,imolty,boxa,boxb,ipair,ipairb
       real::bxo(nbxmax),byo(nbxmax),bzo(nbxmax)
-      real::volo(nbxmax),vboxo(nbxmax) ,dfac(nbxmax),voln(nbxmax),vflucqo(nbxmax),vintero(nbxmax) ,vtailo(nbxmax),vexto(nbxmax),velecto(nbxmax)
-      real::vboxn(nbxmax),vintern(nbxmax), vtailn(nbxmax),vextn(nbxmax),velectn(nbxmax)
-      real::rxuo(nmax,numax),ryuo(nmax,numax) ,rzuo(nmax,numax),qquo(nmax,numax)
-      real::volt,expdv,df,dx,dy,dz,v,dele, vinter,vtail,vext,vdum,velect
+      real::volo(nbxmax),vboxo(nbxmax),dfac(nbxmax),voln(nbxmax),vflucqo(nbxmax),vintero(nbxmax),vtailo(nbxmax),vexto(nbxmax),velecto(nbxmax)
+      real::vboxn(nbxmax),vintern(nbxmax),vtailn(nbxmax),vextn(nbxmax),velectn(nbxmax)
+      real::rxuo(nmax,numax),ryuo(nmax,numax),rzuo(nmax,numax),qquo(nmax,numax)
+      real::volt,expdv,df,dx,dy,dz,v,dele,vinter,vtail,vext,vdum,velect
       real::vminim(nbxmax)
       real::xcmo,ycmo,zcmo
       real::rbcut(nbxmax),rbcuta,rbcutb,rpair,rm
@@ -1565,17 +1521,6 @@ contains
       use sim_cell
       use energy_pairwise,only:sumup
       use energy_kspace,only:calp,save_kvector,restore_kvector
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'ensemble.inc'
-!$$$      include 'system.inc'
-!$$$      include 'inputdata.inc'
-!$$$      include 'bnbsma.inc'
-!$$$      include 'ewaldsum.inc'
-!$$$      include 'neigh.inc'
-!$$$      include 'cell.inc'
-!$$$!kea
-!$$$      include 'garofalini.inc'
 
       logical::ovrlap,lvol,lx,ly,lz,la,lb,lc
 
@@ -2064,6 +2009,13 @@ contains
   end subroutine prvolume
 
   subroutine init_moves_simple
+    integer::jerr
+    allocate(acntrax(ntmax,nbxmax),acntray(ntmax,nbxmax),acntraz(ntmax,nbxmax),acnrotx(ntmax,nbxmax),acnroty(ntmax,nbxmax),acnrotz(ntmax,nbxmax),acstrax(ntmax,nbxmax),acstray(ntmax,nbxmax),acstraz(ntmax,nbxmax),acsrotx(ntmax,nbxmax),acsroty(ntmax,nbxmax),acsrotz(ntmax,nbxmax),bntrax(ntmax,nbxmax),bntray(ntmax,nbxmax),bntraz(ntmax,nbxmax),bstrax(ntmax,nbxmax),bstray(ntmax,nbxmax),bstraz(ntmax,nbxmax),bnrotx(ntmax,nbxmax),bnroty(ntmax,nbxmax),bnrotz(ntmax,nbxmax),bsrotx(ntmax,nbxmax),bsroty(ntmax,nbxmax),bsrotz(ntmax,nbxmax),acsvol(nbxmax),acnvol(nbxmax),acshmat(nbxmax,9),acnhmat(nbxmax,9),bsvol(nbxmax),bnvol(nbxmax),bshmat(nbxmax,9),bnhmat(nbxmax,9),stat=jerr)
+    if (jerr.ne.0) then
+       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+       call err_exit('init_moves_simple: allocation failed')
+    end if
+
     acntrax = 0.d0
     acntray = 0.d0
     acntraz = 0.d0

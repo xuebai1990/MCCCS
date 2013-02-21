@@ -12,9 +12,9 @@ module transfer_shared
   integer::freq_opt_bias=500
   namelist /transfer/ lopt_bias,freq_opt_bias
 contains
-  subroutine read_transfer(io_input)
-    integer,intent(in)::io_input
-    integer::jerr
+  subroutine read_transfer(file_in)
+    character(LEN=*),INTENT(IN)::file_in
+    integer::io_input,jerr
 
     allocate(u_bias_diff(nbox,nmolty),num_update_bias(nbox,nmolty),lopt_bias(nmolty),stat=jerr)
     if (jerr.ne.0) then
@@ -24,14 +24,20 @@ contains
 
     u_bias_diff=0.0_double_precision
     num_update_bias=0
-    lopt_bias=.true.
+    lopt_bias=.false.
 
-    rewind(io_input)
+    io_input=get_iounit()
+    open(unit=io_input,access='sequential',action='read',file=file_in,form='formatted',iostat=jerr,status='old')
+    if (jerr.ne.0) then
+       call err_exit('cannot open transfer input file')
+    end if
+
     read(UNIT=io_input,NML=transfer,iostat=jerr)
     if (jerr.ne.0.and.jerr.ne.-1) then
        write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
        call err_exit('reading namelist: transfer')
     end if
+    close(io_input)
 
     write(io_output,*) 'lopt_bias: ',lopt_bias
     write(io_output,*) 'freq_opt_bias: ',freq_opt_bias

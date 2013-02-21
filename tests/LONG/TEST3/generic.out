@@ -1,7 +1,4 @@
- lopt_bias:  F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F
- F
- freq_opt_bias:     10000000
- Program started at 2012-12-20 17:12:07.950
+ Program started at 2013-02-20 21:43:39.032
  Number of processors:            1
            0  threads per processor
  Random number seed:            0
@@ -51,6 +48,8 @@
  neighbor list cutoff (rcutnn):  0.000000000000000E+000 A
     rcut:   10.0000000000000      A
     kalp:  0.350000000000000     
+ lopt_bias:  F
+ freq_opt_bias:          500
  number of chains:        1000
  number of molecule types:           1
  number of chains of molecule type           1 :        1000
@@ -62,6 +61,7 @@
  CBMC inner cutoff (rcutin):   5.00000000000000       A
  AVBMC outer cutoff (rbsmax):   3.50000000000000       A
  AVBMC inner cutoff (rbsmin):   2.50000000000000       A
+ using linear interpolation for electrostatic interactions
  molecule type:           1
     number of units:           3
     number of units for CBMC growth:           3
@@ -91,8 +91,6 @@
     bead            3  beadtype          108  charge leader            3
        bead           3  bonded to bead           1
           bond type: 25 bond length:    1.000 k/2:      0.0
- 
- using linear interpolation for electrostatic interactions
  licell: F
  rintramax:  0.000000000000000E+000  A
  boxlink:           4
@@ -280,12 +278,12 @@
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -6667731.94074046     
+ coulombic energy  -6667731.94074045     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -5662975.92017789     
+ total energy      -5662975.92017787     
  
- box             1  initial v   =   -5662975.92017789     
+ box             1  initial v   =   -5662975.92017787     
  surf. tension :   box 1 =     -20.92707
  pressure check:   box 1 =    -183215.32
  
@@ -293,92 +291,92 @@
  
  Cycle   Total   Energy    Boxlength   Pressure  Molecules
  Box            1
- Type 1 bn  83526.  83179.  83362.  83039.  83287.  83494.
+ Type  1 bn  83526.  83179.  83362.  83039.  83287.  83494.
  max.displ.     0.3246    0.3213    0.3225    0.4056    0.4073    0.4086
  volume change:  bn =   113.0   bs =    48.0   max.displ. = 0.38731E+03
  Box            1
- Type 1 bn  83193.  83160.  83126.  83241.  83339.  83807.
+ Type  1 bn  83193.  83160.  83126.  83241.  83339.  83807.
  max.displ.     0.3220    0.3187    0.3200    0.4047    0.4065    0.4078
  volume change:  bn =   134.0   bs =    57.0   max.displ. = 0.41187E+03
   1000  451000 -0.5714E+07    30.967         0.01000
  Box            1
- Type 1 bn  83531.  83672.  83330.  83572.  82579.  83189.
+ Type  1 bn  83531.  83672.  83330.  83572.  82579.  83189.
  max.displ.     0.3217    0.3207    0.3208    0.4032    0.4054    0.4087
  volume change:  bn =   127.0   bs =    46.0   max.displ. = 0.37296E+03
  Box            1
- Type 1 bn  83232.  82722.  82899.  83727.  83535.  83758.
+ Type  1 bn  83232.  82722.  82899.  83727.  83535.  83758.
  max.displ.     0.3236    0.3203    0.3197    0.4050    0.4083    0.4055
  volume change:  bn =   127.0   bs =    56.0   max.displ. = 0.41113E+03
   2000  452000 -0.5690E+07    31.046         0.01000
  Box            1
- Type 1 bn  83262.  82622.  83484.  83324.  83635.  83546.
+ Type  1 bn  83262.  82622.  83484.  83324.  83635.  83546.
  max.displ.     0.3227    0.3216    0.3179    0.4036    0.4066    0.4031
  volume change:  bn =   127.0   bs =    42.0   max.displ. = 0.33991E+03
  Box            1
- Type 1 bn  82878.  83093.  83590.  83774.  83417.  83115.
+ Type  1 bn  82878.  83093.  83590.  83774.  83417.  83115.
  max.displ.     0.3247    0.3193    0.3180    0.4037    0.4065    0.4062
  volume change:  bn =   133.0   bs =    65.0   max.displ. = 0.41531E+03
   3000  453000 -0.5713E+07    31.030         0.01000
  Box            1
- Type 1 bn  83181.  83892.  83164.  83087.  83219.  83341.
+ Type  1 bn  83181.  83892.  83164.  83087.  83219.  83341.
  max.displ.     0.3212    0.3190    0.3187    0.4025    0.4048    0.4065
  volume change:  bn =   116.0   bs =    36.0   max.displ. = 0.32222E+03
  Box            1
- Type 1 bn  82647.  83352.  83389.  83655.  83557.  83266.
+ Type  1 bn  82647.  83352.  83389.  83655.  83557.  83266.
  max.displ.     0.3210    0.3199    0.3197    0.4062    0.4056    0.4065
  volume change:  bn =   134.0   bs =    73.0   max.displ. = 0.43885E+03
   4000  454000 -0.5650E+07    31.090         0.01000
  Box            1
- Type 1 bn  83166.  83644.  83221.  83498.  83535.  82817.
+ Type  1 bn  83166.  83644.  83221.  83498.  83535.  82817.
  max.displ.     0.3193    0.3194    0.3201    0.4060    0.4070    0.4054
  volume change:  bn =   119.0   bs =    45.0   max.displ. = 0.41487E+03
  Box            1
- Type 1 bn  83202.  83639.  82967.  83703.  83206.  83127.
+ Type  1 bn  83202.  83639.  82967.  83703.  83206.  83127.
  max.displ.     0.3198    0.3193    0.3196    0.4030    0.4052    0.4036
  volume change:  bn =   156.0   bs =    56.0   max.displ. = 0.37232E+03
   5000  455000 -0.5710E+07    31.042         0.01000
  Box            1
- Type 1 bn  83832.  83306.  83241.  83384.  83026.  83082.
+ Type  1 bn  83832.  83306.  83241.  83384.  83026.  83082.
  max.displ.     0.3195    0.3217    0.3202    0.4035    0.4082    0.4051
  volume change:  bn =   129.0   bs =    58.0   max.displ. = 0.41850E+03
  Box            1
- Type 1 bn  83563.  83404.  83689.  83356.  83041.  82821.
+ Type  1 bn  83563.  83404.  83689.  83356.  83041.  82821.
  max.displ.     0.3200    0.3204    0.3203    0.4005    0.4042    0.4034
  volume change:  bn =   126.0   bs =    46.0   max.displ. = 0.38197E+03
   6000  456000 -0.5651E+07    31.125         0.01000
  Box            1
- Type 1 bn  83882.  83209.  83026.  82892.  83469.  83396.
+ Type  1 bn  83882.  83209.  83026.  82892.  83469.  83396.
  max.displ.     0.3178    0.3225    0.3218    0.4030    0.4071    0.4053
  volume change:  bn =   126.0   bs =    55.0   max.displ. = 0.41683E+03
  Box            1
- Type 1 bn  83352.  82842.  83021.  83630.  83775.  83243.
+ Type  1 bn  83352.  82842.  83021.  83630.  83775.  83243.
  max.displ.     0.3202    0.3213    0.3204    0.4058    0.4054    0.4050
  volume change:  bn =   137.0   bs =    61.0   max.displ. = 0.46399E+03
   7000  457000 -0.5648E+07    31.107         0.01000
  Box            1
- Type 1 bn  83068.  82939.  83139.  83364.  83333.  84030.
+ Type  1 bn  83068.  82939.  83139.  83364.  83333.  84030.
  max.displ.     0.3226    0.3205    0.3195    0.4093    0.4086    0.4049
  volume change:  bn =   127.0   bs =    46.0   max.displ. = 0.42015E+03
  Box            1
- Type 1 bn  83586.  83175.  83160.  83460.  83128.  83363.
+ Type  1 bn  83586.  83175.  83160.  83460.  83128.  83363.
  max.displ.     0.3221    0.3226    0.3231    0.4090    0.4073    0.4048
  volume change:  bn =   128.0   bs =    44.0   max.displ. = 0.36106E+03
   8000  458000 -0.5670E+07    31.103         0.01000
  Box            1
- Type 1 bn  83776.  83614.  83077.  83162.  83036.  83235.
+ Type  1 bn  83776.  83614.  83077.  83162.  83036.  83235.
  max.displ.     0.3218    0.3199    0.3186    0.4065    0.4072    0.4047
  volume change:  bn =   100.0   bs =    31.0   max.displ. = 0.27982E+03
  Box            1
- Type 1 bn  83127.  83203.  82975.  83635.  83467.  83464.
+ Type  1 bn  83127.  83203.  82975.  83635.  83467.  83464.
  max.displ.     0.3214    0.3224    0.3183    0.4072    0.4077    0.4042
  volume change:  bn =   129.0   bs =    62.0   max.displ. = 0.33622E+03
   9000  459000 -0.5649E+07    31.144         0.01000
  Box            1
- Type 1 bn  83562.  83136.  83170.  83252.  83494.  83274.
+ Type  1 bn  83562.  83136.  83170.  83252.  83494.  83274.
  max.displ.     0.3219    0.3225    0.3182    0.4076    0.4089    0.4034
  volume change:  bn =   112.0   bs =    42.0   max.displ. = 0.31521E+03
  Box            1
- Type 1 bn  83590.  83661.  83184.  83440.  82893.  83120.
+ Type  1 bn  83590.  83661.  83184.  83440.  82893.  83120.
  max.displ.     0.3188    0.3175    0.3204    0.4044    0.4060    0.4017
  volume change:  bn =   112.0   bs =    56.0   max.displ. = 0.39401E+03
  10000  460000 -0.5690E+07    31.057         0.01000
@@ -416,35 +414,35 @@ number of times move out:          0.0  accepted=     0.0
  pair typ =           1
  moltyps =            2  and           3
 between box  1 and  2   uattempts =         0.0  attempts =      0.0  accepted =     0.0
-
+ 
  ### Charge Fluctuation  ###
  
  
  ### Expanded Ensemble Move  ###
  
- 
+
 New Biasing Potential
 
-molecule  1:   0.00000000    
-
+molecule  1:   0.00000000     
+ 
  sumup control
  number of chains        1000
  number of chains of type           1        1000
- inter lj energy    980214.514524668     
+ inter lj energy    980214.514524669     
  intra lj energy   0.000000000000000E+000
  Tail correction   -21996.3907379940     
  bond vibration    0.000000000000000E+000
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -6670333.67622617     
+ coulombic energy  -6670333.67622632     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -5690119.16170151     
+ total energy      -5690119.16170165     
  
- vstart       =     -5662975.9201778863
- vend         =     -5690119.1617015060
- vbox         =     -5690119.1617017556
+ vstart       =     -5662975.9201778714
+ vend         =     -5690119.1617016532
+ vbox         =     -5690119.1617003446
  
  Averages and fluctuations                            Box 1
  
@@ -480,7 +478,7 @@ molecule  1:   0.00000000
     1    1-20994.17983     0.00000     0.00000     0.00000-13340.66735
  specific density    box   1 =  0.99933E+00 0.38596E-02 0.12865E-02
  system volume       box   1 =  0.29938E+05 0.11542E+03 0.38472E+02
- pressure            box   1 =      1433.18    37987.67    12662.56
+ pressure            box   1 =   1433.2      37988.      12663.    
  surface tension     box   1 =    -37.13530   139.79422    46.59807
  
  Total energy   box   1 =   -0.56733E+07   0.11129E+05   0.37097E+04
@@ -497,9 +495,9 @@ molecule  1:   0.00000000
  Enthalpy Inst.[kJ/mol] for box  1 =    -47.1478      0.6340      0.2113
  Enthalpy Ext. [kJ/mol] for box  1 =    -47.1689      0.0915      0.0305
  
- Cp residual(J/Kmol) =   47.7992178340086     
-  H2=   32184508606802.6     
-  H=  -5673093.61773858     
+ Cp residual(J/Kmol) =   47.7992178733429     
+  H2=   32184508606798.3     
+  H=  -5673093.61773816     
  chemical potential  itype   1 box   1 =        0.000       0.000       0.000
  mean sete length    itype   1 box   1 =        1.000       0.000       0.000
  number density      itype   1 box   1 =  0.33404E+02 0.12901E+00 0.43004E-01
@@ -519,4 +517,4 @@ molecule  1:   0.00000000
    8  -0.566E+07   0.998E+00  -0.479E+05   0.262E+02   0.100E+01
    9  -0.566E+07   0.993E+00  -0.314E+05  -0.381E+02   0.100E+01
   10  -0.568E+07   0.998E+00   0.511E+05   0.733E+02   0.100E+01
- Program ended at 2012-12-20 18:04:58.201
+ Program ended at 2013-02-20 23:21:43.315

@@ -1,7 +1,4 @@
- lopt_bias:  F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F
- F
- freq_opt_bias:     10000000
- Program started at 2012-12-20 19:17:27.334
+ Program started at 2013-02-20 21:19:18.275
  Number of processors:            1
            0  threads per processor
  Random number seed:            0
@@ -50,6 +47,8 @@
     lrect: F
  neighbor list cutoff (rcutnn):  0.000000000000000E+000 A
     rcut:   6.50000000000000      A
+ lopt_bias:  F F F
+ freq_opt_bias:          500
  number of chains:         360
  number of molecule types:           3
  number of chains of molecule type           1 :          60
@@ -379,7 +378,7 @@
  number of chains of type           1          60
  number of chains of type           2         180
  number of chains of type           3         120
- inter lj energy   -35375629.7884057     
+ inter lj energy   -35375629.7883971     
  intra lj energy   0.000000000000000E+000
  bond vibration    0.000000000000000E+000
  bond bending      0.000000000000000E+000
@@ -389,9 +388,9 @@
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
  3-body garo        561334.679490283     
- total energy      -34814295.1089154     
+ total energy      -34814295.1089069     
  
- box             1  initial v   =   -34814295.1089154     
+ box             1  initial v   =   -34814295.1089069     
  surf. tension :   box 1 =   -9580.26910
  pressure check:   box 1 = -118081445.36
  
@@ -478,25 +477,25 @@ number of times move out:          0.0  accepted=     0.0
  moltyps =            1  and           4
 between box  1 and  1   uattempts =         0.0  attempts =      0.0  accepted =     0.0
 between box  2 and  2   uattempts =         0.0  attempts =      0.0  accepted =     0.0
-
+ 
  ### Charge Fluctuation  ###
  
  
  ### Expanded Ensemble Move  ###
  
- 
+
 New Biasing Potential
 
 molecule  1:   0.00000000    
 molecule  2:   0.00000000    
-molecule  3:   0.00000000    
-
+molecule  3:   0.00000000     
+ 
  sumup control
  number of chains         360
  number of chains of type           1          60
  number of chains of type           2         180
  number of chains of type           3         120
- inter lj energy   -35646622.9618839     
+ inter lj energy   -35646622.9618752     
  intra lj energy   0.000000000000000E+000
  bond vibration    0.000000000000000E+000
  bond bending      0.000000000000000E+000
@@ -506,11 +505,11 @@ molecule  3:   0.00000000
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
  3-body garo        541864.984237892     
- total energy      -35104757.9776460     
+ total energy      -35104757.9776373     
  
- vstart       =    -34814295.1089154407
- vend         =    -35104757.9776459560
- vbox         =    -35104757.9776471704
+ vstart       =    -34814295.1089068577
+ vend         =    -35104757.9776372984
+ vbox         =    -35104757.9776382521
  
  Averages and fluctuations                            Box 1
  
@@ -575,9 +574,9 @@ molecule  3:   0.00000000
  Enthalpy Inst.[kJ/mol] for box  1 =      0.0000      0.0000      0.0000
  Enthalpy Ext. [kJ/mol] for box  1 =      0.0000      0.0000      0.0000
  
- Cp residual(J/Kmol) =   11.3350352669075     
-  H2=  1.019023184027462E+015
-  H=  -31921865.7897512     
+ Cp residual(J/Kmol) =   11.3350352799789     
+  H2=  1.019023184026922E+015
+  H=  -31921865.7897424     
  chemical potential  itype   1 box   1 =        0.000       0.000       0.000
  chemical potential  itype   2 box   1 =        0.000       0.000       0.000
  chemical potential  itype   3 box   1 =        0.000       0.000       0.000
@@ -605,4 +604,4 @@ molecule  3:   0.00000000
    8  -0.350E+08   0.187E+01   0.000E+00   0.000E+00   0.167E+00   0.500E+00   0.333E+00
    9  -0.349E+08   0.184E+01   0.000E+00   0.000E+00   0.167E+00   0.500E+00   0.333E+00
   10  -0.350E+08   0.185E+01   0.000E+00   0.000E+00   0.167E+00   0.500E+00   0.333E+00
- Program ended at 2012-12-20 19:17:47.926
+ Program ended at 2013-02-20 21:19:46.826

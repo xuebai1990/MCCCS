@@ -3,9 +3,6 @@
       use sim_system
       implicit none
 
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'connect.inc'
       integer,intent(in)::io_input,imolty
       integer::i,j,k,n,iunit,dum,iu,countbend,counttor,atype,btype,ctype,dtype,tortype,bendtype ,ju,ku,nu,vibtype,countvib
 

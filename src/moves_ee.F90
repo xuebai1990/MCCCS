@@ -10,22 +10,14 @@ MODULE moves_ee
   public::eesetup,eemove,ee_index_swap,expand,read_expand,init_ee,output_ee_stats
 
 ! EXPAND.INC
-  real,public::epsil(ntmax,numax,100),sigm(ntmax,numax,100)
-  real::bnexpc(ntmax,nbxmax),bsexpc(ntmax,nbxmax),qcharge(ntmax,numax,100),eta(nbxmax,ntmax,20)
-  integer,public::numcoeff(ntmax)
+  real,allocatable,public::epsil(:,:,:),sigm(:,:,:)
+  real,allocatable::qcharge(:,:,:),bnexpc(:,:),bsexpc(:,:),eta(:,:,:)
+  integer,allocatable,public::numcoeff(:)
 
 contains
 !> \brief sets up EE. contains some EE stuff, see eemove.f for more details
   subroutine eesetup
     use energy_pairwise,only:type_2body
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'coord2.inc'
-!$$$      include 'eepar.inc'
-!$$$      include 'inputdata.inc'
-!$$$      include 'system.inc'
-!$$$      include 'nsix.inc'
-!$$$      include 'poten.inc'
 
       integer::i,m,j,ntii,ntij,ntjj,ntjjs,ii,jj,ntijs ,imolty,isv,cnt
 
@@ -270,27 +262,9 @@ contains
   subroutine eemove
       use transfer_swap,only:swap
       use sim_cell
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'conver.inc'
-!$$$      include 'coord2.inc'
-!$$$      include 'system.inc'
-!$$$      include 'ensemble.inc'
-!$$$      include 'cbmc.inc'
-!$$$      include 'rosen.inc'
-!$$$      include 'boltzmann.inc'
-!$$$      include 'external.inc'
-!$$$      include 'inputdata.inc'
-!$$$      include 'ewaldsum.inc'
-!$$$      include 'poten.inc'
-!$$$      include 'fepsi.inc'
-!$$$      include 'clusterbias.inc'
-!$$$      include 'neigh.inc'
-!$$$      include 'cell.inc'
-!$$$      include 'eepar.inc'
 
       logical::ovrlap
-      integer::i,ibox,iunit,imolty,imolty1,j ,idummy(nmax)
+      integer::i,ibox,iunit,imolty,imolty1,j,idummy(nmax)
       real::dum,vrecipn,vrecipo,vnew,vold,vintern ,vintero,vintran,vintrao,velectn,velecto,vewaldn,vewaldo,vextn ,vexto,deltv,deltvb,wdeltvb,vtailn,vtailo
 
 ! --------------------------------------------------------------------
@@ -502,9 +476,6 @@ contains
 ! swaps the tagged index for ee moves
 !
   subroutine ee_index_swap
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'eepar.inc'
 
       integer::imolty,ibox,ibox1
       real::accr
@@ -559,15 +530,6 @@ contains
   subroutine expand
     use energy_kspace,only:recip
     use energy_pairwise,only:coru
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'coord2.inc'
-!$$$      include 'system.inc'
-!$$$      include 'ensemble.inc'
-!$$$      include 'bnbsma.inc'
-!$$$      include 'inputdata.inc'
-!$$$      include 'expand.inc'
-!$$$      include 'poten.inc'
 
       logical::ovrlap
       integer::i,ibox,iunit,flagon,itype,j,imolty,icbu ,ic,imt,jmt,itype2,disp
@@ -769,8 +731,16 @@ contains
   end subroutine read_expand
 
   subroutine init_ee
+    integer::jerr
+    allocate(epsil(ntmax,numax,100),sigm(ntmax,numax,100),qcharge(ntmax,numax,100),bnexpc(ntmax,nbxmax),bsexpc(ntmax,nbxmax),eta(nbxmax,ntmax,20),numcoeff(ntmax),stat=jerr)
+    if (jerr.ne.0) then
+       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+       call err_exit('init_ee: allocation failed')
+    end if
     bsexpc = 0.0d0
     bnexpc = 0.0d0
+
+    call read_expand()
   end subroutine init_ee
 
   subroutine output_ee_stats(io_output)

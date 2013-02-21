@@ -13,7 +13,7 @@ module transfer_swatch
   public::swatch,init_swatch,output_swatch_stats
 
 ! SWTCMOVE.INC
-  real::bnswat(npamax,npabmax),bnswat_empty(npamax,npabmax),bsswat(npamax,npabmax) !< accumulators for swatch performance
+  real,allocatable::bnswat(:,:),bnswat_empty(:,:),bsswat(:,:) !< accumulators for swatch performance
 contains
 !      **********************************************************
 !    *** Added intrabox move for two particles within one box   ***
@@ -24,19 +24,6 @@ contains
 !      **********************************************************
   subroutine swatch
     use sim_particle,only:update_neighbor_list
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'coord2.inc'
-!$$$      include 'system.inc'
-!$$$      include 'external.inc'
-!$$$      include 'zeopoten.inc'
-!$$$      include 'ensemble.inc'
-!$$$      include 'cbmc.inc'
-!$$$      include 'inputdata.inc'
-!$$$      include 'rosen.inc'
-!$$$      include 'swtcmove.inc'
-!$$$      include 'ewaldsum.inc'
-!$$$      include 'cell.inc'
 
       logical::lempty,lterm
 
@@ -1566,6 +1553,13 @@ contains
   end subroutine swatch
 
   subroutine init_swatch
+    integer::jerr
+    allocate(bnswat(npamax,npabmax),bnswat_empty(npamax,npabmax),bsswat(npamax,npabmax),stat=jerr)
+    if (jerr.ne.0) then
+       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+       call err_exit('init_swatch: allocation failed')
+    end if
+
     bnswat = 0.0d0
     bsswat = 0.0d0
     bnswat_empty = 0.0d0

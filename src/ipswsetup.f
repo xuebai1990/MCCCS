@@ -6,12 +6,6 @@
       use sim_system
       use sim_cell
       implicit none
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'ipswpar.inc'
-!$$$      include 'inputdata.inc'
-!$$$      include 'system.inc'
-!$$$      include 'cell.inc'
 
       integer::i,j,k,tnw,ibox
 

@@ -23,7 +23,7 @@ class simpleRunTest(unittest.TestCase):
             os.mkdir(os.path.abspath(os.path.join(self.testRoot,"..")))
         #if not os.path.exists(self.testRoot):
         #    os.mkdir(self.testRoot)
-        commands.getoutput('cp -a "'+os.path.join(self.srcRoot,"tests","SHORT",self.testName)+'" '+self.testRoot)
+        commands.getoutput('cp -rL "'+os.path.join(self.srcRoot,"tests","SHORT",self.testName)+'" '+self.testRoot)
 
     def tearDown(self):pass
 

@@ -15,17 +15,6 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
   use energy_sami,only:ljsami,ljmuir
   implicit none
 
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'system.inc'
-!$$$      include 'poten.inc'
-!$$$      include 'conver.inc' 
-!$$$      include 'external.inc'
-!$$$      include 'connect.inc'
-!$$$      include 'fepsi.inc'
-!$$$      include 'inputdata.inc'
-!$$$      include 'eepar.inc'
-
       integer::i, imolty, ii, j, jmolty, jj, ntii, ntjj , ntij,nnn,nvirial,ip,itemp,iii
       real::vinter,rminsq,rxui,ryui,rzui,rxuij ,ryuij,rzuij,rijsq,sr2, sr6 ,velect,mayer
 

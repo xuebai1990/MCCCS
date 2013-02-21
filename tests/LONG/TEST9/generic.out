@@ -1,7 +1,4 @@
- lopt_bias:  F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F
- F
- freq_opt_bias:     10000000
- Program started at 2012-12-20 15:09:05.293
+ Program started at 2013-02-20 21:43:39.936
  Number of processors:            1
            0  threads per processor
  Random number seed:            0
@@ -50,11 +47,13 @@
     lrect: F
  neighbor list cutoff (rcutnn):  0.000000000000000E+000 A
     rcut:   14.0000000000000      A
+ lopt_bias:  F
+ freq_opt_bias:          500
  number of chains:         300
  number of molecule types:           1
  number of chains of molecule type           1 :         300
  Lorentz-Berthelot combining rules apply
-    lmixlb: T  lmixjo: F  ltab: F
+    lmixlb: T  lmixjo: F
  number of special combining parameters:           0
  minimum cutoff (rmin):   1.20000000000000       A
  softcut:   100.000000000000     
@@ -806,12 +805,12 @@ cell angle gamma:       120.341
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -542380.823334683     
+ coulombic energy  -542380.823334673     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -3898345.99483978     
+ total energy      -3898345.99483977     
  
- box             1  initial v   =   -3898345.99483978     
+ box             1  initial v   =   -3898345.99483977     
  surf. tension :   box 1 =      58.92130
  pressure check:   box 1 =     -22255.98
  
@@ -822,7 +821,7 @@ cell angle gamma:       120.341
    200   35200 -0.3901E+07    45.221         0.0 300
    300   35300 -0.3872E+07    45.256         0.0 300
  Box            1
- Type 1 bn  22110.  21705.  21920.  18171.  17820.  18091.
+ Type  1 bn  22110.  21705.  21920.  18171.  17820.  18091.
  max.displ.     0.2928    0.2913    0.1899    0.1049    0.1023    0.1207
    400   35400 -0.3892E+07    45.278         0.0 300
  
@@ -873,11 +872,11 @@ between box  1 and  2   uattempts =         0.0  attempts =      0.0  accepted =
  
  ### Expanded Ensemble Move  ###
  
- 
+
 New Biasing Potential
 
-molecule  1:   0.00000000    
-
+molecule  1:   0.00000000     
+ 
  sumup control
  number of chains         300
  number of chains of type           1         300
@@ -888,14 +887,14 @@ molecule  1:   0.00000000
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -538917.522696076     
+ coulombic energy  -538917.522696086     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -3891547.41329594     
+ total energy      -3891547.41329595     
  
- vstart       =     -3898345.9948397814
- vend         =     -3891547.4132959363
- vbox         =     -3891547.4132963098
+ vstart       =     -3898345.9948397721
+ vend         =     -3891547.4132959475
+ vbox         =     -3891547.4132963629
  
  Averages and fluctuations                            Box 1
  
@@ -934,7 +933,7 @@ molecule  1:   0.00000000
     1    1     0.00000     0.00000     0.00000     0.00000     0.00000
  specific density    box   1 =  0.19300E+01 0.34576E-02 0.19962E-02
  system volume       box   1 =  0.66636E+05 0.11932E+03 0.68889E+02
- pressure            box   1 =    -11580.71    10541.31     6086.03
+ pressure            box   1 =  -11581.      10541.      6086.0    
  surface tension     box   1 =     28.74246    36.12179    20.85493
  
  Total energy   box   1 =   -0.38930E+07   0.54149E+04   0.31263E+04
@@ -951,7 +950,7 @@ molecule  1:   0.00000000
  Enthalpy Inst.[kJ/mol] for box  1 =   -109.4447      1.3189      0.7615
  Enthalpy Ext. [kJ/mol] for box  1 =   -107.8730      0.1466      0.0847
  
- Cp residual(J/Kmol) =   25.3913412848743     
+ Cp residual(J/Kmol) =   25.3913412743002     
   H2=   15150726285406.9     
   H=  -3892383.14597883     
  chemical potential  itype   1 box   1 =        0.000       0.000       0.000
@@ -967,4 +966,4 @@ molecule  1:   0.00000000
    2  -0.390E+07   0.193E+01  -0.414E+04   0.634E+02   0.100E+01
    3  -0.389E+07   0.193E+01  -0.775E+04   0.552E+02   0.100E+01
    4  -0.389E+07   0.192E+01  -0.297E+05   0.251E+02   0.100E+01
- Program ended at 2012-12-20 15:57:06.649
+ Program ended at 2013-02-20 22:35:33.265

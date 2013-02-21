@@ -13,8 +13,8 @@ module transfer_swap
   save
   public::swap,init_swap,cnt,output_swap_stats
 
-  real::bsswap(ntmax,npabmax,nbxmax*2),bnswap(ntmax,npabmax,nbxmax*2),bnswap_in(ntmax,2),bnswap_out(ntmax,2)
-  real,public::acchem(nbxmax,ntmax),bnchem(nbxmax,ntmax)
+  real,allocatable,public::acchem(:,:),bnchem(:,:)
+  real,allocatable::bsswap(:,:,:),bnswap(:,:,:),bnswap_in(:,:),bnswap_out(:,:)
   integer::cnt_wf1(0:6,0:6,4),cnt_wf2(0:6,0:6,4),cnt_wra1(1000,4),cnt_wra2(1000,4)
 
 contains
@@ -27,98 +27,77 @@ contains
 !    ********************************************************************
   subroutine swap
     use sim_particle,only:update_neighbor_list
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'conver.inc'
-!$$$      include 'coord2.inc'
-!$$$      include 'system.inc'
-!$$$      include 'ensemble.inc'
-!$$$      include 'zeopoten.inc'
-!$$$      include 'cbmc.inc'
-!$$$      include 'rosen.inc'
-!$$$      include 'boltzmann.inc'
-!$$$      include 'external.inc'
-!$$$      include 'connect.inc'
-!$$$      include 'inputdata.inc'
-!$$$      include 'ewaldsum.inc'
-!$$$      include 'poten.inc'
-!$$$      include 'fepsi.inc'
-!$$$      include 'clusterbias.inc'
-!$$$      include 'neigh.inc'
-!$$$      include 'cell.inc'
-!$$$      include 'eepar.inc'
 
-      logical::ovrlap,lterm,lnew,lempty,ldone,ltors,lovrh,lfavor, laccept,lswapinter,lrem_out,lins_in,lneighij,linsk_in, lremk_in ,lfixnow
+    logical::ovrlap,lterm,lnew,lempty,ldone,ltors,lovrh,lfavor, laccept,lswapinter,lrem_out,lins_in,lneighij,linsk_in, lremk_in ,lfixnow
 
 
-      integer::boxins,boxrem,imol,ichoi,ip,iwalk,idum ,iins1,imolty1
-      integer::istt,iett,itype,ipair,ipairb,beg
+    integer::boxins,boxrem,imol,ichoi,ip,iwalk,idum ,iins1,imolty1
+    integer::istt,iett,itype,ipair,ipairb,beg
 
-      integer::iutry,icbu,ifrom,irem,iins,glist,findex ,iii,j,ibox,iunit,ic,pointp,imolty,imt,jmt,igrow ,pointp2,jins ,jmolty,neighj_num,neighk_num ,joffset,koffset,kmolty,kins,target,neigh_old
+    integer::iutry,icbu,ifrom,irem,iins,glist,findex ,iii,j,ibox,iunit,ic,pointp,imolty,imt,jmt,igrow ,pointp2,jins ,jmolty,neighj_num,neighk_num ,joffset,koffset,kmolty,kins,target,neigh_old
 
-      dimension glist(numax)
+    dimension glist(numax)
 
-      real::sx,sy,sz
+    real::sx,sy,sz
 
-      real::v,vintra,vinter,vext,velect,vtorold ,vtornew,vewald,vflucq,delen,deleo,rpair
-      real::vnewflucq,voldflucq,qion,ctorfo ,ctorfn
-      dimension qion(numax)
-      real::rxuold,ryuold,rzuold
-      dimension rxuold(numax),ryuold(numax),rzuold(numax)
-      real::rmol,rbf,bsum
-      real::waddnew,waddold
+    real::v,vintra,vinter,vext,velect,vtorold ,vtornew,vewald,vflucq,delen,deleo,rpair
+    real::vnewflucq,voldflucq,qion,ctorfo ,ctorfn
+    dimension qion(numax)
+    real::rxuold,ryuold,rzuold
+    dimension rxuold(numax),ryuold(numax),rzuold(numax)
+    real::rmol,rbf,bsum
+    real::waddnew,waddold
 
-      real::total_NBE,vtgn
-      real::vbendn,vvibn
+    real::total_NBE,vtgn
+    real::vbendn,vvibn
 
-      real::v1insext,v1remext,v1ins,w1ins,v1rem ,w1rem,v1insint,v1remint,v1insewd,v1remewd,wnlog,wolog,wdlog ,wratio,vinsta,vremta,volins,volrem,rho,arg,v1inselc,v1remelc
-      real::rvol,x,y,z,rijsq,wbias_ins,wbias_rem ,r,xi1,xi2,xisq
-      real::vrecipn,vrecipo,vdum,whins,whrem
-      real::rxuh,ryuh,rzuh,delenh,vtrhext ,vtrhintra,vtrhinter,vtrhelect,vtrhewald,vtrhtg,bfach
+    real::v1insext,v1remext,v1ins,w1ins,v1rem ,w1rem,v1insint,v1remint,v1insewd,v1remewd,wnlog,wolog,wdlog ,wratio,vinsta,vremta,volins,volrem,rho,arg,v1inselc,v1remelc
+    real::rvol,x,y,z,rijsq,wbias_ins,wbias_rem ,r,xi1,xi2,xisq
+    real::vrecipn,vrecipo,vdum,whins,whrem
+    real::rxuh,ryuh,rzuh,delenh,vtrhext ,vtrhintra,vtrhinter,vtrhelect,vtrhewald,vtrhtg,bfach
 
-      dimension bfach(nchmax),delenh(nchmax),vtrhinter(nchmax) ,vtrhext(nchmax),vtrhintra(nchmax),vtrhelect(nchmax) ,vtrhewald(nchmax),vtrhtg(nchmax)
+    dimension bfach(nchmax),delenh(nchmax),vtrhinter(nchmax) ,vtrhext(nchmax),vtrhintra(nchmax),vtrhelect(nchmax) ,vtrhewald(nchmax),vtrhtg(nchmax)
 
-      dimension lovrh(nchmax)
-      dimension rxuh(numax,nchmax),ryuh(numax,nchmax) ,rzuh(numax ,nchmax)
+    dimension lovrh(nchmax)
+    dimension rxuh(numax,nchmax),ryuh(numax,nchmax) ,rzuh(numax ,nchmax)
 
 ! --------------------------------------------------------------------
 
 !      write(io_output,*) 'START SWAP'
 !      write(11,*) '1:',neigh_cnt(18)
 
-      lempty = .false.
-      lfixnow = .false.
-      lins_in = .false.
-      linsk_in = .false.
+    lempty = .false.
+    lfixnow = .false.
+    lins_in = .false.
+    linsk_in = .false.
 
-
-      if (lexpee.and.leemove) then
-         imolty = ee_moltyp(nstate)
-         imolty1 = imolty
-         irem = eeirem
-         pointp = eepointp
-         boxrem = boxrem1
-         boxins = boxins1
-         if (boxins.eq.boxrem) then
-            lswapinter = .false.
-         else
-            lswapinter = .true.
-         end if
+    if (lexpee.and.leemove) then
+       imolty = ee_moltyp(nstate)
+       imolty1 = imolty
+       irem = eeirem
+       pointp = eepointp
+       boxrem = boxrem1
+       boxins = boxins1
+       if (boxins.eq.boxrem) then
+          lswapinter = .false.
+       else
+          lswapinter = .true.
+       end if
 !       write(io_output,*) 'ee val', imolty, irem, pointp, boxrem, boxins
-      else
-         wee_ratio = 1.0d0
+    else
+       wee_ratio = 1.0d0
 
 ! --- select a molecule typ with probabilities given in pmswmt
-         rmol = random()
-         do imol = 1, nmolty
-            if ( rmol .lt. pmswmt(imol) ) then
-               imolty = imol
-               exit
-            end if
-         end do
+       rmol = random()
+       do imol = 1, nmolty
+          if ( rmol .lt. pmswmt(imol) ) then
+             imolty = imol
+             exit
+          end if
+       end do
 
-         if (temtyp(imolty).eq.0) return
-         imolty1 = imolty
+       if (temtyp(imolty).eq.0) return
+       imolty1 = imolty
 
 ! ---    select a box given in pmswatyp
          if ( nswapb(imolty) .gt. 1 ) then
@@ -1783,6 +1762,13 @@ contains
   end subroutine swap
 
   subroutine init_swap
+    integer::jerr
+    allocate(acchem(nbxmax,ntmax),bnchem(nbxmax,ntmax),bsswap(ntmax,npabmax,nbxmax*2),bnswap(ntmax,npabmax,nbxmax*2),bnswap_in(ntmax,2),bnswap_out(ntmax,2),stat=jerr)
+    if (jerr.ne.0) then
+       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+       call err_exit('init_swap: allocation failed')
+    end if
+
     bnswap=0.0_double_precision
     bsswap=0.0_double_precision
     bnswap_in=0.0_double_precision

@@ -10,14 +10,8 @@ subroutine charge( i, qion, vflucq, vewald )
   use util_math,only:erfunc
   use sim_system
   use energy_kspace,only:calp
+  use energy_pairwise,only:type_2body
   implicit none
-
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'poten.inc'
-!$$$      include 'conver.inc'
-!$$$      include 'ewaldsum.inc'
-!$$$      include 'connect.inc'      
 
       integer::i,imolty,iunit,ii,jj,ntii,ntjj,ntij,ibox
       real::vflucq,qion(numax),qqii,vewald,rxui ,ryui,rzui,rxuij,ryuij,rzuij,rij
@@ -41,7 +35,7 @@ subroutine charge( i, qion, vflucq, vewald )
                vflucq = vflucq + xiq(ntii)*qqii + jayself(ntii)*qqii*qqii
             else
                ntjj = ntype(imolty,jj)
-               ntij = (ntii-1)*nntype + ntjj
+               ntij = type_2body(ntii,ntjj)
                
                vflucq = vflucq + jayq(ntij)*qqii*qion(jj)
             end if

@@ -21,9 +21,6 @@ contains
 !     ***  parameters are defined in suijtab.f  KE ANDERSON      ***
 !     **************************************************************
   function garofalini(rijsq,ntij,qa,qb,aa,bb)
-!$$$      include 'control.inc'
-!$$$      include 'garofalini.inc'
-!$$$      include 'poten.inc'
 
       real::rijsq,rij,hterm,coul,qa,qb
       real::hterma,garofalini
@@ -61,9 +58,6 @@ contains
   end function garofalini
 
   subroutine vthreebody(vthree)
-!$$$      include "control.inc"
-!$$$      include "coord.inc"
-!$$$      include 'garofalini.inc'
 
       integer::ntang,nta,ntb,tri,i,j,k
       real::vthree,vthreea,thetac,g,p
@@ -159,10 +153,6 @@ contains
 
 !**************************************************************************
   subroutine triad
-!$$$      include "control.inc"
-!$$$      include "coord.inc"
-!$$$      include "garofalini.inc"
-!$$$      include "neigh.inc"
 
       integer::i,j,k,ptr,ptr2
 
@@ -210,10 +200,6 @@ contains
 
 !******************************************************************
   subroutine triad_en(i,vthree,cnt,ni,nrij,nxi,nyi,nzi,lupdate)
-!$$$      include "control.inc"
-!$$$      include "coord.inc"
-!$$$      include "garofalini.inc"
-!$$$      include "neigh.inc"
 
       integer::i,j,k,m,imolty,jmolty,kmolty,mmolty,atomj,atomk,atomm
       integer::nta,ntb,ntang,cnt,ni(maxneigh),temp_cnt,itemp,number(nmax)

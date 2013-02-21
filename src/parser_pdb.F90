@@ -43,11 +43,10 @@ MODULE parser_pdb
 
 CONTAINS
 
-  SUBROUTINE readPDB(filePDB,zeo,lunitcell,lhere,ztype,zcell,zunit)
+  SUBROUTINE readPDB(filePDB,zeo,lunitcell,ztype,zcell,zunit)
     character(LEN=*),intent(in)::filePDB
     type(MoleculeType),intent(out)::zeo
     logical,allocatable,intent(out)::lunitcell(:)
-    logical,intent(out)::lhere(:)
     type(ZeoliteBeadType),intent(out)::ztype
     type(CellMaskType),intent(out)::zcell ! the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
     type(ZeoliteUnitCellGridType),intent(out)::zunit
@@ -74,7 +73,6 @@ CONTAINS
        CALL readLine(IOPDB,line,.false.,jerr)
        IF(jerr.ne.0) call err_exit('wrong PDB file format')
        read(line(2:),*) ztype%name(i),ztype%type(i),ztype%radiisq(i)
-       lhere(ztype%type(i))=.true.
        ztype%radiisq(i)=ztype%radiisq(i)*ztype%radiisq(i)
        ztype%num(i)=0
     end do

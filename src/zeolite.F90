@@ -61,9 +61,9 @@ contains
     end do
   end subroutine initZeo
 
-  subroutine zeocoord(file_in,lhere)
+  subroutine zeocoord(file_in)
+    use util_search,only:indexOf
     character(LEN=*),intent(in)::file_in
-    logical,intent(inout)::lhere(:)
 
     integer::io_input,jerr
 
@@ -80,20 +80,25 @@ contains
     end if
     close(io_input)
 
+    volume_probe=indexOf(atoms,volume_probe)
+    area_probe=indexOf(atoms,area_probe)
+    if ((lpore_volume.and.volume_probe.eq.0).or.(lsurface_area.and.area_probe.eq.0)) then
+       write(io_output,*) 'ERROR in ',TRIM(__FILE__),':',__LINE__
+       call err_exit('zeocoord: atom parameters for volume_probe or area_probe undefined')
+    end if
+       
     call initZeo()
 
     if (index(file_zeocoord,'.cif').gt.0) then
-       call readCIF(file_zeocoord,zeo,lunitcell,lhere,ztype,zcell,zunit)
+       call readCIF(file_zeocoord,zeo,lunitcell,ztype,zcell,zunit)
     else if (index(file_zeocoord,'.pdb').gt.0) then
-       call readPDB(file_zeocoord,zeo,lunitcell,lhere,ztype,zcell,zunit)
+       call readPDB(file_zeocoord,zeo,lunitcell,ztype,zcell,zunit)
     else if (index(file_zeocoord,'.cssr').gt.0) then
-       call readCSSR(file_zeocoord,zeo,lunitcell,lhere,ztype,zcell,zunit)
+       call readCSSR(file_zeocoord,zeo,lunitcell,ztype,zcell,zunit)
     end if
-
   end subroutine zeocoord
 
-  subroutine addAllBeadTypes(lhere)
-    logical,intent(inout)::lhere(:)
+  subroutine addAllBeadTypes()
     integer::imol,iunit,igtype,i,idi,idj,ntij,jerr,list(nntype)
     real::sig6
 
@@ -102,14 +107,12 @@ contains
        nmolty=nmolty+1
        nunit(nmolty)=1
        ntype(nmolty,1)=volume_probe
-       lhere(volume_probe)=.true.
     end if
 
     if (lsurface_area) then
        nmolty=nmolty+1
        nunit(nmolty)=1
        ntype(nmolty,1)=area_probe
-       lhere(area_probe)=.true.
     end if
 
     zpot%ntype=0
@@ -157,12 +160,20 @@ contains
     zpot%param(1:2,:,:)=4.*zpot%param(1:2,:,:)
   end subroutine addAllBeadTypes
 
-  subroutine suzeo(lhere)
-    logical,intent(inout)::lhere(:)
+  subroutine suzeo()
+    use util_search,only:indexOf
     character(LEN=default_string_length)::atom
     integer::io_ztb,igtype,idi,idj,jerr,sw,i,j,k,oldi,oldj,oldk,ngridtmp(3),zntypetmp
     real::wzeo,zunittmp(3),zangtmp(3),rcuttmp,rci3,rci9,rho
     logical::lewaldtmp,ltailczeotmp,lshifttmp
+
+    do i=1,ztype%ntype
+       ztype%type(i)=indexOf(atoms,ztype%type(i))
+       if (ztype%type(i).eq.0) then
+          write(io_output,*) 'ERROR in ',TRIM(__FILE__),':',__LINE__
+          call err_exit('zeocoord: type '//integer_to_string(i)//' undefined: '//ztype%name(i))
+       end if
+    end do
 
     !     === Calculate zeolite density
     wzeo=dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype)))
@@ -183,7 +194,7 @@ contains
 
     ! === tabulation of the zeolite potential
     if (lzgrid) then
-       call addAllBeadTypes(lhere)
+       call addAllBeadTypes()
        call setpbc(boxZeo)
 
        nlayermax=0
@@ -589,10 +600,6 @@ contains
 !> See O. Talu and A.L. Myers, "Molecular simulation of adsorption: Gibbs dividing surface and comparison with experiment", AICHE J., 47(5), 1160-1168 (2001).
   subroutine ztest()
     use util_random,only:random
-!$$$      include 'grid.inc'
-!$$$      include 'zeolite.inc'
-!$$$      include 'control.inc'
-!$$$      include 'mpi.inc'
     integer::i,tel
     real::errTot,errRel,errAbs,err,BoltTabulated,eBoltTabulated,BoltExplicit,eBoltExplicit,xi,yi,zi,Utabulated,Uexplicit,weight
 
@@ -680,7 +687,6 @@ contains
           call err_exit('')
        end if
     END DO
-
 
     stotal=0.0d0
     Do i=1,zeo%nbead ! Loop over all framework atoms

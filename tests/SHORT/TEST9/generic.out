@@ -1,7 +1,4 @@
- lopt_bias:  F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F
- F
- freq_opt_bias:     10000000
- Program started at 2012-12-20 19:18:29.472
+ Program started at 2013-02-20 21:20:33.764
  Number of processors:            1
            0  threads per processor
  Random number seed:            0
@@ -50,6 +47,8 @@
     lrect: F
  neighbor list cutoff (rcutnn):  0.000000000000000E+000 A
     rcut:   14.0000000000000      A
+ lopt_bias:  F
+ freq_opt_bias:          500
  number of chains:         300
  number of molecule types:           1
  number of chains of molecule type           1 :         300
@@ -806,12 +805,12 @@ cell angle gamma:       120.341
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -542380.823334681     
+ coulombic energy  -542380.823334673     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -3898345.99483978     
+ total energy      -3898345.99483977     
  
- box             1  initial v   =   -3898345.99483978     
+ box             1  initial v   =   -3898345.99483977     
  surf. tension :   box 1 =      58.92130
  pressure check:   box 1 =     -22255.98
  
@@ -863,17 +862,17 @@ number of times move out:          0.0  accepted=     0.0
  pair typ =           1
  moltyps =            2  and           3
 between box  1 and  2   uattempts =         0.0  attempts =      0.0  accepted =     0.0
-
+ 
  ### Charge Fluctuation  ###
  
  
  ### Expanded Ensemble Move  ###
  
- 
+
 New Biasing Potential
 
-molecule  1:   0.00000000    
-
+molecule  1:   0.00000000     
+ 
  sumup control
  number of chains         300
  number of chains of type           1         300
@@ -884,14 +883,14 @@ molecule  1:   0.00000000
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -542979.792057570     
+ coulombic energy  -542979.792057553     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -3899759.51971489     
+ total energy      -3899759.51971487     
  
- vstart       =     -3898345.9948397800
- vend         =     -3899759.5197148924
- vbox         =     -3899759.5197148426
+ vstart       =     -3898345.9948397721
+ vend         =     -3899759.5197148747
+ vbox         =     -3899759.5197148267
  
  Averages and fluctuations                            Box 1
  
@@ -928,4 +927,4 @@ molecule  1:   0.00000000
  
  type  box     vinter      vintra      vtor        vbend       vtail
     1    1     0.00000     0.00000     0.00000     0.00000     0.00000
- Program ended at 2012-12-20 19:18:41.026
+ Program ended at 2013-02-20 21:20:50.217

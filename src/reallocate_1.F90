@@ -18,7 +18,7 @@
     ALLOCATE(p(lb1_new:ub1_new),STAT=istat)
     IF (istat /= 0) CALL err_exit(TRIM(__FILE__)//":"//integer_to_string(__LINE__))
 
-    p(:) = 0.
+    p(:) = p0
 
     IF (ALLOCATED(p).AND.ALLOCATED(work)) THEN
        p(lb1:ub1) = work(lb1:ub1)

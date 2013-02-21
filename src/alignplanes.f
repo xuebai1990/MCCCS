@@ -28,10 +28,6 @@ subroutine align_planes(isplist,imol_b,imol_a,itype_b,itype_a,xb,yb,zb)
   use const_math,only:onepi,twopi
   use sim_system
   implicit none
-!$$$      include 'control.inc'
-!$$$      include 'conver.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'swtcmove.inc'
 
 !     --- INPUT VARIABLES ---
       integer::isplist, imol_b, imol_a, itype_b, itype_a

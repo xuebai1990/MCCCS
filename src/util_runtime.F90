@@ -5,8 +5,6 @@ module util_runtime
   public::err_exit
 contains
   subroutine err_exit(msg)
-    !$$$      include 'control.inc'
-    !$$$      include 'mpi.inc'
     character(LEN=*),intent(in)::msg
     integer::ierr
 

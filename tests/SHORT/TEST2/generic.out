@@ -1,7 +1,4 @@
- lopt_bias:  F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F
- F
- freq_opt_bias:     10000000
- Program started at 2012-12-20 19:16:58.326
+ Program started at 2013-02-20 21:18:39.261
  Number of processors:            1
            0  threads per processor
  Random number seed:            0
@@ -51,6 +48,8 @@
  neighbor list cutoff (rcutnn):  0.000000000000000E+000 A
     rcut:   14.0000000000000      A
     kalp:  0.250000000000000     
+ lopt_bias:  F F
+ freq_opt_bias:          500
  number of chains:         256
  number of molecule types:           2
  number of chains of molecule type           1 :          52
@@ -208,13 +207,13 @@
     lq14scale: F
     qscale:  0.500000000000000     
     energy offset for box           1 :  0.000000000000000E+000  K
-    bead            1  beadtype            4  Tr-UA CH3 alkane 
+    bead            1  beadtype            4 C   
        bead           1  bonded to bead           2
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead   1 bending interaction through   2 with bead   3
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead  1            torsional interact  2 and  3 with bead  4 of torsional type:   1
-    bead            2  beadtype            5  Tr-UA CH2 alkane 
+    bead            2  beadtype            5 C   
        bead           2  bonded to bead           1
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead           2  bonded to bead           3
@@ -222,7 +221,7 @@
        bead   2 bending interaction through   3 with bead   4
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead  2            torsional interact  3 and  4 with bead  5 of torsional type:   1
-    bead            3  beadtype            5  Tr-UA CH2 alkane 
+    bead            3  beadtype            5 C   
        bead           3  bonded to bead           2
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead           3  bonded to bead           4
@@ -232,7 +231,7 @@
        bead   3 bending interaction through   4 with bead   5
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead  3            torsional interact  4 and  5 with bead  6 of torsional type:   1
-    bead            4  beadtype            5  Tr-UA CH2 alkane 
+    bead            4  beadtype            5 C   
        bead           4  bonded to bead           3
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead           4  bonded to bead           5
@@ -243,7 +242,7 @@
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead  4            torsional interact  3 and  2 with bead  1 of torsional type:   1
        bead  4            torsional interact  5 and  6 with bead  7 of torsional type:   1
-    bead            5  beadtype            5  Tr-UA CH2 alkane 
+    bead            5  beadtype            5 C   
        bead           5  bonded to bead           4
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead           5  bonded to bead           6
@@ -254,7 +253,7 @@
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead  5            torsional interact  4 and  3 with bead  2 of torsional type:   1
        bead  5            torsional interact  6 and  7 with bead  8 of torsional type:   1
-    bead            6  beadtype            5  Tr-UA CH2 alkane 
+    bead            6  beadtype            5 C   
        bead           6  bonded to bead           5
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead           6  bonded to bead           7
@@ -265,7 +264,7 @@
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead  6            torsional interact  5 and  4 with bead  3 of torsional type:   1
        bead  6            torsional interact  7 and  8 with bead  9 of torsional type:   1
-    bead            7  beadtype            5  Tr-UA CH2 alkane 
+    bead            7  beadtype            5 C   
        bead           7  bonded to bead           6
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead           7  bonded to bead           8
@@ -276,7 +275,7 @@
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead  7            torsional interact  6 and  5 with bead  4 of torsional type:   1
        bead  7            torsional interact  8 and  9 with bead 10 of torsional type:   1
-    bead            8  beadtype            5  Tr-UA CH2 alkane 
+    bead            8  beadtype            5 C   
        bead           8  bonded to bead           7
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead           8  bonded to bead           9
@@ -286,7 +285,7 @@
        bead   8 bending interaction through   9 with bead  10
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead  8            torsional interact  7 and  6 with bead  5 of torsional type:   1
-    bead            9  beadtype            5  Tr-UA CH2 alkane 
+    bead            9  beadtype            5 C   
        bead           9  bonded to bead           8
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead           9  bonded to bead          10
@@ -294,7 +293,7 @@
        bead   9 bending interaction through   8 with bead   7
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead  9            torsional interact  8 and  7 with bead  6 of torsional type:   1
-    bead           10  beadtype            4  Tr-UA CH3 alkane 
+    bead           10  beadtype            4 C   
        bead          10  bonded to bead           9
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead  10 bending interaction through   9 with bead   8
@@ -936,15 +935,15 @@
  intra lj energy   -77233.1378939768     
  Tail correction   -45641.0958611112     
  bond vibration    0.000000000000000E+000
- bond bending       8456269.70522316     
+ bond bending       8456269.70522318     
  torsional          414177.104673605     
- external           95.9713996320011     
- coulombic energy  -449971.088508065     
+ external           95.9713996320020     
+ coulombic energy  -449971.088508063     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy       6993800.16020412     
+ total energy       6993800.16020415     
  
- box             1  initial v   =    6993800.16020412     
+ box             1  initial v   =    6993800.16020415     
  surf. tension :   box 1 =      25.72707
  pressure check:   box 1 =     -32220.73
  
@@ -1016,18 +1015,18 @@ number of times move out:          0.0  accepted=     0.0
  pair typ =           1
  moltyps =            1  and           2
 between box  1 and  2   uattempts =         0.0  attempts =      0.0  accepted =     0.0
-
+ 
  ### Charge Fluctuation  ###
  
  
  ### Expanded Ensemble Move  ###
  
- 
+
 New Biasing Potential
 
 molecule  1:   0.00000000    
-molecule  2:   0.00000000    
-
+molecule  2:   0.00000000     
+ 
  sumup control
  number of chains         256
  number of chains of type           1          52
@@ -1036,17 +1035,17 @@ molecule  2:   0.00000000
  intra lj energy   -77350.5326894293     
  Tail correction   -45641.0958611112     
  bond vibration    0.000000000000000E+000
- bond bending       8456444.21008923     
+ bond bending       8456444.21008924     
  torsional          423560.778943052     
- external           92.3438261293634     
+ external           92.3438261293654     
  coulombic energy  -446351.602637222     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy       7001754.43285084     
+ total energy       7001754.43285085     
  
- vstart       =      6993800.1602041246
- vend         =      7001754.4328508396
- vbox         =      7001754.4328508517
+ vstart       =      6993800.1602041451
+ vend         =      7001754.4328508517
+ vbox         =      7001754.4328508712
  
  Averages and fluctuations                            Box 1
  
@@ -1105,9 +1104,9 @@ molecule  2:   0.00000000
  Enthalpy Inst.[kJ/mol] for box  1 =    222.9604      0.6908      0.4884
  Enthalpy Ext. [kJ/mol] for box  1 =    227.4702      0.0638      0.0451
  
- Cv residual(J/Kmol) =   10.2157313835852     
-  E2=   49017345339079.9     
-  E=   7001236.84631173     
+ Cv residual(J/Kmol) =   10.2157314007113     
+  E2=   49017345339080.2     
+  E=   7001236.84631175     
  chemical potential  itype   1 box   1 =        0.000       0.000       0.000
  chemical potential  itype   2 box   1 =        0.000       0.000       0.000
  mean sete length    itype   1 box   1 =       30.906       0.010       0.007
@@ -1124,4 +1123,4 @@ molecule  2:   0.00000000
    1   0.700E+07   0.788E+00  -0.259E+05   0.327E+02   0.203E+00   0.797E+00
    2   0.700E+07   0.788E+00  -0.204E+05   0.219E+01   0.203E+00   0.797E+00
    3   0.700E+07   0.788E+00  -0.289E+05   0.236E+02   0.203E+00   0.797E+00
- Program ended at 2012-12-20 19:17:07.591
+ Program ended at 2013-02-20 21:19:01.417

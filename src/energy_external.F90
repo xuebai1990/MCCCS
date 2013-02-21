@@ -5,7 +5,9 @@ MODULE energy_external
   implicit none
   private
   save
-  public::U_ext
+  public::U_ext,init_energy_external
+
+  real,allocatable::extc12(:),extc3(:),extz0(:)
 
 ! EXTERNAL.INC
   real::a1,delta,rsol
@@ -23,9 +25,6 @@ contains
 ! -- calculates the surface energy of a bend with a featureless
 ! -- graphite surface
   function slitpore(z,ntij)
-!$$$	include 'control.inc'
-!$$$	include 'external.inc'
-!$$$	include 'poten.inc'
 	integer::ntij
 	real::vgs,z
 	real::slitpore
@@ -46,9 +45,6 @@ contains
 
 ! - calculates the energy of a bead with a graphite surface
   function exgrph(x,y,z,ntij)
-!$$$        include 'control.inc'
-!$$$        include 'external.inc'
-!$$$        include 'poten.inc'
         real::aa,aa2
         real::a1sq
         real::e0,e1
@@ -115,9 +111,6 @@ contains
 ! **  added 06/24/07 by KM                                           ***
 ! **********************************************************************
   function v_elect_field(i, j, rzfield,E)
-!$$$      include 'control.inc'
-!$$$      include 'external.inc'
-!$$$      include 'coord.inc'
 
       real::v_elect_field,rzfield, E
       integer::i,j
@@ -139,7 +132,7 @@ contains
 
   function U_ext(ibox,i,j,ntj)
     use const_phys,only:eXV_to_K
-    use sim_system,only:rxu,ryu,rzu,nntype,extc12,extc3,extz0,lelect_field,Elect_field,ljoe,lslit,lgraphite,lsami,lmuir,lexzeo,io_output,nchain,boxlz
+    use sim_system,only:rxu,ryu,rzu,nntype,lelect_field,Elect_field,ljoe,lslit,lgraphite,lsami,lmuir,lexzeo,io_output,nchain,boxlz
     use energy_sami,only:exsami,exmuir
     use zeolite
     real::U_ext
@@ -192,4 +185,57 @@ contains
     end if
 
   end function U_ext
+
+  subroutine init_energy_external(nntype)
+    use util_runtime,only:err_exit
+    use sim_system,only:ljoe,lmuir,io_output
+    use energy_sami
+    integer,intent(in)::nntype
+    integer::jerr
+
+    if ( ljoe ) then
+       allocate(extc12(1:nntype),extc3(1:nntype),extz0(1:nntype),stat=jerr)
+       if (jerr.ne.0) then
+          write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+          call err_exit('init_pairwise: nonbond allocation failed')
+       end if
+
+! --- STANDARD METHYL GROUP
+       extc12(4) = 3.41d7
+       extc3(4)  = 20800.0d0
+       extz0(4)  = 0.86d0
+
+! --- STANDARD METHYLENE GROUP
+       extc12(5) = 2.80d7
+       extc3(5)  = 17100.0d0
+       extz0(5)  = 0.86d0
+
+! --- Methane
+       extc12(3) = 3.41d7
+       extc3(3)  = 20800.0d0
+       extz0(3)  = 0.86d0
+
+! --- Martin's methyl (CH3)
+       extc12(18) = 3.41d7
+       extc3(18)  = 20800.0d0
+       extz0(18)  = 0.86d0
+    end if
+
+! *** calculate constants for lmuir external potential ***
+    if ( lmuir ) then
+       sigpri = 0.715d0 * dsqrt( 3.8d0 * 3.93d0 )
+       c9ch2 = 4.0d0 * ( 1.43d0 * dsqrt(80.0d0*47.0d0) ) * sigpri**9
+       c3ch2 = 4.0d0 * ( 1.43d0 * dsqrt(80.0d0*47.0d0) ) * sigpri**3
+       c9ch3 = 4.0d0 * ( 1.43d0 * dsqrt(80.0d0*114.0d0) ) * sigpri**9
+       c3ch3 = 4.0d0 * ( 1.43d0 * dsqrt(80.0d0*114.0d0) ) * sigpri**3
+       zprmin = ( 3.0d0**(1/6.0d0) ) * sigpri
+       v2prmin = c9ch2 / zprmin**9 - c3ch2 / zprmin**3
+       v3prmin = c9ch3 / zprmin**9 - c3ch3 / zprmin**3
+       betac2 = beta1 - v2prmin
+       betac3 = beta1 - v3prmin
+       write(io_output,*) 'external potential for Langmuir monolayers used'
+       write(io_output,*) 'zprmin',zprmin
+       write(io_output,*) 'v2prmin',v2prmin,'v3prmin',v3prmin
+    end if
+  end subroutine init_energy_external
 end MODULE energy_external

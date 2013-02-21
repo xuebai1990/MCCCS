@@ -14,17 +14,6 @@ subroutine flucq (ichoice,boxi)
   use energy_pairwise,only:energy
   implicit none
 
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'coord2.inc'
-!$$$      include 'ensemble.inc'
-!$$$      include 'system.inc' 
-!$$$      include 'inputdata.inc'
-!$$$      include 'bnbsma.inc'
-!$$$      include 'ewaldsum.inc'
-!$$$      include 'fepsi.inc'
-!$$$      include 'poten.inc'
-      
       logical::linterqt,ovrlap
       integer::i,ibox,iunit,j,imolty,icbu,mainunit ,ichoice,qunit,boxi,flagon
       real::dchain,vnew,vold,deltv,deltvb ,velectn,velecto,vflucqn,vflucqo ,dispbig,displit,vintern,vintero ,vewaldn,vewaldo

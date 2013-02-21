@@ -1,7 +1,4 @@
- lopt_bias:  F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F
- F
- freq_opt_bias:     10000000
- Program started at 2012-12-20 19:17:07.732
+ Program started at 2013-02-20 21:18:15.041
  Number of processors:            1
            0  threads per processor
  Random number seed:            0
@@ -51,6 +48,8 @@
  neighbor list cutoff (rcutnn):  0.000000000000000E+000 A
     rcut:   14.0000000000000      A
     kalp:  0.250000000000000     
+ lopt_bias:  F
+ freq_opt_bias:          500
  number of chains:         300
  number of molecule types:           1
  number of chains of molecule type           1 :         300
@@ -266,14 +265,14 @@
  
  CHARGE INCLUSION TABLE
            1 F F F F F F T T T
-           2 F F F F T F F T T
-           3 F F F F F T T T T
-           4 F F F F T T T T T
-           5 F T F T F T T T T
-           6 F F T T T F F F T
-           7 T F T T T F F F F
-           8 T T T T T F F F F
-           9 T T T T T T F F F
+           2 F F F F F F F T T
+           3 F F F F F F F F F
+           4 F F F F F T T T T
+           5 F F F F F F F F F
+           6 F F F T F F F F T
+           7 T F F T F F F F F
+           8 T T F T F F F F F
+           9 T T F T F T F F F
  
  1-4 LJ SCALING FACTORS
            1   1.00000000000000        1.00000000000000     
@@ -547,15 +546,15 @@
  intra lj energy   -39079.7197222186     
  Tail correction   -37709.2573216958     
  bond vibration    0.000000000000000E+000
- bond bending       343800.041328878     
+ bond bending       343800.041328877     
  torsional          1061216.10486417     
  external          0.000000000000000E+000
  coulombic energy  -2267086.36593826     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -2119705.43650298     
+ total energy      -2119705.43650299     
  
- box             1  initial v   =   -2119705.43650298     
+ box             1  initial v   =   -2119705.43650299     
  surf. tension :   box 1 =     -57.19834
  pressure check:   box 1 =     -48795.55
  
@@ -612,17 +611,17 @@ number of times move out:          0.0  accepted=     0.0
  pair typ =           1
  moltyps =            2  and           3
 between box  1 and  2   uattempts =         0.0  attempts =      0.0  accepted =     0.0
-
+ 
  ### Charge Fluctuation  ###
  
  
  ### Expanded Ensemble Move  ###
  
- 
+
 New Biasing Potential
 
-molecule  1:   0.00000000    
-
+molecule  1:   0.00000000     
+ 
  sumup control
  number of chains         300
  number of chains of type           1         300
@@ -636,11 +635,11 @@ molecule  1:   0.00000000
  coulombic energy  -2268766.59155373     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -2102593.98359634     
+ total energy      -2102593.98359635     
  
- vstart       =     -2119705.4365029847
- vend         =     -2102593.9835963445
- vbox         =     -2102593.9835963603
+ vstart       =     -2119705.4365029857
+ vend         =     -2102593.9835963454
+ vbox         =     -2102593.9835963580
  
  Averages and fluctuations                            Box 1
  
@@ -693,9 +692,9 @@ molecule  1:   0.00000000
  Enthalpy Inst.[kJ/mol] for box  1 =    -59.1122     41.7987     41.7987
  Enthalpy Ext. [kJ/mol] for box  1 =    -58.2626     41.1979     41.1979
  
- Cp residual(J/Kmol) =   8.84936326564466     
+ Cp residual(J/Kmol) =   8.84936326747145     
   H2=   4433430738689.47     
-  H=  -2105564.61657461     
+  H=  -2105564.61657460     
  chemical potential  itype   1 box   1 =        0.000       0.000       0.000
  mean sete length    itype   1 box   1 =       18.851       0.007       0.007
  number density      itype   1 box   1 =  0.55615E+01 0.25406E-02 0.25406E-02
@@ -707,4 +706,4 @@ molecule  1:   0.00000000
  block   energy    density   pressure   surf ten  mol fracs
    1  -0.211E+07   0.107E+01   0.000E+00   0.000E+00   0.100E+01
    2  -0.210E+07   0.107E+01  -0.774E+04  -0.132E+03   0.100E+01
- Program ended at 2012-12-20 19:17:18.677
+ Program ended at 2013-02-20 21:18:38.941

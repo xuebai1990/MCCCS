@@ -35,11 +35,10 @@ CONTAINS
 !> \brief  Performs the real task of reading the proper information from the CIF
 !>         file
 ! *****************************************************************************
-  SUBROUTINE readCIF(fileCIF,zeo,lunitcell,lhere,ztype,zcell,zunit)
+  SUBROUTINE readCIF(fileCIF,zeo,lunitcell,ztype,zcell,zunit)
     character(LEN=*),intent(in)::fileCIF
     type(MoleculeType),intent(out)::zeo
     logical,allocatable,intent(out)::lunitcell(:)
-    logical,intent(out)::lhere(:)
     type(ZeoliteBeadType),intent(out)::ztype
     type(CellMaskType),intent(out)::zcell ! the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
     type(ZeoliteUnitCellGridType),intent(out)::zunit
@@ -66,7 +65,6 @@ CONTAINS
        CALL readLine(IOCIF,line,.false.,jerr)
        IF(jerr.ne.0) call err_exit('wrong CIF file format')
        read(line(2:),*) ztype%name(i),ztype%type(i),ztype%radiisq(i)
-       lhere(ztype%type(i))=.true.
        ztype%radiisq(i)=ztype%radiisq(i)*ztype%radiisq(i)
        ztype%num(i)=0
     end do

@@ -1,9 +1,8 @@
 MODULE sim_particle
   use var_type,only:default_string_length
-  use sim_system,only:nbxmax,ntmax
   implicit none
   private
-  public::BeadType,AtomType,MoleculeType,init_neighbor_list,rebuild_neighbor_list,update_neighbor_list,check_neighbor_list,lnn
+  public::BeadType,AtomType,MoleculeType,init_neighbor_list,rebuild_neighbor_list,update_neighbor_list,check_neighbor_list,lnn,allocate_neighbor_list
 
   type BeadType
      integer::type
@@ -23,10 +22,8 @@ MODULE sim_particle
   end type MoleculeType
 
 ! NEIGH.INC
-! lnn(1,1):replace the 1s with nmax to use neighbor list
-  logical::lnn(1,1)
-! disvec(3,2,1):replace the 1 with nmax to use neighbor lists
-  real::disvec(3,2,1),upnn(nbxmax),upnnsq(nbxmax),upnndg(ntmax,nbxmax)
+  logical,allocatable::lnn(:,:)
+  real,allocatable::disvec(:,:,:),upnn(:),upnnsq(:),upnndg(:,:)
 
 contains
   subroutine check_neighbor_list(ibox,imol)
@@ -235,4 +232,15 @@ contains
  
     return
   end subroutine update_neighbor_list
+
+  subroutine allocate_neighbor_list
+    use util_runtime,only:err_exit
+    use sim_system,only:nbxmax,ntmax,nmax,io_output
+    integer::jerr
+    allocate(lnn(nmax,nmax),disvec(3,2,nmax),upnn(nbxmax),upnnsq(nbxmax),upnndg(ntmax,nbxmax),stat=jerr)
+    if (jerr.ne.0) then
+       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+       call err_exit('allocate_neighbor_list: allocation failed')
+    end if
+  end subroutine allocate_neighbor_list
 end MODULE sim_particle

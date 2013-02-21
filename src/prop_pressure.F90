@@ -17,23 +17,6 @@ contains
 !    ** calculates the pressure for a configuration.    **
 !    *****************************************************
   subroutine pressure( press, surf, ibox )
-!$$$      include 'mpi.inc'
-!$$$      include 'mpif.h'
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'system.inc'
-!$$$      include 'poten.inc'
-!$$$      include 'expsix.inc'
-!$$$      include 'merck.inc'
-!$$$      include 'connect.inc'
-!$$$      include 'ewaldsum.inc'
-!$$$      include 'conver.inc'
-!$$$      include 'inputdata.inc'
-!$$$      include 'fepsi.inc'
-!$$$      include 'qqlist.inc'
-!$$$      include 'nsix.inc'
-!$$$      include 'ipswpar.inc'
-!$$$      include 'cell.inc'
 
       logical::lcoulo,lexplt,lqimol,lqjmol,lij2
       integer::ibox
@@ -542,14 +525,6 @@ contains
 ! ************************************
 ! *** tail-corrections in pressure ***
 ! ************************************
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'conver.inc'
-!$$$      include 'poten.inc'
-!$$$      include 'system.inc'
-!$$$      include 'expsix.inc'
-!$$$      include 'merck.inc'
-!$$$      include 'nsix.inc'
 
       real::corp,rci3,rhosq, epsilon2, sigma2
       real::rci1

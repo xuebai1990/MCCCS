@@ -1,11 +1,11 @@
 MODULE sim_cell
   use var_type,only:RealPtr
   use util_runtime,only:err_exit
-  use sim_system,only:nmax,nbxmax
+  use sim_system,only:nmax
   implicit none
   private
   save
-  public::CellType,CellMaskType,matops,setpbc,mimage,build_linked_cell,update_linked_cell,get_cell_neighbors
+  public::CellType,CellMaskType,matops,setpbc,mimage,build_linked_cell,update_linked_cell,get_cell_neighbors,allocate_sim_cell,allocate_linked_cell
 
   type CellType
      logical::ortho,solid ! ortho=.true. if the simulation box is orthorhombic
@@ -22,7 +22,7 @@ MODULE sim_cell
      type(RealPtr)::boxl(3),ang(3),height(3),hmat(3,3),hmati(3,3)
   end type CellMaskType
 
-  real,target,public::hmat(nbxmax,9),hmati(nbxmax,9),cell_length(nbxmax,3),min_width(nbxmax,3),cell_vol(nbxmax),cell_ang(nbxmax,3)
+  real,allocatable,target,public::hmat(:,:),hmati(:,:),cell_length(:,:),min_width(:,:),cell_vol(:),cell_ang(:,:)
 
 ! PEBOCO.INC
   real::bx,by,bz,hbx,hby,hbz,bxi,byi,bzi
@@ -30,7 +30,8 @@ MODULE sim_cell
   integer,parameter::cmax = 1000& !< cmax is the max number of cells for the linkcell list
    ,cmaxa = 100 !< cmaxa is the max number of molecules per cell
   real::dcellx,dcelly,dcellz
-  integer::icell(nmax),nicell(cmax),iucell(cmax,cmaxa),ncellx,ncelly,ncellz
+  integer::nicell(cmax),iucell(cmax,cmaxa),ncellx,ncelly,ncellz
+  integer,allocatable::icell(:)
 
 contains
 !> \brief Calculates for non cubic simulation cell:
@@ -169,10 +170,6 @@ contains
 
   pure subroutine mimage(rxuij,ryuij,rzuij,ibox)
     use sim_system,only:lsolid,lrect,lpbcx,lpbcy,lpbcz,lfold,ltwice
-    !$$$      include 'peboco.inc'
-    !$$$      include 'control.inc'
-    !$$$      include 'system.inc'
-    !$$$      include 'cell.inc'
     integer,intent(in)::ibox
     real,intent(inout)::rxuij,ryuij,rzuij
 
@@ -525,4 +522,26 @@ contains
        end do
     end do
   end subroutine get_cell_neighbors
+
+  subroutine allocate_sim_cell
+    use sim_system,only:nbxmax,io_output
+    integer::jerr
+    allocate(hmat(nbxmax,9),hmati(nbxmax,9),cell_length(nbxmax,3),min_width(nbxmax,3),cell_vol(nbxmax),cell_ang(nbxmax,3),stat=jerr)
+    if (jerr.ne.0) then
+       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+       call err_exit('allocate_sim_cell: allocation failed')
+    end if
+
+    hmat=0.0d0
+  end subroutine allocate_sim_cell
+
+  subroutine allocate_linked_cell
+    use sim_system,only:io_output
+    integer::jerr
+    allocate(icell(nmax),stat=jerr)
+    if (jerr.ne.0) then
+       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+       call err_exit('allocate_linked_cell: allocation failed')
+    end if
+  end subroutine allocate_linked_cell
 end MODULE sim_cell

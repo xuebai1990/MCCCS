@@ -11,11 +11,10 @@ MODULE parser_cssr
 
 CONTAINS
 
-  SUBROUTINE readCSSR(fileCSSR,zeo,lunitcell,lhere,ztype,zcell,zunit)
+  SUBROUTINE readCSSR(fileCSSR,zeo,lunitcell,ztype,zcell,zunit)
     character(LEN=*),intent(in)::fileCSSR
     type(MoleculeType),intent(out)::zeo
     logical,allocatable,intent(out)::lunitcell(:)
-    logical,intent(out)::lhere(:)
     type(ZeoliteBeadType),intent(out)::ztype
     type(CellMaskType),intent(out)::zcell ! the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
     type(ZeoliteUnitCellGridType),intent(out)::zunit
@@ -36,7 +35,6 @@ CONTAINS
 
     do i=1,ztype%ntype
        read(IOCSSR,*) ztype%name(i),ztype%type(i),ztype%radiisq(i)
-       lhere(ztype%type(i))=.true.
        ztype%radiisq(i)=ztype%radiisq(i)*ztype%radiisq(i)
        ztype%num(i)=0
     end do

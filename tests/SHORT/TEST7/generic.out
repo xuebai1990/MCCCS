@@ -1,7 +1,4 @@
- lopt_bias:  F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F
- F
- freq_opt_bias:     10000000
- Program started at 2012-12-20 19:17:56.648
+ Program started at 2013-02-26 13:38:20.643
  Number of processors:            1
            0  threads per processor
  Random number seed:           44
@@ -38,10 +35,10 @@
  lete: F
  lrhoz: F
  bin_width:  0.100000000000000     
- iprint:        1000
+ iprint:           1
  imv:         200
  iratio:           1
- iblock:        1000
+ iblock:           1
  idiele:     3000000
  L_movie_xyz F
  box:           1
@@ -71,6 +68,8 @@
  neighbor list cutoff (rcutnn):  0.000000000000000E+000 A
     rcut:   40.0000000000000      A
     kalp:  1.000000000000000E-008
+ lopt_bias:  F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F
+ freq_opt_bias:          500
  number of chains:        1801
  number of molecule types:          34
  number of chains of molecule type           1 :         400
@@ -250,7 +249,7 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  0.000000000000000E+000  K
-    bead            1  beadtype          124  TraPPE helium    
+    bead            1  beadtype          124 N   
  molecule type:           6
     number of units:           6
     number of units for CBMC growth:           6
@@ -667,12 +666,12 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :   1360.00000000000       K
-    bead            1  beadtype          203 stage 1 benzene   
-    bead            2  beadtype          203 stage 1 benzene   
-    bead            3  beadtype          203 stage 1 benzene   
-    bead            4  beadtype          203 stage 1 benzene   
-    bead            5  beadtype          203 stage 1 benzene   
-    bead            6  beadtype          203 stage 1 benzene   
+    bead            1  beadtype          203 O   
+    bead            2  beadtype          203 O   
+    bead            3  beadtype          203 O   
+    bead            4  beadtype          203 O   
+    bead            5  beadtype          203 O   
+    bead            6  beadtype          203 O   
  molecule type:           9
     number of units:           6
     number of units for CBMC growth:           6
@@ -693,12 +692,12 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :   1060.00000000000       K
-    bead            1  beadtype          204 stage 2 benzene   
-    bead            2  beadtype          204 stage 2 benzene   
-    bead            3  beadtype          204 stage 2 benzene   
-    bead            4  beadtype          204 stage 2 benzene   
-    bead            5  beadtype          204 stage 2 benzene   
-    bead            6  beadtype          204 stage 2 benzene   
+    bead            1  beadtype          204 C   
+    bead            2  beadtype          204 C   
+    bead            3  beadtype          204 C   
+    bead            4  beadtype          204 C   
+    bead            5  beadtype          204 C   
+    bead            6  beadtype          204 C   
  molecule type:          10
     number of units:           6
     number of units for CBMC growth:           6
@@ -719,12 +718,12 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :   710.000000000000       K
-    bead            1  beadtype          205 stage 3 benzene   
-    bead            2  beadtype          205 stage 3 benzene   
-    bead            3  beadtype          205 stage 3 benzene   
-    bead            4  beadtype          205 stage 3 benzene   
-    bead            5  beadtype          205 stage 3 benzene   
-    bead            6  beadtype          205 stage 3 benzene   
+    bead            1  beadtype          205 C   
+    bead            2  beadtype          205 C   
+    bead            3  beadtype          205 C   
+    bead            4  beadtype          205 C   
+    bead            5  beadtype          205 C   
+    bead            6  beadtype          205 C   
  molecule type:          11
     number of units:           6
     number of units for CBMC growth:           6
@@ -745,12 +744,12 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :   310.000000000000       K
-    bead            1  beadtype          206 stage 4 benzene   
-    bead            2  beadtype          206 stage 4 benzene   
-    bead            3  beadtype          206 stage 4 benzene   
-    bead            4  beadtype          206 stage 4 benzene   
-    bead            5  beadtype          206 stage 4 benzene   
-    bead            6  beadtype          206 stage 4 benzene   
+    bead            1  beadtype          206 C   
+    bead            2  beadtype          206 C   
+    bead            3  beadtype          206 C   
+    bead            4  beadtype          206 C   
+    bead            5  beadtype          206 C   
+    bead            6  beadtype          206 C   
  molecule type:          12
     number of units:           6
     number of units for CBMC growth:           6
@@ -771,12 +770,12 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  -180.000000000000       K
-    bead            1  beadtype          207 stage 5 benzene   
-    bead            2  beadtype          207 stage 5 benzene   
-    bead            3  beadtype          207 stage 5 benzene   
-    bead            4  beadtype          207 stage 5 benzene   
-    bead            5  beadtype          207 stage 5 benzene   
-    bead            6  beadtype          207 stage 5 benzene   
+    bead            1  beadtype          207 C   
+    bead            2  beadtype          207 C   
+    bead            3  beadtype          207 C   
+    bead            4  beadtype          207 C   
+    bead            5  beadtype          207 C   
+    bead            6  beadtype          207 C   
  molecule type:          13
     number of units:           6
     number of units for CBMC growth:           6
@@ -797,12 +796,12 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  -840.000000000000       K
-    bead            1  beadtype           56  Tr-UA CH benzene6
-    bead            2  beadtype           56  Tr-UA CH benzene6
-    bead            3  beadtype           56  Tr-UA CH benzene6
-    bead            4  beadtype           56  Tr-UA CH benzene6
-    bead            5  beadtype           56  Tr-UA CH benzene6
-    bead            6  beadtype           56  Tr-UA CH benzene6
+    bead            1  beadtype           56 C   
+    bead            2  beadtype           56 C   
+    bead            3  beadtype           56 C   
+    bead            4  beadtype           56 C   
+    bead            5  beadtype           56 C   
+    bead            6  beadtype           56 C   
  molecule type:          14
     number of units:           8
     number of units for CBMC growth:           8
@@ -823,14 +822,14 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  -1000.00000000000       K
-    bead            1  beadtype           56  Tr-UA CH benzene6
-    bead            2  beadtype           56  Tr-UA CH benzene6
-    bead            3  beadtype           56  Tr-UA CH benzene6
-    bead            4  beadtype           56  Tr-UA CH benzene6
-    bead            5  beadtype           60  Tr-UA C arom naph
-    bead            6  beadtype           60  Tr-UA C arom naph
-    bead            7  beadtype           56  Tr-UA CH benzene6
-    bead            8  beadtype           56  Tr-UA CH benzene6
+    bead            1  beadtype           56 C   
+    bead            2  beadtype           56 C   
+    bead            3  beadtype           56 C   
+    bead            4  beadtype           56 C   
+    bead            5  beadtype           60 C   
+    bead            6  beadtype           60 C   
+    bead            7  beadtype           56 C   
+    bead            8  beadtype           56 C   
  molecule type:          15
     number of units:          10
     number of units for CBMC growth:          10
@@ -851,16 +850,16 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  -2360.00000000000       K
-    bead            1  beadtype           56  Tr-UA CH benzene6
-    bead            2  beadtype           56  Tr-UA CH benzene6
-    bead            3  beadtype           56  Tr-UA CH benzene6
-    bead            4  beadtype           56  Tr-UA CH benzene6
-    bead            5  beadtype           60  Tr-UA C arom naph
-    bead            6  beadtype           60  Tr-UA C arom naph
-    bead            7  beadtype           56  Tr-UA CH benzene6
-    bead            8  beadtype           56  Tr-UA CH benzene6
-    bead            9  beadtype           56  Tr-UA CH benzene6
-    bead           10  beadtype           56  Tr-UA CH benzene6
+    bead            1  beadtype           56 C   
+    bead            2  beadtype           56 C   
+    bead            3  beadtype           56 C   
+    bead            4  beadtype           56 C   
+    bead            5  beadtype           60 C   
+    bead            6  beadtype           60 C   
+    bead            7  beadtype           56 C   
+    bead            8  beadtype           56 C   
+    bead            9  beadtype           56 C   
+    bead           10  beadtype           56 C   
  molecule type:          16
     number of units:          12
     number of units for CBMC growth:          12
@@ -881,18 +880,18 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  -2580.00000000000       K
-    bead            1  beadtype           56  Tr-UA CH benzene6
-    bead            2  beadtype           56  Tr-UA CH benzene6
-    bead            3  beadtype           56  Tr-UA CH benzene6
-    bead            4  beadtype           56  Tr-UA CH benzene6
-    bead            5  beadtype           60  Tr-UA C arom naph
-    bead            6  beadtype           60  Tr-UA C arom naph
-    bead            7  beadtype           56  Tr-UA CH benzene6
-    bead            8  beadtype           56  Tr-UA CH benzene6
-    bead            9  beadtype           60  Tr-UA C arom naph
-    bead           10  beadtype           60  Tr-UA C arom naph
-    bead           11  beadtype           56  Tr-UA CH benzene6
-    bead           12  beadtype           56  Tr-UA CH benzene6
+    bead            1  beadtype           56 C   
+    bead            2  beadtype           56 C   
+    bead            3  beadtype           56 C   
+    bead            4  beadtype           56 C   
+    bead            5  beadtype           60 C   
+    bead            6  beadtype           60 C   
+    bead            7  beadtype           56 C   
+    bead            8  beadtype           56 C   
+    bead            9  beadtype           60 C   
+    bead           10  beadtype           60 C   
+    bead           11  beadtype           56 C   
+    bead           12  beadtype           56 C   
  molecule type:          17
     number of units:          14
     number of units for CBMC growth:          14
@@ -913,20 +912,20 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  -3980.00000000000       K
-    bead            1  beadtype           56  Tr-UA CH benzene6
-    bead            2  beadtype           56  Tr-UA CH benzene6
-    bead            3  beadtype           56  Tr-UA CH benzene6
-    bead            4  beadtype           56  Tr-UA CH benzene6
-    bead            5  beadtype           60  Tr-UA C arom naph
-    bead            6  beadtype           60  Tr-UA C arom naph
-    bead            7  beadtype           56  Tr-UA CH benzene6
-    bead            8  beadtype           56  Tr-UA CH benzene6
-    bead            9  beadtype           60  Tr-UA C arom naph
-    bead           10  beadtype           60  Tr-UA C arom naph
-    bead           11  beadtype           56  Tr-UA CH benzene6
-    bead           12  beadtype           56  Tr-UA CH benzene6
-    bead           13  beadtype           56  Tr-UA CH benzene6
-    bead           14  beadtype           56  Tr-UA CH benzene6
+    bead            1  beadtype           56 C   
+    bead            2  beadtype           56 C   
+    bead            3  beadtype           56 C   
+    bead            4  beadtype           56 C   
+    bead            5  beadtype           60 C   
+    bead            6  beadtype           60 C   
+    bead            7  beadtype           56 C   
+    bead            8  beadtype           56 C   
+    bead            9  beadtype           60 C   
+    bead           10  beadtype           60 C   
+    bead           11  beadtype           56 C   
+    bead           12  beadtype           56 C   
+    bead           13  beadtype           56 C   
+    bead           14  beadtype           56 C   
  molecule type:          18
     number of units:          16
     number of units for CBMC growth:          16
@@ -947,22 +946,22 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  -4210.00000000000       K
-    bead            1  beadtype           56  Tr-UA CH benzene6
-    bead            2  beadtype           56  Tr-UA CH benzene6
-    bead            3  beadtype           56  Tr-UA CH benzene6
-    bead            4  beadtype           56  Tr-UA CH benzene6
-    bead            5  beadtype           60  Tr-UA C arom naph
-    bead            6  beadtype           60  Tr-UA C arom naph
-    bead            7  beadtype           56  Tr-UA CH benzene6
-    bead            8  beadtype           56  Tr-UA CH benzene6
-    bead            9  beadtype           60  Tr-UA C arom naph
-    bead           10  beadtype           60  Tr-UA C arom naph
-    bead           11  beadtype           56  Tr-UA CH benzene6
-    bead           12  beadtype           56  Tr-UA CH benzene6
-    bead           13  beadtype           60  Tr-UA C arom naph
-    bead           14  beadtype           60  Tr-UA C arom naph
-    bead           15  beadtype           56  Tr-UA CH benzene6
-    bead           16  beadtype           56  Tr-UA CH benzene6
+    bead            1  beadtype           56 C   
+    bead            2  beadtype           56 C   
+    bead            3  beadtype           56 C   
+    bead            4  beadtype           56 C   
+    bead            5  beadtype           60 C   
+    bead            6  beadtype           60 C   
+    bead            7  beadtype           56 C   
+    bead            8  beadtype           56 C   
+    bead            9  beadtype           60 C   
+    bead           10  beadtype           60 C   
+    bead           11  beadtype           56 C   
+    bead           12  beadtype           56 C   
+    bead           13  beadtype           60 C   
+    bead           14  beadtype           60 C   
+    bead           15  beadtype           56 C   
+    bead           16  beadtype           56 C   
  molecule type:          19
     number of units:          18
     number of units for CBMC growth:          18
@@ -983,24 +982,24 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  -5640.00000000000       K
-    bead            1  beadtype           56  Tr-UA CH benzene6
-    bead            2  beadtype           56  Tr-UA CH benzene6
-    bead            3  beadtype           56  Tr-UA CH benzene6
-    bead            4  beadtype           56  Tr-UA CH benzene6
-    bead            5  beadtype           60  Tr-UA C arom naph
-    bead            6  beadtype           60  Tr-UA C arom naph
-    bead            7  beadtype           56  Tr-UA CH benzene6
-    bead            8  beadtype           56  Tr-UA CH benzene6
-    bead            9  beadtype           60  Tr-UA C arom naph
-    bead           10  beadtype           60  Tr-UA C arom naph
-    bead           11  beadtype           56  Tr-UA CH benzene6
-    bead           12  beadtype           56  Tr-UA CH benzene6
-    bead           13  beadtype           60  Tr-UA C arom naph
-    bead           14  beadtype           60  Tr-UA C arom naph
-    bead           15  beadtype           56  Tr-UA CH benzene6
-    bead           16  beadtype           56  Tr-UA CH benzene6
-    bead           17  beadtype           56  Tr-UA CH benzene6
-    bead           18  beadtype           56  Tr-UA CH benzene6
+    bead            1  beadtype           56 C   
+    bead            2  beadtype           56 C   
+    bead            3  beadtype           56 C   
+    bead            4  beadtype           56 C   
+    bead            5  beadtype           60 C   
+    bead            6  beadtype           60 C   
+    bead            7  beadtype           56 C   
+    bead            8  beadtype           56 C   
+    bead            9  beadtype           60 C   
+    bead           10  beadtype           60 C   
+    bead           11  beadtype           56 C   
+    bead           12  beadtype           56 C   
+    bead           13  beadtype           60 C   
+    bead           14  beadtype           60 C   
+    bead           15  beadtype           56 C   
+    bead           16  beadtype           56 C   
+    bead           17  beadtype           56 C   
+    bead           18  beadtype           56 C   
  molecule type:          20
     number of units:          16
     number of units for CBMC growth:          16
@@ -1021,22 +1020,22 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  -4270.00000000000       K
-    bead            1  beadtype           56  Tr-UA CH benzene6
-    bead            2  beadtype           56  Tr-UA CH benzene6
-    bead            3  beadtype           56  Tr-UA CH benzene6
-    bead            4  beadtype           56  Tr-UA CH benzene6
-    bead            5  beadtype           60  Tr-UA C arom naph
-    bead            6  beadtype           60  Tr-UA C arom naph
-    bead            7  beadtype           56  Tr-UA CH benzene6
-    bead            8  beadtype           56  Tr-UA CH benzene6
-    bead            9  beadtype           60  Tr-UA C arom naph
-    bead           10  beadtype           60  Tr-UA C arom naph
-    bead           11  beadtype           56  Tr-UA CH benzene6
-    bead           12  beadtype           60  Tr-UA C arom naph
-    bead           13  beadtype           56  Tr-UA CH benzene6
-    bead           14  beadtype           60  Tr-UA C arom naph
-    bead           15  beadtype           56  Tr-UA CH benzene6
-    bead           16  beadtype           56  Tr-UA CH benzene6
+    bead            1  beadtype           56 C   
+    bead            2  beadtype           56 C   
+    bead            3  beadtype           56 C   
+    bead            4  beadtype           56 C   
+    bead            5  beadtype           60 C   
+    bead            6  beadtype           60 C   
+    bead            7  beadtype           56 C   
+    bead            8  beadtype           56 C   
+    bead            9  beadtype           60 C   
+    bead           10  beadtype           60 C   
+    bead           11  beadtype           56 C   
+    bead           12  beadtype           60 C   
+    bead           13  beadtype           56 C   
+    bead           14  beadtype           60 C   
+    bead           15  beadtype           56 C   
+    bead           16  beadtype           56 C   
  molecule type:          21
     number of units:          18
     number of units for CBMC growth:          18
@@ -1057,24 +1056,24 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  -5720.00000000000       K
-    bead            1  beadtype           56  Tr-UA CH benzene6
-    bead            2  beadtype           56  Tr-UA CH benzene6
-    bead            3  beadtype           56  Tr-UA CH benzene6
-    bead            4  beadtype           56  Tr-UA CH benzene6
-    bead            5  beadtype           60  Tr-UA C arom naph
-    bead            6  beadtype           60  Tr-UA C arom naph
-    bead            7  beadtype           56  Tr-UA CH benzene6
-    bead            8  beadtype           56  Tr-UA CH benzene6
-    bead            9  beadtype           60  Tr-UA C arom naph
-    bead           10  beadtype           60  Tr-UA C arom naph
-    bead           11  beadtype           56  Tr-UA CH benzene6
-    bead           12  beadtype           60  Tr-UA C arom naph
-    bead           13  beadtype           56  Tr-UA CH benzene6
-    bead           14  beadtype           60  Tr-UA C arom naph
-    bead           15  beadtype           56  Tr-UA CH benzene6
-    bead           16  beadtype           56  Tr-UA CH benzene6
-    bead           17  beadtype           56  Tr-UA CH benzene6
-    bead           18  beadtype           56  Tr-UA CH benzene6
+    bead            1  beadtype           56 C   
+    bead            2  beadtype           56 C   
+    bead            3  beadtype           56 C   
+    bead            4  beadtype           56 C   
+    bead            5  beadtype           60 C   
+    bead            6  beadtype           60 C   
+    bead            7  beadtype           56 C   
+    bead            8  beadtype           56 C   
+    bead            9  beadtype           60 C   
+    bead           10  beadtype           60 C   
+    bead           11  beadtype           56 C   
+    bead           12  beadtype           60 C   
+    bead           13  beadtype           56 C   
+    bead           14  beadtype           60 C   
+    bead           15  beadtype           56 C   
+    bead           16  beadtype           56 C   
+    bead           17  beadtype           56 C   
+    bead           18  beadtype           56 C   
  molecule type:          22
     number of units:          12
     number of units for CBMC growth:          12
@@ -1095,18 +1094,18 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  -2580.00000000000       K
-    bead            1  beadtype           56  Tr-UA CH benzene6
-    bead            2  beadtype           56  Tr-UA CH benzene6
-    bead            3  beadtype           56  Tr-UA CH benzene6
-    bead            4  beadtype           56  Tr-UA CH benzene6
-    bead            5  beadtype           60  Tr-UA C arom naph
-    bead            6  beadtype           60  Tr-UA C arom naph
-    bead            7  beadtype           56  Tr-UA CH benzene6
-    bead            8  beadtype           60  Tr-UA C arom naph
-    bead            9  beadtype           56  Tr-UA CH benzene6
-    bead           10  beadtype           60  Tr-UA C arom naph
-    bead           11  beadtype           56  Tr-UA CH benzene6
-    bead           12  beadtype           56  Tr-UA CH benzene6
+    bead            1  beadtype           56 C   
+    bead            2  beadtype           56 C   
+    bead            3  beadtype           56 C   
+    bead            4  beadtype           56 C   
+    bead            5  beadtype           60 C   
+    bead            6  beadtype           60 C   
+    bead            7  beadtype           56 C   
+    bead            8  beadtype           60 C   
+    bead            9  beadtype           56 C   
+    bead           10  beadtype           60 C   
+    bead           11  beadtype           56 C   
+    bead           12  beadtype           56 C   
  molecule type:          23
     number of units:          14
     number of units for CBMC growth:          14
@@ -1127,20 +1126,20 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  -3900.00000000000       K
-    bead            1  beadtype           56  Tr-UA CH benzene6
-    bead            2  beadtype           56  Tr-UA CH benzene6
-    bead            3  beadtype           56  Tr-UA CH benzene6
-    bead            4  beadtype           56  Tr-UA CH benzene6
-    bead            5  beadtype           60  Tr-UA C arom naph
-    bead            6  beadtype           60  Tr-UA C arom naph
-    bead            7  beadtype           56  Tr-UA CH benzene6
-    bead            8  beadtype           60  Tr-UA C arom naph
-    bead            9  beadtype           56  Tr-UA CH benzene6
-    bead           10  beadtype           60  Tr-UA C arom naph
-    bead           11  beadtype           56  Tr-UA CH benzene6
-    bead           12  beadtype           56  Tr-UA CH benzene6
-    bead           13  beadtype           56  Tr-UA CH benzene6
-    bead           14  beadtype           56  Tr-UA CH benzene6
+    bead            1  beadtype           56 C   
+    bead            2  beadtype           56 C   
+    bead            3  beadtype           56 C   
+    bead            4  beadtype           56 C   
+    bead            5  beadtype           60 C   
+    bead            6  beadtype           60 C   
+    bead            7  beadtype           56 C   
+    bead            8  beadtype           60 C   
+    bead            9  beadtype           56 C   
+    bead           10  beadtype           60 C   
+    bead           11  beadtype           56 C   
+    bead           12  beadtype           56 C   
+    bead           13  beadtype           56 C   
+    bead           14  beadtype           56 C   
  molecule type:          24
     number of units:          16
     number of units for CBMC growth:          16
@@ -1161,22 +1160,22 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  -3760.00000000000       K
-    bead            1  beadtype           56  Tr-UA CH benzene6
-    bead            2  beadtype           60  Tr-UA C arom naph
-    bead            3  beadtype           60  Tr-UA C arom naph
-    bead            4  beadtype           56  Tr-UA CH benzene6
-    bead            5  beadtype           60  Tr-UA C arom naph
-    bead            6  beadtype           60  Tr-UA C arom naph
-    bead            7  beadtype           56  Tr-UA CH benzene6
-    bead            8  beadtype           60  Tr-UA C arom naph
-    bead            9  beadtype           56  Tr-UA CH benzene6
-    bead           10  beadtype           60  Tr-UA C arom naph
-    bead           11  beadtype           56  Tr-UA CH benzene6
-    bead           12  beadtype           56  Tr-UA CH benzene6
-    bead           13  beadtype           60  Tr-UA C arom naph
-    bead           14  beadtype           60  Tr-UA C arom naph
-    bead           15  beadtype           56  Tr-UA CH benzene6
-    bead           16  beadtype           56  Tr-UA CH benzene6
+    bead            1  beadtype           56 C   
+    bead            2  beadtype           60 C   
+    bead            3  beadtype           60 C   
+    bead            4  beadtype           56 C   
+    bead            5  beadtype           60 C   
+    bead            6  beadtype           60 C   
+    bead            7  beadtype           56 C   
+    bead            8  beadtype           60 C   
+    bead            9  beadtype           56 C   
+    bead           10  beadtype           60 C   
+    bead           11  beadtype           56 C   
+    bead           12  beadtype           56 C   
+    bead           13  beadtype           60 C   
+    bead           14  beadtype           60 C   
+    bead           15  beadtype           56 C   
+    bead           16  beadtype           56 C   
  molecule type:          25
     number of units:          16
     number of units for CBMC growth:          16
@@ -1197,22 +1196,22 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  -4190.00000000000       K
-    bead            1  beadtype           56  Tr-UA CH benzene6
-    bead            2  beadtype           56  Tr-UA CH benzene6
-    bead            3  beadtype           56  Tr-UA CH benzene6
-    bead            4  beadtype           56  Tr-UA CH benzene6
-    bead            5  beadtype           60  Tr-UA C arom naph
-    bead            6  beadtype           60  Tr-UA C arom naph
-    bead            7  beadtype           56  Tr-UA CH benzene6
-    bead            8  beadtype           60  Tr-UA C arom naph
-    bead            9  beadtype           56  Tr-UA CH benzene6
-    bead           10  beadtype           60  Tr-UA C arom naph
-    bead           11  beadtype           56  Tr-UA CH benzene6
-    bead           12  beadtype           60  Tr-UA C arom naph
-    bead           13  beadtype           56  Tr-UA CH benzene6
-    bead           14  beadtype           60  Tr-UA C arom naph
-    bead           15  beadtype           56  Tr-UA CH benzene6
-    bead           16  beadtype           56  Tr-UA CH benzene6
+    bead            1  beadtype           56 C   
+    bead            2  beadtype           56 C   
+    bead            3  beadtype           56 C   
+    bead            4  beadtype           56 C   
+    bead            5  beadtype           60 C   
+    bead            6  beadtype           60 C   
+    bead            7  beadtype           56 C   
+    bead            8  beadtype           60 C   
+    bead            9  beadtype           56 C   
+    bead           10  beadtype           60 C   
+    bead           11  beadtype           56 C   
+    bead           12  beadtype           60 C   
+    bead           13  beadtype           56 C   
+    bead           14  beadtype           60 C   
+    bead           15  beadtype           56 C   
+    bead           16  beadtype           56 C   
  molecule type:          26
     number of units:          18
     number of units for CBMC growth:          18
@@ -1233,24 +1232,24 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  -5670.00000000000       K
-    bead            1  beadtype           56  Tr-UA CH benzene6
-    bead            2  beadtype           56  Tr-UA CH benzene6
-    bead            3  beadtype           56  Tr-UA CH benzene6
-    bead            4  beadtype           56  Tr-UA CH benzene6
-    bead            5  beadtype           60  Tr-UA C arom naph
-    bead            6  beadtype           60  Tr-UA C arom naph
-    bead            7  beadtype           56  Tr-UA CH benzene6
-    bead            8  beadtype           60  Tr-UA C arom naph
-    bead            9  beadtype           56  Tr-UA CH benzene6
-    bead           10  beadtype           60  Tr-UA C arom naph
-    bead           11  beadtype           56  Tr-UA CH benzene6
-    bead           12  beadtype           60  Tr-UA C arom naph
-    bead           13  beadtype           56  Tr-UA CH benzene6
-    bead           14  beadtype           60  Tr-UA C arom naph
-    bead           15  beadtype           56  Tr-UA CH benzene6
-    bead           16  beadtype           56  Tr-UA CH benzene6
-    bead           17  beadtype           56  Tr-UA CH benzene6
-    bead           18  beadtype           56  Tr-UA CH benzene6
+    bead            1  beadtype           56 C   
+    bead            2  beadtype           56 C   
+    bead            3  beadtype           56 C   
+    bead            4  beadtype           56 C   
+    bead            5  beadtype           60 C   
+    bead            6  beadtype           60 C   
+    bead            7  beadtype           56 C   
+    bead            8  beadtype           60 C   
+    bead            9  beadtype           56 C   
+    bead           10  beadtype           60 C   
+    bead           11  beadtype           56 C   
+    bead           12  beadtype           60 C   
+    bead           13  beadtype           56 C   
+    bead           14  beadtype           60 C   
+    bead           15  beadtype           56 C   
+    bead           16  beadtype           56 C   
+    bead           17  beadtype           56 C   
+    bead           18  beadtype           56 C   
  molecule type:          27
     number of units:          16
     number of units for CBMC growth:          16
@@ -1271,22 +1270,22 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  -4320.00000000000       K
-    bead            1  beadtype           56  Tr-UA CH benzene6
-    bead            2  beadtype           56  Tr-UA CH benzene6
-    bead            3  beadtype           56  Tr-UA CH benzene6
-    bead            4  beadtype           56  Tr-UA CH benzene6
-    bead            5  beadtype           60  Tr-UA C arom naph
-    bead            6  beadtype           60  Tr-UA C arom naph
-    bead            7  beadtype           56  Tr-UA CH benzene6
-    bead            8  beadtype           60  Tr-UA C arom naph
-    bead            9  beadtype           56  Tr-UA CH benzene6
-    bead           10  beadtype           60  Tr-UA C arom naph
-    bead           11  beadtype           60  Tr-UA C arom naph
-    bead           12  beadtype           56  Tr-UA CH benzene6
-    bead           13  beadtype           60  Tr-UA C arom naph
-    bead           14  beadtype           56  Tr-UA CH benzene6
-    bead           15  beadtype           56  Tr-UA CH benzene6
-    bead           16  beadtype           56  Tr-UA CH benzene6
+    bead            1  beadtype           56 C   
+    bead            2  beadtype           56 C   
+    bead            3  beadtype           56 C   
+    bead            4  beadtype           56 C   
+    bead            5  beadtype           60 C   
+    bead            6  beadtype           60 C   
+    bead            7  beadtype           56 C   
+    bead            8  beadtype           60 C   
+    bead            9  beadtype           56 C   
+    bead           10  beadtype           60 C   
+    bead           11  beadtype           60 C   
+    bead           12  beadtype           56 C   
+    bead           13  beadtype           60 C   
+    bead           14  beadtype           56 C   
+    bead           15  beadtype           56 C   
+    bead           16  beadtype           56 C   
  molecule type:          28
     number of units:          18
     number of units for CBMC growth:          18
@@ -1307,24 +1306,24 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  -5770.00000000000       K
-    bead            1  beadtype           56  Tr-UA CH benzene6
-    bead            2  beadtype           56  Tr-UA CH benzene6
-    bead            3  beadtype           56  Tr-UA CH benzene6
-    bead            4  beadtype           56  Tr-UA CH benzene6
-    bead            5  beadtype           60  Tr-UA C arom naph
-    bead            6  beadtype           60  Tr-UA C arom naph
-    bead            7  beadtype           56  Tr-UA CH benzene6
-    bead            8  beadtype           60  Tr-UA C arom naph
-    bead            9  beadtype           56  Tr-UA CH benzene6
-    bead           10  beadtype           60  Tr-UA C arom naph
-    bead           11  beadtype           60  Tr-UA C arom naph
-    bead           12  beadtype           56  Tr-UA CH benzene6
-    bead           13  beadtype           60  Tr-UA C arom naph
-    bead           14  beadtype           56  Tr-UA CH benzene6
-    bead           15  beadtype           56  Tr-UA CH benzene6
-    bead           16  beadtype           56  Tr-UA CH benzene6
-    bead           17  beadtype           56  Tr-UA CH benzene6
-    bead           18  beadtype           56  Tr-UA CH benzene6
+    bead            1  beadtype           56 C   
+    bead            2  beadtype           56 C   
+    bead            3  beadtype           56 C   
+    bead            4  beadtype           56 C   
+    bead            5  beadtype           60 C   
+    bead            6  beadtype           60 C   
+    bead            7  beadtype           56 C   
+    bead            8  beadtype           60 C   
+    bead            9  beadtype           56 C   
+    bead           10  beadtype           60 C   
+    bead           11  beadtype           60 C   
+    bead           12  beadtype           56 C   
+    bead           13  beadtype           60 C   
+    bead           14  beadtype           56 C   
+    bead           15  beadtype           56 C   
+    bead           16  beadtype           56 C   
+    bead           17  beadtype           56 C   
+    bead           18  beadtype           56 C   
  molecule type:          29
     number of units:          16
     number of units for CBMC growth:          16
@@ -1345,22 +1344,22 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  -4210.00000000000       K
-    bead            1  beadtype           56  Tr-UA CH benzene6
-    bead            2  beadtype           56  Tr-UA CH benzene6
-    bead            3  beadtype           56  Tr-UA CH benzene6
-    bead            4  beadtype           56  Tr-UA CH benzene6
-    bead            5  beadtype           60  Tr-UA C arom naph
-    bead            6  beadtype           60  Tr-UA C arom naph
-    bead            7  beadtype           60  Tr-UA C arom naph
-    bead            8  beadtype           60  Tr-UA C arom naph
-    bead            9  beadtype           60  Tr-UA C arom naph
-    bead           10  beadtype           60  Tr-UA C arom naph
-    bead           11  beadtype           56  Tr-UA CH benzene6
-    bead           12  beadtype           56  Tr-UA CH benzene6
-    bead           13  beadtype           56  Tr-UA CH benzene6
-    bead           14  beadtype           56  Tr-UA CH benzene6
-    bead           15  beadtype           56  Tr-UA CH benzene6
-    bead           16  beadtype           56  Tr-UA CH benzene6
+    bead            1  beadtype           56 C   
+    bead            2  beadtype           56 C   
+    bead            3  beadtype           56 C   
+    bead            4  beadtype           56 C   
+    bead            5  beadtype           60 C   
+    bead            6  beadtype           60 C   
+    bead            7  beadtype           60 C   
+    bead            8  beadtype           60 C   
+    bead            9  beadtype           60 C   
+    bead           10  beadtype           60 C   
+    bead           11  beadtype           56 C   
+    bead           12  beadtype           56 C   
+    bead           13  beadtype           56 C   
+    bead           14  beadtype           56 C   
+    bead           15  beadtype           56 C   
+    bead           16  beadtype           56 C   
  molecule type:          30
     number of units:          18
     number of units for CBMC growth:          18
@@ -1381,24 +1380,24 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  -5690.00000000000       K
-    bead            1  beadtype           56  Tr-UA CH benzene6
-    bead            2  beadtype           56  Tr-UA CH benzene6
-    bead            3  beadtype           56  Tr-UA CH benzene6
-    bead            4  beadtype           56  Tr-UA CH benzene6
-    bead            5  beadtype           60  Tr-UA C arom naph
-    bead            6  beadtype           60  Tr-UA C arom naph
-    bead            7  beadtype           60  Tr-UA C arom naph
-    bead            8  beadtype           60  Tr-UA C arom naph
-    bead            9  beadtype           60  Tr-UA C arom naph
-    bead           10  beadtype           60  Tr-UA C arom naph
-    bead           11  beadtype           56  Tr-UA CH benzene6
-    bead           12  beadtype           56  Tr-UA CH benzene6
-    bead           13  beadtype           56  Tr-UA CH benzene6
-    bead           14  beadtype           56  Tr-UA CH benzene6
-    bead           15  beadtype           56  Tr-UA CH benzene6
-    bead           16  beadtype           56  Tr-UA CH benzene6
-    bead           17  beadtype           56  Tr-UA CH benzene6
-    bead           18  beadtype           56  Tr-UA CH benzene6
+    bead            1  beadtype           56 C   
+    bead            2  beadtype           56 C   
+    bead            3  beadtype           56 C   
+    bead            4  beadtype           56 C   
+    bead            5  beadtype           60 C   
+    bead            6  beadtype           60 C   
+    bead            7  beadtype           60 C   
+    bead            8  beadtype           60 C   
+    bead            9  beadtype           60 C   
+    bead           10  beadtype           60 C   
+    bead           11  beadtype           56 C   
+    bead           12  beadtype           56 C   
+    bead           13  beadtype           56 C   
+    bead           14  beadtype           56 C   
+    bead           15  beadtype           56 C   
+    bead           16  beadtype           56 C   
+    bead           17  beadtype           56 C   
+    bead           18  beadtype           56 C   
  molecule type:          31
     number of units:          16
     number of units for CBMC growth:          16
@@ -1419,22 +1418,22 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  -4820.00000000000       K
-    bead            1  beadtype           60  Tr-UA C arom naph
-    bead            2  beadtype           56  Tr-UA CH benzene6
-    bead            3  beadtype           56  Tr-UA CH benzene6
-    bead            4  beadtype           56  Tr-UA CH benzene6
-    bead            5  beadtype           60  Tr-UA C arom naph
-    bead            6  beadtype           60  Tr-UA C arom naph
-    bead            7  beadtype           56  Tr-UA CH benzene6
-    bead            8  beadtype           60  Tr-UA C arom naph
-    bead            9  beadtype           56  Tr-UA CH benzene6
-    bead           10  beadtype           60  Tr-UA C arom naph
-    bead           11  beadtype           60  Tr-UA C arom naph
-    bead           12  beadtype           56  Tr-UA CH benzene6
-    bead           13  beadtype           56  Tr-UA CH benzene6
-    bead           14  beadtype           56  Tr-UA CH benzene6
-    bead           15  beadtype           56  Tr-UA CH benzene6
-    bead           16  beadtype           56  Tr-UA CH benzene6
+    bead            1  beadtype           60 C   
+    bead            2  beadtype           56 C   
+    bead            3  beadtype           56 C   
+    bead            4  beadtype           56 C   
+    bead            5  beadtype           60 C   
+    bead            6  beadtype           60 C   
+    bead            7  beadtype           56 C   
+    bead            8  beadtype           60 C   
+    bead            9  beadtype           56 C   
+    bead           10  beadtype           60 C   
+    bead           11  beadtype           60 C   
+    bead           12  beadtype           56 C   
+    bead           13  beadtype           56 C   
+    bead           14  beadtype           56 C   
+    bead           15  beadtype           56 C   
+    bead           16  beadtype           56 C   
  molecule type:          32
     number of units:          18
     number of units for CBMC growth:          18
@@ -1455,24 +1454,24 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  -5370.00000000000       K
-    bead            1  beadtype           56  Tr-UA CH benzene6
-    bead            2  beadtype           56  Tr-UA CH benzene6
-    bead            3  beadtype           60  Tr-UA C arom naph
-    bead            4  beadtype           60  Tr-UA C arom naph
-    bead            5  beadtype           56  Tr-UA CH benzene6
-    bead            6  beadtype           56  Tr-UA CH benzene6
-    bead            7  beadtype           60  Tr-UA C arom naph
-    bead            8  beadtype           60  Tr-UA C arom naph
-    bead            9  beadtype           56  Tr-UA CH benzene6
-    bead           10  beadtype           56  Tr-UA CH benzene6
-    bead           11  beadtype           60  Tr-UA C arom naph
-    bead           12  beadtype           60  Tr-UA C arom naph
-    bead           13  beadtype           56  Tr-UA CH benzene6
-    bead           14  beadtype           56  Tr-UA CH benzene6
-    bead           15  beadtype           56  Tr-UA CH benzene6
-    bead           16  beadtype           56  Tr-UA CH benzene6
-    bead           17  beadtype           56  Tr-UA CH benzene6
-    bead           18  beadtype           56  Tr-UA CH benzene6
+    bead            1  beadtype           56 C   
+    bead            2  beadtype           56 C   
+    bead            3  beadtype           60 C   
+    bead            4  beadtype           60 C   
+    bead            5  beadtype           56 C   
+    bead            6  beadtype           56 C   
+    bead            7  beadtype           60 C   
+    bead            8  beadtype           60 C   
+    bead            9  beadtype           56 C   
+    bead           10  beadtype           56 C   
+    bead           11  beadtype           60 C   
+    bead           12  beadtype           60 C   
+    bead           13  beadtype           56 C   
+    bead           14  beadtype           56 C   
+    bead           15  beadtype           56 C   
+    bead           16  beadtype           56 C   
+    bead           17  beadtype           56 C   
+    bead           18  beadtype           56 C   
  molecule type:          33
     number of units:          16
     number of units for CBMC growth:          16
@@ -1493,22 +1492,22 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  -4000.00000000000       K
-    bead            1  beadtype           56  Tr-UA CH benzene6
-    bead            2  beadtype           56  Tr-UA CH benzene6
-    bead            3  beadtype           60  Tr-UA C arom naph
-    bead            4  beadtype           60  Tr-UA C arom naph
-    bead            5  beadtype           56  Tr-UA CH benzene6
-    bead            6  beadtype           56  Tr-UA CH benzene6
-    bead            7  beadtype           60  Tr-UA C arom naph
-    bead            8  beadtype           60  Tr-UA C arom naph
-    bead            9  beadtype           56  Tr-UA CH benzene6
-    bead           10  beadtype           56  Tr-UA CH benzene6
-    bead           11  beadtype           60  Tr-UA C arom naph
-    bead           12  beadtype           60  Tr-UA C arom naph
-    bead           13  beadtype           56  Tr-UA CH benzene6
-    bead           14  beadtype           56  Tr-UA CH benzene6
-    bead           15  beadtype           56  Tr-UA CH benzene6
-    bead           16  beadtype           56  Tr-UA CH benzene6
+    bead            1  beadtype           56 C   
+    bead            2  beadtype           56 C   
+    bead            3  beadtype           60 C   
+    bead            4  beadtype           60 C   
+    bead            5  beadtype           56 C   
+    bead            6  beadtype           56 C   
+    bead            7  beadtype           60 C   
+    bead            8  beadtype           60 C   
+    bead            9  beadtype           56 C   
+    bead           10  beadtype           56 C   
+    bead           11  beadtype           60 C   
+    bead           12  beadtype           60 C   
+    bead           13  beadtype           56 C   
+    bead           14  beadtype           56 C   
+    bead           15  beadtype           56 C   
+    bead           16  beadtype           56 C   
  molecule type:          34
     number of units:          14
     number of units for CBMC growth:          14
@@ -1529,20 +1528,20 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  -3330.00000000000       K
-    bead            1  beadtype           56  Tr-UA CH benzene6
-    bead            2  beadtype           56  Tr-UA CH benzene6
-    bead            3  beadtype           60  Tr-UA C arom naph
-    bead            4  beadtype           60  Tr-UA C arom naph
-    bead            5  beadtype           56  Tr-UA CH benzene6
-    bead            6  beadtype           56  Tr-UA CH benzene6
-    bead            7  beadtype           60  Tr-UA C arom naph
-    bead            8  beadtype           60  Tr-UA C arom naph
-    bead            9  beadtype           56  Tr-UA CH benzene6
-    bead           10  beadtype           56  Tr-UA CH benzene6
-    bead           11  beadtype           60  Tr-UA C arom naph
-    bead           12  beadtype           60  Tr-UA C arom naph
-    bead           13  beadtype           56  Tr-UA CH benzene6
-    bead           14  beadtype           56  Tr-UA CH benzene6
+    bead            1  beadtype           56 C   
+    bead            2  beadtype           56 C   
+    bead            3  beadtype           60 C   
+    bead            4  beadtype           60 C   
+    bead            5  beadtype           56 C   
+    bead            6  beadtype           56 C   
+    bead            7  beadtype           60 C   
+    bead            8  beadtype           60 C   
+    bead            9  beadtype           56 C   
+    bead           10  beadtype           56 C   
+    bead           11  beadtype           60 C   
+    bead           12  beadtype           60 C   
+    bead           13  beadtype           56 C   
+    bead           14  beadtype           56 C   
  licell: F
  rintramax:  0.000000000000000E+000  A
  boxlink:           1
@@ -2609,7 +2608,7 @@
        box pair:           1           1
  pmcb:  0.600000000000000     
        CBMC probability for molecule type         1 (pmcbmt):  0.0000
-       CBMC probability for molecule type         2 (pmcbmt):  0.0500
+       CBMC probability for molecule type         2 (pmcbmt):  0.0000
        CBMC probability for molecule type         3 (pmcbmt):  0.0000
        CBMC probability for molecule type         4 (pmcbmt):  0.0000
        CBMC probability for molecule type         5 (pmcbmt):  0.0000
@@ -10165,7 +10164,7 @@
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -2814060.60422790     
+ coulombic energy  -2814060.60422789     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
  total energy      -3460542.84829406     
@@ -10229,10 +10228,10 @@
  
  Cycle   Total   Energy    Boxlength   Pressure  Molecules
  Box            1
- Type  1 bn     12.     13.     12.      8.     15.     14.
- max.displ.     0.3539    0.6577    0.4670    0.6550    0.1733    0.3298
- Type  2 bn      7.     14.     13.     13.      8.     15.
- max.displ.     0.9331    0.5002    0.6009    0.8867    0.5742    0.2732
+ Type  1 bn     10.      9.     14.     14.     11.     15.
+ max.displ.     0.5662    0.4750    0.4670    0.5347    0.4726    0.6157
+ Type  2 bn     10.     12.      9.     12.     10.     15.
+ max.displ.     0.4354    0.6808    0.5786    0.7471    0.4594    0.4781
  Type  3 bn      0.      0.      0.      0.      0.      0.
  max.displ.     0.3000    0.3000    0.3000    0.4000    0.4000    0.4000
  Type  4 bn      0.      0.      0.      0.      0.      0.
@@ -10243,12 +10242,12 @@
  max.displ.     0.3000    0.3000    0.3000    0.4000    0.4000    0.4000
  Type  7 bn      0.      0.      0.      0.      0.      0.
  max.displ.     0.3000    0.3000    0.3000    0.4000    0.4000    0.4000
- Type  8 bn      0.      0.      0.      0.      0.      0.
- max.displ.     0.0362    0.2163    0.1584    0.2681    0.0000    0.3687
- Type  9 bn      0.      0.      0.      0.      0.      0.
- max.displ.     0.8860    0.0921    0.0599    0.0000    0.3094    0.1723
- Type 10 bn      1.      0.      2.      1.      2.      2.
- max.displ.     3.4898    2.5081    0.0860    1.1372    0.0670    0.0628
+ Type  8 bn      0.      0.      0.      0.      0.      1.
+ max.displ.     0.0362    0.2163    0.1584    0.2681    0.0000    0.7375
+ Type  9 bn      0.      0.      1.      2.      0.      3.
+ max.displ.     0.8860    0.0921    0.1198    0.0000    0.3094    0.3447
+ Type 10 bn      0.      0.      0.      1.      1.      0.
+ max.displ.     1.7449    2.5081    0.0860    0.0569    0.0670    0.0628
  Type 11 bn      0.      0.      0.      0.      0.      0.
  max.displ.     0.0414    0.0434    0.1135    0.3770    0.2513    0.9552
  Type 12 bn      0.      0.      0.      0.      0.      0.
@@ -10263,8 +10262,8 @@
  max.displ.     0.0972    0.0835    0.1050    0.6210    0.0181    0.1720
  Type 17 bn      0.      0.      0.      0.      0.      0.
  max.displ.     1.8586    0.0709    0.0265    0.2039    0.1194    0.0369
- Type 18 bn      2.      1.      0.      0.      0.      1.
- max.displ.     0.7234    0.1768    0.0374    0.0186    0.3660    0.9631
+ Type 18 bn      1.      0.      2.      1.      3.      2.
+ max.displ.     0.0723    0.0884    0.0748    0.0372    0.0366    0.0482
  Type 19 bn      0.      0.      0.      0.      0.      0.
  max.displ.     0.0231    0.2284    0.3747    0.0493    0.1576    0.2135
  Type 20 bn      0.      0.      0.      0.      0.      0.
@@ -10298,10 +10297,10 @@
  Type 34 bn      0.      0.      0.      0.      0.      0.
  max.displ.     2.2105    0.6908    0.0216    0.5299    0.3312    0.2028
  Box            2
- Type  1 bn     39.     35.     37.     45.     29.     29.
- max.displ.     0.4958    0.3888    0.4350    0.3970    0.3689    0.3919
- Type  2 bn     30.     31.     27.     26.     28.     28.
- max.displ.     0.4254    0.4264    0.6735    0.6774    0.6187    0.8065
+ Type  1 bn     22.     49.     32.     37.     38.     32.
+ max.displ.     0.4395    0.3240    0.5559    0.5458    0.2815    0.4520
+ Type  2 bn     26.     30.     33.     20.     29.     32.
+ max.displ.     0.4908    0.6009    0.4821    0.5504    0.5547    0.6664
  Type  3 bn      0.      0.      0.      0.      0.      0.
  max.displ.     0.3000    0.3000    0.3000    0.4000    0.4000    0.4000
  Type  4 bn      0.      0.      0.      0.      0.      0.
@@ -10381,74 +10380,82 @@
  max.displ.     0.3000    0.3000    0.3000    0.4000    0.4000    0.4000
  Type  7 bn      0.      0.      0.      0.      0.      0.
  max.displ.     0.3000    0.3000    0.3000    0.4000    0.4000    0.4000
- Type  8 bn      1.      1.      3.      2.      2.      0.
+ Type  8 bn      0.      1.      3.      1.      1.      1.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type  9 bn      0.      1.      2.      1.      1.      5.
+ Type  9 bn      0.      0.      0.      1.      0.      1.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 10 bn      0.      0.      1.      0.      0.      0.
+ Type 10 bn      0.      0.      2.      0.      1.      0.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 11 bn      0.      0.      0.      0.      0.      0.
+ Type 11 bn      1.      4.      2.      0.      2.      1.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 12 bn      2.      2.      5.      1.      1.      1.
+ Type 12 bn      0.      3.      2.      2.      1.      0.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 13 bn      1.      0.      1.      1.      0.      1.
+ Type 13 bn      3.      1.      2.      1.      2.      3.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 14 bn      3.      0.      1.      0.      2.      0.
+ Type 14 bn      2.      3.      1.      3.      1.      1.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 15 bn      4.      2.      1.      0.      2.      1.
+ Type 15 bn      0.      4.      2.      2.      2.      1.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 16 bn      1.      2.      0.      1.      2.      1.
+ Type 16 bn      0.      2.      1.      0.      0.      2.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 17 bn      1.      0.      0.      0.      2.      1.
+ Type 17 bn      3.      0.      2.      2.      3.      1.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 18 bn      0.      0.      0.      0.      0.      1.
+ Type 18 bn      0.      0.      0.      0.      0.      0.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 19 bn      1.      3.      1.      1.      2.      2.
+ Type 19 bn      0.      1.      1.      2.      0.      1.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 20 bn      0.      2.      0.      1.      1.      2.
+ Type 20 bn      2.      1.      3.      1.      0.      2.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 21 bn      0.      1.      1.      0.      1.      2.
+ Type 21 bn      1.      1.      1.      0.      0.      1.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 22 bn      2.      1.      1.      2.      1.      3.
+ Type 22 bn      0.      1.      0.      1.      1.      1.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 23 bn      2.      1.      1.      1.      0.      1.
+ Type 23 bn      1.      1.      1.      1.      0.      0.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 24 bn      0.      0.      0.      2.      1.      0.
+ Type 24 bn      6.      3.      0.      0.      0.      3.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 25 bn      2.      1.      3.      1.      0.      3.
+ Type 25 bn      1.      0.      1.      0.      1.      2.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 26 bn      1.      4.      1.      1.      3.      5.
+ Type 26 bn      1.      1.      1.      1.      0.      1.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 27 bn      0.      0.      1.      1.      1.      0.
+ Type 27 bn      0.      2.      1.      0.      0.      0.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 28 bn      1.      1.      1.      2.      0.      1.
+ Type 28 bn      1.      1.      1.      1.      0.      1.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 29 bn      2.      4.      1.      2.      1.      0.
+ Type 29 bn      1.      0.      1.      0.      0.      1.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 30 bn      0.      1.      3.      3.      3.      3.
+ Type 30 bn      2.      1.      0.      2.      1.      1.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 31 bn      3.      1.      0.      0.      2.      1.
+ Type 31 bn      1.      2.      2.      1.      2.      1.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 32 bn      0.      2.      4.      1.      4.      0.
+ Type 32 bn      0.      2.      0.      1.      1.      2.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 33 bn      0.      1.      1.      2.      2.      1.
+ Type 33 bn      0.      3.      2.      0.      0.      2.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 34 bn      1.      1.      0.      2.      0.      0.
+ Type 34 bn      3.      1.      0.      0.      0.      2.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
+     1   12723 -0.2866E+08    20.000         0.0  86 222 192 312   0  30  18   0   1   0   0   0   0   0   0
+     0       0  0.1401E-44     0.000         0.0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+               -0.3454E+07    40.130         0.0 314 578   0   0   0   0   0   0   0   0   0   0   0   0   0
+                0.0000E+00     0.000         0.0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
+                0.0000E+00
+                0.0000E+00   134.228         0.0   0   0   0   0  22   0   0   1   0   1   1   1   1   1   1
+                0.1401E-44     0.000         0.0   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
+                0.1401E-44
  
  +++++ end of markov chain +++++
  
  ### Translations ###
  
  molecule typ =           1  in box           1
- x-dir: attempts =      12.0   ratio = 0.500   max.displ. = 0.3539E+00
- y-dir: attempts =      13.0   ratio = 0.769   max.displ. = 0.6577E+00
- z-dir: attempts =      12.0   ratio = 0.500   max.displ. = 0.4670E+00
+ x-dir: attempts =      10.0   ratio = 0.800   max.displ. = 0.5662E+00
+ y-dir: attempts =       9.0   ratio = 0.556   max.displ. = 0.4750E+00
+ z-dir: attempts =      14.0   ratio = 0.500   max.displ. = 0.4670E+00
  
  molecule typ =           2  in box           1
- x-dir: attempts =       7.0   ratio = 0.857   max.displ. = 0.9331E+00
- y-dir: attempts =      14.0   ratio = 0.429   max.displ. = 0.5002E+00
- z-dir: attempts =      13.0   ratio = 0.462   max.displ. = 0.6009E+00
+ x-dir: attempts =      10.0   ratio = 0.400   max.displ. = 0.4354E+00
+ y-dir: attempts =      12.0   ratio = 0.583   max.displ. = 0.6808E+00
+ z-dir: attempts =       9.0   ratio = 0.444   max.displ. = 0.5786E+00
  
  molecule typ =           3  in box           1
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3000E+00
@@ -10483,12 +10490,12 @@
  molecule typ =           9  in box           1
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8860E+00
  y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.9209E-01
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.5988E-01
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.1198E+00
  
  molecule typ =          10  in box           1
- x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3490E+01
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.1745E+01
  y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.2508E+01
- z-dir: attempts =       2.0   ratio = 0.500   max.displ. = 0.8603E-01
+ z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8603E-01
  
  molecule typ =          11  in box           1
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.4143E-01
@@ -10526,9 +10533,9 @@
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.2647E-01
  
  molecule typ =          18  in box           1
- x-dir: attempts =       2.0   ratio = 0.500   max.displ. = 0.7234E+00
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.1768E+00
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3741E-01
+ x-dir: attempts =       1.0   ratio = 0.000   max.displ. = 0.7234E-01
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8838E-01
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.7483E-01
  
  molecule typ =          19  in box           1
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.2313E-01
@@ -10611,14 +10618,14 @@
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.2159E-01
  
  molecule typ =           1  in box           2
- x-dir: attempts =      39.0   ratio = 0.564   max.displ. = 0.4958E+00
- y-dir: attempts =      35.0   ratio = 0.514   max.displ. = 0.3888E+00
- z-dir: attempts =      37.0   ratio = 0.514   max.displ. = 0.4350E+00
+ x-dir: attempts =      22.0   ratio = 0.500   max.displ. = 0.4395E+00
+ y-dir: attempts =      49.0   ratio = 0.429   max.displ. = 0.3240E+00
+ z-dir: attempts =      32.0   ratio = 0.656   max.displ. = 0.5559E+00
  
  molecule typ =           2  in box           2
- x-dir: attempts =      30.0   ratio = 0.433   max.displ. = 0.4254E+00
- y-dir: attempts =      31.0   ratio = 0.355   max.displ. = 0.4264E+00
- z-dir: attempts =      27.0   ratio = 0.593   max.displ. = 0.6735E+00
+ x-dir: attempts =      26.0   ratio = 0.500   max.displ. = 0.4908E+00
+ y-dir: attempts =      30.0   ratio = 0.500   max.displ. = 0.6009E+00
+ z-dir: attempts =      33.0   ratio = 0.424   max.displ. = 0.4821E+00
  
  molecule typ =           3  in box           2
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3000E+00
@@ -10816,54 +10823,54 @@
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3000E+00
  
  molecule typ =           8  in box           3
- x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
  y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
  z-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  molecule typ =           9  in box           3
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
  
  molecule typ =          10  in box           3
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
  y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  molecule typ =          11  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       4.0   ratio = 1.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  molecule typ =          12  in box           3
- x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
- y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       5.0   ratio = 1.000   max.displ. = 0.8000E+02
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  molecule typ =          13  in box           3
- x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ x-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  molecule typ =          14  in box           3
- x-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
  z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  molecule typ =          15  in box           3
- x-dir: attempts =       4.0   ratio = 1.000   max.displ. = 0.8000E+02
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       4.0   ratio = 1.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
+ 
+ molecule typ =          16  in box           3
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
  y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
  z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
  
- molecule typ =          16  in box           3
- x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- 
  molecule typ =          17  in box           3
- x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ x-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
  y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  molecule typ =          18  in box           3
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
@@ -10871,48 +10878,48 @@
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
  
  molecule typ =          19  in box           3
- x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- y-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
  z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  molecule typ =          20  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- 
- molecule typ =          21  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- 
- molecule typ =          22  in box           3
- x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- 
- molecule typ =          23  in box           3
- x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- 
- molecule typ =          24  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- 
- molecule typ =          25  in box           3
  x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
  y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
  z-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
  
+ molecule typ =          21  in box           3
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ 
+ molecule typ =          22  in box           3
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ 
+ molecule typ =          23  in box           3
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ 
+ molecule typ =          24  in box           3
+ x-dir: attempts =       6.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ 
+ molecule typ =          25  in box           3
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ 
  molecule typ =          26  in box           3
  x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- y-dir: attempts =       4.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
  z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  molecule typ =          27  in box           3
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
  z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  molecule typ =          28  in box           3
@@ -10921,46 +10928,46 @@
  z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  molecule typ =          29  in box           3
- x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
- y-dir: attempts =       4.0   ratio = 1.000   max.displ. = 0.8000E+02
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
  z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  molecule typ =          30  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
- 
- molecule typ =          31  in box           3
- x-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
+ x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
  y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ 
+ molecule typ =          31  in box           3
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  molecule typ =          32  in box           3
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
  y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       4.0   ratio = 1.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
  
  molecule typ =          33  in box           3
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  molecule typ =          34  in box           3
- x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ x-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
  y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
  
  ### Rotations ###
  
  molecule typ =           1  in box           1
- x-dir: attempts =       8.0   ratio = 0.875   max.displ. = 0.6550E+00
- y-dir: attempts =      15.0   ratio = 0.133   max.displ. = 0.1733E+00
- z-dir: attempts =      14.0   ratio = 0.357   max.displ. = 0.3298E+00
+ x-dir: attempts =      14.0   ratio = 0.714   max.displ. = 0.5347E+00
+ y-dir: attempts =      11.0   ratio = 0.364   max.displ. = 0.4726E+00
+ z-dir: attempts =      15.0   ratio = 0.667   max.displ. = 0.6157E+00
  
  molecule typ =           2  in box           1
- x-dir: attempts =      13.0   ratio = 0.692   max.displ. = 0.8867E+00
- y-dir: attempts =       8.0   ratio = 0.500   max.displ. = 0.5742E+00
- z-dir: attempts =      15.0   ratio = 0.267   max.displ. = 0.2732E+00
+ x-dir: attempts =      12.0   ratio = 0.583   max.displ. = 0.7471E+00
+ y-dir: attempts =      10.0   ratio = 0.400   max.displ. = 0.4594E+00
+ z-dir: attempts =      15.0   ratio = 0.467   max.displ. = 0.4781E+00
  
  molecule typ =           3  in box           1
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.4000E+00
@@ -10990,17 +10997,17 @@
  molecule typ =           8  in box           1
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.2681E+00
  y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.0000E+00
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3687E+00
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.7375E+00
  
  molecule typ =           9  in box           1
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.0000E+00
+ x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.0000E+00
  y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3094E+00
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.1723E+00
+ z-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.3447E+00
  
  molecule typ =          10  in box           1
- x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.1137E+01
- y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.6702E-01
- z-dir: attempts =       2.0   ratio = 0.500   max.displ. = 0.6283E-01
+ x-dir: attempts =       1.0   ratio = 0.000   max.displ. = 0.5686E-01
+ y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.6702E-01
+ z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.6283E-01
  
  molecule typ =          11  in box           1
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3770E+00
@@ -11038,9 +11045,9 @@
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3686E-01
  
  molecule typ =          18  in box           1
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.1859E-01
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3660E+00
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.9631E+00
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3718E-01
+ y-dir: attempts =       3.0   ratio = 0.000   max.displ. = 0.3660E-01
+ z-dir: attempts =       2.0   ratio = 0.000   max.displ. = 0.4816E-01
  
  molecule typ =          19  in box           1
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.4925E-01
@@ -11123,14 +11130,14 @@
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.2028E+00
  
  molecule typ =           1  in box           2
- x-dir: attempts =      45.0   ratio = 0.511   max.displ. = 0.3970E+00
- y-dir: attempts =      29.0   ratio = 0.414   max.displ. = 0.3689E+00
- z-dir: attempts =      29.0   ratio = 0.379   max.displ. = 0.3919E+00
+ x-dir: attempts =      37.0   ratio = 0.703   max.displ. = 0.5458E+00
+ y-dir: attempts =      38.0   ratio = 0.316   max.displ. = 0.2815E+00
+ z-dir: attempts =      32.0   ratio = 0.438   max.displ. = 0.4520E+00
  
  molecule typ =           2  in box           2
- x-dir: attempts =      26.0   ratio = 0.615   max.displ. = 0.6774E+00
- y-dir: attempts =      28.0   ratio = 0.500   max.displ. = 0.6187E+00
- z-dir: attempts =      28.0   ratio = 0.643   max.displ. = 0.8065E+00
+ x-dir: attempts =      20.0   ratio = 0.500   max.displ. = 0.5504E+00
+ y-dir: attempts =      29.0   ratio = 0.448   max.displ. = 0.5547E+00
+ z-dir: attempts =      32.0   ratio = 0.531   max.displ. = 0.6664E+00
  
  molecule typ =           3  in box           2
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.4000E+00
@@ -11328,139 +11335,139 @@
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.4000E+00
  
  molecule typ =           8  in box           3
- x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =           9  in box           3
  x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- z-dir: attempts =       5.0   ratio = 1.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          10  in box           3
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
  
  molecule typ =          11  in box           3
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          12  in box           3
- x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
  y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
  
  molecule typ =          13  in box           3
  x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          14  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ x-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          15  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
  y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
  z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          16  in box           3
- x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          17  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.3142E+01
  z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          18  in box           3
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
  y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
  
  molecule typ =          19  in box           3
- x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
- z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          20  in box           3
  x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
  z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          21  in box           3
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          22  in box           3
- x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- z-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          23  in box           3
  x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- 
- molecule typ =          24  in box           3
- x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
  
- molecule typ =          25  in box           3
- x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ molecule typ =          24  in box           3
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
  y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
  z-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.3142E+01
  
+ molecule typ =          25  in box           3
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ 
  molecule typ =          26  in box           3
  x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.3142E+01
- z-dir: attempts =       5.0   ratio = 1.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          27  in box           3
- x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
  
  molecule typ =          28  in box           3
- x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
  z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          29  in box           3
- x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          30  in box           3
- x-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.3142E+01
- z-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.3142E+01
+ x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          31  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
  z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          32  in box           3
  x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       4.0   ratio = 1.000   max.displ. = 0.3142E+01
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          33  in box           3
- x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          34  in box           3
- x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
  y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  
  ### Configurational-bias ###
@@ -11469,7 +11476,6 @@
      length  attempts  succ.growth  accepted   %su.gr.    %accep.
  molecule typ =           2
      length  attempts  succ.growth  accepted   %su.gr.    %accep.
-        2      11.0       3.0       0.0     27.27      0.00
  molecule typ =           3
      length  attempts  succ.growth  accepted   %su.gr.    %accep.
  molecule typ =           4
@@ -11478,35 +11484,35 @@
      length  attempts  succ.growth  accepted   %su.gr.    %accep.
  molecule typ =           6
      length  attempts  succ.growth  accepted   %su.gr.    %accep.
-        1      19.0      19.0      11.0    100.00     57.89
+        1      45.0      45.0      24.0    100.00     53.33
  molecule typ =           7
      length  attempts  succ.growth  accepted   %su.gr.    %accep.
-        1       5.0       5.0       3.0    100.00     60.00
-        2       9.0       9.0       6.0    100.00     66.67
-        3      15.0      15.0       5.0    100.00     33.33
-        4      15.0      15.0       4.0    100.00     26.67
-        5      11.0      10.0       2.0     90.91     18.18
-        6      18.0      17.0       2.0     94.44     11.11
-        7      17.0      16.0       1.0     94.12      5.88
-        8       7.0       6.0       0.0     85.71      0.00
-        9       7.0       6.0       0.0     85.71      0.00
-       10      18.0      13.0       0.0     72.22      0.00
-       11       4.0       2.0       0.0     50.00      0.00
-       12      14.0      11.0       0.0     78.57      0.00
-       13      13.0       9.0       1.0     69.23      7.69
-       14      13.0      11.0       0.0     84.62      0.00
-       15      12.0       9.0       0.0     75.00      0.00
-       16      16.0       9.0       0.0     56.25      0.00
+        1      14.0      14.0       9.0    100.00     64.29
+        2      16.0      16.0      11.0    100.00     68.75
+        3      14.0      14.0       6.0    100.00     42.86
+        4       9.0       9.0       3.0    100.00     33.33
+        5      13.0      13.0       6.0    100.00     46.15
+        6      13.0      13.0       2.0    100.00     15.38
+        7      14.0      14.0       1.0    100.00      7.14
+        8      11.0       8.0       1.0     72.73      9.09
+        9      14.0      14.0       0.0    100.00      0.00
+       10      16.0      16.0       0.0    100.00      0.00
+       11       9.0       8.0       2.0     88.89     22.22
+       12       7.0       3.0       0.0     42.86      0.00
+       13      13.0      10.0       0.0     76.92      0.00
+       14      15.0      12.0       0.0     80.00      0.00
+       15      13.0       9.0       0.0     69.23      0.00
+       16      17.0      11.0       0.0     64.71      0.00
   SAFE-CBMC move 
      length  attempts  succ.growth  accepted   %su.gr.    %accep.
-        1      25.0      25.0      24.0    100.00     96.00
-        2      25.0      25.0      13.0    100.00     52.00
-        3      18.0      18.0       3.0    100.00     16.67
-        4      13.0      13.0       3.0    100.00     23.08
-        5      17.0      17.0       1.0    100.00      5.88
-        6      11.0      10.0       0.0     90.91      0.00
-        7       5.0       3.0       0.0     60.00      0.00
-        8       8.0       8.0       0.0    100.00      0.00
+        1      29.0      29.0      27.0    100.00     93.10
+        2      19.0      19.0       3.0    100.00     15.79
+        3      20.0      20.0       4.0    100.00     20.00
+        4      18.0      18.0       0.0    100.00      0.00
+        5      11.0      11.0       0.0    100.00      0.00
+        6      18.0      18.0       0.0    100.00      0.00
+        7       9.0       7.0       0.0     77.78      0.00
+        8       9.0       7.0       0.0     77.78      0.00
  molecule typ =           8
      length  attempts  succ.growth  accepted   %su.gr.    %accep.
  molecule typ =           9
@@ -11565,8 +11571,8 @@
  
  ### Volume change       ###
  attempts =     0.0   ratio = 0.000   max.displ. = 0.1000E+00
- attempts =     5.0   ratio = 0.600   max.displ. = 0.6267E+03
- attempts =     0.0   ratio = 0.000   max.displ. = 0.6889E+06
+ attempts =     0.0   ratio = 0.000   max.displ. = 0.6267E+03
+ attempts =     1.0   ratio = 1.000   max.displ. = 0.6889E+06
  
  ### Molecule swap       ###
  
@@ -11574,23 +11580,23 @@
 between box  1 and  2 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
 between box  1 and  2 into box 2   uattempts =         0.0 attempts =      0.0   accepted =     0.0
 between box  1 and  3 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  1 and  3 into box 3   uattempts =         5.0 attempts =      5.0   accepted =     0.0
+between box  1 and  3 into box 3   uattempts =         8.0 attempts =      8.0   accepted =     0.0
  suc.growth % =100.000   accepted % =  0.000
 between box  2 and  3 into box 2   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  2 and  3 into box 3   uattempts =         4.0 attempts =      4.0   accepted =     0.0
+between box  2 and  3 into box 3   uattempts =         5.0 attempts =      5.0   accepted =     0.0
  suc.growth % =100.000   accepted % =  0.000
 number of times move in:          0.0  accepted=     0.0
 number of times move out:          0.0  accepted=     0.0
  molecule typ =           2
-between box  1 and  2 into box 1   uattempts =         4.0 attempts =      4.0   accepted =     0.0
+between box  1 and  2 into box 1   uattempts =         8.0 attempts =      8.0   accepted =     0.0
  suc.growth % =100.000   accepted % =  0.000
-between box  1 and  2 into box 2   uattempts =         4.0 attempts =      4.0   accepted =     0.0
+between box  1 and  2 into box 2   uattempts =         1.0 attempts =      1.0   accepted =     0.0
  suc.growth % =100.000   accepted % =  0.000
 between box  1 and  3 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  1 and  3 into box 3   uattempts =         8.0 attempts =      8.0   accepted =     0.0
+between box  1 and  3 into box 3   uattempts =         4.0 attempts =      4.0   accepted =     0.0
  suc.growth % =100.000   accepted % =  0.000
 between box  2 and  3 into box 2   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  2 and  3 into box 3   uattempts =         9.0 attempts =      9.0   accepted =     0.0
+between box  2 and  3 into box 3   uattempts =         8.0 attempts =      8.0   accepted =     0.0
  suc.growth % =100.000   accepted % =  0.000
 number of times move in:          0.0  accepted=     0.0
 number of times move out:          0.0  accepted=     0.0
@@ -11617,10 +11623,10 @@ number of times move out:          0.0  accepted=     0.0
  molecule typ =           8
 between box  1 and  2 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
 between box  1 and  2 into box 2   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  1 and  3 into box 1   uattempts =        48.0 attempts =     48.0   accepted =     4.0
- suc.growth % = 85.417   accepted % =  8.333
-between box  1 and  3 into box 3   uattempts =         5.0 attempts =      5.0   accepted =     4.0
- suc.growth % =100.000   accepted % = 80.000
+between box  1 and  3 into box 1   uattempts =        43.0 attempts =     43.0   accepted =     4.0
+ suc.growth % = 88.372   accepted % =  9.302
+between box  1 and  3 into box 3   uattempts =         4.0 attempts =      4.0   accepted =     4.0
+ suc.growth % =100.000   accepted % =100.000
 between box  2 and  3 into box 2   uattempts =         0.0 attempts =      0.0   accepted =     0.0
 between box  2 and  3 into box 3   uattempts =         0.0 attempts =      0.0   accepted =     0.0
 number of times move in:          0.0  accepted=     0.0
@@ -11744,111 +11750,111 @@ number of times move out:          0.0  accepted=     0.0
  
  pair typ =           1
  moltyps =            8  and           9
-between box  1 and  3   uattempts =        11.0  attempts =      0.0  accepted =     0.0
- accepted % =    NaN
+between box  1 and  3   uattempts =        14.0  attempts =      4.0  accepted =     0.0
+ accepted % =  0.000
  pair typ =           2
  moltyps =            9  and          10
-between box  1 and  3   uattempts =        11.0  attempts =      5.0  accepted =     4.0
- accepted % = 80.000
+between box  1 and  3   uattempts =         7.0  attempts =      5.0  accepted =     5.0
+ accepted % =100.000
  pair typ =           3
  moltyps =           10  and          11
-between box  1 and  3   uattempts =        10.0  attempts =      5.0  accepted =     0.0
+between box  1 and  3   uattempts =         7.0  attempts =      3.0  accepted =     0.0
  accepted % =  0.000
  pair typ =           4
  moltyps =           11  and          12
-between box  1 and  3   uattempts =         5.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =         9.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =           5
  moltyps =           12  and          13
-between box  1 and  3   uattempts =         5.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =         9.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =           6
  moltyps =           13  and          14
-between box  1 and  3   uattempts =        15.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =        14.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =           7
  moltyps =           14  and          15
-between box  1 and  3   uattempts =        15.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =        16.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =           8
  moltyps =           15  and          16
-between box  1 and  3   uattempts =        19.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =        15.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =           9
  moltyps =           16  and          17
-between box  1 and  3   uattempts =        20.0  attempts =      2.0  accepted =     0.0
- accepted % =  0.000
+between box  1 and  3   uattempts =        21.0  attempts =      0.0  accepted =     0.0
+ accepted % =    NaN
  pair typ =          10
  moltyps =           17  and          18
-between box  1 and  3   uattempts =        18.0  attempts =     11.0  accepted =     6.0
- accepted % = 54.545
+between box  1 and  3   uattempts =        10.0  attempts =      2.0  accepted =     0.0
+ accepted % =  0.000
  pair typ =          11
  moltyps =           18  and          19
-between box  1 and  3   uattempts =        16.0  attempts =      5.0  accepted =     2.0
- accepted % = 40.000
+between box  1 and  3   uattempts =        12.0  attempts =      7.0  accepted =     0.0
+ accepted % =  0.000
  pair typ =          12
  moltyps =           17  and          20
-between box  1 and  3   uattempts =        17.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =        16.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =          13
  moltyps =           20  and          21
-between box  1 and  3   uattempts =        16.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =        11.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =          14
  moltyps =           15  and          22
-between box  1 and  3   uattempts =        17.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =        19.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =          15
  moltyps =           22  and          24
-between box  1 and  3   uattempts =        18.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =        15.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =          16
  moltyps =           23  and          24
-between box  1 and  3   uattempts =        21.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =        23.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =          17
  moltyps =           24  and          21
-between box  1 and  3   uattempts =        13.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =        17.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =          18
  moltyps =           23  and          25
-between box  1 and  3   uattempts =        10.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =        22.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =          19
  moltyps =           25  and          26
-between box  1 and  3   uattempts =        15.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =        18.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =          20
  moltyps =           23  and          27
-between box  1 and  3   uattempts =        13.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =        15.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =          21
  moltyps =           27  and          28
-between box  1 and  3   uattempts =        20.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =        10.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =          22
  moltyps =           23  and          29
-between box  1 and  3   uattempts =        12.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =        18.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =          23
  moltyps =           29  and          30
-between box  1 and  3   uattempts =        22.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =        16.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =          24
  moltyps =           23  and          31
-between box  1 and  3   uattempts =        20.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =        13.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =          25
  moltyps =           16  and          22
-between box  1 and  3   uattempts =        16.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =        12.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =          26
  moltyps =           18  and          20
-between box  1 and  3   uattempts =        14.0  attempts =      6.0  accepted =     0.0
+between box  1 and  3   uattempts =        17.0  attempts =     11.0  accepted =     0.0
  accepted % =  0.000
  pair typ =          27
  moltyps =           20  and          24
-between box  1 and  3   uattempts =        18.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =        21.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =          28
  moltyps =           24  and          25
@@ -11856,47 +11862,47 @@ between box  1 and  3   uattempts =        14.0  attempts =      0.0  accepted =
  accepted % =    NaN
  pair typ =          29
  moltyps =           24  and          27
-between box  1 and  3   uattempts =        18.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =        12.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =          30
  moltyps =           24  and          29
-between box  1 and  3   uattempts =        34.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =        28.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =          31
  moltyps =           25  and          27
-between box  1 and  3   uattempts =        17.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =        14.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =          32
  moltyps =           25  and          29
-between box  1 and  3   uattempts =        21.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =        17.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =          33
  moltyps =           27  and          29
-between box  1 and  3   uattempts =        16.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =        17.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =          34
  moltyps =           23  and          34
-between box  1 and  3   uattempts =        10.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =        14.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =          35
  moltyps =           34  and          33
-between box  1 and  3   uattempts =         4.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =         5.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =          36
  moltyps =           33  and          32
-between box  1 and  3   uattempts =         4.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =         6.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
  pair typ =          37
  moltyps =           28  and          32
-between box  1 and  3   uattempts =         8.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts =         9.0  attempts =      0.0  accepted =     0.0
  accepted % =    NaN
-
+ 
  ### Charge Fluctuation  ###
  
  
  ### Expanded Ensemble Move  ###
  
- 
+
 New Biasing Potential
 
 molecule  1:  -1500.00000     -1500.00000      0.00000000    
@@ -11932,8 +11938,8 @@ molecule 30:   0.00000000      0.00000000     -5690.00000
 molecule 31:   0.00000000      0.00000000     -4820.00000    
 molecule 32:   0.00000000      0.00000000     -5370.00000    
 molecule 33:   0.00000000      0.00000000     -4000.00000    
-molecule 34:   0.00000000      0.00000000     -3330.00000    
-
+molecule 34:   0.00000000      0.00000000     -3330.00000     
+ 
  sumup control
  number of chains         862
  number of chains of type           1          86
@@ -11944,8 +11950,8 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  number of chains of type           6          30
  number of chains of type           7          18
  number of chains of type           8           0
- number of chains of type           9           0
- number of chains of type          10           1
+ number of chains of type           9           1
+ number of chains of type          10           0
  number of chains of type          11           0
  number of chains of type          12           0
  number of chains of type          13           0
@@ -11970,16 +11976,19 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  number of chains of type          32           0
  number of chains of type          33           0
  number of chains of type          34           0
- inter lj energy    4819886.98456207     
- intra lj energy   -27116.0336218033     
+ inter lj energy    4814331.70457185     
+ intra lj energy   -27797.0195350598     
  bond vibration    0.000000000000000E+000
- bond bending       277124.752486454     
- torsional          105021.846526314     
+ bond bending       271528.203716425     
+ torsional          102785.406427291     
  external          0.000000000000000E+000
- coulombic energy  -33818112.8001555     
+ coulombic energy  -33819497.9142066     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -28643195.2502024     
+ total energy      -28658649.6190261     
+ ### problem with energy ###  box            1
+  Total energy:   -28658649.6190261       -28658649.6188487     
+ -1.774057745933533E-004
  
  sumup control
  number of chains         892
@@ -12017,16 +12026,16 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  number of chains of type          32           0
  number of chains of type          33           0
  number of chains of type          34           0
- inter lj energy   -627119.313962723     
+ inter lj energy   -638893.871080297     
  intra lj energy   0.000000000000000E+000
  bond vibration    0.000000000000000E+000
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -2835585.18364294     
+ coulombic energy  -2814893.50983322     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -3462704.49760566     
+ total energy      -3453787.38091351     
  
  sumup control
  number of chains          47
@@ -12038,8 +12047,8 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  number of chains of type           6           0
  number of chains of type           7           0
  number of chains of type           8           1
- number of chains of type           9           1
- number of chains of type          10           0
+ number of chains of type           9           0
+ number of chains of type          10           1
  number of chains of type          11           1
  number of chains of type          12           1
  number of chains of type          13           1
@@ -12075,23 +12084,23 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  well energy       0.000000000000000E+000
  total energy      0.000000000000000E+000
  
- vstart       =    -28653815.6751322411     -3460542.8482940611            0.0000000000
- vend         =    -28643195.2502024360     -3462704.4976056614            0.0000000000
- vbox         =    -28643195.2501889206     -3462704.4976056493            0.0000000000
+ vstart       =    -28653815.6751322187     -3460542.8482940579            0.0000000000
+ vend         =    -28658649.6190261133     -3453787.3809135128            0.0000000000
+ vbox         =    -28658649.6188487075     -3453787.3809134602            0.0000000000
  
  Averages and fluctuations                            Box 1       Box 2       Box 3
  
  pressure                               [kPa] =        0.00        0.00        0.00
  pressure                  [simulation units] =    0.000000    0.000000    0.000000
  surface tension                       [mN/m] =      0.0000      0.0000      0.0000
- chem. potential of type       1          [K] =       0.000       0.000   -6181.513
- chem. potential of type       2          [K] =   -3851.082     670.260   -6580.578
+ chem. potential of type       1          [K] =       0.000       0.000   -6179.998
+ chem. potential of type       2          [K] =   -3545.854    1314.974   -6578.524
  chem. potential of type       3          [K] =       0.000       0.000       0.000
  chem. potential of type       4          [K] =       0.000       0.000       0.000
  chem. potential of type       5          [K] =       0.000       0.000       0.000
  chem. potential of type       6          [K] =       0.000       0.000       0.000
  chem. potential of type       7          [K] =       0.000       0.000       0.000
- chem. potential of type       8          [K] =   -4569.851       0.000   -6894.935
+ chem. potential of type       8          [K] =   -4850.478       0.000   -6894.935
  chem. potential of type       9          [K] =       0.000       0.000       0.000
  chem. potential of type      10          [K] =       0.000       0.000       0.000
  chem. potential of type      11          [K] =       0.000       0.000       0.000
@@ -12119,9 +12128,9 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  chem. potential of type      33          [K] =       0.000       0.000       0.000
  chem. potential of type      34          [K] =       0.000       0.000       0.000
  
- boxlength                                [A] =      20.000      40.051     134.915
- boxlength                                [A] =      25.980      40.051     134.915
- boxlength                                [A] =      90.000      40.051     134.915
+ boxlength                                [A] =      20.000      40.130     134.708
+ boxlength                                [A] =      25.980      40.130     134.708
+ boxlength                                [A] =      90.000      40.130     134.708
  no. of chains of type         1              =      86.000     314.000       0.000
  no. of chains of type         2              =     222.000     578.000       0.000
  no. of chains of type         3              =     192.000       0.000       0.000
@@ -12129,18 +12138,18 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  no. of chains of type         5              =       0.000       0.000      22.000
  no. of chains of type         6              =      30.000       0.000       0.000
  no. of chains of type         7              =      18.000       0.000       0.000
- no. of chains of type         8              =       0.052       0.000       0.948
- no. of chains of type         9              =       0.079       0.000       0.921
- no. of chains of type        10              =       0.921       0.000       0.079
+ no. of chains of type         8              =       0.109       0.000       0.891
+ no. of chains of type         9              =       0.617       0.000       0.383
+ no. of chains of type        10              =       0.383       0.000       0.617
  no. of chains of type        11              =       0.000       0.000       1.000
  no. of chains of type        12              =       0.000       0.000       1.000
  no. of chains of type        13              =       0.000       0.000       1.000
  no. of chains of type        14              =       0.000       0.000       1.000
  no. of chains of type        15              =       0.000       0.000       1.000
  no. of chains of type        16              =       0.000       0.000       1.000
- no. of chains of type        17              =       0.127       0.000       0.873
- no. of chains of type        18              =       0.862       0.000       0.138
- no. of chains of type        19              =       0.011       0.000       0.989
+ no. of chains of type        17              =       0.000       0.000       1.000
+ no. of chains of type        18              =       1.000       0.000       0.000
+ no. of chains of type        19              =       0.000       0.000       1.000
  no. of chains of type        20              =       0.000       0.000       1.000
  no. of chains of type        21              =       0.000       0.000       1.000
  no. of chains of type        22              =       0.000       0.000       1.000
@@ -12156,27 +12165,27 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  no. of chains of type        32              =       0.000       0.000       1.000
  no. of chains of type        33              =       0.000       0.000       1.000
  no. of chains of type        34              =       0.000       0.000       1.000
- molar volume                      [cm^3/mol] =      32.668      43.373   31499.577
- specific density                    [g/cm^3] =    1.114595    0.759524    0.002928
- number density of type        1 [chain/nm^3] =     1.83902     4.88751     0.00000
- number density of type        2 [chain/nm^3] =     4.74724     8.99676     0.00000
+ molar volume                      [cm^3/mol] =      32.666      43.631   31391.770
+ specific density                    [g/cm^3] =    1.114853    0.755033    0.002937
+ number density of type        1 [chain/nm^3] =     1.83902     4.85861     0.00000
+ number density of type        2 [chain/nm^3] =     4.74724     8.94356     0.00000
  number density of type        3 [chain/nm^3] =     4.10572     0.00000     0.00000
  number density of type        4 [chain/nm^3] =     6.67180     0.00000     0.00000
- number density of type        5 [chain/nm^3] =     0.00000     0.00000     0.00896
+ number density of type        5 [chain/nm^3] =     0.00000     0.00000     0.00900
  number density of type        6 [chain/nm^3] =     0.64152     0.00000     0.00000
  number density of type        7 [chain/nm^3] =     0.38491     0.00000     0.00000
- number density of type        8 [chain/nm^3] =     0.00110     0.00000     0.00039
- number density of type        9 [chain/nm^3] =     0.00170     0.00000     0.00037
- number density of type       10 [chain/nm^3] =     0.01969     0.00000     0.00003
+ number density of type        8 [chain/nm^3] =     0.00233     0.00000     0.00036
+ number density of type        9 [chain/nm^3] =     0.01320     0.00000     0.00016
+ number density of type       10 [chain/nm^3] =     0.00818     0.00000     0.00025
  number density of type       11 [chain/nm^3] =     0.00000     0.00000     0.00041
  number density of type       12 [chain/nm^3] =     0.00000     0.00000     0.00041
  number density of type       13 [chain/nm^3] =     0.00000     0.00000     0.00041
  number density of type       14 [chain/nm^3] =     0.00000     0.00000     0.00041
  number density of type       15 [chain/nm^3] =     0.00000     0.00000     0.00041
  number density of type       16 [chain/nm^3] =     0.00000     0.00000     0.00041
- number density of type       17 [chain/nm^3] =     0.00272     0.00000     0.00036
- number density of type       18 [chain/nm^3] =     0.01844     0.00000     0.00006
- number density of type       19 [chain/nm^3] =     0.00023     0.00000     0.00040
+ number density of type       17 [chain/nm^3] =     0.00000     0.00000     0.00041
+ number density of type       18 [chain/nm^3] =     0.02138     0.00000     0.00000
+ number density of type       19 [chain/nm^3] =     0.00000     0.00000     0.00041
  number density of type       20 [chain/nm^3] =     0.00000     0.00000     0.00041
  number density of type       21 [chain/nm^3] =     0.00000     0.00000     0.00041
  number density of type       22 [chain/nm^3] =     0.00000     0.00000     0.00041
@@ -12192,57 +12201,57 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  number density of type       32 [chain/nm^3] =     0.00000     0.00000     0.00041
  number density of type       33 [chain/nm^3] =     0.00000     0.00000     0.00041
  number density of type       34 [chain/nm^3] =     0.00000     0.00000     0.00041
- molfraction of type           1              =   0.0997620   0.3520179   0.0000000
- molfraction of type           2              =   0.2575252   0.6479821   0.0000000
- molfraction of type           3              =   0.2227245   0.0000000   0.0000000
- molfraction of type           4              =   0.3619273   0.0000000   0.0000000
- molfraction of type           5              =   0.0000000   0.0000000   0.4686106
- molfraction of type           6              =   0.0348007   0.0000000   0.0000000
- molfraction of type           7              =   0.0208804   0.0000000   0.0000000
- molfraction of type           8              =   0.0000598   0.0000000   0.0201779
- molfraction of type           9              =   0.0000921   0.0000000   0.0196111
- molfraction of type          10              =   0.0010679   0.0000000   0.0016894
- molfraction of type          11              =   0.0000000   0.0000000   0.0213005
- molfraction of type          12              =   0.0000000   0.0000000   0.0213005
- molfraction of type          13              =   0.0000000   0.0000000   0.0213005
- molfraction of type          14              =   0.0000000   0.0000000   0.0213005
- molfraction of type          15              =   0.0000000   0.0000000   0.0213005
- molfraction of type          16              =   0.0000000   0.0000000   0.0213005
- molfraction of type          17              =   0.0001475   0.0000000   0.0185869
- molfraction of type          18              =   0.0010003   0.0000000   0.0029380
- molfraction of type          19              =   0.0000122   0.0000000   0.0210760
- molfraction of type          20              =   0.0000000   0.0000000   0.0213005
- molfraction of type          21              =   0.0000000   0.0000000   0.0213005
- molfraction of type          22              =   0.0000000   0.0000000   0.0213005
- molfraction of type          23              =   0.0000000   0.0000000   0.0213005
- molfraction of type          24              =   0.0000000   0.0000000   0.0213005
- molfraction of type          25              =   0.0000000   0.0000000   0.0213005
- molfraction of type          26              =   0.0000000   0.0000000   0.0213005
- molfraction of type          27              =   0.0000000   0.0000000   0.0213005
- molfraction of type          28              =   0.0000000   0.0000000   0.0213005
- molfraction of type          29              =   0.0000000   0.0000000   0.0213005
- molfraction of type          30              =   0.0000000   0.0000000   0.0213005
- molfraction of type          31              =   0.0000000   0.0000000   0.0213005
- molfraction of type          32              =   0.0000000   0.0000000   0.0213005
- molfraction of type          33              =   0.0000000   0.0000000   0.0213005
- molfraction of type          34              =   0.0000000   0.0000000   0.0213005
+ molfraction of type           1              =   0.0997554   0.3520179   0.0000000
+ molfraction of type           2              =   0.2575081   0.6479821   0.0000000
+ molfraction of type           3              =   0.2227097   0.0000000   0.0000000
+ molfraction of type           4              =   0.3619033   0.0000000   0.0000000
+ molfraction of type           5              =   0.0000000   0.0000000   0.4691925
+ molfraction of type           6              =   0.0347984   0.0000000   0.0000000
+ molfraction of type           7              =   0.0208790   0.0000000   0.0000000
+ molfraction of type           8              =   0.0001261   0.0000000   0.0189611
+ molfraction of type           9              =   0.0007162   0.0000000   0.0081638
+ molfraction of type          10              =   0.0004437   0.0000000   0.0131631
+ molfraction of type          11              =   0.0000000   0.0000000   0.0213269
+ molfraction of type          12              =   0.0000000   0.0000000   0.0213269
+ molfraction of type          13              =   0.0000000   0.0000000   0.0213269
+ molfraction of type          14              =   0.0000000   0.0000000   0.0213269
+ molfraction of type          15              =   0.0000000   0.0000000   0.0213269
+ molfraction of type          16              =   0.0000000   0.0000000   0.0213269
+ molfraction of type          17              =   0.0000000   0.0000000   0.0213269
+ molfraction of type          18              =   0.0011599   0.0000000   0.0000000
+ molfraction of type          19              =   0.0000000   0.0000000   0.0213269
+ molfraction of type          20              =   0.0000000   0.0000000   0.0213269
+ molfraction of type          21              =   0.0000000   0.0000000   0.0213269
+ molfraction of type          22              =   0.0000000   0.0000000   0.0213269
+ molfraction of type          23              =   0.0000000   0.0000000   0.0213269
+ molfraction of type          24              =   0.0000000   0.0000000   0.0213269
+ molfraction of type          25              =   0.0000000   0.0000000   0.0213269
+ molfraction of type          26              =   0.0000000   0.0000000   0.0213269
+ molfraction of type          27              =   0.0000000   0.0000000   0.0213269
+ molfraction of type          28              =   0.0000000   0.0000000   0.0213269
+ molfraction of type          29              =   0.0000000   0.0000000   0.0213269
+ molfraction of type          30              =   0.0000000   0.0000000   0.0213269
+ molfraction of type          31              =   0.0000000   0.0000000   0.0213269
+ molfraction of type          32              =   0.0000000   0.0000000   0.0213269
+ molfraction of type          33              =   0.0000000   0.0000000   0.0213269
+ molfraction of type          34              =   0.0000000   0.0000000   0.0213269
  mean sete length of type      1        [A^2] =       0.022       0.023       0.000
  mean sete length of type      2        [A^2] =       7.274       7.274       0.000
  mean sete length of type      3        [A^2] =       0.000       0.000       0.000
  mean sete length of type      4        [A^2] =       0.000       0.000       0.000
  mean sete length of type      5        [A^2] =       0.000       0.000       0.000
- mean sete length of type      6        [A^2] =       8.829       0.000       0.000
- mean sete length of type      7        [A^2] =     376.575       0.000       0.000
+ mean sete length of type      6        [A^2] =       8.806       0.000       0.000
+ mean sete length of type      7        [A^2] =     369.123       0.000       0.000
  mean sete length of type      8        [A^2] =       0.000       0.000       1.960
- mean sete length of type      9        [A^2] =       0.000       0.000       1.960
- mean sete length of type     10        [A^2] =       1.960       0.000       0.000
+ mean sete length of type      9        [A^2] =       1.960       0.000       0.000
+ mean sete length of type     10        [A^2] =       0.000       0.000       1.960
  mean sete length of type     11        [A^2] =       0.000       0.000       1.960
  mean sete length of type     12        [A^2] =       0.000       0.000       1.960
  mean sete length of type     13        [A^2] =       0.000       0.000       1.960
  mean sete length of type     14        [A^2] =       0.000       0.000       5.880
  mean sete length of type     15        [A^2] =       0.000       0.000      13.720
  mean sete length of type     16        [A^2] =       0.000       0.000      23.521
- mean sete length of type     17        [A^2] =       0.000       0.000      37.240
+ mean sete length of type     17        [A^2] =       0.000       0.000      37.241
  mean sete length of type     18        [A^2] =      52.921       0.000       0.000
  mean sete length of type     19        [A^2] =       0.000       0.000      72.520
  mean sete length of type     20        [A^2] =       0.000       0.000      52.921
@@ -12261,18 +12270,18 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  mean sete length of type     33        [A^2] =       0.000       0.000      43.656
  mean sete length of type     34        [A^2] =       0.000       0.000      41.873
  
- Total energy  [K per system and kJ/mol per chain] =  -28652335.81 -3461606.85          0.00     -276.35        -32.27        0.00
- Inter LJ      [K per system and kJ/mol per chain] =    4818783.31  -629969.80          0.00       46.48         -5.87        0.00
- Bond bending  [K per system and kJ/mol per chain] =     274187.73        0.00          0.00        2.64          0.00        0.00
- Torsion       [K per system and kJ/mol per chain] =     100512.17        0.00          0.00        0.97          0.00        0.00
- Intra LJ      [K per system and kJ/mol per chain] =     -27377.57        0.00          0.00       -0.26          0.00        0.00
+ Total energy  [K per system and kJ/mol per chain] =  -28656481.24 -3454701.18          0.00     -276.37        -32.20        0.00
+ Inter LJ      [K per system and kJ/mol per chain] =    4814173.23  -641227.62          0.00       46.43         -5.98        0.00
+ Bond bending  [K per system and kJ/mol per chain] =     272920.97        0.00          0.00        2.63          0.00        0.00
+ Torsion       [K per system and kJ/mol per chain] =     101680.84        0.00          0.00        0.98          0.00        0.00
+ Intra LJ      [K per system and kJ/mol per chain] =     -27569.19        0.00          0.00       -0.27          0.00        0.00
  External pot  [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00          0.00        0.00
  Stretch       [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00          0.00        0.00
- Coulomb       [K per system and kJ/mol per chain] =  -33818441.45 -2831637.05          0.00     -326.18        -26.39        0.00
+ Coulomb       [K per system and kJ/mol per chain] =  -33817687.08 -2813473.56          0.00     -326.15        -26.22        0.00
  Tail  LJ      [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00          0.00        0.00
  Fluc Q        [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00          0.00        0.00
  
- fluctuation in <vtot>                          =     5919.44     1372.48        0.00
+ fluctuation in <vtot>                          =     1985.46     2286.58        0.00
  
  type  box     vinter      vintra      vtor        vbend       vtail
     1    1     0.00000     0.00000     0.00000     0.00000     0.00000
@@ -12377,4 +12386,4 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
    34    1     0.00000     0.00000     0.00000     0.00000     0.00000
    34    2     0.00000     0.00000     0.00000     0.00000     0.00000
    34    3     0.00000     0.00000     0.00000     0.00000     0.00000
- Program ended at 2012-12-20 19:18:04.549
+ Program ended at 2013-02-26 13:38:27.749

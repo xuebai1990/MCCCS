@@ -1,7 +1,4 @@
- lopt_bias:  F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F
- F
- freq_opt_bias:     10000000
- Program started at 2012-12-20 15:07:44.063
+ Program started at 2013-02-20 21:43:39.032
  Number of processors:            1
            0  threads per processor
  Random number seed:            0
@@ -51,11 +48,13 @@
  neighbor list cutoff (rcutnn):  0.000000000000000E+000 A
     rcut:   14.0000000000000      A
     kalp:  0.250000000000000     
+ lopt_bias:  F
+ freq_opt_bias:          500
  number of chains:         300
  number of molecule types:           1
  number of chains of molecule type           1 :         300
  Lorentz-Berthelot combining rules apply
-    lmixlb: T  lmixjo: F  ltab: F
+    lmixlb: T  lmixjo: F
  number of special combining parameters:           0
  minimum cutoff (rmin):   1.00000000000000       A
  softcut:   100.000000000000     
@@ -266,14 +265,14 @@
  
  CHARGE INCLUSION TABLE
            1 F F F F F F T T T
-           2 F F F F T F F T T
-           3 F F F F F T T T T
-           4 F F F F T T T T T
-           5 F T F T F T T T T
-           6 F F T T T F F F T
-           7 T F T T T F F F F
-           8 T T T T T F F F F
-           9 T T T T T T F F F
+           2 F F F F F F F T T
+           3 F F F F F F F F F
+           4 F F F F F T T T T
+           5 F F F F F F F F F
+           6 F F F T F F F F T
+           7 T F F T F F F F F
+           8 T T F T F F F F F
+           9 T T F T F T F F F
  
  1-4 LJ SCALING FACTORS
            1   1.00000000000000        1.00000000000000     
@@ -547,15 +546,15 @@
  intra lj energy   -39079.7197222186     
  Tail correction   -37709.2573216958     
  bond vibration    0.000000000000000E+000
- bond bending       343800.041328878     
+ bond bending       343800.041328877     
  torsional          1061216.10486417     
  external          0.000000000000000E+000
  coulombic energy  -2267086.36593826     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -2119705.43650298     
+ total energy      -2119705.43650299     
  
- box             1  initial v   =   -2119705.43650298     
+ box             1  initial v   =   -2119705.43650299     
  surf. tension :   box 1 =     -57.19834
  pressure check:   box 1 =     -48795.55
  
@@ -564,35 +563,35 @@
  Cycle   Total   Energy    Boxlength   Pressure  Molecules
    300  620300 -0.2106E+07    37.790         0.0 300
  Box            1
- Type 1 bn  17368.  17481.  17508.  17689.  17371.  17630.
+ Type  1 bn  17368.  17481.  17508.  17689.  17371.  17630.
  max.displ.     0.3139    0.3139    0.3144    0.1431    0.1414    0.1404
  volume change:  bn =   129.0   bs =    48.0   max.displ. = 0.50334E+03
    600  620600 -0.2115E+07    37.651         0.0 300
    900  620900 -0.2113E+07    37.754         0.0 300
  Box            1
- Type 1 bn  17459.  17615.  17419.  17430.  17489.  17396.
+ Type  1 bn  17459.  17615.  17419.  17430.  17489.  17396.
  max.displ.     0.3161    0.3159    0.3112    0.1458    0.1389    0.1415
  volume change:  bn =   111.0   bs =    50.0   max.displ. = 0.56683E+03
   1200  621200 -0.2103E+07    37.834         0.0 300
  Box            1
- Type 1 bn  17418.  17303.  17475.  17639.  17413.  17691.
+ Type  1 bn  17418.  17303.  17475.  17639.  17413.  17691.
  max.displ.     0.3169    0.3142    0.3099    0.1433    0.1402    0.1416
  volume change:  bn =   132.0   bs =    59.0   max.displ. = 0.63338E+03
   1500  621500 -0.2135E+07    37.700         0.0 300
   1800  621800 -0.2115E+07    37.706         0.0 300
  Box            1
- Type 1 bn  17470.  17475.  17546.  17226.  17395.  17671.
+ Type  1 bn  17470.  17475.  17546.  17226.  17395.  17671.
  max.displ.     0.3122    0.3126    0.3094    0.1442    0.1422    0.1390
  volume change:  bn =   106.0   bs =    35.0   max.displ. = 0.52284E+03
   2100  622100 -0.2084E+07    37.817         0.0 300
   2400  622400 -0.2076E+07    37.786         0.0 300
  Box            1
- Type 1 bn  17557.  17344.  17122.  17614.  17713.  17534.
+ Type  1 bn  17557.  17344.  17122.  17614.  17713.  17534.
  max.displ.     0.3208    0.3159    0.3120    0.1441    0.1426    0.1408
  volume change:  bn =    95.0   bs =    42.0   max.displ. = 0.57788E+03
   2700  622700 -0.2089E+07    37.780         0.0 300
  Box            1
- Type 1 bn  17477.  17519.  17645.  17534.  17349.  17511.
+ Type  1 bn  17477.  17519.  17645.  17534.  17349.  17511.
  max.displ.     0.3145    0.3088    0.3144    0.1460    0.1436    0.1420
  volume change:  bn =   105.0   bs =    43.0   max.displ. = 0.59164E+03
   3000  623000 -0.2105E+07    37.871         0.0 300
@@ -650,29 +649,29 @@ between box  1 and  2   uattempts =         0.0  attempts =      0.0  accepted =
  
  ### Expanded Ensemble Move  ###
  
- 
+
 New Biasing Potential
 
-molecule  1:   0.00000000    
-
+molecule  1:   0.00000000     
+ 
  sumup control
  number of chains         300
  number of chains of type           1         300
- inter lj energy   -1207317.58053438     
- intra lj energy   -30934.9469551364     
+ inter lj energy   -1207317.58053439     
+ intra lj energy   -30934.9469551369     
  Tail correction   -37457.5948958781     
  bond vibration    0.000000000000000E+000
- bond bending       330208.148620641     
- torsional          1057054.64347474     
+ bond bending       330208.148620638     
+ torsional          1057054.64347473     
  external          0.000000000000000E+000
  coulombic energy  -2254322.74156806     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
  total energy      -2105312.47696221     
  
- vstart       =     -2119705.4365029847
- vend         =     -2105312.4769622078
- vbox         =     -2105312.4769622199
+ vstart       =     -2119705.4365029857
+ vend         =     -2105312.4769622115
+ vbox         =     -2105312.4769619042
  
  Averages and fluctuations                            Box 1
  
@@ -708,7 +707,7 @@ molecule  1:   0.00000000
     1    1     0.00000     0.00000     0.00000     0.00000     0.00000
  specific density    box   1 =  0.10742E+01 0.27136E-02 0.90453E-03
  system volume       box   1 =  0.53851E+05 0.13595E+03 0.45315E+02
- pressure            box   1 =     -8048.12     6780.68     2260.23
+ pressure            box   1 =  -8048.1      6780.7      2260.2    
  surface tension     box   1 =     35.20799    40.77329    13.59110
  
  Total energy   box   1 =   -0.21028E+07   0.14130E+05   0.47099E+04
@@ -725,9 +724,9 @@ molecule  1:   0.00000000
  Enthalpy Inst.[kJ/mol] for box  1 =    -59.1589      0.8080      0.2693
  Enthalpy Ext. [kJ/mol] for box  1 =    -58.2703      0.3853      0.1284
  
- Cp residual(J/Kmol) =   89.0120545850112     
-  H2=   4420363954106.18     
-  H=  -2102398.26153262     
+ Cp residual(J/Kmol) =   89.0120546048014     
+  H2=   4420363954105.65     
+  H=  -2102398.26153247     
  chemical potential  itype   1 box   1 =        0.000       0.000       0.000
  mean sete length    itype   1 box   1 =       18.736       0.049       0.016
  number density      itype   1 box   1 =  0.55710E+01 0.14073E-01 0.46911E-02
@@ -747,4 +746,4 @@ molecule  1:   0.00000000
    8  -0.208E+07   0.107E+01  -0.150E+05   0.920E+02   0.100E+01
    9  -0.208E+07   0.107E+01   0.770E+03   0.699E+02   0.100E+01
   10  -0.210E+07   0.107E+01  -0.120E+05   0.199E+02   0.100E+01
- Program ended at 2012-12-20 16:02:43.743
+ Program ended at 2013-02-20 22:38:56.007

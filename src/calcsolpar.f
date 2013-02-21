@@ -15,13 +15,6 @@ subroutine  calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ, Heat_vapor_COUL, pdV, CE
   use sim_system
   use sim_cell
   implicit none
-!$$$      include 'control.inc'
-!$$$      include 'inputdata.inc'
-!$$$      include 'blkavg.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'ensemble.inc'
-!$$$      include 'system.inc'
-!$$$      include 'cell.inc'
 
       integer::ibox, jbox, ig, il, imolty
       integer,dimension(nbxmax):: temp_nmol,box_volume

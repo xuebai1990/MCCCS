@@ -1,7 +1,4 @@
- lopt_bias:  F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F
- F
- freq_opt_bias:     10000000
- Program started at 2012-12-20 15:08:26.917
+ Program started at 2013-02-20 21:43:39.032
  Number of processors:            1
            0  threads per processor
  Random number seed:            0
@@ -59,11 +56,13 @@
     lrect: F
  neighbor list cutoff (rcutnn):  0.000000000000000E+000 A
     rcut:   14.0000000000000      A
+ lopt_bias:  F
+ freq_opt_bias:          500
  number of chains:         200
  number of molecule types:           1
  number of chains of molecule type           1 :         200
  Lorentz-Berthelot combining rules apply
-    lmixlb: T  lmixjo: F  ltab: F
+    lmixlb: T  lmixjo: F
  number of special combining parameters:           0
  minimum cutoff (rmin):   1.00000000000000       A
  softcut:   100.000000000000     
@@ -509,9 +508,9 @@
  coulombic energy  -1029356.42719971     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -604410.834946776     
+ total energy      -604410.834946775     
  
- box             1  initial v   =   -604410.834946776     
+ box             1  initial v   =   -604410.834946775     
  surf. tension :   box 1 =     -13.93898
  pressure check:   box 1 =       3553.60
  
@@ -542,10 +541,10 @@
    400   35660 -0.5581E+06    33.907         0.0 187
                 0.1457E+05    42.623         0.0  13
  Box            1
- Type 1 bn   9265.   9265.   9218.  10858.  10826.  10850.
+ Type  1 bn   9265.   9265.   9218.  10858.  10826.  10850.
  max.displ.     0.6231    0.6419    0.6310    0.3827    0.3722    0.3698
  Box            2
- Type 1 bn    736.    701.    681.    869.    834.    874.
+ Type  1 bn    736.    701.    681.    869.    834.    874.
  max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
  volume change:  bn = 10128.0   bs =  4220.0   max.displ. = 0.41028E-01
  volume change:  bn =     0.0   bs =     0.0   max.displ. = 0.10000E-02
@@ -554,10 +553,10 @@
    800   36060 -0.6328E+06    34.116         0.0 187
                 0.9722E+04    42.490         0.0  13
  Box            1
- Type 1 bn   9190.   9435.   9148.  10822.  10859.  10782.
+ Type  1 bn   9190.   9435.   9148.  10822.  10859.  10782.
  max.displ.     0.6382    0.6248    0.6264    0.3706    0.3762    0.3726
  Box            2
- Type 1 bn    759.    752.    743.    826.    844.    874.
+ Type  1 bn    759.    752.    743.    826.    844.    874.
  max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
  volume change:  bn = 10019.0   bs =  4123.0   max.displ. = 0.42209E-01
  volume change:  bn =     0.0   bs =     0.0   max.displ. = 0.10000E-02
@@ -568,10 +567,10 @@
   1400   36660 -0.5579E+06    34.015         0.0 182
                -0.2629E+04    42.555         0.0  18
  Box            1
- Type 1 bn   9100.   9205.   9121.  10617.  10813.  10654.
+ Type  1 bn   9100.   9205.   9121.  10617.  10813.  10654.
  max.displ.     0.6413    0.6316    0.6207    0.3714    0.3779    0.3689
  Box            2
- Type 1 bn    807.    853.    869.    979.   1004.    991.
+ Type  1 bn    807.    853.    869.    979.   1004.    991.
  max.displ.    27.4796   25.8664   27.0656    3.1415    3.1415    3.1415
  volume change:  bn =  9995.0   bs =  4030.0   max.displ. = 0.42547E-01
  volume change:  bn =     0.0   bs =     0.0   max.displ. = 0.10000E-02
@@ -580,10 +579,10 @@
   1800   37060 -0.5507E+06    34.393         0.0 184
                 0.2847E+05    42.309         0.0  16
  Box            1
- Type 1 bn   9137.   9258.   9014.  10726.  10843.  10766.
+ Type  1 bn   9137.   9258.   9014.  10726.  10843.  10766.
  max.displ.     0.6411    0.6423    0.6248    0.3776    0.3781    0.3797
  Box            2
- Type 1 bn    835.    739.    825.    918.    994.    947.
+ Type  1 bn    835.    739.    825.    918.    994.    947.
  max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
  volume change:  bn =  9944.0   bs =  3927.0   max.displ. = 0.42006E-01
  volume change:  bn =     0.0   bs =     0.0   max.displ. = 0.10000E-02
@@ -654,44 +653,44 @@ between box  1 and  2   uattempts =         0.0  attempts =      0.0  accepted =
  
  ### Expanded Ensemble Move  ###
  
- 
+
 New Biasing Potential
 
-molecule  1:   0.00000000      0.00000000    
-
+molecule  1:   0.00000000      0.00000000     
+ 
  sumup control
  number of chains         182
  number of chains of type           1         182
- inter lj energy   -312121.542089042     
- intra lj energy    99544.0960925846     
+ inter lj energy   -312121.542089037     
+ intra lj energy    99544.0960925821     
  Tail correction   -12058.1481840848     
  bond vibration    0.000000000000000E+000
  bond bending       366723.358923506     
- torsional          276297.985403523     
+ torsional          276297.985403527     
  external          0.000000000000000E+000
- coulombic energy  -1001773.48424579     
+ coulombic energy  -1001773.48424578     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -571329.585915218     
+ total energy      -571329.585915205     
  
  sumup control
  number of chains          18
  number of chains of type           1          18
- inter lj energy   -3099.16602409050     
- intra lj energy    11184.2134295296     
+ inter lj energy   -3099.16602409052     
+ intra lj energy    11184.2134295294     
  Tail correction   -60.5759774073554     
  bond vibration    0.000000000000000E+000
- bond bending       35575.5165685871     
- torsional          27062.2961160470     
+ bond bending       35575.5165685889     
+ torsional          27062.2961160471     
  external          0.000000000000000E+000
- coulombic energy  -53641.0319332114     
+ coulombic energy  -53641.0319332109     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy       17081.8281568617     
+ total energy       17081.8281568640     
  
- vstart       =      -604410.8349467763        15998.5449859083
- vend         =      -571329.5859152185        17081.8281568617
- vbox         =      -571329.5859152767        17081.8281568711
+ vstart       =      -604410.8349467748        15998.5449859083
+ vend         =      -571329.5859152046        17081.8281568640
+ vbox         =      -571329.5859153466        17081.8281568724
  
  Averages and fluctuations                            Box 1       Box 2
  
@@ -740,8 +739,8 @@ molecule  1:   0.00000000      0.00000000
  specific density    box   2 =  0.30186E-01 0.26285E-02 0.87618E-03
  system volume       box   1 =  0.39229E+05 0.54420E+03 0.18140E+03
  system volume       box   2 =  0.77189E+05 0.54420E+03 0.18140E+03
- pressure            box   1 =     -5720.66     5657.76     1885.92
- pressure            box   2 =      1036.92      393.49      131.16
+ pressure            box   1 =  -5720.7      5657.8      1885.9    
+ pressure            box   2 =   1036.9      393.49      131.16    
  surface tension     box   1 =      0.30568    17.86040     5.95347
  surface tension     box   2 =     -0.43212     1.65412     0.55137
  
@@ -780,7 +779,7 @@ molecule  1:   0.00000000      0.00000000
  mole fraction       itype   1 box   1 =    1.0000000   0.0000000   0.0000000
  mole fraction       itype   1 box   2 =    1.0000000   0.0000000   0.0000000
 Ostwald Coefficient  itype   1 between box  2 and  1         23.318462          2.077842
-Free Enrgy of Transf itype   1 between box  2 and  1        -15.002760          0.424500 kJ/mol
+Free Enrgy of Transf itype   1 between box  2 and  1        -15.002759          0.424500 kJ/mol
  
  
  -----block averages ------
@@ -808,4 +807,4 @@ Free Enrgy of Transf itype   1 between box  2 and  1        -15.002760          
    8   0.112E+05   0.353E-01   0.182E+04  -0.294E+01   0.100E+01
    9   0.126E+05   0.315E-01   0.117E+04   0.172E+01   0.100E+01
   10   0.222E+05   0.315E-01   0.146E+04  -0.296E+00   0.100E+01
- Program ended at 2012-12-20 16:13:09.704
+ Program ended at 2013-02-20 22:45:39.087

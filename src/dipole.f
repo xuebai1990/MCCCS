@@ -1,10 +1,7 @@
       subroutine dipole(ibox,mtype)
       use sim_system
       implicit none
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'coord2.inc'
-!$$$      include 'ewaldsum.inc'
+
       integer::ibox,mtype,i,imolty,zzz,ii
       real::dipox(2),dipoy(2),dipoz(2)
       

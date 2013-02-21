@@ -1,10 +1,10 @@
 #!/bin/bash -l
-#PBS -l nodes=2:ppn=8,pmem=2gb,walltime=24:00:00
+#PBS -l nodes=2:ppn=8,walltime=02:00:00
 #PBS -N name
 #PBS -m ae
 #PBS -e stderr
 #PBS -o stdout
-###PBS -q devel
+#PBS -q devel
 
 DATA=$PBS_O_WORKDIR
 cd $DATA
@@ -16,9 +16,9 @@ rm tmp1
 inode=-1
 ijob=0
 
-for ((K=1;K<=8;K++)); do
-    [ $((++ijob % 8)) -eq 1 ] && ((inode++))
-    ssh ${NODE[inode]} $DATA/sub$K &
+for ((K=1;K<=9;K++)); do
+    [ $((ijob++ % 8)) -eq 0 ] && ((inode++))
+    ssh ${NODE[inode]} $DATA/sub$K.script &
 done
 
 wait

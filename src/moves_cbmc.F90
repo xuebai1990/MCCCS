@@ -10,21 +10,27 @@ MODULE moves_cbmc
   implicit none
   private
   save
-  public::config,rosenbluth,schedule,explct,safeschedule,init_cbmc,output_cbmc_stats
+  public::config,rosenbluth,schedule,explct,safeschedule,init_cbmc,output_cbmc_stats,allocate_cbmc
 
 ! CBMC.INC
-  logical,public::lexshed(numax),llplace(ntmax),lpnow(numax),llrig,lsave(numax)
-  real::bncb(ntmax,numax),bscb(ntmax,2,numax),fbncb(ntmax,numax),fbscb(ntmax,2,numax) !< temporary accumulators for conf.bias performance
+  logical,public::llrig
+  logical,allocatable,public::lexshed(:),llplace(:),lpnow(:)
+  logical,allocatable::lsave(:)
+  real,allocatable::bncb(:,:),bscb(:,:,:),fbncb(:,:),fbscb(:,:,:) !< temporary accumulators for conf.bias performance
+  real::brvibmin(60),brvibmax(60)
 
 ! FIX.INC
-  integer::iend,ipast,endnum,pastnum,fclose,fcount,iwbef,ibef,befnum,wbefnum,nextnum,inext
+  integer::endnum,wbefnum
+  integer,allocatable::iend(:),ipast(:,:),pastnum(:),fclose(:,:),fcount(:),iwbef(:),ibef(:,:),befnum(:),nextnum(:),inext(:,:)
   logical::lcrank
-  real::xx,yy,zz,distij,vtgtr,vtbend,bsum_tor,vtvib
-  dimension iend(numax),ipast(numax,numax),pastnum(numax),fclose(numax,numax),fcount(numax),iwbef(numax),ibef(numax,numax),befnum(numax),xx(numax),yy(numax),zz(numax),distij(numax,numax),nextnum(numax),inext(numax,numax),vtvib(nchmax),vtgtr(nchmax),vtbend(nchmax),bsum_tor(nchmax)
+  real,allocatable::xx(:),yy(:),zz(:),distij(:,:),vtvib(:),vtbend(:),vtgtr(:),bsum_tor(:)
+
+! subroutine safecbmc
+  real,allocatable::kforceb(:,:),equilb(:,:),flength(:,:),vequil(:,:),vkforce(:,:)
 
 contains
 !    *******************************************************************
-!    ** performs a lengthconserving configurational bias move         **
+!    ** performs a length conserving configurational bias move        **
 !    ** for linear, branched, anisotropic, and explicit atom          **
 !    ** molecules                                                     **
 !    ** rewritten from old config and branch subroutines by           **
@@ -39,19 +45,6 @@ contains
   subroutine config
     use sim_particle,only:update_neighbor_list
     use sim_cell,only:update_linked_cell
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'coord2.inc'
-!$$$      include 'system.inc'
-!$$$      include 'ensemble.inc'
-!$$$      include 'cbmc.inc'
-!$$$      include 'rosen.inc'
-!$$$      include 'inputdata.inc'
-!$$$      include 'ewaldsum.inc'
-!$$$      include 'poten.inc'
-!$$$      include 'neigh.inc'
-!$$$      include 'ipswpar.inc'
-!$$$      include 'eepar.inc'
 
       logical::lterm, ovrlap, ltors, lneighij,lfixnow
 
@@ -562,17 +555,6 @@ contains
 !     movetype:
   subroutine rosenbluth(lnew,lterm,i,icharge,imolty,ifrom,ibox ,igrow,wadd,lfixnow,cwtorf,movetype )
     use util_random,only:sphere
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'system.inc'
-!$$$      include 'ensemble.inc'
-!$$$      include 'poten.inc'
-!$$$      include 'conver.inc'
-!$$$      include 'cbmc.inc'
-!$$$      include 'rosen.inc'
-!$$$      include 'connect.inc'
-!$$$      include 'fix.inc'
-!$$$      include 'ipswpar.inc'
 
 !     --- variables passed to the subroutine
       logical::lnew,lterm,lwbef
@@ -595,8 +577,8 @@ contains
 
 !     -- new stuff
       integer::itor,bin,counta,movetype,ku
-      real::bf_tor,vtorsion,phitors,ran_tor ,wei_bend,jacobian,ctorf
-      dimension bf_tor(nchtor_max),vtorsion(nchtor_max) ,phitors(nchtor_max),ctorf(nchmax,nchtor_max)
+      real::bf_tor,vtorsion,phitors,ran_tor,wei_bend,jacobian,ctorf
+      dimension bf_tor(nchtor_max),vtorsion(nchtor_max),phitors(nchtor_max),ctorf(nchmax,nchtor_max)
       dimension toracc(nchmax) ,vfbbtr(nchmax,nchtor_max)
 ! ------------------------------------------------------------------
 
@@ -1339,12 +1321,6 @@ contains
 !     ** computes the growth shedule for CBMC type moves               **
 !     *******************************************************************
   subroutine schedule(igrow,imolty,index,iutry,iprev,movetype)
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'cbmc.inc'
-!$$$      include 'rosen.inc'
-!$$$      include 'connect.inc'
-!$$$      include 'inputdata.inc'
 
       logical::lprint,lfind
       integer::random_index
@@ -1932,13 +1908,6 @@ contains
 !     ** last modified by Neeraj Rai on 12/23/2008 for CG models           **
 !     ***********************************************************************
   subroutine geometry(lnew,iw,i,imolty,angstart,iuprev,glist ,bondlen,bendang,phi,vvibtr,vbbtr, maxlen, wei_bend )
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'connect.inc'
-!$$$      include 'conver.inc'
-!$$$      include 'rosen.inc'
-!$$$      include 'cbmc.inc'
-!$$$      include 'tabulated.inc'
 
 !     --- variables passed to/from the subroutine
 
@@ -2443,8 +2412,6 @@ contains
 !     * last modified 02-12-2001 by M.G. Martin                        *
 !     ******************************************************************
   subroutine cone(iinit,x,y,z,alpha,gamma,ux,uy,uz)
-!$$$      include 'control.inc'
-!$$$      include 'conver.inc'
 
 !     --- variables passed to/from the subroutine
       integer::iinit
@@ -2555,9 +2522,6 @@ contains
 !     * last modified 02-12-2001 by M.G. Martin                        *
 !     ******************************************************************
   function arccos( value )
-!$$$      include 'conver.inc'
-
-!#include "constant.inc"
 
       real::arccos,value
 
@@ -2586,7 +2550,6 @@ contains
 !     ** M.G. Martin 2-4-98                                           **
 !     ******************************************************************
   subroutine coneangle( thetaone, phione, thetatwo, phitwo, angle )
-!$$$      include 'control.inc'
       real::thetaone, thetatwo, phione, phitwo, angle,sintheone,costheone,sinthetwo,costhetwo,sinphione,cosphione ,sinphitwo,cosphitwo,cosangle
 
       sintheone = dsin(thetaone)
@@ -2617,7 +2580,6 @@ contains
 !     *** M.G. Martin  2-4-98                                    ***
 !     **************************************************************
   subroutine bondlength(vibtype,requil,kvib,betaT,length,vvib)
-!$$$      include 'tabulated.inc'
 
       integer::vibtype
       real::length,bond,bf,vvib,betaT,kvib,requil
@@ -2676,14 +2638,6 @@ contains
 !             All Rigid Molecules Should Come After Riutry
 !     &*&*&*&*&*&*&*&*&*&*&*&* IMPORTANT *&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&
   subroutine rigrot(lnew,lterm,iskip,imol,imolty,ibox,wadd )
-!$$$      include 'control.inc'
-!$$$      include 'cbmc.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'coord2.inc'
-!$$$      include 'rosen.inc'
-!$$$      include 'system.inc'
-!$$$      include 'conver.inc'
-!$$$      include 'ipswpar.inc'
 
       logical::lnew,ovrlap,lterm,ltors
 
@@ -2906,10 +2860,6 @@ contains
 !     alpha is Ryckaert torsion angle!
 !     ------
   subroutine explct(ichain,vmethyl,lcrysl,lswitch)
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'conver.inc'
-!$$$      include 'connect.inc'
 
 ! - arguments
       integer::ichain,nngrow,negrow,i,iplus,imins,nn, imolty,iuend,ii,jj
@@ -3560,24 +3510,14 @@ contains
 !     **           -- Uses CDCBMC to grow them --              **
 !     ***********************************************************
   subroutine place(lnew,lterm,i,imolty,ibox,index,wplace)
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'cbmc.inc'
-!$$$      include 'connect.inc'
-!$$$      include 'fix.inc'
-!$$$      include 'system.inc'
-!$$$      include 'rosen.inc'
-!$$$      include 'tabulated.inc'
+    ! integer,parameter::max=numax
+    logical::lnew,lterm,ovrlap
 
-      logical::lnew,lterm,ovrlap
+    integer::i,j,imolty,count,counta,iu,ju,ku,jtvib ,start,iv,index,ivib,nchvib,ibend,ib,type,ip,ichoi,niplace,iw,iufrom,it,jut2,jut3,jut4,ibox,glist,iwalk,iuprev,list,nchben_a,nchben_b,iu2back
 
-      integer::i,j,imolty,count,counta,iu,ju,ku,jtvib ,start,iv,index,ivib,nchvib,ibend,ib,type,ip,ichoi,niplace,iw,iufrom,it,jut2,jut3,jut4,ibox,glist,iwalk,iuprev,list,nchben_a,nchben_b,max,iu2back
+    real::wplace,equil,kforce,bsum_try,mincb ,delcb,ux,uy,uz,r,vvib,bfactor,third,length,bs,rbf,vvibtr ,wei_vib,bendang,vangle,vbbtr,angle,vphi,phione,thetac,rx,ry,rz ,rsint,dist,wei_bend,ang_trial,vdha,vbend,vtorsion ,bsum,alpha,gamma,dum,phi,thetaone,thetatwo,phitwo
 
-      parameter(max=numax)
-
-      real::wplace,equil,kforce,bsum_try,mincb ,delcb,ux,uy,uz,r,vvib,bfactor,third,length,bs,rbf,vvibtr ,wei_vib,bendang,vangle,vbbtr,angle,vphi,phione,thetac,rx,ry,rz ,rsint,dist,wei_bend,ang_trial,vdha,vbend,vtorsion ,bsum,alpha,gamma,dum,phi,thetaone,thetatwo,phitwo
-
-      dimension r(nchbn_max),bfactor(nchbn_max) ,bendang(numax,numax) ,ang_trial(nchbn_max),dist(max) ,niplace(numax),vbend(nchmax) ,vtorsion(nchmax),phi(max) ,list(max),glist(max)
+    dimension r(nchbn_max),bfactor(nchbn_max),bendang(numax,numax),ang_trial(nchbn_max),dist(numax),niplace(numax),vbend(nchmax),vtorsion(nchmax),phi(numax),list(numax),glist(numax)
 
 !      write(io_output,*) 'START PLACE'
 
@@ -4127,12 +4067,6 @@ contains
 !     iinit = 2  calculates closing probabilities
 !     iinit = 3  does final crankshaft move
   subroutine safecbmc(iinit,lnew,i,iw,igrow,imolty,count,ux,uy,uz,vphi,vtor,wei_bv,lterm,movetype)
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'connect.inc'
-!$$$      include 'fix.inc'
-!$$$      include 'rosen.inc'
-!$$$      include 'cbmc.inc'
 
       logical::lnew,lshit,lterm,ldo,lreturn
 
@@ -4146,11 +4080,9 @@ contains
 !     *** possible in place of numax
       parameter(max=10)
 
-      real::flength,x,y,z,equil,kforce,length,vvib,equilb,kforceb,ux,uy,uz,hdist,lengtha,lengthb,vtor,vphi,thetac,angle,equila,kforcea,ovphi,alpha,phidisp,dum,rxt,ryt,rzt,phiacc,rxa,rya,rza,angles,bangles,r,mincb,delcb ,vkforce,vequil,vvibration,ovvib
+      real::x,y,z,equil,kforce,length,vvib,ux,uy,uz,hdist,lengtha,lengthb,vtor,vphi,thetac,angle,equila,kforcea,ovphi,alpha,phidisp,dum,rxt,ryt,rzt,phiacc,rxa,rya,rza,angles,bangles,r,mincb,delcb,vvibration,ovvib
 
-      dimension flength(numax,numax),alpha(max,numax) ,equilb(numax ,numax),kforceb(numax,numax),equila(max) ,rxa(max,max),rya(max ,max),rza(max,max) ,rxt(max),ryt(max),rzt(max),vbend(2 *nchtor_max) ,phicrank(2*nchtor_max,max),phiacc(max) ,vtorsion(2 *nchtor_max),bf_tor(2*nchtor_max) ,dir(2*nchtor_max,max) ,diracc(max),kforcea(max) ,bfactor(nchbn_max),ang_bend(nchbn_max) ,angles(3) ,bangles(max,3),iopen(2),r(nchbn_max) ,vkforce(numax ,numax),vequil(numax,numax) ,vvibration(2*nchtor_max)
-
-      save kforceb,equilb,flength,vequil,vkforce
+      dimension alpha(max,numax),equila(max),rxa(max,max),rya(max,max),rza(max,max),rxt(max),ryt(max),rzt(max),vbend(2*nchtor_max),phicrank(2*nchtor_max,max),phiacc(max),vtorsion(2*nchtor_max),bf_tor(2*nchtor_max),dir(2*nchtor_max,max),diracc(max),kforcea(max),bfactor(nchbn_max),ang_bend(nchbn_max),angles(3),bangles(max,3),iopen(2),r(nchbn_max),vvibration(2*nchtor_max)
 
 !     ---------------------------------------------------------------
 
@@ -5814,14 +5746,6 @@ contains
 !     **  COLLIN = MASTER of the known universe                          **
 !     *********************************************************************
   subroutine safeschedule(igrow,imolty,islen,iutry,findex,movetype)
-!$$$      include 'control.inc'
-!$$$      include 'cbmc.inc'
-!$$$      include 'connect.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'coord2.inc'
-!$$$      include 'fix.inc'
-!$$$      include 'inputdata.inc'
-!$$$      include 'rosen.inc'
 
       logical::lcount,lpick,lterm,lfixed,lfix,lfind
 
@@ -6418,7 +6342,6 @@ contains
 !     **            on December 1999, BUT IT DOES WORK            **
 !     **************************************************************
   subroutine close(iinit,rx,ry,rz,bondl,angle,lterm)
-!$$$      include 'control.inc'
 
       logical::lterm
 
@@ -6703,13 +6626,6 @@ contains
   end subroutine close
 
   subroutine rigfix(lnew,i,ibox,imolty,lterm,wrig)
-!$$$      include 'control.inc'
-!$$$      include 'coord.inc'
-!$$$      include 'cbmc.inc'
-!$$$      include 'rosen.inc'
-!$$$      include 'fix.inc'
-!$$$      include 'connect.inc'
-!$$$      include 'system.inc'
 
       logical::lnew,ovrlap,lterm,lovra,lfind,lshit
 
@@ -7223,7 +7139,26 @@ contains
       return
   end subroutine rigfix
 
-  subroutine init_cbmc
+  subroutine allocate_cbmc()
+    integer::jerr
+    allocate(vtry(nchmax),vtrext(nchmax),vtrintra(nchmax),vtrinter(nchmax),vtrelect(nchmax),vtrewald(nchmax),vtrorient(nchmax),vtrelect_intra(nchmax),vtrelect_inter(nchmax),bfac(nchmax),rxp(numax,nchmax),ryp(numax,nchmax),rzp(numax,nchmax),vwellipswot(nchmax),vwellipswnt(nchmax),vipswot(nchmax),vipswnt(nchmax),lovr(nchmax),vtvib(nchmax),vtgtr(nchmax),vtbend(nchmax),bsum_tor(nchmax),stat=jerr)
+    if (jerr.ne.0) then
+       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+       call err_exit('allocate_cbmc: allocation failed')
+    end if
+  end subroutine allocate_cbmc
+
+  subroutine init_cbmc()
+    integer::jerr
+    allocate(lexshed(numax),llplace(ntmax),lpnow(numax),lsave(numax),bncb(ntmax,numax),bscb(ntmax,2,numax),fbncb(ntmax,numax),fbscb(ntmax,2,numax),iend(numax),ipast(numax,numax),pastnum(numax),fclose(numax,numax),fcount(numax),iwbef(numax),ibef(numax,numax),befnum(numax),xx(numax),yy(numax),zz(numax),distij(numax,numax),nextnum(numax),inext(numax,numax),kforceb(numax,numax),equilb(numax,numax),flength(numax,numax),vequil(numax,numax),vkforce(numax,numax),stat=jerr)
+    if (jerr.ne.0) then
+       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+       call err_exit('init_cbmc: allocation failed')
+    end if
+
+    llplace=.FALSE.
+    lsave=.FALSE.
+
     bncb = 0.0d0
     bscb = 0.0d0
     fbncb = 0.0d0

@@ -6,7 +6,7 @@ module util_memory
   public::reallocate
 
   interface reallocate
-     module procedure reallocate_l1,reallocate_l2,reallocate_l3,reallocate_l4,reallocate_l5,reallocate_i1,reallocate_i2,reallocate_i3,reallocate_i4,reallocate_i5,reallocate_r1,reallocate_r2,reallocate_r3,reallocate_r4,reallocate_r5
+     module procedure reallocate_l1,reallocate_l2,reallocate_l3,reallocate_l4,reallocate_l5,reallocate_i1,reallocate_i2,reallocate_i3,reallocate_i4,reallocate_i5,reallocate_r1,reallocate_r2,reallocate_r3,reallocate_r4,reallocate_r5,reallocate_c1l4
   end interface
 
 contains
@@ -16,6 +16,7 @@ contains
     INTEGER,INTENT(IN)::lb1_new,ub1_new
 
     LOGICAL,ALLOCATABLE::work(:)
+    LOGICAL,PARAMETER::p0=.FALSE.
 #include "reallocate_1.F90"
   END subroutine reallocate_l1
 
@@ -56,6 +57,7 @@ contains
     INTEGER,INTENT(IN)::lb1_new,ub1_new
 
     INTEGER,ALLOCATABLE::work(:)
+    INTEGER,PARAMETER::p0=0
 #include "reallocate_1.F90"
   END subroutine reallocate_i1
 
@@ -96,6 +98,7 @@ contains
     INTEGER,INTENT(IN)::lb1_new,ub1_new
 
     REAL,ALLOCATABLE::work(:)
+    REAL,PARAMETER::p0=0.
 #include "reallocate_1.F90"
   END subroutine reallocate_r1
 
@@ -130,5 +133,14 @@ contains
     REAL,ALLOCATABLE::work(:,:,:,:,:)
 #include "reallocate_5.F90"
   END subroutine reallocate_r5
+
+  SUBROUTINE reallocate_c1l4(p,lb1_new,ub1_new)
+    CHARACTER(LEN=4),ALLOCATABLE,INTENT(INOUT)::p(:)
+    INTEGER,INTENT(IN)::lb1_new,ub1_new
+
+    CHARACTER(LEN=4),ALLOCATABLE::work(:)
+    CHARACTER(LEN=4),PARAMETER::p0=''
+#include "reallocate_1.F90"
+  END subroutine reallocate_c1l4
 
 end module util_memory

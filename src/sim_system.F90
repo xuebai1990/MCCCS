@@ -94,32 +94,22 @@ module sim_system
   integer::io_output=6
   character(LEN=default_path_length)::file_input='fort.4',file_restart='fort.77',file_struct='input_struc.xyz',file_run='run1a.dat',file_movie='movie1a.dat',file_dipole='dipole1a.dat'
   namelist /io/ file_input,file_restart,file_struct,file_run,file_movie,file_dipole,io_output
-  integer,parameter::nmax = 7000& !< maximum number of chains +2
-   ,numax = 35& !< - numax = maximum number of units
-   ,ntmax = 35& !< ntmax = maximum number of types of chains
-   ,smax = 35& !< smax = max no. of mstates
-   ,nbxmax = 3& !< nbxmax = maximum number of boxes
-   ,nntype = 450& !< nntype = number of types of beads
-   ,natom=3& !< for exsix
-   ,nxatom=5& !< for ninesix
-   ,nvmax = 300& !< nvmax = maximum number of bond vibration and bending constants
-   ,npamax = 40& !< npamax = maximum number of pairs to switch or swatch
-   ,npabmax = 3& !< npabmax = maximum number of box pairs (for swatch and swap)
-   ,maxvir = 1,maxntemp=3& !< maxvir = maximum number of bins for the 2nd virial coefficient
-   ,nchmax=100& !< nchmax = maximum number of choices for trial sites in CBMC growth
-   ,nchbn_max=2000& !< nchbn_max = maxium number of choices for bending CBMC growth
-   ,nchtor_max = 200& !< nchtor_max = maximum number of choices for torsion CBMC growth
-   ,maxbin = 201& !< SAFECBMC max number of bins
-   ,maxneigh = 20
-!*************************************************************
-!***
-!***      FOR ANALYSIS PART
-!***
-!*************************************************************
-   integer,parameter::ntdifmx=2& !< max number of diff beads in simulation
-    ,nbinmx=2& !< NBINMX = max number of bins for histograms
-    ,angle_max=2,ang_bin_max=2,tor_bin_max=2,tor_max=2& !< THESE ARE FOR ANGLE AND TORSIONAL DISTRIBUTION
-    ,nbinmax_ete=2 !< For end to end vector calculation
+  integer::nntype& !< number of types of beads
+   ,nbox=1,nbxmax& !< maximum number of boxes
+   ,npabmax& !< maximum number of box pairs (for swatch and swap)
+   ,nchain=4,nmax& !< maximum number of chains + 2
+   ,nmolty=1,ntmax& !< maximum number of types of chains
+   ,npamax& !< maximum number of pairs to switch or swatch
+   ,numax& !< maximum number of units
+   ,nchmax& !< maximum number of choices for trial sites in CBMC growth
+   ,nchtor_max& !< maximum number of choices for torsion CBMC growth
+   ,nchbn_max& !< maxium number of choices for bending CBMC growth
+   ,nprop
+
+  integer,parameter::smax=35& !< max no. of mstates
+   ,maxvir=1,maxntemp=3& !< maximum number of bins for the 2nd virial coefficient
+   ,maxbin=201& !< SAFECBMC max number of bins
+   ,maxneigh=20,nener=18,nprop1=11,blockm=100
 
 ! OPENMP.inc
   integer::thread_id,thread_num,thread_num_max,thread_num_proc
@@ -127,6 +117,20 @@ module sim_system
 ! MPI.INC
   integer::myid,numprocs,ierr
   integer,parameter::numprocmax=32
+
+  real,allocatable,target::boxlx(:),boxly(:),boxlz(:),rcut(:),rcutnn(:),kalp(:)
+  logical,allocatable,target::lsolid(:),lrect(:)
+
+  real,allocatable::sigi(:),epsi(:),qelect(:),mass(:),sig2ij(:),epsij(:),q1(:),xiq(:),jayself(:),rminee(:),ecut(:),jayq(:)
+  logical,allocatable::lij(:),lqchg(:),lpl(:)
+  character(len=4),allocatable::chemid(:)
+  real,allocatable::brvib(:),brvibk(:),brben(:),brbenk(:)
+
+  real,allocatable::pmrotbd(:,:),vtry(:),vtrext(:),vtrintra(:),vtrinter(:),vtrelect(:),vtrewald(:),vtrorient(:),vtrelect_intra(:),vtrelect_inter(:),bfac(:),rxp(:,:),ryp(:,:),rzp(:,:),vwellipswot(:),vwellipswnt(:),vipswnt(:),vipswot(:),epsilon_f(:,:),sigma_f(:,:),ljscale(:,:,:),qscale2(:,:,:),ee_qqu(:,:),rxnew(:),rynew(:),rznew(:),rxu(:,:),ryu(:,:),rzu(:,:),xcm(:),ycm(:),zcm(:),qqu(:,:),rxuion(:,:),ryuion(:,:),rzuion(:,:),qquion(:,:),xvec(:,:),yvec(:,:),zvec(:,:),awell(:,:,:),pmsatc(:),pmswtcb(:,:),pmisatc(:),B(:),fqegp(:),eta2(:,:),qscale(:),pmbias(:),pmbsmt(:),pmbias2(:),rmtrax(:,:),rmtray(:,:),rmtraz(:,:),rmrotx(:,:),rmroty(:,:),rmrotz(:,:),rmflcq(:,:),pmswmt(:),pmswapb(:,:),pmcbmt(:),pmall(:),pmfix(:),pmfqmt(:),pmeemt(:),pmtrmt(:),pmromt(:),masst(:),avsolinter(:,:),avsolintra(:,:),avsolbend(:,:),avsoltor(:,:),avsolelc(:,:),rxwell(:,:),rywell(:,:),rzwell(:,:),sxwell(:,:),sywell(:,:),szwell(:,:),naccu(:,:),nccold(:,:),accum(:,:),bccold(:,:),aver(:,:),baver(:,:,:),naccu1(:,:,:),nccold1(:,:,:),rcmu(:),exp_c(:),sxcm(:),sycm(:),szcm(:),ndij(:,:),nxij(:,:),nyij(:,:),nxijo(:,:),nzij(:,:),ndijo(:,:),nyijo(:,:),nzijo(:,:),favor(:),favor2(:),express(:),Elect_field(:),zshift(:),dshift(:),rmvol(:),pmvlmt(:),pmvolb(:),rmhmat(:,:),dipolex(:),dipoley(:),dipolez(:),vbox(:),wbox(:),vinterb(:),vtailb(:),vintrab(:),vvibb(:),vbendb(:),vtgb(:),vextb(:),velectb(:),vflucqb(:),v3garob(:),vipswb(:),vwellipswb(:)
+  real,allocatable::bnflcq(:,:),bsflcq(:,:),bnflcq2(:,:),bsflcq2(:,:) ! *** temporary accumulators for max. displacement updates ***
+  real,allocatable::aver1(:,:,:),accum1(:,:,:),bccold1(:,:,:),baver1(:,:,:,:) ! ** Neeraj adding for solubility parameter and heat of vaporization
+  integer,allocatable::ucheck(:),ntype(:,:),leaderq(:,:),invib(:,:),itvib(:,:,:),ijvib(:,:,:),inben(:,:),itben(:,:,:),ijben2(:,:,:),ijben3(:,:,:),intor(:,:),ittor(:,:,:),ijtor2(:,:,:),ijtor3(:,:,:),ijtor4(:,:,:),nrotbd(:),irotbd(:,:),splist(:,:,:),rlist(:,:),rfrom(:),rprev(:),rnum(:),iplace(:,:),pfrom(:),pnum(:),pprev(:),a15type(:,:,:),prior(:,:),wsched(:),growfrom(:),growprev(:),grownum(:),growlist(:,:),nswatb(:,:),nsampos(:),ncut(:,:),gswatc(:,:,:),nswtcb(:),box3(:,:),box4(:,:),temtyp(:),nunit(:),nugrow(:),nmaxcbmc(:),iurot(:),maxgrow(:),isolute(:),iring(:),nrig(:),irig(:,:),frig(:,:),nrigmin(:),nrigmax(:),rindex(:),riutry(:,:),ininch(:,:),nswapb(:),box1(:,:),box2(:,:),nchoi1(:),nchoi(:),nchoir(:),nchoih(:),nchtor(:),nchbna(:),nchbnb(:),icbdir(:),icbsta(:),rmexpc(:),eetype(:),ncmt(:,:),ncmt2(:,:,:),parall(:,:),parbox(:,:,:),solcount(:,:),nwell(:),moltyp(:),nboxi(:),neighbor(:,:),neigh_cnt(:),neighboro(:,:),neigh_o(:),ghost_particles(:),numberDimensionIsIsotropic(:),inix(:),iniy(:),iniz(:),inirot(:),inimix(:),nchoiq(:),box5(:),box6(:),nchbox(:)
+  logical,allocatable::lovr(:),lexist(:),lexclu(:,:,:,:),lrigi(:,:),liswinc(:,:),lchiral(:,:),linclu(:,:,:),lqinclu(:,:,:),lainclu(:,:,:),wschvib(:,:),wschben(:,:),wschtor(:,:),lelect(:),lflucq(:),lqtrans(:),lexpand(:),lavbmc1(:),lavbmc2(:),lavbmc3(:),lbias(:),lring(:),lrigid(:),lrig(:),lq14scale(:),lbranch(:),lrplc(:),lplace(:,:),lwell(:),lideal(:),ltwice(:)
 
 ! INPUTDATA.INC
   logical::ldie
@@ -140,176 +144,84 @@ module sim_system
   integer::nstep,iupdatefix
   logical::lstop,lpresim
   logical::L_tor_table,L_spline,L_linear,L_vib_table,L_bend_table,L_vdW_table,L_elect_table
-  integer::nbox=1
-  real::express(nbxmax)
-  integer::ghost_particles(nbxmax)
-  real::temp,Elect_field(nbxmax)
+  real::temp
   integer::ianalyze,nbin
   logical::lrdf,lintra,lstretch,lgvst,lbend,lete,lrhoz
   real::bin_width
   integer::iprint,imv,iratio,iblock,idiele,iheatcapacity
   logical::L_movie_xyz
   integer::nequil,ninstf,ninsth,ndumph
-  real,target::boxlx(nbxmax),boxly(nbxmax),boxlz(nbxmax),rcut(nbxmax),rcutnn(nbxmax),kalp(nbxmax)
-  logical,target::lsolid(nbxmax),lrect(nbxmax)
-  integer::numberDimensionIsIsotropic(nbxmax)
-  integer::nchain=4,nmolty=1,temtyp(ntmax)
-  real::B(ntmax)
   real::rmin,softcut,softlog,rcutin,rbsmax,rbsmin,vol_eff
-  integer::nunit(ntmax),nugrow(ntmax),nmaxcbmc(ntmax),iurot(ntmax),maxgrow(ntmax),isolute(ntmax),iring(ntmax),nrig(ntmax),irig(ntmax,6),frig(ntmax,6),nrigmin(ntmax),nrigmax(ntmax),rindex(ntmax),riutry(ntmax,3),ntype(ntmax,numax),leaderq(ntmax,numax),invib(ntmax,numax),itvib(ntmax,numax,6),ijvib(ntmax,numax,6),inben(ntmax,numax),itben(ntmax,numax,12),ijben2(ntmax,numax,12),ijben3(ntmax,numax,12),intor(ntmax,numax) ,ittor(ntmax,numax,12),ijtor2(ntmax,numax,12),ijtor3(ntmax,numax ,12),ijtor4(ntmax,numax,12),nrotbd(ntmax),irotbd(numax,ntmax)
-  logical::lelect(ntmax),lflucq(ntmax),lqtrans(ntmax),lexpand(ntmax),lavbmc1(ntmax),lavbmc2(ntmax),lavbmc3(ntmax),lbias(ntmax),lring(ntmax),lrigid(ntmax),lrig(ntmax),lq14scale(ntmax)
-  real::fqegp(ntmax),eta2(nbxmax,ntmax),qscale(ntmax),pmbias(ntmax),pmbsmt(ntmax),pmbias2(ntmax),pmrotbd(numax,ntmax)
   logical::licell
   real::rintramax
   integer::boxlink
-  real::Armtrax,Armtray,Armtraz,rmtrax(ntmax,nbxmax),rmtray(ntmax,nbxmax),rmtraz(ntmax,nbxmax),rmrotx(ntmax,nbxmax),rmroty(ntmax,nbxmax),rmrotz(ntmax,nbxmax),tatra, tarot
-  logical::lbranch(ntmax)
-  integer::ininch(ntmax,nbxmax),inix(nbxmax),iniy(nbxmax),iniz(nbxmax),inirot(nbxmax),inimix(nbxmax),nchoiq(nbxmax)
-  real::zshift(nbxmax),dshift(nbxmax)
-  real::rmvol(nbxmax),tavol,rmflcq(ntmax,nbxmax),taflcq
+  real::Armtrax,Armtray,Armtraz,tatra,tarot
+  real::tavol,taflcq
   integer::iratv,iratp
-  real::pmvol,pmvlmt(nbxmax),pmvolb(nbxmax),pmvolx,pmvoly
-  integer::nvolb,box5(nbxmax),box6(nbxmax)
-  real::pmswat,pmsatc(npamax),pmswtcb(npamax,npabmax)
-  integer::nswaty,nswatb(npamax,npabmax),nsampos(npamax),ncut(npamax,2),splist(npamax,numax,2),gswatc(npamax,2,2*npamax),nswtcb(npamax),box3(npamax,npabmax),box4(npamax,npabmax)
-  real::pmswap,pmswmt(ntmax),pmswapb(ntmax,npabmax)
-  integer::nswapb(ntmax),box1(ntmax,npabmax),box2(ntmax,npabmax)
-  real::pmcb,pmcbmt(ntmax),pmall(ntmax),pmfix(ntmax)
-  real::pmflcq,pmfqmt(ntmax)
-  real::pmexpc,pmeemt(ntmax),pmexpc1
+  real::pmvol,pmvolx,pmvoly
+  integer::nvolb
+  real::pmswat
+  integer::nswaty
+  real::pmswap,pmcb
+  real::pmflcq
+  real::pmexpc,pmexpc1
   real::pm_atom_tra
-  real::pmtra,pmtrmt(ntmax)
-  real::pmromt(ntmax)
-  integer::nchoi1(ntmax),nchoi(ntmax),nchoir(ntmax),nchoih(ntmax),nchtor(ntmax)
+  real::pmtra
   integer::counttot
   real::probf(30,30,maxbin)
-  integer::nchbna(ntmax),nchbnb(ntmax),icbdir(ntmax),icbsta(ntmax)
-  logical::lexclu(ntmax,numax,ntmax,numax)
   integer::ntemp
   real::virtemp(maxntemp)
-  logical::lideal(nbxmax),ltwice(nbxmax),lrplc(ntmax)
 
 ! global
-  real::beta,fqbeta,mass(0:nntype),masst(ntmax),hist(30,30,maxbin)
-  integer::moltyp(nmax),tmcc
-  logical::lrigi(ntmax,numax),lpl(nntype),lneighbor
-  integer::nchbox,ncmt,ncmt2,counthist,nrigi,rlist(numax ,numax),rfrom(numax),rprev(numax),rnum(numax)
-  integer::irsave,nnstep,rmexpc
-  real::rmhmat,pmiswat,pmisatc
-  dimension rmexpc(ntmax)
-  dimension pmisatc(npamax)
-  dimension rmhmat(nbxmax,9)
+  real::beta,fqbeta,hist(30,30,maxbin)
+  integer::tmcc
+  logical::lneighbor
+  integer::counthist,nrigi
+  integer::irsave,nnstep
+  real::pmiswat
 
 ! *** adding this for iswatch move ***
-  logical::liswinc(numax,ntmax),liswatch
-  integer::other,iparty,iplace(numax,numax),pfrom(numax),pnum(numax),pprev(numax),nplace
+  logical::liswatch
+  integer::other,iparty,nplace
 ! *** end add ***
 
 ! POTEN.INC
-  logical::lspecial,lqchg,lij,lovr(nchmax),lexist(numax)
-  real::dipolex(nbxmax),dipoley(nbxmax),dipolez(nbxmax),dipolexo,dipoleyo,dipolezo
-  integer::a15type(ntmax,numax,numax)
-  real::sig2ij,epsij,epsilon_f(2,numax),sigma_f(2,numax),epsi,sigi,ecut,extc12,extc3,extz0,aspecial,bspecial,q1
-  real::xiq,jayq,jayself,a15(2),qelect,vtry(nchmax),vtrext(nchmax),vtrintra(nchmax),vtrinter(nchmax),vtrelect(nchmax),vtrewald(nchmax),vtrorient(nchmax),vtrelect_intra(nchmax),vtrelect_inter(nchmax),bfac(nchmax)
-  real::ljscale,qscale2
-  real::v3garo,rminee(nntype*nntype),rxp(numax,nchmax),ryp(numax,nchmax),rzp(numax,nchmax)
-  dimension extc12(nntype),extc3(nntype),extz0(nntype),xiq(0:nntype),jayself(nntype),lqchg(0:nntype),lij(0:nntype)
-  dimension sig2ij(nntype*nntype),epsij(nntype*nntype),ecut(nntype*nntype),jayq(nntype*nntype),epsi(0:nntype),sigi(0:nntype),q1(nntype),qelect(0:nntype)
-  dimension aspecial(nntype*nntype),bspecial(nntype*nntype),lspecial(nntype*nntype)
-  dimension ljscale(ntmax,numax,numax),qscale2(ntmax,numax,numax)
+  real::dipolexo,dipoleyo,dipolezo
+  real::v3garo
 
 ! EEPAR.INC
   logical::leemove,lmstate,leeacc
   integer::fmstate,sstate1,sstate2,nstate,box_state,eepointp,eeirem,boxrem1,boxins1,ee_prob
-  real::wee_ratio,psi,ee_qqu,um_markov,eeratio
-  dimension psi(smax),ee_qqu(numax,smax),box_state(smax),um_markov(smax,smax),ee_prob(smax)
+  real::wee_ratio,psi,um_markov,eeratio
+  dimension psi(smax),box_state(smax),um_markov(smax,smax),ee_prob(smax)
   integer::mstate,ee_moltyp(smax),nmolty1
-
-! COORD.INC
-  logical::lplace,lchiral
-  integer::nboxi,eetype,parbox
-  integer::parall,prior
-  real::rxu, ryu, rzu, xcm ,ycm,zcm,exp_c,sxcm,sycm,szcm
-  real::rxnew(numax),rynew(numax),rznew(numax)
-  real::qqu,rcmu
-  character(LEN=18)::chname
-  character(LEN=4)::chemid
-  dimension lplace(ntmax,nntype)
-  dimension prior(ntmax,numax)
-  dimension nboxi(nmax),eetype(ntmax),rcmu(nmax)
-  dimension rxu(nmax,numax),ryu(nmax,numax),rzu(nmax,numax)
-  dimension qqu(nmax,numax)
-  dimension nchbox(nbxmax),ncmt(nbxmax,ntmax),ncmt2(nbxmax,ntmax,20)
-  dimension parall(ntmax,nmax)
-  dimension parbox(nmax,nbxmax,ntmax)
-  dimension xcm(nmax),ycm(nmax),zcm(nmax),exp_c(nmax),sxcm(nmax),sycm(nmax),szcm(nmax)
-  dimension lchiral(ntmax,numax)
-  dimension chname(0:nntype), chemid(nntype)
 
 ! COORD2.INC
   integer::moltion(2)
-  real::rxuion(numax,2),ryuion(numax,2),rzuion(numax,2),qquion(numax,2),exp_cion(2)
-
-! CONNECT.INC
-  logical::linclu(ntmax,numax,numax),lqinclu(ntmax,numax,numax),lainclu(ntmax,numax,numax),wschvib(numax,6),wschben(numax,12),wschtor(numax,12)
-  integer::wsched(numax)
-  real::brvib(nvmax),brvibk(nvmax),brvibmin(60),brvibmax(60),brben(nvmax),brbenk(nvmax)
-
-! SYSTEM.INC
-  integer::solcount(nbxmax,ntmax)
-  real::avsolinter,avsolintra,avsolbend,avsoltor,avsolelc
-  dimension avsolinter(nbxmax,ntmax),avsolintra(nbxmax,ntmax),avsolbend(nbxmax,ntmax),avsoltor(nbxmax,ntmax) ,avsolelc(nbxmax,ntmax)
+  real::exp_cion(2)
 
 ! NEIGH.INC
-  integer::neighbor(maxneigh,nmax),neigh_cnt(nmax),neigh_icnt,neighi(maxneigh),neighboro(maxneigh,nmax),neigh_o(nmax)
-  real::ndij(maxneigh,nmax),nxij(maxneigh,nmax),nyij(maxneigh,nmax),nxijo(maxneigh,nmax),nzij(maxneigh ,nmax),ndiji(maxneigh),nxiji(maxneigh),nyiji(maxneigh),nziji(maxneigh),ndijo(maxneigh,nmax),nyijo(maxneigh,nmax),nzijo(maxneigh,nmax)
-
-! ENSEMBLE.INC
-  real::vbox(nbxmax),wbox(nbxmax) ,vinterb(nbxmax),vtailb(nbxmax),vintrab(nbxmax),vvibb(nbxmax) ,vbendb(nbxmax),vtgb(nbxmax),vextb(nbxmax), velectb(nbxmax) ,vflucqb(nbxmax),v3garob(nbxmax)
-!      real::velectb_intra(nbxmax), velectb_inter(nbxmax)
-
-! FIX.INC
-  real::xvec(numax,numax),yvec(numax,numax),zvec(numax,numax)
+  integer::neigh_icnt,neighi(maxneigh)
+  real::ndiji(maxneigh),nxiji(maxneigh),nyiji(maxneigh),nziji(maxneigh)
 
 ! BNBSMA.INC
-! *** temporary accumulators for max. displacement updates ***
-  real::bnflcq,bsflcq,bnflcq2,bsflcq2
   real::Abntrax,Abntray,Abntraz,Abstrax,Abstray,Abstraz
-  dimension bnflcq(ntmax,nbxmax),bsflcq(ntmax,nbxmax),bnflcq2(ntmax,nbxmax),bsflcq2(ntmax,nbxmax)
 
 ! ROSEN.INC
-  integer::growfrom,growprev,growlist,grownum
-  dimension growfrom(numax),growprev(numax),grownum(numax)
-  dimension growlist(numax,numax)
   real::weight,weiold,voldt,voldbb,voldtg,voldext,voldintra,voldinter,voldbvib,voldelect,voldewald,vnewt,vnewbb,vnewtg,vnewext,vnewintra,vnewbvib,vnewinter,vnewelect,vnewewald,vneworient,vnewinterr,vnewextr,vnewelectr,voldinterr ,voldextr,voldelectr,voldorient
 
 ! IPSWPAR.INC
-  integer::nw,nwell,iratipsw
+  integer::nw,iratipsw
   parameter (nw = 4000)
-  real::dvdl,acdvdl,acipsw,vipsw,pipsw ,vwellipsw,pwellipsw,vwellipswb,vipswb,etais,lambdais,rxwell ,rywell,rzwell,awell,bwell,vipswo,vipswn,vwellipswo,vwellipswn ,lena,lenc,pwellips,pips,dhmat,sxwell,sywell,szwell,vwellipswot ,vwellipswnt,vipswnt,vipswot
-  logical::lwell,lstagea,lstageb,lstagec
-  dimension vipswb(nbxmax),vwellipswb(nbxmax),rxwell(nw,ntmax) ,rywell(nw,ntmax) ,rzwell(nw,ntmax),pwellips(3,3),pips(3,3),nwell(ntmax) ,lwell(ntmax),awell(numax,numax,ntmax),dhmat(3,3),sxwell(nw,ntmax),sywell(nw,ntmax),szwell(nw,ntmax) ,vwellipswot(nchmax),vwellipswnt(nchmax) ,vipswot(nchmax),vipswnt(nchmax)
-
-! BLKAVG.INC
-  integer::nener,nprop,blockm
-  real::naccu,nccold,accum,bccold,aver,baver
-! ** Neeraj adding for solubility parameter and heat of vaporization
-  real::naccu1,nccold1,accum1,bccold1,aver1,baver1
-  integer::nprop1
-  parameter (nener=18,nprop=4+nener+(4*ntmax)+3,blockm=100)
-  parameter (nprop1=11)
-  dimension naccu(nprop,nbxmax),nccold(nprop,nbxmax)
-  dimension accum(nprop,nbxmax),bccold(nprop,nbxmax)
-  dimension aver(nprop,nbxmax), baver(nprop,nbxmax,blockm)
-  dimension naccu1(nprop1,nbxmax,nbxmax), nccold1(nprop1,nbxmax,nbxmax), aver1(nprop1,nbxmax,nbxmax)
-  dimension accum1(nprop1,nbxmax,nbxmax), bccold1(nprop1,nbxmax,nbxmax), baver1(nprop1,nbxmax,nbxmax,blockm)
+  real::dvdl,acdvdl,acipsw,vipsw,pipsw ,vwellipsw,pwellipsw,etais,lambdais,bwell,vipswo,vipswn,vwellipswo,vwellipswn,lena,lenc,pwellips,pips,dhmat
+  logical::lstagea,lstageb,lstagec
+  dimension pwellips(3,3),pips(3,3),dhmat(3,3)
 
 ! BOLTZMANN.INC
   real::rxi1,ryi1,rzi1,vi1,wi1,vext1,velect1
 
 ! FEPSI.INC
   real::aslope,bslope,ashift,bshift,a0,b0
-  real::favor(nmax),favor2(nmax)
 
 ! *** slope=0.3 a=3.05
 !	parameter (a0 = 0.2003d0)
@@ -502,13 +414,13 @@ CONTAINS
        call err_exit('reading namelist: io')
     end if
 
-    rewind(io_input)
-    read(UNIT=io_input,NML=system,iostat=jerr)
-    if (jerr.ne.0.and.jerr.ne.-1) then
-       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-       call err_exit('reading namelist: system')
-    end if
-    nchain=nchain+2
+    ! rewind(io_input)
+    ! read(UNIT=io_input,NML=system,iostat=jerr)
+    ! if (jerr.ne.0.and.jerr.ne.-1) then
+    !    write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+    !    call err_exit('reading namelist: system')
+    ! end if
+    ! nchain=nchain+2
 
     if (io_output.eq.5) then
        call err_exit('unit 5 is for standard input')
@@ -519,8 +431,35 @@ CONTAINS
           call err_exit('cannot open output file '//file_run)
        end if
     end if
-
   end subroutine read_system
+
+  subroutine allocate_cell()
+    integer::jerr
+    allocate(boxlx(nbxmax),boxly(nbxmax),boxlz(nbxmax),rcut(nbxmax),rcutnn(nbxmax),kalp(nbxmax),lsolid(nbxmax),lrect(nbxmax),express(nbxmax),Elect_field(nbxmax),ghost_particles(nbxmax),numberDimensionIsIsotropic(nbxmax),inix(nbxmax),iniy(nbxmax),iniz(nbxmax),inirot(nbxmax),inimix(nbxmax),nchoiq(nbxmax),box5(nbxmax),box6(nbxmax),zshift(nbxmax),dshift(nbxmax),rmvol(nbxmax),pmvlmt(nbxmax),pmvolb(nbxmax),lideal(nbxmax),ltwice(nbxmax),rmhmat(nbxmax,9),dipolex(nbxmax),dipoley(nbxmax),dipolez(nbxmax),nchbox(nbxmax),vbox(nbxmax),wbox(nbxmax),vinterb(nbxmax),vtailb(nbxmax),vintrab(nbxmax),vvibb(nbxmax),vbendb(nbxmax),vtgb(nbxmax),vextb(nbxmax),velectb(nbxmax),vflucqb(nbxmax),v3garob(nbxmax),vipswb(nbxmax),vwellipswb(nbxmax),stat=jerr)
+    if (jerr.ne.0) then
+       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+       call err_exit('allocate_system: allocation failed')
+    end if
+  end subroutine allocate_cell
+
+  subroutine allocate_system()
+    integer,parameter::initial_size=15
+    integer::jerr
+    allocate(ucheck(ntmax),nrotbd(ntmax),xcm(nmax),ycm(nmax),zcm(nmax),pmsatc(npamax),pmswtcb(npamax,npabmax),nswatb(npamax,2),nsampos(npamax),ncut(npamax,2),gswatc(npamax,2,2*npamax),nswtcb(npamax),box3(npamax,npabmax),box4(npamax,npabmax),pmisatc(npamax),temtyp(ntmax),B(ntmax),nunit(ntmax),nugrow(ntmax),nmaxcbmc(ntmax),iurot(ntmax),maxgrow(ntmax),isolute(ntmax),iring(ntmax),nrig(ntmax),irig(ntmax,6),frig(ntmax,6),nrigmin(ntmax),nrigmax(ntmax),rindex(ntmax),riutry(ntmax,3),lelect(ntmax),lflucq(ntmax),lqtrans(ntmax),lexpand(ntmax),lavbmc1(ntmax),lavbmc2(ntmax),lavbmc3(ntmax),lbias(ntmax),lring(ntmax),lrigid(ntmax),lrig(ntmax),lq14scale(ntmax),fqegp(ntmax),eta2(nbxmax,ntmax),qscale(ntmax),pmbias(ntmax),pmbsmt(ntmax),pmbias2(ntmax),rmtrax(ntmax,nbxmax),rmtray(ntmax,nbxmax),rmtraz(ntmax,nbxmax),rmrotx(ntmax,nbxmax),rmroty(ntmax,nbxmax),rmrotz(ntmax,nbxmax),lbranch(ntmax),ininch(ntmax,nbxmax),rmflcq(ntmax,nbxmax),pmswmt(ntmax),pmswapb(ntmax,npabmax),pmcbmt(ntmax),pmall(ntmax),pmfix(ntmax),pmfqmt(ntmax),pmeemt(ntmax),pmtrmt(ntmax),pmromt(ntmax),nswapb(ntmax),box1(ntmax,npabmax),box2(ntmax,npabmax),nchoi1(ntmax),nchoi(ntmax),nchoir(ntmax),nchoih(ntmax),nchtor(ntmax),nchbna(ntmax),nchbnb(ntmax),icbdir(ntmax),icbsta(ntmax),lrplc(ntmax),masst(ntmax),rmexpc(ntmax),eetype(ntmax),ncmt(nbxmax,ntmax),ncmt2(nbxmax,ntmax,20),parall(ntmax,nmax),parbox(nmax,nbxmax,ntmax),solcount(nbxmax,ntmax),avsolinter(nbxmax,ntmax),avsolintra(nbxmax,ntmax),avsolbend(nbxmax,ntmax),avsoltor(nbxmax,ntmax),avsolelc(nbxmax,ntmax),bnflcq(ntmax,nbxmax),bsflcq(ntmax,nbxmax),bnflcq2(ntmax,nbxmax),bsflcq2(ntmax,nbxmax),rxwell(nw,ntmax),rywell(nw,ntmax),rzwell(nw,ntmax),sxwell(nw,ntmax),sywell(nw,ntmax),szwell(nw,ntmax),nwell(ntmax),lwell(ntmax),naccu(nprop,nbxmax),nccold(nprop,nbxmax),accum(nprop,nbxmax),bccold(nprop,nbxmax),aver(nprop,nbxmax),baver(nprop,nbxmax,blockm),naccu1(nprop1,nbxmax,nbxmax),nccold1(nprop1,nbxmax,nbxmax),aver1(nprop1,nbxmax,nbxmax),accum1(nprop1,nbxmax,nbxmax),bccold1(nprop1,nbxmax,nbxmax),baver1(nprop1,nbxmax,nbxmax,blockm),moltyp(nmax),rcmu(nmax),exp_c(nmax),sxcm(nmax),sycm(nmax),szcm(nmax),nboxi(nmax),neighbor(maxneigh,nmax),neigh_cnt(nmax),neighboro(maxneigh,nmax),neigh_o(nmax),ndij(maxneigh,nmax),nxij(maxneigh,nmax),nyij(maxneigh,nmax),nxijo(maxneigh,nmax),nzij(maxneigh,nmax),ndijo(maxneigh,nmax),nyijo(maxneigh,nmax),nzijo(maxneigh,nmax),favor(nmax),favor2(nmax),ntype(ntmax,initial_size),leaderq(ntmax,initial_size),lplace(ntmax,initial_size),lrigi(ntmax,initial_size),invib(ntmax,initial_size),itvib(ntmax,initial_size,6),ijvib(ntmax,initial_size,6),inben(ntmax,initial_size),itben(ntmax,initial_size,12),ijben2(ntmax,initial_size,12),ijben3(ntmax,initial_size,12),intor(ntmax,initial_size),ittor(ntmax,initial_size,12),ijtor2(ntmax,initial_size,12),ijtor3(ntmax,initial_size,12),ijtor4(ntmax,initial_size,12),irotbd(initial_size,ntmax),pmrotbd(initial_size,ntmax),stat=jerr)
+    if (jerr.ne.0) then
+       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+       call err_exit('allocate_system: allocation failed')
+    end if
+  end subroutine allocate_system
+
+  subroutine allocate_molecule()
+    integer::jerr
+    allocate(splist(npamax,numax,2),lexist(numax),lexclu(ntmax,numax,ntmax,numax),rlist(numax,numax),rfrom(numax),rprev(numax),rnum(numax),liswinc(numax,ntmax),iplace(numax,numax),pfrom(numax),pnum(numax),pprev(numax),a15type(ntmax,numax,numax),epsilon_f(2,numax),sigma_f(2,numax),ljscale(ntmax,numax,numax),qscale2(ntmax,numax,numax),ee_qqu(numax,smax),rxnew(numax),rynew(numax),rznew(numax),prior(ntmax,numax),rxu(nmax,numax),ryu(nmax,numax),rzu(nmax,numax),qqu(nmax,numax),lchiral(ntmax,numax),rxuion(numax,2),ryuion(numax,2),rzuion(numax,2),qquion(numax,2),linclu(ntmax,numax,numax),lqinclu(ntmax,numax,numax),lainclu(ntmax,numax,numax),wschvib(numax,6),wschben(numax,12),wschtor(numax,12),wsched(numax),xvec(numax,numax),yvec(numax,numax),zvec(numax,numax),growfrom(numax),growprev(numax),grownum(numax),growlist(numax,numax),awell(numax,numax,ntmax),stat=jerr)
+    if (jerr.ne.0) then
+       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
+       call err_exit('allocate_molecule: allocation failed')
+    end if
+  end subroutine allocate_molecule
 
   subroutine checkAtom()
     if (.not.allocated(atoms%list)) call err_exit(TRIM(__FILE__)//integer_to_string(__LINE__)//": ATOMS section has not been defined!")
