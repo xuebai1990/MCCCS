@@ -42,7 +42,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   integer::nijspecial,ispecial,jspecial
   real::aspecd,bspecd
   logical::lsetup,linit,lreadq
-! -- variables added (3/24/05) for scaling of 1-4 interactions
+! variables added (3/24/05) for scaling of 1-4 interactions
   integer::nexclu,inclnum,ainclnum
   logical::lucall
   integer::nvirial
@@ -51,7 +51,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   real::dum,pm,pcumu,w(3)
   integer::ndum,ij,ii,jj
 
-! -- variables for histograms
+! variables for histograms
   integer::temnc,imol,iutemp,imolty,itype,ipair,bdum,bin
 
   integer::i,j,k,ncres,nmtres,iensem,inpbc,nmcount
@@ -64,12 +64,12 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   logical::lpolar,lqqelect,lee
   logical::lprint,lxyz,lfound
 
-! -- Variables added (6/30/2006) for fort.4 consistency check
+! Variables added (6/30/2006) for fort.4 consistency check
   integer::numvib,numbend,numtor,vib1,bend2,bend3,tor2,tor3,tor4
   integer::vibtype,bendtype,tortype
 
-!      real::temx,temy,temz
-!      dimension temx(nmax,numax),temy(nmax,numax),temz(nmax,numax)
+! real::temx,temy,temz
+! dimension temx(nmax,numax),temy(nmax,numax),temz(nmax,numax)
 
 ! KM variable added when analysis removed
   integer::nhere
@@ -82,7 +82,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   io_input=get_iounit()
   open(unit=io_input,access='sequential',action='read',file=file_in,form='formatted',iostat=jerr,status='old')
   if (jerr.ne.0) then
-     call err_exit('cannot open input file')
+     call err_exit(__FILE__,__LINE__,'cannot open input file',myid+1)
   end if
   call read_system(io_input)
   close(io_input)
@@ -91,18 +91,18 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   io_input=get_iounit()
   open(unit=io_input,access='sequential',action='read',file=file_input,form='formatted',iostat=jerr,status='old')
   if (jerr.ne.0) then
-     call err_exit('cannot open main input file')
+     call err_exit(__FILE__,__LINE__,'cannot open main input file',myid+1)
   end if
 
   read(io_input,*)
   read(io_input,*) seed
-! --- initialize random number generator
+! initialize random number generator
   call ranset(seed)
 
 ! -------------------------------------------------------------------
-! *** Output unit (if 2, write to runXX.dat file; if 6, write to stdout/screen; outherwise,
-! *** user designate a file to which to write) KEA 6/3/09 (defined in control.inc)
-! *** read echoing and long output flags
+! Output unit (if 2, write to runXX.dat file; if 6, write to stdout/screen; outherwise,
+! user designate a file to which to write) KEA 6/3/09 (defined in control.inc)
+! read echoing and long output flags
   read(io_input,*)
   read(io_input,*) ndum,lecho,lverbose,run_num,suffix
   read(io_input,*)
@@ -110,32 +110,32 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   read(io_input,*)
   read(io_input,*) lijall,lchgall,lewald,ldielect,ltailc,lshift,ltailcZeo
 
-! *** To add or remove helium atoms
+! To add or remove helium atoms
   read(io_input,*)
   read(io_input,*) L_add,N_add,N_box2add,N_moltyp2add
   read(io_input,*)
   read(io_input,*) L_sub,N_sub,N_box2sub,N_moltyp2sub
 
-! - read whether to compute electrostatic interaction or not during CBMC/SWAP
+! read whether to compute electrostatic interaction or not during CBMC/SWAP
   read(io_input,*)
   read(io_input,*) L_Coul_CBMC,lcutcm,ldual,lneigh
-!-- read the number of unitcell replicated in each directions (a, b, and c)
+! read the number of unitcell replicated in each directions (a, b, and c)
   read(io_input,*)
   read(io_input,*) Num_cell_a,Num_cell_b,Num_cell_c
-! - read run information
+! read run information
   read(io_input,*)
   read(io_input,*) nstep, lstop, lpresim, iupdatefix
-! - read torsion, decide whether to use torsion in function form or Table
+! read torsion, decide whether to use torsion in function form or Table
   read(io_input,*)
   read(io_input,*) lslit,lexzeo,lzgrid,lelect_field,ljoe,lsami,lmuir,lpsurf,lgraphite,lcorreg,llj,lexpsix,lmmff,lninesix,lgenlj,lgaro,lionic
   read(io_input,*)
   read(io_input,*) L_tor_table,L_spline,L_linear,L_vib_table,L_bend_table,L_vdW_table,L_elect_table
 
 ! KM ldielect writes to fort.27
-!      if (ldielect) then
-!        open(17,file=file_dipole,status='unknown')
-!        write(17,*) '# step  ibox   dipole_x   dipole_y   dipole_z'
-!      end if
+! if (ldielect) then
+! open(17,file=file_dipole,status='unknown')
+! write(17,*) '# step  ibox   dipole_x   dipole_y   dipole_z'
+! end if
 
 ! KM for MPI
 ! only processor 0 writes data
@@ -233,7 +233,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 
 ! -------------------------------------------------------------------
 
-! *** set up constants and conversion factors ***
+! set up constants and conversion factors ***
   beta = 1.0d0 / temp
   fqbeta = 1.0d0 / fqtemp
 
@@ -262,7 +262,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         write(io_output,*) iprint, imv, iratio, iblock, idiele,L_movie_xyz
      end if
   end if
-! - read information for histogram output (added 8/30/99)
+! read information for histogram output (added 8/30/99)
   if (lgrand) then
      read(io_input,*)
      read(io_input,*) nequil,ninstf, ninsth, ndumph
@@ -288,12 +288,12 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      return
   end if
 
-! - read system information
+! read system information
   do i = 1,nbox
      read(io_input,*)
      read(io_input,*) boxlx(i),boxly(i),boxlz(i),lsolid(i),lrect(i),kalp(i),rcut(i),rcutnn(i),numberDimensionIsIsotropic(i)
      if (i.eq.1 .and. lexzeo) then
-! === load positions of zeolite atoms
+! load positions of zeolite atoms
         call zeocoord(file_in)
         if (myid.eq.0) write(io_output,*) ' note zeolite determines the box size !'
      end if
@@ -341,11 +341,10 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 
   allocate(ncarbon(ntmax),lsolute(ntmax),idummy(ntmax),lratfix(ntmax),qbox(nbxmax),nures(ntmax),k_max_l(nbxmax),k_max_m(nbxmax),k_max_n(nbxmax),stat=jerr)
   if (jerr.ne.0) then
-     write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-     call err_exit('readdat: allocating system failed')
+     call err_exit(__FILE__,__LINE__,'readdat: allocating system failed',jerr)
   end if
 
-! *** set input arrays to zero ***
+! set input arrays to zero ***
   do j=1, ntmax
      lratfix(j) = .false.
      nugrow(j) = 0
@@ -384,7 +383,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   end do
 
   if (lgrand) then
-! - read chemical potentials (added 8/30/99 by jpotoff)
+! read chemical potentials (added 8/30/99 by jpotoff)
      read(io_input,*)
      read(io_input,*) (B(i),i=1,nmolty)
      if (lecho.and.myid.eq.0) then
@@ -397,12 +396,12 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         end if
      end if
 
-! --- removing from here. It will be calculated once we have molecular mass
-! --- to calculate debroglie wavelength.
-! - convert chemical potentials to activities
-!         do i=1,nmolty
-!            B(i) = exp(B(i)/temp)
-!         end do
+! removing from here. It will be calculated once we have molecular mass
+! to calculate debroglie wavelength.
+! convert chemical potentials to activities
+! do i=1,nmolty
+! B(i) = exp(B(i)/temp)
+! end do
   end if
 
   read(io_input,*)
@@ -424,7 +423,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         write(io_output,*) lmixlb,lmixjo
      end if
   end if
-! --- read special combining rule information
+! read special combining rule information
   read(io_input,*)
   read(io_input,*) nijspecial
   if (lecho.and.myid.eq.0) then
@@ -467,18 +466,17 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   softlog = 10.0d0**(-softcut)
   vol_eff = (4.0d0/3.0d0)*onepi*(rbsmax*rbsmax*rbsmax-rbsmin*rbsmin*rbsmin)
 
-! - set up the forcefield and the masses
+! set up the forcefield and the masses
   call init_energy_pairwise(file_in,lmixlb,lmixjo)
 
   allocate(lhere(nntype),temphe(nntype),stat=jerr)
   lhere=.false.
   if (jerr.ne.0) then
-     write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-     call err_exit('readdat: allocating potential failed')
+     call err_exit(__FILE__,__LINE__,'readdat: allocating potential failed',jerr)
   end if
 
   numax=0
-! - read bead potential information
+! read bead potential information
   do imol = 1, nmolty
      read(io_input,*)
      read(io_input,*) nunit(imol),nugrow(imol),ncarbon(imol),nmaxcbmc(imol),iurot(imol),lelect(imol),lflucq(imol),lqtrans(imol),lexpand(imol),lavbmc1(imol),lavbmc2(imol),lavbmc3(imol) ,fqegp(imol)
@@ -530,34 +528,34 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         lrigi(imol,i) = .false.
      end do
 
-!     *** irig is the site rigid sites will be grown from
-!     *** and frig will be the previous site (not kept rigid)
+! irig is the site rigid sites will be grown from
+! and frig will be the previous site (not kept rigid)
 
      if (lrig(imol)) then
         read(io_input,*)
         read(io_input,*) nrig(imol)
 
         if (nrig(imol).gt.0) then
-!     --- read in specific points to keep rigid in growth
+! read in specific points to keep rigid in growth
            read(io_input,*)
            do i = 1, nrig(imol)
               read(io_input,*) irig(imol,i),frig(imol,i)
               lrigi(imol,irig(imol,i)) = .true.
            end do
         else
-!     --- we will pick irig at random in each case if nrig = 0
+! we will pick irig at random in each case if nrig = 0
            read(io_input,*)
            read(io_input,*) nrigmin(imol),nrigmax(imol)
 
-!     --- nrigmin is the minimum amount of the chain to keep rigid
-!     --- nrigmax is the maximum
+! nrigmin is the minimum amount of the chain to keep rigid
+! nrigmax is the maximum
 
         end if
      end if
 
      if (lrigid(imol)) then
         read(io_input,*)
-!     - number of flexible parts
+! number of flexible parts
         read(io_input,*) rindex(imol)
         if ( rindex(imol).gt.0) then
            do i = 1, rindex(imol)
@@ -587,7 +585,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         lbias(imol) = .true.
      end if
 
-         ! *** choose only one from the three AVBMC algorithms
+         ! choose only one from the three AVBMC algorithms
      if ( lavbmc1(imol) ) then
         lavbmc2(imol) = .false.
         lavbmc3(imol) = .false.
@@ -637,7 +635,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      end if
 
      do i = 1, nunit(imol)
-! - linear/branched chain with connectivity table -
+! linear/branched chain with connectivity table -
         read(io_input,*)
         read(io_input,*) j, ntype(imol,i), leaderq(imol,i)
         ntype(imol,i)=indexOf(atoms,ntype(imol,i))
@@ -677,7 +675,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         masst(imol)=masst(imol)+mass(iutemp)
         lhere(iutemp) = .true.
 
-! - bond vibration -
+! bond vibration -
         read(io_input,*)
         read(io_input,*) invib(imol,i)
         if ( invib(imol,i) .gt. 6 ) then
@@ -707,17 +705,14 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
            end if
 
            if (lverbose.and.myid.eq.0) then
-!                  write(io_output,*) '      bead',i,' bonded to bead',
-!     &                 ijvib(imol,i,j),' with bond type:',
-!     &                 itvib(imol,i,j)
               write(io_output,*) '      bead',i,' bonded to bead', ijvib(imol,i,j)
               write(io_output,'(a20,i3,a13,f9.3,a5,f9.1)') '          bond type:', bonds%list(itvib(imol,i,j)),' bond length:', brvib(itvib(imol,i,j)),' k/2:', brvibk(itvib(imol,i,j))
            end if
         end do
-! - bond bending -
+! bond bending -
         read(io_input,*)
         read(io_input,*) inben(imol,i)
-!            write(io_output,*) inben(imol,i)
+! write(io_output,*) inben(imol,i)
         if ( inben(imol,i) .gt. 12 ) then
            write(io_output,*) 'too many bends'
            ldie = .true.
@@ -749,14 +744,11 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
            end if
 
            if (lverbose.and.myid.eq.0) then
-!                  write(io_output,*) '      bead',i, ' bending interaction',
-!     &                 ' through',ijben2(imol,i,j),' with bead',
-!     &                 ijben3(imol,i,j),' of bend type:',itben(imol,i,j)
               write(io_output,'(1x,a10,i4,a20,a8,i4,a10,i4)') '      bead' ,i, ' bending interaction',' through',ijben2(imol,i,j ),' with bead',ijben3(imol,i,j)
               write(io_output,'(a20,i3,a13,f9.3,a5,f9.1)') '          bend type:',angles%list(itben(imol,i,j)) ,' bend angle :',brben(itben(imol,i,j))*180.0d0/onepi ,' k/2:',brbenk(itben(imol,i,j))
            end if
         end do
-! - bond torsion -
+! bond torsion -
         read(io_input,*)
         read(io_input,*) intor(imol,i)
         if ( intor(imol,i) .gt. 12 ) then
@@ -793,9 +785,9 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 112  continue
 
 
-! -- starting the self consistency check for the bond vibrations, bending, and torsions
-! -- this would help in catching errors in fort.4 connectivity. Starting after continue
-! -- so that if we use molsetup subroutine it will provide extra checking. (Neeraj)
+! starting the self consistency check for the bond vibrations, bending, and torsions
+! this would help in catching errors in fort.4 connectivity. Starting after continue
+! so that if we use molsetup subroutine it will provide extra checking. (Neeraj)
      if (.not.lrigid(imol)) then
         do i = 1,nunit(imol)
            numvib=invib(imol,i)
@@ -833,9 +825,9 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
            do j = 1,numbend
               bend2 = ijben2(imol,i,j)
               bend3 = ijben3(imol,i,j)
-              !            if ( i .eq. 17) then
-              !              write(io_output,*) bend2, bend3, numbend
-              !            end if
+              ! if ( i .eq. 17) then
+              ! write(io_output,*) bend2, bend3, numbend
+              ! end if
               bendtype = itben(imol,i,j)
               if(inben(imol,bend3).eq.0) then
                  write(io_output,*) 'ERROR IN FORT.4 BENDING'
@@ -894,7 +886,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         end do
      end if
 
-! -- Neeraj Adding molecule neutrality check
+! Neeraj Adding molecule neutrality check
 !kea skip if lgaro
      if(.not.(lgaro .or.lionic)) then
         do i=1,nmolty
@@ -902,11 +894,11 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
            do j = 1,nunit(i)
               qtot = qtot+qelect(ntype(i,j))
            end do
-!            if(dabs(qtot).gt.1d-7) then
-!               write(io_output,*)'molecule type',i,'not neutral check charges'
-!               ldie = .true.
-!               return
-!            end if
+! if(dabs(qtot).gt.1d-7) then
+! write(io_output,*)'molecule type',i,'not neutral check charges'
+! ldie = .true.
+! return
+! end if
         end do
      end if
 
@@ -936,11 +928,11 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         end if
      end if
 !kea 6/4/09 -- added for multiple rotation centers
-! -- To assign multiple rotation centers, set iurot(imol) < 0
-! -- Add line after molecule specification, avbmc parameters
-! -- First, number of rotation centers
-! -- Second, identity of centers (0=COM,integer::> 0 = bead number)
-! -- Third, give probability to rotate around different centers
+! To assign multiple rotation centers, set iurot(imol) < 0
+! Add line after molecule specification, avbmc parameters
+! First, number of rotation centers
+! Second, identity of centers (0=COM,integer::> 0 = bead number)
+! Third, give probability to rotate around different centers
      if(iurot(imol).lt.0) then
         read(io_input,*)
         read(io_input,*) nrotbd(imol),irotbd(1:nrotbd(imol),imol), pmrotbd(1:nrotbd(imol),imol)
@@ -963,11 +955,10 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 
   allocate(inclmol(ntmax*numax*numax),inclbead(ntmax*numax*numax,2),inclsign(ntmax*numax*numax),ofscale(ntmax*numax*numax),ofscale2(ntmax*numax*numax),ainclmol(ntmax*numax*numax),ainclbead(ntmax*numax*numax,2),a15t(ntmax*numax*numax),stat=jerr)
   if (jerr.ne.0) then
-     write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-     call err_exit('readdat: allocating molecule failed')
+     call err_exit(__FILE__,__LINE__,'readdat: allocating molecule failed',jerr)
   end if
 
-! -- check whether there is a polarizable molecule
+! check whether there is a polarizable molecule
   lpolar = .false.
   lqqelect = .false.
 
@@ -1006,7 +997,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      end do
   end if
 
-! - read linkcell information
+! read linkcell information
   read(io_input,*)
   read(io_input,*) licell,rintramax,boxlink
 
@@ -1029,7 +1020,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      end if
   end if
 
-! -- read the atomic displacements
+! read the atomic displacements
   read(io_input,*)
   read(io_input,*) Armtrax, Armtray, Armtraz
 
@@ -1041,7 +1032,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      end if
   end if
 
-! - read displacement information
+! read displacement information
   read(io_input,*)
   read(io_input,*) rmtrax(1,1),rmtray(1,1),rmtraz(1,1)
   do im = 1,nbox
@@ -1086,7 +1077,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      end if
   end if
 
-! - read initial setup information
+! read initial setup information
   read(io_input,*)
   read(io_input,*) linit,lreadq
   if ( lecho.and.myid.eq.0 ) then
@@ -1137,7 +1128,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      end if
   end do
 
-! - read ensemble specific information
+! read ensemble specific information
   read(io_input,*)
   read(io_input,*) rmvol(1), tavol, iratv, iratp, rmflcq(1,1), taflcq
   do izz = 1,nmolty
@@ -1223,7 +1214,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      end if
   end do
 
-!     --- read swatch information
+! read swatch information
   read(io_input,*)
   read(io_input,*) pmswat,nswaty
   if ( nswaty .gt. npamax ) then
@@ -1247,7 +1238,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      read(io_input,*)
      read(io_input,*) (pmsatc(i),i=1,nswaty)
 
-!        --- safety checks on swatch
+! safety checks on swatch
      do i = 1,nswaty
         if ( nswatb(i,1) .eq. nswatb(i,2) ) then
            write(io_output,*) 'nswaty ',i,' has identical moltyp'
@@ -1274,7 +1265,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      end if
 
      do i=1,nswaty
-!           --- number of beads that remain in the same position
+! number of beads that remain in the same position
         read(io_input,*)
         read(io_input,*) nsampos(i),(ncut(i,j),j=1,2)
         if (lecho.and.myid.eq.0) then
@@ -1285,7 +1276,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
               write(io_output,*) 'nsampos',nsampos(i),' ncut', (ncut(i,j),j=1,2)
            end if
         end if
-!           --- bead number
+! bead number
         read(io_input,*)
         do j = 1,nsampos(i)
            read(io_input,*) (splist(i,j,k),k=1,2)
@@ -1328,7 +1319,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      end do
 
   else
-!        --- skip past all of the swatch info
+! skip past all of the swatch info
      read(io_input,*)
      read(io_input,*)
      read(io_input,*)
@@ -1341,7 +1332,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      read(io_input,*)
   end if
 
-! --- read swap info
+! read swap info
   read(io_input,*)
   read(io_input,*) pmswap, (pmswmt(i),i=1,nmolty)
   if ( lecho.and.myid.eq.0 ) then
@@ -1380,7 +1371,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      end do
   end do
 
-! --- read cbmc info
+! read cbmc info
   read(io_input,*)
   read(io_input,*) pmcb, (pmcbmt(i),i=1,nmolty)
   read(io_input,*)
@@ -1416,7 +1407,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         return
      end if
   end do
-! --- read fluctuating charge info
+! read fluctuating charge info
   read(io_input,*)
   read(io_input,*) pmflcq, (pmfqmt(i),i=1,nmolty)
   if ( lecho.and.myid.eq.0 ) then
@@ -1429,7 +1420,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         write(io_output,*) 'pmflcq',pmflcq,(pmfqmt(i),i=1,nmolty)
      end if
   end if
-! --- read expanded-coefficient move info
+! read expanded-coefficient move info
   read(io_input,*)
   read(io_input,*) pmexpc, (pmeemt(i),i=1,nmolty)
   if ( lecho.and.myid.eq.0 ) then
@@ -1445,10 +1436,10 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 ! read new expanded ensemble info
   read(io_input,*)
   read(io_input,*) pmexpc1
-! -- read atom translation probability
+! read atom translation probability
   read(io_input,*)
   read(io_input,*) pm_atom_tra
-! --- read translation info
+! read translation info
   read(io_input,*)
   read(io_input,*) pmtra,(pmtrmt(i),i=1,nmolty)
   if ( lecho.and.myid.eq.0 ) then
@@ -1462,7 +1453,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      end if
   end if
 
-! --- read rotation info
+! read rotation info
   read(io_input,*)
   read(io_input,*) (pmromt(i),i=1,nmolty)
   if ( lecho.and.myid.eq.0 ) then
@@ -1476,7 +1467,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      end if
   end if
 
-! *** writeout probabilities, in percent
+! writeout probabilities, in percent
   if (lverbose.and.myid.eq.0) then
      write(io_output,*)
      write(io_output,*) 'percentage move probabilities:'
@@ -1530,7 +1521,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      write(io_output,*) 'Fraction of atom translations move', pm_atom_tra
   end if
 
-! --- read growth details
+! read growth details
   read(io_input,*)
   read(io_input,*) (nchoi1(i),i=1,nmolty),(nchoi(i),i=1,nmolty) ,(nchoir(i),i=1,nmolty) ,(nchoih(i),i=1,nmolty),(nchtor(i),i=1,nmolty)
   if ( lecho.and.myid.eq.0 ) then
@@ -1576,7 +1567,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   do imol = 1, nmolty
      if (pmfix(imol).gt.0) then
         read(23,*) counttot
-!     --- read in from fort.23 the bead-bead distribution
+! read in from fort.23 the bead-bead distribution
         do i = 1, iring(imol)
            do j = 1, iring(imol)
               if (i.eq.j) goto 110
@@ -1590,7 +1581,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      end if
   end do
 
-!     --- read information for CBMC bond angle growth
+! read information for CBMC bond angle growth
   read(io_input,*)
   read(io_input,*) (nchbna(i),i=1,nmolty),(nchbnb(i),i=1,nmolty)
   if ( lecho.and.myid.eq.0 ) then
@@ -1637,7 +1628,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 
   call allocate_cbmc()
 
-! --- read exclusion table for intermolecular interactions
+! read exclusion table for intermolecular interactions
   read(io_input,*)
   read(io_input,*) nexclu
   do i = 1, nmolty
@@ -1669,7 +1660,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      read(io_input,*)
   end if
 
-! --- read inclusion list
+! read inclusion list
   read(io_input,*)
   read(io_input,*) inclnum
   if ( lecho.and.myid.eq.0 ) then
@@ -1699,7 +1690,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      read(io_input,*)
   end if
 
-! --- read a15 inclusion list
+! read a15 inclusion list
   read(io_input,*)
   read(io_input,*) ainclnum
   if ( lecho.and.myid.eq.0 ) then
@@ -1724,10 +1715,10 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      read(io_input,*)
   end if
 
-! - set up the inclusion table
+! set up the inclusion table
   call inclus(inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ainclbead,a15t,ofscale,ofscale2)
 
-! -  read in information on the chemical potential checker
+! read in information on the chemical potential checker
   read(io_input,*)
   read(io_input,*) lucall
   read(io_input,*)
@@ -1743,7 +1734,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      end if
   end if
 
-! -   read information for virial coefficient calculation
+! read information for virial coefficient calculation
   read(io_input,*)
   read(io_input,*) nvirial,starvir,stepvir
   if (lecho.and.myid.eq.0) then
@@ -1775,11 +1766,11 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      end if
   end if
 
-! --- JLR 11-11-09
-! --- reading in extra variables for RPLC simulations
-! --- if lideal=.true. then intermolecular interactions are not computed
-! --- if ltwice=.true. then mimage is applied twice
-! --- if lrplc=.true. there are some special rules in CBMC for how to grow chains
+! JLR 11-11-09
+! reading in extra variables for RPLC simulations
+! if lideal=.true. then intermolecular interactions are not computed
+! if ltwice=.true. then mimage is applied twice
+! if lrplc=.true. there are some special rules in CBMC for how to grow chains
   read(io_input,*)
   read(io_input,*) (lideal(i),i=1,nbox)
   if (lecho.and.myid.eq.0)  then
@@ -1801,31 +1792,31 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      write(io_output,*) 'ltwice: ', (ltwice(i),i=1,nbox)
      write(io_output,*) 'lrplc: ', (lrplc(i),i=1,nmolty)
   end if
-! --- END JLR 11-11-09
+! END JLR 11-11-09
 
-!--- JLR 11-11-09
-!--- skip this part if analysis will not be done (if ianalyze .gt. nstep)
+! JLR 11-11-09
+! skip this part if analysis will not be done (if ianalyze .gt. nstep)
 ! KM 01/10 remove analysis
-!      if (ianalyze.lt.nstep) then
-!         nhere = 0
-!         do izz=1,nntype
-!            if ( lhere(izz) ) then
-!               nhere = nhere + 1
-!               temphe(nhere) = izz
-!               beadtyp(nhere)=izz
-!            end if
-!         end do
-!         do izz = 1,nhere
-!            atemp = temphe(izz)
-!            decode(atemp) = izz
-!         end do
-!      end if
-! --- END JLR 11-11-09
+! if (ianalyze.lt.nstep) then
+! nhere = 0
+! do izz=1,nntype
+! if ( lhere(izz) ) then
+! nhere = nhere + 1
+! temphe(nhere) = izz
+! beadtyp(nhere)=izz
+! end if
+! end do
+! do izz = 1,nhere
+! atemp = temphe(izz)
+! decode(atemp) = izz
+! end do
+! end if
+! END JLR 11-11-09
   close(io_input)
 
 ! -------------------------------------------------------------------
 
-! *** restart saver
+! restart saver
   if ( nstep .gt. 100 ) then
      irsave = nstep / 50
   else
@@ -1834,7 +1825,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 
 ! -------------------------------------------------------------------
 
-! * check information of .INC-files
+! check information of .INC-files
   if (myid.eq.0) then
      write(io_output,*)
      write(io_output,*) '***** program   =  THE MAGIC BLACK BOX'
@@ -1927,7 +1918,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
            ldie = .true.
            return
         end if
-        !         if ( lchgall ) call err_exit('cannot have lchgall with lcutcm')
+        ! if ( lchgall ) call err_exit(__FILE__,__LINE__,'cannot have lchgall with lcutcm',myid+1)
      end if
      if ( ldual ) then
         write(io_output,*) 'Dual Cutoff Configurational-bias Monte Carlo'
@@ -1997,7 +1988,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 ! -------------------------------------------------------------------
 
   if (lgrand .and. .not.(lslit)) then
-! ---     volume ideal gas box is set arbitry large!
+! volume ideal gas box is set arbitry large!
      boxlx(2)=1000*boxlx(1)
      boxly(2)=1000*boxly(1)
      boxlz(2)=1000*boxlz(1)
@@ -2021,7 +2012,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      io_restart=get_iounit()
      open(unit=io_restart,access='sequential',action='read',file=file_restart,form='formatted',iostat=jerr,recl=4096,status='old')
      if (jerr.ne.0) then
-        call err_exit('cannot open main restart file')
+        call err_exit(__FILE__,__LINE__,'cannot open main restart file',myid+1)
      end if
      read(io_restart,*) nnstep
      read(io_restart,*) Armtrax, Armtray, Armtraz
@@ -2054,9 +2045,9 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
            write(io_output,*) (rmflcq(i,im),i=1,nmolty)
         end do
      end if
-! -- changed so fort.77 the same for all ensembles
-! -- 06/08/09 KM
-!         if ( lgibbs .or. lgrand .or. lnpt ) then
+! changed so fort.77 the same for all ensembles
+! 06/08/09 KM
+! if ( lgibbs .or. lgrand .or. lnpt ) then
      read(io_restart,*) (rmvol(ibox), ibox = 1,nbox)
      if (myid.eq.0) then
         write(io_output,"(' max volume displacement:        ',3e12.4)") (rmvol(ibox), ibox = 1,nbox)
@@ -2124,7 +2115,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
               write(io_output,'("cell angle beta: ",2x,f12.3)') cell_ang(ibox,2)*180.0d0/onepi
               write(io_output,'("cell angle gamma:",2x,f12.3)') cell_ang(ibox,3)*180.0d0/onepi
 
-!                     write(io_output,"(' angle of  box ',i1,'  :  ','   alpha:   ',f12.6,'
+! write(io_output,"(' angle of  box ',i1,'  :  ','   alpha:   ',f12.6,'
 !     &  beta: ', f12.6, '    gamma:   ',f12.6)") ibox,cell_ang(ibox,1)*180.0d0/onepi,
 !     &                cell_ang(ibox,2)*180.0d0/onepi,cell_ang(ibox,3)
 !     &                *180/onepi
@@ -2146,7 +2137,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         end if
      end do
 
-!         end if ! end if ( lgibbs .or. lgrand .or. lnpt )
+! end if ! end if ( lgibbs .or. lgrand .or. lnpt )
      if (myid.eq.0) then
         write(io_output,*)
         write(io_output,*) 'Finished writing simulation box related info'
@@ -2154,7 +2145,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 
      read(io_restart,*) ncres
      read(io_restart,*) nmtres
-! --- check that number of particles in fort.4 & fort.77 agree ---
+! check that number of particles in fort.4 & fort.77 agree ---
      if ( ncres .ne. nchain .or. nmtres .ne. nmolty ) then
         write(io_output,*) 'conflicting information in restart and control files'
         write(io_output,*) 'nchain',nchain,'ncres',ncres
@@ -2164,15 +2155,15 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      end if
      read(io_restart,*) (nures(i),i=1,nmtres)
 
-!         do i = 1, nmtres
-!            if ( nures(i) .ne. nunit(i) ) then
-!               write(io_output,*)
+! do i = 1, nmtres
+! if ( nures(i) .ne. nunit(i) ) then
+! write(io_output,*)
 !     +           'conflicting information in restart and control files'
-!               write(io_output,*) 'unit',i,'nunit',nunit(i),'nures',nures(i)
-!               call err_exit('')
-!            end if
-!         end do
-!         write(io_output,*) 'ncres',ncres,'   nmtres',nmtres
+! write(io_output,*) 'unit',i,'nunit',nunit(i),'nures',nures(i)
+! call err_exit(__FILE__,__LINE__,'',myid+1)
+! end if
+! end do
+! write(io_output,*) 'ncres',ncres,'   nmtres',nmtres
 
      read(io_restart,*) (moltyp(i),i=1,ncres)
      read(io_restart,*) (nboxi(i),i=1,ncres)
@@ -2185,9 +2176,9 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         end do
      end if
 
-!         write(io_output,*) 'start reading coordinates'
-! --- check that particles are in correct boxes ---
-! --- obtain ncmt values
+! write(io_output,*) 'start reading coordinates'
+! check that particles are in correct boxes ---
+! obtain ncmt values
      do ibox = 1,nbox
 
         nchbox(ibox) = 0
@@ -2244,7 +2235,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 
      end do
 
-! --- check that number of particles of each type is consistent
+! check that number of particles of each type is consistent
      do i = 1, nmolty
         tcount = 0
         do ibox = 1, nbox
@@ -2260,14 +2251,14 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         end if
      end do
 
-!         write(io_output,*) 'particles found in correct box with correct type'
+! write(io_output,*) 'particles found in correct box with correct type'
 
      do i = 1,nbxmax
         qbox(i) = 0.0d0
      end do
 
      do i = 1, nchain
-!            write(io_output,*) 'reading coord of chain i',i
+! write(io_output,*) 'reading coord of chain i',i
         imolty = moltyp(i)
         do j = 1, nunit(imolty)
            read(io_restart,*) rxu(i,j), ryu(i,j), rzu(i,j),qqu(i,j)
@@ -2314,16 +2305,16 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
            else
               min_boxl = min(boxlx(ibox),boxly(ibox),boxlz(ibox))
            end if
-           !              rcut(ibox) = 0.4d0*min_boxl
+           ! rcut(ibox) = 0.4d0*min_boxl
            calp(ibox) = 3.2d0/rcut(ibox)
         end do
      end if
   else
      if ( lchgall ) then
-! *** if real space term are summed over all possible pairs in the box
-! *** kalp(1) & kalp(2) are fixed while calp(1) & calp(2) change
-! *** according to the boxlength, kalp(1) should have a value greater than
-! *** 5.0
+! if real space term are summed over all possible pairs in the box
+! kalp(1) & kalp(2) are fixed while calp(1) & calp(2) change
+! according to the boxlength, kalp(1) should have a value greater than
+! 5.0
         do ibox = 1, nbox
            if (lsolid(ibox).and.(.not.lrect(ibox))) then
               min_boxl = min(min_width(ibox,1),min_width(ibox,2), min_width(ibox,3))
@@ -2347,7 +2338,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
            end if
         end do
      else
-! *** if not lchgall, calp(1) & calp(2) are fixed
+! if not lchgall, calp(1) & calp(2) are fixed
         do ibox = 1, nbox
            calp(ibox) = kalp(ibox)
            if ( lewald ) then
@@ -2356,8 +2347,8 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
                  write(io_output,*) ibox,calp(ibox),rcut(ibox)
 !cc --- JLR 11-24-09
 !cc --- you may want a smaller kalp, e.g. when comparing to previous work
-!cc --- This does not need to be a call err_exit('')
-!                  call err_exit('kalp is too small, set to 3.2/rcutchg')
+!cc --- This does not need to be an error
+! call err_exit(__FILE__,__LINE__,'kalp is too small, set to 3.2/rcutchg',myid+1)
                  write(io_output,*) 'kalp is too small, set to 3.2/rcutchg'
 !cc --- END JLR 11-24-09
               end if
@@ -2390,7 +2381,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      write(io_output,*)
   end if
 
-!--- book keeping arrays
+! book keeping arrays
   do ibox=1,nbox
      do imolty=1,nmolty
         idummy(imolty)=0
@@ -2400,7 +2391,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
            imolty=moltyp(i)
            idummy(imolty) = idummy(imolty)+1
            parbox(idummy(imolty),ibox,imolty)=i
-!               pparbox(i,ibox) = nmcount
+! pparbox(i,ibox) = nmcount
         end if
      end do
      nmcount = 0
@@ -2413,11 +2404,11 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         return
      end if
   end do
-!     set idummy counter to 0
+! set idummy counter to 0
   do imolty=1,nmolty
      idummy(imolty)=0
   end do
-!     set up parall
+! set up parall
   do i =1,nchain
      imolty = moltyp(i)
      idummy(imolty) = idummy(imolty) + 1
@@ -2425,43 +2416,43 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   end do
 
 ! -------------------------------------------------------------------
-! *** read/produce initial/starting configuration ***
-! *** zeolite external potential
+! read/produce initial/starting configuration ***
+! zeolite external potential
   if ( lexzeo ) call suzeo()
   call buildTripletTable(file_in)
   call buildQuadrupletTable(file_in)
 ! ----------------------------------------------------------------
 
-! - reordering of numbers for charmm
-!      do i = 1, nchain
-!         imolty = moltyp(i)
-!         temtyp(i) = imolty
-!         do j = 1, nunit(imolty)
-!            temx(i,j) = rxu(i,j)
-!            temy(i,j) = ryu(i,j)
-!            temz(i,j) = rzu(i,j)
-!         end do
-!      end do
-!      innew = 0
-!      do it = 1, nmolty
-!         do i = 1, nchain
-!            imolty = temtyp(i)
-!            if ( imolty .eq. it ) then
-!               innew = innew + 1
-!               moltyp(innew) = it
-!               do j = 1, nunit(imolty)
-!                  rxu(innew,j) = temx(i,j)
-!                  ryu(innew,j) = temy(i,j)
-!                  rzu(innew,j) = temz(i,j)
-!               end do
-!            end if
-!         end do
-!         write(io_output,*) 'it =',it,'   innew =',innew
-!      end do
+! reordering of numbers for charmm
+! do i = 1, nchain
+! imolty = moltyp(i)
+! temtyp(i) = imolty
+! do j = 1, nunit(imolty)
+! temx(i,j) = rxu(i,j)
+! temy(i,j) = ryu(i,j)
+! temz(i,j) = rzu(i,j)
+! end do
+! end do
+! innew = 0
+! do it = 1, nmolty
+! do i = 1, nchain
+! imolty = temtyp(i)
+! if ( imolty .eq. it ) then
+! innew = innew + 1
+! moltyp(innew) = it
+! do j = 1, nunit(imolty)
+! rxu(innew,j) = temx(i,j)
+! ryu(innew,j) = temy(i,j)
+! rzu(innew,j) = temz(i,j)
+! end do
+! end if
+! end do
+! write(io_output,*) 'it =',it,'   innew =',innew
+! end do
 
 ! -------------------------------------------------------------------
 
-! --- set the centers of mass if LFOLD = .TRUE.
+! set the centers of mass if LFOLD = .TRUE.
 
   if ( lfold ) then
      do ibox = 1, nbox
@@ -2469,7 +2460,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      end do
   end if
 
-! * check that rintramax is really valid
+! check that rintramax is really valid
   if (licell) then
      do i = 1,nchain
         if (2.0d0*rcmu(i) .gt. rintramax) then
@@ -2480,10 +2471,10 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      end do
   end if
 
-! * calculate number of frames *
+! calculate number of frames *
   nnframe = nstep / imv
 
-! *** write out movie-header ***
+! write out movie-header ***
   if (myid.eq.0) then
      open(10, file=file_movie, status='unknown')
      if ( nnframe .ne. 0 ) then
@@ -2500,12 +2491,12 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 
         do imolty = 1,nmolty
            write(10,*) nunit(imolty)
-!     output bond connectivity information
+! output bond connectivity information
            do ii=1,nunit(imolty)
               write(10,*) invib(imolty,ii) ,(ijvib(imolty,ii,z),z=1,invib(imolty,ii))
            end do
 
-!     output torsional connectivity information
+! output torsional connectivity information
            do j = 1,nunit(imolty)
               write(10,*) intor(imolty,j),(ijtor2(imolty,j,ii), ijtor3(imolty,j,ii),ijtor4(imolty,j,ii),ii=1,intor(imolty,j))
            end do
@@ -2514,7 +2505,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      end if
   end if
 
-!     --- write out isolute movie header
+! write out isolute movie header
   lprint = .false.
   do imol = 1,nmolty
      if (lsolute(imol)) then
@@ -2530,17 +2521,17 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   end if
 
 
-! *** write out initial configuration for first movie frame ***
+! write out initial configuration for first movie frame ***
   if (nnstep .eq. 0) then
      dum = 1.0d0
-! * fixed by adding nbox, why the hell didn't this cause errors before?
-! * KM fixed by adding dum for acsolpar
+! fixed by adding nbox, why the hell didn't this cause errors before?
+! KM fixed by adding dum for acsolpar
      call monper(dum,dum,dum,dum,dum,dum,dum,dum,dum,dum,dum,nbox,nnstep,dum,.false.,.false.,.false. ,.true.,.false.,.false.,lratfix,lsolute,dum,0.0d0,0.0d0)
   end if
 
 ! -------------------------------------------------------------------
 
-! * write out connectivity and bonded interactions
+! write out connectivity and bonded interactions
   if (lverbose.and.myid.eq.0) then
      do imol = 1,nmolty
         write(io_output,*) 'molecule type',imol
@@ -2577,7 +2568,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      end do
   end if
 
-! * write out non-bonded interaction table
+! write out non-bonded interaction table
   if (myid.eq.0) then
      write(io_output,*)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
@@ -2603,7 +2594,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      end if
   end if
 
-! *** write input data to unit 6 for control ***
+! write input data to unit 6 for control ***
   if (myid.eq.0) then
      write(io_output,*)
      write(io_output,*) 'number of mc cycles:            ', nstep
@@ -2618,8 +2609,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 
   deallocate(ncarbon,lsolute,idummy,lratfix,qbox,nures,k_max_l,k_max_m,k_max_n,lhere,temphe,inclmol,inclbead,inclsign,ofscale,ofscale2,ainclmol,ainclbead,a15t,stat=jerr)
   if (jerr.ne.0) then
-     write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-     call err_exit('readdat: deallocation failed')
+     call err_exit(__FILE__,__LINE__,'readdat: deallocation failed',jerr)
   end if
 
   return

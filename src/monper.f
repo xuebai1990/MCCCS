@@ -32,15 +32,13 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
 ! -------------------------------------------------------------------
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
-  DO im=1,nbxmax
-     pres(im)=0.0d0
-  end do
-!      write(io_output,*) 'begin MONPER'
-! *** perform periodic operations  ***
+  pres=0.0d0
+! write(io_output,*) 'begin MONPER'
+! perform periodic operations  ***
  
-! *** Deciding the minimum rcut for atom displacement. As we
-! *** would have strecthing potential, this ought to be much
-! *** smaller than the rcutmin
+! Deciding the minimum rcut for atom displacement. As we
+! would have strecthing potential, this ought to be much
+! smaller than the rcutmin
 
   rcutmin = 1.0d10
 
@@ -51,18 +49,18 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
   end do
 
   if ( lratio ) then
-! *** adjust the atomic displacements
+! adjust the atomic displacements
      if ( Abntrax .gt. 0.5d0 ) then
         ratrax = Abstrax / Abntrax
         rttrax = Armtrax * ratrax / tatra
         if ( rttrax .gt. 2.0d0 * rcutmin ) then
-! --- maximum translational displacement
+! maximum translational displacement
            Armtrax = 2.0d0*rcutmin
         else if (rttrax .lt. 1.0d-10 ) then
-! --- ratio must have been zero, so divide by 10
+! ratio must have been zero, so divide by 10
            Armtrax = Armtrax/10.0d0
         else
-! --- accept new ratio
+! accept new ratio
            Armtrax = rttrax
         end if
      end if
@@ -71,13 +69,13 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
         ratray = Abstray / Abntray
         rttray = Armtray * ratray / tatra
         if ( rttray .gt. 2.0d0 * rcutmin ) then
-! --- maximum translational displacement
+! maximum translational displacement
            Armtray = 2.0d0*rcutmin
         else if (rttray .lt. 1.0d-10 ) then
-! --- ratio must have been zero, so divide by 10
+! ratio must have been zero, so divide by 10
            Armtray = Armtray/10.0d0
         else
-! --- accept new ratio
+! accept new ratio
            Armtray = rttray
         end if
      end if
@@ -86,141 +84,140 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
         ratraz = Abstraz / Abntraz
         rttraz = Armtraz * ratraz / tatra
         if ( rttraz .gt. 2.0d0 * rcutin ) then
-! --- maximum translational displacement
+! maximum translational displacement
            Armtraz = 2.0d0*rcutin
         else if (rttraz .lt. 1.0d-10 ) then
-! --- ratio must have been zero, so divide by 10
+! ratio must have been zero, so divide by 10
            Armtraz = Armtraz/10.0d0
         else
-! --- accept new ratio
+! accept new ratio
            Armtraz = rttraz
         end if
      end if
  
-! *** adjust maximum translational displacement for COM***
+! adjust maximum translational displacement for COM***
      imend = nbox
      do im=1,imend
         if (myid.eq.0) then
            write(io_output,*) 'Box ',im
         end if
         do imolty = 1,nmolty
-!              --- rmtrax
-!              --- check whether any x translations have been done for 
-!              --- molecule type imolty in box im
+! rmtrax
+! check whether any x translations have been done for 
+! molecule type imolty in box im
            if ( bntrax(imolty,im) .gt. 0.5d0 ) then
-!                 --- compute possible new ratio
+! compute possible new ratio
               ratrax = bstrax(imolty,im) / bntrax(imolty,im)
               rttrax = rmtrax(imolty,im) * ratrax / tatra
 
               if ( rttrax .gt. 2.0d0 * rcut(im)) then 
-!                    --- maximum translational displacement
+! maximum translational displacement
                  rmtrax(imolty,im) = 2.0d0*rcut(im)
               else if (rttrax .lt. 1.0d-10 ) then  
-!                    --- ratio must have been zero, so divide by 10
+! ratio must have been zero, so divide by 10
                  rmtrax(imolty,im) = rmtrax(imolty,im)/10.0d0
               else 
-!                    --- accept new ratio
+! accept new ratio
                  rmtrax(imolty,im) = rttrax
               end if
            end if
 
-!              --- rmtray
-!              --- check whether any y translations have been done for 
-!              --- molecule type imolty in box im
-
+! rmtray
+! check whether any y translations have been done for 
+! molecule type imolty in box im
            if ( bntray(imolty,im) .gt. 0.5d0 ) then
-!                 --- compute possiblt new ratio
+! compute possiblt new ratio
               ratray = bstray(imolty,im) / bntray(imolty,im)
               rttray = rmtray(imolty,im) * ratray / tatra
 
               if ( rttray .gt. 2.0d0*rcut(im) ) then 
-!                    --- maximum translational displacement
+! maximum translational displacement
                  rmtray(imolty,im) = 2.0d0*rcut(im)
               else if (rttray .eq. 0.0d0) then  
-!                    --- ratio must have been zero, divide old by 10
+! ratio must have been zero, divide old by 10
                  rmtray(imolty,im) = rmtray(imolty,im)/10.0d0
               else 
-!                    --- accept new ratio
+! accept new ratio
                  rmtray(imolty,im) = rttray
               end if
            end if
 
-!              --- rmtraz
-!              --- check whether any z translations have been done for 
-!              --- molecule type imolty in box im
+! rmtraz
+! check whether any z translations have been done for 
+! molecule type imolty in box im
            if ( bntraz(imolty,im) .gt. 0.5d0 ) then
-!                 --- compute possible new ratio
+! compute possible new ratio
               ratraz = bstraz(imolty,im) / bntraz(imolty,im)
               rttraz = rmtraz(imolty,im) * ratraz / tatra
 
               if ( rttraz .gt. 2.0d0*rcut(im) ) then 
-!                    --- maximum translational displacement
+! maximum translational displacement
                  rmtraz(imolty,im) = 2.0d0*rcut(im)
               else if ( rttraz .lt. 1.0d-10 ) then  
-!                    --- ratio must have been zero, divide old by 10
+! ratio must have been zero, divide old by 10
                  rmtraz(imolty,im) = rmtraz(imolty,im)/10.0d0
               else 
-!                    --- accept new ratio
+! accept new ratio
                  rmtraz(imolty,im) = rttraz
               end if
            end if
  
-!              --- rmrotx
-!              --- check whether any x-axis rotations have been done for 
-!              --- molecule type imolty in box im
+! rmrotx
+! check whether any x-axis rotations have been done for 
+! molecule type imolty in box im
            if ( bnrotx(imolty,im) .gt. 0.5d0 ) then
-!                 --- compute possible new ratio
+! compute possible new ratio
               rarotx = bsrotx(imolty,im) / bnrotx(imolty,im)
               rtrotx = rmrotx(imolty,im) * rarotx / tarot
 
               if ( rtrotx .lt. 1.0d-10 )  then
-!                    --- ratio was zero, divide old by 10
+! ratio was zero, divide old by 10
                  rmrotx(imolty,im) = rmrotx(imolty,im)/10.d0
               else if (rtrotx .gt. 3.1415d0) then
-!                    --- maximum rotational displacement
+! maximum rotational displacement
                  rmrotx(imolty,im) = 3.1415d0
               else
-!                    --- accept trial ratio
+! accept trial ratio
                  rmrotx(imolty,im) = rtrotx
               end if
            end if
 
-!              --- rmroty
-!              --- check whether any y-axis rotations have been done for 
-!              --- molecule type imolty in box im
+! rmroty
+! check whether any y-axis rotations have been done for 
+! molecule type imolty in box im
            if ( bnroty(imolty,im) .gt. 0.5d0 ) then
-!                 --- compute possible new ratio
+! compute possible new ratio
               raroty = bsroty(imolty,im) / bnroty(imolty,im)
               rtroty = rmroty(imolty,im) * raroty / tarot
 
               if ( rtroty .lt. 1.0d-10)  then
-!                    --- ratio was zero, divide old by 10
+! ratio was zero, divide old by 10
                  rmroty(imolty,im) = rmroty(imolty,im)/10.0d0
               else if (rtroty .gt. 3.1415d0) then
-!                    --- maximum rotational displacement
+! maximum rotational displacement
                  rmroty(imolty,im) = 3.1415d0
               else
-!                    --- accept trial ratio
+! accept trial ratio
                  rmroty(imolty,im) = rtroty
               end if
            end if
                
-!              --- rmrotz
-!              --- check whether any y-axis rotations have been done for 
-!              --- molecule type imolty in box im
+! rmrotz
+! check whether any y-axis rotations have been done for 
+! molecule type imolty in box im
            if ( bnrotz(imolty,im) .gt. 0.5d0 ) then
-!                 --- compute possible new ratio
+! compute possible new ratio
               rarotz = bsrotz(imolty,im) / bnrotz(imolty,im)
               rtrotz = rmrotz(imolty,im) * rarotz / tarot
                   
               if (rtrotz .eq. 0.0d0)  then
-!                    --- ratio was zero, divide old by 10
+! ratio was zero, divide old by 10
                  rmrotz(imolty,im) = rmrotz(imolty,im)/10.0d0
               else if (rtrotz .gt. 3.1415d0) then
-!                    --- maximum rotational displacement
+! maximum rotational displacement
                  rmrotz(imolty,im) = 3.1415d0
               else
-!                    --- accept trial ratio
+! accept trial ratio
                  rmrotz(imolty,im) = rtrotz
               end if
            end if
@@ -231,9 +228,9 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
 ! KM for MPI
 ! only processor 0 writes to output files (except for error messages)
            if (myid.eq.0) then
-! *** write some ratio update information ***
+! write some ratio update information ***
               write(io_output,"(' Type ',i2,' bn ',6(f7.0,1x))") imolty ,bntrax(imolty,im),bntray(imolty,im), bntraz(imolty ,im),bnrotx(imolty,im), bnroty(imolty,im) ,bnrotz(imolty,im)
-!              write(io_output,"(' ratio       ',6(f7.4,1x))") ratrax, ratray, ratraz,rarotx, raroty,rarotz
+! write(io_output,"(' ratio       ',6(f7.4,1x))") ratrax, ratray, ratraz,rarotx, raroty,rarotz
               write(io_output,"(' max.displ.  ',6(f9.4,1x))") rmtrax(imolty,im), rmtray(imolty,im), rmtraz(imolty ,im), rmrotx(imolty,im), rmroty(imolty,im), rmrotz(imolty,im)
            end if
 
@@ -266,7 +263,7 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
         end do
      end do
 
-!        ---  adjust maximum charge displacement for fluc Q
+! adjust maximum charge displacement for fluc Q
      lfq = .false.
      do i = 1,nmolty
         do im = 1,imend
@@ -279,16 +276,16 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
                  rmflcq(i,im) = rmflcq(i,im) * ratflcq
               end if
            end if
-!              --- accumulate flcq info for final output
+! accumulate flcq info for final output
            bsflcq2(i,im) = bsflcq2(i,im) + bsflcq(i,im)
            bnflcq2(i,im) = bnflcq2(i,im) + bnflcq(i,im)
-!              --- rezero flcq
+! rezero flcq
            bsflcq(i,im) = 0.0d0
            bnflcq(i,im) = 0.0d0
         end do
      end do
      if ( lfq.and.myid.eq.0 ) then
-!           --- write out information about fluctuating charge success
+! write out information about fluctuating charge success
         write(io_output,*) 'Box:   rmflcq for moltyps'
         do im =1,imend
            write(io_output,*) im,(rmflcq(i,im),i=1,nmolty)
@@ -299,11 +296,11 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
 
   do imolty = 1, nmolty
      if (lratfix(imolty)) then
-!     *** readjust fixed end point data to assure optimum efficiency ***
+! readjust fixed end point data to assure optimum efficiency ***
         counttot = counttot + counthist
         histrat = dble(counthist) / dble(counttot) 
 
-!     --- reset counthist
+! reset counthist
         counthist = 0
         do j = 1, iring(imolty) 
            do k = 1, iring(imolty)
@@ -315,15 +312,15 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
 
               if (histtot.eq.0) goto 150
 
-!     *** normalize and multiply hist by its weighting using above condition
+! normalize and multiply hist by its weighting using above condition
               do bin = 1, maxbin
                  hist(j,k,bin) = hist(j,k,bin)*dble(histrat) / histtot
-!     *** add weighed hist to hist
+! add weighed hist to hist
                  probf(j,k,bin) = probf(j,k,bin) + hist(j,k,bin)
-!     *** reset hist to zero for next iteration
+! reset hist to zero for next iteration
                  hist(j,k,bin) = 0
               end do
-!     *** renormalize new distribution
+! renormalize new distribution
               histtot = 0
               do bin = 1, maxbin
                  histtot = histtot + probf(j,k,bin)
@@ -338,12 +335,12 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
 
 ! KM for MPI
 ! only do anything for lsolute if monper is not called from readdat (nnn.ne.0)
-!     *** calculate energy and write out movie for lsolute
+! calculate energy and write out movie for lsolute
      if (lsolute(imolty).and.nnn.ne.0) then
         do ibox = 1, nbox
            do k = 1, ncmt(ibox,imolty)
               i = parbox(k,ibox,imolty)
-!     --- set coords for energy and write out conformations
+! set coords for energy and write out conformations
               if (myid.eq.0) write(11,*) imolty,ibox,nunit(imolty)
               do j = 1, nunit(imolty)
                  rxuion(j,1) = rxu(i,j)                     
@@ -356,7 +353,7 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
               if (ovrlap) write(io_output,*)  '*** DISASTER, OVERLAP IN MONPER'
 
               if (ltailc) then
-!     --- tail corrections
+! tail corrections
                  if (lsolid(ibox).and..not.lrect(ibox)) then
                     vol = cell_vol(ibox) 
                  else
@@ -384,7 +381,7 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
 
   if ( lgibbs .or. lnpt ) then
      if ( lratv ) then
-!     *** adjust maximum volume displacement ***
+! adjust maximum volume displacement ***
         do ibox = 1, nbox
            if (lsolid(ibox) .and. .not. lrect(ibox)) then
               do j = 1,9
@@ -445,7 +442,7 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
 
 ! KM for MPI
   if ( lprint.and.myid.eq.0 ) then
-!     *** write out runtime information ***
+! write out runtime information ***
      ntot = nnn + nnstep
      write(io_output,'(i6,i8,e12.4,f10.3,f12.1,15i4)') nnn,ntot, vbox(1),boxlx(1),pres(1) ,(ncmt(1,imolty),imolty=1,nmolty)
      if ( lgibbs ) then
@@ -457,7 +454,7 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
 
 ! KM for MPI      
   if ( lmv .and.myid.eq.0) then
-!     *** write out the movie configurations ***
+! write out the movie configurations ***
      write(10,*) nnn
      do ibox = 1, nbox
         write(10,*) (ncmt(ibox,zzz),zzz=1,nmolty)
@@ -501,53 +498,11 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
   end if
 
   if ( lrsave .and.myid.eq.0) then
-!     *** write out the restart configurations to SAFETY-file ***
-     open(88,file="save-config")
-     write (88,*) nnn + nnstep
-     write (88,*) Armtrax, Armtray, Armtraz 
-     do im=1,nbox
-        do imolty=1,nmolty
-           write (88,*) rmtrax(imolty,im), rmtray(imolty,im) , rmtraz(imolty,im)
-           write (88,*) rmrotx(imolty,im), rmroty(imolty,im) , rmrotz(imolty,im)
-        end do
-     end do
-     do im=1,nbox
-        write (88,*) (rmflcq(i,im),i=1,nmolty)
-     end do
-     if ( lgibbs .or. lgrand .or. lnpt) then
-! KM 01/10 
-        write (88,*) (rmvol(ibox),ibox=1,nbox)
-        do im = 1,nbox
-
-           if (lsolid(im) .and. .not. lrect(im)) then
-              write(88,*) (rmhmat(im,zzz),zzz=1,9)
-              write(88,*) (hmat(im,zzz),zzz=1,9)
-           else
-              write (88,*) boxlx(im),boxly(im),boxlz(im)
-           end if
-        end do
-     end if
-     write (88,*) nchain
-     write (88,*) nmolty
-     write (88,*) (nunit(i),i=1,nmolty)
-     write (88,*) (moltyp(i),i=1,nchain)
-     write (88,*) (nboxi(i),i=1,nchain)
-     do i = 1, nmolty
-        if ( lexpand(i) ) write(88,*) eetype(i)
-     end do
-     do i = 1, nmolty
-        if ( lexpand(i) ) write(88,*) rmexpc(i)
-     end do
-     do i = 1, nchain
-        imolty = moltyp(i)
-        do j = 1, nunit(imolty)
-           write (88,*) rxu(i,j), ryu(i,j), rzu(i,j),qqu(i,j)
-        end do
-     end do
-     close(88)
+! write out the restart configurations to SAFETY-file ***
+     call dump('save-config')
   end if
          
-!     ***    calculation of block averages ***
+! calculation of block averages ***
   if ( lblock )  then
      nblock = nblock + 1
      do ibox=1,nibox
@@ -561,7 +516,7 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
 ! 4+nener+4*nmolty+1                      = Enthalpy
 ! ---------------------------------------------------------
 
-! - specific density
+! specific density
         if ( lpbcz ) then
            temmass = 0.0d0
            do itype = 1, nmolty
@@ -577,32 +532,32 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
         end if
         call update(nblock,1,ibox,dp,acmove)
 
-! - pressure
+! pressure
         call update(nblock,2,ibox,acpres(ibox),acnp)
 
-! - surface tension
+! surface tension
         itel = 2+nener+4*nmolty+1
         call update(nblock,itel,ibox,acsurf(ibox),acnp)
 
-! - box volume
+! box volume
         itel = 4+nener+4*nmolty
         call update(nblock,itel,ibox,acvolume(ibox),acmove)
 
-! - energies
+! energies
         do j=1,nener
            itel=j+2
            call update(nblock,itel,ibox,acv(j,ibox),acmove)
         end do
 
-! - chemical potential
+! chemical potential
         do itype = 1, nmolty
            itel = (2+nener) + itype
            dnchoi = dble(nchoi(itype))
            dnchoi1 = dble(nchoi1(itype))
-!                 --- determine how many steps it takes to grow the 
-!                 --- molecule not counting the first inserted bead
+! determine how many steps it takes to grow the 
+! molecule not counting the first inserted bead
            igrow = nugrow(itype)
-! --- need the first schedule call for rigid molecules, else it will seg fault
+! need the first schedule call for rigid molecules, else it will seg fault
            if (lrigid(itype))then
               call schedule(igrow,itype,steps,1,0,4)
            else
@@ -616,11 +571,11 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
            call update(nblock,itel,ibox,dpp,dvalue)
         end do
 
-! - square end-to-end length
+! square end-to-end length
         do itype = 1, nmolty
            itel = (2 + nener) + nmolty + itype
            if ( mnbox(ibox,itype) .eq. 0 ) then
-!                 avoid division by zero in update
+! avoid division by zero in update
               dn = 1.0d0
            else
               dn = dble(mnbox(ibox,itype))
@@ -628,22 +583,22 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
            call update(nblock,itel,ibox,asetel(ibox,itype),dn)
         end do
 
-! - number density
+! number density
         do itype = 1, nmolty
            itel = (2 + nener) + (2*nmolty) + itype
            dpp = acdens(ibox,itype)
            call update(nblock,itel,ibox,dpp,acmove)
         end do
-! - mol fraction
+! mol fraction
         do itype = 1, nmolty
            itel = (2 + nener) + (3*nmolty) + itype
            dpp = molfra(ibox,itype)
            call update(nblock,itel,ibox,dpp,acmove)
         end do
 
-! - Enthalpy
+! Enthalpy
         itel = 4+nener+4*nmolty+1
-!            write(io_output,*) acEnthalpy(ibox)
+! write(io_output,*) acEnthalpy(ibox)
         call update(nblock,itel,ibox,acEnthalpy(ibox),acnp)
         itel = 4+nener+4*nmolty+2
         call update(nblock,itel,ibox,acEnthalpy1(ibox),acnp)
@@ -657,7 +612,7 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
      end do
   end if
       
-!      write(io_output,*) 'end MONPER'
+! write(io_output,*) 'end MONPER'
   return
 end subroutine monper
 

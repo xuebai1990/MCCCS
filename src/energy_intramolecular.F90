@@ -53,8 +53,7 @@ contains
        if (UPPERCASE(line_in(1:5)).eq.'BONDS') then
           allocate(vib_type(1:initial_size),brvib(1:initial_size),brvibk(1:initial_size),stat=jerr)
           if (jerr.ne.0) then
-             write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-             call err_exit('init_intramolecular: bonds allocation failed')
+             call err_exit(__FILE__,__LINE__,'init_intramolecular: bonds allocation failed',jerr)
           end if
           brvib=0.0d0
           brvibk=0.0d0
@@ -62,8 +61,7 @@ contains
           do
              call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
              if (jerr.ne.0) then
-                write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-                call err_exit('Reading section BONDS')
+                call err_exit(__FILE__,__LINE__,'Reading section BONDS',jerr)
              end if
              if (UPPERCASE(line_in(1:9)).eq.'END BONDS') exit
              n=n+1
@@ -81,9 +79,9 @@ contains
     END DO CYCLE_READ_BONDS
 
     ! do j=1,nvmax
-    !    if (brvib(j).gt.0) then
-    !       write(101,'(I3,1X,I1,1X,F7.5,1X,G13.6)') j,1,brvib(j),brvibk(j)
-    !    end if
+    ! if (brvib(j).gt.0) then
+    ! write(101,'(I3,1X,I1,1X,F7.5,1X,G13.6)') j,1,brvib(j),brvibk(j)
+    ! end if
     ! end do
 
     ! Looking for section ANGLES
@@ -97,8 +95,7 @@ contains
        if (UPPERCASE(line_in(1:6)).eq.'ANGLES') then
           allocate(ben_type(1:initial_size),brben(1:initial_size),brbenk(1:initial_size),stat=jerr)
           if (jerr.ne.0) then
-             write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-             call err_exit('init_intramolecular: angles allocation failed')
+             call err_exit(__FILE__,__LINE__,'init_intramolecular: angles allocation failed',jerr)
           end if
           brben=0.0d0
           brbenk=0.0d0
@@ -106,8 +103,7 @@ contains
           do
              call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
              if (jerr.ne.0) then
-                write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-                call err_exit('Reading section ANGLES')
+                call err_exit(__FILE__,__LINE__,'Reading section ANGLES',jerr)
              end if
              if (UPPERCASE(line_in(1:10)).eq.'END ANGLES') exit
              n=n+1
@@ -126,9 +122,9 @@ contains
     END DO CYCLE_READ_ANGLES
 
     ! do j=1,nvmax
-    !    if (brben(j).ne.0) then
-    !       write(102,'(I3,1X,I1,1X,F8.4,1X,G13.6)') j,1,brben(j),brbenk(j)
-    !    end if
+    ! if (brben(j).ne.0) then
+    ! write(102,'(I3,1X,I1,1X,F8.4,1X,G13.6)') j,1,brben(j),brbenk(j)
+    ! end if
     ! end do
 
     ! Looking for section DIHEDRALS
@@ -142,16 +138,14 @@ contains
        if (UPPERCASE(line_in(1:9)).eq.'DIHEDRALS') then
           allocate(vtt(0:9,1:initial_size),torsion_type(1:initial_size),stat=jerr)
           if (jerr.ne.0) then
-             write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-             call err_exit('init_intramolecular: dihedrals allocation failed')
+             call err_exit(__FILE__,__LINE__,'init_intramolecular: dihedrals allocation failed',jerr)
           end if
           vtt=0.0d0
           n=0
           do
              call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
              if (jerr.ne.0) then
-                write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-                call err_exit('Reading section DIHEDRALS')
+                call err_exit(__FILE__,__LINE__,'Reading section DIHEDRALS',jerr)
              end if
              if (UPPERCASE(line_in(1:13)).eq.'END DIHEDRALS') exit
              n=n+1
@@ -179,9 +173,9 @@ contains
     END DO CYCLE_READ_DIHEDRALS
 
     ! do j=1,ntormax
-    !    if (vtt0(j).ne.0.or.vtt1(j).ne.0.or.vtt2(j).ne.0.or.vtt3(j).ne.0.or.vtt4(j).ne.0.or.vtt5(j).ne.0.or.vtt6(j).ne.0.or.vtt7(j).ne.0.or.vtt8(j).ne.0.or.vtt9(j).ne.0) then
-    !       write(103,'(I3,1X,I1,10(1X,F13.7))') j,1,vtt0(j),vtt1(j),vtt2(j),vtt3(j),vtt4(j),vtt5(j),vtt6(j),vtt7(j),vtt8(j),vtt9(j)
-    !    end if
+    ! if (vtt0(j).ne.0.or.vtt1(j).ne.0.or.vtt2(j).ne.0.or.vtt3(j).ne.0.or.vtt4(j).ne.0.or.vtt5(j).ne.0.or.vtt6(j).ne.0.or.vtt7(j).ne.0.or.vtt8(j).ne.0.or.vtt9(j).ne.0) then
+    ! write(103,'(I3,1X,I1,10(1X,F13.7))') j,1,vtt0(j),vtt1(j),vtt2(j),vtt3(j),vtt4(j),vtt5(j),vtt6(j),vtt7(j),vtt8(j),vtt9(j)
+    ! end if
     ! end do
 
     return
@@ -225,7 +219,7 @@ contains
         else if (torsion_type(itype).eq.1) then
            ! type 1: OPLS potential (three terms), angle in protein convention (trans is 180 deg)
            theta=theta+onepi
-    ! --- remember: 1 + cos( theta+onepi ) = 1 - cos( theta )
+    ! remember: 1 + cos( theta+onepi ) = 1 - cos( theta )
            vtorso = vtt(0,itype) + vtt(1,itype)*(1.0d0-thetac) + vtt(2,itype)*(1.d0-dcos(2.d0*theta)) + vtt(3,itype)*(1.d0+dcos(3.d0*theta))
         else if (torsion_type(itype).eq.5) then
            ! type 5: OPLS potential (four terms), angle in protein convention (trans is 180 deg)
@@ -236,7 +230,7 @@ contains
            theta=theta+onepi
            vtorso=vtt(0,itype)-vtt(1,itype)*thetac+vtt(2,itype)*dcos(2.0d0*theta)+vtt(3,itype)*dcos(3.0d0*theta)+vtt(4,itype)*dcos(4.0d0*theta)+vtt(5,itype)*dcos(5.0d0*theta)+vtt(6,itype)*dcos(6.0d0*theta)+vtt(7,itype)*dcos(7.0d0*theta)+vtt(8,itype)*dcos(8.0d0*theta)+vtt(9,itype)*dcos(9.0d0*theta)
         else
-           call err_exit('you picked a non-defined torsional type')
+           call err_exit(__FILE__,__LINE__,'you picked a non-defined torsional type',myid+1)
         end if
      end if
 
@@ -254,22 +248,22 @@ contains
 
     real::x12,y12,z12,x23,y23,z23,d12,d23,dot,tcc,xcc,ycc,zcc
 
-!   --- calculate cross products d_a x d_a-1
+! calculate cross products d_a x d_a-1
     x12 = yvec1 * zvec2 - zvec1 * yvec2
     y12 = zvec1 * xvec2 - xvec1 * zvec2
     z12 = xvec1 * yvec2 - yvec1 * xvec2
 
-!   --- calculate cross products d_a-1 x d_a-2
+! calculate cross products d_a-1 x d_a-2
     x23 = yvec2 * zvec3 - zvec2 * yvec3
     y23 = zvec2 * xvec3 - xvec2 * zvec3
     z23 = xvec2 * yvec3 - yvec2 * xvec3
 
-!   --- calculate lengths of cross products ***
+! calculate lengths of cross products ***
     d12 = dsqrt ( x12*x12 + y12*y12 + z12*z12 )
     d23 = dsqrt ( x23*x23 + y23*y23 + z23*z23 )
 
-! ----Addition for table look up for Torsion potential
-!   --- calculate dot product of cross products ***
+! Addition for table look up for Torsion potential
+! calculate dot product of cross products ***
     dot = x12*x23 + y12*y23 + z12*z23
     thetac = - (dot / ( d12 * d23 ))
 
@@ -279,13 +273,13 @@ contains
 
     if (present(extended)) then
        if (extended) then
-!     *** calculate cross product of cross products ***
+! calculate cross product of cross products ***
           xcc = y12*z23 - z12*y23
           ycc = z12*x23 - x12*z23
           zcc = x12*y23 - y12*x23
-!     *** calculate scalar triple product ***
+! calculate scalar triple product ***
           tcc = xcc*xvec2 + ycc*yvec2 + zcc*zvec2
-!     determine angle between -180 and 180, not 0 to 180
+! determine angle between -180 and 180, not 0 to 180
           if (tcc .lt. 0.0d0) theta = -theta
        end if
     end if
@@ -362,9 +356,9 @@ contains
     return
   end function inter_tor
 
-! - branched and linear molecules with connectivity table -
-! - go through entire chain -
-! - calculate all bonds vectors and lengths
+! branched and linear molecules with connectivity table -
+! go through entire chain -
+! calculate all bonds vectors and lengths
 !DEC$ ATTRIBUTES FORCEINLINE :: calc_connectivity
   subroutine calc_connectivity(i,imolty)
     use sim_system,only:nunit,nugrow,rxu,ryu,rzu,ijvib,invib
@@ -386,7 +380,7 @@ contains
           distanceij(ii,jj) = dsqrt(distij2(ii,jj))
 
           if ( nunit(imolty) .ne. nugrow(imolty) )then
-!            --- account for explct atoms in opposite direction
+! account for explct atoms in opposite direction
              rxvec(jj,ii)   = -rxvec(ii,jj)
              ryvec(jj,ii)   = -ryvec(ii,jj)
              rzvec(jj,ii)   = -rzvec(ii,jj)
@@ -420,8 +414,8 @@ contains
     end do
   end function U_torsion
 
-! - calculate all stretching, bending, and torsional potentials
-! - that have an end-bead with an index smaller than the current bead
+! calculate all stretching, bending, and torsional potentials
+! that have an end-bead with an index smaller than the current bead
 !DEC$ ATTRIBUTES FORCEINLINE :: U_bonded
   subroutine U_bonded(i,imolty,vvib,vbend,vtg)
     use sim_system,only:nunit,invib,itvib,ijvib,inben,itben,ijben2,ijben3,L_vib_table
@@ -433,7 +427,7 @@ contains
 
     call calc_connectivity(i,imolty)
 
-! - stretching -
+! stretching -
     vvib=0.0d0
     do j = 2, nunit(imolty)
        do jjvib = 1, invib(imolty,j)
@@ -441,15 +435,15 @@ contains
           it  = itvib(imolty,j,jjvib)
           if ( ip1.lt. j .and. L_vib_table) then
              vvib = vvib + lininter_vib(distanceij(ip1,j),it)
-!             write(io_output,*) 'TABULATED VVIB: ', tabulated_vib,
+! write(io_output,*) 'TABULATED VVIB: ', tabulated_vib,
 !   &         distanceij(ip1,j), ip1, j
           end if
           if ( ip1 .lt. j .and..not.L_vib_table) vvib = vvib + brvibk(it) * (distanceij(ip1,j) - brvib(it))**2
        end do
     end do
 
-! - bending -
-! ### molecule with bond bending
+! bending -
+! molecule with bond bending
     vbend=0.0d0
     do j = 2, nunit(imolty)
        do jjben = 1, inben(imolty,j)
@@ -464,21 +458,21 @@ contains
              theta = dacos(thetac)
 
              ! if (L_bend_table) then
-             !    rbendsq=distij2(ip1,j)+distij2(ip1,ip2)-2.0d0*distanceij(ip1,j)*distanceij(ip1,ip2)*thetac
-             !    rbend = dsqrt(rbendsq)
-             !    vbend = vbend + lininter_bend(rbend,it)
+             ! rbendsq=distij2(ip1,j)+distij2(ip1,ip2)-2.0d0*distanceij(ip1,j)*distanceij(ip1,ip2)*thetac
+             ! rbend = dsqrt(rbendsq)
+             ! vbend = vbend + lininter_bend(rbend,it)
              ! else
              vbend = vbend +  brbenk(it) * (theta-brben(it))**2
              ! end if
 
-!             write(io_output,*) 'j,ip1,ip2, it',j,ip1,ip2, it
-!             write(io_output,*) 'bend energy, theta ',brbenk(it) * (theta-brben(it))**2,theta
+! write(io_output,*) 'j,ip1,ip2, it',j,ip1,ip2, it
+! write(io_output,*) 'bend energy, theta ',brbenk(it) * (theta-brben(it))**2,theta
           end if
        end do
     end do
 
-! - torsions -
-! ### molecule with dihedral potenials ###
+! torsions -
+! molecule with dihedral potenials ###
     vtg=U_torsion(i,imolty,2,.false.)
 
   end subroutine U_bonded
@@ -497,7 +491,7 @@ contains
     io_tab=get_iounit()
     open(unit=io_tab,access='sequential',action='read',file=file_tab,form='formatted',iostat=jerr,status='old')
     if (jerr.ne.0) then
-       call err_exit('cannot open tabulated potential file: '//file_tab)
+       call err_exit(__FILE__,__LINE__,'cannot open tabulated potential file: '//file_tab,myid+1)
     end if
 
     read(io_tab,*) ntab
@@ -558,12 +552,12 @@ contains
 
     if (L_tor_table) then
        allocate(splpnts(1:initial_size),deg(1:grid_size,1:initial_size),tabtorso(1:grid_size,1:initial_size),stat=jerr)
-       if (jerr.ne.0) call err_exit('init_tabulated_potential_bonded: allocation failed for vib_table 1')
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_bonded: allocation failed for vib_table 1',myid+1)
        call read_tabulated_potential_bonded('fort.40',nttor,deg,tabtorso,splpnts,dihedrals)
        if (L_spline) then
           if (myid.eq.0) write(io_output,*) 'using spline interpolation'
           allocate(torderiv2(1:grid_size,1:initial_size),stat=jerr)
-          if (jerr.ne.0) call err_exit('init_tabulated_potential_bonded: allocation failed for tor_table 2')
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_bonded: allocation failed for tor_table 2',myid+1)
           do ttor=1,nttor
              call spline(deg(:,ttor),tabtorso(:,ttor),splpnts(ttor),1.0d31,1.0d31,torderiv2(:,ttor))
           end do
@@ -574,14 +568,14 @@ contains
 
     if (L_vib_table) then
        allocate(vibsplits(1:initial_size),vib(1:grid_size,1:initial_size),tabvib(1:grid_size,1:initial_size),stat=jerr)
-       if (jerr.ne.0) call err_exit('init_tabulated_potential_bonded: allocation failed for vib_table')
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_bonded: allocation failed for vib_table',myid+1)
        call read_tabulated_potential_bonded('fort.41',ntabvib,vib,tabvib,vibsplits,bonds)
        if (myid.eq.0)  write(io_output,'(/,A)') 'using linear interpolation for vibrations'
     end if
 
     if (L_bend_table) then
        allocate(bendsplits(1:initial_size),bend(1:grid_size,1:initial_size),tabbend(1:grid_size,1:initial_size),stat=jerr)
-       if (jerr.ne.0) call err_exit('init_tabulated_potential_bonded: allocation failed for bend_table')
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_bonded: allocation failed for bend_table',myid+1)
        call read_tabulated_potential_bonded('fort.42',ntabbend,bend,tabbend,bendsplits,angles)
        if (myid.eq.0) write(io_output,*) 'using linear interpolation for 1-3 nonbonded bending'
     end if
@@ -592,8 +586,7 @@ contains
     integer::jerr
     allocate(rxvec(numax,numax),ryvec(numax,numax),rzvec(numax,numax),distij2(numax,numax),distanceij(numax,numax),stat=jerr)
     if (jerr.ne.0) then
-       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-       call err_exit('allocate_energy_bonded: allocation failed')
+       call err_exit(__FILE__,__LINE__,'allocate_energy_bonded: allocation failed',jerr)
     end if
   end subroutine allocate_energy_bonded
 end MODULE energy_intramolecular

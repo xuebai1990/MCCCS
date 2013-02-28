@@ -1,18 +1,23 @@
 module util_runtime
   implicit none
-  include 'common.inc'
+#ifdef __MPI__
+  include 'mpif.h'
+#endif
   private
   public::err_exit
 contains
-  subroutine err_exit(msg)
-    character(LEN=*),intent(in)::msg
+  subroutine err_exit(file,lineno,msg,code)
+    character(LEN=*),intent(in)::file,msg
+    integer,intent(in)::lineno,code
     integer::ierr
 
-    write(*,*) msg
+    write(*,*) 'ERROR in ',TRIM(file),':',lineno
+    write(*,FMT='("code ",I3,": ",A)') code,msg
 
-    call MPI_ABORT(ierr)
+#ifdef __MPI__
+    call MPI_ABORT(MPI_COMM_WORLD,code,ierr)
+#endif
 
     stop
-
   end subroutine err_exit
 end module util_runtime

@@ -1,10 +1,10 @@
 !    *******************************************************************
-!    ** computes the 2nd virial coefficient                           **
-!    ** B2(T) = -2Pi Int 0toInf [ Exp[-beta*u(r)] -1] r^2 dr          **
-!    ** Using the trapazoid method of numerical integration give      **
-!    ** B2(T) = -2*Pi*stepvir* Sum(i=2,n-1)[ <Exp[-beta*u(r)]-1> ri^2 **
-!    ** + 1/2( <Exp[-beta*u(r1)]-1> r1 + <Exp[-beta*u(rn)]-1> rn      **
-!    ** Marcus Martin 1-15-97                                         **
+! computes the 2nd virial coefficient                           **
+! B2(T) = -2Pi Int 0toInf [ Exp[-beta*u(r)] -1] r^2 dr          **
+! Using the trapazoid method of numerical integration give      **
+! B2(T) = -2*Pi*stepvir* Sum(i=2,n-1)[ <Exp[-beta*u(r)]-1> ri^2 **
+! 1/2( <Exp[-beta*u(r1)]-1> r1 + <Exp[-beta*u(rn)]-1> rn      **
+! Marcus Martin 1-15-97                                         **
 !    *******************************************************************
 subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
   use const_math,only:onepi,twopi
@@ -24,7 +24,7 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
 
       logical::ovrlap,lqimol,lqjmol,lmatrix
   
-! *** only use for polarizable models
+! only use for polarizable models
       integer::chgmax
       parameter (chgmax=10)
       integer::ip1,ip2,iunit,numchg ,mainsite(2,2),lam1,lam2
@@ -36,8 +36,8 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
 
 ! --------------------------------------------------------------------
 
-!      write(io_output,*) 'start VIRIAL'
-!      write(io_output,*) 'binvir',binvir
+! write(io_output,*) 'start VIRIAL'
+! write(io_output,*) 'binvir',binvir
       rminsq = rmin * rmin
       vmin = -2000.0d0
 
@@ -51,13 +51,13 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
 
       if ( nboxi(1) .eq. nboxi(2) ) then
          write(io_output,*) 'particles found in same box'
-         call err_exit('')
+         call err_exit(__FILE__,__LINE__,'',myid+1)
       end if
  
 ! ################################################################
 
 ! *******************************
-! *** INTERCHAIN INTERACTIONS ***
+! INTERCHAIN INTERACTIONS ***
 ! *******************************
 
       xdiff = xcm(2) - xcm(1)
@@ -79,7 +79,7 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
       if ( lflucq(imolty) .and. lflucq(moltyp(2))) then
          lmatrix = .true.
 
-! *** count charge site for type 1 molecule
+! count charge site for type 1 molecule
          numchg = 0
          do ii = 1, iunit
             ntii = ntype(imolty,ii)
@@ -92,7 +92,7 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
       do nnn = 1,nvirial
 
          if ( lmatrix ) then
-! *** initialize matrix
+! initialize matrix
             do ii = 1,chgmax
                do jj = 1,chgmax
                   a(ii,jj) = 0
@@ -104,7 +104,7 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
          ovrlap = .false.
          vinter = 0.0d0
          velect = 0.0d0
-! --- loop over all beads ii of chain i
+! loop over all beads ii of chain i
          ip1 = 0
          do 99 ii = 1, nunit(imolty) 
             ntii = ntype(imolty,ii)
@@ -113,14 +113,14 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
             ryui = ryu(i,ii)  + ydiff
             rzui = rzu(i,ii)  + zdiff
 
-! --- loop over chain 2 
+! loop over chain 2 
             j = 2
             jmolty = moltyp(j)
             lqjmol = lelect(jmolty)
-!     --- loop over all beads jj of chain j 
+! loop over all beads jj of chain j 
             ip2 = numchg
             do 97 jj = 1, nunit(jmolty) 
-!     --- check exclusion table
+! check exclusion table
                if ( lexclu(imolty,ii,jmolty,jj) ) goto 97
                ntjj = ntype(jmolty,jj)
                if ( lqchg(ntjj) ) ip2 = ip2 + 1
@@ -178,7 +178,7 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
  97         continue
  99      continue
 
-! *** use Matrix Minimization to solve the equilibrium charge
+! use Matrix Minimization to solve the equilibrium charge
 
          if ( lmatrix ) then
 
@@ -216,7 +216,7 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
                end do
             end do
 
-! *** undetermined multiplier
+! undetermined multiplier
             if ( lqtrans(imolty) ) then
                lam1 = ip2 + 1
                do ii = 1, numchg*2
@@ -270,27 +270,27 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
                end if
             end if
 
-! *** commenting this out JMS 6-20-00 ***
-!            call dgesv(chgmax,1,a,chgmax,ipiv,b2,chgmax,info)
+! commenting this out JMS 6-20-00 ***
+! call dgesv(chgmax,1,a,chgmax,ipiv,b2,chgmax,info)
 ! *** 
 
 
-!            write(21,*) b2
-!            do ii = 1, nunit(imolty)
-!               write(21,*) rxu(i,ii)+xdiff-dvircm,ryu(i,ii)+ydiff
+! write(21,*) b2
+! do ii = 1, nunit(imolty)
+! write(21,*) rxu(i,ii)+xdiff-dvircm,ryu(i,ii)+ydiff
 !     &              ,rzu(i,ii)+zdiff
-!            end do
-!            do ii = 1, nunit(imolty)
-!               write(21,*) rxu(2,ii),ryu(2,ii),rzu(2,ii)
-!            end do
-!            write(11,*) sr6**(1.0/6.0d0),b2(1,1),b2(2,1)
+! end do
+! do ii = 1, nunit(imolty)
+! write(21,*) rxu(2,ii),ryu(2,ii),rzu(2,ii)
+! end do
+! write(11,*) sr6**(1.0/6.0d0),b2(1,1),b2(2,1)
 
             velect = 0.0d0
             do ip = 1, 2
                ii = mainsite(ip,1)
                if ( lfepsi ) then
                   velect = velect-0.5d0*b2(ii,1)*(mainxiq(ip,1) +selfadd1)
-!                  write(21,*) b2(ii,1),mainxiq(ip,1)
+! write(21,*) b2(ii,1),mainxiq(ip,1)
                   vinter = epsilon2*((aslope*a0*a0+ashift)/sr6 -(bslope*b0*b0+bshift))/sr6
                else
                   velect = velect-0.5d0*b2(ii,1)*mainxiq(ip,1)
@@ -299,7 +299,7 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
                   ii = mainsite(ip,2)
                   if ( lfepsi ) then
                      velect = velect-0.5d0*b2(ii,1)*(mainxiq(ip,2) +selfadd1)
-!                     write(21,*) b2(ii,1),mainxiq(ip,2)
+! write(21,*) b2(ii,1),mainxiq(ip,2)
                      vinter = epsilon2*((aslope*a0*a0+ashift)/sr6 -(bslope*b0*b0+bshift))/sr6
                   else
                      velect = velect-0.5d0*b2(ii,1)*mainxiq(ip,2)
@@ -318,7 +318,7 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
                end do
                rewind(11)
             end if
-!            write(11,*) 'energy:',velect+vinter*4.0d0
+! write(11,*) 'energy:',velect+vinter*4.0d0
 
          end if
                      
@@ -333,8 +333,8 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
                mayer(itemp) = dexp(-(vinter+velect)/virtemp(itemp))-1.0d0
             end do
          end if
-!         write(io_output,*) 'mayer',mayer
-!         write(io_output,*) 'nnn',nnn
+! write(io_output,*) 'mayer',mayer
+! write(io_output,*) 'nnn',nnn
          do itemp = 1,ntemp
             binvir(nnn,itemp) = binvir(nnn,itemp) + mayer(itemp)
          end do
@@ -355,9 +355,9 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
 
 ! ################################################################
 
-!      write(io_output,*) 'binvir',binvir
+! write(io_output,*) 'binvir',binvir
 
-!      write(io_output,*) 'end VIRIAL'
+! write(io_output,*) 'end VIRIAL'
 
       return
       end

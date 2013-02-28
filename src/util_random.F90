@@ -169,7 +169,7 @@ contains
           return
        end if
     end do
-    call err_exit('exceeded 100 tries to get a vector in sphere')
+    call err_exit(__FILE__,__LINE__,'exceeded 100 tries to get a vector in sphere',-1)
 #endif
   end subroutine sphere
 

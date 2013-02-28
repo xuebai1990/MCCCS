@@ -15,7 +15,7 @@ MODULE energy_sami
   parameter ( alpha1=21.162d0, alpha2=-21.162d0, beta1=661.6d0, beta2=6616.0d0, tau1=-32, tau2=-16 )
 contains
 !    *******************************
-!    ** Set-Up SAMI's potentials. **
+! Set-Up SAMI's potentials. **
 !    *******************************
   subroutine susami
 
@@ -58,11 +58,11 @@ contains
          vsha(ij) = 4.0d0 * eij(ij) * ( ( 12.0d0 * sij(ij)**12 / rcsami**13 ) - (  6.0d0 * sij(ij)**6  / rcsami**7  ) )
       end do
 
-!      do ij = 1,9
-!         write(io_output,*) 'ij',ij,'vsh',(vsh(ij)/80.0d0),
+! do ij = 1,9
+! write(io_output,*) 'ij',ij,'vsh',(vsh(ij)/80.0d0),
 !     +                      'vsha',(vsha(ij)/80.0d0),
 !     +                      'eij',(eij(ij)/80.0d0)
-!      end do
+! end do
 
       return
 
@@ -71,7 +71,7 @@ contains
   end subroutine susami
 
 !    *********************************************************
-!    ** calculates SAMI's LJ and 12+3 energy for a bead.    **
+! calculates SAMI's LJ and 12+3 energy for a bead.    **
 !    *********************************************************
   function ljsami( rijsq, ntij )
 
@@ -84,10 +84,10 @@ contains
       sr = sij(ntij) / rij
 
       if ( ntij .eq. 1 ) then
-! *** head-head interaction ( repulsive 12+3 interaction )
+! head-head interaction ( repulsive 12+3 interaction )
          ljsami = ( eij(1) * sr**3 * ( 1.0d0 + sr**9 ) ) - vsh(1) + ( rij * vsha(1) )
       else
-! *** head-tail or tail-tail interaction ( LJ 12-6 interaction )
+! head-tail or tail-tail interaction ( LJ 12-6 interaction )
          ljsami = ( 4.0d0 * eij(ntij) * sr**6 * ( sr**6 - 1.0d0 ) ) - vsh(ntij) + ( rij * vsha(ntij) )
       end if
 
@@ -95,7 +95,7 @@ contains
   end function ljsami
 
 !    **********************************************************
-!    ** calculates the SAMI's external energy for a bead.    **
+! calculates the SAMI's external energy for a bead.    **
 !    **********************************************************
   function exsami( z, ntj )
 
@@ -105,14 +105,14 @@ contains
 ! --------------------------------------------------------------------
 
       if ( ntj .eq. 1 ) then
-! --- HEADgroup potential ---
+! HEADgroup potential ---
          if ( z .le. alpha2 ) then
             exsami = 0.0d0
          else
             exsami = beta2 / ( 1.0d0 + ( (z/alpha2) - 1.0d0 )**tau2 )
          end if
       else
-! --- TAILgroup potential ---
+! TAILgroup potential ---
          if ( z .ge. alpha1 ) then
             exsami = 0.0d0
          else
@@ -125,32 +125,32 @@ contains
   end function exsami
 
 !    *************************************************
-!    ** calculates SAMI's 12+3 energy for headgroup **
-!    **            and normal LJ energy for tail    **
+! calculates SAMI's 12+3 energy for headgroup **
+! and normal LJ energy for tail    **
 !    *************************************************
   function ljmuir ( rijsq, ntij )
 
       real::ljmuir, rijsq, sr, sr2, sr6, epshead, sighead
       integer::ntij
 
-! --- attention: eps_hh / 4 used, since later multiplied by 4 ---
-!      parameter (epshead=27.67204d0,sighead=4.22d0)
+! attention: eps_hh / 4 used, since later multiplied by 4 ---
+! parameter (epshead=27.67204d0,sighead=4.22d0)
       parameter (epshead=27.7204d0,sighead=6.5d0)
 
 ! --------------------------------------------------------------------
 
-!       write(io_output,*) 'sig2ij',sig2ij
-!       write(io_output,*) 'epsij',epsij
+! write(io_output,*) 'sig2ij',sig2ij
+! write(io_output,*) 'epsij',epsij
 
       if ( ntij .eq. 1 ) then
          sr = sighead / dsqrt( rijsq )
-!       write(io_output,*) 'sr',sr,'v',4.0d0*epshead*sr**3*(sr**9+1.0d0)
+! write(io_output,*) 'sr',sr,'v',4.0d0*epshead*sr**3*(sr**9+1.0d0)
          ljmuir = epshead * sr**3 * ( sr**9 + 1.0d0 )
       else
          sr2 = sig2ij(ntij) / rijsq
          sr6 = sr2 * sr2 * sr2
          ljmuir = epsij(ntij) * sr6 * ( sr6 - 1.0d0)
-!         if (ljmuir .gt. 100.0d0)
+! if (ljmuir .gt. 100.0d0)
 !     &       write(18,*) sig2ij(ntij),rijsq,'sr',dsqrt(sr2),'v',
 !     &            4.0d0 * epsij(ntij) * sr6 * ( sr6 - 1.0d0)
       end if
@@ -162,7 +162,7 @@ contains
   end function ljmuir
 
 !    *********************************************************
-!    ** calculates the lmuir external energy for a bead.    **
+! calculates the lmuir external energy for a bead.    **
 !    *********************************************************
   function exmuir( z, ntj )
 
@@ -172,14 +172,14 @@ contains
 ! --------------------------------------------------------------------
 
       if ( ntj .eq. 1 ) then
-! --- HEADgroup potential ---
+! HEADgroup potential ---
          if ( z .le. alpha2 ) then
             exmuir = 0.0d0
          else
             exmuir = beta2 / ( 1.0d0 + ( (z/alpha2) - 1.0d0 )**tau2 )
          end if
       else
-! --- TAILgroup potential ---
+! TAILgroup potential ---
          if ( z .ge. alpha1 ) then
             exmuir = 0.0d0
          else

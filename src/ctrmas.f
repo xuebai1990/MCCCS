@@ -1,9 +1,9 @@
 !     ************************************************************
-!     ** finds the center of mass of a chain and returns it to  **
-!     ** the periodic box if it has left the box.  lall controls**
-!     ** whether this is done for just one chain or for the     **
-!     ** entire box. ibox is the box of the particle and j is   **
-!     ** the particle number.                                   **
+! finds the center of mass of a chain and returns it to  **
+! the periodic box if it has left the box.  lall controls**
+! whether this is done for just one chain or for the     **
+! entire box. ibox is the box of the particle and j is   **
+! the particle number.                                   **
 !     ************************************************************
 subroutine ctrmas ( lall, ibox, j, mtype)
   use util_runtime,only:err_exit
@@ -51,9 +51,9 @@ subroutine ctrmas ( lall, ibox, j, mtype)
      iunit = nunit(imolty)
      iadjust = 1            
 
-! ----- Check if the chain i is in the correct box
+! Check if the chain i is in the correct box
      if (nboxi(i) .eq. ibox) then
-! ----- Determine new center of mass for chain i 
+! Determine new center of mass for chain i 
         lintbx = .false.
 25      nxcm = 0.0d0
         nycm = 0.0d0
@@ -224,13 +224,13 @@ subroutine ctrmas ( lall, ibox, j, mtype)
               lintbx = .true.
               write(io_output,*) 'nxcm,nycm,nzcm',nxcm,nycm,nzcm
               write(io_output,*) 'dx,dy,dz',dx,dy,dz
-              if (iwarn .ne. 0) call err_exit('')
+              if (iwarn .ne. 0) call err_exit(__FILE__,__LINE__,'',myid+1)
            end if
            iadjust = iadjust + 1
            goto 25
         end if
 
-!     assign the new center of mass
+! assign the new center of mass
         xcm(i) = nxcm
         ycm(i) = nycm
         zcm(i) = nzcm
@@ -241,7 +241,7 @@ subroutine ctrmas ( lall, ibox, j, mtype)
               ryuij = ryu(i,ii)-nycm
               rzuij = rzu(i,ii)-nzcm
                   
-!     --- minimum image the ctrmas pair separations ---
+! minimum image the ctrmas pair separations ---
               if ( lpbc ) call mimage ( rxuij,ryuij,rzuij,ibox )
 
               rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
@@ -249,7 +249,7 @@ subroutine ctrmas ( lall, ibox, j, mtype)
               if ( rijsq .gt. dmaxsq ) dmaxsq = rijsq
            end do                  
            rcmu(i) = dsqrt(dmaxsq)+ 1.0d-10
-!               write(io_output,*) 'rcmu(i)',rcmu(i)
+! write(io_output,*) 'rcmu(i)',rcmu(i)
         end if
                   
      else

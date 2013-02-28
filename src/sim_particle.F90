@@ -78,25 +78,25 @@ contains
     integer::ibox,imol,j
     real::umatch
 
-! *** If using neighbour list make sure the rcut & rcutnn is the same
-! *** for all the boxes
+! If using neighbour list make sure the rcut & rcutnn is the same
+! for all the boxes
     do ibox = 1,nbox
        if ((dabs(rcut(1)-rcut(ibox)).gt.1.0d-10).and.(dabs(rcutnn(1)-rcutnn(ibox)).gt.1.0d-10)) then
-          call err_exit('Keep rcut and rcutnn for all the boxes same')
+          call err_exit(__FILE__,__LINE__,'Keep rcut and rcutnn for all the boxes same',-1)
        end if
 
        if (rcut(ibox).ge.rcutnn(ibox)) then
-          call err_exit(' rcut greater equal rcutnn for box'//integer_to_string(ibox))
+          call err_exit(__FILE__,__LINE__,' rcut greater equal rcutnn for box'//integer_to_string(ibox),-1)
        end if
     end do
 
-! --- set logical map to .false. ---
+! set logical map to .false.
     lnn = .false.
-! *** set displacementvectors to zero ***
+! set displacementvectors to zero
     disvec = 0.0d0
 
-! *** calculate max. angular displacement that doesn't violate upnn ***
-! *** calculate max. all-trans chain length ( umatch ) ***
+! calculate max. angular displacement that doesn't violate upnn
+! calculate max. all-trans chain length ( umatch )
     do ibox=1,nbox
        upnn(ibox) = ( rcutnn(ibox) - rcut(ibox) ) / 3.0d0
        upnnsq(ibox)=upnn(ibox)*upnn(ibox)
@@ -127,10 +127,10 @@ contains
 
     do i=1,nchain
        if (nboxi(i).eq.ibox) then
-! --- set i-part of logical::map to .false. ---
+! set i-part of logical::map to .false.
           lnn(i,:)=.false.
           lnn(:,i)=.false.
- ! *** set displacementvectors to zero ***
+! set displacementvectors to zero
           disvec(:,:,i)=0.0d0
        end if
     end do
@@ -138,23 +138,23 @@ contains
     rcnnsq = rcutnn(ibox)**2
     if (lpbc) call setpbc(ibox)
  
-! --- loop over all chains i 
+! loop over all chains i 
     do i = 1, nchain-1
        if (nboxi(i).ne.ibox) cycle
-! --- loop over all chains j
+! loop over all chains j
        molecule2:do j = i+1, nchain
           if (nboxi(j).ne.ibox) cycle
-! --- loop over all beads ii of chain i 
+! loop over all beads ii of chain i 
           do ii = 1, nunit(i)
              rxui = rxu(i,ii)
              ryui = ryu(i,ii)
              rzui = rzu(i,ii)
-! --- loop over all beads jj of chain j 
+! loop over all beads jj of chain j 
              do jj = 1, nunit(j)
                 rxuij = rxui - rxu(j,jj)
                 ryuij = ryui - ryu(j,jj)
                 rzuij = rzui - rzu(j,jj)
-! *** minimum image the pair separations ***
+! minimum image the pair separations
                 if (lpbc) call mimage(rxuij,ryuij,rzuij,ibox)
                 rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
                 if ( rijsq .le. rcnnsq ) then
@@ -182,13 +182,13 @@ contains
  
     ibox=nboxi(i)
 
-! *** check for update of near neighbour bitmap ***
-! *** check for headgroup ***
+! check for update of near neighbour bitmap
+! check for headgroup
     disvec(1,1,i) = disvec(1,1,i) + rx
     disvec(2,1,i) = disvec(2,1,i) + ry
     disvec(3,1,i) = disvec(3,1,i) + rz
     disvsq1 = disvec(1,1,i) * disvec(1,1,i) + disvec(2,1,i) * disvec(2,1,i) + disvec(3,1,i) * disvec(3,1,i)
-! *** check for last unit ***
+! check for last unit
     disvec(1,2,i) = disvec(1,2,i) + rx
     disvec(2,2,i) = disvec(2,2,i) + ry
     disvec(3,2,i) = disvec(3,2,i) + rz
@@ -196,29 +196,29 @@ contains
 
     if ((disvsq1.le.upnnsq(ibox)).and.(disvsq2.le.upnnsq(ibox)).and.(.not.force_update)) return
 
-! --- set i-part of logical::map to .false. ---
+! set i-part of logical::map to .false.
     lnn(i,:)=.false.
     lnn(:,i)=.false.
- ! *** set displacementvectors to zero ***
+! set displacementvectors to zero
     disvec(:,:,i)=0.0d0
 
     rcnnsq = rcutnn(ibox)**2
     if (lpbc) call setpbc(ibox)
 
-! --- loop over all chains j
+! loop over all chains j
     molecule2:do j = 1, nchain
        if ((i.eq.j).or.(nboxi(j).ne.ibox)) cycle
-! --- loop over all beads ii of chain i 
+! loop over all beads ii of chain i 
        do ii = 1, nunit(i)
           rxui = rxu(i,ii)
           ryui = ryu(i,ii)
           rzui = rzu(i,ii)
-! --- loop over all beads jj of chain j 
+! loop over all beads jj of chain j 
           do jj = 1, nunit(j)
              rxuij = rxui - rxu(j,jj)
              ryuij = ryui - ryu(j,jj)
              rzuij = rzui - rzu(j,jj)
-! *** minimum image the pair separations ***
+! minimum image the pair separations
              if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox )
              rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
              if ( rijsq .le. rcnnsq ) then
@@ -239,8 +239,7 @@ contains
     integer::jerr
     allocate(lnn(nmax,nmax),disvec(3,2,nmax),upnn(nbxmax),upnnsq(nbxmax),upnndg(ntmax,nbxmax),stat=jerr)
     if (jerr.ne.0) then
-       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-       call err_exit('allocate_neighbor_list: allocation failed')
+       call err_exit(__FILE__,__LINE__,'allocate_neighbor_list: allocation failed',jerr)
     end if
   end subroutine allocate_neighbor_list
 end MODULE sim_particle

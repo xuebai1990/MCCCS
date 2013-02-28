@@ -25,13 +25,13 @@ CONTAINS
     IOCSSR=get_iounit()
     open(unit=IOCSSR,access='sequential',action='read',file=fileCSSR,form='formatted',iostat=jerr,status='old')
     if (jerr.ne.0) then
-       call err_exit('cannot open zeolite CSSR file')
+       call err_exit(__FILE__,__LINE__,'cannot open zeolite CSSR file',-1)
     end if
 
     read(IOCSSR,*) zcell%boxl(1)%val,zcell%boxl(2)%val,zcell%boxl(3)%val,zcell%ang(1)%val,zcell%ang(2)%val,zcell%ang(3)%val,zunit%dup(1),zunit%dup(2),zunit%dup(3)
     read(IOCSSR,*) zeo%nbead,ztype%ntype
     allocate(zeo%bead(zeo%nbead),lunitcell(zeo%nbead),ztype%name(ztype%ntype),ztype%radiisq(ztype%ntype),ztype%type(ztype%ntype),ztype%num(ztype%ntype),stat=jerr)
-    if (jerr.ne.0) call err_exit('readCSSR: allocation failed')
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'readCSSR: allocation failed',-1)
 
     do i=1,ztype%ntype
        read(IOCSSR,*) ztype%name(i),ztype%type(i),ztype%radiisq(i)

@@ -216,7 +216,7 @@ CONTAINS
              IF (MOD(Comp(i)%Stack(SP),REAL(ipow,KIND=rn))==0.0_rn) THEN
                 Comp(i)%Stack(SP-1)=Comp(i)%Stack(SP-1)**ipow
              ELSE
-                CALL err_exit("evalf: Negative floating-point value raised to a real power!")
+                call err_exit(__FILE__,__LINE__,"evalf: Negative floating-point value raised to a real power!",-1)
              END IF
           ELSE
              Comp(i)%Stack(SP-1)=Comp(i)%Stack(SP-1)**Comp(i)%Stack(SP)
@@ -945,7 +945,7 @@ CONTAINS
           IF(ABS(a(i,i)-a(i-1,i-1)).GE.safe*err)RETURN
        END DO
     ELSE
-       CALL err_exit("evalfd: DX provided equals zero!!")
+       call err_exit(__FILE__,__LINE__,"evalfd: DX provided equals zero!!",-1)
     END IF
     vals(ipar)=xval
   END FUNCTION evalfd

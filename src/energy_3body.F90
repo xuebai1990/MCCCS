@@ -29,7 +29,7 @@ CONTAINS
     integer::jerr
 
     allocate(triplets(0:6,1:nchain,1:nbox),coeffs(1:4,1:nEntries),nTriplets(1:nbox),ttype(1:nEntries),STAT=jerr)
-    if (jerr.ne.0) CALL err_exit(TRIM(__FILE__)//":"//integer_to_string(__LINE__))
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'',jerr)
     call initiateTable(threebodies,nEntries)
     hasThreeBody=.true.
   end subroutine initiateThreeBody
@@ -62,13 +62,12 @@ CONTAINS
     io_ff=get_iounit()
     open(unit=io_ff,access='sequential',action='read',file=file_ff,form='formatted',iostat=jerr,status='old')
     if (jerr.ne.0) then
-       call err_exit('cannot open three_body input file')
+       call err_exit(__FILE__,__LINE__,'cannot open three_body input file',jerr)
     end if
 
     read(UNIT=io_ff,NML=threebody,iostat=jerr)
     if (jerr.ne.0.and.jerr.ne.-1) then
-       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-       call err_exit('reading namelist: threebody')
+       call err_exit(__FILE__,__LINE__,'reading namelist: threebody',jerr)
     end if
 
 ! Looking for section THREEBODY
@@ -97,7 +96,7 @@ CONTAINS
              coeffs(3,i)=coeffs(3,i)*degrad !degree to radians
           end do
           if (i.ne.nEntries) then
-             call err_exit('readThreeBody: the number of entries is incorrect!')
+             call err_exit(__FILE__,__LINE__,'readThreeBody: the number of entries is incorrect!',myid+1)
           end if
        end if
     END DO
@@ -117,10 +116,10 @@ CONTAINS
     if (.not.lbuild_triplet_table) then
        open(unit=io_triplets,access='sequential',action='read',file=file_triplets,form='formatted',iostat=jerr,status='old')
        if (jerr.ne.0) then
-          call err_exit('cannot read triplets file')
+          call err_exit(__FILE__,__LINE__,'cannot read triplets file',jerr)
        end if
        read(io_triplets,*) nboxtmp,nTriplets
-       if (nbox.ne.nboxtmp) call err_exit('triplets file not generated with current input')
+       if (nbox.ne.nboxtmp) call err_exit(__FILE__,__LINE__,'triplets file not generated with current input',myid+1)
        do ibox=1,nbox
           read(io_triplets,*) triplets(:,1:nTriplets(ibox),ibox)
        end do
@@ -179,7 +178,7 @@ CONTAINS
 
        open(unit=io_triplets,access='sequential',action='write',file=file_triplets,form='formatted',iostat=jerr,status='unknown')
        if (jerr.ne.0) then
-          call err_exit('cannot open triplets file')
+          call err_exit(__FILE__,__LINE__,'cannot open triplets file',jerr)
        end if
        write(io_triplets,*) nbox,nTriplets
        do ibox=1,nbox

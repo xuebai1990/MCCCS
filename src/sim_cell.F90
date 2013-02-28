@@ -24,7 +24,6 @@ MODULE sim_cell
 
   real,allocatable,target,public::hmat(:,:),hmati(:,:),cell_length(:,:),min_width(:,:),cell_vol(:),cell_ang(:,:)
 
-! PEBOCO.INC
   real::bx,by,bz,hbx,hby,hbz,bxi,byi,bzi
 
   integer,parameter::cmax = 1000& !< cmax is the max number of cells for the linkcell list
@@ -51,8 +50,7 @@ contains
        elem(i)=hmat(ibox,i)
     end do
 
-    !     -- calculating the length of cell vectors
-
+    ! calculating the length of cell vectors
     cell_length(ibox,1)=sqrt(elem(1)*elem(1)+elem(2)*elem(2)+ elem(3)*elem(3))
     cell_length(ibox,2)=sqrt(elem(4)*elem(4)+elem(5)*elem(5)+ elem(6)*elem(6))
     cell_length(ibox,3)=sqrt(elem(7)*elem(7)+elem(8)*elem(8)+ elem(9)*elem(9))
@@ -61,8 +59,7 @@ contains
     boxly(ibox) = cell_length(ibox,2)
     boxlz(ibox) = cell_length(ibox,3)
 
-    !    -- calculating cross product of cell vectors
-
+    ! calculating cross product of cell vectors
     abx=elem(2)*elem(6)-elem(3)*elem(5)
     aby=elem(3)*elem(4)-elem(1)*elem(6)
     abz=elem(1)*elem(5)-elem(2)*elem(4)
@@ -73,24 +70,21 @@ contains
     cay=elem(1)*elem(9)-elem(3)*elem(7)
     caz=elem(2)*elem(7)-elem(1)*elem(8)
 
-    !    -- calculating cell volume
-
+    ! calculating cell volume
     cell_vol(ibox) = elem(1)*bcx+elem(2)*bcy+elem(3)*bcz
 
     if(abs(cell_vol(ibox)).lt.1D-16) then
-       call err_exit('Volume of cell negligible, check input H matrix')
+       call err_exit(__FILE__,__LINE__,'Volume of cell negligible, check input H matrix',-1)
     end if
 
     inv_vol = 1.0d0/cell_vol(ibox)
 
-    !    -- calculating minimum cell widths
-
+    ! calculating minimum cell widths
     min_width(ibox,1) = cell_vol(ibox)/sqrt(bcx*bcx+bcy*bcy+ bcz*bcz)
     min_width(ibox,2) = cell_vol(ibox)/sqrt(cax*cax+cay*cay+ caz*caz)
     min_width(ibox,3) = cell_vol(ibox)/sqrt(abx*abx+aby*aby+ abz*abz)
 
-    !    -- calculating adjoint for inverting the h-matrix
-
+    ! calculating adjoint for inverting the h-matrix
     adj(1)=elem(5)*elem(9)-elem(6)*elem(8)
     adj(2)=elem(3)*elem(8)-elem(2)*elem(9)
     adj(3)=elem(2)*elem(6)-elem(3)*elem(5)
@@ -101,9 +95,7 @@ contains
     adj(8)=elem(2)*elem(7)-elem(1)*elem(8)
     adj(9)=elem(1)*elem(5)-elem(2)*elem(4)
 
-    !     --  inverting the matrix
-
-
+    ! inverting the matrix
     hmati(ibox,1) = inv_vol * adj(1)
     hmati(ibox,2) = inv_vol * adj(2)
     hmati(ibox,3) = inv_vol * adj(3)
@@ -114,19 +106,13 @@ contains
     hmati(ibox,8) = inv_vol * adj(8)
     hmati(ibox,9) = inv_vol * adj(9)
 
-    !   ---  calculating alpha, beta and gamma using the dot product rule
-
-    !   ---  cell_ang(ibox,1)=alpha;2= beta; 3= gamma
-    !   ---  In crystallography Literature angle between b & c is alpha (1),
-    !        angle between c & a is Beta (2) and angle between a & b is gamma (3)
-
-
+    ! calculating alpha, beta and gamma using the dot product rule
+    ! cell_ang(ibox,1)=alpha;2= beta; 3= gamma
+    ! In crystallography Literature angle between b & c is alpha (1),
+    ! angle between c & a is Beta (2) and angle between a & b is gamma (3)
     cosa = (elem(4)*elem(7)+elem(5)*elem(8)+elem(6)*elem(9))/ (cell_length(ibox,2)*cell_length(ibox,3))
-
     cosb = (elem(1)*elem(7)+elem(2)*elem(8)+elem(3)*elem(9))/ (cell_length(ibox,1)*cell_length(ibox,3))
-
     cosg = (elem(4)*elem(1)+elem(5)*elem(2)+elem(6)*elem(3))/ (cell_length(ibox,2)*cell_length(ibox,1))
-
     cell_ang(ibox,1) = dacos(cosa)
     cell_ang(ibox,2) = dacos(cosb)
     cell_ang(ibox,3) = dacos(cosg)
@@ -176,7 +162,7 @@ contains
     real::hsx,hsy,hsz,sx,sy,sz
 
     if ( lsolid(ibox) .and. .not. lrect(ibox) ) then
-       ! *** non-hexagonal box
+       ! non-hexagonal box
        hsx = 0.5d0*hmat(ibox,1)
        hsy = 0.5d0*hmat(ibox,5)
        hsz = 0.5d0*hmat(ibox,9)
@@ -263,7 +249,7 @@ contains
        !         print*, sqrt(rxuij**2+ryuij**2+rzuij**2)
        !         print*
     else
-       ! *** orthorhombic box
+       ! orthorhombic box
        if ( lpbcx ) then
           if ( lfold ) then
              if ( rxuij .gt. hbx ) then
@@ -340,22 +326,22 @@ contains
 
     ibox = boxlink
 
-!     --- determine dcell
-!         write(io_output,*) 'linkcell used',rcut,rintramax
-!   *** rintramax is the maximum distance between endpoints in a molecule
+! determine dcell
+! write(io_output,*) 'linkcell used',rcut,rintramax
+! rintramax is the maximum distance between endpoints in a molecule
     dcellx = rcut(ibox) + rintramax
 
-!     --- find hypothetical ncell
+! find hypothetical ncell
     ncellx = int( boxlx(ibox) / dcellx ) 
     ncelly = int( boxly(ibox) / dcellx ) 
     ncellz = int( boxlz(ibox) / dcellx )
          
-!     --- make dcells larger so each each cell is the same size
+! make dcells larger so each each cell is the same size
     dcellx = boxlx(ibox) / dble(ncellx)
     dcelly = boxly(ibox) / dble(ncelly)
     dcellz = boxlz(ibox) / dble(ncellz)
 
-!     --- now reweight ncell one more time
+! now reweight ncell one more time
     ncellx = anint( boxlx(ibox) / dcellx ) 
     ncelly = anint( boxly(ibox) / dcelly ) 
     ncellz = anint( boxlz(ibox) / dcellz ) 
@@ -374,14 +360,14 @@ contains
 
     if (ncell.gt.cmax) then
        write(io_output,*) 'ncell,cmax',ncell,cmax
-       call err_exit('ncell greater than cmax in linkcell')
+       call err_exit(__FILE__,__LINE__,'ncell greater than cmax in linkcell',-1)
     end if
          
     do n = 1, ncell
        nicell(n) = 0
     end do
 
-!   --- assign molecules to cells
+! assign molecules to cells
     do n = 1, nchain
        if (nboxi(n).eq.boxlink) then
           i = int(xcm(n) / dcellx) + 1
@@ -391,7 +377,7 @@ contains
 
           if (ic.gt.cmax) then
              write(io_output,*) 'ic,cmax',ic,cmax
-             call err_exit('ic gt cmax')
+             call err_exit(__FILE__,__LINE__,'ic gt cmax',-1)
           end if
 
           icell(n) = ic
@@ -399,7 +385,7 @@ contains
 
           if (nicell(ic).gt.cmaxa) then
              write(io_output,*) 'nicell,cmaxa',nicell(ic) ,cmaxa
-             call err_exit('nicell gt cmaxa')
+             call err_exit(__FILE__,__LINE__,'nicell gt cmaxa',-1)
           end if
 
           iucell(ic,nicell(ic)) = n
@@ -427,10 +413,10 @@ contains
     ico=icell(imol)
     if (ic.ne.ico) then
        if (ico.gt.0) then
-!          --- first remove our molecule
+! first remove our molecule
           do n = 1, nicell(ico) 
              if (iucell(ico,n).eq.imol) then
-!                --- replace removed occupant with last occupant and erase last spot
+! replace removed occupant with last occupant and erase last spot
                 iucell(ico,n) = iucell(ico,nicell(ico))
                 iucell(ico,nicell(ico)) = 0
                 exit
@@ -438,17 +424,17 @@ contains
           end do
 
           if (n.gt.nicell(ico)) then
-             call err_exit('screwup for iinit = 2 for linkcell')
+             call err_exit(__FILE__,__LINE__,'screwup for iinit = 2 for linkcell',-1)
           else
              nicell(ico) = nicell(ico) - 1
           end if
        end if
 
        if (ic.gt.0) then
-!         --- now we will add the molecule 
+! now we will add the molecule 
           icell(imol) = ic
           nicell(ic) = nicell(ic) + 1
-          if (nicell(ic).gt.cmaxa) call err_exit('nicell too big')
+          if (nicell(ic).gt.cmaxa) call err_exit(__FILE__,__LINE__,'nicell too big',-1)
           iucell(ic,nicell(ic)) = imol
        end if
     end if
@@ -462,7 +448,7 @@ contains
     integer,intent(out)::jcell(nmax),nmole
     integer::i,j,k,ia,ja,ka,ib,jb,kb,ic,n
 
-!   --- check perodic boundaries
+! check perodic boundaries
     if (xcmi.gt.boxlx(ibox)) then
        xcmi = xcmi - boxlx(ibox)
     else if (xcmi.lt.0) then
@@ -528,8 +514,7 @@ contains
     integer::jerr
     allocate(hmat(nbxmax,9),hmati(nbxmax,9),cell_length(nbxmax,3),min_width(nbxmax,3),cell_vol(nbxmax),cell_ang(nbxmax,3),stat=jerr)
     if (jerr.ne.0) then
-       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-       call err_exit('allocate_sim_cell: allocation failed')
+       call err_exit(__FILE__,__LINE__,'allocate_sim_cell: allocation failed',jerr)
     end if
 
     hmat=0.0d0
@@ -540,8 +525,7 @@ contains
     integer::jerr
     allocate(icell(nmax),stat=jerr)
     if (jerr.ne.0) then
-       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-       call err_exit('allocate_linked_cell: allocation failed')
+       call err_exit(__FILE__,__LINE__,'allocate_linked_cell: allocation failed',jerr)
     end if
   end subroutine allocate_linked_cell
 end MODULE sim_cell

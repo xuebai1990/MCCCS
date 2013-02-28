@@ -115,8 +115,8 @@ module sim_system
   integer::thread_id,thread_num,thread_num_max,thread_num_proc
 
 ! MPI.INC
-  integer::myid,numprocs,ierr
-  integer,parameter::numprocmax=32
+  integer::myid,numprocs,groupid
+  integer,parameter::rootid=0
 
   real,allocatable,target::boxlx(:),boxly(:),boxlz(:),rcut(:),rcutnn(:),kalp(:)
   logical,allocatable,target::lsolid(:),lrect(:)
@@ -191,9 +191,8 @@ module sim_system
 
 ! EEPAR.INC
   logical::leemove,lmstate,leeacc
-  integer::fmstate,sstate1,sstate2,nstate,box_state,eepointp,eeirem,boxrem1,boxins1,ee_prob
-  real::wee_ratio,psi,um_markov,eeratio
-  dimension psi(smax),box_state(smax),um_markov(smax,smax),ee_prob(smax)
+  integer::fmstate,sstate1,sstate2,nstate,box_state(smax),eepointp,eeirem,boxrem1,boxins1,ee_prob(smax)
+  real::wee_ratio,psi(smax),um_markov(smax,smax),eeratio
   integer::mstate,ee_moltyp(smax),nmolty1
 
 ! COORD2.INC
@@ -213,9 +212,8 @@ module sim_system
 ! IPSWPAR.INC
   integer::nw,iratipsw
   parameter (nw = 4000)
-  real::dvdl,acdvdl,acipsw,vipsw,pipsw ,vwellipsw,pwellipsw,etais,lambdais,bwell,vipswo,vipswn,vwellipswo,vwellipswn,lena,lenc,pwellips,pips,dhmat
+  real::dvdl,acdvdl,acipsw,vipsw,pipsw ,vwellipsw,pwellipsw,etais,lambdais,bwell,vipswo,vipswn,vwellipswo,vwellipswn,lena,lenc,pwellips(3,3),pips(3,3),dhmat(3,3)
   logical::lstagea,lstageb,lstagec
-  dimension pwellips(3,3),pips(3,3),dhmat(3,3)
 
 ! BOLTZMANN.INC
   real::rxi1,ryi1,rzi1,vi1,wi1,vext1,velect1
@@ -410,25 +408,23 @@ CONTAINS
 
     read(UNIT=io_input,NML=io,iostat=jerr)
     if (jerr.ne.0.and.jerr.ne.-1) then
-       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-       call err_exit('reading namelist: io')
+       call err_exit(__FILE__,__LINE__,'reading namelist: io',jerr)
     end if
 
     ! rewind(io_input)
     ! read(UNIT=io_input,NML=system,iostat=jerr)
     ! if (jerr.ne.0.and.jerr.ne.-1) then
-    !    write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-    !    call err_exit('reading namelist: system')
+    !    call err_exit(__FILE__,__LINE__,'reading namelist: system',jerr)
     ! end if
     ! nchain=nchain+2
 
     if (io_output.eq.5) then
-       call err_exit('unit 5 is for standard input')
+       call err_exit(__FILE__,__LINE__,'unit 5 is for standard input',myid+1)
     else if(io_output.ne.6.and.io_output.ne.0.and.myid.eq.0) then
        io_output=get_iounit()
        open(unit=io_output,access='sequential',action='write',file=file_run,form='formatted',iostat=jerr,status='unknown')
        if (jerr.ne.0) then
-          call err_exit('cannot open output file '//file_run)
+          call err_exit(__FILE__,__LINE__,'cannot open output file '//file_run,myid+1)
        end if
     end if
   end subroutine read_system
@@ -437,8 +433,7 @@ CONTAINS
     integer::jerr
     allocate(boxlx(nbxmax),boxly(nbxmax),boxlz(nbxmax),rcut(nbxmax),rcutnn(nbxmax),kalp(nbxmax),lsolid(nbxmax),lrect(nbxmax),express(nbxmax),Elect_field(nbxmax),ghost_particles(nbxmax),numberDimensionIsIsotropic(nbxmax),inix(nbxmax),iniy(nbxmax),iniz(nbxmax),inirot(nbxmax),inimix(nbxmax),nchoiq(nbxmax),box5(nbxmax),box6(nbxmax),zshift(nbxmax),dshift(nbxmax),rmvol(nbxmax),pmvlmt(nbxmax),pmvolb(nbxmax),lideal(nbxmax),ltwice(nbxmax),rmhmat(nbxmax,9),dipolex(nbxmax),dipoley(nbxmax),dipolez(nbxmax),nchbox(nbxmax),vbox(nbxmax),wbox(nbxmax),vinterb(nbxmax),vtailb(nbxmax),vintrab(nbxmax),vvibb(nbxmax),vbendb(nbxmax),vtgb(nbxmax),vextb(nbxmax),velectb(nbxmax),vflucqb(nbxmax),v3garob(nbxmax),vipswb(nbxmax),vwellipswb(nbxmax),stat=jerr)
     if (jerr.ne.0) then
-       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-       call err_exit('allocate_system: allocation failed')
+       call err_exit(__FILE__,__LINE__,'allocate_system: allocation failed',jerr)
     end if
   end subroutine allocate_cell
 
@@ -447,8 +442,7 @@ CONTAINS
     integer::jerr
     allocate(ucheck(ntmax),nrotbd(ntmax),xcm(nmax),ycm(nmax),zcm(nmax),pmsatc(npamax),pmswtcb(npamax,npabmax),nswatb(npamax,2),nsampos(npamax),ncut(npamax,2),gswatc(npamax,2,2*npamax),nswtcb(npamax),box3(npamax,npabmax),box4(npamax,npabmax),pmisatc(npamax),temtyp(ntmax),B(ntmax),nunit(ntmax),nugrow(ntmax),nmaxcbmc(ntmax),iurot(ntmax),maxgrow(ntmax),isolute(ntmax),iring(ntmax),nrig(ntmax),irig(ntmax,6),frig(ntmax,6),nrigmin(ntmax),nrigmax(ntmax),rindex(ntmax),riutry(ntmax,3),lelect(ntmax),lflucq(ntmax),lqtrans(ntmax),lexpand(ntmax),lavbmc1(ntmax),lavbmc2(ntmax),lavbmc3(ntmax),lbias(ntmax),lring(ntmax),lrigid(ntmax),lrig(ntmax),lq14scale(ntmax),fqegp(ntmax),eta2(nbxmax,ntmax),qscale(ntmax),pmbias(ntmax),pmbsmt(ntmax),pmbias2(ntmax),rmtrax(ntmax,nbxmax),rmtray(ntmax,nbxmax),rmtraz(ntmax,nbxmax),rmrotx(ntmax,nbxmax),rmroty(ntmax,nbxmax),rmrotz(ntmax,nbxmax),lbranch(ntmax),ininch(ntmax,nbxmax),rmflcq(ntmax,nbxmax),pmswmt(ntmax),pmswapb(ntmax,npabmax),pmcbmt(ntmax),pmall(ntmax),pmfix(ntmax),pmfqmt(ntmax),pmeemt(ntmax),pmtrmt(ntmax),pmromt(ntmax),nswapb(ntmax),box1(ntmax,npabmax),box2(ntmax,npabmax),nchoi1(ntmax),nchoi(ntmax),nchoir(ntmax),nchoih(ntmax),nchtor(ntmax),nchbna(ntmax),nchbnb(ntmax),icbdir(ntmax),icbsta(ntmax),lrplc(ntmax),masst(ntmax),rmexpc(ntmax),eetype(ntmax),ncmt(nbxmax,ntmax),ncmt2(nbxmax,ntmax,20),parall(ntmax,nmax),parbox(nmax,nbxmax,ntmax),solcount(nbxmax,ntmax),avsolinter(nbxmax,ntmax),avsolintra(nbxmax,ntmax),avsolbend(nbxmax,ntmax),avsoltor(nbxmax,ntmax),avsolelc(nbxmax,ntmax),bnflcq(ntmax,nbxmax),bsflcq(ntmax,nbxmax),bnflcq2(ntmax,nbxmax),bsflcq2(ntmax,nbxmax),rxwell(nw,ntmax),rywell(nw,ntmax),rzwell(nw,ntmax),sxwell(nw,ntmax),sywell(nw,ntmax),szwell(nw,ntmax),nwell(ntmax),lwell(ntmax),naccu(nprop,nbxmax),nccold(nprop,nbxmax),accum(nprop,nbxmax),bccold(nprop,nbxmax),aver(nprop,nbxmax),baver(nprop,nbxmax,blockm),naccu1(nprop1,nbxmax,nbxmax),nccold1(nprop1,nbxmax,nbxmax),aver1(nprop1,nbxmax,nbxmax),accum1(nprop1,nbxmax,nbxmax),bccold1(nprop1,nbxmax,nbxmax),baver1(nprop1,nbxmax,nbxmax,blockm),moltyp(nmax),rcmu(nmax),exp_c(nmax),sxcm(nmax),sycm(nmax),szcm(nmax),nboxi(nmax),neighbor(maxneigh,nmax),neigh_cnt(nmax),neighboro(maxneigh,nmax),neigh_o(nmax),ndij(maxneigh,nmax),nxij(maxneigh,nmax),nyij(maxneigh,nmax),nxijo(maxneigh,nmax),nzij(maxneigh,nmax),ndijo(maxneigh,nmax),nyijo(maxneigh,nmax),nzijo(maxneigh,nmax),favor(nmax),favor2(nmax),ntype(ntmax,initial_size),leaderq(ntmax,initial_size),lplace(ntmax,initial_size),lrigi(ntmax,initial_size),invib(ntmax,initial_size),itvib(ntmax,initial_size,6),ijvib(ntmax,initial_size,6),inben(ntmax,initial_size),itben(ntmax,initial_size,12),ijben2(ntmax,initial_size,12),ijben3(ntmax,initial_size,12),intor(ntmax,initial_size),ittor(ntmax,initial_size,12),ijtor2(ntmax,initial_size,12),ijtor3(ntmax,initial_size,12),ijtor4(ntmax,initial_size,12),irotbd(initial_size,ntmax),pmrotbd(initial_size,ntmax),stat=jerr)
     if (jerr.ne.0) then
-       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-       call err_exit('allocate_system: allocation failed')
+       call err_exit(__FILE__,__LINE__,'allocate_system: allocation failed',jerr)
     end if
   end subroutine allocate_system
 
@@ -456,12 +450,11 @@ CONTAINS
     integer::jerr
     allocate(splist(npamax,numax,2),lexist(numax),lexclu(ntmax,numax,ntmax,numax),rlist(numax,numax),rfrom(numax),rprev(numax),rnum(numax),liswinc(numax,ntmax),iplace(numax,numax),pfrom(numax),pnum(numax),pprev(numax),a15type(ntmax,numax,numax),epsilon_f(2,numax),sigma_f(2,numax),ljscale(ntmax,numax,numax),qscale2(ntmax,numax,numax),ee_qqu(numax,smax),rxnew(numax),rynew(numax),rznew(numax),prior(ntmax,numax),rxu(nmax,numax),ryu(nmax,numax),rzu(nmax,numax),qqu(nmax,numax),lchiral(ntmax,numax),rxuion(numax,2),ryuion(numax,2),rzuion(numax,2),qquion(numax,2),linclu(ntmax,numax,numax),lqinclu(ntmax,numax,numax),lainclu(ntmax,numax,numax),wschvib(numax,6),wschben(numax,12),wschtor(numax,12),wsched(numax),xvec(numax,numax),yvec(numax,numax),zvec(numax,numax),growfrom(numax),growprev(numax),grownum(numax),growlist(numax,numax),awell(numax,numax,ntmax),stat=jerr)
     if (jerr.ne.0) then
-       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-       call err_exit('allocate_molecule: allocation failed')
+       call err_exit(__FILE__,__LINE__,'allocate_molecule: allocation failed',jerr)
     end if
   end subroutine allocate_molecule
 
   subroutine checkAtom()
-    if (.not.allocated(atoms%list)) call err_exit(TRIM(__FILE__)//integer_to_string(__LINE__)//": ATOMS section has not been defined!")
+    if (.not.allocated(atoms%list)) call err_exit(__FILE__,__LINE__,": ATOMS section has not been defined!",myid+1)
   end subroutine checkAtom
 end module sim_system

@@ -14,7 +14,9 @@ module zeolite
   use parser_cif
   use energy_kspace,only:calp
   implicit none
-  include 'common.inc'
+#ifdef __OPENMP__
+  include 'omp_lib.h'
+#endif
   private
   save
   public::zeocoord,suzeo,exzeo
@@ -70,21 +72,19 @@ contains
     io_input=get_iounit()
     open(unit=io_input,access='sequential',action='read',file=file_in,form='formatted',iostat=jerr,status='old')
     if (jerr.ne.0) then
-       call err_exit('cannot open zeolite input file')
+       call err_exit(__FILE__,__LINE__,'cannot open zeolite input file',myid+1)
     end if
 
     read(UNIT=io_input,NML=zeolite_in,iostat=jerr)
     if (jerr.ne.0.and.jerr.ne.-1) then
-       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-       call err_exit('reading namelist: zeolite_in')
+       call err_exit(__FILE__,__LINE__,'reading namelist: zeolite_in',jerr)
     end if
     close(io_input)
 
     volume_probe=indexOf(atoms,volume_probe)
     area_probe=indexOf(atoms,area_probe)
     if ((lpore_volume.and.volume_probe.eq.0).or.(lsurface_area.and.area_probe.eq.0)) then
-       write(io_output,*) 'ERROR in ',TRIM(__FILE__),':',__LINE__
-       call err_exit('zeocoord: atom parameters for volume_probe or area_probe undefined')
+       call err_exit(__FILE__,__LINE__,'zeocoord: atom parameters for volume_probe or area_probe undefined',myid+1)
     end if
        
     call initZeo()
@@ -132,7 +132,7 @@ contains
     if (lsurface_area) nmolty=nmolty-1
 
     allocate(zgrid(3,ztype%ntype,0:zunit%ngrid(1)-1,0:zunit%ngrid(2)-1,0:zunit%ngrid(3)-1),egrid(0:zunit%ngrid(1)-1,0:zunit%ngrid(2)-1,0:zunit%ngrid(3)-1,zpot%ntype),zpot%param(3,ztype%ntype,zpot%ntype),zpot%table(zpot%ntype),stat=jerr)
-    if (jerr.ne.0) call err_exit('addAllBeadTypes: allocation failed')
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'addAllBeadTypes: allocation failed',myid+1)
 
     do igtype=1,zpot%ntype
        idi=list(igtype)
@@ -170,12 +170,11 @@ contains
     do i=1,ztype%ntype
        ztype%type(i)=indexOf(atoms,ztype%type(i))
        if (ztype%type(i).eq.0) then
-          write(io_output,*) 'ERROR in ',TRIM(__FILE__),':',__LINE__
-          call err_exit('zeocoord: type '//integer_to_string(i)//' undefined: '//ztype%name(i))
+          call err_exit(__FILE__,__LINE__,'zeocoord: type '//integer_to_string(i)//' undefined: '//ztype%name(i),myid+1)
        end if
     end do
 
-    !     === Calculate zeolite density
+    ! Calculate zeolite density
     wzeo=dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype)))
     if (myid.eq.0) write(io_output,"(' Tabulated zeolite potential: ',/&
                               ,' --------------------------------------------------',/&
@@ -192,7 +191,7 @@ contains
 
     if (lsurface_area) call zsurface()
 
-    ! === tabulation of the zeolite potential
+    ! tabulation of the zeolite potential
     if (lzgrid) then
        call addAllBeadTypes()
        call setpbc(boxZeo)
@@ -202,15 +201,15 @@ contains
 
        open(unit=io_ztb,access='sequential',action='read',file=file_ztb,form='binary',iostat=jerr, status='old')
        if (jerr.eq.0) then
-          ! --- read zeolite table from disk
+          ! read zeolite table from disk
           if (myid.eq.0) write(io_output,'(A,/)') 'read in tabulated potential'
           read(io_ztb) zunittmp,zangtmp,ngridtmp,zntypetmp,lewaldtmp,ltailczeotmp,lshifttmp,rcuttmp
-          if (ANY(abs(zunittmp-zunit%boxl).gt.eps).or.ANY(ngridtmp.ne.zunit%ngrid).or.(zntypetmp.ne.ztype%ntype)) call err_exit('problem 1 in zeolite potential table')
+          if (ANY(abs(zunittmp-zunit%boxl).gt.eps).or.ANY(ngridtmp.ne.zunit%ngrid).or.(zntypetmp.ne.ztype%ntype)) call err_exit(__FILE__,__LINE__,'problem 1 in zeolite potential table',myid+1)
           do igtype=1,ztype%ntype
              read(io_ztb) atom
              if (trim(ztype%name(igtype))/=trim(atom)) then
                 write(io_output,*) igtype,' atom should be ',trim(atom)
-                call err_exit('problem 2 in zeolite potential table')
+                call err_exit(__FILE__,__LINE__,'problem 2 in zeolite potential table',myid+1)
              end if
           end do
           do k=0,zunit%ngrid(3)-1
@@ -229,7 +228,7 @@ contains
 !              close(io_ztb)
 !              open(unit=io_ztb,access='sequential',action='write',file=file_ztb,form='binary',iostat=jerr,status='unknown')
 !              if (jerr.ne.0) then
-!                 call err_exit('cannot create file for tabulated potential')
+!                 call err_exit(__FILE__,__LINE__,'cannot create file for tabulated potential',myid+1)
 !              end if
 !              write(io_ztb) zunittmp,zangtmp,ngridtmp,zntypetmp,lewaldtmp,ltailczeotmp,lshifttmp,rcuttmp
 !              do igtype=1,ztype%ntype
@@ -262,7 +261,7 @@ contains
              write(io_output,*) 'make tabulated potential'
              open(unit=io_ztb,access='sequential',action='write',file=file_ztb,form='binary',iostat=jerr,status='unknown')
              if (jerr.ne.0) then
-                call err_exit('cannot create file for tabulated potential')
+                call err_exit(__FILE__,__LINE__,'cannot create file for tabulated potential',myid+1)
              end if
              write(io_ztb) zunit%boxl,zcell%ang(1)%val,zcell%ang(2)%val,zcell%ang(3)%val,zunit%ngrid,ztype%ntype,lewald,ltailcZeo,lshift,zcell%cut
              do igtype=1,ztype%ntype
@@ -272,14 +271,18 @@ contains
           write(io_output,*) 'time 1:',time_now()
           do k=0,zunit%ngrid(3)-1
              do j=0,zunit%ngrid(2)-1
+#ifdef __OPENMP__
 !$omp parallel &
 !$omp private(i) shared(k,j,zgrid) default(shared)
 !$omp do
+#endif
                 do i=0,zunit%ngrid(1)-1
                    ! pass to exzeof arguments in fractional coordinates with respect to the unit cell
                    if (k.gt.oldk.or.(k.eq.oldk.and.j.ge.oldj)) call exzeof(zgrid(:,:,i,j,k),dble(i)/zunit%ngrid(1),dble(j)/zunit%ngrid(2),dble(k)/zunit%ngrid(3))
                 end do
+#ifdef __OPENMP__
 !$omp end parallel
+#endif
                 if (myid.eq.0) write(io_ztb) zgrid(:,:,:,j,k)
              end do
           end do
@@ -448,7 +451,7 @@ contains
     alpsqr4 = 4.0d0*zcell%calp*zcell%calp
     hmaxsq = alpsqr4*onepi*onepi
 
-    ! *** generate the reciprocal-space
+    ! Generate the reciprocal-space
     ! here -kmax(1),-kmax(1)+1,...,-1 are skipped, so no need to divide by 2 for the prefactor
     do l = 0,kmax(1)
        if ( l .eq. 0 ) then
@@ -468,8 +471,8 @@ contains
              ki(3) = dble(l)*hmatik(1,3)+dble(m)*hmatik(2,3)+ dble(n)*hmatik(3,3)
              ksqr = dot_product(ki,ki)
              ! if ( ksqr .lt. hmaxsq ) then
-             ! --- sometimes these are about equal, which can cause different
-             ! --- behavior on 32 and 64 bit machines without this .and. statement
+             ! sometimes these are about equal, which can cause different
+             ! behavior on 32 and 64 bit machines without this .and. statement
              if ( hmaxsq-ksqr.gt.eps ) then
                 sums = 0.0E0_double_precision
                 do i = 1,zeo%nbead
@@ -502,7 +505,7 @@ contains
        if (zpot%table(igtype).eq.idi) exit
     end do
     if (igtype.gt.zpot%ntype) then
-       call err_exit('exzeo: no such bead type')
+       call err_exit(__FILE__,__LINE__,'exzeo: no such bead type',myid+1)
     end if
 
     if (present(ignoreTable)) then
@@ -511,7 +514,7 @@ contains
        lignore=.false.
     end if
 
-    ! --- fold coordinates into the unit cell, result in fractional coordinates
+    ! fold coordinates into the unit cell, result in fractional coordinates
     !!!
     scoord(1)=(xi*zunit%hmati(1,1)+yi*zunit%hmati(1,2)+zi*zunit%hmati(1,3))
     scoord(2)=(xi*zunit%hmati(2,1)+yi*zunit%hmati(2,2)+zi*zunit%hmati(2,3))
@@ -532,11 +535,11 @@ contains
     if (.not.lignore.and.lzgrid) then
        ! calculation using a grid
 
-       ! --- test if in the reasonable regime
+       ! test if in the reasonable regime
        if (egrid(j,k,l,igtype).ge.upperLimit) return
-       ! ---  block m*m*m centered around: j,k,l
-       ! ---  set up hulp array: (allow for going beyond unit cell
-       !      for polynom fitting)
+       ! block m*m*m centered around: j,k,l
+       ! set up hulp array: (allow for going beyond unit cell
+       ! for polynom fitting)
        do l0=mst,m
           lp=l+l0
           scoord(3)=dble(lp)/zunit%ngrid(3)
@@ -603,7 +606,7 @@ contains
     integer::i,tel
     real::errTot,errRel,errAbs,err,BoltTabulated,eBoltTabulated,BoltExplicit,eBoltExplicit,xi,yi,zi,Utabulated,Uexplicit,weight
 
-!--- test accuracy
+    ! test accuracy
     if (myid.eq.0) write(io_output,'(A,/,A)') ' Test accuracy of tabulated zeolite potential & Calculate void volume',' -------------------------------------------------'
     tel=0
     errTot=0
@@ -682,9 +685,8 @@ contains
        call absoluteToFractional(scoord,zeo%bead(i)%coord,zcell)
        position(:,i)=scoord*zunit%dup
        if (ANY(position(:,i).ge.1)) then
-          write(io_output,'(3A,I6)') 'Error in ',TRIM(__FILE__),':',__LINE__
           write(io_output,*) i,position(:,i),scoord,zunit%dup
-          call err_exit('')
+          call err_exit(__FILE__,__LINE__,'',myid+1)
        end if
     END DO
 

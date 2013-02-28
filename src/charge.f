@@ -1,8 +1,8 @@
 !    *******************************************************************
-!    ** calculates the intramolcular polarization energies            **
-!    ** for fluctuating charge moves                                  **
-!    ** written by Marcus G. Martin 9-16-97                           **
-!    ** rewritten by Bin Chen 6-25-99                                 **
+! calculates the intramolcular polarization energies            **
+! for fluctuating charge moves                                  **
+! written by Marcus G. Martin 9-16-97                           **
+! rewritten by Bin Chen 6-25-99                                 **
 !    *******************************************************************
 subroutine charge( i, qion, vflucq, vewald )
   use const_math,only:onepi
@@ -22,10 +22,10 @@ subroutine charge( i, qion, vflucq, vewald )
       ibox = nboxi(i)
 
 ! *************************************
-! *** INTRACHAIN FLUCQ INTERACTIONS ***
+! INTRACHAIN FLUCQ INTERACTIONS ***
 ! *************************************
 
-! --- calculate intramolecular flucq energy for chain i      
+! calculate intramolecular flucq energy for chain i      
       do ii = 1, iunit
          ntii = ntype(imolty,ii)
          qqii = qion(ii)
@@ -41,7 +41,7 @@ subroutine charge( i, qion, vflucq, vewald )
             end if
          end do
       end do
-!     --- remove the ground state gas phase energy
+! remove the ground state gas phase energy
       vflucq = vflucq - fqegp(imolty)
 
       if ( lewald ) then
@@ -52,7 +52,7 @@ subroutine charge( i, qion, vflucq, vewald )
             qqii = qion(ii)
             
             do jj = ii+1, iunit
-!              --- correction term in ewald sum
+! correction term in ewald sum
                rxuij = rxui - rxu(i,jj)
                ryuij = ryui - ryu(i,jj)
                rzuij = rzui - rzu(i,jj)
@@ -63,7 +63,7 @@ subroutine charge( i, qion, vflucq, vewald )
                    vewald = vewald + (1.0d0-qscale2(imolty,ii,jj))*qqii* qion(jj)* (erfunc(calp(ibox)*rij)-1.0d0)/rij
                end if 
             end do
-! --- self term in ewald sum ---
+! self term in ewald sum ---
             vewald = vewald - qqii*qqii*calp(ibox)/dsqrt(onepi)
          end do
       end if

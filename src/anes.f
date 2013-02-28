@@ -1,8 +1,8 @@
 !    *********************************************************************
-!    ** optimize the electronic configuration for trans, rot, and swap  **
+! optimize the electronic configuration for trans, rot, and swap  **
 !    ** (config, swatch in the future) moves and accept/reject the      **
-!    ** combined move.                                                  **
-!    ** written on June 25/99 by Bin Chen.                              **
+! combined move.                                                  **
+! written on June 25/99 by Bin Chen.                              **
 !    *********************************************************************
 subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn,vintero,vintrao,vexto,velecto,vinsta,vremta, vnewflucq,voldflucq,lswapinter)
   use util_random,only:random
@@ -15,12 +15,12 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
       real::deltv,vintern,vintran,vextn,velectn ,vintero,vintrao,vexto,velecto,vinsta,vremta,vnewflucq,voldflucq ,vboxo(nbxmax),vinterbo(nbxmax),vintrabo(nbxmax),vextbo(nbxmax) ,velectbo(nbxmax),vflucqbo(nbxmax),vtailbo(nbxmax),vvibbo(nbxmax) ,vtgbo(nbxmax),vbendbo(nbxmax),rxuo(numax),ryuo(numax) ,rzuo(numax),xcmo,ycmo,zcmo,vdum,wratio,volins,volrem,deltvb,vnewt2,voldt2
       real::qquo(nmax,numax) 
 
-!      write(io_output,*) 'START the optimization of the charge configuration'
+! write(io_output,*) 'START the optimization of the charge configuration'
 
       imolty = moltyp(i)
       iunit = nunit(imolty)
 
-! *** store the old energy, old coordinates and ewald sum
+! store the old energy, old coordinates and ewald sum
       do ibox2 = 1,nbox
          vboxo(ibox2) = vbox(ibox2)
          vinterbo(ibox2) = vinterb(ibox2)
@@ -45,14 +45,14 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
       xcmo = xcm(i)
       ycmo = ycm(i)
       zcmo = zcm(i)
-! *** store the old charges
+! store the old charges
       do ip = 1,nchain
          do j = 1,nunit(moltyp(ip))
             qquo(ip,j) = qqu(ip,j)
          end do
       end do
       if (lewald) then
-! *** store the reciprocal-space sum
+! store the reciprocal-space sum
          do ibox2 = 1,nbox
             call recip(ibox2,vdum,vdum,3)
          end do
@@ -61,12 +61,12 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
          end if
       end if
 
-! *** on the new coordinates, continue to use the fluctuating charge
-! *** algorithm to optimize the charge configurations, update the
-! *** energy, coordinates and the ewald sum
+! on the new coordinates, continue to use the fluctuating charge
+! algorithm to optimize the charge configurations, update the
+! energy, coordinates and the ewald sum
       
       if ( mtype .eq. 3 ) then
-! *** for swap move
+! for swap move
          vbox(ibox)     = vbox(ibox) + vnewt
          vinterb(ibox)  = vinterb(ibox) + vnewinter
          vintrab(ibox)  = vintrab(ibox) + vnewintra
@@ -102,28 +102,28 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
          ryu(i,j) = ryuion(j,2)
          rzu(i,j) = rzuion(j,2)
       end do
-! *** update chain center of mass
+! update chain center of mass
       call ctrmas(.false.,ibox,i,mtype)
 
       if (lewald) then
-! *** update reciprocal-space sum
+! update reciprocal-space sum
          call recip(ibox,vdum,vdum,2)
          if (mtype .eq. 3) call recip(boxrem,vdum,vdum,2)
          if ( ldielect ) then
-! *** update the dipole term
+! update the dipole term
             call dipole(ibox,1)
          end if
       end if            
 
-! *** begin to optimize the charge configuration
+! begin to optimize the charge configuration
 
       if ( mtype .eq. 3 ) then
          do ichoiq = 1,500
             call flucq(-1,0)
          end do
-!         do ichoiq = 1,0
-!            call flucq(-2,0)
-!         end do
+! do ichoiq = 1,0
+! call flucq(-2,0)
+! end do
          do ichoiq = 1,500
             call flucq(2,0) 
          end do
@@ -136,14 +136,14 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
 
          if ( lswapinter ) then
             if (lgibbs) then
-!     --- Note: acceptance based on only molecules of type imolty
+! Note: acceptance based on only molecules of type imolty
                wratio = ( weight / weiold ) * ( volins * dble( ncmt(boxrem,imolty)+1 ) /  ( volrem * dble( ncmt(ibox,imolty) ) ) )
             else if (lgrand) then
                if (ibox.eq.1) then
-!           --- molecule added to box 1
+! molecule added to box 1
                   wratio = (weight /  weiold ) *  volins * B(imolty) / (ncmt(ibox,imolty)) 
                else
-!            --- molecule removed from box 1
+! molecule removed from box 1
                   wratio = (weight /  weiold ) *  (ncmt(boxrem,imolty)+1)/ (B(imolty)*volrem) 
                end if
             end if
@@ -184,10 +184,10 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
 
       if ( laccept ) then
 
-! *** combined move can be accepted now !!!
+! combined move can be accepted now !!!
 
       else
-! *** restore the old energy and old coordinates and ewald sum
+! restore the old energy and old coordinates and ewald sum
          do ibox2 = 1,nbox
             vbox(ibox2) = vboxo(ibox2)
             vinterb(ibox2) = vinterbo(ibox2)
@@ -216,18 +216,18 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
          ycm(i) = ycmo
          zcm(i) = zcmo
          if (lewald) then
-! *** restore the reciprocal-space sum
+! restore the reciprocal-space sum
             do ibox2 = 1,nbox
                call recip(ibox2,vdum,vdum,4)
             end do
             if ( ldielect ) then
-! *** restore old dipole moment
+! restore old dipole moment
                call dipole(ibox,3)
             end if
          end if
       end if    
 
-!      write(io_output,*) 'END the optimization of the charge configuration'
+! write(io_output,*) 'END the optimization of the charge configuration'
 
       return         
       end

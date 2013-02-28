@@ -59,19 +59,19 @@ CONTAINS
     IOPDB=get_iounit()
     open(unit=IOPDB,access='sequential',action='read',file=filePDB,form='formatted',iostat=jerr,status='old')
     if (jerr.ne.0) then
-       call err_exit('cannot open zeolite PDB file')
+       call err_exit(__FILE__,__LINE__,'cannot open zeolite PDB file',-1)
     end if
 
     CALL readLine(IOPDB,line,.false.,jerr)
-    IF(jerr.ne.0) call err_exit('wrong PDB file format')
+    IF(jerr.ne.0) call err_exit(__FILE__,__LINE__,'wrong PDB file format',-1)
 
     read(line(2:),*) zeo%nbead,zunit%dup(1),zunit%dup(2),zunit%dup(3),ztype%ntype
     allocate(zeo%bead(zeo%nbead),lunitcell(zeo%nbead),ztype%name(ztype%ntype),ztype%radiisq(ztype%ntype),ztype%type(ztype%ntype),ztype%num(ztype%ntype),stat=jerr)
-    if (jerr.ne.0) call err_exit('readPDB: allocation failed')
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'readPDB: allocation failed',-1)
 
     do i=1,ztype%ntype
        CALL readLine(IOPDB,line,.false.,jerr)
-       IF(jerr.ne.0) call err_exit('wrong PDB file format')
+       IF(jerr.ne.0) call err_exit(__FILE__,__LINE__,'wrong PDB file format',-1)
        read(line(2:),*) ztype%name(i),ztype%type(i),ztype%radiisq(i)
        ztype%radiisq(i)=ztype%radiisq(i)*ztype%radiisq(i)
        ztype%num(i)=0
@@ -89,7 +89,7 @@ CONTAINS
           call setUpCellStruct(zcell,zunit)
           uninitialized=.false.
        CASE ("ATOM","HETATM")
-          if (uninitialized) call err_exit('PDB: CRYST1 needs to be defined before ATOM')
+          if (uninitialized) call err_exit(__FILE__,__LINE__,'PDB: CRYST1 needs to be defined before ATOM',-1)
           i = i + 1
           READ(line(13:16),*) atomname
           READ(line(18:20),*,IOSTAT=jerr) resName
@@ -120,7 +120,7 @@ CONTAINS
        END SELECT
     END DO
 
-    if (i.ne.zeo%nbead) call err_exit('PDB: Number of atoms incorrect')
+    if (i.ne.zeo%nbead) call err_exit(__FILE__,__LINE__,'PDB: Number of atoms incorrect',-1)
 
   END SUBROUTINE readPDB
 
@@ -137,7 +137,7 @@ CONTAINS
     IOPDB=get_iounit()
     open(unit=IOPDB,access='sequential',action='write',file=filePDB,form='formatted',iostat=jerr,status='unknown')
     if (jerr.ne.0) then
-       call err_exit('cannot open file for writing (PDB)')
+       call err_exit(__FILE__,__LINE__,'cannot open file for writing (PDB)',-1)
     end if
 
     WRITE(IOPDB,'(A6,3(F9.3),3(F7.2),1X,A10)') "CRYST1",boxlx(ibox),boxly(ibox),boxlz(ibox),cell_ang(ibox,1),cell_ang(ibox,2),cell_ang(ibox,3),"P1        "

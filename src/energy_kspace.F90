@@ -2,337 +2,271 @@ MODULE energy_kspace
   use const_math,only:onepi,twopi
   use const_phys,only:qqfact
   use util_runtime,only:err_exit
-  use sim_system,only:lsolid,lrect,boxlx,boxly,boxlz,nchain,moltyp,lelect,nboxi,ntype,lqchg,rxu,ryu,rzu,qqu,myid,numprocmax,moltion,nunit,numprocs,ierr,rxuion,ryuion,rzuion,qquion,xcm,ycm,zcm
+  use util_mp,only:mp_sum,mp_allgather,mp_set_displs
+  use sim_system,only:lsolid,lrect,boxlx,boxly,boxlz,nchain,moltyp,lelect,nboxi,ntype,lqchg,rxu,ryu,rzu,qqu,myid,numprocs,moltion,nunit,rxuion,ryuion,rzuion,qquion,xcm,ycm,zcm,groupid
   use sim_cell
   implicit none
-  include 'common.inc'
   private
   save
   public::recipsum,recip,recip_atom,ee_recip,recippress,calp,sself,correct,save_kvector,restore_kvector,allocate_kspace
 
 ! EWALDSUM.INC
-! - vectormax = the maximum number of reciprocal vectors for Ewald sum
+! vectormax = the maximum number of reciprocal vectors for Ewald sum
   integer,parameter::vectormax=100000
   integer,allocatable::numvect(:),numvecto(:)
   real,allocatable::kx(:,:),ky(:,:),kz(:,:),prefact(:,:),ssumr(:,:),ssumi(:,:),ssumrn(:,:),ssumin(:,:),ssumro(:,:),ssumio(:,:),kxo(:,:),kyo(:,:),kzo(:,:),prefacto(:,:),calpo(:)
   real,allocatable,target::calp(:)
   real::sself,correct
-! - numvect, the total number of reciprocal vectors
-! - kalp, a parameter to control the real space sum
-! - calp = kalp / boxlen
+! numvect, the total number of reciprocal vectors
+! kalp, a parameter to control the real space sum
+! calp = kalp / boxlen
 
 contains
 !    *********************************************************************
-!    ** calculates the total reciprocal space ewald-sum term for volume **
-!    ** moves, written in 1998 by Bin Chen.                             **
-!    ** rewritten in 2001 by Bin Chen.                                  **
-!    ** rewritten again, probably by Bin.                               **
+! calculates the total reciprocal space ewald-sum term for volume **
+! moves, written in 1998 by Bin Chen.                             **
+! rewritten in 2001 by Bin Chen.                                  **
+! rewritten again, probably by Bin.                               **
 !    *********************************************************************
   subroutine recipsum(ibox,vrecip)
 
-      integer::ibox,i,ii,imolty,ncount
+    integer::ibox,i,ii,imolty,ncount
 
-! * from h-matrix formulation
-      integer::l,m,n,m_min,n_min,kmaxl,kmaxm,kmaxn
+    ! from h-matrix formulation
+    integer::l,m,n,m_min,n_min,kmaxl,kmaxm,kmaxn
 
-      real::alpsqr4,vol,ksqr,sumr,sumi,arg ,vrecip,bx1,by1,bz1 ,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi
-!      real::sum_sumr,sum_sumi
+    real::alpsqr4,vol,ksqr,sumr,sumi,arg ,vrecip,bx1,by1,bz1 ,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi
+    ! real::sum_sumr,sum_sumi
 
-! RP added for calculating time for communication step
-      integer::mystart,myend,blocksize
-      integer::ncount_arr(numprocmax) ,ncount_displs(numprocmax)
-      real::sum_vrecip,kx_arr(vectormax) ,ky_arr(vectormax),kz_arr(vectormax),kx_one(vectormax) ,ky_one(vectormax),kz_one(vectormax),ssumi_arr(vectormax) ,prefact_arr(vectormax),ssumr_one(vectormax),ssumi_one(vectormax) ,prefact_one(vectormax),ssumr_arr(vectormax)
+    ! RP added for calculating time for communication step
+    integer::mystart,myend,blocksize
+    integer::ncount_arr(numprocs),ncount_displs(numprocs)
+    real::kx_arr(vectormax),ky_arr(vectormax),kz_arr(vectormax),ssumr_arr(vectormax),ssumi_arr(vectormax),prefact_arr(vectormax)
 
-! KM for MPI
-      do i=1,numprocmax
-         ncount_displs(i) = 0
-         ncount_arr(i) = 0
-      end do
+    ! Set up the reciprocal space vectors ***
+    ncount = 0
+    vrecip = 0.0d0
 
+    calpi = calp(ibox)
 
-! *** Set up the reciprocal space vectors ***
-
-      ncount = 0
-      vrecip = 0.0d0
-
-      calpi = calp(ibox)
-
-      if ( (.not. lsolid(ibox)) .or. lrect(ibox) )  then
-         bx1 = boxlx(ibox)
-         by1 = boxly(ibox)
-         bz1 = boxlz(ibox)
-         hmat(ibox,1) = bx1
-         hmat(ibox,5) = by1
-         hmat(ibox,9) = bz1
-         do i = 1,9
-            hmatik(i) = 0.0d0
-         end do
-         hmatik(1) = twopi/bx1
-         hmatik(5) = twopi/by1
-         hmatik(9) = twopi/bz1
-         kmaxl = dint(bx1*calpi)+1
-         kmaxm = dint(by1*calpi)+1
-         kmaxn = dint(bz1*calpi)+1
-      else
-         do i = 1,9
-            hmatik(i) = twopi*hmati(ibox,i)
-         end do
-         kmaxl = dint(hmat(ibox,1)*calpi)+2
-         kmaxm = dint(hmat(ibox,5)*calpi)+2
-         kmaxn = dint(hmat(ibox,9)*calpi)+2
-      end if
-
-      alpsqr4 = 4.0d0*calpi*calpi
-
-      vol = hmat(ibox,1)* (hmat(ibox,5)*hmat(ibox,9) - hmat(ibox,8)*hmat(ibox,6)) + hmat(ibox,4)* (hmat(ibox,8)*hmat(ibox,3) - hmat(ibox,2)*hmat(ibox,9)) + hmat(ibox,7)* (hmat(ibox,2)*hmat(ibox,6) - hmat(ibox,5)*hmat(ibox,3))
-
-      vol = vol/(4.0d0*onepi)
-
-      hmaxsq = alpsqr4*onepi*onepi
-! RP added for MPI
-      blocksize = kmaxl/numprocs
-
-      mystart = myid * blocksize
-      if(myid .eq. (numprocs-1))then
-         myend = kmaxl
-      else
-         myend = (myid + 1) * blocksize - 1
-      end if
-! *** generate the reciprocal-space
-! here -kmaxl,-kmaxl+1,...,-1 are skipped, so no need to divide by 2 for the prefactor
-      do l = mystart,myend
-!      do l = 0,kmaxl
-        if ( l .eq. 0 ) then
-            m_min = 0
-         else
-            m_min = -kmaxm
-         end if
-         do m = m_min, kmaxm
-            if (l .eq. 0 .and. m .eq. 0) then
-               n_min = 1
-            else
-               n_min = -kmaxn
-            end if
-            do n = n_min, kmaxn
-               kx1 = dble(l)*hmatik(1)+dble(m)*hmatik(2)+ dble(n)*hmatik(3)
-               ky1 = dble(l)*hmatik(4)+dble(m)*hmatik(5)+ dble(n)*hmatik(6)
-               kz1 = dble(l)*hmatik(7)+dble(m)*hmatik(8)+ dble(n)*hmatik(9)
-               ksqr = kx1*kx1+ky1*ky1+kz1*kz1
-!               if ( ksqr .lt. hmaxsq ) then
-! --- sometimes these are about equal, which can cause different
-! --- behavior on 32 and 64 bit machines without this .and. statement
-               if ( ksqr .lt. hmaxsq .and. abs(ksqr-hmaxsq) .gt. 1d-9 ) then
-                  ncount = ncount + 1
-                  kx_arr(ncount) = kx1
-                  ky_arr(ncount) = ky1
-                  kz_arr(ncount) = kz1
-                  prefact_arr(ncount) = exp(-ksqr/alpsqr4)/(ksqr*vol)
-!     *** sum up q*cos and q*sin ***
-                  sumr = 0.0d0
-                  sumi = 0.0d0
-!                  do i = myid+1,nchain,numprocs
-                  do i = 1,nchain
-                     imolty = moltyp(i)
-                     if (.not.lelect(imolty).or.nboxi(i).ne.ibox ) cycle
-                     do ii = 1,nunit(imolty)
-                        if ( lqchg(ntype(imolty,ii)) ) then
-                           arg=kx1*rxu(i,ii)+ky1*ryu(i,ii)+kz1*rzu(i ,ii)
-                           sumr = sumr + cos(arg)*qqu(i,ii)
-                           sumi = sumi + sin(arg)*qqu(i,ii)
-                        end if
-                     end do
-                  end do
-
-                  ssumr_arr(ncount) = sumr
-                  ssumi_arr(ncount) = sumi
-! *** Potential energy ***
-                  vrecip = vrecip + (sumr*sumr + sumi*sumi) * prefact_arr(ncount)
-               end if
-            end do
-         end do
-      end do
-
-       CALL MPI_ALLREDUCE(vrecip,sum_vrecip,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD, ierr)
-
-      vrecip = sum_vrecip
-
-       CALL MPI_ALLGATHER(ncount,1,MPI_INTEGER,ncount_arr, 1,MPI_INTEGER,MPI_COMM_WORLD,ierr)
-
-       ncount_displs(1) = 0
-       do i = 2,numprocs
-           ncount_displs(i) = ncount_displs(i-1) + ncount_arr(i-1)
+    if ( (.not. lsolid(ibox)) .or. lrect(ibox) )  then
+       bx1 = boxlx(ibox)
+       by1 = boxly(ibox)
+       bz1 = boxlz(ibox)
+       hmat(ibox,1) = bx1
+       hmat(ibox,5) = by1
+       hmat(ibox,9) = bz1
+       do i = 1,9
+          hmatik(i) = 0.0d0
        end do
-
-      CALL MPI_ALLGATHERV(kx_arr,ncount,MPI_DOUBLE_PRECISION,kx_one, ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION, MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLGATHERV(ky_arr,ncount,MPI_DOUBLE_PRECISION,ky_one, ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION, MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLGATHERV(kz_arr,ncount,MPI_DOUBLE_PRECISION, kz_one, ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION, MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLGATHERV(ssumr_arr,ncount,MPI_DOUBLE_PRECISION, ssumr_one, ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION, MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLGATHERV(ssumi_arr,ncount,MPI_DOUBLE_PRECISION, ssumi_one, ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION, MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLGATHERV(prefact_arr,ncount,MPI_DOUBLE_PRECISION, prefact_one, ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION, MPI_COMM_WORLD,ierr)
-
-      ncount = 0
-      do i = 1,numprocs
-        ncount = ncount + ncount_arr(i)
+       hmatik(1) = twopi/bx1
+       hmatik(5) = twopi/by1
+       hmatik(9) = twopi/bz1
+       kmaxl = dint(bx1*calpi)+1
+       kmaxm = dint(by1*calpi)+1
+       kmaxn = dint(bz1*calpi)+1
+    else
+       do i = 1,9
+          hmatik(i) = twopi*hmati(ibox,i)
        end do
-      do i = 1, ncount
-        kx(i,ibox) = kx_one(i)
-        ky(i,ibox) = ky_one(i)
-        kz(i,ibox) = kz_one(i)
-        ssumr(i,ibox) = ssumr_one(i)
-        ssumi(i,ibox) = ssumi_one(i)
-        prefact(i,ibox) = prefact_one(i)
-      end do
+       kmaxl = dint(hmat(ibox,1)*calpi)+2
+       kmaxm = dint(hmat(ibox,5)*calpi)+2
+       kmaxn = dint(hmat(ibox,9)*calpi)+2
+    end if
 
-!      write(io_output,*) 'in recipsum:',ssumr(100,ibox),ibox
-! *** safety check ***
-!      write(io_output,*) 'A total of ',ncount,' vectors are used'
-      if ( ncount .gt. vectormax ) call err_exit ('choose a larger vectormax')
+    alpsqr4 = 4.0d0*calpi*calpi
 
-      numvect(ibox) = ncount
-      return
+    vol = hmat(ibox,1)* (hmat(ibox,5)*hmat(ibox,9) - hmat(ibox,8)*hmat(ibox,6)) + hmat(ibox,4)* (hmat(ibox,8)*hmat(ibox,3) - hmat(ibox,2)*hmat(ibox,9)) + hmat(ibox,7)* (hmat(ibox,2)*hmat(ibox,6) - hmat(ibox,5)*hmat(ibox,3))
 
+    vol = vol/(4.0d0*onepi)
+
+    hmaxsq = alpsqr4*onepi*onepi
+
+    ! RP added for MPI
+    blocksize = kmaxl/numprocs
+    mystart = myid * blocksize
+    if (myid .eq. (numprocs-1)) then
+       myend = kmaxl
+    else
+       myend = (myid + 1) * blocksize - 1
+    end if
+    ! generate the reciprocal-space
+    ! here -kmaxl,-kmaxl+1,...,-1 are skipped, so no need to divide by 2 for the prefactor
+    do l = mystart,myend
+       ! do l = 0,kmaxl
+       if ( l .eq. 0 ) then
+          m_min = 0
+       else
+          m_min = -kmaxm
+       end if
+       do m = m_min, kmaxm
+          if (l .eq. 0 .and. m .eq. 0) then
+             n_min = 1
+          else
+             n_min = -kmaxn
+          end if
+          do n = n_min, kmaxn
+             kx1 = dble(l)*hmatik(1)+dble(m)*hmatik(2)+ dble(n)*hmatik(3)
+             ky1 = dble(l)*hmatik(4)+dble(m)*hmatik(5)+ dble(n)*hmatik(6)
+             kz1 = dble(l)*hmatik(7)+dble(m)*hmatik(8)+ dble(n)*hmatik(9)
+             ksqr = kx1*kx1+ky1*ky1+kz1*kz1
+             ! if ( ksqr .lt. hmaxsq ) then
+             ! sometimes these are about equal, which can cause different
+             ! behavior on 32 and 64 bit machines without this .and. statement
+             if ( ksqr .lt. hmaxsq .and. abs(ksqr-hmaxsq) .gt. 1d-9 ) then
+                ncount = ncount + 1
+                kx_arr(ncount) = kx1
+                ky_arr(ncount) = ky1
+                kz_arr(ncount) = kz1
+                prefact_arr(ncount) = exp(-ksqr/alpsqr4)/(ksqr*vol)
+                ! sum up q*cos and q*sin ***
+                sumr = 0.0d0
+                sumi = 0.0d0
+                ! do i = myid+1,nchain,numprocs
+                do i = 1,nchain
+                   imolty = moltyp(i)
+                   if (.not.lelect(imolty).or.nboxi(i).ne.ibox ) cycle
+                   do ii = 1,nunit(imolty)
+                      if ( lqchg(ntype(imolty,ii)) ) then
+                         arg=kx1*rxu(i,ii)+ky1*ryu(i,ii)+kz1*rzu(i ,ii)
+                         sumr = sumr + cos(arg)*qqu(i,ii)
+                         sumi = sumi + sin(arg)*qqu(i,ii)
+                      end if
+                   end do
+                end do
+
+                ssumr_arr(ncount) = sumr
+                ssumi_arr(ncount) = sumi
+                ! Potential energy ***
+                vrecip = vrecip + (sumr*sumr + sumi*sumi) * prefact_arr(ncount)
+             end if
+          end do
+       end do
+    end do
+
+    call mp_sum(vrecip,1,groupid)
+    call mp_allgather(ncount,ncount_arr,groupid)
+    call mp_set_displs(ncount_arr,ncount_displs,numvect(ibox),numprocs)
+    call mp_allgather(kx_arr,ncount,kx(:,ibox),ncount_arr,ncount_displs,groupid)
+    call mp_allgather(ky_arr,ncount,ky(:,ibox),ncount_arr,ncount_displs,groupid)
+    call mp_allgather(kz_arr,ncount,kz(:,ibox),ncount_arr,ncount_displs,groupid)
+    call mp_allgather(ssumr_arr,ncount,ssumr(:,ibox),ncount_arr,ncount_displs,groupid)
+    call mp_allgather(ssumi_arr,ncount,ssumi(:,ibox),ncount_arr,ncount_displs,groupid)
+    call mp_allgather(prefact_arr,ncount,prefact(:,ibox),ncount_arr,ncount_displs,groupid)
+
+! write(io_output,*) 'in recipsum:',ssumr(100,ibox),ibox
+! safety check ***
+! write(io_output,*) 'A total of ',ncount,' vectors are used'
+    if ( ncount .gt. vectormax ) call err_exit(__FILE__,__LINE__,'choose a larger vectormax',myid+1)
+
+    return
   end subroutine recipsum
 
 !    *********************************************************************
-!    ** calculates the reciprocal ewald-sum term for trans, rot, flucq, **
-!    ** swatch and swap moves, and update the reciprocal ewald-sum.     **
-!    ** rewritten on June 25/99 by Bin Chen.                            **
+! calculates the reciprocal ewald-sum term for trans, rot, flucq, **
+! swatch and swap moves, and update the reciprocal ewald-sum.     **
+! rewritten on June 25/99 by Bin Chen.                            **
 !    *********************************************************************
   subroutine recip(ibox,vrecipnew,vrecipold,type)
 
-      integer::ic,izz,ii,imolty,ibox,ncount,type
-      real::vrecipnew,vrecipold,sumr(2),sumi(2) ,arg
-! RP added for MPI
-      integer::mystart,myend,blocksize,i
-      real::ssumrn_arr(vectormax) ,ssumin_arr(vectormax),ssumrn_one(vectormax) ,ssumin_one(vectormax)
-      integer::countn,ncount_displs(numprocmax) ,ncount_arr(numprocmax)
+    integer::ic,izz,ii,imolty,ibox,ncount,type
+    real::vrecipnew,vrecipold,sumr(2),sumi(2),arg
 
-!      if (LSOLPAR.and.(ibox.eq.2))then
-!        return
-!      end if
+    ! RP added for MPI
+    integer::ncount_arr(numprocs),ncount_displs(numprocs),my_start,my_end,blocksize
+    real::ssumrn_arr(vectormax),ssumin_arr(vectormax)
 
-! KM for MPI
-      do i=1,numprocmax
-         ncount_displs(i) = 0
-         ncount_arr(i) = 0
-      end do
+! if (LSOLPAR.and.(ibox.eq.2))then
+! return
+! end if
 
-      ncount = numvect(ibox)
-      if ( type .eq. 1 ) then
+    ncount = numvect(ibox)
+    if ( type .eq. 1 ) then
+! recalculate the reciprocal space part for one-particle move, translation,
+! rotation, swap, flucq, and swatch.
+! old conformation izz = 1 (which is 0 for swap inserted molecule)
+! new conformation izz = 2 (which is 0 for swap removed molecule)
 
-! *** recalculate the reciprocal space part for one-particle move, translation,
-! *** rotation, swap, flucq, and swatch.
-! *** old conformation izz = 1 (which is 0 for swap inserted molecule)
-! *** new conformation izz = 2 (which is 0 for swap removed molecule)
+! write(io_output,*) 'in recip:',moltion(1),moltion(2)
+! do izz = 1,2
+! imolty = moltion(izz)
+! do ii = 1, nunit(imolty)
+! write(io_output,*) rxuion(ii,izz),ryuion(ii,izz),rzuion(ii,izz), qquion(ii,izz)
+! end do
+! end do
 
-!         write(io_output,*) 'in recip:',moltion(1),moltion(2)
-!         do izz = 1,2
-!            imolty = moltion(izz)
-!            do ii = 1, nunit(imolty)
-!               write(io_output,*) rxuion(ii,izz),ryuion(ii,izz),rzuion(ii,izz),
-!     &              qquion(ii,izz)
-!            end do
-!         end do
+       ! RP added for MPI
+       blocksize = ncount/numprocs
+       ncount_arr = blocksize
+       blocksize = ncount - blocksize * numprocs
+       if (blocksize.gt.0) ncount_arr(1:blocksize) = ncount_arr(1:blocksize) + 1
+       call mp_set_displs(ncount_arr,ncount_displs,blocksize,numprocs)
+       my_start = ncount_displs(myid+1) + 1
+       my_end = my_start + ncount_arr(myid+1) - 1
 
-! RP added for MPI
-         blocksize = ncount/numprocs
-         mystart = myid * blocksize + 1
-         if(myid .eq. (numprocs-1))then
-            myend = ncount
-         else
-            myend = (myid + 1) * blocksize
-         end if
-         countn = myend - mystart + 1
-         do 30 ic = mystart,myend
-!         do 30 ic = 1,ncount
-            do 20 izz = 1,2
-! --- izz = 1: old configuration
-! --- izz = 2: new configuration
+       ! do 30 ic = 1,ncount
+       do ic = my_start,my_end
+          do izz = 1,2
+             ! izz = 1: old configuration
+             ! izz = 2: new configuration
+             sumr(izz) = 0.0d0
+             sumi(izz) = 0.0d0
+             imolty = moltion(izz)
+             do ii = 1, nunit(imolty)
+                if ( lqchg(ntype(imolty,ii)) ) then
+                   arg = kx(ic,ibox)*rxuion(ii,izz) + ky(ic,ibox)*ryuion(ii,izz) + kz(ic,ibox)*rzuion(ii,izz)
+                   sumr(izz) = sumr(izz) +  qquion(ii,izz)*dcos(arg)
+                   sumi(izz) = sumi(izz) +  qquion(ii,izz)*dsin(arg)
+                end if
+             end do
+          end do
 
-               sumr(izz) = 0.0d0
-               sumi(izz) = 0.0d0
-               imolty = moltion(izz)
-               do ii = 1, nunit(imolty)
-                  if ( lqchg(ntype(imolty,ii)) ) then
-                     arg = kx(ic,ibox)*rxuion(ii,izz) + ky(ic,ibox)*ryuion(ii,izz) + kz(ic,ibox)*rzuion(ii,izz)
-                     sumr(izz) = sumr(izz) +  qquion(ii,izz)*dcos(arg)
-                     sumi(izz) = sumi(izz) +  qquion(ii,izz)*dsin(arg)
-                  end if
-               end do
- 20         continue
-!          ssumrn(ic,ibox) = ssumr(ic,ibox) - sumr(1)
-!     &           + sumr(2)
-!            ssumin(ic,ibox) = ssumi(ic,ibox) - sumi(1)
-!     &           + sumi(2)
+          ! ssumrn(ic,ibox) = ssumr(ic,ibox) - sumr(1) + sumr(2)
+          ! ssumin(ic,ibox) = ssumi(ic,ibox) - sumi(1) + sumi(2)
+          ! RP added for MPI
+          ssumrn_arr(ic-my_start + 1) = ssumr(ic,ibox) - sumr(1) + sumr(2)
+          ssumin_arr(ic-my_start + 1) = ssumi(ic,ibox) - sumi(1) + sumi(2)
+       end do
 
-
-! RP added for MPI
-            ssumrn_arr(ic-mystart + 1) = ssumr(ic,ibox) - sumr(1) + sumr(2)
-            ssumin_arr(ic-mystart + 1) = ssumi(ic,ibox) - sumi(1) + sumi(2)
-
- 30      continue
-
-          CALL MPI_ALLGATHER(countn,1,MPI_INTEGER,ncount_arr, 1,MPI_INTEGER,MPI_COMM_WORLD,ierr)
-
-         ncount_displs(1) = 0
-         do i = 2,numprocs
-           ncount_displs(i) = ncount_displs(i-1) + ncount_arr(i-1)
-         end do
-
-         CALL MPI_ALLGATHERV(ssumrn_arr,ncount_arr(myid + 1), MPI_DOUBLE_PRECISION, ssumrn_one,ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION, MPI_COMM_WORLD,ierr)
-
-        CALL MPI_ALLGATHERV(ssumin_arr,ncount_arr(myid+1), MPI_DOUBLE_PRECISION, ssumin_one,ncount_arr,ncount_displs,MPI_DOUBLE_PRECISION, MPI_COMM_WORLD,ierr)
-
-       do i = 1,ncount
-        ssumrn(i,ibox) = ssumrn_one(i)
-        ssumin(i,ibox) = ssumin_one(i)
-      end do
+       blocksize = ncount_arr(myid+1)
+       call mp_allgather(ssumrn_arr,blocksize,ssumrn(:,ibox),ncount_arr,ncount_displs,groupid)
+       call mp_allgather(ssumin_arr,blocksize,ssumin(:,ibox),ncount_arr,ncount_displs,groupid)
 !----------------------------------------------------------------------
-         vrecipnew = 0.0d0
-         vrecipold = 0.0d0
-         do ic = 1,ncount
-            vrecipnew = vrecipnew + (ssumrn(ic,ibox)* ssumrn(ic,ibox) + ssumin(ic,ibox)* ssumin(ic,ibox))*prefact(ic,ibox)
-            vrecipold = vrecipold + (ssumr(ic,ibox)* ssumr(ic,ibox) + ssumi(ic,ibox)* ssumi(ic,ibox))*prefact(ic,ibox)
-         end do
+       vrecipnew = 0.0d0
+       vrecipold = 0.0d0
+       do ic = my_start,my_end
+          vrecipnew = vrecipnew + (ssumrn(ic,ibox)*ssumrn(ic,ibox) + ssumin(ic,ibox)*ssumin(ic,ibox))*prefact(ic,ibox)
+          vrecipold = vrecipold + (ssumr(ic,ibox)*ssumr(ic,ibox) + ssumi(ic,ibox)*ssumi(ic,ibox))*prefact(ic,ibox)
+       end do
+       vrecipnew = vrecipnew*qqfact
+       vrecipold = vrecipold*qqfact
+       call mp_sum(vrecipnew,1,groupid)
+       call mp_sum(vrecipold,1,groupid)
+    else if (type .eq. 2) then
+       ! update the reciprocal space k vectors
+       do ic = 1, ncount
+          ssumr(ic,ibox) = ssumrn(ic,ibox)
+          ssumi(ic,ibox) = ssumin(ic,ibox)
+       end do
+    else if (type .eq. 3) then
+       ! store the reciprocal space k vectors
+       do ic = 1, ncount
+          ssumro(ic,ibox) = ssumr(ic,ibox)
+          ssumio(ic,ibox) = ssumi(ic,ibox)
+       end do
+    else if (type .eq. 4) then
+       ! restore the reciprocal space k vectors
+       do ic = 1, ncount
+          ssumr(ic,ibox) = ssumro(ic,ibox)
+          ssumi(ic,ibox) = ssumio(ic,ibox)
+       end do
+    end if
 
-         vrecipnew = vrecipnew*qqfact
-         vrecipold = vrecipold*qqfact
-
-      else if (type .eq. 2) then
-
-! *** update the reciprocal space k vectors
-
-         do ic = 1, ncount
-            ssumr(ic,ibox) = ssumrn(ic,ibox)
-            ssumi(ic,ibox) = ssumin(ic,ibox)
-         end do
-
-      else if (type .eq. 3) then
-
-! *** store the reciprocal space k vectors
-
-         do ic = 1, ncount
-            ssumro(ic,ibox) = ssumr(ic,ibox)
-            ssumio(ic,ibox) = ssumi(ic,ibox)
-         end do
-
-      else if (type .eq. 4) then
-
-! *** restore the reciprocal space k vectors
-
-         do ic = 1, ncount
-            ssumr(ic,ibox) = ssumro(ic,ibox)
-            ssumi(ic,ibox) = ssumio(ic,ibox)
-         end do
-
-      end if
-
-!      write(io_output,*) 'in recip:',ssumr(100,ibox),ibox,ssumrn(100,ibox)
-
-      return
+! write(io_output,*) 'in recip:',ssumr(100,ibox),ibox,ssumrn(100,ibox)
+    return
   end subroutine recip
 
-! --- store old k vectors and reciprocal sum
+! store old k vectors and reciprocal sum
   subroutine save_kvector(ibox)
     integer,intent(in)::ibox
     integer::ic,ncount
@@ -347,7 +281,7 @@ contains
     end do
   end subroutine save_kvector
 
-! --- restore old k vectors and reciprocal sum and calp
+! restore old k vectors and reciprocal sum and calp
   subroutine restore_kvector(ibox)
     integer,intent(in)::ibox
     integer::ic,ncount
@@ -364,9 +298,9 @@ contains
   end subroutine restore_kvector
 
 !    *********************************************************************
-!    ** calculates the reciprocal ewald-sum term for trans, rot, flucq, **
-!    ** swatch and swap moves, and update the reciprocal ewald-sum.     **
-!    ** rewritten on June 25/99 by Bin Chen.                            **
+! calculates the reciprocal ewald-sum term for trans, rot, flucq, **
+! swatch and swap moves, and update the reciprocal ewald-sum.     **
+! rewritten on June 25/99 by Bin Chen.                            **
 !    *********************************************************************
   subroutine recip_atom(ibox,vrecipnew,vrecipold,type,ii)
       integer::ic,izz,ii,imolty,ibox,ncount,type
@@ -376,24 +310,24 @@ contains
 
       if ( type .eq. 1 ) then
 
-! *** recalculate the reciprocal space part for one-particle move, translation,
-! *** rotation, swap, flucq, and swatch.
-! *** old conformation izz = 1 (which is 0 for swap inserted molecule)
-! *** new conformation izz = 2 (which is 0 for swap removed molecule)
+! recalculate the reciprocal space part for one-particle move, translation,
+! rotation, swap, flucq, and swatch.
+! old conformation izz = 1 (which is 0 for swap inserted molecule)
+! new conformation izz = 2 (which is 0 for swap removed molecule)
 
-!         write(io_output,*) 'in recip:',moltion(1),moltion(2)
-!         do izz = 1,2
-!            imolty = moltion(izz)
-!            do ii = 1, nunit(imolty)
-!               write(io_output,*) rxuion(ii,izz),ryuion(ii,izz),rzuion(ii,izz),
+! write(io_output,*) 'in recip:',moltion(1),moltion(2)
+! do izz = 1,2
+! imolty = moltion(izz)
+! do ii = 1, nunit(imolty)
+! write(io_output,*) rxuion(ii,izz),ryuion(ii,izz),rzuion(ii,izz),
 !     &              qquion(ii,izz)
-!            end do
-!         end do
+! end do
+! end do
 
          do 30 ic = 1, ncount
             do 20 izz = 1,2
-! --- izz = 1: old configuration
-! --- izz = 2: new configuration
+! izz = 1: old configuration
+! izz = 2: new configuration
 
                sumr(izz) = 0.0d0
                sumi(izz) = 0.0d0
@@ -419,7 +353,7 @@ contains
 
       else if (type .eq. 2) then
 
-! *** update the reciprocal space k vectors
+! update the reciprocal space k vectors
 
          do ic = 1, ncount
             ssumr(ic,ibox) = ssumrn(ic,ibox)
@@ -428,7 +362,7 @@ contains
 
       else if (type .eq. 3) then
 
-! *** store the reciprocal space k vectors
+! store the reciprocal space k vectors
 
          do ic = 1, ncount
             ssumro(ic,ibox) = ssumr(ic,ibox)
@@ -437,7 +371,7 @@ contains
 
       else if (type .eq. 4) then
 
-! *** restore the reciprocal space k vectors
+! restore the reciprocal space k vectors
 
          do ic = 1, ncount
             ssumr(ic,ibox) = ssumro(ic,ibox)
@@ -446,15 +380,15 @@ contains
 
       end if
 
-!      write(io_output,*) 'in recip:',ssumr(100,ibox),ibox,ssumrn(100,ibox)
+! write(io_output,*) 'in recip:',ssumr(100,ibox),ibox,ssumrn(100,ibox)
 
       return
   end subroutine recip_atom
 
 !    *********************************************************************
-!    ** calculates the reciprocal ewald-sum term for trans, rot, flucq, **
-!    ** swatch and swap moves, and update the reciprocal ewald-sum.     **
-!    ** rewritten on June 25/99 by Bin Chen.                            **
+! calculates the reciprocal ewald-sum term for trans, rot, flucq, **
+! swatch and swap moves, and update the reciprocal ewald-sum.     **
+! rewritten on June 25/99 by Bin Chen.                            **
 !    *********************************************************************
   subroutine ee_recip(ibox,vrecipnew,vrecipold,type)
       integer::ic,zzz,ii,imolty,ibox,ncount,type
@@ -464,34 +398,34 @@ contains
 
       if ( type .eq. 1 ) then
 
-! *** recalculate the reciprocal space part for one-particle move, translation,
-! *** rotation, swap, flucq, and swatch.
-! *** old conformation zzz = 1 (which is 0 for swap inserted molecule)
-! *** new conformation zzz = 2 (which is 0 for swap removed molecule)
+! recalculate the reciprocal space part for one-particle move, translation,
+! rotation, swap, flucq, and swatch.
+! old conformation zzz = 1 (which is 0 for swap inserted molecule)
+! new conformation zzz = 2 (which is 0 for swap removed molecule)
 
-!         write(io_output,*) 'in recip:',moltion(1),moltion(2)
-!         do zzz = 1,2
-!            imolty = moltion(zzz)
-!            do ii = 1, nunit(imolty)
-!               write(io_output,*) rxuion(ii,zzz),ryuion(ii,zzz),rzuion(ii,zzz),
+! write(io_output,*) 'in recip:',moltion(1),moltion(2)
+! do zzz = 1,2
+! imolty = moltion(zzz)
+! do ii = 1, nunit(imolty)
+! write(io_output,*) rxuion(ii,zzz),ryuion(ii,zzz),rzuion(ii,zzz),
 !     &              qquion(ii,zzz)
-!            end do
-!         end do
+! end do
+! end do
 
          do 30 ic = 1, ncount
             do 20 zzz = 1,2
-! --- zzz = 1: old configuration
-! --- zzz = 2: new configuration
+! zzz = 1: old configuration
+! zzz = 2: new configuration
 
                sumr(zzz) = 0.0d0
                sumi(zzz) = 0.0d0
                imolty = moltion(zzz)
                do ii = 1, nunit(imolty)
-!                  if ( lqchg(ntype(imolty,ii)) ) then
+! if ( lqchg(ntype(imolty,ii)) ) then
                      arg = kx(ic,ibox)*rxuion(ii,zzz) + ky(ic,ibox)*ryuion(ii,zzz) + kz(ic,ibox)*rzuion(ii,zzz)
                      sumr(zzz) = sumr(zzz) +  qquion(ii,zzz)*dcos(arg)
                      sumi(zzz) = sumi(zzz) +  qquion(ii,zzz)*dsin(arg)
-!                  end if
+! end if
                end do
  20         continue
             ssumrn(ic,ibox) = ssumr(ic,ibox) - sumr(1) + sumr(2)
@@ -509,7 +443,7 @@ contains
 
       else if (type .eq. 2) then
 
-! *** update the reciprocal space k vectors
+! update the reciprocal space k vectors
 
          do ic = 1, ncount
             ssumr(ic,ibox) = ssumrn(ic,ibox)
@@ -518,7 +452,7 @@ contains
 
       else if (type .eq. 3) then
 
-! *** store the reciprocal space k vectors
+! store the reciprocal space k vectors
 
          do ic = 1, ncount
             ssumro(ic,ibox) = ssumr(ic,ibox)
@@ -527,7 +461,7 @@ contains
 
       else if (type .eq. 4) then
 
-! *** restore the reciprocal space k vectors
+! restore the reciprocal space k vectors
 
          do ic = 1, ncount
             ssumr(ic,ibox) = ssumro(ic,ibox)
@@ -536,187 +470,141 @@ contains
 
       end if
 
-!      write(io_output,*) 'in recip:',ssumr(100,ibox),ibox,ssumrn(100,ibox)
+! write(io_output,*) 'in recip:',ssumr(100,ibox),ibox,ssumrn(100,ibox)
 
       return
   end subroutine ee_recip
 
 !    ********************************************************************
-!    ** calculates the reciprocal space contribution to pressure using **
-!    ** thermodynamic definition. See J. Chem. Phys. Vol. 109 P2791.   **
-!    ** written in 1998 by Bin Chen.                                   **
-!    ** modified to calculate surface tension, 11/24/03 JMS            **
+! calculates the reciprocal space contribution to pressure using **
+! thermodynamic definition. See J. Chem. Phys. Vol. 109 P2791.   **
+! written in 1998 by Bin Chen.                                   **
+! modified to calculate surface tension, 11/24/03 JMS            **
 !    ********************************************************************
   subroutine recippress(ibox,repress,pxx,pyy,pzz,pxy,pyx,pxz,pzx, pyz,pzy)
 
-      integer::ncount,ibox,i,ii,imolty
-      real::factor,repress,repressx,repressy ,repressz,recipintra,piix,piiy,piiz,xcmi,ycmi,zcmi,arg
+    integer::ncount,ibox,i,ii,imolty
+    real::factor,repress,repressx,repressy,repressz,recipintra,piix,piiy,piiz,xcmi,ycmi,zcmi,arg
 
-      real::pxx,pyy,pzz,intraxx,intrayy,intrazz ,intraxy,intraxz,intrazy,intrayz,intrayx,intrazx,pxy,pyx,pyz,pzy ,pxz,pzx
+    real::pxx,pyy,pzz,intraxx,intrayy,intrazz,intraxy,intraxz,intrazy,intrayz,intrayx,intrazx,pxy,pyx,pyz,pzy,pxz,pzx
 
-!----RP added for MPI
-      real::sum_repressx,sum_repressy ,sum_repressz,sum_pxy,sum_pxz,sum_pyz
-      real::sum_recipintra,sum_intraxx ,sum_intrayy,sum_intrazz,sum_intraxy,sum_intrazy,sum_intraxz ,sum_intrayz,sum_intrazx,sum_intrayx
+    repress  = 0.0d0
+    repressx = 0.0d0
+    repressy = 0.0d0
+    repressz = 0.0d0
+    recipintra = 0.0d0
+    pxy = 0.0d0
+    pxz = 0.0d0
+    pyx = 0.0d0
+    pyz = 0.0d0
+    pzx = 0.0d0
+    pzy = 0.0d0
 
-      repress  = 0.0d0
-      repressx = 0.0d0
-      repressy = 0.0d0
-      repressz = 0.0d0
-      recipintra = 0.0d0
-      pxy = 0.0d0
-      pxz = 0.0d0
-      pyx = 0.0d0
-      pyz = 0.0d0
-      pzx = 0.0d0
-      pzy = 0.0d0
+    intraxx = 0.0d0
+    intrayy = 0.0d0
+    intrazz = 0.0d0
+    intraxy = 0.0d0
+    intrazy = 0.0d0
+    intraxz = 0.0d0
+    intrazx = 0.0d0
+    intrayz = 0.0d0
+    intrayx = 0.0d0
 
-      intraxx = 0.0d0
-      intrayy = 0.0d0
-      intrazz = 0.0d0
-      intraxy = 0.0d0
-      intrazy = 0.0d0
-      intraxz = 0.0d0
-      intrazx = 0.0d0
-      intrayz = 0.0d0
-      intrayx = 0.0d0
+    ! RP for MPI
+    do ncount = myid+1,numvect(ibox),numprocs
+       ! do ncount = 1, numvect(ibox)
+       factor = prefact(ncount,ibox)*(ssumr(ncount,ibox)*ssumr(ncount,ibox) + ssumi(ncount,ibox)* ssumi(ncount,ibox))
+       repressx = repressx + factor*(1.0d0 - (1.0d0/(4.0d0*calp(ibox) *calp(ibox)) + 1.0d0/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0d0*kx(ncount,ibox)*kx(ncount,ibox))
+       repressy = repressy + factor*(1.0d0 - (1.0d0/(4.0d0*calp(ibox) *calp(ibox)) + 1.0d0/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0d0*ky(ncount,ibox)*ky(ncount,ibox))
+       repressz = repressz + factor*(1.0d0 - (1.0d0/(4.0d0*calp(ibox) *calp(ibox)) + 1.0d0/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0d0*kz(ncount,ibox)*kz(ncount,ibox))
+       pxy = pxy + factor*(0.0d0 - (1.0d0/(4.0d0*calp(ibox) *calp(ibox)) + 1.0d0/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0d0*kx(ncount,ibox)*ky(ncount,ibox))
+       pxz = pxz + factor*(0.0d0 - (1.0d0/(4.0d0*calp(ibox) *calp(ibox)) + 1.0d0/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0d0*kx(ncount,ibox)*kz(ncount,ibox))
+       pyz = pyz + factor*(0.0d0 - (1.0d0/(4.0d0*calp(ibox) *calp(ibox)) + 1.0d0/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0d0*ky(ncount,ibox)*kz(ncount,ibox))
+    end do
 
-! KM for MPI
-      sum_repressx = 0.0d0
-      sum_repressy = 0.0d0
-      sum_repressz = 0.0d0
-      sum_pxy = 0.0d0
-      sum_pxz = 0.0d0
-      sum_pyz = 0.0d0
-      sum_recipintra = 0.0d0
-      sum_intraxx = 0.0d0
-      sum_intrayy = 0.0d0
-      sum_intrazz = 0.0d0
-      sum_intraxy = 0.0d0
-      sum_intrazy = 0.0d0
-      sum_intraxz = 0.0d0
-      sum_intrayz = 0.0d0
-      sum_intrazx = 0.0d0
-      sum_intrayx = 0.0d0
+    ! RP added for MPI
+    call mp_sum(repressx,1,groupid)
+    call mp_sum(repressy,1,groupid)
+    call mp_sum(repressz,1,groupid)
+    call mp_sum(pxy,1,groupid)
+    call mp_sum(pxz,1,groupid)
+    call mp_sum(pyz,1,groupid)
 
-! RP for MPI
-      do ncount = myid+1,numvect(ibox),numprocs
-!      do ncount = 1, numvect(ibox)
-         factor = prefact(ncount,ibox)*(ssumr(ncount,ibox)* ssumr(ncount,ibox) + ssumi(ncount,ibox)* ssumi(ncount,ibox))
-         repressx = repressx + factor*(1.0d0 - (1.0d0/(4.0d0*calp(ibox) *calp(ibox)) + 1.0d0/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0d0*kx(ncount,ibox)*kx(ncount,ibox))
-         repressy = repressy + factor*(1.0d0 - (1.0d0/(4.0d0*calp(ibox) *calp(ibox)) + 1.0d0/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0d0*ky(ncount,ibox)*ky(ncount,ibox))
-         repressz = repressz + factor*(1.0d0 - (1.0d0/(4.0d0*calp(ibox) *calp(ibox)) + 1.0d0/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0d0*kz(ncount,ibox)*kz(ncount,ibox))
-         pxy = pxy + factor*(0.0d0 - (1.0d0/(4.0d0*calp(ibox) *calp(ibox)) + 1.0d0/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0d0*kx(ncount,ibox)*ky(ncount,ibox))
-         pxz = pxz + factor*(0.0d0 - (1.0d0/(4.0d0*calp(ibox) *calp(ibox)) + 1.0d0/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0d0*kx(ncount,ibox)*kz(ncount,ibox))
-         pyz = pyz + factor*(0.0d0 - (1.0d0/(4.0d0*calp(ibox) *calp(ibox)) + 1.0d0/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0d0*ky(ncount,ibox)*kz(ncount,ibox))
+    repress = repressx + repressy + repressz
+    ! keep x,y,z separate for surface tension calculation
+    pxx = repressx
+    pyy = repressy
+    pzz = repressz
+    pyx = pxy
+    pzx = pxz
+    pzy = pyz
 
-       end do
+    ! the intramolecular part should be substracted
+    ! RP for MPI
+    do i = myid+1, nchain, numprocs
+       ! check if i is in relevant box ###
+       if ( nboxi(i) .eq. ibox ) then
+          imolty = moltyp(i)
+          if ( .not. lelect(imolty) ) cycle
+          xcmi = xcm(i)
+          ycmi = ycm(i)
+          zcmi = zcm(i)
 
-! -- RP added for MPI
-       CALL MPI_ALLREDUCE(repressx,sum_repressx,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLREDUCE(repressy,sum_repressy,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLREDUCE(repressz,sum_repressz,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLREDUCE(pxy,sum_pxy,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLREDUCE(pxz,sum_pxz,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLREDUCE(pyz,sum_pyz,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
+          ! loop over all beads ii of chain i
+          do ii = 1, nunit(imolty)
+             ! compute the vector of the bead to the COM (p)
+             piix = rxu(i,ii) - xcmi
+             piiy = ryu(i,ii) - ycmi
+             piiz = rzu(i,ii) - zcmi
 
-      repressx = sum_repressx
-      repressy = sum_repressy
-      repressz = sum_repressz
-      pxy = sum_pxy
-      pxz = sum_pxz
-      pyz = sum_pyz
+             do ncount = 1,numvect(ibox)
+                ! compute the dot product of k and r
+                arg = kx(ncount,ibox)*rxu(i,ii) + ky(ncount,ibox)*ryu(i,ii) + kz(ncount,ibox)*rzu(i,ii)
+                factor = prefact(ncount,ibox)*2.0d0* (-ssumr(ncount,ibox)*dsin(arg) +ssumi(ncount,ibox)*dcos(arg))*qqu(i,ii)
+                recipintra = recipintra + factor* (kx(ncount,ibox)*piix+ky(ncount,ibox)*piiy +kz(ncount,ibox)*piiz)
+                ! keep x,y and z separate for surface tension calculation
+                intraxx = intraxx + factor*(kx(ncount,ibox)*piix)
+                intrayy = intrayy + factor*(ky(ncount,ibox)*piiy)
+                intrazz = intrazz + factor*(kz(ncount,ibox)*piiz)
+                intraxy = intraxy + factor*(kx(ncount,ibox)*piiy)
+                intraxz = intraxz + factor*(kx(ncount,ibox)*piiz)
+                intrayx = intrayx + factor*(ky(ncount,ibox)*piix)
+                intrayz = intrayz + factor*(ky(ncount,ibox)*piiz)
+                intrazx = intrazx + factor*(kz(ncount,ibox)*piix)
+                intrazy = intrazy + factor*(kz(ncount,ibox)*piiy)
 
-      repress = repressx + repressy + repressz
-! * keep x,y,z separate for surface tension calculation
-      pxx = repressx
-      pyy = repressy
-      pzz = repressz
-      pyx = pxy
-      pzx = pxz
-      pzy = pyz
+             end do
+          end do
+       end if
+    end do
+    
+    call mp_sum(recipintra,1,groupid)
+    call mp_sum(intraxx,1,groupid)
+    call mp_sum(intrayy,1,groupid)
+    call mp_sum(intrazz,1,groupid)
+    call mp_sum(intraxy,1,groupid)
+    call mp_sum(intraxz,1,groupid)
+    call mp_sum(intrayx,1,groupid)
+    call mp_sum(intrayz,1,groupid)
+    call mp_sum(intrazx,1,groupid)
+    call mp_sum(intrazy,1,groupid)
 
-! --- the intramolecular part should be substracted
-! RP for MPI
-      do 10 i = myid+1, nchain, numprocs
-! ### check if i is in relevant box ###
-         if ( nboxi(i) .eq. ibox ) then
+    repress = (repress + recipintra)*qqfact
 
-            imolty = moltyp(i)
-            if ( .not. lelect(imolty) ) goto 10
-            xcmi = xcm(i)
-            ycmi = ycm(i)
-            zcmi = zcm(i)
+    pxx = (pxx + intraxx)*qqfact
+    pyy = (pyy + intrayy)*qqfact
+    pzz = (pzz + intrazz)*qqfact
 
-! --- loop over all beads ii of chain i
-            do ii = 1, nunit(imolty)
+    pxy = pxy + intraxy
+    pyx = pyx + intrayx
+    pxz = pxz + intraxz
+    pzx = pzx + intrazx
+    pyz = pyz + intrayz
+    pzy = pzy + intrazy
 
-! --- compute the vector of the bead to the COM (p)
+    ! write(io_output,*) 'internal part:',intraxx,intrayy,intrazz
 
-               piix = rxu(i,ii) - xcmi
-               piiy = ryu(i,ii) - ycmi
-               piiz = rzu(i,ii) - zcmi
-
-               do ncount = 1,numvect(ibox)
-
-! --- compute the dot product of k and r
-
-                  arg = kx(ncount,ibox)*rxu(i,ii) + ky(ncount,ibox)*ryu(i,ii) + kz(ncount,ibox)*rzu(i,ii)
-                  factor = prefact(ncount,ibox)*2.0d0* (-ssumr(ncount,ibox)*dsin(arg) +ssumi(ncount,ibox)*dcos(arg))*qqu(i,ii)
-                  recipintra = recipintra + factor* (kx(ncount,ibox)*piix+ky(ncount,ibox)*piiy +kz(ncount,ibox)*piiz)
-! * keep x,y and z separate for surface tension calculation
-                  intraxx = intraxx + factor*(kx(ncount,ibox)*piix)
-                  intrayy = intrayy + factor*(ky(ncount,ibox)*piiy)
-                  intrazz = intrazz + factor*(kz(ncount,ibox)*piiz)
-                  intraxy = intraxy + factor*(kx(ncount,ibox)*piiy)
-                  intraxz = intraxz + factor*(kx(ncount,ibox)*piiz)
-                  intrayx = intrayx + factor*(ky(ncount,ibox)*piix)
-                  intrayz = intrayz + factor*(ky(ncount,ibox)*piiz)
-                  intrazx = intrazx + factor*(kz(ncount,ibox)*piix)
-                  intrazy = intrazy + factor*(kz(ncount,ibox)*piiy)
-
-               end do
-            end do
-         end if
- 10   continue
-
-       CALL MPI_ALLREDUCE(recipintra,sum_recipintra,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLREDUCE(intraxx,sum_intraxx,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLREDUCE(intrayy,sum_intrayy,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLREDUCE(intrazz,sum_intrazz,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLREDUCE(intraxy,sum_intraxy,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLREDUCE(intraxz,sum_intraxz,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLREDUCE(intrayx,sum_intrayx,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLREDUCE(intrayz,sum_intrayz,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLREDUCE(intrazx,sum_intrazx,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-       CALL MPI_ALLREDUCE(intrazy,sum_intrazy,1, MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD,ierr)
-
-      recipintra = sum_recipintra
-      intraxx = sum_intraxx
-      intrayy = sum_intrayy
-      intrazz = sum_intrazz
-      intraxy = sum_intraxy
-      intraxz = sum_intraxz
-      intrayx = sum_intrayx
-      intrayz = sum_intrayz
-      intrazx = sum_intrazx
-      intrazy = sum_intrazy
-
-      repress = (repress + recipintra)*qqfact
-
-      pxx = (pxx + intraxx)*qqfact
-      pyy = (pyy + intrayy)*qqfact
-      pzz = (pzz + intrazz)*qqfact
-
-      pxy = pxy + intraxy
-      pyx = pyx + intrayx
-      pxz = pxz + intraxz
-      pzx = pzx + intrazx
-      pyz = pyz + intrayz
-      pzy = pzy + intrazy
-
-!      write(io_output,*) 'internal part:',intraxx,intrayy,intrazz
-
-      return
+    return
   end subroutine recippress
 
   subroutine allocate_kspace()
@@ -724,8 +612,7 @@ contains
     integer::jerr
     allocate(kx(vectormax,nbxmax),ky(vectormax,nbxmax),kz(vectormax,nbxmax),prefact(vectormax,nbxmax),ssumr(vectormax,nbxmax),ssumi(vectormax,nbxmax),ssumrn(vectormax,nbxmax),ssumin(vectormax,nbxmax),ssumro(vectormax,nbxmax),ssumio(vectormax,nbxmax),kxo(vectormax,nbxmax),kyo(vectormax,nbxmax),kzo(vectormax,nbxmax),prefacto(vectormax,nbxmax),calpo(nbxmax),calp(nbxmax),numvect(nbxmax),numvecto(nbxmax),stat=jerr)
     if (jerr.ne.0) then
-       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-       call err_exit('allocate_kspace: allocation failed')
+       call err_exit(__FILE__,__LINE__,'allocate_kspace: allocation failed',jerr)
     end if
   end subroutine allocate_kspace
 end MODULE energy_kspace

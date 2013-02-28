@@ -42,7 +42,7 @@ subroutine initia
      write(io_output,*) 
   end if
 
-  !     --- initialize nchbox ---
+  ! initialize nchbox ---
   do i=1,nbox
      nchbox(i) = 0
   end do
@@ -68,7 +68,7 @@ subroutine initia
         write(io_output,*) 'ininch',j,(ininch(i,j),i=1,nmolty)
      end do
      write(io_output,*) 'nchain',nchain
-     call err_exit('')
+     call err_exit(__FILE__,__LINE__,'',myid+1)
   end if
 
   do i = 1, nmolty
@@ -76,7 +76,7 @@ subroutine initia
         write(io_output,*) 'inconsistant number of chains in INITIA'
         write(io_output,*) 'moltyp',i,(ininch(i,j),j=1,nbox)
         write(io_output,*) 'temtyp:',temtyp(i)
-        call err_exit('')
+        call err_exit(__FILE__,__LINE__,'',myid+1)
      end if
   end do
 
@@ -84,12 +84,12 @@ subroutine initia
      unitc = inix(i)*iniy(i)*iniz(i)
      if ( nchbox(i) .gt. unitc ) then
         write(io_output,*) 'unit cell too small in box',i
-        call err_exit('')
+        call err_exit(__FILE__,__LINE__,'',myid+1)
      end if
   end do
 ! -----------------------------------------------------------------------------
  
-! *** calculation of unit cell dimensions ***
+! calculation of unit cell dimensions ***
   do i = 1,nbox
      ux(i) = boxlx(i) / dble(inix(i)) 
      uy(i) = boxly(i) / dble(iniy(i))
@@ -102,7 +102,7 @@ subroutine initia
      end if
   end do
 
-! - count number of molecules of each type -
+! count number of molecules of each type -
   do i = 1,nmolty
      mcmt(i,1) = 0
   end do
@@ -117,7 +117,7 @@ subroutine initia
      if ( mcmt(i,1) .ne. check(i) ) then
         write(io_output,*) 'inconsistant number of type in INITIA'
         write(io_output,*) 'mcmt(i,total),check(i)',mcmt(i,1),check(i)
-        call err_exit('')
+        call err_exit(__FILE__,__LINE__,'',myid+1)
      end if
   end do
 
@@ -140,13 +140,13 @@ subroutine initia
   end if
 
 ! *****************************
-! *** calculate coordinates ***
+! calculate coordinates ***
 
-!     read sample structure from unit 78 -
+! read sample structure from unit 78 -
   io_struct=get_iounit()
   open(unit=io_struct,access='sequential',action='readwrite',file=file_struct,form='formatted',iostat=jerr,status='unknown')
   if (jerr.ne.0) then
-     call err_exit('cannot open input file')
+     call err_exit(__FILE__,__LINE__,'cannot open input file',myid+1)
   end if
 
   do i = 1, nmolty         
@@ -157,8 +157,8 @@ subroutine initia
            read(io_struct,*) samx(i,m), samy(i,m), samz(i,m)
         end do
      else
-! * if lbranch is false but the molecule is not linear attempt
-! * to grow it with cbmc
+! if lbranch is false but the molecule is not linear attempt
+! to grow it with cbmc
         lgrow = .false.
         do m = 1,nunit(i)
            if (invib(i,m) .gt. 2) then
@@ -173,17 +173,17 @@ subroutine initia
            end if
 
            if (nunit(i) .ne. nugrow(i)) then
-              call err_exit('Cant grow molecule.  Please provide a structure via '//file_struct)
+              call err_exit(__FILE__,__LINE__,'Cant grow molecule.  Please provide a structure via '//file_struct,myid+1)
            end if
-! * put the first bead at the origin
+! put the first bead at the origin
            rxnew(1) = 0.0d0
            rynew(1) = 0.0d0
            rznew(1) = 0.0d0
 
-! * determine the growth schedule
+! determine the growth schedule
            call schedule(nugrow(i),i,ifrom,1,0,2)
 
-! * actually grow the structure
+! actually grow the structure
            nsave = nchain
 
            moltyp(1) = i
@@ -196,12 +196,12 @@ subroutine initia
            call rosenbluth(.true.,lterm,1,1,i,ifrom ,2,nugrow(i),ddum,.false.,ddum,2 )
 
            if (lterm) then
-              call err_exit('Error in initia growing molecule: maybe increasing nchoi would help?')
+              call err_exit(__FILE__,__LINE__,'Error in initia growing molecule: maybe increasing nchoi would help?',myid+1)
            end if
 
-! * return the value of nchain
+! return the value of nchain
            nchain = nsave
-! * assign the coordinates
+! assign the coordinates
            do m = 1,nunit(i)
               samx(i,m) = rxnew(m)
               samy(i,m) = rynew(m)
@@ -223,9 +223,9 @@ subroutine initia
   end do
 
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-!     - inimix = 0 : take molecules at random
-!     - inimix > 0 : take molecules in order (first type I etc.)
-!     - inimix < 0 : take molecules in alternating order
+! inimix = 0 : take molecules at random
+! inimix > 0 : take molecules in order (first type I etc.)
+! inimix < 0 : take molecules in alternating order
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc 
 
   count_chain = 0 
@@ -249,7 +249,7 @@ subroutine initia
                     exit
                  end if
               end do
-              !             write(io_output,*) count_chain, rand_id,moltyp(rand_id) 
+              ! write(io_output,*) count_chain, rand_id,moltyp(rand_id) 
            end if
         end do
      end do
@@ -292,11 +292,11 @@ subroutine initia
                  cycle do_ibox
               end if
                   
-!                  write(io_output,*) 'nn',nn
-!                  write(io_output,*) 'ic',ic,'   jc',jc,'   kc',kc
+! write(io_output,*) 'nn',nn
+! write(io_output,*) 'ic',ic,'   jc',jc,'   kc',kc
                   
-!     - inimix > 0 : take molecules in order (first type I etc.)
-!     - inimix < 0 : take molecules in alternating order
+! inimix > 0 : take molecules in order (first type I etc.)
+! inimix < 0 : take molecules in alternating order
 
               if ( nmolty .gt. 1 ) then
                  if ( inimix(ibox) .gt. 0 ) then
@@ -307,13 +307,13 @@ subroutine initia
                        end if
                     end do
                  else if ( inimix(ibox) .lt. 0 ) then
-!     This is not right. It doesn't consider the number of molecules of each type in the box.
-!                        do imol = 1, nmolty
-!                           nt = n - imol
-!                           if ( mod( nt, nmolty ) .eq. 0 ) then
-!                              intemp = imol
-!                           end if
-!                        end do
+! This is not right. It doesn't consider the number of molecules of each type in the box.
+! do imol = 1, nmolty
+! nt = n - imol
+! if ( mod( nt, nmolty ) .eq. 0 ) then
+! intemp = imol
+! end if
+! end do
                     intemp = mod(n,nmolty)
                  end if
               else
@@ -328,7 +328,7 @@ subroutine initia
 
               ncmt(ibox,intemp) = ncmt(ibox,intemp) + 1
                   
-!                  write(io_output,*) 'intemp', intemp     
+! write(io_output,*) 'intemp', intemp     
               
               if ( lbranch(intemp) ) then
                  ibuild = nunit(intemp)
@@ -338,40 +338,40 @@ subroutine initia
 
               if ( .not. lbranch(intemp)) then
 ! *************************************************
-! *** start determination of linear chain positions
-! *** allowing for numbering out of order
-! *** note: doesn't exactly create equilibrium structure with
-! *** respect to bond angles or torsions, but that will shake out
-! *** with CBMC anyways.  Should at least take away the overlaps of
-! *** the previous method
+! start determination of linear chain positions
+! allowing for numbering out of order
+! note: doesn't exactly create equilibrium structure with
+! respect to bond angles or torsions, but that will shake out
+! with CBMC anyways.  Should at least take away the overlaps of
+! the previous method
 ! *************************************************
-! * first need to determine re-mapped bead order- search through connectivity
+! first need to determine re-mapped bead order- search through connectivity
 !
-!   call the results map(i) where i=1 is one chain end, and its
-!   value is equal to the bead number of that end
+! call the results map(i) where i=1 is one chain end, and its
+! value is equal to the bead number of that end
 ! 
-!   for example, methanol oxygen first, then hydrogen, then CH3
+! for example, methanol oxygen first, then hydrogen, then CH3
 !   
-!                        H---O--CH3
+! H---O--CH3
 !
-!        bead numbers:   2 - 1 - 3
+! bead numbers:   2 - 1 - 3
 !
-!        bmap(1) = 2
-!        bmap(2) = 1
-!        bmap(3) = 3
+! bmap(1) = 2
+! bmap(2) = 1
+! bmap(3) = 3
 !
-!        the inverse map is just the opposite:
+! the inverse map is just the opposite:
 !
-!        imap(1) = 2
-!        imap(2) = 1
-!        imap(3) = 3
+! imap(1) = 2
+! imap(2) = 1
+! imap(3) = 3
 !
-! * initialize accounted for variable
+! initialize accounted for variable
                  do m = 1,ibuild
                     lacc(m) = .false.
                  end do
 
-! * first find the end with the lowest number
+! first find the end with the lowest number
                  zzz = ibuild
                  do m = 1,ibuild
                     if (invib(intemp,m) .le. 1) then
@@ -379,7 +379,7 @@ subroutine initia
                           zzz = m
                        end if
                     else if (invib(intemp,m) .gt. 2) then
-                       call err_exit('initia only works for linear molecules! Maybe you should make a fort.78 file and use lbranch?')
+                       call err_exit(__FILE__,__LINE__,'initia only works for linear molecules! Maybe you should make a fort.78 file and use lbranch?',myid+1)
                     end if
                  end do
 
@@ -387,7 +387,7 @@ subroutine initia
                  imap(zzz) = 1
                  lacc(zzz) = .true.
 
-! * now determine the rest
+! now determine the rest
                  do m = 2,ibuild
                     prev = bmap(m-1)
                     do zzz = 1,ibuild
@@ -401,13 +401,13 @@ subroutine initia
                     end do
                  end do
 
-! * now use old method with re-mapped numbers:
-! * put first end at origin:
+! now use old method with re-mapped numbers:
+! put first end at origin:
                  xtemp(1) = 0.0d0
                  ytemp(1) = 0.0d0
                  ztemp(1) = 0.0d0
 
-! * now we need to loop over all the other beads:
+! now we need to loop over all the other beads:
                  do m = 2, ibuild
 
                     m1 = m - 1
@@ -436,11 +436,11 @@ subroutine initia
                           ibtype = itben(intemp,bmap(m2),1)
                           angnew = brben(ibtype) - angold
                        end if
-!     write(io_output,*) 'angold',angold*raddeg,
+! write(io_output,*) 'angold',angold*raddeg,
 !     +                       '   angnew',angnew*raddeg
                        angold = angnew
                            
-! * need to search for proper bond length
+! need to search for proper bond length
                        do zzz = 1,invib(intemp,bmap(m))
                           if (ijvib(intemp,bmap(m),zzz)  .eq. bmap(m1)) then
                              ibtype = itvib(intemp,bmap(m),zzz)
@@ -449,17 +449,17 @@ subroutine initia
 
                        ztemp(m) = dsin(angnew) * brvib(ibtype)
                        xynext = dcos(angnew) * brvib(ibtype)
-!                           write(io_output,*) 'znext',znext,'   xynext',xynext
+! write(io_output,*) 'znext',znext,'   xynext',xynext
                     else
-! * need to search for proper bond length
+! need to search for proper bond length
                        do zzz = 1,invib(intemp,bmap(m))
                           if (ijvib(intemp,bmap(m),zzz)  .eq. bmap(m1)) then
                              ibtype = itvib(intemp,bmap(m),zzz)
                           end if
                        end do
 
-!                           ztemp(m) = dsin(angnew) * brvib(ibtype)
-!                           xynext = dcos(angnew) * brvib(ibtype)
+! ztemp(m) = dsin(angnew) * brvib(ibtype)
+! xynext = dcos(angnew) * brvib(ibtype)
 
                        ztemp(m) = brvib(ibtype)
                        xynext = 0.0d0
@@ -480,7 +480,7 @@ subroutine initia
 
                  end do
 
-! * translate so that first bead number is at origin
+! translate so that first bead number is at origin
                  do m = 1,ibuild
                     if (m .ne. imap(1)) then
                        xtemp(m) = xtemp(m) - xtemp(imap(1)) 
@@ -493,21 +493,21 @@ subroutine initia
                  ztemp(imap(1)) = 0.0d0
 
               end if
-! *** end linear determination
+! end linear determination
 ! ****************************
-!                  write(io_output,*) 'ibuild',ibuild
+! write(io_output,*) 'ibuild',ibuild
               do m = 2, ibuild
 
                  m1 = m - 1
                  m2 = m - 2
-!                     write(io_output,*) 'intemp',intemp 
+! write(io_output,*) 'intemp',intemp 
                  if ( lbranch(intemp) ) then
-!     - branched molecule with sample structure -
+! branched molecule with sample structure -
                     xnext = samx(intemp,m) -samx(intemp,m1)
                     ynext = samy(intemp,m) -samy(intemp,m1)
                     znext = samz(intemp,m) -samz(intemp,m1)
                  else
-! * linear molecule determined above- replacing old code that follows.
+! linear molecule determined above- replacing old code that follows.
                     xnext = xtemp(bmap(m)) - xtemp(bmap(m1))
                     ynext = ytemp(bmap(m)) - ytemp(bmap(m1))
                     znext = ztemp(bmap(m)) - ztemp(bmap(m1))
@@ -571,20 +571,20 @@ subroutine initia
   end do do_ibox
 ! -----------------------------------------------------
 
-! *** check initial structure ***
+! check initial structure ***
   aben = 0.0d0
   ator = 0.0d0
 
   do n = 1, nchain
      imolty = moltyp(n)
-!         write(io_output,*) 'n',n,'   imolty',imolty
+! write(io_output,*) 'n',n,'   imolty',imolty
             
      if ( lbranch(imolty) ) then
-! - branched molecule with connectivity table -
-! - go through entire chain -
-! - calculate all bonds vectors and lengths
-! - calculate all stretching, bending, and torsional potentials
-! - that have an end-bead with an index smaller than the current bead
+! branched molecule with connectivity table -
+! go through entire chain -
+! calculate all bonds vectors and lengths
+! calculate all stretching, bending, and torsional potentials
+! that have an end-bead with an index smaller than the current bead
         do ii = 1, nunit(imolty)
            rxui=rxu(n,ii)
            ryui=ryu(n,ii)
@@ -598,7 +598,7 @@ subroutine initia
               rzvec(ii,jj) = rzu(n,jj) - rzui
               distanceij(ii,jj) = dsqrt( rxvec(ii,jj)**2 + ryvec(ii,jj)**2 + rzvec(ii,jj)**2 )
               if ( nunit(imolty) .ne. nugrow(imolty) )then
-!                 --- account for explct atoms in opposite direction
+! account for explct atoms in opposite direction
                  rxvec(jj,ii)   = -rxvec(ii,jj)
                  ryvec(jj,ii)   = -ryvec(ii,jj)
                  rzvec(jj,ii)   = -rzvec(ii,jj)
@@ -608,13 +608,13 @@ subroutine initia
         end do
 
         do j = 1, nunit(imolty)
-! - vibrations -
+! vibrations -
            do iivib = 1, invib(1,j)
               jj = ijvib(1,j,iivib)
               if ( n .eq. 1 ) write(io_output,"('bond with units:',2i3 ,'   length:',f9.4)") j,jj,distanceij(j,jj)
            end do
 
-! - bending -
+! bending -
            do jjben = 1, inben(imolty,j)
               ip2 = ijben3(imolty,j,jjben)
               ip1 = ijben2(imolty,j,jjben)
@@ -623,14 +623,14 @@ subroutine initia
               theta = dacos(thetac)
               vbend = brbenk(it) * (theta-brben(it))**2
               aben = aben + vbend
-!                  if ( n .eq. 1 ) then
-!                  write(io_output,*) 'theta',theta,'vbend',vbend
-!                  write(io_output,*) 'brben',brben(it),'brbenk',brbenk(it)
-!                  end if
+! if ( n .eq. 1 ) then
+! write(io_output,*) 'theta',theta,'vbend',vbend
+! write(io_output,*) 'brben',brben(it),'brbenk',brbenk(it)
+! end if
               if ( n .eq. 1 ) write(io_output,"('bend with units:',3i3 ,'   type:',i3,'   angle:',f9.4,f9.2)") j,ip1,ip2,it ,theta*raddeg,vbend
            end do
 
-! - torsions -
+! torsions -
            do jjtor = 1, intor(imolty,j)
               ip3 = ijtor4(imolty,j,jjtor)
               ip1 = ijtor2(imolty,j,jjtor)
@@ -669,11 +669,11 @@ subroutine initia
               bang = 0.0d0
            end if
 
-!               if ( n .eq. 1 .or. m .eq. 1 )
+! if ( n .eq. 1 .or. m .eq. 1 )
 !     &              write(io_output,'(2i4,5f9.3,i6)') n,m,rxu(n,m),ryu(n,m),rzu(n,m),
 !     &                            blen,bang,nboxi(n)
 
-!               write(io_output,'(2i4,5f9.3,i6)') n,m,rxu(n,m),ryu(n,m),rzu(n,m),
+! write(io_output,'(2i4,5f9.3,i6)') n,m,rxu(n,m),ryu(n,m),rzu(n,m),
 !     &                            blen,bang,nboxi(n)
 
         end do
@@ -686,7 +686,7 @@ subroutine initia
         call explct(i,vdummy,.true.,.false.)
      end if
   end do
-!     --- set up intial charges on the atoms
+! set up intial charges on the atoms
   do i = 1,nchain
      imolty = moltyp(i)
      do ii = 1,nunit(imolty)

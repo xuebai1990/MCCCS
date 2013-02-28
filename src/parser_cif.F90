@@ -51,19 +51,19 @@ CONTAINS
     IOCIF=get_iounit()
     open(unit=IOCIF,access='sequential',action='read',file=fileCIF,form='formatted',iostat=jerr,status='old')
     if (jerr.ne.0) then
-       call err_exit('cannot open zeolite CIF file')
+       call err_exit(__FILE__,__LINE__,'cannot open zeolite CIF file',-1)
     end if
 
     CALL readLine(IOCIF,line,.false.,jerr)
-    IF(jerr.ne.0) call err_exit('wrong CIF file format')
+    IF(jerr.ne.0) call err_exit(__FILE__,__LINE__,'wrong CIF file format',-1)
 
     read(line(2:),*) zeo%nbead,zunit%dup(1),zunit%dup(2),zunit%dup(3),ztype%ntype
     allocate(zeo%bead(zeo%nbead),lunitcell(zeo%nbead),ztype%name(ztype%ntype),ztype%radiisq(ztype%ntype),ztype%type(ztype%ntype),ztype%num(ztype%ntype),stat=jerr)
-    if (jerr.ne.0) call err_exit('readCIF: allocation failed')
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'readCIF: allocation failed',-1)
 
     do i=1,ztype%ntype
        CALL readLine(IOCIF,line,.false.,jerr)
-       IF(jerr.ne.0) call err_exit('wrong CIF file format')
+       IF(jerr.ne.0) call err_exit(__FILE__,__LINE__,'wrong CIF file format',-1)
        read(line(2:),*) ztype%name(i),ztype%type(i),ztype%radiisq(i)
        ztype%radiisq(i)=ztype%radiisq(i)*ztype%radiisq(i)
        ztype%num(i)=0
@@ -233,7 +233,7 @@ CONTAINS
        end if
     END DO
 
-    if (nAtom.ne.zeo%nbead) call err_exit('CIF: Number of atoms incorrect')
+    if (nAtom.ne.zeo%nbead) call err_exit(__FILE__,__LINE__,'CIF: Number of atoms incorrect',-1)
 
   END SUBROUTINE readCIF
 

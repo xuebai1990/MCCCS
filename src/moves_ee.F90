@@ -21,72 +21,72 @@ contains
 
       integer::i,m,j,ntii,ntij,ntjj,ntjjs,ii,jj,ntijs ,imolty,isv,cnt
 
-! --- initialize a few things
+! initialize a few things
 
       leemove = .false.
       if ((pmexpc1.gt.1.0d-6).and.(.not.lexpee)) then
          write(io_output,*) 'pmexp nonzero but no lexpee?'
-         call err_exit('')
+         call err_exit(__FILE__,__LINE__,'',myid+1)
       else if ((pmexpc1.lt.1.0d-6).and.lexpee) then
          write(io_output,*) 'pmexp zero but lexpee?'
-         call err_exit('')
+         call err_exit(__FILE__,__LINE__,'',myid+1)
       end if
 
-! --- read necessary stuff
+! read necessary stuff
 
-! --- moltyp (of fort.4) on which EE is performed
+! moltyp (of fort.4) on which EE is performed
       read(44,*)
       read(44,*) imolty
 
-! --- number of actual types of molecules (i.e. nmolty minus the
-! --- types that identify intermediate states.
+! number of actual types of molecules (i.e. nmolty minus the
+! types that identify intermediate states.
       read(44,*)
       read(44,*) nmolty1
 
-! --- the number for final state (first one is 1)
+! the number for final state (first one is 1)
       read(44,*)
       read(44,*) fmstate
 
-      if (fmstate.lt.3) call err_exit('EE when no intermediate state')
+      if (fmstate.lt.3) call err_exit(__FILE__,__LINE__,'EE when no intermediate state',myid+1)
 
-! --- weight (psi) associated with each state
+! weight (psi) associated with each state
       read(44,*)
       read(44,*) (psi(i), i = 1, fmstate)
 
-! --- the two states between which 'swap' is. ensure that sstate1 is
-! --- sstate2-1
+! the two states between which 'swap' is. ensure that sstate1 is
+! sstate2-1
       read(44,*)
       read(44,*) sstate1, sstate2
-      if (sstate1.ne.(sstate2-1)) call err_exit('choose sstates in order')
+      if (sstate1.ne.(sstate2-1)) call err_exit(__FILE__,__LINE__,'choose sstates in order',myid+1)
 
-! --- once an ee move is performed, the prob that it will be
-! --- ee_index_swap move (keep is quite low)
+! once an ee move is performed, the prob that it will be
+! ee_index_swap move (keep is quite low)
       read(44,*)
       read(44,*) eeratio
 
-! --- read the starting mstate
+! read the starting mstate
       read(44,*)
       read(44,*) mstate
 
-! --- check with temtyp
+! check with temtyp
       cnt = 0
       do i = nmolty1, nmolty
          if (temtyp(i).gt.0) then
-            if (temtyp(i).ne.1) call err_exit('ee must be on one molecule only')
+            if (temtyp(i).ne.1) call err_exit(__FILE__,__LINE__,'ee must be on one molecule only',myid+1)
             isv = i
             cnt = cnt+1
          end if
       end do
-      if (cnt.gt.1) call err_exit('only one state should be present in ee')
-      if ((nmolty1+mstate-1).ne.isv) call err_exit('initial mstate inconsistent with temtyp')
+      if (cnt.gt.1) call err_exit(__FILE__,__LINE__,'only one state should be present in ee',myid+1)
+      if ((nmolty1+mstate-1).ne.isv) call err_exit(__FILE__,__LINE__,'initial mstate inconsistent with temtyp',myid+1)
       if ((mstate.eq.1).or.(mstate.eq.fmstate)) lmstate = .true.
 
-! --- setup rminee for each unit. for fully grown units (same as in
-! --- the full molecules), rminee is to be set to rmin (read from
-! --- fort.4). for the partially grown units scale rmin by equating
-! --- the 12th power potential values of the partially grown beads
-! --- with the 12th power of the equivalent full beads. this choice
-! --- is more or less arbitrary - but is consistent.
+! setup rminee for each unit. for fully grown units (same as in
+! the full molecules), rminee is to be set to rmin (read from
+! fort.4). for the partially grown units scale rmin by equating
+! the 12th power potential values of the partially grown beads
+! with the 12th power of the equivalent full beads. this choice
+! is more or less arbitrary - but is consistent.
 
       do i = 1, nmolty1-1
          do ii = 1, nunit(i)
@@ -176,45 +176,45 @@ contains
 !	do j = 1, nmolty
 !	do jj = 1, nunit(j)
 !	ntjj = ntype(j,jj)
-!                  ntij = (ntii-1)*nntype+ntjj
+! ntij = (ntii-1)*nntype+ntjj
 !	write(io_output,'(4(i4,1x),3(1x,e17.8))') i,ii,j,jj,rminee(ntij),epsij(ntij),sig2ij(ntij)
 !	end do
 !	end do
 !	end do
 !	end do
-!	call err_exit('')
+!	call err_exit(__FILE__,__LINE__,'',myid+1)
 
-! --- associate moltyp with mstate
+! associate moltyp with mstate
 
       do m = 1, fmstate
          ee_moltyp(m) = nmolty1+m-1
       end do
-!      ee_moltyp(fmstate) = imolty
+! ee_moltyp(fmstate) = imolty
       do i = 1, nunit(imolty)
          do m = 1, fmstate
             ee_qqu(i,m) = qelect(ntype(nmolty1+m-1,i))
 !	write(io_output,*) i,m,ee_qqu(i,m)
          end do
-!         ee_qqu(i,fmstate) = qelect(ntype(imolty,i))
+! ee_qqu(i,fmstate) = qelect(ntype(imolty,i))
 !	write(io_output,*) i,1,ee_qqu(i,1)
 !	write(io_output,*) i,fmstate,ee_qqu(i,fmstate)
       end do
 
-! --- associate a box with each state (convention: box 2 with states
-! --- 1 to sstate1, and box 1 with sstate2 to fmstate)
+! associate a box with each state (convention: box 2 with states
+! 1 to sstate1, and box 1 with sstate2 to fmstate)
 
       do m = 1, fmstate
          box_state(m) = 1
       end do
-!      do m = 1, sstate1
-!         box_state(m) = 2
-!      end do
-!      do m = sstate2, fmstate
-!         box_state(m) = 1
-!      end do
+! do m = 1, sstate1
+! box_state(m) = 2
+! end do
+! do m = sstate2, fmstate
+! box_state(m) = 1
+! end do
 
-! --- the underlying matix of the markov chain (nonsymmetric if one of
-! --- the state is an end state)
+! the underlying matix of the markov chain (nonsymmetric if one of
+! the state is an end state)
 
       do m = 2, fmstate-1
          um_markov(m,m+1) = 0.5d0
@@ -223,27 +223,27 @@ contains
       um_markov(1,2) = 1.0d0
       um_markov(fmstate,fmstate-1) = 1.0d0
 
-! --- pick a random chain at m=1 (i.e, in boxstate 1 ) to start off things
-! --- if chain not present in boxstate 1, start with m = 6. for brute
-! --- force method, there is always a unique tagged one (the tag doesn't
-! --- change)
+! pick a random chain at m=1 (i.e, in boxstate 1 ) to start off things
+! if chain not present in boxstate 1, start with m = 6. for brute
+! force method, there is always a unique tagged one (the tag doesn't
+! change)
 
        eepointp = 1
 
-!      if (dble(ncmt(box_state(1),imolty)).gt.0) then
-!         eepointp = idint(dble(ncmt(box_state(1),imolty))*random())+1
-!         mstate = 1
-!      else if (dble(ncmt(box_state(2),imolty)).gt.0) then
-!         eepointp = idint(dble(ncmt(box_state(2),imolty))*random())+1
-!         mstate = fmstate
-!      else
-!         write(io_output,*)'the type is in neither box, imolty:',imolty
-!         call err_exit('')
-!      end if
-!      lmstate = .true.
+! if (dble(ncmt(box_state(1),imolty)).gt.0) then
+! eepointp = idint(dble(ncmt(box_state(1),imolty))*random())+1
+! mstate = 1
+! else if (dble(ncmt(box_state(2),imolty)).gt.0) then
+! eepointp = idint(dble(ncmt(box_state(2),imolty))*random())+1
+! mstate = fmstate
+! else
+! write(io_output,*)'the type is in neither box, imolty:',imolty
+! call err_exit(__FILE__,__LINE__,'',myid+1)
+! end if
+! lmstate = .true.
 !	write(io_output,*) 'starting point', eepointp, mstate
 
-! --- probability accumulators
+! probability accumulators
 
 !	write(io_output,*) 'prob check start'
       do m = 1, fmstate
@@ -269,8 +269,8 @@ contains
 
 ! --------------------------------------------------------------------
 
-!      write(*,*) 'START EEMOVE'
-!      write(11,*) '1:',neigh_cnt(18)
+! write(*,*) 'START EEMOVE'
+! write(11,*) '1:',neigh_cnt(18)
 
       leemove = .true.
       leeacc = .false.
@@ -294,11 +294,11 @@ contains
 
       if (ncmt(box_state(mstate),ee_moltyp(mstate)).eq.0) then
          write(io_output,*)'problem: mstate, but no molecule in mstate',mstate
-         call err_exit('')
+         call err_exit(__FILE__,__LINE__,'',myid+1)
       end if
 
-! --- type of move depending upon mstate and nstate. one type of move
-! --- is 'swap', other is usual ee
+! type of move depending upon mstate and nstate. one type of move
+! is 'swap', other is usual ee
 
       wee_ratio = dexp(psi(nstate)-psi(mstate))* um_markov(nstate,mstate)/um_markov(mstate,nstate)
 
@@ -319,7 +319,7 @@ contains
 
       else
 
-! --- energy for the new state
+! energy for the new state
 
          ibox = box_state(mstate)
          eeirem = parbox(eepointp,ibox,ee_moltyp(mstate))
@@ -338,12 +338,12 @@ contains
          call energy(eeirem,imolty,vnew,vintran,vintern,vextn,velectn,vewaldn,2,ibox,1,iunit,.false.,ovrlap,.false.,dum,.false.,.false.,.false.)
          if (ovrlap) goto 100
          if (ltailc) then
-!-----   add tail corrections for the Lennard-Jones energy
+! add tail corrections for the Lennard-Jones energy
             vtailn=ee_coru(ibox,imolty,2)
             vintern = vintern + vtailn
          end if
 
-! --- energy for the old state
+! energy for the old state
 
          imolty = ee_moltyp(mstate)
          do i = 1, iunit
@@ -355,10 +355,10 @@ contains
          moltion(2) = imolty
          call energy(eeirem,imolty,vold,vintrao,vintero,vexto,velecto,vewaldo,1,ibox,1,iunit,.false.,ovrlap,.false.,dum,.false.,.false.,.false.)
          if (ovrlap) then
-            call err_exit('disaster ovrlap in old conf eemove')
+            call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf eemove',myid+1)
          end if
          if (ltailc) then
-!-----   add tail corrections for the Lennard-Jones energy
+! add tail corrections for the Lennard-Jones energy
             vtailo=ee_coru(ibox,imolty,1)
             vintero = vintero + vtailo
          end if
@@ -371,22 +371,22 @@ contains
             vold = vold + vrecipo
          end if
 
-! --- check for acceptance
+! check for acceptance
 
          deltv = (vnew - vold)
          deltvb = beta*deltv
          wdeltvb = wee_ratio*dexp(-deltvb)
 
          if ((deltvb-dlog(wee_ratio)).le.0.0d0) then
-!           --- accept move
+! accept move
          else if (wdeltvb.gt.random()) then
-!           --- accept move
+! accept move
          else
-!           --- reject move
+! reject move
             goto 100
          end if
 
-! --- update new
+! update new
 
          imolty1 = ee_moltyp(nstate)
          parbox(ncmt(ibox,imolty1)+1,ibox,imolty1) = eeirem
@@ -412,13 +412,13 @@ contains
          velectb(ibox) = velectb(ibox) + (velectn-velecto)
 !	write(io_output,*) vtailn,vtailo,vintern,vintero
 
-! --- update reciprocal space term
+! update reciprocal space term
 
          call ee_recip(ibox,dum,dum,2)
 
       end if
 
-! --- update the present state
+! update the present state
 
 !	ovr = .true.
 
@@ -444,7 +444,7 @@ contains
          lmstate = .false.
       end if
 
-! --- update parall (since one molecule has changed its state/type)
+! update parall (since one molecule has changed its state/type)
 
       do  i = 1, nmolty
          idummy(i) = 0
@@ -480,10 +480,10 @@ contains
       integer::imolty,ibox,ibox1
       real::accr
 
-! --- if mstate = 1, with equal probability change the tagged index
-! --- to another one in the same box (m = 1, still), or with the other
-! --- box (m = 6). note that the acceptance prob of m = 1 to m = 6
-! --- move involves a permutation factor
+! if mstate = 1, with equal probability change the tagged index
+! to another one in the same box (m = 1, still), or with the other
+! box (m = 6). note that the acceptance prob of m = 1 to m = 6
+! move involves a permutation factor
 
       imolty = ee_moltyp(mstate)
       ibox = box_state(1)
@@ -523,9 +523,9 @@ contains
   end subroutine ee_index_swap
 
 !    **********************************************************************
-!    ** make a transition of a selected molecule from state i to state j **
-!    ** in an expanded-ensemble sampling.                                **
-!    ** written on Aug. 4/99 by Bin Chen.                                **
+! make a transition of a selected molecule from state i to state j **
+! in an expanded-ensemble sampling.                                **
+! written on Aug. 4/99 by Bin Chen.                                **
 !    **********************************************************************
   subroutine expand
     use energy_kspace,only:recip
@@ -535,8 +535,8 @@ contains
       integer::i,ibox,iunit,flagon,itype,j,imolty,icbu ,ic,imt,jmt,itype2,disp
       real::dchain,vnew,vold ,vintran ,vintrao,deltv,deltvb,vintern,vintero,vextn,vexto ,velectn,velecto,vdum ,vrecipo,vrecipn,vexpta,vexptb,volume,rho
 
-!      write(io_output,*) 'start expand-ensemble move'
-! ***    select a chain at random ***
+! write(io_output,*) 'start expand-ensemble move'
+! select a chain at random ***
       dchain  = random()
       do icbu = 1,nmolty
          if ( dchain .lt. pmeemt(icbu) ) then
@@ -544,10 +544,10 @@ contains
             dchain = 2.0d0
          end if
       end do
-      if ( .not. lexpand(imolty) )  call err_exit('wrong type of molecule for the ES-move')
+      if ( .not. lexpand(imolty) )  call err_exit(__FILE__,__LINE__,'wrong type of molecule for the ES-move',myid+1)
 
       if (lgrand) then
-! ---    select a chain at random in box 1!
+! select a chain at random in box 1!
 !         (in box 2 is an ideal gas!)
          ibox = 1
          if (nchbox(ibox).eq.0) then
@@ -568,7 +568,7 @@ contains
 
       iunit = nunit(imolty)
 
-! *** perform a move in the expanded coefficients
+! perform a move in the expanded coefficients
 
  10   disp = int( rmexpc(imolty)*(2.0d0*random()-1.0d0) )
       itype = mod(eetype(imolty)+disp+numcoeff(imolty) , numcoeff(imolty))
@@ -589,7 +589,7 @@ contains
          moltion(ic) = imolty
       end do
 
-! *** calculate the energy of i in the new configuration ***
+! calculate the energy of i in the new configuration ***
 
       flagon = 2
       do j = 1,iunit
@@ -599,7 +599,7 @@ contains
       call energy(i,imolty, vnew,vintran, vintern,vextn,velectn ,vdum,flagon, ibox,1, iunit,.false.,ovrlap,.false. ,vdum,.false.,.false.,.false.)
       if (ovrlap) return
 
-!     Start of intermolecular tail correction for new
+! Start of intermolecular tail correction for new
 
       if ( ltailc ) then
 
@@ -617,7 +617,7 @@ contains
          vintern = vintern + vexpta
       end if
 
-! *** calculate the energy of i in the old configuration ***
+! calculate the energy of i in the old configuration ***
       flagon = 1
       do j = 1, iunit
          epsilon_f(imolty,j) = epsil(imolty,j,eetype(imolty))
@@ -626,7 +626,7 @@ contains
       call energy(i,imolty,vold,vintrao,vintero,vexto,velecto ,vdum,flagon,ibox,1, iunit,.false.,ovrlap,.false. ,vdum,.false.,.false.,.false.)
 
 
-!     Start of intermolecular tail correction for old
+! Start of intermolecular tail correction for old
 
       if (ltailc ) then
          vexptb = 0.0d0
@@ -643,7 +643,7 @@ contains
 
       bnexpc(imolty,ibox) = bnexpc(imolty,ibox) + 1.0d0
 
-      if (ovrlap) call err_exit('disaster ovrlap in old conf of TRAXYZ')
+      if (ovrlap) call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf of TRAXYZ',myid+1)
 
       if ( lewald ) then
          call recip(ibox,vrecipn,vrecipo,1)
@@ -653,7 +653,7 @@ contains
          vold = vold + vrecipo
       end if
 
-! *** check for acceptance ***
+! check for acceptance ***
 
       deltv  = vnew - vold + eta(ibox,imolty,itype)  - eta(ibox,imolty,eetype(imolty))
       deltvb = beta * deltv
@@ -661,15 +661,15 @@ contains
       if ( deltvb .gt. (2.3d0*softcut) ) return
 
       if ( deltv .le. 0.0d0 ) then
-!        --- accept move
+! accept move
       else if ( dexp(-deltvb) .gt. random() ) then
-!        --- accept move
+! accept move
       else
-!        --- move rejected
+! move rejected
          return
       end if
 
-!      write(io_output,*) 'expanded move accepted i',i,exp_cion(2)
+! write(io_output,*) 'expanded move accepted i',i,exp_cion(2)
       vbox(ibox)     = vbox(ibox) + vnew - vold
       vinterb(ibox)  = vinterb(ibox) + (vintern - vintero)
       vintrab(ibox)  = vintrab(ibox) + (vintran - vintrao)
@@ -688,7 +688,7 @@ contains
 
 
       if (lewald) then
-! *** update reciprocal-space sum
+! update reciprocal-space sum
          call recip(ibox,vdum,vdum,2)
       end if
 
@@ -698,7 +698,7 @@ contains
 
       bsexpc(imolty,ibox) = bsexpc(imolty,ibox) + 1.0d0
 
-!      write(io_output,*) 'end expand-ensemble move'
+! write(io_output,*) 'end expand-ensemble move'
 
       return
   end subroutine expand
@@ -709,7 +709,7 @@ contains
     do imol=1,nmolty
        if ( lexpand(imol) ) then
           if ( temtyp(imol) .gt. 1 ) then
-             call err_exit('Only one molecule of this type is allowed!')
+             call err_exit(__FILE__,__LINE__,'Only one molecule of this type is allowed!',myid+1)
           end if
           read(7,*)
           read(7,*) numcoeff(imol)
@@ -734,8 +734,7 @@ contains
     integer::jerr
     allocate(epsil(ntmax,numax,100),sigm(ntmax,numax,100),qcharge(ntmax,numax,100),bnexpc(ntmax,nbxmax),bsexpc(ntmax,nbxmax),eta(nbxmax,ntmax,20),numcoeff(ntmax),stat=jerr)
     if (jerr.ne.0) then
-       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-       call err_exit('init_ee: allocation failed')
+       call err_exit(__FILE__,__LINE__,'init_ee: allocation failed',jerr)
     end if
     bsexpc = 0.0d0
     bnexpc = 0.0d0
@@ -779,12 +778,12 @@ contains
     end if
     do kmolty = 1, nmolty
        do jmolty = 1, nmolty
-!                rho = ncmt(ibox,jmolty) /
+! rho = ncmt(ibox,jmolty) /
 !     &               ( boxlx(ibox)*boxly(ibox)*boxlz(ibox) )
           if (flagon.eq.1) then
              rho = ncmt(ibox,jmolty) / vol
              vtail = vtail + ncmt(ibox,kmolty) * coru(kmolty,jmolty,rho,ibox)
-!                write(io_output,*) 'vtail',vtail
+! write(io_output,*) 'vtail',vtail
           else
              if (jmolty.eq.ee_moltyp(mstate)) then
                 rho = (ncmt(ibox,jmolty)-1) / vol

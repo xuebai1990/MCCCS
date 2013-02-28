@@ -1,9 +1,14 @@
 module util_timings
   implicit none
+#ifdef __MPI__
+  include 'mpif.h'
+#endif
+#ifdef __OPENMP__
+  include 'omp_lib.h'
+#endif
   private
   public::time_date_str,time_init,time_now
   real,save::time_start
-  include 'common.inc'
 
 contains
 ! *****************************************************************************
@@ -24,17 +29,24 @@ contains
 ! available using MPI, double precision function
 ! OMP_GET_WTIME() is available with OpenMP, whether or not
 ! the program is running with multiple processes or threads
-!    call cpu_time(time_start)
+#ifdef __MPI__
     time_start=MPI_WTIME()
-!!$   time_start=omp_get_wtime()
+#elif defined __OPENMP__
+!$   time_start=omp_get_wtime()
+#else
+    call cpu_time(time_start)
+#endif
   end subroutine time_init
 
   function time_now()
     real::time_now
-!    call cpu_time(time_now)
+#ifdef __MPI__
     time_now=MPI_WTIME()
-!!$   time_now=omp_get_wtime()
+#elif defined __OPENMP__
+!$   time_now=omp_get_wtime()
+#else
+    call cpu_time(time_now)
+#endif
     time_now=time_now-time_start
   end function time_now
-
 end module util_timings

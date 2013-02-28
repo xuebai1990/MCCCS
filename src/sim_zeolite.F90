@@ -58,7 +58,7 @@ CONTAINS
        zunit%boxl(i)=zcell%boxl(i)%val/zunit%dup(i)
     end forall
 
-     !     --- find closest values for x and y
+     ! find closest values for x and y
     zunit%ngrid=int(zunit%boxl/dgr)
 
 ! align crystallography axis a with cartesian axis x, b in x-y plane
@@ -111,7 +111,7 @@ CONTAINS
     end if
 
     pos=str_search(ztype%name,ztype%ntype,atom)
-    if (pos.eq.0) call err_exit('** setUpAtom: unknown atomtype **')
+    if (pos.eq.0) call err_exit(__FILE__,__LINE__,'** setUpAtom: unknown atomtype **',myid+1)
 
     zeo%bead(i)%type=pos
 

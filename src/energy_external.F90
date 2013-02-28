@@ -12,8 +12,8 @@ MODULE energy_external
 ! EXTERNAL.INC
   real::a1,delta,rsol
   integer::ntsubst
-! -- Slitpore
-! -- a1, delta are in Angstroms, rsol [=] 1/A^3
+! Slitpore
+! a1, delta are in Angstroms, rsol [=] 1/A^3
   parameter (a1 = 2.460d0)
   parameter (delta = 3.40d0)
   parameter (ntsubst = 190)
@@ -22,8 +22,8 @@ MODULE energy_external
 ! AT PRESENT no parameters for polymeric surfactants (see LJPSUR)
 
 contains
-! -- calculates the surface energy of a bend with a featureless
-! -- graphite surface
+! calculates the surface energy of a bend with a featureless
+! graphite surface
   function slitpore(z,ntij)
 	integer::ntij
 	real::vgs,z
@@ -43,7 +43,7 @@ contains
     slitpore = vgs
   end function slitpore
 
-! - calculates the energy of a bead with a graphite surface
+! calculates the energy of a bead with a graphite surface
   function exgrph(x,y,z,ntij)
         real::aa,aa2
         real::a1sq
@@ -62,7 +62,7 @@ contains
         e1 = 0.0d0
         fxy = 0.0d0
 
-!       write(81,*) ntij,sqrt(sig2ij(ntij))
+! write(81,*) ntij,sqrt(sig2ij(ntij))
 
         sz2 = sig2ij(ntij)/(z**2)
 
@@ -70,7 +70,7 @@ contains
 
         e0 = aa*epsij(ntij)*((2.0d0/5.0d0)*(sz2**5) - (sz2**2) - (sig2ij(ntij)**2/(3.0d0*delta*(0.61*delta+z)**3)))
 
-!       write(82,*) e0,aa,delta,z
+! write(82,*) e0,aa,delta,z
         if ( lcorreg ) then
                 a1sq = a1**2
 
@@ -78,12 +78,12 @@ contains
 
                 bb = aa2*fourpi*epsij(ntij)/sqrt(3.0d0)
 
-!               bb = fourpi*epsij(ntij)*sig2ij(ntij)**3/
+! bb = fourpi*epsij(ntij)*sig2ij(ntij)**3/
 !     +                 (sqrt(3.0d0)*a1**6)
 
                 cc = aa2/(30.0d0*(twopi/sqrt(3.0d0))**5)
 
-!               cc = sig2ij(ntij)**6/
+! cc = sig2ij(ntij)**6/
 !     +         (30.0d0*a1**6*(twopi/sqrt(3.0d0)**5))
 
                 dd = 2.0d0*(twopi/sqrt(3.0d0))**2
@@ -93,22 +93,22 @@ contains
                 k2 = mbessel(zzz,2.0d0)
 
                 k5 = mbessel(zzz,5.0d0)
-!               write(84,*) zzz,k2,k5
+! write(84,*) zzz,k2,k5
                 e1 = bb*(cc * k5 * (a1/z)**5 - dd * k2 * (a1/z)**2)
-!               write(82,*) bb,cc,dd,e1,k2,k5
+! write(82,*) bb,cc,dd,e1,k2,k5
                 fxy = -2.0d0*(cos(twopi*(x/a1 + y/sqrt(3.0d0)/a1)) + cos(twopi*(x/a1 - y/sqrt(3.0d0)/a1)) + cos(fourpi*y/sqrt(3.0d0)/a1))
 
-!       write(82,'(6g12.5)') x,y,z,fxy,e1,e0
+! write(82,'(6g12.5)') x,y,z,fxy,e1,e0
                 exgrph = e0 + e1*fxy
         else
-!       write(83,'(6g12.5)') x,y,z,e0
+! write(83,'(6g12.5)') x,y,z,e0
                 exgrph = e0
         end if
   end function exgrph
 
 ! **********************************************************************
-! **  calculates interaction of molecule i with an external field E  ***
-! **  added 06/24/07 by KM                                           ***
+! calculates interaction of molecule i with an external field E  ***
+! added 06/24/07 by KM                                           ***
 ! **********************************************************************
   function v_elect_field(i, j, rzfield,E)
 
@@ -117,15 +117,15 @@ contains
 
 
 ! ********************************************
-! **  units
-! **  E in V/A, q in e, rz in A
-! **  E*q*rz = V*e
-! **  1 V*e = 11600 K
+! units
+! E in V/A, q in e, rz in A
+! E*q*rz = V*e
+! 1 V*e = 11600 K
 ! ********************************************
 
       v_elect_field = -E*rzfield*qqu(i,j)
 
-!      write(io_output,*) 'E ', E, ' exfield ', exfield
+! write(io_output,*) 'E ', E, ' exfield ', exfield
 
       return
   end function v_elect_field
@@ -143,8 +143,8 @@ contains
     U_ext=0.0d0
 
 ! **********************************************************************
-! *** calculation of interaction energy with external electric field ***
-! *** added 06/24/07 by KM
+! calculation of interaction energy with external electric field ***
+! added 06/24/07 by KM
 ! **********************************************************************
     if (lelect_field) then
        U_ext = U_ext + v_elect_field(i,j,rzu(i,j),Elect_field(ibox)) * eXV_to_K
@@ -162,11 +162,11 @@ contains
     end if
 
     if (lslit) then
-       ! -- Carbon slitpore
+       ! Carbon slitpore
        ntij = (ntj-1)*nntype + ntsubst
-       ! -- calculate interaction with surface at the bottom of the box
+       ! calculate interaction with surface at the bottom of the box
        U_ext = U_ext + slitpore(rzu(i,j),ntij)
-       ! -- calculate interaction with the surface at the top of the box
+       ! calculate interaction with the surface at the top of the box
        dzui = boxlz(ibox)-rzu(i,j)
        U_ext = U_ext +slitpore(dzui,ntij)
     end if
@@ -196,32 +196,31 @@ contains
     if ( ljoe ) then
        allocate(extc12(1:nntype),extc3(1:nntype),extz0(1:nntype),stat=jerr)
        if (jerr.ne.0) then
-          write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-          call err_exit('init_pairwise: nonbond allocation failed')
+          call err_exit(__FILE__,__LINE__,'init_pairwise: nonbond allocation failed',jerr)
        end if
 
-! --- STANDARD METHYL GROUP
+! STANDARD METHYL GROUP
        extc12(4) = 3.41d7
        extc3(4)  = 20800.0d0
        extz0(4)  = 0.86d0
 
-! --- STANDARD METHYLENE GROUP
+! STANDARD METHYLENE GROUP
        extc12(5) = 2.80d7
        extc3(5)  = 17100.0d0
        extz0(5)  = 0.86d0
 
-! --- Methane
+! Methane
        extc12(3) = 3.41d7
        extc3(3)  = 20800.0d0
        extz0(3)  = 0.86d0
 
-! --- Martin's methyl (CH3)
+! Martin's methyl (CH3)
        extc12(18) = 3.41d7
        extc3(18)  = 20800.0d0
        extz0(18)  = 0.86d0
     end if
 
-! *** calculate constants for lmuir external potential ***
+! calculate constants for lmuir external potential ***
     if ( lmuir ) then
        sigpri = 0.715d0 * dsqrt( 3.8d0 * 3.93d0 )
        c9ch2 = 4.0d0 * ( 1.43d0 * dsqrt(80.0d0*47.0d0) ) * sigpri**9

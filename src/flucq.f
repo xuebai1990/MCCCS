@@ -1,8 +1,8 @@
 !    *******************************************************************
-!    ** select one (or two in charge transfer) molecule and displace  **
-!    ** the charge magnitude of charge sites on selected molecule(s)  **
-!    ** according to charge nutrality and preferential strategy.      **
-!    ** rewritten by Bin Chen at 6-25-99.                             **
+! select one (or two in charge transfer) molecule and displace  **
+! the charge magnitude of charge sites on selected molecule(s)  **
+! according to charge nutrality and preferential strategy.      **
+! rewritten by Bin Chen at 6-25-99.                             **
 !    *******************************************************************
 subroutine flucq (ichoice,boxi)
   use const_phys,only:qqfact
@@ -25,8 +25,8 @@ subroutine flucq (ichoice,boxi)
 
 ! --------------------------------------------------------------------
 
-!      write(io_output,*) 'start FLUCQ'
-! ***    select a chain at random ***
+! write(io_output,*) 'start FLUCQ'
+! select a chain at random ***
       dchain  = random()
       do icbu = 1,nmolty
          if ( dchain .lt. pmfqmt(icbu) ) then
@@ -36,7 +36,7 @@ subroutine flucq (ichoice,boxi)
       end do
       
       if (lgrand) then
-! ---    select a chain at random in box 1!
+! select a chain at random in box 1!
 !         (in box 2 is an ideal gas!)
          ibox = 1
          if (nchbox(ibox).eq.0) then
@@ -50,23 +50,23 @@ subroutine flucq (ichoice,boxi)
       else if ( lanes ) then
 
          if ( ichoice .eq. -1 ) then
-! *** equal probability charge moves in two boxes (for swap)
-! *** preferential charge moves according to favor
+! equal probability charge moves in two boxes (for swap)
+! preferential charge moves according to favor
             dchain = dble(temtyp(imolty))
  77         i = int( dchain*random() ) + 1
             i = parall(imolty,i)
             if ( random() .gt. favor(i)) goto 77
             ibox = nboxi(i)
          else if ( ichoice .eq. -2 ) then
-! *** equal probability charge moves in two boxes (for swap)
-! *** preferential charge moves according to favor2
+! equal probability charge moves in two boxes (for swap)
+! preferential charge moves according to favor2
             dchain = dble(temtyp(imolty))
  66         i = int( dchain*random() ) + 1
             i = parall(imolty,i)
             if ( random() .gt. favor2(i)) goto 66
             ibox = nboxi(i)
          else if ( ichoice .eq. 0 ) then
-! *** equal probability charge moves in separate box (for trans,rot)
+! equal probability charge moves in separate box (for trans,rot)
  88         dchain = dble(temtyp(imolty))
             i = int( dchain*random() ) + 1
             i = parall(imolty,i)
@@ -86,13 +86,13 @@ subroutine flucq (ichoice,boxi)
          
       end if
 
-! *** For charge transfer case, select a second molecule to perform the
-! *** fluctuating-charge move. The second molecule should be in the same
-! *** box as chain i.
+! For charge transfer case, select a second molecule to perform the
+! fluctuating-charge move. The second molecule should be in the same
+! box as chain i.
 
       If ( lqtrans(imolty) ) then
          if (lgrand) then
-! ---    select a chain at random in box 1!
+! select a chain at random in box 1!
 !     (in box 2 is an ideal gas!)
             ibox = 1
             if (nchbox(ibox).eq.0) then
@@ -106,23 +106,23 @@ subroutine flucq (ichoice,boxi)
          else if ( lanes ) then
 
             if ( ichoice .eq. -1 ) then
-! *** equal probability charge moves in two boxes (for swap)
-! *** preferential charge moves according to favor
+! equal probability charge moves in two boxes (for swap)
+! preferential charge moves according to favor
                dchain = dble(temtyp(imolty))
  70            jchain = int( dchain*random() ) + 1
                jchain = parall(imolty,jchain)
                if ( random() .gt. favor(jchain)) goto 70
                if ( nboxi(jchain) .ne. ibox ) goto 70 
             else if ( ichoice .eq. -2 ) then
-! *** equal probability charge moves in two boxes (for swap)
-! *** preferential charge moves according to favor
+! equal probability charge moves in two boxes (for swap)
+! preferential charge moves according to favor
                dchain = dble(temtyp(imolty))
  60            jchain = int( dchain*random() ) + 1
                jchain = parall(imolty,jchain)
                if ( random() .gt. favor2(jchain)) goto 60
                if ( nboxi(jchain) .ne. ibox ) goto 60
             else if ( ichoice .eq. 0 ) then
-! *** equal probability charge moves in separate box (for trans,rot)
+! equal probability charge moves in separate box (for trans,rot)
  80            dchain = dble(temtyp(imolty))
                jchain = int( dchain*random() ) + 1
                jchain = parall(imolty,jchain)
@@ -147,21 +147,21 @@ subroutine flucq (ichoice,boxi)
          linterqt = .false.
       end if
 
-! *** store number of units of i in iunit ***
+! store number of units of i in iunit ***
 
       iunit = nunit(imolty)
-! *** count the number of charge sites
+! count the number of charge sites
       qunit = 0
       do j = 1, iunit
          if ( lqchg(ntype(imolty,j)) ) qunit = qunit + 1
       end do
 
-!     --- store the charges in qion
+! store the charges in qion
       do  j = 1, iunit
          qion(j)   = qqu(i,j)         
       end do
 
-! *** calculate the polariztion energy of i in the old configuration ***
+! calculate the polariztion energy of i in the old configuration ***
  
       call charge(i, qion, vflucqo, vewaldo)
       
@@ -170,7 +170,7 @@ subroutine flucq (ichoice,boxi)
             qionj(j) = qqu(jchain,j)
          end do
 
-! *** calculate the polarization energy of jchain in the old configuration ***
+! calculate the polarization energy of jchain in the old configuration ***
 
          call charge(jchain, qionj, vflucqjo, vewaldjo)
 
@@ -178,22 +178,22 @@ subroutine flucq (ichoice,boxi)
          vewaldo = vewaldo + vewaldjo
       end if
 
-! --- Choose one of the units as the main charge transfer site
+! Choose one of the units as the main charge transfer site
 
  30   mainunit = int( dble(iunit)*random() ) + 1
-! *** for unit which is not a charge site 
+! for unit which is not a charge site 
       if ( .not. lqchg(ntype(imolty,mainunit)) ) goto 30
       bnflcq(imolty,ibox) = bnflcq(imolty,ibox) + 1.0d0
       dispbig = ( 2.0d0*random() - 1.0d0 )*rmflcq(imolty,ibox)
 
       if ( linterqt ) then
-! *** For charge transfer case, i molecule increases by dispbig and
-! *** jchain molecule decreases by dispbig. 
-! *** correction for the reptition of the calculation of the 
-! *** coulombic real space term between maini and mainj
+! For charge transfer case, i molecule increases by dispbig and
+! jchain molecule decreases by dispbig. 
+! correction for the reptition of the calculation of the 
+! coulombic real space term between maini and mainj
          maini = mainunit
  32      mainunit = int( dble(iunit)*random() ) + 1
-! *** for unit which is not a charge site
+! for unit which is not a charge site
          if ( .not. lqchg(ntype(imolty,mainunit)) ) goto 32
          mainj = mainunit
          corr = (qion(maini)-qionj(mainj))*dispbig  - qion(maini)*qionj(mainj)
@@ -213,7 +213,7 @@ subroutine flucq (ichoice,boxi)
 
          displit = (-dispbig) / (dble(qunit)-1.0d0)
 
-! --- displace the charges on the molecule
+! displace the charges on the molecule
       
          do j = 1, iunit
             if ( j .eq. mainunit ) then
@@ -234,19 +234,19 @@ subroutine flucq (ichoice,boxi)
       moltion(1) = imolty
       moltion(2) = imolty
 
-!  *** calculate the polarization energy of i in the new configuration ***
+! calculate the polarization energy of i in the new configuration ***
  
       call charge(i, qion, vflucqn, vewaldn)
 
       if ( linterqt ) then
          
-!  *** calculate the polarization energy of jchain in the new configuration ***
+! calculate the polarization energy of jchain in the new configuration ***
 
          call charge(jchain, qionj, vflucqjn, vewaldjn)
          vflucqn = vflucqn + vflucqjn
          vewaldn = vewaldn + vewaldjn
 
-! *** calculate the energy of i in the new configuration ***
+! calculate the energy of i in the new configuration ***
          flagon = 2 
          rxuion(maini,flagon) = rxu(i,maini)
          ryuion(maini,flagon) = ryu(i,maini)
@@ -260,7 +260,7 @@ subroutine flucq (ichoice,boxi)
          velectni = velectn + vewaldn
          vinterni = vintern
 
-! *** calculate the energy of i in the old configuration ***
+! calculate the energy of i in the old configuration ***
          flagon = 1
          rxuion(maini,flagon) = rxu(i,maini)
          ryuion(maini,flagon) = ryu(i,maini)
@@ -273,11 +273,11 @@ subroutine flucq (ichoice,boxi)
          velectoi = velecto + vewaldo
          vinteroi = vintero
 
-!  *** restore the old charges
+! restore the old charges
 
          qqu(jchain,mainj) = qoldj2
 
-! *** calculate the energy of jchain in the new configuration ***
+! calculate the energy of jchain in the new configuration ***
 
          flagon = 2 
          rxuion(mainj,flagon) = rxu(jchain,mainj)
@@ -290,7 +290,7 @@ subroutine flucq (ichoice,boxi)
          velectn = velectn + velectni
          vintern = vintern + vinterni
 
-! *** calculate the energy of jchain in the old configuration ***
+! calculate the energy of jchain in the old configuration ***
 
          flagon = 1
          rxuion(mainj,flagon) = rxu(jchain,mainj)
@@ -304,8 +304,8 @@ subroutine flucq (ichoice,boxi)
          velecto = velecto + velectoi
          vintero = vintero + vinteroi
   
-! *** prepare the rxuion etc for ewald sum and dielectric constant
-! *** and for energy calculation
+! prepare the rxuion etc for ewald sum and dielectric constant
+! and for energy calculation
 
          if ( linterqt ) then
             rxuion(1,1) = rxu(i,maini)
@@ -335,14 +335,14 @@ subroutine flucq (ichoice,boxi)
 
       else
 
-! *** calculate the energy of i in the new configuration ***
+! calculate the energy of i in the new configuration ***
          flagon = 2 
          call energy(i,imolty, vnew,vdum, vintern,vdum,velectn ,vdum,flagon, ibox,1, iunit,.false.,ovrlap,.false. ,vdum,.false.,.false.,.false.)
          if (ovrlap) return
          vnew = vnew + vflucqn + vewaldn
          velectn = velectn + vewaldn
 
-! *** calculate the energy of i in the old configuration ***
+! calculate the energy of i in the old configuration ***
          flagon = 1
          call energy(i,imolty,vold,vdum,vintero,vdum,velecto ,vdum,flagon,ibox,1, iunit,.false.,ovrlap,.false. ,vdum,.false.,.false.,.false.)
          vold = vold + vflucqo + vewaldo
@@ -350,7 +350,7 @@ subroutine flucq (ichoice,boxi)
 
       end if
 
-! *** Begin Ewald-sum correction
+! Begin Ewald-sum correction
       if ( lewald ) then
          call recip(ibox,vrecipn,vrecipo,1)
          vnew = vnew + vrecipn
@@ -360,21 +360,21 @@ subroutine flucq (ichoice,boxi)
       end if
          
 
-! *** check for acceptance ***
+! check for acceptance ***
  
       deltv  = vnew - vold
-! --- use the thermostat temperature instead of real::temp
+! use the thermostat temperature instead of real::temp
       deltvb = fqbeta * deltv
 
-!      if ( deltv .lt. -100.0d0) then
-!         write(io_output,*) i,favor(i),deltv
-!      end if 
+! if ( deltv .lt. -100.0d0) then
+! write(io_output,*) i,favor(i),deltv
+! end if 
       if ( deltvb .gt. (2.3d0*softcut) ) return
 
       if ( deltv .le. 0.0d0 ) then
-!        accept move
+! accept move
       else if ( dexp(-deltvb) .gt. random() ) then
-!        accept move
+! accept move
       else
          return
       end if
@@ -383,12 +383,12 @@ subroutine flucq (ichoice,boxi)
       velectb(ibox)  = velectb(ibox)  + (velectn - velecto)
       vflucqb(ibox)  = vflucqb(ibox) + (vflucqn - vflucqo)
       vinterb(ibox) = vinterb(ibox) + (vintern - vintero)
-!      write(io_output,*) 'this move has been accepted!!!'
+! write(io_output,*) 'this move has been accepted!!!'
       do j = 1,iunit
          qqu(i,j) = qion(j)
          if ( linterqt )  qqu(jchain,j) = qionj(j)
       end do
-! --- update the reciprocal-space sum
+! update the reciprocal-space sum
       if ( lewald ) then
          call recip(ibox,vdum,vdum,2)
       end if
@@ -401,7 +401,7 @@ subroutine flucq (ichoice,boxi)
 
       bsflcq(imolty,ibox) = bsflcq(imolty,ibox) + 1.0d0
 
-!      write(io_output,*) 'end FLUCQ'
+! write(io_output,*) 'end FLUCQ'
 
       return
       end

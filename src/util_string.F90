@@ -217,7 +217,7 @@ contains
        END IF
     END DO
 
-    string(z:) = ""
+    string(z:) = ''
 
   END SUBROUTINE str_compress
 
@@ -234,7 +234,7 @@ contains
 
     INTEGER                                  :: i
 
-    string = ""
+    string = ''
 
     DO i=1,MIN(LEN(string),SIZE(nascii))
        IF ((nascii(i) >= 0).AND.(nascii(i) <= 127)) THEN

@@ -19,21 +19,21 @@
        ub4 = MIN(ub4_new,ub4_old)
 
        ALLOCATE (work(lb1:ub1,lb2:ub2,lb3:ub3,lb4:ub4),STAT=istat)
-       IF (istat /= 0) CALL err_exit(TRIM(__FILE__)//":"//integer_to_string(__LINE__))
+       IF (istat /= 0) call err_exit(__FILE__,__LINE__,'',istat)
 
        work(lb1:ub1,lb2:ub2,lb3:ub3,lb4:ub4) = p(lb1:ub1,lb2:ub2,lb3:ub3,lb4:ub4)
 
        DEALLOCATE(p,STAT=istat)
-       IF (istat /= 0) CALL err_exit(TRIM(__FILE__)//":"//integer_to_string(__LINE__))
+       IF (istat /= 0) call err_exit(__FILE__,__LINE__,'',istat)
     END IF
 
     ALLOCATE(p(lb1_new:ub1_new,lb2_new:ub2_new,lb3_new:ub3_new,lb4_new:ub4_new),STAT=istat)
-    IF (istat /= 0) CALL err_exit(TRIM(__FILE__)//":"//integer_to_string(__LINE__))
+    IF (istat /= 0) call err_exit(__FILE__,__LINE__,'',istat)
 
     p(:,:,:,:) = 0.
 
     IF (ALLOCATED(p).AND.ALLOCATED(work)) THEN
        p(lb1:ub1,lb2:ub2,lb3:ub3,lb4:ub4) = work(lb1:ub1,lb2:ub2,lb3:ub3,lb4:ub4)
        DEALLOCATE (work,STAT=istat)
-       IF (istat /= 0) CALL err_exit(TRIM(__FILE__)//":"//integer_to_string(__LINE__))
+       IF (istat /= 0) call err_exit(__FILE__,__LINE__,'',istat)
     END IF

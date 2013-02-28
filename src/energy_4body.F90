@@ -30,7 +30,7 @@ CONTAINS
     integer::jerr
 
     allocate(quadruplets(0:8,1:nchain,1:nbox),coeffs(1:5,1:nEntries),nQuadruplets(1:nbox),qtype(1:nEntries),STAT=jerr)
-    if (jerr.ne.0) CALL err_exit(TRIM(__FILE__)//":"//integer_to_string(__LINE__))
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'',jerr)
     call initiateTable(fourbodies,nEntries)
     hasFourBody=.true.
   end subroutine initiateFourBody
@@ -65,13 +65,12 @@ CONTAINS
     io_ff=get_iounit()
     open(unit=io_ff,access='sequential',action='read',file=file_ff,form='formatted',iostat=jerr,status='old')
     if (jerr.ne.0) then
-       call err_exit('cannot open four_body input file')
+       call err_exit(__FILE__,__LINE__,'cannot open four_body input file',jerr)
     end if
 
     read(UNIT=io_ff,NML=fourbody,iostat=jerr)
     if (jerr.ne.0.and.jerr.ne.-1) then
-       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-       call err_exit('reading namelist: fourbody')
+       call err_exit(__FILE__,__LINE__,'reading namelist: fourbody',jerr)
     end if
 
 ! Looking for section FOURBODY
@@ -100,7 +99,7 @@ CONTAINS
              coeffs(3,i)=coeffs(3,i)*degrad !degree to radians
           end do
           if (i.ne.nEntries) then
-             call err_exit('readFourBody: the number of entries is incorrect!')
+             call err_exit(__FILE__,__LINE__,'readFourBody: the number of entries is incorrect!',myid+1)
           end if
        end if
     END DO
@@ -120,10 +119,10 @@ CONTAINS
     if (.not.lbuild_quadruplet_table) then
        open(unit=io_quadruplets,access='sequential',action='read',file=file_quadruplets,form='formatted',iostat=jerr,status='old')
        if (jerr.ne.0) then
-          call err_exit('cannot read quadruplets file')
+          call err_exit(__FILE__,__LINE__,'cannot read quadruplets file',jerr)
        end if
        read(io_quadruplets,*) nboxtmp,nQuadruplets
-       if (nbox.ne.nboxtmp) call err_exit('quadruplets file not generated with current input')
+       if (nbox.ne.nboxtmp) call err_exit(__FILE__,__LINE__,'quadruplets file not generated with current input',myid+1)
        write(*,*) nbox,nQuadruplets
        do ibox=1,nbox
           read(io_quadruplets,*) quadruplets(:,1:nQuadruplets(ibox),ibox)
@@ -192,7 +191,7 @@ CONTAINS
 
        open(unit=io_quadruplets,access='sequential',action='write',file=file_quadruplets,form='formatted',iostat=jerr,status='unknown')
        if (jerr.ne.0) then
-          call err_exit('cannot open quadruplets file')
+          call err_exit(__FILE__,__LINE__,'cannot open quadruplets file',jerr)
        end if
        write(io_quadruplets,*) nbox,nQuadruplets
        do ibox=1,nbox

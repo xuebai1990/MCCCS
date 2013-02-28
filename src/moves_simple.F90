@@ -13,10 +13,10 @@ MODULE moves_simple
 
 contains
 !    *******************************************************************
-!    ** makes a translational movement in x,y,or z-direction.         **
-!    ** the maximum displacement is controlled by rmtrax(yz) and the  **
-!    ** number of successful trial moves is stored in bstrax(yz).     **
-!    ** The attempts are stored in bntrax(yz)                         **
+! makes a translational movement in x,y,or z-direction.         **
+! the maximum displacement is controlled by rmtrax(yz) and the  **
+! number of successful trial moves is stored in bstrax(yz).     **
+! The attempts are stored in bntrax(yz)                         **
 !    *******************************************************************
   subroutine traxyz (lx,ly,lz)
     use sim_particle,only:update_neighbor_list
@@ -36,7 +36,7 @@ contains
       write(io_output,*) 'start TRAXYZ',lx,ly,lz
 #endif
       ovrlap = .false.
-!     ***    select a chain at random ***
+! select a chain at random ***
       rchain  = random()
       do icbu = 1,nmolty
          if ( rchain .lt. pmtrmt(icbu) ) then
@@ -50,7 +50,7 @@ contains
       if (temtyp(imolty).eq.0) return
 
       if (lgrand) then
-! ---    select a chain at random in box 1!
+! select a chain at random in box 1!
 !         (in box 2 is an ideal gas!)
          ibox = 1
          if (ncmt(ibox,imolty).eq.0) then
@@ -73,7 +73,7 @@ contains
 
       end if
 
-! *** store number of units of i in iunit ***
+! store number of units of i in iunit ***
 
       iunit = nunit(imolty)
 
@@ -85,7 +85,7 @@ contains
       end do
       moltion(1) = imolty
 
-! *** move i ***
+! move i ***
       if (lx) then
          rx =  ( 2.0*random() - 1.0d0 ) * rmtrax(imolty,ibox)
          bntrax(imolty,ibox) = bntrax(imolty,ibox) + 1.0d0
@@ -135,19 +135,19 @@ contains
       end do
       moltion(2) = imolty
 
-!     *** calculate the energy of i in the new configuration ***
+! calculate the energy of i in the new configuration ***
       flagon = 2
       call energy(i,imolty, vnew,vintran, vintern,vextn,velectn ,vdum,flagon, ibox,1, iunit,.false.,ovrlap,.false. ,vdum,.false.,.false.,.false.)
       v3n=v3garo
       if (ovrlap) return
 
-! *** calculate the energy of i in the old configuration ***
+! calculate the energy of i in the old configuration ***
       flagon = 1
       call energy(i,imolty,vold,vintrao,vintero,vexto,velecto ,vdum,flagon,ibox,1, iunit,.false.,ovrlap,.false. ,vdum,.false.,.false.,.false.)
       v3o = v3garo
 
       if (ovrlap) then
-         call err_exit('disaster ovrlap in old conf of TRAXYZ')
+         call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf of TRAXYZ',myid+1)
       end if
 
       if (lewald.and.lelect(imolty).and..not.lideal(ibox)) then
@@ -169,13 +169,13 @@ contains
          vnew = vnew + vrecipn
          vold = vold + vrecipo
       end if
-! *** check for acceptance ***
+! check for acceptance ***
 
       deltv  = vnew - vold
       deltvb = beta * deltv
 
 
-! *** For ANES algorithm, do the Fluctuating charge moves.
+! For ANES algorithm, do the Fluctuating charge moves.
 
       if ( lanes ) then
          call anes(i,ibox,ibox,1,laccept,deltv,vintern,vintran,vextn, velectn,vintero,vintrao,vexto,velecto,vdum,vdum, vdum,vdum,.false.)
@@ -190,15 +190,15 @@ contains
       if ( deltvb .gt. (2.3d0*softcut) ) return
 
       if ( deltv .le. 0.0d0 ) then
-!        --- accept move
+! accept move
       else if ( dexp(-deltvb) .gt. random() ) then
-!        --- accept move
+! accept move
       else
-!        --- move rejected
+! move rejected
          return
       end if
 
-!      write(io_output,*) 'TRAXYZ accepted i',i
+! write(io_output,*) 'TRAXYZ accepted i',i
 
       vbox(ibox)     = vbox(ibox) + deltv
       vinterb(ibox)  = vinterb(ibox) + (vintern - vintero)
@@ -218,16 +218,16 @@ contains
       end do
 
       if (lewald.and.lelect(imolty).and..not.lideal(ibox)) then
-! *** update reciprocal-space sum
+! update reciprocal-space sum
          call recip(ibox,vdum,vdum,2)
       end if
 
       if ( ldielect ) then
-! *** update the dipole term
+! update the dipole term
          call dipole(ibox,1)
       end if
 
-! *** update chain center of mass
+! update chain center of mass
 
       call ctrmas(.false.,ibox,i,1)
 
@@ -236,7 +236,7 @@ contains
       if (lz) bstraz(imolty,ibox) = bstraz(imolty,ibox) + 1.0d0
 
       if ( licell .and. (ibox.eq.boxlink)) then
-!     --- update linkcell list
+! update linkcell list
          call update_linked_cell(i)
       end if
 
@@ -248,7 +248,7 @@ contains
 
          do ic = 1, neigh_cnt(i)
             j = neighbor(ic,i)
-!            write(io_output,*) ic,i,'j:',j
+! write(io_output,*) ic,i,'j:',j
             do ip = 1,neigh_cnt(j)
                if ( neighbor(ip,j) .eq. i ) then
                   neighbor(ip,j)=neighbor(neigh_cnt(j),j)
@@ -294,13 +294,13 @@ contains
     end subroutine traxyz
 
 !    *******************************************************************
-!    ** makes a rotational movement around "x" space-fixed axis.      **
-!    ** the maximum displacement is controlled by rmrotx and the      **
-!    ** number of successful rotation is given by bsrotx.             **
+! makes a rotational movement around "x" space-fixed axis.      **
+! the maximum displacement is controlled by rmrotx and the      **
+! number of successful rotation is given by bsrotx.             **
 !    **                                                               **
-!    ** rotxyz chooses one of the three space-fixed axes at random    **
-!    ** and rotates the molecule around this axis by dgamma radians.  **
-!    ** the maximum angular displacement is dgamax.                   **
+! rotxyz chooses one of the three space-fixed axes at random    **
+! and rotates the molecule around this axis by dgamma radians.  **
+! the maximum angular displacement is dgamax.                   **
 !    *******************************************************************
     subroutine rotxyz (lx,ly,lz )
       use sim_particle,only:update_neighbor_list
@@ -308,7 +308,7 @@ contains
       logical::lx,ly,lz,ovrlap,lneighij
       integer::i,ibox,flagon,iunit,j,imolty,iuroty,icbu ,ic,ip
       real::rx,ry,rz,dchain,rchain,vnew,vold,vintrao,dgamma,rxorig,ryorig,rzorig,rxnew2,rynew2,rznew2,vintran,deltv,deltvb,vintern,vintero,vextn,vexto,vdum ,velectn,velecto
-! *** further variable definitions
+! further variable definitions
       real::cosdg, sindg, rmrot
       real::vrecipn,vrecipo
 
@@ -322,7 +322,7 @@ contains
 #endif
       ovrlap = .false.
       if (lgrand) then
-! ---    select a chain at random in box 1!
+! select a chain at random in box 1!
 !         (in box 2 is an ideal gas!)
          ibox = 1
          rchain  = random()
@@ -345,7 +345,7 @@ contains
          if (nboxi(i) .ne. 1) goto 10
          iuroty = iurot(imolty)
       else
-! ***    select a chain type at random ***
+! select a chain type at random ***
          rchain  = random()
          do icbu = 1,nmolty
             if ( rchain .lt. pmromt(icbu) ) then
@@ -380,10 +380,10 @@ contains
          end if
       end if
 
-! *** store number of units of i in iunit ***
+! store number of units of i in iunit ***
       iunit = nunit(imolty)
 
-! *** store current positions in old-new array #1# ***
+! store current positions in old-new array #1# ***
       do j = 1, iunit
          rxuion(j,1) = rxu(i,j)
          ryuion(j,1) = ryu(i,j)
@@ -392,7 +392,7 @@ contains
       end do
       moltion(1) = imolty
 
-! *** choose a random angular displacement ***
+! choose a random angular displacement ***
 
       if (lx) then
          rmrot = rmrotx(imolty,ibox)
@@ -406,32 +406,32 @@ contains
       end if
       dgamma = ( 2.0d0*random() - 1.0d0 ) * rmrot
 
-! *** set up the rotation marix ***
+! set up the rotation marix ***
 
       cosdg = dcos( dgamma )
       sindg = dsin( dgamma )
 
-! *** Determine the rotation coordinates ***
+! Determine the rotation coordinates ***
       if (iuroty .eq. 0) then
-! *** Use the center of mass for rotation
+! Use the center of mass for rotation
          rxorig = xcm(i)
          ryorig = ycm(i)
          rzorig = zcm(i)
       else
-! *** Use iurot for rotation
+! Use iurot for rotation
          rxorig = rxuion(iuroty,1)
          ryorig = ryuion(iuroty,1)
          rzorig = rzuion(iuroty,1)
       end if
 
-!      write(io_output,*) 'before rotating'
-!      write(io_output,*) xcm(i),ycm(i),zcm(i)
-!      write(io_output,*) rxu(i,1),ryu(i,1),rzu(i,1)
+! write(io_output,*) 'before rotating'
+! write(io_output,*) xcm(i),ycm(i),zcm(i)
+! write(io_output,*) rxu(i,1),ryu(i,1),rzu(i,1)
 
 
       if (lx) then
 
-! ***    ROTATE UNITS OF I AROUND X-AXIS ***
+! ROTATE UNITS OF I AROUND X-AXIS ***
 
          do  j = 1, iunit
             ry = ryuion(j,1) - ryorig
@@ -447,7 +447,7 @@ contains
       end if
       if (ly) then
 
-! ***    ROTATE UNITS OF I AROUND y-AXIS ***
+! ROTATE UNITS OF I AROUND y-AXIS ***
 
          do  j = 1, iunit
             rx = rxuion(j,1) - rxorig
@@ -463,7 +463,7 @@ contains
       end if
       if (lz) then
 
-! ***    ROTATE UNITS OF I AROUND z-AXIS ***
+! ROTATE UNITS OF I AROUND z-AXIS ***
 
          do  j = 1, iunit
             rx = rxuion(j,1) - rxorig
@@ -479,17 +479,17 @@ contains
       end if
       moltion(2) = imolty
 
-!  *** calculate the energy of i in the new configuration ***
+! calculate the energy of i in the new configuration ***
 
       flagon = 2
       call energy(i,imolty, vnew,vintran,vintern,vextn,velectn,vdum ,flagon, ibox,1,iunit,.false.,ovrlap,.false.,vdum, .false.,.false.,.false.)
       if (ovrlap) return
 
-! *** calculate the energy of i in the old configuration ***
+! calculate the energy of i in the old configuration ***
       flagon = 1
       call energy(i,imolty, vold,vintrao,vintero,vexto,velecto,vdum ,flagon,ibox, 1, iunit,.false.,ovrlap,.false.,vdum, .false.,.false.,.false.)
 
-      if (ovrlap) call err_exit('disaster- overlap for old conf in ROTXYZ')
+      if (ovrlap) call err_exit(__FILE__,__LINE__,'disaster- overlap for old conf in ROTXYZ',myid+1)
       if (lewald.and.lelect(imolty).and..not.lideal(ibox)) then
          call recip(ibox,vrecipn,vrecipo,1)
          velectn = velectn + vrecipn
@@ -510,12 +510,12 @@ contains
          vold = vold + vrecipo
       end if
 
-! *** check for acceptance ***
+! check for acceptance ***
 
       deltv  = vnew - vold
       deltvb = beta * deltv
 
-! *** For ANES algorithm, do the Fluctuating charge moves.
+! For ANES algorithm, do the Fluctuating charge moves.
 
       if ( lanes ) then
          call anes(i,ibox,ibox,2,laccept,deltv,vintern,vintran,vextn, velectn,vintero,vintrao,vexto,velecto,vdum,vdum,vdum, vdum,.false.)
@@ -530,15 +530,15 @@ contains
       if ( deltvb .gt. (2.3d0*softcut) ) return
 
       if ( deltv .le. 0.0d0 ) then
-!        --- move accepted
+! move accepted
       else if ( dexp(-deltvb) .gt. random() ) then
-!        --- move accepted
+! move accepted
       else
-!        --- move rejected
+! move rejected
          return
       end if
 
-!      write(io_output,*) 'ROTXYZ accepted',i
+! write(io_output,*) 'ROTXYZ accepted',i
       vbox(ibox) = vbox(ibox) + deltv
       vinterb(ibox)  = vinterb(ibox) + (vintern -  vintero)
       vintrab(ibox)  = vintrab(ibox) + (vintran - vintrao)
@@ -556,7 +556,7 @@ contains
       end do
 
       if (lewald.and.lelect(imolty).and..not.lideal(ibox)) then
-! *** update reciprocal-space sum
+! update reciprocal-space sum
          call recip(ibox,vdum,vdum,2)
       end if
 
@@ -565,7 +565,7 @@ contains
       end if
 
 
-! *** update center of mass
+! update center of mass
       call ctrmas(.false.,ibox,i,2)
 
       if (lx) bsrotx(imolty,ibox) = bsrotx(imolty,ibox) + 1.0d0
@@ -578,7 +578,7 @@ contains
       end if
 
       if ( lneighbor ) then
-!         write(io_output,*) 'in rotxyz:',i,neigh_cnt(i)
+! write(io_output,*) 'in rotxyz:',i,neigh_cnt(i)
          do 11 ic = 1, neigh_cnt(i)
             j = neighbor(ic,i)
             do ip = 1,neigh_cnt(j)
@@ -614,10 +614,10 @@ contains
     end subroutine rotxyz
 
 !    *******************************************************************
-!    ** makes a translational movement in x,y,or z-direction.         **
-!    ** the maximum displacement is controlled by rAtrax(yz) and the  **
-!    ** number of successful trial moves is stored in Abstrax(yz).     **
-!    ** The attempts are stored in Abntrax(yz)                         **
+! makes a translational movement in x,y,or z-direction.         **
+! the maximum displacement is controlled by rAtrax(yz) and the  **
+! number of successful trial moves is stored in Abstrax(yz).     **
+! The attempts are stored in Abntrax(yz)                         **
 !    *******************************************************************
     subroutine Atom_traxyz (lx,ly,lz )
       use sim_particle,only:update_neighbor_list
@@ -641,9 +641,9 @@ contains
 
 ! --------------------------------------------------------------------
 
-!      write(io_output,*) 'start TRAXYZ'
+! write(io_output,*) 'start TRAXYZ'
       ovrlap = .false.
-!     ***    select a chain at random ***
+! select a chain at random ***
       rchain  = random()
       do icbu = 1,nmolty
          if ( rchain .lt. pmtrmt(icbu) ) then
@@ -653,7 +653,7 @@ contains
       end do
 
       if (lgrand) then
-! ---    select a chain at random in box 1!
+! select a chain at random in box 1!
 !         (in box 2 is an ideal gas!)
          ibox = 1
          if (ncmt(ibox,imolty).eq.0) then
@@ -676,13 +676,13 @@ contains
 
       end if
 
-! *** store number of units of i in iunit ***
+! store number of units of i in iunit ***
 
       iunit = nunit(imolty)
 
       pick_unit = int(dble(iunit*random()) + 1 )
 
-!      write(io_output,*) pick_unit, imolty, pick_chain
+! write(io_output,*) pick_unit, imolty, pick_chain
 
       i = pick_chain
 
@@ -695,7 +695,7 @@ contains
 
       moltion(1) = imolty
 
-! *** move i ***
+! move i ***
       if (lx) then
          rx =  ( 2.0*random() - 1.0d0 ) * Armtrax
          Abntrax = Abntrax + 1.0d0
@@ -731,16 +731,16 @@ contains
 
       moltion(2) = imolty
 
-!  *** calculate the energy of i in the new configuration ***
+! calculate the energy of i in the new configuration ***
       flagon = 2
       call energy(i,imolty,vnew,vintran,vintern,vextn,velectn,vewaldn,flagon,ibox,pick_unit, pick_unit,.true.,ovrlap,.false.,vdum,.false.,.false.,.true.)
       if (ovrlap) return
       call U_bonded(i,imolty,vvibn,vbendn,vtgn)
 
-! *** calculate the energy of i in the old configuration ***
+! calculate the energy of i in the old configuration ***
       flagon = 1
       call energy(i,imolty,vold,vintrao,vintero,vexto,velecto,vewaldo,flagon,ibox,pick_unit, pick_unit,.true.,ovrlap,.false.,vdum,.false.,.false.,.true.)
-      if (ovrlap) call err_exit('disaster ovrlap in old conf of ATOM_TRAXYZ')
+      if (ovrlap) call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf of ATOM_TRAXYZ',myid+1)
       call U_bonded(i,imolty,vvibo,vbendo,vtgo)
 
       if ( lewald .and. lelect(imolty) ) then
@@ -750,13 +750,13 @@ contains
          vnew = vnew + vrecipn
          vold = vold + vrecipo
       end if
-! *** check for acceptance ***
+! check for acceptance ***
 
       deltv  = vnew - vold
       deltvb = beta * deltv
 
-! *** For ANES algorithm, do the Fluctuating charge moves.
-! *** For time being it will not work for atom disp [Neeraj]****
+! For ANES algorithm, do the Fluctuating charge moves.
+! For time being it will not work for atom disp [Neeraj]****
       if ( lanes ) then
          call anes(i,ibox,ibox,1,laccept,deltv,vintern,vintran,vextn, velectn,vintero,vintrao,vexto,velecto,vdum,vdum, vdum,vdum,.false.)
          if ( laccept ) then
@@ -770,15 +770,15 @@ contains
       if ( deltvb .gt. (2.3d0*softcut) ) return
 
       if ( deltv .le. 0.0d0 ) then
-!        --- accept move
+! accept move
       else if ( dexp(-deltvb) .gt. random() ) then
-!        --- accept move
+! accept move
       else
-!        --- move rejected
+! move rejected
          return
       end if
 
-!      write(io_output,*) 'TRAXYZ accepted i',i
+! write(io_output,*) 'TRAXYZ accepted i',i
       vbox(ibox)     = vbox(ibox) + deltv
       vinterb(ibox)  = vinterb(ibox) + (vintern - vintero)
       vintrab(ibox)  = vintrab(ibox) + (vintran - vintrao)
@@ -795,17 +795,17 @@ contains
       if (lz) rzu(i,pick_unit) = rzuion(pick_unit,2)
 
       if (lewald .and. lelect(imolty)) then
-! *** update reciprocal-space sum
+! update reciprocal-space sum
          call recip_atom(ibox,vdum,vdum,2,pick_unit)
       end if
 
       if ( ldielect ) then
-! *** update the dipole term
+! update the dipole term
          call dipole(ibox,1)
       end if
 
 
-! *** update chain center of mass
+! update chain center of mass
 
       call ctrmas(.false.,ibox,i,10)
 
@@ -814,7 +814,7 @@ contains
       if (lz) Abstraz = Abstraz + 1.0d0
 
       if ( licell .and. (ibox.eq.boxlink)) then
-!     --- update linkcell list
+! update linkcell list
          call update_linked_cell(i)
       end if
 
@@ -826,7 +826,7 @@ contains
 
          do 10 ic = 1, neigh_cnt(i)
             j = neighbor(ic,i)
-!            write(io_output,*) ic,i,'j:',j
+! write(io_output,*) ic,i,'j:',j
             do ip = 1,neigh_cnt(j)
                if ( neighbor(ip,j) .eq. i ) then
                   neighbor(ip,j)=neighbor(neigh_cnt(j),j)
@@ -852,18 +852,18 @@ contains
          end do
       end if
 
-!      write(io_output,*) 'end TRAXYZ',i
+! write(io_output,*) 'end TRAXYZ',i
 
       return
     end subroutine Atom_traxyz
 
 !    *************************************************************
-!    ** makes an isotropic volume change                        **
-!    ** the maximum change is controlled by rmtrax and the      **
-!    ** number of successful trial moves is stored in bsvol.    **
+! makes an isotropic volume change                        **
+! the maximum change is controlled by rmtrax and the      **
+! number of successful trial moves is stored in bsvol.    **
 !    *************************************************************
 !
-! --- perform change of the volume: random walk in ln(vol)
+! perform change of the volume: random walk in ln(vol)
 !
     subroutine volume
       use sim_particle,only:rebuild_neighbor_list
@@ -871,7 +871,7 @@ contains
       use energy_pairwise,only:sumup
       use energy_kspace,only:calp,save_kvector,restore_kvector
 
-!      logical::ovrlap,lvol,lx(nbxmax),ly(nbxmax),lz(nbxmax),lncubic
+! logical::ovrlap,lvol,lx(nbxmax),ly(nbxmax),lz(nbxmax),lncubic
       logical::ovrlap,lvol,lx,ly,lz,lncubic
       logical::la,lb,lc
 
@@ -897,9 +897,9 @@ contains
 
 ! --------------------------------------------------------------------
 
-!      write(io_output,*) 'start VOLUME'
+! write(io_output,*) 'start VOLUME'
 
-! *** select pair of boxes to do the volume move
+! select pair of boxes to do the volume move
       if ( nvolb .gt. 1 ) then
          rpair = random()
          do ipair = 1, nvolb
@@ -922,27 +922,27 @@ contains
       lz = .false.
 
       if ( lsolid(boxa) ) then
-! *** volume move independently in x, y, z directions
-! * changing to only move in z direction:
+! volume move independently in x, y, z directions
+! changing to only move in z direction:
          rm = random()
          if ( rm .le. pmvolx ) then
-!            lx(boxa) = .true.
-!            ly(boxa) = .false.
-!            lz(boxa) = .false.
+! lx(boxa) = .true.
+! ly(boxa) = .false.
+! lz(boxa) = .false.
             lx = .true.
             ly = .false.
             lz = .false.
          else if ( rm .le. pmvoly ) then
-!            lx(boxa) = .false.
-!            ly(boxa) = .true.
-!            lz(boxa) = .false.
+! lx(boxa) = .false.
+! ly(boxa) = .true.
+! lz(boxa) = .false.
             lx = .false.
             ly = .true.
             lz = .false.
          else
-!            lx(boxa) = .false.
-!            ly(boxa) = .false.
-!            lz(boxa) = .true.
+! lx(boxa) = .false.
+! ly(boxa) = .false.
+! lz(boxa) = .true.
             lx = .false.
             ly = .false.
             lz = .true.
@@ -955,27 +955,27 @@ contains
          end if
       end if
       if ( lsolid(boxb) ) then
-! *** volume move independently in x, y, z directions
-! * changing to only move in z direction:
+! volume move independently in x, y, z directions
+! changing to only move in z direction:
          rm = random()
          if ( rm .le. pmvolx ) then
-!            lx(boxb) = .true.
-!            ly(boxb) = .false.
-!            lz(boxb) = .false.
+! lx(boxb) = .true.
+! ly(boxb) = .false.
+! lz(boxb) = .false.
             lx = .true.
             ly = .false.
             lz = .false.
          else if ( rm .le. pmvoly ) then
-!            lx(boxb) = .false.
-!            ly(boxb) = .true.
-!            lz(boxb) = .false.
+! lx(boxb) = .false.
+! ly(boxb) = .true.
+! lz(boxb) = .false.
             lx = .false.
             ly = .true.
             lz = .false.
          else
-!            lx(boxb) = .false.
-!            ly(boxb) = .false.
-!            lz(boxb) = .true.
+! lx(boxb) = .false.
+! ly(boxb) = .false.
+! lz(boxb) = .true.
             lx = .false.
             ly = .false.
             lz = .true.
@@ -990,11 +990,11 @@ contains
 
       if (lsolid(boxa) .and. .not. lrect(boxa)) then
          if (lsolid(boxb) .and. .not. lrect(boxb)) then
-            call err_exit('can not perform volume move between two non-re ctangular boxes')
+            call err_exit(__FILE__,__LINE__,'can not perform volume move between two non-re ctangular boxes',myid+1)
          end if
       end if
 
-! --- store old box lengths, energy, configuration etc
+! store old box lengths, energy, configuration etc
       lncubic = .false.
 
       do ibox = 1, 2
@@ -1026,7 +1026,7 @@ contains
          vflucqo(i) = vflucqb(i)
          v3o(i)      = v3garob(i)
 
-! --- store neighbor list for garofalini --- KEA
+! store neighbor list for garofalini --- KEA
       if (lgaro) then
          do i=1,nchain
             neigh_o(i) = neigh_cnt(i)
@@ -1064,14 +1064,14 @@ contains
       end do
 
 
-!      write(io_output,*) 'before lncubic', lx,ly,lz
+! write(io_output,*) 'before lncubic', lx,ly,lz
 
-! --- calculate total volume
+! calculate total volume
       volt = volo(boxa) + volo(boxb)
 
       if ( lncubic ) then
 
-! *** select one of the cell edge
+! select one of the cell edge
          rbox = 3.0d0*random()
          if ( lx ) then
             if ( rbox .le. 1.0d0 ) then
@@ -1148,20 +1148,20 @@ contains
             write(io_output,*) 'non-rectangular volume move rejected-', ' box width below cutoff size'
             write(io_output,*) 'w1:',w(1),'w2:',w(2),'w3:',w(3)
             hmat(hbox,jhmat) = hmato(jhmat)
-            call dump
-            call err_exit('')
-!            goto 500
+            call dump('final-config')
+            call err_exit(__FILE__,__LINE__,'volume',myid+1)
+! goto 500
          end if
 
          voln(jbox) = volt-voln(hbox)
-!         if ( la ) boxlx(hbox) = hmat(hbox,1)
-!         if ( lb ) boxly(hbox) = dsqrt(hmat(hbox,4)*hmat(hbox,4)+
+! if ( la ) boxlx(hbox) = hmat(hbox,1)
+! if ( lb ) boxly(hbox) = dsqrt(hmat(hbox,4)*hmat(hbox,4)+
 !     &                 hmat(hbox,5)*hmat(hbox,5))
-!         if ( lc ) boxlz(hbox) = dsqrt(hmat(hbox,7)*hmat(hbox,7)
+! if ( lc ) boxlz(hbox) = dsqrt(hmat(hbox,7)*hmat(hbox,7)
 !     &        +hmat(hbox,8)*hmat(hbox,8) +
 !     &        hmat(hbox,9)*hmat(hbox,9))
 
-! *** determine the displacement of the COM
+! determine the displacement of the COM
 
          df=(voln(jbox)/volo(jbox))**(1.0d0/3.0d0)
          boxlx(jbox) = boxlx(jbox)*df
@@ -1211,7 +1211,7 @@ contains
       else
 
 
-! --- calculate new volume
+! calculate new volume
          expdv = dexp(dlog(volo(boxa)/volo(boxb)) + rmvol(ipairb)*(2.0d0*random()-1.0d0))
          voln(boxa)= expdv*volt/(1+expdv)
          voln(boxb)= volt-voln(boxa)
@@ -1221,7 +1221,7 @@ contains
          if ( lpbcz ) then
 
             if ( lsolid(boxa).and.lrect(boxa) ) then
-! *** volume move independently in x, y, z directions
+! volume move independently in x, y, z directions
                dfac(boxa)=voln(boxa)/volo(boxa)
             else
                dfac(boxa)= (voln(boxa)/volo(boxa))**(1.0d0/3.0d0)
@@ -1229,7 +1229,7 @@ contains
 
 
             if ( lsolid(boxb).and.lrect(boxb) ) then
-! *** volume move independently in x, y, z directions
+! volume move independently in x, y, z directions
                dfac(boxb)=voln(boxb)/volo(boxb)
             else
                dfac(boxb)= (voln(boxb)/volo(boxb))**(1.0d0/3.0d0)
@@ -1281,17 +1281,17 @@ contains
                boxlz(boxa) = bzo(boxa)
                boxlz(boxb) = bzo(boxb)
             end if
-            call dump
-            call err_exit('')
+            call dump('final-config')
+            call err_exit(__FILE__,__LINE__,'volume',myid+1)
             return
          end if
 
 
-! *** determine new positions of the molecules
-! *** calculate centre of mass and its displacement
+! determine new positions of the molecules
+! calculate centre of mass and its displacement
 
-! - WARNING
-         if ( .not. lfold )  call err_exit('volume move only correct with folded coordinates')
+! WARNING
+         if ( .not. lfold )  call err_exit(__FILE__,__LINE__,'volume move only correct with folded coordinates',myid+1)
 
          do i = 1, nchain
 
@@ -1302,9 +1302,9 @@ contains
                imolty = moltyp(i)
                df = dfac(ibox) - 1.0d0
 
-!     if ( lsolid(ibox) ) then
+! if ( lsolid(ibox) ) then
                if ( lsolid(ibox).and.lrect(ibox) ) then
-!     if ( lx(ibox) ) then
+! if ( lx(ibox) ) then
                   if ( lx ) then
                      dx = xcm(i) * df
                      xcm(i) = xcm(i) + dx
@@ -1312,7 +1312,7 @@ contains
                         rxu(i,j) = rxu(i,j) + dx
                      end do
                   end if
-!     if ( ly(ibox) ) then
+! if ( ly(ibox) ) then
                   if ( ly ) then
                      dy = ycm(i) * df
                      ycm(i) = ycm(i) + dy
@@ -1320,7 +1320,7 @@ contains
                         ryu(i,j) = ryu(i,j) + dy
                      end do
                   end if
-!     if ( lz(ibox) ) then
+! if ( lz(ibox) ) then
                   if ( lz ) then
                      dz = zcm(i) * df
                      zcm(i) = zcm(i) + dz
@@ -1379,13 +1379,13 @@ contains
       end do
 
       if ( lanes ) then
-! *** for ANES algorithm, optimize the charge configuration
+! for ANES algorithm, optimize the charge configuration
          do i = 1,2
             if ( i .eq. 1 ) ibox = boxa
             if ( i .eq. 2 ) ibox = boxb
-! *** on the new coordinates, continue to use the fluctuating charge
-! *** algorithm to optimize the charge configurations, update the
-! *** energy, coordinates and the ewald sum
+! on the new coordinates, continue to use the fluctuating charge
+! algorithm to optimize the charge configurations, update the
+! energy, coordinates and the ewald sum
 
             vbox(ibox) = vbox(ibox) + (vboxn(ibox) - vboxo(ibox))
             vinterb(ibox)  = vinterb(ibox) +  (vintern(ibox) - vintero(ibox))
@@ -1408,11 +1408,11 @@ contains
          dele = (vboxn(boxa)-vboxo(boxa)) + (vboxn(boxb)-vboxo(boxb)) - ((nchbox(boxa)+1+ghost_particles(boxa)) *dlog(voln(boxa)/volo(boxa))/beta) - ((nchbox(boxb)+1+ghost_particles(boxb)) *dlog(voln(boxb)/volo(boxb))/beta)
       end if
 
-! --- acceptance test
+! acceptance test
 
-!      write(io_output,*) 'dele',dele
+! write(io_output,*) 'dele',dele
       if (random() .lt. dexp(-beta*dele) ) then
-! --      accepted
+! accepted
          if ( lncubic ) then
             bshmat(hbox,jhmat) = bshmat(hbox,jhmat) + 1.0d0
          else
@@ -1432,10 +1432,10 @@ contains
              end do
           end if
 
-! --      update centers of mass
+! update centers of mass
           call ctrmas(.true.,boxa,0,5)
           call ctrmas(.true.,boxb,0,5)
-! *** update linkcell, if applicable
+! update linkcell, if applicable
           if (licell .and. (boxa .eq. boxlink .or. boxb .eq. boxlink)) then
              call build_linked_cell()
           end if
@@ -1445,8 +1445,8 @@ contains
           end if
           return
       end if
-! ---     rejected
-! --- restore old energy, box lengths
+! rejected
+! restore old energy, box lengths
  500  do ibox = 1, 2
          if ( ibox .eq. 1 ) i = boxa
          if ( ibox .eq. 2 ) i = boxb
@@ -1475,7 +1475,7 @@ contains
          end if
       end do
 
-! --- restore old neighbor list for garofalini --- KEA
+! restore old neighbor list for garofalini --- KEA
       if (lgaro) then
          do i=1,nchain
             neigh_cnt(i) = neigh_o(i)
@@ -1504,17 +1504,17 @@ contains
             end do
          end if
       end do
-!      write(io_output,*) 'end VOLUME'
+! write(io_output,*) 'end VOLUME'
       return
     end subroutine volume
 
 !    *************************************************************
-!    ** makes an isotropic volume change under const. pressure  **
-!    ** the maximum change is controlled by rmtrax and the      **
-!    ** number of successful trial moves is stored in bsvol.    **
+! makes an isotropic volume change under const. pressure  **
+! the maximum change is controlled by rmtrax and the      **
+! number of successful trial moves is stored in bsvol.    **
 !    *************************************************************
 !
-! --- perform change of the volume: random walk in ln(vol)
+! perform change of the volume: random walk in ln(vol)
 !
     subroutine prvolume
       use sim_particle,only:rebuild_neighbor_list
@@ -1546,7 +1546,7 @@ contains
       write(io_output,*) 'start VOLUME of LNPTGIBBS'
 #endif
 
-!     Select a box at  random to change the volume of box
+! Select a box at  random to change the volume of box
 
 
       lx = .false.
@@ -1566,7 +1566,7 @@ contains
  99   bnvol(boxvch) = bnvol(boxvch) + 1.0d0
 
       if ( lsolid(boxvch) ) then
-! *** volume move independently in x, y, z directions
+! volume move independently in x, y, z directions
          rbox = random()
          if ( rbox .le. pmvolx ) then
             lx = .true.
@@ -1589,9 +1589,9 @@ contains
          end if
       end if
 
-! --- store old box lengths, energy, configuration etc
+! store old box lengths, energy, configuration etc
 
-!---- in the box of volume change ----
+! in the box of volume change ----
       bxo    = boxlx(boxvch)
       byo    = boxly(boxvch)
       if ( lpbcz ) bzo = boxlz(boxvch)
@@ -1614,7 +1614,7 @@ contains
       vflucqo = vflucqb(boxvch)
 !kea
       v3o = v3garob(boxvch)
-! --- store neighbor list for garofalini --- KEA
+! store neighbor list for garofalini --- KEA
       if (lgaro) then
          do i=1,nchain
             neigh_o(i) = neigh_cnt(i)
@@ -1628,13 +1628,13 @@ contains
          end do
       end if
 
-! --- store old k vectors and reciprocal sum
+! store old k vectors and reciprocal sum
       if ( lewald ) then
          call save_kvector(boxvch)
          call recip(boxvch,vdum,vdum,3)
       end if
       do i = 1, nchain
-! ----- Check if the chain i is in the correct box
+! Check if the chain i is in the correct box
          if (nboxi(i).eq. boxvch) then
 
             imolty = moltyp(i)
@@ -1657,7 +1657,7 @@ contains
       end do
 
       if ( lsolid(boxvch) .and. .not. lrect(boxvch) ) then
-! *** select one of the cell edge
+! select one of the cell edge
          rbox = 3.0d0*random()
          if ( lx ) then
             if ( rbox .le. 1.0d0 ) then
@@ -1720,13 +1720,13 @@ contains
             write(io_output,*) 'non-rectangular prvolume move rejected-', ' box width below cutoff size'
             write(io_output,*) 'w1:',w(1),'w2:',w(2),'w3:',w(3)
             hmat(boxvch,jhmat) = hmato(jhmat)
-            call dump
-            call err_exit('')
-!            goto 500
+            call dump('final-config')
+            call err_exit(__FILE__,__LINE__,'prvolume',myid+1)
+! goto 500
          end if
 
 
-! *** determine the displacement of the COM
+! determine the displacement of the COM
          do i = 1,nchain
             imolty = moltyp(i)
             if (nboxi(i) .eq. boxvch) then
@@ -1754,26 +1754,26 @@ contains
 
       else
 
-! --- calculate new volume
+! calculate new volume
          voln = volo + rmvol(boxvch) * ( 2.0d0*random() - 1.0d0 )
          rbcut = rcut(boxvch)
          if ( lpbcz ) then
             if (lsolid(boxvch).and.lrect(boxvch)) then
-! *** volume move independently in x, y, z directions
+! volume move independently in x, y, z directions
                dfac=voln/volo
             else
                dfac = (voln/volo)**(1.0d0/3.0d0)
             end if
-!            vminim = rbcut**(3.0d0)
+! vminim = rbcut**(3.0d0)
          else
             dfac= dsqrt(voln/volo)
-!            vminim = rbcut**(2.0d0)
+! vminim = rbcut**(2.0d0)
          end if
 
-!         if ( voln .lt. vminim ) then
-!            write(io_output,*) 'prvolume move rejected - below cut-off size'
-!            return
-!         end if
+! if ( voln .lt. vminim ) then
+! write(io_output,*) 'prvolume move rejected - below cut-off size'
+! return
+! end if
 
          if ( lsolid(boxvch).and.lrect(boxvch) ) then
             if (lx) boxlx(boxvch) = boxlx(boxvch) * dfac
@@ -1799,23 +1799,23 @@ contains
             write(io_output,*) 'boxvch',boxvch
             write(io_output,*) 'Problem in line 381 of subroutine prvolume.f'
             write(io_output,*) 'A move was attempted that would lead to a  boxlength less than twice rcut'
-            call dump
-            call err_exit('')
+            call dump('final-config')
+            call err_exit(__FILE__,__LINE__,'prvolume',myid+1)
             return
          end if
 
-! *** determine new positions of the molecules
-! *** calculate centre of mass and its displacement
+! determine new positions of the molecules
+! calculate centre of mass and its displacement
 
-! - WARNING
-         if ( .not. lfold ) call err_exit('volume move only correct with folded coordinates')
+! WARNING
+         if ( .not. lfold ) call err_exit(__FILE__,__LINE__,'volume move only correct with folded coordinates',myid+1)
 
          df = dfac - 1.0d0
 
          do i = 1, nchain
             imolty = moltyp(i)
 
-! ----- Check if the chain i is in the correct box
+! Check if the chain i is in the correct box
             if (nboxi(i) .eq. boxvch) then
 
                if (lsolid(boxvch).and.lrect(boxvch)) then
@@ -1869,7 +1869,7 @@ contains
       end if
       call sumup( ovrlap, v, vinter, vtail, vdum,vdum, vdum,vdum,vext,velect,vdum, boxvch, lvol)
       if ( ovrlap ) then
-!         write(io_output,*) 'move rejected due to overlap in PRVOLUME'
+! write(io_output,*) 'move rejected due to overlap in PRVOLUME'
          goto 500
       end if
 
@@ -1879,13 +1879,13 @@ contains
       velectn  = velect
       v3n = v3garo
       vboxn    = vboxo + (vintern-vintero) + (vextn-vexto)  + (velectn-velecto) + (v3n-v3o)
-!      write(io_output,*) 'new  energy',  vboxn
+! write(io_output,*) 'new  energy',  vboxn
 
       if ( lanes ) then
-! *** for ANES algorithm, optimize the charge configuration
-! *** on the new coordinates, continue to use the fluctuating charge
-! *** algorithm to optimize the charge configurations, update the
-! *** energy, coordinates and the ewald sum
+! for ANES algorithm, optimize the charge configuration
+! on the new coordinates, continue to use the fluctuating charge
+! algorithm to optimize the charge configurations, update the
+! energy, coordinates and the ewald sum
 
          vbox(boxvch)    = vbox(boxvch) + (vboxn - vboxo)
          vinterb(boxvch) = vinterb(boxvch) + (vintern-vintero)
@@ -1903,17 +1903,17 @@ contains
          dele = ( vboxn - vboxo ) +  express(boxvch)*(voln-volo)  - ((nchbox(boxvch)+ghost_particles(boxvch))  * dlog(voln/volo)/beta )
       end if
 
-! --- acceptance test
+! acceptance test
 
-!--- check problem--
-!      write(io_output,*) 'length of box',      boxlx(boxvch)
-!      write(io_output,*) 'change of  vol',     voln - volo
-!      write(io_output,*) 'change of  energy',  vboxn, vboxo
-!      write(io_output,*) 'dele',     dele
+! check problem--
+! write(io_output,*) 'length of box',      boxlx(boxvch)
+! write(io_output,*) 'change of  vol',     voln - volo
+! write(io_output,*) 'change of  energy',  vboxn, vboxo
+! write(io_output,*) 'dele',     dele
 
 
       if (random() .lt. dexp(-(beta*dele)) ) then
-! --      accepted
+! accepted
           if ( lsolid(boxvch) .and. .not. lrect(boxvch) ) then
              bshmat(boxvch,jhmat) = bshmat(boxvch,jhmat) + 1.0d0
           else
@@ -1927,9 +1927,9 @@ contains
              velectb(boxvch) = velectb(boxvch) + (velectn-velecto)
              v3garob(boxvch) = v3garob(boxvch) + (v3n-v3o)
           end if
-! ---     update centers of mass
+! update centers of mass
           call ctrmas(.true.,boxvch,0,5)
-! *** update linkcell, if applicable
+! update linkcell, if applicable
           if (licell .and. (boxvch .eq. boxlink)) then
              call build_linked_cell()
           end if
@@ -1939,8 +1939,8 @@ contains
           return
       end if
 
-! ---     rejected
-! --- re store old box lengths, energy, configuration etc
+! rejected
+! re store old box lengths, energy, configuration etc
  500  continue
       if ( lsolid(boxvch) .and. .not. lrect( boxvch)) then
          do i = 1,9
@@ -1960,7 +1960,7 @@ contains
       vflucqb(boxvch) = vflucqo
       v3garob(boxvch) = v3o
 
-! --- restore old neighbor list for garofalini --- KEA
+! restore old neighbor list for garofalini --- KEA
       if (lgaro) then
          do i=1,nchain
             neigh_cnt(i) = neigh_o(i)
@@ -1975,13 +1975,13 @@ contains
       end if
 
       if ( lewald ) then
-! --- restore old k vectors and reciprocal sum and calp
+! restore old k vectors and reciprocal sum and calp
          call restore_kvector(boxvch)
          call recip(boxvch,vdum,vdum,4)
       end if
       do i = 1, nchain
          imolty = moltyp(i)
-! ----- Check if the chain i is in the correct box
+! Check if the chain i is in the correct box
          if (nboxi(i) .eq. boxvch) then
             xcm(i) = xcmo(i)
             ycm(i) = ycmo(i)
@@ -2012,8 +2012,7 @@ contains
     integer::jerr
     allocate(acntrax(ntmax,nbxmax),acntray(ntmax,nbxmax),acntraz(ntmax,nbxmax),acnrotx(ntmax,nbxmax),acnroty(ntmax,nbxmax),acnrotz(ntmax,nbxmax),acstrax(ntmax,nbxmax),acstray(ntmax,nbxmax),acstraz(ntmax,nbxmax),acsrotx(ntmax,nbxmax),acsroty(ntmax,nbxmax),acsrotz(ntmax,nbxmax),bntrax(ntmax,nbxmax),bntray(ntmax,nbxmax),bntraz(ntmax,nbxmax),bstrax(ntmax,nbxmax),bstray(ntmax,nbxmax),bstraz(ntmax,nbxmax),bnrotx(ntmax,nbxmax),bnroty(ntmax,nbxmax),bnrotz(ntmax,nbxmax),bsrotx(ntmax,nbxmax),bsroty(ntmax,nbxmax),bsrotz(ntmax,nbxmax),acsvol(nbxmax),acnvol(nbxmax),acshmat(nbxmax,9),acnhmat(nbxmax,9),bsvol(nbxmax),bnvol(nbxmax),bshmat(nbxmax,9),bnhmat(nbxmax,9),stat=jerr)
     if (jerr.ne.0) then
-       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-       call err_exit('init_moves_simple: allocation failed')
+       call err_exit(__FILE__,__LINE__,'init_moves_simple: allocation failed',jerr)
     end if
 
     acntrax = 0.d0
@@ -2051,7 +2050,7 @@ contains
     bnhmat = 0.0d0
   end subroutine init_moves_simple
 
-! *** write some information about translations and rotations
+! write some information about translations and rotations
   subroutine output_translation_rotation_stats(io_output)
     integer,intent(in)::io_output
     integer::ibox,i

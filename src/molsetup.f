@@ -33,7 +33,7 @@
          if (invib(imolty,i).gt.6) then
 
             write(io_output,*) 'imolty',imolty,'   i',i,'   invib' ,invib(imolty,i)
-            call err_exit('too many vibrations')
+            call err_exit(__FILE__,__LINE__,'too many vibrations',myid+1)
          end if
 
       end do
@@ -56,7 +56,7 @@
             
             if (vibtype.eq.0) then
                write(io_output,*) 'atype,btype',atype,btype
-               call err_exit('screwup in vibrations')
+               call err_exit(__FILE__,__LINE__,'screwup in vibrations',myid+1)
             end if
                         
             countvib = countvib + 1
@@ -76,7 +76,7 @@
 
                   if (bendtype.eq.0) then
                      write(io_output,*) 'atype,btype,ctype',atype ,btype,ctype
-                     call err_exit('screwup in bending angles')
+                     call err_exit(__FILE__,__LINE__,'screwup in bending angles',myid+1)
                   end if
 
                   countbend = countbend + 1
@@ -95,7 +95,7 @@
 
                         if (tortype.eq.0) then
                            write(io_output,*) 'atype,btype,ctype,dtype',atype ,btype,ctype,dtype
-                           call err_exit('screwup in torsion angles')
+                           call err_exit(__FILE__,__LINE__,'screwup in torsion angles',myid+1)
                         end if
                         
                         counttor = counttor + 1
@@ -200,7 +200,7 @@
             
             if (lfinda.and.lfindb) then
                if (lfound) then
-                  call err_exit('vibration type not distinguishable')
+                  call err_exit(__FILE__,__LINE__,'vibration type not distinguishable',-1)
                end if
                vibtype = vbtype(n)
                lfound = .true.
@@ -298,7 +298,7 @@
 
             if (lfinda.and.lfindb.and.lfindc) then
                if (lfound) then
-                  call err_exit('bend type not distinguishable')
+                  call err_exit(__FILE__,__LINE__,'bend type not distinguishable',-1)
                end if
                bendtype = bntype(n)
                lfound = .true.
@@ -450,7 +450,7 @@
            if (lfinda.and.lfindb.and.lfindc.and.lfindd) then
               if (lfound) then
                  write(io_output,*) 'a,b,c,d',atype,btype,ctype,dtype
-                 call err_exit('torsion type not distinguishable')
+                 call err_exit(__FILE__,__LINE__,'torsion type not distinguishable',-1)
               end if
               
               tortype = trtype(n)

@@ -1,56 +1,60 @@
 ! -----------------------------------------------------------------
-! subroutine dump
 ! dumps the final configuration before stopping the program (Neeraj).
 ! -----------------------------------------------------------------
-subroutine dump  
+subroutine dump(file_cfg)
   use sim_system
   use sim_cell
   implicit none
+  character(LEN=*),intent(in)::file_cfg
 
-  integer::i,j,im,imolty,ibox
+  integer::io_cfg,jerr,i,j,imolty,ibox
 
-  open (8, file="final-config")
-  write(8,*) tmcc
-  if ( tmcc .gt. 0 ) then
-     write(8,*) Armtrax, Armtray, Armtraz 
-     do im=1,nbox
-        do imolty=1,nmolty
-           write(8,*) rmtrax(imolty,im), rmtray(imolty,im) , rmtraz(imolty,im)
-           write(8,*) rmrotx(imolty,im), rmroty(imolty,im) , rmrotz(imolty,im)
-        end do
-     end do
-     do im=1, nbox
-        write (8,*) (rmflcq(i,im),i=1,nmolty)
-     end do
-     if ( lgibbs .or. lgrand .or. lnpt ) then
-        write(8,*) (rmvol(ibox),ibox=1,nbox)
-        do ibox = 1,nbox
-           if (lsolid(ibox) .and. .not. lrect(ibox)) then
-              write(8,*) (rmhmat(ibox,i),i=1,9)
-              write(8,*) (hmat(ibox,i),i=1,9)
-           else
-              write(8,*) boxlx(ibox),boxly(ibox),boxlz(ibox)
-           end if
-        end do
-     end if
+  io_cfg=get_iounit()
+  open(unit=io_cfg,access='sequential',action='write',file=file_cfg,form='formatted',iostat=jerr,status='unknown')
+  if (jerr.ne.0) then
+     call err_exit(__FILE__,__LINE__,'cannot open file '//trim(file_cfg),myid+1)
   end if
-  write(8,*) nchain
-  write(8,*) nmolty
-  write(8,*) (nunit(i),i=1,nmolty)
-  write(8,*) (moltyp(i),i=1,nchain)
-  write(8,*) (nboxi(i),i=1,nchain)
+
+  write(io_cfg,*) tmcc
+  write(io_cfg,*) Armtrax, Armtray, Armtraz
+  do ibox=1,nbox
+     do imolty=1,nmolty
+        write(io_cfg,*) rmtrax(imolty,ibox), rmtray(imolty,ibox) , rmtraz(imolty,ibox)
+        write(io_cfg,*) rmrotx(imolty,ibox), rmroty(imolty,ibox) , rmrotz(imolty,ibox)
+     end do
+  end do
+  do ibox=1, nbox
+     write (io_cfg,*) (rmflcq(i,ibox),i=1,nmolty)
+  end do
+  ! changed formatting so fort.77 same for all ensembles, 06/08/09 KM
+  !if ( lgibbs .or. lgrand .or. lnpt ) then
+  write(io_cfg,*) (rmvol(ibox),ibox=1,nbox)
+  do ibox = 1,nbox
+     if (lsolid(ibox) .and. .not. lrect(ibox)) then
+        write(io_cfg,*) (rmhmat(ibox,i),i=1,9)
+        write(io_cfg,*) (hmat(ibox,i),i=1,9)
+     else
+        write(io_cfg,*) boxlx(ibox),boxly(ibox),boxlz(ibox)
+     end if
+  end do
+  !end if
+  write(io_cfg,*) nchain
+  write(io_cfg,*) nmolty
+  write(io_cfg,*) (nunit(i),i=1,nmolty)
+  write(io_cfg,*) (moltyp(i),i=1,nchain)
+  write(io_cfg,*) (nboxi(i),i=1,nchain)
   do i = 1, nmolty
-     if ( lexpand(i) ) write(8,*) eetype(i)
+     if ( lexpand(i) ) write(io_cfg,*) eetype(i)
   end do
   do i = 1, nmolty
-     if ( lexpand(i) ) write(8,*) rmexpc(i)
+     if ( lexpand(i) ) write(io_cfg,*) rmexpc(i)
   end do
   do  i = 1, nchain
      imolty = moltyp(i)
      do j = 1, nunit(imolty)
-        write(8,*) rxu(i,j), ryu(i,j), rzu(i,j), qqu(i,j)
+        write(io_cfg,*) rxu(i,j), ryu(i,j), rzu(i,j), qqu(i,j)
      end do
   end do
-  close (8)
+  close(io_cfg)
   return
 end subroutine dump

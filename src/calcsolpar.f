@@ -1,11 +1,11 @@
 ! ***********************************************************************************
-!  Written by Neeraj Rai. Date 08/22/2006
+! Written by Neeraj Rai. Date 08/22/2006
 
-!  This subroutine calculates heat of vaporization and solubility parameter
-!  Separates the Coulombic and LJ part of solubility parameter
+! This subroutine calculates heat of vaporization and solubility parameter
+! Separates the Coulombic and LJ part of solubility parameter
 ! Previos implementation of heat of vaporization was good only for single component
 ! system. Now we can do any number of components.
-!  It is being written for two box gibbs ensemble simulations. If it is more than two boxes it will c return without doing anything.
+! It is being written for two box gibbs ensemble simulations. If it is more than two boxes it will c return without doing anything.
 ! or if the box is solid and non rectangular it will return.
 ! If you have more than two boxes then there are couple changes that need to be done
 ! in order for this subroutine to work. nprop in blkavg.inc needs to be set properly
@@ -42,9 +42,9 @@ subroutine  calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ, Heat_vapor_COUL, pdV, CE
       else   
          box_volume(ibox) = boxlx(ibox)*boxly(ibox)*boxlz(ibox)
       end if
-!     molar volume in cc/mol    
+! molar volume in cc/mol    
       if (temp_nmol(ibox).eq.0) then    
-!     set the molar volume artibrarily high as it will not affect any since pressure will be zero
+! set the molar volume artibrarily high as it will not affect any since pressure will be zero
          mol_vol(ibox) = 10.0d10    
       else
          mol_vol(ibox)=box_volume(ibox)/temp_nmol(ibox)*0.6022d0 
@@ -61,7 +61,7 @@ subroutine  calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ, Heat_vapor_COUL, pdV, CE
       else
          box_volume(jbox) = boxlx(jbox)*boxly(jbox)*boxlz(jbox)
       end if
-!     -- molar volume in cc/mol
+! molar volume in cc/mol
       if (temp_nmol(jbox).eq.0) then
          mol_vol(jbox) = 10.0D6
       else
@@ -75,7 +75,7 @@ subroutine  calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ, Heat_vapor_COUL, pdV, CE
          ig = jbox
          il = ibox
       end if
-!     -- This is total energy
+! This is total energy
       if (temp_nmol(il).eq.0) then
          T_Energy_Liq = 0.0d0
          LJ_Energy_Liq = 0.0d0
@@ -102,30 +102,30 @@ subroutine  calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ, Heat_vapor_COUL, pdV, CE
       pdV = pres(ig)*(mol_vol(ig)-mol_vol(il))*1.0d-6
       
       Heat_vapor_T = enchg1 + pres(ig)* (mol_vol(ig)-mol_vol(il))*1.0d-6
-!     write(io_output,1505) il,ig,abs(enthchg1)
-!     -- This is inter+intra LJ
+! write(io_output,1505) il,ig,abs(enthchg1)
+! This is inter+intra LJ
       enchg2 = 0.008314510d0*(LJ_Energy_Gas-LJ_Energy_Liq)
       Heat_vapor_LJ = enchg2 + pres(ig)* (mol_vol(ig)-mol_vol(il))*1.0d-6
-!     -- This is Coulomb part
+! This is Coulomb part
       enchg3 = 0.008314510d0*(Coul_Energy_Gas-Coul_Energy_Liq)
       Heat_vapor_COUL = enchg3 + pres(ig)* (mol_vol(ig)-mol_vol(il))*1.0d-6
-!     -- Calculating Hildebrand solubility parameter (total)
+! Calculating Hildebrand solubility parameter (total)
       CED_T = (abs(enchg1)* 1000.0d0*joule2cal)/mol_vol(il)
       if (CED_T.lt.0.0d0) then
          HSP_T = 0.0
       else
          HSP_T = sqrt(CED_T)
       end if
-!     write(io_output,1508) temp,HSP_TOTAL
-!     -- Calculating Hildebrand solubility parameter (LJ part)
+! write(io_output,1508) temp,HSP_TOTAL
+! Calculating Hildebrand solubility parameter (LJ part)
       CED_LJ = ((abs(enchg2))*1000.0d0* joule2cal)/mol_vol(il)
       if (CED_LJ.lt.0.0d0) then
          HSP_LJ =0.0d0
       else
          HSP_LJ = sqrt(CED_LJ)
       end if
-!     write(io_output,1509) HSP_LJ
-!     -- Calculating Hildebrand solubility parameter (Coulomb part)
+! write(io_output,1509) HSP_LJ
+! Calculating Hildebrand solubility parameter (Coulomb part)
       CED_COUL = (abs(enchg3)* 1000.0d0*joule2cal)/mol_vol(il)
       if (CED_COUL.lt.0.0d0) then
          HSP_COUL=0.0d0

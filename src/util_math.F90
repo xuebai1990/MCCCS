@@ -22,7 +22,7 @@ contains
     real::mbessel
     real,intent(in)::z,nu
 
-! -- simple form
+! simple form
     mbessel = sqrt(onepi/(2.0d0*z))*exp(-z)
 !     &         *(1.0d0 + (4.0d0*nu**2-1)/(8.0d0*z) +
 !     &         (4.0d0*nu**2-1)*(4.0d0*nu**2-9.0d0)/(2.0d0*64.0d0*z**2))
@@ -136,7 +136,7 @@ contains
     klo = locate(xa,n,x,2)
     khi = klo+1
     h = xa(khi)-xa(klo)
-    if (h.eq.0.) call err_exit('bad xa input in splint')
+    if (h.eq.0.) call err_exit(__FILE__,__LINE__,'bad xa input in splint',-1)
     a = (xa(khi)-x)/h
     b = (x-xa(klo))/h
     y = a*ya(klo)+b*ya(khi)+((a**3-a)*y2a(klo)+(b**3-b)*y2a(khi))*(h**2)/6.0d0

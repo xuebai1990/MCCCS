@@ -14,8 +14,8 @@
       logical::lhm,llwell
 
       ibox = 1
-      if (lmipsw.and.(nbox.gt.1)) call err_exit('ipsw only for 1 box')
-      if (lmipsw.and.lnpt.and.pmvol.gt.1.0d-7) call err_exit('ipsw only for NVT')
+      if (lmipsw.and.(nbox.gt.1)) call err_exit(__FILE__,__LINE__,'ipsw only for 1 box',myid+1)
+      if (lmipsw.and.lnpt.and.pmvol.gt.1.0d-7) call err_exit(__FILE__,__LINE__,'ipsw only for NVT',myid+1)
       read(35,*)
       read(35,*) (lwell(i),i=1,nmolty)
       read(35,*)
@@ -33,29 +33,29 @@
       end do 
       if (nw.lt.tnw) then
          write(io_output,*) 'increase nw in ipswpar to ', tnw
-         call err_exit('')
+         call err_exit(__FILE__,__LINE__,'',myid+1)
       end if
       read(35,*)
       read(35,*) bwell
       read(35,*)
       read(35,*) lstagea, lstageb, lstagec
       if (lmipsw) then
-         if ((.not.lstagea).and.(.not.lstageb).and.(.not.lstagec)) call err_exit('one stage must be true')
+         if ((.not.lstagea).and.(.not.lstageb).and.(.not.lstagec)) call err_exit(__FILE__,__LINE__,'one stage must be true',myid+1)
       end if
-      if (llwell.and.lstagea) call err_exit('ipsw well NOT for stage a')
+      if (llwell.and.lstagea) call err_exit(__FILE__,__LINE__,'ipsw well NOT for stage a',myid+1)
       if (lstagea) then
-         if (lstageb.or.lstagec) call err_exit('only one lstage must be true')
+         if (lstageb.or.lstagec) call err_exit(__FILE__,__LINE__,'only one lstage must be true',myid+1)
       end if
       if (lstageb) then
-         if (lstagea.or.lstagec) call err_exit('only one lstage must be true')
+         if (lstagea.or.lstagec) call err_exit(__FILE__,__LINE__,'only one lstage must be true',myid+1)
       end if
       if (lstagec) then
-         if (lstagea.or.lstageb) call err_exit('only one lstage must be true')
+         if (lstagea.or.lstageb) call err_exit(__FILE__,__LINE__,'only one lstage must be true',myid+1)
       end if
       read(35,*)
       read(35,*) etais, lambdais
-      if ((lambdais.le.-1.0d-6).or.(lambdais.ge.1.000001)) call err_exit('lambdais must be between 0 and 1')
-      if ((etais.le.-1.0d-6).or.(etais.ge.1.000001)) call err_exit('etais must be between 0 and 1')
+      if ((lambdais.le.-1.0d-6).or.(lambdais.ge.1.000001)) call err_exit(__FILE__,__LINE__,'lambdais must be between 0 and 1',myid+1)
+      if ((etais.le.-1.0d-6).or.(etais.ge.1.000001)) call err_exit(__FILE__,__LINE__,'etais must be between 0 and 1',myid+1)
       read(35,*)
       if (lsolid(ibox).and.(.not.lrect(ibox))) then
          read(35,*) hmata(1),hmata(2),hmata(3)
@@ -79,13 +79,13 @@
                write(io_output,*) hm(1),hm(2),hm(3)
                write(io_output,*) hm(4),hm(5),hm(6)
                write(io_output,*) hm(7),hm(8),hm(9)
-               call err_exit('')
+               call err_exit(__FILE__,__LINE__,'',myid+1)
             end if
          else if (.not.lsolid(ibox)) then
             lx = (1.0d0-lambdais)*lena+lambdais*lenc
             if (dabs(boxlx(1)-lx).gt.1.0d-6) then
                write(io_output,*) 'input correct boxl', lx
-               call err_exit('')
+               call err_exit(__FILE__,__LINE__,'',myid+1)
             end if
          end if
       end if
@@ -100,13 +100,13 @@
                write(io_output,*) hmata(1),hmata(2),hmata(3)
                write(io_output,*) hmata(4),hmata(5),hmata(6)
                write(io_output,*) hmata(7),hmata(8),hmata(9)
-               call err_exit('')
+               call err_exit(__FILE__,__LINE__,'',myid+1)
             end if
 !	write(io_output,*) boxlx(1),lena
          else if (.not.lsolid(ibox)) then
             if (dabs(boxlx(1)-lena).gt.1.0d-6) then
                write(io_output,*) 'input correct boxl', lena
-               call err_exit('')
+               call err_exit(__FILE__,__LINE__,'',myid+1)
             end if
          end if
       end if
@@ -121,12 +121,12 @@
                write(io_output,*) hmatc(1),hmatc(2),hmatc(3)
                write(io_output,*) hmatc(4),hmatc(5),hmatc(6)
                write(io_output,*) hmatc(7),hmatc(8),hmatc(9)
-               call err_exit('')
+               call err_exit(__FILE__,__LINE__,'',myid+1)
             end if
          else if (.not.lsolid(ibox)) then
             if (dabs(boxlx(1)-lenc).gt.1.0d-6) then
                write(io_output,*) 'input correct boxl', lenc
-               call err_exit('')
+               call err_exit(__FILE__,__LINE__,'',myid+1)
             end if
          end if
       end if
@@ -142,7 +142,7 @@
       read(35,*)
       read(35,*) iratipsw
       if (lmipsw.and.lstageb) then
-         if (mod(iratipsw,iratp).ne.0) call err_exit('iratipsw must be integer multiple of iratp if lstageb is true')
+         if (mod(iratipsw,iratp).ne.0) call err_exit(__FILE__,__LINE__,'iratipsw must be integer multiple of iratp if lstageb is true',myid+1)
       end if
       do i = 1, nmolty
          if (lwell(i)) then

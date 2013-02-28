@@ -22,8 +22,8 @@ get_filename_component (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 
 if (Fortran_COMPILER_NAME MATCHES "mpif90*")
   # mpif90 wrapper
-  set (CMAKE_Fortran_FLAGS_RELEASE "-free -fpp -O3 -xHost -ipo -no-prec-div -integer-size 32 -real-size 64")
-  set (CMAKE_Fortran_FLAGS_DEBUG   "-free -fpp -O0 -integer-size 32 -real-size 64 -g -traceback -check all -warn unused -warn declarations -warn truncated_source -warn uncalled -warn ignore_loc -D__DEBUG__")
+  set (CMAKE_Fortran_FLAGS_RELEASE "-free -fpp -O3 -xHost -ipo -no-prec-div -integer-size 32 -real-size 64 -D__MPI__")
+  set (CMAKE_Fortran_FLAGS_DEBUG   "-free -fpp -O0 -integer-size 32 -real-size 64 -g -traceback -check all -warn unused -warn declarations -warn truncated_source -warn uncalled -warn ignore_loc -D__MPI__ -D__DEBUG__")
 elseif (Fortran_COMPILER_NAME MATCHES "ifort*")
   # Intel Compiler for x86 architecture
   set (CMAKE_Fortran_FLAGS_RELEASE "-free -fpp -O3 -xHost -ipo -no-prec-div")
@@ -74,7 +74,7 @@ endif (Fortran_COMPILER_NAME MATCHES "mpif90*")
 #include_directories(${MPI_Fortran_INCLUDE_PATH})
 
 # build executables
-set (NMPROGRAMS "var_type.F90" "const_math.F90" "const_phys.F90" "util_math.F90" "util_random.F90" "util_string.F90" "util_files.F90" "util_timings.F90" "util_memory.F90" "util_runtime.F90" "util_search.F90" "sim_system.F90" "sim_cell.F90" "sim_particle.F90" "sim_zeolite.F90" "fparser.F90" "parser_cif.F90" "parser_pdb.F90" "parser_cssr.F90" "zeolite.F90" "energy_kspace.F90" "energy_intramolecular.F90" "energy_external.F90" "energy_pairwise.F90" "energy_sami.F90" "energy_garofalini.F90" "energy_3body.F90" "energy_4body.F90" "moves_simple.F90" "moves_cbmc.F90" "moves_ee.F90" "transfer_shared.F90" "transfer_swap.F90" "transfer_swatch.F90" "prop_pressure.F90" "topmon.F90" "alignplanes.f" "anes.f" "calcsolpar.f" "charge.f" "ctrmas.f" "deriv.f" "dipole.f" "dump.f" "flucq.f" "inclus.f" "initia.f" "ipswsetup.f" "molsetup.f" "monola.f" "monper.f" "readdat.f" "update.f" "update1.f" "virial.f")
+set (NMPROGRAMS "var_type.F90" "const_math.F90" "const_phys.F90" "util_math.F90" "util_search.F90" "util_string.F90" "util_files.F90" "util_timings.F90" "util_memory.F90" "util_runtime.F90" "util_random.F90" "util_prng.F90" "util_mp.F90" "util_mp_aux.F90" "sim_system.F90" "sim_cell.F90" "sim_particle.F90" "sim_zeolite.F90" "fparser.F90" "parser_cif.F90" "parser_pdb.F90" "parser_cssr.F90" "zeolite.F90" "energy_kspace.F90" "energy_intramolecular.F90" "energy_external.F90" "energy_pairwise.F90" "energy_sami.F90" "energy_garofalini.F90" "energy_3body.F90" "energy_4body.F90" "moves_simple.F90" "moves_cbmc.F90" "moves_ee.F90" "transfer_shared.F90" "transfer_swap.F90" "transfer_swatch.F90" "prop_pressure.F90" "topmon.F90" "alignplanes.f" "anes.f" "calcsolpar.f" "charge.f" "ctrmas.f" "deriv.f" "dipole.f" "dump.f" "flucq.f" "inclus.f" "initia.f" "ipswsetup.f" "molsetup.f" "monola.f" "monper.f" "readdat.f" "update.f" "update1.f" "virial.f")
 set (EXECUTABLES "topmon")
 set (SCRIPTS "reconf")
 

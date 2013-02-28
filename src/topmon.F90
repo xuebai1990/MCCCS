@@ -1,9 +1,12 @@
 program topmon
   use var_type,only:default_path_length
   use util_timings,only:time_init
-  use sim_system,only:ierr,myid,numprocs,thread_id,thread_num,thread_num_max,thread_num_proc
+  use util_mp,only:mp_start,mp_end
+  use sim_system,only:myid,numprocs,groupid,thread_num,thread_num_max
   implicit none
-  include 'common.inc'
+#ifdef __OPENMP__
+  include 'omp_lib.h'
+#endif
   integer::narg,iarg,jerr
   character(LEN=default_path_length)::sarg,file_in='topmon.inp'
   logical::lrun=.true.,lsetinput=.false.,lversion=.false.,lusage =.false.
@@ -37,9 +40,11 @@ program topmon
            lrun=.false.
            exit
         end if
+#ifdef __OPENMP__
 !$       thread_num_max=omp_get_max_threads()
 !$       if (thread_num.gt.thread_num_max) thread_num=thread_num_max
 !$       call omp_set_num_threads(thread_num)
+#endif
      case('--input','-i')
         iarg=iarg+1
         if (iarg.gt.narg) then
@@ -67,14 +72,12 @@ program topmon
   end if
 
   if (lrun) then
-     call MPI_INIT( ierr )
-     call MPI_COMM_RANK( MPI_COMM_WORLD, myid, ierr )
-     call MPI_COMM_SIZE( MPI_COMM_WORLD, numprocs, ierr )
+     call mp_start(numprocs,myid,groupid)
 
 ! --- call main program
      call monola(file_in)
 
-     call MPI_FINALIZE(ierr)
+     call mp_end()
   end if
 ! ----------------------------------------------------------------
 end program topmon

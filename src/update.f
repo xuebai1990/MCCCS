@@ -1,5 +1,5 @@
 !
-! *** this subroutine updates the block averages
+! this subroutine updates the block averages
 !
 subroutine update(nblock,ipos,ibox,value,acmove)
   use sim_system
@@ -9,8 +9,8 @@ subroutine update(nblock,ipos,ibox,value,acmove)
   real::acmove,dp,dn,value      
       
   if (nblock.eq.1) then
-! ---     first block
-!         write(io_output,*) 'acmove', acmove       
+! first block
+! write(io_output,*) 'acmove', acmove       
      dn = acmove
      dp = value
      if ( dn .lt. 0.5d0 ) then
@@ -23,8 +23,8 @@ subroutine update(nblock,ipos,ibox,value,acmove)
      naccu(ipos,ibox) = naccu(ipos,ibox) + dn
      accum(ipos,ibox) = accum(ipos,ibox) + dp
   else      
-! ---   other blocks
-!         write(io_output,*) 'acmove', acmove
+! other blocks
+! write(io_output,*) 'acmove', acmove
      dn = acmove - nccold(ipos,ibox)
      dp = value - bccold(ipos,ibox)
      if ( dn .lt. 0.5d0 ) then

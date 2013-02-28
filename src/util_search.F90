@@ -23,7 +23,7 @@ CONTAINS
 
     table%size=0
     allocate(table%list(1:initialSize),stat=jerr)
-    if (jerr.ne.0) call err_exit(TRIM(__FILE__)//":"//integer_to_string(__LINE__))
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'',jerr)
   end subroutine initiateTable
 
   !> \brief Add item to table, ignore if exist, increase table size by 2 if table is full and expand is set to .true., signal an error otherwise
@@ -51,7 +51,7 @@ CONTAINS
           if (lexpand) then
              call reallocate(table%list,1,2*size(table%list))
           else
-             call err_exit(TRIM(__FILE__)//":"//integer_to_string(__LINE__))
+             call err_exit(__FILE__,__LINE__,'addToTable: table full',-1)
           end if
        end if
        table%size=i
@@ -86,7 +86,7 @@ CONTAINS
     LOGICAL::ASCND
     INTEGER::JLO,JHI,JM,INC
 
-    IF (N.LT.2.OR.MM.LT.2.OR.MM.GT.N) CALL ERR_EXIT('HUNT SIZE ERROR')
+    IF (N.LT.2.OR.MM.LT.2.OR.MM.GT.N) CALL ERR_EXIT(__FILE__,__LINE__,'HUNT SIZE ERROR',-1)
 
     ASCND=XX(N).GT.XX(1)
 
@@ -145,7 +145,7 @@ CONTAINS
     INTEGER::JL,JM,JU
     LOGICAL::ASCND
 
-    IF (N.LT.2.OR.MM.LT.2.OR.MM.GT.N) CALL ERR_EXIT('LOCATE SIZE ERROR')
+    IF (N.LT.2.OR.MM.LT.2.OR.MM.GT.N) CALL ERR_EXIT(__FILE__,__LINE__,'LOCATE SIZE ERROR',-1)
 
     ASCND=(XX(N).GT.XX(1))
 

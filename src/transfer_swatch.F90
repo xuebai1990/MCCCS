@@ -16,11 +16,11 @@ module transfer_swatch
   real,allocatable::bnswat(:,:),bnswat_empty(:,:),bsswat(:,:) !< accumulators for swatch performance
 contains
 !      **********************************************************
-!    *** Added intrabox move for two particles within one box   ***
-!    *** in combined move that shares the same parameters.      ***
-!    *** Will also accept rigid (lrigid) molecules.  Contains   ***
-!    *** several critical bug fixes as well.                    ***
-!    ***                                     9-25-02 JMS        ***
+! Added intrabox move for two particles within one box   ***
+! in combined move that shares the same parameters.      ***
+! Will also accept rigid (lrigid) molecules.  Contains   ***
+! several critical bug fixes as well.                    ***
+! 9-25-02 JMS        ***
 !      **********************************************************
   subroutine swatch
     use sim_particle,only:update_neighbor_list
@@ -38,7 +38,7 @@ contains
       real::vnbox,vninte,vnintr,vnvibb,vntgb ,vnextb,vnbend,vntail,vnelect,vnewald,wnlog,wolog,wdlog,wswat
 
       real::v,vintra,vinter,vext,velect,vewald ,vdum,delen,deleo,dicount,vrecipn,vrecipo
-! * additions from iswatch
+! additions from iswatch
 
       integer::izz,box,iboxi,bdmol_a,bdmol_b
       integer::imola,imolb,moltaid,moltbid
@@ -49,23 +49,23 @@ contains
       dimension from(2*numax),prev(2*numax)
       dimension rxut(4,numax),ryut(4,numax),rzut(4,numax)
 
-! * end additions
+! end additions
 
       real::waddold,waddnew,vdum2
 
       dimension vnbox(nbxmax),vninte(nbxmax),vnintr(nbxmax) ,vnvibb(nbxmax),vntgb(nbxmax),vnextb(nbxmax),vnbend(nbxmax) ,vntail(nbxmax),vnelect(nbxmax),vnewald(nbxmax)
 
-! --- JLR 11-24-09
+! JLR 11-24-09
       integer::icallrose
-! --- END JLR 11-24-09
+! END JLR 11-24-09
 
 ! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-!      write(io_output,*) 'start SWATCH'
+! write(io_output,*) 'start SWATCH'
 
       lempty = .false.
-!     ---randomly select chains to switch between boxa boxb
-!     --- select a pair type to switch
+! randomly select chains to switch between boxa boxb
+! select a pair type to switch
       if ( nswaty .gt. 1 ) then
          rpair = random()
          do 96 ipair = 1, nswaty
@@ -78,7 +78,7 @@ contains
          iparty = 1
       end if
 
-! *** randomly select the molecules from the pair ***
+! randomly select the molecules from the pair ***
 
       if (random() .lt. 0.5d0) then
          type_a = 1
@@ -88,14 +88,14 @@ contains
          type_b = 1
       end if
 
-!     ---select the molecules from the pair
+! select the molecules from the pair
  97   imolta = nswatb(iparty,1)
       imoltb = nswatb(iparty,2)
 ! ???!!!
       type_a = 1
       type_b = 2
 
-!     ---choose box A and box B at random
+! choose box A and box B at random
       if ( nswtcb(iparty) .gt. 1 ) then
          rpair = random()
          do 98 ipair = 1, nswtcb(iparty)
@@ -119,14 +119,14 @@ contains
       if (boxa .eq. boxb) then
 
 ! ****************************************************************
-! * INTRABOX SWATCH ADD *
+! INTRABOX SWATCH ADD *
 ! ****************************************************************
 ! ****************************************************************
 
-! * liswatch prevents non-grown beads from being included in
-! * the new growth in boltz.f
+! liswatch prevents non-grown beads from being included in
+! the new growth in boltz.f
 
-!      write(io_output,*) 'start iSWATCH'
+! write(io_output,*) 'start iSWATCH'
 
 !$$$c *** randomly select chains to switch ***
 !$$$c *** select a pair type to switch ***
@@ -159,7 +159,7 @@ contains
 !$$$
 !$$$      box = thisbox
 
-! *** box determinations ***
+! box determinations ***
 
          if ( (ncmt(boxa,imolta) .eq. 0) .or. (ncmt(boxb,imoltb) .eq. 0) ) then
             lempty = .true.
@@ -178,20 +178,20 @@ contains
               otherbox = 2
            end if
 
-!     *** get particle of type a ***
+! get particle of type a ***
 
            moltaid = idint(dble (ncmt(box,imolta))*random()) + 1
 
-!     * imola is the overall molecule id number (runs from 1 to total #) *
+! imola is the overall molecule id number (runs from 1 to total #) *
            imola = parbox( moltaid, box, imolta)
 
            if (moltyp(imola) .ne. imolta)  write(io_output,*) 'screwup in iswatch'
 
            iboxi = nboxi(imola)
 
-           if (iboxi .ne. box) call err_exit('problem in iswatch')
+           if (iboxi .ne. box) call err_exit(__FILE__,__LINE__,'problem in iswatch',myid+1)
 
-!     *** get particle of type b ***
+! get particle of type b ***
 
            moltbid = idint(dble (ncmt(box,imoltb))*random()) + 1
            imolb = parbox( moltbid, box, imoltb)
@@ -199,26 +199,26 @@ contains
            if (moltyp(imolb) .ne. imoltb)  write(io_output,*) 'screwup in iswatch'
            iboxi = nboxi(imolb)
 
-           if (iboxi .ne. box) call err_exit('problem in iswatch')
+           if (iboxi .ne. box) call err_exit(__FILE__,__LINE__,'problem in iswatch',myid+1)
          end if
-!     *** add one attempt to the count for iparty
+! add one attempt to the count for iparty
 !$$$  bniswat(iparty,box) = bniswat(iparty,box) + 1.0d0
          bnswat(iparty,ipairb) = bnswat(iparty,ipairb) + 1.0d0
-! --- JLR 12-1-09 count the empty attempts
+! JLR 12-1-09 count the empty attempts
          if (lempty) then
             bnswat_empty(iparty,ipairb) = bnswat_empty(iparty,ipairb) + 1.0d0
             return
          end if
-! --- END JLR 12-1-09
+! END JLR 12-1-09
 
-!     * write out the molecule numbers of the pair *
-!     write(io_output,*) imola,imolb
+! write out the molecule numbers of the pair *
+! write(io_output,*) imola,imolb
 
 !     ***************************
-!     *** Begin Growth Setups ***
+! Begin Growth Setups ***
 !     ***************************
 
-!     *** assign from and prev for each moltyp
+! assign from and prev for each moltyp
 
          do izz = 1,ncut(iparty,type_a)
 
@@ -251,17 +251,17 @@ contains
 !$$$     &        prev(type_b+2*(izz-1))
 !$$$         end do
 !$$$
-!$$$         call err_exit('')
+!$$$         call err_exit(__FILE__,__LINE__,'',myid+1)
 
-!     *** store number of units in iunita and iunitb
+! store number of units in iunita and iunitb
          iunita = nunit(imolta)
          iunitb = nunit(imoltb)
 
-!     *** initialize trial weights ***
+! initialize trial weights ***
          tweight = 1.0d0
          tweiold = 1.0d0
 
-!     *** set the trial energies to zero ***
+! set the trial energies to zero ***
          vnbox(box)   = 0.0d0
          vninte(box)  = 0.0d0
          vnintr(box)  = 0.0d0
@@ -272,7 +272,7 @@ contains
          vnelect(box) = 0.0d0
          vnewald(box) = 0.0d0
 
-!     *** store position 1, a's original site ***
+! store position 1, a's original site ***
 
          do izz = 1, nunit(imolta)
 
@@ -282,7 +282,7 @@ contains
 
          end do
 
-!     *** store same bead coordinates for molecules a and b ***
+! store same bead coordinates for molecules a and b ***
 
          do icbu = 1, nsampos(iparty)
 
@@ -301,11 +301,11 @@ contains
          end do
 
 !     *****************************
-!     *** Liswinc Determination ***
+! Liswinc Determination ***
 !     *****************************
 
-!     *** only need this for molecule b, since b is grown after a
-!     *** but a is grown when some of b doesn't exist
+! only need this for molecule b, since b is grown after a
+! but a is grown when some of b doesn't exist
 
          self = imolb
          other = imola
@@ -315,7 +315,7 @@ contains
          ifirst = from(type_b)
          iprev = prev(type_b)
 
-!     * determine which beads aren't in the same positions *
+! determine which beads aren't in the same positions *
 
          call schedule(igrow,imolty,islen,ifirst,iprev,3)
 
@@ -329,21 +329,21 @@ contains
             end do
          end if
 
-!     * assign growth schedule for molecule b *
+! assign growth schedule for molecule b *
 
          do izz = 1,nunit(imolty)
 
             liswinc(izz,imolty) = lexshed(izz)
 
-!     write(io_output,*) izz, liswinc(izz,imolty)
+! write(io_output,*) izz, liswinc(izz,imolty)
 
          end do
 
 !     ******************
-!     *** ROSENBLUTH ***
+! ROSENBLUTH ***
 !     ******************
 
-!     *** start rosenbluth weight calculations ***
+! start rosenbluth weight calculations ***
          do ic = 1,2
             if ( ic .eq. 1 ) then
                liswatch = .true.
@@ -373,7 +373,7 @@ contains
 
             end if
 
-!     *** assign same bead coordinates for new growth ***
+! assign same bead coordinates for new growth ***
             do icbu = 1, nsampos(iparty)
 
                new = splist(iparty,icbu,s_type)
@@ -385,11 +385,11 @@ contains
 
             end do
 
-!        --- set up growth schedule
+! set up growth schedule
             ifirst = from(s_type)
             iprev = prev(s_type)
 
-!     --- lrigid add on
+! lrigid add on
 
             if (lrigid(imolty)) then
 !cc--- JLR 11-24-09
@@ -406,7 +406,7 @@ contains
 
                      else
 
-!     --- calculate new vector from initial bead
+! calculate new vector from initial bead
                         do j = 1,iunit
                            rxnew(j) = rxnew(ifirst) - (rxu(self,ifirst) - rxu(self,j))
                            rynew(j) = rynew(ifirst) - (ryu(self,ifirst) - ryu(self,j))
@@ -422,7 +422,7 @@ contains
                call schedule(igrow,imolty,islen,ifirst,iprev,3)
             end if
 
-! * I wonder if this works with lrigid?
+! I wonder if this works with lrigid?
             if (ncut(iparty,s_type) .gt. 1) then
                do izz = 2,ncut(iparty,s_type)
                   ifirst = from(s_type+2*(izz-1))
@@ -435,20 +435,20 @@ contains
 
 
 
-!     *********** Commenting out for new combined code JMS 6-20-00 *****
-!     *** Call qqcheck to setup the group based qq cutoff ***
+! Commenting out for new combined code JMS 6-20-00 *****
+! Call qqcheck to setup the group based qq cutoff ***
 !$$$  if ( lelect(imolty) ) then
 !$$$  call qqcheck(other,box,rxnew(1),rynew(1),rznew(1))
 !$$$  end if
 
 !     ******************
-!     *** new growth ***
+! new growth ***
 !     ******************
 
-!     *** moving molecules for rosenbluth ***
+! moving molecules for rosenbluth ***
             if (ic .eq. 1) then
 
-!     * putting molecule b in position 1 *
+! putting molecule b in position 1 *
 
                do izz = 1, nsampos(iparty)
 
@@ -462,7 +462,7 @@ contains
 
             else
 
-!     * putting molecule a into its (fully grown) trial position 2 *
+! putting molecule a into its (fully grown) trial position 2 *
 
                do izz = 1, nunit(moltyp(other))
 
@@ -474,41 +474,41 @@ contains
 
             end if
 
-!     --- grow molecules
+! grow molecules
 
-!     --- changing for lrigid to include waddnew
+! changing for lrigid to include waddnew
             waddnew = 1.0d0
 
-!     --- grow new chain conformation
-! --- JLR 11-24-09
-! --- Different logic/calls to rosenbluth for rigid molecules
+! grow new chain conformation
+! JLR 11-24-09
+! Different logic/calls to rosenbluth for rigid molecules
             if (lrigid(imolty)) then
 
                if(nsampos(iparty).ge.iunit) then
                   !molecule is all there
                   !don't regrow anything in rosenbluth
                   icallrose = 4
-               else if( (nsampos(iparty).ge.3)      .or. (ifirst.ge.riutry(imolty,1) )) then
-!                 rigid part is grown, don't do rigrot in rosebluth
+               else if( (nsampos(iparty).ge.3) .or. (ifirst.ge.riutry(imolty,1) )) then
+! rigid part is grown, don't do rigrot in rosebluth
                   icallrose = 3
                else
-!                 rigid part is not grown, do rigrot
+! rigid part is not grown, do rigrot
                   icallrose = 2
                end if
             else
-!              flexible molecule call rosenbluth in normal fashion
+! flexible molecule call rosenbluth in normal fashion
                icallrose = 2
             end if
 
             call rosenbluth(.true.,lterm,self,self,imolty,islen ,box ,igrow,waddnew,.false.,vdum2,icallrose)
-! ---END JLR 11-24-09
+! END JLR 11-24-09
 
-!     --- propagate new rosenbluth weight
+! propagate new rosenbluth weight
             tweight = tweight*weight*waddnew
 
-! --- end rigid add on
+! end rigid add on
 
-!     * moving molecules back *
+! moving molecules back *
             if (ic .eq. 1) then
 
                do izz = 1, nsampos(iparty)
@@ -532,25 +532,25 @@ contains
             end if
 
             if ( lterm ) then
-!     *** termination of cbmc attempt due to walk termination ***
-!     write(io_output,*) 'iSWATCH:new growth rejected',ic
-! * reset liswatch
+! termination of cbmc attempt due to walk termination ***
+! write(io_output,*) 'iSWATCH:new growth rejected',ic
+! reset liswatch
                liswatch = .false.
                return
             else
-!     write(io_output,*) 'iSWATCH:new growth accepted',ic
+! write(io_output,*) 'iSWATCH:new growth accepted',ic
             end if
 
-!     *** save the new coordinates ***
+! save the new coordinates ***
             do jj = 1,igrow
                rxut(ic,jj) = rxnew(jj)
                ryut(ic,jj) = rynew(jj)
                rzut(ic,jj) = rznew(jj)
             end do
 
-!     --- Corrections for switched beads, and DC-CBMC
-!     --- Assign all of the grown new and old beads to rxuion
-!     --- with rxuion: new = 2
+! Corrections for switched beads, and DC-CBMC
+! Assign all of the grown new and old beads to rxuion
+! with rxuion: new = 2
             iii = 2
             do j=1,igrow
                rxuion(j,iii) = rxnew(j)
@@ -559,11 +559,11 @@ contains
                qquion(j,iii) = qqu(self,j)
             end do
 
-!     *** added from new-combined code ***
+! added from new-combined code ***
             if ( iunit .ne. igrow ) then
 
-!     --- for explicit-hydrogen model, put on the hydrogens
-!     --- use phony number iins and call explct to add constrained hydrogens
+! for explicit-hydrogen model, put on the hydrogens
+! use phony number iins and call explct to add constrained hydrogens
 
                iins = nchain + 1
                moltyp(iins) = imolty
@@ -591,16 +591,16 @@ contains
             end if
 
 
-!     --- Begin DC-CBMC and switched bead Corrections for NEW configuration
-!     --- calculate the true site-site energy
+! Begin DC-CBMC and switched bead Corrections for NEW configuration
+! calculate the true site-site energy
 
             if (ic .eq. 1) then
-!     * exclude molecule b from energy calculation, put in other box *
+! exclude molecule b from energy calculation, put in other box *
                nboxi(imolb) = otherbox
 
             else
-!     * put molecule a into position 2 (fully grown trial position)
-!     * for the energy of b's new position (second time around)
+! put molecule a into position 2 (fully grown trial position)
+! for the energy of b's new position (second time around)
                do izz = 1,nunit(imolta)
                   rxu(imola,izz) = rxut(1,izz)
                   ryu(imola,izz) = ryut(1,izz)
@@ -608,19 +608,19 @@ contains
                end do
             end if
 
-!     *** get energy of configuration ***
+! get energy of configuration ***
 
             call ctrmas(.false.,box,self,8)
             call energy(self,imolty, v, vintra,vinter,vext ,velect,vewald,iii,box,1,iunit,.true.,lterm,.false. ,vdum,.false.,.false.,.false.)
 
-!     *** return to normal ***
+! return to normal ***
             if (ic .eq. 1) then
 
-!     * return b to original box *
+! return b to original box *
                nboxi(imolb) = thisbox
             else
 
-!     * return a to position 1 *
+! return a to position 1 *
                do izz = 1, nunit(imolta)
                   rxu(imola,izz) = rx_1(izz)
                   ryu(imola,izz) = ry_1(izz)
@@ -632,10 +632,10 @@ contains
 
             if (lterm) then
                write(io_output,*) 'other ',other,' self ',self,ic
-               call err_exit('interesting screwup in CBMC iswatch')
+               call err_exit(__FILE__,__LINE__,'interesting screwup in CBMC iswatch',myid+1)
             end if
 
-!     *** add on the changes in energy ***
+! add on the changes in energy ***
 
             delen = v - ( vnewt - (vnewbvib + vnewbb + vnewtg ))
 
@@ -647,9 +647,9 @@ contains
             vnewelect = velect
             vnewewald = vewald
 
-!     End DC-CBMC and switched bead Corrections for NEW configuration
+! End DC-CBMC and switched bead Corrections for NEW configuration
 
-!     *** save the trial energies ***
+! save the trial energies ***
             vnbox(box)   = vnbox(box) + vnewt
             vninte(box)  = vninte(box) + vnewinter
             vnintr(box)  = vnintr(box) + vnewintra
@@ -661,53 +661,53 @@ contains
             vnewald(box) = vnewald(box) + vnewewald
 
 !     ******************
-!     *** old growth ***
+! old growth ***
 !     ******************
 
-!     --- lrigid add on
+! lrigid add on
 
             waddold = 1.0d0
 
-!        --- grow old chain conformation
-! --- JLR 11-24-09
+! grow old chain conformation
+! JLR 11-24-09
             if (lrigid(imolty)) then
 
                if(nsampos(iparty).ge.iunit) then
-!                 molecule is all there
-!                 don't regrow anything in rosenbluth
+! molecule is all there
+! don't regrow anything in rosenbluth
                   icallrose = 4
                else if( (nsampos(iparty).ge.3)      .or. (ifirst.ge.riutry(imolty,1)) ) then
-!                 rigid part is grown, don't do rigrot in rosebluth
+! rigid part is grown, don't do rigrot in rosebluth
                   icallrose = 3
                else
-!                 rigid part is not grown, do rigrot
+! rigid part is not grown, do rigrot
                   icallrose = 2
                end if
             else
-!              flexible molecule call rosenbluth in normal fashion
+! flexible molecule call rosenbluth in normal fashion
                icallrose = 2
             end if
 
             call rosenbluth(.false.,lterm,self,self,imolty, islen,box,igrow,waddold,.false.,vdum2,icallrose)
-! --- END JLR 11-24-09
+! END JLR 11-24-09
 
             if ( lterm ) then
-!     *** termination of old walk due to problems generating orientations ***
-!     write(io_output,*) 'iSWATCH:old growth rejected',ic
-! * reset liswatch
+! termination of old walk due to problems generating orientations ***
+! write(io_output,*) 'iSWATCH:old growth rejected',ic
+! reset liswatch
                liswatch = .false.
                return
             else
-!     write(io_output,*) 'iSWATCH:old growth accepted',ic
+! write(io_output,*) 'iSWATCH:old growth accepted',ic
             end if
 
-!        --- propagate old rosenbluth weight
+! propagate old rosenbluth weight
             tweiold = tweiold*weiold*waddold
 
-! --- end rigid add on
+! end rigid add on
 
-!     --- store the old grown beads and explict placed beads positions
-!     --- 1 = old conformation
+! store the old grown beads and explict placed beads positions
+! 1 = old conformation
             iii = 1
             do j = 1,iunit
                rxuion(j,1) = rxu(self,j)
@@ -716,25 +716,25 @@ contains
                qquion(j,1) = qqu(self,j)
             end do
 
-!     Begin Correction for DC-CBMC and switched beads for OLD configuration
-!     --- correct the acceptance rules
-!     --- calculate the Full rcut site-site energy
+! Begin Correction for DC-CBMC and switched beads for OLD configuration
+! correct the acceptance rules
+! calculate the Full rcut site-site energy
 
-!     *** excluding molecule b for first loop ***
+! excluding molecule b for first loop ***
             if (ic .eq. 1) then
                nboxi(imolb) = otherbox
             end if
 
-!     * get total energy *
+! get total energy *
 
             call energy(self,imolty, v, vintra,vinter,vext,velect ,vewald,iii,box, 1,iunit,.true.,lterm,.false.,vdum ,.false.,.false.,.false.)
 
             if (ic .eq. 1) then
-!     * return b to current box *
+! return b to current box *
                nboxi(imolb) = thisbox
             end if
 
-            if (lterm) call err_exit('disaster ovrlap in old conf iSWATCH')
+            if (lterm) call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf iSWATCH',myid+1)
             deleo = v - ( voldt - (voldbvib + voldbb + voldtg) )
 
             tweiold = tweiold*dexp(-beta*deleo)
@@ -745,9 +745,9 @@ contains
             voldelect = velect
             voldewald = vewald
 
-!     End Correction for DC-CBMC and switched beads for OLD configuration
+! End Correction for DC-CBMC and switched beads for OLD configuration
 
-!     *** save the trial energies ***
+! save the trial energies ***
             vnbox(box)   = vnbox(box)  - voldt
             vninte(box)  = vninte(box) - voldinter
             vnintr(box)  = vnintr(box) - voldintra
@@ -761,17 +761,17 @@ contains
          end do
 
 !     *****************************
-!     *** Ewald sum corrections ***
+! Ewald sum corrections ***
 !     *****************************
 
-!     --- Perform the Ewald sum reciprical space corrections
+! Perform the Ewald sum reciprical space corrections
          if (lewald.and..not.lideal(box)) then
-!     --- added into tweight even though it really contains new-old
+! added into tweight even though it really contains new-old
 
-!     *** store the reciprocal space vector
+! store the reciprocal space vector
             call recip(box,vdum,vdum,3)
 
-!     *** Position 1 ***
+! Position 1 ***
             oldchain = imola
             newchain = imolb
             oldunit = nunit(imolta)
@@ -800,10 +800,10 @@ contains
             vnewald(box) = vnewald(box) + delen
             vnbox(box) = vnbox(box) + delen
 
-!     * update the reciprocal space terms *
+! update the reciprocal space terms *
             call recip(box,vdum,vdum,2)
 
-!     *** Position 2 ***
+! Position 2 ***
             oldchain = imolb
             newchain = imola
             oldunit = nunit(imoltb)
@@ -833,19 +833,19 @@ contains
             vnbox(box) = vnbox(box) + delen
 
          end if
-!     End Ewald-sum Corrections
+! End Ewald-sum Corrections
 
 !     ----------------------------------------------------------------------
 
 !     *************************
-!     *** Ratio Calculation ***
+! Ratio Calculation ***
 !     *************************
 
          wnlog = dlog10( tweight )
          wolog = dlog10( tweiold )
          wdlog = wnlog - wolog
          if (wdlog.lt.-softcut.and..not.lideal(box)) then
-!     write(io_output,*) '### underflow in wratio calculation ###'
+! write(io_output,*) '### underflow in wratio calculation ###'
             call recip(box,vdum,vdum,4)
             return
          end if
@@ -853,9 +853,9 @@ contains
          wswat = ( tweight / tweiold )
 
          if ( random() .le. wswat ) then
-!     *** we can now accept !!!!! ***
+! we can now accept !!!!! ***
             bsswat(iparty,ipairb) = bsswat(iparty,ipairb) + 1.0d0
-!     write(io_output,*) 'SWATCH ACCEPTED',imola,imolb
+! write(io_output,*) 'SWATCH ACCEPTED',imola,imolb
 
             vbox(box)     = vbox(box)    + vnbox(box)
             vinterb(box)  = vinterb(box) + vninte(box)
@@ -866,104 +866,104 @@ contains
             vbendb(box)   = vbendb(box)  + vnbend(box)
             velectb(box)  = velectb(box) + vnelect(box) + vnewald(box)
 
-!     *** update book keeping ***
-!     *** assign new geometries ***
+! update book keeping ***
+! assign new geometries ***
             do ic = 1,iunita
                rxu(imola,ic) = rxut(1,ic)
                ryu(imola,ic) = ryut(1,ic)
                rzu(imola,ic) = rzut(1,ic)
-!     write(io_output,*) 'imola:',imola
-!     write(io_output,*) rxu(imola,ic),ryu(imola,ic),rzu(imola,ic)
+! write(io_output,*) 'imola:',imola
+! write(io_output,*) rxu(imola,ic),ryu(imola,ic),rzu(imola,ic)
             end do
 
             do ic = 1,iunitb
                rxu(imolb,ic) = rxut(2,ic)
                ryu(imolb,ic) = ryut(2,ic)
                rzu(imolb,ic) = rzut(2,ic)
-!     write(io_output,*) 'imolb:',imolb
-!     write(io_output,*) rxu(imolb,ic),ryu(imolb,ic),rzu(imolb,ic)
+! write(io_output,*) 'imolb:',imolb
+! write(io_output,*) rxu(imolb,ic),ryu(imolb,ic),rzu(imolb,ic)
             end do
             if (lewald.and..not.lideal(box)) then
-!     -- update reciprocal-space sum
+! update reciprocal-space sum
                call recip(box,vdum,vdum,2)
             end if
 
-!     *** update center of mass
+! update center of mass
             call ctrmas(.false.,box,imolb,8)
             call ctrmas(.false.,box,imola,8)
 
-            if (licell .and. (box .eq. boxlink))  call err_exit('not yet implemented!')
+            if (licell .and. (box .eq. boxlink))  call err_exit(__FILE__,__LINE__,'not yet implemented!',myid+1)
 
-!     --- call nearest neighbor list
+! call nearest neighbor list
             if ( lneigh ) then
                call update_neighbor_list(imola,0.,0.,0.,.true.)
                call update_neighbor_list(imolb,0.,0.,0.,.true.)
             end if
          else if (lewald.and..not.lideal(box)) then
-!     *** recover the reciprocal space vectors
-!     if the move is not accepted ***
+! recover the reciprocal space vectors
+! if the move is not accepted ***
             call recip(box,vdum,vdum,4)
          end if
 
 ! ****************************************************************
-! * END INTRABOX SWATCH ADD *
+! END INTRABOX SWATCH ADD *
 ! ****************************************************************
 
       else
 
-!     --- check if the particle types are in their boxes
+! check if the particle types are in their boxes
          if ( (ncmt(boxa,imolta) .eq. 0) .or.  (ncmt(boxb,imoltb) .eq. 0) ) then
             lempty = .true.
-!     write(io_output,*) 'one box out of swatch particle'
+! write(io_output,*) 'one box out of swatch particle'
          else
-!     ---get particle from box a
+! get particle from box a
 
             iboxal = idint( dble(ncmt(boxa,imolta))*random() ) + 1
             iboxa = parbox(iboxal,boxa,imolta)
             if ( moltyp(iboxa) .ne. imolta ) write(io_output,*) 'screwup'
             iboxia = nboxi(iboxa)
-            if (iboxia .ne. boxa) call err_exit('problem in swatch')
+            if (iboxia .ne. boxa) call err_exit(__FILE__,__LINE__,'problem in swatch',myid+1)
 
-!     ---get particle from box b
+! get particle from box b
 
             iboxbl = idint( dble(ncmt(boxb,imoltb))*random() ) + 1
             iboxb = parbox(iboxbl,boxb,imoltb)
             if ( moltyp(iboxb) .ne. imoltb ) write(io_output,*) 'screwup'
             iboxib = nboxi(iboxb)
-            if (iboxib .ne. boxb) call err_exit('problem in swatch')
+            if (iboxib .ne. boxb) call err_exit(__FILE__,__LINE__,'problem in swatch',myid+1)
 
 !cc--!!!JLR - for test write coordinates of a and b
-!            open(91,file='a_init.xyz',status='unknown')
-!            write(91,*) nunit(imolta)
-!            write(91,*)
-!            do izz = 1,nunit(imolta)
-!               write(91,*) 'C ', rxu(iboxa,izz),ryu(iboxa,izz),
+! open(91,file='a_init.xyz',status='unknown')
+! write(91,*) nunit(imolta)
+! write(91,*)
+! do izz = 1,nunit(imolta)
+! write(91,*) 'C ', rxu(iboxa,izz),ryu(iboxa,izz),
 !     &              rzu(iboxa,izz)
-!            end do
-!            close(91)
-!            open(92,file='b_init.xyz',status='unknown')
-!            write(92,*) nunit(imoltb)
-!            write(92,*)
-!            do izz = 1,nunit(imoltb)
-!               write(92,*) 'O ', rxu(iboxb,izz),ryu(iboxb,izz),
+! end do
+! close(91)
+! open(92,file='b_init.xyz',status='unknown')
+! write(92,*) nunit(imoltb)
+! write(92,*)
+! do izz = 1,nunit(imoltb)
+! write(92,*) 'O ', rxu(iboxb,izz),ryu(iboxb,izz),
 !     &              rzu(iboxb,izz)
-!            end do
-!            close(92)
+! end do
+! close(92)
 !cc--!!!JLR - end of coordinate test
 
          end if
 
-!     ---add one attempt to the count for iparty
-!     write(io_output,*) 'iparty:',iparty,'boxa:',boxa
+! add one attempt to the count for iparty
+! write(io_output,*) 'iparty:',iparty,'boxa:',boxa
          bnswat(iparty,ipairb) = bnswat(iparty,ipairb) + 1.0d0
 
-! --- JLR 12-1-09, Count the empty attempts
-!         if (lempty) return
+! JLR 12-1-09, Count the empty attempts
+! if (lempty) return
          if (lempty) then
             bnswat_empty(iparty,ipairb) = bnswat_empty(iparty,ipairb) + 1.0d0
             return
          end if
-! --- END JLR 12-1-09 ---
+! END JLR 12-1-09 ---
 
 !$$$c     --- assign from and prev for each moltyp
 !$$$         from(1) = gswatc(iparty,type_a,1)
@@ -984,11 +984,11 @@ contains
             prev(type_b+2*(izz-1)) = gswatc(iparty,type_b,2+2*(izz-1))
 
          end do
-!     ---store number of units in iunita and iunitb
+! store number of units in iunita and iunitb
          iunita = nunit(imolta)
          iunitb = nunit(imoltb)
 
-!     ---store number of each type in the boxes
+! store number of each type in the boxes
          orgaia = ncmt(boxa, imolta)
          orgbia = ncmt(boxa, imoltb)
          orgaib = ncmt(boxb, imolta)
@@ -996,7 +996,7 @@ contains
          tweight = 1.0d0
          tweiold = 1.0d0
 
-!     --- set the trial energies to zero
+! set the trial energies to zero
          vnbox(boxa)   = 0.0d0
          vninte(boxa)  = 0.0d0
          vnintr(boxa)  = 0.0d0
@@ -1017,13 +1017,13 @@ contains
          vnelect(boxb) = 0.0d0
          vnewald(boxb) = 0.0d0
 
-!     --- compute the rosenbluth weights for each molecule type in each box
+! compute the rosenbluth weights for each molecule type in each box
          do ic = 1,2
             if ( ic .eq. 1 ) then
                self = iboxa
                other = iboxb
-!               s_type = imolta
-!               o_type = imoltb
+! s_type = imolta
+! o_type = imoltb
                s_type = type_a
                o_type = type_b
                iboxnew = iboxib
@@ -1034,8 +1034,8 @@ contains
             else
                self = iboxb
                other = iboxa
-!               s_type = imoltb
-!               o_type = imolta
+! s_type = imoltb
+! o_type = imolta
                s_type = type_b
                o_type = type_a
                iboxnew = iboxia
@@ -1045,14 +1045,14 @@ contains
                iunit = nunit(imoltb)
             end if
 
-!     --- store the beads that are identical
+! store the beads that are identical
             do icbu = 1, nsampos(iparty)
                if ( ic .eq. 1 ) then
-!     --- new conformation is for type a
+! new conformation is for type a
                   new = splist(iparty,icbu,type_a)
                   old = splist(iparty,icbu,type_b)
                else
-!     --- new conformation is for type b
+! new conformation is for type b
                   new = splist(iparty,icbu,type_b)
                   old = splist(iparty,icbu,type_a)
                end if
@@ -1062,11 +1062,11 @@ contains
                rznew(new) = rzu(other,old)
             end do
 
-!        --- set up growth schedule
+! set up growth schedule
             ifirst = from(ic)
             iprev = prev(ic)
 
-! --- rigid molecule add on
+! rigid molecule add on
 
             if (lrigid(imolty)) then
 !cc--- JLR 11-24-09
@@ -1081,7 +1081,7 @@ contains
 
                      else
 
-!     --- calculate new vector from initial bead
+! calculate new vector from initial bead
                         do j = 1,iunit
 
                            rxnew(j) = rxnew(ifirst) - (rxu(self,ifirst) - rxu(self,j))
@@ -1098,7 +1098,7 @@ contains
                call schedule(igrow,imolty,islen,ifirst,iprev,3)
             end if !lrigid
 
-!           --- Adding in multiple end regrowths
+! Adding in multiple end regrowths
 
             if (ncut(iparty,s_type) .gt. 1) then
                do izz = 2,ncut(iparty,s_type)
@@ -1111,7 +1111,7 @@ contains
             end if
 
             waddnew = 1.0d0
-! --- JLR 11-24-09 New stuff for rigid swatch
+! JLR 11-24-09 New stuff for rigid swatch
             if (lrigid(imolty)) then
 
                if(nsampos(iparty).ge.iunit) then
@@ -1119,44 +1119,44 @@ contains
                   !don't regrow anything in rosenbluth
                   icallrose = 4
                else if( (nsampos(iparty).ge.3)      .or. (ifirst.ge.riutry(imolty,1)) ) then
-!                 rigid part is grown, don't do rigrot in rosebluth
+! rigid part is grown, don't do rigrot in rosebluth
                   icallrose = 3
                else
-!                 rigid part is not grown, do rigrot
+! rigid part is not grown, do rigrot
                   icallrose = 2
                end if
             else
-!              flexible molecule call rosenbluth in normal fashion
+! flexible molecule call rosenbluth in normal fashion
                icallrose = 2
             end if
 
 
             call rosenbluth(.true.,lterm,other,self,imolty,islen, iboxnew,igrow,waddnew,.false.,vdum2,icallrose)
-! --- END JLR 11-24-09
-!        --- termination of cbmc attempt due to walk termination ---
+! END JLR 11-24-09
+! termination of cbmc attempt due to walk termination ---
             if ( lterm ) return
 
-!        --- propagate new rosenbluth weight
+! propagate new rosenbluth weight
             tweight = tweight*weight*waddnew
 
-! --- end rigid add on
+! end rigid add on
 
-!     --- save the new coordinates
-!     write(io_output,*) 'new:',moltyp(self),iunit
+! save the new coordinates
+! write(io_output,*) 'new:',moltyp(self),iunit
             do jj = 1,igrow
                rxut(ic,jj) = rxnew(jj)
                ryut(ic,jj) = rynew(jj)
                rzut(ic,jj) = rznew(jj)
-!     write(io_output,*) rxnew(jj),rynew(jj),rznew(jj)
+! write(io_output,*) rxnew(jj),rynew(jj),rznew(jj)
             end do
-!     write(io_output,*) 'old:',moltyp(other),nunit(moltyp(other))
-!     do jj = 1,nunit(moltyp(other))
-!     write(io_output,*) rxu(other,jj),ryu(other,jj),rzu(other,jj)
-!     end do
+! write(io_output,*) 'old:',moltyp(other),nunit(moltyp(other))
+! do jj = 1,nunit(moltyp(other))
+! write(io_output,*) rxu(other,jj),ryu(other,jj),rzu(other,jj)
+! end do
 
-!     --- Corrections for switched beads, and DC-CBMC
-!     --- Assign all of the grown new and old beads to rxuion
-!     --- with rxuion: new = 2
+! Corrections for switched beads, and DC-CBMC
+! Assign all of the grown new and old beads to rxuion
+! with rxuion: new = 2
             iii = 2
             do j=1,igrow
                rxuion(j,iii) = rxnew(j)
@@ -1167,8 +1167,8 @@ contains
 
             if ( iunit .ne. igrow ) then
 
-!     --- for explicit-hydrogen model, put on the hydrogens
-!     --- use phony number iins and call explct to add constrained hydrogens
+! for explicit-hydrogen model, put on the hydrogens
+! use phony number iins and call explct to add constrained hydrogens
 
                iins = nchain + 1
                moltyp(iins) = imolty
@@ -1186,23 +1186,23 @@ contains
                   rxut(ic,j) = rxu(iins,j)
                   ryut(ic,j) = ryu(iins,j)
                   rzut(ic,j) = rzu(iins,j)
-!     write(io_output,*) 'new:',rxut(ic,j),ryut(ic,j),rzut(ic,j)
+! write(io_output,*) 'new:',rxut(ic,j),ryut(ic,j),rzut(ic,j)
                end do
             end if
 
-!     --- Begin DC-CBMC, explicit-hydrogen and
-!     --- switched bead Corrections for NEW configuration
-!     --- calculate the true site-site energy
+! Begin DC-CBMC, explicit-hydrogen and
+! switched bead Corrections for NEW configuration
+! calculate the true site-site energy
 
 !     ??? energy problem for cases which involve the change of the bending type
-!     and torsional type for those units swatched!!!!!!
+! and torsional type for those units swatched!!!!!!
 
             call ctrmas(.false.,iboxnew,other,8)
             call energy(other,imolty, v, vintra,vinter,vext ,velect,vewald,iii,iboxnew,1,iunit,.true.,lterm,.false. ,vdum,.false.,.false.,.false.)
 
             if (lterm) then
-!     write(io_output,*) 'other ',other,' self ',self
-!     call err_exit('interesting screwup in CBMC swatch')
+! write(io_output,*) 'other ',other,' self ',self
+! call err_exit(__FILE__,__LINE__,'interesting screwup in CBMC swatch',myid+1)
                return
             end if
             delen = v - ( vnewt - (vnewbvib + vnewbb + vnewtg ))
@@ -1215,9 +1215,9 @@ contains
             vnewelect = velect
             vnewewald = vewald
 
-!     End DC-CBMC and switched bead Corrections for NEW configuration
+! End DC-CBMC and switched bead Corrections for NEW configuration
 
-!     --- save the trial energies
+! save the trial energies
             vnbox(iboxnew)   = vnbox(iboxnew) + vnewt
             vninte(iboxnew)  = vninte(iboxnew) + vnewinter
             vnintr(iboxnew)  = vnintr(iboxnew) + vnewintra
@@ -1227,12 +1227,12 @@ contains
             vnbend(iboxnew)  = vnbend(iboxnew) + vnewbb
             vnelect(iboxnew) = vnelect(iboxnew) + vnewelect
             vnewald(iboxnew) = vnewald(iboxnew) + vnewewald
-! --- rigid add on
+! rigid add on
 
             waddold = 1.0d0
 
-!        --- grow old chain conformation
-! --- JLR 11-24-09 New stuff for rigid swatch
+! grow old chain conformation
+! JLR 11-24-09 New stuff for rigid swatch
             if (lrigid(imolty)) then
 
                if(nsampos(iparty).ge.iunit) then
@@ -1240,31 +1240,31 @@ contains
                   !don't regrow anything in rosenbluth
                   icallrose = 4
                else if( (nsampos(iparty).ge.3)      .or. (ifirst.ge.riutry(imolty,1) )) then
-!                 rigid part is grown, don't do rigrot in rosebluth
+! rigid part is grown, don't do rigrot in rosebluth
                   icallrose = 3
                else
-!                 rigid part is not grown, do rigrot
+! rigid part is not grown, do rigrot
                   icallrose = 2
                end if
             else
-!              flexible molecule call rosenbluth in normal fashion
+! flexible molecule call rosenbluth in normal fashion
                icallrose = 2
             end if
 
             call rosenbluth(.false.,lterm,self,self,imolty, islen,iboxold,igrow,waddold,.false.,vdum2,icallrose)
-! --- END JLR 11-24-09
+! END JLR 11-24-09
 
-!        --- termination of old walk due to problems generating orientations
+! termination of old walk due to problems generating orientations
             if ( lterm ) then
                write(io_output,*) 'SWATCH: old growth rejected'
                return
             end if
 
-!        --- propagate old rosenbluth weight
+! propagate old rosenbluth weight
             tweiold = tweiold*weiold*waddold
 
-!     --- store the old grown beads and explict placed beads positions
-!     --- 1 = old conformation
+! store the old grown beads and explict placed beads positions
+! 1 = old conformation
             iii = 1
             do j = 1,iunit
                rxuion(j,1) = rxu(self,j)
@@ -1273,13 +1273,13 @@ contains
                qquion(j,1) = qqu(self,j)
             end do
 
-!     Begin Correction for DC-CBMC and switched beads for OLD configuration
-!     --- correct the acceptance rules
-!     --- calculate the Full rcut site-site energy
+! Begin Correction for DC-CBMC and switched beads for OLD configuration
+! correct the acceptance rules
+! calculate the Full rcut site-site energy
 
             call energy(self,imolty, v, vintra,vinter,vext,velect ,vewald,iii,iboxold, 1,iunit,.true.,lterm,.false.,vdum ,.false.,.false.,.false.)
 
-            if (lterm) call err_exit('disaster ovrlap in old conf SWATCH')
+            if (lterm) call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf SWATCH',myid+1)
             deleo = v - ( voldt - (voldbvib + voldbb + voldtg) )
 
             tweiold = tweiold*dexp(-beta*deleo)
@@ -1291,9 +1291,9 @@ contains
             voldelect = velect
             voldewald = vewald
 
-!     End Correction for DC-CBMC and switched beads for OLD configuration
+! End Correction for DC-CBMC and switched beads for OLD configuration
 
-!     --- save the trial energies
+! save the trial energies
             vnbox(iboxold)   = vnbox(iboxold)  - voldt
             vninte(iboxold)  = vninte(iboxold) - voldinter
             vnintr(iboxold)  = vnintr(iboxold) - voldintra
@@ -1306,10 +1306,10 @@ contains
 
          end do
 
-!     --- Perform the Ewald sum reciprical space corrections
+! Perform the Ewald sum reciprical space corrections
          if ( lewald ) then
-!     --- added into tweight even though it really contains new-old
-!     --- Box A
+! added into tweight even though it really contains new-old
+! Box A
             if (.not.lideal(iboxia)) then
                oldchain = iboxa
                newchain = iboxb
@@ -1341,7 +1341,7 @@ contains
                vnbox(iboxia) = vnbox(iboxia) + delen
             end if
             if (.not.lideal(iboxib)) then
-!     --- Box B
+! Box B
                oldchain = iboxb
                newchain = iboxa
                oldunit = nunit(imoltb)
@@ -1371,12 +1371,12 @@ contains
                vnbox(iboxib) = vnbox(iboxib) + delen
             end if
          end if
-!     End Ewald-sum Corrections
+! End Ewald-sum Corrections
 
 !     ----------------------------------------------------------------------
 
          if (ltailc) then
-!     ---    add tail corrections
+! add tail corrections
             if (lpbcz) then
                if (lsolid(boxa) .and. .not. lrect(boxa)) then
                   vola = (hmat(boxa,1) * (hmat(boxa,5) * hmat(boxa,9) - hmat(boxa,8)*hmat(boxa,6))+ hmat(boxa,4)*(hmat(boxa,8) * hmat(boxa,3)-hmat(boxa,2)* hmat(boxa,9))+hmat(boxa,7) * (hmat(boxa,2)*hmat(boxa,6)- hmat(boxa,5)*hmat(boxa,3)))
@@ -1394,7 +1394,7 @@ contains
                volb=boxlx(boxb)*boxly(boxb)
             end if
 
-!     - for new BOXINS with inserted particle
+! for new BOXINS with inserted particle
             do mm = 1,2
                dinsta = 0.0d0
                if ( mm .eq. 1 ) then
@@ -1408,9 +1408,9 @@ contains
                   dvol   = volb
                   imolrm = imoltb
                end if
-! --- JLR 11-24-09 don't do tail corrections for ideal box
+! JLR 11-24-09 don't do tail corrections for ideal box
                if (.not.lideal(ibox)) then
-!     --- new logic for tail correction (same answer) MGM 3-25-98
+! new logic for tail correction (same answer) MGM 3-25-98
                   do jmt = 1, nmolty
                      rho = dble( ncmt(ibox,jmt) )
                      if ( jmt .eq. imolin ) rho = rho + 1.0d0
@@ -1437,7 +1437,7 @@ contains
                else
                   dinsta = 0.0d0
                end if
-! --- END JLR 11-24-09
+! END JLR 11-24-09
                dinsta = dinsta - vtailb( ibox )
 
                tweight=tweight*dexp(-beta*dinsta)
@@ -1453,7 +1453,7 @@ contains
          wolog = dlog10( tweiold )
          wdlog = wnlog - wolog
          if ( wdlog .lt. -softcut ) then
-!     write(io_output,*) '### underflow in wratio calculation ###'
+! write(io_output,*) '### underflow in wratio calculation ###'
             return
          end if
          wswat = ( tweight / tweiold ) * ( dble(orgaia*orgbib) / dble((orgbia+1)*(orgaib+1)) ) * dexp(beta*(eta2(boxa,imolta) +eta2(boxb,imoltb)-eta2(boxa,imoltb) -eta2(boxb,imolta)))
@@ -1461,12 +1461,12 @@ contains
          if (lopt_bias(imolta)) call update_bias(log(wswat*2.0)/beta/2.0,boxa,boxb,imolta)
          if (lopt_bias(imoltb)) call update_bias(log(wswat*2.0)/beta/2.0,boxb,boxa,imoltb)
 
-!     write(io_output,*) 'imolta,imoltb',imolta,imoltb
-!     write(io_output,*) 'wswat,tweight,tweiold',wswat,tweight,tweiold
+! write(io_output,*) 'imolta,imoltb',imolta,imoltb
+! write(io_output,*) 'wswat,tweight,tweiold',wswat,tweight,tweiold
          if ( random() .le. wswat ) then
-!     *** we can now accept !!!!! ***
+! we can now accept !!!!! ***
             bsswat(iparty,ipairb) = bsswat(iparty,ipairb) + 1.0d0
-!     write(io_output,*) 'SWATCH ACCEPTED',iboxa,iboxb
+! write(io_output,*) 'SWATCH ACCEPTED',iboxa,iboxb
             do jj = 1,2
                if ( jj .eq. 1 ) ic = boxa
                if ( jj .eq. 2 ) ic = boxb
@@ -1481,7 +1481,7 @@ contains
                velectb(ic)  = velectb(ic) + vnelect(ic) + vnewald(ic)
             end do
 
-!     ---update book keeping
+! update book keeping
             nboxi(iboxa) = boxb
             nboxi(iboxb) = boxa
 
@@ -1508,38 +1508,38 @@ contains
                rzu(iboxb,ic) = rzut(2,ic)
             end do
             if ( lewald ) then
-!     -- update reciprocal-space sum
+! update reciprocal-space sum
                if (.not.lideal(boxa)) call recip(boxa,vdum,vdum,2)
                if (.not.lideal(boxb)) call recip(boxb,vdum,vdum,2)
             end if
 
-!     ---update center of mass
+! update center of mass
             call ctrmas(.false.,boxa,iboxb,8)
             call ctrmas(.false.,boxb,iboxa,8)
 
-            if (licell .and. (boxa .eq. boxlink .or. boxb .eq. boxlink)) call err_exit('not yet implemented!')
+            if (licell .and. (boxa .eq. boxlink .or. boxb .eq. boxlink)) call err_exit(__FILE__,__LINE__,'not yet implemented!',myid+1)
 
-!     --- call nearest neighbor list
+! call nearest neighbor list
             if ( lneigh ) then
                call update_neighbor_list(iboxa,0.,0.,0.,.true.)
                call update_neighbor_list(iboxb,0.,0.,0.,.true.)
             end if
 
 !cc--!!!JLR - for test 2 write final coordinates of a and b
-!         open(93,file='a_final.xyz',status='unknown')
-!         write(93,*) iunita
-!         write(93,*)
-!         do izz = 1,iunita
-!            write(93,*) 'C ', rxu(iboxa,izz),ryu(iboxa,izz),rzu(iboxa,izz)
-!         end do
+! open(93,file='a_final.xyz',status='unknown')
+! write(93,*) iunita
+! write(93,*)
+! do izz = 1,iunita
+! write(93,*) 'C ', rxu(iboxa,izz),ryu(iboxa,izz),rzu(iboxa,izz)
+! end do
 !
-!         open(93,file='b_final.xyz',status='unknown')
-!         write(93,*) iunitb
-!         write(93,*)
-!         do izz = 1,iunitb
-!            write(93,*) 'C ', rxu(iboxb,izz),ryu(iboxb,izz),rzu(iboxb,izz)
-!         end do
-!         call err_exit('END OF SWATCH TEST')
+! open(93,file='b_final.xyz',status='unknown')
+! write(93,*) iunitb
+! write(93,*)
+! do izz = 1,iunitb
+! write(93,*) 'C ', rxu(iboxb,izz),ryu(iboxb,izz),rzu(iboxb,izz)
+! end do
+! call err_exit(__FILE__,__LINE__,'END OF SWATCH TEST',myid+1)
 !cc--!!!JLR - end of coordinate test
 
          end if
@@ -1547,7 +1547,7 @@ contains
 
       end if
 
-!      write(io_output,*) 'end SWATCH'
+! write(io_output,*) 'end SWATCH'
 
       return
   end subroutine swatch
@@ -1556,8 +1556,7 @@ contains
     integer::jerr
     allocate(bnswat(npamax,npabmax),bnswat_empty(npamax,npabmax),bsswat(npamax,npabmax),stat=jerr)
     if (jerr.ne.0) then
-       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-       call err_exit('init_swatch: allocation failed')
+       call err_exit(__FILE__,__LINE__,'init_swatch: allocation failed',jerr)
     end if
 
     bnswat = 0.0d0
@@ -1576,12 +1575,12 @@ contains
        write(io_output,*) 'pair typ =',i
        write(io_output,*) 'moltyps = ',nswatb(i,1),' and',nswatb(i,2)
        do j = 1, nswtcb(i)
-          ! --- JLR 12-1-09 changing to exclude empty box attempts from swatch rate
+          ! JLR 12-1-09 changing to exclude empty box attempts from swatch rate
           write(io_output,"('between box ',i2,' and ',i2, '   uattempts =',f12.1,   '  attempts =',f9.1, '  accepted =',f8.1)") box3(i,j),box4(i,j), bnswat(i,j),bnswat(i,j)-bnswat_empty(i,j),bsswat(i,j)
           if (bnswat(i,j) .gt. 0.5d0 ) then
              write(io_output,"(' accepted % =',f7.3)") 100.0d0 * bsswat(i,j)/ (bnswat(i,j)-bnswat_empty(i,j))
           end if
-          ! --- EN JLR 12-1-09
+          ! EN JLR 12-1-09
        end do
     end do
   end subroutine output_swatch_stats

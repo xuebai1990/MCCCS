@@ -12,7 +12,7 @@ subroutine inclus( inclnum,inclmol,inclbead,inclsign,ncarbon, ainclnum,ainclmol,
   dimension ainclbead(ntmax*numax*numax,2)
   dimension a15t(ntmax*numax*numax)
       
-! -- variables added (3/24/05) for variable 1-4 interactions 	
+! variables added (3/24/05) for variable 1-4 interactions 	
   real::ofscale,ofscale2
   dimension ofscale(ntmax*numax*numax),ofscale2(ntmax*numax*numax)
 
@@ -20,34 +20,34 @@ subroutine inclus( inclnum,inclmol,inclbead,inclsign,ncarbon, ainclnum,ainclmol,
 
 !c !!!!This is modified to work only for TATB NR-2007!!!
 
-! - triple loop over all types of molecules -
+! triple loop over all types of molecules -
   do imolty = 1, nmolty
 
      do m = 1, nunit(imolty)
         do n = 1, nunit(imolty)
            linclu(imolty,m,n) = .true.
            lqinclu(imolty,m,n) = .true.	      
-! * by default, dont want any 1-5 r^12 interactions
+! by default, dont want any 1-5 r^12 interactions
            lainclu(imolty,m,n) = .false.
 	       ljscale(imolty,m,n) = 1.0
 	       qscale2(imolty,m,n) = 1.0
         end do
      end do
          
-! - double loop over all units -
+! double loop over all units -
      do m = 1, nunit(imolty)
 
-! - exclude all self interactions -
+! exclude all self interactions -
         linclu(imolty,m,m) = .false.
         lqinclu(imolty,m,m) = .false.
-! - exclude all directly bonded beads (vibrations) -
+! exclude all directly bonded beads (vibrations) -
         do n = 1, invib(imolty,m)
            nb = ijvib(imolty,m,n)
            linclu(imolty,m,nb) = .false.
            lqinclu(imolty,m,nb) = .false.
         end do
 
-! - exclude carbons around a quaternary center for explct
+! exclude carbons around a quaternary center for explct
         if (invib(imolty,m) .eq. 4) then
            do n = 1,4
               do nb = 1,4
@@ -57,17 +57,17 @@ subroutine inclus( inclnum,inclmol,inclbead,inclsign,ncarbon, ainclnum,ainclmol,
            end do
         end if
 
-! - exclude all next-nearest neighbor bonded beads (bending) -
+! exclude all next-nearest neighbor bonded beads (bending) -
         do n = 1, inben(imolty,m)
            nb = ijben3(imolty,m,n)
            linclu(imolty,m,nb) = .false.
            lqinclu(imolty,m,nb) = .false.
         end do
-! - exclude all third-nearest neighbor bonded beads (torsions) -
+! exclude all third-nearest neighbor bonded beads (torsions) -
         do n = 1, intor(imolty,m)
            nb = ijtor4(imolty,m,n)
            linclu(imolty,m,nb) = .false.
-! * dont set lqinclu since we want 1-4 interactions, unless 1q14scale is F
+! dont set lqinclu since we want 1-4 interactions, unless 1q14scale is F
            if (.not.lq14scale(imolty)) then
               lqinclu(imolty,m,nb) = .false.
            else
@@ -78,7 +78,7 @@ subroutine inclus( inclnum,inclmol,inclbead,inclsign,ncarbon, ainclnum,ainclmol,
 
      end do
 
-!     - include or exclude additional beads accoring to incl
+! include or exclude additional beads accoring to incl
      do n = 1,inclnum
         if ( inclmol(n) .eq. imolty ) then
            m = inclbead(n,1)
@@ -99,13 +99,13 @@ subroutine inclus( inclnum,inclmol,inclbead,inclsign,ncarbon, ainclnum,ainclmol,
               lqinclu(imolty,nb,m) = .false.
            else
               write(io_output,*) 'INCLUS: n,inclsign(n)',n,inclsign(n)
-              call err_exit('inclusign must be 1 or -1')
+              call err_exit(__FILE__,__LINE__,'inclusign must be 1 or -1',myid+1)
            end if
         end if
 
      end do
 
-! * add in 1-5 interactions according to aincl
+! add in 1-5 interactions according to aincl
      do m = 1,ainclnum
         if ( ainclmol(m) .eq. imolty ) then
            mb = ainclbead(m,1)
@@ -117,16 +117,16 @@ subroutine inclus( inclnum,inclmol,inclbead,inclsign,ncarbon, ainclnum,ainclmol,
         end if
      end do
 
-! - exclude all hydrogens that have their carbons excluded 
+! exclude all hydrogens that have their carbons excluded 
      if ( ncarbon(imolty) .lt. nunit(imolty) ) then
         if (ncarbon(imolty) .eq. 3 .and. nunit(imolty) .eq. 8) then
-! - ethane with bead 3 being hydrogen
+! ethane with bead 3 being hydrogen
            ioffset = 0
         else
            ioffset = 1
         end if
         do m = ncarbon(imolty)+ioffset,nunit(imolty)
-! - hydrogens only have one vibration and that is to the C atom               
+! hydrogens only have one vibration and that is to the C atom               
            mb = ijvib(imolty,m,1)
            do nb = 1, ncarbon(imolty)
               if ( .not. linclu(imolty,mb,nb) ) then
@@ -160,7 +160,7 @@ subroutine inclus( inclnum,inclmol,inclbead,inclsign,ncarbon, ainclnum,ainclmol,
         end do
      end if
 
-! * exclude charge interactions if lqchg is false
+! exclude charge interactions if lqchg is false
      do m = 1,nunit(imolty)
         do n = m+1,nunit(imolty)
            if (.not. lqchg(ntype(imolty,m)) .or. .not. lqchg(ntype(imolty,n))) then
@@ -170,7 +170,7 @@ subroutine inclus( inclnum,inclmol,inclbead,inclsign,ncarbon, ainclnum,ainclmol,
         end do
      end do
 
-! * self consistency check *
+! self consistency check *
      do m = 1,nunit(imolty)
         do n = m+1,nunit(imolty)
            if (linclu(imolty,m,n) .neqv. linclu(imolty,n,m)) then
@@ -187,10 +187,10 @@ subroutine inclus( inclnum,inclmol,inclbead,inclsign,ncarbon, ainclnum,ainclmol,
 
 !! Removing this part for TATB (NR-2007)
      if (lrigid(imolty)) then
-! - dont include rigid beads
+! dont include rigid beads
 
-! - there will be no intramolecular forces between rigid beads
-! - or beads connected one away from a rigid bead          
+! there will be no intramolecular forces between rigid beads
+! or beads connected one away from a rigid bead          
         do m = 1, invib(imolty,riutry(imolty,1))
            mb = ijvib(imolty,riutry(imolty,1),m)
            do n = riutry(imolty,1), nunit(imolty)
@@ -225,7 +225,7 @@ subroutine inclus( inclnum,inclmol,inclbead,inclsign,ncarbon, ainclnum,ainclmol,
            write(io_output,*) m,  (lqinclu(imolty,m,n),n=1,nunit(imolty))
         end do
 
-!  400  format (<nunit(imolty)> F5.2)
+! 400  format (<nunit(imolty)> F5.2)
         write(io_output,*) 
 
         write(io_output,*) '1-4 LJ SCALING FACTORS'
@@ -242,16 +242,16 @@ subroutine inclus( inclnum,inclmol,inclbead,inclsign,ncarbon, ainclnum,ainclmol,
      end if
 ! 600  format (i5,<nunit(imolty)> F5.2)
 
-! * not really that important to write out
-!         write(io_output,*) 
-!         write(io_output,*) '1-5 OH INTERACTION TABLE'
-!         do m = 1, nunit(imolty)
-!            write(io_output,*) m, (lainclu(imolty,m,n),n=1,nunit(imolty))
-!         end do
-!         write(io_output,*) 
+! not really that important to write out
+! write(io_output,*) 
+! write(io_output,*) '1-5 OH INTERACTION TABLE'
+! do m = 1, nunit(imolty)
+! write(io_output,*) m, (lainclu(imolty,m,n),n=1,nunit(imolty))
+! end do
+! write(io_output,*) 
 
   end do
-!      write(io_output,*) 'finished inclus'
+! write(io_output,*) 'finished inclus'
   return
 end subroutine inclus
 

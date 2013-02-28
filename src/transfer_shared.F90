@@ -18,8 +18,7 @@ contains
 
     allocate(u_bias_diff(nbox,nmolty),num_update_bias(nbox,nmolty),lopt_bias(nmolty),stat=jerr)
     if (jerr.ne.0) then
-       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-       call err_exit('read_transfer: memory allocation')
+       call err_exit(__FILE__,__LINE__,'read_transfer: memory allocation',jerr)
     end if
 
     u_bias_diff=0.0_double_precision
@@ -29,18 +28,19 @@ contains
     io_input=get_iounit()
     open(unit=io_input,access='sequential',action='read',file=file_in,form='formatted',iostat=jerr,status='old')
     if (jerr.ne.0) then
-       call err_exit('cannot open transfer input file')
+       call err_exit(__FILE__,__LINE__,'cannot open transfer input file',myid+1)
     end if
 
     read(UNIT=io_input,NML=transfer,iostat=jerr)
     if (jerr.ne.0.and.jerr.ne.-1) then
-       write(io_output,*) 'ERROR ',jerr,' in ',TRIM(__FILE__),':',__LINE__
-       call err_exit('reading namelist: transfer')
+       call err_exit(__FILE__,__LINE__,'reading namelist: transfer',jerr)
     end if
     close(io_input)
 
-    write(io_output,*) 'lopt_bias: ',lopt_bias
-    write(io_output,*) 'freq_opt_bias: ',freq_opt_bias
+    if (myid.eq.0) then
+       write(io_output,*) 'lopt_bias: ',lopt_bias
+       write(io_output,*) 'freq_opt_bias: ',freq_opt_bias
+    end if
 
   end subroutine read_transfer
 
