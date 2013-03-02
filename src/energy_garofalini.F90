@@ -26,7 +26,10 @@ contains
       real::hterma,garofalini
       integer::ntij,aa,bb,i
 
-! write(io_output,*) 'input',rijsq,ntij,qa,qb
+#ifdef __DEBUG__
+      write(io_output,*) 'entering garofalini in ',myid,'. Input:',rijsq,ntij,qa,qb
+#endif
+
       rij = dsqrt(rijsq)
       hterm = 0.0d0
       coul = 0.0d0
@@ -52,8 +55,9 @@ contains
 !     &     ' Total:',garofalini
 ! write(io_output,*) '                     ',rij
 
-! write(io_output,*) 'leaving garofalini'
-
+#ifdef __DEBUG__
+      write(io_output,*) 'leaving garofalini in ',myid
+#endif
       return
   end function garofalini
 
@@ -62,6 +66,10 @@ contains
       integer::ntang,nta,ntb,tri,i,j,k
       real::vthree,vthreea,thetac,g,p
       logical::lwrite
+
+#ifdef __DEBUG__
+      write(io_output,*) 'start Vthreebody in ',myid
+#endif
 
       vthreea = 0.0d0
       vthree = 0.0d0
@@ -146,7 +154,9 @@ contains
       end do
       ntr = 0
 
-! write(io_output,*) 'end Vthreebody'
+#ifdef __DEBUG__
+      write(io_output,*) 'end Vthreebody in ',myid
+#endif
 
       return
   end subroutine vthreebody
@@ -156,7 +166,9 @@ contains
 
       integer::i,j,k,ptr,ptr2
 
-! write(io_output,*) 'starting triad'
+#ifdef __DEBUG__
+      write(io_output,*) 'starting triad in ',myid
+#endif
 
       ntr = 0
 
@@ -193,7 +205,9 @@ contains
 ! 20      continue
  10   continue
 
-! write(io_output,*) 'end triad'
+#ifdef __DEBUG__
+      write(io_output,*) 'end triad in ',myid
+#endif
 
       return
   end subroutine triad

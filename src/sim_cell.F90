@@ -258,7 +258,7 @@ contains
                 if (rxuij.lt.-hbx) rxuij=rxuij+bx
              end if
           else
-             !            rxuij = rxuij - bx*anint(rxuij*bxi)
+             ! rxuij = rxuij - bx*anint(rxuij*bxi)
              rxuij = rxuij - bx*dint(rxuij*bxi+dsign(0.5d0,rxuij))
           end if
        end if
@@ -271,7 +271,7 @@ contains
                 if (ryuij.lt.-hby) ryuij=ryuij+by
              end if
           else
-             !           ryuij  = ryuij - by*anint(ryuij*byi)
+             ! ryuij  = ryuij - by*anint(ryuij*byi)
              ryuij = ryuij - by*dint(ryuij*byi+dsign(0.5d0,ryuij))
           end if
        end if
@@ -284,7 +284,7 @@ contains
                 if (rzuij.lt.-hbz) rzuij=rzuij+bz
              end if
           else
-             !            rzuij  = rzuij - bz*anint(rzuij*bzi)
+             ! rzuij  = rzuij - bz*anint(rzuij*bzi)
              rzuij = rzuij - bz*dint(rzuij*bzi+dsign(0.5d0,rzuij))
           end if
        end if

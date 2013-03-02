@@ -239,7 +239,7 @@ subroutine initia
            offset = offset+nchbox(ibox-1)
         end if
         do while (count_chain.lt.(nchbox(ibox)+offset))
-           rand_id = idint(dble(nchbox(ibox))*random())+ 1 + offset
+           rand_id = idint(dble(nchbox(ibox))*random(-1))+ 1 + offset
            if (.not.lhere(rand_id)) then
               count_chain = count_chain + 1
               lhere(rand_id) = .true.
@@ -414,7 +414,7 @@ subroutine initia
                     m2 = m - 2
 
                     if ( inirot(ibox) .eq. 0 ) then
-                       rot = random() * 360.0d0 * degrad
+                       rot = random(-1) * 360.0d0 * degrad
                     else if ( inirot(ibox) .gt. 0 ) then
                        rot = dble(inirot(ibox)) * degrad
                     else
@@ -513,7 +513,7 @@ subroutine initia
                     znext = ztemp(bmap(m)) - ztemp(bmap(m1))
 !$$$c     - alkane type molecule -
 !$$$                        if ( inirot(ibox) .eq. 0 ) then
-!$$$                           rot = random() * 360.0d0 * degrad
+!$$$                           rot = random(-1) * 360.0d0 * degrad
 !$$$                        else if ( inirot(ibox) .gt. 0 ) then
 !$$$                           rot = dble(inirot(ibox)) * degrad
 !$$$                        else

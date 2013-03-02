@@ -35,9 +35,11 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
       real::mass_t,binvir2(maxvir,maxntemp), factor,corr,vold,deri_u
 
 ! --------------------------------------------------------------------
+#ifdef __DEBUG__
+      write(io_output,*) 'start VIRIAL in ',myid
+      write(io_output,*) 'binvir',binvir
+#endif
 
-! write(io_output,*) 'start VIRIAL'
-! write(io_output,*) 'binvir',binvir
       rminsq = rmin * rmin
       vmin = -2000.0d0
 
@@ -351,14 +353,11 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
          end do
          dvircm = dvircm + stepvir
       end do
-
-
 ! ################################################################
-
-! write(io_output,*) 'binvir',binvir
-
-! write(io_output,*) 'end VIRIAL'
-
+#ifdef __DEBUG__
+      write(io_output,*) 'binvir',binvir
+      write(io_output,*) 'end VIRIAL in ',myid
+#endif
       return
       end
 

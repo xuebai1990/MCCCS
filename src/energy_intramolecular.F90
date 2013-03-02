@@ -12,7 +12,7 @@ MODULE energy_intramolecular
   save
   public::init_energy_bonded,vtorso,lininter_vib,lininter_bend,U_torsion,U_bonded,allocate_energy_bonded,bonds,angles,dihedrals
 
-  integer,parameter::torsion_nParameter(6)=(/4,10,3,2,5,10/)
+  integer,parameter::torsion_nParameter(8)=(/4,10,3,2,5,10,4,5/)
   integer,allocatable::vib_type(:),ben_type(:),torsion_type(:) !< type 0: dummy torsion type for setting up interaction table
                                        !< type 1: OPLS potential (three terms), angle in protein convention (trans is 180 deg)
                                        !< type 2: Ryckaert-Bellemans potential, angle in polymer convention (trans is 0 deg)
@@ -20,6 +20,8 @@ MODULE energy_intramolecular
                                        !< type 4: harmonic type, angle in polymer convention (trans is 0 deg)
                                        !< type 5: OPLS potential (four terms), angle in protein convention (trans is 180 deg)
                                        !< type 6: nine-term Fourier cosine series, angle in protein convention (trans is 180 deg)
+                                       !< type 7: Ryckaert-Bellemans potential (three terms), angle in polymer convention (trans is 0 deg)
+                                       !< type 8: Ryckaert-Bellemans potential (four terms), angle in polymer convention (trans is 0 deg)
   real,allocatable::vtt(:,:)
 
   integer,allocatable::vibsplits(:),bendsplits(:),splpnts(:)
@@ -156,16 +158,20 @@ contains
                 call reallocate(vtt,0,9,1,2*UBOUND(vtt,2))
              end if
              read(line_in,*) jerr,torsion_type(i),vtt(0:torsion_nParameter(torsion_type(i))-1,i)
-             if (torsion_type(i).eq.1.or.torsion_type(i).eq.5) then
+             if (torsion_type(i).eq.3) then
+                vtt(2,i)=vtt(2,i)*onepi/180.0d0
+             else if (torsion_type(i).eq.1.or.torsion_type(i).eq.5) then
                 ! convert OPLS to Ryckaert-Bellemans because the latter is more efficient
-                torsion_type(i)=2
                 vtt(0,i)=vtt(0,i)+vtt(1,i)+2.0d0*vtt(2,i)+vtt(3,i)
                 vtt(1,i)=-vtt(1,i)+3.0d0*vtt(3,i)
                 vtt(2,i)=-2.0d0*vtt(2,i)+8.0d0*vtt(4,i)
                 vtt(3,i)=-4.0d0*vtt(3,i)
                 vtt(4,i)=-8.0d0*vtt(4,i)
-             else if (torsion_type(i).eq.3) then
-                vtt(2,i)=vtt(2,i)*onepi/180.0d0
+                if (torsion_type(i).eq.1) then
+                   torsion_type(i)=7
+                else if (torsion_type(i).eq.5) then
+                   torsion_type(i)=8
+                end if
              end if
           end do
           exit cycle_read_dihedrals
@@ -181,6 +187,7 @@ contains
     return
   end subroutine init_energy_bonded
 
+!DEC$ ATTRIBUTES FORCEINLINE :: vtorso
   function vtorso(xvec1,yvec1,zvec1,xvec2,yvec2,zvec2,xvec3,yvec3,zvec3,itype)
     use sim_system,only:L_tor_table
     real::vtorso
@@ -195,9 +202,20 @@ contains
        call dihedral_angle(xvec1,yvec1,zvec1,xvec2,yvec2,zvec2,xvec3,yvec3,zvec3,thetac,theta,.true.)
        vtorso=inter_tor(theta,itype)
     else
-       call dihedral_angle(xvec1,yvec1,zvec1,xvec2,yvec2,zvec2,xvec3,yvec3,zvec3,thetac,theta)
+       call dihedral_angle(xvec1,yvec1,zvec1,xvec2,yvec2,zvec2,xvec3,yvec3,zvec3,thetac,theta,.false.)
 
-        if (torsion_type(itype).eq.2) then
+        if (torsion_type(itype).eq.7) then
+           !< type 7: Ryckaert-Bellemans potential (three terms), angle in polymer convention (trans is 0 deg)
+           tac2 = thetac*thetac
+           tac3 = tac2*thetac
+           vtorso = vtt(0,itype)+vtt(1,itype)*thetac+vtt(2,itype)*tac2+vtt(3,itype)*tac3
+        else if (torsion_type(itype).eq.8) then
+           !< type 8: Ryckaert-Bellemans potential (four terms), angle in polymer convention (trans is 0 deg)
+           tac2 = thetac*thetac
+           tac3 = tac2*thetac
+           tac4 = tac3*thetac
+           vtorso = vtt(0,itype)+vtt(1,itype)*thetac+vtt(2,itype)*tac2+vtt(3,itype)*tac3+vtt(4,itype)*tac4
+        else if (torsion_type(itype).eq.2) then
            ! type 2: Ryckaert-Bellemans potential, angle in polymer convention (trans is 0 deg)
            tac2 = thetac*thetac
            tac3 = tac2*thetac
@@ -240,11 +258,11 @@ contains
 !> \brief Calculate the dihedral angle and its cosine
 !>
 !> The dihedral is formed between vectors (1,2), (2,3), and (3,4) using polymer convention (trans is 0 degree)
-!DEC$ ATTRIBUTES FORCEINLINE :: calctor
+!DEC$ ATTRIBUTES FORCEINLINE :: dihedral_angle
   subroutine dihedral_angle(xvec1,yvec1,zvec1,xvec2,yvec2,zvec2,xvec3,yvec3,zvec3,thetac,theta,extended)
     real,intent(in)::xvec1,yvec1,zvec1,xvec2,yvec2,zvec2,xvec3,yvec3,zvec3
     real,intent(out)::thetac,theta
-    logical,intent(in),optional::extended !< whether to extend the dihedral angle to the range of -180 -- +180 degree
+    logical,intent(in)::extended !< whether to extend the dihedral angle to the range of -180 -- +180 degree
 
     real::x12,y12,z12,x23,y23,z23,d12,d23,dot,tcc,xcc,ycc,zcc
 
@@ -271,17 +289,15 @@ contains
     if (thetac.lt.-1.0d0) thetac=-1.0d0
     theta = dacos(thetac)
 
-    if (present(extended)) then
-       if (extended) then
-! calculate cross product of cross products ***
-          xcc = y12*z23 - z12*y23
-          ycc = z12*x23 - x12*z23
-          zcc = x12*y23 - y12*x23
-! calculate scalar triple product ***
-          tcc = xcc*xvec2 + ycc*yvec2 + zcc*zvec2
-! determine angle between -180 and 180, not 0 to 180
-          if (tcc .lt. 0.0d0) theta = -theta
-       end if
+    if (extended) then
+       ! calculate cross product of cross products ***
+       xcc = y12*z23 - z12*y23
+       ycc = z12*x23 - x12*z23
+       zcc = x12*y23 - y12*x23
+       ! calculate scalar triple product ***
+       tcc = xcc*xvec2 + ycc*yvec2 + zcc*zvec2
+       ! determine angle between -180 and 180, not 0 to 180
+       if (tcc .lt. 0.0d0) theta = -theta
     end if
 
     return
@@ -398,7 +414,7 @@ contains
     logical,intent(in)::lupdate_connectivity
 
     integer::j,jjtor,ip1,ip2,ip3
-    
+
     if (lupdate_connectivity) call calc_connectivity(i,imolty)
 
     vtg=0.0d0

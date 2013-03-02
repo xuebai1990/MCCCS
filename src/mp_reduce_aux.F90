@@ -25,7 +25,7 @@
 #ifdef __MPI__
     INTEGER            :: ierr, ibuf, nbuf, remaining, istart, nproc, myid
 
-#ifdef __DEBUG__
+#ifdef __DEBUG_MPI__
     write(*,*) 'mp_reduce_aux IN'
 #endif
     CALL MPI_comm_size( comm, nproc, ierr )
@@ -104,7 +104,7 @@
 
 1   CONTINUE
 
-#ifdef __DEBUG__
+#ifdef __DEBUG_MPI__
     write(*,*) 'mp_reduce_aux OUT'
 #endif
 

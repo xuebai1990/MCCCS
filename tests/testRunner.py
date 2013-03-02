@@ -39,7 +39,7 @@ logDirPath=os.path.join(Root,"test-"+time.strftime("%y%m%d"))
 if not os.path.exists(logDirPath):
     os.mkdir(logDirPath)
 
-buildDir=logDirPath
+buildDir=os.path.join(logDirPath,"build")
 
 mainLog=open(os.path.join(logDirPath,"main.log"),'w')
 mainLog.write(" ******* "+time.strftime("%y%m%d-%H:%M")+
@@ -69,7 +69,7 @@ mainLog.flush()
 # test
 if directives["test"]:
     mainLog.write("====== tests ======\n")
-    suite=testUtils.simpleTests(srcRoot=Root,exeRoot=buildDir,testsRoot=logDirPath,command="topmon")
+    suite=testUtils.simpleTests(srcRoot=Root,exeRoot=os.path.join(buildDir,"src"),testsRoot=logDirPath,command="topmon")
     testRunner=unittest.TextTestRunner(stream=mainLog,verbosity=2)
     testRunner.run(suite)
 

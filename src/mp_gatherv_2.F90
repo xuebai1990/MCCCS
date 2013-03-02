@@ -1,26 +1,34 @@
-    DATA_TYPE :: mydata(:,:)  ! Warning first dimension is supposed constant!
+    DATA_TYPE :: mydata(:,:) ! Warning first dimension is supposed constant!
     DATA_TYPE :: alldata(:,:)
-    INTEGER, INTENT(IN) :: recvcount(:), displs(:), root
-    INTEGER, OPTIONAL, INTENT(IN) :: gid
-    INTEGER :: group
+    INTEGER, INTENT(IN) :: recvcount(:), displs(:)
+    INTEGER, INTENT(IN) :: comm
+#ifndef ALLGATHER
+    INTEGER, INTENT(IN) :: root
+#endif
     INTEGER :: ierr, npe, myid
     INTEGER, ALLOCATABLE :: nrecv(:), ndisp(:)
 
 #ifdef __MPI__
-    group = MPI_COMM_WORLD
-    IF( PRESENT( gid ) ) group = gid
 
-    CALL MPI_comm_size( group, npe, ierr )
+    CALL MPI_comm_size( comm, npe, ierr )
     IF (ierr/=0) CALL mp_stop(__LINE__)
 
-    CALL MPI_comm_rank( group, myid, ierr )
+    CALL MPI_comm_rank( comm, myid, ierr )
     IF (ierr/=0) CALL mp_stop(__LINE__)
 
     IF ( SIZE( recvcount ) < npe .OR. SIZE( displs ) < npe ) CALL mp_stop(__LINE__)
+
+#ifndef ALLGATHER
     IF ( myid == root ) THEN
+#endif
+
        IF ( SIZE( alldata, 2 ) < displs( npe ) + recvcount( npe ) ) CALL mp_stop(__LINE__)
        IF ( SIZE( alldata, 1 ) /= SIZE( mydata, 1 ) ) CALL mp_stop(__LINE__)
+
+#ifndef ALLGATHER
     END IF
+#endif
+
     IF ( SIZE( mydata, 2 ) < recvcount( myid + 1 ) ) CALL mp_stop(__LINE__)
 
     ALLOCATE( nrecv( npe ), ndisp( npe ) )
@@ -28,8 +36,14 @@
     nrecv( 1:npe ) = recvcount( 1:npe ) * SIZE( mydata, 1 )
     ndisp( 1:npe ) = displs( 1:npe ) * SIZE( mydata, 1 )
 
+#ifdef ALLGATHER
+    CALL MPI_ALLGATHERV( mydata, nrecv( myid + 1 ), MP_TYPE, &
+     alldata, nrecv, ndisp, MP_TYPE, comm, ierr )
+#else
     CALL MPI_GATHERV( mydata, nrecv( myid + 1 ), MP_TYPE, &
-     alldata, nrecv, ndisp, MP_TYPE, root, group, ierr )
+     alldata, nrecv, ndisp, MP_TYPE, root, comm, ierr )
+#endif
+
     IF (ierr/=0) CALL mp_stop(__LINE__)
 
     DEALLOCATE( nrecv, ndisp )

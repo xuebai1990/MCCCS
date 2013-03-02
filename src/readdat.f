@@ -8,6 +8,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   use util_files,only:get_iounit
   use util_search,only:indexOf
   use util_memory,only:reallocate
+  use util_string,only:integer_to_string,real_to_string
   use sim_system
   use sim_cell
   use sim_particle,only:allocate_neighbor_list
@@ -76,7 +77,6 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 
   lee = .false.
   qtot = 0.0d0
-  ldie = .false.
 ! -------------------------------------------------------------------
 
   io_input=get_iounit()
@@ -97,7 +97,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   read(io_input,*)
   read(io_input,*) seed
 ! initialize random number generator
-  call ranset(seed)
+  call ranset(seed,numprocs)
 
 ! -------------------------------------------------------------------
 ! Output unit (if 2, write to runXX.dat file; if 6, write to stdout/screen; outherwise,
@@ -283,9 +283,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 ! KM for MPI
 ! jobs stop in monola so that all processors die
   if (dint(dble(nstep)/dble(iblock)) .gt. 100) then
-     write(io_output,*) 'too many blocks'
-     ldie = .true.
-     return
+     call err_exit(__FILE__,__LINE__,'too many blocks',myid+1)
   end if
 
 ! read system information
@@ -407,9 +405,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   read(io_input,*)
   read(io_input,*) lmixlb, lmixjo
   if (lmixlb .and. lmixjo) then
-     write(io_output,*) 'cant use both combining rules!'
-     ldie = .true.
-     return
+     call err_exit(__FILE__,__LINE__,'cant use both combining rules!',myid+1)
   end if
   if ( lecho.and.myid.eq.0 ) then
      if (lverbose) then
@@ -457,9 +453,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   end if
   do i = 1, nbox
      if( rcut(i)/boxlx(i) .gt. 0.5d0) then
-        write(io_output,*) 'rcut > 0.5*boxlx'
-        ldie = .true.
-        return
+        call err_exit(__FILE__,__LINE__,'rcut > 0.5*boxlx',myid+1)
      end if
   end do
 
@@ -567,15 +561,11 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      end if
 
      if ( lflucq(imol) .and. (.not. lelect(imol) ) ) then
-        write(io_output,*) 'lelect must be true if flucq is true'
-        ldie = .true.
-        return
+        call err_exit(__FILE__,__LINE__,'lelect must be true if flucq is true',myid+1)
      end if
      if ( lqtrans(imol) ) then
         if (.not. lflucq(imol) ) then
-           write(io_output,*) 'lflucq must be true if interm.  CT is allowed'
-           ldie = .true.
-           return
+           call err_exit(__FILE__,__LINE__,'lflucq must be true if interm.  CT is allowed',myid+1)
         end if
         write(io_output,*) 'Intermolecular Charge Transfer is allowed'
      end if
@@ -642,9 +632,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         if ( lelect(imol) .and. .not. lchgall ) then
            if ( lecho.and.myid.eq.0 ) write(io_output,*) '   bead ',j,' beadtype ',atoms%list(ntype(imol,i)),chemid(ntype(imol,i)),' charge leader ',leaderq(imol,i)
            if ( leaderq(imol,i) .gt. j .and. .not. lchgall) then
-              write(io_output,*) 'group-based cut-off screwed for qq'
-              ldie = .true.
-              return
+              call err_exit(__FILE__,__LINE__,'group-based cut-off screwed for qq',myid+1)
            end if
         else
            if ( lecho.and.myid.eq.0 ) write(io_output,*) '   bead ',j,' beadtype ',atoms%list(ntype(imol,i)),chemid(ntype(imol,i))
@@ -652,14 +640,9 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 
         IF (.not.(lmmff.or.lexpsix.or.lgaro.or.lninesix)) THEN
            if (ntype(imol,i).eq.0) then
-              ldie=.true.
+              call err_exit(__FILE__,__LINE__,'ERROR: atom type undefined!',myid+1)
            else if (sigi(ntype(imol,i)).lt.1d-06.and.epsi(ntype(imol,i)).lt.1d-06.and.abs(qelect(ntype(imol,i))).lt.1d-06) then
-              ldie=.true.
-           end if
-
-           if (ldie) then
-              write(io_output,*) 'ERROR: atom type undefined!'
-              return
+              call err_exit(__FILE__,__LINE__,'ERROR: atom type undefined!',myid+1)
            end if
         end if
 
@@ -680,28 +663,19 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         read(io_input,*) invib(imol,i)
         if ( invib(imol,i) .gt. 6 ) then
            write(io_output,*) 'imol',imol,'   i',i,'  invib',invib(imol,i)
-           write(io_output,*) 'too many vibrations'
-           ldie = .true.
-           return
+           call err_exit(__FILE__,__LINE__,'too many vibrations',myid+1)
         end if
         do j = 1, invib(imol,i)
            read(io_input,*) ijvib(imol,i,j),itvib(imol,i,j)
            if((ijvib(imol,i,j).eq.i).or.(ijvib(imol,i,j).gt. nunit(imol))) then
-              write(io_output,*) 'check vibrations for mol type',imol, 'and bead',i
-              ldie = .true.
-              return
+              call err_exit(__FILE__,__LINE__,'check vibrations for mol type '//integer_to_string(imol)//' and bead '//integer_to_string(i),myid+1)
            end if
 
            itvib(imol,i,j)=indexOf(bonds,itvib(imol,i,j))
            if (itvib(imol,i,j).eq.0) then
-              ldie=.true.
+              call err_exit(__FILE__,__LINE__,'ERROR: stretching parameters undefined!',myid+1)
            else if(brvib(itvib(imol,i,j)).lt.1d-06) then
-              ldie=.true.
-           end if
-
-           if (ldie) then
-              write(io_output,*) 'ERROR: stretching parameters undefined!'
-              return
+              call err_exit(__FILE__,__LINE__,'ERROR: stretching parameters undefined!',myid+1)
            end if
 
            if (lverbose.and.myid.eq.0) then
@@ -714,33 +688,22 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         read(io_input,*) inben(imol,i)
 ! write(io_output,*) inben(imol,i)
         if ( inben(imol,i) .gt. 12 ) then
-           write(io_output,*) 'too many bends'
-           ldie = .true.
-           return
+           call err_exit(__FILE__,__LINE__,'too many bends',myid+1)
         end if
         do j = 1, inben(imol,i)
            read(io_input,*) ijben2(imol,i,j),ijben3(imol,i,j) ,itben(imol,i,j)
            if ((ijben2(imol,i,j).gt.nunit(imol)).or.( ijben3(imol,i,j).gt.nunit(imol))) then
-              write(io_output,*) 'check bending for the mol type',imol, 'bead',i
-              ldie = .true.
-              return
+              call err_exit(__FILE__,__LINE__,'check bending for molecule type '//integer_to_string(imol)//' bead '//integer_to_string(i),myid+1)
            end if
            if ((ijben2(imol,i,j).eq.i).or.( ijben3(imol,i,j).eq.i).or.(ijben2(imol,i,j) .eq.ijben3(imol,i,j))) then
-              write(io_output,*) 'check bending for the mol type',imol, 'bead',i
-              ldie = .true.
-              return
+              call err_exit(__FILE__,__LINE__,'check bending for molecule type '//integer_to_string(imol)//' bead '//integer_to_string(i),myid+1)
            end if
 
            itben(imol,i,j)=indexOf(angles,itben(imol,i,j))
            if (itben(imol,i,j).eq.0) then
-              ldie=.true.
+              call err_exit(__FILE__,__LINE__,'ERROR: bending parameters undefined!',myid+1)
            else if(brben(itben(imol,i,j)).lt.1d-06) then
-              ldie=.true.
-           end if
-
-           if (ldie) then
-              write(io_output,*) 'ERROR: bending parameters undefined!'
-              return
+              call err_exit(__FILE__,__LINE__,'ERROR: bending parameters undefined!',myid+1)
            end if
 
            if (lverbose.and.myid.eq.0) then
@@ -752,23 +715,17 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         read(io_input,*)
         read(io_input,*) intor(imol,i)
         if ( intor(imol,i) .gt. 12 ) then
-           write(io_output,*) 'too many torsions'
-           ldie = .true.
-           return
+           call err_exit(__FILE__,__LINE__,'too many torsions',myid+1)
         end if
         do j = 1, intor(imol,i)
            read(io_input,*) ijtor2(imol,i,j),ijtor3(imol,i,j), ijtor4(imol,i,j),ittor(imol,i,j)
 
            if(ijtor2(imol,i,j).gt.nunit(imol).or.ijtor3(imol,i,j) .gt.nunit(imol).or.ijtor4(imol,i,j).gt.nunit(imol)) then
-              write(io_output,*) 'check torsion for the mol type',imol, 'bead',i
-              ldie = .true.
-              return
+              call err_exit(__FILE__,__LINE__,'check torsion for molecule type '//integer_to_string(imol)//' bead '//integer_to_string(i),myid+1)
            end if
 
            if((ijtor2(imol,i,j).eq.i.or.ijtor3(imol,i,j).eq.i .or.ijtor4(imol,i,j).eq.i).or.(ijtor2(imol,i,j).eq. ijtor3(imol,i,j).or.ijtor2(imol,i,j).eq. (ijtor4(imol,i,j)).or.(ijtor3(imol,i,j).eq. ijtor4(imol,i,j)))) then
-              write(io_output,*) 'check torsion for the mol type',imol, 'bead',i
-              ldie = .true.
-              return
+              call err_exit(__FILE__,__LINE__,'check torsion for molecule type '//integer_to_string(imol)//' bead '//integer_to_string(i),myid+1)
            end if
 
            if (lverbose.and.myid.eq.0) then
@@ -798,27 +755,21 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
               vib1 = ijvib(imol,i,j)
               vibtype  = itvib(imol,i,j)
               if(invib(imol,vib1).eq.0) then
-                 write(io_output,*) 'ERROR IN FORT.4 VIBRATIONS'
                  write(io_output,*) 'Check vibration for mol. type:',imol, 'bead',vib1,'with',i
-                 ldie = .true.
-                 return
+                 call err_exit(__FILE__,__LINE__,'ERROR IN FORT.4 VIBRATIONS',myid+1)
               end if
               do k =1,invib(imol,vib1)
                  if(ijvib(imol,vib1,k).eq.i) then
                     lfound = .true.
                     if(vibtype.ne.itvib(imol,vib1,k)) then
-                       write(io_output,*) 'Error in fort.4 vibration', ' specifications'
                        write(io_output,*) 'check vibration type of bead',i, 'with',vib1,'molecule type',imol,'vice versa'
-                       ldie = .true.
-                       return
+                       call err_exit(__FILE__,__LINE__,'Error in fort.4 vibration specifications',myid+1)
                     end if
                  end if
               end do
               if(.not.lfound) then
-                 write(io_output,*) 'Error in fort.4 vibration iformation'
                  write(io_output,*) 'Check vibration for mol. type:',imol, 'bead ',vib1,'with ',i
-                 ldie = .true.
-                 return
+                 call err_exit(__FILE__,__LINE__,'Error in fort.4 vibration iformation',myid+1)
               end if
            end do
            lfound= .false.
@@ -830,27 +781,21 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
               ! end if
               bendtype = itben(imol,i,j)
               if(inben(imol,bend3).eq.0) then
-                 write(io_output,*) 'ERROR IN FORT.4 BENDING'
                  write(io_output,*) 'Check bending for mol. type:',imol, 'bead ',bend3,'with ',i
-                 ldie = .true.
-                 return
+                 call err_exit(__FILE__,__LINE__,'ERROR IN FORT.4 BENDING',myid+1)
               end if
               do k = 1,inben(imol,bend3)
                  if((ijben2(imol,bend3,k).eq.bend2).and. (ijben3(imol,bend3,k).eq.i)) then
                     lfound = .true.
                     if(itben(imol,bend3,k).ne.bendtype) then
-                       write(io_output,*) 'Error in fort.4 bending', ' specifications'
                        write(io_output,*) 'check bending type of bead',i, 'with',bend3,'mol. typ.',imol,'and vice versa'
-                       ldie = .true.
-                       return
+                       call err_exit(__FILE__,__LINE__,'Error in fort.4 bending specifications',myid+1)
                     end if
                  end if
               end do
               if(.not.lfound) then
-                 write(io_output,*) 'Error in fort.4 bending iformation'
                  write(io_output,*) 'Check bending for mol. type:',imol, 'bead ',bend3,'with ',i
-                 ldie = .true.
-                 return
+                 call err_exit(__FILE__,__LINE__,'Error in fort.4 bending information',myid+1)
               end if
            end do
            lfound = .false.
@@ -860,27 +805,21 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
               tor4 = ijtor4(imol,i,j)
               tortype = ittor(imol,i,j)
               if(intor(imol,tor4).eq.0) then
-                 write(io_output,*) 'ERROR IN FORT.4 TORSION'
                  write(io_output,*) 'Check torsion for mol. type:',imol, 'bead ',tor4,'with ',i,'and vice versa'
-                 ldie = .true.
-                 return
+                 call err_exit(__FILE__,__LINE__,'ERROR IN FORT.4 TORSION',myid+1)
               end if
               do k = 1,intor(imol,tor4)
                  if((ijtor2(imol,tor4,k).eq.tor3).and.(ijtor3(imol,tor4 ,k).eq.tor2).and.(ijtor4(imol,tor4,k).eq.i)) then
                     lfound=.true.
                     if(ittor(imol,tor4,k).ne.tortype) then
-                       write(io_output,*) 'Error in fort.4 torsion', ' specifications'
                        write(io_output,*) 'check torsion type of bead',i, 'with',tor4,'mol. typ.',imol,'and vice versa'
-                       ldie = .true.
-                       return
+                       call err_exit(__FILE__,__LINE__,'Error in fort.4 torsion specifications',myid+1)
                     end if
                  end if
               end do
               if(.not.lfound) then
-                 write(io_output,*) 'Error in fort.4 torsion iformation'
                  write(io_output,*) 'Check torsion for mol. type:',imol, 'bead ',tor4,'with ',i
-                 ldie = .true.
-                 return
+                 call err_exit(__FILE__,__LINE__,'Error in fort.4 torsion information',myid+1)
               end if
            end do
         end do
@@ -888,17 +827,15 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 
 ! Neeraj Adding molecule neutrality check
 !kea skip if lgaro
-     if(.not.(lgaro .or.lionic)) then
+     if(.not.(lgaro.or.lionic.or.lexzeo)) then
         do i=1,nmolty
            qtot =0.0d0
            do j = 1,nunit(i)
               qtot = qtot+qelect(ntype(i,j))
            end do
-! if(dabs(qtot).gt.1d-7) then
-! write(io_output,*)'molecule type',i,'not neutral check charges'
-! ldie = .true.
-! return
-! end if
+           if(dabs(qtot).gt.1d-7) then
+              call err_exit(__FILE__,__LINE__,'molecule type '//integer_to_string(i)//' not neutral. check charges',myid+1)
+           end if
         end do
      end if
 
@@ -922,9 +859,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
            end if
         end if
         if (rbsmax .lt. rbsmin) then
-           write(io_output,*)'rbsmax should be greater than rbsmin'
-           ldie = .true.
-           return
+           call err_exit(__FILE__,__LINE__,'rbsmax should be greater than rbsmin',myid+1)
         end if
      end if
 !kea 6/4/09 -- added for multiple rotation centers
@@ -969,22 +904,16 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 
   if ( .not. lqqelect ) then
      if ( lewald .or. lchgall ) then
-        write(io_output,*) 'no charges in the system and turn off lewald'
-        ldie = .true.
-        return
+        if (myid.eq.0) write(io_output,*) 'No charges in the system -> lewald is now turned off'
      end if
   end if
 
   if ( .not. lpolar ) then
      if ( lanes  ) then
-        write(io_output,*) 'lanes should be false for nonpolarizable systems!'
-        ldie = .true.
-        return
+        call err_exit(__FILE__,__LINE__,'lanes should be false for nonpolarizable systems!',myid+1)
      end if
      if ( lfepsi ) then
-        write(io_output,*) 'lfepsi should be false for nonpolarizable systems!'
-        ldie = .true.
-        return
+        call err_exit(__FILE__,__LINE__,'lfepsi should be false for nonpolarizable systems!',myid+1)
      end if
   end if
 
@@ -1014,9 +943,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
   IF(boxlink .LE. nbxmax)THEN
      if (lsolid(boxlink).and.(.not.lrect(boxlink))) then
-        write(io_output,*)  'Linkcell not implemented for nonrectangular boxes'
-        ldie = .true.
-        return
+        call err_exit(__FILE__,__LINE__,'Linkcell not implemented for nonrectangular boxes',myid+1)
      end if
   end if
 
@@ -1218,9 +1145,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   read(io_input,*)
   read(io_input,*) pmswat,nswaty
   if ( nswaty .gt. npamax ) then
-     write(io_output,*) 'nswaty gt npamax'
-     ldie = .true.
-     return
+     call err_exit(__FILE__,__LINE__,'nswaty gt npamax',myid+1)
   end if
 
   if ( lecho.and.myid.eq.0 ) then
@@ -1242,9 +1167,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      do i = 1,nswaty
         if ( nswatb(i,1) .eq. nswatb(i,2) ) then
            write(io_output,*) 'nswaty ',i,' has identical moltyp'
-           write(io_output,*) 'cannot swatch identical moltyp'
-           ldie = .true.
-           return
+           call err_exit(__FILE__,__LINE__,'cannot swatch identical moltyp',myid+1)
         end if
      end do
 
@@ -1402,9 +1325,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   end if
   do i = 1, nmolty
      if (lring(i).and.pmfix(i).lt.0.999.and. .not.lrig(i)) then
-        write(io_output,*) 'a ring can only be used with safe-cbmc'
-        ldie = .true.
-        return
+        call err_exit(__FILE__,__LINE__,'a ring can only be used with safe-cbmc',myid+1)
      end if
   end do
 ! read fluctuating charge info
@@ -1555,9 +1476,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         nchmax=nchoir(imol)
      end if
      if ( nchoih(imol) .ne. 1 .and. nunit(imol) .eq. nugrow(imol) )  then
-        write(io_output,*) ' nchoih must be one if nunit = nugrow'
-        ldie = .true.
-        return
+        call err_exit(__FILE__,__LINE__,'nchoih must be 1 (one) if nunit = nugrow',myid+1)
      end if
      if (nchtor(imol) .gt. nchtor_max ) then
         nchtor_max=nchtor(imol)
@@ -1620,9 +1539,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         nchbn_max=nchbnb(i)
      end if
      if ( abs(icbsta(i)) .gt. nunit(i) ) then
-        write(io_output,*) 'icbsta > nunit for molecule ',i
-        ldie = .true.
-        return
+        call err_exit(__FILE__,__LINE__,'icbsta > nunit for molecule '//integer_to_string(i),myid+1)
      end if
   end do
 
@@ -1749,9 +1666,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 
   if (lvirial) then
      if ( nvirial .gt. maxvir ) then
-        write(io_output,*) 'nvirial .gt. maxvir'
-        ldie = .true.
-        return
+        call err_exit(__FILE__,__LINE__,'nvirial .gt. maxvir',myid+1)
      end if
 
      read(io_input,*)
@@ -1778,10 +1693,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   end if
   do i = 1,nbox
      if (lideal(i) .and. lexpee) then
-        write(io_output,*) 'cannot have lideal and lexpee both true'
-        write(io_output,*) 'If you want this you will have change code'
-        ldie = .true.
-        return
+        call err_exit(__FILE__,__LINE__,'Cannot have lideal and lexpee both true (if you want this you will have change code)',myid+1)
      end if
   end do
   read(io_input,*)
@@ -1813,16 +1725,6 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 ! end if
 ! END JLR 11-11-09
   close(io_input)
-
-! -------------------------------------------------------------------
-
-! restart saver
-  if ( nstep .gt. 100 ) then
-     irsave = nstep / 50
-  else
-     irsave = nstep + 1
-  end if
-
 ! -------------------------------------------------------------------
 
 ! check information of .INC-files
@@ -1837,9 +1739,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      if ( lvirial ) then
         write(io_output,*) 'Computing Second Virial Coefficient'
         if ( nchain .ne. 2) then
-           write(io_output,*) 'nchain must equal 2'
-           ldie = .true.
-           return
+           call err_exit(__FILE__,__LINE__,'nchain must equal 2',myid+1)
         end if
      end if
      if ( lgibbs ) then
@@ -1860,9 +1760,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         end if
      end if
      if ( iensem .gt. 1 ) then
-        write(io_output,*) 'INCONSISTENT ENSEMBLE SPECIFICATION'
-        ldie = .true.
-        return
+        call err_exit(__FILE__,__LINE__,'INCONSISTENT ENSEMBLE SPECIFICATION',myid+1)
      end if
 
      inpbc = 0
@@ -1881,26 +1779,20 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
            write(io_output,*) 'in z-direction'
         end if
         if ( inpbc .eq. 0 ) then
-           write(io_output,*) 'INCONSISTENT PBC SPECIFICATION'
-           ldie = .true.
-           return
+           call err_exit(__FILE__,__LINE__,'INCONSISTENT PBC SPECIFICATION',myid+1)
         end if
         write(io_output,*) inpbc,'-dimensional periodic box'
      else
         write(io_output,*) 'cluster mode (no pbc)'
         if ( lgibbs .or. lgrand ) then
-           write(io_output,*) 'INCONSISTENT SPECIFICATION OF LPBC  AND ENSEMBLE'
-           ldie = .true.
-           return
+           call err_exit(__FILE__,__LINE__,'INCONSISTENT SPECIFICATION OF LPBC  AND ENSEMBLE',myid+1)
         end if
      end if
 
      if ( lfold ) then
         write(io_output,*) 'particle coordinates are folded into central box'
         if ( .not. lpbc ) then
-           write(io_output,*) 'INCONSISTENT SPECIFICATION OF LPBC AND  LFOLD'
-           ldie = .true.
-           return
+           call err_exit(__FILE__,__LINE__,'INCONSISTENT SPECIFICATION OF LPBC AND LFOLD',myid+1)
         end if
      end if
 
@@ -1914,9 +1806,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      if ( lcutcm ) then
         write(io_output,*) 'additional (COM) cutoff on computed rcmu'
         if ( lijall ) then
-           write(io_output,*) 'cannot have lijall with lcutcm'
-           ldie = .true.
-           return
+           call err_exit(__FILE__,__LINE__,'cannot have lijall with lcutcm',myid+1)
         end if
         ! if ( lchgall ) call err_exit(__FILE__,__LINE__,'cannot have lchgall with lcutcm',myid+1)
      end if
@@ -1939,9 +1829,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         write(io_output,*) 'WARNING: sets potential cut-off to 2.5sigma'
         write(io_output,*) 'WARNING: has build-in tail corrections'
         if ( ltailc ) then
-           write(io_output,*) 'INCONSISTENT SPECIFICATION OF LTAILC AND  LSAMI'
-           ldie = .true.
-           return
+           call err_exit(__FILE__,__LINE__,'INCONSISTENT SPECIFICATION OF LTAILC AND LSAMI',myid+1)
         end if
      end if
 
@@ -1974,8 +1862,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      end if
 
      if (lshift.and.ltailc) then
-        write(io_output,*) ' lshift.and.ltailc!'
-        ldie = .true.
+        call err_exit(__FILE__,__LINE__,'lshift.and.ltailc!',myid+1)
         return
      end if
 
@@ -1996,9 +1883,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   if (linit) then
      do ibox = 1,nbox
         if (lsolid(ibox).and..not.lrect(ibox) .and..not.(ibox.eq.1.and.lexzeo)) then
-           write(io_output,*) 'Cannot initialize non-rectangular system'
-           ldie = .true.
-           return
+           call err_exit(__FILE__,__LINE__,'Cannot initialize non-rectangular system',myid+1)
         end if
      end do
   end if
@@ -2098,9 +1983,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
            w(3) = min_width(ibox,3)
 
            if (rcut(ibox)/w(1) .gt. 0.5d0 .or.  rcut(ibox)/w(2) .gt. 0.5d0 .or.  rcut(ibox)/w(3) .gt. 0.5d0) then
-              write(io_output,*) 'rcut > half cell width'
-              ldie = .true.
-              return
+              call err_exit(__FILE__,__LINE__,'rcut > half cell width',myid+1)
            end if
 
            if (myid.eq.0) then
@@ -2129,9 +2012,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
            end if
            do i = 1, nbox
               if( (rcut(i)/boxlx(i) .gt. 0.5d0).or. (rcut(i)/boxly(i) .gt. 0.5d0).or. (rcut(i)/boxlz(i) .gt. 0.5d0)) then
-                 write(io_output,*) 'rcut > 0.5*boxlx'
-                 ldie = .true.
-                 return
+                 call err_exit(__FILE__,__LINE__,'rcut > 0.5*boxlx',myid+1)
               end if
            end do
         end if
@@ -2147,20 +2028,16 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      read(io_restart,*) nmtres
 ! check that number of particles in fort.4 & fort.77 agree ---
      if ( ncres .ne. nchain .or. nmtres .ne. nmolty ) then
-        write(io_output,*) 'conflicting information in restart and control files'
         write(io_output,*) 'nchain',nchain,'ncres',ncres
         write(io_output,*) 'nmolty',nmolty,'nmtres',nmtres
-        ldie = .true.
-        return
+        call err_exit(__FILE__,__LINE__,'conflicting information in restart and control files',myid+1)
      end if
      read(io_restart,*) (nures(i),i=1,nmtres)
 
 ! do i = 1, nmtres
 ! if ( nures(i) .ne. nunit(i) ) then
-! write(io_output,*)
-!     +           'conflicting information in restart and control files'
 ! write(io_output,*) 'unit',i,'nunit',nunit(i),'nures',nures(i)
-! call err_exit(__FILE__,__LINE__,'',myid+1)
+! call err_exit(__FILE__,__LINE__,'conflicting information in restart and control files',myid+1)
 ! end if
 ! end do
 ! write(io_output,*) 'ncres',ncres,'   nmtres',nmtres
@@ -2180,9 +2057,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 ! check that particles are in correct boxes ---
 ! obtain ncmt values
      do ibox = 1,nbox
-
         nchbox(ibox) = 0
-
      end do
      do i = 1, nmolty
         do ibox = 1,nbox
@@ -2206,18 +2081,14 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         if( nboxi(i) .le. nbox ) then
            ibox = nboxi(i)
            if ( ibox .ne. 1 .and. .not. lgibbs  .and. .not.lgrand) then
-              write(io_output,*) 'Particle found outside BOX 1'
-              ldie = .true.
-              return
+              call err_exit(__FILE__,__LINE__,'Particle found outside BOX 1',myid+1)
            end if
            nchbox(ibox) = nchbox(ibox) + 1
            imolty = moltyp(i)
            ncmt(ibox,imolty) = ncmt(ibox,imolty) + 1
            if ( lexpand(imolty) ) then
               if ( ibox .gt. 2 ) then
-                 write(io_output,*) 'put in box 1 and 2 for such  molecules'
-                 ldie = .true.
-                 return
+                 call err_exit(__FILE__,__LINE__,'put in box 1 and 2 for such  molecules',myid+1)
               end if
               itype = eetype(imolty)
               ncmt2(ibox,imolty,itype) =  ncmt2(ibox,imolty,itype) + 1
@@ -2228,9 +2099,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
            end if
         else
            write(io_output,*) 'i:',i,'nboxi(i)',nboxi(i)
-           write(io_output,*) 'Particle found in ill-defined box'
-           ldie = .true.
-           return
+           call err_exit(__FILE__,__LINE__,'Particle found in ill-defined box',myid+1)
         end if
 
      end do
@@ -2242,12 +2111,10 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
            tcount = tcount + ncmt(ibox,i)
         end do
         if ( tcount .ne. temtyp(i) ) then
-           write(io_output,*) 'Particle type number inconsistency'
            write(io_output,*) 'type',i
            write(io_output,*) 'ncmt',(ncmt(ibox,i), ibox = 1,nbox)
            write(io_output,*) 'temtyp', temtyp(i)
-           ldie = .true.
-           return
+           call err_exit(__FILE__,__LINE__,'Particle type number inconsistency',myid+1)
         end if
      end do
 
@@ -2274,9 +2141,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      do i = 1,nbxmax
         if ( dabs(qbox(i)) .gt. 1d-6 ) then
            if (i.eq.1.and.lexzeo) cycle
-           write(io_output,*) 'box',i,' has a net charge of',qbox(i)
-           ldie = .true.
-           return
+           call err_exit(__FILE__,__LINE__,'box '//integer_to_string(i)//' has a net charge of '//real_to_string(qbox(i)),myid+1)
         end if
      end do
   end if
@@ -2294,9 +2159,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
               calp(ibox) = kalp(ibox)/min_boxl
            end do
         else
-           write(io_output,*) 'lewald should be true when lchgall is true'
-           ldie = .true.
-           return
+           call err_exit(__FILE__,__LINE__,'lewald should be true when lchgall is true',myid+1)
         end if
      else
         do ibox = 1, nbox
@@ -2324,16 +2187,12 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
            calp(ibox) = kalp(ibox)/min_boxl
            if ( lewald ) then
               if ( kalp(ibox) .lt. 5.6d0 ) then
-                 write(io_output,*) 'Warning, kalp is too small'
-                 ldie = .true.
-                 return
+                 call err_exit(__FILE__,__LINE__,'Warning, kalp is too small',myid+1)
               end if
            else
 !kea
               if(.not. lgaro) then
-                 write(io_output,*) 'lewald should be true when lchgall  is true'
-                 ldie = .true.
-                 return
+                 call err_exit(__FILE__,__LINE__,'lewald should be true when lchgall is true',myid+1)
               end if
            end if
         end do
@@ -2399,9 +2258,8 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         nmcount = nmcount + idummy(imolty)
      end do
      if ( nmcount .ne. nchbox(ibox) ) then
-        write(io_output,*) 'Readdat: nmcount ne nchbox', nmcount, nchbox
-        ldie = .true.
-        return
+        write(io_output,*) 'nmcount: ',nmcount,'; nchbox: ',nchbox
+        call err_exit(__FILE__,__LINE__,'Readdat: nmcount ne nchbox',myid+1)
      end if
   end do
 ! set idummy counter to 0
@@ -2464,9 +2322,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   if (licell) then
      do i = 1,nchain
         if (2.0d0*rcmu(i) .gt. rintramax) then
-           write(io_output,*) 'rintramax for the linkcell list too small'
-           ldie = .true.
-           return
+           call err_exit(__FILE__,__LINE__,'rintramax for the linkcell list too small',myid+1)
         end if
      end do
   end if

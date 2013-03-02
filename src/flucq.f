@@ -24,10 +24,12 @@ subroutine flucq (ichoice,boxi)
       real::qoldj2,vnewi,velectni,vinterni,voldi, velectoi,vinteroi
 
 ! --------------------------------------------------------------------
+#ifdef __DEBUG__
+      write(io_output,*) 'start FLUCQ in ',myid
+#endif
 
-! write(io_output,*) 'start FLUCQ'
 ! select a chain at random ***
-      dchain  = random()
+      dchain  = random(-1)
       do icbu = 1,nmolty
          if ( dchain .lt. pmfqmt(icbu) ) then
             imolty = icbu
@@ -43,7 +45,7 @@ subroutine flucq (ichoice,boxi)
             bnflcq(imolty,ibox) = bnflcq(imolty,ibox) + 1.0d0
             return
          end if
-         i = dint( dble(ncmt(1,imolty))*random() ) + 1
+         i = dint( dble(ncmt(1,imolty))*random(-1) ) + 1
          i = parbox(i,1,imolty)
          if ( moltyp(i) .ne. imolty ) write(io_output,*) 'screwup'
 
@@ -53,34 +55,34 @@ subroutine flucq (ichoice,boxi)
 ! equal probability charge moves in two boxes (for swap)
 ! preferential charge moves according to favor
             dchain = dble(temtyp(imolty))
- 77         i = int( dchain*random() ) + 1
+ 77         i = int( dchain*random(-1) ) + 1
             i = parall(imolty,i)
-            if ( random() .gt. favor(i)) goto 77
+            if ( random(-1) .gt. favor(i)) goto 77
             ibox = nboxi(i)
          else if ( ichoice .eq. -2 ) then
 ! equal probability charge moves in two boxes (for swap)
 ! preferential charge moves according to favor2
             dchain = dble(temtyp(imolty))
- 66         i = int( dchain*random() ) + 1
+ 66         i = int( dchain*random(-1) ) + 1
             i = parall(imolty,i)
-            if ( random() .gt. favor2(i)) goto 66
+            if ( random(-1) .gt. favor2(i)) goto 66
             ibox = nboxi(i)
          else if ( ichoice .eq. 0 ) then
 ! equal probability charge moves in separate box (for trans,rot)
  88         dchain = dble(temtyp(imolty))
-            i = int( dchain*random() ) + 1
+            i = int( dchain*random(-1) ) + 1
             i = parall(imolty,i)
             ibox = nboxi(i)
             if ( ibox .ne. boxi ) goto 88
          else if (ichoice .eq. 2) then
             dchain = dble(temtyp(imolty))
-            i = int( dchain*random() ) + 1
+            i = int( dchain*random(-1) ) + 1
             i = parall(imolty,i)
             ibox = nboxi(i)
          end if
       else
          dchain = dble(temtyp(imolty))
-         i = int( dchain*random() ) + 1
+         i = int( dchain*random(-1) ) + 1
          i = parall(imolty,i)
          ibox = nboxi(i)
          
@@ -99,7 +101,7 @@ subroutine flucq (ichoice,boxi)
                bnflcq(imolty,ibox) = bnflcq(imolty,ibox) + 1.0d0
                return
             end if
-            jchain = dint( dble(ncmt(1,imolty))*random() ) + 1
+            jchain = dint( dble(ncmt(1,imolty))*random(-1) ) + 1
             jchain = parbox(jchain,1,imolty)
             if ( moltyp(jchain) .ne. imolty ) write(io_output,*) 'screwup'
 
@@ -109,33 +111,33 @@ subroutine flucq (ichoice,boxi)
 ! equal probability charge moves in two boxes (for swap)
 ! preferential charge moves according to favor
                dchain = dble(temtyp(imolty))
- 70            jchain = int( dchain*random() ) + 1
+ 70            jchain = int( dchain*random(-1) ) + 1
                jchain = parall(imolty,jchain)
-               if ( random() .gt. favor(jchain)) goto 70
+               if ( random(-1) .gt. favor(jchain)) goto 70
                if ( nboxi(jchain) .ne. ibox ) goto 70 
             else if ( ichoice .eq. -2 ) then
 ! equal probability charge moves in two boxes (for swap)
 ! preferential charge moves according to favor
                dchain = dble(temtyp(imolty))
- 60            jchain = int( dchain*random() ) + 1
+ 60            jchain = int( dchain*random(-1) ) + 1
                jchain = parall(imolty,jchain)
-               if ( random() .gt. favor2(jchain)) goto 60
+               if ( random(-1) .gt. favor2(jchain)) goto 60
                if ( nboxi(jchain) .ne. ibox ) goto 60
             else if ( ichoice .eq. 0 ) then
 ! equal probability charge moves in separate box (for trans,rot)
  80            dchain = dble(temtyp(imolty))
-               jchain = int( dchain*random() ) + 1
+               jchain = int( dchain*random(-1) ) + 1
                jchain = parall(imolty,jchain)
                if ( nboxi(jchain) .ne. boxi ) goto 80
             else if (ichoice .eq. 2) then
  90            dchain = dble(temtyp(imolty))
-               jchain = int( dchain*random() ) + 1
+               jchain = int( dchain*random(-1) ) + 1
                jchain = parall(imolty,jchain)
                if ( nboxi(jchain) .ne. ibox ) goto 90
             end if
          else
  100        dchain = dble(temtyp(imolty))
-            jchain = int( dchain*random() ) + 1
+            jchain = int( dchain*random(-1) ) + 1
             jchain = parall(imolty,jchain)
             if ( nboxi(jchain) .ne. ibox ) goto 100
          end if
@@ -180,11 +182,11 @@ subroutine flucq (ichoice,boxi)
 
 ! Choose one of the units as the main charge transfer site
 
- 30   mainunit = int( dble(iunit)*random() ) + 1
+ 30   mainunit = int( dble(iunit)*random(-1) ) + 1
 ! for unit which is not a charge site 
       if ( .not. lqchg(ntype(imolty,mainunit)) ) goto 30
       bnflcq(imolty,ibox) = bnflcq(imolty,ibox) + 1.0d0
-      dispbig = ( 2.0d0*random() - 1.0d0 )*rmflcq(imolty,ibox)
+      dispbig = ( 2.0d0*random(-1) - 1.0d0 )*rmflcq(imolty,ibox)
 
       if ( linterqt ) then
 ! For charge transfer case, i molecule increases by dispbig and
@@ -192,7 +194,7 @@ subroutine flucq (ichoice,boxi)
 ! correction for the reptition of the calculation of the 
 ! coulombic real space term between maini and mainj
          maini = mainunit
- 32      mainunit = int( dble(iunit)*random() ) + 1
+ 32      mainunit = int( dble(iunit)*random(-1) ) + 1
 ! for unit which is not a charge site
          if ( .not. lqchg(ntype(imolty,mainunit)) ) goto 32
          mainj = mainunit
@@ -373,7 +375,7 @@ subroutine flucq (ichoice,boxi)
 
       if ( deltv .le. 0.0d0 ) then
 ! accept move
-      else if ( dexp(-deltvb) .gt. random() ) then
+      else if ( dexp(-deltvb) .gt. random(-1) ) then
 ! accept move
       else
          return
@@ -396,14 +398,13 @@ subroutine flucq (ichoice,boxi)
       if ( ldielect ) then
           call dipole(ibox,1)
       end if
- 
-
 
       bsflcq(imolty,ibox) = bsflcq(imolty,ibox) + 1.0d0
 
-! write(io_output,*) 'end FLUCQ'
-
+#ifdef __DEBUG__
+      write(io_output,*) 'end FLUCQ in ',myid
+#endif
       return
-      end
+    end subroutine flucq
 
 

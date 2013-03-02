@@ -4,9 +4,9 @@
 import sys,re,os,commands,time,shutil,unittest,glob
 import diffEpsilon
 
-defaultSrcRoot=os.path.expanduser("~/MCCCS/zeolite")
-defaultExeRoot=os.path.join(defaultSrcRoot,"test-"+time.strftime("%y%m%d-%H:%M"))
-defaultTestsRoot=defaultExeRoot
+defaultSrcRoot=os.path.expanduser("~/MCCCS/topmon")
+defaultTestsRoot=os.path.join(defaultSrcRoot,"test-"+time.strftime("%y%m%d-%H:%M"))
+defaultExeRoot=os.path.join(defaultTestsRoot,"build","src")
 defaultCommand="topmon"
 
 class simpleRunTest(unittest.TestCase):

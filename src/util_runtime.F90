@@ -11,8 +11,8 @@ contains
     integer,intent(in)::lineno,code
     integer::ierr
 
-    write(*,*) 'ERROR in ',TRIM(file),':',lineno
-    write(*,FMT='("code ",I3,": ",A)') code,msg
+    write(*,FMT='("ERROR in ",A,": line ",I6)') TRIM(file),lineno
+    write(*,FMT='("code ",I5,": ",A)') code,msg
 
 #ifdef __MPI__
     call MPI_ABORT(MPI_COMM_WORLD,code,ierr)

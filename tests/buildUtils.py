@@ -27,7 +27,7 @@ def build(srcRoot,buildType="",buildDir=None,clean=None,logFilePath=None):
         makeCmd=os.path.expanduser("~/cmake/bin/cmake")
     else:
         makeCmd="cmake"
-    pipe=os.popen("{ { "+makeCmd+' '+os.path.abspath(os.path.join(srcRoot,'src'))+"; } 2>&1 ; } >>"+logFilePath)
+    pipe=os.popen("{ { FC=ifort "+makeCmd+' '+os.path.abspath(srcRoot)+"; } 2>&1 ; } >>"+logFilePath)
     if (pipe.close()):
         logFile=open(logFilePath,'a')
         logFile.write("\n+++ ERROR, cmake "+buildType+" FAILED! +++\n")
@@ -65,7 +65,7 @@ def prettify(srcRoot,buildType="",logDirPath=None,mainLog=sys.stdout,
     if os.access(outDir,os.W_OK): commands.getoutput('rm -rf "'+outDir+'"')
     os.mkdir(outDir)
 
-    filesToPret2=[] # glob.glob(os.path.join(srcRoot,"src","cp_*.F"))
+    filesToPret2=[] # glob.glob(os.path.join(srcRoot,"src","*.F90"))
     filesToPret=templateInstances
     baseNames=map(os.path.basename,filesToPret)
     for fileToPret in filesToPret2:

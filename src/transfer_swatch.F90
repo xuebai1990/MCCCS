@@ -15,59 +15,53 @@ module transfer_swatch
 ! SWTCMOVE.INC
   real,allocatable::bnswat(:,:),bnswat_empty(:,:),bsswat(:,:) !< accumulators for swatch performance
 contains
-!      **********************************************************
-! Added intrabox move for two particles within one box   ***
-! in combined move that shares the same parameters.      ***
-! Will also accept rigid (lrigid) molecules.  Contains   ***
-! several critical bug fixes as well.                    ***
-! 9-25-02 JMS        ***
-!      **********************************************************
-  subroutine swatch
+!*********************************************************
+! Added intrabox move for two particles within one box  **
+! in combined move that shares the same parameters.     **
+! Will also accept rigid (lrigid) molecules.  Contains  **
+! several critical bug fixes as well.                   **
+!                                        9-25-02 JMS    **
+!*********************************************************
+  subroutine swatch()
     use sim_particle,only:update_neighbor_list
 
       logical::lempty,lterm
 
-      integer::type_a,type_b,from,prev,self,iboxnew ,iboxold,imolty,igrow,new,old,islen,ifirst,iprev,iii,j
-      integer::oldchain,newchain,oldunit,newunit ,iunit,iins
+      integer::type_a,type_b,from(2*numax),prev(2*numax),self,iboxnew,iboxold,imolty,igrow,new,old,islen,ifirst,iprev,iii,j
+      integer::oldchain,newchain,oldunit,newunit,iunit,iins
 
       integer::ic,ibox,icbu,jj,mm,imt,jmt,imolin,imolrm
-      integer::boxa,boxb,ipair,imolta,imoltb,iboxa ,iboxb,iboxal,iboxbl,iboxia,iboxib,iunita,iunitb,orgaia ,orgaib ,orgbia,orgbib,ipairb
+      integer::boxa,boxb,ipair,imolta,imoltb,iboxa,iboxb,iboxal,iboxbl,iboxia,iboxib,iunita,iunitb,orgaia,orgaib,orgbia,orgbib,ipairb
 
-      real::tweight,tweiold,rxut,ryut,rzut ,dvol,vola,volb,rho,dinsta,rpair
+      real::tweight,tweiold,rxut(4,numax),ryut(4,numax),rzut(4,numax),dvol,vola,volb,rho,dinsta,rpair
 
-      real::vnbox,vninte,vnintr,vnvibb,vntgb ,vnextb,vnbend,vntail,vnelect,vnewald,wnlog,wolog,wdlog,wswat
+      real::vnbox(nbxmax),vninte(nbxmax),vnintr(nbxmax),vnvibb(nbxmax),vntgb(nbxmax),vnextb(nbxmax),vnbend(nbxmax),vntail(nbxmax),vnelect(nbxmax),vnewald(nbxmax),wnlog,wolog,wdlog,wswat
 
-      real::v,vintra,vinter,vext,velect,vewald ,vdum,delen,deleo,dicount,vrecipn,vrecipo
-! additions from iswatch
+      real::v,vintra,vinter,vext,velect,vewald,vdum,delen,deleo,dicount,vrecipn,vrecipo
 
+      ! additions from iswatch
       integer::izz,box,iboxi,bdmol_a,bdmol_b
       integer::imola,imolb,moltaid,moltbid
-
-      integer::s_type, o_type, thisbox, otherbox
-
+      integer::s_type,o_type,thisbox,otherbox
       real::rx_1(numax),ry_1(numax),rz_1(numax)
-      dimension from(2*numax),prev(2*numax)
-      dimension rxut(4,numax),ryut(4,numax),rzut(4,numax)
-
-! end additions
+      ! end additions
 
       real::waddold,waddnew,vdum2
 
-      dimension vnbox(nbxmax),vninte(nbxmax),vnintr(nbxmax) ,vnvibb(nbxmax),vntgb(nbxmax),vnextb(nbxmax),vnbend(nbxmax) ,vntail(nbxmax),vnelect(nbxmax),vnewald(nbxmax)
-
-! JLR 11-24-09
+      ! JLR 11-24-09
       integer::icallrose
-! END JLR 11-24-09
+      ! END JLR 11-24-09
 
 ! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-! write(io_output,*) 'start SWATCH'
+#ifdef __DEBUG__
+      write(io_output,*) 'start SWATCH in ',myid
+#endif
 
       lempty = .false.
 ! randomly select chains to switch between boxa boxb
 ! select a pair type to switch
       if ( nswaty .gt. 1 ) then
-         rpair = random()
+         rpair = random(-1)
          do 96 ipair = 1, nswaty
             if ( rpair .lt. pmsatc(ipair) ) then
                iparty = ipair
@@ -80,7 +74,7 @@ contains
 
 ! randomly select the molecules from the pair ***
 
-      if (random() .lt. 0.5d0) then
+      if (random(-1) .lt. 0.5d0) then
          type_a = 1
          type_b = 2
       else
@@ -97,7 +91,7 @@ contains
 
 ! choose box A and box B at random
       if ( nswtcb(iparty) .gt. 1 ) then
-         rpair = random()
+         rpair = random(-1)
          do 98 ipair = 1, nswtcb(iparty)
             if ( rpair .lt. pmswtcb(iparty,ipair) ) then
                ipairb = ipair
@@ -108,7 +102,7 @@ contains
          ipairb = 1
       end if
 
- 99   if (random() .lt. 0.5d0) then
+ 99   if (random(-1) .lt. 0.5d0) then
          boxa=box3(iparty,ipairb)
          boxb=box4(iparty,ipairb)
       else
@@ -131,7 +125,7 @@ contains
 !$$$c *** randomly select chains to switch ***
 !$$$c *** select a pair type to switch ***
 !$$$      if ( niswaty .gt. 1 ) then
-!$$$         rpair = random()
+!$$$         rpair = random(-1)
 !$$$         do 96 ipair = 1, niswaty
 !$$$            if ( rpair .lt. pmisatc(ipair) ) then
 !$$$               iparty = ipair
@@ -145,7 +139,7 @@ contains
 !$$$c *** box determinations ***
 !$$$
 !$$$      if ( lgibbs ) then
-!$$$         if (random() .lt. 0.5d0) then
+!$$$         if (random(-1) .lt. 0.5d0) then
 !$$$            thisbox = 1
 !$$$            otherbox = 2
 !$$$         else
@@ -180,7 +174,7 @@ contains
 
 ! get particle of type a ***
 
-           moltaid = idint(dble (ncmt(box,imolta))*random()) + 1
+           moltaid = idint(dble (ncmt(box,imolta))*random(-1)) + 1
 
 ! imola is the overall molecule id number (runs from 1 to total #) *
            imola = parbox( moltaid, box, imolta)
@@ -193,7 +187,7 @@ contains
 
 ! get particle of type b ***
 
-           moltbid = idint(dble (ncmt(box,imoltb))*random()) + 1
+           moltbid = idint(dble (ncmt(box,imoltb))*random(-1)) + 1
            imolb = parbox( moltbid, box, imoltb)
 
            if (moltyp(imolb) .ne. imoltb)  write(io_output,*) 'screwup in iswatch'
@@ -332,11 +326,8 @@ contains
 ! assign growth schedule for molecule b *
 
          do izz = 1,nunit(imolty)
-
             liswinc(izz,imolty) = lexshed(izz)
-
-! write(io_output,*) izz, liswinc(izz,imolty)
-
+            ! write(io_output,*) izz, liswinc(izz,imolty)
          end do
 
 !     ******************
@@ -489,14 +480,14 @@ contains
                   !don't regrow anything in rosenbluth
                   icallrose = 4
                else if( (nsampos(iparty).ge.3) .or. (ifirst.ge.riutry(imolty,1) )) then
-! rigid part is grown, don't do rigrot in rosebluth
+                  ! rigid part is grown, don't do rigrot in rosebluth
                   icallrose = 3
                else
-! rigid part is not grown, do rigrot
+                  ! rigid part is not grown, do rigrot
                   icallrose = 2
                end if
             else
-! flexible molecule call rosenbluth in normal fashion
+               ! flexible molecule call rosenbluth in normal fashion
                icallrose = 2
             end if
 
@@ -852,7 +843,7 @@ contains
 
          wswat = ( tweight / tweiold )
 
-         if ( random() .le. wswat ) then
+         if ( random(-1) .le. wswat ) then
 ! we can now accept !!!!! ***
             bsswat(iparty,ipairb) = bsswat(iparty,ipairb) + 1.0d0
 ! write(io_output,*) 'SWATCH ACCEPTED',imola,imolb
@@ -918,7 +909,7 @@ contains
          else
 ! get particle from box a
 
-            iboxal = idint( dble(ncmt(boxa,imolta))*random() ) + 1
+            iboxal = idint( dble(ncmt(boxa,imolta))*random(-1) ) + 1
             iboxa = parbox(iboxal,boxa,imolta)
             if ( moltyp(iboxa) .ne. imolta ) write(io_output,*) 'screwup'
             iboxia = nboxi(iboxa)
@@ -926,7 +917,7 @@ contains
 
 ! get particle from box b
 
-            iboxbl = idint( dble(ncmt(boxb,imoltb))*random() ) + 1
+            iboxbl = idint( dble(ncmt(boxb,imoltb))*random(-1) ) + 1
             iboxb = parbox(iboxbl,boxb,imoltb)
             if ( moltyp(iboxb) .ne. imoltb ) write(io_output,*) 'screwup'
             iboxib = nboxi(iboxb)
@@ -1463,7 +1454,7 @@ contains
 
 ! write(io_output,*) 'imolta,imoltb',imolta,imoltb
 ! write(io_output,*) 'wswat,tweight,tweiold',wswat,tweight,tweiold
-         if ( random() .le. wswat ) then
+         if ( random(-1) .le. wswat ) then
 ! we can now accept !!!!! ***
             bsswat(iparty,ipairb) = bsswat(iparty,ipairb) + 1.0d0
 ! write(io_output,*) 'SWATCH ACCEPTED',iboxa,iboxb
@@ -1547,7 +1538,9 @@ contains
 
       end if
 
-! write(io_output,*) 'end SWATCH'
+#ifdef __DEBUG__
+      write(io_output,*) 'end SWATCH in ',myid
+#endif
 
       return
   end subroutine swatch

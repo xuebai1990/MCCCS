@@ -55,14 +55,14 @@ MODULE energy_pairwise
   real,public::epsimmff(natomtyp),sigimmff(natomtyp),smmff(natomtyp),ammff(natomtyp),nmmff(natomtyp),gmmff(natomtyp),sigisq(natomtyp),alphammff(natomtyp),coru_cons(natomtyp),corp_cons(natomtyp)
 
 contains
-!    *******************************************************************
-! calculates the total potential energy for a configuration.    **
-!    **                                                               **
-! ovrlap: logical, true for substantial atom overlap
-! v*: energies
-! ibox: box number
-! lvol: true if called from volume.f, no output of summary infomation
-!    *******************************************************************
+!*****************************************************************
+!> \brief Calculates the total potential energy for a configuration.
+!
+!> ovrlap: logical, true for substantial atom overlap
+!> v*: energies
+!> ibox: box number
+!> lvol: true if called from volume.f, no output of summary infomation
+!******************************************************************
   subroutine sumup(ovrlap,v,vinter,vtail,vintra,vvib,vbend,vtg,vext,velect,vflucq,ibox,lvol)
     use energy_kspace,only:recipsum
     use energy_intramolecular,only:U_bonded
@@ -70,19 +70,19 @@ contains
     use energy_4body,only:U4System
 
     logical::ovrlap,lvol
-    logical::lexplt,lqimol,lqjmol,lcoulo,lij2,liji,lqchgi
+    logical::lexplt,lqimol,lqjmol,lcoulo(numax,numax),lij2,liji,lqchgi
     integer::i,imolty,ii,j,jmolty,jj,ntii,ntjj,ntij,iunit,ibox,nmcount,ntj,k,mmm
     real::v,vinter,vintra,vtail,vvib,vbend,vtg,vext,velect,vflucq,qqii
     real::rcutsq,rminsq,rxui,ryui,rzui,rxuij,ryuij,rzuij,rijsq,rho,rij,vrecipsum,rbcut,vwell,calpi
     ! real::vtemp
-
     real::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq
     real::vintera,velecta,vol
-    dimension lcoulo(numax,numax)
     ! Neeraj & RP for MPI
     real::sum_vvib,sum_vbend,sum_vtg,my_velect
 ! --------------------------------------------------------------------
-! write(io_output,*) 'start SUMUP, box ', ibox
+#ifdef __DEBUG__
+    write(io_output,*) 'start SUMUP in ',myid,' for box ', ibox
+#endif
 
     if ( lpbc ) call setpbc(ibox)
 
@@ -180,7 +180,7 @@ contains
                       ! neigh_cnt(j,imolty)=neigh_cnt(j,imolty)+1
                       ! neighbor(neigh_cnt(j,imolty),j,imolty)=i
                       ! end if
-                      
+
                       if ( rijsq .gt. rcmsq ) then
                          if ( lqimol .and. lqjmol .and. lchgall ) then
                             lij2 = .false.
@@ -234,7 +234,7 @@ contains
                          ! write(io_output,*) 'dist2',rijsq
                          ! write(io_output,*) 'distance', dsqrt(rijsq)
                          ! end if
-                         
+
                          if (rijsq.lt.rminsq .and. .not.(lexpand(imolty).or.lexpand(jmolty))) then
                             if ( .not. lvol .and.myid.eq.0) then
                                write(io_output,*) 'overlap inter'
@@ -691,26 +691,28 @@ contains
        write(io_output,*) 'total energy    ', v
     end if
 
-! write(io_output,*) 'end SUMUP'
+#ifdef __DEBUG__
+    write(io_output,*) 'end SUMUP in ',myid
+#endif
 
     return
   end subroutine sumup
 
-!    *******************************************************************
-! calculates the total potential energy for a configuration.    **
-!    *******************************************************************
-! i: calculate the energies associated with the i-th chain
-! imolty: molecule type of chain i
-! v*: energies
-! flagon: flag for old/new configuration
-! ibox: box number of chain i
-! istart, iuend: calculate energies from bead istart to bead iuend for chain i
-! lljii: whether to include intramolecular LJ interactions
-! ovrlap: atom overlap
-! ltors: whether to calculate torsional energy
-! lcharge_table: whether need to set up charge interaction table; true if called from CBMC
-! lfavor:
-!    *******************************************************************
+!*****************************************************************
+!> \brief Calculates the total potential energy for a configuration.
+!>
+!> i: calculate the energies associated with chain i
+!> imolty: molecule type of chain i
+!> v*: energies
+!> flagon: flag for old(flagon=1)/new(flagon=2) configurations
+!> ibox: box number of chain i
+!> istart, iuend: calculate energies from bead istart to bead iuend for chain i
+!> lljii: whether to include intramolecular LJ interactions
+!> ovrlap: atom overlap
+!> ltors: whether to calculate torsional energy
+!> lcharge_table: whether need to set up charge interaction table; true if called from CBMC
+!> lfavor:
+!*****************************************************************
   subroutine energy(i,imolty,v,vintra,vinter,vext,velect,vewald,flagon,ibox,istart,iuend,lljii,ovrlap,ltors,vtors,lcharge_table,lfavor,lAtom_traxyz)
     use sim_particle,only:lnn
     use energy_intramolecular,only:U_torsion
@@ -718,7 +720,7 @@ contains
     use energy_4body,only:U4MolSys
     use energy_garofalini,only:triad_en
 
-    logical::lqimol,lqjmol,lexplt,lcoulo,lfavor,lij2,liji,lqchgi
+    logical::lqimol,lqjmol,lexplt,lcoulo(numax,numax),lfavor,lij2,liji,lqchgi
     logical::lljii,ovrlap,ltors,lcharge_table,lAtom_traxyz
 
     integer::growii,growjj,k,jcell(nmax),nmole
@@ -729,12 +731,13 @@ contains
     real::vwell
     real::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq
 
-    dimension lcoulo(numax,numax)
     ! KEA
     integer::neigh_j,neighj(maxneigh)
     real::ndijj(maxneigh),nxijj(maxneigh),nyijj(maxneigh),nzijj(maxneigh)
 ! --------------------------------------------------------------------
-! write(io_output,*) 'start ENERGY'
+#ifdef __DEBUG__
+    write(io_output,*) 'start ENERGY in ',myid,' for molecule ',i,' in box ',ibox
+#endif
 
     if ( lpbc ) call setpbc(ibox)
 
@@ -1000,8 +1003,7 @@ contains
 ! for expanded ensemble
 ! lmim = .false.
 ! mlen2 = rcmu(nchp2)*2d0
-! if ( mlen2>boxlx(ibox) .or. mlen2>boxly(ibox) .or.
-!     $     mlen2>boxlz(ibox)) lmim = .true.
+! if ( mlen2>boxlx(ibox) .or. mlen2>boxly(ibox) .or. mlen2>boxlz(ibox)) lmim = .true.
 ! END JLR 11-19-09
 
 ! calculate intramolecular energy correction for chain i
@@ -1170,30 +1172,30 @@ contains
        end if
     end if
 
-! write(io_output,*) 'v :', v
-
-! write(io_output,*) 'end ENERGY'
-
+#ifdef __DEBUG__
+    ! write(io_output,*) 'v :', v
+    write(io_output,*) 'end ENERGY in ',myid
+#endif
     return
   end subroutine energy
 
-!    *******************************************************************
-! calculates the potential energy and the boltzmann factor      **
-! for ichoi trial positions.
-!    *******************************************************************
-! lnew: true for new configurations
-! lfirst: true for insertion of the first bead in swap moves
-! ovrlap: logical variable, true for walk termination
-! i: the i-th chain
-! icharge: the i-th chain with charges, usually identical to i
-! imolty: molecule type of chain i
-! ibox: box number of chain i
-! ichoi: number of trial positions
-! iufrom: previous bead
-! ntogrow: number of beads to grow from
-! glist: the list of beads to grow from, there are ntogrow entries
-! maxlen: maximum possible length of grown chain
-!    *******************************************************************
+!*****************************************************************
+!> \brief Calculates the potential energy and the boltzmann factor
+!>       for ichoi trial positions.
+!>
+!> lnew: true for new configurations
+!> lfirst: true for insertion of the first bead in swap moves
+!> ovrlap: logical variable, true for walk termination
+!> i: calculates Boltzmann weights for the newly-grown beads in chain i
+!> icharge: usually identical to i
+!> imolty: molecule type of chain i
+!> ibox: box number of chain i
+!> ichoi: number of trial positions
+!> iufrom: the bead from which the new beads were grown
+!> ntogrow: number of new beads that have been grown
+!> glist: the list of new beads that have been grown; ntogrow entries
+!> maxlen: maximum possible distance of the newly-grown beads from iufrom
+!*****************************************************************
   subroutine boltz(lnew,lfirst,ovrlap,i,icharge,imolty,ibox,ichoi,iufrom,ntogrow,glist,maxlen)
     use sim_particle,only:lnn
     use util_mp,only:mp_set_displs
@@ -1208,12 +1210,13 @@ contains
     integer::mmm
 
     ! RP added for MPI
-    integer::ncount_arr(numprocs),ncount_displs(numprocs),my_start,my_end,blocksize,my_itrial
+    integer::rcounts(numprocs),displs(numprocs),my_start,my_end,blocksize,my_itrial
     real::my_vtry(nchmax),my_vtrintra(nchmax),my_vtrext(nchmax),my_vtrinter(nchmax),my_vtrelect(nchmax),my_vtrewald(nchmax),my_bfac(nchmax),my_vipswot(nchmax),my_vwellipswot(nchmax),my_vipswnt(nchmax),my_vwellipswnt(nchmax)
     logical::my_lovr(nchmax)
 ! ------------------------------------------
-! ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-! write(io_output,*) 'start BOLTZ'
+#ifdef __DEBUG__
+    write(io_output,*) 'start BOLTZ in ',myid
+#endif
 
     if ( lpbc ) call setpbc(ibox)
 
@@ -1296,18 +1299,18 @@ contains
 
     ! RP added for MPI
     blocksize = ichoi/numprocs
-    ncount_arr = blocksize
+    rcounts = blocksize
     blocksize = ichoi - blocksize * numprocs
-    if (blocksize.gt.0) ncount_arr(1:blocksize) = ncount_arr(1:blocksize) + 1
-    call mp_set_displs(ncount_arr,ncount_displs,blocksize,numprocs)
-    my_start = ncount_displs(myid+1) + 1
-    my_end = my_start + ncount_arr(myid+1) - 1
-    !if (ldie) write(myid+100,*)'boltz: my_start=',my_start,'; my_end=',my_end,'; ichoi=',ichoi,'; ncount_arr=',ncount_arr,'; ncount_displs=',ncount_displs
+    if (blocksize.gt.0) rcounts(1:blocksize) = rcounts(1:blocksize) + 1
+    call mp_set_displs(rcounts,displs,blocksize,numprocs)
+    my_start = displs(myid+1) + 1
+    my_end = my_start + rcounts(myid+1) - 1
+    !if (ldebug) write(myid+100,*)'boltz: my_start=',my_start,'; my_end=',my_end,'; ichoi=',ichoi,'; rcounts=',rcounts,'; displs=',displs
 
-    my_itrial  = 0
+    my_itrial = 0
     ! do itrial = 1, ichoi
     do itrial = my_start,my_end
-       my_itrial  = my_itrial + 1
+       my_itrial = my_itrial + 1
        ! lovr(itrial) = .false.
        my_lovr(my_itrial) = .false.
 
@@ -1699,37 +1702,38 @@ contains
        end if
     end do
 
-    ! if (ldie) then
+    ! if (ldebug) then
     !    write(100+myid,*) 'boltz for box ',ibox,' molecule ',i,' from myid ',myid
-    !    do my_itrial=my_start,my_end
+    !    do my_itrial=1,counts(myid+1)
     !       write(100+myid,*) "my_lovr(",my_itrial,") = ",my_lovr(my_itrial), "my_bfac(",my_itrial,") = ",my_bfac(my_itrial)
     !    end do
     ! end if
 
-    blocksize = ncount_arr(myid+1)
-    call mp_allgather(my_vtry,blocksize,vtry,ncount_arr,ncount_displs,groupid)
-    call mp_allgather(my_vtrintra,blocksize,vtrintra,ncount_arr,ncount_displs,groupid)
-    call mp_allgather(my_vtrext,blocksize,vtrext,ncount_arr,ncount_displs,groupid)
-    call mp_allgather(my_vtrinter,blocksize,vtrinter,ncount_arr,ncount_displs,groupid)
-    call mp_allgather(my_vtrelect,blocksize,vtrelect,ncount_arr,ncount_displs,groupid)
-    call mp_allgather(my_vtrewald,blocksize,vtrewald,ncount_arr,ncount_displs,groupid)
-    call mp_allgather(my_bfac,blocksize,bfac,ncount_arr,ncount_displs,groupid)
-    call mp_allgather(my_vipswot,blocksize,vipswot,ncount_arr,ncount_displs,groupid)
-    call mp_allgather(my_vwellipswot,blocksize,vwellipswot,ncount_arr,ncount_displs,groupid)
-    call mp_allgather(my_vipswnt,blocksize,vipswnt,ncount_arr,ncount_displs,groupid)
-    call mp_allgather(my_vwellipswnt,blocksize,vwellipswnt,ncount_arr,ncount_displs,groupid)
-    call mp_allgather(my_lovr,blocksize,lovr,ncount_arr,ncount_displs,groupid)
+    call mp_allgather(my_vtry,vtry,rcounts,displs,groupid)
+    call mp_allgather(my_vtrintra,vtrintra,rcounts,displs,groupid)
+    call mp_allgather(my_vtrext,vtrext,rcounts,displs,groupid)
+    call mp_allgather(my_vtrinter,vtrinter,rcounts,displs,groupid)
+    call mp_allgather(my_vtrelect,vtrelect,rcounts,displs,groupid)
+    call mp_allgather(my_vtrewald,vtrewald,rcounts,displs,groupid)
+    call mp_allgather(my_bfac,bfac,rcounts,displs,groupid)
+    call mp_allgather(my_vipswot,vipswot,rcounts,displs,groupid)
+    call mp_allgather(my_vwellipswot,vwellipswot,rcounts,displs,groupid)
+    call mp_allgather(my_vipswnt,vipswnt,rcounts,displs,groupid)
+    call mp_allgather(my_vwellipswnt,vwellipswnt,rcounts,displs,groupid)
+    call mp_allgather(my_lovr,lovr,rcounts,displs,groupid)
     ovrlap = .true.
     if (ANY(.not.lovr(1:ichoi))) ovrlap=.false.
 
-    ! if (ldie) then
+    ! if (ldebug) then
     !    do my_itrial=1,ichoi
     !       write(100+myid,*)"lovr(",my_itrial,") = ",lovr(my_itrial)
     !       write(100+myid,*)"bfac(",my_itrial,") = ",bfac(my_itrial)
     !    end do
     ! end if
 ! ----------------------------------------------------------------------------
-! write(io_output,*) 'end BOLTZ'
+#ifdef __DEBUG__
+    write(io_output,*) 'end BOLTZ in ',myid
+#endif
     return
   end subroutine boltz
 
@@ -2551,7 +2555,6 @@ contains
          genlj =epsilon2*(((2.0d0**((4.0d0*n1/n0)))*((srij)** (2.0d0*n1)))-((2.0d0**((2.0d0*(n1/n0))+1.0d0))*((srij)**(n1))))
       end if
 
-
 ! In reduced units
 ! xij=(1.0d0/dsqrt(sr2))
 !
@@ -2562,7 +2565,6 @@ contains
 !     & (2.0d0**((2.0d0*(n1/n0))+1.0d0)*((1/xij)**(n1))))
 ! end if
 ! vinter=vinter+e
-
 
 ! not usually used in MC
 ! if (lshift) then
@@ -2641,7 +2643,7 @@ contains
     else
        type_2body = (ntii-1)*nntype + ntjj
     end if
-    
+
   end function type_2body
 
 !DEC$ ATTRIBUTES FORCEINLINE :: U2
@@ -2677,7 +2679,7 @@ contains
        if(lshift) then
           U2=U2-ecut(ntij)
        end if
-    else if ((lij(ntii).and.lij(ntjj)).or.(i.eq.j)) then 
+    else if ((lij(ntii).and.lij(ntjj)).or.(i.eq.j)) then
        if ( lexpand(imolty).and.lexpand(jmolty)) then
           sigma2=(sigma_f(imolty,ii)+sigma_f(jmolty,jj))/2.0d0
           sr2 = sigma2*sigma2/rijsq

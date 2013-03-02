@@ -231,10 +231,10 @@ contains
        eepointp = 1
 
 ! if (dble(ncmt(box_state(1),imolty)).gt.0) then
-! eepointp = idint(dble(ncmt(box_state(1),imolty))*random())+1
+! eepointp = idint(dble(ncmt(box_state(1),imolty))*random(-1))+1
 ! mstate = 1
 ! else if (dble(ncmt(box_state(2),imolty)).gt.0) then
-! eepointp = idint(dble(ncmt(box_state(2),imolty))*random())+1
+! eepointp = idint(dble(ncmt(box_state(2),imolty))*random(-1))+1
 ! mstate = fmstate
 ! else
 ! write(io_output,*)'the type is in neither box, imolty:',imolty
@@ -268,8 +268,10 @@ contains
       real::dum,vrecipn,vrecipo,vnew,vold,vintern ,vintero,vintran,vintrao,velectn,velecto,vewaldn,vewaldo,vextn ,vexto,deltv,deltvb,wdeltvb,vtailn,vtailo
 
 ! --------------------------------------------------------------------
+#ifdef __DEBUG__
+      write(*,*) 'START EEMOVE in ',myid
+#endif
 
-! write(*,*) 'START EEMOVE'
 ! write(11,*) '1:',neigh_cnt(18)
 
       leemove = .true.
@@ -282,7 +284,7 @@ contains
       else if (mstate.eq.fmstate) then
          nstate = mstate - 1
       else
-         if (random().le.0.5d0) then
+         if (random(-1).le.0.5d0) then
             nstate = mstate - 1
          else
             nstate = mstate + 1
@@ -379,7 +381,7 @@ contains
 
          if ((deltvb-dlog(wee_ratio)).le.0.0d0) then
 ! accept move
-         else if (wdeltvb.gt.random()) then
+         else if (wdeltvb.gt.random(-1)) then
 ! accept move
          else
 ! reject move
@@ -469,6 +471,9 @@ contains
  100    continue
         leemove = .false.
 
+#ifdef __DEBUG__
+      write(*,*) 'END EEMOVE in ',myid
+#endif
       return
   end subroutine eemove
 
@@ -479,6 +484,10 @@ contains
 
       integer::imolty,ibox,ibox1
       real::accr
+
+#ifdef __DEBUG__
+      write(*,*) 'END EE_INDEX_SWAP in ',myid
+#endif
 
 ! if mstate = 1, with equal probability change the tagged index
 ! to another one in the same box (m = 1, still), or with the other
@@ -491,33 +500,34 @@ contains
 !	write(io_output,*) 'index swap old', mstate, eepointp, box_state(mstate),
 !     &             ncmt(box_state(mstate),imolty)
       if (mstate.eq.1) then
-         if (random().le.0.5d0) then
-            eepointp = idint(dble(ncmt(ibox,imolty))*random())+1
+         if (random(-1).le.0.5d0) then
+            eepointp = idint(dble(ncmt(ibox,imolty))*random(-1))+1
          else
             accr=dble(ncmt(ibox1,imolty))/(dble(ncmt(ibox,imolty))+1.0) *dexp(psi(fmstate)-psi(1))
-            if (random().le.accr) then
+            if (random(-1).le.accr) then
                mstate = fmstate
-               eepointp = idint(dble(ncmt(ibox1,imolty))*random())+1
+               eepointp = idint(dble(ncmt(ibox1,imolty))*random(-1))+1
 !	write(io_output,*) 'mstate,nstate', 1, 6, accr
             end if
          end if
       else if (mstate.eq.fmstate) then
-         if (random().le.0.5d0) then
-            eepointp = idint(dble(ncmt(ibox1,imolty))*random())+1
+         if (random(-1).le.0.5d0) then
+            eepointp = idint(dble(ncmt(ibox1,imolty))*random(-1))+1
          else
             accr=dble(ncmt(ibox,imolty))/(dble(ncmt(ibox1,imolty))+1.0) *dexp(psi(1)-psi(fmstate))
-            if (random().le.accr) then
+            if (random(-1).le.accr) then
                mstate = 1
-               eepointp = idint(dble(ncmt(ibox,imolty))*random())+1
+               eepointp = idint(dble(ncmt(ibox,imolty))*random(-1))+1
             end if
 !	write(io_output,*) 'mstate,nstate', 6, 1, accr
          end if
       end if
 
-!	write(io_output,*) ibox, ibox1,parbox(eepointp,ibox,imolty)
-!     &    ,parbox(eepointp,ibox1,imolty)
-!	write(io_output,*) 'index swap new', mstate, eepointp, box_state(mstate),
-!     &             ncmt(box_state(mstate),imolty)
+#ifdef __DEBUG__
+      write(io_output,*) ibox, ibox1,parbox(eepointp,ibox,imolty),parbox(eepointp,ibox1,imolty)
+      write(io_output,*) 'index swap new', mstate, eepointp, box_state(mstate),ncmt(box_state(mstate),imolty)
+      write(*,*) 'END EE_INDEX_SWAP in ',myid
+#endif
 
       return
   end subroutine ee_index_swap
@@ -535,9 +545,12 @@ contains
       integer::i,ibox,iunit,flagon,itype,j,imolty,icbu ,ic,imt,jmt,itype2,disp
       real::dchain,vnew,vold ,vintran ,vintrao,deltv,deltvb,vintern,vintero,vextn,vexto ,velectn,velecto,vdum ,vrecipo,vrecipn,vexpta,vexptb,volume,rho
 
-! write(io_output,*) 'start expand-ensemble move'
+#ifdef __DEBUG__
+      write(io_output,*) 'start expand-ensemble move in ',myid
+#endif
+
 ! select a chain at random ***
-      dchain  = random()
+      dchain  = random(-1)
       do icbu = 1,nmolty
          if ( dchain .lt. pmeemt(icbu) ) then
             imolty = icbu
@@ -554,14 +567,14 @@ contains
             bnexpc(imolty,ibox) = bnexpc(imolty,ibox) + 1.0d0
             return
          end if
-         i = dint( dble(ncmt(1,imolty))*random() ) + 1
+         i = dint( dble(ncmt(1,imolty))*random(-1) ) + 1
          i = parbox(i,1,imolty)
          if ( moltyp(i) .ne. imolty ) write(io_output,*) 'screwup'
 
       else
 
          dchain = dble(temtyp(imolty))
-         i = int( dchain*random() ) + 1
+         i = int( dchain*random(-1) ) + 1
          i = parall(imolty,i)
          ibox = nboxi(i)
       end if
@@ -570,7 +583,7 @@ contains
 
 ! perform a move in the expanded coefficients
 
- 10   disp = int( rmexpc(imolty)*(2.0d0*random()-1.0d0) )
+ 10   disp = int( rmexpc(imolty)*(2.0d0*random(-1)-1.0d0) )
       itype = mod(eetype(imolty)+disp+numcoeff(imolty) , numcoeff(imolty))
       if ( disp .eq. 0 ) goto 10
       if ( itype .eq. 0 ) itype = numcoeff(imolty)
@@ -662,7 +675,7 @@ contains
 
       if ( deltv .le. 0.0d0 ) then
 ! accept move
-      else if ( dexp(-deltvb) .gt. random() ) then
+      else if ( dexp(-deltvb) .gt. random(-1) ) then
 ! accept move
       else
 ! move rejected
@@ -698,8 +711,9 @@ contains
 
       bsexpc(imolty,ibox) = bsexpc(imolty,ibox) + 1.0d0
 
-! write(io_output,*) 'end expand-ensemble move'
-
+#ifdef __DEBUG__
+      write(io_output,*) 'end expand-ensemble move in ',myid
+#endif
       return
   end subroutine expand
 

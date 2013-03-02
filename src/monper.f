@@ -30,10 +30,12 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
 
   real::ratrax,ratray,ratraz,rttrax,rttray ,rttraz,rarotx,raroty,rarotz,rtrotx,rtroty,rtrotz,vol,ratvol ,temmass,dn,pres(nbxmax)
 ! -------------------------------------------------------------------
+#ifdef __DEBUG__
+  write(io_output,*) 'begin MONPER in ',myid
+#endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
   pres=0.0d0
-! write(io_output,*) 'begin MONPER'
 ! perform periodic operations  ***
  
 ! Deciding the minimum rcut for atom displacement. As we
@@ -611,8 +613,10 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
         end do
      end do
   end if
-      
-! write(io_output,*) 'end MONPER'
+
+#ifdef __DEBUG__      
+  write(io_output,*) 'end MONPER in ',myid
+#endif
   return
 end subroutine monper
 

@@ -14,16 +14,16 @@
 !
 #define __USE_BARRIER
 
-  SUBROUTINE mp_synchronize( gid )
+  SUBROUTINE mp_synchronize( comm )
     USE util_runtime,ONLY:err_exit
     IMPLICIT NONE
 #ifdef __MPI__
   include 'mpif.h'
 #endif
-    INTEGER, INTENT(IN) :: gid
+    INTEGER, INTENT(IN) :: comm
 #if defined __MPI__ && defined __USE_BARRIER
     INTEGER :: ierr
-    CALL MPI_barrier( gid, ierr )
+    CALL MPI_barrier( comm, ierr )
     IF( ierr /= 0 ) call err_exit(__FILE__,__LINE__, 'mp_synchronize error in MPI_barrier ', ierr)
 #endif
     RETURN
@@ -38,7 +38,7 @@
 #undef MP_TYPE
 #endif
 #define MP_TYPE MPI_LOGICAL
-  SUBROUTINE BCAST_LOGICAL( array, n, root, gid )
+  SUBROUTINE BCAST_LOGICAL( array, n, root, comm )
 #include "mp_bcast_aux.F90"
   END SUBROUTINE BCAST_LOGICAL
 
@@ -72,7 +72,7 @@
 #undef MP_TYPE
 #endif
 #define MP_TYPE MPI_INTEGER
-  SUBROUTINE BCAST_INTEGER( array, n, root, gid )
+  SUBROUTINE BCAST_INTEGER( array, n, root, comm )
 #include "mp_bcast_aux.F90"
   END SUBROUTINE BCAST_INTEGER
 
@@ -121,7 +121,7 @@
 #undef MP_TYPE
 #endif
 #define MP_TYPE MPI_DOUBLE_PRECISION
-  SUBROUTINE BCAST_REAL( array, n, root, gid )
+  SUBROUTINE BCAST_REAL( array, n, root, comm )
 #include "mp_bcast_aux.F90"
   END SUBROUTINE BCAST_REAL
 

@@ -51,9 +51,9 @@ subroutine align_planes(isplist,imol_b,imol_a,itype_b,itype_a,xb,yb,zb)
       real::gamma_a, gamma_b
       real::theta, cos_theta, sin_theta
 
-      
-
-! write(io_output,*) 'BEGIN align_planes'
+#ifdef __DEBUG__
+      write(io_output,*) 'BEGIN align_planes in ',myid
+#endif
 
       imoltype_b = moltyp(imol_b)
       nunit_b = nunit(imoltype_b)
@@ -332,20 +332,22 @@ subroutine align_planes(isplist,imol_b,imol_a,itype_b,itype_a,xb,yb,zb)
 
 !CC --- FINALLY WE ARE DONE
 
+#ifdef __DEBUG__
 ! Write a check
-! open(90, file='align.xyz',status='unknown')
-! nunit_a = nunit(moltyp(imol_a))
-! write(90,*) nunit_a+nunit_b
-! write(90,*) 'Plane Alignment Test'
-! do i=1,nunit_a
-! write(90,*) 'C ',rxu(imol_a,i),ryu(imol_a,i),rzu(imol_a,i)
-! end do
-! do i=1,nunit_b
-! write(90,*) 'O ',xb(i),yb(i),zb(i)
-! end do
-! close(90)
-! write(io_output,*) 'END align_planes'
+      ! open(90, file='align.xyz',status='unknown')
+      ! nunit_a = nunit(moltyp(imol_a))
+      ! write(90,*) nunit_a+nunit_b
+      ! write(90,*) 'Plane Alignment Test'
+      ! do i=1,nunit_a
+      !    write(90,*) 'C ',rxu(imol_a,i),ryu(imol_a,i),rzu(imol_a,i)
+      ! end do
+      ! do i=1,nunit_b
+      !    write(90,*) 'O ',xb(i),yb(i),zb(i)
+      ! end do
+      ! close(90)
+      write(io_output,*) 'END align_planes in ',myid
+#endif
 
       return
 
-      end
+    end subroutine align_planes

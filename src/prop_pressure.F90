@@ -18,7 +18,7 @@ contains
 !    *****************************************************
   subroutine pressure( press, surf, ibox )
 
-    logical::lcoulo,lexplt,lqimol,lqjmol,lij2
+    logical::lcoulo(numax,numax),lexplt,lqimol,lqjmol,lij2
     integer::ibox
     integer::i,ii,j,jj,ntii,ntjj,ntij,imolty,jmolty,iii,jjj,k
 
@@ -31,8 +31,6 @@ contains
     real::fxcmi,fycmi,fzcmi,fij,xcmi,ycmi,zcmi,flj
     real::rcm,rcmsq,rcmi
     real::rbcut,qave,volsq,epsilon2,sigma2,pwell,vol
-
-    dimension lcoulo(numax,numax)
 ! --------------------------------------------------------------------
     if ( lpbc ) call setpbc(ibox)
 

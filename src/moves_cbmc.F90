@@ -29,20 +29,17 @@ MODULE moves_cbmc
   real,allocatable::kforceb(:,:),equilb(:,:),flength(:,:),vequil(:,:),vkforce(:,:)
 
 contains
-!    *******************************************************************
-! performs a length conserving configurational bias move        **
-! for linear, branched, anisotropic, and explicit atom          **
-! molecules                                                     **
-! rewritten from old config and branch subroutines by           **
-! M.G. Martin 9-19-97                                           **
-! number of trial attempts starting at unit inb is stored in    **
-! bncb ( inb ).                                              **
-! number of successful generations of trial configuration is in **
-! bscb ( 1,inb ).                                            **
-! number of accepted trial configurations is in                 **
-! bscb ( 2,inb ).                                            **
-!    *******************************************************************
-  subroutine config
+!*****************************************************************
+!> \brief Performs a length conserving configurational bias move
+!> for linear, branched, anisotropic, and explicit atom molecules
+!>
+!> rewritten from old config and branch subroutines by M.G. Martin 9-19-97
+!>
+!> bncb(inb): number of trial attempts starting at unit inb
+!> bscb(1,inb): number of successful generations of trial configuration
+!> bscb(2,inb): number of accepted trial configurations
+!*****************************************************************
+  subroutine config()
     use sim_particle,only:update_neighbor_list
     use sim_cell,only:update_linked_cell
 
@@ -60,13 +57,13 @@ contains
 ! ------------------------------------------------------------------
 
 #ifdef __DEBUG__
-      write(io_output,*) 'start CONFIG'
+      write(io_output,*) 'start CONFIG in ',myid
 #endif
 ! select a chain at random ***
       vnew=0.
       vold=0.
 
-      rchain  = random()
+      rchain  = random(-1)
       do icbu = 1,nmolty
          if ( rchain .lt. pmcbmt(icbu) ) then
             imolty = icbu
@@ -79,7 +76,7 @@ contains
       if (temtyp(imolty).eq.0) return
 
 ! determine whether to use fecbmc or not ***
-      if (random().lt.pmfix(imolty)) then
+      if (random(-1).lt.pmfix(imolty)) then
          lfixnow = .true.
       else
          lfixnow = .false.
@@ -89,13 +86,13 @@ contains
 ! select a chain in box 1
 ! write(io_output,*) 'counters not implemented properly for grand'
          if (ncmt(1,imolty).eq.0) return
-         i = idint( dble(ncmt(1,imolty))*random() ) + 1
+         i = idint( dble(ncmt(1,imolty))*random(-1) ) + 1
          i = parbox(i,1,imolty)
          if ( moltyp(i) .ne. imolty ) write(io_output,*) 'screwup config'
          ibox=1
       else
          dchain = dble(temtyp(imolty))
-         i = int( dchain*random() + 1 )
+         i = int( dchain*random(-1) + 1 )
          i = parall(imolty,i)
          ibox = nboxi(i)
          if ( moltyp(i) .ne. imolty ) call err_exit(__FILE__,__LINE__,'screwup config',myid+1)
@@ -136,7 +133,7 @@ contains
 ! end if
 
 ! grow new chain conformation
-      call rosenbluth( .true., lterm,i,i,imolty,islen,ibox,igrow ,vdum,lfixnow,cwtorfn,1 )
+      call rosenbluth(.true.,lterm,i,i,imolty,islen,ibox,igrow,vdum,lfixnow,cwtorfn,1)
 
 ! termination of cbmc attempt due to walk termination ---
       if ( lterm ) then
@@ -157,7 +154,7 @@ contains
       end if
 
 ! grow old chain conformation
-      call rosenbluth( .false.,lterm,i,i,imolty,islen,ibox,igrow ,vdum,lfixnow,cwtorfo,1)
+      call rosenbluth(.false.,lterm,i,i,imolty,islen,ibox,igrow,vdum,lfixnow,cwtorfo,1)
 
 ! termination of old walk due to problems generating orientations
       if ( lterm ) then
@@ -425,7 +422,7 @@ contains
       wratio=wratio*dexp(beta*(vold-vnew))
 ! write(99,*) wratio,vold,vnew
 
-      if ( random() .le. wratio ) then
+      if ( random(-1) .le. wratio ) then
 ! write(io_output,*) 'CONFIG accepted',i,ibox
 ! we can now accept !!!!! ***
          if (lfixnow) then
@@ -531,56 +528,57 @@ contains
 
 ! -----------------------------------------------------------------
 #ifdef __DEBUG__
-       write(io_output,*) 'end CONFIG'
+       write(io_output,*) 'end CONFIG in ',myid,i
 #endif
        return
   end subroutine config
 
-!    *******************************************************************
-! performs a configurational bias move for branched molecules **
-!    *******************************************************************
-! lnew: true for new configurations
-! lterm: true if early terminated
-! i: perform rosenbluth growth for chain i
-! icharge: usually same as i
-! imolty: molecule type of chain i
-! ifrom: number of grow-from points
-! ibox: box number of chain i
-! igrow: number of units to be grown
-! wadd: rosenbluth weight for growth
-! lfixnow: SAFE-CBMC
-! cwtorf: rosenbluth weight of the crank-shaft move for the last torsion
-! movetype: 2 = flexible molecule, 4 = partly rigid molecule
+!***************************************************************
+!> \brief Performs a configurational bias move for branched molecules
+!>
+!> lnew: true for new configurations
+!> lterm: true if early terminated
+!> i: perform rosenbluth growth for chain i
+!> icharge: usually same as i
+!> imolty: molecule type of chain i
+!> ifrom: number of grow-from points
+!> ibox: box number of chain i
+!> igrow: number of units to be grown
+!> wadd: rosenbluth weight for growth
+!> lfixnow: SAFE-CBMC
+!> cwtorf: rosenbluth weight of the crank-shaft move for the last torsion
+!> movetype: 1 = config moves; 2 = swap/swatch moves for flexible molecule or swatch moves for rigid molecules that need rigrot (number of same-position atoms smaller than 2, i.e., less than sufficient to determine orientation); 3 = swatch moves for rigid molecules that do not need rigrot but do need regrowth; 4 = swatch moves for completely rigid molecule that regrow nothing
   subroutine rosenbluth(lnew,lterm,i,icharge,imolty,ifrom,ibox,igrow,wadd,lfixnow,cwtorf,movetype)
     use util_random,only:sphere
+    use util_mp,only:mp_set_displs,mp_allgather
 
-! variables passed to the subroutine
+    ! variables passed to the subroutine
     logical::lnew,lterm,lwbef
-    integer::i,j,ja,icharge,imolty,ifrom,ibox,igrow ,tac
+    integer::i,j,ja,icharge,imolty,ifrom,ibox,igrow
 
-! local variables
+    ! local variables
     logical::ovrlap,ltorsion,lfixnow,lfixed,lreturn
 
     integer::glist(numax),iuprev,iufrom,ichoi,ntogrow,count
-    integer::iu,iv,iw,ju,ip,ichtor,it,jut2,jut3,jut4,iwalk,ivect
-    integer::angstart,toracc
+    integer::iu,iv,iw,ju,ip,ichtor,it,jut2,jut3,jut4,iwalk
+    integer::angstart
     real::dum,xub,yub,zub,length,lengtha ,lengthb,wadd
     real::vdha,x,y,z,maxlen,vtorf,rbf,bsum,bs
     real::vbbtr,vvibtr,wei_vib,wbendv,dist
-    real::bondlen,bendang,phi,phidisp,phinew ,thetanew
-    real::cwtorf,vfbbtr,vphi
+    real::bondlen(numax),bendang(numax),phi(numax),phidisp
+    real::cwtorf,vphi,vfbbtr(nchtor_max),vfbbtr_acc(nchmax)
 
-    dimension bondlen(numax),bendang(numax),phi(numax)
-
-! new stuff
+    ! new stuff
     integer::itor,bin,counta,movetype,ku
-    real::bf_tor,vtorsion,phitors,ran_tor,wei_bend,jacobian,ctorf
-    dimension bf_tor(nchtor_max),vtorsion(nchtor_max),phitors(nchtor_max),ctorf(nchmax,nchtor_max)
-    dimension toracc(nchmax) ,vfbbtr(nchmax,nchtor_max)
+    real::bf_tor(nchtor_max),vtorsion(nchtor_max),phitors(nchtor_max),ran_tor,wei_bend,jacobian,ctorf(nchtor_max),ctorf_acc(nchmax)
+
+    ! MPI
+    integer::rcounts(numprocs),displs(numprocs),my_start,my_end,blocksize,my_itrial,rid
+    real::my_bsum_tor(nchmax),my_vtgtr(nchmax),my_ctorf_acc(nchmax),my_vfbbtr_acc(nchmax),my_rxp(numax,nchmax),my_ryp(numax,nchmax),my_rzp(numax,nchmax)
 ! ------------------------------------------------------------------
 
 #ifdef __DEBUG__
-    write(io_output,*) 'start ROSENBLUTH'
+    write(io_output,*) 'start ROSENBLUTH in ',myid
 #endif
 
     lterm = .false.
@@ -590,11 +588,11 @@ contains
 ! *******************************************
 ! Rosenbluth weight of trial conformation *
 ! *******************************************
-! initialize conformation energies and weight
+    ! initialize conformation energies and weight
     if ( lnew ) then
-! set the initial weight to unity ***
+       ! set the initial weight to unity ***
        weight = 1.0d0
-! set total energy of trial configuration to zero ***
+       ! set total energy of trial configuration to zero ***
        vnewt     = 0.0d0
        vnewtg    = 0.0d0
        vnewbb    = 0.0d0
@@ -607,10 +605,10 @@ contains
        vipswn = 0.0d0
        vwellipswn = 0.0d0
     else
-! old conformation
-! set the initial weight of the old configuration to unity ***
+       ! old conformation
+       ! set the initial weight of the old configuration to unity ***
        weiold = 1.0d0
-! set total energy of trial configuration to zero ***
+       ! set total energy of trial configuration to zero ***
        voldt     = 0.0d0
        voldtg    = 0.0d0
        voldbb    = 0.0d0
@@ -626,7 +624,7 @@ contains
 
 ! for rigid molecules
 ! JLR 11-14-09 modifying for calls from swatch for rigid molecules
-!cc      we don't want to do rigrot for rigid swatch when nsampos .ge. 3
+!   we don't want to do rigrot for rigid swatch when nsampos .ge. 3
     if (lrigid(imolty).and.movetype.ne.1) then
        wadd = 1.0d0
        if (movetype.eq.2) then
@@ -637,35 +635,36 @@ contains
           return
        end if
 
-! if (movetype.eq.4) then
-! return
-! end if
+       ! if (movetype.eq.4) then
+       !    return
+       ! end if
 
        if (lterm) then
           return
        end if
     end if
 
-!cc    Swatch and swap the same from here change imovetype to 2
+    !Swatch and swap the same from here change imovetype to 2
     if (movetype.gt.2) movetype=2
-!cc --- END JLR 11-24-09
-! set lexist to lexshed
+! --- END JLR 11-24-09
+
+    ! set lexist to lexshed
     do iu = 1,igrow
        lexist(iu) = lexshed(iu)
     end do
 
-! calculate all bond vectors for lexist
+    ! calculate all bond vectors for lexist
     do iu = 1, igrow
        do iv = 1, invib(imolty,iu)
           ju = ijvib(imolty,iu,iv)
           if ( lexist(iu) .and. lexist(ju) ) then
              if ( lnew ) then
-! use new coordinates
+                ! use new coordinates
                 xvec(iu,ju) = rxnew(ju) - rxnew(iu)
                 yvec(iu,ju) = rynew(ju) - rynew(iu)
                 zvec(iu,ju) = rznew(ju) - rznew(iu)
              else
-! use old coordinates
+                ! use old coordinates
                 xvec(iu,ju) = rxu(i,ju) - rxu(i,iu)
                 yvec(iu,ju) = ryu(i,ju) - ryu(i,iu)
                 zvec(iu,ju) = rzu(i,ju) - rzu(i,iu)
@@ -679,7 +678,7 @@ contains
 ! loop over trial units *
 ! *************************
     do iw = 1, ifrom
-! set vibration and bending energies for this growth to 0.0
+       ! set vibration and bending energies for this growth to 0.0
        if (llrig.and.lsave(iw)) cycle
        iufrom = growfrom(iw)
        ntogrow = grownum(iw)
@@ -691,7 +690,7 @@ contains
              do j = 1, wbefnum
                 do ja = 1, befnum(j)
                    if (iu.eq.ibef(j,ja)) then
-! time to do final crankshaft move
+                      ! time to do final crankshaft move
                       call safecbmc(3,lnew,i,iw,igrow,imolty,count,x,y,z,vphi,vtorf,wbendv ,lterm,movetype)
                       if (lterm) then
                          return
@@ -707,8 +706,8 @@ contains
                          glist(counta) = growlist(iw,counta)
                       end do
                       ichoi = nchoi(imolty)
-! sometimes this loop makes the code skip geometry, which sets this
-! maxlen (the maximum bond length that CBMC will try to grow)
+                      ! sometimes this loop makes the code skip geometry, which sets this
+                      ! maxlen (the maximum bond length that CBMC will try to grow)
                       maxlen=2.0d0
                       goto 250
                    end if
@@ -717,13 +716,16 @@ contains
           end do
        end if
 
-! perform the biased selection of bond angles and get lengths
+       ! perform the biased selection of bond angles and get lengths
        call geometry(lnew,iw,i,imolty,angstart,iuprev,glist,bondlen,bendang,phi,vvibtr,vbbtr,maxlen,wei_bend)
 
-! write(io_output,*) 'lnew, wei_bend',lnew,wei_bend
+       ! if (ldebug) then
+       !    write(100+myid,*) 'rosen after geom for molecule ',i,' bead ',growlist(iw,1:ntogrow),' from myid ',myid
+       !    write(100+myid,*) "bondlen: ",bondlen,"; bendang ",bendang, "; phi: ",phi,"; vbbtr: ",vbbtr
+       ! end if
+       ! write(io_output,*) 'lnew, wei_bend',lnew,wei_bend
 
-! for lfixnow check if there are two beads to go
-
+       ! for lfixnow check if there are two beads to go
        if (lfixnow) then
           fix_count:do count = 1, ntogrow
              iu = growlist(iw,count)
@@ -744,58 +746,74 @@ contains
 ! select nchoi trial positions based only on torsions
        ichoi = nchoi(imolty)
        ichtor = nchtor(imolty)
-       do ip = 1,ichoi
-          ivect = 0
 
+       ! MPI
+       if (numprocs.gt.1) then
+          rid=myid
+       else
+          rid=-1
+       end if
+       blocksize = ichoi/numprocs
+       rcounts = blocksize
+       blocksize = ichoi - blocksize * numprocs
+       if (blocksize.gt.0) rcounts(1:blocksize) = rcounts(1:blocksize) + 1
+       call mp_set_displs(rcounts,displs,blocksize,numprocs)
+       my_start = displs(myid+1) + 1
+       my_end = my_start + rcounts(myid+1) - 1
+
+       my_itrial = 0
+       !do ip = 1,ichoi
+       do ip=my_start,my_end
+          my_itrial = my_itrial + 1
           lreturn = .false.
 205       continue
-! set up the cone based on iuprev (could be grown if no prev)
+          ! set up the cone based on iuprev (could be grown if no prev)
           if (.not.lreturn.and.growprev(iw).eq.0) then
-! calculate random vector on the unit sphere for the first bead
+             ! calculate random vector on the unit sphere for the first bead
              count = 1
              if ( (.not. lnew) .and. ip .eq. 1 ) then
-! use old molecule position
+                ! use old molecule position
                 iu = growlist(iw,count)
                 length = bondlen(count)
-! compute unit vector to be used in cone and torsion
+                ! compute unit vector to be used in cone and torsion
                 x = ( rxu(i,iu) - rxu(i,iufrom) )/length
                 y = ( ryu(i,iu) - ryu(i,iufrom) )/length
                 z = ( rzu(i,iu) - rzu(i,iufrom) )/length
-! store this in xx yy zz
+                ! store this in xx yy zz
                 xx(count) = x
                 yy(count) = y
                 zz(count) = z
              else
-! choose randomly on the unit sphere
-                call sphere(x,y,z)
+                ! choose randomly on the unit sphere
+                call sphere(x,y,z,rid)
                 xx(count) = x
                 yy(count) = y
                 zz(count) = z
              end if
 
              if ( ntogrow .gt. 1 ) then
-! set up the cone
+                ! set up the cone
                 xub = -x
                 yub = -y
                 zub = -z
-                call cone(1,xub,yub,zub,dum,dum,dum,dum,dum)
+                call cone(1,xub,yub,zub,dum,dum)
              end if
 
              if (lrigid(imolty)) then
+                ! For a rigid molecule, the part that needs regrowth comes before all rigid beads.
+                ! The first flexible bead have growprev = 0 but is connected to rigid part which may have torsion
                 growprev(iw)=riutry(imolty,iw)+1
                 lreturn = .true.
                 goto 205
              end if
-
              ltorsion = .false.
-
           else
-! set up the cone based on iuprev and iufrom
+             ! set up the cone based on iuprev and iufrom
              length = distij(iuprev,iufrom)
              xub = xvec(iuprev,iufrom) / length
              yub = yvec(iuprev,iufrom) / length
              zub = zvec(iuprev,iufrom) / length
-             call cone(1,xub,yub,zub,dum,dum,dum,dum,dum)
+             call cone(1,xub,yub,zub,dum,dum)
              if (movetype.eq.2.and.lring(imolty).and.iw.eq.1) then
                 ltorsion = .false.
              else
@@ -803,42 +821,38 @@ contains
              end if
           end if
 
-! Begin loop to determine torsional angle
+          ! Begin loop to determine torsional angle
           if ( ltorsion ) then
-! initialize bsum_tor
-             bsum_tor(ip) = 0.0d0
+             ! initialize bsum_tor
+             my_bsum_tor(my_itrial) = 0.0d0
 
              do itor = 1,ichtor
-                if ( (.not. lnew) .and. ip .eq. 1  .and. itor .eq. 1) then
-! old conformation - set phidisp to 0.0d0
+                if ( (.not. lnew) .and. ip .eq. 1 .and. itor .eq. 1) then
+                   ! old conformation - set phidisp to 0.0d0
                    phidisp = 0.0d0
                 else
-! choose a random displacement angle from anglestart
-! assign the positions based on angles and lengths above
-                   phidisp = twopi*random()
+                   ! choose a random displacement angle from anglestart
+                   ! assign the positions based on angles and lengths above
+                   phidisp = twopi*random(rid)
                 end if
 
                 do count = angstart,ntogrow
-                   phinew = phi(count) + phidisp
-                   thetanew = bendang(count)
-
-                   call cone(2,dum,dum,dum,thetanew,phinew,x,y,z)
-! store the unit vectors in xx, yy, zz
+                   call cone(2,x,y,z,bendang(count),phi(count) + phidisp)
+                   ! store the unit vectors in xx, yy, zz
                    xx(count) = x
                    yy(count) = y
                    zz(count) = z
                 end do
 
-! set energies of trial position to zero ---
+                ! set energies of trial position to zero ---
                 vdha = 0.0d0
-! compute torsion energy for given trial conformation
+                if (movetype.eq.2 .and.lring(imolty).and.iw.lt.3) then
+                   goto 300
+                end if
+
+                ! compute torsion energy for given trial conformation
                 do count = 1,ntogrow
                    iu = growlist(iw,count)
-
-                   if (movetype.eq.2 .and.lring(imolty).and.iw.lt.3) then
-                      bf_tor(itor) = 1.0d0
-                      goto 300
-                   end if
 
                    do it = 1, intor(imolty,iu)
                       jut2 = ijtor2(imolty,iu,it)
@@ -846,23 +860,21 @@ contains
                       if ( jut2 .eq. iufrom .and.  jut3 .eq. iuprev) then
                          jut4 = ijtor4(imolty,iu,it)
 
-! jut4 must already exist or we made a big mistake
+                         ! jut4 must already exist or we made a big mistake
                          if ( .not. lexist(jut4) )  then
-! allow regrowth where one torsion may already exist and one may not
+                            ! allow regrowth where one torsion may already exist and one may not
                             cycle
-! write(io_output,*) 'jut4,jut3,jut2,iu',
-!     &                             jut4,jut3,jut2,iu
-! call err_exit(__FILE__,__LINE__,'trouble jut4',myid+1)
+                            ! write(io_output,*) 'jut4,jut3,jut2,iu',jut4,jut3,jut2,iu
+                            ! call err_exit(__FILE__,__LINE__,'trouble jut4',myid+1)
                          end if
                          vdha = vdha + vtorso(xvec(jut4,jut3),yvec(jut4,jut3),zvec(jut4,jut3),xvec(jut3,jut2),yvec(jut3,jut2),zvec(jut3,jut2),xx(count),yy(count),zz(count),ittor(imolty,iu,it))
                       end if
                    end do
                 end do
+300             continue
 
 ! compute boltzmann factor and add it to bsum_tor
                 bf_tor(itor) = dexp ( -vdha * beta )
-
-300             continue
 
 ! store vtorsion and phidisp for this trial
                 vtorsion(itor) = vdha
@@ -870,9 +882,8 @@ contains
 
 ! for safecbmc add extra weight to assure closure
                 if (lfixnow) then
-                   ctorf(ip,itor) = 1.0d0
-
-                   vfbbtr(ip,itor) = 0
+                   ctorf(itor) = 1.0d0
+                   vfbbtr(itor) = 0.0d0
 
                    do count = 1, ntogrow
                       length = bondlen(count)
@@ -893,12 +904,12 @@ contains
                          if (lwbef) then
 
 ! determine special closing energies
-                            call safecbmc(2,lnew,i,iw,igrow,imolty ,count,x,y,z,vphi,vtorf,wbendv ,lterm,movetype)
+                            call safecbmc(2,lnew,i,iw,igrow,imolty,count,x,y,z,vphi,vtorf,wbendv,lterm,movetype)
 
-                            bf_tor(itor) = bf_tor(itor) * vtorf  * dexp( - beta * vphi )
-                            ctorf(ip,itor) = ctorf(ip,itor)  * vtorf
+                            bf_tor(itor) = bf_tor(itor) * vtorf * dexp( - beta * vphi )
+                            ctorf(itor) = ctorf(itor) * vtorf
 
-                            vfbbtr(ip,itor) =  vfbbtr(ip,itor) + vphi
+                            vfbbtr(itor) =  vfbbtr(itor) + vphi
                          else
                             do j = 1, fcount(iu)
                                ju = fclose(iu,j)
@@ -906,7 +917,7 @@ contains
                                bin = anint(dist*10.0d0)
 
                                bf_tor(itor) = bf_tor(itor) * probf(iu,ju,bin)
-                               ctorf(ip,itor) = ctorf(ip,itor) *  probf(iu,ju,bin)
+                               ctorf(itor) = ctorf(itor) * probf(iu,ju,bin)
 
                                if (iw.gt.2) then
                                   do counta = 1, pastnum(ju)
@@ -916,7 +927,7 @@ contains
                                         bin = anint(dist*10.0d0)
 
                                         bf_tor(itor) = bf_tor(itor) * probf(iu,ku,bin)
-                                        ctorf(ip,itor) = ctorf(ip,itor) *  probf(iu,ku,bin)
+                                        ctorf(itor) = ctorf(itor) * probf(iu,ku,bin)
                                      end if
                                   end do
                                end if
@@ -925,12 +936,12 @@ contains
                       else
                          if (lwbef) then
 ! determine special closing energies
-                            call safecbmc(2,lnew,i,iw,igrow,imolty ,count,x,y,z,vphi,vtorf ,wbendv,lterm,movetype)
+                            call safecbmc(2,lnew,i,iw,igrow,imolty,count,x,y,z,vphi,vtorf ,wbendv,lterm,movetype)
 
                             bf_tor(itor) = bf_tor(itor) * vtorf  * dexp( - beta * vphi )
-                            ctorf(ip,itor) = ctorf(ip,itor)  * vtorf
+                            ctorf(itor) = ctorf(itor)  * vtorf
 
-                            vfbbtr(ip,itor) =  vfbbtr(ip,itor) + vphi
+                            vfbbtr(itor) = vfbbtr(itor) + vphi
                          else
                             if (fcount(iu).gt.0) then
                                do j = 1, fcount(iu)
@@ -939,7 +950,7 @@ contains
                                   bin = anint(dist*10.0d0)
 
                                   bf_tor(itor) = bf_tor(itor) * probf(ju,iu,bin)
-                                  ctorf(ip,itor) = ctorf(ip,itor) *  probf(iu,ju,bin)
+                                  ctorf(itor) = ctorf(itor) * probf(iu,ju,bin)
 
                                   if (pastnum(ju).ne.0) then
                                      do counta = 1, pastnum(ju)
@@ -949,7 +960,7 @@ contains
                                            bin = anint(dist*10.0d0)
 
                                            bf_tor(itor) = bf_tor(itor) * probf(iu,ku,bin)
-                                           ctorf(ip,itor) = ctorf(ip,itor) *  probf(iu,ku,bin)
+                                           ctorf(itor) = ctorf(itor) * probf(iu,ku,bin)
                                         end if
 
                                      end do
@@ -960,86 +971,107 @@ contains
                       end if
                    end do
                 end if
-
-                bsum_tor(ip) = bsum_tor(ip) + bf_tor(itor)
+                my_bsum_tor(my_itrial) = my_bsum_tor(my_itrial) + bf_tor(itor)
              end do
 
              if ( lnew .or. ip .ne. 1 ) then
-! choose one of the trial sites in a biased fashion
-                ran_tor = random()*bsum_tor(ip)
+                ! choose one of the trial sites in a biased fashion
+                ran_tor = random(rid)*my_bsum_tor(my_itrial)
                 bs = 0.0d0
                 do itor = 1,ichtor
                    bs = bs + bf_tor(itor)
                    if ( ran_tor .lt. bs ) then
-! save torsion energy of this trial position
-                      vtgtr(ip) = vtorsion(itor)
-                      toracc(ip) = itor
-! assign the phidisp of this trial postion
+                      ! save torsion energy of this trial position
+                      my_vtgtr(my_itrial) = vtorsion(itor)
+                      my_ctorf_acc(my_itrial) = ctorf(itor)
+                      my_vfbbtr_acc(my_itrial) = vfbbtr(itor)
+                      ! assign the phidisp of this trial postion
                       phidisp = phitors(itor)
-! exit the loop
+                      ! exit the loop
                       exit
                    end if
                 end do
              else
-! select the old conformation
-                vtgtr(ip) = vtorsion(1)
+                ! select the old conformation
+                my_vtgtr(my_itrial) = vtorsion(1)
+                my_ctorf_acc(my_itrial) = ctorf(1)
+                my_vfbbtr_acc(my_itrial) = vfbbtr(1)
                 phidisp = phitors(1)
              end if
 
-! divide bsum by ichtor
-             bsum_tor(ip) = bsum_tor(ip) / dble(ichtor)
+             ! divide bsum by ichtor
+             my_bsum_tor(my_itrial) = my_bsum_tor(my_itrial) / dble(ichtor)
           else
-! no torsion energy, choose phidisp at random (except old)
+             ! no torsion energy, choose phidisp at random(-1except old)
              if ( (.not. lnew) .and. ip .eq. 1 ) then
-! old conformation - set phidisp to 0.0d0
+                ! old conformation - set phidisp to 0.0d0
                 phidisp = 0.0d0
              else
-! choose a random displacement angle from anglestart
-! assign the positions based on angles and lengths above
-                phidisp = twopi*random()
+                ! choose a random displacement angle from anglestart
+                ! assign the positions based on angles and lengths above
+                phidisp = twopi*random(rid)
              end if
 
-! assign the torsional energy a value of 0.0
-             vtgtr(ip) = 0.0d0
+             ! set bsum_tor to 1.0d0
+             my_bsum_tor(my_itrial) = 1.0d0
 
-! set bsum_tor to 1.0d0
-             bsum_tor(ip) = 1.0d0
+             ! assign the torsional energy a value of 0.0
+             my_vtgtr(my_itrial) = 0.0d0
+             my_ctorf_acc(my_itrial) = 1.0d0
+             my_vfbbtr_acc(my_itrial) = 0.0d0
           end if
 
-! for accepted phidisp set up the vectors
+          ! for accepted phidisp set up the vectors
           do count = angstart,ntogrow
-             phinew = phi(count) + phidisp
-             thetanew = bendang(count)
-
-             call cone(2,dum,dum,dum,thetanew,phinew,x,y,z)
-! store the unit vectors in xx, yy, zz
+             call cone(2,x,y,z,bendang(count),phi(count) + phidisp)
+             ! store the unit vectors in xx, yy, zz
              xx(count) = x
              yy(count) = y
              zz(count) = z
-
           end do
 
-! accepted coordinates, save them in r*p(trial)
+          ! accepted coordinates, save them in r*p(trial)
           do count = 1,ntogrow
              length = bondlen(count)
              if ( lnew ) then
-! use new positions
-                rxp(count,ip) = rxnew(iufrom) + xx(count)*length
-                ryp(count,ip) = rynew(iufrom) + yy(count)*length
-                rzp(count,ip) = rznew(iufrom) + zz(count)*length
+                ! use new positions
+                my_rxp(count,my_itrial) = rxnew(iufrom) + xx(count)*length
+                my_ryp(count,my_itrial) = rynew(iufrom) + yy(count)*length
+                my_rzp(count,my_itrial) = rznew(iufrom) + zz(count)*length
              else
-! use old coordinates
-                rxp(count,ip) = rxu(i,iufrom) + xx(count)*length
-                ryp(count,ip) = ryu(i,iufrom) + yy(count)*length
-                rzp(count,ip) = rzu(i,iufrom) + zz(count)*length
+                ! use old coordinates
+                my_rxp(count,my_itrial) = rxu(i,iufrom) + xx(count)*length
+                my_ryp(count,my_itrial) = ryu(i,iufrom) + yy(count)*length
+                my_rzp(count,my_itrial) = rzu(i,iufrom) + zz(count)*length
              end if
           end do
        end do
 
-! now that we have the trial site need to compute non-bonded energy
+       ! if (ldebug) then
+       !    write(100+myid,*) 'rosen for molecule ',i,' bead ',growlist(iw,1:ntogrow),' from myid ',myid
+       !    do my_itrial=1,rcounts(myid+1)
+       !       write(100+myid,*) "my_vtgtr(",my_itrial,") = ",my_vtgtr(my_itrial), "my_rxp(",my_itrial,") = ",my_rxp(:,my_itrial)
+       !    end do
+       ! end if
+
+       call mp_allgather(my_bsum_tor,bsum_tor,rcounts,displs,groupid)
+       call mp_allgather(my_vtgtr,vtgtr,rcounts,displs,groupid)
+       call mp_allgather(my_ctorf_acc,ctorf_acc,rcounts,displs,groupid)
+       call mp_allgather(my_vfbbtr_acc,vfbbtr_acc,rcounts,displs,groupid)
+       call mp_allgather(my_rxp,rxp,rcounts,displs,groupid)
+       call mp_allgather(my_ryp,ryp,rcounts,displs,groupid)
+       call mp_allgather(my_rzp,rzp,rcounts,displs,groupid)
+
+       ! if (ldebug) then
+       !    do my_itrial=1,ichoi
+       !       write(100+myid,*)"vtgtr(",my_itrial,") = ",vtgtr(my_itrial)
+       !       write(100+myid,*)"rxp(",my_itrial,") = ",rxp(:,my_itrial)
+       !    end do
+       ! end if
 
 250    continue
 
+       ! now that we have the trial site need to compute non-bonded energy
        call boltz(lnew,.false.,ovrlap,i,icharge,imolty,ibox,ichoi,iufrom,ntogrow,glist,maxlen)
        if (ovrlap) then
           lterm = .true.
@@ -1054,7 +1086,7 @@ contains
           ! include both the torsional and the LJ/qq
           bsum = bsum + bfac(ip)*bsum_tor(ip)
        end do
-       
+
        if ( lnew ) then
           ! update new rosenbluth weight - include bending weight
           weight = weight * bsum * wei_bend * wei_vib
@@ -1065,7 +1097,7 @@ contains
           end if
 
           ! select one position at random ---
-          rbf = bsum * random()
+          rbf = bsum * random(-1)
           bs = 0.0d0
           do ip = 1, ichoi
              if ( .not. lovr(ip) ) then
@@ -1143,16 +1175,14 @@ contains
        if ( lnew ) then
           if (lfixnow) then
              if (lwbef) then
-                tac = toracc(iwalk)
-                vbbtr = vbbtr + vfbbtr(iwalk,tac)
+                vbbtr = vbbtr + vfbbtr_acc(iwalk)
              end if
              if (lfixed) then
                 vbbtr = vtbend(iwalk)
                 vvibtr = vvibtr + vtvib(iwalk)
              else
                 if (.not.(movetype.eq.2.and.lring(imolty).and.iw.eq.1)) then
-                   tac = toracc(iwalk)
-                   cwtorf = cwtorf * ctorf(iwalk,tac)
+                   cwtorf = cwtorf * ctorf_acc(iwalk)
                 end if
              end if
           end if
@@ -1169,21 +1199,22 @@ contains
           vnewewald = vnewewald + vtrewald(iwalk)
           vipswn = vipswn+vipswnt(iwalk)
           vwellipswn = vwellipswn+vwellipswnt(iwalk)
+
+          ! if (ldebug) then
+          !    write(100+myid,*) 'iwalk: ',iwalk,'; vnewt: ',vnewt,'; vnewbb: ',vnewbb,'; vnewtg: ',vnewtg
+          ! end if
        else
           if (lfixnow) then
              if (lfixed) then
                 vbbtr = vtbend(1)
                 vvibtr = vvibtr + vtvib(1)
              else
-
                 if (.not.(movetype.eq.2.and.lring(imolty).and.iw.eq.1)) then
-
-                   cwtorf = cwtorf * ctorf(1,1)
-
+                   cwtorf = cwtorf * ctorf_acc(1)
                 end if
              end if
              if (lwbef) then
-                vbbtr = vbbtr + vfbbtr(1,1)
+                vbbtr = vbbtr + vfbbtr_acc(1)
              end if
           end if
 
@@ -1199,6 +1230,10 @@ contains
           voldewald = voldewald + vtrewald(1)
           vipswo = vipswo+vipswot(1)
           vwellipswo = vwellipswo+vwellipswot(1)
+
+          ! if (ldebug) then
+          !    write(100+myid,*) 'iwalk: ',iwalk,'; voldt: ',voldt,'; voldbb: ',voldbb,'; voldtg: ',voldtg
+          ! end if
        end if
 
        do count = 1,ntogrow
@@ -1265,7 +1300,7 @@ contains
     end do
 
 #ifdef __DEBUG__
-    write(io_output,*) 'end ROSENBLUTH'
+    write(io_output,*) 'end ROSENBLUTH in ',myid
 #endif
 
 ! ------------------------------------------------------------------
@@ -1273,578 +1308,535 @@ contains
     return
   end subroutine rosenbluth
 
-!     *******************************************************************
-! computes the growth shedule for CBMC type moves               **
-!     *******************************************************************
+!*****************************************************************
+!> \brief Computes the growth shedule for CBMC type moves
+!>
+!> movetype: 1 = config moves; 2 = swap moves for flexible molecules; 3 = swatch moves for molecules with only 1 cut; 4 = swap moves for partially rigid molecules; 5 = swatch moves for molecules with more than 1 cuts
+!*****************************************************************
   subroutine schedule(igrow,imolty,index,iutry,iprev,movetype)
-
-      logical::lprint,lfind
-      integer::random_index
-      integer::kickout,icbu,igrow,imolty,iutry,iut ,invtry,iu,ju
-      integer::ibead,count,ivib,idir,movetype,iprev ,itry,i,ib2
-      integer::temp_store,temp_count,izz,outer_sites ,index,outer_num,outer_prev,iufrom,outer_try
-      real::dbgrow
-      parameter (lprint = .false.)
-      dimension temp_store(numax),outer_sites(numax),outer_prev(numax) ,lfind(numax)
+    logical::lfind(numax)
+    integer::random_index
+    integer::kickout,icbu,igrow,imolty,iutry,iut ,invtry,iu,ju
+    integer::ibead,count,ivib,idir,movetype,iprev,itry,i,ib2
+    integer::temp_store(numax),temp_count,izz,outer_sites(numax),index,outer_num,outer_prev(numax),iufrom,outer_try
+    real::dbgrow
+    logical,parameter::lprint = .false.
 ! ------------------------------------------------------------------
 
 #ifdef __DEBUG__
-      write(io_output,*) 'start SCHEDULE'
+    write(io_output,*) 'start SCHEDULE in ',myid
 #endif
 
-! DECODER for the new growth logic
-! lexshed is true if the bead exists at that time of the growth
-! it is false when a bead has not yet been grown this time
-! growfrom(index) gives the unit number that is to be grown from for
-! the index step
-! growprev(index) gives the bead that exists connected to growfrom(index)
-! grownum(index) gives the number of beads to be grown from growfrom(index)
-! growlist(index,count) gives the unit numbers for the beads grown
-! from growfrom(index), get count from grownum(index)
+!===DECODER for the new growth logic===
+!< lexshed: true if the bead exists at that time of the growth, false when a bead has not yet been grown this time
+!< growfrom(index): the bead from which the new beads are to be grown at the index-th step
+!< growprev(index): the bead that exists and is connected to growfrom(index)
+!< grownum(index): the number of beads to be grown from growfrom(index)
+!< growlist(index,count): the count-th one of the new beads to be grown from growfrom(index), grownum(index) entries
 
-      kickout = 0
+    kickout = 0
 
-! dummy loop to set position of 11 for movetype 1
- 11   do iu = 1,1
-      end do
+11  continue
 
-! initialize temp_count
-      temp_count = 0
+    ! initialize temp_count
+    temp_count = 0
 
-! movetype=1: called from config.f
-! this part is just for config right now
-      if ( movetype .eq. 1 ) then
+    if ( movetype .eq. 1 ) then
+       ! movetype=1: called from config.f
+       ! this part is just for config right now
 
-! initialize lexshed so all beads currently exist
-         do iu = 1,igrow
-            lexshed(iu) = .true.
-         end do
+       ! initialize lexshed so all beads currently exist
+       do iu = 1,igrow
+          lexshed(iu) = .true.
+       end do
 
-         if ( kickout .eq. 50 ) call err_exit(__FILE__,__LINE__,'kickout is 50',myid+1)
+       if ( kickout .eq. 50 ) call err_exit(__FILE__,__LINE__,'kickout is 50',myid+1)
 
-! select the first bead to grow from
-         if (lrigid(imolty)) then
-! N.R. Randomly select one of the grow points
-            random_index = int(dble(rindex(imolty))*random()+1)
-            iutry = riutry(imolty,random_index)
-         else if ( lrig(imolty).and.nrig(imolty).gt.0 ) then
-            dbgrow = random()*dble(nrig(imolty)) + 1.0d0
-            iutry = irig(imolty,int(dbgrow))
-         else if ( icbsta(imolty) .gt. 0 ) then
-            iutry = icbsta(imolty)
-         else if ( icbsta(imolty) .eq. 0 ) then
-            dbgrow = dble( igrow )
-            iutry = int( dbgrow*random() ) + 1
-         else
-            dbgrow = dble( igrow + icbsta(imolty) + 1 )
-            iutry = int( dbgrow*random() ) - icbsta(imolty)
-         end if
+       ! select the first bead to grow from
+       if (lrigid(imolty)) then
+          ! N.R. Randomly select one of the grow points
+          random_index = int(dble(rindex(imolty))*random(-1)+1)
+          iutry = riutry(imolty,random_index)
+       else if ( lrig(imolty).and.nrig(imolty).gt.0 ) then
+          dbgrow = random(-1)*dble(nrig(imolty)) + 1.0d0
+          iutry = irig(imolty,int(dbgrow))
+       else if ( icbsta(imolty) .gt. 0 ) then
+          iutry = icbsta(imolty)
+       else if ( icbsta(imolty) .eq. 0 ) then
+          dbgrow = dble( igrow )
+          iutry = int( dbgrow*random(-1) ) + 1
+       else
+          dbgrow = dble( igrow + icbsta(imolty) + 1 )
+          iutry = int( dbgrow*random(-1) ) - icbsta(imolty)
+       end if
 
-         if (lrig(imolty).and.(nrig(imolty).eq.0)) then
+       if (lrig(imolty).and.(nrig(imolty).eq.0)) then
+          ju = int(random(-1) * dble(nrigmax(imolty) - nrigmin(imolty) + 1)) + nrigmin(imolty)
+       end if
 
-            ju = int(random() * dble(nrigmax(imolty)  - nrigmin(imolty) + 1)) + nrigmin(imolty)
-         end if
+       ! write(io_output,*) '********************************************'
+       ! write(io_output,*) 'iutry',iutry
 
-! write(io_output,*) '********************************************'
-! write(io_output,*) 'iutry',iutry
+       idir = icbdir(imolty)
+       growfrom(1) = iutry
+       invtry = invib(imolty,iutry)
+       index = 1
 
-         idir = icbdir(imolty)
-         growfrom(1) = iutry
-         invtry = invib(imolty,iutry)
-         index = 1
+       if ( invtry .eq. 0 ) then
+          ! problem, cannot do config move on a 1 bead molecule
+          call err_exit(__FILE__,__LINE__,'cannot do CBMC on a one grow unit molecule',myid+1)
 
-         if ( invtry .eq. 0 ) then
-! problem, cannot do config move on a 1 bead molecule
-            call err_exit(__FILE__,__LINE__,'cannot do CBMC on a one grow unit molecule',myid+1)
+       else if ( invtry .eq. 1 ) then
+          ! regrow entire molecule, check nmaxcbmc
+          if ( nmaxcbmc(imolty) .lt. igrow - 1 ) then
+             kickout = kickout + 1
+             goto 11
+          end if
 
-         else if ( invtry .eq. 1 ) then
-! regrow entire molecule, check nmaxcbmc
-            if ( nmaxcbmc(imolty) .lt. igrow - 1 ) then
-               kickout = kickout + 1
-               goto 11
-            end if
+          growprev(1) = 0
 
-            growprev(1) = 0
+          grownum(1) = invtry
+          ivib = invtry
+          iut = ijvib(imolty,iutry,ivib)
+          if ( idir .eq. 1 .and. iut .lt. iutry ) then
+             ! cannot grow from this bead, try again
+             kickout = kickout + 1
+             goto 11
+          end if
+          growlist(1,ivib) = iut
+          lexshed(iut) = .false.
+       else
+          ! at a branch point, decide how many branches to regrow
+          ! regrow all of legal branches (check idir )
+          count = 0
+          do ivib = 1,invtry
+             iut = ijvib(imolty,iutry,ivib)
+             if ( idir .eq. 1 .and. iut .lt. iutry ) then
+                ! this is the one and only previous nongrown bead
+                growprev(1) = iut
+             else
+                ! grow these branches
+                temp_count = temp_count + 1
+                temp_store(temp_count) = iut
+             end if
+          end do
 
-            grownum(1) = invtry
-            ivib = invtry
-            iut = ijvib(imolty,iutry,ivib)
-            if ( idir .eq. 1 .and. iut .lt. iutry ) then
-! cannot grow from this bead, try again
-               kickout = kickout + 1
-               goto 11
-            end if
-            growlist(1,ivib) = iut
-            lexshed(iut) = .false.
-         else
+          do izz = temp_count,1,-1
+             ! choose grow bead randomly from temp_store
+             itry = int( dble(izz) * random(-1) ) + 1
+             iut = temp_store(itry)
+             count = count + 1
+             growlist(1,count) = iut
+             lexshed(iut) = .false.
 
-! at a branch point, decide how many branches to regrow
-! regrow all of legal branches (check idir )
-            count = 0
-            do ivib = 1,invtry
-               iut = ijvib(imolty,iutry,ivib)
-               if ( idir .eq. 1 .and. iut .lt. iutry ) then
-! this is the one and only previous nongrown bead
-                  growprev(1) = iut
-               else
-! grow these branches
-                  temp_count = temp_count + 1
-                  temp_store(temp_count) = iut
-               end if
-            end do
+             ! update temp_store for next iteration
+             temp_store(itry) = temp_store(izz)
+          end do
+          grownum(1) = count
 
-            do izz = temp_count,1,-1
-! choose grow bead randomly from temp_store
-               itry = int( dble(izz) * random() ) + 1
-               iut = temp_store(itry)
-               count = count + 1
-               growlist(1,count) = iut
-               lexshed(iut) = .false.
+          if ( count .eq. invtry ) then
+             if ( random(-1) .gt. pmall(imolty) ) then
+                ! not pmall so select a previous bead
+20              ivib = int( random(-1)*dble(invtry) ) + 1
 
-! update temp_store for next iteration
-               temp_store(itry) = temp_store(izz)
-            end do
-            grownum(1) = count
+                iu = growlist(1,ivib)
 
-            if ( count .eq. invtry ) then
-               if ( random() .gt. pmall(imolty) ) then
-! not pmall so select a previous bead
- 20               ivib = int( random()*dble(invtry) ) + 1
+                if (lrig(imolty).and.nrig(imolty).gt.0) then
+                   if (iu.ne.frig(imolty,int(dbgrow))) goto 20
+                end if
+                ! we should start to determine a random section to keep rigid
 
-                  iu = growlist(1,ivib)
+                if (lrigid(imolty)) then
+                   if (iu.lt.riutry(imolty,1)) goto 20
+                end if
 
-                  if (lrig(imolty).and.nrig(imolty).gt.0) then
-                     if (iu.ne.frig(imolty,int(dbgrow))) goto 20
-                  end if
-! we should start to determine a random section to keep rigid
+                growprev(1) = iu
 
-                  if (lrigid(imolty)) then
-                     if (iu.lt.riutry(imolty,1)) goto 20
-                  end if
+                ! replace this unit with the last unit in growlist
+                growlist(1,ivib) = growlist(1,invtry)
 
-                  growprev(1) = iu
+                ! reduce numgrow by 1
+                grownum(1) = grownum(1) - 1
+                ! add this back into lexshed
+                lexshed(iu) = .true.
+             else
+                ! we regrew all branches, no previous bead
+                growprev(1) = 0
+             end if
+          else if ( invtry - count .ne. 1 ) then
+             ! problem in logic, should only be one nongrown bead
+             write(io_output,*) 'invtry,count',invtry,count
+             write(io_output,*) 'igrow,imolty',igrow,imolty
+             call err_exit(__FILE__,__LINE__,'logic problem in schedule',myid+1)
+          end if
+       end if
+       ! end the part that is specific for config
+    else if ( movetype .eq. 2 ) then
+       ! begin the part that is specific for swap
+       ! iutry is the first bead inserted - need to grow its neighbors
+       do iu = 1,igrow
+          lexshed(iu) = .true.
+       end do
 
-! replace this unit with the last unit in growlist
-                  growlist(1,ivib) = growlist(1,invtry)
+       growfrom(1) = iutry
 
-! reduce numgrow by 1
-                  grownum(1) = grownum(1) - 1
-! add this back into lexshed
-                  lexshed(iu) = .true.
-               else
-! we regrew all branches, no previous bead
-                  growprev(1) = 0
-               end if
-            else if ( invtry - count .ne. 1 ) then
-! problem in logic, should only be one nongrown bead
-               write(io_output,*) 'invtry,count',invtry,count
-               write(io_output,*) 'igrow,imolty',igrow,imolty
-               call err_exit(__FILE__,__LINE__,'logic problem in schedule',myid+1)
-            end if
-         end if
+       invtry = invib(imolty,iutry)
+       growprev(1) = 0
+       if ( invtry .eq. 0 ) then
+          ! Bead iutry is the only bead to be grown ---
+          index = 0
+       else
+          ! grow all of the beads connected to bead iutry
+          index = 1
+          grownum(1) = invtry
+          do ivib = 1,invtry
+             iut = ijvib(imolty,iutry,ivib)
+             if (lrigid(imolty)) iut = iutry - 1
+             ! grow these branches
+             temp_count = temp_count + 1
+             temp_store(temp_count) = iut
+          end do
 
-! end the part that is specific for config
-      else if ( movetype .eq. 2 ) then
-! begin the part that is specific for swap
-! iutry is the first bead inserted - need to grow its neighbors
-         do iu = 1,igrow
-            lexshed(iu) = .true.
-         end do
+          count = 0
+          do izz = temp_count,1,-1
+             ! choose grow bead randomly from temp_store
+             itry = int( dble(izz) * random(-1) ) + 1
+             iut = temp_store(itry)
+             count = count + 1
+             growlist(1,count) = iut
+             lexshed(iut) = .false.
 
-         growfrom(1) = iutry
+             ! update temp_store for next iteration
+             temp_store(itry) = temp_store(izz)
+          end do
+       end if
+       ! end the part that is specific for swap
+    else if ( movetype .eq. 3 ) then
+       ! begin part that is specific for swatch
+       do iu = 1,igrow
+          lexshed(iu) = .true.
+       end do
+       if ( iutry .eq. 0 ) then
+          ! no beads to be regrown via cbmc
+          index = 0
+          return
+       end if
+       growfrom(1) = iutry
 
-         invtry = invib(imolty,iutry)
-         growprev(1) = 0
-         if ( invtry .eq. 0 ) then
-! Bead iutry is the only bead to be grown ---
-            index = 0
-         else
-! grow all of the beads connected to bead iutry
-            index = 1
-            grownum(1) = invtry
-            do ivib = 1,invtry
-               iut = ijvib(imolty,iutry,ivib)
-               if (lrigid(imolty)) iut = iutry - 1
-! grow these branches
-               temp_count = temp_count + 1
-               temp_store(temp_count) = iut
-            end do
+       invtry = invib(imolty,iutry)
+       growprev(1) = iprev
 
-            count = 0
-            do izz = temp_count,1,-1
-! choose grow bead randomly from temp_store
-               itry = int( dble(izz) * random() ) + 1
-               iut = temp_store(itry)
-               count = count + 1
-               growlist(1,count) = iut
-               lexshed(iut) = .false.
+       if ( invtry .eq. 0 ) then
+          ! Bead 1 is the only bead to be grown ---
+          index = 0
+       else
 
-! update temp_store for next iteration
-               temp_store(itry) = temp_store(izz)
-            end do
-         end if
+          ! grow all (except iprev) of the beads connected to bead 1
+          index = 1
+          do ivib = 1,invtry
+             iut = ijvib(imolty,iutry,ivib)
+             if ( iut .ne. iprev ) then
+                temp_count = temp_count + 1
+                temp_store(temp_count) = iut
+             end if
+          end do
 
-! end the part that is specific for swap
+          count = 0
+          do izz = temp_count,1,-1
+             ! choose grow bead randomly from temp_store
+             itry = int( dble(izz) * random(-1) ) + 1
+             iut = temp_store(itry)
+             count = count + 1
+             growlist(1,count) = iut
+             lexshed(iut) = .false.
 
-      else if ( movetype .eq. 3 ) then
-         do iu = 1,igrow
-            lexshed(iu) = .true.
-         end do
-! begin part that is specific for swatch
-         if ( iutry .eq. 0 ) then
-! no beads to be regrown via cbmc
-            index = 0
-            return
-         end if
-         growfrom(1) = iutry
+             ! update temp_store for next iteration
+             temp_store(itry) = temp_store(izz)
+          end do
 
-         invtry = invib(imolty,iutry)
-         growprev(1) = iprev
+          grownum(1) = count
+       end if
+       ! end part that is specific for swatch
+    else if ( movetype .eq. 4 ) then
+       ! begin part that is specific for rigid molecules
+       do iu = 1,igrow
+          lexshed(iu) = .true.
+       end do
 
-         if ( invtry .eq. 0 ) then
-! Bead 1 is the only bead to be grown ---
-            index = 0
-         else
+       if ( rindex(imolty) .eq. 0 ) then
+          ! entire molecule is rigid
+          index = 0
+       else
+          index = rindex(imolty)
 
-! grow all (except iprev) of the beads connected to bead 1
-            index = 1
-            do ivib = 1,invtry
-               iut = ijvib(imolty,iutry,ivib)
-               if ( iut .ne. iprev ) then
-                  temp_count = temp_count + 1
-                  temp_store(temp_count) = iut
-               end if
-            end do
+          do i = 1, rindex(imolty)
+             ! grow all non-rigid beads from the rigid part
+             temp_count = 0
+             invtry = invib(imolty,riutry(imolty,i)) - 1
+             grownum(i) = invtry
+             growfrom(i) = riutry(imolty,i)
 
-            count = 0
-            do izz = temp_count,1,-1
-! choose grow bead randomly from temp_store
-               itry = int( dble(izz) * random() ) + 1
-               iut = temp_store(itry)
-               count = count + 1
-               growlist(1,count) = iut
-               lexshed(iut) = .false.
+             ! for rigid molecules, have rigid vib last
+             growprev(i)=ijvib(imolty,growfrom(i),invtry+1)
 
-! update temp_store for next iteration
-               temp_store(itry) = temp_store(izz)
-            end do
+             do ivib = 1, invtry
+                iut = ijvib(imolty,riutry(imolty,i),ivib)
+                ! grow these branches
+                temp_count = temp_count + 1
+                temp_store(temp_count) = iut
+             end do
 
-            grownum(1) = count
-         end if
-! end part that is specific for swatch
+             count = 0
 
-      else if ( movetype .eq. 4 ) then
-         do iu = 1,igrow
-            lexshed(iu) = .true.
-         end do
-! begin part that is specific for rigid molecules
+             do izz = temp_count,1,-1
+                ! choose grow bead randomly from temp_store
+                itry = int ( dble(izz) * random(-1) ) + 1
+                iut = temp_store(itry)
+                count = count + 1
+                growlist(i,count) = iut
+                lexshed(iut) = .false.
 
-         if ( rindex(imolty) .eq. 0 ) then
-! entire molecule is rigid
-            index = 0
-         else
-            index = rindex(imolty)
+                ! update temp_store for next iteration
+                temp_store(itry) = temp_store(izz)
+             end do
+          end do
+       end if
+       ! end part that is specific for rigid molecules
+    else if (movetype .eq. 5) then
+       if ( iutry .eq. 0 ) then
+          ! no beads to be regrown via cbmc
+          return
+       end if
+       growfrom(index+1) = iutry
 
-            do i = 1, rindex(imolty)
-! grow all non-rigid beads from the rigid part
-               temp_count = 0
-               invtry = invib(imolty,riutry(imolty,i)) - 1
-               grownum(i) = invtry
-               growfrom(i) = riutry(imolty,i)
+       invtry = invib(imolty,iutry)
+       growprev(index+1) = iprev
 
-! for rigid molecules, have rigid vib last
-               growprev(i)=ijvib(imolty,growfrom(i),invtry+1)
+       if ( invtry .eq. 0 ) then
+          ! Bead 1 is the only bead to be grown ---
+       else
+          ! grow all (except iprev) of the beads connected to bead 1
+          index = index + 1
+          do ivib = 1,invtry
+             iut = ijvib(imolty,iutry,ivib)
+             if ( iut .ne. iprev ) then
+                temp_count = temp_count + 1
+                temp_store(temp_count) = iut
+             end if
+          end do
 
-               do ivib = 1, invtry
-                  iut = ijvib(imolty,riutry(imolty,i),ivib)
-! grow these branches
-                  temp_count = temp_count + 1
-                  temp_store(temp_count) = iut
-               end do
-
-               count = 0
-
-               do izz = temp_count,1,-1
-! choose grow bead randomly from temp_store
-                  itry = int ( dble(izz) * random() ) + 1
-                  iut = temp_store(itry)
-                  count = count + 1
-                  growlist(i,count) = iut
-                  lexshed(iut) = .false.
-
-! update temp_store for next iteration
-                  temp_store(itry) = temp_store(izz)
-               end do
-            end do
-         end if
-
-! end part that is specific for rigid molecules
-      else if (movetype .eq. 5) then
-         if ( iutry .eq. 0 ) then
-! no beads to be regrown via cbmc
-            return
-         end if
-         growfrom(index+1) = iutry
-
-         invtry = invib(imolty,iutry)
-         growprev(index+1) = iprev
-
-         if ( invtry .eq. 0 ) then
-! Bead 1 is the only bead to be grown ---
-         else
-
-! grow all (except iprev) of the beads connected to bead 1
-            index = index + 1
-            do ivib = 1,invtry
-               iut = ijvib(imolty,iutry,ivib)
-               if ( iut .ne. iprev ) then
-                  temp_count = temp_count + 1
-                  temp_store(temp_count) = iut
-               end if
-            end do
-
-            count = 0
-            do izz = temp_count,1,-1
-! choose grow bead randomly from temp_store
-               itry = int( dble(izz) * random() ) + 1
-               iut = temp_store(itry)
-               count = count + 1
-               growlist(index,count) = iut
-               lexshed(iut) = .false.
-! update temp_store for next iteration
-               temp_store(itry) = temp_store(izz)
-            end do
-
-            grownum(index) = count
-         end if
-
-! end iswatch stuff *
-
-      else
-
-! non-existant move type
-         write(io_output,*) 'schedule movetype ',movetype
-         call err_exit(__FILE__,__LINE__,'non-valid move type',myid+1)
-      end if
+          count = 0
+          do izz = temp_count,1,-1
+             ! choose grow bead randomly from temp_store
+             itry = int( dble(izz) * random(-1) ) + 1
+             iut = temp_store(itry)
+             count = count + 1
+             growlist(index,count) = iut
+             lexshed(iut) = .false.
+             ! update temp_store for next iteration
+             temp_store(itry) = temp_store(izz)
+          end do
+          grownum(index) = count
+       end if
+       ! end iswatch stuff *
+    else
+       ! non-existent move type
+       write(io_output,*) 'schedule movetype ',movetype
+       call err_exit(__FILE__,__LINE__,'non-valid move type',myid+1)
+    end if
 
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-
 ! from here on down config, swap, and swatch are the same
 
 ! OLD METHOD - not fully random - removed 6-13-98
-
-! if ( .false. ) then
-! write(io_output,*) 'old method'
-! ibead = 0
-! index = 0
-! 50   if ( index .lt. islen ) then
-! index = index + 1
-! do icbu = 1,grownum(index)
-! ibead = ibead + 1
-! iu = growlist(index,icbu)
-! invtry = invib(imolty,iu)
-! if ( invtry .ne. 1) then
-! this will be the next growing bead
-! islen = islen + 1
-! growprev(islen) = growfrom(index)
-! growfrom(islen) = iu
-! count = 0
-! do ivib = 1,invtry
-! iut = ijvib(imolty,iu,ivib)
-! if ( iut .ne. growprev(islen) ) then
-! count = count + 1
-! growlist(islen,count) = iut
-! lexshed(iut) = .false.
-! end if
-! end do
-! grownum(islen) = count
-! end if
-! end do
-! goto 50
-! end if
+!     ibead = 0
+!     index = 0
+! 50  if ( index .lt. islen ) then
+!        index = index + 1
+!        do icbu = 1,grownum(index)
+!           ibead = ibead + 1
+!           iu = growlist(index,icbu)
+!           invtry = invib(imolty,iu)
+!           if ( invtry .ne. 1) then
+!              this will be the next growing bead
+!              islen = islen + 1
+!              growprev(islen) = growfrom(index)
+!              growfrom(islen) = iu
+!              count = 0
+!              do ivib = 1,invtry
+!                 iut = ijvib(imolty,iu,ivib)
+!                 if ( iut .ne. growprev(islen) ) then
+!                    count = count + 1
+!                    growlist(islen,count) = iut
+!                    lexshed(iut) = .false.
+!                 end if
+!              end do
+!              grownum(islen) = count
+!           end if
+!        end do
+!        goto 50
+!     end if
 
 ! set up list of "outer" beads that have further growth sites
 ! this method implemented 6-13-98
+    ibead=0
+    if ( index .gt. 0 ) then
+       outer_num = 0
+       iufrom = growfrom(index)
+       do icbu = 1,grownum(index)
+          ! increment counter ibead for total number of beads grown
+          ibead = ibead + 1
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
-! ibead should be set here, otherwise it's not initialized below
-      ibead=0
+          ! determine whether this bead has any non-grown neighbors
+          iu = growlist(index,icbu)
+          invtry = invib(imolty,iu)
 
-      if ( index .gt. 0 ) then
-         ibead = 0
-         outer_num = 0
-         iufrom = growfrom(index)
-         do icbu = 1,grownum(index)
-! increment counter ibead for total number of beads grown
-            ibead = ibead + 1
+          if ( invtry .gt. 1 ) then
+             ! add one to the stack of outer_sites
+             outer_num = outer_num + 1
+             outer_sites(outer_num) = iu
+             outer_prev(outer_num) = iufrom
+          end if
+       end do
 
-! determine whether this bead has any non-grown neighbors
-            iu = growlist(index,icbu)
-            invtry = invib(imolty,iu)
+       ! begin while loop to grow all outer beads until done
+70     if ( outer_num .gt. 0 ) then
+          ! choose one site randomly from the stack
+          outer_try = int( dble(outer_num) * random(-1) ) + 1
 
-            if ( invtry .gt. 1 ) then
-! add one to the stack of outer_sites
-               outer_num = outer_num + 1
-               outer_sites(outer_num) = iu
-               outer_prev(outer_num) = iufrom
-            end if
-         end do
+          ! increment index to show this is the next growfrom
+          index = index + 1
 
-! begin while loop to grow all outer beads until done
- 70      if ( outer_num .gt. 0 ) then
+          iu = outer_sites(outer_try)
+          iufrom = outer_prev(outer_try)
+          ! assign growfrom and growprev for this index
+          growfrom(index) = iu
+          growprev(index) = iufrom
 
-! choose one site randomly from the stack
-            outer_try = int( dble(outer_num) * random() ) + 1
+          invtry = invib(imolty,iu)
+          ! assign the grow beads in random order
+          temp_count = 0
+          do ivib = 1,invtry
+             iut = ijvib(imolty,iu,ivib)
+             if ( iut .ne. iufrom ) then
+                ! add to the list of beads to be grown from iu
+                temp_count = temp_count + 1
+                temp_store(temp_count) = iut
+             end if
+          end do
 
-! increment index to show this is the next growfrom
-            index = index + 1
+          count = 0
+          do izz = temp_count, 1, -1
+             itry = int ( dble(izz) * random(-1) ) + 1
+             iut = temp_store(itry)
+             count = count + 1
+             ! assign growlist for current index and count
+             growlist(index,count) = iut
+             lexshed(iut) = .false.
 
-            iu = outer_sites(outer_try)
-            iufrom = outer_prev(outer_try)
-! assign growfrom and growprev for this index
-            growfrom(index) = iu
-            growprev(index) = iufrom
+             ! update temp_store for next iteration
+             temp_store(itry) = temp_store(izz)
+          end do
+          ! assign grownum for this index
+          grownum(index) = count
 
-            invtry = invib(imolty,iu)
-! assign the grow beads in random order
-            temp_count = 0
-            do ivib = 1,invtry
-               iut = ijvib(imolty,iu,ivib)
-               if ( iut .ne. iufrom ) then
-! add to the list of beads to be grown from iu
-                  temp_count = temp_count + 1
-                  temp_store(temp_count) = iut
-               end if
-            end do
+          ! update list of "outer" beads
+          ! remove bead that was just grown from outer list
+          outer_sites(outer_try) = outer_sites(outer_num)
+          outer_prev(outer_try) = outer_prev(outer_num)
+          outer_num = outer_num - 1
 
-            count = 0
-            do izz = temp_count, 1, -1
-               itry = int ( dble(izz) * random() ) + 1
-               iut = temp_store(itry)
-               count = count + 1
-! assign growlist for current index and count
-               growlist(index,count) = iut
-               lexshed(iut) = .false.
+          ! add the new beads if they have more to be grown
+          iufrom = iu
+          do icbu = 1,grownum(index)
+             ! increment counter ibead for total number of beads grown
+             ibead = ibead + 1
 
-! update temp_store for next iteration
-               temp_store(itry) = temp_store(izz)
-            end do
-! assign grownum for this index
-            grownum(index) = count
+             ! determine whether this bead has any non-grown neighbors
+             iu = growlist(index,icbu)
+             invtry = invib(imolty,iu)
 
-! update list of "outer" beads
-! remove bead that was just grown from outer list
-            outer_sites(outer_try) = outer_sites(outer_num)
-            outer_prev(outer_try) = outer_prev(outer_num)
-            outer_num = outer_num - 1
+             if ( invtry .gt. 1 ) then
+                ! add one to the stack of outer_sites
+                outer_num = outer_num + 1
+                outer_sites(outer_num) = iu
+                outer_prev(outer_num) = iufrom
+             end if
+          end do
+          ! end of while loop 70
+          goto 70
+       end if
+    end if
 
-! add the new beads if they have more to be grown
-            iufrom = iu
-            do icbu = 1,grownum(index)
-! increment counter ibead for total number of beads grown
-               ibead = ibead + 1
+100 if ( (movetype .eq. 1) .and. (ibead .gt. nmaxcbmc(imolty)) ) then
+       kickout = kickout + 1
+       goto 11
+    end if
 
-! determine whether this bead has any non-grown neighbors
-               iu = growlist(index,icbu)
-               invtry = invib(imolty,iu)
+    if ( lprint ) then
+       write(io_output,*) 'movetype',movetype
+       write(io_output,*) 'index',index
+       do ibead = 1,index
+          write(io_output,*) 'ibead',ibead
+          write(io_output,*) 'growfrom(ibead)',growfrom(ibead)
+          write(io_output,*) 'growprev(ibead)',growprev(ibead)
+          write(io_output,*) 'grownum(ibead)',grownum(ibead)
+          do count = 1,grownum(ibead)
+             write(io_output,*) 'count,growlist(ibead,count)',count ,growlist(ibead,count)
+          end do
+       end do
+       do iu = 1,igrow
+          write(io_output,*) 'iu,lexshed(iu)',iu,lexshed(iu)
+       end do
+    end if
 
-               if ( invtry .gt. 1 ) then
-! add one to the stack of outer_sites
-                  outer_num = outer_num + 1
-                  outer_sites(outer_num) = iu
-                  outer_prev(outer_num) = iufrom
-               end if
-            end do
+    if (lrig(imolty).and.nrig(imolty).eq.0) then
+       ib2 = index - ju
+       if (ib2.lt.1) then
+          llrig = .false.
+          return
+       else
+          do ibead = 1, index
+             lsave(ibead) = .false.
+          end do
 
-! end of while loop 70
-            goto 70
-         end if
-      end if
+          nrigi = 1
+          llrig = .true.
+          rfrom(1) = growfrom(ib2)
+          rprev(1) = growprev(ib2)
+          rnum(1) = grownum(ib2)
+          lsave(ib2) = .true.
 
- 100  if ( (movetype .eq. 1) .and. (ibead .gt. nmaxcbmc(imolty)) ) then
-         kickout = kickout + 1
-         goto 11
-      end if
+          do count = 1, grownum(ib2)
+             iu = growlist(ib2,count)
+             lfind(iu) = .true.
+             rlist(1,count) = iu
+             lexshed(iu) = .false.
+          end do
+       end if
 
-      if ( lprint ) then
-         write(io_output,*) 'movetype',movetype
-         write(io_output,*) 'index',index
-         do ibead = 1,index
-            write(io_output,*) 'ibead',ibead
-            write(io_output,*) 'growfrom(ibead)',growfrom(ibead)
-            write(io_output,*) 'growprev(ibead)',growprev(ibead)
-            write(io_output,*) 'grownum(ibead)',grownum(ibead)
-            do count = 1,grownum(ibead)
-               write(io_output,*) 'count,growlist(ibead,count)',count ,growlist(ibead,count)
-            end do
-         end do
-         do iu = 1,igrow
-            write(io_output,*) 'iu,lexshed(iu)',iu,lexshed(iu)
-         end do
-      end if
-
-      if (lrig(imolty).and.nrig(imolty).eq.0) then
-         ib2 = index - ju
-         if (ib2.lt.1) then
-            llrig = .false.
-            return
-         else
-
-            do ibead = 1, index
-               lsave(ibead) = .false.
-            end do
-
-            nrigi = 1
-            llrig = .true.
-
-            rfrom(1) = growfrom(ib2)
-            rprev(1) = growprev(ib2)
-
-            rnum(1) = grownum(ib2)
-            lsave(ib2) = .true.
-
-            do count = 1, grownum(ib2)
-               iu = growlist(ib2,count)
-
-               lfind(iu) = .true.
-
-               rlist(1,count) = iu
-               lexshed(iu) = .false.
-            end do
-
-         end if
-
-! cycle through the rest of the rigid beads
-
-         do ibead = ib2 + 1, index
-            iufrom = growfrom(ibead)
-
-            if (lfind(iufrom)) then
-
-               lsave(ibead) = .true.
-
-               do count = 1, grownum(ibead)
-
-                  iu = growlist(ibead,count)
-
-                  lfind(iu) = .true.
-
-               end do
-
-            end if
-         end do
-      else
-         llrig = .false.
-      end if
+       ! cycle through the rest of the rigid beads
+       do ibead = ib2 + 1, index
+          iufrom = growfrom(ibead)
+          if (lfind(iufrom)) then
+             lsave(ibead) = .true.
+             do count = 1, grownum(ibead)
+                iu = growlist(ibead,count)
+                lfind(iu) = .true.
+             end do
+          end if
+       end do
+    else
+       llrig = .false.
+    end if
 
 #ifdef __DEBUG__
-      write(io_output,*) 'end SCHEDULE'
+    write(io_output,*) 'end SCHEDULE in ',myid
 #endif
-
-      return
+    return
   end subroutine schedule
 
-!     ***********************************************************************
+!*********************************************************************
 ! determines the new geometry of the bond lengths and angles to be  **
 ! rotated on the cone for rosenb.f                                  **
 ! for old computes the rosenbluth weight for bending and determines **
@@ -1854,950 +1846,890 @@ contains
 ! phi(count) is the angle around the cone between count and 1       **
 ! written by M.G. Martin 7-10-98 from geomnew and geomold           **
 ! last modified by Neeraj Rai on 12/23/2008 for CG models           **
-!     ***********************************************************************
-  subroutine geometry(lnew,iw,i,imolty,angstart,iuprev,glist ,bondlen,bendang,phi,vvibtr,vbbtr, maxlen, wei_bend )
+!*********************************************************************
+  subroutine geometry(lnew,iw,i,imolty,angstart,iuprev,glist,bondlen,bendang,phi,vvibtr,vbbtr,maxlen,wei_bend)
+    use util_math,only:cone_angle
+    use util_mp,only:mp_set_displs,mp_allgather,mp_sum,mp_max
 
-! variables passed to/from the subroutine
+    ! variables passed to/from the subroutine
+    logical::lnew
+    integer::iw,imolty,angstart,iuprev,glist(numax),i
+    real::bondlen(numax),bendang(numax),phi(numax),vvibtr,vbbtr,maxlen
+    real::wei_bend
 
-      logical::lnew
-      integer::iw,imolty,angstart,iuprev,glist,i
-      real::bondlen,bendang,phi,vvibtr,vbbtr ,maxlen
-      real::wei_bend
+    ! local variables
+    integer::count,ntogrow,iugrow,iufrom,iv,juvib,jtvib,iu2back,ib,iulast,type,aaa,iuone
+    real::equil,kforce,vvib,length,angle,phitwo,vangle,vphi
 
-      dimension glist(numax)
-      dimension bondlen(numax),bendang(numax),phi(numax)
+    ! new variables
+    integer::ibend,nchben_a,nchben_b
+    real::bsum_try,rsint,ang_trial(nchbn_max),bfactor(nchbn_max),rbf,bs
 
-! local variables
+    ! variables from geomold
+    real::rxui,ryui,rzui,rxuij,ryuij,rzuij,xvecprev,yvecprev,zvecprev,distprev,xvecgrow,yvecgrow,zvecgrow,distgrow,anglec
+    real::xub,yub,zub,dum,ux,uy,uz
 
-      integer::count,ntogrow,iugrow,iufrom,iv,juvib ,jtvib,iu2back,ib,iulast,type,aaa,iuone
+    ! Neeraj: Adding for the lookup table for CG model
+    real::distgrow2
+    real::lengtha,lengthb,lengtha2,lengthb2,lengthc,lengthc2,lengthFP,lengthFP2
 
-      real::equil,kforce,thetaone,thetatwo ,vvib ,length,angle,phione,phitwo,vangle,vphi
+    ! MPI
+    integer::rcounts(numprocs),displs(numprocs),my_start,my_end,blocksize,my_itrial,rid
+    real::my_ang_trial(nchbn_max),my_bfactor(nchbn_max)
 
-! new variables
-      integer::ibend,nchben_a,nchben_b,start,start_ang
-      real::bsum_try,rsint,ang_trial,bfactor,rbf ,bs
+#ifdef __DEBUG__
+    write(io_output,*) 'START GEOMETRY in ',myid
+#endif
 
-      dimension ang_trial(nchbn_max),bfactor(nchbn_max)
+    ! assign grownum and growfrom to local variables
+    ntogrow = grownum(iw)
+    iufrom = growfrom(iw)
 
-! variables from geomold
-      real::rxui,ryui,rzui,rxuij,ryuij,rzuij ,xvecprev,yvecprev,zvecprev,distprev,xvecgrow ,yvecgrow,zvecgrow ,distgrow,anglec
-      real::xub,yub,zub,dum,ux,uy,uz,alpha,gamma
+    ! initialize trial energies
+    vvibtr = 0.0d0
 
-! Neeraj: Adding for the lookup table for CG model
+    if ( .not. lnew ) then
+       ! OLD store r*ui positions for unit iufrom
+       rxui = rxu(i,iufrom)
+       ryui = ryu(i,iufrom)
+       rzui = rzu(i,iufrom)
+    end if
 
-      real::distgrow2
-      real::lengtha,lengthb,lengtha2,lengthb2, lengthc,lengthc2,lengthFP,lengthFP2
+    ! Begin Bond length selection based on Boltzmann rejection
 
-! assign nchben_a and ncben_b
-      nchben_a = nchbna(imolty)
-      nchben_b = nchbnb(imolty)
+    ! determine the bond lengths of the beads to be grown
+    maxlen = 0.0d0
 
-! write(io_output,*) 'START GEOMETRY'
+    do count = 1,ntogrow
+       iugrow = growlist(iw,count)
+       glist(count) = iugrow
 
-! initialize trial energies
-      vvibtr = 0.0d0
-      vbbtr = 0.0d0
+       ! determine the vibration (bond) type as jtvib
+       do iv = 1, invib(imolty,iugrow)
+          juvib = ijvib(imolty,iugrow,iv)
+          if ( juvib .eq. iufrom ) then
+             jtvib = itvib(imolty,iugrow,iv)
+             exit
+          end if
+       end do
 
-! assign grownum and growfrom to local variables
-      ntogrow = grownum(iw)
-      iufrom = growfrom(iw)
+       if ( lnew ) then
+          ! compute bond length
+          equil = brvib(jtvib)
+          kforce = brvibk(jtvib)
+          call bondlength( jtvib,equil,kforce,beta,length,vvib )
+       else
+          ! compute bond length
+          rxuij = rxu(i,iugrow) - rxui
+          ryuij = ryu(i,iugrow) - ryui
+          rzuij = rzu(i,iugrow) - rzui
 
-      if ( .not. lnew ) then
-! OLD store r*ui positions for unit iufrom
-         rxui = rxu(i,iufrom)
-         ryui = ryu(i,iufrom)
-         rzui = rzu(i,iufrom)
-      end if
+          ! do not need mimage for intramolecular
+          length = dsqrt(rxuij*rxuij + ryuij*ryuij + rzuij*rzuij)
 
-! Begin Bond length selection based on Boltzmann rejection
+          ! compute vibration energy
+          if (L_vib_table) then
+             vvib = lininter_vib(length,jtvib)
+          else
+             equil = brvib(jtvib)
+             kforce = brvibk(jtvib)
+             vvib = kforce * (length-equil )**2
+          end if
+       end if
 
-! determine the bond lengths of the beads to be grown
-      maxlen = 0.0d0
+       ! adjust maximum bond length of those being grown
+       if ( length .gt. maxlen ) maxlen = length
 
-      do count = 1,ntogrow
-         iugrow = growlist(iw,count)
-         glist(count) = iugrow
+       ! assign bondlength and add up vibrational energy
+       bondlen(count) = length
+       vvibtr = vvibtr + vvib
+    end do
 
-! determine the vibration (bond) type as jtvib
-         do iv = 1, invib(imolty,iugrow)
-            juvib = ijvib(imolty,iugrow,iv)
-            if ( juvib .eq. iufrom ) then
-               jtvib = itvib(imolty,iugrow,iv)
-            end if
-         end do
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!         --- Begin Bond angle biased selection ---             c
+!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+    if ( growprev(iw) .eq. 0 ) then
+       ! need to choose one bead to grow on unit sphere
+       iuprev = growlist(iw,1)
+       angstart = 2
+    else
+       iuprev = growprev(iw)
+       angstart = 1
+    end if
 
-         if ( lnew ) then
-! compute bond length
-            equil = brvib(jtvib)
-            kforce = brvibk(jtvib)
-            call bondlength( jtvib,equil,kforce,beta,length,vvib )
+    if ( .not. lnew ) then
+       ! compute the vector from iufrom to iuprev
+       xvecprev = rxu(i,iuprev) - rxui
+       yvecprev = ryu(i,iuprev) - ryui
+       zvecprev = rzu(i,iuprev) - rzui
+       distprev = dsqrt( xvecprev*xvecprev + yvecprev*yvecprev  + zvecprev*zvecprev )
+    end if
 
-         else
-! compute bond length
-            rxuij = rxu(i,iugrow) - rxui
-            ryuij = ryu(i,iugrow) - ryui
-            rzuij = rzu(i,iugrow) - rzui
-
-! do not need mimage for intramolecular
-            length = dsqrt(rxuij*rxuij + ryuij*ryuij + rzuij*rzuij)
-
-! compute vibration energy
-
-            if (L_vib_table) then
-               vvib = lininter_vib(length,jtvib)
-            else
-               equil = brvib(jtvib)
-               kforce = brvibk(jtvib)
-               vvib = kforce * (length-equil )**2
-            end if
-         end if
-
-! adjust maximum bond length of those being grown
-         if ( length .gt. maxlen ) maxlen = length
-
-! assign bondlength and add up vibrational energy
-         bondlen(count) = length
-         vvibtr = vvibtr + vvib
-      end do
-
-      if ( growprev(iw) .eq. 0 ) then
-! need to choose one bead to grow on unit sphere
-         iuprev = growlist(iw,1)
-         angstart = 2
-      else
-         iuprev = growprev(iw)
-         angstart = 1
-      end if
-
-      if (L_bend_table) then
-         if ( growprev(iw) .eq. 0 ) then
-             iuprev = growlist(iw,1)
-             lengthFP = bondlen(1)
+    if (L_bend_table) then
+       if ( growprev(iw) .eq. 0 ) then
+          lengthFP = bondlen(1)
+          lengthFP2 = lengthFP*lengthFP
+       else
+          if(.not.lnew) then
+             lengthFP = distprev
              lengthFP2 = lengthFP*lengthFP
-         else
-             iuprev = growprev(iw)
-             if(.not.lnew) then
-                rxuij = rxu(i,iuprev) - rxu(i,iufrom)
-                ryuij = ryu(i,iuprev) - ryu(i,iufrom)
-                rzuij = rzu(i,iuprev) - rzu(i,iufrom)
-                lengthFP = dsqrt(rxuij*rxuij+ryuij*ryuij+rzuij*rzuij)
-                lengthFP2 = lengthFP*lengthFP
-              else
-                rxuij = rxnew(iuprev) - rxnew(iufrom)
-                ryuij = rynew(iuprev) - rynew(iufrom)
-                rzuij = rznew(iuprev) - rznew(iufrom)
-                lengthFP = dsqrt(rxuij*rxuij+ryuij*ryuij+rzuij*rzuij)
-                lengthFP2 = lengthFP*lengthFP
-              end if
-         end if
-      end if
+          else
+             rxuij = rxnew(iuprev) - rxnew(iufrom)
+             ryuij = rynew(iuprev) - rynew(iufrom)
+             rzuij = rznew(iuprev) - rznew(iufrom)
+             lengthFP2 = rxuij*rxuij+ryuij*ryuij+rzuij*rzuij
+             lengthFP = dsqrt(lengthFP2)
+          end if
+       end if
+    end if
 
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! Begin Bond angle biased selection ---                 c
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+    ! initialize wei_bend
+    wei_bend = 1.0d0
+    vbbtr = 0.0d0
+    nchben_a = nchbna(imolty)
+    ! MPI
+    if (numprocs.gt.1) then
+       rid=myid
+    else
+       rid=-1
+    end if
+    blocksize = nchben_a/numprocs
+    rcounts = blocksize
+    blocksize = nchben_a - blocksize * numprocs
+    if (blocksize.gt.0) rcounts(1:blocksize) = rcounts(1:blocksize) + 1
+    call mp_set_displs(rcounts,displs,blocksize,numprocs)
+    my_start = displs(myid+1) + 1
+    my_end = my_start + rcounts(myid+1) - 1
 
-      if ( .not. lnew ) then
-! compute the vector from iufrom to iuprev
-         xvecprev = rxu(i,iuprev) - rxui
-         yvecprev = ryu(i,iuprev) - ryui
-         zvecprev = rzu(i,iuprev) - rzui
-         distprev = dsqrt( xvecprev*xvecprev + yvecprev*yvecprev  + zvecprev*zvecprev )
-      end if
+    ! determine the iugrow-iufrom-iuprev angles
+    do count = angstart,ntogrow
+       iugrow = growlist(iw,count)
+       do ib = 1, inben(imolty,iugrow)
+          iulast = ijben2(imolty,iugrow,ib)
+          if ( iulast .eq. iufrom ) then
+             iu2back = ijben3(imolty,iugrow,ib)
+             if ( iu2back .eq. iuprev ) then
+                type = itben(imolty,iugrow,ib)
+                equil = brben(type)
+                kforce = brbenk(type)
+                exit
+             end if
+          end if
+       end do
 
-! initialize wei_bend
-      wei_bend = 1.0d0
+       if ( kforce .gt. 0.1d0 ) then
+          ! flexible bond angle
+          ! initialize bsum_try
+          bsum_try = 0.0d0
 
-! determine the iugrow-iufrom-iuprev angles
-      do count = angstart,ntogrow
-         iugrow = growlist(iw,count)
-         do ib = 1, inben(imolty,iugrow)
-            iulast = ijben2(imolty,iugrow,ib)
-            if ( iulast .eq. iufrom ) then
-               iu2back = ijben3(imolty,iugrow,ib)
-               if ( iu2back .eq. iuprev ) then
-                  type = itben(imolty,iugrow,ib)
-                  equil = brben(type)
-                  kforce = brbenk(type)
-               end if
-            end if
-         end do
+          if (L_bend_table) then
+             distgrow = bondlen(count)
+             distgrow2 = distgrow*distgrow
+          end if
 
-         if ( kforce .gt. 0.1d0 ) then
-! flexible bond angle
-! initialize bsum_try
-            bsum_try = 0.0d0
+          ! compute trial angles and energies
+          my_itrial = 0
+          do ibend = my_start,my_end
+             my_itrial = my_itrial + 1
+             if (lnew.or.ibend.ne.1) then
+                ! new conformation or old conformation skipping 1st
+                ! choose the angle uniformly on sin(theta)
+                rsint = 2.0d0*random(rid) - 1.0d0
+                angle = dacos(rsint)
 
-            if ( .not. lnew ) then
-! first ibend is the old conformation
-               xvecgrow = rxu(i,iugrow) - rxui
-               yvecgrow = ryu(i,iugrow) - ryui
-               zvecgrow = rzu(i,iugrow) - rzui
-               distgrow = bondlen(count)
-               distgrow2 = distgrow*distgrow
-! dot product divided by lengths gives cos(angle)
-               anglec = ( xvecprev*xvecgrow + yvecprev*yvecgrow  + zvecprev*zvecgrow ) / (distprev*distgrow)
-               angle = dacos(anglec)
-               if (L_bend_table) then
-                  lengthc2 = lengthFP2 + distgrow2 -  2.0d0*lengthFP*distgrow*anglec
-                  lengthc = dsqrt(lengthc2)
-                  vangle = lininter_bend(lengthc,type)
+                ! calculate the bond angle energy
+                if (L_bend_table) then
+                   lengthc2 = lengthFP2 + distgrow2 - 2.0d0*lengthFP*distgrow*dcos(angle)
+                   lengthc = dsqrt(lengthc2)
+                   vangle = lininter_bend(lengthc,type)
                 else
-                  vangle = kforce * (angle - equil)**2
-               end if
+                   vangle = kforce * (angle - equil)**2
+                end if
 
-               ang_trial(1) = angle
-               bfactor(1) = dexp( -beta*vangle )
-               bsum_try = bsum_try + bfactor(1)
-! skip first ibend in next loop
-               start = 2
+                my_ang_trial(my_itrial) = angle
+                my_bfactor(my_itrial) = dexp(-beta*vangle)
+                bsum_try = bsum_try + my_bfactor(my_itrial)
+             else
+                ! first ibend is the old conformation
+                xvecgrow = rxu(i,iugrow) - rxui
+                yvecgrow = ryu(i,iugrow) - ryui
+                zvecgrow = rzu(i,iugrow) - rzui
+                distgrow = bondlen(count)
+                distgrow2 = distgrow*distgrow
+                ! dot product divided by lengths gives cos(angle)
+                anglec = ( xvecprev*xvecgrow + yvecprev*yvecgrow  + zvecprev*zvecgrow ) / (distprev*distgrow)
+                angle = dacos(anglec)
 
-            else
-! new conformation start at 1
-               start = 1
-            end if
+                if (L_bend_table) then
+                   lengthc2 = lengthFP2 + distgrow2 - 2.0d0*lengthFP*distgrow*anglec
+                   lengthc = dsqrt(lengthc2)
+                   vangle = lininter_bend(lengthc,type)
+                else
+                   vangle = kforce * (angle - equil)**2
+                end if
 
-            if (L_bend_table) then
-                  distgrow = bondlen(count)
-                  distgrow2 = distgrow*distgrow
-            end if
-! compute trial angles and energies
-            do ibend = start,nchben_a
-! choose the angle uniformly on sin(theta)
-               rsint = 2.0d0*random() - 1.0d0
-               angle = dacos(rsint)
-               ang_trial(ibend) = angle
+                my_ang_trial(1) = angle
+                my_bfactor(1) = dexp( -beta*vangle )
+                bsum_try = bsum_try + my_bfactor(1)
+             end if
+          end do
 
-! calculate the bond angle energy
-               if (L_bend_table) then
-                  lengthc2 = lengthFP2 + distgrow2 - 2.0d0*lengthFP*distgrow*dcos(angle)
-                  lengthc = dsqrt(lengthc2)
-                  vangle = lininter_bend(lengthc,type)
-               else
-                  vangle = kforce * (angle - equil)**2
-               end if
-               bfactor(ibend) = dexp(-beta*vangle)
-               bsum_try = bsum_try + bfactor(ibend)
-            end do
+          ! if (ldebug) then
+          !    write(100+myid,*) 'geom for molecule ',i,' lnew: ',lnew,' bead ',growlist(iw,1:ntogrow),' from myid ',myid
+          !    do my_itrial=1,rcounts(myid+1)
+          !       write(100+myid,*) "my_ang_trial(",my_itrial,") = ",my_ang_trial(my_itrial)
+          !    end do
+          ! end if
 
-            if ( lnew ) then
-! select one of the trial sites via bias
-               rbf = random()*bsum_try
-               bs = 0.0d0
-               do ibend = 1,nchben_a
-                  bs = bs + bfactor(ibend)
-                  if ( rbf .lt. bs ) then
-                     angle = ang_trial(ibend)
-                     vangle = dlog(bfactor(ibend))/(-beta)
-                     goto 10
-                  end if
-               end do
- 10            continue
-            else
-! select the old conformation
-               angle = ang_trial(1)
-               vangle = dlog(bfactor(1))/(-beta)
-            end if
+          call mp_sum(bsum_try,1,groupid)
+          call mp_allgather(my_ang_trial,ang_trial,rcounts,displs,groupid)
+          call mp_allgather(my_bfactor,bfactor,rcounts,displs,groupid)
 
-! propagate the rosenbluth weight
-            wei_bend = wei_bend * bsum_try/dble(nchben_a)
+          ! if (ldebug) then
+          !    do my_itrial=1,nchben_a
+          !       write(100+myid,*) "ang_trial(",my_itrial,") = ",ang_trial(my_itrial)
+          !    end do
+          ! end if
 
-         else
-! fixed bond angle
-            angle = equil
-            vangle = 0.0d0
-         end if
+          if ( lnew ) then
+             ! select one of the trial sites via bias
+             rbf = random(-1)*bsum_try
+             bs = 0.0d0
+             do ibend = 1,nchben_a
+                bs = bs + bfactor(ibend)
+                if ( rbf .lt. bs ) then
+                   angle = ang_trial(ibend)
+                   vangle = dlog(bfactor(ibend))/(-beta)
+                   exit
+                end if
+             end do
+          else
+             ! select the old conformation
+             angle = ang_trial(1)
+             vangle = dlog(bfactor(1))/(-beta)
+          end if
 
-         bendang(count) = angle
+          ! propagate the rosenbluth weight
+          wei_bend = wei_bend * bsum_try/dble(nchben_a)
+       else
+          ! fixed bond angle
+          angle = equil
+          vangle = 0.0d0
+       end if
+       bendang(count) = angle
+       vbbtr = vbbtr + vangle
+    end do
 
-         vbbtr = vbbtr + vangle
+    ! Neeraj  iugrow-iufrom-iuprev bend angle has been selected!
+    if ( lnew ) then
+       ! assign phi(angstart) to 0.0
+       phi(angstart) = 0.0d0
+    else
+       ! set up the cone using iuprev
+       xub = -xvecprev/distprev
+       yub = -yvecprev/distprev
+       zub = -zvecprev/distprev
+       call cone(1,xub,yub,zub,dum,dum)
 
-      end do
+       iugrow = growlist(iw,angstart)
 
-! Neeraj  iugrow-iufrom-iuprev bend angle has been selected!
+       ! compute vector from iufrom to iugrow
+       xvecgrow = rxu(i,iugrow) - rxui
+       yvecgrow = ryu(i,iugrow) - ryui
+       zvecgrow = rzu(i,iugrow) - rzui
+       distgrow = bondlen(angstart)
 
-      if ( lnew ) then
-! assign phi(angstart) to 0.0
-         phi(angstart) = 0.0d0
-! skip angstart in the loop below
-         start_ang = angstart+1
-      else
-! set up the cone using iuprev
-         xub = -xvecprev/distprev
-         yub = -yvecprev/distprev
-         zub = -zvecprev/distprev
+       ! turn this into a unit vector
+       ux = xvecgrow/distgrow
+       uy = yvecgrow/distgrow
+       uz = zvecgrow/distgrow
 
-         call cone(1,xub,yub,zub,dum,dum,dum,dum,dum)
+       call cone(3,ux,uy,uz,bendang(angstart),phi(angstart))
+    end if
 
-! need to determine angstart
-         start_ang = angstart
-      end if
+    nchben_b = nchbnb(imolty)
+    ! MPI
+    blocksize = nchben_b/numprocs
+    rcounts = blocksize
+    blocksize = nchben_b - blocksize * numprocs
+    if (blocksize.gt.0) rcounts(1:blocksize) = rcounts(1:blocksize) + 1
+    call mp_set_displs(rcounts,displs,blocksize,numprocs)
+    my_start = displs(myid+1) + 1
+    my_end = my_start + rcounts(myid+1) - 1
 
-! determine the angles of the grown beads relative to anglestart
+    ! determine the angles of the grown beads relative to anglestart
+    ! skip angstart in the loop below
+    do count = angstart+1,ntogrow
+       iugrow = growlist(iw,count)
 
-      do count = start_ang,ntogrow
-         iugrow = growlist(iw,count)
+       ! initialize bsum_try
+       bsum_try = 0.0d0
 
-         lengtha = bondlen(count)
-         lengtha2 = lengtha * lengtha
+       if (L_bend_table) then
+          lengtha = bondlen(count)
+          lengtha2 = lengtha * lengtha
+       end if
 
-! initialize bsum_try
-         bsum_try = 0.0d0
+       ! compute trial energies and weights
+       my_itrial = 0
+       do ibend = my_start,my_end
+          my_itrial = my_itrial + 1
+          vphi = 0.0d0
+          if (lnew.or.ibend.ne.1) then
+             ! perform all ibend for NEW and OLD (except for 1st in OLD)
+             ! determine a value of phitwo
+             phitwo = random(rid)*twopi
 
-         if ( .not. lnew ) then
-! compute vector from iufrom to iugrow
-            xvecgrow = rxu(i,iugrow) - rxui
-            yvecgrow = ryu(i,iugrow) - ryui
-            zvecgrow = rzu(i,iugrow) - rzui
-            distgrow = bondlen(count)
+             do aaa = angstart,count-1
+                iuone = growlist(iw,aaa)
+                angle=cone_angle(bendang(aaa),phi(aaa),bendang(count),phitwo)
 
-! turn this into a unit vector
-            ux = xvecgrow/distgrow
-            uy = yvecgrow/distgrow
-            uz = zvecgrow/distgrow
-            alpha = bendang(count)
+                do ib = 1, inben(imolty,iugrow)
+                   iulast = ijben2(imolty,iugrow,ib)
+                   if ( iulast .eq. iufrom ) then
+                      iu2back = ijben3(imolty,iugrow,ib)
+                      if ( iu2back .eq. iuone ) then
+                         type = itben(imolty,iugrow,ib)
+                         ! calculate the bond angle energy
+                         if (L_bend_table) then
+                            lengthb = bondlen(aaa)
+                            lengthb2 = lengthb*lengthb
+                            lengthc2 = lengtha2 + lengthb2 -  2.0d0*lengtha*lengthb*dcos(angle)
+                            lengthc = dsqrt(lengthc2)
+                            vphi = vphi + lininter_bend (lengthc,type)
+                         else
+                            vphi = vphi + brbenk(type) * (angle - brben(type))**2
+                         end if
+                      end if
+                   end if
+                end do
+             end do
 
-            call cone(3,dum,dum,dum,alpha,gamma,ux,uy,uz)
+             ! store the boltzmann factors and phi
+             my_ang_trial(my_itrial) = phitwo
+             my_bfactor(my_itrial) = dexp(-beta*vphi)
+             bsum_try = bsum_try + my_bfactor(my_itrial)
+          else
+             ! compute vector from iufrom to iugrow
+             xvecgrow = rxu(i,iugrow) - rxui
+             yvecgrow = ryu(i,iugrow) - ryui
+             zvecgrow = rzu(i,iugrow) - rzui
+             distgrow = bondlen(count)
 
-            phitwo = gamma
+             ! turn this into a unit vector
+             ux = xvecgrow/distgrow
+             uy = yvecgrow/distgrow
+             uz = zvecgrow/distgrow
 
-!     ******************************************************************
-! if iinit = 2 then it creates a unit vector that has an angle   *
-! of alpha from the +z direction (previous vector) and an angle  *
-! of gamma (0,2Pi) around the cone circle and returns this as    *
-! ux,uy,uz                                                       *
-!     ******************************************************************
+             call cone(3,ux,uy,uz,bendang(count),phitwo)
 
-            call cone(2,dum,dum,dum,alpha,gamma,ux,uy,uz)
+             do aaa = angstart,count-1
+                iuone = growlist(iw,aaa)
+                angle=cone_angle(bendang(aaa),phi(aaa),bendang(count),phitwo)
 
-            if ( angstart .eq. count ) then
-! this is the first phi, no need to compute bias
-               vphi = 0.0d0
-               goto 20
-            else
-               vphi = 0.0d0
-               do aaa = angstart,count-1
-                  iuone = growlist(iw,aaa)
-                  lengthb = bondlen(aaa)
-                  lengthb2 = lengthb * lengthb
-                  phione = phi(aaa)
-                  thetaone = bendang(aaa)
-                  thetatwo = bendang(count)
-                  call coneangle(thetaone,phione,thetatwo,phitwo ,angle)
+                do ib = 1, inben(imolty,iugrow)
+                   iulast = ijben2(imolty,iugrow,ib)
+                   if ( iulast .eq. iufrom ) then
+                      iu2back = ijben3(imolty,iugrow,ib)
+                      if ( iu2back .eq. iuone ) then
+                         type = itben(imolty,iugrow,ib)
+                         ! calculate the bond angle energy
+                         if (L_bend_table) then
+                            lengthb = bondlen(aaa)
+                            lengthb2 = lengthb * lengthb
+                            lengthc2 = lengtha2 + lengthb2 -  2.0d0*lengtha*lengthb*dcos(angle)
+                            lengthc = dsqrt(lengthc2)
+                            vphi = vphi + lininter_bend(lengthc,type)
+                         else
+                            vphi = vphi + brbenk(type) * (angle - brben(type))**2
+                         end if
+                      end if
+                   end if
+                end do
+             end do
 
-                  do ib = 1, inben(imolty,iugrow)
-                     iulast = ijben2(imolty,iugrow,ib)
-                     if ( iulast .eq. iufrom ) then
-                        iu2back = ijben3(imolty,iugrow,ib)
-                        if ( iu2back .eq. iuone ) then
-                           type = itben(imolty,iugrow,ib)
-! calculate the bond angle energy
-                           if (L_bend_table) then
-                              lengthc2 = lengtha2 + lengthb2 -  2.0d0*lengtha*lengthb*dcos(angle)
-                              lengthc = dsqrt(lengthc2)
-                              vphi = vphi + lininter_bend(lengthc,type)
-                           else
-                              vphi = vphi + brbenk(type)  * (angle - brben(type))**2
-                           end if
-                        end if
-                     end if
-                  end do
-               end do
+             my_ang_trial(1) = phitwo
+             my_bfactor(1) = dexp( -beta * vphi )
+             bsum_try = bsum_try + my_bfactor(1)
+          end if
+       end do
+       call mp_sum(bsum_try,1,groupid)
+       call mp_allgather(my_ang_trial,ang_trial,rcounts,displs,groupid)
+       call mp_allgather(my_bfactor,bfactor,rcounts,displs,groupid)
 
-               ang_trial(1) = phitwo
-               bfactor(1) = dexp( -beta * vphi )
-               bsum_try = bsum_try + bfactor(1)
+       if ( lnew ) then
+          ! select a value of phitwo in a biased fashion
+          rbf = random(-1)*bsum_try
+          bs = 0.0d0
+          do ibend = 1,nchben_b
+             bs = bs + bfactor(ibend)
+             if ( rbf .lt. bs ) then
+                phitwo = ang_trial(ibend)
+                vphi = dlog( bfactor(ibend) )/(-beta)
+                exit
+             end if
+          end do
+       else
+          ! select the OLD value of phitwo
+          phitwo = ang_trial(1)
+          vphi = dlog( bfactor(1) )/(-beta)
+       end if
 
-            end if
-! skip first ibend for OLD
-            start = 2
-         else
-! perform all ibend for NEW
-            start = 1
-         end if
+       ! propagate angle weight
+       wei_bend = wei_bend * (bsum_try/dble(nchben_b))
 
-! compute trial energies and weights
-         do ibend = start,nchben_b
-! determine a value of phitwo
-            phitwo = random()*twopi
-            vphi = 0.0d0
-            do aaa = angstart,count-1
-               lengthb = bondlen(aaa)
-               lengthb2 = lengthb*lengthb
-               iuone = growlist(iw,aaa)
-               phione = phi(aaa)
-               thetaone = bendang(aaa)
-               thetatwo = bendang(count)
-               call coneangle(thetaone,phione,thetatwo,phitwo ,angle)
-
-               do ib = 1, inben(imolty,iugrow)
-                  iulast = ijben2(imolty,iugrow,ib)
-                  if ( iulast .eq. iufrom ) then
-                     iu2back = ijben3(imolty,iugrow,ib)
-                     if ( iu2back .eq. iuone ) then
-                        type = itben(imolty,iugrow,ib)
-! calculate the bond angle energy
-                        if (L_bend_table) then
-                           lengthc2 = lengtha2 + lengthb2 -  2.0d0*lengtha*lengthb*dcos(angle)
-                           lengthc = dsqrt(lengthc2)
-                           vphi = vphi + lininter_bend (lengthc,type)
-                        else
-                           vphi = vphi + brbenk(type)  * (angle - brben(type))**2
-                        end if
-                     end if
-                  end if
-               end do
-            end do
-
-! store the boltzmann factors and phi
-            bfactor(ibend) = dexp(-beta*vphi)
-            ang_trial(ibend) = phitwo
-            bsum_try = bsum_try + bfactor(ibend)
-         end do
-
-         if ( lnew ) then
-! select a value of phitwo in a biased fashion
-            rbf = random()*bsum_try
-            bs = 0.0d0
-            do ibend = 1,nchben_b
-               bs = bs + bfactor(ibend)
-               if ( rbf .lt. bs ) then
-                  phitwo = ang_trial(ibend)
-                  vphi = dlog( bfactor(ibend) )/(-beta)
-                  goto 15
-               end if
-            end do
- 15         continue
-         else
-! select the OLD value of phitwo
-            phitwo = ang_trial(1)
-            vphi = dlog( bfactor(1) )/(-beta)
-         end if
-
-! propagate angle weight
-         wei_bend = wei_bend * (bsum_try/dble(nchben_b))
-
- 20      continue
-! store the angle for thetatwo
-         phi(count) = phitwo
-         vbbtr = vbbtr + vphi
-      end do
+       ! store the angle for phitwo
+       phi(count) = phitwo
+       vbbtr = vbbtr + vphi
+    end do
 
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 ! End Bond angle biased selection ---           c
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! write(io_output,*) 'FINISH GEOMETRY'
-
-      return
+#ifdef __DEBUG__
+    write(io_output,*) 'FINISH GEOMETRY in ',myid
+#endif
+    return
   end subroutine geometry
 
-!     *************************************************************
+!**********************************************************
 ! choose a bond angle                                   ***
 ! equil is equilibrium bond angle                       ***
 ! kforce is the force constant                          ***
-! betaT is 1/kT                                          ***
+! betaT is 1/kT                                         ***
 ! angle is the angle returned by this subroutine        ***
 ! vangle is the energy of the angle                     ***
 ! M.G. Martin                                           ***
-!     *************************************************************
-  subroutine bendangle(equil,kforce,betaT,angle,vangle )
-      real::equil, kforce, betaT, angle, vangle, rr, v1, v2
+!**********************************************************
+  subroutine bendangle(equil,kforce,betaT,angle,vangle)
+    real::equil,kforce,betaT,angle,vangle,rr,v1,v2
 
-! write(io_output,*) 'start BENDANGLE'
+#ifdef __DEBUG__
+    write(io_output,*) 'start BENDANGLE in ',myid
+#endif
 
-      if ( kforce .gt. 0.1d0 ) then
-! find a vector inside the unit sphere
- 80      v1 = 2.0d0*random()-1.0d0
-         v2 = 2.0d0*random()-1.0d0
-         rr = v1*v1 + v2*v2
-         if (rr .ge. 1.0d0 ) goto 80
+    if ( kforce .gt. 0.1d0 ) then
+       ! find a vector inside the unit sphere
+80     v1 = 2.0d0*random(-1)-1.0d0
+       v2 = 2.0d0*random(-1)-1.0d0
+       rr = v1*v1 + v2*v2
+       if (rr .ge. 1.0d0 ) goto 80
 
-! select angle from a gaussian distribution
-         angle = equil + v1*dsqrt( (-dlog(rr)) /( kforce*betaT*rr) )
+       ! select angle from a gaussian distribution
+       angle = equil + v1*dsqrt( (-dlog(rr)) /( kforce*betaT*rr) )
 
-         if (angle .le. 0.0d0 .or. angle .ge. 3.1415 ) then
-            write(io_output,*) 'chose angle outside of 0,Pi in bendangle'
-            goto 80
-         end if
+       if (angle .le. 0.0d0 .or. angle .ge. 3.1415 ) then
+          write(io_output,*) 'chose angle outside of 0,Pi in bendangle'
+          goto 80
+       end if
 
-! correct for the phase space of the angle
-         if ( random() .gt. dsin(angle) ) goto 80
-! if (L_bend_table) then
-! call lininter_bend(angle, tabulated_bend, type)
-! type isn't specified in this subroutine, but
-! I don't think its called anywhere anymore
-         vangle = kforce * (angle - equil)**2
-      else
-! fixed bond angle
-         angle = equil
-         vangle = 0.0d0
-      end if
+       ! correct for the phase space of the angle
+       if ( random(-1) .gt. dsin(angle) ) goto 80
+       ! if (L_bend_table) then
+       ! call lininter_bend(angle, tabulated_bend, type)
+       ! type isn't specified in this subroutine, but
+       ! I don't think its called anywhere anymore
+       vangle = kforce * (angle - equil)**2
+    else
+       ! fixed bond angle
+       angle = equil
+       vangle = 0.0d0
+    end if
 
-! write(io_output,*) 'end BENDANGLE'
-
-      return
+#ifdef __DEBUG__
+    write(io_output,*) 'end BENDANGLE in ',myid
+#endif
+    return
   end subroutine bendangle
 
-!     ******************************************************************
+!*****************************************************************
 ! if iinit = 1 then it sets up the rotation matrix for the cone  *
 ! using x,y,z as a unit vector pointing in the +z direction      *
-!     ******************************************************************
+!*****************************************************************
 ! if iinit = 2 then it creates a unit vector that has an angle   *
 ! of alpha from the +z direction (previous vector) and an angle  *
 ! of gamma (0,2Pi) around the cone circle and returns this as    *
-! ux,uy,uz                                                       *
-!     ******************************************************************
+! x,y,z                                                          *
+!*****************************************************************
 ! if iinit = 3 then this computes gamma (0,2Pi) for a unit       *
-! vector ux,uy,uz with angle alpha from the -z direction         *
-!     ******************************************************************
+! vector x,y,z with angle alpha from the -z direction            *
+!*****************************************************************
 ! note that the rotation matrix is saved after each call so it   *
 ! needs to be reset when you wish to use another cone            *
-!     *                                                                *
+!                                                                *
 ! originally written prior to 1995                               *
 ! last modified 02-12-2001 by M.G. Martin                        *
-!     ******************************************************************
-  subroutine cone(iinit,x,y,z,alpha,gamma,ux,uy,uz)
+!*****************************************************************
+  subroutine cone(iinit,x,y,z,alpha,gamma)
+    ! variables passed to/from the subroutine
+    integer,intent(in)::iinit
+    real,intent(in)::alpha
+    real::x,y,z,gamma
 
-! variables passed to/from the subroutine
-      integer::iinit
-      real::x,y,z,alpha,gamma,ux,uy,uz
+    ! local variables
+    real,save::a11,a12,a13,a21,a22,a31,a32,a33,cosalph,sinalph
+    real::determ,sinthe,costhe,sinpsi,cospsi,singamma,cosgamma,uxtemp,uytemp,uztemp
 
-! local variables
-      real::a11,a12,a13,a21,a22,a31,a32,a33 ,sinthe,costhe,sinpsi,cospsi,singamma,cosgamma ,uxtemp,uytemp,uztemp,sinalph,cosalph
-      real::determ
-      save a11,a12,a13,a21,a22,a31,a32,a33,cosalph,sinalph
+#ifdef __DEBUG__
+    write(io_output,*) 'start CONE in ',myid
+#endif
 
-! write(io_output,*) 'start CONE'
+    if ( iinit .eq. 1 ) then
+       ! setup the unit cone
+       ! assume x,y,z is a rotation of vector (0,0,1)
+       ! conversions from xyz to theta,psi
+       ! x = -dsin(theta)*dcos(psi)
+       ! y = dsin(theta)*dsin(psi)
+       ! z = dcos(theta)
+       ! rotation matrix (note that sin(phi) = 0, cos(phi) = 1)
+       ! a11 = cos(psi) cos(theta) cos(phi) - sin(psi) sin(phi)
+       ! cos(psi) cos(theta)
+       ! a12 = -sin(psi) cos(theta) cos(phi) - cos(psi) sin(phi)
+       ! sin(psi) cos(theta)
+       ! a13 = sin(theta) cos(phi)
+       ! sin(theta)
+       ! a21 = cos(psi) cos(theta) sin(phi) + sin (psi) cos(phi)
+       ! sin(psi)
+       ! a22 = -sin(psi) cos(theta) sin(phi) + cos (psi) cos(phi)
+       ! cos(psi)
+       ! a23 = sin(theta) sin(phi)
+       ! 0.0
+       ! a31 = -cos(psi) sin(theta)
+       ! x
+       ! a32 = sin(psi)  sin (theta)
+       ! y
+       ! a33 = cos(theta)
+       ! z
 
-      if ( iinit .eq. 1 ) then
-! setup the unit cone
-! assume x,y,z is a rotation of vector (0,0,1)
-! conversions from xyz to theta,psi
-! x = -dsin(theta)*dcos(psi)
-! y = dsin(theta)*dsin(psi)
-! z = dcos(theta)
-! rotation matrix (note that sin(phi) = 0, cos(phi) = 1)
-! a11 = cos(psi) cos(theta) cos(phi) - sin(psi) sin(phi)
-! cos(psi) cos(theta)
-! a12 = -sin(psi) cos(theta) cos(phi) - cos(psi) sin(phi)
-! sin(psi) cos(theta)
-! a13 = sin(theta) cos(phi)
-! sin(theta)
-! a21 = cos(psi) cos(theta) sin(phi) + sin (psi) cos(phi)
-! sin(psi)
-! a22 = -sin(psi) cos(theta) sin(phi) + cos (psi) cos(phi)
-! cos(psi)
-! a23 = sin(theta) sin(phi)
-! 0.0
-! a31 = -cos(psi) sin(theta)
-! x
-! a32 = sin(psi)  sin (theta)
-! y
-! a33 = cos(theta)
-! z
+       costhe = z
+       sinthe = dsqrt(1.0d0 - costhe*costhe)
+       if (sinthe .ne. 0.0d0) then
+          sinpsi=(y)/sinthe
+          cospsi=(-x)/sinthe
+       else
+          sinpsi = 0.0d0
+          cospsi = 1.0d0
+       end if
 
-        costhe = z
-        sinthe = dsqrt(1.0d0 - costhe*costhe)
-        if (sinthe .ne. 0.0d0) then
-           sinpsi=(y)/sinthe
-           cospsi=(-x)/sinthe
-        else
-           sinpsi = 0.0d0
-           cospsi = 1.0d0
-        end if
+       ! rotation matrix
+       a11 = cospsi*costhe
+       a12 = -(sinpsi*costhe)
+       a13 = sinthe
+       a21 = sinpsi
+       a22 = cospsi
+       a31 = x
+       a32 = y
+       a33 = z
+    else if ( iinit .eq. 2 ) then
+       ! find the vector on a cone:
+       ! alpha is the angle with the cone axis (theta)
+       sinalph = dsin(alpha)
+       cosalph = dcos(alpha)
+       ! gamma is now passed to cone - (phi)
+       uztemp = -cosalph
+       uytemp = sinalph*dcos(gamma)
+       uxtemp = sinalph*dsin(gamma)
+       x = a11*uxtemp + a21*uytemp + a31*uztemp
+       y = a12*uxtemp + a22*uytemp + a32*uztemp
+       z = a13*uxtemp +              a33*uztemp
+    else if ( iinit .eq. 3 ) then
+       ! find gamma for a given unit vector on the cone
+       ! use cramer's rule where a23 has already been replaced with 0
+       ! we don't need the uztemp so it is not computed
+       determ =  ( a11*a22*a33 + a21*(a32*a13 - a12*a33) - a31*a22*a13 )
+       uxtemp =   ( x*a22*a33 + a21*(a32*z - y*a33) - a31*a22*z ) / determ
+       uytemp =  ( a11*(y*a33 - a32*z) + x*(a32*a13 - a12*a33) + a31*(a12*z - y*a13) ) / determ
 
-! rotation matrix
-        a11 = cospsi*costhe
-        a12 = -(sinpsi*costhe)
-        a13 = sinthe
-        a21 = sinpsi
-        a22 = cospsi
-        a31 = x
-        a32 = y
-        a33 = z
+       sinalph = dsin(alpha)
+       singamma = uxtemp/sinalph
+       cosgamma = uytemp/sinalph
 
-      else if ( iinit .eq. 2 ) then
-! find the vector on a cone:
-! alpha is the angle with the cone axis (theta)
-         sinalph = dsin(alpha)
-         cosalph = dcos(alpha)
-! gamma is now passed to cone - (phi)
-         uztemp = -cosalph
-         uytemp = sinalph*dcos(gamma)
-         uxtemp = sinalph*dsin(gamma)
-         ux = a11*uxtemp + a21*uytemp + a31*uztemp
-         uy = a12*uxtemp + a22*uytemp + a32*uztemp
-         uz = a13*uxtemp +              a33*uztemp
+       ! now need to find the gamma on [-Pi,Pi] that satisfies cos and sin
+       if ( cosgamma .gt. 1.0d0 ) then
+          gamma = 0.0d0
+       else if ( cosgamma .lt. -1.0d0 ) then
+          gamma = onepi
+       else
+          gamma = dacos(cosgamma)
+       end if
+       if ( singamma .lt. 0.0d0 ) gamma = -gamma
+    else
+       write(io_output,*) 'iinit ',iinit
+       call err_exit(__FILE__,__LINE__,'non valid iinit in cone.f',myid+1)
+    end if
 
-      else if ( iinit .eq. 3 ) then
-! find gamma for a given unit vector on the cone
-! use cramer's rule where a23 has already been replaced with 0
-! we don't need the uztemp so it is not computed
+#ifdef __DEBUG__
+    write(io_output,*) 'finish CONE in ',myid
+#endif
 
-         determ =  ( a11*a22*a33 + a21*(a32*a13 - a12*a33) - a31*a22*a13 )
-
-         uxtemp =   ( ux*a22*a33 + a21*(a32*uz - uy*a33) - a31*a22*uz ) / determ
-
-         uytemp =  ( a11*(uy*a33 - a32*uz) + ux*(a32*a13 - a12*a33) + a31*(a12*uz - uy*a13) ) / determ
-
-         sinalph = dsin(alpha)
-         singamma = uxtemp/sinalph
-         cosgamma = uytemp/sinalph
-
-! now need to find the gamma on [-Pi,Pi] that satisfies cos and sin
-         gamma = arccos(cosgamma)
-         if ( singamma .lt. 0.0d0 ) gamma = -gamma
-
-      else
-         write(io_output,*) 'iinit ',iinit
-         call err_exit(__FILE__,__LINE__,'non valid iinit in cone.f',myid+1)
-      end if
-
-! write(io_output,*) 'finish CONE'
-
-      return
+    return
   end subroutine cone
 
-!     ******************************************************************
-! computes the arc cosine of a value, with safety checks to make *
-! sure that value is between -1.0 and 1.0.  If value is outside  *
-! of that range, it is set to the nearest extreme of the range   *
-!     *                                                                *
-! originally written 02-12-2001 by M.G. Martin                   *
-! last modified 02-12-2001 by M.G. Martin                        *
-!     ******************************************************************
-  function arccos( value )
-
-      real::arccos,value
-
-      if ( value .gt. 1.0d0 ) then
-         arccos = 0.0d0
-      else if ( value .lt. -1.0d0 ) then
-         arccos = onepi
-      else
-         arccos = dacos(value)
-      end if
-
-      return
-  end function arccos
-
-!     ******************************************************************
-! takes two unit vectors in spherical coordinates and computes **
-! the angle between them.                                      **
-! thetaone is the angle between vector one and the z-axis      **
-! phione is the angle between vector one and the x-axis        **
-! thetatwo is the angle between vector two and the z-axis      **
-! phitwo is the angle between vector two and the x-axis        **
-! angle is the angle between the two vectors                   **
-! x = r sin (theta) cos (phi)                                  **
-! y = r sin (theta) sin (phi)                                  **
-! z = r cos (theta)                                            **
-! M.G. Martin 2-4-98                                           **
-!     ******************************************************************
-  subroutine coneangle( thetaone, phione, thetatwo, phitwo, angle )
-      real::thetaone, thetatwo, phione, phitwo, angle,sintheone,costheone,sinthetwo,costhetwo,sinphione,cosphione ,sinphitwo,cosphitwo,cosangle
-
-      sintheone = dsin(thetaone)
-      costheone = dcos(thetaone)
-      sinthetwo = dsin(thetatwo)
-      costhetwo = dcos(thetatwo)
-      sinphione = dsin(phione)
-      cosphione = dcos(phione)
-      sinphitwo = dsin(phitwo)
-      cosphitwo = dcos(phitwo)
-
-      cosangle = sintheone*cosphione*sinthetwo*cosphitwo + sintheone*sinphione*sinthetwo*sinphitwo + costheone*costhetwo
-
-      angle = dacos(cosangle)
-
-      return
-  end subroutine coneangle
-
-!     **************************************************************
+!***********************************************************
 ! computes the bond length for a given vibration type    ***
 ! vibtype is the vibration type                          ***
 ! requil is the equilibrium bond length                  ***
 ! kvib is the force constant for the bond length         ***
 ! length is the bond length returned by this subroutine  ***
-! betaT is 1/kT                                           ***
+! betaT is 1/kT                                          ***
 ! vvib is the vibration energy for this bond             ***
 ! M.G. Martin  2-4-98                                    ***
-!     **************************************************************
+!***********************************************************
   subroutine bondlength(vibtype,requil,kvib,betaT,length,vvib)
+    integer::vibtype
+    real::length,bond,bf,vvib,betaT,kvib,requil
 
-      integer::vibtype
-      real::length,bond,bf,vvib,betaT,kvib,requil
+    vvib = 0.0d0
 
-      vvib = 0.0d0
+    if ( kvib .gt. 0.1d0 ) then
+       ! random bond length from Boltzmann distribution ---
+107    bond = (0.2d0*random(-1)+0.9d0)
 
-      if ( kvib .gt. 0.1d0 ) then
-! random bond length from Boltzmann distribution ---
- 107     bond = (0.2d0*random()+0.9d0)
+       ! correct for jacobian by dividing by the max^2
+       ! 1.21  = (1.1)^2, the equilibrium bond length cancels out
+       bf = bond*bond*bond/(1.21d0)
+       if ( random(-1) .ge. bf ) goto 107
+       bond = bond * requil
 
-! correct for jacobian by dividing by the max^2
-! 1.21  = (1.1)^2, the equilibrium bond length cancels out
-         bf = bond*bond*bond/(1.21d0)
-         if ( random() .ge. bf ) goto 107
-         bond = bond * requil
+       ! correct for the bond energy
+       vvib = kvib * (bond-requil )**2
+       bf = dexp ( -(vvib * betaT) )
+       if ( random(-1) .ge. bf ) goto 107
+       length = bond
 
-! correct for the bond energy
-         vvib = kvib * (bond-requil )**2
-         bf = dexp ( -(vvib * betaT) )
-         if ( random() .ge. bf ) goto 107
-         length = bond
+       ! tabulated bond stretching potential
+       ! added 12/02/08 by KM
+    else if (L_vib_table) then
+       ! random bond length from Boltzmann distribution ---
+       !     ---  +/- 25% of equilibrium bond length
+108    bond = (0.5d0*random(-1)+0.75d0)
 
-! tabulated bond stretching potential
-! added 12/02/08 by KM
-      else if (L_vib_table) then
-! random bond length from Boltzmann distribution ---
-!     ---  +/- 25% of equilibrium bond length
- 108     bond = (0.5d0*random()+0.75d0)
+    ! correct for jacobian by dividing by the max^2
+    ! 1.5625  = (1.25)^2, the equilibrium bond length cancels out
+       bf = bond*bond*bond/(1.5625d0)
+       if ( random(-1) .ge. bf ) goto 108
 
-! correct for jacobian by dividing by the max^2
-! 1.5625  = (1.25)^2, the equilibrium bond length cancels out
-         bf = bond*bond*bond/(1.5625d0)
-         if ( random() .ge. bf ) goto 108
+       bond = bond * requil
+       vvib=lininter_vib(bond,vibtype)
 
-         bond = bond * requil
-         vvib=lininter_vib(bond,vibtype)
+       bf = dexp ( -(vvib * betaT) )
 
-         bf = dexp ( -(vvib * betaT) )
+       if ( random(-1) .ge. bf ) goto 108
+       length = bond
 
-         if ( random() .ge. bf ) goto 108
-         length = bond
+    else
+       ! fixed bond length
+       length = requil
+    end if
 
-      else
-! fixed bond length
-         length = requil
-      end if
-
-      return
-
+    return
   end subroutine bondlength
 
-!     *******************************************************************
-! performs a rotational configurational bias move          **
-!     *******************************************************************
-!     &*&*&*&*&*&*&*&*&*&*&*&* IMPORTANT *&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&
-! All Rigid Molecules Should Come After Riutry
-!     &*&*&*&*&*&*&*&*&*&*&*&* IMPORTANT *&*&*&*&*&*&*&*&*&*&*&*&*&*&*&*&
-  subroutine rigrot(lnew,lterm,iskip,imol,imolty,ibox,wadd )
+!************************************************************
+!> \brief Performs a rotational configurational bias move
+!>
+!> IMPORTANT: all rigid beads should come after riutry
+!************************************************************
+  subroutine rigrot(lnew,lterm,iskip,imol,imolty,ibox,wadd)
+    logical::lnew,ovrlap,lterm,ltors
 
-      logical::lnew,ovrlap,lterm,ltors
+    integer::ibox,igrow,j,ip,iwalk,iunit,imolty,iu,iskip
+    integer::ichoi,imol,glist(numax),ntogrow,count
 
-      integer::ibox,igrow,j,ip,iwalk,iunit,imolty ,iu,iskip
-      integer::ichoi,imol,istt,iuend,glist(numax) ,ntogrow,count
-
-      real::rx,ry,rz,rxorig,ryorig,rzorig,rxnw ,rynw,rznw
-      real::xdgamma,ydgamma,zdgamma,xcosdg,xsindg ,ycosdg,ysindg,zcosdg,zsindg,rbf,rxur(numax),ryur(numax) ,rzur(numax),length
-      real::w,bsum,wadd,maxlen,bs
-
+    real::rx,ry,rz,rxorig,ryorig,rzorig,rxnw,rynw,rznw
+    real::xdgamma,ydgamma,zdgamma,xcosdg,xsindg,ycosdg,ysindg,zcosdg,zsindg,rbf,rxur(numax),ryur(numax),rzur(numax),length
+    real::w,bsum,wadd,maxlen,bs
 ! ----------------------------------------------------------------------
-
-! write(io_output,*) 'start RIGROT'
+#ifdef __DEBUG__
+    write(io_output,*) 'start RIGROT in ',myid
+#endif
 
 ! initialize conformation energies and weight
+    wadd = 1.0d0
+    w = 0.0d0
+    ichoi = nchoir(imolty)
+    ltors = .false.
+    iunit = nunit(imolty)
+    igrow = riutry(imolty,1)
 
-      wadd = 1.0d0
-      w = 0.0d0
-      ichoi = nchoir(imolty)
-      ltors = .false.
-      iunit = nunit(imolty)
-      igrow = riutry(imolty,1)
-      istt = igrow + 1
-      iuend = iunit
+    if (lnew) then
+       rxorig = rxnew(igrow)
+       ryorig = rynew(igrow)
+       rzorig = rznew(igrow)
+       do j = igrow+1, iunit
+          rxur(j) = rxnew(j)
+          ryur(j) = rynew(j)
+          rzur(j) = rznew(j)
+       end do
+    else
+       rxorig = rxu(imol,igrow)
+       ryorig = ryu(imol,igrow)
+       rzorig = rzu(imol,igrow)
+       do j = igrow+1, iunit
+          rxur(j) = rxu(imol,j)
+          ryur(j) = ryu(imol,j)
+          rzur(j) = rzu(imol,j)
+       end do
+    end if
 
-      if (lnew) then
-         rxorig = rxnew(igrow)
-         ryorig = rynew(igrow)
-         rzorig = rznew(igrow)
+    ! find maxlen
+    maxlen = 0.0d0
+    do j = igrow+1, iunit
+       length = (rxur(j)-rxorig)**2+(ryur(j)-ryorig)**2 +(rzur(j)-rzorig)**2
+       if (length.gt.maxlen) maxlen = length
+    end do
+    maxlen = dsqrt(maxlen)
 
-         do j = igrow+1, iunit
-            rxur(j) = rxnew(j)
-            ryur(j) = rynew(j)
-            rzur(j) = rznew(j)
+    do ip = 1, ichoi
+       if (lnew.or.ip.ne.1) then
+          xdgamma = twopi*random(-1)
+          ydgamma = twopi*random(-1)
+          zdgamma = twopi*random(-1)
+          ! set up rotation matrix
+          xcosdg = dcos(xdgamma)
+          xsindg = dsin(xdgamma)
+          ycosdg = dcos(ydgamma)
+          ysindg = dsin(ydgamma)
+          zcosdg = dcos(zdgamma)
+          zsindg = dsin(zdgamma)
 
-         end do
-      else
-         rxorig = rxu(imol,igrow)
-         ryorig = ryu(imol,igrow)
-         rzorig = rzu(imol,igrow)
+          ! set molecule to rotate around
+          ! rotate around all axis
+          count = 0
+          do j = igrow+1, iunit
+             count = count + 1
+             ry = ryur(j) - ryorig
+             rz = rzur(j) - rzorig
+             rynw = xcosdg * ry + xsindg * rz
+             rznw = xcosdg * rz - xsindg * ry
+             ryp(count,ip) = ryorig + rynw
+             rzp(count,ip) = rzorig + rznw
 
-         do j = igrow+1, iunit
-            rxur(j) = rxu(imol,j)
-            ryur(j) = ryu(imol,j)
-            rzur(j) = rzu(imol,j)
-         end do
-      end if
+             rx = rxur(j) - rxorig
+             rz = rzp(count,ip) - rzorig
+             rxnw = ycosdg * rx - ysindg * rz
+             rznw = ycosdg * rz + ysindg * rx
+             rxp(count,ip) = rxorig + rxnw
+             rzp(count,ip) = rzorig + rznw
 
-! find maxlen
-      maxlen = 0.0d0
+             rx = rxp(count,ip) - rxorig
+             ry = ryp(count,ip) - ryorig
+             rxnw = zcosdg * rx + zsindg * ry
+             rynw = zcosdg * ry - zsindg * rx
+             rxp(count,ip) = rxorig + rxnw
+             ryp(count,ip) = ryorig + rynw
+          end do
 
-      do j = igrow+1, iunit
-         length = (rxur(j)-rxorig)**2+(ryur(j)-ryorig)**2 +(rzur(j)-rzorig)**2
+       else
+          count = 0
+          do j = igrow+1, iunit
+             count = count + 1
+             rxp(count,ip) = rxu(imol,j)
+             ryp(count,ip) = ryu(imol,j)
+             rzp(count,ip) = rzu(imol,j)
+          end do
+       end if
+    end do
 
-         if (length.gt.maxlen) maxlen = length
-      end do
+    ntogrow = iunit-igrow
 
-      maxlen = dsqrt(maxlen)
+    do j=1,igrow-1
+       lexist(j) = .false.
+    end do
 
-      do ip = 1, ichoi
+    lexist(igrow) = .true.
+    count = 0
+    do j = igrow+1, iunit
+       count = count + 1
+       glist(count) = j
+       lexist(j) = .false.
+    end do
 
-         if (lnew.or.ip.ne.1) then
+    call boltz( lnew,.false.,ovrlap,iskip,imol,imolty,ibox ,ichoi,igrow,ntogrow,glist,maxlen )
 
-! xdgamma = 8.0d0*atan(1.0d0)*random()
-! ydgamma = 8.0d0*atan(1.0d0)*random()
-! zdgamma = 8.0d0*atan(1.0d0)*random()
-            xdgamma = twopi*random()
-            ydgamma = twopi*random()
-            zdgamma = twopi*random()
-! set up rotation matrix
-            xcosdg = dcos(xdgamma)
-            xsindg = dsin(xdgamma)
-            ycosdg = dcos(ydgamma)
-            ysindg = dsin(ydgamma)
-            zcosdg = dcos(zdgamma)
-            zsindg = dsin(zdgamma)
-! set molecule to rotate around
+    if (ovrlap) then
+       lterm = .true.
+       return
+    end if
 
-! rotate around all axis
-            count = 0
-            do j = igrow+1, iunit
-               count = count + 1
-               ry = ryur(j) - ryorig
-               rz = rzur(j) - rzorig
-               rynw = xcosdg * ry + xsindg * rz
-               rznw = xcosdg * rz - xsindg * ry
-               ryp(count,ip) = ryorig + rynw
-               rzp(count,ip) = rzorig + rznw
+    bsum = 0.0d0
+    do ip = 1, ichoi
+       bsum = bsum + bfac(ip)
+    end do
 
-               rx = rxur(j) - rxorig
-               rz = rzp(count,ip) - rzorig
-               rxnw = ycosdg * rx - ysindg * rz
-               rznw = ycosdg * rz + ysindg * rx
-               rxp(count,ip) = rxorig + rxnw
-               rzp(count,ip) = rzorig + rznw
+    wadd = wadd * bsum
 
-               rx = rxp(count,ip) - rxorig
-               ry = ryp(count,ip) - ryorig
-               rxnw = zcosdg * rx + zsindg * ry
-               rynw = zcosdg * ry - zsindg * rx
-               rxp(count,ip) = rxorig + rxnw
-               ryp(count,ip) = ryorig + rynw
-            end do
+    if (lnew) then
+       if ( wadd .lt. softlog ) then
+          lterm = .true.
+          return
+       end if
 
-         else
-            count = 0
-            do j = igrow+1, iunit
-               count = count + 1
-               rxp(count,ip) = rxu(imol,j)
-               ryp(count,ip) = ryu(imol,j)
-               rzp(count,ip) = rzu(imol,j)
-            end do
-         end if
-      end do
+       ! select one position at random ---
+       rbf = bsum * random(-1)
+       bs = 0.0d0
+       do ip = 1, ichoi
+          if (.not. lovr(ip) ) then
+             bs = bs + bfac(ip)
+             if ( rbf .lt. bs ) then
+                ! select ip position
+                iwalk = ip
+                goto 15
+             end if
+          end if
+       end do
+       write(io_output,*) 'screwup in rigrot'
+       call err_exit(__FILE__,__LINE__,'screwup in rigrot',myid+1)
+15     continue
+    else
+       iwalk = 1
+       if ( wadd .lt. softlog ) then
+          write(io_output,*) '###old rigrot weight too low'
+       end if
+    end if
 
-      ntogrow = iunit-igrow
+    if ( lnew ) then
+       vnewt = vnewt + vtry(iwalk)
+       vnewext = vnewext + vtrext(iwalk)
+       vnewinter = vnewinter + vtrinter(iwalk)
+       ! vnewintra = vnewintra + vtrintra(iwalk)
+       vnewelect = vnewelect + vtrelect(iwalk)
+       vnewewald = vnewewald + vtrewald(iwalk)
+       vipswn = vipswn+vipswnt(iwalk)
+       vwellipswn = vwellipswn+vwellipswnt(iwalk)
+    else
+       voldt = voldt + vtry(iwalk)
+       voldext = voldext + vtrext(iwalk)
+       voldinter = voldinter + vtrinter(iwalk)
+       ! voldintra = voldintra + vtrintra(iwalk)
+       voldelect = voldelect + vtrelect(iwalk)
+       voldewald = voldewald + vtrewald(iwalk)
+       vipswo = vipswo+vipswot(iwalk)
+       vwellipswo = vwellipswo+vwellipswot(iwalk)
+    end if
 
-      count = 0
-      do j=1,igrow-1
-          lexist(j) = .false.
-      end do
+    !	write(io_output,*) 'vtry', vtry(iwalk),iwalk
 
-! write(io_output,*) 'igrow',igrow
+    do j = 1, ntogrow
+       iu = glist(j)
+       if (lnew) then
+          rxnew(iu) = rxp(j,iwalk)
+          rynew(iu) = ryp(j,iwalk)
+          rznew(iu) = rzp(j,iwalk)
+       end if
+    end do
 
-      lexist(igrow) = .true.
+#ifdef __DEBUG__
+    write(io_output,*) 'end RIGROT in ',myid
+#endif
 
-      do j = igrow+1, iunit
-         count = count + 1
-         glist(count) = j
-         lexist(j) = .false.
-      end do
-
-      call boltz( lnew,.false.,ovrlap,iskip,imol,imolty,ibox ,ichoi,igrow,ntogrow,glist,maxlen )
-
-      if (ovrlap) then
-         lterm = .true.
-         return
-      end if
-
-      bsum = 0.0d0
-      do ip = 1, ichoi
-         bsum = bsum + bfac(ip)
-      end do
-
-      wadd = wadd * bsum
-
-      if (lnew) then
-         if ( wadd .lt. softlog ) then
-            lterm = .true.
-            return
-         end if
-
-! select one position at random ---
-         rbf = bsum * random()
-         bs = 0.0d0
-         do ip = 1, ichoi
-            if (.not. lovr(ip) ) then
-               bs = bs + bfac(ip)
-               if ( rbf .lt. bs ) then
-! select ip position
-                  iwalk = ip
-                  goto 15
-               end if
-            end if
-         end do
-         write(io_output,*) 'screwup in rigrot'
-         call err_exit(__FILE__,__LINE__,'screwup in rigrot',myid+1)
- 15      continue
-
-      else
-         iwalk = 1
-         if ( wadd .lt. softlog ) then
-            write(io_output,*) '###old rigrot weight too low'
-         end if
-      end if
-
-      if ( lnew ) then
-         vnewt = vnewt + vtry(iwalk)
-         vnewext = vnewext + vtrext(iwalk)
-         vnewinter = vnewinter + vtrinter(iwalk)
-! vnewintra = vnewintra + vtrintra(iwalk)
-         vnewelect = vnewelect + vtrelect(iwalk)
-         vnewewald = vnewewald + vtrewald(iwalk)
-         vipswn = vipswn+vipswnt(iwalk)
-         vwellipswn = vwellipswn+vwellipswnt(iwalk)
-      else
-         voldt = voldt + vtry(iwalk)
-         voldext = voldext + vtrext(iwalk)
-         voldinter = voldinter + vtrinter(iwalk)
-! voldintra = voldintra + vtrintra(iwalk)
-         voldelect = voldelect + vtrelect(iwalk)
-         voldewald = voldewald + vtrewald(iwalk)
-         vipswo = vipswo+vipswot(iwalk)
-         vwellipswo = vwellipswo+vwellipswot(iwalk)
-      end if
-
-!	write(io_output,*) 'vtry', vtry(iwalk),iwalk
-
-      do j = 1, ntogrow
-         iu = glist(j)
-         if (lnew) then
-            rxnew(iu) = rxp(j,iwalk)
-            rynew(iu) = ryp(j,iwalk)
-            rznew(iu) = rzp(j,iwalk)
-         end if
-      end do
-
-! write(io_output,*) 'end RIGROT'
-
-      return
+    return
   end subroutine rigrot
 
 ! adds H-atoms to a linear carbon chain
 ! Potential for methyl-group rotation
 ! is: V = 0.5*E0*(1-cos(3*alpha)), where
 ! alpha is Ryckaert torsion angle!
-!     ------
   subroutine explct(ichain,vmethyl,lcrysl,lswitch)
 
 ! arguments
@@ -2867,8 +2799,8 @@ contains
                   oa = oh*dcos(onepi-hoh)
                   ah = oh*dsin(onepi-hoh)
 ! generate a random vector on a sphere for the first H ---
- 111              rx = 2.0d0*random() - 1.0d0
-                  ry = 2.0d0*random() - 1.0d0
+ 111              rx = 2.0d0*random(-1) - 1.0d0
+                  ry = 2.0d0*random(-1) - 1.0d0
                   dr = rx*rx + ry*ry
                   if ( dr .gt. 1.0d0 ) goto 111
                   rz = 2.0d0*dsqrt(1-dr)
@@ -2880,8 +2812,8 @@ contains
                   ryu(ichain,2) = ryu(ichain,1) - oh*b2
                   rzu(ichain,2) = rzu(ichain,1) - oh*c2
 ! generate another random vector on a sphere for the second H ---
- 222              rx = 2.0d0*random() - 1.0d0
-                  ry = 2.0d0*random() - 1.0d0
+ 222              rx = 2.0d0*random(-1) - 1.0d0
+                  ry = 2.0d0*random(-1) - 1.0d0
                   dr = rx*rx + ry*ry
                   if ( dr .gt. 1.0d0 ) goto 222
                   rz = 2.0d0*dsqrt(1-dr)
@@ -2921,8 +2853,8 @@ contains
             else
 ! HF model
 ! generate a random vector on a sphere for the H and M sites ---
- 333           rx = 2.0d0*random() - 1.0d0
-               ry = 2.0d0*random() - 1.0d0
+ 333           rx = 2.0d0*random(-1) - 1.0d0
+               ry = 2.0d0*random(-1) - 1.0d0
                dr = rx*rx + ry*ry
                if ( dr .gt. 1.0d0 ) goto 333
                rz = 2.0d0*dsqrt(1-dr)
@@ -3023,8 +2955,8 @@ contains
             y12 = ryu(ichain,2)-ryu(ichain,1)
             z12 = rzu(ichain,2)-rzu(ichain,1)
 ! generate a random vector ------
- 444        rx = 2.0d0*random() - 1.0d0
-            ry = 2.0d0*random() - 1.0d0
+ 444        rx = 2.0d0*random(-1) - 1.0d0
+            ry = 2.0d0*random(-1) - 1.0d0
             dr = rx*rx + ry*ry
             if ( dr .gt. 1.0d0 ) goto 444
             rz = 2.0d0*dsqrt(1-dr)
@@ -3119,8 +3051,8 @@ contains
                ca = ch*dcos(hch2)
                ah = ch*dsin(hch2)
 ! generate a random vector for the first H ------
- 555           rx = 2.0d0*random() - 1.0d0
-               ry = 2.0d0*random() - 1.0d0
+ 555           rx = 2.0d0*random(-1) - 1.0d0
+               ry = 2.0d0*random(-1) - 1.0d0
                dr = rx*rx + ry*ry
                if ( dr .gt. 1.0d0 ) goto 555
                rz = 2.0d0*dsqrt(1-dr)
@@ -3128,8 +3060,8 @@ contains
                b2 = ry*rz
                c2 = 1 - 2.0d0*dr
 ! generate another random vector for the rotation ------
- 666           rx = 2.0d0*random() - 1.0d0
-               ry = 2.0d0*random() - 1.0d0
+ 666           rx = 2.0d0*random(-1) - 1.0d0
+               ry = 2.0d0*random(-1) - 1.0d0
                dr = rx*rx + ry*ry
                if ( dr .gt. 1.0d0 ) goto 666
                rz = 2.0d0*dsqrt(1-dr)
@@ -3281,10 +3213,10 @@ contains
                r=0.0d0
                ven = 0.0d0
             else
- 101           r = 2.0d0*onepi*random()
+ 101           r = 2.0d0*onepi*random(-1)
                ven = en0*(1.0d0-dcos(3.0d0*r))
                prob = dexp(-beta*ven)
-               rn = random()
+               rn = random(-1)
                if (rn.gt.prob) goto 101
             end if
 ! rgr = r*180.0d0/onepi
@@ -3337,10 +3269,10 @@ contains
                r = 0.0d0
                ven = 0.0d0
             else
- 200           r = 2.0d0*onepi*random()
+ 200           r = 2.0d0*onepi*random(-1)
                ven = en0*(1.0d0-dcos(3.0d0*r))
                prob = dexp(-beta*ven)
-               rn = random()
+               rn = random(-1)
                if (rn.gt.prob) goto 200
             end if
             vmethyl = vmethyl + ven
@@ -3366,8 +3298,8 @@ contains
             y12 = ryu(ichain,1)-ryu(ichain,2)
             z12 = rzu(ichain,1)-rzu(ichain,2)
 ! generate a random vector ------
- 777        rx = 2.0d0*random() - 1.0d0
-            ry = 2.0d0*random() - 1.0d0
+ 777        rx = 2.0d0*random(-1) - 1.0d0
+            ry = 2.0d0*random(-1) - 1.0d0
             dr = rx*rx + ry*ry
             if ( dr .gt. 1.0d0 ) goto 777
             rz = 2.0d0*dsqrt(1-dr)
@@ -3415,10 +3347,10 @@ contains
                r=0.0d0
                ven = 0.0d0
             else
- 100           r = 2.0d0*onepi*random()
+ 100           r = 2.0d0*onepi*random(-1)
                ven = en0*(1.0d0-dcos(3.0d0*r))
                prob = dexp(-beta*ven)
-               rn = random()
+               rn = random(-1)
                if (rn.gt.prob) goto 100
             end if
 ! rgr = r*180.0d0/onepi
@@ -3440,22 +3372,25 @@ contains
       return
   end subroutine explct
 
-!     ***********************************************************
+!********************************************************
 ! Places hydrogens after the growth of the backbone of **
 ! a molecule for linear, branched or cylic molecules.  **
-! Uses CDCBMC to grow them --              **
-!     ***********************************************************
+! Uses CDCBMC to grow them                             **
+!********************************************************
   subroutine place(lnew,lterm,i,imolty,ibox,index,wplace)
+    use util_math,only:cone_angle
     ! integer,parameter::max=numax
     logical::lnew,lterm,ovrlap
 
     integer::i,j,imolty,count,counta,iu,ju,ku,jtvib ,start,iv,index,ivib,nchvib,ibend,ib,type,ip,ichoi,niplace,iw,iufrom,it,jut2,jut3,jut4,ibox,glist,iwalk,iuprev,list,nchben_a,nchben_b,iu2back
 
-    real::wplace,equil,kforce,bsum_try,mincb ,delcb,ux,uy,uz,r,vvib,bfactor,third,length,bs,rbf,vvibtr ,wei_vib,bendang,vangle,vbbtr,angle,vphi,phione,thetac,rx,ry,rz ,rsint,dist,wei_bend,ang_trial,vdha,vbend,vtorsion ,bsum,alpha,gamma,dum,phi,thetaone,thetatwo,phitwo
+    real::wplace,equil,kforce,bsum_try,mincb ,delcb,ux,uy,uz,r,vvib,bfactor,third,length,bs,rbf,vvibtr ,wei_vib,bendang,vangle,vbbtr,angle,vphi,thetac,rx,ry,rz ,rsint,dist,wei_bend,ang_trial,vdha,vbend,vtorsion ,bsum,alpha,gamma,dum,phi,thetatwo,phitwo
 
     dimension r(nchbn_max),bfactor(nchbn_max),bendang(numax,numax),ang_trial(nchbn_max),dist(numax),niplace(numax),vbend(nchmax),vtorsion(nchmax),phi(numax),list(numax),glist(numax)
 
-! write(io_output,*) 'START PLACE'
+#ifdef __DEBUG__
+    write(io_output,*) 'START PLACE in ',myid
+#endif
 
       nchvib = nchbna(imolty)
       nchben_a = nchvib
@@ -3528,7 +3463,7 @@ contains
                end if
 
                do ivib = start, nchvib
-                  r(ivib) = (mincb + random()*delcb)**third
+                  r(ivib) = (mincb + random(-1)*delcb)**third
                   if (L_vib_table) then
                      vvib = lininter_vib(r(ivib),jtvib)
                   else
@@ -3542,7 +3477,7 @@ contains
 
                if (lnew) then
 ! select one of the trial sites via bias
-                  rbf = random()*bsum_try
+                  rbf = random(-1)*bsum_try
                   bs = 0.0d0
                   do ivib = 1, nchvib
                      bs = bs + bfactor(ivib)
@@ -3592,7 +3527,7 @@ contains
          ry = yvec(iuprev,iufrom) / dist(2)
          rz = zvec(iuprev,iufrom) / dist(2)
 
-         call cone(1,rx,ry,rz,dum,dum,dum,dum,dum)
+         call cone(1,rx,ry,rz,dum,dum)
 
 ! now that we set up cone, we must determine other beads grown
 ! from iufrom
@@ -3622,7 +3557,7 @@ contains
 
             alpha = bendang(ku,iuprev)
 
-            call cone(3,dum,dum,dum,alpha,gamma,ux,uy,uz)
+            call cone(3,ux,uy,uz,alpha,gamma)
 
             phi(counta) = gamma
             list(counta) = ku
@@ -3689,7 +3624,7 @@ contains
 ! compute trial angles and energies
                      do ibend = start,nchben_a
 ! choose the angle uniformly on sin(theta)
-                        rsint = 2.0d0*random() - 1.0d0
+                        rsint = 2.0d0*random(-1) - 1.0d0
                         angle = dacos(rsint)
                         ang_trial(ibend) = angle
 
@@ -3701,7 +3636,7 @@ contains
 
                      if ( lnew.or.ip.ne.1 ) then
 ! select one of the trial sites via bias
-                        rbf = random()*bsum_try
+                        rbf = random(-1)*bsum_try
                         bs = 0.0d0
                         do ibend = 1,nchben_a
                            bs = bs + bfactor(ibend)
@@ -3749,22 +3684,16 @@ contains
                   ux = ux / dist(1)
                   uy = uy / dist(1)
                   uz = uz / dist(1)
-                  alpha = bendang(iu,iuprev)
-                  thetatwo = alpha
+                  thetatwo = bendang(iu,iuprev)
 
-                  call cone(3,dum,dum,dum,alpha,gamma,ux,uy,uz)
-
-                  phitwo = gamma
+                  call cone(3,ux,uy,uz,thetatwo,phitwo)
 
                   vphi = 0.0d0
 
                   do j = 3, counta + count - 1
                      ku = list(j)
 
-                     phione = phi(j)
-                     thetaone = bendang(ku,iuprev)
-
-                     call coneangle(thetaone,phione,thetatwo,phitwo ,angle)
+                     angle=cone_angle(bendang(ku,iuprev),phi(j),thetatwo,phitwo)
 
                      do ib = 1, inben(imolty,iu)
                         iu2back = ijben3(imolty,iu,ib)
@@ -3789,14 +3718,12 @@ contains
                end if
 
                do ibend = start, nchben_b
-                  phitwo = random() * twopi
+                  phitwo = random(-1) * twopi
                   vphi = 0.0d0
                   do j = 3, counta + count - 1
                      ku = list(j)
-                     phione = phi(j)
-                     thetaone = bendang(ku,iuprev)
 
-                     call coneangle(thetaone,phione,thetatwo,phitwo ,angle)
+                     angle=cone_angle(bendang(ku,iuprev),phi(j),thetatwo,phitwo)
 
                      do ib = 1, inben(imolty,iu)
                         iu2back = ijben3(imolty,iu,ib)
@@ -3813,7 +3740,7 @@ contains
                end do
 
                if ( lnew.or.ip.ne.1 ) then
-                  rbf = random() * bsum_try
+                  rbf = random(-1) * bsum_try
                   bs = 0.0d0
                   do ibend = 1, nchben_b
                      bs = bs + bfactor(ibend)
@@ -3839,7 +3766,7 @@ contains
 
 ! determine vectors associated with this
 
-               call cone(2,dum,dum,dum,thetatwo,phitwo,ux,uy,uz)
+               call cone(2,ux,uy,uz,thetatwo,phitwo)
 
                xvec(iufrom,iu) = ux * distij(iufrom,iu)
                yvec(iufrom,iu) = uy * distij(iufrom,iu)
@@ -3912,7 +3839,7 @@ contains
          end if
 
          if (lnew) then
-            rbf = bsum * random()
+            rbf = bsum * random(-1)
             bs = 0.0d0
 
             do ip = 1, ichoi
@@ -3981,18 +3908,20 @@ contains
          end do
       end do
 
-! write(io_output,*) 'END PLACE'
+#ifdef __DEBUG__
+      write(io_output,*) 'END PLACE in ',myid
+#endif
 
       return
   end subroutine place
 
-!     **************************************************************
-! Finshes the last two steps for Fixed Endpoint CBMC     **
-!     **************************************************************
-! Originally completed by Collin Wick on 1-1-2000      **
-!     **************************************************************
-! SEE safeschedule.f FOR MORE INFORMATION ---      **
-!     **************************************************************
+!******************************************************
+! Finshes the last two steps for Fixed Endpoint CBMC **
+!******************************************************
+! Originally completed by Collin Wick on 1-1-2000    **
+!******************************************************
+! SEE safeschedule.f FOR MORE INFORMATION ---        **
+!******************************************************
 
 ! lshit is used for diagnistics ---
 
@@ -4019,8 +3948,11 @@ contains
 
 !     ---------------------------------------------------------------
 
-! write(io_output,*) 'START SAFECMBC ',iinit,'!'
-! print*,'iinit',iinit,'iw',iw,'igrow',igrow,'count',count
+#ifdef __DEBUG__
+      write(io_output,*) 'START SAFECMBC in ',myid
+      write(io_output,*) 'iinit',iinit,'iw',iw,'igrow',igrow,'count',count
+#endif
+
       vphi = 0.0d0
       ovphi = 0.0d0
       wei_bv = 1.0d0
@@ -4094,7 +4026,7 @@ contains
 
                         do ivib = start, nchvib
 
-                           r(ivib) = (mincb + random()*delcb)**third
+                           r(ivib) = (mincb + random(-1)*delcb)**third
                            vvib = kforce * ( r(ivib) - equil )**2
                            bfactor(ivib) = dexp(-beta*vvib)
                            bsum_try = bsum_try + bfactor(ivib)
@@ -4102,7 +4034,7 @@ contains
 
                         if (lnew) then
 ! select one of the trial sites via vias
-                           rbf = random()*bsum_try
+                           rbf = random(-1)*bsum_try
                            bs = 0.0d0
                            do ivib = 1, nchvib
                               bs = bs + bfactor(ivib)
@@ -4182,7 +4114,7 @@ contains
 
                            do ivib = start, nchvib
 
-                              r(ivib) = (mincb + random()*delcb)**third
+                              r(ivib) = (mincb + random(-1)*delcb)**third
                               vvib = kforce * ( r(ivib) - equil )**2
                               bfactor(ivib) = dexp(-beta*vvib)
                               bsum_try = bsum_try + bfactor(ivib)
@@ -4190,7 +4122,7 @@ contains
 
                            if (lnew) then
 ! select one of the trial sites via vias
-                              rbf = random()*bsum_try
+                              rbf = random(-1)*bsum_try
                               bs = 0.0d0
                               do ivib = 1, nchvib
                                  bs = bs + bfactor(ivib)
@@ -4610,7 +4542,7 @@ contains
 
                         do ivib = start, nchvib
 
-                           r(ivib) = (mincb  + random()*delcb)**third
+                           r(ivib) = (mincb  + random(-1)*delcb)**third
                            vvib = kforce *  ( r(ivib) - equil )**2
                            bfactor(ivib) = dexp(-beta*vvib)
                            bsum_try = bsum_try + bfactor(ivib)
@@ -4618,7 +4550,7 @@ contains
 
                         if (lnew) then
 ! select one of the trial sites via vias
-                           rbf = random()*bsum_try
+                           rbf = random(-1)*bsum_try
                            bs = 0.0d0
                            do ivib = 1, nchvib
                               bs = bs + bfactor(ivib)
@@ -4687,7 +4619,7 @@ contains
 
                do ibend = start, nchben_a
 ! choose angle uniformly on sin(angle)
-                  thetac = 2.0d0*random() - 1.0d0
+                  thetac = 2.0d0*random(-1) - 1.0d0
                   angle = dacos(thetac)
                   ang_bend(ibend) = angle
 
@@ -4699,7 +4631,7 @@ contains
 
                if (lnew) then
 ! select one of the trial sites at random
-                  rbf = random()*bsum_bend
+                  rbf = random(-1)*bsum_bend
                   bs = 0.0d0
                   do ibend = 1, nchben_a
                      bs = bs + bfactor(ibend)
@@ -4772,7 +4704,7 @@ contains
                      nchben_b = nchbnb(imolty)
                      do ibend = start, nchben_b
 ! choose angle uniformly on sin(angle)
-                        thetac = 2.0d0*random() - 1.0d0
+                        thetac = 2.0d0*random(-1) - 1.0d0
                         angle = dacos(thetac)
                         ang_bend(ibend) = angle
 
@@ -4785,7 +4717,7 @@ contains
 
                      if (lnew) then
 ! select one of the trial sites at random
-                        rbf = random()*bsum_bend
+                        rbf = random(-1)*bsum_bend
                         bs = 0.0d0
                         do ibend = 1, nchben_b
                            bs = bs + bfactor(ibend)
@@ -4855,7 +4787,7 @@ contains
 ! set up cone
 
                      ju = fclose(iu,1)
-                     call cone(1, xvec(iufrom,ju),yvec(iufrom,ju) ,zvec(iufrom,ju),dum,dum,dum,dum,dum)
+                     call cone(1,xvec(iufrom,ju),yvec(iufrom,ju),zvec(iufrom,ju),dum,dum)
 
 ! determine phidisp
                      if (.not.lnew.and.ip.eq.1.and.itor.eq.1) then
@@ -4869,9 +4801,9 @@ contains
                         uz = rzu(i,iu)
 
                      else
-                        phidisp = twopi*random()
+                        phidisp = twopi*random(-1)
 
-                        call cone(2,dum,dum,dum,alpha(count,ju) ,phidisp,x,y,z)
+                        call cone(2,x,y,z,alpha(count,ju),phidisp)
 
                         phicrank(itor,count) = phidisp
 
@@ -4963,19 +4895,13 @@ contains
                            vphi = vphi + kforceb(iufrom,ju) * (angle - equilb(iufrom,ju))**2
 
 ! if (lshit) then
-! write(io_output,*) iufrom,iu,ju
-!     &                             ,kforceb(iufrom,ju)
-!     &                             * (angle
-!     &                          - equilb(iufrom,ju))**2
+! write(io_output,*) iufrom,iu,ju,kforceb(iufrom,ju)*(angle-equilb(iufrom,ju))**2
 ! end if
 
                         end do
-
                      end if
-
                   else if (fcount(iu).eq.0) then
-
-! we use the angle with the closed bond
+                     ! we use the angle with the closed bond
                      if (.not.ldo) then
                         ldo = .true.
                         countb = countb + 1
@@ -5047,7 +4973,7 @@ contains
 
 ! since there are two possibilities, choose one at random
                               lengtha = flength(iufrom,iu)
-                              if (random().lt.0.5d0) then
+                              if (random(-1).lt.0.5d0) then
                                  xx(count) = rxt(3) * lengtha
                                  yy(count) = ryt(3) * lengtha
                                  zz(count) = rzt(3) * lengtha
@@ -5131,7 +5057,7 @@ contains
 
 ! determine position at random
 
-                     j = int(2.0d0 * random()) + 1
+                     j = int(2.0d0 * random(-1)) + 1
 
                      if (.not.lnew.and.ip.eq.1.and.itor.eq.1) then
 ! give old unit vector for connection
@@ -5194,8 +5120,7 @@ contains
                      vphi = vphi + kforcea(count) * (angle-equila(count) )**2
 
 ! if (lshit) then
-! write(io_output,*) iu,iufrom,iuprev,kforcea(count)
-!     &                       * (angle-equila(count))**2
+! write(io_output,*) iu,iufrom,iuprev,kforcea(count) *(angle-equila(count))**2
 ! end if
                   end if
 
@@ -5229,9 +5154,7 @@ contains
                            vphi = vphi + kforceb(iu,ku) * (angle -equilb(iu,ku))**2
 
 ! if (lshit) then
-! write(io_output,*) iu,ju,ku
-!     &                             ,kforceb(iu,ku)
-!     &                          * (angle-equilb(iu,ku))**2
+! write(io_output,*) iu,ju,ku,kforceb(iu,ku)*(angle-equilb(iu,ku))**2
 ! end if
                         end do
                      end if
@@ -5378,8 +5301,7 @@ contains
                            vphi = vphi + kforceb(ju,ku) * (angle-equilb(ju,ku))**2
 
 ! if (lshit) then
-! write(io_output,*) ju,iu,ku,kforceb(ju,ku)
-!     &                          * (angle-equilb(ju,ku))**2
+! write(io_output,*) ju,iu,ku,kforceb(ju,ku)*(angle-equilb(ju,ku))**2
 ! end if
 
                         end do
@@ -5408,8 +5330,7 @@ contains
                            vphi = vphi + kforceb(iu,ju) * (angle -equilb(iu,ju))**2
 
 ! if (lshit) then
-! write(io_output,*) iu,iufrom,ju,kforceb(iu,ju)
-!     &                          * (angle-equilb(iu,ju))**2.0d0
+! write(io_output,*) iu,iufrom,ju,kforceb(iu,ju)*(angle-equilb(iu,ju))**2.0d0
 ! end if
                         end if
                      end do
@@ -5427,7 +5348,7 @@ contains
 
             if (lnew.or.ip.ne.1) then
 ! choose one of the trial sites in a biased fashion
-               ran_tor = random() * bsum_tor(ip)
+               ran_tor = random(-1) * bsum_tor(ip)
                bs = 0
                do itor = 1, ichtor
                   bs = bs + bf_tor(itor)
@@ -5477,10 +5398,10 @@ contains
                else
                   if (fcount(iu).gt.0) then
                      ju = fclose(iu,1)
-                     call cone(1, xvec(iufrom,ju),yvec(iufrom,ju) ,zvec(iufrom,ju),dum,dum,dum,dum,dum)
+                     call cone(1,xvec(iufrom,ju),yvec(iufrom,ju),zvec(iufrom,ju),dum,dum)
                      phidisp = phiacc(count)
 
-                     call cone(2,dum,dum,dum,alpha(count,ju) ,phidisp,x,y,z)
+                     call cone(2,x,y,z,alpha(count,ju),phidisp)
 
 ! store the unit vectors in xx, yy, zz
                      xx(count) = x
@@ -5621,36 +5542,38 @@ contains
          end if
       end if
 
-! write(io_output,*) 'END SAFECMBC ',iinit,'!'
+#ifdef __DEBUG__
+      write(io_output,*) 'END SAFECMBC in ',myid,'. init: ',iinit
+#endif
       return
 
   end subroutine safecbmc
 
-!     *********************************************************************
-! Self-Adapting Fixed-Endpoint Configurational-Bias Monte Carlo  **
-! SAFE-CBMC ---                            **
-!     *********************************************************************
-! Determines logic for a CBMC Move Between Fixed End Points    **
-! for Linear, Branched, and Cyclic Molecules            **
-!     *********************************************************************
+!*************************************************************
+! Self-Adapting Fixed-Endpoint Configurational-Bias         **
+! Monte Carlo SAFE-CBMC                                     **
+!*************************************************************
+! Determines logic for a CBMC Move Between Fixed End Points **
+! for Linear, Branched, and Cyclic Molecules                **
+!*************************************************************
 ! Originally completed by Collin Wick around 1-1-2000       **
-!     *********************************************************************
+!*************************************************************
 
-!     *********************************************************************
+!***************************************************************
 ! Most work is in this subroutine, safecbmc.f, and close.f.   **
-!     *********************************************************************
+!***************************************************************
 ! Presently, works for linear molecules with rigid bond       **
 ! lengths, and can (with little program changes) work for     **
 ! branched molecules with rigid bonds, as long as it closes   **
 ! at a binary or tertiary segment.                            **
-!     *********************************************************************
+!***************************************************************
 ! Does work for any branched molecule with flexible bond      **
 ! lengths.                                                    **
-!     *********************************************************************
+!***************************************************************
 
-!     *********************************************************************
-! NEW LOGIC ONLY FOR SAFE-CMBC                    **
-!     **  -------------------------------------------------------------  **
+!******************************************************************
+!                NEW LOGIC ONLY FOR SAFE-CMBC                    **
+!**  ----------------------------------------------------------  **
 ! iend = beads to grow to                                        **
 ! ipast = one bead past iend                                     **
 ! inext = two beads past iend                                    **
@@ -5659,7 +5582,7 @@ contains
 ! fclose(iu) = beads to calculate interaction with from iu       **
 ! fcount(iu) = number of fcloses for iu                          **
 ! COLLIN = MASTER of the known universe                          **
-!     *********************************************************************
+!******************************************************************
   subroutine safeschedule(igrow,imolty,islen,iutry,findex,movetype)
 
       logical::lcount,lpick,lterm,lfixed,lfix,lfind
@@ -5704,7 +5627,7 @@ contains
       if (movetype.eq.2) then
          findex = fmaxgrow
       else
-         findex = int( random() * dble(fmaxgrow - 1)) + 2
+         findex = int( random(-1) * dble(fmaxgrow - 1)) + 2
       end if
 
 !     ******************************
@@ -5750,9 +5673,9 @@ contains
 ! factoring in icbsta for safecbmc
 
 ! OLD WAY
-! iutry = int( random() * dble(iring(imolty)) ) + 1
+! iutry = int( random(-1) * dble(iring(imolty)) ) + 1
 ! NEW WAY - picks between icbsta and last unit of chain
-         iutry = int( random() * dble(iring(imolty)+icbsta(imolty)))+1 -icbsta(imolty)
+         iutry = int( random(-1) * dble(iring(imolty)+icbsta(imolty)))+1 -icbsta(imolty)
 
 ! need the following of scheduler gets confused!
          if (lrplc(imolty)) then
@@ -5788,8 +5711,8 @@ contains
 ! at a branch point, decide which way not to grow
 ! JLR 11-11-09
 ! adding statements so we don't get messed up at the branch point in ODS chains
-! ivib = int(random() * dble(invtry)) + 1
- 13         ivib = int(random() * dble(invtry)) + 1
+! ivib = int(random(-1) * dble(invtry)) + 1
+ 13         ivib = int(random(-1) * dble(invtry)) + 1
 !     ********************************
 ! ivib = 2
 !     *******************************
@@ -5920,7 +5843,7 @@ contains
                   call err_exit(__FILE__,__LINE__,'Randomizer in FECMBC kicked you out',myid+1)
                end if
 ! this is the only random part
-               counta = int(random() * dble(fnuma(iw,j))) + 1
+               counta = int(random(-1) * dble(fnuma(iw,j))) + 1
                if (lpick(counta)) then
                   kickout = kickout + 1
                   goto 115
@@ -6238,18 +6161,18 @@ contains
       return
   end subroutine safeschedule
 
-!     **************************************************************
-! Takes three or four points and determines a point     **
-! that is a certain length from all of them          **
-! ALL LENGTHS MUST BE THE SAME -              **
-!     **************************************************************
-! This wonderful subroutine can also find a unit vector  **
+!***********************************************************
+! Takes three or four points and determines a point       **
+! that is a certain length from all of them               **
+! ALL LENGTHS MUST BE THE SAME -                          **
+!***********************************************************
+! This wonderful subroutine can also find a unit vector   **
 ! connected to two other unit vectors with all the angles **
-! between them given.                   **
-!     **************************************************************
-! This mess was unfortunately created by Collin Wick    **
-! on December 1999, BUT IT DOES WORK            **
-!     **************************************************************
+! between them given.                                     **
+!***********************************************************
+! This mess was unfortunately created by Collin Wick      **
+! on December 1999, BUT IT DOES WORK                      **
+!***********************************************************
   subroutine close(iinit,rx,ry,rz,bondl,angle,lterm)
 
       logical::lterm
@@ -6269,8 +6192,9 @@ contains
 ! if iinit=2 it finds one possibility to close 4 beads
 ! if iinit=3 it finds a vector connected two others given
 !     *******************************************************
-
-! write(io_output,*) 'START CLOSE iinit=',iinit
+#ifdef __DEBUG__
+      write(io_output,*) 'START CLOSE in ',myid,'. iinit:',iinit
+#endif
 
       if (iinit.ne.3) then
 
@@ -6519,8 +6443,9 @@ contains
 
       end if
 
-! write(io_output,*) 'END CLOSE iinit=',iinit
-
+#ifdef __DEBUG__
+      write(io_output,*) 'END CLOSE in ',myid,'. iinit:',iinit
+#endif
 !     ---------------------------------------------------------------
 
       return
@@ -6538,8 +6463,9 @@ contains
 
       dimension ilist(numax),inum(max),xfix(numax),yfix(numax) ,zfix(numax),lfind(numax),phia(numax),bendang(numax) ,rlength(numax),vtorsion(nchtor_max),phitors(nchtor_max) ,bf_tor(nchtor_max),rxpa(numax,nchmax),rypa(numax,nchmax) ,rzpa(numax,nchmax),vtrelecta(nchmax),vtrewalda(nchmax) ,bsuma(nchmax),vtrya(nchmax),vtrintraa(nchmax) ,vtrorienta(nchmax),vtrexta(nchmax),glist(numax) ,lovra(nchmax) ,vtrintera(nchmax),ifrom(numax),inuma(max) ,vtrelecta_intra(nchmax),vtrelecta_inter(nchmax)
 !     ----------------------------------------------------------
-
-! write(io_output,*) 'START RIGFIX'
+#ifdef __DEBUG__
+      write(io_output,*) 'START RIGFIX in ',myid
+#endif
 
       wrig = 1.0d0
       do j = 1, nunit(imolty)
@@ -6567,7 +6493,7 @@ contains
          yub = yfix(iufrom) / lengthb
          zub = zfix(iufrom) / lengthb
 
-         call cone(1,xub,yub,zub,dum,dum,dum,dum,dum )
+         call cone(1,xub,yub,zub,dum,dum)
 
 ! now we must cycle through all sites that we want to be rigid
          do count = 1, ntogrow
@@ -6592,7 +6518,7 @@ contains
             zub = zfix(iu) / lengtha
 
 ! determine the phi value associated with this
-            call cone(3,dum,dum,dum,bendang(iu),phia(iu),xub,yub,zub)
+            call cone(3,xub,yub,zub,bendang(iu),phia(iu))
 
             lfind(iu) = .true.
             inum(count) = iu
@@ -6634,7 +6560,7 @@ contains
                   yub = yfix(ju) / lengtha
                   zub = zfix(ju) / lengtha
 ! determine the phi value associated with this
-                  call cone(3,dum,dum,dum,bendang(ju) ,phia(ju),xub,yub,zub)
+                  call cone(3,xub,yub,zub,bendang(ju),phia(ju))
 
                end if
             end do
@@ -6663,7 +6589,7 @@ contains
             yub = yub / lengthb
             zub = zub / lengthb
 
-            call cone(1,xub,yub,zub,dum,dum,dum,dum,dum)
+            call cone(1,xub,yub,zub,dum,dum)
          end if
 
          do ip = 1, ichoi
@@ -6688,11 +6614,11 @@ contains
                      yub = ryu(i,iu) - ryu(i,iufrom)
                      zub = rzu(i,iu) - rzu(i,iufrom)
                   else
-                     phidisp = random() * twopi
+                     phidisp = random(-1) * twopi
 
                      phi = phia(iu) + phidisp
 
-                     call cone(2,dum,dum,dum,bendang(iu),phi ,xub,yub,zub)
+                     call cone(2,xub,yub,zub,bendang(iu),phi)
 
                      lengtha = rlength(iu)
 
@@ -6734,7 +6660,7 @@ contains
 
 ! pick a torsion at random
             if (lnew .or. ip .ne. 1) then
-               ran_tor = random()*bsum_tor(ip)
+               ran_tor = random(-1)*bsum_tor(ip)
                bs = 0.0d0
                do itor = 1, ichtor
                   bs = bs + bf_tor(itor)
@@ -6758,7 +6684,7 @@ contains
                if (lnew .or. ip.ne.1) then
                   phi = phia(iu) + phidisp
 
-                  call cone(2,dum,dum,dum,bendang(iu),phi ,xub,yub,zub)
+                  call cone(2,xub,yub,zub,bendang(iu),phi)
 
                   lengtha = rlength(iu)
 
@@ -6789,7 +6715,7 @@ contains
                if (lnew.or.ip.ne.1) then
                   phi = phia(iu) + phidisp
 
-                  call cone(2,dum,dum,dum,bendang(iu),phi ,xub,yub,zub)
+                  call cone(2,xub,yub,zub,bendang(iu),phi)
 
                   lengtha = rlength(iu)
 
@@ -6922,7 +6848,7 @@ contains
                return
             end if
 
-            rbf = bsum * random()
+            rbf = bsum * random(-1)
             bs = 0.0d0
             do ip = 1, ichoi
                if ( .not. lovra(ip) ) then
@@ -7030,7 +6956,9 @@ contains
          end do
       end do
 
-! write(io_output,*) 'END RIGFIX'
+#ifdef __DEBUG__
+      write(io_output,*) 'END RIGFIX in ',myid
+#endif
 
       return
   end subroutine rigfix

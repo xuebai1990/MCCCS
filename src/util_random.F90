@@ -8,20 +8,22 @@ module util_random
   use var_type,only:double_precision
   use const_math,only:twopi
   use util_runtime,only:err_exit
+  use util_prng,only:rng_stream_type_ptr,create_rng_stream,next_random_number
   implicit none
   private
   save
   public::ranset,random,sphere
+
+  TYPE(rng_stream_type_ptr),ALLOCATABLE::rng(:)
 contains
 !-----------------------------------------------------------------------
 !> \brief Initialize large number (over 32-bit constant number)
 !-----------------------------------------------------------------------
   subroutine mt_initln
-    implicit none
-    integer ALLBIT_MASK
-    integer TOPBIT_MASK
-    integer UPPER_MASK,LOWER_MASK,MATRIX_A,T1_MASK,T2_MASK
-    integer mag01(0:1)
+    integer::ALLBIT_MASK
+    integer::TOPBIT_MASK
+    integer::UPPER_MASK,LOWER_MASK,MATRIX_A,T1_MASK,T2_MASK
+    integer::mag01(0:1)
     common /mt_mask1/ ALLBIT_MASK
     common /mt_mask2/ TOPBIT_MASK
     common /mt_mask3/ UPPER_MASK,LOWER_MASK,MATRIX_A,T1_MASK,T2_MASK
@@ -58,19 +60,19 @@ contains
 !> This subroutine should be called once before using the RNG, otherwise
 !> a default seed will be used.
 !-----------------------------------------------------------------------
-  subroutine RANSET(s)
-    implicit none
-    integer s
-    integer N
-    integer DONE
-    integer ALLBIT_MASK
-    parameter (N=624)
-    parameter (DONE=123456789)
-    integer mti,initialized
-    integer mt(0:N-1)
+  subroutine RANSET(s,nStream)
+    use util_string,only:integer_to_string
+    integer,intent(in)::s,nStream
+    integer,parameter::N=624,DONE=123456789
+    integer::ALLBIT_MASK
+    integer::mti,initialized
+    integer::mt(0:N-1)
+    common /mt_mask1/ ALLBIT_MASK
     common /mt_state1/ mti,initialized
     common /mt_state2/ mt
-    common /mt_mask1/ ALLBIT_MASK
+    real(8)::iseeds(3,2)
+    integer::i,ierr
+    logical::err
          
     call mt_initln
     mt(0)=iand(s,ALLBIT_MASK)
@@ -79,6 +81,24 @@ contains
        mt(mti)=iand(mt(mti),ALLBIT_MASK)
     end do
     initialized=DONE
+
+    if (nStream.gt.1) then
+       allocate(rng(0:nStream-1),stat=ierr)
+       if (ierr.ne.0) call err_exit(__FILE__,__LINE__,'RANSET: allocation error',ierr)
+
+       do i=0,nStream-1
+          rng(i)%val=>null()
+       end do
+
+       iseeds=s
+       err=create_rng_stream(rng(0)%val,integer_to_string(0),seed=iseeds)
+       if (err) call err_exit(__FILE__,__LINE__,'RANSET: error creating prng stream 0',-1)
+
+       do i=1,nStream-1
+          err=create_rng_stream(rng(i)%val,integer_to_string(i),last_rng_stream=rng(i-1)%val)
+          if (err) call err_exit(__FILE__,__LINE__,'RANSET: error creating prng stream '//integer_to_string(i),-1)
+       end do
+    end if
         
     return
   end subroutine RANSET
@@ -86,25 +106,28 @@ contains
 !-----------------------------------------------------------------------
 !> \brief Generates a random number on [0,1)-real-interval
 !-----------------------------------------------------------------------
-  double precision function random()
-    integer N,M
-    integer DONE
-    integer UPPER_MASK,LOWER_MASK,MATRIX_A
-    integer T1_MASK,T2_MASK
-    parameter (N=624)
-    parameter (M=397)
-    parameter (DONE=123456789)
-    integer mti,initialized
-    integer mt(0:N-1)
-    integer y,kk
-    integer mag01(0:1)
+  double precision function random(iStream)
+    integer,intent(in)::iStream
+    integer,parameter::N=624,M=397,DONE=123456789
+    integer::UPPER_MASK,LOWER_MASK,MATRIX_A,T1_MASK,T2_MASK
+    integer::mti,initialized
+    integer::mt(0:N-1)
+    integer::mag01(0:1)
     common /mt_state1/ mti,initialized
     common /mt_state2/ mt
     common /mt_mask3/ UPPER_MASK,LOWER_MASK,MATRIX_A,T1_MASK,T2_MASK
     common /mt_mag01/ mag01
+    integer::y,kk
+
+    if (iStream.ge.0) then
+       RANDOM=next_random_number(rng(iStream)%val)
+       return
+    end if
+
+    ! iStream.lt.0
 
     if(initialized.ne.DONE)then
-       call RANSET(21641)
+       call RANSET(21641,1)
     end if
 !   First generates a random number on [0,0xffffffff]-interval
     if(mti.ge.N)then
@@ -145,13 +168,14 @@ contains
 !> 
 !> See http://mathworld.wolfram.com/SpherePointPicking.html for further explanations
 !> See also P349 of Allen & Tildesley: G.4 Random vectors on the surface of a sphere
-  subroutine sphere(x,y,z)
+  subroutine sphere(x,y,z,iStream)
     real,intent(out)::x,y,z
+    integer,intent(in)::iStream
 
 #ifdef RANDOM_SPHERE_DIRECT
     real::theta,phi
-    theta=twopi*random()
-    z=2.0_double_precision*random()-1.0_double_precision
+    theta=twopi*random(iStream)
+    z=2.0_double_precision*random(iStream)-1.0_double_precision
     phi=acos(z)
     x=sin(phi)*cos(theta)
     y=sin(phi)*sin(theta)
@@ -159,8 +183,8 @@ contains
     integer::ii
     real::xi1,xi2,xisq
     do ii = 1,100
-       xi1 = ( 2.0d0 * random() ) - 1.0d0
-       xi2 = ( 2.0d0 * random() ) - 1.0d0
+       xi1 = ( 2.0d0 * random(iStream) ) - 1.0d0
+       xi2 = ( 2.0d0 * random(iStream) ) - 1.0d0
        xisq = xi1**2 + xi2**2
        if ( xisq .lt. 1.0d0 ) then
           x = 2.0d0 * xi1 * dsqrt( 1.0d0 - xisq )
@@ -181,15 +205,16 @@ contains
 !> Leva's ratio-of-uniforms method; See $7.3.9 of Numerical Recipes (3rd ed.)
 !> Note that algorithms in P347 of Allen & Tildesley, G.4 Generating non-uniform
 !> distributions, are inferior in either speed, accuracy, or both
-  function gaussian(mu,sig) result(gau)
+  function gaussian(mu,sig,iStream) result(gau)
     real,intent(in)::mu,sig
+    integer,intent(in)::iStream
     real::gau
 
     real::u,v,x,y,q
 
     do
-       u=random()
-       v=1.7156_double_precision*(random()-0.5_double_precision)
+       u=random(iStream)
+       v=1.7156_double_precision*(random(iStream)-0.5_double_precision)
        x=u-0.449871_double_precision
        y=abs(v)+0.386595_double_precision
        q=x*x+y*(0.19600_double_precision*y-0.25472_double_precision*x)

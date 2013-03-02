@@ -18,52 +18,43 @@ module transfer_swap
   integer::cnt_wf1(0:6,0:6,4),cnt_wf2(0:6,0:6,4),cnt_wra1(1000,4),cnt_wra2(1000,4)
 
 contains
-!    ********************************************************************
+!******************************************************************
 ! removes a molecule from one box and inserts it into the other  **
 ! using CBMC insertion techniques.  Works for linear or branched **
 ! molecules and for DC-CBMC and Explicit atom                    **
 ! Rewritten from old swap and swapbr subroutines by M.G. Martin  **
 ! 9-18-97                                                        **
-!    ********************************************************************
-  subroutine swap
+!******************************************************************
+  subroutine swap()
     use sim_particle,only:update_neighbor_list
 
-    logical::ovrlap,lterm,lnew,lempty,ldone,ltors,lovrh,lfavor, laccept,lswapinter,lrem_out,lins_in,lneighij,linsk_in, lremk_in ,lfixnow
+    logical::ovrlap,lterm,lnew,lempty,ldone,ltors,lovrh(nchmax),lfavor,laccept,lswapinter,lrem_out,lins_in,lneighij,linsk_in,lremk_in,lfixnow
 
-
-    integer::boxins,boxrem,imol,ichoi,ip,iwalk,idum ,iins1,imolty1
+    integer::boxins,boxrem,imol,ichoi,ip,iwalk,idum,iins1,imolty1
     integer::istt,iett,itype,ipair,ipairb,beg
 
-    integer::iutry,icbu,ifrom,irem,iins,glist,findex ,iii,j,ibox,iunit,ic,pointp,imolty,imt,jmt,igrow ,pointp2,jins ,jmolty,neighj_num,neighk_num ,joffset,koffset,kmolty,kins,target,neigh_old
-
-    dimension glist(numax)
+    integer::iutry,icbu,ifrom,irem,iins,glist(numax),findex,iii,j,ibox,iunit,ic,pointp,imolty,imt,jmt,igrow,pointp2,jins,jmolty,neighj_num,neighk_num,joffset,koffset,kmolty,kins,target,neigh_old
 
     real::sx,sy,sz
 
-    real::v,vintra,vinter,vext,velect,vtorold ,vtornew,vewald,vflucq,delen,deleo,rpair
-    real::vnewflucq,voldflucq,qion,ctorfo,ctorfn
-    dimension qion(numax)
-    real::rxuold,ryuold,rzuold
-    dimension rxuold(numax),ryuold(numax),rzuold(numax)
+    real::v,vintra,vinter,vext,velect,vtorold,vtornew,vewald,vflucq,delen,deleo,rpair
+    real::vnewflucq,voldflucq,qion(numax),ctorfo,ctorfn
+    real::rxuold(numax),ryuold(numax),rzuold(numax)
     real::rmol,rbf,bsum
     real::waddnew,waddold
 
     real::total_NBE,vtgn
     real::vbendn,vvibn
 
-    real::v1insext,v1remext,v1ins,w1ins,v1rem ,w1rem,v1insint,v1remint,v1insewd,v1remewd,wnlog,wolog,wdlog ,wratio,vinsta,vremta,volins,volrem,rho,arg,v1inselc,v1remelc
-    real::rvol,x,y,z,rijsq,wbias_ins,wbias_rem ,r,xi1,xi2,xisq
+    real::v1insext,v1remext,v1ins,w1ins,v1rem,w1rem,v1insint,v1remint,v1insewd,v1remewd,wnlog,wolog,wdlog,wratio,vinsta,vremta,volins,volrem,rho,arg,v1inselc,v1remelc
+    real::rvol,x,y,z,rijsq,wbias_ins,wbias_rem,r,xi1,xi2,xisq
     real::vrecipn,vrecipo,vdum,whins,whrem
-    real::rxuh,ryuh,rzuh,delenh,vtrhext ,vtrhintra,vtrhinter,vtrhelect,vtrhewald,vtrhtg,bfach
-
-    dimension bfach(nchmax),delenh(nchmax),vtrhinter(nchmax) ,vtrhext(nchmax),vtrhintra(nchmax),vtrhelect(nchmax) ,vtrhewald(nchmax),vtrhtg(nchmax)
-
-    dimension lovrh(nchmax)
-    dimension rxuh(numax,nchmax),ryuh(numax,nchmax) ,rzuh(numax ,nchmax)
+    real::rxuh(numax,nchmax),ryuh(numax,nchmax),rzuh(numax,nchmax),delenh(nchmax),vtrhext(nchmax),vtrhintra(nchmax),vtrhinter(nchmax),vtrhelect(nchmax),vtrhewald(nchmax),vtrhtg(nchmax),bfach(nchmax)
 
 ! --------------------------------------------------------------------
-
-! write(io_output,*) 'START SWAP'
+#ifdef __DEBUG__
+    write(io_output,*) 'START SWAP in ',myid
+#endif
 ! write(11,*) '1:',neigh_cnt(18)
 
     lempty = .false.
@@ -88,7 +79,7 @@ contains
        wee_ratio = 1.0d0
 
 ! select a molecule typ with probabilities given in pmswmt
-       rmol = random()
+       rmol = random(-1)
        do imol = 1, nmolty
           if ( rmol .lt. pmswmt(imol) ) then
              imolty = imol
@@ -101,7 +92,7 @@ contains
 
 ! select a box given in pmswatyp
        if ( nswapb(imolty) .gt. 1 ) then
-          rpair = random()
+          rpair = random(-1)
           do ipair = 1, nswapb(imolty)
              if ( rpair .lt. pmswapb(imolty,ipair) ) then
                 ipairb = ipair
@@ -112,7 +103,7 @@ contains
           ipairb = 1
        end if
 
-       if (random().lt.0.5d0) then
+       if (random(-1).lt.0.5d0) then
           boxins=box1(imolty,ipairb)
           boxrem=box2(imolty,ipairb)
        else
@@ -138,7 +129,7 @@ contains
        else if ( lswapinter .or. lavbmc1(imolty) .and. .not.   (lavbmc2(imolty) .or. lavbmc3(imolty)) ) then
 ! for the advanced AVBMC algorithm, this particle will be selected in
 ! sub-regions defined by Vin
-197       pointp = idint( dble(ncmt(boxrem,imolty))*random() ) + 1
+197       pointp = idint( dble(ncmt(boxrem,imolty))*random(-1) ) + 1
           if (lexpee) then
              if ((pointp.eq.eepointp).and. (boxrem.eq.box_state(mstate)).and. (ncmt(boxrem,imolty).gt.1)) then
                 goto 197
@@ -236,7 +227,7 @@ contains
 ! *********************
 ! First AVBMC Steps *
 ! *********************
-       rmol = random()
+       rmol = random(-1)
        ldone = .false.
        do imol = 1, nmolty
           if ( rmol .lt. pmbsmt(imol) ) then
@@ -254,7 +245,7 @@ contains
           return
 
        else
-111       pointp2=idint( dble(ncmt(boxins,jmolty))*random())+1
+111       pointp2=idint( dble(ncmt(boxins,jmolty))*random(-1))+1
           jins = parbox(pointp2,boxins,jmolty)
           if ( jins .eq. iins ) goto 111
           if ( moltyp(jins) .ne. jmolty )  write(io_output,*) 'screwup swap, jins:' ,jins,moltyp(jins),jmolty
@@ -265,7 +256,7 @@ contains
 
        if ( lavbmc3(imolty) ) then
 ! define a second bonding region bounded by kins with kmolty type
-          rmol = random()
+          rmol = random(-1)
           ldone = .false.
           do imol = 1, nmolty
              if ( rmol .lt. pmbsmt(imol) ) then
@@ -281,7 +272,7 @@ contains
              lempty = .true.
              return
           else
-112          pointp2=idint( dble(ncmt(boxins,kmolty))*random())+1
+112          pointp2=idint( dble(ncmt(boxins,kmolty))*random(-1))+1
              kins = parbox(pointp2,boxins,kmolty)
 
 ! make sure the two regions bounded by jins and kins do not
@@ -330,17 +321,17 @@ contains
 
        if ( lpbc ) call setpbc(boxins)
 
-       if ( random() .lt. pmbias(imolty) ) then
+       if ( random(-1) .lt. pmbias(imolty) ) then
           wbias_rem = pmbias(imolty) * (1.0d0/vol_eff)
           lins_in = .true.
-          if (lavbmc2(imolty) .or. (lavbmc3(imolty)  .and. random() .gt. pmbias2(imolty)) ) then
+          if (lavbmc2(imolty) .or. (lavbmc3(imolty)  .and. random(-1) .gt. pmbias2(imolty)) ) then
 ! select a particle in the out region and move this particle into
 ! the in region defined by the particle jins's bonding region
 ! out -> j case
              wbias_rem=wbias_rem /dble(ncmt(boxrem,imolty)-neighj_num-joffset)
 
              lrem_out = .true.
-119          pointp=idint(dble(ncmt(boxrem,imolty))*random())+1
+119          pointp=idint(dble(ncmt(boxrem,imolty))*random(-1))+1
              irem = parbox(pointp,boxrem,imolty)
              if ( irem .eq. jins ) goto 119
              x = rxu(irem,1) - rxu(jins,1)
@@ -370,7 +361,7 @@ contains
                 lempty = .true.
                 return
              else
-113             pointp=idint(dble(neighk_num)*random())+1
+113             pointp=idint(dble(neighk_num)*random(-1))+1
 ! irem = neighbor(pointp,kins,imolty)
 ! write(io_output,*) 'kins,irem:',kins,irem,neighk_num
                 irem = neighbor(pointp,kins)
@@ -385,12 +376,12 @@ contains
 
           do icbu = 1,ichoi
 ! choose a random association distance
-             rvol = random()
+             rvol = random(-1)
              r = (rbsmax*rbsmax*rbsmax*rvol +  (1.0d0-rvol)*rbsmin*rbsmin*rbsmin)**(1.0d0/3.0d0)
 
 ! calculate random vector on the unit sphere ---
-109          xi1 = ( 2.0d0 * random() ) - 1.0d0
-             xi2 = ( 2.0d0 * random() ) - 1.0d0
+109          xi1 = ( 2.0d0 * random(-1) ) - 1.0d0
+             xi2 = ( 2.0d0 * random(-1) ) - 1.0d0
              xisq = xi1**2 + xi2**2
              if ( xisq .lt. 1.0d0 ) then
                 x = r * 2.0d0 * xi1 * dsqrt( 1.0d0 - xisq )
@@ -414,7 +405,7 @@ contains
                 lempty = .true.
                 return
              else
-114             pointp=idint(dble(neighj_num)*random())+1
+114             pointp=idint(dble(neighj_num)*random(-1))+1
 ! irem = neighbor(pointp,jins,imolty)
 ! write(io_output,*) 'jins,irem:',jins,irem,neighj_num
                 irem = neighbor(pointp,jins)
@@ -433,7 +424,7 @@ contains
 ! write(io_output,*) 'move out'
 ! write(io_output,*) '4:',wbias_rem,boxlx(boxins),vol_eff
 
-          if ( lavbmc3(imolty) .and.  random() .lt. pmbias2(imolty) ) then
+          if ( lavbmc3(imolty) .and.  random(-1) .lt. pmbias2(imolty) ) then
 ! move to the region bounded by kins in AVBMC3
 ! j -> k case
              linsk_in = .true.
@@ -441,12 +432,12 @@ contains
 
              do icbu = 1,ichoi
 ! choose a random association distance
-                rvol = random()
+                rvol = random(-1)
                 r = (rbsmax*rbsmax*rbsmax*rvol +  (1-rvol)*rbsmin*rbsmin*rbsmin)**(1.0/3.0d0)
 
 ! calculate random vector on the unit sphere ---
-139             xi1 = ( 2.0d0 * random() ) - 1.0d0
-                xi2 = ( 2.0d0 * random() ) - 1.0d0
+139             xi1 = ( 2.0d0 * random(-1) ) - 1.0d0
+                xi2 = ( 2.0d0 * random(-1) ) - 1.0d0
                 xisq = xi1**2 + xi2**2
                 if ( xisq .lt. 1.0d0 ) then
                    x = r * 2.0d0 * xi1 * dsqrt( 1.0d0 - xisq )
@@ -467,13 +458,13 @@ contains
              if ( lavbmc2(imolty) .or. lavbmc3(imolty) )  wbias_rem = wbias_rem/dble(neighj_num)
 
              do icbu = 1,ichoi
-222             rxp(1,icbu) = boxlx(boxins) * random()
-                ryp(1,icbu) = boxly(boxins) * random()
+222             rxp(1,icbu) = boxlx(boxins) * random(-1)
+                ryp(1,icbu) = boxly(boxins) * random(-1)
                 if (lpbcz .or. lslit) then
-                   rzp(1,icbu) = boxlz(boxins) * random()
+                   rzp(1,icbu) = boxlz(boxins) * random(-1)
                 else if ( lsami .or. lmuir .or. ljoe ) then
                    if ( lempty ) then
-                      rzp(1,icbu) = 20*random()-10
+                      rzp(1,icbu) = 20*random(-1)-10
                    else
                       rzp(1,icbu) = rzu(irem,1)
                    end if
@@ -499,9 +490,9 @@ contains
           ibox = boxins
           do icbu = 1,ichoi
 !$$$               if (lbnow.and.boxins.eq.boxsite) then
-!$$$                  x = random()
-!$$$                  y = random()
-!$$$                  z = random()
+!$$$                  x = random(-1)
+!$$$                  y = random(-1)
+!$$$                  z = random(-1)
 !$$$
 !$$$c     --- gaussian picking probabilities
 !$$$c                  x = adev * dsqrt(- 2.0d0 * dlog(x*adev*twopiroot))
@@ -509,13 +500,13 @@ contains
 !$$$c                  z = adev * dsqrt(- 2.0d0 * dlog(z*adev*twopiroot))
 !$$$
 !$$$c     --- old picking probabilities
-!$$$                  rvol = random()
+!$$$                  rvol = random(-1)
 !$$$                  r = (rbsmax2**3*rvol +
 !$$$     &                 (1-rvol)*rbsmin*rbsmin*rbsmin)**(1.0/3.0d0)
 !$$$
 !$$$c --- calculate random vector on the unit sphere ---
-!$$$ 129              xi1 = ( 2.0d0 * random() ) - 1.0d0
-!$$$                  xi2 = ( 2.0d0 * random() ) - 1.0d0
+!$$$ 129              xi1 = ( 2.0d0 * random(-1) ) - 1.0d0
+!$$$                  xi2 = ( 2.0d0 * random(-1) ) - 1.0d0
 !$$$                  xisq = xi1**2 + xi2**2
 !$$$                  if ( xisq .lt. 1.0d0 ) then
 !$$$                     x = r * 2.0d0 * xi1 * dsqrt( 1.0d0 - xisq )
@@ -530,9 +521,9 @@ contains
 !$$$                  rzp(1,icbu) = rzu(jins,1) + z
 !$$$
 !$$$               else
-             sx = random()
-             sy = random()
-             sz = random()
+             sx = random(-1)
+             sy = random(-1)
+             sz = random(-1)
 
              rxp(1,icbu) = sx*hmat(ibox,1)+sy*hmat(ibox,4) +sz*hmat(ibox,7)
              ryp(1,icbu) = sx*hmat(ibox,2)+sy*hmat(ibox,5) +sz*hmat(ibox,8)
@@ -541,13 +532,13 @@ contains
           end do
        else
           do icbu = 1,ichoi
-             rxp(1,icbu) = boxlx(boxins) * random()
-             ryp(1,icbu) = boxly(boxins) * random()
+             rxp(1,icbu) = boxlx(boxins) * random(-1)
+             ryp(1,icbu) = boxly(boxins) * random(-1)
              if (lpbcz .or. lslit) then
-                rzp(1,icbu) = boxlz(boxins) * random()
+                rzp(1,icbu) = boxlz(boxins) * random(-1)
              else if ( lsami .or. lmuir .or. ljoe ) then
                 if ( lempty ) then
-                   rzp(1,icbu) = 20*random()-10
+                   rzp(1,icbu) = 20*random(-1)-10
                 else
                    rzp(1,icbu) = rzu(irem,1)
                 end if
@@ -593,7 +584,7 @@ contains
 
 ! select one position at random ---
     if ( ichoi .gt. 1 ) then
-       rbf = w1ins * random()
+       rbf = w1ins * random(-1)
        bsum = 0.0d0
        do ip = 1, ichoi
           if ( .not. lovr(ip) ) then
@@ -787,7 +778,7 @@ contains
        if ( whins .lt. softlog ) return
 
        if ( ichoi .gt. 1 ) then
-          rbf = whins * random()
+          rbf = whins * random(-1)
           bsum = 0.0d0
           do ip = 1, ichoi
              if ( .not. lovrh(ip) ) then
@@ -997,13 +988,13 @@ contains
 ! write(io_output,*) '1:',wbias_ins,boxlx(boxins),vol_eff
 
              do icbu = 2,ichoi
-232             rxp(1,icbu) = boxlx(boxins) * random()
-                ryp(1,icbu) = boxly(boxins) * random()
+232             rxp(1,icbu) = boxlx(boxins) * random(-1)
+                ryp(1,icbu) = boxly(boxins) * random(-1)
                 if (lpbcz .or. lslit) then
-                   rzp(1,icbu) = boxlz(boxins) * random()
+                   rzp(1,icbu) = boxlz(boxins) * random(-1)
                 else if ( lsami .or. lmuir .or. ljoe ) then
                    if ( lempty ) then
-                      rzp(1,icbu) = 20*random()-10
+                      rzp(1,icbu) = 20*random(-1)-10
                    else
                       rzp(1,icbu) = rzu(irem,1)
                    end if
@@ -1043,17 +1034,17 @@ contains
                    end if
                 end if
              end if
-               
+
 ! write(io_output,*) 'originally in'
 ! write(io_output,*) '2:',wbias_ins,boxlx(boxins),vol_eff
 
              do icbu = 2,ichoi
 ! choose a random association distance
-                rvol = random()
+                rvol = random(-1)
                 r = (rbsmax*rbsmax*rbsmax*rvol +  (1-rvol)*rbsmin*rbsmin*rbsmin)**(1.0/3.0d0)
 ! calculate random vector on the unit sphere ---
-129             xi1 = ( 2.0d0 * random() ) - 1.0d0
-                xi2 = ( 2.0d0 * random() ) - 1.0d0
+129             xi1 = ( 2.0d0 * random(-1) ) - 1.0d0
+                xi2 = ( 2.0d0 * random(-1) ) - 1.0d0
                 xisq = xi1**2 + xi2**2
                 if ( xisq .lt. 1.0d0 ) then
                    x = r * 2.0d0 * xi1 * dsqrt( 1.0d0 - xisq )
@@ -1076,22 +1067,22 @@ contains
        if (lsolid(boxrem) .and. .not. lrect(boxrem)) then
           ibox = boxrem
           do icbu = 2,ichoi
-             sx = random()
-             sy = random()
-             sz = random()
+             sx = random(-1)
+             sy = random(-1)
+             sz = random(-1)
              rxp(1,icbu) = sx*hmat(ibox,1)+sy*hmat(ibox,4) +sz*hmat(ibox,7)
              ryp(1,icbu) = sx*hmat(ibox,2)+sy*hmat(ibox,5) +sz*hmat(ibox,8)
              rzp(1,icbu) = sx*hmat(ibox,3)+sy*hmat(ibox,6) +sz*hmat(ibox,9)
           end do
        else
           do icbu = 2,ichoi
-             rxp(1,icbu) = boxlx(boxrem) * random()
-             ryp(1,icbu) = boxly(boxrem) * random()
+             rxp(1,icbu) = boxlx(boxrem) * random(-1)
+             ryp(1,icbu) = boxly(boxrem) * random(-1)
              if (lpbcz .or. lslit) then
-                rzp(1,icbu) = boxlz(boxrem) * random()
+                rzp(1,icbu) = boxlz(boxrem) * random(-1)
              else if ( lsami .or. lmuir .or. ljoe ) then
                 if ( lempty ) then
-                   rzp(1,icbu) = 20*random()-10
+                   rzp(1,icbu) = 20*random(-1)-10
                 else
                    rzp(1,icbu) = rzu(irem,1)
                 end if
@@ -1493,7 +1484,7 @@ contains
 
     if (lopt_bias(imolty)) call update_bias(log(wratio*2.0)/beta,boxrem,boxins,imolty)
 
-    if ( random() .le. wratio ) then
+    if ( random(-1) .le. wratio ) then
 ! write(io_output,*) 'SWAP MOVE ACCEPTED',irem
 ! we can now accept !!!!! ***
        if ((.not.leemove).and.(.not.lexpee)) then
@@ -1653,10 +1644,11 @@ contains
              end if
           end do
        end if
-! write(io_output,*) irem,'end SWAP'
     end if
-
 ! -----------------------------------------------------------------
+#ifdef __DEBUG__
+    write(io_output,*) 'end SWAP in ',myid,irem
+#endif
     return
   end subroutine swap
 

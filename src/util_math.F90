@@ -2,19 +2,57 @@ module util_math
   use const_math,only:onepi
   implicit none
   private
-  public::erfunc,mbessel,polint,spline,splint
+  public::cone_angle,erfunc,mbessel,polint,spline,splint
 contains
+!****************************************************************
+! takes two unit vectors in spherical coordinates and computes **
+! the angle between them.                                      **
+! thetaone is the angle between vector one and the z-axis      **
+! phione is the angle between vector one and the x-axis        **
+! thetatwo is the angle between vector two and the z-axis      **
+! phitwo is the angle between vector two and the x-axis        **
+! angle is the angle between the two vectors                   **
+! x = r sin (theta) cos (phi)                                  **
+! y = r sin (theta) sin (phi)                                  **
+! z = r cos (theta)                                            **
+! M.G. Martin 2-4-98                                           **
+!****************************************************************
+  function cone_angle( thetaone, phione, thetatwo, phitwo ) result(angle)
+    real,intent(in)::thetaone,thetatwo,phione,phitwo
+    real::angle
+    real::sintheone,costheone,sinthetwo,costhetwo,sinphione,cosphione,sinphitwo,cosphitwo,cosangle
+
+    sintheone = dsin(thetaone)
+    costheone = dcos(thetaone)
+    sinthetwo = dsin(thetatwo)
+    costhetwo = dcos(thetatwo)
+    sinphione = dsin(phione)
+    cosphione = dcos(phione)
+    sinphitwo = dsin(phitwo)
+    cosphitwo = dcos(phitwo)
+
+    cosangle = sintheone*cosphione*sinthetwo*cosphitwo + sintheone*sinphione*sinthetwo*sinphitwo + costheone*costhetwo
+
+    angle = dacos(cosangle)
+
+    return
+  end function cone_angle
+
 !> \brief complementary error function
   pure function erfunc(x)
     real::erfunc
     real,intent(in)::x
 
+#ifdef __USEOWN__
     real,parameter::p=0.3275911d0,a1=0.254829592d0,a2=-0.284496736d0,a3=1.421413741d0,a4=-1.453152027d0,a5=1.061405429d0
     real::tt,eee
 
     eee = dexp(-x*x)
     tt = 1.0d0/(1.0d0 + p*x)
     erfunc = ((((a5*tt+a4)*tt+a3)*tt+a2)*tt+a1)*tt*eee
+#else
+    erfunc = erfc(x)
+#endif
     return
   end function erfunc
 

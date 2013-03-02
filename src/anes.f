@@ -13,9 +13,11 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
       logical::laccept,lswapinter
       integer::i,ibox,boxrem,mtype,imolty,iunit,ichoiq ,ip,ibox2,j
       real::deltv,vintern,vintran,vextn,velectn ,vintero,vintrao,vexto,velecto,vinsta,vremta,vnewflucq,voldflucq ,vboxo(nbxmax),vinterbo(nbxmax),vintrabo(nbxmax),vextbo(nbxmax) ,velectbo(nbxmax),vflucqbo(nbxmax),vtailbo(nbxmax),vvibbo(nbxmax) ,vtgbo(nbxmax),vbendbo(nbxmax),rxuo(numax),ryuo(numax) ,rzuo(numax),xcmo,ycmo,zcmo,vdum,wratio,volins,volrem,deltvb,vnewt2,voldt2
-      real::qquo(nmax,numax) 
+      real::qquo(nmax,numax)
 
-! write(io_output,*) 'START the optimization of the charge configuration'
+#ifdef __DEBUG__
+      write(io_output,*) 'START the optimization of the charge configuration in ',myid
+#endif
 
       imolty = moltyp(i)
       iunit = nunit(imolty)
@@ -35,7 +37,7 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
             vtgbo(ibox2) = vtgb(ibox2)
             vbendbo(ibox2) = vbendb(ibox2)
          end if
-         
+
       end do
       do j = 1,iunit
          rxuo(j) = rxu(i,j)
@@ -64,7 +66,7 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
 ! on the new coordinates, continue to use the fluctuating charge
 ! algorithm to optimize the charge configurations, update the
 ! energy, coordinates and the ewald sum
-      
+
       if ( mtype .eq. 3 ) then
 ! for swap move
          vbox(ibox)     = vbox(ibox) + vnewt
@@ -78,7 +80,7 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
 	 vbendb(ibox)   = vbendb(ibox)   + vnewbb
          vflucqb(ibox)  = vflucqb(ibox)  + vnewflucq
 
-         vbox(boxrem)     = vbox(boxrem)     - voldt 
+         vbox(boxrem)     = vbox(boxrem)     - voldt
          vinterb(boxrem)  = vinterb(boxrem)  - voldinter
          vtailb(boxrem)   = vtailb(boxrem)   - vremta
          vintrab(boxrem)  = vintrab(boxrem)  - voldintra
@@ -96,7 +98,7 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
          vextb(ibox)    = vextb(ibox)   + (vextn   - vexto)
          velectb(ibox)   = velectb(ibox)  + (velectn - velecto)
       end if
-      
+
       do j = 1,iunit
          rxu(i,j) = rxuion(j,2)
          ryu(i,j) = ryuion(j,2)
@@ -113,7 +115,7 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
 ! update the dipole term
             call dipole(ibox,1)
          end if
-      end if            
+      end if
 
 ! begin to optimize the charge configuration
 
@@ -125,7 +127,7 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
 ! call flucq(-2,0)
 ! end do
          do ichoiq = 1,500
-            call flucq(2,0) 
+            call flucq(2,0)
          end do
          deltv = vbox(ibox) - vboxo(ibox)
          weight = dexp(-deltv*beta)
@@ -141,16 +143,16 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
             else if (lgrand) then
                if (ibox.eq.1) then
 ! molecule added to box 1
-                  wratio = (weight /  weiold ) *  volins * B(imolty) / (ncmt(ibox,imolty)) 
+                  wratio = (weight /  weiold ) *  volins * B(imolty) / (ncmt(ibox,imolty))
                else
 ! molecule removed from box 1
-                  wratio = (weight /  weiold ) *  (ncmt(boxrem,imolty)+1)/ (B(imolty)*volrem) 
+                  wratio = (weight /  weiold ) *  (ncmt(boxrem,imolty)+1)/ (B(imolty)*volrem)
                end if
             end if
          else
                wratio = weight / weiold
          end if
-         if ( wratio .gt. random() ) then
+         if ( wratio .gt. random(-1) ) then
             laccept = .true.
          else
             laccept = .false.
@@ -174,7 +176,7 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
             laccept = .false.
          else if ( deltv .le. 0.0d0 ) then
             laccept = .true.
-         else if ( dexp(-deltvb) .gt. random() ) then
+         else if ( dexp(-deltvb) .gt. random(-1) ) then
             laccept = .true.
          else
             laccept = .false.
@@ -225,12 +227,14 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
                call dipole(ibox,3)
             end if
          end if
-      end if    
+      end if
 
-! write(io_output,*) 'END the optimization of the charge configuration'
+#ifdef __DEBUG__
+      write(io_output,*) 'END the optimization of the charge configuration in ',myid
+#endif
 
-      return         
-      end
+      return
+    end subroutine anes
 
 
 

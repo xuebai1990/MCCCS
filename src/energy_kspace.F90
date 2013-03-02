@@ -40,8 +40,8 @@ contains
 
     ! RP added for calculating time for communication step
     integer::mystart,myend,blocksize
-    integer::ncount_arr(numprocs),ncount_displs(numprocs)
-    real::kx_arr(vectormax),ky_arr(vectormax),kz_arr(vectormax),ssumr_arr(vectormax),ssumi_arr(vectormax),prefact_arr(vectormax)
+    integer::rcounts(numprocs),displs(numprocs)
+    real::my_kx(vectormax),my_ky(vectormax),my_kz(vectormax),my_ssumr(vectormax),my_ssumi(vectormax),my_prefact(vectormax)
 
     ! Set up the reciprocal space vectors ***
     ncount = 0
@@ -115,10 +115,10 @@ contains
              ! behavior on 32 and 64 bit machines without this .and. statement
              if ( ksqr .lt. hmaxsq .and. abs(ksqr-hmaxsq) .gt. 1d-9 ) then
                 ncount = ncount + 1
-                kx_arr(ncount) = kx1
-                ky_arr(ncount) = ky1
-                kz_arr(ncount) = kz1
-                prefact_arr(ncount) = exp(-ksqr/alpsqr4)/(ksqr*vol)
+                my_kx(ncount) = kx1
+                my_ky(ncount) = ky1
+                my_kz(ncount) = kz1
+                my_prefact(ncount) = exp(-ksqr/alpsqr4)/(ksqr*vol)
                 ! sum up q*cos and q*sin ***
                 sumr = 0.0d0
                 sumi = 0.0d0
@@ -135,24 +135,24 @@ contains
                    end do
                 end do
 
-                ssumr_arr(ncount) = sumr
-                ssumi_arr(ncount) = sumi
+                my_ssumr(ncount) = sumr
+                my_ssumi(ncount) = sumi
                 ! Potential energy ***
-                vrecip = vrecip + (sumr*sumr + sumi*sumi) * prefact_arr(ncount)
+                vrecip = vrecip + (sumr*sumr + sumi*sumi) * my_prefact(ncount)
              end if
           end do
        end do
     end do
 
     call mp_sum(vrecip,1,groupid)
-    call mp_allgather(ncount,ncount_arr,groupid)
-    call mp_set_displs(ncount_arr,ncount_displs,numvect(ibox),numprocs)
-    call mp_allgather(kx_arr,ncount,kx(:,ibox),ncount_arr,ncount_displs,groupid)
-    call mp_allgather(ky_arr,ncount,ky(:,ibox),ncount_arr,ncount_displs,groupid)
-    call mp_allgather(kz_arr,ncount,kz(:,ibox),ncount_arr,ncount_displs,groupid)
-    call mp_allgather(ssumr_arr,ncount,ssumr(:,ibox),ncount_arr,ncount_displs,groupid)
-    call mp_allgather(ssumi_arr,ncount,ssumi(:,ibox),ncount_arr,ncount_displs,groupid)
-    call mp_allgather(prefact_arr,ncount,prefact(:,ibox),ncount_arr,ncount_displs,groupid)
+    call mp_allgather(ncount,rcounts,groupid)
+    call mp_set_displs(rcounts,displs,numvect(ibox),numprocs)
+    call mp_allgather(my_kx,kx(:,ibox),rcounts,displs,groupid)
+    call mp_allgather(my_ky,ky(:,ibox),rcounts,displs,groupid)
+    call mp_allgather(my_kz,kz(:,ibox),rcounts,displs,groupid)
+    call mp_allgather(my_ssumr,ssumr(:,ibox),rcounts,displs,groupid)
+    call mp_allgather(my_ssumi,ssumi(:,ibox),rcounts,displs,groupid)
+    call mp_allgather(my_prefact,prefact(:,ibox),rcounts,displs,groupid)
 
 ! write(io_output,*) 'in recipsum:',ssumr(100,ibox),ibox
 ! safety check ***
@@ -173,8 +173,8 @@ contains
     real::vrecipnew,vrecipold,sumr(2),sumi(2),arg
 
     ! RP added for MPI
-    integer::ncount_arr(numprocs),ncount_displs(numprocs),my_start,my_end,blocksize
-    real::ssumrn_arr(vectormax),ssumin_arr(vectormax)
+    integer::rcounts(numprocs),displs(numprocs),my_start,my_end,blocksize
+    real::my_ssumrn(vectormax),my_ssumin(vectormax)
 
 ! if (LSOLPAR.and.(ibox.eq.2))then
 ! return
@@ -187,22 +187,24 @@ contains
 ! old conformation izz = 1 (which is 0 for swap inserted molecule)
 ! new conformation izz = 2 (which is 0 for swap removed molecule)
 
-! write(io_output,*) 'in recip:',moltion(1),moltion(2)
-! do izz = 1,2
-! imolty = moltion(izz)
-! do ii = 1, nunit(imolty)
-! write(io_output,*) rxuion(ii,izz),ryuion(ii,izz),rzuion(ii,izz), qquion(ii,izz)
-! end do
-! end do
+#ifdef __DEBUG_KSPACE__
+       write(io_output,*) myid,' in recip:',moltion(1),moltion(2)
+       do izz = 1,2
+          imolty = moltion(izz)
+          do ii = 1, nunit(imolty)
+             write(io_output,*) rxuion(ii,izz),ryuion(ii,izz),rzuion(ii,izz), qquion(ii,izz)
+          end do
+       end do
+#endif
 
        ! RP added for MPI
        blocksize = ncount/numprocs
-       ncount_arr = blocksize
+       rcounts = blocksize
        blocksize = ncount - blocksize * numprocs
-       if (blocksize.gt.0) ncount_arr(1:blocksize) = ncount_arr(1:blocksize) + 1
-       call mp_set_displs(ncount_arr,ncount_displs,blocksize,numprocs)
-       my_start = ncount_displs(myid+1) + 1
-       my_end = my_start + ncount_arr(myid+1) - 1
+       if (blocksize.gt.0) rcounts(1:blocksize) = rcounts(1:blocksize) + 1
+       call mp_set_displs(rcounts,displs,blocksize,numprocs)
+       my_start = displs(myid+1) + 1
+       my_end = my_start + rcounts(myid+1) - 1
 
        ! do 30 ic = 1,ncount
        do ic = my_start,my_end
@@ -224,13 +226,12 @@ contains
           ! ssumrn(ic,ibox) = ssumr(ic,ibox) - sumr(1) + sumr(2)
           ! ssumin(ic,ibox) = ssumi(ic,ibox) - sumi(1) + sumi(2)
           ! RP added for MPI
-          ssumrn_arr(ic-my_start + 1) = ssumr(ic,ibox) - sumr(1) + sumr(2)
-          ssumin_arr(ic-my_start + 1) = ssumi(ic,ibox) - sumi(1) + sumi(2)
+          my_ssumrn(ic-my_start + 1) = ssumr(ic,ibox) - sumr(1) + sumr(2)
+          my_ssumin(ic-my_start + 1) = ssumi(ic,ibox) - sumi(1) + sumi(2)
        end do
 
-       blocksize = ncount_arr(myid+1)
-       call mp_allgather(ssumrn_arr,blocksize,ssumrn(:,ibox),ncount_arr,ncount_displs,groupid)
-       call mp_allgather(ssumin_arr,blocksize,ssumin(:,ibox),ncount_arr,ncount_displs,groupid)
+       call mp_allgather(my_ssumrn,ssumrn(:,ibox),rcounts,displs,groupid)
+       call mp_allgather(my_ssumin,ssumin(:,ibox),rcounts,displs,groupid)
 !----------------------------------------------------------------------
        vrecipnew = 0.0d0
        vrecipold = 0.0d0
@@ -262,7 +263,9 @@ contains
        end do
     end if
 
-! write(io_output,*) 'in recip:',ssumr(100,ibox),ibox,ssumrn(100,ibox)
+#ifdef __DEBUG_KSPACE__
+    write(io_output,*) myid,' in recip:',ssumr(100,ibox),ibox,ssumrn(100,ibox)
+#endif
     return
   end subroutine recip
 
@@ -315,14 +318,16 @@ contains
 ! old conformation izz = 1 (which is 0 for swap inserted molecule)
 ! new conformation izz = 2 (which is 0 for swap removed molecule)
 
-! write(io_output,*) 'in recip:',moltion(1),moltion(2)
-! do izz = 1,2
-! imolty = moltion(izz)
-! do ii = 1, nunit(imolty)
-! write(io_output,*) rxuion(ii,izz),ryuion(ii,izz),rzuion(ii,izz),
-!     &              qquion(ii,izz)
-! end do
-! end do
+#ifdef __DEBUG_KSPACE__
+         write(io_output,*) myid,' in recip_atom:',moltion(1),moltion(2)
+         do izz = 1,2
+            imolty = moltion(izz)
+            do ii = 1, nunit(imolty)
+               write(io_output,*) rxuion(ii,izz),ryuion(ii,izz),rzuion(ii,izz),
+               &              qquion(ii,izz)
+            end do
+         end do
+#endif
 
          do 30 ic = 1, ncount
             do 20 izz = 1,2
@@ -380,7 +385,9 @@ contains
 
       end if
 
-! write(io_output,*) 'in recip:',ssumr(100,ibox),ibox,ssumrn(100,ibox)
+#ifdef __DEBUG_KSPACE__
+      write(io_output,*) myid,' in recip_atom:',ssumr(100,ibox),ibox,ssumrn(100,ibox)
+#endif
 
       return
   end subroutine recip_atom
@@ -403,14 +410,15 @@ contains
 ! old conformation zzz = 1 (which is 0 for swap inserted molecule)
 ! new conformation zzz = 2 (which is 0 for swap removed molecule)
 
-! write(io_output,*) 'in recip:',moltion(1),moltion(2)
-! do zzz = 1,2
-! imolty = moltion(zzz)
-! do ii = 1, nunit(imolty)
-! write(io_output,*) rxuion(ii,zzz),ryuion(ii,zzz),rzuion(ii,zzz),
-!     &              qquion(ii,zzz)
-! end do
-! end do
+#ifdef __DEBUG_KSPACE__
+         write(io_output,*) myid,' in ee_recip:',moltion(1),moltion(2)
+         do zzz = 1,2
+            imolty = moltion(zzz)
+            do ii = 1, nunit(imolty)
+               write(io_output,*) rxuion(ii,zzz),ryuion(ii,zzz),rzuion(ii,zzz),qquion(ii,zzz)
+            end do
+         end do
+#endif
 
          do 30 ic = 1, ncount
             do 20 zzz = 1,2
@@ -470,8 +478,9 @@ contains
 
       end if
 
-! write(io_output,*) 'in recip:',ssumr(100,ibox),ibox,ssumrn(100,ibox)
-
+#ifdef __DEBUG_KSPACE__
+      write(io_output,*) myid,' in ee_recip:',ssumr(100,ibox),ibox,ssumrn(100,ibox)
+#endif
       return
   end subroutine ee_recip
 
@@ -602,8 +611,9 @@ contains
     pyz = pyz + intrayz
     pzy = pzy + intrazy
 
-    ! write(io_output,*) 'internal part:',intraxx,intrayy,intrazz
-
+#ifdef __DEBUG_KSPACE__
+    write(io_output,*) myid,' in recippress. Internal part:',intraxx,intrayy,intrazz
+#endif
     return
   end subroutine recippress
 

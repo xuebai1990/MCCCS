@@ -9,7 +9,7 @@ subroutine monola(file_in)
   use const_math,only:onepi,twopi
   use util_random,only:random
   use util_runtime,only:err_exit
-  use util_timings,only:time_date_str
+  use util_timings,only:time_date_str,time_now
   use util_mp,only:mp_barrier
   use sim_particle,only:init_neighbor_list
   use sim_system
@@ -46,11 +46,11 @@ subroutine monola(file_in)
   integer::ntii
   integer::imax,itmax
   integer::n,nconfig,nentry
-  real::vhist,eng_list(fmax)
+  real::time_prev,time_cur,vhist,eng_list(fmax)
 
-  real::Temp_Energy, Temp_Mol_Vol
+  real::Temp_Energy,Temp_Mol_Vol
 
-  integer::point_of_start, point_to_end
+  integer::point_of_start,point_to_end
 
   integer::i,j,nblock,ibox,jbox,nnn,ii,itemp,itype,itype2,intg,imolty,ilunit,nbl,itel,ig,il,k,histtot,Temp_nmol
   integer::nvirial,zzz,steps,igrow
@@ -102,10 +102,6 @@ subroutine monola(file_in)
      end if
      call mp_barrier(groupid)
   end do
-! KM for MPI
-! program will hang if stop called from readdat
-! set ldie in readdat and have all processors call err_exit(__FILE__,__LINE__,'',myid+1) here
-  if (ldie) call err_exit(__FILE__,__LINE__,'',myid+1)
 
   allocate(nminp(ntmax),nmaxp(ntmax),ncmt_list(fmax,ntmax),ndist(0:nmax,ntmax),pres(nbxmax),acvkjmol(nener,nbxmax),acsolpar(nprop1,nbxmax,nbxmax),acEnthalpy(nbxmax),acEnthalpy1(nbxmax),stdev1(nprop1,nbxmax,nbxmax),sterr1(nprop1,nbxmax,nbxmax),errme1(nprop1,nbxmax,nbxmax),vstart(nbxmax),vend(nbxmax),avv(nener,nbxmax),acv(nener,nbxmax),acvsq(nener,nbxmax),aflv(nbxmax),acboxl(nbxmax,3),acboxa(nbxmax,3),acpres(nbxmax),acsurf(nbxmax),acvolume(nbxmax),acnbox(nbxmax,ntmax),acnbox2(nbxmax,ntmax,20),mnbox(nbxmax,ntmax),asetel(nbxmax,ntmax),acdens(nbxmax,ntmax),molfra(nbxmax,ntmax),dsq(nprop,nbxmax),stdev(nprop,nbxmax),dsq1(nprop1,nbxmax,nbxmax),sterr(nprop,nbxmax),errme(nprop,nbxmax),lratfix(ntmax),lsolute(ntmax),molvol(nbxmax),speden(nbxmax),flucmom(nbxmax),flucmom2(nbxmax),acvol(nbxmax),acvolsq(nbxmax),file_ndis(ntmax),stat=jerr)
   if (jerr.ne.0) then
@@ -400,12 +396,14 @@ subroutine monola(file_in)
      write(21,*) 'ii:',nnstep,(neigh_cnt(i),i=1,nchain)
   end if
 
+  time_prev = time_now()
+
   do nnn = 1, nstep
      tmcc = nnstep + nnn
      do ii = 1, nchain
 ! write(io_output,*) 'nstep',(nnn-1)*nchain+ii
 ! select a move-type at random ***
-        rm = random()
+        rm = random(-1)
 ! write(io_output,*) 'tmcc, random: ',tmcc,rm
 ! special ensemble dependent moves ###
         if  (rm .le. pmvol) then
@@ -436,13 +434,13 @@ subroutine monola(file_in)
         else if (rm .le. pmexpc1 ) then
 ! new expanded-ensemble move ---
 ! call expand
-           if (random().le.eeratio) then
+           if (random(-1).le.eeratio) then
               call ee_index_swap
            else
               call eemove
            end if
         else if ( rm .le. pm_atom_tra) then
-           rm = 3.0d0 * random()
+           rm = 3.0d0 * random(-1)
            if ( rm .le. 1.0d0 ) then
               call Atom_traxyz (.true.,.false.,.false.)
            else if ( rm .le. 2.0d0 ) then
@@ -452,7 +450,7 @@ subroutine monola(file_in)
            end if
         else if ( rm .le. pmtra ) then
 ! translational move in x,y, or z direction ---
-           rm = 3.0d0 * random()
+           rm = 3.0d0 * random(-1)
            if ( rm .le. 1.0d0 ) then
               call traxyz(.true.,.false.,.false.)
            else if ( rm .le. 2.0d0 ) then
@@ -462,7 +460,7 @@ subroutine monola(file_in)
            end if
         else
 ! rotation around x,y, or z axis move --
-           rm = 3.0d0 * random()
+           rm = 3.0d0 * random(-1)
            if ( rm .le. 1.0d0 ) then
               call rotxyz(.true.,.false.,.false.)
            else if ( rm .le. 2.0d0 ) then
@@ -683,6 +681,13 @@ subroutine monola(file_in)
 ! *************************************************************
 
 ! perform periodic operations  ***
+     time_cur = time_now()
+     if ( time_cur - time_prev .gt. checkpoint_interval ) then
+        lrsave = .true.
+        time_prev = time_cur
+     else
+        lrsave = .false.
+     end if
 
      if (any(lopt_bias).and.mod(nnn,freq_opt_bias).eq.0) then
         call opt_bias
@@ -790,7 +795,6 @@ subroutine monola(file_in)
      lratv = .false.
      lprint = .false.
      lmv = .false.
-     lrsave = .false.
      lblock = .false.
 
      if ( mod(nnn,iratio) .eq. 0 ) then
@@ -813,9 +817,6 @@ subroutine monola(file_in)
         else
            lmv = .true.
         end if
-     end if
-     if ( mod(nnn,irsave) .eq. 0 ) then
-        lrsave = .true.
      end if
 
 ! JLR 11-11-09
@@ -1162,9 +1163,9 @@ subroutine monola(file_in)
         do i = nchain+1, nchain+N_add
            moltyp(i)=N_moltyp2add
            nboxi(i) = N_box2add
-           rxu(i,1) = random()*boxlx(N_box2add)
-           ryu(i,1) = random()*boxly(N_box2add)
-           rzu(i,1) = random()*boxlz(N_box2add)
+           rxu(i,1) = random(-1)*boxlx(N_box2add)
+           ryu(i,1) = random(-1)*boxly(N_box2add)
+           rzu(i,1) = random(-1)*boxlz(N_box2add)
            qqu(i,1) = 0.0
         end do
         nchain = nchain+N_add

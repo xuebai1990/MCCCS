@@ -91,9 +91,9 @@ module sim_system
 ! ***************************************
 ! ** DIMENSIONS FOR ARRAYS             **
 ! ***************************************
-  integer::io_output=6
+  integer::io_output=6,checkpoint_interval=1800
   character(LEN=default_path_length)::file_input='fort.4',file_restart='fort.77',file_struct='input_struc.xyz',file_run='run1a.dat',file_movie='movie1a.dat',file_dipole='dipole1a.dat'
-  namelist /io/ file_input,file_restart,file_struct,file_run,file_movie,file_dipole,io_output
+  namelist /io/ file_input,file_restart,file_struct,file_run,file_movie,file_dipole,io_output,checkpoint_interval
   integer::nntype& !< number of types of beads
    ,nbox=1,nbxmax& !< maximum number of boxes
    ,npabmax& !< maximum number of box pairs (for swatch and swap)
@@ -132,8 +132,9 @@ module sim_system
   integer,allocatable::ucheck(:),ntype(:,:),leaderq(:,:),invib(:,:),itvib(:,:,:),ijvib(:,:,:),inben(:,:),itben(:,:,:),ijben2(:,:,:),ijben3(:,:,:),intor(:,:),ittor(:,:,:),ijtor2(:,:,:),ijtor3(:,:,:),ijtor4(:,:,:),nrotbd(:),irotbd(:,:),splist(:,:,:),rlist(:,:),rfrom(:),rprev(:),rnum(:),iplace(:,:),pfrom(:),pnum(:),pprev(:),a15type(:,:,:),prior(:,:),wsched(:),growfrom(:),growprev(:),grownum(:),growlist(:,:),nswatb(:,:),nsampos(:),ncut(:,:),gswatc(:,:,:),nswtcb(:),box3(:,:),box4(:,:),temtyp(:),nunit(:),nugrow(:),nmaxcbmc(:),iurot(:),maxgrow(:),isolute(:),iring(:),nrig(:),irig(:,:),frig(:,:),nrigmin(:),nrigmax(:),rindex(:),riutry(:,:),ininch(:,:),nswapb(:),box1(:,:),box2(:,:),nchoi1(:),nchoi(:),nchoir(:),nchoih(:),nchtor(:),nchbna(:),nchbnb(:),icbdir(:),icbsta(:),rmexpc(:),eetype(:),ncmt(:,:),ncmt2(:,:,:),parall(:,:),parbox(:,:,:),solcount(:,:),nwell(:),moltyp(:),nboxi(:),neighbor(:,:),neigh_cnt(:),neighboro(:,:),neigh_o(:),ghost_particles(:),numberDimensionIsIsotropic(:),inix(:),iniy(:),iniz(:),inirot(:),inimix(:),nchoiq(:),box5(:),box6(:),nchbox(:)
   logical,allocatable::lovr(:),lexist(:),lexclu(:,:,:,:),lrigi(:,:),liswinc(:,:),lchiral(:,:),linclu(:,:,:),lqinclu(:,:,:),lainclu(:,:,:),wschvib(:,:),wschben(:,:),wschtor(:,:),lelect(:),lflucq(:),lqtrans(:),lexpand(:),lavbmc1(:),lavbmc2(:),lavbmc3(:),lbias(:),lring(:),lrigid(:),lrig(:),lq14scale(:),lbranch(:),lrplc(:),lplace(:,:),lwell(:),lideal(:),ltwice(:)
 
+  logical::ldebug=.true.
+
 ! INPUTDATA.INC
-  logical::ldie
   integer::run_num
   character(LEN=1)::suffix
   logical::L_add,L_sub
@@ -177,7 +178,7 @@ module sim_system
   integer::tmcc
   logical::lneighbor
   integer::counthist,nrigi
-  integer::irsave,nnstep
+  integer::nnstep
   real::pmiswat
 
 ! *** adding this for iswatch move ***

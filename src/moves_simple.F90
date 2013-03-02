@@ -33,11 +33,11 @@ contains
 ! --------------------------------------------------------------------
 
 #ifdef __DEBUG__
-      write(io_output,*) 'start TRAXYZ',lx,ly,lz
+      write(io_output,*) 'start TRAXYZ in ',myid,lx,ly,lz
 #endif
       ovrlap = .false.
 ! select a chain at random ***
-      rchain  = random()
+      rchain  = random(-1)
       do icbu = 1,nmolty
          if ( rchain .lt. pmtrmt(icbu) ) then
             imolty = icbu
@@ -59,7 +59,7 @@ contains
             if(lz) bntraz(imolty,ibox) = bntraz(imolty,ibox) + 1.0d0
             return
          end if
-         i = idint( dble(ncmt(1,imolty))*random() ) + 1
+         i = idint( dble(ncmt(1,imolty))*random(-1) ) + 1
          i = parbox(i,1,imolty)
          if ( moltyp(i) .ne. imolty ) write(io_output,*) 'screwup traxyz'
 
@@ -67,7 +67,7 @@ contains
       else
 
          dchain = dble(temtyp(imolty))
-         i = int( dchain*random() + 1 )
+         i = int( dchain*random(-1) + 1 )
          i = parall(imolty,i)
          ibox = nboxi(i)
 
@@ -87,19 +87,19 @@ contains
 
 ! move i ***
       if (lx) then
-         rx =  ( 2.0*random() - 1.0d0 ) * rmtrax(imolty,ibox)
+         rx =  ( 2.0*random(-1) - 1.0d0 ) * rmtrax(imolty,ibox)
          bntrax(imolty,ibox) = bntrax(imolty,ibox) + 1.0d0
       else
          rx=0
       end if
       if (ly) then
-         ry =  ( 2.0*random() - 1.0d0 ) * rmtray(imolty,ibox)
+         ry =  ( 2.0*random(-1) - 1.0d0 ) * rmtray(imolty,ibox)
          bntray(imolty,ibox) = bntray(imolty,ibox) + 1.0d0
       else
          ry=0
       end if
       if (lz) then
-         rz =  ( 2.0*random() - 1.0d0 ) * rmtraz(imolty,ibox)
+         rz =  ( 2.0*random(-1) - 1.0d0 ) * rmtraz(imolty,ibox)
          bntraz(imolty,ibox) = bntraz(imolty,ibox) + 1.0d0
       else
          rz=0
@@ -191,7 +191,7 @@ contains
 
       if ( deltv .le. 0.0d0 ) then
 ! accept move
-      else if ( dexp(-deltvb) .gt. random() ) then
+      else if ( dexp(-deltvb) .gt. random(-1) ) then
 ! accept move
       else
 ! move rejected
@@ -287,7 +287,7 @@ contains
       end if
 
 #ifdef __DEBUG__
-      write(io_output,*) 'end TRAXYZ',i
+      write(io_output,*) 'end TRAXYZ in ',myid,i
 #endif
 
       return
@@ -318,14 +318,14 @@ contains
 ! --------------------------------------------------------------------
 
 #ifdef __DEBUG__
-      write(io_output,*) 'start ROTXYZ',lx,ly,lz
+      write(io_output,*) 'start ROTXYZ in ',myid,lx,ly,lz
 #endif
       ovrlap = .false.
       if (lgrand) then
 ! select a chain at random in box 1!
 !         (in box 2 is an ideal gas!)
          ibox = 1
-         rchain  = random()
+         rchain  = random(-1)
          do icbu = 1,nmolty
             if ( rchain .lt. pmromt(icbu) ) then
                imolty = icbu
@@ -340,13 +340,13 @@ contains
          end if
 
  10      dchain = dble(temtyp(imolty))
-         i = int( dchain*random() + 1 )
+         i = int( dchain*random(-1) + 1 )
          i = parall(imolty,i)
          if (nboxi(i) .ne. 1) goto 10
          iuroty = iurot(imolty)
       else
 ! select a chain type at random ***
-         rchain  = random()
+         rchain  = random(-1)
          do icbu = 1,nmolty
             if ( rchain .lt. pmromt(icbu) ) then
                imolty = icbu
@@ -359,7 +359,7 @@ contains
          if (temtyp(imolty).eq.0) return
 
          dchain = dble(temtyp(imolty))
-         i = int( dchain*random() + 1 )
+         i = int( dchain*random(-1) + 1 )
          i = parall(imolty,i)
 
          ibox = nboxi(i)
@@ -369,7 +369,7 @@ contains
 !kea 6/4/09 -- for multiple rotation centers
       if(iuroty.lt.0) then
          if(nrotbd(imolty).gt.1) then
-            rchain = random()
+            rchain = random(-1)
             do icbu = 1,nrotbd(imolty)
                if( rchain .lt. pmrotbd(icbu,imolty)) then
                   iuroty = irotbd(icbu,imolty)
@@ -404,7 +404,7 @@ contains
          rmrot = rmrotz(imolty,ibox)
          bnrotz(imolty,ibox) = bnrotz(imolty,ibox) + 1.0d0
       end if
-      dgamma = ( 2.0d0*random() - 1.0d0 ) * rmrot
+      dgamma = ( 2.0d0*random(-1) - 1.0d0 ) * rmrot
 
 ! set up the rotation marix ***
 
@@ -531,7 +531,7 @@ contains
 
       if ( deltv .le. 0.0d0 ) then
 ! move accepted
-      else if ( dexp(-deltvb) .gt. random() ) then
+      else if ( dexp(-deltvb) .gt. random(-1) ) then
 ! move accepted
       else
 ! move rejected
@@ -607,7 +607,7 @@ contains
       end if
 
 #ifdef __DEBUG__
-      write(io_output,*) 'end ROTXYZ'
+      write(io_output,*) 'end ROTXYZ in ',myid,i
 #endif
 
       return
@@ -640,11 +640,12 @@ contains
       logical::laccept
 
 ! --------------------------------------------------------------------
-
-! write(io_output,*) 'start TRAXYZ'
+#ifdef __DEBUG__
+      write(io_output,*) 'start ATOM_TRAXYZ in ',myid
+#endif
       ovrlap = .false.
 ! select a chain at random ***
-      rchain  = random()
+      rchain  = random(-1)
       do icbu = 1,nmolty
          if ( rchain .lt. pmtrmt(icbu) ) then
             imolty = icbu
@@ -662,7 +663,7 @@ contains
             if(lz) Abntraz = Abntraz + 1.0d0
             return
          end if
-         pick_chain = idint( dble(ncmt(1,imolty))*random() ) + 1
+         pick_chain = idint( dble(ncmt(1,imolty))*random(-1) ) + 1
          pick_chain = parbox(pick_chain,1,imolty)
          if ( moltyp(pick_chain) .ne. imolty )  write(io_output,*) 'screwup traxyz'
 
@@ -670,7 +671,7 @@ contains
       else
 
          dchain = dble(temtyp(imolty))
-         pick_chain = int( dchain*random() + 1 )
+         pick_chain = int( dchain*random(-1) + 1 )
          pick_chain = parall(imolty,pick_chain)
          ibox = nboxi(pick_chain)
 
@@ -680,7 +681,7 @@ contains
 
       iunit = nunit(imolty)
 
-      pick_unit = int(dble(iunit*random()) + 1 )
+      pick_unit = int(dble(iunit*random(-1)) + 1 )
 
 ! write(io_output,*) pick_unit, imolty, pick_chain
 
@@ -697,19 +698,19 @@ contains
 
 ! move i ***
       if (lx) then
-         rx =  ( 2.0*random() - 1.0d0 ) * Armtrax
+         rx =  ( 2.0*random(-1) - 1.0d0 ) * Armtrax
          Abntrax = Abntrax + 1.0d0
       else
          rx=0
       end if
       if (ly) then
-         ry =  ( 2.0*random() - 1.0d0 ) * Armtray
+         ry =  ( 2.0*random(-1) - 1.0d0 ) * Armtray
          Abntray = Abntray + 1.0d0
       else
          ry=0
       end if
       if (lz) then
-         rz =  ( 2.0*random() - 1.0d0 ) * Armtraz
+         rz =  ( 2.0*random(-1) - 1.0d0 ) * Armtraz
          Abntraz = Abntraz + 1.0d0
       else
          rz=0
@@ -771,7 +772,7 @@ contains
 
       if ( deltv .le. 0.0d0 ) then
 ! accept move
-      else if ( dexp(-deltvb) .gt. random() ) then
+      else if ( dexp(-deltvb) .gt. random(-1) ) then
 ! accept move
       else
 ! move rejected
@@ -852,8 +853,9 @@ contains
          end do
       end if
 
-! write(io_output,*) 'end TRAXYZ',i
-
+#ifdef __DEBUG__
+      write(io_output,*) 'end ATOM_TRAXYZ in ',myid,i
+#endif
       return
     end subroutine Atom_traxyz
 
@@ -865,7 +867,7 @@ contains
 !
 ! perform change of the volume: random walk in ln(vol)
 !
-    subroutine volume
+    subroutine volume()
       use sim_particle,only:rebuild_neighbor_list
       use sim_cell
       use energy_pairwise,only:sumup
@@ -896,12 +898,13 @@ contains
       real::v3n(nbxmax),v3o(nbxmax)
 
 ! --------------------------------------------------------------------
-
-! write(io_output,*) 'start VOLUME'
+#ifdef __DEBUG__
+      write(io_output,*) 'start VOLUME in ',myid
+#endif
 
 ! select pair of boxes to do the volume move
       if ( nvolb .gt. 1 ) then
-         rpair = random()
+         rpair = random(-1)
          do ipair = 1, nvolb
             if ( rpair .lt. pmvolb(ipair) ) then
                ipairb = ipair
@@ -924,7 +927,7 @@ contains
       if ( lsolid(boxa) ) then
 ! volume move independently in x, y, z directions
 ! changing to only move in z direction:
-         rm = random()
+         rm = random(-1)
          if ( rm .le. pmvolx ) then
 ! lx(boxa) = .true.
 ! ly(boxa) = .false.
@@ -957,7 +960,7 @@ contains
       if ( lsolid(boxb) ) then
 ! volume move independently in x, y, z directions
 ! changing to only move in z direction:
-         rm = random()
+         rm = random(-1)
          if ( rm .le. pmvolx ) then
 ! lx(boxb) = .true.
 ! ly(boxb) = .false.
@@ -1072,7 +1075,7 @@ contains
       if ( lncubic ) then
 
 ! select one of the cell edge
-         rbox = 3.0d0*random()
+         rbox = 3.0d0*random(-1)
          if ( lx ) then
             if ( rbox .le. 1.0d0 ) then
                la = .true.
@@ -1120,14 +1123,14 @@ contains
             hbox = boxa
             jbox = boxb
 
-            hmat(boxa,jhmat) = hmat(boxa,jhmat) + rmhmat(boxa,jhmat)* ( 2.0d0*random() - 1.0d0 )
+            hmat(boxa,jhmat) = hmat(boxa,jhmat) + rmhmat(boxa,jhmat)* ( 2.0d0*random(-1) - 1.0d0 )
             bnhmat(boxa,jhmat) = bnhmat(boxa,jhmat) + 1.0d0
 
          else
             hbox = boxb
             jbox = boxa
 
-            hmat(boxb,jhmat) = hmat(boxb,jhmat) + rmhmat(boxb,jhmat)* ( 2.0d0*random() - 1.0d0 )
+            hmat(boxb,jhmat) = hmat(boxb,jhmat) + rmhmat(boxb,jhmat)* ( 2.0d0*random(-1) - 1.0d0 )
             bnhmat(boxb,jhmat) = bnhmat(boxb,jhmat) + 1.0d0
 
          end if
@@ -1212,7 +1215,7 @@ contains
 
 
 ! calculate new volume
-         expdv = dexp(dlog(volo(boxa)/volo(boxb)) + rmvol(ipairb)*(2.0d0*random()-1.0d0))
+         expdv = dexp(dlog(volo(boxa)/volo(boxb)) + rmvol(ipairb)*(2.0d0*random(-1)-1.0d0))
          voln(boxa)= expdv*volt/(1+expdv)
          voln(boxb)= volt-voln(boxa)
          rbcut(boxa) = rcut(boxa)
@@ -1411,7 +1414,7 @@ contains
 ! acceptance test
 
 ! write(io_output,*) 'dele',dele
-      if (random() .lt. dexp(-beta*dele) ) then
+      if (random(-1) .lt. dexp(-beta*dele) ) then
 ! accepted
          if ( lncubic ) then
             bshmat(hbox,jhmat) = bshmat(hbox,jhmat) + 1.0d0
@@ -1504,7 +1507,10 @@ contains
             end do
          end if
       end do
-! write(io_output,*) 'end VOLUME'
+
+#ifdef __DEBUG__
+      write(io_output,*) 'end VOLUME in ',myid,boxa,boxb
+#endif
       return
     end subroutine volume
 
@@ -1516,7 +1522,7 @@ contains
 !
 ! perform change of the volume: random walk in ln(vol)
 !
-    subroutine prvolume
+    subroutine prvolume()
       use sim_particle,only:rebuild_neighbor_list
       use sim_cell
       use energy_pairwise,only:sumup
@@ -1543,7 +1549,7 @@ contains
 ! --------------------------------------------------------------------
 
 #ifdef __DEBUG__
-      write(io_output,*) 'start VOLUME of LNPTGIBBS'
+      write(io_output,*) 'start PRVOLUME in ',myid
 #endif
 
 ! Select a box at  random to change the volume of box
@@ -1554,7 +1560,7 @@ contains
       lz = .false.
 
 
-      rbox = random()
+      rbox = random(-1)
       do ibox = 1,nbox
          if (rbox .lt. pmvlmt(ibox) ) then
             boxvch=ibox
@@ -1567,7 +1573,7 @@ contains
 
       if ( lsolid(boxvch) ) then
 ! volume move independently in x, y, z directions
-         rbox = random()
+         rbox = random(-1)
          if ( rbox .le. pmvolx ) then
             lx = .true.
             ly = .false.
@@ -1658,7 +1664,7 @@ contains
 
       if ( lsolid(boxvch) .and. .not. lrect(boxvch) ) then
 ! select one of the cell edge
-         rbox = 3.0d0*random()
+         rbox = 3.0d0*random(-1)
          if ( lx ) then
             if ( rbox .le. 1.0d0 ) then
                la = .true.
@@ -1702,7 +1708,7 @@ contains
             if ( lz ) jhmat = 9
          end if
 
-         hmat(boxvch,jhmat) = hmat(boxvch,jhmat) + rmhmat(boxvch,jhmat)* ( 2.0d0*random() - 1.0d0 )
+         hmat(boxvch,jhmat) = hmat(boxvch,jhmat) + rmhmat(boxvch,jhmat)* ( 2.0d0*random(-1) - 1.0d0 )
          bnhmat(boxvch,jhmat) = bnhmat(boxvch,jhmat) + 1.0d0
 
          call matops(boxvch)
@@ -1755,7 +1761,7 @@ contains
       else
 
 ! calculate new volume
-         voln = volo + rmvol(boxvch) * ( 2.0d0*random() - 1.0d0 )
+         voln = volo + rmvol(boxvch) * ( 2.0d0*random(-1) - 1.0d0 )
          rbcut = rcut(boxvch)
          if ( lpbcz ) then
             if (lsolid(boxvch).and.lrect(boxvch)) then
@@ -1912,7 +1918,7 @@ contains
 ! write(io_output,*) 'dele',     dele
 
 
-      if (random() .lt. dexp(-(beta*dele)) ) then
+      if (random(-1) .lt. dexp(-(beta*dele)) ) then
 ! accepted
           if ( lsolid(boxvch) .and. .not. lrect(boxvch) ) then
              bshmat(boxvch,jhmat) = bshmat(boxvch,jhmat) + 1.0d0
@@ -2002,7 +2008,7 @@ contains
       end do
 
 #ifdef __DEBUG__
-      write(io_output,*) 'end VOLUME of LNPTGIBBS'
+      write(io_output,*) 'end PRVOLUME in ',myid,boxvch
 #endif
 
       return

@@ -20,7 +20,7 @@ module util_mp
   END INTERFACE
 
   INTERFACE mp_allgather
-     MODULE PROCEDURE mp_allgather_l1, mp_allgatherv_l1, mp_allgather_i0, mp_allgather_r1, mp_allgatherv_r1
+     MODULE PROCEDURE mp_allgather_l1, mp_allgatherv_l1, mp_allgather_i0, mp_allgather_r1, mp_allgatherv_r1, mp_allgatherv_r2
   END INTERFACE
 
   INTERFACE mp_alltoall
@@ -107,46 +107,35 @@ CONTAINS
 
   FUNCTION mp_rank( comm )
     INTEGER :: mp_rank
-    INTEGER, OPTIONAL, INTENT(IN) :: comm
+    INTEGER, INTENT(IN) :: comm
     INTEGER :: ierr
 
     ierr = 0
     mp_rank = 0
 #ifdef __MPI__
-    IF( PRESENT( comm ) ) THEN
-       CALL MPI_comm_rank(comm,mp_rank,ierr)
-    ELSE
-       CALL MPI_comm_rank(MPI_COMM_WORLD,mp_rank,ierr)
-    END IF
+    CALL MPI_comm_rank(comm,mp_rank,ierr)
     IF (ierr/=0) CALL mp_stop(__LINE__)
 #endif
   END FUNCTION mp_rank
 
   FUNCTION mp_size( comm )
     INTEGER :: mp_size
-    INTEGER, OPTIONAL, INTENT(IN) :: comm
+    INTEGER, INTENT(IN) :: comm
     INTEGER :: ierr
 
     ierr = 0
     mp_size = 1
 #ifdef __MPI__
-    IF( PRESENT( comm ) ) THEN
-       CALL MPI_comm_size(comm,mp_size,ierr)
-    ELSE
-       CALL MPI_comm_size(MPI_COMM_WORLD,mp_size,ierr)
-    END IF
+    CALL MPI_comm_size(comm,mp_size,ierr)
     IF (ierr/=0) CALL mp_stop(__LINE__)
 #endif
   END FUNCTION mp_size
 
-  SUBROUTINE mp_barrier(gid)
-    INTEGER, OPTIONAL, INTENT(IN) :: gid
-    INTEGER :: group
+  SUBROUTINE mp_barrier(comm)
+    INTEGER, INTENT(IN) :: comm
     INTEGER :: ierr
 #ifdef __MPI__
-    group = MPI_COMM_WORLD
-    IF( PRESENT( gid ) ) group = gid
-    CALL MPI_BARRIER(group,IERR)
+    CALL MPI_BARRIER(comm,IERR)
     IF (ierr/=0) CALL mp_stop(__LINE__)
 #endif
   END SUBROUTINE mp_barrier
@@ -156,12 +145,12 @@ CONTAINS
 #undef MP_TYPE
 #endif
 #define MP_TYPE MPI_INTEGER
-  SUBROUTINE mp_sendrecv_i0(msg_src,msg_dest,msglen,src,dest,tag,gid)
+  SUBROUTINE mp_sendrecv_i0(msg_src,msg_dest,msglen,src,dest,tag,comm)
     INTEGER :: msg_dest, msg_src
 #include "mp_sendrecv.F90"
   END SUBROUTINE mp_sendrecv_i0
 
-  SUBROUTINE mp_sendrecv_i1(msg_src,msg_dest,msglen,src,dest,tag,gid)
+  SUBROUTINE mp_sendrecv_i1(msg_src,msg_dest,msglen,src,dest,tag,comm)
     INTEGER :: msg_dest(:), msg_src(:)
 #include "mp_sendrecv.F90"
   END SUBROUTINE mp_sendrecv_i1
@@ -170,17 +159,17 @@ CONTAINS
 #undef MP_TYPE
 #endif
 #define MP_TYPE MPI_DOUBLE_PRECISION
-  SUBROUTINE mp_sendrecv_r0(msg_src,msg_dest,msglen,src,dest,tag,gid)
+  SUBROUTINE mp_sendrecv_r0(msg_src,msg_dest,msglen,src,dest,tag,comm)
     REAL (DP) :: msg_dest, msg_src
 #include "mp_sendrecv.F90"
   END SUBROUTINE mp_sendrecv_r0
 
-  SUBROUTINE mp_sendrecv_r1(msg_src,msg_dest,msglen,src,dest,tag,gid)
+  SUBROUTINE mp_sendrecv_r1(msg_src,msg_dest,msglen,src,dest,tag,comm)
     REAL (DP) :: msg_dest(:), msg_src(:)
 #include "mp_sendrecv.F90"
   END SUBROUTINE mp_sendrecv_r1
 
-  SUBROUTINE mp_sendrecv_r2(msg_src,msg_dest,msglen,src,dest,tag,gid)
+  SUBROUTINE mp_sendrecv_r2(msg_src,msg_dest,msglen,src,dest,tag,comm)
     REAL (DP) :: msg_dest(:,:), msg_src(:,:)
 #include "mp_sendrecv.F90"
   END SUBROUTINE mp_sendrecv_r2
@@ -191,17 +180,17 @@ CONTAINS
 #undef MP_AUX_FUNC
 #endif
 #define MP_AUX_FUNC bcast_logical
-  SUBROUTINE mp_bcast_l0(msg,msglen,source,gid)
+  SUBROUTINE mp_bcast_l0(msg,msglen,source,comm)
     LOGICAL :: msg
 #include "mp_bcast.F90"
   END SUBROUTINE mp_bcast_l0
 
-  SUBROUTINE mp_bcast_l1(msg,msglen,source,gid)
+  SUBROUTINE mp_bcast_l1(msg,msglen,source,comm)
     LOGICAL :: msg(:)
 #include "mp_bcast.F90"
   END SUBROUTINE mp_bcast_l1
 
-  SUBROUTINE mp_bcast_l2(msg,msglen,source,gid)
+  SUBROUTINE mp_bcast_l2(msg,msglen,source,comm)
     LOGICAL :: msg(:,:)
 #include "mp_bcast.F90"
   END SUBROUTINE mp_bcast_l2
@@ -210,22 +199,22 @@ CONTAINS
 #undef MP_AUX_FUNC
 #endif
 #define MP_AUX_FUNC bcast_integer
-  SUBROUTINE mp_bcast_i0(msg,msglen,source,gid)
+  SUBROUTINE mp_bcast_i0(msg,msglen,source,comm)
     INTEGER :: msg
 #include "mp_bcast.F90"
   END SUBROUTINE mp_bcast_i0
 
-  SUBROUTINE mp_bcast_i1(msg,msglen,source,gid)
+  SUBROUTINE mp_bcast_i1(msg,msglen,source,comm)
     INTEGER :: msg(:)
 #include "mp_bcast.F90"
   END SUBROUTINE mp_bcast_i1
 
-  SUBROUTINE mp_bcast_i2( msg,msglen,source,gid )
+  SUBROUTINE mp_bcast_i2(msg,msglen,source,comm)
     INTEGER :: msg(:,:)
 #include "mp_bcast.F90"
   END SUBROUTINE mp_bcast_i2
 
-  SUBROUTINE mp_bcast_i3(msg,msglen,source,gid)
+  SUBROUTINE mp_bcast_i3(msg,msglen,source,comm)
     INTEGER :: msg(:,:,:)
 #include "mp_bcast.F90"
   END SUBROUTINE mp_bcast_i3
@@ -234,54 +223,51 @@ CONTAINS
 #undef MP_AUX_FUNC
 #endif
 #define MP_AUX_FUNC bcast_real
-  SUBROUTINE mp_bcast_r0(msg,msglen,source,gid)
+  SUBROUTINE mp_bcast_r0(msg,msglen,source,comm)
     REAL (DP) :: msg
 #include "mp_bcast.F90"
   END SUBROUTINE mp_bcast_r0
 
-  SUBROUTINE mp_bcast_r1(msg,msglen,source,gid)
+  SUBROUTINE mp_bcast_r1(msg,msglen,source,comm)
     REAL (DP) :: msg(:)
 #include "mp_bcast.F90"
   END SUBROUTINE mp_bcast_r1
 
-  SUBROUTINE mp_bcast_r2(msg,msglen,source,gid)
+  SUBROUTINE mp_bcast_r2(msg,msglen,source,comm)
     REAL (DP) :: msg(:,:)
 #include "mp_bcast.F90"
   END SUBROUTINE mp_bcast_r2
 
-  SUBROUTINE mp_bcast_r3(msg,msglen,source,gid)
+  SUBROUTINE mp_bcast_r3(msg,msglen,source,comm)
     REAL (DP) :: msg(:,:,:)
 #include "mp_bcast.F90"
   END SUBROUTINE mp_bcast_r3
 
-  SUBROUTINE mp_bcast_r4(msg,msglen,source,gid)
+  SUBROUTINE mp_bcast_r4(msg,msglen,source,comm)
     REAL (DP) :: msg(:,:,:,:)
 #include "mp_bcast.F90"
   END SUBROUTINE mp_bcast_r4
 
-  SUBROUTINE mp_bcast_r5(msg,msglen,source,gid)
+  SUBROUTINE mp_bcast_r5(msg,msglen,source,comm)
     REAL (DP) :: msg(:,:,:,:,:)
 #include "mp_bcast.F90"
   END SUBROUTINE mp_bcast_r5
 
-  SUBROUTINE mp_bcast_c0(msg,source,gid)
+  SUBROUTINE mp_bcast_c0(msg,source,comm)
     CHARACTER (len=*) :: msg
     INTEGER :: source
-    INTEGER, OPTIONAL, INTENT(IN) :: gid
-    INTEGER :: group
+    INTEGER, INTENT(IN) :: comm
     INTEGER :: msglen, ierr, i
     INTEGER, ALLOCATABLE :: imsg(:)
 #ifdef __MPI__
     ierr = 0
     msglen = len(msg)
-    group = MPI_COMM_WORLD
-    IF( PRESENT( gid ) ) group = gid
     ALLOCATE (imsg(1:msglen), STAT=ierr)
     IF (ierr/=0) CALL mp_stop(__LINE__)
     DO i = 1, msglen
        imsg(i) = ichar(msg(i:i))
     END DO
-    CALL bcast_integer( imsg, msglen, source, group )
+    CALL bcast_integer( imsg, msglen, source, comm )
     DO i = 1, msglen
        msg(i:i) = char(imsg(i))
     END DO
@@ -290,11 +276,10 @@ CONTAINS
 #endif
   END SUBROUTINE mp_bcast_c0
 
-  SUBROUTINE mp_bcast_c1(msg,source,gid)
+  SUBROUTINE mp_bcast_c1(msg,source,comm)
     CHARACTER (len=*) :: msg(:)
     INTEGER :: source
-    INTEGER, OPTIONAL, INTENT(IN) :: gid
-    INTEGER :: group
+    INTEGER, INTENT(IN) :: comm
     INTEGER :: msglen, m1, m2, ierr, i, j
     INTEGER, ALLOCATABLE :: imsg(:,:)
 #ifdef __MPI__
@@ -302,8 +287,6 @@ CONTAINS
     m1 = LEN(msg)
     m2 = SIZE(msg)
     msglen = LEN(msg)*SIZE(msg)
-    group = MPI_COMM_WORLD
-    IF( PRESENT( gid ) ) group = gid
     ALLOCATE (imsg(1:m1,1:m2), STAT=ierr)
     IF (ierr/=0) CALL mp_stop(__LINE__)
     DO j = 1, m2
@@ -311,7 +294,7 @@ CONTAINS
           imsg(i,j) = ichar(msg(j)(i:i))
        END DO
     END DO
-    CALL bcast_integer( imsg, msglen, source, group )
+    CALL bcast_integer( imsg, msglen, source, comm )
     DO j = 1, m2
        DO i = 1, m1
           msg(j)(i:i) = char(imsg(i,j))
@@ -337,19 +320,19 @@ CONTAINS
 #undef MP_TYPE
 #endif
 #define MP_TYPE MPI_INTEGER
-  SUBROUTINE mp_gather_i0(mydata, alldata, root, gid)
+  SUBROUTINE mp_gather_i0(mydata, alldata, root, comm)
 #include "mp_gather_0.F90"
   END SUBROUTINE mp_gather_i0
 
-  SUBROUTINE mp_gather_i1(mydata, alldata, root, gid)
+  SUBROUTINE mp_gather_i1(mydata, alldata, root, comm)
 #include "mp_gather_1.F90"
   END SUBROUTINE mp_gather_i1
 
-  SUBROUTINE mp_gatherv_i1( mydata, mycount, alldata, recvcount, displs, root, gid)
+  SUBROUTINE mp_gatherv_i1( mydata, alldata, recvcount, displs, root, comm)
 #include "mp_gatherv_1.F90"
   END SUBROUTINE mp_gatherv_i1
 
-  SUBROUTINE mp_gatherv_i2( mydata, alldata, recvcount, displs, root, gid)
+  SUBROUTINE mp_gatherv_i2( mydata, alldata, recvcount, displs, root, comm)
 #include "mp_gatherv_2.F90"
   END SUBROUTINE mp_gatherv_i2
 
@@ -362,15 +345,15 @@ CONTAINS
 #undef MP_TYPE
 #endif
 #define MP_TYPE MPI_DOUBLE_PRECISION
-  SUBROUTINE mp_gather_r1(mydata, alldata, root, gid)
+  SUBROUTINE mp_gather_r1(mydata, alldata, root, comm)
 #include "mp_gather_1.F90"
   END SUBROUTINE mp_gather_r1
 
-  SUBROUTINE mp_gatherv_r1( mydata, mycount, alldata, recvcount, displs, root, gid)
+  SUBROUTINE mp_gatherv_r1( mydata, alldata, recvcount, displs, root, comm)
 #include "mp_gatherv_1.F90"
   END SUBROUTINE mp_gatherv_r1
 
-  SUBROUTINE mp_gatherv_r2( mydata, alldata, recvcount, displs, root, gid)
+  SUBROUTINE mp_gatherv_r2( mydata, alldata, recvcount, displs, root, comm)
 #include "mp_gatherv_2.F90"
   END SUBROUTINE mp_gatherv_r2
 ! ===END MP_GATHER===
@@ -389,11 +372,11 @@ CONTAINS
 #undef MP_TYPE
 #endif
 #define MP_TYPE MPI_LOGICAL
-  SUBROUTINE mp_allgather_l1(mydata, alldata, gid)
+  SUBROUTINE mp_allgather_l1(mydata, alldata, comm)
 #include "mp_gather_1.F90"
   END SUBROUTINE mp_allgather_l1
 
-  SUBROUTINE mp_allgatherv_l1(mydata, mycount, alldata, recvcount, displs, gid)
+  SUBROUTINE mp_allgatherv_l1(mydata, alldata, recvcount, displs, comm)
 #include "mp_gatherv_1.F90"
   END SUBROUTINE mp_allgatherv_l1
 
@@ -406,7 +389,7 @@ CONTAINS
 #undef MP_TYPE
 #endif
 #define MP_TYPE MPI_INTEGER
-  SUBROUTINE mp_allgather_i0(mydata, alldata, gid)
+  SUBROUTINE mp_allgather_i0(mydata, alldata, comm)
 #include "mp_gather_0.F90"
   END SUBROUTINE mp_allgather_i0
 
@@ -419,27 +402,28 @@ CONTAINS
 #undef MP_TYPE
 #endif
 #define MP_TYPE MPI_DOUBLE_PRECISION
-  SUBROUTINE mp_allgather_r1(mydata, alldata, gid)
+  SUBROUTINE mp_allgather_r1(mydata, alldata, comm)
 #include "mp_gather_1.F90"
   END SUBROUTINE mp_allgather_r1
 
-  SUBROUTINE mp_allgatherv_r1(mydata, mycount, alldata, recvcount, displs, gid)
+  SUBROUTINE mp_allgatherv_r1(mydata, alldata, recvcount, displs, comm)
 #include "mp_gatherv_1.F90"
   END SUBROUTINE mp_allgatherv_r1
+
+  SUBROUTINE mp_allgatherv_r2(mydata, alldata, recvcount, displs, comm)
+#include "mp_gatherv_2.F90"
+  END SUBROUTINE mp_allgatherv_r2
 ! ===END MP_ALLGATHER===
 
 ! ===BEGIN MP_ALLTOALL===
-  SUBROUTINE mp_alltoall_i3( sndbuf, rcvbuf, gid )
+  SUBROUTINE mp_alltoall_i3( sndbuf, rcvbuf, comm )
     INTEGER :: sndbuf( :, :, : )
     INTEGER :: rcvbuf( :, :, : )
-    INTEGER, OPTIONAL, INTENT(IN) :: gid
-    INTEGER :: nsiz, group, ierr, npe
+    INTEGER, INTENT(IN) :: comm
+    INTEGER :: nsiz, ierr, npe
 
 #ifdef __MPI__
-    group = MPI_COMM_WORLD
-    IF( PRESENT( gid ) ) group = gid
-
-    CALL MPI_comm_size( group, npe, ierr )
+    CALL MPI_comm_size( comm, npe, ierr )
     IF (ierr/=0) CALL mp_stop(__LINE__)
 
     IF ( SIZE( sndbuf, 3 ) < npe ) CALL mp_stop(__LINE__)
@@ -448,7 +432,7 @@ CONTAINS
     nsiz = SIZE( sndbuf, 1 ) * SIZE( sndbuf, 2 )
 
     CALL MPI_ALLTOALL( sndbuf, nsiz, MPI_INTEGER, &
-     rcvbuf, nsiz, MPI_INTEGER, group, ierr )
+     rcvbuf, nsiz, MPI_INTEGER, comm, ierr )
 
     IF (ierr/=0) CALL mp_stop(__LINE__)
 #else
@@ -464,12 +448,12 @@ CONTAINS
 #undef MP_AUX_FUNC
 #endif
 #define MP_AUX_FUNC mp_reduce_min_integer
-  SUBROUTINE mp_min_i0(msg,msglen,gid)
+  SUBROUTINE mp_min_i0(msg,msglen,comm)
     INTEGER, INTENT (INOUT) :: msg
 #include "mp_reduce.F90"
   END SUBROUTINE mp_min_i0
 
-  SUBROUTINE mp_min_i1(msg,msglen,gid)
+  SUBROUTINE mp_min_i1(msg,msglen,comm)
     INTEGER, INTENT (INOUT) :: msg(:)
 #include "mp_reduce.F90"
   END SUBROUTINE mp_min_i1
@@ -478,12 +462,12 @@ CONTAINS
 #undef MP_AUX_FUNC
 #endif
 #define MP_AUX_FUNC mp_reduce_min_real
-  SUBROUTINE mp_min_r0(msg,msglen,gid)
+  SUBROUTINE mp_min_r0(msg,msglen,comm)
     REAL (DP), INTENT (INOUT) :: msg
 #include "mp_reduce.F90"
   END SUBROUTINE mp_min_r0
 
-  SUBROUTINE mp_min_r1(msg,msglen,gid)
+  SUBROUTINE mp_min_r1(msg,msglen,comm)
     REAL (DP), INTENT (INOUT) :: msg(:)
 #include "mp_reduce.F90"
   END SUBROUTINE mp_min_r1
@@ -494,12 +478,12 @@ CONTAINS
 #undef MP_AUX_FUNC
 #endif
 #define MP_AUX_FUNC mp_reduce_max_integer
-  SUBROUTINE mp_max_i0(msg,msglen,gid)
+  SUBROUTINE mp_max_i0(msg,msglen,comm)
     INTEGER, INTENT (INOUT) :: msg
 #include "mp_reduce.F90"
   END SUBROUTINE mp_max_i0
 
-  SUBROUTINE mp_max_i1(msg,msglen,gid)
+  SUBROUTINE mp_max_i1(msg,msglen,comm)
     INTEGER, INTENT (INOUT) :: msg(:)
 #include "mp_reduce.F90"
   END SUBROUTINE mp_max_i1
@@ -508,12 +492,12 @@ CONTAINS
 #undef MP_AUX_FUNC
 #endif
 #define MP_AUX_FUNC mp_reduce_max_real
-  SUBROUTINE mp_max_r0(msg,msglen,gid)
+  SUBROUTINE mp_max_r0(msg,msglen,comm)
     REAL (DP), INTENT (INOUT) :: msg
 #include "mp_reduce.F90"
   END SUBROUTINE mp_max_r0
 
-  SUBROUTINE mp_max_r1(msg,msglen,gid)
+  SUBROUTINE mp_max_r1(msg,msglen,comm)
     REAL (DP), INTENT (INOUT) :: msg(:)
 #include "mp_reduce.F90"
   END SUBROUTINE mp_max_r1
@@ -524,22 +508,22 @@ CONTAINS
 #undef MP_AUX_FUNC
 #endif
 #define MP_AUX_FUNC mp_reduce_sum_integer
-  SUBROUTINE mp_sum_i0(msg,msglen,gid)
+  SUBROUTINE mp_sum_i0(msg,msglen,comm)
     INTEGER, INTENT (INOUT) :: msg
 #include "mp_reduce.F90"
   END SUBROUTINE mp_sum_i0
 
-  SUBROUTINE mp_sum_i1(msg,msglen,gid)
+  SUBROUTINE mp_sum_i1(msg,msglen,comm)
     INTEGER, INTENT (INOUT) :: msg(:)
 #include "mp_reduce.F90"
   END SUBROUTINE mp_sum_i1
 
-  SUBROUTINE mp_sum_i2(msg,msglen,gid)
+  SUBROUTINE mp_sum_i2(msg,msglen,comm)
     INTEGER, INTENT (INOUT) :: msg(:,:)
 #include "mp_reduce.F90"
   END SUBROUTINE mp_sum_i2
 
-  SUBROUTINE mp_sum_i3(msg,msglen,gid)
+  SUBROUTINE mp_sum_i3(msg,msglen,comm)
     INTEGER, INTENT (INOUT) :: msg(:,:,:)
 #include "mp_reduce.F90"
   END SUBROUTINE mp_sum_i3
@@ -548,68 +532,63 @@ CONTAINS
 #undef MP_AUX_FUNC
 #endif
 #define MP_AUX_FUNC mp_reduce_sum_real
-  SUBROUTINE mp_sum_r0(msg,msglen,gid)
+  SUBROUTINE mp_sum_r0(msg,msglen,comm)
     REAL (DP), INTENT (INOUT) :: msg
 #include "mp_reduce.F90"
   END SUBROUTINE mp_sum_r0
 
-  SUBROUTINE mp_sum_r1(msg,msglen,gid)
+  SUBROUTINE mp_sum_r1(msg,msglen,comm)
     REAL (DP), INTENT (INOUT) :: msg(:)
 #include "mp_reduce.F90"
   END SUBROUTINE mp_sum_r1
 
-  SUBROUTINE mp_sum_r2(msg,msglen,gid)
+  SUBROUTINE mp_sum_r2(msg,msglen,comm)
     REAL (DP), INTENT (INOUT) :: msg(:,:)
 #include "mp_reduce.F90"
   END SUBROUTINE mp_sum_r2
 
-  SUBROUTINE mp_sum_r3(msg,msglen,gid)
+  SUBROUTINE mp_sum_r3(msg,msglen,comm)
     REAL (DP), INTENT (INOUT) :: msg(:,:,:)
 #include "mp_reduce.F90"
   END SUBROUTINE mp_sum_r3
 
-  SUBROUTINE mp_sum_r4(msg,msglen,gid)
+  SUBROUTINE mp_sum_r4(msg,msglen,comm)
     REAL (DP), INTENT (INOUT) :: msg(:,:,:,:)
 #include "mp_reduce.F90"
   END SUBROUTINE mp_sum_r4
 
-  SUBROUTINE mp_sum_r5(msg,msglen,gid)
+  SUBROUTINE mp_sum_r5(msg,msglen,comm)
     REAL (DP), INTENT (INOUT) :: msg(:,:,:,:,:)
 #include "mp_reduce.F90"
   END SUBROUTINE mp_sum_r5
 
-  SUBROUTINE mp_sum_r22( msg, res, root, gid )
+  SUBROUTINE mp_sum_r22( msg, res, root, comm )
     REAL (DP), INTENT (IN) :: msg(:,:)
     REAL (DP), INTENT (OUT) :: res(:,:)
     INTEGER, OPTIONAL, INTENT (IN) :: root
-    INTEGER, OPTIONAL, INTENT (IN) :: gid
-    INTEGER :: group
+    INTEGER, INTENT (IN) :: comm
     INTEGER :: msglen
     INTEGER :: myid, ierr
 
     msglen = size(msg)
 
 #ifdef __MPI__
-
-    group = MPI_COMM_WORLD
-    IF( PRESENT( gid ) ) group = gid
-
     IF( PRESENT( root ) ) THEN
        !
-       CALL MPI_comm_rank( group, myid, ierr)
+       CALL MPI_comm_rank( comm, myid, ierr)
        IF( ierr /= 0 ) CALL mp_stop(__LINE__)
 
        IF( myid == root ) THEN
           IF( msglen > size(res) ) CALL mp_stop(__LINE__)
        END IF
        !
-       CALL mp_reduce_sum_to_real( msglen, msg, res, group, root )
+       CALL mp_reduce_sum_to_real( msglen, msg, res, comm, root )
        !
     ELSE
        !
        IF( msglen > size(res) ) CALL mp_stop(__LINE__)
        !
-       CALL mp_reduce_sum_to_real( msglen, msg, res, group, -1 )
+       CALL mp_reduce_sum_to_real( msglen, msg, res, comm, -1 )
        !
     END IF
 #else
@@ -619,27 +598,24 @@ CONTAINS
 ! ===END MP_SUM===
 
 ! ===BEGIN MP_ROOT_SUM===
-  SUBROUTINE mp_root_sum_r2( msg, res, root, gid )
+  SUBROUTINE mp_root_sum_r2( msg, res, root, comm )
     REAL (DP), INTENT (IN)  :: msg(:,:)
     REAL (DP), INTENT (OUT) :: res(:,:)
     INTEGER,   INTENT (IN)  :: root
-    INTEGER, OPTIONAL, INTENT (IN) :: gid
-    INTEGER :: group
+    INTEGER, INTENT (IN) :: comm
     INTEGER :: msglen, ierr, myid
 
 #ifdef __MPI__
     msglen = size(msg)
-    group = MPI_COMM_WORLD
-    IF( PRESENT( gid ) ) group = gid
 
-    CALL MPI_comm_rank( group, myid, ierr)
+    CALL MPI_comm_rank( comm, myid, ierr)
     IF( ierr /= 0 ) CALL mp_stop(__LINE__)
     !
     IF( myid == root ) THEN
        IF( msglen > size(res) ) CALL mp_stop(__LINE__)
     END IF
 
-    CALL mp_reduce_sum_to_real( msglen, msg, res, group, root )
+    CALL mp_reduce_sum_to_real( msglen, msg, res, comm, root )
 #else
     res = msg
 #endif
@@ -651,12 +627,12 @@ CONTAINS
 #undef MP_AUX_FUNC
 #endif
 #define MP_AUX_FUNC mp_reduce_land
-  SUBROUTINE mp_land_l0(msg,msglen,gid)
+  SUBROUTINE mp_land_l0(msg,msglen,comm)
     LOGICAL, INTENT (INOUT) :: msg
 #include "mp_reduce.F90"
   END SUBROUTINE mp_land_l0
 
-  SUBROUTINE mp_land_l1(msg,msglen,gid)
+  SUBROUTINE mp_land_l1(msg,msglen,comm)
     LOGICAL, INTENT (INOUT) :: msg(:)
 #include "mp_reduce.F90"
   END SUBROUTINE mp_land_l1
@@ -667,80 +643,72 @@ CONTAINS
 #undef MP_AUX_FUNC
 #endif
 #define MP_AUX_FUNC mp_reduce_lor
-  SUBROUTINE mp_lor_l0(msg,msglen,gid)
+  SUBROUTINE mp_lor_l0(msg,msglen,comm)
     LOGICAL, INTENT (INOUT) :: msg
 #include "mp_reduce.F90"
   END SUBROUTINE mp_lor_l0
 
-  SUBROUTINE mp_lor_l1(msg,msglen,gid)
+  SUBROUTINE mp_lor_l1(msg,msglen,comm)
     LOGICAL, INTENT (INOUT) :: msg(:)
 #include "mp_reduce.F90"
   END SUBROUTINE mp_lor_l1
 ! ===END MP_LOR===
 
 ! ===BEGIN MP_CIRCULAR_SHIFT_LEFT===
-  SUBROUTINE mp_circular_shift_left_d2d_int( buf, itag, gid )
+  SUBROUTINE mp_circular_shift_left_d2d_int( buf, itag, comm )
     INTEGER :: buf
     INTEGER, INTENT(IN) :: itag
-    INTEGER, OPTIONAL, INTENT(IN) :: gid
-    INTEGER :: group, ierr, npe, sour, dest, myid
+    INTEGER, INTENT(IN) :: comm
+    INTEGER :: ierr, npe, sour, dest, myid
 
 #ifdef __MPI__
-
     INTEGER :: istatus( MPI_status_size )
-    !
-    group = MPI_COMM_WORLD
-    IF( PRESENT( gid ) ) group = gid
-    !
-    CALL MPI_comm_size( group, npe, ierr )
+
+    CALL MPI_comm_size( comm, npe, ierr )
     IF (ierr/=0) CALL mp_stop(__LINE__)
-    CALL MPI_comm_rank( group, myid, ierr )
+    CALL MPI_comm_rank( comm, myid, ierr )
     IF (ierr/=0) CALL mp_stop(__LINE__)
-    !
+
     sour = myid + 1
     IF( sour == npe ) sour = 0
     dest = myid - 1
     IF( dest == -1 ) dest = npe - 1
-    !
+
     CALL MPI_Sendrecv_replace( buf, 1, MPI_INTEGER, &
-     dest, itag, sour, itag, group, istatus, ierr)
-    !
+     dest, itag, sour, itag, comm, istatus, ierr)
+
     IF (ierr/=0) CALL mp_stop(__LINE__)
-    !
+
 #else
     ! do nothing
 #endif
     RETURN
   END SUBROUTINE mp_circular_shift_left_d2d_int
 
-  SUBROUTINE mp_circular_shift_left_d2d_double( buf, itag, gid )
+  SUBROUTINE mp_circular_shift_left_d2d_double( buf, itag, comm )
     REAL(DP) :: buf( :, : )
     INTEGER, INTENT(IN) :: itag
-    INTEGER, OPTIONAL, INTENT(IN) :: gid
-    INTEGER :: group, ierr, npe, sour, dest, myid
+    INTEGER, INTENT(IN) :: comm
+    INTEGER :: ierr, npe, sour, dest, myid
 
 #ifdef __MPI__
-
     INTEGER :: istatus( MPI_status_size )
-    !
-    group = MPI_COMM_WORLD
-    IF( PRESENT( gid ) ) group = gid
-    !
-    CALL MPI_comm_size( group, npe, ierr )
+
+    CALL MPI_comm_size( comm, npe, ierr )
     IF (ierr/=0) CALL mp_stop(__LINE__)
-    CALL MPI_comm_rank( group, myid, ierr )
+    CALL MPI_comm_rank( comm, myid, ierr )
     IF (ierr/=0) CALL mp_stop(__LINE__)
-    !
+
     sour = myid + 1
     IF( sour == npe ) sour = 0
     dest = myid - 1
     IF( dest == -1 ) dest = npe - 1
-    !
+
     CALL MPI_Sendrecv_replace( buf, SIZE(buf), MPI_DOUBLE_PRECISION, &
-     dest, itag, sour, itag, group, istatus, ierr)
-    !
+     dest, itag, sour, itag, comm, istatus, ierr)
+
     IF (ierr/=0) CALL mp_stop(__LINE__)
-    !
+
 #else
     ! do nothing
 #endif
@@ -815,12 +783,12 @@ CONTAINS
 #endif
   END SUBROUTINE mp_group_create
 
-  SUBROUTINE mp_group_free( group )
-    INTEGER, INTENT (INOUT) :: group
+  SUBROUTINE mp_group_free( comm )
+    INTEGER, INTENT (INOUT) :: comm
     INTEGER :: ierr
     ierr = 0
 #ifdef __MPI__
-    CALL MPI_group_free( group, ierr )
+    CALL MPI_group_free( comm, ierr )
     IF (ierr/=0) CALL mp_stop(__LINE__)
 #endif
   END SUBROUTINE mp_group_free

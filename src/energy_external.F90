@@ -179,7 +179,7 @@ contains
     if ( lsami )  U_ext = U_ext + exsami(rzu(i,j),ntj)
     if ( lmuir )  U_ext = U_ext + exmuir(rzu(i,j),ntj)
     if ( lexzeo ) then
-       vtmp=exzeo(rxu(i,j),ryu(i,j),rzu(i,j),ntj)
+       vtmp=exzeo(rxu(i,j),ryu(i,j),rzu(i,j),ntj,ignoreTable=.false.)
        if (i.le.nchain.and.abs(vtmp).gt.1d5) write(io_output,*) i,j,rxu(i,j),ryu(i,j),rzu(i,j),vtmp
        U_ext = U_ext + vtmp
     end if

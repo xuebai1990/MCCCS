@@ -494,7 +494,7 @@ contains
     real::exzeo
     real,intent(in)::xi,yi,zi
     integer,intent(in)::idi
-    logical,intent(in),optional::ignoreTable
+    logical,intent(in)::ignoreTable
 
     logical::lignore
     integer,parameter::m=2,mt=2*m+1,mst=-m
@@ -508,11 +508,7 @@ contains
        call err_exit(__FILE__,__LINE__,'exzeo: no such bead type',myid+1)
     end if
 
-    if (present(ignoreTable)) then
-       lignore=ignoreTable
-    else
-       lignore=.false.
-    end if
+    lignore=ignoreTable
 
     ! fold coordinates into the unit cell, result in fractional coordinates
     !!!
@@ -617,10 +613,10 @@ contains
     BoltExplicit=0
     eBoltExplicit=0
     do i=1,volume_nsample
-       xi=random()*zunit%boxl(1)
-       yi=random()*zunit%boxl(2)
-       zi=random()*zunit%boxl(3)
-       Utabulated=exzeo(xi,yi,zi,volume_probe)
+       xi=random(-1)*zunit%boxl(1)
+       yi=random(-1)*zunit%boxl(2)
+       zi=random(-1)*zunit%boxl(3)
+       Utabulated=exzeo(xi,yi,zi,volume_probe,ignoreTable=.false.)
        if (ltestztb) then
           Uexplicit=exzeo(xi,yi,zi,volume_probe,ignoreTable=.true.)
        else
@@ -698,7 +694,7 @@ contains
 
        ncount=0
        Do j=1,area_nsample ! Number of trial positions around each framework atom
-          call sphere(coord(1),coord(2),coord(3))
+          call sphere(coord(1),coord(2),coord(3),-1)
 
           ! Make this vector of length (sigma_atom+sigma_probe)/2.0 and centered at particle i
           coord=coord*sigij+zeo%bead(i)%coord
