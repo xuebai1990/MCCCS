@@ -8,9 +8,9 @@
       if ( mtype .eq. 0 ) then
 ! in sumup, initiliaze dipole to be 0 and then sum up all the dipoles
 
-         dipolex(ibox) = 0.0d0
-         dipoley(ibox) = 0.0d0
-         dipolez(ibox) = 0.0d0
+         dipolex(ibox) = 0.0E0_dp
+         dipoley(ibox) = 0.0E0_dp
+         dipolez(ibox) = 0.0E0_dp
          
          do i = 1, nchain
             if ( nboxi(i) .eq. ibox ) then
@@ -29,9 +29,9 @@
 ! charge move
 
          do zzz = 1,2
-            dipox(zzz) = 0.0d0
-            dipoy(zzz) = 0.0d0
-            dipoz(zzz) = 0.0d0
+            dipox(zzz) = 0.0E0_dp
+            dipoy(zzz) = 0.0E0_dp
+            dipoz(zzz) = 0.0E0_dp
             imolty = moltion(zzz)
             do i = 1,nunit(imolty)
                dipox(zzz) = dipox(zzz) +  qquion(i,zzz)*rxuion(i,zzz)

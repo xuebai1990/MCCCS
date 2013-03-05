@@ -1,5 +1,5 @@
 MODULE energy_intramolecular
-  use var_type,only:default_string_length
+  use var_type,only:dp,default_string_length
   use const_math,only:onepi,twopi,raddeg
   use util_runtime,only:err_exit
   use util_memory,only:reallocate
@@ -57,8 +57,8 @@ contains
           if (jerr.ne.0) then
              call err_exit(__FILE__,__LINE__,'init_intramolecular: bonds allocation failed',jerr)
           end if
-          brvib=0.0d0
-          brvibk=0.0d0
+          brvib=0.0E0_dp
+          brvibk=0.0E0_dp
           n=0
           do
              call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
@@ -99,8 +99,8 @@ contains
           if (jerr.ne.0) then
              call err_exit(__FILE__,__LINE__,'init_intramolecular: angles allocation failed',jerr)
           end if
-          brben=0.0d0
-          brbenk=0.0d0
+          brben=0.0E0_dp
+          brbenk=0.0E0_dp
           n=0
           do
              call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
@@ -117,7 +117,7 @@ contains
                 call reallocate(brbenk,1,2*ubound(brbenk,1))
              end if
              read(line_in,*) jerr,ben_type(i),brben(i),brbenk(i)
-             brben(i) = brben(i) * onepi / 180.0d0
+             brben(i) = brben(i) * onepi / 180.0E0_dp
           end do
           exit cycle_read_angles
        end if
@@ -142,7 +142,7 @@ contains
           if (jerr.ne.0) then
              call err_exit(__FILE__,__LINE__,'init_intramolecular: dihedrals allocation failed',jerr)
           end if
-          vtt=0.0d0
+          vtt=0.0E0_dp
           n=0
           do
              call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
@@ -159,14 +159,14 @@ contains
              end if
              read(line_in,*) jerr,torsion_type(i),vtt(0:torsion_nParameter(torsion_type(i))-1,i)
              if (torsion_type(i).eq.3) then
-                vtt(2,i)=vtt(2,i)*onepi/180.0d0
+                vtt(2,i)=vtt(2,i)*onepi/180.0E0_dp
              else if (torsion_type(i).eq.1.or.torsion_type(i).eq.5) then
                 ! convert OPLS to Ryckaert-Bellemans because the latter is more efficient
-                vtt(0,i)=vtt(0,i)+vtt(1,i)+2.0d0*vtt(2,i)+vtt(3,i)
-                vtt(1,i)=-vtt(1,i)+3.0d0*vtt(3,i)
-                vtt(2,i)=-2.0d0*vtt(2,i)+8.0d0*vtt(4,i)
-                vtt(3,i)=-4.0d0*vtt(3,i)
-                vtt(4,i)=-8.0d0*vtt(4,i)
+                vtt(0,i)=vtt(0,i)+vtt(1,i)+2.0E0_dp*vtt(2,i)+vtt(3,i)
+                vtt(1,i)=-vtt(1,i)+3.0E0_dp*vtt(3,i)
+                vtt(2,i)=-2.0E0_dp*vtt(2,i)+8.0E0_dp*vtt(4,i)
+                vtt(3,i)=-4.0E0_dp*vtt(3,i)
+                vtt(4,i)=-8.0E0_dp*vtt(4,i)
                 if (torsion_type(i).eq.1) then
                    torsion_type(i)=7
                 else if (torsion_type(i).eq.5) then
@@ -197,7 +197,7 @@ contains
 
     if (torsion_type(itype).eq.0) then
        ! type 0: dummy torsion type for setting up interaction table
-       vtorso=0.0d0
+       vtorso=0.0E0_dp
     else if (L_tor_table) then
        call dihedral_angle(xvec1,yvec1,zvec1,xvec2,yvec2,zvec2,xvec3,yvec3,zvec3,thetac,theta,.true.)
        vtorso=inter_tor(theta,itype)
@@ -229,7 +229,7 @@ contains
         else if (torsion_type(itype).eq.3) then
            ! type 3: periodic type, angle in protein convention (trans is 180 deg)
            theta=theta+onepi
-           vtorso=vtt(0,itype)*(1+dcos(vtt(1,itype)*theta-vtt(2,itype)))
+           vtorso=vtt(0,itype)*(1+cos(vtt(1,itype)*theta-vtt(2,itype)))
         else if (torsion_type(itype).eq.4) then
            ! type 4: harmonic type, angle in polymer convention (trans is 0 deg)
            tac2=theta-vtt(1,itype)
@@ -238,15 +238,15 @@ contains
            ! type 1: OPLS potential (three terms), angle in protein convention (trans is 180 deg)
            theta=theta+onepi
     ! remember: 1 + cos( theta+onepi ) = 1 - cos( theta )
-           vtorso = vtt(0,itype) + vtt(1,itype)*(1.0d0-thetac) + vtt(2,itype)*(1.d0-dcos(2.d0*theta)) + vtt(3,itype)*(1.d0+dcos(3.d0*theta))
+           vtorso = vtt(0,itype) + vtt(1,itype)*(1.0E0_dp-thetac) + vtt(2,itype)*(1.E0_dp-cos(2.E0_dp*theta)) + vtt(3,itype)*(1.E0_dp+cos(3.E0_dp*theta))
         else if (torsion_type(itype).eq.5) then
            ! type 5: OPLS potential (four terms), angle in protein convention (trans is 180 deg)
            theta=theta+onepi
-           vtorso = vtt(0,itype) + vtt(1,itype)*(1.0d0-thetac) + vtt(2,itype)*(1.d0-dcos(2.d0*theta)) + vtt(3,itype)*(1.d0+dcos(3.d0*theta)) + vtt(4,itype)*(1.d0-dcos(4.d0*theta))
+           vtorso = vtt(0,itype) + vtt(1,itype)*(1.0E0_dp-thetac) + vtt(2,itype)*(1.E0_dp-cos(2.E0_dp*theta)) + vtt(3,itype)*(1.E0_dp+cos(3.E0_dp*theta)) + vtt(4,itype)*(1.E0_dp-cos(4.E0_dp*theta))
         else if (torsion_type(itype).eq.6) then
            ! type 6: nine-term Fourier cosine series, angle in protein convention (trans is 180 deg)
            theta=theta+onepi
-           vtorso=vtt(0,itype)-vtt(1,itype)*thetac+vtt(2,itype)*dcos(2.0d0*theta)+vtt(3,itype)*dcos(3.0d0*theta)+vtt(4,itype)*dcos(4.0d0*theta)+vtt(5,itype)*dcos(5.0d0*theta)+vtt(6,itype)*dcos(6.0d0*theta)+vtt(7,itype)*dcos(7.0d0*theta)+vtt(8,itype)*dcos(8.0d0*theta)+vtt(9,itype)*dcos(9.0d0*theta)
+           vtorso=vtt(0,itype)-vtt(1,itype)*thetac+vtt(2,itype)*cos(2.0E0_dp*theta)+vtt(3,itype)*cos(3.0E0_dp*theta)+vtt(4,itype)*cos(4.0E0_dp*theta)+vtt(5,itype)*cos(5.0E0_dp*theta)+vtt(6,itype)*cos(6.0E0_dp*theta)+vtt(7,itype)*cos(7.0E0_dp*theta)+vtt(8,itype)*cos(8.0E0_dp*theta)+vtt(9,itype)*cos(9.0E0_dp*theta)
         else
            call err_exit(__FILE__,__LINE__,'you picked a non-defined torsional type',myid+1)
         end if
@@ -277,17 +277,17 @@ contains
     z23 = xvec2 * yvec3 - yvec2 * xvec3
 
 ! calculate lengths of cross products ***
-    d12 = dsqrt ( x12*x12 + y12*y12 + z12*z12 )
-    d23 = dsqrt ( x23*x23 + y23*y23 + z23*z23 )
+    d12 = sqrt ( x12*x12 + y12*y12 + z12*z12 )
+    d23 = sqrt ( x23*x23 + y23*y23 + z23*z23 )
 
 ! Addition for table look up for Torsion potential
 ! calculate dot product of cross products ***
     dot = x12*x23 + y12*y23 + z12*z23
     thetac = - (dot / ( d12 * d23 ))
 
-    if (thetac.gt.1.0d0) thetac=1.0d0
-    if (thetac.lt.-1.0d0) thetac=-1.0d0
-    theta = dacos(thetac)
+    if (thetac.gt.1.0E0_dp) thetac=1.0E0_dp
+    if (thetac.lt.-1.0E0_dp) thetac=-1.0E0_dp
+    theta = acos(thetac)
 
     if (extended) then
        ! calculate cross product of cross products ***
@@ -297,7 +297,7 @@ contains
        ! calculate scalar triple product ***
        tcc = xcc*xvec2 + ycc*yvec2 + zcc*zvec2
        ! determine angle between -180 and 180, not 0 to 180
-       if (tcc .lt. 0.0d0) theta = -theta
+       if (tcc .lt. 0.0E0_dp) theta = -theta
     end if
 
     return
@@ -393,7 +393,7 @@ contains
           ryvec(ii,jj) = ryu(i,jj) - ryui
           rzvec(ii,jj) = rzu(i,jj) - rzui
           distij2(ii,jj) = ( rxvec(ii,jj)**2 + ryvec(ii,jj)**2 + rzvec(ii,jj)**2 )
-          distanceij(ii,jj) = dsqrt(distij2(ii,jj))
+          distanceij(ii,jj) = sqrt(distij2(ii,jj))
 
           if ( nunit(imolty) .ne. nugrow(imolty) )then
 ! account for explct atoms in opposite direction
@@ -417,7 +417,7 @@ contains
 
     if (lupdate_connectivity) call calc_connectivity(i,imolty)
 
-    vtg=0.0d0
+    vtg=0.0E0_dp
     do j = ist, nunit(imolty)
        do jjtor = 1, intor(imolty,j)
           ip3 = ijtor4(imolty,j,jjtor)
@@ -444,7 +444,7 @@ contains
     call calc_connectivity(i,imolty)
 
 ! stretching -
-    vvib=0.0d0
+    vvib=0.0E0_dp
     do j = 2, nunit(imolty)
        do jjvib = 1, invib(imolty,j)
           ip1 = ijvib(imolty,j,jjvib)
@@ -460,7 +460,7 @@ contains
 
 ! bending -
 ! molecule with bond bending
-    vbend=0.0d0
+    vbend=0.0E0_dp
     do j = 2, nunit(imolty)
        do jjben = 1, inben(imolty,j)
           ip2 = ijben3(imolty,j,jjben)
@@ -468,14 +468,14 @@ contains
              ip1 = ijben2(imolty,j,jjben)
              it  = itben(imolty,j,jjben)
              thetac = ( rxvec(ip1,j)*rxvec(ip1,ip2) + ryvec(ip1,j)*ryvec(ip1,ip2) + rzvec(ip1,j)*rzvec(ip1,ip2) ) / ( distanceij(ip1,j)*distanceij(ip1,ip2) )
-             if ( thetac .ge. 1.0d0 ) thetac = 1.0d0
-             if ( thetac .le. -1.0d0 ) thetac = -1.0d0
+             if ( thetac .ge. 1.0E0_dp ) thetac = 1.0E0_dp
+             if ( thetac .le. -1.0E0_dp ) thetac = -1.0E0_dp
 
-             theta = dacos(thetac)
+             theta = acos(thetac)
 
              ! if (L_bend_table) then
-             ! rbendsq=distij2(ip1,j)+distij2(ip1,ip2)-2.0d0*distanceij(ip1,j)*distanceij(ip1,ip2)*thetac
-             ! rbend = dsqrt(rbendsq)
+             ! rbendsq=distij2(ip1,j)+distij2(ip1,ip2)-2.0E0_dp*distanceij(ip1,j)*distanceij(ip1,ip2)*thetac
+             ! rbend = sqrt(rbendsq)
              ! vbend = vbend + lininter_bend(rbend,it)
              ! else
              vbend = vbend +  brbenk(it) * (theta-brben(it))**2
@@ -575,7 +575,7 @@ contains
           allocate(torderiv2(1:grid_size,1:initial_size),stat=jerr)
           if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_bonded: allocation failed for tor_table 2',myid+1)
           do ttor=1,nttor
-             call spline(deg(:,ttor),tabtorso(:,ttor),splpnts(ttor),1.0d31,1.0d31,torderiv2(:,ttor))
+             call spline(deg(:,ttor),tabtorso(:,ttor),splpnts(ttor),1.0E31_dp,1.0E31_dp,torderiv2(:,ttor))
           end do
        else if (L_linear) then
           if (myid.eq.0) write(io_output,*) 'using linear interpolation'

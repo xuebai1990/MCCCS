@@ -48,7 +48,7 @@
       write(16,"(/,' FORCE FIELD DEFINITION:',/, ' ------------------------------------------------',/ ,' Lennard-Jones Parameters (K, Angstrom):')")
       jtype=idz
       do itype = 1,zntype
-         write(16,"(  ' epsilon(',i2,',',i2,') = ',f6.1, ' K &  sigma (',i2,',',i2,') = ',f6.1,' Angstrom')") itype,jtype,zeps(itype ,jtype), itype,jtype,dsqrt(zsig2(itype,jtype))
+         write(16,"(  ' epsilon(',i2,',',i2,') = ',f6.1, ' K &  sigma (',i2,',',i2,') = ',f6.1,' Angstrom')") itype,jtype,zeps(itype ,jtype), itype,jtype,sqrt(zsig2(itype,jtype))
       end do
  
 ! Force field cutoff radius rczeo for interactions between guests

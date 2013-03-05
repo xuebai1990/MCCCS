@@ -11,11 +11,11 @@
       real::vol,hmats(3,3),hmatsi(3,3)
 
       if (lstagea) then
-         dvdl = -(1.0d0-etais)*vipsw
+         dvdl = -(1.0E0_dp-etais)*vipsw
       else if (lstageb) then
          if (.not.lsolid(ibox)) then
             vol = boxlx(ibox)*boxly(ibox)*boxlz(ibox)
-            dvdl = -3.0d0*vol/boxlx(ibox)*(lenc-lena)*(etais*pipsw +lambdais*pwellipsw)+vwellipsw
+            dvdl = -3.0E0_dp*vol/boxlx(ibox)*(lenc-lena)*(etais*pipsw +lambdais*pwellipsw)+vwellipsw
          else if (lsolid(ibox).and.(.not.lrect(ibox))) then
             vol = cell_vol(ibox) 
             hmats(1,1) = hmat(ibox,1)
@@ -36,7 +36,7 @@
             hmatsi(3,1) = hmati(ibox,3)
             hmatsi(3,2) = hmati(ibox,6)
             hmatsi(3,3) = hmati(ibox,9)
-            dvdl = 0.0d0
+            dvdl = 0.0E0_dp
             do i = 1, 3
                do j = 1, 3
                   do k = 1, 3
@@ -49,7 +49,7 @@
             dvdl = vol*dvdl+vwellipsw
          end if
       else
-         dvdl = (1.0d0-etais)*vipsw-vwellipsw
+         dvdl = (1.0E0_dp-etais)*vipsw-vwellipsw
       end if
 
 !	write(io_output,*) 'deriv', dvdl,vwellipsw,pipsw,pwellipsw,vol

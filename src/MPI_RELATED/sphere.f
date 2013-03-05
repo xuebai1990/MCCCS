@@ -49,8 +49,8 @@
          xi2 = ( 2.0d0 * random2() ) - 1.0d0
          xisq = xi1**2 + xi2**2
          if ( xisq .lt. 1.0d0 ) then
-            x = 2.0d0 * xi1 * dsqrt( 1.0d0 - xisq )
-            y = 2.0d0 * xi2 * dsqrt( 1.0d0 - xisq )
+            x = 2.0d0 * xi1 * sqrt( 1.0d0 - xisq )
+            y = 2.0d0 * xi2 * sqrt( 1.0d0 - xisq )
             z = ( 1.0d0 - 2.0d0 * xisq )
             return
          end if

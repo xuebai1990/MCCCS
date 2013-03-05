@@ -24,10 +24,10 @@ contains
 ! initialize a few things
 
       leemove = .false.
-      if ((pmexpc1.gt.1.0d-6).and.(.not.lexpee)) then
+      if ((pmexpc1.gt.1.0E-6_dp).and.(.not.lexpee)) then
          write(io_output,*) 'pmexp nonzero but no lexpee?'
          call err_exit(__FILE__,__LINE__,'',myid+1)
-      else if ((pmexpc1.lt.1.0d-6).and.lexpee) then
+      else if ((pmexpc1.lt.1.0E-6_dp).and.lexpee) then
          write(io_output,*) 'pmexp zero but lexpee?'
          call err_exit(__FILE__,__LINE__,'',myid+1)
       end if
@@ -110,12 +110,12 @@ contains
                   ntjjs = ntype(nmolty,jj)
                   ntij=type_2body(ntii,ntjj)
                   ntijs=type_2body(ntii,ntjjs)
-                  if (epsij(ntijs).ge.1.0d-6.and.sig2ij(ntijs).ge. 1.0d-6) then
-                     rminee(ntij) = (epsij(ntij)/epsij(ntijs))** (1.0d0/12.0d0)*dsqrt(sig2ij(ntij)/sig2ij(ntijs))* rmin
-                  else if ((dabs(qelect(ntii)*qelect(ntjj))) .ge.1.0d-6) then
+                  if (epsij(ntijs).ge.1.0E-6_dp.and.sig2ij(ntijs).ge. 1.0E-6_dp) then
+                     rminee(ntij) = (epsij(ntij)/epsij(ntijs))** (1.0E0_dp/12.0E0_dp)*sqrt(sig2ij(ntij)/sig2ij(ntijs))* rmin
+                  else if ((abs(qelect(ntii)*qelect(ntjj))) .ge.1.0E-6_dp) then
                      rminee(ntij) = rmin
                   else
-                     rminee(ntij) = 0.0d0
+                     rminee(ntij) = 0.0E0_dp
                   end if
 !	write(io_output,*) i,ii,j,jj,rminee(ntij)
 !	write(io_output,*) 'nt', ntii,ntjj,ntij,ntjjs,ntijs
@@ -134,12 +134,12 @@ contains
                   ntjj = ntype(j,jj)
                   ntij=type_2body(ntii,ntjj)
                   ntijs=type_2body(ntjjs,ntjj)
-                  if (epsij(ntijs).ge.1.0d-6.and.sig2ij(ntijs).ge. 1.0d-6) then
-                     rminee(ntij) = (epsij(ntij)/epsij(ntijs))** (1.0d0/12.0d0)*dsqrt(sig2ij(ntij)/sig2ij(ntijs))* rmin
-                  else if ((dabs(qelect(ntii)*qelect(ntjj))) .ge.1.0d-6) then
+                  if (epsij(ntijs).ge.1.0E-6_dp.and.sig2ij(ntijs).ge. 1.0E-6_dp) then
+                     rminee(ntij) = (epsij(ntij)/epsij(ntijs))** (1.0E0_dp/12.0E0_dp)*sqrt(sig2ij(ntij)/sig2ij(ntijs))* rmin
+                  else if ((abs(qelect(ntii)*qelect(ntjj))) .ge.1.0E-6_dp) then
                      rminee(ntij) = rmin
                   else
-                     rminee(ntij) = 0.0d0
+                     rminee(ntij) = 0.0E0_dp
                   end if
 !	write(io_output,*) i,ii,j,jj,rminee(ntij)
 !	write(io_output,*) 'nt', ntii,ntjj,ntij,ntjjs,ntijs
@@ -157,12 +157,12 @@ contains
                ntjjs = ntype(nmolty,jj)
                ntij=type_2body(ntii,ntjj)
                ntijs=type_2body(ntii,ntjjs)
-               if (epsij(ntijs).ge.1.0d-6.and.sig2ij(ntijs).ge. 1.0d-6) then
-                  rminee(ntij) = (epsij(ntij)/epsij(ntijs))** (1.0d0/12.0d0)*dsqrt(sig2ij(ntij)/sig2ij(ntijs))* rmin
-               else if ((dabs(qelect(ntii)*qelect(ntjj))) .ge.1.0d-6) then
+               if (epsij(ntijs).ge.1.0E-6_dp.and.sig2ij(ntijs).ge. 1.0E-6_dp) then
+                  rminee(ntij) = (epsij(ntij)/epsij(ntijs))** (1.0E0_dp/12.0E0_dp)*sqrt(sig2ij(ntij)/sig2ij(ntijs))* rmin
+               else if ((abs(qelect(ntii)*qelect(ntjj))) .ge.1.0E-6_dp) then
                   rminee(ntij) = rmin
                else
-                  rminee(ntij) = 0.0d0
+                  rminee(ntij) = 0.0E0_dp
                end if
 !	write(io_output,*) i,ii,i,jj,rminee(ntij)
             end do
@@ -217,11 +217,11 @@ contains
 ! the state is an end state)
 
       do m = 2, fmstate-1
-         um_markov(m,m+1) = 0.5d0
-         um_markov(m,m-1) = 0.5d0
+         um_markov(m,m+1) = 0.5E0_dp
+         um_markov(m,m-1) = 0.5E0_dp
       end do
-      um_markov(1,2) = 1.0d0
-      um_markov(fmstate,fmstate-1) = 1.0d0
+      um_markov(1,2) = 1.0E0_dp
+      um_markov(fmstate,fmstate-1) = 1.0E0_dp
 
 ! pick a random chain at m=1 (i.e, in boxstate 1 ) to start off things
 ! if chain not present in boxstate 1, start with m = 6. for brute
@@ -231,10 +231,10 @@ contains
        eepointp = 1
 
 ! if (dble(ncmt(box_state(1),imolty)).gt.0) then
-! eepointp = idint(dble(ncmt(box_state(1),imolty))*random(-1))+1
+! eepointp = int(dble(ncmt(box_state(1),imolty))*random(-1))+1
 ! mstate = 1
 ! else if (dble(ncmt(box_state(2),imolty)).gt.0) then
-! eepointp = idint(dble(ncmt(box_state(2),imolty))*random(-1))+1
+! eepointp = int(dble(ncmt(box_state(2),imolty))*random(-1))+1
 ! mstate = fmstate
 ! else
 ! write(io_output,*)'the type is in neither box, imolty:',imolty
@@ -284,7 +284,7 @@ contains
       else if (mstate.eq.fmstate) then
          nstate = mstate - 1
       else
-         if (random(-1).le.0.5d0) then
+         if (random(-1).le.0.5E0_dp) then
             nstate = mstate - 1
          else
             nstate = mstate + 1
@@ -302,7 +302,7 @@ contains
 ! type of move depending upon mstate and nstate. one type of move
 ! is 'swap', other is usual ee
 
-      wee_ratio = dexp(psi(nstate)-psi(mstate))* um_markov(nstate,mstate)/um_markov(mstate,nstate)
+      wee_ratio = exp(psi(nstate)-psi(mstate))* um_markov(nstate,mstate)/um_markov(mstate,nstate)
 
 !	write(io_output,*) 'mstate', mstate, ee_moltyp(mstate)
 !	write(io_output,*) 'nstate', nstate, ee_moltyp(nstate)
@@ -377,9 +377,9 @@ contains
 
          deltv = (vnew - vold)
          deltvb = beta*deltv
-         wdeltvb = wee_ratio*dexp(-deltvb)
+         wdeltvb = wee_ratio*exp(-deltvb)
 
-         if ((deltvb-dlog(wee_ratio)).le.0.0d0) then
+         if ((deltvb-log(wee_ratio)).le.0.0E0_dp) then
 ! accept move
          else if (wdeltvb.gt.random(-1)) then
 ! accept move
@@ -500,24 +500,24 @@ contains
 !	write(io_output,*) 'index swap old', mstate, eepointp, box_state(mstate),
 !     &             ncmt(box_state(mstate),imolty)
       if (mstate.eq.1) then
-         if (random(-1).le.0.5d0) then
-            eepointp = idint(dble(ncmt(ibox,imolty))*random(-1))+1
+         if (random(-1).le.0.5E0_dp) then
+            eepointp = int(dble(ncmt(ibox,imolty))*random(-1))+1
          else
-            accr=dble(ncmt(ibox1,imolty))/(dble(ncmt(ibox,imolty))+1.0) *dexp(psi(fmstate)-psi(1))
+            accr=dble(ncmt(ibox1,imolty))/(dble(ncmt(ibox,imolty))+1.0) *exp(psi(fmstate)-psi(1))
             if (random(-1).le.accr) then
                mstate = fmstate
-               eepointp = idint(dble(ncmt(ibox1,imolty))*random(-1))+1
+               eepointp = int(dble(ncmt(ibox1,imolty))*random(-1))+1
 !	write(io_output,*) 'mstate,nstate', 1, 6, accr
             end if
          end if
       else if (mstate.eq.fmstate) then
-         if (random(-1).le.0.5d0) then
-            eepointp = idint(dble(ncmt(ibox1,imolty))*random(-1))+1
+         if (random(-1).le.0.5E0_dp) then
+            eepointp = int(dble(ncmt(ibox1,imolty))*random(-1))+1
          else
-            accr=dble(ncmt(ibox,imolty))/(dble(ncmt(ibox1,imolty))+1.0) *dexp(psi(1)-psi(fmstate))
+            accr=dble(ncmt(ibox,imolty))/(dble(ncmt(ibox1,imolty))+1.0) *exp(psi(1)-psi(fmstate))
             if (random(-1).le.accr) then
                mstate = 1
-               eepointp = idint(dble(ncmt(ibox,imolty))*random(-1))+1
+               eepointp = int(dble(ncmt(ibox,imolty))*random(-1))+1
             end if
 !	write(io_output,*) 'mstate,nstate', 6, 1, accr
          end if
@@ -554,7 +554,7 @@ contains
       do icbu = 1,nmolty
          if ( dchain .lt. pmeemt(icbu) ) then
             imolty = icbu
-            dchain = 2.0d0
+            dchain = 2.0E0_dp
          end if
       end do
       if ( .not. lexpand(imolty) )  call err_exit(__FILE__,__LINE__,'wrong type of molecule for the ES-move',myid+1)
@@ -564,10 +564,10 @@ contains
 !         (in box 2 is an ideal gas!)
          ibox = 1
          if (nchbox(ibox).eq.0) then
-            bnexpc(imolty,ibox) = bnexpc(imolty,ibox) + 1.0d0
+            bnexpc(imolty,ibox) = bnexpc(imolty,ibox) + 1.0E0_dp
             return
          end if
-         i = dint( dble(ncmt(1,imolty))*random(-1) ) + 1
+         i = aint( dble(ncmt(1,imolty))*random(-1) ) + 1
          i = parbox(i,1,imolty)
          if ( moltyp(i) .ne. imolty ) write(io_output,*) 'screwup'
 
@@ -583,7 +583,7 @@ contains
 
 ! perform a move in the expanded coefficients
 
- 10   disp = int( rmexpc(imolty)*(2.0d0*random(-1)-1.0d0) )
+ 10   disp = int( rmexpc(imolty)*(2.0E0_dp*random(-1)-1.0E0_dp) )
       itype = mod(eetype(imolty)+disp+numcoeff(imolty) , numcoeff(imolty))
       if ( disp .eq. 0 ) goto 10
       if ( itype .eq. 0 ) itype = numcoeff(imolty)
@@ -618,7 +618,7 @@ contains
 
          volume = boxlx(ibox)*boxly(ibox)*boxlz(ibox)
 
-         vexpta = 0.0d0
+         vexpta = 0.0E0_dp
 
          do imt = 1, nmolty
             do jmt = 1, nmolty
@@ -642,7 +642,7 @@ contains
 ! Start of intermolecular tail correction for old
 
       if (ltailc ) then
-         vexptb = 0.0d0
+         vexptb = 0.0E0_dp
          do imt = 1, nmolty
             do jmt = 1, nmolty
                rho = ncmt(ibox,jmt) / volume
@@ -654,7 +654,7 @@ contains
 
       end if
 
-      bnexpc(imolty,ibox) = bnexpc(imolty,ibox) + 1.0d0
+      bnexpc(imolty,ibox) = bnexpc(imolty,ibox) + 1.0E0_dp
 
       if (ovrlap) call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf of TRAXYZ',myid+1)
 
@@ -671,11 +671,11 @@ contains
       deltv  = vnew - vold + eta(ibox,imolty,itype)  - eta(ibox,imolty,eetype(imolty))
       deltvb = beta * deltv
 
-      if ( deltvb .gt. (2.3d0*softcut) ) return
+      if ( deltvb .gt. (2.3E0_dp*softcut) ) return
 
-      if ( deltv .le. 0.0d0 ) then
+      if ( deltv .le. 0.0E0_dp ) then
 ! accept move
-      else if ( dexp(-deltvb) .gt. random(-1) ) then
+      else if ( exp(-deltvb) .gt. random(-1) ) then
 ! accept move
       else
 ! move rejected
@@ -709,7 +709,7 @@ contains
           call dipole(ibox,1)
       end if
 
-      bsexpc(imolty,ibox) = bsexpc(imolty,ibox) + 1.0d0
+      bsexpc(imolty,ibox) = bsexpc(imolty,ibox) + 1.0E0_dp
 
 #ifdef __DEBUG__
       write(io_output,*) 'end expand-ensemble move in ',myid
@@ -750,8 +750,8 @@ contains
     if (jerr.ne.0) then
        call err_exit(__FILE__,__LINE__,'init_ee: allocation failed',jerr)
     end if
-    bsexpc = 0.0d0
-    bnexpc = 0.0d0
+    bsexpc = 0.0E0_dp
+    bnexpc = 0.0E0_dp
 
     call read_expand()
   end subroutine init_ee
@@ -783,7 +783,7 @@ contains
     real::vol,rho
     integer::kmolty,jmolty
 
-    vtail=0.0d0
+    vtail=0.0E0_dp
 
     if ( lsolid(ibox) .and. .not. lrect(ibox) ) then
        vol = cell_vol(ibox)

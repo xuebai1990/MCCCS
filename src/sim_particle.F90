@@ -1,5 +1,5 @@
 MODULE sim_particle
-  use var_type,only:default_string_length
+  use var_type,only:dp,default_string_length
   implicit none
   private
   public::BeadType,AtomType,MoleculeType,init_neighbor_list,rebuild_neighbor_list,update_neighbor_list,check_neighbor_list,lnn,allocate_neighbor_list
@@ -81,7 +81,7 @@ contains
 ! If using neighbour list make sure the rcut & rcutnn is the same
 ! for all the boxes
     do ibox = 1,nbox
-       if ((dabs(rcut(1)-rcut(ibox)).gt.1.0d-10).and.(dabs(rcutnn(1)-rcutnn(ibox)).gt.1.0d-10)) then
+       if ((abs(rcut(1)-rcut(ibox)).gt.1.0E-10_dp).and.(abs(rcutnn(1)-rcutnn(ibox)).gt.1.0E-10_dp)) then
           call err_exit(__FILE__,__LINE__,'Keep rcut and rcutnn for all the boxes same',-1)
        end if
 
@@ -93,15 +93,15 @@ contains
 ! set logical map to .false.
     lnn = .false.
 ! set displacementvectors to zero
-    disvec = 0.0d0
+    disvec = 0.0E0_dp
 
 ! calculate max. angular displacement that doesn't violate upnn
 ! calculate max. all-trans chain length ( umatch )
     do ibox=1,nbox
-       upnn(ibox) = ( rcutnn(ibox) - rcut(ibox) ) / 3.0d0
+       upnn(ibox) = ( rcutnn(ibox) - rcut(ibox) ) / 3.0E0_dp
        upnnsq(ibox)=upnn(ibox)*upnn(ibox)
        do imol=1,nmolty
-          umatch = 0.0d0
+          umatch = 0.0E0_dp
           do j = 1, nunit(imol) - 1
              umatch = umatch + brvib(1)
           end do
@@ -131,7 +131,7 @@ contains
           lnn(i,:)=.false.
           lnn(:,i)=.false.
 ! set displacementvectors to zero
-          disvec(:,:,i)=0.0d0
+          disvec(:,:,i)=0.0E0_dp
        end if
     end do
 
@@ -200,7 +200,7 @@ contains
     lnn(i,:)=.false.
     lnn(:,i)=.false.
 ! set displacementvectors to zero
-    disvec(:,:,i)=0.0d0
+    disvec(:,:,i)=0.0E0_dp
 
     rcnnsq = rcutnn(ibox)**2
     if (lpbc) call setpbc(ibox)

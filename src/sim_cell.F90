@@ -1,5 +1,5 @@
 MODULE sim_cell
-  use var_type,only:RealPtr
+  use var_type,only:dp,RealPtr
   use util_runtime,only:err_exit
   use sim_system,only:nmax
   implicit none
@@ -73,11 +73,11 @@ contains
     ! calculating cell volume
     cell_vol(ibox) = elem(1)*bcx+elem(2)*bcy+elem(3)*bcz
 
-    if(abs(cell_vol(ibox)).lt.1D-16) then
+    if(abs(cell_vol(ibox)).lt.1E-16_dp) then
        call err_exit(__FILE__,__LINE__,'Volume of cell negligible, check input H matrix',-1)
     end if
 
-    inv_vol = 1.0d0/cell_vol(ibox)
+    inv_vol = 1.0E0_dp/cell_vol(ibox)
 
     ! calculating minimum cell widths
     min_width(ibox,1) = cell_vol(ibox)/sqrt(bcx*bcx+bcy*bcy+ bcz*bcz)
@@ -113,9 +113,9 @@ contains
     cosa = (elem(4)*elem(7)+elem(5)*elem(8)+elem(6)*elem(9))/ (cell_length(ibox,2)*cell_length(ibox,3))
     cosb = (elem(1)*elem(7)+elem(2)*elem(8)+elem(3)*elem(9))/ (cell_length(ibox,1)*cell_length(ibox,3))
     cosg = (elem(4)*elem(1)+elem(5)*elem(2)+elem(6)*elem(3))/ (cell_length(ibox,2)*cell_length(ibox,1))
-    cell_ang(ibox,1) = dacos(cosa)
-    cell_ang(ibox,2) = dacos(cosb)
-    cell_ang(ibox,3) = dacos(cosg)
+    cell_ang(ibox,1) = acos(cosa)
+    cell_ang(ibox,2) = acos(cosb)
+    cell_ang(ibox,3) = acos(cosg)
 
     return
   end subroutine matops
@@ -127,27 +127,27 @@ contains
     if ( lpbcx ) then
        bx = boxlx(ibox)
        if ( lfold ) then
-          hbx = 0.5d0 * bx
+          hbx = 0.5E0_dp * bx
        else
-          bxi = 1.0d0 / bx
+          bxi = 1.0E0_dp / bx
        end if
     end if
 
     if ( lpbcy ) then
        by = boxly(ibox)
        if ( lfold ) then
-          hby = 0.5d0 * by
+          hby = 0.5E0_dp * by
        else
-          byi = 1.0d0 / by
+          byi = 1.0E0_dp / by
        end if
     end if
 
     if ( lpbcz ) then
        bz = boxlz(ibox)
        if ( lfold ) then
-          hbz = 0.5d0 * bz
+          hbz = 0.5E0_dp * bz
        else
-          bzi = 1.0d0 / bz
+          bzi = 1.0E0_dp / bz
        end if
     end if
 
@@ -163,9 +163,9 @@ contains
 
     if ( lsolid(ibox) .and. .not. lrect(ibox) ) then
        ! non-hexagonal box
-       hsx = 0.5d0*hmat(ibox,1)
-       hsy = 0.5d0*hmat(ibox,5)
-       hsz = 0.5d0*hmat(ibox,9)
+       hsx = 0.5E0_dp*hmat(ibox,1)
+       hsy = 0.5E0_dp*hmat(ibox,5)
+       hsz = 0.5E0_dp*hmat(ibox,9)
        ! sx, sy, sz are the coordinates of vector (rxuij,ryuij,rzuij) in the
        ! basis (n1,n2,n3), which is the transpose of the H matrix, and is the
        ! transforming matrix from basis (n1,n2,n3) to the canonical basis
@@ -174,20 +174,20 @@ contains
        sy = rxuij*hmati(ibox,2)+ryuij*hmati(ibox,5) +rzuij*hmati(ibox,8)
        sz = rxuij*hmati(ibox,3)+ryuij*hmati(ibox,6) +rzuij*hmati(ibox,9)
 
-       !         if ( sx .gt. 0.5d0 ) then
-       !            sx = sx-1d0
-       !         else if ( sx .lt. -0.5d0 ) then
-       !            sx = sx+1d0
+       !         if ( sx .gt. 0.5E0_dp ) then
+       !            sx = sx-1E0_dp
+       !         else if ( sx .lt. -0.5E0_dp ) then
+       !            sx = sx+1E0_dp
        !         end if
-       !         if ( sy .gt. 0.5d0 ) then
-       !            sy = sy-1d0
-       !         else if ( sy .lt. -0.5d0 ) then
-       !            sy = sy+1d0
+       !         if ( sy .gt. 0.5E0_dp ) then
+       !            sy = sy-1E0_dp
+       !         else if ( sy .lt. -0.5E0_dp ) then
+       !            sy = sy+1E0_dp
        !         end if
-       !         if ( sz .gt. 0.5d0 ) then
-       !            sz = sz-1d0
-       !         else if ( sz .lt. -0.5d0 ) then
-       !            sz = sz+1d0
+       !         if ( sz .gt. 0.5E0_dp ) then
+       !            sz = sz-1E0_dp
+       !         else if ( sz .lt. -0.5E0_dp ) then
+       !            sz = sz+1E0_dp
        !         end if
        !         sx = sx-nint(sx)
        !         sy = sy-nint(sy)
@@ -203,34 +203,34 @@ contains
        ! third can have all the x,y,z components
        if ( rzuij .gt. hsz ) then
           rzuij=rzuij-hmat(ibox,9)
-          sz=sz-1d0
+          sz=sz-1E0_dp
           if ( rzuij .gt. hsz ) then
              rzuij=rzuij-hmat(ibox,9)
-             sz=sz-1d0
+             sz=sz-1E0_dp
           end if
        else if ( rzuij .lt. -hsz ) then
           rzuij=rzuij+hmat(ibox,9)
-          sz=sz+1d0
+          sz=sz+1E0_dp
           if ( rzuij .lt. -hsz ) then
              rzuij=rzuij+hmat(ibox,9)
-             sz=sz+1d0
+             sz=sz+1E0_dp
           end if
        end if
 
        ryuij=sy*hmat(ibox,5)+sz*hmat(ibox,8)
        if ( ryuij .gt. hsy ) then
           ryuij=ryuij-hmat(ibox,5)
-          sy=sy-1d0
+          sy=sy-1E0_dp
           if ( ryuij .gt. hsy ) then
              ryuij=ryuij-hmat(ibox,5)
-             sy=sy-1d0
+             sy=sy-1E0_dp
           end if
        else if ( ryuij .lt. -hsy ) then
           ryuij=ryuij+hmat(ibox,5)
-          sy=sy+1d0
+          sy=sy+1E0_dp
           if ( ryuij .lt. -hsy ) then
              ryuij=ryuij+hmat(ibox,5)
-             sy=sy+1d0
+             sy=sy+1E0_dp
           end if
        end if
 
@@ -259,7 +259,7 @@ contains
              end if
           else
              ! rxuij = rxuij - bx*anint(rxuij*bxi)
-             rxuij = rxuij - bx*dint(rxuij*bxi+dsign(0.5d0,rxuij))
+             rxuij = rxuij - bx*aint(rxuij*bxi+sign(0.5E0_dp,rxuij))
           end if
        end if
 
@@ -272,7 +272,7 @@ contains
              end if
           else
              ! ryuij  = ryuij - by*anint(ryuij*byi)
-             ryuij = ryuij - by*dint(ryuij*byi+dsign(0.5d0,ryuij))
+             ryuij = ryuij - by*aint(ryuij*byi+sign(0.5E0_dp,ryuij))
           end if
        end if
 
@@ -285,7 +285,7 @@ contains
              end if
           else
              ! rzuij  = rzuij - bz*anint(rzuij*bzi)
-             rzuij = rzuij - bz*dint(rzuij*bzi+dsign(0.5d0,rzuij))
+             rzuij = rzuij - bz*aint(rzuij*bzi+sign(0.5E0_dp,rzuij))
           end if
        end if
 
@@ -517,7 +517,7 @@ contains
        call err_exit(__FILE__,__LINE__,'allocate_sim_cell: allocation failed',jerr)
     end if
 
-    hmat=0.0d0
+    hmat=0.0E0_dp
   end subroutine allocate_sim_cell
 
   subroutine allocate_linked_cell

@@ -1,5 +1,5 @@
 MODULE moves_cbmc
-  use var_type,only:double_precision
+  use var_type,only:dp
   use const_math,only:onepi,twopi
   use util_random,only:random
   use util_runtime,only:err_exit
@@ -86,7 +86,7 @@ contains
 ! select a chain in box 1
 ! write(io_output,*) 'counters not implemented properly for grand'
          if (ncmt(1,imolty).eq.0) return
-         i = idint( dble(ncmt(1,imolty))*random(-1) ) + 1
+         i = int( dble(ncmt(1,imolty))*random(-1) ) + 1
          i = parbox(i,1,imolty)
          if ( moltyp(i) .ne. imolty ) write(io_output,*) 'screwup config'
          ibox=1
@@ -122,9 +122,9 @@ contains
       end do
 
       if (lfixnow) then
-         fbncb(imolty,findex-1) = fbncb(imolty,findex-1) + 1.0d0
+         fbncb(imolty,findex-1) = fbncb(imolty,findex-1) + 1.0E0_dp
       else
-         bncb(imolty,total) = bncb(imolty,total) + 1.0d0
+         bncb(imolty,total) = bncb(imolty,total) + 1.0E0_dp
       end if
 
 ! if ( lelect(imolty) ) then
@@ -256,24 +256,24 @@ contains
             if (iii .eq. 2) then
                delen = ( vnewinter + vnewext + vnewelect + vnewewald + vnewintra)
                if (lstagea) then
-                  delen = (1.0d0-(1.0d0-etais)*lambdais)*delen
+                  delen = (1.0E0_dp-(1.0E0_dp-etais)*lambdais)*delen
                else if (lstageb) then
                   delen = etais*delen
                else if (lstagec) then
-                  delen = (etais+(1.0d0-etais)*lambdais)*delen
+                  delen = (etais+(1.0E0_dp-etais)*lambdais)*delen
                end if
                delen = v - delen
 ! JLR 11-19-09 Commenting this out, it makes no sense and gives me an energy error!!!
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM   this may not exactly right, but for
 !!!!! numerical reasons I think we need it
-! IF(delen*beta .LT. -2.3d0*softcut) THEN
-! delen=-2.3d0*softcut/beta
-! else if(delen*beta .GT. 2.3d0*softcut) THEN
-! delen=2.3d0*softcut
+! IF(delen*beta .LT. -2.3E0_dp*softcut) THEN
+! delen=-2.3E0_dp*softcut/beta
+! else if(delen*beta .GT. 2.3E0_dp*softcut) THEN
+! delen=2.3E0_dp*softcut
 ! end if
 ! END JLR 11-19-09
-! weight    = weight*dexp(-(beta*delen))
+! weight    = weight*exp(-(beta*delen))
                vnew= delen
                vnewt     = vnewt + delen
                vnewinter = vinter
@@ -284,24 +284,24 @@ contains
             else
                deleo = ( voldinter + voldext + voldelect + voldewald + voldintra)
                if (lstagea) then
-                  deleo = (1.0d0-(1.0d0-etais)*lambdais)*deleo
+                  deleo = (1.0E0_dp-(1.0E0_dp-etais)*lambdais)*deleo
                else if (lstageb) then
                   deleo = etais*deleo
                else if (lstagec) then
-                  deleo = (etais+(1.0d0-etais)*lambdais)*deleo
+                  deleo = (etais+(1.0E0_dp-etais)*lambdais)*deleo
                end if
                deleo = v - deleo
 ! JLR 11-19-09 Commenting this out, it gives me energy error!!!
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM   this may not exactly right, but for
 !!!!! numerical reasons I think we need it
-! IF(deleo*beta .LT. -2.3d0*softcut) THEN
-! deleo=-2.3d0*softcut/beta
-! else if(deleo*beta .GT. 2.3d0*softcut) THEN
-! deleo=2.3d0*softcut
+! IF(deleo*beta .LT. -2.3E0_dp*softcut) THEN
+! deleo=-2.3E0_dp*softcut/beta
+! else if(deleo*beta .GT. 2.3E0_dp*softcut) THEN
+! deleo=2.3E0_dp*softcut
 ! end if
 ! END JLR 11-19-09
-! weiold    = weiold*dexp(-(beta*deleo))
+! weiold    = weiold*exp(-(beta*deleo))
                vold = deleo
                voldt     = voldt + deleo
                voldinter = vinter
@@ -337,11 +337,11 @@ contains
             if (iii .eq. 2) then
                if (ovrlap) return
                delen = v + vtornew
-               if ( delen*beta .gt. (2.3d0*softcut) ) then
+               if ( delen*beta .gt. (2.3E0_dp*softcut) ) then
 ! write(io_output,*) '##softcut in config caught explicit atoms'
                   return
                end if
-               weight = weight*dexp(-(beta*delen))
+               weight = weight*exp(-(beta*delen))
                vnewt  = vnewt + delen
                vnewintra = vnewintra + vintra
                vnewinter = vnewinter + vinter
@@ -355,7 +355,7 @@ contains
                   return
                end if
                deleo = v + vtorold
-               weiold = weiold*dexp(-(beta*deleo))
+               weiold = weiold*exp(-(beta*deleo))
                if ( weiold .lt. softlog ) then
                   write(io_output,*) '##old weight for explicit too low'
                end if
@@ -381,17 +381,17 @@ contains
          vipswn = vipswn + vrecipn
          vipswo = vipswo + vrecipo
          if (lstagea) then
-            vrecipn = (1.0d0-(1.0d0-etais)*lambdais)*vrecipn
-            vrecipo = (1.0d0-(1.0d0-etais)*lambdais)*vrecipo
+            vrecipn = (1.0E0_dp-(1.0E0_dp-etais)*lambdais)*vrecipn
+            vrecipo = (1.0E0_dp-(1.0E0_dp-etais)*lambdais)*vrecipo
          else if (lstageb) then
             vrecipn = etais*vrecipn
             vrecipo = etais*vrecipo
          else if (lstagec) then
-            vrecipn = (etais+(1.0d0-etais)*lambdais)*vrecipn
-            vrecipo = (etais+(1.0d0-etais)*lambdais)*vrecipo
+            vrecipn = (etais+(1.0E0_dp-etais)*lambdais)*vrecipn
+            vrecipo = (etais+(1.0E0_dp-etais)*lambdais)*vrecipo
          end if
-         weight = weight * dexp(-(beta*vrecipn))
-         weiold = weiold * dexp(-(beta*vrecipo))
+         weight = weight * exp(-(beta*vrecipn))
+         weiold = weiold * exp(-(beta*vrecipo))
          vnewt = vnewt + vrecipn
          voldt = voldt + vrecipo
       end if
@@ -399,8 +399,8 @@ contains
 ! End of DC-CBMC, Explicit Atom and Ewald-sum Corrections
 
 ! check for acceptance of trial configuration ***
-      wnlog = dlog10 ( weight )
-      wolog = dlog10 ( weiold )
+      wnlog = log10 ( weight )
+      wolog = log10 ( weiold )
 ! write(io_output,*) 'weight:',weight
 ! write(io_output,*) 'weiold:',weiold
       wdlog = wnlog - wolog
@@ -411,24 +411,24 @@ contains
 
       if (lfixnow) then
          wratio = weight * cwtorfo / ( weiold * cwtorfn)
-         fbscb(imolty,1,findex-1) =  fbscb(imolty,1,findex-1) + 1.0d0
+         fbscb(imolty,1,findex-1) =  fbscb(imolty,1,findex-1) + 1.0E0_dp
       else
          wratio = weight / weiold
 ! write(99,*) weight,weiold
-         bscb(imolty,1,total) = bscb(imolty,1,total) + 1.0d0
+         bscb(imolty,1,total) = bscb(imolty,1,total) + 1.0E0_dp
       end if
 
 ! write(99,*) wratio
-      wratio=wratio*dexp(beta*(vold-vnew))
+      wratio=wratio*exp(beta*(vold-vnew))
 ! write(99,*) wratio,vold,vnew
 
       if ( random(-1) .le. wratio ) then
 ! write(io_output,*) 'CONFIG accepted',i,ibox
 ! we can now accept !!!!! ***
          if (lfixnow) then
-            fbscb(imolty,2,findex-1) = fbscb(imolty,2,findex-1)  + 1.0d0
+            fbscb(imolty,2,findex-1) = fbscb(imolty,2,findex-1)  + 1.0E0_dp
          else
-            bscb(imolty,2,total) = bscb(imolty,2,total) + 1.0d0
+            bscb(imolty,2,total) = bscb(imolty,2,total) + 1.0E0_dp
          end if
 
          vbox(ibox)    = vbox(ibox)    + ( vnewt - voldt )
@@ -515,7 +515,7 @@ contains
                    y = ryu(i,j) - ryu(i,k)
                    z = rzu(i,j) - rzu(i,k)
 
-                   bin = anint(10.0d0*dsqrt(x**2+y**2+z**2))
+                   bin = anint(10.0E0_dp*sqrt(x**2+y**2+z**2))
 
                    if (bin.gt.maxbin) cycle
 
@@ -582,8 +582,8 @@ contains
 #endif
 
     lterm = .false.
-    cwtorf = 1.0d0
-    wei_vib = 1.0d0
+    cwtorf = 1.0E0_dp
+    wei_vib = 1.0E0_dp
 
 ! *******************************************
 ! Rosenbluth weight of trial conformation *
@@ -591,42 +591,42 @@ contains
     ! initialize conformation energies and weight
     if ( lnew ) then
        ! set the initial weight to unity ***
-       weight = 1.0d0
+       weight = 1.0E0_dp
        ! set total energy of trial configuration to zero ***
-       vnewt     = 0.0d0
-       vnewtg    = 0.0d0
-       vnewbb    = 0.0d0
-       vnewbvib  = 0.0d0
-       vnewext   = 0.0d0
-       vnewintra = 0.0d0
-       vnewinter = 0.0d0
-       vnewelect = 0.0d0
-       vnewewald = 0.0d0
-       vipswn = 0.0d0
-       vwellipswn = 0.0d0
+       vnewt     = 0.0E0_dp
+       vnewtg    = 0.0E0_dp
+       vnewbb    = 0.0E0_dp
+       vnewbvib  = 0.0E0_dp
+       vnewext   = 0.0E0_dp
+       vnewintra = 0.0E0_dp
+       vnewinter = 0.0E0_dp
+       vnewelect = 0.0E0_dp
+       vnewewald = 0.0E0_dp
+       vipswn = 0.0E0_dp
+       vwellipswn = 0.0E0_dp
     else
        ! old conformation
        ! set the initial weight of the old configuration to unity ***
-       weiold = 1.0d0
+       weiold = 1.0E0_dp
        ! set total energy of trial configuration to zero ***
-       voldt     = 0.0d0
-       voldtg    = 0.0d0
-       voldbb    = 0.0d0
-       voldbvib  = 0.0d0
-       voldext   = 0.0d0
-       voldintra = 0.0d0
-       voldinter = 0.0d0
-       voldelect = 0.0d0
-       voldewald = 0.0d0
-       vipswo = 0.0d0
-       vwellipswo = 0.0d0
+       voldt     = 0.0E0_dp
+       voldtg    = 0.0E0_dp
+       voldbb    = 0.0E0_dp
+       voldbvib  = 0.0E0_dp
+       voldext   = 0.0E0_dp
+       voldintra = 0.0E0_dp
+       voldinter = 0.0E0_dp
+       voldelect = 0.0E0_dp
+       voldewald = 0.0E0_dp
+       vipswo = 0.0E0_dp
+       vwellipswo = 0.0E0_dp
     end if
 
 ! for rigid molecules
 ! JLR 11-14-09 modifying for calls from swatch for rigid molecules
 !   we don't want to do rigrot for rigid swatch when nsampos .ge. 3
     if (lrigid(imolty).and.movetype.ne.1) then
-       wadd = 1.0d0
+       wadd = 1.0E0_dp
        if (movetype.eq.2) then
           call rigrot(lnew,lterm,i,icharge,imolty,ibox,wadd)
        end if
@@ -669,7 +669,7 @@ contains
                 yvec(iu,ju) = ryu(i,ju) - ryu(i,iu)
                 zvec(iu,ju) = rzu(i,ju) - rzu(i,iu)
              end if
-             distij(iu,ju) = dsqrt( xvec(iu,ju)**2 + yvec(iu,ju)**2 + zvec(iu,ju)**2 )
+             distij(iu,ju) = sqrt( xvec(iu,ju)**2 + yvec(iu,ju)**2 + zvec(iu,ju)**2 )
           end if
        end do
     end do
@@ -700,7 +700,7 @@ contains
                       if (lcrank) then
                          vvibtr = vphi
                       else
-                         vvibtr = 0.0d0
+                         vvibtr = 0.0E0_dp
                       end if
                       do counta = 1, ntogrow
                          glist(counta) = growlist(iw,counta)
@@ -708,7 +708,7 @@ contains
                       ichoi = nchoi(imolty)
                       ! sometimes this loop makes the code skip geometry, which sets this
                       ! maxlen (the maximum bond length that CBMC will try to grow)
-                      maxlen=2.0d0
+                      maxlen=2.0E0_dp
                       goto 250
                    end if
                 end do
@@ -824,12 +824,12 @@ contains
           ! Begin loop to determine torsional angle
           if ( ltorsion ) then
              ! initialize bsum_tor
-             my_bsum_tor(my_itrial) = 0.0d0
+             my_bsum_tor(my_itrial) = 0.0E0_dp
 
              do itor = 1,ichtor
                 if ( (.not. lnew) .and. ip .eq. 1 .and. itor .eq. 1) then
-                   ! old conformation - set phidisp to 0.0d0
-                   phidisp = 0.0d0
+                   ! old conformation - set phidisp to 0.0E0_dp
+                   phidisp = 0.0E0_dp
                 else
                    ! choose a random displacement angle from anglestart
                    ! assign the positions based on angles and lengths above
@@ -845,7 +845,7 @@ contains
                 end do
 
                 ! set energies of trial position to zero ---
-                vdha = 0.0d0
+                vdha = 0.0E0_dp
                 if (movetype.eq.2 .and.lring(imolty).and.iw.lt.3) then
                    goto 300
                 end if
@@ -874,7 +874,7 @@ contains
 300             continue
 
 ! compute boltzmann factor and add it to bsum_tor
-                bf_tor(itor) = dexp ( -vdha * beta )
+                bf_tor(itor) = exp ( -vdha * beta )
 
 ! store vtorsion and phidisp for this trial
                 vtorsion(itor) = vdha
@@ -882,8 +882,8 @@ contains
 
 ! for safecbmc add extra weight to assure closure
                 if (lfixnow) then
-                   ctorf(itor) = 1.0d0
-                   vfbbtr(itor) = 0.0d0
+                   ctorf(itor) = 1.0E0_dp
+                   vfbbtr(itor) = 0.0E0_dp
 
                    do count = 1, ntogrow
                       length = bondlen(count)
@@ -906,15 +906,15 @@ contains
 ! determine special closing energies
                             call safecbmc(2,lnew,i,iw,igrow,imolty,count,x,y,z,vphi,vtorf,wbendv,lterm,movetype)
 
-                            bf_tor(itor) = bf_tor(itor) * vtorf * dexp( - beta * vphi )
+                            bf_tor(itor) = bf_tor(itor) * vtorf * exp( - beta * vphi )
                             ctorf(itor) = ctorf(itor) * vtorf
 
                             vfbbtr(itor) =  vfbbtr(itor) + vphi
                          else
                             do j = 1, fcount(iu)
                                ju = fclose(iu,j)
-                               dist = dsqrt((x-rxnew(ju))**2 + (y-rynew(ju))**2 + (z-rznew(ju))**2)
-                               bin = anint(dist*10.0d0)
+                               dist = sqrt((x-rxnew(ju))**2 + (y-rynew(ju))**2 + (z-rznew(ju))**2)
+                               bin = anint(dist*10.0E0_dp)
 
                                bf_tor(itor) = bf_tor(itor) * probf(iu,ju,bin)
                                ctorf(itor) = ctorf(itor) * probf(iu,ju,bin)
@@ -923,8 +923,8 @@ contains
                                   do counta = 1, pastnum(ju)
                                      ku = ipast(ju,counta)
                                      if (.not.lplace(imolty,ku)) then
-                                        dist = dsqrt((x-rxnew(ku))**2 + (y-rynew(ku))**2 + (z-rznew(ku))**2)
-                                        bin = anint(dist*10.0d0)
+                                        dist = sqrt((x-rxnew(ku))**2 + (y-rynew(ku))**2 + (z-rznew(ku))**2)
+                                        bin = anint(dist*10.0E0_dp)
 
                                         bf_tor(itor) = bf_tor(itor) * probf(iu,ku,bin)
                                         ctorf(itor) = ctorf(itor) * probf(iu,ku,bin)
@@ -938,7 +938,7 @@ contains
 ! determine special closing energies
                             call safecbmc(2,lnew,i,iw,igrow,imolty,count,x,y,z,vphi,vtorf ,wbendv,lterm,movetype)
 
-                            bf_tor(itor) = bf_tor(itor) * vtorf  * dexp( - beta * vphi )
+                            bf_tor(itor) = bf_tor(itor) * vtorf  * exp( - beta * vphi )
                             ctorf(itor) = ctorf(itor)  * vtorf
 
                             vfbbtr(itor) = vfbbtr(itor) + vphi
@@ -946,8 +946,8 @@ contains
                             if (fcount(iu).gt.0) then
                                do j = 1, fcount(iu)
                                   ju = fclose(iu,j)
-                                  dist = dsqrt((x-rxu(i,ju))**2 + (y-ryu(i,ju))**2 + (z-rzu(i,ju))**2)
-                                  bin = anint(dist*10.0d0)
+                                  dist = sqrt((x-rxu(i,ju))**2 + (y-ryu(i,ju))**2 + (z-rzu(i,ju))**2)
+                                  bin = anint(dist*10.0E0_dp)
 
                                   bf_tor(itor) = bf_tor(itor) * probf(ju,iu,bin)
                                   ctorf(itor) = ctorf(itor) * probf(iu,ju,bin)
@@ -956,8 +956,8 @@ contains
                                      do counta = 1, pastnum(ju)
                                         ku = ipast(ju,counta)
                                         if (.not.lplace(imolty,ku)) then
-                                           dist = dsqrt((x-rxu(i,ku))**2 + (y-ryu(i,ku))**2 + (z-rzu(i,ku))**2)
-                                           bin = anint(dist*10.0d0)
+                                           dist = sqrt((x-rxu(i,ku))**2 + (y-ryu(i,ku))**2 + (z-rzu(i,ku))**2)
+                                           bin = anint(dist*10.0E0_dp)
 
                                            bf_tor(itor) = bf_tor(itor) * probf(iu,ku,bin)
                                            ctorf(itor) = ctorf(itor) * probf(iu,ku,bin)
@@ -977,7 +977,7 @@ contains
              if ( lnew .or. ip .ne. 1 ) then
                 ! choose one of the trial sites in a biased fashion
                 ran_tor = random(rid)*my_bsum_tor(my_itrial)
-                bs = 0.0d0
+                bs = 0.0E0_dp
                 do itor = 1,ichtor
                    bs = bs + bf_tor(itor)
                    if ( ran_tor .lt. bs ) then
@@ -1004,21 +1004,21 @@ contains
           else
              ! no torsion energy, choose phidisp at random(-1except old)
              if ( (.not. lnew) .and. ip .eq. 1 ) then
-                ! old conformation - set phidisp to 0.0d0
-                phidisp = 0.0d0
+                ! old conformation - set phidisp to 0.0E0_dp
+                phidisp = 0.0E0_dp
              else
                 ! choose a random displacement angle from anglestart
                 ! assign the positions based on angles and lengths above
                 phidisp = twopi*random(rid)
              end if
 
-             ! set bsum_tor to 1.0d0
-             my_bsum_tor(my_itrial) = 1.0d0
+             ! set bsum_tor to 1.0E0_dp
+             my_bsum_tor(my_itrial) = 1.0E0_dp
 
              ! assign the torsional energy a value of 0.0
-             my_vtgtr(my_itrial) = 0.0d0
-             my_ctorf_acc(my_itrial) = 1.0d0
-             my_vfbbtr_acc(my_itrial) = 0.0d0
+             my_vtgtr(my_itrial) = 0.0E0_dp
+             my_ctorf_acc(my_itrial) = 1.0E0_dp
+             my_vfbbtr_acc(my_itrial) = 0.0E0_dp
           end if
 
           ! for accepted phidisp set up the vectors
@@ -1081,7 +1081,7 @@ contains
 
        ! perform the walk according to the availibility of the choices ***
        ! and calculate the correct weight for the trial walk           ***
-       bsum = 0.0d0
+       bsum = 0.0E0_dp
        do ip = 1, ichoi
           ! include both the torsional and the LJ/qq
           bsum = bsum + bfac(ip)*bsum_tor(ip)
@@ -1098,7 +1098,7 @@ contains
 
           ! select one position at random ---
           rbf = bsum * random(-1)
-          bs = 0.0d0
+          bs = 0.0E0_dp
           do ip = 1, ichoi
              if ( .not. lovr(ip) ) then
                 bs = bs + bfac(ip)*bsum_tor(ip)
@@ -1117,7 +1117,7 @@ contains
 
        if (lfixed) then
           ! determine jacobian contribution for crankshaft
-          jacobian = 1.0d0
+          jacobian = 1.0E0_dp
           do count = 1, ntogrow
              iu = growlist(iw,count)
              if (fcount(iu).gt.0) then
@@ -1128,43 +1128,43 @@ contains
                       x = rxnew(ju) - rxnew(iufrom)
                       y = rynew(ju) - rynew(iufrom)
                       z = rznew(ju) - rznew(iufrom)
-                      length = dsqrt( x**2 + y**2 + z**2 )
+                      length = sqrt( x**2 + y**2 + z**2 )
 
                       x = rxnew(ju) - rxp(count,iwalk)
                       y = rynew(ju) - ryp(count,iwalk)
                       z = rznew(ju) - rzp(count,iwalk)
-                      lengtha = dsqrt( x**2 + y**2 + z**2 )
+                      lengtha = sqrt( x**2 + y**2 + z**2 )
                    else
                       x = rxu(i,ju) - rxnew(iufrom)
                       y = ryu(i,ju) - rynew(iufrom)
                       z = rzu(i,ju) - rznew(iufrom)
-                      length = dsqrt( x**2 + y**2 + z**2 )
+                      length = sqrt( x**2 + y**2 + z**2 )
 
                       x = rxu(i,ju) - rxp(count,iwalk)
                       y = ryu(i,ju) - ryp(count,iwalk)
                       z = rzu(i,ju) - rzp(count,iwalk)
-                      lengtha = dsqrt( x**2 + y**2 + z**2 )
+                      lengtha = sqrt( x**2 + y**2 + z**2 )
                    end if
 
                    x = rxp(count,iwalk) - rxnew(iufrom)
                    y = ryp(count,iwalk) - rynew(iufrom)
                    z = rzp(count,iwalk) - rznew(iufrom)
-                   lengthb = dsqrt( x**2 + y**2 + z**2 )
+                   lengthb = sqrt( x**2 + y**2 + z**2 )
                 else
                    x = rxu(i,ju) - rxu(i,iufrom)
                    y = ryu(i,ju) - ryu(i,iufrom)
                    z = rzu(i,ju) - rzu(i,iufrom)
-                   length = dsqrt( x**2 + y**2 + z**2 )
+                   length = sqrt( x**2 + y**2 + z**2 )
 
                    x = rxu(i,ju) - rxu(i,iu)
                    y = ryu(i,ju) - ryu(i,iu)
                    z = rzu(i,ju) - rzu(i,iu)
-                   lengtha = dsqrt( x**2 + y**2 + z**2 )
+                   lengtha = sqrt( x**2 + y**2 + z**2 )
 
                    x = rxu(i,iu) - rxu(i,iufrom)
                    y = ryu(i,iu) - ryu(i,iufrom)
                    z = rzu(i,iu) - rzu(i,iufrom)
-                   lengthb = dsqrt( x**2 + y**2 + z**2 )
+                   lengthb = sqrt( x**2 + y**2 + z**2 )
                 end if
                 jacobian = jacobian / (length*lengtha*lengthb)
              end if
@@ -1260,7 +1260,7 @@ contains
              yvec(iu,iufrom) = ryu(i,iufrom) - ryu(i,iu)
              zvec(iu,iufrom) = rzu(i,iufrom) - rzu(i,iu)
           end if
-          distij(iu,iufrom) = dsqrt( xvec(iu,iufrom)**2 + yvec(iu,iufrom)**2 + zvec(iu,iufrom)**2 )
+          distij(iu,iufrom) = sqrt( xvec(iu,iufrom)**2 + yvec(iu,iufrom)**2 + zvec(iu,iufrom)**2 )
 
           xvec(iufrom,iu) = - xvec(iu,iufrom)
           yvec(iufrom,iu) = - yvec(iu,iufrom)
@@ -1287,7 +1287,7 @@ contains
                    yvec(ju,iu) = - yvec(iu,ju)
                    zvec(ju,iu) = - zvec(iu,ju)
 
-                   distij(iu,ju) = dsqrt(xvec(iu,ju)**2 + yvec(iu,ju)**2 + zvec(iu,ju)**2)
+                   distij(iu,ju) = sqrt(xvec(iu,ju)**2 + yvec(iu,ju)**2 + zvec(iu,ju)**2)
                    distij(ju,iu) = distij(iu,ju)
                 end do
              end if
@@ -1358,7 +1358,7 @@ contains
           random_index = int(dble(rindex(imolty))*random(-1)+1)
           iutry = riutry(imolty,random_index)
        else if ( lrig(imolty).and.nrig(imolty).gt.0 ) then
-          dbgrow = random(-1)*dble(nrig(imolty)) + 1.0d0
+          dbgrow = random(-1)*dble(nrig(imolty)) + 1.0E0_dp
           iutry = irig(imolty,int(dbgrow))
        else if ( icbsta(imolty) .gt. 0 ) then
           iutry = icbsta(imolty)
@@ -1886,7 +1886,7 @@ contains
     iufrom = growfrom(iw)
 
     ! initialize trial energies
-    vvibtr = 0.0d0
+    vvibtr = 0.0E0_dp
 
     if ( .not. lnew ) then
        ! OLD store r*ui positions for unit iufrom
@@ -1898,7 +1898,7 @@ contains
     ! Begin Bond length selection based on Boltzmann rejection
 
     ! determine the bond lengths of the beads to be grown
-    maxlen = 0.0d0
+    maxlen = 0.0E0_dp
 
     do count = 1,ntogrow
        iugrow = growlist(iw,count)
@@ -1925,7 +1925,7 @@ contains
           rzuij = rzu(i,iugrow) - rzui
 
           ! do not need mimage for intramolecular
-          length = dsqrt(rxuij*rxuij + ryuij*ryuij + rzuij*rzuij)
+          length = sqrt(rxuij*rxuij + ryuij*ryuij + rzuij*rzuij)
 
           ! compute vibration energy
           if (L_vib_table) then
@@ -1962,7 +1962,7 @@ contains
        xvecprev = rxu(i,iuprev) - rxui
        yvecprev = ryu(i,iuprev) - ryui
        zvecprev = rzu(i,iuprev) - rzui
-       distprev = dsqrt( xvecprev*xvecprev + yvecprev*yvecprev  + zvecprev*zvecprev )
+       distprev = sqrt( xvecprev*xvecprev + yvecprev*yvecprev  + zvecprev*zvecprev )
     end if
 
     if (L_bend_table) then
@@ -1978,14 +1978,14 @@ contains
              ryuij = rynew(iuprev) - rynew(iufrom)
              rzuij = rznew(iuprev) - rznew(iufrom)
              lengthFP2 = rxuij*rxuij+ryuij*ryuij+rzuij*rzuij
-             lengthFP = dsqrt(lengthFP2)
+             lengthFP = sqrt(lengthFP2)
           end if
        end if
     end if
 
     ! initialize wei_bend
-    wei_bend = 1.0d0
-    vbbtr = 0.0d0
+    wei_bend = 1.0E0_dp
+    vbbtr = 0.0E0_dp
     nchben_a = nchbna(imolty)
     ! MPI
     if (numprocs.gt.1) then
@@ -2017,10 +2017,10 @@ contains
           end if
        end do
 
-       if ( kforce .gt. 0.1d0 ) then
+       if ( kforce .gt. 0.1E0_dp ) then
           ! flexible bond angle
           ! initialize bsum_try
-          bsum_try = 0.0d0
+          bsum_try = 0.0E0_dp
 
           if (L_bend_table) then
              distgrow = bondlen(count)
@@ -2034,20 +2034,20 @@ contains
              if (lnew.or.ibend.ne.1) then
                 ! new conformation or old conformation skipping 1st
                 ! choose the angle uniformly on sin(theta)
-                rsint = 2.0d0*random(rid) - 1.0d0
-                angle = dacos(rsint)
+                rsint = 2.0E0_dp*random(rid) - 1.0E0_dp
+                angle = acos(rsint)
 
                 ! calculate the bond angle energy
                 if (L_bend_table) then
-                   lengthc2 = lengthFP2 + distgrow2 - 2.0d0*lengthFP*distgrow*dcos(angle)
-                   lengthc = dsqrt(lengthc2)
+                   lengthc2 = lengthFP2 + distgrow2 - 2.0E0_dp*lengthFP*distgrow*cos(angle)
+                   lengthc = sqrt(lengthc2)
                    vangle = lininter_bend(lengthc,type)
                 else
                    vangle = kforce * (angle - equil)**2
                 end if
 
                 my_ang_trial(my_itrial) = angle
-                my_bfactor(my_itrial) = dexp(-beta*vangle)
+                my_bfactor(my_itrial) = exp(-beta*vangle)
                 bsum_try = bsum_try + my_bfactor(my_itrial)
              else
                 ! first ibend is the old conformation
@@ -2058,18 +2058,18 @@ contains
                 distgrow2 = distgrow*distgrow
                 ! dot product divided by lengths gives cos(angle)
                 anglec = ( xvecprev*xvecgrow + yvecprev*yvecgrow  + zvecprev*zvecgrow ) / (distprev*distgrow)
-                angle = dacos(anglec)
+                angle = acos(anglec)
 
                 if (L_bend_table) then
-                   lengthc2 = lengthFP2 + distgrow2 - 2.0d0*lengthFP*distgrow*anglec
-                   lengthc = dsqrt(lengthc2)
+                   lengthc2 = lengthFP2 + distgrow2 - 2.0E0_dp*lengthFP*distgrow*anglec
+                   lengthc = sqrt(lengthc2)
                    vangle = lininter_bend(lengthc,type)
                 else
                    vangle = kforce * (angle - equil)**2
                 end if
 
                 my_ang_trial(1) = angle
-                my_bfactor(1) = dexp( -beta*vangle )
+                my_bfactor(1) = exp( -beta*vangle )
                 bsum_try = bsum_try + my_bfactor(1)
              end if
           end do
@@ -2094,19 +2094,19 @@ contains
           if ( lnew ) then
              ! select one of the trial sites via bias
              rbf = random(-1)*bsum_try
-             bs = 0.0d0
+             bs = 0.0E0_dp
              do ibend = 1,nchben_a
                 bs = bs + bfactor(ibend)
                 if ( rbf .lt. bs ) then
                    angle = ang_trial(ibend)
-                   vangle = dlog(bfactor(ibend))/(-beta)
+                   vangle = log(bfactor(ibend))/(-beta)
                    exit
                 end if
              end do
           else
              ! select the old conformation
              angle = ang_trial(1)
-             vangle = dlog(bfactor(1))/(-beta)
+             vangle = log(bfactor(1))/(-beta)
           end if
 
           ! propagate the rosenbluth weight
@@ -2114,7 +2114,7 @@ contains
        else
           ! fixed bond angle
           angle = equil
-          vangle = 0.0d0
+          vangle = 0.0E0_dp
        end if
        bendang(count) = angle
        vbbtr = vbbtr + vangle
@@ -2123,7 +2123,7 @@ contains
     ! Neeraj  iugrow-iufrom-iuprev bend angle has been selected!
     if ( lnew ) then
        ! assign phi(angstart) to 0.0
-       phi(angstart) = 0.0d0
+       phi(angstart) = 0.0E0_dp
     else
        ! set up the cone using iuprev
        xub = -xvecprev/distprev
@@ -2163,7 +2163,7 @@ contains
        iugrow = growlist(iw,count)
 
        ! initialize bsum_try
-       bsum_try = 0.0d0
+       bsum_try = 0.0E0_dp
 
        if (L_bend_table) then
           lengtha = bondlen(count)
@@ -2174,7 +2174,7 @@ contains
        my_itrial = 0
        do ibend = my_start,my_end
           my_itrial = my_itrial + 1
-          vphi = 0.0d0
+          vphi = 0.0E0_dp
           if (lnew.or.ibend.ne.1) then
              ! perform all ibend for NEW and OLD (except for 1st in OLD)
              ! determine a value of phitwo
@@ -2194,8 +2194,8 @@ contains
                          if (L_bend_table) then
                             lengthb = bondlen(aaa)
                             lengthb2 = lengthb*lengthb
-                            lengthc2 = lengtha2 + lengthb2 -  2.0d0*lengtha*lengthb*dcos(angle)
-                            lengthc = dsqrt(lengthc2)
+                            lengthc2 = lengtha2 + lengthb2 -  2.0E0_dp*lengtha*lengthb*cos(angle)
+                            lengthc = sqrt(lengthc2)
                             vphi = vphi + lininter_bend (lengthc,type)
                          else
                             vphi = vphi + brbenk(type) * (angle - brben(type))**2
@@ -2207,7 +2207,7 @@ contains
 
              ! store the boltzmann factors and phi
              my_ang_trial(my_itrial) = phitwo
-             my_bfactor(my_itrial) = dexp(-beta*vphi)
+             my_bfactor(my_itrial) = exp(-beta*vphi)
              bsum_try = bsum_try + my_bfactor(my_itrial)
           else
              ! compute vector from iufrom to iugrow
@@ -2237,8 +2237,8 @@ contains
                          if (L_bend_table) then
                             lengthb = bondlen(aaa)
                             lengthb2 = lengthb * lengthb
-                            lengthc2 = lengtha2 + lengthb2 -  2.0d0*lengtha*lengthb*dcos(angle)
-                            lengthc = dsqrt(lengthc2)
+                            lengthc2 = lengtha2 + lengthb2 -  2.0E0_dp*lengtha*lengthb*cos(angle)
+                            lengthc = sqrt(lengthc2)
                             vphi = vphi + lininter_bend(lengthc,type)
                          else
                             vphi = vphi + brbenk(type) * (angle - brben(type))**2
@@ -2249,7 +2249,7 @@ contains
              end do
 
              my_ang_trial(1) = phitwo
-             my_bfactor(1) = dexp( -beta * vphi )
+             my_bfactor(1) = exp( -beta * vphi )
              bsum_try = bsum_try + my_bfactor(1)
           end if
        end do
@@ -2260,19 +2260,19 @@ contains
        if ( lnew ) then
           ! select a value of phitwo in a biased fashion
           rbf = random(-1)*bsum_try
-          bs = 0.0d0
+          bs = 0.0E0_dp
           do ibend = 1,nchben_b
              bs = bs + bfactor(ibend)
              if ( rbf .lt. bs ) then
                 phitwo = ang_trial(ibend)
-                vphi = dlog( bfactor(ibend) )/(-beta)
+                vphi = log( bfactor(ibend) )/(-beta)
                 exit
              end if
           end do
        else
           ! select the OLD value of phitwo
           phitwo = ang_trial(1)
-          vphi = dlog( bfactor(1) )/(-beta)
+          vphi = log( bfactor(1) )/(-beta)
        end if
 
        ! propagate angle weight
@@ -2308,23 +2308,23 @@ contains
     write(io_output,*) 'start BENDANGLE in ',myid
 #endif
 
-    if ( kforce .gt. 0.1d0 ) then
+    if ( kforce .gt. 0.1E0_dp ) then
        ! find a vector inside the unit sphere
-80     v1 = 2.0d0*random(-1)-1.0d0
-       v2 = 2.0d0*random(-1)-1.0d0
+80     v1 = 2.0E0_dp*random(-1)-1.0E0_dp
+       v2 = 2.0E0_dp*random(-1)-1.0E0_dp
        rr = v1*v1 + v2*v2
-       if (rr .ge. 1.0d0 ) goto 80
+       if (rr .ge. 1.0E0_dp ) goto 80
 
        ! select angle from a gaussian distribution
-       angle = equil + v1*dsqrt( (-dlog(rr)) /( kforce*betaT*rr) )
+       angle = equil + v1*sqrt( (-log(rr)) /( kforce*betaT*rr) )
 
-       if (angle .le. 0.0d0 .or. angle .ge. 3.1415 ) then
+       if (angle .le. 0.0E0_dp .or. angle .ge. 3.1415 ) then
           write(io_output,*) 'chose angle outside of 0,Pi in bendangle'
           goto 80
        end if
 
        ! correct for the phase space of the angle
-       if ( random(-1) .gt. dsin(angle) ) goto 80
+       if ( random(-1) .gt. sin(angle) ) goto 80
        ! if (L_bend_table) then
        ! call lininter_bend(angle, tabulated_bend, type)
        ! type isn't specified in this subroutine, but
@@ -2333,7 +2333,7 @@ contains
     else
        ! fixed bond angle
        angle = equil
-       vangle = 0.0d0
+       vangle = 0.0E0_dp
     end if
 
 #ifdef __DEBUG__
@@ -2378,9 +2378,9 @@ contains
        ! setup the unit cone
        ! assume x,y,z is a rotation of vector (0,0,1)
        ! conversions from xyz to theta,psi
-       ! x = -dsin(theta)*dcos(psi)
-       ! y = dsin(theta)*dsin(psi)
-       ! z = dcos(theta)
+       ! x = -sin(theta)*cos(psi)
+       ! y = sin(theta)*sin(psi)
+       ! z = cos(theta)
        ! rotation matrix (note that sin(phi) = 0, cos(phi) = 1)
        ! a11 = cos(psi) cos(theta) cos(phi) - sin(psi) sin(phi)
        ! cos(psi) cos(theta)
@@ -2402,13 +2402,13 @@ contains
        ! z
 
        costhe = z
-       sinthe = dsqrt(1.0d0 - costhe*costhe)
-       if (sinthe .ne. 0.0d0) then
+       sinthe = sqrt(1.0E0_dp - costhe*costhe)
+       if (sinthe .ne. 0.0E0_dp) then
           sinpsi=(y)/sinthe
           cospsi=(-x)/sinthe
        else
-          sinpsi = 0.0d0
-          cospsi = 1.0d0
+          sinpsi = 0.0E0_dp
+          cospsi = 1.0E0_dp
        end if
 
        ! rotation matrix
@@ -2423,12 +2423,12 @@ contains
     else if ( iinit .eq. 2 ) then
        ! find the vector on a cone:
        ! alpha is the angle with the cone axis (theta)
-       sinalph = dsin(alpha)
-       cosalph = dcos(alpha)
+       sinalph = sin(alpha)
+       cosalph = cos(alpha)
        ! gamma is now passed to cone - (phi)
        uztemp = -cosalph
-       uytemp = sinalph*dcos(gamma)
-       uxtemp = sinalph*dsin(gamma)
+       uytemp = sinalph*cos(gamma)
+       uxtemp = sinalph*sin(gamma)
        x = a11*uxtemp + a21*uytemp + a31*uztemp
        y = a12*uxtemp + a22*uytemp + a32*uztemp
        z = a13*uxtemp +              a33*uztemp
@@ -2440,19 +2440,19 @@ contains
        uxtemp =   ( x*a22*a33 + a21*(a32*z - y*a33) - a31*a22*z ) / determ
        uytemp =  ( a11*(y*a33 - a32*z) + x*(a32*a13 - a12*a33) + a31*(a12*z - y*a13) ) / determ
 
-       sinalph = dsin(alpha)
+       sinalph = sin(alpha)
        singamma = uxtemp/sinalph
        cosgamma = uytemp/sinalph
 
        ! now need to find the gamma on [-Pi,Pi] that satisfies cos and sin
-       if ( cosgamma .gt. 1.0d0 ) then
-          gamma = 0.0d0
-       else if ( cosgamma .lt. -1.0d0 ) then
+       if ( cosgamma .gt. 1.0E0_dp ) then
+          gamma = 0.0E0_dp
+       else if ( cosgamma .lt. -1.0E0_dp ) then
           gamma = onepi
        else
-          gamma = dacos(cosgamma)
+          gamma = acos(cosgamma)
        end if
-       if ( singamma .lt. 0.0d0 ) gamma = -gamma
+       if ( singamma .lt. 0.0E0_dp ) gamma = -gamma
     else
        write(io_output,*) 'iinit ',iinit
        call err_exit(__FILE__,__LINE__,'non valid iinit in cone.f',myid+1)
@@ -2479,21 +2479,21 @@ contains
     integer::vibtype
     real::length,bond,bf,vvib,betaT,kvib,requil
 
-    vvib = 0.0d0
+    vvib = 0.0E0_dp
 
-    if ( kvib .gt. 0.1d0 ) then
+    if ( kvib .gt. 0.1E0_dp ) then
        ! random bond length from Boltzmann distribution ---
-107    bond = (0.2d0*random(-1)+0.9d0)
+107    bond = (0.2E0_dp*random(-1)+0.9E0_dp)
 
        ! correct for jacobian by dividing by the max^2
        ! 1.21  = (1.1)^2, the equilibrium bond length cancels out
-       bf = bond*bond*bond/(1.21d0)
+       bf = bond*bond*bond/(1.21E0_dp)
        if ( random(-1) .ge. bf ) goto 107
        bond = bond * requil
 
        ! correct for the bond energy
        vvib = kvib * (bond-requil )**2
-       bf = dexp ( -(vvib * betaT) )
+       bf = exp ( -(vvib * betaT) )
        if ( random(-1) .ge. bf ) goto 107
        length = bond
 
@@ -2502,17 +2502,17 @@ contains
     else if (L_vib_table) then
        ! random bond length from Boltzmann distribution ---
        !     ---  +/- 25% of equilibrium bond length
-108    bond = (0.5d0*random(-1)+0.75d0)
+108    bond = (0.5E0_dp*random(-1)+0.75E0_dp)
 
     ! correct for jacobian by dividing by the max^2
     ! 1.5625  = (1.25)^2, the equilibrium bond length cancels out
-       bf = bond*bond*bond/(1.5625d0)
+       bf = bond*bond*bond/(1.5625E0_dp)
        if ( random(-1) .ge. bf ) goto 108
 
        bond = bond * requil
        vvib=lininter_vib(bond,vibtype)
 
-       bf = dexp ( -(vvib * betaT) )
+       bf = exp ( -(vvib * betaT) )
 
        if ( random(-1) .ge. bf ) goto 108
        length = bond
@@ -2545,8 +2545,8 @@ contains
 #endif
 
 ! initialize conformation energies and weight
-    wadd = 1.0d0
-    w = 0.0d0
+    wadd = 1.0E0_dp
+    w = 0.0E0_dp
     ichoi = nchoir(imolty)
     ltors = .false.
     iunit = nunit(imolty)
@@ -2573,12 +2573,12 @@ contains
     end if
 
     ! find maxlen
-    maxlen = 0.0d0
+    maxlen = 0.0E0_dp
     do j = igrow+1, iunit
        length = (rxur(j)-rxorig)**2+(ryur(j)-ryorig)**2 +(rzur(j)-rzorig)**2
        if (length.gt.maxlen) maxlen = length
     end do
-    maxlen = dsqrt(maxlen)
+    maxlen = sqrt(maxlen)
 
     do ip = 1, ichoi
        if (lnew.or.ip.ne.1) then
@@ -2586,12 +2586,12 @@ contains
           ydgamma = twopi*random(-1)
           zdgamma = twopi*random(-1)
           ! set up rotation matrix
-          xcosdg = dcos(xdgamma)
-          xsindg = dsin(xdgamma)
-          ycosdg = dcos(ydgamma)
-          ysindg = dsin(ydgamma)
-          zcosdg = dcos(zdgamma)
-          zsindg = dsin(zdgamma)
+          xcosdg = cos(xdgamma)
+          xsindg = sin(xdgamma)
+          ycosdg = cos(ydgamma)
+          ysindg = sin(ydgamma)
+          zcosdg = cos(zdgamma)
+          zsindg = sin(zdgamma)
 
           ! set molecule to rotate around
           ! rotate around all axis
@@ -2652,7 +2652,7 @@ contains
        return
     end if
 
-    bsum = 0.0d0
+    bsum = 0.0E0_dp
     do ip = 1, ichoi
        bsum = bsum + bfac(ip)
     end do
@@ -2667,7 +2667,7 @@ contains
 
        ! select one position at random ---
        rbf = bsum * random(-1)
-       bs = 0.0d0
+       bs = 0.0E0_dp
        do ip = 1, ichoi
           if (.not. lovr(ip) ) then
              bs = bs + bfac(ip)
@@ -2742,7 +2742,7 @@ contains
       imolty = moltyp(ichain)
       nngrow = nugrow(imolty)
       negrow = nunit(imolty) - 3
-      vmethyl = 0.0d0
+      vmethyl = 0.0E0_dp
       if ((nunit(imolty)-6) .eq. 3*(nngrow-3) ) then
 ! alkanol cases
          lalkanol = .true.
@@ -2763,10 +2763,10 @@ contains
 ! constraint
 
             om = brvib(itvib(imolty,4,1))
-            aa1 = 0.5d0*(rxu(ichain,2)+rxu(ichain,3))  - rxu(ichain,1)
-            b1 = 0.5d0*(ryu(ichain,2)+ryu(ichain,3))  - ryu(ichain,1)
-            c1 = 0.5d0*(rzu(ichain,2)+rzu(ichain,3))  - rzu(ichain,1)
-            dr = dsqrt(aa1*aa1+b1*b1+c1*c1)
+            aa1 = 0.5E0_dp*(rxu(ichain,2)+rxu(ichain,3))  - rxu(ichain,1)
+            b1 = 0.5E0_dp*(ryu(ichain,2)+ryu(ichain,3))  - ryu(ichain,1)
+            c1 = 0.5E0_dp*(rzu(ichain,2)+rzu(ichain,3))  - rzu(ichain,1)
+            dr = sqrt(aa1*aa1+b1*b1+c1*c1)
             rxu(ichain,4) = rxu(ichain,1) + om*aa1/dr
             ryu(ichain,4) = ryu(ichain,1) + om*b1/dr
             rzu(ichain,4) = rzu(ichain,1) + om*c1/dr
@@ -2786,9 +2786,9 @@ contains
                   hoh = brben(itben(imolty,nngrow+1,1))
                end if
                if ( lcrysl ) then
-                  hoh2 = hoh / 2.0d0
-                  hk = oh*dsin(hoh2)
-                  ok = oh*dcos(hoh2)
+                  hoh2 = hoh / 2.0E0_dp
+                  hk = oh*sin(hoh2)
+                  ok = oh*cos(hoh2)
                   rxu(ichain,2) = rxu(ichain,1)
                   ryu(ichain,2) = ryu(ichain,1) + hk
                   rzu(ichain,2) = rzu(ichain,1) + ok
@@ -2796,36 +2796,36 @@ contains
                   ryu(ichain,3) = ryu(ichain,1) - hk
                   rzu(ichain,3) = rzu(ichain,1) + ok
                else
-                  oa = oh*dcos(onepi-hoh)
-                  ah = oh*dsin(onepi-hoh)
+                  oa = oh*cos(onepi-hoh)
+                  ah = oh*sin(onepi-hoh)
 ! generate a random vector on a sphere for the first H ---
- 111              rx = 2.0d0*random(-1) - 1.0d0
-                  ry = 2.0d0*random(-1) - 1.0d0
+ 111              rx = 2.0E0_dp*random(-1) - 1.0E0_dp
+                  ry = 2.0E0_dp*random(-1) - 1.0E0_dp
                   dr = rx*rx + ry*ry
-                  if ( dr .gt. 1.0d0 ) goto 111
-                  rz = 2.0d0*dsqrt(1-dr)
+                  if ( dr .gt. 1.0E0_dp ) goto 111
+                  rz = 2.0E0_dp*sqrt(1-dr)
                   a2 = rx*rz
                   b2 = ry*rz
-                  c2 = 1 - 2.0d0*dr
+                  c2 = 1 - 2.0E0_dp*dr
 
                   rxu(ichain,2) = rxu(ichain,1) - oh*a2
                   ryu(ichain,2) = ryu(ichain,1) - oh*b2
                   rzu(ichain,2) = rzu(ichain,1) - oh*c2
 ! generate another random vector on a sphere for the second H ---
- 222              rx = 2.0d0*random(-1) - 1.0d0
-                  ry = 2.0d0*random(-1) - 1.0d0
+ 222              rx = 2.0E0_dp*random(-1) - 1.0E0_dp
+                  ry = 2.0E0_dp*random(-1) - 1.0E0_dp
                   dr = rx*rx + ry*ry
-                  if ( dr .gt. 1.0d0 ) goto 222
-                  rz = 2.0d0*dsqrt(1-dr)
+                  if ( dr .gt. 1.0E0_dp ) goto 222
+                  rz = 2.0E0_dp*sqrt(1-dr)
                   rx = rx*rz
                   ry = ry*rz
-                  rz = 1 - 2.0d0*dr
+                  rz = 1 - 2.0E0_dp*dr
 
 ! The two vectors above form a plane identified by n1 ---
                   aa1 = b2*rz - c2*ry
                   b1 = -(a2*rz - rx*c2)
                   c1 = a2*ry - rx*b2
-                  dln1 = dsqrt(aa1*aa1 + b1*b1 + c1*c1)
+                  dln1 = sqrt(aa1*aa1 + b1*b1 + c1*c1)
                   aa1 = aa1/dln1
                   b1 = b1/dln1
                   c1 = c1/dln1
@@ -2841,10 +2841,10 @@ contains
                end if
                if ( nunit(imolty) .eq. 4 ) then
                   om = brvib(itvib(imolty,4,1))
-                  aa1 = 0.5d0*(rxu(ichain,2)+rxu(ichain,3))  - rxu(ichain,1)
-                  b1 = 0.5d0*(ryu(ichain,2)+ryu(ichain,3))  - ryu(ichain,1)
-                  c1 = 0.5d0*(rzu(ichain,2)+rzu(ichain,3))  - rzu(ichain,1)
-                  dr = dsqrt(aa1*aa1+b1*b1+c1*c1)
+                  aa1 = 0.5E0_dp*(rxu(ichain,2)+rxu(ichain,3))  - rxu(ichain,1)
+                  b1 = 0.5E0_dp*(ryu(ichain,2)+ryu(ichain,3))  - ryu(ichain,1)
+                  c1 = 0.5E0_dp*(rzu(ichain,2)+rzu(ichain,3))  - rzu(ichain,1)
+                  dr = sqrt(aa1*aa1+b1*b1+c1*c1)
                   rxu(ichain,4) = rxu(ichain,1) + om*aa1/dr
                   ryu(ichain,4) = ryu(ichain,1) + om*b1/dr
                   rzu(ichain,4) = rzu(ichain,1) + om*c1/dr
@@ -2853,14 +2853,14 @@ contains
             else
 ! HF model
 ! generate a random vector on a sphere for the H and M sites ---
- 333           rx = 2.0d0*random(-1) - 1.0d0
-               ry = 2.0d0*random(-1) - 1.0d0
+ 333           rx = 2.0E0_dp*random(-1) - 1.0E0_dp
+               ry = 2.0E0_dp*random(-1) - 1.0E0_dp
                dr = rx*rx + ry*ry
-               if ( dr .gt. 1.0d0 ) goto 333
-               rz = 2.0d0*dsqrt(1-dr)
+               if ( dr .gt. 1.0E0_dp ) goto 333
+               rz = 2.0E0_dp*sqrt(1-dr)
                a2 = rx*rz
                b2 = ry*rz
-               c2 = 1 - 2.0d0*dr
+               c2 = 1 - 2.0E0_dp*dr
 
                do i = 2,3
                   ch = brvib(itvib(imolty,i,1))
@@ -2884,29 +2884,29 @@ contains
 ! aa1 = rxu(ichain,3)-rxu(ichain,1)
 ! b1 = ryu(ichain,3)-ryu(ichain,1)
 ! c1 = rzu(ichain,3)-rzu(ichain,1)
-! dln1 = dsqrt(aa1*aa1 + b1*b1 + c1*c1)
+! dln1 = sqrt(aa1*aa1 + b1*b1 + c1*c1)
 ! aa1 = aa1/dln1
 ! b1 = b1/dln1
 ! c1 = c1/dln1
-! a2 = 0.5d0*(rxu(ichain,1)+rxu(ichain,3))-
+! a2 = 0.5E0_dp*(rxu(ichain,1)+rxu(ichain,3))-
 !     &           rxu(ichain,2)
-! b2 = 0.5d0*(ryu(ichain,1)+ryu(ichain,3))-
+! b2 = 0.5E0_dp*(ryu(ichain,1)+ryu(ichain,3))-
 !     &           ryu(ichain,2)
-! c2 = 0.5d0*(rzu(ichain,1)+rzu(ichain,3))-
+! c2 = 0.5E0_dp*(rzu(ichain,1)+rzu(ichain,3))-
 !     &           rzu(ichain,2)
-! dln1 = dsqrt(a2*a2 + b2*b2 + c2*c2)
+! dln1 = sqrt(a2*a2 + b2*b2 + c2*c2)
 ! a2 = a2/dln1
 ! b2 = b2/dln1
 ! c2 = c2/dln1
-! rxu(ichain,4) = rxu(ichain,2) + 2.2758059d0*a2 +
-!     &           0.765d0*aa1
-! ryu(ichain,4) = ryu(ichain,2) + 2.2758059d0*b2 +
-!     &           0.765d0*b1
-! rzu(ichain,4) = rzu(ichain,2) + 2.2758059d0*c2 +
-!     &           0.765d0*c1
-! rxu(ichain,5) = rxu(ichain,4) - 1.53d0*aa1
-! ryu(ichain,5) = ryu(ichain,4) - 1.53d0*b1
-! rzu(ichain,5) = rzu(ichain,4) - 1.53d0*c1
+! rxu(ichain,4) = rxu(ichain,2) + 2.2758059E0_dp*a2 +
+!     &           0.765E0_dp*aa1
+! ryu(ichain,4) = ryu(ichain,2) + 2.2758059E0_dp*b2 +
+!     &           0.765E0_dp*b1
+! rzu(ichain,4) = rzu(ichain,2) + 2.2758059E0_dp*c2 +
+!     &           0.765E0_dp*c1
+! rxu(ichain,5) = rxu(ichain,4) - 1.53E0_dp*aa1
+! ryu(ichain,5) = ryu(ichain,4) - 1.53E0_dp*b1
+! rzu(ichain,5) = rzu(ichain,4) - 1.53E0_dp*c1
 
             aa1 = rxu(ichain,2)-rxu(ichain,1)
             b1 = ryu(ichain,2)-ryu(ichain,1)
@@ -2920,15 +2920,15 @@ contains
             a3 = b1*c2 - b2*c1
             b3 = -(aa1*c2 - a2*c1)
             c3 = aa1*b2 - a2*b1
-            dln1 = dsqrt(a3*a3 + b3*b3 + c3*c3)
+            dln1 = sqrt(a3*a3 + b3*b3 + c3*c3)
             a2 = a3/dln1
             b2 = b3/dln1
             c2 = c3/dln1
 
-            aa1 = 0.5d0*(rxu(ichain,1)+rxu(ichain,3))- rxu(ichain,2)
-            b1 = 0.5d0*(ryu(ichain,1)+ryu(ichain,3))- ryu(ichain,2)
-            c1 = 0.5d0*(rzu(ichain,1)+rzu(ichain,3))- rzu(ichain,2)
-            dln1 = dsqrt(aa1*aa1 + b1*b1 + c1*c1)
+            aa1 = 0.5E0_dp*(rxu(ichain,1)+rxu(ichain,3))- rxu(ichain,2)
+            b1 = 0.5E0_dp*(ryu(ichain,1)+ryu(ichain,3))- ryu(ichain,2)
+            c1 = 0.5E0_dp*(rzu(ichain,1)+rzu(ichain,3))- rzu(ichain,2)
+            dln1 = sqrt(aa1*aa1 + b1*b1 + c1*c1)
             aa1 = aa1/dln1
             b1 = b1/dln1
             c1 = c1/dln1
@@ -2936,16 +2936,16 @@ contains
             b3 = -(aa1*c2 - a2*c1)
             c3 = aa1*b2 - a2*b1
 
-            rxu(ichain,4) = rxu(ichain,2) + 2.25d0*aa1 +  0.41d0*a2+0.77d0*a3
-            ryu(ichain,4) = ryu(ichain,2) + 2.25d0*b1 +  0.41d0*b2+0.77d0*b3
-            rzu(ichain,4) = rzu(ichain,2) + 2.25d0*c1 +  0.41d0*c2+0.77d0*c3
-            rxu(ichain,5) = rxu(ichain,4) - 1.54d0*a3
-            ryu(ichain,5) = ryu(ichain,4) - 1.54d0*b3
-            rzu(ichain,5) = rzu(ichain,4) - 1.54d0*c3
+            rxu(ichain,4) = rxu(ichain,2) + 2.25E0_dp*aa1 +  0.41E0_dp*a2+0.77E0_dp*a3
+            ryu(ichain,4) = ryu(ichain,2) + 2.25E0_dp*b1 +  0.41E0_dp*b2+0.77E0_dp*b3
+            rzu(ichain,4) = rzu(ichain,2) + 2.25E0_dp*c1 +  0.41E0_dp*c2+0.77E0_dp*c3
+            rxu(ichain,5) = rxu(ichain,4) - 1.54E0_dp*a3
+            ryu(ichain,5) = ryu(ichain,4) - 1.54E0_dp*b3
+            rzu(ichain,5) = rzu(ichain,4) - 1.54E0_dp*c3
          else if ( nugrow(imolty) .eq. 2) then
 
-            ca = ch*dcos(onepi-hch)
-            ah = ch*dsin(onepi-hch)
+            ca = ch*cos(onepi-hch)
+            ah = ch*sin(onepi-hch)
 
 ! only one H participate in the growing
 ! this subroutine put on the rest 3 hydrogens
@@ -2955,20 +2955,20 @@ contains
             y12 = ryu(ichain,2)-ryu(ichain,1)
             z12 = rzu(ichain,2)-rzu(ichain,1)
 ! generate a random vector ------
- 444        rx = 2.0d0*random(-1) - 1.0d0
-            ry = 2.0d0*random(-1) - 1.0d0
+ 444        rx = 2.0E0_dp*random(-1) - 1.0E0_dp
+            ry = 2.0E0_dp*random(-1) - 1.0E0_dp
             dr = rx*rx + ry*ry
-            if ( dr .gt. 1.0d0 ) goto 444
-            rz = 2.0d0*dsqrt(1-dr)
+            if ( dr .gt. 1.0E0_dp ) goto 444
+            rz = 2.0E0_dp*sqrt(1-dr)
             rx = rx*rz
             ry = ry*rz
-            rz = 1 - 2.0d0*dr
+            rz = 1 - 2.0E0_dp*dr
 
 ! the two vectors above form a plane identified by n1 ------
             aa1 = y12*rz - z12*ry
             b1 = -(x12*rz - rx*z12)
             c1 = x12*ry - rx*y12
-            dln1 = dsqrt(aa1**2 + b1**2 + c1**2)
+            dln1 = sqrt(aa1**2 + b1**2 + c1**2)
             aa1 = aa1/dln1
             b1 = b1/dln1
             c1 = c1/dln1
@@ -2985,15 +2985,15 @@ contains
             ya = ryu(ichain,2)+b2*ca
             za = rzu(ichain,2)+c2*ca
 ! H-atoms for the first methyl group------
-            r = 0.0d0
+            r = 0.0E0_dp
             do i = 1,3
-               a4 = ah*a3*dcos(r) + ah*aa1*dsin(r)
-               b4 = ah*b3*dcos(r) + ah*b1*dsin(r)
-               c4 = ah*c3*dcos(r) + ah*c1*dsin(r)
+               a4 = ah*a3*cos(r) + ah*aa1*sin(r)
+               b4 = ah*b3*cos(r) + ah*b1*sin(r)
+               c4 = ah*c3*cos(r) + ah*c1*sin(r)
                rxu(ichain,nngrow+i) = xa + a4
                ryu(ichain,nngrow+i) = ya + b4
                rzu(ichain,nngrow+i) = za + c4
-               r = r + 120.0d0*onepi/180.0d0
+               r = r + 120.0E0_dp*onepi/180.0E0_dp
             end do
 
          else
@@ -3002,8 +3002,8 @@ contains
 ! METHANE ------
             if ( lcrysl ) then
                hch2 = brben(itben(imolty,2,1))/2
-               hk = ch*dsin(hch2)
-               ck = ch*dcos(hch2)
+               hk = ch*sin(hch2)
+               ck = ch*cos(hch2)
                rxu(ichain,2) = rxu(ichain,1) - ck
                ryu(ichain,2) = ryu(ichain,1)
                rzu(ichain,2) = rzu(ichain,1) + hk
@@ -3012,8 +3012,8 @@ contains
                rzu(ichain,3) = rzu(ichain,1) - hk
                hch2 = brben(itben(imolty,4,1))/2
                ch = brvib(itvib(imolty,4,1))
-               hk = ch*dsin(hch2)
-               ck = ch*dcos(hch2)
+               hk = ch*sin(hch2)
+               ck = ch*cos(hch2)
                rxu(ichain,4) = rxu(ichain,1) + ck
                ryu(ichain,4) = ryu(ichain,1) + hk
                rzu(ichain,4) = rzu(ichain,1)
@@ -3031,14 +3031,14 @@ contains
 ! ratio = brvib(itvib(2,nngrow+1,1))
 !     &                 /brvib(itvib(1,nngrow+1,1))
 ! end if
-               ratio = 1.0d0
+               ratio = 1.0E0_dp
                rxu(ichain,2) = rxu(ichain,1) + ratio*(rxu(ichain,2) -rxu(ichain,1))
                ryu(ichain,2) = ryu(ichain,1) + ratio*(ryu(ichain,2) -ryu(ichain,1))
                rzu(ichain,2) = rzu(ichain,1) + ratio*(rzu(ichain,2) -rzu(ichain,1))
                rxu(ichain,3) = rxu(ichain,1) + ratio*(rxu(ichain,3) -rxu(ichain,1))
                ryu(ichain,3) = ryu(ichain,1) + ratio*(ryu(ichain,3) -ryu(ichain,1))
                rzu(ichain,3) = rzu(ichain,1) + ratio*(rzu(ichain,3) -rzu(ichain,1))
-               ratio = 0.7d0/0.25d0
+               ratio = 0.7E0_dp/0.25E0_dp
                rxu(ichain,4) = rxu(ichain,1) + ratio*(rxu(ichain,4) -rxu(ichain,1))
                ryu(ichain,4) = ryu(ichain,1) + ratio*(ryu(ichain,4) -ryu(ichain,1))
                rzu(ichain,4) = rzu(ichain,1) + ratio*(rzu(ichain,4) -rzu(ichain,1))
@@ -3048,31 +3048,31 @@ contains
             else
                ch = brvib(itvib(imolty,2,1))
                hch2 = brben(itben(imolty,2,1))/2
-               ca = ch*dcos(hch2)
-               ah = ch*dsin(hch2)
+               ca = ch*cos(hch2)
+               ah = ch*sin(hch2)
 ! generate a random vector for the first H ------
- 555           rx = 2.0d0*random(-1) - 1.0d0
-               ry = 2.0d0*random(-1) - 1.0d0
+ 555           rx = 2.0E0_dp*random(-1) - 1.0E0_dp
+               ry = 2.0E0_dp*random(-1) - 1.0E0_dp
                dr = rx*rx + ry*ry
-               if ( dr .gt. 1.0d0 ) goto 555
-               rz = 2.0d0*dsqrt(1-dr)
+               if ( dr .gt. 1.0E0_dp ) goto 555
+               rz = 2.0E0_dp*sqrt(1-dr)
                a2 = rx*rz
                b2 = ry*rz
-               c2 = 1 - 2.0d0*dr
+               c2 = 1 - 2.0E0_dp*dr
 ! generate another random vector for the rotation ------
- 666           rx = 2.0d0*random(-1) - 1.0d0
-               ry = 2.0d0*random(-1) - 1.0d0
+ 666           rx = 2.0E0_dp*random(-1) - 1.0E0_dp
+               ry = 2.0E0_dp*random(-1) - 1.0E0_dp
                dr = rx*rx + ry*ry
-               if ( dr .gt. 1.0d0 ) goto 666
-               rz = 2.0d0*dsqrt(1-dr)
+               if ( dr .gt. 1.0E0_dp ) goto 666
+               rz = 2.0E0_dp*sqrt(1-dr)
                rx = rx*rz
                ry = ry*rz
-               rz = 1 - 2.0d0*dr
+               rz = 1 - 2.0E0_dp*dr
 ! the two vectors above form a plane identified by n1 ------
                aa1 = b2*rz - c2*ry
                b1 = -(a2*rz - rx*c2)
                c1 = a2*ry - rx*b2
-               dln1 = dsqrt(aa1**2 + b1**2 + c1**2)
+               dln1 = sqrt(aa1**2 + b1**2 + c1**2)
                aa1 = aa1/dln1
                b1 = b1/dln1
                c1 = c1/dln1
@@ -3086,8 +3086,8 @@ contains
 
                ch = brvib(itvib(imolty,4,1))
                hch2 = brben(itben(imolty,4,1))/2
-               ca = ch*dcos(hch2)
-               ah = ch*dsin(hch2)
+               ca = ch*cos(hch2)
+               ah = ch*sin(hch2)
 
 ! cross product n1 x n2 calc.-> n3 ---
                a3 = b1*c2 - b2*c1
@@ -3116,12 +3116,12 @@ contains
          end if
          if ( nunit(imolty) .eq. 7 ) then
 ! for seven site water model
-            rxu(ichain,6) =  4d0*rxu(ichain,4)-3d0*rxu(ichain,1)
-            ryu(ichain,6) =  4d0*ryu(ichain,4)-3d0*ryu(ichain,1)
-            rzu(ichain,6) =  4d0*rzu(ichain,4)-3d0*rzu(ichain,1)
-            rxu(ichain,7) =  4d0*rxu(ichain,5)-3d0*rxu(ichain,1)
-            ryu(ichain,7) =  4d0*ryu(ichain,5)-3d0*ryu(ichain,1)
-            rzu(ichain,7) =  4d0*rzu(ichain,5)-3d0*rzu(ichain,1)
+            rxu(ichain,6) =  4E0_dp*rxu(ichain,4)-3E0_dp*rxu(ichain,1)
+            ryu(ichain,6) =  4E0_dp*ryu(ichain,4)-3E0_dp*ryu(ichain,1)
+            rzu(ichain,6) =  4E0_dp*rzu(ichain,4)-3E0_dp*rzu(ichain,1)
+            rxu(ichain,7) =  4E0_dp*rxu(ichain,5)-3E0_dp*rxu(ichain,1)
+            ryu(ichain,7) =  4E0_dp*ryu(ichain,5)-3E0_dp*ryu(ichain,1)
+            rzu(ichain,7) =  4E0_dp*rzu(ichain,5)-3E0_dp*rzu(ichain,1)
          end if
       else
 
@@ -3133,14 +3133,14 @@ contains
          ch = brvib(itvib(imolty,nngrow+1,1))
 
          cch = brben(itben(imolty,nngrow+1,1))
-         ca = ch*dcos(onepi-cch)
-         ah = ch*dsin(onepi-cch)
+         ca = ch*cos(onepi-cch)
+         ah = ch*sin(onepi-cch)
          if ( nngrow .gt. 2) then
             hch = brben(itben(imolty,nngrow+4,1))
-            hch2 = hch/2.0d0
-            hk = ch*dsin(hch2)
-            ck = ch*dcos(hch2)
-            en0 = 853.93d0
+            hch2 = hch/2.0E0_dp
+            hk = ch*sin(hch2)
+            ck = ch*cos(hch2)
+            en0 = 853.93E0_dp
 
 ! REGULAR N-ALKANE ------
 ! main loop
@@ -3152,14 +3152,14 @@ contains
                aa1 = (ryu(ichain,imins)-ryu(ichain,i))*(rzu(ichain ,iplus)-rzu(ichain,i)) - (rzu(ichain,imins)-rzu(ichain ,i))*(ryu(ichain,iplus)-ryu(ichain,i))
                b1 = -(rxu(ichain,imins)-rxu(ichain,i))*(rzu(ichain ,iplus)-rzu(ichain,i)) + (rzu(ichain,imins)-rzu(ichain ,i))*(rxu(ichain,iplus)-rxu(ichain,i))
                c1 = (rxu(ichain,imins)-rxu(ichain,i))*(ryu(ichain,iplus) -ryu(ichain,i)) - (ryu(ichain,imins)-ryu(ichain,i))* (rxu(ichain,iplus)-rxu(ichain,i))
-               dln1 = dsqrt(aa1**2 + b1**2 + c1**2)
+               dln1 = sqrt(aa1**2 + b1**2 + c1**2)
                aa1 = aa1/dln1
                b1 = b1/dln1
                c1 = c1/dln1
                a2 = (rxu(ichain,iplus)-rxu(ichain,imins))
                b2 = (ryu(ichain,iplus)-ryu(ichain,imins))
                c2 = (rzu(ichain,iplus)-rzu(ichain,imins))
-               dln2 = dsqrt(a2**2 + b2**2 + c2**2)
+               dln2 = sqrt(a2**2 + b2**2 + c2**2)
                a2 = a2/dln2
                b2 = b2/dln2
                c2 = c2/dln2
@@ -3192,7 +3192,7 @@ contains
             aa1 = y12*z32 - z12*y32
             b1 = -(x12*z32 - x32*z12)
             c1 = x12*y32 - x32*y12
-            dln1 = dsqrt(aa1**2 + b1**2 + c1**2)
+            dln1 = sqrt(aa1**2 + b1**2 + c1**2)
             aa1 = aa1/dln1
             b1 = b1/dln1
             c1 = c1/dln1
@@ -3210,27 +3210,27 @@ contains
             za = rzu(ichain,1)+c2*ca
 ! H-atoms ------
             if ( lcrysl ) then
-               r=0.0d0
-               ven = 0.0d0
+               r=0.0E0_dp
+               ven = 0.0E0_dp
             else
- 101           r = 2.0d0*onepi*random(-1)
-               ven = en0*(1.0d0-dcos(3.0d0*r))
-               prob = dexp(-beta*ven)
+ 101           r = 2.0E0_dp*onepi*random(-1)
+               ven = en0*(1.0E0_dp-cos(3.0E0_dp*r))
+               prob = exp(-beta*ven)
                rn = random(-1)
                if (rn.gt.prob) goto 101
             end if
-! rgr = r*180.0d0/onepi
+! rgr = r*180.0E0_dp/onepi
 ! write(io_output,*) 'final Ryckaert angle: ',rgr
             vmethyl = vmethyl + ven
             do i = 1,3
-               a4 = ah*a3*dcos(r+onepi) + ah*aa1*dsin(r+onepi)
-               b4 = ah*b3*dcos(r+onepi) + ah*b1*dsin(r+onepi)
-               c4 = ah*c3*dcos(r+onepi) + ah*c1*dsin(r+onepi)
+               a4 = ah*a3*cos(r+onepi) + ah*aa1*sin(r+onepi)
+               b4 = ah*b3*cos(r+onepi) + ah*b1*sin(r+onepi)
+               c4 = ah*c3*cos(r+onepi) + ah*c1*sin(r+onepi)
 
                rxu(ichain,nngrow+i) = xa + a4
                ryu(ichain,nngrow+i) = ya + b4
                rzu(ichain,nngrow+i) = za + c4
-               r = r + 120.0d0*onepi/180.0d0
+               r = r + 120.0E0_dp*onepi/180.0E0_dp
             end do
 
 ! if it is an alkanol molecule, it did not have the other ending CH3
@@ -3248,7 +3248,7 @@ contains
             aa1 = y12*z32 - z12*y32
             b1 = -(x12*z32 - x32*z12)
             c1 = x12*y32 - x32*y12
-            dln1 = dsqrt(aa1**2 + b1**2 + c1**2)
+            dln1 = sqrt(aa1**2 + b1**2 + c1**2)
             aa1 = aa1/dln1
             b1 = b1/dln1
             c1 = c1/dln1
@@ -3266,31 +3266,31 @@ contains
             za = rzu(ichain,nngrow)+c2*ca
 ! H-atoms -------
             if (lcrysl) then
-               r = 0.0d0
-               ven = 0.0d0
+               r = 0.0E0_dp
+               ven = 0.0E0_dp
             else
- 200           r = 2.0d0*onepi*random(-1)
-               ven = en0*(1.0d0-dcos(3.0d0*r))
-               prob = dexp(-beta*ven)
+ 200           r = 2.0E0_dp*onepi*random(-1)
+               ven = en0*(1.0E0_dp-cos(3.0E0_dp*r))
+               prob = exp(-beta*ven)
                rn = random(-1)
                if (rn.gt.prob) goto 200
             end if
             vmethyl = vmethyl + ven
             do i = 1,3
-               a4 = ah*a3*dcos(r+onepi) + ah*aa1*dsin(r+onepi)
-               b4 = ah*b3*dcos(r+onepi) + ah*b1*dsin(r+onepi)
-               c4 = ah*c3*dcos(r+onepi) + ah*c1*dsin(r+onepi)
+               a4 = ah*a3*cos(r+onepi) + ah*aa1*sin(r+onepi)
+               b4 = ah*b3*cos(r+onepi) + ah*b1*sin(r+onepi)
+               c4 = ah*c3*cos(r+onepi) + ah*c1*sin(r+onepi)
                rxu(ichain,negrow+i) = xa + a4
                ryu(ichain,negrow+i) = ya + b4
                rzu(ichain,negrow+i) = za + c4
-               r = r + 120.0d0*onepi/180.0d0
+               r = r + 120.0E0_dp*onepi/180.0E0_dp
             end do
 
          else if (nngrow .eq. 2 .and. nunit(imolty) .eq. 8) then
 ! ETHANE  -----
 ! define the new type en0 ------
 ! use en0 for torsion type 19
-            en0 = 716.77d0
+            en0 = 716.77E0_dp
 ! for ethane case ------
 ! H-atoms for the first CH3-group---
 ! first define vector C2C1 ------
@@ -3298,20 +3298,20 @@ contains
             y12 = ryu(ichain,1)-ryu(ichain,2)
             z12 = rzu(ichain,1)-rzu(ichain,2)
 ! generate a random vector ------
- 777        rx = 2.0d0*random(-1) - 1.0d0
-            ry = 2.0d0*random(-1) - 1.0d0
+ 777        rx = 2.0E0_dp*random(-1) - 1.0E0_dp
+            ry = 2.0E0_dp*random(-1) - 1.0E0_dp
             dr = rx*rx + ry*ry
-            if ( dr .gt. 1.0d0 ) goto 777
-            rz = 2.0d0*dsqrt(1-dr)
+            if ( dr .gt. 1.0E0_dp ) goto 777
+            rz = 2.0E0_dp*sqrt(1-dr)
             rx = rx*rz
             ry = ry*rz
-            rz = 1 - 2.0d0*dr
+            rz = 1 - 2.0E0_dp*dr
 
 ! the two vectors above form a plane identified by n1 ------
             aa1 = y12*rz - z12*ry
             b1 = -(x12*rz - rx*z12)
             c1 = x12*ry - rx*y12
-            dln1 = dsqrt(aa1**2 + b1**2 + c1**2)
+            dln1 = sqrt(aa1**2 + b1**2 + c1**2)
             aa1 = aa1/dln1
             b1 = b1/dln1
             c1 = c1/dln1
@@ -3328,15 +3328,15 @@ contains
             ya = ryu(ichain,1)+b2*ca
             za = rzu(ichain,1)+c2*ca
 ! H-atoms for the first methyl group------
-            r = 0.0d0
+            r = 0.0E0_dp
             do i = 1,3
-               a4 = ah*a3*dcos(r) + ah*aa1*dsin(r)
-               b4 = ah*b3*dcos(r) + ah*b1*dsin(r)
-               c4 = ah*c3*dcos(r) + ah*c1*dsin(r)
+               a4 = ah*a3*cos(r) + ah*aa1*sin(r)
+               b4 = ah*b3*cos(r) + ah*b1*sin(r)
+               c4 = ah*c3*cos(r) + ah*c1*sin(r)
                rxu(ichain,nngrow+i) = xa + a4
                ryu(ichain,nngrow+i) = ya + b4
                rzu(ichain,nngrow+i) = za + c4
-               r = r + 120.0d0*onepi/180.0d0
+               r = r + 120.0E0_dp*onepi/180.0E0_dp
             end do
 ! H-atoms for the second methyl group ------
 ! point A' is opposite to point A ------
@@ -3344,27 +3344,27 @@ contains
             ya = ryu(ichain,2)-b2*ca
             za = rzu(ichain,2)-c2*ca
             if ( lcrysl ) then
-               r=0.0d0
-               ven = 0.0d0
+               r=0.0E0_dp
+               ven = 0.0E0_dp
             else
- 100           r = 2.0d0*onepi*random(-1)
-               ven = en0*(1.0d0-dcos(3.0d0*r))
-               prob = dexp(-beta*ven)
+ 100           r = 2.0E0_dp*onepi*random(-1)
+               ven = en0*(1.0E0_dp-cos(3.0E0_dp*r))
+               prob = exp(-beta*ven)
                rn = random(-1)
                if (rn.gt.prob) goto 100
             end if
-! rgr = r*180.0d0/onepi
+! rgr = r*180.0E0_dp/onepi
 ! write(io_output,*) 'final Ryckaert angle: ',rgr
             vmethyl = vmethyl + ven
 
             do i = 4,6
-               a4 = ah*a3*dcos(r+onepi) + ah*aa1*dsin(r+onepi)
-               b4 = ah*b3*dcos(r+onepi) + ah*b1*dsin(r+onepi)
-               c4 = ah*c3*dcos(r+onepi) + ah*c1*dsin(r+onepi)
+               a4 = ah*a3*cos(r+onepi) + ah*aa1*sin(r+onepi)
+               b4 = ah*b3*cos(r+onepi) + ah*b1*sin(r+onepi)
+               c4 = ah*c3*cos(r+onepi) + ah*c1*sin(r+onepi)
                rxu(ichain,nngrow+i) = xa + a4
                ryu(ichain,nngrow+i) = ya + b4
                rzu(ichain,nngrow+i) = za + c4
-               r = r + 120.0d0*onepi/180.0d0
+               r = r + 120.0E0_dp*onepi/180.0E0_dp
             end do
 
          end if
@@ -3395,8 +3395,8 @@ contains
       nchvib = nchbna(imolty)
       nchben_a = nchvib
       nchben_b = nchbnb(imolty)
-      third = 1.0d0 / 3.0d0
-      wplace = 1.0d0
+      third = 1.0E0_dp / 3.0E0_dp
+      wplace = 1.0E0_dp
 
       ichoi = nchoi(imolty)
 
@@ -3412,8 +3412,8 @@ contains
       end do
 
       do iw = 1, nplace
-         vvibtr = 0.0d0
-         wei_vib = 1.0d0
+         vvibtr = 0.0E0_dp
+         wei_vib = 1.0E0_dp
          iufrom = pfrom(iw)
          do count = 1, pnum(iw)
 
@@ -3441,7 +3441,7 @@ contains
 
             if (kforce.gt.0.001) then
 ! we will use flexible bond lengths
-               bsum_try = 0.0d0
+               bsum_try = 0.0E0_dp
                mincb = brvibmin(jtvib)**3
                delcb = brvibmax(jtvib)**3 - mincb
 
@@ -3449,13 +3449,13 @@ contains
                   ux = rxu(i,ju) - rxu(i,iu)
                   uy = ryu(i,ju) - ryu(i,iu)
                   uz = rzu(i,ju) - rzu(i,iu)
-                  r(1) = dsqrt(ux**2 + uy**2 + uz**2)
+                  r(1) = sqrt(ux**2 + uy**2 + uz**2)
                   if (L_vib_table) then
                      vvib = lininter_vib(r(1),jtvib)
                    else
                      vvib = kforce * (r(1) - equil)**2
                   end if
-                  bfactor(1) = dexp(-beta*vvib)
+                  bfactor(1) = exp(-beta*vvib)
                   bsum_try = bsum_try + bfactor(1)
                   start = 2
                else
@@ -3469,7 +3469,7 @@ contains
                   else
                      vvib = kforce * ( r(ivib) - equil )**2
                   end if
-                  bfactor(ivib) = dexp(-beta*vvib)
+                  bfactor(ivib) = exp(-beta*vvib)
                   bsum_try = bsum_try + bfactor(ivib)
                end do
 
@@ -3478,12 +3478,12 @@ contains
                if (lnew) then
 ! select one of the trial sites via bias
                   rbf = random(-1)*bsum_try
-                  bs = 0.0d0
+                  bs = 0.0E0_dp
                   do ivib = 1, nchvib
                      bs = bs + bfactor(ivib)
                      if (rbf .lt. bs ) then
                         length = r(ivib)
-                        vvib = dlog(bfactor(ivib))/(-beta)
+                        vvib = log(bfactor(ivib))/(-beta)
                         goto 5
                      end if
                   end do
@@ -3491,7 +3491,7 @@ contains
                else
 ! select old conformation
                   length = r(1)
-                  vvib = dlog(bfactor(1))/(-beta)
+                  vvib = log(bfactor(1))/(-beta)
                end if
                vvibtr = vvibtr + vvib
 
@@ -3553,7 +3553,7 @@ contains
 ! determine angle with iuprev
             thetac = -(ux*rx + uy*ry + uz*rz)
 
-            bendang(ku,iuprev) = dacos(thetac)
+            bendang(ku,iuprev) = acos(thetac)
 
             alpha = bendang(ku,iuprev)
 
@@ -3567,9 +3567,9 @@ contains
 
          do ip = 1, ichoi
 
-            wei_bend = 1.0d0
-            vbbtr = 0.0d0
-            vdha = 0.0d0
+            wei_bend = 1.0E0_dp
+            vbbtr = 0.0E0_dp
+            vdha = 0.0E0_dp
 
             do count = 1, pnum(iw)
 
@@ -3601,16 +3601,16 @@ contains
                         ux = rxu(i,iu) - rxu(i,ju)
                         uy = ryu(i,iu) - ryu(i,ju)
                         uz = rzu(i,iu) - rzu(i,ju)
-                        dist(1) = dsqrt(ux**2 + uy**2 + uz**2)
+                        dist(1) = sqrt(ux**2 + uy**2 + uz**2)
 
 ! dot product divided by lengths gives cos(angle)
                         thetac = -( ux*rx + uy*ry  + uz*rz )  / (dist(1))
-                        angle = dacos(thetac)
+                        angle = acos(thetac)
 
 ! compute the energy of this angle
                         vangle = kforce * (angle - equil)**2
                         ang_trial(1) = angle
-                        bfactor(1) = dexp( -beta*vangle )
+                        bfactor(1) = exp( -beta*vangle )
                         bsum_try = bsum_try + bfactor(1)
 
 ! skip first ibend in next loop
@@ -3624,25 +3624,25 @@ contains
 ! compute trial angles and energies
                      do ibend = start,nchben_a
 ! choose the angle uniformly on sin(theta)
-                        rsint = 2.0d0*random(-1) - 1.0d0
-                        angle = dacos(rsint)
+                        rsint = 2.0E0_dp*random(-1) - 1.0E0_dp
+                        angle = acos(rsint)
                         ang_trial(ibend) = angle
 
 ! calculate the bond angle energy
                         vangle = kforce * (angle - equil)**2
-                        bfactor(ibend) = dexp(-beta*vangle)
+                        bfactor(ibend) = exp(-beta*vangle)
                         bsum_try = bsum_try + bfactor(ibend)
                      end do
 
                      if ( lnew.or.ip.ne.1 ) then
 ! select one of the trial sites via bias
                         rbf = random(-1)*bsum_try
-                        bs = 0.0d0
+                        bs = 0.0E0_dp
                         do ibend = 1,nchben_a
                            bs = bs + bfactor(ibend)
                            if ( rbf .lt. bs ) then
                               angle = ang_trial(ibend)
-                              vangle = dlog(bfactor(ibend))/(-beta)
+                              vangle = log(bfactor(ibend))/(-beta)
                               goto 10
                            end if
                         end do
@@ -3650,7 +3650,7 @@ contains
                      else
 ! select the old conformation
                         angle = ang_trial(1)
-                        vangle = dlog(bfactor(1))/(-beta)
+                        vangle = log(bfactor(1))/(-beta)
                      end if
 
 ! propagate the rosenbluth weight
@@ -3672,14 +3672,14 @@ contains
                iu = iplace(iw,count)
 
 ! initialize bsum_try
-               bsum_try = 0.0d0
+               bsum_try = 0.0E0_dp
 
                if ( .not. lnew .and.ip.eq.1) then
                   ux = rxu(i,iu) - rxu(i,iufrom)
                   uy = ryu(i,iu) - ryu(i,iufrom)
                   uz = rzu(i,iu) - rzu(i,iufrom)
 
-                  dist(1) = dsqrt(ux**2 + uy**2 + uz**2)
+                  dist(1) = sqrt(ux**2 + uy**2 + uz**2)
 
                   ux = ux / dist(1)
                   uy = uy / dist(1)
@@ -3688,7 +3688,7 @@ contains
 
                   call cone(3,ux,uy,uz,thetatwo,phitwo)
 
-                  vphi = 0.0d0
+                  vphi = 0.0E0_dp
 
                   do j = 3, counta + count - 1
                      ku = list(j)
@@ -3708,7 +3708,7 @@ contains
                   end do
 
                   ang_trial(1) = phitwo
-                  bfactor(1) = dexp( -beta * vphi )
+                  bfactor(1) = exp( -beta * vphi )
                   bsum_try = bsum_try + bfactor(1)
 
                   start = 2
@@ -3719,7 +3719,7 @@ contains
 
                do ibend = start, nchben_b
                   phitwo = random(-1) * twopi
-                  vphi = 0.0d0
+                  vphi = 0.0E0_dp
                   do j = 3, counta + count - 1
                      ku = list(j)
 
@@ -3734,25 +3734,25 @@ contains
                      end do
                   end do
 ! store the boltzmann factors and phi
-                  bfactor(ibend) = dexp(-beta*vphi)
+                  bfactor(ibend) = exp(-beta*vphi)
                   ang_trial(ibend) = phitwo
                   bsum_try = bsum_try + bfactor(ibend)
                end do
 
                if ( lnew.or.ip.ne.1 ) then
                   rbf = random(-1) * bsum_try
-                  bs = 0.0d0
+                  bs = 0.0E0_dp
                   do ibend = 1, nchben_b
                      bs = bs + bfactor(ibend)
                      if (rbf .lt. bs) then
                         phitwo = ang_trial(ibend)
-                        vphi = dlog( bfactor(ibend)) / (-beta)
+                        vphi = log( bfactor(ibend)) / (-beta)
                         goto 15
                      end if
                   end do
                else
                   phitwo = ang_trial(1)
-                  vphi = dlog( bfactor(1) )/ (-beta)
+                  vphi = log( bfactor(1) )/ (-beta)
                end if
 
  15            continue
@@ -3811,18 +3811,18 @@ contains
             end do
             vtorsion(ip) = vdha
             vbend(ip) = vbbtr
-            bsum_tor(ip) = dexp(-beta * vdha) * wei_bend
+            bsum_tor(ip) = exp(-beta * vdha) * wei_bend
          end do
 
 ! now we calculate the nonbonded interactions
-         call boltz(lnew,.false.,ovrlap,i,i,imolty,ibox,ichoi,iufrom,pnum(iw),glist,0._double_precision)
+         call boltz(lnew,.false.,ovrlap,i,i,imolty,ibox,ichoi,iufrom,pnum(iw),glist,0._dp)
 
          if (ovrlap) then
             lterm = .true.
             return
          end if
 
-         bsum = 0.0d0
+         bsum = 0.0E0_dp
 
          do ip = 1, ichoi
             if (.not. lovr(ip)) then
@@ -3840,7 +3840,7 @@ contains
 
          if (lnew) then
             rbf = bsum * random(-1)
-            bs = 0.0d0
+            bs = 0.0E0_dp
 
             do ip = 1, ichoi
                if (.not. lovr(ip)) then
@@ -3899,7 +3899,7 @@ contains
                yvec(iu,iufrom) = ryu(i,iufrom) - ryu(i,iu)
                zvec(iu,iufrom) = rzu(i,iufrom) - rzu(i,iu)
             end if
-            distij(iu,iufrom) = dsqrt( xvec(iu,iufrom)**2 + yvec(iu,iufrom)**2 + zvec(iu,iufrom)**2 )
+            distij(iu,iufrom) = sqrt( xvec(iu,iufrom)**2 + yvec(iu,iufrom)**2 + zvec(iu,iufrom)**2 )
 
             xvec(iufrom,iu) = - xvec(iu,iufrom)
             yvec(iufrom,iu) = - yvec(iu,iufrom)
@@ -3953,9 +3953,9 @@ contains
       write(io_output,*) 'iinit',iinit,'iw',iw,'igrow',igrow,'count',count
 #endif
 
-      vphi = 0.0d0
-      ovphi = 0.0d0
-      wei_bv = 1.0d0
+      vphi = 0.0E0_dp
+      ovphi = 0.0E0_dp
+      wei_bv = 1.0E0_dp
 
       lreturn = .false.
 
@@ -3963,7 +3963,7 @@ contains
 
       if (iinit.eq.1.or.(.not.lreturn.and.lcrank)) then
 
-         third = 1.0d0 / 3.0d0
+         third = 1.0E0_dp / 3.0E0_dp
          nchvib = nchbna(imolty)
          ntogrow = grownum(iw)
 
@@ -4005,9 +4005,9 @@ contains
                      jtvib = itvib(imolty,iu,iv)
                      equil = brvib(jtvib)
                      kforce = brvibk(jtvib)
-                     if (kforce.gt.0.1d0) then
+                     if (kforce.gt.0.1E0_dp) then
 ! we will use flexible bond lengths
-                        bsum_try = 0.0d0
+                        bsum_try = 0.0E0_dp
                         mincb = brvibmin(jtvib)**3
                         delcb = brvibmax(jtvib)**3 - mincb
 
@@ -4015,9 +4015,9 @@ contains
                            x = rxu(i,iu) - rxu(i,ju)
                            y = ryu(i,iu) - ryu(i,ju)
                            z = rzu(i,iu) - rzu(i,ju)
-                           r(1) = dsqrt(x**2 + y**2 + z**2)
+                           r(1) = sqrt(x**2 + y**2 + z**2)
                            vvib = kforce * ( r(1) - equil )**2
-                           bfactor(1) = dexp(-beta*vvib)
+                           bfactor(1) = exp(-beta*vvib)
                            bsum_try = bsum_try + bfactor(1)
                            start = 2
                         else
@@ -4028,19 +4028,19 @@ contains
 
                            r(ivib) = (mincb + random(-1)*delcb)**third
                            vvib = kforce * ( r(ivib) - equil )**2
-                           bfactor(ivib) = dexp(-beta*vvib)
+                           bfactor(ivib) = exp(-beta*vvib)
                            bsum_try = bsum_try + bfactor(ivib)
                         end do
 
                         if (lnew) then
 ! select one of the trial sites via vias
                            rbf = random(-1)*bsum_try
-                           bs = 0.0d0
+                           bs = 0.0E0_dp
                            do ivib = 1, nchvib
                               bs = bs + bfactor(ivib)
                               if (rbf .lt. bs ) then
                                  flength(iu,ju) = r(ivib)
-                                 vvib = dlog(bfactor(ivib))/(-beta)
+                                 vvib = log(bfactor(ivib))/(-beta)
                                  goto 4
                               end if
                            end do
@@ -4048,7 +4048,7 @@ contains
                         else
 ! select old conformation
                            flength(iu,ju) = r(1)
-                           vvib = dlog(bfactor(1))/(-beta)
+                           vvib = log(bfactor(1))/(-beta)
                         end if
 
 ! add up vibrational energy
@@ -4068,7 +4068,7 @@ contains
                            x = rxu(i,ju) - rxu(i,iu)
                            y = ryu(i,ju) - ryu(i,iu)
                            z = rzu(i,ju) - rzu(i,iu)
-                           flength(iu,ju) = dsqrt(x**2+y**2+z**2)
+                           flength(iu,ju) = sqrt(x**2+y**2+z**2)
                         end if
                      end if
                   end if
@@ -4086,10 +4086,10 @@ contains
                         jtvib = itvib(imolty,ju,iv)
                         equil = brvib(jtvib)
                         kforce = brvibk(jtvib)
-                        if (kforce.gt.0.1d0) then
+                        if (kforce.gt.0.1E0_dp) then
 ! we have flexible bond lengths
 
-                           bsum_try = 0.0d0
+                           bsum_try = 0.0E0_dp
                            mincb = brvibmin(jtvib)**3
                            delcb = brvibmax(jtvib)**3 - mincb
 
@@ -4103,9 +4103,9 @@ contains
                               x = rxu(i,ku) - rxu(i,ju)
                               y = ryu(i,ku) - ryu(i,ju)
                               z = rzu(i,ku) - rzu(i,ju)
-                              r(1) = dsqrt(x**2 + y**2 + z**2)
+                              r(1) = sqrt(x**2 + y**2 + z**2)
                               vvib = kforce * ( r(1) - equil )**2
-                              bfactor(1) = dexp(-beta*vvib)
+                              bfactor(1) = exp(-beta*vvib)
                               bsum_try = bsum_try + bfactor(1)
                               start = 2
                            else
@@ -4116,19 +4116,19 @@ contains
 
                               r(ivib) = (mincb + random(-1)*delcb)**third
                               vvib = kforce * ( r(ivib) - equil )**2
-                              bfactor(ivib) = dexp(-beta*vvib)
+                              bfactor(ivib) = exp(-beta*vvib)
                               bsum_try = bsum_try + bfactor(ivib)
                            end do
 
                            if (lnew) then
 ! select one of the trial sites via vias
                               rbf = random(-1)*bsum_try
-                              bs = 0.0d0
+                              bs = 0.0E0_dp
                               do ivib = 1, nchvib
                                  bs = bs + bfactor(ivib)
                                  if (rbf .lt. bs ) then
                                     flength(ju,ku) = r(ivib)
-                                    vvib = dlog(bfactor(ivib)) /(-beta)
+                                    vvib = log(bfactor(ivib)) /(-beta)
                                     goto 6
                                  end if
                               end do
@@ -4136,7 +4136,7 @@ contains
                            else
 ! select old conformation
                               flength(ju,ku) = r(1)
-                              vvib = dlog(bfactor(1))/(-beta)
+                              vvib = log(bfactor(1))/(-beta)
 
                            end if
 
@@ -4160,7 +4160,7 @@ contains
                               y = ryu(i,ku) - ryu(i,ju)
                               z = rzu(i,ku) - rzu(i,ju)
 
-                              flength(ju,ku) = dsqrt(x**2 + y**2 + z**2)
+                              flength(ju,ku) = sqrt(x**2 + y**2 + z**2)
 
                            end if
                         end if
@@ -4218,26 +4218,26 @@ contains
                   y = ryu(i,ju) - rynew(iufrom)
                   z = rzu(i,ju) - rznew(iufrom)
 
-                  hdist = dsqrt( x**2 + y**2 + z**2 )
+                  hdist = sqrt( x**2 + y**2 + z**2 )
 ! use law of cosines to calculate bond angle
-                  thetac = (lengtha**2 + lengthb**2 - hdist**2) / (2.0d0 * lengtha * lengthb)
+                  thetac = (lengtha**2 + lengthb**2 - hdist**2) / (2.0E0_dp * lengtha * lengthb)
 
 ! check to make sure this will give a number
 
-                  if (abs(thetac).gt.1.0d0) then
+                  if (abs(thetac).gt.1.0E0_dp) then
                      vtor = 0
                      vphi = 0
                      lterm = .true.
                      return
                   end if
-                  angle = dacos(thetac)
+                  angle = acos(thetac)
 
                   ovphi = ovphi + kforceb(iufrom,ju) * (angle - equilb(iufrom,ju))**2
 
 ! write(io_output,*) iufrom,iu,ju,kforceb(iufrom,ju)*(angle
 !     &                 - equilb(iufrom,ju))**2
 
-                  wei_bv = wei_bv * dexp( - beta * ovphi )
+                  wei_bv = wei_bv * exp( - beta * ovphi )
                end if
             end do
             vibtr= vphi
@@ -4255,7 +4255,7 @@ contains
 ! lshit = .true.
 ! end if
 
-         vtor = 1.0d0
+         vtor = 1.0E0_dp
 
 ! this case iw and count is sent in from rosenbluth
 
@@ -4283,12 +4283,12 @@ contains
                z = rzu(i,ku) - uz
             end if
 
-            hdist = dsqrt( x**2 + y**2 + z**2 )
+            hdist = sqrt( x**2 + y**2 + z**2 )
 
             if (j.gt.1) then
 ! we will use a phoney probability since we don't know our bond
 ! distances yet
-               bin = anint( hdist * 10.0d0 )
+               bin = anint( hdist * 10.0E0_dp )
                vtor = vtor * probf(iu,ku,bin)
             else
 ! we can calculate an angle here
@@ -4308,16 +4308,16 @@ contains
 
 ! use law of cosines to calculate bond angle
 
-                  thetac = (lengtha**2 + lengthb**2 - hdist**2) / (2.0d0 * lengtha * lengthb)
+                  thetac = (lengtha**2 + lengthb**2 - hdist**2) / (2.0E0_dp * lengtha * lengthb)
 
 ! check to make sure this will give a number
 
-                  if (abs(thetac).gt.1.0d0) then
+                  if (abs(thetac).gt.1.0E0_dp) then
                      vtor = 0
                      vphi = 0
                      return
                   end if
-                  angle = dacos( thetac )
+                  angle = acos( thetac )
 
                   vphi = vphi + kforceb(iu,ku) * ( angle - equilb(iu,ku) )**2
 
@@ -4342,8 +4342,8 @@ contains
                         y = ryu(i,nu) - uy
                         z = rzu(i,nu) - uz
                      end if
-                     hdist = dsqrt( x**2 + y**2 + z**2 )
-                     bin = anint( hdist * 10.0d0 )
+                     hdist = sqrt( x**2 + y**2 + z**2 )
+                     bin = anint( hdist * 10.0E0_dp )
                      vtor = vtor * probf(iu,nu,bin)
 
                      if (nextnum(nu).ne.0) then
@@ -4359,8 +4359,8 @@ contains
                                  y = ryu(i,lu) - uy
                                  z = rzu(i,lu) - uz
                               end if
-                              hdist = dsqrt( x**2 + y**2 + z**2 )
-                              bin = anint( hdist * 10.0d0 )
+                              hdist = sqrt( x**2 + y**2 + z**2 )
+                              bin = anint( hdist * 10.0E0_dp )
                               vtor = vtor * probf(iu,lu,bin)
                            end if
                         end do
@@ -4447,7 +4447,7 @@ contains
                      yvec(iufrom,ju) = ryu(i,ju) - ryu(i,iufrom)
                      zvec(iufrom,ju) = rzu(i,ju) - rzu(i,iufrom)
                   end if
-                  hdist = dsqrt( xvec(iufrom,ju)**2 + yvec(iufrom,ju)**2 + zvec(iufrom,ju)**2 )
+                  hdist = sqrt( xvec(iufrom,ju)**2 + yvec(iufrom,ju)**2 + zvec(iufrom,ju)**2 )
 
 ! normalize these distances to one for cone
                   xvec(iufrom,ju) = xvec(iufrom,ju) / hdist
@@ -4459,15 +4459,15 @@ contains
                   lengtha = flength(iufrom,iu)
                   lengthb = flength(iu,ju)
 
-                  thetac = (lengtha**2 + hdist**2 - lengthb**2) / (2.0d0 * lengtha * hdist)
+                  thetac = (lengtha**2 + hdist**2 - lengthb**2) / (2.0E0_dp * lengtha * hdist)
 
-                  if (abs(thetac).gt.1.0d0) then
+                  if (abs(thetac).gt.1.0E0_dp) then
                      vphi = 0
                      vtor = 0
                      lterm = .true.
                      return
                   end if
-                  alpha(count,ju) = dacos(-1.0d0) - dacos(thetac)
+                  alpha(count,ju) = acos(-1.0E0_dp) - acos(thetac)
  126              continue
                end do
             end if
@@ -4521,9 +4521,9 @@ contains
                      jtvib = itvib(imolty,iufrom,iv)
                      equil = brvib(jtvib)
                      kforce = brvibk(jtvib)
-                     if (kforce.gt.0.1d0) then
+                     if (kforce.gt.0.1E0_dp) then
 ! we will use flexible bond lengths
-                        bsum_try = 0.0d0
+                        bsum_try = 0.0E0_dp
                         mincb = brvibmin(jtvib)**3
                         delcb = brvibmax(jtvib)**3 - mincb
 
@@ -4531,9 +4531,9 @@ contains
                            x = rxu(i,iufrom) - rxu(i,iu)
                            y = ryu(i,iufrom) - ryu(i,iu)
                            z = rzu(i,iufrom) - rzu(i,iu)
-                           r(1) = dsqrt(x**2 + y**2 + z**2)
+                           r(1) = sqrt(x**2 + y**2 + z**2)
                            vvib = kforce * ( r(1) - equil )**2
-                           bfactor(1) = dexp(-beta*vvib)
+                           bfactor(1) = exp(-beta*vvib)
                            bsum_try = bsum_try + bfactor(1)
                            start = 2
                         else
@@ -4544,19 +4544,19 @@ contains
 
                            r(ivib) = (mincb  + random(-1)*delcb)**third
                            vvib = kforce *  ( r(ivib) - equil )**2
-                           bfactor(ivib) = dexp(-beta*vvib)
+                           bfactor(ivib) = exp(-beta*vvib)
                            bsum_try = bsum_try + bfactor(ivib)
                         end do
 
                         if (lnew) then
 ! select one of the trial sites via vias
                            rbf = random(-1)*bsum_try
-                           bs = 0.0d0
+                           bs = 0.0E0_dp
                            do ivib = 1, nchvib
                               bs = bs + bfactor(ivib)
                               if (rbf .lt. bs ) then
                                  flength(iufrom,iu) = r(ivib)
-                                 vvib = dlog(bfactor(ivib))/(-beta)
+                                 vvib = log(bfactor(ivib))/(-beta)
                                  goto 61
                               end if
                            end do
@@ -4564,7 +4564,7 @@ contains
                         else
 ! select old conformation
                            flength(iufrom,iu) = r(1)
-                           vvib = dlog(bfactor(1))/(-beta)
+                           vvib = log(bfactor(1))/(-beta)
                         end if
 
 ! add up vibrational energy
@@ -4585,7 +4585,7 @@ contains
                            x = rxu(i,iufrom) - rxu(i,iu)
                            y = ryu(i,iufrom) - ryu(i,iu)
                            z = rzu(i,iufrom) - rzu(i,iu)
-                           flength(iufrom,iu) = dsqrt(x**2+y**2+z**2)
+                           flength(iufrom,iu) = sqrt(x**2+y**2+z**2)
 
                         end if
                      end if
@@ -4602,13 +4602,13 @@ contains
 
                   thetac = -( (rxu(i,iu) - rxu(i,iufrom)) * xvec(iuprev,iufrom)  + (ryu(i,iu) - ryu(i,iufrom)) * yvec(iuprev,iufrom) + (rzu(i,iu) - rzu(i,iufrom)) * zvec(iuprev,iufrom))  / (lengtha*lengthb)
 
-                  angle = dacos(thetac)
+                  angle = acos(thetac)
                   vphi =  kforcea(count) * (angle-equila(count))**2
 
 ! write(io_output,*) 'b',iu,iufrom,iuprev,vphi
 
                   ang_bend(1) = angle
-                  bfactor(1) = dexp( -beta*vphi)
+                  bfactor(1) = exp( -beta*vphi)
                   bsum_bend = bsum_bend + bfactor(1)
                   start = 2
                else
@@ -4619,28 +4619,27 @@ contains
 
                do ibend = start, nchben_a
 ! choose angle uniformly on sin(angle)
-                  thetac = 2.0d0*random(-1) - 1.0d0
-                  angle = dacos(thetac)
+                  thetac = 2.0E0_dp*random(-1) - 1.0E0_dp
+                  angle = acos(thetac)
                   ang_bend(ibend) = angle
 
 ! find bend energy
                   vphi = kforcea(count) * (angle-equila(count))**2
-                  bfactor(ibend) = dexp(-beta*vphi)
+                  bfactor(ibend) = exp(-beta*vphi)
                   bsum_bend = bsum_bend + bfactor(ibend)
                end do
 
                if (lnew) then
 ! select one of the trial sites at random
                   rbf = random(-1)*bsum_bend
-                  bs = 0.0d0
+                  bs = 0.0E0_dp
                   do ibend = 1, nchben_a
                      bs = bs + bfactor(ibend)
                      if (rbf.lt.bs) then
                         bangles(count,1) = ang_bend(ibend)
-                        ovphi = ovphi + dlog(bfactor(ibend))/(-beta)
+                        ovphi = ovphi + log(bfactor(ibend))/(-beta)
 
-! write(io_output,*) 'c',iu,iufrom,iuprev
-!     &                       ,dlog(bfactor(ibend))/(-beta)
+! write(io_output,*) 'c',iu,iufrom,iuprev,log(bfactor(ibend))/(-beta)
 
                         goto 10
                      end if
@@ -4648,7 +4647,7 @@ contains
  10               continue
                else
                   bangles(count,1) = ang_bend(1)
-                  ovphi = ovphi + dlog(bfactor(1))/(-beta)
+                  ovphi = ovphi + log(bfactor(1))/(-beta)
                end if
 
                wei_bv = wei_bv * bsum_bend/dble(nchben_a)
@@ -4686,14 +4685,14 @@ contains
 
                         thetac = ( (rxu(i,ju) - rxu(i,iufrom)) * (rxu(i,iu) - rxu(i,iufrom)) + (ryu(i,ju) - ryu(i,iufrom)) * (ryu(i,iu) - ryu(i,iufrom)) + (rzu(i,ju) - rzu(i,iufrom)) * (rzu(i,iu) - rzu(i,iufrom))) / (lengtha * lengthb)
 
-                        angle = dacos(thetac)
+                        angle = acos(thetac)
 
                         vphi = kforceb(iu,ju) * (angle-equilb(iu,ju))**2
 
 ! write(io_output,*) 'd',iu,iufrom,ju,vphi
 
                         ang_bend(1) = angle
-                        bfactor(1) = dexp( -beta*vphi )
+                        bfactor(1) = exp( -beta*vphi )
                         bsum_bend = bsum_bend + bfactor(1)
 
                         start = 2
@@ -4704,29 +4703,28 @@ contains
                      nchben_b = nchbnb(imolty)
                      do ibend = start, nchben_b
 ! choose angle uniformly on sin(angle)
-                        thetac = 2.0d0*random(-1) - 1.0d0
-                        angle = dacos(thetac)
+                        thetac = 2.0E0_dp*random(-1) - 1.0E0_dp
+                        angle = acos(thetac)
                         ang_bend(ibend) = angle
 
 ! find bend energy
                         vphi = kforceb(iu,ju) * (angle-equilb(iu,ju))**2
 
-                        bfactor(ibend) = dexp(-beta*vphi)
+                        bfactor(ibend) = exp(-beta*vphi)
                         bsum_bend = bsum_bend + bfactor(ibend)
                      end do
 
                      if (lnew) then
 ! select one of the trial sites at random
                         rbf = random(-1)*bsum_bend
-                        bs = 0.0d0
+                        bs = 0.0E0_dp
                         do ibend = 1, nchben_b
                            bs = bs + bfactor(ibend)
                            if (rbf.lt.bs) then
                               bangles(count,2) = ang_bend(ibend)
-                              ovphi = ovphi  + dlog(bfactor(ibend))/(-beta)
+                              ovphi = ovphi  + log(bfactor(ibend))/(-beta)
 
-! write(io_output,*) 'd',iu,iufrom,ju
-!     &                             ,dlog(bfactor(ibend))/(-beta)
+! write(io_output,*) 'd',iu,iufrom,ju,log(bfactor(ibend))/(-beta)
 
                               goto 20
                            end if
@@ -4734,7 +4732,7 @@ contains
  20                     continue
                      else
                         bangles(count,2) = ang_bend(1)
-                        ovphi = ovphi + dlog(bfactor(1))/(-beta)
+                        ovphi = ovphi + log(bfactor(1))/(-beta)
 
                      end if
 
@@ -4850,7 +4848,7 @@ contains
                            yvec(ju,iu) = -y
                            zvec(ju,iu) = -z
 
-                           length = dsqrt(x**2 + y**2 + z**2)
+                           length = sqrt(x**2 + y**2 + z**2)
 
                            flength(iu,ju) = length
 
@@ -4877,20 +4875,20 @@ contains
                               z = rzu(i,ju) - rzu(i,iufrom)
                            end if
 
-                           hdist = dsqrt( x**2 + y**2 + z**2 )
+                           hdist = sqrt( x**2 + y**2 + z**2 )
 ! use law of cosines to calculate bond angle
-                           thetac = (lengtha**2 + lengthb**2  - hdist**2) / (2.0d0 * lengtha * lengthb)
+                           thetac = (lengtha**2 + lengthb**2  - hdist**2) / (2.0E0_dp * lengtha * lengthb)
 
 ! check to make sure this will give a number
 
-                           if (abs(thetac).gt.1.0d0) then
+                           if (abs(thetac).gt.1.0E0_dp) then
                               vtor = 0
                               vphi = 0
                               vvib = 0
                               bf_tor(itor) = 0
                               goto 190
                            end if
-                           angle = dacos(thetac)
+                           angle = acos(thetac)
 
                            vphi = vphi + kforceb(iufrom,ju) * (angle - equilb(iufrom,ju))**2
 
@@ -4973,7 +4971,7 @@ contains
 
 ! since there are two possibilities, choose one at random
                               lengtha = flength(iufrom,iu)
-                              if (random(-1).lt.0.5d0) then
+                              if (random(-1).lt.0.5E0_dp) then
                                  xx(count) = rxt(3) * lengtha
                                  yy(count) = ryt(3) * lengtha
                                  zz(count) = rzt(3) * lengtha
@@ -5032,7 +5030,7 @@ contains
                            z = rzt(1) - rzu(i,iufrom)
                         end if
 
-                        length = dsqrt(x**2+y**2+z**2)
+                        length = sqrt(x**2+y**2+z**2)
 
                         if (lnew) then
                            x = rxt(2) - rxnew(iufrom)
@@ -5044,7 +5042,7 @@ contains
                            z = rzt(2) - rzu(i,iufrom)
                         end if
 
-                        length = dsqrt(x**2+y**2+z**2)
+                        length = sqrt(x**2+y**2+z**2)
 
                         rxa(count,1) = rxt(1)
                         rya(count,1) = ryt(1)
@@ -5057,7 +5055,7 @@ contains
 
 ! determine position at random
 
-                     j = int(2.0d0 * random(-1)) + 1
+                     j = int(2.0E0_dp * random(-1)) + 1
 
                      if (.not.lnew.and.ip.eq.1.and.itor.eq.1) then
 ! give old unit vector for connection
@@ -5115,7 +5113,7 @@ contains
                      length = distij(iufrom,iuprev)
                      thetac = -(xx(count)*xvec(iuprev,iufrom)  + yy(count)*yvec(iuprev,iufrom) + zz(count)*zvec(iuprev,iufrom))  / (lengtha*length)
 
-                     angle = dacos(thetac)
+                     angle = acos(thetac)
 
                      vphi = vphi + kforcea(count) * (angle-equila(count) )**2
 
@@ -5149,7 +5147,7 @@ contains
                            ku = ipast(ju,counta)
                            length = distij(ju,ku)
                            thetac = - (xvec(iu,ju) * xvec(ju,ku) + yvec(iu,ju) * yvec(ju,ku) + zvec(iu,ju) * zvec(ju,ku)) / (length * lengthb)
-                           angle = dacos( thetac )
+                           angle = acos( thetac )
 
                            vphi = vphi + kforceb(iu,ku) * (angle -equilb(iu,ku))**2
 
@@ -5296,7 +5294,7 @@ contains
                               call err_exit(__FILE__,__LINE__,'shitfuck',myid+1)
                            end if
 
-                           angle = dacos(thetac)
+                           angle = acos(thetac)
 
                            vphi = vphi + kforceb(ju,ku) * (angle-equilb(ju,ku))**2
 
@@ -5325,19 +5323,19 @@ contains
 
                            thetac = (xx(count) * xx(counta) + yy(count) * yy(counta) + zz(count) * zz(counta)) /  (lengtha * lengthb)
 
-                           angle = dacos(thetac)
+                           angle = acos(thetac)
 
                            vphi = vphi + kforceb(iu,ju) * (angle -equilb(iu,ju))**2
 
 ! if (lshit) then
-! write(io_output,*) iu,iufrom,ju,kforceb(iu,ju)*(angle-equilb(iu,ju))**2.0d0
+! write(io_output,*) iu,iufrom,ju,kforceb(iu,ju)*(angle-equilb(iu,ju))**2.0E0_dp
 ! end if
                         end if
                      end do
                   end do
                end if
 
-               bf_tor(itor) = dexp(-(vvib + vphi + vdha)*beta)
+               bf_tor(itor) = exp(-(vvib + vphi + vdha)*beta)
  190           continue
 
                vvibration(itor) = vvib
@@ -6205,13 +6203,13 @@ contains
          end if
 
 ! determine lengths from all coordinates
-         lengtha = dsqrt( (rx(2)-rx(1))**2 + (ry(2)-ry(1))**2 + (rz(2)-rz(1))**2)
-         lengthb = dsqrt( (rx(2)-rx(3))**2 + (ry(2)-ry(3))**2 + (rz(2)-rz(3))**2)
-         lengthc = dsqrt( (rx(3)-rx(1))**2 + (ry(3)-ry(1))**2 + (rz(3)-rz(1))**2)
+         lengtha = sqrt( (rx(2)-rx(1))**2 + (ry(2)-ry(1))**2 + (rz(2)-rz(1))**2)
+         lengthb = sqrt( (rx(2)-rx(3))**2 + (ry(2)-ry(3))**2 + (rz(2)-rz(3))**2)
+         lengthc = sqrt( (rx(3)-rx(1))**2 + (ry(3)-ry(1))**2 + (rz(3)-rz(1))**2)
 
 ! detemine the angle at 1
-         thetac = - 0.5d0 * ( lengthb**2 - lengtha**2 - lengthc**2 ) / ( lengtha * lengthc )
-         theta = dacos(thetac)
+         thetac = - 0.5E0_dp * ( lengthb**2 - lengtha**2 - lengthc**2 ) / ( lengtha * lengthc )
+         theta = acos(thetac)
 
 ! now lets determine the in-plane coordinates
          x(1) = 0
@@ -6219,15 +6217,15 @@ contains
          x(2) = lengtha
          y(2) = 0
          x(3) = lengthc * thetac
-         y(3) = lengthc * dsin( theta )
+         y(3) = lengthc * sin( theta )
 
 ! determine the in-plane coordinates with the same length
-         ya = 0.5d0 * ( ( x(2)**2 - x(3)**2 - y(3)**2 ) / ( - y(3) ) + ( x(2)**2 * ( x(3) - x(2) ) )  / ( ( - y(3) ) * ( x(2) ) ) )
+         ya = 0.5E0_dp * ( ( x(2)**2 - x(3)**2 - y(3)**2 ) / ( - y(3) ) + ( x(2)**2 * ( x(3) - x(2) ) )  / ( ( - y(3) ) * ( x(2) ) ) )
 
-         xa = 0.5d0 * x(2)
+         xa = 0.5E0_dp * x(2)
 
 ! determine length to new position
-         length = dsqrt( (x(1)-xa)**2 + (y(1)-ya)**2 )
+         length = sqrt( (x(1)-xa)**2 + (y(1)-ya)**2 )
 
          if (length.gt.bondl) then
 ! the distances are too far to be able to close
@@ -6236,7 +6234,7 @@ contains
          end if
 
 ! determine perpendicular distance from here to final point
-         lengthc = dsqrt( bondl**2 - length**2 )
+         lengthc = sqrt( bondl**2 - length**2 )
 
 ! find vectors from 1 to 2, 2 to 3, and 3 to 1 in real::space
          x(1) = (rx(2) - rx(1))
@@ -6253,13 +6251,13 @@ contains
 
 ! find middle point from 1 to 2
 
-         rx(4) = 0.5d0 * x(1) + rx(1)
-         ry(4) = 0.5d0 * y(1) + ry(1)
-         rz(4) = 0.5d0 * z(1) + rz(1)
+         rx(4) = 0.5E0_dp * x(1) + rx(1)
+         ry(4) = 0.5E0_dp * y(1) + ry(1)
+         rz(4) = 0.5E0_dp * z(1) + rz(1)
 
 ! find distance from this point to a
 
-         length = dsqrt( length**2 - (0.5d0*lengtha)**2 )
+         length = sqrt( length**2 - (0.5E0_dp*lengtha)**2 )
 
 ! cross 1 with 2 to find perpendicular vector
 
@@ -6275,7 +6273,7 @@ contains
 
 ! normalize this vector and give it the appropriate distance
 
-         lengtha = dsqrt( ux(2)**2 + uy(2)**2 + uz(2)**2)
+         lengtha = sqrt( ux(2)**2 + uy(2)**2 + uz(2)**2)
 
          ux(2) = length * ux(2) / lengtha
          uy(2) = length * uy(2) / lengtha
@@ -6293,8 +6291,8 @@ contains
 
 ! with the two possibilities, determine which is closer to 3
 
-         lengtha = dsqrt((rx(3)-rx(5))**2 + (ry(3)-ry(5))**2 + (rz(3) - rz(5))**2)
-         lengthb = dsqrt((rx(3)-rx(6))**2 + (ry(3)-ry(6))**2 + (rz(3) - rz(6))**2)
+         lengtha = sqrt((rx(3)-rx(5))**2 + (ry(3)-ry(5))**2 + (rz(3) - rz(5))**2)
+         lengthb = sqrt((rx(3)-rx(6))**2 + (ry(3)-ry(6))**2 + (rz(3) - rz(6))**2)
 
          if (lengtha.lt.lengthb) then
 ! number 5 is right
@@ -6322,7 +6320,7 @@ contains
 
 ! normalize this and give it the length to our final point
 
-         length = dsqrt(ux(1)**2 + uy(1)**2 + uz(1)**2)
+         length = sqrt(ux(1)**2 + uy(1)**2 + uz(1)**2)
 
          ux(1) = ux(1) * lengthc / length
          uy(1) = uy(1) * lengthc / length
@@ -6345,12 +6343,12 @@ contains
             x(1) = rxf - rx(1)
             y(1) = ryf - ry(1)
             z(1) = rzf - rz(1)
-            lengtha = dsqrt(x(1)**2 + y(1)**2 + z(1)**2)
+            lengtha = sqrt(x(1)**2 + y(1)**2 + z(1)**2)
 
             x(2) = rxf - rx(2)
             y(2) = ryf - ry(2)
             z(2) = rzf - rz(2)
-            lengthb = dsqrt(x(2)**2 + y(2)**2 + z(2)**2)
+            lengthb = sqrt(x(2)**2 + y(2)**2 + z(2)**2)
 
             write(io_output,*) lengtha,lengthb,bondl
 
@@ -6381,7 +6379,7 @@ contains
 ! angle 2 is from vector 2 to the new
 ! angle 3 is between vectors 1 and 2
 
-         avar = dcos(angle(2)) - rx(2)*dcos(angle(1))/rx(1)
+         avar = cos(angle(2)) - rx(2)*cos(angle(1))/rx(1)
          bvar = rx(2) * rz(1) / rx(1) - rz(2)
          cvar = ry(2) - rx(2) * ry(1) / rx(1)
 
@@ -6389,21 +6387,21 @@ contains
          bvar = bvar / cvar
 
          cvar = (ry(1) * bvar + rz(1)) / rx(1)
-         dvar = (dcos(angle(1)) - ry(1) * avar) / rx(1)
+         dvar = (cos(angle(1)) - ry(1) * avar) / rx(1)
 
-         a = cvar**2 + bvar**2 + 1.0d0
-         bb = 2.0d0 * (avar*bvar - cvar*dvar)
-         c = dvar**2 + avar**2 - 1.0d0
+         a = cvar**2 + bvar**2 + 1.0E0_dp
+         bb = 2.0E0_dp * (avar*bvar - cvar*dvar)
+         c = dvar**2 + avar**2 - 1.0E0_dp
 
-         var = bb**2 - 4.0d0 * a * c
+         var = bb**2 - 4.0E0_dp * a * c
 
          if (var.lt.0) then
             lterm = .true.
             return
          end if
 
-         rz(3) = (-bb + dsqrt(var)) / (2.0d0 * a )
-         rz(4) = (-bb - dsqrt(var)) / (2.0d0 * a )
+         rz(3) = (-bb + sqrt(var)) / (2.0E0_dp * a )
+         rz(4) = (-bb - sqrt(var)) / (2.0E0_dp * a )
 
          rx(3) = dvar - rz(3) * cvar
          rx(4) = dvar - rz(4) * cvar
@@ -6413,9 +6411,9 @@ contains
 
          return
 
-         avar = dcos(angle(1))*(rx(2)*(rx(2)*rz(1) - rx(1)*rz(2)) + ry(2)*(ry(2)*rz(1) - ry(1)*rz(2))) + dcos(angle(2))*(rx(1)*(rx(1)*rz(2) - rx(2)*rz(1)) + ry(1)*(ry(1)*rz(2) - ry(2)*rz(1)))
+         avar = cos(angle(1))*(rx(2)*(rx(2)*rz(1) - rx(1)*rz(2)) + ry(2)*(ry(2)*rz(1) - ry(1)*rz(2))) + cos(angle(2))*(rx(1)*(rx(1)*rz(2) - rx(2)*rz(1)) + ry(1)*(ry(1)*rz(2) - ry(2)*rz(1)))
 
-         var = rx(2)**2*(ry(1)**2 + rz(1)**2) + ry(2)**2*(rx(1)**2 + rz(1)**2) + rz(2)**2*(rx(1)**2 + ry(1)**2) - 2.0d0*(rx(1)*rx(2)*ry(1)*ry(2) + rx(1)*rx(2)*rz(1)*rz(2) + ry(1)*ry(2)*rz(1)*rz(2)) - (rx(2)**2 + ry(2)**2 + rz(2)**2)*dcos(angle(1))**2 - (rx(1)**2 + ry(1)**2 + rz(1)**2)*dcos(angle(2))**2 + 2.0d0*(rx(1)*rx(2) + ry(1)*ry(2) + rz(1)*rz(2)) *dcos(angle(1))*dcos(angle(2))
+         var = rx(2)**2*(ry(1)**2 + rz(1)**2) + ry(2)**2*(rx(1)**2 + rz(1)**2) + rz(2)**2*(rx(1)**2 + ry(1)**2) - 2.0E0_dp*(rx(1)*rx(2)*ry(1)*ry(2) + rx(1)*rx(2)*rz(1)*rz(2) + ry(1)*ry(2)*rz(1)*rz(2)) - (rx(2)**2 + ry(2)**2 + rz(2)**2)*cos(angle(1))**2 - (rx(1)**2 + ry(1)**2 + rz(1)**2)*cos(angle(2))**2 + 2.0E0_dp*(rx(1)*rx(2) + ry(1)*ry(2) + rz(1)*rz(2)) *cos(angle(1))*cos(angle(2))
 
          if (var.lt.0) then
             var = abs(var)
@@ -6424,22 +6422,22 @@ contains
 ! return
          end if
 
-         bvar = (rx(1)*ry(2) - rx(2)*ry(1))*dsqrt(var)
+         bvar = (rx(1)*ry(2) - rx(2)*ry(1))*sqrt(var)
 
-         cvar = rx(2)**2*(ry(1)**2 + rz(1)**2) + (ry(2)*rz(1) - ry(1)*rz(2))**2 - 2.0d0*rx(1)*rx(2)*(ry(1)*ry(2) + rz(1)*rz(2)) + rx(1)**2*(ry(2)**2 + rz(2)**2)
+         cvar = rx(2)**2*(ry(1)**2 + rz(1)**2) + (ry(2)*rz(1) - ry(1)*rz(2))**2 - 2.0E0_dp*rx(1)*rx(2)*(ry(1)*ry(2) + rz(1)*rz(2)) + rx(1)**2*(ry(2)**2 + rz(2)**2)
 
          rz(3) = (avar + bvar) / cvar
          rz(4) = (avar - bvar) / cvar
 
          avar = rx(2)*rz(1) - rx(1)*rz(2)
-         bvar = rx(1)*dcos(angle(2)) - rx(2)*dcos(angle(1))
+         bvar = rx(1)*cos(angle(2)) - rx(2)*cos(angle(1))
          cvar = rx(1)*ry(2) - rx(2)*ry(1)
 
          ry(3) = (rz(3)*avar + bvar) / cvar
          ry(4) = (rz(4)*avar + bvar) / cvar
 
-         rx(3) = (dcos(angle(1)) - ry(1)*ry(3) - rz(1)*rz(3)) / rx(1)
-         rx(4) = (dcos(angle(1)) - ry(1)*ry(4) - rz(1)*rz(4)) / rx(1)
+         rx(3) = (cos(angle(1)) - ry(1)*ry(3) - rz(1)*rz(3)) / rx(1)
+         rx(4) = (cos(angle(1)) - ry(1)*ry(4) - rz(1)*rz(4)) / rx(1)
 
       end if
 
@@ -6467,7 +6465,7 @@ contains
       write(io_output,*) 'START RIGFIX in ',myid
 #endif
 
-      wrig = 1.0d0
+      wrig = 1.0E0_dp
       do j = 1, nunit(imolty)
          lfind(j) = .false.
       end do
@@ -6487,7 +6485,7 @@ contains
          yfix(iufrom) = ryu(i,iufrom) - ryu(i,iuprev)
          zfix(iufrom) = rzu(i,iufrom) - rzu(i,iuprev)
 
-         lengthb = dsqrt(xfix(iufrom)**2 + yfix(iufrom)**2  + zfix(iufrom)**2)
+         lengthb = sqrt(xfix(iufrom)**2 + yfix(iufrom)**2  + zfix(iufrom)**2)
 
          xub = xfix(iufrom) / lengthb
          yub = yfix(iufrom) / lengthb
@@ -6503,15 +6501,15 @@ contains
             yfix(iu) = ryu(i,iu) - ryu(i,iufrom)
             zfix(iu) = rzu(i,iu) - rzu(i,iufrom)
 
-            lengtha = dsqrt(xfix(iu)**2 + yfix(iu)**2 + zfix(iu)**2)
+            lengtha = sqrt(xfix(iu)**2 + yfix(iu)**2 + zfix(iu)**2)
 
             rlength(iu) = lengtha
 
             thetac = -(xfix(iu)*xfix(iufrom) + yfix(iu)*yfix(iufrom) + zfix(iu)*zfix(iufrom)) / (lengtha*lengthb)
 
-            if (abs(thetac).gt.1.0d0) call err_exit(__FILE__,__LINE__,'screwup in rigfix',myid+1)
+            if (abs(thetac).gt.1.0E0_dp) call err_exit(__FILE__,__LINE__,'screwup in rigfix',myid+1)
 
-            bendang(iu) = dacos(thetac)
+            bendang(iu) = acos(thetac)
 
             xub = xfix(iu) / lengtha
             yub = yfix(iu) / lengtha
@@ -6548,13 +6546,13 @@ contains
                   yfix(ju) = ryu(i,ju) - ryu(i,iufrom)
                   zfix(ju) = rzu(i,ju) - rzu(i,iufrom)
 
-                  lengtha = dsqrt(xfix(ju)**2 + yfix(ju)**2 + zfix(ju)**2)
+                  lengtha = sqrt(xfix(ju)**2 + yfix(ju)**2 + zfix(ju)**2)
 
                   rlength(ju) = lengtha
 
                   thetac = -(xfix(ju)*xfix(iufrom) + yfix(ju) *yfix(iufrom) + zfix(ju)*zfix(iufrom)) / (lengtha*lengthb)
 
-                  bendang(ju) = dacos(thetac)
+                  bendang(ju) = acos(thetac)
 
                   xub = xfix(ju) / lengtha
                   yub = yfix(ju) / lengtha
@@ -6593,10 +6591,10 @@ contains
          end if
 
          do ip = 1, ichoi
-            bsum_tor(ip) = 0.0d0
+            bsum_tor(ip) = 0.0E0_dp
 
             do itor = 1, ichtor
-               vdha = 0.0d0
+               vdha = 0.0E0_dp
 
                lshit = .false.
                if (lnew.and.ip.eq.17.and.itor.eq.6) then
@@ -6654,14 +6652,14 @@ contains
 
                vtorsion(itor) = vdha
                phitors(itor) = phidisp
-               bf_tor(itor) = dexp(-beta*vdha)
+               bf_tor(itor) = exp(-beta*vdha)
                bsum_tor(ip) = bsum_tor(ip) + bf_tor(itor)
             end do
 
 ! pick a torsion at random
             if (lnew .or. ip .ne. 1) then
                ran_tor = random(-1)*bsum_tor(ip)
-               bs = 0.0d0
+               bs = 0.0E0_dp
                do itor = 1, ichtor
                   bs = bs + bf_tor(itor)
                   if (ran_tor .lt. bs) then
@@ -6746,17 +6744,17 @@ contains
 
 ! initialize rosenbluth weight
          do ip = 1, ichoi
-            bsuma(ip) = 1.0d0
-            vtrya(ip) = 0.0d0
+            bsuma(ip) = 1.0E0_dp
+            vtrya(ip) = 0.0E0_dp
             lovra(ip) = .false.
-            vtrintraa(ip) = 0.0d0
-            vtrexta(ip)   = 0.0d0
-            vtrintera(ip) = 0.0d0
-            vtrelecta(ip) =  0.0d0
-            vtrelecta_intra(ip) =  0.0d0
-            vtrelecta_inter(ip) =  0.0d0
-            vtrewalda(ip) = 0.0d0
-            vtrorienta(ip) = 0.0d0
+            vtrintraa(ip) = 0.0E0_dp
+            vtrexta(ip)   = 0.0E0_dp
+            vtrintera(ip) = 0.0E0_dp
+            vtrelecta(ip) =  0.0E0_dp
+            vtrelecta_intra(ip) =  0.0E0_dp
+            vtrelecta_inter(ip) =  0.0E0_dp
+            vtrewalda(ip) = 0.0E0_dp
+            vtrorienta(ip) = 0.0E0_dp
          end do
 
          do count = 1, ntogrow
@@ -6832,7 +6830,7 @@ contains
             end do
          end do
 
-         bsum = 0.0d0
+         bsum = 0.0E0_dp
 ! add up rosenbluth weight
          do ip = 1, ichoi
             if (.not. lovra(ip)) then
@@ -6849,7 +6847,7 @@ contains
             end if
 
             rbf = bsum * random(-1)
-            bs = 0.0d0
+            bs = 0.0E0_dp
             do ip = 1, ichoi
                if ( .not. lovra(ip) ) then
                   bs = bs + bsuma(ip) * bsum_tor(ip)
@@ -6912,7 +6910,7 @@ contains
                zvec(iu,ju) = rzu(i,ju) - rzu(i,iu)
             end if
 
-            distij(iu,ju) = dsqrt(xvec(iu,ju)**2 + yvec(iu,ju)**2 + zvec(iu,ju)**2)
+            distij(iu,ju) = sqrt(xvec(iu,ju)**2 + yvec(iu,ju)**2 + zvec(iu,ju)**2)
 
             distij(ju,iu) = distij(iu,ju)
 
@@ -6945,7 +6943,7 @@ contains
                zvec(iu,ju) = rzu(i,ju) - rzu(i,iu)
             end if
 
-            distij(iu,ju) = dsqrt(xvec(iu,ju)**2 + yvec(iu,ju)**2 + zvec(iu,ju)**2)
+            distij(iu,ju) = sqrt(xvec(iu,ju)**2 + yvec(iu,ju)**2 + zvec(iu,ju)**2)
 
             distij(ju,iu) = distij(iu,ju)
 
@@ -6981,10 +6979,10 @@ contains
     llplace=.FALSE.
     lsave=.FALSE.
 
-    bncb = 0.0d0
-    bscb = 0.0d0
-    fbncb = 0.0d0
-    fbscb = 0.0d0
+    bncb = 0.0E0_dp
+    bscb = 0.0E0_dp
+    fbncb = 0.0E0_dp
+    fbscb = 0.0E0_dp
   end subroutine init_cbmc
 
 ! write some information about config performance ***
@@ -7000,19 +6998,19 @@ contains
        write(io_output,*) 'molecule typ =',i
        write(io_output,*) '    length  attempts  succ.growth  accepted' ,'   %su.gr.    %accep.'
        do inb = 1, nunit(i)
-          if ( bncb(i,inb) .gt. 0.0d0 ) then
-             pscb1 = bscb(i,1,inb) * 100.0d0 / bncb(i,inb)
-             pscb2 = bscb(i,2,inb) * 100.0d0 / bncb(i,inb)
+          if ( bncb(i,inb) .gt. 0.0E0_dp ) then
+             pscb1 = bscb(i,1,inb) * 100.0E0_dp / bncb(i,inb)
+             pscb2 = bscb(i,2,inb) * 100.0E0_dp / bncb(i,inb)
              write(io_output,'(i9,3f10.1,2f10.2)') inb, bncb(i,inb), bscb(i,1,inb), bscb(i,2,inb), pscb1, pscb2
           end if
        end do
-       if (pmfix(i).gt.0.0d0) then
+       if (pmfix(i).gt.0.0E0_dp) then
           write(io_output,*) ' SAFE-CBMC move '
           write(io_output,*) '    length  attempts  succ.growth  ', 'accepted   %su.gr.    %accep.'
           do inb = 1, nunit(i)
-             if (fbncb(i,inb) .gt. 0.0d0 ) then
-                pscb1 = fbscb(i,1,inb) * 100.0d0  / fbncb(i,inb)
-                pscb2 = fbscb(i,2,inb) * 100.0d0  / fbncb(i,inb)
+             if (fbncb(i,inb) .gt. 0.0E0_dp ) then
+                pscb1 = fbscb(i,1,inb) * 100.0E0_dp  / fbncb(i,inb)
+                pscb2 = fbscb(i,2,inb) * 100.0E0_dp  / fbncb(i,inb)
                 write(io_output,'(i9,3f10.1,2f10.2)') inb,fbncb(i,inb), fbscb(i,1,inb), fbscb(i,2,inb) , pscb1, pscb2
              end if
           end do

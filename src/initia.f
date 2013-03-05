@@ -176,9 +176,9 @@ subroutine initia
               call err_exit(__FILE__,__LINE__,'Cant grow molecule.  Please provide a structure via '//file_struct,myid+1)
            end if
 ! put the first bead at the origin
-           rxnew(1) = 0.0d0
-           rynew(1) = 0.0d0
-           rznew(1) = 0.0d0
+           rxnew(1) = 0.0E0_dp
+           rynew(1) = 0.0E0_dp
+           rznew(1) = 0.0E0_dp
 
 ! determine the growth schedule
            call schedule(nugrow(i),i,ifrom,1,0,2)
@@ -239,7 +239,7 @@ subroutine initia
            offset = offset+nchbox(ibox-1)
         end if
         do while (count_chain.lt.(nchbox(ibox)+offset))
-           rand_id = idint(dble(nchbox(ibox))*random(-1))+ 1 + offset
+           rand_id = int(dble(nchbox(ibox))*random(-1))+ 1 + offset
            if (.not.lhere(rand_id)) then
               count_chain = count_chain + 1
               lhere(rand_id) = .true.
@@ -265,7 +265,7 @@ subroutine initia
 
      do kc = 0, iniz(ibox)-1
         if ( mod(kc,2) .eq. 0) then
-           xshift = 0.0d0
+           xshift = 0.0E0_dp
         else
            xshift = dshift(ibox)
         end if
@@ -275,9 +275,9 @@ subroutine initia
            do jc = 0, iniy(ibox)-1
 
               if ( mod(jc,2) .eq. 0) then
-                 dic = 0.0d0
+                 dic = 0.0E0_dp
               else
-                 dic = 0.5d0
+                 dic = 0.5E0_dp
               end if
 
               n=n+1
@@ -403,9 +403,9 @@ subroutine initia
 
 ! now use old method with re-mapped numbers:
 ! put first end at origin:
-                 xtemp(1) = 0.0d0
-                 ytemp(1) = 0.0d0
-                 ztemp(1) = 0.0d0
+                 xtemp(1) = 0.0E0_dp
+                 ytemp(1) = 0.0E0_dp
+                 ztemp(1) = 0.0E0_dp
 
 ! now we need to loop over all the other beads:
                  do m = 2, ibuild
@@ -414,7 +414,7 @@ subroutine initia
                     m2 = m - 2
 
                     if ( inirot(ibox) .eq. 0 ) then
-                       rot = random(-1) * 360.0d0 * degrad
+                       rot = random(-1) * 360.0E0_dp * degrad
                     else if ( inirot(ibox) .gt. 0 ) then
                        rot = dble(inirot(ibox)) * degrad
                     else
@@ -427,7 +427,7 @@ subroutine initia
 
                     if ( inben(intemp,bmap(m1)) .gt. 0 ) then
                        ibtype = itben(intemp,bmap(m1),1)
-                       angold = brben(ibtype) / 2.0d0
+                       angold = brben(ibtype) / 2.0E0_dp
 
                        if ( m .eq. 2 ) then
                           ibtype = itben(intemp,bmap(m1),1)
@@ -447,8 +447,8 @@ subroutine initia
                           end if
                        end do
 
-                       ztemp(m) = dsin(angnew) * brvib(ibtype)
-                       xynext = dcos(angnew) * brvib(ibtype)
+                       ztemp(m) = sin(angnew) * brvib(ibtype)
+                       xynext = cos(angnew) * brvib(ibtype)
 ! write(io_output,*) 'znext',znext,'   xynext',xynext
                     else
 ! need to search for proper bond length
@@ -458,19 +458,19 @@ subroutine initia
                           end if
                        end do
 
-! ztemp(m) = dsin(angnew) * brvib(ibtype)
-! xynext = dcos(angnew) * brvib(ibtype)
+! ztemp(m) = sin(angnew) * brvib(ibtype)
+! xynext = cos(angnew) * brvib(ibtype)
 
                        ztemp(m) = brvib(ibtype)
-                       xynext = 0.0d0
+                       xynext = 0.0E0_dp
                     end if
 
                     if ( mod(m,2) .eq. 0 ) then
-                       xtemp(m) = dcos(rot) * xynext
-                       ytemp(m) = dsin(rot) * xynext
+                       xtemp(m) = cos(rot) * xynext
+                       ytemp(m) = sin(rot) * xynext
                     else
-                       xtemp(m) = -(dcos(rot) * xynext)
-                       ytemp(m) = -(dsin(rot) * xynext)
+                       xtemp(m) = -(cos(rot) * xynext)
+                       ytemp(m) = -(sin(rot) * xynext)
                     end if
 
                     xtemp(m) = xtemp(m1) + xtemp(m)
@@ -488,9 +488,9 @@ subroutine initia
                        ztemp(m) = ztemp(m) - ztemp(imap(1)) 
                     end if
                  end do
-                 xtemp(imap(1)) = 0.0d0
-                 ytemp(imap(1)) = 0.0d0
-                 ztemp(imap(1)) = 0.0d0
+                 xtemp(imap(1)) = 0.0E0_dp
+                 ytemp(imap(1)) = 0.0E0_dp
+                 ztemp(imap(1)) = 0.0E0_dp
 
               end if
 ! end linear determination
@@ -513,7 +513,7 @@ subroutine initia
                     znext = ztemp(bmap(m)) - ztemp(bmap(m1))
 !$$$c     - alkane type molecule -
 !$$$                        if ( inirot(ibox) .eq. 0 ) then
-!$$$                           rot = random(-1) * 360.0d0 * degrad
+!$$$                           rot = random(-1) * 360.0E0_dp * degrad
 !$$$                        else if ( inirot(ibox) .gt. 0 ) then
 !$$$                           rot = dble(inirot(ibox)) * degrad
 !$$$                        else
@@ -526,7 +526,7 @@ subroutine initia
 !$$$                        
 !$$$                        if ( inben(intemp,m1) .gt. 0 ) then
 !$$$                           ibtype = itben(intemp,1,1)
-!$$$                           angold = brben(ibtype) / 2.0d0
+!$$$                           angold = brben(ibtype) / 2.0E0_dp
 !$$$                           if ( m .eq. 2 ) then
 !$$$                              ibtype = itben(intemp,m1,1)
 !$$$                              angnew = brben(ibtype) - angold
@@ -539,21 +539,21 @@ subroutine initia
 !$$$                           angold = angnew
 !$$$                           
 !$$$                           ibtype = itvib(intemp,m,1)
-!$$$                           znext = dsin(angnew) * brvib(ibtype)
-!$$$                           xynext = dcos(angnew) * brvib(ibtype)
+!$$$                           znext = sin(angnew) * brvib(ibtype)
+!$$$                           xynext = cos(angnew) * brvib(ibtype)
 !$$$c                           write(io_output,*) 'znext',znext,'   xynext',xynext
 !$$$                        else
 !$$$                           ibtype = itvib(intemp,m,1)
 !$$$                           znext = brvib(ibtype)
-!$$$                           xynext = 0.0d0
+!$$$                           xynext = 0.0E0_dp
 !$$$                        end if
 !$$$                        
 !$$$                        if ( mod(m,2) .eq. 0 ) then
-!$$$                           xnext = dcos(rot) * xynext
-!$$$                           ynext = dsin(rot) * xynext
+!$$$                           xnext = cos(rot) * xynext
+!$$$                           ynext = sin(rot) * xynext
 !$$$                        else
-!$$$                           xnext = -(dcos(rot) * xynext)
-!$$$                           ynext = -(dsin(rot) * xynext)
+!$$$                           xnext = -(cos(rot) * xynext)
+!$$$                           ynext = -(sin(rot) * xynext)
 !$$$                        end if
                  end if
 
@@ -572,8 +572,8 @@ subroutine initia
 ! -----------------------------------------------------
 
 ! check initial structure ***
-  aben = 0.0d0
-  ator = 0.0d0
+  aben = 0.0E0_dp
+  ator = 0.0E0_dp
 
   do n = 1, nchain
      imolty = moltyp(n)
@@ -596,7 +596,7 @@ subroutine initia
               rxvec(ii,jj) = rxu(n,jj) - rxui
               ryvec(ii,jj) = ryu(n,jj) - ryui
               rzvec(ii,jj) = rzu(n,jj) - rzui
-              distanceij(ii,jj) = dsqrt( rxvec(ii,jj)**2 + ryvec(ii,jj)**2 + rzvec(ii,jj)**2 )
+              distanceij(ii,jj) = sqrt( rxvec(ii,jj)**2 + ryvec(ii,jj)**2 + rzvec(ii,jj)**2 )
               if ( nunit(imolty) .ne. nugrow(imolty) )then
 ! account for explct atoms in opposite direction
                  rxvec(jj,ii)   = -rxvec(ii,jj)
@@ -620,7 +620,7 @@ subroutine initia
               ip1 = ijben2(imolty,j,jjben)
               it  = itben(imolty,j,jjben)
               thetac = ( rxvec(ip1,j)*rxvec(ip1,ip2) + ryvec(ip1,j)*ryvec(ip1,ip2) + rzvec(ip1,j)*rzvec(ip1,ip2) ) / ( distanceij(ip1,j)*distanceij(ip1,ip2) )
-              theta = dacos(thetac)
+              theta = acos(thetac)
               vbend = brbenk(it) * (theta-brben(it))**2
               aben = aben + vbend
 ! if ( n .eq. 1 ) then
@@ -638,7 +638,7 @@ subroutine initia
               it  = ittor(imolty,j,jjtor)
               vtg = vtorso(rxvec(j,ip1),ryvec(j,ip1),rzvec(j,ip1),rxvec(ip1,ip2),ryvec(ip1,ip2),rzvec(ip1,ip2),rxvec(ip2,ip3),ryvec(ip2,ip3),rzvec(ip2,ip3),it)
               ator = ator + vtg
-              if ( n .eq. 1 ) write(io_output,"('tors with units:',4i3 ,'   type:',i3,'   angle:',f9.4,f9.2)") j,ip1,ip2,ip3,it,dacos(thetac)*raddeg,vtg
+              if ( n .eq. 1 ) write(io_output,"('tors with units:',4i3 ,'   type:',i3,'   angle:',f9.4,f9.2)") j,ip1,ip2,ip3,it,acos(thetac)*raddeg,vtg
            end do
         end do
      else
@@ -653,20 +653,20 @@ subroutine initia
               x1 = rxu(n,m) - rxu(n,m1)
               y1 = ryu(n,m) - ryu(n,m1)
               z1 = rzu(n,m) - rzu(n,m1)
-              d1 = dsqrt( x1**2 + y1**2 + z1**2 ) 
+              d1 = sqrt( x1**2 + y1**2 + z1**2 ) 
               if ( m2 .gt. 0 ) then
                  x2 = rxu(n,m2) - rxu(n,m1)
                  y2 = ryu(n,m2) - ryu(n,m1)
                  z2 = rzu(n,m2) - rzu(n,m1)
-                 d2 = dsqrt( x2**2 + y2**2 + z2**2 ) 
-                 bang = dacos((x1*x2+y1*y2+ z1*z2)/(d1*d2))*raddeg
+                 d2 = sqrt( x2**2 + y2**2 + z2**2 ) 
+                 bang = acos((x1*x2+y1*y2+ z1*z2)/(d1*d2))*raddeg
               else
-                 bang  = 0.0d0
+                 bang  = 0.0E0_dp
               end if
               blen = d1
            else
-              blen = 0.0d0
-              bang = 0.0d0
+              blen = 0.0E0_dp
+              bang = 0.0E0_dp
            end if
 
 ! if ( n .eq. 1 .or. m .eq. 1 )
@@ -696,7 +696,7 @@ subroutine initia
   end do
 
   if (myid.eq.0) then
-     write(io_output,*) 'aben',aben/2.0d0,'ator',ator/2.0d0
+     write(io_output,*) 'aben',aben/2.0E0_dp,'ator',ator/2.0E0_dp
   end if
 
   return

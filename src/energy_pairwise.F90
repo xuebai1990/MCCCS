@@ -1,4 +1,5 @@
 MODULE energy_pairwise
+  use var_type,only:dp,default_string_length
   use const_math,only:onepi,twopi,sqrtpi,degrad
   use const_phys,only:qqfact
   use util_math,only:erfunc
@@ -20,7 +21,7 @@ MODULE energy_pairwise
   save
   public::sumup,energy,boltz,coru,init_energy_pairwise,exsix,ljpsur,type_2body
 
-  real,parameter::a15(2)=(/4.0d7,7.5d7/) !< 1-5 correction term for unprotected hydrogen-oxygen interaction; 1 for ether oxygens, 2 for alcohol oxygens
+  real,parameter::a15(2)=(/4.0E7_dp,7.5E7_dp/) !< 1-5 correction term for unprotected hydrogen-oxygen interaction; 1 for ether oxygens, 2 for alcohol oxygens
   !OLD VALUES: a15(2)=/17.0**6,16.0**6/)
   integer,allocatable::atom_type(:),nonbond_type(:)
 
@@ -44,9 +45,9 @@ MODULE energy_pairwise
 ! parameters for Generalized Lennard Jones Potential  ***
   real,public::n0,n1
 ! repulsive part
-  parameter(n0=12.0d0)
+  parameter(n0=12.0E0_dp)
 ! attractive part
-  parameter(n1=6.0d0)
+  parameter(n1=6.0E0_dp)
 ! Ref:  J. Chem. Phys. 120, 4994 (2004)         ****
 ! ***********************************************************
 
@@ -69,16 +70,15 @@ contains
     use energy_3body,only:U3System
     use energy_4body,only:U4System
 
+    real(kind=dp)::v,vinter,vtail,vintra,vvib,vbend,vtg,vext,velect,vflucq,vrecipsum,vwell,my_velect
     logical::ovrlap,lvol
     logical::lexplt,lqimol,lqjmol,lcoulo(numax,numax),lij2,liji,lqchgi
     integer::i,imolty,ii,j,jmolty,jj,ntii,ntjj,ntij,iunit,ibox,nmcount,ntj,k,mmm
-    real::v,vinter,vintra,vtail,vvib,vbend,vtg,vext,velect,vflucq,qqii
-    real::rcutsq,rminsq,rxui,ryui,rzui,rxuij,ryuij,rzuij,rijsq,rho,rij,vrecipsum,rbcut,vwell,calpi
+    real::rcutsq,rminsq,rxui,ryui,rzui,rxuij,ryuij,rzuij,rijsq,rho,rij,rbcut,calpi,qqii
     ! real::vtemp
-    real::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq
-    real::vintera,velecta,vol
+    real::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq,vol
     ! Neeraj & RP for MPI
-    real::sum_vvib,sum_vbend,sum_vtg,my_velect
+    real::sum_vvib,sum_vbend,sum_vtg
 ! --------------------------------------------------------------------
 #ifdef __DEBUG__
     write(io_output,*) 'start SUMUP in ',myid,' for box ', ibox
@@ -91,26 +91,23 @@ contains
     calpi=calp(ibox)
     rminsq = rmin * rmin
 
-    vintera = 0.0d0
-    velecta = 0.0d0
-
     ! KM for MPI
-    my_velect = 0.0d0
+    my_velect = 0.0E0_dp
 
     ovrlap = .false.
-    v = 0.0d0
-    vinter = 0.0d0
-    vintra = 0.0d0
-    vtail = 0.0d0
-    vtg = 0.0d0
-    vbend = 0.0d0
-    vvib = 0.0d0
-    vext = 0.0d0
-    velect = 0.0d0
-    vflucq = 0.0d0
+    v = 0.0E0_dp
+    vinter = 0.0E0_dp
+    vintra = 0.0E0_dp
+    vtail = 0.0E0_dp
+    vtg = 0.0E0_dp
+    vbend = 0.0E0_dp
+    vvib = 0.0E0_dp
+    vext = 0.0E0_dp
+    velect = 0.0E0_dp
+    vflucq = 0.0E0_dp
     !kea - 3body garofalini term
-    v3garo = 0.0d0
-    vwell = 0.0d0
+    v3garo = 0.0E0_dp
+    vwell = 0.0E0_dp
     ! check the molecule count ***
     nmcount = 0
     do i = 1, nchain
@@ -170,7 +167,7 @@ contains
                       if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
 
                       rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-                      rij  = dsqrt(rijsq)
+                      rij  = sqrt(rijsq)
                       rcm = rbcut + rcmi + rcmu(j)
                       rcmsq = rcm*rcm
 
@@ -223,7 +220,7 @@ contains
                          if (lpbc) call mimage(rxuij,ryuij,rzuij,ibox)
 
                          rijsq=(rxuij*rxuij)+(ryuij*ryuij)+(rzuij*rzuij)
-                         rij=dsqrt(rijsq)
+                         rij=sqrt(rijsq)
 
                          ! if ( i .eq. 12 .and. ii .eq. 6 .and. j .eq. 95 .and. jj .eq. 1 ) then
                          ! write(io_output,*) 'CONTROL CONTROL CONTROL'
@@ -232,7 +229,7 @@ contains
                          ! write(io_output,*) 'j xyz',rxu(j,jj),ryu(j,jj),rzu(j,jj)
                          ! write(io_output,*) 'r*uij',rxuij,ryuij,rzuij
                          ! write(io_output,*) 'dist2',rijsq
-                         ! write(io_output,*) 'distance', dsqrt(rijsq)
+                         ! write(io_output,*) 'distance', sqrt(rijsq)
                          ! end if
 
                          if (rijsq.lt.rminsq .and. .not.(lexpand(imolty).or.lexpand(jmolty))) then
@@ -308,7 +305,7 @@ contains
        call mp_sum(velect,1,groupid)
 
        if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff  .and. .not. lgenlj .and. .not. lninesix .and..not.lgaro .and..not.L_vdW_table) then
-          vinter = 4.0d0 * vinter
+          vinter = 4.0E0_dp * vinter
        end if
 
 ! KEA garofalini 3 body potential
@@ -349,10 +346,10 @@ contains
     if (lewald.and..not.lideal(ibox)) then
        call recipsum(ibox,vrecipsum)
        ! update self terms and correction terms
-       sself = 0.0d0
-       correct = 0.0d0
+       sself = 0.0E0_dp
+       correct = 0.0E0_dp
        ! combine to reduce numerical error
-       ! vsc = 0.0d0
+       ! vsc = 0.0E0_dp
 
        ! RP added for MPI
        ! do i = 1,nchain
@@ -362,7 +359,7 @@ contains
              do ii = 1,nunit(imolty)
                 sself = sself + qqu(i,ii)*qqu(i,ii)
                 ! 1.772.. is the square root of pi
-                ! vsc = vsc - qqu(i,ii)*qqu(i,ii)*calpi/1.772453851d0
+                ! vsc = vsc - qqu(i,ii)*qqu(i,ii)*calpi/1.772453851E0_dp
                 do jj = ii+1,nunit(imolty)
                    rxuij = rxu(i,ii) - rxu(i,jj)
                    ryuij = ryu(i,ii) - ryu(i,jj)
@@ -370,17 +367,17 @@ contains
                    ! JLR 11-17-09  need call to mimage for intrachain
                    if (lpbc) call mimage(rxuij,ryuij,rzuij,ibox)
                    ! END JLR 11-17-09
-                   rij = dsqrt(rxuij*rxuij + ryuij*ryuij + rzuij*rzuij)
+                   rij = sqrt(rxuij*rxuij + ryuij*ryuij + rzuij*rzuij)
 
                    ! correct should only be calculated if ii and jj should NOT interact,
                    ! so only calculating it if lqinclu is false
                    ! this part is 1,2 and 1,3
                    if (.not. lqinclu(imolty,ii,jj)) then
-                      correct = correct + qqu(i,ii)*qqu(i,jj)*(erfunc(calpi*rij)-1.0d0)/rij
-                      ! vsc = vsc + qqu(i,ii)*qqu(i,jj)*(erfunc(calpi*rij)-1.0d0)/rij
+                      correct = correct + qqu(i,ii)*qqu(i,jj)*(erfunc(calpi*rij)-1.0E0_dp)/rij
+                      ! vsc = vsc + qqu(i,ii)*qqu(i,jj)*(erfunc(calpi*rij)-1.0E0_dp)/rij
                    else
-                      correct=correct+(1.0d0 - qscale2(imolty,ii,jj))*qqu(i,ii)*qqu(i,jj)* (erfunc(calpi*rij)-1.0d0)/rij
-                      ! vsc = vsc + (1.0d0 - qscale2(imolty,ii,jj))*qqu(i,ii)*qqu(i,jj)*(erfunc(calpi*rij)-1.0d0)/rij
+                      correct=correct+(1.0E0_dp - qscale2(imolty,ii,jj))*qqu(i,ii)*qqu(i,jj)* (erfunc(calpi*rij)-1.0E0_dp)/rij
+                      ! vsc = vsc + (1.0E0_dp - qscale2(imolty,ii,jj))*qqu(i,ii)*qqu(i,jj)*(erfunc(calpi*rij)-1.0E0_dp)/rij
                    end if
                 end do
              end do
@@ -390,7 +387,7 @@ contains
        call mp_sum(correct,1,groupid)
        call mp_sum(sself,1,groupid)
 
-! vdipole = (dipolex*dipolex+dipoley*dipoley+dipolez*dipolez)*(2.0d0*onepi)/(3.0d0*boxlx(ibox)**3.0d0)
+! vdipole = (dipolex*dipolex+dipoley*dipoley+dipolez*dipolez)*(2.0E0_dp*onepi)/(3.0E0_dp*boxlx(ibox)**3.0E0_dp)
 ! write(io_output,*) dipolex,dipoley,dipolez
        sself = -sself*calpi/sqrtpi
        velect = velect + sself + correct + vrecipsum
@@ -442,7 +439,7 @@ contains
                       if (lpbc) call mimage(rxuij,ryuij,rzuij,ibox)
                       ! END JLR 11-17-09
                       rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-                      rij  = dsqrt(rijsq)
+                      rij  = sqrt(rijsq)
                       if (linclu(imolty,ii,jj)) then
 
                          if (rijsq.lt.rminsq.and..not.lexpand(imolty)) then
@@ -506,7 +503,7 @@ contains
 ! write(io_output,*) 'test', vintra
 
        if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff  .and. .not. lgenlj .and. .not. lninesix .and..not.lgaro .and..not.L_vdW_table) then
-          vintra = 4.0d0 * vintra
+          vintra = 4.0E0_dp * vintra
        end if
 
 ! ################################################################
@@ -543,7 +540,7 @@ contains
                    end do
                    vflucq = vflucq - fqegp(imolty)
                 else
-                   vflucq = 0.0d0
+                   vflucq = 0.0E0_dp
                 end if
              end if
           end if
@@ -622,7 +619,7 @@ contains
                 rcmsq = rcm*rcm
                 if (rijsq.lt.rcmsq) then
                    do ii = 1, nunit(imolty)
-                      if (awell(ii,k,imolty).lt.1.0d-6) cycle
+                      if (awell(ii,k,imolty).lt.1.0E-6_dp) cycle
                       rxui = rxu(i,ii)
                       ryui = ryu(i,ii)
                       rzui = rzu(i,ii)
@@ -631,7 +628,7 @@ contains
                       rzuij = rzui-rzwell(j,imolty)
                       call mimage(rxuij,ryuij,rzuij,ibox)
                       rijsq = rxuij*rxuij+ryuij*ryuij+rzuij*rzuij
-                      vwell = vwell-awell(ii,k,imolty)*dexp(-bwell*rijsq)
+                      vwell = vwell-awell(ii,k,imolty)*exp(-bwell*rijsq)
                    end do
                 end if
              end do
@@ -660,11 +657,11 @@ contains
     vwellipsw = vwell
 
     if (lstagea) then
-       v = (1.0d0-lambdais*(1.0d0-etais))*v
+       v = (1.0E0_dp-lambdais*(1.0E0_dp-etais))*v
     else if (lstageb) then
        v = etais*v+lambdais*vwell
     else if (lstagec) then
-       v = (etais+(1.0d0-etais)*lambdais)*v+(1.0d0-lambdais)*vwell
+       v = (etais+(1.0E0_dp-etais)*lambdais)*v+(1.0E0_dp-lambdais)*vwell
     end if
 
     v = v + vvib + vbend + vtg
@@ -748,17 +745,17 @@ contains
     rminsq = rmin * rmin
 
     ovrlap = .false.
-    v = 0.0d0
-    vinter = 0.0d0
-    vintra = 0.0d0
-    vext = 0.0d0
-    velect = 0.0d0
-    vewald = 0.0d0
-    vtors = 0.0d0
-    sself  = 0.0d0
-    correct = 0.0d0
+    v = 0.0E0_dp
+    vinter = 0.0E0_dp
+    vintra = 0.0E0_dp
+    vext = 0.0E0_dp
+    velect = 0.0E0_dp
+    vewald = 0.0E0_dp
+    vtors = 0.0E0_dp
+    sself  = 0.0E0_dp
+    correct = 0.0E0_dp
     !kea
-    v3garo = 0.0d0
+    v3garo = 0.0E0_dp
 
     if ( istart .eq. 1 .and. flagon .eq. 2) then
        neigh_icnt = 0
@@ -841,12 +838,12 @@ contains
                 ! minimum image the ctrmas pair separations ***
                 if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
                 rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-                rij  = dsqrt(rijsq)
+                rij  = sqrt(rijsq)
                 rcm = rbcut + rcmi + rcmu(j)
                 rcmsq = rcm*rcm
                 ! write(io_output,*) rcm,rcmi,rcmu(j)
                 if ( lfavor ) then
-                   favor(j) = (rminsq/rijsq)**2*5.0d0
+                   favor(j) = (rminsq/rijsq)**2*5.0E0_dp
                    favor2(j) = rminsq/rijsq
                 end if
                 if ( rijsq .gt. rcmsq .and. lcutcm) then
@@ -913,14 +910,14 @@ contains
                    ! minimum image the pair separations ***
                    if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
                    rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-                   rij  = dsqrt(rijsq)
+                   rij  = sqrt(rijsq)
                    if (rijsq.lt.rminsq .and. .not.(lexpand(imolty).or.lexpand(jmolty))) then
                       ovrlap = .true.
                       ! write(io_output,*) 'inter ovrlap:',i,j, myid
                       ! write(io_output,*) 'i xyz',rxui,ryui,rzui
                       ! write(io_output,*) 'j xyz',rxu(j,jj),ryu(j,jj),rzu(j,jj)
                       ! write(io_output,*) 'ii:',ii,'jj:',jj
-                      ! write(io_output,*) 'distance', dsqrt(rijsq)
+                      ! write(io_output,*) 'distance', sqrt(rijsq)
                       ! RP added for MPI
                       ! return
                       goto 99
@@ -976,7 +973,7 @@ contains
 ! -----------------------------------------------
 
     if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff .and. .not. lgenlj .and. .not. lninesix .and..not.lgaro .and..not.L_vdW_table) then
-       vinter = 4.0d0 * vinter
+       vinter = 4.0E0_dp * vinter
     end if
 
 !kea - garo: add three body loop for intermolecular interactions
@@ -1002,7 +999,7 @@ contains
 ! JLR 11-19-09 commenting this out, alway do mimage for intrachain
 ! for expanded ensemble
 ! lmim = .false.
-! mlen2 = rcmu(nchp2)*2d0
+! mlen2 = rcmu(nchp2)*2E0_dp
 ! if ( mlen2>boxlx(ibox) .or. mlen2>boxly(ibox) .or. mlen2>boxlz(ibox)) lmim = .true.
 ! END JLR 11-19-09
 
@@ -1033,7 +1030,7 @@ contains
           if (lpbc) call mimage(rxuij,ryuij,rzuij,ibox)
           ! END JLR 11-19-09
           rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-          rij = dsqrt(rijsq)
+          rij = sqrt(rijsq)
 
           if (lqinclu(imolty,ii,jj) ) then
              ! calculation of intramolecular electrostatics
@@ -1069,10 +1066,10 @@ contains
              ! rest of their own molecule, if there's no interaction
              ! these are 1,2 and 1,3
              if (.not. lqinclu(imolty,ii,jj)) then
-                correct=correct+qquion(ii,flagon)*qquion(jj,flagon)*(erfunc(calpi*rij)-1.0d0)/rij
+                correct=correct+qquion(ii,flagon)*qquion(jj,flagon)*(erfunc(calpi*rij)-1.0E0_dp)/rij
                 ! 1,4 interaction which we scale by qscale
              else
-                correct=correct+(1.0d0-qscale2(imolty,ii,jj))*qquion(ii,flagon)*qquion(jj,flagon)*(erfunc(calpi*rij)-1.0d0)/rij
+                correct=correct+(1.0E0_dp-qscale2(imolty,ii,jj))*qquion(ii,flagon)*qquion(jj,flagon)*(erfunc(calpi*rij)-1.0E0_dp)/rij
              end if
           end if
        end do
@@ -1085,7 +1082,7 @@ contains
        vewald = sself + correct
     end if
     if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff  .and. .not. lgenlj  .and. .not. lninesix .and..not.L_vdW_table) then
-       vintra = 4.0d0 * vintra
+       vintra = 4.0E0_dp * vintra
     end if
 
 ! ################################################################
@@ -1111,7 +1108,7 @@ contains
 ! --------------------------------------------------------------------------
 ! well potential for thermodynamic integration stages b and c
 ! --------------------------------------------------------------------------
-    vwell = 0.0d0
+    vwell = 0.0E0_dp
     if (lwell(imolty).and.lmipsw) then
        rxui = xcmi
        ryui = ycmi
@@ -1128,7 +1125,7 @@ contains
           rcmsq = rcm*rcm
           if (rijsq.lt.rcmsq) then
              do ii = 1, nunit(imolty)
-                if (awell(ii,k,imolty).lt.1.0d-6) cycle
+                if (awell(ii,k,imolty).lt.1.0E-6_dp) cycle
                 rxui = rxuion(ii,flagon)
                 ryui = ryuion(ii,flagon)
                 rzui = rzuion(ii,flagon)
@@ -1137,7 +1134,7 @@ contains
                 rzuij = rzui-rzwell(j,imolty)
                 call mimage(rxuij,ryuij,rzuij,ibox)
                 rijsq = rxuij*rxuij+ryuij*ryuij+rzuij*rzuij
-                vwell = vwell-awell(ii,k,imolty)*dexp(-bwell*rijsq)
+                vwell = vwell-awell(ii,k,imolty)*exp(-bwell*rijsq)
              end do
           end if
        end do
@@ -1164,11 +1161,11 @@ contains
 
     if (lmipsw) then
        if (lstagea) then
-          v = (1.0d0-lambdais*(1.0d0-etais))*v
+          v = (1.0E0_dp-lambdais*(1.0E0_dp-etais))*v
        else if (lstageb) then
           v = etais*v+lambdais*vwell
        else if (lstagec) then
-          v = (etais+(1.0d0-etais)*lambdais)*v+(1.0d0-lambdais)*vwell
+          v = (etais+(1.0E0_dp-etais)*lambdais)*v+(1.0E0_dp-lambdais)*vwell
        end if
     end if
 
@@ -1227,17 +1224,17 @@ contains
     do j=1,ichoi
        my_lovr(j) = .false.
        lovr(j) = .false.
-       my_vtry(j) = 0.0d0
-       my_vtrintra(j) = 0.0d0
-       my_vtrelect(j) = 0.0d0
-       my_vtrext(j) = 0.0d0
-       my_vtrinter(j) = 0.0d0
-       my_vtrewald(j) = 0.0d0
-       my_bfac(j) = 0.0d0
-       my_vipswot(j) = 0.0d0
-       my_vwellipswot(j) = 0.0d0
-       my_vipswnt(j) = 0.0d0
-       my_vwellipswnt(j) = 0.0d0
+       my_vtry(j) = 0.0E0_dp
+       my_vtrintra(j) = 0.0E0_dp
+       my_vtrelect(j) = 0.0E0_dp
+       my_vtrext(j) = 0.0E0_dp
+       my_vtrinter(j) = 0.0E0_dp
+       my_vtrewald(j) = 0.0E0_dp
+       my_bfac(j) = 0.0E0_dp
+       my_vipswot(j) = 0.0E0_dp
+       my_vwellipswot(j) = 0.0E0_dp
+       my_vipswnt(j) = 0.0E0_dp
+       my_vwellipswnt(j) = 0.0E0_dp
     end do
 
     if ( ldual ) then
@@ -1283,7 +1280,7 @@ contains
              if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
 
              rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-             rij  = dsqrt(rijsq)
+             rij  = sqrt(rijsq)
 
              if ( ldual ) then
                 rcm = rcutin + rcmu(j) + maxlen
@@ -1314,11 +1311,11 @@ contains
        ! lovr(itrial) = .false.
        my_lovr(my_itrial) = .false.
 
-       vinter = 0.0d0
-       vintra = 0.0d0
-       vext = 0.0d0
-       velect = 0.0d0
-       vewald = 0.0d0
+       vinter = 0.0E0_dp
+       vintra = 0.0E0_dp
+       vext = 0.0E0_dp
+       velect = 0.0E0_dp
+       vewald = 0.0E0_dp
 
        ! Only if L_Coul_CBMC is true, then compute electrostatic interactions/corrections
        if(L_Coul_CBMC.and.lewald.and..not.lideal(ibox)) then
@@ -1365,7 +1362,7 @@ contains
                    end if
                    if (lpbc) call mimage(rxuij,ryuij,rzuij,ibox)
                    rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-                   rij = dsqrt(rijsq)
+                   rij = sqrt(rijsq)
                 end if
                 if ( linclu(imolty,ii,iu) .or. lqinclu(imolty,ii,iu)) then
                    if ( linclu(imolty,ii,iu) ) then
@@ -1403,7 +1400,7 @@ contains
                          ! compute real space term of vewald
                          velect = velect + qscale2(imolty,ii,iu)*qqu(icharge,ii)*qqu(icharge,iu)*erfunc(calp(ibox)*rij)/ rij
                          ! ewald sum correction term
-                         corr = (1.0d0 - qscale2(imolty,ii,iu))*qqu(icharge,ii)*qqu(icharge,iu)*(erfunc(calp(ibox)*rij)-1.0d0) /rij
+                         corr = (1.0E0_dp - qscale2(imolty,ii,iu))*qqu(icharge,ii)*qqu(icharge,iu)*(erfunc(calp(ibox)*rij)-1.0E0_dp) /rij
                          vewald = vewald + corr
                       else
                          velect = velect + qscale2(imolty,ii,iu)*qqu(icharge,ii)*qqu(i,iu)/rij
@@ -1413,7 +1410,7 @@ contains
                    ! will only add correction if lqinclu is false.
                 else if (L_Coul_CBMC.and.lewald) then
                    ! ewald sum correction term
-                   corr = qqu(icharge,ii)*qqu(icharge,iu)*(erfunc(calp(ibox)*rij)-1.0d0) /rij
+                   corr = qqu(icharge,ii)*qqu(icharge,iu)*(erfunc(calp(ibox)*rij)-1.0E0_dp) /rij
                    vewald = vewald + corr
                 end if
              end do
@@ -1435,16 +1432,16 @@ contains
                    rzuij  = rzp(cnt,itrial) - rzp(count,itrial)
                    !!?? no mimage convertion??
                    rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-                   rij   = dsqrt(rijsq)
+                   rij   = sqrt(rijsq)
                    ! ewald sum correction term
-                   corr = qqu(icharge,ii)*qqu(icharge,iu)*(erfunc(calp(ibox)*rij)-1.0d0)/rij
+                   corr = qqu(icharge,ii)*qqu(icharge,iu)*(erfunc(calp(ibox)*rij)-1.0E0_dp)/rij
                    vewald = vewald + corr
                 end do
              end do
           end if
 
           if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff  .and. .not. lgenlj .and. .not. lninesix .and..not.L_vdW_table.and..not.L_bend_table) then
-             vintra = 4.0d0 * vintra
+             vintra = 4.0E0_dp * vintra
           end if
        end if
 
@@ -1505,7 +1502,7 @@ contains
                       ! minimum image the ctrmas pair separations
                       if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
                       rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-                      rij   = dsqrt(rijsq)
+                      rij   = sqrt(rijsq)
                       ! determine cutoff
                       if ( ldual ) then
                          ! must be lfirst so no previous bead
@@ -1544,7 +1541,7 @@ contains
                       ! minimum image the pair separations ***
                       if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
                       rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-                      rij   = dsqrt(rijsq)
+                      rij   = sqrt(rijsq)
                       ! compute vinter (eg. lennard-jones)
                       if (rijsq.lt.rminsq.and..not.(lexpand(imolty).or.lexpand(jmolty))) then
                          my_lovr(my_itrial) = .true.
@@ -1578,7 +1575,7 @@ contains
           end do do_nmole
 
           if (.not.lsami.and..not.lexpsix.and..not.lmmff.and..not.lgenlj.and..not.lninesix.and..not.L_vdW_table) then
-             vinter = 4.0d0 * vinter
+             vinter = 4.0E0_dp * vinter
           end if
        end if
 ! ################################################################
@@ -1608,7 +1605,7 @@ contains
 ! --------------------------------------------------------------------------
 ! well potential for thermodynamic integration stages b and c
 ! --------------------------------------------------------------------------
-       vwell = 0.0d0
+       vwell = 0.0E0_dp
        if (lwell(imolty).and.lmipsw) then
           rxui = xcm(i)
           ryui = ycm(i)
@@ -1626,7 +1623,7 @@ contains
              if (rijsq.lt.rcmsq) then
                 do count = 1, ntogrow
                    ii = glist(count)
-                   if (awell(ii,k,imolty).lt.1.0d-6) cycle
+                   if (awell(ii,k,imolty).lt.1.0E-6_dp) cycle
                    rxui = rxp(count,itrial)
                    ryui = ryp(count,itrial)
                    rzui = rzp(count,itrial)
@@ -1635,7 +1632,7 @@ contains
                    rzuij = rzui-rzwell(j,imolty)
                    call mimage(rxuij,ryuij,rzuij,ibox)
                    rijsq = rxuij*rxuij+ryuij*ryuij+rzuij*rzuij
-                   vwell = vwell-awell(ii,k,imolty)*dexp(-bwell*rijsq)
+                   vwell = vwell-awell(ii,k,imolty)*exp(-bwell*rijsq)
                 end do
              end if
           end do
@@ -1655,7 +1652,7 @@ contains
 ! end if
 
 19     if ( my_lovr(my_itrial) ) then
-          my_bfac(my_itrial) = 0.0d0
+          my_bfac(my_itrial) = 0.0E0_dp
        else
           if (.not.L_elect_table) then
              velect = velect*qqfact
@@ -1671,11 +1668,11 @@ contains
           end if
 
           if (lstagea) then
-             v = (1.0d0-lambdais*(1.0d0-etais))*v
+             v = (1.0E0_dp-lambdais*(1.0E0_dp-etais))*v
           else if (lstageb) then
              v = etais*v+lambdais*vwell
           else if (lstagec) then
-             v = (etais+(1.0d0-etais)*lambdais)*v+ (1.0d0-lambdais)*vwell
+             v = (etais+(1.0E0_dp-etais)*lambdais)*v+ (1.0E0_dp-lambdais)*vwell
           end if
 
           my_vtry(my_itrial) = v
@@ -1688,16 +1685,16 @@ contains
           ! write(23,*) vtry(itrial), vtrintra(itrial), vtrext(itrial),
           !   &       vtrinter(itrial),vtrelect(itrial), vtrewald(itrial)
 
-          if ((my_vtry(my_itrial)*beta).gt.(2.3d0*softcut))then
+          if ((my_vtry(my_itrial)*beta).gt.(2.3E0_dp*softcut))then
              ! write(io_output,*) 'caught by softcut',vtry(itrial)*beta
              my_lovr(my_itrial) = .true.
-             my_bfac(my_itrial) = 0.0d0
-          else if((my_vtry(my_itrial)*beta).lt.-2.303d0*308)then
+             my_bfac(my_itrial) = 0.0E0_dp
+          else if((my_vtry(my_itrial)*beta).lt.-2.303E0_dp*308)then
              ! write(io_output,*) '### warning: weight too big out of range'
              my_lovr(my_itrial) = .true.
-             my_bfac(my_itrial) = 0.0d0
+             my_bfac(my_itrial) = 0.0E0_dp
           else
-             my_bfac(my_itrial) = dexp ( -(my_vtry(my_itrial)*beta) )
+             my_bfac(my_itrial) = exp ( -(my_vtry(my_itrial)*beta) )
           end if
        end if
     end do
@@ -1746,7 +1743,7 @@ contains
       real::rci1
       integer::imolty,jmolty,ii,jj, ntii, ntjj, ntij ,ibox
 
-      coru = 0.0d0
+      coru = 0.0E0_dp
       do ii = 1, nunit(imolty)
          ntii = ntype(imolty,ii)
          do jj = 1, nunit(jmolty)
@@ -1755,44 +1752,44 @@ contains
             if (lexpsix) then
                coru = coru + rho*consu(ntij)
             else if (lmmff) then
-               coru = coru + rho * epsimmff(ntij) * coru_cons(ntij) * sigimmff(ntij)**3.0d0*twopi
+               coru = coru + rho * epsimmff(ntij) * coru_cons(ntij) * sigimmff(ntij)**3.0E0_dp*twopi
             else if (lninesix) then
-               coru = coru + 8.0d0*onepi*rho*epsnx(ntij)* rzero(ntij)**3*(rzero(ntij)/rcut(ibox))**3* ((rzero(ntij)/rcut(ibox))**3/3.0d0 - 1.0d0)
+               coru = coru + 8.0E0_dp*onepi*rho*epsnx(ntij)* rzero(ntij)**3*(rzero(ntij)/rcut(ibox))**3* ((rzero(ntij)/rcut(ibox))**3/3.0E0_dp - 1.0E0_dp)
             else if (lgenlj) then
-               rci3 = sig2ij(ntij)**(3.0d0/2.0d0) / rcut(ibox)**3
-               rci1 = rci3 **(1.0d0/3.0d0)
+               rci3 = sig2ij(ntij)**(3.0E0_dp/2.0E0_dp) / rcut(ibox)**3
+               rci1 = rci3 **(1.0E0_dp/3.0E0_dp)
 
                if ( lexpand(imolty) .and. lexpand(jmolty) ) then
-                  sigma2 = (sigma_f(imolty,ii)+sigma_f(jmolty,jj))**2/4.0d0
-                  epsilon2 = dsqrt(epsilon_f(imolty,ii) *epsilon_f(jmolty,jj))
+                  sigma2 = (sigma_f(imolty,ii)+sigma_f(jmolty,jj))**2/4.0E0_dp
+                  epsilon2 = sqrt(epsilon_f(imolty,ii) *epsilon_f(jmolty,jj))
                else if ( lexpand(imolty) ) then
-                  sigma2 = (sigma_f(imolty,ii)+sigi(ntjj))**2/4.0d0
-                  epsilon2 = dsqrt(epsilon_f(imolty,ii)*epsi(ntjj))
+                  sigma2 = (sigma_f(imolty,ii)+sigi(ntjj))**2/4.0E0_dp
+                  epsilon2 = sqrt(epsilon_f(imolty,ii)*epsi(ntjj))
                else if ( lexpand(jmolty) ) then
-                  sigma2 = (sigma_f(jmolty,jj)+sigi(ntii))**2/4.0d0
-                  epsilon2 = dsqrt(epsilon_f(jmolty,jj)*epsi(ntii))
+                  sigma2 = (sigma_f(jmolty,jj)+sigi(ntii))**2/4.0E0_dp
+                  epsilon2 = sqrt(epsilon_f(jmolty,jj)*epsi(ntii))
                else
                   sigma2 = sig2ij(ntij)
                   epsilon2 = epsij(ntij)
                end if
-               coru = coru + 2.0d0 * onepi * epsilon2 * sigma2 ** (1.50d0) * rho * (  (( (2.0d0**(4.0d0*n1/n0))/(2.0d0*n1-3.0d0)) * rci1 **(2.0d0*n1-3.0d0) ) - ( (2.0d0**((2.0d0*n1/n0)+1.0d0))/(n1-3.0d0)) * rci1 **(n1-3.0d0) )
+               coru = coru + 2.0E0_dp * onepi * epsilon2 * sigma2 ** (1.50E0_dp) * rho * (  (( (2.0E0_dp**(4.0E0_dp*n1/n0))/(2.0E0_dp*n1-3.0E0_dp)) * rci1 **(2.0E0_dp*n1-3.0E0_dp) ) - ( (2.0E0_dp**((2.0E0_dp*n1/n0)+1.0E0_dp))/(n1-3.0E0_dp)) * rci1 **(n1-3.0E0_dp) )
 
             else
-               rci3 = sig2ij(ntij)**(3.0d0/2.0d0) / rcut(ibox)**3
+               rci3 = sig2ij(ntij)**(3.0E0_dp/2.0E0_dp) / rcut(ibox)**3
                if ( lexpand(imolty) .and. lexpand(jmolty) ) then
-                  sigma2 = (sigma_f(imolty,ii)+sigma_f(jmolty,jj))**2/4.0d0
-                  epsilon2 = dsqrt(epsilon_f(imolty,ii) *epsilon_f(jmolty,jj))
+                  sigma2 = (sigma_f(imolty,ii)+sigma_f(jmolty,jj))**2/4.0E0_dp
+                  epsilon2 = sqrt(epsilon_f(imolty,ii) *epsilon_f(jmolty,jj))
                else if ( lexpand(imolty) ) then
-                  sigma2 = (sigma_f(imolty,ii)+sigi(ntjj))**2/4.0d0
-                  epsilon2 = dsqrt(epsilon_f(imolty,ii)*epsi(ntjj))
+                  sigma2 = (sigma_f(imolty,ii)+sigi(ntjj))**2/4.0E0_dp
+                  epsilon2 = sqrt(epsilon_f(imolty,ii)*epsi(ntjj))
                else if ( lexpand(jmolty) ) then
-                  sigma2 = (sigma_f(jmolty,jj)+sigi(ntii))**2/4.0d0
-                  epsilon2 = dsqrt(epsilon_f(jmolty,jj)*epsi(ntii))
+                  sigma2 = (sigma_f(jmolty,jj)+sigi(ntii))**2/4.0E0_dp
+                  epsilon2 = sqrt(epsilon_f(jmolty,jj)*epsi(ntii))
                else
                   sigma2 = sig2ij(ntij)
                   epsilon2 = epsij(ntij)
                end if
-               coru = coru +  8.0d0 * onepi * epsilon2 *  sigma2**(1.5d0) *rho *  (rci3 * rci3 * rci3 / 9.0d0 - rci3 / 3.0d0)
+               coru = coru +  8.0E0_dp * onepi * epsilon2 *  sigma2**(1.5E0_dp) *rho *  (rci3 * rci3 * rci3 / 9.0E0_dp - rci3 / 3.0E0_dp)
             end if
          end do
       end do
@@ -1816,7 +1813,7 @@ contains
     if (lshift.or.lmmff.or.lninesix.or.lexpsix.or.lsami) then
        ! Keep the rcut same for each box
        do ibox = 2,nbox
-          if (dabs(rcut(1)-rcut(ibox)).gt.1.0d-10) then
+          if (abs(rcut(1)-rcut(ibox)).gt.1.0E-10_dp) then
              call err_exit(__FILE__,__LINE__,'Keep rcut for each box same',myid+1)
           end if
        end do
@@ -1844,10 +1841,10 @@ contains
           if (jerr.ne.0) then
              call err_exit(__FILE__,__LINE__,'init_pairwise: atoms allocation failed',jerr)
           end if
-          sigi = 0.0d0
-          epsi = 0.0d0
-          qelect = 0.0d0
-          mass = 0.0d0
+          sigi = 0.0E0_dp
+          epsi = 0.0E0_dp
+          qelect = 0.0E0_dp
+          mass = 0.0E0_dp
           lij = .true.
           lqchg = .false.
 
@@ -1901,11 +1898,11 @@ contains
        call err_exit(__FILE__,__LINE__,'init_pairwise: nonbond allocation failed',jerr)
     end if
 
-    xiq = 0.0d0
+    xiq = 0.0E0_dp
     lpl = .false.
-    sig2ij=0.0d0
-    epsij=0.0d0
-    jayq=0.0d0
+    sig2ij=0.0E0_dp
+    epsij=0.0E0_dp
+    jayq=0.0E0_dp
 
     if (lgaro) then
 ! KEA adding garofalini silica/water potential
@@ -1917,123 +1914,123 @@ contains
 !             [cos(theta)-cos(theta*)]**2     for rij<rij* and rik<rik*
 ! 0 otherwise
        do i=1,6
-          galpha(i) = 0.0d0
-          grho(i) = 0.0d0
-          gbeta(i) = 0.0d0
-          ecut(i) = 0.0d0
+          galpha(i) = 0.0E0_dp
+          grho(i) = 0.0E0_dp
+          gbeta(i) = 0.0E0_dp
+          ecut(i) = 0.0E0_dp
           do j=1,3
-             ga(i,j) = 0.0d0
-             gb(i,j) = 0.0d0
-             gc(i,j) = 0.0d0
+             ga(i,j) = 0.0E0_dp
+             gb(i,j) = 0.0E0_dp
+             gc(i,j) = 0.0E0_dp
           end do
        end do
        do i=1,4
-          glambda(i) = 0.0d0
+          glambda(i) = 0.0E0_dp
           do j=1,2
-             grij(i,j) = 0.0d0
-             grijsq(i,j) = 0.0d0
-             ggamma(i,j) = 0.0d0
+             grij(i,j) = 0.0E0_dp
+             grijsq(i,j) = 0.0E0_dp
+             ggamma(i,j) = 0.0E0_dp
           end do
-          gtheta(i) = 0.0d0
+          gtheta(i) = 0.0E0_dp
        end do
 
 ! Parameters (galpha,grho,gbeta,ga,gb,gc; lambda,grij,ggamma,gtheta)
 ! Si-Si
-       galpha(1) = 13597175.7d0
-       grho(1) = 0.29d0
-       gbeta(1) = 2.29d0
+       galpha(1) = 13597175.7E0_dp
+       grho(1) = 0.29E0_dp
+       gbeta(1) = 2.29E0_dp
        lqchg(1) = .true.
-       qelect(1) = 4.0d0
-       mass(1) = 28.09d0
+       qelect(1) = 4.0E0_dp
+       mass(1) = 28.09E0_dp
        ecut(1) = garofalini(rcut(1)*rcut(1),1,qelect(1),qelect(1) ,1,1)
        chemid(1) = 'Si '
 
 ! O-O
-       galpha(2) = 5251972.5d0
-       grho(2) = 0.29d0
-       gbeta(2) = 2.34d0
+       galpha(2) = 5251972.5E0_dp
+       grho(2) = 0.29E0_dp
+       gbeta(2) = 2.34E0_dp
        lqchg(2) = .true.
-       qelect(2) = -2.0d0
-       mass(2) = 16.00d0
+       qelect(2) = -2.0E0_dp
+       mass(2) = 16.00E0_dp
        ecut(2) = garofalini(rcut(1)*rcut(1),2,qelect(2),qelect(2) ,2,2)
        chemid(2) = 'O  '
 
 ! H-H
-       galpha(3) = 246299.4d0
-       grho(3) = 0.35d0
-       gbeta(3) = 2.1d0
-       ga(3,1) = -38243.8d0
-       gb(3,1) = 6.0d0
-       gc(3,1) = 1.51d0
-       ga(3,2) = 2515.9d0
-       gb(3,2) = 2.0d0
-       gc(3,2) = 2.42d0
+       galpha(3) = 246299.4E0_dp
+       grho(3) = 0.35E0_dp
+       gbeta(3) = 2.1E0_dp
+       ga(3,1) = -38243.8E0_dp
+       gb(3,1) = 6.0E0_dp
+       gc(3,1) = 1.51E0_dp
+       ga(3,2) = 2515.9E0_dp
+       gb(3,2) = 2.0E0_dp
+       gc(3,2) = 2.42E0_dp
        lqchg(3) = .true.
-       qelect(3) = 1.0d0
-       mass(3) = 1.0078d0
+       qelect(3) = 1.0E0_dp
+       mass(3) = 1.0078E0_dp
        ecut(3) = garofalini(rcut(1)*rcut(1),3,qelect(3),qelect(3) ,3,3)
        chemid(3) = 'H  '
 
 ! Si-O
-       galpha(4) =  21457024.2d0
-       grho(4) = 0.29d0
-       gbeta(4) = 2.34d0
+       galpha(4) =  21457024.2E0_dp
+       grho(4) = 0.29E0_dp
+       gbeta(4) = 2.34E0_dp
        ecut(4) = garofalini(rcut(1)*rcut(1),4,qelect(1),qelect(2) ,1,2)
 
 ! Si-H
-       galpha(5) = 499842.9d0
-       grho(5) = 0.29d0
-       gbeta(5) = 2.31d0
-       ga(5,1) = -33715.5d0
-       gb(5,1) = 6.0d0
-       gc(5,1) = 2.2d0
+       galpha(5) = 499842.9E0_dp
+       grho(5) = 0.29E0_dp
+       gbeta(5) = 2.31E0_dp
+       ga(5,1) = -33715.5E0_dp
+       gb(5,1) = 6.0E0_dp
+       gc(5,1) = 2.2E0_dp
        ecut(5) = garofalini(rcut(1)*rcut(1),5,qelect(1),qelect(3) ,1,3)
 
 ! 0-H
-       galpha(6) = 2886049.4d0
-       grho(6) = 0.29d0
-       gbeta(6) = 2.26d0
-       ga(6,1) = -15096.7d0
-       gb(6,1) = 15.0d0
-       gc(6,1) = 1.05d0
-       ga(6,2) = 55353.6d0
-       gb(6,2) = 3.2d0
-       gc(6,2) = 1.50d0
-       ga(6,3) = -6038.7d0
-       gb(6,3) = 5.0d0
-       gc(6,3) = 2.0d0
+       galpha(6) = 2886049.4E0_dp
+       grho(6) = 0.29E0_dp
+       gbeta(6) = 2.26E0_dp
+       ga(6,1) = -15096.7E0_dp
+       gb(6,1) = 15.0E0_dp
+       gc(6,1) = 1.05E0_dp
+       ga(6,2) = 55353.6E0_dp
+       gb(6,2) = 3.2E0_dp
+       gc(6,2) = 1.50E0_dp
+       ga(6,3) = -6038.7E0_dp
+       gb(6,3) = 5.0E0_dp
+       gc(6,3) = 2.0E0_dp
        ecut(6) = garofalini(rcut(1)*rcut(1),6,qelect(2),qelect(3) ,2,3)
 
 ! Si-O-Si
-       glambda(1) = 21732.3d0
-       ggamma(1,1) = 2.0d0
-       grij(1,1) = 2.6d0
+       glambda(1) = 21732.3E0_dp
+       ggamma(1,1) = 2.0E0_dp
+       grij(1,1) = 2.6E0_dp
        grijsq(1,1) = grij(1,1)*grij(1,1)
-       gtheta(1) = dcos(109.5d0*degrad)
+       gtheta(1) = cos(109.5E0_dp*degrad)
 
 ! O-Si-O
-       glambda(2) = 1376379.0d0
-       ggamma(2,1) = 2.8d0
-       grij(2,1) = 3.0d0
+       glambda(2) = 1376379.0E0_dp
+       ggamma(2,1) = 2.8E0_dp
+       grij(2,1) = 3.0E0_dp
        grijsq(2,1) = grij(2,1)*grij(2,1)
-       gtheta(2) = dcos(109.5d0*degrad)
+       gtheta(2) = cos(109.5E0_dp*degrad)
 
 ! H-O-H
-       glambda(3) = 2535435.0d0
-       ggamma(3,1) = 1.3d0
-       grij(3,1) = 1.6d0
+       glambda(3) = 2535435.0E0_dp
+       ggamma(3,1) = 1.3E0_dp
+       grij(3,1) = 1.6E0_dp
        grijsq(3,1) = grij(3,1)*grij(3,1)
-       gtheta(3) = dcos(104.5d0*degrad)
+       gtheta(3) = cos(104.5E0_dp*degrad)
 
 ! Si-O-H
-       glambda(4) = 362205.0d0
-       ggamma(4,1) = 2.0d0
-       ggamma(4,2) = 1.2d0
+       glambda(4) = 362205.0E0_dp
+       ggamma(4,1) = 2.0E0_dp
+       ggamma(4,2) = 1.2E0_dp
        grij(4,1) = grij(1,1)
-       grij(4,2) = 1.5d0
+       grij(4,2) = 1.5E0_dp
        grijsq(4,1) = grij(4,1)*grij(4,1)
        grijsq(4,2) = grij(4,2)*grij(4,2)
-       gtheta(4) = dcos(109.5d0*degrad)
+       gtheta(4) = cos(109.5E0_dp*degrad)
 
        do i=1,6
           write(io_output,*) 'garo ecut',i,ecut(i)
@@ -2047,11 +2044,11 @@ contains
 ! natom is set in expsix.inc
 ! U(r) = A*r^(-6) + B*exp[C*r]
        do i = 1,natom
-          aexsix(i) = 0.0d0
-          bexsix(i) = 0.0d0
-          cexsix(i) = 0.0d0
-          qelect(i) = 0.0d0
-          xiq(i) = 0.0d0
+          aexsix(i) = 0.0E0_dp
+          bexsix(i) = 0.0E0_dp
+          cexsix(i) = 0.0E0_dp
+          qelect(i) = 0.0E0_dp
+          xiq(i) = 0.0E0_dp
           lqchg(i) = .false.
           lij(i) = .true.
        end do
@@ -2060,15 +2057,15 @@ contains
 ! BKS [O]
        qelect(1) = -1.2
        lqchg(1) = .true.
-       aexsix(1) = -175.0000d0*1.602177d-19/1.3806503d-23
-       bexsix(1) = 1388.7730d0*1.602177d-19/1.3806503d-23
-       cexsix(1) = -2.76000d0
+       aexsix(1) = -175.0000E0_dp*1.602177E-19_dp/1.3806503E-23_dp
+       bexsix(1) = 1388.7730E0_dp*1.602177E-19_dp/1.3806503E-23_dp
+       cexsix(1) = -2.76000E0_dp
        mass(1) = 15.9994
 
 ! O---Si nonbonded interaction
-       aexsix(2) = -133.5381d0*1.602177d-19/1.3806503d-23
-       bexsix(2) = 18003.7572d0*1.602177d-19/1.3806503d-23
-       cexsix(2) = -4.87318d0
+       aexsix(2) = -133.5381E0_dp*1.602177E-19_dp/1.3806503E-23_dp
+       bexsix(2) = 18003.7572E0_dp*1.602177E-19_dp/1.3806503E-23_dp
+       cexsix(2) = -4.87318E0_dp
        lqchg(2) = .true.
 
 ! Si---Si nonbonded interaction
@@ -2086,8 +2083,8 @@ contains
           end do
        else
           do i=1,natom
-             consp(i) = (2.0d0/3.0d0)*onepi*(2.0d0*aexsix(i)/(rcut(1) *rcut(1)*rcut(1))+bexsix(i)*dexp(cexsix(i)*rcut(1)) *(-6.0d0/(cexsix(i)*cexsix(i)*cexsix(i))+6.0d0 *rcut(1)/(cexsix(i)*cexsix(i))-3.0d0*rcut(1)* rcut(1)/ cexsix(i)+rcut(1)*rcut(1)*rcut(1)))
-             consu(i) = 2.0d0*onepi*(aexsix(i)/(3.0d0*rcut(1)*rcut(1)* rcut(1)) +(-rcut(1)*rcut(1)+2.0d0*rcut(1)/cexsix(i)-2.0d0/ (cexsix(i)* cexsix(i)))*bexsix(i)*dexp(cexsix(i)*rcut(1))/ cexsix(i))
+             consp(i) = (2.0E0_dp/3.0E0_dp)*onepi*(2.0E0_dp*aexsix(i)/(rcut(1) *rcut(1)*rcut(1))+bexsix(i)*exp(cexsix(i)*rcut(1)) *(-6.0E0_dp/(cexsix(i)*cexsix(i)*cexsix(i))+6.0E0_dp *rcut(1)/(cexsix(i)*cexsix(i))-3.0E0_dp*rcut(1)* rcut(1)/ cexsix(i)+rcut(1)*rcut(1)*rcut(1)))
+             consu(i) = 2.0E0_dp*onepi*(aexsix(i)/(3.0E0_dp*rcut(1)*rcut(1)* rcut(1)) +(-rcut(1)*rcut(1)+2.0E0_dp*rcut(1)/cexsix(i)-2.0E0_dp/ (cexsix(i)* cexsix(i)))*bexsix(i)*exp(cexsix(i)*rcut(1))/ cexsix(i))
           end do
 ! write(11,*) 'consp(i)',consp
 ! write(11,*) 'consu(i)',consu
@@ -2095,7 +2092,7 @@ contains
 
        write(io_output,*)  ' i   aexsix       bexsix      cexsix     sexsix'
        do i = 1,natom
-          write(io_output,'(i3,2x,4e12.4)')i,aexsix(i),bexsix(i) ,cexsix(i),sexsix(i)
+          write(io_output,'(i3,2x,4E12.4)')i,aexsix(i),bexsix(i) ,cexsix(i),sexsix(i)
        end do
        return
     else if (lmmff) then
@@ -2106,109 +2103,109 @@ contains
 ! rs = r / sigimmff
 
 ! C---C nonbonded interaction ***
-       alphammff(1) = 1.050d0
-       nmmff(1) = 2.490d0
-       ammff(1) = 3.890d0
-       gmmff(1) = 1.282d0
-       sigimmff(1) = ammff(1)*dsqrt(dsqrt(alphammff(1)))
-       epsimmff(1) = 45582.6d0*gmmff(1)*gmmff(1)*dsqrt(nmmff(1)) /(ammff(1)**6.0d0)
-! sigimmff(1) = 1.126763255691509d0
-! epsimmff(1) = 0.9994354715851470d0
+       alphammff(1) = 1.050E0_dp
+       nmmff(1) = 2.490E0_dp
+       ammff(1) = 3.890E0_dp
+       gmmff(1) = 1.282E0_dp
+       sigimmff(1) = ammff(1)*sqrt(sqrt(alphammff(1)))
+       epsimmff(1) = 45582.6E0_dp*gmmff(1)*gmmff(1)*sqrt(nmmff(1)) /(ammff(1)**6.0E0_dp)
+! sigimmff(1) = 1.126763255691509E0_dp
+! epsimmff(1) = 0.9994354715851470E0_dp
        sigisq(1) = sigimmff(1)*sigimmff(1)
-       mass(1) = 12.011d0
-! mass(1) = 1.0d0
+       mass(1) = 12.011E0_dp
+! mass(1) = 1.0E0_dp
 
 ! H---H nonbonded interaction ***
-       alphammff(3) = 0.250d0
-       nmmff(3) = 0.800d0
-       ammff(3) = 4.200d0
-       gmmff(3) = 1.209d0
-       sigimmff(3) = ammff(3)*dsqrt(dsqrt(alphammff(3)))
-       epsimmff(3) = 45582.6d0*gmmff(3)*gmmff(3)*dsqrt(nmmff(3)) /(ammff(3)**6.0d0)
+       alphammff(3) = 0.250E0_dp
+       nmmff(3) = 0.800E0_dp
+       ammff(3) = 4.200E0_dp
+       gmmff(3) = 1.209E0_dp
+       sigimmff(3) = ammff(3)*sqrt(sqrt(alphammff(3)))
+       epsimmff(3) = 45582.6E0_dp*gmmff(3)*gmmff(3)*sqrt(nmmff(3)) /(ammff(3)**6.0E0_dp)
        sigisq(3) = sigimmff(3)*sigimmff(3)
-       mass(3) = 1.0078d0
+       mass(3) = 1.0078E0_dp
 
 ! C---H nonbonded interaction by using cominbination rule ***
-       sigimmff(2) = 0.5d0*(sigimmff(1)+sigimmff(3))*(1.0d0 +  0.2d0*(1.0d0-dexp(-12.d0*(((sigimmff(1)-sigimmff(3))/ (sigimmff(3)+sigimmff(1)))**2.0d0))))
-       epsimmff(2) = 91165.1d0*gmmff(1)*gmmff(3)*alphammff(1)* alphammff(3)/((dsqrt(alphammff(1)/nmmff(1))+ dsqrt(alphammff(3)/nmmff(3)))*(sigimmff(2)**6.0d0))
+       sigimmff(2) = 0.5E0_dp*(sigimmff(1)+sigimmff(3))*(1.0E0_dp +  0.2E0_dp*(1.0E0_dp-exp(-12.E0_dp*(((sigimmff(1)-sigimmff(3))/ (sigimmff(3)+sigimmff(1)))**2.0E0_dp))))
+       epsimmff(2) = 91165.1E0_dp*gmmff(1)*gmmff(3)*alphammff(1)* alphammff(3)/((sqrt(alphammff(1)/nmmff(1))+ sqrt(alphammff(3)/nmmff(3)))*(sigimmff(2)**6.0E0_dp))
        sigisq(2) = sigimmff(2)*sigimmff(2)
 
        if (lshift) then
           do i=1,natomtyp
              rs1 = rcut(1)/sigimmff(i)
-             rs7 = rs1**7.0d0
-             sr7 = (1.07d0/(rs1+0.07d0))**7.0d0
-             smmff(i) = epsimmff(i)*sr7*(1.12d0/(rs7+0.12)-2)
+             rs7 = rs1**7.0E0_dp
+             sr7 = (1.07E0_dp/(rs1+0.07E0_dp))**7.0E0_dp
+             smmff(i) = epsimmff(i)*sr7*(1.12E0_dp/(rs7+0.12)-2)
           end do
        else
           do i = 1,natomtyp
-             smmff(i) = 0.0d0
+             smmff(i) = 0.0E0_dp
           end do
-          coru_cons(1) = -2.4837937263569310d-02
-          ! coru_cons(1) = -5.8244592746534724E-03
-          coru_cons(2) = -1.7583010189381791d-02
-          coru_cons(3) = -8.3770412792126582d-03
-          corp_cons(1) = 0.1696349613545569d0
-          ! corp_cons(1) = 4.0098456560842058E-02
-          corp_cons(2) = 0.1203650950025348d0
-          corp_cons(3) = 5.7576802340310304d-02
+          coru_cons(1) = -2.4837937263569310E-02_dp
+          ! coru_cons(1) = -5.8244592746534724E-03_dp
+          coru_cons(2) = -1.7583010189381791E-02_dp
+          coru_cons(3) = -8.3770412792126582E-03_dp
+          corp_cons(1) = 0.1696349613545569E0_dp
+          ! corp_cons(1) = 4.0098456560842058E-02_dp
+          corp_cons(2) = 0.1203650950025348E0_dp
+          corp_cons(3) = 5.7576802340310304E-02_dp
        end if
 
        write(io_output,*) ' i   epsimmff     sigimmff   smmff'
        do i = 1,natom
-          write(io_output,'(i3,2x,4e12.4)')i,epsimmff(i),sigimmff(i) ,smmff(i)
+          write(io_output,'(i3,2x,4E12.4)')i,epsimmff(i),sigimmff(i) ,smmff(i)
        end do
        return
     else if (lninesix) then
 ! special potential for all-atom formic acid from llnl 4/6/04 jms
 ! sp2 carbon site H-[C](=O)-OH
-       rzeronx(1) = 4.1834161d0
-       epsilonnx(1) = 45.224d0
-       qelect(1) = 0.44469d0
+       rzeronx(1) = 4.1834161E0_dp
+       epsilonnx(1) = 45.224E0_dp
+       qelect(1) = 0.44469E0_dp
        lqchg(1) = .true.
-       mass(1) = 12.011d0
+       mass(1) = 12.011E0_dp
        chemid(1) = 'C'
 
 ! hydroxyl oxygen site H-C(=O)-[O]H
-       rzeronx(2) = 3.5694293136d0
-       epsilonnx(2) = 47.151d0
-       qelect(2) = -0.55296d0
+       rzeronx(2) = 3.5694293136E0_dp
+       epsilonnx(2) = 47.151E0_dp
+       qelect(2) = -0.55296E0_dp
        lqchg(2) = .true.
-       mass(2) = 15.9996d0
+       mass(2) = 15.9996E0_dp
        chemid(2) = 'OH'
 
 ! carbonyl oxygen site H-C[=O]-OH
-       rzeronx(3) = 3.0014635172d0
-       epsilonnx(3) = 146.008d0
-       qelect(3) = -0.43236d0
+       rzeronx(3) = 3.0014635172E0_dp
+       epsilonnx(3) = 146.008E0_dp
+       qelect(3) = -0.43236E0_dp
        lqchg(3) = .true.
-       mass(3) = 15.9996d0
+       mass(3) = 15.9996E0_dp
        chemid(3) = 'O='
 
 ! hydrogen site [H]-C(=O)-OH
-       rzeronx(4) = 0.8979696387d0
-       epsilonnx(4) = 2.4054d0
-       qelect(4) = 0.10732d0
+       rzeronx(4) = 0.8979696387E0_dp
+       epsilonnx(4) = 2.4054E0_dp
+       qelect(4) = 0.10732E0_dp
        lqchg(4) = .true.
-       mass(4) = 1.00794d0
+       mass(4) = 1.00794E0_dp
        chemid(4) = 'HC'
 
 ! acidic hydrogen site H-C(=O)-O[H]
-       rzeronx(5) = 1.115727276d0
-       epsilonnx(5) = 12.027d0
-       qelect(5) = 0.43331d0
+       rzeronx(5) = 1.115727276E0_dp
+       epsilonnx(5) = 12.027E0_dp
+       qelect(5) = 0.43331E0_dp
        lqchg(5) = .true.
-       mass(5) = 1.00794d0
+       mass(5) = 1.00794E0_dp
        chemid(5) = 'HO'
 
 ! calculate all site-site parameters via Lorentz-Berthelot rules
        do i = 1,nxatom
           do j = 1,nxatom
              ij = (i-1)*nxatom + j
-             rzero(ij) = 0.5d0*(rzeronx(i) + rzeronx(j))
-             epsnx(ij) = dsqrt(epsilonnx(i)*epsilonnx(j))
+             rzero(ij) = 0.5E0_dp*(rzeronx(i) + rzeronx(j))
+             epsnx(ij) = sqrt(epsilonnx(i)*epsilonnx(j))
              if (lshift) then
-                shiftnsix(ij) = 4.0d0*epsnx(ij)*(rzero(ij) /rcut(1))**6 * (2.0d0*(rzero(ij)/rcut(1))**3 - 3.0d0)
+                shiftnsix(ij) = 4.0E0_dp*epsnx(ij)*(rzero(ij) /rcut(1))**6 * (2.0E0_dp*(rzero(ij)/rcut(1))**3 - 3.0E0_dp)
              end if
           end do
        end do
@@ -2216,112 +2213,112 @@ contains
     end if
 
 ! ! --- TraPPE-UA? Methane [CH4] sp3 charged with polarizability
-! sigi(28) = 3.73d0
-! epsi(28) = 148.0d0
+! sigi(28) = 3.73E0_dp
+! epsi(28) = 148.0E0_dp
 ! ! is this correct?
-! mass(28) = 16.043d0
-! qelect(28) = -0.572d0
+! mass(28) = 16.043E0_dp
+! qelect(28) = -0.572E0_dp
 ! lqchg(28) = .true.
-! jayself(28) = 0.5d0*117403d0
-! xiq(28) = 9449.3d0
+! jayself(28) = 0.5E0_dp*117403E0_dp
+! xiq(28) = 9449.3E0_dp
 ! chname(28) = 'Tr C CH4 chg pol '
 ! chemid(28)  = 'C  '
 
 ! ! --- Methane hydrogen charged with polarizibility
-! sigi(29) = 0.0d0
-! epsi(29) = 0.0d0
-! mass(29) = 1.0078d0
-! qelect(29) = 0.143d0
+! sigi(29) = 0.0E0_dp
+! epsi(29) = 0.0E0_dp
+! mass(29) = 1.0078E0_dp
+! qelect(29) = 0.143E0_dp
 ! lqchg(29) = .true.
-! jayself(29) = 0.5d0*177700d0
-! xiq(29) = 0.0d0
+! jayself(29) = 0.5E0_dp*177700E0_dp
+! xiq(29) = 0.0E0_dp
 ! lij(29) = .false.
 ! chname(29) = 'Tr H CH4 chg pol '
 ! chemid(29)  = 'H  '
 
 ! ! --- SPC-FQ oxygen [O]   S.W. Rick et al JCP 101 (7), 1 1994 6141
 ! sigi(109) = 3.176
-! epsi(109) = 148.0d0
-! mass(109) = 15.999d0
+! epsi(109) = 148.0E0_dp
+! mass(109) = 15.999E0_dp
 ! qelect(109) = -0.672123708
 ! lqchg(109) = .true.
-! xiq(109) = 36899.0d0
-! jayself(109) = (0.5d0)*(503.2d0)*(367.0d0)
+! xiq(109) = 36899.0E0_dp
+! jayself(109) = (0.5E0_dp)*(503.2E0_dp)*(367.0E0_dp)
 ! chname(109) = 'SPC-FQ O water   '
 ! chemid(109)  = '0  '
 
 ! ! --- SPC-FQ hydrogen [H] S.W. Rick et al JCP 101 (7), 1 1994 6141
-! sigi(110) = 0.0d0
-! epsi(110) = 0.0d0
-! mass(110) = 1.0079d0
+! sigi(110) = 0.0E0_dp
+! epsi(110) = 0.0E0_dp
+! mass(110) = 1.0079E0_dp
 ! qelect(110) = 0.336061854
 ! lij(110) = .false.
 ! lqchg(110) = .true.
-! xiq(110) = 0.0d0
-! jayself(110) = (0.5d0)*(503.2d0)*(392.2d0)
+! xiq(110) = 0.0E0_dp
+! jayself(110) = (0.5E0_dp)*(503.2E0_dp)*(392.2E0_dp)
 ! chname(110) = 'SPC-FQ H water   '
 ! chemid(110)  = 'H  '
 
 ! ! --- TIP4P-FQ Oxygen [O] S.W. Rick et al JCP 101 (7), 1 1994 6141
-! sigi(111) = 3.159d0
-! epsi(111) = 144.1d0
-! !      epsi(111) = 105.0d0
-! mass(111) = 15.999d0
+! sigi(111) = 3.159E0_dp
+! epsi(111) = 144.1E0_dp
+! !      epsi(111) = 105.0E0_dp
+! mass(111) = 15.999E0_dp
 ! chname(111) = 'TIP4P-FQ O water '
 ! chemid(111)  = 'O  '
 
 ! ! --- TIP4P-FQ Hydrogen [H] S.W. Rick et al JCP 101 (7), 1 1994 6141
-! sigi(112) = 0.0d0
-! epsi(112) = 0.0d0
-! mass(112) = 1.0079d0
-! qelect(112) = 0.35d0
+! sigi(112) = 0.0E0_dp
+! epsi(112) = 0.0E0_dp
+! mass(112) = 1.0079E0_dp
+! qelect(112) = 0.35E0_dp
 ! lij(112) = .false.
 ! lqchg(112) = .true.
-! xiq(112) = 0.0d0
-! jayself(112) = (0.5d0)*(503.2d0)*(353.0d0)
+! xiq(112) = 0.0E0_dp
+! jayself(112) = (0.5E0_dp)*(503.2E0_dp)*(353.0E0_dp)
 ! chname(112) = 'TIP4P-FQ H water '
 ! chemid(112)  = 'H  '
 
 ! ! --- TIP4P-FQ Charge [Q] S.W. Rick et al JCP 101 (7), 1 1994 6141
-! sigi(113) = 0.0d0
-! epsi(113) = 0.0d0
-! mass(113) = 0.0d0
-! qelect(113) = -0.70d0
+! sigi(113) = 0.0E0_dp
+! epsi(113) = 0.0E0_dp
+! mass(113) = 0.0E0_dp
+! qelect(113) = -0.70E0_dp
 ! lij(113) = .false.
 ! lqchg(113) = .true.
-! xiq(113) = 34464.0d0
-! jayself(113) = (0.5d0)*(503.2d0)*(371.6d0)
+! xiq(113) = 34464.0E0_dp
+! jayself(113) = (0.5E0_dp)*(503.2E0_dp)*(371.6E0_dp)
 ! chname(113) = 'TIP4P-FQ M water '
 ! chemid(113)  = 'M  '
 
 ! ! --- TraPPE carbon dioxide carbon in [C]O2-fq (jpotoff 2/15/00)
-! sigi(131) = 2.80d0
-! epsi(131) = 28.5d0
-! mass(131) = 12.011d0
-! qelect(131) = 0.6512d0
+! sigi(131) = 2.80E0_dp
+! epsi(131) = 28.5E0_dp
+! mass(131) = 12.011E0_dp
+! qelect(131) = 0.6512E0_dp
 ! lqchg(131) = .true.
-! !      xiq(131) = (503.2d0)*123.2d0
-! xiq(131) = 0.0d0
-! jayself(131) = (0.5d0)*(503.2d0)*(233.5d0)
+! !      xiq(131) = (503.2E0_dp)*123.2E0_dp
+! xiq(131) = 0.0E0_dp
+! jayself(131) = (0.5E0_dp)*(503.2E0_dp)*(233.5E0_dp)
 ! chname(131) = 'Tr-FQ C in CO2   '
 ! chemid(131)  = 'C  '
 
 ! ! --- TraPPE carbon dioxide oxygen in C[O]2-fq (jpotoff 2/15/00)
-! sigi(132) = 3.06d0
-! epsi(132) = 80.5d0
-! mass(132) = 15.999d0
-! qelect(132) = -0.3256d0
+! sigi(132) = 3.06E0_dp
+! epsi(132) = 80.5E0_dp
+! mass(132) = 15.999E0_dp
+! qelect(132) = -0.3256E0_dp
 ! lqchg(132) = .true.
-! !      xiq(132) = (503.2d0)*201.56d0
-! xiq(132) = 39430.75d0
-! jayself(132) = (0.5d0)*(503.2d0)*(308.17d0)
+! !      xiq(132) = (503.2E0_dp)*201.56E0_dp
+! xiq(132) = 39430.75E0_dp
+! jayself(132) = (0.5E0_dp)*(503.2E0_dp)*(308.17E0_dp)
 ! chname(132) = 'Tr-FQ O in CO2   '
 ! chemid(132)  = 'O  '
 
 ! ! - CO2-FQ Carbon-Oxygen cross term (JCO)
 ! i = 131
 ! j = 132
-! djay = (503.2d0)*(133.905d0)
+! djay = (503.2E0_dp)*(133.905E0_dp)
 ! ij = (i-1)*nntype + j
 ! ji = (j-1)*nntype + i
 ! jayq(ij) = djay
@@ -2330,14 +2327,14 @@ contains
 ! ! - CO2-FQ Oxygen-Oxygen cross term (JOO)
 ! i = 132
 ! j = 132
-! djay = (503.2d0)*(1.09d0)
+! djay = (503.2E0_dp)*(1.09E0_dp)
 ! ij = (i-1)*nntype + j
 ! jayq(ij) = djay
 
 ! ! --- SPC-FQ water Oxygen-Hydrogen cross term
 ! i = 109
 ! j = 110
-! djay = (503.2d0)*(276.0d0)
+! djay = (503.2E0_dp)*(276.0E0_dp)
 ! ij = (i-1)*nntype + j
 ! ji = (j-1)*nntype + i
 ! jayq(ij) = djay
@@ -2346,14 +2343,14 @@ contains
 ! ! --- SPC-FQ water Hydrogen-Hydrogen cross term
 ! i = 110
 ! j = 110
-! djay = (503.2d0)*(196.0d0)
+! djay = (503.2E0_dp)*(196.0E0_dp)
 ! ij = (i-1)*nntype + j
 ! jayq(ij) = djay
 
 ! ! --- TIP4P water Charge-Hydrogen cross term
 ! i = 112
 ! j = 113
-! djay = (503.2d0)*(286.4d0)
+! djay = (503.2E0_dp)*(286.4E0_dp)
 ! ij = (i-1)*nntype + j
 ! ji = (j-1)*nntype + i
 ! jayq(ji) = djay
@@ -2362,7 +2359,7 @@ contains
 ! ! --- TIP4P water Hydrogen-Hydrogen cross term
 ! i = 112
 ! j = 112
-! djay = (503.2d0)*(203.6d0)
+! djay = (503.2E0_dp)*(203.6E0_dp)
 ! ij = (i-1)*nntype + j
 ! jayq(ij) = djay
 
@@ -2371,21 +2368,21 @@ contains
 ! j = 29
 ! ij = (i-1)*nntype + j
 ! ji = (j-i)*nntype + i
-! jayq(ji) = 114855.0d0
-! jayq(ij) = 114855.0d0
+! jayq(ji) = 114855.0E0_dp
+! jayq(ij) = 114855.0E0_dp
 
 ! ! --- Methane H-H cross term
 ! i = 29
 ! j = 29
 ! ij = (i-1)*nntype + j
-! jayq(ij) = 112537.0d0
+! jayq(ij) = 112537.0E0_dp
 
 ! Computation of un-like interactions
 
 ! convert input data to program units ***
     if ( lsami ) then
        call susami
-       rcheck = 2.5d0 * 3.527d0
+       rcheck = 2.5E0_dp * 3.527E0_dp
        if ( rcut(1) .ne. rcheck ) then
           write(io_output,*) 'WARNING ### rcut set to 2.5sigma for SAMI'
           rcut(1) = rcheck
@@ -2397,18 +2394,18 @@ contains
              ij = (i-1)*nntype + j
              if (lmixlb) then
 ! Lorentz-Berthelot rules --- sig_ij = 0.5 [ sig_i + sig_j ]
-                sig2ij(ij) =(0.5d0*(sigi(i)+sigi(j)))**2
-                if (sigi(i).eq.0.0d0.or.sigi(j).eq.0.0d0) sig2ij(ij) = 0.0d0
+                sig2ij(ij) =(0.5E0_dp*(sigi(i)+sigi(j)))**2
+                if (sigi(i).eq.0.0E0_dp.or.sigi(j).eq.0.0E0_dp) sig2ij(ij) = 0.0E0_dp
              else if (lmixjo) then
 ! Jorgensen mixing rules --- sig_ij = [ sig_i * sig_j ]^(1/2)
                 sig2ij(ij) = sigi(i) * sigi(j)
              end if
-             epsij(ij) = dsqrt(epsi(i)*epsi(j))
+             epsij(ij) = sqrt(epsi(i)*epsi(j))
 
              if (lshift) then
                 sr2 = sig2ij(ij)/(rcut(1)*rcut(1))
                 sr6 = sr2 * sr2 * sr2
-                ecut(ij)= sr6*(sr6-1.0d0)*epsij(ij)
+                ecut(ij)= sr6*(sr6-1.0E0_dp)*epsij(ij)
              end if
           end do
        end do
@@ -2442,7 +2439,7 @@ contains
              if (lshift) then
                 sr2 = sig2ij(ij) / (rcut(1)*rcut(1))
                 sr6 = sr2 * sr2 * sr2
-                ecut(ij)= sr6*(sr6-1.0d0)*epsij(ij)
+                ecut(ij)= sr6*(sr6-1.0E0_dp)*epsij(ij)
                 ecut((j-1)*nntype+i)=ecut(ij)
              end if
           end do
@@ -2510,8 +2507,8 @@ contains
       real::rijsq,rij,exsix
       integer::ntij
 
-      rij=dsqrt(rijsq)
-      exsix = aexsix(ntij)/(rijsq*rijsq*rijsq) + bexsix(ntij)*dexp(cexsix(ntij)*rij)
+      rij=sqrt(rijsq)
+      exsix = aexsix(ntij)/(rijsq*rijsq*rijsq) + bexsix(ntij)*exp(cexsix(ntij)*rij)
       if (lshift) exsix = exsix-sexsix(ntij)
       return
   end function exsix
@@ -2524,9 +2521,9 @@ contains
       real::rijsq,rij,ror,ninesix
       integer::ntij
 
-      rij=dsqrt(rijsq)
+      rij=sqrt(rijsq)
       ror = rzero(ntij)/rij
-      ninesix = 4.0d0*epsnx(ntij)*ror**6*(2.0d0*ror**3 - 3.0d0)
+      ninesix = 4.0E0_dp*epsnx(ntij)*ror**6*(2.0E0_dp*ror**3 - 3.0E0_dp)
       if (lshift) then
          ninesix = ninesix - shiftnsix(ntij)
       end if
@@ -2546,23 +2543,23 @@ contains
   function genlj (rijsq,sr2,epsilon2)
       real::rijsq,rij,srij,sr2,epsilon2,genlj
 
-      rij=(dsqrt(rijsq))
-      srij=dsqrt(sr2)
+      rij=(sqrt(rijsq))
+      srij=sqrt(sr2)
 
-      if ( (rij) .le.(rij*srij)*2.0d0**(2.0d0/n0) ) then
-         genlj = 4.0d0*epsilon2*(((srij)**n0)-((srij)**(n0/2.0d0)))
+      if ( (rij) .le.(rij*srij)*2.0E0_dp**(2.0E0_dp/n0) ) then
+         genlj = 4.0E0_dp*epsilon2*(((srij)**n0)-((srij)**(n0/2.0E0_dp)))
       else
-         genlj =epsilon2*(((2.0d0**((4.0d0*n1/n0)))*((srij)** (2.0d0*n1)))-((2.0d0**((2.0d0*(n1/n0))+1.0d0))*((srij)**(n1))))
+         genlj =epsilon2*(((2.0E0_dp**((4.0E0_dp*n1/n0)))*((srij)** (2.0E0_dp*n1)))-((2.0E0_dp**((2.0E0_dp*(n1/n0))+1.0E0_dp))*((srij)**(n1))))
       end if
 
 ! In reduced units
-! xij=(1.0d0/dsqrt(sr2))
+! xij=(1.0E0_dp/sqrt(sr2))
 !
-! if ( (xij) .le. 2.0d0**(2.0d0/n0) ) then
-! genlj = 4.0d0 * (((1/xij)**n0)-((1/xij)**(n0/2.0d0)))
+! if ( (xij) .le. 2.0E0_dp**(2.0E0_dp/n0) ) then
+! genlj = 4.0E0_dp * (((1/xij)**n0)-((1/xij)**(n0/2.0E0_dp)))
 ! else
-! genlj =(( (2.0d0**((4.0d0*n1/n0)))*(1/xij)**(2.0d0*n1))-
-!     & (2.0d0**((2.0d0*(n1/n0))+1.0d0)*((1/xij)**(n1))))
+! genlj =(( (2.0E0_dp**((4.0E0_dp*n1/n0)))*(1/xij)**(2.0E0_dp*n1))-
+!     & (2.0E0_dp**((2.0E0_dp*(n1/n0))+1.0E0_dp)*((1/xij)**(n1))))
 ! end if
 ! vinter=vinter+e
 
@@ -2587,7 +2584,7 @@ contains
 ! epsilon   = 1.0
 ! --------------------------------------------------------------------
 
-      sr = 1.0d0 / rijsq
+      sr = 1.0E0_dp / rijsq
       sr6 = sr**3
 
       if ( ntij .eq. 1 ) then
@@ -2595,10 +2592,10 @@ contains
          ljpsur = sr6*sr6 - sr6
       else
 ! polar-polar or polar-nonpolar interaction ( repulsive LJ interaction )
-         if ( rijsq .le. 1.259921d0 ) then
-            ljpsur = sr6*sr6 - sr6 + 0.25d0
+         if ( rijsq .le. 1.259921E0_dp ) then
+            ljpsur = sr6*sr6 - sr6 + 0.25E0_dp
          else
-            ljpsur = 0.0d0
+            ljpsur = 0.0E0_dp
          end if
       end if
 
@@ -2614,11 +2611,11 @@ contains
       integer::ntij
 
         rs2 = rijsq / (sigisq(ntij))
-        rs1 = dsqrt(rs2)
+        rs1 = sqrt(rs2)
         rs7 = rs1*rs2*rs2*rs2
-        sr1 = 1.07d0/(rs1+0.07d0)
-        sr7 = sr1**7.0d0
-        mmff = sr7*(1.12d0/(rs7+0.12d0) - 2.0d0) *epsimmff(ntij)
+        sr1 = 1.07E0_dp/(rs1+0.07E0_dp)
+        sr7 = sr1**7.0E0_dp
+        mmff = sr7*(1.12E0_dp/(rs7+0.12E0_dp) - 2.0E0_dp) *epsimmff(ntij)
 
       if (lshift) mmff = mmff-smmff(ntij)
       return
@@ -2654,7 +2651,7 @@ contains
 
     real::epsilon2,sigma2,sr2,sr6,qave
 
-    U2=0.0d0
+    U2=0.0E0_dp
     if (L_vdW_table) then
        U2=lininter_vdW(rij,ntii,ntjj)
     else if ( lsami ) then
@@ -2681,17 +2678,17 @@ contains
        end if
     else if ((lij(ntii).and.lij(ntjj)).or.(i.eq.j)) then
        if ( lexpand(imolty).and.lexpand(jmolty)) then
-          sigma2=(sigma_f(imolty,ii)+sigma_f(jmolty,jj))/2.0d0
+          sigma2=(sigma_f(imolty,ii)+sigma_f(jmolty,jj))/2.0E0_dp
           sr2 = sigma2*sigma2/rijsq
-          epsilon2=dsqrt(epsilon_f(imolty,ii)*epsilon_f(jmolty,jj))
+          epsilon2=sqrt(epsilon_f(imolty,ii)*epsilon_f(jmolty,jj))
        else if (lexpand(imolty)) then
-          sigma2=(sigma_f(imolty,ii)+ sigi(ntjj))/2.0d0
+          sigma2=(sigma_f(imolty,ii)+ sigi(ntjj))/2.0E0_dp
           sr2 = sigma2*sigma2/rijsq
-          epsilon2=dsqrt(epsilon_f(imolty,ii)*epsi(ntjj))
+          epsilon2=sqrt(epsilon_f(imolty,ii)*epsi(ntjj))
        else if (lexpand(jmolty)) then
-          sigma2=(sigma_f(jmolty,jj)+ sigi(ntii))/2.0d0
+          sigma2=(sigma_f(jmolty,jj)+ sigi(ntii))/2.0E0_dp
           sr2 = sigma2*sigma2/rijsq
-          epsilon2=dsqrt(epsi(ntii)*epsilon_f(jmolty,jj))
+          epsilon2=sqrt(epsi(ntii)*epsilon_f(jmolty,jj))
        else
           sr2 = sig2ij(ntij) / rijsq
           epsilon2=epsij(ntij)
@@ -2702,17 +2699,17 @@ contains
           if ((.not.lqchg(ntii)).and.(.not.lqchg(ntjj))) then
              if (nunit(imolty).eq.4) then
                 ! TIP-4P structure (temperary use !??)
-                qave=(qqu(i,4)+qqu(j,4))/2.0d0
+                qave=(qqu(i,4)+qqu(j,4))/2.0E0_dp
              else
-                qave=(qqu(i,4)+qqu(i,5)+qqu(j,4)+qqu(j,5))*0.85d0
+                qave=(qqu(i,4)+qqu(i,5)+qqu(j,4)+qqu(j,5))*0.85E0_dp
              end if
           else
-             qave=(qqu(i,ii)+qqu(j,jj))/2.0d0
+             qave=(qqu(i,ii)+qqu(j,jj))/2.0E0_dp
           end if
           U2=((aslope*(qave-a0)*(qave-a0)+ashift)/sr6-(bslope*(qave- b0)*(qave-b0)+bshift))/sr6*epsilon2
        else
           sr6 = sr2 * sr2 * sr2
-          U2=sr6*(sr6-1.0d0)*epsilon2
+          U2=sr6*(sr6-1.0E0_dp)*epsilon2
           if (lshift) then
              U2=U2-ecut(ntij)
           end if
@@ -2721,7 +2718,7 @@ contains
              U2=U2*ljscale(imolty,ii,jj)
              if (lainclu(imolty,ii,jj)) then
                 ! OH 1-5 interaction
-               U2=U2+0.25d0*a15(a15type(imolty,ii,jj))/((rijsq**2)*(rijsq**2)*(rijsq**2))
+               U2=U2+0.25E0_dp*a15(a15type(imolty,ii,jj))/((rijsq**2)*(rijsq**2)*(rijsq**2))
             end if
           end if
        end if
@@ -2739,7 +2736,7 @@ contains
 
     integer::iii,jjj
 
-    Q2=0.0d0
+    Q2=0.0E0_dp
 !kea - skip for garofalini; included in vinter
     if(.not.lgaro.and.lqchgi.and.lqchg(ntjj)) then
        if (.not.lewald) then

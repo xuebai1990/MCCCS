@@ -50,7 +50,7 @@
             rci3 = sig2ij(ntij)**(3.0d0/2.0d0) / rcut(ibox)**3
             if ( lexpand(imolty) ) then
                sigma2 = (sigma(imolty,ii)+sigi(ntjj))**2/4.0d0
-               epsilon2 = dsqrt(epsilon(imolty,ii)*epsi(ntjj))
+               epsilon2 = sqrt(epsilon(imolty,ii)*epsi(ntjj))
             else
                sigma2 = sig2ij(ntij)
                epsilon2 = epsij(ntij)

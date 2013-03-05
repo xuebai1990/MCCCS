@@ -5,7 +5,7 @@
 !> Translated to Fortran 77 by Tsuyoshi TADA. (2005-12-19)
 !> Modified for use in topmon by Peng Bai. (2012-02-11)
 module util_random
-  use var_type,only:double_precision
+  use var_type,only:dp
   use const_math,only:twopi
   use util_runtime,only:err_exit
   use util_prng,only:rng_stream_type_ptr,create_rng_stream,next_random_number
@@ -106,8 +106,9 @@ contains
 !-----------------------------------------------------------------------
 !> \brief Generates a random number on [0,1)-real-interval
 !-----------------------------------------------------------------------
-  double precision function random(iStream)
+  function random(iStream)
     integer,intent(in)::iStream
+    real::random
     integer,parameter::N=624,M=397,DONE=123456789
     integer::UPPER_MASK,LOWER_MASK,MATRIX_A,T1_MASK,T2_MASK
     integer::mti,initialized
@@ -152,15 +153,15 @@ contains
     y=ieor(y,iand(ishft(y,15),T2_MASK))
     y=ieor(y,ishft(y,-18))
 
-    if(y.lt.0.d0) then
-       random=dble(y)+2.d0**32
+    if(y.lt.0.E0_dp) then
+       random=dble(y)+2.E0_dp**32
     else
        random=dble(y)
     end if
 ! Divide by 2^32-1, for [0,1]-real-interval
-!    random=random/4294967295.d0
+!    random=random/4294967295.E0_dp
 ! Divide by 2^32, for [0,1)-real-interval
-    random=random/4294967296.d0
+    random=random/4294967296.E0_dp
     return
   end function random
 
@@ -175,7 +176,7 @@ contains
 #ifdef RANDOM_SPHERE_DIRECT
     real::theta,phi
     theta=twopi*random(iStream)
-    z=2.0_double_precision*random(iStream)-1.0_double_precision
+    z=2.0_dp*random(iStream)-1.0_dp
     phi=acos(z)
     x=sin(phi)*cos(theta)
     y=sin(phi)*sin(theta)
@@ -183,13 +184,13 @@ contains
     integer::ii
     real::xi1,xi2,xisq
     do ii = 1,100
-       xi1 = ( 2.0d0 * random(iStream) ) - 1.0d0
-       xi2 = ( 2.0d0 * random(iStream) ) - 1.0d0
+       xi1 = ( 2.0E0_dp * random(iStream) ) - 1.0E0_dp
+       xi2 = ( 2.0E0_dp * random(iStream) ) - 1.0E0_dp
        xisq = xi1**2 + xi2**2
-       if ( xisq .lt. 1.0d0 ) then
-          x = 2.0d0 * xi1 * dsqrt( 1.0d0 - xisq )
-          y = 2.0d0 * xi2 * dsqrt( 1.0d0 - xisq )
-          z = ( 1.0d0 - 2.0d0 * xisq )
+       if ( xisq .lt. 1.0E0_dp ) then
+          x = 2.0E0_dp * xi1 * sqrt( 1.0E0_dp - xisq )
+          y = 2.0E0_dp * xi2 * sqrt( 1.0E0_dp - xisq )
+          z = ( 1.0E0_dp - 2.0E0_dp * xisq )
           return
        end if
     end do
@@ -214,12 +215,12 @@ contains
 
     do
        u=random(iStream)
-       v=1.7156_double_precision*(random(iStream)-0.5_double_precision)
-       x=u-0.449871_double_precision
-       y=abs(v)+0.386595_double_precision
-       q=x*x+y*(0.19600_double_precision*y-0.25472_double_precision*x)
+       v=1.7156_dp*(random(iStream)-0.5_dp)
+       x=u-0.449871_dp
+       y=abs(v)+0.386595_dp
+       q=x*x+y*(0.19600_dp*y-0.25472_dp*x)
        if (q.le.0.27597) exit
-       if (q.le.0.27846 .and. v*v.le.-4.0_double_precision*log(u)*u*u) exit
+       if (q.le.0.27846 .and. v*v.le.-4.0_dp*log(u)*u*u) exit
     end do
     gau=mu+sig*v/u
   end function gaussian

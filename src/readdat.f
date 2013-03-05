@@ -76,7 +76,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   integer::nhere
 
   lee = .false.
-  qtot = 0.0d0
+  qtot = 0.0E0_dp
 ! -------------------------------------------------------------------
 
   io_input=get_iounit()
@@ -234,8 +234,8 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 ! -------------------------------------------------------------------
 
 ! set up constants and conversion factors ***
-  beta = 1.0d0 / temp
-  fqbeta = 1.0d0 / fqtemp
+  beta = 1.0E0_dp / temp
+  fqbeta = 1.0E0_dp / fqtemp
 
 ! ------------------------------------------------------------------
   read(io_input,*)
@@ -282,7 +282,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 
 ! KM for MPI
 ! jobs stop in monola so that all processors die
-  if (dint(dble(nstep)/dble(iblock)) .gt. 100) then
+  if (aint(dble(nstep)/dble(iblock)) .gt. 100) then
      call err_exit(__FILE__,__LINE__,'too many blocks',myid+1)
   end if
 
@@ -452,13 +452,13 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      end if
   end if
   do i = 1, nbox
-     if( rcut(i)/boxlx(i) .gt. 0.5d0) then
+     if( rcut(i)/boxlx(i) .gt. 0.5E0_dp) then
         call err_exit(__FILE__,__LINE__,'rcut > 0.5*boxlx',myid+1)
      end if
   end do
 
-  softlog = 10.0d0**(-softcut)
-  vol_eff = (4.0d0/3.0d0)*onepi*(rbsmax*rbsmax*rbsmax-rbsmin*rbsmin*rbsmin)
+  softlog = 10.0E0_dp**(-softcut)
+  vol_eff = (4.0E0_dp/3.0E0_dp)*onepi*(rbsmax*rbsmax*rbsmax-rbsmin*rbsmin*rbsmin)
 
 ! set up the forcefield and the masses
   call init_energy_pairwise(file_in,lmixlb,lmixjo)
@@ -612,7 +612,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
            write(io_output,*) nunit(imol),nugrow(imol),ncarbon(imol) ,nmaxcbmc(imol),iurot(imol) ,lelect(imol),lflucq(imol)  ,lqtrans(imol),lexpand(imol),lavbmc1(imol),lavbmc2(imol) ,lavbmc3(imol),fqegp(imol) ,lsetup,(eta2(i,imol), i=1,nbox)
         end if
      end if
-     masst(imol) = 0.0d0
+     masst(imol) = 0.0E0_dp
 
      if (lsetup) then
         call molsetup(io_input,imol)
@@ -641,7 +641,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         IF (.not.(lmmff.or.lexpsix.or.lgaro.or.lninesix)) THEN
            if (ntype(imol,i).eq.0) then
               call err_exit(__FILE__,__LINE__,'ERROR: atom type undefined!',myid+1)
-           else if (sigi(ntype(imol,i)).lt.1d-06.and.epsi(ntype(imol,i)).lt.1d-06.and.abs(qelect(ntype(imol,i))).lt.1d-06) then
+           else if (sigi(ntype(imol,i)).lt.1E-06_dp.and.epsi(ntype(imol,i)).lt.1E-06_dp.and.abs(qelect(ntype(imol,i))).lt.1E-06_dp) then
               call err_exit(__FILE__,__LINE__,'ERROR: atom type undefined!',myid+1)
            end if
         end if
@@ -674,7 +674,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
            itvib(imol,i,j)=indexOf(bonds,itvib(imol,i,j))
            if (itvib(imol,i,j).eq.0) then
               call err_exit(__FILE__,__LINE__,'ERROR: stretching parameters undefined!',myid+1)
-           else if(brvib(itvib(imol,i,j)).lt.1d-06) then
+           else if(brvib(itvib(imol,i,j)).lt.1E-06_dp) then
               call err_exit(__FILE__,__LINE__,'ERROR: stretching parameters undefined!',myid+1)
            end if
 
@@ -702,13 +702,13 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
            itben(imol,i,j)=indexOf(angles,itben(imol,i,j))
            if (itben(imol,i,j).eq.0) then
               call err_exit(__FILE__,__LINE__,'ERROR: bending parameters undefined!',myid+1)
-           else if(brben(itben(imol,i,j)).lt.1d-06) then
+           else if(brben(itben(imol,i,j)).lt.1E-06_dp) then
               call err_exit(__FILE__,__LINE__,'ERROR: bending parameters undefined!',myid+1)
            end if
 
            if (lverbose.and.myid.eq.0) then
               write(io_output,'(1x,a10,i4,a20,a8,i4,a10,i4)') '      bead' ,i, ' bending interaction',' through',ijben2(imol,i,j ),' with bead',ijben3(imol,i,j)
-              write(io_output,'(a20,i3,a13,f9.3,a5,f9.1)') '          bend type:',angles%list(itben(imol,i,j)) ,' bend angle :',brben(itben(imol,i,j))*180.0d0/onepi ,' k/2:',brbenk(itben(imol,i,j))
+              write(io_output,'(a20,i3,a13,f9.3,a5,f9.1)') '          bend type:',angles%list(itben(imol,i,j)) ,' bend angle :',brben(itben(imol,i,j))*180.0E0_dp/onepi ,' k/2:',brbenk(itben(imol,i,j))
            end if
         end do
 ! bond torsion -
@@ -829,11 +829,11 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 !kea skip if lgaro
      if(.not.(lgaro.or.lionic.or.lexzeo)) then
         do i=1,nmolty
-           qtot =0.0d0
+           qtot =0.0E0_dp
            do j = 1,nunit(i)
               qtot = qtot+qelect(ntype(i,j))
            end do
-           if(dabs(qtot).gt.1d-7) then
+           if(abs(qtot).gt.1E-7_dp) then
               call err_exit(__FILE__,__LINE__,'molecule type '//integer_to_string(i)//' not neutral. check charges',myid+1)
            end if
         end do
@@ -921,7 +921,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 
   if (lgrand) then
      do i=1,nmolty
-        debroglie = 17.458d0/( dsqrt(masst(i)/beta ))
+        debroglie = 17.458E0_dp/( sqrt(masst(i)/beta ))
         B(i) = exp(B(i)/temp)/(debroglie*debroglie*debroglie)
      end do
   end if
@@ -1379,7 +1379,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   read(io_input,*) (pmromt(i),i=1,nmolty)
   if ( lecho.and.myid.eq.0 ) then
      if (lverbose) then
-        write(io_output,*) 'pmrot:',1.0d0
+        write(io_output,*) 'pmrot:',1.0E0_dp
         do i = 1,nmolty
            write(io_output,'(1x,a41,a5,i4,a10,f8.4)') '   rotational probability for molecule','    typ e',i ,' (pmromt):',pmromt(i)
         end do
@@ -1392,52 +1392,52 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   if (lverbose.and.myid.eq.0) then
      write(io_output,*)
      write(io_output,*) 'percentage move probabilities:'
-     write(io_output,'(1x,a19,f8.2,a2)') 'volume move       :', 100.0d0*pmvol,' %'
+     write(io_output,'(1x,a19,f8.2,a2)') 'volume move       :', 100.0E0_dp*pmvol,' %'
      pcumu = pmvol
      if (pmswat .gt. pmvol) then
         pm = pmswat - pcumu
         pcumu = pcumu + pm
      else
-        pm = 0.0d0
+        pm = 0.0E0_dp
      end if
-     write(io_output,'(1x,a19,f8.2,a2)') 'swatch move       :', 100.0d0*pm,' %'
+     write(io_output,'(1x,a19,f8.2,a2)') 'swatch move       :', 100.0E0_dp*pm,' %'
      if (pmswap .gt. pmswat) then
         pm = pmswap - pcumu
         pcumu = pcumu + pm
      else
-        pm = 0.0d0
+        pm = 0.0E0_dp
      end if
-     write(io_output,'(1x,a19,f8.2,a2)') 'swap move         :', 100.0d0*pm,' %'
+     write(io_output,'(1x,a19,f8.2,a2)') 'swap move         :', 100.0E0_dp*pm,' %'
      if (pmcb .gt. pmswap) then
         pm = pmcb - pcumu
         pcumu = pcumu + pm
      else
-        pm = 0.0d0
+        pm = 0.0E0_dp
      end if
-     write(io_output,'(1x,a19,f8.2,a2)') 'CBMC move         :', 100.0d0*pm,' %'
+     write(io_output,'(1x,a19,f8.2,a2)') 'CBMC move         :', 100.0E0_dp*pm,' %'
      if (pmflcq .gt. pmcb) then
         pm = pmflcq - pcumu
         pcumu = pcumu + pm
      else
-        pm = 0.0d0
+        pm = 0.0E0_dp
      end if
-     write(io_output,'(1x,a19,f8.2,a2)') 'fluct charge move :', 100.0d0*pm,' %'
+     write(io_output,'(1x,a19,f8.2,a2)') 'fluct charge move :', 100.0E0_dp*pm,' %'
      if (pmexpc .gt. pmflcq) then
         pm = pmexpc - pcumu
         pcumu = pcumu + pm
      else
-        pm = 0.0d0
+        pm = 0.0E0_dp
      end if
-     write(io_output,'(1x,a19,f8.2,a2)') 'expanded ens move :', 100.0d0*pm,' %'
+     write(io_output,'(1x,a19,f8.2,a2)') 'expanded ens move :', 100.0E0_dp*pm,' %'
      if (pmtra .gt. pmexpc) then
         pm = pmtra - pcumu
         pcumu = pcumu + pm
      else
-        pm = 0.0d0
+        pm = 0.0E0_dp
      end if
-     write(io_output,'(1x,a19,f8.2,a2)') 'translation move  :', 100.0d0*pm,' %'
-     pm = 1.0d0 - pmtra
-     write(io_output,'(1x,a19,f8.2,a2)') 'rotation move     :', 100.0d0*pm,' %'
+     write(io_output,'(1x,a19,f8.2,a2)') 'translation move  :', 100.0E0_dp*pm,' %'
+     pm = 1.0E0_dp - pmtra
+     write(io_output,'(1x,a19,f8.2,a2)') 'rotation move     :', 100.0E0_dp*pm,' %'
      write(io_output,*)
      write(io_output,*) 'Fraction of atom translations move', pm_atom_tra
   end if
@@ -1935,7 +1935,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 ! if ( lgibbs .or. lgrand .or. lnpt ) then
      read(io_restart,*) (rmvol(ibox), ibox = 1,nbox)
      if (myid.eq.0) then
-        write(io_output,"(' max volume displacement:        ',3e12.4)") (rmvol(ibox), ibox = 1,nbox)
+        write(io_output,"(' max volume displacement:        ',3E12.4)") (rmvol(ibox), ibox = 1,nbox)
         write(io_output,*)
         write(io_output,*)
      end if
@@ -1982,7 +1982,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
            w(2) = min_width(ibox,2)
            w(3) = min_width(ibox,3)
 
-           if (rcut(ibox)/w(1) .gt. 0.5d0 .or.  rcut(ibox)/w(2) .gt. 0.5d0 .or.  rcut(ibox)/w(3) .gt. 0.5d0) then
+           if (rcut(ibox)/w(1) .gt. 0.5E0_dp .or.  rcut(ibox)/w(2) .gt. 0.5E0_dp .or.  rcut(ibox)/w(3) .gt. 0.5E0_dp) then
               call err_exit(__FILE__,__LINE__,'rcut > half cell width',myid+1)
            end if
 
@@ -1994,13 +1994,13 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
               write(io_output,'("cell length |c|:",2x,f12.3)')  cell_length(ibox,3)
 
               write(io_output,*)
-              write(io_output,'("cell angle alpha:",2x,f12.3)')  cell_ang(ibox,1)*180.0d0/onepi
-              write(io_output,'("cell angle beta: ",2x,f12.3)') cell_ang(ibox,2)*180.0d0/onepi
-              write(io_output,'("cell angle gamma:",2x,f12.3)') cell_ang(ibox,3)*180.0d0/onepi
+              write(io_output,'("cell angle alpha:",2x,f12.3)')  cell_ang(ibox,1)*180.0E0_dp/onepi
+              write(io_output,'("cell angle beta: ",2x,f12.3)') cell_ang(ibox,2)*180.0E0_dp/onepi
+              write(io_output,'("cell angle gamma:",2x,f12.3)') cell_ang(ibox,3)*180.0E0_dp/onepi
 
 ! write(io_output,"(' angle of  box ',i1,'  :  ','   alpha:   ',f12.6,'
-!     &  beta: ', f12.6, '    gamma:   ',f12.6)") ibox,cell_ang(ibox,1)*180.0d0/onepi,
-!     &                cell_ang(ibox,2)*180.0d0/onepi,cell_ang(ibox,3)
+!     &  beta: ', f12.6, '    gamma:   ',f12.6)") ibox,cell_ang(ibox,1)*180.0E0_dp/onepi,
+!     &                cell_ang(ibox,2)*180.0E0_dp/onepi,cell_ang(ibox,3)
 !     &                *180/onepi
            end if
         else
@@ -2011,7 +2011,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
               write(io_output,"(' dimension box ',i1,'  :','  a:   ',f12.6,'   b:   ',f12.6,'   c   :  ' ,f12.6)") ibox,boxlx(ibox),boxly(ibox),boxlz(ibox)
            end if
            do i = 1, nbox
-              if( (rcut(i)/boxlx(i) .gt. 0.5d0).or. (rcut(i)/boxly(i) .gt. 0.5d0).or. (rcut(i)/boxlz(i) .gt. 0.5d0)) then
+              if( (rcut(i)/boxlx(i) .gt. 0.5E0_dp).or. (rcut(i)/boxly(i) .gt. 0.5E0_dp).or. (rcut(i)/boxlz(i) .gt. 0.5E0_dp)) then
                  call err_exit(__FILE__,__LINE__,'rcut > 0.5*boxlx',myid+1)
               end if
            end do
@@ -2121,7 +2121,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 ! write(io_output,*) 'particles found in correct box with correct type'
 
      do i = 1,nbxmax
-        qbox(i) = 0.0d0
+        qbox(i) = 0.0E0_dp
      end do
 
      do i = 1, nchain
@@ -2139,7 +2139,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
      close(io_restart)
 
      do i = 1,nbxmax
-        if ( dabs(qbox(i)) .gt. 1d-6 ) then
+        if ( abs(qbox(i)) .gt. 1E-6_dp ) then
            if (i.eq.1.and.lexzeo) cycle
            call err_exit(__FILE__,__LINE__,'box '//integer_to_string(i)//' has a net charge of '//real_to_string(qbox(i)),myid+1)
         end if
@@ -2155,7 +2155,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
               else
                  min_boxl = min(boxlx(ibox),boxly(ibox),boxlz(ibox))
               end if
-              kalp(ibox) = 6.40d0
+              kalp(ibox) = 6.40E0_dp
               calp(ibox) = kalp(ibox)/min_boxl
            end do
         else
@@ -2168,8 +2168,8 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
            else
               min_boxl = min(boxlx(ibox),boxly(ibox),boxlz(ibox))
            end if
-           ! rcut(ibox) = 0.4d0*min_boxl
-           calp(ibox) = 3.2d0/rcut(ibox)
+           ! rcut(ibox) = 0.4E0_dp*min_boxl
+           calp(ibox) = 3.2E0_dp/rcut(ibox)
         end do
      end if
   else
@@ -2186,7 +2186,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
            end if
            calp(ibox) = kalp(ibox)/min_boxl
            if ( lewald ) then
-              if ( kalp(ibox) .lt. 5.6d0 ) then
+              if ( kalp(ibox) .lt. 5.6E0_dp ) then
                  call err_exit(__FILE__,__LINE__,'Warning, kalp is too small',myid+1)
               end if
            else
@@ -2201,7 +2201,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         do ibox = 1, nbox
            calp(ibox) = kalp(ibox)
            if ( lewald ) then
-              if (calp(ibox)*rcut(ibox).lt.3.2d0.and.myid.eq.0) then
+              if (calp(ibox)*rcut(ibox).lt.3.2E0_dp.and.myid.eq.0) then
                  write(io_output,*) 'Warning, kalp too small in box',ibox
                  write(io_output,*) ibox,calp(ibox),rcut(ibox)
 !cc --- JLR 11-24-09
@@ -2219,13 +2219,13 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   if (L_Ewald_Auto) then
      do ibox = 1,nbox
         if ( (.not. lsolid(ibox)) .or. lrect(ibox) )  then
-           k_max_l(ibox) = dint(boxlx(ibox)*calp(ibox))+1
-           k_max_m(ibox) = dint(boxly(ibox)*calp(ibox))+1
-           k_max_n(ibox) = dint(boxlz(ibox)*calp(ibox))+1
+           k_max_l(ibox) = aint(boxlx(ibox)*calp(ibox))+1
+           k_max_m(ibox) = aint(boxly(ibox)*calp(ibox))+1
+           k_max_n(ibox) = aint(boxlz(ibox)*calp(ibox))+1
         else
-           k_max_l(ibox) = dint(hmat(ibox,1)*calp(ibox))+2
-           k_max_m(ibox) = dint(hmat(ibox,5)*calp(ibox))+2
-           k_max_n(ibox) = dint(hmat(ibox,9)*calp(ibox))+2
+           k_max_l(ibox) = aint(hmat(ibox,1)*calp(ibox))+2
+           k_max_m(ibox) = aint(hmat(ibox,5)*calp(ibox))+2
+           k_max_n(ibox) = aint(hmat(ibox,9)*calp(ibox))+2
         end if
      end do
   end if
@@ -2321,7 +2321,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 ! check that rintramax is really valid
   if (licell) then
      do i = 1,nchain
-        if (2.0d0*rcmu(i) .gt. rintramax) then
+        if (2.0E0_dp*rcmu(i) .gt. rintramax) then
            call err_exit(__FILE__,__LINE__,'rintramax for the linkcell list too small',myid+1)
         end if
      end do
@@ -2379,10 +2379,10 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 
 ! write out initial configuration for first movie frame ***
   if (nnstep .eq. 0) then
-     dum = 1.0d0
+     dum = 1.0E0_dp
 ! fixed by adding nbox, why the hell didn't this cause errors before?
 ! KM fixed by adding dum for acsolpar
-     call monper(dum,dum,dum,dum,dum,dum,dum,dum,dum,dum,dum,nbox,nnstep,dum,.false.,.false.,.false. ,.true.,.false.,.false.,lratfix,lsolute,dum,0.0d0,0.0d0)
+     call monper(dum,dum,dum,dum,dum,dum,dum,dum,dum,dum,dum,nbox,nnstep,dum,.false.,.false.,.false. ,.true.,.false.,.false.,lratfix,lsolute,dum,0.0E0_dp,0.0E0_dp)
   end if
 
 ! -------------------------------------------------------------------
@@ -2406,7 +2406,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         end if
         do i = 1,nunit(imol)
            do j = 1,inben(imol,i)
-              write(io_output,'(i5,i4,i4,i7,i7,i7,f12.2,f12.1)') i ,ijben2(imol,i,j),ijben3(imol,i,j),atoms%list(ntype(imol,i)),atoms%list(ntype(imol,ijben2(imol,i,j))),atoms%list(ntype(imol,ijben3(imol,i,j))),brben(itben(imol,i,j))*180.0d0/onepi,brbenk(itben(imol,i,j))
+              write(io_output,'(i5,i4,i4,i7,i7,i7,f12.2,f12.1)') i ,ijben2(imol,i,j),ijben3(imol,i,j),atoms%list(ntype(imol,i)),atoms%list(ntype(imol,ijben2(imol,i,j))),atoms%list(ntype(imol,ijben3(imol,i,j))),brben(itben(imol,i,j))*180.0E0_dp/onepi,brbenk(itben(imol,i,j))
            end do
         end do
 
@@ -2442,7 +2442,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
                  if (lninesix) then
                     write(io_output,'(3x,2i4,2f10.5,2f15.6)') atoms%list(i),atoms%list(j) ,rzero(ij),epsnx(ij),qelect(i),qelect(j)
                  else
-                    write(io_output,'(3x,2i4,2f10.5,2f15.6)') atoms%list(i),atoms%list(j) ,dsqrt(sig2ij(ij)),epsij(ij),qelect(i),qelect(j)
+                    write(io_output,'(3x,2i4,2f10.5,2f15.6)') atoms%list(i),atoms%list(j) ,sqrt(sig2ij(ij)),epsij(ij),qelect(i),qelect(j)
                  end if
               end if
            end do

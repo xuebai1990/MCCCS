@@ -1,4 +1,4 @@
-    USE var_type,ONLY:DP=>double_precision
+    USE var_type,ONLY:DP
     USE util_runtime,ONLY:err_exit
     IMPLICIT NONE
 #ifdef __MPI__

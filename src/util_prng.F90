@@ -46,9 +46,10 @@
 !> \author C++ code converted to Fortran 90/95 (18.05.2005, Matthias Krack)
 ! *****************************************************************************
 MODULE util_prng
+  USE var_type,only:dp=>double_precision
   IMPLICIT NONE
   PRIVATE
-  save
+  SAVE
   ! Global parameters in this module
 
   CHARACTER(len=*), PARAMETER :: rng_record_format = "(A40,I2,3L2,ES25.16,18F20.1)"
@@ -62,7 +63,6 @@ MODULE util_prng
   INTEGER, PARAMETER          :: GAUSSIAN = 1,&
                                  UNIFORM  = 2
 
-  integer,parameter::dp=selected_real_kind(14,200) ,dp_size=8
   REAL(KIND=dp), PARAMETER :: norm  = 2.328306549295727688e-10_dp,&
                               m1    = 4294967087.0_dp,&
                               m2    = 4294944443.0_dp,&

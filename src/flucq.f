@@ -33,7 +33,7 @@ subroutine flucq (ichoice,boxi)
       do icbu = 1,nmolty
          if ( dchain .lt. pmfqmt(icbu) ) then
             imolty = icbu
-            dchain = 2.0d0
+            dchain = 2.0E0_dp
          end if
       end do
       
@@ -42,10 +42,10 @@ subroutine flucq (ichoice,boxi)
 !         (in box 2 is an ideal gas!)
          ibox = 1
          if (nchbox(ibox).eq.0) then
-            bnflcq(imolty,ibox) = bnflcq(imolty,ibox) + 1.0d0
+            bnflcq(imolty,ibox) = bnflcq(imolty,ibox) + 1.0E0_dp
             return
          end if
-         i = dint( dble(ncmt(1,imolty))*random(-1) ) + 1
+         i = aint( dble(ncmt(1,imolty))*random(-1) ) + 1
          i = parbox(i,1,imolty)
          if ( moltyp(i) .ne. imolty ) write(io_output,*) 'screwup'
 
@@ -98,10 +98,10 @@ subroutine flucq (ichoice,boxi)
 !     (in box 2 is an ideal gas!)
             ibox = 1
             if (nchbox(ibox).eq.0) then
-               bnflcq(imolty,ibox) = bnflcq(imolty,ibox) + 1.0d0
+               bnflcq(imolty,ibox) = bnflcq(imolty,ibox) + 1.0E0_dp
                return
             end if
-            jchain = dint( dble(ncmt(1,imolty))*random(-1) ) + 1
+            jchain = aint( dble(ncmt(1,imolty))*random(-1) ) + 1
             jchain = parbox(jchain,1,imolty)
             if ( moltyp(jchain) .ne. imolty ) write(io_output,*) 'screwup'
 
@@ -185,8 +185,8 @@ subroutine flucq (ichoice,boxi)
  30   mainunit = int( dble(iunit)*random(-1) ) + 1
 ! for unit which is not a charge site 
       if ( .not. lqchg(ntype(imolty,mainunit)) ) goto 30
-      bnflcq(imolty,ibox) = bnflcq(imolty,ibox) + 1.0d0
-      dispbig = ( 2.0d0*random(-1) - 1.0d0 )*rmflcq(imolty,ibox)
+      bnflcq(imolty,ibox) = bnflcq(imolty,ibox) + 1.0E0_dp
+      dispbig = ( 2.0E0_dp*random(-1) - 1.0E0_dp )*rmflcq(imolty,ibox)
 
       if ( linterqt ) then
 ! For charge transfer case, i molecule increases by dispbig and
@@ -206,14 +206,14 @@ subroutine flucq (ichoice,boxi)
          ryuij = ryu(i,maini)-ryu(jchain,mainj)
          rzuij = rzu(i,maini)-rzu(jchain,mainj)
          if ( lpbc ) call mimage ( rxuij,ryuij,rzuij,ibox )
-         rij = dsqrt( rxuij*rxuij + ryuij*ryuij + rzuij*rzuij )
+         rij = sqrt( rxuij*rxuij + ryuij*ryuij + rzuij*rzuij )
          corr = qqfact*erfunc(calp(ibox)*rij)*corr/rij
 
 ! *** ??? problems here for charge transfer
 
       else
 
-         displit = (-dispbig) / (dble(qunit)-1.0d0)
+         displit = (-dispbig) / (dble(qunit)-1.0E0_dp)
 
 ! displace the charges on the molecule
       
@@ -368,14 +368,14 @@ subroutine flucq (ichoice,boxi)
 ! use the thermostat temperature instead of real::temp
       deltvb = fqbeta * deltv
 
-! if ( deltv .lt. -100.0d0) then
+! if ( deltv .lt. -100.0E0_dp) then
 ! write(io_output,*) i,favor(i),deltv
 ! end if 
-      if ( deltvb .gt. (2.3d0*softcut) ) return
+      if ( deltvb .gt. (2.3E0_dp*softcut) ) return
 
-      if ( deltv .le. 0.0d0 ) then
+      if ( deltv .le. 0.0E0_dp ) then
 ! accept move
-      else if ( dexp(-deltvb) .gt. random(-1) ) then
+      else if ( exp(-deltvb) .gt. random(-1) ) then
 ! accept move
       else
          return
@@ -399,7 +399,7 @@ subroutine flucq (ichoice,boxi)
           call dipole(ibox,1)
       end if
 
-      bsflcq(imolty,ibox) = bsflcq(imolty,ibox) + 1.0d0
+      bsflcq(imolty,ibox) = bsflcq(imolty,ibox) + 1.0E0_dp
 
 #ifdef __DEBUG__
       write(io_output,*) 'end FLUCQ in ',myid

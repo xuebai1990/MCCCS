@@ -14,6 +14,12 @@
 !
 #define __USE_BARRIER
 
+#ifdef __DOUBLE_PRECISION__
+#define MP_REAL MPI_DOUBLE_PRECISION
+#else
+#define MP_REAL MPI_REAL
+#endif
+
   SUBROUTINE mp_synchronize( comm )
     USE util_runtime,ONLY:err_exit
     IMPLICIT NONE
@@ -120,7 +126,7 @@
 #ifdef MP_TYPE
 #undef MP_TYPE
 #endif
-#define MP_TYPE MPI_DOUBLE_PRECISION
+#define MP_TYPE MP_REAL
   SUBROUTINE BCAST_REAL( array, n, root, comm )
 #include "mp_bcast_aux.F90"
   END SUBROUTINE BCAST_REAL

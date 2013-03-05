@@ -119,9 +119,9 @@
                            x = rxu(i,iu) - rxu(i,ju)
                            y = ryu(i,iu) - ryu(i,ju)
                            z = rzu(i,iu) - rzu(i,ju)
-                           r(1) = dsqrt(x**2 + y**2 + z**2)
+                           r(1) = sqrt(x**2 + y**2 + z**2)
                            vvib = kforce * ( r(1) - equil )**2
-                           bfactor(1) = dexp(-beta*vvib)
+                           bfactor(1) = exp(-beta*vvib)
                            bsum_try = bsum_try + bfactor(1)
                            start = 2
                         else
@@ -132,7 +132,7 @@
                            
                            r(ivib) = (mincb + random2()*delcb)**third
                            vvib = kforce * ( r(ivib) - equil )**2
-                           bfactor(ivib) = dexp(-beta*vvib)
+                           bfactor(ivib) = exp(-beta*vvib)
                            bsum_try = bsum_try + bfactor(ivib)
                         end do
                         
@@ -144,7 +144,7 @@
                               bs = bs + bfactor(ivib)
                               if (rbf .lt. bs ) then
                                  flength(iu,ju) = r(ivib)
-                                 vvib = dlog(bfactor(ivib))/(-beta)
+                                 vvib = log(bfactor(ivib))/(-beta)
                                  goto 4
                               end if
                            end do
@@ -152,7 +152,7 @@
                         else
 !     --- select old conformation
                            flength(iu,ju) = r(1)
-                           vvib = dlog(bfactor(1))/(-beta)
+                           vvib = log(bfactor(1))/(-beta)
                         end if
                         
 !     --- add up vibrational energy
@@ -172,7 +172,7 @@
                            x = rxu(i,ju) - rxu(i,iu)
                            y = ryu(i,ju) - ryu(i,iu)
                            z = rzu(i,ju) - rzu(i,iu)
-                           flength(iu,ju) = dsqrt(x**2+y**2+z**2)
+                           flength(iu,ju) = sqrt(x**2+y**2+z**2)
                         end if
                      end if 
                   end if
@@ -207,9 +207,9 @@
                               x = rxu(i,ku) - rxu(i,ju)
                               y = ryu(i,ku) - ryu(i,ju)
                               z = rzu(i,ku) - rzu(i,ju)
-                              r(1) = dsqrt(x**2 + y**2 + z**2)
+                              r(1) = sqrt(x**2 + y**2 + z**2)
                               vvib = kforce * ( r(1) - equil )**2
-                              bfactor(1) = dexp(-beta*vvib)
+                              bfactor(1) = exp(-beta*vvib)
                               bsum_try = bsum_try + bfactor(1)
                               start = 2
                            else
@@ -220,7 +220,7 @@
                               
                               r(ivib) = (mincb + random2()*delcb)**third
                               vvib = kforce * ( r(ivib) - equil )**2
-                              bfactor(ivib) = dexp(-beta*vvib)
+                              bfactor(ivib) = exp(-beta*vvib)
                               bsum_try = bsum_try + bfactor(ivib)
                            end do
                            
@@ -232,7 +232,7 @@
                                  bs = bs + bfactor(ivib)
                                  if (rbf .lt. bs ) then
                                     flength(ju,ku) = r(ivib)
-                                    vvib = dlog(bfactor(ivib)) /(-beta)
+                                    vvib = log(bfactor(ivib)) /(-beta)
                                     goto 6
                                  end if
                               end do
@@ -240,7 +240,7 @@
                            else
 !     --- select old conformation
                               flength(ju,ku) = r(1)
-                              vvib = dlog(bfactor(1))/(-beta)
+                              vvib = log(bfactor(1))/(-beta)
                               
                            end if
                            
@@ -264,7 +264,7 @@
                               y = ryu(i,ku) - ryu(i,ju)
                               z = rzu(i,ku) - rzu(i,ju)
                               
-                              flength(ju,ku) = dsqrt(x**2 + y**2 + z**2)
+                              flength(ju,ku) = sqrt(x**2 + y**2 + z**2)
                               
                            end if
                         end if
@@ -322,7 +322,7 @@
                   y = ryu(i,ju) - rynew(iufrom)
                   z = rzu(i,ju) - rznew(iufrom)
                   
-                  hdist = dsqrt( x**2 + y**2 + z**2 )
+                  hdist = sqrt( x**2 + y**2 + z**2 )
 !     --- use law of cosines to calculate bond angle
                   thetac = (lengtha**2 + lengthb**2 - hdist**2) / (2.0d0 * lengtha * lengthb)
                   
@@ -334,14 +334,14 @@
                      lterm = .true.
                      return
                   end if
-                  angle = dacos(thetac)
+                  angle = acos(thetac)
                   
                   ovphi = ovphi + kforceb(iufrom,ju) * (angle - equilb(iufrom,ju))**2
              
 !                  write(io_output,*) iufrom,iu,ju,kforceb(iufrom,ju)*(angle
 !     &                 - equilb(iufrom,ju))**2
      
-                  wei_bv = wei_bv * dexp( - beta * ovphi )
+                  wei_bv = wei_bv * exp( - beta * ovphi )
                end if
             end do
             vibtr= vphi
@@ -387,7 +387,7 @@
                z = rzu(i,ku) - uz
             end if
                
-            hdist = dsqrt( x**2 + y**2 + z**2 )
+            hdist = sqrt( x**2 + y**2 + z**2 )
 
             if (j.gt.1) then
 !     --- we will use a phoney probability since we don't know our bond
@@ -421,7 +421,7 @@
                      vphi = 0
                      return
                   end if
-                  angle = dacos( thetac )
+                  angle = acos( thetac )
                   
                   vphi = vphi + kforceb(iu,ku) * ( angle - equilb(iu,ku) )**2
                   
@@ -446,7 +446,7 @@
                         y = ryu(i,nu) - uy
                         z = rzu(i,nu) - uz
                      end if
-                     hdist = dsqrt( x**2 + y**2 + z**2 )
+                     hdist = sqrt( x**2 + y**2 + z**2 )
                      bin = anint( hdist * 10.0d0 )
                      vtor = vtor * probf(iu,nu,bin)
                      
@@ -463,7 +463,7 @@
                                  y = ryu(i,lu) - uy
                                  z = rzu(i,lu) - uz
                               end if
-                              hdist = dsqrt( x**2 + y**2 + z**2 )
+                              hdist = sqrt( x**2 + y**2 + z**2 )
                               bin = anint( hdist * 10.0d0 )
                               vtor = vtor * probf(iu,lu,bin)
                            end if
@@ -551,7 +551,7 @@
                      yvec(iufrom,ju) = ryu(i,ju) - ryu(i,iufrom)
                      zvec(iufrom,ju) = rzu(i,ju) - rzu(i,iufrom)
                   end if
-                  hdist = dsqrt( xvec(iufrom,ju)**2 + yvec(iufrom,ju)**2 + zvec(iufrom,ju)**2 )
+                  hdist = sqrt( xvec(iufrom,ju)**2 + yvec(iufrom,ju)**2 + zvec(iufrom,ju)**2 )
                   
 !     --- normalize these distances to one for cone
                   xvec(iufrom,ju) = xvec(iufrom,ju) / hdist
@@ -571,7 +571,7 @@
                      lterm = .true.
                      return
                   end if
-                  alpha(count,ju) = dacos(-1.0d0) - dacos(thetac)
+                  alpha(count,ju) = acos(-1.0d0) - acos(thetac)
  126              continue
                end do
             end if
@@ -640,9 +640,9 @@
                            x = rxu(i,iufrom) - rxu(i,iu)
                            y = ryu(i,iufrom) - ryu(i,iu)
                            z = rzu(i,iufrom) - rzu(i,iu)
-                           r(1) = dsqrt(x**2 + y**2 + z**2)
+                           r(1) = sqrt(x**2 + y**2 + z**2)
                            vvib = kforce * ( r(1) - equil )**2
-                           bfactor(1) = dexp(-beta*vvib)
+                           bfactor(1) = exp(-beta*vvib)
                            bsum_try = bsum_try + bfactor(1)
                            start = 2
                         else
@@ -653,7 +653,7 @@
                            
                            r(ivib) = (mincb  + random2()*delcb)**third
                            vvib = kforce *  ( r(ivib) - equil )**2
-                           bfactor(ivib) = dexp(-beta*vvib)
+                           bfactor(ivib) = exp(-beta*vvib)
                            bsum_try = bsum_try + bfactor(ivib)
                         end do
                          
@@ -665,7 +665,7 @@
                               bs = bs + bfactor(ivib)
                               if (rbf .lt. bs ) then
                                  flength(iufrom,iu) = r(ivib)
-                                 vvib = dlog(bfactor(ivib))/(-beta)
+                                 vvib = log(bfactor(ivib))/(-beta)
                                  goto 61
                               end if
                            end do
@@ -673,7 +673,7 @@
                         else
 !     --- select old conformation
                            flength(iufrom,iu) = r(1)
-                           vvib = dlog(bfactor(1))/(-beta)
+                           vvib = log(bfactor(1))/(-beta)
                         end if
                         
 !     --- add up vibrational energy
@@ -694,7 +694,7 @@
                            x = rxu(i,iufrom) - rxu(i,iu)
                            y = ryu(i,iufrom) - ryu(i,iu)
                            z = rzu(i,iufrom) - rzu(i,iu)
-                           flength(iufrom,iu) = dsqrt(x**2+y**2+z**2)
+                           flength(iufrom,iu) = sqrt(x**2+y**2+z**2)
                            
                         end if
                      end if
@@ -711,14 +711,14 @@
                 
                   thetac = -( (rxu(i,iu) - rxu(i,iufrom)) * xvec(iuprev,iufrom)  + (ryu(i,iu) - ryu(i,iufrom)) * yvec(iuprev,iufrom) + (rzu(i,iu) - rzu(i,iufrom)) * zvec(iuprev,iufrom))  / (lengtha*lengthb)
                   
-                  angle = dacos(thetac)
+                  angle = acos(thetac)
                   vphi =  kforcea(count) * (angle-equila(count))**2
          
 !                  write(io_output,*) 'b',iu,iufrom,iuprev,vphi
 
 
                   ang_bend(1) = angle
-                  bfactor(1) = dexp( -beta*vphi)
+                  bfactor(1) = exp( -beta*vphi)
                   bsum_bend = bsum_bend + bfactor(1)
                   start = 2
                else
@@ -730,12 +730,12 @@
                do ibend = start, nchben_a
 !     --- choose angle uniformly on sin(angle)
                   thetac = 2.0d0*random2()- 1.0d0
-                  angle = dacos(thetac)
+                  angle = acos(thetac)
                   ang_bend(ibend) = angle
 
 !     --- find bend energy
                   vphi = kforcea(count) * (angle-equila(count))**2
-                  bfactor(ibend) = dexp(-beta*vphi)
+                  bfactor(ibend) = exp(-beta*vphi)
                   bsum_bend = bsum_bend + bfactor(ibend)
                end do
 
@@ -747,11 +747,11 @@
                      bs = bs + bfactor(ibend)
                      if (rbf.lt.bs) then
                         bangles(count,1) = ang_bend(ibend)
-                        ovphi = ovphi + dlog(bfactor(ibend))/(-beta)
+                        ovphi = ovphi + log(bfactor(ibend))/(-beta)
 
 
 !                        write(io_output,*) 'c',iu,iufrom,iuprev
-!     &                       ,dlog(bfactor(ibend))/(-beta)
+!     &                       ,log(bfactor(ibend))/(-beta)
 
                         goto 10
                      end if
@@ -759,7 +759,7 @@
  10               continue
                else
                   bangles(count,1) = ang_bend(1)
-                  ovphi = ovphi + dlog(bfactor(1))/(-beta)
+                  ovphi = ovphi + log(bfactor(1))/(-beta)
                end if
 
                wei_bv = wei_bv * bsum_bend/dble(nchben_a)
@@ -798,7 +798,7 @@
                         
                         thetac = ( (rxu(i,ju) - rxu(i,iufrom)) * (rxu(i,iu) - rxu(i,iufrom)) + (ryu(i,ju) - ryu(i,iufrom)) * (ryu(i,iu) - ryu(i,iufrom)) + (rzu(i,ju) - rzu(i,iufrom)) * (rzu(i,iu) - rzu(i,iufrom))) / (lengtha * lengthb)
 
-                        angle = dacos(thetac)
+                        angle = acos(thetac)
                         
                         vphi = kforceb(iu,ju) * (angle-equilb(iu,ju))**2
                         
@@ -806,7 +806,7 @@
 !                        write(io_output,*) 'd',iu,iufrom,ju,vphi
 
                         ang_bend(1) = angle
-                        bfactor(1) = dexp( -beta*vphi )
+                        bfactor(1) = exp( -beta*vphi )
                         bsum_bend = bsum_bend + bfactor(1)
 
                         start = 2
@@ -818,13 +818,13 @@
                      do ibend = start, nchben_b
 !     --- choose angle uniformly on sin(angle)
                         thetac = 2.0d0*random2()- 1.0d0
-                        angle = dacos(thetac)
+                        angle = acos(thetac)
                         ang_bend(ibend) = angle
                         
 !     --- find bend energy
                         vphi = kforceb(iu,ju) * (angle-equilb(iu,ju))**2
                         
-                        bfactor(ibend) = dexp(-beta*vphi)
+                        bfactor(ibend) = exp(-beta*vphi)
                         bsum_bend = bsum_bend + bfactor(ibend)
                      end do
 
@@ -836,10 +836,10 @@
                            bs = bs + bfactor(ibend)
                            if (rbf.lt.bs) then
                               bangles(count,2) = ang_bend(ibend)
-                              ovphi = ovphi  + dlog(bfactor(ibend))/(-beta)
+                              ovphi = ovphi  + log(bfactor(ibend))/(-beta)
 
 !                              write(io_output,*) 'd',iu,iufrom,ju
-!     &                             ,dlog(bfactor(ibend))/(-beta)
+!     &                             ,log(bfactor(ibend))/(-beta)
 
                               goto 20
                            end if
@@ -847,7 +847,7 @@
  20                     continue
                      else
                         bangles(count,2) = ang_bend(1)
-                        ovphi = ovphi + dlog(bfactor(1))/(-beta)
+                        ovphi = ovphi + log(bfactor(1))/(-beta)
                         
                      end if
                      
@@ -866,7 +866,7 @@
          ichoi = nchoi(imolty)
 !     --- double ichtor to give extra help for this move
          ichtor = nchtor(imolty) * 2
-         twopi = 2.0d0 * dacos(-1.0d0)
+         twopi = 2.0d0 * acos(-1.0d0)
          
          do ip = 1, ichoi
             
@@ -966,7 +966,7 @@
                            yvec(ju,iu) = -y
                            zvec(ju,iu) = -z
                            
-                           length = dsqrt(x**2 + y**2 + z**2)
+                           length = sqrt(x**2 + y**2 + z**2)
                      
                            flength(iu,ju) = length
                            
@@ -994,7 +994,7 @@
                            end if
 
                               
-                           hdist = dsqrt( x**2 + y**2 + z**2 )
+                           hdist = sqrt( x**2 + y**2 + z**2 )
 !     --- use law of cosines to calculate bond angle
                            thetac = (lengtha**2 + lengthb**2  - hdist**2) / (2.0d0 * lengtha * lengthb)
                            
@@ -1007,7 +1007,7 @@
                               bf_tor(itor) = 0
                               goto 190
                            end if
-                           angle = dacos(thetac)
+                           angle = acos(thetac)
                          
                            vphi = vphi + kforceb(iufrom,ju) * (angle - equilb(iufrom,ju))**2
                            
@@ -1156,7 +1156,7 @@
                            z = rzt(1) - rzu(i,iufrom)
                         end if
                         
-                        length = dsqrt(x**2+y**2+z**2)
+                        length = sqrt(x**2+y**2+z**2)
                         
                         if (lnew) then
                            x = rxt(2) - rxnew(iufrom)
@@ -1168,7 +1168,7 @@
                            z = rzt(2) - rzu(i,iufrom)
                         end if
                            
-                        length = dsqrt(x**2+y**2+z**2)
+                        length = sqrt(x**2+y**2+z**2)
                         
                         rxa(count,1) = rxt(1)
                         rya(count,1) = ryt(1)
@@ -1240,7 +1240,7 @@
                      length = distij(iufrom,iuprev)
                      thetac = -(xx(count)*xvec(iuprev,iufrom)  + yy(count)*yvec(iuprev,iufrom) + zz(count)*zvec(iuprev,iufrom))  / (lengtha*length)
                      
-                     angle = dacos(thetac)
+                     angle = acos(thetac)
                      
                      vphi = vphi + kforcea(count) * (angle-equila(count) )**2
 
@@ -1275,7 +1275,7 @@
                            ku = ipast(ju,counta)
                            length = distij(ju,ku)
                            thetac = - (xvec(iu,ju) * xvec(ju,ku) + yvec(iu,ju) * yvec(ju,ku) + zvec(iu,ju) * zvec(ju,ku)) / (length * lengthb)
-                           angle = dacos( thetac )
+                           angle = acos( thetac )
                           
                            vphi = vphi + kforceb(iu,ku) * (angle -equilb(iu,ku))**2
                            
@@ -1444,7 +1444,7 @@
                               call cleanup('shitfuck')
                            end if
 
-                           angle = dacos(thetac)
+                           angle = acos(thetac)
 
                            vphi = vphi + kforceb(ju,ku) * (angle-equilb(ju,ku))**2
        
@@ -1475,7 +1475,7 @@
 
                            thetac = (xx(count) * xx(counta) + yy(count) * yy(counta) + zz(count) * zz(counta)) /  (lengtha * lengthb)
 
-                           angle = dacos(thetac)
+                           angle = acos(thetac)
                            
                            vphi = vphi + kforceb(iu,ju) * (angle -equilb(iu,ju))**2
                            
@@ -1488,7 +1488,7 @@
                   end do
                end if
 
-               bf_tor(itor) = dexp(-(vvib + vphi + vdha)*beta)
+               bf_tor(itor) = exp(-(vvib + vphi + vdha)*beta)
  190           continue
                
                vvibration(itor) = vvib 

@@ -16,7 +16,7 @@
 
       iunit = nunit(imolty)
       
-      masst(imolty) = 0.0d0
+      masst(imolty) = 0.0E0_dp
 
       do i = 1, iunit
 

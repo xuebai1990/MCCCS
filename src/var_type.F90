@@ -6,6 +6,12 @@ module var_type
 
   integer,parameter::single_precision=selected_real_kind(6,30),single_precision_size=4
   integer,parameter::double_precision=selected_real_kind(14,200),double_precision_size=8
+! dp is default precision
+#ifdef __DOUBLE_PRECISION__
+  integer,parameter::dp=double_precision
+#else
+  integer,parameter::dp=single_precision
+#endif
 
   integer,parameter::normal_int=selected_int_kind(5),int_size=4
   integer,parameter::long_int=selected_int_kind(10),long_int_size=8

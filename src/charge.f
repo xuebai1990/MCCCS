@@ -15,8 +15,8 @@ subroutine charge( i, qion, vflucq, vewald )
 
       integer::i,imolty,iunit,ii,jj,ntii,ntjj,ntij,ibox
       real::vflucq,qion(numax),qqii,vewald,rxui ,ryui,rzui,rxuij,ryuij,rzuij,rij
-      vflucq = 0.0d0
-      vewald = 0.0d0
+      vflucq = 0.0E0_dp
+      vewald = 0.0E0_dp
       imolty = moltyp(i)
       iunit = nunit(imolty)
       ibox = nboxi(i)
@@ -56,15 +56,15 @@ subroutine charge( i, qion, vflucq, vewald )
                rxuij = rxui - rxu(i,jj)
                ryuij = ryui - ryu(i,jj)
                rzuij = rzui - rzu(i,jj)
-               rij = dsqrt(rxuij*rxuij + ryuij*ryuij + rzuij*rzuij)
+               rij = sqrt(rxuij*rxuij + ryuij*ryuij + rzuij*rzuij)
                if (.not.lqinclu(imolty,ii,jj)) then
-                   vewald = vewald + qqii*qion(jj)* (erfunc(calp(ibox)*rij)-1.0d0)/rij
+                   vewald = vewald + qqii*qion(jj)* (erfunc(calp(ibox)*rij)-1.0E0_dp)/rij
                else
-                   vewald = vewald + (1.0d0-qscale2(imolty,ii,jj))*qqii* qion(jj)* (erfunc(calp(ibox)*rij)-1.0d0)/rij
+                   vewald = vewald + (1.0E0_dp-qscale2(imolty,ii,jj))*qqii* qion(jj)* (erfunc(calp(ibox)*rij)-1.0E0_dp)/rij
                end if 
             end do
 ! self term in ewald sum ---
-            vewald = vewald - qqii*qqii*calp(ibox)/dsqrt(onepi)
+            vewald = vewald - qqii*qqii*calp(ibox)/sqrt(onepi)
          end do
       end if
       vewald = qqfact*vewald

@@ -94,8 +94,8 @@
             dfac(1) = (voln(1)/volo(1))**(1.0d0/3.0d0)
             dfac(2) = (voln(2)/volo(2))**(1.0d0/3.0d0)
          else
-            dfac(1) = dsqrt(voln(1)/volo(1))
-            dfac(2) = dsqrt(voln(2)/volo(2))
+            dfac(1) = sqrt(voln(1)/volo(1))
+            dfac(2) = sqrt(voln(2)/volo(2))
          end if            
          boxlx(1) = boxlx(1) * dfac(1)
          boxly(1) = boxly(1) * dfac(1)
@@ -136,7 +136,7 @@
             vextn(ibox)   = vext  
             velectn(ibox) = velect
             vboxn(ibox)   = vboxo(ibox) +  (vintern(ibox)-vintero(ibox)) + (vextn(ibox)-vexto(ibox)) +  (velectn(ibox)-velecto(ibox))
-            apress = dexp(-(vboxn(ibox)-vboxo(ibox))*beta)* ((voln(ibox)/volo(ibox))**nchbox(ibox))
+            apress = exp(-(vboxn(ibox)-vboxo(ibox))*beta)* ((voln(ibox)/volo(ibox))**nchbox(ibox))
             apresscum(ibox,itest) = apresscum(ibox,itest)  + apress
 
  400     continue

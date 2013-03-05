@@ -1,5 +1,5 @@
 MODULE sim_zeolite
-  use var_type,only:double_precision,default_string_length
+  use var_type,only:dp,default_string_length
   use const_math,only:onepi
   use util_runtime,only:err_exit
   use util_string,only:str_search
@@ -29,7 +29,7 @@ MODULE sim_zeolite
   end type ZeolitePotentialType
 
   integer,parameter::boxZeo=1
-  real,parameter::eps=1.0E-4_double_precision,dgr=0.2_double_precision
+  real,parameter::eps=1.0E-4_dp,dgr=0.2_dp
 
 CONTAINS
 

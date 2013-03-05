@@ -130,9 +130,9 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
             call flucq(2,0)
          end do
          deltv = vbox(ibox) - vboxo(ibox)
-         weight = dexp(-deltv*beta)
+         weight = exp(-deltv*beta)
          deltv = vboxo(boxrem) - vbox(boxrem)
-         weiold = dexp(-deltv*beta)
+         weiold = exp(-deltv*beta)
          volins=boxlx(ibox)*boxly(ibox)*boxlz(ibox)
          volrem=boxlx(boxrem)*boxly(boxrem)*boxlz(boxrem)
 
@@ -163,8 +163,8 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
          do ichoiq = 1,nchoiq(ibox)
             call flucq(0,ibox)
          end do
-         vnewt2 = 0.0d0
-         voldt2 = 0.0d0
+         vnewt2 = 0.0E0_dp
+         voldt2 = 0.0E0_dp
          do ibox2 = 1, nbox
             vnewt2 = vnewt2 + vbox(ibox2)
             voldt2 = voldt2 + vboxo(ibox2)
@@ -172,11 +172,11 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
          deltv = vnewt2 - voldt2
 
          deltvb = beta * deltv
-         if ( deltvb .gt. (2.3d0*softcut) ) then
+         if ( deltvb .gt. (2.3E0_dp*softcut) ) then
             laccept = .false.
-         else if ( deltv .le. 0.0d0 ) then
+         else if ( deltv .le. 0.0E0_dp ) then
             laccept = .true.
-         else if ( dexp(-deltvb) .gt. random(-1) ) then
+         else if ( exp(-deltvb) .gt. random(-1) ) then
             laccept = .true.
          else
             laccept = .false.

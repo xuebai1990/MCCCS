@@ -1,4 +1,5 @@
 module util_math
+  use var_type,only:dp
   use const_math,only:onepi
   implicit none
   private
@@ -22,18 +23,18 @@ contains
     real::angle
     real::sintheone,costheone,sinthetwo,costhetwo,sinphione,cosphione,sinphitwo,cosphitwo,cosangle
 
-    sintheone = dsin(thetaone)
-    costheone = dcos(thetaone)
-    sinthetwo = dsin(thetatwo)
-    costhetwo = dcos(thetatwo)
-    sinphione = dsin(phione)
-    cosphione = dcos(phione)
-    sinphitwo = dsin(phitwo)
-    cosphitwo = dcos(phitwo)
+    sintheone = sin(thetaone)
+    costheone = cos(thetaone)
+    sinthetwo = sin(thetatwo)
+    costhetwo = cos(thetatwo)
+    sinphione = sin(phione)
+    cosphione = cos(phione)
+    sinphitwo = sin(phitwo)
+    cosphitwo = cos(phitwo)
 
     cosangle = sintheone*cosphione*sinthetwo*cosphitwo + sintheone*sinphione*sinthetwo*sinphitwo + costheone*costhetwo
 
-    angle = dacos(cosangle)
+    angle = acos(cosangle)
 
     return
   end function cone_angle
@@ -44,11 +45,11 @@ contains
     real,intent(in)::x
 
 #ifdef __USEOWN__
-    real,parameter::p=0.3275911d0,a1=0.254829592d0,a2=-0.284496736d0,a3=1.421413741d0,a4=-1.453152027d0,a5=1.061405429d0
+    real,parameter::p=0.3275911E0_dp,a1=0.254829592E0_dp,a2=-0.284496736E0_dp,a3=1.421413741E0_dp,a4=-1.453152027E0_dp,a5=1.061405429E0_dp
     real::tt,eee
 
-    eee = dexp(-x*x)
-    tt = 1.0d0/(1.0d0 + p*x)
+    eee = exp(-x*x)
+    tt = 1.0E0_dp/(1.0E0_dp + p*x)
     erfunc = ((((a5*tt+a4)*tt+a3)*tt+a2)*tt+a1)*tt*eee
 #else
     erfunc = erfc(x)
@@ -61,9 +62,9 @@ contains
     real,intent(in)::z,nu
 
 ! simple form
-    mbessel = sqrt(onepi/(2.0d0*z))*exp(-z)
-!     &         *(1.0d0 + (4.0d0*nu**2-1)/(8.0d0*z) +
-!     &         (4.0d0*nu**2-1)*(4.0d0*nu**2-9.0d0)/(2.0d0*64.0d0*z**2))
+    mbessel = sqrt(onepi/(2.0E0_dp*z))*exp(-z)
+!     &         *(1.0E0_dp + (4.0E0_dp*nu**2-1)/(8.0E0_dp*z) +
+!     &         (4.0E0_dp*nu**2-1)*(4.0E0_dp*nu**2-9.0E0_dp)/(2.0E0_dp*64.0E0_dp*z**2))
   end function mbessel
 
 !  (C) Copr. 1986-92 Numerical Recipes Software +3Y.
@@ -116,7 +117,7 @@ contains
 !> for the first derivative of the interpolating function at the point 1
 !> and n, respectively, this routine returns an array y2(1:n) of length n
 !> which contains the second derivatives of the interpolating function at
-!> the tabulated points x(i). If yp1 and/or ypn are equal to 1E30 or larger,
+!> the tabulated points x(i). If yp1 and/or ypn are equal to 1E30_dp or larger,
 !> the routine is signaled to set the corresponding boundary condition for
 !> a natural spline, with zero second derivative on that boundary
 !> Parameter: NMAX is the largest anticipated value of n
@@ -130,27 +131,27 @@ contains
     integer::i,k
     real::p,qn,sig,un,u(NMAX)
 
-    if (yp1.gt.0.99d30) then
-       y2(1) = 0.0d0
-       u(1) = 0.0d0
+    if (yp1.gt.0.99E30_dp) then
+       y2(1) = 0.0E0_dp
+       u(1) = 0.0E0_dp
     else
-       y2(1) = -0.5d0
-       u(1) = (3.0d0/(x(2)-x(1)))*((y(2)-y(1))/(x(2)-x(1))-yp1)
+       y2(1) = -0.5E0_dp
+       u(1) = (3.0E0_dp/(x(2)-x(1)))*((y(2)-y(1))/(x(2)-x(1))-yp1)
     end if
     do i = 2,n-1
        sig = (x(i)-x(i-1))/(x(i+1)-x(i-1))
-       p = sig*y2(i-1)+2.0d0
-       y2(i) = (sig-1.0d0)/p
-       u(i) = (6.0d0*((y(i+1)-y(i))/(x(i+1)-x(i))-(y(i)-y(i-1))/(x(i)-x(i-1)))/(x(i+1)-x(i-1))-sig*u(i-1))/p
+       p = sig*y2(i-1)+2.0E0_dp
+       y2(i) = (sig-1.0E0_dp)/p
+       u(i) = (6.0E0_dp*((y(i+1)-y(i))/(x(i+1)-x(i))-(y(i)-y(i-1))/(x(i)-x(i-1)))/(x(i+1)-x(i-1))-sig*u(i-1))/p
     end do
-    if (ypn .gt. 0.99d30) then
-       qn = 0.0d0
-       un = 0.0d0
+    if (ypn .gt. 0.99E30_dp) then
+       qn = 0.0E0_dp
+       un = 0.0E0_dp
     else
-       qn = 0.5d0
-       un = (3.0d0/(x(n)-x(n-1)))*(ypn-(y(n)-y(n-1))/(x(n)-x(n-1)))
+       qn = 0.5E0_dp
+       un = (3.0E0_dp/(x(n)-x(n-1)))*(ypn-(y(n)-y(n-1))/(x(n)-x(n-1)))
     end if
-    y2(n) = (un-qn*u(n-1))/(qn*y2(n-1)+1.0d0)
+    y2(n) = (un-qn*u(n-1))/(qn*y2(n-1)+1.0E0_dp)
     do k = n-1, 1, -1
        y2(k) = y2(k)*y2(k+1)+u(k)
     end do
@@ -177,7 +178,7 @@ contains
     if (h.eq.0.) call err_exit(__FILE__,__LINE__,'bad xa input in splint',-1)
     a = (xa(khi)-x)/h
     b = (x-xa(klo))/h
-    y = a*ya(klo)+b*ya(khi)+((a**3-a)*y2a(klo)+(b**3-b)*y2a(khi))*(h**2)/6.0d0
+    y = a*ya(klo)+b*ya(khi)+((a**3-a)*y2a(klo)+(b**3-b)*y2a(khi))*(h**2)/6.0E0_dp
     return
   end subroutine splint
 

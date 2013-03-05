@@ -12,7 +12,7 @@ MODULE energy_sami
   real::sij(9),eij(9),vsh(9),vsha(9)
   integer::tau1,tau2
 ! Sami's parameters: to be used with lsami = .true. AND lmuir = .true.
-  parameter ( alpha1=21.162d0, alpha2=-21.162d0, beta1=661.6d0, beta2=6616.0d0, tau1=-32, tau2=-16 )
+  parameter ( alpha1=21.162E0_dp, alpha2=-21.162E0_dp, beta1=661.6E0_dp, beta2=6616.0E0_dp, tau1=-32, tau2=-16 )
 contains
 !    *******************************
 ! Set-Up SAMI's potentials. **
@@ -21,17 +21,17 @@ contains
 
       real::hsig,heps,tsig,teps
 
-      parameter ( hsig=4.220d0, heps=110.68816d0,  tsig=3.527d0, teps=79.982210d0 )
+      parameter ( hsig=4.220E0_dp, heps=110.68816E0_dp,  tsig=3.527E0_dp, teps=79.982210E0_dp )
 
       real::rcsami
       integer::ij
 
 ! --------------------------------------------------------------------
 
-      rcsami = 2.5d0*tsig
+      rcsami = 2.5E0_dp*tsig
 
       sij(1)=hsig
-      sij(2)=0.5d0*(hsig+tsig)
+      sij(2)=0.5E0_dp*(hsig+tsig)
       sij(3)=sij(2)
       sij(4)=sij(2)
       sij(5)=tsig
@@ -41,7 +41,7 @@ contains
       sij(9)=tsig
 
       eij(1)=heps
-      eij(2)=dsqrt(heps*teps)
+      eij(2)=sqrt(heps*teps)
       eij(3)=eij(2)
       eij(4)=eij(2)
       eij(5)=teps
@@ -50,18 +50,18 @@ contains
       eij(8)=teps
       eij(9)=teps
 
-      vsh(1)  = eij(1) * ( ( 13.0d0 * (sij(1)/rcsami)**12 ) + (  4.0d0 * (sij(1)/rcsami)**3  ) )
-      vsha(1) = eij(1) * ( ( 12.0d0 * sij(1)**12 / rcsami**13 ) + (  3.0d0 * sij(1)**3  / rcsami**4  ) )
+      vsh(1)  = eij(1) * ( ( 13.0E0_dp * (sij(1)/rcsami)**12 ) + (  4.0E0_dp * (sij(1)/rcsami)**3  ) )
+      vsha(1) = eij(1) * ( ( 12.0E0_dp * sij(1)**12 / rcsami**13 ) + (  3.0E0_dp * sij(1)**3  / rcsami**4  ) )
 
       do ij = 2, 9
-         vsh(ij)  = 4.0d0 * eij(ij) *  ( ( 13.0d0 * (sij(ij)/rcsami)**12 ) - (  7.0d0 * (sij(ij)/rcsami)**6  ) )
-         vsha(ij) = 4.0d0 * eij(ij) * ( ( 12.0d0 * sij(ij)**12 / rcsami**13 ) - (  6.0d0 * sij(ij)**6  / rcsami**7  ) )
+         vsh(ij)  = 4.0E0_dp * eij(ij) *  ( ( 13.0E0_dp * (sij(ij)/rcsami)**12 ) - (  7.0E0_dp * (sij(ij)/rcsami)**6  ) )
+         vsha(ij) = 4.0E0_dp * eij(ij) * ( ( 12.0E0_dp * sij(ij)**12 / rcsami**13 ) - (  6.0E0_dp * sij(ij)**6  / rcsami**7  ) )
       end do
 
 ! do ij = 1,9
-! write(io_output,*) 'ij',ij,'vsh',(vsh(ij)/80.0d0),
-!     +                      'vsha',(vsha(ij)/80.0d0),
-!     +                      'eij',(eij(ij)/80.0d0)
+! write(io_output,*) 'ij',ij,'vsh',(vsh(ij)/80.0E0_dp),
+!     +                      'vsha',(vsha(ij)/80.0E0_dp),
+!     +                      'eij',(eij(ij)/80.0E0_dp)
 ! end do
 
       return
@@ -80,15 +80,15 @@ contains
 
 ! --------------------------------------------------------------------
 
-      rij = dsqrt( rijsq )
+      rij = sqrt( rijsq )
       sr = sij(ntij) / rij
 
       if ( ntij .eq. 1 ) then
 ! head-head interaction ( repulsive 12+3 interaction )
-         ljsami = ( eij(1) * sr**3 * ( 1.0d0 + sr**9 ) ) - vsh(1) + ( rij * vsha(1) )
+         ljsami = ( eij(1) * sr**3 * ( 1.0E0_dp + sr**9 ) ) - vsh(1) + ( rij * vsha(1) )
       else
 ! head-tail or tail-tail interaction ( LJ 12-6 interaction )
-         ljsami = ( 4.0d0 * eij(ntij) * sr**6 * ( sr**6 - 1.0d0 ) ) - vsh(ntij) + ( rij * vsha(ntij) )
+         ljsami = ( 4.0E0_dp * eij(ntij) * sr**6 * ( sr**6 - 1.0E0_dp ) ) - vsh(ntij) + ( rij * vsha(ntij) )
       end if
 
       return
@@ -107,16 +107,16 @@ contains
       if ( ntj .eq. 1 ) then
 ! HEADgroup potential ---
          if ( z .le. alpha2 ) then
-            exsami = 0.0d0
+            exsami = 0.0E0_dp
          else
-            exsami = beta2 / ( 1.0d0 + ( (z/alpha2) - 1.0d0 )**tau2 )
+            exsami = beta2 / ( 1.0E0_dp + ( (z/alpha2) - 1.0E0_dp )**tau2 )
          end if
       else
 ! TAILgroup potential ---
          if ( z .ge. alpha1 ) then
-            exsami = 0.0d0
+            exsami = 0.0E0_dp
          else
-            exsami = beta1 / ( 1.0d0 + ( 1.0d0 - (z/alpha1) )**tau1 )
+            exsami = beta1 / ( 1.0E0_dp + ( 1.0E0_dp - (z/alpha1) )**tau1 )
          end if
       end if
 
@@ -134,8 +134,8 @@ contains
       integer::ntij
 
 ! attention: eps_hh / 4 used, since later multiplied by 4 ---
-! parameter (epshead=27.67204d0,sighead=4.22d0)
-      parameter (epshead=27.7204d0,sighead=6.5d0)
+! parameter (epshead=27.67204E0_dp,sighead=4.22E0_dp)
+      parameter (epshead=27.7204E0_dp,sighead=6.5E0_dp)
 
 ! --------------------------------------------------------------------
 
@@ -143,16 +143,16 @@ contains
 ! write(io_output,*) 'epsij',epsij
 
       if ( ntij .eq. 1 ) then
-         sr = sighead / dsqrt( rijsq )
-! write(io_output,*) 'sr',sr,'v',4.0d0*epshead*sr**3*(sr**9+1.0d0)
-         ljmuir = epshead * sr**3 * ( sr**9 + 1.0d0 )
+         sr = sighead / sqrt( rijsq )
+! write(io_output,*) 'sr',sr,'v',4.0E0_dp*epshead*sr**3*(sr**9+1.0E0_dp)
+         ljmuir = epshead * sr**3 * ( sr**9 + 1.0E0_dp )
       else
          sr2 = sig2ij(ntij) / rijsq
          sr6 = sr2 * sr2 * sr2
-         ljmuir = epsij(ntij) * sr6 * ( sr6 - 1.0d0)
-! if (ljmuir .gt. 100.0d0)
-!     &       write(18,*) sig2ij(ntij),rijsq,'sr',dsqrt(sr2),'v',
-!     &            4.0d0 * epsij(ntij) * sr6 * ( sr6 - 1.0d0)
+         ljmuir = epsij(ntij) * sr6 * ( sr6 - 1.0E0_dp)
+! if (ljmuir .gt. 100.0E0_dp)
+!     &       write(18,*) sig2ij(ntij),rijsq,'sr',sqrt(sr2),'v',
+!     &            4.0E0_dp * epsij(ntij) * sr6 * ( sr6 - 1.0E0_dp)
       end if
 
       return
@@ -174,26 +174,26 @@ contains
       if ( ntj .eq. 1 ) then
 ! HEADgroup potential ---
          if ( z .le. alpha2 ) then
-            exmuir = 0.0d0
+            exmuir = 0.0E0_dp
          else
-            exmuir = beta2 / ( 1.0d0 + ( (z/alpha2) - 1.0d0 )**tau2 )
+            exmuir = beta2 / ( 1.0E0_dp + ( (z/alpha2) - 1.0E0_dp )**tau2 )
          end if
       else
 ! TAILgroup potential ---
          if ( z .ge. alpha1 ) then
-            exmuir = 0.0d0
+            exmuir = 0.0E0_dp
          else
             if ( z .lt. zprmin ) then
                if ( ntj .eq. 2 ) then
-                  exmuir = betac2 / (1.0d0+(1.0d0-(z/alpha1))**tau1 ) + v2prmin
+                  exmuir = betac2 / (1.0E0_dp+(1.0E0_dp-(z/alpha1))**tau1 ) + v2prmin
                else
-                  exmuir = betac3 / (1.0d0+(1.0d0-(z/alpha1))**tau1 ) + v3prmin
+                  exmuir = betac3 / (1.0E0_dp+(1.0E0_dp-(z/alpha1))**tau1 ) + v3prmin
                end if
             else
                if ( ntj .eq. 2 ) then
-                  exmuir = betac2 / (1.0d0+(1.0d0-(z/alpha1))**tau1 ) + c9ch2 / z**9 -  c3ch2 / z**3
+                  exmuir = betac2 / (1.0E0_dp+(1.0E0_dp-(z/alpha1))**tau1 ) + c9ch2 / z**9 -  c3ch2 / z**3
                else
-                  exmuir = betac3 / (1.0d0+(1.0d0-(z/alpha1))**tau1 ) + c9ch3 / z**9 -  c3ch3 / z**3
+                  exmuir = betac3 / (1.0E0_dp+(1.0E0_dp-(z/alpha1))**tau1 ) + c9ch3 / z**9 -  c3ch3 / z**3
                end if
             end if
          end if

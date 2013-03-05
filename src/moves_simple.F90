@@ -41,7 +41,7 @@ contains
       do icbu = 1,nmolty
          if ( rchain .lt. pmtrmt(icbu) ) then
             imolty = icbu
-            rchain = 2.0d0
+            rchain = 2.0E0_dp
          end if
       end do
 
@@ -54,12 +54,12 @@ contains
 !         (in box 2 is an ideal gas!)
          ibox = 1
          if (ncmt(ibox,imolty).eq.0) then
-            if(lx) bntrax(imolty,ibox) = bntrax(imolty,ibox) + 1.0d0
-            if(ly) bntray(imolty,ibox) = bntray(imolty,ibox) + 1.0d0
-            if(lz) bntraz(imolty,ibox) = bntraz(imolty,ibox) + 1.0d0
+            if(lx) bntrax(imolty,ibox) = bntrax(imolty,ibox) + 1.0E0_dp
+            if(ly) bntray(imolty,ibox) = bntray(imolty,ibox) + 1.0E0_dp
+            if(lz) bntraz(imolty,ibox) = bntraz(imolty,ibox) + 1.0E0_dp
             return
          end if
-         i = idint( dble(ncmt(1,imolty))*random(-1) ) + 1
+         i = int( dble(ncmt(1,imolty))*random(-1) ) + 1
          i = parbox(i,1,imolty)
          if ( moltyp(i) .ne. imolty ) write(io_output,*) 'screwup traxyz'
 
@@ -87,20 +87,20 @@ contains
 
 ! move i ***
       if (lx) then
-         rx =  ( 2.0*random(-1) - 1.0d0 ) * rmtrax(imolty,ibox)
-         bntrax(imolty,ibox) = bntrax(imolty,ibox) + 1.0d0
+         rx =  ( 2.0*random(-1) - 1.0E0_dp ) * rmtrax(imolty,ibox)
+         bntrax(imolty,ibox) = bntrax(imolty,ibox) + 1.0E0_dp
       else
          rx=0
       end if
       if (ly) then
-         ry =  ( 2.0*random(-1) - 1.0d0 ) * rmtray(imolty,ibox)
-         bntray(imolty,ibox) = bntray(imolty,ibox) + 1.0d0
+         ry =  ( 2.0*random(-1) - 1.0E0_dp ) * rmtray(imolty,ibox)
+         bntray(imolty,ibox) = bntray(imolty,ibox) + 1.0E0_dp
       else
          ry=0
       end if
       if (lz) then
-         rz =  ( 2.0*random(-1) - 1.0d0 ) * rmtraz(imolty,ibox)
-         bntraz(imolty,ibox) = bntraz(imolty,ibox) + 1.0d0
+         rz =  ( 2.0*random(-1) - 1.0E0_dp ) * rmtraz(imolty,ibox)
+         bntraz(imolty,ibox) = bntraz(imolty,ibox) + 1.0E0_dp
       else
          rz=0
       end if
@@ -111,19 +111,19 @@ contains
          if ( .not. (lsolid(ibox) .and. .not. lrect(ibox)) ) then
             if (lx) then
                if ( lfold .and. lpbcx ) then
-                  if ((xcm(i) + rx) .lt. 0.0d0) ddx = boxlx(ibox)
+                  if ((xcm(i) + rx) .lt. 0.0E0_dp) ddx = boxlx(ibox)
                   if ((xcm(i) + rx) .gt. boxlx(ibox)) ddx = -boxlx(ibox)
                end if
             end if
             if (ly) then
                if ( lfold .and. lpbcy ) then
-                  if ((ycm(i) + ry).lt.0.0d0)  ddy=boxly(ibox)
+                  if ((ycm(i) + ry).lt.0.0E0_dp)  ddy=boxly(ibox)
                   if ((ycm(i) + ry).gt.boxly(ibox))  ddy=-boxly(ibox)
                end if
             end if
             if (lz) then
                if ( lfold .and. lpbcz ) then
-                  if ((zcm(i) + rz).lt.0.0d0)  ddz=boxlz(ibox)
+                  if ((zcm(i) + rz).lt.0.0E0_dp)  ddz=boxlz(ibox)
                   if ((zcm(i) + rz).gt.boxlz(ibox))  ddz=-boxlz(ibox)
                end if
             end if
@@ -157,14 +157,14 @@ contains
          vipswn = vipswn + vrecipn
          vipswo = vipswo + vrecipo
          if (lstagea) then
-            vrecipn    =   (1.0d0-(1.0d0-etais)*lambdais)*vrecipn
-            vrecipo    =   (1.0d0-(1.0d0-etais)*lambdais)*vrecipo
+            vrecipn    =   (1.0E0_dp-(1.0E0_dp-etais)*lambdais)*vrecipn
+            vrecipo    =   (1.0E0_dp-(1.0E0_dp-etais)*lambdais)*vrecipo
          else if (lstageb) then
             vrecipn =  etais*vrecipn
             vrecipo =  etais*vrecipo
          else if (lstagec) then
-            vrecipn =  (etais+(1.0d0-etais)*lambdais)*vrecipn
-            vrecipo =  (etais+(1.0d0-etais)*lambdais)*vrecipo
+            vrecipn =  (etais+(1.0E0_dp-etais)*lambdais)*vrecipn
+            vrecipo =  (etais+(1.0E0_dp-etais)*lambdais)*vrecipo
          end if
          vnew = vnew + vrecipn
          vold = vold + vrecipo
@@ -180,18 +180,18 @@ contains
       if ( lanes ) then
          call anes(i,ibox,ibox,1,laccept,deltv,vintern,vintran,vextn, velectn,vintero,vintrao,vexto,velecto,vdum,vdum, vdum,vdum,.false.)
          if ( laccept ) then
-            if (lx) bstrax(imolty,ibox) = bstrax(imolty,ibox) + 1.0d0
-            if (ly) bstray(imolty,ibox) = bstray(imolty,ibox) + 1.0d0
-            if (lz) bstraz(imolty,ibox) = bstraz(imolty,ibox) + 1.0d0
+            if (lx) bstrax(imolty,ibox) = bstrax(imolty,ibox) + 1.0E0_dp
+            if (ly) bstray(imolty,ibox) = bstray(imolty,ibox) + 1.0E0_dp
+            if (lz) bstraz(imolty,ibox) = bstraz(imolty,ibox) + 1.0E0_dp
          end if
          return
       end if
 
-      if ( deltvb .gt. (2.3d0*softcut) ) return
+      if ( deltvb .gt. (2.3E0_dp*softcut) ) return
 
-      if ( deltv .le. 0.0d0 ) then
+      if ( deltv .le. 0.0E0_dp ) then
 ! accept move
-      else if ( dexp(-deltvb) .gt. random(-1) ) then
+      else if ( exp(-deltvb) .gt. random(-1) ) then
 ! accept move
       else
 ! move rejected
@@ -231,9 +231,9 @@ contains
 
       call ctrmas(.false.,ibox,i,1)
 
-      if (lx) bstrax(imolty,ibox) = bstrax(imolty,ibox) + 1.0d0
-      if (ly) bstray(imolty,ibox) = bstray(imolty,ibox) + 1.0d0
-      if (lz) bstraz(imolty,ibox) = bstraz(imolty,ibox) + 1.0d0
+      if (lx) bstrax(imolty,ibox) = bstrax(imolty,ibox) + 1.0E0_dp
+      if (ly) bstray(imolty,ibox) = bstray(imolty,ibox) + 1.0E0_dp
+      if (lz) bstraz(imolty,ibox) = bstraz(imolty,ibox) + 1.0E0_dp
 
       if ( licell .and. (ibox.eq.boxlink)) then
 ! update linkcell list
@@ -329,13 +329,13 @@ contains
          do icbu = 1,nmolty
             if ( rchain .lt. pmromt(icbu) ) then
                imolty = icbu
-               rchain = 2.0d0
+               rchain = 2.0E0_dp
             end if
          end do
          if (ncmt(ibox,imolty).eq.0) then
-            if(lx) bnrotx(imolty,ibox) = bnrotx(imolty,ibox) + 1.0d0
-            if(ly) bnroty(imolty,ibox) = bnroty(imolty,ibox) + 1.0d0
-            if(lz) bnrotz(imolty,ibox) = bnrotz(imolty,ibox) + 1.0d0
+            if(lx) bnrotx(imolty,ibox) = bnrotx(imolty,ibox) + 1.0E0_dp
+            if(ly) bnroty(imolty,ibox) = bnroty(imolty,ibox) + 1.0E0_dp
+            if(lz) bnrotz(imolty,ibox) = bnrotz(imolty,ibox) + 1.0E0_dp
             return
          end if
 
@@ -350,7 +350,7 @@ contains
          do icbu = 1,nmolty
             if ( rchain .lt. pmromt(icbu) ) then
                imolty = icbu
-               rchain = 2.0d0
+               rchain = 2.0E0_dp
             end if
          end do
 
@@ -396,20 +396,20 @@ contains
 
       if (lx) then
          rmrot = rmrotx(imolty,ibox)
-         bnrotx(imolty,ibox) = bnrotx(imolty,ibox) + 1.0d0
+         bnrotx(imolty,ibox) = bnrotx(imolty,ibox) + 1.0E0_dp
       else if (ly) then
          rmrot = rmroty(imolty,ibox)
-         bnroty(imolty,ibox) = bnroty(imolty,ibox) + 1.0d0
+         bnroty(imolty,ibox) = bnroty(imolty,ibox) + 1.0E0_dp
       else if (lz) then
          rmrot = rmrotz(imolty,ibox)
-         bnrotz(imolty,ibox) = bnrotz(imolty,ibox) + 1.0d0
+         bnrotz(imolty,ibox) = bnrotz(imolty,ibox) + 1.0E0_dp
       end if
-      dgamma = ( 2.0d0*random(-1) - 1.0d0 ) * rmrot
+      dgamma = ( 2.0E0_dp*random(-1) - 1.0E0_dp ) * rmrot
 
 ! set up the rotation marix ***
 
-      cosdg = dcos( dgamma )
-      sindg = dsin( dgamma )
+      cosdg = cos( dgamma )
+      sindg = sin( dgamma )
 
 ! Determine the rotation coordinates ***
       if (iuroty .eq. 0) then
@@ -497,14 +497,14 @@ contains
          vipswn = vipswn + vrecipn
          vipswo = vipswo + vrecipo
          if (lstagea) then
-           vrecipn  =  (1.0d0-(1.0d0-etais)*lambdais)*vrecipn
-           vrecipo  =  (1.0d0-(1.0d0-etais)*lambdais)*vrecipo
+           vrecipn  =  (1.0E0_dp-(1.0E0_dp-etais)*lambdais)*vrecipn
+           vrecipo  =  (1.0E0_dp-(1.0E0_dp-etais)*lambdais)*vrecipo
          else if (lstageb) then
            vrecipn  =  etais*vrecipn
            vrecipo  =  etais*vrecipo
          else if (lstagec) then
-           vrecipn  =  (etais+(1.0d0-etais)*lambdais)*vrecipn
-           vrecipo  =  (etais+(1.0d0-etais)*lambdais)*vrecipo
+           vrecipn  =  (etais+(1.0E0_dp-etais)*lambdais)*vrecipn
+           vrecipo  =  (etais+(1.0E0_dp-etais)*lambdais)*vrecipo
          end if
          vnew = vnew + vrecipn
          vold = vold + vrecipo
@@ -520,18 +520,18 @@ contains
       if ( lanes ) then
          call anes(i,ibox,ibox,2,laccept,deltv,vintern,vintran,vextn, velectn,vintero,vintrao,vexto,velecto,vdum,vdum,vdum, vdum,.false.)
          if (laccept) then
-            if (lx) bsrotx(imolty,ibox) = bsrotx(imolty,ibox) + 1.0d0
-            if (ly) bsroty(imolty,ibox) = bsroty(imolty,ibox) + 1.0d0
-            if (lz) bsrotz(imolty,ibox) = bsrotz(imolty,ibox) + 1.0d0
+            if (lx) bsrotx(imolty,ibox) = bsrotx(imolty,ibox) + 1.0E0_dp
+            if (ly) bsroty(imolty,ibox) = bsroty(imolty,ibox) + 1.0E0_dp
+            if (lz) bsrotz(imolty,ibox) = bsrotz(imolty,ibox) + 1.0E0_dp
          end if
          return
       end if
 
-      if ( deltvb .gt. (2.3d0*softcut) ) return
+      if ( deltvb .gt. (2.3E0_dp*softcut) ) return
 
-      if ( deltv .le. 0.0d0 ) then
+      if ( deltv .le. 0.0E0_dp ) then
 ! move accepted
-      else if ( dexp(-deltvb) .gt. random(-1) ) then
+      else if ( exp(-deltvb) .gt. random(-1) ) then
 ! move accepted
       else
 ! move rejected
@@ -568,9 +568,9 @@ contains
 ! update center of mass
       call ctrmas(.false.,ibox,i,2)
 
-      if (lx) bsrotx(imolty,ibox) = bsrotx(imolty,ibox) + 1.0d0
-      if (ly) bsroty(imolty,ibox) = bsroty(imolty,ibox) + 1.0d0
-      if (lz) bsrotz(imolty,ibox) = bsrotz(imolty,ibox) + 1.0d0
+      if (lx) bsrotx(imolty,ibox) = bsrotx(imolty,ibox) + 1.0E0_dp
+      if (ly) bsroty(imolty,ibox) = bsroty(imolty,ibox) + 1.0E0_dp
+      if (lz) bsrotz(imolty,ibox) = bsrotz(imolty,ibox) + 1.0E0_dp
 
       if ( lneigh ) then
          call update_neighbor_list(i,rxuion(1,2) - rxuion(1,1),ryuion(1,2) - ryuion(1,1),rzuion(1,2) - rzuion(1,1),.false.)
@@ -649,7 +649,7 @@ contains
       do icbu = 1,nmolty
          if ( rchain .lt. pmtrmt(icbu) ) then
             imolty = icbu
-            rchain = 2.0d0
+            rchain = 2.0E0_dp
          end if
       end do
 
@@ -658,12 +658,12 @@ contains
 !         (in box 2 is an ideal gas!)
          ibox = 1
          if (ncmt(ibox,imolty).eq.0) then
-            if(lx) Abntrax = Abntrax + 1.0d0
-            if(ly) Abntray = Abntray + 1.0d0
-            if(lz) Abntraz = Abntraz + 1.0d0
+            if(lx) Abntrax = Abntrax + 1.0E0_dp
+            if(ly) Abntray = Abntray + 1.0E0_dp
+            if(lz) Abntraz = Abntraz + 1.0E0_dp
             return
          end if
-         pick_chain = idint( dble(ncmt(1,imolty))*random(-1) ) + 1
+         pick_chain = int( dble(ncmt(1,imolty))*random(-1) ) + 1
          pick_chain = parbox(pick_chain,1,imolty)
          if ( moltyp(pick_chain) .ne. imolty )  write(io_output,*) 'screwup traxyz'
 
@@ -698,20 +698,20 @@ contains
 
 ! move i ***
       if (lx) then
-         rx =  ( 2.0*random(-1) - 1.0d0 ) * Armtrax
-         Abntrax = Abntrax + 1.0d0
+         rx =  ( 2.0*random(-1) - 1.0E0_dp ) * Armtrax
+         Abntrax = Abntrax + 1.0E0_dp
       else
          rx=0
       end if
       if (ly) then
-         ry =  ( 2.0*random(-1) - 1.0d0 ) * Armtray
-         Abntray = Abntray + 1.0d0
+         ry =  ( 2.0*random(-1) - 1.0E0_dp ) * Armtray
+         Abntray = Abntray + 1.0E0_dp
       else
          ry=0
       end if
       if (lz) then
-         rz =  ( 2.0*random(-1) - 1.0d0 ) * Armtraz
-         Abntraz = Abntraz + 1.0d0
+         rz =  ( 2.0*random(-1) - 1.0E0_dp ) * Armtraz
+         Abntraz = Abntraz + 1.0E0_dp
       else
          rz=0
       end if
@@ -761,18 +761,18 @@ contains
       if ( lanes ) then
          call anes(i,ibox,ibox,1,laccept,deltv,vintern,vintran,vextn, velectn,vintero,vintrao,vexto,velecto,vdum,vdum, vdum,vdum,.false.)
          if ( laccept ) then
-            if (lx) Abstrax = Abstrax + 1.0d0
-            if (ly) Abstray = Abstray + 1.0d0
-            if (lz) Abstraz = Abstraz + 1.0d0
+            if (lx) Abstrax = Abstrax + 1.0E0_dp
+            if (ly) Abstray = Abstray + 1.0E0_dp
+            if (lz) Abstraz = Abstraz + 1.0E0_dp
          end if
          return
       end if
 
-      if ( deltvb .gt. (2.3d0*softcut) ) return
+      if ( deltvb .gt. (2.3E0_dp*softcut) ) return
 
-      if ( deltv .le. 0.0d0 ) then
+      if ( deltv .le. 0.0E0_dp ) then
 ! accept move
-      else if ( dexp(-deltvb) .gt. random(-1) ) then
+      else if ( exp(-deltvb) .gt. random(-1) ) then
 ! accept move
       else
 ! move rejected
@@ -810,9 +810,9 @@ contains
 
       call ctrmas(.false.,ibox,i,10)
 
-      if (lx) Abstrax = Abstrax + 1.0d0
-      if (ly) Abstray = Abstray + 1.0d0
-      if (lz) Abstraz = Abstraz + 1.0d0
+      if (lx) Abstrax = Abstrax + 1.0E0_dp
+      if (ly) Abstray = Abstray + 1.0E0_dp
+      if (lz) Abstraz = Abstraz + 1.0E0_dp
 
       if ( licell .and. (ibox.eq.boxlink)) then
 ! update linkcell list
@@ -918,7 +918,7 @@ contains
       boxa = box5(ipairb)
       boxb = box6(ipairb)
 
-      bnvol(ipairb) = bnvol(ipairb) + 1.0d0
+      bnvol(ipairb) = bnvol(ipairb) + 1.0E0_dp
 
       lx = .false.
       ly = .false.
@@ -1075,13 +1075,13 @@ contains
       if ( lncubic ) then
 
 ! select one of the cell edge
-         rbox = 3.0d0*random(-1)
+         rbox = 3.0E0_dp*random(-1)
          if ( lx ) then
-            if ( rbox .le. 1.0d0 ) then
+            if ( rbox .le. 1.0E0_dp ) then
                la = .true.
                lb = .false.
                lc = .false.
-            else if (rbox .le. 2.0d0 ) then
+            else if (rbox .le. 2.0E0_dp ) then
                la = .false.
                lb = .true.
                lc = .false.
@@ -1092,7 +1092,7 @@ contains
             end if
          else if ( ly ) then
             la = .false.
-            if ( rbox .le. 1.5d0 ) then
+            if ( rbox .le. 1.5E0_dp ) then
                lb = .true.
                lc = .false.
             else
@@ -1123,15 +1123,15 @@ contains
             hbox = boxa
             jbox = boxb
 
-            hmat(boxa,jhmat) = hmat(boxa,jhmat) + rmhmat(boxa,jhmat)* ( 2.0d0*random(-1) - 1.0d0 )
-            bnhmat(boxa,jhmat) = bnhmat(boxa,jhmat) + 1.0d0
+            hmat(boxa,jhmat) = hmat(boxa,jhmat) + rmhmat(boxa,jhmat)* ( 2.0E0_dp*random(-1) - 1.0E0_dp )
+            bnhmat(boxa,jhmat) = bnhmat(boxa,jhmat) + 1.0E0_dp
 
          else
             hbox = boxb
             jbox = boxa
 
-            hmat(boxb,jhmat) = hmat(boxb,jhmat) + rmhmat(boxb,jhmat)* ( 2.0d0*random(-1) - 1.0d0 )
-            bnhmat(boxb,jhmat) = bnhmat(boxb,jhmat) + 1.0d0
+            hmat(boxb,jhmat) = hmat(boxb,jhmat) + rmhmat(boxb,jhmat)* ( 2.0E0_dp*random(-1) - 1.0E0_dp )
+            bnhmat(boxb,jhmat) = bnhmat(boxb,jhmat) + 1.0E0_dp
 
          end if
 
@@ -1146,7 +1146,7 @@ contains
          w(3) = min_width(hbox,3)
 
 
-         if (rbcut(hbox)/w(1) .gt. 0.5d0 .or. rbcut(hbox)/w(2) .gt. 0.5d0 .or. rbcut(hbox)/w(3) .gt. 0.5d0) then
+         if (rbcut(hbox)/w(1) .gt. 0.5E0_dp .or. rbcut(hbox)/w(2) .gt. 0.5E0_dp .or. rbcut(hbox)/w(3) .gt. 0.5E0_dp) then
             write(io_output,*) 'Problem with line 381 in volume.f'
             write(io_output,*) 'non-rectangular volume move rejected-', ' box width below cutoff size'
             write(io_output,*) 'w1:',w(1),'w2:',w(2),'w3:',w(3)
@@ -1158,19 +1158,19 @@ contains
 
          voln(jbox) = volt-voln(hbox)
 ! if ( la ) boxlx(hbox) = hmat(hbox,1)
-! if ( lb ) boxly(hbox) = dsqrt(hmat(hbox,4)*hmat(hbox,4)+
+! if ( lb ) boxly(hbox) = sqrt(hmat(hbox,4)*hmat(hbox,4)+
 !     &                 hmat(hbox,5)*hmat(hbox,5))
-! if ( lc ) boxlz(hbox) = dsqrt(hmat(hbox,7)*hmat(hbox,7)
+! if ( lc ) boxlz(hbox) = sqrt(hmat(hbox,7)*hmat(hbox,7)
 !     &        +hmat(hbox,8)*hmat(hbox,8) +
 !     &        hmat(hbox,9)*hmat(hbox,9))
 
 ! determine the displacement of the COM
 
-         df=(voln(jbox)/volo(jbox))**(1.0d0/3.0d0)
+         df=(voln(jbox)/volo(jbox))**(1.0E0_dp/3.0E0_dp)
          boxlx(jbox) = boxlx(jbox)*df
          boxly(jbox) = boxly(jbox)*df
          boxlz(jbox) = boxlz(jbox)*df
-         df = df - 1.0d0
+         df = df - 1.0E0_dp
 
          do i = 1,nchain
             imolty = moltyp(i)
@@ -1215,7 +1215,7 @@ contains
 
 
 ! calculate new volume
-         expdv = dexp(dlog(volo(boxa)/volo(boxb)) + rmvol(ipairb)*(2.0d0*random(-1)-1.0d0))
+         expdv = exp(log(volo(boxa)/volo(boxb)) + rmvol(ipairb)*(2.0E0_dp*random(-1)-1.0E0_dp))
          voln(boxa)= expdv*volt/(1+expdv)
          voln(boxb)= volt-voln(boxa)
          rbcut(boxa) = rcut(boxa)
@@ -1227,7 +1227,7 @@ contains
 ! volume move independently in x, y, z directions
                dfac(boxa)=voln(boxa)/volo(boxa)
             else
-               dfac(boxa)= (voln(boxa)/volo(boxa))**(1.0d0/3.0d0)
+               dfac(boxa)= (voln(boxa)/volo(boxa))**(1.0E0_dp/3.0E0_dp)
             end if
 
 
@@ -1235,13 +1235,13 @@ contains
 ! volume move independently in x, y, z directions
                dfac(boxb)=voln(boxb)/volo(boxb)
             else
-               dfac(boxb)= (voln(boxb)/volo(boxb))**(1.0d0/3.0d0)
+               dfac(boxb)= (voln(boxb)/volo(boxb))**(1.0E0_dp/3.0E0_dp)
             end if
-            vminim(boxa) = (2.0d0*rbcut(boxa))**(3.0d0)
+            vminim(boxa) = (2.0E0_dp*rbcut(boxa))**(3.0E0_dp)
          else
-            dfac(boxa)= dsqrt(voln(boxa)/volo(boxa))
-            dfac(boxb)= dsqrt(voln(boxb)/volo(boxb))
-            vminim(boxb) = (2.0d0*rbcut(boxb))**(2.0d0)
+            dfac(boxa)= sqrt(voln(boxa)/volo(boxa))
+            dfac(boxb)= sqrt(voln(boxb)/volo(boxb))
+            vminim(boxb) = (2.0E0_dp*rbcut(boxb))**(2.0E0_dp)
          end if
 
          if ( lsolid(boxa).and. lrect(boxa) ) then
@@ -1269,8 +1269,8 @@ contains
             end if
          end if
 
-         rbcuta = 2.0d0*rbcut(boxa)
-         rbcutb = 2.0d0*rbcut(boxb)
+         rbcuta = 2.0E0_dp*rbcut(boxa)
+         rbcutb = 2.0E0_dp*rbcut(boxb)
          if ( boxlx(boxa) .lt. rbcuta .or.  boxly(boxa) .lt. rbcuta .or.  (lpbcz .and. boxlz(boxa) .lt. rbcuta) .or. boxlx(boxb) .lt. rbcutb .or.  boxly(boxb) .lt. rbcutb .or.  (lpbcz .and. boxlz(boxb) .lt. rbcutb) ) then
 
             write(io_output,*) 'Problem in line 552 of subroutine volume.f'
@@ -1303,7 +1303,7 @@ contains
             if ( ibox .eq. boxa .or. ibox .eq. boxb ) then
 
                imolty = moltyp(i)
-               df = dfac(ibox) - 1.0d0
+               df = dfac(ibox) - 1.0E0_dp
 
 ! if ( lsolid(ibox) ) then
                if ( lsolid(ibox).and.lrect(ibox) ) then
@@ -1400,26 +1400,26 @@ contains
             end do
          end do
 
-         dele = (vbox(boxa) - vboxo(boxa))+( vbox(boxb)- vboxo(boxb)) - ((nchbox(boxa)+1+ghost_particles(boxa)) *dlog(voln(boxa)/volo(boxa))/beta) - ((nchbox(boxb)+1+ghost_particles(boxb)) *dlog(voln(boxb)/volo(boxb))/beta)
+         dele = (vbox(boxa) - vboxo(boxa))+( vbox(boxb)- vboxo(boxb)) - ((nchbox(boxa)+1+ghost_particles(boxa)) *log(voln(boxa)/volo(boxa))/beta) - ((nchbox(boxb)+1+ghost_particles(boxb)) *log(voln(boxb)/volo(boxb))/beta)
 
       else if (lncubic) then
 
-         dele = (vboxn(boxa)-vboxo(boxa)) + (vboxn(boxb)-vboxo(boxb)) - ((nchbox(boxa)+ghost_particles(boxa)) *dlog(voln(boxa)/volo(boxa))/beta) - ((nchbox(boxb)+ghost_particles(boxb)) *dlog(voln(boxb)/volo(boxb))/beta)
+         dele = (vboxn(boxa)-vboxo(boxa)) + (vboxn(boxb)-vboxo(boxb)) - ((nchbox(boxa)+ghost_particles(boxa)) *log(voln(boxa)/volo(boxa))/beta) - ((nchbox(boxb)+ghost_particles(boxb)) *log(voln(boxb)/volo(boxb))/beta)
 
       else
 
-         dele = (vboxn(boxa)-vboxo(boxa)) + (vboxn(boxb)-vboxo(boxb)) - ((nchbox(boxa)+1+ghost_particles(boxa)) *dlog(voln(boxa)/volo(boxa))/beta) - ((nchbox(boxb)+1+ghost_particles(boxb)) *dlog(voln(boxb)/volo(boxb))/beta)
+         dele = (vboxn(boxa)-vboxo(boxa)) + (vboxn(boxb)-vboxo(boxb)) - ((nchbox(boxa)+1+ghost_particles(boxa)) *log(voln(boxa)/volo(boxa))/beta) - ((nchbox(boxb)+1+ghost_particles(boxb)) *log(voln(boxb)/volo(boxb))/beta)
       end if
 
 ! acceptance test
 
 ! write(io_output,*) 'dele',dele
-      if (random(-1) .lt. dexp(-beta*dele) ) then
+      if (random(-1) .lt. exp(-beta*dele) ) then
 ! accepted
          if ( lncubic ) then
-            bshmat(hbox,jhmat) = bshmat(hbox,jhmat) + 1.0d0
+            bshmat(hbox,jhmat) = bshmat(hbox,jhmat) + 1.0E0_dp
          else
-            bsvol(ipairb) = bsvol(ipairb) + 1.0d0
+            bsvol(ipairb) = bsvol(ipairb) + 1.0E0_dp
          end if
 
           if ( .not. lanes ) then
@@ -1569,7 +1569,7 @@ contains
       end do
 
 
- 99   bnvol(boxvch) = bnvol(boxvch) + 1.0d0
+ 99   bnvol(boxvch) = bnvol(boxvch) + 1.0E0_dp
 
       if ( lsolid(boxvch) ) then
 ! volume move independently in x, y, z directions
@@ -1664,13 +1664,13 @@ contains
 
       if ( lsolid(boxvch) .and. .not. lrect(boxvch) ) then
 ! select one of the cell edge
-         rbox = 3.0d0*random(-1)
+         rbox = 3.0E0_dp*random(-1)
          if ( lx ) then
-            if ( rbox .le. 1.0d0 ) then
+            if ( rbox .le. 1.0E0_dp ) then
                la = .true.
                lb = .false.
                lc = .false.
-            else if (rbox .le. 2.0d0 ) then
+            else if (rbox .le. 2.0E0_dp ) then
                la = .false.
                lb = .true.
                lc = .false.
@@ -1681,7 +1681,7 @@ contains
             end if
          else if ( ly ) then
             la = .false.
-            if ( rbox .le. 1.5d0 ) then
+            if ( rbox .le. 1.5E0_dp ) then
                lb = .true.
                lc = .false.
             else
@@ -1708,8 +1708,8 @@ contains
             if ( lz ) jhmat = 9
          end if
 
-         hmat(boxvch,jhmat) = hmat(boxvch,jhmat) + rmhmat(boxvch,jhmat)* ( 2.0d0*random(-1) - 1.0d0 )
-         bnhmat(boxvch,jhmat) = bnhmat(boxvch,jhmat) + 1.0d0
+         hmat(boxvch,jhmat) = hmat(boxvch,jhmat) + rmhmat(boxvch,jhmat)* ( 2.0E0_dp*random(-1) - 1.0E0_dp )
+         bnhmat(boxvch,jhmat) = bnhmat(boxvch,jhmat) + 1.0E0_dp
 
          call matops(boxvch)
 
@@ -1721,7 +1721,7 @@ contains
 
          rbcut = rcut(boxvch)
 
-         if (rbcut/w(1) .gt. 0.5d0 .or. rbcut/w(2) .gt. 0.5d0 .or. rbcut/w(3) .gt. 0.5d0) then
+         if (rbcut/w(1) .gt. 0.5E0_dp .or. rbcut/w(2) .gt. 0.5E0_dp .or. rbcut/w(3) .gt. 0.5E0_dp) then
             write(io_output,*) 'Problem with line 275 prvolume.f'
             write(io_output,*) 'non-rectangular prvolume move rejected-', ' box width below cutoff size'
             write(io_output,*) 'w1:',w(1),'w2:',w(2),'w3:',w(3)
@@ -1761,19 +1761,19 @@ contains
       else
 
 ! calculate new volume
-         voln = volo + rmvol(boxvch) * ( 2.0d0*random(-1) - 1.0d0 )
+         voln = volo + rmvol(boxvch) * ( 2.0E0_dp*random(-1) - 1.0E0_dp )
          rbcut = rcut(boxvch)
          if ( lpbcz ) then
             if (lsolid(boxvch).and.lrect(boxvch)) then
 ! volume move independently in x, y, z directions
                dfac=voln/volo
             else
-               dfac = (voln/volo)**(1.0d0/3.0d0)
+               dfac = (voln/volo)**(1.0E0_dp/3.0E0_dp)
             end if
-! vminim = rbcut**(3.0d0)
+! vminim = rbcut**(3.0E0_dp)
          else
-            dfac= dsqrt(voln/volo)
-! vminim = rbcut**(2.0d0)
+            dfac= sqrt(voln/volo)
+! vminim = rbcut**(2.0E0_dp)
          end if
 
 ! if ( voln .lt. vminim ) then
@@ -1794,7 +1794,7 @@ contains
          end if
 
 
-         rbcut = 2.0d0*rbcut
+         rbcut = 2.0E0_dp*rbcut
 
          if (boxlx(boxvch) .lt. rbcut .or. boxly(boxvch) .lt. rbcut .or. (lpbcz .and. boxlz(boxvch) .lt. rbcut) ) then
             boxlx(boxvch) = bxo
@@ -1816,7 +1816,7 @@ contains
 ! WARNING
          if ( .not. lfold ) call err_exit(__FILE__,__LINE__,'volume move only correct with folded coordinates',myid+1)
 
-         df = dfac - 1.0d0
+         df = dfac - 1.0E0_dp
 
          do i = 1, nchain
             imolty = moltyp(i)
@@ -1902,11 +1902,11 @@ contains
             call flucq(0,boxvch)
          end do
 
-         dele = (vbox(boxvch) - vboxo)+ express(boxvch)*(voln-volo)  - ((nchbox(boxvch)+ghost_particles(boxvch)) * dlog(voln/volo) / beta )
+         dele = (vbox(boxvch) - vboxo)+ express(boxvch)*(voln-volo)  - ((nchbox(boxvch)+ghost_particles(boxvch)) * log(voln/volo) / beta )
 
       else
 
-         dele = ( vboxn - vboxo ) +  express(boxvch)*(voln-volo)  - ((nchbox(boxvch)+ghost_particles(boxvch))  * dlog(voln/volo)/beta )
+         dele = ( vboxn - vboxo ) +  express(boxvch)*(voln-volo)  - ((nchbox(boxvch)+ghost_particles(boxvch))  * log(voln/volo)/beta )
       end if
 
 ! acceptance test
@@ -1918,12 +1918,12 @@ contains
 ! write(io_output,*) 'dele',     dele
 
 
-      if (random(-1) .lt. dexp(-(beta*dele)) ) then
+      if (random(-1) .lt. exp(-(beta*dele)) ) then
 ! accepted
           if ( lsolid(boxvch) .and. .not. lrect(boxvch) ) then
-             bshmat(boxvch,jhmat) = bshmat(boxvch,jhmat) + 1.0d0
+             bshmat(boxvch,jhmat) = bshmat(boxvch,jhmat) + 1.0E0_dp
           else
-             bsvol(boxvch) = bsvol(boxvch) + 1.0d0
+             bsvol(boxvch) = bsvol(boxvch) + 1.0E0_dp
           end if
           if ( .not. lanes ) then
              vbox(boxvch)    = vbox(boxvch) + (vboxn - vboxo)
@@ -2021,39 +2021,39 @@ contains
        call err_exit(__FILE__,__LINE__,'init_moves_simple: allocation failed',jerr)
     end if
 
-    acntrax = 0.d0
-    acntray = 0.d0
-    acntraz = 0.d0
-    acnrotx = 0.d0
-    acnroty = 0.d0
-    acnrotz = 0.d0
-    acstrax = 0.d0
-    acstray = 0.d0
-    acstraz = 0.d0
-    acsrotx = 0.d0
-    acsroty = 0.d0
-    acsrotz = 0.d0
-    bstrax = 0.0d0
-    bstray = 0.0d0
-    bstraz = 0.0d0
-    bsrotx = 0.0d0
-    bsroty = 0.0d0
-    bsrotz = 0.0d0
-    bntrax = 0.0d0
-    bntray = 0.0d0
-    bntraz = 0.0d0
-    bnrotx = 0.0d0
-    bnroty = 0.0d0
-    bnrotz = 0.0d0
+    acntrax = 0.E0_dp
+    acntray = 0.E0_dp
+    acntraz = 0.E0_dp
+    acnrotx = 0.E0_dp
+    acnroty = 0.E0_dp
+    acnrotz = 0.E0_dp
+    acstrax = 0.E0_dp
+    acstray = 0.E0_dp
+    acstraz = 0.E0_dp
+    acsrotx = 0.E0_dp
+    acsroty = 0.E0_dp
+    acsrotz = 0.E0_dp
+    bstrax = 0.0E0_dp
+    bstray = 0.0E0_dp
+    bstraz = 0.0E0_dp
+    bsrotx = 0.0E0_dp
+    bsroty = 0.0E0_dp
+    bsrotz = 0.0E0_dp
+    bntrax = 0.0E0_dp
+    bntray = 0.0E0_dp
+    bntraz = 0.0E0_dp
+    bnrotx = 0.0E0_dp
+    bnroty = 0.0E0_dp
+    bnrotz = 0.0E0_dp
 
-    acsvol = 0.d0
-    acnvol = 0.d0
-    acshmat = 0.0d0
-    acnhmat = 0.0d0
-    bsvol = 0.0d0
-    bnvol = 0.0d0
-    bshmat = 0.0d0
-    bnhmat = 0.0d0
+    acsvol = 0.E0_dp
+    acnvol = 0.E0_dp
+    acshmat = 0.0E0_dp
+    acnhmat = 0.0E0_dp
+    bsvol = 0.0E0_dp
+    bnvol = 0.0E0_dp
+    bshmat = 0.0E0_dp
+    bnhmat = 0.0E0_dp
   end subroutine init_moves_simple
 
 ! write some information about translations and rotations
@@ -2071,28 +2071,28 @@ contains
           write(io_output,*) 'molecule typ =',i,' in box',ibox
           acntrax(i,ibox) = acntrax(i,ibox) + bntrax(i,ibox)
           acstrax(i,ibox) = acstrax(i,ibox) + bstrax(i,ibox)
-          if ( acntrax(i,ibox) .ne. 0.0d0 ) then
+          if ( acntrax(i,ibox) .ne. 0.0E0_dp ) then
              ratvol = acstrax(i,ibox) / acntrax(i,ibox)
           else
-             ratvol = 0.0d0
+             ratvol = 0.0E0_dp
           end if
           write(io_output,fmt(1)) acntrax(i,ibox),ratvol,rmtrax(i,ibox)
 
           acntray(i,ibox) = acntray(i,ibox) + bntray(i,ibox)
           acstray(i,ibox) = acstray(i,ibox) + bstray(i,ibox)
-          if ( acntray(i,ibox) .ne. 0.0d0 ) then
+          if ( acntray(i,ibox) .ne. 0.0E0_dp ) then
              ratvol = acstray(i,ibox) / acntray(i,ibox)
           else
-             ratvol = 0.0d0
+             ratvol = 0.0E0_dp
           end if
           write(io_output,fmt(2)) acntray(i,ibox),ratvol,rmtray(i,ibox)
 
           acntraz(i,ibox) = acntraz(i,ibox) + bntraz(i,ibox)
           acstraz(i,ibox) = acstraz(i,ibox) + bstraz(i,ibox)
-          if ( acntraz(i,ibox) .ne. 0.0d0 ) then
+          if ( acntraz(i,ibox) .ne. 0.0E0_dp ) then
              ratvol = acstraz(i,ibox) / acntraz(i,ibox)
           else
-             ratvol = 0.0d0
+             ratvol = 0.0E0_dp
           end if
           write(io_output,fmt(3)) acntraz(i,ibox),ratvol,rmtraz(i,ibox)
           write(io_output,*)
@@ -2107,28 +2107,28 @@ contains
           write(io_output,*) 'molecule typ =',i,' in box',ibox
           acnrotx(i,ibox) = acnrotx(i,ibox) + bnrotx(i,ibox)
           acsrotx(i,ibox) = acsrotx(i,ibox) + bsrotx(i,ibox)
-          if ( acnrotx(i,ibox) .ne. 0.0d0 ) then
+          if ( acnrotx(i,ibox) .ne. 0.0E0_dp ) then
              ratvol = acsrotx(i,ibox) / acnrotx(i,ibox)
           else
-             ratvol = 0.0d0
+             ratvol = 0.0E0_dp
           end if
           write(io_output,fmt(1)) acnrotx(i,ibox),ratvol,rmrotx(i,ibox)
 
           acnroty(i,ibox) = acnroty(i,ibox) + bnroty(i,ibox)
           acsroty(i,ibox) = acsroty(i,ibox) + bsroty(i,ibox)
-          if ( acnroty(i,ibox) .ne. 0.0d0 ) then
+          if ( acnroty(i,ibox) .ne. 0.0E0_dp ) then
              ratvol = acsroty(i,ibox) / acnroty(i,ibox)
           else
-             ratvol = 0.0d0
+             ratvol = 0.0E0_dp
           end if
           write(io_output,fmt(2)) acnroty(i,ibox),ratvol,rmroty(i,ibox)
 
           acnrotz(i,ibox) = acnrotz(i,ibox) + bnrotz(i,ibox)
           acsrotz(i,ibox) = acsrotz(i,ibox) + bsrotz(i,ibox)
-          if ( acnrotz(i,ibox) .ne. 0.0d0 ) then
+          if ( acnrotz(i,ibox) .ne. 0.0E0_dp ) then
              ratvol = acsrotz(i,ibox) / acnrotz(i,ibox)
           else
-             ratvol = 0.0d0
+             ratvol = 0.0E0_dp
           end if
           write(io_output,fmt(3)) acnrotz(i,ibox),ratvol,rmrotz(i,ibox)
           write(io_output,*)
@@ -2149,19 +2149,19 @@ contains
           do j = 1,9
              acnhmat(ibox,j) = acnhmat(ibox,j) + bnhmat(ibox,j)
              acshmat(ibox,j) = acshmat(ibox,j) + bshmat(ibox,j)
-             if ( acshmat(ibox,j) .gt. 0.5d0) then
+             if ( acshmat(ibox,j) .gt. 0.5E0_dp) then
                 write(io_output,fmt) acnhmat(ibox,j), acshmat(ibox,j)/acnhmat(ibox,j),rmhmat(ibox,j)
              else
-                write(io_output,fmt) acnhmat(ibox,j),0.0d0,rmhmat(ibox,j)
+                write(io_output,fmt) acnhmat(ibox,j),0.0E0_dp,rmhmat(ibox,j)
              end if
           end do
        else
           acnvol(ibox) = acnvol(ibox) + bnvol(ibox)
           acsvol(ibox) = acsvol(ibox) + bsvol(ibox)
-          if ( acnvol(ibox) .ne. 0.0d0 ) then
+          if ( acnvol(ibox) .ne. 0.0E0_dp ) then
              ratvol = acsvol(ibox) / acnvol(ibox)
           else
-             ratvol = 0.0d0
+             ratvol = 0.0E0_dp
           end if
           write(io_output,"(' attempts =',f8.1,'   ratio =',f6.3, '   max.displ. =',e11.4)") acnvol(ibox),ratvol,rmvol(ibox)
        end if

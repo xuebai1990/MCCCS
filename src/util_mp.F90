@@ -1,5 +1,5 @@
 module util_mp
-  USE var_type,ONLY:DP=>double_precision
+  USE var_type,ONLY:DP
   IMPLICIT NONE
 #ifdef __MPI__
   include 'mpif.h'
@@ -59,6 +59,12 @@ module util_mp
   INTEGER,PUBLIC::mp_comm_null=MPI_COMM_NULL,mp_comm_self=MPI_COMM_SELF
 #else
   INTEGER,PUBLIC::mp_comm_null=0,mp_comm_self=0
+#endif
+
+#ifdef __DOUBLE_PRECISION__
+#define MP_REAL MPI_DOUBLE_PRECISION
+#else
+#define MP_REAL MPI_REAL
 #endif
 
 CONTAINS
@@ -158,7 +164,7 @@ CONTAINS
 #ifdef MP_TYPE
 #undef MP_TYPE
 #endif
-#define MP_TYPE MPI_DOUBLE_PRECISION
+#define MP_TYPE MP_REAL
   SUBROUTINE mp_sendrecv_r0(msg_src,msg_dest,msglen,src,dest,tag,comm)
     REAL (DP) :: msg_dest, msg_src
 #include "mp_sendrecv.F90"
@@ -344,7 +350,7 @@ CONTAINS
 #ifdef MP_TYPE
 #undef MP_TYPE
 #endif
-#define MP_TYPE MPI_DOUBLE_PRECISION
+#define MP_TYPE MP_REAL
   SUBROUTINE mp_gather_r1(mydata, alldata, root, comm)
 #include "mp_gather_1.F90"
   END SUBROUTINE mp_gather_r1
@@ -401,7 +407,7 @@ CONTAINS
 #ifdef MP_TYPE
 #undef MP_TYPE
 #endif
-#define MP_TYPE MPI_DOUBLE_PRECISION
+#define MP_TYPE MP_REAL
   SUBROUTINE mp_allgather_r1(mydata, alldata, comm)
 #include "mp_gather_1.F90"
   END SUBROUTINE mp_allgather_r1
@@ -704,7 +710,7 @@ CONTAINS
     dest = myid - 1
     IF( dest == -1 ) dest = npe - 1
 
-    CALL MPI_Sendrecv_replace( buf, SIZE(buf), MPI_DOUBLE_PRECISION, &
+    CALL MPI_Sendrecv_replace( buf, SIZE(buf), MP_REAL, &
      dest, itag, sour, itag, comm, istatus, ierr)
 
     IF (ierr/=0) CALL mp_stop(__LINE__)

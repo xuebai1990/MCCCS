@@ -55,9 +55,9 @@ subroutine ctrmas ( lall, ibox, j, mtype)
      if (nboxi(i) .eq. ibox) then
 ! Determine new center of mass for chain i 
         lintbx = .false.
-25      nxcm = 0.0d0
-        nycm = 0.0d0
-        nzcm = 0.0d0
+25      nxcm = 0.0E0_dp
+        nycm = 0.0E0_dp
+        nzcm = 0.0E0_dp
         do ii = 1, iunit
            itype = ntype(imolty,ii)
            nxcm = nxcm + rxu(i,ii) * mass(itype)
@@ -71,9 +71,9 @@ subroutine ctrmas ( lall, ibox, j, mtype)
         ldx = .false.
         ldy = .false.
         ldz = .false.
-        dx = 0.0d0
-        dy = 0.0d0
-        dz = 0.0d0
+        dx = 0.0E0_dp
+        dy = 0.0E0_dp
+        dz = 0.0E0_dp
 
         if (lsolid(ibox) .and. .not. lrect(ibox)) then
 
@@ -81,25 +81,25 @@ subroutine ctrmas ( lall, ibox, j, mtype)
            sy = nxcm*hmati(ibox,2)+nycm*hmati(ibox,5) +nzcm*hmati(ibox,8)
            sz = nxcm*hmati(ibox,3)+nycm*hmati(ibox,6) +nzcm*hmati(ibox,9)
 
-           if ( sx .lt. -1.0d-10 ) then
-              sx = sx + 1.0d0
+           if ( sx .lt. -1.0E-10_dp ) then
+              sx = sx + 1.0E0_dp
               ldx = .true.
-           else if( sx .gt. 1d0 ) then
-              sx = sx - 1.0d0
+           else if( sx .gt. 1E0_dp ) then
+              sx = sx - 1.0E0_dp
               ldx = .true.
            end if
-           if ( sy .lt. -1.0d-10 ) then
-              sy = sy + 1.0d0
+           if ( sy .lt. -1.0E-10_dp ) then
+              sy = sy + 1.0E0_dp
               ldy = .true.
-           else if( sy .gt. 1d0 ) then
-              sy = sy - 1.0d0
+           else if( sy .gt. 1E0_dp ) then
+              sy = sy - 1.0E0_dp
               ldy = .true.
            end if
-           if ( sz .lt. -1.0d-10 ) then
-              sz = sz + 1.0d0
+           if ( sz .lt. -1.0E-10_dp ) then
+              sz = sz + 1.0E0_dp
               ldz = .true.
-           else if( sz .gt. 1d0 ) then
-              sz = sz - 1.0d0
+           else if( sz .gt. 1E0_dp ) then
+              sz = sz - 1.0E0_dp
               ldz = .true.
            end if
 
@@ -130,25 +130,25 @@ subroutine ctrmas ( lall, ibox, j, mtype)
 
            if( lintbx ) then
               if ( nxcm .gt. rbx ) then
-                 inboxx = idint(nxcm/rbx)
+                 inboxx = int(nxcm/rbx)
                  ldx = .true.
-              else if ( nxcm .lt. -1.0d-10 ) then
-                 inboxx = idint(nxcm/rbx) - 1
+              else if ( nxcm .lt. -1.0E-10_dp ) then
+                 inboxx = int(nxcm/rbx) - 1
                  ldx = .true.
               end if
               if ( nycm .gt. rby ) then
-                 inboxy = idint(nycm/rby)
+                 inboxy = int(nycm/rby)
                  ldy = .true.
-              else if( nycm .lt. -1.0d-10 )then
-                 inboxy = idint(nycm/rby) - 1
+              else if( nycm .lt. -1.0E-10_dp )then
+                 inboxy = int(nycm/rby) - 1
                  ldy = .true.
               end if
               if (lpbcz) then
                  if ( nzcm .gt. rbz ) then
-                    inboxz = idint(nzcm/rbz)
+                    inboxz = int(nzcm/rbz)
                     ldz = .true.
-                 else if( nzcm .lt. -1.0d-10 ) then
-                    inboxz = idint(nzcm/rbz) - 1
+                 else if( nzcm .lt. -1.0E-10_dp ) then
+                    inboxz = int(nzcm/rbz) - 1
                     ldz = .true.
                  end if
               end if
@@ -162,7 +162,7 @@ subroutine ctrmas ( lall, ibox, j, mtype)
                  dz = -(dble(inboxz)*rbz)
               end if
            else
-              if (nxcm .lt. -1.0d-10) then
+              if (nxcm .lt. -1.0E-10_dp) then
                  dx = rbx
                  ldx = .true.
               else if (nxcm .gt. rbx) then
@@ -170,7 +170,7 @@ subroutine ctrmas ( lall, ibox, j, mtype)
                  ldx = .true.
               end if
 
-              if (nycm .lt. -1.0d-10) then
+              if (nycm .lt. -1.0E-10_dp) then
                  dy = rby
                  ldy = .true.
               else if (nycm .gt. rby) then
@@ -179,7 +179,7 @@ subroutine ctrmas ( lall, ibox, j, mtype)
               end if
 
               if(lpbcz) then
-                 if (nzcm .lt. -1.0d-10) then
+                 if (nzcm .lt. -1.0E-10_dp) then
                     dz = rbz
                     ldz = .true.
                  else if (nzcm .gt. rbz) then
@@ -235,7 +235,7 @@ subroutine ctrmas ( lall, ibox, j, mtype)
         ycm(i) = nycm
         zcm(i) = nzcm
         if ( (lcutcm .or. ldual) .and. iwarn .ne. 1 ) then
-           dmaxsq = 0.0d0 
+           dmaxsq = 0.0E0_dp 
            do ii=1,iunit
               rxuij = rxu(i,ii)-nxcm
               ryuij = ryu(i,ii)-nycm
@@ -248,7 +248,7 @@ subroutine ctrmas ( lall, ibox, j, mtype)
 
               if ( rijsq .gt. dmaxsq ) dmaxsq = rijsq
            end do                  
-           rcmu(i) = dsqrt(dmaxsq)+ 1.0d-10
+           rcmu(i) = sqrt(dmaxsq)+ 1.0E-10_dp
 ! write(io_output,*) 'rcmu(i)',rcmu(i)
         end if
                   

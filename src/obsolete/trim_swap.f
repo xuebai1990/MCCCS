@@ -136,7 +136,7 @@
 ! *** for the advanced AVBMC algorithm, this particle will be selected in
 ! *** sub-regions defined by Vin
 
-         pointp = idint( dble(ncmt(boxrem,imolty))*random() ) + 1
+         pointp = int( dble(ncmt(boxrem,imolty))*random() ) + 1
          irem = parbox(pointp,boxrem,imolty)
          if ( moltyp(irem) .ne. imolty )  write(io_output,*) 'screwup swap, irem:',irem,moltyp(irem),imolty
          ibox = nboxi(irem)
@@ -353,7 +353,7 @@
 !$$$         delen = v - ( vnewinter + vnewext +vnewelect) 
 !$$$     &        - (v1ins - v1insewd)
          delen = v - ( vnewinter + vnewext +vnewelect + vnewintra + vnewewald + v1ins) 
-         waddnew = waddnew*dexp(-beta*delen)
+         waddnew = waddnew*exp(-beta*delen)
          vnewt     = vnewt + delen
          vnewinter = vinter - v1insint
          vnewext   = vext - v1insext
@@ -374,7 +374,7 @@
             end do
             call recip(boxins,vrecipn,vrecipo,1)
             delen = vrecipn - vrecipo 
-            waddnew = waddnew*dexp(-beta*delen)
+            waddnew = waddnew*exp(-beta*delen)
             vnewelect = vnewelect + delen
             vnewt = vnewt + delen
          end if
@@ -415,7 +415,7 @@
          end do
 
          vinsta = vinsta - vtailb( boxins )
-         waddnew = waddnew*dexp(-beta*vinsta)
+         waddnew = waddnew*exp(-beta*vinsta)
          vnewt = vnewt + vinsta
          vnewinter = vnewinter + vinsta
       else
@@ -551,7 +551,7 @@
 !$$$         deleo = v - ( voldinter + voldext +voldelect) 
 !$$$     &        - (v1rem - v1remewd)
          deleo = v - ( voldinter + voldext +voldelect + voldintra  + voldewald + v1rem) 
-         waddold = waddold*dexp(-beta*deleo)
+         waddold = waddold*exp(-beta*deleo)
          voldt     = voldt + deleo
          voldinter = vinter - v1remint
          voldext   = vext - v1remext
@@ -574,7 +574,7 @@
          deleo = vrecipo - vrecipn
          voldt = voldt + deleo 
          voldelect = voldelect + deleo
-         waddold = waddold * dexp(-beta*deleo)
+         waddold = waddold * exp(-beta*deleo)
       end if
 
 !     End Ewald-sum Corrections for OLD configuration
@@ -612,7 +612,7 @@
          end do
    
          vremta = - vremta + vtailb( boxrem )
-         waddold=waddold*dexp(-beta*vremta) 
+         waddold=waddold*exp(-beta*vremta) 
          voldt = voldt + vremta
          voldinter = voldinter + vremta
       else
@@ -637,8 +637,8 @@
       weight= w1ins * waddnew * weight
       weiold= w1rem * waddold * weiold
 
-      wnlog = dlog10 ( weight )
-      wolog = dlog10 ( weiold )
+      wnlog = log10 ( weight )
+      wolog = log10 ( weiold )
       wdlog = wnlog - wolog
       
       if ( wdlog .lt. -softcut ) then
@@ -649,7 +649,7 @@
       if ( lswapinter ) then
          if (lgibbs) then
 !     --- Note: acceptance based on only molecules of type imolty
-            wratio = ( weight / weiold ) * ( volins * dble( ncmt(boxrem,imolty) ) /  ( volrem * dble( ncmt(boxins,imolty) + 1 ) ) ) * dexp(beta*(eta2(boxrem,imolty)- eta2(boxins,imolty)))
+            wratio = ( weight / weiold ) * ( volins * dble( ncmt(boxrem,imolty) ) /  ( volrem * dble( ncmt(boxins,imolty) + 1 ) ) ) * exp(beta*(eta2(boxrem,imolty)- eta2(boxins,imolty)))
 
          else if (lgrand) then
             if (boxins.eq.1) then

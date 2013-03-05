@@ -1,4 +1,5 @@
 MODULE energy_garofalini
+  use var_type,only:dp
   use const_phys,only:qqfact
   use util_math,only:erfunc
   use sim_system
@@ -30,16 +31,16 @@ contains
       write(io_output,*) 'entering garofalini in ',myid,'. Input:',rijsq,ntij,qa,qb
 #endif
 
-      rij = dsqrt(rijsq)
-      hterm = 0.0d0
-      coul = 0.0d0
-      garofalini = 0.0d0
+      rij = sqrt(rijsq)
+      hterm = 0.0E0_dp
+      coul = 0.0E0_dp
+      garofalini = 0.0E0_dp
 
 
 ! write(io_output,*) aa,bb,ntij,qa,qb,gbeta(ntij),galpha(ntij),grho(ntij)
 ! H term
       do i=1,3
-         hterma =   ga(ntij,i)/(1+dexp(gb(ntij,i)*(rij-gc(ntij,i))))
+         hterma =   ga(ntij,i)/(1+exp(gb(ntij,i)*(rij-gc(ntij,i))))
 ! write(io_output,*) i,hterma,' (',ntij,')'
          hterm = hterm + hterma
       end do
@@ -48,7 +49,7 @@ contains
 ! write(io_output,*) 'erfunc',coul*rij
       coul = coul * qqfact
 
-      garofalini = galpha(ntij)*dexp(-rij/grho(ntij)) + hterm  + coul
+      garofalini = galpha(ntij)*exp(-rij/grho(ntij)) + hterm  + coul
 
 ! write(io_output,*) 'i,j,v2',aa,bb,'H term:',hterm,' Coul term:'
 !     &     ,coul,' the rest:',garofalini-hterm-coul,
@@ -62,17 +63,17 @@ contains
   end function garofalini
 
   subroutine vthreebody(vthree)
-
+    real(kind=dp)::vthree
       integer::ntang,nta,ntb,tri,i,j,k
-      real::vthree,vthreea,thetac,g,p
+      real::vthreea,thetac,g,p
       logical::lwrite
 
 #ifdef __DEBUG__
       write(io_output,*) 'start Vthreebody in ',myid
 #endif
 
-      vthreea = 0.0d0
-      vthree = 0.0d0
+      vthreea = 0.0E0_dp
+      vthree = 0.0E0_dp
       nta = 0
       ntb = 0
       lwrite=.false.
@@ -120,15 +121,15 @@ contains
             end if
          end if
 
-! dij = dsqrt(dijsq(tri))
-! dik = dsqrt(diksq(tri))
+! dij = sqrt(dijsq(tri))
+! dik = sqrt(diksq(tri))
 
          thetac = (dxij(tri)*dxik(tri)+dyij(tri)*dyik(tri)+ dzij(tri)*dzik(tri))/(dij(tri)*dik(tri))
-         if ( thetac .ge. 1.0d0 ) thetac = 1.0d0
-         if ( thetac .le. -1.0d0 ) thetac = -1.0d0
+         if ( thetac .ge. 1.0E0_dp ) thetac = 1.0E0_dp
+         if ( thetac .le. -1.0E0_dp ) thetac = -1.0E0_dp
 
          p = (thetac-gtheta(ntang))**2
-         g = dexp((ggamma(ntang,nta)/(dij(tri)-grij(ntang,nta))) + (ggamma(ntang,ntb)/(dik(tri)-grij(ntang,ntb))))
+         g = exp((ggamma(ntang,nta)/(dij(tri)-grij(ntang,nta))) + (ggamma(ntang,ntb)/(dik(tri)-grij(ntang,ntb))))
 
          vthreea = glambda(ntang)*p*g
          if(lwrite) then
@@ -214,12 +215,12 @@ contains
 
 !******************************************************************
   subroutine triad_en(i,vthree,cnt,ni,nrij,nxi,nyi,nzi,lupdate)
-
+    real(kind=dp)::vthree
       integer::i,j,k,m,imolty,jmolty,kmolty,mmolty,atomj,atomk,atomm
       integer::nta,ntb,ntang,cnt,ni(maxneigh),temp_cnt,itemp,number(nmax)
       integer::temp_nei(nmax),itype,jtype,ktype ,mtype
       logical::ltemp(nmax),lupdate,lwrite
-      real::vthree,vthreea,thetac,p,g,nrij(maxneigh),nxi(maxneigh),nyi(maxneigh),nzi(maxneigh)
+      real::vthreea,thetac,p,g,nrij(maxneigh),nxi(maxneigh),nyi(maxneigh),nzi(maxneigh)
       real::temp_dist(nmax),temp_x(nmax),temp_y(nmax),temp_z(nmax)
 
       lwrite=.false.
@@ -230,14 +231,14 @@ contains
 ! number of pairs within cutoff: cnt
 ! identity of pair molecule: ni(cnt)   ---- set in energy
 
-      vthree = 0.0d0
+      vthree = 0.0E0_dp
       temp_cnt = 0
       do itemp = 1,nmax
          ltemp(itemp) = .false.
-         temp_dist(itemp) = 0.0d0
-         temp_x(itemp) = 0.0d0
-         temp_y(itemp) = 0.0d0
-         temp_z(itemp) = 0.0d0
+         temp_dist(itemp) = 0.0E0_dp
+         temp_x(itemp) = 0.0E0_dp
+         temp_y(itemp) = 0.0E0_dp
+         temp_z(itemp) = 0.0E0_dp
       end do
 
       imolty = moltyp(i)
@@ -307,11 +308,11 @@ contains
                end if
 
                thetac = (nxi(j)*nxi(k)+nyi(j)*nyi(k)+ nzi(j)*nzi(k))/(nrij(j)*nrij(k))
-               if ( thetac .ge. 1.0d0 ) thetac = 1.0d0
-               if ( thetac .le. -1.0d0 ) thetac = -1.0d0
+               if ( thetac .ge. 1.0E0_dp ) thetac = 1.0E0_dp
+               if ( thetac .le. -1.0E0_dp ) thetac = -1.0E0_dp
 
                p = (thetac-gtheta(ntang))**2
-              g = dexp((ggamma(ntang,nta)/(nrij(j)-grij(ntang,nta)) )+(ggamma(ntang,ntb)/(nrij(k)-grij(ntang,ntb))))
+              g = exp((ggamma(ntang,nta)/(nrij(j)-grij(ntang,nta)) )+(ggamma(ntang,ntb)/(nrij(k)-grij(ntang,ntb))))
 
                vthreea = glambda(ntang)*p*g
 
@@ -408,11 +409,11 @@ contains
                end if
 ! because the values saved are i-j not j-i must multiply all by -1
                thetac = ((-nxi(j))*nxij(m,atomj)+(-nyi(j))* nyij(m,atomj)+(-nzi(j))*nzij(m,atomj))/ (nrij(j)*ndij(m,atomj))
-               if ( thetac .ge. 1.0d0 ) thetac = 1.0d0
-               if ( thetac .le. -1.0d0 ) thetac = -1.0d0
+               if ( thetac .ge. 1.0E0_dp ) thetac = 1.0E0_dp
+               if ( thetac .le. -1.0E0_dp ) thetac = -1.0E0_dp
 
                p = (thetac-gtheta(ntang))**2
-              g = dexp((ggamma(ntang,nta)/(nrij(j)-grij(ntang,nta)) )+(ggamma(ntang,ntb)/(ndij(m,atomj)- grij(ntang,ntb))))
+              g = exp((ggamma(ntang,nta)/(nrij(j)-grij(ntang,nta)) )+(ggamma(ntang,ntb)/(ndij(m,atomj)- grij(ntang,ntb))))
 
                vthreea = glambda(ntang)*p*g
 

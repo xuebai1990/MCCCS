@@ -21,7 +21,7 @@ contains
        call err_exit(__FILE__,__LINE__,'read_transfer: memory allocation',jerr)
     end if
 
-    u_bias_diff=0.0_double_precision
+    u_bias_diff=0.0_dp
     num_update_bias=0
     lopt_bias=.false.
 
@@ -63,7 +63,7 @@ contains
           eta2(ibox,imolty)=eta2(ibox,imolty)+u_bias_diff(ibox,imolty)
        end do
     end do
-    u_bias_diff=0.0_double_precision
+    u_bias_diff=0.0_dp
     num_update_bias=0
   end subroutine opt_bias
 

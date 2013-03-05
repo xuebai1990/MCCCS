@@ -1,4 +1,5 @@
 MODULE energy_kspace
+  use var_type,only:dp
   use const_math,only:onepi,twopi
   use const_phys,only:qqfact
   use util_runtime,only:err_exit
@@ -29,13 +30,13 @@ contains
 ! rewritten again, probably by Bin.                               **
 !    *********************************************************************
   subroutine recipsum(ibox,vrecip)
-
+    real(kind=dp)::vrecip
     integer::ibox,i,ii,imolty,ncount
 
     ! from h-matrix formulation
     integer::l,m,n,m_min,n_min,kmaxl,kmaxm,kmaxn
 
-    real::alpsqr4,vol,ksqr,sumr,sumi,arg ,vrecip,bx1,by1,bz1 ,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi
+    real::alpsqr4,vol,ksqr,sumr,sumi,arg,bx1,by1,bz1,hmatik(9),kx1,ky1,kz1,hmaxsq,calpi
     ! real::sum_sumr,sum_sumi
 
     ! RP added for calculating time for communication step
@@ -45,7 +46,7 @@ contains
 
     ! Set up the reciprocal space vectors ***
     ncount = 0
-    vrecip = 0.0d0
+    vrecip = 0.0E0_dp
 
     calpi = calp(ibox)
 
@@ -57,28 +58,28 @@ contains
        hmat(ibox,5) = by1
        hmat(ibox,9) = bz1
        do i = 1,9
-          hmatik(i) = 0.0d0
+          hmatik(i) = 0.0E0_dp
        end do
        hmatik(1) = twopi/bx1
        hmatik(5) = twopi/by1
        hmatik(9) = twopi/bz1
-       kmaxl = dint(bx1*calpi)+1
-       kmaxm = dint(by1*calpi)+1
-       kmaxn = dint(bz1*calpi)+1
+       kmaxl = aint(bx1*calpi)+1
+       kmaxm = aint(by1*calpi)+1
+       kmaxn = aint(bz1*calpi)+1
     else
        do i = 1,9
           hmatik(i) = twopi*hmati(ibox,i)
        end do
-       kmaxl = dint(hmat(ibox,1)*calpi)+2
-       kmaxm = dint(hmat(ibox,5)*calpi)+2
-       kmaxn = dint(hmat(ibox,9)*calpi)+2
+       kmaxl = aint(hmat(ibox,1)*calpi)+2
+       kmaxm = aint(hmat(ibox,5)*calpi)+2
+       kmaxn = aint(hmat(ibox,9)*calpi)+2
     end if
 
-    alpsqr4 = 4.0d0*calpi*calpi
+    alpsqr4 = 4.0E0_dp*calpi*calpi
 
     vol = hmat(ibox,1)* (hmat(ibox,5)*hmat(ibox,9) - hmat(ibox,8)*hmat(ibox,6)) + hmat(ibox,4)* (hmat(ibox,8)*hmat(ibox,3) - hmat(ibox,2)*hmat(ibox,9)) + hmat(ibox,7)* (hmat(ibox,2)*hmat(ibox,6) - hmat(ibox,5)*hmat(ibox,3))
 
-    vol = vol/(4.0d0*onepi)
+    vol = vol/(4.0E0_dp*onepi)
 
     hmaxsq = alpsqr4*onepi*onepi
 
@@ -113,15 +114,15 @@ contains
              ! if ( ksqr .lt. hmaxsq ) then
              ! sometimes these are about equal, which can cause different
              ! behavior on 32 and 64 bit machines without this .and. statement
-             if ( ksqr .lt. hmaxsq .and. abs(ksqr-hmaxsq) .gt. 1d-9 ) then
+             if ( ksqr .lt. hmaxsq .and. abs(ksqr-hmaxsq) .gt. 1E-9_dp ) then
                 ncount = ncount + 1
                 my_kx(ncount) = kx1
                 my_ky(ncount) = ky1
                 my_kz(ncount) = kz1
                 my_prefact(ncount) = exp(-ksqr/alpsqr4)/(ksqr*vol)
                 ! sum up q*cos and q*sin ***
-                sumr = 0.0d0
-                sumi = 0.0d0
+                sumr = 0.0E0_dp
+                sumi = 0.0E0_dp
                 ! do i = myid+1,nchain,numprocs
                 do i = 1,nchain
                    imolty = moltyp(i)
@@ -211,14 +212,14 @@ contains
           do izz = 1,2
              ! izz = 1: old configuration
              ! izz = 2: new configuration
-             sumr(izz) = 0.0d0
-             sumi(izz) = 0.0d0
+             sumr(izz) = 0.0E0_dp
+             sumi(izz) = 0.0E0_dp
              imolty = moltion(izz)
              do ii = 1, nunit(imolty)
                 if ( lqchg(ntype(imolty,ii)) ) then
                    arg = kx(ic,ibox)*rxuion(ii,izz) + ky(ic,ibox)*ryuion(ii,izz) + kz(ic,ibox)*rzuion(ii,izz)
-                   sumr(izz) = sumr(izz) +  qquion(ii,izz)*dcos(arg)
-                   sumi(izz) = sumi(izz) +  qquion(ii,izz)*dsin(arg)
+                   sumr(izz) = sumr(izz) +  qquion(ii,izz)*cos(arg)
+                   sumi(izz) = sumi(izz) +  qquion(ii,izz)*sin(arg)
                 end if
              end do
           end do
@@ -233,8 +234,8 @@ contains
        call mp_allgather(my_ssumrn,ssumrn(:,ibox),rcounts,displs,groupid)
        call mp_allgather(my_ssumin,ssumin(:,ibox),rcounts,displs,groupid)
 !----------------------------------------------------------------------
-       vrecipnew = 0.0d0
-       vrecipold = 0.0d0
+       vrecipnew = 0.0E0_dp
+       vrecipold = 0.0E0_dp
        do ic = my_start,my_end
           vrecipnew = vrecipnew + (ssumrn(ic,ibox)*ssumrn(ic,ibox) + ssumin(ic,ibox)*ssumin(ic,ibox))*prefact(ic,ibox)
           vrecipold = vrecipold + (ssumr(ic,ibox)*ssumr(ic,ibox) + ssumi(ic,ibox)*ssumi(ic,ibox))*prefact(ic,ibox)
@@ -334,20 +335,20 @@ contains
 ! izz = 1: old configuration
 ! izz = 2: new configuration
 
-               sumr(izz) = 0.0d0
-               sumi(izz) = 0.0d0
+               sumr(izz) = 0.0E0_dp
+               sumi(izz) = 0.0E0_dp
                imolty = moltion(izz)
                   if ( lqchg(ntype(imolty,ii)) ) then
                      arg = kx(ic,ibox)*rxuion(ii,izz) + ky(ic,ibox)*ryuion(ii,izz) + kz(ic,ibox)*rzuion(ii,izz)
-                     sumr(izz) = sumr(izz) +  qquion(ii,izz)*dcos(arg)
-                     sumi(izz) = sumi(izz) +  qquion(ii,izz)*dsin(arg)
+                     sumr(izz) = sumr(izz) +  qquion(ii,izz)*cos(arg)
+                     sumi(izz) = sumi(izz) +  qquion(ii,izz)*sin(arg)
                   end if
  20         continue
             ssumrn(ic,ibox) = ssumr(ic,ibox) - sumr(1) + sumr(2)
             ssumin(ic,ibox) = ssumi(ic,ibox) - sumi(1) + sumi(2)
  30      continue
-         vrecipnew = 0.0d0
-         vrecipold = 0.0d0
+         vrecipnew = 0.0E0_dp
+         vrecipold = 0.0E0_dp
          do ic = 1,ncount
             vrecipnew = vrecipnew + (ssumrn(ic,ibox)* ssumrn(ic,ibox) + ssumin(ic,ibox)* ssumin(ic,ibox))*prefact(ic,ibox)
             vrecipold = vrecipold + (ssumr(ic,ibox)* ssumr(ic,ibox) + ssumi(ic,ibox)* ssumi(ic,ibox))*prefact(ic,ibox)
@@ -425,22 +426,22 @@ contains
 ! zzz = 1: old configuration
 ! zzz = 2: new configuration
 
-               sumr(zzz) = 0.0d0
-               sumi(zzz) = 0.0d0
+               sumr(zzz) = 0.0E0_dp
+               sumi(zzz) = 0.0E0_dp
                imolty = moltion(zzz)
                do ii = 1, nunit(imolty)
 ! if ( lqchg(ntype(imolty,ii)) ) then
                      arg = kx(ic,ibox)*rxuion(ii,zzz) + ky(ic,ibox)*ryuion(ii,zzz) + kz(ic,ibox)*rzuion(ii,zzz)
-                     sumr(zzz) = sumr(zzz) +  qquion(ii,zzz)*dcos(arg)
-                     sumi(zzz) = sumi(zzz) +  qquion(ii,zzz)*dsin(arg)
+                     sumr(zzz) = sumr(zzz) +  qquion(ii,zzz)*cos(arg)
+                     sumi(zzz) = sumi(zzz) +  qquion(ii,zzz)*sin(arg)
 ! end if
                end do
  20         continue
             ssumrn(ic,ibox) = ssumr(ic,ibox) - sumr(1) + sumr(2)
             ssumin(ic,ibox) = ssumi(ic,ibox) - sumi(1) + sumi(2)
  30      continue
-         vrecipnew = 0.0d0
-         vrecipold = 0.0d0
+         vrecipnew = 0.0E0_dp
+         vrecipold = 0.0E0_dp
          do ic = 1,ncount
             vrecipnew = vrecipnew + (ssumrn(ic,ibox)* ssumrn(ic,ibox) + ssumin(ic,ibox)* ssumin(ic,ibox))*prefact(ic,ibox)
             vrecipold = vrecipold + (ssumr(ic,ibox)* ssumr(ic,ibox) + ssumi(ic,ibox)* ssumi(ic,ibox))*prefact(ic,ibox)
@@ -497,38 +498,38 @@ contains
 
     real::pxx,pyy,pzz,intraxx,intrayy,intrazz,intraxy,intraxz,intrazy,intrayz,intrayx,intrazx,pxy,pyx,pyz,pzy,pxz,pzx
 
-    repress  = 0.0d0
-    repressx = 0.0d0
-    repressy = 0.0d0
-    repressz = 0.0d0
-    recipintra = 0.0d0
-    pxy = 0.0d0
-    pxz = 0.0d0
-    pyx = 0.0d0
-    pyz = 0.0d0
-    pzx = 0.0d0
-    pzy = 0.0d0
+    repress  = 0.0E0_dp
+    repressx = 0.0E0_dp
+    repressy = 0.0E0_dp
+    repressz = 0.0E0_dp
+    recipintra = 0.0E0_dp
+    pxy = 0.0E0_dp
+    pxz = 0.0E0_dp
+    pyx = 0.0E0_dp
+    pyz = 0.0E0_dp
+    pzx = 0.0E0_dp
+    pzy = 0.0E0_dp
 
-    intraxx = 0.0d0
-    intrayy = 0.0d0
-    intrazz = 0.0d0
-    intraxy = 0.0d0
-    intrazy = 0.0d0
-    intraxz = 0.0d0
-    intrazx = 0.0d0
-    intrayz = 0.0d0
-    intrayx = 0.0d0
+    intraxx = 0.0E0_dp
+    intrayy = 0.0E0_dp
+    intrazz = 0.0E0_dp
+    intraxy = 0.0E0_dp
+    intrazy = 0.0E0_dp
+    intraxz = 0.0E0_dp
+    intrazx = 0.0E0_dp
+    intrayz = 0.0E0_dp
+    intrayx = 0.0E0_dp
 
     ! RP for MPI
     do ncount = myid+1,numvect(ibox),numprocs
        ! do ncount = 1, numvect(ibox)
        factor = prefact(ncount,ibox)*(ssumr(ncount,ibox)*ssumr(ncount,ibox) + ssumi(ncount,ibox)* ssumi(ncount,ibox))
-       repressx = repressx + factor*(1.0d0 - (1.0d0/(4.0d0*calp(ibox) *calp(ibox)) + 1.0d0/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0d0*kx(ncount,ibox)*kx(ncount,ibox))
-       repressy = repressy + factor*(1.0d0 - (1.0d0/(4.0d0*calp(ibox) *calp(ibox)) + 1.0d0/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0d0*ky(ncount,ibox)*ky(ncount,ibox))
-       repressz = repressz + factor*(1.0d0 - (1.0d0/(4.0d0*calp(ibox) *calp(ibox)) + 1.0d0/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0d0*kz(ncount,ibox)*kz(ncount,ibox))
-       pxy = pxy + factor*(0.0d0 - (1.0d0/(4.0d0*calp(ibox) *calp(ibox)) + 1.0d0/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0d0*kx(ncount,ibox)*ky(ncount,ibox))
-       pxz = pxz + factor*(0.0d0 - (1.0d0/(4.0d0*calp(ibox) *calp(ibox)) + 1.0d0/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0d0*kx(ncount,ibox)*kz(ncount,ibox))
-       pyz = pyz + factor*(0.0d0 - (1.0d0/(4.0d0*calp(ibox) *calp(ibox)) + 1.0d0/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0d0*ky(ncount,ibox)*kz(ncount,ibox))
+       repressx = repressx + factor*(1.0E0_dp - (1.0E0_dp/(4.0E0_dp*calp(ibox) *calp(ibox)) + 1.0E0_dp/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0E0_dp*kx(ncount,ibox)*kx(ncount,ibox))
+       repressy = repressy + factor*(1.0E0_dp - (1.0E0_dp/(4.0E0_dp*calp(ibox) *calp(ibox)) + 1.0E0_dp/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0E0_dp*ky(ncount,ibox)*ky(ncount,ibox))
+       repressz = repressz + factor*(1.0E0_dp - (1.0E0_dp/(4.0E0_dp*calp(ibox) *calp(ibox)) + 1.0E0_dp/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0E0_dp*kz(ncount,ibox)*kz(ncount,ibox))
+       pxy = pxy + factor*(0.0E0_dp - (1.0E0_dp/(4.0E0_dp*calp(ibox) *calp(ibox)) + 1.0E0_dp/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0E0_dp*kx(ncount,ibox)*ky(ncount,ibox))
+       pxz = pxz + factor*(0.0E0_dp - (1.0E0_dp/(4.0E0_dp*calp(ibox) *calp(ibox)) + 1.0E0_dp/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0E0_dp*kx(ncount,ibox)*kz(ncount,ibox))
+       pyz = pyz + factor*(0.0E0_dp - (1.0E0_dp/(4.0E0_dp*calp(ibox) *calp(ibox)) + 1.0E0_dp/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0E0_dp*ky(ncount,ibox)*kz(ncount,ibox))
     end do
 
     ! RP added for MPI
@@ -569,7 +570,7 @@ contains
              do ncount = 1,numvect(ibox)
                 ! compute the dot product of k and r
                 arg = kx(ncount,ibox)*rxu(i,ii) + ky(ncount,ibox)*ryu(i,ii) + kz(ncount,ibox)*rzu(i,ii)
-                factor = prefact(ncount,ibox)*2.0d0* (-ssumr(ncount,ibox)*dsin(arg) +ssumi(ncount,ibox)*dcos(arg))*qqu(i,ii)
+                factor = prefact(ncount,ibox)*2.0E0_dp* (-ssumr(ncount,ibox)*sin(arg) +ssumi(ncount,ibox)*cos(arg))*qqu(i,ii)
                 recipintra = recipintra + factor* (kx(ncount,ibox)*piix+ky(ncount,ibox)*piiy +kz(ncount,ibox)*piiz)
                 ! keep x,y and z separate for surface tension calculation
                 intraxx = intraxx + factor*(kx(ncount,ibox)*piix)

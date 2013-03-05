@@ -15,7 +15,7 @@
 
       ibox = 1
       if (lmipsw.and.(nbox.gt.1)) call err_exit(__FILE__,__LINE__,'ipsw only for 1 box',myid+1)
-      if (lmipsw.and.lnpt.and.pmvol.gt.1.0d-7) call err_exit(__FILE__,__LINE__,'ipsw only for NVT',myid+1)
+      if (lmipsw.and.lnpt.and.pmvol.gt.1.0E-7_dp) call err_exit(__FILE__,__LINE__,'ipsw only for NVT',myid+1)
       read(35,*)
       read(35,*) (lwell(i),i=1,nmolty)
       read(35,*)
@@ -54,8 +54,8 @@
       end if
       read(35,*)
       read(35,*) etais, lambdais
-      if ((lambdais.le.-1.0d-6).or.(lambdais.ge.1.000001)) call err_exit(__FILE__,__LINE__,'lambdais must be between 0 and 1',myid+1)
-      if ((etais.le.-1.0d-6).or.(etais.ge.1.000001)) call err_exit(__FILE__,__LINE__,'etais must be between 0 and 1',myid+1)
+      if ((lambdais.le.-1.0E-6_dp).or.(lambdais.ge.1.000001)) call err_exit(__FILE__,__LINE__,'lambdais must be between 0 and 1',myid+1)
+      if ((etais.le.-1.0E-6_dp).or.(etais.ge.1.000001)) call err_exit(__FILE__,__LINE__,'etais must be between 0 and 1',myid+1)
       read(35,*)
       if (lsolid(ibox).and.(.not.lrect(ibox))) then
          read(35,*) hmata(1),hmata(2),hmata(3)
@@ -71,8 +71,8 @@
          if (lsolid(ibox).and.(.not.lrect(ibox))) then
             lhm = .false.
             do i = 1, 9
-               hm(i) = (1.0d0-lambdais)*hmata(i)+lambdais*hmatc(i)
-               if (dabs(hmat(ibox,i)-hm(i)).gt.1.0d-6) lhm = .true.
+               hm(i) = (1.0E0_dp-lambdais)*hmata(i)+lambdais*hmatc(i)
+               if (abs(hmat(ibox,i)-hm(i)).gt.1.0E-6_dp) lhm = .true.
             end do
             if (lhm) then
                write(io_output,*) 'enter correct hmat'
@@ -82,8 +82,8 @@
                call err_exit(__FILE__,__LINE__,'',myid+1)
             end if
          else if (.not.lsolid(ibox)) then
-            lx = (1.0d0-lambdais)*lena+lambdais*lenc
-            if (dabs(boxlx(1)-lx).gt.1.0d-6) then
+            lx = (1.0E0_dp-lambdais)*lena+lambdais*lenc
+            if (abs(boxlx(1)-lx).gt.1.0E-6_dp) then
                write(io_output,*) 'input correct boxl', lx
                call err_exit(__FILE__,__LINE__,'',myid+1)
             end if
@@ -93,7 +93,7 @@
          if (lsolid(ibox).and.(.not.lrect(ibox))) then
             lhm = .false.
             do i = 1, 9
-               if (dabs(hmat(ibox,i)-hmata(i)).gt.1.0d-6) lhm = .true.
+               if (abs(hmat(ibox,i)-hmata(i)).gt.1.0E-6_dp) lhm = .true.
             end do
             if (lhm) then
                write(io_output,*) 'enter correct hmat'
@@ -104,7 +104,7 @@
             end if
 !	write(io_output,*) boxlx(1),lena
          else if (.not.lsolid(ibox)) then
-            if (dabs(boxlx(1)-lena).gt.1.0d-6) then
+            if (abs(boxlx(1)-lena).gt.1.0E-6_dp) then
                write(io_output,*) 'input correct boxl', lena
                call err_exit(__FILE__,__LINE__,'',myid+1)
             end if
@@ -114,7 +114,7 @@
          if (lsolid(ibox).and.(.not.lrect(ibox))) then
             lhm = .false.
             do i = 1, 9
-               if (dabs(hmat(ibox,i)-hmatc(i)).gt.1.0d-6) lhm = .true.
+               if (abs(hmat(ibox,i)-hmatc(i)).gt.1.0E-6_dp) lhm = .true.
             end do
             if (lhm) then
                write(io_output,*) 'enter correct hmat'
@@ -124,7 +124,7 @@
                call err_exit(__FILE__,__LINE__,'',myid+1)
             end if
          else if (.not.lsolid(ibox)) then
-            if (dabs(boxlx(1)-lenc).gt.1.0d-6) then
+            if (abs(boxlx(1)-lenc).gt.1.0E-6_dp) then
                write(io_output,*) 'input correct boxl', lenc
                call err_exit(__FILE__,__LINE__,'',myid+1)
             end if
@@ -172,10 +172,10 @@
          do i = 1, nmolty
             lwell(i) = .false.
          end do
-         lambdais = 0.0d0
+         lambdais = 0.0E0_dp
       end if
-      acdvdl = 0.0d0
-      acipsw = 0.0d0
+      acdvdl = 0.0E0_dp
+      acipsw = 0.0E0_dp
 
       if (lsolid(ibox).and.(.not.lrect(ibox))) then
          do i = 1, nmolty

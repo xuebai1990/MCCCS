@@ -439,7 +439,7 @@
             if (ovrlap) goto 500
             delen = v - ( vnewintra + vnewinter + vnewext +vnewelect) - v1ins
 
-            waddnew = waddnew*dexp(-(beta*delen))
+            waddnew = waddnew*exp(-(beta*delen))
 
             vnewt     = vnewt + delen
             vnewinter = vinter - v1insint
@@ -474,7 +474,7 @@
             if (ovrlap) goto 500
             delen = v - vnewintra + vtornew
 
-            waddnew = waddnew*dexp(-beta*delen)
+            waddnew = waddnew*exp(-beta*delen)
 
             vnewt     = vnewt + delen
             vnewintra = vintra
@@ -507,7 +507,7 @@
                else
                   rho = dble(ncmt(boxins,jmt))/volins
                end if
-               arg=arg*dexp(-(beta*2.0d0*coru(imolty,jmt,rho,boxins)))
+               arg=arg*exp(-(beta*2.0d0*coru(imolty,jmt,rho,boxins)))
             end do
          end if
 

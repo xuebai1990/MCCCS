@@ -722,7 +722,7 @@
                   acv(13,ibox) = acv(13,ibox)+dipolez(ibox)
                   acvsq(13,ibox) = acvsq(13,ibox)+dipolez(ibox)**2
                   acvsq(14,ibox) = acvsq(11,ibox) + acvsq(12,ibox) + acvsq(13,ibox)
-                  acv(15,ibox) = acv(15,ibox)+dsqrt(dipolex(ibox)* dipolex(ibox)+dipoley(ibox)*dipoley(ibox)+ dipolez(ibox)*dipolez(ibox))
+                  acv(15,ibox) = acv(15,ibox)+sqrt(dipolex(ibox)* dipolex(ibox)+dipoley(ibox)*dipoley(ibox)+ dipolez(ibox)*dipolez(ibox))
                end if
 
                if (lsolid(ibox) .and. .not. lrect(ibox)) then
@@ -1110,7 +1110,7 @@
 !         do i = 1,nchain
 !            if ( nboxi(i) .eq. ibox ) then
 !               if ( moltyp(i) .eq. imolty ) then
-!                  bin = dint(zcm(i)/binstep) + 1
+!                  bin = aint(zcm(i)/binstep) + 1
 !                  temvol = boxlx(ibox)*boxly(ibox)*binstep
 !                  profile(bin) = profile(bin)+1.0d0/temvol
 !               end if
@@ -1782,7 +1782,7 @@
 !              --- determine how many steps it takes to grow molecule
 !              --- not counting the first inserted bead
                      igrow = nugrow(itype)
-                     debroglie = 17.458d0/( dsqrt(masst(itype)/beta ))
+                     debroglie = 17.458d0/( sqrt(masst(itype)/beta ))
                      if (lrigid(itype)) then 
                         call schedule(igrow,itype,steps,1,0,4)
                      else
@@ -1794,12 +1794,12 @@
                   if( bnchem(ibox,itype) .gt. 0.5d0 ) then
 !              --- determine how many steps it takes to grow molecule
 !              --- not counting the first inserted bead
-                     debroglie = 17.458d0/( dsqrt(masst(itype)/beta ))
+                     debroglie = 17.458d0/( sqrt(masst(itype)/beta ))
                      acchem(ibox,itype) = ((-1.0d0)/beta) * dlog(acchem(ibox,itype) / ( dble( nchoi1(itype) ) * dble( nchoir(itype)) * dble( nchoih(itype) ) * bnchem(ibox,itype) * debroglie*debroglie*debroglie ) )
                   end if
                end if
             end do
-            if (acvsq(1,ibox).gt.0.0d0) aflv(ibox)=dsqrt(acvsq(1,ibox))
+            if (acvsq(1,ibox).gt.0.0d0) aflv(ibox)=sqrt(acvsq(1,ibox))
          end do
 
          write(io_output,1215) ('       Box ',i,i=1,nbox) 
@@ -1944,9 +1944,9 @@
                   do nbl = 1, nblock
                      dsq(i,j) = dsq(i,j) +  ( baver(i,j,nbl) - aver(i,j) )**2
                   end do
-                  stdev(i,j) = dsqrt( dsq(i,j) / dblock )
-                  sterr(i,j) = dsqrt( dsq(i,j) / dbl1 )
-                  errme(i,j) = sterr(i,j) / dsqrt(dblock)
+                  stdev(i,j) = sqrt( dsq(i,j) / dblock )
+                  sterr(i,j) = sqrt( dsq(i,j) / dbl1 )
+                  errme(i,j) = sterr(i,j) / sqrt(dblock)
                end do
             end do
 
@@ -1969,9 +1969,9 @@
                      do nbl = 1, nblock
                         dsq1(i,ibox,jbox) = dsq1(i,ibox,jbox) + ( baver1(i,ibox,jbox,nbl) - aver1(i,ibox,jbox) )**2
                      end do
-                     stdev1(i,ibox,jbox) = dsqrt( dsq1(i,ibox,jbox) / dblock )
-                     sterr1(i,ibox,jbox) = dsqrt( dsq1(i,ibox,jbox) /  dbl1 )
-                     errme1(i,ibox,jbox) = sterr1(i,ibox,jbox) /  dsqrt(dblock)
+                     stdev1(i,ibox,jbox) = sqrt( dsq1(i,ibox,jbox) / dblock )
+                     sterr1(i,ibox,jbox) = sqrt( dsq1(i,ibox,jbox) /  dbl1 )
+                     errme1(i,ibox,jbox) = sterr1(i,ibox,jbox) /  sqrt(dblock)
                   end do
                end do
             end do
@@ -2128,7 +2128,7 @@
                      do itype = 1,nmolty
                         itel = (2+nener) + 2 * nmolty + itype
                         ostwald = aver(itel,il)/aver(itel,ig)
-                        stdost  = ostwald * dsqrt( (stdev(itel,il)/aver(itel,il))**2 + (stdev(itel,ig)/aver(itel,ig))**2 )
+                        stdost  = ostwald * sqrt( (stdev(itel,il)/aver(itel,il))**2 + (stdev(itel,ig)/aver(itel,ig))**2 )
 !                    write(42,*) nunit(itype),ostwald,stdost
 !                    write(43,*) nunit(itype),
 !     &                   -(gconst*log(ostwald)) + (eta2(ig,itype) 

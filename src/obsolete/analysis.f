@@ -156,7 +156,7 @@
       
    
          do imolty=1,nmolty
-            i = (dint((max_length(imolty))/bin_width)+1) 
+            i = (aint((max_length(imolty))/bin_width)+1) 
             if(i.gt.nbinmax_ete) then
 	       write(io_output,*) 'Stopped in Analysis end-to-end dist calc'
                write(io_output,*) 'number of bins greater than nbinmax_ete',i, nbinmax_ete
@@ -189,7 +189,7 @@
          
          
          do kk=1,nbox
-            i=(dint(boxlz(kk)/bin_width)+1)
+            i=(aint(boxlz(kk)/bin_width)+1)
             if(i.gt.nbinmax_ete) then
                write(io_output,*) 'Stopped in Analysis Z profile calculation'  
                write(io_output,*) 'number of bins greater than nbinmax_ete',i, nbinmax_ete
@@ -427,7 +427,7 @@
 !                           call cleanup('q value out of range')
 !                        end if
 !                        qdummy = qdummy - qmin
-!                        qbin = dint(qdummy/qstep) + 1
+!                        qbin = aint(qdummy/qstep) + 1
 !                        qqcode = numax*(imolty-1) + ii
 !                        qanalhist(qqcode,kk,qbin) = 
 !     &                       qanalhist(qqcode,kk,qbin) + 1.0d0
@@ -452,7 +452,7 @@
 !                  dipz = dipz + qdummy*rzu(i,iunit)
 !               end do
 !               dipole(imolty,kk) = dipole(imolty,kk) 
-!     &              + dsqrt(dipx*dipx + dipy*dipy + dipz*dipz)
+!     &              + sqrt(dipx*dipx + dipy*dipy + dipz*dipz)
 !               dicount(imolty,kk) = dicount(imolty,kk) + 1.0d0
 !            end do
 !
@@ -498,13 +498,13 @@
               
               ruij   = sqrt(ruijsq)
             
-              vec_hist(kk,imolty,(idint(ruij/bin_width)+1))= vec_hist(kk,imolty,(idint(ruij/bin_width)+1))+1
+              vec_hist(kk,imolty,(int(ruij/bin_width)+1))= vec_hist(kk,imolty,(int(ruij/bin_width)+1))+1
 
            end do
  
            do kk=1,nbox
              do imolty=1,nmolty
-                 xx =  (idint(max_length(imolty)/bin_width)+1)
+                 xx =  (int(max_length(imolty)/bin_width)+1)
                 do bin=1,xx 
                   vec_hist(kk,imolty,bin)=vec_hist(kk,imolty,bin)/ ncmt(kk,imolty)
                 
@@ -545,15 +545,15 @@
          do i=1,nchain
             kk=nboxi(i)
             imolty=moltyp(i) 
-            rhoz(kk,imolty,idint(zcm(i)/bin_width)+1)=rhoz(kk,imolty, idint(zcm(i)/bin_width)+1) +1
+            rhoz(kk,imolty,int(zcm(i)/bin_width)+1)=rhoz(kk,imolty, int(zcm(i)/bin_width)+1) +1
 
             rzuij=zcm(i)-tempzcm(kk)
-            boxcom_rhoz(kk,imolty,idint(rzuij/bin_width))=boxcom_rhoz(  kk,imolty,idint(rzuij/bin_width))+1          
+            boxcom_rhoz(kk,imolty,int(rzuij/bin_width))=boxcom_rhoz(  kk,imolty,int(rzuij/bin_width))+1          
          end do  
 
          do kk=1,nbox
             do imolty=1,nmolty
-               xx = (idint(max_boxlz(kk)/bin_width))+1
+               xx = (int(max_boxlz(kk)/bin_width))+1
                do bin=1,xx
                  slab_vol = hmat(kk,1)*hmat(kk,5)*bin_width
                  rhoz(kk,imolty,bin)=rhoz(kk,imolty,bin)/slab_vol
@@ -652,9 +652,9 @@
                               ruijsq = rxuij*rxuij + ryuij*ryuij  + rzuij*rzuij
 
                               if (ruijsq .lt. rcutsq) then
-                                 ruij = dsqrt(ruijsq)
+                                 ruij = sqrt(ruijsq)
 
-                                 bin = dint(ruij/binstep) + 1 
+                                 bin = aint(ruij/binstep) + 1 
                                  analhist(ntij,bin) = analhist(ntij, bin) + 1.0d0
                               end if
 
@@ -779,9 +779,9 @@
                         ruijsq = rxuij*rxuij + ryuij*ryuij  + rzuij*rzuij
                         
                         if (ruijsq .lt. rcutsq) then
-                           ruij = dsqrt(ruijsq)
+                           ruij = sqrt(ruijsq)
                            
-                           bin = dint(ruij/binstep) + 1 
+                           bin = aint(ruij/binstep) + 1 
                            comanalhist(ntij,bin) = comanalhist(ntij,bin)  + 1.0d0
                         end if
 
@@ -892,7 +892,7 @@
                         xvec(ii,jj) = rxu(i,jj) - rxui
                         yvec(ii,jj) = ryu(i,jj) - ryui
                         zvec(ii,jj) = rzu(i,jj) - rzui
-                        distij(ii,jj) = dsqrt( xvec(ii,jj)**2 + yvec(ii,jj)**2 + zvec(ii,jj)**2 )
+                        distij(ii,jj) = sqrt( xvec(ii,jj)**2 + yvec(ii,jj)**2 + zvec(ii,jj)**2 )
                      end do
                   end do
                   
@@ -908,13 +908,13 @@
                         ip2 = angle_3(imolty,bend)
 
                         thetac = ( xvec(ip1,j)*xvec(ip1,ip2) + yvec(ip1,j)*yvec(ip1,ip2) + zvec(ip1,j)*zvec(ip1,ip2) ) / ( distij(ip1,j)*distij(ip1,ip2) )
-                        theta = dacos(thetac)
+                        theta = acos(thetac)
                         if(abs(theta).lt.0.000001) then
                             theta =0.0d0
                         end if
 !                        write(io_output,*) 'value of theta',theta
                         angle_avg(kk,imolty,bend) =  angle_avg(kk,imolty,bend) + theta
-                        bin = dint(dble(theta)/dble(ang_bin_size))+1
+                        bin = aint(dble(theta)/dble(ang_bin_size))+1
 	                if (bin.lt.0) then
                             write(io_output,*) 'theta, ang_bin_size, bin',theta, ang_bin_size, bin
                             bin=1
@@ -945,12 +945,12 @@
                         za1a2 = xvec(ip1,ip2) * yvec(ip2,ip3) + yvec(ip1,ip2) * xvec(ip3,ip2)
                               
 !     *** calculate lengths of cross products ***
-                        daa1 = dsqrt(xaa1**2+yaa1**2+zaa1**2)
-                        da1a2 = dsqrt(xa1a2**2+ya1a2**2+za1a2**2)
+                        daa1 = sqrt(xaa1**2+yaa1**2+zaa1**2)
+                        da1a2 = sqrt(xa1a2**2+ya1a2**2+za1a2**2)
 !              *** calculate dot product of cross products ***
                         dot = xaa1*xa1a2 + yaa1*ya1a2 + zaa1*za1a2
                         thetac = - dot / ( daa1 * da1a2 )
-                        theta = dacos(thetac)
+                        theta = acos(thetac)
 
 !              *** calculate cross product of cross products ***
                         xcc = yaa1*za1a2 - zaa1*ya1a2
@@ -964,7 +964,7 @@
                         theta = theta*(180.0d0/onepi)
 
 !                       --- bin the torsion --
-                        bin = dint( (theta+180.0d0)/tor_bin_size)+1
+                        bin = aint( (theta+180.0d0)/tor_bin_size)+1
                         tor_bin(kk,imolty,torsion,bin) =  tor_bin(kk,imolty,torsion,bin)+1.0d0
                         tor_tot(kk,imolty,torsion) =  tor_tot(kk,imolty,torsion) + 1.0d0
 
@@ -1028,7 +1028,7 @@
 
          do kk=1,nbox
            do imolty=1,nmolty
-              xx =  (dint(max_length(imolty)/bin_width)+1)
+              xx =  (aint(max_length(imolty)/bin_width)+1)
               write(140+kk,*) 'molecule type', imolty
               write(140+kk,*) 
               do bin=1,xx
@@ -1062,7 +1062,7 @@
                      
          do kk=1,nbox
            do imolty=1,nmolty
-              xx =  (dint(max_boxlz(kk)/bin_width)+1)
+              xx =  (aint(max_boxlz(kk)/bin_width)+1)
               write(150+kk,*) 'molecule type',imolty
               write(153+kk,*) 'molecule type',imolty
               write(153+kk,*) 
@@ -1298,7 +1298,7 @@
 !                  do k = 1,nblock
 !                     stddev = stddev + (dipblk(imol,kk,k)-avera)**2
 !                  end do
-!                  stddev = dsqrt( stddev/dble(nblock-1) )
+!                  stddev = sqrt( stddev/dble(nblock-1) )
 !                  stddev = stddev*diconv
 !                  avera = avera*diconv
 !                  write(io_output,'(i3,4x,i3,4x,2f10.4)') kk,imol,avera,stddev
@@ -1368,7 +1368,7 @@
                write(130+kk,"('Units',8x,'Frac g+',1x,'Frac g-',1x ,'Frac t')")
                gaudef = g_plus(kk,imolty)+g_minus(kk,imolty)
        
-               if((dint(trans(kk,imolty))+gaudef).ne.0) then
+               if((aint(trans(kk,imolty))+gaudef).ne.0) then
                   ratio = gaudef/(trans(kk,imolty)+gaudef)
                else
 !                  ratio = 0.0d0

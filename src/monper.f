@@ -19,7 +19,7 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
   logical::lratio,lratv,lprint,lmv,lrsave,lblock,lfq,lratfix ,lsolute,ovrlap
   real, dimension(nprop1,nbxmax,nbxmax):: acsolpar
   real, dimension(nbxmax):: acEnthalpy ,acEnthalpy1
-  real::dp,dpp,debroglie ,histrat
+  real::dpr,dpp,debroglie ,histrat
   real::acv, molfra,acpres,acsurf,acvolume,asetel,acdens,histtot,acmove,acnp,dvalue,dnchoi,dnchoi1,dnchoih ,dnunit,ratflcq,v,vintra,vinter,vext,velect,vewald,vtors,vtail,rho,vbend,rcutmin,vvib
 
   dimension acv(nener,nbxmax),lratfix(ntmax)
@@ -35,14 +35,14 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
 #endif
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
-  pres=0.0d0
+  pres=0.0E0_dp
 ! perform periodic operations  ***
  
 ! Deciding the minimum rcut for atom displacement. As we
 ! would have strecthing potential, this ought to be much
 ! smaller than the rcutmin
 
-  rcutmin = 1.0d10
+  rcutmin = 1.0E10_dp
 
   do  im = 1,nbox
      if (rcutmin.gt.rcut(im)) then
@@ -52,45 +52,45 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
 
   if ( lratio ) then
 ! adjust the atomic displacements
-     if ( Abntrax .gt. 0.5d0 ) then
+     if ( Abntrax .gt. 0.5E0_dp ) then
         ratrax = Abstrax / Abntrax
         rttrax = Armtrax * ratrax / tatra
-        if ( rttrax .gt. 2.0d0 * rcutmin ) then
+        if ( rttrax .gt. 2.0E0_dp * rcutmin ) then
 ! maximum translational displacement
-           Armtrax = 2.0d0*rcutmin
-        else if (rttrax .lt. 1.0d-10 ) then
+           Armtrax = 2.0E0_dp*rcutmin
+        else if (rttrax .lt. 1.0E-10_dp ) then
 ! ratio must have been zero, so divide by 10
-           Armtrax = Armtrax/10.0d0
+           Armtrax = Armtrax/10.0E0_dp
         else
 ! accept new ratio
            Armtrax = rttrax
         end if
      end if
 
-     if ( Abntray .gt. 0.5d0 ) then
+     if ( Abntray .gt. 0.5E0_dp ) then
         ratray = Abstray / Abntray
         rttray = Armtray * ratray / tatra
-        if ( rttray .gt. 2.0d0 * rcutmin ) then
+        if ( rttray .gt. 2.0E0_dp * rcutmin ) then
 ! maximum translational displacement
-           Armtray = 2.0d0*rcutmin
-        else if (rttray .lt. 1.0d-10 ) then
+           Armtray = 2.0E0_dp*rcutmin
+        else if (rttray .lt. 1.0E-10_dp ) then
 ! ratio must have been zero, so divide by 10
-           Armtray = Armtray/10.0d0
+           Armtray = Armtray/10.0E0_dp
         else
 ! accept new ratio
            Armtray = rttray
         end if
      end if
         
-     if ( Abntraz .gt. 0.5d0 ) then
+     if ( Abntraz .gt. 0.5E0_dp ) then
         ratraz = Abstraz / Abntraz
         rttraz = Armtraz * ratraz / tatra
-        if ( rttraz .gt. 2.0d0 * rcutin ) then
+        if ( rttraz .gt. 2.0E0_dp * rcutin ) then
 ! maximum translational displacement
-           Armtraz = 2.0d0*rcutin
-        else if (rttraz .lt. 1.0d-10 ) then
+           Armtraz = 2.0E0_dp*rcutin
+        else if (rttraz .lt. 1.0E-10_dp ) then
 ! ratio must have been zero, so divide by 10
-           Armtraz = Armtraz/10.0d0
+           Armtraz = Armtraz/10.0E0_dp
         else
 ! accept new ratio
            Armtraz = rttraz
@@ -107,17 +107,17 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
 ! rmtrax
 ! check whether any x translations have been done for 
 ! molecule type imolty in box im
-           if ( bntrax(imolty,im) .gt. 0.5d0 ) then
+           if ( bntrax(imolty,im) .gt. 0.5E0_dp ) then
 ! compute possible new ratio
               ratrax = bstrax(imolty,im) / bntrax(imolty,im)
               rttrax = rmtrax(imolty,im) * ratrax / tatra
 
-              if ( rttrax .gt. 2.0d0 * rcut(im)) then 
+              if ( rttrax .gt. 2.0E0_dp * rcut(im)) then 
 ! maximum translational displacement
-                 rmtrax(imolty,im) = 2.0d0*rcut(im)
-              else if (rttrax .lt. 1.0d-10 ) then  
+                 rmtrax(imolty,im) = 2.0E0_dp*rcut(im)
+              else if (rttrax .lt. 1.0E-10_dp ) then  
 ! ratio must have been zero, so divide by 10
-                 rmtrax(imolty,im) = rmtrax(imolty,im)/10.0d0
+                 rmtrax(imolty,im) = rmtrax(imolty,im)/10.0E0_dp
               else 
 ! accept new ratio
                  rmtrax(imolty,im) = rttrax
@@ -127,17 +127,17 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
 ! rmtray
 ! check whether any y translations have been done for 
 ! molecule type imolty in box im
-           if ( bntray(imolty,im) .gt. 0.5d0 ) then
+           if ( bntray(imolty,im) .gt. 0.5E0_dp ) then
 ! compute possiblt new ratio
               ratray = bstray(imolty,im) / bntray(imolty,im)
               rttray = rmtray(imolty,im) * ratray / tatra
 
-              if ( rttray .gt. 2.0d0*rcut(im) ) then 
+              if ( rttray .gt. 2.0E0_dp*rcut(im) ) then 
 ! maximum translational displacement
-                 rmtray(imolty,im) = 2.0d0*rcut(im)
-              else if (rttray .eq. 0.0d0) then  
+                 rmtray(imolty,im) = 2.0E0_dp*rcut(im)
+              else if (rttray .eq. 0.0E0_dp) then  
 ! ratio must have been zero, divide old by 10
-                 rmtray(imolty,im) = rmtray(imolty,im)/10.0d0
+                 rmtray(imolty,im) = rmtray(imolty,im)/10.0E0_dp
               else 
 ! accept new ratio
                  rmtray(imolty,im) = rttray
@@ -147,17 +147,17 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
 ! rmtraz
 ! check whether any z translations have been done for 
 ! molecule type imolty in box im
-           if ( bntraz(imolty,im) .gt. 0.5d0 ) then
+           if ( bntraz(imolty,im) .gt. 0.5E0_dp ) then
 ! compute possible new ratio
               ratraz = bstraz(imolty,im) / bntraz(imolty,im)
               rttraz = rmtraz(imolty,im) * ratraz / tatra
 
-              if ( rttraz .gt. 2.0d0*rcut(im) ) then 
+              if ( rttraz .gt. 2.0E0_dp*rcut(im) ) then 
 ! maximum translational displacement
-                 rmtraz(imolty,im) = 2.0d0*rcut(im)
-              else if ( rttraz .lt. 1.0d-10 ) then  
+                 rmtraz(imolty,im) = 2.0E0_dp*rcut(im)
+              else if ( rttraz .lt. 1.0E-10_dp ) then  
 ! ratio must have been zero, divide old by 10
-                 rmtraz(imolty,im) = rmtraz(imolty,im)/10.0d0
+                 rmtraz(imolty,im) = rmtraz(imolty,im)/10.0E0_dp
               else 
 ! accept new ratio
                  rmtraz(imolty,im) = rttraz
@@ -167,17 +167,17 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
 ! rmrotx
 ! check whether any x-axis rotations have been done for 
 ! molecule type imolty in box im
-           if ( bnrotx(imolty,im) .gt. 0.5d0 ) then
+           if ( bnrotx(imolty,im) .gt. 0.5E0_dp ) then
 ! compute possible new ratio
               rarotx = bsrotx(imolty,im) / bnrotx(imolty,im)
               rtrotx = rmrotx(imolty,im) * rarotx / tarot
 
-              if ( rtrotx .lt. 1.0d-10 )  then
+              if ( rtrotx .lt. 1.0E-10_dp )  then
 ! ratio was zero, divide old by 10
-                 rmrotx(imolty,im) = rmrotx(imolty,im)/10.d0
-              else if (rtrotx .gt. 3.1415d0) then
+                 rmrotx(imolty,im) = rmrotx(imolty,im)/10.E0_dp
+              else if (rtrotx .gt. 3.1415E0_dp) then
 ! maximum rotational displacement
-                 rmrotx(imolty,im) = 3.1415d0
+                 rmrotx(imolty,im) = 3.1415E0_dp
               else
 ! accept trial ratio
                  rmrotx(imolty,im) = rtrotx
@@ -187,17 +187,17 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
 ! rmroty
 ! check whether any y-axis rotations have been done for 
 ! molecule type imolty in box im
-           if ( bnroty(imolty,im) .gt. 0.5d0 ) then
+           if ( bnroty(imolty,im) .gt. 0.5E0_dp ) then
 ! compute possible new ratio
               raroty = bsroty(imolty,im) / bnroty(imolty,im)
               rtroty = rmroty(imolty,im) * raroty / tarot
 
-              if ( rtroty .lt. 1.0d-10)  then
+              if ( rtroty .lt. 1.0E-10_dp)  then
 ! ratio was zero, divide old by 10
-                 rmroty(imolty,im) = rmroty(imolty,im)/10.0d0
-              else if (rtroty .gt. 3.1415d0) then
+                 rmroty(imolty,im) = rmroty(imolty,im)/10.0E0_dp
+              else if (rtroty .gt. 3.1415E0_dp) then
 ! maximum rotational displacement
-                 rmroty(imolty,im) = 3.1415d0
+                 rmroty(imolty,im) = 3.1415E0_dp
               else
 ! accept trial ratio
                  rmroty(imolty,im) = rtroty
@@ -207,17 +207,17 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
 ! rmrotz
 ! check whether any y-axis rotations have been done for 
 ! molecule type imolty in box im
-           if ( bnrotz(imolty,im) .gt. 0.5d0 ) then
+           if ( bnrotz(imolty,im) .gt. 0.5E0_dp ) then
 ! compute possible new ratio
               rarotz = bsrotz(imolty,im) / bnrotz(imolty,im)
               rtrotz = rmrotz(imolty,im) * rarotz / tarot
                   
-              if (rtrotz .eq. 0.0d0)  then
+              if (rtrotz .eq. 0.0E0_dp)  then
 ! ratio was zero, divide old by 10
-                 rmrotz(imolty,im) = rmrotz(imolty,im)/10.0d0
-              else if (rtrotz .gt. 3.1415d0) then
+                 rmrotz(imolty,im) = rmrotz(imolty,im)/10.0E0_dp
+              else if (rtrotz .gt. 3.1415E0_dp) then
 ! maximum rotational displacement
-                 rmrotz(imolty,im) = 3.1415d0
+                 rmrotz(imolty,im) = 3.1415E0_dp
               else
 ! accept trial ratio
                  rmrotz(imolty,im) = rtrotz
@@ -250,18 +250,18 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
            acsroty(imolty,im) = acsroty(imolty,im)+bsroty(imolty,im)
            acsrotz(imolty,im) = acsrotz(imolty,im)+bsrotz(imolty,im)
 
-           bstrax(imolty,im) = 0.0d0
-           bstray(imolty,im) = 0.0d0
-           bstraz(imolty,im) = 0.0d0
-           bntrax(imolty,im) = 0.0d0
-           bntray(imolty,im) = 0.0d0
-           bntraz(imolty,im) = 0.0d0
-           bsrotx(imolty,im) = 0.0d0
-           bsroty(imolty,im) = 0.0d0
-           bsrotz(imolty,im) = 0.0d0
-           bnrotx(imolty,im) = 0.0d0
-           bnroty(imolty,im) = 0.0d0
-           bnrotz(imolty,im) = 0.0d0
+           bstrax(imolty,im) = 0.0E0_dp
+           bstray(imolty,im) = 0.0E0_dp
+           bstraz(imolty,im) = 0.0E0_dp
+           bntrax(imolty,im) = 0.0E0_dp
+           bntray(imolty,im) = 0.0E0_dp
+           bntraz(imolty,im) = 0.0E0_dp
+           bsrotx(imolty,im) = 0.0E0_dp
+           bsroty(imolty,im) = 0.0E0_dp
+           bsrotz(imolty,im) = 0.0E0_dp
+           bnrotx(imolty,im) = 0.0E0_dp
+           bnroty(imolty,im) = 0.0E0_dp
+           bnrotz(imolty,im) = 0.0E0_dp
         end do
      end do
 
@@ -269,11 +269,11 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
      lfq = .false.
      do i = 1,nmolty
         do im = 1,imend
-           if ( bnflcq(i,im) .gt. 0.5d0 ) then
+           if ( bnflcq(i,im) .gt. 0.5E0_dp ) then
               lfq = .true.
               ratflcq = bsflcq(i,im)/(bnflcq(i,im)*taflcq)
-              if ( ratflcq .lt. 0.1d0 ) then
-                 rmflcq(i,im) = rmflcq(i,im) * 0.1d0
+              if ( ratflcq .lt. 0.1E0_dp ) then
+                 rmflcq(i,im) = rmflcq(i,im) * 0.1E0_dp
               else
                  rmflcq(i,im) = rmflcq(i,im) * ratflcq
               end if
@@ -282,8 +282,8 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
            bsflcq2(i,im) = bsflcq2(i,im) + bsflcq(i,im)
            bnflcq2(i,im) = bnflcq2(i,im) + bnflcq(i,im)
 ! rezero flcq
-           bsflcq(i,im) = 0.0d0
-           bnflcq(i,im) = 0.0d0
+           bsflcq(i,im) = 0.0E0_dp
+           bnflcq(i,im) = 0.0E0_dp
         end do
      end do
      if ( lfq.and.myid.eq.0 ) then
@@ -361,7 +361,7 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
                  else
                     vol = boxlx(ibox)*boxly(ibox)*boxlz(ibox)
                  end if
-                 vtail = 0.0d0
+                 vtail = 0.0E0_dp
                  do jmolty = 1, nmolty
                     rho = ncmt(ibox,jmolty) / vol
                     vtail = vtail + ncmt(ibox,imolty) * coru(imolty,jmolty,rho,ibox)
@@ -371,7 +371,7 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
               call U_bonded(i,imolty,vvib,vbend,vtors)
 
               solcount(ibox,imolty) = solcount(ibox,imolty) + 1
-              avsolinter(ibox,imolty) =  avsolinter(ibox,imolty) + vinter / 2.0d0 + vtail
+              avsolinter(ibox,imolty) =  avsolinter(ibox,imolty) + vinter / 2.0E0_dp + vtail
               avsolintra(ibox,imolty) = avsolintra(ibox,imolty)  + vintra 
               avsoltor(ibox,imolty) = avsoltor(ibox,imolty) + vtors
               avsolbend(ibox,imolty) = avsolbend(ibox,imolty)  + vbend
@@ -387,24 +387,24 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
         do ibox = 1, nbox
            if (lsolid(ibox) .and. .not. lrect(ibox)) then
               do j = 1,9
-                 if ( bnhmat(ibox,j) .gt. 0.5d0 ) then
+                 if ( bnhmat(ibox,j) .gt. 0.5E0_dp ) then
                     ratvol = bshmat(ibox,j) / bnhmat(ibox,j)
-                    if (ratvol .eq. 0.0d0) then
-                       rmhmat(ibox,j) = rmhmat(ibox,j) * 0.1d0
+                    if (ratvol .eq. 0.0E0_dp) then
+                       rmhmat(ibox,j) = rmhmat(ibox,j) * 0.1E0_dp
                     else
                        rmhmat(ibox,j) = rmhmat(ibox,j)*ratvol/tavol
                     end if
                  end if
               end do
            else
-              if ( bnvol(ibox) .gt. 0.5d0 ) then
+              if ( bnvol(ibox) .gt. 0.5E0_dp ) then
                  ratvol = bsvol(ibox) / bnvol(ibox)
-                 if ( ratvol .eq. 0.0d0 ) then
-                    rmvol(ibox) = rmvol(ibox) * 0.1d0
+                 if ( ratvol .eq. 0.0E0_dp ) then
+                    rmvol(ibox) = rmvol(ibox) * 0.1E0_dp
                  else
                     rmvol(ibox) = rmvol(ibox) * ratvol / tavol
-                    if (rmvol(ibox).gt.(0.10d0*boxlx(ibox)*boxly(ibox)*boxlz(ibox))) then
-                       rmvol(ibox)=0.1d0*(boxlx(ibox)*boxly(ibox)*boxlz(ibox))
+                    if (rmvol(ibox).gt.(0.10E0_dp*boxlx(ibox)*boxly(ibox)*boxlz(ibox))) then
+                       rmvol(ibox)=0.1E0_dp*(boxlx(ibox)*boxly(ibox)*boxlz(ibox))
                     end if
                  end if
               end if
@@ -429,14 +429,14 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
               do j = 1,9
                  acshmat(ibox,j) = acshmat(ibox,j) + bshmat(ibox,j)
                  acnhmat(ibox,j) = acnhmat(ibox,j) + bnhmat(ibox,j)
-                 bshmat(ibox,j) = 0.0d0
-                 bnhmat(ibox,j) = 0.0d0
+                 bshmat(ibox,j) = 0.0E0_dp
+                 bnhmat(ibox,j) = 0.0E0_dp
               end do
            else
               acnvol(ibox) = acnvol(ibox) + bnvol(ibox)
               acsvol(ibox) = acsvol(ibox) + bsvol(ibox)
-              bnvol(ibox) = 0.0d0
-              bsvol(ibox) = 0.0d0
+              bnvol(ibox) = 0.0E0_dp
+              bsvol(ibox) = 0.0E0_dp
            end if
         end do
      end if
@@ -520,19 +520,19 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
 
 ! specific density
         if ( lpbcz ) then
-           temmass = 0.0d0
+           temmass = 0.0E0_dp
            do itype = 1, nmolty
               temmass = temmass + masst(itype)*acdens(ibox,itype)
            end do
-           dp = temmass / 0.6022045d0
+           dpr = temmass / 0.6022045E0_dp
         else
-           temmass = 0.0d0
+           temmass = 0.0E0_dp
            do itype = 1, nmolty
               temmass = temmass + acdens(ibox,itype)
            end do
-           dp = temmass
+           dpr = temmass
         end if
-        call update(nblock,1,ibox,dp,acmove)
+        call update(nblock,1,ibox,dpr,acmove)
 
 ! pressure
         call update(nblock,2,ibox,acpres(ibox),acnp)
@@ -567,7 +567,7 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
            end if
            dnunit = dble(steps)
            dnchoih = dble(nchoih(itype))
-           debroglie = 17.458d0/( dsqrt(masst(itype)/beta ))
+           debroglie = 17.458E0_dp/( sqrt(masst(itype)/beta ))
            dpp = acchem(ibox,itype)/( dnchoih* dnchoi1*(dnchoi**(dnunit)) *debroglie*debroglie*debroglie )
            dvalue = bnchem(ibox,itype)
            call update(nblock,itel,ibox,dpp,dvalue)
@@ -578,7 +578,7 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
            itel = (2 + nener) + nmolty + itype
            if ( mnbox(ibox,itype) .eq. 0 ) then
 ! avoid division by zero in update
-              dn = 1.0d0
+              dn = 1.0E0_dp
            else
               dn = dble(mnbox(ibox,itype))
            end if

@@ -167,7 +167,7 @@
                   yvec(iu,ju) = ryu(i,ju) - ryu(i,iu)
                   zvec(iu,ju) = rzu(i,ju) - rzu(i,iu)
                end if
-               distij(iu,ju) = dsqrt( xvec(iu,ju)**2 + yvec(iu,ju)**2 + zvec(iu,ju)**2 )
+               distij(iu,ju) = sqrt( xvec(iu,ju)**2 + yvec(iu,ju)**2 + zvec(iu,ju)**2 )
             end if
          end do
       end do 
@@ -415,8 +415,8 @@
                            za1a2 = xvec(jut2,jut3) * yvec(jut3,jut4) - yvec(jut2,jut3) * xvec(jut3,jut4)
 
 !                       --- calculate lengths of cross products ***
-                           daa1 = dsqrt ( xaa1**2 + yaa1**2 + zaa1**2 )
-                           da1a2 = dsqrt ( xa1a2**2 + ya1a2**2  + za1a2**2 )
+                           daa1 = sqrt ( xaa1**2 + yaa1**2 + zaa1**2 )
+                           da1a2 = sqrt ( xa1a2**2 + ya1a2**2  + za1a2**2 )
                            
 !                       --- calculate dot product of cross products ***
                            dot = xaa1*xa1a2 + yaa1*ya1a2 + zaa1*za1a2
@@ -432,7 +432,7 @@
                               zcc = xaa1*ya1a2 - yaa1*xa1a2
 !     *** calculate scalar triple product ***
                               tcc = xcc*xvec(jut2,jut3) + ycc*yvec(jut2,jut3) + zcc*zvec(jut2,jut3)
-                              theta = dacos(thetac)
+                              theta = acos(thetac)
                               if (tcc .lt. 0.0d0) theta = -theta
                               if (L_spline) then
                                  call splint(theta,spltor,jttor)
@@ -454,7 +454,7 @@
                   end do
 
 !                 --- compute boltzmann factor and add it to bsum_tor
-                  bf_tor(itor) = dexp ( -vdha * beta )
+                  bf_tor(itor) = exp ( -vdha * beta )
 
  300              continue
 
@@ -494,7 +494,7 @@
                            
                            call safecbmc(2,lnew,i,iw,igrow,imolty ,count,x,y,z,vphi,vtorf,wbendv ,lterm,movetype)
                        
-                           bf_tor(itor) = bf_tor(itor) * vtorf  * dexp( - beta * vphi )
+                           bf_tor(itor) = bf_tor(itor) * vtorf  * exp( - beta * vphi )
 ! RP added for MPI
                            my_ctorf(ipitor) = my_ctorf(ipitor) * vtorf
 
@@ -509,7 +509,7 @@
                         else
                            do j = 1, fcount(iu)
                               ju = fclose(iu,j)
-                              dist = dsqrt((x-rxnew(ju))**2 + (y-rynew(ju))**2 + (z-rznew(ju))**2)
+                              dist = sqrt((x-rxnew(ju))**2 + (y-rynew(ju))**2 + (z-rznew(ju))**2)
                               bin = anint(dist*10.0d0)
                               bf_tor(itor) = bf_tor(itor) * probf(iu,ju,bin)
 ! RP added for MPI
@@ -522,7 +522,7 @@
                                  do counta = 1, pastnum(ju)
                                     ku = ipast(ju,counta)
                                     if (.not.lplace(imolty,ku)) then
-                                       dist = dsqrt((x-rxnew(ku))**2 + (y-rynew(ku))**2 + (z-rznew(ku))**2)
+                                       dist = sqrt((x-rxnew(ku))**2 + (y-rynew(ku))**2 + (z-rznew(ku))**2)
                                        bin = anint(dist*10.0d0)
                                     
                                        bf_tor(itor) = bf_tor(itor) * probf(iu,ku,bin)
@@ -545,7 +545,7 @@
                            
                            call safecbmc(2,lnew,i,iw,igrow,imolty ,count,x,y,z,vphi,vtorf ,wbendv,lterm,movetype)
                            
-                           bf_tor(itor) = bf_tor(itor) * vtorf  * dexp( - beta * vphi )
+                           bf_tor(itor) = bf_tor(itor) * vtorf  * exp( - beta * vphi )
 ! RP added for MPI
                            my_ctorf(ipitor) = my_ctorf(ipitor) * vtorf
 
@@ -560,7 +560,7 @@
                         if (fcount(iu).gt.0) then
                            do j = 1, fcount(iu)
                               ju = fclose(iu,j)
-                              dist = dsqrt((x-rxu(i,ju))**2 + (y-ryu(i,ju))**2 + (z-rzu(i,ju))**2)
+                              dist = sqrt((x-rxu(i,ju))**2 + (y-ryu(i,ju))**2 + (z-rzu(i,ju))**2)
                               bin = anint(dist*10.0d0)
                               
                               bf_tor(itor) = bf_tor(itor) * probf(ju,iu,bin)
@@ -573,7 +573,7 @@
                                  do counta = 1, pastnum(ju)
                                     ku = ipast(ju,counta)
                                     if (.not.lplace(imolty,ku)) then
-                                       dist = dsqrt((x-rxu(i,ku))**2 + (y-ryu(i,ku))**2 + (z-rzu(i,ku))**2)
+                                       dist = sqrt((x-rxu(i,ku))**2 + (y-ryu(i,ku))**2 + (z-rzu(i,ku))**2)
                                        bin = anint(dist*10.0d0)
                                     
                                        bf_tor(itor) = bf_tor(itor) * probf(iu,ku,bin)
@@ -846,43 +846,43 @@
                         x = rxnew(ju) - rxnew(iufrom)
                         y = rynew(ju) - rynew(iufrom)
                         z = rznew(ju) - rznew(iufrom)
-                        length = dsqrt( x**2 + y**2 + z**2 )
+                        length = sqrt( x**2 + y**2 + z**2 )
                         
                         x = rxnew(ju) - rxp(count,iwalk)
                         y = rynew(ju) - ryp(count,iwalk)
                         z = rznew(ju) - rzp(count,iwalk)
-                        lengtha = dsqrt( x**2 + y**2 + z**2 )
+                        lengtha = sqrt( x**2 + y**2 + z**2 )
                      else
                         x = rxu(i,ju) - rxnew(iufrom)
                         y = ryu(i,ju) - rynew(iufrom)
                         z = rzu(i,ju) - rznew(iufrom)
-                        length = dsqrt( x**2 + y**2 + z**2 )
+                        length = sqrt( x**2 + y**2 + z**2 )
 
                         x = rxu(i,ju) - rxp(count,iwalk)
                         y = ryu(i,ju) - ryp(count,iwalk)
                         z = rzu(i,ju) - rzp(count,iwalk)
-                        lengtha = dsqrt( x**2 + y**2 + z**2 )
+                        lengtha = sqrt( x**2 + y**2 + z**2 )
                      end if
                                   
                      x = rxp(count,iwalk) - rxnew(iufrom)
                      y = ryp(count,iwalk) - rynew(iufrom)
                      z = rzp(count,iwalk) - rznew(iufrom)
-                     lengthb = dsqrt( x**2 + y**2 + z**2 )
+                     lengthb = sqrt( x**2 + y**2 + z**2 )
                   else
                      x = rxu(i,ju) - rxu(i,iufrom)
                      y = ryu(i,ju) - ryu(i,iufrom)
                      z = rzu(i,ju) - rzu(i,iufrom)
-                     length = dsqrt( x**2 + y**2 + z**2 )
+                     length = sqrt( x**2 + y**2 + z**2 )
 
                      x = rxu(i,ju) - rxu(i,iu)
                      y = ryu(i,ju) - ryu(i,iu)
                      z = rzu(i,ju) - rzu(i,iu)
-                     lengtha = dsqrt( x**2 + y**2 + z**2 )
+                     lengtha = sqrt( x**2 + y**2 + z**2 )
 
                      x = rxu(i,iu) - rxu(i,iufrom)
                      y = ryu(i,iu) - ryu(i,iufrom)
                      z = rzu(i,iu) - rzu(i,iufrom)
-                     lengthb = dsqrt( x**2 + y**2 + z**2 )
+                     lengthb = sqrt( x**2 + y**2 + z**2 )
                   end if
                   jacobian = jacobian / (length*lengtha*lengthb)
                end if
@@ -978,7 +978,7 @@
                yvec(iu,iufrom) = ryu(i,iufrom) - ryu(i,iu)
                zvec(iu,iufrom) = rzu(i,iufrom) - rzu(i,iu)
             end if
-            distij(iu,iufrom) = dsqrt( xvec(iu,iufrom)**2 + yvec(iu,iufrom)**2 + zvec(iu,iufrom)**2 )
+            distij(iu,iufrom) = sqrt( xvec(iu,iufrom)**2 + yvec(iu,iufrom)**2 + zvec(iu,iufrom)**2 )
             
             xvec(iufrom,iu) = - xvec(iu,iufrom)
             yvec(iufrom,iu) = - yvec(iu,iufrom)
@@ -1005,7 +1005,7 @@
                      yvec(ju,iu) = - yvec(iu,ju)
                      zvec(ju,iu) = - zvec(iu,ju)
                      
-                     distij(iu,ju) = dsqrt(xvec(iu,ju)**2 + yvec(iu,ju)**2 + zvec(iu,ju)**2)
+                     distij(iu,ju) = sqrt(xvec(iu,ju)**2 + yvec(iu,ju)**2 + zvec(iu,ju)**2)
                      distij(ju,iu) = distij(iu,ju)
                      
                        

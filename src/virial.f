@@ -41,13 +41,13 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
 #endif
 
       rminsq = rmin * rmin
-      vmin = -2000.0d0
+      vmin = -2000.0E0_dp
 
       if ( lfepsi ) then
-         consa1 = 4.0d0*aslope*a0*(2.0d0/1.6d0)
-         consb1 = 4.0d0*bslope*b0*(2.0d0/1.6d0)
-         consa2 = 2.0d0*aslope*(4.0d0/2.56d0)
-         consb2 = 2.0d0*bslope*(4.0d0/2.56d0)
+         consa1 = 4.0E0_dp*aslope*a0*(2.0E0_dp/1.6E0_dp)
+         consb1 = 4.0E0_dp*bslope*b0*(2.0E0_dp/1.6E0_dp)
+         consa2 = 2.0E0_dp*aslope*(4.0E0_dp/2.56E0_dp)
+         consb2 = 2.0E0_dp*bslope*(4.0E0_dp/2.56E0_dp)
       end if
       
 
@@ -69,12 +69,12 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
       i = 1
       imolty = moltyp(i)
       iunit = nunit(imolty)
-      mass_t = 0.0d0
+      mass_t = 0.0E0_dp
       do ii = 1, iunit
          mass_t = mass_t + mass(ntype(imolty,ii))
       end do
-      mass_t = mass_t/1000d0
-      factor = -(6.6260755d-34)**2*6.0221367d23*1d20 /  (24.0d0*onepi*mass_t*1.380658d-23*twopi)
+      mass_t = mass_t/1000E0_dp
+      factor = -(6.6260755E-34_dp)**2*6.0221367E23_dp*1E20_dp /  (24.0E0_dp*onepi*mass_t*1.380658E-23_dp*twopi)
 
       lqimol = lelect(imolty)
 
@@ -104,8 +104,8 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
          end if
 
          ovrlap = .false.
-         vinter = 0.0d0
-         velect = 0.0d0
+         vinter = 0.0E0_dp
+         velect = 0.0E0_dp
 ! loop over all beads ii of chain i
          ip1 = 0
          do 99 ii = 1, nunit(imolty) 
@@ -137,7 +137,7 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
 
                rijsq = (rxuij*rxuij)+(ryuij*ryuij) + (rzuij*rzuij)
                if ( lmatrix .and. lqchg(ntii) .and. lqchg(ntjj) ) then
-                  a(ip1,ip2) = qqfact/dsqrt(rijsq)
+                  a(ip1,ip2) = qqfact/sqrt(rijsq)
                   a(ip2,ip1) = a(ip1,ip2)
                end if
 
@@ -156,7 +156,7 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
                   else if (lshift) then
                      sr2 = sig2ij(ntij) / rijsq
                      sr6 = sr2 * sr2 * sr2
-                     vinter = vinter +  sr6*(sr6-1.0d0)*epsij(ntij)-ecut(ntij) 
+                     vinter = vinter +  sr6*(sr6-1.0E0_dp)*epsij(ntij)-ecut(ntij) 
                   else if ( lfepsi ) then
                      if ( lij(ntii) .and. lij(ntjj) ) then
                         sr6 = rijsq*rijsq*rijsq
@@ -167,12 +167,12 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
                   else
                      sr2 = sig2ij(ntij) / rijsq
                      sr6 = sr2 * sr2 * sr2
-                     vinter = vinter +  sr6*(sr6-1.0d0)*epsij(ntij)
+                     vinter = vinter +  sr6*(sr6-1.0E0_dp)*epsij(ntij)
                      
                   end if
                   
                   if ( lqimol .and. lqjmol .and. .not. lmatrix ) then
-                     velect = velect + qqfact*qqu(i,ii)*qqu(j,jj) /dsqrt(rijsq)
+                     velect = velect + qqfact*qqu(i,ii)*qqu(j,jj) /sqrt(rijsq)
                   end if
                   
                end if
@@ -193,9 +193,9 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
                   ntii = ntype(imolty,ii)
                   if ( lqchg(ntii) ) then
                      ip1 = ip1 + 1
-                     a(ip1,ip1) = 2.0d0*jayself(ntii)
+                     a(ip1,ip1) = 2.0E0_dp*jayself(ntii)
                      b2(ip1,1) = -xiq(ntii)
-                     if ( dabs(xiq(ntii)) .gt. 1.0d-10 ) then
+                     if ( abs(xiq(ntii)) .gt. 1.0E-10_dp ) then
                         if ( iii .eq. 1 ) then
                            iii = 2
                         else if ( iii .eq. 2 ) then
@@ -285,32 +285,32 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
 ! do ii = 1, nunit(imolty)
 ! write(21,*) rxu(2,ii),ryu(2,ii),rzu(2,ii)
 ! end do
-! write(11,*) sr6**(1.0/6.0d0),b2(1,1),b2(2,1)
+! write(11,*) sr6**(1.0/6.0E0_dp),b2(1,1),b2(2,1)
 
-            velect = 0.0d0
+            velect = 0.0E0_dp
             do ip = 1, 2
                ii = mainsite(ip,1)
                if ( lfepsi ) then
-                  velect = velect-0.5d0*b2(ii,1)*(mainxiq(ip,1) +selfadd1)
+                  velect = velect-0.5E0_dp*b2(ii,1)*(mainxiq(ip,1) +selfadd1)
 ! write(21,*) b2(ii,1),mainxiq(ip,1)
                   vinter = epsilon2*((aslope*a0*a0+ashift)/sr6 -(bslope*b0*b0+bshift))/sr6
                else
-                  velect = velect-0.5d0*b2(ii,1)*mainxiq(ip,1)
+                  velect = velect-0.5E0_dp*b2(ii,1)*mainxiq(ip,1)
                end if
                if ( nunit(imolty) .eq. 5 ) then
                   ii = mainsite(ip,2)
                   if ( lfepsi ) then
-                     velect = velect-0.5d0*b2(ii,1)*(mainxiq(ip,2) +selfadd1)
+                     velect = velect-0.5E0_dp*b2(ii,1)*(mainxiq(ip,2) +selfadd1)
 ! write(21,*) b2(ii,1),mainxiq(ip,2)
                      vinter = epsilon2*((aslope*a0*a0+ashift)/sr6 -(bslope*b0*b0+bshift))/sr6
                   else
-                     velect = velect-0.5d0*b2(ii,1)*mainxiq(ip,2)
+                     velect = velect-0.5E0_dp*b2(ii,1)*mainxiq(ip,2)
                   end if
                end if
             end do
             velect = velect - fqegp(moltyp(1)) - fqegp(moltyp(2))
-            if ( velect + vinter*4.0d0 .lt. vmin ) then
-               vmin = velect + vinter*4.0d0
+            if ( velect + vinter*4.0E0_dp .lt. vmin ) then
+               vmin = velect + vinter*4.0E0_dp
                write(11,*) 'vmin:',vmin
                do ii = 1, nunit(imolty)
                   write(11,*) rxu(i,ii)+xdiff-dvircm,ryu(i,ii)+ydiff ,rzu(i,ii)+zdiff
@@ -320,19 +320,19 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
                end do
                rewind(11)
             end if
-! write(11,*) 'energy:',velect+vinter*4.0d0
+! write(11,*) 'energy:',velect+vinter*4.0E0_dp
 
          end if
                      
 
  100     if ( ovrlap ) then
             do itemp = 1, ntemp
-               mayer(itemp) = -1.0d0
+               mayer(itemp) = -1.0E0_dp
             end do
          else
-            if (.not.lsami .and. .not.lexpsix) vinter = 4.0d0*vinter
+            if (.not.lsami .and. .not.lexpsix) vinter = 4.0E0_dp*vinter
             do itemp = 1,ntemp
-               mayer(itemp) = dexp(-(vinter+velect)/virtemp(itemp))-1.0d0
+               mayer(itemp) = exp(-(vinter+velect)/virtemp(itemp))-1.0E0_dp
             end do
          end if
 ! write(io_output,*) 'mayer',mayer
@@ -341,7 +341,7 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
             binvir(nnn,itemp) = binvir(nnn,itemp) + mayer(itemp)
          end do
          if ( nnn .eq. 1 ) then
-            corr = 0.0d0
+            corr = 0.0E0_dp
             vold = vinter + velect
          else
             deri_u = (vinter+velect-vold)/stepvir
@@ -349,7 +349,7 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
             vold = vinter + velect
          end if
          do itemp = 1, ntemp
-            binvir2(nnn,itemp) = binvir2(nnn,itemp) + (mayer(itemp)+1.0d0)*corr/(virtemp(itemp)**3)
+            binvir2(nnn,itemp) = binvir2(nnn,itemp) + (mayer(itemp)+1.0E0_dp)*corr/(virtemp(itemp)**3)
          end do
          dvircm = dvircm + stepvir
       end do

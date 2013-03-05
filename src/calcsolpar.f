@@ -45,9 +45,9 @@ subroutine  calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ, Heat_vapor_COUL, pdV, CE
 ! molar volume in cc/mol    
       if (temp_nmol(ibox).eq.0) then    
 ! set the molar volume artibrarily high as it will not affect any since pressure will be zero
-         mol_vol(ibox) = 10.0d10    
+         mol_vol(ibox) = 10.0E10_dp    
       else
-         mol_vol(ibox)=box_volume(ibox)/temp_nmol(ibox)*0.6022d0 
+         mol_vol(ibox)=box_volume(ibox)/temp_nmol(ibox)*0.6022E0_dp 
       end if
 
       temp_nmol(jbox) = 0
@@ -63,9 +63,9 @@ subroutine  calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ, Heat_vapor_COUL, pdV, CE
       end if
 ! molar volume in cc/mol
       if (temp_nmol(jbox).eq.0) then
-         mol_vol(jbox) = 10.0D6
+         mol_vol(jbox) = 10.0E6_dp
       else
-         mol_vol(jbox)=box_volume(jbox)/temp_nmol(jbox)*0.6022d0
+         mol_vol(jbox)=box_volume(jbox)/temp_nmol(jbox)*0.6022E0_dp
       end if
 
       if ( mol_vol(ibox).gt.mol_vol(jbox) ) then
@@ -77,9 +77,9 @@ subroutine  calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ, Heat_vapor_COUL, pdV, CE
       end if
 ! This is total energy
       if (temp_nmol(il).eq.0) then
-         T_Energy_Liq = 0.0d0
-         LJ_Energy_Liq = 0.0d0
-         Coul_energy_Liq = 0.0d0 
+         T_Energy_Liq = 0.0E0_dp
+         LJ_Energy_Liq = 0.0E0_dp
+         Coul_energy_Liq = 0.0E0_dp 
       else
          T_Energy_Liq = vbox(il)/temp_nmol(il)
          LJ_Energy_Liq = (vinterb(il)+vintrab(il)+ vtailb(il))/temp_nmol(il)
@@ -87,9 +87,9 @@ subroutine  calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ, Heat_vapor_COUL, pdV, CE
       end if
       
       if (temp_nmol(ig).eq.0) then
-         T_Energy_Gas = 0.0d0
-         LJ_Energy_Gas = 0.0d0
-         Coul_energy_Gas = 0.0d0
+         T_Energy_Gas = 0.0E0_dp
+         LJ_Energy_Gas = 0.0E0_dp
+         Coul_energy_Gas = 0.0E0_dp
       else
          T_Energy_Gas = vbox(ig)/temp_nmol(ig)
          LJ_Energy_Gas = (vinterb(ig)+vintrab(ig)+ vtailb(ig))/temp_nmol(ig)
@@ -97,38 +97,38 @@ subroutine  calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ, Heat_vapor_COUL, pdV, CE
       end if
       
       
-      enchg1 = 0.008314510d0*(T_Energy_Gas - T_Energy_Liq)
+      enchg1 = 0.008314510E0_dp*(T_Energy_Gas - T_Energy_Liq)
 
-      pdV = pres(ig)*(mol_vol(ig)-mol_vol(il))*1.0d-6
+      pdV = pres(ig)*(mol_vol(ig)-mol_vol(il))*1.0E-6_dp
       
-      Heat_vapor_T = enchg1 + pres(ig)* (mol_vol(ig)-mol_vol(il))*1.0d-6
+      Heat_vapor_T = enchg1 + pres(ig)* (mol_vol(ig)-mol_vol(il))*1.0E-6_dp
 ! write(io_output,1505) il,ig,abs(enthchg1)
 ! This is inter+intra LJ
-      enchg2 = 0.008314510d0*(LJ_Energy_Gas-LJ_Energy_Liq)
-      Heat_vapor_LJ = enchg2 + pres(ig)* (mol_vol(ig)-mol_vol(il))*1.0d-6
+      enchg2 = 0.008314510E0_dp*(LJ_Energy_Gas-LJ_Energy_Liq)
+      Heat_vapor_LJ = enchg2 + pres(ig)* (mol_vol(ig)-mol_vol(il))*1.0E-6_dp
 ! This is Coulomb part
-      enchg3 = 0.008314510d0*(Coul_Energy_Gas-Coul_Energy_Liq)
-      Heat_vapor_COUL = enchg3 + pres(ig)* (mol_vol(ig)-mol_vol(il))*1.0d-6
+      enchg3 = 0.008314510E0_dp*(Coul_Energy_Gas-Coul_Energy_Liq)
+      Heat_vapor_COUL = enchg3 + pres(ig)* (mol_vol(ig)-mol_vol(il))*1.0E-6_dp
 ! Calculating Hildebrand solubility parameter (total)
-      CED_T = (abs(enchg1)* 1000.0d0*joule2cal)/mol_vol(il)
-      if (CED_T.lt.0.0d0) then
+      CED_T = (abs(enchg1)* 1000.0E0_dp*joule2cal)/mol_vol(il)
+      if (CED_T.lt.0.0E0_dp) then
          HSP_T = 0.0
       else
          HSP_T = sqrt(CED_T)
       end if
 ! write(io_output,1508) temp,HSP_TOTAL
 ! Calculating Hildebrand solubility parameter (LJ part)
-      CED_LJ = ((abs(enchg2))*1000.0d0* joule2cal)/mol_vol(il)
-      if (CED_LJ.lt.0.0d0) then
-         HSP_LJ =0.0d0
+      CED_LJ = ((abs(enchg2))*1000.0E0_dp* joule2cal)/mol_vol(il)
+      if (CED_LJ.lt.0.0E0_dp) then
+         HSP_LJ =0.0E0_dp
       else
          HSP_LJ = sqrt(CED_LJ)
       end if
 ! write(io_output,1509) HSP_LJ
 ! Calculating Hildebrand solubility parameter (Coulomb part)
-      CED_COUL = (abs(enchg3)* 1000.0d0*joule2cal)/mol_vol(il)
-      if (CED_COUL.lt.0.0d0) then
-         HSP_COUL=0.0d0
+      CED_COUL = (abs(enchg3)* 1000.0E0_dp*joule2cal)/mol_vol(il)
+      if (CED_COUL.lt.0.0E0_dp) then
+         HSP_COUL=0.0E0_dp
       else
          HSP_COUL = sqrt(CED_COUL)
       end if

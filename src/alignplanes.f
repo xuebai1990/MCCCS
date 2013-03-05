@@ -75,9 +75,9 @@ subroutine align_planes(isplist,imol_b,imol_a,itype_b,itype_a,xb,yb,zb)
       yorigin = ryu(imol_a,ia_bead1)
       zorigin = rzu(imol_a,ia_bead1)
 ! use this bead as the origin
-      xa(1) = 0.0d0
-      ya(1) = 0.0d0
-      za(1) = 0.0d0
+      xa(1) = 0.0E0_dp
+      ya(1) = 0.0E0_dp
+      za(1) = 0.0E0_dp
       xa(2) = rxu(imol_a,ia_bead2) - xorigin
       ya(2) = ryu(imol_a,ia_bead2) - yorigin
       za(2) = rzu(imol_a,ia_bead2) - zorigin
@@ -145,7 +145,7 @@ subroutine align_planes(isplist,imol_b,imol_a,itype_b,itype_a,xb,yb,zb)
 ! first we need the angle between the two 1--2 vectors
 
 ! angle of vector for molecule_a with x axis
-      gamma_a = datan(abs(ya(2)/xa(2)))
+      gamma_a = atan(abs(ya(2)/xa(2)))
       if (ya(2).lt.0.0) then
          if (xa(2).lt.0.0) then
             gamma_a = gamma_a + onepi
@@ -157,7 +157,7 @@ subroutine align_planes(isplist,imol_b,imol_a,itype_b,itype_a,xb,yb,zb)
       end if
 
 ! angle of vector for molecule_b with x axis
-      gamma_b = datan(abs(yb(ib_bead2)/xb(ib_bead2)))
+      gamma_b = atan(abs(yb(ib_bead2)/xb(ib_bead2)))
       if (yb(ib_bead2).lt.0.0) then
          if (xb(ib_bead2).lt.0.0) then
             gamma_b = gamma_b + onepi
@@ -169,8 +169,8 @@ subroutine align_planes(isplist,imol_b,imol_a,itype_b,itype_a,xb,yb,zb)
       end if
 
       theta = gamma_a - gamma_b
-      cos_theta = dcos(theta)
-      sin_theta = dsin(theta)
+      cos_theta = cos(theta)
+      sin_theta = sin(theta)
 
 ! now rotate molecule_b by theta
       do i=1,nunit_b
@@ -221,7 +221,7 @@ subroutine align_planes(isplist,imol_b,imol_a,itype_b,itype_a,xb,yb,zb)
 !CC --- STEP 2, rotate space about x-axis so that rotation lies in yz plane
 
 ! The unit rotation axis
-      rnorm = dsqrt( xa(2)*xa(2) + ya(2)*ya(2) + za(2)*za(2) )
+      rnorm = sqrt( xa(2)*xa(2) + ya(2)*ya(2) + za(2)*za(2) )
       xcross = xa(2)/rnorm
       ycross = ya(2)/rnorm
       zcross = za(2)/rnorm
@@ -269,7 +269,7 @@ subroutine align_planes(isplist,imol_b,imol_a,itype_b,itype_a,xb,yb,zb)
       dxb = xb(ib_bead3) - xb(ib_bead2)
       dyb = yb(ib_bead3) - yb(ib_bead2)
 ! angle of vector for molecule_a with x axis
-      gamma_a = datan(abs(dya/dxa))
+      gamma_a = atan(abs(dya/dxa))
       if (dya.lt.0.0) then
          if (dxa.lt.0.0) then
             gamma_a = gamma_a + onepi
@@ -281,7 +281,7 @@ subroutine align_planes(isplist,imol_b,imol_a,itype_b,itype_a,xb,yb,zb)
       end if
 
 ! angle of vector for molecule_b with x axis
-      gamma_b = datan(abs(dyb/dxb))
+      gamma_b = atan(abs(dyb/dxb))
       if (dyb.lt.0.0) then
          if (dxb.lt.0.0) then
             gamma_b = gamma_b + onepi
@@ -293,8 +293,8 @@ subroutine align_planes(isplist,imol_b,imol_a,itype_b,itype_a,xb,yb,zb)
       end if
 
       theta = gamma_a - gamma_b
-      cos_theta = dcos(theta)
-      sin_theta = dsin(theta)
+      cos_theta = cos(theta)
+      sin_theta = sin(theta)
 
 ! now rotate molecule_b by theta
       do i=1,nunit_b

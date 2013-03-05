@@ -74,7 +74,7 @@ contains
 
 ! randomly select the molecules from the pair ***
 
-      if (random(-1) .lt. 0.5d0) then
+      if (random(-1) .lt. 0.5E0_dp) then
          type_a = 1
          type_b = 2
       else
@@ -102,7 +102,7 @@ contains
          ipairb = 1
       end if
 
- 99   if (random(-1) .lt. 0.5d0) then
+ 99   if (random(-1) .lt. 0.5E0_dp) then
          boxa=box3(iparty,ipairb)
          boxb=box4(iparty,ipairb)
       else
@@ -139,7 +139,7 @@ contains
 !$$$c *** box determinations ***
 !$$$
 !$$$      if ( lgibbs ) then
-!$$$         if (random(-1) .lt. 0.5d0) then
+!$$$         if (random(-1) .lt. 0.5E0_dp) then
 !$$$            thisbox = 1
 !$$$            otherbox = 2
 !$$$         else
@@ -174,7 +174,7 @@ contains
 
 ! get particle of type a ***
 
-           moltaid = idint(dble (ncmt(box,imolta))*random(-1)) + 1
+           moltaid = int(dble (ncmt(box,imolta))*random(-1)) + 1
 
 ! imola is the overall molecule id number (runs from 1 to total #) *
            imola = parbox( moltaid, box, imolta)
@@ -187,7 +187,7 @@ contains
 
 ! get particle of type b ***
 
-           moltbid = idint(dble (ncmt(box,imoltb))*random(-1)) + 1
+           moltbid = int(dble (ncmt(box,imoltb))*random(-1)) + 1
            imolb = parbox( moltbid, box, imoltb)
 
            if (moltyp(imolb) .ne. imoltb)  write(io_output,*) 'screwup in iswatch'
@@ -196,11 +196,11 @@ contains
            if (iboxi .ne. box) call err_exit(__FILE__,__LINE__,'problem in iswatch',myid+1)
          end if
 ! add one attempt to the count for iparty
-!$$$  bniswat(iparty,box) = bniswat(iparty,box) + 1.0d0
-         bnswat(iparty,ipairb) = bnswat(iparty,ipairb) + 1.0d0
+!$$$  bniswat(iparty,box) = bniswat(iparty,box) + 1.0E0_dp
+         bnswat(iparty,ipairb) = bnswat(iparty,ipairb) + 1.0E0_dp
 ! JLR 12-1-09 count the empty attempts
          if (lempty) then
-            bnswat_empty(iparty,ipairb) = bnswat_empty(iparty,ipairb) + 1.0d0
+            bnswat_empty(iparty,ipairb) = bnswat_empty(iparty,ipairb) + 1.0E0_dp
             return
          end if
 ! END JLR 12-1-09
@@ -252,19 +252,19 @@ contains
          iunitb = nunit(imoltb)
 
 ! initialize trial weights ***
-         tweight = 1.0d0
-         tweiold = 1.0d0
+         tweight = 1.0E0_dp
+         tweiold = 1.0E0_dp
 
 ! set the trial energies to zero ***
-         vnbox(box)   = 0.0d0
-         vninte(box)  = 0.0d0
-         vnintr(box)  = 0.0d0
-         vnvibb(box)  = 0.0d0
-         vntgb(box)   = 0.0d0
-         vnextb(box)  = 0.0d0
-         vnbend(box)  = 0.0d0
-         vnelect(box) = 0.0d0
-         vnewald(box) = 0.0d0
+         vnbox(box)   = 0.0E0_dp
+         vninte(box)  = 0.0E0_dp
+         vnintr(box)  = 0.0E0_dp
+         vnvibb(box)  = 0.0E0_dp
+         vntgb(box)   = 0.0E0_dp
+         vnextb(box)  = 0.0E0_dp
+         vnbend(box)  = 0.0E0_dp
+         vnelect(box) = 0.0E0_dp
+         vnewald(box) = 0.0E0_dp
 
 ! store position 1, a's original site ***
 
@@ -468,7 +468,7 @@ contains
 ! grow molecules
 
 ! changing for lrigid to include waddnew
-            waddnew = 1.0d0
+            waddnew = 1.0E0_dp
 
 ! grow new chain conformation
 ! JLR 11-24-09
@@ -630,7 +630,7 @@ contains
 
             delen = v - ( vnewt - (vnewbvib + vnewbb + vnewtg ))
 
-            tweight = tweight*dexp(-beta*delen)
+            tweight = tweight*exp(-beta*delen)
             vnewt     = vnewt + delen
             vnewinter = vinter
             vnewintra = vintra
@@ -657,7 +657,7 @@ contains
 
 ! lrigid add on
 
-            waddold = 1.0d0
+            waddold = 1.0E0_dp
 
 ! grow old chain conformation
 ! JLR 11-24-09
@@ -728,7 +728,7 @@ contains
             if (lterm) call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf iSWATCH',myid+1)
             deleo = v - ( voldt - (voldbvib + voldbb + voldtg) )
 
-            tweiold = tweiold*dexp(-beta*deleo)
+            tweiold = tweiold*exp(-beta*deleo)
             voldt     = voldt + deleo
             voldintra = vintra
             voldinter = vinter
@@ -786,7 +786,7 @@ contains
             call recip(box,vrecipn,vrecipo,1)
 
             delen = vrecipn - vrecipo
-            tweight = tweight * dexp(-beta*delen)
+            tweight = tweight * exp(-beta*delen)
 
             vnewald(box) = vnewald(box) + delen
             vnbox(box) = vnbox(box) + delen
@@ -818,7 +818,7 @@ contains
             call recip(box,vrecipn,vrecipo,1)
 
             delen = vrecipn - vrecipo
-            tweight = tweight * dexp(-beta*delen)
+            tweight = tweight * exp(-beta*delen)
 
             vnewald(box) = vnewald(box) + delen
             vnbox(box) = vnbox(box) + delen
@@ -832,8 +832,8 @@ contains
 ! Ratio Calculation ***
 !     *************************
 
-         wnlog = dlog10( tweight )
-         wolog = dlog10( tweiold )
+         wnlog = log10( tweight )
+         wolog = log10( tweiold )
          wdlog = wnlog - wolog
          if (wdlog.lt.-softcut.and..not.lideal(box)) then
 ! write(io_output,*) '### underflow in wratio calculation ###'
@@ -845,7 +845,7 @@ contains
 
          if ( random(-1) .le. wswat ) then
 ! we can now accept !!!!! ***
-            bsswat(iparty,ipairb) = bsswat(iparty,ipairb) + 1.0d0
+            bsswat(iparty,ipairb) = bsswat(iparty,ipairb) + 1.0E0_dp
 ! write(io_output,*) 'SWATCH ACCEPTED',imola,imolb
 
             vbox(box)     = vbox(box)    + vnbox(box)
@@ -909,7 +909,7 @@ contains
          else
 ! get particle from box a
 
-            iboxal = idint( dble(ncmt(boxa,imolta))*random(-1) ) + 1
+            iboxal = int( dble(ncmt(boxa,imolta))*random(-1) ) + 1
             iboxa = parbox(iboxal,boxa,imolta)
             if ( moltyp(iboxa) .ne. imolta ) write(io_output,*) 'screwup'
             iboxia = nboxi(iboxa)
@@ -917,7 +917,7 @@ contains
 
 ! get particle from box b
 
-            iboxbl = idint( dble(ncmt(boxb,imoltb))*random(-1) ) + 1
+            iboxbl = int( dble(ncmt(boxb,imoltb))*random(-1) ) + 1
             iboxb = parbox(iboxbl,boxb,imoltb)
             if ( moltyp(iboxb) .ne. imoltb ) write(io_output,*) 'screwup'
             iboxib = nboxi(iboxb)
@@ -946,12 +946,12 @@ contains
 
 ! add one attempt to the count for iparty
 ! write(io_output,*) 'iparty:',iparty,'boxa:',boxa
-         bnswat(iparty,ipairb) = bnswat(iparty,ipairb) + 1.0d0
+         bnswat(iparty,ipairb) = bnswat(iparty,ipairb) + 1.0E0_dp
 
 ! JLR 12-1-09, Count the empty attempts
 ! if (lempty) return
          if (lempty) then
-            bnswat_empty(iparty,ipairb) = bnswat_empty(iparty,ipairb) + 1.0d0
+            bnswat_empty(iparty,ipairb) = bnswat_empty(iparty,ipairb) + 1.0E0_dp
             return
          end if
 ! END JLR 12-1-09 ---
@@ -984,29 +984,29 @@ contains
          orgbia = ncmt(boxa, imoltb)
          orgaib = ncmt(boxb, imolta)
          orgbib = ncmt(boxb, imoltb)
-         tweight = 1.0d0
-         tweiold = 1.0d0
+         tweight = 1.0E0_dp
+         tweiold = 1.0E0_dp
 
 ! set the trial energies to zero
-         vnbox(boxa)   = 0.0d0
-         vninte(boxa)  = 0.0d0
-         vnintr(boxa)  = 0.0d0
-         vnvibb(boxa)  = 0.0d0
-         vntgb(boxa)   = 0.0d0
-         vnextb(boxa)  = 0.0d0
-         vnbend(boxa)  = 0.0d0
-         vnelect(boxa) = 0.0d0
-         vnewald(boxa) = 0.0d0
+         vnbox(boxa)   = 0.0E0_dp
+         vninte(boxa)  = 0.0E0_dp
+         vnintr(boxa)  = 0.0E0_dp
+         vnvibb(boxa)  = 0.0E0_dp
+         vntgb(boxa)   = 0.0E0_dp
+         vnextb(boxa)  = 0.0E0_dp
+         vnbend(boxa)  = 0.0E0_dp
+         vnelect(boxa) = 0.0E0_dp
+         vnewald(boxa) = 0.0E0_dp
 
-         vnbox(boxb)   = 0.0d0
-         vninte(boxb)  = 0.0d0
-         vnintr(boxb)  = 0.0d0
-         vnvibb(boxb)  = 0.0d0
-         vntgb(boxb)   = 0.0d0
-         vnextb(boxb)  = 0.0d0
-         vnbend(boxb)  = 0.0d0
-         vnelect(boxb) = 0.0d0
-         vnewald(boxb) = 0.0d0
+         vnbox(boxb)   = 0.0E0_dp
+         vninte(boxb)  = 0.0E0_dp
+         vnintr(boxb)  = 0.0E0_dp
+         vnvibb(boxb)  = 0.0E0_dp
+         vntgb(boxb)   = 0.0E0_dp
+         vnextb(boxb)  = 0.0E0_dp
+         vnbend(boxb)  = 0.0E0_dp
+         vnelect(boxb) = 0.0E0_dp
+         vnewald(boxb) = 0.0E0_dp
 
 ! compute the rosenbluth weights for each molecule type in each box
          do ic = 1,2
@@ -1101,7 +1101,7 @@ contains
                end do
             end if
 
-            waddnew = 1.0d0
+            waddnew = 1.0E0_dp
 ! JLR 11-24-09 New stuff for rigid swatch
             if (lrigid(imolty)) then
 
@@ -1197,7 +1197,7 @@ contains
                return
             end if
             delen = v - ( vnewt - (vnewbvib + vnewbb + vnewtg ))
-            tweight = tweight*dexp(-beta*delen)
+            tweight = tweight*exp(-beta*delen)
 
             vnewt     = vnewt + delen
             vnewinter = vinter
@@ -1220,7 +1220,7 @@ contains
             vnewald(iboxnew) = vnewald(iboxnew) + vnewewald
 ! rigid add on
 
-            waddold = 1.0d0
+            waddold = 1.0E0_dp
 
 ! grow old chain conformation
 ! JLR 11-24-09 New stuff for rigid swatch
@@ -1273,7 +1273,7 @@ contains
             if (lterm) call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf SWATCH',myid+1)
             deleo = v - ( voldt - (voldbvib + voldbb + voldtg) )
 
-            tweiold = tweiold*dexp(-beta*deleo)
+            tweiold = tweiold*exp(-beta*deleo)
 
             voldt     = voldt + deleo
             voldintra = vintra
@@ -1326,7 +1326,7 @@ contains
 
                delen = vrecipn - vrecipo
 
-               tweight = tweight * dexp(-beta*delen)
+               tweight = tweight * exp(-beta*delen)
 
                vnewald(iboxia) = vnewald(iboxia) + delen
                vnbox(iboxia) = vnbox(iboxia) + delen
@@ -1356,7 +1356,7 @@ contains
                call recip(iboxib,vrecipn,vrecipo,1)
 
                delen = vrecipn - vrecipo
-               tweight = tweight * dexp(-beta*delen)
+               tweight = tweight * exp(-beta*delen)
 
                vnewald(iboxib) = vnewald(iboxib) + delen
                vnbox(iboxib) = vnbox(iboxib) + delen
@@ -1387,7 +1387,7 @@ contains
 
 ! for new BOXINS with inserted particle
             do mm = 1,2
-               dinsta = 0.0d0
+               dinsta = 0.0E0_dp
                if ( mm .eq. 1 ) then
                   ibox   = boxa
                   imolin = imoltb
@@ -1404,8 +1404,8 @@ contains
 ! new logic for tail correction (same answer) MGM 3-25-98
                   do jmt = 1, nmolty
                      rho = dble( ncmt(ibox,jmt) )
-                     if ( jmt .eq. imolin ) rho = rho + 1.0d0
-                     if ( jmt .eq. imolrm ) rho = rho - 1.0d0
+                     if ( jmt .eq. imolin ) rho = rho + 1.0E0_dp
+                     if ( jmt .eq. imolrm ) rho = rho - 1.0E0_dp
                      rho = rho / dvol
                      do imt = 1, nmolty
                         dicount = ncmt(ibox,imt)
@@ -1426,28 +1426,28 @@ contains
 !$$$                     end do
 !$$$                  end if
                else
-                  dinsta = 0.0d0
+                  dinsta = 0.0E0_dp
                end if
 ! END JLR 11-24-09
                dinsta = dinsta - vtailb( ibox )
 
-               tweight=tweight*dexp(-beta*dinsta)
+               tweight=tweight*exp(-beta*dinsta)
 
                vntail(ibox) = dinsta
             end do
          else
-            vntail(boxa) = 0.0d0
-            vntail(boxb) = 0.0d0
+            vntail(boxa) = 0.0E0_dp
+            vntail(boxb) = 0.0E0_dp
          end if
 
-         wnlog = dlog10( tweight )
-         wolog = dlog10( tweiold )
+         wnlog = log10( tweight )
+         wolog = log10( tweiold )
          wdlog = wnlog - wolog
          if ( wdlog .lt. -softcut ) then
 ! write(io_output,*) '### underflow in wratio calculation ###'
             return
          end if
-         wswat = ( tweight / tweiold ) * ( dble(orgaia*orgbib) / dble((orgbia+1)*(orgaib+1)) ) * dexp(beta*(eta2(boxa,imolta) +eta2(boxb,imoltb)-eta2(boxa,imoltb) -eta2(boxb,imolta)))
+         wswat = ( tweight / tweiold ) * ( dble(orgaia*orgbib) / dble((orgbia+1)*(orgaib+1)) ) * exp(beta*(eta2(boxa,imolta) +eta2(boxb,imoltb)-eta2(boxa,imoltb) -eta2(boxb,imolta)))
 
          if (lopt_bias(imolta)) call update_bias(log(wswat*2.0)/beta/2.0,boxa,boxb,imolta)
          if (lopt_bias(imoltb)) call update_bias(log(wswat*2.0)/beta/2.0,boxb,boxa,imoltb)
@@ -1456,7 +1456,7 @@ contains
 ! write(io_output,*) 'wswat,tweight,tweiold',wswat,tweight,tweiold
          if ( random(-1) .le. wswat ) then
 ! we can now accept !!!!! ***
-            bsswat(iparty,ipairb) = bsswat(iparty,ipairb) + 1.0d0
+            bsswat(iparty,ipairb) = bsswat(iparty,ipairb) + 1.0E0_dp
 ! write(io_output,*) 'SWATCH ACCEPTED',iboxa,iboxb
             do jj = 1,2
                if ( jj .eq. 1 ) ic = boxa
@@ -1552,9 +1552,9 @@ contains
        call err_exit(__FILE__,__LINE__,'init_swatch: allocation failed',jerr)
     end if
 
-    bnswat = 0.0d0
-    bsswat = 0.0d0
-    bnswat_empty = 0.0d0
+    bnswat = 0.0E0_dp
+    bsswat = 0.0E0_dp
+    bnswat_empty = 0.0E0_dp
   end subroutine init_swatch
 
   subroutine output_swatch_stats(io_output)
@@ -1570,8 +1570,8 @@ contains
        do j = 1, nswtcb(i)
           ! JLR 12-1-09 changing to exclude empty box attempts from swatch rate
           write(io_output,"('between box ',i2,' and ',i2, '   uattempts =',f12.1,   '  attempts =',f9.1, '  accepted =',f8.1)") box3(i,j),box4(i,j), bnswat(i,j),bnswat(i,j)-bnswat_empty(i,j),bsswat(i,j)
-          if (bnswat(i,j) .gt. 0.5d0 ) then
-             write(io_output,"(' accepted % =',f7.3)") 100.0d0 * bsswat(i,j)/ (bnswat(i,j)-bnswat_empty(i,j))
+          if (bnswat(i,j) .gt. 0.5E0_dp ) then
+             write(io_output,"(' accepted % =',f7.3)") 100.0E0_dp * bsswat(i,j)/ (bnswat(i,j)-bnswat_empty(i,j))
           end if
           ! EN JLR 12-1-09
        end do

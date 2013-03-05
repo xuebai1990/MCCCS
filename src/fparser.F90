@@ -16,7 +16,7 @@ MODULE fparser
   ! Roland Schmehl <Roland.Schmehl@mach.uni-karlsruhe.de>
   !
   !------- -------- --------- --------- --------- --------- --------- --------- -------
-  USE var_type,                           ONLY: rn => double_precision
+  USE var_type,                           ONLY: rn => dp
   USE util_runtime,                       ONLY: err_exit
 
   IMPLICIT NONE

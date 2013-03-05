@@ -59,7 +59,7 @@
          if ( lpoly ) then
             dmrtab(i) = dble(i) * brvib(1)
          else
-            dmrtab(i) = dble(i) * brvib(1) * dsin( 0.5d0 * brben(1) )
+            dmrtab(i) = dble(i) * brvib(1) * sin( 0.5d0 * brben(1) )
             dmrtab(i) = dmrtab(i) * 1.1d0
          end if 
          dbrtab(i) = dmrtab(i) / dble(nrtbin)
@@ -122,7 +122,7 @@
                ya1a2 = zprev*xpprev - xprev*zpprev
                za1a2 = xprev*ypprev - yprev*xpprev
 ! ***          calculate lengths of cross products ***
-               da1a2 = dsqrt ( xa1a2**2 + ya1a2**2 + za1a2**2 )
+               da1a2 = sqrt ( xa1a2**2 + ya1a2**2 + za1a2**2 )
             end if
          end if
 	 
@@ -152,8 +152,8 @@
             xisq = xi1**2 + xi2**2
             if ( xisq .lt. 1.0d0 ) then
                if ( brvibk(1) .gt. 0.1d0 )  call cleanup('bond vibrations not implemented')
-               x = brvib(1) * 2.0d0 * xi1 * dsqrt( 1.0d0 - xisq )
-               y = brvib(1) * 2.0d0 * xi2 * dsqrt( 1.0d0 - xisq )
+               x = brvib(1) * 2.0d0 * xi1 * sqrt( 1.0d0 - xisq )
+               y = brvib(1) * 2.0d0 * xi2 * sqrt( 1.0d0 - xisq )
                z = brvib(1) * ( 1.0d0 - 2.0d0 * xisq )
                dlast = brvib(1)
             else
@@ -168,7 +168,7 @@
                else
 ! *** calculate the bond bending potential energy ***
                   thetac = ( x*xprev+y*yprev+z*zprev ) / (dlast*dprev)
-                  theta = dacos(thetac)
+                  theta = acos(thetac)
                   vbba = brbenk(1) * ( theta - brben(1) )**2
                end if
 
@@ -179,7 +179,7 @@
                   yaa1 = z*(-xprev) + x*zprev
                   zaa1 = x*(-yprev) + y*xprev
 ! *** calculate lengths of cross products ***
-                  daa1 = dsqrt ( xaa1**2 + yaa1**2 + zaa1**2 )
+                  daa1 = sqrt ( xaa1**2 + yaa1**2 + zaa1**2 )
 ! *** calculate dot product of cross products ***
                   dot = xaa1*xa1a2 + yaa1*ya1a2 + zaa1*za1a2
                   thetac = -(dot / ( daa1 * da1a2 ))
@@ -189,7 +189,7 @@
             end if
 
             va = vbba + vdha
-            bf = dexp ( -(va * beta) )
+            bf = exp ( -(va * beta) )
             if ( random() .ge. bf ) go to 108 
 !            write(io_output,*) 'new ip', ip, '   va', va
 
@@ -220,12 +220,12 @@
                   x = rxtmp(i) - rxtmp(j)
                   y = rytmp(i) - rytmp(j)
                   z = rztmp(i) - rztmp(j)
-                  rij = dsqrt( x*x + y*y + z*z )
+                  rij = sqrt( x*x + y*y + z*z )
                   if ( rij .gt. dmrtab(idiff) ) then
                      write(io_output,*) 'WARNING NRTAB: rij .gt. dmrtab'
                      write(io_output,*) 'idiff',idiff, 'rij',rij,'dmrtab',dmrtab(idiff)
                   end if
-                  ibin = idint( rij / dbrtab(idiff) ) + 1
+                  ibin = int( rij / dbrtab(idiff) ) + 1
                   if ( ibin .gt. nrtbin ) ibin = nrtbin
                   hnrtab(idiff,ibin) = hnrtab(idiff,ibin) + 1
 

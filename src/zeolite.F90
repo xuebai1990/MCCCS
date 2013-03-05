@@ -1,4 +1,5 @@
 module zeolite
+  use var_type,only:dp,default_string_length
   use const_math,only:eps,onepi,twopi,fourpi
   use const_phys,only:qqfact
   use util_math,only:erfunc
@@ -21,7 +22,7 @@ module zeolite
   save
   public::zeocoord,suzeo,exzeo
 
-  real,parameter::requiredPrecision=1.0E-2_double_precision,overlapValue=1.0E+20_double_precision,upperLimit=1.0E+7_double_precision
+  real,parameter::requiredPrecision=1.0E-2_dp,overlapValue=1.0E+20_dp,upperLimit=1.0E+7_dp
   integer,parameter::boxZeo=1
 
   logical,allocatable::lunitcell(:)
@@ -143,7 +144,7 @@ contains
              if (lij(idi).and.lij(idj)) then
                 ntij = (idi-1)*nntype + idj
                 ! LJ parameters are scaled to reduce round-off errors, see exzeof()
-                sig6=sig2ij(ntij)**3/2e4
+                sig6=sig2ij(ntij)**3/2E4_dp
                 zpot%param(2,i,igtype)=epsij(ntij)*sig6
                 zpot%param(1,i,igtype)=zpot%param(2,i,igtype)*sig6
              else
@@ -187,7 +188,7 @@ contains
                               ,' Size unit-cell zeolite: ',f7.4,' x ',f7.4,' x ',f7.4,/&
                               ,'         x-dir           : ',i12,'  size: ',f7.4,/&
                               ,'         y-dir           : ',i12,'  size: ',f7.4,/&
-                              ,'         z-dir           : ',i12,'  size: ',f7.4,/)") (trim(ztype%name(i)),ztype%num(i),i=1,ztype%ntype),zcell%vol,ztype%ntype,zeo%nbead,wzeo/6.023d23,1000.0/wzeo,zunit%boxl(1),zunit%boxl(2),zunit%boxl(3),zunit%ngrid(1),zunit%boxl(1)/zunit%ngrid(1),zunit%ngrid(2),zunit%boxl(2)/zunit%ngrid(2),zunit%ngrid(3),zunit%boxl(3)/zunit%ngrid(3)
+                              ,'         z-dir           : ',i12,'  size: ',f7.4,/)") (trim(ztype%name(i)),ztype%num(i),i=1,ztype%ntype),zcell%vol,ztype%ntype,zeo%nbead,wzeo/6.023E23_dp,1000.0/wzeo,zunit%boxl(1),zunit%boxl(2),zunit%boxl(3),zunit%ngrid(1),zunit%boxl(1)/zunit%ngrid(1),zunit%ngrid(2),zunit%boxl(2)/zunit%ngrid(2),zunit%ngrid(3),zunit%boxl(3)/zunit%ngrid(3)
 
     if (lsurface_area) call zsurface()
 
@@ -224,7 +225,7 @@ contains
              end do
           end do
 !           if (myid.eq.0) then
-!              rcuttmp=10.0d0
+!              rcuttmp=10.0E0_dp
 !              close(io_ztb)
 !              open(unit=io_ztb,access='sequential',action='write',file=file_ztb,form='binary',iostat=jerr,status='unknown')
 !              if (jerr.ne.0) then
@@ -278,7 +279,7 @@ contains
 #endif
                 do i=0,zunit%ngrid(1)-1
                    ! pass to exzeof arguments in fractional coordinates with respect to the unit cell
-                   if (k.gt.oldk.or.(k.eq.oldk.and.j.ge.oldj)) call exzeof(zgrid(:,:,i,j,k),dble(i)/zunit%ngrid(1),dble(j)/zunit%ngrid(2),dble(k)/zunit%ngrid(3))
+                   if (k.gt.oldk.or.(k.eq.oldk.and.j.ge.oldj)) call exzeof(zgrid(:,:,i,j,k),real(i,dp)/zunit%ngrid(1),real(j,dp)/zunit%ngrid(2),real(k,dp)/zunit%ngrid(3))
                 end do
 #ifdef __OPENMP__
 !$omp end parallel
@@ -292,8 +293,8 @@ contains
 
        if (ltailczeo.and..not.ltailcZeotmp) then
           rci3=1./rcuttmp**3
-          rci9=4e8*rci3**3
-          rci3=2e4*rci3
+          rci9=4E8_dp*rci3**3
+          rci3=2E4_dp*rci3
        end if
 
        egrid=0.
@@ -340,15 +341,15 @@ contains
 
     tab=0.
     rcutsq = zcell%cut*zcell%cut
-    vbc=2e4/rcutsq**3
+    vbc=2E4_dp/rcutsq**3
     vac=vbc*vbc
 
     if (lewald.or.(.not.ltailcZeo)) then
        ! further scale i,j,k with respect to the whole cell
        !!!
-       scoord(1)=dble(i)/zunit%dup(1)
-       scoord(2)=dble(j)/zunit%dup(2)
-       scoord(3)=dble(k)/zunit%dup(3)
+       scoord(1)=real(i,dp)/zunit%dup(1)
+       scoord(2)=real(j,dp)/zunit%dup(2)
+       scoord(3)=real(k,dp)/zunit%dup(3)
        ri(1)=scoord(1)*zcell%hmat(1,1)%val+scoord(2)*zcell%hmat(1,2)%val+scoord(3)*zcell%hmat(1,3)%val
        ri(2)=scoord(2)*zcell%hmat(2,2)%val+scoord(3)*zcell%hmat(2,3)%val
        ri(3)=scoord(3)*zcell%hmat(3,3)%val
@@ -362,7 +363,7 @@ contains
              return
           else if (r2 .lt. rcutsq) then
              if (.not.ltailcZeo) then
-                vb=2e4/r2**3
+                vb=2E4_dp/r2**3
                 if (lshift) then
                    tab(2,iztype)=tab(2,iztype)+vb-vbc
                    tab(1,iztype)=tab(1,iztype)+vb*vb-vac
@@ -398,9 +399,9 @@ contains
                       do kk=-layer,layer
                          if (abs(ii).eq.layer .or. abs(jj).eq.layer .or.abs(kk).eq.layer) then
                             !!!
-                            scoord(1) = zeo%bead(izeo)%coord(1)*zcell%hmati(1,1)%val+zeo%bead(izeo)%coord(2)*zcell%hmati(1,2)%val+zeo%bead(izeo)%coord(3)*zcell%hmati(1,3)%val+dble(ii-i)/zunit%dup(1)
-                            scoord(2) = zeo%bead(izeo)%coord(1)*zcell%hmati(2,1)%val+zeo%bead(izeo)%coord(2)*zcell%hmati(2,2)%val+zeo%bead(izeo)%coord(3)*zcell%hmati(2,3)%val+dble(jj-j)/zunit%dup(2)
-                            scoord(3) = zeo%bead(izeo)%coord(1)*zcell%hmati(3,1)%val+zeo%bead(izeo)%coord(2)*zcell%hmati(3,2)%val+zeo%bead(izeo)%coord(3)*zcell%hmati(3,3)%val+dble(kk-k)/zunit%dup(3)
+                            scoord(1) = zeo%bead(izeo)%coord(1)*zcell%hmati(1,1)%val+zeo%bead(izeo)%coord(2)*zcell%hmati(1,2)%val+zeo%bead(izeo)%coord(3)*zcell%hmati(1,3)%val+real(ii-i,dp)/zunit%dup(1)
+                            scoord(2) = zeo%bead(izeo)%coord(1)*zcell%hmati(2,1)%val+zeo%bead(izeo)%coord(2)*zcell%hmati(2,2)%val+zeo%bead(izeo)%coord(3)*zcell%hmati(2,3)%val+real(jj-j,dp)/zunit%dup(2)
+                            scoord(3) = zeo%bead(izeo)%coord(1)*zcell%hmati(3,1)%val+zeo%bead(izeo)%coord(2)*zcell%hmati(3,2)%val+zeo%bead(izeo)%coord(3)*zcell%hmati(3,3)%val+real(kk-k,dp)/zunit%dup(3)
                             dr(1)=scoord(1)*zcell%hmat(1,1)%val+scoord(2)*zcell%hmat(1,2)%val+scoord(3)*zcell%hmat(1,3)%val
                             dr(2)=scoord(2)*zcell%hmat(2,2)%val+scoord(3)*zcell%hmat(2,3)%val
                             dr(3)=scoord(3)*zcell%hmat(3,3)%val
@@ -409,7 +410,7 @@ contains
                                tab=overlapValue
                                return
                             end if
-                            vb=2e4/r2**3
+                            vb=2E4_dp/r2**3
                             if (lshift) then
                                vnew(2,iztype)=vnew(2,iztype)+vb-vbc
                                vnew(1,iztype)=vnew(1,iztype)+vb*vb-vac
@@ -440,7 +441,7 @@ contains
     real::hmatik(3,3),ki(3),alpsqr4,hmaxsq,ksqr,arg,sums(ztype%ntype),vrecipz(ztype%ntype)
 
     ! *** Set up the reciprocal space vectors ***
-    vrecipz = 0.0E+0_double_precision
+    vrecipz = 0.0E+0_dp
 
     forall(i=1:3,j=1:3) hmatik(j,i) = twopi*zcell%hmati(j,i)%val
     kmax(1) = int(zcell%hmat(1,1)%val*zcell%calp)+1
@@ -448,7 +449,7 @@ contains
     kmax(3) = int(zcell%hmat(3,3)%val*zcell%calp)+1
     if (zcell%solid.and..not.zcell%ortho) kmax = kmax+1
 
-    alpsqr4 = 4.0d0*zcell%calp*zcell%calp
+    alpsqr4 = 4.0E0_dp*zcell%calp*zcell%calp
     hmaxsq = alpsqr4*onepi*onepi
 
     ! Generate the reciprocal-space
@@ -466,15 +467,15 @@ contains
              kmin(3) = -kmax(3)
           end if
           do n = kmin(3), kmax(3)
-             ki(1) = dble(l)*hmatik(1,1)+dble(m)*hmatik(2,1)+ dble(n)*hmatik(3,1)
-             ki(2) = dble(l)*hmatik(1,2)+dble(m)*hmatik(2,2)+ dble(n)*hmatik(3,2)
-             ki(3) = dble(l)*hmatik(1,3)+dble(m)*hmatik(2,3)+ dble(n)*hmatik(3,3)
+             ki(1) = real(l,dp)*hmatik(1,1)+real(m,dp)*hmatik(2,1)+real(n,dp)*hmatik(3,1)
+             ki(2) = real(l,dp)*hmatik(1,2)+real(m,dp)*hmatik(2,2)+real(n,dp)*hmatik(3,2)
+             ki(3) = real(l,dp)*hmatik(1,3)+real(m,dp)*hmatik(2,3)+real(n,dp)*hmatik(3,3)
              ksqr = dot_product(ki,ki)
              ! if ( ksqr .lt. hmaxsq ) then
              ! sometimes these are about equal, which can cause different
              ! behavior on 32 and 64 bit machines without this .and. statement
              if ( hmaxsq-ksqr.gt.eps ) then
-                sums = 0.0E0_double_precision
+                sums = 0.0E0_dp
                 do i = 1,zeo%nbead
                    arg=dot_product(ki,ri-zeo%bead(i)%coord)
                    sums(zeo%bead(i)%type)=sums(zeo%bead(i)%type)+cos(arg)
@@ -538,20 +539,20 @@ contains
        ! for polynom fitting)
        do l0=mst,m
           lp=l+l0
-          scoord(3)=dble(lp)/zunit%ngrid(3)
+          scoord(3)=real(lp,dp)/zunit%ngrid(3)
           ! ---    store x,y,z values around xi,yi,zi in arrays
           zt(l0)=scoord(3)*zunit%hmat(3,3)
           if (lp.lt.0) lp=lp+zunit%ngrid(3)
           if (lp.ge.zunit%ngrid(3)) lp=lp-zunit%ngrid(3)
           do k0=mst,m
              kp=k+k0
-             scoord(2)=dble(kp)/zunit%ngrid(2)
+             scoord(2)=real(kp,dp)/zunit%ngrid(2)
              yt(k0)=scoord(2)*zunit%hmat(2,2)+scoord(3)*zunit%hmat(2,3)
              if (kp.lt.0) kp=kp+zunit%ngrid(2)
              if (kp.ge.zunit%ngrid(2)) kp=kp-zunit%ngrid(2)
              do j0=mst,m
                 jp=j+j0
-                scoord(1)=dble(jp)/zunit%ngrid(1)
+                scoord(1)=real(jp,dp)/zunit%ngrid(1)
                 xt(j0)=scoord(1)*zunit%hmat(1,1)+scoord(2)*zunit%hmat(1,2)+scoord(3)*zunit%hmat(1,3)
                 if (jp.lt.0) jp=jp+zunit%ngrid(1)
                 if (jp.ge.zunit%ngrid(1)) jp=jp-zunit%ngrid(1)
@@ -570,11 +571,11 @@ contains
 
        if (ltailc) then
           rci3=1./zcell%cut**3
-          rci9=4e8*rci3**3
-          rci3=2e4*rci3
+          rci9=4E8_dp*rci3**3
+          rci3=2E4_dp*rci3
        end if
 
-       exzeo=0.0d0
+       exzeo=0.0E0_dp
        do j=1,ztype%ntype
           idj=ztype%type(j)
           if (lij(idj).or.lqchg(idj)) then
@@ -622,12 +623,12 @@ contains
        else
           Uexplicit=Utabulated
        end if
-       weight=dexp(-Utabulated*beta)
-       if (weight.gt.1.0d-5) then
+       weight=exp(-Utabulated*beta)
+       if (weight.gt.1.0E-5_dp) then
           tel=tel+1
           BoltTabulated=BoltTabulated+weight
           eBoltTabulated=eBoltTabulated+Utabulated*weight
-          weight=dexp(-Uexplicit*beta)
+          weight=exp(-Uexplicit*beta)
           BoltExplicit=BoltExplicit+weight
           eBoltExplicit=eBoltExplicit+Uexplicit*weight
           err=abs(Uexplicit-Utabulated)
@@ -635,7 +636,7 @@ contains
           err=abs(err/Uexplicit)
           if (errRel.lt.err) errRel=err
           errTot=errTot+err
-          if (myid.eq.0 .and. err.gt.3.0d-2) then
+          if (myid.eq.0 .and. err.gt.3.0E-2_dp) then
              write(io_output,'("WARNING: interpolation error at (",3(F8.5,1X),")=",G20.7," > 3%")') xi,yi,zi,err
              write(io_output,*) Utabulated,Uexplicit
           end if
@@ -649,7 +650,7 @@ contains
        write(io_output,'(A,G)') ' maximum absolute error [K]: ',errAbs
        write(io_output,'(A,G,A,G,A)') ' void fraction: ',BoltTabulated/volume_nsample, '(tabulated), ',BoltExplicit/volume_nsample,'(explicit)'
        write(io_output,'(A,G,A,G,A)') ' void volume in [Angstrom^3]: ',BoltTabulated*zcell%vol/volume_nsample, '(tabulated), ',BoltExplicit*zcell%vol/volume_nsample,'(explicit)'
-       write(io_output,'(A,G,A,G,A)') ' void volume in [cm^3/g]: ',BoltTabulated*zcell%vol/volume_nsample*6.023d-1/dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype))), '(tabulated), ',BoltExplicit*zcell%vol/volume_nsample*6.023d-1/dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype))),'(explicit)'
+       write(io_output,'(A,G,A,G,A)') ' void volume in [cm^3/g]: ',BoltTabulated*zcell%vol/volume_nsample*6.023E-1_dp/dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype))), '(tabulated), ',BoltExplicit*zcell%vol/volume_nsample*6.023E-1_dp/dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype))),'(explicit)'
        write(io_output,'(A,G,A,G,A)') ' Boltzmann averaged energy in [K]: ',eBoltTabulated/BoltTabulated,'(tabulated), ',eBoltExplicit/BoltExplicit,'(explicit)'
        write(io_output,*)
     end if
@@ -686,7 +687,7 @@ contains
        end if
     END DO
 
-    stotal=0.0d0
+    stotal=0.0E0_dp
     Do i=1,zeo%nbead ! Loop over all framework atoms
        if (.not.lunitcell(i)) cycle
        ntij = (area_probe-1)*nntype + ztype%type(zeo%bead(i)%type)
@@ -709,7 +710,7 @@ contains
              call fractionalToAbsolute(dr,sdr/zunit%dup,zcell)
              rsq=dot_product(dr,dr)
              ntij = (area_probe-1)*nntype + ztype%type(zeo%bead(k)%type)
-             If(rsq.lt.0.998001d0*sig2ij(ntij)) exit
+             If(rsq.lt.0.998001E0_dp*sig2ij(ntij)) exit
           End Do
 
           If (k.le.zeo%nbead) cycle
@@ -723,8 +724,8 @@ contains
     ! Report results
     stotal=stotal*fourpi*product(zunit%dup)
     Write(io_output,'(A,F12.2)') ' Total surface area in [Angstroms^2]: ', stotal
-    Write(io_output,'(A,F12.2)') ' Total surface area per volume in [m^2/cm^3]: ',stotal/zcell%vol*1.0d4
-    Write(io_output,'(A,F12.2,/)') ' Total surface area per volume in [m^2/g]: ', stotal*6.023d3/dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype)))
+    Write(io_output,'(A,F12.2)') ' Total surface area per volume in [m^2/cm^3]: ',stotal/zcell%vol*1.0E4_dp
+    Write(io_output,'(A,F12.2,/)') ' Total surface area per volume in [m^2/g]: ', stotal*6.023E3_dp/dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype)))
 
     deallocate(position)
 

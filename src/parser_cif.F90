@@ -15,7 +15,7 @@ MODULE parser_cif
 !>            _atom_site_fract_y
 !>            _atom_site_fract_z
 ! *****************************************************************************
-  use var_type,only:double_precision,default_string_length
+  use var_type,only:dp,default_string_length
   use util_runtime,only:err_exit
   use util_files,only:get_iounit,readLine
   use util_string,only:splitAndGetNext
@@ -27,7 +27,7 @@ MODULE parser_cif
   PRIVATE
   PUBLIC::readCIF
   integer,parameter::boxZeo=1
-  real,parameter::eps=1.0E-4_double_precision
+  real,parameter::eps=1.0E-4_dp
 
 CONTAINS
 
@@ -217,7 +217,7 @@ CONTAINS
                          zeo%bead(i)%type=zeo%bead(id)%type
                          ztype%num(zeo%bead(id)%type)=ztype%num(zeo%bead(id)%type)+1
                          call absoluteToFractional(scoord,zeo%bead(id)%coord,zcell)
-                         call fractionalToAbsolute(zeo%bead(i)%coord,scoord+dble((/ia,ib,ic/))/zunit%dup,zcell)
+                         call fractionalToAbsolute(zeo%bead(i)%coord,scoord+real((/ia,ib,ic/),dp)/zunit%dup,zcell)
                       END IF
                    END DO
                 END DO
