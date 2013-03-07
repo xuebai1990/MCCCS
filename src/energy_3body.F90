@@ -144,7 +144,10 @@ CONTAINS
                             if ((lchain.eq.cchain.and.lunit.eq.cunit).or.(lchain.eq.rchain.and.lunit.eq.runit).or.(cchain.eq.rchain.and.cunit.eq.runit)) cycle
                             itype=indexOf(threebodies,idx((/ntype(lmolty,lunit),ntype(cmolty,cunit),ntype(rmolty,runit)/)))
                             if (itype.eq.0) cycle !no 3-body defined for this triplet
-                            !write(*,'("Box ",I1,"(",I4,",",I4,",",I4,")->[",I2,",",I2,",",I2,"]:",I2,",",I2,",",I2,". itype=",I5,". Triplet ",I2," of size ",I2)') ibox,lchain,cchain,rchain,lunit,cunit,runit,indexOf(atoms,ntype(lmolty,lunit)),indexOf(atoms,ntype(cmolty,cunit)),indexOf(atoms,ntype(rmolty,runit)),itype,nTriplets(ibox),size(triplets,2)
+                            ! write(*,'("Box ",I1,"(",I4,",",I4,",",I4,")->[",I2,",",I2,",",I2,"]:",I2,",",I2,",",I2,". itype=",I5,". Triplet ",I2," of size ",I2)')&
+                            !  ibox,lchain,cchain,rchain,lunit,cunit,runit,indexOf(atoms,ntype(lmolty,lunit))&
+                            !  ,indexOf(atoms,ntype(cmolty,cunit)),indexOf(atoms,ntype(rmolty,runit))&
+                            !  ,itype,nTriplets(ibox),size(triplets,2)
                             ar(1)=rxu(lchain,lunit)-rxu(cchain,cunit)
                             ar(2)=ryu(lchain,lunit)-ryu(cchain,cunit)
                             ar(3)=rzu(lchain,lunit)-rzu(cchain,cunit)
@@ -158,7 +161,9 @@ CONTAINS
                             !write(*,'("ar=",D16.9,". br=",D16.9)') dot_product(ar,ar),dot_product(br,br)
                             if (dot_product(ar,ar).le.coeffs(1,itype).and.dot_product(br,br).le.coeffs(1,itype)) then
                                nTriplets(ibox)=nTriplets(ibox)+1
-                               write(*,'("Box ",I1,": (",I4,",",I4,",",I4,")->[",I2,",",I2,",",I2,"]: tritype=",I2,". Triplet ",I8," of size ",I8,". ar=",D16.9,". br=",D16.9)') ibox,lchain,cchain,rchain,lunit,cunit,runit,itype,nTriplets(ibox),size(triplets,2),dot_product(ar,ar),dot_product(br,br)
+                               write(*,'("Box ",I1,": (",I4,",",I4,",",I4,")->[",I2,",",I2,",",I2,"]: tritype=",I2,". Triplet ",I8," of size ",I8,". ar=",D16.9,". br=",D16.9)')&
+                                ibox,lchain,cchain,rchain,lunit,cunit,runit,itype,nTriplets(ibox)&
+                                ,size(triplets,2),dot_product(ar,ar),dot_product(br,br)
                                if (nTriplets(ibox).gt.size(triplets,2)) call reallocate(triplets,0,6,1,2*size(triplets,2),1,nbox)
                                triplets(0,nTriplets(ibox),ibox)=itype
                                triplets(1,nTriplets(ibox),ibox)=lchain

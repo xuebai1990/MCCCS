@@ -43,8 +43,7 @@ contains
     real::rmol,rbf,bsum
     real::waddnew,waddold
 
-    real::total_NBE,vtgn
-    real::vbendn,vvibn
+    real::total_NBE,vtgn,vbendn,vvibn
 
     real::v1insext,v1remext,v1ins,w1ins,v1rem,w1rem,v1insint,v1remint,v1insewd,v1remewd,wnlog,wolog,wdlog,wratio,vinsta,vremta,volins,volrem,rho,arg,v1inselc,v1remelc
     real::rvol,x,y,z,rijsq,wbias_ins,wbias_rem,r,xi1,xi2,xisq
@@ -1511,6 +1510,9 @@ contains
           rzu(irem,ic) = rzuion(ic,2)
        end do
 
+       vtgn = 0.0_dp
+       vbendn = 0.0_dp
+       vvibn = 0.0_dp
        if (lrigid(imolty).and.(pm_atom_tra.gt.0.000001)) then
           call U_bonded(irem,imolty,vvibn,vbendn,vtgn)
        end if

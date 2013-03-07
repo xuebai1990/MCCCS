@@ -9,6 +9,7 @@ subroutine monola(file_in)
   use var_type,only:dp,default_string_length
   use const_math,only:onepi,twopi
   use util_random,only:random
+  use util_string,only:format_n
   use util_runtime,only:err_exit
   use util_timings,only:time_date_str,time_now
   use util_mp,only:mp_barrier
@@ -27,7 +28,10 @@ subroutine monola(file_in)
 
   character(LEN=*),intent(in)::file_in
 
-  real,allocatable::pres(:),acvkjmol(:,:),acsolpar(:,:,:),acEnthalpy(:),acEnthalpy1(:),stdev1(:,:,:),sterr1(:,:,:),errme1(:,:,:),vstart(:),vend(:),avv(:,:),acv(:,:),acvsq(:,:),aflv(:),acboxl(:,:),acboxa(:,:),acpres(:),acsurf(:),acvolume(:),acnbox(:,:),acnbox2(:,:,:),asetel(:,:),acdens(:,:),molfra(:,:),dsq(:,:),stdev(:,:),dsq1(:,:,:),sterr(:,:),errme(:,:),molvol(:),speden(:),flucmom(:),flucmom2(:),acvol(:),acvolsq(:)
+  real,allocatable::pres(:),acvkjmol(:,:),acsolpar(:,:,:),acEnthalpy(:),acEnthalpy1(:),stdev1(:,:,:),sterr1(:,:,:)&
+   ,errme1(:,:,:),vstart(:),vend(:),avv(:,:),acv(:,:),acvsq(:,:),aflv(:),acboxl(:,:),acboxa(:,:),acpres(:),acsurf(:)&
+   ,acvolume(:),acnbox(:,:),acnbox2(:,:,:),asetel(:,:),acdens(:,:),molfra(:,:),dsq(:,:),stdev(:,:),dsq1(:,:,:),sterr(:,:)&
+   ,errme(:,:),molvol(:),speden(:),flucmom(:),flucmom2(:),acvol(:),acvolsq(:)
   integer,allocatable::nminp(:),nmaxp(:),ncmt_list(:,:),ndist(:,:),mnbox(:,:)
   logical,allocatable::lratfix(:),lsolute(:)
   character(LEN=default_path_length),allocatable::file_ndis(:)
@@ -104,7 +108,14 @@ subroutine monola(file_in)
      call mp_barrier(groupid)
   end do
 
-  allocate(nminp(ntmax),nmaxp(ntmax),ncmt_list(fmax,ntmax),ndist(0:nmax,ntmax),pres(nbxmax),acvkjmol(nener,nbxmax),acsolpar(nprop1,nbxmax,nbxmax),acEnthalpy(nbxmax),acEnthalpy1(nbxmax),stdev1(nprop1,nbxmax,nbxmax),sterr1(nprop1,nbxmax,nbxmax),errme1(nprop1,nbxmax,nbxmax),vstart(nbxmax),vend(nbxmax),avv(nener,nbxmax),acv(nener,nbxmax),acvsq(nener,nbxmax),aflv(nbxmax),acboxl(nbxmax,3),acboxa(nbxmax,3),acpres(nbxmax),acsurf(nbxmax),acvolume(nbxmax),acnbox(nbxmax,ntmax),acnbox2(nbxmax,ntmax,20),mnbox(nbxmax,ntmax),asetel(nbxmax,ntmax),acdens(nbxmax,ntmax),molfra(nbxmax,ntmax),dsq(nprop,nbxmax),stdev(nprop,nbxmax),dsq1(nprop1,nbxmax,nbxmax),sterr(nprop,nbxmax),errme(nprop,nbxmax),lratfix(ntmax),lsolute(ntmax),molvol(nbxmax),speden(nbxmax),flucmom(nbxmax),flucmom2(nbxmax),acvol(nbxmax),acvolsq(nbxmax),file_ndis(ntmax),stat=jerr)
+  allocate(nminp(ntmax),nmaxp(ntmax),ncmt_list(fmax,ntmax),ndist(0:nmax,ntmax),pres(nbxmax),acvkjmol(nener,nbxmax)&
+   ,acsolpar(nprop1,nbxmax,nbxmax),acEnthalpy(nbxmax),acEnthalpy1(nbxmax),stdev1(nprop1,nbxmax,nbxmax)&
+   ,sterr1(nprop1,nbxmax,nbxmax),errme1(nprop1,nbxmax,nbxmax),vstart(nbxmax),vend(nbxmax),avv(nener,nbxmax)&
+   ,acv(nener,nbxmax),acvsq(nener,nbxmax),aflv(nbxmax),acboxl(nbxmax,3),acboxa(nbxmax,3),acpres(nbxmax),acsurf(nbxmax)&
+   ,acvolume(nbxmax),acnbox(nbxmax,ntmax),acnbox2(nbxmax,ntmax,20),mnbox(nbxmax,ntmax),asetel(nbxmax,ntmax)&
+   ,acdens(nbxmax,ntmax),molfra(nbxmax,ntmax),dsq(nprop,nbxmax),stdev(nprop,nbxmax),dsq1(nprop1,nbxmax,nbxmax)&
+   ,sterr(nprop,nbxmax),errme(nprop,nbxmax),lratfix(ntmax),lsolute(ntmax),molvol(nbxmax),speden(nbxmax),flucmom(nbxmax)&
+   ,flucmom2(nbxmax),acvol(nbxmax),acvolsq(nbxmax),file_ndis(ntmax),stat=jerr)
   if (jerr.ne.0) then
      call err_exit(__FILE__,__LINE__,'monola: allocation failed',jerr)
   end if
@@ -698,7 +709,7 @@ subroutine monola(file_in)
         do ibox = 1,nbox
            if ( lpbcz ) then
               if (lsolid(ibox) .and. .not. lrect(ibox).and. myid.eq.0) then
-                 write(12,'(7E13.5,<nmolty>i5)') hmat(ibox,1) ,hmat(ibox,4),hmat(ibox,5) ,hmat(ibox,7),hmat(ibox,8) ,hmat(ibox,9),vbox(ibox), (ncmt(ibox,itype),itype=1,nmolty)
+                 write(12,FMT='(7E13.5,'//format_n(nmolty,"i5")//')') hmat(ibox,1) ,hmat(ibox,4),hmat(ibox,5) ,hmat(ibox,7),hmat(ibox,8) ,hmat(ibox,9),vbox(ibox), (ncmt(ibox,itype),itype=1,nmolty)
 
                  open(13,file = file_cell,status='old', position='append')
                  write(13,'(i8,6f12.4)') nnn+nnstep, cell_length(ibox,1)/Num_cell_a, cell_length(ibox,2)/Num_cell_b, cell_length(ibox,3)/Num_cell_c, cell_ang(ibox,1)*180.0E0_dp/onepi, cell_ang(ibox,2)*180.0E0_dp/onepi, cell_ang(ibox,3)*180.0E0_dp/onepi
@@ -709,14 +720,14 @@ subroutine monola(file_in)
               else
 ! do ibox = 1, nbox
                  if (myid.eq.0) then
-                    write(12,'(4E13.5,<nmolty>i5)')boxlx(ibox),boxly(ibox) ,boxlz(ibox),vbox(ibox), (ncmt(ibox,itype),itype=1,nmolty)
+                    write(12,'(4E13.5,'//format_n(nmolty,"i5")//')')boxlx(ibox),boxly(ibox) ,boxlz(ibox),vbox(ibox), (ncmt(ibox,itype),itype=1,nmolty)
                  end if
 ! end do
               end if
            else
 ! do ibox = 1, nbox
               if (myid.eq.0) then
-                 write(12,'(2E12.5,<nmolty>i4)') boxlx(ibox)*boxly(ibox) ,vbox(ibox),(ncmt(ibox,itype),itype=1,nmolty)
+                 write(12,'(2E12.5,'//format_n(nmolty,"i4")//')') boxlx(ibox)*boxly(ibox) ,vbox(ibox),(ncmt(ibox,itype),itype=1,nmolty)
               end if
 ! end do
            end if
@@ -997,9 +1008,9 @@ subroutine monola(file_in)
 
      write(io_output,"(/,'New Biasing Potential')")
      do i=1,nmolty
-        write(io_output,"(/,'molecule ',I2,': ',\)") i
+        write(io_output,"(/,'molecule ',I2,': ',$)") i
         do j=1,nbox
-           write(io_output,"(G16.9,1X,\)") eta2(j,i)
+           write(io_output,"(G16.9,1X,$)") eta2(j,i)
         end do
      end do
      write(io_output,*)
@@ -1424,7 +1435,9 @@ subroutine monola(file_in)
      do itype = 1, nmolty
         do ibox = 1, nbox
            if (solcount(ibox,itype).gt.0) then
-              write(io_output,1372) itype,ibox,avsolinter(ibox,itype) /solcount(ibox,itype),avsolintra(ibox,itype) /solcount(ibox,itype),avsoltor(ibox,itype) /solcount(ibox,itype),avsolbend(ibox,itype) /solcount(ibox,itype),avsolelc(ibox,itype) /solcount(ibox,itype)
+              write(io_output,1372) itype,ibox,avsolinter(ibox,itype) /solcount(ibox,itype)&
+               ,avsolintra(ibox,itype) /solcount(ibox,itype),avsoltor(ibox,itype) /solcount(ibox,itype)&
+               ,avsolbend(ibox,itype) /solcount(ibox,itype),avsolelc(ibox,itype) /solcount(ibox,itype)
            else
               write(io_output,1372) itype,ibox,0.0,0.0,0.0,0.0,0.0
            end if
@@ -1757,7 +1770,9 @@ subroutine monola(file_in)
  1517 format(a15,'[kJ/mol] for box',i3,' =',3(f12.4))
  1601 format(i5,1x,i10)
 
-  deallocate(nminp,nmaxp,ncmt_list,ndist,pres,acvkjmol,acsolpar,acEnthalpy,acEnthalpy1,stdev1,sterr1,errme1,vstart,vend,avv,acv,acvsq,aflv,acboxl,acboxa,acpres,acsurf,acvolume,acnbox,acnbox2,mnbox,asetel,acdens,molfra,dsq,stdev,dsq1,sterr,errme,lratfix,lsolute,molvol,speden,flucmom,flucmom2,acvol,acvolsq,file_ndis,stat=jerr)
+  deallocate(nminp,nmaxp,ncmt_list,ndist,pres,acvkjmol,acsolpar,acEnthalpy,acEnthalpy1,stdev1,sterr1,errme1,vstart,vend,avv,acv&
+   ,acvsq,aflv,acboxl,acboxa,acpres,acsurf,acvolume,acnbox,acnbox2,mnbox,asetel,acdens,molfra,dsq,stdev,dsq1,sterr,errme,lratfix&
+   ,lsolute,molvol,speden,flucmom,flucmom2,acvol,acvolsq,file_ndis,stat=jerr)
   if (jerr.ne.0) then
      call err_exit(__FILE__,__LINE__,'monola: deallocation failed',jerr)
   end if

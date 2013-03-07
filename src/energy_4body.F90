@@ -150,10 +150,18 @@ CONTAINS
                          do crunit=1,nunit(crmolty)
                             do lunit=1,nunit(lmolty)
                                do runit=1,nunit(rmolty)
-                                  if ((lchain.eq.clchain.and.lunit.eq.clunit).or.(lchain.eq.crchain.and.lunit.eq.crunit).or.(lchain.eq.rchain.and.lunit.eq.runit).or.(clchain.eq.crchain.and.clunit.eq.crunit).or.(clchain.eq.rchain.and.clunit.eq.runit).or.(crchain.eq.rchain.and.crunit.eq.runit)) cycle
+                                  if ((lchain.eq.clchain.and.lunit.eq.clunit)&
+                                   .or.(lchain.eq.crchain.and.lunit.eq.crunit)&
+                                   .or.(lchain.eq.rchain.and.lunit.eq.runit)&
+                                   .or.(clchain.eq.crchain.and.clunit.eq.crunit)&
+                                   .or.(clchain.eq.rchain.and.clunit.eq.runit)&
+                                   .or.(crchain.eq.rchain.and.crunit.eq.runit)) cycle
                                   itype=indexOf(fourbodies,idx((/ntype(lmolty,lunit),ntype(clmolty,clunit),ntype(crmolty,crunit),ntype(rmolty,runit)/)))
                                   if (itype.eq.0) cycle !no 4-body defined for this quadruplet
-                                  !write(*,'("Box ",I1,"(",I4,",",I4,",",I4,")->[",I2,",",I2,",",I2,"]:",I2,",",I2,",",I2,". itype=",I5,". Quadruplet ",I2," of size ",I2)') ibox,lchain,cchain,rchain,lunit,cunit,runit,indexOf(atoms,ntype(lmolty,lunit)),indexOf(atoms,ntype(cmolty,cunit)),indexOf(atoms,ntype(rmolty,runit)),itype,nQuadruplets(ibox),size(quadruplets,2)
+                                  ! write(*,'("Box ",I1,"(",I4,",",I4,",",I4,")->[",I2,",",I2,",",I2,"]:",I2,",",I2,",",I2,". itype=",I5,". Quadruplet ",I2," of size ",I2)')&
+                                  !  ibox,lchain,cchain,rchain,lunit,cunit,runit,indexOf(atoms,ntype(lmolty,lunit))&
+                                  !  ,indexOf(atoms,ntype(cmolty,cunit)),indexOf(atoms,ntype(rmolty,runit))&
+                                  !  ,itype,nQuadruplets(ibox),size(quadruplets,2)
                                   ar(1)=rxu(lchain,lunit)-rxu(clchain,clunit)
                                   ar(2)=ryu(lchain,lunit)-ryu(clchain,clunit)
                                   ar(3)=rzu(lchain,lunit)-rzu(clchain,clunit)
@@ -167,7 +175,10 @@ CONTAINS
                                   !write(*,'("ar=",D16.9,". br=",D16.9)') dot_product(ar,ar),dot_product(br,br)
                                   if (dot_product(ar,ar).le.coeffs(1,itype).and.dot_product(br,br).le.coeffs(1,itype)) then
                                      nQuadruplets(ibox)=nQuadruplets(ibox)+1
-                                     write(*,'("Box ",I1,": (",I4,",",I4,",",I4,",",I4,")->[",I2,",",I2,",",I2,",",I2,"]: quatype=",I2,". Quadruplet ",I8," of size ",I8,". ar=",D16.9,". br=",D16.9)') ibox,lchain,clchain,crchain,rchain,lunit,clunit,crunit,runit,indexOf(atoms,ntype(lmolty,lunit)),itype,nQuadruplets(ibox),size(quadruplets,2),dot_product(ar,ar),dot_product(br,br)
+                                     write(*,'("Box ",I1,": (",I4,",",I4,",",I4,",",I4,")->[",I2,",",I2,",",I2,",",I2,"]: quatype=",I2,". Quadruplet ",I8," of size ",I8,". ar=",D16.9,". br=",D16.9)')&
+                                      ibox,lchain,clchain,crchain,rchain,lunit,clunit,crunit,runit&
+                                      ,indexOf(atoms,ntype(lmolty,lunit)),itype,nQuadruplets(ibox)&
+                                      ,size(quadruplets,2),dot_product(ar,ar),dot_product(br,br)
                                      if (nQuadruplets(ibox).gt.size(quadruplets,2)) call reallocate(quadruplets,0,8,1,2*size(quadruplets,2),1,nbox)
                                      quadruplets(0,nQuadruplets(ibox),ibox)=itype
                                      quadruplets(1,nQuadruplets(ibox),ibox)=lchain

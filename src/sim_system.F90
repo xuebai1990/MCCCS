@@ -92,8 +92,10 @@ module sim_system
 ! ** DIMENSIONS FOR ARRAYS             **
 ! ***************************************
   integer::io_output=6,checkpoint_interval=1800
-  character(LEN=default_path_length)::file_input='fort.4',file_restart='fort.77',file_struct='input_struc.xyz',file_run='run1a.dat',file_movie='movie1a.dat',file_dipole='dipole1a.dat'
-  namelist /io/ file_input,file_restart,file_struct,file_run,file_movie,file_dipole,io_output,checkpoint_interval
+  character(LEN=default_path_length)::file_input='fort.4',file_restart='fort.77',file_struct='input_struc.xyz'&
+   ,file_run='run1a.dat',file_movie='movie1a.dat',file_dipole='dipole1a.dat'
+  namelist /io/ file_input,file_restart,file_struct,file_run&
+   ,file_movie,file_dipole,io_output,checkpoint_interval
   integer::nntype& !< number of types of beads
    ,nbox=1,nbxmax& !< maximum number of boxes
    ,npabmax& !< maximum number of box pairs (for swatch and swap)
@@ -127,11 +129,52 @@ module sim_system
   real,allocatable::brvib(:),brvibk(:),brben(:),brbenk(:)
 
   real(kind=dp),allocatable::vbox(:),vinterb(:),vtailb(:),vintrab(:),vvibb(:),vbendb(:),vtgb(:),vextb(:),velectb(:),vflucqb(:),v3garob(:),vipswb(:),vwellipswb(:)
-  real,allocatable::pmrotbd(:,:),vtry(:),vtrext(:),vtrintra(:),vtrinter(:),vtrelect(:),vtrewald(:),vtrorient(:),vtrelect_intra(:),vtrelect_inter(:),bfac(:),rxp(:,:),ryp(:,:),rzp(:,:),vwellipswot(:),vwellipswnt(:),vipswnt(:),vipswot(:),epsilon_f(:,:),sigma_f(:,:),ljscale(:,:,:),qscale2(:,:,:),ee_qqu(:,:),rxnew(:),rynew(:),rznew(:),rxu(:,:),ryu(:,:),rzu(:,:),xcm(:),ycm(:),zcm(:),qqu(:,:),rxuion(:,:),ryuion(:,:),rzuion(:,:),qquion(:,:),xvec(:,:),yvec(:,:),zvec(:,:),awell(:,:,:),pmsatc(:),pmswtcb(:,:),pmisatc(:),B(:),fqegp(:),eta2(:,:),qscale(:),pmbias(:),pmbsmt(:),pmbias2(:),rmtrax(:,:),rmtray(:,:),rmtraz(:,:),rmrotx(:,:),rmroty(:,:),rmrotz(:,:),rmflcq(:,:),pmswmt(:),pmswapb(:,:),pmcbmt(:),pmall(:),pmfix(:),pmfqmt(:),pmeemt(:),pmtrmt(:),pmromt(:),masst(:),avsolinter(:,:),avsolintra(:,:),avsolbend(:,:),avsoltor(:,:),avsolelc(:,:),rxwell(:,:),rywell(:,:),rzwell(:,:),sxwell(:,:),sywell(:,:),szwell(:,:),naccu(:,:),nccold(:,:),accum(:,:),bccold(:,:),aver(:,:),baver(:,:,:),naccu1(:,:,:),nccold1(:,:,:),rcmu(:),exp_c(:),sxcm(:),sycm(:),szcm(:),ndij(:,:),nxij(:,:),nyij(:,:),nxijo(:,:),nzij(:,:),ndijo(:,:),nyijo(:,:),nzijo(:,:),favor(:),favor2(:),express(:),Elect_field(:),zshift(:),dshift(:),rmvol(:),pmvlmt(:),pmvolb(:),rmhmat(:,:),dipolex(:),dipoley(:),dipolez(:),wbox(:)
+  real,allocatable::pmrotbd(:,:),vtry(:),vtrext(:),vtrintra(:)&
+   ,vtrinter(:),vtrelect(:),vtrewald(:),vtrorient(:),vtrelect_intra(:)&
+   ,vtrelect_inter(:),bfac(:),rxp(:,:),ryp(:,:),rzp(:,:)&
+   ,vwellipswot(:),vwellipswnt(:),vipswnt(:),vipswot(:),epsilon_f(:,:)&
+   ,sigma_f(:,:),ljscale(:,:,:),qscale2(:,:,:),ee_qqu(:,:),rxnew(:)&
+   ,rynew(:),rznew(:),rxu(:,:),ryu(:,:),rzu(:,:),xcm(:),ycm(:),zcm(:)&
+   ,qqu(:,:),rxuion(:,:),ryuion(:,:),rzuion(:,:),qquion(:,:),xvec(:,:)&
+   ,yvec(:,:),zvec(:,:),awell(:,:,:),pmsatc(:),pmswtcb(:,:),pmisatc(:)&
+   ,B(:),fqegp(:),eta2(:,:),qscale(:),pmbias(:),pmbsmt(:),pmbias2(:)&
+   ,rmtrax(:,:),rmtray(:,:),rmtraz(:,:),rmrotx(:,:),rmroty(:,:)&
+   ,rmrotz(:,:),rmflcq(:,:),pmswmt(:),pmswapb(:,:),pmcbmt(:),pmall(:)&
+   ,pmfix(:),pmfqmt(:),pmeemt(:),pmtrmt(:),pmromt(:),masst(:)&
+   ,avsolinter(:,:),avsolintra(:,:),avsolbend(:,:),avsoltor(:,:)&
+   ,avsolelc(:,:),rxwell(:,:),rywell(:,:),rzwell(:,:),sxwell(:,:)&
+   ,sywell(:,:),szwell(:,:),naccu(:,:),nccold(:,:),accum(:,:)&
+   ,bccold(:,:),aver(:,:),baver(:,:,:),naccu1(:,:,:),nccold1(:,:,:)&
+   ,rcmu(:),exp_c(:),sxcm(:),sycm(:),szcm(:),ndij(:,:),nxij(:,:)&
+   ,nyij(:,:),nxijo(:,:),nzij(:,:),ndijo(:,:),nyijo(:,:),nzijo(:,:)&
+   ,favor(:),favor2(:),express(:),Elect_field(:),zshift(:),dshift(:)&
+   ,rmvol(:),pmvlmt(:),pmvolb(:),rmhmat(:,:),dipolex(:),dipoley(:)&
+   ,dipolez(:),wbox(:)
   real,allocatable::bnflcq(:,:),bsflcq(:,:),bnflcq2(:,:),bsflcq2(:,:) ! *** temporary accumulators for max. displacement updates ***
   real,allocatable::aver1(:,:,:),accum1(:,:,:),bccold1(:,:,:),baver1(:,:,:,:) ! ** Neeraj adding for solubility parameter and heat of vaporization
-  integer,allocatable::ucheck(:),ntype(:,:),leaderq(:,:),invib(:,:),itvib(:,:,:),ijvib(:,:,:),inben(:,:),itben(:,:,:),ijben2(:,:,:),ijben3(:,:,:),intor(:,:),ittor(:,:,:),ijtor2(:,:,:),ijtor3(:,:,:),ijtor4(:,:,:),nrotbd(:),irotbd(:,:),splist(:,:,:),rlist(:,:),rfrom(:),rprev(:),rnum(:),iplace(:,:),pfrom(:),pnum(:),pprev(:),a15type(:,:,:),prior(:,:),wsched(:),growfrom(:),growprev(:),grownum(:),growlist(:,:),nswatb(:,:),nsampos(:),ncut(:,:),gswatc(:,:,:),nswtcb(:),box3(:,:),box4(:,:),temtyp(:),nunit(:),nugrow(:),nmaxcbmc(:),iurot(:),maxgrow(:),isolute(:),iring(:),nrig(:),irig(:,:),frig(:,:),nrigmin(:),nrigmax(:),rindex(:),riutry(:,:),ininch(:,:),nswapb(:),box1(:,:),box2(:,:),nchoi1(:),nchoi(:),nchoir(:),nchoih(:),nchtor(:),nchbna(:),nchbnb(:),icbdir(:),icbsta(:),rmexpc(:),eetype(:),ncmt(:,:),ncmt2(:,:,:),parall(:,:),parbox(:,:,:),solcount(:,:),nwell(:),moltyp(:),nboxi(:),neighbor(:,:),neigh_cnt(:),neighboro(:,:),neigh_o(:),ghost_particles(:),numberDimensionIsIsotropic(:),inix(:),iniy(:),iniz(:),inirot(:),inimix(:),nchoiq(:),box5(:),box6(:),nchbox(:)
-  logical,allocatable::lovr(:),lexist(:),lexclu(:,:,:,:),lrigi(:,:),liswinc(:,:),lchiral(:,:),linclu(:,:,:),lqinclu(:,:,:),lainclu(:,:,:),wschvib(:,:),wschben(:,:),wschtor(:,:),lelect(:),lflucq(:),lqtrans(:),lexpand(:),lavbmc1(:),lavbmc2(:),lavbmc3(:),lbias(:),lring(:),lrigid(:),lrig(:),lq14scale(:),lbranch(:),lrplc(:),lplace(:,:),lwell(:),lideal(:),ltwice(:)
+  integer,allocatable::ucheck(:),ntype(:,:),leaderq(:,:),invib(:,:)&
+   ,itvib(:,:,:),ijvib(:,:,:),inben(:,:),itben(:,:,:),ijben2(:,:,:)&
+   ,ijben3(:,:,:),intor(:,:),ittor(:,:,:),ijtor2(:,:,:),ijtor3(:,:,:)&
+   ,ijtor4(:,:,:),nrotbd(:),irotbd(:,:),splist(:,:,:),rlist(:,:)&
+   ,rfrom(:),rprev(:),rnum(:),iplace(:,:),pfrom(:),pnum(:),pprev(:)&
+   ,a15type(:,:,:),prior(:,:),wsched(:),growfrom(:),growprev(:)&
+   ,grownum(:),growlist(:,:),nswatb(:,:),nsampos(:),ncut(:,:)&
+   ,gswatc(:,:,:),nswtcb(:),box3(:,:),box4(:,:),temtyp(:),nunit(:)&
+   ,nugrow(:),nmaxcbmc(:),iurot(:),maxgrow(:),isolute(:),iring(:)&
+   ,nrig(:),irig(:,:),frig(:,:),nrigmin(:),nrigmax(:),rindex(:)&
+   ,riutry(:,:),ininch(:,:),nswapb(:),box1(:,:),box2(:,:),nchoi1(:)&
+   ,nchoi(:),nchoir(:),nchoih(:),nchtor(:),nchbna(:),nchbnb(:)&
+   ,icbdir(:),icbsta(:),rmexpc(:),eetype(:),ncmt(:,:),ncmt2(:,:,:)&
+   ,parall(:,:),parbox(:,:,:),solcount(:,:),nwell(:),moltyp(:)&
+   ,nboxi(:),neighbor(:,:),neigh_cnt(:),neighboro(:,:),neigh_o(:)&
+   ,ghost_particles(:),numberDimensionIsIsotropic(:),inix(:),iniy(:)&
+   ,iniz(:),inirot(:),inimix(:),nchoiq(:),box5(:),box6(:),nchbox(:)
+  logical,allocatable::lovr(:),lexist(:),lexclu(:,:,:,:),lrigi(:,:)&
+   ,liswinc(:,:),lchiral(:,:),linclu(:,:,:),lqinclu(:,:,:)&
+   ,lainclu(:,:,:),wschvib(:,:),wschben(:,:),wschtor(:,:),lelect(:)&
+   ,lflucq(:),lqtrans(:),lexpand(:),lavbmc1(:),lavbmc2(:),lavbmc3(:)&
+   ,lbias(:),lring(:),lrigid(:),lrig(:),lq14scale(:),lbranch(:)&
+   ,lrplc(:),lplace(:,:),lwell(:),lideal(:),ltwice(:)
 
   logical::ldebug=.true.
 
@@ -433,7 +476,13 @@ CONTAINS
 
   subroutine allocate_cell()
     integer::jerr
-    allocate(boxlx(nbxmax),boxly(nbxmax),boxlz(nbxmax),rcut(nbxmax),rcutnn(nbxmax),kalp(nbxmax),lsolid(nbxmax),lrect(nbxmax),express(nbxmax),Elect_field(nbxmax),ghost_particles(nbxmax),numberDimensionIsIsotropic(nbxmax),inix(nbxmax),iniy(nbxmax),iniz(nbxmax),inirot(nbxmax),inimix(nbxmax),nchoiq(nbxmax),box5(nbxmax),box6(nbxmax),zshift(nbxmax),dshift(nbxmax),rmvol(nbxmax),pmvlmt(nbxmax),pmvolb(nbxmax),lideal(nbxmax),ltwice(nbxmax),rmhmat(nbxmax,9),dipolex(nbxmax),dipoley(nbxmax),dipolez(nbxmax),nchbox(nbxmax),vbox(nbxmax),wbox(nbxmax),vinterb(nbxmax),vtailb(nbxmax),vintrab(nbxmax),vvibb(nbxmax),vbendb(nbxmax),vtgb(nbxmax),vextb(nbxmax),velectb(nbxmax),vflucqb(nbxmax),v3garob(nbxmax),vipswb(nbxmax),vwellipswb(nbxmax),stat=jerr)
+    allocate(boxlx(nbxmax),boxly(nbxmax),boxlz(nbxmax),rcut(nbxmax),rcutnn(nbxmax),kalp(nbxmax),lsolid(nbxmax),lrect(nbxmax)&
+     ,express(nbxmax),Elect_field(nbxmax),ghost_particles(nbxmax),numberDimensionIsIsotropic(nbxmax),inix(nbxmax),iniy(nbxmax)&
+     ,iniz(nbxmax),inirot(nbxmax),inimix(nbxmax),nchoiq(nbxmax),box5(nbxmax),box6(nbxmax),zshift(nbxmax),dshift(nbxmax)&
+     ,rmvol(nbxmax),pmvlmt(nbxmax),pmvolb(nbxmax),lideal(nbxmax),ltwice(nbxmax),rmhmat(nbxmax,9),dipolex(nbxmax),dipoley(nbxmax)&
+     ,dipolez(nbxmax),nchbox(nbxmax),vbox(nbxmax),wbox(nbxmax),vinterb(nbxmax),vtailb(nbxmax),vintrab(nbxmax),vvibb(nbxmax)&
+     ,vbendb(nbxmax),vtgb(nbxmax),vextb(nbxmax),velectb(nbxmax),vflucqb(nbxmax),v3garob(nbxmax),vipswb(nbxmax)&
+     ,vwellipswb(nbxmax),stat=jerr)
     if (jerr.ne.0) then
        call err_exit(__FILE__,__LINE__,'allocate_system: allocation failed',jerr)
     end if
@@ -442,7 +491,32 @@ CONTAINS
   subroutine allocate_system()
     integer,parameter::initial_size=15
     integer::jerr
-    allocate(ucheck(ntmax),nrotbd(ntmax),xcm(nmax),ycm(nmax),zcm(nmax),pmsatc(npamax),pmswtcb(npamax,npabmax),nswatb(npamax,2),nsampos(npamax),ncut(npamax,2),gswatc(npamax,2,2*npamax),nswtcb(npamax),box3(npamax,npabmax),box4(npamax,npabmax),pmisatc(npamax),temtyp(ntmax),B(ntmax),nunit(ntmax),nugrow(ntmax),nmaxcbmc(ntmax),iurot(ntmax),maxgrow(ntmax),isolute(ntmax),iring(ntmax),nrig(ntmax),irig(ntmax,6),frig(ntmax,6),nrigmin(ntmax),nrigmax(ntmax),rindex(ntmax),riutry(ntmax,3),lelect(ntmax),lflucq(ntmax),lqtrans(ntmax),lexpand(ntmax),lavbmc1(ntmax),lavbmc2(ntmax),lavbmc3(ntmax),lbias(ntmax),lring(ntmax),lrigid(ntmax),lrig(ntmax),lq14scale(ntmax),fqegp(ntmax),eta2(nbxmax,ntmax),qscale(ntmax),pmbias(ntmax),pmbsmt(ntmax),pmbias2(ntmax),rmtrax(ntmax,nbxmax),rmtray(ntmax,nbxmax),rmtraz(ntmax,nbxmax),rmrotx(ntmax,nbxmax),rmroty(ntmax,nbxmax),rmrotz(ntmax,nbxmax),lbranch(ntmax),ininch(ntmax,nbxmax),rmflcq(ntmax,nbxmax),pmswmt(ntmax),pmswapb(ntmax,npabmax),pmcbmt(ntmax),pmall(ntmax),pmfix(ntmax),pmfqmt(ntmax),pmeemt(ntmax),pmtrmt(ntmax),pmromt(ntmax),nswapb(ntmax),box1(ntmax,npabmax),box2(ntmax,npabmax),nchoi1(ntmax),nchoi(ntmax),nchoir(ntmax),nchoih(ntmax),nchtor(ntmax),nchbna(ntmax),nchbnb(ntmax),icbdir(ntmax),icbsta(ntmax),lrplc(ntmax),masst(ntmax),rmexpc(ntmax),eetype(ntmax),ncmt(nbxmax,ntmax),ncmt2(nbxmax,ntmax,20),parall(ntmax,nmax),parbox(nmax,nbxmax,ntmax),solcount(nbxmax,ntmax),avsolinter(nbxmax,ntmax),avsolintra(nbxmax,ntmax),avsolbend(nbxmax,ntmax),avsoltor(nbxmax,ntmax),avsolelc(nbxmax,ntmax),bnflcq(ntmax,nbxmax),bsflcq(ntmax,nbxmax),bnflcq2(ntmax,nbxmax),bsflcq2(ntmax,nbxmax),rxwell(nw,ntmax),rywell(nw,ntmax),rzwell(nw,ntmax),sxwell(nw,ntmax),sywell(nw,ntmax),szwell(nw,ntmax),nwell(ntmax),lwell(ntmax),naccu(nprop,nbxmax),nccold(nprop,nbxmax),accum(nprop,nbxmax),bccold(nprop,nbxmax),aver(nprop,nbxmax),baver(nprop,nbxmax,blockm),naccu1(nprop1,nbxmax,nbxmax),nccold1(nprop1,nbxmax,nbxmax),aver1(nprop1,nbxmax,nbxmax),accum1(nprop1,nbxmax,nbxmax),bccold1(nprop1,nbxmax,nbxmax),baver1(nprop1,nbxmax,nbxmax,blockm),moltyp(nmax),rcmu(nmax),exp_c(nmax),sxcm(nmax),sycm(nmax),szcm(nmax),nboxi(nmax),neighbor(maxneigh,nmax),neigh_cnt(nmax),neighboro(maxneigh,nmax),neigh_o(nmax),ndij(maxneigh,nmax),nxij(maxneigh,nmax),nyij(maxneigh,nmax),nxijo(maxneigh,nmax),nzij(maxneigh,nmax),ndijo(maxneigh,nmax),nyijo(maxneigh,nmax),nzijo(maxneigh,nmax),favor(nmax),favor2(nmax),ntype(ntmax,initial_size),leaderq(ntmax,initial_size),lplace(ntmax,initial_size),lrigi(ntmax,initial_size),invib(ntmax,initial_size),itvib(ntmax,initial_size,6),ijvib(ntmax,initial_size,6),inben(ntmax,initial_size),itben(ntmax,initial_size,12),ijben2(ntmax,initial_size,12),ijben3(ntmax,initial_size,12),intor(ntmax,initial_size),ittor(ntmax,initial_size,12),ijtor2(ntmax,initial_size,12),ijtor3(ntmax,initial_size,12),ijtor4(ntmax,initial_size,12),irotbd(initial_size,ntmax),pmrotbd(initial_size,ntmax),stat=jerr)
+    allocate(ucheck(ntmax),nrotbd(ntmax),xcm(nmax),ycm(nmax),zcm(nmax),pmsatc(npamax),pmswtcb(npamax,npabmax),nswatb(npamax,2)&
+     ,nsampos(npamax),ncut(npamax,2),gswatc(npamax,2,2*npamax),nswtcb(npamax),box3(npamax,npabmax),box4(npamax,npabmax)&
+     ,pmisatc(npamax),temtyp(ntmax),B(ntmax),nunit(ntmax),nugrow(ntmax),nmaxcbmc(ntmax),iurot(ntmax)&
+     ,maxgrow(ntmax),isolute(ntmax),iring(ntmax),nrig(ntmax),irig(ntmax,6),frig(ntmax,6),nrigmin(ntmax),nrigmax(ntmax)&
+     ,rindex(ntmax),riutry(ntmax,3),lelect(ntmax),lflucq(ntmax),lqtrans(ntmax),lexpand(ntmax),lavbmc1(ntmax),lavbmc2(ntmax)&
+     ,lavbmc3(ntmax),lbias(ntmax),lring(ntmax),lrigid(ntmax),lrig(ntmax),lq14scale(ntmax),fqegp(ntmax),eta2(nbxmax,ntmax)&
+     ,qscale(ntmax),pmbias(ntmax),pmbsmt(ntmax),pmbias2(ntmax),rmtrax(ntmax,nbxmax),rmtray(ntmax,nbxmax),rmtraz(ntmax,nbxmax)&
+     ,rmrotx(ntmax,nbxmax),rmroty(ntmax,nbxmax),rmrotz(ntmax,nbxmax),lbranch(ntmax),ininch(ntmax,nbxmax),rmflcq(ntmax,nbxmax)&
+     ,pmswmt(ntmax),pmswapb(ntmax,npabmax),pmcbmt(ntmax),pmall(ntmax),pmfix(ntmax),pmfqmt(ntmax),pmeemt(ntmax),pmtrmt(ntmax)&
+     ,pmromt(ntmax),nswapb(ntmax),box1(ntmax,npabmax),box2(ntmax,npabmax),nchoi1(ntmax),nchoi(ntmax),nchoir(ntmax)&
+     ,nchoih(ntmax),nchtor(ntmax),nchbna(ntmax),nchbnb(ntmax),icbdir(ntmax),icbsta(ntmax),lrplc(ntmax),masst(ntmax)&
+     ,rmexpc(ntmax),eetype(ntmax),ncmt(nbxmax,ntmax),ncmt2(nbxmax,ntmax,20),parall(ntmax,nmax)&
+     ,parbox(nmax,nbxmax,ntmax),solcount(nbxmax,ntmax),avsolinter(nbxmax,ntmax),avsolintra(nbxmax,ntmax)&
+     ,avsolbend(nbxmax,ntmax),avsoltor(nbxmax,ntmax),avsolelc(nbxmax,ntmax),bnflcq(ntmax,nbxmax),bsflcq(ntmax,nbxmax)&
+     ,bnflcq2(ntmax,nbxmax),bsflcq2(ntmax,nbxmax),rxwell(nw,ntmax),rywell(nw,ntmax),rzwell(nw,ntmax),sxwell(nw,ntmax)&
+     ,sywell(nw,ntmax),szwell(nw,ntmax),nwell(ntmax),lwell(ntmax),naccu(nprop,nbxmax),nccold(nprop,nbxmax),accum(nprop,nbxmax)&
+     ,bccold(nprop,nbxmax),aver(nprop,nbxmax),baver(nprop,nbxmax,blockm),naccu1(nprop1,nbxmax,nbxmax)&
+     ,nccold1(nprop1,nbxmax,nbxmax),aver1(nprop1,nbxmax,nbxmax),accum1(nprop1,nbxmax,nbxmax),bccold1(nprop1,nbxmax,nbxmax)&
+     ,baver1(nprop1,nbxmax,nbxmax,blockm),moltyp(nmax),rcmu(nmax),exp_c(nmax),sxcm(nmax),sycm(nmax),szcm(nmax),nboxi(nmax)&
+     ,neighbor(maxneigh,nmax),neigh_cnt(nmax),neighboro(maxneigh,nmax),neigh_o(nmax),ndij(maxneigh,nmax),nxij(maxneigh,nmax)&
+     ,nyij(maxneigh,nmax),nxijo(maxneigh,nmax),nzij(maxneigh,nmax),ndijo(maxneigh,nmax),nyijo(maxneigh,nmax),nzijo(maxneigh,nmax)&
+     ,favor(nmax),favor2(nmax),ntype(ntmax,initial_size),leaderq(ntmax,initial_size),lplace(ntmax,initial_size)&
+     ,lrigi(ntmax,initial_size),invib(ntmax,initial_size),itvib(ntmax,initial_size,6),ijvib(ntmax,initial_size,6)&
+     ,inben(ntmax,initial_size),itben(ntmax,initial_size,12),ijben2(ntmax,initial_size,12),ijben3(ntmax,initial_size,12)&
+     ,intor(ntmax,initial_size),ittor(ntmax,initial_size,12),ijtor2(ntmax,initial_size,12),ijtor3(ntmax,initial_size,12)&
+     ,ijtor4(ntmax,initial_size,12),irotbd(initial_size,ntmax),pmrotbd(initial_size,ntmax),stat=jerr)
     if (jerr.ne.0) then
        call err_exit(__FILE__,__LINE__,'allocate_system: allocation failed',jerr)
     end if
@@ -450,7 +524,14 @@ CONTAINS
 
   subroutine allocate_molecule()
     integer::jerr
-    allocate(splist(npamax,numax,2),lexist(numax),lexclu(ntmax,numax,ntmax,numax),rlist(numax,numax),rfrom(numax),rprev(numax),rnum(numax),liswinc(numax,ntmax),iplace(numax,numax),pfrom(numax),pnum(numax),pprev(numax),a15type(ntmax,numax,numax),epsilon_f(2,numax),sigma_f(2,numax),ljscale(ntmax,numax,numax),qscale2(ntmax,numax,numax),ee_qqu(numax,smax),rxnew(numax),rynew(numax),rznew(numax),prior(ntmax,numax),rxu(nmax,numax),ryu(nmax,numax),rzu(nmax,numax),qqu(nmax,numax),lchiral(ntmax,numax),rxuion(numax,2),ryuion(numax,2),rzuion(numax,2),qquion(numax,2),linclu(ntmax,numax,numax),lqinclu(ntmax,numax,numax),lainclu(ntmax,numax,numax),wschvib(numax,6),wschben(numax,12),wschtor(numax,12),wsched(numax),xvec(numax,numax),yvec(numax,numax),zvec(numax,numax),growfrom(numax),growprev(numax),grownum(numax),growlist(numax,numax),awell(numax,numax,ntmax),stat=jerr)
+    allocate(splist(npamax,numax,2),lexist(numax),lexclu(ntmax,numax,ntmax,numax),rlist(numax,numax),rfrom(numax)&
+     ,rprev(numax),rnum(numax),liswinc(numax,ntmax),iplace(numax,numax),pfrom(numax),pnum(numax),pprev(numax)&
+     ,a15type(ntmax,numax,numax),epsilon_f(2,numax),sigma_f(2,numax),ljscale(ntmax,numax,numax),qscale2(ntmax,numax,numax)&
+     ,ee_qqu(numax,smax),rxnew(numax),rynew(numax),rznew(numax),prior(ntmax,numax),rxu(nmax,numax),ryu(nmax,numax)&
+     ,rzu(nmax,numax),qqu(nmax,numax),lchiral(ntmax,numax),rxuion(numax,2),ryuion(numax,2),rzuion(numax,2),qquion(numax,2)&
+     ,linclu(ntmax,numax,numax),lqinclu(ntmax,numax,numax),lainclu(ntmax,numax,numax),wschvib(numax,6),wschben(numax,12)&
+     ,wschtor(numax,12),wsched(numax),xvec(numax,numax),yvec(numax,numax),zvec(numax,numax),growfrom(numax)&
+     ,growprev(numax),grownum(numax),growlist(numax,numax),awell(numax,numax,ntmax),stat=jerr)
     if (jerr.ne.0) then
        call err_exit(__FILE__,__LINE__,'allocate_molecule: allocation failed',jerr)
     end if

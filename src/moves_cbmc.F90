@@ -547,7 +547,10 @@ contains
 !> wadd: rosenbluth weight for growth
 !> lfixnow: SAFE-CBMC
 !> cwtorf: rosenbluth weight of the crank-shaft move for the last torsion
-!> movetype: 1 = config moves; 2 = swap/swatch moves for flexible molecule or swatch moves for rigid molecules that need rigrot (number of same-position atoms smaller than 2, i.e., less than sufficient to determine orientation); 3 = swatch moves for rigid molecules that do not need rigrot but do need regrowth; 4 = swatch moves for completely rigid molecule that regrow nothing
+!> movetype: 1 = config moves;
+!>           2 = swap/swatch moves for flexible molecule or swatch moves for rigid molecules that need rigrot (number of same-position atoms smaller than 2, i.e., less than sufficient to determine orientation);
+!>           3 = swatch moves for rigid molecules that do not need rigrot but do need regrowth;
+!>           4 = swatch moves for completely rigid molecule that regrow nothing
   subroutine rosenbluth(lnew,lterm,i,icharge,imolty,ifrom,ibox,igrow,wadd,lfixnow,cwtorf,movetype)
     use util_random,only:sphere
     use util_mp,only:mp_set_displs,mp_allgather
@@ -566,11 +569,11 @@ contains
     real::vdha,x,y,z,maxlen,vtorf,rbf,bsum,bs
     real::vbbtr,vvibtr,wei_vib,wbendv,dist
     real::bondlen(numax),bendang(numax),phi(numax),phidisp
-    real::cwtorf,vphi,vfbbtr(nchtor_max),vfbbtr_acc(nchmax)
+    real::cwtorf,vphi
 
     ! new stuff
     integer::itor,bin,counta,movetype,ku
-    real::bf_tor(nchtor_max),vtorsion(nchtor_max),phitors(nchtor_max),ran_tor,wei_bend,jacobian,ctorf(nchtor_max),ctorf_acc(nchmax)
+    real::bf_tor(nchtor_max),vtorsion(nchtor_max),phitors(nchtor_max),ctorf(nchtor_max),vfbbtr(nchtor_max),ctorf_acc(nchmax),vfbbtr_acc(nchmax),ran_tor,wei_bend,jacobian
 
     ! MPI
     integer::rcounts(numprocs),displs(numprocs),my_start,my_end,blocksize,my_itrial,rid
@@ -674,6 +677,23 @@ contains
        end do
     end do
 
+   ichoi = nchoi(imolty)
+   ichtor = nchtor(imolty)
+
+   ! MPI
+   if (numprocs.gt.1) then
+      rid=myid
+   else
+      rid=-1
+   end if
+   blocksize = ichoi/numprocs
+   rcounts = blocksize
+   blocksize = ichoi - blocksize * numprocs
+   if (blocksize.gt.0) rcounts(1:blocksize) = rcounts(1:blocksize) + 1
+   call mp_set_displs(rcounts,displs,blocksize,numprocs)
+   my_start = displs(myid+1) + 1
+   my_end = my_start + rcounts(myid+1) - 1
+
 ! *************************
 ! loop over trial units *
 ! *************************
@@ -719,12 +739,6 @@ contains
        ! perform the biased selection of bond angles and get lengths
        call geometry(lnew,iw,i,imolty,angstart,iuprev,glist,bondlen,bendang,phi,vvibtr,vbbtr,maxlen,wei_bend)
 
-       ! if (ldebug) then
-       !    write(100+myid,*) 'rosen after geom for molecule ',i,' bead ',growlist(iw,1:ntogrow),' from myid ',myid
-       !    write(100+myid,*) "bondlen: ",bondlen,"; bendang ",bendang, "; phi: ",phi,"; vbbtr: ",vbbtr
-       ! end if
-       ! write(io_output,*) 'lnew, wei_bend',lnew,wei_bend
-
        ! for lfixnow check if there are two beads to go
        if (lfixnow) then
           fix_count:do count = 1, ntogrow
@@ -742,27 +756,9 @@ contains
           end do fix_count
        end if
 
-! we now have the bond lengths and angles for the grown beads
-! select nchoi trial positions based only on torsions
-       ichoi = nchoi(imolty)
-       ichtor = nchtor(imolty)
-
-       ! MPI
-       if (numprocs.gt.1) then
-          rid=myid
-       else
-          rid=-1
-       end if
-       blocksize = ichoi/numprocs
-       rcounts = blocksize
-       blocksize = ichoi - blocksize * numprocs
-       if (blocksize.gt.0) rcounts(1:blocksize) = rcounts(1:blocksize) + 1
-       call mp_set_displs(rcounts,displs,blocksize,numprocs)
-       my_start = displs(myid+1) + 1
-       my_end = my_start + rcounts(myid+1) - 1
-
+       ! we now have the bond lengths and angles for the grown beads
+       ! select nchoi trial positions based only on torsions
        my_itrial = 0
-       !do ip = 1,ichoi
        do ip=my_start,my_end
           my_itrial = my_itrial + 1
           lreturn = .false.
@@ -873,14 +869,14 @@ contains
                 end do
 300             continue
 
-! compute boltzmann factor and add it to bsum_tor
+                ! compute boltzmann factor and add it to bsum_tor
                 bf_tor(itor) = exp ( -vdha * beta )
 
-! store vtorsion and phidisp for this trial
+                ! store vtorsion and phidisp for this trial
                 vtorsion(itor) = vdha
                 phitors(itor) = phidisp
 
-! for safecbmc add extra weight to assure closure
+                ! for safecbmc add extra weight to assure closure
                 if (lfixnow) then
                    ctorf(itor) = 1.0E0_dp
                    vfbbtr(itor) = 0.0E0_dp
@@ -903,7 +899,7 @@ contains
                       if (movetype.eq.2.and.lnew) then
                          if (lwbef) then
 
-! determine special closing energies
+                            ! determine special closing energies
                             call safecbmc(2,lnew,i,iw,igrow,imolty,count,x,y,z,vphi,vtorf,wbendv,lterm,movetype)
 
                             bf_tor(itor) = bf_tor(itor) * vtorf * exp( - beta * vphi )
@@ -935,7 +931,7 @@ contains
                          end if
                       else
                          if (lwbef) then
-! determine special closing energies
+                            ! determine special closing energies
                             call safecbmc(2,lnew,i,iw,igrow,imolty,count,x,y,z,vphi,vtorf ,wbendv,lterm,movetype)
 
                             bf_tor(itor) = bf_tor(itor) * vtorf  * exp( - beta * vphi )
@@ -1047,13 +1043,6 @@ contains
           end do
        end do
 
-       ! if (ldebug) then
-       !    write(100+myid,*) 'rosen for molecule ',i,' bead ',growlist(iw,1:ntogrow),' from myid ',myid
-       !    do my_itrial=1,rcounts(myid+1)
-       !       write(100+myid,*) "my_vtgtr(",my_itrial,") = ",my_vtgtr(my_itrial), "my_rxp(",my_itrial,") = ",my_rxp(:,my_itrial)
-       !    end do
-       ! end if
-
        call mp_allgather(my_bsum_tor,bsum_tor,rcounts,displs,groupid)
        call mp_allgather(my_vtgtr,vtgtr,rcounts,displs,groupid)
        call mp_allgather(my_ctorf_acc,ctorf_acc,rcounts,displs,groupid)
@@ -1061,13 +1050,6 @@ contains
        call mp_allgather(my_rxp,rxp,rcounts,displs,groupid)
        call mp_allgather(my_ryp,ryp,rcounts,displs,groupid)
        call mp_allgather(my_rzp,rzp,rcounts,displs,groupid)
-
-       ! if (ldebug) then
-       !    do my_itrial=1,ichoi
-       !       write(100+myid,*)"vtgtr(",my_itrial,") = ",vtgtr(my_itrial)
-       !       write(100+myid,*)"rxp(",my_itrial,") = ",rxp(:,my_itrial)
-       !    end do
-       ! end if
 
 250    continue
 
@@ -1849,7 +1831,7 @@ contains
 !*********************************************************************
   subroutine geometry(lnew,iw,i,imolty,angstart,iuprev,glist,bondlen,bendang,phi,vvibtr,vbbtr,maxlen,wei_bend)
     use util_math,only:cone_angle
-    use util_mp,only:mp_set_displs,mp_allgather,mp_sum,mp_max
+    use util_mp,only:mp_set_displs,mp_allgather,mp_sum
 
     ! variables passed to/from the subroutine
     logical::lnew
@@ -3944,7 +3926,10 @@ contains
 
       real::x,y,z,equil,kforce,length,vvib,ux,uy,uz,hdist,lengtha,lengthb,vtor,vphi,thetac,angle,equila,kforcea,ovphi,alpha,phidisp,dum,rxt,ryt,rzt,phiacc,rxa,rya,rza,angles,bangles,r,mincb,delcb,vvibration,ovvib
 
-      dimension alpha(max,numax),equila(max),rxa(max,max),rya(max,max),rza(max,max),rxt(max),ryt(max),rzt(max),vbend(2*nchtor_max),phicrank(2*nchtor_max,max),phiacc(max),vtorsion(2*nchtor_max),bf_tor(2*nchtor_max),dir(2*nchtor_max,max),diracc(max),kforcea(max),bfactor(nchbn_max),ang_bend(nchbn_max),angles(3),bangles(max,3),iopen(2),r(nchbn_max),vvibration(2*nchtor_max)
+      dimension alpha(max,numax),equila(max),rxa(max,max),rya(max,max),rza(max,max),rxt(max),ryt(max),rzt(max)&
+       ,vbend(2*nchtor_max),phicrank(2*nchtor_max,max),phiacc(max),vtorsion(2*nchtor_max),bf_tor(2*nchtor_max)&
+       ,dir(2*nchtor_max,max),diracc(max),kforcea(max),bfactor(nchbn_max),ang_bend(nchbn_max),angles(3),bangles(max,3)&
+       ,iopen(2),r(nchbn_max),vvibration(2*nchtor_max)
 
 !     ---------------------------------------------------------------
 
@@ -6413,7 +6398,10 @@ contains
 
          avar = cos(angle(1))*(rx(2)*(rx(2)*rz(1) - rx(1)*rz(2)) + ry(2)*(ry(2)*rz(1) - ry(1)*rz(2))) + cos(angle(2))*(rx(1)*(rx(1)*rz(2) - rx(2)*rz(1)) + ry(1)*(ry(1)*rz(2) - ry(2)*rz(1)))
 
-         var = rx(2)**2*(ry(1)**2 + rz(1)**2) + ry(2)**2*(rx(1)**2 + rz(1)**2) + rz(2)**2*(rx(1)**2 + ry(1)**2) - 2.0E0_dp*(rx(1)*rx(2)*ry(1)*ry(2) + rx(1)*rx(2)*rz(1)*rz(2) + ry(1)*ry(2)*rz(1)*rz(2)) - (rx(2)**2 + ry(2)**2 + rz(2)**2)*cos(angle(1))**2 - (rx(1)**2 + ry(1)**2 + rz(1)**2)*cos(angle(2))**2 + 2.0E0_dp*(rx(1)*rx(2) + ry(1)*ry(2) + rz(1)*rz(2)) *cos(angle(1))*cos(angle(2))
+         var = rx(2)**2*(ry(1)**2 + rz(1)**2) + ry(2)**2*(rx(1)**2 + rz(1)**2) + rz(2)**2*(rx(1)**2 + ry(1)**2)&
+          - 2.0E0_dp*(rx(1)*rx(2)*ry(1)*ry(2) + rx(1)*rx(2)*rz(1)*rz(2) + ry(1)*ry(2)*rz(1)*rz(2))&
+          - (rx(2)**2 + ry(2)**2 + rz(2)**2)*cos(angle(1))**2 - (rx(1)**2 + ry(1)**2 + rz(1)**2)&
+          *cos(angle(2))**2 + 2.0E0_dp*(rx(1)*rx(2) + ry(1)*ry(2) + rz(1)*rz(2)) *cos(angle(1))*cos(angle(2))
 
          if (var.lt.0) then
             var = abs(var)
@@ -6450,16 +6438,19 @@ contains
   end subroutine close
 
   subroutine rigfix(lnew,i,ibox,imolty,lterm,wrig)
+    logical::lnew,ovrlap,lterm,lovra,lfind,lshit
+    integer::iw,i,ibox,imolty,iufrom,iuprev,ntogrow,count,iu,counta,ilist,ja,max,num,inum,j,ju,iv,nlist,ichoi,ichtor,ip,itor,it,jut2,jut3,jut4,iwalk,glist,ifrom,inuma
 
-      logical::lnew,ovrlap,lterm,lovra,lfind,lshit
+    parameter(max=10)
 
-      integer::iw,i,ibox,imolty,iufrom,iuprev,ntogrow,count,iu,counta,ilist,ja,max,num,inum,j,ju,iv,nlist,ichoi,ichtor,ip,itor,it,jut2,jut3,jut4,iwalk,glist,ifrom,inuma
+    real::xub,yub,zub,lengtha,lengthb,dum,xfix,yfix,zfix,phia,bendang,thetac,phidisp,phi,rlength,vdha,vtorsion,phitors,bf_tor&
+     ,ran_tor,bs,rxpa,rypa,rzpa,bsuma,vtrya,vtrintraa,vtrexta,vtrelecta,vtrewalda,vtrorienta,vtrintera,bsum,rbf,wrig&
+     ,vtrelecta_intra,vtrelecta_inter
 
-      parameter(max=10)
-
-      real::xub,yub,zub,lengtha,lengthb,dum,xfix ,yfix,zfix,phia,bendang,thetac,phidisp,phi,rlength,vdha,vtorsion,phitors,bf_tor,ran_tor,bs,rxpa,rypa,rzpa,bsuma,vtrya,vtrintraa,vtrexta,vtrelecta,vtrewalda,vtrorienta ,vtrintera,bsum,rbf,wrig,vtrelecta_intra,vtrelecta_inter
-
-      dimension ilist(numax),inum(max),xfix(numax),yfix(numax) ,zfix(numax),lfind(numax),phia(numax),bendang(numax) ,rlength(numax),vtorsion(nchtor_max),phitors(nchtor_max) ,bf_tor(nchtor_max),rxpa(numax,nchmax),rypa(numax,nchmax) ,rzpa(numax,nchmax),vtrelecta(nchmax),vtrewalda(nchmax) ,bsuma(nchmax),vtrya(nchmax),vtrintraa(nchmax) ,vtrorienta(nchmax),vtrexta(nchmax),glist(numax) ,lovra(nchmax) ,vtrintera(nchmax),ifrom(numax),inuma(max) ,vtrelecta_intra(nchmax),vtrelecta_inter(nchmax)
+    dimension ilist(numax),inum(max),xfix(numax),yfix(numax),zfix(numax),lfind(numax),phia(numax),bendang(numax),rlength(numax)&
+     ,vtorsion(nchtor_max),phitors(nchtor_max),bf_tor(nchtor_max),rxpa(numax,nchmax),rypa(numax,nchmax),rzpa(numax,nchmax)&
+     ,vtrelecta(nchmax),vtrewalda(nchmax),bsuma(nchmax),vtrya(nchmax),vtrintraa(nchmax),vtrorienta(nchmax),vtrexta(nchmax)&
+     ,glist(numax),lovra(nchmax),vtrintera(nchmax),ifrom(numax),inuma(max),vtrelecta_intra(nchmax),vtrelecta_inter(nchmax)
 !     ----------------------------------------------------------
 #ifdef __DEBUG__
       write(io_output,*) 'START RIGFIX in ',myid
@@ -6963,7 +6954,10 @@ contains
 
   subroutine allocate_cbmc()
     integer::jerr
-    allocate(vtry(nchmax),vtrext(nchmax),vtrintra(nchmax),vtrinter(nchmax),vtrelect(nchmax),vtrewald(nchmax),vtrorient(nchmax),vtrelect_intra(nchmax),vtrelect_inter(nchmax),bfac(nchmax),rxp(numax,nchmax),ryp(numax,nchmax),rzp(numax,nchmax),vwellipswot(nchmax),vwellipswnt(nchmax),vipswot(nchmax),vipswnt(nchmax),lovr(nchmax),vtvib(nchmax),vtgtr(nchmax),vtbend(nchmax),bsum_tor(nchmax),stat=jerr)
+    allocate(vtry(nchmax),vtrext(nchmax),vtrintra(nchmax),vtrinter(nchmax),vtrelect(nchmax),vtrewald(nchmax),vtrorient(nchmax)&
+     ,vtrelect_intra(nchmax),vtrelect_inter(nchmax),bfac(nchmax),rxp(numax,nchmax),ryp(numax,nchmax),rzp(numax,nchmax)&
+     ,vwellipswot(nchmax),vwellipswnt(nchmax),vipswot(nchmax),vipswnt(nchmax),lovr(nchmax),vtvib(nchmax),vtgtr(nchmax)&
+     ,vtbend(nchmax),bsum_tor(nchmax),stat=jerr)
     if (jerr.ne.0) then
        call err_exit(__FILE__,__LINE__,'allocate_cbmc: allocation failed',jerr)
     end if
@@ -6971,7 +6965,10 @@ contains
 
   subroutine init_cbmc()
     integer::jerr
-    allocate(lexshed(numax),llplace(ntmax),lpnow(numax),lsave(numax),bncb(ntmax,numax),bscb(ntmax,2,numax),fbncb(ntmax,numax),fbscb(ntmax,2,numax),iend(numax),ipast(numax,numax),pastnum(numax),fclose(numax,numax),fcount(numax),iwbef(numax),ibef(numax,numax),befnum(numax),xx(numax),yy(numax),zz(numax),distij(numax,numax),nextnum(numax),inext(numax,numax),kforceb(numax,numax),equilb(numax,numax),flength(numax,numax),vequil(numax,numax),vkforce(numax,numax),stat=jerr)
+    allocate(lexshed(numax),llplace(ntmax),lpnow(numax),lsave(numax),bncb(ntmax,numax),bscb(ntmax,2,numax),fbncb(ntmax,numax)&
+     ,fbscb(ntmax,2,numax),iend(numax),ipast(numax,numax),pastnum(numax),fclose(numax,numax),fcount(numax),iwbef(numax)&
+     ,ibef(numax,numax),befnum(numax),xx(numax),yy(numax),zz(numax),distij(numax,numax),nextnum(numax),inext(numax,numax)&
+     ,kforceb(numax,numax),equilb(numax,numax),flength(numax,numax),vequil(numax,numax),vkforce(numax,numax),stat=jerr)
     if (jerr.ne.0) then
        call err_exit(__FILE__,__LINE__,'init_cbmc: allocation failed',jerr)
     end if

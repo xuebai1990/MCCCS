@@ -10,10 +10,12 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
   use energy_kspace,only:recip
   implicit none
 
-      logical::laccept,lswapinter
-      integer::i,ibox,boxrem,mtype,imolty,iunit,ichoiq ,ip,ibox2,j
-      real::deltv,vintern,vintran,vextn,velectn ,vintero,vintrao,vexto,velecto,vinsta,vremta,vnewflucq,voldflucq ,vboxo(nbxmax),vinterbo(nbxmax),vintrabo(nbxmax),vextbo(nbxmax) ,velectbo(nbxmax),vflucqbo(nbxmax),vtailbo(nbxmax),vvibbo(nbxmax) ,vtgbo(nbxmax),vbendbo(nbxmax),rxuo(numax),ryuo(numax) ,rzuo(numax),xcmo,ycmo,zcmo,vdum,wratio,volins,volrem,deltvb,vnewt2,voldt2
-      real::qquo(nmax,numax)
+  logical::laccept,lswapinter
+  integer::i,ibox,boxrem,mtype,imolty,iunit,ichoiq,ip,ibox2,j
+  real::deltv,vintern,vintran,vextn,velectn,vintero,vintrao,vexto,velecto,vinsta,vremta,vnewflucq,voldflucq,vboxo(nbxmax)&
+   ,vinterbo(nbxmax),vintrabo(nbxmax),vextbo(nbxmax),velectbo(nbxmax),vflucqbo(nbxmax),vtailbo(nbxmax),vvibbo(nbxmax)&
+   ,vtgbo(nbxmax),vbendbo(nbxmax),rxuo(numax),ryuo(numax),rzuo(numax),xcmo,ycmo,zcmo,vdum,wratio,volins,volrem,deltvb,vnewt2,voldt2
+  real::qquo(nmax,numax)
 
 #ifdef __DEBUG__
       write(io_output,*) 'START the optimization of the charge configuration in ',myid

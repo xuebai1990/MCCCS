@@ -2406,7 +2406,9 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
         end if
         do i = 1,nunit(imol)
            do j = 1,inben(imol,i)
-              write(io_output,'(i5,i4,i4,i7,i7,i7,f12.2,f12.1)') i ,ijben2(imol,i,j),ijben3(imol,i,j),atoms%list(ntype(imol,i)),atoms%list(ntype(imol,ijben2(imol,i,j))),atoms%list(ntype(imol,ijben3(imol,i,j))),brben(itben(imol,i,j))*180.0E0_dp/onepi,brbenk(itben(imol,i,j))
+              write(io_output,'(i5,i4,i4,i7,i7,i7,f12.2,f12.1)') i ,ijben2(imol,i,j),ijben3(imol,i,j),atoms%list(ntype(imol,i))&
+               ,atoms%list(ntype(imol,ijben2(imol,i,j))),atoms%list(ntype(imol,ijben3(imol,i,j)))&
+               ,brben(itben(imol,i,j))*180.0E0_dp/onepi,brbenk(itben(imol,i,j))
            end do
         end do
 
@@ -2417,7 +2419,9 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 
         do i = 1,nunit(imol)
            do j = 1, intor(imol,i)
-              write(io_output,'(i5,i4,i4,i4,i8,i7,i7,i7,i14)') i,ijtor2(imol,i,j),ijtor3(imol,i,j),ijtor4(imol,i,j),atoms%list(ntype(imol,i)),atoms%list(ntype(imol,ijtor2(imol,i,j))),atoms%list(ntype(imol,ijtor3(imol,i,j))),atoms%list(ntype(imol,ijtor4(imol,i,j))),dihedrals%list(ittor(imol,i,j))
+              write(io_output,'(i5,i4,i4,i4,i8,i7,i7,i7,i14)') i,ijtor2(imol,i,j),ijtor3(imol,i,j),ijtor4(imol,i,j)&
+               ,atoms%list(ntype(imol,i)),atoms%list(ntype(imol,ijtor2(imol,i,j))),atoms%list(ntype(imol,ijtor3(imol,i,j)))&
+               ,atoms%list(ntype(imol,ijtor4(imol,i,j))),dihedrals%list(ittor(imol,i,j))
            end do
         end do
 

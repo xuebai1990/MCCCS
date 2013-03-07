@@ -22,7 +22,7 @@
     ALLOCATE(p(lb1_new:ub1_new,lb2_new:ub2_new),STAT=istat)
     IF (istat /= 0) call err_exit(__FILE__,__LINE__,'',istat)
 
-    p(:,:) = 0.
+    p(:,:) = p0
 
     IF (ALLOCATED(p).AND.ALLOCATED(work)) THEN
        p(lb1:ub1,lb2:ub2) = work(lb1:ub1,lb2:ub2)

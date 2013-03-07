@@ -5,7 +5,12 @@ module util_mp
   include 'mpif.h'
 #endif
   PRIVATE
-  PUBLIC::mp_start, mp_end, mp_rank, mp_size, mp_barrier, mp_sendrecv, mp_bcast, mp_gather, mp_allgather, mp_alltoall, mp_min, mp_max, mp_sum, mp_root_sum, mp_land, mp_lor, mp_circular_shift_left, mp_comm_group, mp_comm_split, mp_comm_create, mp_comm_free, mp_group_create, mp_group_free, mp_set_displs
+  PUBLIC::mp_start, mp_end, mp_rank, mp_size, mp_barrier, mp_sendrecv&
+   , mp_bcast, mp_gather, mp_allgather, mp_alltoall&
+   , mp_min, mp_max, mp_sum, mp_root_sum, mp_land, mp_lor&
+   , mp_circular_shift_left&
+   , mp_comm_group, mp_comm_split, mp_comm_create, mp_comm_free&
+   , mp_group_create, mp_group_free, mp_set_displs
 
   INTERFACE mp_sendrecv
      MODULE PROCEDURE mp_sendrecv_i0, mp_sendrecv_i1, mp_sendrecv_r0, mp_sendrecv_r1, mp_sendrecv_r2

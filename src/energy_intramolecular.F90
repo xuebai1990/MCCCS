@@ -246,7 +246,9 @@ contains
         else if (torsion_type(itype).eq.6) then
            ! type 6: nine-term Fourier cosine series, angle in protein convention (trans is 180 deg)
            theta=theta+onepi
-           vtorso=vtt(0,itype)-vtt(1,itype)*thetac+vtt(2,itype)*cos(2.0E0_dp*theta)+vtt(3,itype)*cos(3.0E0_dp*theta)+vtt(4,itype)*cos(4.0E0_dp*theta)+vtt(5,itype)*cos(5.0E0_dp*theta)+vtt(6,itype)*cos(6.0E0_dp*theta)+vtt(7,itype)*cos(7.0E0_dp*theta)+vtt(8,itype)*cos(8.0E0_dp*theta)+vtt(9,itype)*cos(9.0E0_dp*theta)
+           vtorso=vtt(0,itype)-vtt(1,itype)*thetac+vtt(2,itype)*cos(2.0E0_dp*theta)+vtt(3,itype)*cos(3.0E0_dp*theta)&
+            +vtt(4,itype)*cos(4.0E0_dp*theta)+vtt(5,itype)*cos(5.0E0_dp*theta)+vtt(6,itype)*cos(6.0E0_dp*theta)&
+            +vtt(7,itype)*cos(7.0E0_dp*theta)+vtt(8,itype)*cos(8.0E0_dp*theta)+vtt(9,itype)*cos(9.0E0_dp*theta)
         else
            call err_exit(__FILE__,__LINE__,'you picked a non-defined torsional type',myid+1)
         end if

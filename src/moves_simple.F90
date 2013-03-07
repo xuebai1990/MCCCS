@@ -9,7 +9,10 @@ MODULE moves_simple
   save
   public::traxyz,rotxyz,Atom_traxyz,volume,prvolume,init_moves_simple,output_translation_rotation_stats,output_volume_stats
 
-  real,allocatable,public::acntrax(:,:),acntray(:,:),acntraz(:,:),acnrotx(:,:),acnroty(:,:),acnrotz(:,:),acstrax(:,:),acstray(:,:),acstraz(:,:),acsrotx(:,:),acsroty(:,:),acsrotz(:,:),bntrax(:,:),bntray(:,:),bntraz(:,:),bstrax(:,:),bstray(:,:),bstraz(:,:),bnrotx(:,:),bnroty(:,:),bnrotz(:,:),bsrotx(:,:),bsroty(:,:),bsrotz(:,:),acsvol(:),acnvol(:),acshmat(:,:),acnhmat(:,:),bsvol(:),bnvol(:),bshmat(:,:),bnhmat(:,:)
+  real,allocatable,public::acntrax(:,:),acntray(:,:),acntraz(:,:),acnrotx(:,:),acnroty(:,:),acnrotz(:,:),acstrax(:,:)&
+   ,acstray(:,:),acstraz(:,:),acsrotx(:,:),acsroty(:,:),acsrotz(:,:),bntrax(:,:),bntray(:,:),bntraz(:,:),bstrax(:,:)&
+   ,bstray(:,:),bstraz(:,:),bnrotx(:,:),bnroty(:,:),bnrotz(:,:),bsrotx(:,:),bsroty(:,:),bsrotz(:,:),acsvol(:),acnvol(:)&
+   ,acshmat(:,:),acnhmat(:,:),bsvol(:),bnvol(:),bshmat(:,:),bnhmat(:,:)
 
 contains
 !    *******************************************************************
@@ -2016,7 +2019,12 @@ contains
 
   subroutine init_moves_simple
     integer::jerr
-    allocate(acntrax(ntmax,nbxmax),acntray(ntmax,nbxmax),acntraz(ntmax,nbxmax),acnrotx(ntmax,nbxmax),acnroty(ntmax,nbxmax),acnrotz(ntmax,nbxmax),acstrax(ntmax,nbxmax),acstray(ntmax,nbxmax),acstraz(ntmax,nbxmax),acsrotx(ntmax,nbxmax),acsroty(ntmax,nbxmax),acsrotz(ntmax,nbxmax),bntrax(ntmax,nbxmax),bntray(ntmax,nbxmax),bntraz(ntmax,nbxmax),bstrax(ntmax,nbxmax),bstray(ntmax,nbxmax),bstraz(ntmax,nbxmax),bnrotx(ntmax,nbxmax),bnroty(ntmax,nbxmax),bnrotz(ntmax,nbxmax),bsrotx(ntmax,nbxmax),bsroty(ntmax,nbxmax),bsrotz(ntmax,nbxmax),acsvol(nbxmax),acnvol(nbxmax),acshmat(nbxmax,9),acnhmat(nbxmax,9),bsvol(nbxmax),bnvol(nbxmax),bshmat(nbxmax,9),bnhmat(nbxmax,9),stat=jerr)
+    allocate(acntrax(ntmax,nbxmax),acntray(ntmax,nbxmax),acntraz(ntmax,nbxmax),acnrotx(ntmax,nbxmax),acnroty(ntmax,nbxmax)&
+     ,acnrotz(ntmax,nbxmax),acstrax(ntmax,nbxmax),acstray(ntmax,nbxmax),acstraz(ntmax,nbxmax),acsrotx(ntmax,nbxmax)&
+     ,acsroty(ntmax,nbxmax),acsrotz(ntmax,nbxmax),bntrax(ntmax,nbxmax),bntray(ntmax,nbxmax),bntraz(ntmax,nbxmax)&
+     ,bstrax(ntmax,nbxmax),bstray(ntmax,nbxmax),bstraz(ntmax,nbxmax),bnrotx(ntmax,nbxmax),bnroty(ntmax,nbxmax)&
+     ,bnrotz(ntmax,nbxmax),bsrotx(ntmax,nbxmax),bsroty(ntmax,nbxmax),bsrotz(ntmax,nbxmax),acsvol(nbxmax),acnvol(nbxmax)&
+     ,acshmat(nbxmax,9),acnhmat(nbxmax,9),bsvol(nbxmax),bnvol(nbxmax),bshmat(nbxmax,9),bnhmat(nbxmax,9),stat=jerr)
     if (jerr.ne.0) then
        call err_exit(__FILE__,__LINE__,'init_moves_simple: allocation failed',jerr)
     end if
@@ -2061,7 +2069,9 @@ contains
     integer,intent(in)::io_output
     integer::ibox,i
     real::ratvol
-    character(LEN=default_path_length)::fmt(3)=(/"(' x-dir: attempts =',F10.1,'   ratio =',f6.3, '   max.displ. =',e11.4)","(' y-dir: attempts =',F10.1,'   ratio =',f6.3, '   max.displ. =',e11.4)","(' z-dir: attempts =',F10.1,'   ratio =',f6.3, '   max.displ. =',e11.4)"/)
+    character(LEN=default_path_length)::fmt(3)=(/"(' x-dir: attempts =',F10.1,'   ratio =',f6.3, '   max.displ. =',e11.4)"&
+     ,"(' y-dir: attempts =',F10.1,'   ratio =',f6.3, '   max.displ. =',e11.4)"&
+     ,"(' z-dir: attempts =',F10.1,'   ratio =',f6.3, '   max.displ. =',e11.4)"/)
 
     write(io_output,*)
     write(io_output,*) '### Translations ###'

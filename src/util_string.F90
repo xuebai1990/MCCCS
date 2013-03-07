@@ -2,7 +2,7 @@ module util_string
   use var_type,only:default_string_length
   implicit none
   private
-  public::splitAndGetNext,integer_to_string,real_to_string,uppercase,lowercase,is_whitespace,str_trim,str_comp,str_search,remove_word,str_compress,typo_match,glob_match,is_blank_line
+  public::splitAndGetNext,integer_to_string,real_to_string,uppercase,lowercase,is_whitespace,str_trim,str_comp,str_search,remove_word,str_compress,typo_match,glob_match,is_blank_line,format_n
   CHARACTER,PARAMETER::whitespace*3=" "//CHAR(9)//CHAR(11),commentChar(3)=(/"#","!","%"/),backslash='\\',star='*',question='?'
 contains
 
@@ -30,7 +30,7 @@ contains
     INTEGER,INTENT(IN)::number
     CHARACTER(LEN=default_string_length)::string
 
-    WRITE(UNIT=string,FMT='(I10)') number
+    WRITE(UNIT=string,FMT='(I0)') number
   END FUNCTION  integer_to_string
 
 ! *****************************************************************************
@@ -434,6 +434,13 @@ contains
         end if
     end if
     RETURN
-END FUNCTION glob_match
+  END FUNCTION glob_match
 
+  function format_n(n,fmtstr) result(fmtstr_n)
+    integer,intent(in)::n
+    character(len=*),intent(in)::fmtstr
+    character(len=(len_trim(fmtstr)+10))::fmtstr_n
+
+    write(fmtstr_n,FMT='(I0,A)') n,trim(fmtstr)
+  end function format_n
 end module util_string

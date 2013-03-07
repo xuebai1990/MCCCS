@@ -481,7 +481,9 @@ contains
                 sigma2 = sig2ij(ntij)
                 epsilon2 = epsij(ntij)
              end if
-             corp = corp + (2.0E0_dp/3.0E0_dp) * onepi * epsilon2 * sigma2 ** (1.50E0_dp) * n1 * ( (( (2.0E0_dp**((4.0E0_dp*n1/n0)+1.0E0_dp))/(2.0E0_dp*n1-3.0E0_dp)) * rci1 **(2.0E0_dp*n1-3.0E0_dp) ) - ( ((2.0E0_dp**((2.0E0_dp*n1/n0)+1.0E0_dp))/(n1-3.0E0_dp))* rci1 **(n1-3.0E0_dp) )  )
+             corp = corp + (2.0E0_dp/3.0E0_dp) * onepi * epsilon2 * sigma2 ** (1.50E0_dp) * n1&
+              * ( (( (2.0E0_dp**((4.0E0_dp*n1/n0)+1.0E0_dp))/(2.0E0_dp*n1-3.0E0_dp)) * rci1 **(2.0E0_dp*n1-3.0E0_dp) )&
+              - ( ((2.0E0_dp**((2.0E0_dp*n1/n0)+1.0E0_dp))/(n1-3.0E0_dp))* rci1 **(n1-3.0E0_dp) )  )
           else if (.not.(lexpsix.or.lmmff.or.lninesix.or.lgenlj)) then
              if ( lexpand(imolty) .and. lexpand(jmolty) ) then
                 sigma2 = (sigma_f(imolty,ii)+sigma_f(jmolty,jj))**2/4.0E0_dp

@@ -8,11 +8,11 @@ project(MCCCS Fortran)
 # make sure that the default is a RELEASE
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE RELEASE CACHE STRING "Choose the type of build, options are: None DEBUG RELEASE." FORCE)
-endif()
 
-# default installation
-get_filename_component(default_prefix "." ABSOLUTE)
-set(CMAKE_INSTALL_PREFIX "${default_prefix}" CACHE STRING "Choose the installation directory; by default it installs in the current directory.")
+  # default installation
+  get_filename_component(default_prefix "." ABSOLUTE)
+  set(CMAKE_INSTALL_PREFIX "${default_prefix}" CACHE STRING "Choose the installation directory; by default it installs in the current directory." FORCE)
+endif()
 
 ########################################################################
 # Check and warn if cache generated on a different host is being reused
@@ -46,59 +46,129 @@ if(UNIX AND NOT APPLE)
     endif()
 endif()
 
-# FFLAGS depend on the compiler; or use CMAKE_Fortran_COMPILER_ID
-get_filename_component(TMP_Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
-
-if(NOT "${Fortran_COMPILER_NAME}" STREQUAL "${TMP_Fortran_COMPILER_NAME}")
-  set(Fortran_COMPILER_NAME "${TMP_Fortran_COMPILER_NAME}" CACHE INTERNAL "Compiler name when the cache was generated." FORCE)
-
-  if(Fortran_COMPILER_NAME STREQUAL "gfortran")
-    # GNU Compiler
-    set(CMAKE_Fortran_FLAGS_RELEASE "-ffree-form -ffree-line-length-none -cpp -O3 -fomit-frame-pointer -finline-functions -ffast-math")
-    set(CMAKE_Fortran_FLAGS_DEBUG   "-ffree-form -ffree-line-length-none -cpp -O0 -ftrace=full -pg -fbounds-check -mcpu=i686 -march=i686")
-  elseif(Fortran_COMPILER_NAME STREQUAL "g77")
-    # GNU Compiler
-    # set(CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O3 -m32")
-    # set(CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g -m32")
-    set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -fomit-frame-pointer -finline-functions -ffast-math")
-    set(CMAKE_Fortran_FLAGS_DEBUG   "-ftrace=full -pg -fbounds-check -mcpu=i686 -march=i686")
-  elseif(Fortran_COMPILER_NAME STREQUAL "g95")
-    # g95
-    set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -fomit-frame-pointer -finline-functions -ffast-math")
-    set(CMAKE_Fortran_FLAGS_DEBUG   "-ftrace=full -pg -fbounds-check -mcpu=i686 -march=i686")
-  elseif(Fortran_COMPILER_NAME STREQUAL "ifort")
-    # Intel Compiler for x86 architecture
-    set(CMAKE_Fortran_FLAGS_RELEASE "-free -fpp -O3 -xHost -ipo -no-prec-div")# -opt-streaming-stores always -no-unroll-aggressive -scalar-rep -Zp16 -nolib-inline")
-    set(CMAKE_Fortran_FLAGS_DEBUG   "-free -fpp -O0 -g -traceback -check all -warn unused -warn declarations -warn truncated_source -warn uncalled -warn ignore_loc -D__DEBUG__")
-    # SGI Altix: Intel Compiler for ia64 architecture
-    #set(CMAKE_Fortran_FLAGS_RELEASE "-O2 -tpp2 -w90 -w95 -cm -f77rtl")
-    #set(CMAKE_Fortran_FLAGS_DEBUG   "-check all -traceback -w90 -w95 -cm -CB -CU -p -g")
-  elseif(Fortran_COMPILER_NAME STREQUAL "f95")
-    # NAG Compiler for OSX
-    set(CMAKE_Fortran_FLAGS_RELEASE "-O2n")
-    set(CMAKE_Fortran_FLAGS_DEBUG   "-O0 -gline -f77 -mismatch_all -C=all -C=undefined -na")
-  elseif(Fortran_COMPILER_NAME STREQUAL "pgf95")
-    # Portland Compiler for x86 architecture
-    set(CMAKE_Fortran_FLAGS_RELEASE "-O2 -tp k8-64 -Mvect=sse")
-    set(CMAKE_Fortran_FLAGS_DEBUG   "-tp k8-64 -Mbounds -g -Mchkptr -check_bounds")
-  elseif(Fortran_COMPILER_NAME STREQUAL "f77")
-    # SGI Compiler for Origin
-    set(CMAKE_Fortran_FLAGS_RELEASE "-O2")
-    set(CMAKE_Fortran_FLAGS_DEBUG   "-march=opteron -mips4 -r12000 -check_bounds -g")
-  elseif(Fortran_COMPILER_NAME STREQUAL "xlf")
-    # IBM AIX Compiler for SP
-    set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -qstrict -bmaxdata:2000000000")
-    set(CMAKE_Fortran_FLAGS_DEBUG   "-check_bounds -g")
+if(WIN32)
+  if (CMAKE_CL_64)
+    set(ARCH_IS_64 "TRUE")
   else()
-    message("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
-    message("Fortran compiler: " ${Fortran_COMPILER_NAME})
-    message("No optimized Fortran compiler flags are known, we just try -O2...")
-    set(CMAKE_Fortran_FLAGS_RELEASE "-O2")
-    set(CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g")
+    set(ARCH_IS_64 "FALSE")
   endif()
+else()
+  get_property(ARCH_IS_64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
+endif()
+
+option(USE_MPI "Build a parallel version using message passing interface." ON)
+option(USE_OPENMP "Build a parallel version using threads (shared memory). Cannot combine with USE_MPI yet." OFF)
+
+if(USE_MPI)
+  if(USE_OPENMP)
+    message(WARNING "Thread-based parallelization conflicts with MPI.")
+    set(USE_OPENMP OFF CACHE BOOL "Build a parallel version using threads (shared memory). Cannot combine with USE_MPI yet." FORCE)
+  endif()
+endif()
+
+option(DOUBLE_PRECISION "Turn on to use double precision (real*8) floating numbers" ON)
+if(DOUBLE_PRECISION)
+  add_definitions(-D__DOUBLE_PRECISION__)
+endif()
+
+option(USE_OWN "Use own implementation of certain math functions instead of system-provided ones" ON)
+if(USE_OWN)
+  add_definitions(-D__USEOWN__)
+endif()
+
+set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} $ENV{FC_FLAGS}" CACHE STRING "Flags for Fortran compiler." FORCE)
+
+# FFLAGS depend on the compiler
+get_filename_component(Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
+
+if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+  # gfortran (forked from g95 in January 2003; called g77 before gcc v4.0)
+  set(CMAKE_Fortran_FLAGS_RELEASE "-ffree-form -ffree-line-length-none -cpp -O3 -mtune=native -march=native -ffast-math -fassociative-math -freciprocal-math -fno-signed-zeros -fno-trapping-math -funroll-loops")
+  set(CMAKE_Fortran_FLAGS_DEBUG   "-ffree-form -ffree-line-length-none -cpp -O0 -g -fbacktrace -fbounds-check -Wall -Wextra -Wcharacter-truncation -Wunderflow -D__DEBUG__")
+  if(USE_OPENMP)
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fopenmp")
+  endif()
+  if(DOUBLE_PRECISION)
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fdefault-real-8 -fdefault-double-8")
+  endif()
+elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "G95")
+  # g95, also based on GCC (GNU Compiler Collection)
+  set(CMAKE_Fortran_FLAGS_RELEASE "-ffree-form -ffree-line-length-huge -cpp -O3 -mtune=native -ffast-math -fno-trapping-math -funroll-loops")
+  set(CMAKE_Fortran_FLAGS_DEBUG   "-ffree-form -ffree-line-length-huge -cpp -O0 -g -ftrace=full -fbounds-check -Wall -Wextra -D__DEBUG__")
+  if(USE_OPENMP)
+    message(WARNING "g95 does not support OpenMP.")
+    set(USE_OPENMP OFF CACHE BOOL "Build a parallel version using threads (shared memory). Cannot combine with USE_MPI yet." FORCE)
+  endif()
+  if(DOUBLE_PRECISION)
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -r8")
+  endif()
+elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
+  # ifort
+  set(CMAKE_Fortran_FLAGS_RELEASE "-free -fpp -O3 -xHost -ipo -no-prec-div")# -opt-streaming-stores always -no-unroll-aggressive -scalar-rep -Zp16 -nolib-inline") #-tpp2 for SGI Altix ia64 architecture
+  set(CMAKE_Fortran_FLAGS_DEBUG   "-free -fpp -O0 -g -traceback -check all -warn unused -warn declarations -warn truncated_source -warn uncalled -warn ignore_loc -D__DEBUG__")
+  if(USE_OPENMP)
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -openmp")
+  endif()
+  if(DOUBLE_PRECISION)
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -real-size 64")
+  endif()
+elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "PGI")
+  # pgf77, pgfortran/pgf90/pgf95
+  set(CMAKE_Fortran_FLAGS_RELEASE "-Mfree -Mpreprocess -fast -Mipa=fast -O4")
+  set(CMAKE_Fortran_FLAGS_DEBUG   "-Mfree -Mpreprocess -O0 -g -traceback -Mbounds -Mchkfpstk -Mchkptr -Mchkstk -D__DEBUG__")
+  if(USE_OPENMP)
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -mp=allcores")
+  endif()
+  if(DOUBLE_PRECISION)
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -r8")
+  endif()
+elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "XL")
+  # xlf from IBM for AIX SP
+  set(CMAKE_Fortran_FLAGS_RELEASE "-qfree=f90 -tF -O5 -qunroll=yes -qfloat=fltint:hssngl:maf:rndsngl:rsqrt")
+  set(CMAKE_Fortran_FLAGS_DEBUG   "-qfree=f90 -tF -O0 -g -qstrict -qcheck -qextchk -qflttrap")
+  if(USE_OPENMP)
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -qsmp=omp")
+  endif()
+  if(DOUBLE_PRECISION)
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -qautodbl=dbl4")
+  endif()
+elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "MIPSpro")
+  # f77, f90 from SGI for Origin; Open64 (initially known as Pro64)
+  set(CMAKE_Fortran_FLAGS_RELEASE "-freeform -cpp -O3 -IPA -mips4 -r12000 -OPT:IEEE_arithmetic=3") #Ofast[=ipxx]
+  set(CMAKE_Fortran_FLAGS_DEBUG   "-freeform -cpp -O0 -g -DEBUG:verbose_runtime:subscript_check=ON:div_check=3:fullwarn")
+  if(USE_OPENMP)
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -mp")
+  endif()
+  if(DOUBLE_PRECISION)
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -r8")
+  endif()
+elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "NAG")
+  # f95, nagfor
+  set(CMAKE_Fortran_FLAGS_RELEASE "-free -fpp -kind=byte -O4 -Orounding -Ounsafe")
+  set(CMAKE_Fortran_FLAGS_DEBUG   "-free -fpp -kind=byte -O0 -g -gline -C=all -C=undefined -color")
+  if(USE_OPENMP)
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -openmp")
+  endif()
+  if(DOUBLE_PRECISION)
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -double")
+  endif()
+else()
+  message("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
+  message("Fortran compiler: " ${Fortran_COMPILER_NAME})
+  message("No optimized Fortran compiler flags are known, we just try -O2...")
+  set(CMAKE_Fortran_FLAGS_RELEASE "-O2")
+  set(CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g")
+endif()
+
+if(NOT "${Fortran_COMPILER_NAME}" STREQUAL "${SAVE_Fortran_COMPILER_NAME}")
+  set(SAVE_Fortran_COMPILER_NAME "${Fortran_COMPILER_NAME}" CACHE INTERNAL "Compiler name when the cache was generated." FORCE)
 
   set(CMAKE_Fortran_FLAGS_RELEASE ${CMAKE_Fortran_FLAGS_RELEASE} CACHE STRING "Flags used by the compiler during RELEASE builds." FORCE)
   set(CMAKE_Fortran_FLAGS_DEBUG ${CMAKE_Fortran_FLAGS_DEBUG} CACHE STRING "Flags used by the compiler during DEBUG builds." FORCE)
+else()
+  # use cache values
+  unset(CMAKE_Fortran_FLAGS_RELEASE)
+  unset(CMAKE_Fortran_FLAGS_DEBUG)
 endif()
 
 # Set Profiler
@@ -123,16 +193,6 @@ if (DEFINED COMPILER_WRAPPER)
   CMAKE_FORCE_Fortran_COMPILER(${COMPILER_WRAPPER} ${CMAKE_Fortran_COMPILER_ID})
 endif ()
 
-if(WIN32)
-  if (CMAKE_CL_64)
-    set(ARCH_IS_64 "TRUE")
-  else()
-    set(ARCH_IS_64 "FALSE")
-  endif()
-else()
-  get_property(ARCH_IS_64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
-endif()
-
 set(EXTRA_LIBRARIES)
 
 if(APPLE)
@@ -142,18 +202,10 @@ endif()
 
 set(Fortran_INCLUDE_DIRS)
 set(Fortran_LINK_FLAGS)
-set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} $ENV{FC_FLAGS}" CACHE STRING "Flags for Fortran compiler." FORCE)
-
-option(USE_MPI "Build a parallel version using message passing interface" ON)
-option(USE_OPENMP "Build a parallel version using threads (shared memory). Cannot combine with USE_MPI yet" OFF)
 
 if(USE_MPI)
-  if(USE_OPENMP)
-    message(WARNING "Thread-based parallelization conflicts with MPI.")
-    set(USE_OPENMP OFF CACHE BOOL "Thread-based parallelization conflicts with MPI." FORCE)
-  endif()
-  # fix the problem with ifort not being able to find 64-bit libraries
-  if(${ARCH_IS_64} STREQUAL "TRUE" AND Fortran_COMPILER_NAME MATCHES "ifort*")
+  # fix the problem with Intel/PGI compilers not being able to find 64-bit libraries
+  if(${ARCH_IS_64} STREQUAL "TRUE" AND (CMAKE_Fortran_COMPILER_ID STREQUAL "Intel" OR CMAKE_Fortran_COMPILER_ID STREQUAL "PGI"))
     list(APPEND CMAKE_LIBRARY_PATH "/usr/lib64")
   endif()
 
@@ -171,18 +223,6 @@ endif()
 
 if(USE_OPENMP)
   add_definitions(-D__OPENMP__)
-  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -openmp")
-endif()
-
-option(DOUBLE_PRECISION "Turn on to use double precision (real*8) floating numbers" ON)
-if(DOUBLE_PRECISION)
-  add_definitions(-D__DOUBLE_PRECISION__)
-  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -real-size 64")
-endif()
-
-option(USE_OWN "Use own implementation of certain math functions instead of system-provided ones" ON)
-if(USE_OWN)
-  add_definitions(-D__USEOWN__)
 endif()
 
 file(GLOB_RECURSE Fortran_HEADERS "*.inc")

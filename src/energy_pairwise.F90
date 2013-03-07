@@ -1772,7 +1772,9 @@ contains
                   sigma2 = sig2ij(ntij)
                   epsilon2 = epsij(ntij)
                end if
-               coru = coru + 2.0E0_dp * onepi * epsilon2 * sigma2 ** (1.50E0_dp) * rho * (  (( (2.0E0_dp**(4.0E0_dp*n1/n0))/(2.0E0_dp*n1-3.0E0_dp)) * rci1 **(2.0E0_dp*n1-3.0E0_dp) ) - ( (2.0E0_dp**((2.0E0_dp*n1/n0)+1.0E0_dp))/(n1-3.0E0_dp)) * rci1 **(n1-3.0E0_dp) )
+               coru = coru + 2.0E0_dp * onepi * epsilon2 * sigma2 ** (1.50E0_dp) * rho&
+                * (  (( (2.0E0_dp**(4.0E0_dp*n1/n0))/(2.0E0_dp*n1-3.0E0_dp)) * rci1 **(2.0E0_dp*n1-3.0E0_dp) )&
+                - ( (2.0E0_dp**((2.0E0_dp*n1/n0)+1.0E0_dp))/(n1-3.0E0_dp)) * rci1 **(n1-3.0E0_dp) )
 
             else
                rci3 = sig2ij(ntij)**(3.0E0_dp/2.0E0_dp) / rcut(ibox)**3
@@ -2083,8 +2085,11 @@ contains
           end do
        else
           do i=1,natom
-             consp(i) = (2.0E0_dp/3.0E0_dp)*onepi*(2.0E0_dp*aexsix(i)/(rcut(1) *rcut(1)*rcut(1))+bexsix(i)*exp(cexsix(i)*rcut(1)) *(-6.0E0_dp/(cexsix(i)*cexsix(i)*cexsix(i))+6.0E0_dp *rcut(1)/(cexsix(i)*cexsix(i))-3.0E0_dp*rcut(1)* rcut(1)/ cexsix(i)+rcut(1)*rcut(1)*rcut(1)))
-             consu(i) = 2.0E0_dp*onepi*(aexsix(i)/(3.0E0_dp*rcut(1)*rcut(1)* rcut(1)) +(-rcut(1)*rcut(1)+2.0E0_dp*rcut(1)/cexsix(i)-2.0E0_dp/ (cexsix(i)* cexsix(i)))*bexsix(i)*exp(cexsix(i)*rcut(1))/ cexsix(i))
+             consp(i) = (2.0E0_dp/3.0E0_dp)*onepi*(2.0E0_dp*aexsix(i)/(rcut(1) *rcut(1)*rcut(1))&
+              +bexsix(i)*exp(cexsix(i)*rcut(1)) *(-6.0E0_dp/(cexsix(i)*cexsix(i)*cexsix(i))+6.0E0_dp *rcut(1)&
+              /(cexsix(i)*cexsix(i))-3.0E0_dp*rcut(1)* rcut(1)/ cexsix(i)+rcut(1)*rcut(1)*rcut(1)))
+             consu(i) = 2.0E0_dp*onepi*(aexsix(i)/(3.0E0_dp*rcut(1)*rcut(1)* rcut(1)) +(-rcut(1)*rcut(1)&
+              +2.0E0_dp*rcut(1)/cexsix(i)-2.0E0_dp/ (cexsix(i)* cexsix(i)))*bexsix(i)*exp(cexsix(i)*rcut(1))/ cexsix(i))
           end do
 ! write(11,*) 'consp(i)',consp
 ! write(11,*) 'consu(i)',consu

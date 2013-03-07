@@ -163,6 +163,7 @@ contains
 
   subroutine suzeo()
     use util_search,only:indexOf
+    use util_string,only:format_n
     character(LEN=default_string_length)::atom
     integer::io_ztb,igtype,idi,idj,jerr,sw,i,j,k,oldi,oldj,oldk,ngridtmp(3),zntypetmp
     real::wzeo,zunittmp(3),zangtmp(3),rcuttmp,rci3,rci9,rho
@@ -177,18 +178,26 @@ contains
 
     ! Calculate zeolite density
     wzeo=dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype)))
-    if (myid.eq.0) write(io_output,"(' Tabulated zeolite potential: ',/&
-                              ,' --------------------------------------------------',/&
-                              ,<ztype%ntype>(' number of ',A,':',I5,3X),/&
-                              ,' simulation volume                 = ', f10.1, 20x,' Angst**3',/&
-                              ,' number of atomtypes in the lattice= ',i10,/&
-                              ,' number of zeolite atoms           = ',i10,/&
-                              ,' mass zeolite                      = ',e12.5,' grams',/ &
-                              ,' one adsorbed molecule in sim box  = ',e12.5 ,' mol/kg',/&
-                              ,' Size unit-cell zeolite: ',f7.4,' x ',f7.4,' x ',f7.4,/&
-                              ,'         x-dir           : ',i12,'  size: ',f7.4,/&
-                              ,'         y-dir           : ',i12,'  size: ',f7.4,/&
-                              ,'         z-dir           : ',i12,'  size: ',f7.4,/)") (trim(ztype%name(i)),ztype%num(i),i=1,ztype%ntype),zcell%vol,ztype%ntype,zeo%nbead,wzeo/6.023E23_dp,1000.0/wzeo,zunit%boxl(1),zunit%boxl(2),zunit%boxl(3),zunit%ngrid(1),zunit%boxl(1)/zunit%ngrid(1),zunit%ngrid(2),zunit%boxl(2)/zunit%ngrid(2),zunit%ngrid(3),zunit%boxl(3)/zunit%ngrid(3)
+    if (myid.eq.0) then
+       write(io_output,"(' Tabulated zeolite potential: ',/&
+                       &,' --------------------------------------------------',/,"//format_n(ztype%ntype,"(' number of ',A,':',I5,3X)")//&
+                     ",/,' simulation volume                 = ', f10.1, 20x,' Angst**3',/&
+                       &,' number of atomtypes in the lattice= ',i10,/&
+                       &,' number of zeolite atoms           = ',i10,/&
+                       &,' mass zeolite                      = ',e12.5,' grams',/&
+                       &,' one adsorbed molecule in sim box  = ',e12.5 ,' mol/kg',/&
+                       &,' Size unit-cell zeolite: ',f7.4,' x ',f7.4,' x ',f7.4,/&
+                       &,'         x-dir           : ',i12,'  size: ',f7.4,/&
+                       &,'         y-dir           : ',i12,'  size: ',f7.4,/&
+                       &,'         z-dir           : ',i12,'  size: ',f7.4,/)")&
+                       (trim(ztype%name(i)),ztype%num(i),i=1,ztype%ntype)&
+                       ,zcell%vol,ztype%ntype,zeo%nbead&
+                       ,wzeo/6.023E23_dp,1000.0/wzeo,zunit%boxl(1)&
+                       ,zunit%boxl(2),zunit%boxl(3),zunit%ngrid(1)&
+                       ,zunit%boxl(1)/zunit%ngrid(1),zunit%ngrid(2)&
+                       ,zunit%boxl(2)/zunit%ngrid(2),zunit%ngrid(3)&
+                       ,zunit%boxl(3)/zunit%ngrid(3)
+    end if
 
     if (lsurface_area) call zsurface()
 
@@ -200,7 +209,7 @@ contains
        nlayermax=0
        io_ztb=get_iounit()
 
-       open(unit=io_ztb,access='sequential',action='read',file=file_ztb,form='binary',iostat=jerr, status='old')
+       open(unit=io_ztb,access='stream',action='read',file=file_ztb,form='unformatted',iostat=jerr, status='old')
        if (jerr.eq.0) then
           ! read zeolite table from disk
           if (myid.eq.0) write(io_output,'(A,/)') 'read in tabulated potential'
@@ -227,7 +236,7 @@ contains
 !           if (myid.eq.0) then
 !              rcuttmp=10.0E0_dp
 !              close(io_ztb)
-!              open(unit=io_ztb,access='sequential',action='write',file=file_ztb,form='binary',iostat=jerr,status='unknown')
+!              open(unit=io_ztb,access='stream',action='write',file=file_ztb,form='unformatted',iostat=jerr,status='unknown')
 !              if (jerr.ne.0) then
 !                 call err_exit(__FILE__,__LINE__,'cannot create file for tabulated potential',myid+1)
 !              end if
@@ -260,7 +269,7 @@ contains
           ! make a tabulated potential of the zeolite
           if (myid.eq.0) then
              write(io_output,*) 'make tabulated potential'
-             open(unit=io_ztb,access='sequential',action='write',file=file_ztb,form='binary',iostat=jerr,status='unknown')
+             open(unit=io_ztb,access='stream',action='write',file=file_ztb,form='unformatted',iostat=jerr,status='unknown')
              if (jerr.ne.0) then
                 call err_exit(__FILE__,__LINE__,'cannot create file for tabulated potential',myid+1)
              end if
@@ -324,7 +333,7 @@ contains
        deallocate(lunitcell,zgrid,zeo%bead,ztype%type,ztype%num,ztype%radiisq,ztype%name,zpot%param)
        if (myid.eq.0) then
           close(io_ztb)
-          write(io_output,'(4(A,L),A,G,A,/)') 'tabulated potential: lewald[',lewaldtmp,'] ltailc[',ltailcZeotmp,'] lshift[',lshifttmp,'] ltailcZeo[',ltailcZeo,'] rcut[',rcuttmp,']'
+          write(io_output,'(4(A,L),A,G10.3,A,/)') 'tabulated potential: lewald[',lewaldtmp,'] ltailc[',ltailcZeotmp,'] lshift[',lshifttmp,'] ltailcZeo[',ltailcZeo,'] rcut[',rcuttmp,']'
        end if
     end if
 
@@ -644,14 +653,18 @@ contains
     end do
 
     if (myid.eq.0) then
-       write(io_output,'(A,I,A,I,A)') ' test over ',tel,' out of ',volume_nsample,' random positions '
-       write(io_output,'(A,G)') ' average error: ',errTot/tel
-       write(io_output,'(A,G)') ' maximum relative error: ',errRel
-       write(io_output,'(A,G)') ' maximum absolute error [K]: ',errAbs
-       write(io_output,'(A,G,A,G,A)') ' void fraction: ',BoltTabulated/volume_nsample, '(tabulated), ',BoltExplicit/volume_nsample,'(explicit)'
-       write(io_output,'(A,G,A,G,A)') ' void volume in [Angstrom^3]: ',BoltTabulated*zcell%vol/volume_nsample, '(tabulated), ',BoltExplicit*zcell%vol/volume_nsample,'(explicit)'
-       write(io_output,'(A,G,A,G,A)') ' void volume in [cm^3/g]: ',BoltTabulated*zcell%vol/volume_nsample*6.023E-1_dp/dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype))), '(tabulated), ',BoltExplicit*zcell%vol/volume_nsample*6.023E-1_dp/dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype))),'(explicit)'
-       write(io_output,'(A,G,A,G,A)') ' Boltzmann averaged energy in [K]: ',eBoltTabulated/BoltTabulated,'(tabulated), ',eBoltExplicit/BoltExplicit,'(explicit)'
+       write(io_output,'(A,I0,A,I0,A)') ' test over ',tel,' out of ',volume_nsample,' random positions '
+       write(io_output,'(A,G16.9)') ' average error: ',errTot/tel
+       write(io_output,'(A,G16.9)') ' maximum relative error: ',errRel
+       write(io_output,'(A,G16.9)') ' maximum absolute error [K]: ',errAbs
+       write(io_output,'(A,G16.9,A,G16.9,A)') ' void fraction: ',BoltTabulated/volume_nsample, '(tabulated), ',BoltExplicit/volume_nsample,'(explicit)'
+       write(io_output,'(A,G16.9,A,G16.9,A)') ' void volume in [Angstrom^3]: ',BoltTabulated*zcell%vol/volume_nsample, '(tabulated), ',BoltExplicit*zcell%vol/volume_nsample,'(explicit)'
+       write(io_output,'(A,G16.9,A,G16.9,A)') ' void volume in [cm^3/g]: '&
+        ,BoltTabulated*zcell%vol/volume_nsample*6.023E-1_dp/dot_product(ztype%num(1:ztype%ntype)&
+        ,mass(ztype%type(1:ztype%ntype))), '(tabulated), '&
+        ,BoltExplicit*zcell%vol/volume_nsample*6.023E-1_dp/dot_product(ztype%num(1:ztype%ntype)&
+        ,mass(ztype%type(1:ztype%ntype))),'(explicit)'
+       write(io_output,'(A,G16.9,A,G16.9,A)') ' Boltzmann averaged energy in [K]: ',eBoltTabulated/BoltTabulated,'(tabulated), ',eBoltExplicit/BoltExplicit,'(explicit)'
        write(io_output,*)
     end if
 
@@ -661,7 +674,8 @@ contains
 !> \brief Calculate geometric surface area
 !>
 !> See
-!> 1. O.K. Farha, A.O. Yazaydin, I. Eryazici, C.D. Malliakas, B.G. Hauser, M.G. Kanatzidis, S.T. Nguyen, R.Q. Snurr, and J.T. Hupp, "De novo synthesis of a metal-organic framework material featuring ultra-high surface area and gas storage capacities", Nature Chem., xx(x), xxx-xxx (2010).
+!> 1. O.K. Farha, A.O. Yazaydin, I. Eryazici, C.D. Malliakas, B.G. Hauser, M.G. Kanatzidis, S.T. Nguyen, R.Q. Snurr, and J.T. Hupp,
+!>   "De novo synthesis of a metal-organic framework material featuring ultra-high surface area and gas storage capacities", Nature Chem., xx(x), xxx-xxx (2010).
 !> 2. T. Duren, L. Sarkisov, O.M. Yaghi, and R.Q. Snurr, "Design of New Materials for Methane Storage", Langmuir, 20(7), 2683-2689 (2004).
 !> 3. K.S. Walton and R.Q. Snurr, "Applicability of the BET method for determining surface areas of microporous metal-organic frameworks", J. Am. Chem. Soc., 129(27), 8552-8556 (2007).
 !> 4. T. Duren, F. Millange, G. Ferey, K.S. Walton, and R.Q. Snurr, "Calculating geometric surface areas as a characterization tool for metal-organic frameworks", J. Phys. Chem., 111(42), 15350-15356 (2007).

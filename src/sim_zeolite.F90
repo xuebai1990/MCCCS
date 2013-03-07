@@ -40,10 +40,10 @@ CONTAINS
     integer::i,j
 
     if (myid.eq.0) write(io_output,"(/,' READING ZEOLITE LATTICE FROM FILE zeolite.cssr:',/&
-                                ,' --------------------------------------------------',/&
-                                ,' box dimensions                    = ',3f10.3,' Angstrom',/&
-                                ,' box angles                        = ',3f10.3,' degrees',/&
-                                ,' number of zeolite cells           = ',3i5)") zcell%boxl(1)%val,zcell%boxl(2)%val,zcell%boxl(3)%val,zcell%ang(1)%val,zcell%ang(2)%val,zcell%ang(3)%val,zunit%dup(1),zunit%dup(2),zunit%dup(3)
+                               &,' --------------------------------------------------',/&
+                               &,' box dimensions                    = ',3f10.3,' Angstrom',/&
+                               &,' box angles                        = ',3f10.3,' degrees',/&
+                               &,' number of zeolite cells           = ',3i5)") zcell%boxl(1)%val,zcell%boxl(2)%val,zcell%boxl(3)%val,zcell%ang(1)%val,zcell%ang(2)%val,zcell%ang(3)%val,zunit%dup(1),zunit%dup(2),zunit%dup(3)
 
     if (abs(zcell%ang(1)%val-90)>eps.or.abs(zcell%ang(2)%val-90)>eps.or.abs(zcell%ang(3)%val-90)>eps) then
        zcell%solid=.true.

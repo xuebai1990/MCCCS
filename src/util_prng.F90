@@ -73,7 +73,7 @@ MODULE util_prng
                               two17 = 131072.0_dp,&            ! 2**17
                               two53 = 9007199254740992.0_dp,&  ! 2**53
                               fact  = 5.9604644775390625e-8_dp ! 1/2**24
-  REAL(KIND=dp), DIMENSION(3,2), save :: nextSeed = 12345.0_dp
+  REAL(KIND=dp), DIMENSION(3,2) :: nextSeed = 12345.0_dp
 
   ! Data type definitions
 
