@@ -25,7 +25,7 @@ module util_mp
   END INTERFACE
 
   INTERFACE mp_allgather
-     MODULE PROCEDURE mp_allgather_l1, mp_allgatherv_l1, mp_allgather_i0, mp_allgather_r1, mp_allgatherv_r1, mp_allgatherv_r2
+     MODULE PROCEDURE mp_allgather_l1, mp_allgatherv_l1, mp_allgather_i0, mp_allgather_r0, mp_allgather_r1, mp_allgatherv_r1, mp_allgatherv_r2
   END INTERFACE
 
   INTERFACE mp_alltoall
@@ -413,6 +413,10 @@ CONTAINS
 #undef MP_TYPE
 #endif
 #define MP_TYPE MP_REAL
+  SUBROUTINE mp_allgather_r0(mydata, alldata, comm)
+#include "mp_gather_0.F90"
+  END SUBROUTINE mp_allgather_r0
+
   SUBROUTINE mp_allgather_r1(mydata, alldata, comm)
 #include "mp_gather_1.F90"
   END SUBROUTINE mp_allgather_r1

@@ -577,7 +577,7 @@ contains
 
     ! MPI
     integer::rcounts(numprocs),displs(numprocs),my_start,my_end,blocksize,my_itrial,rid
-    real::my_bsum_tor(nchmax),my_vtgtr(nchmax),my_ctorf_acc(nchmax),my_vfbbtr_acc(nchmax),my_rxp(numax,nchmax),my_ryp(numax,nchmax),my_rzp(numax,nchmax)
+    real::my_bf_tor(nchtor_max),my_vtorsion(nchtor_max),my_phitors(nchtor_max),my_ctorf(nchtor_max),my_vfbbtr(nchtor_max)
 ! ------------------------------------------------------------------
 
 #ifdef __DEBUG__
@@ -686,9 +686,9 @@ contains
    else
       rid=-1
    end if
-   blocksize = ichoi/numprocs
+   blocksize = ichtor/numprocs
    rcounts = blocksize
-   blocksize = ichoi - blocksize * numprocs
+   blocksize = ichtor - blocksize * numprocs
    if (blocksize.gt.0) rcounts(1:blocksize) = rcounts(1:blocksize) + 1
    call mp_set_displs(rcounts,displs,blocksize,numprocs)
    my_start = displs(myid+1) + 1
@@ -758,9 +758,7 @@ contains
 
        ! we now have the bond lengths and angles for the grown beads
        ! select nchoi trial positions based only on torsions
-       my_itrial = 0
-       do ip=my_start,my_end
-          my_itrial = my_itrial + 1
+       do ip = 1,ichoi
           lreturn = .false.
 205       continue
           ! set up the cone based on iuprev (could be grown if no prev)
@@ -781,7 +779,7 @@ contains
                 zz(count) = z
              else
                 ! choose randomly on the unit sphere
-                call sphere(x,y,z,rid)
+                call sphere(x,y,z,-1)
                 xx(count) = x
                 yy(count) = y
                 zz(count) = z
@@ -820,9 +818,11 @@ contains
           ! Begin loop to determine torsional angle
           if ( ltorsion ) then
              ! initialize bsum_tor
-             my_bsum_tor(my_itrial) = 0.0E0_dp
+             bsum_tor(ip) = 0.0E0_dp
 
-             do itor = 1,ichtor
+             my_itrial = 0
+             do itor=my_start,my_end
+                my_itrial = my_itrial + 1
                 if ( (.not. lnew) .and. ip .eq. 1 .and. itor .eq. 1) then
                    ! old conformation - set phidisp to 0.0E0_dp
                    phidisp = 0.0E0_dp
@@ -870,16 +870,16 @@ contains
 300             continue
 
                 ! compute boltzmann factor and add it to bsum_tor
-                bf_tor(itor) = exp ( -vdha * beta )
+                my_bf_tor(my_itrial) = exp ( -vdha * beta )
 
                 ! store vtorsion and phidisp for this trial
-                vtorsion(itor) = vdha
-                phitors(itor) = phidisp
+                my_vtorsion(my_itrial) = vdha
+                my_phitors(my_itrial) = phidisp
 
                 ! for safecbmc add extra weight to assure closure
                 if (lfixnow) then
-                   ctorf(itor) = 1.0E0_dp
-                   vfbbtr(itor) = 0.0E0_dp
+                   my_ctorf(my_itrial) = 1.0E0_dp
+                   my_vfbbtr(my_itrial) = 0.0E0_dp
 
                    do count = 1, ntogrow
                       length = bondlen(count)
@@ -902,18 +902,18 @@ contains
                             ! determine special closing energies
                             call safecbmc(2,lnew,i,iw,igrow,imolty,count,x,y,z,vphi,vtorf,wbendv,lterm,movetype)
 
-                            bf_tor(itor) = bf_tor(itor) * vtorf * exp( - beta * vphi )
-                            ctorf(itor) = ctorf(itor) * vtorf
+                            my_bf_tor(my_itrial) = my_bf_tor(my_itrial) * vtorf * exp( - beta * vphi )
+                            my_ctorf(my_itrial) = my_ctorf(my_itrial) * vtorf
 
-                            vfbbtr(itor) =  vfbbtr(itor) + vphi
+                            my_vfbbtr(my_itrial) =  my_vfbbtr(my_itrial) + vphi
                          else
                             do j = 1, fcount(iu)
                                ju = fclose(iu,j)
                                dist = sqrt((x-rxnew(ju))**2 + (y-rynew(ju))**2 + (z-rznew(ju))**2)
                                bin = anint(dist*10.0E0_dp)
 
-                               bf_tor(itor) = bf_tor(itor) * probf(iu,ju,bin)
-                               ctorf(itor) = ctorf(itor) * probf(iu,ju,bin)
+                               my_bf_tor(my_itrial) = my_bf_tor(my_itrial) * probf(iu,ju,bin)
+                               my_ctorf(my_itrial) = my_ctorf(my_itrial) * probf(iu,ju,bin)
 
                                if (iw.gt.2) then
                                   do counta = 1, pastnum(ju)
@@ -922,8 +922,8 @@ contains
                                         dist = sqrt((x-rxnew(ku))**2 + (y-rynew(ku))**2 + (z-rznew(ku))**2)
                                         bin = anint(dist*10.0E0_dp)
 
-                                        bf_tor(itor) = bf_tor(itor) * probf(iu,ku,bin)
-                                        ctorf(itor) = ctorf(itor) * probf(iu,ku,bin)
+                                        my_bf_tor(my_itrial) = my_bf_tor(my_itrial) * probf(iu,ku,bin)
+                                        my_ctorf(my_itrial) = my_ctorf(my_itrial) * probf(iu,ku,bin)
                                      end if
                                   end do
                                end if
@@ -934,10 +934,10 @@ contains
                             ! determine special closing energies
                             call safecbmc(2,lnew,i,iw,igrow,imolty,count,x,y,z,vphi,vtorf ,wbendv,lterm,movetype)
 
-                            bf_tor(itor) = bf_tor(itor) * vtorf  * exp( - beta * vphi )
-                            ctorf(itor) = ctorf(itor)  * vtorf
+                            my_bf_tor(my_itrial) = my_bf_tor(my_itrial) * vtorf  * exp( - beta * vphi )
+                            my_ctorf(my_itrial) = my_ctorf(my_itrial)  * vtorf
 
-                            vfbbtr(itor) = vfbbtr(itor) + vphi
+                            my_vfbbtr(my_itrial) = my_vfbbtr(my_itrial) + vphi
                          else
                             if (fcount(iu).gt.0) then
                                do j = 1, fcount(iu)
@@ -945,8 +945,8 @@ contains
                                   dist = sqrt((x-rxu(i,ju))**2 + (y-ryu(i,ju))**2 + (z-rzu(i,ju))**2)
                                   bin = anint(dist*10.0E0_dp)
 
-                                  bf_tor(itor) = bf_tor(itor) * probf(ju,iu,bin)
-                                  ctorf(itor) = ctorf(itor) * probf(iu,ju,bin)
+                                  my_bf_tor(my_itrial) = my_bf_tor(my_itrial) * probf(ju,iu,bin)
+                                  my_ctorf(my_itrial) = my_ctorf(my_itrial) * probf(iu,ju,bin)
 
                                   if (pastnum(ju).ne.0) then
                                      do counta = 1, pastnum(ju)
@@ -955,8 +955,8 @@ contains
                                            dist = sqrt((x-rxu(i,ku))**2 + (y-ryu(i,ku))**2 + (z-rzu(i,ku))**2)
                                            bin = anint(dist*10.0E0_dp)
 
-                                           bf_tor(itor) = bf_tor(itor) * probf(iu,ku,bin)
-                                           ctorf(itor) = ctorf(itor) * probf(iu,ku,bin)
+                                           my_bf_tor(my_itrial) = my_bf_tor(my_itrial) * probf(iu,ku,bin)
+                                           my_ctorf(my_itrial) = my_ctorf(my_itrial) * probf(iu,ku,bin)
                                         end if
 
                                      end do
@@ -967,36 +967,70 @@ contains
                       end if
                    end do
                 end if
-                my_bsum_tor(my_itrial) = my_bsum_tor(my_itrial) + bf_tor(itor)
+                bsum_tor(ip) = bsum_tor(ip) + my_bf_tor(my_itrial)
              end do
 
              if ( lnew .or. ip .ne. 1 ) then
                 ! choose one of the trial sites in a biased fashion
-                ran_tor = random(rid)*my_bsum_tor(my_itrial)
+                ran_tor = random(rid)*bsum_tor(ip)
                 bs = 0.0E0_dp
-                do itor = 1,ichtor
-                   bs = bs + bf_tor(itor)
+                do itor = 1,rcounts(myid+1)
+                   bs = bs + my_bf_tor(itor)
                    if ( ran_tor .lt. bs ) then
                       ! save torsion energy of this trial position
-                      my_vtgtr(my_itrial) = vtorsion(itor)
-                      my_ctorf_acc(my_itrial) = ctorf(itor)
-                      my_vfbbtr_acc(my_itrial) = vfbbtr(itor)
+                      vtgtr(ip) = my_vtorsion(itor)
+                      ctorf_acc(ip) = my_ctorf(itor)
+                      vfbbtr_acc(ip) = my_vfbbtr(itor)
                       ! assign the phidisp of this trial postion
-                      phidisp = phitors(itor)
+                      phidisp = my_phitors(itor)
                       ! exit the loop
                       exit
                    end if
                 end do
              else
                 ! select the old conformation
-                my_vtgtr(my_itrial) = vtorsion(1)
-                my_ctorf_acc(my_itrial) = ctorf(1)
-                my_vfbbtr_acc(my_itrial) = vfbbtr(1)
-                phidisp = phitors(1)
+                vtgtr(ip) = my_vtorsion(1)
+                ctorf_acc(ip) = my_ctorf(1)
+                vfbbtr_acc(ip) = my_vfbbtr(1)
+                phidisp = my_phitors(1)
+             end if
+
+             if (numprocs.gt.1) then
+                call mp_allgather(bsum_tor(ip),bf_tor,groupid)
+                bsum_tor(ip)=sum(bf_tor(1:numprocs))
+                call mp_allgather(vtgtr(ip),vtorsion,groupid)
+                call mp_allgather(phidisp,phitors,groupid)
+                call mp_allgather(ctorf_acc(ip),ctorf,groupid)
+                call mp_allgather(vfbbtr_acc(ip),vfbbtr,groupid)
+
+                if ( lnew .or. ip .ne. 1 ) then
+                   ! choose one of the trial sites in a biased fashion
+                   ran_tor = random(-1)*bsum_tor(ip)
+                   bs = 0.0E0_dp
+                   do itor = 1,numprocs
+                      bs = bs + bf_tor(itor)
+                      if ( ran_tor .lt. bs ) then
+                         ! save torsion energy of this trial position
+                         vtgtr(ip) = vtorsion(itor)
+                         ctorf_acc(ip) = ctorf(itor)
+                         vfbbtr_acc(ip) = vfbbtr(itor)
+                         ! assign the phidisp of this trial postion
+                         phidisp = phitors(itor)
+                         ! exit the loop
+                         exit
+                      end if
+                   end do
+                else
+                   ! select the old conformation
+                   vtgtr(ip) = vtorsion(1)
+                   ctorf_acc(ip) = ctorf(1)
+                   vfbbtr_acc(ip) = vfbbtr(1)
+                   phidisp = phitors(1)
+                end if
              end if
 
              ! divide bsum by ichtor
-             my_bsum_tor(my_itrial) = my_bsum_tor(my_itrial) / dble(ichtor)
+             bsum_tor(ip) = bsum_tor(ip) / real(ichtor,dp)
           else
              ! no torsion energy, choose phidisp at random(-1except old)
              if ( (.not. lnew) .and. ip .eq. 1 ) then
@@ -1005,16 +1039,16 @@ contains
              else
                 ! choose a random displacement angle from anglestart
                 ! assign the positions based on angles and lengths above
-                phidisp = twopi*random(rid)
+                phidisp = twopi*random(-1)
              end if
 
              ! set bsum_tor to 1.0E0_dp
-             my_bsum_tor(my_itrial) = 1.0E0_dp
+             bsum_tor(ip) = 1.0E0_dp
 
              ! assign the torsional energy a value of 0.0
-             my_vtgtr(my_itrial) = 0.0E0_dp
-             my_ctorf_acc(my_itrial) = 1.0E0_dp
-             my_vfbbtr_acc(my_itrial) = 0.0E0_dp
+             vtgtr(ip) = 0.0E0_dp
+             ctorf_acc(ip) = 1.0E0_dp
+             vfbbtr_acc(ip) = 0.0E0_dp
           end if
 
           ! for accepted phidisp set up the vectors
@@ -1031,25 +1065,17 @@ contains
              length = bondlen(count)
              if ( lnew ) then
                 ! use new positions
-                my_rxp(count,my_itrial) = rxnew(iufrom) + xx(count)*length
-                my_ryp(count,my_itrial) = rynew(iufrom) + yy(count)*length
-                my_rzp(count,my_itrial) = rznew(iufrom) + zz(count)*length
+                rxp(count,ip) = rxnew(iufrom) + xx(count)*length
+                ryp(count,ip) = rynew(iufrom) + yy(count)*length
+                rzp(count,ip) = rznew(iufrom) + zz(count)*length
              else
                 ! use old coordinates
-                my_rxp(count,my_itrial) = rxu(i,iufrom) + xx(count)*length
-                my_ryp(count,my_itrial) = ryu(i,iufrom) + yy(count)*length
-                my_rzp(count,my_itrial) = rzu(i,iufrom) + zz(count)*length
+                rxp(count,ip) = rxu(i,iufrom) + xx(count)*length
+                ryp(count,ip) = ryu(i,iufrom) + yy(count)*length
+                rzp(count,ip) = rzu(i,iufrom) + zz(count)*length
              end if
           end do
        end do
-
-       call mp_allgather(my_bsum_tor,bsum_tor,rcounts,displs,groupid)
-       call mp_allgather(my_vtgtr,vtgtr,rcounts,displs,groupid)
-       call mp_allgather(my_ctorf_acc,ctorf_acc,rcounts,displs,groupid)
-       call mp_allgather(my_vfbbtr_acc,vfbbtr_acc,rcounts,displs,groupid)
-       call mp_allgather(my_rxp,rxp,rcounts,displs,groupid)
-       call mp_allgather(my_ryp,ryp,rcounts,displs,groupid)
-       call mp_allgather(my_rzp,rzp,rcounts,displs,groupid)
 
 250    continue
 
@@ -1831,7 +1857,7 @@ contains
 !*********************************************************************
   subroutine geometry(lnew,iw,i,imolty,angstart,iuprev,glist,bondlen,bendang,phi,vvibtr,vbbtr,maxlen,wei_bend)
     use util_math,only:cone_angle
-    use util_mp,only:mp_set_displs,mp_allgather,mp_sum
+    use util_mp,only:mp_set_displs,mp_allgather
 
     ! variables passed to/from the subroutine
     logical::lnew
@@ -1845,7 +1871,7 @@ contains
 
     ! new variables
     integer::ibend,nchben_a,nchben_b
-    real::bsum_try,rsint,ang_trial(nchbn_max),bfactor(nchbn_max),rbf,bs
+    real::bsum_try,rsint,ang_trial(nchbn_max),vbend(nchbn_max),bfactor(nchbn_max),rbf,bs
 
     ! variables from geomold
     real::rxui,ryui,rzui,rxuij,ryuij,rzuij,xvecprev,yvecprev,zvecprev,distprev,xvecgrow,yvecgrow,zvecgrow,distgrow,anglec
@@ -1857,7 +1883,7 @@ contains
 
     ! MPI
     integer::rcounts(numprocs),displs(numprocs),my_start,my_end,blocksize,my_itrial,rid
-    real::my_ang_trial(nchbn_max),my_bfactor(nchbn_max)
+    real::my_ang_trial(nchbn_max),my_vbend(nchbn_max),my_bfactor(nchbn_max)
 
 #ifdef __DEBUG__
     write(io_output,*) 'START GEOMETRY in ',myid
@@ -1986,6 +2012,7 @@ contains
     ! determine the iugrow-iufrom-iuprev angles
     do count = angstart,ntogrow
        iugrow = growlist(iw,count)
+       kforce = -1000.0E0_dp
        do ib = 1, inben(imolty,iugrow)
           iulast = ijben2(imolty,iugrow,ib)
           if ( iulast .eq. iufrom ) then
@@ -2029,6 +2056,7 @@ contains
                 end if
 
                 my_ang_trial(my_itrial) = angle
+                my_vbend(my_itrial)=vangle
                 my_bfactor(my_itrial) = exp(-beta*vangle)
                 bsum_try = bsum_try + my_bfactor(my_itrial)
              else
@@ -2051,48 +2079,62 @@ contains
                 end if
 
                 my_ang_trial(1) = angle
+                my_vbend(1)=vangle
                 my_bfactor(1) = exp( -beta*vangle )
                 bsum_try = bsum_try + my_bfactor(1)
              end if
           end do
 
-          ! if (ldebug) then
-          !    write(100+myid,*) 'geom for molecule ',i,' lnew: ',lnew,' bead ',growlist(iw,1:ntogrow),' from myid ',myid
-          !    do my_itrial=1,rcounts(myid+1)
-          !       write(100+myid,*) "my_ang_trial(",my_itrial,") = ",my_ang_trial(my_itrial)
-          !    end do
-          ! end if
-
-          call mp_sum(bsum_try,1,groupid)
-          call mp_allgather(my_ang_trial,ang_trial,rcounts,displs,groupid)
-          call mp_allgather(my_bfactor,bfactor,rcounts,displs,groupid)
-
-          ! if (ldebug) then
-          !    do my_itrial=1,nchben_a
-          !       write(100+myid,*) "ang_trial(",my_itrial,") = ",ang_trial(my_itrial)
-          !    end do
-          ! end if
-
           if ( lnew ) then
              ! select one of the trial sites via bias
-             rbf = random(-1)*bsum_try
+             rbf = random(rid)*bsum_try
              bs = 0.0E0_dp
-             do ibend = 1,nchben_a
-                bs = bs + bfactor(ibend)
+             do ibend = 1,rcounts(myid+1)
+                bs = bs + my_bfactor(ibend)
                 if ( rbf .lt. bs ) then
-                   angle = ang_trial(ibend)
-                   vangle = log(bfactor(ibend))/(-beta)
+                   angle = my_ang_trial(ibend)
+                   vangle=my_vbend(ibend)
                    exit
                 end if
              end do
           else
              ! select the old conformation
-             angle = ang_trial(1)
-             vangle = log(bfactor(1))/(-beta)
+             angle = my_ang_trial(1)
+             vangle=my_vbend(1)
+          end if
+
+          if (numprocs.gt.1) then
+             call mp_allgather(bsum_try,bfactor,groupid)
+             bsum_try=sum(bfactor(1:numprocs))
+             call mp_allgather(angle,ang_trial,groupid)
+             call mp_allgather(vangle,vbend,groupid)
+
+             if ( lnew ) then
+                ! select one of the trial sites via bias
+                rbf = random(-1)*bsum_try
+                bs = 0.0E0_dp
+                do ibend = 1,numprocs
+                   bs = bs + bfactor(ibend)
+                   if ( rbf .lt. bs ) then
+                      angle = ang_trial(ibend)
+                      vangle=vbend(ibend)
+                      exit
+                   end if
+                end do
+             else
+                ! select the old conformation
+                angle = ang_trial(1)
+                vangle=vbend(1)
+             end if
           end if
 
           ! propagate the rosenbluth weight
           wei_bend = wei_bend * bsum_try/dble(nchben_a)
+       else if (kforce.lt.-0.1E0_dp) then
+          ! freely-joint beads
+          rsint = 2.0E0_dp*random(-1) - 1.0E0_dp
+          angle = acos(rsint)
+          vangle=0.0E0_dp
        else
           ! fixed bond angle
           angle = equil
@@ -2176,7 +2218,7 @@ contains
                          if (L_bend_table) then
                             lengthb = bondlen(aaa)
                             lengthb2 = lengthb*lengthb
-                            lengthc2 = lengtha2 + lengthb2 -  2.0E0_dp*lengtha*lengthb*cos(angle)
+                            lengthc2 = lengtha2 + lengthb2 - 2.0E0_dp*lengtha*lengthb*cos(angle)
                             lengthc = sqrt(lengthc2)
                             vphi = vphi + lininter_bend (lengthc,type)
                          else
@@ -2189,6 +2231,7 @@ contains
 
              ! store the boltzmann factors and phi
              my_ang_trial(my_itrial) = phitwo
+             my_vbend(my_itrial)=vphi
              my_bfactor(my_itrial) = exp(-beta*vphi)
              bsum_try = bsum_try + my_bfactor(my_itrial)
           else
@@ -2219,7 +2262,7 @@ contains
                          if (L_bend_table) then
                             lengthb = bondlen(aaa)
                             lengthb2 = lengthb * lengthb
-                            lengthc2 = lengtha2 + lengthb2 -  2.0E0_dp*lengtha*lengthb*cos(angle)
+                            lengthc2 = lengtha2 + lengthb2 - 2.0E0_dp*lengtha*lengthb*cos(angle)
                             lengthc = sqrt(lengthc2)
                             vphi = vphi + lininter_bend(lengthc,type)
                          else
@@ -2231,30 +2274,53 @@ contains
              end do
 
              my_ang_trial(1) = phitwo
+             my_vbend(1)=vphi
              my_bfactor(1) = exp( -beta * vphi )
              bsum_try = bsum_try + my_bfactor(1)
           end if
        end do
-       call mp_sum(bsum_try,1,groupid)
-       call mp_allgather(my_ang_trial,ang_trial,rcounts,displs,groupid)
-       call mp_allgather(my_bfactor,bfactor,rcounts,displs,groupid)
 
        if ( lnew ) then
           ! select a value of phitwo in a biased fashion
-          rbf = random(-1)*bsum_try
+          rbf = random(rid)*bsum_try
           bs = 0.0E0_dp
-          do ibend = 1,nchben_b
-             bs = bs + bfactor(ibend)
+          do ibend = 1,rcounts(myid+1)
+             bs = bs + my_bfactor(ibend)
              if ( rbf .lt. bs ) then
-                phitwo = ang_trial(ibend)
-                vphi = log( bfactor(ibend) )/(-beta)
+                phitwo = my_ang_trial(ibend)
+                vphi=my_vbend(ibend)
                 exit
              end if
           end do
        else
           ! select the OLD value of phitwo
-          phitwo = ang_trial(1)
-          vphi = log( bfactor(1) )/(-beta)
+          phitwo = my_ang_trial(1)
+          vphi=my_vbend(1)
+       end if
+
+       if (numprocs.gt.1) then
+          call mp_allgather(bsum_try,bfactor,groupid)
+          bsum_try=sum(bfactor(1:numprocs))
+          call mp_allgather(phitwo,ang_trial,groupid)
+          call mp_allgather(vphi,vbend,groupid)
+
+          if ( lnew ) then
+             ! select a value of phitwo in a biased fashion
+             rbf = random(-1)*bsum_try
+             bs = 0.0E0_dp
+             do ibend = 1,numprocs
+                bs = bs + bfactor(ibend)
+                if ( rbf .lt. bs ) then
+                   phitwo = ang_trial(ibend)
+                   vphi=vbend(ibend)
+                   exit
+                end if
+             end do
+          else
+             ! select the OLD value of phitwo
+             phitwo = ang_trial(1)
+             vphi=vbend(1)
+          end if
        end if
 
        ! propagate angle weight
@@ -3421,7 +3487,7 @@ contains
             equil = brvib(jtvib)
             kforce = brvibk(jtvib)
 
-            if (kforce.gt.0.001) then
+            if (kforce.gt.1.0E-3_dp) then
 ! we will use flexible bond lengths
                bsum_try = 0.0E0_dp
                mincb = brvibmin(jtvib)**3

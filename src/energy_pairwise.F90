@@ -125,13 +125,11 @@ contains
 ! INTERCHAIN INTERACTIONS ***
 ! *******************************
 
-! loop over all chains i
-! not if lgrand and ibox =2
+    ! loop over all chains i
     if (.not.(lgrand.and.ibox.eq.2) .and. .not.lideal(ibox)) then
-! RP added for MPI
-! do i = 1, nchain - 1
-       do i = myid+1,nchain-1,numprocs
-! check if i is in relevant box ###
+       ! MPI
+       do i = 1, nchain - 1
+          ! check if i is in relevant box ###
           if ( nboxi(i) .eq. ibox ) then
              imolty = moltyp(i)
              lqimol = lelect(imolty)
@@ -152,7 +150,7 @@ contains
              end if
 
              ! loop over all chains j with j>i
-             molecule2: do j = i + 1, nchain
+             molecule2: do j = i + 1 + myid, nchain, numprocs
                 ! check for simulation box ###
                 if ( nboxi(j) .eq. ibox ) then
                    jmolty = moltyp(j)
@@ -351,11 +349,10 @@ contains
        ! combine to reduce numerical error
        ! vsc = 0.0E0_dp
 
-       ! RP added for MPI
-       ! do i = 1,nchain
-       do i = myid+1,nchain,numprocs
-          if (nboxi(i) .eq. ibox) then
-             imolty = moltyp(i)
+       ! MPI
+       do imolty=1,nmolty
+          do nmcount=myid+1,ncmt(ibox,imolty),numprocs
+             i=parbox(nmcount,ibox,imolty)
              do ii = 1,nunit(imolty)
                 sself = sself + qqu(i,ii)*qqu(i,ii)
                 ! 1.772.. is the square root of pi
@@ -381,7 +378,7 @@ contains
                    end if
                 end do
              end do
-          end if
+          end do
        end do
 
        call mp_sum(correct,1,groupid)
@@ -409,15 +406,12 @@ contains
 ! *******************************
 ! INTRACHAIN INTERACTIONS ***
 ! *******************************
-! write(io_output,*) 'starting intrachain'
-! loop over all chains i
-! RP added for MPI
-! do i = 1, nchain
-       do i = myid+1,nchain,numprocs
-! check if i is in relevant box ###
-! write(io_output,*) 'nboxi(i),i,ibox',nboxi(i),i,ibox
-          if ( nboxi(i) .eq. ibox ) then
-             imolty = moltyp(i)
+       ! write(io_output,*) 'starting intrachain'
+       ! loop over all chains i
+       ! MPI
+       do imolty=1,nmolty
+          do nmcount=myid+1,ncmt(ibox,imolty),numprocs
+             i=parbox(nmcount,ibox,imolty)
              do ii = 1, nunit(imolty)-1
 ! write(io_output,*) 'ntype(imolty,ii),ii',ntype(imolty,ii),ii
                 ntii = ntype(imolty,ii)
@@ -478,7 +472,7 @@ contains
                    end if
                 end do
              end do
-          end if
+          end do
        end do
 
 ! RP added for MPI----- Returning from ovrlap--------------
@@ -551,18 +545,16 @@ contains
 ! CALCULATION OF VIB. + BEND. + TORS. ENERGY ***
 ! **************************************************
 
-! NOTE here virtual coordinates can be used!!!
-! RP added for MPI
-! do i = 1, nchain
-       do i = myid+1,nchain,numprocs
-          imolty = moltyp(i)
-          ! check if i is in relevant box ###
-          if ( nboxi(i) .eq. ibox ) then
+       ! NOTE here virtual coordinates can be used!!!
+       ! MPI
+       do imolty=1,nmolty
+          do nmcount=myid+1,ncmt(ibox,imolty),numprocs
+             i=parbox(nmcount,ibox,imolty)
              call U_bonded(i,imolty,sum_vvib,sum_vbend,sum_vtg)
              vvib=vvib+sum_vvib
              vbend=vbend+sum_vbend
              vtg=vtg+sum_vtg
-          end if
+          end do
        end do
        call mp_sum(vvib,1,groupid)
        call mp_sum(vbend,1,groupid)
@@ -578,17 +570,15 @@ contains
 ! for adsorption isotherms, don't calculate energy w/surface
 ! in box 2
     if ((lelect_field) .or. ((ibox .eq. 1) .and. (ljoe .or. lsami .or. lmuir .or.  lexzeo .or. lgraphite .or. lslit))) then
-! RP added for MPI
-! do i = 1, nchain
-       do i = myid+1, nchain,numprocs
-          ! check if i is in relevant box ###
-          if ( nboxi(i) .eq. ibox ) then
-             imolty = moltyp(i)
+       ! MPI
+       do imolty=1,nmolty
+          do nmcount=myid+1,ncmt(ibox,imolty),numprocs
+             i=parbox(nmcount,ibox,imolty)
              do j = 1, nunit(imolty)
                 ntj = ntype(imolty,j)
                 vext=vext+U_ext(ibox,i,j,ntj)
              end do
-          end if
+          end do
        end do
 
        call mp_sum(vext,1,groupid)
@@ -599,10 +589,11 @@ contains
 ! integration in stages b and c
 ! --------------------------------------------------------------------
     if (lmipsw) then
-! RP added for MPI
-! do i = 1, nchain
-       do i = myid+1,nchain,numprocs
-          imolty = moltyp(i)
+       ! MPI
+       do imolty=1,nmolty
+          !!?? most likely only works when nbox = 1
+       do nmcount=myid+1,ncmt(ibox,imolty),numprocs
+          i=parbox(nmcount,ibox,imolty)
           if (lwell(imolty)) then
              rxui = xcm(i)
              ryui = ycm(i)
@@ -633,6 +624,7 @@ contains
                 end if
              end do
           end if
+       end do
        end do
 
        call mp_sum(vwell,1,groupid)
@@ -669,7 +661,7 @@ contains
     if ( .not. lvol.and.myid.eq.0 ) then
        write(io_output,*)
        write(io_output,*) 'sumup control'
-       write(io_output,*) 'number of chains', nmcount
+       write(io_output,*) 'number of chains', nchbox(ibox)
        do i = 1, nmolty
           write(io_output,*) 'number of chains of type',i,ncmt(ibox,i)
        end do

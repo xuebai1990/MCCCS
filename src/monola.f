@@ -482,9 +482,6 @@ subroutine monola(file_in)
            end if
         end if
 
-! RP added for MPI
-        CALL mp_barrier(groupid)
-
         acmove = acmove + 1.0E0_dp
 ! accumulate probability of being in an expanded ensemble
 ! state

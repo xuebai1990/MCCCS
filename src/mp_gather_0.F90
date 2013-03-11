@@ -1,5 +1,5 @@
-    INTEGER, INTENT(IN) :: mydata
-    INTEGER, INTENT(OUT) :: alldata(:)
+    DATA_TYPE, INTENT(IN) :: mydata
+    DATA_TYPE, INTENT(OUT) :: alldata(:)
     INTEGER, INTENT(IN) :: comm
 #ifndef ALLGATHER
     INTEGER, INTENT(IN) :: root
@@ -9,9 +9,9 @@
 #ifdef __MPI__
 
 #ifdef ALLGATHER
-    CALL MPI_ALLGATHER(mydata, 1, MPI_INTEGER, alldata, 1, MPI_INTEGER, comm, IERR)
+    CALL MPI_ALLGATHER(mydata, 1, MP_TYPE, alldata, 1, MP_TYPE, comm, IERR)
 #else
-    CALL MPI_GATHER(mydata, 1, MPI_INTEGER, alldata, 1, MPI_INTEGER, root, comm, IERR)
+    CALL MPI_GATHER(mydata, 1, MP_TYPE, alldata, 1, MP_TYPE, root, comm, IERR)
 #endif
 
     IF (ierr/=0) CALL mp_stop(__LINE__)
