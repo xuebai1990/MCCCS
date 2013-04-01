@@ -909,7 +909,7 @@ contains
          else
 ! get particle from box a
 
-            iboxal = int( dble(ncmt(boxa,imolta))*random(-1) ) + 1
+            iboxal = int( real(ncmt(boxa,imolta),dp)*random(-1) ) + 1
             iboxa = parbox(iboxal,boxa,imolta)
             if ( moltyp(iboxa) .ne. imolta ) write(io_output,*) 'screwup'
             iboxia = nboxi(iboxa)
@@ -917,7 +917,7 @@ contains
 
 ! get particle from box b
 
-            iboxbl = int( dble(ncmt(boxb,imoltb))*random(-1) ) + 1
+            iboxbl = int( real(ncmt(boxb,imoltb),dp)*random(-1) ) + 1
             iboxb = parbox(iboxbl,boxb,imoltb)
             if ( moltyp(iboxb) .ne. imoltb ) write(io_output,*) 'screwup'
             iboxib = nboxi(iboxb)
@@ -1403,7 +1403,7 @@ contains
                if (.not.lideal(ibox)) then
 ! new logic for tail correction (same answer) MGM 3-25-98
                   do jmt = 1, nmolty
-                     rho = dble( ncmt(ibox,jmt) )
+                     rho = real( ncmt(ibox,jmt) ,dp)
                      if ( jmt .eq. imolin ) rho = rho + 1.0E0_dp
                      if ( jmt .eq. imolrm ) rho = rho - 1.0E0_dp
                      rho = rho / dvol
@@ -1447,7 +1447,7 @@ contains
 ! write(io_output,*) '### underflow in wratio calculation ###'
             return
          end if
-         wswat = ( tweight / tweiold ) * ( dble(orgaia*orgbib) / dble((orgbia+1)*(orgaib+1)) ) * exp(beta*(eta2(boxa,imolta) +eta2(boxb,imoltb)-eta2(boxa,imoltb) -eta2(boxb,imolta)))
+         wswat = ( tweight / tweiold ) * ( real(orgaia*orgbib,dp) / real((orgbia+1)*(orgaib+1),dp) ) * exp(beta*(eta2(boxa,imolta) +eta2(boxb,imoltb)-eta2(boxa,imoltb) -eta2(boxb,imolta)))
 
          if (lopt_bias(imolta)) call update_bias(log(wswat*2.0)/beta/2.0,boxa,boxb,imolta)
          if (lopt_bias(imoltb)) call update_bias(log(wswat*2.0)/beta/2.0,boxb,boxa,imoltb)

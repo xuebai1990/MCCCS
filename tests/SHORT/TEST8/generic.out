@@ -1,4 +1,4 @@
- Program started at 2013-02-20 21:20:06.055
+ Program started at 2013-04-01 02:42:21.717
  Number of processors:            1
            0  threads per processor
  Random number seed:            0
@@ -423,8 +423,8 @@
  
  temperature:                       3440.00000000000     
  
- ex-pressure:                      7.242900000000000E-003
-  7.242900000000000E-003
+ ex-pressure:                      7.242971565252510E-003
+  7.242971565252510E-003
  
  
  sumup control
@@ -435,7 +435,7 @@
  Tail correction   -19514.4537596172     
  bond vibration    0.000000000000000E+000
  bond bending      6.480215002478620E-023
- torsional        -1.264197635464370E-010
+ torsional        -1.361968315904960E-010
  external          0.000000000000000E+000
  coulombic energy  0.000000000000000E+000
  fluc Q energy     0.000000000000000E+000
@@ -454,7 +454,7 @@
  Tail correction   -21.1506552289709     
  bond vibration    0.000000000000000E+000
  bond bending      3.125553188147157E-023
- torsional        -1.364242052659392E-011
+ torsional        -1.477928890381008E-011
  external          0.000000000000000E+000
  coulombic energy  0.000000000000000E+000
  fluc Q energy     0.000000000000000E+000
@@ -520,10 +520,10 @@
  ### Molecule swap       ###
  
  molecule typ =           1
-between box  1 and  2 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  1 and  2 into box 2   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 2 into box 1   uattempts = 0 attempts = 0   accepted = 0
+between box 1 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  
  ### Molecule swatch     ###
  
@@ -544,27 +544,27 @@ molecule  1:   0.00000000      0.00000000
  sumup control
  number of chains         180
  number of chains of type           1         180
- inter lj energy   -212242.698732589     
- intra lj energy    72244.2481092224     
+ inter lj energy   -212242.698732588     
+ intra lj energy    72244.2481092230     
  Tail correction   -19514.4537596172     
  bond vibration    0.000000000000000E+000
- bond bending       1689971.59499731     
+ bond bending       1689971.59499732     
  torsional          841979.574966605     
  external          0.000000000000000E+000
  coulombic energy  0.000000000000000E+000
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy       2391952.71934055     
+ total energy       2391952.71934056     
  
  sumup control
  number of chains          20
  number of chains of type           1          20
- inter lj energy   -81.4567949916028     
- intra lj energy    1594.66627094458     
+ inter lj energy   -81.4567949916029     
+ intra lj energy    1594.66627094451     
  Tail correction   -21.1506552289709     
  bond vibration    0.000000000000000E+000
- bond bending       185722.937485686     
- torsional          92121.1739218026     
+ bond bending       185722.937485687     
+ torsional          92121.1739218025     
  external          0.000000000000000E+000
  coulombic energy  0.000000000000000E+000
  fluc Q energy     0.000000000000000E+000
@@ -572,8 +572,8 @@ molecule  1:   0.00000000      0.00000000
  total energy       279357.320883442     
  
  vstart       =      -367905.2979132421        -3533.8603734371
- vend         =      2391952.7193405526       279357.3208834419
- vbox         =      2391952.7193406052       279357.3208834433
+ vend         =      2391952.7193405577       279357.3208834421
+ vbox         =      2391952.7193405940       279357.3208834393
  
  Averages and fluctuations                            Box 1       Box 2
  
@@ -651,7 +651,7 @@ molecule  1:   0.00000000      0.00000000
  Enthalpy Inst.[kJ/mol] for box  1 =   1775.4710    195.3543    195.3543
  Enthalpy Ext. [kJ/mol] for box  1 =     96.7841     13.7717     13.7717
  Enthalpy Inst.[kJ/mol] for box  2 =    146.3720      5.9441      5.9441
- Enthalpy Ext. [kJ/mol] for box  2 =    119.9697      5.7730      5.7730
+ Enthalpy Ext. [kJ/mol] for box  2 =    119.9698      5.7730      5.7730
  
  chemical potential  itype   1 box   1 =        0.000       0.000       0.000
  chemical potential  itype   1 box   2 =        0.000       0.000       0.000
@@ -674,4 +674,4 @@ Free Enrgy of Transf itype   1 between box  2 and  1       -132.419176          
  block   energy    density   pressure   surf ten  mol fracs
    1   0.257E+06   0.520E-02   0.130E+04   0.291E-01   0.100E+01
    2   0.295E+06   0.520E-02   0.131E+04   0.723E-01   0.100E+01
- Program ended at 2013-02-20 21:20:33.544
+ Program ended at 2013-04-01 02:42:45.880

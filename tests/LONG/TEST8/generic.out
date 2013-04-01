@@ -1,4 +1,4 @@
- Program started at 2013-02-20 21:43:39.032
+ Program started at 2013-04-01 02:38:57.764
  Number of processors:            1
            0  threads per processor
  Random number seed:            0
@@ -423,8 +423,8 @@
  
  temperature:                       3440.00000000000     
  
- ex-pressure:                      7.242900000000000E-003
-  7.242900000000000E-003
+ ex-pressure:                      7.242971565252510E-003
+  7.242971565252510E-003
  
  
  sumup control
@@ -435,7 +435,7 @@
  Tail correction   -19514.4537596172     
  bond vibration    0.000000000000000E+000
  bond bending      6.480215002478620E-023
- torsional        -1.264197635464370E-010
+ torsional        -1.361968315904960E-010
  external          0.000000000000000E+000
  coulombic energy  0.000000000000000E+000
  fluc Q energy     0.000000000000000E+000
@@ -454,7 +454,7 @@
  Tail correction   -21.1506552289709     
  bond vibration    0.000000000000000E+000
  bond bending      3.125553188147157E-023
- torsional        -1.364242052659392E-011
+ torsional        -1.477928890381008E-011
  external          0.000000000000000E+000
  coulombic energy  0.000000000000000E+000
  fluc Q energy     0.000000000000000E+000
@@ -680,10 +680,10 @@
  ### Molecule swap       ###
  
  molecule typ =           1
-between box  1 and  2 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  1 and  2 into box 2   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 2 into box 1   uattempts = 0 attempts = 0   accepted = 0
+between box 1 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  
  ### Molecule swatch     ###
  
@@ -704,8 +704,8 @@ molecule  1:   0.00000000      0.00000000
  sumup control
  number of chains         180
  number of chains of type           1         180
- inter lj energy   -202292.907210774     
- intra lj energy    51695.3130401165     
+ inter lj energy   -202292.907211021     
+ intra lj energy    51695.3130401155     
  Tail correction   -19514.4537596172     
  bond vibration    0.000000000000000E+000
  bond bending       1725388.45963240     
@@ -714,26 +714,26 @@ molecule  1:   0.00000000      0.00000000
  coulombic energy  0.000000000000000E+000
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy       2389304.39281023     
+ total energy       2389304.39280998     
  
  sumup control
  number of chains          20
  number of chains of type           1          20
- inter lj energy   -114.863639036755     
- intra lj energy   -2666.82636967427     
+ inter lj energy   -114.863639036733     
+ intra lj energy   -2666.82636967422     
  Tail correction   -21.1506552289709     
  bond vibration    0.000000000000000E+000
- bond bending       216522.618694862     
+ bond bending       216522.618694861     
  torsional          85776.0670372708     
  external          0.000000000000000E+000
  coulombic energy  0.000000000000000E+000
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy       299516.995723422     
+ total energy       299516.995723421     
  
  vstart       =      -367905.2979132421        -3533.8603734371
- vend         =      2389304.3928102250       299516.9957234223
- vbox         =      2389304.3928153240       299516.9957237117
+ vend         =      2389304.3928099764       299516.9957234209
+ vbox         =      2389304.3928150078       299516.9957234727
  
  Averages and fluctuations                            Box 1       Box 2
  
@@ -850,4 +850,4 @@ Free Enrgy of Transf itype   1 between box  2 and  1       -132.419176          
    8   0.282E+06   0.520E-02   0.133E+04  -0.730E-01   0.100E+01
    9   0.281E+06   0.520E-02   0.132E+04   0.327E-01   0.100E+01
   10   0.283E+06   0.520E-02   0.132E+04   0.591E-02   0.100E+01
- Program ended at 2013-02-20 22:38:20.425
+ Program ended at 2013-04-01 03:29:42.672

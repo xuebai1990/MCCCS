@@ -180,7 +180,7 @@ contains
     wzeo=dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype)))
     if (myid.eq.0) then
        write(io_output,"(' Tabulated zeolite potential: ',/&
-                       &,' --------------------------------------------------',/,"//format_n(ztype%ntype,"(' number of ',A,':',I5,3X)")//&
+                       &,' --------------------------------------------------',/,"//format_n(ztype%ntype,"(' number of ',A,':',I0,3X)")//&
                      ",/,' simulation volume                 = ', f10.1, 20x,' Angst**3',/&
                        &,' number of atomtypes in the lattice= ',i10,/&
                        &,' number of zeolite atoms           = ',i10,/&
@@ -732,7 +732,7 @@ contains
        End Do
 
        ! Surface area for sphere i in real units [Angstrom^2]
-       stotal=stotal+sigij**2*real(ncount)/real(area_nsample)
+       stotal=stotal+sigij**2*real(ncount,dp)/real(area_nsample,dp)
     End Do
 
     ! Report results

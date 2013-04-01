@@ -1,4 +1,4 @@
- Program started at 2013-02-20 21:19:47.094
+ Program started at 2013-04-01 02:42:05.289
  Number of processors:            1
            0  threads per processor
  Random number seed:            2
@@ -88,18 +88,18 @@
     qscale:  0.000000000000000E+000
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
-    bead            1  beadtype          114  charge leader            1
+    bead            1  beadtype          114 O    charge leader            1
        bead           1  bonded to bead           2
           bond type: 18 bond length:    0.957 k/2:      0.0
        bead           1  bonded to bead           3
           bond type: 18 bond length:    0.957 k/2:      0.0
-    bead            2  beadtype          115  charge leader            2
+    bead            2  beadtype          115 H    charge leader            2
        bead           2  bonded to bead           1
           bond type: 18 bond length:    0.957 k/2:      0.0
-    bead            3  beadtype          115  charge leader            2
+    bead            3  beadtype          115 H    charge leader            2
        bead           3  bonded to bead           1
           bond type: 18 bond length:    0.957 k/2:      0.0
-    bead            4  beadtype          116  charge leader            2
+    bead            4  beadtype          116 M    charge leader            2
  licell: F
  rintramax:  0.000000000000000E+000  A
  boxlink:           1
@@ -316,8 +316,8 @@
  
  temperature:                       450.000000000000     
  
- ex-pressure:                      7.242900000000000E-003
-  7.242900000000000E-003
+ ex-pressure:                      7.242971565252510E-003
+  7.242971565252510E-003
  
  
  sumup control
@@ -330,14 +330,14 @@
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -3852164.54228314     
+ coulombic energy  -3851610.35225436     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -3398407.42504245     
+ total energy      -3397853.23501368     
  
- box             1  initial v   =   -3398407.42504245     
- surf. tension :   box 1 =     -32.71952
- pressure check:   box 1 =     -26244.51
+ box             1  initial v   =   -3397853.23501368     
+ surf. tension :   box 1 =     -32.72654
+ pressure check:   box 1 =     -25937.54
  
  sumup control
  number of chains         133
@@ -349,14 +349,14 @@
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -53042.7768924958     
+ coulombic energy  -53035.1459157475     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -46076.5434984032     
+ total energy      -46068.9125216549     
  
- box             2  initial v   =   -46076.5434984032     
- surf. tension :   box 2 =       1.12928
- pressure check:   box 2 =       1193.75
+ box             2  initial v   =   -46068.9125216549     
+ surf. tension :   box 2 =       1.12906
+ pressure check:   box 2 =       1194.00
  
  +++++ start of markov chain +++++
  
@@ -402,12 +402,12 @@
  ### Molecule swap       ###
  
  molecule typ =           1
-between box  1 and  2 into box 1   uattempts =        29.0 attempts =     29.0   accepted =     0.0
+between box 1 and 2 into box 1   uattempts = 29 attempts = 29   accepted = 0
  suc.growth % =100.000   accepted % =  0.000
-between box  1 and  2 into box 2   uattempts =        27.0 attempts =     27.0   accepted =     0.0
+between box 1 and 2 into box 2   uattempts = 27 attempts = 27   accepted = 0
  suc.growth % =100.000   accepted % =  0.000
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  
  ### Molecule swatch     ###
  
@@ -435,10 +435,10 @@ molecule  1:   0.00000000      0.00000000
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -3874814.80451733     
+ coulombic energy  -3874257.35591812     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -3403799.52274975     
+ total energy      -3403242.07415054     
  
  sumup control
  number of chains         133
@@ -450,21 +450,21 @@ molecule  1:   0.00000000      0.00000000
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -51900.5170751816     
+ coulombic energy  -51893.0504291607     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -45662.9400721099     
+ total energy      -45655.4734260890     
  
- vstart       =     -3398407.4250424532       -46076.5434984032
- vend         =     -3403799.5227497546       -45662.9400721099
- vbox         =     -3403799.5227497811       -45662.9400721092
+ vstart       =     -3397853.2350136773       -46068.9125216549
+ vend         =     -3403242.0741505413       -45655.4734260890
+ vbox         =     -3403242.0741505846       -45655.4734260884
  
  Averages and fluctuations                            Box 1       Box 2
  
- pressure                               [kPa] =    -7322.20     1227.52
- pressure                  [simulation units] =   -0.530339    0.088908
- surface tension                       [mN/m] =    -76.4942     -0.2448
- chem. potential of type       1          [K] =   -3863.850   -5919.400
+ pressure                               [kPa] =    -7012.34     1227.75
+ pressure                  [simulation units] =   -0.507897    0.088925
+ surface tension                       [mN/m] =    -76.4928     -0.2448
+ chem. potential of type       1          [K] =   -3863.452   -5919.374
  
  boxlength                                [A] =      31.394      80.095
  boxlength                                [A] =      31.394      80.095
@@ -476,20 +476,20 @@ molecule  1:   0.00000000      0.00000000
  molfraction of type           1              =   1.0000000   1.0000000
  mean sete length of type      1        [A^2] =       0.023       0.022
  
- Total energy  [K per system and kJ/mol per chain] =   -3400980.60   -45549.61        -32.62       -2.85
+ Total energy  [K per system and kJ/mol per chain] =   -3400424.54   -45542.06        -32.61       -2.85
  Inter LJ      [K per system and kJ/mol per chain] =     464137.99     6963.67          4.45        0.44
  Bond bending  [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00
  Torsion       [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00
  Intra LJ      [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00
  External pot  [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00
  Stretch       [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00
- Coulomb       [K per system and kJ/mol per chain] =   -3865118.58   -52513.28        -37.07       -3.28
+ Coulomb       [K per system and kJ/mol per chain] =   -3864562.53   -52505.73        -37.06       -3.28
  Tail  LJ      [K per system and kJ/mol per chain] =      -5694.82       -0.68         -0.05        0.00
  Fluc Q        [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00
  
- fluctuation in <vtot>                          =     7131.83     2474.27
+ fluctuation in <vtot>                          =     7130.38     2473.83
  
  type  box     vinter      vintra      vtor        vbend       vtail
     1    1     0.00000     0.00000     0.00000     0.00000     0.00000
     1    2     0.00000     0.00000     0.00000     0.00000     0.00000
- Program ended at 2013-02-20 21:19:56.376
+ Program ended at 2013-04-01 02:42:14.467

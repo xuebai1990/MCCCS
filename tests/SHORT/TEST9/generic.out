@@ -1,4 +1,4 @@
- Program started at 2013-02-20 21:20:33.764
+ Program started at 2013-04-01 02:42:46.043
  Number of processors:            1
            0  threads per processor
  Random number seed:            0
@@ -78,30 +78,30 @@
     lq14scale: F
     qscale:  0.000000000000000E+000
     energy offset for box           1 :  0.000000000000000E+000  K
-    bead            1  beadtype          380  charge leader            1
-    bead            2  beadtype          381  charge leader            2
-    bead            3  beadtype          380  charge leader            3
-    bead            4  beadtype          381  charge leader            4
-    bead            5  beadtype          380  charge leader            5
-    bead            6  beadtype          381  charge leader            6
-    bead            7  beadtype          385  charge leader            7
-    bead            8  beadtype          385  charge leader            8
-    bead            9  beadtype          385  charge leader            9
-    bead           10  beadtype          385  charge leader           10
-    bead           11  beadtype          385  charge leader           11
-    bead           12  beadtype          385  charge leader           12
-    bead           13  beadtype          382  charge leader           13
-    bead           14  beadtype          383  charge leader           14
-    bead           15  beadtype          382  charge leader           15
-    bead           16  beadtype          383  charge leader           16
-    bead           17  beadtype          382  charge leader           17
-    bead           18  beadtype          383  charge leader           18
-    bead           19  beadtype          384  charge leader           19
-    bead           20  beadtype          384  charge leader           20
-    bead           21  beadtype          384  charge leader           21
-    bead           22  beadtype          384  charge leader           22
-    bead           23  beadtype          384  charge leader           23
-    bead           24  beadtype          384  charge leader           24
+    bead            1  beadtype          380 C    charge leader            1
+    bead            2  beadtype          381 C    charge leader            2
+    bead            3  beadtype          380 C    charge leader            3
+    bead            4  beadtype          381 C    charge leader            4
+    bead            5  beadtype          380 C    charge leader            5
+    bead            6  beadtype          381 C    charge leader            6
+    bead            7  beadtype          385 H    charge leader            7
+    bead            8  beadtype          385 H    charge leader            8
+    bead            9  beadtype          385 H    charge leader            9
+    bead           10  beadtype          385 H    charge leader           10
+    bead           11  beadtype          385 H    charge leader           11
+    bead           12  beadtype          385 H    charge leader           12
+    bead           13  beadtype          382 N    charge leader           13
+    bead           14  beadtype          383 N    charge leader           14
+    bead           15  beadtype          382 N    charge leader           15
+    bead           16  beadtype          383 N    charge leader           16
+    bead           17  beadtype          382 N    charge leader           17
+    bead           18  beadtype          383 N    charge leader           18
+    bead           19  beadtype          384 O    charge leader           19
+    bead           20  beadtype          384 O    charge leader           20
+    bead           21  beadtype          384 O    charge leader           21
+    bead           22  beadtype          384 O    charge leader           22
+    bead           23  beadtype          384 O    charge leader           23
+    bead           24  beadtype          384 O    charge leader           24
  licell: F
  rintramax:  0.000000000000000E+000  A
  boxlink:           2
@@ -792,7 +792,7 @@ cell angle gamma:       120.341
  
  temperature:                       295.000000000000     
  
- ex-pressure:                      7.242900000000000E-003
+ ex-pressure:                      7.242971565252510E-003
  
  
  sumup control
@@ -805,36 +805,36 @@ cell angle gamma:       120.341
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -542380.823334673     
+ coulombic energy  -542302.793946054     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -3898345.99483977     
+ total energy      -3898267.96545115     
  
- box             1  initial v   =   -3898345.99483977     
- surf. tension :   box 1 =      58.92130
- pressure check:   box 1 =     -22255.98
+ box             1  initial v   =   -3898267.96545115     
+ surf. tension :   box 1 =      58.83400
+ pressure check:   box 1 =     -22215.59
  
  +++++ start of markov chain +++++
  
  Cycle   Total   Energy    Boxlength   Pressure  Molecules
  Box            1
- Type  1 bn     50.     60.     62.     41.     39.     46.
- max.displ.     0.3203    0.2135    0.2058    0.1169    0.1121    0.1159
+ Type  1 bn     51.     59.     62.     44.     37.     46.
+ max.displ.     0.3256    0.2171    0.2119    0.1184    0.1013    0.1159
  
  +++++ end of markov chain +++++
  
  ### Translations ###
  
  molecule typ =           1  in box           1
- x-dir: attempts =      50.0   ratio = 0.540   max.displ. = 0.3203E+00
- y-dir: attempts =      60.0   ratio = 0.367   max.displ. = 0.2135E+00
- z-dir: attempts =      62.0   ratio = 0.548   max.displ. = 0.2058E+00
+ x-dir: attempts =      51.0   ratio = 0.549   max.displ. = 0.3256E+00
+ y-dir: attempts =      59.0   ratio = 0.373   max.displ. = 0.2171E+00
+ z-dir: attempts =      62.0   ratio = 0.565   max.displ. = 0.2119E+00
  
  ### Rotations ###
  
  molecule typ =           1  in box           1
- x-dir: attempts =      41.0   ratio = 0.561   max.displ. = 0.1169E+00
- y-dir: attempts =      39.0   ratio = 0.538   max.displ. = 0.1121E+00
+ x-dir: attempts =      44.0   ratio = 0.568   max.displ. = 0.1184E+00
+ y-dir: attempts =      37.0   ratio = 0.486   max.displ. = 0.1013E+00
  z-dir: attempts =      46.0   ratio = 0.478   max.displ. = 0.1159E+00
  
  
@@ -845,17 +845,17 @@ cell angle gamma:       120.341
  h-matrix attempts =     0.0   ratio = 0.000   max.displ. = 0.2467E+00
  h-matrix attempts =     0.0   ratio = 0.000   max.displ. = 0.1507E+00
  h-matrix attempts =     0.0   ratio = 0.000   max.displ. = 0.1000E-02
- h-matrix attempts =     1.0   ratio = 1.000   max.displ. = 0.6501E+00
+ h-matrix attempts =     0.0   ratio = 0.000   max.displ. = 0.6501E+00
  h-matrix attempts =     0.0   ratio = 0.000   max.displ. = 0.7925E+00
  h-matrix attempts =     1.0   ratio = 0.000   max.displ. = 0.1891E+00
  
  ### Molecule swap       ###
  
  molecule typ =           1
-between box  1 and  2 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  1 and  2 into box 2   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 2 into box 1   uattempts = 0 attempts = 0   accepted = 0
+between box 1 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  
  ### Molecule swatch     ###
  
@@ -876,21 +876,21 @@ molecule  1:   0.00000000
  sumup control
  number of chains         300
  number of chains of type           1         300
- inter lj energy   -3356779.72765732     
+ inter lj energy   -3357156.45482273     
  intra lj energy   0.000000000000000E+000
  Tail correction   -68741.0663068097     
  bond vibration    0.000000000000000E+000
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -542979.792057553     
+ coulombic energy  -542894.015887832     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -3899759.51971487     
+ total energy      -3900050.47071056     
  
- vstart       =     -3898345.9948397721
- vend         =     -3899759.5197148747
- vbox         =     -3899759.5197148267
+ vstart       =     -3898267.9654511530
+ vend         =     -3900050.4707105607
+ vbox         =     -3900050.4707103395
  
  Averages and fluctuations                            Box 1
  
@@ -901,9 +901,9 @@ molecule  1:   0.00000000
  
  boxlength                                [A] =      45.303
  boxlength                                [A] =      45.201
- boxlength                                [A] =      40.943
- box angle                                deg =     110.764
- box angle                                deg =      87.826
+ boxlength                                [A] =      40.944
+ box angle                                deg =     110.785
+ box angle                                deg =      87.786
  box angle                                deg =     120.341
  no. of chains of type         1              =     300.000
  molar volume                      [cm^3/mol] =     133.718
@@ -912,19 +912,19 @@ molecule  1:   0.00000000
  molfraction of type           1              =   1.0000000
  mean sete length of type      1        [A^2] =      17.634
  
- Total energy  [K per system and kJ/mol per chain] =   -3898703.10     -108.05
- Inter LJ      [K per system and kJ/mol per chain] =   -3356387.48      -93.02
+ Total energy  [K per system and kJ/mol per chain] =   -3898724.47     -108.05
+ Inter LJ      [K per system and kJ/mol per chain] =   -3356484.88      -93.03
  Bond bending  [K per system and kJ/mol per chain] =          0.00        0.00
  Torsion       [K per system and kJ/mol per chain] =          0.00        0.00
  Intra LJ      [K per system and kJ/mol per chain] =          0.00        0.00
  External pot  [K per system and kJ/mol per chain] =          0.00        0.00
  Stretch       [K per system and kJ/mol per chain] =          0.00        0.00
- Coulomb       [K per system and kJ/mol per chain] =    -542315.61      -15.03
+ Coulomb       [K per system and kJ/mol per chain] =    -542239.59      -15.03
  Tail  LJ      [K per system and kJ/mol per chain] =     -68741.07       -1.91
  Fluc Q        [K per system and kJ/mol per chain] =          0.00        0.00
  
- fluctuation in <vtot>                          =      664.35
+ fluctuation in <vtot>                          =      787.93
  
  type  box     vinter      vintra      vtor        vbend       vtail
     1    1     0.00000     0.00000     0.00000     0.00000     0.00000
- Program ended at 2013-02-20 21:20:50.217
+ Program ended at 2013-04-01 02:43:00.056

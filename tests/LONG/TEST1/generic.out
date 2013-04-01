@@ -1,4 +1,4 @@
- Program started at 2013-02-20 21:43:39.032
+ Program started at 2013-04-01 02:38:57.762
  Number of processors:            1
            0  threads per processor
  Random number seed:            0
@@ -79,7 +79,7 @@
     lq14scale: T
     qscale:  0.500000000000000     
     energy offset for box           1 :  0.000000000000000E+000  K
-    bead            1  beadtype          212  charge leader            1
+    bead            1  beadtype          212 C    charge leader            1
        bead           1  bonded to bead           2
           bond type:101 bond length:    1.344 k/2:      0.0
        bead           1  bonded to bead           4
@@ -91,7 +91,7 @@
        bead   1 bending interaction through   3 with bead   5
           bend type:104 bend angle :  119.700 k/2:  35210.0
        bead  1            torsional interact  2 and  6 with bead  7 of torsional type:  40
-    bead            2  beadtype          211  charge leader            2
+    bead            2  beadtype          211 O    charge leader            2
        bead           2  bonded to bead           1
           bond type:101 bond length:    1.344 k/2:      0.0
        bead           2  bonded to bead           6
@@ -104,7 +104,7 @@
           bend type:102 bend angle :  111.000 k/2:  17650.0
        bead  2            torsional interact  1 and  3 with bead  5 of torsional type:  35
        bead  2            torsional interact  6 and  7 with bead  8 of torsional type:  45
-    bead            3  beadtype          214  charge leader            3
+    bead            3  beadtype          214 C    charge leader            3
        bead           3  bonded to bead           1
           bond type:103 bond length:    1.520 k/2:      0.0
        bead           3  bonded to bead           5
@@ -114,7 +114,7 @@
        bead   3 bending interaction through   1 with bead   2
           bend type:102 bend angle :  111.000 k/2:  17650.0
        bead  3            torsional interact  1 and  2 with bead  6 of torsional type:  36
-    bead            4  beadtype          213  charge leader            4
+    bead            4  beadtype          213 O    charge leader            4
        bead           4  bonded to bead           1
           bond type:102 bond length:    1.200 k/2:      0.0
        bead   4 bending interaction through   1 with bead   2
@@ -123,14 +123,14 @@
           bend type:103 bend angle :  126.000 k/2:  20150.0
        bead  4            torsional interact  1 and  2 with bead  6 of torsional type:  34
        bead  4            torsional interact  1 and  3 with bead  5 of torsional type:  37
-    bead            5  beadtype          215  charge leader            5
+    bead            5  beadtype          215 C    charge leader            5
        bead           5  bonded to bead           3
           bond type:104 bond length:    1.330 k/2:      0.0
        bead   5 bending interaction through   3 with bead   1
           bend type:104 bend angle :  119.700 k/2:  35210.0
        bead  5            torsional interact  3 and  1 with bead  2 of torsional type:  35
        bead  5            torsional interact  3 and  1 with bead  4 of torsional type:  37
-    bead            6  beadtype          218  charge leader            6
+    bead            6  beadtype          218 C    charge leader            6
        bead           6  bonded to bead           2
           bond type:100 bond length:    1.410 k/2:      0.0
        bead           6  bonded to bead           7
@@ -142,7 +142,7 @@
        bead  6            torsional interact  2 and  1 with bead  3 of torsional type:  36
        bead  6            torsional interact  2 and  1 with bead  4 of torsional type:  34
        bead  6            torsional interact  7 and  8 with bead  9 of torsional type:  44
-    bead            7  beadtype           64  charge leader            7
+    bead            7  beadtype           64 C    charge leader            7
        bead           7  bonded to bead           6
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead           7  bonded to bead           8
@@ -152,7 +152,7 @@
        bead   7 bending interaction through   8 with bead   9
           bend type: 35 bend angle :  108.500 k/2:  27720.0
        bead  7            torsional interact  6 and  2 with bead  1 of torsional type:  40
-    bead            8  beadtype           62  charge leader            8
+    bead            8  beadtype           62 O    charge leader            8
        bead           8  bonded to bead           7
           bond type: 30 bond length:    1.430 k/2:      0.0
        bead           8  bonded to bead           9
@@ -160,7 +160,7 @@
        bead   8 bending interaction through   7 with bead   6
           bend type: 36 bend angle :  109.470 k/2:  25200.0
        bead  8            torsional interact  7 and  6 with bead  2 of torsional type:  45
-    bead            9  beadtype           61  charge leader            9
+    bead            9  beadtype           61 H    charge leader            9
        bead           9  bonded to bead           8
           bond type: 29 bond length:    0.945 k/2:      0.0
        bead   9 bending interaction through   8 with bead   7
@@ -536,7 +536,7 @@
  
  temperature:                       298.150000000000     
  
- ex-pressure:                      7.242900000000000E-003
+ ex-pressure:                      7.242971565252510E-003
  
  
  sumup control
@@ -549,94 +549,94 @@
  bond bending       343800.041328877     
  torsional          1061216.10486417     
  external          0.000000000000000E+000
- coulombic energy  -2267086.36593826     
+ coulombic energy  -2266760.21251345     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -2119705.43650299     
+ total energy      -2119379.28307818     
  
- box             1  initial v   =   -2119705.43650299     
- surf. tension :   box 1 =     -57.19834
- pressure check:   box 1 =     -48795.55
+ box             1  initial v   =   -2119379.28307818     
+ surf. tension :   box 1 =     -57.22375
+ pressure check:   box 1 =     -48710.72
  
  +++++ start of markov chain +++++
  
  Cycle   Total   Energy    Boxlength   Pressure  Molecules
-   300  620300 -0.2106E+07    37.790         0.0 300
+   300  620300 -0.2104E+07    37.865         0.0 300
  Box            1
- Type  1 bn  17368.  17481.  17508.  17689.  17371.  17630.
- max.displ.     0.3139    0.3139    0.3144    0.1431    0.1414    0.1404
- volume change:  bn =   129.0   bs =    48.0   max.displ. = 0.50334E+03
-   600  620600 -0.2115E+07    37.651         0.0 300
-   900  620900 -0.2113E+07    37.754         0.0 300
+ Type  1 bn  17444.  17674.  17303.  17730.  17486.  17321.
+ max.displ.     0.3133    0.3104    0.3156    0.1461    0.1426    0.1399
+ volume change:  bn =   120.0   bs =    64.0   max.displ. = 0.72146E+03
+   600  620600 -0.2099E+07    37.777         0.0 300
+   900  620900 -0.2113E+07    37.878         0.0 300
  Box            1
- Type  1 bn  17459.  17615.  17419.  17430.  17489.  17396.
- max.displ.     0.3161    0.3159    0.3112    0.1458    0.1389    0.1415
- volume change:  bn =   111.0   bs =    50.0   max.displ. = 0.56683E+03
-  1200  621200 -0.2103E+07    37.834         0.0 300
+ Type  1 bn  17609.  17413.  17484.  17442.  17753.  17344.
+ max.displ.     0.3187    0.3066    0.3105    0.1476    0.1430    0.1400
+ volume change:  bn =   129.0   bs =    44.0   max.displ. = 0.61519E+03
+  1200  621200 -0.2099E+07    37.800         0.0 300
  Box            1
- Type  1 bn  17418.  17303.  17475.  17639.  17413.  17691.
- max.displ.     0.3169    0.3142    0.3099    0.1433    0.1402    0.1416
- volume change:  bn =   132.0   bs =    59.0   max.displ. = 0.63338E+03
-  1500  621500 -0.2135E+07    37.700         0.0 300
-  1800  621800 -0.2115E+07    37.706         0.0 300
+ Type  1 bn  17545.  17236.  17490.  17585.  17587.  17701.
+ max.displ.     0.3145    0.3095    0.3082    0.1461    0.1433    0.1419
+ volume change:  bn =   114.0   bs =    46.0   max.displ. = 0.62059E+03
+  1500  621500 -0.2090E+07    37.814         0.0 300
+  1800  621800 -0.2107E+07    37.757         0.0 300
  Box            1
- Type  1 bn  17470.  17475.  17546.  17226.  17395.  17671.
- max.displ.     0.3122    0.3126    0.3094    0.1442    0.1422    0.1390
- volume change:  bn =   106.0   bs =    35.0   max.displ. = 0.52284E+03
-  2100  622100 -0.2084E+07    37.817         0.0 300
-  2400  622400 -0.2076E+07    37.786         0.0 300
+ Type  1 bn  17201.  17394.  17536.  17742.  17455.  17688.
+ max.displ.     0.3163    0.3073    0.3102    0.1468    0.1439    0.1397
+ volume change:  bn =   110.0   bs =    36.0   max.displ. = 0.50776E+03
+  2100  622100 -0.2098E+07    37.685         0.0 300
+  2400  622400 -0.2086E+07    37.826         0.0 300
  Box            1
- Type  1 bn  17557.  17344.  17122.  17614.  17713.  17534.
- max.displ.     0.3208    0.3159    0.3120    0.1441    0.1426    0.1408
- volume change:  bn =    95.0   bs =    42.0   max.displ. = 0.57788E+03
-  2700  622700 -0.2089E+07    37.780         0.0 300
+ Type  1 bn  17426.  17396.  17317.  17655.  17666.  17638.
+ max.displ.     0.3130    0.3119    0.3140    0.1449    0.1449    0.1407
+ volume change:  bn =   124.0   bs =    57.0   max.displ. = 0.58351E+03
+  2700  622700 -0.2123E+07    37.627         0.0 300
  Box            1
- Type  1 bn  17477.  17519.  17645.  17534.  17349.  17511.
- max.displ.     0.3145    0.3088    0.3144    0.1460    0.1436    0.1420
- volume change:  bn =   105.0   bs =    43.0   max.displ. = 0.59164E+03
-  3000  623000 -0.2105E+07    37.871         0.0 300
+ Type  1 bn  17556.  17394.  17482.  17601.  17436.  17479.
+ max.displ.     0.3189    0.3080    0.3136    0.1449    0.1452    0.1403
+ volume change:  bn =   137.0   bs =    50.0   max.displ. = 0.53240E+03
+  3000  623000 -0.2109E+07    37.658         0.0 300
  
  +++++ end of markov chain +++++
  
  ### Translations ###
  
  molecule typ =           1  in box           1
- x-dir: attempts =  104749.0   ratio = 0.501   max.displ. = 0.3145E+00
- y-dir: attempts =  104737.0   ratio = 0.499   max.displ. = 0.3088E+00
- z-dir: attempts =  104715.0   ratio = 0.500   max.displ. = 0.3144E+00
+ x-dir: attempts =  104781.0   ratio = 0.502   max.displ. = 0.3189E+00
+ y-dir: attempts =  104507.0   ratio = 0.499   max.displ. = 0.3080E+00
+ z-dir: attempts =  104612.0   ratio = 0.500   max.displ. = 0.3136E+00
  
  ### Rotations ###
  
  molecule typ =           1  in box           1
- x-dir: attempts =  105132.0   ratio = 0.502   max.displ. = 0.1460E+00
- y-dir: attempts =  104730.0   ratio = 0.500   max.displ. = 0.1436E+00
- z-dir: attempts =  105433.0   ratio = 0.499   max.displ. = 0.1420E+00
+ x-dir: attempts =  105755.0   ratio = 0.501   max.displ. = 0.1449E+00
+ y-dir: attempts =  105383.0   ratio = 0.501   max.displ. = 0.1452E+00
+ z-dir: attempts =  105171.0   ratio = 0.498   max.displ. = 0.1403E+00
  
  
  ### Configurational-bias ###
  
  molecule typ =           1
      length  attempts  succ.growth  accepted   %su.gr.    %accep.
-        1   30085.0   30085.0   17466.0    100.00     58.06
-        2   14980.0   14980.0    1108.0    100.00      7.40
-        3   25140.0   19227.0    2095.0     76.48      8.33
-        4   29846.0   15936.0     103.0     53.39      0.35
-        5   14967.0    4230.0      31.0     28.26      0.21
-        6   24986.0    8734.0      16.0     34.96      0.06
-        7   39933.0   14725.0       5.0     36.87      0.01
-        8   89889.0   24427.0       2.0     27.17      0.00
+        1   29947.0   29947.0   17382.0    100.00     58.04
+        2   15052.0   15052.0    1095.0    100.00      7.27
+        3   24982.0   18983.0    2015.0     75.99      8.07
+        4   29894.0   15770.0      96.0     52.75      0.32
+        5   14851.0    4159.0      26.0     28.00      0.18
+        6   24867.0    8777.0      13.0     35.30      0.05
+        7   39429.0   14680.0       4.0     37.23      0.01
+        8   90035.0   24512.0       3.0     27.22      0.00
  
  
  ### Volume change       ###
- attempts =   678.0   ratio = 0.409   max.displ. = 0.5916E+03
+ attempts =   734.0   ratio = 0.405   max.displ. = 0.5324E+03
  
  ### Molecule swap       ###
  
  molecule typ =           1
-between box  1 and  2 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  1 and  2 into box 2   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 2 into box 1   uattempts = 0 attempts = 0   accepted = 0
+between box 1 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  
  ### Molecule swatch     ###
  
@@ -657,93 +657,93 @@ molecule  1:   0.00000000
  sumup control
  number of chains         300
  number of chains of type           1         300
- inter lj energy   -1207317.58053439     
- intra lj energy   -30934.9469551369     
- Tail correction   -37457.5948958781     
+ inter lj energy   -1228758.93289642     
+ intra lj energy   -38471.5417666245     
+ Tail correction   -38097.0012356778     
  bond vibration    0.000000000000000E+000
- bond bending       330208.148620638     
- torsional          1057054.64347473     
+ bond bending       332702.216582379     
+ torsional          1063564.83186666     
  external          0.000000000000000E+000
- coulombic energy  -2254322.74156806     
+ coulombic energy  -2238171.93527758     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -2105312.47696221     
+ total energy      -2109135.36149158     
  
- vstart       =     -2119705.4365029857
- vend         =     -2105312.4769622115
- vbox         =     -2105312.4769619042
+ vstart       =     -2119379.2830781778
+ vend         =     -2109135.3614915768
+ vbox         =     -2109135.3614917821
  
  Averages and fluctuations                            Box 1
  
- pressure                               [kPa] =    -8048.12
- pressure                  [simulation units] =   -0.582917
- surface tension                       [mN/m] =     35.2080
+ pressure                               [kPa] =   -10185.79
+ pressure                  [simulation units] =   -0.737747
+ surface tension                       [mN/m] =    -10.1976
  chem. potential of type       1          [K] =       0.000
  
- boxlength                                [A] =      37.763
- boxlength                                [A] =      37.763
- boxlength                                [A] =      37.763
+ boxlength                                [A] =      37.785
+ boxlength                                [A] =      37.785
+ boxlength                                [A] =      37.785
  no. of chains of type         1              =     300.000
- molar volume                      [cm^3/mol] =     108.097
- specific density                    [g/cm^3] =    1.074182
- number density of type        1 [chain/nm^3] =     5.57099
+ molar volume                      [cm^3/mol] =     108.286
+ specific density                    [g/cm^3] =    1.072304
+ number density of type        1 [chain/nm^3] =     5.56124
  molfraction of type           1              =   1.0000000
- mean sete length of type      1        [A^2] =      18.736
+ mean sete length of type      1        [A^2] =      18.784
  
- Total energy  [K per system and kJ/mol per chain] =   -2102788.30      -58.28
- Inter LJ      [K per system and kJ/mol per chain] =   -1205855.61      -33.42
- Bond bending  [K per system and kJ/mol per chain] =     334201.89        9.26
- Torsion       [K per system and kJ/mol per chain] =    1053039.92       29.19
- Intra LJ      [K per system and kJ/mol per chain] =     -32543.35       -0.90
+ Total energy  [K per system and kJ/mol per chain] =   -2105254.15      -58.35
+ Inter LJ      [K per system and kJ/mol per chain] =   -1201458.07      -33.30
+ Bond bending  [K per system and kJ/mol per chain] =     332502.00        9.22
+ Torsion       [K per system and kJ/mol per chain] =    1062039.98       29.43
+ Intra LJ      [K per system and kJ/mol per chain] =     -37944.62       -1.05
  External pot  [K per system and kJ/mol per chain] =          0.00        0.00
  Stretch       [K per system and kJ/mol per chain] =          0.00        0.00
- Coulomb       [K per system and kJ/mol per chain] =   -2251631.16      -62.40
- Tail  LJ      [K per system and kJ/mol per chain] =     -37780.26       -1.05
+ Coulomb       [K per system and kJ/mol per chain] =   -2260393.44      -62.65
+ Tail  LJ      [K per system and kJ/mol per chain] =     -37714.20       -1.05
  Fluc Q        [K per system and kJ/mol per chain] =          0.00        0.00
  
- fluctuation in <vtot>                          =    16896.14
+ fluctuation in <vtot>                          =    12506.99
  
  type  box     vinter      vintra      vtor        vbend       vtail
     1    1     0.00000     0.00000     0.00000     0.00000     0.00000
- specific density    box   1 =  0.10742E+01 0.27136E-02 0.90453E-03
- system volume       box   1 =  0.53851E+05 0.13595E+03 0.45315E+02
- pressure            box   1 =  -8048.1      6780.7      2260.2    
- surface tension     box   1 =     35.20799    40.77329    13.59110
+ specific density    box   1 =  0.10723E+01 0.30319E-02 0.10106E-02
+ system volume       box   1 =  0.53946E+05 0.15220E+03 0.50733E+02
+ pressure            box   1 =  -10186.      4003.0      1334.3    
+ surface tension     box   1 =    -10.19759    31.44787    10.48262
  
- Total energy   box   1 =   -0.21028E+07   0.14130E+05   0.47099E+04
- Inter LJ       box   1 =   -0.12059E+07   0.41739E+04   0.13913E+04
- Bond bending   box   1 =    0.33420E+06   0.48065E+04   0.16022E+04
- Torsion        box   1 =    0.10530E+07   0.40269E+04   0.13423E+04
- Intra LJ       box   1 =   -0.32543E+05   0.26367E+04   0.87889E+03
+ Total energy   box   1 =   -0.21053E+07   0.75079E+04   0.25026E+04
+ Inter LJ       box   1 =   -0.12015E+07   0.86736E+04   0.28912E+04
+ Bond bending   box   1 =    0.33250E+06   0.66639E+04   0.22213E+04
+ Torsion        box   1 =    0.10620E+07   0.50904E+04   0.16968E+04
+ Intra LJ       box   1 =   -0.37945E+05   0.14662E+04   0.48873E+03
  External pot   box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
  Stretch        box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
- Coulomb        box   1 =   -0.22516E+07   0.10264E+05   0.34213E+04
- Tail  LJ       box   1 =   -0.37780E+05   0.95440E+02   0.31813E+02
+ Coulomb        box   1 =   -0.22604E+07   0.74922E+04   0.24974E+04
+ Tail  LJ       box   1 =   -0.37714E+05   0.10664E+03   0.35545E+02
  Fluc Q         box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
  
- Enthalpy Inst.[kJ/mol] for box  1 =    -59.1589      0.8080      0.2693
- Enthalpy Ext. [kJ/mol] for box  1 =    -58.2703      0.3853      0.1284
+ Enthalpy Inst.[kJ/mol] for box  1 =    -59.4546      0.5275      0.1758
+ Enthalpy Ext. [kJ/mol] for box  1 =    -58.3337      0.2073      0.0691
  
- Cp residual(J/Kmol) =   89.0120546048014     
-  H2=   4420363954105.65     
-  H=  -2102398.26153247     
+ Cp residual(J/Kmol) =   48.7738447041940     
+  H2=   4430606459603.44     
+  H=  -2104863.42043302     
  chemical potential  itype   1 box   1 =        0.000       0.000       0.000
- mean sete length    itype   1 box   1 =       18.736       0.049       0.016
- number density      itype   1 box   1 =  0.55710E+01 0.14073E-01 0.46911E-02
+ mean sete length    itype   1 box   1 =       18.784       0.043       0.014
+ number density      itype   1 box   1 =  0.55612E+01 0.15724E-01 0.52414E-02
  mole fraction       itype   1 box   1 =    1.0000000   0.0000000   0.0000000
  
  
  -----block averages ------
   ------------ box:    1
  block   energy    density   pressure   surf ten  mol fracs
-   1  -0.210E+07   0.107E+01  -0.104E+05  -0.191E+02   0.100E+01
-   2  -0.211E+07   0.108E+01  -0.455E+04  -0.108E+02   0.100E+01
-   3  -0.211E+07   0.107E+01  -0.183E+05   0.192E+02   0.100E+01
-   4  -0.211E+07   0.108E+01  -0.314E+04   0.174E+02   0.100E+01
-   5  -0.210E+07   0.107E+01   0.249E+04   0.205E+02   0.100E+01
-   6  -0.213E+07   0.108E+01  -0.511E+04   0.299E+02   0.100E+01
-   7  -0.210E+07   0.107E+01  -0.152E+05   0.113E+03   0.100E+01
-   8  -0.208E+07   0.107E+01  -0.150E+05   0.920E+02   0.100E+01
-   9  -0.208E+07   0.107E+01   0.770E+03   0.699E+02   0.100E+01
-  10  -0.210E+07   0.107E+01  -0.120E+05   0.199E+02   0.100E+01
- Program ended at 2013-02-20 22:38:56.007
+   1  -0.211E+07   0.107E+01  -0.173E+05   0.306E+02   0.100E+01
+   2  -0.211E+07   0.107E+01  -0.126E+05  -0.880E+01   0.100E+01
+   3  -0.209E+07   0.107E+01  -0.899E+04  -0.168E+02   0.100E+01
+   4  -0.210E+07   0.107E+01  -0.826E+04   0.476E+01   0.100E+01
+   5  -0.211E+07   0.107E+01  -0.965E+04  -0.499E+01   0.100E+01
+   6  -0.210E+07   0.107E+01  -0.855E+04  -0.772E+02   0.100E+01
+   7  -0.210E+07   0.108E+01  -0.267E+04  -0.152E+00   0.100E+01
+   8  -0.210E+07   0.107E+01  -0.158E+05  -0.332E+00   0.100E+01
+   9  -0.210E+07   0.107E+01  -0.751E+04  -0.546E+02   0.100E+01
+  10  -0.212E+07   0.108E+01  -0.105E+05   0.255E+02   0.100E+01
+ Program ended at 2013-04-01 03:34:49.488

@@ -1,4 +1,4 @@
- Program started at 2013-02-20 21:20:50.459
+ Program started at 2013-04-01 02:41:19.557
  Number of processors:            1
            0  threads per processor
  Random number seed:            0
@@ -80,15 +80,15 @@
     lq14scale: F
     qscale:  0.500000000000000     
     energy offset for box           1 :  0.000000000000000E+000  K
-    bead            1  beadtype          107  charge leader            1
+    bead            1  beadtype          107 O    charge leader            1
        bead           1  bonded to bead           2
           bond type: 25 bond length:    1.000 k/2:      0.0
        bead           1  bonded to bead           3
           bond type: 25 bond length:    1.000 k/2:      0.0
-    bead            2  beadtype          108  charge leader            2
+    bead            2  beadtype          108 H    charge leader            2
        bead           2  bonded to bead           1
           bond type: 25 bond length:    1.000 k/2:      0.0
-    bead            3  beadtype          108  charge leader            3
+    bead            3  beadtype          108 H    charge leader            3
        bead           3  bonded to bead           1
           bond type: 25 bond length:    1.000 k/2:      0.0
  licell: F
@@ -265,7 +265,7 @@
  
  temperature:                       300.000000000000     
  
- ex-pressure:                      7.242900000000000E-003
+ ex-pressure:                      7.242971565252510E-003
  
  
  sumup control
@@ -284,8 +284,8 @@
  total energy      -5662975.92017787     
  
  box             1  initial v   =   -5662975.92017787     
- surf. tension :   box 1 =     -20.92707
- pressure check:   box 1 =    -183215.32
+ surf. tension :   box 1 =     -20.92838
+ pressure check:   box 1 =    -182649.86
  
  +++++ start of markov chain +++++
  
@@ -319,10 +319,10 @@
  ### Molecule swap       ###
  
  molecule typ =           1
-between box  1 and  2 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  1 and  2 into box 2   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 2 into box 1   uattempts = 0 attempts = 0   accepted = 0
+between box 1 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  
  ### Molecule swatch     ###
  
@@ -357,13 +357,13 @@ molecule  1:   0.00000000
  
  vstart       =     -5662975.9201778714
  vend         =     -5667091.1101370286
- vbox         =     -5667091.1101369457
+ vbox         =     -5667091.1101369476
  
  Averages and fluctuations                            Box 1
  
- pressure                               [kPa] =  -133691.06
- pressure                  [simulation units] =   -9.683110
- surface tension                       [mN/m] =    203.7249
+ pressure                               [kPa] =  -133139.81
+ pressure                  [simulation units] =   -9.643183
+ surface tension                       [mN/m] =    203.6846
  chem. potential of type       1          [K] =       0.000
  
  boxlength                                [A] =      31.008
@@ -393,8 +393,8 @@ molecule  1:   0.00000000
     1    1     0.00000     0.00000     0.00000     0.00000     0.00000
  specific density    box   1 =  0.10034E+01 0.13504E-02 0.67521E-03
  system volume       box   1 =  0.29815E+05 0.40055E+02 0.20027E+02
- pressure            box   1 = -0.13369E+06 0.12699E+06  63495.    
- surface tension     box   1 =    203.72488    44.68503    22.34251
+ pressure            box   1 = -0.13314E+06 0.12697E+06  63487.    
+ surface tension     box   1 =    203.68458    44.68093    22.34046
  
  Total energy   box   1 =   -0.56611E+07   0.53052E+04   0.26526E+04
  Inter LJ       box   1 =    0.97996E+06   0.78459E+04   0.39229E+04
@@ -407,12 +407,12 @@ molecule  1:   0.00000000
  Tail  LJ       box   1 =   -0.22099E+05   0.29742E+02   0.14871E+02
  Fluc Q         box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
  
- Enthalpy Inst.[kJ/mol] for box  1 =    -49.4828      2.3011      1.1506
+ Enthalpy Inst.[kJ/mol] for box  1 =    -49.4729      2.3008      1.1504
  Enthalpy Ext. [kJ/mol] for box  1 =    -47.0798      0.0660      0.0330
  
- Cp residual(J/Kmol) =   5.04974527352694     
-  H2=   32045132995711.5     
-  H=  -5660837.24671901     
+ Cp residual(J/Kmol) =   5.04974531250038     
+  H2=   32045132971553.7     
+  H=  -5660837.24458521     
  chemical potential  itype   1 box   1 =        0.000       0.000       0.000
  mean sete length    itype   1 box   1 =        1.000       0.000       0.000
  number density      itype   1 box   1 =  0.33540E+02 0.45140E-01 0.22570E-01
@@ -422,9 +422,9 @@ molecule  1:   0.00000000
  -----block averages ------
   ------------ box:    1
  block   energy    density   pressure   surf ten  mol fracs
-   1  -0.567E+07   0.100E+01  -0.376E+06   0.256E+03   0.100E+01
-   2  -0.566E+07   0.100E+01  -0.412E+05   0.180E+03   0.100E+01
-   3  -0.566E+07   0.100E+01  -0.148E+06   0.202E+03   0.100E+01
-   4  -0.565E+07   0.100E+01  -0.513E+05   0.246E+03   0.100E+01
-   5  -0.567E+07   0.101E+01  -0.526E+05   0.134E+03   0.100E+01
- Program ended at 2013-02-20 21:21:06.131
+   1  -0.567E+07   0.100E+01  -0.375E+06   0.256E+03   0.100E+01
+   2  -0.566E+07   0.100E+01  -0.407E+05   0.180E+03   0.100E+01
+   3  -0.566E+07   0.100E+01  -0.147E+06   0.202E+03   0.100E+01
+   4  -0.565E+07   0.100E+01  -0.507E+05   0.246E+03   0.100E+01
+   5  -0.567E+07   0.101E+01  -0.521E+05   0.134E+03   0.100E+01
+ Program ended at 2013-04-01 02:41:34.609

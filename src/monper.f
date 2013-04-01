@@ -3,12 +3,14 @@
 ! performs periodic updates and block averages
 ! -----------------------------------------------------------------
 subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove,acnp,pres,nibox,nnn,nblock,lratio,lratv ,lprint,lmv,lrsave,lblock,lratfix,lsolute,acsolpar, acEnthalpy,acEnthalpy1)
+  use const_phys,only:debroglie_factor
+  use sim_particle,only:check_neighbor_list
   use sim_system
   use sim_cell
   use energy_intramolecular,only:U_bonded
-  use sim_particle,only:check_neighbor_list
   use energy_pairwise,only:energy,coru
   use moves_simple
+  use moves_volume
   use moves_cbmc,only:schedule
   use transfer_swap,only:acchem,bnchem
   implicit none
@@ -16,11 +18,11 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
   integer::nummol,ntii
   integer::nibox,im,nnn,ntot,nblock,imolty,m,mm,i,j,ibox,itype,itel,mnbox,zzz,steps,igrow,jmolty,jbox
   integer::imend,bin,k,ii
-  logical::lratio,lratv,lprint,lmv,lrsave,lblock,lfq,lratfix ,lsolute,ovrlap
-  real, dimension(nprop1,nbxmax,nbxmax):: acsolpar
-  real, dimension(nbxmax):: acEnthalpy ,acEnthalpy1
-  real::dpr,dpp,debroglie ,histrat
-  real::acv, molfra,acpres,acsurf,acvolume,asetel,acdens,histtot,acmove,acnp,dvalue,dnchoi,dnchoi1,dnchoih ,dnunit,ratflcq,v,vintra,vinter,vext,velect,vewald,vtors,vtail,rho,vbend,rcutmin,vvib
+  logical::lratio,lratv,lprint,lmv,lrsave,lblock,lfq,lratfix,lsolute,ovrlap
+  real, dimension(nprop1,nbxmax,nbxmax)::acsolpar
+  real, dimension(nbxmax)::acEnthalpy,acEnthalpy1
+  real::dpr,dpp,debroglie,histrat
+  real::acv,molfra,acpres,acsurf,acvolume,asetel,acdens,histtot,acmove,acnp,dvalue,ratflcq,v,vintra,vinter,vext,velect,vewald,vtors,vtail,rho,vbend,rcutmin,vvib
 
   dimension acv(nener,nbxmax),lratfix(ntmax)
   dimension mnbox(nbxmax,ntmax)
@@ -28,7 +30,7 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
   dimension asetel(nbxmax,ntmax),acdens(nbxmax,ntmax) ,molfra(nbxmax,ntmax)
   dimension lsolute(ntmax)
 
-  real::ratrax,ratray,ratraz,rttrax,rttray ,rttraz,rarotx,raroty,rarotz,rtrotx,rtroty,rtrotz,vol,ratvol ,temmass,dn,pres(nbxmax)
+  real::ratrax,ratray,ratraz,rttrax,rttray,rttraz,rarotx,raroty,rarotz,rtrotx,rtroty,rtrotz,vol,ratvol,temmass,dn,pres(nbxmax)
 ! -------------------------------------------------------------------
 #ifdef __DEBUG__
   write(io_output,*) 'begin MONPER in ',myid
@@ -554,21 +556,17 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
 ! chemical potential
         do itype = 1, nmolty
            itel = (2+nener) + itype
-           dnchoi = dble(nchoi(itype))
-           dnchoi1 = dble(nchoi1(itype))
-! determine how many steps it takes to grow the 
-! molecule not counting the first inserted bead
+           debroglie = debroglie_factor*sqrt(beta/masst(itype))
+           ! determine how many steps it takes to grow the 
+           ! molecule not counting the first inserted bead
            igrow = nugrow(itype)
-! need the first schedule call for rigid molecules, else it will seg fault
            if (lrigid(itype))then
               call schedule(igrow,itype,steps,1,0,4)
+              dpp = acchem(ibox,itype)/( real(nchoi1(itype)*nchoir(itype)*(nchoi(itype)**steps)*nchoih(itype),dp) * (debroglie**3) )
            else
               call schedule(igrow,itype,steps,1,0,2)
+              dpp = acchem(ibox,itype)/( real(nchoi1(itype)*(nchoi(itype)**steps)*nchoih(itype),dp) * (debroglie**3) )
            end if
-           dnunit = dble(steps)
-           dnchoih = dble(nchoih(itype))
-           debroglie = 17.458E0_dp/( sqrt(masst(itype)/beta ))
-           dpp = acchem(ibox,itype)/( dnchoih* dnchoi1*(dnchoi**(dnunit)) *debroglie*debroglie*debroglie )
            dvalue = bnchem(ibox,itype)
            call update(nblock,itel,ibox,dpp,dvalue)
         end do

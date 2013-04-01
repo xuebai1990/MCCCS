@@ -1,4 +1,4 @@
- Program started at 2013-02-20 21:18:39.261
+ Program started at 2013-04-01 02:41:09.168
  Number of processors:            1
            0  threads per processor
  Random number seed:            0
@@ -80,7 +80,7 @@
     lq14scale: T
     qscale:  0.500000000000000     
     energy offset for box           1 :  0.000000000000000E+000  K
-    bead            1  beadtype          198  charge leader            1
+    bead            1  beadtype          198 O    charge leader            1
        bead           1  bonded to bead           3
           bond type: 57 bond length:    1.225 k/2:      0.0
        bead   1 bending interaction through   3 with bead   4
@@ -89,7 +89,7 @@
           bend type: 71 bend angle :  125.000 k/2:  40284.0
        bead  1            torsional interact  3 and  4 with bead  5 of torsional type:  32
        bead  1            torsional interact  3 and  4 with bead  9 of torsional type:  32
-    bead            2  beadtype          198  charge leader            2
+    bead            2  beadtype          198 O    charge leader            2
        bead           2  bonded to bead           3
           bond type: 57 bond length:    1.225 k/2:      0.0
        bead   2 bending interaction through   3 with bead   4
@@ -98,7 +98,7 @@
           bend type: 71 bend angle :  125.000 k/2:  40284.0
        bead  2            torsional interact  3 and  4 with bead  5 of torsional type:  32
        bead  2            torsional interact  3 and  4 with bead  9 of torsional type:  32
-    bead            3  beadtype          197  charge leader            3
+    bead            3  beadtype          197 N    charge leader            3
        bead           3  bonded to bead           1
           bond type: 57 bond length:    1.225 k/2:      0.0
        bead           3  bonded to bead           2
@@ -109,7 +109,7 @@
           bend type: 72 bend angle :  120.000 k/2:      0.0
        bead   3 bending interaction through   4 with bead   9
           bend type: 72 bend angle :  120.000 k/2:      0.0
-    bead            4  beadtype          196  charge leader            4
+    bead            4  beadtype          196 c    charge leader            4
        bead           4  bonded to bead           3
           bond type: 56 bond length:    1.490 k/2:      0.0
        bead           4  bonded to bead           5
@@ -124,7 +124,7 @@
           bend type: 72 bend angle :  120.000 k/2:      0.0
        bead   4 bending interaction through   9 with bead   8
           bend type: 72 bend angle :  120.000 k/2:      0.0
-    bead            5  beadtype          199  charge leader            5
+    bead            5  beadtype          199 C    charge leader            5
        bead           5  bonded to bead           4
           bond type: 47 bond length:    1.400 k/2:      0.0
        bead           5  bonded to bead           6
@@ -137,7 +137,7 @@
           bend type: 72 bend angle :  120.000 k/2:      0.0
        bead  5            torsional interact  4 and  3 with bead  1 of torsional type:  32
        bead  5            torsional interact  4 and  3 with bead  2 of torsional type:  32
-    bead            6  beadtype          199  charge leader            6
+    bead            6  beadtype          199 C    charge leader            6
        bead           6  bonded to bead           5
           bond type: 47 bond length:    1.400 k/2:      0.0
        bead           6  bonded to bead           7
@@ -146,7 +146,7 @@
           bend type: 72 bend angle :  120.000 k/2:      0.0
        bead   6 bending interaction through   7 with bead   8
           bend type: 72 bend angle :  120.000 k/2:      0.0
-    bead            7  beadtype          199  charge leader            7
+    bead            7  beadtype          199 C    charge leader            7
        bead           7  bonded to bead           6
           bond type: 47 bond length:    1.400 k/2:      0.0
        bead           7  bonded to bead           8
@@ -157,7 +157,7 @@
           bend type: 72 bend angle :  120.000 k/2:      0.0
        bead   7 bending interaction through   8 with bead  13
           bend type: 72 bend angle :  120.000 k/2:      0.0
-    bead            8  beadtype           59  charge leader            8
+    bead            8  beadtype           59 C    charge leader            8
        bead           8  bonded to bead           7
           bond type: 47 bond length:    1.400 k/2:      0.0
        bead           8  bonded to bead           9
@@ -168,25 +168,25 @@
           bend type: 72 bend angle :  120.000 k/2:      0.0
        bead   8 bending interaction through   7 with bead   6
           bend type: 72 bend angle :  120.000 k/2:      0.0
-    bead            9  beadtype          199  charge leader            9
+    bead            9  beadtype          199 C    charge leader            9
        bead           9  bonded to bead           8
           bond type: 47 bond length:    1.400 k/2:      0.0
        bead           9  bonded to bead           4
           bond type: 47 bond length:    1.400 k/2:      0.0
        bead  9            torsional interact  4 and  3 with bead  1 of torsional type:  32
        bead  9            torsional interact  4 and  3 with bead  2 of torsional type:  32
-    bead           10  beadtype           57  charge leader           10
+    bead           10  beadtype           57 H    charge leader           10
        bead          10  bonded to bead          11
           bond type: 58 bond length:    0.785 k/2:      0.0
        bead          10  bonded to bead          12
           bond type: 58 bond length:    0.785 k/2:      0.0
-    bead           11  beadtype           58  charge leader           11
+    bead           11  beadtype           58 H    charge leader           11
        bead          11  bonded to bead          10
           bond type: 58 bond length:    0.785 k/2:      0.0
-    bead           12  beadtype           58  charge leader           12
+    bead           12  beadtype           58 H    charge leader           12
        bead          12  bonded to bead          10
           bond type: 58 bond length:    0.785 k/2:      0.0
-    bead           13  beadtype            4  charge leader           13
+    bead           13  beadtype            4 C    charge leader           13
        bead          13  bonded to bead           8
           bond type:  1 bond length:    1.540 k/2:      0.0
  molecule type:           2
@@ -924,7 +924,7 @@
  
  temperature:                       298.150000000000     
  
- ex-pressure:                      7.242900000000000E-003
+ ex-pressure:                      7.242971565252510E-003
  
  
  sumup control
@@ -937,15 +937,15 @@
  bond vibration    0.000000000000000E+000
  bond bending       8456269.70522318     
  torsional          414177.104673605     
- external           95.9713996320020     
- coulombic energy  -449971.088508063     
+ external           96.0087896161316     
+ coulombic energy  -449906.353607009     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy       6993800.16020415     
+ total energy       6993864.93249518     
  
- box             1  initial v   =    6993800.16020415     
- surf. tension :   box 1 =      25.72707
- pressure check:   box 1 =     -32220.73
+ box             1  initial v   =    6993864.93249518     
+ surf. tension :   box 1 =      25.72550
+ pressure check:   box 1 =     -32203.17
  
  +++++ start of markov chain +++++
  
@@ -1002,13 +1002,13 @@
  ### Molecule swap       ###
  
  molecule typ =           1
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =           2
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  
  ### Molecule swatch     ###
  
@@ -1037,21 +1037,21 @@ molecule  2:   0.00000000
  bond vibration    0.000000000000000E+000
  bond bending       8456444.21008924     
  torsional          423560.778943052     
- external           92.3438261293654     
- coulombic energy  -446351.602637222     
+ external           92.3798028287447     
+ coulombic energy  -446287.388451977     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy       7001754.43285085     
+ total energy       7001818.68301280     
  
- vstart       =      6993800.1602041451
- vend         =      7001754.4328508517
- vbox         =      7001754.4328508712
+ vstart       =      6993864.9324951824
+ vend         =      7001818.6830127956
+ vbox         =      7001818.6830128133
  
  Averages and fluctuations                            Box 1
  
- pressure                               [kPa] =   -25076.26
- pressure                  [simulation units] =   -1.816248
- surface tension                       [mN/m] =     19.5103
+ pressure                               [kPa] =   -25058.83
+ pressure                  [simulation units] =   -1.814986
+ surface tension                       [mN/m] =     19.5084
  chem. potential of type       1          [K] =       0.000
  chem. potential of type       2          [K] =       0.000
  
@@ -1069,44 +1069,44 @@ molecule  2:   0.00000000
  mean sete length of type      1        [A^2] =      30.906
  mean sete length of type      2        [A^2] =      94.601
  
- Total energy  [K per system and kJ/mol per chain] =    7001236.85      227.39
+ Total energy  [K per system and kJ/mol per chain] =    7001301.65      227.39
  Inter LJ      [K per system and kJ/mol per chain] =   -1348311.40      -43.79
  Bond bending  [K per system and kJ/mol per chain] =    8457984.27      274.70
  Torsion       [K per system and kJ/mol per chain] =     419159.68       13.61
  Intra LJ      [K per system and kJ/mol per chain] =     -77451.18       -2.52
- External pot  [K per system and kJ/mol per chain] =         79.25        0.00
+ External pot  [K per system and kJ/mol per chain] =         79.28        0.00
  Stretch       [K per system and kJ/mol per chain] =          0.00        0.00
- Coulomb       [K per system and kJ/mol per chain] =    -450223.78      -14.62
+ Coulomb       [K per system and kJ/mol per chain] =    -450159.01      -14.62
  Tail  LJ      [K per system and kJ/mol per chain] =     -45641.10       -1.48
  Fluc Q        [K per system and kJ/mol per chain] =          0.00        0.00
  
- fluctuation in <vtot>                          =     5287.81
+ fluctuation in <vtot>                          =     5287.84
  
  type  box     vinter      vintra      vtor        vbend       vtail
     1    1     0.00000     0.00000     0.00000     0.00000     0.00000
     2    1     0.00000     0.00000     0.00000     0.00000     0.00000
  specific density    box   1 =  0.78846E+00 0.13054E-13 0.92306E-14
  system volume       box   1 =  0.76150E+05 0.43859E-08 0.31013E-08
- pressure            box   1 =  -25076.      3520.0      2489.0    
- surface tension     box   1 =     19.51032    12.79153     9.04498
+ pressure            box   1 =  -25059.      3520.1      2489.1    
+ surface tension     box   1 =     19.50842    12.79218     9.04544
  
- Total energy   box   1 =    0.70012E+07   0.42931E+04   0.30357E+04
+ Total energy   box   1 =    0.70013E+07   0.42931E+04   0.30357E+04
  Inter LJ       box   1 =   -0.13483E+07   0.19205E+04   0.13580E+04
  Bond bending   box   1 =    0.84580E+07   0.54148E+03   0.38288E+03
  Torsion        box   1 =    0.41916E+06   0.29081E+04   0.20564E+04
  Intra LJ       box   1 =   -0.77451E+05   0.12878E+03   0.91061E+02
- External pot   box   1 =    0.79251E+02   0.74656E+01   0.52790E+01
+ External pot   box   1 =    0.79281E+02   0.74685E+01   0.52810E+01
  Stretch        box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
- Coulomb        box   1 =   -0.45022E+06   0.86394E+03   0.61090E+03
- Tail  LJ       box   1 =   -0.45641E+05   0.23050E-08   0.16299E-08
+ Coulomb        box   1 =   -0.45016E+06   0.86382E+03   0.61081E+03
+ Tail  LJ       box   1 =   -0.45641E+05   0.23016E-08   0.16275E-08
  Fluc Q         box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
  
- Enthalpy Inst.[kJ/mol] for box  1 =    222.9604      0.6908      0.4884
- Enthalpy Ext. [kJ/mol] for box  1 =    227.4702      0.0638      0.0451
+ Enthalpy Inst.[kJ/mol] for box  1 =    222.9656      0.6908      0.4884
+ Enthalpy Ext. [kJ/mol] for box  1 =    227.4723      0.0638      0.0451
  
- Cv residual(J/Kmol) =   10.2157314007113     
-  E2=   49017345339080.2     
-  E=   7001236.84631175     
+ Cv residual(J/Kmol) =   10.2158624726766     
+  E2=   49018252733758.3     
+  E=   7001301.64844171     
  chemical potential  itype   1 box   1 =        0.000       0.000       0.000
  chemical potential  itype   2 box   1 =        0.000       0.000       0.000
  mean sete length    itype   1 box   1 =       30.906       0.010       0.007
@@ -1123,4 +1123,4 @@ molecule  2:   0.00000000
    1   0.700E+07   0.788E+00  -0.259E+05   0.327E+02   0.203E+00   0.797E+00
    2   0.700E+07   0.788E+00  -0.204E+05   0.219E+01   0.203E+00   0.797E+00
    3   0.700E+07   0.788E+00  -0.289E+05   0.236E+02   0.203E+00   0.797E+00
- Program ended at 2013-02-20 21:19:01.417
+ Program ended at 2013-04-01 02:41:19.190

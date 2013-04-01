@@ -48,8 +48,8 @@ contains
     real,intent(in)::u_diff
     integer,intent(in)::boxrem,boxins,imolty
 
-    u_bias_diff(boxins,imolty)=(u_bias_diff(boxins,imolty)*num_update_bias(boxins,imolty)+u_diff/2.0)/real(num_update_bias(boxins,imolty)+1.0)
-    u_bias_diff(boxrem,imolty)=(u_bias_diff(boxrem,imolty)*num_update_bias(boxrem,imolty)-u_diff/2.0)/real(num_update_bias(boxrem,imolty)+1.0)
+    u_bias_diff(boxins,imolty)=(u_bias_diff(boxins,imolty)*num_update_bias(boxins,imolty)+u_diff/2.0)/real(num_update_bias(boxins,imolty)+1.0,dp)
+    u_bias_diff(boxrem,imolty)=(u_bias_diff(boxrem,imolty)*num_update_bias(boxrem,imolty)-u_diff/2.0)/real(num_update_bias(boxrem,imolty)+1.0,dp)
     num_update_bias(boxins,imolty)=num_update_bias(boxins,imolty)+1
     num_update_bias(boxrem,imolty)=num_update_bias(boxrem,imolty)+1
   end subroutine update_bias

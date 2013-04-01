@@ -1,4 +1,4 @@
- Program started at 2013-02-26 13:38:20.643
+ Program started at 2013-04-01 02:42:14.694
  Number of processors:            1
            0  threads per processor
  Random number seed:           44
@@ -134,22 +134,22 @@
     energy offset for box           1 :  -1500.00000000000       K
     energy offset for box           2 :  -1500.00000000000       K
     energy offset for box           3 :  0.000000000000000E+000  K
-    bead            1  beadtype          114  charge leader            1
+    bead            1  beadtype          114 O    charge leader            1
        bead           1  bonded to bead           2
           bond type: 26 bond length:    0.957 k/2:      0.0
        bead           1  bonded to bead           3
           bond type: 26 bond length:    0.957 k/2:      0.0
-    bead            2  beadtype          115  charge leader            2
+    bead            2  beadtype          115 H    charge leader            2
        bead           2  bonded to bead           1
           bond type: 26 bond length:    0.957 k/2:      0.0
        bead   2 bending interaction through   1 with bead   3
           bend type: 44 bend angle :  104.520 k/2:      0.0
-    bead            3  beadtype          115  charge leader            2
+    bead            3  beadtype          115 H    charge leader            2
        bead           3  bonded to bead           1
           bond type: 26 bond length:    0.957 k/2:      0.0
        bead   3 bending interaction through   1 with bead   2
           bend type: 44 bend angle :  104.520 k/2:      0.0
-    bead            4  beadtype          116  charge leader            2
+    bead            4  beadtype          116 M    charge leader            2
        bead           4  bonded to bead           1
           bond type: 27 bond length:    0.150 k/2:      0.0
  molecule type:           2
@@ -172,17 +172,17 @@
     energy offset for box           1 :  -1500.00000000000       K
     energy offset for box           2 :  -1500.00000000000       K
     energy offset for box           3 :  0.000000000000000E+000  K
-    bead            1  beadtype          151  charge leader            1
+    bead            1  beadtype          151 N    charge leader            1
        bead           1  bonded to bead           2
           bond type: 48 bond length:    1.157 k/2:      0.0
        bead   1 bending interaction through   2 with bead   3
           bend type: 49 bend angle :  180.000 k/2:      0.0
-    bead            2  beadtype          152  charge leader            1
+    bead            2  beadtype          152 C    charge leader            1
        bead           2  bonded to bead           1
           bond type: 48 bond length:    1.157 k/2:      0.0
        bead           2  bonded to bead           3
           bond type:  1 bond length:    1.540 k/2:      0.0
-    bead            3  beadtype          154  charge leader            1
+    bead            3  beadtype          154 C    charge leader            1
        bead           3  bonded to bead           2
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead   3 bending interaction through   2 with bead   1
@@ -207,7 +207,7 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  0.000000000000000E+000  K
-    bead            1  beadtype          177  charge leader            1
+    bead            1  beadtype          177 Si   charge leader            1
  molecule type:           4
     number of units:           1
     number of units for CBMC growth:           1
@@ -228,7 +228,7 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  0.000000000000000E+000  K
-    bead            1  beadtype          178  charge leader            1
+    bead            1  beadtype          178 O    charge leader            1
  molecule type:           5
     number of units:           1
     number of units for CBMC growth:           1
@@ -249,7 +249,7 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  0.000000000000000E+000  K
-    bead            1  beadtype          124 N   
+    bead            1  beadtype          124 HE  
  molecule type:           6
     number of units:           6
     number of units for CBMC growth:           6
@@ -270,7 +270,7 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  0.000000000000000E+000  K
-    bead            1  beadtype          178  charge leader            1
+    bead            1  beadtype          178 O    charge leader            1
        bead           1  bonded to bead           4
           bond type: 56 bond length:    1.490 k/2:      0.0
        bead   1 bending interaction through   4 with bead   5
@@ -280,7 +280,7 @@
        bead   1 bending interaction through   4 with bead   3
           bend type:  3 bend angle :  109.470 k/2:  31250.0
        bead  1            torsional interact  4 and  5 with bead  6 of torsional type:  23
-    bead            2  beadtype          178  charge leader            2
+    bead            2  beadtype          178 O    charge leader            2
        bead           2  bonded to bead           4
           bond type: 56 bond length:    1.490 k/2:      0.0
        bead   2 bending interaction through   4 with bead   5
@@ -290,7 +290,7 @@
        bead   2 bending interaction through   4 with bead   1
           bend type:  3 bend angle :  109.470 k/2:  31250.0
        bead  2            torsional interact  4 and  5 with bead  6 of torsional type:  23
-    bead            3  beadtype          178  charge leader            3
+    bead            3  beadtype          178 O    charge leader            3
        bead           3  bonded to bead           4
           bond type: 56 bond length:    1.490 k/2:      0.0
        bead   3 bending interaction through   4 with bead   5
@@ -300,7 +300,7 @@
        bead   3 bending interaction through   4 with bead   1
           bend type:  3 bend angle :  109.470 k/2:  31250.0
        bead  3            torsional interact  4 and  5 with bead  6 of torsional type:  23
-    bead            4  beadtype          177  charge leader            4
+    bead            4  beadtype          177 Si   charge leader            4
        bead           4  bonded to bead           1
           bond type: 56 bond length:    1.490 k/2:      0.0
        bead           4  bonded to bead           2
@@ -311,7 +311,7 @@
           bond type: 56 bond length:    1.490 k/2:      0.0
        bead   4 bending interaction through   5 with bead   6
           bend type: 46 bend angle :  108.500 k/2:      0.0
-    bead            5  beadtype          183  charge leader            5
+    bead            5  beadtype          183 O    charge leader            5
        bead           5  bonded to bead           4
           bond type: 56 bond length:    1.490 k/2:      0.0
        bead           5  bonded to bead           6
@@ -322,7 +322,7 @@
           bend type:  3 bend angle :  109.470 k/2:  31250.0
        bead   5 bending interaction through   4 with bead   3
           bend type:  3 bend angle :  109.470 k/2:  31250.0
-    bead            6  beadtype           61  charge leader            6
+    bead            6  beadtype           61 H    charge leader            6
        bead           6  bonded to bead           5
           bond type: 16 bond length:    0.960 k/2:      0.0
        bead   6 bending interaction through   5 with bead   4
@@ -350,7 +350,7 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  0.000000000000000E+000  K
-    bead            1  beadtype          178  charge leader            1
+    bead            1  beadtype          178 O    charge leader            1
        bead           1  bonded to bead           4
           bond type: 56 bond length:    1.490 k/2:      0.0
        bead   1 bending interaction through   4 with bead   5
@@ -360,7 +360,7 @@
        bead   1 bending interaction through   4 with bead   3
           bend type:  3 bend angle :  109.470 k/2:  31250.0
        bead  1            torsional interact  4 and  5 with bead  6 of torsional type:   3
-    bead            2  beadtype          178  charge leader            2
+    bead            2  beadtype          178 O    charge leader            2
        bead           2  bonded to bead           4
           bond type: 56 bond length:    1.490 k/2:      0.0
        bead   2 bending interaction through   4 with bead   5
@@ -370,7 +370,7 @@
        bead   2 bending interaction through   4 with bead   1
           bend type:  3 bend angle :  109.470 k/2:  31250.0
        bead  2            torsional interact  4 and  5 with bead  6 of torsional type:   3
-    bead            3  beadtype          178  charge leader            3
+    bead            3  beadtype          178 O    charge leader            3
        bead           3  bonded to bead           4
           bond type: 56 bond length:    1.490 k/2:      0.0
        bead   3 bending interaction through   4 with bead   5
@@ -380,7 +380,7 @@
        bead   3 bending interaction through   4 with bead   1
           bend type:  3 bend angle :  109.470 k/2:  31250.0
        bead  3            torsional interact  4 and  5 with bead  6 of torsional type:   3
-    bead            4  beadtype          177  charge leader            4
+    bead            4  beadtype          177 Si   charge leader            4
        bead           4  bonded to bead           1
           bond type: 56 bond length:    1.490 k/2:      0.0
        bead           4  bonded to bead           2
@@ -394,7 +394,7 @@
        bead  4            torsional interact  5 and  6 with bead  9 of torsional type:   3
        bead  4            torsional interact  5 and  6 with bead  7 of torsional type:   3
        bead  4            torsional interact  5 and  6 with bead  8 of torsional type:   3
-    bead            5  beadtype          178  charge leader            5
+    bead            5  beadtype          178 O    charge leader            5
        bead           5  bonded to bead           4
           bond type: 56 bond length:    1.490 k/2:      0.0
        bead           5  bonded to bead           6
@@ -412,7 +412,7 @@
        bead   5 bending interaction through   6 with bead   9
           bend type:  3 bend angle :  109.470 k/2:  31250.0
        bead  5            torsional interact  6 and  9 with bead 10 of torsional type:   3
-    bead            6  beadtype          179  charge leader            6
+    bead            6  beadtype          179 Si   charge leader            6
        bead           6  bonded to bead           5
           bond type: 56 bond length:    1.490 k/2:      0.0
        bead           6  bonded to bead           7
@@ -429,7 +429,7 @@
        bead  6            torsional interact  5 and  4 with bead  2 of torsional type:   3
        bead  6            torsional interact  5 and  4 with bead  3 of torsional type:   3
        bead  6            torsional interact  9 and 10 with bead 11 of torsional type:   1
-    bead            7  beadtype          180  charge leader            7
+    bead            7  beadtype          180 C    charge leader            7
        bead           7  bonded to bead           6
           bond type: 57 bond length:    1.225 k/2:      0.0
        bead   7 bending interaction through   6 with bead   5
@@ -440,7 +440,7 @@
           bend type:  3 bend angle :  109.470 k/2:  31250.0
        bead  7            torsional interact  6 and  9 with bead 10 of torsional type:   3
        bead  7            torsional interact  6 and  5 with bead  4 of torsional type:   3
-    bead            8  beadtype          180  charge leader            8
+    bead            8  beadtype          180 C    charge leader            8
        bead           8  bonded to bead           6
           bond type: 57 bond length:    1.225 k/2:      0.0
        bead   8 bending interaction through   6 with bead   5
@@ -451,7 +451,7 @@
           bend type:  3 bend angle :  109.470 k/2:  31250.0
        bead  8            torsional interact  6 and  5 with bead  4 of torsional type:   3
        bead  8            torsional interact  6 and  9 with bead 10 of torsional type:   3
-    bead            9  beadtype          181  charge leader            9
+    bead            9  beadtype          181 C    charge leader            9
        bead           9  bonded to bead           6
           bond type: 57 bond length:    1.225 k/2:      0.0
        bead           9  bonded to bead          10
@@ -466,7 +466,7 @@
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead  9            torsional interact  6 and  5 with bead  4 of torsional type:   3
        bead  9            torsional interact 10 and 11 with bead 12 of torsional type:   1
-    bead           10  beadtype            5  charge leader           10
+    bead           10  beadtype            5 C    charge leader           10
        bead          10  bonded to bead           9
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead          10  bonded to bead          11
@@ -479,7 +479,7 @@
        bead 10            torsional interact  9 and  6 with bead  5 of torsional type:   3
        bead 10            torsional interact  9 and  6 with bead  7 of torsional type:   3
        bead 10            torsional interact  9 and  6 with bead  8 of torsional type:   3
-    bead           11  beadtype            5  charge leader           11
+    bead           11  beadtype            5 C    charge leader           11
        bead          11  bonded to bead          10
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead          11  bonded to bead          12
@@ -490,7 +490,7 @@
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead 11            torsional interact 12 and 13 with bead 14 of torsional type:   1
        bead 11            torsional interact 10 and  9 with bead  6 of torsional type:   1
-    bead           12  beadtype            5  charge leader           11
+    bead           12  beadtype            5 C    charge leader           11
        bead          12  bonded to bead          11
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead          12  bonded to bead          13
@@ -501,7 +501,7 @@
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead 12            torsional interact 13 and 14 with bead 15 of torsional type:   1
        bead 12            torsional interact 11 and 10 with bead  9 of torsional type:   1
-    bead           13  beadtype            5  charge leader           11
+    bead           13  beadtype            5 C    charge leader           11
        bead          13  bonded to bead          12
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead          13  bonded to bead          14
@@ -512,7 +512,7 @@
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead 13            torsional interact 14 and 15 with bead 16 of torsional type:   1
        bead 13            torsional interact 12 and 11 with bead 10 of torsional type:   1
-    bead           14  beadtype            5  charge leader           11
+    bead           14  beadtype            5 C    charge leader           11
        bead          14  bonded to bead          13
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead          14  bonded to bead          15
@@ -523,7 +523,7 @@
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead 14            torsional interact 13 and 12 with bead 11 of torsional type:   1
        bead 14            torsional interact 15 and 16 with bead 17 of torsional type:   1
-    bead           15  beadtype            5  charge leader           11
+    bead           15  beadtype            5 C    charge leader           11
        bead          15  bonded to bead          14
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead          15  bonded to bead          16
@@ -534,7 +534,7 @@
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead 15            torsional interact 14 and 13 with bead 12 of torsional type:   1
        bead 15            torsional interact 16 and 17 with bead 18 of torsional type:   1
-    bead           16  beadtype            5  charge leader           11
+    bead           16  beadtype            5 C    charge leader           11
        bead          16  bonded to bead          15
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead          16  bonded to bead          17
@@ -545,7 +545,7 @@
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead 16            torsional interact 15 and 14 with bead 13 of torsional type:   1
        bead 16            torsional interact 17 and 18 with bead 19 of torsional type:   1
-    bead           17  beadtype            5  charge leader           11
+    bead           17  beadtype            5 C    charge leader           11
        bead          17  bonded to bead          16
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead          17  bonded to bead          18
@@ -556,7 +556,7 @@
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead 17            torsional interact 16 and 15 with bead 14 of torsional type:   1
        bead 17            torsional interact 18 and 19 with bead 20 of torsional type:   1
-    bead           18  beadtype            5  charge leader           11
+    bead           18  beadtype            5 C    charge leader           11
        bead          18  bonded to bead          17
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead          18  bonded to bead          19
@@ -567,7 +567,7 @@
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead 18            torsional interact 17 and 16 with bead 15 of torsional type:   1
        bead 18            torsional interact 19 and 20 with bead 21 of torsional type:   1
-    bead           19  beadtype            5  charge leader           11
+    bead           19  beadtype            5 C    charge leader           11
        bead          19  bonded to bead          18
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead          19  bonded to bead          20
@@ -578,7 +578,7 @@
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead 19            torsional interact 18 and 17 with bead 16 of torsional type:   1
        bead 19            torsional interact 20 and 21 with bead 22 of torsional type:   1
-    bead           20  beadtype            5  charge leader           11
+    bead           20  beadtype            5 C    charge leader           11
        bead          20  bonded to bead          19
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead          20  bonded to bead          21
@@ -589,7 +589,7 @@
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead 20            torsional interact 19 and 18 with bead 17 of torsional type:   1
        bead 20            torsional interact 21 and 22 with bead 23 of torsional type:   1
-    bead           21  beadtype            5  charge leader           11
+    bead           21  beadtype            5 C    charge leader           11
        bead          21  bonded to bead          20
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead          21  bonded to bead          22
@@ -600,7 +600,7 @@
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead 21            torsional interact 20 and 19 with bead 18 of torsional type:   1
        bead 21            torsional interact 22 and 23 with bead 24 of torsional type:   1
-    bead           22  beadtype            5  charge leader           11
+    bead           22  beadtype            5 C    charge leader           11
        bead          22  bonded to bead          21
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead          22  bonded to bead          23
@@ -611,7 +611,7 @@
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead 22            torsional interact 21 and 20 with bead 19 of torsional type:   1
        bead 22            torsional interact 23 and 24 with bead 25 of torsional type:   1
-    bead           23  beadtype            5  charge leader           11
+    bead           23  beadtype            5 C    charge leader           11
        bead          23  bonded to bead          22
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead          23  bonded to bead          24
@@ -622,7 +622,7 @@
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead 23            torsional interact 22 and 21 with bead 20 of torsional type:   1
        bead 23            torsional interact 24 and 25 with bead 26 of torsional type:   1
-    bead           24  beadtype            5  charge leader           11
+    bead           24  beadtype            5 C    charge leader           11
        bead          24  bonded to bead          23
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead          24  bonded to bead          25
@@ -632,7 +632,7 @@
        bead  24 bending interaction through  25 with bead  26
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead 24            torsional interact 23 and 22 with bead 21 of torsional type:   1
-    bead           25  beadtype            5  charge leader           11
+    bead           25  beadtype            5 C    charge leader           11
        bead          25  bonded to bead          24
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead          25  bonded to bead          26
@@ -640,7 +640,7 @@
        bead  25 bending interaction through  24 with bead  23
           bend type:  1 bend angle :  114.000 k/2:  31250.0
        bead 25            torsional interact 24 and 23 with bead 22 of torsional type:   1
-    bead           26  beadtype            4  charge leader           11
+    bead           26  beadtype            4 C    charge leader           11
        bead          26  bonded to bead          25
           bond type:  1 bond length:    1.540 k/2:      0.0
        bead  26 bending interaction through  25 with bead  24
@@ -666,12 +666,12 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :   1360.00000000000       K
-    bead            1  beadtype          203 O   
-    bead            2  beadtype          203 O   
-    bead            3  beadtype          203 O   
-    bead            4  beadtype          203 O   
-    bead            5  beadtype          203 O   
-    bead            6  beadtype          203 O   
+    bead            1  beadtype          203 C6H6
+    bead            2  beadtype          203 C6H6
+    bead            3  beadtype          203 C6H6
+    bead            4  beadtype          203 C6H6
+    bead            5  beadtype          203 C6H6
+    bead            6  beadtype          203 C6H6
  molecule type:           9
     number of units:           6
     number of units for CBMC growth:           6
@@ -692,12 +692,12 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :   1060.00000000000       K
-    bead            1  beadtype          204 C   
-    bead            2  beadtype          204 C   
-    bead            3  beadtype          204 C   
-    bead            4  beadtype          204 C   
-    bead            5  beadtype          204 C   
-    bead            6  beadtype          204 C   
+    bead            1  beadtype          204 C6H6
+    bead            2  beadtype          204 C6H6
+    bead            3  beadtype          204 C6H6
+    bead            4  beadtype          204 C6H6
+    bead            5  beadtype          204 C6H6
+    bead            6  beadtype          204 C6H6
  molecule type:          10
     number of units:           6
     number of units for CBMC growth:           6
@@ -718,12 +718,12 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :   710.000000000000       K
-    bead            1  beadtype          205 C   
-    bead            2  beadtype          205 C   
-    bead            3  beadtype          205 C   
-    bead            4  beadtype          205 C   
-    bead            5  beadtype          205 C   
-    bead            6  beadtype          205 C   
+    bead            1  beadtype          205 C6H6
+    bead            2  beadtype          205 C6H6
+    bead            3  beadtype          205 C6H6
+    bead            4  beadtype          205 C6H6
+    bead            5  beadtype          205 C6H6
+    bead            6  beadtype          205 C6H6
  molecule type:          11
     number of units:           6
     number of units for CBMC growth:           6
@@ -744,12 +744,12 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :   310.000000000000       K
-    bead            1  beadtype          206 C   
-    bead            2  beadtype          206 C   
-    bead            3  beadtype          206 C   
-    bead            4  beadtype          206 C   
-    bead            5  beadtype          206 C   
-    bead            6  beadtype          206 C   
+    bead            1  beadtype          206 C6H6
+    bead            2  beadtype          206 C6H6
+    bead            3  beadtype          206 C6H6
+    bead            4  beadtype          206 C6H6
+    bead            5  beadtype          206 C6H6
+    bead            6  beadtype          206 C6H6
  molecule type:          12
     number of units:           6
     number of units for CBMC growth:           6
@@ -770,12 +770,12 @@
     energy offset for box           1 :  0.000000000000000E+000  K
     energy offset for box           2 :  0.000000000000000E+000  K
     energy offset for box           3 :  -180.000000000000       K
-    bead            1  beadtype          207 C   
-    bead            2  beadtype          207 C   
-    bead            3  beadtype          207 C   
-    bead            4  beadtype          207 C   
-    bead            5  beadtype          207 C   
-    bead            6  beadtype          207 C   
+    bead            1  beadtype          207 C6H6
+    bead            2  beadtype          207 C6H6
+    bead            3  beadtype          207 C6H6
+    bead            4  beadtype          207 C6H6
+    bead            5  beadtype          207 C6H6
+    bead            6  beadtype          207 C6H6
  molecule type:          13
     number of units:           6
     number of units for CBMC growth:           6
@@ -10067,8 +10067,8 @@
  
  temperature:                       323.000000000000     
  
- ex-pressure:                      7.242900000000000E-003
-  7.242900000000000E-003  7.242900000000000E-003
+ ex-pressure:                      7.242971565252510E-003
+  7.242971565252510E-003  7.242971565252510E-003
  
  
  sumup control
@@ -10113,14 +10113,14 @@
  bond bending       272513.656210887     
  torsional          101865.369708667     
  external          0.000000000000000E+000
- coulombic energy  -33817991.8932213     
+ coulombic energy  -33813126.6820667     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -28653815.6751322     
+ total energy      -28648950.4639776     
  
- box             1  initial v   =   -28653815.6751322     
- surf. tension :   box 1 =   16233.93965
- pressure check:   box 1 =    5181399.18
+ box             1  initial v   =   -28648950.4639776     
+ surf. tension :   box 1 =   16234.17648
+ pressure check:   box 1 =    5182019.55
  
  sumup control
  number of chains         892
@@ -10164,14 +10164,14 @@
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -2814060.60422789     
+ coulombic energy  -2813655.76058476     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -3460542.84829406     
+ total energy      -3460138.00465093     
  
- box             2  initial v   =   -3460542.84829406     
- surf. tension :   box 2 =    -119.07281
- pressure check:   box 2 =     -23872.03
+ box             2  initial v   =   -3460138.00465093     
+ surf. tension :   box 2 =    -119.07486
+ pressure check:   box 2 =     -23773.35
  
  sumup control
  number of chains          47
@@ -10434,9 +10434,9 @@
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
  Type 34 bn      3.      1.      0.      0.      0.      2.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
-     1   12723 -0.2866E+08    20.000         0.0  86 222 192 312   0  30  18   0   1   0   0   0   0   0   0
+     1   12723 -0.2865E+08    20.000         0.0  86 222 192 312   0  30  18   0   1   0   0   0   0   0   0
      0       0  0.1401E-44     0.000         0.0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
-               -0.3454E+07    40.130         0.0 314 578   0   0   0   0   0   0   0   0   0   0   0   0   0
+               -0.3453E+07    40.130         0.0 314 578   0   0   0   0   0   0   0   0   0   0   0   0   0
                 0.0000E+00     0.000         0.0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
                 0.0000E+00
                 0.0000E+00   134.228         0.0   0   0   0   0  22   0   0   1   0   1   1   1   1   1   1
@@ -11577,174 +11577,174 @@
  ### Molecule swap       ###
  
  molecule typ =           1
-between box  1 and  2 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  1 and  2 into box 2   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  1 and  3 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  1 and  3 into box 3   uattempts =         8.0 attempts =      8.0   accepted =     0.0
+between box 1 and 2 into box 1   uattempts = 0 attempts = 0   accepted = 0
+between box 1 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
+between box 1 and 3 into box 1   uattempts = 7 attempts = 0   accepted = 0
+between box 1 and 3 into box 3   uattempts = 8 attempts = 8   accepted = 0
  suc.growth % =100.000   accepted % =  0.000
-between box  2 and  3 into box 2   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  2 and  3 into box 3   uattempts =         5.0 attempts =      5.0   accepted =     0.0
+between box 2 and 3 into box 2   uattempts = 9 attempts = 0   accepted = 0
+between box 2 and 3 into box 3   uattempts = 5 attempts = 5   accepted = 0
  suc.growth % =100.000   accepted % =  0.000
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =           2
-between box  1 and  2 into box 1   uattempts =         8.0 attempts =      8.0   accepted =     0.0
+between box 1 and 2 into box 1   uattempts = 8 attempts = 8   accepted = 0
  suc.growth % =100.000   accepted % =  0.000
-between box  1 and  2 into box 2   uattempts =         1.0 attempts =      1.0   accepted =     0.0
+between box 1 and 2 into box 2   uattempts = 1 attempts = 1   accepted = 0
  suc.growth % =100.000   accepted % =  0.000
-between box  1 and  3 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  1 and  3 into box 3   uattempts =         4.0 attempts =      4.0   accepted =     0.0
+between box 1 and 3 into box 1   uattempts = 5 attempts = 0   accepted = 0
+between box 1 and 3 into box 3   uattempts = 4 attempts = 4   accepted = 0
  suc.growth % =100.000   accepted % =  0.000
-between box  2 and  3 into box 2   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  2 and  3 into box 3   uattempts =         8.0 attempts =      8.0   accepted =     0.0
+between box 2 and 3 into box 2   uattempts = 7 attempts = 0   accepted = 0
+between box 2 and 3 into box 3   uattempts = 8 attempts = 8   accepted = 0
  suc.growth % =100.000   accepted % =  0.000
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =           3
-between box  2 and  2 into box 2   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 2 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =           4
-between box  2 and  2 into box 2   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 2 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =           5
-between box  3 and  3 into box 3   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 3 and 3 into box 3   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =           6
-between box  2 and  2 into box 2   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 2 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =           7
-between box  2 and  2 into box 2   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 2 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =           8
-between box  1 and  2 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  1 and  2 into box 2   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  1 and  3 into box 1   uattempts =        43.0 attempts =     43.0   accepted =     4.0
- suc.growth % = 88.372   accepted % =  9.302
-between box  1 and  3 into box 3   uattempts =         4.0 attempts =      4.0   accepted =     4.0
- suc.growth % =100.000   accepted % =100.000
-between box  2 and  3 into box 2   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  2 and  3 into box 3   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 2 into box 1   uattempts = 0 attempts = 0   accepted = 0
+between box 1 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
+between box 1 and 3 into box 1   uattempts = 50 attempts = 43   accepted = 4
+ suc.growth % = 88.372   accepted % =  8.000
+between box 1 and 3 into box 3   uattempts = 56 attempts = 4   accepted = 4
+ suc.growth % =100.000   accepted % =  7.143
+between box 2 and 3 into box 2   uattempts = 0 attempts = 0   accepted = 0
+between box 2 and 3 into box 3   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =           9
-between box  1 and  2 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  1 and  2 into box 2   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  1 and  3 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  1 and  3 into box 3   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  2 and  3 into box 2   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  2 and  3 into box 3   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 2 into box 1   uattempts = 0 attempts = 0   accepted = 0
+between box 1 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
+between box 1 and 3 into box 1   uattempts = 0 attempts = 0   accepted = 0
+between box 1 and 3 into box 3   uattempts = 0 attempts = 0   accepted = 0
+between box 2 and 3 into box 2   uattempts = 0 attempts = 0   accepted = 0
+between box 2 and 3 into box 3   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          10
-between box  1 and  2 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  1 and  2 into box 2   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  1 and  3 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  1 and  3 into box 3   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  2 and  3 into box 2   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-between box  2 and  3 into box 3   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 2 into box 1   uattempts = 0 attempts = 0   accepted = 0
+between box 1 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
+between box 1 and 3 into box 1   uattempts = 0 attempts = 0   accepted = 0
+between box 1 and 3 into box 3   uattempts = 0 attempts = 0   accepted = 0
+between box 2 and 3 into box 2   uattempts = 0 attempts = 0   accepted = 0
+between box 2 and 3 into box 3   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          11
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          12
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          13
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          14
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          15
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          16
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          17
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          18
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          19
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          20
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          21
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          22
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          23
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          24
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          25
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          26
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          27
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          28
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          29
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          30
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          31
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          32
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          33
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  molecule typ =          34
-between box  1 and  1 into box 1   uattempts =         0.0 attempts =      0.0   accepted =     0.0
-number of times move in:          0.0  accepted=     0.0
-number of times move out:          0.0  accepted=     0.0
+between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
+number of times move in: 0  accepted = 0
+number of times move out: 0  accepted = 0
  
  ### Molecule swatch     ###
  
@@ -11982,13 +11982,13 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  bond bending       271528.203716425     
  torsional          102785.406427291     
  external          0.000000000000000E+000
- coulombic energy  -33819497.9142066     
+ coulombic energy  -33814632.4863889     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -28658649.6190261     
+ total energy      -28653784.1912084     
  ### problem with energy ###  box            1
-  Total energy:   -28658649.6190261       -28658649.6188487     
- -1.774057745933533E-004
+  Total energy:   -28653784.1912084       -28653784.1910310     
+ -1.774281263351440E-004
  
  sumup control
  number of chains         892
@@ -12032,10 +12032,10 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -2814893.50983322     
+ coulombic energy  -2814488.54636447     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -3453787.38091351     
+ total energy      -3453382.41744476     
  
  sumup control
  number of chains          47
@@ -12084,23 +12084,23 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  well energy       0.000000000000000E+000
  total energy      0.000000000000000E+000
  
- vstart       =    -28653815.6751322187     -3460542.8482940579            0.0000000000
- vend         =    -28658649.6190261133     -3453787.3809135128            0.0000000000
- vbox         =    -28658649.6188487075     -3453787.3809134602            0.0000000000
+ vstart       =    -28648950.4639775865     -3460138.0046509267            0.0000000000
+ vend         =    -28653784.1912084036     -3453382.4174447628            0.0000000000
+ vbox         =    -28653784.1910309754     -3453382.4174447129            0.0000000000
  
  Averages and fluctuations                            Box 1       Box 2       Box 3
  
  pressure                               [kPa] =        0.00        0.00        0.00
  pressure                  [simulation units] =    0.000000    0.000000    0.000000
  surface tension                       [mN/m] =      0.0000      0.0000      0.0000
- chem. potential of type       1          [K] =       0.000       0.000   -6179.998
- chem. potential of type       2          [K] =   -3545.854    1314.974   -6578.524
+ chem. potential of type       1          [K] =       0.000       0.000   -6179.986
+ chem. potential of type       2          [K] =   -3545.551    1314.852   -6578.512
  chem. potential of type       3          [K] =       0.000       0.000       0.000
  chem. potential of type       4          [K] =       0.000       0.000       0.000
  chem. potential of type       5          [K] =       0.000       0.000       0.000
  chem. potential of type       6          [K] =       0.000       0.000       0.000
  chem. potential of type       7          [K] =       0.000       0.000       0.000
- chem. potential of type       8          [K] =   -4850.478       0.000   -6894.935
+ chem. potential of type       8          [K] =   -4850.466       0.000   -6894.923
  chem. potential of type       9          [K] =       0.000       0.000       0.000
  chem. potential of type      10          [K] =       0.000       0.000       0.000
  chem. potential of type      11          [K] =       0.000       0.000       0.000
@@ -12270,18 +12270,18 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  mean sete length of type     33        [A^2] =       0.000       0.000      43.656
  mean sete length of type     34        [A^2] =       0.000       0.000      41.873
  
- Total energy  [K per system and kJ/mol per chain] =  -28656481.24 -3454701.18          0.00     -276.37        -32.20        0.00
+ Total energy  [K per system and kJ/mol per chain] =  -28651616.07 -3454296.42          0.00     -276.33        -32.20        0.00
  Inter LJ      [K per system and kJ/mol per chain] =    4814173.23  -641227.62          0.00       46.43         -5.98        0.00
  Bond bending  [K per system and kJ/mol per chain] =     272920.97        0.00          0.00        2.63          0.00        0.00
  Torsion       [K per system and kJ/mol per chain] =     101680.84        0.00          0.00        0.98          0.00        0.00
  Intra LJ      [K per system and kJ/mol per chain] =     -27569.19        0.00          0.00       -0.27          0.00        0.00
  External pot  [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00          0.00        0.00
  Stretch       [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00          0.00        0.00
- Coulomb       [K per system and kJ/mol per chain] =  -33817687.08 -2813473.56          0.00     -326.15        -26.22        0.00
+ Coulomb       [K per system and kJ/mol per chain] =  -33812821.91 -2813068.80          0.00     -326.10        -26.22        0.00
  Tail  LJ      [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00          0.00        0.00
  Fluc Q        [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00          0.00        0.00
  
- fluctuation in <vtot>                          =     1985.46     2286.58        0.00
+ fluctuation in <vtot>                          =     1985.38     2286.41        0.00
  
  type  box     vinter      vintra      vtor        vbend       vtail
     1    1     0.00000     0.00000     0.00000     0.00000     0.00000
@@ -12386,4 +12386,4 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
    34    1     0.00000     0.00000     0.00000     0.00000     0.00000
    34    2     0.00000     0.00000     0.00000     0.00000     0.00000
    34    3     0.00000     0.00000     0.00000     0.00000     0.00000
- Program ended at 2013-02-26 13:38:27.749
+ Program ended at 2013-04-01 02:42:21.460

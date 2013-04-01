@@ -153,13 +153,13 @@ subroutine ctrmas ( lall, ibox, j, mtype)
                  end if
               end if
               if ( ldx ) then
-                 dx = -(dble(inboxx)*rbx)
+                 dx = -real(inboxx,dp)*rbx
               end if
               if ( ldy ) then
-                 dy = -(dble(inboxy)*rby)
+                 dy = -real(inboxy,dp)*rby
               end if
               if ( ldz ) then
-                 dz = -(dble(inboxz)*rbz)
+                 dz = -real(inboxz,dp)*rbz
               end if
            else
               if (nxcm .lt. -1.0E-10_dp) then

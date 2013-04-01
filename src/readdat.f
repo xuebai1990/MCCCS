@@ -20,6 +20,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   use energy_4body,only:buildQuadrupletTable
   use energy_sami
   use moves_simple,only:init_moves_simple
+  use moves_volume,only:init_moves_volume
   use moves_cbmc,only:init_cbmc,allocate_cbmc,llplace
   use moves_ee,only:init_ee,numcoeff,sigm,epsil
   use transfer_shared,only:read_transfer
@@ -885,6 +886,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   call allocate_molecule()
   call allocate_energy_bonded()
   call init_moves_simple()
+  call init_moves_volume()
   call init_cbmc()
   call init_ee()
 
@@ -1090,6 +1092,7 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
 
   read(io_input,*)
   read(io_input,*) pmvol,(pmvlmt(j),j=1,nbox)
+  if ( .not. lfold )  call err_exit(__FILE__,__LINE__,'volume move only correct with folded coordinates',myid+1)
   if ( lecho.and.myid.eq.0 ) then
      if (lverbose) then
         write(io_output,*) 'pmvol:',pmvol
@@ -1115,6 +1118,11 @@ subroutine readdat(file_in,lucall,nvirial,starvir,stepvir)
   read(io_input,*)
   do j = 1,nvolb
      read(io_input,*) box5(j),box6(j)
+
+     if ((lsolid(box5(j)) .and. .not. lrect(box5(j))) .and. (lsolid(box6(j)) .and. .not. lrect(box6(j)))) then
+        call err_exit(__FILE__,__LINE__,'can not perform volume move between two non-rectangular boxes',myid+1)
+     end if
+     
      if ( lecho.and.myid.eq.0 ) then
         if (lverbose) then
            write(io_output,*) '   box pair for volume move number',j,':', box5(j),box6(j)

@@ -1324,7 +1324,7 @@ contains
   subroutine schedule(igrow,imolty,index,iutry,iprev,movetype)
     logical::lfind(numax)
     integer::random_index
-    integer::kickout,icbu,igrow,imolty,iutry,iut ,invtry,iu,ju
+    integer::kickout,icbu,igrow,imolty,iutry,iut,invtry,iu,ju
     integer::ibead,count,ivib,idir,movetype,iprev,itry,i,ib2
     integer::temp_store(numax),temp_count,izz,outer_sites(numax),index,outer_num,outer_prev(numax),iufrom,outer_try
     real::dbgrow

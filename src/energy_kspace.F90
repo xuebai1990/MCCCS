@@ -107,9 +107,9 @@ contains
              n_min = -kmaxn
           end if
           do n = n_min, kmaxn
-             kx1 = dble(l)*hmatik(1)+dble(m)*hmatik(2)+ dble(n)*hmatik(3)
-             ky1 = dble(l)*hmatik(4)+dble(m)*hmatik(5)+ dble(n)*hmatik(6)
-             kz1 = dble(l)*hmatik(7)+dble(m)*hmatik(8)+ dble(n)*hmatik(9)
+             kx1 = real(l,dp)*hmatik(1)+real(m,dp)*hmatik(2)+real(n,dp)*hmatik(3)
+             ky1 = real(l,dp)*hmatik(4)+real(m,dp)*hmatik(5)+real(n,dp)*hmatik(6)
+             kz1 = real(l,dp)*hmatik(7)+real(m,dp)*hmatik(8)+real(n,dp)*hmatik(9)
              ksqr = kx1*kx1+ky1*ky1+kz1*kz1
              ! if ( ksqr .lt. hmaxsq ) then
              ! sometimes these are about equal, which can cause different

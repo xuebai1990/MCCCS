@@ -13,8 +13,9 @@ module transfer_swap
   save
   public::swap,init_swap,cnt,output_swap_stats
 
-  real,allocatable,public::acchem(:,:),bnchem(:,:)
-  real,allocatable::bsswap(:,:,:),bnswap(:,:,:),bnswap_in(:,:),bnswap_out(:,:)
+  real,allocatable,public::acchem(:,:)
+  integer,allocatable,public::bnchem(:,:)
+  integer,allocatable::bsswap(:,:,:),bnswap(:,:,:),bnswap_in(:,:),bnswap_out(:,:)
   integer::cnt_wf1(0:6,0:6,4),cnt_wf2(0:6,0:6,4),cnt_wra1(1000,4),cnt_wra2(1000,4)
 
 contains
@@ -124,8 +125,8 @@ contains
 
        if ( ncmt(boxrem,imolty) .eq. 0 ) then
           lempty = .true.
-          if ( .not. lswapinter .or. lrigid(imolty) ) return !???not counting bsswap
-       else if ( lswapinter .or. lavbmc1(imolty) .and. .not.   (lavbmc2(imolty) .or. lavbmc3(imolty)) ) then
+          if ( .not. lswapinter ) return
+       else if ( lswapinter .or. lavbmc1(imolty) .and. .not. (lavbmc2(imolty) .or. lavbmc3(imolty)) ) then
 ! for the advanced AVBMC algorithm, this particle will be selected in
 ! sub-regions defined by Vin
 197       pointp = int( dble(ncmt(boxrem,imolty))*random(-1) ) + 1
@@ -160,9 +161,13 @@ contains
 ! bsswap is the same thing but keeps track of all attempts (X = 1 to nbox)
 ! and successful growths (X = nbox + 1 to nbox + nbox)
 
-       if (.not. lempty) bnswap(imolty,ipairb,boxins) = bnswap(imolty,ipairb,boxins) + 1.0E0_dp
-
-       bsswap(imolty,ipairb,boxins)=bsswap(imolty,ipairb,boxins)+1.0E0_dp
+       bsswap(imolty,ipairb,boxins)=bsswap(imolty,ipairb,boxins)+1
+       if (.not. lempty) then
+          bnswap(imolty,ipairb,boxins) = bnswap(imolty,ipairb,boxins) + 1
+       else if (lrigid(imolty)) then
+          ! old configuration for irem must exist to grow the new configuration
+          return
+       end if
     end if
 
 ! store number of units in iunit ***
@@ -563,7 +568,7 @@ contains
        lfavor = .true.
     else
        lfavor = .false.
-       if ( lswapinter ) bnchem(boxins,imolty) = bnchem(boxins,imolty) + 1.0E0_dp
+       if ( lswapinter ) bnchem(boxins,imolty) = bnchem(boxins,imolty) + 1
     end if
 
     if ( ovrlap ) return
@@ -916,7 +921,7 @@ contains
 
     if ( .not. lanes ) then
        if ( lswapinter ) then
-          arg = w1ins * waddnew * weight * volins  / dble( ncmt(boxins,imolty)+1 )
+          arg = w1ins * waddnew * weight * volins  / real(ncmt(boxins,imolty)+1,dp)
           acchem(boxins,imolty) = acchem(boxins,imolty)+arg
        end if
     end if
@@ -930,7 +935,7 @@ contains
        goto 500
     end if
 
-    bsswap(imolty,ipairb,boxins+nbox) =  bsswap(imolty,ipairb,boxins+nbox) + 1.0E0_dp
+    bsswap(imolty,ipairb,boxins+nbox) =  bsswap(imolty,ipairb,boxins+nbox) + 1
 
 ! Compute weights for the molecule to be removed from boxrem
 
@@ -1094,9 +1099,9 @@ contains
 
     if ( .not. lswapinter .and. lbias(imolty) ) then
        if ( lrem_out .and. lins_in ) then
-          bnswap_in(imolty,1) = bnswap_in(imolty,1) + 1.0E0_dp
+          bnswap_in(imolty,1) = bnswap_in(imolty,1) + 1
        else if ( (.not. lrem_out) .and. (.not. lins_in ) ) then
-          bnswap_out(imolty,1) = bnswap_out(imolty,1) + 1.0E0_dp
+          bnswap_out(imolty,1) = bnswap_out(imolty,1) + 1
        end if
     end if
 
@@ -1378,17 +1383,16 @@ contains
        favor(irem) = 1.0E0_dp
        favor2(irem) = 1.0E0_dp
 
-       call anes(irem,boxins,boxrem,3,laccept,vdum,vdum,vdum, vdum,vdum,vdum,vdum,vdum,vdum,vinsta,vremta, vnewflucq,voldflucq,lswapinter)
+       call anes(irem,boxins,boxrem,3,laccept,vdum,vdum,vdum,vdum,vdum,vdum,vdum,vdum,vdum,vinsta,vremta,vnewflucq,voldflucq,lswapinter)
 
        if ( lswapinter ) then
           arg = weight * volins  / dble( ncmt(boxins,imolty) )
           acchem(boxins,imolty) = acchem(boxins,imolty)+arg
-          bnchem(boxins,imolty) = bnchem(boxins,imolty) + 1.0E0_dp
+          bnchem(boxins,imolty) = bnchem(boxins,imolty) + 1
        end if
 
        if ( laccept ) then
-          bnswap(imolty,ipairb,boxins+nbox)= bnswap(imolty,ipairb,boxins+nbox)+1.0E0_dp
-
+          bnswap(imolty,ipairb,boxins+nbox)= bnswap(imolty,ipairb,boxins+nbox)+1
        else if ( lswapinter ) then
           nboxi(irem) = boxrem
           parbox(ncmt(boxrem,imolty)+1,boxrem,imolty)=irem
@@ -1487,13 +1491,13 @@ contains
 ! write(io_output,*) 'SWAP MOVE ACCEPTED',irem
 ! we can now accept !!!!! ***
        if ((.not.leemove).and.(.not.lexpee)) then
-          bnswap(imolty,ipairb,boxins+nbox) =  bnswap(imolty,ipairb,boxins+nbox) + 1.0E0_dp
+          bnswap(imolty,ipairb,boxins+nbox) =  bnswap(imolty,ipairb,boxins+nbox) + 1
        end if
        if ( .not. lswapinter .and. lbias(imolty) ) then
           if ( lrem_out .and. lins_in ) then
-             bnswap_in(imolty,2) = bnswap_in(imolty,2) + 1.0E0_dp
+             bnswap_in(imolty,2) = bnswap_in(imolty,2) + 1
           else if ( (.not. lrem_out) .and. (.not. lins_in ) ) then
-             bnswap_out(imolty,2) = bnswap_out(imolty,2) + 1.0E0_dp
+             bnswap_out(imolty,2) = bnswap_out(imolty,2) + 1
           end if
        end if
 
@@ -1661,16 +1665,16 @@ contains
        call err_exit(__FILE__,__LINE__,'init_swap: allocation failed',jerr)
     end if
 
-    bnswap=0.0_dp
-    bsswap=0.0_dp
-    bnswap_in=0.0_dp
-    bnswap_out=0.0_dp
+    bnswap=0
+    bsswap=0
+    bnswap_in=0
+    bnswap_out=0
     cnt_wf1=0
     cnt_wf2=0
     cnt_wra1=0
     cnt_wra2=0
     acchem=0.0_dp
-    bnchem=0.0_dp
+    bnchem=0
   end subroutine init_swap
 
   subroutine output_swap_stats(io_output)
@@ -1691,16 +1695,14 @@ contains
           do jbox = 1,jbox_max
              if ( jbox .eq. 1 ) ibox = box1(i,j)
              if ( jbox .eq. 2 ) ibox = box2(i,j)
-             write(io_output,"('between box ',i2,' and ',i2,' into box',i2, '   uattempts =',f12.1,' attempts =',f9.1 ,'   accepted =',f8.1)") box1(i,j),box2(i,j),ibox, bsswap(i,j,ibox),bnswap(i,j,ibox), bnswap(i,j,ibox+nbox)
-             if (bnswap(i,j,ibox) .gt. 0.5E0_dp) then
-                bsswap(i,j,ibox) = bsswap(i,j,ibox+nbox)* 100.0E0_dp/bsswap(i,j,ibox)
-                bnswap(i,j,ibox) = bnswap(i,j,ibox+nbox)* 100.0E0_dp/bnswap(i,j,ibox)
-                write(io_output,"(' suc.growth % =',f7.3,'   accepted % =',f7.3)") bsswap(i,j,ibox),bnswap(i,j,ibox)
+             write(io_output,"('between box ',i0,' and ',i0,' into box ',i0, '   uattempts = ',I0,' attempts = ',I0 ,'   accepted = ',I0)") box1(i,j),box2(i,j),ibox,bsswap(i,j,ibox),bnswap(i,j,ibox),bnswap(i,j,ibox+nbox)
+             if (bnswap(i,j,ibox) .gt. 0) then
+                write(io_output,"(' suc.growth % =',f7.3,'   accepted % =',f7.3)") bsswap(i,j,ibox+nbox)*100.0_dp/bnswap(i,j,ibox),bnswap(i,j,ibox+nbox)*100.0_dp/bsswap(i,j,ibox)
              end if
           end do
        end do
-       write(io_output,"('number of times move in: ', f12.1,  '  accepted=',f8.1)") bnswap_in(i,1), bnswap_in(i,2)
-       write(io_output,"('number of times move out: ', f12.1,  '  accepted=',f8.1)") bnswap_out(i,1), bnswap_out(i,2)
+       write(io_output,"('number of times move in: ', I0,  '  accepted = ',I0)") bnswap_in(i,1), bnswap_in(i,2)
+       write(io_output,"('number of times move out: ', I0,  '  accepted = ',I0)") bnswap_out(i,1), bnswap_out(i,2)
     end do
   end subroutine output_swap_stats
 

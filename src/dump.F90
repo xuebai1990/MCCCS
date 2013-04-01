@@ -1,6 +1,4 @@
-! -----------------------------------------------------------------
-! dumps the final configuration before stopping the program (Neeraj).
-! -----------------------------------------------------------------
+!> \brief Dumps the final configuration before stopping the program.
 subroutine dump(file_cfg)
   use sim_system
   use sim_cell
