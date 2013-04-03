@@ -38,7 +38,7 @@ contains
 
     real::sx,sy,sz
 
-    real::v,vintra,vinter,vext,velect,vtorold,vtornew,vewald,vflucq,delen,deleo,rpair
+    real::v(nEnergy),delen,deleo,rpair
     real::vnewflucq,voldflucq,qion(numax),ctorfo,ctorfn
     real::rxuold(numax),ryuold(numax),rzuold(numax)
     real::rmol,rbf,bsum
@@ -608,13 +608,13 @@ contains
        iwalk = 1
     end if
 
-    v1ins =  vtry(iwalk)
-    v1insext = vtrext(iwalk)
-    v1insint = vtrinter(iwalk)
-    v1inselc = vtrelect(iwalk)
-    v1insewd = vtrewald(iwalk)
+    v1ins =  vtr(1,iwalk)
+    v1insext = vtr(9,iwalk)
+    v1insint = vtr(2,iwalk)
+    v1inselc = vtr(8,iwalk)
+    v1insewd = vtr(14,iwalk)
 ! KM
-! if (myid.eq.0) write(io_output,*) 'vtry swap ', iwalk, vtry(iwalk)
+! if (myid.eq.0) write(io_output,*) 'vtry swap ', iwalk, vtr(1,iwalk)
 
 ! neigh_icnt = ntr_icnt(iwalk)
 ! do ip = 1,neigh_icnt
@@ -673,7 +673,7 @@ contains
              ! write(io_output,*) rxu(idum,j),ryu(idum,j),rzu(idum,j)
           end do
           moltyp(idum) = imolty
-          call explct(idum,vtornew,.false.,.false.)
+          call explct(idum,v(7),.false.,.false.)
           do j=igrow+1,iunit
              rxuion(j,iii) = rxu(idum,j)
              ryuion(j,iii) = ryu(idum,j)
@@ -695,23 +695,22 @@ contains
        iett = igrow
        ! write(io_output,*) igrow
 
-       call energy(iins,imolty,v,vintra,vinter,vext,velect,vewald,iii,ibox,istt,iett,.true.,ovrlap,.false.,vdum,.false.,lfavor,.false.)
+       call energy(iins,imolty,v,iii,ibox,istt,iett,.true.,ovrlap,.false.,.false.,lfavor,.false.)
 
        if (ovrlap) then
           write(io_output,*) 'iins',iins,'irem',irem
           call err_exit(__FILE__,__LINE__,'strange screwup in DC-CBMC swap',myid+1)
        end if
 ! v1insewd, vnewewald and vnewintra now accounted for in v from energy
-!$$$         delen = v - ( vnewinter + vnewext +vnewelect)
-!$$$     &        - (v1ins - v1insewd)
-       delen = v - ( vnewinter + vnewext +vnewelect + vnewintra + vnewewald + v1ins)
+!$$$         delen = v(1) - ( vnew(2) + vnew(9) +vnew(8)) - (v1ins - v1insewd)
+       delen = v(1) - ( vnew(2) + vnew(9) +vnew(8) + vnew(4) + vnew(14) + v1ins)
        waddnew = waddnew*exp(-beta*delen)
-       vnewt     = vnewt + delen
-       vnewinter = vinter - v1insint
-       vnewext   = vext - v1insext
-       vnewelect = velect - v1inselc
-       vnewewald = vewald - v1insewd
-       vnewintra = vintra
+       vnew(1)     = vnew(1) + delen
+       vnew(2) = v(2) - v1insint
+       vnew(9)   = v(9) - v1insext
+       vnew(8) = v(8) - v1inselc
+       vnew(14) = v(14) - v1insewd
+       vnew(4) = v(4)
     end if
 ! End DC-CBMC Corrections for NEW configuration
 
@@ -739,7 +738,7 @@ contains
           else
              idum = nchain+1
 ! generate positions for the hydrogens
-             call explct(idum,vtornew,.false.,.false.)
+             call explct(idum,v(7),.false.,.false.)
              do j = igrow+1, iunit
                 rxuion(j,iii) = rxu(idum,j)
                 ryuion(j,iii) = ryu(idum,j)
@@ -752,14 +751,14 @@ contains
 
 ! ??? problem here on calculation of favor and favor2 when ichoi > 1
 
-          call energy(iins,imolty,v,vintra,vinter,vext,velect,vewald,iii,ibox,istt,iett,.true.,ovrlap,ltors,vdum,.true.,lfavor,.false.)
+          call energy(iins,imolty,v,iii,ibox,istt,iett,.true.,ovrlap,ltors,.true.,lfavor,.false.)
           ! write(io_output,*) 'ovrlap:',ovrlap
-          ! if ( iins .eq. 118) write(io_output,*) 'vinter:',vinter
+          ! if ( iins .eq. 118) write(io_output,*) 'vinter:',v(2)
 
           if (ovrlap) then
              lovrh(ip) = .true.
           else
-             delenh(ip) = v + vtornew
+             delenh(ip) = v(1) + v(7)
 
              if ( delenh(ip)*beta .gt. (3.3E0_dp*softcut) ) then
                 lovrh(ip) = .true.
@@ -768,12 +767,12 @@ contains
                 bfach(ip) = exp(-beta*delenh(ip))
                 whins = whins + bfach(ip)
                 lovrh(ip) = .false.
-                vtrhintra(ip) = vintra
-                vtrhinter(ip) = vinter
-                vtrhext(ip) = vext
-                vtrhtg(ip) = vtornew
-                vtrhelect(ip) = velect
-                vtrhewald(ip) = vewald
+                vtrhintra(ip) = v(4)
+                vtrhinter(ip) = v(2)
+                vtrhext(ip) = v(9)
+                vtrhtg(ip) = v(7)
+                vtrhelect(ip) = v(8)
+                vtrhewald(ip) = v(14)
              end if
           end if
        end do
@@ -799,13 +798,13 @@ contains
        end if
 
 190    waddnew = waddnew * whins
-       vnewt     = vnewt + delenh(iwalk)
-       vnewintra = vnewintra + vtrhintra(iwalk)
-       vnewinter = vnewinter + vtrhinter(iwalk)
-       vnewext   = vnewext + vtrhext(iwalk)
-       vnewtg = vnewtg + vtrhtg(iwalk)
-       vnewelect = vnewelect + vtrhelect(iwalk)
-       vnewewald = vnewewald + vtrhewald(iwalk)
+       vnew(1)     = vnew(1) + delenh(iwalk)
+       vnew(4) = vnew(4) + vtrhintra(iwalk)
+       vnew(2) = vnew(2) + vtrhinter(iwalk)
+       vnew(9)   = vnew(9) + vtrhext(iwalk)
+       vnew(7) = vnew(7) + vtrhtg(iwalk)
+       vnew(8) = vnew(8) + vtrhelect(iwalk)
+       vnew(14) = vnew(14) + vtrhewald(iwalk)
        do j = igrow+1, iunit
           rxuion(j,iii) = rxuh(j,iwalk)
           ryuion(j,iii) = ryuh(j,iwalk)
@@ -826,8 +825,8 @@ contains
           call recip(boxins,vrecipn,vrecipo,1)
           delen = vrecipn - vrecipo
           waddnew = waddnew*exp(-beta*delen)
-          vnewelect = vnewelect + delen
-          vnewt = vnewt + delen
+          vnew(8) = vnew(8) + delen
+          vnew(1) = vnew(1) + delen
        end if
     end if
 ! End Ewald-sum Corrections
@@ -849,11 +848,11 @@ contains
        do j = 1,iunit
           qion(j) = qqu(iins,j)
        end do
-       call charge(iins, qion, vflucq,vdum)
+       call charge(iins, qion, v(11),vdum)
 ! once we go to fully flexible will need to compute this in boltz
-       vnewflucq = vflucq
-       vnewt = vnewt + vflucq
-       waddnew = waddnew*exp(-beta*vflucq)
+       vnewflucq = v(11)
+       vnew(1) = vnew(1) + v(11)
+       waddnew = waddnew*exp(-beta*v(11))
     end if
 ! End Fluctuating Charge corrections for NEW configuration
 
@@ -896,10 +895,10 @@ contains
 ! vinsta = 0.0E0_dp
 ! end if
 
-       vinsta = vinsta - vtailb( boxins )
+       vinsta = vinsta - vbox(3, boxins )
        waddnew = waddnew*exp(-beta*vinsta)
-       vnewt = vnewt + vinsta
-       vnewinter = vnewinter + vinsta
+       vnew(1) = vnew(1) + vinsta
+       vnew(2) = vnew(2) + vinsta
 
 ! this approximate method of tail correction was used for chem. pot.
 ! until 1-26-98 MGM
@@ -1124,11 +1123,11 @@ contains
        write(io_output,*) 'SWAP:soft overlap in rembox',boxrem,' for moltyp' ,imolty
     end if
 
-    v1rem = vtry(1)
-    v1remint = vtrinter(1)
-    v1remext = vtrext(1)
-    v1remelc = vtrelect(1)
-    v1remewd = vtrewald(1)
+    v1rem = vtr(1,1)
+    v1remint = vtr(2,1)
+    v1remext = vtr(9,1)
+    v1remelc = vtr(8,1)
+    v1remewd = vtr(14,1)
 
     waddold = 1.0E0_dp
 
@@ -1160,23 +1159,23 @@ contains
        istt=1
        iett = igrow
 
-       call energy(irem,imolty, v, vintra,vinter,vext,velect ,vewald,iii, boxrem, istt, iett, .true.,ovrlap ,.false.,vtorold,.false.,lfavor,.false.)
+       call energy(irem,imolty,v,iii,boxrem,istt,iett,.true.,ovrlap,.false.,.false.,lfavor,.false.)
 
        if (ovrlap) then
           write(io_output,*) 'disaster ovrlap in old conf SWAP'
           call err_exit(__FILE__,__LINE__,'',myid+1)
        end if
 ! v now includes vnewintra,v1remewd and voldewald, take out
-!$$$         deleo = v - ( voldinter + voldext +voldelect)
+!$$$         deleo = v(1) - ( vold(2) + vold(9) +vold(8))
 !$$$     &        - (v1rem - v1remewd)
-       deleo = v - ( voldinter + voldext +voldelect + voldintra  + voldewald + v1rem)
+       deleo = v(1) - ( vold(2) + vold(9) +vold(8) + vold(4)  + vold(14) + v1rem)
        waddold = waddold*exp(-beta*deleo)
-       voldt     = voldt + deleo
-       voldinter = vinter - v1remint
-       voldext   = vext - v1remext
-       voldelect = velect - v1remelc
-       voldewald = vewald - v1remewd
-       voldintra = vintra
+       vold(1)     = vold(1) + deleo
+       vold(2) = v(2) - v1remint
+       vold(9)   = v(9) - v1remext
+       vold(8) = v(8) - v1remelc
+       vold(14) = v(14) - v1remewd
+       vold(4) = v(4)
     end if
 ! End Correction for DC-CBMC for OLD configuration
 
@@ -1190,21 +1189,21 @@ contains
        istt = igrow + 1
        iett = iunit
 
-       call energy(irem,imolty,v, vintra,vinter,vext,velect ,vewald ,iii,ibox,istt,iett,.true.,ovrlap,ltors,vtorold ,.true.,lfavor,.false.)
+       call energy(irem,imolty,v,iii,ibox,istt,iett,.true.,ovrlap,ltors,.true.,lfavor,.false.)
 
-       ! if (irem .eq. 118)  write(io_output,*) 'for old',vinter
+       ! if (irem .eq. 118)  write(io_output,*) 'for old',v(2)
        if (ovrlap) then
           write(io_output,*) 'disaster ovrlap in old conf SWAP'
           call err_exit(__FILE__,__LINE__,'',myid+1)
        end if
-       deleo = v + vtorold
-       voldt     = voldt + deleo
-       voldintra = voldintra + vintra
-       voldinter = voldinter + vinter
-       voldext   = voldext + vext
-       voldtg    = voldtg + vtorold
-       voldelect = voldelect + velect
-       voldewald = voldewald + vewald
+       deleo = v(1) + v(7)
+       vold(1)     = vold(1) + deleo
+       vold(4) = vold(4) + v(4)
+       vold(2) = vold(2) + v(2)
+       vold(9)   = vold(9) + v(9)
+       vold(7)    = vold(7) + v(7)
+       vold(8) = vold(8) + v(8)
+       vold(14) = vold(14) + v(14)
 
        whrem = exp(-beta*deleo)
        ichoi = nchoih(imolty)
@@ -1221,7 +1220,7 @@ contains
 
           do ip = 2,ichoi
 ! rosenbluth weight for multiple placement of explicit hydrogens
-             call explct(irem,vtorold,.false.,.false.)
+             call explct(irem,v(7),.false.,.false.)
              do j = igrow + 1, iunit
                 rxuion(j,iii) = rxu(irem,j)
                 ryuion(j,iii) = ryu(irem,j)
@@ -1229,9 +1228,9 @@ contains
              end do
 
 ! ??? problem here on calculation of favor and favor2
-             call energy(irem,imolty,v, vintra,vinter,vext ,velect ,vewald,iii,ibox,istt,iett, .true.,ovrlap,ltors ,vdum,.true.,lfavor,.false.)
+             call energy(irem,imolty,v,iii,ibox,istt,iett,.true.,ovrlap,ltors,.true.,lfavor,.false.)
 
-             deleo = v + vtorold
+             deleo = v(1) + v(7)
              if ( .not. ovrlap ) then
                 whrem = whrem + exp(-beta*deleo)
              end if
@@ -1264,8 +1263,8 @@ contains
        end if
        call recip(boxrem,vrecipn,vrecipo,1)
        deleo = vrecipo - vrecipn
-       voldt = voldt + deleo
-       voldelect = voldelect + deleo
+       vold(1) = vold(1) + deleo
+       vold(8) = vold(8) + deleo
        waddold = waddold * exp(-beta*deleo)
     end if
 ! End Ewald-sum Corrections for OLD configuration
@@ -1277,7 +1276,7 @@ contains
 ! flexible fluctuating charge calculation into boltz
 ! right now the old flucq energy is the same as the new flucq
        voldflucq = vnewflucq
-       voldt = voldt + voldflucq
+       vold(1) = vold(1) + voldflucq
        waddold = waddold*exp(-beta*voldflucq)
     end if
 ! End Fluctuating Charge corrections for OLD configuration
@@ -1333,27 +1332,27 @@ contains
 !$$$            end do
 !$$$         end if
 
-       vremta = - vremta + vtailb( boxrem )
+       vremta = - vremta + vbox(3, boxrem )
        waddold=waddold*exp(-beta*vremta)
-       voldt = voldt + vremta
-       voldinter = voldinter + vremta
+       vold(1) = vold(1) + vremta
+       vold(2) = vold(2) + vremta
     else
        vremta = 0.0E0_dp
     end if
 ! End of intermolecular tail correction for boxrem
 
 ! Add contributions of the first bead and additional beads:
-    vnewt     = vnewt  + v1ins
-    vnewinter = vnewinter + v1insint
-    vnewext   = vnewext + v1insext
-    vnewelect = vnewelect + v1inselc
-    vnewewald = vnewewald + v1insewd
+    vnew(1)     = vnew(1)  + v1ins
+    vnew(2) = vnew(2) + v1insint
+    vnew(9)   = vnew(9) + v1insext
+    vnew(8) = vnew(8) + v1inselc
+    vnew(14) = vnew(14) + v1insewd
 
-    voldt     = voldt  + v1rem
-    voldinter = voldinter+(v1remint)
-    voldext   = voldext+v1remext
-    voldelect = voldelect + v1remelc
-    voldewald = voldewald + v1remewd
+    vold(1)     = vold(1)  + v1rem
+    vold(2) = vold(2)+(v1remint)
+    vold(9)   = vold(9)+v1remext
+    vold(8) = vold(8) + v1remelc
+    vold(14) = vold(14) + v1remewd
 
     weight= w1ins * waddnew * weight
     weiold= w1rem * waddold * weiold
@@ -1383,7 +1382,7 @@ contains
        favor(irem) = 1.0E0_dp
        favor2(irem) = 1.0E0_dp
 
-       call anes(irem,boxins,boxrem,3,laccept,vdum,vdum,vdum,vdum,vdum,vdum,vdum,vdum,vdum,vinsta,vremta,vnewflucq,voldflucq,lswapinter)
+       call anes(irem,boxins,boxrem,3,laccept,v,vinsta,vremta,vnewflucq,voldflucq,lswapinter)
 
        if ( lswapinter ) then
           arg = weight * volins  / dble( ncmt(boxins,imolty) )
@@ -1527,27 +1526,27 @@ contains
 ! write(io_output,*) 'irem', irem
 
 ! update energies:
-       vbox(boxrem)     = vbox(boxrem)     - voldt - total_NBE
-       vinterb(boxrem)  = vinterb(boxrem)  - voldinter
-       vtailb(boxrem)   = vtailb(boxrem)   - vremta
-       vintrab(boxrem)  = vintrab(boxrem)  - voldintra
-       vvibb(boxrem)    = vvibb(boxrem)    - voldbvib - vvibn
-       vtgb(boxrem)     = vtgb(boxrem)     - voldtg - vtgn
-       vextb(boxrem)    = vextb(boxrem)    - voldext
-       vbendb(boxrem)   = vbendb(boxrem)   - voldbb - vbendn
-       velectb(boxrem)  = velectb(boxrem)  - (voldelect+voldewald)
-       vflucqb(boxrem)  = vflucqb(boxrem)  - voldflucq
+       vbox(1,boxrem)     = vbox(1,boxrem)     - vold(1) - total_NBE
+       vbox(2,boxrem)  = vbox(2,boxrem)  - vold(2)
+       vbox(3,boxrem)   = vbox(3,boxrem)   - vremta
+       vbox(4,boxrem)  = vbox(4,boxrem)  - vold(4)
+       vbox(5,boxrem)    = vbox(5,boxrem)    - vold(5) - vvibn
+       vbox(7,boxrem)     = vbox(7,boxrem)     - vold(7) - vtgn
+       vbox(9,boxrem)    = vbox(9,boxrem)    - vold(9)
+       vbox(6,boxrem)   = vbox(6,boxrem)   - vold(6) - vbendn
+       vbox(8,boxrem)  = vbox(8,boxrem)  - (vold(8)+vold(14))
+       vbox(11,boxrem)  = vbox(11,boxrem)  - voldflucq
 
-       vbox(boxins)     = vbox(boxins)     + vnewt + total_NBE
-       vinterb(boxins)  = vinterb(boxins)  + vnewinter
-       vtailb(boxins)   = vtailb(boxins)   + vinsta
-       vintrab(boxins)  = vintrab(boxins)  + vnewintra
-       vvibb(boxins)    =  vvibb(boxins)   + vnewbvib + vvibn
-       vtgb(boxins)     = vtgb(boxins)     + vnewtg + vtgn
-       vextb(boxins)    = vextb(boxins)    + vnewext
-       vbendb(boxins)   = vbendb(boxins)   + vnewbb + vbendn
-       velectb(boxins)  = velectb(boxins)  + (vnewelect+vnewewald)
-       vflucqb(boxins)  = vflucqb(boxins)  + vnewflucq
+       vbox(1,boxins)     = vbox(1,boxins)     + vnew(1) + total_NBE
+       vbox(2,boxins)  = vbox(2,boxins)  + vnew(2)
+       vbox(3,boxins)   = vbox(3,boxins)   + vinsta
+       vbox(4,boxins)  = vbox(4,boxins)  + vnew(4)
+       vbox(5,boxins)    =  vbox(5,boxins)   + vnew(5) + vvibn
+       vbox(7,boxins)     = vbox(7,boxins)     + vnew(7) + vtgn
+       vbox(9,boxins)    = vbox(9,boxins)    + vnew(9)
+       vbox(6,boxins)   = vbox(6,boxins)   + vnew(6) + vbendn
+       vbox(8,boxins)  = vbox(8,boxins)  + (vnew(8)+vnew(14))
+       vbox(11,boxins)  = vbox(11,boxins)  + vnewflucq
 
 ! update book keeping
        if ( lswapinter ) then

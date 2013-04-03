@@ -64,13 +64,13 @@ contains
 !> ibox: box number
 !> lvol: true if called from volume.f, no output of summary infomation
 !******************************************************************
-  subroutine sumup(ovrlap,v,vinter,vtail,vintra,vvib,vbend,vtg,vext,velect,vflucq,ibox,lvol)
+  subroutine sumup(ovrlap,v,ibox,lvol)
     use energy_kspace,only:recipsum
     use energy_intramolecular,only:U_bonded
     use energy_3body,only:U3System
     use energy_4body,only:U4System
 
-    real(kind=dp)::v,vinter,vtail,vintra,vvib,vbend,vtg,vext,velect,vflucq,vrecipsum,vwell,my_velect
+    real(kind=dp)::v(nEnergy),vrecipsum,vwell,my_velect
     logical::ovrlap,lvol
     logical::lexplt,lqimol,lqjmol,lcoulo(numax,numax),lij2,liji,lqchgi
     integer::i,imolty,ii,j,jmolty,jj,ntii,ntjj,ntij,iunit,ibox,nmcount,ntj,k,mmm
@@ -96,15 +96,6 @@ contains
 
     ovrlap = .false.
     v = 0.0E0_dp
-    vinter = 0.0E0_dp
-    vintra = 0.0E0_dp
-    vtail = 0.0E0_dp
-    vtg = 0.0E0_dp
-    vbend = 0.0E0_dp
-    vvib = 0.0E0_dp
-    vext = 0.0E0_dp
-    velect = 0.0E0_dp
-    vflucq = 0.0E0_dp
     !kea - 3body garofalini term
     v3garo = 0.0E0_dp
     vwell = 0.0E0_dp
@@ -244,10 +235,10 @@ contains
                             ! return
                             goto 199
                          else if (rijsq.lt.rcutsq .or. lijall) then
-                            vinter=vinter+U2(rij,rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
+                            v(2)=v(2)+U2(rij,rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
                          end if
 
-                         velect=velect+Q2(rij,rijsq,rcutsq,i,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
+                         v(8)=v(8)+Q2(rij,rijsq,rcutsq,i,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
 
 !cc  KM for MPI
 !cc  all processors need to know neighbor information
@@ -299,11 +290,11 @@ contains
           return
        end if
 
-       call mp_sum(vinter,1,groupid)
-       call mp_sum(velect,1,groupid)
+       call mp_sum(v(2),1,groupid)
+       call mp_sum(v(8),1,groupid)
 
        if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff  .and. .not. lgenlj .and. .not. lninesix .and..not.lgaro .and..not.L_vdW_table) then
-          vinter = 4.0E0_dp * vinter
+          v(2) = 4.0E0_dp * v(2)
        end if
 
 ! KEA garofalini 3 body potential
@@ -312,8 +303,8 @@ contains
           call vthreebody(v3garo)
        end if
 
-       if (hasThreeBody) vinter=vinter+U3System(ibox)
-       if (hasFourBody) vinter=vinter+U4System(ibox)
+       if (hasThreeBody) v(2)=v(2)+U3System(ibox)
+       if (hasFourBody) v(2)=v(2)+U4System(ibox)
 
        if (ltailc) then
           ! add tail corrections for the Lennard-Jones energy
@@ -325,17 +316,17 @@ contains
           do jmolty = 1, nmolty
              rho = ncmt(ibox,jmolty) / vol
              do imolty = 1, nmolty
-                vtail = vtail +  ncmt(ibox,imolty) * coru(imolty,jmolty,rho,ibox)
+                v(3) = v(3) +  ncmt(ibox,imolty) * coru(imolty,jmolty,rho,ibox)
              end do
           end do
-          vinter = vinter + vtail
+          v(2) = v(2) + v(3)
        end if
     end if
 
 !$$$c      write(io_output,*)
 !$$$c      write(io_output,*) '+++++++'
-!$$$c      vtemp = velect
-!$$$c      write(io_output,*) 'direct space part:',velect*qqfact
+!$$$c      vtemp = v(8)
+!$$$c      write(io_output,*) 'direct space part:',v(8)*qqfact
 
     if ( ldielect ) then
        call dipole(ibox,0)
@@ -387,17 +378,17 @@ contains
 ! vdipole = (dipolex*dipolex+dipoley*dipoley+dipolez*dipolez)*(2.0E0_dp*onepi)/(3.0E0_dp*boxlx(ibox)**3.0E0_dp)
 ! write(io_output,*) dipolex,dipoley,dipolez
        sself = -sself*calpi/sqrtpi
-       velect = velect + sself + correct + vrecipsum
-! velect = velect + vsc + vrecipsum
+       v(8) = v(8) + sself + correct + vrecipsum
+! v(8) = v(8) + vsc + vrecipsum
     end if
 
 !$$$c at this point velect contains all intermolecular charge interactions,
 !$$$c plus the ewald self term and intramolecular corrections
 !$$$
 ! write(io_output,*)
-! write(io_output,*) '== After Inter === velect is:',velect*qqfact
+! write(io_output,*) '== After Inter === velect is:',v(8)*qqfact
 !$$$
-!$$$       vtemp = velect
+!$$$       vtemp = v(8)
 
 ! ################################################################
 
@@ -455,13 +446,13 @@ contains
                             if (L_bend_table) then
                                do mmm=1,inben(imolty,ii)
                                   if (ijben3(imolty,ii,mmm).eq.jj)then
-                                     vintra = vintra + lininter_bend(rij,itben(imolty,ii,mmm))
+                                     v(4) = v(4) + lininter_bend(rij,itben(imolty,ii,mmm))
                                      goto 94
                                   end if
                                end do
                             end if
 
-                            vintra=vintra+U2(rij,rijsq,i,imolty,ii,ntii,i,imolty,jj,ntjj,ntij)
+                            v(4)=v(4)+U2(rij,rijsq,i,imolty,ii,ntii,i,imolty,jj,ntjj,ntij)
                          end if
                       end if !if (linclu(imolty,ii,jj))
 
@@ -484,20 +475,20 @@ contains
           return
        end if
 ! -----------------------------------------
-       call mp_sum(vintra,1,groupid)
+       call mp_sum(v(4),1,groupid)
        call mp_sum(my_velect,1,groupid)
-       velect = velect + my_velect
+       v(8) = v(8) + my_velect
 
-!$$$       vtemp = velect - vtemp
+!$$$       vtemp = v(8) - vtemp
 !$$$
 !$$$c       write(io_output,*) '== Intra Velect ===',vtemp*qqfact
-! write(io_output,*) '== After Intra  === velect is:',velect*qqfact
-! write(io_output,*) 'vintra ', vintra
-! write(io_output,*) 'vinter ', vinter
-! write(io_output,*) 'test', vintra
+! write(io_output,*) '== After Intra  === velect is:',v(8)*qqfact
+! write(io_output,*) 'vintra ', v(4)
+! write(io_output,*) 'vinter ', v(2)
+! write(io_output,*) 'test', v(4)
 
        if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff  .and. .not. lgenlj .and. .not. lninesix .and..not.lgaro .and..not.L_vdW_table) then
-          vintra = 4.0E0_dp * vintra
+          v(4) = 4.0E0_dp * v(4)
        end if
 
 ! ################################################################
@@ -523,18 +514,18 @@ contains
                       do jj = ii, iunit
 
                          if ( ii .eq. jj) then
-                            vflucq = vflucq + xiq(ntii)*qqii + jayself(ntii)*qqii*qqii
+                            v(11) = v(11) + xiq(ntii)*qqii + jayself(ntii)*qqii*qqii
                          else
                             ntjj = ntype(imolty,jj)
                             ntij = type_2body(ntii,ntjj)
 
-                            vflucq = vflucq  + jayq(ntij)*qqii*qqu(i,jj)
+                            v(11) = v(11)  + jayq(ntij)*qqii*qqu(i,jj)
                          end if
                       end do
                    end do
-                   vflucq = vflucq - fqegp(imolty)
+                   v(11) = v(11) - fqegp(imolty)
                 else
-                   vflucq = 0.0E0_dp
+                   v(11) = 0.0E0_dp
                 end if
              end if
           end if
@@ -551,14 +542,14 @@ contains
           do nmcount=myid+1,ncmt(ibox,imolty),numprocs
              i=parbox(nmcount,ibox,imolty)
              call U_bonded(i,imolty,sum_vvib,sum_vbend,sum_vtg)
-             vvib=vvib+sum_vvib
-             vbend=vbend+sum_vbend
-             vtg=vtg+sum_vtg
+             v(5)=v(5)+sum_vvib
+             v(6)=v(6)+sum_vbend
+             v(7)=v(7)+sum_vtg
           end do
        end do
-       call mp_sum(vvib,1,groupid)
-       call mp_sum(vbend,1,groupid)
-       call mp_sum(vtg,1,groupid)
+       call mp_sum(v(5),1,groupid)
+       call mp_sum(v(6),1,groupid)
+       call mp_sum(v(7),1,groupid)
     end if !if ( .not. lvol .or. (lvol .and. lewald) )
 
 ! ################################################################
@@ -576,12 +567,12 @@ contains
              i=parbox(nmcount,ibox,imolty)
              do j = 1, nunit(imolty)
                 ntj = ntype(imolty,j)
-                vext=vext+U_ext(ibox,i,j,ntj)
+                v(9)=v(9)+U_ext(ibox,i,j,ntj)
              end do
           end do
        end do
 
-       call mp_sum(vext,1,groupid)
+       call mp_sum(v(9),1,groupid)
     end if
 
 ! --------------------------------------------------------------------
@@ -632,31 +623,31 @@ contains
 
 ! ----------------------------------------------------------------------------
 
-! write(io_output,*) 'self,corr:',(velect-vrecipsum)*qqfact
+! write(io_output,*) 'self,corr:',(v(8)-vrecipsum)*qqfact
 ! write(io_output,*) 'vsc, new self cor:',vsc*qqfact
 ! write(io_output,*) 'recip space part :',vrecipsum*qqfact
 ! write(io_output,*) 'sc and recip:',(vsc+vrecipsum)*qqfact
 
     if (.not.L_elect_table) then
-       velect = velect*qqfact
+       v(8) = v(8)*qqfact
     end if
 
-    v = vinter + vintra + vext + velect + vflucq + v3garo
+    v(1) = v(2) + v(4) + v(9) + v(8) + v(11) + v3garo
 
-! write(io_output,*) 'v in sumup',v
+! write(io_output,*) 'v in sumup',v(1)
 
-    vipsw = v
+    vipsw = v(1)
     vwellipsw = vwell
 
     if (lstagea) then
-       v = (1.0E0_dp-lambdais*(1.0E0_dp-etais))*v
+       v(1) = (1.0E0_dp-lambdais*(1.0E0_dp-etais))*v(1)
     else if (lstageb) then
-       v = etais*v+lambdais*vwell
+       v(1) = etais*v(1)+lambdais*vwell
     else if (lstagec) then
-       v = (etais+(1.0E0_dp-etais)*lambdais)*v+(1.0E0_dp-lambdais)*vwell
+       v(1) = (etais+(1.0E0_dp-etais)*lambdais)*v(1)+(1.0E0_dp-lambdais)*vwell
     end if
 
-    v = v + vvib + vbend + vtg
+    v(1) = v(1) + v(5) + v(6) + v(7)
 
     if ( .not. lvol.and.myid.eq.0 ) then
        write(io_output,*)
@@ -665,19 +656,19 @@ contains
        do i = 1, nmolty
           write(io_output,*) 'number of chains of type',i,ncmt(ibox,i)
        end do
-       write(io_output,*) 'inter lj energy ', vinter
-       write(io_output,*) 'intra lj energy ', vintra
-       if (ltailc) write(io_output,*) 'Tail correction ', vtail
-       write(io_output,*) 'bond vibration  ', vvib
-       write(io_output,*) 'bond bending    ', vbend
-       write(io_output,*) 'torsional       ', vtg
-       write(io_output,*) 'external        ', vext
-       write(io_output,*) 'coulombic energy', velect
+       write(io_output,*) 'inter lj energy ', v(2)
+       write(io_output,*) 'intra lj energy ', v(4)
+       if (ltailc) write(io_output,*) 'Tail correction ', v(3)
+       write(io_output,*) 'bond vibration  ', v(5)
+       write(io_output,*) 'bond bending    ', v(6)
+       write(io_output,*) 'torsional       ', v(7)
+       write(io_output,*) 'external        ', v(9)
+       write(io_output,*) 'coulombic energy', v(8)
        ! write(io_output,*) 'exact energy    ', 1.74756*1.67*831.441/3.292796
-       write(io_output,*) 'fluc Q energy   ', vflucq
+       write(io_output,*) 'fluc Q energy   ', v(11)
        write(io_output,*) 'well energy     ', vwellipsw
        if(lgaro) write(io_output,*) '3-body garo     ', v3garo
-       write(io_output,*) 'total energy    ', v
+       write(io_output,*) 'total energy    ', v(1)
     end if
 
 #ifdef __DEBUG__
@@ -702,7 +693,7 @@ contains
 !> lcharge_table: whether need to set up charge interaction table; true if called from CBMC
 !> lfavor:
 !*****************************************************************
-  subroutine energy(i,imolty,v,vintra,vinter,vext,velect,vewald,flagon,ibox,istart,iuend,lljii,ovrlap,ltors,vtors,lcharge_table,lfavor,lAtom_traxyz)
+  subroutine energy(i,imolty,v,flagon,ibox,istart,iuend,lljii,ovrlap,ltors,lcharge_table,lfavor,lAtom_traxyz)
     use sim_particle,only:lnn
     use energy_intramolecular,only:U_torsion
     use energy_3body,only:U3MolSys
@@ -716,7 +707,7 @@ contains
     integer::i,ibox,istart,iuend,ii,ntii,flagon,jjj,iii,mmm,j,jj,ntjj,ntij,ntj,imolty,jmolty,jjend
     integer::nchp2
 
-    real::v,vintra,vinter,vext,rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq,ryuij,rzuij,rij,rijsq,vtors,velect,vewald,rbcut,calpi
+    real::v(nEnergy),rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq,ryuij,rzuij,rij,rijsq,rbcut,calpi
     real::vwell
     real::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq
 
@@ -738,12 +729,6 @@ contains
 
     ovrlap = .false.
     v = 0.0E0_dp
-    vinter = 0.0E0_dp
-    vintra = 0.0E0_dp
-    vext = 0.0E0_dp
-    velect = 0.0E0_dp
-    vewald = 0.0E0_dp
-    vtors = 0.0E0_dp
     sself  = 0.0E0_dp
     correct = 0.0E0_dp
     !kea
@@ -914,10 +899,10 @@ contains
                       ! return
                       goto 99
                    else if ((rijsq .lt. rcutsq) .or. lijall) then
-                      vinter=vinter+U2(rij,rijsq,nchp2,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
+                      v(2)=v(2)+U2(rij,rijsq,nchp2,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
                    end if
 
-                   velect=velect+Q2(rij,rijsq,rcutsq,nchp2,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
+                   v(8)=v(8)+Q2(rij,rijsq,rcutsq,nchp2,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
 
                    ! KM lneighbor and lgaro does not work in parallel
                    if ( lneighbor .and. ii .eq. 1 .and.  jj .eq. 1 .and. flagon .eq. 2 .and. rijsq .lt. rbsmax**2  .and. rijsq .gt. rbsmin**2) then
@@ -960,12 +945,12 @@ contains
        return
     end if
 
-    call mp_sum(vinter,1,groupid)
-    call mp_sum(velect,1,groupid)
+    call mp_sum(v(2),1,groupid)
+    call mp_sum(v(8),1,groupid)
 ! -----------------------------------------------
 
     if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff .and. .not. lgenlj .and. .not. lninesix .and..not.lgaro .and..not.L_vdW_table) then
-       vinter = 4.0E0_dp * vinter
+       v(2) = 4.0E0_dp * v(2)
     end if
 
 !kea - garo: add three body loop for intermolecular interactions
@@ -977,8 +962,8 @@ contains
        end if
     end if
 
-    if (hasThreeBody) vinter=vinter+U3MolSys(i,istart,iuend,flagon)
-    if (hasFourBody) vinter=vinter+U4MolSys(i,istart,iuend,flagon)
+    if (hasThreeBody) v(2)=v(2)+U3MolSys(i,istart,iuend,flagon)
+    if (hasFourBody) v(2)=v(2)+U4MolSys(i,istart,iuend,flagon)
 
 ! ################################################################
 
@@ -1026,7 +1011,7 @@ contains
 
           if (lqinclu(imolty,ii,jj) ) then
              ! calculation of intramolecular electrostatics
-             velect=velect+qscale2(imolty,ii,jj)*Q2(rij,rijsq,rcutsq,nchp2,imolty,ii,ntii,lqchg(ntii),nchp2,imolty,jj,ntjj,calpi,lcoulo)
+             v(8)=v(8)+qscale2(imolty,ii,jj)*Q2(rij,rijsq,rcutsq,nchp2,imolty,ii,ntii,lqchg(ntii),nchp2,imolty,jj,ntjj,calpi,lcoulo)
           end if
 
           ! calculation of other non-bonded interactions
@@ -1041,13 +1026,13 @@ contains
                    if (L_bend_table) then
                       do mmm=1,inben(imolty,ii)
                          if (ijben3(imolty,ii,mmm).eq.jj) then
-                            vintra = vintra + lininter_bend(rij,itben(imolty,ii,mmm))
+                            v(4) = v(4) + lininter_bend(rij,itben(imolty,ii,mmm))
                             goto 96
                          end if
                       end do
                    end if
 
-                   vintra=vintra+U2(rij,rijsq,nchp2,imolty,ii,ntii,nchp2,imolty,jj,ntjj,ntij)
+                   v(4)=v(4)+U2(rij,rijsq,nchp2,imolty,ii,ntii,nchp2,imolty,jj,ntjj,ntij)
                 end if
              end if
           end if
@@ -1071,10 +1056,10 @@ contains
     end do
     if (lewald.and..not.lideal(ibox)) then
        sself = -sself * calpi/sqrtpi
-       vewald = sself + correct
+       v(14) = sself + correct
     end if
     if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff  .and. .not. lgenlj  .and. .not. lninesix .and..not.L_vdW_table) then
-       vintra = 4.0E0_dp * vintra
+       v(4) = 4.0E0_dp * v(4)
     end if
 
 ! ################################################################
@@ -1086,7 +1071,7 @@ contains
     if ((lelect_field.and.lqimol) .or. ((ibox .eq. 1) .and. (ljoe .or. lsami .or. lmuir .or. lexzeo .or. lgraphite .or. lslit))) then
        do j = istart,iuend
           ntj = ntype(imolty,j)
-          vext=vext+U_ext(ibox,nchp2,j,ntj)
+          v(9)=v(9)+U_ext(ibox,nchp2,j,ntj)
        end do
     end if
 
@@ -1094,7 +1079,7 @@ contains
 ! calculation of torsion energy for explicit atom methyl groups ****
 ! *********************************************************************
     if ( ltors ) then
-       vtors=U_torsion(nchp2,imolty,nugrow(imolty)+1,.true.)
+       v(7)=U_torsion(nchp2,imolty,nugrow(imolty)+1,.true.)
     end if
 
 ! --------------------------------------------------------------------------
@@ -1135,34 +1120,34 @@ contains
 ! ----------------------------------------------------------------------------
 
     if (.not.L_elect_table) then
-       velect = velect*qqfact
-       vewald = vewald*qqfact
+       v(8) = v(8)*qqfact
+       v(14) = v(14)*qqfact
     end if
 
 ! note that vintra is only computed when the flag lljii is true
-    v = vinter + vext + vintra + velect + vewald + v3garo
-! write(io_output,*) 'vinter:',vinter,'vext:',vext,'vintra:',vintra,'velect',velect,'vewald:',vewald,'v'
+    v(1) = v(2) + v(9) + v(4) + v(8) + v(14) + v3garo
+! write(io_output,*) 'vinter:',v(2),'vext:',v(9),'vintra:',v(4),'velect',v(8),'vewald:',v(14),'v'
 
     if (flagon.eq.1) then
-       vipswo = v
+       vipswo = v(1)
        vwellipswo = vwell
     else
-       vipswn = v
+       vipswn = v(1)
        vwellipswn = vwell
     end if
 
     if (lmipsw) then
        if (lstagea) then
-          v = (1.0E0_dp-lambdais*(1.0E0_dp-etais))*v
+          v(1) = (1.0E0_dp-lambdais*(1.0E0_dp-etais))*v(1)
        else if (lstageb) then
-          v = etais*v+lambdais*vwell
+          v(1) = etais*v(1)+lambdais*vwell
        else if (lstagec) then
-          v = (etais+(1.0E0_dp-etais)*lambdais)*v+(1.0E0_dp-lambdais)*vwell
+          v(1) = (etais+(1.0E0_dp-etais)*lambdais)*v(1)+(1.0E0_dp-lambdais)*vwell
        end if
     end if
 
 #ifdef __DEBUG__
-    ! write(io_output,*) 'v :', v
+    ! write(io_output,*) 'v :', v(1)
     write(io_output,*) 'end ENERGY in ',myid
 #endif
     return
@@ -1195,7 +1180,7 @@ contains
     integer::i,imolty,ibox,ntogrow,itrial,ntii,j,jj,ntjj,ntij,iu,jmolty,iufrom,ii,k,nmole
     ! integer::NRtype
     real::rminsq,rxui,ryui,rzui,rxuij,ryuij,rzuij,rij,rijsq,maxlen,rcm,rcmsq,corr,rcutmax
-    real::vinter,vintra,vext,velect,vewald,vwell,v,rcutsq,rcinsq
+    real::v(nEnergy),vwell,rcutsq,rcinsq
     integer::mmm
 
     ! RP added for MPI
@@ -1303,11 +1288,11 @@ contains
        ! lovr(itrial) = .false.
        my_lovr(my_itrial) = .false.
 
-       vinter = 0.0E0_dp
-       vintra = 0.0E0_dp
-       vext = 0.0E0_dp
-       velect = 0.0E0_dp
-       vewald = 0.0E0_dp
+       v(2) = 0.0E0_dp
+       v(4) = 0.0E0_dp
+       v(9) = 0.0E0_dp
+       v(8) = 0.0E0_dp
+       v(14) = 0.0E0_dp
 
        ! Only if L_Coul_CBMC is true, then compute electrostatic interactions/corrections
        if(L_Coul_CBMC.and.lewald.and..not.lideal(ibox)) then
@@ -1315,7 +1300,7 @@ contains
              ii = glist(count)
              ! This part does not change for fixed charge moves, but is
              ! used in the swap rosenbluth weight. - ewald self term
-             vewald = vewald - qqu(icharge,ii)*qqu(icharge,ii)*calp(ibox)/sqrtpi
+             v(14) = v(14) - qqu(icharge,ii)*qqu(icharge,ii)*calp(ibox)/sqrtpi
           end do
        end if
 
@@ -1368,13 +1353,13 @@ contains
                          if (L_bend_table) then
                             do mmm=1,inben(imolty,ii)
                                if (ijben3(imolty,ii,mmm).eq.iu) then
-                                  vintra = vintra + lininter_bend(rij,itben(imolty,ii,mmm))
+                                  v(4) = v(4) + lininter_bend(rij,itben(imolty,ii,mmm))
                                   goto 96
                                end if
                             end do
                          end if
 
-                         vintra=vintra+U2(rij,rijsq,i,imolty,ii,ntii,i,imolty,iu,ntjj,ntij)
+                         v(4)=v(4)+U2(rij,rijsq,i,imolty,ii,ntii,i,imolty,iu,ntjj,ntij)
                       end if
                    end if
 
@@ -1387,15 +1372,15 @@ contains
                       ! group but on its own distance in SC, but should be corrected
                       ! later by calling energy subroutine.
                       if (L_elect_table) then
-                         velect = velect + qscale2(imolty,ii,iu)*qqu(icharge,ii)*qqu(icharge,iu)*lininter_elect(rij,ntii,ntjj)
+                         v(8) = v(8) + qscale2(imolty,ii,iu)*qqu(icharge,ii)*qqu(icharge,iu)*lininter_elect(rij,ntii,ntjj)
                       else if (lewald) then
                          ! compute real space term of vewald
-                         velect = velect + qscale2(imolty,ii,iu)*qqu(icharge,ii)*qqu(icharge,iu)*erfunc(calp(ibox)*rij)/ rij
+                         v(8) = v(8) + qscale2(imolty,ii,iu)*qqu(icharge,ii)*qqu(icharge,iu)*erfunc(calp(ibox)*rij)/ rij
                          ! ewald sum correction term
                          corr = (1.0E0_dp - qscale2(imolty,ii,iu))*qqu(icharge,ii)*qqu(icharge,iu)*(erfunc(calp(ibox)*rij)-1.0E0_dp) /rij
-                         vewald = vewald + corr
+                         v(14) = v(14) + corr
                       else
-                         velect = velect + qscale2(imolty,ii,iu)*qqu(icharge,ii)*qqu(i,iu)/rij
+                         v(8) = v(8) + qscale2(imolty,ii,iu)*qqu(icharge,ii)*qqu(i,iu)/rij
                       end if
                    end if
                    ! end charge calculation
@@ -1403,7 +1388,7 @@ contains
                 else if (L_Coul_CBMC.and.lewald) then
                    ! ewald sum correction term
                    corr = qqu(icharge,ii)*qqu(icharge,iu)*(erfunc(calp(ibox)*rij)-1.0E0_dp) /rij
-                   vewald = vewald + corr
+                   v(14) = v(14) + corr
                 end if
              end do
           end do
@@ -1427,13 +1412,13 @@ contains
                    rij   = sqrt(rijsq)
                    ! ewald sum correction term
                    corr = qqu(icharge,ii)*qqu(icharge,iu)*(erfunc(calp(ibox)*rij)-1.0E0_dp)/rij
-                   vewald = vewald + corr
+                   v(14) = v(14) + corr
                 end do
              end do
           end if
 
           if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff  .and. .not. lgenlj .and. .not. lninesix .and..not.L_vdW_table.and..not.L_bend_table) then
-             vintra = 4.0E0_dp * vintra
+             v(4) = 4.0E0_dp * v(4)
           end if
        end if
 
@@ -1541,7 +1526,7 @@ contains
                          ! write(io_output,*) 'rjsq:',rijsq,rminsq
                          goto 19
                       else if (rijsq.lt.rcinsq.or.lijall) then
-                         vinter=vinter+U2(rij,rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
+                         v(2)=v(2)+U2(rij,rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
                       end if
 
                       ! compute velect (coulomb and ewald)
@@ -1552,13 +1537,13 @@ contains
                          ! group but on its own distance in SC, but should be corrected
                          ! later by calling energy subroutine.
                          if (L_elect_table) then
-                            velect = velect + qqu(icharge,ii)*qqu(j,jj)*lininter_elect(rij,ntii,ntjj)
+                            v(8) = v(8) + qqu(icharge,ii)*qqu(j,jj)*lininter_elect(rij,ntii,ntjj)
                          else if (lewald) then
                             ! compute real space term of velect
-                            velect = velect + qqu(icharge,ii)*qqu(j,jj)*erfunc(calp(ibox)*rij)/rij
+                            v(8) = v(8) + qqu(icharge,ii)*qqu(j,jj)*erfunc(calp(ibox)*rij)/rij
                          else
                             ! compute all electrostatic interactions
-                            velect = velect + qqu(icharge,ii)*qqu(j,jj)/ rij
+                            v(8) = v(8) + qqu(icharge,ii)*qqu(j,jj)/ rij
                          end if
                       end if
                    end do
@@ -1567,7 +1552,7 @@ contains
           end do do_nmole
 
           if (.not.lsami.and..not.lexpsix.and..not.lmmff.and..not.lgenlj.and..not.lninesix.and..not.L_vdW_table) then
-             vinter = 4.0E0_dp * vinter
+             v(2) = 4.0E0_dp * v(2)
           end if
        end if
 ! ################################################################
@@ -1589,7 +1574,7 @@ contains
                 rxu(nchain+2,ii) = rxp(count,itrial)
                 ryu(nchain+2,ii) = ryp(count,itrial)
                 rzu(nchain+2,ii) = rzp(count,itrial)
-                vext=vext+U_ext(ibox,nchain+2,ii,ntii)
+                v(9)=v(9)+U_ext(ibox,nchain+2,ii,ntii)
              end do
           end if
        end if
@@ -1647,38 +1632,38 @@ contains
           my_bfac(my_itrial) = 0.0E0_dp
        else
           if (.not.L_elect_table) then
-             velect = velect*qqfact
-             vewald = vewald*qqfact
+             v(8) = v(8)*qqfact
+             v(14) = v(14)*qqfact
           end if
-          v = vinter+vintra+vext+velect+vewald
+          v(1) = v(2)+v(4)+v(9)+v(8)+v(14)
           if (.not.lnew) then
-             my_vipswot(my_itrial) = v
+             my_vipswot(my_itrial) = v(1)
              my_vwellipswot(my_itrial) = vwell
           else
-             my_vipswnt(my_itrial) = v
+             my_vipswnt(my_itrial) = v(1)
              my_vwellipswnt(my_itrial) = vwell
           end if
 
           if (lstagea) then
-             v = (1.0E0_dp-lambdais*(1.0E0_dp-etais))*v
+             v(1) = (1.0E0_dp-lambdais*(1.0E0_dp-etais))*v(1)
           else if (lstageb) then
-             v = etais*v+lambdais*vwell
+             v(1) = etais*v(1)+lambdais*vwell
           else if (lstagec) then
-             v = (etais+(1.0E0_dp-etais)*lambdais)*v+ (1.0E0_dp-lambdais)*vwell
+             v(1) = (etais+(1.0E0_dp-etais)*lambdais)*v(1)+ (1.0E0_dp-lambdais)*vwell
           end if
 
-          my_vtry(my_itrial) = v
-          my_vtrintra(my_itrial) = vintra
-          my_vtrext(my_itrial)   = vext
-          my_vtrinter(my_itrial) = vinter
-          my_vtrelect(my_itrial) = velect
-          my_vtrewald(my_itrial) = vewald
+          my_vtry(my_itrial) = v(1)
+          my_vtrintra(my_itrial) = v(4)
+          my_vtrext(my_itrial)   = v(9)
+          my_vtrinter(my_itrial) = v(2)
+          my_vtrelect(my_itrial) = v(8)
+          my_vtrewald(my_itrial) = v(14)
           ! write(23,*) 'itrial' ,itrial
-          ! write(23,*) vtry(itrial), vtrintra(itrial), vtrext(itrial),
-          !   &       vtrinter(itrial),vtrelect(itrial), vtrewald(itrial)
+          ! write(23,*) vtr(1,itrial), vtr(4,itrial), vtr(9,itrial),
+          !   &       vtr(2,itrial),vtr(8,itrial), vtr(14,itrial)
 
           if ((my_vtry(my_itrial)*beta).gt.(2.3E0_dp*softcut))then
-             ! write(io_output,*) 'caught by softcut',vtry(itrial)*beta
+             ! write(io_output,*) 'caught by softcut',vtr(1,itrial)*beta
              my_lovr(my_itrial) = .true.
              my_bfac(my_itrial) = 0.0E0_dp
           else if((my_vtry(my_itrial)*beta).lt.-2.303E0_dp*308)then
@@ -1691,19 +1676,12 @@ contains
        end if
     end do
 
-    ! if (ldebug) then
-    !    write(100+myid,*) 'boltz for box ',ibox,' molecule ',i,' from myid ',myid
-    !    do my_itrial=1,counts(myid+1)
-    !       write(100+myid,*) "my_lovr(",my_itrial,") = ",my_lovr(my_itrial), "my_bfac(",my_itrial,") = ",my_bfac(my_itrial)
-    !    end do
-    ! end if
-
-    call mp_allgather(my_vtry,vtry,rcounts,displs,groupid)
-    call mp_allgather(my_vtrintra,vtrintra,rcounts,displs,groupid)
-    call mp_allgather(my_vtrext,vtrext,rcounts,displs,groupid)
-    call mp_allgather(my_vtrinter,vtrinter,rcounts,displs,groupid)
-    call mp_allgather(my_vtrelect,vtrelect,rcounts,displs,groupid)
-    call mp_allgather(my_vtrewald,vtrewald,rcounts,displs,groupid)
+    call mp_allgather(my_vtry,vtr(1,:),rcounts,displs,groupid)
+    call mp_allgather(my_vtrintra,vtr(4,:),rcounts,displs,groupid)
+    call mp_allgather(my_vtrext,vtr(9,:),rcounts,displs,groupid)
+    call mp_allgather(my_vtrinter,vtr(2,:),rcounts,displs,groupid)
+    call mp_allgather(my_vtrelect,vtr(8,:),rcounts,displs,groupid)
+    call mp_allgather(my_vtrewald,vtr(14,:),rcounts,displs,groupid)
     call mp_allgather(my_bfac,bfac,rcounts,displs,groupid)
     call mp_allgather(my_vipswot,vipswot,rcounts,displs,groupid)
     call mp_allgather(my_vwellipswot,vwellipswot,rcounts,displs,groupid)
@@ -1712,13 +1690,6 @@ contains
     call mp_allgather(my_lovr,lovr,rcounts,displs,groupid)
     ovrlap = .true.
     if (ANY(.not.lovr(1:ichoi))) ovrlap=.false.
-
-    ! if (ldebug) then
-    !    do my_itrial=1,ichoi
-    !       write(100+myid,*)"lovr(",my_itrial,") = ",lovr(my_itrial)
-    !       write(100+myid,*)"bfac(",my_itrial,") = ",bfac(my_itrial)
-    !    end do
-    ! end if
 ! ----------------------------------------------------------------------------
 #ifdef __DEBUG__
     write(io_output,*) 'end BOLTZ in ',myid
@@ -2558,7 +2529,7 @@ contains
 ! genlj =(( (2.0E0_dp**((4.0E0_dp*n1/n0)))*(1/xij)**(2.0E0_dp*n1))-
 !     & (2.0E0_dp**((2.0E0_dp*(n1/n0))+1.0E0_dp)*((1/xij)**(n1))))
 ! end if
-! vinter=vinter+e
+! v(2)=v(2)+e
 
 ! not usually used in MC
 ! if (lshift) then

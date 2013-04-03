@@ -22,12 +22,12 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
   real, dimension(nprop1,nbxmax,nbxmax)::acsolpar
   real, dimension(nbxmax)::acEnthalpy,acEnthalpy1
   real::dpr,dpp,debroglie,histrat
-  real::acv,molfra,acpres,acsurf,acvolume,asetel,acdens,histtot,acmove,acnp,dvalue,ratflcq,v,vintra,vinter,vext,velect,vewald,vtors,vtail,rho,vbend,rcutmin,vvib
+  real::acv,molfra,acpres,acsurf,acvolume,asetel,acdens,histtot,acmove,acnp,dvalue,ratflcq,v(nEnergy),rho,rcutmin
 
   dimension acv(nener,nbxmax),lratfix(ntmax)
   dimension mnbox(nbxmax,ntmax)
   dimension acpres(nbxmax),acsurf(nbxmax),acvolume(nbxmax)
-  dimension asetel(nbxmax,ntmax),acdens(nbxmax,ntmax) ,molfra(nbxmax,ntmax)
+  dimension asetel(nbxmax,ntmax),acdens(nbxmax,ntmax),molfra(nbxmax,ntmax)
   dimension lsolute(ntmax)
 
   real::ratrax,ratray,ratraz,rttrax,rttray,rttraz,rarotx,raroty,rarotz,rtrotx,rtroty,rtrotz,vol,ratvol,temmass,dn,pres(nbxmax)
@@ -353,7 +353,7 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
                  if (myid.eq.0) write(11,*) ntype(imolty,j) ,rxuion(j,1),ryuion(j,1),rzuion(j,1) ,qqu(j,1)
               end do
 
-              call energy(i,imolty,v,vintra,vinter,vext,velect ,vewald,1,ibox,1,nunit(imolty),.true.,ovrlap ,.false.,vtors,.false.,.false.,.false.)
+              call energy(i,imolty,v,1,ibox,1,nunit(imolty),.true.,ovrlap ,.false.,.false.,.false.,.false.)
               if (ovrlap) write(io_output,*)  '*** DISASTER, OVERLAP IN MONPER'
 
               if (ltailc) then
@@ -363,21 +363,21 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
                  else
                     vol = boxlx(ibox)*boxly(ibox)*boxlz(ibox)
                  end if
-                 vtail = 0.0E0_dp
+                 v(3) = 0.0E0_dp
                  do jmolty = 1, nmolty
                     rho = ncmt(ibox,jmolty) / vol
-                    vtail = vtail + ncmt(ibox,imolty) * coru(imolty,jmolty,rho,ibox)
+                    v(3) = v(3) + ncmt(ibox,imolty) * coru(imolty,jmolty,rho,ibox)
                  end do
               end if
 
-              call U_bonded(i,imolty,vvib,vbend,vtors)
+              call U_bonded(i,imolty,v(5),v(6),v(7))
 
               solcount(ibox,imolty) = solcount(ibox,imolty) + 1
-              avsolinter(ibox,imolty) =  avsolinter(ibox,imolty) + vinter / 2.0E0_dp + vtail
-              avsolintra(ibox,imolty) = avsolintra(ibox,imolty)  + vintra 
-              avsoltor(ibox,imolty) = avsoltor(ibox,imolty) + vtors
-              avsolbend(ibox,imolty) = avsolbend(ibox,imolty)  + vbend
-              avsolelc(ibox,imolty) = avsolelc(ibox,imolty)  + velect + vewald
+              avsolinter(ibox,imolty) =  avsolinter(ibox,imolty) + v(2) / 2.0E0_dp + v(3)
+              avsolintra(ibox,imolty) = avsolintra(ibox,imolty)  + v(4) 
+              avsoltor(ibox,imolty) = avsoltor(ibox,imolty) + v(7)
+              avsolbend(ibox,imolty) = avsolbend(ibox,imolty)  + v(6)
+              avsolelc(ibox,imolty) = avsolelc(ibox,imolty)  + v(8) + v(14)
            end do
         end do
      end if
@@ -448,10 +448,10 @@ subroutine monper (acv,acpres,acsurf,acvolume,molfra,mnbox,asetel ,acdens,acmove
   if ( lprint.and.myid.eq.0 ) then
 ! write out runtime information ***
      ntot = nnn + nnstep
-     write(io_output,'(i6,i8,e12.4,f10.3,f12.1,15i4)') nnn,ntot, vbox(1),boxlx(1),pres(1) ,(ncmt(1,imolty),imolty=1,nmolty)
+     write(io_output,'(i6,i8,e12.4,f10.3,f12.1,15i4)') nnn,ntot, vbox(1,1),boxlx(1),pres(1) ,(ncmt(1,imolty),imolty=1,nmolty)
      if ( lgibbs ) then
         do ibox = 2, nbox
-           write(io_output,'(14x,e12.4,f10.3,f12.1,15i4)')  vbox(ibox),boxlx(ibox),pres(ibox) ,(ncmt(ibox,imolty),imolty=1,nmolty)
+           write(io_output,'(14x,e12.4,f10.3,f12.1,15i4)')  vbox(1,ibox),boxlx(ibox),pres(ibox) ,(ncmt(ibox,imolty),imolty=1,nmolty)
         end do
      end if
   end if

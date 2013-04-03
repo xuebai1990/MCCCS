@@ -4,7 +4,7 @@
 ! combined move.                                                  **
 ! written on June 25/99 by Bin Chen.                              **
 !    *********************************************************************
-subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn,vintero,vintrao,vexto,velecto,vinsta,vremta, vnewflucq,voldflucq,lswapinter)
+subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vn,vo,vinsta,vremta,vnewflucq,voldflucq,lswapinter)
   use util_random,only:random
   use sim_system
   use energy_kspace,only:recip
@@ -12,7 +12,7 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
 
   logical::laccept,lswapinter
   integer::i,ibox,boxrem,mtype,imolty,iunit,ichoiq,ip,ibox2,j
-  real::deltv,vintern,vintran,vextn,velectn,vintero,vintrao,vexto,velecto,vinsta,vremta,vnewflucq,voldflucq,vboxo(nbxmax)&
+  real::deltv,vn(nEnergy),vo(nEnergy),vinsta,vremta,vnewflucq,voldflucq,vboxo(nbxmax)&
    ,vinterbo(nbxmax),vintrabo(nbxmax),vextbo(nbxmax),velectbo(nbxmax),vflucqbo(nbxmax),vtailbo(nbxmax),vvibbo(nbxmax)&
    ,vtgbo(nbxmax),vbendbo(nbxmax),rxuo(numax),ryuo(numax),rzuo(numax),xcmo,ycmo,zcmo,vdum,wratio,volins,volrem,deltvb,vnewt2,voldt2
   real::qquo(nmax,numax)
@@ -26,18 +26,18 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
 
 ! store the old energy, old coordinates and ewald sum
       do ibox2 = 1,nbox
-         vboxo(ibox2) = vbox(ibox2)
-         vinterbo(ibox2) = vinterb(ibox2)
-         vintrabo(ibox2) = vintrab(ibox2)
-         vextbo(ibox2) = vextb(ibox2)
-         vflucqbo(ibox2) = vflucqb(ibox2)
-         velectbo(ibox2) = velectb(ibox2)
+         vboxo(ibox2) = vbox(1,ibox2)
+         vinterbo(ibox2) = vbox(2,ibox2)
+         vintrabo(ibox2) = vbox(4,ibox2)
+         vextbo(ibox2) = vbox(9,ibox2)
+         vflucqbo(ibox2) = vbox(11,ibox2)
+         velectbo(ibox2) = vbox(8,ibox2)
 
          if ( mtype .eq. 3 ) then
-            vtailbo(ibox2) = vtailb(ibox2)
-            vvibbo(ibox2) = vvibb(ibox2)
-            vtgbo(ibox2) = vtgb(ibox2)
-            vbendbo(ibox2) = vbendb(ibox2)
+            vtailbo(ibox2) = vbox(3,ibox2)
+            vvibbo(ibox2) = vbox(5,ibox2)
+            vtgbo(ibox2) = vbox(7,ibox2)
+            vbendbo(ibox2) = vbox(6,ibox2)
          end if
 
       end do
@@ -71,34 +71,34 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
 
       if ( mtype .eq. 3 ) then
 ! for swap move
-         vbox(ibox)     = vbox(ibox) + vnewt
-         vinterb(ibox)  = vinterb(ibox) + vnewinter
-         vintrab(ibox)  = vintrab(ibox) + vnewintra
-         vextb(ibox)    = vextb(ibox)   + vnewext
-         velectb(ibox)   = velectb(ibox)  + vnewelect+vnewewald
-         vtailb(ibox)   = vtailb(ibox)   + vinsta
-         vvibb(ibox)    =  vvibb(ibox)   + vnewbvib
-         vtgb(ibox)     = vtgb(ibox)     + vnewtg
-	 vbendb(ibox)   = vbendb(ibox)   + vnewbb
-         vflucqb(ibox)  = vflucqb(ibox)  + vnewflucq
+         vbox(1,ibox)     = vbox(1,ibox) + vnew(1)
+         vbox(2,ibox)  = vbox(2,ibox) + vnew(2)
+         vbox(4,ibox)  = vbox(4,ibox) + vnew(4)
+         vbox(9,ibox)    = vbox(9,ibox)   + vnew(9)
+         vbox(8,ibox)   = vbox(8,ibox)  + vnew(8)+vnew(14)
+         vbox(3,ibox)   = vbox(3,ibox)   + vinsta
+         vbox(5,ibox)    =  vbox(5,ibox)   + vnew(5)
+         vbox(7,ibox)     = vbox(7,ibox)     + vnew(7)
+	 vbox(6,ibox)   = vbox(6,ibox)   + vnew(6)
+         vbox(11,ibox)  = vbox(11,ibox)  + vnewflucq
 
-         vbox(boxrem)     = vbox(boxrem)     - voldt
-         vinterb(boxrem)  = vinterb(boxrem)  - voldinter
-         vtailb(boxrem)   = vtailb(boxrem)   - vremta
-         vintrab(boxrem)  = vintrab(boxrem)  - voldintra
-         vvibb(boxrem)    = vvibb(boxrem)    - voldbvib
-         vtgb(boxrem)     = vtgb(boxrem)     - voldtg
-         vextb(boxrem)    = vextb(boxrem)    - voldext
-         vbendb(boxrem)   = vbendb(boxrem)   - voldbb
-         velectb(boxrem)  = velectb(boxrem)  -  (voldelect+voldewald)
-         vflucqb(boxrem)  = vflucqb(boxrem)  - voldflucq
+         vbox(1,boxrem)     = vbox(1,boxrem)     - vold(1)
+         vbox(2,boxrem)  = vbox(2,boxrem)  - vold(2)
+         vbox(3,boxrem)   = vbox(3,boxrem)   - vremta
+         vbox(4,boxrem)  = vbox(4,boxrem)  - vold(4)
+         vbox(5,boxrem)    = vbox(5,boxrem)    - vold(5)
+         vbox(7,boxrem)     = vbox(7,boxrem)     - vold(7)
+         vbox(9,boxrem)    = vbox(9,boxrem)    - vold(9)
+         vbox(6,boxrem)   = vbox(6,boxrem)   - vold(6)
+         vbox(8,boxrem)  = vbox(8,boxrem)  -  (vold(8)+vold(14))
+         vbox(11,boxrem)  = vbox(11,boxrem)  - voldflucq
       else
 
-         vbox(ibox)     = vbox(ibox) + deltv
-         vinterb(ibox)  = vinterb(ibox) + (vintern - vintero)
-         vintrab(ibox)  = vintrab(ibox) + (vintran - vintrao)
-         vextb(ibox)    = vextb(ibox)   + (vextn   - vexto)
-         velectb(ibox)   = velectb(ibox)  + (velectn - velecto)
+         vbox(1,ibox)     = vbox(1,ibox) + deltv
+         vbox(2,ibox)  = vbox(2,ibox) + (vn(2) - vo(2))
+         vbox(4,ibox)  = vbox(4,ibox) + (vn(4) - vo(4))
+         vbox(9,ibox)    = vbox(9,ibox)   + (vn(9)   - vo(9))
+         vbox(8,ibox)   = vbox(8,ibox)  + (vn(8) - vo(8))
       end if
 
       do j = 1,iunit
@@ -131,9 +131,9 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
          do ichoiq = 1,500
             call flucq(2,0)
          end do
-         deltv = vbox(ibox) - vboxo(ibox)
+         deltv = vbox(1,ibox) - vboxo(ibox)
          weight = exp(-deltv*beta)
-         deltv = vboxo(boxrem) - vbox(boxrem)
+         deltv = vboxo(boxrem) - vbox(1,boxrem)
          weiold = exp(-deltv*beta)
          volins=boxlx(ibox)*boxly(ibox)*boxlz(ibox)
          volrem=boxlx(boxrem)*boxly(boxrem)*boxlz(boxrem)
@@ -168,7 +168,7 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
          vnewt2 = 0.0E0_dp
          voldt2 = 0.0E0_dp
          do ibox2 = 1, nbox
-            vnewt2 = vnewt2 + vbox(ibox2)
+            vnewt2 = vnewt2 + vbox(1,ibox2)
             voldt2 = voldt2 + vboxo(ibox2)
          end do
          deltv = vnewt2 - voldt2
@@ -193,17 +193,17 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vintern,vintran, vextn,velectn
       else
 ! restore the old energy and old coordinates and ewald sum
          do ibox2 = 1,nbox
-            vbox(ibox2) = vboxo(ibox2)
-            vinterb(ibox2) = vinterbo(ibox2)
-            vintrab(ibox2) = vintrabo(ibox2)
-            vextb(ibox2) = vextbo(ibox2)
-            velectb(ibox2) = velectbo(ibox2)
-            vflucqb(ibox2) = vflucqbo(ibox2)
+            vbox(1,ibox2) = vboxo(ibox2)
+            vbox(2,ibox2) = vinterbo(ibox2)
+            vbox(4,ibox2) = vintrabo(ibox2)
+            vbox(9,ibox2) = vextbo(ibox2)
+            vbox(8,ibox2) = velectbo(ibox2)
+            vbox(11,ibox2) = vflucqbo(ibox2)
             if ( mtype .eq. 3 ) then
-               vtailb(ibox2) = vtailbo(ibox2)
-               vvibb(ibox2) = vvibbo(ibox2)
-               vtgb(ibox2) = vtgbo(ibox2)
-               vbendb(ibox2) = vbendbo(ibox2)
+               vbox(3,ibox2) = vtailbo(ibox2)
+               vbox(5,ibox2) = vvibbo(ibox2)
+               vbox(7,ibox2) = vtgbo(ibox2)
+               vbox(6,ibox2) = vbendbo(ibox2)
             end if
          end do
          do j = 1,iunit

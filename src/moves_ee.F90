@@ -265,7 +265,7 @@ contains
 
       logical::ovrlap
       integer::i,ibox,iunit,imolty,imolty1,j,idummy(nmax)
-      real::dum,vrecipn,vrecipo,vnew,vold,vintern ,vintero,vintran,vintrao,velectn,velecto,vewaldn,vewaldo,vextn ,vexto,deltv,deltvb,wdeltvb,vtailn,vtailo
+      real::dum,vrecipn,vrecipo,vn(nEnergy),vo(nEnergy),deltv,deltvb,wdeltvb
 
 ! --------------------------------------------------------------------
 #ifdef __DEBUG__
@@ -337,12 +337,12 @@ contains
          end do
 
          moltion(1) = imolty
-         call energy(eeirem,imolty,vnew,vintran,vintern,vextn,velectn,vewaldn,2,ibox,1,iunit,.false.,ovrlap,.false.,dum,.false.,.false.,.false.)
+         call energy(eeirem,imolty,vn,2,ibox,1,iunit,.false.,ovrlap,.false.,.false.,.false.,.false.)
          if (ovrlap) goto 100
          if (ltailc) then
 ! add tail corrections for the Lennard-Jones energy
-            vtailn=ee_coru(ibox,imolty,2)
-            vintern = vintern + vtailn
+            vn(3)=ee_coru(ibox,imolty,2)
+            vn(2) = vn(2) + vn(3)
          end if
 
 ! energy for the old state
@@ -355,27 +355,27 @@ contains
             qquion(i,1) = qqu(eeirem,i)
          end do
          moltion(2) = imolty
-         call energy(eeirem,imolty,vold,vintrao,vintero,vexto,velecto,vewaldo,1,ibox,1,iunit,.false.,ovrlap,.false.,dum,.false.,.false.,.false.)
+         call energy(eeirem,imolty,vo,1,ibox,1,iunit,.false.,ovrlap,.false.,.false.,.false.,.false.)
          if (ovrlap) then
             call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf eemove',myid+1)
          end if
          if (ltailc) then
 ! add tail corrections for the Lennard-Jones energy
-            vtailo=ee_coru(ibox,imolty,1)
-            vintero = vintero + vtailo
+            vo(3)=ee_coru(ibox,imolty,1)
+            vo(2) = vo(2) + vo(3)
          end if
 
          if (lewald.and.(lelect(moltion(2)).or.lelect(moltion(1))))then
             call ee_recip(ibox,vrecipn,vrecipo,1)
-            velectn = velectn+vrecipn+vewaldn
-            velecto = velecto+vrecipo+vewaldo
-            vnew = vnew + vrecipn
-            vold = vold + vrecipo
+            vn(8) = vn(8)+vrecipn+vn(14)
+            vo(8) = vo(8)+vrecipo+vo(14)
+            vn(1) = vn(1) + vrecipn
+            vo(1) = vo(1) + vrecipo
          end if
 
 ! check for acceptance
 
-         deltv = (vnew - vold)
+         deltv = (vn(1) - vo(1))
          deltvb = beta*deltv
          wdeltvb = wee_ratio*exp(-deltvb)
 
@@ -406,13 +406,13 @@ contains
          ncmt(ibox,imolty) = ncmt(ibox,imolty) - 1
          eepointp = ncmt(ibox,imolty1)
 
-         vbox(ibox) = vbox(ibox) + deltv
-         vinterb(ibox) = vinterb(ibox) + (vintern-vintero)
-         vintrab(ibox) = vintrab(ibox) + (vintran-vintrao)
-         vextb(ibox) = vextb(ibox) + (vextn-vexto)
-         vtailb(ibox) = vtailb(ibox) + (vtailn-vtailo)
-         velectb(ibox) = velectb(ibox) + (velectn-velecto)
-!	write(io_output,*) vtailn,vtailo,vintern,vintero
+         vbox(1,ibox) = vbox(1,ibox) + deltv
+         vbox(2,ibox) = vbox(2,ibox) + (vn(2)-vo(2))
+         vbox(4,ibox) = vbox(4,ibox) + (vn(4)-vo(4))
+         vbox(9,ibox) = vbox(9,ibox) + (vn(9)-vo(9))
+         vbox(3,ibox) = vbox(3,ibox) + (vn(3)-vo(3))
+         vbox(8,ibox) = vbox(8,ibox) + (vn(8)-vo(8))
+!	write(io_output,*) vn(3),vo(3),vn(2),vo(2)
 
 ! update reciprocal space term
 
@@ -542,8 +542,8 @@ contains
     use energy_pairwise,only:coru
 
       logical::ovrlap
-      integer::i,ibox,iunit,flagon,itype,j,imolty,icbu ,ic,imt,jmt,itype2,disp
-      real::dchain,vnew,vold ,vintran ,vintrao,deltv,deltvb,vintern,vintero,vextn,vexto ,velectn,velecto,vdum ,vrecipo,vrecipn,vexpta,vexptb,volume,rho
+      integer::i,ibox,iunit,flagon,itype,j,imolty,icbu,ic,imt,jmt,itype2,disp
+      real::dchain,vn(nEnergy),vo(nEnergy),deltv,deltvb,vdum,vrecipo,vrecipn,vexpta,vexptb,volume,rho
 
 #ifdef __DEBUG__
       write(io_output,*) 'start expand-ensemble move in ',myid
@@ -609,7 +609,7 @@ contains
          epsilon_f(imolty,j) = epsil(imolty,j,itype)
          sigma_f(imolty,j) = sigm(imolty,j,itype)
       end do
-      call energy(i,imolty, vnew,vintran, vintern,vextn,velectn ,vdum,flagon, ibox,1, iunit,.false.,ovrlap,.false. ,vdum,.false.,.false.,.false.)
+      call energy(i,imolty,vn,flagon,ibox,1,iunit,.false.,ovrlap,.false. ,.false.,.false.,.false.)
       if (ovrlap) return
 
 ! Start of intermolecular tail correction for new
@@ -626,8 +626,8 @@ contains
                vexpta = vexpta + dble( ncmt(ibox,imt) ) * coru(imt,jmt,rho,ibox)
             end do
          end do
-         vnew = vnew + vexpta
-         vintern = vintern + vexpta
+         vn(1) = vn(1) + vexpta
+         vn(2) = vn(2) + vexpta
       end if
 
 ! calculate the energy of i in the old configuration ***
@@ -636,7 +636,7 @@ contains
          epsilon_f(imolty,j) = epsil(imolty,j,eetype(imolty))
          sigma_f(imolty,j) = sigm(imolty,j,eetype(imolty))
       end do
-      call energy(i,imolty,vold,vintrao,vintero,vexto,velecto ,vdum,flagon,ibox,1, iunit,.false.,ovrlap,.false. ,vdum,.false.,.false.,.false.)
+      call energy(i,imolty,vo,flagon,ibox,1,iunit,.false.,ovrlap,.false. ,.false.,.false.,.false.)
 
 
 ! Start of intermolecular tail correction for old
@@ -649,8 +649,8 @@ contains
                vexptb = vexptb +  dble(ncmt(ibox,imt)) * coru(imt,jmt,rho,ibox)
             end do
          end do
-         vold = vold + vexptb
-         vintero = vintero + vexptb
+         vo(1) = vo(1) + vexptb
+         vo(2) = vo(2) + vexptb
 
       end if
 
@@ -660,15 +660,15 @@ contains
 
       if ( lewald ) then
          call recip(ibox,vrecipn,vrecipo,1)
-         velectn = velectn + vrecipn
-         velecto = velecto + vrecipo
-         vnew = vnew + vrecipn
-         vold = vold + vrecipo
+         vn(8) = vn(8) + vrecipn
+         vo(8) = vo(8) + vrecipo
+         vn(1) = vn(1) + vrecipn
+         vo(1) = vo(1) + vrecipo
       end if
 
 ! check for acceptance ***
 
-      deltv  = vnew - vold + eta(ibox,imolty,itype)  - eta(ibox,imolty,eetype(imolty))
+      deltv  = vn(1) - vo(1) + eta(ibox,imolty,itype)  - eta(ibox,imolty,eetype(imolty))
       deltvb = beta * deltv
 
       if ( deltvb .gt. (2.3E0_dp*softcut) ) return
@@ -683,12 +683,12 @@ contains
       end if
 
 ! write(io_output,*) 'expanded move accepted i',i,exp_cion(2)
-      vbox(ibox)     = vbox(ibox) + vnew - vold
-      vinterb(ibox)  = vinterb(ibox) + (vintern - vintero)
-      vintrab(ibox)  = vintrab(ibox) + (vintran - vintrao)
-      vextb(ibox)    = vextb(ibox)   + (vextn   - vexto)
-      velectb(ibox)   = velectb(ibox)  + (velectn - velecto)
-      vtailb(ibox) = vtailb(ibox) + vexpta - vexptb
+      vbox(1,ibox)     = vbox(1,ibox) + vn(1) - vo(1)
+      vbox(2,ibox)  = vbox(2,ibox) + (vn(2) - vo(2))
+      vbox(4,ibox)  = vbox(4,ibox) + (vn(4) - vo(4))
+      vbox(9,ibox)    = vbox(9,ibox)   + (vn(9)   - vo(9))
+      vbox(8,ibox)   = vbox(8,ibox)  + (vn(8) - vo(8))
+      vbox(3,ibox) = vbox(3,ibox) + vexpta - vexptb
 
       ncmt2(ibox,imolty,itype) = ncmt2(ibox,imolty,itype) + 1
       ncmt2(ibox,imolty,eetype(imolty)) =  ncmt2(ibox,imolty,eetype(imolty)) - 1

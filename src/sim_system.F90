@@ -111,7 +111,7 @@ module sim_system
   integer,parameter::smax=35& !< max no. of mstates
    ,maxvir=1,maxntemp=3& !< maximum number of bins for the 2nd virial coefficient
    ,maxbin=201& !< SAFECBMC max number of bins
-   ,maxneigh=20,nener=18,nprop1=11,blockm=100
+   ,maxneigh=20,nener=18,nprop1=11,blockm=100,nEnergy=14
 
 ! OPENMP.inc
   integer::thread_id,thread_num,thread_num_max,thread_num_proc
@@ -128,9 +128,8 @@ module sim_system
   character(len=4),allocatable::chemid(:)
   real,allocatable::brvib(:),brvibk(:),brben(:),brbenk(:)
 
-  real(kind=dp),allocatable::vbox(:),vinterb(:),vtailb(:),vintrab(:),vvibb(:),vbendb(:),vtgb(:),vextb(:),velectb(:),vflucqb(:),v3garob(:),vipswb(:),vwellipswb(:)
-  real,allocatable::pmrotbd(:,:),vtry(:),vtrext(:),vtrintra(:)&
-   ,vtrinter(:),vtrelect(:),vtrewald(:),vtrorient(:),vtrelect_intra(:)&
+  real(kind=dp),allocatable::vbox(:,:) !< 1: total energy; 2: intermolecular LJ; 3: tail correction; 4: intramolecular non-bonded LJ; 5: stretching; 6: bending; 7: torsion; 8: electrostatic; 9: external field; 10: 3-body garofalini; 11: fluctuating charge (vflucqb); 12: vipswb; 13: vwellipswb; 14: Ewald reciprocal-space electrostatic
+  real,allocatable::pmrotbd(:,:),vtr(:,:),vtrorient(:),vtrelect_intra(:)&
    ,vtrelect_inter(:),bfac(:),rxp(:,:),ryp(:,:),rzp(:,:)&
    ,vwellipswot(:),vwellipswnt(:),vipswnt(:),vipswot(:),epsilon_f(:,:)&
    ,sigma_f(:,:),ljscale(:,:,:),qscale2(:,:,:),ee_qqu(:,:),rxnew(:)&
@@ -175,8 +174,6 @@ module sim_system
    ,lflucq(:),lqtrans(:),lexpand(:),lavbmc1(:),lavbmc2(:),lavbmc3(:)&
    ,lbias(:),lring(:),lrigid(:),lrig(:),lq14scale(:),lbranch(:)&
    ,lrplc(:),lplace(:,:),lwell(:),lideal(:),ltwice(:)
-
-  logical::ldebug=.true.
 
 ! INPUTDATA.INC
   integer::run_num
@@ -252,12 +249,12 @@ module sim_system
   real::Abntrax,Abntray,Abntraz,Abstrax,Abstray,Abstraz
 
 ! ROSEN.INC
-  real::weight,weiold,voldt,voldbb,voldtg,voldext,voldintra,voldinter,voldbvib,voldelect,voldewald,vnewt,vnewbb,vnewtg,vnewext,vnewintra,vnewbvib,vnewinter,vnewelect,vnewewald,vneworient,vnewinterr,vnewextr,vnewelectr,voldinterr ,voldextr,voldelectr,voldorient
+  real::weight,weiold,vold(nEnergy),vnew(nEnergy),vneworient,voldorient
 
 ! IPSWPAR.INC
   integer::nw,iratipsw
   parameter (nw = 4000)
-  real::dvdl,acdvdl,acipsw,vipsw,pipsw ,vwellipsw,pwellipsw,etais,lambdais,bwell,vipswo,vipswn,vwellipswo,vwellipswn,lena,lenc,pwellips(3,3),pips(3,3),dhmat(3,3)
+  real::dvdl,acdvdl,acipsw,vipsw,pipsw,vwellipsw,pwellipsw,etais,lambdais,bwell,vipswo,vipswn,vwellipswo,vwellipswn,lena,lenc,pwellips(3,3),pips(3,3),dhmat(3,3)
   logical::lstagea,lstageb,lstagec
 
 ! BOLTZMANN.INC
@@ -480,9 +477,7 @@ CONTAINS
      ,express(nbxmax),Elect_field(nbxmax),ghost_particles(nbxmax),numberDimensionIsIsotropic(nbxmax),inix(nbxmax),iniy(nbxmax)&
      ,iniz(nbxmax),inirot(nbxmax),inimix(nbxmax),nchoiq(nbxmax),box5(nbxmax),box6(nbxmax),zshift(nbxmax),dshift(nbxmax)&
      ,rmvol(nbxmax),pmvlmt(nbxmax),pmvolb(nbxmax),lideal(nbxmax),ltwice(nbxmax),rmhmat(nbxmax,9),dipolex(nbxmax),dipoley(nbxmax)&
-     ,dipolez(nbxmax),nchbox(nbxmax),vbox(nbxmax),wbox(nbxmax),vinterb(nbxmax),vtailb(nbxmax),vintrab(nbxmax),vvibb(nbxmax)&
-     ,vbendb(nbxmax),vtgb(nbxmax),vextb(nbxmax),velectb(nbxmax),vflucqb(nbxmax),v3garob(nbxmax),vipswb(nbxmax)&
-     ,vwellipswb(nbxmax),stat=jerr)
+     ,dipolez(nbxmax),nchbox(nbxmax),vbox(nEnergy,nbxmax),wbox(nbxmax),stat=jerr)
     if (jerr.ne.0) then
        call err_exit(__FILE__,__LINE__,'allocate_system: allocation failed',jerr)
     end if

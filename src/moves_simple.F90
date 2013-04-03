@@ -20,7 +20,7 @@ contains
 ! number of successful trial moves is stored in bstrax(yz).     **
 ! The attempts are stored in bntrax(yz)                         **
 !    *******************************************************************
-  subroutine traxyz (lx,ly,lz)
+  subroutine traxyz(lx,ly,lz)
     use sim_particle,only:update_neighbor_list
     use sim_cell,only:update_linked_cell
 
@@ -28,7 +28,7 @@ contains
       logical::lneighij
 
       integer::i,ibox,flagon,iunit,j,imolty,icbu,ic,ip
-      real::rx,ry,rz,dchain,ddx,ddy,ddz,vnew,vold,vintran,vintrao,deltv,deltvb,vintern,vintero ,vextn,vexto,rchain,velectn,velecto,vdum,vrecipo,vrecipn,v3n,v3o
+      real::rx,ry,rz,dchain,ddx,ddy,ddz,vn(nEnergy),vo(nEnergy),deltv,deltvb,rchain,vdum,vrecipo,vrecipn
 
       logical::laccept
 
@@ -139,14 +139,14 @@ contains
 
 ! calculate the energy of i in the new configuration ***
       flagon = 2
-      call energy(i,imolty, vnew,vintran, vintern,vextn,velectn ,vdum,flagon, ibox,1, iunit,.false.,ovrlap,.false. ,vdum,.false.,.false.,.false.)
-      v3n=v3garo
+      call energy(i,imolty,vn,flagon,ibox,1,iunit,.false.,ovrlap,.false. ,.false.,.false.,.false.)
+      vn(10)=v3garo
       if (ovrlap) return
 
 ! calculate the energy of i in the old configuration ***
       flagon = 1
-      call energy(i,imolty,vold,vintrao,vintero,vexto,velecto ,vdum,flagon,ibox,1, iunit,.false.,ovrlap,.false. ,vdum,.false.,.false.,.false.)
-      v3o = v3garo
+      call energy(i,imolty,vo,flagon,ibox,1,iunit,.false.,ovrlap,.false. ,.false.,.false.,.false.)
+      vo(10) = v3garo
 
       if (ovrlap) then
          call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf of TRAXYZ',myid+1)
@@ -154,8 +154,8 @@ contains
 
       if (lewald.and.lelect(imolty).and..not.lideal(ibox)) then
          call recip(ibox,vrecipn,vrecipo,1)
-         velectn = velectn + vrecipn
-         velecto = velecto + vrecipo
+         vn(8) = vn(8) + vrecipn
+         vo(8) = vo(8) + vrecipo
          vipswn = vipswn + vrecipn
          vipswo = vipswo + vrecipo
          if (lstagea) then
@@ -168,19 +168,19 @@ contains
             vrecipn =  (etais+(1.0E0_dp-etais)*lambdais)*vrecipn
             vrecipo =  (etais+(1.0E0_dp-etais)*lambdais)*vrecipo
          end if
-         vnew = vnew + vrecipn
-         vold = vold + vrecipo
+         vn(1) = vn(1) + vrecipn
+         vo(1) = vo(1) + vrecipo
       end if
 ! check for acceptance ***
 
-      deltv  = vnew - vold
+      deltv  = vn(1) - vo(1)
       deltvb = beta * deltv
 
 
 ! For ANES algorithm, do the Fluctuating charge moves.
 
       if ( lanes ) then
-         call anes(i,ibox,ibox,1,laccept,deltv,vintern,vintran,vextn, velectn,vintero,vintrao,vexto,velecto,vdum,vdum, vdum,vdum,.false.)
+         call anes(i,ibox,ibox,1,laccept,deltv,vn,vo,vdum,vdum,vdum,vdum,.false.)
          if ( laccept ) then
             if (lx) bstrax(imolty,ibox) = bstrax(imolty,ibox) + 1.0E0_dp
             if (ly) bstray(imolty,ibox) = bstray(imolty,ibox) + 1.0E0_dp
@@ -202,16 +202,16 @@ contains
 
 ! write(io_output,*) 'TRAXYZ accepted i',i
 
-      vbox(ibox)     = vbox(ibox) + deltv
-      vinterb(ibox)  = vinterb(ibox) + (vintern - vintero)
-      vintrab(ibox)  = vintrab(ibox) + (vintran - vintrao)
-      vextb(ibox)    = vextb(ibox)   + (vextn   - vexto)
-      velectb(ibox)   = velectb(ibox)  + (velectn - velecto)
-      vipswb(ibox) = vipswb(ibox) + (vipswn-vipswo)
-      vwellipswb(ibox) = vwellipswb(ibox) + (vwellipswn-vwellipswo)
-      vipsw = vipswb(ibox)
-      vwellipsw = vwellipswb(ibox)
-      v3garob(ibox) = v3garob(ibox) + (v3n-v3o)
+      vbox(1,ibox)     = vbox(1,ibox) + deltv
+      vbox(2,ibox)  = vbox(2,ibox) + (vn(2) - vo(2))
+      vbox(4,ibox)  = vbox(4,ibox) + (vn(4) - vo(4))
+      vbox(9,ibox)    = vbox(9,ibox)   + (vn(9)   - vo(9))
+      vbox(8,ibox)   = vbox(8,ibox)  + (vn(8) - vo(8))
+      vbox(12,ibox) = vbox(12,ibox) + (vipswn-vipswo)
+      vbox(13,ibox) = vbox(13,ibox) + (vwellipswn-vwellipswo)
+      vipsw = vbox(12,ibox)
+      vwellipsw = vbox(13,ibox)
+      vbox(10,ibox) = vbox(10,ibox) + (vn(10)-vo(10))
 
       do j = 1,iunit
          if (lx) rxu(i,j) = rxuion(j,2)
@@ -308,13 +308,11 @@ contains
       use sim_particle,only:update_neighbor_list
 
       logical::lx,ly,lz,ovrlap,lneighij
-      integer::i,ibox,flagon,iunit,j,imolty,iuroty,icbu ,ic,ip
-      real::rx,ry,rz,dchain,rchain,vnew,vold,vintrao,dgamma,rxorig,ryorig,rzorig,rxnew2,rynew2,rznew2,vintran,deltv,deltvb,vintern,vintero,vextn,vexto,vdum ,velectn,velecto
+      integer::i,ibox,flagon,iunit,j,imolty,iuroty,icbu,ic,ip
+      real::rx,ry,rz,dchain,rchain,vn(nEnergy),vo(nEnergy),dgamma,rxorig,ryorig,rzorig,rxnew2,rynew2,rznew2,deltv,deltvb,vdum
 ! further variable definitions
-      real::cosdg, sindg, rmrot
+      real::cosdg,sindg,rmrot
       real::vrecipn,vrecipo
-
-
       logical::laccept
 
 ! --------------------------------------------------------------------
@@ -484,18 +482,18 @@ contains
 ! calculate the energy of i in the new configuration ***
 
       flagon = 2
-      call energy(i,imolty, vnew,vintran,vintern,vextn,velectn,vdum ,flagon, ibox,1,iunit,.false.,ovrlap,.false.,vdum, .false.,.false.,.false.)
+      call energy(i,imolty,vn,flagon,ibox,1,iunit,.false.,ovrlap,.false.,.false.,.false.,.false.)
       if (ovrlap) return
 
 ! calculate the energy of i in the old configuration ***
       flagon = 1
-      call energy(i,imolty, vold,vintrao,vintero,vexto,velecto,vdum ,flagon,ibox, 1, iunit,.false.,ovrlap,.false.,vdum, .false.,.false.,.false.)
+      call energy(i,imolty,vo,flagon,ibox,1,iunit,.false.,ovrlap,.false.,.false.,.false.,.false.)
 
       if (ovrlap) call err_exit(__FILE__,__LINE__,'disaster- overlap for old conf in ROTXYZ',myid+1)
       if (lewald.and.lelect(imolty).and..not.lideal(ibox)) then
          call recip(ibox,vrecipn,vrecipo,1)
-         velectn = velectn + vrecipn
-         velecto = velecto + vrecipo
+         vn(8) = vn(8) + vrecipn
+         vo(8) = vo(8) + vrecipo
          vipswn = vipswn + vrecipn
          vipswo = vipswo + vrecipo
          if (lstagea) then
@@ -508,19 +506,19 @@ contains
            vrecipn  =  (etais+(1.0E0_dp-etais)*lambdais)*vrecipn
            vrecipo  =  (etais+(1.0E0_dp-etais)*lambdais)*vrecipo
          end if
-         vnew = vnew + vrecipn
-         vold = vold + vrecipo
+         vn(1) = vn(1) + vrecipn
+         vo(1) = vo(1) + vrecipo
       end if
 
 ! check for acceptance ***
 
-      deltv  = vnew - vold
+      deltv  = vn(1) - vo(1)
       deltvb = beta * deltv
 
 ! For ANES algorithm, do the Fluctuating charge moves.
 
       if ( lanes ) then
-         call anes(i,ibox,ibox,2,laccept,deltv,vintern,vintran,vextn, velectn,vintero,vintrao,vexto,velecto,vdum,vdum,vdum, vdum,.false.)
+         call anes(i,ibox,ibox,2,laccept,deltv,vn,vo,vdum,vdum,vdum,vdum,.false.)
          if (laccept) then
             if (lx) bsrotx(imolty,ibox) = bsrotx(imolty,ibox) + 1.0E0_dp
             if (ly) bsroty(imolty,ibox) = bsroty(imolty,ibox) + 1.0E0_dp
@@ -541,15 +539,15 @@ contains
       end if
 
 ! write(io_output,*) 'ROTXYZ accepted',i
-      vbox(ibox) = vbox(ibox) + deltv
-      vinterb(ibox)  = vinterb(ibox) + (vintern -  vintero)
-      vintrab(ibox)  = vintrab(ibox) + (vintran - vintrao)
-      vextb(ibox)    = vextb(ibox)   + (vextn-vexto)
-      velectb(ibox)  = velectb(ibox) + (velectn-velecto)
-      vipswb(ibox) = vipswb(ibox) + (vipswn-vipswo)
-      vwellipswb(ibox) = vwellipswb(ibox) + (vwellipswn-vwellipswo)
-      vipsw = vipswb(ibox)
-      vwellipsw = vwellipswb(ibox)
+      vbox(1,ibox) = vbox(1,ibox) + deltv
+      vbox(2,ibox)  = vbox(2,ibox) + (vn(2) -  vo(2))
+      vbox(4,ibox)  = vbox(4,ibox) + (vn(4) - vo(4))
+      vbox(9,ibox)    = vbox(9,ibox)   + (vn(9)-vo(9))
+      vbox(8,ibox)  = vbox(8,ibox) + (vn(8)-vo(8))
+      vbox(12,ibox) = vbox(12,ibox) + (vipswn-vipswo)
+      vbox(13,ibox) = vbox(13,ibox) + (vwellipswn-vwellipswo)
+      vipsw = vbox(12,ibox)
+      vwellipsw = vbox(13,ibox)
 
       do j = 1, iunit
          rxu(i,j) = rxuion(j,2)
@@ -621,24 +619,17 @@ contains
 ! number of successful trial moves is stored in Abstrax(yz).     **
 ! The attempts are stored in Abntrax(yz)                         **
 !    *******************************************************************
-    subroutine Atom_traxyz (lx,ly,lz )
+    subroutine Atom_traxyz(lx,ly,lz )
       use sim_particle,only:update_neighbor_list
       use sim_cell,only:update_linked_cell
       use energy_kspace,only:recip_atom
       use energy_intramolecular,only:U_bonded
 
       logical::lx,ly,lz,ovrlap
-
       logical::lneighij
-
-      integer::i,ibox,flagon,iunit,j,imolty,icbu ,ic,ip
-      integer::pick_unit, pick_chain
-      real::rx,ry,rz,dchain,vnew,vold,vintran,vintrao,deltv,deltvb,vintern,vintero ,vextn,vexto,rchain,velectn,velecto,vdum,vrecipo,vrecipn
-
-      real::vvibn,vbendn,vtgn,vvibo,vbendo,vtgo
-
-      real::vewaldn, vewaldo
-
+      integer::i,ibox,flagon,iunit,j,imolty,icbu,ic,ip
+      integer::pick_unit,pick_chain
+      real::rx,ry,rz,dchain,vn(nEnergy),vo(nEnergy),deltv,deltvb,rchain,vdum,vrecipo,vrecipn
       logical::laccept
 
 ! --------------------------------------------------------------------
@@ -736,32 +727,32 @@ contains
 
 ! calculate the energy of i in the new configuration ***
       flagon = 2
-      call energy(i,imolty,vnew,vintran,vintern,vextn,velectn,vewaldn,flagon,ibox,pick_unit, pick_unit,.true.,ovrlap,.false.,vdum,.false.,.false.,.true.)
+      call energy(i,imolty,vn,flagon,ibox,pick_unit,pick_unit,.true.,ovrlap,.false.,.false.,.false.,.true.)
       if (ovrlap) return
-      call U_bonded(i,imolty,vvibn,vbendn,vtgn)
+      call U_bonded(i,imolty,vn(5),vn(6),vn(7))
 
 ! calculate the energy of i in the old configuration ***
       flagon = 1
-      call energy(i,imolty,vold,vintrao,vintero,vexto,velecto,vewaldo,flagon,ibox,pick_unit, pick_unit,.true.,ovrlap,.false.,vdum,.false.,.false.,.true.)
+      call energy(i,imolty,vo,flagon,ibox,pick_unit,pick_unit,.true.,ovrlap,.false.,.false.,.false.,.true.)
       if (ovrlap) call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf of ATOM_TRAXYZ',myid+1)
-      call U_bonded(i,imolty,vvibo,vbendo,vtgo)
+      call U_bonded(i,imolty,vo(5),vo(6),vo(7))
 
       if ( lewald .and. lelect(imolty) ) then
          call recip_atom(ibox,vrecipn,vrecipo,1,pick_unit)
-         velectn = velectn + vrecipn + vewaldn
-         velecto = velecto + vrecipo + vewaldo
-         vnew = vnew + vrecipn
-         vold = vold + vrecipo
+         vn(8) = vn(8) + vrecipn + vn(14)
+         vo(8) = vo(8) + vrecipo + vo(14)
+         vn(1) = vn(1) + vrecipn
+         vo(1) = vo(1) + vrecipo
       end if
 ! check for acceptance ***
 
-      deltv  = vnew - vold
+      deltv  = vn(1) - vo(1)
       deltvb = beta * deltv
 
 ! For ANES algorithm, do the Fluctuating charge moves.
 ! For time being it will not work for atom disp [Neeraj]****
       if ( lanes ) then
-         call anes(i,ibox,ibox,1,laccept,deltv,vintern,vintran,vextn, velectn,vintero,vintrao,vexto,velecto,vdum,vdum, vdum,vdum,.false.)
+         call anes(i,ibox,ibox,1,laccept,deltv,vn,vo,vdum,vdum,vdum,vdum,.false.)
          if ( laccept ) then
             if (lx) Abstrax = Abstrax + 1.0E0_dp
             if (ly) Abstray = Abstray + 1.0E0_dp
@@ -782,15 +773,15 @@ contains
       end if
 
 ! write(io_output,*) 'TRAXYZ accepted i',i
-      vbox(ibox)     = vbox(ibox) + deltv
-      vinterb(ibox)  = vinterb(ibox) + (vintern - vintero)
-      vintrab(ibox)  = vintrab(ibox) + (vintran - vintrao)
-      vextb(ibox)    = vextb(ibox)   + (vextn   - vexto)
-      velectb(ibox)   = velectb(ibox)  + (velectn - velecto)
+      vbox(1,ibox)     = vbox(1,ibox) + deltv
+      vbox(2,ibox)  = vbox(2,ibox) + (vn(2) - vo(2))
+      vbox(4,ibox)  = vbox(4,ibox) + (vn(4) - vo(4))
+      vbox(9,ibox)    = vbox(9,ibox)   + (vn(9)   - vo(9))
+      vbox(8,ibox)   = vbox(8,ibox)  + (vn(8) - vo(8))
 
-      vtgb(ibox) = vtgb(ibox) + (vtgn-vtgo)
-      vbendb(ibox) = vbendb(ibox) + (vbendn-vbendo)
-      vvibb(ibox) = vvibb(ibox) + (vvibn-vvibo)
+      vbox(7,ibox) = vbox(7,ibox) + (vn(7)-vo(7))
+      vbox(6,ibox) = vbox(6,ibox) + (vn(6)-vo(6))
+      vbox(5,ibox) = vbox(5,ibox) + (vn(5)-vo(5))
 
 
       if (lx) rxu(i,pick_unit) = rxuion(pick_unit,2)

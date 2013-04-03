@@ -37,7 +37,7 @@ contains
 
       real::vnbox(nbxmax),vninte(nbxmax),vnintr(nbxmax),vnvibb(nbxmax),vntgb(nbxmax),vnextb(nbxmax),vnbend(nbxmax),vntail(nbxmax),vnelect(nbxmax),vnewald(nbxmax),wnlog,wolog,wdlog,wswat
 
-      real::v,vintra,vinter,vext,velect,vewald,vdum,delen,deleo,dicount,vrecipn,vrecipo
+      real::v(nEnergy),vdum,delen,deleo,dicount,vrecipn,vrecipo
 
       ! additions from iswatch
       integer::izz,box,iboxi,bdmol_a,bdmol_b
@@ -602,7 +602,7 @@ contains
 ! get energy of configuration ***
 
             call ctrmas(.false.,box,self,8)
-            call energy(self,imolty, v, vintra,vinter,vext ,velect,vewald,iii,box,1,iunit,.true.,lterm,.false. ,vdum,.false.,.false.,.false.)
+            call energy(self,imolty,v,iii,box,1,iunit,.true.,lterm,.false.,.false.,.false.,.false.)
 
 ! return to normal ***
             if (ic .eq. 1) then
@@ -628,28 +628,28 @@ contains
 
 ! add on the changes in energy ***
 
-            delen = v - ( vnewt - (vnewbvib + vnewbb + vnewtg ))
+            delen = v(1) - ( vnew(1) - (vnew(5) + vnew(6) + vnew(7) ))
 
             tweight = tweight*exp(-beta*delen)
-            vnewt     = vnewt + delen
-            vnewinter = vinter
-            vnewintra = vintra
-            vnewext   = vext
-            vnewelect = velect
-            vnewewald = vewald
+            vnew(1)     = vnew(1) + delen
+            vnew(2) = v(2)
+            vnew(4) = v(4)
+            vnew(9)   = v(9)
+            vnew(8) = v(8)
+            vnew(14) = v(14)
 
 ! End DC-CBMC and switched bead Corrections for NEW configuration
 
 ! save the trial energies ***
-            vnbox(box)   = vnbox(box) + vnewt
-            vninte(box)  = vninte(box) + vnewinter
-            vnintr(box)  = vnintr(box) + vnewintra
-            vnvibb(box)  = vnvibb(box) + vnewbvib
-            vntgb(box)   = vntgb(box) + vnewtg
-            vnextb(box)  = vnextb(box) + vnewext
-            vnbend(box)  = vnbend(box) + vnewbb
-            vnelect(box) = vnelect(box) + vnewelect
-            vnewald(box) = vnewald(box) + vnewewald
+            vnbox(box)   = vnbox(box) + vnew(1)
+            vninte(box)  = vninte(box) + vnew(2)
+            vnintr(box)  = vnintr(box) + vnew(4)
+            vnvibb(box)  = vnvibb(box) + vnew(5)
+            vntgb(box)   = vntgb(box) + vnew(7)
+            vnextb(box)  = vnextb(box) + vnew(9)
+            vnbend(box)  = vnbend(box) + vnew(6)
+            vnelect(box) = vnelect(box) + vnew(8)
+            vnewald(box) = vnewald(box) + vnew(14)
 
 !     ******************
 ! old growth ***
@@ -718,7 +718,7 @@ contains
 
 ! get total energy *
 
-            call energy(self,imolty, v, vintra,vinter,vext,velect ,vewald,iii,box, 1,iunit,.true.,lterm,.false.,vdum ,.false.,.false.,.false.)
+            call energy(self,imolty,v,iii,box,1,iunit,.true.,lterm,.false.,.false.,.false.,.false.)
 
             if (ic .eq. 1) then
 ! return b to current box *
@@ -726,28 +726,28 @@ contains
             end if
 
             if (lterm) call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf iSWATCH',myid+1)
-            deleo = v - ( voldt - (voldbvib + voldbb + voldtg) )
+            deleo = v(1) - ( vold(1) - (vold(5) + vold(6) + vold(7)) )
 
             tweiold = tweiold*exp(-beta*deleo)
-            voldt     = voldt + deleo
-            voldintra = vintra
-            voldinter = vinter
-            voldext   = vext
-            voldelect = velect
-            voldewald = vewald
+            vold(1)     = vold(1) + deleo
+            vold(4) = v(4)
+            vold(2) = v(2)
+            vold(9)   = v(9)
+            vold(8) = v(8)
+            vold(14) = v(14)
 
 ! End Correction for DC-CBMC and switched beads for OLD configuration
 
 ! save the trial energies ***
-            vnbox(box)   = vnbox(box)  - voldt
-            vninte(box)  = vninte(box) - voldinter
-            vnintr(box)  = vnintr(box) - voldintra
-            vnvibb(box)  = vnvibb(box) - voldbvib
-            vntgb(box)   = vntgb(box)  - voldtg
-            vnextb(box)  = vnextb(box) - voldext
-            vnbend(box)  = vnbend(box) - voldbb
-            vnelect(box) = vnelect(box) - voldelect
-            vnewald(box) = vnewald(box) - voldewald
+            vnbox(box)   = vnbox(box)  - vold(1)
+            vninte(box)  = vninte(box) - vold(2)
+            vnintr(box)  = vnintr(box) - vold(4)
+            vnvibb(box)  = vnvibb(box) - vold(5)
+            vntgb(box)   = vntgb(box)  - vold(7)
+            vnextb(box)  = vnextb(box) - vold(9)
+            vnbend(box)  = vnbend(box) - vold(6)
+            vnelect(box) = vnelect(box) - vold(8)
+            vnewald(box) = vnewald(box) - vold(14)
 
          end do
 
@@ -848,14 +848,14 @@ contains
             bsswat(iparty,ipairb) = bsswat(iparty,ipairb) + 1.0E0_dp
 ! write(io_output,*) 'SWATCH ACCEPTED',imola,imolb
 
-            vbox(box)     = vbox(box)    + vnbox(box)
-            vinterb(box)  = vinterb(box) + vninte(box)
-            vintrab(box)  = vintrab(box) + vnintr(box)
-            vvibb(box)    = vvibb(box)   + vnvibb(box)
-            vtgb(box)     = vtgb(box)    + vntgb(box)
-            vextb(box)    = vextb(box)   + vnextb(box)
-            vbendb(box)   = vbendb(box)  + vnbend(box)
-            velectb(box)  = velectb(box) + vnelect(box) + vnewald(box)
+            vbox(1,box)     = vbox(1,box)    + vnbox(box)
+            vbox(2,box)  = vbox(2,box) + vninte(box)
+            vbox(4,box)  = vbox(4,box) + vnintr(box)
+            vbox(5,box)    = vbox(5,box)   + vnvibb(box)
+            vbox(7,box)     = vbox(7,box)    + vntgb(box)
+            vbox(9,box)    = vbox(9,box)   + vnextb(box)
+            vbox(6,box)   = vbox(6,box)  + vnbend(box)
+            vbox(8,box)  = vbox(8,box) + vnelect(box) + vnewald(box)
 
 ! update book keeping ***
 ! assign new geometries ***
@@ -1189,35 +1189,35 @@ contains
 ! and torsional type for those units swatched!!!!!!
 
             call ctrmas(.false.,iboxnew,other,8)
-            call energy(other,imolty, v, vintra,vinter,vext ,velect,vewald,iii,iboxnew,1,iunit,.true.,lterm,.false. ,vdum,.false.,.false.,.false.)
+            call energy(other,imolty,v,iii,iboxnew,1,iunit,.true.,lterm,.false.,.false.,.false.,.false.)
 
             if (lterm) then
 ! write(io_output,*) 'other ',other,' self ',self
 ! call err_exit(__FILE__,__LINE__,'interesting screwup in CBMC swatch',myid+1)
                return
             end if
-            delen = v - ( vnewt - (vnewbvib + vnewbb + vnewtg ))
+            delen = v(1) - ( vnew(1) - (vnew(5) + vnew(6) + vnew(7) ))
             tweight = tweight*exp(-beta*delen)
 
-            vnewt     = vnewt + delen
-            vnewinter = vinter
-            vnewintra = vintra
-            vnewext   = vext
-            vnewelect = velect
-            vnewewald = vewald
+            vnew(1)     = vnew(1) + delen
+            vnew(2) = v(2)
+            vnew(4) = v(4)
+            vnew(9)   = v(9)
+            vnew(8) = v(8)
+            vnew(14) = v(14)
 
 ! End DC-CBMC and switched bead Corrections for NEW configuration
 
 ! save the trial energies
-            vnbox(iboxnew)   = vnbox(iboxnew) + vnewt
-            vninte(iboxnew)  = vninte(iboxnew) + vnewinter
-            vnintr(iboxnew)  = vnintr(iboxnew) + vnewintra
-            vnvibb(iboxnew)  = vnvibb(iboxnew) + vnewbvib
-            vntgb(iboxnew)   = vntgb(iboxnew) + vnewtg
-            vnextb(iboxnew)  = vnextb(iboxnew) + vnewext
-            vnbend(iboxnew)  = vnbend(iboxnew) + vnewbb
-            vnelect(iboxnew) = vnelect(iboxnew) + vnewelect
-            vnewald(iboxnew) = vnewald(iboxnew) + vnewewald
+            vnbox(iboxnew)   = vnbox(iboxnew) + vnew(1)
+            vninte(iboxnew)  = vninte(iboxnew) + vnew(2)
+            vnintr(iboxnew)  = vnintr(iboxnew) + vnew(4)
+            vnvibb(iboxnew)  = vnvibb(iboxnew) + vnew(5)
+            vntgb(iboxnew)   = vntgb(iboxnew) + vnew(7)
+            vnextb(iboxnew)  = vnextb(iboxnew) + vnew(9)
+            vnbend(iboxnew)  = vnbend(iboxnew) + vnew(6)
+            vnelect(iboxnew) = vnelect(iboxnew) + vnew(8)
+            vnewald(iboxnew) = vnewald(iboxnew) + vnew(14)
 ! rigid add on
 
             waddold = 1.0E0_dp
@@ -1268,32 +1268,32 @@ contains
 ! correct the acceptance rules
 ! calculate the Full rcut site-site energy
 
-            call energy(self,imolty, v, vintra,vinter,vext,velect ,vewald,iii,iboxold, 1,iunit,.true.,lterm,.false.,vdum ,.false.,.false.,.false.)
+            call energy(self,imolty,v,iii,iboxold,1,iunit,.true.,lterm,.false.,.false.,.false.,.false.)
 
             if (lterm) call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf SWATCH',myid+1)
-            deleo = v - ( voldt - (voldbvib + voldbb + voldtg) )
+            deleo = v(1) - ( vold(1) - (vold(5) + vold(6) + vold(7)) )
 
             tweiold = tweiold*exp(-beta*deleo)
 
-            voldt     = voldt + deleo
-            voldintra = vintra
-            voldinter = vinter
-            voldext   = vext
-            voldelect = velect
-            voldewald = vewald
+            vold(1)     = vold(1) + deleo
+            vold(4) = v(4)
+            vold(2) = v(2)
+            vold(9)   = v(9)
+            vold(8) = v(8)
+            vold(14) = v(14)
 
 ! End Correction for DC-CBMC and switched beads for OLD configuration
 
 ! save the trial energies
-            vnbox(iboxold)   = vnbox(iboxold)  - voldt
-            vninte(iboxold)  = vninte(iboxold) - voldinter
-            vnintr(iboxold)  = vnintr(iboxold) - voldintra
-            vnvibb(iboxold)  = vnvibb(iboxold) - voldbvib
-            vntgb(iboxold)   = vntgb(iboxold)  - voldtg
-            vnextb(iboxold)  = vnextb(iboxold) - voldext
-            vnbend(iboxold)  = vnbend(iboxold) - voldbb
-            vnelect(iboxold) = vnelect(iboxold) - voldelect
-            vnewald(iboxold) = vnewald(iboxold) - voldewald
+            vnbox(iboxold)   = vnbox(iboxold)  - vold(1)
+            vninte(iboxold)  = vninte(iboxold) - vold(2)
+            vnintr(iboxold)  = vnintr(iboxold) - vold(4)
+            vnvibb(iboxold)  = vnvibb(iboxold) - vold(5)
+            vntgb(iboxold)   = vntgb(iboxold)  - vold(7)
+            vnextb(iboxold)  = vnextb(iboxold) - vold(9)
+            vnbend(iboxold)  = vnbend(iboxold) - vold(6)
+            vnelect(iboxold) = vnelect(iboxold) - vold(8)
+            vnewald(iboxold) = vnewald(iboxold) - vold(14)
 
          end do
 
@@ -1429,7 +1429,7 @@ contains
                   dinsta = 0.0E0_dp
                end if
 ! END JLR 11-24-09
-               dinsta = dinsta - vtailb( ibox )
+               dinsta = dinsta - vbox(3,ibox)
 
                tweight=tweight*exp(-beta*dinsta)
 
@@ -1461,15 +1461,15 @@ contains
             do jj = 1,2
                if ( jj .eq. 1 ) ic = boxa
                if ( jj .eq. 2 ) ic = boxb
-               vbox(ic)     = vbox(ic)    + vnbox(ic) + vntail(ic)
-               vinterb(ic)  = vinterb(ic) + vninte(ic) + vntail(ic)
-               vintrab(ic)  = vintrab(ic) + vnintr(ic)
-               vvibb(ic)    = vvibb(ic)   + vnvibb(ic)
-               vtgb(ic)     = vtgb(ic)    + vntgb(ic)
-               vextb(ic)    = vextb(ic)   + vnextb(ic)
-               vbendb(ic)   = vbendb(ic)  + vnbend(ic)
-               vtailb(ic)   = vtailb(ic)  + vntail(ic)
-               velectb(ic)  = velectb(ic) + vnelect(ic) + vnewald(ic)
+               vbox(1,ic)     = vbox(1,ic)    + vnbox(ic) + vntail(ic)
+               vbox(2,ic)  = vbox(2,ic) + vninte(ic) + vntail(ic)
+               vbox(4,ic)  = vbox(4,ic) + vnintr(ic)
+               vbox(5,ic)    = vbox(5,ic)   + vnvibb(ic)
+               vbox(7,ic)     = vbox(7,ic)    + vntgb(ic)
+               vbox(9,ic)    = vbox(9,ic)   + vnextb(ic)
+               vbox(6,ic)   = vbox(6,ic)  + vnbend(ic)
+               vbox(3,ic)   = vbox(3,ic)  + vntail(ic)
+               vbox(8,ic)  = vbox(8,ic) + vnelect(ic) + vnewald(ic)
             end do
 
 ! update book keeping

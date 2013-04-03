@@ -81,9 +81,9 @@ subroutine  calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ, Heat_vapor_COUL, pdV, CE
          LJ_Energy_Liq = 0.0E0_dp
          Coul_energy_Liq = 0.0E0_dp 
       else
-         T_Energy_Liq = vbox(il)/temp_nmol(il)
-         LJ_Energy_Liq = (vinterb(il)+vintrab(il)+ vtailb(il))/temp_nmol(il)
-         Coul_Energy_Liq = velectb(il)/temp_nmol(il)
+         T_Energy_Liq = vbox(1,il)/temp_nmol(il)
+         LJ_Energy_Liq = (vbox(2,il)+vbox(4,il)+ vbox(3,il))/temp_nmol(il)
+         Coul_Energy_Liq = vbox(8,il)/temp_nmol(il)
       end if
       
       if (temp_nmol(ig).eq.0) then
@@ -91,9 +91,9 @@ subroutine  calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ, Heat_vapor_COUL, pdV, CE
          LJ_Energy_Gas = 0.0E0_dp
          Coul_energy_Gas = 0.0E0_dp
       else
-         T_Energy_Gas = vbox(ig)/temp_nmol(ig)
-         LJ_Energy_Gas = (vinterb(ig)+vintrab(ig)+ vtailb(ig))/temp_nmol(ig)
-         Coul_Energy_Gas = velectb(ig)/temp_nmol(ig)
+         T_Energy_Gas = vbox(1,ig)/temp_nmol(ig)
+         LJ_Energy_Gas = (vbox(2,ig)+vbox(4,ig)+ vbox(3,ig))/temp_nmol(ig)
+         Coul_Energy_Gas = vbox(8,ig)/temp_nmol(ig)
       end if
       
       

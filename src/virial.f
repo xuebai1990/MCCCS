@@ -32,7 +32,7 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
 
       real::consa1,consa2,consb1,consb2,selfadd1 ,selfadd2,epsilon2,vmin
 
-      real::mass_t,binvir2(maxvir,maxntemp), factor,corr,vold,deri_u
+      real::mass_t,binvir2(maxvir,maxntemp), factor,corr,vprev,deri_u
 
 ! --------------------------------------------------------------------
 #ifdef __DEBUG__
@@ -342,11 +342,11 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
          end do
          if ( nnn .eq. 1 ) then
             corr = 0.0E0_dp
-            vold = vinter + velect
+            vprev = vinter + velect
          else
-            deri_u = (vinter+velect-vold)/stepvir
+            deri_u = (vinter+velect-vprev)/stepvir
             corr = deri_u * deri_u * factor
-            vold = vinter + velect
+            vprev = vinter + velect
          end if
          do itemp = 1, ntemp
             binvir2(nnn,itemp) = binvir2(nnn,itemp) + (mayer(itemp)+1.0E0_dp)*corr/(virtemp(itemp)**3)

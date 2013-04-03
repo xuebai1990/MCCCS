@@ -62,7 +62,7 @@ subroutine monola(file_in)
   integer::i,j,nblock,ibox,jbox,nnn,ii,itemp,itype,itype2,intg,imolty,ilunit,nbl,itel,ig,il,k,histtot,Temp_nmol
   integer::nvirial,zzz,steps,igrow
   real::starvir,stepvir,starviro
-  real::acnp,acmove,v,vinter,vtail,vintra,vvib,vbend,vtg,vext,press1,velect,vflucq,surf
+  real::acnp,acmove,v(nEnergy),press1,surf
   real::rm,temvol,setx,sety,setz,setel,temacd,temspd,dblock,dbl1
   real::ostwald,stdost,dummy,debroglie
 
@@ -361,30 +361,30 @@ subroutine monola(file_in)
 
   ! calculate initial energy and check for overlaps ***
   do ibox=1,nbox
-     call sumup( ovrlap, v, vinter,vtail, vintra,vvib, vbend,vtg,vext,velect,vflucq, ibox, .false.)
+     call sumup(ovrlap,v,ibox,.false.)
 
-     vbox(ibox) = v
-     vinterb(ibox)  = vinter
-     vtailb(ibox)   = vtail
-     vintrab(ibox)  = vintra
-     vvibb(ibox)    = vvib
-     vbendb(ibox)   = vbend
-     vtgb(ibox)     = vtg
-     vextb(ibox)    = vext
-     velectb(ibox)  = velect
-     vflucqb(ibox)  = vflucq
-     vipswb(ibox) = vipsw
-     vwellipswb(ibox) = vwellipsw
+     vbox(:,ibox) = v
+     vbox(2,ibox)  = v(2)
+     vbox(3,ibox)   = v(3)
+     vbox(4,ibox)  = v(4)
+     vbox(5,ibox)    = v(5)
+     vbox(6,ibox)   = v(6)
+     vbox(7,ibox)     = v(7)
+     vbox(9,ibox)    = v(9)
+     vbox(8,ibox)  = v(8)
+     vbox(11,ibox)  = v(11)
+     vbox(12,ibox) = vipsw
+     vbox(13,ibox) = vwellipsw
      ! kea
-     v3garob(ibox) = v3garo
+     vbox(10,ibox) = v3garo
 
      if( ovrlap ) then
         call err_exit(__FILE__,__LINE__,'overlap in initial configuration',myid+1)
      end if
-     vstart(ibox) = vbox(ibox)
+     vstart(ibox) = vbox(1,ibox)
      if (myid.eq.0) then
         write(io_output,*)
-        write(io_output,*) 'box  ',ibox,' initial v   = ', vbox(ibox)
+        write(io_output,*) 'box  ',ibox,' initial v   = ', vbox(1,ibox)
      end if
      ! calculate initial pressure ***
      call pressure( press1, surf, ibox )
@@ -502,29 +502,29 @@ subroutine monola(file_in)
               end if
            end do
 
-           acv(1,ibox)    = acv(1,ibox)   + vbox(ibox)
-           acvsq(1,ibox)  = acvsq(1,ibox) + vbox(ibox)**2
-           acv(2,ibox)    = acv(2,ibox)   + vinterb(ibox)
-           acvsq(2,ibox)  = acvsq(2,ibox) + vinterb(ibox)**2
-           acv(3,ibox)    = acv(3,ibox)   + vbendb(ibox)
-           acvsq(3,ibox)  = acvsq(3,ibox) + vbendb(ibox)**2
-           acv(4,ibox)    = acv(4,ibox)   + vtgb(ibox)
-           acvsq(4,ibox)  = acvsq(4,ibox) + vtgb(ibox)**2
-           acv(5,ibox)    = acv(5,ibox)   + vintrab(ibox)
-           acvsq(5,ibox)  = acvsq(5,ibox) + vintrab(ibox)**2
-           acv(6,ibox)    = acv(6,ibox)   + vextb(ibox)
-           acvsq(6,ibox)  = acvsq(6,ibox) + vextb(ibox)**2
-           acv(7,ibox)    = acv(7,ibox)   + vvibb(ibox)
-           acvsq(7,ibox)  = acvsq(7,ibox) + vvibb(ibox)**2
-           acv(8,ibox)    = acv(8,ibox)   + velectb(ibox)
-           acvsq(8,ibox)  = acvsq(8,ibox) + velectb(ibox)**2
-           acv(9,ibox)    = acv(9,ibox)   + vtailb(ibox)
-           acvsq(9,ibox)  = acvsq(9,ibox) + vtailb(ibox)**2
-           acv(10,ibox)    = acv(10,ibox)   + vflucqb(ibox)
-           acvsq(10,ibox)  = acvsq(10,ibox) + vflucqb(ibox)**2
+           acv(1,ibox)    = acv(1,ibox)   + vbox(1,ibox)
+           acvsq(1,ibox)  = acvsq(1,ibox) + vbox(1,ibox)**2
+           acv(2,ibox)    = acv(2,ibox)   + vbox(2,ibox)
+           acvsq(2,ibox)  = acvsq(2,ibox) + vbox(2,ibox)**2
+           acv(3,ibox)    = acv(3,ibox)   + vbox(6,ibox)
+           acvsq(3,ibox)  = acvsq(3,ibox) + vbox(6,ibox)**2
+           acv(4,ibox)    = acv(4,ibox)   + vbox(7,ibox)
+           acvsq(4,ibox)  = acvsq(4,ibox) + vbox(7,ibox)**2
+           acv(5,ibox)    = acv(5,ibox)   + vbox(4,ibox)
+           acvsq(5,ibox)  = acvsq(5,ibox) + vbox(4,ibox)**2
+           acv(6,ibox)    = acv(6,ibox)   + vbox(9,ibox)
+           acvsq(6,ibox)  = acvsq(6,ibox) + vbox(9,ibox)**2
+           acv(7,ibox)    = acv(7,ibox)   + vbox(5,ibox)
+           acvsq(7,ibox)  = acvsq(7,ibox) + vbox(5,ibox)**2
+           acv(8,ibox)    = acv(8,ibox)   + vbox(8,ibox)
+           acvsq(8,ibox)  = acvsq(8,ibox) + vbox(8,ibox)**2
+           acv(9,ibox)    = acv(9,ibox)   + vbox(3,ibox)
+           acvsq(9,ibox)  = acvsq(9,ibox) + vbox(3,ibox)**2
+           acv(10,ibox)    = acv(10,ibox)   + vbox(11,ibox)
+           acvsq(10,ibox)  = acvsq(10,ibox) + vbox(11,ibox)**2
            ! KEA added 17 for v3garo
-           acv(17,ibox)    = acv(17,ibox) + v3garob(ibox)
-           acvsq(17,ibox)  = acvsq(17,ibox) + v3garob(ibox)**2
+           acv(17,ibox)    = acv(17,ibox) + vbox(10,ibox)
+           acvsq(17,ibox)  = acvsq(17,ibox) + vbox(10,ibox)**2
 
            ! leftover from Bin, not currently used
            if ( ldielect ) then
@@ -553,32 +553,32 @@ subroutine monola(file_in)
            do itype=1,nmolty
               Temp_nmol =   Temp_nmol + ncmt(ibox,itype)
            end do
-           Temp_Energy  = (vbox(ibox)/Temp_nmol)*0.00831451E0_dp
+           Temp_Energy  = (vbox(1,ibox)/Temp_nmol)*0.00831451E0_dp
            acvkjmol(1,ibox) = acvkjmol(1,ibox) + Temp_Energy
-           Temp_Energy  = (vinterb(ibox)/Temp_nmol)*0.00831451E0_dp
+           Temp_Energy  = (vbox(2,ibox)/Temp_nmol)*0.00831451E0_dp
            acvkjmol(2,ibox) = acvkjmol(2,ibox) + Temp_Energy
-           Temp_Energy  = (vbendb(ibox)/Temp_nmol)*0.00831451E0_dp
+           Temp_Energy  = (vbox(6,ibox)/Temp_nmol)*0.00831451E0_dp
            acvkjmol(3,ibox) = acvkjmol(3,ibox) + Temp_Energy
-           Temp_Energy  = (vtgb(ibox)/Temp_nmol)*0.00831451E0_dp
+           Temp_Energy  = (vbox(7,ibox)/Temp_nmol)*0.00831451E0_dp
            acvkjmol(4,ibox) = acvkjmol(4,ibox) + Temp_Energy
-           Temp_Energy  = (vintrab(ibox)/Temp_nmol)*0.00831451E0_dp
+           Temp_Energy  = (vbox(4,ibox)/Temp_nmol)*0.00831451E0_dp
            acvkjmol(5,ibox) = acvkjmol(5,ibox) + Temp_Energy
-           Temp_Energy  = (vextb(ibox)/Temp_nmol)*0.00831451E0_dp
+           Temp_Energy  = (vbox(9,ibox)/Temp_nmol)*0.00831451E0_dp
            acvkjmol(6,ibox) = acvkjmol(6,ibox) + Temp_Energy
-           Temp_Energy  = (vvibb(ibox)/Temp_nmol)*0.00831451E0_dp
+           Temp_Energy  = (vbox(5,ibox)/Temp_nmol)*0.00831451E0_dp
            acvkjmol(7,ibox) = acvkjmol(7,ibox) + Temp_Energy
-           Temp_Energy  = (velectb(ibox)/Temp_nmol)*0.00831451E0_dp
+           Temp_Energy  = (vbox(8,ibox)/Temp_nmol)*0.00831451E0_dp
            acvkjmol(8,ibox) = acvkjmol(8,ibox) + Temp_Energy
-           Temp_Energy  = (vtailb(ibox)/Temp_nmol)*0.00831451E0_dp
+           Temp_Energy  = (vbox(3,ibox)/Temp_nmol)*0.00831451E0_dp
            acvkjmol(9,ibox) = acvkjmol(9,ibox) + Temp_Energy
-           Temp_Energy  = (vflucqb(ibox)/Temp_nmol)*0.00831451E0_dp
+           Temp_Energy  = (vbox(11,ibox)/Temp_nmol)*0.00831451E0_dp
            acvkjmol(10,ibox) = acvkjmol(10,ibox) + Temp_Energy
-           Temp_Energy  = (v3garob(ibox)/Temp_nmol)*0.00831451E0_dp
+           Temp_Energy  = (vbox(10,ibox)/Temp_nmol)*0.00831451E0_dp
            acvkjmol(17,ibox) = acvkjmol(17,ibox) + Temp_Energy
 
            if ( lnpt ) then
-              ! acv(16,ibox) = acv(16,ibox) + vbox(ibox)*boxlx(ibox)*boxly(ibox)*boxlz(ibox)
-              acv(16,ibox) = acv(16,ibox) + vbox(ibox)*temvol
+              ! acv(16,ibox) = acv(16,ibox) + vbox(1,ibox)*boxlx(ibox)*boxly(ibox)*boxlz(ibox)
+              acv(16,ibox) = acv(16,ibox) + vbox(1,ibox)*temvol
            end if
 
            if (lsolid(ibox) .and. .not. lrect(ibox)) then
@@ -614,7 +614,7 @@ subroutine monola(file_in)
 
         If  ( lnpt.and..not.lgibbs ) then
            ibox = 1
-           tmp= vbox(ibox) + express(ibox) * ( boxlx(ibox) *boxly(ibox)*boxlz(ibox))
+           tmp= vbox(1,ibox) + express(ibox) * ( boxlx(ibox) *boxly(ibox)*boxlz(ibox))
            ! write(49,*) nnn, tmp
            inst_enth=inst_enth+ tmp
            inst_enth2=inst_enth2+(tmp*tmp)
@@ -622,7 +622,7 @@ subroutine monola(file_in)
 
         If  (.not. lnpt .and..not.lgibbs ) then
            ibox = 1
-           tmp= vbox(ibox)
+           tmp= vbox(1,ibox)
            ! write(49,*) nnn, tmp
            inst_energy=inst_energy + tmp
            inst_energy2=inst_energy2+ (tmp*tmp)
@@ -631,7 +631,7 @@ subroutine monola(file_in)
         ! collect histogram data (added 8/30/99)
         if(lgrand) then
            ibox = 1
-           vhist = vinterb(ibox) + velectb(ibox) + vflucqb(ibox)
+           vhist = vbox(2,ibox) + vbox(8,ibox) + vbox(11,ibox)
            nconfig = nconfig + 1
            ! KM for MPI
            ! check this if want to run grand canonical
@@ -698,7 +698,7 @@ subroutine monola(file_in)
         do ibox = 1,nbox
            if ( lpbcz ) then
               if (lsolid(ibox) .and. .not. lrect(ibox).and. myid.eq.0) then
-                 write(12,FMT='(7E13.5,'//format_n(nmolty,"i5")//')') hmat(ibox,1) ,hmat(ibox,4),hmat(ibox,5) ,hmat(ibox,7),hmat(ibox,8) ,hmat(ibox,9),vbox(ibox), (ncmt(ibox,itype),itype=1,nmolty)
+                 write(12,FMT='(7E13.5,'//format_n(nmolty,"i5")//')') hmat(ibox,1) ,hmat(ibox,4),hmat(ibox,5) ,hmat(ibox,7),hmat(ibox,8) ,hmat(ibox,9),vbox(1,ibox), (ncmt(ibox,itype),itype=1,nmolty)
 
                  open(13,file = file_cell,status='old', position='append')
                  write(13,'(i8,6f12.4)') nnn+nnstep, cell_length(ibox,1)/Num_cell_a, cell_length(ibox,2)/Num_cell_b, cell_length(ibox,3)/Num_cell_c, cell_ang(ibox,1)*180.0E0_dp/onepi, cell_ang(ibox,2)*180.0E0_dp/onepi, cell_ang(ibox,3)*180.0E0_dp/onepi
@@ -708,14 +708,14 @@ subroutine monola(file_in)
               else
                  ! do ibox = 1, nbox
                  if (myid.eq.0) then
-                    write(12,'(4E13.5,'//format_n(nmolty,"i5")//')')boxlx(ibox),boxly(ibox) ,boxlz(ibox),vbox(ibox), (ncmt(ibox,itype),itype=1,nmolty)
+                    write(12,'(4E13.5,'//format_n(nmolty,"i5")//')')boxlx(ibox),boxly(ibox) ,boxlz(ibox),vbox(1,ibox), (ncmt(ibox,itype),itype=1,nmolty)
                  end if
                  ! end do
               end if
            else
               ! do ibox = 1, nbox
               if (myid.eq.0) then
-                 write(12,'(2E12.5,'//format_n(nmolty,"i4")//')') boxlx(ibox)*boxly(ibox) ,vbox(ibox),(ncmt(ibox,itype),itype=1,nmolty)
+                 write(12,'(2E12.5,'//format_n(nmolty,"i4")//')') boxlx(ibox)*boxly(ibox) ,vbox(1,ibox),(ncmt(ibox,itype),itype=1,nmolty)
               end if
               ! end do
            end if
@@ -750,7 +750,7 @@ subroutine monola(file_in)
            end do
            ! Volume in m3/mol, energies in kJ/mol
            Temp_Mol_Vol = temvol/Temp_nmol*0.6022E-06_dp
-           Temp_Energy  = (vbox(ibox)/Temp_nmol)*0.00831451E0_dp
+           Temp_Energy  = (vbox(1,ibox)/Temp_nmol)*0.00831451E0_dp
            acEnthalpy(ibox) = acEnthalpy(ibox) + Temp_Energy + pres(ibox)*Temp_Mol_Vol
            acEnthalpy1(ibox) = acEnthalpy1(ibox) + Temp_Energy + (express(ibox)/7.2429E-5_dp)*Temp_Mol_Vol
         end do
@@ -899,7 +899,7 @@ subroutine monola(file_in)
         end do
      end if
 
-     ! if ( mod(nnn,idiele) .eq. 0 ) write(25,*) nnn+nnstep,vbox(1)
+     ! if ( mod(nnn,idiele) .eq. 0 ) write(25,*) nnn+nnstep,vbox(1,1)
 
      ! ibox = 1
      ! imolty = 1
@@ -1004,58 +1004,58 @@ subroutine monola(file_in)
      end if
 
      ! checks final value of the potential energy is consistent ***
-     call sumup( ovrlap, v, vinter,vtail,vintra,vvib, vbend,vtg,vext,velect,vflucq,ibox, .false.)
-     vend(ibox) = v
+     call sumup(ovrlap,v,ibox,.false.)
+     vend(ibox) = v(1)
 
      ! need to check
      if (myid.eq.0) then
-        if ( abs(v - vbox(ibox)) .gt. 0.0001) then
+        if ( abs(v(1) - vbox(1,ibox)) .gt. 0.0001) then
            write(io_output,*) '### problem with energy ###  box ',ibox
-           write(io_output,*) ' Total energy: ',v,vbox(ibox),v-vbox(ibox)
+           write(io_output,*) ' Total energy: ',v(1),vbox(1,ibox),v(1)-vbox(1,ibox)
         end if
-        if ( abs(vinter - vinterb(ibox)) .gt. 0.000001) then
+        if ( abs(v(2) - vbox(2,ibox)) .gt. 0.000001) then
            write(io_output,*) '### problem  ###'
-           write(io_output,*) ' Inter mol.en.: ',vinter,vinterb(ibox)
+           write(io_output,*) ' Inter mol.en.: ',v(2),vbox(2,ibox)
            if (lsolid(ibox) .and. .not. lrect(ibox)) then
               write(io_output,*)'You might check the cutoff wrt box widths'
               write(io_output,*) 'Normal PBC might be failing'
            end if
         end if
-        if ( abs(vtail - vtailb(ibox)) .gt. 0.000001) then
+        if ( abs(v(3) - vbox(3,ibox)) .gt. 0.000001) then
            write(io_output,*) '### problem  ###'
-           write(io_output,*) ' Tail corr.en.: ',vtail,vtailb(ibox)
+           write(io_output,*) ' Tail corr.en.: ',v(3),vbox(3,ibox)
         end if
-        if ( abs(vintra - vintrab(ibox)) .gt. 0.000001) then
+        if ( abs(v(4) - vbox(4,ibox)) .gt. 0.000001) then
            write(io_output,*) '### problem  ###'
-           write(io_output,*) ' Intra mol.en.: ',vintra,vintrab(ibox)
+           write(io_output,*) ' Intra mol.en.: ',v(4),vbox(4,ibox)
         end if
-        if ( abs(vvib - vvibb(ibox)) .gt. 0.001) then
+        if ( abs(v(5) - vbox(5,ibox)) .gt. 0.001) then
            write(io_output,*) '### problem  ###'
-           write(io_output,*) ' bond vib. en.: ',vvib,vvibb(ibox)
+           write(io_output,*) ' bond vib. en.: ',v(5),vbox(5,ibox)
         end if
-        if ( abs(vbend - vbendb(ibox)) .gt. 0.001) then
+        if ( abs(v(6) - vbox(6,ibox)) .gt. 0.001) then
            write(io_output,*) '### problem  ###'
-           write(io_output,*) ' Bond ben.en.: ',vbend,vbendb(ibox)
+           write(io_output,*) ' Bond ben.en.: ',v(6),vbox(6,ibox)
         end if
-        if ( abs(vtg - vtgb(ibox)) .gt. 0.001) then
+        if ( abs(v(7) - vbox(7,ibox)) .gt. 0.001) then
            write(io_output,*) '### problem  ###'
-           write(io_output,*) ' Torsion.en.: ',vtg,vtgb(ibox)
+           write(io_output,*) ' Torsion.en.: ',v(7),vbox(7,ibox)
         end if
-        if ( abs(vext - vextb(ibox)) .gt. 0.0001) then
+        if ( abs(v(9) - vbox(9,ibox)) .gt. 0.0001) then
            write(io_output,*) '### problem  ###'
-           write(io_output,*) ' Externa.en.: ',vext,vextb(ibox)
+           write(io_output,*) ' Externa.en.: ',v(9),vbox(9,ibox)
         end if
-        if ( abs(velect - velectb(ibox)) .gt. 0.000001) then
+        if ( abs(v(8) - vbox(8,ibox)) .gt. 0.000001) then
            write(io_output,*) '### problem  ###'
-           write(io_output,*) ' Coulomb.en.: ',velect,velectb(ibox)
+           write(io_output,*) ' Coulomb.en.: ',v(8),vbox(8,ibox)
         end if
-        if ( abs(vflucq - vflucqb(ibox)) .gt. 0.0001) then
+        if ( abs(v(11) - vbox(11,ibox)) .gt. 0.0001) then
            write(io_output,*) '### problem  ###'
-           write(io_output,*) ' Fluc Q en.: ',vflucq,vflucqb(ibox)
+           write(io_output,*) ' Fluc Q en.: ',v(11),vbox(11,ibox)
         end if
-        if ( abs(v3garo - v3garob(ibox) ) .gt.0.001) then
+        if ( abs(v3garo - vbox(10,ibox) ) .gt.0.001) then
            write(io_output,*) '### problem ###'
-           write(io_output,*) ' 3-body en.: ',v3garo,v3garob(ibox)
+           write(io_output,*) ' 3-body en.: ',v3garo,vbox(10,ibox)
         end if
         if ( ldielect ) then
            if ( abs(dipolexo - dipolex(ibox)) .gt. 0.0001) then
@@ -1064,9 +1064,9 @@ subroutine monola(file_in)
            end if
         end if
         if (lmipsw) then
-           if (abs(vwellipsw-vwellipswb(ibox)).gt.0.001) then
+           if (abs(vwellipsw-vbox(13,ibox)).gt.0.001) then
               write(io_output,*) '### problem  ###'
-              write(io_output,*) ' well en.: ',vwellipsw,vwellipswb(ibox)
+              write(io_output,*) ' well en.: ',vwellipsw,vbox(13,ibox)
            end if
         end if
      end if
@@ -1078,7 +1078,7 @@ subroutine monola(file_in)
      write(io_output,*)
      write(io_output,"(' vstart       =',3f24.10)") (vstart(i) ,i=1,nbox)
      write(io_output,"(' vend         =',3f24.10)") (vend(i)   ,i=1,nbox)
-     write(io_output,"(' vbox         =',3f24.10)") (vbox(i)   ,i=1,nbox)
+     write(io_output,"(' vbox         =',3f24.10)") (vbox(1,i)   ,i=1,nbox)
      write(io_output,*)
 
      ! normalize and write out presim results in fort.22 **
