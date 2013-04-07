@@ -32,8 +32,9 @@ MODULE energy_intramolecular
 
   real,allocatable::rxvec(:,:),ryvec(:,:),rzvec(:,:),distij2(:,:),distanceij(:,:)
 contains
-  subroutine init_energy_bonded(io_ff)
+  subroutine init_energy_bonded(io_ff,lprint)
     integer,intent(in)::io_ff
+    LOGICAL,INTENT(IN)::lprint
     integer,parameter::initial_size=20
     integer::i,n,jerr
     character(LEN=default_string_length)::line_in
@@ -42,7 +43,7 @@ contains
     call initiateTable(angles,initial_size)
     call initiateTable(dihedrals,initial_size)
 
-    call init_tabulated_potential_bonded()
+    call init_tabulated_potential_bonded(lprint)
 
     ! Looking for section BONDS
     REWIND(io_ff)
@@ -562,9 +563,10 @@ contains
 !ccc  make sure potential does not go up to infinity!
 !ccc  KM 12/03/08
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-  subroutine init_tabulated_potential_bonded()
+  subroutine init_tabulated_potential_bonded(lprint)
     use util_math,only:spline
     use sim_system,only:L_tor_table,L_vib_table,L_bend_table
+    LOGICAL,INTENT(IN)::lprint
     integer,parameter::initial_size=10,grid_size=1500
     integer::jerr,ttor
 
@@ -573,14 +575,14 @@ contains
        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_bonded: allocation failed for vib_table 1',myid+1)
        call read_tabulated_potential_bonded('fort.40',nttor,deg,tabtorso,splpnts,dihedrals)
        if (L_spline) then
-          if (myid.eq.0) write(io_output,*) 'using spline interpolation'
+          if (lprint) write(io_output,*) 'using spline interpolation'
           allocate(torderiv2(1:grid_size,1:initial_size),stat=jerr)
           if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_bonded: allocation failed for tor_table 2',myid+1)
           do ttor=1,nttor
              call spline(deg(:,ttor),tabtorso(:,ttor),splpnts(ttor),1.0E31_dp,1.0E31_dp,torderiv2(:,ttor))
           end do
        else if (L_linear) then
-          if (myid.eq.0) write(io_output,*) 'using linear interpolation'
+          if (lprint) write(io_output,*) 'using linear interpolation'
        end if
     end if
 
@@ -588,14 +590,14 @@ contains
        allocate(vibsplits(1:initial_size),vib(1:grid_size,1:initial_size),tabvib(1:grid_size,1:initial_size),stat=jerr)
        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_bonded: allocation failed for vib_table',myid+1)
        call read_tabulated_potential_bonded('fort.41',ntabvib,vib,tabvib,vibsplits,bonds)
-       if (myid.eq.0)  write(io_output,'(/,A)') 'using linear interpolation for vibrations'
+       if (lprint)  write(io_output,'(/,A)') 'using linear interpolation for vibrations'
     end if
 
     if (L_bend_table) then
        allocate(bendsplits(1:initial_size),bend(1:grid_size,1:initial_size),tabbend(1:grid_size,1:initial_size),stat=jerr)
        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_bonded: allocation failed for bend_table',myid+1)
        call read_tabulated_potential_bonded('fort.42',ntabbend,bend,tabbend,bendsplits,angles)
-       if (myid.eq.0) write(io_output,*) 'using linear interpolation for 1-3 nonbonded bending'
+       if (lprint) write(io_output,*) 'using linear interpolation for 1-3 nonbonded bending'
     end if
   end subroutine init_tabulated_potential_bonded
 

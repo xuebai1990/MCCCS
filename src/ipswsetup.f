@@ -1,6 +1,4 @@
-!
-! setup maginns interphase switch
-!
+!> \brief Setup Maginns interphase switch
       subroutine ipswsetup
       use util_runtime,only:err_exit
       use sim_system
@@ -174,8 +172,6 @@
          end do
          lambdais = 0.0E0_dp
       end if
-      acdvdl = 0.0E0_dp
-      acipsw = 0.0E0_dp
 
       if (lsolid(ibox).and.(.not.lrect(ibox))) then
          do i = 1, nmolty

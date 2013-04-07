@@ -1,9 +1,10 @@
-      subroutine molsetup(io_input,imolty)
+      subroutine molsetup(io_input,imolty,lprint)
       use util_runtime,only:err_exit
       use sim_system
       implicit none
 
       integer,intent(in)::io_input,imolty
+      LOGICAL,INTENT(IN)::lprint
       integer::i,j,k,n,iunit,dum,iu,countbend,counttor,atype,btype,ctype,dtype,tortype,bendtype ,ju,ku,nu,vibtype,countvib
 
 !     ************************************************************
@@ -25,7 +26,7 @@
          
          masst(imolty) = masst(imolty) + mass(ntype(imolty,i))
 
-         write(io_output,*) 'bead ',iu,' beadtype ',ntype(imolty,i)
+         if (lprint) write(io_output,*) 'bead ',iu,' beadtype ',ntype(imolty,i)
 
          read(io_input,*) 
          read(io_input,*) invib(imolty,i),(ijvib(imolty,i,j) ,j=1,invib(imolty,i))

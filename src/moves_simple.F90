@@ -7,11 +7,12 @@ MODULE moves_simple
   implicit none
   private
   save
-  public::traxyz,rotxyz,Atom_traxyz,init_moves_simple,output_translation_rotation_stats
+  public::translation,rotation,Atom_translation,init_moves_simple,update_translation_rotation_max_displacement,averageMaximumDisplacement,output_translation_rotation_stats,read_checkpoint_simple,write_checkpoint_simple
 
   real,allocatable,public::acntrax(:,:),acntray(:,:),acntraz(:,:),acnrotx(:,:),acnroty(:,:),acnrotz(:,:),acstrax(:,:)&
    ,acstray(:,:),acstraz(:,:),acsrotx(:,:),acsroty(:,:),acsrotz(:,:),bntrax(:,:),bntray(:,:),bntraz(:,:),bstrax(:,:)&
    ,bstray(:,:),bstraz(:,:),bnrotx(:,:),bnroty(:,:),bnrotz(:,:),bsrotx(:,:),bsroty(:,:),bsrotz(:,:)
+  real::Abntrax,Abntray,Abntraz,Abstrax,Abstray,Abstraz
 
 contains
 !    *******************************************************************
@@ -20,7 +21,7 @@ contains
 ! number of successful trial moves is stored in bstrax(yz).     **
 ! The attempts are stored in bntrax(yz)                         **
 !    *******************************************************************
-  subroutine traxyz(lx,ly,lz)
+  subroutine translation()
     use sim_particle,only:update_neighbor_list
     use sim_cell,only:update_linked_cell
 
@@ -35,8 +36,21 @@ contains
 ! --------------------------------------------------------------------
 
 #ifdef __DEBUG__
-      write(io_output,*) 'start TRAXYZ in ',myid,lx,ly,lz
+      write(io_output,*) 'start TRANSLATION in ',myid
 #endif
+
+      lx=.false.
+      ly=.false.
+      lz=.false.
+      rchain = 3.0E0_dp * random(-1)
+      if ( rchain .lt. 1.0E0_dp ) then
+         lx=.true.
+      else if ( rchain .lt. 2.0E0_dp ) then
+         ly=.true.
+      else
+         lz=.true.
+      end if
+
       ovrlap = .false.
 ! select a chain at random ***
       rchain  = random(-1)
@@ -63,7 +77,7 @@ contains
          end if
          i = int( real(ncmt(1,imolty),dp)*random(-1) ) + 1
          i = parbox(i,1,imolty)
-         if ( moltyp(i) .ne. imolty ) write(io_output,*) 'screwup traxyz'
+         if ( moltyp(i) .ne. imolty ) write(io_output,*) 'screwup translation'
 
 
       else
@@ -149,7 +163,7 @@ contains
       vo(10) = v3garo
 
       if (ovrlap) then
-         call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf of TRAXYZ',myid+1)
+         call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf of TRANSLATION',myid+1)
       end if
 
       if (lewald.and.lelect(imolty).and..not.lideal(ibox)) then
@@ -200,7 +214,7 @@ contains
          return
       end if
 
-! write(io_output,*) 'TRAXYZ accepted i',i
+! write(io_output,*) 'TRANSLATION accepted i',i
 
       vbox(1,ibox)     = vbox(1,ibox) + deltv
       vbox(2,ibox)  = vbox(2,ibox) + (vn(2) - vo(2))
@@ -289,22 +303,22 @@ contains
       end if
 
 #ifdef __DEBUG__
-      write(io_output,*) 'end TRAXYZ in ',myid,i
+      write(io_output,*) 'end TRANSLATION in ',myid,i
 #endif
 
       return
-    end subroutine traxyz
+    end subroutine translation
 
-!    *******************************************************************
+!*****************************************************************
 ! makes a rotational movement around "x" space-fixed axis.      **
 ! the maximum displacement is controlled by rmrotx and the      **
 ! number of successful rotation is given by bsrotx.             **
-!    **                                                               **
-! rotxyz chooses one of the three space-fixed axes at random    **
+!                                                               **
+! rotation chooses one of the three space-fixed axes at random  **
 ! and rotates the molecule around this axis by dgamma radians.  **
 ! the maximum angular displacement is dgamax.                   **
-!    *******************************************************************
-    subroutine rotxyz (lx,ly,lz )
+!*****************************************************************
+    subroutine rotation ()
       use sim_particle,only:update_neighbor_list
 
       logical::lx,ly,lz,ovrlap,lneighij
@@ -318,8 +332,21 @@ contains
 ! --------------------------------------------------------------------
 
 #ifdef __DEBUG__
-      write(io_output,*) 'start ROTXYZ in ',myid,lx,ly,lz
+      write(io_output,*) 'start ROTATION in ',myid
 #endif
+
+      lx=.false.
+      ly=.false.
+      lz=.false.
+      rchain = 3.0E0_dp * random(-1)
+      if ( rchain .lt. 1.0E0_dp ) then
+         lx=.true.
+      else if ( rchain .lt. 2.0E0_dp ) then
+         ly=.true.
+      else
+         lz=.true.
+      end if
+
       ovrlap = .false.
       if (lgrand) then
 ! select a chain at random in box 1!
@@ -489,7 +516,7 @@ contains
       flagon = 1
       call energy(i,imolty,vo,flagon,ibox,1,iunit,.false.,ovrlap,.false.,.false.,.false.,.false.)
 
-      if (ovrlap) call err_exit(__FILE__,__LINE__,'disaster- overlap for old conf in ROTXYZ',myid+1)
+      if (ovrlap) call err_exit(__FILE__,__LINE__,'disaster- overlap for old conf in ROTATION',myid+1)
       if (lewald.and.lelect(imolty).and..not.lideal(ibox)) then
          call recip(ibox,vrecipn,vrecipo,1)
          vn(8) = vn(8) + vrecipn
@@ -538,7 +565,7 @@ contains
          return
       end if
 
-! write(io_output,*) 'ROTXYZ accepted',i
+! write(io_output,*) 'ROTATION accepted',i
       vbox(1,ibox) = vbox(1,ibox) + deltv
       vbox(2,ibox)  = vbox(2,ibox) + (vn(2) -  vo(2))
       vbox(4,ibox)  = vbox(4,ibox) + (vn(4) - vo(4))
@@ -578,7 +605,7 @@ contains
       end if
 
       if ( lneighbor ) then
-! write(io_output,*) 'in rotxyz:',i,neigh_cnt(i)
+! write(io_output,*) 'in rotation:',i,neigh_cnt(i)
          do 11 ic = 1, neigh_cnt(i)
             j = neighbor(ic,i)
             do ip = 1,neigh_cnt(j)
@@ -607,11 +634,11 @@ contains
       end if
 
 #ifdef __DEBUG__
-      write(io_output,*) 'end ROTXYZ in ',myid,i
+      write(io_output,*) 'end ROTATION in ',myid,i
 #endif
 
       return
-    end subroutine rotxyz
+    end subroutine rotation
 
 !    *******************************************************************
 ! makes a translational movement in x,y,or z-direction.         **
@@ -619,7 +646,7 @@ contains
 ! number of successful trial moves is stored in Abstrax(yz).     **
 ! The attempts are stored in Abntrax(yz)                         **
 !    *******************************************************************
-    subroutine Atom_traxyz(lx,ly,lz )
+    subroutine Atom_translation()
       use sim_particle,only:update_neighbor_list
       use sim_cell,only:update_linked_cell
       use energy_kspace,only:recip_atom
@@ -634,8 +661,21 @@ contains
 
 ! --------------------------------------------------------------------
 #ifdef __DEBUG__
-      write(io_output,*) 'start ATOM_TRAXYZ in ',myid
+      write(io_output,*) 'start ATOM_TRANSLATION in ',myid
 #endif
+
+      lx=.false.
+      ly=.false.
+      lz=.false.
+      rchain = 3.0E0_dp * random(-1)
+      if ( rchain .lt. 1.0E0_dp ) then
+         lx=.true.
+      else if ( rchain .lt. 2.0E0_dp ) then
+         ly=.true.
+      else
+         lz=.true.
+      end if
+
       ovrlap = .false.
 ! select a chain at random ***
       rchain  = random(-1)
@@ -658,7 +698,7 @@ contains
          end if
          pick_chain = int( real(ncmt(1,imolty),dp)*random(-1) ) + 1
          pick_chain = parbox(pick_chain,1,imolty)
-         if ( moltyp(pick_chain) .ne. imolty )  write(io_output,*) 'screwup traxyz'
+         if ( moltyp(pick_chain) .ne. imolty )  write(io_output,*) 'screwup translation'
 
 
       else
@@ -734,7 +774,7 @@ contains
 ! calculate the energy of i in the old configuration ***
       flagon = 1
       call energy(i,imolty,vo,flagon,ibox,pick_unit,pick_unit,.true.,ovrlap,.false.,.false.,.false.,.true.)
-      if (ovrlap) call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf of ATOM_TRAXYZ',myid+1)
+      if (ovrlap) call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf of ATOM_TRANSLATION',myid+1)
       call U_bonded(i,imolty,vo(5),vo(6),vo(7))
 
       if ( lewald .and. lelect(imolty) ) then
@@ -772,7 +812,7 @@ contains
          return
       end if
 
-! write(io_output,*) 'TRAXYZ accepted i',i
+! write(io_output,*) 'TRANSLATION accepted i',i
       vbox(1,ibox)     = vbox(1,ibox) + deltv
       vbox(2,ibox)  = vbox(2,ibox) + (vn(2) - vo(2))
       vbox(4,ibox)  = vbox(4,ibox) + (vn(4) - vo(4))
@@ -847,10 +887,10 @@ contains
       end if
 
 #ifdef __DEBUG__
-      write(io_output,*) 'end ATOM_TRAXYZ in ',myid,i
+      write(io_output,*) 'end ATOM_TRANSLATION in ',myid,i
 #endif
       return
-    end subroutine Atom_traxyz
+    end subroutine Atom_translation
 
   subroutine init_moves_simple
     integer::jerr
@@ -863,6 +903,12 @@ contains
        call err_exit(__FILE__,__LINE__,'init_moves_simple: allocation failed',jerr)
     end if
 
+    Abstrax = 0.0E0_dp
+    Abstray = 0.0E0_dp
+    Abstraz = 0.0E0_dp
+    Abntrax = 0.0E0_dp
+    Abntray = 0.0E0_dp
+    Abntraz = 0.0E0_dp
     acntrax = 0.E0_dp
     acntray = 0.E0_dp
     acntraz = 0.E0_dp
@@ -889,7 +935,252 @@ contains
     bnrotz = 0.0E0_dp
   end subroutine init_moves_simple
 
-! write some information about translations and rotations
+  subroutine update_translation_rotation_max_displacement(io_output)
+    use sim_particle,only:check_neighbor_list
+    integer,intent(in)::io_output
+    real::rcutmin,ratrax,ratray,ratraz,rttrax,rttray,rttraz,rarotx,raroty,rarotz,rtrotx,rtroty,rtrotz
+    integer::im,imolty
+
+    ! adjust the atomic displacements
+    rcutmin = rcut(1)
+    do im = 2,nbox
+       if (rcutmin.gt.rcut(im)) then
+          rcutmin = rcut(im)
+       end if
+    end do
+
+    if ( Abntrax .gt. 0.5E0_dp ) then
+       ratrax = Abstrax / Abntrax
+       rttrax = Armtrax * ratrax / tatra
+       if ( rttrax .gt. 2.0E0_dp * rcutmin ) then
+          ! maximum translational displacement
+          Armtrax = 2.0E0_dp*rcutmin
+       else if (rttrax .lt. 1.0E-10_dp ) then
+          ! ratio must have been zero, so divide by 10
+          Armtrax = Armtrax/10.0E0_dp
+       else
+          ! accept new ratio
+          Armtrax = rttrax
+       end if
+    end if
+
+    if ( Abntray .gt. 0.5E0_dp ) then
+       ratray = Abstray / Abntray
+       rttray = Armtray * ratray / tatra
+       if ( rttray .gt. 2.0E0_dp * rcutmin ) then
+          ! maximum translational displacement
+          Armtray = 2.0E0_dp*rcutmin
+       else if (rttray .lt. 1.0E-10_dp ) then
+          ! ratio must have been zero, so divide by 10
+          Armtray = Armtray/10.0E0_dp
+       else
+          ! accept new ratio
+          Armtray = rttray
+       end if
+    end if
+
+    if ( Abntraz .gt. 0.5E0_dp ) then
+       ratraz = Abstraz / Abntraz
+       rttraz = Armtraz * ratraz / tatra
+       if ( rttraz .gt. 2.0E0_dp * rcutmin ) then
+          ! maximum translational displacement
+          Armtraz = 2.0E0_dp*rcutin
+       else if (rttraz .lt. 1.0E-10_dp ) then
+          ! ratio must have been zero, so divide by 10
+          Armtraz = Armtraz/10.0E0_dp
+       else
+          ! accept new ratio
+          Armtraz = rttraz
+       end if
+    end if
+
+    ! adjust maximum translational displacement for COM***
+    do im=1,nbox
+       if (myid.eq.rootid) then
+          write(io_output,*) 'Box ',im
+       end if
+       do imolty = 1,nmolty
+          ! rmtrax
+          ! check whether any x translations have been done for 
+          ! molecule type imolty in box im
+          if ( bntrax(imolty,im) .gt. 0.5E0_dp ) then
+             ! compute possible new ratio
+             ratrax = bstrax(imolty,im) / bntrax(imolty,im)
+             rttrax = rmtrax(imolty,im) * ratrax / tatra
+
+             if ( rttrax .gt. 2.0E0_dp * rcut(im)) then 
+                ! maximum translational displacement
+                rmtrax(imolty,im) = 2.0E0_dp*rcut(im)
+             else if (rttrax .lt. 1.0E-10_dp ) then  
+                ! ratio must have been zero, so divide by 10
+                rmtrax(imolty,im) = rmtrax(imolty,im)/10.0E0_dp
+             else 
+                ! accept new ratio
+                rmtrax(imolty,im) = rttrax
+             end if
+          end if
+
+          ! rmtray
+          ! check whether any y translations have been done for 
+          ! molecule type imolty in box im
+          if ( bntray(imolty,im) .gt. 0.5E0_dp ) then
+             ! compute possiblt new ratio
+             ratray = bstray(imolty,im) / bntray(imolty,im)
+             rttray = rmtray(imolty,im) * ratray / tatra
+
+             if ( rttray .gt. 2.0E0_dp*rcut(im) ) then 
+                ! maximum translational displacement
+                rmtray(imolty,im) = 2.0E0_dp*rcut(im)
+             else if (rttray .eq. 0.0E0_dp) then  
+                ! ratio must have been zero, divide old by 10
+                rmtray(imolty,im) = rmtray(imolty,im)/10.0E0_dp
+             else 
+                ! accept new ratio
+                rmtray(imolty,im) = rttray
+             end if
+          end if
+
+          ! rmtraz
+          ! check whether any z translations have been done for 
+          ! molecule type imolty in box im
+          if ( bntraz(imolty,im) .gt. 0.5E0_dp ) then
+             ! compute possible new ratio
+             ratraz = bstraz(imolty,im) / bntraz(imolty,im)
+             rttraz = rmtraz(imolty,im) * ratraz / tatra
+
+             if ( rttraz .gt. 2.0E0_dp*rcut(im) ) then 
+                ! maximum translational displacement
+                rmtraz(imolty,im) = 2.0E0_dp*rcut(im)
+             else if ( rttraz .lt. 1.0E-10_dp ) then  
+                ! ratio must have been zero, divide old by 10
+                rmtraz(imolty,im) = rmtraz(imolty,im)/10.0E0_dp
+             else 
+                ! accept new ratio
+                rmtraz(imolty,im) = rttraz
+             end if
+          end if
+
+          ! rmrotx
+          ! check whether any x-axis rotations have been done for 
+          ! molecule type imolty in box im
+          if ( bnrotx(imolty,im) .gt. 0.5E0_dp ) then
+             ! compute possible new ratio
+             rarotx = bsrotx(imolty,im) / bnrotx(imolty,im)
+             rtrotx = rmrotx(imolty,im) * rarotx / tarot
+
+             if ( rtrotx .lt. 1.0E-10_dp )  then
+                ! ratio was zero, divide old by 10
+                rmrotx(imolty,im) = rmrotx(imolty,im)/10.E0_dp
+             else if (rtrotx .gt. 3.1415E0_dp) then
+                ! maximum rotational displacement
+                rmrotx(imolty,im) = 3.1415E0_dp
+             else
+                ! accept trial ratio
+                rmrotx(imolty,im) = rtrotx
+             end if
+          end if
+
+          ! rmroty
+          ! check whether any y-axis rotations have been done for 
+          ! molecule type imolty in box im
+          if ( bnroty(imolty,im) .gt. 0.5E0_dp ) then
+             ! compute possible new ratio
+             raroty = bsroty(imolty,im) / bnroty(imolty,im)
+             rtroty = rmroty(imolty,im) * raroty / tarot
+
+             if ( rtroty .lt. 1.0E-10_dp)  then
+                ! ratio was zero, divide old by 10
+                rmroty(imolty,im) = rmroty(imolty,im)/10.0E0_dp
+             else if (rtroty .gt. 3.1415E0_dp) then
+                ! maximum rotational displacement
+                rmroty(imolty,im) = 3.1415E0_dp
+             else
+                ! accept trial ratio
+                rmroty(imolty,im) = rtroty
+             end if
+          end if
+
+          ! rmrotz
+          ! check whether any y-axis rotations have been done for 
+          ! molecule type imolty in box im
+          if ( bnrotz(imolty,im) .gt. 0.5E0_dp ) then
+             ! compute possible new ratio
+             rarotz = bsrotz(imolty,im) / bnrotz(imolty,im)
+             rtrotz = rmrotz(imolty,im) * rarotz / tarot
+
+             if (rtrotz .eq. 0.0E0_dp)  then
+                ! ratio was zero, divide old by 10
+                rmrotz(imolty,im) = rmrotz(imolty,im)/10.0E0_dp
+             else if (rtrotz .gt. 3.1415E0_dp) then
+                ! maximum rotational displacement
+                rmrotz(imolty,im) = 3.1415E0_dp
+             else
+                ! accept trial ratio
+                rmrotz(imolty,im) = rtrotz
+             end if
+          end if
+
+          if (lneigh) call check_neighbor_list(im,imolty)
+          call averageMaximumDisplacement(im,imolty)
+
+          ! KM for MPI
+          ! only processor 0 writes to output files (except for error messages)
+          if (myid.eq.rootid) then
+             ! write some ratio update information ***
+             write(io_output,"(' Type ',i2,' bn ',6(f7.0,1x))") imolty,bntrax(imolty,im),bntray(imolty,im),bntraz(imolty,im),bnrotx(imolty,im),bnroty(imolty,im),bnrotz(imolty,im)
+             ! write(io_output,"(' ratio       ',6(f7.4,1x))") ratrax, ratray, ratraz,rarotx, raroty,rarotz
+             write(io_output,"(' max.displ.  ',6(f9.4,1x))") rmtrax(imolty,im),rmtray(imolty,im),rmtraz(imolty,im),rmrotx(imolty,im),rmroty(imolty,im),rmrotz(imolty,im)
+          end if
+
+          acntrax(imolty,im) = acntrax(imolty,im)+bntrax(imolty,im)
+          acntray(imolty,im) = acntray(imolty,im)+bntray(imolty,im)
+          acntraz(imolty,im) = acntraz(imolty,im)+bntraz(imolty,im)
+          acstrax(imolty,im) = acstrax(imolty,im)+bstrax(imolty,im)
+          acstray(imolty,im) = acstray(imolty,im)+bstray(imolty,im)
+          acstraz(imolty,im) = acstraz(imolty,im)+bstraz(imolty,im)
+
+          acnrotx(imolty,im) = acnrotx(imolty,im)+bnrotx(imolty,im)
+          acnroty(imolty,im) = acnroty(imolty,im)+bnroty(imolty,im)
+          acnrotz(imolty,im) = acnrotz(imolty,im)+bnrotz(imolty,im)
+          acsrotx(imolty,im) = acsrotx(imolty,im)+bsrotx(imolty,im)
+          acsroty(imolty,im) = acsroty(imolty,im)+bsroty(imolty,im)
+          acsrotz(imolty,im) = acsrotz(imolty,im)+bsrotz(imolty,im)
+
+          bstrax(imolty,im) = 0.0E0_dp
+          bstray(imolty,im) = 0.0E0_dp
+          bstraz(imolty,im) = 0.0E0_dp
+          bntrax(imolty,im) = 0.0E0_dp
+          bntray(imolty,im) = 0.0E0_dp
+          bntraz(imolty,im) = 0.0E0_dp
+          bsrotx(imolty,im) = 0.0E0_dp
+          bsroty(imolty,im) = 0.0E0_dp
+          bsrotz(imolty,im) = 0.0E0_dp
+          bnrotx(imolty,im) = 0.0E0_dp
+          bnroty(imolty,im) = 0.0E0_dp
+          bnrotz(imolty,im) = 0.0E0_dp
+       end do
+    end do
+  end subroutine update_translation_rotation_max_displacement
+
+  subroutine averageMaximumDisplacement(ibox,imol)
+    integer,intent(in)::ibox,imol
+
+    if (numberDimensionIsIsotropic(ibox).eq.3) then
+       rmtrax(imol,ibox)=(rmtrax(imol,ibox)+rmtray(imol,ibox)+rmtraz(imol,ibox))/3
+       rmtray(imol,ibox)=rmtrax(imol,ibox)
+       rmtraz(imol,ibox)=rmtrax(imol,ibox)
+       rmrotx(imol,ibox)=(rmrotx(imol,ibox)+rmroty(imol,ibox)+rmrotz(imol,ibox))/3
+       rmroty(imol,ibox)=rmrotx(imol,ibox)
+       rmrotz(imol,ibox)=rmrotx(imol,ibox)
+    else if (numberDimensionIsIsotropic(ibox).eq.2) then
+       rmtrax(imol,ibox)=(rmtrax(imol,ibox)+rmtray(imol,ibox))/2
+       rmtray(imol,ibox)=rmtrax(imol,ibox)
+       rmrotx(imol,ibox)=(rmrotx(imol,ibox)+rmroty(imol,ibox))/2
+       rmroty(imol,ibox)=rmrotx(imol,ibox)
+    end if
+  end subroutine averageMaximumDisplacement
+
+!> \brief Write some information about translations and rotations
   subroutine output_translation_rotation_stats(io_output)
     integer,intent(in)::io_output
     integer::ibox,i
@@ -931,7 +1222,6 @@ contains
           end if
           write(io_output,fmt(3)) acntraz(i,ibox),ratvol,rmtraz(i,ibox)
           write(io_output,*)
-
        end do
     end do
 
@@ -970,4 +1260,45 @@ contains
        end do
     end do
   end subroutine output_translation_rotation_stats
+
+  subroutine read_checkpoint_simple(io_chkpt)
+    use util_mp,only:mp_bcast
+    integer,intent(in)::io_chkpt
+    if (myid.eq.rootid) read(io_chkpt) Abntrax,Abntray,Abntraz,Abstrax,Abstray,Abstraz,bntrax,bntray,bntraz,bstrax,bstray,bstraz,acntrax,acntray,acntraz,acstrax,acstray,acstraz,bnrotx,bnroty,bnrotz,bsrotx,bsroty,bsrotz,acnrotx,acnroty,acnrotz,acsrotx,acsroty,acsrotz
+    call mp_bcast(Abntrax,1,rootid,groupid)
+    call mp_bcast(Abntray,1,rootid,groupid)
+    call mp_bcast(Abntraz,1,rootid,groupid)
+    call mp_bcast(Abstrax,1,rootid,groupid)
+    call mp_bcast(Abstray,1,rootid,groupid)
+    call mp_bcast(Abstraz,1,rootid,groupid)
+    call mp_bcast(bntrax,ntmax*nbxmax,rootid,groupid)
+    call mp_bcast(bntray,ntmax*nbxmax,rootid,groupid)
+    call mp_bcast(bntraz,ntmax*nbxmax,rootid,groupid)
+    call mp_bcast(bstrax,ntmax*nbxmax,rootid,groupid)
+    call mp_bcast(bstray,ntmax*nbxmax,rootid,groupid)
+    call mp_bcast(bstraz,ntmax*nbxmax,rootid,groupid)
+    call mp_bcast(acntrax,ntmax*nbxmax,rootid,groupid)
+    call mp_bcast(acntray,ntmax*nbxmax,rootid,groupid)
+    call mp_bcast(acntraz,ntmax*nbxmax,rootid,groupid)
+    call mp_bcast(acstrax,ntmax*nbxmax,rootid,groupid)
+    call mp_bcast(acstray,ntmax*nbxmax,rootid,groupid)
+    call mp_bcast(acstraz,ntmax*nbxmax,rootid,groupid)
+    call mp_bcast(bnrotx,ntmax*nbxmax,rootid,groupid)
+    call mp_bcast(bnroty,ntmax*nbxmax,rootid,groupid)
+    call mp_bcast(bnrotz,ntmax*nbxmax,rootid,groupid)
+    call mp_bcast(bsrotx,ntmax*nbxmax,rootid,groupid)
+    call mp_bcast(bsroty,ntmax*nbxmax,rootid,groupid)
+    call mp_bcast(bsrotz,ntmax*nbxmax,rootid,groupid)
+    call mp_bcast(acnrotx,ntmax*nbxmax,rootid,groupid)
+    call mp_bcast(acnroty,ntmax*nbxmax,rootid,groupid)
+    call mp_bcast(acnrotz,ntmax*nbxmax,rootid,groupid)
+    call mp_bcast(acsrotx,ntmax*nbxmax,rootid,groupid)
+    call mp_bcast(acsroty,ntmax*nbxmax,rootid,groupid)
+    call mp_bcast(acsrotz,ntmax*nbxmax,rootid,groupid)
+  end subroutine read_checkpoint_simple
+
+  subroutine write_checkpoint_simple(io_chkpt)
+    integer,intent(in)::io_chkpt
+    write(io_chkpt) Abntrax,Abntray,Abntraz,Abstrax,Abstray,Abstraz,bntrax,bntray,bntraz,bstrax,bstray,bstraz,acntrax,acntray,acntraz,acstrax,acstray,acstraz,bnrotx,bnroty,bnrotz,bsrotx,bsroty,bsrotz,acnrotx,acnroty,acnrotz,acsrotx,acsroty,acsrotz
+  end subroutine write_checkpoint_simple
 end MODULE moves_simple

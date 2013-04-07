@@ -1,8 +1,8 @@
 module util_files
-  use util_string, only: is_blank_line
+  use util_string,only:is_blank_line
   implicit none
   private
-  public::get_iounit,readLine,readNthLine
+  public::get_iounit,readLine,readNthLine,flush_force
 
   INTEGER,PARAMETER::max_unit_number=999,reserved_unit_numbers(2)=(/5,6/)
 CONTAINS
@@ -61,4 +61,32 @@ CONTAINS
     end do
 
   end subroutine readNthLine
+
+!> \brief Force flushing IO
+!>
+!> Fortran flush seems able to only transfer data from program-specific cache
+!> to system cache, which isn't guaranteed to be written to file system if
+!> program crashes. The current work-around isn't guaranteed to work either,
+!> but in most cases it works. Only the low-level Unix system call (f)sync can
+!> indeed force committing data to file system.
+  function flush_force(io_unit) result(pos)
+    use var_type,only:default_string_length,default_path_length
+    use util_runtime,only:err_exit
+    integer::pos
+    integer,intent(in)::io_unit
+    character(LEN=default_string_length)::mode,action,form
+    character(LEN=default_path_length)::fname
+    integer::jerr
+    logical::lopen
+
+    inquire(unit=io_unit,access=mode,action=action,name=fname,form=form,iostat=jerr,opened=lopen,pos=pos)
+    if (jerr) then
+       write(*,'("Error ",I0," in flush_force file: ",A)') jerr,fname
+    else if (lopen) then
+       close(io_unit)
+       open(unit=io_unit,access=mode,action=action,file=fname,form=form,iostat=jerr,position="append",status="old")
+       if (jerr) call err_exit(__FILE__,__LINE__,'Error when openning file '//fname,jerr)
+       inquire(unit=io_unit,pos=pos)
+    end if
+  end function flush_force
 end module util_files

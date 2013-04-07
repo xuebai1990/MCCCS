@@ -7,7 +7,7 @@ MODULE moves_ee
   implicit none
   private
   save
-  public::eesetup,eemove,ee_index_swap,expand,read_expand,init_ee,output_ee_stats
+  public::eesetup,eemove,ee_index_swap,expand,read_expand,init_ee,output_ee_stats,read_checkpoint_ee,write_checkpoint_ee
 
 ! EXPAND.INC
   real,allocatable,public::epsil(:,:,:),sigm(:,:,:)
@@ -818,4 +818,17 @@ contains
     end do
 
   end function ee_coru
+
+  subroutine read_checkpoint_ee(io_chkpt)
+    use util_mp,only:mp_bcast
+    integer,intent(in)::io_chkpt
+    if (myid.eq.rootid) read(io_chkpt) bnexpc,bsexpc
+    call mp_bcast(bnexpc,ntmax*nbxmax,rootid,groupid)
+    call mp_bcast(bsexpc,ntmax*nbxmax,rootid,groupid)
+  end subroutine read_checkpoint_ee
+
+  subroutine write_checkpoint_ee(io_chkpt)
+    integer,intent(in)::io_chkpt
+    write(io_chkpt) bnexpc,bsexpc
+  end subroutine write_checkpoint_ee
 end MODULE moves_ee

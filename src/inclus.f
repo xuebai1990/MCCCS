@@ -1,8 +1,9 @@
-subroutine inclus( inclnum,inclmol,inclbead,inclsign,ncarbon, ainclnum,ainclmol,ainclbead,a15t,ofscale,ofscale2)
+subroutine inclus(inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ainclbead,a15t,ofscale,ofscale2,lprint)
   use util_runtime,only:err_exit
   use sim_system
   implicit none
 
+  LOGICAL,INTENT(IN)::lprint
   integer::m,n,nb,mb,imolty,ioffset
   integer::inclnum,inclmol,inclbead,inclsign ,ncarbon
   integer::ainclnum,ainclmol,ainclbead,a15t
@@ -209,7 +210,7 @@ subroutine inclus( inclnum,inclmol,inclbead,inclsign,ncarbon, ainclnum,ainclmol,
         end do
      end if
 
-     if (myid.eq.0) then
+     if (lprint) then
         write(io_output,*) 
         write(io_output,*) 'INCLUSION TABLE'
 

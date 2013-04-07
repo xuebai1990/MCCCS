@@ -10,7 +10,7 @@ module transfer_swatch
   implicit none
   private
   save
-  public::swatch,init_swatch,output_swatch_stats
+  public::swatch,init_swatch,output_swatch_stats,read_checkpoint_swatch,write_checkpoint_swatch
 
 ! SWTCMOVE.INC
   real,allocatable::bnswat(:,:),bnswat_empty(:,:),bsswat(:,:) !< accumulators for swatch performance
@@ -40,7 +40,7 @@ contains
       real::v(nEnergy),vdum,delen,deleo,dicount,vrecipn,vrecipo
 
       ! additions from iswatch
-      integer::izz,box,iboxi,bdmol_a,bdmol_b
+      integer::izz,box,iboxi,bdmol_a,bdmol_b,iparty
       integer::imola,imolb,moltaid,moltbid
       integer::s_type,o_type,thisbox,otherbox
       real::rx_1(numax),ry_1(numax),rz_1(numax)
@@ -1577,4 +1577,18 @@ contains
        end do
     end do
   end subroutine output_swatch_stats
+
+  subroutine read_checkpoint_swatch(io_chkpt)
+    use util_mp,only:mp_bcast
+    integer,intent(in)::io_chkpt
+    if (myid.eq.rootid) read(io_chkpt) bnswat,bnswat_empty,bsswat
+    call mp_bcast(bnswat,npamax*npabmax,rootid,groupid)
+    call mp_bcast(bnswat_empty,npamax*npabmax,rootid,groupid)
+    call mp_bcast(bsswat,npamax*npabmax,rootid,groupid)
+  end subroutine read_checkpoint_swatch
+
+  subroutine write_checkpoint_swatch(io_chkpt)
+    integer,intent(in)::io_chkpt
+    write(io_chkpt) bnswat,bnswat_empty,bsswat
+  end subroutine write_checkpoint_swatch
 end module transfer_swatch

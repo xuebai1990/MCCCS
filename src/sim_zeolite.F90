@@ -33,13 +33,14 @@ MODULE sim_zeolite
 
 CONTAINS
 
-  subroutine setUpCellStruct(zcell,zunit)
+  subroutine setUpCellStruct(zcell,zunit,lprint)
     type(CellMaskType),intent(inout)::zcell ! the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
     type(ZeoliteUnitCellGridType),intent(inout)::zunit
+    LOGICAL,INTENT(IN)::lprint
 
     integer::i,j
 
-    if (myid.eq.0) write(io_output,"(/,' READING ZEOLITE LATTICE FROM FILE zeolite.cssr:',/&
+    if (lprint) write(io_output,"(/,' READING ZEOLITE LATTICE FROM FILE zeolite.cssr:',/&
                                &,' --------------------------------------------------',/&
                                &,' box dimensions                    = ',3f10.3,' Angstrom',/&
                                &,' box angles                        = ',3f10.3,' degrees',/&

@@ -1,4 +1,4 @@
- Program started at 2013-04-01 02:41:43.812
+ Program started at 2013-04-08 13:27:08.733
  Number of processors:            1
            0  threads per processor
  Random number seed:            0
@@ -397,15 +397,15 @@
  +++++ start of markov chain +++++
  
  Cycle   Total   Energy    Boxlength   Pressure  Molecules
-   100   20100 -0.3490E+08    16.134         0.0  60 180 120
-   200   20200 -0.3503E+08    16.133         0.0  60 180 120
-   300   20300 -0.3485E+08    16.185         0.0  60 180 120
-   400   20400 -0.3500E+08    16.206         0.0  60 180 120
-   500   20500 -0.3480E+08    16.278         0.0  60 180 120
-   600   20600 -0.3509E+08    16.196         0.0  60 180 120
-   700   20700 -0.3486E+08    16.035         0.0  60 180 120
-   800   20800 -0.3476E+08    16.224         0.0  60 180 120
-   900   20900 -0.3487E+08    16.191         0.0  60 180 120
+   100   20100 -0.3490E+08    16.134         0.0   60  180  120
+   200   20200 -0.3503E+08    16.133         0.0   60  180  120
+   300   20300 -0.3485E+08    16.185         0.0   60  180  120
+   400   20400 -0.3500E+08    16.206         0.0   60  180  120
+   500   20500 -0.3480E+08    16.278         0.0   60  180  120
+   600   20600 -0.3509E+08    16.196         0.0   60  180  120
+   700   20700 -0.3486E+08    16.035         0.0   60  180  120
+   800   20800 -0.3476E+08    16.224         0.0   60  180  120
+   900   20900 -0.3487E+08    16.191         0.0   60  180  120
  Box            1
  Type  1 bn  19860.  19886.  20132.      0.      0.      0.
  max.displ.     0.2948    0.2933    0.2888    0.4000    0.4000    0.4000
@@ -414,7 +414,7 @@
  Type  3 bn  40120.  39745.  40231.      0.      0.      0.
  max.displ.     1.5177    1.5229    1.5154    0.4000    0.4000    0.4000
  volume change:  bn =   182.0   bs =    99.0   max.displ. = 0.14145E+03
-  1000   21000 -0.3504E+08    16.242         0.0  60 180 120
+  1000   21000 -0.3504E+08    16.242         0.0   60  180  120
  
  +++++ end of markov chain +++++
  
@@ -527,7 +527,7 @@ molecule  3:   0.00000000
  no. of chains of type         2              =     180.000
  no. of chains of type         3              =     120.000
  molar volume                      [cm^3/mol] =       7.023
- specific density                    [g/cm^3] =    1.853470
+ specific density                    [g/cm^3] =    1.853441
  number density of type        1 [chain/nm^3] =    14.29050
  number density of type        2 [chain/nm^3] =    42.87150
  number density of type        3 [chain/nm^3] =    28.58100
@@ -538,15 +538,16 @@ molecule  3:   0.00000000
  mean sete length of type      2        [A^2] =       0.000
  mean sete length of type      3        [A^2] =       0.000
  
- Total energy  [K per system and kJ/mol per chain] =  -34933816.53     -806.83
+ Total energy  [K per system and kJ/mol per chain] =  -34933816.53     -806.82
  Inter LJ      [K per system and kJ/mol per chain] =  -35478779.48     -819.41
+ Tail  LJ      [K per system and kJ/mol per chain] =          0.00        0.00
+ Intra LJ      [K per system and kJ/mol per chain] =          0.00        0.00
+ Stretch       [K per system and kJ/mol per chain] =          0.00        0.00
  Bond bending  [K per system and kJ/mol per chain] =          0.00        0.00
  Torsion       [K per system and kJ/mol per chain] =          0.00        0.00
- Intra LJ      [K per system and kJ/mol per chain] =          0.00        0.00
- External pot  [K per system and kJ/mol per chain] =          0.00        0.00
- Stretch       [K per system and kJ/mol per chain] =          0.00        0.00
  Coulomb       [K per system and kJ/mol per chain] =          0.00        0.00
- Tail  LJ      [K per system and kJ/mol per chain] =          0.00        0.00
+ External pot  [K per system and kJ/mol per chain] =          0.00        0.00
+ 3-body Garo   [K per system and kJ/mol per chain] =     544962.95       12.59
  Fluc Q        [K per system and kJ/mol per chain] =          0.00        0.00
  
  fluctuation in <vtot>                          =   135021.12
@@ -555,27 +556,28 @@ molecule  3:   0.00000000
     1    1     0.00000     0.00000     0.00000     0.00000     0.00000
     2    1     0.00000     0.00000     0.00000     0.00000     0.00000
     3    1     0.00000     0.00000     0.00000     0.00000     0.00000
- specific density    box   1 =  0.18535E+01 0.20874E-01 0.69579E-02
+ specific density    box   1 =  0.18534E+01 0.20873E-01 0.69578E-02
  system volume       box   1 =  0.41995E+04 0.46861E+02 0.15620E+02
  pressure            box   1 =   0.0000      0.0000      0.0000    
  surface tension     box   1 =      0.00000     0.00000     0.00000
  
  Total energy   box   1 =   -0.34934E+08   0.73202E+05   0.24401E+05
  Inter LJ       box   1 =   -0.35479E+08   0.71491E+05   0.23830E+05
+ Tail  LJ       box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
+ Intra LJ       box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
+ Stretch        box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
  Bond bending   box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
  Torsion        box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
- Intra LJ       box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
- External pot   box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
- Stretch        box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
  Coulomb        box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
- Tail  LJ       box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
+ External pot   box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
+ 3-body Garo    box   1 =    0.54496E+06   0.19773E+05   0.65911E+04
  Fluc Q         box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
  
  Enthalpy Inst.[kJ/mol] for box  1 =      0.0000      0.0000      0.0000
  Enthalpy Ext. [kJ/mol] for box  1 =      0.0000      0.0000      0.0000
  
- Cp residual(J/Kmol) =   13.5761394053974     
-  H2=  1.017128494739880E+015
+ Cp residual(J/Kmol) =   13.5763477277669     
+  H2=  1.017128494739879E+015
   H=  -31892120.2318355     
  chemical potential  itype   1 box   1 =        0.000       0.000       0.000
  chemical potential  itype   2 box   1 =        0.000       0.000       0.000
@@ -604,4 +606,4 @@ molecule  3:   0.00000000
    8  -0.349E+08   0.186E+01   0.000E+00   0.000E+00   0.167E+00   0.500E+00   0.333E+00
    9  -0.349E+08   0.185E+01   0.000E+00   0.000E+00   0.167E+00   0.500E+00   0.333E+00
   10  -0.351E+08   0.185E+01   0.000E+00   0.000E+00   0.167E+00   0.500E+00   0.333E+00
- Program ended at 2013-04-01 02:42:05.097
+ Program ended at 2013-04-08 13:27:29.526

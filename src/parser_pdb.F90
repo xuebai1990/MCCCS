@@ -43,13 +43,14 @@ MODULE parser_pdb
 
 CONTAINS
 
-  SUBROUTINE readPDB(filePDB,zeo,lunitcell,ztype,zcell,zunit)
+  SUBROUTINE readPDB(filePDB,zeo,lunitcell,ztype,zcell,zunit,lprint)
     character(LEN=*),intent(in)::filePDB
     type(MoleculeType),intent(out)::zeo
     logical,allocatable,intent(out)::lunitcell(:)
     type(ZeoliteBeadType),intent(out)::ztype
     type(CellMaskType),intent(out)::zcell ! the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
     type(ZeoliteUnitCellGridType),intent(out)::zunit
+    LOGICAL,INTENT(IN)::lprint
 
     INTEGER::IOPDB,jerr,i,resID
     CHARACTER(LEN=default_string_length)::line,atomName,resName,molName,elem
@@ -86,7 +87,7 @@ CONTAINS
        SELECT CASE (line(1:6))
        CASE ("CRYST1")
           read(line(7:),*) zcell%boxl(1)%val,zcell%boxl(2)%val,zcell%boxl(3)%val,zcell%ang(1)%val,zcell%ang(2)%val,zcell%ang(3)%val
-          call setUpCellStruct(zcell,zunit)
+          call setUpCellStruct(zcell,zunit,lprint)
           uninitialized=.false.
        CASE ("ATOM","HETATM")
           if (uninitialized) call err_exit(__FILE__,__LINE__,'PDB: CRYST1 needs to be defined before ATOM',-1)

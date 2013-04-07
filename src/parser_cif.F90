@@ -35,13 +35,14 @@ CONTAINS
 !> \brief  Performs the real task of reading the proper information from the CIF
 !>         file
 ! *****************************************************************************
-  SUBROUTINE readCIF(fileCIF,zeo,lunitcell,ztype,zcell,zunit)
+  SUBROUTINE readCIF(fileCIF,zeo,lunitcell,ztype,zcell,zunit,lprint)
     character(LEN=*),intent(in)::fileCIF
     type(MoleculeType),intent(out)::zeo
     logical,allocatable,intent(out)::lunitcell(:)
     type(ZeoliteBeadType),intent(out)::ztype
     type(CellMaskType),intent(out)::zcell ! the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
     type(ZeoliteUnitCellGridType),intent(out)::zunit
+    LOGICAL,INTENT(IN)::lprint
 
     integer,parameter::maxNumField=20,maxNumSymmOp=50
     INTEGER::IOCIF,jerr,i,uninitialized,ia,ib,ic,id,nAtom,nField,nSymm,Field(maxNumField)
@@ -228,7 +229,7 @@ CONTAINS
 
        if (uninitialized.eq.0) then
           forall(i=1:3) zcell%boxl(i)%val=zunit%boxl(i)*zunit%dup(i)
-          call setUpCellStruct(zcell,zunit)
+          call setUpCellStruct(zcell,zunit,lprint)
           uninitialized=-1
        end if
     END DO

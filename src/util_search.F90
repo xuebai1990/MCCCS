@@ -23,7 +23,7 @@ CONTAINS
 
     table%size=0
     allocate(table%list(1:initialSize),stat=jerr)
-    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'',jerr)
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'initiateTable: allocation error',jerr)
   end subroutine initiateTable
 
   !> \brief Add item to table, ignore if exist, increase table size by 2 if table is full and expand is set to .true., signal an error otherwise

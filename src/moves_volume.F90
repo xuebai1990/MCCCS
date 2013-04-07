@@ -6,11 +6,10 @@ MODULE moves_volume
   use sim_cell
   use energy_kspace,only:recip,calp,save_kvector,restore_kvector
   use energy_pairwise,only:sumup
-
   implicit none
   private
   save
-  public::volume,prvolume,init_moves_volume,output_volume_stats
+  public::volume_1box,volume_2box,init_moves_volume,update_volume_max_displacement,output_volume_stats,read_checkpoint_volume,write_checkpoint_volume
 
   real,allocatable,public::acsvol(:),acnvol(:),acshmat(:,:),acnhmat(:,:),bsvol(:),bnvol(:),bshmat(:,:),bnhmat(:,:)
   real,allocatable::vboxn(:,:),vboxo(:,:),bxo(:),byo(:),bzo(:),xcmo(:),ycmo(:),zcmo(:),rxuo(:,:),ryuo(:,:),rzuo(:,:),qquo(:,:)
@@ -26,13 +25,13 @@ contains
 !
 ! perform change of the volume: random walk in ln(V1/V2) with V1+V2=const
 !
-  subroutine volume()
+  subroutine volume_2box()
     real::rpair,rm,rbox,volo(nbxmax),volt,voln(nbxmax),rbcut(nbxmax),dfac(nbxmax),df,dx,dy,dz,expdv,min_boxl,v(nEnergy),dele
     integer::ipair,ipairb,boxa,boxb,ibox,i,hbox,jbox,jhmat,imolty,j,ichoiq
     logical::lncubic,lx(nbxmax),ly(nbxmax),lz(nbxmax),ovrlap
 ! --------------------------------------------------------------------
 #ifdef __DEBUG__
-    write(io_output,*) 'start VOLUME in ',myid
+    write(io_output,*) 'start VOLUME_2BOX in ',myid
 #endif
 
     ! select pair of boxes to do the volume move
@@ -153,7 +152,7 @@ contains
           end if
           call dump('final-config')
           write(io_output,*) 'w1:',min_width(hbox,1),'w2:',min_width(hbox,2),'w3:',min_width(hbox,3)
-          call err_exit(__FILE__,__LINE__,'non-orthorhombic volume move rejected. box width below cutoff size',myid+1)
+          call err_exit(__FILE__,__LINE__,'non-orthorhombic volume_2box move rejected. box width below cutoff size',myid+1)
        end if
 
        ! determine the displacement of the COM
@@ -372,10 +371,10 @@ contains
     call restore_configuration((/boxa,boxb/))
 
 #ifdef __DEBUG__
-    write(io_output,*) 'end VOLUME in ',myid,boxa,boxb
+    write(io_output,*) 'end VOLUME_2BOX in ',myid,boxa,boxb
 #endif
     return
-  end subroutine volume
+  end subroutine volume_2box
 
 !***********************************************************
 ! makes an isotropic volume change under const. pressure  **
@@ -385,13 +384,13 @@ contains
 !
 ! perform change of the volume: random walk in V
 !
-  subroutine prvolume()
+  subroutine volume_1box()
     real::rbox,volo,voln,rbcut,dx,dy,dz,dfac,df,v(nEnergy),dele,min_boxl
     integer::ibox,boxvch,jhmat,i,imolty,j,ichoiq
     logical::lx,ly,lz,ovrlap
 ! --------------------------------------------------------------------
 #ifdef __DEBUG__
-    write(io_output,*) 'start PRVOLUME in ',myid
+    write(io_output,*) 'start VOLUME_1BOX in ',myid
 #endif
 
     ! Select a box at  random to change the volume of box
@@ -467,7 +466,7 @@ contains
           hmat(boxvch,jhmat) = hmato(jhmat)
           call dump('final-config')
           write(io_output,*) 'w1:',min_width(boxvch,1),'w2:',min_width(boxvch,2),'w3:',min_width(boxvch,3)
-          call err_exit(__FILE__,__LINE__,'non-rectangular prvolume move rejected. box width below cutoff size',myid+1)
+          call err_exit(__FILE__,__LINE__,'non-rectangular volume move rejected. box width below cutoff size',myid+1)
        end if
 
        ! determine the displacement of the COM
@@ -621,10 +620,10 @@ contains
     call restore_configuration((/boxvch/))
 
 #ifdef __DEBUG__
-    write(io_output,*) 'end PRVOLUME in ',myid,boxvch
+    write(io_output,*) 'end VOLUME_1BOX in ',myid,boxvch
 #endif
     return
-  end subroutine prvolume
+  end subroutine volume_1box
 
   subroutine init_moves_volume
     integer::jerr
@@ -642,6 +641,68 @@ contains
     bshmat = 0.0E0_dp
     bnhmat = 0.0E0_dp
   end subroutine init_moves_volume
+
+!> \brief Adjust maximum volume displacement
+  subroutine update_volume_max_displacement(io_output)
+    integer,intent(in)::io_output
+    integer::ibox,j
+    real::ratvol
+
+    do ibox = 1, nbox
+       if (lsolid(ibox) .and. .not. lrect(ibox)) then
+          do j = 1,9
+             if ( bnhmat(ibox,j) .gt. 0.5E0_dp ) then
+                ratvol = bshmat(ibox,j) / bnhmat(ibox,j)
+                if (ratvol .eq. 0.0E0_dp) then
+                   rmhmat(ibox,j) = rmhmat(ibox,j) * 0.1E0_dp
+                else
+                   rmhmat(ibox,j) = rmhmat(ibox,j)*ratvol/tavol
+                end if
+             end if
+          end do
+       else
+          if ( bnvol(ibox) .gt. 0.5E0_dp ) then
+             ratvol = bsvol(ibox) / bnvol(ibox)
+             if ( ratvol .eq. 0.0E0_dp ) then
+                rmvol(ibox) = rmvol(ibox) * 0.1E0_dp
+             else
+                rmvol(ibox) = rmvol(ibox) * ratvol / tavol
+                if (rmvol(ibox).gt.(0.10E0_dp*boxlx(ibox)*boxly(ibox)*boxlz(ibox))) then
+                   rmvol(ibox)=0.1E0_dp*(boxlx(ibox)*boxly(ibox)*boxlz(ibox))
+                end if
+             end if
+          end if
+       end if
+    end do
+
+    if (myid.eq.rootid) then
+       do ibox = 1, nbox
+          if (lsolid(ibox) .and. .not. lrect(ibox)) then
+             do j = 1,9
+                write(io_output,"(' h-matrix change:  bn =',f8.1, '   bs =',f8.1,'   max.displ. =',e12.5)") bnhmat(ibox,j),bshmat(ibox,j), rmhmat(ibox,j)
+             end do
+          else
+             write(io_output,"(' volume change:  bn =',f8.1, '   bs =',f8.1,'   max.displ. =',e12.5)") bnvol(ibox),bsvol(ibox),rmvol(ibox)
+          end if
+       end do
+    end if
+
+    do ibox = 1, nbox
+       if (lsolid(ibox) .and. .not. lrect(ibox)) then
+          do j = 1,9
+             acshmat(ibox,j) = acshmat(ibox,j) + bshmat(ibox,j)
+             acnhmat(ibox,j) = acnhmat(ibox,j) + bnhmat(ibox,j)
+             bshmat(ibox,j) = 0.0E0_dp
+             bnhmat(ibox,j) = 0.0E0_dp
+          end do
+       else
+          acnvol(ibox) = acnvol(ibox) + bnvol(ibox)
+          acsvol(ibox) = acsvol(ibox) + bsvol(ibox)
+          bnvol(ibox) = 0.0E0_dp
+          bsvol(ibox) = 0.0E0_dp
+       end if
+    end do
+  end subroutine update_volume_max_displacement
 
   subroutine output_volume_stats(io_output)
     integer,intent(in)::io_output
@@ -836,4 +897,23 @@ contains
        call rebuild_neighbor_list(box)
     end if
   end subroutine update_box
+
+  subroutine read_checkpoint_volume(io_chkpt)
+    use util_mp,only:mp_bcast
+    integer,intent(in)::io_chkpt
+    if (myid.eq.rootid) read(io_chkpt) bnvol,bsvol,acnvol,acsvol,bnhmat,bshmat,acnhmat,acshmat
+    call mp_bcast(bnvol,nbxmax,rootid,groupid)
+    call mp_bcast(bsvol,nbxmax,rootid,groupid)
+    call mp_bcast(acnvol,nbxmax,rootid,groupid)
+    call mp_bcast(acsvol,nbxmax,rootid,groupid)
+    call mp_bcast(bnhmat,nbxmax*9,rootid,groupid)
+    call mp_bcast(bshmat,nbxmax*9,rootid,groupid)
+    call mp_bcast(acnhmat,nbxmax*9,rootid,groupid)
+    call mp_bcast(acshmat,nbxmax*9,rootid,groupid)
+  end subroutine read_checkpoint_volume
+
+  subroutine write_checkpoint_volume(io_chkpt)
+    integer,intent(in)::io_chkpt
+    write(io_chkpt) bnvol,bsvol,acnvol,acsvol,bnhmat,bshmat,acnhmat,acshmat
+  end subroutine write_checkpoint_volume
 end MODULE moves_volume

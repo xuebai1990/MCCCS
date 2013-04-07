@@ -1,4 +1,4 @@
- Program started at 2013-04-01 02:42:14.694
+ Program started at 2013-04-08 13:27:39.944
  Number of processors:            1
            0  threads per processor
  Random number seed:           44
@@ -10434,14 +10434,9 @@
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
  Type 34 bn      3.      1.      0.      0.      0.      2.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
-     1   12723 -0.2865E+08    20.000         0.0  86 222 192 312   0  30  18   0   1   0   0   0   0   0   0
-     0       0  0.1401E-44     0.000         0.0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
-               -0.3453E+07    40.130         0.0 314 578   0   0   0   0   0   0   0   0   0   0   0   0   0
-                0.0000E+00     0.000         0.0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0
-                0.0000E+00
-                0.0000E+00   134.228         0.0   0   0   0   0  22   0   0   1   0   1   1   1   1   1   1
-                0.1401E-44     0.000         0.0   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
-                0.1401E-44
+     1   12723 -0.2865E+08    20.000         0.0   86  222  192  312    0   30   18    0    1    0    0    0    0    0    0    0    0    1    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0
+               -0.3453E+07    40.130         0.0  314  578    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0
+                0.0000E+00   134.228         0.0    0    0    0    0   22    0    0    1    0    1    1    1    1    1    1    1    1    0    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1
  
  +++++ end of markov chain +++++
  
@@ -11988,7 +11983,7 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  total energy      -28653784.1912084     
  ### problem with energy ###  box            1
   Total energy:   -28653784.1912084       -28653784.1910310     
- -1.774281263351440E-004
+ -1.774318516254425E-004
  
  sumup control
  number of chains         892
@@ -12086,7 +12081,7 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  
  vstart       =    -28648950.4639775865     -3460138.0046509267            0.0000000000
  vend         =    -28653784.1912084036     -3453382.4174447628            0.0000000000
- vbox         =    -28653784.1910309754     -3453382.4174447129            0.0000000000
+ vbox         =    -28653784.1910309717     -3453382.4174447129            0.0000000000
  
  Averages and fluctuations                            Box 1       Box 2       Box 3
  
@@ -12165,8 +12160,8 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  no. of chains of type        32              =       0.000       0.000       1.000
  no. of chains of type        33              =       0.000       0.000       1.000
  no. of chains of type        34              =       0.000       0.000       1.000
- molar volume                      [cm^3/mol] =      32.666      43.631   31391.770
- specific density                    [g/cm^3] =    1.114853    0.755033    0.002937
+ molar volume                      [cm^3/mol] =      32.666      43.632   31392.272
+ specific density                    [g/cm^3] =    1.114835    0.755021    0.002937
  number density of type        1 [chain/nm^3] =     1.83902     4.85861     0.00000
  number density of type        2 [chain/nm^3] =     4.74724     8.94356     0.00000
  number density of type        3 [chain/nm^3] =     4.10572     0.00000     0.00000
@@ -12272,13 +12267,14 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  
  Total energy  [K per system and kJ/mol per chain] =  -28651616.07 -3454296.42          0.00     -276.33        -32.20        0.00
  Inter LJ      [K per system and kJ/mol per chain] =    4814173.23  -641227.62          0.00       46.43         -5.98        0.00
+ Tail  LJ      [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00          0.00        0.00
+ Intra LJ      [K per system and kJ/mol per chain] =     -27569.19        0.00          0.00       -0.27          0.00        0.00
+ Stretch       [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00          0.00        0.00
  Bond bending  [K per system and kJ/mol per chain] =     272920.97        0.00          0.00        2.63          0.00        0.00
  Torsion       [K per system and kJ/mol per chain] =     101680.84        0.00          0.00        0.98          0.00        0.00
- Intra LJ      [K per system and kJ/mol per chain] =     -27569.19        0.00          0.00       -0.27          0.00        0.00
- External pot  [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00          0.00        0.00
- Stretch       [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00          0.00        0.00
  Coulomb       [K per system and kJ/mol per chain] =  -33812821.91 -2813068.80          0.00     -326.10        -26.22        0.00
- Tail  LJ      [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00          0.00        0.00
+ External pot  [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00          0.00        0.00
+ 3-body Garo   [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00          0.00        0.00
  Fluc Q        [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00          0.00        0.00
  
  fluctuation in <vtot>                          =     1985.38     2286.41        0.00
@@ -12386,4 +12382,4 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
    34    1     0.00000     0.00000     0.00000     0.00000     0.00000
    34    2     0.00000     0.00000     0.00000     0.00000     0.00000
    34    3     0.00000     0.00000     0.00000     0.00000     0.00000
- Program ended at 2013-04-01 02:42:21.460
+ Program ended at 2013-04-08 13:27:46.739

@@ -363,7 +363,7 @@ subroutine flucq (ichoice,boxi)
 ! check for acceptance ***
  
       deltv  = vn(1) - vo(1)
-! use the thermostat temperature instead of real::temp
+! use the thermostat temperature instead of real temp
       deltvb = fqbeta * deltv
 
 ! if ( deltv .lt. -100.0E0_dp) then

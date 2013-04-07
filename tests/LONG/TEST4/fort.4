@@ -15,7 +15,7 @@ l_Coul_CBMC lcutcm ldual lneigh
 Number of unit cells in each of a,b, and c directions
 5. 5. 6.
 nstep   lstep   lpresim iupdatefix
-2000      .false.  .false. 100
+6000      .false.  .false. 100
 lslit lexzeo lzgrid lelect_field ljoe lsami lmuir lpsurf lgraphite lcorreg llj lexpsix lmmff lninesix lgenlj lgaro lionic
 .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false.
 L_tor_table L_spline L_linear L_vib_table L_bend_table L_vdW_table L_elect_table
@@ -33,7 +33,7 @@ temp     fqtemp  Elect_field(ibox=1,nbox)
 ianal  nbin  lrdf  lintra  lstretch  lgvst  lbend lete  lrhoz bin_width
 1000    250   .false. .false. .false.  .false. .false. .false. .false. 0.2
 iprint imv iratio iblock  idiele L_movie_xyz iheatcapacity
-200   200  500   200  1    .false.    10000
+600   600  500   600  1    .false.    10000
 boxlx   boxly  boxlz   lsolid  lrect   kalp   rcut     rcutnn numberDimensionIsIsotropic  - for box 1
 34.1d0  34.1d0 34.1d0 .false. .false.   0.2  14.0d0 0.0d0 0
 boxlx   boxly  boxlz   lsolid  lrect   kalp   rcut     rcutnn numberDimensionIsIsotropic  - for box 2
@@ -187,7 +187,7 @@ inix(2) iniy(2) iniz(2) inirot inimix zshift dshift nchoiq - box 2
 rmvol tavol iratv iratp rmflcq taflcq
 1.0d-3 0.4d0 500  5 0.1d0  0.95d0
 pmvol   pmvlmt
-0.1d0   0.5d0 1.0d0
+0.01d0   0.5d0 1.0d0
         nvolb pmvolb
         1     1.0d0
         box5 box6

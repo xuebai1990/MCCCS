@@ -11,7 +11,7 @@ MODULE energy_3body
   implicit none
   private
   save
-  public::hasThreeBody,U3System,U3MolSys,buildTripletTable
+  public::hasThreeBody,U3System,U3MolSys,readThreeBody
 
   integer,parameter::nparam(1)=(/4/)
   character(LEN=default_path_length)::file_triplets='triplets.lst'
@@ -24,16 +24,6 @@ MODULE energy_3body
   type(LookupTable)::threebodies
 
 CONTAINS
-  subroutine initiateThreeBody(nEntries)
-    integer,intent(in)::nEntries
-    integer::jerr
-
-    allocate(triplets(0:6,1:nchain,1:nbox),coeffs(1:4,1:nEntries),nTriplets(1:nbox),ttype(1:nEntries),STAT=jerr)
-    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'',jerr)
-    call initiateTable(threebodies,nEntries)
-    hasThreeBody=.true.
-  end subroutine initiateThreeBody
-
   integer function idx(beadtype)
     integer,intent(in)::beadtype(3)
     integer::atomIdx(3),nAtomType,i
@@ -55,69 +45,62 @@ CONTAINS
 
   subroutine readThreeBody(file_ff)
     character(LEN=*),INTENT(IN)::file_ff
+    integer,parameter::initial_size=10
     character(LEN=default_string_length)::line
     integer::io_ff,jerr,nEntries,i,beadtype(3)
 
     !write(*,*) 'three_body::readInput'
     io_ff=get_iounit()
     open(unit=io_ff,access='sequential',action='read',file=file_ff,form='formatted',iostat=jerr,status='old')
-    if (jerr.ne.0) then
-       call err_exit(__FILE__,__LINE__,'cannot open three_body input file',jerr)
-    end if
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open three_body input file',jerr)
 
     read(UNIT=io_ff,NML=threebody,iostat=jerr)
-    if (jerr.ne.0.and.jerr.ne.-1) then
-       call err_exit(__FILE__,__LINE__,'reading namelist: threebody',jerr)
-    end if
+    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: threebody',jerr)
 
-! Looking for section THREEBODY
+    ! Looking for section THREEBODY
     REWIND(io_ff)
     DO
        call readLine(io_ff,line,skipComment=.true.,iostat=jerr)
        if (jerr.ne.0) exit
 
        if (UPPERCASE(line(1:9)).eq."THREEBODY") then
-          read(line(10:),*) nEntries
-          if (nEntries.gt.0) then
-             call checkAtom()
-             call initiateThreeBody(nEntries)
-             threebodies%size=nEntries
-          end if
-          i=0
+          call checkAtom()
+          allocate(triplets(0:6,1:initial_size,1:nbox),coeffs(1:4,1:initial_size),nTriplets(1:nbox),ttype(1:initial_size),STAT=jerr)
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'initiateThreeBody: allocation error',jerr)
+          call initiateTable(threebodies,initial_size)
+          nEntries=0
           do
              call readLine(io_ff,line,skipComment=.true.,iostat=jerr)
              if (UPPERCASE(line(1:13)).eq.'END THREEBODY') exit
-             i=i+1
+             nEntries=nEntries+1
+             read(line,*) beadtype
+             i=addToTable(threebodies,idx(beadtype),expand=.true.)
+             if (i.gt.ubound(ttype,1)) then
+                call reallocate(coeffs,1,4,1,2*ubound(coeffs,2))
+                call reallocate(ttype,1,2*ubound(ttype,1))
+             end if
              read(line,*) beadtype,ttype(i),coeffs(1:nparam(ttype(i)),i)
-             threebodies%list(i)=idx(beadtype)
              write(*,*) threebodies%list(i),ttype(i),coeffs(:,i)
              coeffs(1,i)=coeffs(1,i)**2 !cutoffLJ
              coeffs(2,i)=coeffs(2,i)**2 !cutoffCoul
              coeffs(3,i)=coeffs(3,i)*degrad !degree to radians
           end do
-          if (i.ne.nEntries) then
-             call err_exit(__FILE__,__LINE__,'readThreeBody: the number of entries is incorrect!',myid+1)
-          end if
+          if (nEntries.gt.0) hasThreeBody=.true.
        end if
     END DO
     close(io_ff)
+
+    if (hasThreeBody) call buildTripletTable()
   end subroutine readThreeBody
 
-  subroutine buildTripletTable(file_ff)
-    character(LEN=*),INTENT(IN)::file_ff
+  subroutine buildTripletTable()
     integer::ibox,lchain,cchain,rchain,lmolty,cmolty,rmolty,lunit,cunit,runit,nAtomType,itype,io_triplets,nboxtmp,jerr
     real::ar(3),br(3)
-
-    !write(*,*) 'buildTripletTable'
-    call readThreeBody(file_ff)
-    if (.not.hasThreeBody) return
 
     io_triplets=get_iounit()
     if (.not.lbuild_triplet_table) then
        open(unit=io_triplets,access='sequential',action='read',file=file_triplets,form='formatted',iostat=jerr,status='old')
-       if (jerr.ne.0) then
-          call err_exit(__FILE__,__LINE__,'cannot read triplets file',jerr)
-       end if
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot read triplets file',jerr)
        read(io_triplets,*) nboxtmp,nTriplets
        if (nbox.ne.nboxtmp) call err_exit(__FILE__,__LINE__,'triplets file not generated with current input',myid+1)
        do ibox=1,nbox
@@ -182,14 +165,12 @@ CONTAINS
        end do
 
        open(unit=io_triplets,access='sequential',action='write',file=file_triplets,form='formatted',iostat=jerr,status='unknown')
-       if (jerr.ne.0) then
-          call err_exit(__FILE__,__LINE__,'cannot open triplets file',jerr)
-       end if
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open triplets file',jerr)
        write(io_triplets,*) nbox,nTriplets
        do ibox=1,nbox
           write(io_triplets,*) triplets(:,1:nTriplets(ibox),ibox)
        end do
-    close(io_triplets)
+       close(io_triplets)
     end if
   end subroutine buildTripletTable
 

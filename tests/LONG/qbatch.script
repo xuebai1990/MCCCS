@@ -1,5 +1,5 @@
 #!/bin/bash -l
-#PBS -l nodes=2:ppn=8,walltime=02:00:00
+#PBS -l nodes=2:ppn=8,walltime=02:00:00,qos=panfsonly
 #PBS -N name
 #PBS -m ae
 #PBS -e stderr

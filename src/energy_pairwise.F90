@@ -222,7 +222,7 @@ contains
                          ! end if
 
                          if (rijsq.lt.rminsq .and. .not.(lexpand(imolty).or.lexpand(jmolty))) then
-                            if ( .not. lvol .and.myid.eq.0) then
+                            if ( .not. lvol .and.myid.eq.rootid) then
                                write(io_output,*) 'overlap inter'
                                write(io_output,*)'rijsq rminsq',rijsq,rminsq
                                write(io_output,*) 'i ii', i, ii
@@ -649,7 +649,7 @@ contains
 
     v(1) = v(1) + v(5) + v(6) + v(7)
 
-    if ( .not. lvol.and.myid.eq.0 ) then
+    if ( .not. lvol.and.myid.eq.rootid ) then
        write(io_output,*)
        write(io_output,*) 'sumup control'
        write(io_output,*) 'number of chains', nchbox(ibox)
@@ -1761,7 +1761,7 @@ contains
       return
   end function coru
 
-  subroutine init_energy_pairwise(file_ff,lmixlb,lmixjo)
+  subroutine init_energy_pairwise(file_ff,lmixlb,lmixjo,lprint)
     use util_search,only:initiateTable,addToTable
     use util_memory,only:reallocate
     use energy_intramolecular,only:init_energy_bonded
@@ -1769,7 +1769,7 @@ contains
     use energy_sami,only:susami
 
     character(LEN=*),INTENT(IN)::file_ff
-    logical,intent(in)::lmixlb,lmixjo
+    logical,intent(in)::lmixlb,lmixjo,lprint
     integer,parameter::initial_size=20
     character(LEN=default_string_length)::line_in
     integer::io_ff,jerr,i,j,ij,ji,ibox,nmix
@@ -1786,7 +1786,7 @@ contains
 
     call initiateTable(atoms,nmolty)
 
-    call init_tabulated_potential_pair()
+    call init_tabulated_potential_pair(lprint)
 
     io_ff=get_iounit()
     open(unit=io_ff,access='sequential',action='read',file=file_ff,form='formatted',iostat=jerr,status='old')
@@ -1858,7 +1858,7 @@ contains
 
     nmix=nntype*nntype
 
-    allocate(lpl(1:nntype),q1(1:nntype),xiq(1:nntype),jayself(1:nntype),nonbond_type(1:nmix),sig2ij(1:nmix),epsij(1:nmix),rminee(1:nmix),ecut(1:nmix),jayq(1:nmix),stat=jerr)
+    allocate(lpl(1:nntype),xiq(1:nntype),jayself(1:nntype),nonbond_type(1:nmix),sig2ij(1:nmix),epsij(1:nmix),rminee(1:nmix),ecut(1:nmix),jayq(1:nmix),stat=jerr)
     if (jerr.ne.0) then
        call err_exit(__FILE__,__LINE__,'init_pairwise: nonbond allocation failed',jerr)
     end if
@@ -1996,10 +1996,11 @@ contains
        grijsq(4,1) = grij(4,1)*grij(4,1)
        grijsq(4,2) = grij(4,2)*grij(4,2)
        gtheta(4) = cos(109.5E0_dp*degrad)
-
-       do i=1,6
-          write(io_output,*) 'garo ecut',i,ecut(i)
-       end do
+       if (lprint) then
+          do i=1,6
+             write(io_output,*) 'garo ecut',i,ecut(i)
+          end do
+       end if
        return
     else if(lexpsix) then
 ! Explicit atom carbon Williams Exp-6 potential
@@ -2058,10 +2059,12 @@ contains
 ! write(11,*) 'consu(i)',consu
        end if
 
-       write(io_output,*)  ' i   aexsix       bexsix      cexsix     sexsix'
-       do i = 1,natom
-          write(io_output,'(i3,2x,4E12.4)')i,aexsix(i),bexsix(i) ,cexsix(i),sexsix(i)
-       end do
+       if (lprint) then
+          write(io_output,*)  ' i   aexsix       bexsix      cexsix     sexsix'
+          do i = 1,natom
+             write(io_output,'(i3,2x,4E12.4)')i,aexsix(i),bexsix(i) ,cexsix(i),sexsix(i)
+          end do
+       end if
        return
     else if (lmmff) then
 ! Merk Molecular Force Field (MMFF)
@@ -2118,11 +2121,12 @@ contains
           corp_cons(2) = 0.1203650950025348E0_dp
           corp_cons(3) = 5.7576802340310304E-02_dp
        end if
-
-       write(io_output,*) ' i   epsimmff     sigimmff   smmff'
-       do i = 1,natom
-          write(io_output,'(i3,2x,4E12.4)')i,epsimmff(i),sigimmff(i) ,smmff(i)
-       end do
+       if (lprint) then
+          write(io_output,*) ' i   epsimmff     sigimmff   smmff'
+          do i = 1,natom
+             write(io_output,'(i3,2x,4E12.4)')i,epsimmff(i),sigimmff(i) ,smmff(i)
+          end do
+       end if
        return
     else if (lninesix) then
 ! special potential for all-atom formic acid from llnl 4/6/04 jms
@@ -2352,7 +2356,7 @@ contains
        call susami
        rcheck = 2.5E0_dp * 3.527E0_dp
        if ( rcut(1) .ne. rcheck ) then
-          write(io_output,*) 'WARNING ### rcut set to 2.5sigma for SAMI'
+          if (lprint) write(io_output,*) 'WARNING ### rcut set to 2.5sigma for SAMI'
           rcut(1) = rcheck
        end if
     else
@@ -2416,11 +2420,11 @@ contains
     END DO CYCLE_READ_NONBOND
 
 ! set up the strectching and bending constants
-    call init_energy_bonded(io_ff)
+    call init_energy_bonded(io_ff,lprint)
 
     close(io_ff)
 
-    call init_energy_external(nntype)
+    call init_energy_external(nntype,lprint)
 
     return
   end subroutine init_energy_pairwise
@@ -2805,8 +2809,9 @@ contains
 !ccc  separate potentials with 1000
 !ccc  KM 04/23/09
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-  subroutine init_tabulated_potential_pair()
+  subroutine init_tabulated_potential_pair(lprint)
     use sim_system,only:L_vdW_table,L_elect_table
+    LOGICAL,INTENT(IN)::lprint
     integer,parameter::initial_size=10,grid_size=1500
     integer::jerr
 
@@ -2814,14 +2819,14 @@ contains
        allocate(vdWsplits(1:initial_size,1:initial_size),rvdW(1:grid_size,1:initial_size,1:initial_size),tabvdW(1:grid_size,1:initial_size,1:initial_size),stat=jerr)
        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_pair: allocation failed for vdW_table',myid+1)
        call read_tabulated_potential_pair('fort.43',ntabvdW,rvdW,tabvdW,vdWsplits,atoms)
-       if (myid.eq.0) write(io_output,*) 'using linear interpolation for nonbonded van der Waals interactions'
+       if (lprint) write(io_output,*) 'using linear interpolation for nonbonded van der Waals interactions'
     end if
 
     if (L_elect_table) then
        allocate(electsplits(1:initial_size,1:initial_size),relect(1:grid_size,1:initial_size,1:initial_size),tabelect(1:grid_size,1:initial_size,1:initial_size),stat=jerr)
        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_pair: allocation failed for elect_table',myid+1)
        call read_tabulated_potential_pair('fort.44',ntabelect,relect,tabelect,electsplits,atoms)
-       if (myid.eq.0) write(io_output,*) 'using linear interpolation for electrostatic interactions'
+       if (lprint) write(io_output,*) 'using linear interpolation for electrostatic interactions'
     end if
   end subroutine init_tabulated_potential_pair
 end MODULE energy_pairwise

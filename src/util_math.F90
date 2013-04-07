@@ -3,7 +3,7 @@ module util_math
   use const_math,only:onepi
   implicit none
   private
-  public::cone_angle,erfunc,mbessel,polint,spline,splint
+  public::cone_angle,erfunc,mbessel,polint,spline,splint,update_average,store_block_average,calculate_statistics
 contains
 !****************************************************************
 ! takes two unit vectors in spherical coordinates and computes **
@@ -40,7 +40,7 @@ contains
   end function cone_angle
 
 !> \brief complementary error function
-  pure function erfunc(x)
+  elemental function erfunc(x)
     real::erfunc
     real,intent(in)::x
 
@@ -57,7 +57,7 @@ contains
     return
   end function erfunc
 
-  pure function mbessel(z,nu)
+  elemental function mbessel(z,nu)
     real::mbessel
     real,intent(in)::z,nu
 
@@ -181,6 +181,49 @@ contains
     y = a*ya(klo)+b*ya(khi)+((a**3-a)*y2a(klo)+(b**3-b)*y2a(khi))*(h**2)/6.0E0_dp
     return
   end subroutine splint
+
+  elemental subroutine update_average(aval,val,count)
+    real,intent(inout)::aval
+    real,intent(in)::val
+    integer,intent(in)::count
+    real::inv_count
+
+    if (count.gt.0) then
+       inv_count=1.0_dp/real(count,dp)
+       ! The sequence of calculations is for avoiding overflow problems
+       aval=inv_count*(count-1)*aval+inv_count*val
+    end if
+  end subroutine update_average
+
+!> \brief Calculate and store block averages
+  elemental subroutine store_block_average(block_average,new_value,new_count,last_value,last_count)
+    real,intent(out)::block_average
+    real,intent(in)::new_value
+    integer,intent(in)::new_count
+    real,intent(inout)::last_value
+    integer,intent(inout)::last_count
+    real::inv_dif_count
+
+    inv_dif_count=real(new_count-last_count,dp)
+    if (inv_dif_count.gt.0.5_dp) then
+       inv_dif_count=1.0_dp/inv_dif_count
+       ! The sequence of calculations is for avoiding overflow problems
+       block_average=inv_dif_count*new_count*new_value-inv_dif_count*last_count*last_value
+       last_value=new_value
+       last_count=new_count
+    end if
+  end subroutine store_block_average
+
+  pure subroutine calculate_statistics(block_values,mean,stdev,sterr)
+    real,intent(in)::block_values(:)
+    real,intent(out)::mean,stdev,sterr
+    integer::nblock
+
+    nblock=size(block_values)
+    mean=sum(block_values)/nblock
+    stdev=sqrt(sum((block_values-mean)**2)/nblock)
+    if (nblock.gt.1) sterr=stdev/sqrt(real(nblock-1,dp))
+  end subroutine calculate_statistics
 
 !      subroutine coordinate_transform(x,y,z,invh,sx,sy,sz)
 !      real,intent(in)::x,y,z,invhmat

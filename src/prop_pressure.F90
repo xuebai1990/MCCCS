@@ -289,7 +289,7 @@ contains
     call mp_sum(pzz,1,groupid)
     call mp_sum(pips,size(pips),groupid)
 
-! if(myid .eq. 0)then
+! if(myid.eq.rootid)then
 ! write(io_output,*)'press=',press,'pxx=',pxx,'pyy=',pyy
 !     &   ,'pzz=',pzz,'pips(1,2)',pips(1,2),'pips(1,3)=',pips(1,3)
 !     &   ,'pips(2,1)=',pips(2,1),'pips(2,3)=',pips(2,3),'pips(3,1)=',

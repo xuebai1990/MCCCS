@@ -64,9 +64,10 @@ contains
     end do
   end subroutine initZeo
 
-  subroutine zeocoord(file_in)
+  subroutine zeocoord(file_in,lprint)
     use util_search,only:indexOf
     character(LEN=*),intent(in)::file_in
+    LOGICAL,INTENT(IN)::lprint
 
     integer::io_input,jerr
 
@@ -91,11 +92,11 @@ contains
     call initZeo()
 
     if (index(file_zeocoord,'.cif').gt.0) then
-       call readCIF(file_zeocoord,zeo,lunitcell,ztype,zcell,zunit)
+       call readCIF(file_zeocoord,zeo,lunitcell,ztype,zcell,zunit,lprint)
     else if (index(file_zeocoord,'.pdb').gt.0) then
-       call readPDB(file_zeocoord,zeo,lunitcell,ztype,zcell,zunit)
+       call readPDB(file_zeocoord,zeo,lunitcell,ztype,zcell,zunit,lprint)
     else if (index(file_zeocoord,'.cssr').gt.0) then
-       call readCSSR(file_zeocoord,zeo,lunitcell,ztype,zcell,zunit)
+       call readCSSR(file_zeocoord,zeo,lunitcell,ztype,zcell,zunit,lprint)
     end if
   end subroutine zeocoord
 
@@ -161,9 +162,10 @@ contains
     zpot%param(1:2,:,:)=4.*zpot%param(1:2,:,:)
   end subroutine addAllBeadTypes
 
-  subroutine suzeo()
+  subroutine suzeo(lprint)
     use util_search,only:indexOf
     use util_string,only:format_n
+    logical,intent(in)::lprint
     character(LEN=default_string_length)::atom
     integer::io_ztb,igtype,idi,idj,jerr,sw,i,j,k,oldi,oldj,oldk,ngridtmp(3),zntypetmp
     real::wzeo,zunittmp(3),zangtmp(3),rcuttmp,rci3,rci9,rho
@@ -178,7 +180,7 @@ contains
 
     ! Calculate zeolite density
     wzeo=dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype)))
-    if (myid.eq.0) then
+    if (lprint) then
        write(io_output,"(' Tabulated zeolite potential: ',/&
                        &,' --------------------------------------------------',/,"//format_n(ztype%ntype,"(' number of ',A,':',I0,3X)")//&
                      ",/,' simulation volume                 = ', f10.1, 20x,' Angst**3',/&
@@ -209,10 +211,10 @@ contains
        nlayermax=0
        io_ztb=get_iounit()
 
-       open(unit=io_ztb,access='stream',action='read',file=file_ztb,form='unformatted',iostat=jerr, status='old')
+       open(unit=io_ztb,access='stream',action='read',file=file_ztb,form='unformatted',iostat=jerr,status='old')
        if (jerr.eq.0) then
           ! read zeolite table from disk
-          if (myid.eq.0) write(io_output,'(A,/)') 'read in tabulated potential'
+          if (lprint) write(io_output,'(A,/)') 'read in tabulated potential'
           read(io_ztb) zunittmp,zangtmp,ngridtmp,zntypetmp,lewaldtmp,ltailczeotmp,lshifttmp,rcuttmp
           if (ANY(abs(zunittmp-zunit%boxl).gt.eps).or.ANY(ngridtmp.ne.zunit%ngrid).or.(zntypetmp.ne.ztype%ntype)) call err_exit(__FILE__,__LINE__,'problem 1 in zeolite potential table',myid+1)
           do igtype=1,ztype%ntype
@@ -233,7 +235,7 @@ contains
                 end do
              end do
           end do
-!           if (myid.eq.0) then
+!           if (myid.eq.rootid) then
 !              rcuttmp=10.0E0_dp
 !              close(io_ztb)
 !              open(unit=io_ztb,access='stream',action='write',file=file_ztb,form='unformatted',iostat=jerr,status='unknown')
@@ -267,7 +269,7 @@ contains
 
        if (jerr.ne.0) then
           ! make a tabulated potential of the zeolite
-          if (myid.eq.0) then
+          if (myid.eq.rootid) then
              write(io_output,*) 'make tabulated potential'
              open(unit=io_ztb,access='stream',action='write',file=file_ztb,form='unformatted',iostat=jerr,status='unknown')
              if (jerr.ne.0) then
@@ -293,11 +295,11 @@ contains
 #ifdef __OPENMP__
 !$omp end parallel
 #endif
-                if (myid.eq.0) write(io_ztb) zgrid(:,:,:,j,k)
+                if (myid.eq.rootid) write(io_ztb) zgrid(:,:,:,j,k)
              end do
           end do
           write(io_output,*) 'time 2:',time_now()
-          if (myid.eq.0.and.ltailcZeo) write(io_output,*) 'maxlayer = ',nlayermax
+          if (myid.eq.rootid.and.ltailcZeo) write(io_output,*) 'maxlayer = ',nlayermax
        end if
 
        if (ltailczeo.and..not.ltailcZeotmp) then
@@ -331,7 +333,7 @@ contains
        if (ltestztb.or.lpore_volume) call ztest()
 
        deallocate(lunitcell,zgrid,zeo%bead,ztype%type,ztype%num,ztype%radiisq,ztype%name,zpot%param)
-       if (myid.eq.0) then
+       if (lprint) then
           close(io_ztb)
           write(io_output,'(4(A,L),A,G10.3,A,/)') 'tabulated potential: lewald[',lewaldtmp,'] ltailc[',ltailcZeotmp,'] lshift[',lshifttmp,'] ltailcZeo[',ltailcZeo,'] rcut[',rcuttmp,']'
        end if
@@ -613,7 +615,7 @@ contains
     real::errTot,errRel,errAbs,err,BoltTabulated,eBoltTabulated,BoltExplicit,eBoltExplicit,xi,yi,zi,Utabulated,Uexplicit,weight
 
     ! test accuracy
-    if (myid.eq.0) write(io_output,'(A,/,A)') ' Test accuracy of tabulated zeolite potential & Calculate void volume',' -------------------------------------------------'
+    if (myid.eq.rootid) write(io_output,'(A,/,A)') ' Test accuracy of tabulated zeolite potential & Calculate void volume',' -------------------------------------------------'
     tel=0
     errTot=0
     errRel=0
@@ -645,14 +647,14 @@ contains
           err=abs(err/Uexplicit)
           if (errRel.lt.err) errRel=err
           errTot=errTot+err
-          if (myid.eq.0 .and. err.gt.3.0E-2_dp) then
+          if (myid.eq.rootid .and. err.gt.3.0E-2_dp) then
              write(io_output,'("WARNING: interpolation error at (",3(F8.5,1X),")=",G20.7," > 3%")') xi,yi,zi,err
              write(io_output,*) Utabulated,Uexplicit
           end if
        end if
     end do
 
-    if (myid.eq.0) then
+    if (myid.eq.rootid) then
        write(io_output,'(A,I0,A,I0,A)') ' test over ',tel,' out of ',volume_nsample,' random positions '
        write(io_output,'(A,G16.9)') ' average error: ',errTot/tel
        write(io_output,'(A,G16.9)') ' maximum relative error: ',errRel

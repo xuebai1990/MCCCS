@@ -10,7 +10,7 @@
 ! If you have more than two boxes then there are couple changes that need to be done
 ! in order for this subroutine to work. nprop in blkavg.inc needs to be set properly
 ! ************************************************************************************
-subroutine  calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ, Heat_vapor_COUL, pdV, CED_T, CED_LJ,CED_COUL,HSP_T,HSP_LJ, HSP_COUL,ibox,jbox)
+subroutine calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ, Heat_vapor_COUL, pdV, CED_T, CED_LJ,CED_COUL,HSP_T,HSP_LJ, HSP_COUL,ibox,jbox)
   use const_phys,only:joule2cal,cal2joule
   use sim_system
   use sim_cell

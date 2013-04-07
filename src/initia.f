@@ -1,4 +1,4 @@
-subroutine initia
+subroutine initia(file_struct)
   use const_math,only:degrad,raddeg
   use util_random,only:random
   use util_runtime,only:err_exit
@@ -6,6 +6,8 @@ subroutine initia
   use energy_intramolecular,only:vtorso
   use moves_cbmc,only:rosenbluth,schedule,explct
   implicit none
+
+  character(LEN=*),intent(in)::file_struct
 
   logical::lhere(nmax)
   integer::io_struct,jerr,i,j,m,m1,m2,n,nn,ic,jc,kc,it,ip1,ip2,ip3 ,ii,jj,iivib,jjben,jjtor,intemp,imol,ibtype,imolty,ibuild,rand_id,offset,count_chain
@@ -36,16 +38,15 @@ subroutine initia
   dimension check(ntmax)
 
   ! --------------------------------------------------------------------
-  if (myid.eq.0) then
+  if (myid.eq.rootid) then
      write(io_output,*) 
      write(io_output,*) 'subroutine initia'
      write(io_output,*) 
   end if
 
   ! initialize nchbox ---
-  do i=1,nbox
-     nchbox(i) = 0
-  end do
+  nchbox = 0
+  ncmt = 0
 
   iboxst = 1
   iboxed = nbox
@@ -94,7 +95,7 @@ subroutine initia
      ux(i) = boxlx(i) / dble(inix(i)) 
      uy(i) = boxly(i) / dble(iniy(i))
      uz(i) = boxlz(i) / dble(iniz(i))
-     if (myid.eq.0) then
+     if (myid.eq.rootid) then
         write(io_output,*) 'box',i
         write(io_output,*) 'ini',inix(i),iniy(i),iniz(i)
         write(io_output,*) 'box',boxlx(i),boxly(i),boxlz(i)
@@ -134,7 +135,7 @@ subroutine initia
      end do
   end do
 
-  if (myid.eq.0) then
+  if (myid.eq.rootid) then
      write(io_output,*) 'nmolty',nmolty
      write(io_output,*) '   mcmt',((mcmt(i,ibox),i=1,nmolty),ibox=1,nbox)
   end if
@@ -168,7 +169,7 @@ subroutine initia
         end do
         if (lgrow) then
 
-           if (myid.eq.0) then
+           if (myid.eq.rootid) then
               write(io_output,*) 'growing a sample structure with CBMC'
            end if
 
@@ -695,7 +696,7 @@ subroutine initia
      end do
   end do
 
-  if (myid.eq.0) then
+  if (myid.eq.rootid) then
      write(io_output,*) 'aben',aben/2.0E0_dp,'ator',ator/2.0E0_dp
   end if
 

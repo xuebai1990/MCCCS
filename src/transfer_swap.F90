@@ -11,7 +11,7 @@ module transfer_swap
   implicit none
   private
   save
-  public::swap,init_swap,cnt,output_swap_stats
+  public::swap,init_swap,cnt,output_swap_stats,read_checkpoint_swap,write_checkpoint_swap
 
   real,allocatable,public::acchem(:,:)
   integer,allocatable,public::bnchem(:,:)
@@ -614,7 +614,7 @@ contains
     v1inselc = vtr(8,iwalk)
     v1insewd = vtr(14,iwalk)
 ! KM
-! if (myid.eq.0) write(io_output,*) 'vtry swap ', iwalk, vtr(1,iwalk)
+! if (myid.eq.rootid) write(io_output,*) 'vtry swap ', iwalk, vtr(1,iwalk)
 
 ! neigh_icnt = ntr_icnt(iwalk)
 ! do ip = 1,neigh_icnt
@@ -1705,7 +1705,7 @@ contains
     end do
   end subroutine output_swap_stats
 
-  subroutine cnt
+  subroutine cnt()
     logical::lpr
     integer::i,j,nnn
 
@@ -1716,7 +1716,7 @@ contains
        end if
     end do
 
-    if (lpr.and.myid.eq.0) then
+    if (lpr.and.myid.eq.rootid) then
        do nnn = 1,4
           write(31,*)
           write(31,*) 'nnn:',nnn
@@ -1739,4 +1739,21 @@ contains
        end do
     end if
   end subroutine cnt
+
+  subroutine read_checkpoint_swap(io_chkpt)
+    use util_mp,only:mp_bcast
+    integer,intent(in)::io_chkpt
+    if (myid.eq.rootid) read(io_chkpt) bnswap,bsswap,bnchem,acchem,bnswap_in,bnswap_out
+    call mp_bcast(bnswap,ntmax*npabmax*nbxmax*2,rootid,groupid)
+    call mp_bcast(bsswap,ntmax*npabmax*nbxmax*2,rootid,groupid)
+    call mp_bcast(bnchem,nbxmax*ntmax,rootid,groupid)
+    call mp_bcast(acchem,nbxmax*ntmax,rootid,groupid)
+    call mp_bcast(bnswap_in,ntmax*2,rootid,groupid)
+    call mp_bcast(bnswap_out,ntmax*2,rootid,groupid)
+  end subroutine read_checkpoint_swap
+
+  subroutine write_checkpoint_swap(io_chkpt)
+    integer,intent(in)::io_chkpt
+    write(io_chkpt) bnswap,bsswap,bnchem,acchem,bnswap_in,bnswap_out
+  end subroutine write_checkpoint_swap
 end module transfer_swap

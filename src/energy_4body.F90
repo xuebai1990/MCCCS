@@ -11,7 +11,7 @@ MODULE energy_4body
   implicit none
   private
   save
-  public::hasFourBody,U4System,U4MolSys,buildQuadrupletTable
+  public::hasFourBody,U4System,U4MolSys,readFourBody
 
   integer,parameter::nparam(1)=(/5/)
   character(LEN=default_path_length)::file_quadruplets='quadruplets.lst'
@@ -25,16 +25,6 @@ MODULE energy_4body
   type(LookupTable)::fourbodies
 
 CONTAINS
-  subroutine initiateFourBody(nEntries)
-    integer,intent(in)::nEntries
-    integer::jerr
-
-    allocate(quadruplets(0:8,1:nchain,1:nbox),coeffs(1:5,1:nEntries),nQuadruplets(1:nbox),qtype(1:nEntries),STAT=jerr)
-    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'',jerr)
-    call initiateTable(fourbodies,nEntries)
-    hasFourBody=.true.
-  end subroutine initiateFourBody
-
   integer function idx(beadtype)
     integer,intent(in)::beadtype(4)
     integer::atomIdx(4),nAtomType,i
@@ -58,69 +48,62 @@ CONTAINS
 
   subroutine readFourBody(file_ff)
     character(LEN=*),INTENT(IN)::file_ff
+    integer,parameter::initial_size=10
     character(LEN=default_string_length)::line
     integer::io_ff,jerr,nEntries,i,beadtype(4)
 
     !write(*,*) 'four_body::readInput'
     io_ff=get_iounit()
     open(unit=io_ff,access='sequential',action='read',file=file_ff,form='formatted',iostat=jerr,status='old')
-    if (jerr.ne.0) then
-       call err_exit(__FILE__,__LINE__,'cannot open four_body input file',jerr)
-    end if
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open four_body input file',jerr)
 
     read(UNIT=io_ff,NML=fourbody,iostat=jerr)
-    if (jerr.ne.0.and.jerr.ne.-1) then
-       call err_exit(__FILE__,__LINE__,'reading namelist: fourbody',jerr)
-    end if
+    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: fourbody',jerr)
 
-! Looking for section FOURBODY
+    ! Looking for section FOURBODY
     REWIND(io_ff)
     DO
        call readLine(io_ff,line,skipComment=.true.,iostat=jerr)
        if (jerr.ne.0) exit
 
        if (UPPERCASE(line(1:8)).eq."FOURBODY") then
-          read(line(9:),*) nEntries
-          if (nEntries.gt.0) then
-             call checkAtom()
-             call initiateFourBody(nEntries)
-             fourbodies%size=nEntries
-          end if
-          i=0
+          call checkAtom()
+          allocate(quadruplets(0:8,initial_size,1:nbox),coeffs(1:5,1:initial_size),nQuadruplets(1:nbox),qtype(1:initial_size),STAT=jerr)
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'initiateFourBody: allocation error',jerr)
+          call initiateTable(fourbodies,initial_size)
+          nEntries=0
           do
              call readLine(io_ff,line,skipComment=.true.,iostat=jerr)
              if (UPPERCASE(line(1:12)).eq.'END FOURBODY') exit
-             i=i+1
+             nEntries=nEntries+1
+             read(line,*) beadtype
+             i=addToTable(fourbodies,idx(beadtype),expand=.true.)
+             if (i.gt.ubound(qtype,1)) then
+                call reallocate(coeffs,1,5,1,2*ubound(coeffs,2))
+                call reallocate(qtype,1,2*ubound(qtype,1))
+             end if
              read(line,*) beadtype,qtype(i),coeffs(1:nparam(qtype(i)),i)
-             fourbodies%list(i)=idx(beadtype)
              write(*,*) fourbodies%list(i),qtype(i),coeffs(:,i)
              coeffs(1,i)=coeffs(1,i)**2 !cutoffLJ
              coeffs(2,i)=coeffs(2,i)**2 !cutoffCoul
              coeffs(3,i)=coeffs(3,i)*degrad !degree to radians
           end do
-          if (i.ne.nEntries) then
-             call err_exit(__FILE__,__LINE__,'readFourBody: the number of entries is incorrect!',myid+1)
-          end if
+          if (nEntries.gt.0) hasFourBody=.true.
        end if
     END DO
     close(io_ff)
+
+    if (hasFourBody) call buildQuadrupletTable()
   end subroutine readFourBody
 
-  subroutine buildQuadrupletTable(file_ff)
-    character(LEN=*),INTENT(IN)::file_ff
+  subroutine buildQuadrupletTable()
     integer::ibox,lchain,clchain,crchain,rchain,lmolty,clmolty,crmolty,rmolty,lunit,clunit,crunit,runit,nAtomType,itype,io_quadruplets,nboxtmp,jerr
     real::ar(3),br(3)
-
-    !write(*,*) 'buildQuadrupletTable'
-    call readFourBody(file_ff)
-    if (.not.hasFourBody) return
 
     io_quadruplets=get_iounit()
     if (.not.lbuild_quadruplet_table) then
        open(unit=io_quadruplets,access='sequential',action='read',file=file_quadruplets,form='formatted',iostat=jerr,status='old')
-       if (jerr.ne.0) then
-          call err_exit(__FILE__,__LINE__,'cannot read quadruplets file',jerr)
-       end if
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot read quadruplets file',jerr)
        read(io_quadruplets,*) nboxtmp,nQuadruplets
        if (nbox.ne.nboxtmp) call err_exit(__FILE__,__LINE__,'quadruplets file not generated with current input',myid+1)
        write(*,*) nbox,nQuadruplets

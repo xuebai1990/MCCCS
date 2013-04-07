@@ -1,4 +1,4 @@
- Program started at 2013-04-01 02:42:46.043
+ Program started at 2013-04-08 13:28:11.234
  Number of processors:            1
            0  threads per processor
  Random number seed:            0
@@ -890,7 +890,7 @@ molecule  1:   0.00000000
  
  vstart       =     -3898267.9654511530
  vend         =     -3900050.4707105607
- vbox         =     -3900050.4707103395
+ vbox         =     -3900050.4707103400
  
  Averages and fluctuations                            Box 1
  
@@ -906,25 +906,26 @@ molecule  1:   0.00000000
  box angle                                deg =      87.786
  box angle                                deg =     120.341
  no. of chains of type         1              =     300.000
- molar volume                      [cm^3/mol] =     133.718
- specific density                    [g/cm^3] =    1.930610
+ molar volume                      [cm^3/mol] =     133.720
+ specific density                    [g/cm^3] =    1.930579
  number density of type        1 [chain/nm^3] =     4.50355
  molfraction of type           1              =   1.0000000
  mean sete length of type      1        [A^2] =      17.634
  
  Total energy  [K per system and kJ/mol per chain] =   -3898724.47     -108.05
- Inter LJ      [K per system and kJ/mol per chain] =   -3356484.88      -93.03
+ Inter LJ      [K per system and kJ/mol per chain] =   -3356484.88      -93.02
+ Tail  LJ      [K per system and kJ/mol per chain] =     -68741.07       -1.91
+ Intra LJ      [K per system and kJ/mol per chain] =          0.00        0.00
+ Stretch       [K per system and kJ/mol per chain] =          0.00        0.00
  Bond bending  [K per system and kJ/mol per chain] =          0.00        0.00
  Torsion       [K per system and kJ/mol per chain] =          0.00        0.00
- Intra LJ      [K per system and kJ/mol per chain] =          0.00        0.00
- External pot  [K per system and kJ/mol per chain] =          0.00        0.00
- Stretch       [K per system and kJ/mol per chain] =          0.00        0.00
  Coulomb       [K per system and kJ/mol per chain] =    -542239.59      -15.03
- Tail  LJ      [K per system and kJ/mol per chain] =     -68741.07       -1.91
+ External pot  [K per system and kJ/mol per chain] =          0.00        0.00
+ 3-body Garo   [K per system and kJ/mol per chain] =          0.00        0.00
  Fluc Q        [K per system and kJ/mol per chain] =          0.00        0.00
  
  fluctuation in <vtot>                          =      787.93
  
  type  box     vinter      vintra      vtor        vbend       vtail
     1    1     0.00000     0.00000     0.00000     0.00000     0.00000
- Program ended at 2013-04-01 02:43:00.056
+ Program ended at 2013-04-08 13:28:25.163

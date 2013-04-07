@@ -6,7 +6,7 @@
 ! 1/2( <Exp[-beta*u(r1)]-1> r1 + <Exp[-beta*u(rn)]-1> rn      **
 ! Marcus Martin 1-15-97                                         **
 !    *******************************************************************
-subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
+subroutine virial(binvir,binvir2)
   use const_math,only:onepi,twopi
   use const_phys,only:qqfact
   use util_runtime,only:err_exit
@@ -15,10 +15,10 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
   use energy_sami,only:ljsami,ljmuir
   implicit none
 
-      integer::i, imolty, ii, j, jmolty, jj, ntii, ntjj , ntij,nnn,nvirial,ip,itemp,iii
+      integer::i, imolty, ii, j, jmolty, jj, ntii, ntjj , ntij,nnn,ip,itemp,iii
       real::vinter,rminsq,rxui,ryui,rzui,rxuij ,ryuij,rzuij,rijsq,sr2, sr6 ,velect,mayer
 
-      real::xdiff,ydiff ,zdiff,dvircm,stepvir,starvir
+      real::xdiff,ydiff ,zdiff,dvircm
       real::binvir
       dimension binvir(maxvir,maxntemp),mayer(maxntemp)
 
@@ -272,20 +272,18 @@ subroutine virial(binvir,binvir2,nvirial,starvir,stepvir)
                end if
             end if
 
-! commenting this out JMS 6-20-00 ***
-! call dgesv(chgmax,1,a,chgmax,ipiv,b2,chgmax,info)
-! *** 
+            ! commenting this out JMS 6-20-00 ***
+            ! call dgesv(chgmax,1,a,chgmax,ipiv,b2,chgmax,info)
+            ! ***
 
-
-! write(21,*) b2
-! do ii = 1, nunit(imolty)
-! write(21,*) rxu(i,ii)+xdiff-dvircm,ryu(i,ii)+ydiff
-!     &              ,rzu(i,ii)+zdiff
-! end do
-! do ii = 1, nunit(imolty)
-! write(21,*) rxu(2,ii),ryu(2,ii),rzu(2,ii)
-! end do
-! write(11,*) sr6**(1.0/6.0E0_dp),b2(1,1),b2(2,1)
+            ! write(21,*) b2
+            ! do ii = 1, nunit(imolty)
+            !    write(21,*) rxu(i,ii)+xdiff-dvircm,ryu(i,ii)+ydiff,rzu(i,ii)+zdiff
+            ! end do
+            ! do ii = 1, nunit(imolty)
+            !    write(21,*) rxu(2,ii),ryu(2,ii),rzu(2,ii)
+            ! end do
+            ! write(11,*) sr6**(1.0/6.0E0_dp),b2(1,1),b2(2,1)
 
             velect = 0.0E0_dp
             do ip = 1, 2

@@ -10,22 +10,24 @@ MODULE moves_cbmc
   implicit none
   private
   save
-  public::config,rosenbluth,schedule,explct,safeschedule,init_cbmc,output_cbmc_stats,allocate_cbmc
+  public::config,rosenbluth,schedule,explct,safeschedule,allocate_cbmc,init_cbmc,read_safecbmc,opt_safecbmc,output_cbmc_stats,output_safecbmc,read_checkpoint_cbmc,write_checkpoint_cbmc
 
-! CBMC.INC
+  ! CBMC.INC
   logical,public::llrig
   logical,allocatable,public::lexshed(:),llplace(:),lpnow(:)
   logical,allocatable::lsave(:)
   real,allocatable::bncb(:,:),bscb(:,:,:),fbncb(:,:),fbscb(:,:,:) !< temporary accumulators for conf.bias performance
   real::brvibmin(60),brvibmax(60)
 
-! FIX.INC
-  integer::endnum,wbefnum
-  integer,allocatable::iend(:),ipast(:,:),pastnum(:),fclose(:,:),fcount(:),iwbef(:),ibef(:,:),befnum(:),nextnum(:),inext(:,:)
+  ! FIX.INC
+  integer::endnum,wbefnum,nplace,nrigi,counttot,counthist
+  real::hist(30,30,maxbin),probf(30,30,maxbin)
+  integer,allocatable::iend(:),ipast(:,:),pastnum(:),fclose(:,:),fcount(:),iwbef(:),ibef(:,:),befnum(:),nextnum(:),inext(:,:)&
+   ,rlist(:,:),rfrom(:),rprev(:),rnum(:),iplace(:,:),pfrom(:),pnum(:),pprev(:)
   logical::lcrank
   real,allocatable::xx(:),yy(:),zz(:),distij(:,:),vtvib(:),vtbend(:),vtgtr(:),bsum_tor(:)
 
-! subroutine safecbmc
+  ! subroutine safecbmc
   real,allocatable::kforceb(:,:),equilb(:,:),flength(:,:),vequil(:,:),vkforce(:,:)
 
 contains
@@ -2148,7 +2150,7 @@ contains
     if ( lnew ) then
        ! assign phi(angstart) to 0.0
        phi(angstart) = 0.0E0_dp
-    else
+    else if (angstart.le.ntogrow) then
        ! set up the cone using iuprev
        xub = -xvecprev/distprev
        yub = -yvecprev/distprev
@@ -7036,7 +7038,7 @@ contains
     allocate(lexshed(numax),llplace(ntmax),lpnow(numax),lsave(numax),bncb(ntmax,numax),bscb(ntmax,2,numax),fbncb(ntmax,numax)&
      ,fbscb(ntmax,2,numax),iend(numax),ipast(numax,numax),pastnum(numax),fclose(numax,numax),fcount(numax),iwbef(numax)&
      ,ibef(numax,numax),befnum(numax),xx(numax),yy(numax),zz(numax),distij(numax,numax),nextnum(numax),inext(numax,numax)&
-     ,kforceb(numax,numax),equilb(numax,numax),flength(numax,numax),vequil(numax,numax),vkforce(numax,numax),stat=jerr)
+     ,kforceb(numax,numax),equilb(numax,numax),flength(numax,numax),vequil(numax,numax),vkforce(numax,numax),rlist(numax,numax),rfrom(numax),rprev(numax),rnum(numax),iplace(numax,numax),pfrom(numax),pnum(numax),pprev(numax),stat=jerr)
     if (jerr.ne.0) then
        call err_exit(__FILE__,__LINE__,'init_cbmc: allocation failed',jerr)
     end if
@@ -7048,7 +7050,83 @@ contains
     bscb = 0.0E0_dp
     fbncb = 0.0E0_dp
     fbscb = 0.0E0_dp
+    counthist=0
   end subroutine init_cbmc
+
+  subroutine read_safecbmc()
+    use var_type,only:default_path_length
+    use util_files,only:get_iounit
+    character(LEN=default_path_length),parameter::file_safecbmc='fort.23'
+    integer::io_safecbmc,jerr,imol,i,j,bin,bdum
+
+    if (ANY(pmfix(1:nmolty).gt.0)) then
+       io_safecbmc=get_iounit()
+       open(unit=io_safecbmc,access='sequential',action='read',file=file_safecbmc,form='formatted',iostat=jerr,status='unknown')
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open safecbmc file '//trim(file_safecbmc),jerr)
+    end if
+
+    do imol = 1, nmolty
+       if (pmfix(imol).gt.0) then
+          read(io_safecbmc,*) counttot
+          ! read in from fort.23 the bead-bead distribution
+          do i = 1, iring(imol)
+             do j = 1, iring(imol)
+                if (i.eq.j) cycle
+                do bin = 1, maxbin
+                   read(io_safecbmc,*) bdum,probf(i,j,bin)
+                   hist(i,j,bin) = 0
+                end do
+             end do
+          end do
+       end if
+    end do
+
+    if (ANY(pmfix(1:nmolty).gt.0)) close(io_safecbmc)
+  end subroutine read_safecbmc
+
+  subroutine opt_safecbmc()
+    integer::imolty,j,k,bin
+    real::histrat,histtot
+
+    do imolty = 1, nmolty
+       if (pmfix(imolty).gt.0.0001_dp) then
+          ! readjust fixed end point data to assure optimum efficiency ***
+          counttot = counttot + counthist
+          histrat = real(counthist,dp) / real(counttot,dp)
+
+          ! reset counthist
+          counthist = 0
+          do j = 1, iring(imolty) 
+             do k = 1, iring(imolty)
+                if (j.eq.k) cycle
+                histtot = 0
+                do bin = 1, maxbin
+                   histtot = histtot + hist(j,k,bin)
+                end do
+
+                if (histtot.eq.0) cycle
+
+                ! normalize and multiply hist by its weighting using above condition
+                do bin = 1, maxbin
+                   hist(j,k,bin) = hist(j,k,bin)*histrat/histtot
+                   ! add weighed hist to hist
+                   probf(j,k,bin) = probf(j,k,bin) + hist(j,k,bin)
+                   ! reset hist to zero for next iteration
+                   hist(j,k,bin) = 0
+                end do
+                ! renormalize new distribution
+                histtot = 0
+                do bin = 1, maxbin
+                   histtot = histtot + probf(j,k,bin)
+                end do
+                do bin = 1, maxbin
+                   probf(j,k,bin) = probf(j,k,bin) / histtot
+                end do
+             end do
+          end do
+       end if
+    end do
+  end subroutine opt_safecbmc
 
 ! write some information about config performance ***
   subroutine output_cbmc_stats(io_output)
@@ -7083,4 +7161,79 @@ contains
     end do
     write(io_output,*)
   end subroutine output_cbmc_stats
+
+  subroutine output_safecbmc()
+    use var_type,only:default_path_length
+    use util_files,only:get_iounit
+    character(LEN=default_path_length),parameter::file_safecbmc='fort.21'
+    integer::io_safecbmc,jerr,j,k,bin,imolty
+    real::histtot
+
+    if (lpresim.or.ANY(pmfix(1:nmolty).gt.0)) then
+       io_safecbmc=get_iounit()
+       open(unit=io_safecbmc,access='sequential',action='write',file=file_safecbmc,form='formatted',iostat=jerr,status='unknown')
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open safecbmc file '//trim(file_safecbmc),jerr)
+    end if
+
+    ! normalize and write out presim results in fort.22 **
+    if (lpresim) then
+       if (counttot.eq.0) then
+          write(io_safecbmc,*) counthist
+       else
+          write(io_safecbmc,*) counttot
+       end if
+
+       do j = 1, iring(1)
+          do k = 1, iring(1)
+             if (j.eq.k) cycle
+             histtot = 0
+             do bin = 1, maxbin
+                hist(j,k,bin) = hist(j,k,bin) + 1.0E0_dp
+                histtot = histtot + hist(j,k,bin)
+             end do
+
+             do bin = 1, maxbin
+                hist(j,k,bin) = hist(j,k,bin) / histtot
+                write(io_safecbmc,*) bin,hist(j,k,bin)
+             end do
+          end do
+       end do
+    end if
+
+    ! put new distribution back into a file
+    do imolty = 1, nmolty
+       if (pmfix(imolty).gt.0) then
+          if (counttot.eq.0) then
+             write(io_safecbmc,*) counthist
+          else
+             write(io_safecbmc,*) counttot
+          end if
+          do j = 1, iring(1)
+             do k = 1, iring(1)
+                if (j.eq.k) cycle
+                do bin = 1, maxbin
+                   write(io_safecbmc,*) bin,probf(j,k,bin)
+                end do
+             end do
+          end do
+       end if
+    end do
+
+    if (lpresim.or.ANY(pmfix(1:nmolty).gt.0)) close(io_safecbmc)
+  end subroutine output_safecbmc
+
+  subroutine read_checkpoint_cbmc(io_chkpt)
+    use util_mp,only:mp_bcast
+    integer,intent(in)::io_chkpt
+    if (myid.eq.rootid) read(io_chkpt) bncb,bscb,fbncb,fbscb
+    call mp_bcast(bncb,ntmax*numax,rootid,groupid)
+    call mp_bcast(bscb,ntmax*2*numax,rootid,groupid)
+    call mp_bcast(fbncb,ntmax*numax,rootid,groupid)
+    call mp_bcast(fbscb,ntmax*2*numax,rootid,groupid)
+  end subroutine read_checkpoint_cbmc
+
+  subroutine write_checkpoint_cbmc(io_chkpt)
+    integer,intent(in)::io_chkpt
+    write(io_chkpt) bncb,bscb,fbncb,fbscb
+  end subroutine write_checkpoint_cbmc
 end MODULE moves_cbmc

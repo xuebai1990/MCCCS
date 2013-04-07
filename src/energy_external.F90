@@ -187,11 +187,12 @@ contains
 
   end function U_ext
 
-  subroutine init_energy_external(nntype)
+  subroutine init_energy_external(nntype,lprint)
     use util_runtime,only:err_exit
     use sim_system,only:ljoe,lmuir,io_output
     use energy_sami
     integer,intent(in)::nntype
+    LOGICAL,INTENT(IN)::lprint
     integer::jerr
 
     if ( ljoe ) then
@@ -233,9 +234,11 @@ contains
        v3prmin = c9ch3 / zprmin**9 - c3ch3 / zprmin**3
        betac2 = beta1 - v2prmin
        betac3 = beta1 - v3prmin
-       write(io_output,*) 'external potential for Langmuir monolayers used'
-       write(io_output,*) 'zprmin',zprmin
-       write(io_output,*) 'v2prmin',v2prmin,'v3prmin',v3prmin
+       if (lprint) then
+          write(io_output,*) 'external potential for Langmuir monolayers used'
+          write(io_output,*) 'zprmin',zprmin
+          write(io_output,*) 'v2prmin',v2prmin,'v3prmin',v3prmin
+       end if
     end if
   end subroutine init_energy_external
 end MODULE energy_external

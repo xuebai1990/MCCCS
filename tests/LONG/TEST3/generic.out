@@ -1,4 +1,4 @@
- Program started at 2013-04-01 02:38:57.763
+ Program started at 2013-04-08 13:22:10.039
  Number of processors:            1
            0  threads per processor
  Random number seed:            0
@@ -294,22 +294,22 @@
  Type  1 bn  83526.  83179.  83362.  83039.  83287.  83494.
  max.displ.     0.3246    0.3213    0.3225    0.4056    0.4073    0.4086
  volume change:  bn =   113.0   bs =    48.0   max.displ. = 0.38731E+03
-   600  450600 -0.5643E+07    31.055         0.01000
+   600  450600 -0.5643E+07    31.055   -166364.4 1000
  Box            1
  Type  1 bn  83193.  83160.  83126.  83241.  83339.  83807.
  max.displ.     0.3220    0.3187    0.3200    0.4047    0.4065    0.4078
  volume change:  bn =   134.0   bs =    57.0   max.displ. = 0.41187E+03
-  1200  451200 -0.5648E+07    31.030         0.01000
+  1200  451200 -0.5648E+07    31.030   -156003.2 1000
  Box            1
  Type  1 bn  83531.  83672.  83330.  83572.  82579.  83189.
  max.displ.     0.3217    0.3207    0.3208    0.4032    0.4054    0.4087
  volume change:  bn =   127.0   bs =    46.0   max.displ. = 0.37296E+03
-  1800  451800 -0.5700E+07    31.045         0.01000
+  1800  451800 -0.5700E+07    31.045   -330313.3 1000
  Box            1
  Type  1 bn  83232.  82722.  82899.  83727.  83535.  83758.
  max.displ.     0.3236    0.3203    0.3197    0.4050    0.4083    0.4055
  volume change:  bn =   127.0   bs =    56.0   max.displ. = 0.41113E+03
-  2400  452400 -0.5672E+07    30.994         0.01000
+  2400  452400 -0.5672E+07    30.994    131741.6 1000
  Box            1
  Type  1 bn  83262.  82622.  83484.  83324.  83635.  83546.
  max.displ.     0.3227    0.3216    0.3179    0.4036    0.4066    0.4031
@@ -318,27 +318,27 @@
  Type  1 bn  82878.  83093.  83590.  83774.  83417.  83115.
  max.displ.     0.3247    0.3193    0.3180    0.4037    0.4065    0.4062
  volume change:  bn =   133.0   bs =    65.0   max.displ. = 0.41531E+03
-  3000  453000 -0.5713E+07    31.030         0.01000
+  3000  453000 -0.5713E+07    31.030    -72993.5 1000
  Box            1
  Type  1 bn  83181.  83892.  83164.  83087.  83219.  83341.
  max.displ.     0.3212    0.3190    0.3187    0.4025    0.4048    0.4065
  volume change:  bn =   116.0   bs =    36.0   max.displ. = 0.32222E+03
-  3600  453600 -0.5649E+07    31.067         0.01000
+  3600  453600 -0.5649E+07    31.067     37325.4 1000
  Box            1
  Type  1 bn  82647.  83352.  83389.  83655.  83557.  83266.
  max.displ.     0.3210    0.3199    0.3197    0.4062    0.4056    0.4065
  volume change:  bn =   134.0   bs =    73.0   max.displ. = 0.43885E+03
-  4200  454200 -0.5680E+07    31.063         0.01000
+  4200  454200 -0.5680E+07    31.063    -44373.8 1000
  Box            1
  Type  1 bn  83166.  83644.  83221.  83498.  83535.  82817.
  max.displ.     0.3193    0.3194    0.3201    0.4060    0.4070    0.4054
  volume change:  bn =   119.0   bs =    45.0   max.displ. = 0.41487E+03
-  4800  454800 -0.5716E+07    30.969         0.01000
+  4800  454800 -0.5716E+07    30.969    110987.9 1000
  Box            1
  Type  1 bn  83202.  83639.  82967.  83703.  83206.  83127.
  max.displ.     0.3198    0.3193    0.3196    0.4030    0.4052    0.4036
  volume change:  bn =   156.0   bs =    56.0   max.displ. = 0.37232E+03
-  5400  455400 -0.5646E+07    31.028         0.01000
+  5400  455400 -0.5646E+07    31.028    286818.6 1000
  Box            1
  Type  1 bn  83832.  83306.  83241.  83384.  83026.  83082.
  max.displ.     0.3195    0.3217    0.3202    0.4035    0.4082    0.4051
@@ -347,7 +347,7 @@
  Type  1 bn  83563.  83404.  83689.  83356.  83041.  82821.
  max.displ.     0.3200    0.3204    0.3203    0.4005    0.4042    0.4034
  volume change:  bn =   126.0   bs =    46.0   max.displ. = 0.38197E+03
-  6000  456000 -0.5651E+07    31.125         0.01000
+  6000  456000 -0.5651E+07    31.125     54548.4 1000
  
  +++++ end of markov chain +++++
  
@@ -415,7 +415,7 @@ molecule  1:   0.00000000
  Averages and fluctuations                            Box 1
  
  pressure                               [kPa] =    11368.93
- pressure                  [simulation units] =    0.823440
+ pressure                  [simulation units] =    0.823448
  surface tension                       [mN/m] =    -89.7122
  chem. potential of type       1          [K] =       0.000
  
@@ -424,20 +424,21 @@ molecule  1:   0.00000000
  boxlength                                [A] =      31.032
  no. of chains of type         1              =    1000.000
  molar volume                      [cm^3/mol] =      17.996
- specific density                    [g/cm^3] =    1.001118
+ specific density                    [g/cm^3] =    1.001102
  number density of type        1 [chain/nm^3] =    33.46385
  molfraction of type           1              =   1.0000000
  mean sete length of type      1        [A^2] =       1.000
  
  Total energy  [K per system and kJ/mol per chain] =   -5678236.08      -47.21
  Inter LJ      [K per system and kJ/mol per chain] =     990748.32        8.24
+ Tail  LJ      [K per system and kJ/mol per chain] =     -22048.86       -0.18
+ Intra LJ      [K per system and kJ/mol per chain] =          0.00        0.00
+ Stretch       [K per system and kJ/mol per chain] =          0.00        0.00
  Bond bending  [K per system and kJ/mol per chain] =          0.00        0.00
  Torsion       [K per system and kJ/mol per chain] =          0.00        0.00
- Intra LJ      [K per system and kJ/mol per chain] =          0.00        0.00
- External pot  [K per system and kJ/mol per chain] =          0.00        0.00
- Stretch       [K per system and kJ/mol per chain] =          0.00        0.00
  Coulomb       [K per system and kJ/mol per chain] =   -6668984.40      -55.45
- Tail  LJ      [K per system and kJ/mol per chain] =     -22048.86       -0.18
+ External pot  [K per system and kJ/mol per chain] =          0.00        0.00
+ 3-body Garo   [K per system and kJ/mol per chain] =          0.00        0.00
  Fluc Q        [K per system and kJ/mol per chain] =          0.00        0.00
  
  fluctuation in <vtot>                          =    23243.22
@@ -451,21 +452,22 @@ molecule  1:   0.00000000
  
  Total energy   box   1 =   -0.56782E+07   0.13478E+05   0.44926E+04
  Inter LJ       box   1 =    0.99075E+06   0.60900E+04   0.20300E+04
+ Tail  LJ       box   1 =   -0.22049E+05   0.85223E+02   0.28408E+02
+ Intra LJ       box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
+ Stretch        box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
  Bond bending   box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
  Torsion        box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
- Intra LJ       box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
- External pot   box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
- Stretch        box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
  Coulomb        box   1 =   -0.66690E+07   0.17906E+05   0.59687E+04
- Tail  LJ       box   1 =   -0.22049E+05   0.85223E+02   0.28408E+02
+ External pot   box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
+ 3-body Garo    box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
  Fluc Q         box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
  
- Enthalpy Inst.[kJ/mol] for box  1 =    -47.0088      0.8489      0.2830
- Enthalpy Ext. [kJ/mol] for box  1 =    -47.2095      0.1112      0.0371
+ Enthalpy Inst.[kJ/mol] for box  1 =    -47.0085      0.8489      0.2830
+ Enthalpy Ext. [kJ/mol] for box  1 =    -47.2093      0.1112      0.0371
  
- Cp residual(J/Kmol) =   49.9117715895539     
-  H2=   32240447229218.2     
-  H=  -5678019.63278801     
+ Cp residual(J/Kmol) =   49.9125371368675     
+  H2=   32240447229218.0     
+  H=  -5678019.63278831     
  chemical potential  itype   1 box   1 =        0.000       0.000       0.000
  mean sete length    itype   1 box   1 =        1.000       0.000       0.000
  number density      itype   1 box   1 =  0.33464E+02 0.12934E+00 0.43115E-01
@@ -485,4 +487,4 @@ molecule  1:   0.00000000
    8  -0.568E+07   0.999E+00   0.870E+05   0.146E+03   0.100E+01
    9  -0.569E+07   0.100E+01  -0.432E+05   0.214E+02   0.100E+01
   10  -0.567E+07   0.995E+00   0.410E+05   0.149E+03   0.100E+01
- Program ended at 2013-04-01 03:40:02.829
+ Program ended at 2013-04-08 14:23:37.033
