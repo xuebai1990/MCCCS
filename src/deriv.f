@@ -1,6 +1,4 @@
-!
-! calculate integrand in maginns interphase switch
-!
+!> \brief Calculate integrand in maginns interphase switch
       subroutine deriv(ibox)
       use sim_system
       use sim_cell
@@ -17,7 +15,7 @@
             vol = boxlx(ibox)*boxly(ibox)*boxlz(ibox)
             dvdl = -3.0E0_dp*vol/boxlx(ibox)*(lenc-lena)*(etais*pipsw +lambdais*pwellipsw)+vwellipsw
          else if (lsolid(ibox).and.(.not.lrect(ibox))) then
-            vol = cell_vol(ibox) 
+            vol = cell_vol(ibox)
             hmats(1,1) = hmat(ibox,1)
             hmats(1,2) = hmat(ibox,4)
             hmats(1,3) = hmat(ibox,7)

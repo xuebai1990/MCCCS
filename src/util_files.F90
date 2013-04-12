@@ -9,9 +9,8 @@ CONTAINS
 
 ! *****************************************************************************
 !> \brief returns the first fortran unit that is not preconnected
-!> \note
-!>       -1 if no free unit exists
-!> taken from CP2K
+!> \return -1 if no free unit exists
+!> \author taken from CP2K
 ! *****************************************************************************
   INTEGER FUNCTION get_iounit()
     INTEGER                                  :: istat
@@ -27,7 +26,7 @@ CONTAINS
 
   END FUNCTION get_iounit
 
-! read the following line, skipping comment or blank lines
+!> \brief read the following line, skipping comment or blank lines
   subroutine readLine(iounit,line,skipComment,iostat)
     integer,intent(in)::iounit
     logical,intent(in)::skipComment
@@ -46,8 +45,8 @@ CONTAINS
 
   end subroutine readLine
 
-! read the n-th line (i.e., skipping n-1 lines and read the following line), skipping
-! comment or blank lines
+!> \brief read the n-th line (i.e., skipping n-1 lines and read the following line), skipping
+!> comment or blank lines
   subroutine readNthLine(iounit,n,line,skipComment,iostat)
     integer,intent(in)::iounit,n
     logical,intent(in)::skipComment
@@ -64,7 +63,7 @@ CONTAINS
 
 !> \brief Force flushing IO
 !>
-!> Fortran flush seems able to only transfer data from program-specific cache
+!> \note Fortran flush seems able to only transfer data from program-specific cache
 !> to system cache, which isn't guaranteed to be written to file system if
 !> program crashes. The current work-around isn't guaranteed to work either,
 !> but in most cases it works. Only the low-level Unix system call (f)sync can

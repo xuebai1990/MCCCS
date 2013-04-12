@@ -19,15 +19,13 @@ module transfer_swap
   integer::cnt_wf1(0:6,0:6,4),cnt_wf2(0:6,0:6,4),cnt_wra1(1000,4),cnt_wra2(1000,4)
 
 contains
-!******************************************************************
-! removes a molecule from one box and inserts it into the other  **
-! using CBMC insertion techniques.  Works for linear or branched **
-! molecules and for DC-CBMC and Explicit atom                    **
-! Rewritten from old swap and swapbr subroutines by M.G. Martin  **
-! 9-18-97                                                        **
-!******************************************************************
+!> \brief Removes a molecule from one box and inserts it into the other
+!> using CBMC insertion techniques.
+!>
+!> Works for linear or branched molecules and for DC-CBMC and explicit atom
+!> \author Rewritten from old swap and swapbr subroutines by M.G. Martin (9-18-97)
   subroutine swap()
-    use sim_particle,only:update_neighbor_list
+    use sim_particle,only:update_neighbor_list,ctrmas
 
     logical::ovrlap,lterm,lnew,lempty,ldone,ltors,lovrh(nchmax),lfavor,laccept,lswapinter,lrem_out,lins_in,lneighij,linsk_in,lremk_in,lfixnow
 

@@ -8,7 +8,6 @@ MODULE energy_garofalini
   save
   public::garofalini,vthreebody,triad,triad_en
 
-! GAROFALINI.INC
   integer::pair_max
   parameter(pair_max=50000)
   real,public::galpha(6),grho(6),gbeta(6),ga(6,3),gb(6,3),gc(6,3),glambda(4),grij(4,2),ggamma(4,2),gtheta(4),grijsq(4,2)
@@ -16,13 +15,10 @@ MODULE energy_garofalini
   integer::itr1(pair_max),itr2(pair_max),itr3(pair_max),ntr
 
 contains
-!     **************************************************************
-! calculates the energy using the garofalini (SiO2/H2O) ***
-! exp-6 potential modified using articles in suijtab    ***
-! parameters are defined in suijtab.f  KE ANDERSON      ***
-!     **************************************************************
+!> \brief calculates the energy using the garofalini (SiO2/H2O)
+!> exp-6 potential modified using articles in suijtab
+!> parameters are defined in suijtab.f  KE ANDERSON
   function garofalini(rijsq,ntij,qa,qb,aa,bb)
-
       real::rijsq,rij,hterm,coul,qa,qb
       real::hterma,garofalini
       integer::ntij,aa,bb,i
@@ -35,7 +31,6 @@ contains
       hterm = 0.0E0_dp
       coul = 0.0E0_dp
       garofalini = 0.0E0_dp
-
 
 ! write(io_output,*) aa,bb,ntij,qa,qb,gbeta(ntij),galpha(ntij),grho(ntij)
 ! H term
@@ -162,9 +157,7 @@ contains
       return
   end subroutine vthreebody
 
-!**************************************************************************
   subroutine triad
-
       integer::i,j,k,ptr,ptr2
 
 #ifdef __DEBUG__
@@ -213,7 +206,10 @@ contains
       return
   end subroutine triad
 
-!******************************************************************
+!> \brief Determine correct 3-body interactions for single particles
+!> particle moved: \a i
+!> \param cnt number of pairs within cutoff
+!> \param ni(cnt) identity of pair molecule; set in energy
   subroutine triad_en(i,vthree,cnt,ni,nrij,nxi,nyi,nzi,lupdate)
     real(kind=dp)::vthree
       integer::i,j,k,m,imolty,jmolty,kmolty,mmolty,atomj,atomk,atomm
@@ -224,13 +220,6 @@ contains
       real::temp_dist(nmax),temp_x(nmax),temp_y(nmax),temp_z(nmax)
 
       lwrite=.false.
-
-
-! this is to determine correct 3-body interactions for single particles
-! particle moved: i
-! number of pairs within cutoff: cnt
-! identity of pair molecule: ni(cnt)   ---- set in energy
-
       vthree = 0.0E0_dp
       temp_cnt = 0
       do itemp = 1,nmax
@@ -449,28 +438,27 @@ contains
          end if
  10   continue
 
-! updating actual neighbors
-! if(lupdate) then
-! if(i.eq.18) then
-! write(io_output,*) 'updating actual neighbors',temp_cnt
-! do itemp = 1,temp_cnt
-! write(io_output,*) 'temp_cnt number',itemp,number(itemp),
-!     &              neighi(number(itemp))
-! end do
-! end if
-! neigh_icnt=temp_cnt
-! do itemp=1,neigh_icnt
-! neighi(itemp) = temp_nei(itemp)
-! ndiji(itemp) = temp_dist(itemp)
-! nxiji(itemp) = temp_x(itemp)
-! nyiji(itemp) = temp_y(itemp)
-! nziji(itemp) = temp_z(itemp)
-! end do
-! do itemp = 1,neigh_icnt
-! write(io_output,*) 'neigh_icnt number',itemp,neighi(itemp)
-! write(io_output,*) 'dists',nxiji(itemp),nyiji(itemp),nziji(itemp)
-! end do
-! end if
+         ! updating actual neighbors
+         ! if(lupdate) then
+         !    if(i.eq.18) then
+         !       write(io_output,*) 'updating actual neighbors',temp_cnt
+         !       do itemp = 1,temp_cnt
+         !          write(io_output,*) 'temp_cnt number',itemp,number(itemp),neighi(number(itemp))
+         !       end do
+         !    end if
+         !    neigh_icnt=temp_cnt
+         !    do itemp=1,neigh_icnt
+         !       neighi(itemp) = temp_nei(itemp)
+         !       ndiji(itemp) = temp_dist(itemp)
+         !       nxiji(itemp) = temp_x(itemp)
+         !       nyiji(itemp) = temp_y(itemp)
+         !       nziji(itemp) = temp_z(itemp)
+         !    end do
+         !    do itemp = 1,neigh_icnt
+         !       write(io_output,*) 'neigh_icnt number',itemp,neighi(itemp)
+         !       write(io_output,*) 'dists',nxiji(itemp),nyiji(itemp),nziji(itemp)
+         !    end do
+         ! end if
       if(lwrite) write(io_output,*) 'triad_en vthree',vthree
 
       return

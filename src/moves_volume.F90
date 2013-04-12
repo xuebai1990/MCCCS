@@ -17,14 +17,11 @@ MODULE moves_volume
   real::hmato(9),hmatio(9)
 
 contains
-!***********************************************************
-! makes an isotropic volume change for NVT-Gibbs ensemble **
-! the maximum change is controlled by rmtrax and the      **
-! number of successful trial moves is stored in bsvol.    **
-!***********************************************************
-!
-! perform change of the volume: random walk in ln(V1/V2) with V1+V2=const
-!
+!> \brief Makes an isotropic volume change for NVT-Gibbs ensemble
+!>
+!> Perform change of the volume: random walk in ln(V1/V2) with V1+V2=const. \n
+!> The maximum change is controlled by \b rmtrax and the
+!> number of successful trial moves is stored in \b bsvol.
   subroutine volume_2box()
     real::rpair,rm,rbox,volo(nbxmax),volt,voln(nbxmax),rbcut(nbxmax),dfac(nbxmax),df,dx,dy,dz,expdv,min_boxl,v(nEnergy),dele
     integer::ipair,ipairb,boxa,boxb,ibox,i,hbox,jbox,jhmat,imolty,j,ichoiq
@@ -376,14 +373,11 @@ contains
     return
   end subroutine volume_2box
 
-!***********************************************************
-! makes an isotropic volume change under const. pressure  **
-! the maximum change is controlled by rmtrax and the      **
-! number of successful trial moves is stored in bsvol.    **
-!***********************************************************
-!
-! perform change of the volume: random walk in V
-!
+!> \brief Makes an isotropic volume change under const. pressure.
+!>
+!> Perform change of the volume: random walk in V. \n
+!> The maximum change is controlled by \b rmtrax and the
+!> number of successful trial moves is stored in \b bsvol.
   subroutine volume_1box()
     real::rbox,volo,voln,rbcut,dx,dy,dz,dfac,df,v(nEnergy),dele,min_boxl
     integer::ibox,boxvch,jhmat,i,imolty,j,ichoiq
@@ -736,7 +730,7 @@ contains
     end do
   end subroutine output_volume_stats
 
-! store old box lengths and energy
+!> \brief Store old box lengths and energy
   subroutine save_box(box)
     integer,intent(in)::box
     integer::j
@@ -767,7 +761,7 @@ contains
     end if
   end subroutine save_box
 
-! store old chain configuration
+!> \brief Store old chain configuration
   subroutine save_configuration(boxes)
     integer,intent(in)::boxes(:)
     integer::i,j
@@ -805,7 +799,7 @@ contains
     end do
   end subroutine save_configuration
 
-! restore old energy, box lengths
+!> \brief Restore old energy, box lengths
   subroutine restore_box(box)
     integer,intent(in)::box
     integer::j
@@ -837,7 +831,7 @@ contains
     end if
   end subroutine restore_box
 
-! restore old energy, box lengths
+!> \brief Restore old energy, box lengths
   subroutine restore_configuration(boxes)
     integer,intent(in)::boxes(:)
     integer::i,j
@@ -876,6 +870,7 @@ contains
   end subroutine restore_configuration
 
   subroutine update_box(box)
+    use sim_particle,only:ctrmas
     integer,intent(in)::box
 
     if ( .not. lanes ) then

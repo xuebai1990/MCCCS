@@ -81,12 +81,6 @@ contains
        end if
     END DO CYCLE_READ_BONDS
 
-    ! do j=1,nvmax
-    ! if (brvib(j).gt.0) then
-    ! write(101,'(I3,1X,I1,1X,F7.5,1X,G13.6)') j,1,brvib(j),brvibk(j)
-    ! end if
-    ! end do
-
     ! Looking for section ANGLES
     REWIND(io_ff)
     CYCLE_READ_ANGLES:DO
@@ -123,12 +117,6 @@ contains
           exit cycle_read_angles
        end if
     END DO CYCLE_READ_ANGLES
-
-    ! do j=1,nvmax
-    ! if (brben(j).ne.0) then
-    ! write(102,'(I3,1X,I1,1X,F8.4,1X,G13.6)') j,1,brben(j),brbenk(j)
-    ! end if
-    ! end do
 
     ! Looking for section DIHEDRALS
     REWIND(io_ff)
@@ -178,12 +166,6 @@ contains
           exit cycle_read_dihedrals
        end if
     END DO CYCLE_READ_DIHEDRALS
-
-    ! do j=1,ntormax
-    ! if (vtt0(j).ne.0.or.vtt1(j).ne.0.or.vtt2(j).ne.0.or.vtt3(j).ne.0.or.vtt4(j).ne.0.or.vtt5(j).ne.0.or.vtt6(j).ne.0.or.vtt7(j).ne.0.or.vtt8(j).ne.0.or.vtt9(j).ne.0) then
-    ! write(103,'(I3,1X,I1,10(1X,F13.7))') j,1,vtt0(j),vtt1(j),vtt2(j),vtt3(j),vtt4(j),vtt5(j),vtt6(j),vtt7(j),vtt8(j),vtt9(j)
-    ! end if
-    ! end do
 
     return
   end subroutine init_energy_bonded
@@ -375,9 +357,9 @@ contains
     return
   end function inter_tor
 
-! branched and linear molecules with connectivity table -
-! go through entire chain -
-! calculate all bonds vectors and lengths
+!> branched and linear molecules with connectivity table -
+!> go through entire chain -
+!> calculate all bonds vectors and lengths
 !DEC$ ATTRIBUTES FORCEINLINE :: calc_connectivity
   subroutine calc_connectivity(i,imolty)
     use sim_system,only:nunit,nugrow,rxu,ryu,rzu,ijvib,invib
@@ -433,8 +415,8 @@ contains
     end do
   end function U_torsion
 
-! calculate all stretching, bending, and torsional potentials
-! that have an end-bead with an index smaller than the current bead
+!> \brief calculate all stretching, bending, and torsional potentials
+!> that have an end-bead with an index smaller than the current bead
 !DEC$ ATTRIBUTES FORCEINLINE :: U_bonded
   subroutine U_bonded(i,imolty,vvib,vbend,vtg)
     use sim_system,only:nunit,invib,itvib,ijvib,inben,itben,ijben2,ijben3,L_vib_table
@@ -538,31 +520,31 @@ contains
     close(io_tab)
   end subroutine read_tabulated_potential_bonded
 
-! L_spline: Requires file (fort.40) running from -195 to 195 in degree steps
-! (Extra 15 degrees on each side required so that second derivatives are
-! reasonable for the degrees of interest)
-! L_linear: Requires a file (fort.40) running from -180 to 180 in 1/4 degree intervals
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-!ccc  Calculates vibrational and 1-3 nonbonded 'bending' potential
-!ccc  using linear interpolation between two points
-!ccc    must specify equilibrium bond length in suvibe, force
-!ccc  constant must be zero
-!ccc  requires a file (fort.41) that starts with 0.0 (not 0.5)
-!ccc  fort.41: number of tabulated potentials, potential number from
-!ccc  suvibe, number of points per angstrom, tabulated potential
-!ccc  (repeat last three parts for each additional potential)
-!ccc  KM 12/02/08
-!ccc    must include 1-3 interactions
-!ccc  must specify equilibrium angle in suvibe, force constant
-!ccc  must be very small but non-zero
-!ccc  requires a file (fort.42) with distances in A
-!ccc  fort.42: number of tabulated potentials, potential number from
-!ccc  suvibe, number of points per degree, tabulated potential
-!ccc  (repeat last three parts for each additional potential,
-!ccc   separated by 1000 1000)
-!ccc  make sure potential does not go up to infinity!
-!ccc  KM 12/03/08
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!> L_spline: Requires file (fort.40) running from -195 to 195 in degree steps
+!> (Extra 15 degrees on each side required so that second derivatives are
+!> reasonable for the degrees of interest) \n
+!> L_linear: Requires a file (fort.40) running from -180 to 180 in 1/4 degree intervals
+!>cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!>  Calculates vibrational and 1-3 nonbonded 'bending' potential
+!>  using linear interpolation between two points \n
+!>    must specify equilibrium bond length in suvibe, force
+!>  constant must be zero \n
+!>  requires a file (fort.41) that starts with 0.0 (not 0.5) \n
+!>  fort.41: number of tabulated potentials, potential number from
+!>  suvibe, number of points per angstrom, tabulated potential
+!>  (repeat last three parts for each additional potential) \n
+!>  KM 12/02/08 \n
+!>    must include 1-3 interactions \n
+!>  must specify equilibrium angle in suvibe, force constant \n
+!>  must be very small but non-zero \n
+!>  requires a file (fort.42) with distances in A \n
+!>  fort.42: number of tabulated potentials, potential number from
+!>  suvibe, number of points per degree, tabulated potential
+!>  (repeat last three parts for each additional potential,
+!>   separated by 1000 1000)
+!>  make sure potential does not go up to infinity! \n
+!>  KM 12/03/08
+!>cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
   subroutine init_tabulated_potential_bonded(lprint)
     use util_math,only:spline
     use sim_system,only:L_tor_table,L_vib_table,L_bend_table

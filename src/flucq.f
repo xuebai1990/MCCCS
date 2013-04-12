@@ -1,9 +1,7 @@
-!    *******************************************************************
-! select one (or two in charge transfer) molecule and displace  **
-! the charge magnitude of charge sites on selected molecule(s)  **
-! according to charge nutrality and preferential strategy.      **
-! rewritten by Bin Chen at 6-25-99.                             **
-!    *******************************************************************
+!> \brief Select one (or two in charge transfer) molecule and displace
+!> the charge magnitude of charge sites on selected molecule(s)
+!> according to charge nutrality and preferential strategy.
+!> \author rewritten by Bin Chen at 6-25-99.
 subroutine flucq (ichoice,boxi)
   use const_phys,only:qqfact
   use util_math,only:erfunc
@@ -36,7 +34,7 @@ subroutine flucq (ichoice,boxi)
             dchain = 2.0E0_dp
          end if
       end do
-      
+
       if (lgrand) then
 ! select a chain at random in box 1!
 !         (in box 2 is an ideal gas!)
@@ -85,7 +83,7 @@ subroutine flucq (ichoice,boxi)
          i = int( dchain*random(-1) ) + 1
          i = parall(imolty,i)
          ibox = nboxi(i)
-         
+
       end if
 
 ! For charge transfer case, select a second molecule to perform the
@@ -114,7 +112,7 @@ subroutine flucq (ichoice,boxi)
  70            jchain = int( dchain*random(-1) ) + 1
                jchain = parall(imolty,jchain)
                if ( random(-1) .gt. favor(jchain)) goto 70
-               if ( nboxi(jchain) .ne. ibox ) goto 70 
+               if ( nboxi(jchain) .ne. ibox ) goto 70
             else if ( ichoice .eq. -2 ) then
 ! equal probability charge moves in two boxes (for swap)
 ! preferential charge moves according to favor
@@ -160,13 +158,13 @@ subroutine flucq (ichoice,boxi)
 
 ! store the charges in qion
       do  j = 1, iunit
-         qion(j)   = qqu(i,j)         
+         qion(j)   = qqu(i,j)
       end do
 
 ! calculate the polariztion energy of i in the old configuration ***
- 
+
       call charge(i, qion, vo(11), vo(14))
-      
+
       If ( linterqt ) then
          do j = 1,iunit
             qionj(j) = qqu(jchain,j)
@@ -183,15 +181,15 @@ subroutine flucq (ichoice,boxi)
 ! Choose one of the units as the main charge transfer site
 
  30   mainunit = int( dble(iunit)*random(-1) ) + 1
-! for unit which is not a charge site 
+! for unit which is not a charge site
       if ( .not. lqchg(ntype(imolty,mainunit)) ) goto 30
       bnflcq(imolty,ibox) = bnflcq(imolty,ibox) + 1.0E0_dp
       dispbig = ( 2.0E0_dp*random(-1) - 1.0E0_dp )*rmflcq(imolty,ibox)
 
       if ( linterqt ) then
 ! For charge transfer case, i molecule increases by dispbig and
-! jchain molecule decreases by dispbig. 
-! correction for the reptition of the calculation of the 
+! jchain molecule decreases by dispbig.
+! correction for the reptition of the calculation of the
 ! coulombic real space term between maini and mainj
          maini = mainunit
  32      mainunit = int( dble(iunit)*random(-1) ) + 1
@@ -216,7 +214,7 @@ subroutine flucq (ichoice,boxi)
          displit = (-dispbig) / (dble(qunit)-1.0E0_dp)
 
 ! displace the charges on the molecule
-      
+
          do j = 1, iunit
             if ( j .eq. mainunit ) then
                qion(j) = qion(j) + dispbig
@@ -237,11 +235,11 @@ subroutine flucq (ichoice,boxi)
       moltion(2) = imolty
 
 ! calculate the polarization energy of i in the new configuration ***
- 
+
       call charge(i, qion, vn(11), vn(14))
 
       if ( linterqt ) then
-         
+
 ! calculate the polarization energy of jchain in the new configuration ***
 
          call charge(jchain, qionj, vflucqjn, vewaldjn)
@@ -249,7 +247,7 @@ subroutine flucq (ichoice,boxi)
          vn(14) = vn(14) + vewaldjn
 
 ! calculate the energy of i in the new configuration ***
-         flagon = 2 
+         flagon = 2
          rxuion(maini,flagon) = rxu(i,maini)
          ryuion(maini,flagon) = ryu(i,maini)
          rzuion(maini,flagon) = rzu(i,maini)
@@ -280,7 +278,7 @@ subroutine flucq (ichoice,boxi)
 
 ! calculate the energy of jchain in the new configuration ***
 
-         flagon = 2 
+         flagon = 2
          rxuion(mainj,flagon) = rxu(jchain,mainj)
          ryuion(mainj,flagon) = ryu(jchain,mainj)
          rzuion(mainj,flagon) = rzu(jchain,mainj)
@@ -303,7 +301,7 @@ subroutine flucq (ichoice,boxi)
          vo(1) = vo(1) + voldi
          vo(8) = vo(8) + velectoi
          vo(2) = vo(2) + vinteroi
-  
+
 ! prepare the rxuion etc for ewald sum and dielectric constant
 ! and for energy calculation
 
@@ -324,7 +322,7 @@ subroutine flucq (ichoice,boxi)
             ryuion(2,2) = ryu(jchain,mainj)
             rzuion(2,2) = rzu(jchain,mainj)
             qquion(2,2) = qionj(mainj)
-            
+
             do j = 3, iunit
                rxuion(j,1) = rxuion(j,2)
                ryuion(j,1) = ryuion(j,2)
@@ -336,7 +334,7 @@ subroutine flucq (ichoice,boxi)
       else
 
 ! calculate the energy of i in the new configuration ***
-         flagon = 2 
+         flagon = 2
          call energy(i,imolty,vn,flagon,ibox,1,iunit,.false.,ovrlap,.false.,.false.,.false.,.false.)
          if (ovrlap) return
          vn(1) = vn(1) + vn(11) + vn(14)
@@ -358,17 +356,17 @@ subroutine flucq (ichoice,boxi)
          vn(8) = vn(8) + vrecipn
          vo(8) = vo(8) + vrecipo
       end if
-         
+
 
 ! check for acceptance ***
- 
+
       deltv  = vn(1) - vo(1)
 ! use the thermostat temperature instead of real temp
       deltvb = fqbeta * deltv
 
 ! if ( deltv .lt. -100.0E0_dp) then
 ! write(io_output,*) i,favor(i),deltv
-! end if 
+! end if
       if ( deltvb .gt. (2.3E0_dp*softcut) ) return
 
       if ( deltv .le. 0.0E0_dp ) then

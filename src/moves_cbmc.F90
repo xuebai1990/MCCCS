@@ -35,14 +35,14 @@ contains
 !> \brief Performs a length conserving configurational bias move
 !> for linear, branched, anisotropic, and explicit atom molecules
 !>
-!> rewritten from old config and branch subroutines by M.G. Martin 9-19-97
+!> \b bncb(inb): number of trial attempts starting at unit inb \n
+!> \b bscb(1,inb): number of successful generations of trial configuration \n
+!> \b bscb(2,inb): number of accepted trial configurations
 !>
-!> bncb(inb): number of trial attempts starting at unit inb
-!> bscb(1,inb): number of successful generations of trial configuration
-!> bscb(2,inb): number of accepted trial configurations
+!> \author rewritten from old config and branch subroutines by M.G. Martin 9-19-97
 !*****************************************************************
   subroutine config()
-    use sim_particle,only:update_neighbor_list
+    use sim_particle,only:update_neighbor_list,ctrmas
     use sim_cell,only:update_linked_cell
 
       logical::lterm,ovrlap,ltors,lneighij,lfixnow
@@ -538,20 +538,20 @@ contains
 !***************************************************************
 !> \brief Performs a configurational bias move for branched molecules
 !>
-!> lnew: true for new configurations
-!> lterm: true if early terminated
-!> i: perform rosenbluth growth for chain i
-!> icharge: usually same as i
-!> imolty: molecule type of chain i
-!> ifrom: number of grow-from points
-!> ibox: box number of chain i
-!> igrow: number of units to be grown
-!> wadd: rosenbluth weight for growth
-!> lfixnow: SAFE-CBMC
-!> cwtorf: rosenbluth weight of the crank-shaft move for the last torsion
-!> movetype: 1 = config moves;
-!>           2 = swap/swatch moves for flexible molecule or swatch moves for rigid molecules that need rigrot (number of same-position atoms smaller than 2, i.e., less than sufficient to determine orientation);
-!>           3 = swatch moves for rigid molecules that do not need rigrot but do need regrowth;
+!> \param lnew true for new configurations
+!> \param lterm true if early terminated
+!> \param i perform rosenbluth growth for chain i
+!> \param icharge usually same as i
+!> \param imolty molecule type of chain i
+!> \param ifrom number of grow-from points
+!> \param ibox box number of chain i
+!> \param igrow number of units to be grown
+!> \param wadd rosenbluth weight for growth
+!> \param lfixnow SAFE-CBMC
+!> \param cwtorf rosenbluth weight of the crank-shaft move for the last torsion
+!> \param movetype 1 = config moves;\n
+!>           2 = swap/swatch moves for flexible molecule or swatch moves for rigid molecules that need rigrot (number of same-position atoms smaller than 2, i.e., less than sufficient to determine orientation);\n
+!>           3 = swatch moves for rigid molecules that do not need rigrot but do need regrowth;\n
 !>           4 = swatch moves for completely rigid molecule that regrow nothing
   subroutine rosenbluth(lnew,lterm,i,icharge,imolty,ifrom,ibox,igrow,wadd,lfixnow,cwtorf,movetype)
     use util_random,only:sphere
@@ -1321,7 +1321,11 @@ contains
 !*****************************************************************
 !> \brief Computes the growth shedule for CBMC type moves
 !>
-!> movetype: 1 = config moves; 2 = swap moves for flexible molecules; 3 = swatch moves for molecules with only 1 cut; 4 = swap moves for partially rigid molecules; 5 = swatch moves for molecules with more than 1 cuts
+!> \param movetype 1 = config moves;\n
+!> 2 = swap moves for flexible molecules;\n
+!> 3 = swatch moves for molecules with only 1 cut;\n
+!> 4 = swap moves for partially rigid molecules;\n
+!> 5 = swatch moves for molecules with more than 1 cuts
 !*****************************************************************
   subroutine schedule(igrow,imolty,index,iutry,iprev,movetype)
     logical::lfind(numax)
@@ -1847,15 +1851,17 @@ contains
   end subroutine schedule
 
 !*********************************************************************
-! determines the new geometry of the bond lengths and angles to be  **
-! rotated on the cone for rosenb.f                                  **
-! for old computes the rosenbluth weight for bending and determines **
-! the old bond lenghts, angles, and phi for growth                  **
-! bondlen(count) is the bondlengths from the grow bead to count     **
-! bendang(count) is the bond angle between iuprev,iufrom, and count **
-! phi(count) is the angle around the cone between count and 1       **
-! written by M.G. Martin 7-10-98 from geomnew and geomold           **
-! last modified by Neeraj Rai on 12/23/2008 for CG models           **
+!> \brief Determines the new geometry of the bond lengths and angles to be
+!> rotated on the cone for rosenb.f
+!>
+!> For old computes the rosenbluth weight for bending and determines
+!> the old bond lenghts, angles, and \a phi for growth
+!> \param bondlen(count) is the bondlengths from the grow bead to count
+!> \param  bendang(count) is the bond angle between iuprev,iufrom, and count
+!> \param  phi(count) is the angle around the cone between count and 1
+!> \par History
+!> written by M.G. Martin 7-10-98 from geomnew and geomold \n
+!> last modified by Neeraj Rai on 12/23/2008 for CG models
 !*********************************************************************
   subroutine geometry(lnew,iw,i,imolty,angstart,iuprev,glist,bondlen,bendang,phi,vvibtr,vbbtr,maxlen,wei_bend)
     use util_math,only:cone_angle
@@ -2343,13 +2349,14 @@ contains
   end subroutine geometry
 
 !**********************************************************
-! choose a bond angle                                   ***
-! equil is equilibrium bond angle                       ***
-! kforce is the force constant                          ***
-! betaT is 1/kT                                         ***
-! angle is the angle returned by this subroutine        ***
-! vangle is the energy of the angle                     ***
-! M.G. Martin                                           ***
+!> \brief choose a bond angle
+!>
+!> \param equil is equilibrium bond angle
+!> \param kforce is the force constant
+!> \param betaT is 1/kT
+!> \param angle is the angle returned by this subroutine
+!> \param vangle is the energy of the angle
+!> \author M.G. Martin
 !**********************************************************
   subroutine bendangle(equil,kforce,betaT,angle,vangle)
     real::equil,kforce,betaT,angle,vangle,rr,v1,v2
@@ -2393,22 +2400,20 @@ contains
   end subroutine bendangle
 
 !*****************************************************************
-! if iinit = 1 then it sets up the rotation matrix for the cone  *
-! using x,y,z as a unit vector pointing in the +z direction      *
-!*****************************************************************
-! if iinit = 2 then it creates a unit vector that has an angle   *
-! of alpha from the +z direction (previous vector) and an angle  *
-! of gamma (0,2Pi) around the cone circle and returns this as    *
-! x,y,z                                                          *
-!*****************************************************************
-! if iinit = 3 then this computes gamma (0,2Pi) for a unit       *
-! vector x,y,z with angle alpha from the -z direction            *
-!*****************************************************************
-! note that the rotation matrix is saved after each call so it   *
-! needs to be reset when you wish to use another cone            *
-!                                                                *
-! originally written prior to 1995                               *
-! last modified 02-12-2001 by M.G. Martin                        *
+!> note that the rotation matrix is saved after each call so it
+!> needs to be reset when you wish to use another cone
+!>
+!> \param iinit if iinit = 1 then it sets up the rotation matrix for the cone
+!> using x,y,z as a unit vector pointing in the +z direction \n
+!> if iinit = 2 then it creates a unit vector that has an angle
+!> of alpha from the +z direction (previous vector) and an angle
+!> of gamma (0,2Pi) around the cone circle and returns this as
+!> x,y,z \n
+!> if iinit = 3 then this computes gamma (0,2Pi) for a unit
+!> vector x,y,z with angle alpha from the -z direction
+!> \par History
+!> originally written prior to 1995 \n
+!> last modified 02-12-2001 by M.G. Martin
 !*****************************************************************
   subroutine cone(iinit,x,y,z,alpha,gamma)
     ! variables passed to/from the subroutine
@@ -2516,14 +2521,15 @@ contains
   end subroutine cone
 
 !***********************************************************
-! computes the bond length for a given vibration type    ***
-! vibtype is the vibration type                          ***
-! requil is the equilibrium bond length                  ***
-! kvib is the force constant for the bond length         ***
-! length is the bond length returned by this subroutine  ***
-! betaT is 1/kT                                          ***
-! vvib is the vibration energy for this bond             ***
-! M.G. Martin  2-4-98                                    ***
+!> \brief Computes the bond length for a given vibration type
+!>
+!> \param vibtype is the vibration type
+!> \param requil is the equilibrium bond length
+!> \param kvib is the force constant for the bond length
+!> \param length is the bond length returned by this subroutine
+!> \param betaT is 1/kT
+!> \param vvib is the vibration energy for this bond
+!> \author M.G. Martin  2-4-98
 !***********************************************************
   subroutine bondlength(vibtype,requil,kvib,betaT,length,vvib)
     integer::vibtype
@@ -2578,7 +2584,7 @@ contains
 !************************************************************
 !> \brief Performs a rotational configurational bias move
 !>
-!> IMPORTANT: all rigid beads should come after riutry
+!> \attention all rigid beads should come after riutry
 !************************************************************
   subroutine rigrot(lnew,lterm,iskip,imol,imolty,ibox,wadd)
     logical::lnew,ovrlap,lterm,ltors
@@ -2776,13 +2782,12 @@ contains
     return
   end subroutine rigrot
 
-! adds H-atoms to a linear carbon chain
-! Potential for methyl-group rotation
-! is: V = 0.5*E0*(1-cos(3*alpha)), where
-! alpha is Ryckaert torsion angle!
+!> \brief Adds H-atoms to a linear carbon chain
+!>
+!> Potential for methyl-group rotation
+!> is: V = 0.5*E0*(1-cos(3*alpha)), where
+!> alpha is Ryckaert torsion angle!
   subroutine explct(ichain,vmethyl,lcrysl,lswitch)
-
-! arguments
       integer::ichain,nngrow,negrow,i,iplus,imins,nn, imolty,iuend,ii,jj
       real::vmethyl,ch,cc,cch,ca,ah,hch2,hk,ck ,en0,aa1,b1,c1,dln1,a2,b2,c2,dln2,a3,b3,c3,x12,y12,z12,x32,y32 ,z32,xa,ya,za,r,rx,ry,rz,dr,ven,prob,a4,b4,c4,rn,hch ,ce,ratio
       real::oa,hoh,hoh2,oh,ok,om
@@ -3423,9 +3428,9 @@ contains
   end subroutine explct
 
 !********************************************************
-! Places hydrogens after the growth of the backbone of **
-! a molecule for linear, branched or cylic molecules.  **
-! Uses CDCBMC to grow them                             **
+!> \brief Places hydrogens after the growth of the backbone of
+!> a molecule for linear, branched or cylic molecules.
+!> Uses CDCBMC to grow them
 !********************************************************
   subroutine place(lnew,lterm,i,imolty,ibox,index,wplace)
     use util_math,only:cone_angle
@@ -3965,23 +3970,21 @@ contains
       return
   end subroutine place
 
-!******************************************************
-! Finshes the last two steps for Fixed Endpoint CBMC **
-!******************************************************
-! Originally completed by Collin Wick on 1-1-2000    **
-!******************************************************
-! SEE safeschedule.f FOR MORE INFORMATION ---        **
-!******************************************************
+!*************************************************************
+! Self-Adapting Fixed-Endpoint Configurational-Bias
+! Monte Carlo SAFE-CBMC
+!
+! Most work is in safeschedule, safecbmc.f, and close.f.
+!*************************************************************
 
-! lshit is used for diagnistics ---
-
-! iinit = 1  initial setup for two beads to go
-! iinit = 2  calculates closing probabilities
-! iinit = 3  does final crankshaft move
+!> \brief Finshes the last two steps for Fixed Endpoint CBMC
+!> \param iinit iinit = 1  initial setup for two beads to go \n
+!> iinit = 2  calculates closing probabilities
+!> iinit = 3  does final crankshaft move
+!> \see safeschedule.f FOR MORE INFORMATION
+!> \author Originally completed by Collin Wick on 1-1-2000
   subroutine safecbmc(iinit,lnew,i,iw,igrow,imolty,count,ux,uy,uz,vphi,vtor,wei_bv,lterm,movetype)
-
-      logical::lnew,lshit,lterm,ldo,lreturn
-
+      logical::lnew,lshit,lterm,ldo,lreturn ! lshit is used for diagnistics
       integer::igrow,imolty,count,counta,j,ja,ivib,iufrom,iuprev,iinit,iu,ju,ku,i,iv,juvib,jtvib,type,iu2,ib,iw,ntogrow,itor,ip,ichoi,ichtor,countb,bin,max,nu,iu1,dir,diracc,start,nchben_a,nchben_b,ibend,iopen,last,iclose,nchvib
 
       integer::it,jut2,jut3,jut4,movetype,lu,k,opencount
@@ -5597,47 +5600,30 @@ contains
       write(io_output,*) 'END SAFECMBC in ',myid,'. init: ',iinit
 #endif
       return
-
   end subroutine safecbmc
 
-!*************************************************************
-! Self-Adapting Fixed-Endpoint Configurational-Bias         **
-! Monte Carlo SAFE-CBMC                                     **
-!*************************************************************
-! Determines logic for a CBMC Move Between Fixed End Points **
-! for Linear, Branched, and Cyclic Molecules                **
-!*************************************************************
-! Originally completed by Collin Wick around 1-1-2000       **
-!*************************************************************
-
-!***************************************************************
-! Most work is in this subroutine, safecbmc.f, and close.f.   **
-!***************************************************************
-! Presently, works for linear molecules with rigid bond       **
-! lengths, and can (with little program changes) work for     **
-! branched molecules with rigid bonds, as long as it closes   **
-! at a binary or tertiary segment.                            **
-!***************************************************************
-! Does work for any branched molecule with flexible bond      **
-! lengths.                                                    **
-!***************************************************************
-
-!******************************************************************
-!                NEW LOGIC ONLY FOR SAFE-CMBC                    **
-!**  ----------------------------------------------------------  **
-! iend = beads to grow to                                        **
-! ipast = one bead past iend                                     **
-! inext = two beads past iend                                    **
-! ibef = one bead before iend                                    **
-! iwbef = two beads before iend                                  **
-! fclose(iu) = beads to calculate interaction with from iu       **
-! fcount(iu) = number of fcloses for iu                          **
-! COLLIN = MASTER of the known universe                          **
+!> \brief Determines logic for a CBMC Move Between Fixed End Points
+!> for Linear, Branched, and Cyclic Molecules
+!>
+!> Presently, works for linear molecules with rigid bond
+!> lengths, and can (with little program changes) work for
+!> branched molecules with rigid bonds, as long as it closes
+!> at a binary or tertiary segment. \n
+!> Does work for any branched molecule with flexible bond
+!> lengths.
+!> \par NEW LOGIC ONLY FOR SAFE-CMBC
+!> \b iend = beads to grow to \n
+!> \b ipast = one bead past iend \n
+!> \b inext = two beads past iend \n
+!> \b ibef = one bead before iend \n
+!> \b iwbef = two beads before iend \n
+!> \b fclose(iu) = beads to calculate interaction with from iu \n
+!> \b fcount(iu) = number of fcloses for iu \n
+!> \b COLLIN = MASTER of the known universe
+!> \author Originally completed by Collin Wick around 1-1-2000
 !******************************************************************
   subroutine safeschedule(igrow,imolty,islen,iutry,findex,movetype)
-
       logical::lcount,lpick,lterm,lfixed,lfix,lfind
-
       integer::igrow,imolty,count,counta,iw,ivib,iv,iu ,ju,iutry
       integer::j,ja,kickout,invtry,index,fintnum,fint,k ,islen
       integer::ffrom,fprev,flist,fnum,fnuma,findex ,countb,iv1
@@ -6213,36 +6199,30 @@ contains
   end subroutine safeschedule
 
 !***********************************************************
-! Takes three or four points and determines a point       **
-! that is a certain length from all of them               **
-! ALL LENGTHS MUST BE THE SAME -                          **
-!***********************************************************
-! This wonderful subroutine can also find a unit vector   **
-! connected to two other unit vectors with all the angles **
-! between them given.                                     **
-!***********************************************************
-! This mess was unfortunately created by Collin Wick      **
-! on December 1999, BUT IT DOES WORK                      **
+!> \brief Takes three or four points and determines a point
+!> that is a certain length from all of them
+!>
+!> This wonderful subroutine can also find a unit vector
+!> connected to two other unit vectors with all the angles
+!> between them given.
+!>
+!> \param iinit if iinit=1 it finds two possibilities to close 3 beads
+!> if iinit=2 it finds one possibility to close 4 beads
+!> if iinit=3 it finds a vector connected two others given
+!> \attention ALL LENGTHS MUST BE THE SAME
+!> \author This mess was unfortunately created by Collin Wick
+!> on December 1999, BUT IT DOES WORK
 !***********************************************************
   subroutine close(iinit,rx,ry,rz,bondl,angle,lterm)
-
       logical::lterm
-
       integer::iinit
-
       real::x,y,z,rx,ry,rz,length,lengtha,lengthb ,xa,ya,za,theta,thetac,ux,uy,uz,bondl,avar,bvar,cvar ,rxa,rya,rza ,lengthc,angle,rxf,ryf,rzf,var,dvar,a,bb,c
 
       dimension rx(6),ry(6),rz(6),x(4),y(4),z(4),ux(3),uy(3),uz(3)
       dimension angle(3)
-
 ! ---------------------------------------------------------------------
 ! Determines a point from three others with equal bond lengths
 
-!     *******************************************************
-! if iinit=1 it finds two possibilities to close 3 beads
-! if iinit=2 it finds one possibility to close 4 beads
-! if iinit=3 it finds a vector connected two others given
-!     *******************************************************
 #ifdef __DEBUG__
       write(io_output,*) 'START CLOSE in ',myid,'. iinit:',iinit
 #endif
@@ -6500,7 +6480,6 @@ contains
 #ifdef __DEBUG__
       write(io_output,*) 'END CLOSE in ',myid,'. iinit:',iinit
 #endif
-!     ---------------------------------------------------------------
 
       return
   end subroutine close
@@ -7096,7 +7075,7 @@ contains
 
           ! reset counthist
           counthist = 0
-          do j = 1, iring(imolty) 
+          do j = 1, iring(imolty)
              do k = 1, iring(imolty)
                 if (j.eq.k) cycle
                 histtot = 0
@@ -7128,7 +7107,7 @@ contains
     end do
   end subroutine opt_safecbmc
 
-! write some information about config performance ***
+!> \brief write some information about config performance
   subroutine output_cbmc_stats(io_output)
     integer,intent(in)::io_output
     integer::i,inb

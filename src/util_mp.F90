@@ -808,12 +808,12 @@ CONTAINS
 #endif
   END SUBROUTINE mp_group_free
 
+!> \brief  Given the number of elements on each processor (recvcount), this subroutine
+!>  sets the correct offsets (displs) to collect them on a single
+!>  array with contiguous elemets
   SUBROUTINE mp_set_displs( recvcount, displs, ntot, nproc )
-    !  Given the number of elements on each processor (recvcount), this subroutine
-    !  sets the correct offsets (displs) to collect them on a single
-    !  array with contiguous elemets
-    INTEGER, INTENT(IN) :: recvcount(:) ! number of elements on each processor
-    INTEGER, INTENT(OUT) :: displs(:)   ! offsets/displacements
+    INTEGER, INTENT(IN) :: recvcount(:) !< number of elements on each processor
+    INTEGER, INTENT(OUT) :: displs(:)   !< offsets/displacements
     INTEGER, INTENT(OUT) :: ntot
     INTEGER, INTENT(IN) :: nproc
     INTEGER :: i

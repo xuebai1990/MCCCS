@@ -175,7 +175,6 @@ CONTAINS
   end subroutine buildTripletTable
 
 !> \brief Return the angle between vector a, b in radians
-!>
   function bondAngle(a,b,positive)
     real::bondAngle
     real,intent(in)::a(3),b(3)

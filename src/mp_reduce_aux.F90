@@ -1,5 +1,6 @@
-!> \brief Reduce a distributed variable ps(dim) over the processors.
-!>     Save the result on either ps or the output variable psout.
+!> \file
+!> Reduce a distributed variable ps(dim) over the processors.
+!> Save the result on either ps or the output variable psout.
 !>
 !> This version uses a fixed-length buffer of appropriate (?) dim
     USE var_type,ONLY:DP
@@ -8,15 +9,14 @@
 #ifdef __MPI__
   include 'mpif.h'
 #endif
-    INTEGER,  INTENT(IN)    :: dim     ! size of the array
-    DATA_TYPE               :: ps(dim) ! array whose elements have to be reduced
-    INTEGER,  INTENT(IN)    :: comm    ! communicator
-    INTEGER,  INTENT(IN)    :: root    ! if root <  0 perform a reduction to all procs
-                                       ! if root >= 0 perform a reduce only to root proc.
+    INTEGER,  INTENT(IN)    :: dim     !< size of the array
+    DATA_TYPE               :: ps(dim) !< array whose elements have to be reduced
+    INTEGER,  INTENT(IN)    :: comm    !< communicator
+    INTEGER,  INTENT(IN)    :: root    !< if root <  0 perform a reduction to all procs
+                                       !< if root >= 0 perform a reduce only to root proc.
     INTEGER, PARAMETER :: maxb = __MSGSIZ_MAX
 #ifdef COMMON_BLOCK_NAME
-    DATA_TYPE :: buff(maxb)
-    ! the use of the common here could help the transfer of data to the network device
+    DATA_TYPE :: buff(maxb) !< the use of the common here could help the transfer of data to the network device
     COMMON / COMMON_BLOCK_NAME/ buff
 #else
     DATA_TYPE               :: psout(dim)

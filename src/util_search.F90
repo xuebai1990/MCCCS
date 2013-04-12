@@ -7,8 +7,8 @@ module util_search
   public::LookupTable,initiateTable,addToTable,indexOf,hunt,locate
 
   type LookupTable
-     integer::size !number of element in the table
-     integer,allocatable::list(:) !correspondence table
+     integer::size !< number of element in the table
+     integer,allocatable::list(:) !< correspondence table
   end type LookupTable
 
 CONTAINS
@@ -26,7 +26,9 @@ CONTAINS
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'initiateTable: allocation error',jerr)
   end subroutine initiateTable
 
-  !> \brief Add item to table, ignore if exist, increase table size by 2 if table is full and expand is set to .true., signal an error otherwise
+  !> \brief Add item to table
+  !>
+  !> Ignore if exist, increase table size by 2 if table is full and \a expand is set to .true., signal an error otherwise
   integer function addToTable(table,item,expand)
     type(LookupTable),intent(inout)::table
     integer,intent(in)::item
@@ -62,7 +64,7 @@ CONTAINS
 
   !> \brief look up item in table
   !>
-  !> Return value: index of item in table; 0 if not found
+  !> \return index of item in table; 0 if not found
   integer function indexOf(table,item)
     type(LookupTable),intent(inout)::table
     integer,intent(in)::item
@@ -78,7 +80,7 @@ CONTAINS
 
 !> \brief Hunt the index of a value in a monotonic array using hunting algorithm
 !>
-!> Given an array xx(1:n) and a value x, return index j such that x is (insofar as possible) centered in the subrange xx(j:j+mm-1). The values in xx must be monotonic, either increasing or decreasing. The returned value is not less than 1, nor greater than n.
+!> Given an array \a xx(1:n) and a value \a x, return index \a j such that \a x is (insofar as possible) centered in the subrange \a xx(j:j+mm-1). The values in \a xx must be monotonic, either increasing or decreasing. The returned value is not less than 1, nor greater than \a n.
   FUNCTION HUNT(XX,N,X,JO,MM) RESULT(J)
     INTEGER::J
     INTEGER,INTENT(IN)::N,JO,MM
@@ -137,7 +139,7 @@ CONTAINS
 
 !> \brief Locate the index of a value in a monotonic array using bisection
 !>
-!> Given an array xx(1:n) and a value x, return index j such that x is (insofar as possible) centered in the subrange xx[j:j+mm-1]. The values in xx must be monotonic, either increasing or decreasing. The returned value is not less than 1, nor greater than n.
+!> Given an array \a xx(1:n) and a value \a x, return index \a j such that \a x is (insofar as possible) centered in the subrange \a xx[j:j+mm-1]. The values in \a xx must be monotonic, either increasing or decreasing. The returned value is not less than 1, nor greater than \a n.
   FUNCTION LOCATE(XX,N,X,MM) RESULT(J)
     INTEGER::J
     INTEGER,INTENT(IN)::N,MM

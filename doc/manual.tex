@@ -25,6 +25,8 @@
 % dvips -P pdf -t letter -f manual.dvi -o manual.ps
 % ps2pdf manual.ps manual.pdf
 %
+% To create html web pages, use latex2html
+% latex2html -local_icons -split 5 -toc_depth 4 -toc_stars -t 'MCCCS 2.3 User Manual' -address http://maxwell8.chem.umn.edu -up_url http://maxwell8.chem.umn.edu -up_title 'Main MCCCS Page' manual 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Document history:
@@ -34,6 +36,8 @@
 % -updated by JMS 2/26/04, 4/21/04
 % -updated by NR 2/11/04
 % -updated by KMB 01/10 -- version 2.2
+% -updated by PB 04/12 -- version 2.3
+% -updated by RKL 07/12 -- version 2.4
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % LaTeX controls: 
@@ -41,22 +45,34 @@
 % in [] formatting- font size, paper size... columns
 \documentclass[12pt,letterpaper]{article}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Import Packages
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % If figures are required
 %\usepackage{epsf}
 %\usepackage{epsfig}
+\usepackage[hyphens]{url}
+\usepackage{hyperref}
+\usepackage{breakurl}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%% I don't like the default paper size
-% somehow even this screws up
-%\setlength{\oddsidemargin}{0in}
-%\setlength{\textwidth}{6.5in}
-%\setlength{\textheight}{9.0in}
-% online answer
-%http://www.rpi.edu/dept/acs/rpinfo/common/Computing/Consulting/Software/LaTeX/Hints/Margins.html
-\topmargin=-.5in     % topmargin is 1/2 inch (note negative value)
-\oddsidemargin=0in   % left margin is 1 inch on right-hand pages
-\evensidemargin=0in  % same for left-hand pages in twosided document
-\textwidth=6.5in     % leaves 1 inch for the right margin
-\textheight=9in      % 9 inches reserved for the text.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Set Page Layout
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\hoffset=0in
+\voffset=0in
+\topmargin=-0.5in % topmargin is 1/2 inch (note negative value)
+\headheight=0in
+\headsep=0in
+\footskip=15pt
+\oddsidemargin=0in % left margin is 1 inch on right-hand pages
+\evensidemargin=0in % same for left-hand pages in twosided document
+\marginparsep=0in
+\marginparwidth=0in
+\textwidth=6.5in % leaves 1 inch for the right margin
+\textheight=9.0in % 9 inches reserved for the text.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
 
@@ -66,7 +82,6 @@
 %%%%%%%                       TITLE PAGE
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 \centerline{\bf \Huge MC$^3$S}
 
 \vskip 24pt
@@ -75,16 +90,15 @@
 
 \vskip 24pt
 
-%\centerline{\bf \Large Manual, Version 2.1}
 \centerline{\bf \Large User Manual}
 
 \vskip 24pt
 
-\centerline{\bf \Large Version 2.2}
+\centerline{\bf \Large Version 2.3}
 
 \vskip 36pt
 
-\centerline{\large January 2010}
+\centerline{\large April 2012}
 
 \eject
 
@@ -101,6 +115,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
+\subsection{About This Manual}
 \noindent This manual is intended to explain the variables necessary for
 simulations carried out in the canonical ($NVT$), isobaric-isothermal
 ($NpT$), $NVT$-Gibbs or $NpT$-Gibbs ensemble.
@@ -109,28 +124,9 @@ The Lennard-Jones 12-6 potential is assumed for non-bonded interactions.
 Other functional forms, such as exponential-6, 9-6 or mmff, have been implemented
 but should be considered non-generalized and used with caution.
 
-%\section{New features in version 2.1}
-%\begin{itemize}
-%\item Automatic assignment of Ewald parameters and rcutchg, if requested
-%\item Thermodynamic integration
-%\item Expanded ensemble
-%\item Addition of external electric field
-%\item Calculation of solubility parameter, cohesive energy density, and heat of vaporization
-%\item Ability to use atom displacement 
-%\item rigid swaps for fully flexible molecules
-%\item Torsion potential using tabulated torsional potential
-%\item Modifying the energy subroutines so that it doesn't use the neutral charge groups for Ewald summation
-%\item Ability to not use Coulombic part in boltzmann weights
-%\item Ability to use different pressures in different boxes, input pressure in MPa instead of simulation units
-%\item Ability to use ghost ideal particles in the simulation, a number of particle offset, to prevent unnecessary memory usage  
-%\item Better way of excluding and including intra-molecular interactions
-%\item Bug fixes  
-%\item System charge neutrality check at an appropriate place
-%\item Extensive checks for the correctness of the fortran.4 input files for the molecule description part. Points the user where to look for a possible error while specifying LJ, stretch, bend, and torsion 
-%\end{itemize}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{New Features in MCCCS}
+\subsection{New Features in MCCCS Software Package}
+\subsubsection{Version 2.2}
 \begin{itemize}
 \item Addition of tabulated potentials
 \item Addition of multiple-center rotations with {\bf iurot}
@@ -140,40 +136,111 @@ but should be considered non-generalized and used with caution.
 \item Introduction of the test suite
 \end{itemize}
 
+\subsubsection{Version 2.1}
+\begin{itemize}
+\item Automatic assignment of Ewald parameters and rcutchg, if requested
+\item Thermodynamic integration
+\item Expanded ensemble
+\item Addition of external electric field
+\item Calculation of solubility parameter, cohesive energy density, and heat of vaporization
+\item Ability to use atom displacement 
+\item rigid swaps for fully flexible molecules
+\item Torsion potential using tabulated torsional potential
+\item Modifying the energy subroutines so that it doesn't use the neutral charge groups for Ewald summation
+\item Ability to not use Coulombic part in boltzmann weights
+\item Ability to use different pressures in different boxes, input pressure in MPa instead of simulation units
+\item Ability to use ghost ideal particles in the simulation, a number of particle offset, to prevent unnecessary memory usage  
+\item Better way of excluding and including intra-molecular interactions
+\item Bug fixes  
+\item System charge neutrality check at an appropriate place
+\item Extensive checks for the correctness of the fortran.4 input files for the molecule description part. Points the user where to look for a possible error while specifying LJ, stretch, bend, and torsion 
+\end{itemize}
+
 \newpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Revising the Code}
-For clarity and to assist future users, please bracket all changes to the code with the following lines:
+\subsection{Revising the Code}
+\paragraph{Documentation of code changes} should be properly made for clarity and to assist future users. Please bracket all changes to the code with the following lines:
 \begin{itemize}
-\item c --- [\textit{your initials}] (\textit{date})
-\item c --- [\textit{explain what changes were made or the purpose of the new code}]
+\item ! --- [\textit{your initials}] (\textit{date})
+\item ! --- [\textit{explain what changes were made or the purpose of the new code}]
 \item {\textit{new or revised code here}}
-\item c --- END [\textit{your initials}] (\textit{date})
+\item ! --- END [\textit{your initials}] (\textit{date})
 \end{itemize}
 
-\noindent Please note that both the serial and parallel versions of the code contain a subdirectory called {\bf TEST\_SUITE}.
-This test suite may be used to check for errors after revising the code.  See the {\bf README} file located within {\bf TEST\_SUITE} 
-for more information.
+\paragraph{Annotation} of functionalities and algorithms should be exercised, using the syntax of Doxygen (\url{http://www.stack.nl/~dimitri/doxygen}) to allow for the automatic generation of reference manual.
+
+For each entity in the code there are two (or in some cases three) types of descriptions, which together form the documentation for that entity; the brief description and the detailed description, both are optional. For subroutines and functions there is also a third type of description, the so-called in-body description, which consists of the concatenation of all comment blocks found within the body of the subroutine or function. As the name suggest, a brief description is a short one-liner, whereas the detailed description provides longer, more detailed documentation. An "in-body" description can also act as a detailed description or can describe a collection of implementation details. For the HTML output brief descriptions are also used to provide tooltips at places where an item is referenced.
+
+\begin{itemize}
+\item  To mark a comment block as a detailed description, start it with ``!$>$'', and use ``!!'' or ``!$>$'' to continuate a one-line comment into a multi-line comment.
+\item For the brief description, one could use the \textbackslash brief command with one of the above comment blocks. This command ends at the end of a paragraph, so the detailed description follows after an empty line.
+\item If you want to document the members of a file or type, it is sometimes desirable to place the documentation block after the member instead of before it. For this purpose you can use ``!$<$'' to start the comment block. Note that this also works for the parameters of a function.
+\item For functions one can use the \textbackslash param command to document their arguments and then use [in], [out], [in,out] to denote the direction. For inline documentation this is also possible by starting with the direction attribute.
+\item Besides putting the comment blocks in front of the declaration or definition of a module, subroutine, function or type, or in front or after one of its members, you can put your documentation blocks elsewhere (except inside the body of a subroutine/function or a normal comment block) with the help of a structural command, which (like all other commands) start with a backslash (\textbackslash), followed by the command name and one or more parameters. Structural commands lead to some duplication of information, so you should avoid using them if possible. There are sometimes, however, reasons to use structural commands to place the documentation blocks in alternative places, for example, to document a file, when there is no such thing as "in front of a file".
+\begin{description}
+\item[\textbackslash file] to document a file.
+\item[\textbackslash fn] to document a function.
+\item[\textbackslash var] to document a variable.
+\item[\textbackslash def] to document a \#define.
+\item[\textbackslash typedef] to document a type definition.
+\end{description}
+\end{itemize}
+
+Here is a example:
+\begin{verbatim}
+!> \brief Build the restriction matrix for the aggregation method.
+!>
+!> Detailed explanation of what the subroutine does.
+!> Some more information,
+!> And more...
+!>
+!> \param A,aggr information about the aggregates
+!> (multiple arguments can be documented together using a comma
+!> separated list)
+!> \param A_ghost mask matrix for \b A (bold font A)
+!> \return Restrict the restriction matrix
+!> \remarks It uses advanced algorithms
+!> \note This is only an example
+!> \attention But you need to pay attention
+!> \warning Otherwise it is bad
+!> \bug None
+!> \todo Handle special case
+!> \author John Smith
+!> \date 2012/04/01
+function IntRestBuild(A,aggr,A_ghost) result(Restrict)
+  implicit none
+  Type(SpMtx),intent(in) ::A !< our fine level matrix
+  Type(Aggrs),intent(in) ::aggr
+  Type(SpMtx),intent(out)::A_ghost !< Our restriction matrix
+\end{verbatim}
+
+For more details on how to use Doxygen, please refer to its documentation (\url{http://www.stack.nl/~dimitri/doxygen/docblocks.html}).
+
+\paragraph{Test suite} is available under the {\bf tests} sub-directory. You should use it to check for errors after any non-trivial modification to the code. Please see the {\bf README} file for more information on the individual test cases.
+
+\paragraph{Management of code updates} is done through the distributed version control system, git (\url{http://git-scm.com}), and there is a set of group guidelines (\url{http://maxwell8.chem.umn.edu/index.php/Git_Guidelines}) which you should read and familiarize yourself with. Every new feature as well as bug fix will need to be merged into the group canonical code repository before your graduation, so it is advisable to adopt its usage early in the process.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Compiling and Running the Code}
+\subsection{Compiling and Running the Code}
 \label{compile}
-\noindent The many files that comprise the MCCCS code are located in directories titled 
-{\bf MCCCS-2010-SERIAL} and {\bf MCCCS-2010-PARALLEL} and are available for download on the internal group website.
-It is necessary to set up all requisite input files and compile the code prior to running a simulation.
+\noindent The many files that comprise the MCCCS software package are organized into sub-directories, including {\bf doc} (tex source file of the user manual), {\bf src}, (Fortran source code), and {\bf tests},  and are available through git.
+It is necessary to compile the code and set up all necessary input files prior to running a simulation.
 
-\noindent Before compiling the code, check to ensure that all logical parameters in {\textbf{control.inc}} conform 
-to the desired system.  Changes in any {\textbf{.inc}} file will not take effect until the code is (re)compiled.  
-If desired, change the name of the executable in {\textbf{Makefile}} before compiling.
-To compile the code, choose the appropriate compiler in {\textbf{Makefile}} and 
-execute the command {\textbf{make}} while in the directory that contains the MCCCS code.  
-To completely rebuild the code from the source, execute {\textbf{make clean}} followed by {\textbf{make}}.
+\noindent Before actually compiling the code, you first need to generate a Makefile. CMake (\url{http://www.cmake.org}) is currently used for this step. It is advisable to create a separate directory, outside the root directory of the code to avoid contaminating the latter and to better manage executables on different machines that share the same file system. You can select compilers by setting the FC environment variable, and toggle the default precision of floating number (DOUBLE\_PRECISION) and whether or not to use MPI (USE\_MPI), OpenMP (USE\_OPENMP), and our own implementation of certain math functions instead of using library functions that are slower (USE\_OWN). After running cmake, execute command {\textbf{make}} while still in the same directory. To completely rebuild the code (only necessary when switching to a different machine or after loading a different compiler), execute {\textbf{make clean}} followed by {\textbf{make}}. The code will be generated in {\bf src} sub-directory. This often boils down to:
+\begin{verbatim}
+$ mkdir -p MCCCS/exe-itasca
+$ cd MCCCS/exe-itasca
+$ FC=ifort cmake -DDOUBLE_PRECISION=ON -DUSE_MPI=OFF \
+-DUSE_OPENMP=OFF -DUSE_OWN=ON ~/MCCCS/topmon
+# 1. assuming the code is in ~/MCCCS/topmon directory;
+# 2. ccmake can be used in place of cmake for a graphical interface
+$ make -j8 # build using 8 cores
+\end{verbatim}
 
-\noindent Sample input files are located within the {\bf TEST\_SUITE} sub-directory.
-The input file(s) ({\bf fort.4} and possibly others) should be placed in a different directory from the code. 
-After setting all necessary variables in {\textbf{fort.4}} and verifying that any other necessary input files are
-included, navigate to the MCCCS directory and type the name of the executable (given in {\bf Makefile}) to run the code.
+\noindent Vendor compilers often produce faster code; the {\bf ifort} Intel compiler is often the choice for machines using Intel processors, which include the latest Macs. Intel provides the Linux version of its compiler family free of charge for non-commercial uses (\url{http://www.intel.com/software/products/noncom}). A set of options have already been defined for a few common compilers (GNU, G95, Intel, PGI, IBM XL, SGI MIPSpro, and NAG) depending on it is a RELEASE or DEBUG build.
+
+\noindent When preparing the input files, the sample files in the {\bf tests} sub-directory can be used as a starting point. After setting all the variables in the input file(s) ({\bf fort.4} and possibly others) and verifying that all other required files are included, type the name of the executable (be sure to include the path) to run the simulation.
 
 \newpage
 
@@ -196,6 +263,8 @@ always generate the same sequence of pseudo-random numbers, which is useful for
 debugging.  Change the seed to any other integer to generate a different sequence.  
 
 \noindent{\textbf{iounit:}} Set to 2 to print to a file.  Set to 6 to print to the screen.
+
+\noindent{\textbf{hplc:}} Specifies whether the simulation contains HPLC bonded chains.
 
 \noindent{\bf{L\_add:}} Used to add particles to the system to increase a box to the desired size.
 The particles may be ghost atoms, helium atoms, L-J particles or any other particles with a single interaction site.
@@ -225,6 +294,8 @@ The particles must have a single interaction site.
 standard output. Should be set to true.
 
 \noindent{\textbf {lverbose:}} Yields verbose output of the input variables if true.
+
+\noindent{\textbf {lmovie\_vrb:}} Controls verboseness of movie file. If false, doesn't print connectivity.
 
 \noindent{\bf{l\_Coul\_CBMC:}} If true, uses the Coulombic energy during the Boltzmann weight calculation.
 Normally true.
@@ -402,6 +473,21 @@ in {\textbf{control.inc}}).
 \noindent{\textbf {rcutnn:}} The nearest neighbor bead-bead cutoff for the neighbor
 list.  Not normally used.
 
+\noindent{\textbf {numberDimensionIsIsotropic:}} The number
+of dimensions that are isotropic. The value can be 3 (
+indicating the system is isotropic in all directions), 2
+(isotropic in the x and y directions), or any other number
+(non-isotropic). It is customary to take the z axis as the
+special direction in systems isotropic in two directions
+(e.g. slit pore, external field). When this parameter is set
+to 2 or 3, the maximum displacements for atom translation,
+COM translation, and rigid-body rotation will be averaged
+across all the equivalent directions during their updating
+and when reading the restart file. This value must be set
+appropriately for production runs, but in initial
+equilibration one may use different maximum displacements to
+allow for rapid equilibration and status monitoring.
+
 \noindent{\textbf {nchain:}} The total number of molecules in the simulation.
 
 \noindent{\textbf {nmolty:}} The number of different molecule types in the
@@ -554,6 +640,10 @@ This variable denotes the maximum amount of the chain to keep rigid.
 \noindent{\textbf {lsetup:}} If true, try to automatically setup the bead-bead
 potential types.  Only for linear molecules.  Experimental.  Use with caution.
 
+\noindent{\textbf {lhplc\_c:}} If {\textbf{lhplc}} is true, this must be included. This variable
+should be between {\textbf{lsetup}} and {\textbf{isolute}}. If true, the molecule type is an HPLC bonded chain
+and special rules are applied for SAFE-CBMC.
+
 \noindent{\textbf {isolute:}} Specifies how often to write the configuration of this molecule 
 to the {\textbf{fort.11}} for later analysis.
 Identical to {\textbf{imov}} but specific to this type of molecule.
@@ -562,6 +652,13 @@ Unless specifically needed, a value larger than {\textbf {ncycles}} is recommend
 \noindent{\textbf {eta:}} Specifies any additional potential energy to be added 
 uniformly to each molecule of this type in a particular simulation box.  Usually 0.
 There must be one value for each simulation box.
+
+\noindent{\textbf {nhplc\_sca, hplc\_sca:}} If {\textbf{lhplc\_c}} is true, these must be included
+They are specified together on a new line between the {\textbf{maxgrow}} and {\textbf{lq14scale}} lines. 
+{\textbf{nhplc\_sca}} is the number of side chain atoms in the molecule and {\textbf{hplc\_sca}} are their bead
+numbers. For example, if the bonded chain were O$_{3}$-Si-O-Si[(CH$_{3}$)$_{2}$]-C8, 
+{\textbf{nhplc\_sca}} would be two, and the bead numbers for the two bracketed CH$_{3}$ groups would
+be provided for {\textbf{hplc\_sca}}.
 
 \noindent{\textbf{lq14scale:}} If true, 1-4 charge-charge interactions need to calculated. 
 Usually true for the TraPPE force field.  True for acrylates and diols.
@@ -736,8 +833,6 @@ which can be calculated dividing {\textbf {boxlx}} by {\textbf {inix}}.
 %                  write(iou,*) 'dx,dy,dz',dx,dy,dz
 %                  if (iwarn .ne. 0) stop
 
-
-
 \noindent{\textbf {nchoiq:}} This variable specifies the number of times to call {\textbf
 {flucq.f}} to optimize the fluctuating charge models in this box and is used only for
 polarizable models.
@@ -747,7 +842,6 @@ For an $NpT$ simulation a value of $10^3$ is appropriate, while $10^{-3}$ is a g
 for an $NVT$ simulation.
 The difference is due to different units for the two ensembles.
 % One may discuss how rmvol is related to the system size.
-
 
 \noindent{\textbf {tavol:}} Specifies the target acceptance rate for volume
 moves.  Reasonable values for equilibration and production might be 0.4 and 0.5, 
@@ -789,7 +883,7 @@ there is approximately one accepted volume move every 10 cycles.
 \noindent{\textbf {pmvlmt:}} The probability to perform a volume move on each box.
 Must be one probability for each simulation box.
 
-\noindent{\textbf {nvolb:} For the $NVT$-Gibbs ensemble, the number of pairs of
+\noindent{\textbf {nvolb:}} For the $NVT$-Gibbs ensemble, the number of pairs of
 boxes on which to perform volume exchange moves.
 
 \noindent{\textbf {pmvolb:}} The probability to perform a volume exchange on
@@ -1040,9 +1134,7 @@ the reciprocal space portion of the Ewald sum is negligible.  There must be {\bf
 is applied twice.  Necessary for the smaller (4x6; 20x26~{\AA})
 RPLC set-up.  There must be {\textbf{nbox}} values.   
 
-\noindent{\textbf{lrplc:}} If true, there are special directions for SAFE-CBMC.
-Needed for ODS chains in RPLC simulations.
-There must be {\textbf{nmolty}} values.
+\noindent{\textbf{lrplc:}} NOTE: This variable is no longer used! See {\textbf{lhplc}}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Input and Output Files}
@@ -1095,12 +1187,12 @@ $x$, $y$ and $z$ coordinates and the charge, $q$, of molecule {\bf nchain} \\
 \end{tabular}
 \end{center}
 
-\noindent{\bf control.inc}
-This file is located in the MCCCS directory with the other code files, so technically it is not an input file.    
+\noindent{\bf sim\_system.F90}
+Old name {\bf control.inc}. This file is located in the MCCCS directory with the other code files, so technically it is not an input file.    
 It is important, however, to check all parameters in {\bf control.inc} prior to running a simulation.  
 Individual parameters are explained within {\bf control.inc}.
 Remember that changes in any {\bf .inc} file do not take place until the code is recompiled (see section \ref{compile}).
-Array dimensions are also set in {\bf control.inc}; thus, an ``array out of bounds'' error may require changing the array dimensions and recompiling the code.
+Most arrays are dynamically allocated, but a few still use bounds defined in {\bf control.inc}; thus, an ``array out of bounds'' error may require changing the array dimensions and recompiling the code.
 
 \noindent{\bf input\_struc.xyz}
 Only necessary if {\bf lbranch} in {\textbf{fort.4}} is true for any molecule.  If so, this is where the structure of the molecule is specified.  
@@ -1412,12 +1504,14 @@ in a {\bf fort.4} file.  Since we are starting from scratch ({\it i.e.}, we do n
 a {\bf fort.77} restart file), we set {\bf linit} to true in {\bf fort.4}.  
 In this case, the box lengths for both simulation boxes
 will be read from {\bf fort.4} and we try to pick densities that
-correspond roughly to a liquid and a vapor.  We place between 10 and 33\%
+correspond roughly to a liquid and a vapor. We place between 10 and 33\%
 of the molecules in the vapor box.  For example, if we are simulating 300 molecules
 ({\bf nchain} = 300), then we might put 50 molecules in the vapor phase and use 29~{\AA} 
 and 38~{\AA} as box lengths for the liquid and vapor phases, which
 correspond to 0.55 and 0.048~g~cm$^{-3}$, respectively.
-%
+
+{\bf Note:} For VLE simulations in the Gibbs ensemble, the volume of the vapor phase should always be larger than the volume of the liquid phase. Making the volume of the vapor phase (highly compressible) smaller than the volume of the liquid phase (less compressible) allows for huge fluctuations in the volume because the volume of the liquid has to change only by a relatively small amount to allow for a relatively huge change in the volume of the vapor phase.
+
 \noindent Split up the attempted Monte Carlo move probabilities so that we
 perform {\sl no} volume moves ({\bf pmvol} = 0) and evenly divide the
 probability into CBMC, translation and rotation by setting {\bf pmcb}
@@ -1640,8 +1734,6 @@ U_{\textrm{field}} & = & -\mu \cdot E \\
 & = & -q * r_z * E
 \end{eqnarray*}
 
-
-
 %\vfill \eject
 
 %
@@ -1822,16 +1914,7 @@ U_{\textrm{field}} & = & -\mu \cdot E \\
 %\vskip -14pt
 %}
 
+\end{document}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%                       END OF THE DOCUMENT
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\end{document}
-
-
-
-
-   
-
-
-

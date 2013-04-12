@@ -29,19 +29,21 @@ MODULE topmon_main
    ,vstart(:),vend(:),pres(:),molvol(:),speden(:)&
    ,aver1(:,:,:),stdev1(:,:,:),errme1(:,:,:),bccold1(:,:,:),baver1(:,:,:,:)& !< accumulators for solubility parameter and heat of vaporization (Neeraj)
    ,aver(:,:),stdev(:,:),errme(:,:),bccold(:,:),baver(:,:,:) !< (j,ibox): properties of ibox; j =
-  ! ---------------------------------------------------------
-  ! 1                                              = specific density
-  ! 2                                              = pressure
-  ! 3                      to (2+nEnergy)          = energies
-  ! 1+(2+nEnergy)          to (2+nEnergy)+  nmolty = chemical potential
-  ! 1+(2+nEnergy)+  nmolty to (2+nEnergy)+2*nmolty = square-end-to-end-length
-  ! 1+(2+nEnergy)+2*nmolty to (2+nEnergy)+3*nmolty = number density
-  ! 1+(2+nEnergy)+3*nmolty to (2+nEnergy)+4*nmolty = mole fraction
-  ! 1+(2+nEnergy)+4*nmolty                         = surface tension
-  ! 2+(2+nEnergy)+4*nmolty                         = system volume
-  ! 3+(2+nEnergy)+4*nmolty                         = enthalpy inst
-  ! 4+(2+nEnergy)+4*nmolty                         = enthalpy ext
-  ! ---------------------------------------------------------
+  !< \verbatim
+  !< ---------------------------------------------------------
+  !< 1                                              = specific density
+  !< 2                                              = pressure
+  !< 3                      to (2+nEnergy)          = energies
+  !< 1+(2+nEnergy)          to (2+nEnergy)+  nmolty = chemical potential
+  !< 1+(2+nEnergy)+  nmolty to (2+nEnergy)+2*nmolty = square-end-to-end-length
+  !< 1+(2+nEnergy)+2*nmolty to (2+nEnergy)+3*nmolty = number density
+  !< 1+(2+nEnergy)+3*nmolty to (2+nEnergy)+4*nmolty = mole fraction
+  !< 1+(2+nEnergy)+4*nmolty                         = surface tension
+  !< 2+(2+nEnergy)+4*nmolty                         = system volume
+  !< 3+(2+nEnergy)+4*nmolty                         = enthalpy inst
+  !< 4+(2+nEnergy)+4*nmolty                         = enthalpy ext
+  !< ---------------------------------------------------------
+  !< \endverbatim
   integer,allocatable::io_box_movie(:),nminp(:),nmaxp(:),ncmt_list(:,:),ndist(:,:)& !< GCMC reweighting histograms
    ,mnbox(:,:),solcount(:,:),nccold1(:,:,:),nccold(:,:)
 
@@ -1099,7 +1101,7 @@ contains
     use util_files,only:get_iounit
     use util_search,only:indexOf
     use util_memory,only:reallocate
-    use sim_particle,only:allocate_neighbor_list
+    use sim_particle,only:allocate_neighbor_list,ctrmas
     use zeolite
     use energy_kspace,only:calp,allocate_kspace
     use energy_pairwise,only:init_energy_pairwise,rzero,epsnx,type_2body

@@ -14,9 +14,7 @@ MODULE prop_pressure
   public::pressure
 
 contains
-!    *****************************************************
-! calculates the pressure for a configuration.    **
-!    *****************************************************
+!> \brief Calculates the pressure for a configuration.
   subroutine pressure( press, surf, ibox )
 
     real(kind=dp)::press,repress,srij

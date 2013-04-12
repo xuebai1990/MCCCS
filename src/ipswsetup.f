@@ -28,7 +28,7 @@
                read(35,*) (awell(j,k,i), k = 1,nunit(i))
             end do
          end if
-      end do 
+      end do
       if (nw.lt.tnw) then
          write(io_output,*) 'increase nw in ipswpar to ', tnw
          call err_exit(__FILE__,__LINE__,'',myid+1)
@@ -158,7 +158,7 @@
                write(io_output,*) i, lwell(i), nwell(i)
             else
                write(io_output,*) i, lwell(i), 'not defined'
-            end if 
+            end if
          end do
          write(io_output,*) 'lstagea,lstageb,lstagec', lstagea,lstageb,lstagec
          write(io_output,*) 'etais, lambdais', etais,lambdais

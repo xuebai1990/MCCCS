@@ -22,7 +22,7 @@ MODULE energy_pairwise
   public::sumup,energy,boltz,coru,init_energy_pairwise,exsix,ljpsur,type_2body
 
   real,parameter::a15(2)=(/4.0E7_dp,7.5E7_dp/) !< 1-5 correction term for unprotected hydrogen-oxygen interaction; 1 for ether oxygens, 2 for alcohol oxygens
-  !OLD VALUES: a15(2)=/17.0**6,16.0**6/)
+  !< OLD VALUES: a15(2)=/17.0**6,16.0**6/)
   integer,allocatable::atom_type(:),nonbond_type(:)
 
   integer,allocatable::vdWsplits(:,:),electsplits(:,:)
@@ -36,19 +36,19 @@ MODULE energy_pairwise
 
 ! NSIX.INC
 ! ***************************************************
-! stores interaction parameters for 9-6 potential *
+! stores interaction parameters for 9-6 potential
 ! ***************************************************
   integer,parameter::nxatom=5 !< for ninesix
   real,public::rzero(nxatom*nxatom),epsnx(nxatom*nxatom),shiftnsix(nxatom*nxatom)
 
 ! ***********************************************************
-! parameters for Generalized Lennard Jones Potential  ***
+! parameters for Generalized Lennard Jones Potential
   real,public::n0,n1
 ! repulsive part
   parameter(n0=12.0E0_dp)
 ! attractive part
   parameter(n1=6.0E0_dp)
-! Ref:  J. Chem. Phys. 120, 4994 (2004)         ****
+! Ref:  J. Chem. Phys. 120, 4994 (2004)
 ! ***********************************************************
 
 ! MERCK.INC
@@ -58,11 +58,11 @@ MODULE energy_pairwise
 contains
 !*****************************************************************
 !> \brief Calculates the total potential energy for a configuration.
-!
-!> ovrlap: logical, true for substantial atom overlap
-!> v*: energies
-!> ibox: box number
-!> lvol: true if called from volume.f, no output of summary infomation
+!>
+!> \param ovrlap logical, true for substantial atom overlap
+!> \param v* energies
+!> \param ibox box number
+!> \param lvol true if called from volume.f, no output of summary infomation
 !******************************************************************
   subroutine sumup(ovrlap,v,ibox,lvol)
     use energy_kspace,only:recipsum
@@ -681,20 +681,20 @@ contains
 !*****************************************************************
 !> \brief Calculates the total potential energy for a configuration.
 !>
-!> i: calculate the energies associated with chain i
-!> imolty: molecule type of chain i
-!> v*: energies
-!> flagon: flag for old(flagon=1)/new(flagon=2) configurations
-!> ibox: box number of chain i
-!> istart, iuend: calculate energies from bead istart to bead iuend for chain i
-!> lljii: whether to include intramolecular LJ interactions
-!> ovrlap: atom overlap
-!> ltors: whether to calculate torsional energy
-!> lcharge_table: whether need to set up charge interaction table; true if called from CBMC
-!> lfavor:
+!> \param i calculate the energies associated with chain i
+!> \param imolty molecule type of chain i
+!> \param v* energies
+!> \param flagon flag for old(flagon=1)/new(flagon=2) configurations
+!> \param ibox box number of chain i
+!> \param istart, iuend calculate energies from bead istart to bead iuend for chain i
+!> \param lljii whether to include intramolecular LJ interactions
+!> \param ovrlap atom overlap
+!> \param ltors whether to calculate torsional energy
+!> \param lcharge_table whether need to set up charge interaction table; true if called from CBMC
+!> \param lfavor
 !*****************************************************************
   subroutine energy(i,imolty,v,flagon,ibox,istart,iuend,lljii,ovrlap,ltors,lcharge_table,lfavor,lAtom_traxyz)
-    use sim_particle,only:lnn
+    use sim_particle,only:lnn,ctrmas
     use energy_intramolecular,only:U_torsion
     use energy_3body,only:U3MolSys
     use energy_4body,only:U4MolSys
@@ -1157,18 +1157,18 @@ contains
 !> \brief Calculates the potential energy and the boltzmann factor
 !>       for ichoi trial positions.
 !>
-!> lnew: true for new configurations
-!> lfirst: true for insertion of the first bead in swap moves
-!> ovrlap: logical variable, true for walk termination
-!> i: calculates Boltzmann weights for the newly-grown beads in chain i
-!> icharge: usually identical to i
-!> imolty: molecule type of chain i
-!> ibox: box number of chain i
-!> ichoi: number of trial positions
-!> iufrom: the bead from which the new beads were grown
-!> ntogrow: number of new beads that have been grown
-!> glist: the list of new beads that have been grown; ntogrow entries
-!> maxlen: maximum possible distance of the newly-grown beads from iufrom
+!> \param lnew true for new configurations
+!> \param lfirst true for insertion of the first bead in swap moves
+!> \param ovrlap logical variable, true for walk termination
+!> \param i calculates Boltzmann weights for the newly-grown beads in chain i
+!> \param icharge usually identical to i
+!> \param imolty molecule type of chain i
+!> \param ibox box number of chain i
+!> \param ichoi number of trial positions
+!> \param iufrom the bead from which the new beads were grown
+!> \param ntogrow number of new beads that have been grown
+!> \param glist the list of new beads that have been grown; ntogrow entries
+!> \param maxlen maximum possible distance of the newly-grown beads from iufrom
 !*****************************************************************
   subroutine boltz(lnew,lfirst,ovrlap,i,icharge,imolty,ibox,ichoi,iufrom,ntogrow,glist,maxlen)
     use sim_particle,only:lnn
@@ -1698,7 +1698,7 @@ contains
   end subroutine boltz
 
 ! **********************************
-! tail-corrections in energy ***
+!> \brief tail-corrections in energy ***
 ! **********************************
   function coru(imolty,jmolty,rho,ibox)
 
@@ -1849,12 +1849,6 @@ contains
           exit cycle_read_atoms
        end if
     END DO CYCLE_READ_ATOMS
-
-    ! do j=1,nntype
-    ! if (sigi(j).ne.0.or.epsi(j).ne.0.or.mass(j).ne.0.or.qelect(j).ne.0) then
-    ! write(104,'(I3,1X,I1,1X,F8.5,1X,F9.4,1X,F7.4,1X,F11.7,1X,A,1X,A)') j,1,sigi(j),epsi(j),qelect(j),mass(j),trim(chemid(j)),'#'//trim(chname(j))
-    ! end if
-    ! end do
 
     nmix=nntype*nntype
 
@@ -2471,10 +2465,9 @@ contains
     return
   end function lininter_elect
 
-!     **************************************************************
-! calculates the energy using the exp-6 potential       ***
-! parameters defined in suijtab.f  M.G. Martin          ***
-!     **************************************************************
+!> \brief calculates the energy using the exp-6 potential
+!> parameters defined in suijtab.f
+!> \author M.G. Martin
   function exsix(rijsq,ntij)
       real::rijsq,rij,exsix
       integer::ntij
@@ -2485,10 +2478,9 @@ contains
       return
   end function exsix
 
-!     ***************************************************
-! calculates the energy of the 9-6 potential ***
-! parameters defined in suijtab.f  JMS       ***
-!     ***************************************************
+!> \brief calculates the energy of the 9-6 potential
+!> parameters defined in suijtab.f
+!> \author JMS
   function ninesix(rijsq,ntij)
       real::rijsq,rij,ror,ninesix
       integer::ntij
@@ -2503,15 +2495,13 @@ contains
       return
   end function ninesix
 
-!  ********************************************************************
-! calculates the energy of the Generalized Lennard Jones
-! potential                                               ***
-! parameters defined  poten.inc           ***
-!  *******************************************************************
-! Also you should make sure that the rcut you choose
-! is .gt. sigma*(2**(2/n0)) (because currently tail corrections
-! are evaluated with this assumption which is rarely incorrect.)
-!  ********************************************************************
+!> \brief calculates the energy of the Generalized Lennard Jones
+!> potential
+!>
+!> parameters defined  poten.inc \n
+!> Also you should make sure that the rcut you choose
+!> is .gt. sigma*(2**(2/n0)) (because currently tail corrections
+!> are evaluated with this assumption which is rarely incorrect.)
   function genlj (rijsq,sr2,epsilon2)
       real::rijsq,rij,srij,sr2,epsilon2,genlj
 
@@ -2543,9 +2533,7 @@ contains
       return
   end function genlj
 
-!    *********************************************************
-! calculates energy for a polymeric surfactant bead.  **
-!    *********************************************************
+!> \brief calculates energy for a polymeric surfactant bead.
   function ljpsur ( rijsq, ntij )
 
       real::ljpsur, rijsq, sr, sr6
@@ -2574,10 +2562,9 @@ contains
       return
   end function ljpsur
 
-!   ******************************************************************
-! calculates the energy using the Buffered 14-7 potential   ***
-! parameters defined in suijtab.f          Bin Chen         ***
-!   ******************************************************************
+!> \brief calculates the energy using the Buffered 14-7 potential
+!> parameters defined in suijtab.f
+!> \author Bin Chen
   function mmff(rijsq,ntij)
       real::rijsq,mmff,rs2,rs1,sr1,sr7,rs7
       integer::ntij
@@ -2790,24 +2777,24 @@ contains
   end subroutine read_tabulated_potential_pair
 
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-!ccc  Calculates nonbonding van der Waals and electrostatic potential
-!ccc  using linear interpolation between two points
-!ccc  requires file: fort.43 -- vdW, fort.44 -- Q
-!ccc    fort.43: number of tabulated potentials, potential number,
-!ccc  number of points per angstrom, tabulated potential
-!ccc  (repeat last three parts for each additional potential)
-!ccc  for unlike interactions, list 1-2 and 2-1
-!ccc  separate potentials with 1000
-!ccc  make sure potential does not go up to infinity!
-!ccc  bead type numbers should be defined in suijtab, but it doesn't
-!ccc  matter what they are (the parameters aren't used)
-!ccc  KM 12/03/08
-!ccc    fort.44: number of tabulated potentials, potential number,
-!ccc  number of points per angstrom, tabulated potential
-!ccc  (repeat last three parts for each additional potential)
-!ccc  for unlike interactions, list 1-2 and 2-1
-!ccc  separate potentials with 1000
-!ccc  KM 04/23/09
+!>  Calculates nonbonding van der Waals and electrostatic potential
+!>  using linear interpolation between two points \n
+!>  requires file: fort.43 -- vdW, fort.44 -- Q \n
+!>    fort.43: number of tabulated potentials, potential number,
+!>  number of points per angstrom, tabulated potential
+!>  (repeat last three parts for each additional potential) \n
+!>  for unlike interactions, list 1-2 and 2-1 \n
+!>  separate potentials with 1000 \n
+!>  make sure potential does not go up to infinity! \n
+!>  bead type numbers should be defined in suijtab, but it doesn't
+!>  matter what they are (the parameters aren't used) \n
+!>  KM 12/03/08 \n
+!>    fort.44: number of tabulated potentials, potential number,
+!>  number of points per angstrom, tabulated potential
+!>  (repeat last three parts for each additional potential) \n
+!>  for unlike interactions, list 1-2 and 2-1 \n
+!>  separate potentials with 1000 \n
+!>  KM 04/23/09
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
   subroutine init_tabulated_potential_pair(lprint)
     use sim_system,only:L_vdW_table,L_elect_table

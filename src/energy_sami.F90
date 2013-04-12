@@ -14,22 +14,14 @@ MODULE energy_sami
 ! Sami's parameters: to be used with lsami = .true. AND lmuir = .true.
   parameter ( alpha1=21.162E0_dp, alpha2=-21.162E0_dp, beta1=661.6E0_dp, beta2=6616.0E0_dp, tau1=-32, tau2=-16 )
 contains
-!    *******************************
-! Set-Up SAMI's potentials. **
-!    *******************************
+!> \brief Set-up SAMI's potentials
   subroutine susami
-
       real::hsig,heps,tsig,teps
-
       parameter ( hsig=4.220E0_dp, heps=110.68816E0_dp,  tsig=3.527E0_dp, teps=79.982210E0_dp )
-
       real::rcsami
       integer::ij
-
 ! --------------------------------------------------------------------
-
       rcsami = 2.5E0_dp*tsig
-
       sij(1)=hsig
       sij(2)=0.5E0_dp*(hsig+tsig)
       sij(3)=sij(2)
@@ -65,21 +57,13 @@ contains
 ! end do
 
       return
-
-! ----------------------------------------------------------------------------
-
   end subroutine susami
 
-!    *********************************************************
-! calculates SAMI's LJ and 12+3 energy for a bead.    **
-!    *********************************************************
+!> \brief Calculates SAMI's LJ and 12+3 energy for a bead
   function ljsami( rijsq, ntij )
-
       real::ljsami, rijsq, rij, sr
       integer::ntij
-
 ! --------------------------------------------------------------------
-
       rij = sqrt( rijsq )
       sr = sij(ntij) / rij
 
@@ -94,16 +78,11 @@ contains
       return
   end function ljsami
 
-!    **********************************************************
-! calculates the SAMI's external energy for a bead.    **
-!    **********************************************************
+!> \brief Calculates the SAMI's external energy for a bead
   function exsami( z, ntj )
-
       real::exsami, z
       integer::ntj
-
 ! --------------------------------------------------------------------
-
       if ( ntj .eq. 1 ) then
 ! HEADgroup potential ---
          if ( z .le. alpha2 ) then
@@ -121,24 +100,17 @@ contains
       end if
 
       return
-
   end function exsami
 
-!    *************************************************
-! calculates SAMI's 12+3 energy for headgroup **
-! and normal LJ energy for tail    **
-!    *************************************************
+!> \brief Calculates SAMI's 12+3 energy for headgroup
+!> and normal LJ energy for tail
   function ljmuir ( rijsq, ntij )
-
       real::ljmuir, rijsq, sr, sr2, sr6, epshead, sighead
       integer::ntij
-
 ! attention: eps_hh / 4 used, since later multiplied by 4 ---
 ! parameter (epshead=27.67204E0_dp,sighead=4.22E0_dp)
       parameter (epshead=27.7204E0_dp,sighead=6.5E0_dp)
-
 ! --------------------------------------------------------------------
-
 ! write(io_output,*) 'sig2ij',sig2ij
 ! write(io_output,*) 'epsij',epsij
 
@@ -156,21 +128,13 @@ contains
       end if
 
       return
-
-! ----------------------------------------------------------------------------
-
   end function ljmuir
 
-!    *********************************************************
-! calculates the lmuir external energy for a bead.    **
-!    *********************************************************
+!> \brief calculates the lmuir external energy for a bead
   function exmuir( z, ntj )
-
       real::exmuir, z
       integer::ntj
-
 ! --------------------------------------------------------------------
-
       if ( ntj .eq. 1 ) then
 ! HEADgroup potential ---
          if ( z .le. alpha2 ) then
@@ -199,6 +163,5 @@ contains
          end if
       end if
       return
-
   end function exmuir
 end MODULE energy_sami

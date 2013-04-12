@@ -1,20 +1,21 @@
-MODULE parser_cif
 ! *****************************************************************************
 !> \brief  Handles CIF (Crystallographic Information File) files
-!>         Format Information implemented:
-!>            _cell_length_a
-!>            _cell_length_b
-!>            _cell_length_c
-!>            _cell_angle_alpha
-!>            _cell_angle_beta
-!>            _cell_angle_gamma
-!>            _symmetry_equiv_pos_as_xyz
-!>            _atom_site_label
-!>            _atom_site_type_symbol
-!>            _atom_site_fract_x
-!>            _atom_site_fract_y
-!>            _atom_site_fract_z
+!>
+!> \par Format Information implemented:
+!> \b   _cell_length_a \n
+!> \b   _cell_length_b \n
+!> \b   _cell_length_c \n
+!> \b   _cell_angle_alpha \n
+!> \b   _cell_angle_beta \n
+!> \b   _cell_angle_gamma \n
+!> \b   _symmetry_equiv_pos_as_xyz \n
+!> \b   _atom_site_label \n
+!> \b   _atom_site_type_symbol \n
+!> \b   _atom_site_fract_x \n
+!> \b   _atom_site_fract_y \n
+!> \b   _atom_site_fract_z
 ! *****************************************************************************
+MODULE parser_cif
   use var_type,only:dp,default_string_length
   use util_runtime,only:err_exit
   use util_files,only:get_iounit,readLine
@@ -40,7 +41,7 @@ CONTAINS
     type(MoleculeType),intent(out)::zeo
     logical,allocatable,intent(out)::lunitcell(:)
     type(ZeoliteBeadType),intent(out)::ztype
-    type(CellMaskType),intent(out)::zcell ! the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
+    type(CellMaskType),intent(out)::zcell !< the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
     type(ZeoliteUnitCellGridType),intent(out)::zunit
     LOGICAL,INTENT(IN)::lprint
 
@@ -257,5 +258,4 @@ CONTAINS
     READ(line(1:ib),*,IOSTAT=err) val
 
   END SUBROUTINE getReal
-
 END MODULE parser_cif

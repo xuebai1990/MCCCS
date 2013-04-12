@@ -11,21 +11,23 @@ MODULE sim_zeolite
   public::ZeoliteUnitCellGridType,ZeoliteBeadType,ZeolitePotentialType,setUpAtom,setUpCellStruct,foldToCenterCell,foldToUnitCell,fractionalToAbsolute,absoluteToFractional
 
   type ZeoliteUnitCellGridType
-     integer::dup(3),ngrid(3) ! dup(:) how many times the unit cell is replicated to form the simulation cell, ngrid(:) number of grid points in each direction
-     real::boxl(3),hmat(3,3),hmati(3,3) ! boxl(:) unit cell length parameters, the angles are the same as for the simulation cell
+     integer::dup(3)& !< how many times the unit cell is replicated to form the simulation cell
+      ,ngrid(3) !< number of grid points in each direction
+     real::boxl(3)& !< unit cell length parameters, the angles are the same as for the simulation cell
+      ,hmat(3,3),hmati(3,3)
   end type ZeoliteUnitCellGridType
 
   type ZeoliteBeadType
-     integer::ntype ! number of framework atom types
-     integer,allocatable::type(:),num(:) ! index (as in suijtab) and number of atoms of each type
-     real,allocatable::radiisq(:) ! square of protective radii of each type
-     character(LEN=default_string_length),allocatable::name(:) ! chemical name of each type
+     integer::ntype !< number of framework atom types
+     integer,allocatable::type(:),num(:) !< index (as in suijtab) and number of atoms of each type
+     real,allocatable::radiisq(:) !< square of protective radii of each type
+     character(LEN=default_string_length),allocatable::name(:) !< chemical name of each type
   end type ZeoliteBeadType
 
   type ZeolitePotentialType
-     integer::ntype ! number of guest bead types present
-     integer,allocatable::table(:) ! bead type of each bead
-     real,allocatable::param(:,:,:) ! param(1,i,j)=A=4 eps sig^12, param(2,i,j)=B=4 eps sig^6
+     integer::ntype !< number of guest bead types present
+     integer,allocatable::table(:) !< bead type of each bead
+     real,allocatable::param(:,:,:) !< param(1,i,j)=A=4 eps sig^12, param(2,i,j)=B=4 eps sig^6
   end type ZeolitePotentialType
 
   integer,parameter::boxZeo=1
@@ -34,7 +36,7 @@ MODULE sim_zeolite
 CONTAINS
 
   subroutine setUpCellStruct(zcell,zunit,lprint)
-    type(CellMaskType),intent(inout)::zcell ! the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
+    type(CellMaskType),intent(inout)::zcell !< the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
     type(ZeoliteUnitCellGridType),intent(inout)::zunit
     LOGICAL,INTENT(IN)::lprint
 
@@ -98,7 +100,7 @@ CONTAINS
     type(MoleculeType),intent(inout)::zeo
     logical,intent(out)::lunitcell(zeo%nbead)
     type(ZeoliteBeadType),intent(inout)::ztype
-    type(CellMaskType),intent(inout)::zcell ! the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
+    type(CellMaskType),intent(inout)::zcell !< the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
     type(ZeoliteUnitCellGridType),intent(in)::zunit
     integer::pos
     real::scoord(3)
@@ -122,7 +124,7 @@ CONTAINS
 
   subroutine foldToCenterCell(coord,zcell,scoord)
     real,intent(inout)::coord(3)
-    type(CellMaskType),intent(in)::zcell ! the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
+    type(CellMaskType),intent(in)::zcell !< the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
     real,intent(out)::scoord(3)
 
     scoord(1) = coord(1)*zcell%hmati(1,1)%val+coord(2)*zcell%hmati(1,2)%val+coord(3)*zcell%hmati(1,3)%val
@@ -150,7 +152,7 @@ CONTAINS
 
   subroutine fractionalToAbsolute(newcoord,oldcoord,zcell)
     real,intent(in)::oldcoord(3)
-    type(CellMaskType),intent(in)::zcell ! the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
+    type(CellMaskType),intent(in)::zcell !< the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
     real,intent(out)::newcoord(3)
 
     newcoord(1)=oldcoord(1)*zcell%hmat(1,1)%val+oldcoord(2)*zcell%hmat(1,2)%val+oldcoord(3)*zcell%hmat(1,3)%val
@@ -160,7 +162,7 @@ CONTAINS
 
   subroutine absoluteToFractional(newcoord,oldcoord,zcell)
     real,intent(in)::oldcoord(3)
-    type(CellMaskType),intent(in)::zcell ! the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
+    type(CellMaskType),intent(in)::zcell !< the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
     real,intent(out)::newcoord(3)
 
     newcoord(1) = oldcoord(1)*zcell%hmati(1,1)%val+oldcoord(2)*zcell%hmati(1,2)%val+oldcoord(3)*zcell%hmati(1,3)%val

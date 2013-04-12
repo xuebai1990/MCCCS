@@ -6,17 +6,19 @@ module util_math
   public::cone_angle,erfunc,mbessel,polint,spline,splint,update_average,store_block_average,calculate_statistics
 contains
 !****************************************************************
-! takes two unit vectors in spherical coordinates and computes **
-! the angle between them.                                      **
-! thetaone is the angle between vector one and the z-axis      **
-! phione is the angle between vector one and the x-axis        **
-! thetatwo is the angle between vector two and the z-axis      **
-! phitwo is the angle between vector two and the x-axis        **
-! angle is the angle between the two vectors                   **
-! x = r sin (theta) cos (phi)                                  **
-! y = r sin (theta) sin (phi)                                  **
-! z = r cos (theta)                                            **
-! M.G. Martin 2-4-98                                           **
+!> \brief takes two unit vectors in spherical coordinates and computes
+!> the angle between them.
+!>
+!> \param thetaone is the angle between vector one and the z-axis
+!> \param phione is the angle between vector one and the x-axis
+!> \param thetatwo is the angle between vector two and the z-axis
+!> \param phitwo is the angle between vector two and the x-axis
+!> \param angle is the angle between the two vectors
+!> \remark x = r sin (theta) cos (phi)
+!> y = r sin (theta) sin (phi)
+!> z = r cos (theta)
+!> \author M.G. Martin
+!> \date 2-4-98
 !****************************************************************
   function cone_angle( thetaone, phione, thetatwo, phitwo ) result(angle)
     real,intent(in)::thetaone,thetatwo,phione,phitwo
@@ -67,7 +69,7 @@ contains
 !     &         (4.0E0_dp*nu**2-1)*(4.0E0_dp*nu**2-9.0E0_dp)/(2.0E0_dp*64.0E0_dp*z**2))
   end function mbessel
 
-!  (C) Copr. 1986-92 Numerical Recipes Software +3Y.
+!> \copyright (C) Copr. 1986-92 Numerical Recipes Software +3Y.
   pure subroutine polint(xa,ya,n,x,y)
     real,intent(in)::xa(n),ya(n),x
     integer,intent(in)::n
@@ -112,19 +114,18 @@ contains
 
 !> \brief Set up cubic spline derivative array
 !>
-!>   Given arrays x(1:n) and y(1:n) containing a tabulated function, i.e.,
-!> y(i) = f(x(i)) with x ascending in order, and given values yp1 and ypn
+!>   Given arrays \a x(1:n) and \a y(1:n) containing a tabulated function, i.e.,
+!> y(i) = f(x(i)) with x ascending in order, and given values \a yp1 and \a ypn
 !> for the first derivative of the interpolating function at the point 1
-!> and n, respectively, this routine returns an array y2(1:n) of length n
+!> and \a n, respectively, this routine returns an array \a y2(1:n) of length \a n
 !> which contains the second derivatives of the interpolating function at
-!> the tabulated points x(i). If yp1 and/or ypn are equal to 1E30_dp or larger,
+!> the tabulated points \a x(i). If \a yp1 and/or \a ypn are equal to 1E30_dp or larger,
 !> the routine is signaled to set the corresponding boundary condition for
 !> a natural spline, with zero second derivative on that boundary
-!> Parameter: NMAX is the largest anticipated value of n
 !>
-!>   Numerical recipes, 2nd ed, 1992.
+!> \copyright  Numerical recipes, 2nd ed, 1992.
   subroutine spline(x,y,n,yp1,ypn,y2)
-    integer::n,NMAX
+    integer::n,NMAX !< NMAX is the largest anticipated value of n
     real::yp1,ypn,x(n),y(n),y2(n)
     parameter (NMAX=500)
 

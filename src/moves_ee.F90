@@ -22,7 +22,6 @@ contains
       integer::i,m,j,ntii,ntij,ntjj,ntjjs,ii,jj,ntijs ,imolty,isv,cnt
 
 ! initialize a few things
-
       leemove = .false.
       if ((pmexpc1.gt.1.0E-6_dp).and.(.not.lexpee)) then
          write(io_output,*) 'pmexp nonzero but no lexpee?'
@@ -33,7 +32,6 @@ contains
       end if
 
 ! read necessary stuff
-
 ! moltyp (of fort.4) on which EE is performed
       read(44,*)
       read(44,*) imolty
@@ -87,7 +85,6 @@ contains
 ! the 12th power potential values of the partially grown beads
 ! with the 12th power of the equivalent full beads. this choice
 ! is more or less arbitrary - but is consistent.
-
       do i = 1, nmolty1-1
          do ii = 1, nunit(i)
             ntii = ntype(i,ii)
@@ -255,10 +252,12 @@ contains
       return
   end subroutine eesetup
 
-! peforms EE move. currently works when EE move is performed on
-! only one type of molecule. put all states in fort.77 and add
-! corresponding bead types in suijtab. can only do EE if the number
-! of beads between states remain constant.
+!> \brief Peforms EE move.
+!>
+!> Currently works when EE move is performed on
+!> only one type of molecule. put all states in fort.77 and add
+!> corresponding bead types in suijtab. can only do EE if the number
+!> of beads between states remain constant.
   subroutine eemove
       use transfer_swap,only:swap
       use sim_cell
@@ -477,11 +476,8 @@ contains
       return
   end subroutine eemove
 
-!
-! swaps the tagged index for ee moves
-!
+!> \brief Swaps the tagged index for ee moves
   subroutine ee_index_swap
-
       integer::imolty,ibox,ibox1
       real::accr
 
@@ -493,7 +489,6 @@ contains
 ! to another one in the same box (m = 1, still), or with the other
 ! box (m = 6). note that the acceptance prob of m = 1 to m = 6
 ! move involves a permutation factor
-
       imolty = ee_moltyp(mstate)
       ibox = box_state(1)
       ibox1 = box_state(fmstate)
@@ -532,11 +527,9 @@ contains
       return
   end subroutine ee_index_swap
 
-!    **********************************************************************
-! make a transition of a selected molecule from state i to state j **
-! in an expanded-ensemble sampling.                                **
-! written on Aug. 4/99 by Bin Chen.                                **
-!    **********************************************************************
+!> \brief Make a transition of a selected molecule from state i to state j
+!> in an expanded-ensemble sampling.
+!> \author written on Aug. 4/99 by Bin Chen
   subroutine expand
     use energy_kspace,only:recip
     use energy_pairwise,only:coru

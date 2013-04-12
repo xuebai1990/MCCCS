@@ -15,14 +15,13 @@ MODULE moves_simple
   real::Abntrax,Abntray,Abntraz,Abstrax,Abstray,Abstraz
 
 contains
-!    *******************************************************************
-! makes a translational movement in x,y,or z-direction.         **
-! the maximum displacement is controlled by rmtrax(yz) and the  **
-! number of successful trial moves is stored in bstrax(yz).     **
-! The attempts are stored in bntrax(yz)                         **
-!    *******************************************************************
+!> \brief Makes a translational movement in x,y,or z-direction.
+!>
+!> The maximum displacement is controlled by \b rmtrax(yz) and the
+!> number of successful trial moves is stored in \b bstrax(yz).
+!> The attempts are stored in \b bntrax(yz)
   subroutine translation()
-    use sim_particle,only:update_neighbor_list
+    use sim_particle,only:update_neighbor_list,ctrmas
     use sim_cell,only:update_linked_cell
 
       logical::lx,ly,lz,ovrlap
@@ -32,9 +31,7 @@ contains
       real::rx,ry,rz,dchain,ddx,ddy,ddz,vn(nEnergy),vo(nEnergy),deltv,deltvb,rchain,vdum,vrecipo,vrecipn
 
       logical::laccept
-
 ! --------------------------------------------------------------------
-
 #ifdef __DEBUG__
       write(io_output,*) 'start TRANSLATION in ',myid
 #endif
@@ -309,17 +306,15 @@ contains
       return
     end subroutine translation
 
-!*****************************************************************
-! makes a rotational movement around "x" space-fixed axis.      **
-! the maximum displacement is controlled by rmrotx and the      **
-! number of successful rotation is given by bsrotx.             **
-!                                                               **
-! rotation chooses one of the three space-fixed axes at random  **
-! and rotates the molecule around this axis by dgamma radians.  **
-! the maximum angular displacement is dgamax.                   **
-!*****************************************************************
+!> \brief Makes a rotational movement around "x" space-fixed axis.
+!>
+!> The maximum displacement is controlled by \b rmrotx and the
+!> number of successful rotation is given by \b bsrotx. \n
+!> Rotation chooses one of the three space-fixed axes at random
+!> and rotates the molecule around this axis by \b dgamma radians.
+!> The maximum angular displacement is \b dgamax.
     subroutine rotation ()
-      use sim_particle,only:update_neighbor_list
+      use sim_particle,only:update_neighbor_list,ctrmas
 
       logical::lx,ly,lz,ovrlap,lneighij
       integer::i,ibox,flagon,iunit,j,imolty,iuroty,icbu,ic,ip
@@ -640,14 +635,13 @@ contains
       return
     end subroutine rotation
 
-!    *******************************************************************
-! makes a translational movement in x,y,or z-direction.         **
-! the maximum displacement is controlled by rAtrax(yz) and the  **
-! number of successful trial moves is stored in Abstrax(yz).     **
-! The attempts are stored in Abntrax(yz)                         **
-!    *******************************************************************
+!> \brief Makes a translational movement in x,y,or z-direction.
+!>
+!> The maximum displacement is controlled by \b rAtrax(yz) and the
+!> number of successful trial moves is stored in \b Abstrax(yz).
+!> The attempts are stored in \b Abntrax(yz)
     subroutine Atom_translation()
-      use sim_particle,only:update_neighbor_list
+      use sim_particle,only:update_neighbor_list,ctrmas
       use sim_cell,only:update_linked_cell
       use energy_kspace,only:recip_atom
       use energy_intramolecular,only:U_bonded
@@ -1001,67 +995,67 @@ contains
        end if
        do imolty = 1,nmolty
           ! rmtrax
-          ! check whether any x translations have been done for 
+          ! check whether any x translations have been done for
           ! molecule type imolty in box im
           if ( bntrax(imolty,im) .gt. 0.5E0_dp ) then
              ! compute possible new ratio
              ratrax = bstrax(imolty,im) / bntrax(imolty,im)
              rttrax = rmtrax(imolty,im) * ratrax / tatra
 
-             if ( rttrax .gt. 2.0E0_dp * rcut(im)) then 
+             if ( rttrax .gt. 2.0E0_dp * rcut(im)) then
                 ! maximum translational displacement
                 rmtrax(imolty,im) = 2.0E0_dp*rcut(im)
-             else if (rttrax .lt. 1.0E-10_dp ) then  
+             else if (rttrax .lt. 1.0E-10_dp ) then
                 ! ratio must have been zero, so divide by 10
                 rmtrax(imolty,im) = rmtrax(imolty,im)/10.0E0_dp
-             else 
+             else
                 ! accept new ratio
                 rmtrax(imolty,im) = rttrax
              end if
           end if
 
           ! rmtray
-          ! check whether any y translations have been done for 
+          ! check whether any y translations have been done for
           ! molecule type imolty in box im
           if ( bntray(imolty,im) .gt. 0.5E0_dp ) then
              ! compute possiblt new ratio
              ratray = bstray(imolty,im) / bntray(imolty,im)
              rttray = rmtray(imolty,im) * ratray / tatra
 
-             if ( rttray .gt. 2.0E0_dp*rcut(im) ) then 
+             if ( rttray .gt. 2.0E0_dp*rcut(im) ) then
                 ! maximum translational displacement
                 rmtray(imolty,im) = 2.0E0_dp*rcut(im)
-             else if (rttray .eq. 0.0E0_dp) then  
+             else if (rttray .eq. 0.0E0_dp) then
                 ! ratio must have been zero, divide old by 10
                 rmtray(imolty,im) = rmtray(imolty,im)/10.0E0_dp
-             else 
+             else
                 ! accept new ratio
                 rmtray(imolty,im) = rttray
              end if
           end if
 
           ! rmtraz
-          ! check whether any z translations have been done for 
+          ! check whether any z translations have been done for
           ! molecule type imolty in box im
           if ( bntraz(imolty,im) .gt. 0.5E0_dp ) then
              ! compute possible new ratio
              ratraz = bstraz(imolty,im) / bntraz(imolty,im)
              rttraz = rmtraz(imolty,im) * ratraz / tatra
 
-             if ( rttraz .gt. 2.0E0_dp*rcut(im) ) then 
+             if ( rttraz .gt. 2.0E0_dp*rcut(im) ) then
                 ! maximum translational displacement
                 rmtraz(imolty,im) = 2.0E0_dp*rcut(im)
-             else if ( rttraz .lt. 1.0E-10_dp ) then  
+             else if ( rttraz .lt. 1.0E-10_dp ) then
                 ! ratio must have been zero, divide old by 10
                 rmtraz(imolty,im) = rmtraz(imolty,im)/10.0E0_dp
-             else 
+             else
                 ! accept new ratio
                 rmtraz(imolty,im) = rttraz
              end if
           end if
 
           ! rmrotx
-          ! check whether any x-axis rotations have been done for 
+          ! check whether any x-axis rotations have been done for
           ! molecule type imolty in box im
           if ( bnrotx(imolty,im) .gt. 0.5E0_dp ) then
              ! compute possible new ratio
@@ -1081,7 +1075,7 @@ contains
           end if
 
           ! rmroty
-          ! check whether any y-axis rotations have been done for 
+          ! check whether any y-axis rotations have been done for
           ! molecule type imolty in box im
           if ( bnroty(imolty,im) .gt. 0.5E0_dp ) then
              ! compute possible new ratio
@@ -1101,7 +1095,7 @@ contains
           end if
 
           ! rmrotz
-          ! check whether any y-axis rotations have been done for 
+          ! check whether any y-axis rotations have been done for
           ! molecule type imolty in box im
           if ( bnrotz(imolty,im) .gt. 0.5E0_dp ) then
              ! compute possible new ratio

@@ -2,7 +2,7 @@ MODULE sim_particle
   use var_type,only:dp,default_string_length
   implicit none
   private
-  public::BeadType,AtomType,MoleculeType,init_neighbor_list,rebuild_neighbor_list,update_neighbor_list,check_neighbor_list,lnn,allocate_neighbor_list
+  public::BeadType,AtomType,MoleculeType,init_neighbor_list,rebuild_neighbor_list,update_neighbor_list,check_neighbor_list,lnn,allocate_neighbor_list,ctrmas
 
   type BeadType
      integer::type
@@ -13,7 +13,8 @@ MODULE sim_particle
      logical::lqchg,llj
      integer::atomID
      real::mass,charge,eps,sig
-     character(LEN=default_string_length)::name,desc !name is the atomic symobl, desc is the full description of the atom
+     character(LEN=default_string_length)::name& !<atomic symobl
+      ,desc !<full description of the atom
   end type AtomType
 
   type MoleculeType
@@ -21,7 +22,6 @@ MODULE sim_particle
      type(BeadType),allocatable::bead(:)
   end type MoleculeType
 
-! NEIGH.INC
   logical,allocatable::lnn(:,:)
   real,allocatable::disvec(:,:,:),upnn(:),upnnsq(:),upnndg(:,:)
 
@@ -68,7 +68,6 @@ contains
        Armtraz = upnn(ibox)
        write(io_output,*) '### problem : for target accept ', 'ratio Armtraz should be smaller than upnn'
     end if
-
   end subroutine check_neighbor_list
 
   subroutine init_neighbor_list()
@@ -137,19 +136,19 @@ contains
 
     rcnnsq = rcutnn(ibox)**2
     if (lpbc) call setpbc(ibox)
- 
-! loop over all chains i 
+
+! loop over all chains i
     do i = 1, nchain-1
        if (nboxi(i).ne.ibox) cycle
 ! loop over all chains j
        molecule2:do j = i+1, nchain
           if (nboxi(j).ne.ibox) cycle
-! loop over all beads ii of chain i 
+! loop over all beads ii of chain i
           do ii = 1, nunit(i)
              rxui = rxu(i,ii)
              ryui = ryu(i,ii)
              rzui = rzu(i,ii)
-! loop over all beads jj of chain j 
+! loop over all beads jj of chain j
              do jj = 1, nunit(j)
                 rxuij = rxui - rxu(j,jj)
                 ryuij = ryui - ryu(j,jj)
@@ -166,7 +165,7 @@ contains
           end do
        end do molecule2
     end do
- 
+
     return
   end subroutine rebuild_neighbor_list
 
@@ -179,7 +178,7 @@ contains
     logical,intent(in)::force_update
     integer::j,ii,jj,ibox
     real::rxui,ryui,rzui,rxuij,ryuij,rzuij,rijsq,rcnnsq,disvsq1,disvsq2
- 
+
     ibox=nboxi(i)
 
 ! check for update of near neighbour bitmap
@@ -208,12 +207,12 @@ contains
 ! loop over all chains j
     molecule2:do j = 1, nchain
        if ((i.eq.j).or.(nboxi(j).ne.ibox)) cycle
-! loop over all beads ii of chain i 
+! loop over all beads ii of chain i
        do ii = 1, nunit(i)
           rxui = rxu(i,ii)
           ryui = ryu(i,ii)
           rzui = rzu(i,ii)
-! loop over all beads jj of chain j 
+! loop over all beads jj of chain j
           do jj = 1, nunit(j)
              rxuij = rxui - rxu(j,jj)
              ryuij = ryui - ryu(j,jj)
@@ -229,7 +228,7 @@ contains
           end do
        end do
     end do molecule2
- 
+
     return
   end subroutine update_neighbor_list
 
@@ -242,4 +241,259 @@ contains
        call err_exit(__FILE__,__LINE__,'allocate_neighbor_list: allocation failed',jerr)
     end if
   end subroutine allocate_neighbor_list
+
+!> \brief Find the center of mass of a chain and returns it to
+!> the periodic box if it has left the box.
+!> \param lall controls whether this is done for just chain \a j or for the entire box
+!> \param ibox is the box of the particle
+!> \param j is the particle number
+!> \param mtype 1 = calling from translation, should need only 1 operation to fold back,
+!> unless the simulation box is non-orthorhombic in which case 2 operations may be needed
+!> 2 = calling from rotation, 2 operations \n
+!> 3 = calling from swap, 0 operation needed \n
+!> 4 = N/A \n
+!> 5 = calling from volume moves, 1 operation \n
+!> 6 = calling from readdat, any number of operations \n
+!> 7 = calling from config, 2 operations \n
+!> 8 = calling from swatch, 2 opeartions \n
+!> 9 = calling from energy for the dummy atom, 2 operations \n
+!> 10= calling from atom_translation, 1 operation
+  subroutine ctrmas(lall,ibox,j,mtype)
+    use util_runtime,only:err_exit
+    use sim_system
+    use sim_cell
+    
+    logical,intent(in)::lall
+    integer,intent(in)::ibox,j,mtype
+
+    integer::stt,edd,i,imolty,iunit,iadjust,ii,itype,inboxx,inboxy,inboxz,iwarn
+    real::rbx,rby,rbz,nxcm,nycm,nzcm,dx,dy,dz,sx,sy,sz,nxcm2,nycm2,nzcm2,dmaxsq,rxuij,ryuij,rzuij,rijsq
+    logical::lintbx,ldx,ldy,ldz
+
+    rbx = boxlx(ibox)
+    rby = boxly(ibox)
+    rbz = boxlz(ibox)
+
+    if (lall) then
+       stt = 1
+       edd = nchain
+    else
+       stt = j
+       edd = j
+    end if
+
+    if ((mtype.eq.1).or.(mtype.eq.2).or.(mtype.eq.5)) then
+       if (mtype.eq.1.and.(lsolid(ibox).and..not.lrect(ibox))) then
+          iwarn = 2
+       else if (mtype.eq.2) then
+          ! kea 6/3/09 --- necessary for non-COM rotations
+          iwarn = 2
+       else
+          iwarn = 1
+       end if
+    else if (mtype.eq.6) then
+       iwarn = 0
+    else
+       iwarn = 2
+    end if
+
+    do i = stt, edd
+       imolty = moltyp(i)
+       iunit = nunit(imolty)
+       iadjust = 1
+
+       ! Check if the chain i is in the correct box
+       if (nboxi(i) .eq. ibox) then
+          ! Determine new center of mass for chain i
+          lintbx = .false.
+25        nxcm = 0.0E0_dp
+          nycm = 0.0E0_dp
+          nzcm = 0.0E0_dp
+          do ii = 1, iunit
+             itype = ntype(imolty,ii)
+             nxcm = nxcm + rxu(i,ii) * mass(itype)
+             nycm = nycm + ryu(i,ii) * mass(itype)
+             nzcm = nzcm + rzu(i,ii) * mass(itype)
+          end do
+          nxcm = nxcm / masst(imolty)
+          nycm = nycm / masst(imolty)
+          nzcm = nzcm / masst(imolty)
+
+          ldx = .false.
+          ldy = .false.
+          ldz = .false.
+          dx = 0.0E0_dp
+          dy = 0.0E0_dp
+          dz = 0.0E0_dp
+
+          if (lsolid(ibox) .and. .not. lrect(ibox)) then
+             sx = nxcm*hmati(ibox,1)+nycm*hmati(ibox,4) +nzcm*hmati(ibox,7)
+             sy = nxcm*hmati(ibox,2)+nycm*hmati(ibox,5) +nzcm*hmati(ibox,8)
+             sz = nxcm*hmati(ibox,3)+nycm*hmati(ibox,6) +nzcm*hmati(ibox,9)
+
+             if ( sx .lt. -1.0E-10_dp ) then
+                sx = sx + 1.0E0_dp
+                ldx = .true.
+             else if ( sx .gt. 1E0_dp ) then
+                sx = sx - 1.0E0_dp
+                ldx = .true.
+             end if
+             if ( sy .lt. -1.0E-10_dp ) then
+                sy = sy + 1.0E0_dp
+                ldy = .true.
+             else if ( sy .gt. 1E0_dp ) then
+                sy = sy - 1.0E0_dp
+                ldy = .true.
+             end if
+             if ( sz .lt. -1.0E-10_dp ) then
+                sz = sz + 1.0E0_dp
+                ldz = .true.
+             else if ( sz .gt. 1E0_dp ) then
+                sz = sz - 1.0E0_dp
+                ldz = .true.
+             end if
+             sxcm(i) = sx
+             sycm(i) = sy
+             szcm(i) = sz
+
+             if ( ldx .or. ldy .or. ldz ) then
+                if ( mtype .eq. 5 ) then
+                   write(io_output,*) 'sx, sy, sz:',sx,sy,sz
+                end if
+                nxcm2 = sx*hmat(ibox,1)+sy*hmat(ibox,4) +sz*hmat(ibox,7)
+                nycm2 = sx*hmat(ibox,2)+sy*hmat(ibox,5) +sz*hmat(ibox,8)
+                nzcm2 = sx*hmat(ibox,3)+sy*hmat(ibox,6) +sz*hmat(ibox,9)
+                dx = nxcm2-nxcm
+                dy = nycm2-nycm
+                dz = nzcm2-nzcm
+                do ii = 1, iunit
+                   rxu(i,ii) = rxu(i,ii) + dx
+                   ryu(i,ii) = ryu(i,ii) + dy
+                   rzu(i,ii) = rzu(i,ii) + dz
+                end do
+                nxcm = nxcm2
+                nycm = nycm2
+                nzcm = nzcm2
+             end if
+          else
+             if ( lintbx ) then
+                if ( nxcm .gt. rbx ) then
+                   inboxx = int(nxcm/rbx)
+                   ldx = .true.
+                else if ( nxcm .lt. -1.0E-10_dp ) then
+                   inboxx = int(nxcm/rbx) - 1
+                   ldx = .true.
+                end if
+                if ( nycm .gt. rby ) then
+                   inboxy = int(nycm/rby)
+                   ldy = .true.
+                else if ( nycm .lt. -1.0E-10_dp )then
+                   inboxy = int(nycm/rby) - 1
+                   ldy = .true.
+                end if
+                if (lpbcz) then
+                   if ( nzcm .gt. rbz ) then
+                      inboxz = int(nzcm/rbz)
+                      ldz = .true.
+                   else if ( nzcm .lt. -1.0E-10_dp ) then
+                      inboxz = int(nzcm/rbz) - 1
+                      ldz = .true.
+                   end if
+                end if
+                if ( ldx ) then
+                   dx = -real(inboxx,dp)*rbx
+                end if
+                if ( ldy ) then
+                   dy = -real(inboxy,dp)*rby
+                end if
+                if ( ldz ) then
+                   dz = -real(inboxz,dp)*rbz
+                end if
+             else
+                if (nxcm .lt. -1.0E-10_dp) then
+                   dx = rbx
+                   ldx = .true.
+                else if (nxcm .gt. rbx) then
+                   dx = -rbx
+                   ldx = .true.
+                end if
+                if (nycm .lt. -1.0E-10_dp) then
+                   dy = rby
+                   ldy = .true.
+                else if (nycm .gt. rby) then
+                   dy = -rby
+                   ldy = .true.
+                end if
+                if (lpbcz) then
+                   if (nzcm .lt. -1.0E-10_dp) then
+                      dz = rbz
+                      ldz = .true.
+                   else if (nzcm .gt. rbz) then
+                      dz = -rbz
+                      ldz = .true.
+                   end if
+                end if
+             end if
+
+             if (ldx) then
+                do ii = 1, iunit
+                   rxu(i,ii) = rxu(i,ii) + dx
+                end do
+             end if
+             if (ldy) then
+                do ii = 1, iunit
+                   ryu(i,ii) = ryu(i,ii) + dy
+                end do
+             end if
+             if (ldz) then
+                do ii = 1, iunit
+                   rzu(i,ii) = rzu(i,ii) + dz
+                end do
+             end if
+          end if
+
+          if (ldx .or. ldy .or. ldz ) then
+             if ( (iadjust .ge. iwarn) ) then
+                if (mtype .eq. 1) write(io_output,*) 'translational move'
+                if (mtype .eq. 2) write(io_output,*) 'rotational move'
+                if (mtype .eq. 3) write(io_output,*) 'swap move'
+                if (mtype .eq. 4) write(io_output,*) 'switch move'
+                if (mtype .eq. 5) write(io_output,*) 'volume move'
+                if (mtype .eq. 6) write(io_output,*) 'readdat move'
+                if (mtype .eq. 7) write(io_output,*) 'config move'
+                if (mtype .eq. 8) write(io_output,*) 'swatch move'
+                if (mtype .eq. 9) write(io_output,*) 'energy call'
+                write(io_output,*) 'ibox,i,iunit,boxlen',ibox,i,iunit,rbx,rby,rbz
+                lintbx = .true.
+                write(io_output,*) 'nxcm,nycm,nzcm',nxcm,nycm,nzcm
+                write(io_output,*) 'dx,dy,dz',dx,dy,dz
+                if (iwarn .ne. 0) call err_exit(__FILE__,__LINE__,'ctrmas failure',myid+1)
+             end if
+             iadjust = iadjust + 1
+             goto 25
+          end if
+
+          ! assign the new center of mass
+          xcm(i) = nxcm
+          ycm(i) = nycm
+          zcm(i) = nzcm
+          if ( (lcutcm .or. ldual) .and. iwarn .ne. 1 ) then
+             dmaxsq = 0.0E0_dp
+             do ii=1,iunit
+                rxuij = rxu(i,ii)-nxcm
+                ryuij = ryu(i,ii)-nycm
+                rzuij = rzu(i,ii)-nzcm
+                ! minimum image the ctrmas pair separations ---
+                if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
+                rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
+                if ( rijsq .gt. dmaxsq ) dmaxsq = rijsq
+             end do
+             rcmu(i) = sqrt(dmaxsq)+ 1.0E-10_dp
+             ! write(io_output,*) 'rcmu(i)',rcmu(i)
+          end if
+       else if (.not. lall) then
+          write(io_output,*) 'prob with box in ctrmas'
+       end if
+    end do
+  end subroutine ctrmas
 end MODULE sim_particle

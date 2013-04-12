@@ -1,7 +1,7 @@
 ! *****************************************************************************
 !> \brief Parallel (pseudo)random number generator (PRNG) for multiple streams
 !>      and substreams of random numbers.
-!> 
+!>
 !>      In detail, this RNG provides 2**64 random number streams each with a
 !>      length of 2**127 resulting in a length of 2**191 for the total RNG.
 !>      Moreover, each stream is divided in 2**51 substream of length 2**76.
@@ -10,34 +10,34 @@
 !>      can be requested. In this case, two 32 bit random numbers are used
 !>      to generate a 53 bit random number and therefore the stream length
 !>      is halved when extended precision are requested.
-!> 
+!>
 !>      Usage hint:
-!> 
+!>
 !>      error=create_rng_stream(rng_stream,name,...)
-!> 
+!>
 !>      to generate the first stream. Optionally, you may define a different
 !>      seed or create a stream of extended precision (53 bits). Then
-!> 
+!>
 !>      error=create_rng_stream(next_rng_stream,name,last_rng_stream=rng_stream)
-!> 
+!>
 !>      to create all the following RNG streams w.r.t. the previous stream.
 !>      The command line
-!> 
+!>
 !>      x = next_random_number(rng_stream)
-!> 
+!>
 !>      will provide the next real random number x between 0 and 1 and
-!> 
+!>
 !>      ix = next_random_number(rng_stream,low,high)
-!> 
+!>
 !>      the next integer random number ix between low and high from stream
 !>      rng_stream. The default distribution type is a uniform distribution
 !>      [0,1], but also other distribution types are available (see below).
-!> 
+!>
 !>      Finally, do not forget to delete each created RNG stream when it is
 !>      no longer needed by
-!> 
+!>
 !>      CALL delete_rng_stream(rng_stream)
-!> 
+!>
 !>      to avoid memory leaks!
 !> \par Literature
 !>      P. L'Ecuyer, R. Simard, E. J. Chen, and W. D. Kelton,
@@ -56,12 +56,8 @@ MODULE util_prng
   INTEGER, PARAMETER          :: rng_record_length = 433
 
   ! Distribution types:
-
-  ! GAUSSIAN: Gaussian distribution with zero mean and unit variance
-  ! UNIFORM:  Uniform distribution [0,1] with 1/2 mean (default)
-
-  INTEGER, PARAMETER          :: GAUSSIAN = 1,&
-                                 UNIFORM  = 2
+  INTEGER, PARAMETER          :: GAUSSIAN = 1,& !< Gaussian distribution with zero mean and unit variance
+                                 UNIFORM  = 2 !< Uniform distribution [0,1] with 1/2 mean (default)
 
   REAL(KIND=dp), PARAMETER :: norm  = 2.328306549295727688e-10_dp,&
                               m1    = 4294967087.0_dp,&
@@ -70,21 +66,22 @@ MODULE util_prng
                               a13n  = 810728.0_dp,&
                               a21   = 527612.0_dp,&
                               a23n  = 1370589.0_dp,&
-                              two17 = 131072.0_dp,&            ! 2**17
-                              two53 = 9007199254740992.0_dp,&  ! 2**53
-                              fact  = 5.9604644775390625e-8_dp ! 1/2**24
+                              two17 = 131072.0_dp,&            !< 2**17
+                              two53 = 9007199254740992.0_dp,&  !< 2**53
+                              fact  = 5.9604644775390625e-8_dp !< 1/2**24
   REAL(KIND=dp), DIMENSION(3,2) :: nextSeed = 12345.0_dp
 
+! *****************************************************************************
   ! Data type definitions
 
-  ! Information on a stream. The arrays bg, cg, and ig contain the current
-  ! state of the stream, the starting state of the current substream, and the
-  ! starting state of the stream. This stream generates antithetic variates
-  ! if antithetic = .TRUE.. It also generates numbers with extended precision
-  ! (53 bits, if machine follows IEEE 754 standard), if extended_precision =
-  ! .TRUE., otherwise, numbers with 32 bits precision are generated.
-
-! *****************************************************************************
+  !> \brief Information on a stream.
+  !>
+  !> The arrays \a bg, \a cg, and \a ig contain the current
+  !> state of the stream, the starting state of the current substream, and the
+  !> starting state of the stream. This stream generates antithetic variates
+  !> if \a antithetic = .TRUE.. It also generates numbers with extended precision
+  !> (53 bits, if machine follows IEEE 754 standard), if \a extended_precision =
+  !> .TRUE., otherwise, numbers with 32 bits precision are generated.
   TYPE rng_stream_type
     PRIVATE
     CHARACTER(LEN=40)             :: name
@@ -104,14 +101,14 @@ MODULE util_prng
   ! The following are the transition matrices of the two MRG components
   ! (in matrix form), raised to the powers -1, 1, 2**76, and 2**127, resp.
 
-  REAL(KIND=dp), DIMENSION(3,3), parameter :: inv_a1 = reshape((/184888585.0_dp,1.0_dp,0.0_dp,0.0_dp,0.0_dp,1.0_dp,1945170933.0_dp,0.0_dp,0.0_dp/),shape(inv_a1)),& ! Inverse of a1p0
-   inv_a2 = reshape((/0.0_dp,1.0_dp,0.0_dp,360363334.0_dp,0.0_dp,1.0_dp,4225571728.0_dp,0.0_dp,0.0_dp/),shape(inv_a2)),& ! Inverse of a2p0
-   a1p0 = reshape((/0.0_dp,0.0_dp,-810728.0_dp,1.0_dp,0.0_dp,1403580.0_dp,0.0_dp,1.0_dp,0.0_dp/),shape(a1p0)),& ! Transition matrix for the first component raised to the power 2**0
-   a2p0 = reshape((/0.0_dp,0.0_dp,-1370589.0_dp,1.0_dp,0.0_dp,0.0_dp,0.0_dp,1.0_dp,527612.0_dp/),shape(a2p0)),& ! Transition matrix for the second component raised to the power 2**0
-   a1p76 = reshape((/82758667.0_dp,3672831523.0_dp,3672091415.0_dp,1871391091.0_dp,69195019.0_dp,3528743235.0_dp,4127413238.0_dp,1871391091.0_dp,69195019.0_dp/),shape(a1p76)),& ! Transition matrix for the first component raised to the power 2**76
-   a2p76 = reshape((/1511326704.0_dp,4292754251.0_dp,3859662829.0_dp,3759209742.0_dp,1511326704.0_dp,4292754251.0_dp,1610795712.0_dp,3889917532.0_dp,3708466080.0_dp/),shape(a2p76)),& ! Transition matrix for the second component raised to the power 2**76    
-   a1p127 = reshape((/2427906178.0_dp,226153695.0_dp,1988835001.0_dp,3580155704.0_dp,1230515664.0_dp,986791581.0_dp,949770784.0_dp,3580155704.0_dp,1230515664.0_dp/),shape(a1p127)),& ! Transition matrix for the first component raised to the power 2**127
-   a2p127 = reshape((/1464411153.0_dp,32183930.0_dp,2824425944.0_dp,277697599.0_dp,1464411153.0_dp,32183930.0_dp,1610723613.0_dp,1022607788.0_dp,2093834863.0_dp/),shape(a2p127)) ! Transition matrix for the second component raised to the power 2**127
+  REAL(KIND=dp), DIMENSION(3,3), parameter :: inv_a1 = reshape((/184888585.0_dp,1.0_dp,0.0_dp,0.0_dp,0.0_dp,1.0_dp,1945170933.0_dp,0.0_dp,0.0_dp/),shape(inv_a1)),& !< Inverse of a1p0
+   inv_a2 = reshape((/0.0_dp,1.0_dp,0.0_dp,360363334.0_dp,0.0_dp,1.0_dp,4225571728.0_dp,0.0_dp,0.0_dp/),shape(inv_a2)),& !< Inverse of a2p0
+   a1p0 = reshape((/0.0_dp,0.0_dp,-810728.0_dp,1.0_dp,0.0_dp,1403580.0_dp,0.0_dp,1.0_dp,0.0_dp/),shape(a1p0)),& !< Transition matrix for the first component raised to the power 2**0
+   a2p0 = reshape((/0.0_dp,0.0_dp,-1370589.0_dp,1.0_dp,0.0_dp,0.0_dp,0.0_dp,1.0_dp,527612.0_dp/),shape(a2p0)),& !< Transition matrix for the second component raised to the power 2**0
+   a1p76 = reshape((/82758667.0_dp,3672831523.0_dp,3672091415.0_dp,1871391091.0_dp,69195019.0_dp,3528743235.0_dp,4127413238.0_dp,1871391091.0_dp,69195019.0_dp/),shape(a1p76)),& !< Transition matrix for the first component raised to the power 2**76
+   a2p76 = reshape((/1511326704.0_dp,4292754251.0_dp,3859662829.0_dp,3759209742.0_dp,1511326704.0_dp,4292754251.0_dp,1610795712.0_dp,3889917532.0_dp,3708466080.0_dp/),shape(a2p76)),& !< Transition matrix for the second component raised to the power 2**76
+   a1p127 = reshape((/2427906178.0_dp,226153695.0_dp,1988835001.0_dp,3580155704.0_dp,1230515664.0_dp,986791581.0_dp,949770784.0_dp,3580155704.0_dp,1230515664.0_dp/),shape(a1p127)),& !< Transition matrix for the first component raised to the power 2**127
+   a2p127 = reshape((/1464411153.0_dp,32183930.0_dp,2824425944.0_dp,277697599.0_dp,1464411153.0_dp,32183930.0_dp,1610723613.0_dp,1022607788.0_dp,2093834863.0_dp/),shape(a2p127)) !< Transition matrix for the second component raised to the power 2**127
 
   ! Interfaces
 
@@ -155,26 +152,21 @@ MODULE util_prng
             write_rng_stream
 
 CONTAINS
-
-! *****************************************************************************
+  !> \brief Advance the state by n steps
+  !>
+  !> i.e. jump n steps forward, if n > 0, or
+  !> backward if n < 0.
+  !> IF e > 0, let n = 2**e + c
+  !> IF e < 0, let n = -2**(-e) + c
+  !> IF e = 0, let n = c
+  !> \attention The use of this method is discouraged.
   SUBROUTINE advance_rng_state(rng_stream,e,c)
-
-    ! Advance the state by n steps, i.e. jump n steps forward, if n > 0, or
-    ! backward if n < 0.
-    ! IF e > 0, let n = 2**e + c
-    ! IF e < 0, let n = -2**(-e) + c
-    ! IF e = 0, let n = c
-
-    ! NOTE: The use of this method is discouraged.
-
     TYPE(rng_stream_type), POINTER           :: rng_stream
     INTEGER, INTENT(IN)                      :: e, c
 
     REAL(KIND=dp), DIMENSION(3, 2)           :: x
     REAL(KIND=dp), DIMENSION(3, 3)           :: u1, u2, v1, v2, w1, w2
-
 ! -------------------------------------------------------------------------
-
     !assert(ASSOCIATED(rng_stream))
 
     u1 = 0.0_dp
@@ -215,14 +207,10 @@ CONTAINS
 
     rng_stream%cg = x
 
-
   END SUBROUTINE advance_rng_state
 
-! *****************************************************************************
+  !> \brief Check the parallel (pseudo)random number generator (RNG).
   FUNCTION check_rng(output_unit) RESULT(error)
-
-    ! Check the parallel (pseudo)random number generator (RNG).
-
     INTEGER, INTENT(IN)                      :: output_unit
     LOGICAL                                  :: error
 
@@ -230,7 +218,6 @@ CONTAINS
     REAL(KIND=dp)                            :: sum, sum3
     REAL(KIND=dp), DIMENSION(3, 2)           :: germe
     TYPE(rng_stream_type), POINTER           :: cantor, g1, g2, g3, galois, laplace, poisson
-
 ! -------------------------------------------------------------------------
 ! Test 1
 
@@ -323,7 +310,6 @@ CONTAINS
     CALL delete_rng_stream(g3)
 
     ! -------------------------------------------------------------------------
-
     ! Test 2
 
     NULLIFY (cantor)
@@ -393,12 +379,11 @@ CONTAINS
 
   END FUNCTION check_rng
 
-! *****************************************************************************
+  !> \brief Check that the seeds are legitimate values.
+  !>
+  !> \return .FALSE.
+  !> if legal seeds, .TRUE. otherwise.
   FUNCTION check_seed(seed) RESULT(error)
-
-    ! Check that the seeds are legitimate values. Returns .FALSE.
-    ! if legal seeds, .TRUE. otherwise.
-
     REAL(KIND=dp), DIMENSION(3, 2), &
       INTENT(IN)                             :: seed
     LOGICAL                                  :: error
@@ -406,7 +391,6 @@ CONTAINS
     CHARACTER(LEN=*), PARAMETER :: fmtstr = "(A,I1,A,ES23.14,A,ES23.14)"
 
     INTEGER                                  :: i
-
 ! -------------------------------------------------------------------------
     error=.false.
     DO i=1,3
@@ -443,17 +427,16 @@ CONTAINS
 
   END FUNCTION check_seed
 
-! *****************************************************************************
+  !> \brief Create a new RNG stream.
+  !>
+  !> \param last_rng_stream is used as a reference stream, if it is specified.
+  !>
+  !> \par Usage hint:
+  !> CALL create_rng_stream(rng_stream,name,...) to generate the first stream.
+  !>
+  !> Then CALL create_rng_stream(next_rng_stream,name,rng_stream) to create
+  !> all the following RNG streams.
   FUNCTION create_rng_stream(rng_stream,name,last_rng_stream,distribution_type,seed,antithetic,extended_precision) RESULT(error)
-
-    ! Create a new RNG stream.
-    ! last_rng_stream is used as a reference stream, if it is specified.
-
-    ! Usage hint:
-    ! CALL create_rng_stream(rng_stream,name,...) to generate the first stream.
-    ! Then CALL create_rng_stream(next_rng_stream,name,rng_stream) to create
-    ! all the following RNG streams.
-
     TYPE(rng_stream_type), POINTER           :: rng_stream
     CHARACTER(LEN=*), INTENT(IN)             :: name
     TYPE(rng_stream_type), OPTIONAL, POINTER :: last_rng_stream
@@ -463,9 +446,7 @@ CONTAINS
     LOGICAL, INTENT(IN), OPTIONAL            :: antithetic, extended_precision
     LOGICAL                                  :: error
     INTEGER                                  :: istat
-
 ! -------------------------------------------------------------------------
-
     IF (ASSOCIATED(rng_stream)) CALL delete_rng_stream(rng_stream)
 
     ALLOCATE (rng_stream,STAT=istat)
@@ -526,31 +507,23 @@ CONTAINS
 
   END FUNCTION create_rng_stream
 
-! *****************************************************************************
+  !> \brief Delete a random number stream.
    SUBROUTINE delete_rng_stream(rng_stream)
-
-    ! Delete a random number stream.
-
     TYPE(rng_stream_type), POINTER           :: rng_stream
 
     INTEGER                                  :: istat
-
 ! -------------------------------------------------------------------------
     !assert(ASSOCIATED(rng_stream))
     DEALLOCATE (rng_stream,STAT=istat)
     !assert(istat==0)
- 
+
   END SUBROUTINE delete_rng_stream
 
-! *****************************************************************************
+  !> \brief Dump a RNG stream as a record given as an internal file (string).
   SUBROUTINE dump_rng_stream(rng_stream,rng_record)
-
-    ! Dump a RNG stream as a record given as an internal file (string).
-
     TYPE(rng_stream_type), POINTER           :: rng_stream
     CHARACTER(LEN=rng_record_length), &
       INTENT(OUT)                            :: rng_record
-
 ! -------------------------------------------------------------------------
     !assert(ASSOCIATED(rng_stream))
 
@@ -567,16 +540,13 @@ CONTAINS
 
   END SUBROUTINE dump_rng_stream
 
-! 2009-11-04 lwalewsk: changed type of bg, cg and ig
-!            from INTEGER, DIMENSION(3, 2) to REAL(KIND=dp), DIMENSION(3, 2)
-! 2009-11-09 lwalewsk: getting of buffer and buffer_filled components added
-! *****************************************************************************
+  !> \brief Get the components of a RNG stream.
+  !> \since 2009-11-04 lwalewsk: changed type of bg, cg and ig
+  !>            from INTEGER, DIMENSION(3, 2) to REAL(KIND=dp), DIMENSION(3, 2)
+  !> \since 2009-11-09 lwalewsk: getting of buffer and buffer_filled components added
   SUBROUTINE get_rng_stream(rng_stream,name,distribution_type,bg,cg,ig,&
                             antithetic,extended_precision,&
                             buffer,buffer_filled)
-
-    ! Get the components of a RNG stream.
-
     TYPE(rng_stream_type), POINTER           :: rng_stream
     CHARACTER(LEN=*), INTENT(OUT), OPTIONAL  :: name
     INTEGER, INTENT(OUT), OPTIONAL           :: distribution_type
@@ -585,7 +555,6 @@ CONTAINS
     LOGICAL, INTENT(OUT), OPTIONAL           :: antithetic, extended_precision
     REAL(KIND=dp), INTENT(OUT), OPTIONAL     :: buffer
     LOGICAL, INTENT(OUT), OPTIONAL           :: buffer_filled
-
 ! -------------------------------------------------------------------------
     !assert(ASSOCIATED(rng_stream))
 
@@ -601,11 +570,8 @@ CONTAINS
 
   END SUBROUTINE get_rng_stream
 
-! *****************************************************************************
+  !> \brief Returns c = MODULO(a*b,m).
   SUBROUTINE mat_mat_mod_m(a,b,c,m)
-
-    ! Returns c = MODULO(a*b,m).
-
     REAL(KIND=dp), DIMENSION(3, 3), &
       INTENT(IN)                             :: a, b
     REAL(KIND=dp), DIMENSION(3, 3), &
@@ -613,20 +579,15 @@ CONTAINS
     REAL(KIND=dp), INTENT(IN)                :: m
 
     INTEGER                                  :: i
-
 ! -------------------------------------------------------------------------
-
     DO i=1,3
       CALL mat_vec_mod_m(a,b(:,i),c(:,i),m)
     END DO
 
   END SUBROUTINE mat_mat_mod_m
 
-! *****************************************************************************
+  !> \brief Compute matrix b = MODULO(a**n,m)
   SUBROUTINE mat_pow_mod_m(a,b,m,n)
-
-    ! Compute matrix b = MODULO(a**n,m)
-
     REAL(KIND=dp), DIMENSION(3, 3), &
       INTENT(IN)                             :: a
     REAL(KIND=dp), DIMENSION(3, 3), &
@@ -636,7 +597,6 @@ CONTAINS
 
     INTEGER                                  :: i
     REAL(KIND=dp), DIMENSION(3, 3)           :: u, v, w
-
 ! -------------------------------------------------------------------------
 ! Initialize: u = v = a; b = I
 
@@ -671,11 +631,8 @@ CONTAINS
 
   END SUBROUTINE mat_pow_mod_m
 
-! *****************************************************************************
+  !> \brief Compute matrix b = MODULO(a**(2**e),m)
   SUBROUTINE mat_two_pow_mod_m(a,b,m,e)
-
-    ! Compute matrix b = MODULO(a**(2**e),m)
-
     REAL(KIND=dp), DIMENSION(3, 3), &
       INTENT(IN)                             :: a
     REAL(KIND=dp), DIMENSION(3, 3), &
@@ -685,9 +642,7 @@ CONTAINS
 
     INTEGER                                  :: i
     REAL(KIND=dp), DIMENSION(3, 3)           :: u, v
-
 ! -------------------------------------------------------------------------
-
     b = a
 
     ! Compute b = MODULO(a**(2**e),m)
@@ -700,11 +655,8 @@ CONTAINS
 
   END SUBROUTINE mat_two_pow_mod_m
 
-! *****************************************************************************
+  !> \brief Returns v = MODULO(a*s,m). Assumes that -m < s(i) < m.
   SUBROUTINE mat_vec_mod_m(a,s,v,m)
-
-    ! Returns v = MODULO(a*s,m). Assumes that -m < s(i) < m.
-
     REAL(KIND=dp), DIMENSION(3, 3), &
       INTENT(IN)                             :: a
     REAL(KIND=dp), DIMENSION(3), INTENT(IN)  :: s
@@ -713,9 +665,7 @@ CONTAINS
 
     INTEGER                                  :: i, j
     REAL(KIND=dp)                            :: a1, a2, c
-
 ! -------------------------------------------------------------------------
-
     v = 0.0_dp
 
     DO i=1,3
@@ -739,18 +689,14 @@ CONTAINS
 
   END SUBROUTINE mat_vec_mod_m
 
-! *****************************************************************************
+  !> \brief Get the next integer random number between low and high from the stream
+  !> rng_stream.
   FUNCTION next_integer_random_number(rng_stream,low,high) RESULT(u)
-
-    ! Get the next integer random number between low and high from the stream
-    ! rng_stream.
-
     TYPE(rng_stream_type), POINTER           :: rng_stream
     INTEGER, INTENT(IN)                      :: low, high
     INTEGER                                  :: u
 
     REAL(KIND=dp)                            :: r
-
 ! -------------------------------------------------------------------------
     !assert(ASSOCIATED(rng_stream))
     !assert((rng_stream%distribution_type == UNIFORM))
@@ -760,18 +706,14 @@ CONTAINS
 
   END FUNCTION next_integer_random_number
 
-! *****************************************************************************
+  !> \brief Get the next real random number from the stream rng_stream.
+  !> variance: variance of the Gaussian distribution (defaults to 1)
   FUNCTION next_real_random_number(rng_stream,variance) RESULT(u)
-
-    ! Get the next real random number from the stream rng_stream.
-    ! variance: variance of the Gaussian distribution (defaults to 1)
-
     TYPE(rng_stream_type), POINTER           :: rng_stream
     REAL(KIND=dp), INTENT(IN), OPTIONAL      :: variance
     REAL(KIND=dp)                            :: u
 
     REAL(KIND=dp)                            :: f, r, u1, u2, var
-
 ! -------------------------------------------------------------------------
     !assert(ASSOCIATED(rng_stream))
 
@@ -815,16 +757,12 @@ CONTAINS
 
   END FUNCTION next_real_random_number
 
-! *****************************************************************************
+  !> \brief Fill entity array with random numbers from the RNG stream rng_stream.
   SUBROUTINE random_numbers_1(array,rng_stream)
-
-    ! Fill entity array with random numbers from the RNG stream rng_stream.
-
     REAL(KIND=dp), DIMENSION(:)              :: array
     TYPE(rng_stream_type), POINTER           :: rng_stream
 
     INTEGER                                  :: i
-
 ! -------------------------------------------------------------------------
     !assert(ASSOCIATED(rng_stream))
 
@@ -834,16 +772,12 @@ CONTAINS
 
   END SUBROUTINE random_numbers_1
 
-! *****************************************************************************
+  !> \brief Fill entity array with random numbers from the RNG stream rng_stream.
   SUBROUTINE random_numbers_2(array,rng_stream)
-
-    ! Fill entity array with random numbers from the RNG stream rng_stream.
-
     REAL(KIND=dp), DIMENSION(:, :)           :: array
     TYPE(rng_stream_type), POINTER           :: rng_stream
 
     INTEGER                                  :: i, j
-
 ! -------------------------------------------------------------------------
     !assert(ASSOCIATED(rng_stream))
 
@@ -855,16 +789,12 @@ CONTAINS
 
   END SUBROUTINE random_numbers_2
 
-! *****************************************************************************
+  !> \brief Fill entity array with random numbers from the RNG stream rng_stream.
   SUBROUTINE random_numbers_3(array,rng_stream)
-
-    ! Fill entity array with random numbers from the RNG stream rng_stream.
-
     REAL(KIND=dp), DIMENSION(:, :, :)        :: array
     TYPE(rng_stream_type), POINTER           :: rng_stream
 
     INTEGER                                  :: i, j, k
-
 ! -------------------------------------------------------------------------
     !assert(ASSOCIATED(rng_stream))
 
@@ -878,17 +808,13 @@ CONTAINS
 
   END SUBROUTINE random_numbers_3
 
-! *****************************************************************************
+  !> \brief Read a RNG stream from a record given as an internal file (string).
   SUBROUTINE read_rng_stream(rng_stream,rng_record)
-
-    ! Read a RNG stream from a record given as an internal file (string).
-
     TYPE(rng_stream_type), POINTER           :: rng_stream
     CHARACTER(LEN=rng_record_length), &
       INTENT(IN)                             :: rng_record
 
     INTEGER                                  :: istat
-
 ! -------------------------------------------------------------------------
     IF (ASSOCIATED(rng_stream)) CALL delete_rng_stream(rng_stream)
 
@@ -908,13 +834,9 @@ CONTAINS
 
   END SUBROUTINE read_rng_stream
 
-! *****************************************************************************
+  !> \brief Reset a random number stream to its initial state.
   SUBROUTINE reset_rng_stream(rng_stream)
-
-    ! Reset a random number stream to its initial state.
-
     TYPE(rng_stream_type), POINTER           :: rng_stream
-
 ! -------------------------------------------------------------------------
     !assert(ASSOCIATED(rng_stream))
 
@@ -923,28 +845,20 @@ CONTAINS
 
   END SUBROUTINE reset_rng_stream
 
-! *****************************************************************************
+  !> \brief Reset a random number stream to the beginning of its current substream.
   SUBROUTINE reset_rng_substream(rng_stream)
-
-    ! Reset a random number stream to the beginning of its current substream.
-
     TYPE(rng_stream_type), POINTER           :: rng_stream
-
 ! -------------------------------------------------------------------------
 
     rng_stream%cg = rng_stream%bg
 
   END SUBROUTINE reset_rng_substream
 
-! *****************************************************************************
+  !> \brief Reset a random number stream to the beginning of its next substream.
   SUBROUTINE reset_to_next_rng_substream(rng_stream)
-
-    ! Reset a random number stream to the beginning of its next substream.
-
     TYPE(rng_stream_type), POINTER           :: rng_stream
 
     REAL(KIND=dp), DIMENSION(3, 2)           :: u
-
 ! -------------------------------------------------------------------------
     !assert(ASSOCIATED(rng_stream))
 
@@ -958,17 +872,13 @@ CONTAINS
 
   END SUBROUTINE reset_to_next_rng_substream
 
-! *****************************************************************************
+  !> \brief Generate the next random number with standard precision (32 bits).
   FUNCTION rn32(rng_stream) RESULT(u)
-
-    ! Generate the next random number with standard precision (32 bits).
-
     TYPE(rng_stream_type), POINTER           :: rng_stream
     REAL(KIND=dp)                            :: u
 
     INTEGER                                  :: k
     REAL(KIND=dp)                            :: p1, p2
-
 ! -------------------------------------------------------------------------
     ! Component 1
 
@@ -1002,16 +912,11 @@ CONTAINS
 
   END FUNCTION rn32
 
-! *****************************************************************************
+  !> \brief Generate the next random number with extended precision (53 bits).
   FUNCTION rn53(rng_stream) RESULT(u)
-
-    ! Generate the next random number with extended precision (53 bits).
-
     TYPE(rng_stream_type), POINTER           :: rng_stream
     REAL(KIND=dp)                            :: u
-
 ! -------------------------------------------------------------------------
-
     u = rn32(rng_stream)
 
     ! Note: rn32 returns 1 - u in the antithetic case
@@ -1026,15 +931,13 @@ CONTAINS
 
   END FUNCTION rn53
 
-! 2009-11-09 lwalewsk: setting of buffer and buffer_filled components added
-! *****************************************************************************
+  !> \brief Set the components of a RNG stream.
+  !>
+  !> \attention The manipulation of an active RNG stream is discouraged.
+  !> \since 2009-11-09 lwalewsk: setting of buffer and buffer_filled components added
   FUNCTION set_rng_stream(rng_stream,name,distribution_type,bg,cg,ig,&
                             seed,antithetic,extended_precision,&
                             buffer,buffer_filled) RESULT(error)
-
-    ! Set the components of a RNG stream.
-    ! NOTE: The manipulation of an active RNG stream is discouraged.
-
     TYPE(rng_stream_type), POINTER           :: rng_stream
     CHARACTER(LEN=*), INTENT(IN), OPTIONAL   :: name
     INTEGER, INTENT(IN), OPTIONAL            :: distribution_type
@@ -1044,7 +947,6 @@ CONTAINS
     REAL(KIND=dp), INTENT(IN), OPTIONAL      :: buffer
     LOGICAL, INTENT(IN), OPTIONAL            :: buffer_filled
     LOGICAL                                  :: error
-
 ! -------------------------------------------------------------------------
     !assert(ASSOCIATED(rng_stream))
     error=.FALSE.
@@ -1068,17 +970,13 @@ CONTAINS
 
   END FUNCTION set_rng_stream
 
-! *****************************************************************************
+  !> \brief Write the transformation matrices of the two MRG components (raised to
+  !> the powers -1, 1, 2**76, and 2**127) the a logical output unit.
   SUBROUTINE write_rng_matrices(output_unit)
-
-    ! Write the transformation matrices of the two MRG components (raised to
-    ! the powers -1, 1, 2**76, and 2**127) the a logical output unit.
-
     INTEGER, INTENT(IN)                      :: output_unit
 
     CHARACTER(LEN=*), PARAMETER :: fmtstr = "(/,T4,A,/,/,(2X,3F14.1))"
     INTEGER                                  :: i, j
-
 ! -------------------------------------------------------------------------
 ! Print the transformation matrices for both components
 
@@ -1105,18 +1003,14 @@ CONTAINS
 
   END SUBROUTINE write_rng_matrices
 
-! *****************************************************************************
+  !> \param write_all: if .TRUE., then print all stream informations.
+  !>            (the default is .FALSE.)
   SUBROUTINE write_rng_stream(rng_stream,output_unit,write_all)
-
-    ! write_all: if .TRUE., then print all stream informations.
-    !            (the default is .FALSE.)
-
     TYPE(rng_stream_type), POINTER           :: rng_stream
     INTEGER, INTENT(IN)                      :: output_unit
     LOGICAL, INTENT(IN), OPTIONAL            :: write_all
 
     LOGICAL                                  :: my_write_all
-
 ! -------------------------------------------------------------------------
     !assert(ASSOCIATED(rng_stream))
 
@@ -1125,7 +1019,7 @@ CONTAINS
     ELSE
       my_write_all = .FALSE.
     END IF
-    
+
     WRITE (UNIT=output_unit,FMT="(/,T2,A,/)")&
      "Random number stream <"//TRIM(rng_stream%name)//">:"
 
@@ -1169,5 +1063,4 @@ CONTAINS
      "Component 2:",rng_stream%cg(:,2)
 
   END SUBROUTINE write_rng_stream
-
 END MODULE util_prng

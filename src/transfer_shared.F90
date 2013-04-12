@@ -42,7 +42,6 @@ contains
        write(io_output,*) 'lopt_bias: ',lopt_bias
        write(io_output,*) 'freq_opt_bias: ',freq_opt_bias
     end if
-
   end subroutine read_transfer
 
   subroutine update_bias(u_diff,boxrem,boxins,imolty)

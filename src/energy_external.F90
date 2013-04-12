@@ -10,21 +10,16 @@ MODULE energy_external
 
   real,allocatable::extc12(:),extc3(:),extz0(:)
 
-! EXTERNAL.INC
-  real::a1,delta,rsol
-  integer::ntsubst
 ! Slitpore
-! a1, delta are in Angstroms, rsol [=] 1/A^3
-  parameter (a1 = 2.460E0_dp)
-  parameter (delta = 3.40E0_dp)
-  parameter (ntsubst = 190)
-  parameter (rsol = 0.114E0_dp)
+  real,parameter::a1=2.460E0_dp,delta=3.40E0_dp& !< a1, delta are in Angstroms
+   ,rsol=0.114E0_dp !< rsol [=] 1/A^3
+  integer,parameter::ntsubst=190
 ! Joe Hautman's parameters are read from standard input, to be used with ljoe = .true.
 ! AT PRESENT no parameters for polymeric surfactants (see LJPSUR)
 
 contains
-! calculates the surface energy of a bend with a featureless
-! graphite surface
+!> \brief calculates the surface energy of a bend with a featureless
+!> graphite surface
   function slitpore(z,ntij)
 	integer::ntij
 	real::vgs,z
@@ -44,7 +39,7 @@ contains
     slitpore = vgs
   end function slitpore
 
-! calculates the energy of a bead with a graphite surface
+!> \brief calculates the energy of a bead with a graphite surface
   function exgrph(x,y,z,ntij)
         real::aa,aa2
         real::a1sq
@@ -107,27 +102,19 @@ contains
         end if
   end function exgrph
 
-! **********************************************************************
-! calculates interaction of molecule i with an external field E  ***
-! added 06/24/07 by KM                                           ***
-! **********************************************************************
+!> \brief calculates interaction of molecule i with an external field E
+!> ********************************************
+!> \par Units
+!> E in V/A, q in e, rz in A \n
+!> E*q*rz = V*e \n
+!> 1 V*e = 11600 K
+!> ********************************************
+!> \author added 06/24/07 by KM
   function v_elect_field(i, j, rzfield,E)
-
       real::v_elect_field,rzfield, E
       integer::i,j
-
-
-! ********************************************
-! units
-! E in V/A, q in e, rz in A
-! E*q*rz = V*e
-! 1 V*e = 11600 K
-! ********************************************
-
       v_elect_field = -E*rzfield*qqu(i,j)
-
 ! write(io_output,*) 'E ', E, ' exfield ', exfield
-
       return
   end function v_elect_field
 

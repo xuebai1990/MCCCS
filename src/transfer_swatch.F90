@@ -12,18 +12,15 @@ module transfer_swatch
   save
   public::swatch,init_swatch,output_swatch_stats,read_checkpoint_swatch,write_checkpoint_swatch
 
-! SWTCMOVE.INC
   real,allocatable::bnswat(:,:),bnswat_empty(:,:),bsswat(:,:) !< accumulators for swatch performance
 contains
-!*********************************************************
-! Added intrabox move for two particles within one box  **
-! in combined move that shares the same parameters.     **
-! Will also accept rigid (lrigid) molecules.  Contains  **
-! several critical bug fixes as well.                   **
-!                                        9-25-02 JMS    **
-!*********************************************************
+!> Added intrabox move for two particles within one box
+!> in combined move that shares the same parameters.
+!> Will also accept rigid (lrigid) molecules.  Contains
+!> several critical bug fixes as well.
+!> \since 9-25-02 JMS
   subroutine swatch()
-    use sim_particle,only:update_neighbor_list
+    use sim_particle,only:update_neighbor_list,ctrmas
 
       logical::lempty,lterm
 

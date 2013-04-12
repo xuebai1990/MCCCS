@@ -35,12 +35,12 @@ module zeolite
 
   type(MoleculeType)::zeo
   type(ZeoliteBeadType)::ztype
-  type(CellMaskType)::zcell ! the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
+  type(CellMaskType)::zcell !< the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
   type(ZeoliteUnitCellGridType)::zunit
   type(ZeolitePotentialType)::zpot
 
 contains
-! Interface to old code using mask data types
+!> \brief Interface to old code using mask data types
   subroutine initZeo()
     integer::i,j
     zcell%solid=>lsolid(boxZeo)
@@ -88,7 +88,7 @@ contains
     if ((lpore_volume.and.volume_probe.eq.0).or.(lsurface_area.and.area_probe.eq.0)) then
        call err_exit(__FILE__,__LINE__,'zeocoord: atom parameters for volume_probe or area_probe undefined',myid+1)
     end if
-       
+
     call initZeo()
 
     if (index(file_zeocoord,'.cif').gt.0) then
@@ -341,8 +341,9 @@ contains
 
   end subroutine suzeo
 
-! arguments i,j,k are in fractional coordinates with respect to the unit cell
-! U_LJ = A/r^12 + B/r^6, scale A by 4*10^8, B by 2*10^4 to reduce round-off error
+!> \param i,j,k are in fractional coordinates with respect to the unit cell
+!>
+!> \remarks U_LJ = A/r^12 + B/r^6, scale A by 4*10^8, B by 2*10^4 to reduce round-off error
   subroutine exzeof(tab,i,j,k)
     real,intent(out)::tab(3,ztype%ntype)
     real,intent(in)::i,j,k
@@ -608,7 +609,8 @@ contains
 
 !> \brief Test accuracy of tabulated zeolite potential and calculate void volume
 !>
-!> See O. Talu and A.L. Myers, "Molecular simulation of adsorption: Gibbs dividing surface and comparison with experiment", AICHE J., 47(5), 1160-1168 (2001).
+!> \par Literature
+!> O. Talu and A.L. Myers, "Molecular simulation of adsorption: Gibbs dividing surface and comparison with experiment", AICHE J., 47(5), 1160-1168 (2001).
   subroutine ztest()
     use util_random,only:random
     integer::i,tel
@@ -675,14 +677,14 @@ contains
 
 !> \brief Calculate geometric surface area
 !>
-!> See
+!> \par Literature
 !> 1. O.K. Farha, A.O. Yazaydin, I. Eryazici, C.D. Malliakas, B.G. Hauser, M.G. Kanatzidis, S.T. Nguyen, R.Q. Snurr, and J.T. Hupp,
-!>   "De novo synthesis of a metal-organic framework material featuring ultra-high surface area and gas storage capacities", Nature Chem., xx(x), xxx-xxx (2010).
-!> 2. T. Duren, L. Sarkisov, O.M. Yaghi, and R.Q. Snurr, "Design of New Materials for Methane Storage", Langmuir, 20(7), 2683-2689 (2004).
-!> 3. K.S. Walton and R.Q. Snurr, "Applicability of the BET method for determining surface areas of microporous metal-organic frameworks", J. Am. Chem. Soc., 129(27), 8552-8556 (2007).
-!> 4. T. Duren, F. Millange, G. Ferey, K.S. Walton, and R.Q. Snurr, "Calculating geometric surface areas as a characterization tool for metal-organic frameworks", J. Phys. Chem., 111(42), 15350-15356 (2007).
-!> 5. T. Duren, Y.S. Bae, and R.Q. Snurr, "Using molecular simulation to characterise metal-organic frameworks for adsorption applications", Chem. Soc. Rev., 38(5), 1237-1247 (2009).
-!> 6. Y.S. Bae, A.O. Yazaydin, and R.Q. Snurr, "Evaluation of the BET method for determining surface areas of MOFs and zeolites that contain ultra-micropores", Langmuir, 26(8), 5475-5483 (2010).
+!>   "De novo synthesis of a metal-organic framework material featuring ultra-high surface area and gas storage capacities", Nature Chem., xx(x), xxx-xxx (2010). \n
+!> 2. T. Duren, L. Sarkisov, O.M. Yaghi, and R.Q. Snurr, "Design of New Materials for Methane Storage", Langmuir, 20(7), 2683-2689 (2004). \n
+!> 3. K.S. Walton and R.Q. Snurr, "Applicability of the BET method for determining surface areas of microporous metal-organic frameworks", J. Am. Chem. Soc., 129(27), 8552-8556 (2007). \n
+!> 4. T. Duren, F. Millange, G. Ferey, K.S. Walton, and R.Q. Snurr, "Calculating geometric surface areas as a characterization tool for metal-organic frameworks", J. Phys. Chem., 111(42), 15350-15356 (2007). \n
+!> 5. T. Duren, Y.S. Bae, and R.Q. Snurr, "Using molecular simulation to characterise metal-organic frameworks for adsorption applications", Chem. Soc. Rev., 38(5), 1237-1247 (2009). \n
+!> 6. Y.S. Bae, A.O. Yazaydin, and R.Q. Snurr, "Evaluation of the BET method for determining surface areas of MOFs and zeolites that contain ultra-micropores", Langmuir, 26(8), 5475-5483 (2010). \n
   subroutine zsurface()
     use util_random,only:random,sphere
     integer::i,j,k,ntij,ncount
@@ -746,5 +748,4 @@ contains
     deallocate(position)
 
   end subroutine zsurface
-
 end module zeolite

@@ -1,15 +1,14 @@
-! ***********************************************************************************
-! Written by Neeraj Rai. Date 08/22/2006
-
-! This subroutine calculates heat of vaporization and solubility parameter
-! Separates the Coulombic and LJ part of solubility parameter
-! Previos implementation of heat of vaporization was good only for single component
-! system. Now we can do any number of components.
-! It is being written for two box gibbs ensemble simulations. If it is more than two boxes it will c return without doing anything.
-! or if the box is solid and non rectangular it will return.
-! If you have more than two boxes then there are couple changes that need to be done
-! in order for this subroutine to work. nprop in blkavg.inc needs to be set properly
-! ************************************************************************************
+!> \brief Calculates heat of vaporization and solubility parameter
+!>
+!> Separates the Coulombic and LJ part of solubility parameter. \n
+!> Previos implementation of heat of vaporization was good only for single component
+!> system. Now we can do any number of components. \n
+!> It is being written for two box gibbs ensemble simulations. If it is more than two boxes it will c return without doing anything.
+!> or if the box is solid and non rectangular it will return.
+!> If you have more than two boxes then there are couple changes that need to be done
+!> in order for this subroutine to work. nprop in blkavg.inc needs to be set properly
+!> \author Neeraj Rai
+!> \date 08/22/2006
 subroutine calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ, Heat_vapor_COUL, pdV, CED_T, CED_LJ,CED_COUL,HSP_T,HSP_LJ, HSP_COUL,ibox,jbox)
   use const_phys,only:joule2cal,cal2joule
   use sim_system
@@ -18,7 +17,7 @@ subroutine calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ, Heat_vapor_COUL, pdV, CED
 
       integer::ibox, jbox, ig, il, imolty
       integer,dimension(nbxmax):: temp_nmol,box_volume
-      real,dimension(nbxmax)::mol_vol      
+      real,dimension(nbxmax)::mol_vol
       real,dimension(nbxmax)::pres
       real::enchg1, enchg2,enchg3
       real::Heat_vapor_T, Heat_vapor_LJ, Heat_vapor_COUL
@@ -39,15 +38,15 @@ subroutine calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ, Heat_vapor_COUL, pdV, CED
 
       if (lsolid(ibox).and.(.not.lrect(ibox))) then
          box_volume(ibox) = cell_vol(ibox)
-      else   
+      else
          box_volume(ibox) = boxlx(ibox)*boxly(ibox)*boxlz(ibox)
       end if
-! molar volume in cc/mol    
-      if (temp_nmol(ibox).eq.0) then    
+! molar volume in cc/mol
+      if (temp_nmol(ibox).eq.0) then
 ! set the molar volume artibrarily high as it will not affect any since pressure will be zero
-         mol_vol(ibox) = 10.0E10_dp    
+         mol_vol(ibox) = 10.0E10_dp
       else
-         mol_vol(ibox)=box_volume(ibox)/temp_nmol(ibox)*0.6022E0_dp 
+         mol_vol(ibox)=box_volume(ibox)/temp_nmol(ibox)*0.6022E0_dp
       end if
 
       temp_nmol(jbox) = 0
@@ -79,13 +78,13 @@ subroutine calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ, Heat_vapor_COUL, pdV, CED
       if (temp_nmol(il).eq.0) then
          T_Energy_Liq = 0.0E0_dp
          LJ_Energy_Liq = 0.0E0_dp
-         Coul_energy_Liq = 0.0E0_dp 
+         Coul_energy_Liq = 0.0E0_dp
       else
          T_Energy_Liq = vbox(1,il)/temp_nmol(il)
          LJ_Energy_Liq = (vbox(2,il)+vbox(4,il)+ vbox(3,il))/temp_nmol(il)
          Coul_Energy_Liq = vbox(8,il)/temp_nmol(il)
       end if
-      
+
       if (temp_nmol(ig).eq.0) then
          T_Energy_Gas = 0.0E0_dp
          LJ_Energy_Gas = 0.0E0_dp
@@ -95,12 +94,12 @@ subroutine calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ, Heat_vapor_COUL, pdV, CED
          LJ_Energy_Gas = (vbox(2,ig)+vbox(4,ig)+ vbox(3,ig))/temp_nmol(ig)
          Coul_Energy_Gas = vbox(8,ig)/temp_nmol(ig)
       end if
-      
-      
+
+
       enchg1 = 0.008314510E0_dp*(T_Energy_Gas - T_Energy_Liq)
 
       pdV = pres(ig)*(mol_vol(ig)-mol_vol(il))*1.0E-6_dp
-      
+
       Heat_vapor_T = enchg1 + pres(ig)* (mol_vol(ig)-mol_vol(il))*1.0E-6_dp
 ! write(io_output,1505) il,ig,abs(enthchg1)
 ! This is inter+intra LJ

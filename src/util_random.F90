@@ -1,9 +1,9 @@
 !> \brief (Pseudo)random number generator (RNG)
 !>
-!> -- Mersenne-Twister (MT19937) with initialization improved 2002-01-26
-!> Originally coded in C by Takuji Nishimura and Makoto Matsumoto
-!> Translated to Fortran 77 by Tsuyoshi TADA. (2005-12-19)
-!> Modified for use in topmon by Peng Bai. (2012-02-11)
+!> -- Mersenne-Twister (MT19937) with initialization improved
+!> \author Originally coded in C by Takuji Nishimura and Makoto Matsumoto (2002-01-26)
+!> \author Translated to Fortran 77 by Tsuyoshi TADA. (2005-12-19)
+!> \author Modified for use in topmon by Peng Bai. (2012-02-11)
 module util_random
   use var_type,only:dp
   use const_math,only:twopi
@@ -55,10 +55,10 @@ contains
 !-----------------------------------------------------------------------
 !> \brief Initialize mt(0:N-1) with a seed
 !>
-!> \param s seed, must be non-negative
-!>
 !> This subroutine should be called once before using the RNG, otherwise
 !> a default seed will be used.
+!>
+!> \param s seed, must be non-negative
 !-----------------------------------------------------------------------
   subroutine RANSET(s,nStream)
     use util_string,only:integer_to_string
@@ -73,7 +73,7 @@ contains
     real(8)::iseeds(3,2)
     integer::i,ierr
     logical::err
-         
+
     call mt_initln
     mt(0)=iand(s,ALLBIT_MASK)
     do mti=1,N-1
@@ -99,7 +99,7 @@ contains
           if (err) call err_exit(__FILE__,__LINE__,'RANSET: error creating prng stream '//integer_to_string(i),-1)
        end do
     end if
-        
+
     return
   end subroutine RANSET
 
@@ -166,9 +166,9 @@ contains
   end function random
 
 !> \brief Generate random vector of length 1 on unit spheres
-!> 
-!> See http://mathworld.wolfram.com/SpherePointPicking.html for further explanations
-!> See also P349 of Allen & Tildesley: G.4 Random vectors on the surface of a sphere
+!>
+!> \see http://mathworld.wolfram.com/SpherePointPicking.html for further explanations
+!> \see P349 of Allen & Tildesley: G.4 Random vectors on the surface of a sphere
   subroutine sphere(x,y,z,iStream)
     real,intent(out)::x,y,z
     integer,intent(in)::iStream
@@ -203,8 +203,8 @@ contains
 !> \param mu mean
 !> \param sig standard deviation
 !>
-!> Leva's ratio-of-uniforms method; See $7.3.9 of Numerical Recipes (3rd ed.)
-!> Note that algorithms in P347 of Allen & Tildesley, G.4 Generating non-uniform
+!> Leva's ratio-of-uniforms method; \see $7.3.9 of Numerical Recipes (3rd ed.)
+!> \note The algorithms in P347 of Allen & Tildesley, G.4 Generating non-uniform
 !> distributions, are inferior in either speed, accuracy, or both
   function gaussian(mu,sig,iStream) result(gau)
     real,intent(in)::mu,sig
@@ -224,5 +224,4 @@ contains
     end do
     gau=mu+sig*v/u
   end function gaussian
-
 end module util_random

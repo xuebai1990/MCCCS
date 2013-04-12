@@ -10,13 +10,12 @@ MODULE parser_cssr
   PUBLIC :: readCSSR
 
 CONTAINS
-
   SUBROUTINE readCSSR(fileCSSR,zeo,lunitcell,ztype,zcell,zunit,lprint)
     character(LEN=*),intent(in)::fileCSSR
     type(MoleculeType),intent(out)::zeo
     logical,allocatable,intent(out)::lunitcell(:)
     type(ZeoliteBeadType),intent(out)::ztype
-    type(CellMaskType),intent(out)::zcell ! the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
+    type(CellMaskType),intent(out)::zcell !< the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
     type(ZeoliteUnitCellGridType),intent(out)::zunit
     LOGICAL,INTENT(IN)::lprint
 
@@ -61,5 +60,4 @@ CONTAINS
     close(IOCSSR)
 
   END SUBROUTINE readCSSR
-
 END MODULE parser_cssr

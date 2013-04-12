@@ -1,4 +1,4 @@
-    DATA_TYPE :: mydata(:,:) ! Warning first dimension is supposed constant!
+    DATA_TYPE :: mydata(:,:) !< \warning first dimension is supposed constant!
     DATA_TYPE :: alldata(:,:)
     INTEGER, INTENT(IN) :: recvcount(:), displs(:)
     INTEGER, INTENT(IN) :: comm

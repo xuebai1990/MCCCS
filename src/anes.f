@@ -1,12 +1,11 @@
-!    *********************************************************************
-! optimize the electronic configuration for trans, rot, and swap  **
-!    ** (config, swatch in the future) moves and accept/reject the      **
-! combined move.                                                  **
-! written on June 25/99 by Bin Chen.                              **
-!    *********************************************************************
+!> \brief Optimize the electronic configuration for trans, rot, and swap
+!> (config, swatch in the future) moves and accept/reject the
+!> combined move.
+!> \author written on June 25/99 by Bin Chen.
 subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vn,vo,vinsta,vremta,vnewflucq,voldflucq,lswapinter)
   use util_random,only:random
   use sim_system
+  use sim_particle,only:ctrmas
   use energy_kspace,only:recip
   implicit none
 

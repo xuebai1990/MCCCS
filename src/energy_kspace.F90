@@ -11,24 +11,20 @@ MODULE energy_kspace
   save
   public::recipsum,recip,recip_atom,ee_recip,recippress,calp,sself,correct,save_kvector,restore_kvector,allocate_kspace
 
-! EWALDSUM.INC
-! vectormax = the maximum number of reciprocal vectors for Ewald sum
-  integer,parameter::vectormax=100000
-  integer,allocatable::numvect(:),numvecto(:)
+  integer,parameter::vectormax=100000 !< the maximum number of reciprocal vectors for Ewald sum
+  integer,allocatable::numvect(:)& !< the total number of reciprocal vectors
+   ,numvecto(:)
   real,allocatable::kx(:,:),ky(:,:),kz(:,:),prefact(:,:),ssumr(:,:),ssumi(:,:),ssumrn(:,:),ssumin(:,:),ssumro(:,:),ssumio(:,:),kxo(:,:),kyo(:,:),kzo(:,:),prefacto(:,:),calpo(:)
-  real,allocatable,target::calp(:)
+  real,allocatable,target::calp(:) !< calp = kalp / boxlen; kalp is a parameter to control the real space sum
   real::sself,correct
-! numvect, the total number of reciprocal vectors
-! kalp, a parameter to control the real space sum
-! calp = kalp / boxlen
 
 contains
-!    *********************************************************************
-! calculates the total reciprocal space ewald-sum term for volume **
-! moves, written in 1998 by Bin Chen.                             **
-! rewritten in 2001 by Bin Chen.                                  **
-! rewritten again, probably by Bin.                               **
-!    *********************************************************************
+!> \brief calculates the total reciprocal space ewald-sum term for volume
+!> moves
+!> \par History
+!> written in 1998 by Bin Chen \n
+!> rewritten in 2001 by Bin Chen \n
+!> rewritten again, probably by Bin
   subroutine recipsum(ibox,vrecip)
     real(kind=dp)::vrecip
     integer::ibox,i,ii,imolty,ncount
@@ -163,13 +159,11 @@ contains
     return
   end subroutine recipsum
 
-!    *********************************************************************
-! calculates the reciprocal ewald-sum term for trans, rot, flucq, **
-! swatch and swap moves, and update the reciprocal ewald-sum.     **
-! rewritten on June 25/99 by Bin Chen.                            **
-!    *********************************************************************
+!> \brief calculates the reciprocal ewald-sum term for trans, rot, flucq,
+!> swatch and swap moves, and update the reciprocal ewald-sum.
+!> \par History
+!> rewritten on June 25/99 by Bin Chen
   subroutine recip(ibox,vrecipnew,vrecipold,type)
-
     integer::ic,izz,ii,imolty,ibox,ncount,type
     real::vrecipnew,vrecipold,sumr(2),sumi(2),arg
 
@@ -270,7 +264,7 @@ contains
     return
   end subroutine recip
 
-! store old k vectors and reciprocal sum
+!> \brief store old k vectors and reciprocal sum
   subroutine save_kvector(ibox)
     integer,intent(in)::ibox
     integer::ic,ncount
@@ -285,7 +279,7 @@ contains
     end do
   end subroutine save_kvector
 
-! restore old k vectors and reciprocal sum and calp
+!> \brief restore old k vectors and reciprocal sum and calp
   subroutine restore_kvector(ibox)
     integer,intent(in)::ibox
     integer::ic,ncount
@@ -301,11 +295,6 @@ contains
     end do
   end subroutine restore_kvector
 
-!    *********************************************************************
-! calculates the reciprocal ewald-sum term for trans, rot, flucq, **
-! swatch and swap moves, and update the reciprocal ewald-sum.     **
-! rewritten on June 25/99 by Bin Chen.                            **
-!    *********************************************************************
   subroutine recip_atom(ibox,vrecipnew,vrecipold,type,ii)
       integer::ic,izz,ii,imolty,ibox,ncount,type
       real::vrecipnew,vrecipold,sumr(2),sumi(2) ,arg
@@ -313,7 +302,6 @@ contains
       ncount = numvect(ibox)
 
       if ( type .eq. 1 ) then
-
 ! recalculate the reciprocal space part for one-particle move, translation,
 ! rotation, swap, flucq, and swatch.
 ! old conformation izz = 1 (which is 0 for swap inserted molecule)
@@ -392,11 +380,6 @@ contains
       return
   end subroutine recip_atom
 
-!    *********************************************************************
-! calculates the reciprocal ewald-sum term for trans, rot, flucq, **
-! swatch and swap moves, and update the reciprocal ewald-sum.     **
-! rewritten on June 25/99 by Bin Chen.                            **
-!    *********************************************************************
   subroutine ee_recip(ibox,vrecipnew,vrecipold,type)
       integer::ic,zzz,ii,imolty,ibox,ncount,type
       real::vrecipnew,vrecipold,sumr(2),sumi(2) ,arg
@@ -484,17 +467,15 @@ contains
       return
   end subroutine ee_recip
 
-!    ********************************************************************
-! calculates the reciprocal space contribution to pressure using **
-! thermodynamic definition. See J. Chem. Phys. Vol. 109 P2791.   **
-! written in 1998 by Bin Chen.                                   **
-! modified to calculate surface tension, 11/24/03 JMS            **
-!    ********************************************************************
+!> \brief Calculates the reciprocal space contribution to pressure using
+!> thermodynamic definition.
+!> \see J. Chem. Phys. Vol. 109 P2791.
+!> \par History
+!> written in 1998 by Bin Chen \n
+!> modified to calculate surface tension, 11/24/03 JMS
   subroutine recippress(ibox,repress,pxx,pyy,pzz,pxy,pyx,pxz,pzx, pyz,pzy)
-
     integer::ncount,ibox,i,ii,imolty
     real::factor,repress,repressx,repressy,repressz,recipintra,piix,piiy,piiz,xcmi,ycmi,zcmi,arg
-
     real::pxx,pyy,pzz,intraxx,intrayy,intrazz,intraxy,intraxz,intrazy,intrayz,intrayx,intrazx,pxy,pyx,pyz,pzy,pxz,pzx
 
     repress  = 0.0E0_dp
@@ -586,7 +567,7 @@ contains
           end do
        end if
     end do
-    
+
     call mp_sum(recipintra,1,groupid)
     call mp_sum(intraxx,1,groupid)
     call mp_sum(intrayy,1,groupid)

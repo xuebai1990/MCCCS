@@ -8,15 +8,15 @@ MODULE sim_cell
   public::CellType,CellMaskType,matops,setpbc,mimage,build_linked_cell,update_linked_cell,get_cell_neighbors,allocate_sim_cell,allocate_linked_cell
 
   type CellType
-     logical::ortho,solid ! ortho=.true. if the simulation box is orthorhombic
-                          ! solid=.true. if the simulation box can change shape
+     logical::ortho& !<.true. if the simulation box is orthorhombic
+      ,solid !<.true. if the simulation box can change shape
      logical,dimension(3)::pbc
      real::cut,vol,calp,boxl(3),ang(3),height(3),hmat(3,3),hmati(3,3)
   end type CellType
 
   type CellMaskType
-     logical,pointer::ortho,solid ! ortho=.true. if the simulation box is orthorhombic
-                          ! solid=.true. if the simulation box can change shape
+     logical,pointer::ortho& !<.true. if the simulation box is orthorhombic
+      ,solid!<.true. if the simulation box can change shape
      logical,dimension(3)::pbc
      real,pointer::cut,vol,calp
      type(RealPtr)::boxl(3),ang(3),height(3),hmat(3,3),hmati(3,3)
@@ -33,11 +33,11 @@ MODULE sim_cell
   integer,allocatable::icell(:)
 
 contains
-!> \brief Calculates for non cubic simulation cell:
-!>       boxlengths: cell_length,
-!>       minimum boxwidths: min_length,
-!>       boxvolume: cell_vol,
-!>       inverse H matrix
+!> \brief Calculates for non cubic simulation cell
+!> \b cell_length: boxlengths \n
+!> \b min_length: minimum boxwidths \n
+!> \b cell_vol: box volume \n
+!> \b hmati: inverse H matrix
 !> \author Neeraj Rai (in Merck Apr 2005)
   subroutine matops(ibox)
     use sim_system,only:boxlx,boxly,boxlz
@@ -332,22 +332,22 @@ contains
     dcellx = rcut(ibox) + rintramax
 
 ! find hypothetical ncell
-    ncellx = int( boxlx(ibox) / dcellx ) 
-    ncelly = int( boxly(ibox) / dcellx ) 
+    ncellx = int( boxlx(ibox) / dcellx )
+    ncelly = int( boxly(ibox) / dcellx )
     ncellz = int( boxlz(ibox) / dcellx )
-         
+
 ! make dcells larger so each each cell is the same size
     dcellx = boxlx(ibox) / dble(ncellx)
     dcelly = boxly(ibox) / dble(ncelly)
     dcellz = boxlz(ibox) / dble(ncellz)
 
 ! now reweight ncell one more time
-    ncellx = anint( boxlx(ibox) / dcellx ) 
-    ncelly = anint( boxly(ibox) / dcelly ) 
-    ncellz = anint( boxlz(ibox) / dcellz ) 
+    ncellx = anint( boxlx(ibox) / dcellx )
+    ncelly = anint( boxly(ibox) / dcelly )
+    ncellz = anint( boxlz(ibox) / dcellz )
 
     ncell = ncellx * ncelly * ncellz
- 
+
     if (ncell .ne. ncello) then
        if (ncello .eq. 0) then
           write(io_output,*) 'number of linkcells set to',ncell
@@ -362,7 +362,7 @@ contains
        write(io_output,*) 'ncell,cmax',ncell,cmax
        call err_exit(__FILE__,__LINE__,'ncell greater than cmax in linkcell',-1)
     end if
-         
+
     do n = 1, ncell
        nicell(n) = 0
     end do
@@ -414,7 +414,7 @@ contains
     if (ic.ne.ico) then
        if (ico.gt.0) then
 ! first remove our molecule
-          do n = 1, nicell(ico) 
+          do n = 1, nicell(ico)
              if (iucell(ico,n).eq.imol) then
 ! replace removed occupant with last occupant and erase last spot
                 iucell(ico,n) = iucell(ico,nicell(ico))
@@ -431,7 +431,7 @@ contains
        end if
 
        if (ic.gt.0) then
-! now we will add the molecule 
+! now we will add the molecule
           icell(imol) = ic
           nicell(ic) = nicell(ic) + 1
           if (nicell(ic).gt.cmaxa) call err_exit(__FILE__,__LINE__,'nicell too big',-1)
@@ -466,7 +466,7 @@ contains
     else if (zcmi.lt.0) then
        zcmi = zcmi + boxlz(ibox)
     end if
-         
+
     i = int(xcmi / dcellx) + 1
     j = int(ycmi / dcelly) + 1
     k = int(zcmi / dcellz) + 1

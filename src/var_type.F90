@@ -1,12 +1,12 @@
+!> \brief Define variable types(kinds) based on required precision, rather than
+!> the default values that rely on the computer architecture and may
+!> cause inconsistent behavior across platforms
 module var_type
-! Define variable types(kinds) based on required precision, rather than
-! the default values that rely on the computer architecture and may
-! cause inconsistent behavior across platforms
   implicit none
 
   integer,parameter::single_precision=selected_real_kind(6,30),single_precision_size=4
   integer,parameter::double_precision=selected_real_kind(14,200),double_precision_size=8
-! dp is default precision
+!> \brief dp is default precision
 #ifdef __DOUBLE_PRECISION__
   integer,parameter::dp=double_precision
 #else

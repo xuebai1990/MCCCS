@@ -1,11 +1,10 @@
-MODULE parser_pdb
 ! *****************************************************************************
 !> \brief Handles PDB (Protein Data Bank) files
 !>
-!> Protein Data Bank Contents Guide:
-!> Atomic Coordinate Entry Format Version 3.3 (July, 2011)
+!> \par Protein Data Bank Contents Guide:
+!> Atomic Coordinate Entry Format Version 3.3 (July, 2011)\n
 !>   http://www.wwpdb.org/documentation/format33/v3.3.html
-!>
+!> \verbatim
 !> COLUMNS        DATA  TYPE    FIELD        DEFINITION
 !> -------------------------------------------------------------------------------------
 !>  1 -  6        Record name   "ATOM  "
@@ -30,7 +29,9 @@ MODULE parser_pdb
 !> 17 - 21        Integer        serial       Serial number of bonded atom
 !> 22 - 26        Integer        serial       Serial number of bonded atom
 !> 27 - 31        Integer        serial       Serial number of bonded atom
+!> \endverbatim
 ! *****************************************************************************
+MODULE parser_pdb
   use var_type,only:default_string_length
   use util_runtime,only:err_exit
   use util_files,only:get_iounit,readLine
@@ -42,13 +43,12 @@ MODULE parser_pdb
   PUBLIC :: readPDB,writePDB
 
 CONTAINS
-
   SUBROUTINE readPDB(filePDB,zeo,lunitcell,ztype,zcell,zunit,lprint)
     character(LEN=*),intent(in)::filePDB
     type(MoleculeType),intent(out)::zeo
     logical,allocatable,intent(out)::lunitcell(:)
     type(ZeoliteBeadType),intent(out)::ztype
-    type(CellMaskType),intent(out)::zcell ! the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
+    type(CellMaskType),intent(out)::zcell !< the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
     type(ZeoliteUnitCellGridType),intent(out)::zunit
     LOGICAL,INTENT(IN)::lprint
 
@@ -125,7 +125,6 @@ CONTAINS
 
   END SUBROUTINE readPDB
 
-! *****************************************************************************
   SUBROUTINE writePDB (filePDB,iBox)
     use sim_system
     character(LEN=*),intent(in)::filePDB
@@ -156,5 +155,4 @@ CONTAINS
     WRITE(IOPDB,'(A3,/,A3)') "TER","END"
 
   END SUBROUTINE writePDB
-
 END MODULE parser_pdb

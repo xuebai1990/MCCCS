@@ -196,7 +196,6 @@ CONTAINS
   end subroutine buildQuadrupletTable
 
 !> \brief Return the angle between vector a, b in radians
-!>
   function bondAngle(a,b,positive)
     real::bondAngle
     real,intent(in)::a(3),b(3)
@@ -207,7 +206,6 @@ CONTAINS
     if (present(positive)) then
        if (positive.and.bondAngle.lt.0) bondAngle=-bondAngle
     end if
-
   end function bondAngle
 
   function U4(ar,br,type)

@@ -20,12 +20,11 @@ contains
 
   end subroutine splitAndGetNext
 
-! *****************************************************************************
 !> \brief   Return a string representing the integer number
+!>
 !>          The WRITE statement will return an error message, if the number of
 !>          digits of the integer number is larger than the length of the
 !>          supplied string.
-! *****************************************************************************
   PURE FUNCTION integer_to_string(number) RESULT(string)
     INTEGER,INTENT(IN)::number
     CHARACTER(LEN=default_string_length)::string
@@ -33,7 +32,6 @@ contains
     WRITE(UNIT=string,FMT='(I0)') number
   END FUNCTION  integer_to_string
 
-! *****************************************************************************
   pure Function real_to_string(number) RESULT(string)
     REAL,INTENT(IN)::number
     CHARACTER(LEN=default_string_length)::string
@@ -41,9 +39,7 @@ contains
     WRITE(UNIT=string,FMT='(G16.9)') number
   END Function real_to_string
 
-! *****************************************************************************
 !> \brief   Convert all lower case characters in a string to upper case.
-! *****************************************************************************
   pure function uppercase(string)
     CHARACTER(LEN=*),INTENT(IN)::string
     character(len=len_trim(string))::uppercase
@@ -56,10 +52,8 @@ contains
           uppercase(i:i)=string(i:i)
        END IF
     END DO
-
   END function uppercase
 
-! *****************************************************************************
   pure function lowercase(string)
     CHARACTER(LEN=*),INTENT(IN)::string
     character(len=len_trim(string))::lowercase
@@ -75,11 +69,7 @@ contains
 
   END function lowercase
 
-! *****************************************************************************
 !> \brief returns .true. if the character passed is a whitespace char.
-!> \par History
-!>      02.2008 created, AK
-! *****************************************************************************
   PURE LOGICAL FUNCTION is_whitespace(testchar)
     CHARACTER(LEN=1), INTENT(IN)             :: testchar
 
@@ -87,9 +77,7 @@ contains
     IF (INDEX(whitespace,testchar).gt.0) is_whitespace = .TRUE.
   END FUNCTION is_whitespace
 
-! *****************************************************************************
 !> \brief returns .true. if the line is a comment line or an empty line
-! *****************************************************************************
   LOGICAL FUNCTION is_blank_line(line,skipComment)
     CHARACTER(LEN=*), INTENT(IN)             :: line
     logical,intent(in)                       :: skipComment
@@ -106,10 +94,8 @@ contains
 
   END FUNCTION is_blank_line
 
-! *****************************************************************************
-! Return ia, ib, such that string(ia:ib) has no leading or
-! trailing spaces
-! *****************************************************************************
+!> \brief Return \a ia, \a ib, such that \a string(ia:ib) has no leading or
+!> trailing spaces
   PURE SUBROUTINE str_trim(string,ia,ib)
     CHARACTER(LEN=*), INTENT(IN)             :: string
     INTEGER, INTENT(OUT)                     :: ia, ib
@@ -119,10 +105,10 @@ contains
 
   END SUBROUTINE str_trim
 
-! *****************************************************************************
-! Compare two strings ignoring the leading or trailing
-! spaces. .true. if str1==str2, .false. otherwise
-! *****************************************************************************
+!> \brief Compare two strings ignoring the leading or trailing
+!> spaces.
+!>
+!> \return .true. if str1==str2, .false. otherwise
   PURE FUNCTION str_comp(str1,str2) RESULT (equal)
     CHARACTER(LEN=*), INTENT(IN)             :: str1, str2
     LOGICAL                                  :: equal
@@ -138,10 +124,8 @@ contains
     equal = (str1(i1:i2)==str2(j1:j2))
   END FUNCTION str_comp
 
-! *****************************************************************************
-! Return the index, pos, of str2 in str1(1:n), which
-! contains an array of strings, using str_comp(str1,str2)
-! *****************************************************************************
+!> \brief Return the index, \a pos, of \a str2 in \a str1(1:\a n), which
+!> contains an array of strings, using str_comp(str1,str2)
   PURE FUNCTION str_search(str1,n,str2) RESULT (pos)
     CHARACTER(LEN=*), INTENT(IN)             :: str1(:)
     INTEGER, INTENT(IN)                      :: n
@@ -159,10 +143,8 @@ contains
     END DO
   END FUNCTION str_search
 
-! *****************************************************************************
 !> \brief   remove a word from a string (words are separated by white spaces)
 !> \version 1.0
-! *****************************************************************************
   PURE SUBROUTINE remove_word(string)
     CHARACTER(LEN=*), INTENT(INOUT)          :: string
 
@@ -181,13 +163,11 @@ contains
 
   END SUBROUTINE remove_word
 
-! *****************************************************************************
 !> \brief   Eliminate multiple space characters in a string.
 !>          If full is .TRUE., then all spaces are eliminated.
 !> \author  MK
 !> \date    23.06.1998
 !> \version 1.0
-! *****************************************************************************
   PURE SUBROUTINE str_compress(string,full)
     CHARACTER(LEN=*), INTENT(INOUT)          :: string
     LOGICAL, INTENT(IN), OPTIONAL            :: full
@@ -221,13 +201,11 @@ contains
 
   END SUBROUTINE str_compress
 
-! *****************************************************************************
 !> \brief Convert a sequence of integer numbers (ASCII code) to a string.
 !>         Blanks are inserted for invalid ASCII code numbers.
 !> \author  MK
 !> \date    19.10.2000
 !> \version 1.0
-! *****************************************************************************
   PURE SUBROUTINE ascii_to_string(nascii,string)
     INTEGER, DIMENSION(:), INTENT(IN)        :: nascii
     CHARACTER(LEN=*), INTENT(OUT)            :: string
@@ -246,12 +224,10 @@ contains
 
   END SUBROUTINE ascii_to_string
 
-! *****************************************************************************
 !> \brief   Convert a string to sequence of integer numbers.
 !> \author  MK
 !> \date    19.10.2000
 !> \version 1.0
-! *****************************************************************************
   PURE SUBROUTINE string_to_ascii(string,nascii)
     CHARACTER(LEN=*), INTENT(IN)             :: string
     INTEGER, DIMENSION(:), INTENT(OUT)       :: nascii
@@ -266,14 +242,11 @@ contains
 
   END SUBROUTINE string_to_ascii
 
-! *****************************************************************************
 !> \brief returns a non-zero positive value if typo_string equals string apart from a few typos.
 !>     It is case sensitive, apart from typos.
 !> \note
 !>     could maybe be made a bit smarter
-!> \par History
-!>      02.2006 created [Joost VandeVondele]
-! *****************************************************************************
+!> \since 02.2006 created [Joost VandeVondele]
   PURE FUNCTION typo_match(string,typo_string) RESULT(match)
     CHARACTER(LEN=*), INTENT(IN)             :: string, typo_string
     INTEGER                                  :: match
@@ -312,35 +285,21 @@ contains
           IF (glob_match(string=typo_string,pattern=tmp2)) match=match+1
        end do
     end do
-
   END FUNCTION typo_match
 
-! *****************************************************************************
-!
-!  Imported from Arjen Markus' flibs project
-!  http://flibs.sourceforge.net/
-!
-! globmatch.f90 --
-!     Match strings according to (simplified) glob patterns
-!
-!     The pattern matching is limited to literals, * and ?
-!     (character classes are not supported). A backslash escapes
-!     any character.
-!
-! *****************************************************************************
-!
-! glob_match --
-!     Tries to match the given string with the pattern
-! Arguments:
-!     string     String to be examined
-!     pattern    Glob pattern to be used for the matching
-! Result:
-!     .true. if the entire string matches the pattern, .false.
-!     otherwise
-! Note:
-!     Trailing blanks are ignored
-!
-! *****************************************************************************
+!> \brief Match strings according to (simplified) glob patterns
+!>
+!> The pattern matching is limited to literals, * and ?
+!> (character classes are not supported). A backslash escapes
+!> any character.
+!>
+!> Trailing blanks are ignored.
+!> \param     string     String to be examined
+!> \param     pattern    Glob pattern to be used for the matching
+!> \return     .true. if the entire string matches the pattern, .false.
+!>     otherwise
+!> \note  Imported from Arjen Markus' flibs project (globmatch.f90):
+!>  http://flibs.sourceforge.net/
   PURE RECURSIVE FUNCTION glob_match( string, pattern ) RESULT(match)
     CHARACTER(len=*), INTENT(in)             :: string, pattern
     LOGICAL                                  :: match

@@ -1,29 +1,26 @@
-! align_planes.f
-!
-! designed with swatching rigid planar PAH molecules in mind
-! it will work for other rigid stuff, but it's not tailored for that
-!
-! 1) Translates so swatch bead 1 of the swathced molecule is in 
-! same position as swatch bead 1 of the other molecule
-! 2) Rotate the swathched molecule so its swatch bead1--bead2 vector
-! is aligned with the swatch bead1--bead2 of the other molecule
-! 3) Rotate the swatched molecule again so its swatch bead2--bead3 
-! vector is parallel with the the bead2--bead3 of the other molecule
-!
-! RESULTS:
-! A) The planes defined by the three swatched beads in each molecule 
-! will become coplanar.  Thus, if both molecules are planar, then they 
-! will definitely become coplanar.
-! B) If both molecules have the same 1--2--3 "bond" angles and
-! 1--2 "bond" lengths, the 1--2--3 bonds will be exactly aligned
-!     (where 1,2,3 refer to the three beads you swatched). If not, 
-! best of luck; I hope you know what you are trying to do :)
-!
-! Written by Jake L. Rafferty on the fine day of 2.28.07
-!
-! a subscripts refer to molecule that exists, the "other"
-! b subscripts refer to molecule that being swatched in, the "self"
-!
+!> \brief Designed with swatching rigid planar PAH molecules in mind
+!> it will work for other rigid stuff, but it's not tailored for that
+!>
+!> 1) Translates so swatch bead 1 of the swathced molecule is in
+!> same position as swatch bead 1 of the other molecule \n
+!> 2) Rotate the swathched molecule so its swatch bead1--bead2 vector
+!> is aligned with the swatch bead1--bead2 of the other molecule \n
+!> 3) Rotate the swatched molecule again so its swatch bead2--bead3
+!> vector is parallel with the the bead2--bead3 of the other molecule
+!>
+!> RESULTS: \n
+!> A) The planes defined by the three swatched beads in each molecule
+!> will become coplanar.  Thus, if both molecules are planar, then they
+!> will definitely become coplanar. \n
+!> B) If both molecules have the same 1--2--3 "bond" angles and
+!> 1--2 "bond" lengths, the 1--2--3 bonds will be exactly aligned
+!>     (where 1,2,3 refer to the three beads you swatched). If not,
+!> best of luck; I hope you know what you are trying to do :)
+!>
+!> \b a subscripts refer to molecule that exists, the "other" \n
+!> \b b subscripts refer to molecule that being swatched in, the "self"
+!>
+!> \author Written by Jake L. Rafferty on the fine day of 2.28.07
 subroutine align_planes(isplist,imol_b,imol_a,itype_b,itype_a,xb,yb,zb)
   use const_math,only:onepi,twopi
   use sim_system
@@ -31,7 +28,7 @@ subroutine align_planes(isplist,imol_b,imol_a,itype_b,itype_a,xb,yb,zb)
 
 ! INPUT VARIABLES ---
       integer::isplist, imol_b, imol_a, itype_b, itype_a
-   
+
 ! OUTPUT VARIABLES ---
       real::xb(numax), yb(numax), zb(numax)
 
@@ -92,8 +89,8 @@ subroutine align_planes(isplist,imol_b,imol_a,itype_b,itype_a,xb,yb,zb)
          zb(i) = rzu(imol_b,i) - rzu(imol_b,ib_bead1)
       end do
 
-               
-! Get first rotation vector -- the vector orthogonal to 
+
+! Get first rotation vector -- the vector orthogonal to
 ! both of the 1--2 vectors, i.e. the cross product
 
 ! take cross product of 1--2 vectors
@@ -141,7 +138,7 @@ subroutine align_planes(isplist,imol_b,imol_a,itype_b,itype_a,xb,yb,zb)
       end do
 
 !CC -- STEP 4, Rotate by theta that about z-axis
-      
+
 ! first we need the angle between the two 1--2 vectors
 
 ! angle of vector for molecule_a with x axis
@@ -262,7 +259,7 @@ subroutine align_planes(isplist,imol_b,imol_a,itype_b,itype_a,xb,yb,zb)
 
 ! This time theta is angle between the two planes
 ! which correponds to the 2--3 vectors
-      
+
       dxa = xa(3) - xa(2)
       dya = ya(3) - ya(2)
 

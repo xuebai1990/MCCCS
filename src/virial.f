@@ -1,11 +1,10 @@
-!    *******************************************************************
-! computes the 2nd virial coefficient                           **
-! B2(T) = -2Pi Int 0toInf [ Exp[-beta*u(r)] -1] r^2 dr          **
-! Using the trapazoid method of numerical integration give      **
-! B2(T) = -2*Pi*stepvir* Sum(i=2,n-1)[ <Exp[-beta*u(r)]-1> ri^2 **
-! 1/2( <Exp[-beta*u(r1)]-1> r1 + <Exp[-beta*u(rn)]-1> rn      **
-! Marcus Martin 1-15-97                                         **
-!    *******************************************************************
+!> \brief Computes the 2nd virial coefficient
+!>
+!> B2(T) = -2Pi Int 0toInf [ Exp[-beta*u(r)] -1] r^2 dr \n
+!> Using the trapazoid method of numerical integration give \n
+!> B2(T) = -2*Pi*stepvir* Sum(i=2,n-1)[ <Exp[-beta*u(r)]-1> ri^2 \n
+!> 1/2( <Exp[-beta*u(r1)]-1> r1 + <Exp[-beta*u(rn)]-1> rn
+!> \author Marcus Martin 1-15-97
 subroutine virial(binvir,binvir2)
   use const_math,only:onepi,twopi
   use const_phys,only:qqfact
@@ -23,7 +22,7 @@ subroutine virial(binvir,binvir2)
       dimension binvir(maxvir,maxntemp),mayer(maxntemp)
 
       logical::ovrlap,lqimol,lqjmol,lmatrix
-  
+
 ! only use for polarizable models
       integer::chgmax
       parameter (chgmax=10)
@@ -49,13 +48,13 @@ subroutine virial(binvir,binvir2)
          consa2 = 2.0E0_dp*aslope*(4.0E0_dp/2.56E0_dp)
          consb2 = 2.0E0_dp*bslope*(4.0E0_dp/2.56E0_dp)
       end if
-      
+
 
       if ( nboxi(1) .eq. nboxi(2) ) then
          write(io_output,*) 'particles found in same box'
          call err_exit(__FILE__,__LINE__,'',myid+1)
       end if
- 
+
 ! ################################################################
 
 ! *******************************
@@ -108,29 +107,29 @@ subroutine virial(binvir,binvir2)
          velect = 0.0E0_dp
 ! loop over all beads ii of chain i
          ip1 = 0
-         do 99 ii = 1, nunit(imolty) 
+         do 99 ii = 1, nunit(imolty)
             ntii = ntype(imolty,ii)
             if ( lqchg(ntii) ) ip1 = ip1 + 1
             rxui = rxu(i,ii)  + xdiff - dvircm
             ryui = ryu(i,ii)  + ydiff
             rzui = rzu(i,ii)  + zdiff
 
-! loop over chain 2 
+! loop over chain 2
             j = 2
             jmolty = moltyp(j)
             lqjmol = lelect(jmolty)
-! loop over all beads jj of chain j 
+! loop over all beads jj of chain j
             ip2 = numchg
-            do 97 jj = 1, nunit(jmolty) 
+            do 97 jj = 1, nunit(jmolty)
 ! check exclusion table
                if ( lexclu(imolty,ii,jmolty,jj) ) goto 97
                ntjj = ntype(jmolty,jj)
                if ( lqchg(ntjj) ) ip2 = ip2 + 1
-               
+
                ntij = type_2body(ntii,ntjj)
 
                if (lexpee) rminsq = rminee(ntij)*rminee(ntij)
-               
+
                rxuij = rxui - rxu(j,jj)
                ryuij = ryui - ryu(j,jj)
                rzuij = rzui - rzu(j,jj)
@@ -156,7 +155,7 @@ subroutine virial(binvir,binvir2)
                   else if (lshift) then
                      sr2 = sig2ij(ntij) / rijsq
                      sr6 = sr2 * sr2 * sr2
-                     vinter = vinter +  sr6*(sr6-1.0E0_dp)*epsij(ntij)-ecut(ntij) 
+                     vinter = vinter +  sr6*(sr6-1.0E0_dp)*epsij(ntij)-ecut(ntij)
                   else if ( lfepsi ) then
                      if ( lij(ntii) .and. lij(ntjj) ) then
                         sr6 = rijsq*rijsq*rijsq
@@ -168,15 +167,15 @@ subroutine virial(binvir,binvir2)
                      sr2 = sig2ij(ntij) / rijsq
                      sr6 = sr2 * sr2 * sr2
                      vinter = vinter +  sr6*(sr6-1.0E0_dp)*epsij(ntij)
-                     
+
                   end if
-                  
+
                   if ( lqimol .and. lqjmol .and. .not. lmatrix ) then
                      velect = velect + qqfact*qqu(i,ii)*qqu(j,jj) /sqrt(rijsq)
                   end if
-                  
+
                end if
-               
+
  97         continue
  99      continue
 
@@ -237,7 +236,7 @@ subroutine virial(binvir,binvir2)
                   a(ii,lam2) = 1
                end do
             end if
-            
+
             if ( lfepsi ) then
                ip1 = mainsite(1,1)
                ip2 = mainsite(2,1)
@@ -321,7 +320,7 @@ subroutine virial(binvir,binvir2)
 ! write(11,*) 'energy:',velect+vinter*4.0E0_dp
 
          end if
-                     
+
 
  100     if ( ovrlap ) then
             do itemp = 1, ntemp
