@@ -1,9 +1,8 @@
-subroutine inclus(inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ainclbead,a15t,ofscale,ofscale2,lprint)
+subroutine inclus(inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ainclbead,a15t,ofscale,ofscale2)
   use util_runtime,only:err_exit
   use sim_system
   implicit none
 
-  LOGICAL,INTENT(IN)::lprint
   integer::inclnum,inclmol(ntmax*numax*numax),inclbead(ntmax*numax*numax,2),inclsign(ntmax*numax*numax),ncarbon(ntmax),ainclnum,ainclmol(ntmax*numax*numax),ainclbead(ntmax*numax*numax,2),a15t(ntmax*numax*numax)
   ! variables added (3/24/05) for variable 1-4 interactions
   real::ofscale(ntmax*numax*numax),ofscale2(ntmax*numax*numax)
@@ -196,46 +195,7 @@ subroutine inclus(inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ai
            end do
         end do
      end if
-
-     if (lprint) then
-        write(io_output,*)
-        write(io_output,*) 'INCLUSION TABLE'
-        do m = 1, nunit(imolty)
-           write(io_output,*) m, (linclu(imolty,m,n),n=1,nunit(imolty))
-        end do
-        write(io_output,*)
-
-        write(io_output,*)
-        write(io_output,*) 'CHARGE INCLUSION TABLE'
-        do m = 1, nunit(imolty)
-           write(io_output,*) m,  (lqinclu(imolty,m,n),n=1,nunit(imolty))
-        end do
-        ! 400  format (<nunit(imolty)> F5.2)
-        write(io_output,*)
-
-        write(io_output,*) '1-4 LJ SCALING FACTORS'
-        do m = 1, nunit(imolty)
-           write(io_output,*) m,  (ljscale(imolty,m,n),n=1,nunit(imolty))
-        end do
-        ! 500  format (i5,<nunit(imolty)> F5.2)
-
-        write(io_output,*)
-        write(io_output,*) '1-4 CHARGE SCALING FACTORS'
-        do m = 1, nunit(imolty)
-           write(io_output,*) m,  (qscale2(imolty,m,n),n=1,nunit(imolty))
-        end do
-     end if
-     ! 600  format (i5,<nunit(imolty)> F5.2)
-
-     ! not really that important to write out
-     ! write(io_output,*)
-     ! write(io_output,*) '1-5 OH INTERACTION TABLE'
-     ! do m = 1, nunit(imolty)
-     !    write(io_output,*) m, (lainclu(imolty,m,n),n=1,nunit(imolty))
-     ! end do
-     ! write(io_output,*)
   end do
-  return
 end subroutine inclus
 
 

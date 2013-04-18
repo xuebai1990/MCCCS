@@ -8,9 +8,10 @@ MODULE topmon_main
 
   ! variables added for GCMC histogram reweighting
   integer,parameter::fmax=1E6,nprop1=11
-  logical::use_checkpoint
-  integer::blockm,checkpoint_interval=1800,checkpoint_copies=1,nstep,nnstep,nnn,acmove,acnp,acipsw,nblock&
-   ,io_movie,io_solute,io_cell,io_traj
+  logical::use_checkpoint=.false.,L_add=.false.,L_sub=.false.
+  integer::blockm,checkpoint_interval=1800,checkpoint_copies=1,nstep=1,nnstep,nnn,acmove,acnp,acipsw,nblock&
+   ,io_movie,io_solute,io_cell,io_traj&
+   ,N_add=0,N_box2add=1,N_moltyp2add=1,N_sub=0,N_box2sub=1,N_moltyp2sub=1
   real::enthalpy,enthalpy2& !< enthalpy (NpT) or internal energy (NVT)
      ,acdvdl,binvir(maxvir,maxntemp),binvir2(maxvir,maxntemp)
   real,allocatable::acdens(:,:)& !< (ibox,itype): accumulators of box density
@@ -63,7 +64,7 @@ contains
     use util_timings,only:time_date_str,time_now
     use util_files,only:get_iounit
     use util_mp,only:mp_barrier
-    use sim_particle,only:init_neighbor_list
+    use sim_particle,only:init_neighbor_list,ctrmas
     use energy_pairwise,only:sumup
     use moves_simple,only:translation,rotation,Atom_translation,output_translation_rotation_stats
     use moves_volume,only:volume_1box,volume_2box,output_volume_stats
@@ -107,8 +108,20 @@ contains
     ! end if
     ! END JLR 11-11-09
 
-    ! set up initial linkcell
+    ! set the centers of mass if LFOLD = .TRUE.
+    if (lfold) then
+       do ibox=1,nbox
+          call ctrmas(.true.,ibox,0,6)
+       end do
+    end if
+
     if (licell) then
+       ! check that rintramax is really valid
+       do i=1,nchain
+          if (2.0_dp*rcmu(i).gt.rintramax) call err_exit(__FILE__,__LINE__,'rintramax for linkcell list is too small',myid+1)
+       end do
+
+       ! set up initial linkcell
        call build_linked_cell()
     end if
 
@@ -282,29 +295,29 @@ contains
           rm = random(-1)
 
           ! special ensemble dependent moves ###
-          if  (rm .le. pmvol) then
+          if (rm.le.pmvol) then
              ! volume move ---
-             if ( lnpt ) then
+             if (lnpt) then
                 call volume_1box()
              else
                 call volume_2box()
              end if
-          else if (rm .le. pmswat) then
+          else if (rm.le.pmswat) then
              ! CBMC switch move ---
              call swatch()
-          else if ( rm .le. pmswap ) then
+          else if (rm.le.pmswap) then
              ! swap move for linear and branched molecules ---
              call swap()
-          else if ( rm .le. pmcb ) then
+          else if (rm.le.pmcb) then
              ! configurational bias move ---
              call config()
-          else if ( rm .le. pmflcq ) then
+          else if (rm.le.pmflcq) then
              ! displacement of fluctuating charges ---
              call flucq(2,0)
-          else if (rm .le. pmexpc ) then
+          else if (rm.le.pmexpc) then
              ! expanded-ensemble move ---
              call expand()
-          else if (rm .le. pmexpc1 ) then
+          else if (rm.le.pmexpc1) then
              ! new expanded-ensemble move ---
              ! call expand
              if (random(-1).le.eeratio) then
@@ -312,9 +325,9 @@ contains
              else
                 call eemove()
              end if
-          else if ( rm .le. pm_atom_tra) then
+          else if (rm.le.pm_atom_tra) then
              call Atom_translation()
-          else if ( rm .le. pmtra ) then
+          else if (rm.le.pmtra) then
              ! translational move ---
              call translation()
           else
@@ -1087,24 +1100,45 @@ contains
     return
   end subroutine monola
 
+#ifdef w_a
+#undef w_a
+#endif
+#define w_a(x) write(io_output,'(1X,A,": ",A)') #x,x
+
+#ifdef w_l
+#undef w_l
+#endif
+#define w_l(x) write(io_output,'(1X,A,": ",L2)') #x,x
+
+#ifdef w_i
+#undef w_i
+#endif
+#define w_i(x) write(io_output,'(1X,A,": ",I0)') #x,x
+
+#ifdef w_r
+#undef w_r
+#endif
+#define w_r(x) write(io_output,'(1X,A,": ",G16.9)') #x,x
 !> \brief Read input data and initializes the positions
 !>
 !> reads a starting configuration from unit 7
 !> calculates interaction table
+!> \remarks It's usually best to print out information right after it is read in and before doing any other operations (which may fail), so that in the case of program error users will know the progress of input processing
   subroutine readdat(file_in)
-    use const_math,only:onepi
+    use var_type,only:default_string_length
+    use const_math,only:onepi,raddeg
     use const_phys,only:MPa2SimUnits,debroglie_factor
     use util_random,only:ranset
-    use util_string,only:integer_to_string,real_to_string
+    use util_string,only:integer_to_string,real_to_string,uppercase,format_n
     use util_runtime,only:err_exit
-    use util_timings,only:time_date_str
-    use util_files,only:get_iounit
+    use util_timings,only:time_date_str,time_now
+    use util_files,only:get_iounit,readLine
     use util_search,only:indexOf
     use util_memory,only:reallocate
-    use sim_particle,only:allocate_neighbor_list,ctrmas
+    use sim_particle,only:allocate_neighbor_list
     use zeolite
     use energy_kspace,only:calp,allocate_kspace
-    use energy_pairwise,only:init_energy_pairwise,rzero,epsnx,type_2body
+    use energy_pairwise,only:read_ff,init_ff,rzero,epsnx,aexsix,bexsix,cexsix,sexsix,epsimmff,sigimmff,smmff,type_2body
     use energy_intramolecular,only:bonds,angles,dihedrals,allocate_energy_bonded
     use energy_3body,only:readThreeBody
     use energy_4body,only:readFourBody
@@ -1119,38 +1153,49 @@ contains
 
     character(LEN=*),intent(in)::file_in
 
-    character(LEN=default_path_length)::file_input,file_restart,file_struct,file_run,file_movie,file_solute,file_traj
-    namelist /io/ file_input,file_restart,file_struct,file_run&
-     ,file_movie,file_solute,file_traj,io_output,checkpoint_interval,checkpoint_copies,use_checkpoint
-
-    !* PARAMETER FOR IONIC SYSTEMS
-    logical::lionic !< if LIONIC=.TRUE. System contains charged species, so system may not neutral
-
     real,allocatable::ofscale(:),ofscale2(:),qbox(:)
     integer,allocatable::ncarbon(:),inclmol(:),inclbead(:,:),inclsign(:),ainclmol(:),ainclbead(:,:),a15t(:),idummy(:),temphe(:),nures(:),k_max_l(:),k_max_m(:),k_max_n(:)
     logical,allocatable::lhere(:)
 
-    character(LEN=default_path_length)::file_box_movie,file_cell
-    integer::io_input,io_restart,jerr,seed,nijspecial,ispecial,jspecial,ndum,ij,ii,jj,i,j,k,ncres,nmtres,iensem,inpbc,nmcount,im,ibox,tcount,izz,z,zzz
-    logical::lprint,lecho,lverbose,L_Ewald_Auto,lmixlb,lmixjo,lsetup,linit,lreadq,lpolar,lqqelect,lee,lxyz,lfound
-    real::fqtemp,aspecd,bspecd,dum,pm,pcumu,w(3),debroglie,qtot,min_boxl
+    character(LEN=default_path_length)::file_input,file_restart,file_struct,file_run,file_movie,file_solute,file_traj,file_box_movie,file_cell
+    character(LEN=default_string_length)::line_in
+    integer::io_input,io_restart,jerr,seed,ndum,ij,ii,jj,i,j,k,ncres,nmtres,iensem,inpbc,iff,im,ibox,izz,z
+    logical::lprint,L_Ewald_Auto,lmixlb,lmixjo,lsetup,linit,lreadq,lfound,ltmp
+    logical,parameter::lverbose=.true.,lecho=.true.
+    real::fqtemp,dum,pm,pcumu,debroglie,qtot,min_boxl,rmflucq,rtmp,rtmp2
+    !* PARAMETER FOR IONIC SYSTEMS
+    logical::lionic !< if LIONIC=.TRUE. System contains charged species, so system may not neutral
     ! variables added (3/24/05) for scaling of 1-4 interactions
     integer::nexclu,inclnum,ainclnum
     ! variables for histograms
-    integer::temnc,imol,iutemp,imolty,itype,ipair
+    integer::temnc,imol,iutemp,imolty,itype
     ! Variables added (6/30/2006) for fort.4 consistency check
     integer::numvib,numbend,numtor,vib1,bend2,bend3,tor2,tor3,tor4
     integer::vibtype,bendtype,tortype
     ! real::temx(nmax,numax),temy(nmax,numax),temz(nmax,numax)
     ! KM variable added when analysis removed
     integer::nhere
-! -------------------------------------------------------------------
+
+    namelist /io/ file_input,file_restart,file_struct,file_run,file_movie,file_solute,file_traj,io_output&
+     ,run_num,suffix,L_movie_xyz
+    namelist /system/ lnpt,lgibbs,lgrand,lanes,lvirial,lmipsw,lexpee,ldielect,lpbc,lpbcx,lpbcy,lpbcz,lfold,lijall,lchgall,lewald,lcutcm,ltailc,lshift,ltailcZeo,ldual,L_Coul_CBMC,lneigh&
+     ,llj,lexpsix,lmmff,lninesix,lgenlj,lexzeo,lzgrid,lsami,lmuir,lslit,lgraphite,ljoe,lpsurf,lcorreg,lelect_field,lgaro,lionic,L_Ewald_Auto,lmixlb,lmixjo&
+     ,L_tor_table,L_spline,L_linear,L_vib_table,L_bend_table,L_vdW_table,L_elect_table
+    namelist /mc_shared/ seed,nbox,nmolty,nchain,nstep,lstop,iratio,rmin,softcut&
+     ,checkpoint_interval,checkpoint_copies,use_checkpoint,linit,lreadq&
+     ,L_add,L_sub,N_add,N_box2add,N_moltyp2add,N_sub,N_box2sub,N_moltyp2sub
+    namelist /analysis/ iprint,imv,iblock,iratp,idiele,iheatcapacity,ianalyze&
+     ,nbin,lrdf,lintra,lstretch,lgvst,lbend,lete,lrhoz,bin_width&
+     ,lucall,ucheck,nvirial,starvir,stepvir,ntemp,virtemp
+    namelist /mc_flucq/ taflcq,fqtemp,rmflucq,pmflcq,pmfqmt,lflucq,lqtrans,fqegp,nchoiq
+    namelist /gcmc/ nequil,ninstf,ninsth,ndumph
+! ===================================================================
+    !> read project-wide parameters
     io_input=get_iounit()
     open(unit=io_input,access='sequential',action='read',file=file_in,form='formatted',iostat=jerr,status='old')
-    if (jerr.ne.0) then
-       call err_exit(__FILE__,__LINE__,'cannot open input file '//trim(file_in),myid+1)
-    end if
-
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open input file '//trim(file_in),jerr)
+! -------------------------------------------------------------------
+    !> read namelist io
     file_input='fort.4'
     file_restart='fort.77'
     file_struct='input_struc.xyz'
@@ -1158,25 +1203,15 @@ contains
     file_movie='movie1a.dat'
     file_solute='fort.11'
     file_traj='fort.12'
-    use_checkpoint=.false.
 
     read(UNIT=io_input,NML=io,iostat=jerr)
-    if (jerr.ne.0.and.jerr.ne.-1) then
-       call err_exit(__FILE__,__LINE__,'reading namelist: io',jerr)
-    end if
+    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: io',jerr)
 
     if (myid.eq.rootid.and..not.use_checkpoint) then
        lprint=.true.
     else
        lprint=.false.
     end if
-
-    ! rewind(io_input)
-    ! read(UNIT=io_input,NML=system,iostat=jerr)
-    ! if (jerr.ne.0.and.jerr.ne.-1) then
-    !    call err_exit(__FILE__,__LINE__,'reading namelist: system',jerr)
-    ! end if
-    ! nchain=nchain+2
 
     ! Output unit: if 6 or 0, write to stdout/stderr; otherwise, write to a user designated file
     if (io_output.eq.5) then
@@ -1188,2013 +1223,1231 @@ contains
           call err_exit(__FILE__,__LINE__,'cannot open output file '//trim(file_run),jerr)
        end if
     end if
-    close(io_input)
 
-! -------------------------------------------------------------------
-    io_input=get_iounit()
-    open(unit=io_input,access='sequential',action='read',file=file_input,form='formatted',iostat=jerr,status='old')
-    if (jerr.ne.0) then
-       call err_exit(__FILE__,__LINE__,'cannot open main input file',myid+1)
+    if (lprint) then
+       write(io_output,'(A,A)') 'Program started at ',time_date_str()
+       write(io_output,'(A,I0)') 'Number of processors: ', numprocs
+       write(io_output,'(A,I0)') 'Threads per processor: ',thread_num
+       w_i(run_num)
+       w_a(suffix)
+       w_l(L_movie_xyz)
     end if
-
-    read(io_input,*)
-    read(io_input,*) seed
-    ! initialize random number generator
-    call ranset(seed,numprocs)
-
 ! -------------------------------------------------------------------
-    ! read echoing and long output flags
-    read(io_input,*)
-    read(io_input,*) ndum,lecho,lverbose,run_num,suffix
-    read(io_input,*)
-    read(io_input,*) lnpt,lgibbs,lgrand,lanes,lvirial,lmipsw,lexpee
-    read(io_input,*)
-    read(io_input,*) lijall,lchgall,lewald,ldielect,ltailc,lshift,ltailcZeo
+    !> read namelist system
+    lionic=.false.
+    L_Ewald_Auto=.true.
+    lmixlb=.true.
+    lmixjo=.false.
 
-    ! To add or remove helium atoms
-    read(io_input,*)
-    read(io_input,*) L_add,N_add,N_box2add,N_moltyp2add
-    read(io_input,*)
-    read(io_input,*) L_sub,N_sub,N_box2sub,N_moltyp2sub
-
-    ! read whether to compute electrostatic interaction or not during CBMC/SWAP
-    read(io_input,*)
-    read(io_input,*) L_Coul_CBMC,lcutcm,ldual,lneigh
-    ! read the number of unitcell replicated in each directions (a, b, and c)
-    read(io_input,*)
-    read(io_input,*) Num_cell_a,Num_cell_b,Num_cell_c
-    ! read run information
-    read(io_input,*)
-    read(io_input,*) nstep, lstop, lpresim, iupdatefix
-    ! read torsion, decide whether to use torsion in function form or Table
-    read(io_input,*)
-    read(io_input,*) lslit,lexzeo,lzgrid,lelect_field,ljoe,lsami,lmuir,lpsurf,lgraphite,lcorreg,llj,lexpsix,lmmff,lninesix,lgenlj,lgaro,lionic
-    read(io_input,*)
-    read(io_input,*) L_tor_table,L_spline,L_linear,L_vib_table,L_bend_table,L_vdW_table,L_elect_table
-
-    ! KM ldielect writes to fort.27
-    ! if (ldielect) then
-    !    open(17,file=file_dipole,status='unknown')
-    !    write(17,*) '# step  ibox   dipole_x   dipole_y   dipole_z'
-    ! end if
+    rewind(io_input)
+    read(UNIT=io_input,NML=system,iostat=jerr)
+    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: system',jerr)
 
     ! KM for MPI
-    ! only processor 0 writes data
-    if ( lecho.and.lprint) then
-       if (lverbose) then
-          write(io_output,*) 'Program started at ',time_date_str()
-          write(io_output,*) 'Number of processors: ', numprocs
-          write(io_output,*) thread_num,' threads per processor'
-          write(io_output,*) 'Random number seed: ',seed
-          write(io_output,*) 'L_Coul_CBMC:',L_Coul_CBMC
-          write(io_output,*) 'Number of unit cells in a dir = ', Num_cell_a
-          write(io_output,*) 'Number of unit cells in b dir = ', Num_cell_b
-          write(io_output,*) 'Number of unit cells in c dir = ', Num_cell_c
-
-          if (lstop) then
-             write(io_output,*) 'number of steps:',nstep
-          else
-             write(io_output,*) 'number of cycles:',nstep
-          end if
-          write(io_output,*) 'lstep:',lstop
-          write(io_output,*) 'lpresim:',lpresim
-          write(io_output,*) 'iupdatefix:',iupdatefix
-          write(io_output,*) 'L_tor_table:',L_tor_table
-          write(io_output,*) 'L_spline:',L_spline
-          write(io_output,*) 'L_linear:',L_linear
-          write(io_output,*) 'L_vib_table:', L_vib_table
-          write(io_output,*) 'L_bend_table:', L_bend_table
-          write(io_output,*) 'L_vdW_table:', L_vdW_table
-          write(io_output,*) 'L_elect_table:', L_elect_table
-       else
-          write(io_output,*) time_date_str(),numprocs,seed
-          write(io_output,*) L_Coul_CBMC,nstep, lstop, lpresim, iupdatefix
-          write(io_output,*) L_tor_table, L_spline,  L_linear
-          write(io_output,*) L_vib_table, L_bend_table, L_vdW_table,  L_elect_table
-       end if
+    if (lneigh.and.numprocs.ne.1) then
+       if (lneigh) call err_exit(__FILE__,__LINE__,'Cannot run on more than 1 processor with neighbor list!!',myid+1)
+       if (lgaro) call err_exit(__FILE__,__LINE__,'Cannot run on more than 1 processor with lgaro = .true.!!',myid+1)
     end if
 
-    read(io_input,*)
-    read(io_input,*) nbox
+    ! kea don't stop for lgaro
+    ! if (lchgall.and.(.not.lewald).and.(.not.lgaro)) call err_exit(__FILE__,__LINE__,'lchgall is true and lewald is false. Not checked for accuracy!',myid+1)
+
+    if (lprint) then
+       write(io_output,'(/,A)') '***** PROGRAM  =  THE MAGIC BLACK BOX *****'
+       iensem = 0
+       if (lgrand) then
+          iensem = iensem + 1
+          write(io_output,'(A)') 'Grand-canonical ensemble'
+       end if
+       if (lgibbs) then
+          iensem = iensem + 1
+          if (lnpt) then
+             write(io_output,'(A)') 'NPT Gibbs ensemble'
+          else
+             write(io_output,'(A)') 'NVT Gibbs ensemble'
+          end if
+       end if
+       if (iensem.eq.0) then
+          if (lnpt) then
+             iensem = iensem + 1
+             write(io_output,'(A)') 'Isobaric-isothermal ensemble'
+          else
+             iensem = iensem + 1
+             write(io_output,'(A)') 'Canonical ensemble'
+          end if
+       end if
+       if (iensem.gt.1) call err_exit(__FILE__,__LINE__,'INCONSISTENT ENSEMBLE SPECIFICATION',myid+1)
+
+       if (lanes) write(io_output,'(A)') 'ANES-MC will be performed for polarizable model'
+       if (lmipsw) write(io_output,'(A)') 'Thermodynamic integration will be performed'
+       if (lexpee) write(io_output,'(A)') 'Expanded ensemble moves enabled'
+       if (ldielect) write(io_output,'(A)') 'Computing dielectric constant'
+
+       if ( lpbc ) then
+          write(io_output,FMT='(A)',ADVANCE='NO') 'Using periodic boundaries in'
+          inpbc = 0
+          if (lpbcx) then
+             inpbc = inpbc + 1
+             write(io_output,'(A)',ADVANCE='NO') ' x'
+          end if
+          if (lpbcy) then
+             inpbc = inpbc + 1
+             write(io_output,'(A)',ADVANCE='NO') ' y'
+          end if
+          if (lpbcz) then
+             inpbc = inpbc + 1
+             write(io_output,'(A)',ADVANCE='NO') ' z'
+          end if
+          if (inpbc.eq.0) call err_exit(__FILE__,__LINE__,'INCONSISTENT PBC SPECIFICATION',myid+1)
+          write(io_output,'(/,I0,A)') inpbc,'-dimensional periodic box'
+       else
+          write(io_output,'(A)') 'Cluster mode (no PBC)'
+          if (lgibbs.or.lgrand) call err_exit(__FILE__,__LINE__,'INCONSISTENT SPECIFICATION OF LPBC AND ENSEMBLE',myid+1)
+       end if
+
+       if (lfold) then
+          write(io_output,'(A)') 'Particle coordinates are folded into central box'
+          if (.not.lpbc) call err_exit(__FILE__,__LINE__,'INCONSISTENT SPECIFICATION OF LPBC AND LFOLD',myid+1)
+       end if
+
+       if (lijall) write(io_output,'(A)') 'All pair interactions are considered (no potential truncation)'
+       if (lchgall) write(io_output,'(A)') 'All the inter- and intra-molecular Coulombic interactions are considered (no potential truncation)'
+       if (lcutcm) then
+          write(io_output,'(A)') 'Additional center-of-mass cutoff on computed rcmu'
+          if (lijall) call err_exit(__FILE__,__LINE__,'cannot have lijall with lcutcm',myid+1)
+          ! if (lchgall) call err_exit(__FILE__,__LINE__,'cannot have lchgall with lcutcm',myid+1)
+       end if
+
+       write(io_output,'(A)') 'CBMC simultaneously grows all beads conected to the same bead'
+       write(io_output,'(A)') '   with bond lengths/angles generated from Gaussian distribution'
+       write(io_output,'(A)') 'Program will call explct() for explicit-hydrogen models'
+       if (ldual) write(io_output,'(A)') 'Dual Cutoff Configurational-bias Monte Carlo'
+       if (L_Coul_CBMC) then
+          write(io_output,'(A)') 'Coulombic interactions will be included in the Rosenbluth weights for CBMC growth'
+       else
+          write(io_output,'(A)') 'Coulombic interactions will NOT be considered during CBMC growth (added only in the final acceptance test)'
+       end if
+
+       write(io_output,'(A)') 'Coulombic inter- and intra-molecular interactions will be calculated'
+       if (L_elect_table) then
+          write(io_output,'(A)') '   using tabulated potential with linear interpolation'
+          if (lewald) call err_exit(__FILE__,__LINE__,'L_elect_table and lewald cannot both be true',myid+1)
+       else if (lewald) then
+          write(io_output,'(A)') '   using Ewald-sum techniques'
+       else
+          write(io_output,'(A)') '   using (neutral-)group-based cutoff'
+       end if
+
+       iff = 0
+       if (L_vdW_table) then
+          iff = iff + 1
+          write(io_output,'(A)') 'Tabulated potential with linear interpolation for pair-wise dispersive interactions'
+       end if
+       if (lexpsix) then
+          iff = iff + 1
+          write(io_output,'(A)') 'Exp-6 potential for pair-wise dispersive interactions'
+       end if
+       if (lmmff) then
+          iff = iff + 1
+          write(io_output,'(A)') 'Buffered 14-7 potential for pair-wise dispersive interactions'
+       end if
+       if (lninesix) then
+          iff = iff + 1
+          write(io_output,'(A)') '9-6 potential for pair-wise dispersive interactions'
+       end if
+       if (lgenlj) then
+          iff = iff + 1
+          write(io_output,'(A)') 'Generalized Lennard-Jones potential for pair-wise dispersive interactions'
+       end if
+       if (lgaro) then
+          iff = iff + 1
+          write(io_output,'(A)') 'Feuston-Garofalini potential for pair-wise dispersive interactions'
+       end if
+       if (llj.or.iff.eq.0) then
+          iff = iff + 1
+          write(io_output,'(A)') 'Lennard-Jones potential for pair-wise dispersive interactions'
+       end if
+       if (iff.gt.1) call err_exit(__FILE__,__LINE__,'More than one functional form specified for pair-wise interactions. Currently not supported.',myid+1)
+
+       if (ltailc) write(io_output,'(A)') '   with additional tail corrections'
+       if (lshift) then
+          write(io_output,'(A)') '   using a shifted potential'
+          if (ltailc) then
+             call err_exit(__FILE__,__LINE__,'lshift.and.ltailc!',myid+1)
+          end if
+       end if
+
+       !> \todo lmuir, lpsurf, lgraphite, lcorreg are not checked
+       if (lexzeo) write(io_output,'(A)') 'external potential for zeolites'
+       if (lslit) write(io_output,'(A)') '10-4-3 graphite slit pore potential'
+       if (ljoe) write(io_output,'(A)') 'External 12-3 potential for SAM (Joe Hautman)'
+       if (lsami) then
+          write(io_output,'(A)') 'external potential for Langmuir films (Sami)'
+          write(io_output,'(A)') 'WARNING: LJ potential defined in SUSAMI'
+          write(io_output,'(A)') 'WARNING: sets potential cut-off to 2.5sigma'
+          write(io_output,'(A)') 'WARNING: has build-in tail corrections'
+          if (ltailc) call err_exit(__FILE__,__LINE__,'INCONSISTENT SPECIFICATION OF LTAILC AND LSAMI',myid+1)
+       end if
+       if (lelect_field) write(io_output,'(A)') 'External electric field applied'
+
+       if (lmixlb) then
+          write(io_output,'(A)') 'Lorentz-Berthelot combining rules apply'
+       else if (lmixjo) then
+          write(io_output,'(A)') 'Jorgensen combining rules apply'
+       else
+          call err_exit(__FILE__,__LINE__,'No combining rule is requested',myid+1)
+       end if
+
+       if (L_tor_table) then
+          write(io_output,'(A)') 'Torsional energy calculated using tabulated potential'
+          if (L_spline) then
+             write(io_output,'(A)') '   with spline interpolation'
+          else if (L_linear) then
+             write(io_output,'(A)') '   with linear interpolation'
+          else
+             call err_exit(__FILE__,__LINE__,'One of L_spline and L_linear must be true if L_tor_table is true',myid+1)
+          end if
+
+          if (L_spline.and.L_linear) call err_exit(__FILE__,__LINE__,'One of L_spline and L_linear must be true if L_tor_table is true',myid+1)
+       end if
+       if (L_vib_table) write(io_output,'(A)') 'Stretching energy calculated using tabulated potential with linear interpolation'
+       if (L_bend_table) write(io_output,'(A)') 'Bending energy calculated using tabulated potential with linear interpolation'
+
+       write(io_output,'(A)') '*******************************************'
+    end if
+
+    if (lmixlb.and.lmixjo) call err_exit(__FILE__,__LINE__,'cannot use both Lorentz-Berthelot and Jorgensen combining rules!',myid+1)
+! -------------------------------------------------------------------
+    !> read force field parameters, including intermolecular and bonded interaction potentials
+    call read_ff(io_input,lmixlb,lmixjo)
+! -------------------------------------------------------------------
+    close(io_input)
+! ===================================================================
+    !> read independent-run-specific parameters
+    io_input=get_iounit()
+    open(unit=io_input,access='sequential',action='read',file=file_input,form='formatted',iostat=jerr,status='old')
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open main input file '//trim(file_input),myid+1)
+! -------------------------------------------------------------------
+    !> read namelist mc_shared
+    seed=time_now()
+    linit=.false.
+    lreadq=.false.
+
+    read(UNIT=io_input,NML=mc_shared,iostat=jerr)
+    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_shared',jerr)
 
     nbxmax=nbox+1
     npabmax=nbxmax*(nbxmax+1)/2
-    call allocate_cell()
-    call allocate_sim_cell()
-    call allocate_kspace()
-
-    if ( lecho.and.lprint ) write(io_output,*) 'number of boxes in the system:',nbox
-
-    read(io_input,*)
-    read(io_input,*) (express(ibox),ibox=1,nbox)
-
-    read(io_input,*)
-    read(io_input,*) (ghost_particles(ibox),ibox=1,nbox)
-
-    read(io_input,*)
-    read(io_input,*) L_Ewald_Auto
-
-    read(io_input,*)
-    read(io_input,*) temp, fqtemp,(Elect_field(ibox),ibox=1,nbox)
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          write(io_output,*) 'temperature:',temp,' K'
-          write(io_output,*) 'external pressure:',express(1:nbox),' MPa'
-          write(io_output,*) 'Ghost particles: ',ghost_particles(1:nbox)
-          write(io_output,*) 'fluctuating charge temperature:',fqtemp,' K'
-          write(io_output,*) 'Electric field in z direction:', Elect_field(1:nbox),' V/A'
-       else
-          write(io_output,*) temp, (express(ibox),ibox=1,nbox), fqtemp, Elect_field
-       end if
-    end if
-
-    do ibox = 1,nbox
-       express(ibox)  = express(ibox)*MPa2SimUnits
-    end do
-
-    ! read the analysis information
-    read(io_input,*)
-    read(io_input,*) ianalyze,nbin,lrdf,lintra,lstretch,lgvst,lbend,lete,lrhoz,bin_width
-    if (lecho.and.lprint) then
-       if(lverbose) then
-          write(io_output,*) 'ianalyze:', ianalyze
-          write(io_output,*) 'nbin', nbin
-          write(io_output,*) 'lrdf:',lrdf
-          write(io_output,*) 'lintra:',lintra
-          write(io_output,*) 'lstretch:', lstretch
-          write(io_output,*) 'lgvst:' ,lgvst
-          write(io_output,*) 'lbend:' ,lbend
-          write(io_output,*) 'lete:' ,lete
-          write(io_output,*) 'lrhoz:', lrhoz
-          write(io_output,*) 'bin_width:' ,bin_width
-       else
-          write(io_output,*) ianalyze,nbin,lrdf,lintra,lstretch,lgvst,lbend ,lete, lrhoz, bin_width
-       end if
-    end if
-
-! -------------------------------------------------------------------
-! set up constants and conversion factors ***
-    lee = .false.
-    qtot = 0.0E0_dp
-
-    beta = 1.0E0_dp / temp
-    fqbeta = 1.0E0_dp / fqtemp
-! ------------------------------------------------------------------
-    read(io_input,*)
-    read(io_input,*) iprint, imv, iratio, iblock, idiele, L_movie_xyz, iheatcapacity
-
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          write(io_output,*) 'iprint:',iprint
-          write(io_output,*) 'imv:',imv
-          write(io_output,*) 'iratio:',iratio
-          write(io_output,*) 'iblock:',iblock
-          write(io_output,*) 'idiele:',idiele
-          write(io_output,*) 'L_movie_xyz',L_movie_xyz
-       else
-          write(io_output,*) iprint, imv, iratio, iblock, idiele,L_movie_xyz
-       end if
-    end if
-
-    ! read information for histogram output (added 8/30/99)
-    if (lgrand) then
-       read(io_input,*)
-       read(io_input,*) nequil,ninstf,ninsth, ndumph
-       if ( lecho.and.lprint ) then
-          if (lverbose) then
-             write(io_output,*) 'nequil:',nequil
-             write(io_output,*) 'ninstf:',ninstf
-             write(io_output,*) 'ninsth:',ninsth
-             write(io_output,*) 'ndumph:',ndumph
-             write(io_output,*) 'run_num:',run_num
-             write(io_output,*) 'suffix:',suffix
-          else
-             write(io_output,*) nequil,ninstf,ninsth,ndumph,run_num,suffix
-          end if
-       end if
-    end if
-
-    ! read system information
-    do i = 1,nbox
-       read(io_input,*)
-       read(io_input,*) boxlx(i),boxly(i),boxlz(i),lsolid(i),lrect(i),kalp(i),rcut(i),rcutnn(i),numberDimensionIsIsotropic(i)
-       if (i.eq.1 .and. lexzeo) then
-          ! load positions of zeolite atoms
-          call zeocoord(file_in,lprint)
-          if (lprint) write(io_output,*) ' note zeolite determines the box size !'
-       end if
-
-       if ( lecho.and.lprint ) then
-          if (lverbose) then
-             write(io_output,*) 'box:',i
-             write(io_output,*) '   boxlx:',boxlx(i),' A'
-             write(io_output,*) '   boxly:',boxly(i),' A'
-             write(io_output,*) '   boxlz:',boxlz(i),' A'
-             write(io_output,*) '   lsolid:',lsolid(i)
-             write(io_output,*) '   lrect:',lrect(i)
-             write(io_output,*) 'neighbor list cutoff (rcutnn):',rcutnn(i), 'A'
-             write(io_output,*) '   rcut:',rcut(i),'A'
-             if(.not.L_Ewald_Auto) then
-                write(io_output,*) '   kalp:',kalp(i)
-             end if
-          else
-             write(io_output,*) boxlx(i),boxly(i),boxlz(i), lsolid(i),lrect(i),rcut(i),rcutnn(i)
-             if (.not.L_Ewald_Auto) then
-                write(io_output,*) kalp(i)
-             end if
-          end if
-       end if
-    end do
-
-    read(io_input,*)
-    read(io_input,*) nchain, nmolty
-
-    if (lgrand) then
-       nchain=nmax
-       write(io_output,*)'in GCMC total number of chains set by NMAX!'
-    end if
-
-    nmax=nchain+2
     ntmax=nmolty+1
     npamax=ntmax*(ntmax-1)/2
     nprop=nEnergy+(4*ntmax)+6
-    blockm=nstep/iblock
+    if (lgrand) then
+       nchain=10*nchain
+    end if
+    nmax=nchain+2
+    softlog = 10.0_dp**(-softcut)
+
+    if (lprint) then
+       write(io_output,'(/,A,/,A)') 'NAMELIST MC_SHARED','------------------------------------------'
+       write(io_output,'(A,I0)') 'Random number seed: ',seed
+       write(io_output,'(A,I0)') 'number of boxes in the system: ',nbox
+       write(io_output,'(A,I0)') 'number of molecule types: ',nmolty
+       if (lgrand) write(io_output,'(A)') 'in GCMC total number of chains set by NMAX!'
+       write(io_output,'(A,I0)') 'number of chains: ',nchain
+       if (lstop) then
+          write(io_output,'(A,I0)') 'number of steps: ',nstep
+       else
+          write(io_output,'(A,I0)') 'number of cycles: ',nstep
+       end if
+       w_i(iratio)
+       write(io_output,'(A,F7.3,A)') 'minimum cutoff (rmin): ',rmin,' [Ang]'
+       w_r(softcut)
+       write(io_output,'(A,I0,A,I0,A)') 'Write checkpoint file every ',checkpoint_interval,' seconds, and keep the last ',checkpoint_copies,' copies'
+       w_l(linit)
+       w_l(lreadq)
+    end if
+
+    ! initialize random number generator
+    call ranset(seed,numprocs)
+
     call allocate_system()
+    call allocate_sim_cell()
+    call allocate_kspace()
     call allocate_neighbor_list()
-    call allocate_linked_cell()
-    call read_transfer(file_in,lprint)
-    call init_swap()
-    call init_swatch()
+! -------------------------------------------------------------------
+    !> read name list analysis
+    ucheck=0
+    virtemp=0.0_dp
 
-    allocate(io_box_movie(nbxmax),ncarbon(ntmax),idummy(ntmax),qbox(nbxmax),nures(ntmax),k_max_l(nbxmax),k_max_m(nbxmax),k_max_n(nbxmax),stat=jerr)
-    if (jerr.ne.0) then
-       call err_exit(__FILE__,__LINE__,'readdat: allocating system failed',jerr)
-    end if
+    rewind(io_input)
+    read(UNIT=io_input,NML=analysis,iostat=jerr)
+    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: analysis',jerr)
 
-    ! set input arrays to zero ***
-    do j=1, ntmax
-       nugrow(j) = 0
-       nunit(j) = 0
-       do i=1, numax
-          ntype(j,i) = 0
-       end do
-    end do
-
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          write(io_output,*) 'number of chains:',nchain
-          write(io_output,*) 'number of molecule types:',nmolty
-       else
-          write(io_output,*) nchain, nmolty
-       end if
-    end if
-
-    read(io_input,*)
-    read(io_input,*) (temtyp(i),i=1,nmolty)
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          do i = 1,nmolty
-             write(io_output,*) 'number of chains of molecule type',i,':', temtyp(i)
-          end do
-       else
-          write(io_output,*) (temtyp(i),i=1,nmolty)
-       end if
-    end if
-    temnc = 0
-    do i = 1, nmolty
-       do j = 1, temtyp(i)
-          temnc = temnc + 1
-          moltyp(temnc) = i
-       end do
-    end do
-
-    if (lgrand) then
-       ! read chemical potentials (added 8/30/99 by jpotoff)
-       read(io_input,*)
-       read(io_input,*) (B(i),i=1,nmolty)
-       if (lecho.and.lprint) then
-          if (lverbose) then
-             do i = 1,nmolty
-                write(io_output,*) 'chemical potential for molecule type', i,':',B(i)
-             end do
-          else
-             write(io_output,*) "B ", (B(i),i=1,nmolty)
-          end if
-       end if
-
-       ! removing from here. It will be calculated once we have molecular mass
-       ! to calculate debroglie wavelength.
-       ! convert chemical potentials to activities
-       ! do i=1,nmolty
-       !    B(i) = exp(B(i)/temp)
-       ! end do
-    end if
-
-    read(io_input,*)
-    read(io_input,*) lmixlb, lmixjo
-    if (lmixlb .and. lmixjo) then
-       call err_exit(__FILE__,__LINE__,'cant use both combining rules!',myid+1)
-    end if
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          if (lmixlb) then
-             write(io_output,*) 'Lorentz-Berthelot combining rules apply'
-          else
-             write(io_output,*) 'Jorgensen combining rules apply'
-          end if
-          write(io_output,*) '   lmixlb:',lmixlb,' lmixjo:',lmixjo
-       else
-          write(io_output,*) lmixlb,lmixjo
-       end if
-    end if
-    ! read special combining rule information
-    read(io_input,*)
-    read(io_input,*) nijspecial
-    if (lecho.and.lprint) then
-       if (lverbose) then
-          write(io_output,*) 'number of special combining parameters:', nijspecial
-       else
-          write(io_output,*) nijspecial
-       end if
-    end if
-    read(io_input,*)
-    if ( nijspecial .eq. 0 ) then
-       read(io_input,*)
-    else
-       do i = 1,nijspecial
-          read(io_input,*) ispecial,jspecial,aspecd,bspecd
-       end do
-    end if
-
-    read(io_input,*)
-    read(io_input,*) rmin,softcut,rcutin,rbsmax,rbsmin
-    if ( lecho .and.lprint) then
-       if (lverbose) then
-          write(io_output,*) 'minimum cutoff (rmin):',rmin,' A'
-          write(io_output,*) 'softcut:',softcut
-          write(io_output,*) 'CBMC inner cutoff (rcutin):',rcutin,' A'
-          write(io_output,*) 'AVBMC outer cutoff (rbsmax):',rbsmax,' A'
-          write(io_output,*) 'AVBMC inner cutoff (rbsmin):',rbsmin,' A'
-       else
-          write(io_output,*) rmin, softcut ,rcutin,rbsmax,rbsmin
-       end if
-    end if
-
-    softlog = 10.0E0_dp**(-softcut)
-    vol_eff = (4.0E0_dp/3.0E0_dp)*onepi*(rbsmax*rbsmax*rbsmax-rbsmin*rbsmin*rbsmin)
-
-    ! set up the forcefield and the masses
-    call init_energy_pairwise(file_in,lmixlb,lmixjo,lprint)
-
-    allocate(lhere(nntype),temphe(nntype),stat=jerr)
-    lhere=.false.
-    if (jerr.ne.0) then
-       call err_exit(__FILE__,__LINE__,'readdat: allocating potential failed',jerr)
-    end if
-
-    numax=0
-    ! read bead potential information
-    do imol = 1, nmolty
-       read(io_input,*)
-       read(io_input,*) nunit(imol),nugrow(imol),ncarbon(imol),nmaxcbmc(imol),iurot(imol),lelect(imol),lflucq(imol),lqtrans(imol),lexpand(imol),lavbmc1(imol),lavbmc2(imol),lavbmc3(imol),fqegp(imol)
-
-       if (nunit(imol).gt.numax) then
-          numax=nunit(imol)
-          if (numax.gt.ubound(ntype,2)) then
-             call reallocate(ntype,1,ntmax,1,2*numax)
-             call reallocate(leaderq,1,ntmax,1,2*numax)
-             call reallocate(lplace,1,ntmax,1,2*numax)
-             call reallocate(lrigi,1,ntmax,1,2*numax)
-             call reallocate(invib,1,ntmax,1,2*numax)
-             call reallocate(itvib,1,ntmax,1,2*numax,1,6)
-             call reallocate(ijvib,1,ntmax,1,2*numax,1,6)
-             call reallocate(inben,1,ntmax,1,2*numax)
-             call reallocate(itben,1,ntmax,1,2*numax,1,12)
-             call reallocate(ijben2,1,ntmax,1,2*numax,1,12)
-             call reallocate(ijben3,1,ntmax,1,2*numax,1,12)
-             call reallocate(intor,1,ntmax,1,2*numax)
-             call reallocate(ittor,1,ntmax,1,2*numax,1,12)
-             call reallocate(ijtor2,1,ntmax,1,2*numax,1,12)
-             call reallocate(ijtor3,1,ntmax,1,2*numax,1,12)
-             call reallocate(ijtor4,1,ntmax,1,2*numax,1,12)
-             call reallocate(irotbd,1,2*numax,1,ntmax)
-             call reallocate(pmrotbd,1,2*numax,1,ntmax)
-          end if
-       end if
-
-       read(io_input,*)
-       read(io_input,*) maxgrow(imol),lring(imol),lrigid(imol),lrig(imol),lsetup,isolute(imol),(eta2(i,imol), i=1,nbox)
-
-       read(io_input,*)
-       read(io_input,*) lq14scale(imol),qscale(imol)
-
-       if (lring(imol)) then
-          read(io_input,*)
-          read(io_input,*) iring(imol)
-       else
-          iring(imol) = nunit(imol)
-       end if
-
-       do i = 1, nunit(imol)
-          lrigi(imol,i) = .false.
-       end do
-
-       ! irig is the site rigid sites will be grown from
-       ! and frig will be the previous site (not kept rigid)
-
-       if (lrig(imol)) then
-          read(io_input,*)
-          read(io_input,*) nrig(imol)
-
-          if (nrig(imol).gt.0) then
-             ! read in specific points to keep rigid in growth
-             read(io_input,*)
-             do i = 1, nrig(imol)
-                read(io_input,*) irig(imol,i),frig(imol,i)
-                lrigi(imol,irig(imol,i)) = .true.
-             end do
-          else
-             ! we will pick irig at random in each case if nrig = 0
-             read(io_input,*)
-             read(io_input,*) nrigmin(imol),nrigmax(imol)
-
-             ! nrigmin is the minimum amount of the chain to keep rigid
-             ! nrigmax is the maximum
-
-          end if
-       end if
-
-       if (lrigid(imol)) then
-          read(io_input,*)
-          ! number of flexible parts
-          read(io_input,*) rindex(imol)
-          if ( rindex(imol).gt.0) then
-             do i = 1, rindex(imol)
-                read(io_input,*) riutry(imol,i)
-             end do
-          else
-             riutry(imol,1) = 1
-          end if
-       end if
-
-       if ( lflucq(imol) .and. (.not. lelect(imol) ) ) then
-          call err_exit(__FILE__,__LINE__,'lelect must be true if flucq is true',myid+1)
-       end if
-       if ( lqtrans(imol) ) then
-          if (.not. lflucq(imol) ) then
-             call err_exit(__FILE__,__LINE__,'lflucq must be true if interm.  CT is allowed',myid+1)
-          end if
-          write(io_output,*) 'Intermolecular Charge Transfer is allowed'
-       end if
-
-       lbias(imol) = .false.
-       if (lavbmc1(imol) .or. lavbmc2(imol) .or. lavbmc3(imol)) then
-          lbias(imol) = .true.
-       end if
-
-       ! choose only one from the three AVBMC algorithms
-       if ( lavbmc1(imol) ) then
-          lavbmc2(imol) = .false.
-          lavbmc3(imol) = .false.
-       else if ( lavbmc2(imol) ) then
-          lavbmc3(imol) = .false.
-       end if
-
-       lneighbor = .false.
-       if ( (lavbmc2(imol) .or. lavbmc3(imol)).and.(.not.lgaro) )  lneighbor = .true.
-
-       if ( lecho.and.lprint ) then
-          if (lverbose) then
-             write(io_output,*) 'molecule type:',imol
-             write(io_output,*) '   number of units:',nunit(imol)
-             write(io_output,*) '   number of units for CBMC growth:', nugrow(imol)
-             write(io_output,*) '   number of carbons for EH alkane:', ncarbon(imol)
-             write(io_output,*) '   maximum number of units for CBMC:', nmaxcbmc(imol)
-             write(io_output,*) '   iurot:',iurot(imol)
-             write(io_output,*) '   lelect:',lelect(imol)
-             write(io_output,*) '   lflucq:',lflucq(imol)
-             write(io_output,*) '   lqtrans:',lqtrans(imol)
-             write(io_output,*) '   lexpand:',lexpand(imol)
-             write(io_output,*) '   lavbmc1:',lavbmc1(imol)
-             write(io_output,*) '   lavbmc2:',lavbmc2(imol)
-             write(io_output,*) '   lavbmc3:',lavbmc3(imol)
-             write(io_output,*) '   fqegp:',fqegp(imol)
-             write(io_output,*) '   lsetup:',lsetup
-             write(io_output,*) '   lq14scale:',lq14scale(imol)
-             write(io_output,*) '   qscale:',qscale(imol)
-             do i = 1,nbox
-                write(io_output,*) '   energy offset for box', i,':',eta2(i,imol),' K'
-             end do
-          else
-             write(io_output,*) nunit(imol),nugrow(imol),ncarbon(imol) ,nmaxcbmc(imol),iurot(imol) ,lelect(imol),lflucq(imol)  ,lqtrans(imol),lexpand(imol),lavbmc1(imol),lavbmc2(imol) ,lavbmc3(imol),fqegp(imol) ,lsetup,(eta2(i,imol), i=1,nbox)
-          end if
-       end if
-       masst(imol) = 0.0E0_dp
-
-       if (lsetup) then
-          call molsetup(io_input,imol,lprint)
-
-          do i = 1,nunit(imol)
-             lhere(ntype(imol,i)) = .true.
-          end do
-
-          goto 112
-       end if
-
-       do i = 1, nunit(imol)
-          ! linear/branched chain with connectivity table -
-          read(io_input,*)
-          read(io_input,*) j, ntype(imol,i), leaderq(imol,i)
-          ntype(imol,i)=indexOf(atoms,ntype(imol,i))
-          if ( lelect(imol) .and. .not. lchgall ) then
-             if ( lecho.and.lprint ) write(io_output,*) '   bead ',j,' beadtype ',atoms%list(ntype(imol,i)),chemid(ntype(imol,i)),' charge leader ',leaderq(imol,i)
-             if ( leaderq(imol,i) .gt. j .and. .not. lchgall) then
-                call err_exit(__FILE__,__LINE__,'group-based cut-off screwed for qq',myid+1)
-             end if
-          else
-             if ( lecho.and.lprint ) write(io_output,*) '   bead ',j,' beadtype ',atoms%list(ntype(imol,i)),chemid(ntype(imol,i))
-          end if
-
-          IF (.not.(lmmff.or.lexpsix.or.lgaro.or.lninesix)) THEN
-             if (ntype(imol,i).eq.0) then
-                call err_exit(__FILE__,__LINE__,'ERROR: atom type undefined!',myid+1)
-             else if (sigi(ntype(imol,i)).lt.1E-06_dp.and.epsi(ntype(imol,i)).lt.1E-06_dp.and.abs(qelect(ntype(imol,i))).lt.1E-06_dp) then
-                call err_exit(__FILE__,__LINE__,'ERROR: atom type undefined!',myid+1)
-             end if
-          end if
-
-          iutemp = ntype(imol,i)
-
-          if (lpl(iutemp)) then
-             lplace(imol,i) = .true.
-             llplace(imol) = .true.
-          else
-             lplace(imol,i) = .false.
-          end if
-
-          masst(imol)=masst(imol)+mass(iutemp)
-          lhere(iutemp) = .true.
-
-          ! bond vibration -
-          read(io_input,*)
-          read(io_input,*) invib(imol,i)
-          if ( invib(imol,i) .gt. 6 ) then
-             write(io_output,*) 'imol',imol,'   i',i,'  invib',invib(imol,i)
-             call err_exit(__FILE__,__LINE__,'too many vibrations',myid+1)
-          end if
-          do j = 1, invib(imol,i)
-             read(io_input,*) ijvib(imol,i,j),itvib(imol,i,j)
-             if((ijvib(imol,i,j).eq.i).or.(ijvib(imol,i,j).gt. nunit(imol))) then
-                call err_exit(__FILE__,__LINE__,'check vibrations for mol type '//integer_to_string(imol)//' and bead '//integer_to_string(i),myid+1)
-             end if
-
-             itvib(imol,i,j)=indexOf(bonds,itvib(imol,i,j))
-             if (itvib(imol,i,j).eq.0) then
-                call err_exit(__FILE__,__LINE__,'ERROR: stretching parameters undefined!',myid+1)
-             else if(brvib(itvib(imol,i,j)).lt.1E-06_dp) then
-                call err_exit(__FILE__,__LINE__,'ERROR: stretching parameters undefined!',myid+1)
-             end if
-
-             if (lverbose.and.lprint) then
-                write(io_output,*) '      bead',i,' bonded to bead', ijvib(imol,i,j)
-                write(io_output,'(a20,i3,a13,f9.3,a5,f9.1)') '          bond type:', bonds%list(itvib(imol,i,j)),' bond length:', brvib(itvib(imol,i,j)),' k/2:', brvibk(itvib(imol,i,j))
-             end if
-          end do
-          ! bond bending -
-          read(io_input,*)
-          read(io_input,*) inben(imol,i)
-          ! write(io_output,*) inben(imol,i)
-          if ( inben(imol,i) .gt. 12 ) then
-             call err_exit(__FILE__,__LINE__,'too many bends',myid+1)
-          end if
-          do j = 1, inben(imol,i)
-             read(io_input,*) ijben2(imol,i,j),ijben3(imol,i,j) ,itben(imol,i,j)
-             if ((ijben2(imol,i,j).gt.nunit(imol)).or.( ijben3(imol,i,j).gt.nunit(imol))) then
-                call err_exit(__FILE__,__LINE__,'check bending for molecule type '//integer_to_string(imol)//' bead '//integer_to_string(i),myid+1)
-             end if
-             if ((ijben2(imol,i,j).eq.i).or.( ijben3(imol,i,j).eq.i).or.(ijben2(imol,i,j) .eq.ijben3(imol,i,j))) then
-                call err_exit(__FILE__,__LINE__,'check bending for molecule type '//integer_to_string(imol)//' bead '//integer_to_string(i),myid+1)
-             end if
-
-             itben(imol,i,j)=indexOf(angles,itben(imol,i,j))
-             if (itben(imol,i,j).eq.0) then
-                call err_exit(__FILE__,__LINE__,'ERROR: bending parameters undefined!',myid+1)
-             else if(brben(itben(imol,i,j)).lt.1E-06_dp) then
-                call err_exit(__FILE__,__LINE__,'ERROR: bending parameters undefined!',myid+1)
-             end if
-
-             if (lverbose.and.lprint) then
-                write(io_output,'(1x,a10,i4,a20,a8,i4,a10,i4)') '      bead' ,i, ' bending interaction',' through',ijben2(imol,i,j ),' with bead',ijben3(imol,i,j)
-                write(io_output,'(a20,i3,a13,f9.3,a5,f9.1)') '          bend type:',angles%list(itben(imol,i,j)) ,' bend angle :',brben(itben(imol,i,j))*180.0E0_dp/onepi ,' k/2:',brbenk(itben(imol,i,j))
-             end if
-          end do
-          ! bond torsion -
-          read(io_input,*)
-          read(io_input,*) intor(imol,i)
-          if ( intor(imol,i) .gt. 12 ) then
-             call err_exit(__FILE__,__LINE__,'too many torsions',myid+1)
-          end if
-          do j = 1, intor(imol,i)
-             read(io_input,*) ijtor2(imol,i,j),ijtor3(imol,i,j),ijtor4(imol,i,j),ittor(imol,i,j)
-
-             if(ijtor2(imol,i,j).gt.nunit(imol).or.ijtor3(imol,i,j) .gt.nunit(imol).or.ijtor4(imol,i,j).gt.nunit(imol)) then
-                call err_exit(__FILE__,__LINE__,'check torsion for molecule type '//integer_to_string(imol)//' bead '//integer_to_string(i),myid+1)
-             end if
-
-             if((ijtor2(imol,i,j).eq.i.or.ijtor3(imol,i,j).eq.i .or.ijtor4(imol,i,j).eq.i).or.(ijtor2(imol,i,j).eq. ijtor3(imol,i,j).or.ijtor2(imol,i,j).eq. (ijtor4(imol,i,j)).or.(ijtor3(imol,i,j).eq. ijtor4(imol,i,j)))) then
-                call err_exit(__FILE__,__LINE__,'check torsion for molecule type '//integer_to_string(imol)//' bead '//integer_to_string(i),myid+1)
-             end if
-
-             if (lverbose.and.lprint) then
-                write(io_output,'(1x,a10,i3,a22,a8,i3,a4,i3,a10,i3,a19,i4)') '      bead',i, ' torsional ','interaction through' ,ijtor2(imol,i,j),' and',ijtor3(imol,i,j) ,' with bead',ijtor4(imol,i,j),' of torsional type:',ittor(imol,i,j)
-             end if
-
-             ittor(imol,i,j)=indexOf(dihedrals,ittor(imol,i,j))
-             if (ittor(imol,i,j).eq.0) then
-                write(io_output,*) 'WARNING: torsion parameters undefined; set to null'
-             end if
-          end do
-       end do
-
-112    continue
-
-
-       ! starting the self consistency check for the bond vibrations, bending, and torsions
-       ! this would help in catching errors in fort.4 connectivity. Starting after continue
-       ! so that if we use molsetup subroutine it will provide extra checking. (Neeraj)
-       if (.not.lrigid(imol)) then
-          do i = 1,nunit(imol)
-             numvib=invib(imol,i)
-             numbend=inben(imol,i)
-             numtor=intor(imol,i)
-             lfound = .false.
-             do j = 1,numvib
-                vib1 = ijvib(imol,i,j)
-                vibtype  = itvib(imol,i,j)
-                if(invib(imol,vib1).eq.0) then
-                   write(io_output,*) 'Check vibration for mol. type:',imol, 'bead',vib1,'with',i
-                   call err_exit(__FILE__,__LINE__,'ERROR IN FORT.4 VIBRATIONS',myid+1)
-                end if
-                do k =1,invib(imol,vib1)
-                   if(ijvib(imol,vib1,k).eq.i) then
-                      lfound = .true.
-                      if(vibtype.ne.itvib(imol,vib1,k)) then
-                         write(io_output,*) 'check vibration type of bead',i, 'with',vib1,'molecule type',imol,'vice versa'
-                         call err_exit(__FILE__,__LINE__,'Error in fort.4 vibration specifications',myid+1)
-                      end if
-                   end if
-                end do
-                if(.not.lfound) then
-                   write(io_output,*) 'Check vibration for mol. type:',imol, 'bead ',vib1,'with ',i
-                   call err_exit(__FILE__,__LINE__,'Error in fort.4 vibration iformation',myid+1)
-                end if
-             end do
-             lfound= .false.
-             do j = 1,numbend
-                bend2 = ijben2(imol,i,j)
-                bend3 = ijben3(imol,i,j)
-                bendtype = itben(imol,i,j)
-                if(inben(imol,bend3).eq.0) then
-                   write(io_output,*) 'Check bending for mol. type:',imol, 'bead ',bend3,'with ',i
-                   call err_exit(__FILE__,__LINE__,'ERROR IN FORT.4 BENDING',myid+1)
-                end if
-                do k = 1,inben(imol,bend3)
-                   if((ijben2(imol,bend3,k).eq.bend2).and. (ijben3(imol,bend3,k).eq.i)) then
-                      lfound = .true.
-                      if(itben(imol,bend3,k).ne.bendtype) then
-                         write(io_output,*) 'check bending type of bead',i, 'with',bend3,'mol. typ.',imol,'and vice versa'
-                         call err_exit(__FILE__,__LINE__,'Error in fort.4 bending specifications',myid+1)
-                      end if
-                   end if
-                end do
-                if(.not.lfound) then
-                   write(io_output,*) 'Check bending for mol. type:',imol, 'bead ',bend3,'with ',i
-                   call err_exit(__FILE__,__LINE__,'Error in fort.4 bending information',myid+1)
-                end if
-             end do
-             lfound = .false.
-             do j = 1,numtor
-                tor2 = ijtor2(imol,i,j)
-                tor3 = ijtor3(imol,i,j)
-                tor4 = ijtor4(imol,i,j)
-                tortype = ittor(imol,i,j)
-                if(intor(imol,tor4).eq.0) then
-                   write(io_output,*) 'Check torsion for mol. type:',imol, 'bead ',tor4,'with ',i,'and vice versa'
-                   call err_exit(__FILE__,__LINE__,'ERROR IN FORT.4 TORSION',myid+1)
-                end if
-                do k = 1,intor(imol,tor4)
-                   if((ijtor2(imol,tor4,k).eq.tor3).and.(ijtor3(imol,tor4 ,k).eq.tor2).and.(ijtor4(imol,tor4,k).eq.i)) then
-                      lfound=.true.
-                      if(ittor(imol,tor4,k).ne.tortype) then
-                         write(io_output,*) 'check torsion type of bead',i, 'with',tor4,'mol. typ.',imol,'and vice versa'
-                         call err_exit(__FILE__,__LINE__,'Error in fort.4 torsion specifications',myid+1)
-                      end if
-                   end if
-                end do
-                if(.not.lfound) then
-                   write(io_output,*) 'Check torsion for mol. type:',imol, 'bead ',tor4,'with ',i
-                   call err_exit(__FILE__,__LINE__,'Error in fort.4 torsion information',myid+1)
-                end if
-             end do
-          end do
-       end if
-
-       ! Neeraj Adding molecule neutrality check
-       !kea skip if lgaro
-       if(.not.(lgaro.or.lionic.or.lexzeo)) then
+    blockm=nstep/iblock
+    if (lprint) then
+       write(io_output,'(/,A,/,A)') 'NAMELIST ANALYSIS','------------------------------------------'
+       w_i(iprint)
+       w_i(imv)
+       w_i(iblock)
+       w_i(iratp)
+       w_i(idiele)
+       w_i(iheatcapacity)
+       w_i(ianalyze)
+       w_i(nbin)
+       w_l(lrdf)
+       w_l(lintra)
+       w_l(lstretch)
+       w_l(lgvst)
+       w_l(lbend)
+       w_l(lete)
+       w_l(lrhoz)
+       w_r(bin_width)
+       if (lucall) then
+          write(io_output,FMT='(A)') '=> Calculate chemical potential for the following molecule types: '
           do i=1,nmolty
-             qtot =0.0E0_dp
-             do j = 1,nunit(i)
-                qtot = qtot+qelect(ntype(i,j))
-             end do
-             if(abs(qtot).gt.1E-7_dp) then
-                call err_exit(__FILE__,__LINE__,'molecule type '//integer_to_string(i)//' not neutral. check charges',myid+1)
-             end if
+             if (ucheck(i).gt.0) write(io_output,'(I0,A,I0)') i,': ucheck = ',ucheck(i)
           end do
        end if
-
-       if ( lexpand(imol) ) then
-          lee = .true.
-       end if
-       if ( lbias(imol) ) then
-          read(io_input,*)
-          read(io_input,*) pmbias(imol),(pmbsmt(ii),ii=1,nmolty),pmbias2(imol)
-          if ( lecho .and.lprint) then
-             if (lverbose) then
-                write(io_output,*) '   AVBMC pmbias',pmbias(imol)
-                do ii = 1,nmolty
-                   write(io_output,*) '   AVBMC2 and 3 probability for', ' molecule',' type',ii,':',pmbsmt(ii)
-                end do
-                write(io_output,*) '   AVBMC3 pmbias2:',pmbias2(imol)
-             else
-                write(io_output,*) '   AVBMC bias for cluster formation and' ,' destruction'
-                write(io_output,*) pmbias(imol),(pmbsmt(ii),ii=1,nmolty) ,pmbias2(imol)
-             end if
-          end if
-          if (rbsmax .lt. rbsmin) then
-             call err_exit(__FILE__,__LINE__,'rbsmax should be greater than rbsmin',myid+1)
-          end if
-       end if
-       !kea 6/4/09 -- added for multiple rotation centers
-       ! To assign multiple rotation centers, set iurot(imol) < 0
-       ! Add line after molecule specification, avbmc parameters
-       ! First, number of rotation centers
-       ! Second, identity of centers (0=COM,integer::> 0 = bead number)
-       ! Third, give probability to rotate around different centers
-       if(iurot(imol).lt.0) then
-          read(io_input,*)
-          read(io_input,*) nrotbd(imol),irotbd(1:nrotbd(imol),imol),pmrotbd(1:nrotbd(imol),imol)
-          if( lecho.and.lprint ) then
-             if ( lverbose ) then
-                write(io_output,*) ' Multiple rotation centers',nrotbd(imol)
-                do ii=1,nrotbd(imol)
-                   write(io_output,*) 'Rotation center',ii,':', irotbd(ii,imol),'    probability to select:', pmrotbd(ii,imol)
-                end do
-             end if
-          end if
-       end if
-    end do
-
-    call allocate_molecule()
-    call allocate_energy_bonded()
-    call init_moves_simple()
-    call init_moves_volume(file_in)
-    call init_cbmc()
-    call init_ee()
-
-    allocate(inclmol(ntmax*numax*numax),inclbead(ntmax*numax*numax,2),inclsign(ntmax*numax*numax),ofscale(ntmax*numax*numax),ofscale2(ntmax*numax*numax),ainclmol(ntmax*numax*numax),ainclbead(ntmax*numax*numax,2),a15t(ntmax*numax*numax),stat=jerr)
-    if (jerr.ne.0) then
-       call err_exit(__FILE__,__LINE__,'readdat: allocating molecule failed',jerr)
-    end if
-
-    ! check whether there is a polarizable molecule
-    lpolar = .false.
-    lqqelect = .false.
-
-    do imol = 1, nmolty
-       if (lflucq(imol)) lpolar = .true.
-       if (lelect(imol)) lqqelect = .true.
-    end do
-
-    if ( .not. lqqelect ) then
-       if ( lewald .or. lchgall ) then
-          if (lprint) write(io_output,*) 'No charges in the system -> lewald is now turned off'
-       end if
-    end if
-
-    if ( .not. lpolar ) then
-       if ( lanes  ) then
-          call err_exit(__FILE__,__LINE__,'lanes should be false for nonpolarizable systems!',myid+1)
-       end if
-       if ( lfepsi ) then
-          call err_exit(__FILE__,__LINE__,'lfepsi should be false for nonpolarizable systems!',myid+1)
-       end if
-    end if
-
-    ! This B(i) goes in the acceptance rules
-
-    if (lgrand) then
-       do i=1,nmolty
-          debroglie = debroglie_factor*sqrt(beta/masst(i))
-          B(i) = exp(B(i)/temp)/(debroglie*debroglie*debroglie)
-       end do
-    end if
-
-    ! read linkcell information
-    read(io_input,*)
-    read(io_input,*) licell,rintramax,boxlink
-
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          write(io_output,*) 'licell:',licell
-          write(io_output,*) 'rintramax:',rintramax,' A'
-          write(io_output,*) 'boxlink:',boxlink
-       else
-          write(io_output,*) licell,rintramax,boxlink
-       end if
-    end if
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
-    IF (boxlink .LE. nbxmax)THEN
-       if (lsolid(boxlink).and.(.not.lrect(boxlink))) then
-          call err_exit(__FILE__,__LINE__,'Linkcell not implemented for nonrectangular boxes',myid+1)
-       end if
-    end if
-
-    ! read the atomic displacements
-    read(io_input,*)
-    read(io_input,*) Armtrax, Armtray, Armtraz
-
-    if(lecho.and.lprint) then
-       if(lverbose) then
-          write(io_output,'(a41,f8.4,f8.4,f8.4)') 'initial maximum displacements for atoms:',Armtrax, Armtray , Armtraz
-       else
-          write(io_output,*) Armtrax, Armtray, Armtraz
-       end if
-    end if
-
-    ! read displacement information
-    read(io_input,*)
-    read(io_input,*) rmtrax(1,1),rmtray(1,1),rmtraz(1,1)
-    do im = 1,nbox
-       do imol = 1,nmolty
-          rmtrax(imol,im) = rmtrax(1,1)
-          rmtray(imol,im) = rmtray(1,1)
-          rmtraz(imol,im) = rmtraz(1,1)
-       end do
-    end do
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          write(io_output,'(a41,f8.4,f8.4,f8.4)') ' initial maximum x, y and z displacement:',rmtrax(1,1) ,rmtray(1,1),rmtraz(1,1)
-       else
-          write(io_output,*) rmtrax(1,1), rmtray(1,1), rmtraz(1,1)
-       end if
-    end if
-
-    read(io_input,*)
-    read(io_input,*) rmrotx(1,1),rmroty(1,1),rmrotz(1,1)
-    do im = 1,nbox
-       do imol = 1,nmolty
-          rmrotx(imol,im) = rmrotx(1,1)
-          rmroty(imol,im) = rmroty(1,1)
-          rmrotz(imol,im) = rmrotz(1,1)
-       end do
-    end do
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          write(io_output,'(a41,f8.4,f8.4,f8.4)') ' initial maximum x, y and z rotation:    ',rmrotx(1,1) ,rmroty(1,1),rmrotz(1,1)
-       else
-          write(io_output,*) rmrotx(1,1), rmroty(1,1), rmrotz(1,1)
-       end if
-    end if
-    read(io_input,*)
-    read(io_input,*) tatra,tarot
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          write(io_output,*) 'target translational acceptance ratio:',tatra
-          write(io_output,*) 'target rotational acceptance ratio:',tarot
-       else
-          write(io_output,*) tatra, tarot
-       end if
-    end if
-
-    ! read initial setup information
-    read(io_input,*)
-    read(io_input,*) linit,lreadq
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          write(io_output,*) 'linit:',linit
-          write(io_output,*) 'lreadq:',lreadq
-       else
-          write(io_output,*) linit, lreadq
-       end if
-    end if
-    read(io_input,*)
-    read(io_input,*) (lbranch(i),i=1,nmolty)
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          do i = 1,nmolty
-             write(io_output,*) 'lbranch for molecule type',i,':',lbranch(i)
-          end do
-       else
-          write(io_output,*) (lbranch(i),i=1,nmolty)
-       end if
-    end if
-    do i = 1, nbox
-       read(io_input,*)
-       read(io_input,*) (ininch(j,i),j=1,nmolty)
-       if ( lecho.and.lprint ) then
-          if (lverbose) then
-             write(io_output,*) 'box:',i
-             do j = 1,nmolty
-                write(io_output,*) '   initial number of chains of type', j,':',ininch(j,i)
-             end do
-          else
-             write(io_output,*) 'box:',i,(ininch(j,i),j=1,nmolty)
-          end if
-       end if
-       read(io_input,*)
-       read(io_input,*) inix(i),iniy(i),iniz(i),inirot(i),inimix(i),zshift(i),dshift(i),nchoiq(i)
-       if ( lecho.and.lprint ) then
-          if (lverbose) then
-             write(io_output,'(a36,a18,3i5)') '    initial number of chains in x, y' ,' and z directions:',inix(i),iniy(i),iniz(i)
-             write(io_output,*) '   initial rotational displacement:', inirot(i)
-             write(io_output,*) '   inimix:',inimix(i)
-             write(io_output,*) '   zshift:',zshift(i)
-             write(io_output,*) '   dshift:',dshift(i)
-             write(io_output,*) '   nchoiq:',nchoiq(i)
-          else
-             write(io_output,*) inix(i),iniy(i),iniz(i),inirot(i), inimix(i),zshift(i),dshift(i),nchoiq(i)
-          end if
-       end if
-    end do
-
-    ! read ensemble specific information
-    read(io_input,*)
-    read(io_input,*) rmvol(1), tavol, iratv, iratp, rmflcq(1,1), taflcq
-    do izz = 1,nmolty
-       do zzz = 1,nbox
-          rmflcq(izz,zzz) = rmflcq(1,1)
-       end do
-    end do
-    if ( lgibbs ) then
-       do zzz = 2, nbox
-          rmvol(zzz) = rmvol(1)
-       end do
-    end if
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          do izz = 1,nbox
-             write(io_output,*) 'initial maximum volume displacement ' ,'(rmvol) in box',izz,':',rmvol(izz)
-          end do
-          write(io_output,*) 'target volume acceptance ratio (tavol):',tavol
-          write(io_output,*) 'iratv:',iratv
-          write(io_output,*) 'iratp:',iratp
-          do izz = 1,nmolty
-             do zzz = 1,nbox
-                write(io_output,*) 'initial maximum fluct. charge', ' displ. for chain type',izz,' box', zzz,':',rmflcq(izz,zzz)
-             end do
-          end do
-          write(io_output,*) 'target fluctuating charge acceptance ratio', ' (taflcq):',taflcq
-       else
-          write(io_output,*) rmvol, tavol, iratv, iratp
-          write(io_output,*) 'rmflcq', ((rmflcq(izz,zzz),zzz=1,nbox),izz=1,nmolty),taflcq
-       end if
-    end if
-
-    read(io_input,*)
-    read(io_input,*) pmvol,(pmvlmt(j),j=1,nbox)
-    if ( .not. lfold )  call err_exit(__FILE__,__LINE__,'volume move only correct with folded coordinates',myid+1)
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          write(io_output,*) 'pmvol:',pmvol
-          do j = 1,nbox
-             write(io_output,*) '   pmvlmt for box',j,':',pmvlmt(j)
-          end do
-       else
-          write(io_output,*) 'pmvol',pmvol,(pmvlmt(j),j=1,nbox)
-       end if
-    end if
-    read(io_input,*)
-    read(io_input,*) nvolb,(pmvolb(j),j=1,nvolb)
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          write(io_output,*) 'nvolb:',nvolb
-          do j = 1,nvolb
-             write(io_output,*) '   pmvolb:',pmvolb(j)
-          end do
-       else
-          write(io_output,*) '   nvolb',nvolb,(pmvolb(j),j=1,nvolb)
-       end if
-    end if
-    read(io_input,*)
-    do j = 1,nvolb
-       read(io_input,*) box5(j),box6(j)
-
-       if ((lsolid(box5(j)) .and. .not. lrect(box5(j))) .and. (lsolid(box6(j)) .and. .not. lrect(box6(j)))) then
-          call err_exit(__FILE__,__LINE__,'can not perform volume move between two non-rectangular boxes',myid+1)
-       end if
-
-       if ( lecho.and.lprint ) then
-          if (lverbose) then
-             write(io_output,*) '   box pair for volume move number',j,':', box5(j),box6(j)
-          else
-             write(io_output,*) box5(j),box6(j)
-          end if
-       end if
-    end do
-
-    lxyz = .false.
-    do j = 1,nbox
-       if (lsolid(j) .and. .not. lxyz) then
-          lxyz = .true.
-          read(io_input,*)
-          read(io_input,*) pmvolx,pmvoly
-          if (lecho.and.lprint) then
-             if (lverbose) then
-                write(io_output,*) 'pmvolx:',pmvolx
-                write(io_output,*) 'pmvoly:',pmvoly
-             else
-                write(io_output,*) pmvolx,pmvoly
-             end if
-          end if
-       end if
-    end do
-
-    ! read swatch information
-    read(io_input,*)
-    read(io_input,*) pmswat,nswaty
-    if ( nswaty .gt. npamax ) then
-       call err_exit(__FILE__,__LINE__,'nswaty gt npamax',myid+1)
-    end if
-
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          write(io_output,*) 'pmswat:',pmswat
-          write(io_output,*) '   number of swatch pairs (nswaty):',nswaty
-       else
-          write(io_output,*) 'pmswat, nswaty',pmswat,nswaty
-       end if
-    end if
-
-    if (nswaty .gt. 0) then
-       read(io_input,*)
-       read(io_input,*) ((nswatb(i,j),j=1,2),i=1,nswaty)
-       read(io_input,*)
-       read(io_input,*) (pmsatc(i),i=1,nswaty)
-
-       ! safety checks on swatch
-       do i = 1,nswaty
-          if ( nswatb(i,1) .eq. nswatb(i,2) ) then
-             write(io_output,*) 'nswaty ',i,' has identical moltyp'
-             call err_exit(__FILE__,__LINE__,'cannot swatch identical moltyp',myid+1)
-          end if
-       end do
-
-       if( lecho.and.lprint ) then
-          if (lverbose) then
-             do i = 1,nswaty
-                write(io_output,*) '   swatch molecule type pairs:', (nswatb(i,j),j=1,2)
-             end do
-             do i = 1,nswaty
-                write(io_output,*) '   probability of each swatch pair:', pmsatc(i)
-             end do
-          else
-             do i=1,nswaty
-                write(io_output,*) 'nswatb', (nswatb(i,j),j=1,2)
-                write(io_output,*) 'pmsatc',pmsatc(i)
-             end do
-          end if
-       end if
-
-       do i=1,nswaty
-          ! number of beads that remain in the same position
-          read(io_input,*)
-          read(io_input,*) nsampos(i),(ncut(i,j),j=1,2)
-          if (lecho.and.lprint) then
-             if (lverbose) then
-                write(io_output,*) '   nsampos:',nsampos(i)
-                write(io_output,*) '   ncut:',(ncut(i,j),j=1,2)
-             else
-                write(io_output,*) 'nsampos',nsampos(i),' ncut', (ncut(i,j),j=1,2)
-             end if
-          end if
-          ! bead number
-          read(io_input,*)
-          do j = 1,nsampos(i)
-             read(io_input,*) (splist(i,j,k),k=1,2)
-             if (lecho.and.lprint) then
-                if (lverbose) then
-                   write(io_output,*) '   splist:', (splist(i,j,k),k=1,2)
-                else
-                   write(io_output,*) 'splist',(splist(i,j,k),k=1,2)
-                end if
-             end if
-          end do
-
-          read(io_input,*)
-          read(io_input,*) (( gswatc(i,j,k), k=1,2*ncut(i,j) ), j=1,2 )
-          ! if (lecho.and.lprint) then
-          !    if (lverbose) then
-          !       do izz = 1,ncut(i,j)
-          !          write(io_output,*) '   grow from and prev for ncut',izz,':',(gswatc(i,j,izz),j=1,2)
-          !       end do
-          !    else
-          !       write(io_output,*) 'gswatc',(( gswatc(i,j,k),k=1,2*ncut(i,j) ), j=1,2 )
-          !    end if
-          ! end if
-
-          read(io_input,*)
-          read(io_input,*) nswtcb(i), (pmswtcb(i,ipair), ipair=1,nswtcb(i))
-          read(io_input,*)
-          do ipair = 1,nswtcb(i)
-             read(io_input,*) box3(i,ipair),box4(i,ipair)
-             if (lecho.and.lprint) then
-                if (lverbose) then
-                   write(io_output,*) '   box pair:', box3(i,ipair),box4(i,ipair)
-                else
-                   write(io_output,*) box3(i,ipair),box4(i,ipair)
-                end if
-             end if
-          end do
-       end do
-    else
-       ! skip past all of the swatch info
-       read(io_input,*)
-       read(io_input,*)
-       read(io_input,*)
-       read(io_input,*)
-       read(io_input,*)
-       read(io_input,*)
-       read(io_input,*)
-       read(io_input,*)
-       read(io_input,*)
-       read(io_input,*)
-    end if
-
-    ! read swap info
-    read(io_input,*)
-    read(io_input,*) pmswap, (pmswmt(i),i=1,nmolty)
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          write(io_output,*) 'pmswap:',pmswap
-          do i = 1,nmolty
-             write(io_output,'(1x,a41,a5,i4,a10,f8.4)') '   swap probability for molecule type ',' ',i ,' (pmswmt):',pmswmt(i)
-          end do
-       else
-          write(io_output,*) 'pmswap',pmswap,(pmswmt(i),i=1,nmolty)
-       end if
-    end if
-    do i = 1, nmolty
-       read(io_input,*)
-       read(io_input,*) nswapb(i), (pmswapb(i,ipair),ipair=1,nswapb(i))
-       if ( lecho.and.lprint ) then
-          if (lverbose) then
-             write(io_output,*) '   number of swap moves for molecule type', i,':',nswapb(i)
-             do ipair = 1,nswapb(i)
-                write(io_output,*) '      pmswapb:',pmswapb(i,ipair)
-             end do
-          else
-             write(io_output,*) nswapb(i),  (pmswapb(i,ipair),ipair=1,nswapb(i))
-          end if
-       end if
-       read(io_input,*)
-       do ipair = 1, nswapb(i)
-          read(io_input,*) box1(i,ipair), box2(i,ipair)
-          if ( lecho.and.lprint) then
-             if (lverbose) then
-                write(io_output,*) '      box pair:', box1(i,ipair), box2(i,ipair)
-             else
-                write(io_output,*) 'box pair:', box1(i,ipair), box2(i,ipair)
-             end if
-          end if
-       end do
-    end do
-
-    ! read cbmc info
-    read(io_input,*)
-    read(io_input,*) pmcb, (pmcbmt(i),i=1,nmolty)
-    read(io_input,*)
-    read(io_input,*) (pmall(i),i=1,nmolty)
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          write(io_output,*) 'pmcb:',pmcb
-          do i = 1,nmolty
-             write(io_output,'(1x,a41,a5,i4,a10,f8.4)') '   CBMC probability for molecule type ',' ',i ,' (pmcbmt):',pmcbmt(i)
-          end do
-          do i = 1,nmolty
-             write(io_output,*) '   pmall for molecule type',i,':',pmall(i)
-          end do
-       else
-          write(io_output,*) 'pmcb',pmcb,(pmcbmt(i),i=1,nmolty), 'pmall',(pmall(i),i=1,nmolty)
-       end if
-    end if
-    read(io_input,*)
-    read(io_input,*) (pmfix(i),i=1,nmolty)
-    if (lecho.and.lprint) then
-       if (lverbose) then
-          do i = 1,nmolty
-             write(io_output,'(1x,a41,a5,i4,a10,f8.4)') '   probability for SAFE-CBMC for ','molecule typ e',i ,'  (pmfix):',pmfix(i)
-          end do
-       else
-          write(io_output,*) (pmfix(i),i=1,nmolty)
-       end if
-    end if
-    do i = 1, nmolty
-       if (lring(i).and.pmfix(i).lt.0.999.and. .not.lrig(i)) then
-          call err_exit(__FILE__,__LINE__,'a ring can only be used with safe-cbmc',myid+1)
-       end if
-    end do
-    ! read fluctuating charge info
-    read(io_input,*)
-    read(io_input,*) pmflcq, (pmfqmt(i),i=1,nmolty)
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          write(io_output,*) 'pmflcq:',pmflcq
-          do i = 1,nmolty
-             write(io_output,'(1x,a41,a5,i4,a10,f8.4)') '   flcq probability for molecule type ',' ',i ,' (pmfqmt):',pmfqmt(i)
-          end do
-       else
-          write(io_output,*) 'pmflcq',pmflcq,(pmfqmt(i),i=1,nmolty)
-       end if
-    end if
-    ! read expanded-coefficient move info
-    read(io_input,*)
-    read(io_input,*) pmexpc, (pmeemt(i),i=1,nmolty)
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          write(io_output,*) 'pmexpc:',pmexpc
-          do i = 1,nmolty
-             write(io_output,'(1x,a41,a5,i4,a10,f8.4)') '   expanded ens. prob. for molecule ','type ',i ,' (pmeemt):',pmeemt(i)
-          end do
-       else
-          write(io_output,*) 'pmexpc',pmexpc,(pmeemt(i),i=1,nmolty)
-       end if
-    end if
-    ! read new expanded ensemble info
-    read(io_input,*)
-    read(io_input,*) pmexpc1
-    ! read atom translation probability
-    read(io_input,*)
-    read(io_input,*) pm_atom_tra
-    ! read translation info
-    read(io_input,*)
-    read(io_input,*) pmtra,(pmtrmt(i),i=1,nmolty)
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          write(io_output,*) 'pmtra:',pmtra
-          do i = 1,nmolty
-             write(io_output,'(1x,a41,a5,i4,a10,f8.4)') '   translation probability for molecule','   typ e',i ,' (pmtrmt):',pmtrmt(i)
-          end do
-       else
-          write(io_output,*) 'pmtra',pmtra,(pmtrmt(i),i=1,nmolty)
-       end if
-    end if
-
-    ! read rotation info
-    read(io_input,*)
-    read(io_input,*) (pmromt(i),i=1,nmolty)
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          write(io_output,*) 'pmrot:',1.0E0_dp
-          do i = 1,nmolty
-             write(io_output,'(1x,a41,a5,i4,a10,f8.4)') '   rotational probability for molecule','    typ e',i ,' (pmromt):',pmromt(i)
-          end do
-       else
-          write(io_output,*) (pmromt(i),i=1,nmolty)
-       end if
-    end if
-
-    ! writeout probabilities, in percent
-    if (lverbose.and.lprint) then
-       write(io_output,*)
-       write(io_output,*) 'percentage move probabilities:'
-       write(io_output,'(1x,a19,f8.2,a2)') 'volume move       :', 100.0E0_dp*pmvol,' %'
-       pcumu = pmvol
-       if (pmswat .gt. pmvol) then
-          pm = pmswat - pcumu
-          pcumu = pcumu + pm
-       else
-          pm = 0.0E0_dp
-       end if
-       write(io_output,'(1x,a19,f8.2,a2)') 'swatch move       :', 100.0E0_dp*pm,' %'
-       if (pmswap .gt. pmswat) then
-          pm = pmswap - pcumu
-          pcumu = pcumu + pm
-       else
-          pm = 0.0E0_dp
-       end if
-       write(io_output,'(1x,a19,f8.2,a2)') 'swap move         :', 100.0E0_dp*pm,' %'
-       if (pmcb .gt. pmswap) then
-          pm = pmcb - pcumu
-          pcumu = pcumu + pm
-       else
-          pm = 0.0E0_dp
-       end if
-       write(io_output,'(1x,a19,f8.2,a2)') 'CBMC move         :', 100.0E0_dp*pm,' %'
-       if (pmflcq .gt. pmcb) then
-          pm = pmflcq - pcumu
-          pcumu = pcumu + pm
-       else
-          pm = 0.0E0_dp
-       end if
-       write(io_output,'(1x,a19,f8.2,a2)') 'fluct charge move :', 100.0E0_dp*pm,' %'
-       if (pmexpc .gt. pmflcq) then
-          pm = pmexpc - pcumu
-          pcumu = pcumu + pm
-       else
-          pm = 0.0E0_dp
-       end if
-       write(io_output,'(1x,a19,f8.2,a2)') 'expanded ens move :', 100.0E0_dp*pm,' %'
-       if (pmtra .gt. pmexpc) then
-          pm = pmtra - pcumu
-          pcumu = pcumu + pm
-       else
-          pm = 0.0E0_dp
-       end if
-       write(io_output,'(1x,a19,f8.2,a2)') 'translation move  :', 100.0E0_dp*pm,' %'
-       pm = 1.0E0_dp - pmtra
-       write(io_output,'(1x,a19,f8.2,a2)') 'rotation move     :', 100.0E0_dp*pm,' %'
-       write(io_output,*)
-       write(io_output,*) 'Fraction of atom translations move', pm_atom_tra
-    end if
-
-    ! read growth details
-    read(io_input,*)
-    read(io_input,*) (nchoi1(i),i=1,nmolty),(nchoi(i),i=1,nmolty) ,(nchoir(i),i=1,nmolty) ,(nchoih(i),i=1,nmolty),(nchtor(i),i=1,nmolty)
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          write(io_output,*)
-          write(io_output,*) 'molecule type :',(i,'  ',i=1,nmolty)
-          write(io_output,*) '     nchoi1   :',(nchoi1(i),' ',i=1,nmolty)
-          write(io_output,*) '     nchoi    :',(nchoi(i),' ',i=1,nmolty)
-          write(io_output,*) '     nchoir   :',(nchoir(i),' ',i=1,nmolty)
-          write(io_output,*) '     nchoih   :',(nchoih(i),' ',i=1,nmolty)
-          write(io_output,*) '     nchtor   :',(nchtor(i),i=1,nmolty)
-       else
-          write(io_output,*) 'nchoi1',(nchoi1(i),i=1,nmolty)
-          write(io_output,*) 'nchoi',(nchoi(i),i=1,nmolty)
-          write(io_output,*) 'nchoir',(nchoir(i),i=1,nmolty)
-          write(io_output,*) 'nchoih',(nchoih(i),i=1,nmolty)
-          write(io_output,*) 'nchtor',(nchtor(i),i=1,nmolty)
-       end if
-    end if
-
-    nchmax=0
-    nchtor_max=0
-    do imol=1,nmolty
-       if ( nchoi1(imol) .gt. nchmax ) then
-          nchmax=nchoi1(imol)
-       end if
-       if (nchoi(imol) .gt. nchmax ) then
-          nchmax=nchoi(imol)
-       end if
-       if (nchoir(imol) .gt. nchmax ) then
-          nchmax=nchoir(imol)
-       end if
-       if ( nchoih(imol) .ne. 1 .and. nunit(imol) .eq. nugrow(imol) )  then
-          call err_exit(__FILE__,__LINE__,'nchoih must be 1 (one) if nunit = nugrow',myid+1)
-       end if
-       if (nchtor(imol) .gt. nchtor_max ) then
-          nchtor_max=nchtor(imol)
-       end if
-    end do
-
-    call read_safecbmc()
-
-    ! read information for CBMC bond angle growth
-    read(io_input,*)
-    read(io_input,*) (nchbna(i),i=1,nmolty),(nchbnb(i),i=1,nmolty)
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          do i = 1,nmolty
-             write(io_output,*) 'nchbna and nchbnb for molecule type',i,':', nchbna(i),nchbnb(i)
-          end do
-       else
-          write(io_output,*) 'nchbna ',(nchbna(i),i=1,nmolty)
-          write(io_output,*) 'nchbnb ',(nchbnb(i),i=1,nmolty)
-       end if
-    end if
-
-    read(io_input,*)
-    read(io_input,*) (icbdir(i),i=1,nmolty),(icbsta(i),i=1,nmolty)
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          do i = 1,nmolty
-             write(io_output,*) 'icbdir for molecule type',i,':',icbdir(i)
-          end do
-          do i = 1,nmolty
-             write(io_output,*) 'icbsta for molecule type',i,':',icbsta(i)
-          end do
-       else
-          write(io_output,*) 'icbdir',(icbdir(i),i=1,nmolty)
-          write(io_output,*) 'icbsta',(icbsta(i),i=1,nmolty)
-       end if
-    end if
-
-    nchbn_max=0
-    do i=1,nmolty
-       if ( nchbna(i) .gt. nchbn_max ) then
-          nchbn_max=nchbna(i)
-       end if
-       if ( nchbnb(i) .gt. nchbn_max ) then
-          nchbn_max=nchbnb(i)
-       end if
-       if ( abs(icbsta(i)) .gt. nunit(i) ) then
-          call err_exit(__FILE__,__LINE__,'icbsta > nunit for molecule '//integer_to_string(i),myid+1)
-       end if
-    end do
-
-    call allocate_cbmc()
-
-    ! read exclusion table for intermolecular interactions
-    read(io_input,*)
-    read(io_input,*) nexclu
-    do i = 1, nmolty
-       do ii = 1, numax
-          do j = 1, nmolty
-             do jj = 1, numax
-                lexclu(i,ii,j,jj) = .false.
-             end do
-          end do
-       end do
-    end do
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          write(io_output,*)'nexclu:',nexclu
-       else
-          write(io_output,*) nexclu
-       end if
-    end if
-    if (nexclu .ne. 0) then
-       do ndum = 1, nexclu
-          read(io_input,*) i, ii, j, jj
-          lexclu(i,ii,j,jj) = .true.
-          lexclu(j,jj,i,ii) = .true.
-          if (lverbose.and.lprint) then
-             write(io_output,*) 'excluding interactions between bead',ii, ' on chain',i,' and bead',jj,' on chain',j
-          end if
-       end do
-    else
-       read(io_input,*)
-    end if
-
-    ! read inclusion list
-    read(io_input,*)
-    read(io_input,*) inclnum
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          write(io_output,*) 'inclnum:',inclnum
-       else
-          write(io_output,*) inclnum
-       end if
-    end if
-    if (inclnum .ne. 0) then
-       do ndum = 1, inclnum
-          read(io_input,*) inclmol(ndum),inclbead(ndum,1),inclbead(ndum,2),inclsign(ndum),ofscale(ndum),ofscale2(ndum)
-          if (lecho.and.lprint ) then
-             if (lverbose) then
-                if (inclsign(ndum) .eq. 1) then
-                   write(io_output,*) 'including intramolecular ' ,'interactions for chain type',inclmol(ndum), ' between beads',inclbead(ndum,1),' and', inclbead(ndum,2)
-                else
-                   write(io_output,*) 'excluding intramolecular ' ,'interactions for chain type',inclmol(ndum), ' between beads',inclbead(ndum,1),' and', inclbead(ndum,2)
-
-                end if
-             else
-                write(io_output,*) inclmol(ndum),inclbead(ndum,1) ,inclbead(ndum,2),inclsign(ndum),ofscale(ndum),ofscale2(ndum)
-             end if
-          end if
-       end do
-    else
-       read(io_input,*)
-    end if
-
-    ! read a15 inclusion list
-    read(io_input,*)
-    read(io_input,*) ainclnum
-    if ( lecho.and.lprint ) then
-       if (lverbose) then
-          write(io_output,*) 'ainclnum:',ainclnum
-       else
-          write(io_output,*) ainclnum
-       end if
-    end if
-    if (ainclnum .ne. 0) then
-       do ndum = 1, ainclnum
-          read(io_input,*) ainclmol(ndum),ainclbead(ndum,1),ainclbead(ndum,2) ,a15t(ndum)
-          if (lecho.and.lprint) then
-             if (lverbose) then
-                write(io_output,*) 'repulsive 1-5 OH interaction for', ' chain type',ainclmol(ndum),' between beads', ainclbead(ndum,1),' and',ainclbead(ndum,2), ' of type:',a15t(ndum)
-             else
-                write(io_output,*) ainclmol(ndum),ainclbead(ndum,1) ,ainclbead(ndum,2),a15t(ndum)
-             end if
-          end if
-       end do
-    else
-       read(io_input,*)
-    end if
-
-    ! set up the inclusion table
-    call inclus(inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ainclbead,a15t,ofscale,ofscale2,lprint)
-
-    ! read in information on the chemical potential checker
-    read(io_input,*)
-    read(io_input,*) lucall
-    read(io_input,*)
-    read(io_input,*) (ucheck(jj),jj=1,nmolty)
-    if (lecho.and.lprint) then
-       if (lverbose) then
-          write(io_output,*) 'lucall:',lucall
-          do jj = 1,nmolty
-             write(io_output,*) '   ucheck for molecule type', jj,':',ucheck(jj)
-          end do
-       else
-          write(io_output,*) lucall,(ucheck(jj),jj=1,nmolty)
-       end if
-    end if
-
-    ! read information for virial coefficient calculation
-    read(io_input,*)
-    read(io_input,*) nvirial,starvir,stepvir
-    if (lecho.and.lprint) then
-       if (lverbose) then
-          write(io_output,*) 'nvirial:',nvirial
-          write(io_output,*) 'starvir:',starvir
-          write(io_output,*) 'stepvir:',stepvir
-       else
-          write(io_output,*) nvirial,starvir,stepvir
+       if (lvirial) then
+          w_i(nvirial)
+          w_r(starvir)
+          w_r(stepvir)
+          write(io_output,'(A,I0,A,'//format_n(ntemp,'(2X,F8.3)')//')') '=> Virial coefficient will be calculated at the following ',ntemp,' temperatures:',(virtemp(i),i=1,ntemp)
        end if
     end if
 
     if (lvirial) then
-       if ( nvirial .gt. maxvir ) then
-          call err_exit(__FILE__,__LINE__,'nvirial .gt. maxvir',myid+1)
-       end if
-
-       read(io_input,*)
-       read(io_input,*) ntemp,(virtemp(jj),jj=1,ntemp)
-       if (lecho.and.lprint) then
-          if (lverbose) then
-             write(io_output,*) 'ntemp:',ntemp
-             write(io_output,*) 'calculation of virial coefficient ', 'at the following temperatures:', (virtemp(jj),jj=1,ntemp)
-          else
-             write(io_output,*) ntemp, 'Calculation of virial coefficient ', 'at the following temperatures:', (virtemp(jj),jj=1,ntemp)
-          end if
-       end if
+       if (nvirial.gt.maxvir) call err_exit(__FILE__,__LINE__,'nvirial .gt. maxvir',myid+1)
+       if (nchain.ne.2) call err_exit(__FILE__,__LINE__,'nchain must equal 2',myid+1)
     end if
 
-    ! JLR 11-11-09
-    ! reading in extra variables for RPLC simulations
-    read(io_input,*)
-    read(io_input,*) (lideal(i),i=1,nbox)
-    if (lecho.and.lprint)  then
-       write(io_output,*) 'lideal: ', (lideal(i),i=1,nbox)
-    end if
-    do i = 1,nbox
-       if (lideal(i) .and. lexpee) then
-          call err_exit(__FILE__,__LINE__,'Cannot have lideal and lexpee both true (if you want this you will have change code)',myid+1)
-       end if
-    end do
-    read(io_input,*)
-    read(io_input,*) (ltwice(i),i=1,nbox)
-    read(io_input,*)
-    read(io_input,*) (lrplc(i),i=1,nmolty)
-    if (lecho.and.lprint) then
-       write(io_output,*) 'ltwice: ', (ltwice(i),i=1,nbox)
-       write(io_output,*) 'lrplc: ', (lrplc(i),i=1,nmolty)
-    end if
-    ! END JLR 11-11-09
-
-    ! JLR 11-11-09
-    ! skip this part if analysis will not be done (if ianalyze .gt. nstep)
-    ! KM 01/10 remove analysis
-    ! if (ianalyze.lt.nstep) then
-    !    nhere = 0
-    !    do izz=1,nntype
-    !       if ( lhere(izz) ) then
-    !          nhere = nhere + 1
-    !          temphe(nhere) = izz
-    !          beadtyp(nhere)=izz
-    !       end if
-    !    end do
-    !    do izz = 1,nhere
-    !       atemp = temphe(izz)
-    !       decode(atemp) = izz
-    !    end do
-    ! end if
-    ! END JLR 11-11-09
-    close(io_input)
+    allocate(lhere(nntype),temphe(nntype),io_box_movie(nbxmax),ncarbon(ntmax),idummy(ntmax),qbox(nbxmax),nures(ntmax),k_max_l(nbxmax),k_max_m(nbxmax),k_max_n(nbxmax),stat=jerr)
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'readdat: allocating system failed',jerr)
+    lhere=.false.
 ! -------------------------------------------------------------------
-    ! KM for MPI
-    ! check that if lneigh or lgaro numprocs .eq. 1
-    if (lneigh.and.numprocs.ne.1) then
-       call err_exit(__FILE__,__LINE__,'Cannot run on more than 1 processor with neighbor list!!',myid+1)
-    end if
-    if (lgaro.and.numprocs.ne.1) then
-       call err_exit(__FILE__,__LINE__,'Cannot run on more than 1 processor with lgaro = .true.!!',myid+1)
-    end if
+    !> read parameters about simulation boxes
 
-    ! kea don't stop for lgaro
-    ! if (lchgall .and. (.not. lewald).and.(.not.lgaro)) then
-    !    call err_exit(__FILE__,__LINE__,'lchgall is true and lewald is false. Not checked for accuracy!',myid+1)
-    ! end if
+    ! Looking for section SIMULATION_BOX
+    REWIND(io_input)
+    CYCLE_READ_CELL:DO
+       call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section SIMULATION_BOX not found',jerr)
 
-    ! check information of .INC-files
+       if (UPPERCASE(line_in(1:14)).eq.'SIMULATION_BOX') then
+          if (lprint) then
+             write(io_output,'(/,A,/,A)') 'SECTION SIMULATION_BOX','------------------------------------------'
+          end if
+
+          do i=1,nbox+1
+             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SIMULATION_BOX',jerr)
+             if (UPPERCASE(line_in(1:18)).eq.'END SIMULATION_BOX') then
+                if (i.ne.nbox+1) call err_exit(__FILE__,__LINE__,'Section SIMULATION_BOX not complete!',jerr)
+                exit
+             else if (i.eq.nbox+1) then
+                call err_exit(__FILE__,__LINE__,'Section SIMULATION_BOX has more than nbox records!',jerr)
+             end if
+
+             ! boxlx boxly boxlz lsolid lrect kalp rcut rcutnn numDimensionIsIstropic pressure temperature use_linkcell rintramax ghost_particles lideal ltwice
+             !> provision for different temperatures (just like different pressures) in each box, such as for parallel tempering
+             read(line_in,*) boxlx(i),boxly(i),boxlz(i),lsolid(i),lrect(i),kalp(i),rcut(i),rcutnn(i),numberDimensionIsIsotropic(i),express(i),rtmp,ltmp,rtmp2,ghost_particles(i),lideal(i),ltwice(i)
+
+             if (lprint) then
+                write(io_output,'(A,I0,A,2(F8.3," x "),F8.3)') 'Box ',i,': ',boxlx(i),boxly(i),boxlz(i)
+                write(io_output,'(2(A,F6.3))') '   rcut: ',rcut(i),' [Ang], kalp: ',kalp(i)
+                write(io_output,'(A,F6.3)') '   neighbor list cutoff (rcutnn): ',rcutnn(i)
+                write(io_output,'(A,I0)') '   number of dimensions that are isotropic: ',numberDimensionIsIsotropic(i)
+                write(io_output,'(4(A,L2))') '   lsolid: ',lsolid(i),', lrect: ',lrect(i),', lideal: ',lideal(i),', ltwice: ',ltwice(i)
+                write(io_output,'(A,F8.3,A)') '   temperature: ',rtmp,' [K]'
+                write(io_output,'(A,G16.9,A)') '   external pressure: ',express(i),' [MPa]'
+                write(io_output,'(A,I0)') '   Ghost particles: ',ghost_particles(i)
+                if (ltmp) write(io_output,'(A,F8.3)') '   Linked cell structures will be used for this box, rintramax = ',rtmp2
+             end if
+
+             if (temp.ge.0) then
+                if (temp.ne.rtmp) call err_exit(__FILE__,__LINE__,'Section SIMULATION_BOX: temperature not the same for each box',myid+1)
+             else
+                temp=rtmp
+                beta = 1.0_dp / temp
+             end if
+
+             ! read linkcell information
+             if (ltmp) then
+                if (licell) call err_exit(__FILE__,__LINE__,'Section SIMULATION_BOX: link cell only allowed for one box',myid+1)
+                licell=.true.
+                boxlink=i
+                rintramax=rtmp2
+                if (lsolid(boxlink).and.(.not.lrect(boxlink))) call err_exit(__FILE__,__LINE__,'Linkcell not implemented for nonrectangular boxes',myid+1)
+             end if
+
+             if (lideal(i).and.lexpee) call err_exit(__FILE__,__LINE__,'Cannot have lideal and lexpee both true (if you want this you will have change code)',myid+1)
+
+             ! nchain_1 ... nchain_nmolty inix iniy iniz inirot inimix zshift dshift
+             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SIMULATION_BOX',jerr)
+             read(line_in,*) (ininch(j,i),j=1,nmolty),inix(i),iniy(i),iniz(i),inirot(i),inimix(i),zshift(i),dshift(i)
+
+             if (lprint) then
+                write(io_output,'(A,'//format_n(nmolty,'(2X,I0)')//')') '   initial number of chains of each type: ',ininch(1:nmolty,i)
+                write(io_output,'(A,2(I0," x "),I0)') '   initial number of chains in x, y and z directions: ',inix(i),iniy(i),iniz(i)
+                write(io_output,'(2(A,I0),A,F4.1,A,F6.3)') '   initial rotational displacement: ',inirot(i),', inimix: ',inimix(i),', zshift: ',zshift(i),', dshift: ',dshift(i)
+             end if
+
+             if (i.eq.1 .and. lexzeo) then
+                ! load positions of zeolite atoms
+                call zeocoord(file_in,lprint)
+                if (lprint) write(io_output,'(A)') ' note zeolite determines the box size !'
+             end if
+          end do
+
+          temnc = 0
+          do i=1,nmolty
+             temtyp(i)=sum(ininch(i,1:nbox))
+             do j = 1, temtyp(i)
+                temnc = temnc + 1
+                moltyp(temnc) = i
+             end do
+          end do
+
+          if (lprint) then
+             write(io_output,'(/,A)') 'NUMBER OF MOLECULES OF EACH TYPE'
+             write(io_output,'(A,'//format_n(nmolty,'(2X,I0)')//')') ' number of chains of each type: ',temtyp(1:nmolty)
+          end if
+
+          express = express*MPa2SimUnits
+
+          if (lshift.or.lmmff.or.lninesix.or.lexpsix.or.lsami) then
+             ! Keep the rcut same for each box
+             do ibox = 2,nbox
+                if (abs(rcut(1)-rcut(ibox)).gt.1.0E-10_dp) then
+                   call err_exit(__FILE__,__LINE__,'Keep rcut for each box same',myid+1)
+                end if
+             end do
+          end if
+
+          exit cycle_read_cell
+       end if
+    END DO CYCLE_READ_CELL
+! -------------------------------------------------------------------
+    !> set up force field parameters and read in external potentials
+    call init_ff(io_input,lprint)
+! -------------------------------------------------------------------
+    !> read parameters about molecule types
+    !> The division of variables between here and in the section specific to a particular MC move is somewhat arbitrary. Variables that are "intrinsic" to the type of molecules are place here, such as whether it's rigid (lrigid), is a ring (lring), etc, while variables that are model- or algorithm-specific are placed in the corresponding MC move sections, such as whether the molecule has fluctuating charges (lflucq), need to treat with expanded ensemble moves (lexpand), etc.
+
+    ! Looking for section MOLECULE_TYPE
+    REWIND(io_input)
+    CYCLE_READ_MOLTYP:DO
+       call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section MOLECULE_TYPE not found',jerr)
+
+       if (UPPERCASE(line_in(1:13)).eq.'MOLECULE_TYPE') then
+          if (lprint) then
+             write(io_output,'(/,A,/,A)') 'SECTION MOLECULE_TYPE','------------------------------------------'
+          end if
+          nugrow=0
+          nunit=0
+          ntype=0
+          numax=0
+
+          do imol=1,nmolty+1
+             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
+             if (UPPERCASE(line_in(1:17)).eq.'END MOLECULE_TYPE') then
+                if (imol.ne.nmolty+1) call err_exit(__FILE__,__LINE__,'Section MOLECULE_TYPE not complete!',jerr)
+                exit
+             else if (imol.eq.nmolty+1) then
+                call err_exit(__FILE__,__LINE__,'Section MOLECULE_TYPE has more than nmolty records!',jerr)
+             end if
+
+             ! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+             read(line_in,*) nunit(imol),nugrow(imol),ncarbon(imol),nmaxcbmc(imol),iurot(imol),lelect(imol),maxgrow(imol),lring(imol),iring(imol),lrigid(imol),lsetup,isolute(imol),(eta2(i,imol),i=1,nbox),lq14scale(imol),qscale(imol),lbranch(imol),lrplc(imol)
+
+             if (lprint) then
+                write(io_output,'(A,I0)') 'molecule type: ',imol
+                write(io_output,'(A,I0)') '   number of units: ',nunit(imol)
+                write(io_output,'(A,I0)') '   number of units for CBMC growth: ', nugrow(imol)
+                write(io_output,'(A,I0)') '   number of carbons for EH alkane: ', ncarbon(imol)
+                write(io_output,'(A,I0)') '   maximum number of units for CBMC: ', nmaxcbmc(imol)
+                write(io_output,'(A,I0)') '   maximum number of interior segments for SAFE-CBMC regrowth: ',maxgrow(imol)
+                write(io_output,'(A,I0)') '   number of atoms in a ring (if lring=.true.): ',iring(imol)
+                write(io_output,'(2(A,I0),7(A,L2),A,F3.1)') '   iurot: ',iurot(imol),', isolute: ',isolute(imol),', lelect: ',lelect(imol),', lring: ',lring(imol),', lrigid: ',lrigid(imol),', lbranch: ',lbranch(imol),', lrplc: ',lrplc(imol),', lsetup: ',lsetup,', lq14scale: ',lq14scale(imol),', qscale: ',qscale(imol)
+                do i=1,nbox
+                   write(io_output,'(A,I0,A,F7.1,A)') '   energy offset for box ', i,': ',eta2(i,imol),' [K]'
+                end do
+             end if
+
+             if (nunit(imol).gt.numax) then
+                numax=nunit(imol)
+                if (numax.gt.ubound(ntype,2)) then
+                   call reallocate(ntype,1,ntmax,1,2*numax)
+                   call reallocate(riutry,1,ntmax,1,2*numax)
+                   call reallocate(leaderq,1,ntmax,1,2*numax)
+                   call reallocate(lplace,1,ntmax,1,2*numax)
+                   call reallocate(lrigi,1,ntmax,1,2*numax)
+                   call reallocate(invib,1,ntmax,1,2*numax)
+                   call reallocate(itvib,1,ntmax,1,2*numax,1,6)
+                   call reallocate(ijvib,1,ntmax,1,2*numax,1,6)
+                   call reallocate(inben,1,ntmax,1,2*numax)
+                   call reallocate(itben,1,ntmax,1,2*numax,1,12)
+                   call reallocate(ijben2,1,ntmax,1,2*numax,1,12)
+                   call reallocate(ijben3,1,ntmax,1,2*numax,1,12)
+                   call reallocate(intor,1,ntmax,1,2*numax)
+                   call reallocate(ittor,1,ntmax,1,2*numax,1,12)
+                   call reallocate(ijtor2,1,ntmax,1,2*numax,1,12)
+                   call reallocate(ijtor3,1,ntmax,1,2*numax,1,12)
+                   call reallocate(ijtor4,1,ntmax,1,2*numax,1,12)
+                   call reallocate(irotbd,1,2*numax,1,ntmax)
+                   call reallocate(pmrotbd,1,2*numax,1,ntmax)
+                end if
+             end if
+
+             if (lrigid(imol)) then
+                ! n, growpoint_1 ... growpoint_n
+                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
+                read(line_in,*) rindex(imol),(riutry(imol,i),i=1,rindex(imol))
+                if (rindex(imol).le.0) then
+                   riutry(imol,1) = 1
+                else if (lprint) then
+                   write(io_output,'(A,I0,A,'//format_n(rindex(imol),'(1X,I0)')//')') '   The following ',rindex(imol),' beads have flexible side chains:',(riutry(imol,i),i=1,rindex(imol))
+                end if
+             end if
+
+             lrigi = .false.
+
+             masst(imol) = 0.0E0_dp
+
+             if (lsetup) then
+                call molsetup(io_input,imol,lprint)
+
+                do i = 1,nunit(imol)
+                   lhere(ntype(imol,i)) = .true.
+                end do
+
+                goto 112
+             end if
+
+             do i = 1, nunit(imol)
+                ! linear/branched chain with connectivity table
+                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
+                ! unit ntype leaderq
+                read(line_in,*) j,ntype(imol,i),leaderq(imol,i)
+                if (leaderq(imol,i).gt.j.and..not.lchgall) call err_exit(__FILE__,__LINE__,'group-based cut-off screwed for qq',myid+1)
+                ntype(imol,i)=indexOf(atoms,ntype(imol,i))
+
+                if (lprint) then
+                   write(io_output,'(/,2(A,I0),A,A,A,I0)') '   bead ',i,': bead type ',atoms%list(ntype(imol,i)),' [',trim(chemid(ntype(imol,i))),'], charge leader ',leaderq(imol,i)
+                end if
+
+                IF (.not.(lmmff.or.lexpsix.or.lgaro.or.lninesix)) THEN
+                   if (ntype(imol,i).eq.0) then
+                      call err_exit(__FILE__,__LINE__,'ERROR: atom type undefined!',myid+1)
+                   else if (sigi(ntype(imol,i)).lt.1E-06_dp.and.epsi(ntype(imol,i)).lt.1E-06_dp.and.abs(qelect(ntype(imol,i))).lt.1E-06_dp) then
+                      call err_exit(__FILE__,__LINE__,'ERROR: atom type undefined!',myid+1)
+                   end if
+                end if
+
+                iutemp = ntype(imol,i)
+
+                if (lpl(iutemp)) then
+                   lplace(imol,i) = .true.
+                   llplace(imol) = .true.
+                else
+                   lplace(imol,i) = .false.
+                end if
+
+                masst(imol)=masst(imol)+mass(iutemp)
+                lhere(iutemp) = .true.
+
+                ! bond stretching
+                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
+                read(line_in,*) invib(imol,i)
+                if (invib(imol,i).gt.6) then
+                   write(io_output,*) 'imol',imol,'   i',i,'  invib',invib(imol,i)
+                   call err_exit(__FILE__,__LINE__,'too many vibrations',myid+1)
+                end if
+
+                do j = 1, invib(imol,i)
+                   call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                   if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
+                   read(line_in,*) ijvib(imol,i,j),itvib(imol,i,j)
+                   if((ijvib(imol,i,j).eq.i).or.(ijvib(imol,i,j).gt.nunit(imol))) then
+                      call err_exit(__FILE__,__LINE__,'check vibrations for mol type '//integer_to_string(imol)//' and bead '//integer_to_string(i),myid+1)
+                   end if
+
+                   itvib(imol,i,j)=indexOf(bonds,itvib(imol,i,j))
+                   if (itvib(imol,i,j).eq.0) then
+                      call err_exit(__FILE__,__LINE__,'ERROR: stretching parameters undefined!',myid+1)
+                   else if(brvib(itvib(imol,i,j)).lt.1E-06_dp) then
+                      call err_exit(__FILE__,__LINE__,'ERROR: stretching parameters undefined!',myid+1)
+                   end if
+
+                   if (lprint) then
+                      write(io_output,'(2(A,I0),A,F8.5,A,G16.9)') '      bonded to bead ',ijvib(imol,i,j),', type ',bonds%list(itvib(imol,i,j)),', bond length: ',brvib(itvib(imol,i,j)),', k/2: ',brvibk(itvib(imol,i,j))
+                   end if
+                end do
+
+                ! bond bending -
+                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
+                read(line_in,*) inben(imol,i)
+                if (inben(imol,i).gt.12) then
+                   call err_exit(__FILE__,__LINE__,'too many bends',myid+1)
+                end if
+
+                do j = 1, inben(imol,i)
+                   call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                   if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
+                   read(line_in,*) ijben2(imol,i,j),ijben3(imol,i,j),itben(imol,i,j)
+                   if ((ijben2(imol,i,j).gt.nunit(imol)).or.(ijben3(imol,i,j).gt.nunit(imol))) then
+                      call err_exit(__FILE__,__LINE__,'check bending for molecule type '//integer_to_string(imol)//' bead '//integer_to_string(i),myid+1)
+                   end if
+                   if ((ijben2(imol,i,j).eq.i).or.(ijben3(imol,i,j).eq.i).or.(ijben2(imol,i,j).eq.ijben3(imol,i,j))) then
+                      call err_exit(__FILE__,__LINE__,'check bending for molecule type '//integer_to_string(imol)//' bead '//integer_to_string(i),myid+1)
+                   end if
+
+                   itben(imol,i,j)=indexOf(angles,itben(imol,i,j))
+                   if (itben(imol,i,j).eq.0) then
+                      call err_exit(__FILE__,__LINE__,'ERROR: bending parameters undefined!',myid+1)
+                   else if(brben(itben(imol,i,j)).lt.1E-06_dp) then
+                      call err_exit(__FILE__,__LINE__,'ERROR: bending parameters undefined!',myid+1)
+                   end if
+
+                   if (lprint) then
+                      write(io_output,'(3(A,I0),A,F8.3,A,G16.9)') '      bending interaction through ',ijben2(imol,i,j),' with bead ',ijben3(imol,i,j),', bending type: ',angles%list(itben(imol,i,j)),', bending angle: ',brben(itben(imol,i,j))*raddeg,', k/2: ',brbenk(itben(imol,i,j))
+                   end if
+                end do
+
+                ! bond torsion -
+                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
+                read(line_in,*) intor(imol,i)
+                if (intor(imol,i).gt.12) then
+                   call err_exit(__FILE__,__LINE__,'too many torsions',myid+1)
+                end if
+
+                do j = 1, intor(imol,i)
+                   call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                   if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
+                   read(line_in,*) ijtor2(imol,i,j),ijtor3(imol,i,j),ijtor4(imol,i,j),ittor(imol,i,j)
+
+                   if (ijtor2(imol,i,j).gt.nunit(imol).or.ijtor3(imol,i,j).gt.nunit(imol).or.ijtor4(imol,i,j).gt.nunit(imol)) then
+                      call err_exit(__FILE__,__LINE__,'check torsion for molecule type '//integer_to_string(imol)//' bead '//integer_to_string(i),myid+1)
+                   end if
+                   if((ijtor2(imol,i,j).eq.i.or.ijtor3(imol,i,j).eq.i.or.ijtor4(imol,i,j).eq.i).or.(ijtor2(imol,i,j).eq.ijtor3(imol,i,j).or.ijtor2(imol,i,j).eq.(ijtor4(imol,i,j)).or.(ijtor3(imol,i,j).eq.ijtor4(imol,i,j)))) then
+                      call err_exit(__FILE__,__LINE__,'check torsion for molecule type '//integer_to_string(imol)//' bead '//integer_to_string(i),myid+1)
+                   end if
+
+                   ittor(imol,i,j)=indexOf(dihedrals,ittor(imol,i,j))
+                   if (ittor(imol,i,j).eq.0) then
+                      write(io_output,'(A)') 'WARNING: torsion parameters undefined; set to null'
+                   end if
+
+                   if (lprint) then
+                      write(io_output,'(4(A,I0))') '      torsional interaction through ',ijtor2(imol,i,j),' and ',ijtor3(imol,i,j),' with bead ',ijtor4(imol,i,j),', torsional type: ',dihedrals%list(ittor(imol,i,j))
+                   end if
+                end do
+             end do
+
+112          continue
+
+             !kea 6/4/09 -- added for multiple rotation centers
+             ! To assign multiple rotation centers, set iurot(imol) < 0
+             ! Add line after molecule specification, avbmc parameters
+             ! First, number of rotation centers
+             ! Second, identity of centers (0=COM,integer::> 0 = bead number)
+             ! Third, give probability to rotate around different centers
+             if(iurot(imol).lt.0) then
+                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
+                read(line_in,*) nrotbd(imol),irotbd(1:nrotbd(imol),imol),pmrotbd(1:nrotbd(imol),imol)
+                if (lprint) then
+                   write(io_output,'(I0,A)') nrotbd(imol),' rotation centers:'
+                   do ii=1,nrotbd(imol)
+                      write(io_output,'(A,I0,A,F5.3)') '   around bead: ',irotbd(ii,imol),', probability: ',pmrotbd(ii,imol)
+                   end do
+                end if
+             end if
+
+             ! starting the self consistency check for the bond vibrations, bending, and torsions
+             ! this would help in catching errors in fort.4 connectivity. Starting after continue
+             ! so that if we use molsetup subroutine it will provide extra checking. (Neeraj)
+             if (.not.lrigid(imol)) then
+                do i = 1,nunit(imol)
+                   numvib=invib(imol,i)
+                   numbend=inben(imol,i)
+                   numtor=intor(imol,i)
+                   lfound = .false.
+                   do j = 1,numvib
+                      vib1 = ijvib(imol,i,j)
+                      vibtype  = itvib(imol,i,j)
+                      if(invib(imol,vib1).eq.0) then
+                         write(io_output,*) 'Check vibration for mol. type:',imol, 'bead',vib1,'with',i
+                         call err_exit(__FILE__,__LINE__,'ERROR IN FORT.4 VIBRATIONS',myid+1)
+                      end if
+                      do k =1,invib(imol,vib1)
+                         if(ijvib(imol,vib1,k).eq.i) then
+                            lfound = .true.
+                            if(vibtype.ne.itvib(imol,vib1,k)) then
+                               write(io_output,*) 'check vibration type of bead',i, 'with',vib1,'molecule type',imol,'vice versa'
+                               call err_exit(__FILE__,__LINE__,'Error in fort.4 vibration specifications',myid+1)
+                            end if
+                         end if
+                      end do
+                      if(.not.lfound) then
+                         write(io_output,*) 'Check vibration for mol. type:',imol, 'bead ',vib1,'with ',i
+                         call err_exit(__FILE__,__LINE__,'Error in fort.4 vibration iformation',myid+1)
+                      end if
+                   end do
+                   lfound= .false.
+                   do j = 1,numbend
+                      bend2 = ijben2(imol,i,j)
+                      bend3 = ijben3(imol,i,j)
+                      bendtype = itben(imol,i,j)
+                      if(inben(imol,bend3).eq.0) then
+                         write(io_output,*) 'Check bending for mol. type:',imol, 'bead ',bend3,'with ',i
+                         call err_exit(__FILE__,__LINE__,'ERROR IN FORT.4 BENDING',myid+1)
+                      end if
+                      do k = 1,inben(imol,bend3)
+                         if((ijben2(imol,bend3,k).eq.bend2).and. (ijben3(imol,bend3,k).eq.i)) then
+                            lfound = .true.
+                            if(itben(imol,bend3,k).ne.bendtype) then
+                               write(io_output,*) 'check bending type of bead',i, 'with',bend3,'mol. typ.',imol,'and vice versa'
+                               call err_exit(__FILE__,__LINE__,'Error in fort.4 bending specifications',myid+1)
+                            end if
+                         end if
+                      end do
+                      if(.not.lfound) then
+                         write(io_output,*) 'Check bending for mol. type:',imol, 'bead ',bend3,'with ',i
+                         call err_exit(__FILE__,__LINE__,'Error in fort.4 bending information',myid+1)
+                      end if
+                   end do
+                   lfound = .false.
+                   do j = 1,numtor
+                      tor2 = ijtor2(imol,i,j)
+                      tor3 = ijtor3(imol,i,j)
+                      tor4 = ijtor4(imol,i,j)
+                      tortype = ittor(imol,i,j)
+                      if(intor(imol,tor4).eq.0) then
+                         write(io_output,*) 'Check torsion for mol. type:',imol, 'bead ',tor4,'with ',i,'and vice versa'
+                         call err_exit(__FILE__,__LINE__,'ERROR IN FORT.4 TORSION',myid+1)
+                      end if
+                      do k = 1,intor(imol,tor4)
+                         if((ijtor2(imol,tor4,k).eq.tor3).and.(ijtor3(imol,tor4 ,k).eq.tor2).and.(ijtor4(imol,tor4,k).eq.i)) then
+                            lfound=.true.
+                            if(ittor(imol,tor4,k).ne.tortype) then
+                               write(io_output,*) 'check torsion type of bead',i, 'with',tor4,'mol. typ.',imol,'and vice versa'
+                               call err_exit(__FILE__,__LINE__,'Error in fort.4 torsion specifications',myid+1)
+                            end if
+                         end if
+                      end do
+                      if(.not.lfound) then
+                         write(io_output,*) 'Check torsion for mol. type:',imol, 'bead ',tor4,'with ',i
+                         call err_exit(__FILE__,__LINE__,'Error in fort.4 torsion information',myid+1)
+                      end if
+                   end do
+                end do
+             end if
+
+             ! Neeraj Adding molecule neutrality check
+             !kea skip if lgaro
+             if(.not.(lgaro.or.lionic.or.lexzeo)) then
+                qtot =0.0E0_dp
+                do j = 1,nunit(imol)
+                   qtot = qtot+qelect(ntype(imol,j))
+                end do
+                if(abs(qtot).gt.1E-7_dp) call err_exit(__FILE__,__LINE__,'molecule type '//integer_to_string(imol)//' not neutral. check charges',myid+1)
+             end if
+          end do
+
+          if (ALL(.NOT.lelect(1:nmolty))) then
+             if (lewald.or.lchgall) then
+                if (lprint) write(io_output,'(A)') 'No charges in the system -> lewald is now turned off'
+             end if
+          end if
+
+          exit cycle_read_moltyp
+       end if
+    END DO CYCLE_READ_MOLTYP
+
     if (lprint) then
-       write(io_output,*)
-       write(io_output,*) '***** program   =  THE MAGIC BLACK BOX'
-       iensem = 0
-       if ( lgrand ) then
-          iensem = iensem + 1
-          write(io_output,*) 'grand-canonical ensemble'
-       end if
-       if ( lvirial ) then
-          write(io_output,*) 'Computing Second Virial Coefficient'
-          if ( nchain .ne. 2) then
-             call err_exit(__FILE__,__LINE__,'nchain must equal 2',myid+1)
-          end if
-       end if
-       if ( lgibbs ) then
-          iensem = iensem + 1
-          if ( lnpt ) then
-             write(io_output,*) 'NPT Gibbs ensemble'
-          else
-             write(io_output,*) 'NVT Gibbs ensemble'
-          end if
-       end if
-       if ( iensem .eq. 0 ) then
-          if ( lnpt ) then
-             write(io_output,*) 'Isobaric-isothermal ensemble'
-             iensem = iensem + 1
-          else
-             write(io_output,*) 'Canonical ensemble'
-             iensem = iensem + 1
-          end if
-       end if
-       if ( iensem .gt. 1 ) then
-          call err_exit(__FILE__,__LINE__,'INCONSISTENT ENSEMBLE SPECIFICATION',myid+1)
-       end if
-
-       inpbc = 0
-       if ( lpbc ) then
-          write(io_output,*) 'using periodic boundaries'
-          if ( lpbcx ) then
-             inpbc = inpbc + 1
-             write(io_output,*) 'in x-direction'
-          end if
-          if ( lpbcy ) then
-             inpbc = inpbc + 1
-             write(io_output,*) 'in y-direction'
-          end if
-          if ( lpbcz ) then
-             inpbc = inpbc + 1
-             write(io_output,*) 'in z-direction'
-          end if
-          if ( inpbc .eq. 0 ) then
-             call err_exit(__FILE__,__LINE__,'INCONSISTENT PBC SPECIFICATION',myid+1)
-          end if
-          write(io_output,*) inpbc,'-dimensional periodic box'
-       else
-          write(io_output,*) 'cluster mode (no pbc)'
-          if ( lgibbs .or. lgrand ) then
-             call err_exit(__FILE__,__LINE__,'INCONSISTENT SPECIFICATION OF LPBC  AND ENSEMBLE',myid+1)
-          end if
-       end if
-
-       if ( lfold ) then
-          write(io_output,*) 'particle coordinates are folded into central box'
-          if ( .not. lpbc ) then
-             call err_exit(__FILE__,__LINE__,'INCONSISTENT SPECIFICATION OF LPBC AND LFOLD',myid+1)
-          end if
-       end if
-
-       if ( lijall ) then
-          write(io_output,*) 'all i-j-interactions are considered', '  (no potential cut-off)'
-       end if
-
-       if ( lchgall ) then
-          write(io_output,*) 'all the inter- and intramolecular Coulombic', ' interactions are considered (no group-based cutoff)'
-       end if
-       if ( lcutcm ) then
-          write(io_output,*) 'additional (COM) cutoff on computed rcmu'
-          if ( lijall ) then
-             call err_exit(__FILE__,__LINE__,'cannot have lijall with lcutcm',myid+1)
-          end if
-          ! if ( lchgall ) call err_exit(__FILE__,__LINE__,'cannot have lchgall with lcutcm',myid+1)
-       end if
-       if ( ldual ) then
-          write(io_output,*) 'Dual Cutoff Configurational-bias Monte Carlo'
-       end if
-
-       write(io_output,*)  'CBMC simultaneously grows all beads conected to the same bead'
-       write(io_output,*) 'with bond angles generated from Gaussian', ' distribution'
-
-       if ( ljoe ) then
-          write(io_output,*) 'external 12-3 potential for SAM (Joe Hautman)'
-       end if
-       if (lslit) then
-          write(io_output,*) '10-4-3 graphite slit pore potential'
-       end if
-       if ( lsami ) then
-          write(io_output,*) 'external potential for Langmuir films (Sami)'
-          write(io_output,*) 'WARNING: LJ potential defined in SUSAMI'
-          write(io_output,*) 'WARNING: sets potential cut-off to 2.5sigma'
-          write(io_output,*) 'WARNING: has build-in tail corrections'
-          if ( ltailc ) then
-             call err_exit(__FILE__,__LINE__,'INCONSISTENT SPECIFICATION OF LTAILC AND LSAMI',myid+1)
-          end if
-       end if
-
-       if ( lexzeo ) then
-          write(io_output,*) 'external potential for zeolites'
-       end if
-
-       write(io_output,*) 'Program will call Explct.f if needed'
-
-       if ( lexpsix ) then
-          write(io_output,*) 'Exponential-6 potential for bead-bead'
-       else if ( lmmff ) then
-          write(io_output,*) 'Buffered 14-7 potential for bead-bead'
-       else if (lninesix) then
-          write(io_output,*) '9-6 potential for bead-bead'
-       else if (lgenlj) then
-          write(io_output,*) 'Generalized Lennard Jones potential for bead-bead'
-       else if (lgaro) then
-          write(io_output,*) 'Feuston-Garofalini potential for bead-bead'
-       else
-          write(io_output,*) 'Lennard-Jones potential for bead-bead'
-       end if
-
-       if ( ltailc ) then
-          write(io_output,*) 'with additional tail corrections'
-       end if
-
-       if ( lshift) then
-          write(io_output,*) 'using a shifted potential'
-       end if
-
-       if (lshift.and.ltailc) then
-          call err_exit(__FILE__,__LINE__,'lshift.and.ltailc!',myid+1)
-          return
-       end if
-
-       write(io_output,*) 'Coulombic inter- and intramolecular interactions'
-       if ( lewald ) write(io_output,*) 'Ewald-sum will be used to calculate Coulombic interactions'
-       write(io_output,*)
-       write(io_output,*) 'MOLECULAR MASS:', (masst(i),i=1,nmolty)
+       write(io_output,'(/,A,'//format_n(nmolty,'(3X,F10.5)')//')') 'MOLECULAR MASS: ',masst(1:nmolty)
     end if
-
 ! -------------------------------------------------------------------
+    !> read information for grand-canonical ensemble simulations
+    if (lgrand) then
+       B=0.0_dp
 
-    if (lgrand .and. .not.(lslit)) then
+       rewind(io_input)
+       read(UNIT=io_input,NML=gcmc,iostat=jerr)
+       if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: gcmc',jerr)
+
+       if (lprint) then
+          write(io_output,'(/,A,/,A)') 'NAMELIST GCMC','------------------------------------------'
+          ! information for histogram output (added 8/30/99)
+          w_i(nequil)
+          w_i(ninstf)
+          w_i(ninsth)
+          w_i(ndumph)
+
+          ! chemical potentials (added 8/30/99 by jpotoff)
+          do i = 1,nmolty
+             write(io_output,'(A,I0,A,G16.9)') 'chemical potential for molecule type ',i,': ',B(i)
+          end do
+       end if
+
+       ! convert chemical potentials to activities
+       ! This B(i) goes in the acceptance rules
+       do i=1,nmolty
+          debroglie = debroglie_factor*sqrt(beta/masst(i))
+          B(i) = exp(B(i)/temp)/(debroglie*debroglie*debroglie)
+       end do
+
        ! volume ideal gas box is set arbitry large!
        boxlx(2)=1000*boxlx(1)
        boxly(2)=1000*boxly(1)
        boxlz(2)=1000*boxlz(1)
     end if
-    if (linit) then
-       do ibox = 1,nbox
-          if (lsolid(ibox).and..not.lrect(ibox) .and..not.(ibox.eq.1.and.lexzeo)) then
-             call err_exit(__FILE__,__LINE__,'Cannot initialize non-rectangular system',myid+1)
-          end if
-       end do
+! -------------------------------------------------------------------
+    pmswat=0.0_dp
+    pmflcq=0.0_dp
+    pmexpc=0.0_dp
+    pmexpc1=0.0_dp
+    pm_atom_tra=0.0_dp
+    if (lgibbs) then
+       pmvol=2.0_dp/nchain
+       pmswap=(1.0_dp-pmvol)/4.0_dp
+       pmcb=pmswap
+    else
+       pmswap=0.0_dp
+       if (lnpt) then
+          pmvol=2.0_dp/nchain
+       else
+          pmvol=0.0_dp
+       end if
+       pmcb=(1.0_dp-pmvol)/3.0_dp
+    end if
+    pmtra=pmcb
+
+    call allocate_molecule()
+    call allocate_energy_bonded()
+    call read_transfer(io_input,lprint)
+    call init_moves_volume(io_input,lprint)
+    call init_swatch(io_input,lprint)
+    call init_swap(io_input,lprint)
+    call init_cbmc(io_input,lprint)
+! -------------------------------------------------------------------
+    !> read namelist mc_flucq
+    fqtemp=5.0_dp
+    rmflucq=0.1_dp
+    lflucq=.false.
+    lqtrans=.false.
+    fqegp=0.0_dp
+    nchoiq=1
+    do i=1,nmolty
+       pmfqmt(i)=real(i,dp)/nmolty
+    end do
+
+    rewind(io_input)
+    read(UNIT=io_input,NML=mc_flucq,iostat=jerr)
+    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_flucq',jerr)
+
+    if (lprint) then
+       write(io_output,'(/,A,/,A)') 'NAMELIST MC_FLUCQ','------------------------------------------'
+       write(io_output,'(A,F4.2)') 'target fluctuating charge acceptance ratio (taflcq): ',taflcq
+       write(io_output,'(A,F8.3,A)') 'fluctuating charge temperature: ',fqtemp,' [K]'
+       write(io_output,'(A,G16.9)') 'initial maximum displacement for fluctuating charge moves: ',rmflucq
+       write(io_output,'(A,G16.9)') 'pmflcq: ',pmflcq
+       write(io_output,'(A,'//format_n(nbox,'(2X,I0)')//')') '   nchoiq for each box: ',nchoiq(1:nbox)
+       write(io_output,'(/,A)') 'molecule type:  lflucq lqtrans   pmfqmt    fqegp'
     end if
 
-    if ( linit ) then
+    fqbeta = 1.0_dp/fqtemp
+    rmflcq = rmflucq
+
+    do i=1,nmolty
+       if (lprint) then
+          write(io_output,'(I13,A,2(1X,L7),2(1X,F8.4))') i,':',lflucq(i),lqtrans(i),pmfqmt(i),fqegp(i)
+       end if
+
+       if (lflucq(i).and..not.lelect(i)) call err_exit(__FILE__,__LINE__,'lelect must be true if flucq is true',myid+1)
+       if (lqtrans(i).and..not.lflucq(i)) call err_exit(__FILE__,__LINE__,'lflucq must be true if intermolecular CT is allowed',myid+1)
+    end do
+
+    if (ALL(.NOT.lflucq(1:nmolty))) then
+       if (lanes) call err_exit(__FILE__,__LINE__,'lanes should be false for nonpolarizable systems!',myid+1)
+       if (lfepsi) call err_exit(__FILE__,__LINE__,'lfepsi should be false for nonpolarizable systems!',myid+1)
+    end if
+! -------------------------------------------------------------------
+    call init_ee(io_input,lprint)
+    call init_moves_simple(io_input,lprint)
+
+    allocate(inclmol(ntmax*numax*numax),inclbead(ntmax*numax*numax,2),inclsign(ntmax*numax*numax),ofscale(ntmax*numax*numax),ofscale2(ntmax*numax*numax),ainclmol(ntmax*numax*numax),ainclbead(ntmax*numax*numax,2),a15t(ntmax*numax*numax),stat=jerr)
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'readdat: allocating molecule failed',jerr)
+
+    ! write out move probabilities, in percentage
+    if (lprint) then
+       write(io_output,'(/,A)') 'percentage move probabilities:'
+
+       pcumu = pmvol
+       write(io_output,'(A,F8.2,A)') ' volume move       :',100.0_dp*pmvol,' %'
+
+       if (pmswat.gt.pcumu) then
+          pm = pmswat - pcumu
+          pcumu = pmswat
+       else
+          pm = 0.0_dp
+       end if
+       write(io_output,'(A,F8.2,A)') ' swatch move       :',100.0_dp*pm,' %'
+
+       if (pmswap.gt.pcumu) then
+          pm = pmswap - pcumu
+          pcumu = pmswap
+       else
+          pm = 0.0_dp
+       end if
+       write(io_output,'(A,F8.2,A)') ' swap move         :',100.0_dp*pm,' %'
+
+       if (pmcb.gt.pcumu) then
+          pm = pmcb - pcumu
+          pcumu = pmcb
+       else
+          pm = 0.0_dp
+       end if
+       write(io_output,'(A,F8.2,A)') ' CBMC move         :',100.0_dp*pm,' %'
+
+       if (pmflcq.gt.pcumu) then
+          pm = pmflcq - pcumu
+          pcumu = pmflcq
+       else
+          pm = 0.0_dp
+       end if
+       write(io_output,'(A,F8.2,A)') ' fluct. charge move:',100.0_dp*pm,' %'
+
+       if (pmexpc.gt.pcumu) then
+          pm = pmexpc - pcumu
+          pcumu = pmexpc
+       else
+          pm = 0.0_dp
+       end if
+       write(io_output,'(A,F8.2,A)') ' expanded ens. move:',100.0_dp*pm,' %'
+
+       if (pmexpc1.gt.pcumu) then
+          pm = pmexpc1 - pcumu
+          pcumu = pmexpc1
+       else
+          pm = 0.0_dp
+       end if
+       write(io_output,'(A,F8.2,A)') ' new EE move       :',100.0_dp*pm,' %'
+
+       if (pm_atom_tra.gt.pcumu) then
+          pm = pm_atom_tra - pcumu
+          pcumu = pm_atom_tra
+       else
+          pm = 0.0_dp
+       end if
+       write(io_output,'(A,F8.2,A)') ' atom trans. move  :',100.0_dp*pm,' %'
+
+       if (pmtra.gt.pcumu) then
+          pm = pmtra - pcumu
+          pcumu = pmtra
+       else
+          pm = 0.0_dp
+       end if
+       write(io_output,'(A,F8.2,A)') ' translation move  :',100.0_dp*pm,' %'
+
+       pm = 1.0_dp - pcumu
+       write(io_output,'(A,F8.2,A)') ' rotation move     :',100.0_dp*pm,' %'
+    end if
+! -------------------------------------------------------------------
+    if (lprint) then
+       write(io_output,'(/,A,/,A)') 'SPECIAL INTERACTION RULES','------------------------------------------'
+    end if
+
+    !> Looking for section INTERMOLECULAR_EXCLUSION
+    ! read exclusion table for intermolecular interactions
+    nexclu=0
+    lexclu=.false.
+    REWIND(io_input)
+    CYCLE_READ_EXCLUSION:DO
+       call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+       if (jerr.ne.0) exit cycle_read_exclusion
+
+       if (UPPERCASE(line_in(1:24)).eq.'INTERMOLECULAR_EXCLUSION') then
+          do
+             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section INTERMOLECULAR_EXCLUSION',jerr)
+             if (UPPERCASE(line_in(1:28)).eq.'END INTERMOLECULAR_EXCLUSION') exit
+
+             nexclu=nexclu+1
+             ! mol_1 bead_1 mol_2 bead_2
+             read(line_in,*) i,ii,j,jj
+
+             if (lprint) then
+                write(io_output,'(4(A,I0))') '      excluding interactions between bead ',ii,' of molecule ',i,' with bead ',jj,' of molecule ',j
+             end if
+
+             lexclu(i,ii,j,jj) = .true.
+             lexclu(j,jj,i,ii) = .true.
+          end do
+
+          if (lprint) then
+             write(io_output,'(A,I0,A,/)') '  Total: ',nexclu,' exclusion rules for intermolecular interactions'
+          end if
+
+          exit cycle_read_exclusion
+       end if
+    END DO CYCLE_READ_EXCLUSION
+! -------------------------------------------------------------------
+    !> Looking for section INTRAMOLECULAR_SPECIAL
+    ! read exclusion table for intermolecular interactions
+    inclnum=0
+    REWIND(io_input)
+    CYCLE_READ_SPECIAL:DO
+       call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+       if (jerr.ne.0) exit cycle_read_special
+
+       if (UPPERCASE(line_in(1:22)).eq.'INTRAMOLECULAR_SPECIAL') then
+          do
+             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section INTRAMOLECULAR_SPECIAL',jerr)
+             if (UPPERCASE(line_in(1:26)).eq.'END INTRAMOLECULAR_SPECIAL') exit
+
+             inclnum=inclnum+1
+             ! inclmol inclbead_1 inclbead_2 inclsign ofscale ofscale2
+             read(line_in,*) inclmol(inclnum),inclbead(inclnum,1),inclbead(inclnum,2),inclsign(inclnum),ofscale(inclnum),ofscale2(inclnum)
+
+             if (lprint) then
+                if (inclsign(inclnum) .eq. 1) then
+                   write(io_output,'(3(A,I0),2(A,F6.3))') '      including intramolecular interactions for molecule type ',inclmol(inclnum), ' between bead ',inclbead(inclnum,1),' and bead ',inclbead(inclnum,2),', ofscale LJ: ',ofscale(inclnum),', ofscale Q: ',ofscale2(inclnum)
+                else
+                   write(io_output,'(3(A,I0),2(A,F6.3))') '      excluding intramolecular interactions for molecule type ',inclmol(inclnum), ' between bead ',inclbead(inclnum,1),' and bead ',inclbead(inclnum,2),', ofscale LJ: ',ofscale(inclnum),', ofscale Q: ',ofscale2(inclnum)
+                end if
+             end if
+          end do
+
+          if (lprint) then
+             write(io_output,'(A,I0,A,/)') '  Total: ',inclnum,' inclusion rules for intramolecular interactions'
+          end if
+
+          exit cycle_read_special
+       end if
+    END DO CYCLE_READ_SPECIAL
+! -------------------------------------------------------------------
+    !> Looking for section INTRAMOLECULAR_OH15
+    ! read exclusion table for intermolecular interactions
+    ainclnum=0
+    REWIND(io_input)
+    CYCLE_READ_OH15:DO
+       call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+       if (jerr.ne.0) exit cycle_read_oh15
+
+       if (UPPERCASE(line_in(1:19)).eq.'INTRAMOLECULAR_OH15') then
+          do
+             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section INTRAMOLECULAR_OH15',jerr)
+             if (UPPERCASE(line_in(1:23)).eq.'END INTRAMOLECULAR_OH15') exit
+
+             ainclnum=ainclnum+1
+             ! ainclmol ainclbead_1 ainclbead_2 a15type
+             read(line_in,*) ainclmol(ainclnum),ainclbead(ainclnum,1),ainclbead(ainclnum,2) ,a15t(ainclnum)
+
+             if (lprint) then
+                write(io_output,'(4(A,I0))') '      repulsive 1-5 OH interaction for molecule type ',ainclmol(ndum),' between bead ',ainclbead(ndum,1),' and bead ',ainclbead(ndum,2),' of type ',a15t(ndum)
+             end if
+          end do
+
+          if (lprint) then
+             write(io_output,'(A,I0,A)') '  Total: ',ainclnum,' special rules for intramolecular 1-5 OH interactions'
+          end if
+
+          exit cycle_read_oh15
+       end if
+    END DO CYCLE_READ_OH15
+! -------------------------------------------------------------------
+    !> set up the inclusion table
+    call inclus(inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ainclbead,a15t,ofscale,ofscale2)
+
+    if (lprint) then
+       do imolty=1,nmolty
+          write(io_output,'(/,A,I0,/,/,A)') 'Molecule type: ',imolty,'LJ INCLUSION TABLE'
+          write(io_output,'(4X,'//format_n(nunit(imolty),'(1X,I3)')//')') (j,j=1,nunit(imolty))
+          do j=1,nunit(imolty)
+             write(io_output,'(I4,'//format_n(nunit(imolty),'(1X,L3)')//')') j,linclu(imolty,j,1:nunit(imolty))
+          end do
+
+          write(io_output,'(/,A)') 'CHARGE INCLUSION TABLE'
+          write(io_output,'(4X,'//format_n(nunit(imolty),'(1X,I3)')//')') (j,j=1,nunit(imolty))
+          do j=1,nunit(imolty)
+             write(io_output,'(I4,'//format_n(nunit(imolty),'(1X,L3)')//')') j,lqinclu(imolty,j,1:nunit(imolty))
+          end do
+
+          write(io_output,'(/,A)') '1-4 LJ SCALING FACTORS'
+          write(io_output,'(7X,'//format_n(nunit(imolty),'(1X,I6)')//')') (j,j=1,nunit(imolty))
+          do j = 1, nunit(imolty)
+             write(io_output,'(I7,'//format_n(nunit(imolty),'(1X,F6.3)')//')') j,ljscale(imolty,j,1:nunit(imolty))
+          end do
+
+          write(io_output,'(/,A)') '1-4 CHARGE SCALING FACTORS'
+          write(io_output,'(7X,'//format_n(nunit(imolty),'(1X,I6)')//')') (j,j=1,nunit(imolty))
+          do j = 1, nunit(imolty)
+             write(io_output,'(I7,'//format_n(nunit(imolty),'(1X,F6.3)')//')') j,qscale2(imolty,j,1:nunit(imolty))
+          end do
+       end do
+    end if
+! -------------------------------------------------------------------
+    close(io_input)
+! ===================================================================
+    !> Initialize the system or read configuration from the restart file
+    if (linit) then
+       do ibox = 1,nbox
+          if (lsolid(ibox).and..not.lrect(ibox).and..not.(ibox.eq.1.and.lexzeo)) call err_exit(__FILE__,__LINE__,'Cannot initialize non-rectangular system',myid+1)
+       end do
        call initia(file_struct)
        nnstep = 0
     else
        if (use_checkpoint) file_restart='save-config'
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM needed for long input records, like
-       ! nboxi and moltyp for a lot of molecules
+
        io_restart=get_iounit()
+       ! MJM recl needed for long input records, like nboxi and moltyp for a lot of molecules
        open(unit=io_restart,access='sequential',action='read',file=file_restart,form='formatted',iostat=jerr,recl=4096,status='old')
-       if (jerr.ne.0) then
-          call err_exit(__FILE__,__LINE__,'cannot open main restart file',myid+1)
-       end if
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open main restart file '//trim(file_restart),myid+1)
+
        read(io_restart,*) nnstep
-       read(io_restart,*) Armtrax, Armtray, Armtraz
-       do im = 1,nbox
+       read(io_restart,*) Armtrax,Armtray,Armtraz
+       do im=1,nbox
           do imol = 1,nmolty
-             read(io_restart,*) rmtrax(imol,im), rmtray(imol,im), rmtraz(imol,im)
-             read(io_restart,*) rmrotx(imol,im), rmroty(imol,im), rmrotz(imol,im)
+             read(io_restart,*) rmtrax(imol,im),rmtray(imol,im),rmtraz(imol,im)
+             read(io_restart,*) rmrotx(imol,im),rmroty(imol,im),rmrotz(imol,im)
           end do
           call averageMaximumDisplacement(im,imol)
        end do
 
-       if (lprint) then
-          write(io_output,*)  'new maximum displacements read from restart-file'
-          do im = 1,nbox
-             write(io_output,*)'box      #',im
-             do imol = 1,nmolty
-                write(io_output,*) 'molecule type',imol
-                write(io_output,"(' max trans. displacement:        ',3f10.6)") rmtrax(imol,im), rmtray(imol,im), rmtraz(imol,im)
-                write(io_output,"(' max rot. displacement:          ',3f10.6)") rmrotx(imol,im), rmroty(imol,im), rmrotz(imol,im)
-             end do
-          end do
-       end if
-
        do im=1,nbox
           read(io_restart,*) (rmflcq(i,im),i=1,nmolty)
        end do
-       if ( lecho.and.lprint) then
-          do im=1,nbox
-             write(io_output,*) 'maximum fluc q displacements: Box #',im
-             write(io_output,*) (rmflcq(i,im),i=1,nmolty)
-          end do
-       end if
+
        ! changed so fort.77 the same for all ensembles
        ! 06/08/09 KM
-       read(io_restart,*) (rmvol(ibox), ibox = 1,nbox)
-       if (lprint) then
-          write(io_output,"(' max volume displacement:        ',3E12.4)") (rmvol(ibox), ibox = 1,nbox)
-          write(io_output,*)
-          write(io_output,*)
-       end if
-       do ibox = 1,nbox
-          if (lsolid(ibox) .and. .not. lrect(ibox)) then
+       read(io_restart,*) (rmvol(ibox),ibox=1,nbox)
+
+       do ibox=1,nbox
+          if (lsolid(ibox).and..not.lrect(ibox)) then
              read(io_restart,*) (rmhmat(ibox,j),j=1,9)
-             if (lprint) write(io_output,*) (rmhmat(ibox,j),j=1,9)
           end if
        end do
 
        if (lprint) then
-          write(io_output,*)
-          write(io_output,*) 'new box size read from restart-file'
-          write(io_output,*)
+          write(io_output,'(/,A,/,A)') 'READING CONFIGURATION FROM RESTART FILE','------------------------------------------'
+          write(io_output,'(A)') 'new maximum displacements read from restart-file'
+          write(io_output,'(A,3(2X,F10.6))') '   max atom trans. displacement: ',Armtrax,Armtray,Armtraz
+          write(io_output,'(A,3(1X,E11.4))') '   max volume displacement:      ',(rmvol(ibox), ibox = 1,nbox)
+          do ibox=1,nbox
+             if (lsolid(ibox).and..not.lrect(ibox)) then
+                write(io_output,'(A,I0)') '   rmhmat for box ',ibox
+                write(io_output,'(3(4X,G16.9))') rmhmat(ibox,1),rmhmat(ibox,4),rmhmat(ibox,7)
+                write(io_output,'(3(4X,G16.9))') rmhmat(ibox,2),rmhmat(ibox,5),rmhmat(ibox,8)
+                write(io_output,'(3(4X,G16.9))') rmhmat(ibox,3),rmhmat(ibox,6),rmhmat(ibox,9)
+             end if
+          end do
+          do im=1,nbox
+             write(io_output,'(/,A,I0)') 'box      #',im
+             do imol = 1,nmolty
+                write(io_output,'(A,I0)') '   molecule type ',imol
+                write(io_output,'(A,3(1X,F10.6))') '      max trans. displacement:  ',rmtrax(imol,im),rmtray(imol,im),rmtraz(imol,im)
+                write(io_output,'(A,3(1X,F10.6))') '      max rot. displacement:    ',rmrotx(imol,im),rmroty(imol,im),rmrotz(imol,im)
+                write(io_output,'(A,3(1X,F10.6))') '      max fluc. q displacement: ',rmflcq(imol,im)
+             end do
+          end do
+          write(io_output,'(/,A)') 'new box size read from restart-file'
        end if
 
-       do ibox = 1,nbox
+       do ibox=1,nbox
           if (ibox.eq.1.and.lexzeo) then
-             if (lsolid(ibox) .and. .not. lrect(ibox)) then
+             if (lsolid(ibox).and..not.lrect(ibox)) then
                 read(io_restart,*) dum,dum,dum,dum,dum,dum,dum,dum,dum
              else
                 read(io_restart,*) dum,dum,dum
              end if
           else if (lsolid(ibox) .and. .not. lrect(ibox)) then
-
              read(io_restart,*) (hmat(ibox,j),j=1,9)
              if (lprint) then
-                write(io_output,*)
-                write(io_output,*) 'HMAT COORDINATES FOR BOX',ibox
-                write(io_output,*) (hmat(ibox,j),j=1,3)
-                write(io_output,*) (hmat(ibox,j),j=4,6)
-                write(io_output,*) (hmat(ibox,j),j=7,9)
-                write(io_output,*)
+                write(io_output,'(A,I0)') 'ibox:  ', ibox
+                write(io_output,'(A)') '   HMAT COORDINATES'
+                write(io_output,'(3(4X,G16.9))') hmat(ibox,1),hmat(ibox,4),hmat(ibox,7)
+                write(io_output,'(3(4X,G16.9))') hmat(ibox,2),hmat(ibox,5),hmat(ibox,8)
+                write(io_output,'(3(4X,G16.9))') hmat(ibox,3),hmat(ibox,6),hmat(ibox,9)
              end if
 
              call matops(ibox)
 
              if (lprint) then
-                write(io_output,*)
-                write(io_output,"(' width of  box ',i1,':',3f12.6)") ibox ,min_width(ibox,1),min_width(ibox,2) ,min_width(ibox,3)
+                write(io_output,'(A,3(1X,F11.6))') 'min widths:',ibox,min_width(ibox,1:3)
+                write(io_output,'(A,2X,F12.3)') "cell length |a|:",cell_length(ibox,1)
+                write(io_output,'(A,2X,F12.3)') "cell length |b|:",cell_length(ibox,2)
+                write(io_output,'(A,2X,F12.3)') "cell length |c|:",cell_length(ibox,3)
+                write(io_output,'(A,2X,F12.3)') "cell angle alpha:",cell_ang(ibox,1)*raddeg
+                write(io_output,'(A,2X,F12.3)') "cell angle beta: ",cell_ang(ibox,2)*raddeg
+                write(io_output,'(A,2X,F12.3)') "cell angle gamma:",cell_ang(ibox,3)*raddeg
              end if
 
-             w(1) = min_width(ibox,1)
-             w(2) = min_width(ibox,2)
-             w(3) = min_width(ibox,3)
-
-             if ((allow_cutoff_failure.gt.0).and.(rcut(ibox)/w(1).gt.0.5E0_dp.or.rcut(ibox)/w(2).gt.0.5E0_dp.or.rcut(ibox)/w(3).gt.0.5E0_dp)) then
+             if ((allow_cutoff_failure.gt.0).and.ANY(rcut(ibox)/min_width(ibox,1:3).gt.0.5_dp)) then
                 call err_exit(__FILE__,__LINE__,'rcut > half cell width',myid+1)
-             end if
-
-             if (lprint) then
-                write(io_output,*)
-                write(io_output,*) 'ibox:  ', ibox
-                write(io_output,'("cell length |a|:",2x,f12.3)') cell_length(ibox,1)
-                write(io_output,'("cell length |b|:",2x,f12.3)')  cell_length(ibox,2)
-                write(io_output,'("cell length |c|:",2x,f12.3)')  cell_length(ibox,3)
-
-                write(io_output,*)
-                write(io_output,'("cell angle alpha:",2x,f12.3)')  cell_ang(ibox,1)*180.0E0_dp/onepi
-                write(io_output,'("cell angle beta: ",2x,f12.3)') cell_ang(ibox,2)*180.0E0_dp/onepi
-                write(io_output,'("cell angle gamma:",2x,f12.3)') cell_ang(ibox,3)*180.0E0_dp/onepi
-
-                ! write(io_output,"(' angle of  box ',i1,'  :  ','   alpha:   ',f12.6,'
-                !     &  beta: ', f12.6, '    gamma:   ',f12.6)") ibox,cell_ang(ibox,1)*180.0E0_dp/onepi,
-                !     &                cell_ang(ibox,2)*180.0E0_dp/onepi,cell_ang(ibox,3)
-                !     &                *180/onepi
              end if
           else
              read(io_restart,*) boxlx(ibox),boxly(ibox),boxlz(ibox)
              if (lprint) then
-                write(io_output,*)
-                write(io_output,*)
-                write(io_output,"(' dimension box ',i1,'  :','  a:   ',f12.6,'   b:   ',f12.6,'   c   :  ' ,f12.6)") ibox,boxlx(ibox),boxly(ibox),boxlz(ibox)
+                write(io_output,"(' dimension box ',I0,': a = ',F12.6,'  b = ',F12.6,'  c = ',F12.6)") ibox,boxlx(ibox),boxly(ibox),boxlz(ibox)
              end if
-             if((allow_cutoff_failure.gt.0).and.(rcut(i)/boxlx(i).gt.0.5E0_dp.or.rcut(i)/boxly(i).gt.0.5E0_dp.or.rcut(i)/boxlz(i).gt.0.5E0_dp)) then
+             if((allow_cutoff_failure.gt.0).and.(rcut(ibox)/boxlx(ibox).gt.0.5_dp.or.rcut(ibox)/boxly(ibox).gt.0.5_dp.or.rcut(ibox)/boxlz(ibox).gt.0.5_dp)) then
                 call err_exit(__FILE__,__LINE__,'rcut > 0.5*boxlx',myid+1)
              end if
           end if
        end do
 
        if (lprint) then
-          write(io_output,*)
-          write(io_output,*) 'Finished writing simulation box related info'
+          write(io_output,'(/,A)') 'Finished writing simulation box related info'
        end if
 
        read(io_restart,*) ncres
        read(io_restart,*) nmtres
-       ! check that number of particles in fort.4 & fort.77 agree ---
-       if ( ncres .ne. nchain .or. nmtres .ne. nmolty ) then
+
+       ! check if the number of particles in fort.4 & fort.77 agree
+       if (ncres.ne.nchain.or.nmtres.ne.nmolty) then
           write(io_output,*) 'nchain',nchain,'ncres',ncres
           write(io_output,*) 'nmolty',nmolty,'nmtres',nmtres
           call err_exit(__FILE__,__LINE__,'conflicting information in restart and control files',myid+1)
        end if
-       read(io_restart,*) (nures(i),i=1,nmtres)
 
-       ! do i = 1, nmtres
-       !    if ( nures(i) .ne. nunit(i) ) then
-       !       write(io_output,*) 'unit',i,'nunit',nunit(i),'nures',nures(i)
-       !       call err_exit(__FILE__,__LINE__,'conflicting information in restart and control files',myid+1)
-       !    end if
-       ! end do
-       ! write(io_output,*) 'ncres',ncres,'   nmtres',nmtres
+       read(io_restart,*) nures(1:nmtres)
 
-       read(io_restart,*) (moltyp(i),i=1,ncres)
-       read(io_restart,*) (nboxi(i),i=1,ncres)
-       if ( lee ) then
-          do i = 1, nmtres
-             if ( lexpand(i) ) read(io_restart,*) eetype(i)
+       do i=1,nmtres
+          if (nures(i).ne.nunit(i)) then
+             write(io_output,*) 'unit',i,'nunit',nunit(i),'nures',nures(i)
+             call err_exit(__FILE__,__LINE__,'conflicting information in restart and control files',myid+1)
+          end if
+       end do
+
+       read(io_restart,*) moltyp(1:ncres)
+       read(io_restart,*) nboxi(1:ncres)
+       if (any(lexpand(1:nmolty))) then
+          do i=1,nmtres
+             if (lexpand(i)) read(io_restart,*) eetype(i)
           end do
-          do i = 1, nmtres
-             if ( lexpand(i) ) read(io_restart,*) rmexpc(i)
+          do i=1,nmtres
+             if (lexpand(i)) read(io_restart,*) rmexpc(i)
           end do
        end if
 
-       ! write(io_output,*) 'start reading coordinates'
-       ! check that particles are in correct boxes ---
-       ! obtain ncmt values
-       do ibox = 1,nbox
-          nchbox(ibox) = 0
-       end do
-       do i = 1, nmolty
-          do ibox = 1,nbox
-             ncmt(ibox,i) = 0
-          end do
-          if ( lexpand(i) ) then
-             !> \bug problem in expand ensemble
-             do j = 1, numcoeff(i)
-                do ibox = 1,2
-                   ncmt2(ibox,i,j) = 0
-                end do
-             end do
-          end if
-       end do
-
-       do i = 1, ncres
-          if( nboxi(i) .le. nbox ) then
-             ibox = nboxi(i)
-             if ( ibox .ne. 1 .and. .not. lgibbs  .and. .not.lgrand) then
-                call err_exit(__FILE__,__LINE__,'Particle found outside BOX 1',myid+1)
-             end if
-             nchbox(ibox) = nchbox(ibox) + 1
-             imolty = moltyp(i)
-             ncmt(ibox,imolty) = ncmt(ibox,imolty) + 1
-             if ( lexpand(imolty) ) then
-                if ( ibox .gt. 2 ) then
-                   call err_exit(__FILE__,__LINE__,'put in box 1 and 2 for such  molecules',myid+1)
-                end if
-                itype = eetype(imolty)
-                ncmt2(ibox,imolty,itype) =  ncmt2(ibox,imolty,itype) + 1
-                do j = 1,nunit(imolty)
-                   sigma_f(imolty,j) = sigm(imolty,j,itype)
-                   epsilon_f(imolty,j) = epsil(imolty,j,itype)
-                end do
-             end if
-          else
-             write(io_output,*) 'i:',i,'nboxi(i)',nboxi(i)
-             call err_exit(__FILE__,__LINE__,'Particle found in ill-defined box',myid+1)
-          end if
-
-       end do
-
-       ! check that number of particles of each type is consistent
-       do i = 1, nmolty
-          tcount = 0
-          do ibox = 1, nbox
-             tcount = tcount + ncmt(ibox,i)
-          end do
-          if ( tcount .ne. temtyp(i) ) then
-             write(io_output,*) 'type',i
-             write(io_output,*) 'ncmt',(ncmt(ibox,i), ibox = 1,nbox)
-             write(io_output,*) 'temtyp', temtyp(i)
-             call err_exit(__FILE__,__LINE__,'Particle type number inconsistency',myid+1)
-          end if
-       end do
-
-       ! write(io_output,*) 'particles found in correct box with correct type'
-
-       do i = 1,nbxmax
-          qbox(i) = 0.0E0_dp
-       end do
-
-       do i = 1, nchain
-          ! write(io_output,*) 'reading coord of chain i',i
+       qbox = 0.0_dp
+       do i=1,nchain
           imolty = moltyp(i)
-          do j = 1, nunit(imolty)
-             read(io_restart,*) rxu(i,j), ryu(i,j), rzu(i,j),qqu(i,j)
-             if (.not. lreadq) then
+          do j=1,nunit(imolty)
+             read(io_restart,*) rxu(i,j),ryu(i,j),rzu(i,j),qqu(i,j)
+             if (.not.lreadq) then
                 qqu(i,j) = qelect(ntype(imolty,j))
              end if
              qbox(nboxi(i)) = qbox(nboxi(i)) + qqu(i,j)
@@ -3203,195 +2456,211 @@ contains
 
        close(io_restart)
 
-       do i = 1,nbxmax
-          if ( abs(qbox(i)) .gt. 1E-6_dp ) then
-             if (i.eq.1.and.lexzeo) cycle
+       do i=1,nbox
+          if (i.eq.1.and.lexzeo) then
+             cycle
+          else if (abs(qbox(i)).gt.1E-6_dp) then
              call err_exit(__FILE__,__LINE__,'box '//integer_to_string(i)//' has a net charge of '//real_to_string(qbox(i)),myid+1)
           end if
        end do
     end if
-
-    if (L_Ewald_Auto) then
-       if ( lchgall ) then
-          if (lewald) then
-             do ibox = 1,nbox
-                if (lsolid(ibox).and.(.not.lrect(ibox))) then
-                   min_boxl = min(min_width(ibox,1),min_width(ibox,2), min_width(ibox,3))
-                else
-                   min_boxl = min(boxlx(ibox),boxly(ibox),boxlz(ibox))
-                end if
-                kalp(ibox) = 6.40E0_dp
-                calp(ibox) = kalp(ibox)/min_boxl
+! ===================================================================
+    !> check that particles are in correct boxes
+    !> obtain nchbox, ncmt, parbox, parall
+    nchbox = 0
+    ncmt = 0
+    parbox = 0
+    parall = 0
+    idummy = 0
+    do i=1,nmolty
+       if (lexpand(i)) then
+          !> \bug problem in expand ensemble
+          do j=1,numcoeff(i)
+             do ibox=1,2
+                ncmt2(ibox,i,j) = 0
              end do
-          else
-             call err_exit(__FILE__,__LINE__,'lewald should be true when lchgall is true',myid+1)
-          end if
-       else
-          do ibox = 1, nbox
-             if (lsolid(ibox).and.(.not.lrect(ibox))) then
-                min_boxl = min(min_width(ibox,1),min_width(ibox,2), min_width(ibox,3))
-             else
-                min_boxl = min(boxlx(ibox),boxly(ibox),boxlz(ibox))
-             end if
-             ! rcut(ibox) = 0.4E0_dp*min_boxl
-             calp(ibox) = 3.2E0_dp/rcut(ibox)
           end do
        end if
-    else
-       if ( lchgall ) then
+    end do
+
+    do i=1,nchain
+       ibox = nboxi(i)
+       if(ibox.le.nbox) then
+          if (ibox.ne.1.and..not.(lgibbs.or.lgrand)) then
+             call err_exit(__FILE__,__LINE__,'Particle found outside BOX 1',myid+1)
+          end if
+
+          nchbox(ibox) = nchbox(ibox) + 1
+          imolty = moltyp(i)
+          ncmt(ibox,imolty) = ncmt(ibox,imolty) + 1
+          parbox(ncmt(ibox,imolty),ibox,imolty) = i
+          idummy(imolty) = idummy(imolty) + 1
+          parall(imolty,idummy(imolty)) = i
+
+          if (lexpand(imolty)) then
+             if (ibox.gt.2) then
+                call err_exit(__FILE__,__LINE__,'put in box 1 and 2 for ee molecules',myid+1)
+             end if
+             itype = eetype(imolty)
+             ncmt2(ibox,imolty,itype) = ncmt2(ibox,imolty,itype) + 1
+             do j=1,nunit(imolty)
+                sigma_f(imolty,j) = sigm(imolty,j,itype)
+                epsilon_f(imolty,j) = epsil(imolty,j,itype)
+             end do
+          end if
+       else
+          write(io_output,*) 'i:',i,'nboxi(i)',ibox
+          call err_exit(__FILE__,__LINE__,'Particle found in ill-defined box',myid+1)
+       end if
+    end do
+
+    do ibox=1,nbox
+       if (sum(ncmt(ibox,1:nmolty)).ne.nchbox(ibox)) then
+          write(io_output,*) 'box ',ibox,', nchbox: ',nchbox(ibox),', ncmt: ',ncmt(ibox,1:nmolty)
+          call err_exit(__FILE__,__LINE__,'readdat: nchbox(ibox) .ne. sum(ncmt(ibox,1:nmolty))',myid+1)
+       end if
+    end do
+
+    ! check that number of particles of each type is consistent
+    do i=1,nmolty
+       if (sum(ncmt(1:nbox,i)).ne.temtyp(i)) then
+          write(io_output,*) 'type ',i,', temtyp: ',temtyp(i),', ncmt: ',ncmt(1:nbox,i)
+          call err_exit(__FILE__,__LINE__,'Particle type number inconsistency',myid+1)
+       end if
+    end do
+! -------------------------------------------------------------------
+    !> Set up Ewald parameters, write out both intra- and inter-molecular interaction parameters
+    if (lewald) then
+       if (lchgall) then
           ! if real space term are summed over all possible pairs in the box
-          ! kalp(1) & kalp(2) are fixed while calp(1) & calp(2) change
-          ! according to the boxlength, kalp(1) should have a value greater than
-          ! 5.0
-          do ibox = 1, nbox
+          ! kalp(1) & kalp(2) are fixed while calp(1) & calp(2) change according
+          ! to the boxlength, kalp(1) should have a value greater than 5.0
+          if (L_Ewald_Auto) kalp = 6.4_dp
+          do ibox=1,nbox
              if (lsolid(ibox).and.(.not.lrect(ibox))) then
-                min_boxl = min(min_width(ibox,1),min_width(ibox,2), min_width(ibox,3))
+                min_boxl=minval(min_width(ibox,1:3))
              else
-                min_boxl = min(boxlx(ibox),boxly(ibox),boxlz(ibox))
+                min_boxl=min(boxlx(ibox),boxly(ibox),boxlz(ibox))
              end if
              calp(ibox) = kalp(ibox)/min_boxl
-             if ( lewald ) then
-                if ( kalp(ibox) .lt. 5.6E0_dp ) then
-                   call err_exit(__FILE__,__LINE__,'Warning, kalp is too small',myid+1)
-                end if
-             else
-                !kea
-                if(.not. lgaro) then
-                   call err_exit(__FILE__,__LINE__,'lewald should be true when lchgall is true',myid+1)
-                end if
+             if (kalp(ibox).lt.5.6E0_dp.and.lprint) then
+                write(io_output,'(A,I0,2(A,G16.9))') 'Warning, kalp too small in box ',ibox,': calp = ',calp(ibox),', min_boxl = ',min_boxl
              end if
           end do
        else
           ! if not lchgall, calp(1) & calp(2) are fixed
-          do ibox = 1, nbox
+          do ibox=1,nbox
+             if (L_Ewald_Auto) kalp(ibox) = 3.2_dp/rcut(ibox)
              calp(ibox) = kalp(ibox)
-             if ( lewald ) then
-                if (calp(ibox)*rcut(ibox).lt.3.2E0_dp.and.lprint) then
-                   write(io_output,*) 'Warning, kalp too small in box',ibox
-                   write(io_output,*) ibox,calp(ibox),rcut(ibox)
-                   ! JLR 11-24-09
-                   ! you may want a smaller kalp, e.g. when comparing to previous work
-                   ! This does not need to be an error
-                   ! call err_exit(__FILE__,__LINE__,'kalp is too small, set to 3.2/rcutchg',myid+1)
-                   write(io_output,*) 'kalp is too small, set to 3.2/rcutchg'
-                   ! END JLR 11-24-09
-                end if
+             if (calp(ibox)*rcut(ibox).lt.2.8E0_dp.and.lprint) then
+                ! JLR 11-24-09
+                ! you may want a smaller kalp, e.g. when comparing to previous work
+                ! This does not need to be an error
+                write(io_output,'(A,I0,2(A,G16.9))') 'Warning, kalp too small in box ',ibox,': calp = ',calp(ibox),', rcut = ',rcut(ibox)
              end if
           end do
        end if
-    end if
 
-    if (L_Ewald_Auto) then
-       do ibox = 1,nbox
-          if ( (.not. lsolid(ibox)) .or. lrect(ibox) )  then
-             k_max_l(ibox) = aint(boxlx(ibox)*calp(ibox))+1
-             k_max_m(ibox) = aint(boxly(ibox)*calp(ibox))+1
-             k_max_n(ibox) = aint(boxlz(ibox)*calp(ibox))+1
-          else
-             k_max_l(ibox) = aint(hmat(ibox,1)*calp(ibox))+2
-             k_max_m(ibox) = aint(hmat(ibox,5)*calp(ibox))+2
-             k_max_n(ibox) = aint(hmat(ibox,9)*calp(ibox))+2
-          end if
-       end do
-    end if
-
-    if (L_Ewald_Auto.and.lprint) then
-       write(io_output,*)
-       write(io_output,*) '****Ewald Parameters*****'
-       write(io_output,*) 'ibox   calp(ibox)  kmaxl(ibox)   kmaxm(ibox)', '   kmaxn(ibox)   rcut(ibox)'
-       do ibox = 1,nbox
-          write(io_output,'(i4,5x,f12.6,3i12,12x,f12.4)') ibox, calp(ibox),  k_max_l(ibox),k_max_m(ibox), k_max_n(ibox),rcut(ibox)
-       end do
-       write(io_output,*)
-    end if
-
-    ! book keeping arrays
-    do ibox=1,nbox
-       do imolty=1,nmolty
-          idummy(imolty)=0
-       end do
-       do i = 1, nchain
-          if ( nboxi(i) .eq. ibox ) then
-             imolty=moltyp(i)
-             idummy(imolty) = idummy(imolty)+1
-             parbox(idummy(imolty),ibox,imolty)=i
-             ! pparbox(i,ibox) = nmcount
-          end if
-       end do
-       nmcount = 0
-       do imolty=1,nmolty
-          nmcount = nmcount + idummy(imolty)
-       end do
-       if ( nmcount .ne. nchbox(ibox) ) then
-          write(io_output,*) 'nmcount: ',nmcount,'; nchbox: ',nchbox
-          call err_exit(__FILE__,__LINE__,'Readdat: nmcount ne nchbox',myid+1)
+       if (lprint) then
+          write(io_output,'(/,A)') '****Ewald Parameters*****'
+          write(io_output,'(A)') 'ibox:      calp  kmaxl  kmaxm  kmaxn         rcut'
+          do ibox=1,nbox
+             if ((.not.lsolid(ibox)).or.lrect(ibox)) then
+                k_max_l(ibox) = aint(boxlx(ibox)*calp(ibox))+1
+                k_max_m(ibox) = aint(boxly(ibox)*calp(ibox))+1
+                k_max_n(ibox) = aint(boxlz(ibox)*calp(ibox))+1
+             else
+                k_max_l(ibox) = aint(hmat(ibox,1)*calp(ibox))+2
+                k_max_m(ibox) = aint(hmat(ibox,5)*calp(ibox))+2
+                k_max_n(ibox) = aint(hmat(ibox,9)*calp(ibox))+2
+             end if
+             write(io_output,'(I4,A,F9.3,3(1X,I6),1X,F12.4)') ibox,': ',calp(ibox),k_max_l(ibox),k_max_m(ibox),k_max_n(ibox),rcut(ibox)
+          end do
        end if
-    end do
-    ! set idummy counter to 0
-    do imolty=1,nmolty
-       idummy(imolty)=0
-    end do
-    ! set up parall
-    do i =1,nchain
-       imolty = moltyp(i)
-       idummy(imolty) = idummy(imolty) + 1
-       parall(imolty,idummy(imolty)) = i
-    end do
-
+    else if (lchgall.and..not.lgaro) then
+       !kea
+       call err_exit(__FILE__,__LINE__,'lewald should be true when lchgall is true',myid+1)
+    end if
 ! -------------------------------------------------------------------
-    ! read/produce initial/starting configuration
     ! zeolite external potential
-    if ( lexzeo ) call suzeo(lprint)
+    if (lexzeo) call suzeo(lprint)
     call readThreeBody(file_in)
     call readFourBody(file_in)
-! ----------------------------------------------------------------
-
-    ! reordering of numbers for charmm
-    ! do i = 1, nchain
-    !    imolty = moltyp(i)
-    !    temtyp(i) = imolty
-    !    do j = 1, nunit(imolty)
-    !       temx(i,j) = rxu(i,j)
-    !       temy(i,j) = ryu(i,j)
-    !       temz(i,j) = rzu(i,j)
-    !    end do
-    ! end do
-    ! innew = 0
-    ! do it = 1, nmolty
-    !    do i = 1, nchain
-    !       imolty = temtyp(i)
-    !       if ( imolty .eq. it ) then
-    !          innew = innew + 1
-    !          moltyp(innew) = it
-    !          do j = 1, nunit(imolty)
-    !             rxu(innew,j) = temx(i,j)
-    !             ryu(innew,j) = temy(i,j)
-    !             rzu(innew,j) = temz(i,j)
-    !          end do
-    !       end if
-    !    end do
-    !    write(io_output,*) 'it =',it,'   innew =',innew
-    ! end do
-
 ! -------------------------------------------------------------------
-
-    ! set the centers of mass if LFOLD = .TRUE.
-
-    if ( lfold ) then
-       do ibox = 1, nbox
-          call ctrmas(.true.,ibox,0,6)
-       end do
-    end if
-
-    ! check that rintramax is really valid
-    if (licell) then
-       do i = 1,nchain
-          if (2.0E0_dp*rcmu(i) .gt. rintramax) then
-             call err_exit(__FILE__,__LINE__,'rintramax for the linkcell list too small',myid+1)
+    !> write out connectivity and bonded interactions
+    if (lprint) then
+       do imol=1,nmolty
+          write(io_output,'(/,A,I0)') 'molecule type ',imol
+          if (nunit(imol).gt.1) then
+             write(io_output,'(A)') '      i      j type_i type_j   bond length           k/2'
           end if
+          do i=1,nunit(imol)
+             do j=1,invib(imol,i)
+                write(io_output,'(4(1X,I6),1X,F13.4,F14.1)') i,ijvib(imol,i,j),atoms%list(ntype(imol,i)),atoms%list(ntype(imol,ijvib(imol,i,j))),brvib(itvib(imol,i,j)),brvibk(itvib(imol,i,j))
+             end do
+          end do
+
+          if (nunit(imol).gt.2) then
+             write(io_output,'(/,A)') '      i      j      k type_i type_j type_k        angle        k/2'
+          end if
+          do i=1,nunit(imol)
+             do j=1,inben(imol,i)
+                write(io_output,'(6(1X,I6),2(1X,F12.2))') i,ijben2(imol,i,j),ijben3(imol,i,j),atoms%list(ntype(imol,i))&
+                 ,atoms%list(ntype(imol,ijben2(imol,i,j))),atoms%list(ntype(imol,ijben3(imol,i,j)))&
+                 ,brben(itben(imol,i,j))*raddeg,brbenk(itben(imol,i,j))
+             end do
+          end do
+
+          if (nunit(imol).gt.3) then
+             write(io_output,'(/,A)') '      i      j      k      l type_i type_j type_k type_l torsion type'
+          end if
+          do i=1,nunit(imol)
+             do j=1,intor(imol,i)
+                write(io_output,'(9(1X,I6))') i,ijtor2(imol,i,j),ijtor3(imol,i,j),ijtor4(imol,i,j)&
+                 ,atoms%list(ntype(imol,i)),atoms%list(ntype(imol,ijtor2(imol,i,j))),atoms%list(ntype(imol,ijtor3(imol,i,j)))&
+                 ,atoms%list(ntype(imol,ijtor4(imol,i,j))),dihedrals%list(ittor(imol,i,j))
+             end do
+          end do
        end do
     end if
 
+    ! write out non-bonded interaction table
+    if (lprint) then
+       write(io_output,'(/,A)') 'PAIRWISE LJ AND COULOMB INTERACTIONS'
+       if (lgaro) then
+          do i=1,6
+             write(io_output,'(A,I0,A,G16.9)') 'garo type ',i,': ecut = ',ecut(i)
+          end do
+       else
+          if (lexpsix) then
+             write(io_output,'(A)') '    i    j      aexsix      bexsix      cexsix      sexsix'
+          else if (lmmff) then
+             write(io_output,'(A)') '    i    j    epsimmff    sigimmff       smmff'
+          else if (lninesix) then
+             write(io_output,'(A)') '    i    j     r_0,ij      epsij         q0(i)         q0(j)'
+          else
+             write(io_output,'(A)') '    i    j     sig2ij      epsij         q0(i)         q0(j)'
+          end if
+          do i=1,nntype
+             do j=1,nntype
+                if (lhere(i).and.lhere(j)) then
+                   ij=type_2body(i,j)
+                   if (lexpsix) then
+                      write(io_output,'(2(1X,I4),4(1X,E11.4))') atoms%list(i),atoms%list(j),aexsix(ij),bexsix(ij),cexsix(ij),sexsix(ij)
+                   else if (lmmff) then
+                      write(io_output,'(2(1X,I4),4(1X,E11.4))') atoms%list(i),atoms%list(j),epsimmff(ij),sigimmff(ij),smmff(ij)
+                   else if (lninesix) then
+                      write(io_output,'(2(1X,I4),2(1X,F10.5),2(1X,F13.6))') atoms%list(i),atoms%list(j),rzero(ij),epsnx(ij),qelect(i),qelect(j)
+                   else
+                      write(io_output,'(2(1X,I4),2(1X,F10.5),2(1X,F13.6))') atoms%list(i),atoms%list(j),sqrt(sig2ij(ij)),epsij(ij),qelect(i),qelect(j)
+                   end if
+                end if
+             end do
+          end do
+       end if
+    end if
+! ===================================================================
+    !> write file headers
     if (myid.eq.rootid) then
        ! write out movie-header
        !*** The very first frame (nnstep=0) is no longer written out because it's usually useless
@@ -3472,90 +2741,25 @@ contains
        if (lprint) write(io_traj,*) nstep,iratp,nbox,nmolty,(masst(i),i=1,nmolty)
     end if
 ! -------------------------------------------------------------------
-
-    ! write out connectivity and bonded interactions
-    if (lverbose.and.lprint) then
-       do imol = 1,nmolty
-          write(io_output,*) 'molecule type',imol
-          if (nunit(imol) .gt. 1) then
-             write(io_output,*) '   i   j   type_i type_j   bond length', '        k/2'
-          end if
-          do i = 1,nunit(imol)
-             do j = 1, invib(imol,i)
-                write(io_output,'(i5,i4,i7,i7,f13.4,f14.1)') i,ijvib(imol,i ,j),atoms%list(ntype(imol,i)),atoms%list(ntype(imol,ijvib(imol,i,j))),brvib(itvib(imol,i,j)),brvibk(itvib(imol,i,j))
-             end do
-          end do
-
-          if (nunit(imol) .gt. 2) then
-             write(io_output,*)
-             write(io_output,*) '   i   j   k   type_i type_j type_k', '     angle      k/2'
-          end if
-          do i = 1,nunit(imol)
-             do j = 1,inben(imol,i)
-                write(io_output,'(i5,i4,i4,i7,i7,i7,f12.2,f12.1)') i ,ijben2(imol,i,j),ijben3(imol,i,j),atoms%list(ntype(imol,i))&
-                 ,atoms%list(ntype(imol,ijben2(imol,i,j))),atoms%list(ntype(imol,ijben3(imol,i,j)))&
-                 ,brben(itben(imol,i,j))*180.0E0_dp/onepi,brbenk(itben(imol,i,j))
-             end do
-          end do
-
-          if (nunit(imol) .gt. 3) then
-             write(io_output,*)
-             write(io_output,*) '   i   j   k   l    type_i type_j type_k', ' type_l     torsion type'
-          end if
-
-          do i = 1,nunit(imol)
-             do j = 1, intor(imol,i)
-                write(io_output,'(i5,i4,i4,i4,i8,i7,i7,i7,i14)') i,ijtor2(imol,i,j),ijtor3(imol,i,j),ijtor4(imol,i,j)&
-                 ,atoms%list(ntype(imol,i)),atoms%list(ntype(imol,ijtor2(imol,i,j))),atoms%list(ntype(imol,ijtor3(imol,i,j)))&
-                 ,atoms%list(ntype(imol,ijtor4(imol,i,j))),dihedrals%list(ittor(imol,i,j))
-             end do
-          end do
-
-       end do
-    end if
-
-    ! write out non-bonded interaction table
-    if (lprint) then
-       write(io_output,*)
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM
-       ! added a flag for lgaro...need to add for all potentials, probably
-       if ((.not.lexpsix).and.(.not.lmmff).and.(.not.lgaro)) then
-          if (lninesix) then
-             write(io_output,*) '     i   j    r_0,ij     epsij         q0(i)          q0(j)'
-          else
-             write(io_output,*) '     i   j    sig2ij     epsij         q0(i)          q0(j)'
-          end if
-          do i = 1, nntype
-             do j = 1,nntype
-                if (lhere(i).and.lhere(j)) then
-                   ij=type_2body(i,j)
-                   if (lninesix) then
-                      write(io_output,'(3x,2i4,2f10.5,2f15.6)') atoms%list(i),atoms%list(j) ,rzero(ij),epsnx(ij),qelect(i),qelect(j)
-                   else
-                      write(io_output,'(3x,2i4,2f10.5,2f15.6)') atoms%list(i),atoms%list(j) ,sqrt(sig2ij(ij)),epsij(ij),qelect(i),qelect(j)
-                   end if
-                end if
-             end do
-          end do
-       end if
-    end if
-
-    ! write input data to unit 6 for control ***
-    if (lprint) then
-       write(io_output,*)
-       write(io_output,*) 'number of mc cycles:            ', nstep
-       write(io_output,*) 'number of chains:               ', nchain
-       write(io_output,*)
-       write(io_output,*) 'temperature:                    ', temp
-       write(io_output,*)
-       write(io_output,*) 'ex-pressure:                    ', (express(ibox),ibox=1,nbox)
-       write(io_output,*)
-    end if
+    ! KM 01/10 remove analysis
+    ! if (ianalyze.lt.nstep) then
+    !    nhere = 0
+    !    do izz=1,nntype
+    !       if ( lhere(izz) ) then
+    !          nhere = nhere + 1
+    !          temphe(nhere) = izz
+    !          beadtyp(nhere)=izz
+    !       end if
+    !    end do
+    !    do izz = 1,nhere
+    !       atemp = temphe(izz)
+    !       decode(atemp) = izz
+    !    end do
+    ! end if
+! ===================================================================
 
     deallocate(ncarbon,idummy,qbox,nures,k_max_l,k_max_m,k_max_n,lhere,temphe,inclmol,inclbead,inclsign,ofscale,ofscale2,ainclmol,ainclbead,a15t,stat=jerr)
-    if (jerr.ne.0) then
-       call err_exit(__FILE__,__LINE__,'readdat: deallocation failed',jerr)
-    end if
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'readdat: deallocation failed',jerr)
 
     return
   end subroutine readdat
@@ -3699,7 +2903,7 @@ contains
        do ibox = 1,nbox
           if ( lpbcz ) then
              if (lsolid(ibox) .and. .not. lrect(ibox)) then
-                write(io_cell,'(i8,6f12.4)') tmcc,cell_length(ibox,1)/Num_cell_a,cell_length(ibox,2)/Num_cell_b,cell_length(ibox,3)/Num_cell_c,cell_ang(ibox,1)*raddeg,cell_ang(ibox,2)*raddeg,cell_ang(ibox,3)*raddeg
+                write(io_cell,'(i8,6f12.4)') tmcc,cell_length(ibox,1),cell_length(ibox,2),cell_length(ibox,3),cell_ang(ibox,1)*raddeg,cell_ang(ibox,2)*raddeg,cell_ang(ibox,3)*raddeg
                 write(io_traj,FMT='(8E13.5,'//format_n(nmolty,"i5")//')') hmat(ibox,1),hmat(ibox,4),hmat(ibox,5),hmat(ibox,7),hmat(ibox,8),hmat(ibox,9),vbox(1,ibox),pres(ibox),(ncmt(ibox,itype),itype=1,nmolty)
              else
                 write(io_traj,'(5E13.5,'//format_n(nmolty,"i5")//')') boxlx(ibox),boxly(ibox),boxlz(ibox),vbox(1,ibox),pres(ibox),(ncmt(ibox,itype),itype=1,nmolty)
@@ -4101,4 +3305,326 @@ contains
 
     close(io_chkpt)
   end subroutine write_checkpoint_main
+
+#ifdef w_nl
+#undef w_nl
+#endif
+#define w_nl(x) write(io_unit,*) '    ',#x,'=',x
+
+#ifdef wa_nl
+#undef wa_nl
+#endif
+#define wa_nl(x,n) if (n.gt.0) write(io_unit,*) '    ',#x,'=',x(1:n)
+!> \brief Generate standard input files containing all parameters
+!>
+!> Put the following calling statement right after having finished reading
+!> fort.4 in readdat
+!> call generate_standard_input(lionic,L_Ewald_Auto,lmixlb,lmixjo,seed,linit,lreadq,fqtemp,inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ainclbead,a15t,ofscale,ofscale2)
+  subroutine generate_standard_input(lionic,L_Ewald_Auto,lmixlb,lmixjo,seed,linit,lreadq,fqtemp,inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ainclbead,a15t,ofscale,ofscale2)
+    use const_phys,only:MPa2SimUnits
+    use util_string,only:format_n
+    use energy_intramolecular,only:bonds,angles,dihedrals
+    integer,parameter::io_unit=512
+    logical,intent(in)::lionic,L_Ewald_Auto,lmixlb,lmixjo,linit,lreadq
+    integer,intent(in)::seed,inclnum,ainclnum,inclmol(:),inclbead(:,:),inclsign(:),ncarbon(:),ainclmol(:),ainclbead(:,:),a15t(:)
+    real,intent(in)::fqtemp,ofscale(:),ofscale2(:)
+    integer::i,imol,j,avbmc_version(nmolty)
+    real::rmvolume,rmtra,rmrot,armtra,rmflucq
+! ===================================================================
+    open(unit=io_unit,access='sequential',action='write',file='topmon.inp.std',form='formatted',status='new')
+! -------------------------------------------------------------------
+    write(io_unit,'(/," &io")')
+    w_nl(io_output)
+    w_nl(run_num)
+    w_nl(suffix)
+    w_nl(L_movie_xyz)
+    write(io_unit,'(" /",/)')
+! -------------------------------------------------------------------
+    write(io_unit,'(/," &system")')
+    w_nl(lnpt)
+    w_nl(lgibbs)
+    w_nl(lgrand)
+    w_nl(lanes)
+    w_nl(lvirial)
+    w_nl(lmipsw)
+    w_nl(lexpee)
+    w_nl(ldielect)
+    w_nl(lpbc)
+    w_nl(lpbcx)
+    w_nl(lpbcy)
+    w_nl(lpbcz)
+    w_nl(lfold)
+    w_nl(lijall)
+    w_nl(lchgall)
+    w_nl(lewald)
+    w_nl(lcutcm)
+    w_nl(ltailc)
+    w_nl(lshift)
+    w_nl(ldual)
+    w_nl(L_Coul_CBMC)
+    w_nl(lneigh)
+    w_nl(llj)
+    w_nl(lexpsix)
+    w_nl(lmmff)
+    w_nl(lninesix)
+    w_nl(lgenlj)
+    w_nl(lexzeo)
+    w_nl(lzgrid)
+    w_nl(lsami)
+    w_nl(lmuir)
+    w_nl(lslit)
+    w_nl(lgraphite)
+    w_nl(ljoe)
+    w_nl(lpsurf)
+    w_nl(lcorreg)
+    w_nl(lelect_field)
+    w_nl(lgaro)
+    w_nl(lionic)
+    w_nl(L_Ewald_Auto)
+    w_nl(lmixlb)
+    w_nl(lmixjo)
+    w_nl(L_tor_table)
+    w_nl(L_spline)
+    w_nl(L_linear)
+    w_nl(L_vib_table)
+    w_nl(L_bend_table)
+    w_nl(L_vdW_table)
+    w_nl(L_elect_table)
+    write(io_unit,'(" /",/)')
+! -------------------------------------------------------------------
+    close(io_unit)
+! ===================================================================
+    open(unit=io_unit,access='sequential',action='write',file='fort.4.std',form='formatted',status='new')
+! -------------------------------------------------------------------
+    write(io_unit,'(/," &mc_shared")')
+    w_nl(seed)
+    w_nl(nbox)
+    w_nl(nmolty)
+    w_nl(nchain)
+    w_nl(nstep)
+    w_nl(lstop)
+    w_nl(iratio)
+    w_nl(rmin)
+    w_nl(softcut)
+    w_nl(linit)
+    w_nl(lreadq)
+    w_nl(L_add)
+    w_nl(L_sub)
+    w_nl(N_add)
+    w_nl(N_box2add)
+    w_nl(N_moltyp2add)
+    w_nl(N_sub)
+    w_nl(N_box2sub)
+    w_nl(N_moltyp2sub)
+    write(io_unit,'(" /",/)')
+! -------------------------------------------------------------------
+    write(io_unit,'(/," &analysis")')
+    w_nl(iprint)
+    w_nl(imv)
+    w_nl(iblock)
+    w_nl(iratp)
+    w_nl(idiele)
+    w_nl(iheatcapacity)
+    w_nl(ianalyze)
+    w_nl(nbin)
+    w_nl(lrdf)
+    w_nl(lintra)
+    w_nl(lstretch)
+    w_nl(lgvst)
+    w_nl(lbend)
+    w_nl(lete)
+    w_nl(lrhoz)
+    w_nl(bin_width)
+    w_nl(lucall)
+    w_nl(ucheck)
+    w_nl(nvirial)
+    w_nl(starvir)
+    w_nl(stepvir)
+    w_nl(ntemp)
+    wa_nl(virtemp,ntemp)
+    write(io_unit,'(" /",/)')
+! -------------------------------------------------------------------
+    write(io_unit,'(/," &mc_volume")')
+    w_nl(tavol)
+    w_nl(iratv)
+    wa_nl(pmvlmt,nbox)
+    w_nl(nvolb)
+    wa_nl(pmvolb,nvolb)
+    wa_nl(box5,nvolb)
+    wa_nl(box6,nvolb)
+    w_nl(pmvol)
+    w_nl(pmvolx)
+    w_nl(pmvoly)
+    rmvolume=rmvol(1)
+    w_nl(rmvolume)
+    write(io_unit,'(" /",/)')
+! -------------------------------------------------------------------
+    write(io_unit,'(/," &mc_swatch")')
+    w_nl(pmswat)
+    w_nl(nswaty)
+    wa_nl(pmsatc,nswaty)
+    write(io_unit,'(" /",/)')
+! -------------------------------------------------------------------
+    write(io_unit,'(/," &mc_swap")')
+    w_nl(pmswap)
+    wa_nl(pmswmt,nmolty)
+    write(io_unit,'(" /",/)')
+! -------------------------------------------------------------------
+    write(io_unit,'(/," &mc_cbmc")')
+    w_nl(rcutin)
+    w_nl(pmcb)
+    wa_nl(pmcbmt,nmolty)
+    wa_nl(pmall,nmolty)
+    wa_nl(nchoi1,nmolty)
+    wa_nl(nchoi,nmolty)
+    wa_nl(nchoir,nmolty)
+    wa_nl(nchoih,nmolty)
+    wa_nl(nchtor,nmolty)
+    wa_nl(nchbna,nmolty)
+    wa_nl(nchbnb,nmolty)
+    wa_nl(icbdir,nmolty)
+    wa_nl(icbsta,nmolty)
+    w_nl(rbsmax)
+    w_nl(rbsmin)
+    do i=1,nmolty
+       if (lavbmc1(i)) then
+          avbmc_version(i)=1
+       else if (lavbmc2(i)) then
+          avbmc_version(i)=2
+       else if (lavbmc3(i)) then
+          avbmc_version(i)=3
+       else
+          avbmc_version(i)=0
+       end if
+    end do
+    wa_nl(avbmc_version,nmolty)
+    wa_nl(pmbias,nmolty)
+    wa_nl(pmbsmt,nmolty)
+    wa_nl(pmbias2,nmolty)
+    wa_nl(pmfix,nmolty)
+    wa_nl(lrig,nmolty)
+    w_nl(lpresim)
+    w_nl(iupdatefix)
+    write(io_unit,'(" /",/)')
+! -------------------------------------------------------------------
+    write(io_unit,'(/," &mc_ee")')
+    w_nl(pmexpc)
+    wa_nl(pmeemt,nmolty)
+    w_nl(pmexpc1)
+    wa_nl(lexpand,nmolty)
+    write(io_unit,'(" /",/)')
+! -------------------------------------------------------------------
+    write(io_unit,'(/," &mc_simple")')
+    armtra=(Armtrax+Armtray+Armtraz)/3.0_dp
+    w_nl(armtra)
+    rmtra=(rmtrax(1,1)+rmtray(1,1)+rmtraz(1,1))/3.0_dp
+    w_nl(rmtra)
+    rmrot=(rmrotx(1,1)+rmroty(1,1)+rmrotz(1,1))/3.0_dp
+    w_nl(rmrot)
+    w_nl(tatra)
+    w_nl(tarot)
+    w_nl(pmtra)
+    wa_nl(pmtrmt,nmolty)
+    wa_nl(pmromt,nmolty)
+    write(io_unit,'(" /",/)')
+! -------------------------------------------------------------------
+    write(io_unit,'(/," &mc_flucq")')
+    w_nl(taflcq)
+    w_nl(fqtemp)
+    rmflucq=rmflcq(1,1)
+    w_nl(rmflucq)
+    w_nl(pmflcq)
+    wa_nl(pmfqmt,nmolty)
+    wa_nl(lflucq,nmolty)
+    wa_nl(lqtrans,nmolty)
+    wa_nl(fqegp,nmolty)
+    wa_nl(nchoiq,nbox)
+    write(io_unit,'(" /",/)')
+! -------------------------------------------------------------------
+    write(io_unit,'(/,"SIMULATION_BOX")')
+    do i=1,nbox
+       ! use_linkcell is always .false., and rintramax is 0.0
+       write(io_unit,'("! boxlx boxly boxlz lsolid lrect kalp rcut rcutnn numDimensionIsIstropic pressure temperature use_linkcell rintramax ghost_particles lideal ltwice",/,3(F8.3,1X),2(L,1X),3(F6.3,1X),I0,1X,F7.1,1X,F7.2,1X,L,1X,F3.1,1X,I0,1X,L,1X,L)') boxlx(i),boxly(i),boxlz(i),lsolid(i),lrect(i),kalp(i),rcut(i),rcutnn(i),numberDimensionIsIsotropic(i),express(i)/MPa2SimUnits,temp,.false.,0.0_dp,ghost_particles(i),lideal(i),ltwice(i)
+       write(io_unit,'("! nchain_1 ... nchain_nmolty inix iniy iniz inirot inimix zshift dshift",/,'//format_n(nmolty+5,'(I0,1X)')//',F4.1,1X,F6.3)') (ininch(j,i),j=1,nmolty),inix(i),iniy(i),iniz(i),inirot(i),inimix(i),zshift(i),dshift(i)
+    end do
+    write(io_unit,'("END SIMULATION_BOX",/)')
+! -------------------------------------------------------------------
+    write(io_unit,'(/,"MOLECULE_TYPE")')
+    do imol=1,nmolty
+       ! lsetup is always .false.
+       write(io_unit,'("! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc",/,5(I0,1X),2(L,1X,I0,1X),2(L,1X),I0,1X,'//format_n(nbox,'(F7.1,1X)')//'L,1X,F3.1,1X,L,1X,L)') nunit(imol),nugrow(imol),ncarbon(imol),nmaxcbmc(imol),iurot(imol),lelect(imol),maxgrow(imol),lring(imol),iring(imol),lrigid(imol),.false.,isolute(imol),(eta2(i,imol),i=1,nbox),lq14scale(imol),qscale(imol),lbranch(imol),lrplc(imol)
+       if (lrigid(imol)) write(io_unit,'("! n, growpoint_1 ... growpoint_n",/,I0,'//format_n(rindex(imol),'(1X,I0)')//')') rindex(imol),(riutry(imol,i),i=1,rindex(imol))
+       do i=1,nunit(imol)
+          write(io_unit,'("! unit ntype leaderq",/,2(I0,1X),I0,/,"! stretching",/,I0)') i,atoms%list(ntype(imol,i)),leaderq(imol,i),invib(imol,i)
+          do j=1,invib(imol,i)
+             write(io_unit,'(I0,1X,I0)') ijvib(imol,i,j),bonds%list(itvib(imol,i,j))
+          end do
+          write(io_unit,'("! bending",/,I0)') inben(imol,i)
+          do j=1,inben(imol,i)
+             write(io_unit,'(2(I0,1X),I0)') ijben2(imol,i,j),ijben3(imol,i,j),angles%list(itben(imol,i,j))
+          end do
+          write(io_unit,'("! torsion",/,I0)') intor(imol,i)
+          do j=1,intor(imol,i)
+             write(io_unit,'(3(I0,1X),I0)') ijtor2(imol,i,j),ijtor3(imol,i,j),ijtor4(imol,i,j),dihedrals%list(ittor(imol,i,j))
+          end do
+       end do
+    end do
+    write(io_unit,'("END MOLECULE_TYPE",/)')
+! -------------------------------------------------------------------
+    write(io_unit,'(/,"MC_SWATCH")')
+    do i=1,nswaty
+       write(io_unit,'("! moltyp1<->moltyp2 nsampos 2xncut",/,4(I0,1X),I0)') nswatb(i,1:2),nsampos(i),ncut(i,1:2)
+       write(io_unit,'("! gswatc 2x(ifrom, iprev)",/,'//format_n(2*(ncut(i,1)+ncut(i,2))-1,'(I0,1X)')//',I0,/,"! splist")') (gswatc(i,j,1:2*ncut(i,j)),j=1,2)
+       do j=1,nsampos(i)
+          write(io_unit,'(I0,1X,I0)') splist(i,j,1:2)
+       end do
+       write(io_unit,'("! nswtcb pmswtcb",/,I0,'//format_n(nswtcb(i),'(F6.2,1X)')//',/,"! box numbers")') nswtcb(i),pmswtcb(i,1:nswtcb(i))
+       do j=1,nswtcb(i)
+          write(io_unit,'(I0,1X,I0)') box3(i,j),box4(i,j)
+       end do
+    end do
+    write(io_unit,'("END MC_SWATCH",/)')
+! -------------------------------------------------------------------
+    write(io_unit,'(/,"MC_SWAP")')
+    do i=1,nmolty
+       write(io_unit,'("! nswapb pmswapb",/,I0,'//format_n(nswapb(i),'(F6.2,1X)')//',/,"! box1 box2")') nswapb(i),(pmswapb(i,j),j=1,nswapb(i))
+       do j=1,nswapb(i)
+          write(io_unit,'(I0,1X,I0)') box1(i,j),box2(i,j)
+       end do
+    end do
+    write(io_unit,'("END MC_SWAP",/)')
+! -------------------------------------------------------------------
+    write(io_unit,'(/,"SAFE_CBMC")')
+    do imol=1,nmolty
+       if (lrig(imol)) then
+          write(io_unit,'(I0)') nrig(imol)
+          if (nrig(imol).gt.0) then
+             do i=1,nrig(imol)
+                write(io_unit,'(I0,1X,I0)') irig(imol,i),frig(imol,i)
+             end do
+          else
+             write(io_unit,'(I0,1X,I0)') nrigmin(imol),nrigmax(imol)
+          end if
+       end if
+    end do
+    write(io_unit,'("END SAFE_CBMC",/)')
+! -------------------------------------------------------------------
+    write(io_unit,'(/,"INTERMOLECULAR_EXCLUSION",/,"! mol_1 bead_1 mol_2 bead_2")')
+    write(io_unit,'("END INTERMOLECULAR_EXCLUSION",/)')
+! -------------------------------------------------------------------
+    write(io_unit,'(/,"INTRAMOLECULAR_SPECIAL",/,"! inclmol inclbead_1 inclbead_2 inclsign ofscale ofscale2")')
+    do i=1,inclnum
+       write(io_unit,'(4(I0,1X),F5.1,1X,F5.1)') inclmol(i),inclbead(i,1),inclbead(i,2),inclsign(i),ofscale(i),ofscale2(i)
+    end do
+    write(io_unit,'("END INTRAMOLECULAR_SPECIAL",/)')
+! -------------------------------------------------------------------
+    write(io_unit,'(/,"INTRAMOLECULAR_OH15",/,"! ainclmol ainclbead_1 ainclbead_2 a15type")')
+    do i=1,ainclnum
+       write(io_unit,'(3(I0,1X),I0)') ainclmol(i),ainclbead(i,1),ainclbead(i,2) ,a15t(i)
+    end do
+    write(io_unit,'("END INTRAMOLECULAR_OH15",/)')
+! -------------------------------------------------------------------
+    close(io_unit)
+! ===================================================================
+  end subroutine generate_standard_input
 END MODULE topmon_main

@@ -5,7 +5,7 @@ MODULE sim_cell
   implicit none
   private
   save
-  public::CellType,CellMaskType,matops,setpbc,mimage,build_linked_cell,update_linked_cell,get_cell_neighbors,allocate_sim_cell,allocate_linked_cell
+  public::CellType,CellMaskType,matops,setpbc,mimage,build_linked_cell,update_linked_cell,get_cell_neighbors,allocate_sim_cell
 
   type CellType
      logical::ortho& !<.true. if the simulation box is orthorhombic
@@ -510,22 +510,15 @@ contains
   end subroutine get_cell_neighbors
 
   subroutine allocate_sim_cell
-    use sim_system,only:nbxmax,io_output
+    use sim_system,only:nbxmax
     integer::jerr
+
     allocate(hmat(nbxmax,9),hmati(nbxmax,9),cell_length(nbxmax,3),min_width(nbxmax,3),cell_vol(nbxmax),cell_ang(nbxmax,3),stat=jerr)
-    if (jerr.ne.0) then
-       call err_exit(__FILE__,__LINE__,'allocate_sim_cell: allocation failed',jerr)
-    end if
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'allocate_sim_cell: allocation failed',jerr)
 
     hmat=0.0E0_dp
-  end subroutine allocate_sim_cell
 
-  subroutine allocate_linked_cell
-    use sim_system,only:io_output
-    integer::jerr
     allocate(icell(nmax),stat=jerr)
-    if (jerr.ne.0) then
-       call err_exit(__FILE__,__LINE__,'allocate_linked_cell: allocation failed',jerr)
-    end if
-  end subroutine allocate_linked_cell
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'allocate_sim_cell.linked_cell: allocation failed',jerr)
+  end subroutine allocate_sim_cell
 end MODULE sim_cell

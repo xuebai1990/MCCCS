@@ -7012,32 +7012,185 @@ contains
     end if
   end subroutine allocate_cbmc
 
-  subroutine init_cbmc()
-    integer::jerr
+  subroutine init_cbmc(io_input,lprint)
+    integer,intent(in)::io_input
+    LOGICAL,INTENT(IN)::lprint
+    integer::jerr,i
+    integer,allocatable::avbmc_version(:)
+    namelist /mc_cbmc/ rcutin,pmcb,pmcbmt,pmall,nchoi1,nchoi,nchoir,nchoih,nchtor,nchbna,nchbnb,icbdir,icbsta&
+     ,rbsmax,rbsmin,avbmc_version,pmbias,pmbsmt,pmbias2&
+     ,pmfix,lrig,lpresim,iupdatefix
+
     allocate(lexshed(numax),llplace(ntmax),lpnow(numax),lsave(numax),bncb(ntmax,numax),bscb(ntmax,2,numax),fbncb(ntmax,numax)&
      ,fbscb(ntmax,2,numax),iend(numax),ipast(numax,numax),pastnum(numax),fclose(numax,numax),fcount(numax),iwbef(numax)&
      ,ibef(numax,numax),befnum(numax),xx(numax),yy(numax),zz(numax),distij(numax,numax),nextnum(numax),inext(numax,numax)&
-     ,kforceb(numax,numax),equilb(numax,numax),flength(numax,numax),vequil(numax,numax),vkforce(numax,numax),rlist(numax,numax),rfrom(numax),rprev(numax),rnum(numax),iplace(numax,numax),pfrom(numax),pnum(numax),pprev(numax),stat=jerr)
-    if (jerr.ne.0) then
-       call err_exit(__FILE__,__LINE__,'init_cbmc: allocation failed',jerr)
-    end if
+     ,kforceb(numax,numax),equilb(numax,numax),flength(numax,numax),vequil(numax,numax),vkforce(numax,numax),rlist(numax,numax),rfrom(numax),rprev(numax),rnum(numax),iplace(numax,numax),pfrom(numax),pnum(numax),pprev(numax),avbmc_version(nmolty),stat=jerr)
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_cbmc: allocation failed',jerr)
 
     llplace=.FALSE.
     lsave=.FALSE.
-
     bncb = 0.0E0_dp
     bscb = 0.0E0_dp
     fbncb = 0.0E0_dp
     fbscb = 0.0E0_dp
     counthist=0
+
+    !> read namelist cbmc
+    do i=1,nmolty
+       pmcbmt(i)=real(i,dp)/nmolty
+    end do
+    pmall=.false.
+    nchoi1=32
+    nchoi=16
+    nchoir=16
+    nchoih=1
+    nchtor=100
+    nchbna=1000
+    nchbnb=1000
+    icbdir=0
+    icbsta=0
+    avbmc_version=0
+    pmbias=0.0_dp
+    pmbsmt=0.0_dp
+    pmbias2=0.0_dp
+    pmfix=.false.
+    lrig=.false.
+
+    rewind(io_input)
+    read(UNIT=io_input,NML=mc_cbmc,iostat=jerr)
+    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_cbmc',jerr)
+
+    if (lprint) then
+       write(io_output,'(/,A,/,A)') 'NAMELIST MC_CBMC','------------------------------------------'
+       write(io_output,'(A,F6.3,A)') 'CBMC inner cutoff (rcutin): ',rcutin,' [Ang]'
+       write(io_output,'(2(A,F6.3),A)') 'AVBMC outer cutoff (rbsmax): ',rbsmax,' [Ang], inner cutoff (rbsmin): ',rbsmin,' [Ang]'
+       write(io_output,'(A,L2)') 'lpresim: ',lpresim
+       write(io_output,'(A,I0)') 'iupdatefix: ',iupdatefix
+       write(io_output,'(A,G16.9)') 'pmcb: ',pmcb
+       write(io_output,'(/,A)') 'molecule type: nchoi1  nchoi nchoir nchoih nchtor nchbna nchbnb icbdir icbsta'
+       do i=1,nmolty
+          write(io_output,'(I13,A,9(1X,I6))') i,':',nchoi1(i),nchoi(i),nchoir(i),nchoih(i),nchtor(i),nchbna(i),nchbnb(i),icbdir(i),icbsta(i)
+       end do
+       write(io_output,'(/,A)') 'molecule type:    pmcbmt         pmall  avbmc_version    pmbias        pmbsmt       pmbias2         pmfix   lrig'
+       do i=1,nmolty
+          write(io_output,'(I13,A,2(1X,G13.6),1X,I10,4(1X,G13.6),1X,L2)') i,':',pmcbmt(i),pmall(i),avbmc_version(i),pmbias(i),pmbsmt(i),pmbias(2),pmfix(i),lrig(i)
+       end do
+    end if
+
+    vol_eff = (4.0E0_dp/3.0E0_dp)*onepi*(rbsmax*rbsmax*rbsmax-rbsmin*rbsmin*rbsmin)
+    nchmax=0
+    nchtor_max=0
+    nchbn_max=0
+    lavbmc1=.false.
+    lavbmc2=.false.
+    lavbmc3=.false.
+    lbias=.false.
+    lneighbor = .false.
+    do i=1,nmolty
+       if (nchoi1(i).gt.nchmax) then
+          nchmax=nchoi1(i)
+       end if
+       if (nchoi(i).gt.nchmax) then
+          nchmax=nchoi(i)
+       end if
+       if (nchoir(i).gt.nchmax) then
+          nchmax=nchoir(i)
+       end if
+       if (nchoih(i).ne.1.and.nunit(i).eq.nugrow(i)) call err_exit(__FILE__,__LINE__,'nchoih must be 1 (one) if nunit = nugrow',myid+1)
+       if (nchtor(i).gt.nchtor_max) then
+          nchtor_max=nchtor(i)
+       end if
+       if (nchbna(i).gt.nchbn_max) then
+          nchbn_max=nchbna(i)
+       end if
+       if (nchbnb(i).gt.nchbn_max) then
+          nchbn_max=nchbnb(i)
+       end if
+       if (abs(icbsta(i)).gt.nunit(i)) call err_exit(__FILE__,__LINE__,'icbsta > nunit for molecule '//integer_to_string(i),myid+1)
+
+       if (avbmc_version(i).eq.1) then
+          lavbmc1(i)=.true.
+       else if (avbmc_version(i).eq.2) then
+          lavbmc2(i)=.true.
+       else if (avbmc_version(i).eq.3) then
+          lavbmc3(i)=.true.
+       end if
+       if (lavbmc1(i).or.lavbmc2(i).or.lavbmc3(i)) then
+          lbias(i) = .true.
+       end if
+       if ((lavbmc2(i).or.lavbmc3(i)).and.(.not.lgaro)) lneighbor = .true.
+
+       if (lring(i).and.pmfix(i).lt.1.and..not.lrig(i)) call err_exit(__FILE__,__LINE__,'a ring can only be used with safe-cbmc',myid+1)
+    end do
+
+    if (any(lbias(1:nmolty)).and.rbsmax.lt.rbsmin) call err_exit(__FILE__,__LINE__,'rbsmax should be greater than rbsmin',myid+1)
+
+    call allocate_cbmc()
+    call read_safecbmc(io_input,lprint)
   end subroutine init_cbmc
 
-  subroutine read_safecbmc()
-    use var_type,only:default_path_length
-    use util_files,only:get_iounit
+  subroutine read_safecbmc(io_input,lprint)
+    use var_type,only:default_path_length,default_string_length
+    use util_string,only:uppercase
+    use util_files,only:get_iounit,readLine
+    integer,intent(in)::io_input
+    LOGICAL,INTENT(IN)::lprint
     character(LEN=default_path_length),parameter::file_safecbmc='fort.23'
+    character(LEN=default_string_length)::line_in
     integer::io_safecbmc,jerr,imol,i,j,bin,bdum
 
+    ! Looking for section SAFE_CBMC
+    REWIND(io_input)
+    CYCLE_READ_SAFECBMC:DO
+       call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section SAFE_CBMC not found',jerr)
+
+       if (UPPERCASE(line_in(1:9)).eq.'SAFE_CBMC') then
+          do imol=1,nmolty+1
+             if (imol.ne.nmolty+1) then
+                if (.not.lrig(imol)) cycle
+             end if
+             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SAFE_CBMC',jerr)
+             if (UPPERCASE(line_in(1:13)).eq.'END SAFE_CBMC') then
+                if (imol.ne.nmolty+1) call err_exit(__FILE__,__LINE__,'Section SAFE_CBMC not complete!',myid+1)
+                exit
+             else if (imol.eq.nmolty+1) then
+                call err_exit(__FILE__,__LINE__,'Section SAFE_CBMC has more than nmolty records!',myid+1)
+             end if
+
+             read(line_in,*) nrig(imol)
+             if (lprint) then
+                write(io_output,'(2(A,I0))') '   Molecule type ',imol,': nrig = ',nrig(imol)
+             end if
+
+             if (nrig(imol).gt.0) then
+                ! read in specific points to keep rigid in growth
+                do i = 1, nrig(imol)
+                   call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                   if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SAFE_CBMC',jerr)
+                   read(line_in,*) irig(imol,i),frig(imol,i)
+                   lrigi(imol,irig(imol,i)) = .true.
+
+                   if (lprint) then
+                      write(io_output,'(3(A,I0))') '      rigid part ',i,': irig = ',irig(imol,i),', frig = ',frig(imol,i)
+                   end if
+                end do
+             else
+                ! we will pick irig at random in each case if nrig = 0
+                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SAFE_CBMC',jerr)
+                read(line_in,*) nrigmin(imol),nrigmax(imol)
+
+                if (lprint) then
+                   write(io_output,'(2(A,I0))') '      nrigmin: ',nrigmin(imol),', nrigmax: ',nrigmax(imol)
+                end if
+             end if
+          end do
+          exit cycle_read_safecbmc
+       end if
+    END DO CYCLE_READ_SAFECBMC
+! -------------------------------------------------------------------
     if (ANY(pmfix(1:nmolty).gt.0)) then
        io_safecbmc=get_iounit()
        open(unit=io_safecbmc,access='sequential',action='read',file=file_safecbmc,form='formatted',iostat=jerr,status='unknown')

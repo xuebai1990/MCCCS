@@ -753,14 +753,15 @@ contains
     return
   end subroutine volume_1box
 
-  subroutine init_moves_volume(file_in)
-    character(LEN=*),intent(in)::file_in
-    integer::jerr,io_input
-    namelist /mc_volume/ allow_cutoff_failure
+  subroutine init_moves_volume(io_input,lprint)
+    integer,intent(in)::io_input
+    LOGICAL,INTENT(IN)::lprint
+    integer::jerr,i,j,k
+    real::rmvolume
+    namelist /mc_volume/ tavol,iratv,pmvlmt,nvolb,pmvolb,box5,box6,pmvol,pmvolx,pmvoly,rmvolume,allow_cutoff_failure
+
     allocate(acsvol(nbxmax),acnvol(nbxmax),acshmat(nbxmax,9),acnhmat(nbxmax,9),bsvol(nbxmax),bnvol(nbxmax),bshmat(nbxmax,9),bnhmat(nbxmax,9),vboxn(nEnergy,nbxmax),vboxo(nEnergy,nbxmax),bxo(nbxmax),byo(nbxmax),bzo(nbxmax),xcmo(nmax),ycmo(nmax),zcmo(nmax),rxuo(nmax,numax),ryuo(nmax,numax),rzuo(nmax,numax),qquo(nmax,numax),neigho_cnt(nmax),neigho(100,nmax),rcuto(nbxmax),stat=jerr)
-    if (jerr.ne.0) then
-       call err_exit(__FILE__,__LINE__,'init_moves_volume: allocation failed',jerr)
-    end if
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_moves_volume: allocation failed',jerr)
 
     acsvol = 0.E0_dp
     acnvol = 0.E0_dp
@@ -772,19 +773,52 @@ contains
     bnhmat = 0.0E0_dp
     rcuto = rcut
 
-    io_input=get_iounit()
-    open(unit=io_input,access='sequential',action='read',file=file_in,form='formatted',iostat=jerr,status='old')
-    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open input file '//trim(file_in),jerr)
-
-    read(UNIT=io_input,NML=mc_volume,iostat=jerr)
-    if (jerr.ne.0.and.jerr.ne.-1) then
-       call err_exit(__FILE__,__LINE__,'reading namelist: mc_volume',jerr)
+    !> read namelist mc_volume
+    nvolb=nbox*(nbox-1)/2
+    do i=1,nvolb
+       pmvolb(i)=real(i,dp)/nvolb
+    end do
+    k=0
+    do i=1,nbox
+       pmvlmt(i)=real(i,dp)/nbox
+       do j=i+1,nbox
+          k=k+1
+          box5(k)=i
+          box6(k)=j
+       end do
+    end do
+    if (lnpt) then
+       rmvolume=1.0E3_dp
+    else
+       rmvolume=1.0E-3_dp
     end if
 
+    rewind(io_input)
+    read(UNIT=io_input,NML=mc_volume,iostat=jerr)
+    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_volume',jerr)
+    rmvol=rmvolume
+
+    if (.not.lfold.and.pmvol.gt.0)  call err_exit(__FILE__,__LINE__,'volume move only correct with folded coordinates',myid+1)
     if (ALL(allow_cutoff_failure.ne.(/-1,0,1,2/))) then
        call err_exit(__FILE__,__LINE__,'mc_volume: invalid value for allow_cutoff_failure = '//integer_to_string(allow_cutoff_failure),-1)
     end if
-    close(io_input)
+
+    if (lprint) then
+       write(io_output,'(/,A,/,A)') 'NAMELIST MC_VOLUME','------------------------------------------'
+       write(io_output,'(A,F4.2)') 'target volume acceptance ratio (tavol): ',tavol
+       write(io_output,'(A,I0)') 'frequency to adjust maximum volume displacement: ',iratv
+       write(io_output,'(A,F8.3)') 'initial maximum volume displacement (rmvol): ',rmvolume
+       write(io_output,'(A,G16.9)') 'pmvol: ',pmvol
+       if (ANY(lsolid(1:nbox))) write(io_output,'(2(A,L2))') 'pmvolx: ',pmvolx,', pmvoly: ',pmvoly
+       do i = 1,nbox
+          write(io_output,'(A,I0,A,G16.9)') '   pmvlmt for box ',i,': ',pmvlmt(i)
+       end do
+       write(io_output,'(A,I0)') 'nvolb: ',nvolb
+       do i = 1,nvolb
+          write(io_output,'(3(A,I0),A,G16.9)') '   box pair ',i,': between ',box5(i),' and ',box6(i),',   pmvolb = ',pmvolb(i)
+          if ((lsolid(box5(i)).and..not.lrect(box5(i))).and.(lsolid(box6(i)).and..not.lrect(box6(i)))) call err_exit(__FILE__,__LINE__,'can not perform volume move between two non-rectangular boxes',myid+1)
+       end do
+    end if
   end subroutine init_moves_volume
 
 !> \brief Adjust maximum volume displacement

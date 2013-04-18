@@ -1655,12 +1655,18 @@ contains
     return
   end subroutine swap
 
-  subroutine init_swap
-    integer::jerr
+  subroutine init_swap(io_input,lprint)
+    use var_type,only:default_string_length
+    use util_string,only:uppercase
+    use util_files,only:readLine
+    integer,intent(in)::io_input
+    LOGICAL,INTENT(IN)::lprint
+    character(LEN=default_string_length)::line_in
+    integer::jerr,i,ipair
+    namelist /mc_swap/ pmswap,pmswmt
+
     allocate(acchem(nbxmax,ntmax),bnchem(nbxmax,ntmax),bsswap(ntmax,npabmax,nbxmax*2),bnswap(ntmax,npabmax,nbxmax*2),bnswap_in(ntmax,2),bnswap_out(ntmax,2),stat=jerr)
-    if (jerr.ne.0) then
-       call err_exit(__FILE__,__LINE__,'init_swap: allocation failed',jerr)
-    end if
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_swap: allocation failed',jerr)
 
     bnswap=0
     bsswap=0
@@ -1672,6 +1678,62 @@ contains
     cnt_wra2=0
     acchem=0.0_dp
     bnchem=0
+
+    !> read namelist mc_swap
+    do i=1,nmolty
+       pmswmt(i)=real(i,dp)/nmolty
+    end do
+
+    rewind(io_input)
+    read(UNIT=io_input,NML=mc_swap,iostat=jerr)
+    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_swap',jerr)
+
+    if (lprint) then
+       write(io_output,'(/,A,/,A)') 'NAMELIST MC_SWAP','------------------------------------------'
+       write(io_output,'(A,G16.9)') 'pmswap: ',pmswap
+       do i = 1,nmolty
+          write(io_output,'(A,I0,A,F8.4)') '   swap probability for molecule type ',i ,' (pmswmt): ',pmswmt(i)
+       end do
+    end if
+
+    ! Looking for section MC_SWAP
+    CYCLE_READ_SWAP:DO
+       call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section MC_SWAP not found',jerr)
+
+       if (UPPERCASE(line_in(1:7)).eq.'MC_SWAP') then
+          do i=1,nmolty+1
+             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_SWAP',jerr)
+             if (UPPERCASE(line_in(1:11)).eq.'END MC_SWAP') then
+                if (i.ne.nmolty+1) call err_exit(__FILE__,__LINE__,'Section MC_SWAP not complete!',myid+1)
+                exit
+             else if (i.eq.nmolty+1) then
+                call err_exit(__FILE__,__LINE__,'Section MC_SWAP has more than nmolty records!',myid+1)
+             end if
+
+             ! nswapb pmswapb
+             read(line_in,*) nswapb(i),(pmswapb(i,ipair),ipair=1,nswapb(i))
+             if (lprint) then
+                write(io_output,'(2(A,I0))') '   number of swap box pairs for molecule type ', i,': ',nswapb(i)
+                do ipair = 1,nswapb(i)
+                   write(io_output,'(A,G16.9)') '   pmswapb: ',pmswapb(i,ipair)
+                end do
+             end if
+
+             do ipair = 1,nswapb(i)
+                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_SWAP',jerr)
+                ! box1 box2
+                read(line_in,*) box1(i,ipair),box2(i,ipair)
+                if (lprint) then
+                   write(io_output,'(A,2(4X,I0))') '   box pair:',box1(i,ipair),box2(i,ipair)
+                end if
+             end do
+          end do
+          exit cycle_read_swap
+       end if
+    END DO CYCLE_READ_SWAP
   end subroutine init_swap
 
   subroutine output_swap_stats(io_output)

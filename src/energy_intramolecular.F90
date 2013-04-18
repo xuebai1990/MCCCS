@@ -10,7 +10,7 @@ MODULE energy_intramolecular
   implicit none
   private
   save
-  public::init_energy_bonded,vtorso,lininter_vib,lininter_bend,U_torsion,U_bonded,allocate_energy_bonded,bonds,angles,dihedrals
+  public::read_energy_bonded,vtorso,lininter_vib,lininter_bend,U_torsion,U_bonded,allocate_energy_bonded,bonds,angles,dihedrals
 
   integer,parameter::torsion_nParameter(8)=(/4,10,3,2,5,10,4,5/)
   integer,allocatable::vib_type(:),ben_type(:),torsion_type(:) !< type 0: dummy torsion type for setting up interaction table
@@ -32,9 +32,8 @@ MODULE energy_intramolecular
 
   real,allocatable::rxvec(:,:),ryvec(:,:),rzvec(:,:),distij2(:,:),distanceij(:,:)
 contains
-  subroutine init_energy_bonded(io_ff,lprint)
+  subroutine read_energy_bonded(io_ff)
     integer,intent(in)::io_ff
-    LOGICAL,INTENT(IN)::lprint
     integer,parameter::initial_size=20
     integer::i,n,jerr
     character(LEN=default_string_length)::line_in
@@ -43,29 +42,23 @@ contains
     call initiateTable(angles,initial_size)
     call initiateTable(dihedrals,initial_size)
 
-    call init_tabulated_potential_bonded(lprint)
+    call init_tabulated_potential_bonded()
 
-    ! Looking for section BONDS
+    !> Looking for section BONDS
     REWIND(io_ff)
     CYCLE_READ_BONDS:DO
        call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
-       if (jerr.ne.0) then
-          exit cycle_read_bonds
-       end if
+       if (jerr.ne.0) exit cycle_read_bonds
 
        if (UPPERCASE(line_in(1:5)).eq.'BONDS') then
           allocate(vib_type(1:initial_size),brvib(1:initial_size),brvibk(1:initial_size),stat=jerr)
-          if (jerr.ne.0) then
-             call err_exit(__FILE__,__LINE__,'init_intramolecular: bonds allocation failed',jerr)
-          end if
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_intramolecular: bonds allocation failed',jerr)
           brvib=0.0E0_dp
           brvibk=0.0E0_dp
           n=0
           do
              call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
-             if (jerr.ne.0) then
-                call err_exit(__FILE__,__LINE__,'Reading section BONDS',jerr)
-             end if
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section BONDS',jerr)
              if (UPPERCASE(line_in(1:9)).eq.'END BONDS') exit
              n=n+1
              read(line_in,*) i
@@ -81,27 +74,21 @@ contains
        end if
     END DO CYCLE_READ_BONDS
 
-    ! Looking for section ANGLES
+    !> Looking for section ANGLES
     REWIND(io_ff)
     CYCLE_READ_ANGLES:DO
        call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
-       if (jerr.ne.0) then
-          exit cycle_read_angles
-       end if
+       if (jerr.ne.0) exit cycle_read_angles
 
        if (UPPERCASE(line_in(1:6)).eq.'ANGLES') then
           allocate(ben_type(1:initial_size),brben(1:initial_size),brbenk(1:initial_size),stat=jerr)
-          if (jerr.ne.0) then
-             call err_exit(__FILE__,__LINE__,'init_intramolecular: angles allocation failed',jerr)
-          end if
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_intramolecular: angles allocation failed',jerr)
           brben=0.0E0_dp
           brbenk=0.0E0_dp
           n=0
           do
              call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
-             if (jerr.ne.0) then
-                call err_exit(__FILE__,__LINE__,'Reading section ANGLES',jerr)
-             end if
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section ANGLES',jerr)
              if (UPPERCASE(line_in(1:10)).eq.'END ANGLES') exit
              n=n+1
              read(line_in,*) i
@@ -118,26 +105,20 @@ contains
        end if
     END DO CYCLE_READ_ANGLES
 
-    ! Looking for section DIHEDRALS
+    !> Looking for section DIHEDRALS
     REWIND(io_ff)
     CYCLE_READ_DIHEDRALS:DO
        call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
-       if (jerr.ne.0) then
-          exit cycle_read_dihedrals
-       end if
+       if (jerr.ne.0) exit cycle_read_dihedrals
 
        if (UPPERCASE(line_in(1:9)).eq.'DIHEDRALS') then
           allocate(vtt(0:9,1:initial_size),torsion_type(1:initial_size),stat=jerr)
-          if (jerr.ne.0) then
-             call err_exit(__FILE__,__LINE__,'init_intramolecular: dihedrals allocation failed',jerr)
-          end if
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_intramolecular: dihedrals allocation failed',jerr)
           vtt=0.0E0_dp
           n=0
           do
              call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
-             if (jerr.ne.0) then
-                call err_exit(__FILE__,__LINE__,'Reading section DIHEDRALS',jerr)
-             end if
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section DIHEDRALS',jerr)
              if (UPPERCASE(line_in(1:13)).eq.'END DIHEDRALS') exit
              n=n+1
              read(line_in,*) i
@@ -168,7 +149,7 @@ contains
     END DO CYCLE_READ_DIHEDRALS
 
     return
-  end subroutine init_energy_bonded
+  end subroutine read_energy_bonded
 
 !DEC$ ATTRIBUTES FORCEINLINE :: vtorso
   function vtorso(xvec1,yvec1,zvec1,xvec2,yvec2,zvec2,xvec3,yvec3,zvec3,itype)
@@ -545,10 +526,9 @@ contains
 !>  make sure potential does not go up to infinity! \n
 !>  KM 12/03/08
 !>cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-  subroutine init_tabulated_potential_bonded(lprint)
+  subroutine init_tabulated_potential_bonded()
     use util_math,only:spline
     use sim_system,only:L_tor_table,L_vib_table,L_bend_table
-    LOGICAL,INTENT(IN)::lprint
     integer,parameter::initial_size=10,grid_size=1500
     integer::jerr,ttor
 
@@ -557,14 +537,11 @@ contains
        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_bonded: allocation failed for vib_table 1',myid+1)
        call read_tabulated_potential_bonded('fort.40',nttor,deg,tabtorso,splpnts,dihedrals)
        if (L_spline) then
-          if (lprint) write(io_output,*) 'using spline interpolation'
           allocate(torderiv2(1:grid_size,1:initial_size),stat=jerr)
           if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_bonded: allocation failed for tor_table 2',myid+1)
           do ttor=1,nttor
              call spline(deg(:,ttor),tabtorso(:,ttor),splpnts(ttor),1.0E31_dp,1.0E31_dp,torderiv2(:,ttor))
           end do
-       else if (L_linear) then
-          if (lprint) write(io_output,*) 'using linear interpolation'
        end if
     end if
 
@@ -572,14 +549,12 @@ contains
        allocate(vibsplits(1:initial_size),vib(1:grid_size,1:initial_size),tabvib(1:grid_size,1:initial_size),stat=jerr)
        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_bonded: allocation failed for vib_table',myid+1)
        call read_tabulated_potential_bonded('fort.41',ntabvib,vib,tabvib,vibsplits,bonds)
-       if (lprint)  write(io_output,'(/,A)') 'using linear interpolation for vibrations'
     end if
 
     if (L_bend_table) then
        allocate(bendsplits(1:initial_size),bend(1:grid_size,1:initial_size),tabbend(1:grid_size,1:initial_size),stat=jerr)
        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_bonded: allocation failed for bend_table',myid+1)
        call read_tabulated_potential_bonded('fort.42',ntabbend,bend,tabbend,bendsplits,angles)
-       if (lprint) write(io_output,*) 'using linear interpolation for 1-3 nonbonded bending'
     end if
   end subroutine init_tabulated_potential_bonded
 

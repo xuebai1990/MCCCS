@@ -12,35 +12,26 @@ module transfer_shared
   integer::freq_opt_bias=500
   namelist /transfer/ lopt_bias,freq_opt_bias
 contains
-  subroutine read_transfer(file_in,lprint)
-    character(LEN=*),INTENT(IN)::file_in
+  subroutine read_transfer(io_input,lprint)
+    use util_string,only:format_n
+    INTEGER,INTENT(IN)::io_input
     LOGICAL,INTENT(IN)::lprint
-    integer::io_input,jerr
+    integer::jerr
 
     allocate(u_bias_diff(nbox,nmolty),num_update_bias(nbox,nmolty),lopt_bias(nmolty),stat=jerr)
-    if (jerr.ne.0) then
-       call err_exit(__FILE__,__LINE__,'read_transfer: memory allocation',jerr)
-    end if
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'read_transfer: memory allocation',jerr)
 
     u_bias_diff=0.0_dp
     num_update_bias=0
     lopt_bias=.false.
 
-    io_input=get_iounit()
-    open(unit=io_input,access='sequential',action='read',file=file_in,form='formatted',iostat=jerr,status='old')
-    if (jerr.ne.0) then
-       call err_exit(__FILE__,__LINE__,'cannot open transfer input file',myid+1)
-    end if
-
     read(UNIT=io_input,NML=transfer,iostat=jerr)
-    if (jerr.ne.0.and.jerr.ne.-1) then
-       call err_exit(__FILE__,__LINE__,'reading namelist: transfer',jerr)
-    end if
-    close(io_input)
+    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: transfer',jerr)
 
     if (lprint) then
-       write(io_output,*) 'lopt_bias: ',lopt_bias
-       write(io_output,*) 'freq_opt_bias: ',freq_opt_bias
+       write(io_output,'(/,A,/,A)') 'NAMELIST TRANSFER','------------------------------------------'
+       write(io_output,'(A,'//format_n(nmolty,'L2')//')') 'lopt_bias: ',lopt_bias(1:nmolty)
+       write(io_output,'(A,I0)') 'freq_opt_bias: ',freq_opt_bias
     end if
   end subroutine read_transfer
 

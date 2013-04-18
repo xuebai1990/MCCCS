@@ -886,16 +886,19 @@ contains
       return
     end subroutine Atom_translation
 
-  subroutine init_moves_simple
-    integer::jerr
+  subroutine init_moves_simple(io_input,lprint)
+    integer,intent(in)::io_input
+    LOGICAL,INTENT(IN)::lprint
+    integer::jerr,i
+    real::armtra,rmtra,rmrot
+    namelist /mc_simple/ armtra,tatra,pmtra,pmtrmt,rmtra,tarot,pmromt,rmrot
+
     allocate(acntrax(ntmax,nbxmax),acntray(ntmax,nbxmax),acntraz(ntmax,nbxmax),acnrotx(ntmax,nbxmax),acnroty(ntmax,nbxmax)&
      ,acnrotz(ntmax,nbxmax),acstrax(ntmax,nbxmax),acstray(ntmax,nbxmax),acstraz(ntmax,nbxmax),acsrotx(ntmax,nbxmax)&
      ,acsroty(ntmax,nbxmax),acsrotz(ntmax,nbxmax),bntrax(ntmax,nbxmax),bntray(ntmax,nbxmax),bntraz(ntmax,nbxmax)&
      ,bstrax(ntmax,nbxmax),bstray(ntmax,nbxmax),bstraz(ntmax,nbxmax),bnrotx(ntmax,nbxmax),bnroty(ntmax,nbxmax)&
      ,bnrotz(ntmax,nbxmax),bsrotx(ntmax,nbxmax),bsroty(ntmax,nbxmax),bsrotz(ntmax,nbxmax),stat=jerr)
-    if (jerr.ne.0) then
-       call err_exit(__FILE__,__LINE__,'init_moves_simple: allocation failed',jerr)
-    end if
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_moves_simple: allocation failed',jerr)
 
     Abstrax = 0.0E0_dp
     Abstray = 0.0E0_dp
@@ -927,6 +930,46 @@ contains
     bnrotx = 0.0E0_dp
     bnroty = 0.0E0_dp
     bnrotz = 0.0E0_dp
+
+    !> read namelist mc_simple
+    do i=1,nmolty
+       pmtrmt(i)=real(i,dp)/nmolty
+       pmromt(i)=real(i,dp)/nmolty
+    end do
+    armtra=0.01_dp
+    rmtra=0.3_dp
+    rmrot=0.4_dp
+
+    rewind(io_input)
+    read(UNIT=io_input,NML=mc_simple,iostat=jerr)
+    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_simple',jerr)
+
+    if (lprint) then
+       write(io_output,'(/,A,/,A)') 'NAMELIST MC_SIMPLE','------------------------------------------'
+       write(io_output,'(A,G16.9)') 'initial maximum displacement for atom translation: ',armtra
+       write(io_output,'(A,F4.2)') 'target translation acceptance ratio: ',tatra
+       write(io_output,'(A,G16.9)') 'initial maximum displacement for molecule translation: ',rmtra
+       write(io_output,'(A,G16.9)') 'pmtra: ',pmtra
+       do i=1,nmolty
+          write(io_output,'(A,I0,A,F8.4)') '   translation probability for molecule type ',i,' (pmtrmt): ',pmtrmt(i)
+       end do
+       write(io_output,'(A,F4.2)') 'target rotation acceptance ratio: ',tarot
+       write(io_output,'(A,G16.9)') 'initial maximum displacement for molecule rotation: ',rmrot
+       write(io_output,'(A,G16.9)') 'pmrot: ',1.0E0_dp
+       do i=1,nmolty
+          write(io_output,'(A,I0,A,f8.4)') '   rotational probability for molecule type ',i,' (pmromt): ',pmromt(i)
+       end do
+    end if
+
+    Armtrax=armtra
+    Armtray=armtra
+    Armtraz=armtra
+    rmtrax=rmtra
+    rmtray=rmtra
+    rmtraz=rmtra
+    rmrotx=rmrot
+    rmroty=rmrot
+    rmrotz=rmrot
   end subroutine init_moves_simple
 
   subroutine update_translation_rotation_max_displacement(io_output)

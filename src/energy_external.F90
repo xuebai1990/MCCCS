@@ -174,42 +174,54 @@ contains
 
   end function U_ext
 
-  subroutine init_energy_external(nntype,lprint)
+  subroutine init_energy_external(io_input,lprint)
     use util_runtime,only:err_exit
-    use sim_system,only:ljoe,lmuir,io_output
+    use sim_system,only:nntype,nbox,ljoe,lmuir,io_output,lelect_field,Elect_field
     use energy_sami
-    integer,intent(in)::nntype
+    INTEGER,INTENT(IN)::io_input
     LOGICAL,INTENT(IN)::lprint
     integer::jerr
+    namelist /E_field/ Elect_field
+
+    if (lelect_field) then
+       !> read namelist E_field
+       Elect_field=0.0_dp
+
+       rewind(io_input)
+       read(UNIT=io_input,NML=E_field,iostat=jerr)
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'reading namelist: E_field',jerr)
+
+       if (lprint) then
+          write(io_output,*) 'Electric field in z direction: ',Elect_field(1:nbox),' [V/A]'
+       end if
+    end if
 
     if ( ljoe ) then
        allocate(extc12(1:nntype),extc3(1:nntype),extz0(1:nntype),stat=jerr)
-       if (jerr.ne.0) then
-          call err_exit(__FILE__,__LINE__,'init_pairwise: nonbond allocation failed',jerr)
-       end if
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_pairwise: nonbond allocation failed',jerr)
 
-! STANDARD METHYL GROUP
+       ! STANDARD METHYL GROUP
        extc12(4) = 3.41E7_dp
        extc3(4)  = 20800.0E0_dp
        extz0(4)  = 0.86E0_dp
 
-! STANDARD METHYLENE GROUP
+       ! STANDARD METHYLENE GROUP
        extc12(5) = 2.80E7_dp
        extc3(5)  = 17100.0E0_dp
        extz0(5)  = 0.86E0_dp
 
-! Methane
+       ! Methane
        extc12(3) = 3.41E7_dp
        extc3(3)  = 20800.0E0_dp
        extz0(3)  = 0.86E0_dp
 
-! Martin's methyl (CH3)
+       ! Martin's methyl (CH3)
        extc12(18) = 3.41E7_dp
        extc3(18)  = 20800.0E0_dp
        extz0(18)  = 0.86E0_dp
     end if
 
-! calculate constants for lmuir external potential ***
+    ! calculate constants for lmuir external potential ***
     if ( lmuir ) then
        sigpri = 0.715E0_dp * sqrt( 3.8E0_dp * 3.93E0_dp )
        c9ch2 = 4.0E0_dp * ( 1.43E0_dp * sqrt(80.0E0_dp*47.0E0_dp) ) * sigpri**9

@@ -1,4767 +1,4709 @@
-seed
-44
-iounit lecho lverbose run_num  suffix
-2  .true. .true. 1       a
-lnpt   lgibbs lgrand   lanes  lvirial lmipsw  lexpee
-.true. .true. .false. .false. .false. .false. .false.
-lijall lchgall lewald ldielect ltailc lshift ltailcZeo
-.false. .false. .true. .false. .false. .false. .true.
-L_add N_add  N_box2add N_moltyp2add
-.false. 9000    2         3
-L_sub N_sub  N_box2sub N_moltyp2sub
-.false. 200     2         3
-l_Coul_CBMC lcutcm ldual lneigh
-.true.      .true. .true. .false.
-Number of unit cells in each of a,b, and c directions
-1. 1. 1.
-nstep   lstep  lpresim iupdatefix
-1     .false.  .false.  100
-lslit lexzeo lzgrid lelect_field ljoe lsami lmuir lpsurf lgraphite lcorreg llj lexpsix lmmff lninesix lgenlj lgaro lionic
-.false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .true.
-L_tor_table L_spline L_linear L_vib_table L_bend_table L_vdW_table L_elect_table
-.false.   .false.     .false. .false. .false. .false. .false.
-nbox
-3
-express(ibox=1,nbox)[MPa]
-0.10d0  0.10d0  0.10d0
-ghost_particles(ibox=1,nbox)
-0 0 0
-L_Ewald_Auto
-.false.
-temp     fqtemp  Elect_field(ibox=1,nbox)
-323.0d0  5.0d0   0.0d0 0.0d0 0.0d0
-ianalyze nbin  lrdf  lintra   lstretch  lgvst   lbend   lete   lrhoz bin_width
-1000000    1  .false. .false.  .false.  .false.
-.false. .false. .false.  0.1
-iprint imv iratio iblock  idiele   L_movie_xyz  iheatcapacity
-1   200    1 1   3000000       .false. 100000000
-boxlx   boxly    boxlz   lsolid   lrect   kalp   rcutchg  rcutnn numberDimensionIsIsotropic - box 1
-20.0d0  25.98d0  90.0d0  .false.  .true.  0.321d0  9.99d0  0.0d0  0
-boxlx   boxly    boxlz   lsolid   lrect   kalp   rcutchg  rcutnn numberDimensionIsIsotropic - box 2
-40.0d0  40.0d0   40.0d0 .false.  .false.  0.321d0  9.99d0  0.0d0  0
-boxlx   boxly    boxlz   lsolid   lrect   kalp   rcutchg  rcutnn numberDimensionIsIsotropic - box 3
-100.0d0 100.0d0  100.0d0 .false.  .false. 1.0d-8  40.0d0   0.0d0  0
-nchain nmolty
-1801    34
-moltyp
-400	800	192	312	22 	
-30	18	1	1	1		
-1	1	1	1	1
-1	1	1	1	1	
-1	1	1	1	1	
-1	1	1	1	1 	
-1	1	1	1
-lmixlb lmixjo ltab
- .true. .false. .false.
-nijspecial
+
+ &mc_shared
+     seed=          44
+     nbox=           3
+     nmolty=          34
+     nchain=        1801
+     nstep=         1
+     lstop= F
+     iratio=          1
+     rmin=  0.500000000000000     
+     softcut=   200.000000000000     
+     linit= F
+     lreadq= F
+     L_add= F
+     L_sub= F
+     N_add=        9000
+     N_box2add=           2
+     N_moltyp2add=           3
+     N_sub=         200
+     N_box2sub=           2
+     N_moltyp2sub=           3
+ /
+
+
+ &analysis
+     iprint=          1
+     imv=          200
+     iblock=          1
+     iratp=         100
+     idiele=     3000000
+     iheatcapacity=   100000000
+     ianalyze=     1000000
+     nbin=           1
+     lrdf= F
+     lintra= F
+     lstretch= F
+     lgvst= F
+     lbend= F
+     lete= F
+     lrhoz= F
+     bin_width=  0.100000000000000     
+     lucall= F
+     ucheck=           0           0           0           0           0
+           0           0           0           0           0           0
+           0           0           0           0           0           0
+           0           0           0           0           0           0
+           0           0           0           0           0           0
+           0           0           0           0           0           0
+     nvirial=           0
+     starvir=  0.000000000000000E+000
+     stepvir=  0.000000000000000E+000
+     ntemp=           0
+ /
+
+
+ &mc_volume
+     tavol=  0.500000000000000     
+     iratv=     5000000
+     pmvlmt=  0.000000000000000E+000  0.900000000000000     
+   1.00000000000000     
+     nvolb=           1
+     pmvolb=   1.00000000000000     
+     box5=           1
+     box6=           2
+     pmvol=  1.000000000000000E-003
+     pmvolx=  0.000000000000000E+000
+     pmvoly=  0.000000000000000E+000
+     rmvolume=  0.100000000000000     
+ /
+
+
+ &mc_swatch
+     pmswat=  0.300000000000000     
+     nswaty=          37
+     pmsatc=  2.000000000000000E-002  4.000000000000000E-002
+  6.000000000000000E-002  8.000000000000000E-002  0.100000000000000     
+  0.130000000000000       0.160000000000000       0.190000000000000     
+  0.220000000000000       0.250000000000000       0.280000000000000     
+  0.310000000000000       0.340000000000000       0.370000000000000     
+  0.400000000000000       0.430000000000000       0.460000000000000     
+  0.490000000000000       0.520000000000000       0.550000000000000     
+  0.580000000000000       0.610000000000000       0.640000000000000     
+  0.670000000000000       0.700000000000000       0.730000000000000     
+  0.760000000000000       0.790000000000000       0.820000000000000     
+  0.860000000000000       0.890000000000000       0.920000000000000     
+  0.940000000000000       0.965000000000000       0.970000000000000     
+  0.985000000000000        1.00000000000000     
+ /
+
+
+ &mc_swap
+     pmswap=  0.400000000000000     
+     pmswmt=  0.200000000000000       0.400000000000000     
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000   1.00000000000000     
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000
+ /
+
+
+ &mc_cbmc
+     rcutin=   6.00000000000000     
+     pmcb=  0.600000000000000     
+     pmcbmt=  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.100000000000000        1.00000000000000       0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000
+     pmall=  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000
+     nchoi1=          20          20           1           1           1
+           1           1          10          10          10           1
+           1           1           1           1           1           1
+           1           1           1           1           1           1
+           1           1           1           1           1           1
+           1           1           1           1           1
+     nchoi=          20          20           1           1           1
+          10          20          10          10          10           1
+           1           1           1           1           1           1
+           1           1           1           1           1           1
+           1           1           1           1           1           1
+           1           1           1           1           1
+     nchoir=          20          20           1           1           1
+           1           1          10          10          10           1
+           1           1           1           1           1           1
+           1           1           1           1           1           1
+           1           1           1           1           1           1
+           1           1           1           1           1
+     nchoih=           1           1           1           1           1
+           1           1           1           1           1           1
+           1           1           1           1           1           1
+           1           1           1           1           1           1
+           1           1           1           1           1           1
+           1           1           1           1           1
+     nchtor=           1           1           1           1           1
+          10          20           1           1           1           1
+           1           1           1           1           1           1
+           1           1           1           1           1           1
+           1           1           1           1           1           1
+           1           1           1           1           1
+     nchbna=           1         100           1           1           1
+         100        1000           1           1           1           1
+           1           1           1           1           1           1
+           1           1           1           1           1           1
+           1           1           1           1           1           1
+           1           1           1           1           1
+     nchbnb=           1         100           1           1           1
+         100        1000           1           1           1           1
+           1           1           1           1           1           1
+           1           1           1           1           1           1
+           1           1           1           1           1           1
+           1           1           1           1           1
+     icbdir=           0           0           0           0           0
+           1           1           0           0           0           0
+           0           0           0           0           0           0
+           0           0           0           0           0           0
+           0           0           0           0           0           0
+           0           0           0           0           0
+     icbsta=           0           0           0           0           0
+           5         -10           0           0           0           0
+           0           0           0           0           0           0
+           0           0           0           0           0           0
+           0           0           0           0           0           0
+           0           0           0           0           0
+     rbsmax=   5.00000000000000     
+     rbsmin=   3.00000000000000     
+     avbmc_version=           0           0           0           0           0
+           0           0           0           0           0           0
+           0           0           0           0           0           0
+           0           0           0           0           0           0
+           0           0           0           0           0           0
+           0           0           0           0           0
+     pmbias=  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000
+     pmbsmt=  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000
+     pmbias2=  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000
+     pmfix=  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.400000000000000       0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000
+     lrig= F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F
+     lpresim= F
+     iupdatefix=         100
+ /
+
+
+ &mc_ee
+     pmexpc=  0.000000000000000E+000
+     pmeemt=  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000
+     pmexpc1=  0.000000000000000E+000
+     lexpand= F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F
+ F
+ /
+
+
+ &mc_simple
+     armtra=  0.000000000000000E+000
+     rmtra=  0.300000000000000     
+     rmrot=  0.400000000000000     
+     tatra=  0.500000000000000     
+     tarot=  0.500000000000000     
+     pmtra=  0.800000000000000     
+     pmtrmt=  0.370000000000000       0.730000000000000     
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.740000000000000     
+  0.750000000000000       0.760000000000000       0.770000000000000     
+  0.780000000000000       0.790000000000000       0.800000000000000     
+  0.810000000000000       0.820000000000000       0.830000000000000     
+  0.840000000000000       0.850000000000000       0.860000000000000     
+  0.870000000000000       0.880000000000000       0.890000000000000     
+  0.900000000000000       0.910000000000000       0.920000000000000     
+  0.930000000000000       0.940000000000000       0.950000000000000     
+  0.960000000000000       0.970000000000000       0.980000000000000     
+  0.990000000000000        1.00000000000000     
+     pmromt=  0.370000000000000       0.730000000000000     
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.740000000000000     
+  0.750000000000000       0.760000000000000       0.770000000000000     
+  0.780000000000000       0.790000000000000       0.800000000000000     
+  0.810000000000000       0.820000000000000       0.830000000000000     
+  0.840000000000000       0.850000000000000       0.860000000000000     
+  0.870000000000000       0.880000000000000       0.890000000000000     
+  0.900000000000000       0.910000000000000       0.920000000000000     
+  0.930000000000000       0.940000000000000       0.950000000000000     
+  0.960000000000000       0.970000000000000       0.980000000000000     
+  0.990000000000000        1.00000000000000     
+ /
+
+
+ &mc_flucq
+     taflcq=  0.950000000000000     
+     rmflucq=  0.100000000000000     
+     pmflcq=  0.000000000000000E+000
+     pmfqmt=  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000
+     lflucq= F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F
+     lqtrans= F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F
+ F
+     fqegp=  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000  0.000000000000000E+000
+  0.000000000000000E+000  0.000000000000000E+000
+     nchoiq=           1           1           1
+ /
+
+
+SIMULATION_BOX
+! boxlx boxly boxlz lsolid lrect kalp rcut rcutnn numDimensionIsIstropic pressure temperature use_linkcell rintramax ghost_particles lideal ltwice
+  20.000   25.980   90.000  F  T  0.321  9.990  0.000 0     0.1  323.00  F 0.0 0  F  T
+! nchain_1 ... nchain_nmolty inix iniy iniz inirot inimix zshift dshift
+400 800 192 312 22 30 18 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 12 12 13 0 0  0.0  2.000
+! boxlx boxly boxlz lsolid lrect kalp rcut rcutnn numDimensionIsIstropic pressure temperature use_linkcell rintramax ghost_particles lideal ltwice
+  40.000   40.000   40.000  F  F  0.321  9.990  0.000 0     0.1  323.00  F 0.0 0  F  F
+! nchain_1 ... nchain_nmolty inix iniy iniz inirot inimix zshift dshift
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0  0.0  2.000
+! boxlx boxly boxlz lsolid lrect kalp rcut rcutnn numDimensionIsIstropic pressure temperature use_linkcell rintramax ghost_particles lideal ltwice
+ 100.000  100.000  100.000  F  F  1.0E-8 40.000  0.000 0     0.1  323.00  F 0.0 0  T  F
+! nchain_1 ... nchain_nmolty inix iniy iniz inirot inimix zshift dshift
+0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 3 3 3 0 1  0.0 10.000
+END SIMULATION_BOX
+
+
+MOLECULE_TYPE
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+4 4 4 10 0  T 10  F 4  T  F 1000000 -1500.0 -1500.0     0.0  F 0.0  F  F
+! n, growpoint_1 ... growpoint_n
 0
-ispec   jspec   aspec   bspec
-1       2       1.0d0   1.0d0
-rmin    softcut   rcutin rbsmax rbsmin 
-0.5d0    200.0d0   6.0d0  5.0d0  3.0d0 
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp---[H2O]---Moltyp 1
-4     4      4      10       0     .true. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid  lrig     lsetup  isolute eta 
- 10     .false. .true. .false.  .false.  1000000   -1500.0d0 -1500.0d0 0.0d0
-lq14scale qscale
-.false.    0.0
-growpoints
-0
-unit ntype leaderq
-1    114    1
-vibration
+! unit ntype leaderq
+1 114 1
+! stretching
 2
-2   26
-3   26
-bending
+2 26
+3 26
+! bending
 0
-torsion
+! torsion
 0
-unit ntype leaderq
-2    115   2
-vibration
+! unit ntype leaderq
+2 115 2
+! stretching
 1
-1  26
-bending
+1 26
+! bending
 1
-1 3  44
-torsion
+1 3 44
+! torsion
 0
-unit ntype leaderq
-3    115   2
-vibration
+! unit ntype leaderq
+3 115 2
+! stretching
 1
-1  26
-bending
+1 26
+! bending
 1
-1 2  44
-torsion
+1 2 44
+! torsion
 0
-unit ntype leaderq
-4    116    2
-vibration
+! unit ntype leaderq
+4 116 2
+! stretching
 1
 1 27
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1  lavbmc2 lavbmc3 fqegp
-3     3      3      3        0   .true. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid  lrig     lsetup eta  ACN
- 3     .false. .true. .false.  .false. 100000 -1500.0d0 -1500.0d0 0.0d0
-lq14scale qscale
-.false.    0.0
-growpoint
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+3 3 3 3 0  T 3  F 3  T  F 100000 -1500.0 -1500.0     0.0  F 0.0  F  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype [N] 
-1   151 1
-vibration 
+! unit ntype leaderq
+1 151 1
+! stretching
 1
-2    48
-bending 
+2 48
+! bending
 1
 2 3 49
-torsion
+! torsion
 0
-unit ntype [C]
-2  152 1
-vibration 
+! unit ntype leaderq
+2 152 1
+! stretching
 2
-1   48
-3   1
-bending 
+1 48
+3 1
+! bending
 0
-torsion
+! torsion
 0
-unit ntype [CH3]
-3   154   1
-vibration 
+! unit ntype leaderq
+3 154 1
+! stretching
 1
-2  1
-bending 
+2 1
+! bending
 1
 2 1 49
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp---[Si]---Moltyp 3
-1     1      1      1       0     .true. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid  lrig     lsetup  isolute eta
- 10     .false. .false. .false.  .false.    10000   0.0d0 0.0d0 0.0d0
-lq14scale qscale
-.false.    0.0
-unit ntype leaderq 
-1	177	1
-vibration
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+1 1 1 1 0  T 10  F 1  F  F 10000     0.0     0.0     0.0  F 0.0  F  F
+! unit ntype leaderq
+1 177 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp---[O]--Moltyp 4
-1     1      1      1       0     .true. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid  lrig     lsetup  isolute eta
- 10     .false. .false. .false.  .false.    10000   0.0d0 0.0d0 0.0d0
-lq14scale qscale
-.false.    0.0
-unit ntype leaderq 
-1	178	1
-vibration
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+1 1 1 1 0  T 10  F 1  F  F 10000     0.0     0.0     0.0  F 0.0  F  F
+! unit ntype leaderq
+1 178 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-1     1      1       1       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta--[ HELIUM] Moltyp 5
- 1     .false.  .false.  .false. .false.  1000000   0.0d0 0.0d0  0.0d0
-lq14scale qscale
-.false.    0.0
-unit ntype  leaderq
-1    124       1
-vibration
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+1 1 1 1 0  F 1  F 1  F  F 1000000     0.0     0.0     0.0  F 0.0  F  F
+! unit ntype leaderq
+1 124 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp---[O3-Si-OH]--Moltyp 6
-6     6      6      2       0     .true. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid  lrig     lsetup  isolute eta
- 9     .false. .false. .false.  .false.  1000000   0.0d0 0.0d0 0.0d0
-lq14scale qscale
-.false.    0.0
-unit ntype leaderq   ---[O-1]
-1	178	1
-vibration
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+6 6 6 2 0  T 9  F 6  F  F 1000000     0.0     0.0     0.0  F 0.0  F  F
+! unit ntype leaderq
+1 178 1
+! stretching
 1
-4	56   
-bending
+4 56
+! bending
 3
-4 5     3
-4 2     3
-4 3    3
-torsion
+4 5 3
+4 2 3
+4 3 3
+! torsion
 1
-4 5 6	23
-unit ntype leaderq   ---[O-2]
-2	178	2
-vibration
+4 5 6 23
+! unit ntype leaderq
+2 178 2
+! stretching
 1
-4	56   
-bending
+4 56
+! bending
 3
-4 5     3
-4 3     3
-4 1     3
-torsion
+4 5 3
+4 3 3
+4 1 3
+! torsion
 1
-4 5 6	23
-unit ntype leaderq   ---[O-3]
-3	178	3
-vibration
+4 5 6 23
+! unit ntype leaderq
+3 178 3
+! stretching
 1
-4	56   
-bending
+4 56
+! bending
 3
-4 5     3
-4 2     3
-4 1     3
-torsion
+4 5 3
+4 2 3
+4 1 3
+! torsion
 1
-4 5 6	23
-unit ntype leaderq  ---Si
-4	177	4
-vibration
+4 5 6 23
+! unit ntype leaderq
+4 177 4
+! stretching
 4
-1     56
-2    56 
-3     56
-5	56
-bending
+1 56
+2 56
+3 56
+5 56
+! bending
 1
 5 6 46
-torsion
+! torsion
 0
-unit ntype leaderq ---O
-5	183	5
-vibration
+! unit ntype leaderq
+5 183 5
+! stretching
 2
-4	56
-6	16
-bending
+4 56
+6 16
+! bending
 3
-4 1  3
-4 2  3
-4 3  3
-torsion
+4 1 3
+4 2 3
+4 3 3
+! torsion
 0
-unit ntype leaderq ---H
-6	61	6
-vibration
+! unit ntype leaderq
+6 61 6
+! stretching
 1
-5	16
-bending
+5 16
+! bending
 1
-5 4   46
-torsion
+5 4 46
+! torsion
 3
-5 4 1	23
-5 4 2	23
-5 4 3	23
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp---[SiOSiC8(CH3)_2]--- Moltyp 7
-26     26      26      18       5     .true. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid  lrig     lsetup  isolute eta
- 8     .false. .false. .false.  .false.  1000000   0.0d0 0.0d0 0.0d0
-lq14scale qscale
-.false.    0.0
-unit ntype leaderq   ---[O-1]
-1	178	1
-vibration
+5 4 1 23
+5 4 2 23
+5 4 3 23
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+26 26 26 18 5  T 8  F 26  F  F 1000000     0.0     0.0     0.0  F 0.0  F  T
+! unit ntype leaderq
+1 178 1
+! stretching
 1
-4	56   
-bending
+4 56
+! bending
 3
-4 5     3
-4 2     3
-4 3    3
-torsion
+4 5 3
+4 2 3
+4 3 3
+! torsion
 1
 4 5 6 3
-unit ntype leaderq   ---[O-2]
-2	178	2
-vibration
+! unit ntype leaderq
+2 178 2
+! stretching
 1
-4	56   
-bending
+4 56
+! bending
 3
-4 5     3
-4 3     3
-4 1     3
-torsion
+4 5 3
+4 3 3
+4 1 3
+! torsion
 1
 4 5 6 3
-unit ntype leaderq   ---[O-3]
-3	178	3
-vibration
+! unit ntype leaderq
+3 178 3
+! stretching
 1
-4	56   
-bending
+4 56
+! bending
 3
-4 5     3
-4 2     3
-4 1     3
-torsion
+4 5 3
+4 2 3
+4 1 3
+! torsion
 1
 4 5 6 3
-unit ntype leaderq   ---[Si-1]
-4	177	4
-vibration
+! unit ntype leaderq
+4 177 4
+! stretching
 4
-1	56   
-2	56
-3	56
-5	56
-bending
+1 56
+2 56
+3 56
+5 56
+! bending
 1
-5 6     71
-torsion
+5 6 71
+! torsion
 3
-5 6 9	3
-5 6 7	3
-5 6 8	3
-unit ntype leaderq   ---[O-1]
-5	178	5
-vibration
+5 6 9 3
+5 6 7 3
+5 6 8 3
+! unit ntype leaderq
+5 178 5
+! stretching
 2
-4	56
-6	56   
-bending
+4 56
+6 56
+! bending
 6
-4 1	3
-4 2     3
-4 3     3 
-6 7     3
-6 8	3
-6 9	3
-torsion
+4 1 3
+4 2 3
+4 3 3
+6 7 3
+6 8 3
+6 9 3
+! torsion
 1
-6 9 10	3
-unit ntype leaderq   --[Si-2]
-6	179	6
-vibration
+6 9 10 3
+! unit ntype leaderq
+6 179 6
+! stretching
 4
-5	56
-7	57
-8	57
-9	57
-bending
+5 56
+7 57
+8 57
+9 57
+! bending
 2
-5 4	71
-9 10     1 
-torsion
+5 4 71
+9 10 1
+! torsion
 4
 5 4 1 3
 5 4 2 3
 5 4 3 3
-9 10 11  1  
-unit ntype leaderq   --CH3(1)
-7	180	7
-vibration
+9 10 11 1
+! unit ntype leaderq
+7 180 7
+! stretching
 1
-6	57
-bending
+6 57
+! bending
 3
-6 5     3
-6 8	3
-6 9	3	
-torsion
+6 5 3
+6 8 3
+6 9 3
+! torsion
 2
-6 9 10   3
-6 5 4	3 
-unit ntype leaderq   --CH3(2)
-8    180  	8
-vibration
+6 9 10 3
+6 5 4 3
+! unit ntype leaderq
+8 180 8
+! stretching
 1
-6	57
-bending
+6 57
+! bending
 3
-6 5	3
-6 9	3
-6 7	3
-torsion
-2
-6 5 4  3
-6 9 10	3
-unit ntype leaderq   --CH2(1)
-9	181	9
-vibration
-2
-6	57
-10	1
-bending
-4
-6 5	3
-6 7	3
-6 8	3
-10 11   1
-torsion
+6 5 3
+6 9 3
+6 7 3
+! torsion
 2
 6 5 4 3
-10 11 12  1
-unit ntype leaderq   --CH2(2)
-10	5	10
-vibration
+6 9 10 3
+! unit ntype leaderq
+9 181 9
+! stretching
 2
-9	1
-11	1
-bending
-2
-9 6	1
-11 12	1
-torsion
+6 57
+10 1
+! bending
 4
-11 12 13  1 
-9 6 5 	3
-9 6 7	3
-9 6 8	3
-unit ntype leaderq   --CH2(3)
-11	5	11
-vibration
+6 5 3
+6 7 3
+6 8 3
+10 11 1
+! torsion
 2
-10	1
-12	1
-bending
+6 5 4 3
+10 11 12 1
+! unit ntype leaderq
+10 5 10
+! stretching
 2
-10 9 	1
-12 13	1
-torsion
+9 1
+11 1
+! bending
 2
-12 13 14  1 
-10 9 6 	1
-unit ntype leaderq   --CH2(4)
-12	5	11
-vibration
-2	
-11	1
-13	1
-bending
+9 6 1
+11 12 1
+! torsion
+4
+11 12 13 1
+9 6 5 3
+9 6 7 3
+9 6 8 3
+! unit ntype leaderq
+11 5 11
+! stretching
 2
-11 10 	1
-13 14	1
-torsion
+10 1
+12 1
+! bending
 2
-13 14 15  1 
-11 10 9 	1
-unit ntype leaderq   --CH2(5)
-13	5	11
-vibration
+10 9 1
+12 13 1
+! torsion
 2
-12	1
-14	1
-bending
+12 13 14 1
+10 9 6 1
+! unit ntype leaderq
+12 5 11
+! stretching
 2
-12 11 	1
-14 15	1
-torsion
+11 1
+13 1
+! bending
 2
-14 15 16  1
-12 11 10 	1
-unit ntype leaderq   --CH2(6)
-14	5	11
-vibration
+11 10 1
+13 14 1
+! torsion
 2
-13	1
-15	1
-bending
+13 14 15 1
+11 10 9 1
+! unit ntype leaderq
+13 5 11
+! stretching
 2
-13 12 	1
-15 16	1
-torsion
+12 1
+14 1
+! bending
 2
-13 12 11  1
+12 11 1
+14 15 1
+! torsion
+2
+14 15 16 1
+12 11 10 1
+! unit ntype leaderq
+14 5 11
+! stretching
+2
+13 1
+15 1
+! bending
+2
+13 12 1
+15 16 1
+! torsion
+2
+13 12 11 1
 15 16 17 1
-unit ntype leaderq   --CH2(7)
-15	5	11
-vibration
+! unit ntype leaderq
+15 5 11
+! stretching
 2
-14	1
-16	1
-bending
+14 1
+16 1
+! bending
 2
-14 13   1
-16 17  1
-torsion
-2 
-14 13 12  1 
+14 13 1
+16 17 1
+! torsion
+2
+14 13 12 1
 16 17 18 1
-unit ntype leaderq   --CH3(8)
-16	5	11
-vibration
+! unit ntype leaderq
+16 5 11
+! stretching
 2
-15	1
-17	1
-bending
+15 1
+17 1
+! bending
 2
-15 14   1
-17 18  1
-torsion
+15 14 1
+17 18 1
+! torsion
 2
-15 14 13 1  
+15 14 13 1
 17 18 19 1
-unit ntype leaderq   --CH2(9)
-17	5	11
-vibration
+! unit ntype leaderq
+17 5 11
+! stretching
 2
-16	1
-18	1
-bending
+16 1
+18 1
+! bending
 2
-16 15   1
-18 19  1
-torsion
+16 15 1
+18 19 1
+! torsion
 2
-16 15 14  1  
+16 15 14 1
 18 19 20 1
-unit ntype leaderq   --CH2(10)
-18	5	11
-vibration
+! unit ntype leaderq
+18 5 11
+! stretching
 2
-17	1
-19	1
-bending
+17 1
+19 1
+! bending
 2
-17 16    1
+17 16 1
 19 20 1
-torsion
+! torsion
 2
-17 16 15   1  
+17 16 15 1
 19 20 21 1
-unit ntype leaderq   --CH2(11)
-19	5	11
-vibration
+! unit ntype leaderq
+19 5 11
+! stretching
 2
-18	1
-20	1
-bending
+18 1
+20 1
+! bending
 2
-18 17     1
+18 17 1
 20 21 1
-torsion
+! torsion
 2
-18 17 16    1  
+18 17 16 1
 20 21 22 1
-unit ntype leaderq   --CH2(12)
-20	5	11
-vibration
+! unit ntype leaderq
+20 5 11
+! stretching
 2
-19	1
-21	1
-bending
+19 1
+21 1
+! bending
 2
-19 18      1
+19 18 1
 21 22 1
-torsion
+! torsion
 2
-19 18 17     1  
+19 18 17 1
 21 22 23 1
-unit ntype leaderq   --CH2(13)
-21	5	11
-vibration
+! unit ntype leaderq
+21 5 11
+! stretching
 2
-20	1
-22	1
-bending
+20 1
+22 1
+! bending
 2
-20 19        1
+20 19 1
 22 23 1
-torsion
+! torsion
 2
-20 19 18      1  
+20 19 18 1
 22 23 24 1
-unit ntype leaderq   --CH2(14)
-22	5	11
-vibration
+! unit ntype leaderq
+22 5 11
+! stretching
 2
-21	1
-23	1
-bending
+21 1
+23 1
+! bending
 2
-21 20        1
+21 20 1
 23 24 1
-torsion
+! torsion
 2
-21 20 19       1  
+21 20 19 1
 23 24 25 1
-unit ntype leaderq   --CH2(15)
-23	5	11
-vibration
+! unit ntype leaderq
+23 5 11
+! stretching
 2
-22	1
-24	1
-bending
+22 1
+24 1
+! bending
 2
-22 21         1
+22 21 1
 24 25 1
-torsion
+! torsion
 2
-22 21 20        1  
+22 21 20 1
 24 25 26 1
-unit ntype leaderq   --CH2(16)
-24	5	11
-vibration
+! unit ntype leaderq
+24 5 11
+! stretching
 2
-23	1
-25	1
-bending
+23 1
+25 1
+! bending
 2
-23 22          1
+23 22 1
 25 26 1
-torsion
+! torsion
 1
-23 22 21         1
-unit ntype leaderq   --CH2(17)
-25	5	11
-vibration
+23 22 21 1
+! unit ntype leaderq
+25 5 11
+! stretching
 2
-24	1
-26	1
-bending
+24 1
+26 1
+! bending
 1
-24 23          1
-torsion
+24 23 1
+! torsion
 1
-24 23 22        1  
-unit ntype leaderq   --CH3(18)
-26	4	11
-vibration
+24 23 22 1
+! unit ntype leaderq
+26 4 11
+! stretching
 1
-25	1
-bending
+25 1
+! bending
 1
-25 24        1
-torsion
+25 24 1
+! torsion
 1
-25 24 23         1
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-6     6      6       6       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 8: stage 1 benzene
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0 1360.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+25 24 23 1
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+6 6 6 6 0  F 1  F 6  T  F 10     0.0     0.0  1360.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    203       1
-vibration
+! unit ntype leaderq
+1 203 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    203       1
-vibration
+! unit ntype leaderq
+2 203 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    203       1
-vibration
+! unit ntype leaderq
+3 203 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    203       1
-vibration
+! unit ntype leaderq
+4 203 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    203       1
-vibration
+! unit ntype leaderq
+5 203 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    203       1
-vibration
+! unit ntype leaderq
+6 203 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-6     6      6       6       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 9: stage 2 benzene
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  1060.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+6 6 6 6 0  F 1  F 6  T  F 10     0.0     0.0  1060.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    204       1
-vibration
+! unit ntype leaderq
+1 204 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    204       1
-vibration
+! unit ntype leaderq
+2 204 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    204       1
-vibration
+! unit ntype leaderq
+3 204 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    204       1
-vibration
+! unit ntype leaderq
+4 204 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    204       1
-vibration
+! unit ntype leaderq
+5 204 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    204       1
-vibration
+! unit ntype leaderq
+6 204 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-6     6      6       6       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 10: stage 3 benzene
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  710.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+6 6 6 6 0  F 1  F 6  T  F 10     0.0     0.0   710.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    205       1
-vibration
+! unit ntype leaderq
+1 205 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    205       1
-vibration
+! unit ntype leaderq
+2 205 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    205       1
-vibration
+! unit ntype leaderq
+3 205 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    205       1
-vibration
+! unit ntype leaderq
+4 205 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    205       1
-vibration
+! unit ntype leaderq
+5 205 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    205       1
-vibration
+! unit ntype leaderq
+6 205 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-6     6      6       6       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 11: stage 4 benzene
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  310.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+6 6 6 6 0  F 1  F 6  T  F 10     0.0     0.0   310.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    206       1
-vibration
+! unit ntype leaderq
+1 206 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    206       1
-vibration
+! unit ntype leaderq
+2 206 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    206       1
-vibration
+! unit ntype leaderq
+3 206 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    206       1
-vibration
+! unit ntype leaderq
+4 206 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    206       1
-vibration
+! unit ntype leaderq
+5 206 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    206       1
-vibration
+! unit ntype leaderq
+6 206 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-6     6      6       6       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 12: stage 5 benzene
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  -180.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+6 6 6 6 0  F 1  F 6  T  F 10     0.0     0.0  -180.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    207       1
-vibration
+! unit ntype leaderq
+1 207 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    207       1
-vibration
+! unit ntype leaderq
+2 207 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    207       1
-vibration
+! unit ntype leaderq
+3 207 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    207       1
-vibration
+! unit ntype leaderq
+4 207 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    207       1
-vibration
+! unit ntype leaderq
+5 207 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    207       1
-vibration
+! unit ntype leaderq
+6 207 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-6     6      6       6       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 13: "real" benzene
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  -840.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+6 6 6 6 0  F 1  F 6  T  F 10     0.0     0.0  -840.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    56       1
-vibration
+! unit ntype leaderq
+1 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    56       1
-vibration
+! unit ntype leaderq
+2 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    56       1
-vibration
+! unit ntype leaderq
+3 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    56       1
-vibration
+! unit ntype leaderq
+4 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    56       1
-vibration
+! unit ntype leaderq
+5 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    56       1
-vibration
+! unit ntype leaderq
+6 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-8     8      8       8       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 14: ortho-xylene
- 1     .false.  .true.  .false. .false.    10    0.0d0 0.0d0  -1000.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+8 8 8 8 0  F 1  F 8  T  F 10     0.0     0.0 -1000.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    56       1
-vibration
+! unit ntype leaderq
+1 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    56       1
-vibration
+! unit ntype leaderq
+2 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    56       1
-vibration
+! unit ntype leaderq
+3 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    56       1
-vibration
+! unit ntype leaderq
+4 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    60       1
-vibration
+! unit ntype leaderq
+5 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    60       1
-vibration
+! unit ntype leaderq
+6 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-7    56       1
-vibration
+! unit ntype leaderq
+7 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-8    56       1
-vibration
+! unit ntype leaderq
+8 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-10     10      10       10       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 15: naphthalene
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  -2360.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+10 10 10 10 0  F 1  F 10  T  F 10     0.0     0.0 -2360.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    56       1
-vibration
+! unit ntype leaderq
+1 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    56       1
-vibration
+! unit ntype leaderq
+2 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    56       1
-vibration
+! unit ntype leaderq
+3 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    56       1
-vibration
+! unit ntype leaderq
+4 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    60       1
-vibration
+! unit ntype leaderq
+5 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    60       1
-vibration
+! unit ntype leaderq
+6 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-7    56       1
-vibration
+! unit ntype leaderq
+7 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-8    56       1
-vibration
+! unit ntype leaderq
+8 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-9    56       1
-vibration
+! unit ntype leaderq
+9 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-10    56       1
-vibration
+! unit ntype leaderq
+10 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-12     12      12       12       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 16: A-naphthalene
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  -2580.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+12 12 12 12 0  F 1  F 12  T  F 10     0.0     0.0 -2580.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    56       1
-vibration
+! unit ntype leaderq
+1 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    56       1
-vibration
+! unit ntype leaderq
+2 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    56       1
-vibration
+! unit ntype leaderq
+3 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    56       1
-vibration
+! unit ntype leaderq
+4 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    60       1
-vibration
+! unit ntype leaderq
+5 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    60       1
-vibration
+! unit ntype leaderq
+6 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-7    56       1
-vibration
+! unit ntype leaderq
+7 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-8    56       1
-vibration
+! unit ntype leaderq
+8 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-9    60       1
-vibration
+! unit ntype leaderq
+9 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-10   60       1
-vibration
+! unit ntype leaderq
+10 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-11    56       1
-vibration
+! unit ntype leaderq
+11 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-12    56       1
-vibration
+! unit ntype leaderq
+12 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-14     14      14       14       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 17: anthracene
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  -3980.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+14 14 14 14 0  F 1  F 14  T  F 10     0.0     0.0 -3980.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    56       1
-vibration
+! unit ntype leaderq
+1 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    56       1
-vibration
+! unit ntype leaderq
+2 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    56       1
-vibration
+! unit ntype leaderq
+3 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    56       1
-vibration
+! unit ntype leaderq
+4 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    60       1
-vibration
+! unit ntype leaderq
+5 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    60       1
-vibration
+! unit ntype leaderq
+6 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-7    56       1
-vibration
+! unit ntype leaderq
+7 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-8    56       1
-vibration
+! unit ntype leaderq
+8 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-9    60       1
-vibration
+! unit ntype leaderq
+9 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-10   60       1
-vibration
+! unit ntype leaderq
+10 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-11    56       1
-vibration
+! unit ntype leaderq
+11 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-12    56       1
-vibration
+! unit ntype leaderq
+12 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-13    56       1
-vibration
+! unit ntype leaderq
+13 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-14    56       1
-vibration
+! unit ntype leaderq
+14 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-16     16      16       16       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 18: A-anthracene
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  -4210.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+16 16 16 16 0  F 1  F 16  T  F 10     0.0     0.0 -4210.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    56       1
-vibration
+! unit ntype leaderq
+1 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    56       1
-vibration
+! unit ntype leaderq
+2 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    56       1
-vibration
+! unit ntype leaderq
+3 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    56       1
-vibration
+! unit ntype leaderq
+4 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    60       1
-vibration
+! unit ntype leaderq
+5 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    60       1
-vibration
+! unit ntype leaderq
+6 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-7    56       1
-vibration
+! unit ntype leaderq
+7 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-8    56       1
-vibration
+! unit ntype leaderq
+8 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-9    60       1
-vibration
+! unit ntype leaderq
+9 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-10   60       1
-vibration
+! unit ntype leaderq
+10 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-11    56       1
-vibration
+! unit ntype leaderq
+11 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-12    56       1
-vibration
+! unit ntype leaderq
+12 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-13    60       1
-vibration
+! unit ntype leaderq
+13 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-14    60       1
-vibration
+! unit ntype leaderq
+14 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-15    56       1
-vibration
+! unit ntype leaderq
+15 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-16    56       1
-vibration
+! unit ntype leaderq
+16 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-18     18      18       18       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 19: naphthacene
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  -5640.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+18 18 18 18 0  F 1  F 18  T  F 10     0.0     0.0 -5640.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    56       1
-vibration
+! unit ntype leaderq
+1 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    56       1
-vibration
+! unit ntype leaderq
+2 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    56       1
-vibration
+! unit ntype leaderq
+3 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    56       1
-vibration
+! unit ntype leaderq
+4 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    60       1
-vibration
+! unit ntype leaderq
+5 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    60       1
-vibration
+! unit ntype leaderq
+6 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-7    56       1
-vibration
+! unit ntype leaderq
+7 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-8    56       1
-vibration
+! unit ntype leaderq
+8 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-9    60       1
-vibration
+! unit ntype leaderq
+9 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-10   60       1
-vibration
+! unit ntype leaderq
+10 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-11    56       1
-vibration
+! unit ntype leaderq
+11 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-12    56       1
-vibration
+! unit ntype leaderq
+12 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-13    60       1
-vibration
+! unit ntype leaderq
+13 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-14    60       1
-vibration
+! unit ntype leaderq
+14 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-15    56       1
-vibration
+! unit ntype leaderq
+15 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-16    56       1
-vibration
+! unit ntype leaderq
+16 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-17    56       1
-vibration
+! unit ntype leaderq
+17 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-18    56       1
-vibration
+! unit ntype leaderq
+18 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-16     16      16       16       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 20: B-anthracene
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  -4270.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+16 16 16 16 0  F 1  F 16  T  F 10     0.0     0.0 -4270.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    56       1
-vibration
+! unit ntype leaderq
+1 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    56       1
-vibration
+! unit ntype leaderq
+2 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    56       1
-vibration
+! unit ntype leaderq
+3 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    56       1
-vibration
+! unit ntype leaderq
+4 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    60       1
-vibration
+! unit ntype leaderq
+5 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    60       1
-vibration
+! unit ntype leaderq
+6 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-7    56       1
-vibration
+! unit ntype leaderq
+7 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-8    56       1
-vibration
+! unit ntype leaderq
+8 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-9    60       1
-vibration
+! unit ntype leaderq
+9 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-10   60       1
-vibration
+! unit ntype leaderq
+10 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-11    56       1
-vibration
+! unit ntype leaderq
+11 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-12    60       1
-vibration
+! unit ntype leaderq
+12 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-13    56       1
-vibration
+! unit ntype leaderq
+13 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-14    60       1
-vibration
+! unit ntype leaderq
+14 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-15    56       1
-vibration
+! unit ntype leaderq
+15 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-16    56       1
-vibration
+! unit ntype leaderq
+16 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-18     18      18       18       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 21: benz[a]anthracene
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  -5720.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+18 18 18 18 0  F 1  F 18  T  F 10     0.0     0.0 -5720.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    56       1
-vibration
+! unit ntype leaderq
+1 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    56       1
-vibration
+! unit ntype leaderq
+2 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    56       1
-vibration
+! unit ntype leaderq
+3 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    56       1
-vibration
+! unit ntype leaderq
+4 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    60       1
-vibration
+! unit ntype leaderq
+5 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    60       1
-vibration
+! unit ntype leaderq
+6 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-7    56       1
-vibration
+! unit ntype leaderq
+7 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-8    56       1
-vibration
+! unit ntype leaderq
+8 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-9    60       1
-vibration
+! unit ntype leaderq
+9 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-10   60       1
-vibration
+! unit ntype leaderq
+10 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-11    56       1
-vibration
+! unit ntype leaderq
+11 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-12    60       1
-vibration
+! unit ntype leaderq
+12 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-13    56       1
-vibration
+! unit ntype leaderq
+13 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-14    60       1
-vibration
+! unit ntype leaderq
+14 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-15    56       1
-vibration
+! unit ntype leaderq
+15 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-16    56       1
-vibration
+! unit ntype leaderq
+16 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-17    56       1
-vibration
+! unit ntype leaderq
+17 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-18    56       1
-vibration
+! unit ntype leaderq
+18 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-12     12      12       12       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 22: B-napthalene
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  -2580.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+12 12 12 12 0  F 1  F 12  T  F 10     0.0     0.0 -2580.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    56       1
-vibration
+! unit ntype leaderq
+1 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    56       1
-vibration
+! unit ntype leaderq
+2 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    56       1
-vibration
+! unit ntype leaderq
+3 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    56       1
-vibration
+! unit ntype leaderq
+4 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    60       1
-vibration
+! unit ntype leaderq
+5 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    60       1
-vibration
+! unit ntype leaderq
+6 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-7    56       1
-vibration
+! unit ntype leaderq
+7 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-8    60       1
-vibration
+! unit ntype leaderq
+8 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-9    56       1
-vibration
+! unit ntype leaderq
+9 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-10   60       1
-vibration
+! unit ntype leaderq
+10 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-11    56       1
-vibration
+! unit ntype leaderq
+11 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-12    56       1
-vibration
+! unit ntype leaderq
+12 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-14     14      14       14       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 23: phenanthranene
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  -3900.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+14 14 14 14 0  F 1  F 14  T  F 10     0.0     0.0 -3900.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    56       1
-vibration
+! unit ntype leaderq
+1 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    56       1
-vibration
+! unit ntype leaderq
+2 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    56       1
-vibration
+! unit ntype leaderq
+3 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    56       1
-vibration
+! unit ntype leaderq
+4 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    60       1
-vibration
+! unit ntype leaderq
+5 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    60       1
-vibration
+! unit ntype leaderq
+6 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-7    56       1
-vibration
+! unit ntype leaderq
+7 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-8    60       1
-vibration
+! unit ntype leaderq
+8 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-9    56       1
-vibration
+! unit ntype leaderq
+9 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-10   60       1
-vibration
+! unit ntype leaderq
+10 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-11    56       1
-vibration
+! unit ntype leaderq
+11 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-12    56       1
-vibration
+! unit ntype leaderq
+12 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-13    56       1
-vibration
+! unit ntype leaderq
+13 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-14    56       1
-vibration
+! unit ntype leaderq
+14 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-16     16      16       16       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 24: A-phenanthranene
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  -3760.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+16 16 16 16 0  F 1  F 16  T  F 10     0.0     0.0 -3760.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    56       1
-vibration
+! unit ntype leaderq
+1 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    60       1
-vibration
+! unit ntype leaderq
+2 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    60       1
-vibration
+! unit ntype leaderq
+3 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    56       1
-vibration
+! unit ntype leaderq
+4 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    60       1
-vibration
+! unit ntype leaderq
+5 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    60       1
-vibration
+! unit ntype leaderq
+6 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-7    56       1
-vibration
+! unit ntype leaderq
+7 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-8    60       1
-vibration
+! unit ntype leaderq
+8 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-9    56       1
-vibration
+! unit ntype leaderq
+9 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-10   60       1
-vibration
+! unit ntype leaderq
+10 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-11    56       1
-vibration
+! unit ntype leaderq
+11 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-12    56       1
-vibration
+! unit ntype leaderq
+12 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-13    60       1
-vibration
+! unit ntype leaderq
+13 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-14    60       1
-vibration
+! unit ntype leaderq
+14 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-15    56       1
-vibration
+! unit ntype leaderq
+15 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-16    56       1
-vibration
+! unit ntype leaderq
+16 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-16     16      16       16       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 25: B-phenanthranene
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  -4190.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+16 16 16 16 0  F 1  F 16  T  F 10     0.0     0.0 -4190.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    56       1
-vibration
+! unit ntype leaderq
+1 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    56       1
-vibration
+! unit ntype leaderq
+2 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    56       1
-vibration
+! unit ntype leaderq
+3 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    56       1
-vibration
+! unit ntype leaderq
+4 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    60       1
-vibration
+! unit ntype leaderq
+5 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    60       1
-vibration
+! unit ntype leaderq
+6 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-7    56       1
-vibration
+! unit ntype leaderq
+7 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-8    60       1
-vibration
+! unit ntype leaderq
+8 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-9    56       1
-vibration
+! unit ntype leaderq
+9 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-10   60       1
-vibration
+! unit ntype leaderq
+10 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-11    56       1
-vibration
+! unit ntype leaderq
+11 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-12    60       1
-vibration
+! unit ntype leaderq
+12 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-13    56       1
-vibration
+! unit ntype leaderq
+13 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-14    60       1
-vibration
+! unit ntype leaderq
+14 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-15    56       1
-vibration
+! unit ntype leaderq
+15 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-16    56       1
-vibration
+! unit ntype leaderq
+16 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-18     18      18       18       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 26: chrysene
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  -5670.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+18 18 18 18 0  F 1  F 18  T  F 10     0.0     0.0 -5670.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    56       1
-vibration
+! unit ntype leaderq
+1 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    56       1
-vibration
+! unit ntype leaderq
+2 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    56       1
-vibration
+! unit ntype leaderq
+3 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    56       1
-vibration
+! unit ntype leaderq
+4 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    60       1
-vibration
+! unit ntype leaderq
+5 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    60       1
-vibration
+! unit ntype leaderq
+6 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-7    56       1
-vibration
+! unit ntype leaderq
+7 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-8    60       1
-vibration
+! unit ntype leaderq
+8 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-9    56       1
-vibration
+! unit ntype leaderq
+9 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-10   60       1
-vibration
+! unit ntype leaderq
+10 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-11    56       1
-vibration
+! unit ntype leaderq
+11 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-12    60       1
-vibration
+! unit ntype leaderq
+12 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-13    56       1
-vibration
+! unit ntype leaderq
+13 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-14    60       1
-vibration
+! unit ntype leaderq
+14 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-15    56       1
-vibration
+! unit ntype leaderq
+15 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-16    56       1
-vibration
+! unit ntype leaderq
+16 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-17    56       1
-vibration
+! unit ntype leaderq
+17 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-18    56       1
-vibration
+! unit ntype leaderq
+18 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-16     16      16       16       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 27: C-phenanthranene
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  -4320.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+16 16 16 16 0  F 1  F 16  T  F 10     0.0     0.0 -4320.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    56       1
-vibration
+! unit ntype leaderq
+1 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    56       1
-vibration
+! unit ntype leaderq
+2 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    56       1
-vibration
+! unit ntype leaderq
+3 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    56       1
-vibration
+! unit ntype leaderq
+4 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    60       1
-vibration
+! unit ntype leaderq
+5 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    60       1
-vibration
+! unit ntype leaderq
+6 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-7    56       1
-vibration
+! unit ntype leaderq
+7 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-8    60       1
-vibration
+! unit ntype leaderq
+8 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-9    56       1
-vibration
+! unit ntype leaderq
+9 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-10   60       1
-vibration
+! unit ntype leaderq
+10 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-11    60       1
-vibration
+! unit ntype leaderq
+11 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-12    56       1
-vibration
+! unit ntype leaderq
+12 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-13    60       1
-vibration
+! unit ntype leaderq
+13 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-14    56       1
-vibration
+! unit ntype leaderq
+14 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-15    56       1
-vibration
+! unit ntype leaderq
+15 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-16    56       1
-vibration
+! unit ntype leaderq
+16 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-18     18      18       18       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 28: benzo[c]anthracene PLANAR
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  -5770.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+18 18 18 18 0  F 1  F 18  T  F 10     0.0     0.0 -5770.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    56       1
-vibration
+! unit ntype leaderq
+1 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    56       1
-vibration
+! unit ntype leaderq
+2 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    56       1
-vibration
+! unit ntype leaderq
+3 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    56       1
-vibration
+! unit ntype leaderq
+4 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    60       1
-vibration
+! unit ntype leaderq
+5 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    60       1
-vibration
+! unit ntype leaderq
+6 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-7    56       1
-vibration
+! unit ntype leaderq
+7 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-8    60       1
-vibration
+! unit ntype leaderq
+8 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-9    56       1
-vibration
+! unit ntype leaderq
+9 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-10   60       1
-vibration
+! unit ntype leaderq
+10 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-11    60       1
-vibration
+! unit ntype leaderq
+11 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-12    56       1
-vibration
+! unit ntype leaderq
+12 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-13    60       1
-vibration
+! unit ntype leaderq
+13 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-14    56       1
-vibration
+! unit ntype leaderq
+14 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-15    56       1
-vibration
+! unit ntype leaderq
+15 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-16    56       1
-vibration
+! unit ntype leaderq
+16 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-17    56       1
-vibration
+! unit ntype leaderq
+17 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-18    56       1
-vibration
+! unit ntype leaderq
+18 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-16     16      16       16       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 29: D-phenanthranene
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  -4210.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+16 16 16 16 0  F 1  F 16  T  F 10     0.0     0.0 -4210.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    56       1
-vibration
+! unit ntype leaderq
+1 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    56       1
-vibration
+! unit ntype leaderq
+2 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    56       1
-vibration
+! unit ntype leaderq
+3 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    56       1
-vibration
+! unit ntype leaderq
+4 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    60       1
-vibration
+! unit ntype leaderq
+5 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    60       1
-vibration
+! unit ntype leaderq
+6 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-7    60       1
-vibration
+! unit ntype leaderq
+7 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-8    60       1
-vibration
+! unit ntype leaderq
+8 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-9    60       1
-vibration
+! unit ntype leaderq
+9 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-10   60       1
-vibration
+! unit ntype leaderq
+10 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-11    56       1
-vibration
+! unit ntype leaderq
+11 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-12    56       1
-vibration
+! unit ntype leaderq
+12 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-13    56       1
-vibration
+! unit ntype leaderq
+13 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-14    56       1
-vibration
+! unit ntype leaderq
+14 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-15    56       1
-vibration
+! unit ntype leaderq
+15 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-16    56       1
-vibration
+! unit ntype leaderq
+16 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-18     18      18       18       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 30: triphenylene
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  -5690.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+18 18 18 18 0  F 1  F 18  T  F 10     0.0     0.0 -5690.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    56       1
-vibration
+! unit ntype leaderq
+1 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    56       1
-vibration
+! unit ntype leaderq
+2 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    56       1
-vibration
+! unit ntype leaderq
+3 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    56       1
-vibration
+! unit ntype leaderq
+4 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    60       1
-vibration
+! unit ntype leaderq
+5 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    60       1
-vibration
+! unit ntype leaderq
+6 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-7    60       1
-vibration
+! unit ntype leaderq
+7 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-8    60       1
-vibration
+! unit ntype leaderq
+8 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-9    60       1
-vibration
+! unit ntype leaderq
+9 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-10   60       1
-vibration
+! unit ntype leaderq
+10 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-11    56       1
-vibration
+! unit ntype leaderq
+11 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-12    56       1
-vibration
+! unit ntype leaderq
+12 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-13    56       1
-vibration
+! unit ntype leaderq
+13 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-14    56       1
-vibration
+! unit ntype leaderq
+14 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-15    56       1
-vibration
+! unit ntype leaderq
+15 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-16    56       1
-vibration
+! unit ntype leaderq
+16 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-17    56       1
-vibration
+! unit ntype leaderq
+17 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-18    56       1
-vibration
+! unit ntype leaderq
+18 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-16     16      16       16       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 31: pyrene
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  -4820.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+16 16 16 16 0  F 1  F 16  T  F 10     0.0     0.0 -4820.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    60       1
-vibration
+! unit ntype leaderq
+1 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    56       1
-vibration
+! unit ntype leaderq
+2 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    56       1
-vibration
+! unit ntype leaderq
+3 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    56       1
-vibration
+! unit ntype leaderq
+4 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    60       1
-vibration
+! unit ntype leaderq
+5 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    60       1
-vibration
+! unit ntype leaderq
+6 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-7    56       1
-vibration
+! unit ntype leaderq
+7 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-8    60       1
-vibration
+! unit ntype leaderq
+8 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-9    56       1
-vibration
+! unit ntype leaderq
+9 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-10   60       1
-vibration
+! unit ntype leaderq
+10 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-11    60       1
-vibration
+! unit ntype leaderq
+11 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-12    56       1
-vibration
+! unit ntype leaderq
+12 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-13    56       1
-vibration
+! unit ntype leaderq
+13 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-14    56       1
-vibration
+! unit ntype leaderq
+14 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-15    56       1
-vibration
+! unit ntype leaderq
+15 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-16    56       1
-vibration
+! unit ntype leaderq
+16 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-18     18      18       18       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 32: benzo[c]anthracene NONPLANAR
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  -5370.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+18 18 18 18 0  F 1  F 18  T  F 10     0.0     0.0 -5370.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    56       1
-vibration
+! unit ntype leaderq
+1 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    56       1
-vibration
+! unit ntype leaderq
+2 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    60       1
-vibration
+! unit ntype leaderq
+3 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    60       1
-vibration
+! unit ntype leaderq
+4 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    56       1
-vibration
+! unit ntype leaderq
+5 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    56       1
-vibration
+! unit ntype leaderq
+6 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-7    60       1
-vibration
+! unit ntype leaderq
+7 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-8    60       1
-vibration
+! unit ntype leaderq
+8 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-9    56       1
-vibration
+! unit ntype leaderq
+9 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-10   56       1
-vibration
+! unit ntype leaderq
+10 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-11    60       1
-vibration
+! unit ntype leaderq
+11 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-12    60       1
-vibration
+! unit ntype leaderq
+12 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-13    56       1
-vibration
+! unit ntype leaderq
+13 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-14    56       1
-vibration
+! unit ntype leaderq
+14 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-15    56       1
-vibration
+! unit ntype leaderq
+15 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-16    56       1
-vibration
+! unit ntype leaderq
+16 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-17    56       1
-vibration
+! unit ntype leaderq
+17 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-18    56       1
-vibration
+! unit ntype leaderq
+18 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-16     16      16       16       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 33: NONPLANAR-1
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  -4000.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+16 16 16 16 0  F 1  F 16  T  F 10     0.0     0.0 -4000.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    56       1
-vibration
+! unit ntype leaderq
+1 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    56       1
-vibration
+! unit ntype leaderq
+2 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    60       1
-vibration
+! unit ntype leaderq
+3 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    60       1
-vibration
+! unit ntype leaderq
+4 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    56       1
-vibration
+! unit ntype leaderq
+5 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    56       1
-vibration
+! unit ntype leaderq
+6 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-7    60       1
-vibration
+! unit ntype leaderq
+7 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-8    60       1
-vibration
+! unit ntype leaderq
+8 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-9    56       1
-vibration
+! unit ntype leaderq
+9 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-10   56       1
-vibration
+! unit ntype leaderq
+10 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-11    60       1
-vibration
+! unit ntype leaderq
+11 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-12    60       1
-vibration
+! unit ntype leaderq
+12 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-13    56       1
-vibration
+! unit ntype leaderq
+13 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-14    56       1
-vibration
+! unit ntype leaderq
+14 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-15    56       1
-vibration
+! unit ntype leaderq
+15 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-16    56       1
-vibration
+! unit ntype leaderq
+16 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3 fqegp
-14     14      14       14       0   .false. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid   lrig     lsetup  isolute eta -- moltyp 34: NONPLANAR-2
- 1     .false.  .true.  .false. .false.    10     0.0d0 0.0d0  -3330.0d0
-lq14scale qscale
-.false.    0.0
-rindex
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+14 14 14 14 0  F 1  F 14  T  F 10     0.0     0.0 -3330.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
 0
-unit ntype  leaderq
-1    56       1
-vibration
+! unit ntype leaderq
+1 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-2    56       1
-vibration
+! unit ntype leaderq
+2 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-3    60       1
-vibration
+! unit ntype leaderq
+3 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-4    60       1
-vibration
+! unit ntype leaderq
+4 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-5    56       1
-vibration
+! unit ntype leaderq
+5 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-6    56       1
-vibration
+! unit ntype leaderq
+6 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-7    60       1
-vibration
+! unit ntype leaderq
+7 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-8    60       1
-vibration
+! unit ntype leaderq
+8 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-9    56       1
-vibration
+! unit ntype leaderq
+9 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-10   56       1
-vibration
+! unit ntype leaderq
+10 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-11    60       1
-vibration
+! unit ntype leaderq
+11 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-12    60       1
-vibration
+! unit ntype leaderq
+12 60 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-13    56       1
-vibration
+! unit ntype leaderq
+13 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype  leaderq
-14    56       1
-vibration
+! unit ntype leaderq
+14 56 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-licell rintramax boxlink 
-.false. 0.0d0   1
-rmtrax rmtray rmtraz
-0.0d0   0.0d0   0.0d0
-rmtrax rmtray rmtraz
-0.3d0   0.3d0   0.3d0
-rmrotx rmroty rmrotz
-0.4d0   0.4d0   0.4d0
-tatra tarot
-0.5d0   0.5d0
-linit lreadq
-.false. .false.
-lbranch 
-.false.  .false.  .false.  .false.  .false. 
-.false.  .false.  .true.   .true.   .true.
-.true.   .true.   .true.   .true.   .true. 
-.true.   .true.   .true.   .true.   .true. 
-.true.   .true.   .true.   .true.   .true. 
-.true.   .true.   .true.   .true.   .true. 
-.true.	 .true.	  .true.   .true.
-inich(1)
-0	0	0	0	0	
-0	0	0	0	0	
-0	0	0	0	0	
-0	0	0	0	0	
-0	0	0	0	0	
-0	0	0	0	0	
-0	0	0	0
-inix(1) iniy(1) iniz(1) inirot	inimix zshift dshift nchoiq - box 1
-0       0       0       0	0      0.0    2.0    1
-inich(2)
-0	0	0	0	0	
-0	0	0	0	0	
-0	0	0	0	0	
-0	0	0	0	0	
-0	0	0	0	0	
-0	0	0	0	0	
-0	0	0	0
-inix(2) iniy(2) iniz(2) inirot	inimix zshift dshift nchoiq - box 2
-0       0       0       0	0      0.0    2.0    1
-inich(1)
-0	0	0	0	0	
-0	0	1	1	1
-1	1	1	1	1	
-1	1	1	1	1	
-1	1	1	1	1	
-1	1	1	1	1	
-1	1	1	1
-inix(1) iniy(1) iniz(1) inirot	inimix zshift dshift nchoiq - box 3
-3       3       3       0	1      0.0    10.0   1
-rmvol tavol iratv iratp  rmflcq taflcq
-1.0d-1 0.5d0  5000000   100     0.1d0  0.95d0
-pmvol   pmvlmt
-0.001d0 0.0d0  0.9d0 1.0d0 
-        nvolb pmvolb
-        1     1.0d0
-        box5 box6
-        1    2
-pmswat nswaty 
-0.3d0   37      
-	nswatb
-	8  9		9  10		10 11		11 12		12 13
-	13 14		14 15		15 16		16 17		17 18
-	18 19		17 20		20 21		15 22		22 24
-	23 24		24 21		23 25		25 26		23 27
-	27 28		23 29		29 30		23 31		16 22
-	18 20		20 24		24 25		24 27		24 29
-	25 27		25 29		27 29		23 34		34 33
-	33 32		28 32
-	pmsatc
-	0.02d0	0.04d0	0.06d0	0.08d0	0.10d0
-	0.13d0	0.16d0	0.19d0	0.22d0	0.25d0
-	0.28d0	0.31d0	0.34d0	0.37d0	0.40d0
-	0.43d0	0.46d0	0.49d0	0.52d0	0.55d0
-	0.58d0	0.61d0	0.64d0	0.67d0	0.70d0
-	0.73d0	0.76d0	0.79d0	0.82d0	0.86d0
-	0.89d0	0.92d0	0.94d0	0.965d0	0.97d0
-	0.985d0  1.00d0
-	nsampos, 2xncut --- swatch #1: 8<->9 = stage1-stage2
-	6 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #2: 9<->10 = stage2-stage3
-	6 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #3: 10<->11 = stage3-stage4
-	6 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #4: 11<->12 = stage4-stage5
-	6 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #5: 12<->13 = stage5-benzene
-	6 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #6: 13<->14 = benzene-xylene
-	6 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #7: 14<->15 = xylene-naphthalene
-	8 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	7 7
-	8 8
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #8: 15<->16 = naphthalene--A-naphthalene
-	10 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	7 7
-	8 8
-	9 9
-	10 10
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #9: 16<->17 = A-naphthalene-anthracene
-	12 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	7 7
-	8 8
-	9 9
-	10 10
-	11 11
-	12 12
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #10: 17<->18 = anthracene--A-anthracene
-	14 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	7 7
-	8 8
-	9 9
-	10 10
-	11 11
-	12 12
-	13 13
-	14 14
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #11: 18<->19 = A-anthracene-naphthacene
-	16 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	7 7
-	8 8
-	9 9
-	10 10
-	11 11
-	12 12
-	13 13
-	14 14
-	15 15
-	16 16
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #12: 17<->20 = anthracene--B-anthracene
-	14 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	7 7
-	8 8
-	9 9
-	10 10
-	11 11
-	12 12
-	13 13
-	14 14
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #13: 20<->21 = B-anthracene-Benz[a]antracene
-	16 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	7 7
-	8 8
-	9 9
-	10 10
-	11 11
-	12 12
-	13 13
-	14 14
-	15 15
-	16 16
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #14: 15<->16 = naphthalene--B-naphthalene
-	10 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	7 7
-	8 8
-	9 9
-	10 10
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #15: 22<->23 = B-naphthalene-phenanthrene
-	12 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	7 7
-	8 8
-	9 9
-	10 10
-	11 11
-	12 12
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #16: 23<->24 = phenanthrene--A-phenanthrene
-	14 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	7 7
-	8 8
-	9 9
-	10 10
-	11 11
-	12 12
-	13 13
-	14 14
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #17: 24<->21 = anthracene--benz[a]anthracene
-	3 0 0
-	splist
-	1 8
-	2 6
-	3 5
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #18: 23<->25 = phenanthrene--B-phenanthrene
-	14 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	7 7
-	8 8
-	9 9
-	10 10
-	11 11
-	12 12
-	13 13
-	14 14
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #19: 25<->26 = B-phananthrene-Chrysene
-	16 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	7 7
-	8 8
-	9 9
-	10 10
-	11 11
-	12 12
-	13 13
-	14 14
-	15 15
-	16 16
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #20: 23<->27 = phenanthrene--C-phenanthrene
-	14 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	7 7
-	8 8
-	9 9
-	10 10
-	11 11
-	12 12
-	13 13
-	14 14
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #21: 27<->28 = C-phenanthrene-Benzo[c]anthracene
-	16 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	7 7
-	8 8
-	9 9
-	10 10
-	11 11
-	12 12
-	13 13
-	14 14
-	15 15
-	16 16
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #22: 23<->29 = phenanthrene--D-phenanthrene
-	14 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	7 7
-	8 8
-	9 9
-	10 10
-	11 11
-	12 12
-	13 13
-	14 14
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #23: 29<->30 = Benz[a]antracene-Chrysene
-	16 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	7 7
-	8 8
-	9 9
-	10 10
-	11 11
-	12 12
-	13 13
-	14 14
-	15 15
-	16 16
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #24: 23<->31 = phenanthrene--pyrene
-	14 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	7 7
-	8 8
-	9 9
-	10 10
-	11 11
-	12 12
-	13 13
-	14 14
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #25: 16<->22 = A-naphthalene-B-naphthalene
-	3 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #26: 18<->20 = A-ant<->B-phen
-	3 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #27: 20<->24 = B-ant<->A-phen
-	3 0 0
-	splist
-	8 1
-	6 2
-	5 3
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #28: 24<->25 = A-phen<->B-phen
-	3 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #29: 24<->27 = A-phen<->B-phen
-	3 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #30: 24<->29 = A-phen<->D-phen
-	3 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #31: 25<->27 = B-phen<->C-phen
-	3 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #32: 25<->29 = B-phen<->C-phen
-	3 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #33: 27<->29 = C-phen<->D-phen
-	3 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #34: 23<->34 = phen<->NONPLANAR-phen
-	3 0 0
-	splist
-	6  7
-	8  4
-	10 5
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #35: 34<->33
-	14 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	7 7
-	8 8
-	9 9
-	10 10
-	11 11
-	12 12
-	13 13
-	14 14
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3	
-	nsampos, 2xncut --- swatch #23: 33<->32 
-	16 0 0
-	splist
-	1 1
-	2 2
-	3 3
-	4 4
-	5 5
-	6 6
-	7 7
-	8 8
-	9 9
-	10 10
-	11 11
-	12 12
-	13 13
-	14 14
-	15 15
-	16 16
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-	nsampos, 2xncut --- swatch #37: 28<->32
-	3 0 0
-	splist
-	6  4
-	8  7
-	10 8
-	gswatc 2x (ifrom iprev)
-	1 0 1 0
-	nswtcb pmswtb
-	1	 1.0d0
-	box_pair 2x
-	1 3
-pmswap  pmswmt
-0.4d0	0.2d0	0.4d0	0.0d0	0.0d0	0.0d0 
-	0.0d0	0.0d0	1.0d0 	0.0d0	0.0d0  
-	0.0d0	0.0d0	0.0d0	0.0d0	0.0d0	
-	0.0d0	0.0d0	0.0d0	0.0d0	0.0d0	
-	0.0d0	0.0d0	0.0d0	0.0d0	0.0d0	
-	0.0d0	0.0d0	0.0d0	0.0d0	0.0d0	
-	0.0d0	0.0d0	0.0d0	0.0d0
-        nswapb pmswapb - type 1
-        3      0.0d0 0.5d0 1.0d0
-        box1   box2
-	1	2
-	1       3
-	2	3
-	nswapb pmswapb - type 2
-	3     0.33d0   0.67d0 1.0d0	
-        box1   box2
-	1	2
-        1	3
-	2	3
-	nswapb pmswapb - type 3
-        1      1.0d0
-        box1   box2
-        2      2	
-	nswapb pmswapb - type 4
-        1      1.0d0
-        box1   box2
-        2      2	
-	nswapb pmswapb - type 5
-        1      1.0d0
-        box1   box2
-        3      3	
-	nswapb pmswapb - type 6
-        1      1.0d0
-        box1   box2
-        2      2	
-	nswapb pmswapb - type 7
-        1      1.0d0
-        box1   box2
-        2      2		
-	nswapb pmswapb - type 8
-        3     0.0d0  1.0d0 1.0d0
-        box1   box2
-	1	2
-        1      3	
-	2 3	
-	nswapb pmswapb - type 9
-        3   0.0d0    1.0d0 1.0d0
-        box1   box2
-        1      2
-	1	3
-	2 3
-        nswapb pmswapb - type 10
-        3      0.0d0 1.0d0 1.0d0
-        box1   box2
-	1	2
-	1	3
-	2 3
-	nswapb pmswapb - type 11
-        1      1.0d0
-        box1   box2
-        1      1		
-	nswapb pmswapb - type 12
-        1      1.0d0
-        box1   box2
-        1      1		
-	nswapb pmswapb - type 13
-        1      1.0d0
-        box1   box2
-        1      1		
-	nswapb pmswapb - type 14
-        1      1.0d0
-        box1   box2
-        1      1		
-	nswapb pmswapb - type 15
-        1      1.0d0
-        box1   box2
-        1      1		
-	nswapb pmswapb - type 16
-        1      1.0d0
-        box1   box2
-        1      1		
-	nswapb pmswapb - type 17
-        1      1.0d0
-        box1   box2
-        1      1		
-	nswapb pmswapb - type 18
-        1      1.0d0
-        box1   box2
-        1      1		
-	nswapb pmswapb - type 19
-        1      1.0d0
-        box1   box2
-        1      1		
-	nswapb pmswapb - type 20
-        1      1.0d0
-        box1   box2
-        1      1		
-	nswapb pmswapb - type 21
-        1      1.0d0
-        box1   box2
-        1      1		
-	nswapb pmswapb - type 22
-        1      1.0d0
-        box1   box2
-        1      1		
-	nswapb pmswapb - type 23
-        1      1.0d0
-        box1   box2
-        1      1		
-	nswapb pmswapb - type 24
-        1      1.0d0
-        box1   box2
-        1      1		
-	nswapb pmswapb - type 25
-        1      1.0d0
-        box1   box2
-        1      1		
-	nswapb pmswapb - type 26
-        1      1.0d0
-        box1   box2
-        1      1		
-	nswapb pmswapb - type 27
-        1      1.0d0
-        box1   box2
-        1      1		
-	nswapb pmswapb - type 28
-        1      1.0d0
-        box1   box2
-        1      1		
-	nswapb pmswapb - type 29
-        1      1.0d0
-        box1   box2
-        1      1		
-	nswapb pmswapb - type 30
-        1      1.0d0
-        box1   box2
-        1      1		
-	nswapb pmswapb - type 31
-        1      1.0d0
-        box1   box2
-        1      1		
-	nswapb pmswapb - type 32
-        1      1.0d0
-        box1   box2
-        1      1		
-	nswapb pmswapb - type 33
-        1      1.0d0
-        box1   box2
-        1      1		
-	nswapb pmswapb - type 34
-        1      1.0d0
-        box1   box2
-        1      1		
-pmcb	pmcbmt 
-0.6d0 	0.0d0	0.0d0	0.0d0	0.0d0	0.0d0	
-	0.1d0	1.0d0	0.0d0	0.0d0	0.0d0	
-	0.0d0	0.0d0   0.0d0	0.0d0	0.0d0 
-	0.0d0	0.0d0   0.0d0	0.0d0	0.0d0 
-	0.0d0	0.0d0   0.0d0	0.0d0	0.0d0 
-	0.0d0	0.0d0   0.0d0	0.0d0	0.0d0 
-	0.0d0	0.0d0	0.0d0	0.0d0
-        pmall
-        0.0d0	0.0d0	0.0d0	0.0d0	0.0d0
-        0.0d0	0.0d0	0.0d0	0.0d0	0.0d0
-        0.0d0	0.0d0	0.0d0	0.0d0	0.0d0
-        0.0d0	0.0d0	0.0d0	0.0d0	0.0d0
-        0.0d0	0.0d0	0.0d0	0.0d0	0.0d0
-        0.0d0	0.0d0	0.0d0	0.0d0	0.0d0
-	0.0d0	0.0d0	0.0d0	0.0d0
-        pmfix
-        0.0d0	0.0d0	0.0d0	0.0d0	0.0d0
-        0.0d0	0.4d0	0.0d0	0.0d0	0.0d0
-        0.0d0	0.0d0	0.0d0	0.0d0	0.0d0
-        0.0d0	0.0d0	0.0d0	0.0d0	0.0d0
-        0.0d0	0.0d0	0.0d0	0.0d0	0.0d0
-        0.0d0	0.0d0	0.0d0	0.0d0	0.0d0
-	0.0d0	0.0d0	0.0d0	0.0d0
-pmflcq  pmfqmt
-0.0d0   0.0d0	0.0d0	0.0d0	0.0d0	0.0d0
-        0.0d0	0.0d0	0.0d0	0.0d0	0.0d0
-        0.0d0	0.0d0	0.0d0	0.0d0	0.0d0
-        0.0d0	0.0d0	0.0d0	0.0d0	0.0d0
-        0.0d0	0.0d0	0.0d0	0.0d0	0.0d0
-        0.0d0	0.0d0	0.0d0	0.0d0	0.0d0
-	0.0d0	0.0d0	0.0d0	0.0d0
-pmexpc  pmeemt
-0.0d0   0.0d0	0.0d0	0.0d0	0.0d0	0.0d0
-        0.0d0	0.0d0	0.0d0	0.0d0	0.0d0
-        0.0d0	0.0d0	0.0d0	0.0d0	0.0d0
-        0.0d0	0.0d0	0.0d0	0.0d0	0.0d0
-        0.0d0	0.0d0	0.0d0	0.0d0	0.0d0
-        0.0d0	0.0d0	0.0d0	0.0d0	0.0d0
-	0.0d0	0.0d0	0.0d0	0.0d0
-pmexpc1
-0.0d0
-pm_atom_tra
-0.0d0
-pmtra   pmtrmt          
-0.8d0	0.37d0	0.73d0	0.00d0	0.00d0	0.00d0
-        0.00d0	0.00d0	0.74d0	0.75d0	0.76d0	
-	0.77d0	0.78d0	0.79d0	0.80d0	0.81d0	
-	0.82d0	0.83d0	0.84d0	0.85d0	0.86d0	
-	0.87d0	0.88d0	0.89d0	0.90d0	0.91d0	
-	0.92d0	0.93d0	0.94d0	0.95d0	0.96d0	
-	0.97d0	0.98d0	0.99d0	1.00d0
-        pmromt  
-	0.37d0	0.73d0	0.00d0	0.00d0	0.00d0
-        0.00d0	0.00d0	0.74d0	0.75d0	0.76d0	
-	0.77d0	0.78d0	0.79d0	0.80d0	0.81d0	
-	0.82d0	0.83d0	0.84d0	0.85d0	0.86d0	
-	0.87d0	0.88d0	0.89d0	0.90d0	0.91d0	
-	0.92d0	0.93d0	0.94d0	0.95d0	0.96d0	
-	0.97d0	0.98d0	0.99d0	1.00d0
-nchoi1	nchoi	nchoir	nchoih	nchoitor 
-20	20	1	1	1	   	
-1	1	10	10	10	
-1	1	1	1	1
-1	1	1	1	1
-1	1	1	1	1
-1	1	1	1	1
-1	1	1	1
-20	20	1	1	1   	
-10	20	10	10	10   	
-1	1	1	1	1
-1	1	1	1	1
-1	1	1	1	1
-1	1	1	1	1
-1	1	1	1
-20	20	1	1	1   	
-1	1	10	10	10
-1	1	1	1	1
-1	1	1	1	1
-1	1	1	1	1
-1	1	1	1	1
-1	1	1	1
-1	1	1	1	1
-1	1	1	1	1
-1	1	1	1	1
-1	1	1	1	1
-1	1	1	1	1
-1	1	1	1	1
-1	1	1	1
-1	1	1	1	1 	
-10	20	1	1	1
-1	1	1	1	1
-1	1	1	1	1
-1	1	1	1	1
-1	1	1	1	1
-1	1	1	1
-nchbna	nchbnb
-1	100	1	1	1
-100	1000	1	1	1
-1	1	1	1	1
-1	1	1	1	1
-1	1	1	1	1
-1	1	1	1	1
-1	1	1	1		
-1	100	1	1	1
-100	1000	1	1	1
-1	1	1	1	1
-1	1	1	1	1
-1	1	1	1	1
-1	1	1	1	1
-1	1	1	1
-icbdir	icbsta 
-0	0	0	0	0 
-1	1	0	0	0
-0	0	0	0	0 
-0	0	0	0	0 
-0	0	0	0	0 
-0	0	0	0	0 
-0	0	0	0
-0	0	0	0	0 
-5	-10	0	0	0
-0	0	0	0	0 
-0	0	0	0	0 
-0	0	0	0	0 
-0	0	0	0	0
-0	0	0	0
-exclusion
-0
+END MOLECULE_TYPE
 
-internal 1-4
-0
 
-ainclnum
-0
+MC_SWATCH
+! moltyp1<->moltyp2 nsampos 2xncut
+8 9 6 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+9 10 6 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+10 11 6 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+11 12 6 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+12 13 6 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+13 14 6 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+14 15 8 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 8
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+15 16 10 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 8
+9 9
+10 10
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+16 17 12 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 8
+9 9
+10 10
+11 11
+12 12
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+17 18 14 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 8
+9 9
+10 10
+11 11
+12 12
+13 13
+14 14
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+18 19 16 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 8
+9 9
+10 10
+11 11
+12 12
+13 13
+14 14
+15 15
+16 16
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+17 20 14 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 8
+9 9
+10 10
+11 11
+12 12
+13 13
+14 14
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+20 21 16 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 8
+9 9
+10 10
+11 11
+12 12
+13 13
+14 14
+15 15
+16 16
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+15 22 10 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 8
+9 9
+10 10
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+22 24 12 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 8
+9 9
+10 10
+11 11
+12 12
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+23 24 14 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 8
+9 9
+10 10
+11 11
+12 12
+13 13
+14 14
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+24 21 3 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 8
+2 6
+3 5
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+23 25 14 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 8
+9 9
+10 10
+11 11
+12 12
+13 13
+14 14
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+25 26 16 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 8
+9 9
+10 10
+11 11
+12 12
+13 13
+14 14
+15 15
+16 16
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+23 27 14 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 8
+9 9
+10 10
+11 11
+12 12
+13 13
+14 14
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+27 28 16 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 8
+9 9
+10 10
+11 11
+12 12
+13 13
+14 14
+15 15
+16 16
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+23 29 14 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 8
+9 9
+10 10
+11 11
+12 12
+13 13
+14 14
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+29 30 16 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 8
+9 9
+10 10
+11 11
+12 12
+13 13
+14 14
+15 15
+16 16
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+23 31 14 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 8
+9 9
+10 10
+11 11
+12 12
+13 13
+14 14
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+16 22 3 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+18 20 3 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+20 24 3 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+8 1
+6 2
+5 3
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+24 25 3 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+24 27 3 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+24 29 3 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+25 27 3 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+25 29 3 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+27 29 3 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+23 34 3 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+6 7
+8 4
+10 5
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+34 33 14 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 8
+9 9
+10 10
+11 11
+12 12
+13 13
+14 14
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+33 32 16 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 8
+9 9
+10 10
+11 11
+12 12
+13 13
+14 14
+15 15
+16 16
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+! moltyp1<->moltyp2 nsampos 2xncut
+28 32 3 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+6 4
+8 7
+10 8
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 3
+END MC_SWATCH
 
-lucall
-.false.
-ucheck
-0	0	0	0	0
-0	0	0	0	0
-0	0	0	0	0
-0	0	0	0	0
-0	0	0	0	0
-0	0	0	0	0
-0	0	0	0
-nviral  start  step
-0       0.0d0  0.0d0
-lideal
-.false. .false. .true. 
-ltwice
-.true.  .false. .false. 
-lrplc
-.false. .false. .false. .false. .false.
-.false. .true.  .false. .false. .false.
-.false. .false. .false. .false. .false.
-.false. .false. .false. .false. .false.
-.false. .false. .false. .false. .false.
-.false. .false. .false. .false. .false.
-.false. .false. .false. .false. 
+
+MC_SWAP
+! nswapb pmswapb
+3  0.00   0.50   1.00
+! box1 box2
+1 2
+1 3
+2 3
+! nswapb pmswapb
+3  0.33   0.67   1.00
+! box1 box2
+1 2
+1 3
+2 3
+! nswapb pmswapb
+1  1.00
+! box1 box2
+2 2
+! nswapb pmswapb
+1  1.00
+! box1 box2
+2 2
+! nswapb pmswapb
+1  1.00
+! box1 box2
+3 3
+! nswapb pmswapb
+1  1.00
+! box1 box2
+2 2
+! nswapb pmswapb
+1  1.00
+! box1 box2
+2 2
+! nswapb pmswapb
+3  0.00   1.00   1.00
+! box1 box2
+1 2
+1 3
+2 3
+! nswapb pmswapb
+3  0.00   1.00   1.00
+! box1 box2
+1 2
+1 3
+2 3
+! nswapb pmswapb
+3  0.00   1.00   1.00
+! box1 box2
+1 2
+1 3
+2 3
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 1
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 1
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 1
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 1
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 1
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 1
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 1
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 1
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 1
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 1
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 1
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 1
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 1
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 1
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 1
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 1
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 1
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 1
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 1
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 1
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 1
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 1
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 1
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 1
+END MC_SWAP
+
+
+SAFE_CBMC
+END SAFE_CBMC
+
+
+INTERMOLECULAR_EXCLUSION
+! mol_1 bead_1 mol_2 bead_2
+END INTERMOLECULAR_EXCLUSION
+
+
+INTRAMOLECULAR_SPECIAL
+! inclmol inclbead_1 inclbead_2 inclsign ofscale ofscale2
+END INTRAMOLECULAR_SPECIAL
+
+
+INTRAMOLECULAR_OH15
+! ainclmol ainclbead_1 ainclbead_2 a15type
+END INTRAMOLECULAR_OH15
 

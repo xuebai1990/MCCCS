@@ -1542,16 +1542,122 @@ contains
       return
   end subroutine swatch
 
-  subroutine init_swatch
-    integer::jerr
+  subroutine init_swatch(io_input,lprint)
+    use var_type,only:default_string_length
+    use util_string,only:uppercase
+    use util_files,only:readLine
+    integer,intent(in)::io_input
+    LOGICAL,INTENT(IN)::lprint
+    character(LEN=default_string_length)::line_in
+    integer::jerr,i,j,k
+    namelist /mc_swatch/ pmswat,nswaty,pmsatc
+
     allocate(bnswat(npamax,npabmax),bnswat_empty(npamax,npabmax),bsswat(npamax,npabmax),stat=jerr)
-    if (jerr.ne.0) then
-       call err_exit(__FILE__,__LINE__,'init_swatch: allocation failed',jerr)
-    end if
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_swatch: allocation failed',jerr)
 
     bnswat = 0.0E0_dp
     bsswat = 0.0E0_dp
     bnswat_empty = 0.0E0_dp
+
+    !> read namelist mc_swatch
+    nswaty=nmolty*(nmolty-1)/2
+    do i=1,nswaty
+       pmsatc(i)=real(i,dp)/nswaty
+    end do
+
+    rewind(io_input)
+    read(UNIT=io_input,NML=mc_swatch,iostat=jerr)
+    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_swatch',jerr)
+
+    if (nswaty.gt.npamax) call err_exit(__FILE__,__LINE__,'nswaty gt npamax',myid+1)
+
+    if (lprint) then
+       write(io_output,'(/,A,/,A)') 'NAMELIST MC_SWATCH','------------------------------------------'
+       write(io_output,'(A,G16.9)') 'pmswat: ',pmswat
+       write(io_output,'(A,I0)') '   number of swatch pairs (nswaty): ',nswaty
+       do i=1,nswaty
+          write(io_output,'(A,G16.9)') '   probability of each swatch pair: ',pmsatc(i)
+       end do
+    end if
+
+    ! Looking for section MC_SWATCH
+    REWIND(io_input)
+    CYCLE_READ_SWATCH:DO
+       call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section MC_SWATCH not found',jerr)
+
+       if (UPPERCASE(line_in(1:9)).eq.'MC_SWATCH') then
+          do i=1,nswaty+1
+             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_SWATCH',jerr)
+             if (UPPERCASE(line_in(1:13)).eq.'END MC_SWATCH') then
+                if (i.ne.nswaty+1) call err_exit(__FILE__,__LINE__,'Section MC_SWATCH not complete!',myid+1)
+                exit
+             else if (i.eq.nswaty+1) then
+                call err_exit(__FILE__,__LINE__,'Section MC_SWATCH has more than nswaty records!',myid+1)
+             end if
+
+             ! moltyp1<->moltyp2 nsampos 2xncut
+             read(line_in,*) nswatb(i,1:2),nsampos(i),ncut(i,1:2)
+             if (nswatb(i,1).eq.nswatb(i,2)) then
+                ! safety checks on swatch
+                write(io_output,*) 'nswaty ',i,' has identical moltyp'
+                call err_exit(__FILE__,__LINE__,'cannot swatch identical moltyp',myid+1)
+             end if
+
+             if (lprint) then
+                write(io_output,'(/,A,2(4X,I0))') '   swatch molecule type pairs:',nswatb(i,1:2)
+                write(io_output,'(A,I0,A,2(2X,I0))') '   nsampos: ',nsampos(i),', ncut:',ncut(i,1:2)
+             end if
+
+             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_SWATCH',jerr)
+             ! gswatc 2x(ifrom, iprev)
+             read(line_in,*) (gswatc(i,j,1:2*ncut(i,j)),j=1,2)
+
+             if (lprint) then
+                do j=1,2
+                   write(io_output,FMT='(A,I0)') '   molecule ',j
+                   do k = 1,ncut(i,j)
+                      write(io_output,'(3(A,I0))') '   ncut ',k,': grom from ',gswatc(i,j,2*k-1),', prev ',gswatc(i,j,2*k-1)
+                   end do
+                end do
+             end if
+
+             do j = 1,nsampos(i)
+                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_SWATCH',jerr)
+                ! splist
+                read(line_in,*) splist(i,j,1:2)
+                if (lprint) then
+                   write(io_output,'(A,2(4X,I0))') '   splist:',splist(i,j,1:2)
+                end if
+             end do
+
+             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_SWATCH',jerr)
+             ! nswtcb pmswtcb
+             read(line_in,*) nswtcb(i),pmswtcb(i,1:nswtcb(i))
+             if (lprint) then
+                write(io_output,'(A,I0)') '   number of swatch box pairs: ',nswtcb(i)
+                do j=1,nswtcb(i)
+                   write(io_output,'(A,G16.9)') '   probability of the swatch box pair: ',pmswtcb(i,j)
+                end do
+             end if
+
+             do j = 1,nswtcb(i)
+                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_SWATCH',jerr)
+                ! box numbers
+                read(line_in,*) box3(i,j),box4(i,j)
+                if (lprint) then
+                   write(io_output,'(A,2(4X,I0))') '   box pair:',box3(i,j),box4(i,j)
+                end if
+             end do
+          end do
+          exit cycle_read_swatch
+       end if
+    END DO CYCLE_READ_SWATCH
   end subroutine init_swatch
 
   subroutine output_swatch_stats(io_output)

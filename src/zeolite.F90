@@ -73,21 +73,22 @@ contains
 
     io_input=get_iounit()
     open(unit=io_input,access='sequential',action='read',file=file_in,form='formatted',iostat=jerr,status='old')
-    if (jerr.ne.0) then
-       call err_exit(__FILE__,__LINE__,'cannot open zeolite input file',myid+1)
-    end if
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open zeolite input file '//trim(file_in),myid+1)
 
     read(UNIT=io_input,NML=zeolite_in,iostat=jerr)
-    if (jerr.ne.0.and.jerr.ne.-1) then
-       call err_exit(__FILE__,__LINE__,'reading namelist: zeolite_in',jerr)
-    end if
+    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: zeolite_in',jerr)
     close(io_input)
+
+    if (lprint.and.(ltestztb.or.lpore_volume.or.lsurface_area)) then
+       write(io_output,FMT='(A)',advance='no') 'zeocoord: will'
+       if (ltestztb) write(io_output,FMT='(A)') ' test accuracy of tabulated potential;'
+       if (lpore_volume) write(io_output,FMT='(A,I0,A,I0,A)') ' calculate pore volume using atom type ',volume_probe,' as probe, with ',volume_nsample,' sample points;'
+       if (lsurface_area) write(io_output,FMT='(A,I0,A,I0,A)') ' calculate surface area using atom type ',area_probe,' as probe, with ',area_nsample,' sample points around each framework atom;'
+    end if
 
     volume_probe=indexOf(atoms,volume_probe)
     area_probe=indexOf(atoms,area_probe)
-    if ((lpore_volume.and.volume_probe.eq.0).or.(lsurface_area.and.area_probe.eq.0)) then
-       call err_exit(__FILE__,__LINE__,'zeocoord: atom parameters for volume_probe or area_probe undefined',myid+1)
-    end if
+    if ((lpore_volume.and.volume_probe.eq.0).or.(lsurface_area.and.area_probe.eq.0)) call err_exit(__FILE__,__LINE__,'zeocoord: atom parameters for volume_probe or area_probe undefined',myid+1)
 
     call initZeo()
 

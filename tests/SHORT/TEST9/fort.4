@@ -1,350 +1,385 @@
-mseed                            ######  input file for solid TATB NpT 1 box
-0
-iounit lecho lverbose run_num  suffix
-2 .true.  .true. 1   a 
-lnpt   lgibbs lgrand   lanes  lvirial lmipsw  lexpee
-.true. .false. .false. .false. .false. .false. .false.
-lijall lchgall lewald ldielect ltailc lshift ltailcZeo
-.false. .false. .true. .false. .true. .false. .true.
-L_add N_add  N_box2add N_moltyp2add
-.false. 9000    2         3
-L_sub N_sub  N_box2sub N_moltyp2sub
-.false. 200     2         3
-l_Coul_CBMC lcutcm ldual lneigh
-.true.      .false. .true. .false. .false.
-Number of unit cells in each of a,b, and c directions
-5. 5. 6.
-nstep   lstep   lpresim iupdatefix
-1  .false.  .false. 100
-lslit lexzeo lzgrid lelect_field ljoe lsami lmuir lpsurf lgraphite lcorreg llj lexpsix lmmff lninesix lgenlj lgaro lionic
-.false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false. .false.
-L_tor_table L_spline L_linear L_vib_table L_bend_table L_vdW_table L_elect_table
-.false.   .false.     .false. .false.     .false.      .false.     .false.
-nbox
-1
-express(ibox=1,nbox)[MPa]
-0.10d0 0.10d0
-ghost_particles(ibox=1,nbox)
-0 0
-L_Ewald_Auto
-.true.
-temp     fqtemp Elec_field(ibox=1,nbox) 
-295.0d0   5.0d0   0.0d0
-ianal  nbin  lrdf  lintra  lstretch  lgvst  lbend lete  lrhoz bin_width
-50  250   .true. .false. .false.  .false. .false. .false. .false. 0.2
-iprint imv iratio iblock  idiele L_movei_xyz iheatcapacity
-100   5000  1   100  1  .false.  5000
-boxlx   boxly  boxlz   lsolid  lrect   kalp   rcutchg - for box 1
-35.50d0 35.50d0  35.50d0 .true. .false.   0.24  14.0d0  0.0d0 0
-nchain nmolty
-300   1
-moltyp
-300
-lmixlb lmixjo ltab
-.true. .false. .false.
-nijspecial
-0
-ispec   jspec   aspec   bspec
-1       2       1.0d0   1.0d0
-rmin  softcut rcutin rbsmax    rbsmin 
-1.2d0  100.0d0  5.0d0 6.0d0     2.0d0 
-nunit nugrow ncarbon maxcbmc iurot lelect lflucq  lqtrans lexpand lavbmc1 lavbmc2 lavbmc3  fqegp
-24     24    24     24      0  .true. .false. .false. .false. .false. .false. .false. 0.0d0
-maxgrow lring   lrigid lrig      lsetup  isolute  eta  
-1     .false. .true. .false.   .false. 100000  0.0d0	0.0d0
-lq14scale qscale
-.false.    0.0
-growpoint
-0
-unit ntype leaderq  
-1    380    1   
-vibration
+
+ &mc_shared
+     seed=           0
+     nbox=           1
+     nmolty=           1
+     nchain=         300
+     nstep=           1
+     lstop= F
+     iratio=           1
+     rmin=   1.20000000000000     
+     softcut=   100.000000000000     
+     linit= F
+     lreadq= F
+     L_add= F
+     L_sub= F
+     N_add=        9000
+     N_box2add=           2
+     N_moltyp2add=           3
+     N_sub=         200
+     N_box2sub=           2
+     N_moltyp2sub=           3
+ /
+
+
+ &analysis
+     iprint=         100
+     imv=        5000
+     iblock=         100
+     iratp=          10
+     idiele=           1
+     iheatcapacity=        5000
+     ianalyze=          50
+     nbin=         250
+     lrdf= T
+     lintra= F
+     lstretch= F
+     lgvst= F
+     lbend= F
+     lete= F
+     lrhoz= F
+     bin_width=  0.200000000000000     
+     lucall= F
+     ucheck=           0           0
+     nvirial=           0
+     starvir=  0.000000000000000E+000
+     stepvir=  0.000000000000000E+000
+     ntemp=           0
+ /
+
+
+ &mc_volume
+     tavol=  0.500000000000000     
+     iratv=         500
+     pmvlmt=   1.00000000000000     
+     nvolb=           1
+     pmvolb=   1.00000000000000     
+     box5=           1
+     box6=           2
+     pmvol=  1.500000000000000E-003
+     pmvolx=  0.333000000000000     
+     pmvoly=  0.666670000000000     
+     rmvolume=  0.100000000000000     
+ /
+
+
+ &mc_swatch
+     pmswat=  0.000000000000000E+000
+     nswaty=           1
+     pmsatc=   1.00000000000000     
+ /
+
+
+ &mc_swap
+     pmswap=  0.000000000000000E+000
+     pmswmt=   1.00000000000000     
+ /
+
+
+ &mc_cbmc
+     rcutin=   5.00000000000000     
+     pmcb=  0.000000000000000E+000
+     pmcbmt=   1.00000000000000     
+     pmall=  0.000000000000000E+000
+     nchoi1=          15
+     nchoi=          10
+     nchoir=          15
+     nchoih=           1
+     nchtor=          10
+     nchbna=        1000
+     nchbnb=        1000
+     icbdir=           0
+     icbsta=           0
+     rbsmax=   6.00000000000000     
+     rbsmin=   2.00000000000000     
+     avbmc_version=           0
+     pmbias=  0.000000000000000E+000
+     pmbsmt=  0.000000000000000E+000
+     pmbias2=  0.000000000000000E+000
+     pmfix=  0.000000000000000E+000
+     lrig= F
+     lpresim= F
+     iupdatefix=         100
+ /
+
+
+ &mc_ee
+     pmexpc=  0.000000000000000E+000
+     pmeemt=   1.00000000000000     
+     pmexpc1=  0.000000000000000E+000
+     lexpand= F
+ /
+
+
+ &mc_simple
+     armtra=  1.000000000000000E-002
+     rmtra=  0.300000000000000     
+     rmrot=  0.400000000000000     
+     tatra=  0.500000000000000     
+     tarot=  0.500000000000000     
+     pmtra=  0.550000000000000     
+     pmtrmt=   1.00000000000000     
+     pmromt=   1.00000000000000     
+ /
+
+
+ &mc_flucq
+     taflcq=  0.950000000000000     
+     rmflucq=  0.100000000000000     
+     pmflcq=  0.000000000000000E+000
+     pmfqmt=   1.00000000000000     
+     lflucq= F
+     lqtrans= F
+     fqegp=  0.000000000000000E+000
+     nchoiq=           1
+ /
+
+
+SIMULATION_BOX
+! boxlx boxly boxlz lsolid lrect kalp rcut rcutnn numDimensionIsIstropic pressure temperature use_linkcell rintramax ghost_particles lideal ltwice
+  35.500   35.500   35.500  T  F  0.240 14.000  0.000 0     0.1  295.00  F 0.0 0  F  F
+! nchain_1 ... nchain_nmolty inix iniy iniz inirot inimix zshift dshift
+300 5 5 5 0 1  0.0  2.000
+END SIMULATION_BOX
+
+
+MOLECULE_TYPE
+! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
+24 24 24 24 0  T 1  F 24  T  F 100000     0.0  F 0.0  T  F
+! n, growpoint_1 ... growpoint_n
+0
+! unit ntype leaderq
+1 380 1
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype leaderq  
-2     381    2 
-vibration
+! unit ntype leaderq
+2 381 2
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype leaderq 
-3    380     3
-vibration
+! unit ntype leaderq
+3 380 3
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype leaderq
-4     381     4
-vibration
+! unit ntype leaderq
+4 381 4
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype leaderq
-5     380     5
-vibration
+! unit ntype leaderq
+5 380 5
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype leaderq
-6     381    6
-vibration
+! unit ntype leaderq
+6 381 6
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype leaderq
-7     385     7
-vibration
+! unit ntype leaderq
+7 385 7
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype leaderq
-8     385     8
-vibration
+! unit ntype leaderq
+8 385 8
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype leaderq
-9     385     9
-vibration
+! unit ntype leaderq
+9 385 9
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype leaderq
-10     385     10
-vibration
+! unit ntype leaderq
+10 385 10
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype leaderq
-11    385     11
-vibration
+! unit ntype leaderq
+11 385 11
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype leaderq
-12    385     12
-vibration
+! unit ntype leaderq
+12 385 12
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype leaderq
-13    382     13
-vibration
+! unit ntype leaderq
+13 382 13
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype leaderq
-14    383     14
-vibration
+! unit ntype leaderq
+14 383 14
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype leaderq
-15    382     15
-vibration
+! unit ntype leaderq
+15 382 15
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype leaderq
-16    383     16
-vibration
+! unit ntype leaderq
+16 383 16
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype leaderq
-17     382      17
-vibration
+! unit ntype leaderq
+17 382 17
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype leaderq
-18     383      18 
-vibration
+! unit ntype leaderq
+18 383 18
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype leaderq
-19    384     19
-vibration
+! unit ntype leaderq
+19 384 19
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype leaderq
-20    384     20
-vibration
+! unit ntype leaderq
+20 384 20
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype leaderq
-21    384     21
-vibration
+! unit ntype leaderq
+21 384 21
+! stretching
 0
-bending
+! bending
 0
-torsion
+! torsion
 0
-unit ntype leaderq
-22    384     22
-vibration
-0
-bending
+! unit ntype leaderq
+22 384 22
+! stretching
 0
-torsion
-0
-unit ntype leaderq
-23    384     23
-vibration
-0
-bending
-0
-torsion
-0
-unit ntype leaderq
-24    384     24
-vibration
-0
-bending
-0
-torsion
-0
-licell rintramax boxlink
-.false. 0.0d0    2
-Armtrax  Armtray  Armtraz This is meant for the atomic displacements
-0.01  0.01  0.01
-rmtrax rmtray rmtraz
-0.3d0   0.3d0   0.3d0
-rmrotx rmroty rmrotz
-0.4d0   0.4d0   0.4d0
-tatra tarot
-0.5d0   0.5d0
-linit lreadq
-.false. .false.
-lbranch 
-.true. 
-inich(1)
-300
-inix(1) iniy(1) iniz(1) inirot inimix zshift dshift nchoiq - box 1
-5       5       5       0      1      0.0    2.0    1
-rmvol tavol iratv iratp rmflcq taflcq
-1.0d-1 0.5d0 500  10 0.1d0  0.95d0
-pmvol   pmvlmt
-0.0015d0 1.0d0 1.0d0
-        nvolb pmvolb
-        1     1.0d0
-        box5 box6
-        1    2
-        pmvolx pmvoly
-        0.333  0.66667
-pmswat  nswaty 
-0.0d0   1      
-        nswatb
-        2 3 
-        pmsatc
-        1.0 
-        nsampos, 2xncut
-        1  1 1
-        splist
-        1 1
-        gswatc 2x(ifrom, iprev)
-        1 0  1 0
-        nswtcb
-        1 1.0d0
-        box numbers
-        1 2
-pmswap  pmswmt
-0.0d0  1.0d0 
-        nswapb pmswapb - type 1
-        1      1.0d0
-        box1   box2
-        1      2
-pmcb    pmcbmt 
-0.00d0   1.0d0
-        pmall
-        0.0d0 
-	pmfix
-	0.0d0
-pmflcq  pmfqmt
-0.0d0   1.0d0 
-pmexpc  pmeemt
-0.0d0   1.0d0 
-pmexpc1 
-0.0d0
-pm_atom_tra
-0.0d0
-pmtra   pmtrmt          
-0.55d0  1.0d0
-        pmromt  
-        1.0d0
-nchoi1 nchoi nchoir nchoih nchoitor 
-15 
-10
-15
-1
-10 
-nchbna nchbnb
-1000 
-1000 
-icbdir icbsta 
-0     0
-exclusion
-0
-1 1 1 1
-internal 1-4
-0
-1 1 1 -1 0.0 0.0
-intra 1-5 OH
-0 
-1 2 5 1
-lucall
-.false.
-ucheck
-0 
-nviral start step
-0       0.0d0 0.0d0
-lideal
-.false.
-ltwice
-.false.
-lrplic
-.false.
+! bending
+0
+! torsion
+0
+! unit ntype leaderq
+23 384 23
+! stretching
+0
+! bending
+0
+! torsion
+0
+! unit ntype leaderq
+24 384 24
+! stretching
+0
+! bending
+0
+! torsion
+0
+END MOLECULE_TYPE
+
+
+MC_SWATCH
+! moltyp1<->moltyp2 nsampos 2xncut
+2 3 1 1 1
+! gswatc 2x(ifrom, iprev)
+1 0 1 0
+! splist
+1 1
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 2
+END MC_SWATCH
+
+
+MC_SWAP
+! nswapb pmswapb
+1  1.00
+! box1 box2
+1 2
+END MC_SWAP
+
+
+SAFE_CBMC
+END SAFE_CBMC
+
+
+INTERMOLECULAR_EXCLUSION
+! mol_1 bead_1 mol_2 bead_2
+END INTERMOLECULAR_EXCLUSION
+
+
+INTRAMOLECULAR_SPECIAL
+! inclmol inclbead_1 inclbead_2 inclsign ofscale ofscale2
+END INTRAMOLECULAR_SPECIAL
+
+
+INTRAMOLECULAR_OH15
+! ainclmol ainclbead_1 ainclbead_2 a15type
+END INTRAMOLECULAR_OH15
+

@@ -22,65 +22,66 @@ module sim_system
   !=== Information about the system ===
 
   !*** PARAMETERS FOR ENSEMBLE ***
-  logical::lnpt& !< if LNPT=.TRUE. then a NPT volume move is used to equilibrate with a pressure bath (implies cubic simulation boxes) else an NVT simulation is performed
-   ,lgibbs& !< if LGIBBS=.TRUE. then a Gibbs-ensemble simulation is performed (implies cubic simulation boxes)
-   ,lgrand& !< if LGRAND=.TRUE. then simulation is performed in the grand-canonical ensemble
-   ,lanes& !< if LANES=.TRUE. then simulation is performed in the adiabatic nuclear and electronic sampling technique for polarizable force fields
-   ,lvirial& !<! if LVIRIAL=.TRUE. then one chain will be simulated in each box independently and the second virial coefficient will be calculated for their interactions at a series of distances along the x-axis
-   ,lmipsw& !< if lmipsw is true, then thermodynamic integration is performed for the phases, fort.35 must be supplied if so
-   ,lexpee& !< if lexpee is true, then expanded esnemble is performed for the phases, fort.44 must be supplied if so
-   ,ldielect !< if LDIELECT=.TRUE. then dielectric constant will be calculated and LEWALD must be .TRUE. Correct only in NVT ensemble
+  logical::lnpt=.false.& !< if LNPT=.TRUE. then a NPT volume move is used to equilibrate with a pressure bath (implies cubic simulation boxes) else an NVT simulation is performed
+   ,lgibbs=.false.& !< if LGIBBS=.TRUE. then a Gibbs-ensemble simulation is performed (implies cubic simulation boxes)
+   ,lgrand=.false.& !< if LGRAND=.TRUE. then simulation is performed in the grand-canonical ensemble
+   ,lanes=.false.& !< if LANES=.TRUE. then simulation is performed in the adiabatic nuclear and electronic sampling technique for polarizable force fields
+   ,lvirial=.false.& !<! if LVIRIAL=.TRUE. then one chain will be simulated in each box independently and the second virial coefficient will be calculated for their interactions at a series of distances along the x-axis
+   ,lmipsw=.false.& !< if lmipsw is true, then thermodynamic integration is performed for the phases, fort.35 must be supplied if so
+   ,lexpee=.false.& !< if lexpee is true, then expanded esnemble is performed for the phases, fort.44 must be supplied if so
+   ,ldielect=.false. !< if LDIELECT=.TRUE. then dielectric constant will be calculated and LEWALD must be .TRUE. Correct only in NVT ensemble
 
   !*** PARAMETERS FOR BOUNDARY CONDITIONS ***
-  logical,parameter::lpbc=.true.& !< if LPBC = .TRUE. then periodic boundaries are used
+  logical::lpbc=.true.& !< if LPBC = .TRUE. then periodic boundaries are used
    ,lpbcx=.true.& !< if LPBCX = .TRUE. then periodic boundary in x-directions is used
    ,lpbcy=.true.& !< if LPBCY = .TRUE. then periodic boundary in y-directions is used
    ,lpbcz=.true.& !< if LPBCZ = .TRUE. then periodic boundary in z-directions is used
    ,lfold=.true. !< if LFOLD = .TRUE. then coordinates are always folded into central box
 
   !*** PARAMETERS FOR INTERACTION CUT-OFFS ***
-  logical::lijall& !< if LIJALL = .TRUE. then all i-j interactions are considered (no potential cut-off). Must set lcutcm and ltailc to false for lijall = true *** check top of sumup.f if lijall = true and lchgall is false
-   ,lchgall& !< if LCHGALL= .TRUE. then all the electrostatic interaction are considered
-   ,lewald& !< if LEWALD=.TRUE. then ewald-sum will be used to calculate the electrostatic interactions.
-   ,lcutcm !< if LCUTCM=.TRUE. then a cutoff of the centers of mass will be used with a value of rcmu as calculated in ctrmas
+  logical::lijall=.false.& !< if LIJALL = .TRUE. then all i-j interactions are considered (no potential cut-off). Must set lcutcm and ltailc to false for lijall = true *** check top of sumup.f if lijall = true and lchgall is false
+   ,lchgall=.false.& !< if LCHGALL= .TRUE. then all the electrostatic interaction are considered
+   ,lewald=.false.& !< if LEWALD=.TRUE. then ewald-sum will be used to calculate the electrostatic interactions.
+   ,lcutcm=.true. !< if LCUTCM=.TRUE. then a cutoff of the centers of mass will be used with a value of rcmu as calculated in ctrmas
 
   !*** PARAMETERS FOR TAIL CORRECTIONS ***
-  logical::ltailc& !< if LTAILC=.TRUE. tail corrections are added (WARNING: .lsami. in external.inc switches an intrinsic tail correction on)
-   ,lshift& !< truncated and shifted potentials
-   ,ltailcZeo
+  logical::ltailc=.true.& !< if LTAILC=.TRUE. tail corrections are added (WARNING: .lsami. in external.inc switches an intrinsic tail correction on)
+   ,lshift=.false.& !< truncated and shifted potentials
+   ,ltailcZeo=.true.
 
   !*** PARAMETERS FOR CBMC-PSEUDO-POTENTIAL ***
-  logical::ldual !< if LDUAL=.TRUE. then the external potential during a CBMC growth will only go out to a radius of rcutin and then will be corrected to the full rcut at the end. This is Dual Cutoff Configurational-bias Monte Carlo (DC-CBMC)
+  logical::ldual=.true.& !< if LDUAL=.TRUE. then the external potential during a CBMC growth will only go out to a radius of rcutin and then will be corrected to the full rcut at the end. This is Dual Cutoff Configurational-bias Monte Carlo (DC-CBMC)
+   ,L_Coul_CBMC=.true. !< if L_Coul_CBMC=.TRUE. then the electrostatic interaction is computed during CBMC/SWAP
 
   !*** PARAMETERS OF NEIGHBOR LIST ***
-  logical::lneigh !< if LNIEGH=.TRUE. the nearest neighbor list will be used with a value of rcutnn specified by fort.4
+  logical::lneigh=.false. !< if LNIEGH=.TRUE. the nearest neighbor list will be used with a value of rcutnn specified by fort.4
 
   !* PARAMETER FOR LENNARD-JONES 12-6
-  logical::llj !< This is only used if you are using regular lj potential, i.e. without shifting or modifying it in any other way.
+  logical::llj=.false. !< This is only used if you are using regular lj potential, i.e. without shifting or modifying it in any other way.
 
   !* PARAMETERS FOR EXP-6 POTENTIAL
-  logical::lexpsix !< if LEXPSIX=.TRUE. exp-6 potential will be used instead of lennard jones
+  logical::lexpsix=.false. !< if LEXPSIX=.TRUE. exp-6 potential will be used instead of lennard jones
 
   !* PARAMETERS FOR BUFFERED 14-7 POTENTIAL
-  logical::lmmff !< if LMMFF=.TRUE. buffered 14-7 potential will be used.
+  logical::lmmff=.false. !< if LMMFF=.TRUE. buffered 14-7 potential will be used.
 
   !* PARAMETERS FOR 9-6 POTENTIAL
-  logical::lninesix !< if LNINESIX=.TRUE. then the 9-6 potential will be used.
+  logical::lninesix=.false. !< if LNINESIX=.TRUE. then the 9-6 potential will be used.
 
   !* PARAMETERS FOR GENERALIZED LJ POTENTIAL
-  logical::lgenlj !< if LGENLJ=.TRUE. then the the Generalized lennard jones potential will be used.
+  logical::lgenlj=.false. !< if LGENLJ=.TRUE. then the the Generalized lennard jones potential will be used.
 
   !*** External surface ***
-  logical::lexzeo& !< implicit rigid framework for zeolites and metal-organic frameworks. Parameters for zeolites are read in subroutine SUZEO
-   ,lzgrid !< whether to use tabulated potential for the interactions with the rigid framework
-  logical::lsami& !<
-   ,lmuir& !<
-   ,lslit& !< planar slit pore
-   ,lgraphite& !< graphite surface
-   ,ljoe& !<
-   ,lpsurf& !<
-   ,lcorreg& !<
-   ,lelect_field !< external electric field
+  logical::lexzeo=.false.& !< implicit rigid framework for zeolites and metal-organic frameworks. Parameters for zeolites are read in subroutine SUZEO
+   ,lzgrid=.false. !< whether to use tabulated potential for the interactions with the rigid framework
+  logical::lsami=.false.& !<
+   ,lmuir=.false.& !<
+   ,lslit=.false.& !< planar slit pore
+   ,lgraphite=.false.& !< graphite surface
+   ,ljoe=.false.& !<
+   ,lpsurf=.false.& !<
+   ,lcorreg=.false.& !<
+   ,lelect_field=.false. !< external electric field
   real,allocatable::Elect_field(:)
 
   !*** Thermodynamic integration ***
@@ -96,18 +97,19 @@ module sim_system
   integer,parameter::nEnergy=14
   real,allocatable::vbox(:,:) !< (j,ibox): energies of ibox; j = 1: total energy; 2: intermolecular LJ; 3: tail correction; 4: intramolecular non-bonded LJ; 5: stretching; 6: bending; 7: torsion; 8: electrostatic; 9: external field; 10: 3-body garofalini; 11: fluctuating charge (vflucqb); 12: vipswb; 13: vwellipswb; 14: Ewald reciprocal-space electrostatic
   integer,allocatable::ucheck(:) !< whether or not to calculate chemical potential for each molecule type
-  integer::io_output=6,iprint,imv,iratp,iblock,idiele,iheatcapacity,nprop,ianalyze,nbin
-  real::bin_width
-  logical::L_movie_xyz,lrdf,lintra,lstretch,lgvst,lbend,lete,lrhoz,lucall
+  character(LEN=1)::suffix='a'
+  integer::io_output=6,iprint=-1,imv=-1,iblock=-1,iratp=500,idiele=-1,iheatcapacity=-1,nprop,ianalyze=-1,nbin=1,run_num=1
+  real::bin_width=0.2_dp
+  logical::L_movie_xyz=.false.,lrdf=.false.,lintra=.false.,lstretch=.false.,lgvst=.false.,lbend=.false.,lete=.false.,lrhoz=.false.,lucall=.false.
 
   !*** Histograms for grand-canonical ensemble ***
-  integer::nequil,ninstf,ninsth,ndumph
+  integer::nequil=0,ninstf=0,ninsth=0,ndumph=0
 
   !*** 2nd virial coefficient ***
   real,allocatable::xiq(:),jayself(:),ecut(:),jayq(:)
   integer,parameter::maxvir=1,maxntemp=3 !< maximum number of bins for the 2nd virial coefficient
-  integer::ntemp,nvirial
-  real::virtemp(maxntemp),starvir,stepvir
+  integer::ntemp=0,nvirial=0
+  real::virtemp(maxntemp),starvir=0.0_dp,stepvir=0.0_dp
 
   !*** Dielectric constant ***
   real,allocatable::dipolex(:),dipoley(:),dipolez(:)
@@ -119,6 +121,7 @@ module sim_system
 
   !=== Force field parameters ===
   integer::nntype !< number of types of beads
+  logical::L_tor_table=.false.,L_spline=.false.,L_linear=.false.,L_vib_table=.false.,L_bend_table=.false.,L_vdW_table=.false.,L_elect_table=.false.
   real,allocatable::mass(:),sigi(:),epsi(:),qelect(:),sig2ij(:),epsij(:)&
    ,brvib(:),brvibk(:),brben(:),brbenk(:)&
    ,ljscale(:,:,:),qscale2(:,:,:)
@@ -127,19 +130,19 @@ module sim_system
   logical,allocatable::lij(:),lqchg(:),lexclu(:,:,:,:),linclu(:,:,:),lqinclu(:,:,:),lainclu(:,:,:),lpl(:)
 
   !*** Garofalini force field ***
-  logical::lgaro !< if LGARO=.TRUE. garofalini potential will be used instead of Lennard-Jones
+  logical::lgaro=.false. !< if LGARO=.TRUE. garofalini potential will be used instead of Lennard-Jones
   real::v3garo
 
   !=== Information about simulation box ===
   integer::nbox=1,nbxmax& !< maximum number of boxes
    ,npabmax& !< maximum number of box pairs (for swatch and swap)
    ,boxlink
-  real::beta
-  logical::licell
+  real::beta,temp=-1.0_dp
+  logical::licell=.false.
   real,allocatable,target::boxlx(:),boxly(:),boxlz(:),rcut(:),rcutnn(:),kalp(:)
   logical,allocatable,target::lsolid(:),lrect(:)
-  real,allocatable::express(:),B(:) !< chemical potential
-  integer,allocatable::ghost_particles(:),numberDimensionIsIsotropic(:)
+  real,allocatable::express(:),zshift(:),dshift(:)
+  integer,allocatable::ghost_particles(:),numberDimensionIsIsotropic(:),ininch(:,:),inix(:),iniy(:),iniz(:),inirot(:),inimix(:)
   logical,allocatable::lideal(:) !< if lideal=.true. then intermolecular interactions are not computed
 
   !=== Information about molecule types ===
@@ -147,8 +150,8 @@ module sim_system
    ,npamax& !< maximum number of pairs to switch or swatch
    ,numax !< maximum number of units
   integer,allocatable::nunit(:),isolute(:),rindex(:),riutry(:,:)
-  logical,allocatable::lelect(:),lrigid(:),lq14scale(:)
-  real,allocatable::eta2(:,:),qscale(:)
+  logical,allocatable::lelect(:),lrigid(:),lq14scale(:),lbranch(:)
+  real,allocatable::eta2(:,:),qscale(:),B(:) !< chemical potential
   integer,allocatable::ntype(:,:),leaderq(:,:)&
    ,invib(:,:),itvib(:,:,:),ijvib(:,:,:)&
    ,inben(:,:),itben(:,:,:),ijben2(:,:,:),ijben3(:,:,:)&
@@ -170,21 +173,22 @@ module sim_system
    ,temtyp(:) !< number of molecules of each molecule type
 
   !=== Information about Monte Carlo moves ===
-  integer::tmcc,iratio
-  logical::lstop
-  real::rmin,softcut,softlog
+  integer::tmcc,iratio=500
+  logical::lstop=.false.
+  real::rmin=1.2_dp,softcut=100.0_dp,softlog
 
   !*** Volume moves ***
-  real::pmvol,pmvolx,pmvoly,tavol
+  real::pmvol,pmvolx=0.333_dp,pmvoly=0.666_dp,tavol=0.5_dp
   real,allocatable::pmvlmt(:),pmvolb(:),rmvol(:),rmhmat(:,:)
-  integer::nvolb,iratv
+  integer::nvolb,iratv=500
   integer,allocatable::box5(:),box6(:)
 
   !*** CBMC particle identity switch (swatch) moves ***
   real::pmswat
   integer::nswaty
   real,allocatable::pmsatc(:),pmswtcb(:,:)
-  integer,allocatable::nswatb(:,:),nsampos(:),ncut(:,:),splist(:,:,:),gswatc(:,:,:),nswtcb(:),box3(:,:),box4(:,:)
+  integer,allocatable::nswatb(:,:),nsampos(:)& !< number of beads that remain in the same position
+   ,ncut(:,:),splist(:,:,:),gswatc(:,:,:),nswtcb(:),box3(:,:),box4(:,:)
   logical,allocatable::liswinc(:,:)
   logical::liswatch
   integer::other
@@ -197,7 +201,7 @@ module sim_system
   !** AVBMC moves **
   logical,allocatable::lavbmc1(:),lavbmc2(:),lavbmc3(:),lbias(:)
   real,allocatable::pmbias(:),pmbsmt(:),pmbias2(:),favor(:),favor2(:)
-  real::rintramax,rbsmax,rbsmin,vol_eff
+  real::rintramax=0.0_dp,rbsmax=3.5_dp,rbsmin=2.5_dp,vol_eff
 
   !* Nucleation *
   integer,allocatable::neighbor(:,:),neigh_cnt(:),neighboro(:,:),neigh_o(:)
@@ -213,15 +217,17 @@ module sim_system
 
   !** SAFE CBMC **
   real,allocatable::pmfix(:)
-  integer,allocatable::iring(:),nrig(:),irig(:,:),frig(:,:),nrigmin(:),nrigmax(:)
+  integer,allocatable::iring(:),nrig(:),irig(:,:)& !< the site rigid sites will be grown from
+   ,frig(:,:)& !< the previous site (not kept rigid)
+   ,nrigmin(:),nrigmax(:) !< the minimum and maximum amounts of the chain to keep rigid
   logical,allocatable::lring(:),lrig(:),lrigi(:,:)
   integer,parameter::maxbin=201 !< SAFECBMC max number of bins
-  integer::iupdatefix
-  logical::lpresim
+  integer::iupdatefix=100
+  logical::lpresim=.false.
 
   !*** CBMC shared variables ***
   integer,allocatable::nugrow(:),nmaxcbmc(:),iurot(:),maxgrow(:)&
-   ,nchoi1(:),nchoi(:),nchoir(:),nchoih(:),nchtor(:),nchbna(:),nchbnb(:)&
+   ,nchoi1(:),nchoi(:),nchoir(:),nchoih(:),nchtor(:),nchbna(:),nchbnb(:)& !< number of candidates during CBMC regrowth for the first bead, subsequent beads (flexible and rigid), explicit-hydrogen, torsion, and bendings
    ,nrotbd(:),irotbd(:,:),icbdir(:),icbsta(:)&
    ,growfrom(:),growprev(:),grownum(:),growlist(:,:)
   real,allocatable::pmrotbd(:,:),rxp(:,:),ryp(:,:),rzp(:,:)& !< (iunit,itrial) coordinates of iunit of the selected molecule for the itrial-th candidate configuration, for use in rosenbluth
@@ -234,15 +240,15 @@ module sim_system
    ,nchtor_max& !< maximum number of choices for torsion CBMC growth
    ,nchbn_max& !< maxium number of choices for bending CBMC growth
    ,moltion(2)
-  real::rcutin,weight,weiold,vold(nEnergy),vnew(nEnergy),vneworient,voldorient
-  logical::L_Coul_CBMC
+  real::rcutin=6.0_dp,weight,weiold,vold(nEnergy),vnew(nEnergy),vneworient,voldorient
 
   !*** Fluctuating charge moves ***
   logical,parameter::lfepsi=.false. !< If lfepsi is true, the fluctuation of epsilon is used instead of the fluctuation of the sigma.
   logical,allocatable::lflucq(:),lqtrans(:)
-  real::pmflcq,taflcq,fqbeta
+  real::pmflcq,taflcq=0.95_dp,fqbeta
   real,allocatable::bnflcq(:,:),bsflcq(:,:),bnflcq2(:,:),bsflcq2(:,:)& !< accumulators for statistics of fluctuating charge moves; bnflcq and bsflcq record the number of all and successful attempts between updates of maximum displacements, while bnflcq2 and bsflcq record the values for the entire run
    ,fqegp(:),pmfqmt(:),rmflcq(:,:)
+  integer,allocatable::nchoiq(:)
 
   !*** Expanded ensemble moves ***
   integer,parameter::smax=35 !< max no. of mstates
@@ -262,11 +268,11 @@ module sim_system
   real::pm_atom_tra,Armtrax,Armtray,Armtraz
 
   !*** Translation ***
-  real::pmtra,tatra
+  real::pmtra,tatra=0.5_dp
   real,allocatable::pmtrmt(:),rmtrax(:,:),rmtray(:,:),rmtraz(:,:)
 
   !*** Rotation ***
-  real::tarot
+  real::tarot=0.5_dp
   real,allocatable::pmromt(:),rmrotx(:,:),rmroty(:,:),rmrotz(:,:)
 
   !=== MPI-related ===
@@ -274,19 +280,7 @@ module sim_system
   integer,parameter::rootid=0
 
   !=== OPENMP-related ===
-  integer::thread_id,thread_num,thread_num_max,thread_num_proc
-
-  real,allocatable::zshift(:),dshift(:)
-  integer,allocatable::ininch(:,:),inix(:),iniy(:),iniz(:),inirot(:),inimix(:),nchoiq(:)
-  logical,allocatable::lbranch(:)
-  integer::run_num
-  character(LEN=1)::suffix
-  logical::L_add,L_sub
-  integer::N_add,N_box2add,N_moltyp2add
-  integer::N_sub,N_box2sub,N_moltyp2sub
-  real::Num_cell_a,Num_cell_b,Num_cell_c
-  logical::L_tor_table,L_spline,L_linear,L_vib_table,L_bend_table,L_vdW_table,L_elect_table
-  real::temp
+  integer::thread_id=0,thread_num=1,thread_num_max=1,thread_num_proc=1
 
   !** Parameters for 2nd virial coefficient calculation ***
   ! real,parameter::a0 = 0.2003E0_dp,b0 = 1.3946E0_dp,aslope = 8.85E5_dp,bslope = 158.25E0_dp,ashift = 7.227E5_dp,bshift = 505.97E0_dp ! slope=0.3 a=3.05
@@ -315,31 +309,25 @@ module sim_system
   !	real,parameter::a0 = -0.48137E0_dp,b0 = -0.11887E0_dp,aslope = 36.99125E5_dp,bslope = 1041.25E0_dp,ashift = 2.4744E5_dp,bshift = 306.23E0_dp ! slope = 0.9 a=2.32
   !	real,parameter::a0 = 0.0E0_dp,b0 = 0.0E0_dp,aslope = 3.0E5_dp,bslope = 0.0E0_dp,ashift = 8.0E5_dp,bshift = 1200.0E0_dp ! slope = 0.3 a=2.85
 
-  namelist /system/nchain,nmolty,nbox
-
   type(LookupTable)::atoms
 
 CONTAINS
-  subroutine allocate_cell()
+  subroutine allocate_system()
+    integer,parameter::initial_size=15
     integer::jerr
+
     allocate(boxlx(nbxmax),boxly(nbxmax),boxlz(nbxmax),rcut(nbxmax),rcutnn(nbxmax),kalp(nbxmax),lsolid(nbxmax),lrect(nbxmax)&
      ,express(nbxmax),Elect_field(nbxmax),ghost_particles(nbxmax),numberDimensionIsIsotropic(nbxmax),inix(nbxmax),iniy(nbxmax)&
      ,iniz(nbxmax),inirot(nbxmax),inimix(nbxmax),nchoiq(nbxmax),box5(nbxmax),box6(nbxmax),zshift(nbxmax),dshift(nbxmax)&
      ,rmvol(nbxmax),pmvlmt(nbxmax),pmvolb(nbxmax),lideal(nbxmax),ltwice(nbxmax),rmhmat(nbxmax,9),dipolex(nbxmax),dipoley(nbxmax)&
      ,dipolez(nbxmax),nchbox(nbxmax),vbox(nEnergy,nbxmax),stat=jerr)
-    if (jerr.ne.0) then
-       call err_exit(__FILE__,__LINE__,'allocate_system: allocation failed',jerr)
-    end if
-  end subroutine allocate_cell
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'allocate_system.1: allocation failed',jerr)
 
-  subroutine allocate_system()
-    integer,parameter::initial_size=15
-    integer::jerr
     allocate(ucheck(ntmax),nrotbd(ntmax),xcm(nmax),ycm(nmax),zcm(nmax),pmsatc(npamax),pmswtcb(npamax,npabmax),nswatb(npamax,2)&
      ,nsampos(npamax),ncut(npamax,2),gswatc(npamax,2,2*npamax),nswtcb(npamax),box3(npamax,npabmax),box4(npamax,npabmax)&
      ,temtyp(ntmax),B(ntmax),nunit(ntmax),nugrow(ntmax),nmaxcbmc(ntmax),iurot(ntmax)&
      ,maxgrow(ntmax),isolute(ntmax),iring(ntmax),nrig(ntmax),irig(ntmax,6),frig(ntmax,6),nrigmin(ntmax),nrigmax(ntmax)&
-     ,rindex(ntmax),riutry(ntmax,3),lelect(ntmax),lflucq(ntmax),lqtrans(ntmax),lexpand(ntmax),lavbmc1(ntmax),lavbmc2(ntmax)&
+     ,rindex(ntmax),riutry(ntmax,initial_size),lelect(ntmax),lflucq(ntmax),lqtrans(ntmax),lexpand(ntmax),lavbmc1(ntmax),lavbmc2(ntmax)&
      ,lavbmc3(ntmax),lbias(ntmax),lring(ntmax),lrigid(ntmax),lrig(ntmax),lq14scale(ntmax),fqegp(ntmax),eta2(nbxmax,ntmax)&
      ,qscale(ntmax),pmbias(ntmax),pmbsmt(ntmax),pmbias2(ntmax),rmtrax(ntmax,nbxmax),rmtray(ntmax,nbxmax),rmtraz(ntmax,nbxmax)&
      ,rmrotx(ntmax,nbxmax),rmroty(ntmax,nbxmax),rmrotz(ntmax,nbxmax),lbranch(ntmax),ininch(ntmax,nbxmax),rmflcq(ntmax,nbxmax)&
@@ -357,9 +345,7 @@ CONTAINS
      ,inben(ntmax,initial_size),itben(ntmax,initial_size,12),ijben2(ntmax,initial_size,12),ijben3(ntmax,initial_size,12)&
      ,intor(ntmax,initial_size),ittor(ntmax,initial_size,12),ijtor2(ntmax,initial_size,12),ijtor3(ntmax,initial_size,12)&
      ,ijtor4(ntmax,initial_size,12),irotbd(initial_size,ntmax),pmrotbd(initial_size,ntmax),stat=jerr)
-    if (jerr.ne.0) then
-       call err_exit(__FILE__,__LINE__,'allocate_system: allocation failed',jerr)
-    end if
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'allocate_system.2: allocation failed',jerr)
   end subroutine allocate_system
 
   subroutine allocate_molecule()

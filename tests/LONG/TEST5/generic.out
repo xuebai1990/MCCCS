@@ -1,377 +1,334 @@
- Program started at 2013-04-08 13:22:10.038
- Number of processors:            1
-           0  threads per processor
- Random number seed:            0
- L_Coul_CBMC: T
- Number of unit cells in a dir =    5.00000000000000     
- Number of unit cells in b dir =    5.00000000000000     
- Number of unit cells in c dir =    6.00000000000000     
- number of cycles:      150000
- lstep: F
- lpresim: F
- iupdatefix:         100
- L_tor_table: F
- L_spline: F
- L_linear: F
- L_vib_table: F
- L_bend_table: F
- L_vdW_table: F
- L_elect_table: F
- number of boxes in the system:           1
- temperature:   6000.00000000000       K
- external pressure:   10000.0000000000       MPa
- Ghost particles:            0
- fluctuating charge temperature:   5.00000000000000       K
- Electric field in z direction:  0.000000000000000E+000  V/A
- ianalyze:      500000
- nbin         250
- lrdf: F
- lintra: F
- lstretch: F
- lgvst: F
- lbend: F
- lete: F
- lrhoz: F
- bin_width:  0.200000000000000     
- iprint:       15000
- imv:       15000
- iratio:        1000
- iblock:       15000
- idiele:           1
- L_movie_xyz T
- box:           1
-    boxlx:   20.0000000000000       A
-    boxly:   20.0000000000000       A
-    boxlz:   20.0000000000000       A
-    lsolid: F
-    lrect: F
- neighbor list cutoff (rcutnn):  0.000000000000000E+000 A
-    rcut:   6.50000000000000      A
- lopt_bias:  F F F
- freq_opt_bias:          500
- number of chains:         360
- number of molecule types:           3
- number of chains of molecule type           1 :          60
- number of chains of molecule type           2 :         180
- number of chains of molecule type           3 :         120
- Lorentz-Berthelot combining rules apply
-    lmixlb: T  lmixjo: F
- number of special combining parameters:           0
- minimum cutoff (rmin):  0.700000000000000       A
- softcut:   100.000000000000     
- CBMC inner cutoff (rcutin):   5.00000000000000       A
- AVBMC outer cutoff (rbsmax):   5.00000000000000       A
- AVBMC inner cutoff (rbsmin):  0.700000000000000       A
- garo ecut           1   24.5547586932432     
- garo ecut           2   8.79910664282140     
- garo ecut           3   1.03022089879427     
- garo ecut           4  -17.5923189715135     
- garo ecut           5   7.10819905510967     
- garo ecut           6  -2.43853823484802     
- molecule type:           1
-    number of units:           1
-    number of units for CBMC growth:           1
-    number of carbons for EH alkane:           1
-    maximum number of units for CBMC:           1
-    iurot:           0
-    lelect: T
-    lflucq: F
-    lqtrans: F
-    lexpand: F
-    lavbmc1: F
-    lavbmc2: F
-    lavbmc3: F
-    fqegp:  0.000000000000000E+000
-    lsetup: F
-    lq14scale: F
-    qscale:   1.00000000000000     
-    energy offset for box           1 :  0.000000000000000E+000  K
-    bead            1  beadtype            1 Si   charge leader            1
- molecule type:           2
-    number of units:           1
-    number of units for CBMC growth:           1
-    number of carbons for EH alkane:           1
-    maximum number of units for CBMC:           1
-    iurot:           0
-    lelect: T
-    lflucq: F
-    lqtrans: F
-    lexpand: F
-    lavbmc1: F
-    lavbmc2: T
-    lavbmc3: F
-    fqegp:  0.000000000000000E+000
-    lsetup: F
-    lq14scale: F
-    qscale:   1.00000000000000     
-    energy offset for box           1 :  0.000000000000000E+000  K
-    bead            1  beadtype            2 O    charge leader            1
-    AVBMC pmbias  0.500000000000000     
-    AVBMC2 and 3 probability for molecule type           1 :
-   1.00000000000000     
-    AVBMC2 and 3 probability for molecule type           2 :
-  0.000000000000000E+000
-    AVBMC2 and 3 probability for molecule type           3 :
-  0.000000000000000E+000
-    AVBMC3 pmbias2:  0.500000000000000     
- molecule type:           3
-    number of units:           1
-    number of units for CBMC growth:           1
-    number of carbons for EH alkane:           1
-    maximum number of units for CBMC:           1
-    iurot:           0
-    lelect: T
-    lflucq: F
-    lqtrans: F
-    lexpand: F
-    lavbmc1: F
-    lavbmc2: T
-    lavbmc3: F
-    fqegp:  0.000000000000000E+000
-    lsetup: F
-    lq14scale: F
-    qscale:   1.00000000000000     
-    energy offset for box           1 :  0.000000000000000E+000  K
-    bead            1  beadtype            3 H    charge leader            1
-    AVBMC pmbias  0.500000000000000     
-    AVBMC2 and 3 probability for molecule type           1 :
-  0.000000000000000E+000
-    AVBMC2 and 3 probability for molecule type           2 :
-   1.00000000000000     
-    AVBMC2 and 3 probability for molecule type           3 :
-  0.000000000000000E+000
-    AVBMC3 pmbias2:  0.500000000000000     
- licell: F
- rintramax:  0.000000000000000E+000  A
- boxlink:           2
- initial maximum displacements for atoms:  0.0100  0.0100  0.0100
- initial maximum x, y and z displacement:  0.3000  0.3000  0.3000
- initial maximum x, y and z rotation:      0.4000  0.4000  0.4000
- target translational acceptance ratio:  0.500000000000000     
- target rotational acceptance ratio:  0.500000000000000     
- linit: F
- lreadq: F
- lbranch for molecule type           1 : F
- lbranch for molecule type           2 : F
- lbranch for molecule type           3 : F
- box:           1
-    initial number of chains of type           1 :          60
-    initial number of chains of type           2 :         180
-    initial number of chains of type           3 :         120
-    initial number of chains in x, y and z directions:    8    7    7
-    initial rotational displacement:           1
-    inimix:           0
-    zshift:  0.000000000000000E+000
-    dshift:   2.00000000000000     
-    nchoiq:           1
- initial maximum volume displacement (rmvol) in box           1 :
-   10.0000000000000     
- target volume acceptance ratio (tavol):  0.500000000000000     
- iratv:        1000
- iratp:      100000
- initial maximum fluct. charge displ. for chain type           1  box
-           1 :  0.100000000000000     
- initial maximum fluct. charge displ. for chain type           2  box
-           1 :  0.100000000000000     
- initial maximum fluct. charge displ. for chain type           3  box
-           1 :  0.100000000000000     
- target fluctuating charge acceptance ratio (taflcq):  0.950000000000000     
- pmvol:  5.000000000000000E-004
-    pmvlmt for box           1 :   1.00000000000000     
- nvolb:           1
-    pmvolb:   1.00000000000000     
-    box pair for volume move number           1 :           1           2
- pmswat:  0.000000000000000E+000
-    number of swatch pairs (nswaty):           1
-    swatch molecule type pairs:           1           4
-    probability of each swatch pair:   1.00000000000000     
-    nsampos:           1
-    ncut:           0           0
-    splist:           1           1
-    box pair:           1           1
-    box pair:           2           2
- pmswap:  0.000000000000000E+000
-       swap probability for molecule type         1 (pmswmt):  0.0000
-       swap probability for molecule type         2 (pmswmt):  0.0000
-       swap probability for molecule type         3 (pmswmt):  1.0000
-    number of swap moves for molecule type           1 :           1
-       pmswapb:   1.00000000000000     
-       box pair:           1           1
-    number of swap moves for molecule type           2 :           1
-       pmswapb:   1.00000000000000     
-       box pair:           1           1
-    number of swap moves for molecule type           3 :           1
-       pmswapb:   1.00000000000000     
-       box pair:           1           1
- pmcb:  0.000000000000000E+000
-       CBMC probability for molecule type         1 (pmcbmt):  1.0000
-       CBMC probability for molecule type         2 (pmcbmt):  0.0000
-       CBMC probability for molecule type         3 (pmcbmt):  0.0000
-    pmall for molecule type           1 :  0.000000000000000E+000
-    pmall for molecule type           2 :  0.000000000000000E+000
-    pmall for molecule type           3 :  0.000000000000000E+000
-            probability for SAFE-CBMC for molec   1  (pmfix):  0.0000
-            probability for SAFE-CBMC for molec   2  (pmfix):  0.0000
-            probability for SAFE-CBMC for molec   3  (pmfix):  0.0000
- pmflcq:  0.000000000000000E+000
-       flcq probability for molecule type         1 (pmfqmt):  1.0000
-       flcq probability for molecule type         2 (pmfqmt):  0.0000
-       flcq probability for molecule type         3 (pmfqmt):  0.0000
- pmexpc:  0.000000000000000E+000
-         expanded ens. prob. for molecule type    1 (pmeemt):  1.0000
-         expanded ens. prob. for molecule type    2 (pmeemt):  0.0000
-         expanded ens. prob. for molecule type    3 (pmeemt):  0.0000
- pmtra:   1.00000000000000     
-      translation probability for molecule   ty   1 (pmtrmt):  0.1670
-      translation probability for molecule   ty   2 (pmtrmt):  0.6670
-      translation probability for molecule   ty   3 (pmtrmt):  1.0000
- pmrot:   1.00000000000000     
-       rotational probability for molecule    t   1 (pmromt):  1.0000
-       rotational probability for molecule    t   2 (pmromt):  0.0000
-       rotational probability for molecule    t   3 (pmromt):  0.0000
- 
- percentage move probabilities:
+Program started at 2013-04-22 17:14:44.416
+Number of processors: 1
+Threads per processor: 1
+ run_num: 1
+ suffix: a
+ L_movie_xyz:  T
+
+***** PROGRAM  =  THE MAGIC BLACK BOX *****
+Isobaric-isothermal ensemble
+Using periodic boundaries in x y z
+3-dimensional periodic box
+Particle coordinates are folded into central box
+Additional center-of-mass cutoff on computed rcmu
+CBMC simultaneously grows all beads conected to the same bead
+   with bond lengths/angles generated from Gaussian distribution
+Program will call explct() for explicit-hydrogen models
+Dual Cutoff Configurational-bias Monte Carlo
+Coulombic interactions will be included in the Rosenbluth weights for CBMC growth
+Coulombic inter- and intra-molecular interactions will be calculated
+   using (neutral-)group-based cutoff
+Feuston-Garofalini potential for pair-wise dispersive interactions
+   using a shifted potential
+Lorentz-Berthelot combining rules apply
+*******************************************
+
+NAMELIST MC_SHARED
+------------------------------------------
+Random number seed: 0
+number of boxes in the system: 1
+number of molecule types: 3
+number of chains: 360
+number of cycles: 150000
+ iratio: 1000
+minimum cutoff (rmin):   0.700 [Ang]
+ softcut:   100.000000    
+Write checkpoint file every 1800 seconds, and keep the last 1 copies
+ linit:  F
+ lreadq:  F
+
+NAMELIST ANALYSIS
+------------------------------------------
+ iprint: 15000
+ imv: 15000
+ iblock: 15000
+ iratp: 100000
+ idiele: 1
+ iheatcapacity: 1000000
+ ianalyze: 500000
+ nbin: 250
+ lrdf:  F
+ lintra:  F
+ lstretch:  F
+ lgvst:  F
+ lbend:  F
+ lete:  F
+ lrhoz:  F
+ bin_width:  0.200000000    
+
+SECTION SIMULATION_BOX
+------------------------------------------
+Box 1:   20.000 x   20.000 x   20.000
+   rcut:  6.500 [Ang], kalp:  0.240
+   neighbor list cutoff (rcutnn):  0.000
+   number of dimensions that are isotropic: 0
+   lsolid:  F, lrect:  F, lideal:  F, ltwice:  F
+   temperature: 6000.000 [K]
+   external pressure:   10000.0000     [MPa]
+   Ghost particles: 0
+   initial number of chains of each type:   60  180  120
+   initial number of chains in x, y and z directions: 8 x 7 x 7
+   initial rotational displacement: 1, inimix: 0, zshift:  0.0, dshift:  2.000
+
+NUMBER OF MOLECULES OF EACH TYPE
+ number of chains of each type:   60  180  120
+
+SECTION MOLECULE_TYPE
+------------------------------------------
+molecule type: 1
+   number of units: 1
+   number of units for CBMC growth: 1
+   number of carbons for EH alkane: 1
+   maximum number of units for CBMC: 1
+   maximum number of interior segments for SAFE-CBMC regrowth: 1
+   number of atoms in a ring (if lring=.true.): 1
+   iurot: 0, isolute: 5000000, lelect:  T, lring:  F, lrigid:  F, lbranch:  F, lrplc:  F, lsetup:  F, lq14scale:  F, qscale: 1.0
+   energy offset for box 1:     0.0 [K]
+
+   bead 1: bead type 1 [Si], charge leader 1
+molecule type: 2
+   number of units: 1
+   number of units for CBMC growth: 1
+   number of carbons for EH alkane: 1
+   maximum number of units for CBMC: 1
+   maximum number of interior segments for SAFE-CBMC regrowth: 1
+   number of atoms in a ring (if lring=.true.): 1
+   iurot: 0, isolute: 5000000, lelect:  T, lring:  F, lrigid:  F, lbranch:  F, lrplc:  F, lsetup:  F, lq14scale:  F, qscale: 1.0
+   energy offset for box 1:     0.0 [K]
+
+   bead 1: bead type 2 [O], charge leader 1
+molecule type: 3
+   number of units: 1
+   number of units for CBMC growth: 1
+   number of carbons for EH alkane: 1
+   maximum number of units for CBMC: 1
+   maximum number of interior segments for SAFE-CBMC regrowth: 1
+   number of atoms in a ring (if lring=.true.): 1
+   iurot: 0, isolute: 5000000, lelect:  T, lring:  F, lrigid:  F, lbranch:  F, lrplc:  F, lsetup:  F, lq14scale:  F, qscale: 1.0
+   energy offset for box 1:     0.0 [K]
+
+   bead 1: bead type 3 [H], charge leader 1
+
+MOLECULAR MASS:      28.09000     16.00000      1.00780
+
+NAMELIST TRANSFER
+------------------------------------------
+lopt_bias:  F F F
+freq_opt_bias: 500
+
+NAMELIST MC_VOLUME
+------------------------------------------
+target volume acceptance ratio (tavol): 0.50
+frequency to adjust maximum volume displacement: 1000
+initial maximum volume displacement (rmvol):   10.000
+pmvol:  0.500000000E-03
+   pmvlmt for box 1:   1.00000000    
+nvolb: 1
+   box pair 1: between 1 and 2,   pmvolb =   1.00000000    
+
+NAMELIST MC_SWATCH
+------------------------------------------
+pmswat:   0.00000000    
+   number of swatch pairs (nswaty): 1
+   probability of each swatch pair:   1.00000000    
+
+   swatch molecule type pairs:    1    4
+   nsampos: 1, ncut:  1  1
+   molecule 1
+   ncut 1: grom from 1, prev 1
+   molecule 2
+   ncut 1: grom from 1, prev 1
+   splist:    1    1
+   number of swatch box pairs: 2
+   probability of the swatch box pair:  0.500000000    
+   probability of the swatch box pair:   1.00000000    
+   box pair:    1    1
+   box pair:    2    2
+
+NAMELIST MC_SWAP
+------------------------------------------
+pmswap:   0.00000000    
+   swap probability for molecule type 1 (pmswmt):   0.0000
+   swap probability for molecule type 2 (pmswmt):   0.0000
+   swap probability for molecule type 3 (pmswmt):   1.0000
+   number of swap box pairs for molecule type 1: 1
+   pmswapb:   1.00000000    
+   box pair:    1    1
+   number of swap box pairs for molecule type 2: 1
+   pmswapb:   1.00000000    
+   box pair:    1    1
+   number of swap box pairs for molecule type 3: 1
+   pmswapb:   1.00000000    
+   box pair:    1    1
+
+NAMELIST MC_CBMC
+------------------------------------------
+CBMC inner cutoff (rcutin):  5.000 [Ang]
+AVBMC outer cutoff (rbsmax):  5.000 [Ang], inner cutoff (rbsmin):  0.700 [Ang]
+lpresim:  F
+iupdatefix: 100
+pmcb:   0.00000000    
+
+molecule type: nchoi1  nchoi nchoir nchoih nchtor nchbna nchbnb icbdir icbsta
+            1:     10      8      1      1    100    500    500      0      0
+            2:     10      8      1      1    100    500    500      0      0
+            3:     10      8      1      1    100    500    500      0      0
+
+molecule type:    pmcbmt         pmall  avbmc_version    pmbias        pmbsmt       pmbias2         pmfix   lrig
+            1:   1.00000       0.00000              0   0.00000       0.00000      0.500000       0.00000      F
+            2:   0.00000       0.00000              2  0.500000       1.00000      0.500000       0.00000      F
+            3:   0.00000       0.00000              2  0.500000       0.00000      0.500000       0.00000      F
+
+NAMELIST MC_FLUCQ
+------------------------------------------
+target fluctuating charge acceptance ratio (taflcq): 0.95
+fluctuating charge temperature:    5.000 [K]
+initial maximum displacement for fluctuating charge moves:  0.100000000    
+pmflcq:   0.00000000    
+   nchoiq for each box:   1
+
+molecule type:  lflucq lqtrans   pmfqmt    fqegp
+            1:       F       F   1.0000   0.0000
+            2:       F       F   0.0000   0.0000
+            3:       F       F   0.0000   0.0000
+
+NAMELIST MC_EE
+------------------------------------------
+pmexpc:   0.00000000    
+   expanded ens. prob. for molecule type 1 (pmeemt):   1.0000, lexpand:  F
+   expanded ens. prob. for molecule type 2 (pmeemt):   0.0000, lexpand:  F
+   expanded ens. prob. for molecule type 3 (pmeemt):   0.0000, lexpand:  F
+pmexpc1:   0.00000000    
+
+NAMELIST MC_SIMPLE
+------------------------------------------
+initial maximum displacement for atom translation:  0.100000000E-01
+target translation acceptance ratio: 0.50
+initial maximum displacement for molecule translation:  0.300000000    
+pmtra:   1.00000000    
+   translation probability for molecule type 1 (pmtrmt):   0.1670
+   translation probability for molecule type 2 (pmtrmt):   0.6670
+   translation probability for molecule type 3 (pmtrmt):   1.0000
+target rotation acceptance ratio: 0.50
+initial maximum displacement for molecule rotation:  0.400000000    
+pmrot:   1.00000000    
+   rotational probability for molecule type 1 (pmromt):   1.0000
+   rotational probability for molecule type 2 (pmromt):   0.0000
+   rotational probability for molecule type 3 (pmromt):   0.0000
+
+percentage move probabilities:
  volume move       :    0.05 %
  swatch move       :    0.00 %
  swap move         :    0.00 %
  CBMC move         :    0.00 %
- fluct charge move :    0.00 %
- expanded ens move :    0.00 %
+ fluct. charge move:    0.00 %
+ expanded ens. move:    0.00 %
+ new EE move       :    0.00 %
+ atom trans. move  :    0.00 %
  translation move  :   99.95 %
  rotation move     :    0.00 %
- 
- Fraction of atom translations move  0.000000000000000E+000
- 
- molecule type :           1              2              3   
-      nchoi1   :          10            10            10  
-      nchoi    :           8             8             8  
-      nchoir   :           1             1             1  
-      nchoih   :           1             1             1  
-      nchtor   :         100         100         100
- nchbna and nchbnb for molecule type           1 :         500         500
- nchbna and nchbnb for molecule type           2 :         500         500
- nchbna and nchbnb for molecule type           3 :         500         500
- icbdir for molecule type           1 :           0
- icbdir for molecule type           2 :           0
- icbdir for molecule type           3 :           0
- icbsta for molecule type           1 :           0
- icbsta for molecule type           2 :           0
- icbsta for molecule type           3 :           0
- nexclu:           0
- inclnum:           1
- including intramolecular interactions for chain type           7  between beads
-           1  and           2
- ainclnum:           0
- 
- INCLUSION TABLE
-           1 F
- 
- 
- CHARGE INCLUSION TABLE
-           1 F
- 
- 1-4 LJ SCALING FACTORS
-           1   1.00000000000000     
- 
- 1-4 CHARGE SCALING FACTORS
-           1   1.00000000000000     
- 
- INCLUSION TABLE
-           1 F
- 
- 
- CHARGE INCLUSION TABLE
-           1 F
- 
- 1-4 LJ SCALING FACTORS
-           1   1.00000000000000     
- 
- 1-4 CHARGE SCALING FACTORS
-           1   1.00000000000000     
- 
- INCLUSION TABLE
-           1 F
- 
- 
- CHARGE INCLUSION TABLE
-           1 F
- 
- 1-4 LJ SCALING FACTORS
-           1   1.00000000000000     
- 
- 1-4 CHARGE SCALING FACTORS
-           1   1.00000000000000     
- lucall: F
-    ucheck for molecule type           1 :           0
-    ucheck for molecule type           2 :           0
-    ucheck for molecule type           3 :           0
- nvirial:           0
- starvir:  0.000000000000000E+000
- stepvir:  0.000000000000000E+000
- lideal:  F
- ltwice:  F
- lrplc:  F F F
- 
- ***** program   =  THE MAGIC BLACK BOX
- Isobaric-isothermal ensemble
- using periodic boundaries
- in x-direction
- in y-direction
- in z-direction
-           3 -dimensional periodic box
- particle coordinates are folded into central box
- additional (COM) cutoff on computed rcmu
- Dual Cutoff Configurational-bias Monte Carlo
- CBMC simultaneously grows all beads conected to the same bead
- with bond angles generated from Gaussian distribution
- Program will call Explct.f if needed
- Feuston-Garofalini potential for bead-bead
- using a shifted potential
- Coulombic inter- and intramolecular interactions
- 
- MOLECULAR MASS:   28.0900000000000        16.0000000000000     
-   1.00780000000000     
- new maximum displacements read from restart-file
- box      #           1
- molecule type           1
- max trans. displacement:          0.288610  0.290838  0.288851
- max rot. displacement:            0.400000  0.400000  0.400000
- molecule type           2
- max trans. displacement:          0.457177  0.462182  0.454740
- max rot. displacement:            0.400000  0.400000  0.400000
- molecule type           3
- max trans. displacement:          1.512141  1.510510  1.498599
- max rot. displacement:            0.400000  0.400000  0.400000
- maximum fluc q displacements: Box #           1
-  0.100000000000000       0.100000000000000       0.100000000000000     
- max volume displacement:          0.1300E+03
- 
- 
- 
- new box size read from restart-file
- 
- 
- 
- dimension box 1  :  a:      16.176787   b:      16.176787   c   :     16.176787
- 
- Finished writing simulation box related info
- 
- ****Ewald Parameters*****
- ibox   calp(ibox)  kmaxl(ibox)   kmaxm(ibox)   kmaxn(ibox)   rcut(ibox)
-   1         0.492308           8           8           8                  6.5000
- 
- molecule type           1
- molecule type           2
- molecule type           3
- 
- 
- number of mc cycles:                  150000
- number of chains:                        360
- 
- temperature:                       6000.00000000000     
- 
- ex-pressure:                       724.297156525251     
- 
+
+SPECIAL INTERACTION RULES
+------------------------------------------
+  Total: 0 exclusion rules for intermolecular interactions
+
+      including intramolecular interactions for molecule type 7 between bead 1 and bead 2, ofscale LJ:  1.000, ofscale Q:  1.000
+  Total: 1 inclusion rules for intramolecular interactions
+
+  Total: 0 special rules for intramolecular 1-5 OH interactions
+
+Molecule type: 1
+
+LJ INCLUSION TABLE
+       1
+   1   F
+
+CHARGE INCLUSION TABLE
+       1
+   1   F
+
+1-4 LJ SCALING FACTORS
+             1
+      1  1.000
+
+1-4 CHARGE SCALING FACTORS
+             1
+      1  1.000
+
+Molecule type: 2
+
+LJ INCLUSION TABLE
+       1
+   1   F
+
+CHARGE INCLUSION TABLE
+       1
+   1   F
+
+1-4 LJ SCALING FACTORS
+             1
+      1  1.000
+
+1-4 CHARGE SCALING FACTORS
+             1
+      1  1.000
+
+Molecule type: 3
+
+LJ INCLUSION TABLE
+       1
+   1   F
+
+CHARGE INCLUSION TABLE
+       1
+   1   F
+
+1-4 LJ SCALING FACTORS
+             1
+      1  1.000
+
+1-4 CHARGE SCALING FACTORS
+             1
+      1  1.000
+
+READING CONFIGURATION FROM RESTART FILE
+------------------------------------------
+new maximum displacements read from restart-file
+   max atom trans. displacement:     0.010000    0.010000    0.010000
+   max volume displacement:        0.1300E+03
+
+box      #1
+   molecule type 1
+      max trans. displacement:     0.288610   0.290838   0.288851
+      max rot. displacement:       0.400000   0.400000   0.400000
+      max fluc. q displacement:    0.100000
+   molecule type 2
+      max trans. displacement:     0.457177   0.462182   0.454740
+      max rot. displacement:       0.400000   0.400000   0.400000
+      max fluc. q displacement:    0.100000
+   molecule type 3
+      max trans. displacement:     1.512141   1.510510   1.498599
+      max rot. displacement:       0.400000   0.400000   0.400000
+      max fluc. q displacement:    0.100000
+
+new box size read from restart-file
+ dimension box 1: a =    16.176787  b =    16.176787  c =    16.176787
+
+Finished writing simulation box related info
+
+molecule type 1
+
+molecule type 2
+
+molecule type 3
+
+PAIRWISE LJ AND COULOMB INTERACTIONS
+garo type 1: ecut =   24.5547587    
+garo type 2: ecut =   8.79910664    
+garo type 3: ecut =   1.03022090    
+garo type 4: ecut =  -17.5923190    
+garo type 5: ecut =   7.10819906    
+garo type 6: ecut =  -2.43853823    
  
  sumup control
  number of chains         360
@@ -391,1222 +348,1672 @@
  total energy      -34805612.6326730     
  
  box             1  initial v   =   -34805612.6326730     
- surf. tension :   box 1 =   -9578.89083
- pressure check:   box 1 = -118063444.14
+ surf. tension :   box 1 =**************
+ pressure check:   box 1 =**************
  
  +++++ start of markov chain +++++
  
  Cycle   Total   Energy    Boxlength   Pressure  Molecules
  Box            1
  Type  1 bn  19860.  19886.  20132.      0.      0.      0.
+         bs  10143.  10028.  10063.      0.      0.      0.
  max.displ.     0.2948    0.2933    0.2888    0.4000    0.4000    0.4000
  Type  2 bn  59802.  60006.  60036.      0.      0.      0.
+         bs  29907.  29684.  29776.      0.      0.      0.
  max.displ.     0.4573    0.4573    0.4511    0.4000    0.4000    0.4000
  Type  3 bn  40120.  39745.  40231.      0.      0.      0.
+         bs  20134.  20036.  20341.      0.      0.      0.
  max.displ.     1.5177    1.5229    1.5154    0.4000    0.4000    0.4000
  volume change:  bn =   182.0   bs =    99.0   max.displ. = 0.14145E+03
  Box            1
  Type  1 bn  20081.  20255.  19857.      0.      0.      0.
+         bs   9998.  10091.  10080.      0.      0.      0.
  max.displ.     0.2936    0.2923    0.2932    0.4000    0.4000    0.4000
  Type  2 bn  59923.  59515.  60633.      0.      0.      0.
+         bs  29739.  29658.  30468.      0.      0.      0.
  max.displ.     0.4539    0.4557    0.4533    0.4000    0.4000    0.4000
  Type  3 bn  39825.  39750.  39959.      0.      0.      0.
+         bs  19870.  19752.  20042.      0.      0.      0.
  max.displ.     1.5145    1.5135    1.5201    0.4000    0.4000    0.4000
  volume change:  bn =   202.0   bs =    87.0   max.displ. = 0.12185E+03
  Box            1
  Type  1 bn  19938.  20155.  19942.      0.      0.      0.
+         bs   9820.   9987.  10088.      0.      0.      0.
  max.displ.     0.2892    0.2896    0.2966    0.4000    0.4000    0.4000
  Type  2 bn  60062.  60383.  59716.      0.      0.      0.
+         bs  30042.  30060.  30034.      0.      0.      0.
  max.displ.     0.4540    0.4538    0.4560    0.4000    0.4000    0.4000
  Type  3 bn  39701.  40235.  39701.      0.      0.      0.
+         bs  19812.  20103.  19942.      0.      0.      0.
  max.displ.     1.5115    1.5124    1.5271    0.4000    0.4000    0.4000
  volume change:  bn =   167.0   bs =    95.0   max.displ. = 0.13863E+03
  Box            1
  Type  1 bn  20127.  20137.  20119.      0.      0.      0.
+         bs  10270.  10010.   9852.      0.      0.      0.
  max.displ.     0.2951    0.2880    0.2905    0.4000    0.4000    0.4000
  Type  2 bn  59917.  59774.  59604.      0.      0.      0.
+         bs  29668.  29634.  29933.      0.      0.      0.
  max.displ.     0.4496    0.4499    0.4580    0.4000    0.4000    0.4000
  Type  3 bn  40359.  39918.  39860.      0.      0.      0.
+         bs  20123.  19887.  19849.      0.      0.      0.
  max.displ.     1.5073    1.5070    1.5209    0.4000    0.4000    0.4000
  volume change:  bn =   185.0   bs =    84.0   max.displ. = 0.12589E+03
  Box            1
  Type  1 bn  20017.  20109.  20094.      0.      0.      0.
+         bs  10009.  10130.  10043.      0.      0.      0.
  max.displ.     0.2951    0.2901    0.2904    0.4000    0.4000    0.4000
  Type  2 bn  59711.  59610.  60003.      0.      0.      0.
+         bs  29950.  29850.  29685.      0.      0.      0.
  max.displ.     0.4511    0.4506    0.4532    0.4000    0.4000    0.4000
  Type  3 bn  40169.  40043.  40068.      0.      0.      0.
+         bs  20230.  20133.  20063.      0.      0.      0.
  max.displ.     1.5182    1.5154    1.5231    0.4000    0.4000    0.4000
  volume change:  bn =   176.0   bs =    81.0   max.displ. = 0.11588E+03
  Box            1
  Type  1 bn  19994.  20074.  20238.      0.      0.      0.
+         bs   9944.  10001.  10089.      0.      0.      0.
  max.displ.     0.2935    0.2891    0.2895    0.4000    0.4000    0.4000
  Type  2 bn  59946.  60341.  60107.      0.      0.      0.
+         bs  30371.  30337.  30083.      0.      0.      0.
  max.displ.     0.4570    0.4531    0.4536    0.4000    0.4000    0.4000
  Type  3 bn  39608.  39724.  39783.      0.      0.      0.
+         bs  19888.  19833.  19813.      0.      0.      0.
  max.displ.     1.5247    1.5131    1.5171    0.4000    0.4000    0.4000
  volume change:  bn =   185.0   bs =   110.0   max.displ. = 0.13780E+03
  Box            1
  Type  1 bn  19971.  20299.  20114.      0.      0.      0.
+         bs  10068.  10076.  10213.      0.      0.      0.
  max.displ.     0.2960    0.2870    0.2940    0.4000    0.4000    0.4000
  Type  2 bn  59858.  59614.  60102.      0.      0.      0.
+         bs  29995.  29934.  30203.      0.      0.      0.
  max.displ.     0.4581    0.4550    0.4559    0.4000    0.4000    0.4000
  Type  3 bn  40154.  39824.  39892.      0.      0.      0.
+         bs  19811.  19611.  19660.      0.      0.      0.
  max.displ.     1.5045    1.4903    1.4954    0.4000    0.4000    0.4000
  volume change:  bn =   172.0   bs =    90.0   max.displ. = 0.14421E+03
  Box            1
  Type  1 bn  19996.  20154.  20182.      0.      0.      0.
+         bs   9882.  10261.  10161.      0.      0.      0.
  max.displ.     0.2925    0.2922    0.2960    0.4000    0.4000    0.4000
  Type  2 bn  60007.  59811.  60224.      0.      0.      0.
+         bs  30029.  29968.  30299.      0.      0.      0.
  max.displ.     0.4584    0.4560    0.4587    0.4000    0.4000    0.4000
  Type  3 bn  39762.  39877.  39788.      0.      0.      0.
+         bs  19884.  20043.  19808.      0.      0.      0.
  max.displ.     1.5047    1.4981    1.4889    0.4000    0.4000    0.4000
  volume change:  bn =   199.0   bs =    89.0   max.displ. = 0.12899E+03
  Box            1
  Type  1 bn  19870.  19931.  20022.      0.      0.      0.
+         bs  10071.  10007.  10040.      0.      0.      0.
  max.displ.     0.2965    0.2934    0.2969    0.4000    0.4000    0.4000
  Type  2 bn  60002.  60014.  59977.      0.      0.      0.
+         bs  29863.  30099.  30120.      0.      0.      0.
  max.displ.     0.4563    0.4574    0.4608    0.4000    0.4000    0.4000
  Type  3 bn  39855.  40018.  40136.      0.      0.      0.
+         bs  19875.  20065.  20303.      0.      0.      0.
  max.displ.     1.5007    1.5023    1.5063    0.4000    0.4000    0.4000
  volume change:  bn =   175.0   bs =    81.0   max.displ. = 0.11941E+03
  Box            1
  Type  1 bn  20170.  20052.  19950.      0.      0.      0.
+         bs   9922.  10105.   9640.      0.      0.      0.
  max.displ.     0.2918    0.2958    0.2869    0.4000    0.4000    0.4000
  Type  2 bn  59902.  59627.  60018.      0.      0.      0.
+         bs  30130.  29506.  29695.      0.      0.      0.
  max.displ.     0.4591    0.4526    0.4559    0.4000    0.4000    0.4000
  Type  3 bn  39924.  40080.  40083.      0.      0.      0.
+         bs  20155.  20087.  20202.      0.      0.      0.
  max.displ.     1.5152    1.5058    1.5184    0.4000    0.4000    0.4000
  volume change:  bn =   194.0   bs =   101.0   max.displ. = 0.12433E+03
  Box            1
  Type  1 bn  20136.  19953.  20098.      0.      0.      0.
+         bs  10072.   9832.  10087.      0.      0.      0.
  max.displ.     0.2919    0.2915    0.2880    0.4000    0.4000    0.4000
  Type  2 bn  59740.  60263.  59766.      0.      0.      0.
+         bs  29907.  30579.  29900.      0.      0.      0.
  max.displ.     0.4596    0.4594    0.4562    0.4000    0.4000    0.4000
  Type  3 bn  40147.  39756.  39944.      0.      0.      0.
+         bs  20073.  19657.  19951.      0.      0.      0.
  max.displ.     1.5152    1.4891    1.5168    0.4000    0.4000    0.4000
  volume change:  bn =   197.0   bs =    98.0   max.displ. = 0.12370E+03
  Box            1
  Type  1 bn  20023.  19901.  20153.      0.      0.      0.
+         bs  10014.   9895.  10143.      0.      0.      0.
  max.displ.     0.2919    0.2898    0.2899    0.4000    0.4000    0.4000
  Type  2 bn  59851.  60190.  59823.      0.      0.      0.
+         bs  29972.  30093.  30255.      0.      0.      0.
  max.displ.     0.4603    0.4593    0.4614    0.4000    0.4000    0.4000
  Type  3 bn  40068.  40131.  39672.      0.      0.      0.
+         bs  19959.  20326.  19853.      0.      0.      0.
  max.displ.     1.5095    1.5084    1.5181    0.4000    0.4000    0.4000
  volume change:  bn =   188.0   bs =   102.0   max.displ. = 0.13423E+03
  Box            1
  Type  1 bn  20015.  20118.  20137.      0.      0.      0.
+         bs  10065.  10058.  10151.      0.      0.      0.
  max.displ.     0.2936    0.2898    0.2923    0.4000    0.4000    0.4000
  Type  2 bn  60118.  59857.  59778.      0.      0.      0.
+         bs  30061.  29258.  29944.      0.      0.      0.
  max.displ.     0.4604    0.4490    0.4623    0.4000    0.4000    0.4000
  Type  3 bn  39909.  39787.  40102.      0.      0.      0.
+         bs  20186.  19944.  20216.      0.      0.      0.
  max.displ.     1.5270    1.5122    1.5306    0.4000    0.4000    0.4000
  volume change:  bn =   179.0   bs =    87.0   max.displ. = 0.13048E+03
  Box            1
  Type  1 bn  19686.  20099.  20123.      0.      0.      0.
+         bs   9855.  10057.  10017.      0.      0.      0.
  max.displ.     0.2940    0.2900    0.2910    0.4000    0.4000    0.4000
  Type  2 bn  59870.  60142.  60163.      0.      0.      0.
+         bs  29794.  30391.  30069.      0.      0.      0.
  max.displ.     0.4582    0.4538    0.4621    0.4000    0.4000    0.4000
  Type  3 bn  40103.  40106.  39539.      0.      0.      0.
+         bs  20009.  20146.  19768.      0.      0.      0.
  max.displ.     1.5238    1.5192    1.5305    0.4000    0.4000    0.4000
  volume change:  bn =   169.0   bs =    82.0   max.displ. = 0.12662E+03
  Box            1
  Type  1 bn  20527.  20102.  19914.      0.      0.      0.
+         bs  10211.   9999.  10003.      0.      0.      0.
  max.displ.     0.2925    0.2885    0.2923    0.4000    0.4000    0.4000
  Type  2 bn  60002.  60177.  59348.      0.      0.      0.
+         bs  29812.  30169.  29391.      0.      0.      0.
  max.displ.     0.4553    0.4550    0.4577    0.4000    0.4000    0.4000
  Type  3 bn  39696.  40140.  39920.      0.      0.      0.
+         bs  19718.  19942.  19773.      0.      0.      0.
  max.displ.     1.5138    1.5095    1.5162    0.4000    0.4000    0.4000
  volume change:  bn =   174.0   bs =    93.0   max.displ. = 0.13535E+03
  15000   35000 -0.3483E+08    16.104         0.0   60  180  120
  Box            1
  Type  1 bn  19931.  20170.  20035.      0.      0.      0.
+         bs  10006.  10221.  10027.      0.      0.      0.
  max.displ.     0.2937    0.2924    0.2926    0.4000    0.4000    0.4000
  Type  2 bn  59995.  60067.  60104.      0.      0.      0.
+         bs  29858.  30372.  30293.      0.      0.      0.
  max.displ.     0.4532    0.4602    0.4614    0.4000    0.4000    0.4000
  Type  3 bn  39852.  39721.  39943.      0.      0.      0.
+         bs  19688.  19721.  19800.      0.      0.      0.
  max.displ.     1.4957    1.4989    1.5031    0.4000    0.4000    0.4000
  volume change:  bn =   182.0   bs =   108.0   max.displ. = 0.16064E+03
  Box            1
  Type  1 bn  20113.  19948.  19943.      0.      0.      0.
+         bs  10036.  10156.   9858.      0.      0.      0.
  max.displ.     0.2931    0.2978    0.2893    0.4000    0.4000    0.4000
  Type  2 bn  60245.  60014.  59939.      0.      0.      0.
+         bs  30196.  29794.  29954.      0.      0.      0.
  max.displ.     0.4543    0.4569    0.4611    0.4000    0.4000    0.4000
  Type  3 bn  39466.  40009.  40128.      0.      0.      0.
+         bs  19402.  19786.  20115.      0.      0.      0.
  max.displ.     1.4707    1.4826    1.5070    0.4000    0.4000    0.4000
  volume change:  bn =   195.0   bs =    82.0   max.displ. = 0.13510E+03
  Box            1
  Type  1 bn  20350.  19895.  20124.      0.      0.      0.
+         bs  10219.   9829.  10065.      0.      0.      0.
  max.displ.     0.2943    0.2942    0.2894    0.4000    0.4000    0.4000
  Type  2 bn  60129.  60324.  59819.      0.      0.      0.
+         bs  30223.  30378.  29811.      0.      0.      0.
  max.displ.     0.4567    0.4602    0.4596    0.4000    0.4000    0.4000
  Type  3 bn  39511.  39878.  39794.      0.      0.      0.
+         bs  19934.  20245.  19865.      0.      0.      0.
  max.displ.     1.4839    1.5053    1.5045    0.4000    0.4000    0.4000
  volume change:  bn =   176.0   bs =    85.0   max.displ. = 0.13049E+03
  Box            1
  Type  1 bn  19968.  19900.  20073.      0.      0.      0.
+         bs   9845.  10001.  10102.      0.      0.      0.
  max.displ.     0.2902    0.2957    0.2913    0.4000    0.4000    0.4000
  Type  2 bn  60117.  60287.  60054.      0.      0.      0.
+         bs  29934.  30172.  30124.      0.      0.      0.
  max.displ.     0.4548    0.4606    0.4611    0.4000    0.4000    0.4000
  Type  3 bn  39752.  39940.  39732.      0.      0.      0.
+         bs  19931.  20073.  19698.      0.      0.      0.
  max.displ.     1.4881    1.5131    1.4918    0.4000    0.4000    0.4000
  volume change:  bn =   177.0   bs =    86.0   max.displ. = 0.12681E+03
  Box            1
  Type  1 bn  19894.  20106.  19940.      0.      0.      0.
+         bs   9954.  10200.  10083.      0.      0.      0.
  max.displ.     0.2904    0.3000    0.2946    0.4000    0.4000    0.4000
  Type  2 bn  60168.  59699.  60003.      0.      0.      0.
+         bs  30433.  29706.  29929.      0.      0.      0.
  max.displ.     0.4601    0.4584    0.4600    0.4000    0.4000    0.4000
  Type  3 bn  39960.  39996.  40046.      0.      0.      0.
+         bs  20273.  19959.  20159.      0.      0.      0.
  max.displ.     1.5099    1.5101    1.5019    0.4000    0.4000    0.4000
  volume change:  bn =   188.0   bs =    89.0   max.displ. = 0.12006E+03
  Box            1
  Type  1 bn  19795.  19907.  19876.      0.      0.      0.
+         bs   9895.   9770.   9896.      0.      0.      0.
  max.displ.     0.2904    0.2945    0.2933    0.4000    0.4000    0.4000
  Type  2 bn  60111.  59902.  60104.      0.      0.      0.
+         bs  29725.  29645.  30155.      0.      0.      0.
  max.displ.     0.4550    0.4537    0.4615    0.4000    0.4000    0.4000
  Type  3 bn  40058.  39953.  40142.      0.      0.      0.
+         bs  19759.  20081.  20050.      0.      0.      0.
  max.displ.     1.4895    1.5180    1.5004    0.4000    0.4000    0.4000
  volume change:  bn =   152.0   bs =    82.0   max.displ. = 0.12954E+03
  Box            1
  Type  1 bn  20122.  20233.  19911.      0.      0.      0.
+         bs  10142.  10022.   9929.      0.      0.      0.
  max.displ.     0.2927    0.2918    0.2925    0.4000    0.4000    0.4000
  Type  2 bn  60002.  59867.  59876.      0.      0.      0.
+         bs  29898.  29888.  29742.      0.      0.      0.
  max.displ.     0.4535    0.4530    0.4585    0.4000    0.4000    0.4000
  Type  3 bn  39683.  40198.  39925.      0.      0.      0.
+         bs  19869.  19915.  20034.      0.      0.      0.
  max.displ.     1.4916    1.5041    1.5057    0.4000    0.4000    0.4000
  volume change:  bn =   183.0   bs =    83.0   max.displ. = 0.11751E+03
  Box            1
  Type  1 bn  20269.  20019.  20007.      0.      0.      0.
+         bs  10202.  10013.   9952.      0.      0.      0.
  max.displ.     0.2947    0.2919    0.2910    0.4000    0.4000    0.4000
  Type  2 bn  60391.  60048.  59671.      0.      0.      0.
+         bs  30384.  30126.  29701.      0.      0.      0.
  max.displ.     0.4563    0.4546    0.4565    0.4000    0.4000    0.4000
  Type  3 bn  39711.  39687.  40011.      0.      0.      0.
+         bs  19629.  19612.  19771.      0.      0.      0.
  max.displ.     1.4746    1.4866    1.4881    0.4000    0.4000    0.4000
  volume change:  bn =   186.0   bs =   104.0   max.displ. = 0.13140E+03
  Box            1
  Type  1 bn  20057.  19985.  20132.      0.      0.      0.
+         bs  10017.  10066.  10163.      0.      0.      0.
  max.displ.     0.2943    0.2940    0.2938    0.4000    0.4000    0.4000
  Type  2 bn  60174.  59930.  60071.      0.      0.      0.
+         bs  30326.  29893.  29887.      0.      0.      0.
  max.displ.     0.4599    0.4535    0.4542    0.4000    0.4000    0.4000
  Type  3 bn  39783.  39994.  39703.      0.      0.      0.
+         bs  20116.  20056.  20049.      0.      0.      0.
  max.displ.     1.4912    1.4910    1.5029    0.4000    0.4000    0.4000
  volume change:  bn =   171.0   bs =    78.0   max.displ. = 0.11988E+03
  Box            1
  Type  1 bn  20061.  19864.  19985.      0.      0.      0.
+         bs   9974.   9857.  10042.      0.      0.      0.
  max.displ.     0.2927    0.2918    0.2953    0.4000    0.4000    0.4000
  Type  2 bn  59929.  59742.  60104.      0.      0.      0.
+         bs  29780.  29988.  30418.      0.      0.      0.
  max.displ.     0.4571    0.4552    0.4597    0.4000    0.4000    0.4000
  Type  3 bn  40052.  39766.  40315.      0.      0.      0.
+         bs  20005.  20048.  20145.      0.      0.      0.
  max.displ.     1.4896    1.5033    1.5020    0.4000    0.4000    0.4000
  volume change:  bn =   182.0   bs =   101.0   max.displ. = 0.13305E+03
  Box            1
  Type  1 bn  19995.  20164.  20158.      0.      0.      0.
+         bs   9891.  10079.  10051.      0.      0.      0.
  max.displ.     0.2895    0.2917    0.2945    0.4000    0.4000    0.4000
  Type  2 bn  59831.  59849.  59945.      0.      0.      0.
+         bs  30143.  30040.  30006.      0.      0.      0.
  max.displ.     0.4606    0.4570    0.4602    0.4000    0.4000    0.4000
  Type  3 bn  39817.  39713.  40339.      0.      0.      0.
+         bs  20139.  19944.  20103.      0.      0.      0.
  max.displ.     1.5069    1.5100    1.4970    0.4000    0.4000    0.4000
  volume change:  bn =   189.0   bs =    98.0   max.displ. = 0.13798E+03
  Box            1
  Type  1 bn  20086.  20130.  20096.      0.      0.      0.
+         bs  10170.  10253.  10109.      0.      0.      0.
  max.displ.     0.2932    0.2972    0.2963    0.4000    0.4000    0.4000
  Type  2 bn  59997.  60218.  59487.      0.      0.      0.
+         bs  29797.  30270.  29962.      0.      0.      0.
  max.displ.     0.4575    0.4594    0.4636    0.4000    0.4000    0.4000
  Type  3 bn  40168.  39603.  40064.      0.      0.      0.
+         bs  20021.  19950.  20238.      0.      0.      0.
  max.displ.     1.5022    1.5213    1.5124    0.4000    0.4000    0.4000
  volume change:  bn =   151.0   bs =    64.0   max.displ. = 0.11696E+03
  Box            1
  Type  1 bn  20096.  20004.  19892.      0.      0.      0.
+         bs   9987.   9882.   9870.      0.      0.      0.
  max.displ.     0.2914    0.2936    0.2940    0.4000    0.4000    0.4000
  Type  2 bn  60079.  60449.  59648.      0.      0.      0.
+         bs  30527.  30218.  29663.      0.      0.      0.
  max.displ.     0.4649    0.4593    0.4611    0.4000    0.4000    0.4000
  Type  3 bn  39955.  39859.  39859.      0.      0.      0.
+         bs  20058.  20094.  20098.      0.      0.      0.
  max.displ.     1.5082    1.5339    1.5252    0.4000    0.4000    0.4000
  volume change:  bn =   159.0   bs =    84.0   max.displ. = 0.12358E+03
  Box            1
  Type  1 bn  20137.  19947.  19814.      0.      0.      0.
+         bs  10101.   9817.  10098.      0.      0.      0.
  max.displ.     0.2924    0.2890    0.2997    0.4000    0.4000    0.4000
  Type  2 bn  59856.  59998.  59791.      0.      0.      0.
+         bs  29639.  30105.  29665.      0.      0.      0.
  max.displ.     0.4604    0.4610    0.4576    0.4000    0.4000    0.4000
  Type  3 bn  40143.  40113.  40022.      0.      0.      0.
+         bs  20028.  19849.  19906.      0.      0.      0.
  max.displ.     1.5050    1.5180    1.5172    0.4000    0.4000    0.4000
  volume change:  bn =   179.0   bs =    90.0   max.displ. = 0.12427E+03
  Box            1
  Type  1 bn  20066.  19885.  19990.      0.      0.      0.
+         bs  10059.  10084.   9827.      0.      0.      0.
  max.displ.     0.2931    0.2931    0.2946    0.4000    0.4000    0.4000
  Type  2 bn  59986.  60186.  59792.      0.      0.      0.
+         bs  30105.  29786.  30367.      0.      0.      0.
  max.displ.     0.4621    0.4563    0.4648    0.4000    0.4000    0.4000
  Type  3 bn  39841.  39998.  40075.      0.      0.      0.
+         bs  20035.  19921.  19891.      0.      0.      0.
  max.displ.     1.5136    1.5121    1.5061    0.4000    0.4000    0.4000
  volume change:  bn =   181.0   bs =    91.0   max.displ. = 0.12496E+03
  30000   50000 -0.3500E+08    15.893         0.0   60  180  120
  Box            1
  Type  1 bn  20141.  20005.  20109.      0.      0.      0.
+         bs  10137.  10036.   9894.      0.      0.      0.
  max.displ.     0.2951    0.2941    0.2899    0.4000    0.4000    0.4000
  Type  2 bn  60106.  59658.  60178.      0.      0.      0.
+         bs  29687.  29833.  29669.      0.      0.      0.
  max.displ.     0.4565    0.4563    0.4583    0.4000    0.4000    0.4000
  Type  3 bn  39841.  39805.  39961.      0.      0.      0.
+         bs  19542.  19594.  19935.      0.      0.      0.
  max.displ.     1.4848    1.4886    1.5027    0.4000    0.4000    0.4000
  volume change:  bn =   196.0   bs =    87.0   max.displ. = 0.11093E+03
  Box            1
  Type  1 bn  20157.  20090.  20203.      0.      0.      0.
+         bs  10059.  10177.  10164.      0.      0.      0.
  max.displ.     0.2945    0.2979    0.2917    0.4000    0.4000    0.4000
  Type  2 bn  59699.  60236.  59885.      0.      0.      0.
+         bs  30026.  30430.  29979.      0.      0.      0.
  max.displ.     0.4592    0.4611    0.4588    0.4000    0.4000    0.4000
  Type  3 bn  39985.  39525.  40058.      0.      0.      0.
+         bs  19768.  19908.  19967.      0.      0.      0.
  max.displ.     1.4682    1.4996    1.4980    0.4000    0.4000    0.4000
  volume change:  bn =   162.0   bs =    95.0   max.displ. = 0.13011E+03
  Box            1
  Type  1 bn  19998.  20098.  19728.      0.      0.      0.
+         bs  10020.   9874.  10150.      0.      0.      0.
  max.displ.     0.2951    0.2928    0.3002    0.4000    0.4000    0.4000
  Type  2 bn  60228.  59946.  59822.      0.      0.      0.
+         bs  29918.  29844.  29768.      0.      0.      0.
  max.displ.     0.4562    0.4591    0.4567    0.4000    0.4000    0.4000
  Type  3 bn  39536.  39739.  40726.      0.      0.      0.
+         bs  19864.  20089.  20565.      0.      0.      0.
  max.displ.     1.4753    1.5162    1.5129    0.4000    0.4000    0.4000
  volume change:  bn =   179.0   bs =    94.0   max.displ. = 0.13665E+03
  Box            1
  Type  1 bn  20208.  19883.  20047.      0.      0.      0.
+         bs   9968.   9884.   9894.      0.      0.      0.
  max.displ.     0.2911    0.2911    0.2963    0.4000    0.4000    0.4000
  Type  2 bn  59879.  60179.  60062.      0.      0.      0.
+         bs  29843.  29776.  30125.      0.      0.      0.
  max.displ.     0.4547    0.4543    0.4581    0.4000    0.4000    0.4000
  Type  3 bn  39833.  39874.  39857.      0.      0.      0.
+         bs  20241.  19803.  19751.      0.      0.      0.
  max.displ.     1.4993    1.5060    1.4994    0.4000    0.4000    0.4000
  volume change:  bn =   178.0   bs =    90.0   max.displ. = 0.13818E+03
  Box            1
  Type  1 bn  19867.  19971.  20209.      0.      0.      0.
+         bs  10018.  10080.  10034.      0.      0.      0.
  max.displ.     0.2936    0.2938    0.2942    0.4000    0.4000    0.4000
  Type  2 bn  59621.  60203.  60018.      0.      0.      0.
+         bs  29935.  30426.  29723.      0.      0.      0.
  max.displ.     0.4566    0.4592    0.4537    0.4000    0.4000    0.4000
  Type  3 bn  39981.  40030.  39914.      0.      0.      0.
+         bs  20157.  20117.  20224.      0.      0.      0.
  max.displ.     1.5118    1.5136    1.5195    0.4000    0.4000    0.4000
  volume change:  bn =   186.0   bs =    82.0   max.displ. = 0.12184E+03
  Box            1
  Type  1 bn  20148.  20142.  19539.      0.      0.      0.
+         bs   9991.   9889.   9713.      0.      0.      0.
  max.displ.     0.2912    0.2885    0.2925    0.4000    0.4000    0.4000
  Type  2 bn  59888.  60368.  59861.      0.      0.      0.
+         bs  29846.  30194.  29863.      0.      0.      0.
  max.displ.     0.4551    0.4593    0.4527    0.4000    0.4000    0.4000
  Type  3 bn  39985.  39786.  40102.      0.      0.      0.
+         bs  20049.  20028.  20064.      0.      0.      0.
  max.displ.     1.5161    1.5239    1.5204    0.4000    0.4000    0.4000
  volume change:  bn =   181.0   bs =    94.0   max.displ. = 0.12655E+03
  Box            1
  Type  1 bn  20003.  20286.  20026.      0.      0.      0.
+         bs   9981.  10182.   9937.      0.      0.      0.
  max.displ.     0.2906    0.2896    0.2903    0.4000    0.4000    0.4000
  Type  2 bn  60217.  60050.  59499.      0.      0.      0.
+         bs  30280.  29936.  29537.      0.      0.      0.
  max.displ.     0.4577    0.4580    0.4495    0.4000    0.4000    0.4000
  Type  3 bn  40127.  39754.  39860.      0.      0.      0.
+         bs  20255.  19940.  19827.      0.      0.      0.
  max.displ.     1.5306    1.5287    1.5126    0.4000    0.4000    0.4000
  volume change:  bn =   178.0   bs =    87.0   max.displ. = 0.12371E+03
  Box            1
  Type  1 bn  20120.  19961.  20193.      0.      0.      0.
+         bs  10006.   9947.  10226.      0.      0.      0.
  max.displ.     0.2890    0.2886    0.2940    0.4000    0.4000    0.4000
  Type  2 bn  59932.  59683.  59646.      0.      0.      0.
+         bs  29635.  29619.  30009.      0.      0.      0.
  max.displ.     0.4527    0.4546    0.4523    0.4000    0.4000    0.4000
  Type  3 bn  39969.  40191.  40104.      0.      0.      0.
+         bs  19608.  19790.  19950.      0.      0.      0.
  max.displ.     1.5017    1.5055    1.5049    0.4000    0.4000    0.4000
  volume change:  bn =   201.0   bs =    96.0   max.displ. = 0.11817E+03
  Box            1
  Type  1 bn  19768.  20076.  20100.      0.      0.      0.
+         bs   9915.  10093.  10086.      0.      0.      0.
  max.displ.     0.2899    0.2902    0.2951    0.4000    0.4000    0.4000
  Type  2 bn  59478.  59938.  60038.      0.      0.      0.
+         bs  29412.  29655.  30269.      0.      0.      0.
  max.displ.     0.4477    0.4498    0.4560    0.4000    0.4000    0.4000
  Type  3 bn  40073.  40273.  40063.      0.      0.      0.
+         bs  20195.  20397.  20125.      0.      0.      0.
  max.displ.     1.5136    1.5250    1.5119    0.4000    0.4000    0.4000
  volume change:  bn =   193.0   bs =   113.0   max.displ. = 0.13837E+03
  Box            1
  Type  1 bn  20088.  19934.  20074.      0.      0.      0.
+         bs  10111.  10006.   9830.      0.      0.      0.
  max.displ.     0.2919    0.2914    0.2890    0.4000    0.4000    0.4000
  Type  2 bn  59880.  60116.  59969.      0.      0.      0.
+         bs  30411.  30375.  29871.      0.      0.      0.
  max.displ.     0.4547    0.4545    0.4543    0.4000    0.4000    0.4000
  Type  3 bn  40004.  39720.  40025.      0.      0.      0.
+         bs  19920.  19740.  20098.      0.      0.      0.
  max.displ.     1.5074    1.5158    1.5184    0.4000    0.4000    0.4000
  volume change:  bn =   190.0   bs =    90.0   max.displ. = 0.13109E+03
  Box            1
  Type  1 bn  20051.  19865.  20223.      0.      0.      0.
+         bs  10070.   9974.  10357.      0.      0.      0.
  max.displ.     0.2932    0.2926    0.2960    0.4000    0.4000    0.4000
  Type  2 bn  59988.  60121.  59873.      0.      0.      0.
+         bs  29920.  30476.  30116.      0.      0.      0.
  max.displ.     0.4536    0.4608    0.4570    0.4000    0.4000    0.4000
  Type  3 bn  39859.  39830.  40010.      0.      0.      0.
+         bs  19886.  19903.  19926.      0.      0.      0.
  max.displ.     1.5041    1.5148    1.5124    0.4000    0.4000    0.4000
  volume change:  bn =   180.0   bs =    82.0   max.displ. = 0.11944E+03
  Box            1
  Type  1 bn  19924.  20114.  20102.      0.      0.      0.
+         bs   9920.   9894.  10094.      0.      0.      0.
  max.displ.     0.2919    0.2878    0.2973    0.4000    0.4000    0.4000
  Type  2 bn  60536.  59723.  59533.      0.      0.      0.
+         bs  30019.  29487.  29836.      0.      0.      0.
  max.displ.     0.4499    0.4550    0.4581    0.4000    0.4000    0.4000
  Type  3 bn  39976.  39917.  39983.      0.      0.      0.
+         bs  20045.  19922.  20111.      0.      0.      0.
  max.displ.     1.5084    1.5121    1.5214    0.4000    0.4000    0.4000
  volume change:  bn =   192.0   bs =   110.0   max.displ. = 0.13686E+03
  Box            1
  Type  1 bn  20042.  20238.  20057.      0.      0.      0.
+         bs   9977.  10283.   9712.      0.      0.      0.
  max.displ.     0.2906    0.2925    0.2879    0.4000    0.4000    0.4000
  Type  2 bn  60234.  59540.  60333.      0.      0.      0.
+         bs  30360.  29569.  30148.      0.      0.      0.
  max.displ.     0.4535    0.4520    0.4578    0.4000    0.4000    0.4000
  Type  3 bn  39832.  39835.  39703.      0.      0.      0.
+         bs  19936.  19962.  19998.      0.      0.      0.
  max.displ.     1.5099    1.5155    1.5327    0.4000    0.4000    0.4000
  volume change:  bn =   186.0   bs =    87.0   max.displ. = 0.12803E+03
  Box            1
  Type  1 bn  20211.  19924.  19940.      0.      0.      0.
+         bs  10081.  10089.  10004.      0.      0.      0.
  max.displ.     0.2899    0.2962    0.2889    0.4000    0.4000    0.4000
  Type  2 bn  59381.  60060.  60155.      0.      0.      0.
+         bs  29544.  29994.  30031.      0.      0.      0.
  max.displ.     0.4513    0.4514    0.4571    0.4000    0.4000    0.4000
  Type  3 bn  40017.  39813.  40330.      0.      0.      0.
+         bs  19865.  19694.  19752.      0.      0.      0.
  max.displ.     1.4991    1.4993    1.5013    0.4000    0.4000    0.4000
  volume change:  bn =   169.0   bs =    98.0   max.displ. = 0.14848E+03
  Box            1
  Type  1 bn  20043.  19854.  20067.      0.      0.      0.
+         bs  10149.   9864.  10194.      0.      0.      0.
  max.displ.     0.2936    0.2943    0.2935    0.4000    0.4000    0.4000
  Type  2 bn  59705.  60051.  59927.      0.      0.      0.
+         bs  29984.  30402.  29794.      0.      0.      0.
  max.displ.     0.4533    0.4571    0.4545    0.4000    0.4000    0.4000
  Type  3 bn  39848.  40033.  40280.      0.      0.      0.
+         bs  19930.  19857.  19995.      0.      0.      0.
  max.displ.     1.4995    1.4873    1.4905    0.4000    0.4000    0.4000
  volume change:  bn =   192.0   bs =    83.0   max.displ. = 0.12837E+03
  45000   65000 -0.3455E+08    15.876         0.0   60  180  120
  Box            1
  Type  1 bn  19995.  20112.  20052.      0.      0.      0.
+         bs   9975.   9999.  10060.      0.      0.      0.
  max.displ.     0.2930    0.2927    0.2945    0.4000    0.4000    0.4000
  Type  2 bn  59989.  60398.  60274.      0.      0.      0.
+         bs  29957.  30422.  30308.      0.      0.      0.
  max.displ.     0.4527    0.4605    0.4571    0.4000    0.4000    0.4000
  Type  3 bn  39475.  39781.  39752.      0.      0.      0.
+         bs  19766.  19805.  19938.      0.      0.      0.
  max.displ.     1.5017    1.4809    1.4951    0.4000    0.4000    0.4000
  volume change:  bn =   172.0   bs =    96.0   max.displ. = 0.14330E+03
  Box            1
  Type  1 bn  20148.  20068.  19883.      0.      0.      0.
+         bs  10035.  10256.   9911.      0.      0.      0.
  max.displ.     0.2918    0.2992    0.2936    0.4000    0.4000    0.4000
  Type  2 bn  60135.  59683.  60242.      0.      0.      0.
+         bs  29996.  29700.  30126.      0.      0.      0.
  max.displ.     0.4516    0.4583    0.4572    0.4000    0.4000    0.4000
  Type  3 bn  39984.  39773.  39899.      0.      0.      0.
+         bs  19949.  20187.  20041.      0.      0.      0.
  max.displ.     1.4985    1.5033    1.5020    0.4000    0.4000    0.4000
  volume change:  bn =   185.0   bs =    81.0   max.displ. = 0.12549E+03
  Box            1
  Type  1 bn  20103.  20166.  19827.      0.      0.      0.
+         bs  10141.  10152.   9743.      0.      0.      0.
  max.displ.     0.2944    0.3012    0.2886    0.4000    0.4000    0.4000
  Type  2 bn  60305.  59835.  60099.      0.      0.      0.
+         bs  30360.  30003.  30341.      0.      0.      0.
  max.displ.     0.4547    0.4596    0.4616    0.4000    0.4000    0.4000
  Type  3 bn  39867.  39645.  39976.      0.      0.      0.
+         bs  20039.  19928.  20229.      0.      0.      0.
  max.displ.     1.5064    1.5113    1.5201    0.4000    0.4000    0.4000
  volume change:  bn =   177.0   bs =    96.0   max.displ. = 0.13612E+03
  Box            1
  Type  1 bn  20028.  19982.  19883.      0.      0.      0.
+         bs   9766.   9923.  10155.      0.      0.      0.
  max.displ.     0.2871    0.2992    0.2947    0.4000    0.4000    0.4000
  Type  2 bn  60432.  59795.  59815.      0.      0.      0.
+         bs  30165.  29842.  29739.      0.      0.      0.
  max.displ.     0.4540    0.4587    0.4590    0.4000    0.4000    0.4000
  Type  3 bn  40379.  40025.  39487.      0.      0.      0.
+         bs  20044.  20029.  19678.      0.      0.      0.
  max.displ.     1.4956    1.5126    1.5150    0.4000    0.4000    0.4000
  volume change:  bn =   174.0   bs =    82.0   max.displ. = 0.12830E+03
  Box            1
  Type  1 bn  19950.  19995.  19992.      0.      0.      0.
+         bs  10089.   9874.   9956.      0.      0.      0.
  max.displ.     0.2904    0.2955    0.2936    0.4000    0.4000    0.4000
  Type  2 bn  60495.  59871.  59728.      0.      0.      0.
+         bs  30302.  29922.  30201.      0.      0.      0.
  max.displ.     0.4548    0.4585    0.4642    0.4000    0.4000    0.4000
  Type  3 bn  40062.  39660.  40069.      0.      0.      0.
+         bs  20175.  19982.  20113.      0.      0.      0.
  max.displ.     1.5063    1.5242    1.5210    0.4000    0.4000    0.4000
  volume change:  bn =   178.0   bs =    97.0   max.displ. = 0.13983E+03
  Box            1
  Type  1 bn  19958.  20123.  19886.      0.      0.      0.
+         bs   9953.  10026.  10035.      0.      0.      0.
  max.displ.     0.2897    0.2944    0.2963    0.4000    0.4000    0.4000
  Type  2 bn  59901.  59893.  59843.      0.      0.      0.
+         bs  29887.  29788.  29776.      0.      0.      0.
  max.displ.     0.4538    0.4561    0.4619    0.4000    0.4000    0.4000
  Type  3 bn  40098.  39986.  40121.      0.      0.      0.
+         bs  20251.  19984.  20013.      0.      0.      0.
  max.displ.     1.5215    1.5235    1.5174    0.4000    0.4000    0.4000
  volume change:  bn =   191.0   bs =    87.0   max.displ. = 0.12738E+03
  Box            1
  Type  1 bn  19910.  20054.  19939.      0.      0.      0.
+         bs  10007.  10137.  10091.      0.      0.      0.
  max.displ.     0.2912    0.2976    0.2999    0.4000    0.4000    0.4000
  Type  2 bn  59886.  59863.  60696.      0.      0.      0.
+         bs  30202.  29944.  30287.      0.      0.      0.
  max.displ.     0.4578    0.4563    0.4610    0.4000    0.4000    0.4000
  Type  3 bn  40106.  39748.  39601.      0.      0.      0.
+         bs  19900.  19752.  19778.      0.      0.      0.
  max.displ.     1.5099    1.5141    1.5156    0.4000    0.4000    0.4000
  volume change:  bn =   197.0   bs =    86.0   max.displ. = 0.11122E+03
  Box            1
  Type  1 bn  19910.  19853.  20195.      0.      0.      0.
+         bs  10022.   9752.   9812.      0.      0.      0.
  max.displ.     0.2931    0.2924    0.2914    0.4000    0.4000    0.4000
  Type  2 bn  60305.  60274.  59783.      0.      0.      0.
+         bs  30131.  30007.  29981.      0.      0.      0.
  max.displ.     0.4574    0.4543    0.4624    0.4000    0.4000    0.4000
  Type  3 bn  39851.  40058.  39587.      0.      0.      0.
+         bs  19952.  20189.  19835.      0.      0.      0.
  max.displ.     1.5119    1.5262    1.5188    0.4000    0.4000    0.4000
  volume change:  bn =   184.0   bs =   109.0   max.displ. = 0.13177E+03
  Box            1
  Type  1 bn  20278.  19958.  19887.      0.      0.      0.
+         bs  10010.   9809.   9986.      0.      0.      0.
  max.displ.     0.2894    0.2874    0.2927    0.4000    0.4000    0.4000
  Type  2 bn  60332.  59990.  59771.      0.      0.      0.
+         bs  30030.  29772.  29630.      0.      0.      0.
  max.displ.     0.4554    0.4509    0.4584    0.4000    0.4000    0.4000
  Type  3 bn  39999.  39666.  39935.      0.      0.      0.
+         bs  20178.  19986.  20109.      0.      0.      0.
  max.displ.     1.5254    1.5380    1.5296    0.4000    0.4000    0.4000
  volume change:  bn =   184.0   bs =    88.0   max.displ. = 0.12604E+03
  Box            1
  Type  1 bn  20016.  19937.  19983.      0.      0.      0.
+         bs  10057.   9989.   9986.      0.      0.      0.
  max.displ.     0.2908    0.2880    0.2925    0.4000    0.4000    0.4000
  Type  2 bn  59486.  60028.  60437.      0.      0.      0.
+         bs  29580.  30189.  29974.      0.      0.      0.
  max.displ.     0.4529    0.4536    0.4547    0.4000    0.4000    0.4000
  Type  3 bn  39985.  39896.  40064.      0.      0.      0.
+         bs  19920.  19822.  20147.      0.      0.      0.
  max.displ.     1.5198    1.5283    1.5384    0.4000    0.4000    0.4000
  volume change:  bn =   168.0   bs =    89.0   max.displ. = 0.13354E+03
  Box            1
  Type  1 bn  20036.  20039.  20106.      0.      0.      0.
+         bs  10011.  10157.  10215.      0.      0.      0.
  max.displ.     0.2906    0.2920    0.2972    0.4000    0.4000    0.4000
  Type  2 bn  59744.  59569.  59946.      0.      0.      0.
+         bs  30248.  29755.  29907.      0.      0.      0.
  max.displ.     0.4586    0.4531    0.4537    0.4000    0.4000    0.4000
  Type  3 bn  39994.  40182.  40204.      0.      0.      0.
+         bs  20077.  19773.  19826.      0.      0.      0.
  max.displ.     1.5259    1.5041    1.5172    0.4000    0.4000    0.4000
  volume change:  bn =   180.0   bs =    97.0   max.displ. = 0.14393E+03
  Box            1
  Type  1 bn  19966.  19967.  19921.      0.      0.      0.
+         bs  10072.  10084.   9727.      0.      0.      0.
  max.displ.     0.2932    0.2949    0.2902    0.4000    0.4000    0.4000
  Type  2 bn  59533.  59855.  60421.      0.      0.      0.
+         bs  29684.  30018.  30282.      0.      0.      0.
  max.displ.     0.4573    0.4545    0.4548    0.4000    0.4000    0.4000
  Type  3 bn  39775.  40084.  40291.      0.      0.      0.
+         bs  19697.  19932.  20030.      0.      0.      0.
  max.displ.     1.5113    1.4958    1.5085    0.4000    0.4000    0.4000
  volume change:  bn =   187.0   bs =    79.0   max.displ. = 0.12161E+03
  Box            1
  Type  1 bn  19999.  20305.  19973.      0.      0.      0.
+         bs  10081.  10031.  10124.      0.      0.      0.
  max.displ.     0.2956    0.2914    0.2942    0.4000    0.4000    0.4000
  Type  2 bn  59716.  59498.  60389.      0.      0.      0.
+         bs  30125.  29968.  30176.      0.      0.      0.
  max.displ.     0.4614    0.4578    0.4545    0.4000    0.4000    0.4000
  Type  3 bn  40015.  39944.  39989.      0.      0.      0.
+         bs  19854.  19973.  19669.      0.      0.      0.
  max.displ.     1.4997    1.4959    1.4840    0.4000    0.4000    0.4000
  volume change:  bn =   172.0   bs =    94.0   max.displ. = 0.13292E+03
  Box            1
  Type  1 bn  19951.  20086.  20006.      0.      0.      0.
+         bs  10066.  10013.   9945.      0.      0.      0.
  max.displ.     0.2983    0.2905    0.2925    0.4000    0.4000    0.4000
  Type  2 bn  59778.  59901.  59972.      0.      0.      0.
+         bs  29742.  30028.  30349.      0.      0.      0.
  max.displ.     0.4591    0.4590    0.4600    0.4000    0.4000    0.4000
  Type  3 bn  40039.  39842.  40210.      0.      0.      0.
+         bs  19960.  19679.  20187.      0.      0.      0.
  max.displ.     1.4953    1.4777    1.4900    0.4000    0.4000    0.4000
  volume change:  bn =   215.0   bs =    96.0   max.displ. = 0.11870E+03
  Box            1
  Type  1 bn  20081.  20124.  20195.      0.      0.      0.
+         bs   9868.  10061.  10162.      0.      0.      0.
  max.displ.     0.2932    0.2905    0.2944    0.4000    0.4000    0.4000
  Type  2 bn  60032.  59973.  59851.      0.      0.      0.
+         bs  29749.  29776.  29792.      0.      0.      0.
  max.displ.     0.4550    0.4558    0.4580    0.4000    0.4000    0.4000
  Type  3 bn  39824.  39867.  39893.      0.      0.      0.
+         bs  20042.  20188.  20014.      0.      0.      0.
  max.displ.     1.5050    1.4966    1.4951    0.4000    0.4000    0.4000
  volume change:  bn =   160.0   bs =    90.0   max.displ. = 0.13354E+03
  60000   80000 -0.3518E+08    16.075         0.0   60  180  120
  Box            1
  Type  1 bn  19777.  20036.  19829.      0.      0.      0.
+         bs   9863.   9999.  10005.      0.      0.      0.
  max.displ.     0.2924    0.2899    0.2971    0.4000    0.4000    0.4000
  Type  2 bn  59857.  60347.  59726.      0.      0.      0.
+         bs  30132.  30352.  29846.      0.      0.      0.
  max.displ.     0.4581    0.4585    0.4577    0.4000    0.4000    0.4000
  Type  3 bn  39945.  39964.  40334.      0.      0.      0.
+         bs  20016.  20045.  20349.      0.      0.      0.
  max.displ.     1.5083    1.5013    1.5086    0.4000    0.4000    0.4000
  volume change:  bn =   185.0   bs =    97.0   max.displ. = 0.14004E+03
  Box            1
  Type  1 bn  20229.  19953.  20043.      0.      0.      0.
+         bs  10107.  10030.   9844.      0.      0.      0.
  max.displ.     0.2922    0.2915    0.2918    0.4000    0.4000    0.4000
  Type  2 bn  59714.  59858.  60129.      0.      0.      0.
+         bs  29632.  29659.  30048.      0.      0.      0.
  max.displ.     0.4547    0.4544    0.4575    0.4000    0.4000    0.4000
  Type  3 bn  40001.  40187.  39710.      0.      0.      0.
+         bs  19937.  20030.  19761.      0.      0.      0.
  max.displ.     1.5035    1.4966    1.5014    0.4000    0.4000    0.4000
  volume change:  bn =   176.0   bs =    73.0   max.displ. = 0.11617E+03
  Box            1
  Type  1 bn  19772.  19863.  20026.      0.      0.      0.
+         bs   9772.  10064.   9988.      0.      0.      0.
  max.displ.     0.2888    0.2954    0.2911    0.4000    0.4000    0.4000
  Type  2 bn  60204.  60222.  59605.      0.      0.      0.
+         bs  30129.  30198.  29542.      0.      0.      0.
  max.displ.     0.4551    0.4557    0.4535    0.4000    0.4000    0.4000
  Type  3 bn  39959.  39995.  40154.      0.      0.      0.
+         bs  20059.  20070.  20437.      0.      0.      0.
  max.displ.     1.5095    1.5020    1.5283    0.4000    0.4000    0.4000
  volume change:  bn =   200.0   bs =   116.0   max.displ. = 0.13475E+03
  Box            1
  Type  1 bn  20208.  19976.  20053.      0.      0.      0.
+         bs  10118.   9874.  10073.      0.      0.      0.
  max.displ.     0.2892    0.2920    0.2925    0.4000    0.4000    0.4000
  Type  2 bn  60072.  59845.  60047.      0.      0.      0.
+         bs  29921.  30112.  30047.      0.      0.      0.
  max.displ.     0.4533    0.4586    0.4538    0.4000    0.4000    0.4000
  Type  3 bn  39975.  39756.  39890.      0.      0.      0.
+         bs  20083.  20404.  19834.      0.      0.      0.
  max.displ.     1.5167    1.5417    1.5198    0.4000    0.4000    0.4000
  volume change:  bn =   178.0   bs =    92.0   max.displ. = 0.13930E+03
  Box            1
  Type  1 bn  20154.  19992.  20119.      0.      0.      0.
+         bs  10159.   9967.   9966.      0.      0.      0.
  max.displ.     0.2916    0.2912    0.2897    0.4000    0.4000    0.4000
  Type  2 bn  59804.  59649.  60167.      0.      0.      0.
+         bs  29927.  29738.  30125.      0.      0.      0.
  max.displ.     0.4537    0.4572    0.4544    0.4000    0.4000    0.4000
  Type  3 bn  39996.  40155.  39790.      0.      0.      0.
+         bs  19958.  19885.  20027.      0.      0.      0.
  max.displ.     1.5137    1.5270    1.5299    0.4000    0.4000    0.4000
  volume change:  bn =   174.0   bs =    71.0   max.displ. = 0.11368E+03
  Box            1
  Type  1 bn  19870.  20023.  20171.      0.      0.      0.
+         bs   9947.  10086.  10251.      0.      0.      0.
  max.displ.     0.2919    0.2933    0.2945    0.4000    0.4000    0.4000
  Type  2 bn  59907.  59681.  60199.      0.      0.      0.
+         bs  30105.  29932.  30134.      0.      0.      0.
  max.displ.     0.4560    0.4586    0.4550    0.4000    0.4000    0.4000
  Type  3 bn  39790.  39879.  40301.      0.      0.      0.
+         bs  19799.  19764.  19945.      0.      0.      0.
  max.displ.     1.5064    1.5135    1.5143    0.4000    0.4000    0.4000
  volume change:  bn =   179.0   bs =   105.0   max.displ. = 0.13337E+03
  Box            1
  Type  1 bn  19968.  20181.  20037.      0.      0.      0.
+         bs  10157.  10046.   9878.      0.      0.      0.
  max.displ.     0.2970    0.2920    0.2904    0.4000    0.4000    0.4000
  Type  2 bn  60345.  59730.  60061.      0.      0.      0.
+         bs  30238.  29743.  29900.      0.      0.      0.
  max.displ.     0.4570    0.4568    0.4530    0.4000    0.4000    0.4000
  Type  3 bn  40123.  39767.  39632.      0.      0.      0.
+         bs  20183.  19761.  19662.      0.      0.      0.
  max.displ.     1.5155    1.5042    1.5026    0.4000    0.4000    0.4000
  volume change:  bn =   156.0   bs =    73.0   max.displ. = 0.12482E+03
  Box            1
  Type  1 bn  20050.  19633.  20188.      0.      0.      0.
+         bs   9832.   9738.  10091.      0.      0.      0.
  max.displ.     0.2913    0.2897    0.2903    0.4000    0.4000    0.4000
  Type  2 bn  60138.  59973.  59434.      0.      0.      0.
+         bs  29773.  30082.  29685.      0.      0.      0.
  max.displ.     0.4525    0.4582    0.4525    0.4000    0.4000    0.4000
  Type  3 bn  40030.  40056.  40310.      0.      0.      0.
+         bs  19714.  19933.  20094.      0.      0.      0.
  max.displ.     1.4927    1.4971    1.4980    0.4000    0.4000    0.4000
  volume change:  bn =   188.0   bs =   110.0   max.displ. = 0.14606E+03
  Box            1
  Type  1 bn  19952.  19826.  20040.      0.      0.      0.
+         bs   9936.   9804.  10065.      0.      0.      0.
  max.displ.     0.2901    0.2865    0.2916    0.4000    0.4000    0.4000
  Type  2 bn  59799.  60324.  59911.      0.      0.      0.
+         bs  30137.  29425.  30194.      0.      0.      0.
  max.displ.     0.4561    0.4470    0.4561    0.4000    0.4000    0.4000
  Type  3 bn  40170.  39887.  39891.      0.      0.      0.
+         bs  20319.  20196.  20309.      0.      0.      0.
  max.displ.     1.5101    1.5160    1.5253    0.4000    0.4000    0.4000
  volume change:  bn =   200.0   bs =    85.0   max.displ. = 0.12415E+03
  Box            1
  Type  1 bn  20417.  19910.  19929.      0.      0.      0.
+         bs  10279.  10120.   9838.      0.      0.      0.
  max.displ.     0.2921    0.2913    0.2879    0.4000    0.4000    0.4000
  Type  2 bn  59680.  59800.  60080.      0.      0.      0.
+         bs  29762.  30180.  30163.      0.      0.      0.
  max.displ.     0.4549    0.4512    0.4580    0.4000    0.4000    0.4000
  Type  3 bn  39945.  39857.  40183.      0.      0.      0.
+         bs  19943.  19953.  20083.      0.      0.      0.
  max.displ.     1.5079    1.5179    1.5247    0.4000    0.4000    0.4000
  volume change:  bn =   199.0   bs =    99.0   max.displ. = 0.12353E+03
  Box            1
  Type  1 bn  19742.  20054.  20356.      0.      0.      0.
+         bs   9893.   9978.  10360.      0.      0.      0.
  max.displ.     0.2928    0.2898    0.2930    0.4000    0.4000    0.4000
  Type  2 bn  59863.  60198.  59815.      0.      0.      0.
+         bs  30095.  30266.  29601.      0.      0.      0.
  max.displ.     0.4574    0.4537    0.4533    0.4000    0.4000    0.4000
  Type  3 bn  39890.  39768.  40141.      0.      0.      0.
+         bs  19895.  19831.  20030.      0.      0.      0.
  max.displ.     1.5041    1.5138    1.5216    0.4000    0.4000    0.4000
  volume change:  bn =   173.0   bs =    75.0   max.displ. = 0.10711E+03
  Box            1
  Type  1 bn  20245.  19841.  20018.      0.      0.      0.
+         bs  10299.  10082.  10065.      0.      0.      0.
  max.displ.     0.2979    0.2946    0.2947    0.4000    0.4000    0.4000
  Type  2 bn  60116.  59976.  59796.      0.      0.      0.
+         bs  29986.  30057.  29843.      0.      0.      0.
  max.displ.     0.4563    0.4548    0.4524    0.4000    0.4000    0.4000
  Type  3 bn  40113.  39783.  39940.      0.      0.      0.
+         bs  19852.  20096.  19733.      0.      0.      0.
  max.displ.     1.4887    1.5294    1.5035    0.4000    0.4000    0.4000
  volume change:  bn =   172.0   bs =   110.0   max.displ. = 0.13700E+03
  Box            1
  Type  1 bn  20076.  19942.  20137.      0.      0.      0.
+         bs   9856.   9924.   9878.      0.      0.      0.
  max.displ.     0.2925    0.2932    0.2891    0.4000    0.4000    0.4000
  Type  2 bn  59918.  60155.  59674.      0.      0.      0.
+         bs  29801.  30100.  29892.      0.      0.      0.
  max.displ.     0.4539    0.4551    0.4533    0.4000    0.4000    0.4000
  Type  3 bn  40118.  39970.  39833.      0.      0.      0.
+         bs  20120.  19810.  19989.      0.      0.      0.
  max.displ.     1.4933    1.5160    1.5090    0.4000    0.4000    0.4000
  volume change:  bn =   177.0   bs =    87.0   max.displ. = 0.13467E+03
  Box            1
  Type  1 bn  19970.  20067.  19992.      0.      0.      0.
+         bs   9965.  10018.  10022.      0.      0.      0.
  max.displ.     0.2919    0.2927    0.2898    0.4000    0.4000    0.4000
  Type  2 bn  59766.  59784.  60461.      0.      0.      0.
+         bs  29842.  30247.  30545.      0.      0.      0.
  max.displ.     0.4533    0.4605    0.4580    0.4000    0.4000    0.4000
  Type  3 bn  40089.  39579.  40114.      0.      0.      0.
+         bs  20253.  19815.  20036.      0.      0.      0.
  max.displ.     1.5088    1.5180    1.5074    0.4000    0.4000    0.4000
  volume change:  bn =   178.0   bs =   102.0   max.displ. = 0.15435E+03
  Box            1
  Type  1 bn  19928.  20010.  20103.      0.      0.      0.
+         bs   9976.  10031.  10037.      0.      0.      0.
  max.displ.     0.2922    0.2935    0.2894    0.4000    0.4000    0.4000
  Type  2 bn  59966.  60030.  59704.      0.      0.      0.
+         bs  29809.  30185.  29776.      0.      0.      0.
  max.displ.     0.4506    0.4631    0.4568    0.4000    0.4000    0.4000
  Type  3 bn  40068.  40014.  39986.      0.      0.      0.
+         bs  20187.  20105.  20001.      0.      0.      0.
  max.displ.     1.5203    1.5254    1.5080    0.4000    0.4000    0.4000
  volume change:  bn =   191.0   bs =    99.0   max.displ. = 0.16000E+03
  75000   95000 -0.3483E+08    16.003         0.0   60  180  120
  Box            1
  Type  1 bn  19943.  20032.  19830.      0.      0.      0.
+         bs  10059.  10026.   9983.      0.      0.      0.
  max.displ.     0.2948    0.2938    0.2914    0.4000    0.4000    0.4000
  Type  2 bn  59934.  60296.  60047.      0.      0.      0.
+         bs  30191.  29651.  30012.      0.      0.      0.
  max.displ.     0.4540    0.4555    0.4566    0.4000    0.4000    0.4000
  Type  3 bn  39909.  40094.  39742.      0.      0.      0.
+         bs  19835.  19944.  20056.      0.      0.      0.
  max.displ.     1.5112    1.5176    1.5221    0.4000    0.4000    0.4000
  volume change:  bn =   173.0   bs =    83.0   max.displ. = 0.15353E+03
  Box            1
  Type  1 bn  20174.  20133.  19971.      0.      0.      0.
+         bs  10115.   9915.   9915.      0.      0.      0.
  max.displ.     0.2956    0.2893    0.2893    0.4000    0.4000    0.4000
  Type  2 bn  59692.  59851.  60185.      0.      0.      0.
+         bs  29776.  30114.  30075.      0.      0.      0.
  max.displ.     0.4529    0.4583    0.4564    0.4000    0.4000    0.4000
  Type  3 bn  39779.  40057.  39965.      0.      0.      0.
+         bs  20068.  20179.  19779.      0.      0.      0.
  max.displ.     1.5248    1.5290    1.5066    0.4000    0.4000    0.4000
  volume change:  bn =   193.0   bs =    81.0   max.displ. = 0.12887E+03
  Box            1
  Type  1 bn  20121.  20067.  20096.      0.      0.      0.
+         bs  10026.  10146.  10080.      0.      0.      0.
  max.displ.     0.2946    0.2926    0.2903    0.4000    0.4000    0.4000
  Type  2 bn  59842.  59765.  60111.      0.      0.      0.
+         bs  30038.  29692.  29972.      0.      0.      0.
  max.displ.     0.4547    0.4554    0.4551    0.4000    0.4000    0.4000
  Type  3 bn  39983.  40016.  39825.      0.      0.      0.
+         bs  19782.  19950.  20027.      0.      0.      0.
  max.displ.     1.5088    1.5245    1.5152    0.4000    0.4000    0.4000
  volume change:  bn =   174.0   bs =    87.0   max.displ. = 0.12887E+03
  Box            1
  Type  1 bn  19979.  19712.  20030.      0.      0.      0.
+         bs  10097.   9766.  10037.      0.      0.      0.
  max.displ.     0.2978    0.2899    0.2909    0.4000    0.4000    0.4000
  Type  2 bn  60112.  59760.  59889.      0.      0.      0.
+         bs  30118.  29941.  29851.      0.      0.      0.
  max.displ.     0.4556    0.4563    0.4537    0.4000    0.4000    0.4000
  Type  3 bn  40094.  40248.  40007.      0.      0.      0.
+         bs  19997.  19853.  19829.      0.      0.      0.
  max.displ.     1.5050    1.5040    1.5020    0.4000    0.4000    0.4000
  volume change:  bn =   169.0   bs =    82.0   max.displ. = 0.12506E+03
  Box            1
  Type  1 bn  20030.  20060.  19980.      0.      0.      0.
+         bs   9868.  10171.  10064.      0.      0.      0.
  max.displ.     0.2934    0.2940    0.2931    0.4000    0.4000    0.4000
  Type  2 bn  60013.  59613.  60338.      0.      0.      0.
+         bs  30399.  29943.  30288.      0.      0.      0.
  max.displ.     0.4616    0.4584    0.4555    0.4000    0.4000    0.4000
  Type  3 bn  40148.  39982.  39666.      0.      0.      0.
+         bs  19756.  19941.  19831.      0.      0.      0.
  max.displ.     1.4812    1.5002    1.5019    0.4000    0.4000    0.4000
  volume change:  bn =   170.0   bs =    88.0   max.displ. = 0.12947E+03
  Box            1
  Type  1 bn  20195.  19773.  20001.      0.      0.      0.
+         bs  10146.   9744.  10035.      0.      0.      0.
  max.displ.     0.2948    0.2898    0.2941    0.4000    0.4000    0.4000
  Type  2 bn  59780.  60020.  60738.      0.      0.      0.
+         bs  29601.  30010.  30514.      0.      0.      0.
  max.displ.     0.4571    0.4584    0.4577    0.4000    0.4000    0.4000
  Type  3 bn  39794.  39997.  39544.      0.      0.      0.
+         bs  19711.  20078.  19521.      0.      0.      0.
  max.displ.     1.4673    1.5062    1.4828    0.4000    0.4000    0.4000
  volume change:  bn =   158.0   bs =    75.0   max.displ. = 0.12291E+03
  Box            1
  Type  1 bn  20132.  19972.  19906.      0.      0.      0.
+         bs  10125.  10151.   9881.      0.      0.      0.
  max.displ.     0.2965    0.2945    0.2919    0.4000    0.4000    0.4000
  Type  2 bn  60210.  60246.  59929.      0.      0.      0.
+         bs  30036.  30023.  30025.      0.      0.      0.
  max.displ.     0.4561    0.4569    0.4586    0.4000    0.4000    0.4000
  Type  3 bn  39673.  40039.  39707.      0.      0.      0.
+         bs  19974.  19808.  19728.      0.      0.      0.
  max.displ.     1.4775    1.4903    1.4734    0.4000    0.4000    0.4000
  volume change:  bn =   186.0   bs =    97.0   max.displ. = 0.12820E+03
  Box            1
  Type  1 bn  20091.  19860.  20165.      0.      0.      0.
+         bs   9877.   9904.  10221.      0.      0.      0.
  max.displ.     0.2916    0.2938    0.2960    0.4000    0.4000    0.4000
  Type  2 bn  59745.  60391.  60117.      0.      0.      0.
+         bs  29902.  30099.  30172.      0.      0.      0.
  max.displ.     0.4565    0.4555    0.4603    0.4000    0.4000    0.4000
  Type  3 bn  39823.  39925.  39707.      0.      0.      0.
+         bs  20056.  20152.  20203.      0.      0.      0.
  max.displ.     1.4882    1.5044    1.4994    0.4000    0.4000    0.4000
  volume change:  bn =   176.0   bs =    83.0   max.displ. = 0.12092E+03
  Box            1
  Type  1 bn  20318.  20099.  20049.      0.      0.      0.
+         bs  10220.  10224.  10028.      0.      0.      0.
  max.displ.     0.2933    0.2989    0.2961    0.4000    0.4000    0.4000
  Type  2 bn  59756.  59570.  59844.      0.      0.      0.
+         bs  30162.  30075.  29924.      0.      0.      0.
  max.displ.     0.4609    0.4599    0.4603    0.4000    0.4000    0.4000
  Type  3 bn  39795.  40217.  40157.      0.      0.      0.
+         bs  19869.  20208.  20128.      0.      0.      0.
  max.displ.     1.4861    1.5119    1.5031    0.4000    0.4000    0.4000
  volume change:  bn =   195.0   bs =   104.0   max.displ. = 0.12898E+03
  Box            1
  Type  1 bn  20249.  20035.  19911.      0.      0.      0.
+         bs  10066.   9888.   9791.      0.      0.      0.
  max.displ.     0.2916    0.2950    0.2912    0.4000    0.4000    0.4000
  Type  2 bn  59810.  59733.  60176.      0.      0.      0.
+         bs  29696.  30156.  29936.      0.      0.      0.
  max.displ.     0.4577    0.4643    0.4580    0.4000    0.4000    0.4000
  Type  3 bn  39835.  40110.  39950.      0.      0.      0.
+         bs  20211.  20041.  20078.      0.      0.      0.
  max.displ.     1.5080    1.5108    1.5108    0.4000    0.4000    0.4000
  volume change:  bn =   191.0   bs =    94.0   max.displ. = 0.12695E+03
  Box            1
  Type  1 bn  19921.  20219.  20080.      0.      0.      0.
+         bs  10151.  10061.  10103.      0.      0.      0.
  max.displ.     0.2972    0.2936    0.2930    0.4000    0.4000    0.4000
  Type  2 bn  59883.  60015.  59950.      0.      0.      0.
+         bs  29775.  29928.  30046.      0.      0.      0.
  max.displ.     0.4551    0.4631    0.4591    0.4000    0.4000    0.4000
  Type  3 bn  40131.  39722.  39889.      0.      0.      0.
+         bs  20068.  19656.  20056.      0.      0.      0.
  max.displ.     1.5082    1.4952    1.5192    0.4000    0.4000    0.4000
  volume change:  bn =   190.0   bs =    89.0   max.displ. = 0.11893E+03
  Box            1
  Type  1 bn  20035.  20009.  19916.      0.      0.      0.
+         bs   9825.  10124.  10000.      0.      0.      0.
  max.displ.     0.2915    0.2971    0.2942    0.4000    0.4000    0.4000
  Type  2 bn  59753.  59945.  60022.      0.      0.      0.
+         bs  29896.  30137.  30043.      0.      0.      0.
  max.displ.     0.4554    0.4657    0.4596    0.4000    0.4000    0.4000
  Type  3 bn  40012.  40182.  39954.      0.      0.      0.
+         bs  19748.  20115.  19905.      0.      0.      0.
  max.displ.     1.4887    1.4970    1.5138    0.4000    0.4000    0.4000
  volume change:  bn =   172.0   bs =    88.0   max.displ. = 0.12170E+03
  Box            1
  Type  1 bn  20191.  20034.  20054.      0.      0.      0.
+         bs  10031.   9878.  10057.      0.      0.      0.
  max.displ.     0.2896    0.2930    0.2951    0.4000    0.4000    0.4000
  Type  2 bn  59627.  59741.  59809.      0.      0.      0.
+         bs  29576.  29773.  29762.      0.      0.      0.
  max.displ.     0.4518    0.4641    0.4574    0.4000    0.4000    0.4000
  Type  3 bn  40349.  39984.  40025.      0.      0.      0.
+         bs  20133.  20114.  19768.      0.      0.      0.
  max.displ.     1.4857    1.5061    1.4953    0.4000    0.4000    0.4000
  volume change:  bn =   186.0   bs =    98.0   max.displ. = 0.12824E+03
  Box            1
  Type  1 bn  20020.  19941.  20171.      0.      0.      0.
+         bs  10155.   9907.   9755.      0.      0.      0.
  max.displ.     0.2938    0.2911    0.2854    0.4000    0.4000    0.4000
  Type  2 bn  60120.  59573.  60170.      0.      0.      0.
+         bs  30296.  29489.  29973.      0.      0.      0.
  max.displ.     0.4553    0.4595    0.4557    0.4000    0.4000    0.4000
  Type  3 bn  39902.  40222.  39707.      0.      0.      0.
+         bs  19755.  19902.  19815.      0.      0.      0.
  max.displ.     1.4711    1.4905    1.4924    0.4000    0.4000    0.4000
  volume change:  bn =   174.0   bs =    93.0   max.displ. = 0.13709E+03
  Box            1
  Type  1 bn  20185.  20141.  19960.      0.      0.      0.
+         bs   9995.  10238.   9936.      0.      0.      0.
  max.displ.     0.2910    0.2960    0.2842    0.4000    0.4000    0.4000
  Type  2 bn  59681.  59869.  60222.      0.      0.      0.
+         bs  30102.  30024.  30391.      0.      0.      0.
  max.displ.     0.4593    0.4609    0.4599    0.4000    0.4000    0.4000
  Type  3 bn  40303.  39857.  39593.      0.      0.      0.
+         bs  20187.  19989.  19686.      0.      0.      0.
  max.displ.     1.4737    1.4950    1.4840    0.4000    0.4000    0.4000
  volume change:  bn =   189.0   bs =   106.0   max.displ. = 0.15377E+03
  90000  110000 -0.3483E+08    16.291         0.0   60  180  120
  Box            1
  Type  1 bn  20214.  20215.  20025.      0.      0.      0.
+         bs  10347.  10219.  10196.      0.      0.      0.
  max.displ.     0.2979    0.2992    0.2894    0.4000    0.4000    0.4000
  Type  2 bn  59758.  59960.  59878.      0.      0.      0.
+         bs  29892.  30033.  29923.      0.      0.      0.
  max.displ.     0.4595    0.4617    0.4597    0.4000    0.4000    0.4000
  Type  3 bn  39818.  39983.  39948.      0.      0.      0.
+         bs  20047.  20346.  20460.      0.      0.      0.
  max.displ.     1.4839    1.5215    1.5202    0.4000    0.4000    0.4000
  volume change:  bn =   201.0   bs =    93.0   max.displ. = 0.14229E+03
  Box            1
  Type  1 bn  20119.  20063.  19920.      0.      0.      0.
+         bs   9925.   9701.  10011.      0.      0.      0.
  max.displ.     0.2939    0.2894    0.2909    0.4000    0.4000    0.4000
  Type  2 bn  59862.  59977.  60196.      0.      0.      0.
+         bs  29556.  29989.  30143.      0.      0.      0.
  max.displ.     0.4538    0.4617    0.4604    0.4000    0.4000    0.4000
  Type  3 bn  39836.  39835.  40010.      0.      0.      0.
+         bs  20265.  19900.  20219.      0.      0.      0.
  max.displ.     1.5097    1.5202    1.5364    0.4000    0.4000    0.4000
  volume change:  bn =   182.0   bs =   100.0   max.displ. = 0.15637E+03
  Box            1
  Type  1 bn  19901.  19976.  19901.      0.      0.      0.
+         bs   9618.   9993.  10035.      0.      0.      0.
  max.displ.     0.2841    0.2895    0.2933    0.4000    0.4000    0.4000
  Type  2 bn  60015.  59912.  59998.      0.      0.      0.
+         bs  30472.  29872.  29894.      0.      0.      0.
  max.displ.     0.4608    0.4604    0.4588    0.4000    0.4000    0.4000
  Type  3 bn  40202.  39945.  40002.      0.      0.      0.
+         bs  20299.  20236.  19843.      0.      0.      0.
  max.displ.     1.5246    1.5403    1.5243    0.4000    0.4000    0.4000
  volume change:  bn =   148.0   bs =    76.0   max.displ. = 0.16059E+03
  Box            1
  Type  1 bn  20112.  19920.  19905.      0.      0.      0.
+         bs  10274.   9979.   9939.      0.      0.      0.
  max.displ.     0.2902    0.2901    0.2929    0.4000    0.4000    0.4000
  Type  2 bn  59855.  59890.  60139.      0.      0.      0.
+         bs  29808.  29845.  30042.      0.      0.      0.
  max.displ.     0.4590    0.4589    0.4583    0.4000    0.4000    0.4000
  Type  3 bn  40008.  39897.  40096.      0.      0.      0.
+         bs  19973.  20050.  20014.      0.      0.      0.
  max.displ.     1.5223    1.5481    1.5217    0.4000    0.4000    0.4000
  volume change:  bn =   178.0   bs =    82.0   max.displ. = 0.14796E+03
  Box            1
  Type  1 bn  19936.  19832.  19963.      0.      0.      0.
+         bs  10174.   9930.   9916.      0.      0.      0.
  max.displ.     0.2962    0.2905    0.2910    0.4000    0.4000    0.4000
  Type  2 bn  60019.  59828.  59859.      0.      0.      0.
+         bs  29829.  29959.  30022.      0.      0.      0.
  max.displ.     0.4562    0.4596    0.4598    0.4000    0.4000    0.4000
  Type  3 bn  40356.  39664.  40369.      0.      0.      0.
+         bs  20091.  19725.  20212.      0.      0.      0.
  max.displ.     1.5157    1.5397    1.5238    0.4000    0.4000    0.4000
  volume change:  bn =   174.0   bs =    75.0   max.displ. = 0.12755E+03
  Box            1
  Type  1 bn  20033.  20140.  19889.      0.      0.      0.
+         bs  10031.  10263.  10088.      0.      0.      0.
  max.displ.     0.2967    0.2960    0.2952    0.4000    0.4000    0.4000
  Type  2 bn  60053.  59704.  60131.      0.      0.      0.
+         bs  30330.  29904.  30056.      0.      0.      0.
  max.displ.     0.4608    0.4604    0.4596    0.4000    0.4000    0.4000
  Type  3 bn  40059.  40074.  39751.      0.      0.      0.
+         bs  20049.  19854.  19734.      0.      0.      0.
  max.displ.     1.5172    1.5257    1.5129    0.4000    0.4000    0.4000
  volume change:  bn =   166.0   bs =    80.0   max.displ. = 0.12294E+03
  Box            1
  Type  1 bn  20083.  19962.  19851.      0.      0.      0.
+         bs  10025.   9817.   9803.      0.      0.      0.
  max.displ.     0.2962    0.2912    0.2916    0.4000    0.4000    0.4000
  Type  2 bn  60020.  60026.  60294.      0.      0.      0.
+         bs  30190.  29839.  30057.      0.      0.      0.
  max.displ.     0.4636    0.4577    0.4582    0.4000    0.4000    0.4000
  Type  3 bn  39935.  39693.  39953.      0.      0.      0.
+         bs  19745.  19772.  20157.      0.      0.      0.
  max.displ.     1.5003    1.5199    1.5266    0.4000    0.4000    0.4000
  volume change:  bn =   183.0   bs =    91.0   max.displ. = 0.12227E+03
  Box            1
  Type  1 bn  20270.  19970.  19784.      0.      0.      0.
+         bs   9784.  10018.   9835.      0.      0.      0.
  max.displ.     0.2859    0.2921    0.2899    0.4000    0.4000    0.4000
  Type  2 bn  59961.  59958.  59829.      0.      0.      0.
+         bs  29902.  29980.  29930.      0.      0.      0.
  max.displ.     0.4624    0.4577    0.4585    0.4000    0.4000    0.4000
  Type  3 bn  39847.  39755.  40422.      0.      0.      0.
+         bs  20008.  19918.  20004.      0.      0.      0.
  max.displ.     1.5066    1.5230    1.5110    0.4000    0.4000    0.4000
  volume change:  bn =   204.0   bs =    97.0   max.displ. = 0.11628E+03
  Box            1
  Type  1 bn  20101.  20184.  19981.      0.      0.      0.
+         bs  10266.  10252.   9923.      0.      0.      0.
  max.displ.     0.2920    0.2968    0.2879    0.4000    0.4000    0.4000
  Type  2 bn  59869.  59679.  59959.      0.      0.      0.
+         bs  29759.  29851.  29818.      0.      0.      0.
  max.displ.     0.4596    0.4579    0.4560    0.4000    0.4000    0.4000
  Type  3 bn  40051.  39860.  40132.      0.      0.      0.
+         bs  19905.  19687.  19902.      0.      0.      0.
  max.displ.     1.4976    1.5045    1.4986    0.4000    0.4000    0.4000
  volume change:  bn =   184.0   bs =   101.0   max.displ. = 0.12765E+03
  Box            1
  Type  1 bn  20253.  20060.  19804.      0.      0.      0.
+         bs  10144.   9980.   9974.      0.      0.      0.
  max.displ.     0.2926    0.2953    0.2900    0.4000    0.4000    0.4000
  Type  2 bn  60105.  59680.  60081.      0.      0.      0.
+         bs  29794.  29890.  30158.      0.      0.      0.
  max.displ.     0.4557    0.4587    0.4578    0.4000    0.4000    0.4000
  Type  3 bn  40013.  39968.  39854.      0.      0.      0.
+         bs  20090.  19838.  20085.      0.      0.      0.
  max.displ.     1.5038    1.4935    1.5105    0.4000    0.4000    0.4000
  volume change:  bn =   182.0   bs =    91.0   max.displ. = 0.12765E+03
  Box            1
  Type  1 bn  20147.  20118.  19732.      0.      0.      0.
+         bs  10193.   9890.  10063.      0.      0.      0.
  max.displ.     0.2960    0.2903    0.2958    0.4000    0.4000    0.4000
  Type  2 bn  59764.  60026.  60148.      0.      0.      0.
+         bs  29963.  29781.  29911.      0.      0.      0.
  max.displ.     0.4569    0.4551    0.4553    0.4000    0.4000    0.4000
  Type  3 bn  39929.  40077.  39875.      0.      0.      0.
+         bs  20060.  20060.  19806.      0.      0.      0.
  max.displ.     1.5110    1.4951    1.5005    0.4000    0.4000    0.4000
  volume change:  bn =   184.0   bs =    93.0   max.displ. = 0.12904E+03
  Box            1
  Type  1 bn  20098.  19975.  19989.      0.      0.      0.
+         bs   9964.  10196.   9931.      0.      0.      0.
  max.displ.     0.2935    0.2964    0.2939    0.4000    0.4000    0.4000
  Type  2 bn  60011.  60049.  60146.      0.      0.      0.
+         bs  29946.  29880.  29914.      0.      0.      0.
  max.displ.     0.4560    0.4529    0.4529    0.4000    0.4000    0.4000
  Type  3 bn  39946.  39912.  39689.      0.      0.      0.
+         bs  19698.  20261.  19932.      0.      0.      0.
  max.displ.     1.4902    1.5179    1.5071    0.4000    0.4000    0.4000
  volume change:  bn =   185.0   bs =    84.0   max.displ. = 0.11718E+03
  Box            1
  Type  1 bn  19924.  20105.  19881.      0.      0.      0.
+         bs   9974.  10031.   9974.      0.      0.      0.
  max.displ.     0.2939    0.2958    0.2949    0.4000    0.4000    0.4000
  Type  2 bn  60089.  60082.  59691.      0.      0.      0.
+         bs  30042.  29978.  30065.      0.      0.      0.
  max.displ.     0.4560    0.4520    0.4562    0.4000    0.4000    0.4000
  Type  3 bn  40172.  39760.  40087.      0.      0.      0.
+         bs  20127.  19588.  20134.      0.      0.      0.
  max.displ.     1.4932    1.4956    1.5139    0.4000    0.4000    0.4000
  volume change:  bn =   209.0   bs =   115.0   max.displ. = 0.12896E+03
  Box            1
  Type  1 bn  20037.  19639.  20040.      0.      0.      0.
+         bs   9876.   9776.  10037.      0.      0.      0.
  max.displ.     0.2897    0.2944    0.2954    0.4000    0.4000    0.4000
  Type  2 bn  60242.  59902.  59740.      0.      0.      0.
+         bs  30226.  30209.  30030.      0.      0.      0.
  max.displ.     0.4576    0.4559    0.4587    0.4000    0.4000    0.4000
  Type  3 bn  40023.  40358.  39831.      0.      0.      0.
+         bs  20098.  20364.  19779.      0.      0.      0.
  max.displ.     1.4997    1.5094    1.5036    0.4000    0.4000    0.4000
  volume change:  bn =   188.0   bs =   108.0   max.displ. = 0.14816E+03
  Box            1
  Type  1 bn  19707.  20264.  20083.      0.      0.      0.
+         bs   9822.  10215.   9910.      0.      0.      0.
  max.displ.     0.2888    0.2969    0.2916    0.4000    0.4000    0.4000
  Type  2 bn  59729.  59917.  60022.      0.      0.      0.
+         bs  29698.  30213.  29939.      0.      0.      0.
  max.displ.     0.4550    0.4597    0.4576    0.4000    0.4000    0.4000
  Type  3 bn  39684.  40489.  39947.      0.      0.      0.
+         bs  19808.  20225.  20005.      0.      0.      0.
  max.displ.     1.4971    1.5079    1.5059    0.4000    0.4000    0.4000
  volume change:  bn =   158.0   bs =    66.0   max.displ. = 0.12378E+03
-105000  125000 -0.3497E+08    16.105-127600270.8   60  180  120
+105000  125000 -0.3497E+08    16.105************   60  180  120
  Box            1
  Type  1 bn  19995.  20315.  20080.      0.      0.      0.
+         bs  10074.  10142.  10058.      0.      0.      0.
  max.displ.     0.2910    0.2964    0.2921    0.4000    0.4000    0.4000
  Type  2 bn  60131.  59783.  59805.      0.      0.      0.
+         bs  30298.  29834.  29915.      0.      0.      0.
  max.displ.     0.4585    0.4588    0.4578    0.4000    0.4000    0.4000
  Type  3 bn  40088.  39751.  39873.      0.      0.      0.
+         bs  20226.  19678.  19589.      0.      0.      0.
  max.displ.     1.5107    1.4929    1.4797    0.4000    0.4000    0.4000
  volume change:  bn =   179.0   bs =    92.0   max.displ. = 0.12724E+03
  Box            1
  Type  1 bn  20109.  19820.  19907.      0.      0.      0.
+         bs  10056.   9905.   9949.      0.      0.      0.
  max.displ.     0.2910    0.2963    0.2920    0.4000    0.4000    0.4000
  Type  2 bn  59636.  59909.  59852.      0.      0.      0.
+         bs  29618.  30025.  29743.      0.      0.      0.
  max.displ.     0.4555    0.4599    0.4550    0.4000    0.4000    0.4000
  Type  3 bn  40057.  39936.  40582.      0.      0.      0.
+         bs  19958.  19874.  20410.      0.      0.      0.
  max.displ.     1.5054    1.4859    1.4884    0.4000    0.4000    0.4000
  volume change:  bn =   192.0   bs =    90.0   max.displ. = 0.11929E+03
  Box            1
  Type  1 bn  19800.  20029.  20083.      0.      0.      0.
+         bs   9976.   9774.  10019.      0.      0.      0.
  max.displ.     0.2933    0.2891    0.2913    0.4000    0.4000    0.4000
  Type  2 bn  59726.  60095.  60170.      0.      0.      0.
+         bs  30124.  29929.  30014.      0.      0.      0.
  max.displ.     0.4594    0.4581    0.4539    0.4000    0.4000    0.4000
  Type  3 bn  39984.  40197.  39724.      0.      0.      0.
+         bs  19847.  20261.  19944.      0.      0.      0.
  max.displ.     1.4945    1.4979    1.4945    0.4000    0.4000    0.4000
  volume change:  bn =   192.0   bs =   101.0   max.displ. = 0.12550E+03
  Box            1
  Type  1 bn  19920.  19816.  20262.      0.      0.      0.
+         bs  10010.   9942.  10226.      0.      0.      0.
  max.displ.     0.2947    0.2901    0.2940    0.4000    0.4000    0.4000
  Type  2 bn  60002.  59995.  59879.      0.      0.      0.
+         bs  30238.  29981.  30048.      0.      0.      0.
  max.displ.     0.4631    0.4579    0.4555    0.4000    0.4000    0.4000
  Type  3 bn  40171.  39733.  40060.      0.      0.      0.
+         bs  20224.  20161.  20101.      0.      0.      0.
  max.displ.     1.5048    1.5201    1.4998    0.4000    0.4000    0.4000
  volume change:  bn =   162.0   bs =    81.0   max.displ. = 0.12550E+03
  Box            1
  Type  1 bn  20310.  19701.  19565.      0.      0.      0.
+         bs  10136.   9931.   9904.      0.      0.      0.
  max.displ.     0.2942    0.2925    0.2977    0.4000    0.4000    0.4000
  Type  2 bn  60108.  60098.  60140.      0.      0.      0.
+         bs  29867.  30019.  30221.      0.      0.      0.
  max.displ.     0.4602    0.4574    0.4578    0.4000    0.4000    0.4000
  Type  3 bn  40101.  39785.  40017.      0.      0.      0.
+         bs  20243.  19738.  20105.      0.      0.      0.
  max.displ.     1.5192    1.5083    1.5070    0.4000    0.4000    0.4000
  volume change:  bn =   175.0   bs =    78.0   max.displ. = 0.11187E+03
  Box            1
  Type  1 bn  19950.  20179.  20137.      0.      0.      0.
+         bs   9940.  10135.  10047.      0.      0.      0.
  max.displ.     0.2931    0.2938    0.2970    0.4000    0.4000    0.4000
  Type  2 bn  60301.  59623.  60103.      0.      0.      0.
+         bs  30083.  29493.  30268.      0.      0.      0.
  max.displ.     0.4592    0.4525    0.4611    0.4000    0.4000    0.4000
  Type  3 bn  39843.  39821.  39855.      0.      0.      0.
+         bs  19938.  20015.  20071.      0.      0.      0.
  max.displ.     1.5205    1.5162    1.5179    0.4000    0.4000    0.4000
  volume change:  bn =   188.0   bs =   103.0   max.displ. = 0.12259E+03
  Box            1
  Type  1 bn  20051.  19968.  20025.      0.      0.      0.
+         bs   9950.   9822.   9807.      0.      0.      0.
  max.displ.     0.2909    0.2891    0.2910    0.4000    0.4000    0.4000
  Type  2 bn  60294.  60114.  59878.      0.      0.      0.
+         bs  30087.  30584.  29880.      0.      0.      0.
  max.displ.     0.4582    0.4605    0.4602    0.4000    0.4000    0.4000
  Type  3 bn  39927.  39843.  39692.      0.      0.      0.
+         bs  20144.  20245.  20016.      0.      0.      0.
  max.displ.     1.5342    1.5408    1.5309    0.4000    0.4000    0.4000
  volume change:  bn =   208.0   bs =   120.0   max.displ. = 0.14144E+03
  Box            1
  Type  1 bn  19946.  19889.  19771.      0.      0.      0.
+         bs   9947.   9744.   9769.      0.      0.      0.
  max.displ.     0.2902    0.2832    0.2875    0.4000    0.4000    0.4000
  Type  2 bn  60090.  60024.  60224.      0.      0.      0.
+         bs  29977.  29677.  29864.      0.      0.      0.
  max.displ.     0.4572    0.4553    0.4564    0.4000    0.4000    0.4000
  Type  3 bn  39853.  40195.  39822.      0.      0.      0.
+         bs  20096.  20102.  19969.      0.      0.      0.
  max.displ.     1.5473    1.5412    1.5354    0.4000    0.4000    0.4000
  volume change:  bn =   186.0   bs =    87.0   max.displ. = 0.13232E+03
  Box            1
  Type  1 bn  19899.  20091.  20079.      0.      0.      0.
+         bs   9955.  10194.  10143.      0.      0.      0.
  max.displ.     0.2903    0.2874    0.2905    0.4000    0.4000    0.4000
  Type  2 bn  59737.  60107.  59968.      0.      0.      0.
+         bs  29648.  30135.  30084.      0.      0.      0.
  max.displ.     0.4538    0.4565    0.4580    0.4000    0.4000    0.4000
  Type  3 bn  39981.  39686.  40274.      0.      0.      0.
+         bs  19566.  19597.  19852.      0.      0.      0.
  max.displ.     1.5144    1.5221    1.5136    0.4000    0.4000    0.4000
  volume change:  bn =   178.0   bs =    88.0   max.displ. = 0.13083E+03
  Box            1
  Type  1 bn  20225.  20169.  19847.      0.      0.      0.
+         bs  10094.  10073.   9962.      0.      0.      0.
  max.displ.     0.2898    0.2871    0.2916    0.4000    0.4000    0.4000
  Type  2 bn  59879.  59571.  60041.      0.      0.      0.
+         bs  29666.  29681.  30115.      0.      0.      0.
  max.displ.     0.4497    0.4549    0.4594    0.4000    0.4000    0.4000
  Type  3 bn  39955.  39914.  40231.      0.      0.      0.
+         bs  20101.  20005.  20097.      0.      0.      0.
  max.displ.     1.5238    1.5257    1.5122    0.4000    0.4000    0.4000
  volume change:  bn =   168.0   bs =    80.0   max.displ. = 0.12460E+03
  Box            1
  Type  1 bn  19907.  19807.  20237.      0.      0.      0.
+         bs   9999.  10075.  10085.      0.      0.      0.
  max.displ.     0.2911    0.2921    0.2906    0.4000    0.4000    0.4000
  Type  2 bn  59842.  60188.  59932.      0.      0.      0.
+         bs  30065.  29769.  29914.      0.      0.      0.
  max.displ.     0.4519    0.4500    0.4586    0.4000    0.4000    0.4000
  Type  3 bn  39798.  39911.  40201.      0.      0.      0.
+         bs  19726.  19820.  20173.      0.      0.      0.
  max.displ.     1.5105    1.5154    1.5177    0.4000    0.4000    0.4000
  volume change:  bn =   177.0   bs =    97.0   max.displ. = 0.13657E+03
  Box            1
  Type  1 bn  20038.  20051.  19903.      0.      0.      0.
+         bs  10016.   9838.   9759.      0.      0.      0.
  max.displ.     0.2910    0.2866    0.2850    0.4000    0.4000    0.4000
  Type  2 bn  59799.  60302.  59933.      0.      0.      0.
+         bs  29928.  30186.  29765.      0.      0.      0.
  max.displ.     0.4523    0.4506    0.4555    0.4000    0.4000    0.4000
  Type  3 bn  40016.  39791.  39996.      0.      0.      0.
+         bs  20263.  19894.  20148.      0.      0.      0.
  max.displ.     1.5298    1.5153    1.5291    0.4000    0.4000    0.4000
  volume change:  bn =   171.0   bs =    83.0   max.displ. = 0.13258E+03
  Box            1
  Type  1 bn  19917.  19971.  20065.      0.      0.      0.
+         bs   9918.  10168.  10302.      0.      0.      0.
  max.displ.     0.2899    0.2918    0.2927    0.4000    0.4000    0.4000
  Type  2 bn  59658.  60026.  60153.      0.      0.      0.
+         bs  30127.  30578.  30009.      0.      0.      0.
  max.displ.     0.4568    0.4590    0.4545    0.4000    0.4000    0.4000
  Type  3 bn  39986.  40192.  39865.      0.      0.      0.
+         bs  19623.  19937.  19805.      0.      0.      0.
  max.displ.     1.5015    1.5033    1.5193    0.4000    0.4000    0.4000
  volume change:  bn =   167.0   bs =    72.0   max.displ. = 0.11432E+03
  Box            1
  Type  1 bn  19776.  19959.  19913.      0.      0.      0.
+         bs  10127.  10102.   9955.      0.      0.      0.
  max.displ.     0.2969    0.2954    0.2926    0.4000    0.4000    0.4000
  Type  2 bn  59914.  60100.  60212.      0.      0.      0.
+         bs  30052.  30110.  30564.      0.      0.      0.
  max.displ.     0.4583    0.4600    0.4614    0.4000    0.4000    0.4000
  Type  3 bn  40059.  40141.  39744.      0.      0.      0.
+         bs  20032.  19994.  19735.      0.      0.      0.
  max.displ.     1.5017    1.4975    1.5088    0.4000    0.4000    0.4000
  volume change:  bn =   182.0   bs =   107.0   max.displ. = 0.13442E+03
  Box            1
  Type  1 bn  19980.  19965.  20018.      0.      0.      0.
+         bs   9908.   9941.   9845.      0.      0.      0.
  max.displ.     0.2944    0.2942    0.2878    0.4000    0.4000    0.4000
  Type  2 bn  60186.  59972.  60484.      0.      0.      0.
+         bs  29977.  29831.  30052.      0.      0.      0.
  max.displ.     0.4565    0.4576    0.4585    0.4000    0.4000    0.4000
  Type  3 bn  39856.  39628.  39738.      0.      0.      0.
+         bs  20113.  20046.  19840.      0.      0.      0.
  max.displ.     1.5156    1.5151    1.5066    0.4000    0.4000    0.4000
  volume change:  bn =   173.0   bs =    88.0   max.displ. = 0.13675E+03
-120000  140000 -0.3484E+08    15.988-127600270.8   60  180  120
+120000  140000 -0.3484E+08    15.988************   60  180  120
  Box            1
  Type  1 bn  20055.  20138.  20032.      0.      0.      0.
+         bs   9926.   9901.  10091.      0.      0.      0.
  max.displ.     0.2914    0.2893    0.2900    0.4000    0.4000    0.4000
  Type  2 bn  59628.  60128.  60063.      0.      0.      0.
+         bs  29823.  30007.  29566.      0.      0.      0.
  max.displ.     0.4566    0.4567    0.4514    0.4000    0.4000    0.4000
  Type  3 bn  40043.  39885.  39849.      0.      0.      0.
+         bs  20093.  20057.  20010.      0.      0.      0.
  max.displ.     1.5210    1.5238    1.5131    0.4000    0.4000    0.4000
  volume change:  bn =   179.0   bs =    89.0   max.displ. = 0.13598E+03
  Box            1
  Type  1 bn  20073.  20157.  19880.      0.      0.      0.
+         bs   9956.  10091.   9969.      0.      0.      0.
  max.displ.     0.2891    0.2896    0.2908    0.4000    0.4000    0.4000
  Type  2 bn  59457.  59860.  60026.      0.      0.      0.
+         bs  29603.  29795.  30244.      0.      0.      0.
  max.displ.     0.4547    0.4546    0.4549    0.4000    0.4000    0.4000
  Type  3 bn  40101.  40402.  39861.      0.      0.      0.
+         bs  20041.  20111.  20055.      0.      0.      0.
  max.displ.     1.5203    1.5170    1.5225    0.4000    0.4000    0.4000
  volume change:  bn =   183.0   bs =    79.0   max.displ. = 0.11741E+03
  Box            1
  Type  1 bn  19981.  20200.  19931.      0.      0.      0.
+         bs  10046.  10287.  10018.      0.      0.      0.
  max.displ.     0.2907    0.2950    0.2924    0.4000    0.4000    0.4000
  Type  2 bn  59997.  59989.  60193.      0.      0.      0.
+         bs  30111.  30110.  30049.      0.      0.      0.
  max.displ.     0.4564    0.4564    0.4542    0.4000    0.4000    0.4000
  Type  3 bn  40098.  39721.  39694.      0.      0.      0.
+         bs  19607.  19688.  19673.      0.      0.      0.
  max.displ.     1.4868    1.5038    1.5092    0.4000    0.4000    0.4000
  volume change:  bn =   196.0   bs =   101.0   max.displ. = 0.12100E+03
  Box            1
  Type  1 bn  19988.  19906.  19944.      0.      0.      0.
+         bs  10074.   9802.   9995.      0.      0.      0.
  max.displ.     0.2930    0.2905    0.2931    0.4000    0.4000    0.4000
  Type  2 bn  60333.  59986.  59948.      0.      0.      0.
+         bs  30349.  29796.  30162.      0.      0.      0.
  max.displ.     0.4592    0.4534    0.4570    0.4000    0.4000    0.4000
  Type  3 bn  39803.  40067.  39851.      0.      0.      0.
+         bs  20152.  20032.  20045.      0.      0.      0.
  max.displ.     1.5055    1.5037    1.5182    0.4000    0.4000    0.4000
  volume change:  bn =   174.0   bs =    95.0   max.displ. = 0.13213E+03
  Box            1
  Type  1 bn  20062.  20065.  20009.      0.      0.      0.
+         bs  10168.  10170.   9998.      0.      0.      0.
  max.displ.     0.2970    0.2945    0.2929    0.4000    0.4000    0.4000
  Type  2 bn  59984.  60087.  59435.      0.      0.      0.
+         bs  29945.  30165.  29988.      0.      0.      0.
  max.displ.     0.4584    0.4552    0.4612    0.4000    0.4000    0.4000
  Type  3 bn  39890.  40228.  40063.      0.      0.      0.
+         bs  19828.  19845.  20075.      0.      0.      0.
  max.displ.     1.4967    1.4836    1.5215    0.4000    0.4000    0.4000
  volume change:  bn =   177.0   bs =    85.0   max.displ. = 0.12690E+03
  Box            1
  Type  1 bn  19926.  19946.  20109.      0.      0.      0.
+         bs   9926.   9905.  10082.      0.      0.      0.
  max.displ.     0.2959    0.2925    0.2937    0.4000    0.4000    0.4000
  Type  2 bn  60266.  59990.  59815.      0.      0.      0.
+         bs  30343.  30038.  29645.      0.      0.      0.
  max.displ.     0.4616    0.4559    0.4571    0.4000    0.4000    0.4000
  Type  3 bn  39805.  40259.  39718.      0.      0.      0.
+         bs  20024.  20440.  19823.      0.      0.      0.
  max.displ.     1.5058    1.5065    1.5188    0.4000    0.4000    0.4000
  volume change:  bn =   166.0   bs =    92.0   max.displ. = 0.14066E+03
  Box            1
  Type  1 bn  20017.  19890.  20043.      0.      0.      0.
+         bs   9866.   9974.  10029.      0.      0.      0.
  max.displ.     0.2917    0.2933    0.2939    0.4000    0.4000    0.4000
  Type  2 bn  59920.  60245.  60053.      0.      0.      0.
+         bs  29976.  30321.  30090.      0.      0.      0.
  max.displ.     0.4619    0.4589    0.4581    0.4000    0.4000    0.4000
  Type  3 bn  39743.  39636.  40268.      0.      0.      0.
+         bs  19851.  19907.  20186.      0.      0.      0.
  max.displ.     1.5043    1.5132    1.5227    0.4000    0.4000    0.4000
  volume change:  bn =   185.0   bs =    97.0   max.displ. = 0.14751E+03
  Box            1
  Type  1 bn  19968.  20122.  20036.      0.      0.      0.
+         bs  10056.   9885.   9982.      0.      0.      0.
  max.displ.     0.2938    0.2882    0.2928    0.4000    0.4000    0.4000
  Type  2 bn  59809.  59793.  60161.      0.      0.      0.
+         bs  29986.  29661.  30060.      0.      0.      0.
  max.displ.     0.4631    0.4553    0.4578    0.4000    0.4000    0.4000
  Type  3 bn  39794.  39931.  40213.      0.      0.      0.
+         bs  20041.  19658.  19844.      0.      0.      0.
  max.displ.     1.5151    1.4899    1.5028    0.4000    0.4000    0.4000
  volume change:  bn =   173.0   bs =    69.0   max.displ. = 0.11766E+03
  Box            1
  Type  1 bn  19915.  20047.  19965.      0.      0.      0.
+         bs  10048.  10058.   9865.      0.      0.      0.
  max.displ.     0.2965    0.2892    0.2894    0.4000    0.4000    0.4000
  Type  2 bn  60202.  60016.  60320.      0.      0.      0.
+         bs  29932.  29879.  30003.      0.      0.      0.
  max.displ.     0.4605    0.4533    0.4554    0.4000    0.4000    0.4000
  Type  3 bn  39959.  39566.  39840.      0.      0.      0.
+         bs  19845.  19797.  19910.      0.      0.      0.
  max.displ.     1.5049    1.4910    1.5021    0.4000    0.4000    0.4000
  volume change:  bn =   170.0   bs =    87.0   max.displ. = 0.12043E+03
  Box            1
  Type  1 bn  20054.  19957.  20287.      0.      0.      0.
+         bs  10124.  10183.  10128.      0.      0.      0.
  max.displ.     0.2994    0.2951    0.2889    0.4000    0.4000    0.4000
  Type  2 bn  59742.  60028.  60304.      0.      0.      0.
+         bs  29929.  30279.  30339.      0.      0.      0.
  max.displ.     0.4614    0.4573    0.4582    0.4000    0.4000    0.4000
  Type  3 bn  40045.  39710.  39695.      0.      0.      0.
+         bs  20036.  19981.  19972.      0.      0.      0.
  max.displ.     1.5060    1.5004    1.5115    0.4000    0.4000    0.4000
  volume change:  bn =   178.0   bs =    91.0   max.displ. = 0.12314E+03
  Box            1
  Type  1 bn  20079.  19938.  19965.      0.      0.      0.
+         bs  10032.  10044.  10145.      0.      0.      0.
  max.displ.     0.2992    0.2974    0.2936    0.4000    0.4000    0.4000
  Type  2 bn  60245.  59705.  59832.      0.      0.      0.
+         bs  29886.  30187.  29778.      0.      0.      0.
  max.displ.     0.4578    0.4624    0.4561    0.4000    0.4000    0.4000
  Type  3 bn  40063.  40131.  39865.      0.      0.      0.
+         bs  19996.  19977.  19611.      0.      0.      0.
  max.displ.     1.5033    1.4938    1.4871    0.4000    0.4000    0.4000
  volume change:  bn =   177.0   bs =    90.0   max.displ. = 0.12523E+03
  Box            1
  Type  1 bn  20178.  20099.  20013.      0.      0.      0.
+         bs   9976.  10022.   9856.      0.      0.      0.
  max.displ.     0.2958    0.2965    0.2892    0.4000    0.4000    0.4000
  Type  2 bn  59893.  59747.  59966.      0.      0.      0.
+         bs  29804.  29637.  29772.      0.      0.      0.
  max.displ.     0.4556    0.4588    0.4529    0.4000    0.4000    0.4000
  Type  3 bn  40278.  40016.  39664.      0.      0.      0.
+         bs  20084.  19995.  19566.      0.      0.      0.
  max.displ.     1.4992    1.4929    1.4672    0.4000    0.4000    0.4000
  volume change:  bn =   146.0   bs =    75.0   max.displ. = 0.12866E+03
  Box            1
  Type  1 bn  19920.  20042.  20082.      0.      0.      0.
+         bs  10045.  10120.  10258.      0.      0.      0.
  max.displ.     0.2983    0.2995    0.2955    0.4000    0.4000    0.4000
  Type  2 bn  59699.  60048.  60129.      0.      0.      0.
+         bs  29966.  29977.  30410.      0.      0.      0.
  max.displ.     0.4574    0.4581    0.4581    0.4000    0.4000    0.4000
  Type  3 bn  40036.  40087.  39790.      0.      0.      0.
+         bs  20211.  20283.  20185.      0.      0.      0.
  max.displ.     1.5136    1.5107    1.4886    0.4000    0.4000    0.4000
  volume change:  bn =   167.0   bs =    96.0   max.displ. = 0.14792E+03
  Box            1
  Type  1 bn  20059.  20385.  20124.      0.      0.      0.
+         bs   9981.  10031.   9856.      0.      0.      0.
  max.displ.     0.2969    0.2947    0.2894    0.4000    0.4000    0.4000
  Type  2 bn  60246.  59356.  59946.      0.      0.      0.
+         bs  29953.  29503.  29950.      0.      0.      0.
  max.displ.     0.4548    0.4554    0.4577    0.4000    0.4000    0.4000
  Type  3 bn  40050.  39688.  39958.      0.      0.      0.
+         bs  19768.  19651.  19967.      0.      0.      0.
  max.displ.     1.4942    1.4960    1.4877    0.4000    0.4000    0.4000
  volume change:  bn =   188.0   bs =    98.0   max.displ. = 0.15421E+03
  Box            1
  Type  1 bn  20006.  19988.  19906.      0.      0.      0.
+         bs   9784.   9949.   9971.      0.      0.      0.
  max.displ.     0.2904    0.2934    0.2899    0.4000    0.4000    0.4000
  Type  2 bn  59737.  60250.  60095.      0.      0.      0.
+         bs  29710.  30277.  30161.      0.      0.      0.
  max.displ.     0.4524    0.4577    0.4595    0.4000    0.4000    0.4000
  Type  3 bn  39983.  40019.  39836.      0.      0.      0.
+         bs  19995.  20048.  20032.      0.      0.      0.
  max.displ.     1.4945    1.4989    1.4962    0.4000    0.4000    0.4000
  volume change:  bn =   180.0   bs =    82.0   max.displ. = 0.14050E+03
-135000  155000 -0.3516E+08    16.262-127600270.8   60  180  120
+135000  155000 -0.3516E+08    16.262************   60  180  120
  Box            1
  Type  1 bn  19928.  19883.  20104.      0.      0.      0.
+         bs  10089.  10157.  10063.      0.      0.      0.
  max.displ.     0.2940    0.2998    0.2903    0.4000    0.4000    0.4000
  Type  2 bn  59931.  59914.  59806.      0.      0.      0.
+         bs  30241.  29999.  29880.      0.      0.      0.
  max.displ.     0.4566    0.4583    0.4591    0.4000    0.4000    0.4000
  Type  3 bn  40090.  40082.  40076.      0.      0.      0.
+         bs  20134.  20031.  19949.      0.      0.      0.
  max.displ.     1.5011    1.4981    1.4895    0.4000    0.4000    0.4000
  volume change:  bn =   186.0   bs =    90.0   max.displ. = 0.13597E+03
  Box            1
  Type  1 bn  20013.  20064.  20218.      0.      0.      0.
+         bs   9973.   9853.  10180.      0.      0.      0.
  max.displ.     0.2930    0.2944    0.2923    0.4000    0.4000    0.4000
  Type  2 bn  59825.  60148.  59941.      0.      0.      0.
+         bs  30096.  30217.  29923.      0.      0.      0.
  max.displ.     0.4594    0.4605    0.4584    0.4000    0.4000    0.4000
  Type  3 bn  39986.  39870.  39747.      0.      0.      0.
+         bs  20047.  20009.  20231.      0.      0.      0.
  max.displ.     1.5052    1.5037    1.5163    0.4000    0.4000    0.4000
  volume change:  bn =   188.0   bs =    86.0   max.displ. = 0.12440E+03
  Box            1
  Type  1 bn  19978.  19818.  20041.      0.      0.      0.
+         bs   9987.   9880.   9997.      0.      0.      0.
  max.displ.     0.2930    0.2935    0.2916    0.4000    0.4000    0.4000
  Type  2 bn  60109.  60085.  59860.      0.      0.      0.
+         bs  29998.  30080.  29896.      0.      0.      0.
  max.displ.     0.4585    0.4611    0.4579    0.4000    0.4000    0.4000
  Type  3 bn  40028.  40001.  39913.      0.      0.      0.
+         bs  20010.  19966.  19678.      0.      0.      0.
  max.displ.     1.5049    1.5011    1.4952    0.4000    0.4000    0.4000
  volume change:  bn =   167.0   bs =    86.0   max.displ. = 0.12812E+03
  Box            1
  Type  1 bn  20020.  20142.  20037.      0.      0.      0.
+         bs  10080.  10046.   9989.      0.      0.      0.
  max.displ.     0.2950    0.2928    0.2908    0.4000    0.4000    0.4000
  Type  2 bn  60090.  60029.  59932.      0.      0.      0.
+         bs  29967.  29744.  29642.      0.      0.      0.
  max.displ.     0.4573    0.4569    0.4529    0.4000    0.4000    0.4000
  Type  3 bn  39875.  39717.  39973.      0.      0.      0.
+         bs  20121.  19761.  19958.      0.      0.      0.
  max.displ.     1.5187    1.4937    1.4930    0.4000    0.4000    0.4000
  volume change:  bn =   185.0   bs =   106.0   max.displ. = 0.14682E+03
  Box            1
  Type  1 bn  20221.  20023.  19943.      0.      0.      0.
+         bs  10261.  10145.   9975.      0.      0.      0.
  max.displ.     0.2994    0.2967    0.2909    0.4000    0.4000    0.4000
  Type  2 bn  59953.  60207.  59880.      0.      0.      0.
+         bs  30110.  30094.  29828.      0.      0.      0.
  max.displ.     0.4594    0.4568    0.4512    0.4000    0.4000    0.4000
  Type  3 bn  39917.  39792.  39870.      0.      0.      0.
+         bs  19812.  20104.  20013.      0.      0.      0.
  max.displ.     1.5076    1.5093    1.4989    0.4000    0.4000    0.4000
  volume change:  bn =   194.0   bs =    87.0   max.displ. = 0.13169E+03
  Box            1
  Type  1 bn  19995.  20129.  19831.      0.      0.      0.
+         bs   9842.   9983.  10105.      0.      0.      0.
  max.displ.     0.2948    0.2943    0.2964    0.4000    0.4000    0.4000
  Type  2 bn  59957.  59882.  59919.      0.      0.      0.
+         bs  29991.  29940.  30267.      0.      0.      0.
  max.displ.     0.4596    0.4567    0.4559    0.4000    0.4000    0.4000
  Type  3 bn  40070.  39780.  40255.      0.      0.      0.
+         bs  19917.  19876.  20302.      0.      0.      0.
  max.displ.     1.4987    1.5083    1.5119    0.4000    0.4000    0.4000
  volume change:  bn =   182.0   bs =    88.0   max.displ. = 0.12734E+03
  Box            1
  Type  1 bn  20087.  20154.  19967.      0.      0.      0.
+         bs   9876.  10166.   9946.      0.      0.      0.
  max.displ.     0.2898    0.2969    0.2953    0.4000    0.4000    0.4000
  Type  2 bn  59922.  59889.  59562.      0.      0.      0.
+         bs  29554.  30021.  29504.      0.      0.      0.
  max.displ.     0.4533    0.4579    0.4516    0.4000    0.4000    0.4000
  Type  3 bn  40119.  40072.  40041.      0.      0.      0.
+         bs  20198.  19982.  19818.      0.      0.      0.
  max.displ.     1.5090    1.5042    1.4966    0.4000    0.4000    0.4000
  volume change:  bn =   187.0   bs =    98.0   max.displ. = 0.13347E+03
  Box            1
  Type  1 bn  20146.  20153.  19980.      0.      0.      0.
+         bs  10192.   9913.   9960.      0.      0.      0.
  max.displ.     0.2933    0.2921    0.2944    0.4000    0.4000    0.4000
  Type  2 bn  60087.  59788.  59683.      0.      0.      0.
+         bs  29879.  29867.  30113.      0.      0.      0.
  max.displ.     0.4508    0.4575    0.4557    0.4000    0.4000    0.4000
  Type  3 bn  39842.  39944.  40192.      0.      0.      0.
+         bs  19767.  20097.  20416.      0.      0.      0.
  max.displ.     1.4974    1.5136    1.5204    0.4000    0.4000    0.4000
  volume change:  bn =   185.0   bs =    87.0   max.displ. = 0.12554E+03
  Box            1
  Type  1 bn  20099.  19987.  19759.      0.      0.      0.
+         bs  10069.   9922.   9780.      0.      0.      0.
  max.displ.     0.2938    0.2900    0.2915    0.4000    0.4000    0.4000
  Type  2 bn  60234.  59868.  60032.      0.      0.      0.
+         bs  30278.  29889.  30153.      0.      0.      0.
  max.displ.     0.4532    0.4568    0.4578    0.4000    0.4000    0.4000
  Type  3 bn  39928.  39941.  39949.      0.      0.      0.
+         bs  20111.  19796.  19971.      0.      0.      0.
  max.displ.     1.5084    1.5004    1.5201    0.4000    0.4000    0.4000
  volume change:  bn =   203.0   bs =   114.0   max.displ. = 0.14100E+03
  Box            1
  Type  1 bn  20221.  20279.  19973.      0.      0.      0.
+         bs  10011.  10366.  10021.      0.      0.      0.
  max.displ.     0.2910    0.2965    0.2925    0.4000    0.4000    0.4000
  Type  2 bn  59937.  59583.  60133.      0.      0.      0.
+         bs  30117.  29620.  30396.      0.      0.      0.
  max.displ.     0.4555    0.4542    0.4628    0.4000    0.4000    0.4000
  Type  3 bn  40175.  39723.  39795.      0.      0.      0.
+         bs  20073.  19610.  19942.      0.      0.      0.
  max.displ.     1.5073    1.4814    1.5235    0.4000    0.4000    0.4000
  volume change:  bn =   181.0   bs =    86.0   max.displ. = 0.13399E+03
  Box            1
  Type  1 bn  20076.  19827.  20031.      0.      0.      0.
+         bs  10012.   9844.   9954.      0.      0.      0.
  max.displ.     0.2902    0.2944    0.2907    0.4000    0.4000    0.4000
  Type  2 bn  60041.  59767.  60282.      0.      0.      0.
+         bs  30042.  29947.  29643.      0.      0.      0.
  max.displ.     0.4558    0.4551    0.4552    0.4000    0.4000    0.4000
  Type  3 bn  40072.  39937.  39763.      0.      0.      0.
+         bs  19914.  20250.  19656.      0.      0.      0.
  max.displ.     1.4981    1.5023    1.5063    0.4000    0.4000    0.4000
  volume change:  bn =   204.0   bs =    84.0   max.displ. = 0.11034E+03
  Box            1
  Type  1 bn  20196.  20028.  20066.      0.      0.      0.
+         bs   9957.   9860.   9906.      0.      0.      0.
  max.displ.     0.2861    0.2899    0.2870    0.4000    0.4000    0.4000
  Type  2 bn  59537.  59912.  59705.      0.      0.      0.
+         bs  29837.  29980.  30070.      0.      0.      0.
  max.displ.     0.4569    0.4555    0.4585    0.4000    0.4000    0.4000
  Type  3 bn  39975.  40214.  40203.      0.      0.      0.
+         bs  19834.  19914.  19892.      0.      0.      0.
  max.displ.     1.4866    1.4879    1.4906    0.4000    0.4000    0.4000
  volume change:  bn =   164.0   bs =    99.0   max.displ. = 0.13322E+03
  Box            1
  Type  1 bn  19988.  19878.  19776.      0.      0.      0.
+         bs  10171.  10015.   9918.      0.      0.      0.
  max.displ.     0.2912    0.2921    0.2879    0.4000    0.4000    0.4000
  Type  2 bn  60117.  59938.  59916.      0.      0.      0.
+         bs  30378.  29801.  29732.      0.      0.      0.
  max.displ.     0.4617    0.4530    0.4550    0.4000    0.4000    0.4000
  Type  3 bn  40061.  39932.  40196.      0.      0.      0.
+         bs  20216.  19985.  20219.      0.      0.      0.
  max.displ.     1.5004    1.4893    1.4995    0.4000    0.4000    0.4000
  volume change:  bn =   198.0   bs =    95.0   max.displ. = 0.12784E+03
  Box            1
  Type  1 bn  19730.  20098.  20233.      0.      0.      0.
+         bs   9947.   9953.  10280.      0.      0.      0.
  max.displ.     0.2936    0.2893    0.2925    0.4000    0.4000    0.4000
  Type  2 bn  59532.  60229.  59746.      0.      0.      0.
+         bs  29617.  30171.  30091.      0.      0.      0.
  max.displ.     0.4594    0.4538    0.4584    0.4000    0.4000    0.4000
  Type  3 bn  40121.  40042.  40083.      0.      0.      0.
+         bs  20074.  20349.  20168.      0.      0.      0.
  max.displ.     1.5014    1.5137    1.5090    0.4000    0.4000    0.4000
  volume change:  bn =   186.0   bs =    86.0   max.displ. = 0.11821E+03
  Box            1
  Type  1 bn  20018.  20076.  19946.      0.      0.      0.
+         bs   9906.  10281.  10035.      0.      0.      0.
  max.displ.     0.2906    0.2963    0.2943    0.4000    0.4000    0.4000
  Type  2 bn  60271.  60197.  59665.      0.      0.      0.
+         bs  30041.  30216.  29601.      0.      0.      0.
  max.displ.     0.4580    0.4556    0.4548    0.4000    0.4000    0.4000
  Type  3 bn  40252.  39900.  39485.      0.      0.      0.
+         bs  20186.  19857.  19748.      0.      0.      0.
  max.displ.     1.5059    1.5066    1.5094    0.4000    0.4000    0.4000
  volume change:  bn =   190.0   bs =   107.0   max.displ. = 0.13315E+03
-150000  170000 -0.3492E+08    16.036-127600270.8   60  180  120
+150000  170000 -0.3492E+08    16.036************   60  180  120
  
  +++++ end of markov chain +++++
  
@@ -1706,8 +2113,8 @@ molecule  3:   0.00000000
  Averages and fluctuations                            Box 1
  
  pressure                               [kPa] =************
- pressure                  [simulation units] =-9242.051330
- surface tension                       [mN/m] =  -4426.9240
+ pressure                  [simulation units] =************
+ surface tension                       [mN/m] =************
  chem. potential of type       1          [K] =       0.000
  chem. potential of type       2          [K] =       0.000
  chem. potential of type       3          [K] =       0.000
@@ -1750,8 +2157,8 @@ molecule  3:   0.00000000
     3    1     0.00000     0.00000     0.00000     0.00000     0.00000
  specific density    box   1 =  0.18680E+01 0.96314E-02 0.32105E-02
  system volume       box   1 =  0.41682E+04 0.21665E+02 0.72218E+01
- pressure            box   1 = -0.12760E+09 0.38280E+08 0.12760E+08
- surface tension     box   1 =  -4426.92397  1328.07719   442.69240
+ pressure            box   1 =  0.45613E+13 0.13684E+13 0.45613E+12
+ surface tension     box   1 = ************************************
  
  Total energy   box   1 =   -0.34929E+08   0.17075E+05   0.56917E+04
  Inter LJ       box   1 =   -0.35464E+08   0.18529E+05   0.61764E+04
@@ -1765,7 +2172,7 @@ molecule  3:   0.00000000
  3-body Garo    box   1 =    0.53483E+06   0.67183E+04   0.22394E+04
  Fluc Q         box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
  
- Enthalpy Inst.[kJ/mol] for box  1 =  -1703.0711    510.9213    170.3071
+ Enthalpy Inst.[kJ/mol] for box  1 =************9624596.09693208198.6990
  Enthalpy Ext. [kJ/mol] for box  1 =   -735.2246    220.5674     73.5225
  
  Cp residual(J/Kmol) =   14.7629586026478     
@@ -1794,8 +2201,8 @@ molecule  3:   0.00000000
    4  -0.349E+08   0.187E+01   0.000E+00   0.000E+00   0.167E+00   0.500E+00   0.333E+00
    5  -0.349E+08   0.186E+01   0.000E+00   0.000E+00   0.167E+00   0.500E+00   0.333E+00
    6  -0.350E+08   0.188E+01   0.000E+00   0.000E+00   0.167E+00   0.500E+00   0.333E+00
-   7  -0.349E+08   0.185E+01  -0.128E+09  -0.443E+04   0.167E+00   0.500E+00   0.333E+00
+   7  -0.349E+08   0.185E+01   0.456E+13  -0.476E+09   0.167E+00   0.500E+00   0.333E+00
    8  -0.349E+08   0.186E+01   0.000E+00   0.000E+00   0.167E+00   0.500E+00   0.333E+00
    9  -0.349E+08   0.188E+01   0.000E+00   0.000E+00   0.167E+00   0.500E+00   0.333E+00
   10  -0.349E+08   0.187E+01   0.000E+00   0.000E+00   0.167E+00   0.500E+00   0.333E+00
- Program ended at 2013-04-08 14:17:51.329
+ Program ended at 2013-04-22 18:14:23.945

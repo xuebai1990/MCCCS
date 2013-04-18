@@ -19,7 +19,7 @@ MODULE energy_pairwise
   implicit none
   private
   save
-  public::sumup,energy,boltz,coru,init_energy_pairwise,exsix,ljpsur,type_2body
+  public::sumup,energy,boltz,coru,read_ff,init_ff,exsix,ljpsur,type_2body
 
   real,parameter::a15(2)=(/4.0E7_dp,7.5E7_dp/) !< 1-5 correction term for unprotected hydrogen-oxygen interaction; 1 for ether oxygens, 2 for alcohol oxygens
   !< OLD VALUES: a15(2)=/17.0**6,16.0**6/)
@@ -31,8 +31,7 @@ MODULE energy_pairwise
 
 ! EXPSIX.INC
   integer,parameter::natom=3 !< for exsix
-  real,public::aexsix,bexsix,cexsix,sexsix,consp,consu
-  dimension aexsix(natom),bexsix(natom),cexsix(natom),sexsix(natom),consu(natom),consp(natom)
+  real,public::aexsix(natom),bexsix(natom),cexsix(natom),sexsix(natom),consu(natom),consp(natom)
 
 ! NSIX.INC
 ! ***************************************************
@@ -1751,51 +1750,35 @@ contains
       return
   end function coru
 
-  subroutine init_energy_pairwise(file_ff,lmixlb,lmixjo,lprint)
+!> \brief Read in force field parameters
+!>
+!> \todo Need to reorganize pairwise interactions so that more than one functional type can be used
+  subroutine read_ff(io_ff,lmixlb,lmixjo)
     use util_search,only:initiateTable,addToTable
     use util_memory,only:reallocate
-    use energy_intramolecular,only:init_energy_bonded
-    use energy_external,only:init_energy_external
-    use energy_sami,only:susami
+    use energy_intramolecular,only:read_energy_bonded
 
-    character(LEN=*),INTENT(IN)::file_ff
-    logical,intent(in)::lmixlb,lmixjo,lprint
+    integer,INTENT(IN)::io_ff
+    logical,intent(in)::lmixlb,lmixjo
     integer,parameter::initial_size=20
     character(LEN=default_string_length)::line_in
-    integer::io_ff,jerr,i,j,ij,ji,ibox,nmix
-    real::rzeronx(nxatom),epsilonnx(nxatom),rcheck,sr2,sr6,rs1,rs7,sr7,sigmaTmp,epsilonTmp
+    integer::jerr,i,j,ij,it,nmix
+    real::sigmaTmp,epsilonTmp
 
-    if (lshift.or.lmmff.or.lninesix.or.lexpsix.or.lsami) then
-       ! Keep the rcut same for each box
-       do ibox = 2,nbox
-          if (abs(rcut(1)-rcut(ibox)).gt.1.0E-10_dp) then
-             call err_exit(__FILE__,__LINE__,'Keep rcut for each box same',myid+1)
-          end if
-       end do
-    end if
+    call initiateTable(atoms,initial_size)
 
-    call initiateTable(atoms,nmolty)
+    call init_tabulated_potential_pair()
 
-    call init_tabulated_potential_pair(lprint)
-
-    io_ff=get_iounit()
-    open(unit=io_ff,access='sequential',action='read',file=file_ff,form='formatted',iostat=jerr,status='old')
-    if (jerr.ne.0) then
-       call err_exit(__FILE__,__LINE__,'cannot open forcefield input file',myid+1)
-    end if
-
-! Looking for section ATOMS
+    !> Looking for section ATOMS
+    nntype=0
+    rewind(io_ff)
     CYCLE_READ_ATOMS:DO
        call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
-       if (jerr.ne.0) then
-          exit cycle_read_atoms
-       end if
+       if (jerr.ne.0) exit cycle_read_atoms
 
        if (UPPERCASE(line_in(1:5)).eq.'ATOMS') then
           allocate(atom_type(1:initial_size),sigi(1:initial_size),epsi(1:initial_size),qelect(1:initial_size),mass(1:initial_size),lij(1:initial_size),lqchg(1:initial_size),chemid(1:initial_size),stat=jerr)
-          if (jerr.ne.0) then
-             call err_exit(__FILE__,__LINE__,'init_pairwise: atoms allocation failed',jerr)
-          end if
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_pairwise: atoms allocation failed',jerr)
           sigi = 0.0E0_dp
           epsi = 0.0E0_dp
           qelect = 0.0E0_dp
@@ -1803,12 +1786,9 @@ contains
           lij = .true.
           lqchg = .false.
 
-          nntype=0
           do
              call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
-             if (jerr.ne.0) then
-                call err_exit(__FILE__,__LINE__,'Reading section ATOMS',jerr)
-             end if
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section ATOMS',jerr)
              if (UPPERCASE(line_in(1:9)).eq.'END ATOMS') exit
              nntype=nntype+1
              read(line_in,*) i
@@ -1843,9 +1823,7 @@ contains
     nmix=nntype*nntype
 
     allocate(lpl(1:nntype),xiq(1:nntype),jayself(1:nntype),nonbond_type(1:nmix),sig2ij(1:nmix),epsij(1:nmix),rminee(1:nmix),ecut(1:nmix),jayq(1:nmix),stat=jerr)
-    if (jerr.ne.0) then
-       call err_exit(__FILE__,__LINE__,'init_pairwise: nonbond allocation failed',jerr)
-    end if
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_pairwise: nonbond allocation failed',jerr)
 
     xiq = 0.0E0_dp
     lpl = .false.
@@ -1853,7 +1831,86 @@ contains
     epsij=0.0E0_dp
     jayq=0.0E0_dp
 
-    if (lgaro) then
+    ! Computation of un-like interactions
+    ! convert input data to program units
+    ! calculate square sigmas and epsilons for lj-energy subroutines
+    do i = 1, nntype
+       do j = 1, nntype
+          ij = (i-1)*nntype + j
+          if (lmixlb) then
+             ! Lorentz-Berthelot rules --- sig_ij = 0.5 [ sig_i + sig_j ]
+             sig2ij(ij) =(0.5E0_dp*(sigi(i)+sigi(j)))**2
+             if (sigi(i).eq.0.0E0_dp.or.sigi(j).eq.0.0E0_dp) sig2ij(ij) = 0.0E0_dp
+          else if (lmixjo) then
+             ! Jorgensen mixing rules --- sig_ij = [ sig_i * sig_j ]^(1/2)
+             sig2ij(ij) = sigi(i) * sigi(j)
+          end if
+          epsij(ij) = sqrt(epsi(i)*epsi(j))
+       end do
+    end do
+
+    !> Looking for section NONBOND
+    REWIND(io_ff)
+    CYCLE_READ_NONBOND:DO
+       call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
+       if (jerr.ne.0) exit cycle_read_nonbond
+
+       if (UPPERCASE(line_in(1:7)).eq.'NONBOND') then
+          nmix=0
+          do
+             call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section NONBOND',jerr)
+             if (UPPERCASE(line_in(1:11)).eq.'END NONBOND') exit
+             nmix=nmix+1
+             read(line_in,*) i,j,it,sigmaTmp,epsilonTmp
+             ij=(i-1)*nntype+j
+             nonbond_type(ij)=it
+             nonbond_type((j-1)*nntype+i)=it
+             sig2ij(ij)=sigmaTmp*sigmaTmp
+             sig2ij((j-1)*nntype+i)=sig2ij(ij)
+             epsij(ij)=epsilonTmp
+             epsij((j-1)*nntype+i)=epsilonTmp
+          end do
+          exit cycle_read_nonbond
+       end if
+    END DO CYCLE_READ_NONBOND
+
+    !> set up the strectching and bending constants
+    call read_energy_bonded(io_ff)
+
+    close(io_ff)
+  end subroutine read_ff
+
+  subroutine init_ff(io_input,lprint)
+    use energy_external,only:init_energy_external
+    use energy_sami,only:susami
+    INTEGER,INTENT(IN)::io_input
+    LOGICAL,INTENT(IN)::lprint
+    integer::i,j,ij
+    real::sr2,sr6,rzeronx(nxatom),epsilonnx(nxatom),rcheck,rs1,rs7,sr7
+
+    do i = 1, nntype
+       do j = 1, nntype
+          ij = (i-1)*nntype + j
+          if (lshift) then
+             sr2 = sig2ij(ij)/(rcut(1)*rcut(1))
+             sr6 = sr2 * sr2 * sr2
+             ecut(ij)= sr6*(sr6-1.0E0_dp)*epsij(ij)
+          end if
+       end do
+    end do
+
+    !> read external potentials
+    call init_energy_external(io_input,lprint)
+
+    if ( lsami ) then
+       call susami()
+       rcheck = 2.5E0_dp * 3.527E0_dp
+       if ( rcut(1) .ne. rcheck ) then
+          if (lprint) write(io_output,*) 'WARNING ### rcut set to 2.5sigma for SAMI'
+          rcut(1) = rcheck
+       end if
+    else if (lgaro) then
 ! KEA adding garofalini silica/water potential
 ! see J. Phys. Chem. 94 5351 (1990)
 ! form:
@@ -1891,7 +1948,7 @@ contains
        lqchg(1) = .true.
        qelect(1) = 4.0E0_dp
        mass(1) = 28.09E0_dp
-       ecut(1) = garofalini(rcut(1)*rcut(1),1,qelect(1),qelect(1) ,1,1)
+       ecut(1) = garofalini(rcut(1)*rcut(1),1,qelect(1),qelect(1),1,1)
        chemid(1) = 'Si '
 
 ! O-O
@@ -1980,12 +2037,6 @@ contains
        grijsq(4,1) = grij(4,1)*grij(4,1)
        grijsq(4,2) = grij(4,2)*grij(4,2)
        gtheta(4) = cos(109.5E0_dp*degrad)
-       if (lprint) then
-          do i=1,6
-             write(io_output,*) 'garo ecut',i,ecut(i)
-          end do
-       end if
-       return
     else if(lexpsix) then
 ! Explicit atom carbon Williams Exp-6 potential
 ! J.Chem.Phys 47 11 4680 (1967) paramter set IV
@@ -2042,14 +2093,6 @@ contains
 ! write(11,*) 'consp(i)',consp
 ! write(11,*) 'consu(i)',consu
        end if
-
-       if (lprint) then
-          write(io_output,*)  ' i   aexsix       bexsix      cexsix     sexsix'
-          do i = 1,natom
-             write(io_output,'(i3,2x,4E12.4)')i,aexsix(i),bexsix(i) ,cexsix(i),sexsix(i)
-          end do
-       end if
-       return
     else if (lmmff) then
 ! Merk Molecular Force Field (MMFF)
 ! J. Am. Chem. Soc. 1992 Vol.114 P7827-7843 (Thomas A. Halgren)
@@ -2105,13 +2148,6 @@ contains
           corp_cons(2) = 0.1203650950025348E0_dp
           corp_cons(3) = 5.7576802340310304E-02_dp
        end if
-       if (lprint) then
-          write(io_output,*) ' i   epsimmff     sigimmff   smmff'
-          do i = 1,natom
-             write(io_output,'(i3,2x,4E12.4)')i,epsimmff(i),sigimmff(i) ,smmff(i)
-          end do
-       end if
-       return
     else if (lninesix) then
 ! special potential for all-atom formic acid from llnl 4/6/04 jms
 ! sp2 carbon site H-[C](=O)-OH
@@ -2165,7 +2201,6 @@ contains
              end if
           end do
        end do
-       return
     end if
 
 ! ! --- TraPPE-UA? Methane [CH4] sp3 charged with polarizability
@@ -2332,86 +2367,7 @@ contains
 ! j = 29
 ! ij = (i-1)*nntype + j
 ! jayq(ij) = 112537.0E0_dp
-
-! Computation of un-like interactions
-
-! convert input data to program units ***
-    if ( lsami ) then
-       call susami
-       rcheck = 2.5E0_dp * 3.527E0_dp
-       if ( rcut(1) .ne. rcheck ) then
-          if (lprint) write(io_output,*) 'WARNING ### rcut set to 2.5sigma for SAMI'
-          rcut(1) = rcheck
-       end if
-    else
-! calculate square sigmas and epsilons for lj-energy subroutines ***
-       do i = 1, nntype
-          do j = 1, nntype
-             ij = (i-1)*nntype + j
-             if (lmixlb) then
-! Lorentz-Berthelot rules --- sig_ij = 0.5 [ sig_i + sig_j ]
-                sig2ij(ij) =(0.5E0_dp*(sigi(i)+sigi(j)))**2
-                if (sigi(i).eq.0.0E0_dp.or.sigi(j).eq.0.0E0_dp) sig2ij(ij) = 0.0E0_dp
-             else if (lmixjo) then
-! Jorgensen mixing rules --- sig_ij = [ sig_i * sig_j ]^(1/2)
-                sig2ij(ij) = sigi(i) * sigi(j)
-             end if
-             epsij(ij) = sqrt(epsi(i)*epsi(j))
-
-             if (lshift) then
-                sr2 = sig2ij(ij)/(rcut(1)*rcut(1))
-                sr6 = sr2 * sr2 * sr2
-                ecut(ij)= sr6*(sr6-1.0E0_dp)*epsij(ij)
-             end if
-          end do
-       end do
-    end if
-
-! Looking for section NONBOND
-    REWIND(io_ff)
-    CYCLE_READ_NONBOND:DO
-       call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
-       if (jerr.ne.0) then
-          exit cycle_read_nonbond
-       end if
-
-       if (UPPERCASE(line_in(1:7)).eq.'NONBOND') then
-          nmix=0
-          do
-             call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
-             if (jerr.ne.0) then
-                call err_exit(__FILE__,__LINE__,'Reading section NONBOND',jerr)
-             end if
-             if (UPPERCASE(line_in(1:11)).eq.'END NONBOND') exit
-             nmix=nmix+1
-             read(line_in,*) i,j,ji,sigmaTmp,epsilonTmp
-             ij=(i-1)*nntype+j
-             nonbond_type(ij)=ji
-             nonbond_type((j-1)*nntype+i)=ji
-             sig2ij(ij)=sigmaTmp*sigmaTmp
-             sig2ij((j-1)*nntype+i)=sig2ij(ij)
-             epsij(ij)=epsilonTmp
-             epsij((j-1)*nntype+i)=epsilonTmp
-             if (lshift) then
-                sr2 = sig2ij(ij) / (rcut(1)*rcut(1))
-                sr6 = sr2 * sr2 * sr2
-                ecut(ij)= sr6*(sr6-1.0E0_dp)*epsij(ij)
-                ecut((j-1)*nntype+i)=ecut(ij)
-             end if
-          end do
-          exit cycle_read_nonbond
-       end if
-    END DO CYCLE_READ_NONBOND
-
-! set up the strectching and bending constants
-    call init_energy_bonded(io_ff,lprint)
-
-    close(io_ff)
-
-    call init_energy_external(nntype,lprint)
-
-    return
-  end subroutine init_energy_pairwise
+  end subroutine init_ff
 
   function lininter_vdW(r,typi,typj) result(tabulated_vdW)
     use util_math,only:polint
@@ -2575,7 +2531,7 @@ contains
     integer::type_2body
     integer,intent(in)::ntii,ntjj
 
-    if (lexpsix .or. lmmff) then
+    if (lexpsix.or.lmmff) then
        type_2body = (ntii+ntjj)/2
     else if (lninesix) then
        type_2body = (ntii-1)*nxatom + ntjj
@@ -2786,9 +2742,8 @@ contains
 !>  separate potentials with 1000 \n
 !>  KM 04/23/09
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-  subroutine init_tabulated_potential_pair(lprint)
+  subroutine init_tabulated_potential_pair()
     use sim_system,only:L_vdW_table,L_elect_table
-    LOGICAL,INTENT(IN)::lprint
     integer,parameter::initial_size=10,grid_size=1500
     integer::jerr
 
@@ -2796,14 +2751,12 @@ contains
        allocate(vdWsplits(1:initial_size,1:initial_size),rvdW(1:grid_size,1:initial_size,1:initial_size),tabvdW(1:grid_size,1:initial_size,1:initial_size),stat=jerr)
        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_pair: allocation failed for vdW_table',myid+1)
        call read_tabulated_potential_pair('fort.43',ntabvdW,rvdW,tabvdW,vdWsplits,atoms)
-       if (lprint) write(io_output,*) 'using linear interpolation for nonbonded van der Waals interactions'
     end if
 
     if (L_elect_table) then
        allocate(electsplits(1:initial_size,1:initial_size),relect(1:grid_size,1:initial_size,1:initial_size),tabelect(1:grid_size,1:initial_size,1:initial_size),stat=jerr)
        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_pair: allocation failed for elect_table',myid+1)
        call read_tabulated_potential_pair('fort.44',ntabelect,relect,tabelect,electsplits,atoms)
-       if (lprint) write(io_output,*) 'using linear interpolation for electrostatic interactions'
     end if
   end subroutine init_tabulated_potential_pair
 end MODULE energy_pairwise
