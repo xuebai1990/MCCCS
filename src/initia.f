@@ -169,7 +169,7 @@ subroutine initia(file_struct)
         end if
      end if
   end do
-  close(io_struct)
+  if (ANY(lbranch(1:nmolty))) close(io_struct)
 
   do i = 1,nmolty
      if (lgrown(i)) then

@@ -9,7 +9,7 @@ subroutine inclus(inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ai
   real::ofscale(ntmax*numax*numax),ofscale2(ntmax*numax*numax)
   integer::imolty,m,n,nb,mb,ioffset
 ! ----------------------------------------------------------------
-!!??This is modified to work only for TATB NR-2007!!!
+!> \bug This is modified to work only for TATB NR-2007! (Is this still true?)
 
   ! triple loop over all types of molecules
   do imolty = 1, nmolty
@@ -37,7 +37,7 @@ subroutine inclus(inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ai
            lqinclu(imolty,m,nb) = .false.
         end do
 
-        !!?? exclude carbons around a quaternary center for explct
+        !> \bug Need to check: exclude carbons around a quaternary center for explct
         if (invib(imolty,m) .eq. 4) then
            do n = 1,4
               do nb = 1,4
@@ -106,7 +106,7 @@ subroutine inclus(inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ai
         end if
      end do
 
-     !!?? exclude all hydrogens that have their carbons excluded
+     !> \bug Need to check: exclude all hydrogens that have their carbons excluded
      if ( ncarbon(imolty) .lt. nunit(imolty) ) then
         if (ncarbon(imolty) .eq. 3 .and. nunit(imolty) .eq. 8) then
            ! ethane with bead 3 being hydrogen
@@ -174,7 +174,7 @@ subroutine inclus(inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ai
         end do
      end do
 
-     !!?? Removing this part for TATB (NR-2007)
+     !> \bug Removing this part for TATB (NR-2007) (Does TATB has interactions between rigid beads?)
      if (lrigid(imolty)) then
         ! dont include rigid beads
 

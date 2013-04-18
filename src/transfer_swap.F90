@@ -195,7 +195,7 @@ contains
     else if ( lavbmc2(imolty) .or. lavbmc3(imolty) ) then
        iins = 0
     else
-       iins = irem !??? irem not defined
+       iins = irem !> \bug irem not defined
        if (lexpee.and.leemove) then
           iins1 = iins
           do icbu = 1, iunit
@@ -242,7 +242,7 @@ contains
 
        if ( ncmt(boxins,jmolty) .eq. 0 .or. (jmolty .eq. imolty .and. ncmt(boxins,jmolty) .eq. 1) ) then
 
-! ??? what shall we do now?
+!> \bug what shall we do now?
           lempty = .true.
           return
 
@@ -270,7 +270,7 @@ contains
           end do
           if ( ncmt(boxins,kmolty) .eq. 0 .or. (kmolty .eq. imolty .and. jmolty .eq. imolty .and.  ncmt(boxins,kmolty) .eq. 2) .or. (kmolty .eq. imolty .and. ncmt(boxins,kmolty) .eq. 1) ) then
 
-! ??? what shall we do now?
+!> \bug what shall we do now?
              lempty = .true.
              return
           else
@@ -279,8 +279,8 @@ contains
 
 ! make sure the two regions bounded by jins and kins do not
 ! overlap (sampling from cluster to cluster)
-! *** ??? Problems: potentially infinite loop if there is only
-! one region in the whole system
+!> \bug Problems: potentially infinite loop if there is only
+!> one region in the whole system
 
              if ( jins .eq. kins ) goto 112
 ! do ip = 1,neighj_num
@@ -359,7 +359,7 @@ contains
              lremk_in = .true.
 
              if ( neighk_num .eq. 0 .or. neighk_num .eq. 1 .and.  neighbor(1,kins) .eq. jins) then
-! ??? what shall we do now?
+!> \bug what shall we do now?
                 lempty = .true.
                 return
              else
@@ -403,7 +403,7 @@ contains
 ! jins's bonding region through neighbor list
 ! and move to the out region or the region bounded by kins in AVBMC3
              if ( neighj_num .eq. 0 .or. (neighj_num .eq. 1 .and. neighbor(1,jins) .eq. kins) ) then
-! ??? what shall we do now?
+!> \bug what shall we do now?
                 lempty = .true.
                 return
              else
@@ -747,7 +747,7 @@ contains
              end do
           end if
 
-! ??? problem here on calculation of favor and favor2 when ichoi > 1
+!> \bug problem here on calculation of favor and favor2 when ichoi > 1
 
           call energy(iins,imolty,v,iii,ibox,istt,iett,.true.,ovrlap,ltors,.true.,lfavor,.false.)
           ! write(io_output,*) 'ovrlap:',ovrlap
@@ -1225,7 +1225,7 @@ contains
                 rzuion(j,iii) = rzu(irem,j)
              end do
 
-! ??? problem here on calculation of favor and favor2
+!> \bug problem here on calculation of favor and favor2
              call energy(irem,imolty,v,iii,ibox,istt,iett,.true.,ovrlap,ltors,.true.,lfavor,.false.)
 
              deleo = v(1) + v(7)

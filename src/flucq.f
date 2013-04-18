@@ -207,7 +207,7 @@ subroutine flucq (ichoice,boxi)
          rij = sqrt( rxuij*rxuij + ryuij*ryuij + rzuij*rzuij )
          corr = qqfact*erfunc(calp(ibox)*rij)*corr/rij
 
-! *** ??? problems here for charge transfer
+!> \bug problems here for charge transfer
 
       else
 

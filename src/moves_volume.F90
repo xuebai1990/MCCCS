@@ -9,12 +9,13 @@ MODULE moves_volume
   implicit none
   private
   save
-  public::volume_1box,volume_2box,init_moves_volume,update_volume_max_displacement,output_volume_stats,read_checkpoint_volume,write_checkpoint_volume
+  public::volume_1box,volume_2box,init_moves_volume,update_volume_max_displacement,output_volume_stats,read_checkpoint_volume,write_checkpoint_volume,allow_cutoff_failure
 
   real,allocatable,public::acsvol(:),acnvol(:),acshmat(:,:),acnhmat(:,:),bsvol(:),bnvol(:),bshmat(:,:),bnhmat(:,:)
-  real,allocatable::vboxn(:,:),vboxo(:,:),bxo(:),byo(:),bzo(:),xcmo(:),ycmo(:),zcmo(:),rxuo(:,:),ryuo(:,:),rzuo(:,:),qquo(:,:)
+  real,allocatable::vboxn(:,:),vboxo(:,:),bxo(:),byo(:),bzo(:),xcmo(:),ycmo(:),zcmo(:),rxuo(:,:),ryuo(:,:),rzuo(:,:),qquo(:,:),rcuto(:)
   integer,allocatable::neigho_cnt(:),neigho(:,:)
   real::hmato(9),hmatio(9)
+  integer::allow_cutoff_failure=-1 !< controls how volume move failures, the ones that will result in box lengths smaller than twice the cutoff, are handled: -1 = fetal error and program exits; 0 = simply rejects the move, which is equivalent to modifying the lower limit of integration of the partition function; 1 = allows the move and adjusts cutoff to be half of the new box lengths (will be restored if possible); 2 = allows the move but does not adjust the cutoff, which could be problematic because this results in a lower density in the cutoff radius (due to periodic boundary conditions)
 
 contains
 !> \brief Makes an isotropic volume change for NVT-Gibbs ensemble
@@ -25,7 +26,7 @@ contains
   subroutine volume_2box()
     real::rpair,rm,rbox,volo(nbxmax),volt,voln(nbxmax),rbcut(nbxmax),dfac(nbxmax),df,dx,dy,dz,expdv,min_boxl,v(nEnergy),dele
     integer::ipair,ipairb,boxa,boxb,ibox,i,hbox,jbox,jhmat,imolty,j,ichoiq
-    logical::lncubic,lx(nbxmax),ly(nbxmax),lz(nbxmax),ovrlap
+    logical::lncubic,lx(nbxmax),ly(nbxmax),lz(nbxmax),ovrlap,ladjust
 ! --------------------------------------------------------------------
 #ifdef __DEBUG__
     write(io_output,*) 'start VOLUME_2BOX in ',myid
@@ -120,8 +121,6 @@ contains
 
        voln(hbox) = cell_vol(hbox)
        voln(jbox) = volt-voln(hbox)
-       rbcut(hbox) = 2.0_dp*rcut(hbox)
-       rbcut(jbox) = 2.0_dp*rcut(jbox)
 
        if (lsolid(jbox)) then
           ! volume move independently in x, y, z directions
@@ -140,16 +139,56 @@ contains
           boxly(jbox) = boxly(jbox)*dfac(jbox)
        end if
 
-       if (ANY(rbcut(hbox) .gt. min_width(hbox,:)) .or. boxlx(jbox) .lt. rbcut(jbox) .or. boxly(jbox) .lt. rbcut(jbox) .or. (lpbcz .and. boxlz(jbox) .lt. rbcut(jbox))) then
-          hmat(hbox,jhmat) = hmato(jhmat)
-          boxlx(jbox) = bxo(jbox)
-          boxly(jbox) = byo(jbox)
-          if ( lpbcz ) then
-             boxlz(jbox) = bzo(jbox)
+       if (allow_cutoff_failure.ne.2) then
+          rbcut(hbox) = minval(min_width(hbox,:))/2.0_dp
+          rbcut(jbox) = min(boxlx(jbox),boxly(jbox))/2.0_dp
+          if (lpbcz) rbcut(jbox)=min(rbcut(jbox),boxlz(jbox)/2.0_dp)
+          if (allow_cutoff_failure.eq.1) then
+             ladjust=.false.
+             if (rbcut(hbox).lt.rcut(hbox)) then
+                ladjust=.true.
+             else if (rcut(hbox).lt.rcuto(hbox)) then
+                ladjust=.true.
+                if (rbcut(hbox).gt.rcuto(hbox)) rbcut(hbox)=rcuto(hbox)
+             end if
+             if (ladjust) then
+                rbox=rbcut(hbox)
+                rbcut(hbox)=rcut(hbox)
+                rcut(hbox)=rbox
+             else
+                rbcut(hbox)=-1.0_dp
+             end if
+
+             ladjust=.false.
+             if (rbcut(jbox).lt.rcut(jbox)) then
+                ladjust=.true.
+             else if (rcut(jbox).lt.rcuto(jbox)) then
+                ladjust=.true.
+                if (rbcut(jbox).gt.rcuto(jbox)) rbcut(jbox)=rcuto(jbox)
+             end if
+             if (ladjust) then
+                rbox=rbcut(jbox)
+                rbcut(jbox)=rcut(jbox)
+                rcut(jbox)=rbox
+             else
+                rbcut(jbox)=-1.0_dp
+             end if
+          else if (rbcut(hbox).lt.rcut(hbox).or.rbcut(jbox).lt.rcut(jbox)) then
+             hmat(hbox,jhmat) = hmato(jhmat)
+             boxlx(jbox) = bxo(jbox)
+             boxly(jbox) = byo(jbox)
+             if ( lpbcz ) then
+                boxlz(jbox) = bzo(jbox)
+             end if
+             if (allow_cutoff_failure.eq.-1) then
+                call dump('final-config')
+                write(io_output,*) 'w1:',min_width(hbox,1),'w2:',min_width(hbox,2),'w3:',min_width(hbox,3)
+                call err_exit(__FILE__,__LINE__,'non-orthorhombic volume_2box move rejected. box width below cutoff size',myid+1)
+             else if (allow_cutoff_failure.eq.0) then
+                call matops(hbox)
+                return
+             end if
           end if
-          call dump('final-config')
-          write(io_output,*) 'w1:',min_width(hbox,1),'w2:',min_width(hbox,2),'w3:',min_width(hbox,3)
-          call err_exit(__FILE__,__LINE__,'non-orthorhombic volume_2box move rejected. box width below cutoff size',myid+1)
        end if
 
        ! determine the displacement of the COM
@@ -219,8 +258,6 @@ contains
        expdv = volo(boxa)/volo(boxb)*exp(expdv)
        voln(boxa)= expdv*volt/(1+expdv)
        voln(boxb)= volt-voln(boxa)
-       rbcut(boxa) = 2.0_dp*rcut(boxa)
-       rbcut(boxb) = 2.0_dp*rcut(boxb)
 
        do i=1,2
           if (i.eq.1) ibox=boxa
@@ -244,17 +281,59 @@ contains
           end if
        end do
 
-       if ( boxlx(boxa) .lt. rbcut(boxa) .or.  boxly(boxa) .lt. rbcut(boxa) .or.  (lpbcz .and. boxlz(boxa) .lt. rbcut(boxa)) .or. boxlx(boxb) .lt. rbcut(boxb) .or.  boxly(boxb) .lt. rbcut(boxb) .or.  (lpbcz .and. boxlz(boxb) .lt. rbcut(boxb)) ) then
-          boxlx(boxa) = bxo(boxa)
-          boxlx(boxb) = bxo(boxb)
-          boxly(boxa) = byo(boxa)
-          boxly(boxb) = byo(boxb)
-          if ( lpbcz ) then
-             boxlz(boxa) = bzo(boxa)
-             boxlz(boxb) = bzo(boxb)
+       if (allow_cutoff_failure.ne.2) then
+          rbcut(boxa) = min(boxlx(boxa),boxly(boxa))/2.0_dp
+          rbcut(boxb) = min(boxlx(boxb),boxly(boxb))/2.0_dp
+          if (lpbcz) then
+             rbcut(boxa)=min(rbcut(boxa),boxlz(boxa)/2.0_dp)
+             rbcut(boxb)=min(rbcut(boxb),boxlz(boxb)/2.0_dp)
           end if
-          call dump('final-config')
-          call err_exit(__FILE__,__LINE__,'A move was attempted that would lead to a boxlength less than twice rcut',myid+1)
+          if (allow_cutoff_failure.eq.1) then
+             ladjust=.false.
+             if (rbcut(boxa).lt.rcut(boxa)) then
+                ladjust=.true.
+             else if (rcut(boxa).lt.rcuto(boxa)) then
+                ladjust=.true.
+                if (rbcut(boxa).gt.rcuto(boxa)) rbcut(boxa)=rcuto(boxa)
+             end if
+             if (ladjust) then
+                rbox=rbcut(boxa)
+                rbcut(boxa)=rcut(boxa)
+                rcut(boxa)=rbox
+             else
+                rbcut(boxa)=-1.0_dp
+             end if
+
+             ladjust=.false.
+             if (rbcut(boxb).lt.rcut(boxb)) then
+                ladjust=.true.
+             else if (rcut(boxb).lt.rcuto(boxb)) then
+                ladjust=.true.
+                if (rbcut(boxb).gt.rcuto(boxb)) rbcut(boxb)=rcuto(boxb)
+             end if
+             if (ladjust) then
+                rbox=rbcut(boxb)
+                rbcut(boxb)=rcut(boxb)
+                rcut(boxb)=rbox
+             else
+                rbcut(boxb)=-1.0_dp
+             end if
+          else if (rbcut(boxa).lt.rcut(boxa).or.rbcut(boxb).lt.rcut(boxb)) then
+             boxlx(boxa) = bxo(boxa)
+             boxlx(boxb) = bxo(boxb)
+             boxly(boxa) = byo(boxa)
+             boxly(boxb) = byo(boxb)
+             if ( lpbcz ) then
+                boxlz(boxa) = bzo(boxa)
+                boxlz(boxb) = bzo(boxb)
+             end if
+             if (allow_cutoff_failure.eq.-1) then
+                call dump('final-config')
+                call err_exit(__FILE__,__LINE__,'A move was attempted that would lead to a boxlength less than twice rcut',myid+1)
+             else if (allow_cutoff_failure.eq.0) then
+                return
+             end if
+          end if
        end if
 
        ! determine new positions of the molecules
@@ -303,13 +382,13 @@ contains
 
     if ( lchgall ) then
        if (lsolid(boxa).and.(.not.lrect(boxa))) then
-          min_boxl = min(min_width(boxa,1),min_width(boxa,2),min_width(boxa,3))
+          min_boxl = minval(min_width(boxa,:))
        else
           min_boxl = min(boxlx(boxa),boxly(boxa),boxlz(boxa))
        end if
        calp(boxa) = kalp(boxa)/min_boxl
        if (lsolid(boxb).and.(.not.lrect(boxb))) then
-          min_boxl = min(min_width(boxb,1),min_width(boxb,2), min_width(boxb,3))
+          min_boxl = minval(min_width(boxb,:))
        else
           min_boxl = min(boxlx(boxb),boxly(boxb),boxlz(boxb))
        end if
@@ -367,6 +446,12 @@ contains
     call restore_box(boxb)
     call restore_configuration((/boxa,boxb/))
 
+    if (allow_cutoff_failure.eq.1) then
+       ! restore cutoff if needed
+       if (rbcut(boxa).gt.0) rcut(boxa)=rbcut(boxa)
+       if (rbcut(boxb).gt.0) rcut(boxb)=rbcut(boxb)
+    end if
+
 #ifdef __DEBUG__
     write(io_output,*) 'end VOLUME_2BOX in ',myid,boxa,boxb
 #endif
@@ -381,7 +466,7 @@ contains
   subroutine volume_1box()
     real::rbox,volo,voln,rbcut,dx,dy,dz,dfac,df,v(nEnergy),dele,min_boxl
     integer::ibox,boxvch,jhmat,i,imolty,j,ichoiq
-    logical::lx,ly,lz,ovrlap
+    logical::lx,ly,lz,ovrlap,ladjust
 ! --------------------------------------------------------------------
 #ifdef __DEBUG__
     write(io_output,*) 'start VOLUME_1BOX in ',myid
@@ -454,13 +539,35 @@ contains
        call matops(boxvch)
 
        voln = cell_vol(boxvch)
-       rbcut = 2.0_dp*rcut(boxvch)
 
-       if (ANY(rbcut .gt. min_width(boxvch,:))) then
-          hmat(boxvch,jhmat) = hmato(jhmat)
-          call dump('final-config')
-          write(io_output,*) 'w1:',min_width(boxvch,1),'w2:',min_width(boxvch,2),'w3:',min_width(boxvch,3)
-          call err_exit(__FILE__,__LINE__,'non-rectangular volume move rejected. box width below cutoff size',myid+1)
+       if (allow_cutoff_failure.ne.2) then
+          rbcut = minval(min_width(boxvch,:))/2.0_dp
+          if (allow_cutoff_failure.eq.1) then
+             ladjust=.false.
+             if (rbcut.lt.rcut(boxvch)) then
+                ladjust=.true.
+             else if (rcut(boxvch).lt.rcuto(boxvch)) then
+                ladjust=.true.
+                if (rbcut.gt.rcuto(boxvch)) rbcut=rcuto(boxvch)
+             end if
+             if (ladjust) then
+                rbox=rbcut
+                rbcut=rcut(boxvch)
+                rcut(boxvch)=rbox
+             else
+                rbcut=-1.0_dp
+             end if
+          else if (rbcut.lt.rcut(boxvch)) then
+             hmat(boxvch,jhmat) = hmato(jhmat)
+             if (allow_cutoff_failure.eq.-1) then
+                call dump('final-config')
+                write(io_output,*) 'w1:',min_width(boxvch,1),'w2:',min_width(boxvch,2),'w3:',min_width(boxvch,3)
+                call err_exit(__FILE__,__LINE__,'non-rectangular volume move rejected. box width below cutoff size',myid+1)
+             else if (allow_cutoff_failure.eq.0) then
+                call matops(boxvch)
+                return
+             end if
+          end if
        end if
 
        ! determine the displacement of the COM
@@ -491,7 +598,6 @@ contains
     else
        ! calculate new volume
        voln = volo + rmvol(boxvch) * ( 2.0E0_dp*random(-1) - 1.0E0_dp )
-       rbcut = 2.0_dp*rcut(boxvch)
 
        if (lsolid(boxvch)) then
           ! volume move independently in x, y, z directions
@@ -510,15 +616,38 @@ contains
           boxly(boxvch) = boxly(boxvch) * dfac
        end if
 
-       if (boxlx(boxvch) .lt. rbcut .or. boxly(boxvch) .lt. rbcut .or. (lpbcz .and. boxlz(boxvch) .lt. rbcut) ) then
-          boxlx(boxvch) = bxo(boxvch)
-          boxly(boxvch) = byo(boxvch)
-          if ( lpbcz ) then
-             boxlz(boxvch) = bzo(boxvch)
+       if (allow_cutoff_failure.ne.2) then
+          rbcut = min(boxlx(boxvch),boxly(boxvch))/2.0_dp
+          if (lpbcz) rbcut=min(rbcut,boxlz(boxvch)/2.0_dp)
+          if (allow_cutoff_failure.eq.1) then
+             ladjust=.false.
+             if (rbcut.lt.rcut(boxvch)) then
+                ladjust=.true.
+             else if (rcut(boxvch).lt.rcuto(boxvch)) then
+                ladjust=.true.
+                if (rbcut.gt.rcuto(boxvch)) rbcut=rcuto(boxvch)
+             end if
+             if (ladjust) then
+                rbox=rbcut
+                rbcut=rcut(boxvch)
+                rcut(boxvch)=rbox
+             else
+                rbcut=-1.0_dp
+             end if
+          else if (rbcut.lt.rcut(boxvch)) then
+             boxlx(boxvch) = bxo(boxvch)
+             boxly(boxvch) = byo(boxvch)
+             if ( lpbcz ) then
+                boxlz(boxvch) = bzo(boxvch)
+             end if
+             if (allow_cutoff_failure.eq.-1) then
+                call dump('final-config')
+                write(io_output,*) 'boxvch',boxvch
+                call err_exit(__FILE__,__LINE__,'A move was attempted that would lead to a boxlength less than twice rcut',myid+1)
+             else if (allow_cutoff_failure.eq.0) then
+                return
+             end if
           end if
-          call dump('final-config')
-          write(io_output,*) 'boxvch',boxvch
-          call err_exit(__FILE__,__LINE__,'A move was attempted that would lead to a boxlength less than twice rcut',myid+1)
        end if
 
        ! determine new positions of the molecules
@@ -567,7 +696,7 @@ contains
 
     if ( lchgall ) then
        if (lsolid(boxvch).and.(.not.lrect(boxvch))) then
-          min_boxl = min(min_width(boxvch,1),min_width(boxvch,2),min_width(boxvch,3))
+          min_boxl = minval(min_width(boxvch,:))
        else
           min_boxl = min(boxlx(boxvch),boxly(boxvch),boxlz(boxvch))
        end if
@@ -613,15 +742,22 @@ contains
 500 call restore_box(boxvch)
     call restore_configuration((/boxvch/))
 
+    if (allow_cutoff_failure.eq.1) then
+       ! restore cutoff if needed
+       if (rbcut.gt.0) rcut(boxvch)=rbcut
+    end if
+
 #ifdef __DEBUG__
     write(io_output,*) 'end VOLUME_1BOX in ',myid,boxvch
 #endif
     return
   end subroutine volume_1box
 
-  subroutine init_moves_volume
-    integer::jerr
-    allocate(acsvol(nbxmax),acnvol(nbxmax),acshmat(nbxmax,9),acnhmat(nbxmax,9),bsvol(nbxmax),bnvol(nbxmax),bshmat(nbxmax,9),bnhmat(nbxmax,9),vboxn(nEnergy,nbxmax),vboxo(nEnergy,nbxmax),bxo(nbxmax),byo(nbxmax),bzo(nbxmax),xcmo(nmax),ycmo(nmax),zcmo(nmax),rxuo(nmax,numax),ryuo(nmax,numax),rzuo(nmax,numax),qquo(nmax,numax),neigho_cnt(nmax),neigho(100,nmax),stat=jerr)
+  subroutine init_moves_volume(file_in)
+    character(LEN=*),intent(in)::file_in
+    integer::jerr,io_input
+    namelist /mc_volume/ allow_cutoff_failure
+    allocate(acsvol(nbxmax),acnvol(nbxmax),acshmat(nbxmax,9),acnhmat(nbxmax,9),bsvol(nbxmax),bnvol(nbxmax),bshmat(nbxmax,9),bnhmat(nbxmax,9),vboxn(nEnergy,nbxmax),vboxo(nEnergy,nbxmax),bxo(nbxmax),byo(nbxmax),bzo(nbxmax),xcmo(nmax),ycmo(nmax),zcmo(nmax),rxuo(nmax,numax),ryuo(nmax,numax),rzuo(nmax,numax),qquo(nmax,numax),neigho_cnt(nmax),neigho(100,nmax),rcuto(nbxmax),stat=jerr)
     if (jerr.ne.0) then
        call err_exit(__FILE__,__LINE__,'init_moves_volume: allocation failed',jerr)
     end if
@@ -634,6 +770,21 @@ contains
     bnvol = 0.0E0_dp
     bshmat = 0.0E0_dp
     bnhmat = 0.0E0_dp
+    rcuto = rcut
+
+    io_input=get_iounit()
+    open(unit=io_input,access='sequential',action='read',file=file_in,form='formatted',iostat=jerr,status='old')
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open input file '//trim(file_in),jerr)
+
+    read(UNIT=io_input,NML=mc_volume,iostat=jerr)
+    if (jerr.ne.0.and.jerr.ne.-1) then
+       call err_exit(__FILE__,__LINE__,'reading namelist: mc_volume',jerr)
+    end if
+
+    if (ALL(allow_cutoff_failure.ne.(/-1,0,1,2/))) then
+       call err_exit(__FILE__,__LINE__,'mc_volume: invalid value for allow_cutoff_failure = '//integer_to_string(allow_cutoff_failure),-1)
+    end if
+    close(io_input)
   end subroutine init_moves_volume
 
 !> \brief Adjust maximum volume displacement
@@ -736,13 +887,13 @@ contains
     integer::j
     real::vdum
 
-    vboxo(1,box)   = vbox(1,box)
+    vboxo(1,box) = vbox(1,box)
     vboxo(2,box) = vbox(2,box)
-    vboxo(3,box)  = vbox(3,box)
-    vboxo(9,box)   = vbox(9,box)
+    vboxo(3,box) = vbox(3,box)
+    vboxo(9,box) = vbox(9,box)
     vboxo(8,box) = vbox(8,box)
-    vboxo(11,box) = vbox(11,box)
-    vboxo(10,box)     = vbox(10,box)
+    vboxo(11,box)= vbox(11,box)
+    vboxo(10,box)= vbox(10,box)
 
     bxo(box) = boxlx(box)
     byo(box) = boxly(box)
@@ -805,13 +956,13 @@ contains
     integer::j
     real::vdum
 
-    vbox(1,box)    = vboxo(1,box)
+    vbox(1,box) = vboxo(1,box)
     vbox(2,box) = vboxo(2,box)
-    vbox(3,box)  = vboxo(3,box)
-    vbox(9,box)   = vboxo(9,box)
+    vbox(3,box) = vboxo(3,box)
+    vbox(9,box) = vboxo(9,box)
     vbox(8,box) = vboxo(8,box)
-    vbox(11,box) = vboxo(11,box)
-    vbox(10,box) = vboxo(10,box)
+    vbox(11,box)= vboxo(11,box)
+    vbox(10,box)= vboxo(10,box)
 
     boxlx(box)   = bxo(box)
     boxly(box)   = byo(box)

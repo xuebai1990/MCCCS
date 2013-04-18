@@ -193,7 +193,7 @@ contains
 
                          ntjj = ntype(jmolty,jj)
                          if ( lij2 ) then
-                            if ((.not.(liji .and. lij(ntjj))).and.(.not.(lqchgi.and.lqchg(ntjj)))) cycle bead2
+                            if ((.not.(liji.and.lij(ntjj))).and.(.not.(lqchgi.and.lqchg(ntjj)))) cycle bead2
                          else
                             if (.not.(lqchgi.and.lqchg(ntjj))) cycle bead2
                          end if
@@ -210,16 +210,6 @@ contains
 
                          rijsq=(rxuij*rxuij)+(ryuij*ryuij)+(rzuij*rzuij)
                          rij=sqrt(rijsq)
-
-                         ! if ( i .eq. 12 .and. ii .eq. 6 .and. j .eq. 95 .and. jj .eq. 1 ) then
-                         ! write(io_output,*) 'CONTROL CONTROL CONTROL'
-                         ! write(io_output,*) 'box',ibox,nboxi(i),nboxi(j)
-                         ! write(io_output,*) 'i xyz',rxui,ryui,rzui
-                         ! write(io_output,*) 'j xyz',rxu(j,jj),ryu(j,jj),rzu(j,jj)
-                         ! write(io_output,*) 'r*uij',rxuij,ryuij,rzuij
-                         ! write(io_output,*) 'dist2',rijsq
-                         ! write(io_output,*) 'distance', sqrt(rijsq)
-                         ! end if
 
                          if (rijsq.lt.rminsq .and. .not.(lexpand(imolty).or.lexpand(jmolty))) then
                             if ( .not. lvol .and.myid.eq.rootid) then
@@ -442,7 +432,7 @@ contains
                             goto 299
                             ! -------------------------------
                          else if (rijsq.lt.rcutsq.or.lijall) then
-                            !!?? skip intra if it is bending 1-3 and using a table??
+                            !> \bug skip intra if it is bending 1-3 and using a table?
                             if (L_bend_table) then
                                do mmm=1,inben(imolty,ii)
                                   if (ijben3(imolty,ii,mmm).eq.jj)then
@@ -497,7 +487,7 @@ contains
 ! INTRACHAIN FLUCQ INTERACTIONS ***
 ! *************************************
 !c RP added for MPI
-! removed at some point?
+!> \bug removed at some point?
        do i = 1,nchain
 ! do i = myid+1,nchain,numprocs
 ! calculate intramolecular flucq energy for chain i
@@ -582,7 +572,7 @@ contains
     if (lmipsw) then
        ! MPI
        do imolty=1,nmolty
-          !!?? most likely only works when nbox = 1
+          !> \bug most likely only works when nbox = 1
        do nmcount=myid+1,ncmt(ibox,imolty),numprocs
           i=parbox(nmcount,ibox,imolty)
           if (lwell(imolty)) then
@@ -1022,7 +1012,7 @@ contains
                    ! write(io_output,*) 'intra ovrlap:',ii,jj
                    return
                 else if (rijsq.lt.rcutsq .or. lijall) then
-                   !!?? skip intra if it is bending 1-3 and using a table??
+                   !> \bug skip intra if it is bending 1-3 and using a table?
                    if (L_bend_table) then
                       do mmm=1,inben(imolty,ii)
                          if (ijben3(imolty,ii,mmm).eq.jj) then
@@ -1246,7 +1236,7 @@ contains
           rzui  = rzu(i,iufrom)
        end if
 
-!!?? to be MPI parallelized
+!> \todo to be MPI parallelized
        do j = 1,nchain
           lcmno(j) = .false.
           if ( ( nboxi(j) .eq. ibox ) .and. ( i .ne. j ) ) then
@@ -1349,7 +1339,7 @@ contains
                          ! write(io_output,*) 'intra overlap'
                          goto 19
                       else if (rijsq.lt.rcutsq .or. lijall) then
-                         !!?? skip intra if it is bending 1-3 and using a table??
+                         !> \bug skip intra if it is bending 1-3 and using a table?
                          if (L_bend_table) then
                             do mmm=1,inben(imolty,ii)
                                if (ijben3(imolty,ii,mmm).eq.iu) then
@@ -1392,7 +1382,7 @@ contains
                 end if
              end do
           end do
-          !!?? double Ewald correction??
+          !> \bug double Ewald correction?
           if (L_Coul_CBMC.and.lewald.and.ntogrow.gt.1.and..not.lideal(ibox)) then
              ! ewald sum correction term for interactions of the
              ! growing beads with each other
@@ -1407,7 +1397,7 @@ contains
                    rxuij  = rxp(cnt,itrial) - rxp(count,itrial)
                    ryuij  = ryp(cnt,itrial) - ryp(count,itrial)
                    rzuij  = rzp(cnt,itrial) - rzp(count,itrial)
-                   !!?? no mimage convertion??
+                   !> \bug no mimage convertion?
                    rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
                    rij   = sqrt(rijsq)
                    ! ewald sum correction term
@@ -1498,7 +1488,7 @@ contains
                       ! check exclusion table
                       if ( lexclu(imolty,ii,jmolty,jj) ) cycle
                       ! start iswatch add-on ***
-                      ! is there a way to pull this out of the loops? ***
+                      !> \todo is there a way to pull this out of the loops?
                       if (liswatch.and.j.eq.other.and.(.not.liswinc(jj,jmolty))) then
                          ! write(io_output,*) 'iSwatch-skipping:',jj
                          cycle
@@ -2505,13 +2495,13 @@ contains
   function genlj (rijsq,sr2,epsilon2)
       real::rijsq,rij,srij,sr2,epsilon2,genlj
 
-      rij=(sqrt(rijsq))
+      rij=sqrt(rijsq)
       srij=sqrt(sr2)
 
-      if ( (rij) .le.(rij*srij)*2.0E0_dp**(2.0E0_dp/n0) ) then
-         genlj = 4.0E0_dp*epsilon2*(((srij)**n0)-((srij)**(n0/2.0E0_dp)))
+      if (rij.le.rij*srij*2.0_dp**(2.0_dp/n0)) then
+         genlj = 4.0E0_dp*epsilon2*(srij**n0-srij**(n0/2.0E0_dp))
       else
-         genlj =epsilon2*(((2.0E0_dp**((4.0E0_dp*n1/n0)))*((srij)** (2.0E0_dp*n1)))-((2.0E0_dp**((2.0E0_dp*(n1/n0))+1.0E0_dp))*((srij)**(n1))))
+         genlj = epsilon2*(2.0E0_dp**(4.0E0_dp*n1/n0)*srij**(2.0_dp*n1)-2.0_dp**(2.0_dp*n1/n0+1.0E0_dp)*srij**n1)
       end if
 
 ! In reduced units
@@ -2613,7 +2603,7 @@ contains
     U2=0.0E0_dp
     if (L_vdW_table) then
        U2=lininter_vdW(rij,ntii,ntjj)
-    else if ( lsami ) then
+    else if (lsami) then
        U2=ljsami(rijsq,ntij)
     else if (lexpsix) then
        U2=exsix(rijsq,ntij)
@@ -2636,7 +2626,7 @@ contains
           U2=U2-ecut(ntij)
        end if
     else if ((lij(ntii).and.lij(ntjj)).or.(i.eq.j)) then
-       if ( lexpand(imolty).and.lexpand(jmolty)) then
+       if (lexpand(imolty).and.lexpand(jmolty)) then
           sigma2=(sigma_f(imolty,ii)+sigma_f(jmolty,jj))/2.0E0_dp
           sr2 = sigma2*sigma2/rijsq
           epsilon2=sqrt(epsilon_f(imolty,ii)*epsilon_f(jmolty,jj))
@@ -2657,7 +2647,7 @@ contains
           sr6 = rijsq*rijsq*rijsq
           if ((.not.lqchg(ntii)).and.(.not.lqchg(ntjj))) then
              if (nunit(imolty).eq.4) then
-                ! TIP-4P structure (temperary use !??)
+                !> \bug TIP-4P structure (temperary use?)
                 qave=(qqu(i,4)+qqu(j,4))/2.0E0_dp
              else
                 qave=(qqu(i,4)+qqu(i,5)+qqu(j,4)+qqu(j,5))*0.85E0_dp
@@ -2696,7 +2686,7 @@ contains
     integer::iii,jjj
 
     Q2=0.0E0_dp
-!kea - skip for garofalini; included in vinter
+    !kea - skip for garofalini; included in vinter
     if(.not.lgaro.and.lqchgi.and.lqchg(ntjj)) then
        if (.not.lewald) then
           if (.not.lchgall) then
@@ -2711,8 +2701,8 @@ contains
                    lcoulo(iii,jjj) = .false.
                 end if
              end if
-! set up table for neighboring groups- make sure they interact when
-! leaderqs are only 2 bonds apart. For intramolecular charge interactions
+             ! set up table for neighboring groups- make sure they interact when
+             ! leaderqs are only 2 bonds apart. For intramolecular charge interactions
              if (i.eq.j.and..not.lqinclu(imolty,iii,jjj)) then
                 lcoulo(iii,jjj)  = .true.
              end if
@@ -2724,7 +2714,7 @@ contains
                 Q2=qqu(i,ii)*qqu(j,jj)/rij
              end if
           end if
-       elseif (lchgall.or.rijsq.lt.rcutsq) then
+       else if (lchgall.or.rijsq.lt.rcutsq) then
           Q2=qqu(i,ii)*qqu(j,jj)*erfunc(calpi*rij)/rij
        end if
     end if

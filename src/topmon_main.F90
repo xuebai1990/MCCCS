@@ -1110,7 +1110,7 @@ contains
     use energy_4body,only:readFourBody
     use energy_sami
     use moves_simple,only:init_moves_simple,averageMaximumDisplacement
-    use moves_volume,only:init_moves_volume
+    use moves_volume,only:init_moves_volume,allow_cutoff_failure
     use moves_cbmc,only:init_cbmc,allocate_cbmc,read_safecbmc,llplace
     use moves_ee,only:init_ee,numcoeff,sigm,epsil
     use transfer_shared,only:read_transfer
@@ -1278,7 +1278,7 @@ contains
     read(io_input,*) nbox
 
     nbxmax=nbox+1
-    npabmax=nbxmax*(nbxmax-1)/2
+    npabmax=nbxmax*(nbxmax+1)/2
     call allocate_cell()
     call allocate_sim_cell()
     call allocate_kspace()
@@ -1539,11 +1539,6 @@ contains
           write(io_output,*) rmin, softcut ,rcutin,rbsmax,rbsmin
        end if
     end if
-    do i = 1, nbox
-       if( rcut(i)/boxlx(i) .gt. 0.5E0_dp) then
-          call err_exit(__FILE__,__LINE__,'rcut > 0.5*boxlx',myid+1)
-       end if
-    end do
 
     softlog = 10.0E0_dp**(-softcut)
     vol_eff = (4.0E0_dp/3.0E0_dp)*onepi*(rbsmax*rbsmax*rbsmax-rbsmin*rbsmin*rbsmin)
@@ -1963,7 +1958,7 @@ contains
     call allocate_molecule()
     call allocate_energy_bonded()
     call init_moves_simple()
-    call init_moves_volume()
+    call init_moves_volume(file_in)
     call init_cbmc()
     call init_ee()
 
@@ -3059,7 +3054,7 @@ contains
              w(2) = min_width(ibox,2)
              w(3) = min_width(ibox,3)
 
-             if (rcut(ibox)/w(1) .gt. 0.5E0_dp .or.  rcut(ibox)/w(2) .gt. 0.5E0_dp .or.  rcut(ibox)/w(3) .gt. 0.5E0_dp) then
+             if ((allow_cutoff_failure.gt.0).and.(rcut(ibox)/w(1).gt.0.5E0_dp.or.rcut(ibox)/w(2).gt.0.5E0_dp.or.rcut(ibox)/w(3).gt.0.5E0_dp)) then
                 call err_exit(__FILE__,__LINE__,'rcut > half cell width',myid+1)
              end if
 
@@ -3087,11 +3082,9 @@ contains
                 write(io_output,*)
                 write(io_output,"(' dimension box ',i1,'  :','  a:   ',f12.6,'   b:   ',f12.6,'   c   :  ' ,f12.6)") ibox,boxlx(ibox),boxly(ibox),boxlz(ibox)
              end if
-             do i = 1, nbox
-                if( (rcut(i)/boxlx(i) .gt. 0.5E0_dp).or. (rcut(i)/boxly(i) .gt. 0.5E0_dp).or. (rcut(i)/boxlz(i) .gt. 0.5E0_dp)) then
-                   call err_exit(__FILE__,__LINE__,'rcut > 0.5*boxlx',myid+1)
-                end if
-             end do
+             if((allow_cutoff_failure.gt.0).and.(rcut(i)/boxlx(i).gt.0.5E0_dp.or.rcut(i)/boxly(i).gt.0.5E0_dp.or.rcut(i)/boxlz(i).gt.0.5E0_dp)) then
+                call err_exit(__FILE__,__LINE__,'rcut > 0.5*boxlx',myid+1)
+             end if
           end if
        end do
 
@@ -3140,7 +3133,7 @@ contains
              ncmt(ibox,i) = 0
           end do
           if ( lexpand(i) ) then
-             !!??? problem in expand ensemble
+             !> \bug problem in expand ensemble
              do j = 1, numcoeff(i)
                 do ibox = 1,2
                    ncmt2(ibox,i,j) = 0
@@ -3476,7 +3469,7 @@ contains
        io_traj=get_iounit()
        open(unit=io_traj,access='stream',action='write',file=file_traj,form='formatted',iostat=jerr,status='unknown')
        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open traj file '//trim(file_traj),jerr)
-       if (lprint) write(io_traj,*) nstep,nmolty,(masst(i),i=1,nmolty)
+       if (lprint) write(io_traj,*) nstep,iratp,nbox,nmolty,(masst(i),i=1,nmolty)
     end if
 ! -------------------------------------------------------------------
 
@@ -3697,7 +3690,7 @@ contains
        write(io_output,FMT='(i6,i8,e12.4,f10.3,f12.1,'//format_n(nmolty,"i5")//')') nnn,tmcc,vbox(1,1),boxlx(1),pres(1),(ncmt(1,imolty),imolty=1,nmolty)
        if ( lgibbs ) then
           do ibox = 2, nbox
-             write(io_output,FMT='(14x,e12.4,f10.3,f12.1,'//format_n(nmolty,"i5")//')') vbox(1,ibox),boxlx(ibox),pres(ibox) ,(ncmt(ibox,imolty),imolty=1,nmolty)
+             write(io_output,FMT='(14x,e12.4,f10.3,f12.1,'//format_n(nmolty,"i5")//')') vbox(1,ibox),boxlx(ibox),pres(ibox),(ncmt(ibox,imolty),imolty=1,nmolty)
           end do
        end if
     end if
@@ -3707,12 +3700,12 @@ contains
           if ( lpbcz ) then
              if (lsolid(ibox) .and. .not. lrect(ibox)) then
                 write(io_cell,'(i8,6f12.4)') tmcc,cell_length(ibox,1)/Num_cell_a,cell_length(ibox,2)/Num_cell_b,cell_length(ibox,3)/Num_cell_c,cell_ang(ibox,1)*raddeg,cell_ang(ibox,2)*raddeg,cell_ang(ibox,3)*raddeg
-                write(io_traj,FMT='(7E13.5,'//format_n(nmolty,"i5")//')') hmat(ibox,1),hmat(ibox,4),hmat(ibox,5),hmat(ibox,7),hmat(ibox,8),hmat(ibox,9),vbox(1,ibox),(ncmt(ibox,itype),itype=1,nmolty)
+                write(io_traj,FMT='(8E13.5,'//format_n(nmolty,"i5")//')') hmat(ibox,1),hmat(ibox,4),hmat(ibox,5),hmat(ibox,7),hmat(ibox,8),hmat(ibox,9),vbox(1,ibox),pres(ibox),(ncmt(ibox,itype),itype=1,nmolty)
              else
-                write(io_traj,'(4E13.5,'//format_n(nmolty,"i5")//')') boxlx(ibox),boxly(ibox),boxlz(ibox),vbox(1,ibox),(ncmt(ibox,itype),itype=1,nmolty)
+                write(io_traj,'(5E13.5,'//format_n(nmolty,"i5")//')') boxlx(ibox),boxly(ibox),boxlz(ibox),vbox(1,ibox),pres(ibox),(ncmt(ibox,itype),itype=1,nmolty)
              end if
           else
-             write(io_traj,'(2E12.5,'//format_n(nmolty,"i4")//')') boxlx(ibox)*boxly(ibox),vbox(1,ibox),(ncmt(ibox,itype),itype=1,nmolty)
+             write(io_traj,'(3E12.5,'//format_n(nmolty,"i4")//')') boxlx(ibox)*boxly(ibox),vbox(1,ibox),pres(ibox),(ncmt(ibox,itype),itype=1,nmolty)
           end if
        end do
     end if

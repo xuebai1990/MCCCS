@@ -82,7 +82,7 @@ contains
 ! select the molecules from the pair
  97   imolta = nswatb(iparty,1)
       imoltb = nswatb(iparty,2)
-! ???!!!
+!> \bug no longer random
       type_a = 1
       type_b = 2
 
@@ -410,7 +410,7 @@ contains
                call schedule(igrow,imolty,islen,ifirst,iprev,3)
             end if
 
-! I wonder if this works with lrigid?
+!> \bug Need to check: I wonder if this works with lrigid?
             if (ncut(iparty,s_type) .gt. 1) then
                do izz = 2,ncut(iparty,s_type)
                   ifirst = from(s_type+2*(izz-1))
@@ -1182,8 +1182,8 @@ contains
 ! switched bead Corrections for NEW configuration
 ! calculate the true site-site energy
 
-!     ??? energy problem for cases which involve the change of the bending type
-! and torsional type for those units swatched!!!!!!
+!> \bug energy problem for cases which involve the change of the bending type
+!> and torsional type for those units swatched!!!!!!
 
             call ctrmas(.false.,iboxnew,other,8)
             call energy(other,imolty,v,iii,iboxnew,1,iunit,.true.,lterm,.false.,.false.,.false.,.false.)

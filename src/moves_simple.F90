@@ -1121,9 +1121,9 @@ contains
           ! only processor 0 writes to output files (except for error messages)
           if (myid.eq.rootid) then
              ! write some ratio update information ***
-             write(io_output,"(' Type ',i2,' bn ',6(f7.0,1x))") imolty,bntrax(imolty,im),bntray(imolty,im),bntraz(imolty,im),bnrotx(imolty,im),bnroty(imolty,im),bnrotz(imolty,im)
+             write(io_output,"(' Type ',i2,' bn',6(1x,f7.0),/,9x,'bs',6(1x,f7.0))") imolty,bntrax(imolty,im),bntray(imolty,im),bntraz(imolty,im),bnrotx(imolty,im),bnroty(imolty,im),bnrotz(imolty,im),bstrax(imolty,im),bstray(imolty,im),bstraz(imolty,im),bsrotx(imolty,im),bsroty(imolty,im),bsrotz(imolty,im)
              ! write(io_output,"(' ratio       ',6(f7.4,1x))") ratrax, ratray, ratraz,rarotx, raroty,rarotz
-             write(io_output,"(' max.displ.  ',6(f9.4,1x))") rmtrax(imolty,im),rmtray(imolty,im),rmtraz(imolty,im),rmrotx(imolty,im),rmroty(imolty,im),rmrotz(imolty,im)
+             write(io_output,"(' max.displ. ',6(1x,f9.4))") rmtrax(imolty,im),rmtray(imolty,im),rmtraz(imolty,im),rmrotx(imolty,im),rmroty(imolty,im),rmrotz(imolty,im)
           end if
 
           acntrax(imolty,im) = acntrax(imolty,im)+bntrax(imolty,im)
