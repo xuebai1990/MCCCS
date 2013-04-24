@@ -1,4 +1,4 @@
-Program started at 2013-04-22 16:52:19.959
+Program started at 2013-04-26 02:14:27.788
 Number of processors: 1
 Threads per processor: 1
  run_num: 1
@@ -18,9 +18,10 @@ Dual Cutoff Configurational-bias Monte Carlo
 Coulombic interactions will be included in the Rosenbluth weights for CBMC growth
 Coulombic inter- and intra-molecular interactions will be calculated
    using tabulated potential with linear interpolation
-Lennard-Jones potential for pair-wise dispersive interactions
    with additional tail corrections
 Lorentz-Berthelot combining rules apply
+ L_spline:  F
+ L_linear:  F
 *******************************************
 
 NAMELIST MC_SHARED
@@ -65,13 +66,23 @@ Box 1:   32.000 x   32.000 x   32.000
    lsolid:  F, lrect:  F, lideal:  F, ltwice:  F
    temperature:  300.000 [K]
    external pressure:  0.100000000     [MPa]
-   Ghost particles: 0
    initial number of chains of each type:   1000
+   Ghost particles: 0
    initial number of chains in x, y and z directions: 10 x 10 x 10
    initial rotational displacement: 0, inimix: 1, zshift:  0.0, dshift:  1.600
 
 NUMBER OF MOLECULES OF EACH TYPE
  number of chains of each type:   1000
+
+NAMELIST EXTERNAL_FIELD
+------------------------------------------
+Steele 10-4-3 slit pore
+On both sides of the simulation box (z = 0 & z = boxlz)
+Surface material bead type: 190
+Surface atom density:  0.11400 [Ang^-3]
+Surface layer spacing:  3.40000 [Ang]
+a1:  2.46000 [Ang]
+Electric field in z direction:     0.00000000     [V/A]
 
 SECTION MOLECULE_TYPE
 ------------------------------------------
@@ -253,11 +264,11 @@ molecule type 1
       i      j      k type_i type_j type_k        angle        k/2
 
 PAIRWISE LJ AND COULOMB INTERACTIONS
-    i    j     sig2ij      epsij         q0(i)         q0(j)
-  107  107    3.16550   78.19580     -0.847600     -0.847600
-  107  108    0.00000    0.00000     -0.847600      0.423800
-  108  107    0.00000    0.00000      0.423800     -0.847600
-  108  108    0.00000    0.00000      0.423800      0.423800
+    i    j         q0(i)         q0(j)     vvdW_1     vvdW_2 ...
+  107  107     -0.847600     -0.847600  312.78320    3.16550
+  107  108     -0.847600      0.423800    0.00000    0.00000
+  108  107      0.423800     -0.847600    0.00000    0.00000
+  108  108      0.423800      0.423800    0.00000    0.00000
  
  sumup control
  number of chains        1000
@@ -276,16 +287,16 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  
  box             1  initial v   =   -5662975.92017787     
  surf. tension :   box 1 =     -20.92824
- pressure check:   box 1 =    -182648.12
+ pressure check:   box 1 =    -172365.46
  
  +++++ start of markov chain +++++
  
  Cycle   Total   Energy    Boxlength   Pressure  Molecules
-     5  450005 -0.5671E+07    31.017   -375025.1 1000
-    10  450010 -0.5660E+07    31.017    -40693.7 1000
-    15  450015 -0.5648E+07    31.017   -147150.3 1000
-    20  450020 -0.5667E+07    30.981    -50738.5 1000
-    25  450025 -0.5667E+07    30.981    -52085.1 1000
+     5  450005 -0.5671E+07    31.017   -364816.3 1000
+    10  450010 -0.5660E+07    31.017    -30484.9 1000
+    15  450015 -0.5648E+07    31.017   -136941.5 1000
+    20  450020 -0.5667E+07    30.981    -40457.4 1000
+    25  450025 -0.5667E+07    30.981    -41804.1 1000
  
  +++++ end of markov chain +++++
  
@@ -348,12 +359,12 @@ molecule  1:   0.00000000
  
  vstart       =     -5662975.9201778714
  vend         =     -5667091.1101370286
- vbox         =     -5667091.1101369476
+ vbox         =     -5667091.1101369495
  
  Averages and fluctuations                            Box 1
  
- pressure                               [kPa] =  -133138.53
- pressure                  [simulation units] =   -9.643186
+ pressure                               [kPa] =  -122900.84
+ pressure                  [simulation units] =   -8.901673
  surface tension                       [mN/m] =    203.6832
  chem. potential of type       1          [K] =       0.000
  
@@ -385,7 +396,7 @@ molecule  1:   0.00000000
     1    1     0.00000     0.00000     0.00000     0.00000     0.00000
  specific density    box   1 =  0.10034E+01 0.13504E-02 0.67520E-03
  system volume       box   1 =  0.29815E+05 0.40055E+02 0.20027E+02
- pressure            box   1 = -0.13314E+06 0.12697E+06  63487.    
+ pressure            box   1 = -0.12290E+06 0.12699E+06  63496.    
  surface tension     box   1 =    203.68323    44.68063    22.34032
  
  Total energy   box   1 =   -0.56611E+07   0.53052E+04   0.26526E+04
@@ -400,7 +411,7 @@ molecule  1:   0.00000000
  3-body Garo    box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
  Fluc Q         box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
  
- Enthalpy Inst.[kJ/mol] for box  1 =    -49.4727      2.3009      1.1504
+ Enthalpy Inst.[kJ/mol] for box  1 =    -49.2889      2.3010      1.1505
  Enthalpy Ext. [kJ/mol] for box  1 =    -47.0796      0.0660      0.0330
  
  Cp residual(J/Kmol) =   5.04982278719094     
@@ -415,9 +426,9 @@ molecule  1:   0.00000000
  -----block averages ------
   ------------ box:    1
  block   energy    density   pressure   surf ten  mol fracs
-   1  -0.567E+07   0.100E+01  -0.375E+06   0.256E+03   0.100E+01
-   2  -0.566E+07   0.100E+01  -0.407E+05   0.180E+03   0.100E+01
-   3  -0.566E+07   0.100E+01  -0.147E+06   0.202E+03   0.100E+01
-   4  -0.565E+07   0.100E+01  -0.507E+05   0.246E+03   0.100E+01
-   5  -0.567E+07   0.101E+01  -0.521E+05   0.134E+03   0.100E+01
- Program ended at 2013-04-22 16:52:36.766
+   1  -0.567E+07   0.100E+01  -0.365E+06   0.256E+03   0.100E+01
+   2  -0.566E+07   0.100E+01  -0.305E+05   0.180E+03   0.100E+01
+   3  -0.566E+07   0.100E+01  -0.137E+06   0.202E+03   0.100E+01
+   4  -0.565E+07   0.100E+01  -0.405E+05   0.246E+03   0.100E+01
+   5  -0.567E+07   0.101E+01  -0.418E+05   0.134E+03   0.100E+01
+ Program ended at 2013-04-26 02:14:50.904

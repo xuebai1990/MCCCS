@@ -14,13 +14,19 @@ MODULE prop_pressure
 
 contains
 !> \brief Calculates the pressure for a configuration, unit [kPa]
+!>
+!> \warning Tabulated potential and Feuston-Garofalini
+!> are NOT supported.
+!> \note New potenial functional form needs to be added here,
+!> and in U2 (energy calculation), coru (tail corrections to
+!> energy), corp (tail corrections to pressure)
   subroutine pressure(press,surf,ibox)
     use const_math,only:sqrtpi
     use const_phys,only:k_B
     real,intent(out)::press,surf
     integer,intent(in)::ibox
 
-    real::rbcut,rcutsq,calpi,calpisq,pxx,pyy,pzz,xcmi,ycmi,zcmi,rcmi,fxcmi,fycmi,fzcmi,rxuij,ryuij,rzuij,rijsq,rcm,rcmsq,rxui,ryui,rzui,rij,fij,rs2,rs1,rs6,rs7,sr1,sr7,sr2,srij,sigma2,epsilon2,sr6,qave,repress,rpxx,rpyy,rpzz,rpxy,rpyx,rpxz,rpzx,rpyz,rpzy,vol,volsq,rhosq,pwell
+    real::rbcut,rcutsq,calpi,calpisq,pxx,pyy,pzz,xcmi,ycmi,zcmi,rcmi,fxcmi,fycmi,fzcmi,rxuij,ryuij,rzuij,rijsq,rcm,rcmsq,rxui,ryui,rzui,rij,fij,tmp,rs1,rs2,rs4,rs6,rs7,rs8,sr1,sr2,sr3,sr6,sr7,sigma2,epsilon2,qave,repress,rpxx,rpyy,rpzz,rpxy,rpyx,rpxz,rpzx,rpyz,rpzy,vol,volsq,rhosq,pwell
     integer::i,imolty,j,jmolty,ii,jj,ntii,ntjj,ntij,iii,jjj,k
     logical::lqimol,lexplt,lij2,lqjmol,lcoulo(numax,numax)
 ! --------------------------------------------------------------------
@@ -138,7 +144,6 @@ contains
 
                       ! compute whether the charged groups will interact & fij
                       fij = 0.0E0_dp
-                      !> \todo when lgaro=.true.
                       if (lqimol.and.lqjmol.and.lqchg(ntii).and.lqchg(ntjj) ) then
                          if (.not.lewald) then
                             if (.not.lchgall) then
@@ -163,48 +168,29 @@ contains
                       end if
 
                       if (rijsq.lt.rcutsq.or.lijall) then
-                         !> \todo when lsami, lmuir, lpsur, lgaro is .true.
-                         if ( lexpsix ) then
-                            fij = fij + (-6.0_dp*aexsix(ntij)/(rijsq*rijsq*rijsq)+bexsix(ntij)*cexsix(ntij)*rij*exp(cexsix(ntij)*rij))/rijsq
-                         else if (lmmff) then
-                            rs2 = rijsq/sigisq(ntij)
-                            rs1 = sqrt(rs2)
-                            rs6 = rs2*rs2*rs2
-                            rs7 = rs1*rs6
-                            sr1 = 1.07_dp/(rs1+0.07_dp)
-                            sr7 = sr1**7.0_dp
-                            fij = fij - 7.0_dp*epsimmff(ntij)*rs1*sr7*(sr1*(1.12_dp/(rs7+0.12_dp)-2.0_dp)/1.07_dp+1.12_dp*rs6/((rs7+0.12_dp)*(rs7+0.12_dp)))/rijsq
-                         else if (lninesix) then
-                            fij = fij + 72.0_dp*epsnx(ntij)/(rij*rzero(ntij))*(rzero(ntij)/rij)**7*(1.0_dp-(rzero(ntij)/rij)**3)
-                         else if (lgenlj) then
-                            sr2 = sig2ij(ntij)/rijsq
-                            srij = sqrt(sr2)
-                            if (rij.le.rij*srij*2.0_dp**(2.0_dp/n0)) then
-                               fij = fij - 4.0E0_dp*epsij(ntij) * (n0*(srij)**n0-n0/2.0_dp*srij**(n0/2.0E0_dp))/rijsq
-                            else
-                               fij = fij - epsij(ntij)*(2.0_dp*n1*srij**(2.0E0_dp*n1)*2.0_dp**(4.0_dp*n1/n0)-n1*srij**n1*2.0_dp**(2.0_dp*n1/n0+1.0E0_dp))/rijsq
-                            end if
-                         else
+                         !> \todo when lsami, lmuir, lgaro is .true.
+                         if (lgaro.or.lsami.or.lmuir) then
+                         else if (nonbond_type(ntij).eq.1) then
+                            ! LJ 12-6
                             if (lexpand(imolty).and.lexpand(jmolty)) then
                                sigma2=(sigma_f(imolty,ii)+sigma_f(jmolty,jj))/2.0_dp
-                               sr2 = sigma2*sigma2/rijsq
-                               epsilon2=sqrt(epsilon_f(imolty,ii)*epsilon_f(jmolty,jj))
+                               sr2=sigma2*sigma2/rijsq
+                               epsilon2=4.0_dp*sqrt(epsilon_f(imolty,ii)*epsilon_f(jmolty,jj))
                             else if (lexpand(imolty)) then
-                               sigma2=(sigma_f(imolty,ii)+sigi(ntjj))/2.0_dp
-                               sr2 = sigma2*sigma2/rijsq
-                               epsilon2=sqrt(epsilon_f(imolty,ii)*epsi(ntjj))
+                               sigma2=(sigma_f(imolty,ii)+vvdW_b(2,ntjj))/2.0_dp
+                               sr2=sigma2*sigma2/rijsq
+                               epsilon2=4.0_dp*sqrt(epsilon_f(imolty,ii)*vvdW_b(1,ntjj))
                             else if (lexpand(jmolty)) then
-                               sigma2=(sigma_f(jmolty,jj)+sigi(ntii))/2.0_dp
-                               sr2 = sigma2*sigma2/rijsq
-                               epsilon2=sqrt(epsilon_f(jmolty,jj)*epsi(ntii))
+                               sigma2=(vvdW_b(2,ntii)+sigma_f(jmolty,jj))/2.0_dp
+                               sr2=sigma2*sigma2/rijsq
+                               epsilon2=4.0_dp*sqrt(vvdW_b(1,ntii)*epsilon_f(jmolty,jj))
                             else
-                               sr2 = sig2ij(ntij) / rijsq
-                               epsilon2 = epsij(ntij)
+                               sr2=vvdW(3,ntij)/rijsq
+                               epsilon2=vvdW(1,ntij)
                             end if
 
                             if (lfepsi) then
-                               sr6 = 1.0_dp/rijsq
-                               sr6 = sr6**3
+                               sr6 = (1.0_dp/rijsq)**3
                                if ((.not.lqchg(ntii)).and.(.not.lqchg(ntjj))) then
                                   if (nunit(imolty).eq.4) then
                                      !> \bug TIP-4P structure (temperary use?)
@@ -215,12 +201,53 @@ contains
                                else
                                   qave=(qqu(i,ii)+qqu(j,jj))/2.0_dp
                                end if
-
-                               fij = fij + 48.0_dp*epsilon2*sr6*(-sr6*(aslope*(qave-a0)*(qave-a0)+ashift)+0.5_dp*(bslope*(qave-b0)*(qave-b0)+ bshift))/rijsq
+                               fij = fij + 12.0_dp*epsilon2*sr6*(-sr6*(aslope*(qave-a0)*(qave-a0)+ashift)+0.5_dp*(bslope*(qave-b0)*(qave-b0)+ bshift))/rijsq
                             else
                                sr6 = sr2**3
-                               fij = fij + 48.0_dp*sr6*(-sr6+0.5_dp)*epsilon2/rijsq
+                               fij = fij - 12.0_dp*epsilon2*sr6*(sr6-0.5_dp)/rijsq
                             end if
+                         else if (nonbond_type(ntij).eq.2) then
+                            ! Buckingham exp-6
+                            rs1=vvdW(2,ntij)*rij
+                            fij = fij + (vvdW(1,ntij)*rs1*exp(rs1)+6.0_dp*vvdW(3,ntij)/(rijsq**3))/rijsq
+                         else if (nonbond_type(ntij).eq.3) then
+                            ! Mie
+                            sr1 = vvdW(2,ntij) / rij
+                            fij = fij - vvdW(1,ntij)*(vvdW(3,ntij)*sr1**vvdW(3,ntij)-vvdW(4,ntij)*sr1**vvdW(4,ntij))/rijsq
+                         else if (nonbond_type(ntij).eq.4) then
+                            ! MMFF94
+                            if (vvdW(2,ntij).ne.0) then
+                               rs1 = rij/vvdW(2,ntij)
+                               rs2 = rs1*rs1
+                               rs6 = rs2**3
+                               rs7 = rs1*rs6
+                               sr1 = 1.07_dp/(rs1+0.07_dp)
+                               sr7 = sr1**7.0_dp
+                               fij = fij - 7.0_dp*vvdW(1,ntij)*rs1*sr7*( sr1*(1.12_dp/(rs7+0.12_dp)-2.0_dp)/1.07_dp + 1.12_dp*rs6/((rs7+0.12_dp)*(rs7+0.12_dp)) )/rijsq
+                            end if
+                         else if (nonbond_type(ntij).eq.5) then
+                            ! LJ 9-6
+                            sr3=(vvdW(2,ntij)/rij)**3
+                            sr6=sr3*sr3
+                            fij = fij - 18.0_dp*vvdW(1,ntij)*sr6*(sr3-1.0_dp)/rijsq
+                         else if (nonbond_type(ntij).eq.6) then
+                            ! Generalized LJ
+                            sr1 = vvdW(2,ntij)/rij
+                            if (rij.le.vvdW(2,ntij)) then
+                               tmp = sr1**(vvdW(3,ntij)/2.0_dp)
+                               fij = fij - vvdW(1,ntij)*vvdW(3,ntij)*tmp*(tmp-1.0_dp)/rijsq
+                            else
+                               tmp = sr1**vvdW(4,ntij)
+                               fij = fij - vvdW(1,ntij)*2.0_dp*vvdW(4,ntij)*tmp*(tmp-1.0_dp)/rijsq
+                            end if
+                         else if (nonbond_type(ntij).eq.7) then
+                            ! LJ 12-6-8
+                            rs4=rijsq*rijsq
+                            rs8=rs4*rs4
+                            tmp=rs8*rs4*rijsq !^14
+                            fij = fij - 12.0_dp*vvdW(1,ntij)/tmp + 6.0_dp*vvdW(2,ntij)/rs8 + 8.0_dp*vvdW(3,ntij)/rs8/rijsq
+                         else if (nonbond_type(ntij).ne.-1.and.nonbond_type(ntij).ne.0) then
+                            call err_exit(__FILE__,__LINE__,'pressure: undefined nonbond type',myid+1)
                          end if
                       end if
                       fxcmi = fxcmi + fij * rxuij
@@ -287,66 +314,68 @@ contains
 
     ! KM for MPI - comment:
     ! this could likely be parallelized in the future
-    do i = 1,nchain
-       imolty = moltyp(i)
-       if (lwell(imolty)) then
-          rxui = xcm(i)
-          ryui = ycm(i)
-          rzui = zcm(i)
-          do j = 1, nwell(imolty)*nunit(imolty)
-             k = j - int(j/nunit(imolty))*nunit(imolty)
-             if (k.eq.0) k = nunit(imolty)
-             rxuij = rxui-rxwell(j,imolty)
-             ryuij = ryui-rywell(j,imolty)
-             rzuij = rzui-rzwell(j,imolty)
-             call mimage (rxuij,ryuij,rzuij,ibox)
-             rijsq = rxuij*rxuij+ryuij*ryuij+rzuij*rzuij
-             rcm = rcut(ibox)+rcmu(i)
-             rcmsq = rcm*rcm
-             if (rijsq.lt.rcmsq) then
-                do ii = 1, nunit(imolty)
-                   if (awell(ii,k,imolty).lt.1.0E-6_dp) cycle
-                   rxui = rxu(i,ii)
-                   ryui = ryu(i,ii)
-                   rzui = rzu(i,ii)
-                   rxuij = rxui-rxwell(j,imolty)
-                   ryuij = ryui-rywell(j,imolty)
-                   rzuij = rzui-rzwell(j,imolty)
-                   call mimage (rxuij,ryuij,rzuij,ibox)
-                   rijsq = rxuij*rxuij+ryuij*ryuij+rzuij*rzuij
-                   fij = 2.0E0_dp*awell(ii,k,imolty)*bwell* exp(-bwell*rijsq)
-                   pwell = pwell+fij*rijsq
-                   pwellips(1,1) = pwellips(1,1)+fij*rxuij*rxuij
-                   pwellips(2,2) = pwellips(2,2)+fij*ryuij*ryuij
-                   pwellips(3,3) = pwellips(3,3)+fij*rzuij*rzuij
-                   pwellips(1,2) = pwellips(1,2)+fij*rxuij*ryuij
-                   pwellips(1,3) = pwellips(1,3)+fij*rxuij*rzuij
-                   pwellips(2,3) = pwellips(2,3)+fij*ryuij*rzuij
-                end do
-             end if
-          end do
-       end if
-    end do
-    pwellips(2,1) = pwellips(1,2)
-    pwellips(3,1) = pwellips(1,3)
-    pwellips(3,2) = pwellips(2,3)
-
-    pipsw = -(press/3.0E0_dp)/vol
-    pwellipsw = -(pwell/3.0E0_dp)/vol
-
-    do i = 1, 3
-       do j = 1, 3
-          pips(i,j) = pips(i,j)/vol
-          pwellips(i,j) = -pwellips(i,j)/vol
+    if (lmipsw) then
+       do i = 1,nchain
+          imolty = moltyp(i)
+          if (lwell(imolty)) then
+             rxui = xcm(i)
+             ryui = ycm(i)
+             rzui = zcm(i)
+             do j = 1, nwell(imolty)*nunit(imolty)
+                k = j - int(j/nunit(imolty))*nunit(imolty)
+                if (k.eq.0) k = nunit(imolty)
+                rxuij = rxui-rxwell(j,imolty)
+                ryuij = ryui-rywell(j,imolty)
+                rzuij = rzui-rzwell(j,imolty)
+                call mimage (rxuij,ryuij,rzuij,ibox)
+                rijsq = rxuij*rxuij+ryuij*ryuij+rzuij*rzuij
+                rcm = rcut(ibox)+rcmu(i)
+                rcmsq = rcm*rcm
+                if (rijsq.lt.rcmsq) then
+                   do ii = 1, nunit(imolty)
+                      if (awell(ii,k,imolty).lt.1.0E-6_dp) cycle
+                      rxui = rxu(i,ii)
+                      ryui = ryu(i,ii)
+                      rzui = rzu(i,ii)
+                      rxuij = rxui-rxwell(j,imolty)
+                      ryuij = ryui-rywell(j,imolty)
+                      rzuij = rzui-rzwell(j,imolty)
+                      call mimage (rxuij,ryuij,rzuij,ibox)
+                      rijsq = rxuij*rxuij+ryuij*ryuij+rzuij*rzuij
+                      fij = 2.0E0_dp*awell(ii,k,imolty)*bwell* exp(-bwell*rijsq)
+                      pwell = pwell+fij*rijsq
+                      pwellips(1,1) = pwellips(1,1)+fij*rxuij*rxuij
+                      pwellips(2,2) = pwellips(2,2)+fij*ryuij*ryuij
+                      pwellips(3,3) = pwellips(3,3)+fij*rzuij*rzuij
+                      pwellips(1,2) = pwellips(1,2)+fij*rxuij*ryuij
+                      pwellips(1,3) = pwellips(1,3)+fij*rxuij*rzuij
+                      pwellips(2,3) = pwellips(2,3)+fij*ryuij*rzuij
+                   end do
+                end if
+             end do
+          end if
        end do
-    end do
+       pwellips(2,1) = pwellips(1,2)
+       pwellips(3,1) = pwellips(1,3)
+       pwellips(3,2) = pwellips(2,3)
 
-    if (lstagea) then
-       press = (1.0E0_dp-lambdais*(1.0E0_dp-etais))*press
-    else if (lstageb) then
-       press = etais*press+lambdais*pwell
-    else if (lstagec) then
-       press = (etais+(1.0E0_dp-etais)*lambdais)*press +(1.0E0_dp-lambdais)*pwell
+       pipsw = -(press/3.0E0_dp)/vol
+       pwellipsw = -(pwell/3.0E0_dp)/vol
+
+       do i = 1, 3
+          do j = 1, 3
+             pips(i,j) = pips(i,j)/vol
+             pwellips(i,j) = -pwellips(i,j)/vol
+          end do
+       end do
+
+       if (lstagea) then
+          press = (1.0E0_dp-lambdais*(1.0E0_dp-etais))*press
+       else if (lstageb) then
+          press = etais*press+lambdais*pwell
+       else if (lstagec) then
+          press = (etais+(1.0E0_dp-etais)*lambdais)*press +(1.0E0_dp-lambdais)*pwell
+       end if
     end if
 
     press = ((nchbox(ibox)+ghost_particles(ibox))/beta - press/3.0_dp)/vol
@@ -375,69 +404,88 @@ contains
 
 !> \brief Impulsive force and tail corrections to pressure
 !>
-!> @todo Impulsive force correction only done for LJ 12-6 potential
+!> \warning Tabulated potential, MMFF94 and Feuston-Garofalini
+!> are NOT supported.
+!> \note New potenial functional form needs to be added here,
+!> and in U2 (energy calculation), coru (tail corrections to
+!> energy), prop_pressure::pressure (force calculation)
+!> \todo Impulsive force correction only done for LJ 12-6 potential
   function corp(imolty,jmolty,rhosq,ibox)
-    use const_math,only:onepi
-    real::corp,rci3,rhosq, epsilon2, sigma2
-    real::rci1
-    integer::imolty,jmolty,ii,jj, ntii, ntjj, ntij ,ibox
+    use const_math,only:twopi
+    real::corp
+    integer,intent(in)::imolty,jmolty,ibox
+    real,intent(in)::rhosq
+    real::rbcut,rbcut2,rbcut3,tmp,rci1,rci3,rci6,sigma2,epsilon2
+    integer::ii,jj,ntii,ntjj,ntij
 
-    corp = 0.0E0_dp
+    rbcut=rcut(ibox)
+    rbcut2=rbcut*rbcut
+    rbcut3=rbcut2*rbcut
+
+    corp = 0.0_dp
     do ii = 1, nunit(imolty)
        ntii = ntype(imolty,ii)
        do jj = 1, nunit(jmolty)
           ntjj = ntype(jmolty,jj)
           ntij=type_2body(ntii,ntjj)
-          if (lexpsix .and. ltailc) then
-             corp = corp + consp(ntij)
-          else if (lmmff .and. ltailc) then
-             corp = corp+((-2.0E0_dp)/3.0E0_dp)*onepi*epsimmff(ntij)*sigimmff(ntij)**3.0E0_dp*corp_cons(ntij)
-          else if (lninesix .and. ltailc) then
-             corp = corp + 16.0E0_dp * onepi * epsnx(ntij) * rzero(ntij)**3 * (0.5E0_dp*(rzero(ntij)/rcut(ibox))**6 - (rzero(ntij)/rcut(ibox))**3)
-          else if (lgenlj .and. ltailc) then
-             rci3 = sig2ij(ntij)**(3.0E0_dp/2.0E0_dp) / rcut(ibox)**3
-             rci1 = rci3 **(1.0E0_dp/3.0E0_dp)
-             if ( lexpand(imolty) .and. lexpand(jmolty) ) then
-                sigma2 = (sigma_f(imolty,ii)+sigma_f(jmolty,jj))**2/4.0E0_dp
-                epsilon2 = sqrt(epsilon_f(imolty,ii) *epsilon_f(jmolty,jj))
-             else if ( lexpand(imolty) ) then
-                sigma2 = (sigma_f(imolty,ii)+sigi(ntjj))**2/4.0E0_dp
-                epsilon2 = sqrt(epsilon_f(imolty,ii)*epsi(ntjj))
-             else if ( lexpand(jmolty) ) then
-                sigma2 = (sigma_f(jmolty,jj)+sigi(ntii))**2/4.0E0_dp
-                epsilon2 = sqrt(epsilon_f(jmolty,jj)*epsi(ntii))
+          if (lgaro.or.lsami.or.lmuir) then
+          else if (nonbond_type(ntij).eq.1) then
+             ! LJ 12-6
+             if (lexpand(imolty).and.lexpand(jmolty)) then
+                sigma2 = (sigma_f(imolty,ii)+sigma_f(jmolty,jj))/2.0_dp
+                epsilon2 = 4.0_dp*sqrt(epsilon_f(imolty,ii)*epsilon_f(jmolty,jj))
+             else if (lexpand(imolty)) then
+                sigma2 = (sigma_f(imolty,ii)+vvdW_b(2,ntjj))/2.0_dp
+                epsilon2 = 4.0_dp*sqrt(epsilon_f(imolty,ii)*vvdW_b(1,ntjj))
+             else if (lexpand(jmolty)) then
+                sigma2 = (vvdW_b(2,ntii)+sigma_f(jmolty,jj))/2.0_dp
+                epsilon2 = 4.0_dp*sqrt(vvdW_b(1,ntii)*epsilon_f(jmolty,jj))
              else
-                sigma2 = sig2ij(ntij)
-                epsilon2 = epsij(ntij)
+                sigma2 = vvdW(2,ntij)
+                epsilon2 = vvdW(1,ntij)
              end if
-             corp = corp + (2.0E0_dp/3.0E0_dp) * onepi * epsilon2 * sigma2 ** (1.50E0_dp) * n1&
-              * ( (( (2.0E0_dp**((4.0E0_dp*n1/n0)+1.0E0_dp))/(2.0E0_dp*n1-3.0E0_dp)) * rci1 **(2.0E0_dp*n1-3.0E0_dp) )&
-              - ( ((2.0E0_dp**((2.0E0_dp*n1/n0)+1.0E0_dp))/(n1-3.0E0_dp))* rci1 **(n1-3.0E0_dp) )  )
-          else if (.not.(lexpsix.or.lmmff.or.lninesix.or.lgenlj)) then
-             if ( lexpand(imolty) .and. lexpand(jmolty) ) then
-                sigma2 = (sigma_f(imolty,ii)+sigma_f(jmolty,jj))**2/4.0E0_dp
-                epsilon2 = sqrt(epsilon_f(imolty,ii)* epsilon_f(jmolty,jj))
-             else if ( lexpand(imolty) ) then
-                sigma2 = (sigma_f(imolty,ii)+sigi(ntjj))**2/4.0E0_dp
-                epsilon2 = sqrt(epsilon_f(imolty,ii)*epsi(ntjj))
-             else if ( lexpand(jmolty) ) then
-                sigma2 = (sigma_f(jmolty,jj)+sigi(ntii))**2/4.0E0_dp
-                epsilon2 = sqrt(epsilon_f(jmolty,jj)*epsi(ntii))
-             else
-                sigma2 = sig2ij(ntij)
-                epsilon2 = epsij(ntij)
+
+             tmp  = sigma2**3
+             rci3 = tmp/rbcut3
+             rci6 = rci3*rci3
+             if (ltailc) then ! tail corrections
+                corp = corp + epsilon2*tmp*rci3*(rci6*4.0_dp/3.0_dp-2.0_dp)
              end if
-             rci3 = (sqrt(sigma2)/rcut(ibox))**3
-             if (ltailc) then ! both impulsive force and tail corrections
-                corp = corp+8.0E0_dp*onepi*epsilon2*sigma2**(1.5E0_dp)*(rci3*rci3*rci3*7.0E0_dp/9.0E0_dp-rci3)
-             else ! only impulsive force corrections
-                corp=corp+(8.0E0_dp/3.0E0_dp)*onepi*epsilon2*sigma2**(1.5E0_dp)*(rci3*rci3*rci3 - rci3)
+             if (.not.lshift.and.numberDimensionIsIsotropic(ibox).eq.3) then ! impulsive force corrections
+                corp = corp + epsilon2*tmp*rci3*(rci6-1.0_dp)
              end if
+          else if (nonbond_type(ntij).eq.2) then
+             ! Buckingham exp-6
+             if (vvdW(2,ntij).ne.0) then
+                tmp = vvdW(2,ntij)*rbcut
+                corp = corp - 2.0_dp*vvdW(3,ntij)/rbcut3 + (-6.0_dp+tmp*(6.0_dp+tmp*(tmp-3.0_dp)))*vvdW(1,ntij)*exp(tmp)/(vvdW(2,ntij)**3)
+             end if
+          else if (nonbond_type(ntij).eq.3) then
+             ! Mie
+             tmp=vvdW(2,ntij)/rbcut
+             rci1=tmp**(vvdW(3,ntij)-3)
+             rci3=tmp**(vvdW(4,ntij)-3)
+             corp = corp + vvdW(1,ntij)*(vvdW(2,ntij)**3)*(rci1*vvdW(3,ntij)/(vvdW(3,ntij)-3)-rci3*vvdW(4,ntij)/(vvdW(4,ntij)-3))
+          else if (nonbond_type(ntij).eq.5) then
+             ! LJ 9-6
+             rci3=(vvdW(2,ntij)/rbcut)**3
+             corp = corp + vvdW(1,ntij)*(vvdW(2,ntij)**3)*rci3*(3.0_dp*rci3-6.0_dp)
+          else if (nonbond_type(ntij).eq.6) then
+             ! Generalized LJ
+             tmp  = 2.0_dp*vvdW(4,ntij)-3.0_dp
+             rci1 = (vvdW(2,ntij)/rbcut)**tmp
+             rci3 = (vvdW(2,ntij)/rbcut)**(vvdW(4,ntij)-3.0_dp)
+             corp = corp + vvdW(1,ntij)*(vvdW(2,ntij)**3)*2.0_dp*vvdW(4,ntij)*(rci1/tmp-rci3/(vvdW(4,ntij)-3.0_dp))
+          else if (nonbond_type(ntij).eq.7) then
+             ! LJ 12-6-8
+             corp = corp + 4.0_dp/3.0_dp*vvdW(1,ntij)/(rbcut3**3)-2.0_dp*vvdW(2,ntij)/rbcut3-8.0_dp/5.0_dp*vvdW(3,ntij)/rbcut3/rbcut2
+          else if (nonbond_type(ntij).ne.4.and.nonbond_type(ntij).ne.-1.and.nonbond_type(ntij).ne.0) then
+             call err_exit(__FILE__,__LINE__,'corp: undefined nonbond type',myid+1)
           end if
        end do
     end do
 
-    corp=corp*rhosq
+    corp=twopi/3.0_dp*rhosq*corp
 
     return
   end function corp

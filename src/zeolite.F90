@@ -26,12 +26,13 @@ module zeolite
   integer,parameter::boxZeo=1
 
   logical,allocatable::lunitcell(:)
-  logical::ltestztb=.false.,lpore_volume=.false.,lsurface_area=.false.
+  logical::ltailcZeo=.true.,ltestztb=.false.,lpore_volume=.false.,lsurface_area=.false.
+
   integer::nlayermax,volume_probe=124,volume_nsample=20,area_probe=124,area_nsample=100
   real,allocatable::zgrid(:,:,:,:,:),egrid(:,:,:,:)
   character(LEN=default_path_length)::file_zeocoord='zeolite.cssr',file_ztb='zeolite.ztb'
 
-  namelist /zeolite_in/ file_zeocoord,file_ztb,ltestztb,lpore_volume,volume_probe,volume_nsample,lsurface_area,area_probe,area_nsample
+  namelist /zeolite_in/ file_zeocoord,file_ztb,ltailcZeo,ltestztb,lpore_volume,volume_probe,volume_nsample,lsurface_area,area_probe,area_nsample
 
   type(MoleculeType)::zeo
   type(ZeoliteBeadType)::ztype
@@ -146,8 +147,8 @@ contains
              if (lij(idi).and.lij(idj)) then
                 ntij = (idi-1)*nntype + idj
                 ! LJ parameters are scaled to reduce round-off errors, see exzeof()
-                sig6=sig2ij(ntij)**3/2E4_dp
-                zpot%param(2,i,igtype)=epsij(ntij)*sig6
+                sig6=vvdW(3,ntij)**3/2E4_dp
+                zpot%param(2,i,igtype)=vvdW(1,ntij)*sig6
                 zpot%param(1,i,igtype)=zpot%param(2,i,igtype)*sig6
              else
                 zpot%param(1:2,i,igtype)=0.
@@ -205,139 +206,137 @@ contains
     if (lsurface_area) call zsurface()
 
     ! tabulation of the zeolite potential
-    if (lzgrid) then
-       call addAllBeadTypes()
-       call setpbc(boxZeo)
+    call addAllBeadTypes()
+    call setpbc(boxZeo)
 
-       nlayermax=0
-       io_ztb=get_iounit()
+    nlayermax=0
+    io_ztb=get_iounit()
 
-       open(unit=io_ztb,access='stream',action='read',file=file_ztb,form='unformatted',iostat=jerr,status='old')
-       if (jerr.eq.0) then
-          ! read zeolite table from disk
-          if (lprint) write(io_output,'(A,/)') 'read in tabulated potential'
-          read(io_ztb) zunittmp,zangtmp,ngridtmp,zntypetmp,lewaldtmp,ltailczeotmp,lshifttmp,rcuttmp
-          if (ANY(abs(zunittmp-zunit%boxl).gt.eps).or.ANY(ngridtmp.ne.zunit%ngrid).or.(zntypetmp.ne.ztype%ntype)) call err_exit(__FILE__,__LINE__,'problem 1 in zeolite potential table',myid+1)
-          do igtype=1,ztype%ntype
-             read(io_ztb) atom
-             if (trim(ztype%name(igtype))/=trim(atom)) then
-                write(io_output,*) igtype,' atom should be ',trim(atom)
-                call err_exit(__FILE__,__LINE__,'problem 2 in zeolite potential table',myid+1)
-             end if
-          end do
-          do k=0,zunit%ngrid(3)-1
-             do j=0,zunit%ngrid(2)-1
-                do i=0,zunit%ngrid(1)-1
-                   do igtype=1,ztype%ntype
-                      do sw=1,3
-                         read(io_ztb,end=100) zgrid(sw,igtype,i,j,k)
-                      end do
+    open(unit=io_ztb,access='stream',action='read',file=file_ztb,form='unformatted',iostat=jerr,status='old')
+    if (jerr.eq.0) then
+       ! read zeolite table from disk
+       if (lprint) write(io_output,'(A,/)') 'read in tabulated potential'
+       read(io_ztb) zunittmp,zangtmp,ngridtmp,zntypetmp,lewaldtmp,ltailczeotmp,lshifttmp,rcuttmp
+       if (ANY(abs(zunittmp-zunit%boxl).gt.eps).or.ANY(ngridtmp.ne.zunit%ngrid).or.(zntypetmp.ne.ztype%ntype)) call err_exit(__FILE__,__LINE__,'problem 1 in zeolite potential table',myid+1)
+       do igtype=1,ztype%ntype
+          read(io_ztb) atom
+          if (trim(ztype%name(igtype))/=trim(atom)) then
+             write(io_output,*) igtype,' atom should be ',trim(atom)
+             call err_exit(__FILE__,__LINE__,'problem 2 in zeolite potential table',myid+1)
+          end if
+       end do
+       do k=0,zunit%ngrid(3)-1
+          do j=0,zunit%ngrid(2)-1
+             do i=0,zunit%ngrid(1)-1
+                do igtype=1,ztype%ntype
+                   do sw=1,3
+                      read(io_ztb,end=100) zgrid(sw,igtype,i,j,k)
                    end do
                 end do
              end do
           end do
-!           if (myid.eq.rootid) then
-!              rcuttmp=10.0E0_dp
-!              close(io_ztb)
-!              open(unit=io_ztb,access='stream',action='write',file=file_ztb,form='unformatted',iostat=jerr,status='unknown')
-!              if (jerr.ne.0) then
-!                 call err_exit(__FILE__,__LINE__,'cannot create file for tabulated potential',myid+1)
-!              end if
-!              write(io_ztb) zunittmp,zangtmp,ngridtmp,zntypetmp,lewaldtmp,ltailczeotmp,lshifttmp,rcuttmp
-!              do igtype=1,ztype%ntype
-!                 write(io_ztb) ztype%name(igtype)
-!              end do
-!              write(io_ztb) zgrid
-!           end if
-       else
-          oldi=0
-          oldj=0
-          oldk=0
-          lewaldtmp=lewald
-          ltailczeotmp=ltailcZeo
-          lshifttmp=lshift
-          rcuttmp=zcell%cut
-       end if
+       end do
+       ! if (myid.eq.rootid) then
+       !    rcuttmp=10.0E0_dp
+       !    close(io_ztb)
+       !    open(unit=io_ztb,access='stream',action='write',file=file_ztb,form='unformatted',iostat=jerr,status='unknown')
+       !    if (jerr.ne.0) then
+       !       call err_exit(__FILE__,__LINE__,'cannot create file for tabulated potential',myid+1)
+       !    end if
+       !    write(io_ztb) zunittmp,zangtmp,ngridtmp,zntypetmp,lewaldtmp,ltailczeotmp,lshifttmp,rcuttmp
+       !    do igtype=1,ztype%ntype
+       !       write(io_ztb) ztype%name(igtype)
+       !    end do
+       !    write(io_ztb) zgrid
+       ! end if
+    else
+       oldi=0
+       oldj=0
+       oldk=0
+       lewaldtmp=lewald
+       ltailczeotmp=ltailcZeo
+       lshifttmp=lshift
+       rcuttmp=zcell%cut
+    end if
 
-100    if (jerr.eq.0.and.(sw.le.3..or.igtype.le.ztype%ntype.or.i.lt.zunit%ngrid(1).or.j.lt.zunit%ngrid(2).or.k.lt.zunit%ngrid(3))) then
-          oldi=i
-          oldj=j
-          oldk=k
-          jerr=1
-          close(io_ztb)
-          write(io_output,*) sw,igtype,oldi,oldj,oldk
-       end if
+100 if (jerr.eq.0.and.(sw.le.3..or.igtype.le.ztype%ntype.or.i.lt.zunit%ngrid(1).or.j.lt.zunit%ngrid(2).or.k.lt.zunit%ngrid(3))) then
+       oldi=i
+       oldj=j
+       oldk=k
+       jerr=1
+       close(io_ztb)
+       write(io_output,*) sw,igtype,oldi,oldj,oldk
+    end if
 
-       if (jerr.ne.0) then
-          ! make a tabulated potential of the zeolite
-          if (myid.eq.rootid) then
-             write(io_output,*) 'make tabulated potential'
-             open(unit=io_ztb,access='stream',action='write',file=file_ztb,form='unformatted',iostat=jerr,status='unknown')
-             if (jerr.ne.0) then
-                call err_exit(__FILE__,__LINE__,'cannot create file for tabulated potential',myid+1)
-             end if
-             write(io_ztb) zunit%boxl,zcell%ang(1)%val,zcell%ang(2)%val,zcell%ang(3)%val,zunit%ngrid,ztype%ntype,lewald,ltailcZeo,lshift,zcell%cut
-             do igtype=1,ztype%ntype
-                write(io_ztb) ztype%name(igtype)
-             end do
+    if (jerr.ne.0) then
+       ! make a tabulated potential of the zeolite
+       if (myid.eq.rootid) then
+          write(io_output,*) 'make tabulated potential'
+          open(unit=io_ztb,access='stream',action='write',file=file_ztb,form='unformatted',iostat=jerr,status='unknown')
+          if (jerr.ne.0) then
+             call err_exit(__FILE__,__LINE__,'cannot create file for tabulated potential',myid+1)
           end if
-          write(io_output,*) 'time 1:',time_now()
-          do k=0,zunit%ngrid(3)-1
-             do j=0,zunit%ngrid(2)-1
+          write(io_ztb) zunit%boxl,zcell%ang(1)%val,zcell%ang(2)%val,zcell%ang(3)%val,zunit%ngrid,ztype%ntype,lewald,ltailcZeo,lshift,zcell%cut
+          do igtype=1,ztype%ntype
+             write(io_ztb) ztype%name(igtype)
+          end do
+       end if
+       write(io_output,*) 'time 1:',time_now()
+       do k=0,zunit%ngrid(3)-1
+          do j=0,zunit%ngrid(2)-1
 #ifdef __OPENMP__
 !$omp parallel &
 !$omp private(i) shared(k,j,zgrid) default(shared)
 !$omp do
 #endif
-                do i=0,zunit%ngrid(1)-1
-                   ! pass to exzeof arguments in fractional coordinates with respect to the unit cell
-                   if (k.gt.oldk.or.(k.eq.oldk.and.j.ge.oldj)) call exzeof(zgrid(:,:,i,j,k),real(i,dp)/zunit%ngrid(1),real(j,dp)/zunit%ngrid(2),real(k,dp)/zunit%ngrid(3))
-                end do
+             do i=0,zunit%ngrid(1)-1
+                ! pass to exzeof arguments in fractional coordinates with respect to the unit cell
+                if (k.gt.oldk.or.(k.eq.oldk.and.j.ge.oldj)) call exzeof(zgrid(:,:,i,j,k),real(i,dp)/zunit%ngrid(1),real(j,dp)/zunit%ngrid(2),real(k,dp)/zunit%ngrid(3))
+             end do
 #ifdef __OPENMP__
 !$omp end parallel
 #endif
-                if (myid.eq.rootid) write(io_ztb) zgrid(:,:,:,j,k)
-             end do
+             if (myid.eq.rootid) write(io_ztb) zgrid(:,:,:,j,k)
           end do
-          write(io_output,*) 'time 2:',time_now()
-          if (myid.eq.rootid.and.ltailcZeo) write(io_output,*) 'maxlayer = ',nlayermax
-       end if
-
-       if (ltailczeo.and..not.ltailcZeotmp) then
-          rci3=1./rcuttmp**3
-          rci9=4E8_dp*rci3**3
-          rci3=2E4_dp*rci3
-       end if
-
-       egrid=0.
-       forall(k=0:zunit%ngrid(3)-1,j=0:zunit%ngrid(2)-1,i=0:zunit%ngrid(1)-1,zgrid(1,1,i,j,k).ge.overlapValue) egrid(i,j,k,:)=overlapValue
-
-       do j=1,ztype%ntype
-          idj=ztype%type(j)
-          if (lij(idj).or.lqchg(idj)) then
-             rho=ztype%num(j)/zcell%vol
-             do i=1,zpot%ntype
-                idi=zpot%table(i)
-                if (lij(idj).and.lij(idi)) then
-                   where(egrid(:,:,:,i).lt.overlapValue) egrid(:,:,:,i)=egrid(:,:,:,i)+zgrid(1,j,:,:,:)*zpot%param(1,j,i)-zgrid(2,j,:,:,:)*zpot%param(2,j,i)
-                   if (ltailczeo.and..not.ltailcZeotmp) then
-                      where(egrid(:,:,:,i).lt.overlapValue) egrid(:,:,:,i)=egrid(:,:,:,i)+twopi*rho*(rci9*zpot%param(1,j,i)/9-rci3*zpot%param(2,j,i)/3)
-                   end if
-                end if
-                if (lqchg(idj).and.lqchg(idi)) then
-                   where(egrid(:,:,:,i).lt.overlapValue) egrid(:,:,:,i)=egrid(:,:,:,i)+qqfact*qelect(idi)*qelect(idj)*zgrid(3,j,:,:,:)
-                end if
-             end do
-          end if
        end do
+       write(io_output,*) 'time 2:',time_now()
+       if (myid.eq.rootid.and.ltailcZeo) write(io_output,*) 'maxlayer = ',nlayermax
+    end if
 
-       if (ltestztb.or.lpore_volume) call ztest()
+    if (ltailczeo.and..not.ltailcZeotmp) then
+       rci3=1./rcuttmp**3
+       rci9=4E8_dp*rci3**3
+       rci3=2E4_dp*rci3
+    end if
 
-       deallocate(lunitcell,zgrid,zeo%bead,ztype%type,ztype%num,ztype%radiisq,ztype%name,zpot%param)
-       if (lprint) then
-          close(io_ztb)
-          write(io_output,'(4(A,L),A,G10.3,A,/)') 'tabulated potential: lewald[',lewaldtmp,'] ltailc[',ltailcZeotmp,'] lshift[',lshifttmp,'] ltailcZeo[',ltailcZeo,'] rcut[',rcuttmp,']'
+    egrid=0.
+    forall(k=0:zunit%ngrid(3)-1,j=0:zunit%ngrid(2)-1,i=0:zunit%ngrid(1)-1,zgrid(1,1,i,j,k).ge.overlapValue) egrid(i,j,k,:)=overlapValue
+
+    do j=1,ztype%ntype
+       idj=ztype%type(j)
+       if (lij(idj).or.lqchg(idj)) then
+          rho=ztype%num(j)/zcell%vol
+          do i=1,zpot%ntype
+             idi=zpot%table(i)
+             if (lij(idj).and.lij(idi)) then
+                where(egrid(:,:,:,i).lt.overlapValue) egrid(:,:,:,i)=egrid(:,:,:,i)+zgrid(1,j,:,:,:)*zpot%param(1,j,i)-zgrid(2,j,:,:,:)*zpot%param(2,j,i)
+                if (ltailczeo.and..not.ltailcZeotmp) then
+                   where(egrid(:,:,:,i).lt.overlapValue) egrid(:,:,:,i)=egrid(:,:,:,i)+twopi*rho*(rci9*zpot%param(1,j,i)/9-rci3*zpot%param(2,j,i)/3)
+                end if
+             end if
+             if (lqchg(idj).and.lqchg(idi)) then
+                where(egrid(:,:,:,i).lt.overlapValue) egrid(:,:,:,i)=egrid(:,:,:,i)+qqfact*qelect(idi)*qelect(idj)*zgrid(3,j,:,:,:)
+             end if
+          end do
        end if
+    end do
+
+    if (ltestztb.or.lpore_volume) call ztest()
+
+    deallocate(lunitcell,zgrid,zeo%bead,ztype%type,ztype%num,ztype%radiisq,ztype%name,zpot%param)
+    if (lprint) then
+       close(io_ztb)
+       write(io_output,'(4(A,L),A,G10.3,A,/)') 'tabulated potential: lewald[',lewaldtmp,'] ltailc[',ltailcZeotmp,'] lshift[',lshifttmp,'] ltailcZeo[',ltailcZeo,'] rcut[',rcuttmp,']'
     end if
 
   end subroutine suzeo
@@ -542,7 +541,7 @@ contains
     l = scoord(3)*zunit%ngrid(3)
 
     exzeo=upperLimit
-    if (.not.lignore.and.lzgrid) then
+    if (.not.lignore) then
        ! calculation using a grid
 
        ! test if in the reasonable regime
@@ -710,7 +709,7 @@ contains
     Do i=1,zeo%nbead ! Loop over all framework atoms
        if (.not.lunitcell(i)) cycle
        ntij = (area_probe-1)*nntype + ztype%type(zeo%bead(i)%type)
-       sigij=sqrt(sig2ij(ntij))
+       sigij=vvdW(2,ntij)
 
        ncount=0
        Do j=1,area_nsample ! Number of trial positions around each framework atom
@@ -729,7 +728,7 @@ contains
              call fractionalToAbsolute(dr,sdr/zunit%dup,zcell)
              rsq=dot_product(dr,dr)
              ntij = (area_probe-1)*nntype + ztype%type(zeo%bead(k)%type)
-             If(rsq.lt.0.998001E0_dp*sig2ij(ntij)) exit
+             If(rsq.lt.0.998001E0_dp*vvdW(3,ntij)) exit
           End Do
 
           If (k.le.zeo%nbead) cycle

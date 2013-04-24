@@ -48,6 +48,11 @@
  /
 
 
+ &external_field
+     Elect_field=  0.000000000000000E+000  0.000000000000000E+000
+ /
+
+
  &mc_volume
      tavol=  0.400000000000000     
      iratv=         500
@@ -125,31 +130,36 @@
 
  &mc_flucq
      taflcq=  0.950000000000000     
+     fqtemp=   5.00000000000000     
      rmflucq=  0.100000000000000     
      pmflcq=  0.000000000000000E+000
      pmfqmt=   1.00000000000000     
      lflucq= F
      lqtrans= F
      fqegp=  0.000000000000000E+000
-     nchoiq=           1   1
+     nchoiq=           1           1
  /
 
 
 SIMULATION_BOX
-! boxlx boxly boxlz lsolid lrect kalp rcut rcutnn numDimensionIsIstropic pressure temperature use_linkcell rintramax ghost_particles lideal ltwice
-  40.000   40.000   40.000  F  F  0.250 14.000  0.000 0     0.1 3440.00  F 0.0 0  F  F
-! nchain_1 ... nchain_nmolty inix iniy iniz inirot inimix zshift dshift
-180 10 10 2 10 0 10.0  2.000
-! boxlx boxly boxlz lsolid lrect kalp rcut rcutnn numDimensionIsIstropic pressure temperature use_linkcell rintramax ghost_particles lideal ltwice
-  90.000   90.000   90.000  F  F  0.250 14.000  0.000 0     0.1 3440.00  F 0.0 0  F  F
-! nchain_1 ... nchain_nmolty inix iniy iniz inirot inimix zshift dshift
-20 4 4 2 10 0 20.0 11.250
+! boxlx boxly boxlz rcut kalp rcutnn numDimensionIsIstropic lsolid lrect lideal ltwice temperature pressure
+  40.000   40.000   40.000 14.000  0.250  0.000 0  F  F  F  F 3440.00     0.1
+! nchain_1 ... nchain_nmolty ghost_particles
+180 0
+! inix iniy iniz inirot inimix zshift dshift use_linkcell rintramax
+10 10 2 10 0 10.0  2.000 F 0.0
+! boxlx boxly boxlz rcut kalp rcutnn numDimensionIsIstropic lsolid lrect lideal ltwice temperature pressure
+  90.000   90.000   90.000 14.000  0.250  0.000 0  F  F  F  F 3440.00     0.1
+! nchain_1 ... nchain_nmolty ghost_particles
+20 0
+! inix iniy iniz inirot inimix zshift dshift use_linkcell rintramax
+4 4 2 10 0 20.0 11.250 F 0.0
 END SIMULATION_BOX
 
 
 MOLECULE_TYPE
-! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
-8 8 8 8 0  F 8  F 8  F  F 1000000     0.0     0.0  T 0.5  F  F
+! nunit nugrow ncarbon maxcbmc maxgrow iring lelect lring lrigid lbranch lrplc lsetup lq14scale qscale iurot isolute eta
+8 8 8 8 8 8  F  F  F  F  F  F  T 0.5 0 1000000     0.0     0.0
 ! unit ntype leaderq
 1 4 1
 ! stretching

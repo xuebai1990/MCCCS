@@ -21,13 +21,12 @@ contains
 !> number of successful trial moves is stored in \b bstrax(yz).
 !> The attempts are stored in \b bntrax(yz)
   subroutine translation()
-    use sim_particle,only:update_neighbor_list,ctrmas
+    use sim_particle,only:update_neighbor_list_molecule,ctrmas
     use sim_cell,only:update_linked_cell
 
       logical::lx,ly,lz,ovrlap
-      logical::lneighij
 
-      integer::i,ibox,flagon,iunit,j,imolty,icbu,ic,ip
+      integer::i,ibox,flagon,iunit,j,imolty,icbu
       real::rx,ry,rz,dchain,ddx,ddy,ddz,vn(nEnergy),vo(nEnergy),deltv,deltvb,rchain,vdum,vrecipo,vrecipn
 
       logical::laccept
@@ -151,13 +150,11 @@ contains
 ! calculate the energy of i in the new configuration ***
       flagon = 2
       call energy(i,imolty,vn,flagon,ibox,1,iunit,.false.,ovrlap,.false. ,.false.,.false.,.false.)
-      vn(10)=v3garo
       if (ovrlap) return
 
 ! calculate the energy of i in the old configuration ***
       flagon = 1
       call energy(i,imolty,vo,flagon,ibox,1,iunit,.false.,ovrlap,.false. ,.false.,.false.,.false.)
-      vo(10) = v3garo
 
       if (ovrlap) then
          call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf of TRANSLATION',myid+1)
@@ -253,50 +250,8 @@ contains
          call update_linked_cell(i)
       end if
 
-      if ( lneigh ) then
-         call update_neighbor_list(i,rx,ry,rz,.false.)
-      end if
-
-      if ( lneighbor .or. lgaro) then
-
-         do ic = 1, neigh_cnt(i)
-            j = neighbor(ic,i)
-! write(io_output,*) ic,i,'j:',j
-            do ip = 1,neigh_cnt(j)
-               if ( neighbor(ip,j) .eq. i ) then
-                  neighbor(ip,j)=neighbor(neigh_cnt(j),j)
-                  ndij(ip,j) = ndij(neigh_cnt(j),j)
-                  nxij(ip,j) = nxij(neigh_cnt(j),j)
-                  nyij(ip,j) = nyij(neigh_cnt(j),j)
-                  nzij(ip,j) = nzij(neigh_cnt(j),j)
-                  neigh_cnt(j) = neigh_cnt(j)-1
-                  cycle
-               end if
-            end do
-         end do
-         neigh_cnt(i) = neigh_icnt
-         do ic = 1,neigh_icnt
-            j = neighi(ic)
-            neighbor(ic,i)=j
-            ndij(ic,i) = ndiji(ic)
-            nxij(ic,i) = nxiji(ic)
-            nyij(ic,i) = nyiji(ic)
-            nzij(ic,i) = nziji(ic)
-            lneighij = .false.
-            do ip = 1,neigh_cnt(j)
-               if ( neighbor(ip,j) .eq. i ) then
-                  lneighij = .true.
-               end if
-            end do
-            if ( .not. lneighij ) then
-               neigh_cnt(j) = neigh_cnt(j)+1
-               neighbor(neigh_cnt(j),j) = i
-               ndij(neigh_cnt(j),j) = ndiji(ic)
-               nxij(neigh_cnt(j),j) = -nxiji(ic)
-               nyij(neigh_cnt(j),j) = -nyiji(ic)
-               nzij(neigh_cnt(j),j) = -nziji(ic)
-            end if
-         end do
+      if (lneigh.or.lneighbor.or.lgaro) then
+         call update_neighbor_list_molecule(i)
       end if
 
 #ifdef __DEBUG__
@@ -313,11 +268,11 @@ contains
 !> Rotation chooses one of the three space-fixed axes at random
 !> and rotates the molecule around this axis by \b dgamma radians.
 !> The maximum angular displacement is \b dgamax.
-    subroutine rotation ()
-      use sim_particle,only:update_neighbor_list,ctrmas
+    subroutine rotation()
+      use sim_particle,only:update_neighbor_list_molecule,ctrmas
 
-      logical::lx,ly,lz,ovrlap,lneighij
-      integer::i,ibox,flagon,iunit,j,imolty,iuroty,icbu,ic,ip
+      logical::lx,ly,lz,ovrlap
+      integer::i,ibox,flagon,iunit,j,imolty,iuroty,icbu
       real::rx,ry,rz,dchain,rchain,vn(nEnergy),vo(nEnergy),dgamma,rxorig,ryorig,rzorig,rxnew2,rynew2,rznew2,deltv,deltvb,vdum
 ! further variable definitions
       real::cosdg,sindg,rmrot
@@ -583,7 +538,7 @@ contains
       end if
 
       if ( ldielect ) then
-           call dipole(ibox,1)
+         call dipole(ibox,1)
       end if
 
 
@@ -594,38 +549,8 @@ contains
       if (ly) bsroty(imolty,ibox) = bsroty(imolty,ibox) + 1.0E0_dp
       if (lz) bsrotz(imolty,ibox) = bsrotz(imolty,ibox) + 1.0E0_dp
 
-      if ( lneigh ) then
-         call update_neighbor_list(i,rxuion(1,2) - rxuion(1,1),ryuion(1,2) - ryuion(1,1),rzuion(1,2) - rzuion(1,1),.false.)
-         call update_neighbor_list(i,rxuion(iunit,2) - rxuion(iunit,1),ryuion(iunit,2) - ryuion(iunit,1),rzuion(iunit,2) - rzuion(iunit,1),.false.)
-      end if
-
-      if ( lneighbor ) then
-! write(io_output,*) 'in rotation:',i,neigh_cnt(i)
-         do 11 ic = 1, neigh_cnt(i)
-            j = neighbor(ic,i)
-            do ip = 1,neigh_cnt(j)
-               if ( neighbor(ip,j) .eq. i ) then
-                  neighbor(ip,j)=neighbor(neigh_cnt(j),j)
-                  neigh_cnt(j) = neigh_cnt(j)-1
-                  goto 11
-               end if
-            end do
- 11      continue
-         neigh_cnt(i) = neigh_icnt
-         do ic = 1,neigh_icnt
-            j = neighi(ic)
-            neighbor(ic,i)=j
-            lneighij = .false.
-            do ip = 1,neigh_cnt(j)
-               if ( neighbor(ip,j) .eq. i ) then
-                  lneighij = .true.
-               end if
-            end do
-            if ( .not. lneighij ) then
-               neigh_cnt(j) = neigh_cnt(j)+1
-               neighbor(neigh_cnt(j),j) = i
-            end if
-         end do
+      if (lneigh.or.lneighbor) then
+         call update_neighbor_list_molecule(i)
       end if
 
 #ifdef __DEBUG__
@@ -641,14 +566,13 @@ contains
 !> number of successful trial moves is stored in \b Abstrax(yz).
 !> The attempts are stored in \b Abntrax(yz)
     subroutine Atom_translation()
-      use sim_particle,only:update_neighbor_list,ctrmas
+      use sim_particle,only:update_neighbor_list_molecule,ctrmas
       use sim_cell,only:update_linked_cell
       use energy_kspace,only:recip_atom
       use energy_intramolecular,only:U_bonded
 
       logical::lx,ly,lz,ovrlap
-      logical::lneighij
-      integer::i,ibox,flagon,iunit,j,imolty,icbu,ic,ip
+      integer::i,ibox,flagon,iunit,j,imolty,icbu
       integer::pick_unit,pick_chain
       real::rx,ry,rz,dchain,vn(nEnergy),vo(nEnergy),deltv,deltvb,rchain,vdum,vrecipo,vrecipn
       logical::laccept
@@ -846,38 +770,8 @@ contains
          call update_linked_cell(i)
       end if
 
-      if ( lneigh ) then
-         call update_neighbor_list(i,rx,ry,rz,.false.)
-      end if
-
-      if ( lneighbor ) then
-
-         do 10 ic = 1, neigh_cnt(i)
-            j = neighbor(ic,i)
-! write(io_output,*) ic,i,'j:',j
-            do ip = 1,neigh_cnt(j)
-               if ( neighbor(ip,j) .eq. i ) then
-                  neighbor(ip,j)=neighbor(neigh_cnt(j),j)
-                  neigh_cnt(j) = neigh_cnt(j)-1
-                  goto 10
-               end if
-            end do
- 10      continue
-         neigh_cnt(i) = neigh_icnt
-         do ic = 1,neigh_icnt
-            j = neighi(ic)
-            neighbor(ic,i)=j
-            lneighij = .false.
-            do ip = 1,neigh_cnt(j)
-               if ( neighbor(ip,j) .eq. i ) then
-                  lneighij = .true.
-               end if
-            end do
-            if ( .not. lneighij ) then
-               neigh_cnt(j) = neigh_cnt(j)+1
-               neighbor(neigh_cnt(j),j) = i
-            end if
-         end do
+      if (lneigh.or.lneighbor) then
+         call update_neighbor_list_molecule(i)
       end if
 
 #ifdef __DEBUG__

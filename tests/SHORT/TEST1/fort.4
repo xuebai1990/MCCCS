@@ -4,7 +4,7 @@
      nbox=           1
      nmolty=           1
      nchain=         300
-     nstep=        10
+     nstep=          10
      lstop= F
      iratio=         500
      rmin=   1.00000000000000     
@@ -23,9 +23,9 @@
 
 
  &analysis
-     iprint=         5
+     iprint=           5
      imv=         500
-     iblock=         5
+     iblock=           5
      iratp=          10
      idiele=           1
      iheatcapacity=     1000000
@@ -45,6 +45,11 @@
      starvir=  0.000000000000000E+000
      stepvir=  0.000000000000000E+000
      ntemp=           0
+ /
+
+
+ &external_field
+     Elect_field=  0.000000000000000E+000
  /
 
 
@@ -125,6 +130,7 @@
 
  &mc_flucq
      taflcq=  0.950000000000000     
+     fqtemp=   5.00000000000000     
      rmflucq=  0.100000000000000     
      pmflcq=  0.000000000000000E+000
      pmfqmt=   1.00000000000000     
@@ -136,16 +142,18 @@
 
 
 SIMULATION_BOX
-! boxlx boxly boxlz lsolid lrect kalp rcut rcutnn numDimensionIsIstropic pressure temperature use_linkcell rintramax ghost_particles lideal ltwice
-  46.000   46.000   46.000  F  F  0.250 14.000  0.000 0     0.1  298.15  F 0.0 0  F  F
-! nchain_1 ... nchain_nmolty inix iniy iniz inirot inimix zshift dshift
-300 7 7 7 0 1  0.0  3.280
+! boxlx boxly boxlz rcut kalp rcutnn numDimensionIsIstropic lsolid lrect lideal ltwice temperature pressure
+  46.000   46.000   46.000 14.000  0.250  0.000 0  F  F  F  F  298.15     0.1
+! nchain_1 ... nchain_nmolty ghost_particles
+300 0
+! inix iniy iniz inirot inimix zshift dshift use_linkcell rintramax
+7 7 7 0 1  0.0  3.280 F 0.0
 END SIMULATION_BOX
 
 
 MOLECULE_TYPE
-! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
-9 9 9 9 0  T 1  F 9  F  F 10000     0.0  T 0.5  F  F
+! nunit nugrow ncarbon maxcbmc maxgrow iring lelect lring lrigid lbranch lrplc lsetup lq14scale qscale iurot isolute eta
+9 9 9 9 1 9  T  F  F  F  F  F  T 0.5 0 10000     0.0
 ! unit ntype leaderq
 1 212 1
 ! stretching

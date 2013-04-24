@@ -1,4 +1,4 @@
-Program started at 2013-04-22 16:53:31.834
+Program started at 2013-04-26 02:16:32.424
 Number of processors: 1
 Threads per processor: 1
  run_num: 1
@@ -18,9 +18,10 @@ Dual Cutoff Configurational-bias Monte Carlo
 Coulombic interactions will be included in the Rosenbluth weights for CBMC growth
 Coulombic inter- and intra-molecular interactions will be calculated
    using Ewald-sum techniques
-Lennard-Jones potential for pair-wise dispersive interactions
    with additional tail corrections
 Lorentz-Berthelot combining rules apply
+ L_spline:  F
+ L_linear:  F
 *******************************************
 
 NAMELIST MC_SHARED
@@ -65,8 +66,8 @@ Box 1:   34.100 x   34.100 x   34.100
    lsolid:  F, lrect:  F, lideal:  F, ltwice:  F
    temperature:  573.000 [K]
    external pressure:  0.100000000     [MPa]
-   Ghost particles: 0
    initial number of chains of each type:   180
+   Ghost particles: 0
    initial number of chains in x, y and z directions: 6 x 6 x 5
    initial rotational displacement: 10, inimix: 0, zshift:  0.0, dshift:  3.800
 Box 2:   42.500 x   42.500 x   42.500
@@ -76,13 +77,23 @@ Box 2:   42.500 x   42.500 x   42.500
    lsolid:  F, lrect:  F, lideal:  F, ltwice:  F
    temperature:  573.000 [K]
    external pressure:  0.100000000     [MPa]
-   Ghost particles: 0
    initial number of chains of each type:   20
+   Ghost particles: 0
    initial number of chains in x, y and z directions: 5 x 2 x 2
    initial rotational displacement: 0, inimix: 0, zshift:  0.0, dshift: 10.625
 
 NUMBER OF MOLECULES OF EACH TYPE
  number of chains of each type:   200
+
+NAMELIST EXTERNAL_FIELD
+------------------------------------------
+Steele 10-4-3 slit pore
+On both sides of the simulation box (z = 0 & z = boxlz)
+Surface material bead type: 190
+Surface atom density:  0.11400 [Ang^-3]
+Surface layer spacing:  3.40000 [Ang]
+a1:  2.46000 [Ang]
+Electric field in z direction:     0.00000000         0.00000000     [V/A]
 
 SECTION MOLECULE_TYPE
 ------------------------------------------
@@ -259,8 +270,8 @@ SPECIAL INTERACTION RULES
 
   Total: 0 inclusion rules for intramolecular interactions
 
-      repulsive 1-5 OH interaction for molecule type 0 between bead 0 and bead 0 of type 0
-      repulsive 1-5 OH interaction for molecule type 0 between bead 0 and bead 0 of type 0
+      repulsive 1-5 OH interaction for molecule type 1 between bead 6 and bead 7 of type 2
+      repulsive 1-5 OH interaction for molecule type 1 between bead 5 and bead 8 of type 2
   Total: 2 special rules for intramolecular 1-5 OH interactions
 
 Molecule type: 1
@@ -388,43 +399,43 @@ molecule type 1
       8      7      3      4     61     62     65     64      7
 
 PAIRWISE LJ AND COULOMB INTERACTIONS
-    i    j     sig2ij      epsij         q0(i)         q0(j)
-    4    4    3.75000   98.00000      0.000000      0.000000
-    4    5    3.85000   67.14164      0.000000      0.000000
-    4   61    0.00000    0.00000      0.000000      0.435000
-    4   62    3.38500   95.46727      0.000000     -0.700000
-    4   64    3.85000   67.14164      0.000000      0.265000
-    4   65    4.04000   31.30495      0.000000      0.265000
-    5    4    3.85000   67.14164      0.000000      0.000000
-    5    5    3.95000   46.00000      0.000000      0.000000
-    5   61    0.00000    0.00000      0.000000      0.435000
-    5   62    3.48500   65.40642      0.000000     -0.700000
-    5   64    3.95000   46.00000      0.000000      0.265000
-    5   65    4.14000   21.44761      0.000000      0.265000
-   61    4    0.00000    0.00000      0.435000      0.000000
-   61    5    0.00000    0.00000      0.435000      0.000000
-   61   61    0.00000    0.00000      0.435000      0.435000
-   61   62    0.00000    0.00000      0.435000     -0.700000
-   61   64    0.00000    0.00000      0.435000      0.265000
-   61   65    0.00000    0.00000      0.435000      0.265000
-   62    4    3.38500   95.46727     -0.700000      0.000000
-   62    5    3.48500   65.40642     -0.700000      0.000000
-   62   61    0.00000    0.00000     -0.700000      0.435000
-   62   62    3.02000   93.00000     -0.700000     -0.700000
-   62   64    3.48500   65.40642     -0.700000      0.265000
-   62   65    3.67500   30.49590     -0.700000      0.265000
-   64    4    3.85000   67.14164      0.265000      0.000000
-   64    5    3.95000   46.00000      0.265000      0.000000
-   64   61    0.00000    0.00000      0.265000      0.435000
-   64   62    3.48500   65.40642      0.265000     -0.700000
-   64   64    3.95000   46.00000      0.265000      0.265000
-   64   65    4.14000   21.44761      0.265000      0.265000
-   65    4    4.04000   31.30495      0.265000      0.000000
-   65    5    4.14000   21.44761      0.265000      0.000000
-   65   61    0.00000    0.00000      0.265000      0.435000
-   65   62    3.67500   30.49590      0.265000     -0.700000
-   65   64    4.14000   21.44761      0.265000      0.265000
-   65   65    4.33000   10.00000      0.265000      0.265000
+    i    j         q0(i)         q0(j)     vvdW_1     vvdW_2 ...
+    4    4      0.000000      0.000000  392.00000    3.75000
+    4    5      0.000000      0.000000  268.56657    3.85000
+    4   61      0.000000      0.435000    0.00000    0.00000
+    4   62      0.000000     -0.700000  381.86909    3.38500
+    4   64      0.000000      0.265000  268.56657    3.85000
+    4   65      0.000000      0.265000  125.21981    4.04000
+    5    4      0.000000      0.000000  268.56657    3.85000
+    5    5      0.000000      0.000000  184.00000    3.95000
+    5   61      0.000000      0.435000    0.00000    0.00000
+    5   62      0.000000     -0.700000  261.62569    3.48500
+    5   64      0.000000      0.265000  184.00000    3.95000
+    5   65      0.000000      0.265000   85.79044    4.14000
+   61    4      0.435000      0.000000    0.00000    0.00000
+   61    5      0.435000      0.000000    0.00000    0.00000
+   61   61      0.435000      0.435000    0.00000    0.00000
+   61   62      0.435000     -0.700000    0.00000    0.00000
+   61   64      0.435000      0.265000    0.00000    0.00000
+   61   65      0.435000      0.265000    0.00000    0.00000
+   62    4     -0.700000      0.000000  381.86909    3.38500
+   62    5     -0.700000      0.000000  261.62569    3.48500
+   62   61     -0.700000      0.435000    0.00000    0.00000
+   62   62     -0.700000     -0.700000  372.00000    3.02000
+   62   64     -0.700000      0.265000  261.62569    3.48500
+   62   65     -0.700000      0.265000  121.98361    3.67500
+   64    4      0.265000      0.000000  268.56657    3.85000
+   64    5      0.265000      0.000000  184.00000    3.95000
+   64   61      0.265000      0.435000    0.00000    0.00000
+   64   62      0.265000     -0.700000  261.62569    3.48500
+   64   64      0.265000      0.265000  184.00000    3.95000
+   64   65      0.265000      0.265000   85.79044    4.14000
+   65    4      0.265000      0.000000  125.21981    4.04000
+   65    5      0.265000      0.000000   85.79044    4.14000
+   65   61      0.265000      0.435000    0.00000    0.00000
+   65   62      0.265000     -0.700000  121.98361    3.67500
+   65   64      0.265000      0.265000   85.79044    4.14000
+   65   65      0.265000      0.265000   40.00000    4.33000
  
  sumup control
  number of chains         186
@@ -443,7 +454,7 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  
  box             1  initial v   =   -604262.747018092     
  surf. tension :   box 1 =     -13.94863
- pressure check:   box 1 =       3612.16
+ pressure check:   box 1 =       8389.88
  
  sumup control
  number of chains          14
@@ -462,7 +473,7 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  
  box             2  initial v   =    16004.4072010518     
  surf. tension :   box 2 =       0.15346
- pressure check:   box 2 =       1201.76
+ pressure check:   box 2 =       1208.08
  
  +++++ start of markov chain +++++
  
@@ -475,8 +486,8 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  Type  1 bn     14.     17.     10.     18.     15.     15.
          bs      9.     10.      6.     14.     15.     15.
  max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
-    10   35270 -0.5964E+06    33.746    -38283.2  186
-                0.1213E+05    42.725      1030.5   14
+    10   35270 -0.5964E+06    33.746    -33633.2  186
+                0.1213E+05    42.725      1036.9   14
  Box            1
  Type  1 bn    169.    188.    220.    207.    236.    215.
          bs     89.     84.    104.    101.    107.    119.
@@ -485,8 +496,8 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  Type  1 bn     11.     14.     23.     14.     14.     16.
          bs      7.      8.     15.     12.     10.     15.
  max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
-    20   35280 -0.5894E+06    33.558     56553.0  185
-                0.7868E+04    42.841      1529.0   15
+    20   35280 -0.5894E+06    33.558     61309.8  185
+                0.7868E+04    42.841      1536.2   15
  
  +++++ end of markov chain +++++
  
@@ -589,12 +600,12 @@ molecule  1:   0.00000000      0.00000000
  
  vstart       =      -604262.7470180918        16004.4072010518
  vend         =      -589406.1566419255         7868.0022273492
- vbox         =      -589406.1566419167         7868.0022273487
+ vbox         =      -589406.1566419192         7868.0022273486
  
  Averages and fluctuations                            Box 1       Box 2
  
- pressure                               [kPa] =     5636.72     1367.58
- pressure                  [simulation units] =    0.408266    0.099054
+ pressure                               [kPa] =    10354.52     1374.38
+ pressure                  [simulation units] =    0.749975    0.099546
  surface tension                       [mN/m] =    -29.7631      0.8934
  chem. potential of type       1          [K] =    2211.166     138.662
  
@@ -625,10 +636,10 @@ molecule  1:   0.00000000      0.00000000
  type  box     vinter      vintra      vtor        vbend       vtail
     1    1     0.00000     0.00000     0.00000     0.00000     0.00000
     1    2     0.00000     0.00000     0.00000     0.00000     0.00000
- H_vap      [kJ/mol] btwn box      1 and   2 =        37.0201         1.2948         1.2948
- H_vap LJ  [kJ/mol] btwn box      1 and   2 =        20.8701         0.2043         0.2043
- H_vap Coul [kJ/mol] btwn box     1 and   2 =        23.7169         0.0954         0.0954
- pdV        [kJ/mol] btwn box      1 and   2 =         4.2782         0.1423         0.1423
+ H_vap      [kJ/mol] btwn box      1 and   2 =        37.0414         1.2942         1.2942
+ H_vap LJ  [kJ/mol] btwn box      1 and   2 =        20.8914         0.2049         0.2049
+ H_vap Coul [kJ/mol] btwn box     1 and   2 =        23.7381         0.0948         0.0948
+ pdV        [kJ/mol] btwn box      1 and   2 =         4.2995         0.1429         0.1429
  CED [cal/cc]   btwn box           1 and   2 =        63.4585         2.5541         2.5541
  CED_LJ[cal/cc] btwn box           1 and   2 =        32.1611         0.2395         0.2395
  CED_Coul[cal/cc] btwn box         1 and   2 =        37.6821         0.3262         0.3262
@@ -639,8 +650,8 @@ molecule  1:   0.00000000      0.00000000
  specific density    box   2 =  0.27402E-01 0.32134E-03 0.32134E-03
  system volume       box   1 =  0.38012E+05 0.63032E+01 0.63032E+01
  system volume       box   2 =  0.78405E+05 0.63032E+01 0.63032E+01
- pressure            box   1 =   5636.7      31761.      31761.    
- pressure            box   2 =   1367.6      89.749      89.749    
+ pressure            box   1 =   10355.      31799.      31799.    
+ pressure            box   2 =   1374.4      90.173      90.173    
  surface tension     box   1 =    -29.76311     5.99947     5.99947
  surface tension     box   2 =      0.89344     0.45584     0.45584
  
@@ -667,9 +678,9 @@ molecule  1:   0.00000000      0.00000000
  3-body Garo    box   2 =    0.00000E+00   0.00000E+00   0.00000E+00
  Fluc Q         box   2 =    0.00000E+00   0.00000E+00   0.00000E+00
  
- Enthalpy Inst.[kJ/mol] for box  1 =    -26.0953      3.9418      3.9418
+ Enthalpy Inst.[kJ/mol] for box  1 =    -25.5126      3.9442      3.9442
  Enthalpy Ext. [kJ/mol] for box  1 =    -26.7608      0.0190      0.0190
- Enthalpy Inst.[kJ/mol] for box  2 =     10.4160      1.2652      1.2652
+ Enthalpy Inst.[kJ/mol] for box  2 =     10.4381      1.2645      1.2645
  Enthalpy Ext. [kJ/mol] for box  2 =      6.2944      1.4282      1.4282
  
  chemical potential  itype   1 box   1 =     2302.416     290.110     290.110
@@ -687,10 +698,10 @@ Free Enrgy of Transf itype   1 between box  2 and  1        -15.643912          
  -----block averages ------
   ------------ box:    1
  block   energy    density   pressure   surf ten  mol fracs
-   1  -0.602E+06   0.732E+00  -0.261E+05  -0.358E+02   0.100E+01
-   2  -0.595E+06   0.730E+00   0.374E+05  -0.238E+02   0.100E+01
+   1  -0.602E+06   0.732E+00  -0.214E+05  -0.358E+02   0.100E+01
+   2  -0.595E+06   0.730E+00   0.422E+05  -0.238E+02   0.100E+01
   ------------ box:    2
  block   energy    density   pressure   surf ten  mol fracs
    1   0.138E+05   0.271E-01   0.128E+04   0.438E+00   0.100E+01
    2   0.981E+04   0.277E-01   0.146E+04   0.135E+01   0.100E+01
- Program ended at 2013-04-22 16:53:43.875
+ Program ended at 2013-04-26 02:16:44.166

@@ -2,7 +2,6 @@ MODULE moves_volume
   use util_random,only:random
   use util_runtime,only:err_exit
   use sim_system
-  use sim_particle,only:rebuild_neighbor_list
   use sim_cell
   use energy_kspace,only:recip,calp,save_kvector,restore_kvector
   use energy_pairwise,only:sumup
@@ -13,7 +12,6 @@ MODULE moves_volume
 
   real,allocatable,public::acsvol(:),acnvol(:),acshmat(:,:),acnhmat(:,:),bsvol(:),bnvol(:),bshmat(:,:),bnhmat(:,:)
   real,allocatable::vboxn(:,:),vboxo(:,:),bxo(:),byo(:),bzo(:),xcmo(:),ycmo(:),zcmo(:),rxuo(:,:),ryuo(:,:),rzuo(:,:),qquo(:,:),rcuto(:)
-  integer,allocatable::neigho_cnt(:),neigho(:,:)
   real::hmato(9),hmatio(9)
   integer::allow_cutoff_failure=-1 !< controls how volume move failures, the ones that will result in box lengths smaller than twice the cutoff, are handled: -1 = fetal error and program exits; 0 = simply rejects the move, which is equivalent to modifying the lower limit of integration of the partition function; 1 = allows the move and adjusts cutoff to be half of the new box lengths (will be restored if possible); 2 = allows the move but does not adjust the cutoff, which could be problematic because this results in a lower density in the cutoff radius (due to periodic boundary conditions)
 
@@ -401,7 +399,6 @@ contains
        call sumup(ovrlap,v,ibox,.true.)
        if ( ovrlap ) goto 500
        vboxn(:,ibox) = v
-       vboxn(10,ibox)= v3garo
        vboxn(1,ibox) = vboxo(1,ibox) + (vboxn(2,ibox)-vboxo(2,ibox)) + (vboxn(9,ibox)-vboxo(9,ibox)) + (vboxn(8,ibox)-vboxo(8,ibox)) + (vboxn(10,ibox)-vboxo(10,ibox)) ! inter, ext, elect, garo
     end do
 
@@ -706,7 +703,6 @@ contains
     call sumup(ovrlap,v,boxvch,.true.)
     if ( ovrlap ) goto 500
     vboxn(:,boxvch) = v
-    vboxn(10,boxvch)= v3garo
     vboxn(1,boxvch) = vboxo(1,boxvch) + (vboxn(2,boxvch)-vboxo(2,boxvch)) + (vboxn(9,boxvch)-vboxo(9,boxvch)) + (vboxn(8,boxvch)-vboxo(8,boxvch)) + (vboxn(10,boxvch)-vboxo(10,boxvch)) !inter, ext, elect, garo
 
     if ( lanes ) then
@@ -760,7 +756,7 @@ contains
     real::rmvolume
     namelist /mc_volume/ tavol,iratv,pmvlmt,nvolb,pmvolb,box5,box6,pmvol,pmvolx,pmvoly,rmvolume,allow_cutoff_failure
 
-    allocate(acsvol(nbxmax),acnvol(nbxmax),acshmat(nbxmax,9),acnhmat(nbxmax,9),bsvol(nbxmax),bnvol(nbxmax),bshmat(nbxmax,9),bnhmat(nbxmax,9),vboxn(nEnergy,nbxmax),vboxo(nEnergy,nbxmax),bxo(nbxmax),byo(nbxmax),bzo(nbxmax),xcmo(nmax),ycmo(nmax),zcmo(nmax),rxuo(nmax,numax),ryuo(nmax,numax),rzuo(nmax,numax),qquo(nmax,numax),neigho_cnt(nmax),neigho(100,nmax),rcuto(nbxmax),stat=jerr)
+    allocate(acsvol(nbxmax),acnvol(nbxmax),acshmat(nbxmax,9),acnhmat(nbxmax,9),bsvol(nbxmax),bnvol(nbxmax),bshmat(nbxmax,9),bnhmat(nbxmax,9),vboxn(nEnergy,nbxmax),vboxo(nEnergy,nbxmax),bxo(nbxmax),byo(nbxmax),bzo(nbxmax),xcmo(nmax),ycmo(nmax),zcmo(nmax),rxuo(nmax,numax),ryuo(nmax,numax),rzuo(nmax,numax),qquo(nmax,numax),rcuto(nbxmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_moves_volume: allocation failed',jerr)
 
     acsvol = 0.E0_dp
@@ -809,7 +805,7 @@ contains
        write(io_output,'(A,I0)') 'frequency to adjust maximum volume displacement: ',iratv
        write(io_output,'(A,F8.3)') 'initial maximum volume displacement (rmvol): ',rmvolume
        write(io_output,'(A,G16.9)') 'pmvol: ',pmvol
-       if (ANY(lsolid(1:nbox))) write(io_output,'(2(A,L2))') 'pmvolx: ',pmvolx,', pmvoly: ',pmvoly
+       if (ANY(lsolid(1:nbox))) write(io_output,'(2(A,G16.9))') 'pmvolx: ',pmvolx,', pmvoly: ',pmvoly
        do i = 1,nbox
           write(io_output,'(A,I0,A,G16.9)') '   pmvlmt for box ',i,': ',pmvlmt(i)
        end do
@@ -948,6 +944,7 @@ contains
 
 !> \brief Store old chain configuration
   subroutine save_configuration(boxes)
+    use sim_particle,only:save_neighbor_list
     integer,intent(in)::boxes(:)
     integer::i,j
 
@@ -962,23 +959,8 @@ contains
              if ( lpbcz ) rzuo(i,j) = rzu(i,j)
              qquo(i,j) = qqu(i,j)
           end do
-          if (lneighbor) then
-             neigho_cnt(i) = neigh_cnt(i)
-             do j = 1,neigho_cnt(i)
-                neigho(j,i)=neighbor(j,i)
-             end do
-          end if
-
-          ! store neighbor list for garofalini --- KEA
-          if (lgaro) then
-             neigh_o(i) = neigh_cnt(i)
-             do j=1,neigh_o(i)
-                neighboro(j,i) = neighbor(j,i)
-                ndijo(j,i) = ndij(j,i)
-                nxijo(j,i) = nxij(j,i)
-                nyijo(j,i) = nyij(j,i)
-                nzijo(j,i) = nzij(j,i)
-             end do
+          if (lneighbor.or.lgaro) then
+             call save_neighbor_list(i)
           end if
        end if
     end do
@@ -1018,6 +1000,7 @@ contains
 
 !> \brief Restore old energy, box lengths
   subroutine restore_configuration(boxes)
+    use sim_particle,only:restore_neighbor_list
     integer,intent(in)::boxes(:)
     integer::i,j
 
@@ -1032,23 +1015,8 @@ contains
              if ( lpbcz ) rzu(i,j) = rzuo(i,j)
              qqu(i,j) = qquo(i,j)
           end do
-          if (lneighbor) then
-             neigh_cnt(i) = neigho_cnt(i)
-             do j = 1,neigh_cnt(i)
-                neighbor(j,i)=neigho(j,i)
-             end do
-          end if
-
-          ! restore old neighbor list for garofalini --- KEA
-          if (lgaro) then
-             neigh_cnt(i) = neigh_o(i)
-             do j=1,neigh_cnt(i)
-                neighbor(j,i) = neighboro(j,i)
-                ndij(j,i) = ndijo(j,i)
-                nxij(j,i) = nxijo(j,i)
-                nyij(j,i) = nyijo(j,i)
-                nzij(j,i) = nzijo(j,i)
-             end do
+          if (lneighbor.or.lgaro) then
+             call restore_neighbor_list(i)
           end if
        end if
     end do
@@ -1072,9 +1040,6 @@ contains
     ! update linkcell, if applicable
     if (licell .and. (box .eq. boxlink)) then
        call build_linked_cell()
-    end if
-    if (lneigh) then
-       call rebuild_neighbor_list(box)
     end if
   end subroutine update_box
 

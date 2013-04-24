@@ -10,18 +10,28 @@ MODULE energy_intramolecular
   implicit none
   private
   save
-  public::read_energy_bonded,vtorso,lininter_vib,lininter_bend,U_torsion,U_bonded,allocate_energy_bonded,bonds,angles,dihedrals
+  public::read_ff_bonded,vtorso,lininter_vib,lininter_bend,U_torsion,U_bonded,allocate_energy_bonded,bonds,angles,dihedrals
 
-  integer,parameter::torsion_nParameter(8)=(/4,10,3,2,5,10,4,5/)
-  integer,allocatable::vib_type(:),ben_type(:),torsion_type(:) !< type 0: dummy torsion type for setting up interaction table
-                                       !< type 1: OPLS potential (three terms), angle in protein convention (trans is 180 deg)
-                                       !< type 2: Ryckaert-Bellemans potential, angle in polymer convention (trans is 0 deg)
-                                       !< type 3: periodic type, angle in protein convention (trans is 180 deg)
-                                       !< type 4: harmonic type, angle in polymer convention (trans is 0 deg)
-                                       !< type 5: OPLS potential (four terms), angle in protein convention (trans is 180 deg)
-                                       !< type 6: nine-term Fourier cosine series, angle in protein convention (trans is 180 deg)
-                                       !< type 7: Ryckaert-Bellemans potential (three terms), angle in polymer convention (trans is 0 deg)
-                                       !< type 8: Ryckaert-Bellemans potential (four terms), angle in polymer convention (trans is 0 deg)
+  integer,parameter::torsion_nParameter(-1:8)=(/0,0,4,10,3,2,5,10,4,5/)
+  integer,allocatable::vib_type(:),ben_type(:),torsion_type(:) !< type -1: tabulated potential
+  !< type 0: dummy torsion type for setting up interaction table
+  !< type 1: OPLS potential (three terms)
+  !< V(phi) = vtt0 + vtt1*[1+cos(phi)] + vtt2*[1-cos(2*phi)] + vtt3*[1+cos(3*phi)]
+  !< type 2: Ryckaert-Bellemans potential
+  !< V(psi) = vtt0 + vtt1*cos(psi) + vtt2*cos(psi)^2 + ... + vtt9*cos(psi)^9
+  !< type 3: periodic type
+  !< V(phi) = vtt0*[1+cos(vtt1*phi-vtt2)]
+  !< type 4: harmonic type
+  !< V(psi) = vtt0*(psi-vtt1)^2
+  !< type 5: OPLS potential (four terms)
+  !< V(phi) = vtt0 + vtt1*[1+cos(phi)] + vtt2*[1-cos(2*phi)] + vtt3*[1+cos(3*phi)] + vtt4*[1-cos(4*phi)]
+  !< type 6: nine-term Fourier cosine series
+  !< V(phi) = vtt0 + vtt1*cos(phi) + vtt2*cos(2*phi) + ... + vtt9*cos(9*phi)
+  !< type 7: Ryckaert-Bellemans potential (three terms)
+  !< V(psi) = vtt0 + vtt1*cos(psi) + vtt2*cos(psi)^2 + vtt3*cos(psi)^3
+  !< type 8: Ryckaert-Bellemans potential (four terms)
+  !< V(psi) = vtt0 + vtt1*cos(psi) + vtt2*cos(psi)^2 + vtt3*cos(psi)^4 + vtt3*cos(psi)^4
+  !< \note psi uses polymer convention (trans is 0 deg), while phi uses protein convention (trans is 180 deg)
   real,allocatable::vtt(:,:)
 
   integer,allocatable::vibsplits(:),bendsplits(:),splpnts(:)
@@ -32,7 +42,8 @@ MODULE energy_intramolecular
 
   real,allocatable::rxvec(:,:),ryvec(:,:),rzvec(:,:),distij2(:,:),distanceij(:,:)
 contains
-  subroutine read_energy_bonded(io_ff)
+  subroutine read_ff_bonded(io_ff)
+    use util_search,only:tightenTable
     integer,intent(in)::io_ff
     integer,parameter::initial_size=20
     integer::i,n,jerr
@@ -41,8 +52,6 @@ contains
     call initiateTable(bonds,initial_size)
     call initiateTable(angles,initial_size)
     call initiateTable(dihedrals,initial_size)
-
-    call init_tabulated_potential_bonded()
 
     !> Looking for section BONDS
     REWIND(io_ff)
@@ -74,6 +83,13 @@ contains
        end if
     END DO CYCLE_READ_BONDS
 
+    if (n.gt.0) then
+       call tightenTable(bonds)
+       call reallocate(vib_type,1,n)
+       call reallocate(brvib,1,n)
+       call reallocate(brvibk,1,n)
+    end if
+
     !> Looking for section ANGLES
     REWIND(io_ff)
     CYCLE_READ_ANGLES:DO
@@ -104,6 +120,13 @@ contains
           exit cycle_read_angles
        end if
     END DO CYCLE_READ_ANGLES
+
+    if (n.gt.0) then
+       call tightenTable(angles)
+       call reallocate(ben_type,1,n)
+       call reallocate(brben,1,n)
+       call reallocate(brbenk,1,n)
+    end if
 
     !> Looking for section DIHEDRALS
     REWIND(io_ff)
@@ -147,13 +170,20 @@ contains
           exit cycle_read_dihedrals
        end if
     END DO CYCLE_READ_DIHEDRALS
+    
+    if (n.gt.0) then
+       call tightenTable(dihedrals)
+       call reallocate(torsion_type,1,n)
+       call reallocate(vtt,0,9,1,n)
+    end if
+
+    call read_tabulated_ff_bonded()
 
     return
-  end subroutine read_energy_bonded
+  end subroutine read_ff_bonded
 
 !DEC$ ATTRIBUTES FORCEINLINE :: vtorso
   function vtorso(xvec1,yvec1,zvec1,xvec2,yvec2,zvec2,xvec3,yvec3,zvec3,itype)
-    use sim_system,only:L_tor_table
     real::vtorso
     real,intent(in)::xvec1,yvec1,zvec1,xvec2,yvec2,zvec2,xvec3,yvec3,zvec3
     integer,intent(in)::itype
@@ -162,61 +192,61 @@ contains
     if (torsion_type(itype).eq.0) then
        ! type 0: dummy torsion type for setting up interaction table
        vtorso=0.0E0_dp
-    else if (L_tor_table) then
+    else if (torsion_type(itype).eq.-1) then
        call dihedral_angle(xvec1,yvec1,zvec1,xvec2,yvec2,zvec2,xvec3,yvec3,zvec3,thetac,theta,.true.)
        vtorso=inter_tor(theta,itype)
     else
        call dihedral_angle(xvec1,yvec1,zvec1,xvec2,yvec2,zvec2,xvec3,yvec3,zvec3,thetac,theta,.false.)
 
-        if (torsion_type(itype).eq.7) then
-           !< type 7: Ryckaert-Bellemans potential (three terms), angle in polymer convention (trans is 0 deg)
-           tac2 = thetac*thetac
-           tac3 = tac2*thetac
-           vtorso = vtt(0,itype)+vtt(1,itype)*thetac+vtt(2,itype)*tac2+vtt(3,itype)*tac3
-        else if (torsion_type(itype).eq.8) then
-           !< type 8: Ryckaert-Bellemans potential (four terms), angle in polymer convention (trans is 0 deg)
-           tac2 = thetac*thetac
-           tac3 = tac2*thetac
-           tac4 = tac3*thetac
-           vtorso = vtt(0,itype)+vtt(1,itype)*thetac+vtt(2,itype)*tac2+vtt(3,itype)*tac3+vtt(4,itype)*tac4
-        else if (torsion_type(itype).eq.2) then
-           ! type 2: Ryckaert-Bellemans potential, angle in polymer convention (trans is 0 deg)
-           tac2 = thetac*thetac
-           tac3 = tac2*thetac
-           tac4 = tac3*thetac
-           tac5 = tac4*thetac
-           tac6 = tac5*thetac
-           tac7 = tac6*thetac
-           tac8 = tac7*thetac
-           tac9 = tac8*thetac
-           vtorso = vtt(0,itype)+vtt(1,itype)*thetac+vtt(2,itype)*tac2+vtt(3,itype)*tac3+vtt(4,itype)*tac4+vtt(5,itype)*tac5+vtt(6,itype)*tac6+vtt(7,itype)*tac7+vtt(8,itype)*tac8+vtt(9,itype)*tac9
-        else if (torsion_type(itype).eq.3) then
-           ! type 3: periodic type, angle in protein convention (trans is 180 deg)
-           theta=theta+onepi
-           vtorso=vtt(0,itype)*(1+cos(vtt(1,itype)*theta-vtt(2,itype)))
-        else if (torsion_type(itype).eq.4) then
-           ! type 4: harmonic type, angle in polymer convention (trans is 0 deg)
-           tac2=theta-vtt(1,itype)
-           vtorso=vtt(0,itype)*tac2*tac2
-        else if (torsion_type(itype).eq.1) then
-           ! type 1: OPLS potential (three terms), angle in protein convention (trans is 180 deg)
-           theta=theta+onepi
-    ! remember: 1 + cos( theta+onepi ) = 1 - cos( theta )
-           vtorso = vtt(0,itype) + vtt(1,itype)*(1.0E0_dp-thetac) + vtt(2,itype)*(1.E0_dp-cos(2.E0_dp*theta)) + vtt(3,itype)*(1.E0_dp+cos(3.E0_dp*theta))
-        else if (torsion_type(itype).eq.5) then
-           ! type 5: OPLS potential (four terms), angle in protein convention (trans is 180 deg)
-           theta=theta+onepi
-           vtorso = vtt(0,itype) + vtt(1,itype)*(1.0E0_dp-thetac) + vtt(2,itype)*(1.E0_dp-cos(2.E0_dp*theta)) + vtt(3,itype)*(1.E0_dp+cos(3.E0_dp*theta)) + vtt(4,itype)*(1.E0_dp-cos(4.E0_dp*theta))
-        else if (torsion_type(itype).eq.6) then
-           ! type 6: nine-term Fourier cosine series, angle in protein convention (trans is 180 deg)
-           theta=theta+onepi
-           vtorso=vtt(0,itype)-vtt(1,itype)*thetac+vtt(2,itype)*cos(2.0E0_dp*theta)+vtt(3,itype)*cos(3.0E0_dp*theta)&
-            +vtt(4,itype)*cos(4.0E0_dp*theta)+vtt(5,itype)*cos(5.0E0_dp*theta)+vtt(6,itype)*cos(6.0E0_dp*theta)&
-            +vtt(7,itype)*cos(7.0E0_dp*theta)+vtt(8,itype)*cos(8.0E0_dp*theta)+vtt(9,itype)*cos(9.0E0_dp*theta)
-        else
-           call err_exit(__FILE__,__LINE__,'you picked a non-defined torsional type',myid+1)
-        end if
-     end if
+       if (torsion_type(itype).eq.7) then
+          !< type 7: Ryckaert-Bellemans potential (three terms), angle in polymer convention (trans is 0 deg)
+          tac2 = thetac*thetac
+          tac3 = tac2*thetac
+          vtorso = vtt(0,itype)+vtt(1,itype)*thetac+vtt(2,itype)*tac2+vtt(3,itype)*tac3
+       else if (torsion_type(itype).eq.8) then
+          !< type 8: Ryckaert-Bellemans potential (four terms), angle in polymer convention (trans is 0 deg)
+          tac2 = thetac*thetac
+          tac3 = tac2*thetac
+          tac4 = tac3*thetac
+          vtorso = vtt(0,itype)+vtt(1,itype)*thetac+vtt(2,itype)*tac2+vtt(3,itype)*tac3+vtt(4,itype)*tac4
+       else if (torsion_type(itype).eq.2) then
+          ! type 2: Ryckaert-Bellemans potential, angle in polymer convention (trans is 0 deg)
+          tac2 = thetac*thetac
+          tac3 = tac2*thetac
+          tac4 = tac3*thetac
+          tac5 = tac4*thetac
+          tac6 = tac5*thetac
+          tac7 = tac6*thetac
+          tac8 = tac7*thetac
+          tac9 = tac8*thetac
+          vtorso = vtt(0,itype)+vtt(1,itype)*thetac+vtt(2,itype)*tac2+vtt(3,itype)*tac3+vtt(4,itype)*tac4+vtt(5,itype)*tac5+vtt(6,itype)*tac6+vtt(7,itype)*tac7+vtt(8,itype)*tac8+vtt(9,itype)*tac9
+       else if (torsion_type(itype).eq.3) then
+          ! type 3: periodic type, angle in protein convention (trans is 180 deg)
+          theta=theta+onepi
+          vtorso=vtt(0,itype)*(1+cos(vtt(1,itype)*theta-vtt(2,itype)))
+       else if (torsion_type(itype).eq.4) then
+          ! type 4: harmonic type, angle in polymer convention (trans is 0 deg)
+          tac2=theta-vtt(1,itype)
+          vtorso=vtt(0,itype)*tac2*tac2
+       else if (torsion_type(itype).eq.1) then
+          ! type 1: OPLS potential (three terms), angle in protein convention (trans is 180 deg)
+          theta=theta+onepi
+          ! remember: 1 + cos( theta+onepi ) = 1 - cos( theta )
+          vtorso = vtt(0,itype) + vtt(1,itype)*(1.0E0_dp-thetac) + vtt(2,itype)*(1.E0_dp-cos(2.E0_dp*theta)) + vtt(3,itype)*(1.E0_dp+cos(3.E0_dp*theta))
+       else if (torsion_type(itype).eq.5) then
+          ! type 5: OPLS potential (four terms), angle in protein convention (trans is 180 deg)
+          theta=theta+onepi
+          vtorso = vtt(0,itype) + vtt(1,itype)*(1.0E0_dp-thetac) + vtt(2,itype)*(1.E0_dp-cos(2.E0_dp*theta)) + vtt(3,itype)*(1.E0_dp+cos(3.E0_dp*theta)) + vtt(4,itype)*(1.E0_dp-cos(4.E0_dp*theta))
+       else if (torsion_type(itype).eq.6) then
+          ! type 6: nine-term Fourier cosine series, angle in protein convention (trans is 180 deg)
+          theta=theta+onepi
+          vtorso=vtt(0,itype)-vtt(1,itype)*thetac+vtt(2,itype)*cos(2.0E0_dp*theta)+vtt(3,itype)*cos(3.0E0_dp*theta)&
+           +vtt(4,itype)*cos(4.0E0_dp*theta)+vtt(5,itype)*cos(5.0E0_dp*theta)+vtt(6,itype)*cos(6.0E0_dp*theta)&
+           +vtt(7,itype)*cos(7.0E0_dp*theta)+vtt(8,itype)*cos(8.0E0_dp*theta)+vtt(9,itype)*cos(9.0E0_dp*theta)
+       else
+          call err_exit(__FILE__,__LINE__,'vtorso: undefined torsional type',myid+1)
+       end if
+    end if
 
     return
   end function vtorso
@@ -271,7 +301,7 @@ contains
 
   function lininter_vib(r,typ) result(tabulated_vib)
     use util_math,only:polint
-    use util_search,only:indexOf,LOCATE
+    use util_search,only:LOCATE
     real::tabulated_vib
     real,intent(in)::r
     integer,intent(in)::typ
@@ -292,7 +322,7 @@ contains
 
   function lininter_bend(r,typ) result(tabulated_bend)
     use util_math,only:polint
-    use util_search,only:indexOf,LOCATE
+    use util_search,only:LOCATE
     real::tabulated_bend
     real,intent(in)::r
     integer,intent(in)::typ
@@ -313,7 +343,7 @@ contains
 
   function inter_tor(thetarad,typ) result(tabulated_tor)
     use util_math,only:polint,splint
-    use util_search,only:indexOf,LOCATE
+    use util_search,only:LOCATE
     real::tabulated_tor
     real,intent(in)::thetarad
     integer,intent(in)::typ
@@ -374,7 +404,7 @@ contains
 
 !DEC$ ATTRIBUTES FORCEINLINE :: U_torsion
   function U_torsion(i,imolty,ist,lupdate_connectivity) result(vtg)
-    use sim_system,only:nunit,intor,ittor,ijtor2,ijtor3,ijtor4,L_tor_table
+    use sim_system,only:nunit,intor,ittor,ijtor2,ijtor3,ijtor4
     real::vtg
     integer,intent(in)::i,imolty,ist
     logical,intent(in)::lupdate_connectivity
@@ -460,8 +490,9 @@ contains
   end subroutine U_bonded
 
 !> \brief Read in tabulated potential for bonded interactions (stretching, bending, and torsion) and set up linear interpolation
-  subroutine read_tabulated_potential_bonded(file_tab,ntab,r,tab,splits,lists)
+  subroutine read_table(file_tab,ntab,r,tab,splits,lists)
     use util_files,only:get_iounit
+    use util_search,only:indexOf
     character(LEN=*),intent(in)::file_tab
     integer,intent(out)::ntab
     integer,allocatable,intent(inout)::splits(:)
@@ -472,19 +503,13 @@ contains
 
     io_tab=get_iounit()
     open(unit=io_tab,access='sequential',action='read',file=file_tab,form='formatted',iostat=jerr,status='old')
-    if (jerr.ne.0) then
-       call err_exit(__FILE__,__LINE__,'cannot open tabulated potential file: '//file_tab,myid+1)
-    end if
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open tabulated potential file: '//file_tab,myid+1)
 
     read(io_tab,*) ntab
     do mmm=1,ntab
        read(io_tab,*) t
-       t=addToTable(lists,t,expand=.true.)
-       if (t.gt.size(splits)) then
-          call reallocate(splits,1,2*size(splits))
-          call reallocate(r,1,size(r,1),1,2*size(r,2))
-          call reallocate(tab,1,size(tab,1),1,2*size(tab,2))
-       end if
+       t=indexOf(lists,t)
+       if (t.eq.0) call err_exit(__FILE__,__LINE__,'read_table: undefined bead',jerr)
        i=1
        do
           if (i.gt.size(r,1)) then
@@ -497,9 +522,11 @@ contains
           i=i+1
        end do
 100    splits(t)=i-1
+       call reallocate(r,1,splits(t),1,size(r,2))
+       call reallocate(tab,1,splits(t),1,size(tab,2))
     end do
     close(io_tab)
-  end subroutine read_tabulated_potential_bonded
+  end subroutine read_table
 
 !> L_spline: Requires file (fort.40) running from -195 to 195 in degree steps
 !> (Extra 15 degrees on each side required so that second derivatives are
@@ -526,37 +553,43 @@ contains
 !>  make sure potential does not go up to infinity! \n
 !>  KM 12/03/08
 !>cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-  subroutine init_tabulated_potential_bonded()
+  subroutine read_tabulated_ff_bonded()
     use util_math,only:spline
-    use sim_system,only:L_tor_table,L_vib_table,L_bend_table
-    integer,parameter::initial_size=10,grid_size=1500
+    use sim_system,only:L_vib_table,L_bend_table
+    integer,parameter::grid_size=1500
     integer::jerr,ttor
 
-    if (L_tor_table) then
-       allocate(splpnts(1:initial_size),deg(1:grid_size,1:initial_size),tabtorso(1:grid_size,1:initial_size),stat=jerr)
-       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_bonded: allocation failed for vib_table 1',myid+1)
-       call read_tabulated_potential_bonded('fort.40',nttor,deg,tabtorso,splpnts,dihedrals)
-       if (L_spline) then
-          allocate(torderiv2(1:grid_size,1:initial_size),stat=jerr)
-          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_bonded: allocation failed for tor_table 2',myid+1)
-          do ttor=1,nttor
-             call spline(deg(:,ttor),tabtorso(:,ttor),splpnts(ttor),1.0E31_dp,1.0E31_dp,torderiv2(:,ttor))
-          end do
+    if (dihedrals%size.gt.0) then
+       if (ANY(torsion_type(1:dihedrals%size).eq.-1)) then
+          if (L_spline.and.L_linear) call err_exit(__FILE__,__LINE__,'L_spline and L_linear should have one and only one to be true if using tabulated potential for torsions',myid+1)
+
+          allocate(splpnts(1:dihedrals%size),deg(1:grid_size,1:dihedrals%size),tabtorso(1:grid_size,1:dihedrals%size),stat=jerr)
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_bonded: allocation failed for vib_table 1',myid+1)
+          call read_table('fort.40',nttor,deg,tabtorso,splpnts,dihedrals)
+          if (L_spline) then
+             allocate(torderiv2(1:grid_size,1:dihedrals%size),stat=jerr)
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_bonded: allocation failed for tor_table 2',myid+1)
+             do ttor=1,nttor
+                call spline(deg(:,ttor),tabtorso(:,ttor),splpnts(ttor),1.0E31_dp,1.0E31_dp,torderiv2(:,ttor))
+             end do
+          else if (.not.L_linear) then
+             call err_exit(__FILE__,__LINE__,'Must set one of L_spline and L_linear to be true if using tabulated potential for torsions',myid+1)
+          end if
        end if
     end if
 
-    if (L_vib_table) then
-       allocate(vibsplits(1:initial_size),vib(1:grid_size,1:initial_size),tabvib(1:grid_size,1:initial_size),stat=jerr)
+    if (bonds%size.gt.0.and.L_vib_table) then
+       allocate(vibsplits(1:bonds%size),vib(1:grid_size,1:bonds%size),tabvib(1:grid_size,1:bonds%size),stat=jerr)
        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_bonded: allocation failed for vib_table',myid+1)
-       call read_tabulated_potential_bonded('fort.41',ntabvib,vib,tabvib,vibsplits,bonds)
+       call read_table('fort.41',ntabvib,vib,tabvib,vibsplits,bonds)
     end if
 
-    if (L_bend_table) then
-       allocate(bendsplits(1:initial_size),bend(1:grid_size,1:initial_size),tabbend(1:grid_size,1:initial_size),stat=jerr)
+    if (angles%size.gt.0.and.L_bend_table) then
+       allocate(bendsplits(1:angles%size),bend(1:grid_size,1:angles%size),tabbend(1:grid_size,1:angles%size),stat=jerr)
        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_bonded: allocation failed for bend_table',myid+1)
-       call read_tabulated_potential_bonded('fort.42',ntabbend,bend,tabbend,bendsplits,angles)
+       call read_table('fort.42',ntabbend,bend,tabbend,bendsplits,angles)
     end if
-  end subroutine init_tabulated_potential_bonded
+  end subroutine read_tabulated_ff_bonded
 
   subroutine allocate_energy_bonded()
     use sim_system,only:numax

@@ -4,9 +4,9 @@
      nbox=           2
      nmolty=           1
      nchain=         200
-     nstep=        20
+     nstep=          20
      lstop= F
-     iratio=         10
+     iratio=          10
      rmin=   1.00000000000000     
      softcut=   100.000000000000     
      linit= F
@@ -23,9 +23,9 @@
 
 
  &analysis
-     iprint=         10
+     iprint=          10
      imv=         600
-     iblock=         10
+     iblock=          10
      iratp=           5
      idiele=           1
      iheatcapacity=       10000
@@ -45,6 +45,11 @@
      starvir=  0.000000000000000E+000
      stepvir=  0.000000000000000E+000
      ntemp=           0
+ /
+
+
+ &external_field
+     Elect_field=  0.000000000000000E+000  0.000000000000000E+000
  /
 
 
@@ -125,31 +130,36 @@
 
  &mc_flucq
      taflcq=  0.950000000000000     
+     fqtemp=   5.00000000000000     
      rmflucq=  0.100000000000000     
      pmflcq=  0.000000000000000E+000
      pmfqmt=   1.00000000000000     
      lflucq= F
      lqtrans= F
      fqegp=  0.000000000000000E+000
-     nchoiq=           1   1
+     nchoiq=           1           1
  /
 
 
 SIMULATION_BOX
-! boxlx boxly boxlz lsolid lrect kalp rcut rcutnn numDimensionIsIstropic pressure temperature use_linkcell rintramax ghost_particles lideal ltwice
-  34.100   34.100   34.100  F  F  0.200 14.000  0.000 0     0.1  573.00  F 0.0 0  F  F
-! nchain_1 ... nchain_nmolty inix iniy iniz inirot inimix zshift dshift
-180 6 6 5 10 0  0.0  3.800
-! boxlx boxly boxlz lsolid lrect kalp rcut rcutnn numDimensionIsIstropic pressure temperature use_linkcell rintramax ghost_particles lideal ltwice
-  42.500   42.500   42.500  F  F  0.200 14.000  0.000 0     0.1  573.00  F 0.0 0  F  F
-! nchain_1 ... nchain_nmolty inix iniy iniz inirot inimix zshift dshift
-20 5 2 2 0 0  0.0 10.625
+! boxlx boxly boxlz rcut kalp rcutnn numDimensionIsIstropic lsolid lrect lideal ltwice temperature pressure
+  34.100   34.100   34.100 14.000  0.200  0.000 0  F  F  F  F  573.00     0.1
+! nchain_1 ... nchain_nmolty ghost_particles
+180 0
+! inix iniy iniz inirot inimix zshift dshift use_linkcell rintramax
+6 6 5 10 0  0.0  3.800 F 0.0
+! boxlx boxly boxlz rcut kalp rcutnn numDimensionIsIstropic lsolid lrect lideal ltwice temperature pressure
+  42.500   42.500   42.500 14.000  0.200  0.000 0  F  F  F  F  573.00     0.1
+! nchain_1 ... nchain_nmolty ghost_particles
+20 0
+! inix iniy iniz inirot inimix zshift dshift use_linkcell rintramax
+5 2 2 0 0  0.0 10.625 F 0.0
 END SIMULATION_BOX
 
 
 MOLECULE_TYPE
-! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
-8 8 8 8 0  T 1  F 8  F  F 10000     0.0     0.0  T 0.5  F  F
+! nunit nugrow ncarbon maxcbmc maxgrow iring lelect lring lrigid lbranch lrplc lsetup lq14scale qscale iurot isolute eta
+8 8 8 8 1 8  T  F  F  F  F  F  T 0.5 0 10000     0.0     0.0
 ! unit ntype leaderq
 1 4 1
 ! stretching

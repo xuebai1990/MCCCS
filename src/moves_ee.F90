@@ -107,8 +107,8 @@ contains
                   ntjjs = ntype(nmolty,jj)
                   ntij=type_2body(ntii,ntjj)
                   ntijs=type_2body(ntii,ntjjs)
-                  if (epsij(ntijs).ge.1.0E-6_dp.and.sig2ij(ntijs).ge. 1.0E-6_dp) then
-                     rminee(ntij) = (epsij(ntij)/epsij(ntijs))** (1.0E0_dp/12.0E0_dp)*sqrt(sig2ij(ntij)/sig2ij(ntijs))* rmin
+                  if (vvdW(1,ntijs).ge.1.0E-6_dp.and.vvdW(3,ntijs).ge.1.0E-6_dp) then
+                     rminee(ntij) = (vvdW(1,ntij)/vvdW(1,ntijs))** (1.0E0_dp/12.0E0_dp)*sqrt(vvdW(3,ntij)/vvdW(3,ntijs))* rmin
                   else if ((abs(qelect(ntii)*qelect(ntjj))) .ge.1.0E-6_dp) then
                      rminee(ntij) = rmin
                   else
@@ -116,8 +116,8 @@ contains
                   end if
 !	write(io_output,*) i,ii,j,jj,rminee(ntij)
 !	write(io_output,*) 'nt', ntii,ntjj,ntij,ntjjs,ntijs
-!	write(io_output,*) 'eps', sig2ij(ntij),sig2ij(ntijs),epsij(ntij),
-!     &              epsij(ntijs),qelect(ntii),qelect(ntjj)
+!	write(io_output,*) 'eps', vvdW(3,ntij),vvdW(3,ntijs),vvdW(1,ntij),
+!     &              vvdW(1,ntijs),qelect(ntii),qelect(ntjj)
                end do
             end do
          end do
@@ -131,8 +131,8 @@ contains
                   ntjj = ntype(j,jj)
                   ntij=type_2body(ntii,ntjj)
                   ntijs=type_2body(ntjjs,ntjj)
-                  if (epsij(ntijs).ge.1.0E-6_dp.and.sig2ij(ntijs).ge. 1.0E-6_dp) then
-                     rminee(ntij) = (epsij(ntij)/epsij(ntijs))** (1.0E0_dp/12.0E0_dp)*sqrt(sig2ij(ntij)/sig2ij(ntijs))* rmin
+                  if (vvdW(1,ntijs).ge.1.0E-6_dp.and.vvdW(3,ntijs).ge.1.0E-6_dp) then
+                     rminee(ntij) = (vvdW(1,ntij)/vvdW(1,ntijs))** (1.0E0_dp/12.0E0_dp)*sqrt(vvdW(3,ntij)/vvdW(3,ntijs))* rmin
                   else if ((abs(qelect(ntii)*qelect(ntjj))) .ge.1.0E-6_dp) then
                      rminee(ntij) = rmin
                   else
@@ -140,8 +140,8 @@ contains
                   end if
 !	write(io_output,*) i,ii,j,jj,rminee(ntij)
 !	write(io_output,*) 'nt', ntii,ntjj,ntij,ntjjs,ntijs
-!	write(io_output,*) 'eps', sig2ij(ntij),sig2ij(ntijs),epsij(ntij),
-!     &              epsij(ntijs)
+!	write(io_output,*) 'eps', vvdW(3,ntij),vvdW(3,ntijs),vvdW(1,ntij),
+!     &              vvdW(1,ntijs)
                end do
             end do
          end do
@@ -154,8 +154,8 @@ contains
                ntjjs = ntype(nmolty,jj)
                ntij=type_2body(ntii,ntjj)
                ntijs=type_2body(ntii,ntjjs)
-               if (epsij(ntijs).ge.1.0E-6_dp.and.sig2ij(ntijs).ge. 1.0E-6_dp) then
-                  rminee(ntij) = (epsij(ntij)/epsij(ntijs))** (1.0E0_dp/12.0E0_dp)*sqrt(sig2ij(ntij)/sig2ij(ntijs))* rmin
+               if (vvdW(1,ntijs).ge.1.0E-6_dp.and.vvdW(3,ntijs).ge.1.0E-6_dp) then
+                  rminee(ntij) = (vvdW(1,ntij)/vvdW(1,ntijs))** (1.0E0_dp/12.0E0_dp)*sqrt(vvdW(3,ntij)/vvdW(3,ntijs))* rmin
                else if ((abs(qelect(ntii)*qelect(ntjj))) .ge.1.0E-6_dp) then
                   rminee(ntij) = rmin
                else
@@ -174,7 +174,7 @@ contains
 !	do jj = 1, nunit(j)
 !	ntjj = ntype(j,jj)
 ! ntij = (ntii-1)*nntype+ntjj
-!	write(io_output,'(4(i4,1x),3(1x,e17.8))') i,ii,j,jj,rminee(ntij),epsij(ntij),sig2ij(ntij)
+!	write(io_output,'(4(i4,1x),3(1x,e17.8))') i,ii,j,jj,rminee(ntij),vvdW(1,ntij),vvdW(3,ntij)
 !	end do
 !	end do
 !	end do

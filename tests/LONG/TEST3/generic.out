@@ -1,4 +1,4 @@
-Program started at 2013-04-22 17:14:44.416
+Program started at 2013-04-25 20:41:04.849
 Number of processors: 1
 Threads per processor: 1
  run_num: 1
@@ -18,9 +18,10 @@ Dual Cutoff Configurational-bias Monte Carlo
 Coulombic interactions will be included in the Rosenbluth weights for CBMC growth
 Coulombic inter- and intra-molecular interactions will be calculated
    using tabulated potential with linear interpolation
-Lennard-Jones potential for pair-wise dispersive interactions
    with additional tail corrections
 Lorentz-Berthelot combining rules apply
+ L_spline:  F
+ L_linear:  F
 *******************************************
 
 NAMELIST MC_SHARED
@@ -65,13 +66,23 @@ Box 1:   32.000 x   32.000 x   32.000
    lsolid:  F, lrect:  F, lideal:  F, ltwice:  F
    temperature:  300.000 [K]
    external pressure:  0.100000000     [MPa]
-   Ghost particles: 0
    initial number of chains of each type:   1000
+   Ghost particles: 0
    initial number of chains in x, y and z directions: 10 x 10 x 10
    initial rotational displacement: 0, inimix: 1, zshift:  0.0, dshift:  1.600
 
 NUMBER OF MOLECULES OF EACH TYPE
  number of chains of each type:   1000
+
+NAMELIST EXTERNAL_FIELD
+------------------------------------------
+Steele 10-4-3 slit pore
+On both sides of the simulation box (z = 0 & z = boxlz)
+Surface material bead type: 190
+Surface atom density:  0.11400 [Ang^-3]
+Surface layer spacing:  3.40000 [Ang]
+a1:  2.46000 [Ang]
+Electric field in z direction:     0.00000000     [V/A]
 
 SECTION MOLECULE_TYPE
 ------------------------------------------
@@ -253,11 +264,11 @@ molecule type 1
       i      j      k type_i type_j type_k        angle        k/2
 
 PAIRWISE LJ AND COULOMB INTERACTIONS
-    i    j     sig2ij      epsij         q0(i)         q0(j)
-  107  107    3.16550   78.19580     -0.847600     -0.847600
-  107  108    0.00000    0.00000     -0.847600      0.423800
-  108  107    0.00000    0.00000      0.423800     -0.847600
-  108  108    0.00000    0.00000      0.423800      0.423800
+    i    j         q0(i)         q0(j)     vvdW_1     vvdW_2 ...
+  107  107     -0.847600     -0.847600  312.78320    3.16550
+  107  108     -0.847600      0.423800    0.00000    0.00000
+  108  107      0.423800     -0.847600    0.00000    0.00000
+  108  108      0.423800      0.423800    0.00000    0.00000
  
  sumup control
  number of chains        1000
@@ -276,7 +287,7 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  
  box             1  initial v   =   -5662975.92017787     
  surf. tension :   box 1 =     -20.92824
- pressure check:   box 1 =    -182648.12
+ pressure check:   box 1 =    -172365.46
  
  +++++ start of markov chain +++++
  
@@ -286,25 +297,25 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
          bs  42139.  41537.  41788.  41436.  41738.  41974.
  max.displ.     0.3246    0.3213    0.3225    0.4056    0.4073    0.4086
  volume change:  bn =   113.0   bs =    48.0   max.displ. = 0.38731E+03
-   600  450600 -0.5643E+07    31.055   -166362.8 1000
+   600  450600 -0.5643E+07    31.055   -156228.7 1000
  Box            1
  Type  1 bn  83193.  83160.  83126.  83241.  83339.  83807.
          bs  41267.  41250.  41240.  41534.  41584.  41820.
  max.displ.     0.3220    0.3187    0.3200    0.4047    0.4065    0.4078
  volume change:  bn =   134.0   bs =    57.0   max.displ. = 0.41187E+03
-  1200  451200 -0.5648E+07    31.030   -156001.7 1000
+  1200  451200 -0.5648E+07    31.030   -145817.6 1000
  Box            1
  Type  1 bn  83531.  83672.  83330.  83572.  82579.  83189.
          bs  41717.  42093.  41771.  41631.  41182.  41689.
  max.displ.     0.3217    0.3207    0.3208    0.4032    0.4054    0.4087
  volume change:  bn =   127.0   bs =    46.0   max.displ. = 0.37296E+03
-  1800  451800 -0.5700E+07    31.045   -330310.2 1000
+  1800  451800 -0.5700E+07    31.045   -320155.5 1000
  Box            1
  Type  1 bn  83232.  82722.  82899.  83727.  83535.  83758.
          bs  41867.  41310.  41304.  42048.  42059.  41548.
  max.displ.     0.3236    0.3203    0.3197    0.4050    0.4083    0.4055
  volume change:  bn =   127.0   bs =    56.0   max.displ. = 0.41113E+03
-  2400  452400 -0.5672E+07    30.994    131740.3 1000
+  2400  452400 -0.5672E+07    30.994    141995.5 1000
  Box            1
  Type  1 bn  83262.  82622.  83484.  83324.  83635.  83546.
          bs  41521.  41483.  41500.  41521.  41643.  41530.
@@ -315,31 +326,31 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
          bs  41690.  41249.  41815.  41893.  41705.  41869.
  max.displ.     0.3247    0.3193    0.3180    0.4037    0.4065    0.4062
  volume change:  bn =   133.0   bs =    65.0   max.displ. = 0.41531E+03
-  3000  453000 -0.5713E+07    31.030    -72992.8 1000
+  3000  453000 -0.5713E+07    31.030    -62810.0 1000
  Box            1
  Type  1 bn  83181.  83892.  83164.  83087.  83219.  83341.
          bs  41145.  41903.  41677.  41420.  41434.  41707.
  max.displ.     0.3212    0.3190    0.3187    0.4025    0.4048    0.4065
  volume change:  bn =   116.0   bs =    36.0   max.displ. = 0.32222E+03
-  3600  453600 -0.5649E+07    31.067     37325.0 1000
+  3600  453600 -0.5649E+07    31.067     47436.0 1000
  Box            1
  Type  1 bn  82647.  83352.  83389.  83655.  83557.  83266.
          bs  41291.  41788.  41824.  42216.  41860.  41632.
  max.displ.     0.3210    0.3199    0.3197    0.4062    0.4056    0.4065
  volume change:  bn =   134.0   bs =    73.0   max.displ. = 0.43885E+03
-  4200  454200 -0.5680E+07    31.063    -44373.4 1000
+  4200  454200 -0.5680E+07    31.063    -34254.2 1000
  Box            1
  Type  1 bn  83166.  83644.  83221.  83498.  83535.  82817.
          bs  41367.  41764.  41655.  41722.  41909.  41296.
  max.displ.     0.3193    0.3194    0.3201    0.4060    0.4070    0.4054
  volume change:  bn =   119.0   bs =    45.0   max.displ. = 0.41487E+03
-  4800  454800 -0.5716E+07    30.969    110986.8 1000
+  4800  454800 -0.5716E+07    30.969    121292.0 1000
  Box            1
  Type  1 bn  83202.  83639.  82967.  83703.  83206.  83127.
          bs  41672.  41799.  41420.  41544.  41427.  41383.
  max.displ.     0.3198    0.3193    0.3196    0.4030    0.4052    0.4036
  volume change:  bn =   156.0   bs =    56.0   max.displ. = 0.37232E+03
-  5400  455400 -0.5646E+07    31.028    286815.9 1000
+  5400  455400 -0.5646E+07    31.028    297003.7 1000
  Box            1
  Type  1 bn  83832.  83306.  83241.  83384.  83026.  83082.
          bs  41877.  41968.  41698.  41740.  41816.  41690.
@@ -350,7 +361,7 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
          bs  41838.  41530.  41861.  41374.  41113.  41240.
  max.displ.     0.3200    0.3204    0.3203    0.4005    0.4042    0.4034
  volume change:  bn =   126.0   bs =    46.0   max.displ. = 0.38197E+03
-  6000  456000 -0.5651E+07    31.125     54547.8 1000
+  6000  456000 -0.5651E+07    31.125     64547.4 1000
  
  +++++ end of markov chain +++++
  
@@ -399,7 +410,7 @@ molecule  1:   0.00000000
  sumup control
  number of chains        1000
  number of chains of type           1        1000
- inter lj energy    963774.496351766     
+ inter lj energy    963774.496351765     
  intra lj energy   0.000000000000000E+000
  Tail correction   -21852.4732538472     
  bond vibration    0.000000000000000E+000
@@ -413,12 +424,12 @@ molecule  1:   0.00000000
  
  vstart       =     -5662975.9201778714
  vend         =     -5651411.9565667445
- vbox         =     -5651411.9565662360
+ vbox         =     -5651411.9565662332
  
  Averages and fluctuations                            Box 1
  
- pressure                               [kPa] =    11368.82
- pressure                  [simulation units] =    0.823440
+ pressure                               [kPa] =    21549.06
+ pressure                  [simulation units] =    1.560792
  surface tension                       [mN/m] =    -89.7116
  chem. potential of type       1          [K] =       0.000
  
@@ -450,7 +461,7 @@ molecule  1:   0.00000000
     1    1     0.00000     0.00000     0.00000     0.00000     0.00000
  specific density    box   1 =  0.10011E+01 0.38695E-02 0.12898E-02
  system volume       box   1 =  0.29884E+05 0.11546E+03 0.38488E+02
- pressure            box   1 =   11369.      47784.      15928.    
+ pressure            box   1 =   21549.      47792.      15931.    
  surface tension     box   1 =    -89.71157   182.71692    60.90564
  
  Total energy   box   1 =   -0.56782E+07   0.13478E+05   0.44926E+04
@@ -465,10 +476,10 @@ molecule  1:   0.00000000
  3-body Garo    box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
  Fluc Q         box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
  
- Enthalpy Inst.[kJ/mol] for box  1 =    -47.0085      0.8489      0.2830
+ Enthalpy Inst.[kJ/mol] for box  1 =    -46.8253      0.8489      0.2830
  Enthalpy Ext. [kJ/mol] for box  1 =    -47.2093      0.1112      0.0371
  
- Cp residual(J/Kmol) =   49.9125371368675     
+ Cp residual(J/Kmol) =   49.9125371343414     
   H2=   32240447229218.0     
   H=  -5678019.63278831     
  chemical potential  itype   1 box   1 =        0.000       0.000       0.000
@@ -480,14 +491,14 @@ molecule  1:   0.00000000
  -----block averages ------
   ------------ box:    1
  block   energy    density   pressure   surf ten  mol fracs
-   1  -0.565E+07   0.996E+00   0.134E+05  -0.176E+03   0.100E+01
-   2  -0.567E+07   0.100E+01  -0.339E+05   0.781E+02   0.100E+01
-   3  -0.568E+07   0.100E+01  -0.370E+05  -0.154E+03   0.100E+01
-   4  -0.569E+07   0.101E+01   0.891E+04  -0.221E+02   0.100E+01
-   5  -0.569E+07   0.101E+01   0.996E+05  -0.389E+03   0.100E+01
-   6  -0.570E+07   0.100E+01  -0.597E+04  -0.219E+03   0.100E+01
-   7  -0.566E+07   0.998E+00  -0.163E+05  -0.332E+03   0.100E+01
-   8  -0.568E+07   0.999E+00   0.870E+05   0.146E+03   0.100E+01
-   9  -0.569E+07   0.100E+01  -0.432E+05   0.214E+02   0.100E+01
-  10  -0.567E+07   0.995E+00   0.410E+05   0.149E+03   0.100E+01
- Program ended at 2013-04-22 18:19:10.183
+   1  -0.565E+07   0.996E+00   0.235E+05  -0.176E+03   0.100E+01
+   2  -0.567E+07   0.100E+01  -0.237E+05   0.781E+02   0.100E+01
+   3  -0.568E+07   0.100E+01  -0.267E+05  -0.154E+03   0.100E+01
+   4  -0.569E+07   0.101E+01   0.192E+05  -0.221E+02   0.100E+01
+   5  -0.569E+07   0.101E+01   0.110E+06  -0.389E+03   0.100E+01
+   6  -0.570E+07   0.100E+01   0.422E+04  -0.219E+03   0.100E+01
+   7  -0.566E+07   0.998E+00  -0.615E+04  -0.332E+03   0.100E+01
+   8  -0.568E+07   0.999E+00   0.972E+05   0.146E+03   0.100E+01
+   9  -0.569E+07   0.100E+01  -0.330E+05   0.214E+02   0.100E+01
+  10  -0.567E+07   0.995E+00   0.511E+05   0.149E+03   0.100E+01
+ Program ended at 2013-04-25 21:43:37.359

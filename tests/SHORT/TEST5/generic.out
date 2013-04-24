@@ -1,4 +1,4 @@
-Program started at 2013-04-22 16:54:43.420
+Program started at 2013-04-25 20:37:49.367
 Number of processors: 1
 Threads per processor: 1
  run_num: 1
@@ -18,9 +18,11 @@ Dual Cutoff Configurational-bias Monte Carlo
 Coulombic interactions will be included in the Rosenbluth weights for CBMC growth
 Coulombic inter- and intra-molecular interactions will be calculated
    using (neutral-)group-based cutoff
-Feuston-Garofalini potential for pair-wise dispersive interactions
    using a shifted potential
+Feuston-Garofalini potential -> parameters hard coded in init_garofalini
 Lorentz-Berthelot combining rules apply
+ L_spline:  F
+ L_linear:  F
 *******************************************
 
 NAMELIST MC_SHARED
@@ -65,13 +67,23 @@ Box 1:   20.000 x   20.000 x   20.000
    lsolid:  F, lrect:  F, lideal:  F, ltwice:  F
    temperature: 6000.000 [K]
    external pressure:   10000.0000     [MPa]
-   Ghost particles: 0
    initial number of chains of each type:   60  180  120
+   Ghost particles: 0
    initial number of chains in x, y and z directions: 8 x 7 x 7
    initial rotational displacement: 1, inimix: 0, zshift:  0.0, dshift:  2.000
 
 NUMBER OF MOLECULES OF EACH TYPE
  number of chains of each type:   60  180  120
+
+NAMELIST EXTERNAL_FIELD
+------------------------------------------
+Steele 10-4-3 slit pore
+On both sides of the simulation box (z = 0 & z = boxlz)
+Surface material bead type: 190
+Surface atom density:  0.11400 [Ang^-3]
+Surface layer spacing:  3.40000 [Ang]
+a1:  2.46000 [Ang]
+Electric field in z direction:     0.00000000     [V/A]
 
 SECTION MOLECULE_TYPE
 ------------------------------------------
@@ -323,12 +335,16 @@ molecule type 2
 molecule type 3
 
 PAIRWISE LJ AND COULOMB INTERACTIONS
-garo type 1: ecut =   24.5547587    
-garo type 2: ecut =   8.79910664    
-garo type 3: ecut =   1.03022090    
-garo type 4: ecut =  -17.5923190    
-garo type 5: ecut =   7.10819906    
-garo type 6: ecut =  -2.43853823    
+    i    j         q0(i)         q0(j)     vvdW_1     vvdW_2 ...
+    1    1      0.000000      0.000000 **********    0.29000
+    1    2      0.000000      0.000000 **********    0.29000
+    1    3      0.000000      0.000000 **********    0.35000
+    2    1      0.000000      0.000000 **********    0.29000
+    2    2      0.000000      0.000000 **********    0.29000
+    2    3      0.000000      0.000000 **********    0.29000
+    3    1      0.000000      0.000000   30.19934    5.16500
+    3    2      0.000000      0.000000  435.75039    3.85250
+    3    3      0.000000      0.000000  400.86706    3.91750
  
  sumup control
  number of chains         360
@@ -348,8 +364,8 @@ garo type 6: ecut =  -2.43853823
  total energy      -34805612.6326730     
  
  box             1  initial v   =   -34805612.6326730     
- surf. tension :   box 1 =**************
- pressure check:   box 1 =**************
+ surf. tension :   box 1 =       0.00000
+ pressure check:   box 1 =    7044662.59
  
  +++++ start of markov chain +++++
  
@@ -467,9 +483,9 @@ molecule  3:   0.00000000
  3-body garo        524197.468650635     
  total energy      -35041415.6007145     
  
- vstart       =    -34805612.6326730251
- vend         =    -35041415.6007145345
- vbox         =    -35041415.6007134691
+ vstart       =    -34805612.6326730177
+ vend         =    -35041415.6007145271
+ vbox         =    -35041415.6007130742
  
  Averages and fluctuations                            Box 1
  
@@ -536,9 +552,9 @@ molecule  3:   0.00000000
  Enthalpy Inst.[kJ/mol] for box  1 =      0.0000      0.0000      0.0000
  Enthalpy Ext. [kJ/mol] for box  1 =      0.0000      0.0000      0.0000
  
- Cp residual(J/Kmol) =   13.5763477277669     
-  H2=  1.017128494739879E+015
-  H=  -31892120.2318355     
+ Cp residual(J/Kmol) =   13.5763477196673     
+  H2=  1.017128494739854E+015
+  H=  -31892120.2318353     
  chemical potential  itype   1 box   1 =        0.000       0.000       0.000
  chemical potential  itype   2 box   1 =        0.000       0.000       0.000
  chemical potential  itype   3 box   1 =        0.000       0.000       0.000
@@ -566,4 +582,4 @@ molecule  3:   0.00000000
    8  -0.349E+08   0.186E+01   0.000E+00   0.000E+00   0.167E+00   0.500E+00   0.333E+00
    9  -0.349E+08   0.185E+01   0.000E+00   0.000E+00   0.167E+00   0.500E+00   0.333E+00
   10  -0.351E+08   0.185E+01   0.000E+00   0.000E+00   0.167E+00   0.500E+00   0.333E+00
- Program ended at 2013-04-22 16:55:05.730
+ Program ended at 2013-04-25 20:38:10.840

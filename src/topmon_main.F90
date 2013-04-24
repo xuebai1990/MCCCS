@@ -64,7 +64,7 @@ contains
     use util_timings,only:time_date_str,time_now
     use util_files,only:get_iounit
     use util_mp,only:mp_barrier
-    use sim_particle,only:init_neighbor_list,ctrmas
+    use sim_particle,only:ctrmas,neighbor,neigh_cnt
     use energy_pairwise,only:sumup
     use moves_simple,only:translation,rotation,Atom_translation,output_translation_rotation_stats
     use moves_volume,only:volume_1box,volume_2box,output_volume_stats
@@ -123,11 +123,6 @@ contains
 
        ! set up initial linkcell
        call build_linked_cell()
-    end if
-
-    if (lneigh) then
-       ! call for initial set-up of the near-neighbour bitmap ***
-       call init_neighbor_list()
     end if
 
     ! set up thermodynamic integration stuff
@@ -254,7 +249,6 @@ contains
        do ibox=1,nbox
           call sumup(ovrlap,v,ibox,lvol=.false.)
           vbox(:,ibox) = v
-          vbox(10,ibox) = v3garo
           vbox(12,ibox) = vipsw
           vbox(13,ibox) = vwellipsw
           if (ovrlap) then
@@ -619,9 +613,9 @@ contains
              write(io_output,*) '### problem  ###'
              write(io_output,*) ' Fluc Q en.: ',v(11),vbox(11,ibox)
           end if
-          if ( abs(v3garo - vbox(10,ibox) ) .gt.0.001) then
+          if ( abs(v(10) - vbox(10,ibox) ) .gt.0.001) then
              write(io_output,*) '### problem ###'
-             write(io_output,*) ' 3-body en.: ',v3garo,vbox(10,ibox)
+             write(io_output,*) ' 3-body en.: ',v(10),vbox(10,ibox)
           end if
           if ( ldielect ) then
              if ( abs(dipolexo - dipolex(ibox)) .gt. 0.0001) then
@@ -1138,7 +1132,7 @@ contains
     use sim_particle,only:allocate_neighbor_list
     use zeolite
     use energy_kspace,only:calp,allocate_kspace
-    use energy_pairwise,only:read_ff,init_ff,rzero,epsnx,aexsix,bexsix,cexsix,sexsix,epsimmff,sigimmff,smmff,type_2body
+    use energy_pairwise,only:read_ff,init_ff,type_2body,vdW_nParameter,nonbond_type
     use energy_intramolecular,only:bonds,angles,dihedrals,allocate_energy_bonded
     use energy_3body,only:readThreeBody
     use energy_4body,only:readFourBody
@@ -1159,10 +1153,10 @@ contains
 
     character(LEN=default_path_length)::file_input,file_restart,file_struct,file_run,file_movie,file_solute,file_traj,file_box_movie,file_cell
     character(LEN=default_string_length)::line_in
-    integer::io_input,io_restart,jerr,seed,ndum,ij,ii,jj,i,j,k,ncres,nmtres,iensem,inpbc,iff,im,ibox,izz,z
+    integer::io_input,io_restart,jerr,seed,ij,ii,jj,i,j,k,ncres,nmtres,iensem,inpbc,im,ibox,izz,z
     logical::lprint,L_Ewald_Auto,lmixlb,lmixjo,lsetup,linit,lreadq,lfound,ltmp
     logical,parameter::lverbose=.true.,lecho=.true.
-    real::fqtemp,dum,pm,pcumu,debroglie,qtot,min_boxl,rmflucq,rtmp,rtmp2
+    real::fqtemp,dum,pm,pcumu,debroglie,qtot,min_boxl,rmflucq,rtmp
     !* PARAMETER FOR IONIC SYSTEMS
     logical::lionic !< if LIONIC=.TRUE. System contains charged species, so system may not neutral
     ! variables added (3/24/05) for scaling of 1-4 interactions
@@ -1178,9 +1172,9 @@ contains
 
     namelist /io/ file_input,file_restart,file_struct,file_run,file_movie,file_solute,file_traj,io_output&
      ,run_num,suffix,L_movie_xyz
-    namelist /system/ lnpt,lgibbs,lgrand,lanes,lvirial,lmipsw,lexpee,ldielect,lpbc,lpbcx,lpbcy,lpbcz,lfold,lijall,lchgall,lewald,lcutcm,ltailc,lshift,ltailcZeo,ldual,L_Coul_CBMC,lneigh&
-     ,llj,lexpsix,lmmff,lninesix,lgenlj,lexzeo,lzgrid,lsami,lmuir,lslit,lgraphite,ljoe,lpsurf,lcorreg,lelect_field,lgaro,lionic,L_Ewald_Auto,lmixlb,lmixjo&
-     ,L_tor_table,L_spline,L_linear,L_vib_table,L_bend_table,L_vdW_table,L_elect_table
+    namelist /system/ lnpt,lgibbs,lgrand,lanes,lvirial,lmipsw,lexpee,ldielect,lpbc,lpbcx,lpbcy,lpbcz,lfold,lijall,lchgall,lewald,lcutcm,ltailc,lshift,ldual,L_Coul_CBMC,lneigh&
+     ,lexzeo,lslit,lgraphite,lsami,lmuir,lelect_field,lgaro,lionic,L_Ewald_Auto,lmixlb,lmixjo&
+     ,L_spline,L_linear,L_vib_table,L_bend_table,L_elect_table
     namelist /mc_shared/ seed,nbox,nmolty,nchain,nstep,lstop,iratio,rmin,softcut&
      ,checkpoint_interval,checkpoint_copies,use_checkpoint,linit,lreadq&
      ,L_add,L_sub,N_add,N_box2add,N_moltyp2add,N_sub,N_box2sub,N_moltyp2sub
@@ -1242,15 +1236,6 @@ contains
     rewind(io_input)
     read(UNIT=io_input,NML=system,iostat=jerr)
     if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: system',jerr)
-
-    ! KM for MPI
-    if (lneigh.and.numprocs.ne.1) then
-       if (lneigh) call err_exit(__FILE__,__LINE__,'Cannot run on more than 1 processor with neighbor list!!',myid+1)
-       if (lgaro) call err_exit(__FILE__,__LINE__,'Cannot run on more than 1 processor with lgaro = .true.!!',myid+1)
-    end if
-
-    ! kea don't stop for lgaro
-    ! if (lchgall.and.(.not.lewald).and.(.not.lgaro)) call err_exit(__FILE__,__LINE__,'lchgall is true and lewald is false. Not checked for accuracy!',myid+1)
 
     if (lprint) then
        write(io_output,'(/,A)') '***** PROGRAM  =  THE MAGIC BLACK BOX *****'
@@ -1338,37 +1323,6 @@ contains
           write(io_output,'(A)') '   using (neutral-)group-based cutoff'
        end if
 
-       iff = 0
-       if (L_vdW_table) then
-          iff = iff + 1
-          write(io_output,'(A)') 'Tabulated potential with linear interpolation for pair-wise dispersive interactions'
-       end if
-       if (lexpsix) then
-          iff = iff + 1
-          write(io_output,'(A)') 'Exp-6 potential for pair-wise dispersive interactions'
-       end if
-       if (lmmff) then
-          iff = iff + 1
-          write(io_output,'(A)') 'Buffered 14-7 potential for pair-wise dispersive interactions'
-       end if
-       if (lninesix) then
-          iff = iff + 1
-          write(io_output,'(A)') '9-6 potential for pair-wise dispersive interactions'
-       end if
-       if (lgenlj) then
-          iff = iff + 1
-          write(io_output,'(A)') 'Generalized Lennard-Jones potential for pair-wise dispersive interactions'
-       end if
-       if (lgaro) then
-          iff = iff + 1
-          write(io_output,'(A)') 'Feuston-Garofalini potential for pair-wise dispersive interactions'
-       end if
-       if (llj.or.iff.eq.0) then
-          iff = iff + 1
-          write(io_output,'(A)') 'Lennard-Jones potential for pair-wise dispersive interactions'
-       end if
-       if (iff.gt.1) call err_exit(__FILE__,__LINE__,'More than one functional form specified for pair-wise interactions. Currently not supported.',myid+1)
-
        if (ltailc) write(io_output,'(A)') '   with additional tail corrections'
        if (lshift) then
           write(io_output,'(A)') '   using a shifted potential'
@@ -1377,17 +1331,20 @@ contains
           end if
        end if
 
-       !> \todo lmuir, lpsurf, lgraphite, lcorreg are not checked
-       if (lexzeo) write(io_output,'(A)') 'external potential for zeolites'
-       if (lslit) write(io_output,'(A)') '10-4-3 graphite slit pore potential'
-       if (ljoe) write(io_output,'(A)') 'External 12-3 potential for SAM (Joe Hautman)'
+       if (lgaro) then
+          write(io_output,'(A)') 'Feuston-Garofalini potential -> parameters hard coded in init_garofalini'
+       end if
+       if (lexzeo) write(io_output,'(A)') 'Tabulated potential enabled for rigid framework zeolites/MOFs'
+       if (lslit) write(io_output,'(A)') 'Featureless, planar slit surface(s) created'
+       if (lgraphite) write(io_output,'(A)') '"Realistic" graphite surface'
        if (lsami) then
-          write(io_output,'(A)') 'external potential for Langmuir films (Sami)'
-          write(io_output,'(A)') 'WARNING: LJ potential defined in SUSAMI'
+          write(io_output,'(A)') 'External potential for Langmuir films (SAMI)'
+          write(io_output,'(A)') 'WARNING: LJ potential hard coded in susami'
           write(io_output,'(A)') 'WARNING: sets potential cut-off to 2.5sigma'
           write(io_output,'(A)') 'WARNING: has build-in tail corrections'
           if (ltailc) call err_exit(__FILE__,__LINE__,'INCONSISTENT SPECIFICATION OF LTAILC AND LSAMI',myid+1)
        end if
+       if (lmuir) write(io_output,'(A)') 'External potential for Langmuir monolayers used -> parameters hard coded in sumuir'
        if (lelect_field) write(io_output,'(A)') 'External electric field applied'
 
        if (lmixlb) then
@@ -1398,18 +1355,8 @@ contains
           call err_exit(__FILE__,__LINE__,'No combining rule is requested',myid+1)
        end if
 
-       if (L_tor_table) then
-          write(io_output,'(A)') 'Torsional energy calculated using tabulated potential'
-          if (L_spline) then
-             write(io_output,'(A)') '   with spline interpolation'
-          else if (L_linear) then
-             write(io_output,'(A)') '   with linear interpolation'
-          else
-             call err_exit(__FILE__,__LINE__,'One of L_spline and L_linear must be true if L_tor_table is true',myid+1)
-          end if
-
-          if (L_spline.and.L_linear) call err_exit(__FILE__,__LINE__,'One of L_spline and L_linear must be true if L_tor_table is true',myid+1)
-       end if
+       w_l(L_spline)
+       w_l(L_linear)
        if (L_vib_table) write(io_output,'(A)') 'Stretching energy calculated using tabulated potential with linear interpolation'
        if (L_bend_table) write(io_output,'(A)') 'Bending energy calculated using tabulated potential with linear interpolation'
 
@@ -1417,8 +1364,14 @@ contains
     end if
 
     if (lmixlb.and.lmixjo) call err_exit(__FILE__,__LINE__,'cannot use both Lorentz-Berthelot and Jorgensen combining rules!',myid+1)
+
+    ! KM for MPI
+    if (numprocs.ne.1) then
+       if (lneigh) call err_exit(__FILE__,__LINE__,'Cannot run on more than 1 processor with neighbor list!!',myid+1)
+       if (lgaro) call err_exit(__FILE__,__LINE__,'Cannot run on more than 1 processor with lgaro = .true.!!',myid+1)
+    end if
 ! -------------------------------------------------------------------
-    !> read force field parameters, including intermolecular and bonded interaction potentials
+    !> read force field parameters, including intermolecular potentials and intramolecular bonded interactions (stretching, bending, torsion)
     call read_ff(io_input,lmixlb,lmixjo)
 ! -------------------------------------------------------------------
     close(io_input)
@@ -1473,7 +1426,6 @@ contains
     call allocate_system()
     call allocate_sim_cell()
     call allocate_kspace()
-    call allocate_neighbor_list()
 ! -------------------------------------------------------------------
     !> read name list analysis
     ucheck=0
@@ -1548,9 +1500,9 @@ contains
                 call err_exit(__FILE__,__LINE__,'Section SIMULATION_BOX has more than nbox records!',jerr)
              end if
 
-             ! boxlx boxly boxlz lsolid lrect kalp rcut rcutnn numDimensionIsIstropic pressure temperature use_linkcell rintramax ghost_particles lideal ltwice
+             ! boxlx boxly boxlz rcut kalp rcutnn numDimensionIsIstropic lsolid lrect lideal ltwice temperature pressure
              !> provision for different temperatures (just like different pressures) in each box, such as for parallel tempering
-             read(line_in,*) boxlx(i),boxly(i),boxlz(i),lsolid(i),lrect(i),kalp(i),rcut(i),rcutnn(i),numberDimensionIsIsotropic(i),express(i),rtmp,ltmp,rtmp2,ghost_particles(i),lideal(i),ltwice(i)
+             read(line_in,*) boxlx(i),boxly(i),boxlz(i),rcut(i),kalp(i),rcutnn(i),numberDimensionIsIsotropic(i),lsolid(i),lrect(i),lideal(i),ltwice(i),rtmp,express(i)
 
              if (lprint) then
                 write(io_output,'(A,I0,A,2(F8.3," x "),F8.3)') 'Box ',i,': ',boxlx(i),boxly(i),boxlz(i)
@@ -1560,8 +1512,6 @@ contains
                 write(io_output,'(4(A,L2))') '   lsolid: ',lsolid(i),', lrect: ',lrect(i),', lideal: ',lideal(i),', ltwice: ',ltwice(i)
                 write(io_output,'(A,F8.3,A)') '   temperature: ',rtmp,' [K]'
                 write(io_output,'(A,G16.9,A)') '   external pressure: ',express(i),' [MPa]'
-                write(io_output,'(A,I0)') '   Ghost particles: ',ghost_particles(i)
-                if (ltmp) write(io_output,'(A,F8.3)') '   Linked cell structures will be used for this box, rintramax = ',rtmp2
              end if
 
              if (temp.ge.0) then
@@ -1571,26 +1521,36 @@ contains
                 beta = 1.0_dp / temp
              end if
 
+             if (lideal(i).and.lexpee) call err_exit(__FILE__,__LINE__,'Cannot have lideal and lexpee both true (if you want this you will have change code)',myid+1)
+
+             ! nchain_1 ... nchain_nmolty ghost_particles
+             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SIMULATION_BOX',jerr)
+             read(line_in,*) (ininch(j,i),j=1,nmolty),ghost_particles(i)
+
+             if (lprint) then
+                write(io_output,'(A,'//format_n(nmolty,'(2X,I0)')//')') '   initial number of chains of each type: ',ininch(1:nmolty,i)
+                write(io_output,'(A,I0)') '   Ghost particles: ',ghost_particles(i)
+             end if
+
+             ! inix iniy iniz inirot inimix zshift dshift use_linkcell rintramax
+             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SIMULATION_BOX',jerr)
+             read(line_in,*) inix(i),iniy(i),iniz(i),inirot(i),inimix(i),zshift(i),dshift(i),ltmp,rtmp
+
+             if (lprint) then
+                write(io_output,'(A,2(I0," x "),I0)') '   initial number of chains in x, y and z directions: ',inix(i),iniy(i),iniz(i)
+                write(io_output,'(2(A,I0),A,F4.1,A,F6.3)') '   initial rotational displacement: ',inirot(i),', inimix: ',inimix(i),', zshift: ',zshift(i),', dshift: ',dshift(i)
+                if (ltmp) write(io_output,'(A,F8.3)') '   Linked cell structures will be used for this box, rintramax = ',rtmp
+             end if
+
              ! read linkcell information
              if (ltmp) then
                 if (licell) call err_exit(__FILE__,__LINE__,'Section SIMULATION_BOX: link cell only allowed for one box',myid+1)
                 licell=.true.
                 boxlink=i
-                rintramax=rtmp2
+                rintramax=rtmp
                 if (lsolid(boxlink).and.(.not.lrect(boxlink))) call err_exit(__FILE__,__LINE__,'Linkcell not implemented for nonrectangular boxes',myid+1)
-             end if
-
-             if (lideal(i).and.lexpee) call err_exit(__FILE__,__LINE__,'Cannot have lideal and lexpee both true (if you want this you will have change code)',myid+1)
-
-             ! nchain_1 ... nchain_nmolty inix iniy iniz inirot inimix zshift dshift
-             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SIMULATION_BOX',jerr)
-             read(line_in,*) (ininch(j,i),j=1,nmolty),inix(i),iniy(i),iniz(i),inirot(i),inimix(i),zshift(i),dshift(i)
-
-             if (lprint) then
-                write(io_output,'(A,'//format_n(nmolty,'(2X,I0)')//')') '   initial number of chains of each type: ',ininch(1:nmolty,i)
-                write(io_output,'(A,2(I0," x "),I0)') '   initial number of chains in x, y and z directions: ',inix(i),iniy(i),iniz(i)
-                write(io_output,'(2(A,I0),A,F4.1,A,F6.3)') '   initial rotational displacement: ',inirot(i),', inimix: ',inimix(i),', zshift: ',zshift(i),', dshift: ',dshift(i)
              end if
 
              if (i.eq.1 .and. lexzeo) then
@@ -1616,7 +1576,7 @@ contains
 
           express = express*MPa2SimUnits
 
-          if (lshift.or.lmmff.or.lninesix.or.lexpsix.or.lsami) then
+          if (lshift.or.lsami) then
              ! Keep the rcut same for each box
              do ibox = 2,nbox
                 if (abs(rcut(1)-rcut(ibox)).gt.1.0E-10_dp) then
@@ -1631,6 +1591,7 @@ contains
 ! -------------------------------------------------------------------
     !> set up force field parameters and read in external potentials
     call init_ff(io_input,lprint)
+    call allocate_neighbor_list()
 ! -------------------------------------------------------------------
     !> read parameters about molecule types
     !> The division of variables between here and in the section specific to a particular MC move is somewhat arbitrary. Variables that are "intrinsic" to the type of molecules are place here, such as whether it's rigid (lrigid), is a ring (lring), etc, while variables that are model- or algorithm-specific are placed in the corresponding MC move sections, such as whether the molecule has fluctuating charges (lflucq), need to treat with expanded ensemble moves (lexpand), etc.
@@ -1660,8 +1621,8 @@ contains
                 call err_exit(__FILE__,__LINE__,'Section MOLECULE_TYPE has more than nmolty records!',jerr)
              end if
 
-             ! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
-             read(line_in,*) nunit(imol),nugrow(imol),ncarbon(imol),nmaxcbmc(imol),iurot(imol),lelect(imol),maxgrow(imol),lring(imol),iring(imol),lrigid(imol),lsetup,isolute(imol),(eta2(i,imol),i=1,nbox),lq14scale(imol),qscale(imol),lbranch(imol),lrplc(imol)
+             ! nunit nugrow ncarbon maxcbmc maxgrow iring lelect lring lrigid lbranch lrplc lsetup lq14scale qscale iurot isolute eta
+             read(line_in,*) nunit(imol),nugrow(imol),ncarbon(imol),nmaxcbmc(imol),maxgrow(imol),iring(imol),lelect(imol),lring(imol),lrigid(imol),lbranch(imol),lrplc(imol),lsetup,lq14scale(imol),qscale(imol),iurot(imol),isolute(imol),(eta2(i,imol),i=1,nbox)
 
              if (lprint) then
                 write(io_output,'(A,I0)') 'molecule type: ',imol
@@ -1741,12 +1702,10 @@ contains
                    write(io_output,'(/,2(A,I0),A,A,A,I0)') '   bead ',i,': bead type ',atoms%list(ntype(imol,i)),' [',trim(chemid(ntype(imol,i))),'], charge leader ',leaderq(imol,i)
                 end if
 
-                IF (.not.(lmmff.or.lexpsix.or.lgaro.or.lninesix)) THEN
-                   if (ntype(imol,i).eq.0) then
-                      call err_exit(__FILE__,__LINE__,'ERROR: atom type undefined!',myid+1)
-                   else if (sigi(ntype(imol,i)).lt.1E-06_dp.and.epsi(ntype(imol,i)).lt.1E-06_dp.and.abs(qelect(ntype(imol,i))).lt.1E-06_dp) then
-                      call err_exit(__FILE__,__LINE__,'ERROR: atom type undefined!',myid+1)
-                   end if
+                if (ntype(imol,i).eq.0) then
+                   call err_exit(__FILE__,__LINE__,'ERROR: atom type undefined!',myid+1)
+                else if (ALL(vvdW_b(:,ntype(imol,i)).lt.1E-06_dp).and.abs(qelect(ntype(imol,i))).lt.1E-06_dp) then
+                   call err_exit(__FILE__,__LINE__,'ERROR: atom type undefined!',myid+1)
                 end if
 
                 iutemp = ntype(imol,i)
@@ -1843,7 +1802,7 @@ contains
 
                    ittor(imol,i,j)=indexOf(dihedrals,ittor(imol,i,j))
                    if (ittor(imol,i,j).eq.0) then
-                      write(io_output,'(A)') 'WARNING: torsion parameters undefined; set to null'
+                      call err_exit(__FILE__,__LINE__,'ERROR: torsion parameters undefined!',myid+1)
                    end if
 
                    if (lprint) then
@@ -1953,7 +1912,6 @@ contains
              end if
 
              ! Neeraj Adding molecule neutrality check
-             !kea skip if lgaro
              if(.not.(lgaro.or.lionic.or.lexzeo)) then
                 qtot =0.0E0_dp
                 do j = 1,nunit(imol)
@@ -1975,6 +1933,28 @@ contains
 
     if (lprint) then
        write(io_output,'(/,A,'//format_n(nmolty,'(3X,F10.5)')//')') 'MOLECULAR MASS: ',masst(1:nmolty)
+    end if
+
+    if (numax.gt.0) then
+       call reallocate(ntype,1,ntmax,1,numax)
+       call reallocate(riutry,1,ntmax,1,numax)
+       call reallocate(leaderq,1,ntmax,1,numax)
+       call reallocate(lplace,1,ntmax,1,numax)
+       call reallocate(lrigi,1,ntmax,1,numax)
+       call reallocate(invib,1,ntmax,1,numax)
+       call reallocate(itvib,1,ntmax,1,numax,1,6)
+       call reallocate(ijvib,1,ntmax,1,numax,1,6)
+       call reallocate(inben,1,ntmax,1,numax)
+       call reallocate(itben,1,ntmax,1,numax,1,12)
+       call reallocate(ijben2,1,ntmax,1,numax,1,12)
+       call reallocate(ijben3,1,ntmax,1,numax,1,12)
+       call reallocate(intor,1,ntmax,1,numax)
+       call reallocate(ittor,1,ntmax,1,numax,1,12)
+       call reallocate(ijtor2,1,ntmax,1,numax,1,12)
+       call reallocate(ijtor3,1,ntmax,1,numax,1,12)
+       call reallocate(ijtor4,1,ntmax,1,numax,1,12)
+       call reallocate(irotbd,1,numax,1,ntmax)
+       call reallocate(pmrotbd,1,numax,1,ntmax)
     end if
 ! -------------------------------------------------------------------
     !> read information for grand-canonical ensemble simulations
@@ -2019,8 +1999,8 @@ contains
     pm_atom_tra=0.0_dp
     if (lgibbs) then
        pmvol=2.0_dp/nchain
-       pmswap=(1.0_dp-pmvol)/4.0_dp
-       pmcb=pmswap
+       pmswap=(1.0_dp-pmvol)/4.0_dp+pmvol
+       pmcb=(1.0_dp-pmswap)/3.0_dp+pmswap
     else
        pmswap=0.0_dp
        if (lnpt) then
@@ -2028,9 +2008,9 @@ contains
        else
           pmvol=0.0_dp
        end if
-       pmcb=(1.0_dp-pmvol)/3.0_dp
+       pmcb=(1.0_dp-pmvol)/3.0_dp+pmvol
     end if
-    pmtra=pmcb
+    pmtra=(1.0_dp-pmcb)/2.0_dp+pmcb
 
     call allocate_molecule()
     call allocate_energy_bonded()
@@ -2256,7 +2236,7 @@ contains
              read(line_in,*) ainclmol(ainclnum),ainclbead(ainclnum,1),ainclbead(ainclnum,2) ,a15t(ainclnum)
 
              if (lprint) then
-                write(io_output,'(4(A,I0))') '      repulsive 1-5 OH interaction for molecule type ',ainclmol(ndum),' between bead ',ainclbead(ndum,1),' and bead ',ainclbead(ndum,2),' of type ',a15t(ndum)
+                write(io_output,'(4(A,I0))') '      repulsive 1-5 OH interaction for molecule type ',ainclmol(ainclnum),' between bead ',ainclbead(ainclnum,1),' and bead ',ainclbead(ainclnum,2),' of type ',a15t(ainclnum)
              end if
           end do
 
@@ -2385,7 +2365,7 @@ contains
              call matops(ibox)
 
              if (lprint) then
-                write(io_output,'(A,3(1X,F11.6))') 'min widths:',ibox,min_width(ibox,1:3)
+                write(io_output,'(A,3(1X,F11.6))') 'min widths:',min_width(ibox,1:3)
                 write(io_output,'(A,2X,F12.3)') "cell length |a|:",cell_length(ibox,1)
                 write(io_output,'(A,2X,F12.3)') "cell length |b|:",cell_length(ibox,2)
                 write(io_output,'(A,2X,F12.3)') "cell length |c|:",cell_length(ibox,3)
@@ -2577,7 +2557,7 @@ contains
              write(io_output,'(I4,A,F9.3,3(1X,I6),1X,F12.4)') ibox,': ',calp(ibox),k_max_l(ibox),k_max_m(ibox),k_max_n(ibox),rcut(ibox)
           end do
        end if
-    else if (lchgall.and..not.lgaro) then
+    else if (lchgall) then
        !kea
        call err_exit(__FILE__,__LINE__,'lewald should be true when lchgall is true',myid+1)
     end if
@@ -2627,37 +2607,15 @@ contains
     ! write out non-bonded interaction table
     if (lprint) then
        write(io_output,'(/,A)') 'PAIRWISE LJ AND COULOMB INTERACTIONS'
-       if (lgaro) then
-          do i=1,6
-             write(io_output,'(A,I0,A,G16.9)') 'garo type ',i,': ecut = ',ecut(i)
+       write(io_output,'(A)') '    i    j         q0(i)         q0(j)     vvdW_1     vvdW_2 ...'
+       do i=1,nntype
+          do j=1,nntype
+             if (lhere(i).and.lhere(j)) then
+                ij=type_2body(i,j)
+                write(io_output,'(2(1X,I4),2(1X,F13.6),'//format_n(vdW_nParameter(nonbond_type(ij)),'(1X,G12.5)')//')') atoms%list(i),atoms%list(j),qelect(i),qelect(j),vvdW(1:vdW_nParameter(nonbond_type(ij)),ij)
+             end if
           end do
-       else
-          if (lexpsix) then
-             write(io_output,'(A)') '    i    j      aexsix      bexsix      cexsix      sexsix'
-          else if (lmmff) then
-             write(io_output,'(A)') '    i    j    epsimmff    sigimmff       smmff'
-          else if (lninesix) then
-             write(io_output,'(A)') '    i    j     r_0,ij      epsij         q0(i)         q0(j)'
-          else
-             write(io_output,'(A)') '    i    j     sig2ij      epsij         q0(i)         q0(j)'
-          end if
-          do i=1,nntype
-             do j=1,nntype
-                if (lhere(i).and.lhere(j)) then
-                   ij=type_2body(i,j)
-                   if (lexpsix) then
-                      write(io_output,'(2(1X,I4),4(1X,E11.4))') atoms%list(i),atoms%list(j),aexsix(ij),bexsix(ij),cexsix(ij),sexsix(ij)
-                   else if (lmmff) then
-                      write(io_output,'(2(1X,I4),4(1X,E11.4))') atoms%list(i),atoms%list(j),epsimmff(ij),sigimmff(ij),smmff(ij)
-                   else if (lninesix) then
-                      write(io_output,'(2(1X,I4),2(1X,F10.5),2(1X,F13.6))') atoms%list(i),atoms%list(j),rzero(ij),epsnx(ij),qelect(i),qelect(j)
-                   else
-                      write(io_output,'(2(1X,I4),2(1X,F10.5),2(1X,F13.6))') atoms%list(i),atoms%list(j),sqrt(sig2ij(ij)),epsij(ij),qelect(i),qelect(j)
-                   end if
-                end if
-             end do
-          end do
-       end if
+       end do
     end if
 ! ===================================================================
     !> write file headers
@@ -3363,32 +3321,21 @@ contains
     w_nl(ldual)
     w_nl(L_Coul_CBMC)
     w_nl(lneigh)
-    w_nl(llj)
-    w_nl(lexpsix)
-    w_nl(lmmff)
-    w_nl(lninesix)
-    w_nl(lgenlj)
     w_nl(lexzeo)
-    w_nl(lzgrid)
-    w_nl(lsami)
-    w_nl(lmuir)
     w_nl(lslit)
     w_nl(lgraphite)
-    w_nl(ljoe)
-    w_nl(lpsurf)
-    w_nl(lcorreg)
+    w_nl(lsami)
+    w_nl(lmuir)
     w_nl(lelect_field)
     w_nl(lgaro)
     w_nl(lionic)
     w_nl(L_Ewald_Auto)
     w_nl(lmixlb)
     w_nl(lmixjo)
-    w_nl(L_tor_table)
     w_nl(L_spline)
     w_nl(L_linear)
     w_nl(L_vib_table)
     w_nl(L_bend_table)
-    w_nl(L_vdW_table)
     w_nl(L_elect_table)
     write(io_unit,'(" /",/)')
 ! -------------------------------------------------------------------
@@ -3442,6 +3389,10 @@ contains
     w_nl(stepvir)
     w_nl(ntemp)
     wa_nl(virtemp,ntemp)
+    write(io_unit,'(" /",/)')
+! -------------------------------------------------------------------
+    write(io_unit,'(/," &external_field")')
+    !wa_nl(Elect_field,nbox)
     write(io_unit,'(" /",/)')
 ! -------------------------------------------------------------------
     write(io_unit,'(/," &mc_volume")')
@@ -3543,16 +3494,17 @@ contains
 ! -------------------------------------------------------------------
     write(io_unit,'(/,"SIMULATION_BOX")')
     do i=1,nbox
+       write(io_unit,'("! boxlx boxly boxlz rcut kalp rcutnn numDimensionIsIstropic lsolid lrect lideal ltwice temperature pressure",/,3(F8.3,1X),3(F6.3,1X),I0,1X,4(L,1X),F7.2,1X,F7.1)') boxlx(i),boxly(i),boxlz(i),rcut(i),kalp(i),rcutnn(i),numberDimensionIsIsotropic(i),lsolid(i),lrect(i),lideal(i),ltwice(i),temp,express(i)/MPa2SimUnits
+       write(io_unit,'("! nchain_1 ... nchain_nmolty ghost_particles",/,'//format_n(nmolty,'(I0,1X)')//',I0)') (ininch(j,i),j=1,nmolty),ghost_particles(i)
        ! use_linkcell is always .false., and rintramax is 0.0
-       write(io_unit,'("! boxlx boxly boxlz lsolid lrect kalp rcut rcutnn numDimensionIsIstropic pressure temperature use_linkcell rintramax ghost_particles lideal ltwice",/,3(F8.3,1X),2(L,1X),3(F6.3,1X),I0,1X,F7.1,1X,F7.2,1X,L,1X,F3.1,1X,I0,1X,L,1X,L)') boxlx(i),boxly(i),boxlz(i),lsolid(i),lrect(i),kalp(i),rcut(i),rcutnn(i),numberDimensionIsIsotropic(i),express(i)/MPa2SimUnits,temp,.false.,0.0_dp,ghost_particles(i),lideal(i),ltwice(i)
-       write(io_unit,'("! nchain_1 ... nchain_nmolty inix iniy iniz inirot inimix zshift dshift",/,'//format_n(nmolty+5,'(I0,1X)')//',F4.1,1X,F6.3)') (ininch(j,i),j=1,nmolty),inix(i),iniy(i),iniz(i),inirot(i),inimix(i),zshift(i),dshift(i)
+       write(io_unit,'("! inix iniy iniz inirot inimix zshift dshift use_linkcell rintramax",/,5(I0,1X),F4.1,1X,F6.3,L,1X,F3.1)') inix(i),iniy(i),iniz(i),inirot(i),inimix(i),zshift(i),dshift(i),.false.,0.0_dp
     end do
     write(io_unit,'("END SIMULATION_BOX",/)')
 ! -------------------------------------------------------------------
     write(io_unit,'(/,"MOLECULE_TYPE")')
     do imol=1,nmolty
        ! lsetup is always .false.
-       write(io_unit,'("! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc",/,5(I0,1X),2(L,1X,I0,1X),2(L,1X),I0,1X,'//format_n(nbox,'(F7.1,1X)')//'L,1X,F3.1,1X,L,1X,L)') nunit(imol),nugrow(imol),ncarbon(imol),nmaxcbmc(imol),iurot(imol),lelect(imol),maxgrow(imol),lring(imol),iring(imol),lrigid(imol),.false.,isolute(imol),(eta2(i,imol),i=1,nbox),lq14scale(imol),qscale(imol),lbranch(imol),lrplc(imol)
+       write(io_unit,'("! nunit nugrow ncarbon maxcbmc maxgrow iring lelect lring lrigid lbranch lrplc lsetup lq14scale qscale iurot isolute eta",/,6(I0,1X),7(L,1X),F3.1,2(1X,I0),'//format_n(nbox,'(1X,F7.1)')//')') nunit(imol),nugrow(imol),ncarbon(imol),nmaxcbmc(imol),maxgrow(imol),iring(imol),lelect(imol),lring(imol),lrigid(imol),lbranch(imol),lrplc(imol),.false.,lq14scale(imol),qscale(imol),iurot(imol),isolute(imol),(eta2(i,imol),i=1,nbox)
        if (lrigid(imol)) write(io_unit,'("! n, growpoint_1 ... growpoint_n",/,I0,'//format_n(rindex(imol),'(1X,I0)')//')') rindex(imol),(riutry(imol,i),i=1,rindex(imol))
        do i=1,nunit(imol)
           write(io_unit,'("! unit ntype leaderq",/,2(I0,1X),I0,/,"! stretching",/,I0)') i,atoms%list(ntype(imol,i)),leaderq(imol,i),invib(imol,i)

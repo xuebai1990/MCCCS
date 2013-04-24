@@ -4,7 +4,7 @@ module util_search
   use util_string,only:integer_to_string
   implicit none
   private
-  public::LookupTable,initiateTable,addToTable,indexOf,hunt,locate
+  public::LookupTable,initiateTable,addToTable,tightenTable,indexOf,hunt,locate
 
   type LookupTable
      integer::size !< number of element in the table
@@ -62,11 +62,19 @@ CONTAINS
     addToTable=i
   end function addToTable
 
+  subroutine tightenTable(table)
+    type(LookupTable),intent(inout)::table
+
+    if (table%size.gt.0) then
+       call reallocate(table%list,1,table%size)
+    end if
+  end subroutine tightenTable
+
   !> \brief look up item in table
   !>
   !> \return index of item in table; 0 if not found
   integer function indexOf(table,item)
-    type(LookupTable),intent(inout)::table
+    type(LookupTable),intent(in)::table
     integer,intent(in)::item
 
     integer::i

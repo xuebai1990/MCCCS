@@ -19,41 +19,39 @@ MODULE energy_pairwise
   implicit none
   private
   save
-  public::sumup,energy,boltz,coru,read_ff,init_ff,exsix,ljpsur,type_2body
+  public::sumup,energy,boltz,coru,read_ff,init_ff,U2,type_2body,vdW_nParameter,nonbond_type
 
   real,parameter::a15(2)=(/4.0E7_dp,7.5E7_dp/) !< 1-5 correction term for unprotected hydrogen-oxygen interaction; 1 for ether oxygens, 2 for alcohol oxygens
-  !< OLD VALUES: a15(2)=/17.0**6,16.0**6/)
-  integer,allocatable::atom_type(:),nonbond_type(:)
+  !< OLD VALUES: a15(2)=/17.0_dp**6,16.0_dp**6/)
+  integer,parameter::vdW_nParameter(-1:8)=(/0,0,2,3,4,2,2,4,3,4/)
+  integer,allocatable::atom_type(:),nonbond_type(:) !< type -1: tabulated potential
+  !< type 1: Lennard-Jones 12-6, U(r) = 4*epsilon*[(sigma/r)^12-(sigma/r)^6]
+  !< vvdW_b_1 = epsilon, vvdW_b_2 = sigma
+  !< vvdW_1 = 4*epsilon, vvdW_2 = sigma, vvdW_3 = sigma^2
+  !< type 2: Buckingham exponential-6, U(r) = A*exp(-B*r) - C/r^6
+  !< vvdW_b_1 = A, vvdW_b_2 = B, vvdW_b_3 = C
+  !< vvdW_1 = A, vvdW_2 = -B, vvdW_3 = C
+  !< type 3: Mie, U(r) = C*epsilon*[(sigma/r)^n0-(sigma/r)^n1], where C = n0/(n0-n1) * (n0/n1)^[n1/(n0-n1)]
+  !< vvdW_b_1 = epsilon, vvdW_b_2 = sigma, vvdW_b_3 = n0, vvdW_b_4 = n1
+  !< vvdW_1 = C*epsilon, vvdW_2 = sigma, vvdW_3 = n0, vvdW_4 = n1
+  !< type 4: MMFF94 (Merck Molecular Force Field: Thomas A. Halgren, J Am Chem Soc 1992,114:7827-7843) buffered 14-7, U(r) = 4*epsilon*{1.07/[(r/r0)+0.07]}^7 * {1.12/[(r/r0)^7+0.12]-2}
+  !< vvdW_b_1 = 4*epsilon, vvdW_b_2 = r0
+  !< vvdW_1 = 4*epsilon, vvdW_2 = r0, vvdW_3 = r0^2
+  !< type 5: Lennard-Jones 9-6, U(r) = 4*epsilon*[2*(r0/r)^9-3*(r0/r)^6],
+  !< vvdW_b_1 = epsilon, vvdW_b_2 = r0
+  !< vvdW_1 = 4*epsilon, vvdW_2 = r0
+  !< type 6: Generalized Lennard-Jones (Ref: J Chem Phys 2004,120:4994),
+  !< U(r) = 4*epsilon*[(r0/r)^n0-2*(r0/r)^(n0/2)] if r<=r0
+  !<      = 4*epsilon*[(r0/r)^(2*n1)-2*(r0/r)^n1] if r>r0
+  !< vvdW_b_1 = epsilon, vvdW_b_2 = r_0, vvdW_b_3 = n0, vvdW_b_4 = n1
+  !< vvdW_1 = 4*epsilon, vvdW_2 = r_0, vvdW_3 = n0, vvdW_4 = n1
+  !< type 7: Lennard-Jones 12-6-8, U(r) = A/r^12 - B/r^6 - C/r^8
+  !< vvdW_b_1 = A, vvdW_b_2 = B, vvdW_b_3 = C
+  !< vvdW_1 = A, vvdW_2 = B, vvdW_3 = C
 
   integer,allocatable::vdWsplits(:,:),electsplits(:,:)
   real,allocatable::rvdW(:,:,:),tabvdW(:,:,:),relect(:,:,:),tabelect(:,:,:)
   integer::ntabvdW,ntabelect
-
-! EXPSIX.INC
-  integer,parameter::natom=3 !< for exsix
-  real,public::aexsix(natom),bexsix(natom),cexsix(natom),sexsix(natom),consu(natom),consp(natom)
-
-! NSIX.INC
-! ***************************************************
-! stores interaction parameters for 9-6 potential
-! ***************************************************
-  integer,parameter::nxatom=5 !< for ninesix
-  real,public::rzero(nxatom*nxatom),epsnx(nxatom*nxatom),shiftnsix(nxatom*nxatom)
-
-! ***********************************************************
-! parameters for Generalized Lennard Jones Potential
-  real,public::n0,n1
-! repulsive part
-  parameter(n0=12.0E0_dp)
-! attractive part
-  parameter(n1=6.0E0_dp)
-! Ref:  J. Chem. Phys. 120, 4994 (2004)
-! ***********************************************************
-
-! MERCK.INC
-  integer,parameter::natomtyp=3
-  real,public::epsimmff(natomtyp),sigimmff(natomtyp),smmff(natomtyp),ammff(natomtyp),nmmff(natomtyp),gmmff(natomtyp),sigisq(natomtyp),alphammff(natomtyp),coru_cons(natomtyp),corp_cons(natomtyp)
-
 contains
 !*****************************************************************
 !> \brief Calculates the total potential energy for a configuration.
@@ -64,12 +62,13 @@ contains
 !> \param lvol true if called from volume.f, no output of summary infomation
 !******************************************************************
   subroutine sumup(ovrlap,v,ibox,lvol)
+    use sim_particle,only:init_neighbor_list,lnn,add_neighbor_list
     use energy_kspace,only:recipsum
     use energy_intramolecular,only:U_bonded
     use energy_3body,only:U3System
     use energy_4body,only:U4System
 
-    real(kind=dp)::v(nEnergy),vrecipsum,vwell,my_velect
+    real::v(nEnergy),vrecipsum,vwell,my_velect
     logical::ovrlap,lvol
     logical::lexplt,lqimol,lqjmol,lcoulo(numax,numax),lij2,liji,lqchgi
     integer::i,imolty,ii,j,jmolty,jj,ntii,ntjj,ntij,iunit,ibox,nmcount,ntj,k,mmm
@@ -95,8 +94,6 @@ contains
 
     ovrlap = .false.
     v = 0.0E0_dp
-    !kea - 3body garofalini term
-    v3garo = 0.0E0_dp
     vwell = 0.0E0_dp
     ! check the molecule count ***
     nmcount = 0
@@ -104,7 +101,6 @@ contains
        if ( nboxi(i) .eq. ibox ) then
           nmcount=nmcount+1
        end if
-       neigh_cnt(i) = 0
     end do
     if ( nmcount .ne. nchbox(ibox) ) then
        call err_exit(__FILE__,__LINE__,'SUMUP: nmcount ne nchbox'//integer_to_string(nmcount)//integer_to_string(nchbox(ibox)),myid+1)
@@ -114,6 +110,7 @@ contains
 ! *******************************
 ! INTERCHAIN INTERACTIONS ***
 ! *******************************
+    if (lneigh.or.lneighbor.or.lgaro) call init_neighbor_list(ibox)
 
     ! loop over all chains i
     if (.not.(lgrand.and.ibox.eq.2) .and. .not.lideal(ibox)) then
@@ -229,34 +226,21 @@ contains
 
                          v(8)=v(8)+Q2(rij,rijsq,rcutsq,i,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
 
+                         if (lneigh.and.rijsq.le.rcutnn(ibox)**2) then
+                            lnn(i,j) = .true.
+                            lnn(j,i) = .true.
+                         end if
+
 !cc  KM for MPI
 !cc  all processors need to know neighbor information
 !cc  lneighbor and lgaro will not work in parallel
 !cc  calculation of neighbors assumes everything is sequential
-                         if ( lneighbor .and. ii .eq. 1 .and.  jj .eq. 1 .and. rijsq .lt. rbsmax**2  .and. rijsq .gt. rbsmin**2 ) then
-                            ! neigh_cnt(i,jmolty)=neigh_cnt(i,jmolty)+1
-                            ! neighbor(neigh_cnt(i,jmolty),i,jmolty)=j
-                            ! neigh_cnt(j,imolty)=neigh_cnt(j,imolty)+1
-                            ! neighbor(neigh_cnt(j,imolty),j,imolty)=i
-                            neigh_cnt(i)=neigh_cnt(i)+1
-                            neighbor(neigh_cnt(i),i)=j
-                            neigh_cnt(j)=neigh_cnt(j)+1
-                            neighbor(neigh_cnt(j),j)=i
-                         else if(lgaro) then
-                            if((ntij.eq.4.and.rijsq.lt.grijsq(2,1)) .or.(ntij.eq.6.and.rijsq.lt. grijsq(3,1))) then
-                               write(64,*) 'neighbor',i,' (', neigh_cnt(i)+1,')',j,' (', neigh_cnt(j)+1,')'
-                               neigh_cnt(i)=neigh_cnt(i)+1
-                               neighbor(neigh_cnt(i),i)=j
-                               neigh_cnt(j)=neigh_cnt(j)+1
-                               neighbor(neigh_cnt(j),j)=i
-                               ndij(neigh_cnt(i),i) = rij
-                               ndij(neigh_cnt(j),j) =  ndij(neigh_cnt(i),i)
-                               nxij(neigh_cnt(i),i) = rxuij
-                               nyij(neigh_cnt(i),i) = ryuij
-                               nzij(neigh_cnt(i),i) = rzuij
-                               nxij(neigh_cnt(j),j) = -rxuij
-                               nyij(neigh_cnt(j),j) = -ryuij
-                               nzij(neigh_cnt(j),j) = -rzuij
+                         !> \bug Wouldn't testing for center-of-mass distance be a better criteria?
+                         if (lneighbor.and.ii.eq.1.and.jj.eq.1.and.rijsq.lt.rbsmax**2.and.rijsq.gt.rbsmin**2) then
+                            call add_neighbor_list(i,j,rij,rxuij,ryuij,rzuij)
+                         else if (lgaro) then
+                            if (isNeighbor(rijsq,ntii,ntjj)) then
+                               call add_neighbor_list(i,j,rij,rxuij,ryuij,rzuij)
                             end if
                          end if
                       end do bead2
@@ -282,18 +266,14 @@ contains
        call mp_sum(v(2),1,groupid)
        call mp_sum(v(8),1,groupid)
 
-       if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff  .and. .not. lgenlj .and. .not. lninesix .and..not.lgaro .and..not.L_vdW_table) then
-          v(2) = 4.0E0_dp * v(2)
-       end if
-
 ! KEA garofalini 3 body potential
-       if (lgaro) then
-          call triad
-          call vthreebody(v3garo)
+       if (lgaro.and..not.lideal(ibox)) then
+          call triad()
+          v(10)=vthreebody()
        end if
 
-       if (hasThreeBody) v(2)=v(2)+U3System(ibox)
-       if (hasFourBody) v(2)=v(2)+U4System(ibox)
+       if (hasThreeBody.and..not.lideal(ibox)) v(2)=v(2)+U3System(ibox)
+       if (hasFourBody.and..not.lideal(ibox)) v(2)=v(2)+U4System(ibox)
 
        if (ltailc) then
           ! add tail corrections for the Lennard-Jones energy
@@ -475,11 +455,6 @@ contains
 ! write(io_output,*) 'vintra ', v(4)
 ! write(io_output,*) 'vinter ', v(2)
 ! write(io_output,*) 'test', v(4)
-
-       if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff  .and. .not. lgenlj .and. .not. lninesix .and..not.lgaro .and..not.L_vdW_table) then
-          v(4) = 4.0E0_dp * v(4)
-       end if
-
 ! ################################################################
 
 ! *************************************
@@ -549,7 +524,7 @@ contains
 
 ! for adsorption isotherms, don't calculate energy w/surface
 ! in box 2
-    if ((lelect_field) .or. ((ibox .eq. 1) .and. (ljoe .or. lsami .or. lmuir .or.  lexzeo .or. lgraphite .or. lslit))) then
+    if ((lelect_field).or.((ibox.eq.1).and.(lexzeo.or.lslit.or.lgraphite.or.lsami.or.lmuir))) then
        ! MPI
        do imolty=1,nmolty
           do nmcount=myid+1,ncmt(ibox,imolty),numprocs
@@ -621,7 +596,7 @@ contains
        v(8) = v(8)*qqfact
     end if
 
-    v(1) = v(2) + v(4) + v(9) + v(8) + v(11) + v3garo
+    v(1) = v(2) + v(4) + v(9) + v(8) + v(11) + v(10)
 
 ! write(io_output,*) 'v in sumup',v(1)
 
@@ -656,7 +631,7 @@ contains
        ! write(io_output,*) 'exact energy    ', 1.74756*1.67*831.441/3.292796
        write(io_output,*) 'fluc Q energy   ', v(11)
        write(io_output,*) 'well energy     ', vwellipsw
-       if(lgaro) write(io_output,*) '3-body garo     ', v3garo
+       if(lgaro) write(io_output,*) '3-body garo     ', v(10)
        write(io_output,*) 'total energy    ', v(1)
     end if
 
@@ -683,7 +658,7 @@ contains
 !> \param lfavor
 !*****************************************************************
   subroutine energy(i,imolty,v,flagon,ibox,istart,iuend,lljii,ovrlap,ltors,lcharge_table,lfavor,lAtom_traxyz)
-    use sim_particle,only:lnn,ctrmas
+    use sim_particle,only:lnn,lnn_t,neighbor,neigh_cnt,ndij,nxij,nyij,nzij,ctrmas,add_neighbor_list_molecule,neighi,neigh_icnt,ndiji,nxiji,nyiji,nziji
     use energy_intramolecular,only:U_torsion
     use energy_3body,only:U3MolSys
     use energy_4body,only:U4MolSys
@@ -699,10 +674,6 @@ contains
     real::v(nEnergy),rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq,ryuij,rzuij,rij,rijsq,rbcut,calpi
     real::vwell
     real::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq
-
-    ! KEA
-    integer::neigh_j,neighj(maxneigh)
-    real::ndijj(maxneigh),nxijj(maxneigh),nyijj(maxneigh),nzijj(maxneigh)
 ! --------------------------------------------------------------------
 #ifdef __DEBUG__
     write(io_output,*) 'start ENERGY in ',myid,' for molecule ',i,' in box ',ibox
@@ -720,13 +691,10 @@ contains
     v = 0.0E0_dp
     sself  = 0.0E0_dp
     correct = 0.0E0_dp
-    !kea
-    v3garo = 0.0E0_dp
 
-    if ( istart .eq. 1 .and. flagon .eq. 2) then
-       neigh_icnt = 0
-    else if(lgaro.and.flagon.eq.1) then
-       neigh_j = 0
+    if (flagon.eq.2) then
+       if (lneigh) lnn_t(:,i)=.false.
+       if (lneighbor.or.lgaro) neigh_icnt = 0
     end if
 
 ! *******************************
@@ -893,29 +861,15 @@ contains
 
                    v(8)=v(8)+Q2(rij,rijsq,rcutsq,nchp2,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
 
+                   if (lneigh.and.flagon.eq.2.and.rijsq.le.rcutnn(ibox)**2) lnn_t(j,i)=.true.
+
                    ! KM lneighbor and lgaro does not work in parallel
-                   if ( lneighbor .and. ii .eq. 1 .and.  jj .eq. 1 .and. flagon .eq. 2 .and. rijsq .lt. rbsmax**2  .and. rijsq .gt. rbsmin**2) then
-                      ! neigh_icnt1(jmolty)=neigh_icnt1(jmolty)+1
-                      ! neighi1(neigh_icnt1(jmolty),jmolty)=j
-                      neigh_icnt=neigh_icnt+1
-                      neighi(neigh_icnt)=j
-                   else if(lgaro) then
-                      if((ntij.eq.4.and.rijsq.lt.grijsq(2,1)).or. (ntij.eq.6.and.rijsq.lt.grijsq(3,1))) then
-                         if(flagon.eq.2) then
-                            neigh_icnt=neigh_icnt+1
-                            neighi(neigh_icnt)=j
-                            ndiji(neigh_icnt) = rij
-                            nxiji(neigh_icnt) = rxuij
-                            nyiji(neigh_icnt) = ryuij
-                            nziji(neigh_icnt) = rzuij
-                         else if(flagon.eq.1) then
-                            neigh_j = neigh_j+1
-                            neighj(neigh_j) = j
-                            ndijj(neigh_j) = rij
-                            nxijj(neigh_j) = rxuij
-                            nyijj(neigh_j) = ryuij
-                            nzijj(neigh_j) = rzuij
-                         end if
+                   !> \bug Wouldn't testing for center-of-mass distance be a better criteria?
+                   if (lneighbor.and.ii.eq.1.and.jj.eq.1.and.flagon.eq.2.and.rijsq.lt.rbsmax**2.and.rijsq.gt.rbsmin**2) then
+                      call add_neighbor_list_molecule(j,rij,rxuij,ryuij,rzuij)
+                   else if (lgaro.and.flagon.eq.2) then
+                      if (isNeighbor(rijsq,ntii,ntjj)) then
+                         call add_neighbor_list_molecule(j,rij,rxuij,ryuij,rzuij)
                       end if
                    end if
                 end do
@@ -938,21 +892,17 @@ contains
     call mp_sum(v(8),1,groupid)
 ! -----------------------------------------------
 
-    if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff .and. .not. lgenlj .and. .not. lninesix .and..not.lgaro .and..not.L_vdW_table) then
-       v(2) = 4.0E0_dp * v(2)
-    end if
-
 !kea - garo: add three body loop for intermolecular interactions
     if (lgaro.and..not.lideal(ibox)) then
        if(flagon.eq.2) then
-          call triad_en(i,v3garo,neigh_icnt,neighi,ndiji,nxiji,nyiji,nziji,.true.)
-       else if(flagon.eq.1) then
-          call triad_en(i,v3garo,neigh_j,neighj,ndijj,nxijj,nyijj,nzijj,.false.)
+          v(10)=triad_en(i,neigh_icnt,neighi,ndiji,nxiji,nyiji,nziji,.true.)
+       else if (flagon.eq.1) then
+          v(10)=triad_en(i,neigh_cnt(i),neighbor(:,i),ndij(:,i),nxij(:,i),nyij(:,i),nzij(:,i),.false.)
        end if
     end if
 
-    if (hasThreeBody) v(2)=v(2)+U3MolSys(i,istart,iuend,flagon)
-    if (hasFourBody) v(2)=v(2)+U4MolSys(i,istart,iuend,flagon)
+    if (hasThreeBody.and..not.lideal(ibox)) v(2)=v(2)+U3MolSys(i,istart,iuend,flagon)
+    if (hasFourBody.and..not.lideal(ibox)) v(2)=v(2)+U4MolSys(i,istart,iuend,flagon)
 
 ! ################################################################
 
@@ -1047,17 +997,13 @@ contains
        sself = -sself * calpi/sqrtpi
        v(14) = sself + correct
     end if
-    if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff  .and. .not. lgenlj  .and. .not. lninesix .and..not.L_vdW_table) then
-       v(4) = 4.0E0_dp * v(4)
-    end if
-
 ! ################################################################
 
 ! ***************************************************************
 ! CALCULATION OF INTERACTION ENERGY WITH EXTERNAL SURFACE ***
 ! ***************************************************************
 
-    if ((lelect_field.and.lqimol) .or. ((ibox .eq. 1) .and. (ljoe .or. lsami .or. lmuir .or. lexzeo .or. lgraphite .or. lslit))) then
+    if ((lelect_field.and.lqimol).or.((ibox.eq.1).and.(lexzeo.or.lslit.or.lgraphite.or.lsami.or.lmuir))) then
        do j = istart,iuend
           ntj = ntype(imolty,j)
           v(9)=v(9)+U_ext(ibox,nchp2,j,ntj)
@@ -1114,7 +1060,7 @@ contains
     end if
 
 ! note that vintra is only computed when the flag lljii is true
-    v(1) = v(2) + v(9) + v(4) + v(8) + v(14) + v3garo
+    v(1) = v(2) + v(9) + v(4) + v(8) + v(14) + v(10)
 ! write(io_output,*) 'vinter:',v(2),'vext:',v(9),'vintra:',v(4),'velect',v(8),'vewald:',v(14),'v'
 
     if (flagon.eq.1) then
@@ -1405,10 +1351,6 @@ contains
                 end do
              end do
           end if
-
-          if ( .not. lsami .and. .not. lexpsix .and. .not. lmmff  .and. .not. lgenlj .and. .not. lninesix .and..not.L_vdW_table.and..not.L_bend_table) then
-             v(4) = 4.0E0_dp * v(4)
-          end if
        end if
 
 ! grand-canonical: if ibox = 2 (ideal gas box) only intra-chain
@@ -1440,8 +1382,12 @@ contains
 
              ! check for simulation box
              if ( ( nboxi(j) .eq. ibox ) .and. ( i .ne. j ) ) then
-                ! check neighbor list and COM table calculated above
-                if ((lneigh.and.(.not.lnew).and.(.not.lnn(j,i))).or.((.not.lfirst).and.(lcmno(j).and.lcutcm))) cycle do_nmole
+                ! check neighbor list
+                if (lneigh.and..not.lnew) then
+                   if (.not.lnn(j,i)) cycle do_nmole
+                end if
+                ! check COM table calculated above
+                if (.not.lfirst.and.lcmno(j).and.lcutcm) cycle do_nmole
 
                 jmolty = moltyp(j)
                 lqjmol = lelect(jmolty)
@@ -1495,7 +1441,7 @@ contains
                       ! end iswatch add-on ***
 
                       ntjj = ntype(jmolty,jj)
-                      if ((.not.(liji.and.lij(ntjj))).and.(.not.(lqchgi.and.lqchg(ntjj))).and..not.L_vdW_table) cycle
+                      if ((.not.(liji.and.lij(ntjj))).and.(.not.(lqchgi.and.lqchg(ntjj)))) cycle
 
                       ntij=type_2body(ntii,ntjj)
 
@@ -1539,10 +1485,6 @@ contains
                 end do
              end if
           end do do_nmole
-
-          if (.not.lsami.and..not.lexpsix.and..not.lmmff.and..not.lgenlj.and..not.lninesix.and..not.L_vdW_table) then
-             v(2) = 4.0E0_dp * v(2)
-          end if
        end if
 ! ################################################################
 
@@ -1555,7 +1497,7 @@ contains
 ! phase diagrams.
 ! not used for adsorption isotherms
        if (ibox .eq. 1) then
-          if ((lelect_field.and.lqimol).or.((ibox.eq.1).and.(ljoe .or. lsami .or. lmuir .or. lexzeo .or. lgraphite .or. lslit))) then
+          if ((lelect_field.and.lqimol).or.((ibox.eq.1).and.(lexzeo.or.lslit.or.lgraphite.or.lsami.or.lmuir))) then
              do count = 1,ntogrow
                 ! assign bead type for ii
                 ii = glist(count)
@@ -1686,88 +1628,99 @@ contains
     return
   end subroutine boltz
 
-! **********************************
-!> \brief tail-corrections in energy ***
-! **********************************
+!> \brief Tail corrections to energy
+!>
+!> \warning Tabulated potential, MMFF94 and Feuston-Garofalini
+!> are NOT supported.
+!> \note New potenial functional form needs to be added here,
+!> and in U2 (energy calculation), prop_pressure::pressure
+!> (force calculation), corp (tail corrections to pressure)
   function coru(imolty,jmolty,rho,ibox)
+    real::coru
+    integer,intent(in)::imolty,jmolty,ibox
+    real,intent(in)::rho
+    real::rbcut,rbcut2,rbcut3,tmp,rci1,rci3,rci6,sigma2,epsilon2
+    integer::ii,jj,ntii,ntjj,ntij
 
-      real::coru,rci3,rho,epsilon2,sigma2
-      real::rci1
-      integer::imolty,jmolty,ii,jj, ntii, ntjj, ntij ,ibox
+    rbcut=rcut(ibox)
+    rbcut2=rbcut*rbcut
+    rbcut3=rbcut2*rbcut
 
-      coru = 0.0E0_dp
-      do ii = 1, nunit(imolty)
-         ntii = ntype(imolty,ii)
-         do jj = 1, nunit(jmolty)
-            ntjj = ntype(jmolty,jj)
-            ntij = type_2body(ntii,ntjj)
-            if (lexpsix) then
-               coru = coru + rho*consu(ntij)
-            else if (lmmff) then
-               coru = coru + rho * epsimmff(ntij) * coru_cons(ntij) * sigimmff(ntij)**3.0E0_dp*twopi
-            else if (lninesix) then
-               coru = coru + 8.0E0_dp*onepi*rho*epsnx(ntij)* rzero(ntij)**3*(rzero(ntij)/rcut(ibox))**3* ((rzero(ntij)/rcut(ibox))**3/3.0E0_dp - 1.0E0_dp)
-            else if (lgenlj) then
-               rci3 = sig2ij(ntij)**(3.0E0_dp/2.0E0_dp) / rcut(ibox)**3
-               rci1 = rci3 **(1.0E0_dp/3.0E0_dp)
+    coru = 0.0_dp
+    do ii = 1, nunit(imolty)
+       ntii = ntype(imolty,ii)
+       do jj = 1, nunit(jmolty)
+          ntjj = ntype(jmolty,jj)
+          ntij = type_2body(ntii,ntjj)
+          if (lgaro.or.lsami.or.lmuir) then
+          else if (nonbond_type(ntij).eq.1) then
+             ! LJ 12-6
+             if (lexpand(imolty).and.lexpand(jmolty)) then
+                sigma2 = (sigma_f(imolty,ii)+sigma_f(jmolty,jj))/2.0_dp
+                epsilon2 = 4.0_dp*sqrt(epsilon_f(imolty,ii)*epsilon_f(jmolty,jj))
+             else if (lexpand(imolty)) then
+                sigma2 = (sigma_f(imolty,ii)+vvdW_b(2,ntjj))/2.0_dp
+                epsilon2 = 4.0_dp*sqrt(epsilon_f(imolty,ii)*vvdW_b(1,ntjj))
+             else if (lexpand(jmolty)) then
+                sigma2 = (vvdW_b(2,ntii)+sigma_f(jmolty,jj))/2.0_dp
+                epsilon2 = 4.0_dp*sqrt(vvdW_b(1,ntii)*epsilon_f(jmolty,jj))
+             else
+                sigma2 = vvdW(2,ntij)
+                epsilon2 = vvdW(1,ntij)
+             end if
 
-               if ( lexpand(imolty) .and. lexpand(jmolty) ) then
-                  sigma2 = (sigma_f(imolty,ii)+sigma_f(jmolty,jj))**2/4.0E0_dp
-                  epsilon2 = sqrt(epsilon_f(imolty,ii) *epsilon_f(jmolty,jj))
-               else if ( lexpand(imolty) ) then
-                  sigma2 = (sigma_f(imolty,ii)+sigi(ntjj))**2/4.0E0_dp
-                  epsilon2 = sqrt(epsilon_f(imolty,ii)*epsi(ntjj))
-               else if ( lexpand(jmolty) ) then
-                  sigma2 = (sigma_f(jmolty,jj)+sigi(ntii))**2/4.0E0_dp
-                  epsilon2 = sqrt(epsilon_f(jmolty,jj)*epsi(ntii))
-               else
-                  sigma2 = sig2ij(ntij)
-                  epsilon2 = epsij(ntij)
-               end if
-               coru = coru + 2.0E0_dp * onepi * epsilon2 * sigma2 ** (1.50E0_dp) * rho&
-                * (  (( (2.0E0_dp**(4.0E0_dp*n1/n0))/(2.0E0_dp*n1-3.0E0_dp)) * rci1 **(2.0E0_dp*n1-3.0E0_dp) )&
-                - ( (2.0E0_dp**((2.0E0_dp*n1/n0)+1.0E0_dp))/(n1-3.0E0_dp)) * rci1 **(n1-3.0E0_dp) )
+             tmp  = sigma2**3
+             rci3 = tmp/rbcut3
+             rci6 = rci3*rci3
+             coru = coru + epsilon2*tmp*rci3*(rci6/9.0_dp-1/3.0_dp)
+          else if (nonbond_type(ntij).eq.2) then
+             ! Buckingham exp-6
+             if (vvdW(2,ntij).ne.0) then
+                tmp = vvdW(2,ntij)*rbcut
+                coru = coru - (2.0_dp+tmp*(tmp-2.0_dp))*vvdW(1,ntij)*exp(tmp)/(vvdW(2,ntij)**3) - vvdW(3,ntij)/3.0_dp/rbcut3
+             end if
+          else if (nonbond_type(ntij).eq.3) then
+             ! Mie
+             tmp=vvdW(2,ntij)/rbcut
+             rci1=tmp**(vvdW(3,ntij)-3)
+             rci3=tmp**(vvdW(4,ntij)-3)
+             coru = coru + vvdW(1,ntij)*(vvdW(2,ntij)**3)*(rci1/(vvdW(3,ntij)-3)-rci3/(vvdW(4,ntij)-3))
+          else if (nonbond_type(ntij).eq.5) then
+             ! LJ 9-6
+             rci3=(vvdW(2,ntij)/rbcut)**3
+             coru = coru + vvdW(1,ntij)*(vvdW(2,ntij)**3)*rci3*(rci3/3.0_dp-1.0_dp)
+          else if (nonbond_type(ntij).eq.6) then
+             ! Generalized LJ
+             tmp  = 2.0_dp*vvdW(4,ntij)-3.0_dp
+             rci1 = (vvdW(2,ntij)/rbcut)**tmp
+             rci3 = (vvdW(2,ntij)/rbcut)**(vvdW(4,ntij)-3.0_dp)
+             coru = coru + vvdW(1,ntij)*(vvdW(2,ntij)**3)*(rci1/tmp-rci3*2.0_dp/(vvdW(4,ntij)-3.0_dp))
+          else if (nonbond_type(ntij).eq.7) then
+             ! LJ 12-6-8
+             coru = coru + vvdW(1,ntij)/9.0_dp/(rbcut3**3)-vvdW(2,ntij)/3.0_dp/rbcut3-vvdW(3,ntij)/5.0_dp/rbcut3/rbcut2
+          else if (nonbond_type(ntij).ne.4.and.nonbond_type(ntij).ne.-1.and.nonbond_type(ntij).ne.0) then
+             call err_exit(__FILE__,__LINE__,'coru: undefined nonbond type',myid+1)
+          end if
+       end do
+    end do
 
-            else
-               rci3 = sig2ij(ntij)**(3.0E0_dp/2.0E0_dp) / rcut(ibox)**3
-               if ( lexpand(imolty) .and. lexpand(jmolty) ) then
-                  sigma2 = (sigma_f(imolty,ii)+sigma_f(jmolty,jj))**2/4.0E0_dp
-                  epsilon2 = sqrt(epsilon_f(imolty,ii) *epsilon_f(jmolty,jj))
-               else if ( lexpand(imolty) ) then
-                  sigma2 = (sigma_f(imolty,ii)+sigi(ntjj))**2/4.0E0_dp
-                  epsilon2 = sqrt(epsilon_f(imolty,ii)*epsi(ntjj))
-               else if ( lexpand(jmolty) ) then
-                  sigma2 = (sigma_f(jmolty,jj)+sigi(ntii))**2/4.0E0_dp
-                  epsilon2 = sqrt(epsilon_f(jmolty,jj)*epsi(ntii))
-               else
-                  sigma2 = sig2ij(ntij)
-                  epsilon2 = epsij(ntij)
-               end if
-               coru = coru +  8.0E0_dp * onepi * epsilon2 *  sigma2**(1.5E0_dp) *rho *  (rci3 * rci3 * rci3 / 9.0E0_dp - rci3 / 3.0E0_dp)
-            end if
-         end do
-      end do
-      return
+    coru=twopi*rho*coru
+
   end function coru
 
-!> \brief Read in force field parameters
-!>
-!> \todo Need to reorganize pairwise interactions so that more than one functional type can be used
+!> \brief Read in non-bonded potentials
   subroutine read_ff(io_ff,lmixlb,lmixjo)
-    use util_search,only:initiateTable,addToTable
+    use util_search,only:initiateTable,addToTable,indexOf,tightenTable
     use util_memory,only:reallocate
-    use energy_intramolecular,only:read_energy_bonded
+    use energy_intramolecular,only:read_ff_bonded
 
     integer,INTENT(IN)::io_ff
     logical,intent(in)::lmixlb,lmixjo
     integer,parameter::initial_size=20
     character(LEN=default_string_length)::line_in
-    integer::jerr,i,j,ij,it,nmix
-    real::sigmaTmp,epsilonTmp
+    integer::jerr,i,j,ij,ji,nmix,itmp
 
     call initiateTable(atoms,initial_size)
-
-    call init_tabulated_potential_pair()
 
     !> Looking for section ATOMS
     nntype=0
@@ -1777,12 +1730,12 @@ contains
        if (jerr.ne.0) exit cycle_read_atoms
 
        if (UPPERCASE(line_in(1:5)).eq.'ATOMS') then
-          allocate(atom_type(1:initial_size),sigi(1:initial_size),epsi(1:initial_size),qelect(1:initial_size),mass(1:initial_size),lij(1:initial_size),lqchg(1:initial_size),chemid(1:initial_size),stat=jerr)
+          allocate(atom_type(1:initial_size),vvdW_b(1:4,1:initial_size),qelect(1:initial_size),mass(1:initial_size),lij(1:initial_size),lqchg(1:initial_size),chemid(1:initial_size),stat=jerr)
           if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_pairwise: atoms allocation failed',jerr)
-          sigi = 0.0E0_dp
-          epsi = 0.0E0_dp
-          qelect = 0.0E0_dp
-          mass = 0.0E0_dp
+          atom_type = 0
+          vvdW_b = 0.0_dp
+          qelect = 0.0_dp
+          mass = 0.0_dp
           lij = .true.
           lqchg = .false.
 
@@ -1795,22 +1748,20 @@ contains
              i=addToTable(atoms,i,expand=.true.)
              if (i.gt.ubound(atom_type,1)) then
                 call reallocate(atom_type,1,2*ubound(atom_type,1))
-                call reallocate(sigi,1,2*ubound(sigi,1))
-                call reallocate(epsi,1,2*ubound(epsi,1))
+                call reallocate(vvdW_b,1,4,1,2*ubound(vvdW_b,2))
                 call reallocate(qelect,1,2*ubound(qelect,1))
                 call reallocate(mass,1,2*ubound(mass,1))
                 call reallocate(lij,1,2*ubound(lij,1))
                 call reallocate(lqchg,1,2*ubound(lqchg,1))
                 call reallocate(chemid,1,2*ubound(chemid,1))
              end if
-             read(line_in,*) j,atom_type(i),sigi(i),epsi(i),qelect(i),mass(i),chemid(i)
-             !read(line_in,'(I,4F,2A)') i,sigi(i),epsi(i),qelect(i),mass(i),chemid(i),chname(i)
+             read(line_in,*) j,atom_type(i),vvdW_b(1:vdW_nParameter(atom_type(i)),i),qelect(i),mass(i),chemid(i)
              if (qelect(i).ne.0) then
                 lqchg(i)=.true.
              else
                 lqchg(i)=.false.
              end if
-             if (sigi(i).eq.0 .and. epsi(i).eq.0) then
+             if (ALL(vvdW_b(1:vdW_nParameter(atom_type(i)),i).eq.0)) then
                 lij(i)=.false.
              else
                 lij(i)=.true.
@@ -1819,33 +1770,86 @@ contains
           exit cycle_read_atoms
        end if
     END DO CYCLE_READ_ATOMS
+    
+    if (nntype.gt.0) then
+       call tightenTable(atoms)
+       call reallocate(atom_type,1,nntype)
+       call reallocate(vvdW_b,1,4,1,nntype)
+       call reallocate(qelect,1,nntype)
+       call reallocate(mass,1,nntype)
+       call reallocate(lij,1,nntype)
+       call reallocate(lqchg,1,nntype)
+       call reallocate(chemid,1,nntype)
 
-    nmix=nntype*nntype
+       nmix=nntype*nntype
 
-    allocate(lpl(1:nntype),xiq(1:nntype),jayself(1:nntype),nonbond_type(1:nmix),sig2ij(1:nmix),epsij(1:nmix),rminee(1:nmix),ecut(1:nmix),jayq(1:nmix),stat=jerr)
-    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_pairwise: nonbond allocation failed',jerr)
+       allocate(lpl(1:nntype),xiq(1:nntype),jayself(1:nntype),nonbond_type(1:nmix),vvdW(1:4,1:nmix),rminee(1:nmix),ecut(1:nmix),jayq(1:nmix),stat=jerr)
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_pairwise: nonbond allocation failed',jerr)
 
-    xiq = 0.0E0_dp
-    lpl = .false.
-    sig2ij=0.0E0_dp
-    epsij=0.0E0_dp
-    jayq=0.0E0_dp
+       lpl = .false.
+       xiq = 0.0_dp
+       nonbond_type=0
+       vvdW=0.0_dp
+       jayq=0.0_dp
+    end if
 
     ! Computation of un-like interactions
     ! convert input data to program units
     ! calculate square sigmas and epsilons for lj-energy subroutines
     do i = 1, nntype
        do j = 1, nntype
+          if (atom_type(i).ne.atom_type(j)) cycle
+
           ij = (i-1)*nntype + j
-          if (lmixlb) then
-             ! Lorentz-Berthelot rules --- sig_ij = 0.5 [ sig_i + sig_j ]
-             sig2ij(ij) =(0.5E0_dp*(sigi(i)+sigi(j)))**2
-             if (sigi(i).eq.0.0E0_dp.or.sigi(j).eq.0.0E0_dp) sig2ij(ij) = 0.0E0_dp
-          else if (lmixjo) then
-             ! Jorgensen mixing rules --- sig_ij = [ sig_i * sig_j ]^(1/2)
-             sig2ij(ij) = sigi(i) * sigi(j)
+          nonbond_type(ij)=atom_type(i)
+
+          if (nonbond_type(ij).eq.1) then
+             ! LJ 12-6
+             if (lmixlb) then
+                ! Lorentz-Berthelot rules --- sig_ij = 0.5 [ sig_i + sig_j ]
+                if (vvdW_b(2,i).eq.0.0_dp.or.vvdW_b(2,j).eq.0.0_dp) then
+                   vvdW(2:3,ij)=0.0_dp
+                else
+                   vvdW(2,ij)=0.5_dp*(vvdW_b(2,i)+vvdW_b(2,j))
+                   vvdW(3,ij)=vvdW(2,ij)**2
+                end if
+             else if (lmixjo) then
+                ! Jorgensen mixing rules --- sig_ij = [ sig_i * sig_j ]^(1/2)
+                vvdW(3,ij)=vvdW_b(2,i)*vvdW_b(2,j)
+                vvdW(2,ij)=sqrt(vvdW(3,ij))
+             end if
+             vvdW(1,ij)=4.0_dp*sqrt(vvdW_b(1,i)*vvdW_b(1,j))
+          else if (nonbond_type(ij).eq.2) then
+             ! Buckingham exp-6
+             vvdW(1,ij)=sqrt(vvdW_b(1,i)*vvdW_b(1,j))
+             vvdW(2,ij)=-0.5_dp*(vvdW_b(2,i)+vvdW_b(2,j))
+             vvdW(3,ij)=sqrt(vvdW_b(3,i)*vvdW_b(3,j))
+          else if (nonbond_type(ij).eq.3) then
+             ! Mie
+             if (lmixlb) then
+                ! Lorentz-Berthelot rules --- sig_ij = 0.5 [ sig_i + sig_j ]
+                vvdW(2:4,ij)=0.5_dp*(vvdW_b(2:4,i)+vvdW_b(2:4,j))
+             else if (lmixjo) then
+                ! Jorgensen mixing rules --- sig_ij = [ sig_i * sig_j ]^(1/2)
+                vvdW(2:4,ij)=sqrt(vvdW_b(2:4,i)*vvdW_b(2:4,j))
+             end if
+             vvdW(1,ij) = vvdW(3,ij)/(vvdW(3,ij)-vvdW(4,ij))*((vvdW(3,ij)/vvdW(4,ij))**(vvdW(4,ij)/(vvdW(3,ij)-vvdW(4,ij))))*sqrt(vvdW_b(1,i)*vvdW_b(1,j))
+          else if (nonbond_type(ij).eq.4.or.nonbond_type(ij).eq.5.or.nonbond_type(ij).eq.6) then
+             ! MMFF94 or LJ 9-6 or Generalized LJ
+             if (lmixlb) then
+                ! Lorentz-Berthelot rules --- sig_ij = 0.5 [ sig_i + sig_j ]
+                vvdW(2:4,ij)=0.5_dp*(vvdW_b(2:4,i)+vvdW_b(2:4,j))
+             else if (lmixjo) then
+                ! Jorgensen mixing rules --- sig_ij = [ sig_i * sig_j ]^(1/2)
+                vvdW(2:4,ij)=sqrt(vvdW_b(2:4,i)*vvdW_b(2:4,j))
+             end if
+             if (nonbond_type(ij).eq.4) vvdW(3,ij)=vvdW(2,ij)*vvdW(2,ij)
+             vvdW(1,ij)=4.0_dp*sqrt(vvdW_b(1,i)*vvdW_b(1,j))
+          else if (nonbond_type(ij).eq.7) then
+             ! LJ 12-6-8
+             vvdW(1:3,ij)=sqrt(vvdW_b(1:3,i)*vvdW_b(1:3,j))
           end if
-          epsij(ij) = sqrt(epsi(i)*epsi(j))
+
        end do
     end do
 
@@ -1862,343 +1866,85 @@ contains
              if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section NONBOND',jerr)
              if (UPPERCASE(line_in(1:11)).eq.'END NONBOND') exit
              nmix=nmix+1
-             read(line_in,*) i,j,it,sigmaTmp,epsilonTmp
+             read(line_in,*) i,j
+             i=indexOf(atoms,i)
+             j=indexOf(atoms,j)
+             if (i.eq.0.or.j.eq.0) call err_exit(__FILE__,__LINE__,'read_ff: undefined bead in section NONBOND',jerr)
              ij=(i-1)*nntype+j
-             nonbond_type(ij)=it
-             nonbond_type((j-1)*nntype+i)=it
-             sig2ij(ij)=sigmaTmp*sigmaTmp
-             sig2ij((j-1)*nntype+i)=sig2ij(ij)
-             epsij(ij)=epsilonTmp
-             epsij((j-1)*nntype+i)=epsilonTmp
+             read(line_in,*) itmp,itmp,nonbond_type(ij),vvdW(1:vdW_nParameter(nonbond_type(ij)),ij)
+
+             if (nonbond_type(ij).eq.1) then
+                ! LJ 12-6
+                vvdW(1,ij)=4.0_dp*vvdW(1,ij)
+                vvdW(3,ij)=vvdW(2,ij)**2
+             else if (nonbond_type(ij).eq.2) then
+                ! Buckingham exp-6
+                vvdW(2,ij)=-vvdW(2,ij)
+             else if (nonbond_type(ij).eq.3) then
+                ! Mie
+                vvdW(1,ij)=vvdW(3,ij)/(vvdW(3,ij)-vvdW(4,ij))*((vvdW(3,ij)/vvdW(4,ij))**(vvdW(4,ij)/(vvdW(3,ij)-vvdW(4,ij))))*vvdW(1,ij)
+             else if (nonbond_type(ij).eq.4) then
+                ! MMFF94
+                vvdW(3,ij)=vvdW(2,ij)**2
+             else if (nonbond_type(ij).eq.5) then
+                ! LJ 9-6
+                vvdW(1,ij)=4.0_dp*vvdW(1,ij)
+             else if (nonbond_type(ij).eq.6) then
+                ! Generalized LJ
+                vvdW(1,ij)=4.0_dp*vvdW(1,ij)
+             else if (nonbond_type(ij).ne.7.and.nonbond_type(ij).ne.-1.and.nonbond_type(ij).ne.0) then
+                call err_exit(__FILE__,__LINE__,'read_ff: undefined nonbond type',myid+1)
+             end if
+
+             ji=(j-1)*nntype+i
+             nonbond_type(ji)=nonbond_type(ij)
+             vvdW(:,ji)=vvdW(:,ij)
+
+             if (ANY(vvdW(1:vdw_nParameter(nonbond_type(ij)),ij).ne.0)) then
+                lij(i)=.true.
+                lij(j)=.true.
+             end if
           end do
           exit cycle_read_nonbond
        end if
     END DO CYCLE_READ_NONBOND
 
-    !> set up the strectching and bending constants
-    call read_energy_bonded(io_ff)
+    call read_tabulated_ff_pair()
 
-    close(io_ff)
+    call read_ff_bonded(io_ff)
   end subroutine read_ff
 
   subroutine init_ff(io_input,lprint)
     use energy_external,only:init_energy_external
-    use energy_sami,only:susami
+    use energy_sami,only:susami,sumuir
+    use energy_garofalini,only:init_garofalini
     INTEGER,INTENT(IN)::io_input
     LOGICAL,INTENT(IN)::lprint
     integer::i,j,ij
-    real::sr2,sr6,rzeronx(nxatom),epsilonnx(nxatom),rcheck,rs1,rs7,sr7
+    real::rbcut,rbcutsq
 
-    do i = 1, nntype
-       do j = 1, nntype
-          ij = (i-1)*nntype + j
-          if (lshift) then
-             sr2 = sig2ij(ij)/(rcut(1)*rcut(1))
-             sr6 = sr2 * sr2 * sr2
-             ecut(ij)= sr6*(sr6-1.0E0_dp)*epsij(ij)
-          end if
-       end do
-    end do
+    if (lgaro) then
+       call init_garofalini()
+    else
+       if (lsami) then
+          call susami()
+       end if
+       if (lmuir) then
+          call sumuir()
+       end if
+    end if
 
     !> read external potentials
     call init_energy_external(io_input,lprint)
 
-    if ( lsami ) then
-       call susami()
-       rcheck = 2.5E0_dp * 3.527E0_dp
-       if ( rcut(1) .ne. rcheck ) then
-          if (lprint) write(io_output,*) 'WARNING ### rcut set to 2.5sigma for SAMI'
-          rcut(1) = rcheck
-       end if
-    else if (lgaro) then
-! KEA adding garofalini silica/water potential
-! see J. Phys. Chem. 94 5351 (1990)
-! form:
-! U(2) = A exp(-rij/rho)+[zi zj erfc (rij/beta)]/rij + a/[1+exp(b/(rij-c))]
-! U(3) = h3(rij rik thetajik) + h3(rjk rji thetakji) + h3(rki rkj thetaijk)
-! h3(rij rik thetajik) = lambda exp[(gamma/(rij-rij*))+(gamma/(rik-rik*))]*
-!             [cos(theta)-cos(theta*)]**2     for rij<rij* and rik<rik*
-! 0 otherwise
-       do i=1,6
-          galpha(i) = 0.0E0_dp
-          grho(i) = 0.0E0_dp
-          gbeta(i) = 0.0E0_dp
-          ecut(i) = 0.0E0_dp
-          do j=1,3
-             ga(i,j) = 0.0E0_dp
-             gb(i,j) = 0.0E0_dp
-             gc(i,j) = 0.0E0_dp
-          end do
-       end do
-       do i=1,4
-          glambda(i) = 0.0E0_dp
-          do j=1,2
-             grij(i,j) = 0.0E0_dp
-             grijsq(i,j) = 0.0E0_dp
-             ggamma(i,j) = 0.0E0_dp
-          end do
-          gtheta(i) = 0.0E0_dp
-       end do
-
-! Parameters (galpha,grho,gbeta,ga,gb,gc; lambda,grij,ggamma,gtheta)
-! Si-Si
-       galpha(1) = 13597175.7E0_dp
-       grho(1) = 0.29E0_dp
-       gbeta(1) = 2.29E0_dp
-       lqchg(1) = .true.
-       qelect(1) = 4.0E0_dp
-       mass(1) = 28.09E0_dp
-       ecut(1) = garofalini(rcut(1)*rcut(1),1,qelect(1),qelect(1),1,1)
-       chemid(1) = 'Si '
-
-! O-O
-       galpha(2) = 5251972.5E0_dp
-       grho(2) = 0.29E0_dp
-       gbeta(2) = 2.34E0_dp
-       lqchg(2) = .true.
-       qelect(2) = -2.0E0_dp
-       mass(2) = 16.00E0_dp
-       ecut(2) = garofalini(rcut(1)*rcut(1),2,qelect(2),qelect(2) ,2,2)
-       chemid(2) = 'O  '
-
-! H-H
-       galpha(3) = 246299.4E0_dp
-       grho(3) = 0.35E0_dp
-       gbeta(3) = 2.1E0_dp
-       ga(3,1) = -38243.8E0_dp
-       gb(3,1) = 6.0E0_dp
-       gc(3,1) = 1.51E0_dp
-       ga(3,2) = 2515.9E0_dp
-       gb(3,2) = 2.0E0_dp
-       gc(3,2) = 2.42E0_dp
-       lqchg(3) = .true.
-       qelect(3) = 1.0E0_dp
-       mass(3) = 1.0078E0_dp
-       ecut(3) = garofalini(rcut(1)*rcut(1),3,qelect(3),qelect(3) ,3,3)
-       chemid(3) = 'H  '
-
-! Si-O
-       galpha(4) =  21457024.2E0_dp
-       grho(4) = 0.29E0_dp
-       gbeta(4) = 2.34E0_dp
-       ecut(4) = garofalini(rcut(1)*rcut(1),4,qelect(1),qelect(2) ,1,2)
-
-! Si-H
-       galpha(5) = 499842.9E0_dp
-       grho(5) = 0.29E0_dp
-       gbeta(5) = 2.31E0_dp
-       ga(5,1) = -33715.5E0_dp
-       gb(5,1) = 6.0E0_dp
-       gc(5,1) = 2.2E0_dp
-       ecut(5) = garofalini(rcut(1)*rcut(1),5,qelect(1),qelect(3) ,1,3)
-
-! 0-H
-       galpha(6) = 2886049.4E0_dp
-       grho(6) = 0.29E0_dp
-       gbeta(6) = 2.26E0_dp
-       ga(6,1) = -15096.7E0_dp
-       gb(6,1) = 15.0E0_dp
-       gc(6,1) = 1.05E0_dp
-       ga(6,2) = 55353.6E0_dp
-       gb(6,2) = 3.2E0_dp
-       gc(6,2) = 1.50E0_dp
-       ga(6,3) = -6038.7E0_dp
-       gb(6,3) = 5.0E0_dp
-       gc(6,3) = 2.0E0_dp
-       ecut(6) = garofalini(rcut(1)*rcut(1),6,qelect(2),qelect(3) ,2,3)
-
-! Si-O-Si
-       glambda(1) = 21732.3E0_dp
-       ggamma(1,1) = 2.0E0_dp
-       grij(1,1) = 2.6E0_dp
-       grijsq(1,1) = grij(1,1)*grij(1,1)
-       gtheta(1) = cos(109.5E0_dp*degrad)
-
-! O-Si-O
-       glambda(2) = 1376379.0E0_dp
-       ggamma(2,1) = 2.8E0_dp
-       grij(2,1) = 3.0E0_dp
-       grijsq(2,1) = grij(2,1)*grij(2,1)
-       gtheta(2) = cos(109.5E0_dp*degrad)
-
-! H-O-H
-       glambda(3) = 2535435.0E0_dp
-       ggamma(3,1) = 1.3E0_dp
-       grij(3,1) = 1.6E0_dp
-       grijsq(3,1) = grij(3,1)*grij(3,1)
-       gtheta(3) = cos(104.5E0_dp*degrad)
-
-! Si-O-H
-       glambda(4) = 362205.0E0_dp
-       ggamma(4,1) = 2.0E0_dp
-       ggamma(4,2) = 1.2E0_dp
-       grij(4,1) = grij(1,1)
-       grij(4,2) = 1.5E0_dp
-       grijsq(4,1) = grij(4,1)*grij(4,1)
-       grijsq(4,2) = grij(4,2)*grij(4,2)
-       gtheta(4) = cos(109.5E0_dp*degrad)
-    else if(lexpsix) then
-! Explicit atom carbon Williams Exp-6 potential
-! J.Chem.Phys 47 11 4680 (1967) paramter set IV
-! note that the combination of C--H has to be the average of C
-! and H the way it is set up in the energy subroutines
-! natom is set in expsix.inc
-! U(r) = A*r^(-6) + B*exp[C*r]
-       do i = 1,natom
-          aexsix(i) = 0.0E0_dp
-          bexsix(i) = 0.0E0_dp
-          cexsix(i) = 0.0E0_dp
-          qelect(i) = 0.0E0_dp
-          xiq(i) = 0.0E0_dp
-          lqchg(i) = .false.
-          lij(i) = .true.
-       end do
-
-! O--- nonbonded interaction
-! BKS [O]
-       qelect(1) = -1.2
-       lqchg(1) = .true.
-       aexsix(1) = -175.0000E0_dp*1.602177E-19_dp/1.3806503E-23_dp
-       bexsix(1) = 1388.7730E0_dp*1.602177E-19_dp/1.3806503E-23_dp
-       cexsix(1) = -2.76000E0_dp
-       mass(1) = 15.9994
-
-! O---Si nonbonded interaction
-       aexsix(2) = -133.5381E0_dp*1.602177E-19_dp/1.3806503E-23_dp
-       bexsix(2) = 18003.7572E0_dp*1.602177E-19_dp/1.3806503E-23_dp
-       cexsix(2) = -4.87318E0_dp
-       lqchg(2) = .true.
-
-! Si---Si nonbonded interaction
-! BKS [Si]
-       qelect(3) = 2.4
-       lqchg(3) = .true.
-       aexsix(3) = 0.
-       bexsix(3) = 0.
-       cexsix(3) = 0.
-       mass(3) = 28.0899
-
-       if (lshift) then
-          do i=1,natom
-             sexsix(i) = aexsix(i)*(rcut(1)**(-6)) + bexsix(i)*Exp(cexsix(i)*rcut(1))
-          end do
-       else
-          do i=1,natom
-             consp(i) = (2.0E0_dp/3.0E0_dp)*onepi*(2.0E0_dp*aexsix(i)/(rcut(1) *rcut(1)*rcut(1))&
-              +bexsix(i)*exp(cexsix(i)*rcut(1)) *(-6.0E0_dp/(cexsix(i)*cexsix(i)*cexsix(i))+6.0E0_dp *rcut(1)&
-              /(cexsix(i)*cexsix(i))-3.0E0_dp*rcut(1)* rcut(1)/ cexsix(i)+rcut(1)*rcut(1)*rcut(1)))
-             consu(i) = 2.0E0_dp*onepi*(aexsix(i)/(3.0E0_dp*rcut(1)*rcut(1)* rcut(1)) +(-rcut(1)*rcut(1)&
-              +2.0E0_dp*rcut(1)/cexsix(i)-2.0E0_dp/ (cexsix(i)* cexsix(i)))*bexsix(i)*exp(cexsix(i)*rcut(1))/ cexsix(i))
-          end do
-! write(11,*) 'consp(i)',consp
-! write(11,*) 'consu(i)',consu
-       end if
-    else if (lmmff) then
-! Merk Molecular Force Field (MMFF)
-! J. Am. Chem. Soc. 1992 Vol.114 P7827-7843 (Thomas A. Halgren)
-! natomtyp is set in mmff.inc
-! U(r) = epsi*(1.07/(rs+0.07))^7 * (1.12/(rs^7+0.12)-2)
-! rs = r / sigimmff
-
-! C---C nonbonded interaction ***
-       alphammff(1) = 1.050E0_dp
-       nmmff(1) = 2.490E0_dp
-       ammff(1) = 3.890E0_dp
-       gmmff(1) = 1.282E0_dp
-       sigimmff(1) = ammff(1)*sqrt(sqrt(alphammff(1)))
-       epsimmff(1) = 45582.6E0_dp*gmmff(1)*gmmff(1)*sqrt(nmmff(1)) /(ammff(1)**6.0E0_dp)
-! sigimmff(1) = 1.126763255691509E0_dp
-! epsimmff(1) = 0.9994354715851470E0_dp
-       sigisq(1) = sigimmff(1)*sigimmff(1)
-       mass(1) = 12.011E0_dp
-! mass(1) = 1.0E0_dp
-
-! H---H nonbonded interaction ***
-       alphammff(3) = 0.250E0_dp
-       nmmff(3) = 0.800E0_dp
-       ammff(3) = 4.200E0_dp
-       gmmff(3) = 1.209E0_dp
-       sigimmff(3) = ammff(3)*sqrt(sqrt(alphammff(3)))
-       epsimmff(3) = 45582.6E0_dp*gmmff(3)*gmmff(3)*sqrt(nmmff(3)) /(ammff(3)**6.0E0_dp)
-       sigisq(3) = sigimmff(3)*sigimmff(3)
-       mass(3) = 1.0078E0_dp
-
-! C---H nonbonded interaction by using cominbination rule ***
-       sigimmff(2) = 0.5E0_dp*(sigimmff(1)+sigimmff(3))*(1.0E0_dp +  0.2E0_dp*(1.0E0_dp-exp(-12.E0_dp*(((sigimmff(1)-sigimmff(3))/ (sigimmff(3)+sigimmff(1)))**2.0E0_dp))))
-       epsimmff(2) = 91165.1E0_dp*gmmff(1)*gmmff(3)*alphammff(1)* alphammff(3)/((sqrt(alphammff(1)/nmmff(1))+ sqrt(alphammff(3)/nmmff(3)))*(sigimmff(2)**6.0E0_dp))
-       sigisq(2) = sigimmff(2)*sigimmff(2)
-
-       if (lshift) then
-          do i=1,natomtyp
-             rs1 = rcut(1)/sigimmff(i)
-             rs7 = rs1**7.0E0_dp
-             sr7 = (1.07E0_dp/(rs1+0.07E0_dp))**7.0E0_dp
-             smmff(i) = epsimmff(i)*sr7*(1.12E0_dp/(rs7+0.12)-2)
-          end do
-       else
-          do i = 1,natomtyp
-             smmff(i) = 0.0E0_dp
-          end do
-          coru_cons(1) = -2.4837937263569310E-02_dp
-          ! coru_cons(1) = -5.8244592746534724E-03_dp
-          coru_cons(2) = -1.7583010189381791E-02_dp
-          coru_cons(3) = -8.3770412792126582E-03_dp
-          corp_cons(1) = 0.1696349613545569E0_dp
-          ! corp_cons(1) = 4.0098456560842058E-02_dp
-          corp_cons(2) = 0.1203650950025348E0_dp
-          corp_cons(3) = 5.7576802340310304E-02_dp
-       end if
-    else if (lninesix) then
-! special potential for all-atom formic acid from llnl 4/6/04 jms
-! sp2 carbon site H-[C](=O)-OH
-       rzeronx(1) = 4.1834161E0_dp
-       epsilonnx(1) = 45.224E0_dp
-       qelect(1) = 0.44469E0_dp
-       lqchg(1) = .true.
-       mass(1) = 12.011E0_dp
-       chemid(1) = 'C'
-
-! hydroxyl oxygen site H-C(=O)-[O]H
-       rzeronx(2) = 3.5694293136E0_dp
-       epsilonnx(2) = 47.151E0_dp
-       qelect(2) = -0.55296E0_dp
-       lqchg(2) = .true.
-       mass(2) = 15.9996E0_dp
-       chemid(2) = 'OH'
-
-! carbonyl oxygen site H-C[=O]-OH
-       rzeronx(3) = 3.0014635172E0_dp
-       epsilonnx(3) = 146.008E0_dp
-       qelect(3) = -0.43236E0_dp
-       lqchg(3) = .true.
-       mass(3) = 15.9996E0_dp
-       chemid(3) = 'O='
-
-! hydrogen site [H]-C(=O)-OH
-       rzeronx(4) = 0.8979696387E0_dp
-       epsilonnx(4) = 2.4054E0_dp
-       qelect(4) = 0.10732E0_dp
-       lqchg(4) = .true.
-       mass(4) = 1.00794E0_dp
-       chemid(4) = 'HC'
-
-! acidic hydrogen site H-C(=O)-O[H]
-       rzeronx(5) = 1.115727276E0_dp
-       epsilonnx(5) = 12.027E0_dp
-       qelect(5) = 0.43331E0_dp
-       lqchg(5) = .true.
-       mass(5) = 1.00794E0_dp
-       chemid(5) = 'HO'
-
-! calculate all site-site parameters via Lorentz-Berthelot rules
-       do i = 1,nxatom
-          do j = 1,nxatom
-             ij = (i-1)*nxatom + j
-             rzero(ij) = 0.5E0_dp*(rzeronx(i) + rzeronx(j))
-             epsnx(ij) = sqrt(epsilonnx(i)*epsilonnx(j))
-             if (lshift) then
-                shiftnsix(ij) = 4.0E0_dp*epsnx(ij)*(rzero(ij) /rcut(1))**6 * (2.0E0_dp*(rzero(ij)/rcut(1))**3 - 3.0E0_dp)
-             end if
+    if (lshift) then
+       ecut=0.0_dp
+       rbcut=rcut(1)
+       rbcutsq=rbcut*rbcut
+       do i = 1, nntype
+          do j = 1, nntype
+             ij = (i-1)*nntype + j
+             ecut(ij) = U2(rbcut,rbcutsq,1,1,1,i,2,1,1,j,ij)
           end do
        end do
     end if
@@ -2371,7 +2117,7 @@ contains
 
   function lininter_vdW(r,typi,typj) result(tabulated_vdW)
     use util_math,only:polint
-    use util_search,only:indexOf,LOCATE
+    use util_search,only:LOCATE
     real::tabulated_vdW
     real,intent(in)::r
     integer,intent(in)::typi,typj
@@ -2392,7 +2138,7 @@ contains
 
   function lininter_elect(r,typi,typj) result(tabulated_elect)
     use util_math,only:polint
-    use util_search,only:indexOf,LOCATE
+    use util_search,only:LOCATE
     real::tabulated_elect
     real,intent(in)::r
     integer,intent(in)::typi,typj
@@ -2411,226 +2157,138 @@ contains
     return
   end function lininter_elect
 
-!> \brief calculates the energy using the exp-6 potential
-!> parameters defined in suijtab.f
-!> \author M.G. Martin
-  function exsix(rijsq,ntij)
-      real::rijsq,rij,exsix
-      integer::ntij
-
-      rij=sqrt(rijsq)
-      exsix = aexsix(ntij)/(rijsq*rijsq*rijsq) + bexsix(ntij)*exp(cexsix(ntij)*rij)
-      if (lshift) exsix = exsix-sexsix(ntij)
-      return
-  end function exsix
-
-!> \brief calculates the energy of the 9-6 potential
-!> parameters defined in suijtab.f
-!> \author JMS
-  function ninesix(rijsq,ntij)
-      real::rijsq,rij,ror,ninesix
-      integer::ntij
-
-      rij=sqrt(rijsq)
-      ror = rzero(ntij)/rij
-      ninesix = 4.0E0_dp*epsnx(ntij)*ror**6*(2.0E0_dp*ror**3 - 3.0E0_dp)
-      if (lshift) then
-         ninesix = ninesix - shiftnsix(ntij)
-      end if
-
-      return
-  end function ninesix
-
-!> \brief calculates the energy of the Generalized Lennard Jones
-!> potential
-!>
-!> parameters defined  poten.inc \n
-!> Also you should make sure that the rcut you choose
-!> is .gt. sigma*(2**(2/n0)) (because currently tail corrections
-!> are evaluated with this assumption which is rarely incorrect.)
-  function genlj (rijsq,sr2,epsilon2)
-      real::rijsq,rij,srij,sr2,epsilon2,genlj
-
-      rij=sqrt(rijsq)
-      srij=sqrt(sr2)
-
-      if (rij.le.rij*srij*2.0_dp**(2.0_dp/n0)) then
-         genlj = 4.0E0_dp*epsilon2*(srij**n0-srij**(n0/2.0E0_dp))
-      else
-         genlj = epsilon2*(2.0E0_dp**(4.0E0_dp*n1/n0)*srij**(2.0_dp*n1)-2.0_dp**(2.0_dp*n1/n0+1.0E0_dp)*srij**n1)
-      end if
-
-! In reduced units
-! xij=(1.0E0_dp/sqrt(sr2))
-!
-! if ( (xij) .le. 2.0E0_dp**(2.0E0_dp/n0) ) then
-! genlj = 4.0E0_dp * (((1/xij)**n0)-((1/xij)**(n0/2.0E0_dp)))
-! else
-! genlj =(( (2.0E0_dp**((4.0E0_dp*n1/n0)))*(1/xij)**(2.0E0_dp*n1))-
-!     & (2.0E0_dp**((2.0E0_dp*(n1/n0))+1.0E0_dp)*((1/xij)**(n1))))
-! end if
-! v(2)=v(2)+e
-
-! not usually used in MC
-! if (lshift) then
-! genlj = genlj - shiftgenlj()
-! end if
-
-      return
-  end function genlj
-
-!> \brief calculates energy for a polymeric surfactant bead.
-  function ljpsur ( rijsq, ntij )
-
-      real::ljpsur, rijsq, sr, sr6
-      integer::ntij
-
-! --------------------------------------------------------------------
-! AT PRESENT: all sigma = 1.0
-! epsilon   = 1.0
-! --------------------------------------------------------------------
-
-      sr = 1.0E0_dp / rijsq
-      sr6 = sr**3
-
-      if ( ntij .eq. 1 ) then
-! nonpolar-nonpolar interaction ( LJ interaction )
-         ljpsur = sr6*sr6 - sr6
-      else
-! polar-polar or polar-nonpolar interaction ( repulsive LJ interaction )
-         if ( rijsq .le. 1.259921E0_dp ) then
-            ljpsur = sr6*sr6 - sr6 + 0.25E0_dp
-         else
-            ljpsur = 0.0E0_dp
-         end if
-      end if
-
-      return
-  end function ljpsur
-
-!> \brief calculates the energy using the Buffered 14-7 potential
-!> parameters defined in suijtab.f
-!> \author Bin Chen
-  function mmff(rijsq,ntij)
-      real::rijsq,mmff,rs2,rs1,sr1,sr7,rs7
-      integer::ntij
-
-        rs2 = rijsq / (sigisq(ntij))
-        rs1 = sqrt(rs2)
-        rs7 = rs1*rs2*rs2*rs2
-        sr1 = 1.07E0_dp/(rs1+0.07E0_dp)
-        sr7 = sr1**7.0E0_dp
-        mmff = sr7*(1.12E0_dp/(rs7+0.12E0_dp) - 2.0E0_dp) *epsimmff(ntij)
-
-      if (lshift) mmff = mmff-smmff(ntij)
-      return
-  end function mmff
-
-!DEC$ ATTRIBUTES FORCEINLINE :: type_2body
+!!!DEC$ ATTRIBUTES FORCEINLINE :: type_2body
   function type_2body(ntii,ntjj)
     integer::type_2body
     integer,intent(in)::ntii,ntjj
 
-    if (lexpsix.or.lmmff) then
-       type_2body = (ntii+ntjj)/2
-    else if (lninesix) then
-       type_2body = (ntii-1)*nxatom + ntjj
-! KEA garofalini
-    else if (lgaro) then
-       if (ntii.eq.ntjj) then
-          type_2body = ntii
-       else
-          type_2body = ntii+ntjj+1
-       end if
-    else
-       type_2body = (ntii-1)*nntype + ntjj
-    end if
+    type_2body = (ntii-1)*nntype + ntjj
 
   end function type_2body
 
-!DEC$ ATTRIBUTES FORCEINLINE :: U2
+!> \brief Calculation of pair energy
+!>
+!> \note New potenial functional form needs to be added here,
+!> and in coru (tail corrections to energy), prop_pressure::pressure
+!> (force calculation), corp (tail corrections to pressure)
+!!!DEC$ ATTRIBUTES FORCEINLINE :: U2
   function U2(rij,rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
     real::U2
     real,intent(in)::rij,rijsq
     integer,intent(in)::i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij
 
-    real::epsilon2,sigma2,sr2,sr6,qave
+    real::sr,sr2,sr3,sr6,rs1,rs2,rs6,rs7,rs8,rs12,tmp,sigma2,epsilon2,qave
 
-    U2=0.0E0_dp
-    if (L_vdW_table) then
-       U2=lininter_vdW(rij,ntii,ntjj)
-    else if (lsami) then
-       U2=ljsami(rijsq,ntij)
-    else if (lexpsix) then
-       U2=exsix(rijsq,ntij)
-    else if (lmmff) then
-       U2=mmff(rijsq,ntij)
-    else if (lninesix) then
-       U2=ninesix(rijsq,ntij)
-    else if (lgenlj) then
-       sr2 = sig2ij(ntij) / rijsq
-       epsilon2=epsij(ntij)
-       U2=genlj(rijsq,sr2,epsilon2)
-    else if ( lmuir ) then
-       U2=ljmuir(rijsq,ntij)
-    else if ( lpsurf ) then
-       U2=ljpsur(rijsq,ntij)
-    else if (lgaro) then
-       ! KEA garofalini potential; do NOT work with CBMC/boltz
-       U2=garofalini(rijsq,ntij,qqu(i,ii),qqu(j,jj),i,j)
-       if(lshift) then
-          U2=U2-ecut(ntij)
-       end if
-    else if ((lij(ntii).and.lij(ntjj)).or.(i.eq.j)) then
-       if (lexpand(imolty).and.lexpand(jmolty)) then
-          sigma2=(sigma_f(imolty,ii)+sigma_f(jmolty,jj))/2.0E0_dp
-          sr2 = sigma2*sigma2/rijsq
-          epsilon2=sqrt(epsilon_f(imolty,ii)*epsilon_f(jmolty,jj))
-       else if (lexpand(imolty)) then
-          sigma2=(sigma_f(imolty,ii)+ sigi(ntjj))/2.0E0_dp
-          sr2 = sigma2*sigma2/rijsq
-          epsilon2=sqrt(epsilon_f(imolty,ii)*epsi(ntjj))
-       else if (lexpand(jmolty)) then
-          sigma2=(sigma_f(jmolty,jj)+ sigi(ntii))/2.0E0_dp
-          sr2 = sigma2*sigma2/rijsq
-          epsilon2=sqrt(epsi(ntii)*epsilon_f(jmolty,jj))
-       else
-          sr2 = sig2ij(ntij) / rijsq
-          epsilon2=epsij(ntij)
-       end if
-
-       if (lfepsi.and.i.ne.j) then ! NOT for intramolecular interactions
-          sr6 = rijsq*rijsq*rijsq
-          if ((.not.lqchg(ntii)).and.(.not.lqchg(ntjj))) then
-             if (nunit(imolty).eq.4) then
-                !> \bug TIP-4P structure (temperary use?)
-                qave=(qqu(i,4)+qqu(j,4))/2.0E0_dp
-             else
-                qave=(qqu(i,4)+qqu(i,5)+qqu(j,4)+qqu(j,5))*0.85E0_dp
-             end if
+    U2 = 0.0_dp
+    if (lij(ntii).and.lij(ntjj)) then
+       if (lgaro) then
+          ! KEA Feuston-Garofalini potential; do NOT work with CBMC/boltz
+          U2=garofalini(rij,ntii,ntjj)
+       else if (lsami) then
+          U2=ljsami(rijsq,ntij)
+       else if (lmuir) then
+          U2=ljmuir(rijsq,ntij)
+       else if (nonbond_type(ntij).eq.1) then
+          ! LJ 12-6
+          if (lexpand(imolty).and.lexpand(jmolty)) then
+             sigma2=(sigma_f(imolty,ii)+sigma_f(jmolty,jj))/2.0_dp
+             sr2=sigma2*sigma2/rijsq
+             epsilon2=4.0_dp*sqrt(epsilon_f(imolty,ii)*epsilon_f(jmolty,jj))
+          else if (lexpand(imolty)) then
+             sigma2=(sigma_f(imolty,ii)+vvdW_b(2,ntjj))/2.0_dp
+             sr2=sigma2*sigma2/rijsq
+             epsilon2=4.0_dp*sqrt(epsilon_f(imolty,ii)*vvdW_b(1,ntjj))
+          else if (lexpand(jmolty)) then
+             sigma2=(vvdW_b(2,ntii)+sigma_f(jmolty,jj))/2.0_dp
+             sr2=sigma2*sigma2/rijsq
+             epsilon2=4.0_dp*sqrt(vvdW_b(1,ntii)*epsilon_f(jmolty,jj))
           else
-             qave=(qqu(i,ii)+qqu(j,jj))/2.0E0_dp
+             sr2=vvdW(3,ntij)/rijsq
+             epsilon2=vvdW(1,ntij)
           end if
-          U2=((aslope*(qave-a0)*(qave-a0)+ashift)/sr6-(bslope*(qave- b0)*(qave-b0)+bshift))/sr6*epsilon2
-       else
-          sr6 = sr2 * sr2 * sr2
-          U2=sr6*(sr6-1.0E0_dp)*epsilon2
-          if (lshift) then
-             U2=U2-ecut(ntij)
+
+          if (lfepsi.and.i.ne.j) then ! NOT for intramolecular interactions
+             sr6 = rijsq**3
+             if ((.not.lqchg(ntii)).and.(.not.lqchg(ntjj))) then
+                if (nunit(imolty).eq.4) then
+                   !> \bug TIP-4P structure (temperary use?)
+                   qave=(qqu(i,4)+qqu(j,4))/2.0_dp
+                else
+                   qave=(qqu(i,4)+qqu(i,5)+qqu(j,4)+qqu(j,5))*0.85_dp
+                end if
+             else
+                qave=(qqu(i,ii)+qqu(j,jj))/2.0_dp
+             end if
+             U2=((aslope*(qave-a0)*(qave-a0)+ashift)/sr6-(bslope*(qave-b0)*(qave-b0)+bshift))/sr6*epsilon2
+          else
+             sr6=sr2**3
+             U2=sr6*(sr6-1.0_dp)*epsilon2
           end if
-          if (i.eq.j) then
-             ! intramolecular interactions
-             U2=U2*ljscale(imolty,ii,jj)
-             if (lainclu(imolty,ii,jj)) then
-                ! OH 1-5 interaction
-               U2=U2+0.25E0_dp*a15(a15type(imolty,ii,jj))/((rijsq**2)*(rijsq**2)*(rijsq**2))
-            end if
+       else if (nonbond_type(ntij).eq.2) then
+          ! Buckingham exp-6
+          U2 = vvdW(1,ntij)*exp(vvdW(2,ntij)*rij) - vvdW(3,ntij)/(rijsq**3)
+       else if (nonbond_type(ntij).eq.3) then
+          ! Mie
+          sr = vvdW(2,ntij) / rij
+          U2 = vvdW(1,ntij)*(sr**vvdW(3,ntij)-sr**vvdW(4,ntij))
+       else if (nonbond_type(ntij).eq.4) then
+          ! MMFF94
+          if (vvdW(2,ntij).ne.0) then
+             rs1 = rij/vvdW(2,ntij)
+             rs2 = rs1*rs1
+             rs7 = rs1*rs2**3
+             U2 = vvdW(1,ntij) * ((1.07_dp/(rs1+0.07_dp))**7) * (1.12_dp/(rs7+0.12_dp)-2.0_dp)
           end if
+       else if (nonbond_type(ntij).eq.5) then
+          ! LJ 9-6
+          sr = vvdW(2,ntij)/rij
+          sr3 = sr**3
+          sr6 = sr3*sr3
+          U2 = vvdW(1,ntij)*sr6*(2.0_dp*sr3 - 3.0_dp)
+       else if (nonbond_type(ntij).eq.6) then
+          ! Generalized LJ
+          sr = vvdW(2,ntij) / rij
+          if (rij.le.vvdW(2,ntij)) then
+             tmp = sr**(vvdW(3,ntij)/2.0_dp)
+             U2 = vvdW(1,ntij)*tmp*(tmp-2.0_dp)
+          else
+             tmp = sr**vvdW(4,ntij)
+             U2 = vvdW(1,ntij)*tmp*(tmp-2.0_dp)
+          end if
+       else if (nonbond_type(ntij).eq.7) then
+          ! LJ 12-6-8
+          rs6=rijsq**3
+          rs8=rs6*rijsq
+          rs12=rs6*rs6
+          U2=vvdW(1,ntij)/rs12-vvdW(2,ntij)/rs6-vvdW(3,ntij)/rs8
+       else if (nonbond_type(ntij).eq.-1) then
+          ! tabulated potential
+          U2=lininter_vdW(rij,ntii,ntjj)
+       else if (nonbond_type(ntij).ne.0) then
+          call err_exit(__FILE__,__LINE__,'U2: undefined nonbond type',myid+1)
+       end if
+
+       if (lshift) U2 = U2-ecut(ntij)
+    end if
+
+    if (i.eq.j) then
+       ! intramolecular interactions
+       U2=U2*ljscale(imolty,ii,jj)
+       if (lainclu(imolty,ii,jj)) then
+          ! OH 1-5 interaction
+          U2=U2+a15(a15type(imolty,ii,jj))/(rijsq**6)
        end if
     end if
+
   end function U2
 
-!> \brief Direct-space charge interactions
+!> \brief Direct-space Coulomb interactions of point charges
+!>
+!> \note Boltz does NOT call this function. The reason is that
+!> when using (neutral-)group-based cutoff, typically and as is
+!> done here, charge leaderq is looked up to determine whether
+!> two beads interact; however, they may not yet exist during
+!> CBMC regrowth.
 !DEC$ ATTRIBUTES FORCEINLINE :: Q2
   function Q2(rij,rijsq,rcutsq,i,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
     real::Q2
@@ -2642,8 +2300,7 @@ contains
     integer::iii,jjj
 
     Q2=0.0E0_dp
-    !kea - skip for garofalini; included in vinter
-    if(.not.lgaro.and.lqchgi.and.lqchg(ntjj)) then
+    if(lqchgi.and.lqchg(ntjj)) then
        if (.not.lewald) then
           if (.not.lchgall) then
              ! All-Atom charges (charge-group look-up table)
@@ -2677,8 +2334,8 @@ contains
   end function Q2
 
 !> \brief Read in tabulated potential for nonbonded pair interactions (vdW and elect) and set up linear interpolation
-  subroutine read_tabulated_potential_pair(file_tab,ntab,r,tab,splits,lists)
-    use util_search,only:addToTable
+  subroutine read_table(file_tab,ntab,r,tab,splits,lists,lused)
+    use util_search,only:indexOf
     use util_memory,only:reallocate
     use util_files,only:get_iounit
     character(len=*),intent(in)::file_tab
@@ -2686,41 +2343,40 @@ contains
     integer,allocatable,intent(inout)::splits(:,:)
     real,allocatable,intent(inout)::r(:,:,:),tab(:,:,:)
     type(LookupTable),intent(inout)::lists
+    logical,allocatable,intent(inout)::lused(:)
 
     integer::io_tab,mmm,ii,jj,i,jerr
 
     io_tab=get_iounit()
     open(unit=io_tab,access='sequential',action='read',file=file_tab,form='formatted',iostat=jerr,status='old')
-    if (jerr.ne.0) then
-       call err_exit(__FILE__,__LINE__,'cannot open tabulated potential file: '//file_tab,myid+1)
-    end if
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open tabulated potential file: '//file_tab,myid+1)
 
     read(io_tab,*) ntab
     do mmm=1,ntab
        ! ii and jj are bead types
        read(io_tab,*) ii, jj
-       ii=addToTable(lists,ii,expand=.true.)
-       jj=addToTable(lists,jj,expand=.true.)
-       if (ii.gt.size(splits,1).or.jj.gt.size(splits,1)) then
-          call reallocate(splits,1,2*size(splits,1),1,2*size(splits,2))
-          call reallocate(r,1,size(r,1),1,2*size(r,2),1,2*size(r,3))
-          call reallocate(tab,1,size(tab,1),1,2*size(tab,2),1,2*size(tab,3))
-       end if
+       ii=indexOf(lists,ii)
+       jj=indexOf(lists,jj)
+       if (ii.eq.0.or.jj.eq.0) call err_exit(__FILE__,__LINE__,'read_table: undefined bead',myid+1)
+       lused(ii)=.true.
+       lused(jj)=.true.
        i=1
        do
           if (i.gt.size(r,1)) then
              call reallocate(r,1,2*size(r,1),1,size(r,2),1,size(r,3))
              call reallocate(tab,1,2*size(tab,1),1,size(tab,2),1,size(tab,3))
           end if
-          read(io_tab,*,end=17) r(i,ii,jj),  tab(i,ii,jj)
+          read(io_tab,*,end=17) r(i,ii,jj),tab(i,ii,jj)
           if (r(i,ii,jj).eq.1000) exit
           ! write(io_tab+10,*) i,r(i,ii,jj),tab(i,ii,jj)
           i=i+1
        end do
 17     splits(ii,jj)=i-1
+       call reallocate(r,1,splits(ii,jj),1,size(r,2),1,size(r,3))
+       call reallocate(tab,1,splits(ii,jj),1,size(tab,2),1,size(tab,3))
     end do
     close(io_tab)
-  end subroutine read_tabulated_potential_pair
+  end subroutine read_table
 
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !>  Calculates nonbonding van der Waals and electrostatic potential
@@ -2742,21 +2398,25 @@ contains
 !>  separate potentials with 1000 \n
 !>  KM 04/23/09
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-  subroutine init_tabulated_potential_pair()
-    use sim_system,only:L_vdW_table,L_elect_table
-    integer,parameter::initial_size=10,grid_size=1500
+  subroutine read_tabulated_ff_pair()
+    use sim_system,only:L_elect_table
+    integer,parameter::grid_size=1500
     integer::jerr
 
-    if (L_vdW_table) then
-       allocate(vdWsplits(1:initial_size,1:initial_size),rvdW(1:grid_size,1:initial_size,1:initial_size),tabvdW(1:grid_size,1:initial_size,1:initial_size),stat=jerr)
-       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_pair: allocation failed for vdW_table',myid+1)
-       call read_tabulated_potential_pair('fort.43',ntabvdW,rvdW,tabvdW,vdWsplits,atoms)
+    if (nntype.le.0) then
+       return
+    end if
+
+    if (ANY(nonbond_type(:).eq.-1)) then
+       allocate(vdWsplits(1:nntype,1:nntype),rvdW(1:grid_size,1:nntype,1:nntype),tabvdW(1:grid_size,1:nntype,1:nntype),stat=jerr)
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'read_tabulated_potential_pair: allocation failed for vdW_table',myid+1)
+       call read_table('fort.43',ntabvdW,rvdW,tabvdW,vdWsplits,atoms,lij)
     end if
 
     if (L_elect_table) then
-       allocate(electsplits(1:initial_size,1:initial_size),relect(1:grid_size,1:initial_size,1:initial_size),tabelect(1:grid_size,1:initial_size,1:initial_size),stat=jerr)
-       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_pair: allocation failed for elect_table',myid+1)
-       call read_tabulated_potential_pair('fort.44',ntabelect,relect,tabelect,electsplits,atoms)
+       allocate(electsplits(1:nntype,1:nntype),relect(1:grid_size,1:nntype,1:nntype),tabelect(1:grid_size,1:nntype,1:nntype),stat=jerr)
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'read_tabulated_potential_pair: allocation failed for elect_table',myid+1)
+       call read_table('fort.44',ntabelect,relect,tabelect,electsplits,atoms,lqchg)
     end if
-  end subroutine init_tabulated_potential_pair
+  end subroutine read_tabulated_ff_pair
 end MODULE energy_pairwise

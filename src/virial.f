@@ -10,12 +10,12 @@ subroutine virial(binvir,binvir2)
   use const_phys,only:qqfact
   use util_runtime,only:err_exit
   use sim_system
-  use energy_pairwise,only:exsix,ljpsur,type_2body
+  use energy_pairwise,only:U2,type_2body
   use energy_sami,only:ljsami,ljmuir
   implicit none
 
       integer::i, imolty, ii, j, jmolty, jj, ntii, ntjj , ntij,nnn,ip,itemp,iii
-      real::vinter,rminsq,rxui,ryui,rzui,rxuij ,ryuij,rzuij,rijsq,sr2, sr6 ,velect,mayer
+      real::vinter,rminsq,rxui,ryui,rzui,rxuij ,ryuij,rzuij,rijsq,sr6,velect,mayer
 
       real::xdiff,ydiff ,zdiff,dvircm
       real::binvir
@@ -144,30 +144,15 @@ subroutine virial(binvir,binvir2)
                   ovrlap = .true.
                   goto 100
                else
-                  if ( lsami ) then
-                     vinter = vinter + ljsami(rijsq,ntij)
-                  else if (lexpsix) then
-                     vinter = vinter + exsix(rijsq,ntij)
-                  else if ( lmuir ) then
-                     vinter = vinter + ljmuir(rijsq,ntij)
-                  else if ( lpsurf ) then
-                     vinter = vinter + ljpsur(rijsq,ntij)
-                  else if (lshift) then
-                     sr2 = sig2ij(ntij) / rijsq
-                     sr6 = sr2 * sr2 * sr2
-                     vinter = vinter +  sr6*(sr6-1.0E0_dp)*epsij(ntij)-ecut(ntij)
-                  else if ( lfepsi ) then
+                  if ( lfepsi ) then
                      if ( lij(ntii) .and. lij(ntjj) ) then
                         sr6 = rijsq*rijsq*rijsq
-                        epsilon2 = epsij(ntij)
+                        epsilon2 = vvdW(1,ntij)
                         selfadd1 = epsilon2*(consa1/sr6-consb1)/sr6
                         selfadd2 = epsilon2*(consa2/sr6-consb2)/sr6
                      end if
                   else
-                     sr2 = sig2ij(ntij) / rijsq
-                     sr6 = sr2 * sr2 * sr2
-                     vinter = vinter +  sr6*(sr6-1.0E0_dp)*epsij(ntij)
-
+                     vinter = vinter + U2(sqrt(rijsq),rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
                   end if
 
                   if ( lqimol .and. lqjmol .and. .not. lmatrix ) then
@@ -327,7 +312,6 @@ subroutine virial(binvir,binvir2)
                mayer(itemp) = -1.0E0_dp
             end do
          else
-            if (.not.lsami .and. .not.lexpsix) vinter = 4.0E0_dp*vinter
             do itemp = 1,ntemp
                mayer(itemp) = exp(-(vinter+velect)/virtemp(itemp))-1.0E0_dp
             end do

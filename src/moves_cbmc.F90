@@ -42,14 +42,13 @@ contains
 !> \author rewritten from old config and branch subroutines by M.G. Martin 9-19-97
 !*****************************************************************
   subroutine config()
-    use sim_particle,only:update_neighbor_list,ctrmas
+    use sim_particle,only:update_neighbor_list_molecule,ctrmas
     use sim_cell,only:update_linked_cell
 
-      logical::lterm,ovrlap,ltors,lneighij,lfixnow
+      logical::lterm,ovrlap,ltors,lfixnow
 
       integer::i,j,k,iii,ibox,iunit,igrow,icbu,islen,imolty,iutry
       integer::istt,iett,nchp1,ic,total,bin,count,findex,iw
-      integer::ip
 
       real::v(nEnergy),vtorold,vtornew,delen,deleo,vdum,wplace,wrig
       real::dchain,rchain,wnlog,wolog,wdlog,wratio
@@ -472,37 +471,10 @@ contains
             call update_linked_cell(i)
          end if
 
-! update the neighbour map ***
-         if ( lneigh ) call update_neighbor_list(i,0.,0.,0.,.true.)
-
-         if ( lneighbor ) then
-            do ic = 1, neigh_cnt(i)
-               j = neighbor(ic,i)
-               do ip = 1,neigh_cnt(j)
-                  if ( neighbor(ip,j) .eq. i ) then
-                     neighbor(ip,j)=neighbor(neigh_cnt(j),j)
-                     neigh_cnt(j) = neigh_cnt(j)-1
-                     exit
-                  end if
-               end do
-            end do
-            neigh_cnt(i) = neigh_icnt
-            do ic = 1,neigh_icnt
-               j = neighi(ic)
-               neighbor(ic,i)=j
-               lneighij = .false.
-               do ip = 1,neigh_cnt(j)
-                  if ( neighbor(ip,j) .eq. i ) then
-                     lneighij = .true.
-                  end if
-               end do
-               if ( .not. lneighij ) then
-                  neigh_cnt(j) = neigh_cnt(j)+1
-                  neighbor(neigh_cnt(j),j) = i
-               end if
-            end do
+         ! update the neighbour map
+         if (lneigh.or.lneighbor) then
+            call update_neighbor_list_molecule(i)
          end if
-
        end if
 
        if (lpresim.or.lfixnow) then

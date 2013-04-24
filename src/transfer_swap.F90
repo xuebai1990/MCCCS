@@ -25,9 +25,9 @@ contains
 !> Works for linear or branched molecules and for DC-CBMC and explicit atom
 !> \author Rewritten from old swap and swapbr subroutines by M.G. Martin (9-18-97)
   subroutine swap()
-    use sim_particle,only:update_neighbor_list,ctrmas
+    use sim_particle,only:update_neighbor_list_molecule,ctrmas,neigh_cnt,neighbor,neigh_icnt
 
-    logical::ovrlap,lterm,lnew,lempty,ldone,ltors,lovrh(nchmax),lfavor,laccept,lswapinter,lrem_out,lins_in,lneighij,linsk_in,lremk_in,lfixnow
+    logical::ovrlap,lterm,lnew,lempty,ldone,ltors,lovrh(nchmax),lfavor,laccept,lswapinter,lrem_out,lins_in,linsk_in,lremk_in,lfixnow
 
     integer::boxins,boxrem,imol,ichoi,ip,iwalk,idum,iins1,imolty1
     integer::istt,iett,itype,ipair,ipairb,beg
@@ -462,10 +462,10 @@ contains
              do icbu = 1,ichoi
 222             rxp(1,icbu) = boxlx(boxins) * random(-1)
                 ryp(1,icbu) = boxly(boxins) * random(-1)
-                if (lpbcz .or. lslit) then
+                if (lpbcz.or.lslit) then
                    rzp(1,icbu) = boxlz(boxins) * random(-1)
-                else if ( lsami .or. lmuir .or. ljoe ) then
-                   if ( lempty ) then
+                else if (lsami.or.lmuir) then
+                   if (lempty) then
                       rzp(1,icbu) = 20*random(-1)-10
                    else
                       rzp(1,icbu) = rzu(irem,1)
@@ -536,10 +536,10 @@ contains
           do icbu = 1,ichoi
              rxp(1,icbu) = boxlx(boxins) * random(-1)
              ryp(1,icbu) = boxly(boxins) * random(-1)
-             if (lpbcz .or. lslit) then
+             if (lpbcz.or.lslit) then
                 rzp(1,icbu) = boxlz(boxins) * random(-1)
-             else if ( lsami .or. lmuir .or. ljoe ) then
-                if ( lempty ) then
+             else if (lsami.or.lmuir) then
+                if (lempty) then
                    rzp(1,icbu) = 20*random(-1)-10
                 else
                    rzp(1,icbu) = rzu(irem,1)
@@ -991,10 +991,10 @@ contains
              do icbu = 2,ichoi
 232             rxp(1,icbu) = boxlx(boxins) * random(-1)
                 ryp(1,icbu) = boxly(boxins) * random(-1)
-                if (lpbcz .or. lslit) then
+                if (lpbcz.or.lslit) then
                    rzp(1,icbu) = boxlz(boxins) * random(-1)
-                else if ( lsami .or. lmuir .or. ljoe ) then
-                   if ( lempty ) then
+                else if (lsami.or.lmuir) then
+                   if (lempty) then
                       rzp(1,icbu) = 20*random(-1)-10
                    else
                       rzp(1,icbu) = rzu(irem,1)
@@ -1081,8 +1081,8 @@ contains
              ryp(1,icbu) = boxly(boxrem) * random(-1)
              if (lpbcz .or. lslit) then
                 rzp(1,icbu) = boxlz(boxrem) * random(-1)
-             else if ( lsami .or. lmuir .or. ljoe ) then
-                if ( lempty ) then
+             else if (lsami.or.lmuir) then
+                if (lempty) then
                    rzp(1,icbu) = 20*random(-1)-10
                 else
                    rzp(1,icbu) = rzu(irem,1)
@@ -1613,39 +1613,15 @@ contains
           call dipole(ibox,1)
        end if
 
-       if ( lneigh ) call update_neighbor_list(irem,0.,0.,0.,.true.)
        if ( lneighbor ) then
           neigh_old = neigh_cnt(irem)
           if ( neigh_old .le. 6 .and. neigh_icnt .le. 6 ) then
              cnt_wf2(neigh_old,neigh_icnt,ip) = cnt_wf2(neigh_old,neigh_icnt,ip)+1
           end if
+       end if
 
-          do ic = 1, neigh_old
-             j = neighbor(ic,irem)
-             do ip = 1,neigh_cnt(j)
-                if ( neighbor(ip,j) .eq. irem ) then
-                   neighbor(ip,j)=neighbor(neigh_cnt(j),j)
-                   neigh_cnt(j) = neigh_cnt(j)-1
-                   exit
-                end if
-             end do
-          end do
-          neigh_cnt(irem) = neigh_icnt
-! write(io_output,*) 'irem:',irem,neigh_icnt
-          do ic = 1,neigh_icnt
-             j = neighi(ic)
-             neighbor(ic,irem)=j
-             lneighij = .false.
-             do ip = 1,neigh_cnt(j)
-                if ( neighbor(ip,j) .eq. irem ) then
-                   lneighij = .true.
-                end if
-             end do
-             if ( .not. lneighij ) then
-                neigh_cnt(j) = neigh_cnt(j)+1
-                neighbor(neigh_cnt(j),j) = irem
-             end if
-          end do
+       if (lneigh.or.lneighbor.or.lgaro) then
+          call update_neighbor_list_molecule(irem)
        end if
     end if
 ! -----------------------------------------------------------------

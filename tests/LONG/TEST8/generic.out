@@ -1,4 +1,4 @@
-Program started at 2013-04-22 17:14:44.416
+Program started at 2013-04-25 20:41:04.849
 Number of processors: 1
 Threads per processor: 1
  run_num: 1
@@ -18,9 +18,10 @@ Dual Cutoff Configurational-bias Monte Carlo
 Coulombic interactions will be included in the Rosenbluth weights for CBMC growth
 Coulombic inter- and intra-molecular interactions will be calculated
    using (neutral-)group-based cutoff
-Lennard-Jones potential for pair-wise dispersive interactions
    with additional tail corrections
 Lorentz-Berthelot combining rules apply
+ L_spline:  F
+ L_linear:  F
 *******************************************
 
 NAMELIST MC_SHARED
@@ -65,8 +66,8 @@ Box 1:   40.000 x   40.000 x   40.000
    lsolid:  F, lrect:  F, lideal:  F, ltwice:  F
    temperature: 3440.000 [K]
    external pressure:  0.100000000     [MPa]
-   Ghost particles: 0
    initial number of chains of each type:   180
+   Ghost particles: 0
    initial number of chains in x, y and z directions: 10 x 10 x 2
    initial rotational displacement: 10, inimix: 0, zshift: 10.0, dshift:  2.000
 Box 2:   90.000 x   90.000 x   90.000
@@ -76,13 +77,23 @@ Box 2:   90.000 x   90.000 x   90.000
    lsolid:  F, lrect:  F, lideal:  F, ltwice:  F
    temperature: 3440.000 [K]
    external pressure:  0.100000000     [MPa]
-   Ghost particles: 0
    initial number of chains of each type:   20
+   Ghost particles: 0
    initial number of chains in x, y and z directions: 4 x 4 x 2
    initial rotational displacement: 10, inimix: 0, zshift: 20.0, dshift: 11.250
 
 NUMBER OF MOLECULES OF EACH TYPE
  number of chains of each type:   200
+
+NAMELIST EXTERNAL_FIELD
+------------------------------------------
+Steele 10-4-3 slit pore
+On both sides of the simulation box (z = 0 & z = boxlz)
+Surface material bead type: 190
+Surface atom density:  0.11400 [Ang^-3]
+Surface layer spacing:  3.40000 [Ang]
+a1:  2.46000 [Ang]
+Electric field in z direction:     0.00000000         0.00000000     [V/A]
 
 SECTION MOLECULE_TYPE
 ------------------------------------------
@@ -359,11 +370,11 @@ molecule type 1
       8      7      6      5      4      5      5      5      1
 
 PAIRWISE LJ AND COULOMB INTERACTIONS
-    i    j     sig2ij      epsij         q0(i)         q0(j)
-    4    4    3.75000   98.00000      0.000000      0.000000
-    4    5    3.85000   67.14164      0.000000      0.000000
-    5    4    3.85000   67.14164      0.000000      0.000000
-    5    5    3.95000   46.00000      0.000000      0.000000
+    i    j         q0(i)         q0(j)     vvdW_1     vvdW_2 ...
+    4    4      0.000000      0.000000  392.00000    3.75000
+    4    5      0.000000      0.000000  268.56657    3.85000
+    5    4      0.000000      0.000000  268.56657    3.85000
+    5    5      0.000000      0.000000  184.00000    3.95000
  
  sumup control
  number of chains         180
@@ -382,7 +393,7 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  
  box             1  initial v   =   -367905.297913242     
  surf. tension :   box 1 =   -2347.44334
- pressure check:   box 1 =     903432.14
+ pressure check:   box 1 =     907640.62
  
  sumup control
  number of chains          20
@@ -401,7 +412,7 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  
  box             2  initial v   =   -3533.86037343709     
  surf. tension :   box 2 =       0.00000
- pressure check:   box 2 =       1301.80
+ pressure check:   box 2 =       1302.20
  
  +++++ start of markov chain +++++
  
@@ -422,8 +433,8 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  Type  1 bn   1065.   1146.   1091.   1075.   1116.   1127.
          bs   1062.   1144.   1089.   1075.   1113.   1124.
  max.displ.     1.1966    1.1957    1.1956    1.5969    1.5943    1.5943
-  1200    1200  0.2254E+07    40.000    609187.9  180
-                0.2771E+06    90.000      1284.5   20
+  1200    1200  0.2254E+07    40.000    613396.4  180
+                0.2771E+06    90.000      1284.9   20
  Box            1
  Type  1 bn   9747.   9749.  10166.   9926.   9996.   9857.
          bs   6712.   6675.   6997.   5555.   5613.   5455.
@@ -440,8 +451,8 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  Type  1 bn   1100.   1046.   1092.   1123.   1096.   1130.
          bs   1086.   1041.   1087.   1115.   1088.   1124.
  max.displ.     4.7212    4.7468    4.7390    3.1415    3.1415    3.1415
-  2400    2400  0.2216E+07    40.000    553937.5  180
-                0.2729E+06    90.000      1301.6   20
+  2400    2400  0.2216E+07    40.000    558146.0  180
+                0.2729E+06    90.000      1302.0   20
  Box            1
  Type  1 bn   9970.   9944.   9793.   9807.   9961.   9934.
          bs   5421.   5424.   5331.   5092.   5119.   5091.
@@ -466,8 +477,8 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  Type  1 bn   1151.   1109.   1124.   1139.   1101.   1076.
          bs   1129.   1094.   1096.   1134.   1092.   1063.
  max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
-  3600    3600  0.2370E+07    40.000    569295.6  180
-                0.2621E+06    90.000      1286.6   20
+  3600    3600  0.2370E+07    40.000    573504.0  180
+                0.2621E+06    90.000      1287.0   20
  Box            1
  Type  1 bn   9812.   9857.   9915.  10167.   9922.   9764.
          bs   4908.   4873.   5005.   5051.   4864.   4954.
@@ -484,8 +495,8 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  Type  1 bn   1151.   1096.   1059.   1084.   1182.   1065.
          bs   1118.   1063.   1040.   1078.   1174.   1059.
  max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
-  4800    4800  0.2339E+07    40.000    591523.8  180
-                0.2806E+06    90.000      1296.5   20
+  4800    4800  0.2339E+07    40.000    595732.3  180
+                0.2806E+06    90.000      1296.9   20
  Box            1
  Type  1 bn   9850.   9983.   9830.   9742.  10011.   9806.
          bs   4997.   4972.   4843.   4866.   5013.   4911.
@@ -510,8 +521,8 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  Type  1 bn   1149.   1086.   1088.   1091.   1100.   1123.
          bs   1118.   1049.   1054.   1082.   1090.   1115.
  max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
-  6000    6000  0.2463E+07    40.000    601564.2  180
-                0.2862E+06    90.000      1453.8   20
+  6000    6000  0.2463E+07    40.000    605772.6  180
+                0.2862E+06    90.000      1454.2   20
  Box            1
  Type  1 bn   9892.   9785.   9826.   9891.   9946.  10078.
          bs   4958.   4824.   4952.   4955.   4987.   5030.
@@ -528,8 +539,8 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  Type  1 bn   1072.   1096.   1039.   1088.   1092.   1096.
          bs   1047.   1057.   1010.   1082.   1081.   1088.
  max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
-  7200    7200  0.2377E+07    40.000    617309.3  180
-                0.2900E+06    90.000      1295.9   20
+  7200    7200  0.2377E+07    40.000    621517.8  180
+                0.2900E+06    90.000      1296.3   20
  Box            1
  Type  1 bn   9937.   9824.   9892.   9991.   9820.   9900.
          bs   4998.   4881.   4870.   4943.   4945.   4916.
@@ -546,8 +557,8 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  Type  1 bn   1040.   1134.   1156.   1076.   1095.   1039.
          bs   1015.   1098.   1120.   1070.   1089.   1026.
  max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
-  8400    8400  0.2408E+07    40.000    553632.3  180
-                0.2794E+06    90.000      1290.5   20
+  8400    8400  0.2408E+07    40.000    557840.8  180
+                0.2794E+06    90.000      1290.9   20
  Box            1
  Type  1 bn   9954.   9898.   9838.   9782.   9904.   9802.
          bs   5049.   4925.   5104.   4908.   4900.   4865.
@@ -572,8 +583,8 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  Type  1 bn   1091.   1118.   1127.   1076.   1144.   1061.
          bs   1058.   1083.   1083.   1065.   1132.   1052.
  max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
-  9600    9600  0.2298E+07    40.000    594483.1  180
-                0.2573E+06    90.000      1295.4   20
+  9600    9600  0.2298E+07    40.000    598691.6  180
+                0.2573E+06    90.000      1295.8   20
  Box            1
  Type  1 bn   9850.   9941.  10039.   9982.   9893.   9799.
          bs   4920.   4920.   5000.   5053.   4777.   4901.
@@ -590,8 +601,8 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  Type  1 bn   1092.   1149.   1097.   1107.   1150.   1147.
          bs   1055.   1116.   1062.   1098.   1144.   1135.
  max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
- 10800   10800  0.2277E+07    40.000    553016.0  180
-                0.2917E+06    90.000      1283.9   20
+ 10800   10800  0.2277E+07    40.000    557224.5  180
+                0.2917E+06    90.000      1284.3   20
  Box            1
  Type  1 bn   9951.   9922.  10012.   9856.   9929.   9906.
          bs   4898.   5055.   5020.   4945.   5077.   4910.
@@ -616,8 +627,8 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  Type  1 bn   1053.   1084.   1120.   1110.   1122.   1113.
          bs   1011.   1056.   1098.   1098.   1115.   1110.
  max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
- 12000   12000  0.2404E+07    40.000    576938.1  180
-                0.2848E+06    90.000      1294.5   20
+ 12000   12000  0.2404E+07    40.000    581146.6  180
+                0.2848E+06    90.000      1294.9   20
  
  +++++ end of markov chain +++++
  
@@ -719,12 +730,12 @@ molecule  1:   0.00000000      0.00000000
  
  vstart       =      -367905.2979132421        -3533.8603734371
  vend         =      2403649.2213544725       284825.7524351925
- vbox         =      2403649.2213550610       284825.7524350935
+ vbox         =      2403649.2213550722       284825.7524350947
  
  Averages and fluctuations                            Box 1       Box 2
  
- pressure                               [kPa] =   593893.06     1315.61
- pressure                  [simulation units] =   43.015505    0.095289
+ pressure                               [kPa] =   598101.54     1316.01
+ pressure                  [simulation units] =   43.320325    0.095318
  surface tension                       [mN/m] =    -11.1535      0.0046
  chem. potential of type       1          [K] =       0.000       0.000
  
@@ -755,10 +766,10 @@ molecule  1:   0.00000000      0.00000000
  type  box     vinter      vintra      vtor        vbend       vtail
     1    1     0.00000     0.00000     0.00000     0.00000     0.00000
     1    2     0.00000     0.00000     0.00000     0.00000     0.00000
- H_vap      [kJ/mol] btwn box      1 and   2 =        37.4732         0.7185         0.2395
- H_vap LJ  [kJ/mol] btwn box      1 and   2 =        39.5166         0.3186         0.1062
- H_vap Coul [kJ/mol] btwn box     1 and   2 =        28.5966         0.1212         0.0404
- pdV        [kJ/mol] btwn box      1 and   2 =        28.5966         0.1212         0.0404
+ H_vap      [kJ/mol] btwn box      1 and   2 =        37.4819         0.7185         0.2395
+ H_vap LJ  [kJ/mol] btwn box      1 and   2 =        39.5253         0.3186         0.1062
+ H_vap Coul [kJ/mol] btwn box     1 and   2 =        28.6053         0.1212         0.0404
+ pdV        [kJ/mol] btwn box      1 and   2 =        28.6053         0.1212         0.0404
  CED [cal/cc]   btwn box           1 and   2 =        12.7354         0.8381         0.2794
  CED_LJ[cal/cc] btwn box           1 and   2 =        12.2084         0.2721         0.0907
  CED_Coul[cal/cc] btwn box         1 and   2 =         0.0000         0.0000         0.0000
@@ -769,8 +780,8 @@ molecule  1:   0.00000000      0.00000000
  specific density    box   2 =  0.52039E-02 0.27122E-12 0.90407E-13
  system volume       box   1 =  0.64000E+05 0.00000E+00 0.00000E+00
  system volume       box   2 =  0.72900E+06 0.00000E+00 0.00000E+00
- pressure            box   1 =  0.59389E+06  4937.2      1645.7    
- pressure            box   2 =   1315.6      5.5765      1.8588    
+ pressure            box   1 =  0.59810E+06  4937.2      1645.7    
+ pressure            box   2 =   1316.0      5.5765      1.8588    
  surface tension     box   1 =    -11.15347    11.05488     3.68496
  surface tension     box   2 =      0.00459     0.05047     0.01682
  
@@ -797,9 +808,9 @@ molecule  1:   0.00000000      0.00000000
  3-body Garo    box   2 =    0.00000E+00   0.00000E+00   0.00000E+00
  Fluc Q         box   2 =    0.00000E+00   0.00000E+00   0.00000E+00
  
- Enthalpy Inst.[kJ/mol] for box  1 =    235.5762      1.4099      0.4700
+ Enthalpy Inst.[kJ/mol] for box  1 =    236.4774      1.4099      0.4700
  Enthalpy Ext. [kJ/mol] for box  1 =    108.4329      0.8184      0.2728
- Enthalpy Inst.[kJ/mol] for box  2 =    146.1666      1.0820      0.3607
+ Enthalpy Inst.[kJ/mol] for box  2 =    146.1754      1.0820      0.3607
  Enthalpy Ext. [kJ/mol] for box  2 =    119.4831      1.1093      0.3698
  
  chemical potential  itype   1 box   1 =        0.000       0.000       0.000
@@ -817,20 +828,20 @@ Free Enrgy of Transf itype   1 between box  2 and  1       -132.426536          
  -----block averages ------
   ------------ box:    1
  block   energy    density   pressure   surf ten  mol fracs
-   1   0.230E+07   0.533E+00   0.597E+06  -0.258E+02   0.100E+01
-   2   0.234E+07   0.533E+00   0.589E+06  -0.123E+02   0.100E+01
-   3   0.235E+07   0.533E+00   0.595E+06  -0.190E+02   0.100E+01
-   4   0.236E+07   0.533E+00   0.599E+06  -0.152E+02   0.100E+01
-   5   0.234E+07   0.533E+00   0.581E+06  -0.174E+00   0.100E+01
-   6   0.236E+07   0.533E+00   0.597E+06   0.406E+01   0.100E+01
-   7   0.237E+07   0.533E+00   0.593E+06  -0.617E+01   0.100E+01
-   8   0.235E+07   0.533E+00   0.596E+06   0.660E+01   0.100E+01
-   9   0.235E+07   0.533E+00   0.595E+06  -0.195E+02   0.100E+01
-  10   0.234E+07   0.533E+00   0.596E+06  -0.241E+02   0.100E+01
+   1   0.230E+07   0.533E+00   0.601E+06  -0.258E+02   0.100E+01
+   2   0.234E+07   0.533E+00   0.593E+06  -0.123E+02   0.100E+01
+   3   0.235E+07   0.533E+00   0.599E+06  -0.190E+02   0.100E+01
+   4   0.236E+07   0.533E+00   0.603E+06  -0.152E+02   0.100E+01
+   5   0.234E+07   0.533E+00   0.585E+06  -0.174E+00   0.100E+01
+   6   0.236E+07   0.533E+00   0.601E+06   0.406E+01   0.100E+01
+   7   0.237E+07   0.533E+00   0.598E+06  -0.617E+01   0.100E+01
+   8   0.235E+07   0.533E+00   0.600E+06   0.660E+01   0.100E+01
+   9   0.235E+07   0.533E+00   0.600E+06  -0.195E+02   0.100E+01
+  10   0.234E+07   0.533E+00   0.600E+06  -0.241E+02   0.100E+01
   ------------ box:    2
  block   energy    density   pressure   surf ten  mol fracs
    1   0.279E+06   0.520E-02   0.131E+04  -0.667E-02   0.100E+01
-   2   0.280E+06   0.520E-02   0.131E+04   0.165E-01   0.100E+01
+   2   0.280E+06   0.520E-02   0.132E+04   0.165E-01   0.100E+01
    3   0.283E+06   0.520E-02   0.131E+04   0.253E-01   0.100E+01
    4   0.286E+06   0.520E-02   0.131E+04  -0.191E-01   0.100E+01
    5   0.282E+06   0.520E-02   0.132E+04  -0.422E-01   0.100E+01
@@ -839,4 +850,4 @@ Free Enrgy of Transf itype   1 between box  2 and  1       -132.426536          
    8   0.281E+06   0.520E-02   0.131E+04  -0.679E-01   0.100E+01
    9   0.284E+06   0.520E-02   0.132E+04  -0.339E-01   0.100E+01
   10   0.278E+06   0.520E-02   0.133E+04   0.124E+00   0.100E+01
- Program ended at 2013-04-22 18:08:49.992
+ Program ended at 2013-04-25 21:33:26.132

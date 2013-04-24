@@ -46,43 +46,23 @@ module sim_system
 
   !*** PARAMETERS FOR TAIL CORRECTIONS ***
   logical::ltailc=.true.& !< if LTAILC=.TRUE. tail corrections are added (WARNING: .lsami. in external.inc switches an intrinsic tail correction on)
-   ,lshift=.false.& !< truncated and shifted potentials
-   ,ltailcZeo=.true.
+   ,lshift=.false. !< truncated and shifted potentials
 
   !*** PARAMETERS FOR CBMC-PSEUDO-POTENTIAL ***
   logical::ldual=.true.& !< if LDUAL=.TRUE. then the external potential during a CBMC growth will only go out to a radius of rcutin and then will be corrected to the full rcut at the end. This is Dual Cutoff Configurational-bias Monte Carlo (DC-CBMC)
    ,L_Coul_CBMC=.true. !< if L_Coul_CBMC=.TRUE. then the electrostatic interaction is computed during CBMC/SWAP
 
   !*** PARAMETERS OF NEIGHBOR LIST ***
-  logical::lneigh=.false. !< if LNIEGH=.TRUE. the nearest neighbor list will be used with a value of rcutnn specified by fort.4
-
-  !* PARAMETER FOR LENNARD-JONES 12-6
-  logical::llj=.false. !< This is only used if you are using regular lj potential, i.e. without shifting or modifying it in any other way.
-
-  !* PARAMETERS FOR EXP-6 POTENTIAL
-  logical::lexpsix=.false. !< if LEXPSIX=.TRUE. exp-6 potential will be used instead of lennard jones
-
-  !* PARAMETERS FOR BUFFERED 14-7 POTENTIAL
-  logical::lmmff=.false. !< if LMMFF=.TRUE. buffered 14-7 potential will be used.
-
-  !* PARAMETERS FOR 9-6 POTENTIAL
-  logical::lninesix=.false. !< if LNINESIX=.TRUE. then the 9-6 potential will be used.
-
-  !* PARAMETERS FOR GENERALIZED LJ POTENTIAL
-  logical::lgenlj=.false. !< if LGENLJ=.TRUE. then the the Generalized lennard jones potential will be used.
+  logical::lneigh=.false.& !< if LNIEGH=.TRUE. the nearest neighbor list will be used with a value of rcutnn specified by fort.4
+   ,lneighbor
 
   !*** External surface ***
-  logical::lexzeo=.false.& !< implicit rigid framework for zeolites and metal-organic frameworks. Parameters for zeolites are read in subroutine SUZEO
-   ,lzgrid=.false. !< whether to use tabulated potential for the interactions with the rigid framework
-  logical::lsami=.false.& !<
-   ,lmuir=.false.& !<
-   ,lslit=.false.& !< planar slit pore
-   ,lgraphite=.false.& !< graphite surface
-   ,ljoe=.false.& !<
-   ,lpsurf=.false.& !<
-   ,lcorreg=.false.& !<
+  logical::lexzeo=.false.& !< implicit rigid framework for zeolites and metal-organic frameworks. Tabulated potential will be used for the interactions with the rigid framework. Parameters are read in subroutine SUZEO
+   ,lslit=.false.& !< featureless, planar slit surface(s)
+   ,lgraphite=.false.& !< x,y-dependent graphite surface
+   ,lsami=.false.& !< SAMI
+   ,lmuir=.false.& !< Langmuir monolayer
    ,lelect_field=.false. !< external electric field
-  real,allocatable::Elect_field(:)
 
   !*** Thermodynamic integration ***
   real,allocatable::rxwell(:,:),rywell(:,:),rzwell(:,:),sxwell(:,:),sywell(:,:),szwell(:,:),vwellipswot(:),vwellipswnt(:),vipswnt(:),vipswot(:),awell(:,:,:)
@@ -95,7 +75,7 @@ module sim_system
 
   !=== Analysis ===
   integer,parameter::nEnergy=14
-  real,allocatable::vbox(:,:) !< (j,ibox): energies of ibox; j = 1: total energy; 2: intermolecular LJ; 3: tail correction; 4: intramolecular non-bonded LJ; 5: stretching; 6: bending; 7: torsion; 8: electrostatic; 9: external field; 10: 3-body garofalini; 11: fluctuating charge (vflucqb); 12: vipswb; 13: vwellipswb; 14: Ewald reciprocal-space electrostatic
+  real,allocatable::vbox(:,:) !< (j,ibox): energies of ibox; j = 1: total energy; 2: intermolecular LJ; 3: tail correction; 4: intramolecular non-bonded LJ; 5: stretching; 6: bending; 7: torsion; 8: electrostatic; 9: external field; 10: 3-body Feuston-Garofalini; 11: fluctuating charge (vflucqb); 12: vipswb; 13: vwellipswb; 14: Ewald reciprocal-space electrostatic
   integer,allocatable::ucheck(:) !< whether or not to calculate chemical potential for each molecule type
   character(LEN=1)::suffix='a'
   integer::io_output=6,iprint=-1,imv=-1,iblock=-1,iratp=500,idiele=-1,iheatcapacity=-1,nprop,ianalyze=-1,nbin=1,run_num=1
@@ -106,7 +86,7 @@ module sim_system
   integer::nequil=0,ninstf=0,ninsth=0,ndumph=0
 
   !*** 2nd virial coefficient ***
-  real,allocatable::xiq(:),jayself(:),ecut(:),jayq(:)
+  real,allocatable::xiq(:),jayself(:),jayq(:)
   integer,parameter::maxvir=1,maxntemp=3 !< maximum number of bins for the 2nd virial coefficient
   integer::ntemp=0,nvirial=0
   real::virtemp(maxntemp),starvir=0.0_dp,stepvir=0.0_dp
@@ -121,23 +101,22 @@ module sim_system
 
   !=== Force field parameters ===
   integer::nntype !< number of types of beads
-  logical::L_tor_table=.false.,L_spline=.false.,L_linear=.false.,L_vib_table=.false.,L_bend_table=.false.,L_vdW_table=.false.,L_elect_table=.false.
-  real,allocatable::mass(:),sigi(:),epsi(:),qelect(:),sig2ij(:),epsij(:)&
+  logical::L_spline=.false.,L_linear=.false.,L_vib_table=.false.,L_bend_table=.false.,L_elect_table=.false.
+  real,allocatable::mass(:),vvdW_b(:,:),qelect(:),vvdW(:,:),ecut(:)&
    ,brvib(:),brvibk(:),brben(:),brbenk(:)&
    ,ljscale(:,:,:),qscale2(:,:,:)
   character(len=4),allocatable::chemid(:)
   integer,allocatable::a15type(:,:,:)
   logical,allocatable::lij(:),lqchg(:),lexclu(:,:,:,:),linclu(:,:,:),lqinclu(:,:,:),lainclu(:,:,:),lpl(:)
 
-  !*** Garofalini force field ***
-  logical::lgaro=.false. !< if LGARO=.TRUE. garofalini potential will be used instead of Lennard-Jones
-  real::v3garo
+  !*** Feuston-Garofalini force field ***
+  logical::lgaro !< if LGARO=.TRUE. Feuston-Garofalini potential will be used
 
   !=== Information about simulation box ===
   integer::nbox=1,nbxmax& !< maximum number of boxes
    ,npabmax& !< maximum number of box pairs (for swatch and swap)
    ,boxlink
-  real::beta,temp=-1.0_dp
+  real::beta,temp=-1.0_dp,rintramax=0.0_dp
   logical::licell=.false.
   real,allocatable,target::boxlx(:),boxly(:),boxlz(:),rcut(:),rcutnn(:),kalp(:)
   logical,allocatable,target::lsolid(:),lrect(:)
@@ -201,15 +180,7 @@ module sim_system
   !** AVBMC moves **
   logical,allocatable::lavbmc1(:),lavbmc2(:),lavbmc3(:),lbias(:)
   real,allocatable::pmbias(:),pmbsmt(:),pmbias2(:),favor(:),favor2(:)
-  real::rintramax=0.0_dp,rbsmax=3.5_dp,rbsmin=2.5_dp,vol_eff
-
-  !* Nucleation *
-  integer,allocatable::neighbor(:,:),neigh_cnt(:),neighboro(:,:),neigh_o(:)
-  real,allocatable::ndij(:,:),nxij(:,:),nyij(:,:),nzij(:,:),ndijo(:,:),nxijo(:,:),nyijo(:,:),nzijo(:,:)
-  integer,parameter::maxneigh=20
-  real::ndiji(maxneigh),nxiji(maxneigh),nyiji(maxneigh),nziji(maxneigh)
-  integer::neigh_icnt,neighi(maxneigh)
-  logical::lneighbor
+  real::rbsmax=3.5_dp,rbsmin=2.5_dp,vol_eff
 
   !*** Regular CBMC moves ***
   real::pmcb
@@ -317,7 +288,7 @@ CONTAINS
     integer::jerr
 
     allocate(boxlx(nbxmax),boxly(nbxmax),boxlz(nbxmax),rcut(nbxmax),rcutnn(nbxmax),kalp(nbxmax),lsolid(nbxmax),lrect(nbxmax)&
-     ,express(nbxmax),Elect_field(nbxmax),ghost_particles(nbxmax),numberDimensionIsIsotropic(nbxmax),inix(nbxmax),iniy(nbxmax)&
+     ,express(nbxmax),ghost_particles(nbxmax),numberDimensionIsIsotropic(nbxmax),inix(nbxmax),iniy(nbxmax)&
      ,iniz(nbxmax),inirot(nbxmax),inimix(nbxmax),nchoiq(nbxmax),box5(nbxmax),box6(nbxmax),zshift(nbxmax),dshift(nbxmax)&
      ,rmvol(nbxmax),pmvlmt(nbxmax),pmvolb(nbxmax),lideal(nbxmax),ltwice(nbxmax),rmhmat(nbxmax,9),dipolex(nbxmax),dipoley(nbxmax)&
      ,dipolez(nbxmax),nchbox(nbxmax),vbox(nEnergy,nbxmax),stat=jerr)
@@ -338,8 +309,6 @@ CONTAINS
      ,parbox(nmax,nbxmax,ntmax),bnflcq(ntmax,nbxmax),bsflcq(ntmax,nbxmax)&
      ,bnflcq2(ntmax,nbxmax),bsflcq2(ntmax,nbxmax),rxwell(nw,ntmax),rywell(nw,ntmax),rzwell(nw,ntmax),sxwell(nw,ntmax)&
      ,sywell(nw,ntmax),szwell(nw,ntmax),nwell(ntmax),lwell(ntmax),moltyp(nmax),rcmu(nmax),sxcm(nmax),sycm(nmax),szcm(nmax),nboxi(nmax)&
-     ,neighbor(maxneigh,nmax),neigh_cnt(nmax),neighboro(maxneigh,nmax),neigh_o(nmax),ndij(maxneigh,nmax),nxij(maxneigh,nmax)&
-     ,nyij(maxneigh,nmax),nxijo(maxneigh,nmax),nzij(maxneigh,nmax),ndijo(maxneigh,nmax),nyijo(maxneigh,nmax),nzijo(maxneigh,nmax)&
      ,favor(nmax),favor2(nmax),ntype(ntmax,initial_size),leaderq(ntmax,initial_size),lplace(ntmax,initial_size)&
      ,lrigi(ntmax,initial_size),invib(ntmax,initial_size),itvib(ntmax,initial_size,6),ijvib(ntmax,initial_size,6)&
      ,inben(ntmax,initial_size),itben(ntmax,initial_size,12),ijben2(ntmax,initial_size,12),ijben3(ntmax,initial_size,12)&

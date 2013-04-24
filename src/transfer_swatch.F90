@@ -20,7 +20,7 @@ contains
 !> several critical bug fixes as well.
 !> \since 9-25-02 JMS
   subroutine swatch()
-    use sim_particle,only:update_neighbor_list,ctrmas
+    use sim_particle,only:ctrmas
 
       logical::lempty,lterm
 
@@ -879,14 +879,6 @@ contains
 ! update center of mass
             call ctrmas(.false.,box,imolb,8)
             call ctrmas(.false.,box,imola,8)
-
-            if (licell .and. (box .eq. boxlink))  call err_exit(__FILE__,__LINE__,'not yet implemented!',myid+1)
-
-! call nearest neighbor list
-            if ( lneigh ) then
-               call update_neighbor_list(imola,0.,0.,0.,.true.)
-               call update_neighbor_list(imolb,0.,0.,0.,.true.)
-            end if
          else if (lewald.and..not.lideal(box)) then
 ! recover the reciprocal space vectors
 ! if the move is not accepted ***
@@ -1505,14 +1497,6 @@ contains
             call ctrmas(.false.,boxa,iboxb,8)
             call ctrmas(.false.,boxb,iboxa,8)
 
-            if (licell .and. (boxa .eq. boxlink .or. boxb .eq. boxlink)) call err_exit(__FILE__,__LINE__,'not yet implemented!',myid+1)
-
-! call nearest neighbor list
-            if ( lneigh ) then
-               call update_neighbor_list(iboxa,0.,0.,0.,.true.)
-               call update_neighbor_list(iboxb,0.,0.,0.,.true.)
-            end if
-
 !cc--!!!JLR - for test 2 write final coordinates of a and b
 ! open(93,file='a_final.xyz',status='unknown')
 ! write(93,*) iunita
@@ -1569,8 +1553,6 @@ contains
     read(UNIT=io_input,NML=mc_swatch,iostat=jerr)
     if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_swatch',jerr)
 
-    if (nswaty.gt.npamax) call err_exit(__FILE__,__LINE__,'nswaty gt npamax',myid+1)
-
     if (lprint) then
        write(io_output,'(/,A,/,A)') 'NAMELIST MC_SWATCH','------------------------------------------'
        write(io_output,'(A,G16.9)') 'pmswat: ',pmswat
@@ -1579,6 +1561,9 @@ contains
           write(io_output,'(A,G16.9)') '   probability of each swatch pair: ',pmsatc(i)
        end do
     end if
+
+    if (nswaty.gt.npamax) call err_exit(__FILE__,__LINE__,'nswaty gt npamax',myid+1)
+    if (pmswat.gt.0.and.lneigh) call err_exit(__FILE__,__LINE__,'Neighbor list currently does not work with CBMC particle identity switch moves!',myid+1)
 
     ! Looking for section MC_SWATCH
     REWIND(io_input)
@@ -1653,6 +1638,7 @@ contains
                 if (lprint) then
                    write(io_output,'(A,2(4X,I0))') '   box pair:',box3(i,j),box4(i,j)
                 end if
+                if (pmswat.gt.0.and.licell.and.(box3(i,j).eq.boxlink.or.box4(i,j).eq.boxlink)) call err_exit(__FILE__,__LINE__,'Cell structure currently does not work with CBMC particle identity switch moves!',myid+1)
              end do
           end do
           exit cycle_read_swatch

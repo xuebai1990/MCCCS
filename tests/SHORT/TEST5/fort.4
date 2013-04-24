@@ -4,7 +4,7 @@
      nbox=           1
      nmolty=           3
      nchain=         360
-     nstep=      1000
+     nstep=        1000
      lstop= F
      iratio=        1000
      rmin=  0.700000000000000     
@@ -23,9 +23,9 @@
 
 
  &analysis
-     iprint=       100
+     iprint=         100
      imv=       15000
-     iblock=       100
+     iblock=         100
      iratp=      100000
      idiele=           1
      iheatcapacity=     1000000
@@ -45,6 +45,11 @@
      starvir=  0.000000000000000E+000
      stepvir=  0.000000000000000E+000
      ntemp=           0
+ /
+
+
+ &external_field
+     Elect_field=  0.000000000000000E+000
  /
 
 
@@ -135,6 +140,7 @@
 
  &mc_flucq
      taflcq=  0.950000000000000     
+     fqtemp=   5.00000000000000     
      rmflucq=  0.100000000000000     
      pmflcq=  0.000000000000000E+000
      pmfqmt=   1.00000000000000       0.000000000000000E+000
@@ -148,16 +154,18 @@
 
 
 SIMULATION_BOX
-! boxlx boxly boxlz lsolid lrect kalp rcut rcutnn numDimensionIsIstropic pressure temperature use_linkcell rintramax ghost_particles lideal ltwice
-  20.000   20.000   20.000  F  F  0.240  6.500  0.000 0 10000.0 6000.00  F 0.0 0  F  F
-! nchain_1 ... nchain_nmolty inix iniy iniz inirot inimix zshift dshift
-60 180 120 8 7 7 1 0  0.0  2.000
+! boxlx boxly boxlz rcut kalp rcutnn numDimensionIsIstropic lsolid lrect lideal ltwice temperature pressure
+  20.000   20.000   20.000  6.500  0.240  0.000 0  F  F  F  F 6000.00 10000.0
+! nchain_1 ... nchain_nmolty ghost_particles
+60 180 120 0
+! inix iniy iniz inirot inimix zshift dshift use_linkcell rintramax
+8 7 7 1 0  0.0  2.000 F 0.0
 END SIMULATION_BOX
 
 
 MOLECULE_TYPE
-! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
-1 1 1 1 0  T 1  F 1  F  F 5000000     0.0  F 1.0  F  F
+! nunit nugrow ncarbon maxcbmc maxgrow iring lelect lring lrigid lbranch lrplc lsetup lq14scale qscale iurot isolute eta
+1 1 1 1 1 1  T  F  F  F  F  F  F 1.0 0 5000000     0.0
 ! unit ntype leaderq
 1 1 1
 ! stretching
@@ -166,8 +174,8 @@ MOLECULE_TYPE
 0
 ! torsion
 0
-! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
-1 1 1 1 0  T 1  F 1  F  F 5000000     0.0  F 1.0  F  F
+! nunit nugrow ncarbon maxcbmc maxgrow iring lelect lring lrigid lbranch lrplc lsetup lq14scale qscale iurot isolute eta
+1 1 1 1 1 1  T  F  F  F  F  F  F 1.0 0 5000000     0.0
 ! unit ntype leaderq
 1 2 1
 ! stretching
@@ -176,8 +184,8 @@ MOLECULE_TYPE
 0
 ! torsion
 0
-! nunit nugrow ncarbon maxcbmc iurot lelect maxgrow lring iring lrigid lsetup isolute eta lq14scale qscale lbranch lrplc
-1 1 1 1 0  T 1  F 1  F  F 5000000     0.0  F 1.0  F  F
+! nunit nugrow ncarbon maxcbmc maxgrow iring lelect lring lrigid lbranch lrplc lsetup lq14scale qscale iurot isolute eta
+1 1 1 1 1 1  T  F  F  F  F  F  F 1.0 0 5000000     0.0
 ! unit ntype leaderq
 1 3 1
 ! stretching
