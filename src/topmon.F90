@@ -69,7 +69,7 @@ program topmon
 
   if (lusage) then
      call get_command_argument(0,sarg)
-     write(*,'(A,/,T4,A,/,T4,A,/)') 'Usage: '//trim(sarg)// ' [--version|-v] [--help|-h] [(--threads|-t) number_of_threads_per_processor]','[(--input|-i) /path/to/input/file]','If the input file is the last argument, --input or -i can  be omitted'
+     write(*,'(A,/,T4,A,/,T4,A,/)') 'Usage: '//trim(sarg)// ' [--version|-v] [--help|-h] [(--threads|-t) number_of_threads_per_processor]','[(--input|-i) name_of_master_input]','If the input file is the last argument, --input or -i can be omitted'
   end if
 
   if (lrun) then

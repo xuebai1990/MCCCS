@@ -2157,7 +2157,7 @@ contains
     return
   end function lininter_elect
 
-!!!DEC$ ATTRIBUTES FORCEINLINE :: type_2body
+!DEC$ ATTRIBUTES FORCEINLINE :: type_2body
   function type_2body(ntii,ntjj)
     integer::type_2body
     integer,intent(in)::ntii,ntjj
@@ -2171,7 +2171,7 @@ contains
 !> \note New potenial functional form needs to be added here,
 !> and in coru (tail corrections to energy), prop_pressure::pressure
 !> (force calculation), corp (tail corrections to pressure)
-!!!DEC$ ATTRIBUTES FORCEINLINE :: U2
+!DEC$ ATTRIBUTES FORCEINLINE :: U2
   function U2(rij,rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
     real::U2
     real,intent(in)::rij,rijsq

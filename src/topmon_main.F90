@@ -636,10 +636,9 @@ contains
     if (myid.eq.rootid) then
        ! Write out final configurations
        write(io_output,*)
-       write(io_output,"(' vstart       =',3f24.10)") (vstart(i) ,i=1,nbox)
-       write(io_output,"(' vend         =',3f24.10)") (vend(i)   ,i=1,nbox)
-       write(io_output,"(' vbox         =',3f24.10)") (vbox(1,i) ,i=1,nbox)
-       write(io_output,*)
+       write(io_output,"(A,"//format_n(nbox,"(1X,F23.10)")//")") ' vstart       =',(vstart(i) ,i=1,nbox)
+       write(io_output,"(A,"//format_n(nbox,"(1X,F23.10)")//")") ' vend         =',(vend(i)   ,i=1,nbox)
+       write(io_output,"(A,"//format_n(nbox,"(1X,F23.10)")//")") ' vbox         =',(vbox(1,i) ,i=1,nbox)
 
        ! write out the final configuration for each box, Added by Neeraj 06/26/2006 3M ***
        io_config=get_iounit()
@@ -770,64 +769,63 @@ contains
           end do
        end do
 
-       write(io_output,"(' Averages and fluctuations',21x,4(a11,i1))") ('       Box ',i,i=1,nbox)
        write(io_output,*)
-       write(io_output,"(' pressure                               [kPa] =',3f12.2)") (acpres(i),i=1,nbox)
-       write(io_output,"(' pressure                  [simulation units] =',3f12.6)") ((acpres(i)*MPa2SimUnits*1E-3_dp),i=1,nbox)
-       write(io_output,"(' surface tension                       [mN/m] =',3f12.4)") (acsurf(i),i=1,nbox)
+       write(io_output,"(A,"//format_n(nbox,"(A,I2)")//")") ' Averages and fluctuations                 ',('       Box ',i,i=1,nbox)
+       write(io_output,*)
+       write(io_output,"(A,"//format_n(nbox,"(1X,F12.2)")//")") ' pressure                           [kPa] =',(acpres(i),i=1,nbox)
+       write(io_output,"(A,"//format_n(nbox,"(1X,F12.6)")//")") ' pressure              [simulation units] =',((acpres(i)*MPa2SimUnits*1E-3_dp),i=1,nbox)
+       write(io_output,"(A,"//format_n(nbox,"(1X,F12.4)")//")") ' surface tension                   [mN/m] =',(acsurf(i),i=1,nbox)
        do itype = 1,nmolty
-          write(io_output,"(' chem. potential of type    ',i4,'          [K] =',3f12.3)") itype,(acchem(i,itype),i=1,nbox)
-       end do
-       write(io_output,*)
-
-       do i = 1,3
-          write(io_output,"(' boxlength                                [A] =',3f12.3)") (acboxl(ibox,i),ibox=1,nbox)
+          write(io_output,"(A,I2,A,"//format_n(nbox,"(1X,F12.3)")//")") ' chem. potential of type  ',itype,'          [K] =',(acchem(i,itype),i=1,nbox)
        end do
 
-       do ibox = 1, nbox
-          if ( lsolid(ibox) .and. .not. lrect(ibox) ) then
-             do i = 1,3
-                write(io_output,"(' box angle                                deg =',3f12.3)") acboxa(ibox,i)*raddeg
-             end do
-          end if
+       do i=1,3
+          write(io_output,"(A,"//format_n(nbox,"(1X,F12.3)")//")") ' boxlength                            [A] =',(acboxl(ibox,i),ibox=1,nbox)
        end do
+
+       if (ANY(lsolid(1:nbox).and..not.lrect(1:nbox))) then
+          do i=1,3
+             write(io_output,"(A,"//format_n(nbox,"(1X,F12.3)")//")") ' box angle                          [deg] =',(acboxa(ibox,i)*raddeg,ibox=1,nbox)
+          end do
+       end if
 
        do itype = 1, nmolty
-          write(io_output,"(' no. of chains of type      ',i4,'              =',3f12.3)") itype,(acnbox(i,itype),i=1,nbox)
+          write(io_output,"(A,I2,A,"//format_n(nbox,"(1X,F12.3)")//")") ' no. of chains of type    ',itype,'              =',(acnbox(i,itype),i=1,nbox)
        end do
-       if ( lpbcz ) then
-          write(io_output,"(' molar volume                      [cm^3/mol] =',3f12.3)") (molvol(i),i=1,nbox)
-          write(io_output,"(' specific density                    [g/cm^3] =',3f12.6)") (speden(i),i=1,nbox)
+       if (lpbcz) then
+          write(io_output,"(A,"//format_n(nbox,"(1X,F12.3)")//")") ' molar volume                  [cm^3/mol] =',(molvol(i),i=1,nbox)
+          write(io_output,"(A,"//format_n(nbox,"(1X,F12.6)")//")") ' specific density                [g/cm^3] =',(speden(i),i=1,nbox)
           do itype = 1, nmolty
-             write(io_output,"(' number density of type     ',i4,' [chain/nm^3] =',3f12.5)") itype,(acdens(i,itype),i=1,nbox)
-             if ( lexpand(itype) ) then
-                do itype2 = 1, numcoeff(itype)
-                   write(io_output,"(' number density of type     ',i4,' eetype ',i4,'  =', 2f12.5)") itype,itype2,acdens(itype,itype)*acnbox2(itype,itype,itype2)/(acnbox(itype,itype)*acmove),acnbox2(itype,itype,itype2)/(acnbox(itype,itype)*acmove)
+             write(io_output,"(A,I2,A,"//format_n(nbox,"(1X,F12.5)")//")") ' number density of type   ',itype,' [chain/nm^3] =',(acdens(i,itype),i=1,nbox)
+             if (lexpand(itype)) then
+                do itype2=1,numcoeff(itype)
+                   write(io_output,"(A,I2,A,I4,A,2F12.5)") ' number density of type   ',itype,' eetype ',itype2,'  =',acdens(itype,itype)*acnbox2(itype,itype,itype2)/(acnbox(itype,itype)*acmove),acnbox2(itype,itype,itype2)/(acnbox(itype,itype)*acmove)
                 end do
              end if
           end do
        else
-          write(io_output,"(' area per chain                     [A^2/chain] =',3f12.4)") (molvol(i),i=1,nbox)
+          write(io_output,"(A,"//format_n(nbox,"(1X,F12.4)")//")") ' area per chain                     [A^2/chain] =',(molvol(i),i=1,nbox)
           do itype = 1, nmolty
-             write(io_output,"(' number density of type     ',i4,' [chain/nm^2] =',3f12.6)") itype,(acdens(i,itype),i=1,nbox)
+             write(io_output,"(A,I2,A,"//format_n(nbox,"(1X,F12.6)")//")") ' number density of type   ',itype,' [chain/nm^2] =',(acdens(i,itype),i=1,nbox)
           end do
        end if
        do itype = 1, nmolty
-          write(io_output,"(' molfraction of type        ',i4,'              =',3f12.7)") itype,(molfra(i,itype),i=1,nbox)
+          write(io_output,"(A,I2,A,"//format_n(nbox,"(1X,F12.7)")//")") ' molfraction of type      ',itype,'              =',(molfra(i,itype),i=1,nbox)
        end do
        do itype = 1, nmolty
-          write(io_output,"(' mean sete length of type   ',i4,'        [A^2] =',3f12.3)") itype,(asetel(i,itype),i=1,nbox)
+          write(io_output,"(A,I2,A,"//format_n(nbox,"(1X,F12.3)")//")") ' mean sete length of type ',itype,'        [A^2] =',(asetel(i,itype),i=1,nbox)
        end do
+
        write(io_output,*)
        do j=1,11
           ! only 1 to 11 is the energy information
-          write(io_output,"(a15,'[K per system and kJ/mol per chain] =',3(f14.2,f12.2))") vname(j),acv(j,1:nbox),acvkjmol(j,1:nbox)
+          write(io_output,"(A14,A,"//format_n(nbox,"(1X,F13.2)")//","//format_n(nbox,"(1X,F10.2)")//")") vname(j),'[K per system and kJ/mol per chain] =',acv(j,1:nbox),acvkjmol(j,1:nbox)
        end do
 
        write(io_output,*)
-       write(io_output,"(' fluctuation in <vtot>                          =',3f12.2)") (sqrt(acvsq(1,i)),i=1,nbox)
-       write(io_output,*)
+       write(io_output,"(A,"//format_n(nbox,"(1X,F11.2)")//")") ' fluctuation in <vtot> =',(sqrt(acvsq(1,i)),i=1,nbox)
 
+       write(io_output,*)
        ! Output 2nd virial coefficient data
 2000   if (lvirial) then
           starviro = starvir
@@ -880,14 +878,13 @@ contains
        end if
 
        ! solute values
-       write(io_output,*) 'type  box     vinter      vintra      vtor', '        vbend       vtail'
-
+       write(io_output,'(A)') ' type  box       vinter       vintra         vtor        vbend        vtail'
        do itype = 1, nmolty
           do ibox = 1, nbox
              if (solcount(ibox,itype).gt.0) then
-                write(io_output,"(i5,i5,3f12.5,3f12.5,3f12.5,3f12.5,3f12.5)") itype,ibox,avsolinter(ibox,itype),avsolintra(ibox,itype),avsoltor(ibox,itype),avsolbend(ibox,itype),avsolelc(ibox,itype)
+                write(io_output,"(2I5,5(1X,F12.5))") itype,ibox,avsolinter(ibox,itype),avsolintra(ibox,itype),avsoltor(ibox,itype),avsolbend(ibox,itype),avsolelc(ibox,itype)
              else
-                write(io_output,"(i5,i5,3f12.5,3f12.5,3f12.5,3f12.5,3f12.5)") itype,ibox,0.0,0.0,0.0,0.0,0.0
+                write(io_output,"(2I5,5(1X,F12.5))") itype,ibox,0.0,0.0,0.0,0.0,0.0
              end if
           end do
        end do
@@ -910,42 +907,44 @@ contains
           end do
 
           ! write out the heat of vaporization and solubility parameters
+          write(io_output,*)
           do ibox = 1,nbox-1
              do jbox = ibox+1,nbox
-                write(io_output,"(' H_vap      [kJ/mol] btwn box   ',i4,' and',i4, ' =', 3f15.4)") ibox,jbox,acsolpar(1,ibox,jbox),stdev1(1,ibox,jbox),errme1(1,ibox,jbox)
-                write(io_output,"(' H_vap LJ  [kJ/mol] btwn box   ',i4,' and',i4, ' =', 3f15.4)") ibox,jbox,acsolpar(2,ibox,jbox),stdev1(2,ibox,jbox),errme1(2,ibox,jbox)
-                write(io_output,"(' H_vap Coul [kJ/mol] btwn box  ',i4,' and',i4, ' =', 3f15.4)") ibox,jbox,acsolpar(3,ibox,jbox),stdev1(3,ibox,jbox),errme1(3,ibox,jbox)
-                ! write(io_output,"(' DeltaU Ext [kJ/mol] btwn box   ',i4,' and',i4, ' =',3f15.4)") ibox,jbox,acsolpar(10,ibox,jbox),stdev1(10,ibox,jbox), errme1(10,ibox,jbox)
-                write(io_output,"(' pdV        [kJ/mol] btwn box   ',i4,' and',i4, ' =', 3f15.4)") ibox,jbox,acsolpar(11,ibox,jbox),stdev1(11,ibox,jbox),errme1(11,ibox,jbox)
-                write(io_output,"(' CED [cal/cc]   btwn box        ',i4,' and',i4, ' =', 3f15.4)") ibox,jbox,acsolpar(4,ibox,jbox),stdev1(4,ibox,jbox),errme1(4,ibox,jbox)
-                write(io_output,"(' CED_LJ[cal/cc] btwn box        ',i4,' and',i4, ' =', 3f15.4)") ibox,jbox,acsolpar(5,ibox,jbox),stdev1(5,ibox,jbox),errme1(5,ibox,jbox)
-                write(io_output,"(' CED_Coul[cal/cc] btwn box      ',i4,' and',i4, ' =', 3f15.4)") ibox,jbox,acsolpar(6,ibox,jbox),stdev1(6,ibox,jbox),errme1(6,ibox,jbox)
-                write(io_output,"(' HSP [(cal/cc)^1/2]  btwn box   ',i4,' and',i4, ' =', 3f15.4)") ibox,jbox,acsolpar(7,ibox,jbox),stdev1(7,ibox,jbox),errme1(7,ibox,jbox)
-                write(io_output,"(' HSP_LJ[(cal/cc)^1/2] btwn box  ',i4,' and',i4, ' =', 3f15.4)") ibox,jbox,acsolpar(8,ibox,jbox),stdev1(8,ibox,jbox),errme1(8,ibox,jbox)
-                write(io_output,"(' HSP_Cou[(cal/cc)^1/2] btwn box ',i4,' and',i4, ' =', 3f15.4)") ibox,jbox,acsolpar(9,ibox,jbox),stdev1(9,ibox,jbox),errme1(9,ibox,jbox)
+                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' H_vap      [kJ/mol] btwn box   ',ibox,' and ',jbox,' =',acsolpar(1,ibox,jbox),stdev1(1,ibox,jbox),errme1(1,ibox,jbox)
+                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' H_vap LJ  [kJ/mol] btwn box    ',ibox,' and ',jbox,' =',acsolpar(2,ibox,jbox),stdev1(2,ibox,jbox),errme1(2,ibox,jbox)
+                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' H_vap Coul [kJ/mol] btwn box   ',ibox,' and ',jbox,' =',acsolpar(3,ibox,jbox),stdev1(3,ibox,jbox),errme1(3,ibox,jbox)
+                ! write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' DeltaU Ext [kJ/mol] btwn box   ',ibox,' and ',jbox,' =',acsolpar(10,ibox,jbox),stdev1(10,ibox,jbox),errme1(10,ibox,jbox)
+                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' pdV        [kJ/mol] btwn box   ',ibox,' and ',jbox,' =',acsolpar(11,ibox,jbox),stdev1(11,ibox,jbox),errme1(11,ibox,jbox)
+                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' CED [cal/cc]   btwn box        ',ibox,' and ',jbox,' =',acsolpar(4,ibox,jbox),stdev1(4,ibox,jbox),errme1(4,ibox,jbox)
+                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' CED_LJ[cal/cc] btwn box        ',ibox,' and ',jbox,' =',acsolpar(5,ibox,jbox),stdev1(5,ibox,jbox),errme1(5,ibox,jbox)
+                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' CED_Coul[cal/cc] btwn box      ',ibox,' and ',jbox,' =',acsolpar(6,ibox,jbox),stdev1(6,ibox,jbox),errme1(6,ibox,jbox)
+                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' HSP [(cal/cc)^1/2]  btwn box   ',ibox,' and ',jbox,' =',acsolpar(7,ibox,jbox),stdev1(7,ibox,jbox),errme1(7,ibox,jbox)
+                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' HSP_LJ[(cal/cc)^1/2] btwn box  ',ibox,' and ',jbox,' =',acsolpar(8,ibox,jbox),stdev1(8,ibox,jbox),errme1(8,ibox,jbox)
+                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' HSP_Cou[(cal/cc)^1/2] btwn box ',ibox,' and ',jbox,' =',acsolpar(9,ibox,jbox),stdev1(9,ibox,jbox),errme1(9,ibox,jbox)
              end do
           end do
 
+          write(io_output,*)
           ! specific density
           do ibox = 1, nbox
-             write(io_output,"(' specific density    box ',i3, ' = ',3E12.5)") ibox,aver(1,ibox),stdev(1,ibox),errme(1,ibox)
+             write(io_output,"(A,I2,A,3(1X,E12.5))") ' specific density box ',ibox,' =',aver(1,ibox),stdev(1,ibox),errme(1,ibox)
           end do
 
           ! system volume
           itel = nEnergy + 4*nmolty + 4
           do ibox = 1, nbox
-             write(io_output,"(' system volume       box ',i3, ' = ',3E12.5)") ibox,aver(itel,ibox),stdev(itel,ibox),errme(itel,ibox)
+             write(io_output,"(A,I2,A,3(1X,E12.5))") ' system volume    box ',ibox,' =',aver(itel,ibox),stdev(itel,ibox),errme(itel,ibox)
           end do
 
           ! pressure
           do ibox = 1, nbox
-             write(io_output,"(' pressure            box ',i3, ' = ',3g12.5)") ibox,acpres(ibox),stdev(2,ibox),errme(2,ibox)
+             write(io_output,"(A,I2,A,3(1X,G12.5))") ' pressure         box ',ibox,' =',acpres(ibox),stdev(2,ibox),errme(2,ibox)
           end do
 
           ! surface tension
           itel = nEnergy + 4*nmolty + 3
           do ibox = 1, nbox
-             write(io_output,"(' surface tension     box ',i3, ' = ',3f12.5)") ibox,acsurf(ibox),stdev(itel,ibox),errme(itel,ibox)
+             write(io_output,"(A,I2,A,3(1X,F12.5))") ' surface tension  box ',ibox,' =',acsurf(ibox),stdev(itel,ibox),errme(itel,ibox)
           end do
 
           write(io_output,*)
@@ -953,40 +952,40 @@ contains
           do ibox = 1, nbox
              do j=3,13
                 ! only 1 to 10 is the energy information
-                write(io_output,"(a15 ,' box ',i3, ' = ',3E14.5)") vname(j-2),ibox,aver(j,ibox),stdev(j,ibox),errme(j,ibox)
+                write(io_output,"(A17,A,I2,A,3(1X,E12.5))") vname(j-2),' box ',ibox,' =',aver(j,ibox),stdev(j,ibox),errme(j,ibox)
              end do
           end do
 
           write(io_output,*)
-
           ! Enthalpy
           do ibox = 1,nbox
              j = nEnergy + 4*nmolty + 5
-             write(io_output, "(' Enthalpy Inst.[kJ/mol] for box',i3,' =',3(f12.4))") ibox,acEnthalpy(ibox),stdev(j,ibox),errme(j,ibox)
+             write(io_output, "(A,I2,A,3(1X,F12.4))") ' Enthalpy Inst.[kJ/mol] for box ',ibox,' =',acEnthalpy(ibox),stdev(j,ibox),errme(j,ibox)
              j = nEnergy + 4*nmolty + 6
-             write(io_output,"(' Enthalpy Ext. [kJ/mol] for box',i3,' =',3(f12.4))") ibox,acEnthalpy1(ibox),stdev(j,ibox),errme(j,ibox)
+             write(io_output,"(A,I2,A,3(1X,F12.4))") ' Enthalpy Ext. [kJ/mol] for box ',ibox,' =',acEnthalpy1(ibox),stdev(j,ibox),errme(j,ibox)
           end do
-          write(io_output,*)
 
+          write(io_output,*)
           ! residual heat capacity, in (J2/mol)
           if (.not.lgibbs) then
              tmp=(enthalpy2-enthalpy*enthalpy)/real(nchain,dp)*R_gas/(temp**2)
              if(lnpt) then
-                write(io_output,*) 'Cp residual(J/Kmol) =',tmp
-                write(io_output,*) ' H2=',enthalpy2
-                write(io_output,*) ' H=',enthalpy
+                write(io_output,'(A,G16.9)') ' Cp residual(J/Kmol) = ',tmp
+                write(io_output,'(A,G16.9)') '   H2 = ',enthalpy2
+                write(io_output,'(A,G16.9)') '   H  = ',enthalpy
              else
-                write(io_output,*) 'Cv residual(J/Kmol) =',tmp
-                write(io_output,*) ' E2=',enthalpy2
-                write(io_output,*) ' E=',enthalpy
+                write(io_output,'(A,G16.9)') ' Cv residual(J/Kmol) = ',tmp
+                write(io_output,'(A,G16.9)') '   E2 = ',enthalpy2
+                write(io_output,'(A,G16.9)') '   E  = ',enthalpy
              end if
           end if
 
+          write(io_output,*)
           ! chemical potential
           do itype = 1, nmolty
              itel = 2 + nEnergy + itype
              do ibox = 1, nbox
-                write(io_output,"(' chemical potential  itype ',i3,' box ',i3, ' = ',3f12.3)") itype,ibox,aver(itel,ibox),stdev(itel,ibox),errme(itel,ibox)
+                write(io_output,"(2(A,I2),A,3(1X,F12.3))") ' chemical potential  itype ',itype,' box ',ibox,' = ',aver(itel,ibox),stdev(itel,ibox),errme(itel,ibox)
              end do
           end do
 
@@ -994,7 +993,7 @@ contains
           do itype = 1, nmolty
              itel = 2 + nEnergy + nmolty + itype
              do ibox = 1, nbox
-                write(io_output,"(' mean sete length    itype ',i3,' box ',i3, ' = ',3f12.3)") itype,ibox,aver(itel,ibox) ,stdev(itel,ibox),errme(itel,ibox)
+                write(io_output,"(2(A,I2),A,3(1X,F12.3))") ' mean sete length    itype ',itype,' box ',ibox,' = ',aver(itel,ibox),stdev(itel,ibox),errme(itel,ibox)
              end do
           end do
 
@@ -1002,15 +1001,15 @@ contains
           do itype = 1, nmolty
              itel = 2 + nEnergy + 2*nmolty + itype
              do ibox = 1, nbox
-                if ( lpbcz ) then
-                   write(io_output,"(' number density      itype ',i3,' box ',i3, ' = ',3E12.5)") itype,ibox,1.0E3_dp*aver(itel,ibox),1.0E3_dp*stdev(itel,ibox),1.0E3_dp*errme(itel,ibox)
+                if (lpbcz) then
+                   write(io_output,"(2(A,I2),A,3(1X,E12.5))") ' number density      itype ',itype,' box ',ibox,' = ',1.0E3_dp*aver(itel,ibox),1.0E3_dp*stdev(itel,ibox),1.0E3_dp*errme(itel,ibox)
                 else
-                   write(io_output,"(' number density      itype ',i3,' box ',i3, ' = ',3E12.5)") itype,ibox,1.0E2_dp*aver(itel,ibox),1.0E2_dp*stdev(itel,ibox),1.0E2_dp*errme(itel,ibox)
+                   write(io_output,"(2(A,I2),A,3(1X,E12.5))") ' number density      itype ',itype,' box ',ibox,' = ',1.0E2_dp*aver(itel,ibox),1.0E2_dp*stdev(itel,ibox),1.0E2_dp*errme(itel,ibox)
                 end if
-                if ( lexpand(itype) .and. acnbox(ibox,itype) .gt. 0.5) then
-                   do itype2 = 1, numcoeff(itype)
+                if (lexpand(itype).and.acnbox(ibox,itype).gt.0.5) then
+                   do itype2=1,numcoeff(itype)
                       molfrac = acnbox2(ibox,itype,itype2) /(acmove*acnbox(ibox,itype))
-                      write(io_output,"(' number density      itype ',i3,' typ ',i3, ' = ',2E12.5)") itype,itype2,1.0E3_dp*aver(itel,ibox)*molfrac,molfrac
+                      write(io_output,"(2(A,I2),A,2(1X,E12.5))") ' number density      itype ',itype,' typ ',itype2,' = ',1.0E3_dp*aver(itel,ibox)*molfrac,molfrac
                    end do
                 end if
              end do
@@ -1020,7 +1019,7 @@ contains
           do itype = 1, nmolty
              itel = 2 + nEnergy + 3*nmolty + itype
              do ibox = 1, nbox
-                write(io_output,"(' mole fraction       itype ',i3,' box ',i3, ' = ',3f12.7)") itype,ibox,aver(itel,ibox),stdev(itel,ibox),errme(itel,ibox)
+                write(io_output,"(2(A,I2),A,3(1X,F12.7))") ' mole fraction       itype ',itype,' box ',ibox,' = ',aver(itel,ibox),stdev(itel,ibox),errme(itel,ibox)
              end do
           end do
 
@@ -1044,24 +1043,23 @@ contains
                       stdost  = ostwald * sqrt( (stdev(itel,il)/aver(itel,il))**2 + (stdev(itel,ig)/aver(itel,ig))**2 )
                       ! write(42,*) nunit(itype),ostwald,stdost
                       ! write(43,*) nunit(itype),-(gconst*log(ostwald)) + (eta2(ig,itype) - eta2(il,itype)) / 120.27167,gconst*stdost/ostwald
-                      write(io_output,"('Ostwald Coefficient  itype ',i3,' between box ',i2, ' and ',i2,f18.6,f18.6)") itype,ig,il,ostwald,stdost
-                      write(io_output,"('Free Enrgy of Transf itype ',i3,' between box ',i2, ' and ',i2,f18.6,f18.6,' kJ/mol')") itype,ig,il,-(gconst*log(ostwald))+(eta2(ig,itype)-eta2(il,itype))*R_gas*1E-3_dp,gconst*stdost/ostwald
+                      write(io_output,"(3(A,I2),A,2(1X,F15.6))") ' Ostwald Coefficient itype ',itype,' between box ',ig,' and ',il,' = ',ostwald,stdost
+                      write(io_output,"(3(A,I2),A,2(1X,F15.6))") ' Free Enrgy of Trans itype ',itype,' between box ',ig,' and ',il,' [kJ/mol] =',-(gconst*log(ostwald))+(eta2(ig,itype)-eta2(il,itype))*R_gas*1E-3_dp,gconst*stdost/ostwald
                    end do
                 end do
              end do
           end if
 
           write(io_output,*)
-
           ! write block averages  ---
           write(io_output,*)
           write(io_output,*) '-----block averages ------'
           do ibox=1,nbox
-             write(io_output,"('  ------------ box: ' ,i4,/, ' block   energy    density   pressure   surf ten  mol fracs')") ibox
+             write(io_output,"('  ------------ box: ' ,I2,/, ' block    energy     density    pressure    surf ten   mol fracs')") ibox
              do nbl = 1, nblock
                 ! changed so output the same for all ensembles
                 ! 06/08/09 KM
-                write(io_output,"(2x,i2,15(2x,e10.3))") nbl,baver(3,ibox,nbl),baver(1,ibox,nbl),baver(2,ibox,nbl),baver(3+nEnergy+4*nmolty,ibox,nbl),(baver(2+nEnergy+3*nmolty+zzz,ibox,nbl),zzz=1,nmolty)
+                write(io_output,"(1X,I3,"//format_n(nmolty+4,"(1X,E11.4)")//")") nbl,baver(3,ibox,nbl),baver(1,ibox,nbl),baver(2,ibox,nbl),baver(3+nEnergy+4*nmolty,ibox,nbl),(baver(2+nEnergy+3*nmolty+zzz,ibox,nbl),zzz=1,nmolty)
              end do
              if (lmipsw) then
                 write(io_output,*) 'lambdais', lambdais

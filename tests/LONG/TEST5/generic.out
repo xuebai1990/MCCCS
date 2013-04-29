@@ -1,4 +1,4 @@
-Program started at 2013-04-25 20:41:04.849
+Program started at 2013-04-29 13:28:07.979
 Number of processors: 1
 Threads per processor: 1
  run_num: 1
@@ -336,15 +336,15 @@ molecule type 3
 
 PAIRWISE LJ AND COULOMB INTERACTIONS
     i    j         q0(i)         q0(j)     vvdW_1     vvdW_2 ...
-    1    1      0.000000      0.000000 **********    0.29000
-    1    2      0.000000      0.000000 **********    0.29000
-    1    3      0.000000      0.000000 **********    0.35000
-    2    1      0.000000      0.000000 **********    0.29000
-    2    2      0.000000      0.000000 **********    0.29000
-    2    3      0.000000      0.000000 **********    0.29000
-    3    1      0.000000      0.000000   30.19934    5.16500
-    3    2      0.000000      0.000000  435.75039    3.85250
-    3    3      0.000000      0.000000  400.86706    3.91750
+    1    1      0.000000      0.000000  0.13597E+08  0.29000    
+    1    2      0.000000      0.000000  0.52520E+07  0.29000    
+    1    3      0.000000      0.000000  0.24630E+06  0.35000    
+    2    1      0.000000      0.000000  0.21457E+08  0.29000    
+    2    2      0.000000      0.000000  0.49984E+06  0.29000    
+    2    3      0.000000      0.000000  0.28860E+07  0.29000    
+    3    1      0.000000      0.000000   30.199       5.1650    
+    3    2      0.000000      0.000000   435.75       3.8525    
+    3    3      0.000000      0.000000   400.87       3.9175    
  
  sumup control
  number of chains         360
@@ -2124,101 +2124,103 @@ molecule  3:   0.00000000
  
  vstart       =    -34805612.6326730177
  vend         =    -34924927.5571116954
- vbox         =    -34924927.5571151599
+ vbox         =    -34924927.5571153685
  
- Averages and fluctuations                            Box 1
+ Averages and fluctuations                        Box  1
  
- pressure                               [kPa] =  7092481.06
- pressure                  [simulation units] =  513.706387
- surface tension                       [mN/m] =      0.0000
- chem. potential of type       1          [K] =       0.000
- chem. potential of type       2          [K] =       0.000
- chem. potential of type       3          [K] =       0.000
+ pressure                           [kPa] =   7092481.06
+ pressure              [simulation units] =   513.706387
+ surface tension                   [mN/m] =       0.0000
+ chem. potential of type   1          [K] =        0.000
+ chem. potential of type   2          [K] =        0.000
+ chem. potential of type   3          [K] =        0.000
+ boxlength                            [A] =       16.092
+ boxlength                            [A] =       16.092
+ boxlength                            [A] =       16.092
+ no. of chains of type     1              =       60.000
+ no. of chains of type     2              =      180.000
+ no. of chains of type     3              =      120.000
+ molar volume                  [cm^3/mol] =        6.969
+ specific density                [g/cm^3] =     1.868037
+ number density of type    1 [chain/nm^3] =     14.40305
+ number density of type    2 [chain/nm^3] =     43.20914
+ number density of type    3 [chain/nm^3] =     28.80609
+ molfraction of type       1              =    0.1666667
+ molfraction of type       2              =    0.5000000
+ molfraction of type       3              =    0.3333333
+ mean sete length of type  1        [A^2] =        0.000
+ mean sete length of type  2        [A^2] =        0.000
+ mean sete length of type  3        [A^2] =        0.000
  
- boxlength                                [A] =      16.092
- boxlength                                [A] =      16.092
- boxlength                                [A] =      16.092
- no. of chains of type         1              =      60.000
- no. of chains of type         2              =     180.000
- no. of chains of type         3              =     120.000
- molar volume                      [cm^3/mol] =       6.969
- specific density                    [g/cm^3] =    1.868037
- number density of type        1 [chain/nm^3] =    14.40305
- number density of type        2 [chain/nm^3] =    43.20914
- number density of type        3 [chain/nm^3] =    28.80609
- molfraction of type           1              =   0.1666667
- molfraction of type           2              =   0.5000000
- molfraction of type           3              =   0.3333333
- mean sete length of type      1        [A^2] =       0.000
- mean sete length of type      2        [A^2] =       0.000
- mean sete length of type      3        [A^2] =       0.000
+ Total energy [K per system and kJ/mol per chain] =  -34929419.98    -806.72
+ Inter LJ     [K per system and kJ/mol per chain] =  -35464254.08    -819.07
+ Tail  LJ     [K per system and kJ/mol per chain] =          0.00       0.00
+ Intra LJ     [K per system and kJ/mol per chain] =          0.00       0.00
+ Stretch      [K per system and kJ/mol per chain] =          0.00       0.00
+ Bond bending [K per system and kJ/mol per chain] =          0.00       0.00
+ Torsion      [K per system and kJ/mol per chain] =          0.00       0.00
+ Coulomb      [K per system and kJ/mol per chain] =          0.00       0.00
+ External pot [K per system and kJ/mol per chain] =          0.00       0.00
+ 3-body Garo  [K per system and kJ/mol per chain] =     534834.10      12.35
+ Fluc Q       [K per system and kJ/mol per chain] =          0.00       0.00
  
- Total energy  [K per system and kJ/mol per chain] =  -34929419.98     -806.72
- Inter LJ      [K per system and kJ/mol per chain] =  -35464254.08     -819.07
- Tail  LJ      [K per system and kJ/mol per chain] =          0.00        0.00
- Intra LJ      [K per system and kJ/mol per chain] =          0.00        0.00
- Stretch       [K per system and kJ/mol per chain] =          0.00        0.00
- Bond bending  [K per system and kJ/mol per chain] =          0.00        0.00
- Torsion       [K per system and kJ/mol per chain] =          0.00        0.00
- Coulomb       [K per system and kJ/mol per chain] =          0.00        0.00
- External pot  [K per system and kJ/mol per chain] =          0.00        0.00
- 3-body Garo   [K per system and kJ/mol per chain] =     534834.10       12.35
- Fluc Q        [K per system and kJ/mol per chain] =          0.00        0.00
+ fluctuation in <vtot> =   146480.12
  
- fluctuation in <vtot>                          =   146480.12
+ type  box       vinter       vintra         vtor        vbend        vtail
+    1    1      0.00000      0.00000      0.00000      0.00000      0.00000
+    2    1      0.00000      0.00000      0.00000      0.00000      0.00000
+    3    1      0.00000      0.00000      0.00000      0.00000      0.00000
  
- type  box     vinter      vintra      vtor        vbend       vtail
-    1    1     0.00000     0.00000     0.00000     0.00000     0.00000
-    2    1     0.00000     0.00000     0.00000     0.00000     0.00000
-    3    1     0.00000     0.00000     0.00000     0.00000     0.00000
- specific density    box   1 =  0.18680E+01 0.96314E-02 0.32105E-02
- system volume       box   1 =  0.41682E+04 0.21665E+02 0.72218E+01
- pressure            box   1 =  0.70925E+07 0.21277E+07 0.70925E+06
- surface tension     box   1 =      0.00000     0.00000     0.00000
  
- Total energy   box   1 =   -0.34929E+08   0.17075E+05   0.56917E+04
- Inter LJ       box   1 =   -0.35464E+08   0.18529E+05   0.61764E+04
- Tail  LJ       box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
- Intra LJ       box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
- Stretch        box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
- Bond bending   box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
- Torsion        box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
- Coulomb        box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
- External pot   box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
- 3-body Garo    box   1 =    0.53483E+06   0.67183E+04   0.22394E+04
- Fluc Q         box   1 =    0.00000E+00   0.00000E+00   0.00000E+00
+ specific density box  1 =  0.18680E+01  0.96314E-02  0.32105E-02
+ system volume    box  1 =  0.41682E+04  0.21665E+02  0.72218E+01
+ pressure         box  1 =  0.70925E+07  0.21277E+07  0.70925E+06
+ surface tension  box  1 =      0.00000      0.00000      0.00000
  
- Enthalpy Inst.[kJ/mol] for box  1 =   -755.6753    226.7026     75.5675
- Enthalpy Ext. [kJ/mol] for box  1 =   -735.2246    220.5674     73.5225
+ Total energy     box  1 = -0.34929E+08  0.17075E+05  0.56917E+04
+ Inter LJ         box  1 = -0.35464E+08  0.18529E+05  0.61764E+04
+ Tail  LJ         box  1 =  0.00000E+00  0.00000E+00  0.00000E+00
+ Intra LJ         box  1 =  0.00000E+00  0.00000E+00  0.00000E+00
+ Stretch          box  1 =  0.00000E+00  0.00000E+00  0.00000E+00
+ Bond bending     box  1 =  0.00000E+00  0.00000E+00  0.00000E+00
+ Torsion          box  1 =  0.00000E+00  0.00000E+00  0.00000E+00
+ Coulomb          box  1 =  0.00000E+00  0.00000E+00  0.00000E+00
+ External pot     box  1 =  0.00000E+00  0.00000E+00  0.00000E+00
+ 3-body Garo      box  1 =  0.53483E+06  0.67183E+04  0.22394E+04
+ Fluc Q           box  1 =  0.00000E+00  0.00000E+00  0.00000E+00
  
- Cp residual(J/Kmol) =   14.7629586771476     
-  H2=  1.018295635094715E+015
-  H=  -31910384.2601561     
- chemical potential  itype   1 box   1 =        0.000       0.000       0.000
- chemical potential  itype   2 box   1 =        0.000       0.000       0.000
- chemical potential  itype   3 box   1 =        0.000       0.000       0.000
- mean sete length    itype   1 box   1 =        0.000       0.000       0.000
- mean sete length    itype   2 box   1 =        0.000       0.000       0.000
- mean sete length    itype   3 box   1 =        0.000       0.000       0.000
- number density      itype   1 box   1 =  0.14403E+02 0.74261E-01 0.24754E-01
- number density      itype   2 box   1 =  0.43209E+02 0.22278E+00 0.74261E-01
- number density      itype   3 box   1 =  0.28806E+02 0.14852E+00 0.49507E-01
- mole fraction       itype   1 box   1 =    0.1666667   0.0000000   0.0000000
- mole fraction       itype   2 box   1 =    0.5000000   0.0000000   0.0000000
- mole fraction       itype   3 box   1 =    0.3333333   0.0000000   0.0000000
+ Enthalpy Inst.[kJ/mol] for box  1 =    -755.6753     226.7026      75.5675
+ Enthalpy Ext. [kJ/mol] for box  1 =    -735.2246     220.5674      73.5225
+ 
+ Cp residual(J/Kmol) =   14.7629587    
+   H2 =  0.101829564E+16
+   H  =  -31910384.3    
+ 
+ chemical potential  itype  1 box  1 =         0.000        0.000        0.000
+ chemical potential  itype  2 box  1 =         0.000        0.000        0.000
+ chemical potential  itype  3 box  1 =         0.000        0.000        0.000
+ mean sete length    itype  1 box  1 =         0.000        0.000        0.000
+ mean sete length    itype  2 box  1 =         0.000        0.000        0.000
+ mean sete length    itype  3 box  1 =         0.000        0.000        0.000
+ number density      itype  1 box  1 =   0.14403E+02  0.74261E-01  0.24754E-01
+ number density      itype  2 box  1 =   0.43209E+02  0.22278E+00  0.74261E-01
+ number density      itype  3 box  1 =   0.28806E+02  0.14852E+00  0.49507E-01
+ mole fraction       itype  1 box  1 =     0.1666667    0.0000000    0.0000000
+ mole fraction       itype  2 box  1 =     0.5000000    0.0000000    0.0000000
+ mole fraction       itype  3 box  1 =     0.3333333    0.0000000    0.0000000
  
  
  -----block averages ------
-  ------------ box:    1
- block   energy    density   pressure   surf ten  mol fracs
-   1  -0.349E+08   0.186E+01   0.000E+00   0.000E+00   0.167E+00   0.500E+00   0.333E+00
-   2  -0.349E+08   0.187E+01   0.000E+00   0.000E+00   0.167E+00   0.500E+00   0.333E+00
-   3  -0.349E+08   0.188E+01   0.000E+00   0.000E+00   0.167E+00   0.500E+00   0.333E+00
-   4  -0.349E+08   0.187E+01   0.000E+00   0.000E+00   0.167E+00   0.500E+00   0.333E+00
-   5  -0.349E+08   0.186E+01   0.000E+00   0.000E+00   0.167E+00   0.500E+00   0.333E+00
-   6  -0.350E+08   0.188E+01   0.000E+00   0.000E+00   0.167E+00   0.500E+00   0.333E+00
-   7  -0.349E+08   0.185E+01   0.709E+07   0.000E+00   0.167E+00   0.500E+00   0.333E+00
-   8  -0.349E+08   0.186E+01   0.000E+00   0.000E+00   0.167E+00   0.500E+00   0.333E+00
-   9  -0.349E+08   0.188E+01   0.000E+00   0.000E+00   0.167E+00   0.500E+00   0.333E+00
-  10  -0.349E+08   0.187E+01   0.000E+00   0.000E+00   0.167E+00   0.500E+00   0.333E+00
- Program ended at 2013-04-25 21:37:53.426
+  ------------ box:  1
+ block    energy     density    pressure    surf ten   mol fracs
+   1 -0.3493E+08  0.1858E+01  0.0000E+00  0.0000E+00  0.1667E+00  0.5000E+00  0.3333E+00
+   2 -0.3492E+08  0.1871E+01  0.0000E+00  0.0000E+00  0.1667E+00  0.5000E+00  0.3333E+00
+   3 -0.3492E+08  0.1877E+01  0.0000E+00  0.0000E+00  0.1667E+00  0.5000E+00  0.3333E+00
+   4 -0.3489E+08  0.1868E+01  0.0000E+00  0.0000E+00  0.1667E+00  0.5000E+00  0.3333E+00
+   5 -0.3493E+08  0.1862E+01  0.0000E+00  0.0000E+00  0.1667E+00  0.5000E+00  0.3333E+00
+   6 -0.3495E+08  0.1883E+01  0.0000E+00  0.0000E+00  0.1667E+00  0.5000E+00  0.3333E+00
+   7 -0.3494E+08  0.1853E+01  0.7092E+07  0.0000E+00  0.1667E+00  0.5000E+00  0.3333E+00
+   8 -0.3494E+08  0.1856E+01  0.0000E+00  0.0000E+00  0.1667E+00  0.5000E+00  0.3333E+00
+   9 -0.3494E+08  0.1877E+01  0.0000E+00  0.0000E+00  0.1667E+00  0.5000E+00  0.3333E+00
+  10 -0.3492E+08  0.1874E+01  0.0000E+00  0.0000E+00  0.1667E+00  0.5000E+00  0.3333E+00
+ Program ended at 2013-04-29 14:25:35.045

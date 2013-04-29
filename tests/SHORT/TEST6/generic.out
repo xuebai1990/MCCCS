@@ -1,4 +1,4 @@
-Program started at 2013-04-26 02:19:12.126
+Program started at 2013-04-29 13:43:46.161
 Number of processors: 1
 Threads per processor: 1
  run_num: 1
@@ -298,15 +298,15 @@ molecule type 1
 
 PAIRWISE LJ AND COULOMB INTERACTIONS
     i    j         q0(i)         q0(j)     vvdW_1     vvdW_2 ...
-  114  114      0.000000      0.000000  312.00000    3.15400
-  114  115      0.000000      0.520000    0.00000    0.00000
-  114  116      0.000000     -1.040000    0.00000    0.00000
-  115  114      0.520000      0.000000    0.00000    0.00000
-  115  115      0.520000      0.520000    0.00000    0.00000
-  115  116      0.520000     -1.040000    0.00000    0.00000
-  116  114     -1.040000      0.000000    0.00000    0.00000
-  116  115     -1.040000      0.520000    0.00000    0.00000
-  116  116     -1.040000     -1.040000    0.00000    0.00000
+  114  114      0.000000      0.000000   312.00       3.1540    
+  114  115      0.000000      0.520000   0.0000       0.0000    
+  114  116      0.000000     -1.040000   0.0000       0.0000    
+  115  114      0.520000      0.000000   0.0000       0.0000    
+  115  115      0.520000      0.520000   0.0000       0.0000    
+  115  116      0.520000     -1.040000   0.0000       0.0000    
+  116  114     -1.040000      0.000000   0.0000       0.0000    
+  116  115     -1.040000      0.520000   0.0000       0.0000    
+  116  116     -1.040000     -1.040000   0.0000       0.0000    
  
  sumup control
  number of chains         867
@@ -447,40 +447,39 @@ molecule  1:   0.00000000      0.00000000
  
  vstart       =     -3397853.2350136773       -46068.9125216549
  vend         =     -3403242.0741505413       -45655.4734260890
- vbox         =     -3403242.0741505865       -45655.4734260882
+ vbox         =     -3403242.0741505856       -45655.4734260884
  
- Averages and fluctuations                            Box 1       Box 2
+ Averages and fluctuations                        Box  1       Box  2
  
- pressure                               [kPa] =    -4471.38     1227.76
- pressure                  [simulation units] =   -0.323861    0.088926
- surface tension                       [mN/m] =    -76.4923     -0.2448
- chem. potential of type       1          [K] =   -3863.452   -5919.374
+ pressure                           [kPa] =     -4471.38      1227.76
+ pressure              [simulation units] =    -0.323861     0.088926
+ surface tension                   [mN/m] =     -76.4923      -0.2448
+ chem. potential of type   1          [K] =    -3863.452    -5919.374
+ boxlength                            [A] =       31.394       80.095
+ boxlength                            [A] =       31.394       80.095
+ boxlength                            [A] =       31.394       80.095
+ no. of chains of type     1              =      867.000      133.000
+ molar volume                  [cm^3/mol] =       21.492     2326.569
+ specific density                [g/cm^3] =     0.838222     0.007743
+ number density of type    1 [chain/nm^3] =     28.02079      0.25884
+ molfraction of type       1              =    1.0000000    1.0000000
+ mean sete length of type  1        [A^2] =        0.023        0.022
  
- boxlength                                [A] =      31.394      80.095
- boxlength                                [A] =      31.394      80.095
- boxlength                                [A] =      31.394      80.095
- no. of chains of type         1              =     867.000     133.000
- molar volume                      [cm^3/mol] =      21.492    2326.569
- specific density                    [g/cm^3] =    0.838222    0.007743
- number density of type        1 [chain/nm^3] =    28.02079     0.25884
- molfraction of type           1              =   1.0000000   1.0000000
- mean sete length of type      1        [A^2] =       0.023       0.022
+ Total energy [K per system and kJ/mol per chain] =   -3400424.54     -45542.06     -32.61      -2.85
+ Inter LJ     [K per system and kJ/mol per chain] =     464137.99       6963.67       4.45       0.44
+ Tail  LJ     [K per system and kJ/mol per chain] =      -5694.82         -0.68      -0.05       0.00
+ Intra LJ     [K per system and kJ/mol per chain] =          0.00          0.00       0.00       0.00
+ Stretch      [K per system and kJ/mol per chain] =          0.00          0.00       0.00       0.00
+ Bond bending [K per system and kJ/mol per chain] =          0.00          0.00       0.00       0.00
+ Torsion      [K per system and kJ/mol per chain] =          0.00          0.00       0.00       0.00
+ Coulomb      [K per system and kJ/mol per chain] =   -3864562.53     -52505.73     -37.06      -3.28
+ External pot [K per system and kJ/mol per chain] =          0.00          0.00       0.00       0.00
+ 3-body Garo  [K per system and kJ/mol per chain] =          0.00          0.00       0.00       0.00
+ Fluc Q       [K per system and kJ/mol per chain] =          0.00          0.00       0.00       0.00
  
- Total energy  [K per system and kJ/mol per chain] =   -3400424.54   -45542.06        -32.61       -2.85
- Inter LJ      [K per system and kJ/mol per chain] =     464137.99     6963.67          4.45        0.44
- Tail  LJ      [K per system and kJ/mol per chain] =      -5694.82       -0.68         -0.05        0.00
- Intra LJ      [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00
- Stretch       [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00
- Bond bending  [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00
- Torsion       [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00
- Coulomb       [K per system and kJ/mol per chain] =   -3864562.53   -52505.73        -37.06       -3.28
- External pot  [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00
- 3-body Garo   [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00
- Fluc Q        [K per system and kJ/mol per chain] =          0.00        0.00          0.00        0.00
+ fluctuation in <vtot> =     7130.38     2473.83
  
- fluctuation in <vtot>                          =     7130.38     2473.83
- 
- type  box     vinter      vintra      vtor        vbend       vtail
-    1    1     0.00000     0.00000     0.00000     0.00000     0.00000
-    1    2     0.00000     0.00000     0.00000     0.00000     0.00000
- Program ended at 2013-04-26 02:19:21.502
+ type  box       vinter       vintra         vtor        vbend        vtail
+    1    1      0.00000      0.00000      0.00000      0.00000      0.00000
+    1    2      0.00000      0.00000      0.00000      0.00000      0.00000
+ Program ended at 2013-04-29 13:43:55.680
