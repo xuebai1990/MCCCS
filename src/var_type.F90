@@ -16,7 +16,7 @@ module var_type
   integer,parameter::normal_int=selected_int_kind(5),int_size=4
   integer,parameter::long_int=selected_int_kind(10),long_int_size=8
 
-  integer,parameter::default_string_length=128
+  integer,parameter::default_string_length=512
   integer,parameter::default_path_length=256
 
   type RealPtr

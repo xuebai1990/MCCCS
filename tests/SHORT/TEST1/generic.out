@@ -1,4 +1,4 @@
-Program started at 2013-04-29 13:28:20.430
+Program started at 2013-05-03 18:22:34.775
 Number of processors: 1
 Threads per processor: 1
  run_num: 1
@@ -235,6 +235,7 @@ pmexpc1:   0.00000000
 
 NAMELIST MC_SIMPLE
 ------------------------------------------
+pm_atom_tra:   0.00000000    
 initial maximum displacement for atom translation:  0.100000000E-01
 target translation acceptance ratio: 0.50
 initial maximum displacement for molecule translation:  0.300000000    
@@ -545,7 +546,7 @@ number of times move out: 0  accepted = 0
  
  pair typ =           1
  moltyps =            2  and           3
-between box  1 and  2   uattempts =         0.0  attempts =      0.0  accepted =     0.0
+between box  1 and  2   uattempts = 0  attempts = 0  accepted = 0
  
  ### Charge Fluctuation  ###
  
@@ -645,4 +646,4 @@ molecule  1:   0.00000000
  block    energy     density    pressure    surf ten   mol fracs
    1 -0.2120E+07  0.1072E+01  0.0000E+00  0.0000E+00  0.1000E+01
    2 -0.2130E+07  0.1078E+01 -0.7289E+04 -0.6697E+02  0.1000E+01
- Program ended at 2013-04-29 13:28:32.111
+ Program ended at 2013-05-03 18:22:46.569

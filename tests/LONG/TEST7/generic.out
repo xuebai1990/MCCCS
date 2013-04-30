@@ -1,4 +1,4 @@
-Program started at 2013-04-29 13:28:07.981
+Program started at 2013-05-03 19:17:32.219
 Number of processors: 1
 Threads per processor: 1
  run_num: 1
@@ -2569,6 +2569,7 @@ pmexpc1:   0.00000000
 
 NAMELIST MC_SIMPLE
 ------------------------------------------
+pm_atom_tra:   0.00000000    
 initial maximum displacement for atom translation:   0.00000000    
 target translation acceptance ratio: 0.50
 initial maximum displacement for molecule translation:  0.300000000    
@@ -10711,151 +10712,151 @@ number of times move out: 0  accepted = 0
  
  pair typ =           1
  moltyps =            8  and           9
-between box  1 and  3   uattempts =      8087.0  attempts =   1083.0  accepted =   412.0
+between box  1 and  3   uattempts = 8087  attempts = 1083  accepted = 412
  accepted % = 38.042
  pair typ =           2
  moltyps =            9  and          10
-between box  1 and  3   uattempts =      7920.0  attempts =    918.0  accepted =   448.0
+between box  1 and  3   uattempts = 7920  attempts = 918  accepted = 448
  accepted % = 48.802
  pair typ =           3
  moltyps =           10  and          11
-between box  1 and  3   uattempts =      8003.0  attempts =    708.0  accepted =   309.0
+between box  1 and  3   uattempts = 8003  attempts = 708  accepted = 309
  accepted % = 43.644
  pair typ =           4
  moltyps =           11  and          12
-between box  1 and  3   uattempts =      8231.0  attempts =    555.0  accepted =   247.0
+between box  1 and  3   uattempts = 8231  attempts = 555  accepted = 247
  accepted % = 44.505
  pair typ =           5
  moltyps =           12  and          13
-between box  1 and  3   uattempts =      8072.0  attempts =    495.0  accepted =   239.0
+between box  1 and  3   uattempts = 8072  attempts = 495  accepted = 239
  accepted % = 48.283
  pair typ =           6
  moltyps =           13  and          14
-between box  1 and  3   uattempts =     12087.0  attempts =    799.0  accepted =    93.0
+between box  1 and  3   uattempts = 12087  attempts = 799  accepted = 93
  accepted % = 11.640
  pair typ =           7
  moltyps =           14  and          15
-between box  1 and  3   uattempts =     12064.0  attempts =    598.0  accepted =   175.0
+between box  1 and  3   uattempts = 12064  attempts = 598  accepted = 175
  accepted % = 29.264
  pair typ =           8
  moltyps =           15  and          16
-between box  1 and  3   uattempts =     12108.0  attempts =    661.0  accepted =    52.0
+between box  1 and  3   uattempts = 12108  attempts = 661  accepted = 52
  accepted % =  7.867
  pair typ =           9
  moltyps =           16  and          17
-between box  1 and  3   uattempts =     12215.0  attempts =   1010.0  accepted =   339.0
+between box  1 and  3   uattempts = 12215  attempts = 1010  accepted = 339
  accepted % = 33.564
  pair typ =          10
  moltyps =           17  and          18
-between box  1 and  3   uattempts =     12326.0  attempts =   1012.0  accepted =   169.0
+between box  1 and  3   uattempts = 12326  attempts = 1012  accepted = 169
  accepted % = 16.700
  pair typ =          11
  moltyps =           18  and          19
-between box  1 and  3   uattempts =     12030.0  attempts =    538.0  accepted =    50.0
+between box  1 and  3   uattempts = 12030  attempts = 538  accepted = 50
  accepted % =  9.294
  pair typ =          12
  moltyps =           17  and          20
-between box  1 and  3   uattempts =     12049.0  attempts =    535.0  accepted =    16.0
+between box  1 and  3   uattempts = 12049  attempts = 535  accepted = 16
  accepted % =  2.991
  pair typ =          13
  moltyps =           20  and          21
-between box  1 and  3   uattempts =     12036.0  attempts =      6.0  accepted =     0.0
+between box  1 and  3   uattempts = 12036  attempts = 6  accepted = 0
  accepted % =  0.000
  pair typ =          14
  moltyps =           15  and          22
-between box  1 and  3   uattempts =     12220.0  attempts =    452.0  accepted =    59.0
+between box  1 and  3   uattempts = 12220  attempts = 452  accepted = 59
  accepted % = 13.053
  pair typ =          15
  moltyps =           22  and          24
-between box  1 and  3   uattempts =     12353.0  attempts =    304.0  accepted =     0.0
+between box  1 and  3   uattempts = 12353  attempts = 304  accepted = 0
  accepted % =  0.000
  pair typ =          16
  moltyps =           23  and          24
-between box  1 and  3   uattempts =     12090.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 12090  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          17
  moltyps =           24  and          21
-between box  1 and  3   uattempts =     12261.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 12261  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          18
  moltyps =           23  and          25
-between box  1 and  3   uattempts =     12099.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 12099  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          19
  moltyps =           25  and          26
-between box  1 and  3   uattempts =     12300.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 12300  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          20
  moltyps =           23  and          27
-between box  1 and  3   uattempts =     12036.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 12036  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          21
  moltyps =           27  and          28
-between box  1 and  3   uattempts =     12071.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 12071  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          22
  moltyps =           23  and          29
-between box  1 and  3   uattempts =     12091.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 12091  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          23
  moltyps =           29  and          30
-between box  1 and  3   uattempts =     12142.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 12142  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          24
  moltyps =           23  and          31
-between box  1 and  3   uattempts =     12091.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 12091  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          25
  moltyps =           16  and          22
-between box  1 and  3   uattempts =     12036.0  attempts =    794.0  accepted =    95.0
+between box  1 and  3   uattempts = 12036  attempts = 794  accepted = 95
  accepted % = 11.965
  pair typ =          26
  moltyps =           18  and          20
-between box  1 and  3   uattempts =     11941.0  attempts =    517.0  accepted =     0.0
+between box  1 and  3   uattempts = 11941  attempts = 517  accepted = 0
  accepted % =  0.000
  pair typ =          27
  moltyps =           20  and          24
-between box  1 and  3   uattempts =     12025.0  attempts =     12.0  accepted =     0.0
+between box  1 and  3   uattempts = 12025  attempts = 12  accepted = 0
  accepted % =  0.000
  pair typ =          28
  moltyps =           24  and          25
-between box  1 and  3   uattempts =     12069.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 12069  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          29
  moltyps =           24  and          27
-between box  1 and  3   uattempts =     12178.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 12178  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          30
  moltyps =           24  and          29
-between box  1 and  3   uattempts =     16368.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 16368  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          31
  moltyps =           25  and          27
-between box  1 and  3   uattempts =     12158.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 12158  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          32
  moltyps =           25  and          29
-between box  1 and  3   uattempts =     12249.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 12249  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          33
  moltyps =           27  and          29
-between box  1 and  3   uattempts =      8144.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 8144  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          34
  moltyps =           23  and          34
-between box  1 and  3   uattempts =     10041.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 10041  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          35
  moltyps =           34  and          33
-between box  1 and  3   uattempts =      2047.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 2047  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          36
  moltyps =           33  and          32
-between box  1 and  3   uattempts =      5959.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 5959  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          37
  moltyps =           28  and          32
-between box  1 and  3   uattempts =      6060.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 6060  attempts = 0  accepted = 0
  accepted % =    NaN
  
  ### Charge Fluctuation  ###
@@ -12084,4 +12085,4 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
    8  0.0000E+00  0.3159E-02  0.8097E+02  0.0000E+00  0.3498E-03  0.5784E-02  0.0000E+00  0.0000E+00  0.4500E+00  0.0000E+00  0.0000E+00  0.1738E-01  0.1734E-01  0.1854E-01  0.2021E-01  0.2045E-01  0.2045E-01  0.2045E-01  0.2045E-01  0.2045E-01  0.2045E-01  0.2045E-01  0.2045E-01  0.2045E-01  0.2045E-01  0.2045E-01  0.2045E-01  0.2045E-01  0.2045E-01  0.2045E-01  0.2045E-01  0.2045E-01  0.2045E-01  0.2045E-01  0.2045E-01  0.2045E-01  0.2045E-01  0.2045E-01
    9  0.0000E+00  0.3678E-02  0.0000E+00  0.0000E+00  0.5979E-03  0.2893E-02  0.0000E+00  0.0000E+00  0.4503E+00  0.0000E+00  0.0000E+00  0.1678E-01  0.1873E-01  0.1973E-01  0.2016E-01  0.2047E-01  0.2047E-01  0.2047E-01  0.2047E-01  0.2047E-01  0.2047E-01  0.2047E-01  0.2047E-01  0.2047E-01  0.2047E-01  0.2047E-01  0.2047E-01  0.2047E-01  0.2047E-01  0.2047E-01  0.2047E-01  0.2047E-01  0.2047E-01  0.2047E-01  0.2047E-01  0.2047E-01  0.2047E-01  0.2047E-01
   10  0.0000E+00  0.3631E-02  0.9944E+02  0.0000E+00  0.8775E-03  0.3274E-03  0.0000E+00  0.0000E+00  0.4521E+00  0.0000E+00  0.0000E+00  0.1737E-01  0.1775E-01  0.1906E-01  0.1990E-01  0.2055E-01  0.2055E-01  0.2055E-01  0.2055E-01  0.2055E-01  0.2055E-01  0.2055E-01  0.2055E-01  0.2055E-01  0.2055E-01  0.2055E-01  0.2055E-01  0.2055E-01  0.2055E-01  0.2055E-01  0.2055E-01  0.2055E-01  0.2055E-01  0.2055E-01  0.2055E-01  0.2055E-01  0.2055E-01  0.2055E-01
- Program ended at 2013-04-29 14:33:10.423
+ Program ended at 2013-05-03 20:22:39.299

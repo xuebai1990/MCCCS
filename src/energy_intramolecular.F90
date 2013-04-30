@@ -299,6 +299,7 @@ contains
     return
   end subroutine dihedral_angle
 
+!> \brief Calculates vibrational potential using linear interpolation between two points.
   function lininter_vib(r,typ) result(tabulated_vib)
     use util_math,only:polint
     use util_search,only:LOCATE
@@ -320,6 +321,7 @@ contains
     return
   end function lininter_vib
 
+!> \brief Calculates 1-3 nonbonded 'bending' potential using linear interpolation between two points.
   function lininter_bend(r,typ) result(tabulated_bend)
     use util_math,only:polint
     use util_search,only:LOCATE
@@ -341,6 +343,7 @@ contains
     return
   end function lininter_bend
 
+!> \brief Calculates torsional potential using interpolation.
   function inter_tor(thetarad,typ) result(tabulated_tor)
     use util_math,only:polint,splint
     use util_search,only:LOCATE
@@ -352,8 +355,10 @@ contains
 
     theta=raddeg*thetarad
     if (L_spline) then
+       ! spline interpolation
        call splint(deg(:,typ),tabtorso(:,typ),torderiv2(:,typ),splpnts(typ),theta,tabulated_tor)
     else if (L_linear) then
+       ! linear interpolation between two points
        low=locate(deg(:,typ),splpnts(typ),theta,2)
        high=low+1
        if (deg(low,typ).gt.theta.or.deg(high,typ).lt.theta) then
@@ -528,31 +533,9 @@ contains
     close(io_tab)
   end subroutine read_table
 
-!> L_spline: Requires file (fort.40) running from -195 to 195 in degree steps
-!> (Extra 15 degrees on each side required so that second derivatives are
-!> reasonable for the degrees of interest) \n
-!> L_linear: Requires a file (fort.40) running from -180 to 180 in 1/4 degree intervals
-!>cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-!>  Calculates vibrational and 1-3 nonbonded 'bending' potential
-!>  using linear interpolation between two points \n
-!>    must specify equilibrium bond length in suvibe, force
-!>  constant must be zero \n
-!>  requires a file (fort.41) that starts with 0.0 (not 0.5) \n
-!>  fort.41: number of tabulated potentials, potential number from
-!>  suvibe, number of points per angstrom, tabulated potential
-!>  (repeat last three parts for each additional potential) \n
-!>  KM 12/02/08 \n
-!>    must include 1-3 interactions \n
-!>  must specify equilibrium angle in suvibe, force constant \n
-!>  must be very small but non-zero \n
-!>  requires a file (fort.42) with distances in A \n
-!>  fort.42: number of tabulated potentials, potential number from
-!>  suvibe, number of points per degree, tabulated potential
-!>  (repeat last three parts for each additional potential,
-!>   separated by 1000 1000)
-!>  make sure potential does not go up to infinity! \n
-!>  KM 12/03/08
-!>cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!> \brief Read in vibrational, 1-3 nonbonded 'bending', and torsional potential.
+!> \since KM 12/02/08 vib
+!> \since KM 12/03/08 1-3 'bending'
   subroutine read_tabulated_ff_bonded()
     use util_math,only:spline
     use sim_system,only:L_vib_table,L_bend_table

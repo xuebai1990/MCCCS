@@ -2115,6 +2115,7 @@ contains
 ! jayq(ij) = 112537.0E0_dp
   end subroutine init_ff
 
+!> \brief Calculates nonbonding van der Waals potential using linear interpolation between two points.
   function lininter_vdW(r,typi,typj) result(tabulated_vdW)
     use util_math,only:polint
     use util_search,only:LOCATE
@@ -2136,6 +2137,7 @@ contains
     return
   end function lininter_vdW
 
+!> \brief Calculates nonbonding electrostatic potential using linear interpolation between two points.
   function lininter_elect(r,typi,typj) result(tabulated_elect)
     use util_math,only:polint
     use util_search,only:LOCATE
@@ -2378,26 +2380,9 @@ contains
     close(io_tab)
   end subroutine read_table
 
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-!>  Calculates nonbonding van der Waals and electrostatic potential
-!>  using linear interpolation between two points \n
-!>  requires file: fort.43 -- vdW, fort.44 -- Q \n
-!>    fort.43: number of tabulated potentials, potential number,
-!>  number of points per angstrom, tabulated potential
-!>  (repeat last three parts for each additional potential) \n
-!>  for unlike interactions, list 1-2 and 2-1 \n
-!>  separate potentials with 1000 \n
-!>  make sure potential does not go up to infinity! \n
-!>  bead type numbers should be defined in suijtab, but it doesn't
-!>  matter what they are (the parameters aren't used) \n
-!>  KM 12/03/08 \n
-!>    fort.44: number of tabulated potentials, potential number,
-!>  number of points per angstrom, tabulated potential
-!>  (repeat last three parts for each additional potential) \n
-!>  for unlike interactions, list 1-2 and 2-1 \n
-!>  separate potentials with 1000 \n
-!>  KM 04/23/09
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!> \brief Read in nonbonding van der Waals and electrostatic potential.
+!> \since KM 12/03/08 vdW
+!> \since KM 04/23/09 Q
   subroutine read_tabulated_ff_pair()
     use sim_system,only:L_elect_table
     integer,parameter::grid_size=1500

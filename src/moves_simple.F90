@@ -785,7 +785,7 @@ contains
     LOGICAL,INTENT(IN)::lprint
     integer::jerr,i
     real::armtra,rmtra,rmrot
-    namelist /mc_simple/ armtra,tatra,pmtra,pmtrmt,rmtra,tarot,pmromt,rmrot
+    namelist /mc_simple/ armtra,pm_atom_tra,tatra,pmtra,pmtrmt,rmtra,tarot,pmromt,rmrot
 
     allocate(acntrax(ntmax,nbxmax),acntray(ntmax,nbxmax),acntraz(ntmax,nbxmax),acnrotx(ntmax,nbxmax),acnroty(ntmax,nbxmax)&
      ,acnrotz(ntmax,nbxmax),acstrax(ntmax,nbxmax),acstray(ntmax,nbxmax),acstraz(ntmax,nbxmax),acsrotx(ntmax,nbxmax)&
@@ -840,6 +840,7 @@ contains
 
     if (lprint) then
        write(io_output,'(/,A,/,A)') 'NAMELIST MC_SIMPLE','------------------------------------------'
+       write(io_output,'(A,G16.9)') 'pm_atom_tra: ',pm_atom_tra
        write(io_output,'(A,G16.9)') 'initial maximum displacement for atom translation: ',armtra
        write(io_output,'(A,F4.2)') 'target translation acceptance ratio: ',tatra
        write(io_output,'(A,G16.9)') 'initial maximum displacement for molecule translation: ',rmtra

@@ -1,4 +1,4 @@
-Program started at 2013-04-29 13:49:42.084
+Program started at 2013-05-03 18:24:01.523
 Number of processors: 1
 Threads per processor: 1
  run_num: 1
@@ -2569,6 +2569,7 @@ pmexpc1:   0.00000000
 
 NAMELIST MC_SIMPLE
 ------------------------------------------
+pm_atom_tra:   0.00000000    
 initial maximum displacement for atom translation:   0.00000000    
 target translation acceptance ratio: 0.50
 initial maximum displacement for molecule translation:  0.300000000    
@@ -7899,151 +7900,151 @@ number of times move out: 0  accepted = 0
  
  pair typ =           1
  moltyps =            8  and           9
-between box  1 and  3   uattempts =        14.0  attempts =      4.0  accepted =     0.0
+between box  1 and  3   uattempts = 14  attempts = 4  accepted = 0
  accepted % =  0.000
  pair typ =           2
  moltyps =            9  and          10
-between box  1 and  3   uattempts =         7.0  attempts =      5.0  accepted =     5.0
+between box  1 and  3   uattempts = 7  attempts = 5  accepted = 5
  accepted % =100.000
  pair typ =           3
  moltyps =           10  and          11
-between box  1 and  3   uattempts =         7.0  attempts =      3.0  accepted =     0.0
+between box  1 and  3   uattempts = 7  attempts = 3  accepted = 0
  accepted % =  0.000
  pair typ =           4
  moltyps =           11  and          12
-between box  1 and  3   uattempts =         9.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 9  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =           5
  moltyps =           12  and          13
-between box  1 and  3   uattempts =         9.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 9  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =           6
  moltyps =           13  and          14
-between box  1 and  3   uattempts =        14.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 14  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =           7
  moltyps =           14  and          15
-between box  1 and  3   uattempts =        16.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 16  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =           8
  moltyps =           15  and          16
-between box  1 and  3   uattempts =        15.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 15  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =           9
  moltyps =           16  and          17
-between box  1 and  3   uattempts =        21.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 21  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          10
  moltyps =           17  and          18
-between box  1 and  3   uattempts =        10.0  attempts =      2.0  accepted =     0.0
+between box  1 and  3   uattempts = 10  attempts = 2  accepted = 0
  accepted % =  0.000
  pair typ =          11
  moltyps =           18  and          19
-between box  1 and  3   uattempts =        12.0  attempts =      7.0  accepted =     0.0
+between box  1 and  3   uattempts = 12  attempts = 7  accepted = 0
  accepted % =  0.000
  pair typ =          12
  moltyps =           17  and          20
-between box  1 and  3   uattempts =        16.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 16  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          13
  moltyps =           20  and          21
-between box  1 and  3   uattempts =        11.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 11  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          14
  moltyps =           15  and          22
-between box  1 and  3   uattempts =        19.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 19  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          15
  moltyps =           22  and          24
-between box  1 and  3   uattempts =        15.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 15  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          16
  moltyps =           23  and          24
-between box  1 and  3   uattempts =        23.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 23  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          17
  moltyps =           24  and          21
-between box  1 and  3   uattempts =        17.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 17  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          18
  moltyps =           23  and          25
-between box  1 and  3   uattempts =        22.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 22  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          19
  moltyps =           25  and          26
-between box  1 and  3   uattempts =        18.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 18  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          20
  moltyps =           23  and          27
-between box  1 and  3   uattempts =        15.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 15  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          21
  moltyps =           27  and          28
-between box  1 and  3   uattempts =        10.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 10  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          22
  moltyps =           23  and          29
-between box  1 and  3   uattempts =        18.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 18  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          23
  moltyps =           29  and          30
-between box  1 and  3   uattempts =        16.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 16  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          24
  moltyps =           23  and          31
-between box  1 and  3   uattempts =        13.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 13  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          25
  moltyps =           16  and          22
-between box  1 and  3   uattempts =        12.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 12  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          26
  moltyps =           18  and          20
-between box  1 and  3   uattempts =        17.0  attempts =     11.0  accepted =     0.0
+between box  1 and  3   uattempts = 17  attempts = 11  accepted = 0
  accepted % =  0.000
  pair typ =          27
  moltyps =           20  and          24
-between box  1 and  3   uattempts =        21.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 21  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          28
  moltyps =           24  and          25
-between box  1 and  3   uattempts =        14.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 14  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          29
  moltyps =           24  and          27
-between box  1 and  3   uattempts =        12.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 12  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          30
  moltyps =           24  and          29
-between box  1 and  3   uattempts =        28.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 28  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          31
  moltyps =           25  and          27
-between box  1 and  3   uattempts =        14.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 14  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          32
  moltyps =           25  and          29
-between box  1 and  3   uattempts =        17.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 17  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          33
  moltyps =           27  and          29
-between box  1 and  3   uattempts =        17.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 17  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          34
  moltyps =           23  and          34
-between box  1 and  3   uattempts =        14.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 14  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          35
  moltyps =           34  and          33
-between box  1 and  3   uattempts =         5.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 5  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          36
  moltyps =           33  and          32
-between box  1 and  3   uattempts =         6.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 6  attempts = 0  accepted = 0
  accepted % =    NaN
  pair typ =          37
  moltyps =           28  and          32
-between box  1 and  3   uattempts =         9.0  attempts =      0.0  accepted =     0.0
+between box  1 and  3   uattempts = 9  attempts = 0  accepted = 0
  accepted % =    NaN
  
  ### Charge Fluctuation  ###
@@ -8534,4 +8535,4 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
    34    1      0.00000      0.00000      0.00000      0.00000      0.00000
    34    2      0.00000      0.00000      0.00000      0.00000      0.00000
    34    3      0.00000      0.00000      0.00000      0.00000      0.00000
- Program ended at 2013-04-29 13:49:49.255
+ Program ended at 2013-05-03 18:24:08.443

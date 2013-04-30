@@ -12,7 +12,7 @@ module transfer_swatch
   save
   public::swatch,init_swatch,output_swatch_stats,read_checkpoint_swatch,write_checkpoint_swatch
 
-  real,allocatable::bnswat(:,:),bnswat_empty(:,:),bsswat(:,:) !< accumulators for swatch performance
+  integer,allocatable::bnswat(:,:),bnswat_empty(:,:),bsswat(:,:) !< accumulators for swatch performance
 contains
 !> Added intrabox move for two particles within one box
 !> in combined move that shares the same parameters.
@@ -194,10 +194,10 @@ contains
          end if
 ! add one attempt to the count for iparty
 !$$$  bniswat(iparty,box) = bniswat(iparty,box) + 1.0E0_dp
-         bnswat(iparty,ipairb) = bnswat(iparty,ipairb) + 1.0E0_dp
+         bnswat(iparty,ipairb) = bnswat(iparty,ipairb) + 1
 ! JLR 12-1-09 count the empty attempts
          if (lempty) then
-            bnswat_empty(iparty,ipairb) = bnswat_empty(iparty,ipairb) + 1.0E0_dp
+            bnswat_empty(iparty,ipairb) = bnswat_empty(iparty,ipairb) + 1
             return
          end if
 ! END JLR 12-1-09
@@ -842,7 +842,7 @@ contains
 
          if ( random(-1) .le. wswat ) then
 ! we can now accept !!!!! ***
-            bsswat(iparty,ipairb) = bsswat(iparty,ipairb) + 1.0E0_dp
+            bsswat(iparty,ipairb) = bsswat(iparty,ipairb) + 1
 ! write(io_output,*) 'SWATCH ACCEPTED',imola,imolb
 
             vbox(1,box)     = vbox(1,box)    + vnbox(box)
@@ -935,12 +935,12 @@ contains
 
 ! add one attempt to the count for iparty
 ! write(io_output,*) 'iparty:',iparty,'boxa:',boxa
-         bnswat(iparty,ipairb) = bnswat(iparty,ipairb) + 1.0E0_dp
+         bnswat(iparty,ipairb) = bnswat(iparty,ipairb) + 1
 
 ! JLR 12-1-09, Count the empty attempts
 ! if (lempty) return
          if (lempty) then
-            bnswat_empty(iparty,ipairb) = bnswat_empty(iparty,ipairb) + 1.0E0_dp
+            bnswat_empty(iparty,ipairb) = bnswat_empty(iparty,ipairb) + 1
             return
          end if
 ! END JLR 12-1-09 ---
@@ -1445,7 +1445,7 @@ contains
 ! write(io_output,*) 'wswat,tweight,tweiold',wswat,tweight,tweiold
          if ( random(-1) .le. wswat ) then
 ! we can now accept !!!!! ***
-            bsswat(iparty,ipairb) = bsswat(iparty,ipairb) + 1.0E0_dp
+            bsswat(iparty,ipairb) = bsswat(iparty,ipairb) + 1
 ! write(io_output,*) 'SWATCH ACCEPTED',iboxa,iboxb
             do jj = 1,2
                if ( jj .eq. 1 ) ic = boxa
@@ -1539,9 +1539,10 @@ contains
     allocate(bnswat(npamax,npabmax),bnswat_empty(npamax,npabmax),bsswat(npamax,npabmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_swatch: allocation failed',jerr)
 
-    bnswat = 0.0E0_dp
-    bsswat = 0.0E0_dp
-    bnswat_empty = 0.0E0_dp
+    bnswat = 0
+    bsswat = 0
+    bnswat_empty = 0
+    liswatch = .false.
 
     !> read namelist mc_swatch
     nswaty=nmolty*(nmolty-1)/2
@@ -1658,9 +1659,9 @@ contains
        write(io_output,*) 'moltyps = ',nswatb(i,1),' and',nswatb(i,2)
        do j = 1, nswtcb(i)
           ! JLR 12-1-09 changing to exclude empty box attempts from swatch rate
-          write(io_output,"('between box ',i2,' and ',i2, '   uattempts =',f12.1,   '  attempts =',f9.1, '  accepted =',f8.1)") box3(i,j),box4(i,j), bnswat(i,j),bnswat(i,j)-bnswat_empty(i,j),bsswat(i,j)
+          write(io_output,"('between box ',I2,' and ',I2, '   uattempts = ',I0,   '  attempts = ',I0, '  accepted = ',I0)") box3(i,j),box4(i,j),bnswat(i,j),bnswat(i,j)-bnswat_empty(i,j),bsswat(i,j)
           if (bnswat(i,j) .gt. 0.5E0_dp ) then
-             write(io_output,"(' accepted % =',f7.3)") 100.0E0_dp * bsswat(i,j)/ (bnswat(i,j)-bnswat_empty(i,j))
+             write(io_output,"(' accepted % =',f7.3)") 100.0_dp*real(bsswat(i,j),dp)/real(bnswat(i,j)-bnswat_empty(i,j),dp)
           end if
           ! EN JLR 12-1-09
        end do

@@ -3381,7 +3381,7 @@ contains
     w_nl(lrhoz)
     w_nl(bin_width)
     w_nl(lucall)
-    w_nl(ucheck)
+    wa_nl(ucheck,nmolty)
     w_nl(nvirial)
     w_nl(starvir)
     w_nl(stepvir)
