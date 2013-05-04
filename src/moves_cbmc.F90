@@ -14,7 +14,8 @@ MODULE moves_cbmc
 
   ! CBMC.INC
   logical,public::llrig
-  logical,allocatable,public::lexshed(:),llplace(:),lpnow(:)
+  logical,allocatable,public::lexshed(:)& !< true if the bead exists at that time of the growth, false when a bead has not yet been grown this time
+   ,llplace(:),lpnow(:)
   logical,allocatable::lsave(:)
   real,allocatable::bncb(:,:),bscb(:,:,:),fbncb(:,:),fbscb(:,:,:) !< temporary accumulators for conf.bias performance
   real::brvibmin(60),brvibmax(60)
@@ -518,7 +519,7 @@ contains
 !> \param ifrom number of grow-from points
 !> \param ibox box number of chain i
 !> \param igrow number of units to be grown
-!> \param wadd rosenbluth weight for growth
+!> \param wadd rosenbluth weight for rigrot
 !> \param lfixnow SAFE-CBMC
 !> \param cwtorf rosenbluth weight of the crank-shaft move for the last torsion
 !> \param movetype 1 = config moves;\n
@@ -568,34 +569,34 @@ contains
     ! initialize conformation energies and weight
     if ( lnew ) then
        ! set the initial weight to unity ***
-       weight = 1.0E0_dp
+       weight  = 1.0E0_dp
        ! set total energy of trial configuration to zero ***
-       vnew(1)     = 0.0E0_dp
-       vnew(7)    = 0.0E0_dp
-       vnew(6)    = 0.0E0_dp
-       vnew(5)  = 0.0E0_dp
-       vnew(9)   = 0.0E0_dp
+       vnew(1) = 0.0E0_dp
+       vnew(7) = 0.0E0_dp
+       vnew(6) = 0.0E0_dp
+       vnew(5) = 0.0E0_dp
+       vnew(9) = 0.0E0_dp
        vnew(4) = 0.0E0_dp
        vnew(2) = 0.0E0_dp
        vnew(8) = 0.0E0_dp
-       vnew(14) = 0.0E0_dp
-       vipswn = 0.0E0_dp
+       vnew(14)= 0.0E0_dp
+       vipswn  = 0.0E0_dp
        vwellipswn = 0.0E0_dp
     else
        ! old conformation
        ! set the initial weight of the old configuration to unity ***
-       weiold = 1.0E0_dp
+       weiold  = 1.0E0_dp
        ! set total energy of trial configuration to zero ***
-       vold(1)     = 0.0E0_dp
-       vold(7)    = 0.0E0_dp
-       vold(6)    = 0.0E0_dp
-       vold(5)  = 0.0E0_dp
-       vold(9)   = 0.0E0_dp
+       vold(1) = 0.0E0_dp
+       vold(7) = 0.0E0_dp
+       vold(6) = 0.0E0_dp
+       vold(5) = 0.0E0_dp
+       vold(9) = 0.0E0_dp
        vold(4) = 0.0E0_dp
        vold(2) = 0.0E0_dp
        vold(8) = 0.0E0_dp
-       vold(14) = 0.0E0_dp
-       vipswo = 0.0E0_dp
+       vold(14)= 0.0E0_dp
+       vipswo  = 0.0E0_dp
        vwellipswo = 0.0E0_dp
     end if
 
@@ -612,9 +613,9 @@ contains
           return
        end if
 
-       ! if (movetype.eq.4) then
-       !    return
-       ! end if
+       if (movetype.eq.4) then
+          return
+       end if
 
        if (lterm) then
           return
@@ -1295,8 +1296,8 @@ contains
 !>
 !> \param movetype 1 = config moves;\n
 !> 2 = swap moves for flexible molecules;\n
-!> 3 = swatch moves for molecules with only 1 cut;\n
-!> 4 = swap moves for partially rigid molecules;\n
+!> 3 = swatch moves for flexible molecules;\n
+!> 4 = swap/swatch moves for partially rigid molecules;\n
 !> 5 = swatch moves for molecules with more than 1 cuts
 !*****************************************************************
   subroutine schedule(igrow,imolty,index,iutry,iprev,movetype)
@@ -1308,17 +1309,9 @@ contains
     real::dbgrow
     logical,parameter::lprint = .false.
 ! ------------------------------------------------------------------
-
 #ifdef __DEBUG__
     write(io_output,*) 'start SCHEDULE in ',myid
 #endif
-
-!===DECODER for the new growth logic===
-!< lexshed: true if the bead exists at that time of the growth, false when a bead has not yet been grown this time
-!< growfrom(index): the bead from which the new beads are to be grown at the index-th step
-!< growprev(index): the bead that exists and is connected to growfrom(index)
-!< grownum(index): the number of beads to be grown from growfrom(index)
-!< growlist(index,count): the count-th one of the new beads to be grown from growfrom(index), grownum(index) entries
 
     kickout = 0
 
@@ -1327,64 +1320,59 @@ contains
     ! initialize temp_count
     temp_count = 0
 
-    if ( movetype .eq. 1 ) then
-       ! movetype=1: called from config.f
-       ! this part is just for config right now
-
+    if (movetype.ne.5) then
        ! initialize lexshed so all beads currently exist
-       do iu = 1,igrow
-          lexshed(iu) = .true.
-       end do
+       lexshed(1:igrow) = .true.
+       index = 0
+    end if
 
-       if ( kickout .eq. 50 ) call err_exit(__FILE__,__LINE__,'kickout is 50',myid+1)
+    if (movetype.eq.1) then
+       ! this part is just for config right now
+       if (kickout.eq.50) call err_exit(__FILE__,__LINE__,'kickout is 50',myid+1)
 
        ! select the first bead to grow from
        if (lrigid(imolty)) then
           ! N.R. Randomly select one of the grow points
-          random_index = int(dble(rindex(imolty))*random(-1)+1)
+          random_index = int(real(rindex(imolty),dp)*random(-1)+1)
           iutry = riutry(imolty,random_index)
-       else if ( lrig(imolty).and.nrig(imolty).gt.0 ) then
-          dbgrow = random(-1)*dble(nrig(imolty)) + 1.0E0_dp
+       else if (lrig(imolty).and.nrig(imolty).gt.0) then
+          dbgrow = random(-1)*real(nrig(imolty),dp) + 1.0_dp
           iutry = irig(imolty,int(dbgrow))
-       else if ( icbsta(imolty) .gt. 0 ) then
+       else if (icbsta(imolty).gt.0) then
           iutry = icbsta(imolty)
-       else if ( icbsta(imolty) .eq. 0 ) then
-          dbgrow = dble( igrow )
-          iutry = int( dbgrow*random(-1) ) + 1
+       else if (icbsta(imolty).eq.0) then
+          dbgrow = real(igrow,dp)
+          iutry = int(dbgrow*random(-1)) + 1
        else
-          dbgrow = dble( igrow + icbsta(imolty) + 1 )
-          iutry = int( dbgrow*random(-1) ) - icbsta(imolty)
+          dbgrow = real(igrow+icbsta(imolty)+1,dp)
+          iutry = int(dbgrow*random(-1)) - icbsta(imolty)
        end if
 
        if (lrig(imolty).and.(nrig(imolty).eq.0)) then
-          ju = int(random(-1) * dble(nrigmax(imolty) - nrigmin(imolty) + 1)) + nrigmin(imolty)
+          ju = int(random(-1)*real(nrigmax(imolty)-nrigmin(imolty)+1,dp)) + nrigmin(imolty)
        end if
-
-       ! write(io_output,*) '********************************************'
-       ! write(io_output,*) 'iutry',iutry
 
        idir = icbdir(imolty)
        growfrom(1) = iutry
        invtry = invib(imolty,iutry)
        index = 1
 
-       if ( invtry .eq. 0 ) then
+       if (invtry.eq.0) then
           ! problem, cannot do config move on a 1 bead molecule
           call err_exit(__FILE__,__LINE__,'cannot do CBMC on a one grow unit molecule',myid+1)
-
-       else if ( invtry .eq. 1 ) then
+       else if (invtry.eq.1) then
           ! regrow entire molecule, check nmaxcbmc
-          if ( nmaxcbmc(imolty) .lt. igrow - 1 ) then
+          if (nmaxcbmc(imolty).lt.igrow-1) then
              kickout = kickout + 1
              goto 11
           end if
 
           growprev(1) = 0
-
           grownum(1) = invtry
+
           ivib = invtry
           iut = ijvib(imolty,iutry,ivib)
-          if ( idir .eq. 1 .and. iut .lt. iutry ) then
+          if (idir.eq.1.and.iut.lt.iutry) then
              ! cannot grow from this bead, try again
              kickout = kickout + 1
              goto 11
@@ -1397,8 +1385,8 @@ contains
           count = 0
           do ivib = 1,invtry
              iut = ijvib(imolty,iutry,ivib)
-             if ( idir .eq. 1 .and. iut .lt. iutry ) then
-                ! this is the one and only previous nongrown bead
+             if (idir.eq.1.and.iut.lt.iutry) then
+                !> \bug this is the one and only previous nongrown bead. This is potentially a bug; certain numbering scheme will fail
                 growprev(1) = iut
              else
                 ! grow these branches
@@ -1409,38 +1397,33 @@ contains
 
           do izz = temp_count,1,-1
              ! choose grow bead randomly from temp_store
-             itry = int( dble(izz) * random(-1) ) + 1
+             itry = int(real(izz,dp)*random(-1)) + 1
              iut = temp_store(itry)
              count = count + 1
              growlist(1,count) = iut
              lexshed(iut) = .false.
-
              ! update temp_store for next iteration
              temp_store(itry) = temp_store(izz)
           end do
           grownum(1) = count
 
-          if ( count .eq. invtry ) then
-             if ( random(-1) .gt. pmall(imolty) ) then
+          if (count.eq.invtry) then
+             if (random(-1).gt.pmall(imolty)) then
                 ! not pmall so select a previous bead
-20              ivib = int( random(-1)*dble(invtry) ) + 1
-
+20              ivib = int(random(-1)*real(invtry,dp)) + 1
                 iu = growlist(1,ivib)
-
                 if (lrig(imolty).and.nrig(imolty).gt.0) then
                    if (iu.ne.frig(imolty,int(dbgrow))) goto 20
                 end if
-                ! we should start to determine a random section to keep rigid
 
+                ! we should start to determine a random section to keep rigid
                 if (lrigid(imolty)) then
                    if (iu.lt.riutry(imolty,1)) goto 20
                 end if
 
                 growprev(1) = iu
-
                 ! replace this unit with the last unit in growlist
                 growlist(1,ivib) = growlist(1,invtry)
-
                 ! reduce numgrow by 1
                 grownum(1) = grownum(1) - 1
                 ! add this back into lexshed
@@ -1449,7 +1432,7 @@ contains
                 ! we regrew all branches, no previous bead
                 growprev(1) = 0
              end if
-          else if ( invtry - count .ne. 1 ) then
+          else if (invtry-count.ne.1) then
              ! problem in logic, should only be one nongrown bead
              write(io_output,*) 'invtry,count',invtry,count
              write(io_output,*) 'igrow,imolty',igrow,imolty
@@ -1457,71 +1440,25 @@ contains
           end if
        end if
        ! end the part that is specific for config
-    else if ( movetype .eq. 2 ) then
-       ! begin the part that is specific for swap
+    else if (movetype.eq.2.or.movetype.eq.3.or.movetype.eq.5) then
+       ! begin the part that is specific for flexible molecules
        ! iutry is the first bead inserted - need to grow its neighbors
-       do iu = 1,igrow
-          lexshed(iu) = .true.
-       end do
-
-       growfrom(1) = iutry
-
-       invtry = invib(imolty,iutry)
-       growprev(1) = 0
-       if ( invtry .eq. 0 ) then
-          ! Bead iutry is the only bead to be grown ---
-          index = 0
-       else
-          ! grow all of the beads connected to bead iutry
-          index = 1
-          grownum(1) = invtry
-          do ivib = 1,invtry
-             iut = ijvib(imolty,iutry,ivib)
-             if (lrigid(imolty)) iut = iutry - 1
-             ! grow these branches
-             temp_count = temp_count + 1
-             temp_store(temp_count) = iut
-          end do
-
-          count = 0
-          do izz = temp_count,1,-1
-             ! choose grow bead randomly from temp_store
-             itry = int( dble(izz) * random(-1) ) + 1
-             iut = temp_store(itry)
-             count = count + 1
-             growlist(1,count) = iut
-             lexshed(iut) = .false.
-
-             ! update temp_store for next iteration
-             temp_store(itry) = temp_store(izz)
-          end do
-       end if
-       ! end the part that is specific for swap
-    else if ( movetype .eq. 3 ) then
-       ! begin part that is specific for swatch
-       do iu = 1,igrow
-          lexshed(iu) = .true.
-       end do
-       if ( iutry .eq. 0 ) then
+       if (iutry.eq.0) then
           ! no beads to be regrown via cbmc
-          index = 0
           return
        end if
-       growfrom(1) = iutry
 
+       growfrom(index+1) = iutry
+       growprev(index+1) = iprev
        invtry = invib(imolty,iutry)
-       growprev(1) = iprev
 
-       if ( invtry .eq. 0 ) then
-          ! Bead 1 is the only bead to be grown ---
-          index = 0
-       else
-
-          ! grow all (except iprev) of the beads connected to bead 1
-          index = 1
-          do ivib = 1,invtry
+       if (invtry.ne.0) then
+          ! grow all of the beads (except iprev) connected to bead iutry
+          index = index + 1
+          do ivib=1,invtry
              iut = ijvib(imolty,iutry,ivib)
-             if ( iut .ne. iprev ) then
+             if (iut.ne.iprev) then
+                ! grow these branches
                 temp_count = temp_count + 1
                 temp_store(temp_count) = iut
              end if
@@ -1530,53 +1467,44 @@ contains
           count = 0
           do izz = temp_count,1,-1
              ! choose grow bead randomly from temp_store
-             itry = int( dble(izz) * random(-1) ) + 1
+             itry = int(real(izz,dp)*random(-1)) + 1
              iut = temp_store(itry)
              count = count + 1
-             growlist(1,count) = iut
+             growlist(index,count) = iut
              lexshed(iut) = .false.
-
              ! update temp_store for next iteration
              temp_store(itry) = temp_store(izz)
           end do
-
-          grownum(1) = count
+          grownum(index) = count
        end if
-       ! end part that is specific for swatch
-    else if ( movetype .eq. 4 ) then
+       ! end the part that is specific for flexible molecules
+    else if (movetype.eq.4) then
        ! begin part that is specific for rigid molecules
-       do iu = 1,igrow
-          lexshed(iu) = .true.
-       end do
 
-       if ( rindex(imolty) .eq. 0 ) then
-          ! entire molecule is rigid
-          index = 0
-       else
-          index = rindex(imolty)
-
-          do i = 1, rindex(imolty)
+       !> \bug only the growth point listed last in riutry can have more than 1 beads to grow!
+       index = rindex(imolty)
+       if (index.ne.0) then
+          ! molecule is partially rigid
+          do i=1,index
              ! grow all non-rigid beads from the rigid part
              temp_count = 0
-             invtry = invib(imolty,riutry(imolty,i)) - 1
-             grownum(i) = invtry
-             growfrom(i) = riutry(imolty,i)
-
              ! for rigid molecules, have rigid vib last
-             growprev(i)=ijvib(imolty,growfrom(i),invtry+1)
+             growfrom(i)= riutry(imolty,i)
+             invtry = invib(imolty,growfrom(i)) - 1
+             growprev(i)= ijvib(imolty,growfrom(i),invtry+1)
+             grownum(i) = invtry
 
              do ivib = 1, invtry
-                iut = ijvib(imolty,riutry(imolty,i),ivib)
+                iut = ijvib(imolty,growfrom(i),ivib)
                 ! grow these branches
                 temp_count = temp_count + 1
                 temp_store(temp_count) = iut
              end do
 
              count = 0
-
              do izz = temp_count,1,-1
                 ! choose grow bead randomly from temp_store
-                itry = int ( dble(izz) * random(-1) ) + 1
+                itry = int(real(izz,dp)*random(-1)) + 1
                 iut = temp_store(itry)
                 count = count + 1
                 growlist(i,count) = iut
@@ -1588,43 +1516,6 @@ contains
           end do
        end if
        ! end part that is specific for rigid molecules
-    else if (movetype .eq. 5) then
-       if ( iutry .eq. 0 ) then
-          ! no beads to be regrown via cbmc
-          return
-       end if
-       growfrom(index+1) = iutry
-
-       invtry = invib(imolty,iutry)
-       growprev(index+1) = iprev
-
-       if ( invtry .eq. 0 ) then
-          ! Bead 1 is the only bead to be grown ---
-       else
-          ! grow all (except iprev) of the beads connected to bead 1
-          index = index + 1
-          do ivib = 1,invtry
-             iut = ijvib(imolty,iutry,ivib)
-             if ( iut .ne. iprev ) then
-                temp_count = temp_count + 1
-                temp_store(temp_count) = iut
-             end if
-          end do
-
-          count = 0
-          do izz = temp_count,1,-1
-             ! choose grow bead randomly from temp_store
-             itry = int( dble(izz) * random(-1) ) + 1
-             iut = temp_store(itry)
-             count = count + 1
-             growlist(index,count) = iut
-             lexshed(iut) = .false.
-             ! update temp_store for next iteration
-             temp_store(itry) = temp_store(izz)
-          end do
-          grownum(index) = count
-       end if
-       ! end iswatch stuff *
     else
        ! non-existent move type
        write(io_output,*) 'schedule movetype ',movetype
@@ -1663,10 +1554,10 @@ contains
 !        goto 50
 !     end if
 
-! set up list of "outer" beads that have further growth sites
-! this method implemented 6-13-98
+    ! set up list of "outer" beads that have further growth sites
+    ! this method implemented 6-13-98
     ibead=0
-    if ( index .gt. 0 ) then
+    if (index.gt.0) then
        outer_num = 0
        iufrom = growfrom(index)
        do icbu = 1,grownum(index)
@@ -1688,7 +1579,7 @@ contains
        ! begin while loop to grow all outer beads until done
 70     if ( outer_num .gt. 0 ) then
           ! choose one site randomly from the stack
-          outer_try = int( dble(outer_num) * random(-1) ) + 1
+          outer_try = int(real(outer_num,dp)*random(-1)) + 1
 
           ! increment index to show this is the next growfrom
           index = index + 1
@@ -1713,7 +1604,7 @@ contains
 
           count = 0
           do izz = temp_count, 1, -1
-             itry = int ( dble(izz) * random(-1) ) + 1
+             itry = int(real(izz,dp)*random(-1)) + 1
              iut = temp_store(itry)
              count = count + 1
              ! assign growlist for current index and count

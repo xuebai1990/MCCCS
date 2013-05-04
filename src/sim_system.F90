@@ -168,9 +168,10 @@ module sim_system
   real,allocatable::pmsatc(:),pmswtcb(:,:)
   integer,allocatable::nswatb(:,:),nsampos(:)& !< number of beads that remain in the same position
    ,ncut(:,:),splist(:,:,:),gswatc(:,:,:),nswtcb(:),box3(:,:),box4(:,:)
-  logical,allocatable::liswinc(:,:)
-  logical::liswatch
-  integer::other
+  !> \bug liswatch, other, liswinc not initialized
+  ! logical,allocatable::liswinc(:,:)
+  ! logical::liswatch !< prevents non-grown beads from being included in the new growth in boltz
+  ! integer::other
 
   !*** CBMC particle transfer (swap) moves ***
   real::pmswap
@@ -200,7 +201,10 @@ module sim_system
   integer,allocatable::nugrow(:),nmaxcbmc(:),iurot(:),maxgrow(:)&
    ,nchoi1(:),nchoi(:),nchoir(:),nchoih(:),nchtor(:),nchbna(:),nchbnb(:)& !< number of candidates during CBMC regrowth for the first bead, subsequent beads (flexible and rigid), explicit-hydrogen, torsion, and bendings
    ,nrotbd(:),irotbd(:,:),icbdir(:),icbsta(:)&
-   ,growfrom(:),growprev(:),grownum(:),growlist(:,:)
+   ,growfrom(:)& !< (index): the bead from which the new beads are to be grown at the index-th step
+   ,growprev(:)& !< (index): the bead that exists and is connected to growfrom(index)
+   ,grownum(:)& !< (index): the number of beads to be grown from growfrom(index)
+   ,growlist(:,:) !< (index,count): the count-th one of the new beads to be grown from growfrom(index), grownum(index) entries
   real,allocatable::pmrotbd(:,:),rxp(:,:),ryp(:,:),rzp(:,:)& !< (iunit,itrial) coordinates of iunit of the selected molecule for the itrial-th candidate configuration, for use in rosenbluth
    ,bfac(:),vtr(:,:),vtrorient(:),vtrelect_intra(:),vtrelect_inter(:)& !< Boltzmann factors and energies for the configuration in r{x,y,z}p
    ,rxuion(:,:),ryuion(:,:),rzuion(:,:),qquion(:,:)& !< (iunit,flag): coordinates of iunit of the selected molecule in its old (flag=1) or new (flag=2) state, for subroutine energy (one-particle energy)
@@ -319,7 +323,7 @@ CONTAINS
 
   subroutine allocate_molecule()
     integer::jerr
-    allocate(splist(npamax,numax,2),lexist(numax),lexclu(ntmax,numax,ntmax,numax),liswinc(numax,ntmax)&
+    allocate(splist(npamax,numax,2),lexist(numax),lexclu(ntmax,numax,ntmax,numax)&
      ,a15type(ntmax,numax,numax),epsilon_f(2,numax),sigma_f(2,numax),ljscale(ntmax,numax,numax),qscale2(ntmax,numax,numax)&
      ,ee_qqu(numax,smax),rxnew(numax),rynew(numax),rznew(numax),rxu(nmax,numax),ryu(nmax,numax)&
      ,rzu(nmax,numax),qqu(nmax,numax),rxuion(numax,2),ryuion(numax,2),rzuion(numax,2),qquion(numax,2)&

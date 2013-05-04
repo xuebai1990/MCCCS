@@ -1434,10 +1434,9 @@ contains
                       if ( lexclu(imolty,ii,jmolty,jj) ) cycle
                       ! start iswatch add-on ***
                       !> \todo is there a way to pull this out of the loops?
-                      if (liswatch.and.j.eq.other.and.(.not.liswinc(jj,jmolty))) then
-                         ! write(io_output,*) 'iSwatch-skipping:',jj
-                         cycle
-                      end if
+                      ! if (liswatch.and.j.eq.other.and.(.not.liswinc(jj,jmolty))) then
+                      !    cycle
+                      ! end if
                       ! end iswatch add-on ***
 
                       ntjj = ntype(jmolty,jj)
