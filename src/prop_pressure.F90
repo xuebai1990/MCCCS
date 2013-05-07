@@ -404,12 +404,12 @@ contains
 
 !> \brief Impulsive force and tail corrections to pressure
 !>
-!> \warning Tabulated potential, MMFF94 and Feuston-Garofalini
-!> are NOT supported.
+!> \warning Both corrections for tabulated potential and
+!> Feuston-Garofalini, and tail corrections for MMFF94 are
+!> NOT supported.
 !> \note New potenial functional form needs to be added here,
 !> and in U2 (energy calculation), coru (tail corrections to
 !> energy), prop_pressure::pressure (force calculation)
-!> \todo Impulsive force correction only done for LJ 12-6 potential
   function corp(imolty,jmolty,rhosq,ibox)
     use const_math,only:twopi
     real::corp
@@ -450,36 +450,67 @@ contains
              rci6 = rci3*rci3
              if (ltailc) then ! tail corrections
                 corp = corp + epsilon2*tmp*rci3*(rci6*4.0_dp/3.0_dp-2.0_dp)
-             end if
-             if (.not.lshift.and.numberDimensionIsIsotropic(ibox).eq.3) then ! impulsive force corrections
+             else if (.not.lshift.and.numberDimensionIsIsotropic(ibox).eq.3) then ! impulsive force corrections
                 corp = corp + epsilon2*tmp*rci3*(rci6-1.0_dp)
              end if
           else if (nonbond_type(ntij).eq.2) then
              ! Buckingham exp-6
-             if (vvdW(2,ntij).ne.0) then
-                tmp = vvdW(2,ntij)*rbcut
-                corp = corp - 2.0_dp*vvdW(3,ntij)/rbcut3 + (-6.0_dp+tmp*(6.0_dp+tmp*(tmp-3.0_dp)))*vvdW(1,ntij)*exp(tmp)/(vvdW(2,ntij)**3)
+             if (ltailc) then ! tail corrections
+                if (vvdW(2,ntij).ne.0) then
+                   tmp = vvdW(2,ntij)*rbcut
+                   corp = corp - 2.0_dp*vvdW(3,ntij)/rbcut3 + (-6.0_dp+tmp*(6.0_dp+tmp*(tmp-3.0_dp)))*vvdW(1,ntij)*exp(tmp)/(vvdW(2,ntij)**3)
+                end if
+             else if (.not.lshift.and.numberDimensionIsIsotropic(ibox).eq.3) then ! impulsive force corrections
+                corp = corp + vvdW(1,ntij)*exp(vvdW(2,ntij)*rbcut)*rbcut3 - vvdW(3,ntij)/rbcut3
              end if
           else if (nonbond_type(ntij).eq.3) then
              ! Mie
              tmp=vvdW(2,ntij)/rbcut
-             rci1=tmp**(vvdW(3,ntij)-3)
-             rci3=tmp**(vvdW(4,ntij)-3)
-             corp = corp + vvdW(1,ntij)*(vvdW(2,ntij)**3)*(rci1*vvdW(3,ntij)/(vvdW(3,ntij)-3)-rci3*vvdW(4,ntij)/(vvdW(4,ntij)-3))
+             if (ltailc) then ! tail corrections
+                rci1=tmp**(vvdW(3,ntij)-3)
+                rci3=tmp**(vvdW(4,ntij)-3)
+                corp = corp + vvdW(1,ntij)*(vvdW(2,ntij)**3)*(rci1*vvdW(3,ntij)/(vvdW(3,ntij)-3)-rci3*vvdW(4,ntij)/(vvdW(4,ntij)-3))
+             else if (.not.lshift.and.numberDimensionIsIsotropic(ibox).eq.3) then ! impulsive force corrections
+                corp = corp + vvdW(1,ntij)*(tmp**vvdW(3,ntij)-tmp**vvdW(4,ntij))*rbcut3
+             end if
+          else if (nonbond_type(ntij).eq.4) then
+             ! MMFF94
+             if (ltailc) then ! tail corrections for MMFF94 are not implemented yet
+             else if (.not.lshift.and.numberDimensionIsIsotropic(ibox).eq.3) then ! impulsive force corrections
+                if (vvdW(2,ntij).ne.0) then
+                   rci1 = rbcut/vvdW(2,ntij)
+                   tmp = rci1**7
+                   corp = corp + vvdW(1,ntij) * ((1.07_dp/(rci1+0.07_dp))**7) * (1.12_dp/(tmp+0.12_dp)-2.0_dp) * rbcut3
+                end if
+             end if
           else if (nonbond_type(ntij).eq.5) then
              ! LJ 9-6
              rci3=(vvdW(2,ntij)/rbcut)**3
-             corp = corp + vvdW(1,ntij)*(vvdW(2,ntij)**3)*rci3*(3.0_dp*rci3-6.0_dp)
+             if (ltailc) then ! tail corrections
+                corp = corp + vvdW(1,ntij)*(vvdW(2,ntij)**3)*rci3*(3.0_dp*rci3-6.0_dp)
+             else if (.not.lshift.and.numberDimensionIsIsotropic(ibox).eq.3) then ! impulsive force corrections
+                corp = corp + vvdW(1,ntij)*rci3*rci3*(2.0_dp*rci3 - 3.0_dp)
+             end if
           else if (nonbond_type(ntij).eq.6) then
              ! Generalized LJ
-             tmp  = 2.0_dp*vvdW(4,ntij)-3.0_dp
-             rci1 = (vvdW(2,ntij)/rbcut)**tmp
-             rci3 = (vvdW(2,ntij)/rbcut)**(vvdW(4,ntij)-3.0_dp)
-             corp = corp + vvdW(1,ntij)*(vvdW(2,ntij)**3)*2.0_dp*vvdW(4,ntij)*(rci1/tmp-rci3/(vvdW(4,ntij)-3.0_dp))
+             if (ltailc) then ! tail corrections
+                tmp  = 2.0_dp*vvdW(4,ntij)-3.0_dp
+                rci1 = (vvdW(2,ntij)/rbcut)**tmp
+                rci3 = (vvdW(2,ntij)/rbcut)**(vvdW(4,ntij)-3.0_dp)
+                corp = corp + vvdW(1,ntij)*(vvdW(2,ntij)**3)*2.0_dp*vvdW(4,ntij)*(rci1/tmp-rci3/(vvdW(4,ntij)-3.0_dp))
+             else if (.not.lshift.and.numberDimensionIsIsotropic(ibox).eq.3) then ! impulsive force corrections
+                tmp = (vvdW(2,ntij)/rbcut)**vvdW(4,ntij)
+                corp = corp + vvdW(1,ntij)*tmp*(tmp-2.0_dp)
+             end if
           else if (nonbond_type(ntij).eq.7) then
              ! LJ 12-6-8
-             corp = corp + 4.0_dp/3.0_dp*vvdW(1,ntij)/(rbcut3**3)-2.0_dp*vvdW(2,ntij)/rbcut3-8.0_dp/5.0_dp*vvdW(3,ntij)/rbcut3/rbcut2
-          else if (nonbond_type(ntij).ne.4.and.nonbond_type(ntij).ne.-1.and.nonbond_type(ntij).ne.0) then
+             if (ltailc) then ! tail corrections
+                corp = corp + 4.0_dp/3.0_dp*vvdW(1,ntij)/(rbcut3**3)-2.0_dp*vvdW(2,ntij)/rbcut3-8.0_dp/5.0_dp*vvdW(3,ntij)/rbcut3/rbcut2
+             else if (.not.lshift.and.numberDimensionIsIsotropic(ibox).eq.3) then ! impulsive force corrections
+                tmp=rbcut2**3
+                corp = corp + vvdW(1,ntij)/tmp/tmp-vvdW(2,ntij)/tmp-vvdW(3,ntij)/tmp/rbcut2
+             end if
+          else if (nonbond_type(ntij).ne.-1.and.nonbond_type(ntij).ne.0) then
              call err_exit(__FILE__,__LINE__,'corp: undefined nonbond type',myid+1)
           end if
        end do

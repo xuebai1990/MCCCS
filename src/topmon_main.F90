@@ -1702,8 +1702,6 @@ contains
 
                 if (ntype(imol,i).eq.0) then
                    call err_exit(__FILE__,__LINE__,'ERROR: atom type undefined!',myid+1)
-                else if (ALL(vvdW_b(:,ntype(imol,i)).lt.1E-06_dp).and.abs(qelect(ntype(imol,i))).lt.1E-06_dp) then
-                   call err_exit(__FILE__,__LINE__,'ERROR: atom type undefined!',myid+1)
                 end if
 
                 iutemp = ntype(imol,i)
@@ -1738,7 +1736,7 @@ contains
                    itvib(imol,i,j)=indexOf(bonds,itvib(imol,i,j))
                    if (itvib(imol,i,j).eq.0) then
                       call err_exit(__FILE__,__LINE__,'ERROR: stretching parameters undefined!',myid+1)
-                   else if(brvib(itvib(imol,i,j)).lt.1E-06_dp) then
+                   else if (brvib(itvib(imol,i,j)).lt.1E-06_dp) then
                       call err_exit(__FILE__,__LINE__,'ERROR: stretching parameters undefined!',myid+1)
                    end if
 
@@ -1769,7 +1767,7 @@ contains
                    itben(imol,i,j)=indexOf(angles,itben(imol,i,j))
                    if (itben(imol,i,j).eq.0) then
                       call err_exit(__FILE__,__LINE__,'ERROR: bending parameters undefined!',myid+1)
-                   else if(brben(itben(imol,i,j)).lt.1E-06_dp) then
+                   else if (brben(itben(imol,i,j)).lt.1E-06_dp) then
                       call err_exit(__FILE__,__LINE__,'ERROR: bending parameters undefined!',myid+1)
                    end if
 
