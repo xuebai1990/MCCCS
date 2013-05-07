@@ -8,7 +8,7 @@ MODULE sim_zeolite
   use sim_particle
   implicit none
   private
-  public::ZeoliteUnitCellGridType,ZeoliteBeadType,ZeolitePotentialType,setUpAtom,setUpCellStruct,foldToCenterCell,foldToUnitCell,fractionalToAbsolute,absoluteToFractional
+  public::ZeoliteUnitCellGridType,ZeoliteBeadType,ZeolitePotentialType,setUpAtom,setUpCellStruct,foldToCenterCell,foldToUnitCell,fractionalToAbsolute,absoluteToFractional,dgr
 
   type ZeoliteUnitCellGridType
      integer::dup(3)& !< how many times the unit cell is replicated to form the simulation cell
@@ -21,7 +21,7 @@ MODULE sim_zeolite
      integer::ntype !< number of framework atom types
      integer,allocatable::type(:),num(:) !< index (as in suijtab) and number of atoms of each type
      real,allocatable::radiisq(:) !< square of protective radii of each type
-     character(LEN=default_string_length),allocatable::name(:) !< chemical name of each type
+     character(LEN=128),allocatable::name(:) !< chemical name of each type
   end type ZeoliteBeadType
 
   type ZeolitePotentialType
@@ -31,7 +31,8 @@ MODULE sim_zeolite
   end type ZeolitePotentialType
 
   integer,parameter::boxZeo=1
-  real,parameter::eps=1.0E-4_dp,dgr=0.2_dp
+  real,parameter::eps=1.0E-4_dp
+  real::dgr=0.2_dp
 
 CONTAINS
 
@@ -48,7 +49,7 @@ CONTAINS
                                &,' box angles                        = ',3f10.3,' degrees',/&
                                &,' number of zeolite cells           = ',3i5)") zcell%boxl(1)%val,zcell%boxl(2)%val,zcell%boxl(3)%val,zcell%ang(1)%val,zcell%ang(2)%val,zcell%ang(3)%val,zunit%dup(1),zunit%dup(2),zunit%dup(3)
 
-    if (abs(zcell%ang(1)%val-90)>eps.or.abs(zcell%ang(2)%val-90)>eps.or.abs(zcell%ang(3)%val-90)>eps) then
+    if (abs(zcell%ang(1)%val-90_dp)>eps.or.abs(zcell%ang(2)%val-90_dp)>eps.or.abs(zcell%ang(3)%val-90_dp)>eps) then
        zcell%solid=.true.
        zcell%ortho=.false.
     else

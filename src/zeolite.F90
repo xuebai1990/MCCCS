@@ -1,7 +1,7 @@
 module zeolite
   use var_type,only:dp,default_string_length
   use const_math,only:eps,onepi,twopi,fourpi
-  use const_phys,only:qqfact
+  use const_phys,only:qqfact,N_Avogadro
   use util_math,only:erfunc
   use util_runtime,only:err_exit
   use util_timings, only: time_now
@@ -22,7 +22,7 @@ module zeolite
   save
   public::zeocoord,suzeo,exzeo
 
-  real,parameter::requiredPrecision=1.0E-2_dp,overlapValue=1.0E+20_dp,upperLimit=1.0E+7_dp
+  real,parameter::overlapValue=1.0E+20_dp,upperLimit=1.0E+7_dp,LJScaling=2E4_dp
   integer,parameter::boxZeo=1
 
   logical,allocatable::lunitcell(:)
@@ -30,9 +30,10 @@ module zeolite
 
   integer::nlayermax,volume_probe=124,volume_nsample=20,area_probe=124,area_nsample=100
   real,allocatable::zgrid(:,:,:,:,:),egrid(:,:,:,:)
+  real::requiredPrecision=1.0E-2_dp
   character(LEN=default_path_length)::file_zeocoord='zeolite.cssr',file_ztb='zeolite.ztb'
 
-  namelist /zeolite_in/ file_zeocoord,file_ztb,ltailcZeo,ltestztb,lpore_volume,volume_probe,volume_nsample,lsurface_area,area_probe,area_nsample
+  namelist /zeolite_in/ file_zeocoord,dgr,file_ztb,requiredPrecision,ltailcZeo,ltestztb,lpore_volume,volume_probe,volume_nsample,lsurface_area,area_probe,area_nsample
 
   type(MoleculeType)::zeo
   type(ZeoliteBeadType)::ztype
@@ -147,28 +148,27 @@ contains
              if (lij(idi).and.lij(idj)) then
                 ntij = (idi-1)*nntype + idj
                 ! LJ parameters are scaled to reduce round-off errors, see exzeof()
-                sig6=vvdW(3,ntij)**3/2E4_dp
+                sig6=vvdW(3,ntij)**3/LJScaling
                 zpot%param(2,i,igtype)=vvdW(1,ntij)*sig6
                 zpot%param(1,i,igtype)=zpot%param(2,i,igtype)*sig6
              else
-                zpot%param(1:2,i,igtype)=0.
+                zpot%param(1:2,i,igtype)=0._dp
              end if
              if (lqchg(idi).and.lqchg(idj)) then
                 zpot%param(3,i,igtype)=qelect(idi)*qelect(idj)
              else
-                zpot%param(3,i,igtype)=0.
+                zpot%param(3,i,igtype)=0._dp
              end if
           end do
        end if
     end do
-    zpot%param(1:2,:,:)=4.*zpot%param(1:2,:,:)
   end subroutine addAllBeadTypes
 
   subroutine suzeo(lprint)
     use util_search,only:indexOf
     use util_string,only:format_n
     logical,intent(in)::lprint
-    character(LEN=default_string_length)::atom
+    character(LEN=128)::atom
     integer::io_ztb,igtype,idi,idj,jerr,sw,i,j,k,oldi,oldj,oldk,ngridtmp(3),zntypetmp
     real::wzeo,zunittmp(3),zangtmp(3),rcuttmp,rci3,rci9,rho
     logical::lewaldtmp,ltailczeotmp,lshifttmp
@@ -196,7 +196,7 @@ contains
                        &,'         z-dir           : ',i12,'  size: ',f7.4,/)")&
                        (trim(ztype%name(i)),ztype%num(i),i=1,ztype%ntype)&
                        ,zcell%vol,ztype%ntype,zeo%nbead&
-                       ,wzeo/6.023E23_dp,1000.0/wzeo,zunit%boxl(1)&
+                       ,wzeo/N_Avogadro,1000.0_dp/wzeo,zunit%boxl(1)&
                        ,zunit%boxl(2),zunit%boxl(3),zunit%ngrid(1)&
                        ,zunit%boxl(1)/zunit%ngrid(1),zunit%ngrid(2)&
                        ,zunit%boxl(2)/zunit%ngrid(2),zunit%ngrid(3)&
@@ -304,12 +304,12 @@ contains
     end if
 
     if (ltailczeo.and..not.ltailcZeotmp) then
-       rci3=1./rcuttmp**3
-       rci9=4E8_dp*rci3**3
-       rci3=2E4_dp*rci3
+       rci3=1._dp/rcuttmp**3
+       rci9=LJScaling*LJScaling*rci3**3
+       rci3=LJScaling*rci3
     end if
 
-    egrid=0.
+    egrid=0._dp
     forall(k=0:zunit%ngrid(3)-1,j=0:zunit%ngrid(2)-1,i=0:zunit%ngrid(1)-1,zgrid(1,1,i,j,k).ge.overlapValue) egrid(i,j,k,:)=overlapValue
 
     do j=1,ztype%ntype
@@ -321,7 +321,7 @@ contains
              if (lij(idj).and.lij(idi)) then
                 where(egrid(:,:,:,i).lt.overlapValue) egrid(:,:,:,i)=egrid(:,:,:,i)+zgrid(1,j,:,:,:)*zpot%param(1,j,i)-zgrid(2,j,:,:,:)*zpot%param(2,j,i)
                 if (ltailczeo.and..not.ltailcZeotmp) then
-                   where(egrid(:,:,:,i).lt.overlapValue) egrid(:,:,:,i)=egrid(:,:,:,i)+twopi*rho*(rci9*zpot%param(1,j,i)/9-rci3*zpot%param(2,j,i)/3)
+                   where(egrid(:,:,:,i).lt.overlapValue) egrid(:,:,:,i)=egrid(:,:,:,i)+twopi*rho*(rci9*zpot%param(1,j,i)/9_dp-rci3*zpot%param(2,j,i)/3_dp)
                 end if
              end if
              if (lqchg(idj).and.lqchg(idi)) then
@@ -351,9 +351,9 @@ contains
     integer::izeo,layer,ii,jj,kk,iztype
     real::rcutsq,vac,vbc,vb,r,scoord(3),ri(3),dr(3),r2,vnew(2,ztype%ntype)
 
-    tab=0.
+    tab=0._dp
     rcutsq = zcell%cut*zcell%cut
-    vbc=2E4_dp/rcutsq**3
+    vbc=LJScaling/rcutsq**3
     vac=vbc*vbc
 
     if (lewald.or.(.not.ltailcZeo)) then
@@ -375,7 +375,7 @@ contains
              return
           else if (r2 .lt. rcutsq) then
              if (.not.ltailcZeo) then
-                vb=2E4_dp/r2**3
+                vb=LJScaling/r2**3
                 if (lshift) then
                    tab(2,iztype)=tab(2,iztype)+vb-vbc
                    tab(1,iztype)=tab(1,iztype)+vb*vb-vac
@@ -388,7 +388,7 @@ contains
              if (lewald) then
                 tab(3,iztype)=tab(3,iztype)+erfunc(calp(boxZeo)*r)/r
              else
-                tab(3,iztype)=tab(3,iztype)+1./r
+                tab(3,iztype)=tab(3,iztype)+1._dp/r
              end if
           end if
        end do
@@ -402,7 +402,7 @@ contains
     if (ltailcZeo) then
        layer=0
        do
-          vnew=0.
+          vnew=0._dp
           do izeo=1,zeo%nbead
              if (lunitcell(izeo)) then
                 iztype=zeo%bead(izeo)%type
@@ -422,7 +422,7 @@ contains
                                tab=overlapValue
                                return
                             end if
-                            vb=2E4_dp/r2**3
+                            vb=LJScaling/r2**3
                             if (lshift) then
                                vnew(2,iztype)=vnew(2,iztype)+vb-vbc
                                vnew(1,iztype)=vnew(1,iztype)+vb*vb-vac
@@ -498,7 +498,7 @@ contains
        end do
     end do
 
-    tab=tab+vrecipz*8.*onepi/zcell%vol
+    tab=tab+vrecipz*8._dp*onepi/zcell%vol
 
   end subroutine recipzeo
 
@@ -582,9 +582,9 @@ contains
        if (tab(1,1).ge.upperLimit) return
 
        if (ltailc) then
-          rci3=1./zcell%cut**3
-          rci9=4E8_dp*rci3**3
-          rci3=2E4_dp*rci3
+          rci3=1._dp/zcell%cut**3
+          rci9=LJScaling*LJScaling*rci3**3
+          rci3=LJScaling*rci3
        end if
 
        exzeo=0.0E0_dp
@@ -595,7 +595,7 @@ contains
              if (lij(idj).and.lij(idi)) then
                 exzeo=exzeo+tab(1,j)*zpot%param(1,j,igtype)-tab(2,j)*zpot%param(2,j,igtype)
                 if (ltailc) then
-                   exzeo=exzeo+twopi*rho*(rci9*zpot%param(1,j,igtype)/9-rci3*zpot%param(2,j,igtype)/3)
+                   exzeo=exzeo+twopi*rho*(rci9*zpot%param(1,j,igtype)/9_dp-rci3*zpot%param(2,j,igtype)/3_dp)
                 end if
              end if
              if (lqchg(idj).and.lqchg(idi)) then
@@ -664,9 +664,9 @@ contains
        write(io_output,'(A,G16.9,A,G16.9,A)') ' void fraction: ',BoltTabulated/volume_nsample, '(tabulated), ',BoltExplicit/volume_nsample,'(explicit)'
        write(io_output,'(A,G16.9,A,G16.9,A)') ' void volume in [Angstrom^3]: ',BoltTabulated*zcell%vol/volume_nsample, '(tabulated), ',BoltExplicit*zcell%vol/volume_nsample,'(explicit)'
        write(io_output,'(A,G16.9,A,G16.9,A)') ' void volume in [cm^3/g]: '&
-        ,BoltTabulated*zcell%vol/volume_nsample*6.023E-1_dp/dot_product(ztype%num(1:ztype%ntype)&
+        ,BoltTabulated*zcell%vol/volume_nsample*N_Avogadro*1E-24_dp/dot_product(ztype%num(1:ztype%ntype)&
         ,mass(ztype%type(1:ztype%ntype))), '(tabulated), '&
-        ,BoltExplicit*zcell%vol/volume_nsample*6.023E-1_dp/dot_product(ztype%num(1:ztype%ntype)&
+        ,BoltExplicit*zcell%vol/volume_nsample*N_Avogadro*1E-24_dp/dot_product(ztype%num(1:ztype%ntype)&
         ,mass(ztype%type(1:ztype%ntype))),'(explicit)'
        write(io_output,'(A,G16.9,A,G16.9,A)') ' Boltzmann averaged energy in [K]: ',eBoltTabulated/BoltTabulated,'(tabulated), ',eBoltExplicit/BoltExplicit,'(explicit)'
        write(io_output,*)
@@ -743,7 +743,7 @@ contains
     stotal=stotal*fourpi*product(zunit%dup)
     Write(io_output,'(A,F12.2)') ' Total surface area in [Angstroms^2]: ', stotal
     Write(io_output,'(A,F12.2)') ' Total surface area per volume in [m^2/cm^3]: ',stotal/zcell%vol*1.0E4_dp
-    Write(io_output,'(A,F12.2,/)') ' Total surface area per volume in [m^2/g]: ', stotal*6.023E3_dp/dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype)))
+    Write(io_output,'(A,F12.2,/)') ' Total surface area per volume in [m^2/g]: ', stotal*N_Avogadro*1E-20_dp/dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype)))
 
     deallocate(position)
 
