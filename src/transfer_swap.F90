@@ -1498,7 +1498,7 @@ contains
           end if
        end if
 
-! update the position, it will be used to get the bonded energy
+       ! update the position, it will be used to get the bonded energy
        do ic = 1,igrow
           rxu(irem,ic) = rxnew(ic)
           ryu(irem,ic) = rynew(ic)
@@ -1517,36 +1517,32 @@ contains
        if (lrigid(imolty).and.(pm_atom_tra.gt.0.000001)) then
           call U_bonded(irem,imolty,vvibn,vbendn,vtgn)
        end if
-! total_NBE = vintran+velectn+vewaldn+vtgn+vbendn+vvibn
        total_NBE = vtgn+vbendn+vvibn
-! write(io_output,*) vintran,velectn,vewaldn
 
-! write(io_output,*) 'irem', irem
-
-! update energies:
-       vbox(1,boxrem)     = vbox(1,boxrem)     - vold(1) - total_NBE
+       ! update energies:
+       vbox(1,boxrem)  = vbox(1,boxrem)  - vold(1) - total_NBE
        vbox(2,boxrem)  = vbox(2,boxrem)  - vold(2)
-       vbox(3,boxrem)   = vbox(3,boxrem)   - vremta
+       vbox(3,boxrem)  = vbox(3,boxrem)  - vremta
        vbox(4,boxrem)  = vbox(4,boxrem)  - vold(4)
-       vbox(5,boxrem)    = vbox(5,boxrem)    - vold(5) - vvibn
-       vbox(7,boxrem)     = vbox(7,boxrem)     - vold(7) - vtgn
-       vbox(9,boxrem)    = vbox(9,boxrem)    - vold(9)
-       vbox(6,boxrem)   = vbox(6,boxrem)   - vold(6) - vbendn
+       vbox(5,boxrem)  = vbox(5,boxrem)  - vold(5) - vvibn
+       vbox(7,boxrem)  = vbox(7,boxrem)  - vold(7) - vtgn
+       vbox(9,boxrem)  = vbox(9,boxrem)  - vold(9)
+       vbox(6,boxrem)  = vbox(6,boxrem)  - vold(6) - vbendn
        vbox(8,boxrem)  = vbox(8,boxrem)  - (vold(8)+vold(14))
-       vbox(11,boxrem)  = vbox(11,boxrem)  - voldflucq
+       vbox(11,boxrem) = vbox(11,boxrem) - voldflucq
 
-       vbox(1,boxins)     = vbox(1,boxins)     + vnew(1) + total_NBE
+       vbox(1,boxins)  = vbox(1,boxins)  + vnew(1) + total_NBE
        vbox(2,boxins)  = vbox(2,boxins)  + vnew(2)
-       vbox(3,boxins)   = vbox(3,boxins)   + vinsta
+       vbox(3,boxins)  = vbox(3,boxins)  + vinsta
        vbox(4,boxins)  = vbox(4,boxins)  + vnew(4)
-       vbox(5,boxins)    =  vbox(5,boxins)   + vnew(5) + vvibn
-       vbox(7,boxins)     = vbox(7,boxins)     + vnew(7) + vtgn
-       vbox(9,boxins)    = vbox(9,boxins)    + vnew(9)
-       vbox(6,boxins)   = vbox(6,boxins)   + vnew(6) + vbendn
+       vbox(5,boxins)  = vbox(5,boxins)  + vnew(5) + vvibn
+       vbox(7,boxins)  = vbox(7,boxins)  + vnew(7) + vtgn
+       vbox(9,boxins)  = vbox(9,boxins)  + vnew(9)
+       vbox(6,boxins)  = vbox(6,boxins)  + vnew(6) + vbendn
        vbox(8,boxins)  = vbox(8,boxins)  + (vnew(8)+vnew(14))
-       vbox(11,boxins)  = vbox(11,boxins)  + vnewflucq
+       vbox(11,boxins) = vbox(11,boxins) + vnewflucq
 
-! update book keeping
+       ! update book keeping
        if ( lswapinter ) then
           nboxi(irem) = boxins
           if ((.not.leemove).and.(.not.lexpee)) then
@@ -1716,11 +1712,9 @@ contains
     integer,intent(in)::io_output
     integer::i,j,ibox,jbox,jbox_max
 
-    write(io_output,*)
-    write(io_output,*) '### Molecule swap       ###'
-    write(io_output,*)
+    write(io_output,'(/,A,/)') '### Molecule swap       ###'
     do i = 1, nmolty
-       write(io_output,*) 'molecule typ =',i
+       write(io_output,'(A,I0)') 'molecule typ = ',i
        do j=1,nswapb(i)
           if ( box1(i,j) .eq. box2(i,j) ) then
              jbox_max = 1
@@ -1730,9 +1724,9 @@ contains
           do jbox = 1,jbox_max
              if ( jbox .eq. 1 ) ibox = box1(i,j)
              if ( jbox .eq. 2 ) ibox = box2(i,j)
-             write(io_output,"('between box ',i0,' and ',i0,' into box ',i0, '   uattempts = ',I0,' attempts = ',I0 ,'   accepted = ',I0)") box1(i,j),box2(i,j),ibox,bsswap(i,j,ibox),bnswap(i,j,ibox),bnswap(i,j,ibox+nbox)
+             write(io_output,"('between box ',I0,' and ',I0,' into box ',I0,'   uattempts = ',I0,' attempts = ',I0,'   accepted = ',I0)") box1(i,j),box2(i,j),ibox,bsswap(i,j,ibox),bnswap(i,j,ibox),bnswap(i,j,ibox+nbox)
              if (bnswap(i,j,ibox) .gt. 0) then
-                write(io_output,"(' suc.growth % =',f7.3,'   accepted % =',f7.3)") bsswap(i,j,ibox+nbox)*100.0_dp/bnswap(i,j,ibox),bnswap(i,j,ibox+nbox)*100.0_dp/bsswap(i,j,ibox)
+                write(io_output,"(' suc.growth % =',F7.3,'   accepted % =',F7.3)") bsswap(i,j,ibox+nbox)*100.0_dp/bnswap(i,j,ibox),bnswap(i,j,ibox+nbox)*100.0_dp/bsswap(i,j,ibox)
              end if
           end do
        end do

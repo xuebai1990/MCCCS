@@ -12,7 +12,7 @@ module transfer_swatch
   save
   public::swatch,init_swatch,output_swatch_stats,read_checkpoint_swatch,write_checkpoint_swatch
 
-  integer,allocatable::bnswat(:,:),bnswat_empty(:,:),bsswat(:,:) !< accumulators for swatch performance
+  integer,allocatable::bnswat(:,:,:),bnswat_empty(:,:,:),bsswat(:,:,:) !< accumulators for swatch performance
 contains
 !> Added intrabox move for two particles within one box
 !> in combined move that shares the same parameters.
@@ -21,9 +21,10 @@ contains
 !> \since 9-25-02 JMS
   subroutine swatch()
     use sim_particle,only:ctrmas
+    use energy_intramolecular,only:U_bonded
 
     logical::lterm
-    real::rpair,tweight,tweiold,vnbox(nbxmax),vninte(nbxmax),vnintr(nbxmax),vnvibb(nbxmax),vntgb(nbxmax),vnextb(nbxmax),vnbend(nbxmax),vntail(nbxmax),vnelect(nbxmax),vnewald(nbxmax),rx_1(numax),ry_1(numax),rz_1(numax),rxut(4,numax),ryut(4,numax),rzut(4,numax),waddold,waddnew,dvol,vola,volb,rho,dinsta,wnlog,wolog,wdlog,wswat,v(nEnergy),vdum,delen,deleo,dicount,vrecipn,vrecipo,vdum2
+    real::rpair,tweight,tweiold,vnbox(nbxmax),vninte(nbxmax),vnintr(nbxmax),vnvibb(nbxmax),vntgb(nbxmax),vnextb(nbxmax),vnbend(nbxmax),vntail(nbxmax),vnelect(nbxmax),vnewald(nbxmax),rx_1(numax),ry_1(numax),rz_1(numax),rxut(4,numax),ryut(4,numax),rzut(4,numax),waddold,waddnew,dvol,vola,volb,rho,dinsta,wnlog,wolog,wdlog,wswat,v(nEnergy),vdum,delen,deleo,dicount,vrecipn,vrecipo,vdum2,total_NBE,total_tor,total_bend,total_vib,vtgn,vbendn,vvibn
     integer::ipair,iparty,type_a,type_b,imolta,imoltb,ipairb,boxa,boxb,imola,imolb,ibox,iboxal,iboxbl,iboxia,iboxib,izz,from(2*numax),prev(2*numax),orgaia,orgaib,orgbia,orgbib,bdmol_a,bdmol_b,s_type,o_type,new,old,ifirst,iprev,imolty,igrow,islen,iunit,iboxnew,iboxold,self,other,iunita,iunitb
     integer::iii,j
     integer::oldchain,newchain,oldunit,newunit,iins
@@ -76,11 +77,11 @@ contains
     end if
 
     ! add one attempt to the count for iparty
-    bnswat(iparty,ipairb) = bnswat(iparty,ipairb) + 1
+    bnswat(iparty,ipairb,boxa) = bnswat(iparty,ipairb,boxa) + 1
 
     ! check if the particle types are in their boxes
     if ((ncmt(boxa,imolta).eq.0).or.(ncmt(boxb,imoltb).eq.0)) then
-       bnswat_empty(iparty,ipairb) = bnswat_empty(iparty,ipairb) + 1
+       bnswat_empty(iparty,ipairb,boxa) = bnswat_empty(iparty,ipairb,boxa) + 1
        return
     else
        ! get particle from box a
@@ -247,7 +248,7 @@ contains
           !cc--- adding some if statements for rigid swaps:
           !cc--- if we have swapped the whole rigid part we will
           !cc--- not compute the vectors from ifirst in old position
-          if (nsampos(iparty).lt.iunit) then
+          !if (nsampos(iparty).lt.iunit) then
              ! if ((rindex(imolty).eq.0).or.(ifirst.lt.riutry(imolty,1))) then
              if (nsampos(iparty).ge.3) then
                 call align_planes(iparty,self,other,s_type,o_type,rxnew,rynew,rznew)
@@ -261,7 +262,7 @@ contains
                 !    end do
              end if
              ! end if
-          end if
+          !end if
           !> \bug problem if nsampos.eq.iunit, but rindex.gt.0
           call schedule(igrow,imolty,islen,ifirst,iprev,4)
           !cc---END JLR 11-24-09
@@ -728,21 +729,42 @@ contains
 
     if (random(-1).le.wswat) then
        ! we can now accept !!!!!
-       bsswat(iparty,ipairb) = bsswat(iparty,ipairb) + 1
+       bsswat(iparty,ipairb,boxa) = bsswat(iparty,ipairb,boxa) + 1
+
+       total_tor =0.0_dp
+       total_bend=0.0_dp
+       total_vib =0.0_dp
+       if (lrigid(imolta).and.((rindex(imolta).gt.0.and.nsampos(iparty).eq.nunit(imolta)).or.pm_atom_tra.gt.0)) then
+          call U_bonded(imola,imolta,vvibn,vbendn,vtgn)
+          total_tor =vtgn
+          total_bend=vbendn
+          total_vib =vvibn
+       end if
+       if (lrigid(imoltb).and.((rindex(imoltb).gt.0.and.nsampos(iparty).eq.nunit(imoltb)).or.pm_atom_tra.gt.0)) then
+          call U_bonded(imolb,imoltb,vvibn,vbendn,vtgn)
+          total_tor  = total_tor - vtgn
+          total_bend = total_bend - vbendn
+          total_vib  = total_vib - vvibn
+       end if
+       total_NBE = total_tor + total_bend + total_vib
 
        do jj=1,2
           if (jj.eq.1) ic = boxa
           if (jj.eq.2) then
              if (boxa.eq.boxb) exit
              ic = boxb
+             total_tor =-total_tor
+             total_bend=-total_bend
+             total_vib =-total_vib
+             total_NBE =-total_NBE
           end if
-          vbox(1,ic) = vbox(1,ic) + vnbox(ic) + vntail(ic)
-          vbox(2,ic) = vbox(2,ic) + vninte(ic) + vntail(ic)
+          vbox(1,ic) = vbox(1,ic) + vnbox(ic)   + vntail(ic) - total_NBE
+          vbox(2,ic) = vbox(2,ic) + vninte(ic)  + vntail(ic)
           vbox(4,ic) = vbox(4,ic) + vnintr(ic)
-          vbox(5,ic) = vbox(5,ic) + vnvibb(ic)
-          vbox(7,ic) = vbox(7,ic) + vntgb(ic)
+          vbox(5,ic) = vbox(5,ic) + vnvibb(ic)  - total_vib
+          vbox(7,ic) = vbox(7,ic) + vntgb(ic)   - total_tor
           vbox(9,ic) = vbox(9,ic) + vnextb(ic)
-          vbox(6,ic) = vbox(6,ic) + vnbend(ic)
+          vbox(6,ic) = vbox(6,ic) + vnbend(ic)  - total_bend
           vbox(3,ic) = vbox(3,ic) + vntail(ic)
           vbox(8,ic) = vbox(8,ic) + vnelect(ic) + vnewald(ic)
        end do
@@ -1151,7 +1173,7 @@ contains
     integer::jerr,i,j,k
     namelist /mc_swatch/ pmswat,nswaty,pmsatc
 
-    allocate(bnswat(npamax,npabmax),bnswat_empty(npamax,npabmax),bsswat(npamax,npabmax),stat=jerr)
+    allocate(bnswat(npamax,npabmax,nbxmax),bnswat_empty(npamax,npabmax,nbxmax),bsswat(npamax,npabmax,nbxmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_swatch: allocation failed',jerr)
 
     bnswat = 0
@@ -1264,21 +1286,26 @@ contains
 
   subroutine output_swatch_stats(io_output)
     integer,intent(in)::io_output
-    integer::i,j
+    integer::i,j,ibox,jbox
 
-    write(io_output,*)
-    write(io_output,*) '### Molecule swatch     ###'
-    write(io_output,*)
+    write(io_output,'(/,A,/)') '### Molecule swatch     ###'
     do i = 1, nswaty
-       write(io_output,*) 'pair typ =',i
-       write(io_output,*) 'moltyps = ',nswatb(i,1),' and',nswatb(i,2)
+       write(io_output,'(A,I0)') 'pair typ = ',i
+       write(io_output,'(2(A,I0))') 'moltyps = ',nswatb(i,1),' and ',nswatb(i,2)
        do j = 1, nswtcb(i)
-          ! JLR 12-1-09 changing to exclude empty box attempts from swatch rate
-          write(io_output,"('between box ',I2,' and ',I2, '   uattempts = ',I0,   '  attempts = ',I0, '  accepted = ',I0)") box3(i,j),box4(i,j),bnswat(i,j),bnswat(i,j)-bnswat_empty(i,j),bsswat(i,j)
-          if (bnswat(i,j) .gt. 0.5E0_dp ) then
-             write(io_output,"(' accepted % =',f7.3)") 100.0_dp*real(bsswat(i,j),dp)/real(bnswat(i,j)-bnswat_empty(i,j),dp)
-          end if
-          ! EN JLR 12-1-09
+          do jbox = 1,2
+             if (jbox.eq.1) ibox=box3(i,j)
+             if (jbox.eq.2) then
+                if (box3(i,j).eq.box4(i,j)) exit
+                ibox=box4(i,j)
+             end if
+             ! JLR 12-1-09 changing to exclude empty box attempts from swatch rate
+             write(io_output,"('between box ',I0,' and ',I0,' into box ',I0,'   uattempts = ',I0,   '  attempts = ',I0,'  accepted = ',I0)") box3(i,j),box4(i,j),ibox,bnswat(i,j,ibox),bnswat(i,j,ibox)-bnswat_empty(i,j,ibox),bsswat(i,j,ibox)
+             if (bnswat(i,j,ibox) .gt. 0) then
+                write(io_output,"(' accepted % =',F7.3)") 100.0_dp*real(bsswat(i,j,ibox),dp)/real(bnswat(i,j,ibox)-bnswat_empty(i,j,ibox),dp)
+             end if
+             ! EN JLR 12-1-09
+          end do
        end do
     end do
   end subroutine output_swatch_stats
@@ -1287,9 +1314,9 @@ contains
     use util_mp,only:mp_bcast
     integer,intent(in)::io_chkpt
     if (myid.eq.rootid) read(io_chkpt) bnswat,bnswat_empty,bsswat
-    call mp_bcast(bnswat,npamax*npabmax,rootid,groupid)
-    call mp_bcast(bnswat_empty,npamax*npabmax,rootid,groupid)
-    call mp_bcast(bsswat,npamax*npabmax,rootid,groupid)
+    call mp_bcast(bnswat,npamax*npabmax*nbxmax,rootid,groupid)
+    call mp_bcast(bnswat_empty,npamax*npabmax*nbxmax,rootid,groupid)
+    call mp_bcast(bsswat,npamax*npabmax*nbxmax,rootid,groupid)
   end subroutine read_checkpoint_swatch
 
   subroutine write_checkpoint_swatch(io_chkpt)
