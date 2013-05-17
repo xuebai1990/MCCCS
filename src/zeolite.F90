@@ -22,18 +22,18 @@ module zeolite
   save
   public::zeocoord,suzeo,exzeo
 
-  real,parameter::overlapValue=1.0E+20_dp,upperLimit=1.0E+7_dp,LJScaling=2E4_dp
+  real,parameter::overlapValue=1.0E+20_dp,LJScaling=2E4_dp
   integer,parameter::boxZeo=1
 
   logical,allocatable::lunitcell(:)
   logical::ltailcZeo=.true.,ltestztb=.false.,lpore_volume=.false.,lsurface_area=.false.
 
-  integer::nlayermax,volume_probe=124,volume_nsample=20,area_probe=124,area_nsample=100
-  real,allocatable::zgrid(:,:,:,:,:),egrid(:,:,:,:)
-  real::requiredPrecision=1.0E-2_dp
+  integer::nlayermax,num_points_interpolation=5,volume_probe=124,volume_nsample=20,area_probe=124,area_nsample=100
+  real,allocatable::zgrid(:,:,:,:,:),egrid(:,:,:,:),yjtmp(:),yktmp(:),yltmp(:),xt(:),yt(:),zt(:)
+  real::requiredPrecision=1.0E-2_dp,upperLimit=1.0E+5_dp
   character(LEN=default_path_length)::file_zeocoord='zeolite.cssr',file_ztb='zeolite.ztb'
 
-  namelist /zeolite_in/ file_zeocoord,dgr,file_ztb,requiredPrecision,ltailcZeo,ltestztb,lpore_volume,volume_probe,volume_nsample,lsurface_area,area_probe,area_nsample
+  namelist /zeolite_in/ file_zeocoord,dgr,file_ztb,requiredPrecision,num_points_interpolation,upperLimit,ltailcZeo,ltestztb,lpore_volume,volume_probe,volume_nsample,lsurface_area,area_probe,area_nsample
 
   type(MoleculeType)::zeo
   type(ZeoliteBeadType)::ztype
@@ -104,7 +104,7 @@ contains
   end subroutine zeocoord
 
   subroutine addAllBeadTypes()
-    integer::imol,iunit,igtype,i,idi,idj,ntij,jerr,list(nntype)
+    integer::imol,iunit,igtype,i,idi,idj,ntij,jerr,list(nntype),mstart,mend
     real::sig6
 
     ! find all bead types and store them in an array
@@ -136,7 +136,9 @@ contains
     if (lpore_volume) nmolty=nmolty-1
     if (lsurface_area) nmolty=nmolty-1
 
-    allocate(zgrid(3,ztype%ntype,0:zunit%ngrid(1)-1,0:zunit%ngrid(2)-1,0:zunit%ngrid(3)-1),egrid(0:zunit%ngrid(1)-1,0:zunit%ngrid(2)-1,0:zunit%ngrid(3)-1,zpot%ntype),zpot%param(3,ztype%ntype,zpot%ntype),zpot%table(zpot%ntype),stat=jerr)
+    mend=num_points_interpolation/2
+    mstart=mend+1-num_points_interpolation
+    allocate(zgrid(3,ztype%ntype,0:zunit%ngrid(1)-1,0:zunit%ngrid(2)-1,0:zunit%ngrid(3)-1),egrid(0:zunit%ngrid(1)-1,0:zunit%ngrid(2)-1,0:zunit%ngrid(3)-1,zpot%ntype),zpot%param(3,ztype%ntype,zpot%ntype),zpot%table(zpot%ntype),yjtmp(mstart:mend),yktmp(mstart:mend),yltmp(mstart:mend),xt(mstart:mend),yt(mstart:mend),zt(mstart:mend),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'addAllBeadTypes: allocation failed',myid+1)
 
     do igtype=1,zpot%ntype
@@ -510,9 +512,8 @@ contains
     logical,intent(in)::ignoreTable
 
     logical::lignore
-    integer,parameter::m=2,mt=2*m+1,mst=-m
-    integer::j,j0,jp,k,k0,kp,l,l0,lp,igtype,idj
-    real::yjtmp(mst:m),yktmp(mst:m),yltmp(mst:m),xt(mst:m),yt(mst:m),zt(mst:m),scoord(3),r(3),tab(3,ztype%ntype),rci3,rci9,rho
+    integer::mstart,mend,j,j0,jp,k,k0,kp,l,l0,lp,igtype,idj
+    real::scoord(3),r(3),tab(3,ztype%ntype),rci3,rci9,rho
 
     do igtype=1,zpot%ntype
        if (zpot%table(igtype).eq.idi) exit
@@ -543,26 +544,28 @@ contains
     exzeo=upperLimit
     if (.not.lignore) then
        ! calculation using a grid
+       mend=num_points_interpolation/2
+       mstart=mend+1-num_points_interpolation
 
        ! test if in the reasonable regime
        if (egrid(j,k,l,igtype).ge.upperLimit) return
-       ! block m*m*m centered around: j,k,l
+       ! block centered around: j,k,l
        ! set up hulp array: (allow for going beyond unit cell
        ! for polynom fitting)
-       do l0=mst,m
+       do l0=mstart,mend
           lp=l+l0
           scoord(3)=real(lp,dp)/zunit%ngrid(3)
           ! ---    store x,y,z values around xi,yi,zi in arrays
           zt(l0)=scoord(3)*zunit%hmat(3,3)
           if (lp.lt.0) lp=lp+zunit%ngrid(3)
           if (lp.ge.zunit%ngrid(3)) lp=lp-zunit%ngrid(3)
-          do k0=mst,m
+          do k0=mstart,mend
              kp=k+k0
              scoord(2)=real(kp,dp)/zunit%ngrid(2)
              yt(k0)=scoord(2)*zunit%hmat(2,2)+scoord(3)*zunit%hmat(2,3)
              if (kp.lt.0) kp=kp+zunit%ngrid(2)
              if (kp.ge.zunit%ngrid(2)) kp=kp-zunit%ngrid(2)
-             do j0=mst,m
+             do j0=mstart,mend
                 jp=j+j0
                 scoord(1)=real(jp,dp)/zunit%ngrid(1)
                 xt(j0)=scoord(1)*zunit%hmat(1,1)+scoord(2)*zunit%hmat(1,2)+scoord(3)*zunit%hmat(1,3)
@@ -571,11 +574,11 @@ contains
                 yjtmp(j0)=egrid(jp,kp,lp,igtype)
                 if (yjtmp(j0).ge.upperLimit) return
              end do
-             call polint(xt,yjtmp,mt,r(1),yktmp(k0))
+             call polint(xt,yjtmp,num_points_interpolation,r(1),yktmp(k0))
           end do
-          call polint(yt,yktmp,mt,r(2),yltmp(l0))
+          call polint(yt,yktmp,num_points_interpolation,r(2),yltmp(l0))
        end do
-       call polint(zt,yltmp,mt,r(3),exzeo)
+       call polint(zt,yltmp,num_points_interpolation,r(3),exzeo)
     else
        ! calculating interaction energy with the zeolite framework explicitly
        call exzeof(tab,scoord(1),scoord(2),scoord(3))
@@ -636,14 +639,14 @@ contains
        else
           Uexplicit=Utabulated
        end if
-       weight=exp(-Utabulated*beta)
+       weight=exp(-Uexplicit*beta)
        if (weight.gt.1.0E-5_dp) then
           tel=tel+1
-          BoltTabulated=BoltTabulated+weight
-          eBoltTabulated=eBoltTabulated+Utabulated*weight
-          weight=exp(-Uexplicit*beta)
           BoltExplicit=BoltExplicit+weight
           eBoltExplicit=eBoltExplicit+Uexplicit*weight
+          weight=exp(-Utabulated*beta)
+          BoltTabulated=BoltTabulated+weight
+          eBoltTabulated=eBoltTabulated+Utabulated*weight
           err=abs(Uexplicit-Utabulated)
           if (errAbs.lt.err) errAbs=err
           err=abs(err/Uexplicit)

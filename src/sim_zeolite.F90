@@ -10,6 +10,8 @@ MODULE sim_zeolite
   private
   public::ZeoliteUnitCellGridType,ZeoliteBeadType,ZeolitePotentialType,setUpAtom,setUpCellStruct,foldToCenterCell,foldToUnitCell,fractionalToAbsolute,absoluteToFractional,dgr
 
+  integer,parameter::atom_symbol_length=128
+
   type ZeoliteUnitCellGridType
      integer::dup(3)& !< how many times the unit cell is replicated to form the simulation cell
       ,ngrid(3) !< number of grid points in each direction
@@ -21,7 +23,7 @@ MODULE sim_zeolite
      integer::ntype !< number of framework atom types
      integer,allocatable::type(:),num(:) !< index (as in suijtab) and number of atoms of each type
      real,allocatable::radiisq(:) !< square of protective radii of each type
-     character(LEN=128),allocatable::name(:) !< chemical name of each type
+     character(LEN=atom_symbol_length),allocatable::name(:) !< chemical name of each type
   end type ZeoliteBeadType
 
   type ZeolitePotentialType

@@ -4,7 +4,7 @@ module util_files
   private
   public::get_iounit,readLine,readNthLine,flush_force
 
-  INTEGER,PARAMETER::max_unit_number=999,reserved_unit_numbers(2)=(/5,6/)
+  INTEGER,PARAMETER::max_unit_number=999,reserved_unit_numbers(3)=(/0,5,6/)
 CONTAINS
 
 ! *****************************************************************************
@@ -81,7 +81,7 @@ CONTAINS
     inquire(unit=io_unit,access=mode,action=action,name=fname,form=form,iostat=jerr,opened=lopen,pos=pos)
     if (jerr) then
        write(*,'("Error ",I0," in flush_force file: ",A)') jerr,fname
-    else if (lopen) then
+    else if (lopen.and.ALL(io_unit.ne.reserved_unit_numbers)) then
        close(io_unit)
        open(unit=io_unit,access=mode,action=action,file=fname,form=form,iostat=jerr,position="append",status="old")
        if (jerr) call err_exit(__FILE__,__LINE__,'Error when openning file '//fname,jerr)

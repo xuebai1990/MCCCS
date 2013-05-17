@@ -2888,7 +2888,7 @@ contains
              imolty = moltyp(m)
              write(io_movie,'(4(1x,i5),3(1x,f16.6))') m,imolty,nunit(imolty),nboxi(m),xcm(m),ycm(m),zcm(m)
              do mm = 1, nunit(imolty)
-                write(io_movie,'(4(1x,f14.6),i5)') rxu(m,mm),ryu(m,mm),rzu(m,mm),qqu(m,mm),ntype(imolty,mm)
+                write(io_movie,'(4(1x,f14.6),i5)') rxu(m,mm),ryu(m,mm),rzu(m,mm),qqu(m,mm),atoms%list(ntype(imolty,mm))
              end do
           end do
 

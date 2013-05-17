@@ -1,5 +1,5 @@
 module sim_system
-  use var_type,only:dp,default_path_length
+  use var_type,only:dp,default_path_length,atom_symbol_length
   use util_runtime,only:err_exit
   use util_string,only:integer_to_string
   use util_files,only:get_iounit
@@ -105,7 +105,7 @@ module sim_system
   real,allocatable::mass(:),vvdW_b(:,:),qelect(:),vvdW(:,:),ecut(:)&
    ,brvib(:),brvibk(:),brben(:),brbenk(:)&
    ,ljscale(:,:,:),qscale2(:,:,:)
-  character(len=4),allocatable::chemid(:)
+  character(len=atom_symbol_length),allocatable::chemid(:)
   integer,allocatable::a15type(:,:,:)
   logical,allocatable::lij(:),lqchg(:),lexclu(:,:,:,:),linclu(:,:,:),lqinclu(:,:,:),lainclu(:,:,:),lpl(:)
 
