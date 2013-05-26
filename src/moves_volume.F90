@@ -426,6 +426,9 @@ contains
        dele = (vboxn(1,boxa)-vboxo(1,boxa)) + (vboxn(1,boxb)-vboxo(1,boxb)) - ((nchbox(boxa)+1+ghost_particles(boxa))*log(voln(boxa)/volo(boxa))/beta) - ((nchbox(boxb)+1+ghost_particles(boxb))*log(voln(boxb)/volo(boxb))/beta)
     end if
 
+    ! allows pressure difference (osmotic pressure)
+    dele = dele + (express(boxa)-express(boxb)) * (voln(boxa)-volo(boxa))
+
     ! acceptance test
     if (random(-1) .lt. exp(-beta*dele) ) then
        ! accepted

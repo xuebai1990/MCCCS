@@ -1,4 +1,4 @@
-Program started at 2013-05-03 18:23:29.188
+Program started at 2013-06-06 02:23:35.336
 Number of processors: 1
 Threads per processor: 1
  run_num: 1
@@ -343,9 +343,9 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
     2    1      0.000000      0.000000  0.21457E+08  0.29000    
     2    2      0.000000      0.000000  0.49984E+06  0.29000    
     2    3      0.000000      0.000000  0.28860E+07  0.29000    
-    3    1      0.000000      0.000000   30.199       5.1650    
-    3    2      0.000000      0.000000   435.75       3.8525    
-    3    3      0.000000      0.000000   400.87       3.9175    
+    3    1      0.000000      0.000000   519.57       3.8300    
+    3    2      0.000000      0.000000   333.61       3.8300    
+    3    3      0.000000      0.000000   592.00       3.7300    
  
  sumup control
  number of chains         360
@@ -432,28 +432,28 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  
  ### Volume change       ###
  attempts =   182.0   ratio = 0.544   max.displ. = 0.1415E+03
- 
- ### Molecule swap       ###
- 
- molecule typ =           1
+
+### Molecule swap       ###
+
+molecule typ = 1
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =           2
+molecule typ = 2
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =           3
+molecule typ = 3
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- 
- ### Molecule swatch     ###
- 
- pair typ =           1
- moltyps =            1  and           4
-between box  1 and  1   uattempts = 0  attempts = 0  accepted = 0
-between box  2 and  2   uattempts = 0  attempts = 0  accepted = 0
+
+### Molecule swatch     ###
+
+pair typ = 1
+moltyps = 1 and 4
+between box 1 and 1 into box 1   uattempts = 0  attempts = 0  accepted = 0
+between box 2 and 2 into box 2   uattempts = 0  attempts = 0  accepted = 0
  
  ### Charge Fluctuation  ###
  
@@ -585,4 +585,4 @@ molecule  3:   0.00000000
    8 -0.3485E+08  0.1861E+01  0.0000E+00  0.0000E+00  0.1667E+00  0.5000E+00  0.3333E+00
    9 -0.3489E+08  0.1854E+01  0.0000E+00  0.0000E+00  0.1667E+00  0.5000E+00  0.3333E+00
   10 -0.3507E+08  0.1855E+01  0.0000E+00  0.0000E+00  0.1667E+00  0.5000E+00  0.3333E+00
- Program ended at 2013-05-03 18:23:50.982
+ Program ended at 2013-06-06 02:23:56.925

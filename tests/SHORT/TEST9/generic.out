@@ -1,4 +1,4 @@
-Program started at 2013-05-03 18:24:34.336
+Program started at 2013-06-06 02:24:22.917
 Number of processors: 1
 Threads per processor: 1
  run_num: 1
@@ -496,20 +496,21 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  h-matrix attempts =     0.0   ratio = 0.000   max.displ. = 0.6501E+00
  h-matrix attempts =     0.0   ratio = 0.000   max.displ. = 0.7925E+00
  h-matrix attempts =     1.0   ratio = 0.000   max.displ. = 0.1891E+00
- 
- ### Molecule swap       ###
- 
- molecule typ =           1
+
+### Molecule swap       ###
+
+molecule typ = 1
 between box 1 and 2 into box 1   uattempts = 0 attempts = 0   accepted = 0
 between box 1 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- 
- ### Molecule swatch     ###
- 
- pair typ =           1
- moltyps =            2  and           3
-between box  1 and  2   uattempts = 0  attempts = 0  accepted = 0
+
+### Molecule swatch     ###
+
+pair typ = 1
+moltyps = 2 and 3
+between box 1 and 2 into box 1   uattempts = 0  attempts = 0  accepted = 0
+between box 1 and 2 into box 2   uattempts = 0  attempts = 0  accepted = 0
  
  ### Charge Fluctuation  ###
  
@@ -575,4 +576,4 @@ molecule  1:   0.00000000
  
  type  box       vinter       vintra         vtor        vbend        vtail
     1    1      0.00000      0.00000      0.00000      0.00000      0.00000
- Program ended at 2013-05-03 18:24:48.942
+ Program ended at 2013-06-06 02:24:36.923

@@ -1,4 +1,4 @@
-Program started at 2013-05-03 18:24:08.738
+Program started at 2013-06-06 02:23:57.724
 Number of processors: 1
 Threads per processor: 1
  run_num: 1
@@ -466,20 +466,21 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  ### Volume change       ###
  attempts =     0.0   ratio = 0.000   max.displ. = 0.1000E-02
  attempts =     0.0   ratio = 0.000   max.displ. = 0.1000E-02
- 
- ### Molecule swap       ###
- 
- molecule typ =           1
+
+### Molecule swap       ###
+
+molecule typ = 1
 between box 1 and 2 into box 1   uattempts = 0 attempts = 0   accepted = 0
 between box 1 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- 
- ### Molecule swatch     ###
- 
- pair typ =           1
- moltyps =            1  and           2
-between box  1 and  2   uattempts = 0  attempts = 0  accepted = 0
+
+### Molecule swatch     ###
+
+pair typ = 1
+moltyps = 1 and 2
+between box 1 and 2 into box 1   uattempts = 0  attempts = 0  accepted = 0
+between box 1 and 2 into box 2   uattempts = 0  attempts = 0  accepted = 0
  
  ### Charge Fluctuation  ###
  
@@ -629,4 +630,4 @@ molecule  1:   0.00000000      0.00000000
  block    energy     density    pressure    surf ten   mol fracs
    1  0.2566E+06  0.5204E-02  0.1295E+04  0.2910E-01  0.1000E+01
    2  0.2926E+06  0.5204E-02  0.1289E+04  0.7399E-01  0.1000E+01
- Program ended at 2013-05-03 18:24:34.106
+ Program ended at 2013-06-06 02:24:22.711

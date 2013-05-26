@@ -1,4 +1,4 @@
-Program started at 2013-05-03 18:24:01.523
+Program started at 2013-06-06 02:36:30.098
 Number of processors: 1
 Threads per processor: 1
  run_num: 1
@@ -7723,10 +7723,10 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  attempts =     0.0   ratio = 0.000   max.displ. = 0.1000E+00
  attempts =     0.0   ratio = 0.000   max.displ. = 0.6267E+03
  attempts =     1.0   ratio = 1.000   max.displ. = 0.6889E+06
- 
- ### Molecule swap       ###
- 
- molecule typ =           1
+
+### Molecule swap       ###
+
+molecule typ = 1
 between box 1 and 2 into box 1   uattempts = 0 attempts = 0   accepted = 0
 between box 1 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
 between box 1 and 3 into box 1   uattempts = 7 attempts = 0   accepted = 0
@@ -7737,7 +7737,7 @@ between box 2 and 3 into box 3   uattempts = 5 attempts = 5   accepted = 0
  suc.growth % =100.000   accepted % =  0.000
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =           2
+molecule typ = 2
 between box 1 and 2 into box 1   uattempts = 8 attempts = 8   accepted = 0
  suc.growth % =100.000   accepted % =  0.000
 between box 1 and 2 into box 2   uattempts = 1 attempts = 1   accepted = 0
@@ -7750,27 +7750,27 @@ between box 2 and 3 into box 3   uattempts = 8 attempts = 8   accepted = 0
  suc.growth % =100.000   accepted % =  0.000
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =           3
+molecule typ = 3
 between box 2 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =           4
+molecule typ = 4
 between box 2 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =           5
+molecule typ = 5
 between box 3 and 3 into box 3   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =           6
+molecule typ = 6
 between box 2 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =           7
+molecule typ = 7
 between box 2 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =           8
+molecule typ = 8
 between box 1 and 2 into box 1   uattempts = 0 attempts = 0   accepted = 0
 between box 1 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
 between box 1 and 3 into box 1   uattempts = 50 attempts = 43   accepted = 4
@@ -7781,7 +7781,7 @@ between box 2 and 3 into box 2   uattempts = 0 attempts = 0   accepted = 0
 between box 2 and 3 into box 3   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =           9
+molecule typ = 9
 between box 1 and 2 into box 1   uattempts = 0 attempts = 0   accepted = 0
 between box 1 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
 between box 1 and 3 into box 1   uattempts = 0 attempts = 0   accepted = 0
@@ -7790,7 +7790,7 @@ between box 2 and 3 into box 2   uattempts = 0 attempts = 0   accepted = 0
 between box 2 and 3 into box 3   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          10
+molecule typ = 10
 between box 1 and 2 into box 1   uattempts = 0 attempts = 0   accepted = 0
 between box 1 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
 between box 1 and 3 into box 1   uattempts = 0 attempts = 0   accepted = 0
@@ -7799,252 +7799,326 @@ between box 2 and 3 into box 2   uattempts = 0 attempts = 0   accepted = 0
 between box 2 and 3 into box 3   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          11
+molecule typ = 11
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          12
+molecule typ = 12
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          13
+molecule typ = 13
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          14
+molecule typ = 14
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          15
+molecule typ = 15
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          16
+molecule typ = 16
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          17
+molecule typ = 17
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          18
+molecule typ = 18
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          19
+molecule typ = 19
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          20
+molecule typ = 20
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          21
+molecule typ = 21
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          22
+molecule typ = 22
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          23
+molecule typ = 23
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          24
+molecule typ = 24
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          25
+molecule typ = 25
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          26
+molecule typ = 26
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          27
+molecule typ = 27
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          28
+molecule typ = 28
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          29
+molecule typ = 29
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          30
+molecule typ = 30
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          31
+molecule typ = 31
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          32
+molecule typ = 32
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          33
+molecule typ = 33
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- molecule typ =          34
+molecule typ = 34
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- 
- ### Molecule swatch     ###
- 
- pair typ =           1
- moltyps =            8  and           9
-between box  1 and  3   uattempts = 14  attempts = 4  accepted = 0
+
+### Molecule swatch     ###
+
+pair typ = 1
+moltyps = 8 and 9
+between box 1 and 3 into box 1   uattempts = 6  attempts = 1  accepted = 0
  accepted % =  0.000
- pair typ =           2
- moltyps =            9  and          10
-between box  1 and  3   uattempts = 7  attempts = 5  accepted = 5
+between box 1 and 3 into box 3   uattempts = 8  attempts = 3  accepted = 0
+ accepted % =  0.000
+pair typ = 2
+moltyps = 9 and 10
+between box 1 and 3 into box 1   uattempts = 2  attempts = 2  accepted = 2
  accepted % =100.000
- pair typ =           3
- moltyps =           10  and          11
-between box  1 and  3   uattempts = 7  attempts = 3  accepted = 0
+between box 1 and 3 into box 3   uattempts = 5  attempts = 3  accepted = 3
+ accepted % =100.000
+pair typ = 3
+moltyps = 10 and 11
+between box 1 and 3 into box 1   uattempts = 3  attempts = 3  accepted = 0
  accepted % =  0.000
- pair typ =           4
- moltyps =           11  and          12
-between box  1 and  3   uattempts = 9  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 4  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =           5
- moltyps =           12  and          13
-between box  1 and  3   uattempts = 9  attempts = 0  accepted = 0
+pair typ = 4
+moltyps = 11 and 12
+between box 1 and 3 into box 1   uattempts = 4  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =           6
- moltyps =           13  and          14
-between box  1 and  3   uattempts = 14  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 5  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =           7
- moltyps =           14  and          15
-between box  1 and  3   uattempts = 16  attempts = 0  accepted = 0
+pair typ = 5
+moltyps = 12 and 13
+between box 1 and 3 into box 1   uattempts = 4  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =           8
- moltyps =           15  and          16
-between box  1 and  3   uattempts = 15  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 5  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =           9
- moltyps =           16  and          17
-between box  1 and  3   uattempts = 21  attempts = 0  accepted = 0
+pair typ = 6
+moltyps = 13 and 14
+between box 1 and 3 into box 1   uattempts = 9  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          10
- moltyps =           17  and          18
-between box  1 and  3   uattempts = 10  attempts = 2  accepted = 0
+between box 1 and 3 into box 3   uattempts = 5  attempts = 0  accepted = 0
+ accepted % =    NaN
+pair typ = 7
+moltyps = 14 and 15
+between box 1 and 3 into box 1   uattempts = 7  attempts = 0  accepted = 0
+ accepted % =    NaN
+between box 1 and 3 into box 3   uattempts = 9  attempts = 0  accepted = 0
+ accepted % =    NaN
+pair typ = 8
+moltyps = 15 and 16
+between box 1 and 3 into box 1   uattempts = 7  attempts = 0  accepted = 0
+ accepted % =    NaN
+between box 1 and 3 into box 3   uattempts = 8  attempts = 0  accepted = 0
+ accepted % =    NaN
+pair typ = 9
+moltyps = 16 and 17
+between box 1 and 3 into box 1   uattempts = 11  attempts = 0  accepted = 0
+ accepted % =    NaN
+between box 1 and 3 into box 3   uattempts = 10  attempts = 0  accepted = 0
+ accepted % =    NaN
+pair typ = 10
+moltyps = 17 and 18
+between box 1 and 3 into box 1   uattempts = 8  attempts = 0  accepted = 0
+ accepted % =    NaN
+between box 1 and 3 into box 3   uattempts = 2  attempts = 2  accepted = 0
  accepted % =  0.000
- pair typ =          11
- moltyps =           18  and          19
-between box  1 and  3   uattempts = 12  attempts = 7  accepted = 0
+pair typ = 11
+moltyps = 18 and 19
+between box 1 and 3 into box 1   uattempts = 7  attempts = 7  accepted = 0
  accepted % =  0.000
- pair typ =          12
- moltyps =           17  and          20
-between box  1 and  3   uattempts = 16  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 5  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          13
- moltyps =           20  and          21
-between box  1 and  3   uattempts = 11  attempts = 0  accepted = 0
+pair typ = 12
+moltyps = 17 and 20
+between box 1 and 3 into box 1   uattempts = 11  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          14
- moltyps =           15  and          22
-between box  1 and  3   uattempts = 19  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 5  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          15
- moltyps =           22  and          24
-between box  1 and  3   uattempts = 15  attempts = 0  accepted = 0
+pair typ = 13
+moltyps = 20 and 21
+between box 1 and 3 into box 1   uattempts = 7  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          16
- moltyps =           23  and          24
-between box  1 and  3   uattempts = 23  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 4  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          17
- moltyps =           24  and          21
-between box  1 and  3   uattempts = 17  attempts = 0  accepted = 0
+pair typ = 14
+moltyps = 15 and 22
+between box 1 and 3 into box 1   uattempts = 10  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          18
- moltyps =           23  and          25
-between box  1 and  3   uattempts = 22  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 9  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          19
- moltyps =           25  and          26
-between box  1 and  3   uattempts = 18  attempts = 0  accepted = 0
+pair typ = 15
+moltyps = 22 and 24
+between box 1 and 3 into box 1   uattempts = 7  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          20
- moltyps =           23  and          27
-between box  1 and  3   uattempts = 15  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 8  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          21
- moltyps =           27  and          28
-between box  1 and  3   uattempts = 10  attempts = 0  accepted = 0
+pair typ = 16
+moltyps = 23 and 24
+between box 1 and 3 into box 1   uattempts = 9  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          22
- moltyps =           23  and          29
-between box  1 and  3   uattempts = 18  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 14  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          23
- moltyps =           29  and          30
-between box  1 and  3   uattempts = 16  attempts = 0  accepted = 0
+pair typ = 17
+moltyps = 24 and 21
+between box 1 and 3 into box 1   uattempts = 8  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          24
- moltyps =           23  and          31
-between box  1 and  3   uattempts = 13  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 9  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          25
- moltyps =           16  and          22
-between box  1 and  3   uattempts = 12  attempts = 0  accepted = 0
+pair typ = 18
+moltyps = 23 and 25
+between box 1 and 3 into box 1   uattempts = 17  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          26
- moltyps =           18  and          20
-between box  1 and  3   uattempts = 17  attempts = 11  accepted = 0
+between box 1 and 3 into box 3   uattempts = 5  attempts = 0  accepted = 0
+ accepted % =    NaN
+pair typ = 19
+moltyps = 25 and 26
+between box 1 and 3 into box 1   uattempts = 11  attempts = 0  accepted = 0
+ accepted % =    NaN
+between box 1 and 3 into box 3   uattempts = 7  attempts = 0  accepted = 0
+ accepted % =    NaN
+pair typ = 20
+moltyps = 23 and 27
+between box 1 and 3 into box 1   uattempts = 7  attempts = 0  accepted = 0
+ accepted % =    NaN
+between box 1 and 3 into box 3   uattempts = 8  attempts = 0  accepted = 0
+ accepted % =    NaN
+pair typ = 21
+moltyps = 27 and 28
+between box 1 and 3 into box 1   uattempts = 4  attempts = 0  accepted = 0
+ accepted % =    NaN
+between box 1 and 3 into box 3   uattempts = 6  attempts = 0  accepted = 0
+ accepted % =    NaN
+pair typ = 22
+moltyps = 23 and 29
+between box 1 and 3 into box 1   uattempts = 7  attempts = 0  accepted = 0
+ accepted % =    NaN
+between box 1 and 3 into box 3   uattempts = 11  attempts = 0  accepted = 0
+ accepted % =    NaN
+pair typ = 23
+moltyps = 29 and 30
+between box 1 and 3 into box 1   uattempts = 6  attempts = 0  accepted = 0
+ accepted % =    NaN
+between box 1 and 3 into box 3   uattempts = 10  attempts = 0  accepted = 0
+ accepted % =    NaN
+pair typ = 24
+moltyps = 23 and 31
+between box 1 and 3 into box 1   uattempts = 4  attempts = 0  accepted = 0
+ accepted % =    NaN
+between box 1 and 3 into box 3   uattempts = 9  attempts = 0  accepted = 0
+ accepted % =    NaN
+pair typ = 25
+moltyps = 16 and 22
+between box 1 and 3 into box 1   uattempts = 8  attempts = 0  accepted = 0
+ accepted % =    NaN
+between box 1 and 3 into box 3   uattempts = 4  attempts = 0  accepted = 0
+ accepted % =    NaN
+pair typ = 26
+moltyps = 18 and 20
+between box 1 and 3 into box 1   uattempts = 11  attempts = 11  accepted = 0
  accepted % =  0.000
- pair typ =          27
- moltyps =           20  and          24
-between box  1 and  3   uattempts = 21  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 6  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          28
- moltyps =           24  and          25
-between box  1 and  3   uattempts = 14  attempts = 0  accepted = 0
+pair typ = 27
+moltyps = 20 and 24
+between box 1 and 3 into box 1   uattempts = 15  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          29
- moltyps =           24  and          27
-between box  1 and  3   uattempts = 12  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 6  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          30
- moltyps =           24  and          29
-between box  1 and  3   uattempts = 28  attempts = 0  accepted = 0
+pair typ = 28
+moltyps = 24 and 25
+between box 1 and 3 into box 1   uattempts = 7  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          31
- moltyps =           25  and          27
-between box  1 and  3   uattempts = 14  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 7  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          32
- moltyps =           25  and          29
-between box  1 and  3   uattempts = 17  attempts = 0  accepted = 0
+pair typ = 29
+moltyps = 24 and 27
+between box 1 and 3 into box 1   uattempts = 7  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          33
- moltyps =           27  and          29
-between box  1 and  3   uattempts = 17  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 5  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          34
- moltyps =           23  and          34
-between box  1 and  3   uattempts = 14  attempts = 0  accepted = 0
+pair typ = 30
+moltyps = 24 and 29
+between box 1 and 3 into box 1   uattempts = 15  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          35
- moltyps =           34  and          33
-between box  1 and  3   uattempts = 5  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 13  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          36
- moltyps =           33  and          32
-between box  1 and  3   uattempts = 6  attempts = 0  accepted = 0
+pair typ = 31
+moltyps = 25 and 27
+between box 1 and 3 into box 1   uattempts = 5  attempts = 0  accepted = 0
  accepted % =    NaN
- pair typ =          37
- moltyps =           28  and          32
-between box  1 and  3   uattempts = 9  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 9  attempts = 0  accepted = 0
+ accepted % =    NaN
+pair typ = 32
+moltyps = 25 and 29
+between box 1 and 3 into box 1   uattempts = 7  attempts = 0  accepted = 0
+ accepted % =    NaN
+between box 1 and 3 into box 3   uattempts = 10  attempts = 0  accepted = 0
+ accepted % =    NaN
+pair typ = 33
+moltyps = 27 and 29
+between box 1 and 3 into box 1   uattempts = 8  attempts = 0  accepted = 0
+ accepted % =    NaN
+between box 1 and 3 into box 3   uattempts = 9  attempts = 0  accepted = 0
+ accepted % =    NaN
+pair typ = 34
+moltyps = 23 and 34
+between box 1 and 3 into box 1   uattempts = 10  attempts = 0  accepted = 0
+ accepted % =    NaN
+between box 1 and 3 into box 3   uattempts = 4  attempts = 0  accepted = 0
+ accepted % =    NaN
+pair typ = 35
+moltyps = 34 and 33
+between box 1 and 3 into box 1   uattempts = 4  attempts = 0  accepted = 0
+ accepted % =    NaN
+between box 1 and 3 into box 3   uattempts = 1  attempts = 0  accepted = 0
+ accepted % =    NaN
+pair typ = 36
+moltyps = 33 and 32
+between box 1 and 3 into box 1   uattempts = 3  attempts = 0  accepted = 0
+ accepted % =    NaN
+between box 1 and 3 into box 3   uattempts = 3  attempts = 0  accepted = 0
+ accepted % =    NaN
+pair typ = 37
+moltyps = 28 and 32
+between box 1 and 3 into box 1   uattempts = 6  attempts = 0  accepted = 0
+ accepted % =    NaN
+between box 1 and 3 into box 3   uattempts = 3  attempts = 0  accepted = 0
  accepted % =    NaN
  
  ### Charge Fluctuation  ###
@@ -8126,7 +8200,7 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  number of chains of type          32           0
  number of chains of type          33           0
  number of chains of type          34           0
- inter lj energy    4814331.70457185     
+ inter lj energy    4814331.70443062     
  intra lj energy   -27797.0195350598     
  bond vibration    0.000000000000000E+000
  bond bending       271528.203716425     
@@ -8135,9 +8209,9 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  coulombic energy  -33814632.4863889     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -28653784.1912084     
+ total energy      -28653784.1913496     
  ### problem with energy ###  box            1
-  Total energy:   -28653784.1912084       -28653784.1910310      -1.774281263351440E-004
+  Total energy:   -28653784.1913496       -28653784.1911722      -1.774430274963379E-004
  
  sumup control
  number of chains         892
@@ -8234,8 +8308,8 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  total energy      0.000000000000000E+000
  
  vstart       =    -28648950.4639775865     -3460138.0046509313            0.0000000000
- vend         =    -28653784.1912084036     -3453382.4174447656            0.0000000000
- vbox         =    -28653784.1910309754     -3453382.4174447176            0.0000000000
+ vend         =    -28653784.1913496405     -3453382.4174447656            0.0000000000
+ vbox         =    -28653784.1911721975     -3453382.4174447176            0.0000000000
  
  Averages and fluctuations                        Box  1       Box  2       Box  3
  
@@ -8535,4 +8609,4 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
    34    1      0.00000      0.00000      0.00000      0.00000      0.00000
    34    2      0.00000      0.00000      0.00000      0.00000      0.00000
    34    3      0.00000      0.00000      0.00000      0.00000      0.00000
- Program ended at 2013-05-03 18:24:08.443
+ Program ended at 2013-06-06 02:36:37.097
