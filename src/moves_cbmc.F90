@@ -7203,8 +7203,8 @@ contains
           else
              write(io_safecbmc,*) counttot
           end if
-          do j = 1, iring(1)
-             do k = 1, iring(1)
+          do j = 1, iring(imolty)
+             do k = 1, iring(imolty)
                 if (j.eq.k) cycle
                 do bin = 1, maxbin
                    write(io_safecbmc,*) bin,probf(j,k,bin)
