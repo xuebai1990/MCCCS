@@ -468,6 +468,7 @@ contains
           if ( ip2 .lt. j ) then
              ip1 = ijben2(imolty,j,jjben)
              it  = itben(imolty,j,jjben)
+             if (brbenk(it).lt.-0.1E0_dp) cycle
              thetac = ( rxvec(ip1,j)*rxvec(ip1,ip2) + ryvec(ip1,j)*ryvec(ip1,ip2) + rzvec(ip1,j)*rzvec(ip1,ip2) ) / ( distanceij(ip1,j)*distanceij(ip1,ip2) )
              if ( thetac .ge. 1.0E0_dp ) thetac = 1.0E0_dp
              if ( thetac .le. -1.0E0_dp ) thetac = -1.0E0_dp

@@ -385,69 +385,69 @@ files. In this manual, references to files such as {\bf
 xyz format if TRUE.
 
 \subsection{Namelist \textbf{system}}
-\noindent{\bf lnpt} if TRUE then a NPT volume move is used
+\noindent{\bf lnpt:} if TRUE then a NPT volume move is used
 to equilibrate with a pressure bath (implies cubic
 simulation boxes) else an NVT simulation is performed.
 
-\noindent{\bf lgibbs} if TRUE then a Gibbs-ensemble
+\noindent{\bf lgibbs:} if TRUE then a Gibbs-ensemble
 simulation is performed (implies cubic simulation boxes).
 
-\noindent{\bf lgrand} if TRUE then simulation is performed
+\noindent{\bf lgrand:} if TRUE then simulation is performed
 in the grand-canonical ensemble.
 
-\noindent{\bf lanes} if TRUE then simulation is performed in
+\noindent{\bf lanes:} if TRUE then simulation is performed in
 the adiabatic nuclear and electronic sampling technique for
 polarizable force fields.
 
-\noindent{\bf lvirial} if TRUE then one chain will be
+\noindent{\bf lvirial:} if TRUE then one chain will be
 simulated in each box independently and the second virial
 coefficient will be calculated for their interactions at a
 series of distances along the x-axis.
 
-\noindent{\bf lmipsw} if TRUE, then thermodynamic
+\noindent{\bf lmipsw:} if TRUE, then thermodynamic
 integration is performed for the phases, fort.35 must be
 supplied if so.
 
-\noindent{\bf lexpee} if TRUE, then expanded esnemble is
+\noindent{\bf lexpee:} if TRUE, then expanded esnemble is
 performed for the phases, {\bf fort.44} must be supplied if
 so.
 
-\noindent{\bf ldielect} if TRUE then dielectric constant
+\noindent{\bf ldielect:} if TRUE then dielectric constant
 will be calculated and LEWALD must be TRUE Correct only in
 NVT ensemble.
 
-\noindent{\bf lpbc} if TRUE then periodic boundaries are used.
+\noindent{\bf lpbc:} if TRUE then periodic boundaries are used.
 
-\noindent{\bf lpbcx} if TRUE then periodic boundary in x-directions is used.
+\noindent{\bf lpbcx:} if TRUE then periodic boundary in x-directions is used.
 
-\noindent{\bf lpbcy} if TRUE then periodic boundary in y-directions is used.
+\noindent{\bf lpbcy:} if TRUE then periodic boundary in y-directions is used.
 
-\noindent{\bf lpbcz} if TRUE then periodic boundary in z-directions is used.
+\noindent{\bf lpbcz:} if TRUE then periodic boundary in z-directions is used.
 
-\noindent{\bf lfold} if TRUE then coordinates are always folded into central box.
+\noindent{\bf lfold:} if TRUE then coordinates are always folded into central box.
 
-\noindent{\bf lijall} if TRUE then all i-j interactions are
+\noindent{\bf lijall:} if TRUE then all i-j interactions are
 considered (no potential cut-off). Must set lcutcm and
 ltailc to FALSE for lijall = TRUE *** check top of sumup.f
 if lijall = TRUE and lchgall is FALSE.
 
-\noindent{\bf lchgall} if TRUE then all the electrostatic
+\noindent{\bf lchgall:} if TRUE then all the electrostatic
 interaction are considered.
 
-\noindent{\bf lewald} if TRUE then ewald-sum will be used to
+\noindent{\bf lewald:} if TRUE then ewald-sum will be used to
 calculate the electrostatic interactions.
 
-\noindent{\bf lcutcm} if TRUE then a cutoff of the centers
+\noindent{\bf lcutcm:} if TRUE then a cutoff of the centers
 of mass will be used with a value of rcmu as calculated in
 ctrmas.
 
-\noindent{\bf ltailc} if TRUE tail corrections are added
+\noindent{\bf ltailc:} if TRUE tail corrections are added
 (WARNING: .lsami. in external.inc switches an intrinsic tail
 correction on).
 
-\noindent{\bf lshift} if TRUE use truncated and shifted potentials.
+\noindent{\bf lshift:} if TRUE use truncated and shifted potentials.
 
-\noindent{\bf ldual} if TRUE then the external potential
+\noindent{\bf ldual:} if TRUE then the external potential
 during a CBMC growth will only go out to a radius of rcutin
 and then will be corrected to the full rcut at the end. This
 is Dual Cutoff Configurational-bias Monte Carlo (DC-CBMC).
@@ -456,30 +456,31 @@ is Dual Cutoff Configurational-bias Monte Carlo (DC-CBMC).
 energy during the Boltzmann weight calculation. Normally
 TRUE.
 
-\noindent{\bf lneigh} if TRUE the nearest neighbor list will
+\noindent{\bf lneigh:} if TRUE the nearest neighbor list will
 be used with a value of rcutnn specified in {\bf
   file\_input}.
 
-\noindent{\bf lexzeo} implicit rigid framework for zeolites
+\noindent{\bf lexzeo:} implicit rigid framework for zeolites
 and metal-organic frameworks. Tabulated potential will be
 used for the interactions with the rigid framework.
-Parameters are read in subroutine SUZEO.
+Parameters are read in subroutine SUZEO. See
+\ref{zeolite_in} and \ref{zeolite} for more information.
 
-\noindent{\bf lslit} featureless, planar slit surface(s).
+\noindent{\bf lslit:} featureless, planar slit surface(s).
 
-\noindent{\bf lgraphite} x,y-dependent graphite surface.
+\noindent{\bf lgraphite:} x,y-dependent graphite surface.
 
-\noindent{\bf lsami} SAMI; LJ potential hard coded in {\bf susami}.
+\noindent{\bf lsami:} SAMI; LJ potential hard coded in {\bf susami}.
 
-\noindent{\bf lmuir} Langmuir monolayer; LJ potential hard coded in {\bf susami}.
+\noindent{\bf lmuir:} Langmuir monolayer; LJ potential hard coded in {\bf susami}.
 
-\noindent{\bf lelect\_field} external electric field.
+\noindent{\bf lelect\_field:} external electric field.
 
-\noindent{\bf lgaro} if TRUE Feuston-Garofalini potential
+\noindent{\bf lgaro:} if TRUE Feuston-Garofalini potential
 will be used; parameters hard coded in
 {\bf init\_garofalini}.
 
-\noindent{\bf lionic} disable the check for molecule neutrality
+\noindent{\bf lionic:} disable the check for molecule neutrality
 
 \noindent{\bf L\_Ewald\_Auto:} For the automatic assignment
 of Ewald parameters. If TRUE, the code will generate {\bf
@@ -527,6 +528,86 @@ designed to work with Greg Voth's
 force-matched/coarse-grained potential, so each potential in
 fort.44 is the same. The tabulated potentials are then
 multiplied by the partial atomic charges within the code.
+
+\subsection{Namelist \textbf{zeolite\_in}}
+\label{zeolite_in}
+Please see \ref{zeolite} for more information.
+
+\noindent{\bf file\_zeocoord:} Name of the zeolite
+coordinate file; default: \textbf{zeolite.cssr}.
+
+\noindent{\bf dgr:} Grid spacing (\AA) for the tabulated
+potential; default: 0.2. This affects the choice of
+\textbf{rexcl} as explained in \ref{zeolite}.
+
+\noindent{\bf file\_ztb:} Name of the zeolite tabulated
+potential file; default: \textbf{zeolite.ztb}.
+
+\noindent{\bf requiredPrecision:} When generating the
+tabulated potential with \textbf{ltailcZeo} set to .true.,
+this controls the precision at which point to stop include
+more layers for the LJ interactions; default: 1.0E-2.
+
+\noindent{\bf num\_points\_interpolation:} Number of points
+used for potential interpolation; default: 5. A polynomial
+interpolation of degree N requires N+1 points.
+
+\noindent{\bf upperLimit:} A large value above which to
+consider the interpolated energy to be infinity; default:
+1.0E+5.
+
+\noindent{\bf ltailcZeo:} Default to .true.. Has different
+meanings for pre-tabulation and for interpolation. For
+pre-tabulation .true. means successive layers of unit cells
+need to be considered for LJ interactions until
+\textbf{requiredPrecision} is achieved, which is to mimick
+the use of the Ewald technique; otherwise \textbf{rcut} for
+this simulation box will be used. If \textbf{ltailcZeo} is
+set to .false. during pre-tabulation, you can, during
+interpolation, optionally set it to .true. to use
+(approximate) analytical tail corrections or set it to
+.false. to use a spherically truncated potential. If
+\textbf{ltailcZeo} is set to .true. during pre-tabulation,
+then its setting during interpolation does not matter. To
+use a shifted potential, set \textbf{ltailcZeo} to .false.
+and \textbf{lshift} to .true. during pre-tabulation. The
+treatment of electrostatic energies is controlled through
+\textbf{lewald} similar to the way it is handled elsewhere.
+
+\noindent{\bf ltestztb:} Set to .true. to test the accuracy
+of the tabulated potential. The program will randomly select
+\textbf{volume\_nsample} points, evaluate the energies both
+explicitly and using interpolated values from the tabulated
+potential, and compare the differences.
+
+\noindent{\bf lpore\_volume:} Set to .true. to calculate the
+pore volume as the adsorption second virial coefficient. See
+O. Talu and A.L. Myers, "Molecular simulation of adsorption:
+Gibbs dividing surface and comparison with experiment",
+\textit{AICHE J.}, 47(5), 1160-1168 (2001). It also involves
+energy calculations at randomly selected positions, so the
+accuracy test and the calculation of pore volume can be done
+together without much added computational cost.
+
+\noindent{\bf volume\_probe:} Bead type (as defined in
+\ref{atoms}) of the volume probe atom.
+
+\noindent{\bf volume\_nsample:} Number of points to consider
+for the accuracy test and the calculation of pore volume.
+
+\noindent{\bf lsurface\_area:} Set to .true. to calculate
+the geometric surface area using a Monte Carlo scheme. It
+randomly generates \textbf{area\_nsample} points around each
+framework atom in the unit cell on a sphere of radius
+$\sigma_{\textrm{host,probe}}$ and calculates the overlap
+with the rest of the framework atoms.
+
+\noindent{\bf area\_probe:} Bead type (as defined in
+\ref{atoms}) of the area probe atom.
+
+\noindent{\bf area\_nsample:} Number of points around each
+unit-cell framework atom to consider for the surface area
+calculation.
 
 \subsection{Section \textbf{ATOMS}}
 \label{atoms}
@@ -1296,7 +1377,7 @@ and if {\bf nrig} is less than or equal to 0. This variable
 denotes the maximum amount of the chain to keep rigid.
 
 \subsubsection{Namelist \textbf{mc\_flucq}}
-\noindent{\bf taflcq} Specifies the target acceptance rate
+\noindent{\bf taflcq:} Specifies the target acceptance rate
 for fluctuating charge moves. For polarizable models only.
 
 \noindent{\bf fqtemp:} The fluctuating charge temperature,
@@ -1781,7 +1862,7 @@ the a15 value, which is 1 is for an ether oxygen ($4\times
 
 \subsection{Input Files}
 
-\noindent{\bf file\_restart} This is the restart file and
+\noindent{\bf file\_restart:} This is the restart file and
 must be present for all simulations in which {\bf linit} (in
 {\bf file\_input} is FALSE. To continue a simulation, copy
 the final configuration file from the previous run, {\bf
@@ -1826,21 +1907,21 @@ $x$, $y$ and $z$ coordinates and the charge, $q$, of molecule {\bf nchain} \\
 \end{tabular}
 \end{center}
 
-\noindent{\bf file\_struct} Only necessary if {\bf lbranch}
+\noindent{\bf file\_struct:} Only necessary if {\bf lbranch}
 in {\bf file\_input} is TRUE for any molecule. If so, this
 is where the structure of the molecule is specified.
 
-\noindent{\bf fort.7, fort.44} Used for the new and the old
+\noindent{\bf fort.7, fort.44:} Used for the new and the old
 expanded ensemble calculations, respectively. {\bf fort.7}
 holds the current values of the Lennard-Jones parameters.
 
-\noindent{\bf fort.23} Only necessary if SAFE-CBMC is used.
+\noindent{\bf fort.23:} Only necessary if SAFE-CBMC is used.
 This file contains the probability histograms used in that
 algorithm. To adapt the probabilities, the final histograms
 that are given in the {\bf fort.21} output file should be
 copied to {\bf fort.23} before continuing the simulation.
 
-\noindent{\bf fort.40, fort.41, fort.42} Tabulated potential
+\noindent{\bf fort.40, fort.41, fort.42:} Tabulated potential
 files for intramolecular bonded interactions all have the
 same format (make sure potential does not go up to
 infinity!):
@@ -1855,7 +1936,7 @@ rn U_n
 (repeat the above for each additional potential)
 \end{verbatim}
 
-\noindent{\bf fort.43, fort.44} Tabulated potential files
+\noindent{\bf fort.43, fort.44:} Tabulated potential files
 for van der Waals and Coulomb interactions, respectively.
 Both files have the following format:
 \begin{verbatim}
@@ -1869,16 +1950,18 @@ rn Uq_n
 (repeat the above for each additional potential)
 \end{verbatim}
 
-\noindent{\bf fort.61, fort.62, fort.63} The vibration,
+\noindent{\bf fort.61, fort.62, fort.63:} The vibration,
 bending and torsion libraries for the molecule builder.
 Experimental - use with caution.
 
-\noindent{\bf zeolite.cssr, zeolite.pdb, zeolite.cif} Used
+\noindent{\bf zeolite.cssr, zeolite.pdb, zeolite.cif:} Used
 in zeolite/MOF calculations to specify the structure of the
-rigid frameworks.
+rigid frameworks. Please see \ref{zeolite} for more
+information.
 
-\noindent{\bf zeolite.ztb} Used in zeolite/MOF calculations
-to store the tabulated potential energy.
+\noindent{\bf zeolite.ztb:} Used in zeolite/MOF calculations
+to store the tabulated potential energy. Please see
+\ref{zeolite} for more information.
 
 \subsection{Output Files}
 \label{output}
@@ -1891,38 +1974,38 @@ about the simulation including the fraction of accepted
 moves and the calculated energies and densities is written
 to {\bf run\#\#.dat}.
 
-\noindent{\bf config\#\#.dat} The final configuration of the
+\noindent{\bf config\#\#.dat:} The final configuration of the
 system as well as the maximum displacements and box lengths
 are contained in this file, which is also known as the
 restart file. Its format is identical to the format of {\bf
   file\_restart}. To continue a simulation, this file should
 be copied to {\bf file\_restart}.
 
-\noindent{\bf movie\#\#.dat} The movie file which holds the
+\noindent{\bf movie\#\#.dat:} The movie file which holds the
 configurations of the system as output every {\bf imv}
 cycles. Used to determine the radial distribution functions,
 $g(r)$ among other things. Formerly called {\bf fort.10}.
 
-\noindent{\bf file\_solute} The solute movie file output
+\noindent{\bf file\_solute:} The solute movie file output
 every {\bf isolute} cycles. Output more frequently to obtain
 information about a particular molecule in the simulation
 with better statistics ({\it e.g.}, the solute molecules in
 a chromatography simulation).
 
-\noindent{\bf file\_traj} Contains the box lengths, total
+\noindent{\bf file\_traj:} Contains the box lengths, total
 energy, pressure, and number of each molecule type for each
 box, output every cycle. Useful for many things.
 
-\noindent{\bf cell\_param\#\#.dat} If there is a
+\noindent{\bf cell\_param\#\#.dat:} If there is a
 non-orthorhombic box in the simulation, this file will
 contain the cell lengths and the angles between cell
 vectors, written out every cycle.
 
-\noindent{\bf box\#config\#\#.xyz} Lists the xyz coordinates
+\noindent{\bf box\#config\#\#.xyz:} Lists the xyz coordinates
 and identifies the molecule type of each molecule in the
 system. In a format for VMD to visualize.
 
-\noindent{\bf fort.14, fort.15, fort.16, fort.17, fort.18}
+\noindent{\bf fort.14, fort.15, fort.16, fort.17, fort.18:}
 If the simulation is of a single molecule type and {\bf
   idiele} is less than {\bf nstep}, then these 5 files will
 contain averages related to the dielectric constant. {\bf
@@ -1947,7 +2030,7 @@ $\langle{\bf M}_x\rangle, \langle{\bf M}_y\rangle,$ and
 $\langle{\bf M}_z\rangle$, respectively, in units of
 $e$~\AA.
 
-\noindent{\bf fort.14, fort.15, fort.16, fort.17, fort.18, fort.19}
+\noindent{\bf fort.14, fort.15, fort.16, fort.17, fort.18, fort.19:}
 If the simulation is of a single molecule type, {\bf idiele} is less
 than {\bf nstep} and {\bf lnpt} is TRUE, then these 6 files will
 contain the following averages: $\langle V\rangle, \langle V^2
@@ -1957,7 +2040,7 @@ contain the following averages: $\langle V\rangle, \langle V^2
 energy, for each box.  This is in addition to the dipole moment
 information contained in {\bf fort.14}-{\bf 18} (see above).
 
-\noindent{\bf fort.21} The final SAFE-CBMC probability
+\noindent{\bf fort.21:} The final SAFE-CBMC probability
 histograms are contained in this file, if the SAFE-CBMC
 algorithm is used. Can be used to start a simulation with
 the new histograms by copying to {\bf fort.23}.
@@ -1973,11 +2056,11 @@ calculate the dielectric constant according to
 \end{equation}
 (See Allen and Tildesley, page 161.)
 
-\noindent{\bf fort.31, fort.32, fort.33} If the AVBMC
+\noindent{\bf fort.31, fort.32, fort.33:} If the AVBMC
 algorithm is used, these files will contain the cluster
 statistics and energy ratios, which are output every cycle.
 
-\noindent{\bf fort.55, fort.56} If {\bf iheatcapacity} is
+\noindent{\bf fort.55, fort.56:} If {\bf iheatcapacity} is
 less than {\bf nstep} and {\bf lnpt} is FALSE, then {\bf
   fort.55} contains the following averages: $<E>$ and
 $<E^2>$. If {\bf iheatcapacity} in {\bf file\_input} is less
@@ -1985,58 +2068,59 @@ than {\bf nstep} and {\bf lnpt}, which is in {\bf
   control.inc}, is TRUE, then {\bf fort.56} contains the
 following averages: $<H>$ and $<H^2>$.
 
-\noindent{\bf end2end\_box1, end2end\_box2, end2end\_box3}
+\noindent{\bf end2end\_box1, end2end\_box2, end2end\_box3:}
 These files contain the end to end vector distribution for
 box 1, box 2 and box 3 respectively. If the box is not
 present in simulation then that particular file will be
 empty.
 
-\noindent{\bf rhoz\_box1, rhoz\_box2, rhoz\_box3} These
+\noindent{\bf rhoz\_box1, rhoz\_box2, rhoz\_box3:} These
 files contain the $z$ density profiles for the respective
 boxes.
 
-\noindent{\bf comrhoz\_box1, comrhoz\_box2, comrhoz\_box3}
+\noindent{\bf comrhoz\_box1, comrhoz\_box2, comrhoz\_box3:}
 These files contain center of mass z density profile for the
 respective boxes.
 
-\noindent{\bf beadrdf\_box1, beadrdf\_box2, beadrdf\_box3}
+\noindent{\bf beadrdf\_box1, beadrdf\_box2, beadrdf\_box3:}
 These files contain bead-bead readial distribution functions
 for the the respective boxes.
 
-\noindent{\bf comrdf\_box1, comrdf\_box2, comrdf\_box3}
+\noindent{\bf comrdf\_box1, comrdf\_box2, comrdf\_box3:}
 These files contain center of mass readial distribution
 functions for the the respective boxes.
 
-\noindent{\bf beadnum\_box1, beadnum\_box2, beadnum\_box3}
+\noindent{\bf beadnum\_box1, beadnum\_box2, beadnum\_box3:}
 These files contain bead-bead number integrals for the the
 respective boxes.
 
-\noindent{\bf comnum\_box1, comnum\_box2, comnum\_box3}
+\noindent{\bf comnum\_box1, comnum\_box2, comnum\_box3:}
 These files contain center of mass number integrals for the
 the respective boxes.
 
 \noindent{\bf bendang\_dist\_box1, bendang\_dist\_box2,
-  bendang\_dist\_box3} These files contain bending angle
+  bendang\_dist\_box3:} These files contain bending angle
 distribution for the respective boxes.
 
 \noindent{\bf tors\_frac\_box1, tors\_frac\_box2,
-  tors\_frac\_box3 } These files contain torsion fractions
+  tors\_frac\_box3:} These files contain torsion fractions
 for the respective boxes.
 
-\noindent{\bf torsprob\_box1, torsprob\_box2, torsprob\_box3
-} These files contain torsion angle probabilty distribution
-vs number of defects per chain, for the respective boxes.
+\noindent{\bf torsprob\_box1, torsprob\_box2,
+  torsprob\_box3:} These files contain torsion angle
+probabilty distribution vs number of defects per chain, for
+the respective boxes.
 
 \noindent{\bf Gauchedefects\_box1, Gauchedefects\_box2,
-  Gauchedefects\_box3 } These files contain fraction gauche
+  Gauchedefects\_box3:} These files contain fraction gauche
 defects versus torsion for the respective boxes.
 
-\noindent{\bf pattern\_box1, pattern\_box2, pattern\_box3 }
+\noindent{\bf pattern\_box1, pattern\_box2, pattern\_box3:}
 These files contain pattern of g+, trans, g- for the
 respective boxes. Transform first number into base 3 to get
 the pattern of gauche defects where -1=g+, 0 = trans, 1=g+.
 
-\noindent{\bf decoder } This file contains decoder
+\noindent{\bf decoder:} This file contains decoder
 information for the gauche defect pattern.
 
 \subsection{Notes on File Management}
@@ -2364,6 +2448,106 @@ electric field, given by:
 U_{\textrm{field}} & = & -\mu \cdot E \\
 & = & -q \cdot r_z \cdot E
 \end{eqnarray}
+
+\subsection{Using Tabulated Potentials for Zeolites and MOFs}
+\label{zeolite}
+This sub-section explains how to use tabulated LJ 12-6 plus
+Coulomb potentials for implicit solid framework structures,
+where the framework is assumed to be rigid and therefore
+their interactions with other species in the same simulation
+box depend only on the location of the other species and can
+be pre-tabulated. Note that if you want to simulate flexible
+structures, then you have to prepare a suitable
+\textbf{file\_restart} with all the framework atoms and this
+sub-section is not relevant.
+
+You need to set \textbf{lexzeo} to .true. and prepare a
+suitable \textbf{zeolite\_in} namelist (see
+\ref{zeolite_in}) to use this feature. In addition, two
+extra files are needed: zeolite coordinates file,
+\textbf{file\_zeocoord} and zeolite tabulated potential,
+\textbf{file\_ztb}. \textbf{file\_zeocoord} can be either
+CSSR, PDB, or CIF format, and should contain the coordinates
+of the framework atoms along with information on the cell
+parameters and interaction bead types. The following
+examples assume a simulation cell constructed using $u\times
+v\times w$ unit cells (you can always view it as composed of
+one unit cell, but correctly specifying this information can
+reduce the size of the tabulated potential). The
+\textbf{rexcl} variables below are used to prevent overflow
+problems, which can happen when a grid point happens to be
+very close to a framework atom. The appropriate settings of
+\textbf{rexcl} depend on \textbf{dgr} and
+\textbf{num\_points\_interpolation} (see \ref{zeolite_in}):
+we need to make sure that the radial distribution function
+is zero at \textbf{rexcl} + \textbf{dgr} $\times$
+\textbf{num\_points\_interpolation} / 2 so that no allowable
+distances will be artifically excluded. For example, if
+\textbf{dgr} and \textbf{num\_points\_interpolation} take
+their default values and the RDF is zero for $r \leq
+1.2$~\AA, \textbf{rexcl} can then be set to 0.6.
+
+The SERC Daresbury Laboratory's Cambridge Structure Search
+and Retrieval (CSSR) format as adapted in earlier versions
+of topmon, which was possibly merged from bigmac
+(\url{http://molsim.chem.uva.nl/bigmac}), were further
+modified as follows:
+\begin{table}[h!]
+\begin{tabular}{|l|l|l|}
+\hline
+LINE       & FORMAT                 & DEFINITION\\ \hline
+1          & 6 reals, 3 intergers   & Cell parameters ($a$, $b$, $c$ in~\AA, $\alpha$, $\beta$, $\gamma$ in degree), $u$, $v$, $w$.\\ \hline
+2          & 2 integers             & N atoms, P atom names.\\ \hline
+3..2+P     & string, integer, real  & Atom name, bead type (as defined in \ref{atoms}), rexcl.\\ \hline
+P+3..P+2+N & I5,1X,A4,2X,3(F9.5,1X) & Atom ID, atom name, x, y, z coordinates.\\ \hline
+\end{tabular}
+\end{table}
+
+The Protein Data Bank (PDB) format can be used if it
+contains a \textbf{CRYST1} record for the cell parameters
+and the following lines are added to the very beginning of
+the file (the first character is supposed to be comment mark
+and will be ignored):
+\begin{table}[h!]
+\begin{tabular}{|l|l|l|}
+\hline
+LINE   & FORMAT                 & DEFINITION\\ \hline
+1      & \#5 intergers           & N atoms, u, v, w, P atom names.\\ \hline
+2..1+P & \#string, integer, real & Atom name, bead type (as defined in \ref{atoms}), rexcl.\\ \hline
+\end{tabular}
+\end{table}
+
+The Crystallographic Information File (CIF) format is
+supported partially (\textbf{\_cell\_length\_\{a,b,c\},
+  \_cell\_angle\_\{alpha,beta,gamma\},
+  \_symmetry\_equiv\_pos\_as\_xyz, \_atom\_site\_label,
+  \_atom\_site\_type\_symbol,
+  \_atom\_site\_fract\_\{x,y,z\}}).
+\textbf{\_cell\_length\_\{a,b,c\},
+  \_cell\_angle\_\{alpha,beta,gamma\}} are used to provide
+the \textit{unit} cell parameters (whereas
+\textit{simulation} cell parameters should be given in CSSR
+and PDB files). Since the program does not store space
+groups symmetry information,
+\textbf{\_symmetry\_equiv\_pos\_as\_xyz} must be included to
+supply this information. The same lines should be added to
+the very beginning of the file just as in the case of PDB
+format.
+
+The \textbf{file\_ztb} file will be automatically created if
+it does not yet exist. It may be more convenient to first
+generate it with a separate run, place the file in a shared
+place, and create symbolic links to it in each simulation
+directory. The tabulation can be expediated through OpenMP,
+so you may enable it in CMake to compile an excutable just
+for this purpose. The pre-tabulation process calculates
+three values ($r^{-12}$, $r^{-6}$, and electrostatic terms)
+for all grid points that are outside \textbf{rexcl} radius
+of any framework atoms. The interpolation multiplies these
+values with relevant $\epsilon$, $\sigma$, $q$ parameters to
+give the energy. Therefore, only if you change lewald,
+ltailcZeo, lshift, or rcut (but not if you change force
+field parameters), do you need to re-generate the table.
 
 \end{document}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

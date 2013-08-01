@@ -6902,7 +6902,7 @@ contains
     do i=1,nmolty
        pmcbmt(i)=real(i,dp)/nmolty
     end do
-    pmall=.false.
+    pmall=0.0_dp
     nchoi1=32
     nchoi=16
     nchoir=16
@@ -6916,7 +6916,7 @@ contains
     pmbias=0.0_dp
     pmbsmt=0.0_dp
     pmbias2=0.0_dp
-    pmfix=.false.
+    pmfix=0.0_dp
     lrig=.false.
 
     rewind(io_input)

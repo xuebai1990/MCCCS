@@ -79,12 +79,12 @@ CONTAINS
     logical::lopen
 
     inquire(unit=io_unit,access=mode,action=action,name=fname,form=form,iostat=jerr,opened=lopen,pos=pos)
-    if (jerr) then
+    if (jerr.ne.0) then
        write(*,'("Error ",I0," in flush_force file: ",A)') jerr,fname
     else if (lopen.and.ALL(io_unit.ne.reserved_unit_numbers)) then
        close(io_unit)
        open(unit=io_unit,access=mode,action=action,file=fname,form=form,iostat=jerr,position="append",status="old")
-       if (jerr) call err_exit(__FILE__,__LINE__,'Error when openning file '//fname,jerr)
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Error when openning file '//fname,jerr)
        inquire(unit=io_unit,pos=pos)
     end if
   end function flush_force

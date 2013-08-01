@@ -1,3 +1,18 @@
+! *****************************************************************************
+!> \brief Handles CSSR (SERC Daresbury Laboratory's Cambridge Structure Search and Retrieval) files
+!>
+!> \note The CSSR format used in topmon was adapted from
+!> but different to the format described below.
+!> \verbatim
+!> LINE      FORMAT                           DEFINITION
+!> -------------------------------------------------------------------------------------
+!>  1    38X,3F8.3                            Cell dimensions of the a, b, c vectors in Angstrom.
+!>  2    21X,3F8.3,4X,'SPGR =',I3,1X,A11      Cell angles of alpha, beta, gamma in degree, space group number, space group name.
+!>  3    2I4,1X,A60                           Number of atoms, coordinate system flag (0=fractional coordinates, 1=orthogonal coordinates in Angstrom), brief title/description.
+!>  4    A53                                  Long title/description.
+!>  5    I4,1X,A4,2X,3(F9.5,1X),8I4,1X,F7.3   Atom ID, atom name(element symbol optionally followed by its ID), x, y, z coordinates, bonding connectivities (max 8), charge.
+!> \endverbatim
+! *****************************************************************************
 MODULE parser_cssr
   use var_type,only:default_string_length
   use util_runtime,only:err_exit
