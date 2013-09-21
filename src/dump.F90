@@ -24,8 +24,6 @@ subroutine dump(file_cfg)
   do ibox=1, nbox
      write (io_cfg,*) (rmflcq(i,ibox),i=1,nmolty)
   end do
-  ! changed formatting so fort.77 same for all ensembles, 06/08/09 KM
-  !if ( lgibbs .or. lgrand .or. lnpt ) then
   write(io_cfg,*) (rmvol(ibox),ibox=1,nbox)
   do ibox = 1,nbox
      if (lsolid(ibox) .and. .not. lrect(ibox)) then
@@ -35,7 +33,6 @@ subroutine dump(file_cfg)
         write(io_cfg,*) boxlx(ibox),boxly(ibox),boxlz(ibox)
      end if
   end do
-  !end if
   write(io_cfg,*) nchain
   write(io_cfg,*) nmolty
   write(io_cfg,*) (nunit(i),i=1,nmolty)

@@ -27,7 +27,7 @@ def build(srcRoot,buildType="",buildDir=None,clean=None,logFilePath=None):
         makeCmd=os.path.expanduser("~/cmake/bin/cmake")
     else:
         makeCmd="cmake"
-    pipe=os.popen("{ { FC=ifort "+makeCmd+' '+os.path.abspath(srcRoot)+"; } 2>&1 ; } >>"+logFilePath)
+    pipe=os.popen("{ { FC=ifort "+makeCmd+' -DCMAKE_Fortran_FLAGS="-mp1 -fp-model precise -fp-model source -fimf-arch-consistency=true" '+os.path.abspath(srcRoot)+"; } 2>&1 ; } >>"+logFilePath)
     if (pipe.close()):
         logFile=open(logFilePath,'a')
         logFile.write("\n+++ ERROR, cmake "+buildType+" FAILED! +++\n")

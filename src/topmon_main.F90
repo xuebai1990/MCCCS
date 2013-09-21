@@ -8,7 +8,7 @@ MODULE topmon_main
 
   ! variables added for GCMC histogram reweighting
   integer,parameter::fmax=1E6,nprop1=11
-  logical::use_checkpoint=.false.,L_add=.false.,L_sub=.false.
+  logical::lstop=.false.,use_checkpoint=.false.,L_add=.false.,L_sub=.false.
   integer::blockm,checkpoint_interval=1800,checkpoint_copies=1,nstep=1,nnstep,nnn,acmove,acnp,acipsw,nblock&
    ,io_movie,io_solute,io_cell,io_traj&
    ,N_add=0,N_box2add=1,N_moltyp2add=1,N_sub=0,N_box2sub=1,N_moltyp2sub=1
@@ -81,7 +81,7 @@ contains
     ! descriptions of different kinds of energies
     character(LEN=default_string_length)::vname(nEnergy)=(/' Total energy',' Inter LJ',' Tail  LJ',' Intra LJ',' Stretch',' Bond bending',' Torsion',' Coulomb',' External pot',' 3-body Garo',' Fluc Q','','',''/)
 
-    integer::io_flt,io_hist,io_cnt,io_ndis,io_config,i,jerr,ibox,itype,itype2,Temp_nmol,nentry,j,nummol,imolty,ii,ntii,point_of_start,point_to_end,igrow,steps,itemp,jbox,itel,ig,il,nbl,n,zzz,ichkpt,nnn_1st
+    integer::io_flt,io_hist,io_cnt,io_ndis,io_config,i,jerr,ibox,itype,itype2,Temp_nmol,nentry,j,nummol,imolty,ii,ntii,point_of_start,point_to_end,igrow,steps,itemp,jbox,itel,ig,il,nbl,n,zzz,ichkpt,nnn_1st,nstep_per_cycle
     real::v(nEnergy),press1,surf,time_prev,time_cur,rm,temvol,tmp,vhist,eng_list(fmax),temacd,temspd,debroglie,starviro,dummy,inside,bvirial,gconst,ostwald,stdost,molfrac
     logical::ovrlap
 
@@ -154,8 +154,6 @@ contains
     end if
 
     ! setup files for histogram reweighting
-    ! KM fom MPI
-    ! will need to check this file I/O if want to run grand canonical in parallel
     if(lgrand) then
        if (myid.eq.rootid) then
           write(file_flt,'("nfl",I1.1,A,".dat")') run_num,suffix
@@ -249,16 +247,16 @@ contains
        do ibox=1,nbox
           call sumup(ovrlap,v,ibox,lvol=.false.)
           vbox(:,ibox) = v
-          vbox(12,ibox) = vipsw
-          vbox(13,ibox) = vwellipsw
+          vbox(ivIpswb,ibox) = vipsw
+          vbox(ivWellIpswb,ibox) = vwellipsw
           if (ovrlap) then
              call err_exit(__FILE__,__LINE__,'overlap in initial configuration',myid+1)
           end if
 
-          vstart(ibox) = vbox(1,ibox)
+          vstart(ibox) = vbox(ivTot,ibox)
           if (myid.eq.rootid) then
              write(io_output,*)
-             write(io_output,*) 'box  ',ibox,' initial v   = ', vbox(1,ibox)
+             write(io_output,*) 'box  ',ibox,' initial v   = ', vbox(ivTot,ibox)
           end if
 
           ! calculate initial pressure ***
@@ -277,13 +275,19 @@ contains
        end if
     end if
 
+    if (lstop) then
+       nstep_per_cycle = 1
+    else
+       nstep_per_cycle = nchain
+    end if
+
 !************************************************************
 ! loops over all cycles and all molecules                  **
 !************************************************************
     time_prev = time_now()
-    MC_cycle: do nnn = nnn_1st, nstep
+    do nnn = nnn_1st, nstep
        tmcc = nnstep + nnn
-       do ii = 1, nchain
+       do ii = 1, nstep_per_cycle
           acmove = acmove + 1.0E0_dp
           ! select a move-type at random ***
           rm = random(-1)
@@ -365,7 +369,7 @@ contains
              call update_average(acvsq(1:11,ibox),vbox(1:11,ibox)**2,acmove)
 
              if (lnpt) then
-                call update_average(acv(14,ibox),vbox(1,ibox)*temvol,acmove)
+                call update_average(acv(14,ibox),vbox(ivTot,ibox)*temvol,acmove)
              end if
 
              ! KMB/KEA Energy in kJ/mol
@@ -403,9 +407,9 @@ contains
           if (.not.lgibbs) then
              ibox=1
              if (lnpt) then
-                tmp=vbox(1,ibox)+express(ibox)*boxlx(ibox)*boxly(ibox)*boxlz(ibox)
+                tmp=vbox(ivTot,ibox)+express(ibox)*boxlx(ibox)*boxly(ibox)*boxlz(ibox)
              else
-                tmp=vbox(1,ibox)
+                tmp=vbox(ivTot,ibox)
              end if
              call update_average(enthalpy,tmp,acmove)
              call update_average(enthalpy2,tmp*tmp,acmove)
@@ -414,12 +418,8 @@ contains
           ! collect histogram data (added 8/30/99)
           if (lgrand) then
              ibox = 1
-             vhist = vbox(2,ibox) + vbox(8,ibox) + vbox(11,ibox) !inter+elect+flucq
-             ! KM for MPI
-             ! check this if want to run grand canonical
+             vhist = vbox(ivInterLJ,ibox) + vbox(ivElect,ibox) + vbox(ivFlucq,ibox) !inter+elect+flucq
              if (mod(acmove,ninstf).eq.0.and.myid.eq.rootid) then
-                ! Formatting removed until I can figure out how to get <n>i7 to work
-                ! write(io_flt, * ) acmove,(ncmt(ibox,i), i=1,nmolty),vhist
                 write(io_flt,FMT='(i0,5x,'//format_n(nmolty,'i7')//',5x,g15.6)') acmove,(ncmt(ibox,i),i=1,nmolty),vhist
              end if
 
@@ -456,10 +456,6 @@ contains
                 close(io_ndis)
              end if
           end if
-
-          if (lstop) then
-             if (acmove.ge.nstep) exit MC_cycle
-          end if
        end do
 !*********************************************
 ! ends loop over chains                     **
@@ -478,7 +474,7 @@ contains
              call write_checkpoint_main('save-stats.'//integer_to_string(ichkpt))
           end if
        end if
-    end do MC_cycle
+    end do
 !********************************************
 ! ends the loop over cycles                **
 !********************************************
@@ -565,57 +561,57 @@ contains
 
        ! checks final value of the potential energy is consistent ***
        call sumup(ovrlap,v,ibox,.false.)
-       vend(ibox) = v(1)
+       vend(ibox) = v(ivTot)
 
        ! need to check
        if (myid.eq.rootid) then
-          if ( abs(v(1) - vbox(1,ibox)) .gt. 0.0001) then
+          if ( abs(v(ivTot) - vbox(ivTot,ibox)) .gt. 0.0001) then
              write(io_output,*) '### problem with energy ###  box ',ibox
-             write(io_output,*) ' Total energy: ',v(1),vbox(1,ibox),v(1)-vbox(1,ibox)
+             write(io_output,*) ' Total energy: ',v(ivTot),vbox(ivTot,ibox),v(ivTot)-vbox(ivTot,ibox)
           end if
-          if ( abs(v(2) - vbox(2,ibox)) .gt. 0.000001) then
+          if ( abs(v(ivInterLJ) - vbox(ivInterLJ,ibox)) .gt. 0.000001) then
              write(io_output,*) '### problem  ###'
-             write(io_output,*) ' Inter mol.en.: ',v(2),vbox(2,ibox)
+             write(io_output,*) ' Inter mol.en.: ',v(ivInterLJ),vbox(ivInterLJ,ibox)
              if (lsolid(ibox) .and. .not. lrect(ibox)) then
                 write(io_output,*)'You might check the cutoff wrt box widths'
                 write(io_output,*) 'Normal PBC might be failing'
              end if
           end if
-          if ( abs(v(3) - vbox(3,ibox)) .gt. 0.000001) then
+          if ( abs(v(ivTail) - vbox(ivTail,ibox)) .gt. 0.000001) then
              write(io_output,*) '### problem  ###'
-             write(io_output,*) ' Tail corr.en.: ',v(3),vbox(3,ibox)
+             write(io_output,*) ' Tail corr.en.: ',v(ivTail),vbox(ivTail,ibox)
           end if
-          if ( abs(v(4) - vbox(4,ibox)) .gt. 0.000001) then
+          if ( abs(v(ivIntraLJ) - vbox(ivIntraLJ,ibox)) .gt. 0.000001) then
              write(io_output,*) '### problem  ###'
-             write(io_output,*) ' Intra mol.en.: ',v(4),vbox(4,ibox)
+             write(io_output,*) ' Intra mol.en.: ',v(ivIntraLJ),vbox(ivIntraLJ,ibox)
           end if
-          if ( abs(v(5) - vbox(5,ibox)) .gt. 0.001) then
+          if ( abs(v(ivStretching) - vbox(ivStretching,ibox)) .gt. 0.001) then
              write(io_output,*) '### problem  ###'
-             write(io_output,*) ' bond vib. en.: ',v(5),vbox(5,ibox)
+             write(io_output,*) ' bond vib. en.: ',v(ivStretching),vbox(ivStretching,ibox)
           end if
-          if ( abs(v(6) - vbox(6,ibox)) .gt. 0.001) then
+          if ( abs(v(ivBending) - vbox(ivBending,ibox)) .gt. 0.001) then
              write(io_output,*) '### problem  ###'
-             write(io_output,*) ' Bond ben.en.: ',v(6),vbox(6,ibox)
+             write(io_output,*) ' Bond ben.en.: ',v(ivBending),vbox(ivBending,ibox)
           end if
-          if ( abs(v(7) - vbox(7,ibox)) .gt. 0.001) then
+          if ( abs(v(ivTorsion) - vbox(ivTorsion,ibox)) .gt. 0.001) then
              write(io_output,*) '### problem  ###'
-             write(io_output,*) ' Torsion.en.: ',v(7),vbox(7,ibox)
+             write(io_output,*) ' Torsion.en.: ',v(ivTorsion),vbox(ivTorsion,ibox)
           end if
-          if ( abs(v(9) - vbox(9,ibox)) .gt. 0.0001) then
+          if ( abs(v(ivExt) - vbox(ivExt,ibox)) .gt. 0.0001) then
              write(io_output,*) '### problem  ###'
-             write(io_output,*) ' Externa.en.: ',v(9),vbox(9,ibox)
+             write(io_output,*) ' Externa.en.: ',v(ivExt),vbox(ivExt,ibox)
           end if
-          if ( abs(v(8) - vbox(8,ibox)) .gt. 0.000001) then
+          if ( abs(v(ivElect) - vbox(ivElect,ibox)) .gt. 0.000001) then
              write(io_output,*) '### problem  ###'
-             write(io_output,*) ' Coulomb.en.: ',v(8),vbox(8,ibox)
+             write(io_output,*) ' Coulomb.en.: ',v(ivElect),vbox(ivElect,ibox)
           end if
-          if ( abs(v(11) - vbox(11,ibox)) .gt. 0.0001) then
+          if ( abs(v(ivFlucq) - vbox(ivFlucq,ibox)) .gt. 0.0001) then
              write(io_output,*) '### problem  ###'
-             write(io_output,*) ' Fluc Q en.: ',v(11),vbox(11,ibox)
+             write(io_output,*) ' Fluc Q en.: ',v(ivFlucq),vbox(ivFlucq,ibox)
           end if
-          if ( abs(v(10) - vbox(10,ibox) ) .gt.0.001) then
+          if ( abs(v(iv3body) - vbox(iv3body,ibox) ) .gt.0.001) then
              write(io_output,*) '### problem ###'
-             write(io_output,*) ' 3-body en.: ',v(10),vbox(10,ibox)
+             write(io_output,*) ' 3-body en.: ',v(iv3body),vbox(iv3body,ibox)
           end if
           if ( ldielect ) then
              if ( abs(dipolexo - dipolex(ibox)) .gt. 0.0001) then
@@ -624,9 +620,9 @@ contains
              end if
           end if
           if (lmipsw) then
-             if (abs(vwellipsw-vbox(13,ibox)).gt.0.001) then
+             if (abs(vwellipsw-vbox(ivWellIpswb,ibox)).gt.0.001) then
                 write(io_output,*) '### problem  ###'
-                write(io_output,*) ' well en.: ',vwellipsw,vbox(13,ibox)
+                write(io_output,*) ' well en.: ',vwellipsw,vbox(ivWellIpswb,ibox)
              end if
           end if
        end if
@@ -638,7 +634,7 @@ contains
        write(io_output,*)
        write(io_output,"(A,"//format_n(nbox,"(1X,F23.10)")//")") ' vstart       =',(vstart(i) ,i=1,nbox)
        write(io_output,"(A,"//format_n(nbox,"(1X,F23.10)")//")") ' vend         =',(vend(i)   ,i=1,nbox)
-       write(io_output,"(A,"//format_n(nbox,"(1X,F23.10)")//")") ' vbox         =',(vbox(1,i) ,i=1,nbox)
+       write(io_output,"(A,"//format_n(nbox,"(1X,F23.10)")//")") ' vbox         =',(vbox(ivTot,i) ,i=1,nbox)
 
        ! write out the final configuration for each box, Added by Neeraj 06/26/2006 3M ***
        io_config=get_iounit()
@@ -748,7 +744,8 @@ contains
           ! end if
 
           ! chemical potential
-          ! This expression is suitable only for NPT ensemble
+          ! This expression is correct for the NVT(-Gibbs) and NPT(-Gibbs) ensembles
+          ! But the use of the dual cutoff method will introduce some inaccuracies
           do itype = 1, nmolty
              if(bnchem(ibox,itype).gt.0) then
                 debroglie = debroglie_factor*sqrt(beta/masst(itype))
@@ -757,10 +754,10 @@ contains
                 igrow = nugrow(itype)
                 if (.not. lrigid(itype)) then
                    call schedule(igrow,itype,steps,1,0,2)
-                   tmp=real(nchoi1(itype)*(nchoi(itype)**steps)*nchoih(itype),dp)*(debroglie**3)
+                   tmp=real(nchoi1(itype)*nchoih(itype),dp)*(real(nchoi(itype),dp)**steps)*(debroglie**3)
                 else
                    call schedule(igrow,itype,steps,1,0,4)
-                   tmp=real(nchoi1(itype)*nchoir(itype)*(nchoi(itype)**steps)*nchoih(itype),dp)*(debroglie**3)
+                   tmp=real(nchoi1(itype)*nchoir(itype)*nchoih(itype),dp)*(real(nchoi(itype),dp)**steps)*(debroglie**3)
                 end if
                 acchem(ibox,itype)=(-1.0E0_dp/beta)*log((acchem(ibox,itype)/bnchem(ibox,itype))/tmp)
                 itel = 2 + nEnergy + itype
@@ -1128,6 +1125,7 @@ contains
     use util_search,only:indexOf
     use util_memory,only:reallocate
     use sim_particle,only:allocate_neighbor_list
+    use sim_initia,only:get_molecule_config,setup_system_config
     use zeolite
     use energy_kspace,only:calp,allocate_kspace
     use energy_pairwise,only:read_ff,init_ff,type_2body,vdW_nParameter,nonbond_type
@@ -1173,14 +1171,14 @@ contains
     namelist /system/ lnpt,lgibbs,lgrand,lanes,lvirial,lmipsw,lexpee,ldielect,lpbc,lpbcx,lpbcy,lpbcz,lfold,lijall,lchgall,lewald,lcutcm,ltailc,lshift,ldual,L_Coul_CBMC,lneigh&
      ,lexzeo,lslit,lgraphite,lsami,lmuir,lelect_field,lgaro,lionic,L_Ewald_Auto,lmixlb,lmixjo&
      ,L_spline,L_linear,L_vib_table,L_bend_table,L_elect_table
-    namelist /mc_shared/ seed,nbox,nmolty,nchain,nstep,lstop,iratio,rmin,softcut&
+    namelist /mc_shared/ seed,nbox,nmolty,nchain,nmax,nstep,lstop,iratio,rmin,softcut&
      ,checkpoint_interval,checkpoint_copies,use_checkpoint,linit,lreadq&
      ,L_add,L_sub,N_add,N_box2add,N_moltyp2add,N_sub,N_box2sub,N_moltyp2sub
     namelist /analysis/ iprint,imv,iblock,iratp,idiele,iheatcapacity,ianalyze&
      ,nbin,lrdf,lintra,lstretch,lgvst,lbend,lete,lrhoz,bin_width&
      ,lucall,ucheck,nvirial,starvir,stepvir,ntemp,virtemp
     namelist /mc_flucq/ taflcq,fqtemp,rmflucq,pmflcq,pmfqmt,lflucq,lqtrans,fqegp,nchoiq
-    namelist /gcmc/ nequil,ninstf,ninsth,ndumph
+    namelist /gcmc/ B,nequil,ninstf,ninsth,ndumph
 ! ===================================================================
     !> read project-wide parameters
     io_input=get_iounit()
@@ -1383,6 +1381,7 @@ contains
     seed=time_now()
     linit=.false.
     lreadq=.false.
+    nmax=0
 
     read(UNIT=io_input,NML=mc_shared,iostat=jerr)
     if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_shared',jerr)
@@ -1392,10 +1391,7 @@ contains
     ntmax=nmolty+1
     npamax=ntmax*(ntmax-1)/2
     nprop=nEnergy+(4*ntmax)+6
-    if (lgrand) then
-       nchain=10*nchain
-    end if
-    nmax=nchain+2
+    if (nmax<nchain+2) nmax=nchain+2
     softlog = 10.0_dp**(-softcut)
 
     if (lprint) then
@@ -1403,7 +1399,6 @@ contains
        write(io_output,'(A,I0)') 'Random number seed: ',seed
        write(io_output,'(A,I0)') 'number of boxes in the system: ',nbox
        write(io_output,'(A,I0)') 'number of molecule types: ',nmolty
-       if (lgrand) write(io_output,'(A)') 'in GCMC total number of chains set by NMAX!'
        write(io_output,'(A,I0)') 'number of chains: ',nchain
        if (lstop) then
           write(io_output,'(A,I0)') 'number of steps: ',nstep
@@ -1570,6 +1565,13 @@ contains
           if (lprint) then
              write(io_output,'(/,A)') 'NUMBER OF MOLECULES OF EACH TYPE'
              write(io_output,'(A,'//format_n(nmolty,'(2X,I0)')//')') ' number of chains of each type: ',temtyp(1:nmolty)
+             if (sum(temtyp(1:nmolty)).ne.nchain) then
+                do j = 1,nbox
+                   write(io_output,*) 'ibox:',j,', ininch:',(ininch(i,j),i=1,nmolty)
+                end do
+                write(io_output,*) 'nchain:',nchain
+                call err_exit(__FILE__,__LINE__,'inconsistant number of chains',myid+1)
+             end if
           end if
 
           express = express*MPa2SimUnits
@@ -1953,41 +1955,6 @@ contains
        call reallocate(pmrotbd,1,numax,1,ntmax)
     end if
 ! -------------------------------------------------------------------
-    !> read information for grand-canonical ensemble simulations
-    if (lgrand) then
-       B=0.0_dp
-
-       rewind(io_input)
-       read(UNIT=io_input,NML=gcmc,iostat=jerr)
-       if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: gcmc',jerr)
-
-       if (lprint) then
-          write(io_output,'(/,A,/,A)') 'NAMELIST GCMC','------------------------------------------'
-          ! information for histogram output (added 8/30/99)
-          w_i(nequil)
-          w_i(ninstf)
-          w_i(ninsth)
-          w_i(ndumph)
-
-          ! chemical potentials (added 8/30/99 by jpotoff)
-          do i = 1,nmolty
-             write(io_output,'(A,I0,A,G16.9)') 'chemical potential for molecule type ',i,': ',B(i)
-          end do
-       end if
-
-       ! convert chemical potentials to activities
-       ! This B(i) goes in the acceptance rules
-       do i=1,nmolty
-          debroglie = debroglie_factor*sqrt(beta/masst(i))
-          B(i) = exp(B(i)/temp)/(debroglie*debroglie*debroglie)
-       end do
-
-       ! volume ideal gas box is set arbitry large!
-       boxlx(2)=1000*boxlx(1)
-       boxly(2)=1000*boxly(1)
-       boxlz(2)=1000*boxlz(1)
-    end if
-! -------------------------------------------------------------------
     pmswat=0.0_dp
     pmflcq=0.0_dp
     pmexpc=0.0_dp
@@ -2056,6 +2023,41 @@ contains
     if (ALL(.NOT.lflucq(1:nmolty))) then
        if (lanes) call err_exit(__FILE__,__LINE__,'lanes should be false for nonpolarizable systems!',myid+1)
        if (lfepsi) call err_exit(__FILE__,__LINE__,'lfepsi should be false for nonpolarizable systems!',myid+1)
+    end if
+! -------------------------------------------------------------------
+    !> read information for grand-canonical ensemble simulations
+    if (lgrand) then
+       B=0.0_dp
+
+       rewind(io_input)
+       read(UNIT=io_input,NML=gcmc,iostat=jerr)
+       if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: gcmc',jerr)
+
+       if (lprint) then
+          write(io_output,'(/,A,/,A)') 'NAMELIST GCMC','------------------------------------------'
+          ! information for histogram output (added 8/30/99)
+          w_i(nequil)
+          w_i(ninstf)
+          w_i(ninsth)
+          w_i(ndumph)
+
+          ! chemical potentials (added 8/30/99 by jpotoff)
+          do i = 1,nmolty
+             write(io_output,'(A,I0,A,G16.9)') 'chemical potential for molecule type ',i,': ',B(i)
+          end do
+       end if
+
+       ! convert chemical potentials to activities
+       ! This B(i) goes in the acceptance rules
+       do i=1,nmolty
+          debroglie = debroglie_factor*sqrt(beta/masst(i))
+          B(i) = exp(B(i)/temp)/(debroglie**3)
+       end do
+
+       boxlx(2:)=boxlx(1)
+       boxly(2:)=boxly(1)
+       boxlz(2:)=boxlz(1)
+       lideal(2:)=.true.
     end if
 ! -------------------------------------------------------------------
     call init_ee(io_input,lprint)
@@ -2282,7 +2284,7 @@ contains
        do ibox = 1,nbox
           if (lsolid(ibox).and..not.lrect(ibox).and..not.(ibox.eq.1.and.lexzeo)) call err_exit(__FILE__,__LINE__,'Cannot initialize non-rectangular system',myid+1)
        end do
-       call initia(file_struct)
+       call setup_system_config(file_struct)
        nnstep = 0
     else
        if (use_checkpoint) file_restart='save-config'
@@ -2370,7 +2372,7 @@ contains
                 write(io_output,'(A,2X,F12.3)') "cell angle gamma:",cell_ang(ibox,3)*raddeg
              end if
 
-             if ((allow_cutoff_failure.gt.0).and.ANY(rcut(ibox)/min_width(ibox,1:3).gt.0.5_dp)) then
+             if ((allow_cutoff_failure.lt.0).and.ANY(rcut(ibox)/min_width(ibox,1:3).gt.0.5_dp)) then
                 call err_exit(__FILE__,__LINE__,'rcut > half cell width',myid+1)
              end if
           else
@@ -2378,7 +2380,7 @@ contains
              if (lprint) then
                 write(io_output,"(' dimension box ',I0,': a = ',F12.6,'  b = ',F12.6,'  c = ',F12.6)") ibox,boxlx(ibox),boxly(ibox),boxlz(ibox)
              end if
-             if((allow_cutoff_failure.gt.0).and.(rcut(ibox)/boxlx(ibox).gt.0.5_dp.or.rcut(ibox)/boxly(ibox).gt.0.5_dp.or.rcut(ibox)/boxlz(ibox).gt.0.5_dp)) then
+             if((allow_cutoff_failure.lt.0).and.(rcut(ibox)/boxlx(ibox).gt.0.5_dp.or.rcut(ibox)/boxly(ibox).gt.0.5_dp.or.rcut(ibox)/boxlz(ibox).gt.0.5_dp)) then
                 call err_exit(__FILE__,__LINE__,'rcut > 0.5*boxlx',myid+1)
              end if
           end if
@@ -2390,6 +2392,7 @@ contains
 
        read(io_restart,*) ncres
        read(io_restart,*) nmtres
+       if (lgrand) nchain=ncres
 
        ! check if the number of particles in fort.4 & fort.77 agree
        if (ncres.ne.nchain.or.nmtres.ne.nmolty) then
@@ -2462,7 +2465,7 @@ contains
     do i=1,nchain
        ibox = nboxi(i)
        if(ibox.le.nbox) then
-          if (ibox.ne.1.and..not.(lgibbs.or.lgrand)) then
+          if (ibox.ne.1.and..not.lgibbs) then
              call err_exit(__FILE__,__LINE__,'Particle found outside BOX 1',myid+1)
           end if
 
@@ -2499,11 +2502,16 @@ contains
 
     ! check that number of particles of each type is consistent
     do i=1,nmolty
+       if (lgrand) temtyp(i)=sum(ncmt(1:nbox,i))
+
        if (sum(ncmt(1:nbox,i)).ne.temtyp(i)) then
           write(io_output,*) 'type ',i,', temtyp: ',temtyp(i),', ncmt: ',ncmt(1:nbox,i)
           call err_exit(__FILE__,__LINE__,'Particle type number inconsistency',myid+1)
        end if
     end do
+
+    if (.not.linit) call get_molecule_config(file_struct,linit=.false.)
+
 ! -------------------------------------------------------------------
     !> Set up Ewald parameters, write out both intra- and inter-molecular interaction parameters
     if (lewald) then
@@ -2811,7 +2819,7 @@ contains
           Temp_nmol = sum(ncmt(ibox,1:nmolty))
           ! molar volume in m3/mol, energies in kJ/mol
           Temp_Mol_Vol = temvol/Temp_nmol*N_Avogadro*1E-30_dp
-          Temp_Energy  = vbox(1,ibox)/Temp_nmol*R_gas/1000_dp
+          Temp_Energy  = vbox(ivTot,ibox)/Temp_nmol*R_gas/1000_dp
           call update_average(acEnthalpy(ibox),Temp_Energy+pres(ibox)*Temp_Mol_Vol,acnp)
           call update_average(acEnthalpy1(ibox),Temp_Energy+(express(ibox)*1E3_dp/MPa2SimUnits)*Temp_Mol_Vol,acnp)
        end do
@@ -2845,10 +2853,10 @@ contains
     ! Print out summary current simulation status
     if ((mod(nnn,iprint).eq.0).and.(myid.eq.rootid)) then
        ! write out runtime information ***
-       write(io_output,FMT='(i6,i8,e12.4,f10.3,f12.1,'//format_n(nmolty,"i5")//')') nnn,tmcc,vbox(1,1),boxlx(1),pres(1),(ncmt(1,imolty),imolty=1,nmolty)
+       write(io_output,FMT='(i6,i8,e12.4,f10.3,f12.1,'//format_n(nmolty,"i5")//')') nnn,tmcc,vbox(ivTot,1),boxlx(1),pres(1),(ncmt(1,imolty),imolty=1,nmolty)
        if ( lgibbs ) then
           do ibox = 2, nbox
-             write(io_output,FMT='(14x,e12.4,f10.3,f12.1,'//format_n(nmolty,"i5")//')') vbox(1,ibox),boxlx(ibox),pres(ibox),(ncmt(ibox,imolty),imolty=1,nmolty)
+             write(io_output,FMT='(14x,e12.4,f10.3,f12.1,'//format_n(nmolty,"i5")//')') vbox(ivTot,ibox),boxlx(ibox),pres(ibox),(ncmt(ibox,imolty),imolty=1,nmolty)
           end do
        end if
     end if
@@ -2858,12 +2866,12 @@ contains
           if ( lpbcz ) then
              if (lsolid(ibox) .and. .not. lrect(ibox)) then
                 write(io_cell,'(i8,6f12.4)') tmcc,cell_length(ibox,1),cell_length(ibox,2),cell_length(ibox,3),cell_ang(ibox,1)*raddeg,cell_ang(ibox,2)*raddeg,cell_ang(ibox,3)*raddeg
-                write(io_traj,FMT='(8E13.5,'//format_n(nmolty,"i5")//')') hmat(ibox,1),hmat(ibox,4),hmat(ibox,5),hmat(ibox,7),hmat(ibox,8),hmat(ibox,9),vbox(1,ibox),pres(ibox),(ncmt(ibox,itype),itype=1,nmolty)
+                write(io_traj,FMT='(8E13.5,'//format_n(nmolty,"i5")//')') hmat(ibox,1),hmat(ibox,4),hmat(ibox,5),hmat(ibox,7),hmat(ibox,8),hmat(ibox,9),vbox(ivTot,ibox),pres(ibox),(ncmt(ibox,itype),itype=1,nmolty)
              else
-                write(io_traj,'(5E13.5,'//format_n(nmolty,"i5")//')') boxlx(ibox),boxly(ibox),boxlz(ibox),vbox(1,ibox),pres(ibox),(ncmt(ibox,itype),itype=1,nmolty)
+                write(io_traj,'(5E13.5,'//format_n(nmolty,"i5")//')') boxlx(ibox),boxly(ibox),boxlz(ibox),vbox(ivTot,ibox),pres(ibox),(ncmt(ibox,itype),itype=1,nmolty)
              end if
           else
-             write(io_traj,'(3E12.5,'//format_n(nmolty,"i4")//')') boxlx(ibox)*boxly(ibox),vbox(1,ibox),pres(ibox),(ncmt(ibox,itype),itype=1,nmolty)
+             write(io_traj,'(3E12.5,'//format_n(nmolty,"i4")//')') boxlx(ibox)*boxly(ibox),vbox(ivTot,ibox),pres(ibox),(ncmt(ibox,itype),itype=1,nmolty)
           end if
        end do
     end if
@@ -2982,21 +2990,21 @@ contains
                    else
                       vol = boxlx(ibox)*boxly(ibox)*boxlz(ibox)
                    end if
-                   v(3) = 0.0E0_dp
+                   v(ivTail) = 0.0E0_dp
                    do jmolty = 1, nmolty
                       rho = ncmt(ibox,jmolty) / vol
-                      v(3) = v(3) + ncmt(ibox,imolty) * coru(imolty,jmolty,rho,ibox)
+                      v(ivTail) = v(ivTail) + ncmt(ibox,imolty) * coru(imolty,jmolty,rho,ibox)
                    end do
                 end if
 
-                call U_bonded(i,imolty,v(5),v(6),v(7))
+                call U_bonded(i,imolty,v(ivStretching),v(ivBending),v(ivTorsion))
 
                 solcount(ibox,imolty) = solcount(ibox,imolty) + 1
-                call update_average(avsolinter(ibox,imolty),v(2)/2.0_dp+v(3),solcount(ibox,imolty))
-                call update_average(avsolintra(ibox,imolty),v(4),solcount(ibox,imolty))
-                call update_average(avsoltor(ibox,imolty),v(7),solcount(ibox,imolty))
-                call update_average(avsolbend(ibox,imolty),v(6),solcount(ibox,imolty))
-                call update_average(avsolelc(ibox,imolty),v(8)+v(14),solcount(ibox,imolty))
+                call update_average(avsolinter(ibox,imolty),v(ivInterLJ)/2.0_dp+v(ivTail),solcount(ibox,imolty))
+                call update_average(avsolintra(ibox,imolty),v(ivIntraLJ),solcount(ibox,imolty))
+                call update_average(avsoltor(ibox,imolty),v(ivTorsion),solcount(ibox,imolty))
+                call update_average(avsolbend(ibox,imolty),v(ivBending),solcount(ibox,imolty))
+                call update_average(avsolelc(ibox,imolty),v(ivElect)+v(ivEwald),solcount(ibox,imolty))
              end do
           end do
        end if

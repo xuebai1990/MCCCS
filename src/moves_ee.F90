@@ -340,8 +340,8 @@ contains
          if (ovrlap) goto 100
          if (ltailc) then
 ! add tail corrections for the Lennard-Jones energy
-            vn(3)=ee_coru(ibox,imolty,2)
-            vn(2) = vn(2) + vn(3)
+            vn(ivTail)=ee_coru(ibox,imolty,2)
+            vn(ivInterLJ) = vn(ivInterLJ) + vn(ivTail)
          end if
 
 ! energy for the old state
@@ -360,21 +360,21 @@ contains
          end if
          if (ltailc) then
 ! add tail corrections for the Lennard-Jones energy
-            vo(3)=ee_coru(ibox,imolty,1)
-            vo(2) = vo(2) + vo(3)
+            vo(ivTail)=ee_coru(ibox,imolty,1)
+            vo(ivInterLJ) = vo(ivInterLJ) + vo(ivTail)
          end if
 
          if (lewald.and.(lelect(moltion(2)).or.lelect(moltion(1))))then
             call ee_recip(ibox,vrecipn,vrecipo,1)
-            vn(8) = vn(8)+vrecipn+vn(14)
-            vo(8) = vo(8)+vrecipo+vo(14)
-            vn(1) = vn(1) + vrecipn
-            vo(1) = vo(1) + vrecipo
+            vn(ivElect) = vn(ivElect)+vrecipn+vn(ivEwald)
+            vo(ivElect) = vo(ivElect)+vrecipo+vo(ivEwald)
+            vn(ivTot) = vn(ivTot) + vrecipn
+            vo(ivTot) = vo(ivTot) + vrecipo
          end if
 
 ! check for acceptance
 
-         deltv = (vn(1) - vo(1))
+         deltv = (vn(ivTot) - vo(ivTot))
          deltvb = beta*deltv
          wdeltvb = wee_ratio*exp(-deltvb)
 
@@ -405,13 +405,13 @@ contains
          ncmt(ibox,imolty) = ncmt(ibox,imolty) - 1
          eepointp = ncmt(ibox,imolty1)
 
-         vbox(1,ibox) = vbox(1,ibox) + deltv
-         vbox(2,ibox) = vbox(2,ibox) + (vn(2)-vo(2))
-         vbox(4,ibox) = vbox(4,ibox) + (vn(4)-vo(4))
-         vbox(9,ibox) = vbox(9,ibox) + (vn(9)-vo(9))
-         vbox(3,ibox) = vbox(3,ibox) + (vn(3)-vo(3))
-         vbox(8,ibox) = vbox(8,ibox) + (vn(8)-vo(8))
-!	write(io_output,*) vn(3),vo(3),vn(2),vo(2)
+         vbox(ivTot,ibox) = vbox(ivTot,ibox) + deltv
+         vbox(ivInterLJ,ibox) = vbox(ivInterLJ,ibox) + (vn(ivInterLJ)-vo(ivInterLJ))
+         vbox(ivIntraLJ,ibox) = vbox(ivIntraLJ,ibox) + (vn(ivIntraLJ)-vo(ivIntraLJ))
+         vbox(ivExt,ibox) = vbox(ivExt,ibox) + (vn(ivExt)-vo(ivExt))
+         vbox(ivTail,ibox) = vbox(ivTail,ibox) + (vn(ivTail)-vo(ivTail))
+         vbox(ivElect,ibox) = vbox(ivElect,ibox) + (vn(ivElect)-vo(ivElect))
+!	write(io_output,*) vn(ivTail),vo(ivTail),vn(ivInterLJ),vo(ivInterLJ)
 
 ! update reciprocal space term
 
@@ -552,26 +552,10 @@ contains
       end do
       if ( .not. lexpand(imolty) )  call err_exit(__FILE__,__LINE__,'wrong type of molecule for the ES-move',myid+1)
 
-      if (lgrand) then
-! select a chain at random in box 1!
-!         (in box 2 is an ideal gas!)
-         ibox = 1
-         if (nchbox(ibox).eq.0) then
-            bnexpc(imolty,ibox) = bnexpc(imolty,ibox) + 1.0E0_dp
-            return
-         end if
-         i = aint( dble(ncmt(1,imolty))*random(-1) ) + 1
-         i = parbox(i,1,imolty)
-         if ( moltyp(i) .ne. imolty ) write(io_output,*) 'screwup'
-
-      else
-
-         dchain = dble(temtyp(imolty))
-         i = int( dchain*random(-1) ) + 1
-         i = parall(imolty,i)
-         ibox = nboxi(i)
-      end if
-
+      dchain = dble(temtyp(imolty))
+      i = int( dchain*random(-1) ) + 1
+      i = parall(imolty,i)
+      ibox = nboxi(i)
       iunit = nunit(imolty)
 
 ! perform a move in the expanded coefficients
@@ -619,8 +603,8 @@ contains
                vexpta = vexpta + dble( ncmt(ibox,imt) ) * coru(imt,jmt,rho,ibox)
             end do
          end do
-         vn(1) = vn(1) + vexpta
-         vn(2) = vn(2) + vexpta
+         vn(ivTot) = vn(ivTot) + vexpta
+         vn(ivInterLJ) = vn(ivInterLJ) + vexpta
       end if
 
 ! calculate the energy of i in the old configuration ***
@@ -642,8 +626,8 @@ contains
                vexptb = vexptb +  dble(ncmt(ibox,imt)) * coru(imt,jmt,rho,ibox)
             end do
          end do
-         vo(1) = vo(1) + vexptb
-         vo(2) = vo(2) + vexptb
+         vo(ivTot) = vo(ivTot) + vexptb
+         vo(ivInterLJ) = vo(ivInterLJ) + vexptb
 
       end if
 
@@ -653,15 +637,15 @@ contains
 
       if ( lewald ) then
          call recip(ibox,vrecipn,vrecipo,1)
-         vn(8) = vn(8) + vrecipn
-         vo(8) = vo(8) + vrecipo
-         vn(1) = vn(1) + vrecipn
-         vo(1) = vo(1) + vrecipo
+         vn(ivElect) = vn(ivElect) + vrecipn
+         vo(ivElect) = vo(ivElect) + vrecipo
+         vn(ivTot) = vn(ivTot) + vrecipn
+         vo(ivTot) = vo(ivTot) + vrecipo
       end if
 
 ! check for acceptance ***
 
-      deltv  = vn(1) - vo(1) + eta(ibox,imolty,itype)  - eta(ibox,imolty,eetype(imolty))
+      deltv  = vn(ivTot) - vo(ivTot) + eta(ibox,imolty,itype)  - eta(ibox,imolty,eetype(imolty))
       deltvb = beta * deltv
 
       if ( deltvb .gt. (2.3E0_dp*softcut) ) return
@@ -676,12 +660,12 @@ contains
       end if
 
 ! write(io_output,*) 'expanded move accepted i',i,exp_cion(2)
-      vbox(1,ibox)     = vbox(1,ibox) + vn(1) - vo(1)
-      vbox(2,ibox)  = vbox(2,ibox) + (vn(2) - vo(2))
-      vbox(4,ibox)  = vbox(4,ibox) + (vn(4) - vo(4))
-      vbox(9,ibox)    = vbox(9,ibox)   + (vn(9)   - vo(9))
-      vbox(8,ibox)   = vbox(8,ibox)  + (vn(8) - vo(8))
-      vbox(3,ibox) = vbox(3,ibox) + vexpta - vexptb
+      vbox(ivTot,ibox)     = vbox(ivTot,ibox) + vn(ivTot) - vo(ivTot)
+      vbox(ivInterLJ,ibox)  = vbox(ivInterLJ,ibox) + (vn(ivInterLJ) - vo(ivInterLJ))
+      vbox(ivIntraLJ,ibox)  = vbox(ivIntraLJ,ibox) + (vn(ivIntraLJ) - vo(ivIntraLJ))
+      vbox(ivExt,ibox)    = vbox(ivExt,ibox)   + (vn(ivExt)   - vo(ivExt))
+      vbox(ivElect,ibox)   = vbox(ivElect,ibox)  + (vn(ivElect) - vo(ivElect))
+      vbox(ivTail,ibox) = vbox(ivTail,ibox) + vexpta - vexptb
 
       ncmt2(ibox,imolty,itype) = ncmt2(ibox,imolty,itype) + 1
       ncmt2(ibox,imolty,eetype(imolty)) =  ncmt2(ibox,imolty,eetype(imolty)) - 1

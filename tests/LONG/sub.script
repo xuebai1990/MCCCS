@@ -1,12 +1,12 @@
 #!/bin/bash -l
 #PBS -l nodes=1:ppn=1,walltime=24:00:00
 #PBS -N name
-#PBS -m ae
-#PBS -e stderr
-#PBS -o stdout
+###PBS -m ae
+#PBS -e stderr-$PBS_JOBID
+#PBS -o stdout-$PBS_JOBID
 ###PBS -q devel
 
-PROG=$HOME/MCCCS/exe-itasca/topmon
+PROG=$HOME/path/to/topmon
 DATA=/path/to/data
 FILELOG=log
 cd $DATA
@@ -14,15 +14,18 @@ cd $DATA
 #for FCUR in melt cool volume equil1;do
 #    echo "$FCUR: " >> $FILELOG
 #    [ -e "fort.4.$FCUR" ] && cp -f "fort.4.$FCUR" fort.4
-    /usr/bin/time -ao $FILELOG mpirun -np 1 $PROG || exit -1
+    /usr/bin/time -ao $FILELOG $PROG || exit -1
 #    cp -f config1a.dat fort.77
+#    [ -e fort.21 ] && cp -f fort.21 fort.23
 #    mv -f run1a.dat "run.$FCUR"
 #    mv -f config1a.dat "config.$FCUR"
 #    mv -f movie1a.dat "movie.$FCUR"
 #    mv -f fort.12 "fort12.$FCUR"
+#    [ -e fort.21 ] && mv -f fort.21 "fort21.$FCUR"
+#    [ -e cell_param1a.dat ] && mv -f cell_param1a.dat "cellparam.$FCUR"
 #    for j in 1 2 3;do
-#        mv -f "box${j}config1a.xyz" "box${j}config.$FCUR"
-#        mv -f "box${j}movie1a.xyz" "box${j}movie.$FCUR"
+#        [ -e "box${j}config1a.xyz" ] && mv -f "box${j}config1a.xyz" "box${j}config.$FCUR"
+#        [ -e "box${j}movie1a.xyz" ] && mv -f "box${j}movie1a.xyz" "box${j}movie.$FCUR"
 #    done
 #done
 

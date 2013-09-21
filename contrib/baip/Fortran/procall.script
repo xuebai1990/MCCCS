@@ -12,5 +12,5 @@ do
     #Each directory contains movie.prod1 to movie.prod30 (some can be missing)
     $ANALYSIS/analysis.script 1 16 prod 1 30
     #There are 13 output files from the analysis step needed to average
-    $ANALYSIS/average.script 1 16 1 30 13
+    $ANALYSIS/average.script 1 16 1 30
 done

@@ -53,7 +53,7 @@ contains
       do icbu = 1,nmolty
          if ( rchain .lt. pmtrmt(icbu) ) then
             imolty = icbu
-            rchain = 2.0E0_dp
+            exit
          end if
       end do
 
@@ -61,29 +61,10 @@ contains
 
       if (temtyp(imolty).eq.0) return
 
-      if (lgrand) then
-! select a chain at random in box 1!
-!         (in box 2 is an ideal gas!)
-         ibox = 1
-         if (ncmt(ibox,imolty).eq.0) then
-            if(lx) bntrax(imolty,ibox) = bntrax(imolty,ibox) + 1.0E0_dp
-            if(ly) bntray(imolty,ibox) = bntray(imolty,ibox) + 1.0E0_dp
-            if(lz) bntraz(imolty,ibox) = bntraz(imolty,ibox) + 1.0E0_dp
-            return
-         end if
-         i = int( real(ncmt(1,imolty),dp)*random(-1) ) + 1
-         i = parbox(i,1,imolty)
-         if ( moltyp(i) .ne. imolty ) write(io_output,*) 'screwup translation'
-
-
-      else
-
-         dchain = real(temtyp(imolty),dp)
-         i = int( dchain*random(-1) + 1 )
-         i = parall(imolty,i)
-         ibox = nboxi(i)
-
-      end if
+      dchain = real(temtyp(imolty),dp)
+      i = int( dchain*random(-1) + 1 )
+      i = parall(imolty,i)
+      ibox = nboxi(i)
 
 ! store number of units of i in iunit ***
 
@@ -162,8 +143,8 @@ contains
 
       if (lewald.and.lelect(imolty).and..not.lideal(ibox)) then
          call recip(ibox,vrecipn,vrecipo,1)
-         vn(8) = vn(8) + vrecipn
-         vo(8) = vo(8) + vrecipo
+         vn(ivElect) = vn(ivElect) + vrecipn
+         vo(ivElect) = vo(ivElect) + vrecipo
          vipswn = vipswn + vrecipn
          vipswo = vipswo + vrecipo
          if (lstagea) then
@@ -176,12 +157,12 @@ contains
             vrecipn =  (etais+(1.0E0_dp-etais)*lambdais)*vrecipn
             vrecipo =  (etais+(1.0E0_dp-etais)*lambdais)*vrecipo
          end if
-         vn(1) = vn(1) + vrecipn
-         vo(1) = vo(1) + vrecipo
+         vn(ivTot) = vn(ivTot) + vrecipn
+         vo(ivTot) = vo(ivTot) + vrecipo
       end if
 ! check for acceptance ***
 
-      deltv  = vn(1) - vo(1)
+      deltv  = vn(ivTot) - vo(ivTot)
       deltvb = beta * deltv
 
 
@@ -210,16 +191,16 @@ contains
 
 ! write(io_output,*) 'TRANSLATION accepted i',i
 
-      vbox(1,ibox)     = vbox(1,ibox) + deltv
-      vbox(2,ibox)  = vbox(2,ibox) + (vn(2) - vo(2))
-      vbox(4,ibox)  = vbox(4,ibox) + (vn(4) - vo(4))
-      vbox(9,ibox)    = vbox(9,ibox)   + (vn(9)   - vo(9))
-      vbox(8,ibox)   = vbox(8,ibox)  + (vn(8) - vo(8))
-      vbox(12,ibox) = vbox(12,ibox) + (vipswn-vipswo)
-      vbox(13,ibox) = vbox(13,ibox) + (vwellipswn-vwellipswo)
-      vipsw = vbox(12,ibox)
-      vwellipsw = vbox(13,ibox)
-      vbox(10,ibox) = vbox(10,ibox) + (vn(10)-vo(10))
+      vbox(ivTot,ibox)     = vbox(ivTot,ibox) + deltv
+      vbox(ivInterLJ,ibox)  = vbox(ivInterLJ,ibox) + (vn(ivInterLJ) - vo(ivInterLJ))
+      vbox(ivIntraLJ,ibox)  = vbox(ivIntraLJ,ibox) + (vn(ivIntraLJ) - vo(ivIntraLJ))
+      vbox(ivExt,ibox)    = vbox(ivExt,ibox)   + (vn(ivExt) - vo(ivExt))
+      vbox(ivElect,ibox)   = vbox(ivElect,ibox)  + (vn(ivElect) - vo(ivElect))
+      vbox(ivIpswb,ibox) = vbox(ivIpswb,ibox) + (vipswn-vipswo)
+      vbox(ivWellIpswb,ibox) = vbox(ivWellIpswb,ibox) + (vwellipswn-vwellipswo)
+      vipsw = vbox(ivIpswb,ibox)
+      vwellipsw = vbox(ivWellIpswb,ibox)
+      vbox(iv3body,ibox) = vbox(iv3body,ibox) + (vn(iv3body)-vo(iv3body))
 
       do j = 1,iunit
          if (lx) rxu(i,j) = rxuion(j,2)
@@ -298,51 +279,25 @@ contains
       end if
 
       ovrlap = .false.
-      if (lgrand) then
-! select a chain at random in box 1!
-!         (in box 2 is an ideal gas!)
-         ibox = 1
-         rchain  = random(-1)
-         do icbu = 1,nmolty
-            if ( rchain .lt. pmromt(icbu) ) then
-               imolty = icbu
-               rchain = 2.0E0_dp
-            end if
-         end do
-         if (ncmt(ibox,imolty).eq.0) then
-            if(lx) bnrotx(imolty,ibox) = bnrotx(imolty,ibox) + 1.0E0_dp
-            if(ly) bnroty(imolty,ibox) = bnroty(imolty,ibox) + 1.0E0_dp
-            if(lz) bnrotz(imolty,ibox) = bnrotz(imolty,ibox) + 1.0E0_dp
-            return
-         end if
-
- 10      dchain = real(temtyp(imolty),dp)
-         i = int( dchain*random(-1) + 1 )
-         i = parall(imolty,i)
-         if (nboxi(i) .ne. 1) goto 10
-         iuroty = iurot(imolty)
-      else
 ! select a chain type at random ***
-         rchain  = random(-1)
-         do icbu = 1,nmolty
-            if ( rchain .lt. pmromt(icbu) ) then
-               imolty = icbu
-               rchain = 2.0E0_dp
-            end if
-         end do
+      rchain  = random(-1)
+      do icbu = 1,nmolty
+         if ( rchain .lt. pmromt(icbu) ) then
+            imolty = icbu
+            exit
+         end if
+      end do
 
-         if ((lexpee).and.(imolty.ge.nmolty1)) imolty = ee_moltyp(mstate)
+      if ((lexpee).and.(imolty.ge.nmolty1)) imolty = ee_moltyp(mstate)
 
-         if (temtyp(imolty).eq.0) return
+      if (temtyp(imolty).eq.0) return
 
-         dchain = real(temtyp(imolty),dp)
-         i = int( dchain*random(-1) + 1 )
-         i = parall(imolty,i)
+      dchain = real(temtyp(imolty),dp)
+      i = int( dchain*random(-1) + 1 )
+      i = parall(imolty,i)
+      ibox = nboxi(i)
 
-         ibox = nboxi(i)
-         iuroty = iurot(imolty)
-      end if
-
+      iuroty = iurot(imolty)
 !kea 6/4/09 -- for multiple rotation centers
       if(iuroty.lt.0) then
          if(nrotbd(imolty).gt.1) then
@@ -469,8 +424,8 @@ contains
       if (ovrlap) call err_exit(__FILE__,__LINE__,'disaster- overlap for old conf in ROTATION',myid+1)
       if (lewald.and.lelect(imolty).and..not.lideal(ibox)) then
          call recip(ibox,vrecipn,vrecipo,1)
-         vn(8) = vn(8) + vrecipn
-         vo(8) = vo(8) + vrecipo
+         vn(ivElect) = vn(ivElect) + vrecipn
+         vo(ivElect) = vo(ivElect) + vrecipo
          vipswn = vipswn + vrecipn
          vipswo = vipswo + vrecipo
          if (lstagea) then
@@ -483,13 +438,13 @@ contains
            vrecipn  =  (etais+(1.0E0_dp-etais)*lambdais)*vrecipn
            vrecipo  =  (etais+(1.0E0_dp-etais)*lambdais)*vrecipo
          end if
-         vn(1) = vn(1) + vrecipn
-         vo(1) = vo(1) + vrecipo
+         vn(ivTot) = vn(ivTot) + vrecipn
+         vo(ivTot) = vo(ivTot) + vrecipo
       end if
 
 ! check for acceptance ***
 
-      deltv  = vn(1) - vo(1)
+      deltv  = vn(ivTot) - vo(ivTot)
       deltvb = beta * deltv
 
 ! For ANES algorithm, do the Fluctuating charge moves.
@@ -516,15 +471,15 @@ contains
       end if
 
 ! write(io_output,*) 'ROTATION accepted',i
-      vbox(1,ibox) = vbox(1,ibox) + deltv
-      vbox(2,ibox)  = vbox(2,ibox) + (vn(2) -  vo(2))
-      vbox(4,ibox)  = vbox(4,ibox) + (vn(4) - vo(4))
-      vbox(9,ibox)    = vbox(9,ibox)   + (vn(9)-vo(9))
-      vbox(8,ibox)  = vbox(8,ibox) + (vn(8)-vo(8))
-      vbox(12,ibox) = vbox(12,ibox) + (vipswn-vipswo)
-      vbox(13,ibox) = vbox(13,ibox) + (vwellipswn-vwellipswo)
-      vipsw = vbox(12,ibox)
-      vwellipsw = vbox(13,ibox)
+      vbox(ivTot,ibox) = vbox(ivTot,ibox) + deltv
+      vbox(ivInterLJ,ibox)  = vbox(ivInterLJ,ibox) + (vn(ivInterLJ) -  vo(ivInterLJ))
+      vbox(ivIntraLJ,ibox)  = vbox(ivIntraLJ,ibox) + (vn(ivIntraLJ) - vo(ivIntraLJ))
+      vbox(ivExt,ibox)    = vbox(ivExt,ibox)   + (vn(ivExt)-vo(ivExt))
+      vbox(ivElect,ibox)  = vbox(ivElect,ibox) + (vn(ivElect)-vo(ivElect))
+      vbox(ivIpswb,ibox) = vbox(ivIpswb,ibox) + (vipswn-vipswo)
+      vbox(ivWellIpswb,ibox) = vbox(ivWellIpswb,ibox) + (vwellipswn-vwellipswo)
+      vipsw = vbox(ivIpswb,ibox)
+      vwellipsw = vbox(ivWellIpswb,ibox)
 
       do j = 1, iunit
          rxu(i,j) = rxuion(j,2)
@@ -573,7 +528,7 @@ contains
 
       logical::lx,ly,lz,ovrlap
       integer::i,ibox,flagon,iunit,j,imolty,icbu
-      integer::pick_unit,pick_chain
+      integer::pick_unit
       real::rx,ry,rz,dchain,vn(nEnergy),vo(nEnergy),deltv,deltvb,rchain,vdum,vrecipo,vrecipn
       logical::laccept
 
@@ -600,33 +555,16 @@ contains
       do icbu = 1,nmolty
          if ( rchain .lt. pmtrmt(icbu) ) then
             imolty = icbu
-            rchain = 2.0E0_dp
+            exit
          end if
       end do
 
-      if (lgrand) then
-! select a chain at random in box 1!
-!         (in box 2 is an ideal gas!)
-         ibox = 1
-         if (ncmt(ibox,imolty).eq.0) then
-            if(lx) Abntrax = Abntrax + 1.0E0_dp
-            if(ly) Abntray = Abntray + 1.0E0_dp
-            if(lz) Abntraz = Abntraz + 1.0E0_dp
-            return
-         end if
-         pick_chain = int( real(ncmt(1,imolty),dp)*random(-1) ) + 1
-         pick_chain = parbox(pick_chain,1,imolty)
-         if ( moltyp(pick_chain) .ne. imolty )  write(io_output,*) 'screwup translation'
+      if (temtyp(imolty).eq.0) return
 
-
-      else
-
-         dchain = real(temtyp(imolty),dp)
-         pick_chain = int( dchain*random(-1) + 1 )
-         pick_chain = parall(imolty,pick_chain)
-         ibox = nboxi(pick_chain)
-
-      end if
+      dchain = real(temtyp(imolty),dp)
+      i = int( dchain*random(-1) + 1 )
+      i = parall(imolty,i)
+      ibox = nboxi(i)
 
 ! store number of units of i in iunit ***
 
@@ -634,9 +572,7 @@ contains
 
       pick_unit = int(real(iunit*random(-1),dp) + 1 )
 
-! write(io_output,*) pick_unit, imolty, pick_chain
-
-      i = pick_chain
+! write(io_output,*) pick_unit, imolty, i
 
       do j = 1,iunit
         rxuion(j,1) = rxu(i,j)
@@ -687,24 +623,24 @@ contains
       flagon = 2
       call energy(i,imolty,vn,flagon,ibox,pick_unit,pick_unit,.true.,ovrlap,.false.,.false.,.false.,.true.)
       if (ovrlap) return
-      call U_bonded(i,imolty,vn(5),vn(6),vn(7))
+      call U_bonded(i,imolty,vn(ivStretching),vn(ivBending),vn(ivTorsion))
 
 ! calculate the energy of i in the old configuration ***
       flagon = 1
       call energy(i,imolty,vo,flagon,ibox,pick_unit,pick_unit,.true.,ovrlap,.false.,.false.,.false.,.true.)
       if (ovrlap) call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf of ATOM_TRANSLATION',myid+1)
-      call U_bonded(i,imolty,vo(5),vo(6),vo(7))
+      call U_bonded(i,imolty,vo(ivStretching),vo(ivBending),vo(ivTorsion))
 
       if ( lewald .and. lelect(imolty) ) then
          call recip_atom(ibox,vrecipn,vrecipo,1,pick_unit)
-         vn(8) = vn(8) + vrecipn + vn(14)
-         vo(8) = vo(8) + vrecipo + vo(14)
-         vn(1) = vn(1) + vrecipn
-         vo(1) = vo(1) + vrecipo
+         vn(ivElect) = vn(ivElect) + vrecipn + vn(ivEwald)
+         vo(ivElect) = vo(ivElect) + vrecipo + vo(ivEwald)
+         vn(ivTot) = vn(ivTot) + vrecipn
+         vo(ivTot) = vo(ivTot) + vrecipo
       end if
 ! check for acceptance ***
 
-      deltv  = vn(1) - vo(1)
+      deltv  = vn(ivTot) - vo(ivTot)
       deltvb = beta * deltv
 
 ! For ANES algorithm, do the Fluctuating charge moves.
@@ -731,15 +667,15 @@ contains
       end if
 
 ! write(io_output,*) 'TRANSLATION accepted i',i
-      vbox(1,ibox)     = vbox(1,ibox) + deltv
-      vbox(2,ibox)  = vbox(2,ibox) + (vn(2) - vo(2))
-      vbox(4,ibox)  = vbox(4,ibox) + (vn(4) - vo(4))
-      vbox(9,ibox)    = vbox(9,ibox)   + (vn(9)   - vo(9))
-      vbox(8,ibox)   = vbox(8,ibox)  + (vn(8) - vo(8))
+      vbox(ivTot,ibox)     = vbox(ivTot,ibox) + deltv
+      vbox(ivInterLJ,ibox)  = vbox(ivInterLJ,ibox) + (vn(ivInterLJ) - vo(ivInterLJ))
+      vbox(ivIntraLJ,ibox)  = vbox(ivIntraLJ,ibox) + (vn(ivIntraLJ) - vo(ivIntraLJ))
+      vbox(ivExt,ibox)    = vbox(ivExt,ibox)   + (vn(ivExt)   - vo(ivExt))
+      vbox(ivElect,ibox)   = vbox(ivElect,ibox)  + (vn(ivElect) - vo(ivElect))
 
-      vbox(7,ibox) = vbox(7,ibox) + (vn(7)-vo(7))
-      vbox(6,ibox) = vbox(6,ibox) + (vn(6)-vo(6))
-      vbox(5,ibox) = vbox(5,ibox) + (vn(5)-vo(5))
+      vbox(ivTorsion,ibox) = vbox(ivTorsion,ibox) + (vn(ivTorsion)-vo(ivTorsion))
+      vbox(ivBending,ibox) = vbox(ivBending,ibox) + (vn(ivBending)-vo(ivBending))
+      vbox(ivStretching,ibox) = vbox(ivStretching,ibox) + (vn(ivStretching)-vo(ivStretching))
 
 
       if (lx) rxu(i,pick_unit) = rxuion(pick_unit,2)

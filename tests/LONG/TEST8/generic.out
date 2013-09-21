@@ -1,4 +1,4 @@
-Program started at 2013-05-03 19:17:32.217
+Program started at 2013-11-20 03:20:47.911
 Number of processors: 1
 Threads per processor: 1
  run_num: 1
@@ -33,7 +33,7 @@ number of chains: 200
 number of cycles: 12000
  iratio: 500
 minimum cutoff (rmin):   1.200 [Ang]
- softcut:   100.000000    
+ softcut:  100.0000000    
 Write checkpoint file every 1800 seconds, and keep the last 1 copies
  linit:  T
  lreadq:  F
@@ -65,7 +65,7 @@ Box 1:   40.000 x   40.000 x   40.000
    number of dimensions that are isotropic: 0
    lsolid:  F, lrect:  F, lideal:  F, ltwice:  F
    temperature: 3440.000 [K]
-   external pressure:  0.100000000     [MPa]
+   external pressure:  0.100000000E+00 [MPa]
    initial number of chains of each type:   180
    Ghost particles: 0
    initial number of chains in x, y and z directions: 10 x 10 x 2
@@ -76,7 +76,7 @@ Box 2:   90.000 x   90.000 x   90.000
    number of dimensions that are isotropic: 0
    lsolid:  F, lrect:  F, lideal:  F, ltwice:  F
    temperature: 3440.000 [K]
-   external pressure:  0.100000000     [MPa]
+   external pressure:  0.100000000E+00 [MPa]
    initial number of chains of each type:   20
    Ghost particles: 0
    initial number of chains in x, y and z directions: 4 x 4 x 2
@@ -173,16 +173,16 @@ target volume acceptance ratio (tavol): 0.40
 frequency to adjust maximum volume displacement: 500
 initial maximum volume displacement (rmvol):    0.001
 pmvol:   0.00000000    
-   pmvlmt for box 1:   1.00000000    
-   pmvlmt for box 2:   1.00000000    
+   pmvlmt for box 1:  1.000000000    
+   pmvlmt for box 2:  1.000000000    
 nvolb: 1
-   box pair 1: between 1 and 2,   pmvolb =   1.00000000    
+   box pair 1: between 1 and 2,   pmvolb =  1.000000000    
 
 NAMELIST MC_SWATCH
 ------------------------------------------
 pmswat:   0.00000000    
    number of swatch pairs (nswaty): 1
-   probability of each swatch pair:   1.00000000    
+   probability of each swatch pair:  1.000000000    
 
    swatch molecule type pairs:    1    2
    nsampos: 1, ncut:  1  1
@@ -192,7 +192,7 @@ pmswat:   0.00000000
    ncut 1: grom from 1, prev 1
    splist:    1    1
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    2
 
 NAMELIST MC_SWAP
@@ -200,7 +200,7 @@ NAMELIST MC_SWAP
 pmswap:   0.00000000    
    swap probability for molecule type 1 (pmswmt):   1.0000
    number of swap box pairs for molecule type 1: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    2
 
 NAMELIST MC_CBMC
@@ -215,13 +215,13 @@ molecule type: nchoi1  nchoi nchoir nchoih nchtor nchbna nchbnb icbdir icbsta
             1:     10      8     10      1    100   1000   1000      0      0
 
 molecule type:    pmcbmt         pmall  avbmc_version    pmbias        pmbsmt       pmbias2         pmfix   lrig
-            1:   1.00000       0.00000              0   0.00000       0.00000       0.00000       0.00000      F
+            1:  1.000000       0.00000              0   0.00000       0.00000       0.00000       0.00000      F
 
 NAMELIST MC_FLUCQ
 ------------------------------------------
 target fluctuating charge acceptance ratio (taflcq): 0.95
 fluctuating charge temperature:    5.000 [K]
-initial maximum displacement for fluctuating charge moves:  0.100000000    
+initial maximum displacement for fluctuating charge moves:  0.100000000E+00
 pmflcq:   0.00000000    
    nchoiq for each box:   1  1
 
@@ -244,7 +244,7 @@ pmtra:  0.670000000
    translation probability for molecule type 1 (pmtrmt):   1.0000
 target rotation acceptance ratio: 0.50
 initial maximum displacement for molecule rotation:  0.400000000    
-pmrot:   1.00000000    
+pmrot:  1.000000000    
    rotational probability for molecule type 1 (pmromt):   1.0000
 
 percentage move probabilities:
@@ -312,20 +312,15 @@ CHARGE INCLUSION TABLE
       6  1.000  1.000  0.500  1.000  1.000  1.000  1.000  1.000
       7  1.000  1.000  1.000  0.500  1.000  1.000  1.000  1.000
       8  1.000  1.000  1.000  1.000  0.500  1.000  1.000  1.000
- 
- subroutine initia
- 
- box           1
- ini          10          10           2
- box   40.0000000000000        40.0000000000000        40.0000000000000     
- uni   4.00000000000000        4.00000000000000        20.0000000000000     
- box           2
- ini           4           4           2
- box   90.0000000000000        90.0000000000000        90.0000000000000     
- uni   22.5000000000000        22.5000000000000        45.0000000000000     
- nmolty           1
-    mcmt         180          20
- aben  0.000000000000000E+000 ator  0.000000000000000E+000
+
+Generating Initial Structures
+------------------------------------------
+Box 1: 10X10X2
+Dimension:   40.0000000    X  40.0000000    X  40.0000000    
+Spacing:   4.00000000    X  4.00000000    X  20.0000000    
+Box 2: 4X4X2
+Dimension:   90.0000000    X  90.0000000    X  90.0000000    
+Spacing:   22.5000000    X  22.5000000    X  45.0000000    
 
 molecule type 1
       i      j type_i type_j   bond length           k/2
@@ -380,19 +375,19 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  sumup control
  number of chains         180
  number of chains of type           1         180
- inter lj energy   -336290.910449369     
- intra lj energy   -31614.3874638733     
+ inter lj energy   -336290.910449354     
+ intra lj energy   -31614.3874638734     
  Tail correction   -19514.4537596172     
  bond vibration    0.000000000000000E+000
- bond bending      6.480215002478620E-023
- torsional        -1.361968315904960E-010
+ bond bending      5.924006434539587E-023
+ torsional         1.818989403545856E-011
  external          0.000000000000000E+000
  coulombic energy  0.000000000000000E+000
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -367905.297913242     
+ total energy      -367905.297913227     
  
- box             1  initial v   =   -367905.297913242     
+ box             1  initial v   =   -367905.297913227     
  surf. tension :   box 1 =   -2347.44334
  pressure check:   box 1 =     907640.62
  
@@ -403,15 +398,15 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  intra lj energy   -3512.70971820810     
  Tail correction   -21.1506552289709     
  bond vibration    0.000000000000000E+000
- bond bending      3.125553188147157E-023
- torsional        -1.477928890381008E-011
+ bond bending      2.965623965565241E-023
+ torsional         9.094947017729282E-012
  external          0.000000000000000E+000
  coulombic energy  0.000000000000000E+000
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -3533.86037343709     
+ total energy      -3533.86037343706     
  
- box             2  initial v   =   -3533.86037343709     
+ box             2  initial v   =   -3533.86037343706     
  surf. tension :   box 2 =       0.00000
  pressure check:   box 2 =       1302.20
  
@@ -419,275 +414,276 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  
  Cycle   Total   Energy    Boxlength   Pressure  Molecules
  Box            1
- Type  1 bn  10003.   9850.   9982.   9981.   9999.   9909.
-         bs   8738.   8631.   8755.   6793.   6845.   6938.
- max.displ.     0.5241    0.5257    0.5262    0.5445    0.5477    0.5601
+ Type  1 bn   9755.   9887.   9945.   9786.   9907.   9942.
+         bs   8528.   8689.   8755.   6757.   6729.   6988.
+ max.displ.     0.5245    0.5273    0.5282    0.5524    0.5434    0.5623
  Box            2
- Type  1 bn   1074.   1095.   1090.   1043.   1110.   1114.
-         bs   1074.   1093.   1088.   1041.   1109.   1113.
- max.displ.     0.6000    0.5989    0.5989    0.7985    0.7993    0.7993
+ Type  1 bn   1106.   1091.   1067.   1058.   1100.   1108.
+         bs   1102.   1091.   1067.   1054.   1096.   1104.
+ max.displ.     0.5978    0.6000    0.6000    0.7970    0.7971    0.7971
  Box            1
- Type  1 bn   9871.   9925.   9962.   9710.   9880.  10001.
-         bs   7849.   7912.   7891.   5950.   6137.   6192.
- max.displ.     0.8335    0.8382    0.8337    0.6673    0.6804    0.6936
+ Type  1 bn   9795.   9821.  10025.  10090.   9795.   9876.
+         bs   7843.   7864.   7952.   6242.   6119.   6030.
+ max.displ.     0.8400    0.8445    0.8380    0.6834    0.6789    0.6866
  Box            2
- Type  1 bn   1065.   1146.   1091.   1075.   1116.   1127.
-         bs   1062.   1144.   1089.   1075.   1113.   1124.
- max.displ.     1.1966    1.1957    1.1956    1.5969    1.5943    1.5943
-  1200    1200  0.2254E+07    40.000    613396.4  180
-                0.2771E+06    90.000      1284.9   20
+ Type  1 bn   1118.   1124.   1114.   1113.   1159.   1122.
+         bs   1117.   1120.   1112.   1108.   1149.   1121.
+ max.displ.     1.1946    1.1957    1.1978    1.5868    1.5804    1.5928
+  1200    1200  0.2442E+07    40.000    508342.0  180
+                0.2629E+06    90.000      1300.2   20
  Box            1
- Type  1 bn   9747.   9749.  10166.   9926.   9996.   9857.
-         bs   6712.   6675.   6997.   5555.   5613.   5455.
- max.displ.     1.1480    1.1478    1.1476    0.7469    0.7641    0.7677
+ Type  1 bn   9990.   9900.   9768.  10049.   9847.   9917.
+         bs   6920.   6803.   6708.   5593.   5460.   5549.
+ max.displ.     1.1637    1.1606    1.1509    0.7608    0.7529    0.7684
  Box            2
- Type  1 bn   1091.   1078.   1104.   1070.   1110.   1110.
-         bs   1090.   1075.   1099.   1061.   1105.   1106.
- max.displ.     2.3910    2.3848    2.3804    3.1415    3.1415    3.1415
+ Type  1 bn   1084.   1138.   1104.   1077.   1115.   1081.
+         bs   1083.   1135.   1100.   1066.   1098.   1076.
+ max.displ.     2.3870    2.3852    2.3870    3.1412    3.1127    3.1415
  Box            1
- Type  1 bn   9879.   9968.   9861.   9832.   9824.   9946.
-         bs   5921.   6008.   5932.   5171.   5046.   5184.
- max.displ.     1.3761    1.3837    1.3807    0.7856    0.7849    0.8003
+ Type  1 bn   9763.   9921.   9842.   9920.   9876.   9828.
+         bs   5688.   5920.   5859.   5104.   5168.   5150.
+ max.displ.     1.3560    1.3851    1.3703    0.7829    0.7879    0.8053
  Box            2
- Type  1 bn   1100.   1046.   1092.   1123.   1096.   1130.
-         bs   1086.   1041.   1087.   1115.   1088.   1124.
- max.displ.     4.7212    4.7468    4.7390    3.1415    3.1415    3.1415
-  2400    2400  0.2216E+07    40.000    558146.0  180
-                0.2729E+06    90.000      1302.0   20
+ Type  1 bn   1109.   1099.   1093.   1101.   1060.   1142.
+         bs   1106.   1090.   1084.   1087.   1047.   1126.
+ max.displ.     4.7610    4.7312    4.7347    3.1415    3.1415    3.1415
+  2400    2400  0.2382E+07    40.000    624314.2  180
+                0.3107E+06    90.000      1299.6   20
  Box            1
- Type  1 bn   9970.   9944.   9793.   9807.   9961.   9934.
-         bs   5421.   5424.   5331.   5092.   5119.   5091.
- max.displ.     1.4964    1.5095    1.5032    0.8158    0.8067    0.8203
+ Type  1 bn   9923.   9902.   9978.   9889.   9828.   9902.
+         bs   5394.   5370.   5333.   5047.   5040.   4960.
+ max.displ.     1.4742    1.5023    1.4648    0.7991    0.8081    0.8068
  Box            2
- Type  1 bn   1081.   1070.   1143.   1067.   1080.   1110.
-         bs   1065.   1058.   1125.   1059.   1069.   1100.
- max.displ.     9.3027    9.3871    9.3286    3.1415    3.1415    3.1415
+ Type  1 bn   1123.   1077.   1050.   1112.   1136.   1127.
+         bs   1111.   1071.   1040.   1103.   1132.   1123.
+ max.displ.     9.4203    9.4098    9.3792    3.1415    3.1415    3.1415
  Box            1
- Type  1 bn   9890.  10003.   9935.   9716.   9893.   9906.
-         bs   5071.   5194.   5062.   4892.   4945.   4883.
- max.displ.     1.5345    1.5676    1.5318    0.8215    0.8065    0.8087
+ Type  1 bn   9950.   9980.  10013.   9946.   9997.   9774.
+         bs   5196.   5264.   5255.   5089.   5049.   5041.
+ max.displ.     1.5397    1.5848    1.5375    0.8177    0.8163    0.8322
  Box            2
- Type  1 bn   1094.   1075.   1080.   1071.   1149.   1163.
-         bs   1065.   1056.   1057.   1066.   1138.   1158.
- max.displ.    18.1122   18.4423   18.2600    3.1415    3.1415    3.1415
+ Type  1 bn   1104.   1053.   1111.   1067.   1098.   1075.
+         bs   1085.   1036.   1090.   1058.   1092.   1066.
+ max.displ.    18.5164   18.5157   18.4039    3.1415    3.1415    3.1415
  Box            1
- Type  1 bn   9912.   9725.   9952.   9890.   9880.   9819.
-         bs   5050.   4886.   5078.   4906.   5091.   4961.
- max.displ.     1.5637    1.5751    1.5632    0.8150    0.8312    0.8171
+ Type  1 bn   9848.   9751.   9883.   9942.   9910.   9994.
+         bs   5014.   4710.   5153.   4918.   5023.   4936.
+ max.displ.     1.5678    1.5310    1.6033    0.8090    0.8275    0.8221
  Box            2
- Type  1 bn   1151.   1109.   1124.   1139.   1101.   1076.
-         bs   1129.   1094.   1096.   1134.   1092.   1063.
+ Type  1 bn   1075.   1161.   1101.   1108.   1105.   1044.
+         bs   1051.   1133.   1080.   1105.   1097.   1038.
  max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
-  3600    3600  0.2370E+07    40.000    573504.0  180
-                0.2621E+06    90.000      1287.0   20
+  3600    3600  0.2210E+07    40.000    509267.7  180
+                0.3062E+06    90.000      1279.6   20
  Box            1
- Type  1 bn   9812.   9857.   9915.  10167.   9922.   9764.
-         bs   4908.   4873.   5005.   5051.   4864.   4954.
- max.displ.     1.5643    1.5574    1.5782    0.8098    0.8149    0.8292
+ Type  1 bn   9890.   9798.   9968.   9945.   9965.   9851.
+         bs   4884.   5113.   4882.   5132.   5056.   4913.
+ max.displ.     1.5485    1.5978    1.5705    0.8350    0.8397    0.8200
  Box            2
- Type  1 bn   1113.   1062.   1057.   1158.   1036.   1149.
-         bs   1071.   1023.   1029.   1149.   1029.   1140.
- max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
- Box            1
- Type  1 bn   9698.   9882.   9888.   9888.   9796.  10016.
-         bs   4860.   4968.   4954.   5060.   4934.   4891.
- max.displ.     1.5678    1.5659    1.5814    0.8288    0.8209    0.8098
- Box            2
- Type  1 bn   1151.   1096.   1059.   1084.   1182.   1065.
-         bs   1118.   1063.   1040.   1078.   1174.   1059.
- max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
-  4800    4800  0.2339E+07    40.000    595732.3  180
-                0.2806E+06    90.000      1296.9   20
- Box            1
- Type  1 bn   9850.   9983.   9830.   9742.  10011.   9806.
-         bs   4997.   4972.   4843.   4866.   5013.   4911.
- max.displ.     1.5908    1.5598    1.5582    0.8280    0.8221    0.8111
- Box            2
- Type  1 bn   1096.   1051.   1090.   1089.   1167.   1068.
-         bs   1058.   1009.   1053.   1073.   1156.   1053.
+ Type  1 bn   1101.   1099.   1086.   1114.   1079.   1147.
+         bs   1068.   1067.   1049.   1105.   1066.   1136.
  max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
  Box            1
- Type  1 bn   9816.   9795.   9914.   9867.   9941.   9748.
-         bs   4822.   5014.   5042.   4930.   4973.   4946.
- max.displ.     1.5629    1.5969    1.5850    0.8274    0.8225    0.8231
+ Type  1 bn   9987.   9912.  10015.   9880.   9836.   9940.
+         bs   5121.   4924.   5154.   4832.   4931.   5015.
+ max.displ.     1.5880    1.5875    1.6164    0.8167    0.8419    0.8274
  Box            2
- Type  1 bn   1123.   1114.   1132.   1114.   1082.   1100.
-         bs   1093.   1079.   1101.   1103.   1069.   1092.
+ Type  1 bn   1078.   1097.   1042.   1136.   1096.   1091.
+         bs   1043.   1065.   1003.   1127.   1080.   1079.
+ max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
+  4800    4800  0.2293E+07    40.000    598449.8  180
+                0.2682E+06    90.000      1301.7   20
+ Box            1
+ Type  1 bn   9865.  10001.   9860.   9996.   9951.   9785.
+         bs   5028.   4977.   4810.   5092.   4983.   4859.
+ max.displ.     1.6188    1.5801    1.5771    0.8321    0.8432    0.8217
+ Box            2
+ Type  1 bn   1145.   1056.   1094.   1103.   1069.   1079.
+         bs   1108.   1028.   1057.   1091.   1064.   1073.
  max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
  Box            1
- Type  1 bn   9740.   9838.   9846.   9845.   9870.  10017.
-         bs   4882.   4941.   4855.   4894.   4939.   5013.
- max.displ.     1.5667    1.6040    1.5631    0.8226    0.8232    0.8239
+ Type  1 bn   9878.   9903.   9727.  10071.   9805.   9872.
+         bs   4908.   4921.   4890.   5056.   4890.   4878.
+ max.displ.     1.6086    1.5703    1.5857    0.8354    0.8411    0.8121
  Box            2
- Type  1 bn   1149.   1086.   1088.   1091.   1100.   1123.
-         bs   1118.   1049.   1054.   1082.   1090.   1115.
- max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
-  6000    6000  0.2463E+07    40.000    605772.6  180
-                0.2862E+06    90.000      1454.2   20
- Box            1
- Type  1 bn   9892.   9785.   9826.   9891.   9946.  10078.
-         bs   4958.   4824.   4952.   4955.   4987.   5030.
- max.displ.     1.5705    1.5816    1.5755    0.8242    0.8255    0.8224
- Box            2
- Type  1 bn   1047.   1148.   1069.   1039.   1097.   1125.
-         bs   1023.   1106.   1041.   1029.   1085.   1113.
+ Type  1 bn   1075.   1063.   1112.   1098.   1097.   1170.
+         bs   1034.   1019.   1079.   1089.   1081.   1158.
  max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
  Box            1
- Type  1 bn  10022.   9918.   9751.   9988.   9899.   9949.
-         bs   5000.   5012.   4992.   5022.   4912.   4939.
- max.displ.     1.5671    1.5985    1.6131    0.8288    0.8193    0.8165
+ Type  1 bn   9927.   9907.   9943.   9883.   9830.   9959.
+         bs   4979.   4902.   4959.   4841.   4884.   5000.
+ max.displ.     1.6136    1.5540    1.5817    0.8185    0.8358    0.8154
  Box            2
- Type  1 bn   1072.   1096.   1039.   1088.   1092.   1096.
-         bs   1047.   1057.   1010.   1082.   1081.   1088.
+ Type  1 bn   1097.   1084.   1122.   1110.   1096.   1063.
+         bs   1064.   1051.   1093.   1104.   1087.   1057.
  max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
-  7200    7200  0.2377E+07    40.000    621517.8  180
-                0.2900E+06    90.000      1296.3   20
+  6000    6000  0.2394E+07    40.000    662131.9  180
+                0.2816E+06    90.000      1285.7   20
  Box            1
- Type  1 bn   9937.   9824.   9892.   9991.   9820.   9900.
-         bs   4998.   4881.   4870.   4943.   4945.   4916.
- max.displ.     1.5764    1.5884    1.5883    0.8201    0.8251    0.8109
+ Type  1 bn   9924.   9950.   9947.   9822.   9963.   9833.
+         bs   4837.   5091.   4974.   4954.   5024.   4997.
+ max.displ.     1.5730    1.5902    1.5818    0.8256    0.8429    0.8288
  Box            2
- Type  1 bn   1072.   1108.   1133.   1130.   1073.   1128.
-         bs   1041.   1089.   1094.   1116.   1063.   1117.
- max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
- Box            1
- Type  1 bn   9753.   9928.   9864.   9889.  10021.   9952.
-         bs   4894.   5028.   4925.   4927.   5024.   5057.
- max.displ.     1.5821    1.6089    1.5861    0.8172    0.8273    0.8241
- Box            2
- Type  1 bn   1040.   1134.   1156.   1076.   1095.   1039.
-         bs   1015.   1098.   1120.   1070.   1089.   1026.
- max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
-  8400    8400  0.2408E+07    40.000    557840.8  180
-                0.2794E+06    90.000      1290.9   20
- Box            1
- Type  1 bn   9954.   9898.   9838.   9782.   9904.   9802.
-         bs   5049.   4925.   5104.   4908.   4900.   4865.
- max.displ.     1.6049    1.6011    1.6457    0.8200    0.8186    0.8181
- Box            2
- Type  1 bn   1062.   1148.   1118.   1123.   1119.   1084.
-         bs   1033.   1119.   1088.   1112.   1108.   1070.
+ Type  1 bn   1079.   1162.   1115.   1082.   1090.   1038.
+         bs   1050.   1122.   1078.   1067.   1073.   1019.
  max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
  Box            1
- Type  1 bn   9890.   9811.   9977.   9857.   9898.   9846.
-         bs   4992.   4897.   4823.   4957.   5029.   4926.
- max.displ.     1.6202    1.5983    1.5911    0.8248    0.8319    0.8186
+ Type  1 bn   9939.   9881.   9721.   9906.   9883.   9904.
+         bs   5004.   4963.   4991.   4998.   4863.   4944.
+ max.displ.     1.5839    1.5975    1.6243    0.8331    0.8295    0.8274
  Box            2
- Type  1 bn   1114.   1094.   1069.   1099.   1109.   1174.
-         bs   1076.   1054.   1031.   1087.   1091.   1159.
+ Type  1 bn   1071.   1125.   1074.   1101.   1121.   1126.
+         bs   1040.   1100.   1043.   1084.   1107.   1109.
+ max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
+  7200    7200  0.2261E+07    40.000    472484.3  180
+                0.3168E+06    90.000      1300.3   20
+ Box            1
+ Type  1 bn   9944.  10110.   9717.  10050.   9892.   9769.
+         bs   5051.   5031.   4930.   5037.   4994.   4934.
+ max.displ.     1.6091    1.5899    1.6482    0.8351    0.8375    0.8358
+ Box            2
+ Type  1 bn   1124.   1085.   1057.   1044.   1111.   1142.
+         bs   1093.   1045.   1023.   1029.   1101.   1130.
  max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
  Box            1
- Type  1 bn   9888.   9920.   9834.   9963.  10055.   9955.
-         bs   4776.   4830.   4934.   5019.   4956.   5001.
- max.displ.     1.5651    1.5564    1.5966    0.8310    0.8200    0.8224
+ Type  1 bn   9885.   9766.   9972.   9924.   9893.   9968.
+         bs   4910.   4774.   4858.   4852.   4870.   5071.
+ max.displ.     1.5985    1.5544    1.6059    0.8166    0.8246    0.8504
  Box            2
- Type  1 bn   1091.   1118.   1127.   1076.   1144.   1061.
-         bs   1058.   1083.   1083.   1065.   1132.   1052.
+ Type  1 bn   1082.   1101.   1166.   1071.   1077.   1108.
+         bs   1040.   1062.   1129.   1059.   1060.   1099.
  max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
-  9600    9600  0.2298E+07    40.000    598691.6  180
-                0.2573E+06    90.000      1295.8   20
+  8400    8400  0.2377E+07    40.000    590485.2  180
+                0.2592E+06    90.000      1289.1   20
  Box            1
- Type  1 bn   9850.   9941.  10039.   9982.   9893.   9799.
-         bs   4920.   4920.   5000.   5053.   4777.   4901.
- max.displ.     1.5636    1.5406    1.5904    0.8413    0.7919    0.8227
+ Type  1 bn   9792.   9871.   9954.   9917.   9846.   9831.
+         bs   4812.   4921.   4974.   5019.   4850.   4786.
+ max.displ.     1.5711    1.5498    1.6049    0.8266    0.8124    0.8280
  Box            2
- Type  1 bn   1085.   1148.   1159.   1079.   1116.   1095.
-         bs   1053.   1109.   1113.   1072.   1104.   1086.
- max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
- Box            1
- Type  1 bn   9711.   9941.   9820.   9931.  10161.   9873.
-         bs   4897.   4999.   4880.   4854.   5180.   5011.
- max.displ.     1.5769    1.5494    1.5807    0.8224    0.8075    0.8351
- Box            2
- Type  1 bn   1092.   1149.   1097.   1107.   1150.   1147.
-         bs   1055.   1116.   1062.   1098.   1144.   1135.
- max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
- 10800   10800  0.2277E+07    40.000    557224.5  180
-                0.2917E+06    90.000      1284.3   20
- Box            1
- Type  1 bn   9951.   9922.  10012.   9856.   9929.   9906.
-         bs   4898.   5055.   5020.   4945.   5077.   4910.
- max.displ.     1.5524    1.5788    1.5851    0.8253    0.8257    0.8278
- Box            2
- Type  1 bn   1125.   1097.   1091.   1080.   1053.   1065.
-         bs   1093.   1061.   1041.   1062.   1041.   1054.
+ Type  1 bn   1133.   1088.   1154.   1073.   1130.   1114.
+         bs   1088.   1054.   1114.   1064.   1123.   1099.
  max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
  Box            1
- Type  1 bn   9830.  10008.   9966.   9833.  10025.   9915.
-         bs   4970.   4984.   4960.   4931.   4951.   5001.
- max.displ.     1.5697    1.5725    1.5778    0.8277    0.8156    0.8351
+ Type  1 bn  10044.   9847.   9883.   9992.   9855.   9825.
+         bs   5053.   5054.   4864.   4993.   5014.   4900.
+ max.displ.     1.5808    1.5909    1.5798    0.8261    0.8266    0.8259
  Box            2
- Type  1 bn   1097.   1143.   1080.   1102.   1091.   1069.
-         bs   1054.   1107.   1055.   1096.   1079.   1054.
+ Type  1 bn   1122.   1143.   1098.   1091.   1102.   1083.
+         bs   1089.   1114.   1061.   1083.   1099.   1080.
  max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
  Box            1
- Type  1 bn   9887.  10114.   9840.   9736.   9892.   9970.
-         bs   4841.   5002.   4953.   4773.   4962.   4971.
- max.displ.     1.5372    1.5554    1.5884    0.8115    0.8183    0.8328
+ Type  1 bn   9837.   9841.   9967.   9942.   9823.   9761.
+         bs   4935.   4982.   5017.   4946.   4813.   4840.
+ max.displ.     1.5861    1.6108    1.5904    0.8219    0.8100    0.8190
  Box            2
- Type  1 bn   1053.   1084.   1120.   1110.   1122.   1113.
-         bs   1011.   1056.   1098.   1098.   1115.   1110.
+ Type  1 bn   1099.   1095.   1104.   1086.   1099.   1097.
+         bs   1063.   1075.   1055.   1073.   1086.   1080.
  max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
- 12000   12000  0.2404E+07    40.000    581146.6  180
-                0.2848E+06    90.000      1294.9   20
+  9600    9600  0.2270E+07    40.000    568282.0  180
+                0.3102E+06    90.000      1296.1   20
+ Box            1
+ Type  1 bn  10032.   9814.   9800.   9995.   9962.   9890.
+         bs   5101.   4899.   4862.   4904.   4934.   4984.
+ max.displ.     1.6129    1.6082    1.5780    0.8065    0.8024    0.8255
+ Box            2
+ Type  1 bn   1101.   1068.   1099.   1123.   1120.   1089.
+         bs   1072.   1030.   1062.   1111.   1105.   1077.
+ max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
+ Box            1
+ Type  1 bn   9818.  10015.   9882.   9926.   9909.   9989.
+         bs   4839.   4969.   5005.   5059.   5017.   4999.
+ max.displ.     1.5899    1.5958    1.5985    0.8221    0.8125    0.8262
+ Box            2
+ Type  1 bn   1146.   1081.   1135.   1104.   1064.   1077.
+         bs   1118.   1048.   1095.   1091.   1054.   1066.
+ max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
+ 10800   10800  0.2355E+07    40.000    625502.7  180
+                0.2628E+06    90.000      1285.2   20
+ Box            1
+ Type  1 bn   9814.   9938.   9924.   9908.   9961.   9897.
+         bs   4844.   4938.   4951.   4950.   5035.   5030.
+ max.displ.     1.5695    1.5859    1.5949    0.8215    0.8214    0.8398
+ Box            2
+ Type  1 bn   1107.   1067.   1049.   1074.   1126.   1153.
+         bs   1079.   1036.   1011.   1066.   1121.   1144.
+ max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
+ Box            1
+ Type  1 bn   9958.   9886.   9935.   9924.   9865.   9969.
+         bs   5049.   4971.   5000.   4969.   4986.   5001.
+ max.displ.     1.5916    1.5948    1.6054    0.8226    0.8303    0.8426
+ Box            2
+ Type  1 bn   1061.   1159.   1112.   1114.   1095.   1110.
+         bs   1032.   1117.   1076.   1102.   1089.   1098.
+ max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
+ Box            1
+ Type  1 bn   9976.   9925.  10093.   9629.   9932.   9996.
+         bs   4972.   5027.   5061.   4800.   4922.   4950.
+ max.displ.     1.5865    1.6156    1.6100    0.8202    0.8230    0.8345
+ Box            2
+ Type  1 bn   1141.   1134.   1078.   1050.   1111.   1095.
+         bs   1103.   1095.   1050.   1038.   1103.   1089.
+ max.displ.    28.0000   28.0000   28.0000    3.1415    3.1415    3.1415
+ 12000   12000  0.2507E+07    40.000    633740.4  180
+                0.3421E+06    90.000      1298.6   20
  
  +++++ end of markov chain +++++
  
  ### Translations ###
  
  molecule typ =           1  in box           1
- x-dir: attempts =  236753.0   ratio = 0.542   max.displ. = 0.1537E+01
- y-dir: attempts =  237529.0   ratio = 0.542   max.displ. = 0.1555E+01
- z-dir: attempts =  237703.0   ratio = 0.543   max.displ. = 0.1588E+01
+ x-dir: attempts =  237534.0   ratio = 0.543   max.displ. = 0.1586E+01
+ y-dir: attempts =  237527.0   ratio = 0.543   max.displ. = 0.1616E+01
+ z-dir: attempts =  237762.0   ratio = 0.543   max.displ. = 0.1610E+01
  
  molecule typ =           1  in box           2
- x-dir: attempts =   26238.0   ratio = 0.975   max.displ. = 0.2800E+02
- y-dir: attempts =   26495.0   ratio = 0.975   max.displ. = 0.2800E+02
- z-dir: attempts =   26408.0   ratio = 0.975   max.displ. = 0.2800E+02
+ x-dir: attempts =   26481.0   ratio = 0.976   max.displ. = 0.2800E+02
+ y-dir: attempts =   26450.0   ratio = 0.976   max.displ. = 0.2800E+02
+ z-dir: attempts =   26337.0   ratio = 0.974   max.displ. = 0.2800E+02
  
  ### Rotations ###
  
  molecule typ =           1  in box           1
- x-dir: attempts =  237070.0   ratio = 0.517   max.displ. = 0.8115E+00
- y-dir: attempts =  238416.0   ratio = 0.517   max.displ. = 0.8183E+00
- z-dir: attempts =  237668.0   ratio = 0.517   max.displ. = 0.8328E+00
+ x-dir: attempts =  238332.0   ratio = 0.517   max.displ. = 0.8202E+00
+ y-dir: attempts =  237331.0   ratio = 0.517   max.displ. = 0.8230E+00
+ z-dir: attempts =  237272.0   ratio = 0.517   max.displ. = 0.8345E+00
  
  molecule typ =           1  in box           2
- x-dir: attempts =   26233.0   ratio = 0.992   max.displ. = 0.3142E+01
- y-dir: attempts =   26590.0   ratio = 0.992   max.displ. = 0.3142E+01
- z-dir: attempts =   26531.0   ratio = 0.992   max.displ. = 0.3142E+01
+ x-dir: attempts =   26210.0   ratio = 0.991   max.displ. = 0.3142E+01
+ y-dir: attempts =   26456.0   ratio = 0.991   max.displ. = 0.3142E+01
+ z-dir: attempts =   26481.0   ratio = 0.991   max.displ. = 0.3142E+01
  
  
  ### Configurational-bias ###
  
  molecule typ =           1
      length  attempts  succ.growth  accepted   %su.gr.    %accep.
-        1  101698.0  101697.0   84117.0    100.00     82.71
-        2  102108.0  102102.0   67122.0     99.99     65.74
-        3  102019.0  101991.0   54632.0     99.97     53.55
-        4  102038.0  101953.0   43757.0     99.92     42.88
-        5  102330.0  102140.0   35480.0     99.81     34.67
-        6  102214.0  101820.0   29027.0     99.61     28.40
-        7  203959.0  202756.0   47326.0     99.41     23.20
+        1  102491.0  102491.0   84981.0    100.00     82.92
+        2  101884.0  101881.0   67274.0    100.00     66.03
+        3  102311.0  102282.0   54984.0     99.97     53.74
+        4  101739.0  101653.0   43715.0     99.92     42.97
+        5  102118.0  101919.0   35502.0     99.81     34.77
+        6  101980.0  101585.0   29163.0     99.61     28.60
+        7  203304.0  202096.0   46892.0     99.41     23.06
  
  
  ### Volume change       ###
  attempts =     0.0   ratio = 0.000   max.displ. = 0.1000E-02
  attempts =     0.0   ratio = 0.000   max.displ. = 0.1000E-02
- 
- ### Molecule swap       ###
- 
- molecule typ =           1
+
+### Molecule swap       ###
+
+molecule typ = 1
 between box 1 and 2 into box 1   uattempts = 0 attempts = 0   accepted = 0
 between box 1 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
- 
- ### Molecule swatch     ###
- 
- pair typ =           1
- moltyps =            1  and           2
-between box  1 and  2   uattempts = 0  attempts = 0  accepted = 0
+
+### Molecule swatch     ###
+
+pair typ = 1
+moltyps = 1 and 2
+between box 1 and 2 into box 1   uattempts = 0  attempts = 0  accepted = 0
+between box 1 and 2 into box 2   uattempts = 0  attempts = 0  accepted = 0
  
  ### Charge Fluctuation  ###
  
@@ -702,42 +698,42 @@ molecule  1:   0.00000000      0.00000000
  sumup control
  number of chains         180
  number of chains of type           1         180
- inter lj energy   -234127.911553865     
- intra lj energy    48848.4437108483     
+ inter lj energy   -221526.152135229     
+ intra lj energy    55881.5815487960     
  Tail correction   -19514.4537596172     
  bond vibration    0.000000000000000E+000
- bond bending       1744864.93566974     
- torsional          844063.753527751     
+ bond bending       1858351.33389473     
+ torsional          814698.957646206     
  external          0.000000000000000E+000
  coulombic energy  0.000000000000000E+000
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy       2403649.22135447     
+ total energy       2507405.72095450     
  
  sumup control
  number of chains          20
  number of chains of type           1          20
- inter lj energy   -194.831242437115     
- intra lj energy    5425.58383621541     
+ inter lj energy   -101.373474617439     
+ intra lj energy    963.957853029694     
  Tail correction   -21.1506552289709     
  bond vibration    0.000000000000000E+000
- bond bending       187489.131275143     
- torsional          92105.8685662714     
+ bond bending       239975.206910607     
+ torsional          101239.046230083     
  external          0.000000000000000E+000
  coulombic energy  0.000000000000000E+000
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy       284825.752435193     
+ total energy       342076.837519103     
  
- vstart       =      -367905.2979132421        -3533.8603734371
- vend         =      2403649.2213544725       284825.7524351925
- vbox         =      2403649.2213550722       284825.7524350947
+ vstart       =      -367905.2979132272        -3533.8603734371
+ vend         =      2507405.7209545043       342076.8375191028
+ vbox         =      2507405.7209554212       342076.8375117208
  
  Averages and fluctuations                        Box  1       Box  2
  
- pressure                           [kPa] =    598101.54      1316.01
- pressure              [simulation units] =    43.320325     0.095318
- surface tension                   [mN/m] =     -11.1535       0.0046
+ pressure                           [kPa] =    596078.02      1314.40
+ pressure              [simulation units] =    43.173761     0.095201
+ surface tension                   [mN/m] =      -8.8895      -0.0131
  chem. potential of type   1          [K] =        0.000        0.000
  boxlength                            [A] =       40.000       90.000
  boxlength                            [A] =       40.000       90.000
@@ -747,81 +743,81 @@ molecule  1:   0.00000000      0.00000000
  specific density                [g/cm^3] =     0.533485     0.005204
  number density of type    1 [chain/nm^3] =      2.81250      0.02743
  molfraction of type       1              =    1.0000000    1.0000000
- mean sete length of type  1        [A^2] =       44.698       45.787
+ mean sete length of type  1        [A^2] =       44.720       45.917
  
- Total energy [K per system and kJ/mol per chain] =    2346476.92     282391.02     108.39     117.40
- Inter LJ     [K per system and kJ/mol per chain] =    -233276.67       -269.64     -10.78      -0.11
+ Total energy [K per system and kJ/mol per chain] =    2347853.32     283173.87     108.45     117.72
+ Inter LJ     [K per system and kJ/mol per chain] =    -234053.38       -276.66     -10.81      -0.12
  Tail  LJ     [K per system and kJ/mol per chain] =     -19514.45        -21.15      -0.90      -0.01
- Intra LJ     [K per system and kJ/mol per chain] =      49424.33       3989.61       2.28       1.66
+ Intra LJ     [K per system and kJ/mol per chain] =      50072.07       3651.17       2.31       1.52
  Stretch      [K per system and kJ/mol per chain] =          0.00          0.00       0.00       0.00
- Bond bending [K per system and kJ/mol per chain] =    1702282.53     187007.62      78.63      77.74
- Torsion      [K per system and kJ/mol per chain] =     828046.73      91663.44      38.25      38.11
+ Bond bending [K per system and kJ/mol per chain] =    1704028.58     188173.73      78.71      78.23
+ Torsion      [K per system and kJ/mol per chain] =     827806.05      91625.63      38.24      38.09
  Coulomb      [K per system and kJ/mol per chain] =          0.00          0.00       0.00       0.00
  External pot [K per system and kJ/mol per chain] =          0.00          0.00       0.00       0.00
  3-body Garo  [K per system and kJ/mol per chain] =          0.00          0.00       0.00       0.00
  Fluc Q       [K per system and kJ/mol per chain] =          0.00          0.00       0.00       0.00
  
- fluctuation in <vtot> =   101935.73    25967.63
+ fluctuation in <vtot> =   104162.15    25318.94
  
  type  box       vinter       vintra         vtor        vbend        vtail
     1    1      0.00000      0.00000      0.00000      0.00000      0.00000
     1    2      0.00000      0.00000      0.00000      0.00000      0.00000
  
- H_vap      [kJ/mol] btwn box    1 and  2 =        37.4819         0.7185         0.2395
- H_vap LJ  [kJ/mol] btwn box     1 and  2 =        39.5253         0.3186         0.1062
- H_vap Coul [kJ/mol] btwn box    1 and  2 =        28.6053         0.1212         0.0404
- pdV        [kJ/mol] btwn box    1 and  2 =        28.6053         0.1212         0.0404
- CED [cal/cc]   btwn box         1 and  2 =        12.7354         0.8381         0.2794
- CED_LJ[cal/cc] btwn box         1 and  2 =        12.2084         0.2721         0.0907
+ H_vap      [kJ/mol] btwn box    1 and  2 =        37.8062         1.0009         0.3336
+ H_vap LJ  [kJ/mol] btwn box     1 and  2 =        39.4018         0.2155         0.0718
+ H_vap Coul [kJ/mol] btwn box    1 and  2 =        28.5703         0.1094         0.0365
+ pdV        [kJ/mol] btwn box    1 and  2 =        28.5703         0.1094         0.0365
+ CED [cal/cc]   btwn box         1 and  2 =        12.9432         0.8770         0.2923
+ CED_LJ[cal/cc] btwn box         1 and  2 =        12.1096         0.2043         0.0681
  CED_Coul[cal/cc] btwn box       1 and  2 =         0.0000         0.0000         0.0000
- HSP [(cal/cc)^1/2]  btwn box    1 and  2 =         3.2859         0.1203         0.0401
- HSP_LJ[(cal/cc)^1/2] btwn box   1 and  2 =         3.4668         0.0388         0.0129
+ HSP [(cal/cc)^1/2]  btwn box    1 and  2 =         3.3372         0.1229         0.0410
+ HSP_LJ[(cal/cc)^1/2] btwn box   1 and  2 =         3.4500         0.0294         0.0098
  HSP_Cou[(cal/cc)^1/2] btwn box  1 and  2 =         0.0000         0.0000         0.0000
  
- specific density box  1 =  0.53349E+00  0.66277E-11  0.22092E-11
- specific density box  2 =  0.52039E-02  0.27122E-12  0.90407E-13
- system volume    box  1 =  0.64000E+05  0.00000E+00  0.00000E+00
- system volume    box  2 =  0.72900E+06  0.00000E+00  0.00000E+00
- pressure         box  1 =  0.59810E+06   4937.2       1645.7    
- pressure         box  2 =   1316.0       5.5765       1.8588    
- surface tension  box  1 =    -11.15347     11.05488      3.68496
- surface tension  box  2 =      0.00459      0.05047      0.01682
+ specific density box  1 =  0.53349E+00  0.13218E-12  0.44059E-13
+ specific density box  2 =  0.52039E-02  0.48130E-15  0.16043E-15
+ system volume    box  1 =  0.64000E+05  0.41159E-08  0.13720E-08
+ system volume    box  2 =  0.72900E+06  0.12318E-06  0.41061E-07
+ pressure         box  1 =  0.59608E+06   5144.4       1714.8    
+ pressure         box  2 =   1314.4       5.0323       1.6774    
+ surface tension  box  1 =     -8.88952     23.85331      7.95110
+ surface tension  box  2 =     -0.01313      0.04660      0.01553
  
- Total energy     box  1 =  0.23465E+07  0.18915E+05  0.63050E+04
- Inter LJ         box  1 = -0.23328E+06  0.20596E+04  0.68654E+03
- Tail  LJ         box  1 = -0.19514E+05  0.60083E-06  0.20028E-06
- Intra LJ         box  1 =  0.49424E+05  0.28020E+04  0.93400E+03
+ Total energy     box  1 =  0.23479E+07  0.10863E+05  0.36210E+04
+ Inter LJ         box  1 = -0.23405E+06  0.26792E+04  0.89307E+03
+ Tail  LJ         box  1 = -0.19514E+05  0.60379E-08  0.20126E-08
+ Intra LJ         box  1 =  0.50072E+05  0.18139E+04  0.60464E+03
  Stretch          box  1 =  0.00000E+00  0.00000E+00  0.00000E+00
- Bond bending     box  1 =  0.17023E+07  0.14880E+05  0.49599E+04
- Torsion          box  1 =  0.82805E+06  0.41576E+04  0.13859E+04
+ Bond bending     box  1 =  0.17040E+07  0.80713E+04  0.26904E+04
+ Torsion          box  1 =  0.82781E+06  0.45235E+04  0.15078E+04
  Coulomb          box  1 =  0.00000E+00  0.00000E+00  0.00000E+00
  External pot     box  1 =  0.00000E+00  0.00000E+00  0.00000E+00
  3-body Garo      box  1 =  0.00000E+00  0.00000E+00  0.00000E+00
  Fluc Q           box  1 =  0.00000E+00  0.00000E+00  0.00000E+00
- Total energy     box  2 =  0.28239E+06  0.27574E+04  0.91913E+03
- Inter LJ         box  2 = -0.26964E+03  0.30194E+02  0.10065E+02
- Tail  LJ         box  2 = -0.21151E+02  0.15276E-08  0.50920E-09
- Intra LJ         box  2 =  0.39896E+04  0.38347E+03  0.12782E+03
+ Total energy     box  2 =  0.28317E+06  0.18521E+04  0.61738E+03
+ Inter LJ         box  2 = -0.27666E+03  0.31285E+02  0.10428E+02
+ Tail  LJ         box  2 = -0.21151E+02  0.24634E-11  0.82112E-12
+ Intra LJ         box  2 =  0.36512E+04  0.30822E+03  0.10274E+03
  Stretch          box  2 =  0.00000E+00  0.00000E+00  0.00000E+00
- Bond bending     box  2 =  0.18701E+06  0.26845E+04  0.89483E+03
- Torsion          box  2 =  0.91663E+05  0.33121E+03  0.11040E+03
+ Bond bending     box  2 =  0.18817E+06  0.16677E+04  0.55589E+03
+ Torsion          box  2 =  0.91626E+05  0.50570E+03  0.16857E+03
  Coulomb          box  2 =  0.00000E+00  0.00000E+00  0.00000E+00
  External pot     box  2 =  0.00000E+00  0.00000E+00  0.00000E+00
  3-body Garo      box  2 =  0.00000E+00  0.00000E+00  0.00000E+00
  Fluc Q           box  2 =  0.00000E+00  0.00000E+00  0.00000E+00
  
- Enthalpy Inst.[kJ/mol] for box  1 =     236.4774       1.4099       0.4700
- Enthalpy Ext. [kJ/mol] for box  1 =     108.4329       0.8184       0.2728
- Enthalpy Inst.[kJ/mol] for box  2 =     146.1754       1.0820       0.3607
- Enthalpy Ext. [kJ/mol] for box  2 =     119.4831       1.1093       0.3698
+ Enthalpy Inst.[kJ/mol] for box  1 =     236.1347       1.3410       0.4470
+ Enthalpy Ext. [kJ/mol] for box  1 =     108.5236       0.4643       0.1548
+ Enthalpy Inst.[kJ/mol] for box  2 =     146.5900       0.9061       0.3020
+ Enthalpy Ext. [kJ/mol] for box  2 =     119.9331       0.8819       0.2940
  
  
  chemical potential  itype  1 box  1 =         0.000        0.000        0.000
  chemical potential  itype  1 box  2 =         0.000        0.000        0.000
- mean sete length    itype  1 box  1 =        44.698        0.254        0.085
- mean sete length    itype  1 box  2 =        45.787        0.206        0.069
- number density      itype  1 box  1 =   0.28125E+01  0.34941E-10  0.11647E-10
- number density      itype  1 box  2 =   0.27435E-01  0.14299E-11  0.47662E-12
+ mean sete length    itype  1 box  1 =        44.720        0.157        0.052
+ mean sete length    itype  1 box  2 =        45.917        0.221        0.074
+ number density      itype  1 box  1 =   0.28125E+01  0.69428E-12  0.23143E-12
+ number density      itype  1 box  2 =   0.27435E-01  0.25340E-14  0.84468E-15
  mole fraction       itype  1 box  1 =     1.0000000    0.0000000    0.0000000
  mole fraction       itype  1 box  2 =     1.0000000    0.0000000    0.0000000
  Ostwald Coefficient itype  1 between box  2 and  1 =       102.515625        0.000000
@@ -831,26 +827,26 @@ molecule  1:   0.00000000      0.00000000
  -----block averages ------
   ------------ box:  1
  block    energy     density    pressure    surf ten   mol fracs
-   1  0.2296E+07  0.5335E+00  0.6010E+06 -0.2581E+02  0.1000E+01
-   2  0.2341E+07  0.5335E+00  0.5931E+06 -0.1232E+02  0.1000E+01
-   3  0.2353E+07  0.5335E+00  0.5993E+06 -0.1898E+02  0.1000E+01
-   4  0.2361E+07  0.5335E+00  0.6032E+06 -0.1519E+02  0.1000E+01
-   5  0.2342E+07  0.5335E+00  0.5855E+06 -0.1739E+00  0.1000E+01
-   6  0.2363E+07  0.5335E+00  0.6015E+06  0.4060E+01  0.1000E+01
-   7  0.2367E+07  0.5335E+00  0.5975E+06 -0.6172E+01  0.1000E+01
-   8  0.2350E+07  0.5335E+00  0.6002E+06  0.6600E+01  0.1000E+01
-   9  0.2349E+07  0.5335E+00  0.5996E+06 -0.1945E+02  0.1000E+01
-  10  0.2342E+07  0.5335E+00  0.6000E+06 -0.2409E+02  0.1000E+01
+   1  0.2330E+07  0.5335E+00  0.6013E+06 -0.5049E+02  0.1000E+01
+   2  0.2372E+07  0.5335E+00  0.6062E+06 -0.2914E+02  0.1000E+01
+   3  0.2347E+07  0.5335E+00  0.5992E+06  0.5837E+01  0.1000E+01
+   4  0.2350E+07  0.5335E+00  0.5891E+06 -0.2404E+02  0.1000E+01
+   5  0.2356E+07  0.5335E+00  0.5977E+06  0.2318E+02  0.1000E+01
+   6  0.2336E+07  0.5335E+00  0.5936E+06 -0.2295E+02  0.1000E+01
+   7  0.2345E+07  0.5335E+00  0.5971E+06  0.1843E+01  0.1000E+01
+   8  0.2345E+07  0.5335E+00  0.5957E+06  0.3498E+01  0.1000E+01
+   9  0.2352E+07  0.5335E+00  0.5916E+06 -0.2463E+02  0.1000E+01
+  10  0.2345E+07  0.5335E+00  0.5893E+06  0.2800E+02  0.1000E+01
   ------------ box:  2
  block    energy     density    pressure    surf ten   mol fracs
-   1  0.2793E+06  0.5204E-02  0.1307E+04 -0.6665E-02  0.1000E+01
-   2  0.2801E+06  0.5204E-02  0.1315E+04  0.1648E-01  0.1000E+01
-   3  0.2831E+06  0.5204E-02  0.1313E+04  0.2533E-01  0.1000E+01
-   4  0.2859E+06  0.5204E-02  0.1315E+04 -0.1907E-01  0.1000E+01
-   5  0.2818E+06  0.5204E-02  0.1316E+04 -0.4220E-01  0.1000E+01
-   6  0.2866E+06  0.5204E-02  0.1315E+04  0.1505E-01  0.1000E+01
-   7  0.2848E+06  0.5204E-02  0.1319E+04  0.3479E-01  0.1000E+01
-   8  0.2806E+06  0.5204E-02  0.1314E+04 -0.6793E-01  0.1000E+01
-   9  0.2836E+06  0.5204E-02  0.1316E+04 -0.3392E-01  0.1000E+01
-  10  0.2780E+06  0.5204E-02  0.1330E+04  0.1240E+00  0.1000E+01
- Program ended at 2013-05-03 20:09:49.353
+   1  0.2814E+06  0.5204E-02  0.1325E+04 -0.5254E-01  0.1000E+01
+   2  0.2806E+06  0.5204E-02  0.1314E+04 -0.6749E-01  0.1000E+01
+   3  0.2821E+06  0.5204E-02  0.1309E+04  0.4059E-01  0.1000E+01
+   4  0.2874E+06  0.5204E-02  0.1317E+04 -0.2331E-01  0.1000E+01
+   5  0.2841E+06  0.5204E-02  0.1320E+04 -0.7492E-01  0.1000E+01
+   6  0.2837E+06  0.5204E-02  0.1317E+04 -0.5904E-01  0.1000E+01
+   7  0.2832E+06  0.5204E-02  0.1312E+04 -0.1142E-01  0.1000E+01
+   8  0.2823E+06  0.5204E-02  0.1309E+04  0.4811E-01  0.1000E+01
+   9  0.2820E+06  0.5204E-02  0.1308E+04  0.3733E-01  0.1000E+01
+  10  0.2848E+06  0.5204E-02  0.1313E+04  0.3144E-01  0.1000E+01
+ Program ended at 2013-11-20 04:17:21.774

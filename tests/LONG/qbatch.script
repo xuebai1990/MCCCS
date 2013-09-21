@@ -1,5 +1,5 @@
 #!/bin/bash -l
-#PBS -l nodes=2:ppn=8,walltime=02:00:00,qos=panfsonly
+#PBS -l nodes=2:ppn=8,walltime=02:00:00
 #PBS -N name
 #PBS -m ae
 #PBS -e stderr
@@ -9,9 +9,10 @@
 DATA=$PBS_O_WORKDIR
 cd $DATA
 
-cat $PBS_NODEFILE | uniq | tr '\\012' ' ' > tmp1
-read -a NODE < tmp1
-rm tmp1
+NODELIST=$(cat $PBS_NODEFILE | uniq)
+echo $NODELIST > tmp-$PBS_JOBID
+read -a NODE < tmp-$PBS_JOBID
+rm tmp-$PBS_JOBID
 
 inode=-1
 ijob=0

@@ -1,4 +1,4 @@
-Program started at 2013-06-06 02:36:30.098
+Program started at 2013-11-20 02:33:48.665
 Number of processors: 1
 Threads per processor: 1
  run_num: 1
@@ -54,7 +54,7 @@ NAMELIST ANALYSIS
  lbend:  F
  lete:  F
  lrhoz:  F
- bin_width:  0.100000000    
+ bin_width:  0.100000000E+00
 
 SECTION SIMULATION_BOX
 ------------------------------------------
@@ -64,7 +64,7 @@ Box 1:   20.000 x   25.980 x   90.000
    number of dimensions that are isotropic: 0
    lsolid:  F, lrect:  T, lideal:  F, ltwice:  T
    temperature:  323.000 [K]
-   external pressure:  0.100000000     [MPa]
+   external pressure:  0.100000000E+00 [MPa]
    initial number of chains of each type:   400  800  192  312  22  30  18  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
    Ghost particles: 0
    initial number of chains in x, y and z directions: 12 x 12 x 13
@@ -75,7 +75,7 @@ Box 2:   40.000 x   40.000 x   40.000
    number of dimensions that are isotropic: 0
    lsolid:  F, lrect:  F, lideal:  F, ltwice:  F
    temperature:  323.000 [K]
-   external pressure:  0.100000000     [MPa]
+   external pressure:  0.100000000E+00 [MPa]
    initial number of chains of each type:   0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
    Ghost particles: 0
    initial number of chains in x, y and z directions: 0 x 0 x 0
@@ -86,7 +86,7 @@ Box 3:  100.000 x  100.000 x  100.000
    number of dimensions that are isotropic: 0
    lsolid:  F, lrect:  F, lideal:  T, ltwice:  F
    temperature:  323.000 [K]
-   external pressure:  0.100000000     [MPa]
+   external pressure:  0.100000000E+00 [MPa]
    initial number of chains of each type:   0  0  0  0  0  0  0  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
    Ghost particles: 0
    initial number of chains in x, y and z directions: 3 x 3 x 3
@@ -1496,9 +1496,9 @@ initial maximum volume displacement (rmvol):    0.100
 pmvol:  0.100000000E-02
    pmvlmt for box 1:   0.00000000    
    pmvlmt for box 2:  0.900000000    
-   pmvlmt for box 3:   1.00000000    
+   pmvlmt for box 3:  1.000000000    
 nvolb: 1
-   box pair 1: between 1 and 2,   pmvolb =   1.00000000    
+   box pair 1: between 1 and 2,   pmvolb =  1.000000000    
 
 NAMELIST MC_SWATCH
 ------------------------------------------
@@ -1508,7 +1508,7 @@ pmswat:  0.300000000
    probability of each swatch pair:  0.400000000E-01
    probability of each swatch pair:  0.600000000E-01
    probability of each swatch pair:  0.800000000E-01
-   probability of each swatch pair:  0.100000000    
+   probability of each swatch pair:  0.100000000E+00
    probability of each swatch pair:  0.130000000    
    probability of each swatch pair:  0.160000000    
    probability of each swatch pair:  0.190000000    
@@ -1540,7 +1540,7 @@ pmswat:  0.300000000
    probability of each swatch pair:  0.965000000    
    probability of each swatch pair:  0.970000000    
    probability of each swatch pair:  0.985000000    
-   probability of each swatch pair:   1.00000000    
+   probability of each swatch pair:  1.000000000    
 
    swatch molecule type pairs:    8    9
    nsampos: 6, ncut:  1  1
@@ -1555,7 +1555,7 @@ pmswat:  0.300000000
    splist:    5    5
    splist:    6    6
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    9    10
@@ -1571,7 +1571,7 @@ pmswat:  0.300000000
    splist:    5    5
    splist:    6    6
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    10    11
@@ -1587,7 +1587,7 @@ pmswat:  0.300000000
    splist:    5    5
    splist:    6    6
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    11    12
@@ -1603,7 +1603,7 @@ pmswat:  0.300000000
    splist:    5    5
    splist:    6    6
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    12    13
@@ -1619,7 +1619,7 @@ pmswat:  0.300000000
    splist:    5    5
    splist:    6    6
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    13    14
@@ -1635,7 +1635,7 @@ pmswat:  0.300000000
    splist:    5    5
    splist:    6    6
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    14    15
@@ -1653,7 +1653,7 @@ pmswat:  0.300000000
    splist:    7    7
    splist:    8    8
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    15    16
@@ -1673,7 +1673,7 @@ pmswat:  0.300000000
    splist:    9    9
    splist:    10    10
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    16    17
@@ -1695,7 +1695,7 @@ pmswat:  0.300000000
    splist:    11    11
    splist:    12    12
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    17    18
@@ -1719,7 +1719,7 @@ pmswat:  0.300000000
    splist:    13    13
    splist:    14    14
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    18    19
@@ -1745,7 +1745,7 @@ pmswat:  0.300000000
    splist:    15    15
    splist:    16    16
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    17    20
@@ -1769,7 +1769,7 @@ pmswat:  0.300000000
    splist:    13    13
    splist:    14    14
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    20    21
@@ -1795,7 +1795,7 @@ pmswat:  0.300000000
    splist:    15    15
    splist:    16    16
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    15    22
@@ -1815,7 +1815,7 @@ pmswat:  0.300000000
    splist:    9    9
    splist:    10    10
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    22    24
@@ -1837,7 +1837,7 @@ pmswat:  0.300000000
    splist:    11    11
    splist:    12    12
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    23    24
@@ -1861,7 +1861,7 @@ pmswat:  0.300000000
    splist:    13    13
    splist:    14    14
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    24    21
@@ -1874,7 +1874,7 @@ pmswat:  0.300000000
    splist:    2    6
    splist:    3    5
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    23    25
@@ -1898,7 +1898,7 @@ pmswat:  0.300000000
    splist:    13    13
    splist:    14    14
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    25    26
@@ -1924,7 +1924,7 @@ pmswat:  0.300000000
    splist:    15    15
    splist:    16    16
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    23    27
@@ -1948,7 +1948,7 @@ pmswat:  0.300000000
    splist:    13    13
    splist:    14    14
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    27    28
@@ -1974,7 +1974,7 @@ pmswat:  0.300000000
    splist:    15    15
    splist:    16    16
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    23    29
@@ -1998,7 +1998,7 @@ pmswat:  0.300000000
    splist:    13    13
    splist:    14    14
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    29    30
@@ -2024,7 +2024,7 @@ pmswat:  0.300000000
    splist:    15    15
    splist:    16    16
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    23    31
@@ -2048,7 +2048,7 @@ pmswat:  0.300000000
    splist:    13    13
    splist:    14    14
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    16    22
@@ -2061,7 +2061,7 @@ pmswat:  0.300000000
    splist:    2    2
    splist:    3    3
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    18    20
@@ -2074,7 +2074,7 @@ pmswat:  0.300000000
    splist:    2    2
    splist:    3    3
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    20    24
@@ -2087,7 +2087,7 @@ pmswat:  0.300000000
    splist:    6    2
    splist:    5    3
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    24    25
@@ -2100,7 +2100,7 @@ pmswat:  0.300000000
    splist:    2    2
    splist:    3    3
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    24    27
@@ -2113,7 +2113,7 @@ pmswat:  0.300000000
    splist:    2    2
    splist:    3    3
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    24    29
@@ -2126,7 +2126,7 @@ pmswat:  0.300000000
    splist:    2    2
    splist:    3    3
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    25    27
@@ -2139,7 +2139,7 @@ pmswat:  0.300000000
    splist:    2    2
    splist:    3    3
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    25    29
@@ -2152,7 +2152,7 @@ pmswat:  0.300000000
    splist:    2    2
    splist:    3    3
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    27    29
@@ -2165,7 +2165,7 @@ pmswat:  0.300000000
    splist:    2    2
    splist:    3    3
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    23    34
@@ -2178,7 +2178,7 @@ pmswat:  0.300000000
    splist:    8    4
    splist:    10    5
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    34    33
@@ -2202,7 +2202,7 @@ pmswat:  0.300000000
    splist:    13    13
    splist:    14    14
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    33    32
@@ -2228,7 +2228,7 @@ pmswat:  0.300000000
    splist:    15    15
    splist:    16    16
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
    swatch molecule type pairs:    28    32
@@ -2241,7 +2241,7 @@ pmswat:  0.300000000
    splist:    8    7
    splist:    10    8
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    3
 
 NAMELIST MC_SWAP
@@ -2284,124 +2284,124 @@ pmswap:  0.400000000
    number of swap box pairs for molecule type 1: 3
    pmswapb:   0.00000000    
    pmswapb:  0.500000000    
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    2
    box pair:    1    3
    box pair:    2    3
    number of swap box pairs for molecule type 2: 3
    pmswapb:  0.330000000    
    pmswapb:  0.670000000    
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    2
    box pair:    1    3
    box pair:    2    3
    number of swap box pairs for molecule type 3: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    2    2
    number of swap box pairs for molecule type 4: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    2    2
    number of swap box pairs for molecule type 5: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    3    3
    number of swap box pairs for molecule type 6: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    2    2
    number of swap box pairs for molecule type 7: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    2    2
    number of swap box pairs for molecule type 8: 3
    pmswapb:   0.00000000    
-   pmswapb:   1.00000000    
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
+   pmswapb:  1.000000000    
    box pair:    1    2
    box pair:    1    3
    box pair:    2    3
    number of swap box pairs for molecule type 9: 3
    pmswapb:   0.00000000    
-   pmswapb:   1.00000000    
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
+   pmswapb:  1.000000000    
    box pair:    1    2
    box pair:    1    3
    box pair:    2    3
    number of swap box pairs for molecule type 10: 3
    pmswapb:   0.00000000    
-   pmswapb:   1.00000000    
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
+   pmswapb:  1.000000000    
    box pair:    1    2
    box pair:    1    3
    box pair:    2    3
    number of swap box pairs for molecule type 11: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    1
    number of swap box pairs for molecule type 12: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    1
    number of swap box pairs for molecule type 13: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    1
    number of swap box pairs for molecule type 14: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    1
    number of swap box pairs for molecule type 15: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    1
    number of swap box pairs for molecule type 16: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    1
    number of swap box pairs for molecule type 17: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    1
    number of swap box pairs for molecule type 18: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    1
    number of swap box pairs for molecule type 19: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    1
    number of swap box pairs for molecule type 20: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    1
    number of swap box pairs for molecule type 21: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    1
    number of swap box pairs for molecule type 22: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    1
    number of swap box pairs for molecule type 23: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    1
    number of swap box pairs for molecule type 24: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    1
    number of swap box pairs for molecule type 25: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    1
    number of swap box pairs for molecule type 26: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    1
    number of swap box pairs for molecule type 27: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    1
    number of swap box pairs for molecule type 28: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    1
    number of swap box pairs for molecule type 29: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    1
    number of swap box pairs for molecule type 30: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    1
    number of swap box pairs for molecule type 31: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    1
    number of swap box pairs for molecule type 32: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    1
    number of swap box pairs for molecule type 33: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    1
    number of swap box pairs for molecule type 34: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    1
 
 NAMELIST MC_CBMC
@@ -2454,8 +2454,8 @@ molecule type:    pmcbmt         pmall  avbmc_version    pmbias        pmbsmt   
             3:   0.00000       0.00000              0   0.00000       0.00000       0.00000       0.00000      F
             4:   0.00000       0.00000              0   0.00000       0.00000       0.00000       0.00000      F
             5:   0.00000       0.00000              0   0.00000       0.00000       0.00000       0.00000      F
-            6:  0.100000       0.00000              0   0.00000       0.00000       0.00000       0.00000      F
-            7:   1.00000       0.00000              0   0.00000       0.00000       0.00000      0.400000      F
+            6:  0.100000E+00   0.00000              0   0.00000       0.00000       0.00000       0.00000      F
+            7:  1.000000       0.00000              0   0.00000       0.00000       0.00000      0.400000      F
             8:   0.00000       0.00000              0   0.00000       0.00000       0.00000       0.00000      F
             9:   0.00000       0.00000              0   0.00000       0.00000       0.00000       0.00000      F
            10:   0.00000       0.00000              0   0.00000       0.00000       0.00000       0.00000      F
@@ -2488,7 +2488,7 @@ NAMELIST MC_FLUCQ
 ------------------------------------------
 target fluctuating charge acceptance ratio (taflcq): 0.95
 fluctuating charge temperature:    5.000 [K]
-initial maximum displacement for fluctuating charge moves:  0.100000000    
+initial maximum displacement for fluctuating charge moves:  0.100000000E+00
 pmflcq:   0.00000000    
    nchoiq for each box:   1  1  1
 
@@ -2610,7 +2610,7 @@ pmtra:  0.800000000
    translation probability for molecule type 34 (pmtrmt):   1.0000
 target rotation acceptance ratio: 0.50
 initial maximum displacement for molecule rotation:  0.400000000    
-pmrot:   1.00000000    
+pmrot:  1.000000000    
    rotational probability for molecule type 1 (pmromt):   0.3700
    rotational probability for molecule type 2 (pmromt):   0.7300
    rotational probability for molecule type 3 (pmromt):   0.0000
@@ -6163,7 +6163,7 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  inter lj energy    4817319.74458875     
  intra lj energy   -27522.5524192061     
  bond vibration    0.000000000000000E+000
- bond bending       272513.656210887     
+ bond bending       272513.656210888     
  torsional          101865.369708667     
  external          0.000000000000000E+000
  coulombic energy  -33813126.6820667     
@@ -6217,12 +6217,12 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -2813655.76058477     
+ coulombic energy  -2813655.76058475     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -3460138.00465093     
+ total energy      -3460138.00465092     
  
- box             2  initial v   =   -3460138.00465093     
+ box             2  initial v   =   -3460138.00465092     
  surf. tension :   box 2 =    -119.07407
  pressure check:   box 2 =     -23773.12
  
@@ -6281,12 +6281,12 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  
  Cycle   Total   Energy    Boxlength   Pressure  Molecules
  Box            1
- Type  1 bn     10.      9.     14.     14.     11.     15.
-         bs      8.      5.      7.     10.      4.     10.
- max.displ.     0.5662    0.4750    0.4670    0.5347    0.4726    0.6157
- Type  2 bn     10.     12.      9.     12.     10.     15.
-         bs      4.      7.      4.      7.      4.      7.
- max.displ.     0.4354    0.6808    0.5786    0.7471    0.4594    0.4781
+ Type  1 bn     10.      8.     16.     12.     14.      2.
+         bs      4.      2.     10.      7.      4.      2.
+ max.displ.     0.2831    0.2137    0.5838    0.4366    0.3713    0.9235
+ Type  2 bn     15.     14.      7.     15.     14.      6.
+         bs      8.      6.      5.      5.      9.      3.
+ max.displ.     0.5806    0.5002    0.9299    0.4269    0.7383    0.5122
  Type  3 bn      0.      0.      0.      0.      0.      0.
          bs      0.      0.      0.      0.      0.      0.
  max.displ.     0.3000    0.3000    0.3000    0.4000    0.4000    0.4000
@@ -6302,15 +6302,15 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  Type  7 bn      0.      0.      0.      0.      0.      0.
          bs      0.      0.      0.      0.      0.      0.
  max.displ.     0.3000    0.3000    0.3000    0.4000    0.4000    0.4000
- Type  8 bn      0.      0.      0.      0.      0.      1.
-         bs      0.      0.      0.      0.      0.      1.
- max.displ.     0.0362    0.2163    0.1584    0.2681    0.0000    0.7375
- Type  9 bn      0.      0.      1.      2.      0.      3.
-         bs      0.      0.      1.      2.      0.      3.
- max.displ.     0.8860    0.0921    0.1198    0.0000    0.3094    0.3447
- Type 10 bn      0.      0.      0.      1.      1.      0.
-         bs      0.      0.      0.      0.      1.      0.
- max.displ.     1.7449    2.5081    0.0860    0.0569    0.0670    0.0628
+ Type  8 bn      0.      1.      0.      0.      0.      2.
+         bs      0.      1.      0.      0.      0.      2.
+ max.displ.     0.0362    0.4326    0.1584    0.2681    0.0000    0.7375
+ Type  9 bn      0.      0.      0.      0.      0.      0.
+         bs      0.      0.      0.      0.      0.      0.
+ max.displ.     0.8860    0.0921    0.0599    0.0000    0.3094    0.1723
+ Type 10 bn      0.      0.      1.      0.      0.      0.
+         bs      0.      0.      1.      0.      0.      0.
+ max.displ.     1.7449    2.5081    0.1721    0.5686    0.0335    0.0628
  Type 11 bn      0.      0.      0.      0.      0.      0.
          bs      0.      0.      0.      0.      0.      0.
  max.displ.     0.0414    0.0434    0.1135    0.3770    0.2513    0.9552
@@ -6332,12 +6332,12 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  Type 17 bn      0.      0.      0.      0.      0.      0.
          bs      0.      0.      0.      0.      0.      0.
  max.displ.     1.8586    0.0709    0.0265    0.2039    0.1194    0.0369
- Type 18 bn      1.      0.      2.      1.      3.      2.
-         bs      0.      0.      2.      1.      0.      0.
- max.displ.     0.0723    0.0884    0.0748    0.0372    0.0366    0.0482
- Type 19 bn      0.      0.      0.      0.      0.      0.
-         bs      0.      0.      0.      0.      0.      0.
- max.displ.     0.0231    0.2284    0.3747    0.0493    0.1576    0.2135
+ Type 18 bn      1.      0.      0.      1.      1.      0.
+         bs      1.      0.      0.      1.      1.      0.
+ max.displ.     1.4469    0.0884    0.0374    0.0372    0.7320    0.4816
+ Type 19 bn      1.      1.      0.      0.      0.      0.
+         bs      1.      1.      0.      0.      0.      0.
+ max.displ.     0.0463    0.4567    0.3747    0.0493    0.1576    0.2135
  Type 20 bn      0.      0.      0.      0.      0.      0.
          bs      0.      0.      0.      0.      0.      0.
  max.displ.     1.9043    1.1706    0.0244    0.2845    0.0365    0.1933
@@ -6384,12 +6384,12 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
          bs      0.      0.      0.      0.      0.      0.
  max.displ.     2.2105    0.6908    0.0216    0.5299    0.3312    0.2028
  Box            2
- Type  1 bn     22.     49.     32.     37.     38.     32.
-         bs     11.     21.     21.     26.     12.     14.
- max.displ.     0.4395    0.3240    0.5559    0.5458    0.2815    0.4520
- Type  2 bn     26.     30.     33.     20.     29.     32.
-         bs     13.     15.     14.     10.     13.     17.
- max.displ.     0.4908    0.6009    0.4821    0.5504    0.5547    0.6664
+ Type  1 bn     30.     32.     29.     22.     37.     28.
+         bs     19.     17.     12.      9.     17.      9.
+ max.displ.     0.5567    0.4016    0.3505    0.3178    0.4096    0.3321
+ Type  2 bn     36.     34.     44.     27.     24.     30.
+         bs     20.     12.     21.     13.      9.     16.
+ max.displ.     0.5454    0.4242    0.5424    0.5300    0.4640    0.6691
  Type  3 bn      0.      0.      0.      0.      0.      0.
          bs      0.      0.      0.      0.      0.      0.
  max.displ.     0.3000    0.3000    0.3000    0.4000    0.4000    0.4000
@@ -6508,104 +6508,104 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  Type  7 bn      0.      0.      0.      0.      0.      0.
          bs      0.      0.      0.      0.      0.      0.
  max.displ.     0.3000    0.3000    0.3000    0.4000    0.4000    0.4000
- Type  8 bn      0.      1.      3.      1.      1.      1.
-         bs      0.      1.      3.      1.      1.      1.
+ Type  8 bn      2.      0.      2.      2.      0.      1.
+         bs      2.      0.      2.      2.      0.      1.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type  9 bn      0.      0.      0.      1.      0.      1.
-         bs      0.      0.      0.      1.      0.      1.
+ Type  9 bn      1.      2.      2.      1.      1.      2.
+         bs      1.      2.      2.      1.      1.      2.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 10 bn      0.      0.      2.      0.      1.      0.
-         bs      0.      0.      2.      0.      1.      0.
+ Type 10 bn      0.      0.      0.      1.      1.      1.
+         bs      0.      0.      0.      1.      1.      1.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 11 bn      1.      4.      2.      0.      2.      1.
-         bs      1.      4.      2.      0.      2.      1.
+ Type 11 bn      1.      0.      1.      2.      0.      1.
+         bs      1.      0.      1.      2.      0.      1.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 12 bn      0.      3.      2.      2.      1.      0.
-         bs      0.      3.      2.      2.      1.      0.
+ Type 12 bn      2.      1.      3.      2.      0.      2.
+         bs      2.      1.      3.      2.      0.      2.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 13 bn      3.      1.      2.      1.      2.      3.
-         bs      3.      1.      2.      1.      2.      3.
+ Type 13 bn      1.      1.      2.      1.      0.      0.
+         bs      1.      1.      2.      1.      0.      0.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 14 bn      2.      3.      1.      3.      1.      1.
-         bs      2.      3.      1.      3.      1.      1.
+ Type 14 bn      3.      0.      0.      3.      1.      2.
+         bs      3.      0.      0.      3.      1.      2.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 15 bn      0.      4.      2.      2.      2.      1.
-         bs      0.      4.      2.      2.      2.      1.
+ Type 15 bn      3.      3.      0.      1.      0.      4.
+         bs      3.      3.      0.      1.      0.      4.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 16 bn      0.      2.      1.      0.      0.      2.
-         bs      0.      2.      1.      0.      0.      2.
+ Type 16 bn      1.      0.      0.      1.      1.      2.
+         bs      1.      0.      0.      1.      1.      2.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 17 bn      3.      0.      2.      2.      3.      1.
-         bs      3.      0.      2.      2.      3.      1.
+ Type 17 bn      1.      0.      1.      2.      2.      2.
+         bs      1.      0.      1.      2.      2.      2.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 18 bn      0.      0.      0.      0.      0.      0.
-         bs      0.      0.      0.      0.      0.      0.
+ Type 18 bn      0.      0.      1.      1.      0.      1.
+         bs      0.      0.      1.      1.      0.      1.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 19 bn      0.      1.      1.      2.      0.      1.
-         bs      0.      1.      1.      2.      0.      1.
+ Type 19 bn      1.      0.      0.      1.      2.      1.
+         bs      1.      0.      0.      1.      2.      1.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 20 bn      2.      1.      3.      1.      0.      2.
-         bs      2.      1.      3.      1.      0.      2.
+ Type 20 bn      1.      2.      4.      2.      2.      0.
+         bs      1.      2.      4.      2.      2.      0.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 21 bn      1.      1.      1.      0.      0.      1.
-         bs      1.      1.      1.      0.      0.      1.
+ Type 21 bn      1.      3.      2.      0.      3.      0.
+         bs      1.      3.      2.      0.      3.      0.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 22 bn      0.      1.      0.      1.      1.      1.
-         bs      0.      1.      0.      1.      1.      1.
+ Type 22 bn      3.      0.      3.      0.      1.      2.
+         bs      3.      0.      3.      0.      1.      2.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 23 bn      1.      1.      1.      1.      0.      0.
-         bs      1.      1.      1.      1.      0.      0.
+ Type 23 bn      1.      3.      1.      0.      2.      0.
+         bs      1.      3.      1.      0.      2.      0.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 24 bn      6.      3.      0.      0.      0.      3.
-         bs      6.      3.      0.      0.      0.      3.
+ Type 24 bn      3.      3.      1.      1.      1.      2.
+         bs      3.      3.      1.      1.      1.      2.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 25 bn      1.      0.      1.      0.      1.      2.
-         bs      1.      0.      1.      0.      1.      2.
+ Type 25 bn      0.      4.      0.      0.      0.      0.
+         bs      0.      4.      0.      0.      0.      0.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 26 bn      1.      1.      1.      1.      0.      1.
-         bs      1.      1.      1.      1.      0.      1.
+ Type 26 bn      0.      0.      1.      1.      0.      2.
+         bs      0.      0.      1.      1.      0.      2.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 27 bn      0.      2.      1.      0.      0.      0.
-         bs      0.      2.      1.      0.      0.      0.
+ Type 27 bn      2.      2.      1.      1.      1.      3.
+         bs      2.      2.      1.      1.      1.      3.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 28 bn      1.      1.      1.      1.      0.      1.
-         bs      1.      1.      1.      1.      0.      1.
+ Type 28 bn      1.      0.      0.      0.      1.      2.
+         bs      1.      0.      0.      0.      1.      2.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 29 bn      1.      0.      1.      0.      0.      1.
-         bs      1.      0.      1.      0.      0.      1.
+ Type 29 bn      0.      0.      3.      1.      0.      0.
+         bs      0.      0.      3.      1.      0.      0.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 30 bn      2.      1.      0.      2.      1.      1.
-         bs      2.      1.      0.      2.      1.      1.
+ Type 30 bn      0.      2.      1.      1.      2.      1.
+         bs      0.      2.      1.      1.      2.      1.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 31 bn      1.      2.      2.      1.      2.      1.
-         bs      1.      2.      2.      1.      2.      1.
+ Type 31 bn      1.      1.      1.      0.      3.      1.
+         bs      1.      1.      1.      0.      3.      1.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 32 bn      0.      2.      0.      1.      1.      2.
-         bs      0.      2.      0.      1.      1.      2.
+ Type 32 bn      0.      3.      3.      1.      2.      1.
+         bs      0.      3.      3.      1.      2.      1.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 33 bn      0.      3.      2.      0.      0.      2.
-         bs      0.      3.      2.      0.      0.      2.
+ Type 33 bn      2.      0.      2.      5.      0.      3.
+         bs      2.      0.      2.      5.      0.      3.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
- Type 34 bn      3.      1.      0.      0.      0.      2.
-         bs      3.      1.      0.      0.      0.      2.
+ Type 34 bn      1.      0.      3.      2.      2.      1.
+         bs      1.      0.      3.      2.      2.      1.
  max.displ.    80.0000   80.0000   80.0000    3.1415    3.1415    3.1415
-     1   12723 -0.2865E+08    20.000         0.0   86  222  192  312    0   30   18    0    1    0    0    0    0    0    0    0    0    1    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0
-               -0.3453E+07    40.130         0.0  314  578    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0
-                0.0000E+00   134.228         0.0    0    0    0    0   22    0    0    1    0    1    1    1    1    1    1    1    1    0    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1
+     1   12723 -0.2864E+08    20.000         0.0   86  222  192  312    0   30   18    0    0    0    0    0    0    0    0    0    0    0    1    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0
+               -0.3457E+07    40.130         0.0  314  578    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0
+                0.0000E+00   132.265         0.0    0    0    0    0   22    0    0    1    1    1    1    1    1    1    1    1    1    1    0    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1
  
  +++++ end of markov chain +++++
  
  ### Translations ###
  
  molecule typ =           1  in box           1
- x-dir: attempts =      10.0   ratio = 0.800   max.displ. = 0.5662E+00
- y-dir: attempts =       9.0   ratio = 0.556   max.displ. = 0.4750E+00
- z-dir: attempts =      14.0   ratio = 0.500   max.displ. = 0.4670E+00
+ x-dir: attempts =      10.0   ratio = 0.400   max.displ. = 0.2831E+00
+ y-dir: attempts =       8.0   ratio = 0.250   max.displ. = 0.2137E+00
+ z-dir: attempts =      16.0   ratio = 0.625   max.displ. = 0.5838E+00
  
  molecule typ =           2  in box           1
- x-dir: attempts =      10.0   ratio = 0.400   max.displ. = 0.4354E+00
- y-dir: attempts =      12.0   ratio = 0.583   max.displ. = 0.6808E+00
- z-dir: attempts =       9.0   ratio = 0.444   max.displ. = 0.5786E+00
+ x-dir: attempts =      15.0   ratio = 0.533   max.displ. = 0.5806E+00
+ y-dir: attempts =      14.0   ratio = 0.429   max.displ. = 0.5002E+00
+ z-dir: attempts =       7.0   ratio = 0.714   max.displ. = 0.9299E+00
  
  molecule typ =           3  in box           1
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3000E+00
@@ -6634,18 +6634,18 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  
  molecule typ =           8  in box           1
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3622E-01
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.2163E+00
+ y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.4326E+00
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.1584E+00
  
  molecule typ =           9  in box           1
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8860E+00
  y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.9209E-01
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.1198E+00
+ z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.5988E-01
  
  molecule typ =          10  in box           1
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.1745E+01
  y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.2508E+01
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8603E-01
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.1721E+00
  
  molecule typ =          11  in box           1
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.4143E-01
@@ -6683,13 +6683,13 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.2647E-01
  
  molecule typ =          18  in box           1
- x-dir: attempts =       1.0   ratio = 0.000   max.displ. = 0.7234E-01
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.1447E+01
  y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8838E-01
- z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.7483E-01
+ z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3741E-01
  
  molecule typ =          19  in box           1
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.2313E-01
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.2284E+00
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.4626E-01
+ y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.4567E+00
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3747E+00
  
  molecule typ =          20  in box           1
@@ -6768,14 +6768,14 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.2159E-01
  
  molecule typ =           1  in box           2
- x-dir: attempts =      22.0   ratio = 0.500   max.displ. = 0.4395E+00
- y-dir: attempts =      49.0   ratio = 0.429   max.displ. = 0.3240E+00
- z-dir: attempts =      32.0   ratio = 0.656   max.displ. = 0.5559E+00
+ x-dir: attempts =      30.0   ratio = 0.633   max.displ. = 0.5567E+00
+ y-dir: attempts =      32.0   ratio = 0.531   max.displ. = 0.4016E+00
+ z-dir: attempts =      29.0   ratio = 0.414   max.displ. = 0.3505E+00
  
  molecule typ =           2  in box           2
- x-dir: attempts =      26.0   ratio = 0.500   max.displ. = 0.4908E+00
- y-dir: attempts =      30.0   ratio = 0.500   max.displ. = 0.6009E+00
- z-dir: attempts =      33.0   ratio = 0.424   max.displ. = 0.4821E+00
+ x-dir: attempts =      36.0   ratio = 0.556   max.displ. = 0.5454E+00
+ y-dir: attempts =      34.0   ratio = 0.353   max.displ. = 0.4242E+00
+ z-dir: attempts =      44.0   ratio = 0.477   max.displ. = 0.5424E+00
  
  molecule typ =           3  in box           2
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3000E+00
@@ -6973,151 +6973,151 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3000E+00
  
  molecule typ =           8  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
+ x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  molecule typ =           9  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  molecule typ =          10  in box           3
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
  y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
  
  molecule typ =          11  in box           3
  x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- y-dir: attempts =       4.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  molecule typ =          12  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- y-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
- 
- molecule typ =          13  in box           3
- x-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
- 
- molecule typ =          14  in box           3
- x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
- y-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- 
- molecule typ =          15  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- y-dir: attempts =       4.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
- 
- molecule typ =          16  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- 
- molecule typ =          17  in box           3
- x-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
- 
- molecule typ =          18  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- 
- molecule typ =          19  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- 
- molecule typ =          20  in box           3
  x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
  y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
  z-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
  
- molecule typ =          21  in box           3
+ molecule typ =          13  in box           3
  x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
  y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
  
- molecule typ =          22  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ molecule typ =          14  in box           3
+ x-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
  
- molecule typ =          23  in box           3
- x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- 
- molecule typ =          24  in box           3
- x-dir: attempts =       6.0   ratio = 1.000   max.displ. = 0.8000E+02
+ molecule typ =          15  in box           3
+ x-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
  y-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
  
- molecule typ =          25  in box           3
+ molecule typ =          16  in box           3
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ 
+ molecule typ =          17  in box           3
  x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
  y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
  z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
  
- molecule typ =          26  in box           3
+ molecule typ =          18  in box           3
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ 
+ molecule typ =          19  in box           3
  x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ 
+ molecule typ =          20  in box           3
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       4.0   ratio = 1.000   max.displ. = 0.8000E+02
+ 
+ molecule typ =          21  in box           3
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
+ 
+ molecule typ =          22  in box           3
+ x-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
+ 
+ molecule typ =          23  in box           3
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ 
+ molecule typ =          24  in box           3
+ x-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ 
+ molecule typ =          25  in box           3
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       4.0   ratio = 1.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ 
+ molecule typ =          26  in box           3
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
  z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  molecule typ =          27  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
  y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
  z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  molecule typ =          28  in box           3
  x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
  
  molecule typ =          29  in box           3
- x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
  y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  molecule typ =          30  in box           3
- x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  molecule typ =          31  in box           3
  x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  molecule typ =          32  in box           3
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  molecule typ =          33  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
- y-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
+ x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
  z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  molecule typ =          34  in box           3
- x-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.8000E+02
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.8000E+02
+ z-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.8000E+02
  
  ### Rotations ###
  
  molecule typ =           1  in box           1
- x-dir: attempts =      14.0   ratio = 0.714   max.displ. = 0.5347E+00
- y-dir: attempts =      11.0   ratio = 0.364   max.displ. = 0.4726E+00
- z-dir: attempts =      15.0   ratio = 0.667   max.displ. = 0.6157E+00
+ x-dir: attempts =      12.0   ratio = 0.583   max.displ. = 0.4366E+00
+ y-dir: attempts =      14.0   ratio = 0.286   max.displ. = 0.3713E+00
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.9235E+00
  
  molecule typ =           2  in box           1
- x-dir: attempts =      12.0   ratio = 0.583   max.displ. = 0.7471E+00
- y-dir: attempts =      10.0   ratio = 0.400   max.displ. = 0.4594E+00
- z-dir: attempts =      15.0   ratio = 0.467   max.displ. = 0.4781E+00
+ x-dir: attempts =      15.0   ratio = 0.333   max.displ. = 0.4269E+00
+ y-dir: attempts =      14.0   ratio = 0.643   max.displ. = 0.7383E+00
+ z-dir: attempts =       6.0   ratio = 0.500   max.displ. = 0.5122E+00
  
  molecule typ =           3  in box           1
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.4000E+00
@@ -7147,16 +7147,16 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  molecule typ =           8  in box           1
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.2681E+00
  y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.0000E+00
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.7375E+00
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.7375E+00
  
  molecule typ =           9  in box           1
- x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.0000E+00
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.0000E+00
  y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3094E+00
- z-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.3447E+00
+ z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.1723E+00
  
  molecule typ =          10  in box           1
- x-dir: attempts =       1.0   ratio = 0.000   max.displ. = 0.5686E-01
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.6702E-01
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.5686E+00
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3351E-01
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.6283E-01
  
  molecule typ =          11  in box           1
@@ -7196,8 +7196,8 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  
  molecule typ =          18  in box           1
  x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3718E-01
- y-dir: attempts =       3.0   ratio = 0.000   max.displ. = 0.3660E-01
- z-dir: attempts =       2.0   ratio = 0.000   max.displ. = 0.4816E-01
+ y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.7320E+00
+ z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.4816E+00
  
  molecule typ =          19  in box           1
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.4925E-01
@@ -7280,14 +7280,14 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.2028E+00
  
  molecule typ =           1  in box           2
- x-dir: attempts =      37.0   ratio = 0.703   max.displ. = 0.5458E+00
- y-dir: attempts =      38.0   ratio = 0.316   max.displ. = 0.2815E+00
- z-dir: attempts =      32.0   ratio = 0.438   max.displ. = 0.4520E+00
+ x-dir: attempts =      22.0   ratio = 0.409   max.displ. = 0.3178E+00
+ y-dir: attempts =      37.0   ratio = 0.459   max.displ. = 0.4096E+00
+ z-dir: attempts =      28.0   ratio = 0.321   max.displ. = 0.3321E+00
  
  molecule typ =           2  in box           2
- x-dir: attempts =      20.0   ratio = 0.500   max.displ. = 0.5504E+00
- y-dir: attempts =      29.0   ratio = 0.448   max.displ. = 0.5547E+00
- z-dir: attempts =      32.0   ratio = 0.531   max.displ. = 0.6664E+00
+ x-dir: attempts =      27.0   ratio = 0.481   max.displ. = 0.5300E+00
+ y-dir: attempts =      24.0   ratio = 0.375   max.displ. = 0.4640E+00
+ z-dir: attempts =      30.0   ratio = 0.533   max.displ. = 0.6691E+00
  
  molecule typ =           3  in box           2
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.4000E+00
@@ -7485,139 +7485,139 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.4000E+00
  
  molecule typ =           8  in box           3
- x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
  z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =           9  in box           3
  x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          10  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          11  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
  z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          12  in box           3
  x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          13  in box           3
  x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
- z-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
  
  molecule typ =          14  in box           3
  x-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.3142E+01
  y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          15  in box           3
- x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       4.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          16  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          17  in box           3
  x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.3142E+01
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          18  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  molecule typ =          19  in box           3
- x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- 
- molecule typ =          20  in box           3
- x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
- 
- molecule typ =          21  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- 
- molecule typ =          22  in box           3
- x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- 
- molecule typ =          23  in box           3
- x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- 
- molecule typ =          24  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- z-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.3142E+01
- 
- molecule typ =          25  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
- 
- molecule typ =          26  in box           3
- x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- 
- molecule typ =          27  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- 
- molecule typ =          28  in box           3
- x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- 
- molecule typ =          29  in box           3
- x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- 
- molecule typ =          30  in box           3
- x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
- y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
- 
- molecule typ =          31  in box           3
  x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
  z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  
- molecule typ =          32  in box           3
+ molecule typ =          20  in box           3
+ x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ 
+ molecule typ =          21  in box           3
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ 
+ molecule typ =          22  in box           3
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ 
+ molecule typ =          23  in box           3
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ 
+ molecule typ =          24  in box           3
  x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
  
- molecule typ =          33  in box           3
+ molecule typ =          25  in box           3
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ 
+ molecule typ =          26  in box           3
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
  z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
  
- molecule typ =          34  in box           3
+ molecule typ =          27  in box           3
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.3142E+01
+ 
+ molecule typ =          28  in box           3
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
- y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  z-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ 
+ molecule typ =          29  in box           3
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ 
+ molecule typ =          30  in box           3
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ 
+ molecule typ =          31  in box           3
+ x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ 
+ molecule typ =          32  in box           3
+ x-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
+ 
+ molecule typ =          33  in box           3
+ x-dir: attempts =       5.0   ratio = 1.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       3.0   ratio = 1.000   max.displ. = 0.3142E+01
+ 
+ molecule typ =          34  in box           3
+ x-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ y-dir: attempts =       2.0   ratio = 1.000   max.displ. = 0.3142E+01
+ z-dir: attempts =       1.0   ratio = 1.000   max.displ. = 0.3142E+01
  
  
  ### Configurational-bias ###
@@ -7634,35 +7634,35 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
      length  attempts  succ.growth  accepted   %su.gr.    %accep.
  molecule typ =           6
      length  attempts  succ.growth  accepted   %su.gr.    %accep.
-        1      45.0      45.0      24.0    100.00     53.33
+        1      35.0      35.0      24.0    100.00     68.57
  molecule typ =           7
      length  attempts  succ.growth  accepted   %su.gr.    %accep.
-        1      14.0      14.0       9.0    100.00     64.29
-        2      16.0      16.0      11.0    100.00     68.75
+        1      11.0      11.0      10.0    100.00     90.91
+        2       9.0       9.0       5.0    100.00     55.56
         3      14.0      14.0       6.0    100.00     42.86
-        4       9.0       9.0       3.0    100.00     33.33
-        5      13.0      13.0       6.0    100.00     46.15
-        6      13.0      13.0       2.0    100.00     15.38
-        7      14.0      14.0       1.0    100.00      7.14
-        8      11.0       8.0       1.0     72.73      9.09
-        9      14.0      14.0       0.0    100.00      0.00
-       10      16.0      16.0       0.0    100.00      0.00
-       11       9.0       8.0       2.0     88.89     22.22
-       12       7.0       3.0       0.0     42.86      0.00
-       13      13.0      10.0       0.0     76.92      0.00
-       14      15.0      12.0       0.0     80.00      0.00
-       15      13.0       9.0       0.0     69.23      0.00
-       16      17.0      11.0       0.0     64.71      0.00
+        4      14.0      14.0       4.0    100.00     28.57
+        5      14.0      14.0       3.0    100.00     21.43
+        6       8.0       8.0       0.0    100.00      0.00
+        7      14.0      13.0       1.0     92.86      7.14
+        8      17.0      17.0       2.0    100.00     11.76
+        9      13.0      13.0       0.0    100.00      0.00
+       10      12.0      11.0       0.0     91.67      0.00
+       11       9.0       5.0       0.0     55.56      0.00
+       12      21.0      12.0       0.0     57.14      0.00
+       13      15.0      12.0       0.0     80.00      0.00
+       14      18.0      13.0       0.0     72.22      0.00
+       15      15.0      11.0       0.0     73.33      0.00
+       16      10.0       7.0       0.0     70.00      0.00
   SAFE-CBMC move 
      length  attempts  succ.growth  accepted   %su.gr.    %accep.
-        1      29.0      29.0      27.0    100.00     93.10
-        2      19.0      19.0       3.0    100.00     15.79
-        3      20.0      20.0       4.0    100.00     20.00
-        4      18.0      18.0       0.0    100.00      0.00
-        5      11.0      11.0       0.0    100.00      0.00
-        6      18.0      18.0       0.0    100.00      0.00
-        7       9.0       7.0       0.0     77.78      0.00
-        8       9.0       7.0       0.0     77.78      0.00
+        1      23.0      23.0      23.0    100.00    100.00
+        2      22.0      22.0       8.0    100.00     36.36
+        3      15.0      15.0       3.0    100.00     20.00
+        4      21.0      21.0       1.0    100.00      4.76
+        5      17.0      16.0       1.0     94.12      5.88
+        6      10.0      10.0       0.0    100.00      0.00
+        7      10.0      10.0       0.0    100.00      0.00
+        8       7.0       5.0       0.0     71.43      0.00
  molecule typ =           8
      length  attempts  succ.growth  accepted   %su.gr.    %accep.
  molecule typ =           9
@@ -7729,24 +7729,24 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
 molecule typ = 1
 between box 1 and 2 into box 1   uattempts = 0 attempts = 0   accepted = 0
 between box 1 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
-between box 1 and 3 into box 1   uattempts = 7 attempts = 0   accepted = 0
-between box 1 and 3 into box 3   uattempts = 8 attempts = 8   accepted = 0
+between box 1 and 3 into box 1   uattempts = 6 attempts = 0   accepted = 0
+between box 1 and 3 into box 3   uattempts = 9 attempts = 9   accepted = 0
  suc.growth % =100.000   accepted % =  0.000
-between box 2 and 3 into box 2   uattempts = 9 attempts = 0   accepted = 0
-between box 2 and 3 into box 3   uattempts = 5 attempts = 5   accepted = 0
+between box 2 and 3 into box 2   uattempts = 7 attempts = 0   accepted = 0
+between box 2 and 3 into box 3   uattempts = 6 attempts = 6   accepted = 0
  suc.growth % =100.000   accepted % =  0.000
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
 molecule typ = 2
-between box 1 and 2 into box 1   uattempts = 8 attempts = 8   accepted = 0
+between box 1 and 2 into box 1   uattempts = 6 attempts = 6   accepted = 0
+ suc.growth % = 83.333   accepted % =  0.000
+between box 1 and 2 into box 2   uattempts = 6 attempts = 6   accepted = 0
  suc.growth % =100.000   accepted % =  0.000
-between box 1 and 2 into box 2   uattempts = 1 attempts = 1   accepted = 0
+between box 1 and 3 into box 1   uattempts = 6 attempts = 0   accepted = 0
+between box 1 and 3 into box 3   uattempts = 3 attempts = 3   accepted = 0
  suc.growth % =100.000   accepted % =  0.000
-between box 1 and 3 into box 1   uattempts = 5 attempts = 0   accepted = 0
-between box 1 and 3 into box 3   uattempts = 4 attempts = 4   accepted = 0
- suc.growth % =100.000   accepted % =  0.000
-between box 2 and 3 into box 2   uattempts = 7 attempts = 0   accepted = 0
-between box 2 and 3 into box 3   uattempts = 8 attempts = 8   accepted = 0
+between box 2 and 3 into box 2   uattempts = 5 attempts = 0   accepted = 0
+between box 2 and 3 into box 3   uattempts = 6 attempts = 6   accepted = 0
  suc.growth % =100.000   accepted % =  0.000
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
@@ -7773,10 +7773,10 @@ number of times move out: 0  accepted = 0
 molecule typ = 8
 between box 1 and 2 into box 1   uattempts = 0 attempts = 0   accepted = 0
 between box 1 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
-between box 1 and 3 into box 1   uattempts = 50 attempts = 43   accepted = 4
- suc.growth % = 88.372   accepted % =  8.000
-between box 1 and 3 into box 3   uattempts = 56 attempts = 4   accepted = 4
- suc.growth % =100.000   accepted % =  7.143
+between box 1 and 3 into box 1   uattempts = 49 attempts = 41   accepted = 4
+ suc.growth % = 90.244   accepted % =  8.163
+between box 1 and 3 into box 3   uattempts = 53 attempts = 8   accepted = 5
+ suc.growth % =100.000   accepted % =  9.434
 between box 2 and 3 into box 2   uattempts = 0 attempts = 0   accepted = 0
 between box 2 and 3 into box 3   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
@@ -7900,127 +7900,127 @@ number of times move out: 0  accepted = 0
 
 pair typ = 1
 moltyps = 8 and 9
-between box 1 and 3 into box 1   uattempts = 6  attempts = 1  accepted = 0
- accepted % =  0.000
-between box 1 and 3 into box 3   uattempts = 8  attempts = 3  accepted = 0
- accepted % =  0.000
+between box 1 and 3 into box 1   uattempts = 5  attempts = 0  accepted = 0
+ accepted % =    NaN
+between box 1 and 3 into box 3   uattempts = 5  attempts = 1  accepted = 1
+ accepted % =100.000
 pair typ = 2
 moltyps = 9 and 10
-between box 1 and 3 into box 1   uattempts = 2  attempts = 2  accepted = 2
- accepted % =100.000
-between box 1 and 3 into box 3   uattempts = 5  attempts = 3  accepted = 3
+between box 1 and 3 into box 1   uattempts = 4  attempts = 0  accepted = 0
+ accepted % =    NaN
+between box 1 and 3 into box 3   uattempts = 2  attempts = 1  accepted = 1
  accepted % =100.000
 pair typ = 3
 moltyps = 10 and 11
-between box 1 and 3 into box 1   uattempts = 3  attempts = 3  accepted = 0
- accepted % =  0.000
+between box 1 and 3 into box 1   uattempts = 4  attempts = 0  accepted = 0
+ accepted % =    NaN
 between box 1 and 3 into box 3   uattempts = 4  attempts = 0  accepted = 0
  accepted % =    NaN
 pair typ = 4
 moltyps = 11 and 12
-between box 1 and 3 into box 1   uattempts = 4  attempts = 0  accepted = 0
+between box 1 and 3 into box 1   uattempts = 6  attempts = 0  accepted = 0
  accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 5  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 7  attempts = 0  accepted = 0
  accepted % =    NaN
 pair typ = 5
 moltyps = 12 and 13
-between box 1 and 3 into box 1   uattempts = 4  attempts = 0  accepted = 0
+between box 1 and 3 into box 1   uattempts = 10  attempts = 0  accepted = 0
  accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 5  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 7  attempts = 0  accepted = 0
  accepted % =    NaN
 pair typ = 6
 moltyps = 13 and 14
-between box 1 and 3 into box 1   uattempts = 9  attempts = 0  accepted = 0
+between box 1 and 3 into box 1   uattempts = 6  attempts = 0  accepted = 0
  accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 5  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 6  attempts = 0  accepted = 0
  accepted % =    NaN
 pair typ = 7
 moltyps = 14 and 15
-between box 1 and 3 into box 1   uattempts = 7  attempts = 0  accepted = 0
+between box 1 and 3 into box 1   uattempts = 8  attempts = 0  accepted = 0
  accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 9  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 5  attempts = 0  accepted = 0
  accepted % =    NaN
 pair typ = 8
 moltyps = 15 and 16
 between box 1 and 3 into box 1   uattempts = 7  attempts = 0  accepted = 0
  accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 8  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 6  attempts = 0  accepted = 0
  accepted % =    NaN
 pair typ = 9
 moltyps = 16 and 17
-between box 1 and 3 into box 1   uattempts = 11  attempts = 0  accepted = 0
+between box 1 and 3 into box 1   uattempts = 10  attempts = 0  accepted = 0
  accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 10  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 3  attempts = 0  accepted = 0
  accepted % =    NaN
 pair typ = 10
 moltyps = 17 and 18
-between box 1 and 3 into box 1   uattempts = 8  attempts = 0  accepted = 0
+between box 1 and 3 into box 1   uattempts = 10  attempts = 0  accepted = 0
  accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 2  attempts = 2  accepted = 0
+between box 1 and 3 into box 3   uattempts = 6  attempts = 6  accepted = 0
  accepted % =  0.000
 pair typ = 11
 moltyps = 18 and 19
-between box 1 and 3 into box 1   uattempts = 7  attempts = 7  accepted = 0
- accepted % =  0.000
-between box 1 and 3 into box 3   uattempts = 5  attempts = 0  accepted = 0
- accepted % =    NaN
+between box 1 and 3 into box 1   uattempts = 14  attempts = 10  accepted = 2
+ accepted % = 20.000
+between box 1 and 3 into box 3   uattempts = 8  attempts = 4  accepted = 1
+ accepted % = 25.000
 pair typ = 12
 moltyps = 17 and 20
-between box 1 and 3 into box 1   uattempts = 11  attempts = 0  accepted = 0
+between box 1 and 3 into box 1   uattempts = 9  attempts = 0  accepted = 0
  accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 5  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 14  attempts = 0  accepted = 0
  accepted % =    NaN
 pair typ = 13
 moltyps = 20 and 21
-between box 1 and 3 into box 1   uattempts = 7  attempts = 0  accepted = 0
+between box 1 and 3 into box 1   uattempts = 13  attempts = 0  accepted = 0
  accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 4  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 2  attempts = 0  accepted = 0
  accepted % =    NaN
 pair typ = 14
 moltyps = 15 and 22
-between box 1 and 3 into box 1   uattempts = 10  attempts = 0  accepted = 0
+between box 1 and 3 into box 1   uattempts = 8  attempts = 0  accepted = 0
  accepted % =    NaN
 between box 1 and 3 into box 3   uattempts = 9  attempts = 0  accepted = 0
  accepted % =    NaN
 pair typ = 15
 moltyps = 22 and 24
-between box 1 and 3 into box 1   uattempts = 7  attempts = 0  accepted = 0
+between box 1 and 3 into box 1   uattempts = 9  attempts = 0  accepted = 0
  accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 8  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 15  attempts = 0  accepted = 0
  accepted % =    NaN
 pair typ = 16
 moltyps = 23 and 24
-between box 1 and 3 into box 1   uattempts = 9  attempts = 0  accepted = 0
+between box 1 and 3 into box 1   uattempts = 5  attempts = 0  accepted = 0
  accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 14  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 4  attempts = 0  accepted = 0
  accepted % =    NaN
 pair typ = 17
 moltyps = 24 and 21
-between box 1 and 3 into box 1   uattempts = 8  attempts = 0  accepted = 0
+between box 1 and 3 into box 1   uattempts = 18  attempts = 0  accepted = 0
  accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 9  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 6  attempts = 0  accepted = 0
  accepted % =    NaN
 pair typ = 18
 moltyps = 23 and 25
-between box 1 and 3 into box 1   uattempts = 17  attempts = 0  accepted = 0
+between box 1 and 3 into box 1   uattempts = 10  attempts = 0  accepted = 0
  accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 5  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 2  attempts = 0  accepted = 0
  accepted % =    NaN
 pair typ = 19
 moltyps = 25 and 26
-between box 1 and 3 into box 1   uattempts = 11  attempts = 0  accepted = 0
- accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 7  attempts = 0  accepted = 0
- accepted % =    NaN
-pair typ = 20
-moltyps = 23 and 27
-between box 1 and 3 into box 1   uattempts = 7  attempts = 0  accepted = 0
+between box 1 and 3 into box 1   uattempts = 6  attempts = 0  accepted = 0
  accepted % =    NaN
 between box 1 and 3 into box 3   uattempts = 8  attempts = 0  accepted = 0
  accepted % =    NaN
+pair typ = 20
+moltyps = 23 and 27
+between box 1 and 3 into box 1   uattempts = 9  attempts = 0  accepted = 0
+ accepted % =    NaN
+between box 1 and 3 into box 3   uattempts = 9  attempts = 0  accepted = 0
+ accepted % =    NaN
 pair typ = 21
 moltyps = 27 and 28
-between box 1 and 3 into box 1   uattempts = 4  attempts = 0  accepted = 0
+between box 1 and 3 into box 1   uattempts = 3  attempts = 0  accepted = 0
  accepted % =    NaN
 between box 1 and 3 into box 3   uattempts = 6  attempts = 0  accepted = 0
  accepted % =    NaN
@@ -8028,97 +8028,96 @@ pair typ = 22
 moltyps = 23 and 29
 between box 1 and 3 into box 1   uattempts = 7  attempts = 0  accepted = 0
  accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 11  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 14  attempts = 0  accepted = 0
  accepted % =    NaN
 pair typ = 23
 moltyps = 29 and 30
-between box 1 and 3 into box 1   uattempts = 6  attempts = 0  accepted = 0
+between box 1 and 3 into box 1   uattempts = 12  attempts = 0  accepted = 0
  accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 10  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 6  attempts = 0  accepted = 0
  accepted % =    NaN
 pair typ = 24
 moltyps = 23 and 31
 between box 1 and 3 into box 1   uattempts = 4  attempts = 0  accepted = 0
  accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 9  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 11  attempts = 0  accepted = 0
  accepted % =    NaN
 pair typ = 25
 moltyps = 16 and 22
 between box 1 and 3 into box 1   uattempts = 8  attempts = 0  accepted = 0
  accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 4  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 5  attempts = 0  accepted = 0
  accepted % =    NaN
 pair typ = 26
 moltyps = 18 and 20
-between box 1 and 3 into box 1   uattempts = 11  attempts = 11  accepted = 0
+between box 1 and 3 into box 1   uattempts = 8  attempts = 3  accepted = 0
  accepted % =  0.000
-between box 1 and 3 into box 3   uattempts = 6  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 12  attempts = 0  accepted = 0
  accepted % =    NaN
 pair typ = 27
 moltyps = 20 and 24
-between box 1 and 3 into box 1   uattempts = 15  attempts = 0  accepted = 0
+between box 1 and 3 into box 1   uattempts = 5  attempts = 0  accepted = 0
  accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 6  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 11  attempts = 0  accepted = 0
  accepted % =    NaN
 pair typ = 28
 moltyps = 24 and 25
-between box 1 and 3 into box 1   uattempts = 7  attempts = 0  accepted = 0
- accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 7  attempts = 0  accepted = 0
- accepted % =    NaN
-pair typ = 29
-moltyps = 24 and 27
-between box 1 and 3 into box 1   uattempts = 7  attempts = 0  accepted = 0
- accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 5  attempts = 0  accepted = 0
- accepted % =    NaN
-pair typ = 30
-moltyps = 24 and 29
-between box 1 and 3 into box 1   uattempts = 15  attempts = 0  accepted = 0
+between box 1 and 3 into box 1   uattempts = 5  attempts = 0  accepted = 0
  accepted % =    NaN
 between box 1 and 3 into box 3   uattempts = 13  attempts = 0  accepted = 0
  accepted % =    NaN
-pair typ = 31
-moltyps = 25 and 27
-between box 1 and 3 into box 1   uattempts = 5  attempts = 0  accepted = 0
+pair typ = 29
+moltyps = 24 and 27
+between box 1 and 3 into box 1   uattempts = 11  attempts = 0  accepted = 0
  accepted % =    NaN
 between box 1 and 3 into box 3   uattempts = 9  attempts = 0  accepted = 0
  accepted % =    NaN
+pair typ = 30
+moltyps = 24 and 29
+between box 1 and 3 into box 1   uattempts = 11  attempts = 0  accepted = 0
+ accepted % =    NaN
+between box 1 and 3 into box 3   uattempts = 16  attempts = 0  accepted = 0
+ accepted % =    NaN
+pair typ = 31
+moltyps = 25 and 27
+between box 1 and 3 into box 1   uattempts = 6  attempts = 0  accepted = 0
+ accepted % =    NaN
+between box 1 and 3 into box 3   uattempts = 7  attempts = 0  accepted = 0
+ accepted % =    NaN
 pair typ = 32
 moltyps = 25 and 29
-between box 1 and 3 into box 1   uattempts = 7  attempts = 0  accepted = 0
+between box 1 and 3 into box 1   uattempts = 6  attempts = 0  accepted = 0
  accepted % =    NaN
 between box 1 and 3 into box 3   uattempts = 10  attempts = 0  accepted = 0
  accepted % =    NaN
 pair typ = 33
 moltyps = 27 and 29
-between box 1 and 3 into box 1   uattempts = 8  attempts = 0  accepted = 0
- accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 9  attempts = 0  accepted = 0
- accepted % =    NaN
-pair typ = 34
-moltyps = 23 and 34
-between box 1 and 3 into box 1   uattempts = 10  attempts = 0  accepted = 0
+between box 1 and 3 into box 1   uattempts = 3  attempts = 0  accepted = 0
  accepted % =    NaN
 between box 1 and 3 into box 3   uattempts = 4  attempts = 0  accepted = 0
  accepted % =    NaN
-pair typ = 35
-moltyps = 34 and 33
+pair typ = 34
+moltyps = 23 and 34
 between box 1 and 3 into box 1   uattempts = 4  attempts = 0  accepted = 0
  accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 1  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 10  attempts = 0  accepted = 0
+ accepted % =    NaN
+pair typ = 35
+moltyps = 34 and 33
+between box 1 and 3 into box 1   uattempts = 0  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 2  attempts = 0  accepted = 0
  accepted % =    NaN
 pair typ = 36
 moltyps = 33 and 32
-between box 1 and 3 into box 1   uattempts = 3  attempts = 0  accepted = 0
+between box 1 and 3 into box 1   uattempts = 9  attempts = 0  accepted = 0
  accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 3  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 5  attempts = 0  accepted = 0
  accepted % =    NaN
 pair typ = 37
 moltyps = 28 and 32
-between box 1 and 3 into box 1   uattempts = 6  attempts = 0  accepted = 0
+between box 1 and 3 into box 1   uattempts = 5  attempts = 0  accepted = 0
  accepted % =    NaN
-between box 1 and 3 into box 3   uattempts = 3  attempts = 0  accepted = 0
+between box 1 and 3 into box 3   uattempts = 4  attempts = 0  accepted = 0
  accepted % =    NaN
  
  ### Charge Fluctuation  ###
@@ -8142,7 +8141,7 @@ molecule 10:   0.00000000      0.00000000      710.000000
 molecule 11:   0.00000000      0.00000000      310.000000    
 molecule 12:   0.00000000      0.00000000     -180.000000    
 molecule 13:   0.00000000      0.00000000     -840.000000    
-molecule 14:   0.00000000      0.00000000     -1000.00000    
+molecule 14:   0.00000000      0.00000000    -1000.000000    
 molecule 15:   0.00000000      0.00000000     -2360.00000    
 molecule 16:   0.00000000      0.00000000     -2580.00000    
 molecule 17:   0.00000000      0.00000000     -3980.00000    
@@ -8165,7 +8164,7 @@ molecule 33:   0.00000000      0.00000000     -4000.00000
 molecule 34:   0.00000000      0.00000000     -3330.00000     
  
  sumup control
- number of chains         862
+ number of chains         861
  number of chains of type           1          86
  number of chains of type           2         222
  number of chains of type           3         192
@@ -8174,7 +8173,7 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  number of chains of type           6          30
  number of chains of type           7          18
  number of chains of type           8           0
- number of chains of type           9           1
+ number of chains of type           9           0
  number of chains of type          10           0
  number of chains of type          11           0
  number of chains of type          12           0
@@ -8183,8 +8182,8 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  number of chains of type          15           0
  number of chains of type          16           0
  number of chains of type          17           0
- number of chains of type          18           1
- number of chains of type          19           0
+ number of chains of type          18           0
+ number of chains of type          19           1
  number of chains of type          20           0
  number of chains of type          21           0
  number of chains of type          22           0
@@ -8200,18 +8199,18 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  number of chains of type          32           0
  number of chains of type          33           0
  number of chains of type          34           0
- inter lj energy    4814331.70443062     
- intra lj energy   -27797.0195350598     
+ inter lj energy    4820645.11128926     
+ intra lj energy   -28268.8105488971     
  bond vibration    0.000000000000000E+000
- bond bending       271528.203716425     
- torsional          102785.406427291     
+ bond bending       277084.797125389     
+ torsional          101398.758259066     
  external          0.000000000000000E+000
- coulombic energy  -33814632.4863889     
+ coulombic energy  -33813912.4569976     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -28653784.1913496     
+ total energy      -28643052.6008728     
  ### problem with energy ###  box            1
-  Total energy:   -28653784.1913496       -28653784.1911722      -1.774430274963379E-004
+  Total energy:   -28643052.6008728       -28643052.6017453       8.724927902221680E-004
  
  sumup control
  number of chains         892
@@ -8249,19 +8248,19 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  number of chains of type          32           0
  number of chains of type          33           0
  number of chains of type          34           0
- inter lj energy   -638893.871080297     
+ inter lj energy   -640966.286630647     
  intra lj energy   0.000000000000000E+000
  bond vibration    0.000000000000000E+000
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -2814488.54636447     
+ coulombic energy  -2815976.87838987     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -3453382.41744477     
+ total energy      -3456943.16502052     
  
  sumup control
- number of chains          47
+ number of chains          48
  number of chains of type           1           0
  number of chains of type           2           0
  number of chains of type           3           0
@@ -8270,7 +8269,7 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  number of chains of type           6           0
  number of chains of type           7           0
  number of chains of type           8           1
- number of chains of type           9           0
+ number of chains of type           9           1
  number of chains of type          10           1
  number of chains of type          11           1
  number of chains of type          12           1
@@ -8279,8 +8278,8 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  number of chains of type          15           1
  number of chains of type          16           1
  number of chains of type          17           1
- number of chains of type          18           0
- number of chains of type          19           1
+ number of chains of type          18           1
+ number of chains of type          19           0
  number of chains of type          20           1
  number of chains of type          21           1
  number of chains of type          22           1
@@ -8307,23 +8306,23 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  well energy       0.000000000000000E+000
  total energy      0.000000000000000E+000
  
- vstart       =    -28648950.4639775865     -3460138.0046509313            0.0000000000
- vend         =    -28653784.1913496405     -3453382.4174447656            0.0000000000
- vbox         =    -28653784.1911721975     -3453382.4174447176            0.0000000000
+ vstart       =    -28648950.4639775902     -3460138.0046509206            0.0000000000
+ vend         =    -28643052.6008728147     -3456943.1650205208            0.0000000000
+ vbox         =    -28643052.6017453074     -3456943.1650204989            0.0000000000
  
  Averages and fluctuations                        Box  1       Box  2       Box  3
  
  pressure                           [kPa] =         0.00         0.00         0.00
  pressure              [simulation units] =     0.000000     0.000000     0.000000
  surface tension                   [mN/m] =       0.0000       0.0000       0.0000
- chem. potential of type   1          [K] =        0.000        0.000    -6179.986
- chem. potential of type   2          [K] =    -3545.551     1314.852    -6578.512
+ chem. potential of type   1          [K] =    -2530.766    -4715.220    -6164.909
+ chem. potential of type   2          [K] =     -582.480      183.032    -6563.537
  chem. potential of type   3          [K] =        0.000        0.000        0.000
  chem. potential of type   4          [K] =        0.000        0.000        0.000
  chem. potential of type   5          [K] =        0.000        0.000        0.000
  chem. potential of type   6          [K] =        0.000        0.000        0.000
  chem. potential of type   7          [K] =        0.000        0.000        0.000
- chem. potential of type   8          [K] =    -4850.466        0.000    -6894.923
+ chem. potential of type   8          [K] =    -4843.201        0.000    -6703.970
  chem. potential of type   9          [K] =        0.000        0.000        0.000
  chem. potential of type  10          [K] =        0.000        0.000        0.000
  chem. potential of type  11          [K] =        0.000        0.000        0.000
@@ -8350,9 +8349,9 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  chem. potential of type  32          [K] =        0.000        0.000        0.000
  chem. potential of type  33          [K] =        0.000        0.000        0.000
  chem. potential of type  34          [K] =        0.000        0.000        0.000
- boxlength                            [A] =       20.000       40.130      134.708
- boxlength                            [A] =       25.980       40.130      134.708
- boxlength                            [A] =       90.000       40.130      134.708
+ boxlength                            [A] =       20.000       40.130      132.852
+ boxlength                            [A] =       25.980       40.130      132.852
+ boxlength                            [A] =       90.000       40.130      132.852
  no. of chains of type     1              =       86.000      314.000        0.000
  no. of chains of type     2              =      222.000      578.000        0.000
  no. of chains of type     3              =      192.000        0.000        0.000
@@ -8360,9 +8359,9 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  no. of chains of type     5              =        0.000        0.000       22.000
  no. of chains of type     6              =       30.000        0.000        0.000
  no. of chains of type     7              =       18.000        0.000        0.000
- no. of chains of type     8              =        0.109        0.000        0.891
- no. of chains of type     9              =        0.617        0.000        0.383
- no. of chains of type    10              =        0.383        0.000        0.617
+ no. of chains of type     8              =        0.164        0.000        0.836
+ no. of chains of type     9              =        0.002        0.000        0.998
+ no. of chains of type    10              =        0.099        0.000        0.901
  no. of chains of type    11              =        0.000        0.000        1.000
  no. of chains of type    12              =        0.000        0.000        1.000
  no. of chains of type    13              =        0.000        0.000        1.000
@@ -8370,8 +8369,8 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  no. of chains of type    15              =        0.000        0.000        1.000
  no. of chains of type    16              =        0.000        0.000        1.000
  no. of chains of type    17              =        0.000        0.000        1.000
- no. of chains of type    18              =        1.000        0.000        0.000
- no. of chains of type    19              =        0.000        0.000        1.000
+ no. of chains of type    18              =        0.639        0.000        0.361
+ no. of chains of type    19              =        0.361        0.000        0.639
  no. of chains of type    20              =        0.000        0.000        1.000
  no. of chains of type    21              =        0.000        0.000        1.000
  no. of chains of type    22              =        0.000        0.000        1.000
@@ -8387,85 +8386,85 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  no. of chains of type    32              =        0.000        0.000        1.000
  no. of chains of type    33              =        0.000        0.000        1.000
  no. of chains of type    34              =        0.000        0.000        1.000
- molar volume                  [cm^3/mol] =       32.666       43.632    31392.272
- specific density                [g/cm^3] =     1.114835     0.755021     0.002937
+ molar volume                  [cm^3/mol] =       32.698       43.632    29566.895
+ specific density                [g/cm^3] =     1.112817     0.755021     0.003103
  number density of type    1 [chain/nm^3] =      1.83902      4.85861      0.00000
  number density of type    2 [chain/nm^3] =      4.74724      8.94356      0.00000
  number density of type    3 [chain/nm^3] =      4.10572      0.00000      0.00000
  number density of type    4 [chain/nm^3] =      6.67180      0.00000      0.00000
- number density of type    5 [chain/nm^3] =      0.00000      0.00000      0.00900
+ number density of type    5 [chain/nm^3] =      0.00000      0.00000      0.00939
  number density of type    6 [chain/nm^3] =      0.64152      0.00000      0.00000
  number density of type    7 [chain/nm^3] =      0.38491      0.00000      0.00000
- number density of type    8 [chain/nm^3] =      0.00233      0.00000      0.00036
- number density of type    9 [chain/nm^3] =      0.01320      0.00000      0.00016
- number density of type   10 [chain/nm^3] =      0.00818      0.00000      0.00025
- number density of type   11 [chain/nm^3] =      0.00000      0.00000      0.00041
- number density of type   12 [chain/nm^3] =      0.00000      0.00000      0.00041
- number density of type   13 [chain/nm^3] =      0.00000      0.00000      0.00041
- number density of type   14 [chain/nm^3] =      0.00000      0.00000      0.00041
- number density of type   15 [chain/nm^3] =      0.00000      0.00000      0.00041
- number density of type   16 [chain/nm^3] =      0.00000      0.00000      0.00041
- number density of type   17 [chain/nm^3] =      0.00000      0.00000      0.00041
- number density of type   18 [chain/nm^3] =      0.02138      0.00000      0.00000
- number density of type   19 [chain/nm^3] =      0.00000      0.00000      0.00041
- number density of type   20 [chain/nm^3] =      0.00000      0.00000      0.00041
- number density of type   21 [chain/nm^3] =      0.00000      0.00000      0.00041
- number density of type   22 [chain/nm^3] =      0.00000      0.00000      0.00041
- number density of type   23 [chain/nm^3] =      0.00000      0.00000      0.00041
- number density of type   24 [chain/nm^3] =      0.00000      0.00000      0.00041
- number density of type   25 [chain/nm^3] =      0.00000      0.00000      0.00041
- number density of type   26 [chain/nm^3] =      0.00000      0.00000      0.00041
- number density of type   27 [chain/nm^3] =      0.00000      0.00000      0.00041
- number density of type   28 [chain/nm^3] =      0.00000      0.00000      0.00041
- number density of type   29 [chain/nm^3] =      0.00000      0.00000      0.00041
- number density of type   30 [chain/nm^3] =      0.00000      0.00000      0.00041
- number density of type   31 [chain/nm^3] =      0.00000      0.00000      0.00041
- number density of type   32 [chain/nm^3] =      0.00000      0.00000      0.00041
- number density of type   33 [chain/nm^3] =      0.00000      0.00000      0.00041
- number density of type   34 [chain/nm^3] =      0.00000      0.00000      0.00041
- molfraction of type       1              =    0.0997554    0.3520179    0.0000000
- molfraction of type       2              =    0.2575081    0.6479821    0.0000000
- molfraction of type       3              =    0.2227097    0.0000000    0.0000000
- molfraction of type       4              =    0.3619033    0.0000000    0.0000000
- molfraction of type       5              =    0.0000000    0.0000000    0.4691925
- molfraction of type       6              =    0.0347984    0.0000000    0.0000000
- molfraction of type       7              =    0.0208790    0.0000000    0.0000000
- molfraction of type       8              =    0.0001261    0.0000000    0.0189611
- molfraction of type       9              =    0.0007162    0.0000000    0.0081638
- molfraction of type      10              =    0.0004437    0.0000000    0.0131631
- molfraction of type      11              =    0.0000000    0.0000000    0.0213269
- molfraction of type      12              =    0.0000000    0.0000000    0.0213269
- molfraction of type      13              =    0.0000000    0.0000000    0.0213269
- molfraction of type      14              =    0.0000000    0.0000000    0.0213269
- molfraction of type      15              =    0.0000000    0.0000000    0.0213269
- molfraction of type      16              =    0.0000000    0.0000000    0.0213269
- molfraction of type      17              =    0.0000000    0.0000000    0.0213269
- molfraction of type      18              =    0.0011599    0.0000000    0.0000000
- molfraction of type      19              =    0.0000000    0.0000000    0.0213269
- molfraction of type      20              =    0.0000000    0.0000000    0.0213269
- molfraction of type      21              =    0.0000000    0.0000000    0.0213269
- molfraction of type      22              =    0.0000000    0.0000000    0.0213269
- molfraction of type      23              =    0.0000000    0.0000000    0.0213269
- molfraction of type      24              =    0.0000000    0.0000000    0.0213269
- molfraction of type      25              =    0.0000000    0.0000000    0.0213269
- molfraction of type      26              =    0.0000000    0.0000000    0.0213269
- molfraction of type      27              =    0.0000000    0.0000000    0.0213269
- molfraction of type      28              =    0.0000000    0.0000000    0.0213269
- molfraction of type      29              =    0.0000000    0.0000000    0.0213269
- molfraction of type      30              =    0.0000000    0.0000000    0.0213269
- molfraction of type      31              =    0.0000000    0.0000000    0.0213269
- molfraction of type      32              =    0.0000000    0.0000000    0.0213269
- molfraction of type      33              =    0.0000000    0.0000000    0.0213269
- molfraction of type      34              =    0.0000000    0.0000000    0.0213269
+ number density of type    8 [chain/nm^3] =      0.00351      0.00000      0.00036
+ number density of type    9 [chain/nm^3] =      0.00004      0.00000      0.00043
+ number density of type   10 [chain/nm^3] =      0.00213      0.00000      0.00039
+ number density of type   11 [chain/nm^3] =      0.00000      0.00000      0.00043
+ number density of type   12 [chain/nm^3] =      0.00000      0.00000      0.00043
+ number density of type   13 [chain/nm^3] =      0.00000      0.00000      0.00043
+ number density of type   14 [chain/nm^3] =      0.00000      0.00000      0.00043
+ number density of type   15 [chain/nm^3] =      0.00000      0.00000      0.00043
+ number density of type   16 [chain/nm^3] =      0.00000      0.00000      0.00043
+ number density of type   17 [chain/nm^3] =      0.00000      0.00000      0.00043
+ number density of type   18 [chain/nm^3] =      0.01367      0.00000      0.00016
+ number density of type   19 [chain/nm^3] =      0.00772      0.00000      0.00027
+ number density of type   20 [chain/nm^3] =      0.00000      0.00000      0.00043
+ number density of type   21 [chain/nm^3] =      0.00000      0.00000      0.00043
+ number density of type   22 [chain/nm^3] =      0.00000      0.00000      0.00043
+ number density of type   23 [chain/nm^3] =      0.00000      0.00000      0.00043
+ number density of type   24 [chain/nm^3] =      0.00000      0.00000      0.00043
+ number density of type   25 [chain/nm^3] =      0.00000      0.00000      0.00043
+ number density of type   26 [chain/nm^3] =      0.00000      0.00000      0.00043
+ number density of type   27 [chain/nm^3] =      0.00000      0.00000      0.00043
+ number density of type   28 [chain/nm^3] =      0.00000      0.00000      0.00043
+ number density of type   29 [chain/nm^3] =      0.00000      0.00000      0.00043
+ number density of type   30 [chain/nm^3] =      0.00000      0.00000      0.00043
+ number density of type   31 [chain/nm^3] =      0.00000      0.00000      0.00043
+ number density of type   32 [chain/nm^3] =      0.00000      0.00000      0.00043
+ number density of type   33 [chain/nm^3] =      0.00000      0.00000      0.00043
+ number density of type   34 [chain/nm^3] =      0.00000      0.00000      0.00043
+ molfraction of type       1              =    0.0998531    0.3520179    0.0000000
+ molfraction of type       2              =    0.2577603    0.6479821    0.0000000
+ molfraction of type       3              =    0.2229279    0.0000000    0.0000000
+ molfraction of type       4              =    0.3622578    0.0000000    0.0000000
+ molfraction of type       5              =    0.0000000    0.0000000    0.4609215
+ molfraction of type       6              =    0.0348325    0.0000000    0.0000000
+ molfraction of type       7              =    0.0208995    0.0000000    0.0000000
+ molfraction of type       8              =    0.0001907    0.0000000    0.0174541
+ molfraction of type       9              =    0.0000019    0.0000000    0.0209155
+ molfraction of type      10              =    0.0001153    0.0000000    0.0188363
+ molfraction of type      11              =    0.0000000    0.0000000    0.0209510
+ molfraction of type      12              =    0.0000000    0.0000000    0.0209510
+ molfraction of type      13              =    0.0000000    0.0000000    0.0209510
+ molfraction of type      14              =    0.0000000    0.0000000    0.0209510
+ molfraction of type      15              =    0.0000000    0.0000000    0.0209510
+ molfraction of type      16              =    0.0000000    0.0000000    0.0209510
+ molfraction of type      17              =    0.0000000    0.0000000    0.0209510
+ molfraction of type      18              =    0.0007420    0.0000000    0.0075448
+ molfraction of type      19              =    0.0004191    0.0000000    0.0134062
+ molfraction of type      20              =    0.0000000    0.0000000    0.0209510
+ molfraction of type      21              =    0.0000000    0.0000000    0.0209510
+ molfraction of type      22              =    0.0000000    0.0000000    0.0209510
+ molfraction of type      23              =    0.0000000    0.0000000    0.0209510
+ molfraction of type      24              =    0.0000000    0.0000000    0.0209510
+ molfraction of type      25              =    0.0000000    0.0000000    0.0209510
+ molfraction of type      26              =    0.0000000    0.0000000    0.0209510
+ molfraction of type      27              =    0.0000000    0.0000000    0.0209510
+ molfraction of type      28              =    0.0000000    0.0000000    0.0209510
+ molfraction of type      29              =    0.0000000    0.0000000    0.0209510
+ molfraction of type      30              =    0.0000000    0.0000000    0.0209510
+ molfraction of type      31              =    0.0000000    0.0000000    0.0209510
+ molfraction of type      32              =    0.0000000    0.0000000    0.0209510
+ molfraction of type      33              =    0.0000000    0.0000000    0.0209510
+ molfraction of type      34              =    0.0000000    0.0000000    0.0209510
  mean sete length of type  1        [A^2] =        0.022        0.023        0.000
  mean sete length of type  2        [A^2] =        7.274        7.274        0.000
  mean sete length of type  3        [A^2] =        0.000        0.000        0.000
  mean sete length of type  4        [A^2] =        0.000        0.000        0.000
  mean sete length of type  5        [A^2] =        0.000        0.000        0.000
- mean sete length of type  6        [A^2] =        8.806        0.000        0.000
- mean sete length of type  7        [A^2] =      369.123        0.000        0.000
+ mean sete length of type  6        [A^2] =        9.237        0.000        0.000
+ mean sete length of type  7        [A^2] =      373.803        0.000        0.000
  mean sete length of type  8        [A^2] =        0.000        0.000        1.960
- mean sete length of type  9        [A^2] =        1.960        0.000        0.000
+ mean sete length of type  9        [A^2] =        0.000        0.000        1.960
  mean sete length of type 10        [A^2] =        0.000        0.000        1.960
  mean sete length of type 11        [A^2] =        0.000        0.000        1.960
  mean sete length of type 12        [A^2] =        0.000        0.000        1.960
@@ -8474,8 +8473,8 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  mean sete length of type 15        [A^2] =        0.000        0.000       13.720
  mean sete length of type 16        [A^2] =        0.000        0.000       23.521
  mean sete length of type 17        [A^2] =        0.000        0.000       37.241
- mean sete length of type 18        [A^2] =       52.921        0.000        0.000
- mean sete length of type 19        [A^2] =        0.000        0.000       72.520
+ mean sete length of type 18        [A^2] =        0.000        0.000       52.921
+ mean sete length of type 19        [A^2] =       72.520        0.000        0.000
  mean sete length of type 20        [A^2] =        0.000        0.000       52.921
  mean sete length of type 21        [A^2] =        0.000        0.000       54.881
  mean sete length of type 22        [A^2] =        0.000        0.000       23.521
@@ -8492,19 +8491,19 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
  mean sete length of type 33        [A^2] =        0.000        0.000       43.656
  mean sete length of type 34        [A^2] =        0.000        0.000       41.873
  
- Total energy [K per system and kJ/mol per chain] =  -28651616.07   -3454296.42          0.00    -276.33     -32.20       0.00
- Inter LJ     [K per system and kJ/mol per chain] =    4814173.23    -641227.62          0.00      46.43      -5.98       0.00
+ Total energy [K per system and kJ/mol per chain] =  -28646055.25   -3459446.69          0.00    -276.54     -32.25       0.00
+ Inter LJ     [K per system and kJ/mol per chain] =    4818515.29    -642444.62          0.00      46.52      -5.99       0.00
  Tail  LJ     [K per system and kJ/mol per chain] =          0.00          0.00          0.00       0.00       0.00       0.00
- Intra LJ     [K per system and kJ/mol per chain] =     -27569.19          0.00          0.00      -0.27       0.00       0.00
+ Intra LJ     [K per system and kJ/mol per chain] =     -28039.85          0.00          0.00      -0.27       0.00       0.00
  Stretch      [K per system and kJ/mol per chain] =          0.00          0.00          0.00       0.00       0.00       0.00
- Bond bending [K per system and kJ/mol per chain] =     272920.97          0.00          0.00       2.63       0.00       0.00
- Torsion      [K per system and kJ/mol per chain] =     101680.84          0.00          0.00       0.98       0.00       0.00
- Coulomb      [K per system and kJ/mol per chain] =  -33812821.91   -2813068.80          0.00    -326.10     -26.22       0.00
+ Bond bending [K per system and kJ/mol per chain] =     273826.49          0.00          0.00       2.64       0.00       0.00
+ Torsion      [K per system and kJ/mol per chain] =     102337.87          0.00          0.00       0.99       0.00       0.00
+ Coulomb      [K per system and kJ/mol per chain] =  -33812695.05   -2817002.07          0.00    -326.42     -26.26       0.00
  External pot [K per system and kJ/mol per chain] =          0.00          0.00          0.00       0.00       0.00       0.00
  3-body Garo  [K per system and kJ/mol per chain] =          0.00          0.00          0.00       0.00       0.00       0.00
  Fluc Q       [K per system and kJ/mol per chain] =          0.00          0.00          0.00       0.00       0.00       0.00
  
- fluctuation in <vtot> =     1985.38     2286.41        0.00
+ fluctuation in <vtot> =     1781.62     1415.84        0.00
  
  type  box       vinter       vintra         vtor        vbend        vtail
     1    1      0.00000      0.00000      0.00000      0.00000      0.00000
@@ -8609,4 +8608,4 @@ molecule 34:   0.00000000      0.00000000     -3330.00000
    34    1      0.00000      0.00000      0.00000      0.00000      0.00000
    34    2      0.00000      0.00000      0.00000      0.00000      0.00000
    34    3      0.00000      0.00000      0.00000      0.00000      0.00000
- Program ended at 2013-06-06 02:36:37.097
+ Program ended at 2013-11-20 02:33:57.274

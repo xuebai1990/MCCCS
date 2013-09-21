@@ -399,7 +399,7 @@ contains
        call sumup(ovrlap,v,ibox,.true.)
        if ( ovrlap ) goto 500
        vboxn(:,ibox) = v
-       vboxn(1,ibox) = vboxo(1,ibox) + (vboxn(2,ibox)-vboxo(2,ibox)) + (vboxn(9,ibox)-vboxo(9,ibox)) + (vboxn(8,ibox)-vboxo(8,ibox)) + (vboxn(10,ibox)-vboxo(10,ibox)) ! inter, ext, elect, garo
+       vboxn(ivTot,ibox) = vboxo(ivTot,ibox) + (vboxn(ivInterLJ,ibox)-vboxo(ivInterLJ,ibox)) + (vboxn(ivExt,ibox)-vboxo(ivExt,ibox)) + (vboxn(ivElect,ibox)-vboxo(ivElect,ibox)) + (vboxn(iv3body,ibox)-vboxo(iv3body,ibox)) ! inter, ext, elect, garo
     end do
 
     if ( lanes ) then
@@ -410,20 +410,20 @@ contains
        do i = 1,2
           if ( i .eq. 1 ) ibox = boxa
           if ( i .eq. 2 ) ibox = boxb
-          vbox(1,ibox) = vbox(1,ibox) + (vboxn(1,ibox) - vboxo(1,ibox))
-          vbox(2,ibox)  = vbox(2,ibox) +  (vboxn(2,ibox) - vboxo(2,ibox))
-          vbox(3,ibox) = vbox(3,ibox) + (vboxn(3,ibox) - vboxo(3,ibox))
-          vbox(9,ibox) = vbox(9,ibox) + (vboxn(9,ibox) - vboxo(9,ibox))
-          vbox(8,ibox) = vbox(8,ibox) +  (vboxn(8,ibox) - vboxo(8,ibox))
+          vbox(ivTot,ibox) = vbox(ivTot,ibox) + (vboxn(ivTot,ibox) - vboxo(ivTot,ibox))
+          vbox(ivInterLJ,ibox)  = vbox(ivInterLJ,ibox) +  (vboxn(ivInterLJ,ibox) - vboxo(ivInterLJ,ibox))
+          vbox(ivTail,ibox) = vbox(ivTail,ibox) + (vboxn(ivTail,ibox) - vboxo(ivTail,ibox))
+          vbox(ivExt,ibox) = vbox(ivExt,ibox) + (vboxn(ivExt,ibox) - vboxo(ivExt,ibox))
+          vbox(ivElect,ibox) = vbox(ivElect,ibox) +  (vboxn(ivElect,ibox) - vboxo(ivElect,ibox))
           do ichoiq = 1,nchoiq(ibox)
              call flucq(0,ibox)
           end do
        end do
-       dele = (vbox(1,boxa) - vboxo(1,boxa))+( vbox(1,boxb)- vboxo(1,boxb)) - ((nchbox(boxa)+1+ghost_particles(boxa)) *log(voln(boxa)/volo(boxa))/beta) - ((nchbox(boxb)+1+ghost_particles(boxb)) *log(voln(boxb)/volo(boxb))/beta)
+       dele = (vbox(ivTot,boxa) - vboxo(ivTot,boxa))+( vbox(ivTot,boxb)- vboxo(ivTot,boxb)) - ((nchbox(boxa)+1+ghost_particles(boxa)) *log(voln(boxa)/volo(boxa))/beta) - ((nchbox(boxb)+1+ghost_particles(boxb)) *log(voln(boxb)/volo(boxb))/beta)
     else if (lncubic) then
-       dele = (vboxn(1,boxa)-vboxo(1,boxa)) + (vboxn(1,boxb)-vboxo(1,boxb)) - ((nchbox(boxa)+ghost_particles(boxa))*log(voln(boxa)/volo(boxa))/beta) - ((nchbox(boxb)+ghost_particles(boxb))*log(voln(boxb)/volo(boxb))/beta)
+       dele = (vboxn(ivTot,boxa)-vboxo(ivTot,boxa)) + (vboxn(ivTot,boxb)-vboxo(ivTot,boxb)) - ((nchbox(boxa)+ghost_particles(boxa))*log(voln(boxa)/volo(boxa))/beta) - ((nchbox(boxb)+ghost_particles(boxb))*log(voln(boxb)/volo(boxb))/beta)
     else
-       dele = (vboxn(1,boxa)-vboxo(1,boxa)) + (vboxn(1,boxb)-vboxo(1,boxb)) - ((nchbox(boxa)+1+ghost_particles(boxa))*log(voln(boxa)/volo(boxa))/beta) - ((nchbox(boxb)+1+ghost_particles(boxb))*log(voln(boxb)/volo(boxb))/beta)
+       dele = (vboxn(ivTot,boxa)-vboxo(ivTot,boxa)) + (vboxn(ivTot,boxb)-vboxo(ivTot,boxb)) - ((nchbox(boxa)+1+ghost_particles(boxa))*log(voln(boxa)/volo(boxa))/beta) - ((nchbox(boxb)+1+ghost_particles(boxb))*log(voln(boxb)/volo(boxb))/beta)
     end if
 
     ! allows pressure difference (osmotic pressure)
@@ -706,24 +706,24 @@ contains
     call sumup(ovrlap,v,boxvch,.true.)
     if ( ovrlap ) goto 500
     vboxn(:,boxvch) = v
-    vboxn(1,boxvch) = vboxo(1,boxvch) + (vboxn(2,boxvch)-vboxo(2,boxvch)) + (vboxn(9,boxvch)-vboxo(9,boxvch)) + (vboxn(8,boxvch)-vboxo(8,boxvch)) + (vboxn(10,boxvch)-vboxo(10,boxvch)) !inter, ext, elect, garo
+    vboxn(ivTot,boxvch) = vboxo(ivTot,boxvch) + (vboxn(ivInterLJ,boxvch)-vboxo(ivInterLJ,boxvch)) + (vboxn(ivExt,boxvch)-vboxo(ivExt,boxvch)) + (vboxn(ivElect,boxvch)-vboxo(ivElect,boxvch)) + (vboxn(iv3body,boxvch)-vboxo(iv3body,boxvch)) !inter, ext, elect, garo
 
     if ( lanes ) then
        ! for ANES algorithm, optimize the charge configuration
        ! on the new coordinates, continue to use the fluctuating charge
        ! algorithm to optimize the charge configurations, update the
        ! energy, coordinates and the ewald sum
-       vbox(1,boxvch)=vbox(1,boxvch)+(vboxn(1,boxvch)-vboxo(1,boxvch))
-       vbox(2,boxvch) = vbox(2,boxvch) + (vboxn(2,boxvch)-vboxo(2,boxvch))
-       vbox(3,boxvch)  = vbox(3,boxvch) + (vboxn(3,boxvch)-vboxo(3,boxvch))
-       vbox(9,boxvch)   = vbox(9,boxvch) + (vboxn(9,boxvch)-vboxo(9,boxvch))
-       vbox(8,boxvch) = vbox(8,boxvch) + (vboxn(8,boxvch)-vboxo(8,boxvch))
+       vbox(ivTot,boxvch)=vbox(ivTot,boxvch)+(vboxn(ivTot,boxvch)-vboxo(ivTot,boxvch))
+       vbox(ivInterLJ,boxvch) = vbox(ivInterLJ,boxvch) + (vboxn(ivInterLJ,boxvch)-vboxo(ivInterLJ,boxvch))
+       vbox(ivTail,boxvch)  = vbox(ivTail,boxvch) + (vboxn(ivTail,boxvch)-vboxo(ivTail,boxvch))
+       vbox(ivExt,boxvch)   = vbox(ivExt,boxvch) + (vboxn(ivExt,boxvch)-vboxo(ivExt,boxvch))
+       vbox(ivElect,boxvch) = vbox(ivElect,boxvch) + (vboxn(ivElect,boxvch)-vboxo(ivElect,boxvch))
        do ichoiq = 1,nchoiq(boxvch)
           call flucq(0,boxvch)
        end do
-       dele = (vbox(1,boxvch) - vboxo(1,boxvch)) + express(boxvch)*(voln-volo) - ((nchbox(boxvch)+ghost_particles(boxvch)) * log(voln/volo) / beta )
+       dele = (vbox(ivTot,boxvch) - vboxo(ivTot,boxvch)) + express(boxvch)*(voln-volo) - ((nchbox(boxvch)+ghost_particles(boxvch)) * log(voln/volo) / beta )
     else
-       dele = ( vboxn(1,boxvch) - vboxo(1,boxvch) ) + express(boxvch)*(voln-volo) - ((nchbox(boxvch)+ghost_particles(boxvch))*log(voln/volo)/beta)
+       dele = ( vboxn(ivTot,boxvch) - vboxo(ivTot,boxvch) ) + express(boxvch)*(voln-volo) - ((nchbox(boxvch)+ghost_particles(boxvch))*log(voln/volo)/beta)
     end if
 
     ! acceptance test
@@ -920,13 +920,13 @@ contains
     integer::j
     real::vdum
 
-    vboxo(1,box) = vbox(1,box)
-    vboxo(2,box) = vbox(2,box)
-    vboxo(3,box) = vbox(3,box)
-    vboxo(9,box) = vbox(9,box)
-    vboxo(8,box) = vbox(8,box)
-    vboxo(11,box)= vbox(11,box)
-    vboxo(10,box)= vbox(10,box)
+    vboxo(ivTot,box) = vbox(ivTot,box)
+    vboxo(ivInterLJ,box) = vbox(ivInterLJ,box)
+    vboxo(ivTail,box) = vbox(ivTail,box)
+    vboxo(ivExt,box) = vbox(ivExt,box)
+    vboxo(ivElect,box) = vbox(ivElect,box)
+    vboxo(ivFlucq,box)= vbox(ivFlucq,box)
+    vboxo(iv3body,box)= vbox(iv3body,box)
 
     bxo(box) = boxlx(box)
     byo(box) = boxly(box)
@@ -975,13 +975,13 @@ contains
     integer::j
     real::vdum
 
-    vbox(1,box) = vboxo(1,box)
-    vbox(2,box) = vboxo(2,box)
-    vbox(3,box) = vboxo(3,box)
-    vbox(9,box) = vboxo(9,box)
-    vbox(8,box) = vboxo(8,box)
-    vbox(11,box)= vboxo(11,box)
-    vbox(10,box)= vboxo(10,box)
+    vbox(ivTot,box) = vboxo(ivTot,box)
+    vbox(ivInterLJ,box) = vboxo(ivInterLJ,box)
+    vbox(ivTail,box) = vboxo(ivTail,box)
+    vbox(ivExt,box) = vboxo(ivExt,box)
+    vbox(ivElect,box) = vboxo(ivElect,box)
+    vbox(ivFlucq,box)= vboxo(ivFlucq,box)
+    vbox(iv3body,box)= vboxo(iv3body,box)
 
     boxlx(box)   = bxo(box)
     boxly(box)   = byo(box)
@@ -1030,12 +1030,12 @@ contains
     integer,intent(in)::box
 
     if ( .not. lanes ) then
-       vbox(1,box)    = vbox(1,box) + (vboxn(1,box) - vboxo(1,box))
-       vbox(2,box) = vbox(2,box) + (vboxn(2,box) - vboxo(2,box))
-       vbox(3,box)  = vbox(3,box) + (vboxn(3,box) - vboxo(3,box))
-       vbox(9,box)   = vbox(9,box) + (vboxn(9,box) - vboxo(9,box))
-       vbox(8,box) = vbox(8,box) + (vboxn(8,box) - vboxo(8,box))
-       vbox(10,box) = vbox(10,box) + (vboxn(10,box)-vboxo(10,box))
+       vbox(ivTot,box)    = vbox(ivTot,box) + (vboxn(ivTot,box) - vboxo(ivTot,box))
+       vbox(ivInterLJ,box) = vbox(ivInterLJ,box) + (vboxn(ivInterLJ,box) - vboxo(ivInterLJ,box))
+       vbox(ivTail,box)  = vbox(ivTail,box) + (vboxn(ivTail,box) - vboxo(ivTail,box))
+       vbox(ivExt,box)   = vbox(ivExt,box) + (vboxn(ivExt,box) - vboxo(ivExt,box))
+       vbox(ivElect,box) = vbox(ivElect,box) + (vboxn(ivElect,box) - vboxo(ivElect,box))
+       vbox(iv3body,box) = vbox(iv3body,box) + (vboxn(iv3body,box)-vboxo(iv3body,box))
     end if
 
     ! update centers of mass

@@ -4,7 +4,7 @@ module transfer_shared
   implicit none
   private
   save
-  public::read_transfer,update_bias,opt_bias,lopt_bias,freq_opt_bias,read_checkpoint_transfer_shared,write_checkpoint_transfer_shared
+  public::read_transfer,update_bias,opt_bias,lopt_bias,freq_opt_bias,read_checkpoint_transfer_shared,write_checkpoint_transfer_shared,gcmc_setup,gcmc_cleanup,gcmc_exchange
 
   real,allocatable::u_bias_diff(:,:) !<u_bias_diff(i,j) is the bias potential difference that should be applied to box i to achieve equal distribution of particles of type j
   integer,allocatable::num_update_bias(:,:)
@@ -25,6 +25,7 @@ contains
     num_update_bias=0
     lopt_bias=.false.
 
+    rewind(io_input)
     read(UNIT=io_input,NML=transfer,iostat=jerr)
     if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: transfer',jerr)
 
@@ -71,4 +72,87 @@ contains
     integer,intent(in)::io_chkpt
     write(io_chkpt) num_update_bias,u_bias_diff
   end subroutine write_checkpoint_transfer_shared
+
+  subroutine gcmc_setup(imolty,boxrem,irem,iparbox)
+    use sim_initia,only:setup_molecule_config
+    integer,intent(in)::imolty,boxrem
+    integer,intent(out)::irem,iparbox
+    nchain=nchain+1
+    irem=nchain
+    moltyp(irem)=imolty
+    nboxi(irem)=boxrem
+    temtyp(imolty)=temtyp(imolty)+1
+    nchbox(boxrem)=nchbox(boxrem)+1
+    ncmt(boxrem,imolty)=ncmt(boxrem,imolty)+1
+    iparbox=ncmt(boxrem,imolty)
+    if (lrigid(imolty)) call setup_molecule_config(imolty,irem)
+  end subroutine gcmc_setup
+
+  subroutine gcmc_cleanup(imolty,boxrem)
+    integer,intent(in)::imolty,boxrem
+    nchain=nchain-1
+    temtyp(imolty)=temtyp(imolty)-1
+    nchbox(boxrem)=nchbox(boxrem)-1
+    ncmt(boxrem,imolty)=ncmt(boxrem,imolty)-1
+  end subroutine gcmc_cleanup
+
+  subroutine gcmc_exchange(irem,iremparbox)
+    integer,intent(in)::irem,iremparbox
+    integer::imolty,ibox,i,jmolty,jbox
+
+    imolty=moltyp(irem)
+    ibox=nboxi(irem)
+
+    ! remove reference to irem in parbox & parall
+    parbox(ncmt(ibox,imolty),ibox,imolty)=0
+    do i=1,temtyp(imolty)
+       if (parall(imolty,i).eq.irem) then
+          parall(imolty,i)=parall(imolty,temtyp(imolty))
+          parall(imolty,temtyp(imolty))=0
+          exit
+       end if
+    end do
+
+    ! copy nchain to irem
+    jmolty=moltyp(nchain)
+    moltyp(irem)=jmolty
+    jbox=nboxi(nchain)
+    nboxi(irem)=jbox
+    do i=1,nunit(jmolty)
+       rcmu(irem)=rcmu(nchain)
+       xcm(irem)=xcm(nchain)
+       ycm(irem)=ycm(nchain)
+       zcm(irem)=zcm(nchain)
+       sxcm(irem)=sxcm(nchain)
+       sycm(irem)=sycm(nchain)
+       szcm(irem)=szcm(nchain)
+       rxu(irem,i)=rxu(nchain,i)
+       ryu(irem,i)=ryu(nchain,i)
+       rzu(irem,i)=rzu(nchain,i)
+       qqu(irem,i)=qqu(nchain,i)
+    end do
+
+    ! change reference of nchain to irem in parall & parbox
+    do i=1,temtyp(jmolty)
+       if (parall(jmolty,i).eq.nchain) then
+          parall(jmolty,i)=irem
+          exit
+       end if
+    end do
+    if (iremparbox.eq.0) then
+       do i=1,ncmt(jbox,jmolty)
+          if (parbox(i,jbox,jmolty).eq.nchain) then
+             parbox(i,jbox,jmolty)=irem
+             exit
+          end if
+       end do
+    else
+       parbox(iremparbox,jbox,jmolty)=irem
+    end if
+
+    nchain = nchain - 1
+    temtyp(imolty)=temtyp(imolty)-1
+    nchbox(ibox)=nchbox(ibox)-1
+    ncmt(ibox,imolty)=ncmt(ibox,imolty)-1
+  end subroutine gcmc_exchange
 end module transfer_shared

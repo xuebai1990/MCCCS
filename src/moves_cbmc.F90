@@ -84,21 +84,11 @@ contains
          lfixnow = .false.
       end if
 
-      if (lgrand) then
-! select a chain in box 1
-! write(io_output,*) 'counters not implemented properly for grand'
-         if (ncmt(1,imolty).eq.0) return
-         i = int( dble(ncmt(1,imolty))*random(-1) ) + 1
-         i = parbox(i,1,imolty)
-         if ( moltyp(i) .ne. imolty ) write(io_output,*) 'screwup config'
-         ibox=1
-      else
-         dchain = dble(temtyp(imolty))
-         i = int( dchain*random(-1) + 1 )
-         i = parall(imolty,i)
-         ibox = nboxi(i)
-         if ( moltyp(i) .ne. imolty ) call err_exit(__FILE__,__LINE__,'screwup config',myid+1)
-      end if
+      dchain = real(temtyp(imolty),dp)
+      i = int( dchain*random(-1) + 1 )
+      i = parall(imolty,i)
+      ibox = nboxi(i)
+      if ( moltyp(i) .ne. imolty ) call err_exit(__FILE__,__LINE__,'screwup config',myid+1)
 
 ! store number of units in iunit and # to be grown in igrow ***
       iunit = nunit(imolty)
@@ -245,9 +235,9 @@ contains
             call energy(i,imolty,v,iii,ibox,istt,iett,.true.,ovrlap,.false.,.false.,.false.,.false.)
 
 ! write(98,*) '------------ ',iii
-! write(98,*) v(1),v(4),v(2),v(9),v(8),v(14)
+! write(98,*) v(ivTot),v(ivIntraLJ),v(ivInterLJ),v(ivExt),v(ivElect),v(ivEwald)
 ! write(98,*) '------------ new ',iii
-! write(98,*) vnew(4),vnew(2),vnew(9),vnew(8),vnew(14)
+! write(98,*) vnew(ivIntraLJ),vnew(ivInterLJ),vnew(ivExt),vnew(ivElect),vnew(ivEwald)
 
             if (ovrlap .and. (iii .eq. 1)) then
 ! if (ovrlap) then
@@ -256,7 +246,7 @@ contains
             end if
 
             if (iii .eq. 2) then
-               delen = ( vnew(2) + vnew(9) + vnew(8) + vnew(14) + vnew(4))
+               delen = ( vnew(ivInterLJ) + vnew(ivExt) + vnew(ivElect) + vnew(ivEwald) + vnew(ivIntraLJ))
                if (lstagea) then
                   delen = (1.0E0_dp-(1.0E0_dp-etais)*lambdais)*delen
                else if (lstageb) then
@@ -264,7 +254,7 @@ contains
                else if (lstagec) then
                   delen = (etais+(1.0E0_dp-etais)*lambdais)*delen
                end if
-               delen = v(1) - delen
+               delen = v(ivTot) - delen
 ! JLR 11-19-09 Commenting this out, it makes no sense and gives me an energy error!!!
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM   this may not exactly right, but for
@@ -277,14 +267,14 @@ contains
 ! END JLR 11-19-09
 ! weight    = weight*exp(-(beta*delen))
                delta_vn= delen
-               vnew(1)     = vnew(1) + delen
-               vnew(2) = v(2)
-               vnew(9)   = v(9)
-               vnew(8) = v(8)
-               vnew(4) = v(4)
-               vnew(14) = v(14)
+               vnew(ivTot)     = vnew(ivTot) + delen
+               vnew(ivInterLJ) = v(ivInterLJ)
+               vnew(ivExt)   = v(ivExt)
+               vnew(ivElect) = v(ivElect)
+               vnew(ivIntraLJ) = v(ivIntraLJ)
+               vnew(ivEwald) = v(ivEwald)
             else
-               deleo = ( vold(2) + vold(9) + vold(8) + vold(14) + vold(4))
+               deleo = ( vold(ivInterLJ) + vold(ivExt) + vold(ivElect) + vold(ivEwald) + vold(ivIntraLJ))
                if (lstagea) then
                   deleo = (1.0E0_dp-(1.0E0_dp-etais)*lambdais)*deleo
                else if (lstageb) then
@@ -292,7 +282,7 @@ contains
                else if (lstagec) then
                   deleo = (etais+(1.0E0_dp-etais)*lambdais)*deleo
                end if
-               deleo = v(1) - deleo
+               deleo = v(ivTot) - deleo
 ! JLR 11-19-09 Commenting this out, it gives me energy error!!!
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MJM   this may not exactly right, but for
@@ -305,12 +295,12 @@ contains
 ! END JLR 11-19-09
 ! weiold    = weiold*exp(-(beta*deleo))
                delta_vo = deleo
-               vold(1)     = vold(1) + deleo
-               vold(2) = v(2)
-               vold(9)   = v(9)
-               vold(8) = v(8)
-               vold(4) = v(4)
-               vold(14) = v(14)
+               vold(ivTot)     = vold(ivTot) + deleo
+               vold(ivInterLJ) = v(ivInterLJ)
+               vold(ivExt)   = v(ivExt)
+               vold(ivElect) = v(ivElect)
+               vold(ivIntraLJ) = v(ivIntraLJ)
+               vold(ivEwald) = v(ivEwald)
             end if
          end do
 
@@ -338,36 +328,36 @@ contains
 
             if (iii .eq. 2) then
                if (ovrlap) return
-               delen = v(1) + vtornew
+               delen = v(ivTot) + vtornew
                if ( delen*beta .gt. (2.3E0_dp*softcut) ) then
 ! write(io_output,*) '##softcut in config caught explicit atoms'
                   return
                end if
                weight = weight*exp(-(beta*delen))
-               vnew(1)  = vnew(1) + delen
-               vnew(4) = vnew(4) + v(4)
-               vnew(2) = vnew(2) + v(2)
-               vnew(9)   = vnew(9) + v(9)
-               vnew(7) = vnew(7) + vtornew
-               vnew(8) = vnew(8) + v(8)
-               vnew(14) = vnew(14) + v(14)
+               vnew(ivTot)  = vnew(ivTot) + delen
+               vnew(ivIntraLJ) = vnew(ivIntraLJ) + v(ivIntraLJ)
+               vnew(ivInterLJ) = vnew(ivInterLJ) + v(ivInterLJ)
+               vnew(ivExt)   = vnew(ivExt) + v(ivExt)
+               vnew(ivTorsion) = vnew(ivTorsion) + vtornew
+               vnew(ivElect) = vnew(ivElect) + v(ivElect)
+               vnew(ivEwald) = vnew(ivEwald) + v(ivEwald)
             else
                if (ovrlap) then
                   write(io_output,*) 'ovrlap problem in old confomation', ' - CONFIG'
                   return
                end if
-               deleo = v(1) + vtorold
+               deleo = v(ivTot) + vtorold
                weiold = weiold*exp(-(beta*deleo))
                if ( weiold .lt. softlog ) then
                   write(io_output,*) '##old weight for explicit too low'
                end if
-               vold(1)     = vold(1) + deleo
-               vold(4) = vold(4) + v(4)
-               vold(2) = vold(2) + v(2)
-               vold(9)   = vold(9) + v(9)
-               vold(7)    = vold(7) + vtorold
-               vold(8) = vold(8) + v(8)
-               vold(14) = vold(14) + v(14)
+               vold(ivTot)     = vold(ivTot) + deleo
+               vold(ivIntraLJ) = vold(ivIntraLJ) + v(ivIntraLJ)
+               vold(ivInterLJ) = vold(ivInterLJ) + v(ivInterLJ)
+               vold(ivExt)   = vold(ivExt) + v(ivExt)
+               vold(ivTorsion)    = vold(ivTorsion) + vtorold
+               vold(ivElect) = vold(ivElect) + v(ivElect)
+               vold(ivEwald) = vold(ivEwald) + v(ivEwald)
             end if
          end do
       end if
@@ -378,8 +368,8 @@ contains
          call recip(ibox,vrecipn,vrecipo,1)
          delen = vrecipn
          deleo = vrecipo
-         vnew(8) = vnew(8) + vrecipn
-         vold(8) = vold(8) + vrecipo
+         vnew(ivElect) = vnew(ivElect) + vrecipn
+         vold(ivElect) = vold(ivElect) + vrecipo
          vipswn = vipswn + vrecipn
          vipswo = vipswo + vrecipo
          if (lstagea) then
@@ -394,8 +384,8 @@ contains
          end if
          weight = weight * exp(-(beta*vrecipn))
          weiold = weiold * exp(-(beta*vrecipo))
-         vnew(1) = vnew(1) + vrecipn
-         vold(1) = vold(1) + vrecipo
+         vnew(ivTot) = vnew(ivTot) + vrecipn
+         vold(ivTot) = vold(ivTot) + vrecipo
       end if
 
 ! End of DC-CBMC, Explicit Atom and Ewald-sum Corrections
@@ -433,18 +423,18 @@ contains
             bscb(imolty,2,total) = bscb(imolty,2,total) + 1.0E0_dp
          end if
 
-         vbox(1,ibox)    = vbox(1,ibox)    + ( vnew(1) - vold(1) )
-         vbox(2,ibox) = vbox(2,ibox) + (vnew(2) - vold(2))
-         vbox(4,ibox) = vbox(4,ibox) + (vnew(4)- vold(4))
-         vbox(5,ibox)   =  vbox(5,ibox)  + (vnew(5)- vold(5))
-         vbox(7,ibox)    = vbox(7,ibox)    + (vnew(7)- vold(7))
-         vbox(9,ibox)   = vbox(9,ibox)   + (vnew(9) - vold(9))
-         vbox(6,ibox)  = vbox(6,ibox)  + (vnew(6) - vold(6))
-         vbox(8,ibox) = vbox(8,ibox) + (vnew(8) - vold(8)) + (vnew(14) - vold(14))
-         vbox(12,ibox) = vbox(12,ibox) + (vipswn-vipswo)
-         vbox(13,ibox) = vbox(13,ibox) + (vwellipswn-vwellipswo)
-         vipsw = vbox(12,ibox)
-         vwellipsw = vbox(13,ibox)
+         vbox(ivTot,ibox)    = vbox(ivTot,ibox)    + ( vnew(ivTot) - vold(ivTot) )
+         vbox(ivInterLJ,ibox) = vbox(ivInterLJ,ibox) + (vnew(ivInterLJ) - vold(ivInterLJ))
+         vbox(ivIntraLJ,ibox) = vbox(ivIntraLJ,ibox) + (vnew(ivIntraLJ)- vold(ivIntraLJ))
+         vbox(ivStretching,ibox)   =  vbox(ivStretching,ibox)  + (vnew(ivStretching)- vold(ivStretching))
+         vbox(ivTorsion,ibox)    = vbox(ivTorsion,ibox)    + (vnew(ivTorsion)- vold(ivTorsion))
+         vbox(ivExt,ibox)   = vbox(ivExt,ibox)   + (vnew(ivExt) - vold(ivExt))
+         vbox(ivBending,ibox)  = vbox(ivBending,ibox)  + (vnew(ivBending) - vold(ivBending))
+         vbox(ivElect,ibox) = vbox(ivElect,ibox) + (vnew(ivElect) - vold(ivElect)) + (vnew(ivEwald) - vold(ivEwald))
+         vbox(ivIpswb,ibox) = vbox(ivIpswb,ibox) + (vipswn-vipswo)
+         vbox(ivWellIpswb,ibox) = vbox(ivWellIpswb,ibox) + (vwellipswn-vwellipswo)
+         vipsw = vbox(ivIpswb,ibox)
+         vwellipsw = vbox(ivWellIpswb,ibox)
          do ic = 1, igrow
             rxu(i,ic) = rxnew(ic)
             ryu(i,ic) = rynew(ic)
@@ -571,15 +561,15 @@ contains
        ! set the initial weight to unity ***
        weight  = 1.0E0_dp
        ! set total energy of trial configuration to zero ***
-       vnew(1) = 0.0E0_dp
-       vnew(7) = 0.0E0_dp
-       vnew(6) = 0.0E0_dp
-       vnew(5) = 0.0E0_dp
-       vnew(9) = 0.0E0_dp
-       vnew(4) = 0.0E0_dp
-       vnew(2) = 0.0E0_dp
-       vnew(8) = 0.0E0_dp
-       vnew(14)= 0.0E0_dp
+       vnew(ivTot) = 0.0E0_dp
+       vnew(ivTorsion) = 0.0E0_dp
+       vnew(ivBending) = 0.0E0_dp
+       vnew(ivStretching) = 0.0E0_dp
+       vnew(ivExt) = 0.0E0_dp
+       vnew(ivIntraLJ) = 0.0E0_dp
+       vnew(ivInterLJ) = 0.0E0_dp
+       vnew(ivElect) = 0.0E0_dp
+       vnew(ivEwald)= 0.0E0_dp
        vipswn  = 0.0E0_dp
        vwellipswn = 0.0E0_dp
     else
@@ -587,15 +577,15 @@ contains
        ! set the initial weight of the old configuration to unity ***
        weiold  = 1.0E0_dp
        ! set total energy of trial configuration to zero ***
-       vold(1) = 0.0E0_dp
-       vold(7) = 0.0E0_dp
-       vold(6) = 0.0E0_dp
-       vold(5) = 0.0E0_dp
-       vold(9) = 0.0E0_dp
-       vold(4) = 0.0E0_dp
-       vold(2) = 0.0E0_dp
-       vold(8) = 0.0E0_dp
-       vold(14)= 0.0E0_dp
+       vold(ivTot) = 0.0E0_dp
+       vold(ivTorsion) = 0.0E0_dp
+       vold(ivBending) = 0.0E0_dp
+       vold(ivStretching) = 0.0E0_dp
+       vold(ivExt) = 0.0E0_dp
+       vold(ivIntraLJ) = 0.0E0_dp
+       vold(ivInterLJ) = 0.0E0_dp
+       vold(ivElect) = 0.0E0_dp
+       vold(ivEwald)= 0.0E0_dp
        vipswo  = 0.0E0_dp
        vwellipswo = 0.0E0_dp
     end if
@@ -1171,20 +1161,20 @@ contains
           end if
 
 ! update new trial energies
-          vnew(1)     = vnew(1)     + vtr(1,iwalk)   + vtgtr(iwalk) + vvibtr + vbbtr
-          vnew(5)  = vnew(5)  + vvibtr
-          vnew(6)    = vnew(6)    + vbbtr
-          vnew(7)    = vnew(7)    + vtgtr(iwalk)
-          vnew(9)   = vnew(9)   + vtr(9,iwalk)
-          vnew(4) = vnew(4) + vtr(4,iwalk)
-          vnew(2) = vnew(2) + vtr(2,iwalk)
-          vnew(8) = vnew(8) + vtr(8,iwalk)
-          vnew(14) = vnew(14) + vtr(14,iwalk)
+          vnew(ivTot)     = vnew(ivTot)     + vtr(ivTot,iwalk)   + vtgtr(iwalk) + vvibtr + vbbtr
+          vnew(ivStretching)  = vnew(ivStretching)  + vvibtr
+          vnew(ivBending)    = vnew(ivBending)    + vbbtr
+          vnew(ivTorsion)    = vnew(ivTorsion)    + vtgtr(iwalk)
+          vnew(ivExt)   = vnew(ivExt)   + vtr(ivExt,iwalk)
+          vnew(ivIntraLJ) = vnew(ivIntraLJ) + vtr(ivIntraLJ,iwalk)
+          vnew(ivInterLJ) = vnew(ivInterLJ) + vtr(ivInterLJ,iwalk)
+          vnew(ivElect) = vnew(ivElect) + vtr(ivElect,iwalk)
+          vnew(ivEwald) = vnew(ivEwald) + vtr(ivEwald,iwalk)
           vipswn = vipswn+vipswnt(iwalk)
           vwellipswn = vwellipswn+vwellipswnt(iwalk)
 
           ! if (ldebug) then
-          !    write(100+myid,*) 'iwalk: ',iwalk,'; vnewt: ',vnew(1),'; vnewbb: ',vnew(6),'; vnewtg: ',vnew(7)
+          !    write(100+myid,*) 'iwalk: ',iwalk,'; vnewt: ',vnew(ivTot),'; vnewbb: ',vnew(ivBending),'; vnewtg: ',vnew(ivTorsion)
           ! end if
        else
           if (lfixnow) then
@@ -1202,20 +1192,20 @@ contains
           end if
 
 ! update old trail energies
-          vold(1)     = vold(1)     + vtr(1,1)   + vtgtr(1) + vvibtr + vbbtr
-          vold(5)  = vold(5)  + vvibtr
-          vold(6)    = vold(6)    + vbbtr
-          vold(7)    = vold(7)    + vtgtr(1)
-          vold(9)   = vold(9)   + vtr(9,1)
-          vold(4) = vold(4) + vtr(4,1)
-          vold(2) = vold(2) + vtr(2,1)
-          vold(8) = vold(8) + vtr(8,1)
-          vold(14) = vold(14) + vtr(14,1)
+          vold(ivTot)     = vold(ivTot)     + vtr(ivTot,1)   + vtgtr(1) + vvibtr + vbbtr
+          vold(ivStretching)  = vold(ivStretching)  + vvibtr
+          vold(ivBending)    = vold(ivBending)    + vbbtr
+          vold(ivTorsion)    = vold(ivTorsion)    + vtgtr(1)
+          vold(ivExt)   = vold(ivExt)   + vtr(ivExt,1)
+          vold(ivIntraLJ) = vold(ivIntraLJ) + vtr(ivIntraLJ,1)
+          vold(ivInterLJ) = vold(ivInterLJ) + vtr(ivInterLJ,1)
+          vold(ivElect) = vold(ivElect) + vtr(ivElect,1)
+          vold(ivEwald) = vold(ivEwald) + vtr(ivEwald,1)
           vipswo = vipswo+vipswot(1)
           vwellipswo = vwellipswo+vwellipswot(1)
 
           ! if (ldebug) then
-          !    write(100+myid,*) 'iwalk: ',iwalk,'; voldt: ',vold(1),'; voldbb: ',vold(6),'; voldtg: ',vold(7)
+          !    write(100+myid,*) 'iwalk: ',iwalk,'; voldt: ',vold(ivTot),'; voldbb: ',vold(ivBending),'; voldtg: ',vold(ivTorsion)
           ! end if
        end if
 
@@ -2288,7 +2278,7 @@ contains
     real,save::a11,a12,a13,a21,a22,a31,a32,a33,cosalph,sinalph
     real::determ,sinthe,costhe,sinpsi,cospsi,singamma,cosgamma,uxtemp,uytemp,uztemp
 
-#ifdef __DEBUG__
+#ifdef __DEBUG_VERBOSE__
     write(io_output,*) 'start CONE in ',myid
 #endif
 
@@ -2376,7 +2366,7 @@ contains
        call err_exit(__FILE__,__LINE__,'non valid iinit in cone.f',myid+1)
     end if
 
-#ifdef __DEBUG__
+#ifdef __DEBUG_VERBOSE__
     write(io_output,*) 'finish CONE in ',myid
 #endif
 
@@ -2608,26 +2598,26 @@ contains
     end if
 
     if ( lnew ) then
-       vnew(1) = vnew(1) + vtr(1,iwalk)
-       vnew(9) = vnew(9) + vtr(9,iwalk)
-       vnew(2) = vnew(2) + vtr(2,iwalk)
-       ! vnew(4) = vnew(4) + vtr(4,iwalk)
-       vnew(8) = vnew(8) + vtr(8,iwalk)
-       vnew(14) = vnew(14) + vtr(14,iwalk)
+       vnew(ivTot) = vnew(ivTot) + vtr(ivTot,iwalk)
+       vnew(ivExt) = vnew(ivExt) + vtr(ivExt,iwalk)
+       vnew(ivInterLJ) = vnew(ivInterLJ) + vtr(ivInterLJ,iwalk)
+       ! vnew(ivIntraLJ) = vnew(ivIntraLJ) + vtr(ivIntraLJ,iwalk)
+       vnew(ivElect) = vnew(ivElect) + vtr(ivElect,iwalk)
+       vnew(ivEwald) = vnew(ivEwald) + vtr(ivEwald,iwalk)
        vipswn = vipswn+vipswnt(iwalk)
        vwellipswn = vwellipswn+vwellipswnt(iwalk)
     else
-       vold(1) = vold(1) + vtr(1,iwalk)
-       vold(9) = vold(9) + vtr(9,iwalk)
-       vold(2) = vold(2) + vtr(2,iwalk)
-       ! vold(4) = vold(4) + vtr(4,iwalk)
-       vold(8) = vold(8) + vtr(8,iwalk)
-       vold(14) = vold(14) + vtr(14,iwalk)
+       vold(ivTot) = vold(ivTot) + vtr(ivTot,iwalk)
+       vold(ivExt) = vold(ivExt) + vtr(ivExt,iwalk)
+       vold(ivInterLJ) = vold(ivInterLJ) + vtr(ivInterLJ,iwalk)
+       ! vold(ivIntraLJ) = vold(ivIntraLJ) + vtr(ivIntraLJ,iwalk)
+       vold(ivElect) = vold(ivElect) + vtr(ivElect,iwalk)
+       vold(ivEwald) = vold(ivEwald) + vtr(ivEwald,iwalk)
        vipswo = vipswo+vipswot(iwalk)
        vwellipswo = vwellipswo+vwellipswot(iwalk)
     end if
 
-    !	write(io_output,*) 'vtry', vtr(1,iwalk),iwalk
+    !	write(io_output,*) 'vtry', vtr(ivTot,iwalk),iwalk
 
     do j = 1, ntogrow
        iu = glist(j)
@@ -3424,11 +3414,11 @@ contains
             distij(ju,iu) = length
          end do
          if (lnew) then
-            vnew(1) = vnew(1) + vvibtr
-            vnew(5)  = vnew(5)  + vvibtr
+            vnew(ivTot) = vnew(ivTot) + vvibtr
+            vnew(ivStretching)  = vnew(ivStretching)  + vvibtr
          else
-            vold(1) = vold(1) + vvibtr
-            vold(5) = vold(5) + vvibtr
+            vold(ivTot) = vold(ivTot) + vvibtr
+            vold(ivStretching) = vold(ivStretching) + vvibtr
          end if
 
       end do
@@ -3777,24 +3767,24 @@ contains
 
          if (lnew) then
 
-            vnew(1) = vnew(1) + vbend(iwalk) + vtorsion(iwalk) + vtr(4,iwalk)
-            vnew(6)    = vnew(6)    + vbend(iwalk)
-            vnew(7)    = vnew(7)    + vtorsion(iwalk)
-            vnew(9)   = vnew(9)   + vtr(9,iwalk)
-            vnew(4) = vnew(4) + vtr(4,iwalk)
-            vnew(2) = vnew(2) + vtr(2,iwalk)
-            vnew(8) = vnew(8) + vtr(8,iwalk)
-            vnew(14) = vnew(14) + vtr(14,iwalk)
+            vnew(ivTot) = vnew(ivTot) + vbend(iwalk) + vtorsion(iwalk) + vtr(ivIntraLJ,iwalk)
+            vnew(ivBending)    = vnew(ivBending)    + vbend(iwalk)
+            vnew(ivTorsion)    = vnew(ivTorsion)    + vtorsion(iwalk)
+            vnew(ivExt)   = vnew(ivExt)   + vtr(ivExt,iwalk)
+            vnew(ivIntraLJ) = vnew(ivIntraLJ) + vtr(ivIntraLJ,iwalk)
+            vnew(ivInterLJ) = vnew(ivInterLJ) + vtr(ivInterLJ,iwalk)
+            vnew(ivElect) = vnew(ivElect) + vtr(ivElect,iwalk)
+            vnew(ivEwald) = vnew(ivEwald) + vtr(ivEwald,iwalk)
          else
-            vold(1) = vold(1) + vbend(1) + vtorsion(1) + vtr(4,1)
-            vold(6)    = vold(6)    + vbend(1)
-            vold(7)    = vold(7)    + vtorsion(1)
-            vold(9)   = vold(9)   + vtr(9,1)
-            vold(4) = vold(4) + vtr(4,1)
-            vold(2) = vold(2) + vtr(2,1)
-            vold(8) = vold(8) + vtr(8,1)
+            vold(ivTot) = vold(ivTot) + vbend(1) + vtorsion(1) + vtr(ivIntraLJ,1)
+            vold(ivBending)    = vold(ivBending)    + vbend(1)
+            vold(ivTorsion)    = vold(ivTorsion)    + vtorsion(1)
+            vold(ivExt)   = vold(ivExt)   + vtr(ivExt,1)
+            vold(ivIntraLJ) = vold(ivIntraLJ) + vtr(ivIntraLJ,1)
+            vold(ivInterLJ) = vold(ivInterLJ) + vtr(ivInterLJ,1)
+            vold(ivElect) = vold(ivElect) + vtr(ivElect,1)
 
-            vold(14) = vold(14) + vtr(14,1)
+            vold(ivEwald) = vold(ivEwald) + vtr(ivEwald,1)
          end if
 
          do count = 1, pnum(iw)
@@ -6682,14 +6672,14 @@ contains
                lovra(ip) = .true.
             end if
             bsuma(ip) = bsuma(ip) * bfac(ip)
-            vtrya(ip) = vtrya(ip) + vtr(1,ip)
-            vtrintraa(ip) = vtrintraa(ip) + vtr(4,ip)
-            vtrexta(ip)   = vtrexta(ip) + vtr(9,ip)
-            vtrintera(ip) = vtrintera(ip) + vtr(2,ip)
-            vtrelecta(ip) =  vtrelecta(ip) + vtr(8,ip)
+            vtrya(ip) = vtrya(ip) + vtr(ivTot,ip)
+            vtrintraa(ip) = vtrintraa(ip) + vtr(ivIntraLJ,ip)
+            vtrexta(ip)   = vtrexta(ip) + vtr(ivExt,ip)
+            vtrintera(ip) = vtrintera(ip) + vtr(ivInterLJ,ip)
+            vtrelecta(ip) =  vtrelecta(ip) + vtr(ivElect,ip)
             vtrelecta_intra(ip) =  vtrelecta_intra(ip) + vtrelect_intra(ip)
             vtrelecta_inter(ip) =  vtrelecta_inter(ip) + vtrelect_inter(ip)
-            vtrewalda(ip) = vtrewalda(ip) + vtr(14,ip)
+            vtrewalda(ip) = vtrewalda(ip) + vtr(ivEwald,ip)
             vtrorienta(ip) = vtrorienta(ip) + vtrorient(ip)
          end do
 
@@ -6719,14 +6709,14 @@ contains
                   lovra(ip) = .true.
                end if
                bsuma(ip) = bsuma(ip) * bfac(ip)
-               vtrya(ip) = vtrya(ip) + vtr(1,ip)
-               vtrintraa(ip) = vtrintraa(ip) + vtr(4,ip)
-               vtrexta(ip)   = vtrexta(ip) + vtr(9,ip)
-               vtrintera(ip) = vtrintera(ip) + vtr(2,ip)
-               vtrelecta(ip) =  vtrelecta(ip) + vtr(8,ip)
+               vtrya(ip) = vtrya(ip) + vtr(ivTot,ip)
+               vtrintraa(ip) = vtrintraa(ip) + vtr(ivIntraLJ,ip)
+               vtrexta(ip)   = vtrexta(ip) + vtr(ivExt,ip)
+               vtrintera(ip) = vtrintera(ip) + vtr(ivInterLJ,ip)
+               vtrelecta(ip) =  vtrelecta(ip) + vtr(ivElect,ip)
                vtrelecta_intra(ip) =  vtrelecta_intra(ip) + vtrelect_intra(ip)
                vtrelecta_inter(ip) =  vtrelecta_inter(ip) +  vtrelect_inter(ip)
-               vtrewalda(ip) = vtrewalda(ip) + vtr(14,ip)
+               vtrewalda(ip) = vtrewalda(ip) + vtr(ivEwald,ip)
                vtrorienta(ip) = vtrorienta(ip) + vtrorient(ip)
             end do
          end do
@@ -6770,22 +6760,22 @@ contains
 
 ! now we must add up energies and record new positions
          if (lnew) then
-            vnew(1) = vnew(1) + vtrya(iwalk) + vtgtr(iwalk)
-            vnew(7) = vnew(7) + vtgtr(iwalk)
-            vnew(9)   = vnew(9)   + vtr(9,iwalk)
-            vnew(4) = vnew(4) + vtrintraa(iwalk)
-            vnew(2) = vnew(2) + vtrintera(iwalk)
-            vnew(8) = vnew(8) + vtrelecta(iwalk)
-            vnew(14) = vnew(14) + vtrewalda(iwalk)
+            vnew(ivTot) = vnew(ivTot) + vtrya(iwalk) + vtgtr(iwalk)
+            vnew(ivTorsion) = vnew(ivTorsion) + vtgtr(iwalk)
+            vnew(ivExt)   = vnew(ivExt)   + vtr(ivExt,iwalk)
+            vnew(ivIntraLJ) = vnew(ivIntraLJ) + vtrintraa(iwalk)
+            vnew(ivInterLJ) = vnew(ivInterLJ) + vtrintera(iwalk)
+            vnew(ivElect) = vnew(ivElect) + vtrelecta(iwalk)
+            vnew(ivEwald) = vnew(ivEwald) + vtrewalda(iwalk)
             vneworient = vneworient + vtrorienta(iwalk)
          else
-            vold(1) = vold(1) + vtrya(1) + vtgtr(1)
-            vold(7) = vold(7) + vtgtr(1)
-            vold(9)   = vold(9)   + vtr(9,1)
-            vold(4) = vold(4) + vtrintraa(1)
-            vold(2) = vold(2) + vtrintera(1)
-            vold(8) = vold(8) + vtrelecta(1)
-            vold(14) = vold(14) + vtrewalda(1)
+            vold(ivTot) = vold(ivTot) + vtrya(1) + vtgtr(1)
+            vold(ivTorsion) = vold(ivTorsion) + vtgtr(1)
+            vold(ivExt)   = vold(ivExt)   + vtr(ivExt,1)
+            vold(ivIntraLJ) = vold(ivIntraLJ) + vtrintraa(1)
+            vold(ivInterLJ) = vold(ivInterLJ) + vtrintera(1)
+            vold(ivElect) = vold(ivElect) + vtrelecta(1)
+            vold(ivEwald) = vold(ivEwald) + vtrewalda(1)
             voldorient = voldorient + vtrorienta(1)
          end if
 

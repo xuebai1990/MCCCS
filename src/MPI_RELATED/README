@@ -1,5 +1,0 @@
-Extra subroutines that RP attempted to make work in parallel
-Unclear if they currently work - has not been tested
-
-The end of monola.f contains the timing subroutines from David Porter at MSI
-for use in profiling the code

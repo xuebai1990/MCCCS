@@ -17,8 +17,6 @@ file_start=$3
 file_end=$4
 #directory name to hold results
 result=RESULT
-#number of output files
-nfile=$5
 
 #names of analysis output files
 file[1]=hbond
@@ -39,7 +37,7 @@ file[13]=rdf3-1-1
 [ -e "$result" ] || mkdir "$result"
 [ -d "$result" ] || exit -1
 
-for ((ifile=1; ifile <= nfile; ifile++))
+for ((ifile=1; ifile <= ${#file[@]}; ifile++))
 do ###LOOP OVER FILES
     echo "-------------------${file[ifile]}-------------------"
 

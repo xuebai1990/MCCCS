@@ -1412,6 +1412,46 @@ times to call {\bf flucq.f} to optimize the fluctuating
 charge models in this box and is used only for polarizable
 models. Must be {\bf nbox} values.
 
+\subsubsection{Namelist \textbf{mc\_gcmc}}
+\noindent{\bf nequil:} Number of cycles considered
+equilibration for GCMC histogram reweighting analysis, after
+which data are accumulated.
+
+\noindent{\bf ninstf:} Frequency for writing out {\bf
+  nfl\#\#.dat}, which includes the step number, numbers of
+molecules of each type, and total energy.
+
+\noindent{\bf ninsth:} Frequency for accumulating the
+histograms of number of molecules of each type in the
+system.
+
+\noindent{\bf ndumph:} Frequency for writing out {\bf
+  his\#\#.dat}, which includes molecule numbers and the
+corresponding energy, and {\bf n\#dis\#\#.dat} (one file per
+molecule type), which includes the histogram of the number
+of molecules of a particular type.
+
+\noindent{\bf B:} Chemical potentials, as given by
+$\exp(\beta\mu_i)=\Lambda_i^3\rho_i/\int\,\mathrm{d}\mathbf{s}_i\exp[-\beta U^{\text{intra}}(\mathbf{s}_i)]$.
+The contribution due to intramolecular interactions can be
+determined by simulating an isolated chain without tail
+corrections and Ewald summations. The entire expression can
+also be determined conveniently from a GCMC or GEMC
+simulation of a single chain by repeatly trying to insert it
+into box 1 without ever accepting the move, which can be
+achieved by setting either the chemical potential (GCMC) or
+the biasing potential (GEMC) to very unfavorable values.
+Suppose you want to use GCMC to calculate the amount of
+adsorption at a given pressure, $p_i$, first convert $p_i$
+to fugacity, $f_i$, which would be the pressure if the
+system was an ideal gas, then calculate the box length that
+corresponds to a single molecule at that fugacity using the
+ideal gas law: $L=(k_{\text{B}}T/f_i)^{1/3}$, and finally
+perform a GCMC or GEMC simulation as mentioned above using
+$L$ as the box length for box 1 and at temperature $T$. The
+chemical potential from the output can be directly used as
+the input for the subsequent GCMC simulations of adsorption.
+
 \subsubsection{Namelist \textbf{mc\_ee}}
 \noindent{\bf pmexpc:} Specifies the probability to perform
 an expanded ensemble move that changes a molecule's

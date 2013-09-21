@@ -25,18 +25,18 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vn,vo,vinsta,vremta,vnewflucq,
 
 ! store the old energy, old coordinates and ewald sum
       do ibox2 = 1,nbox
-         vboxo(ibox2) = vbox(1,ibox2)
-         vinterbo(ibox2) = vbox(2,ibox2)
-         vintrabo(ibox2) = vbox(4,ibox2)
-         vextbo(ibox2) = vbox(9,ibox2)
-         vflucqbo(ibox2) = vbox(11,ibox2)
-         velectbo(ibox2) = vbox(8,ibox2)
+         vboxo(ibox2) = vbox(ivTot,ibox2)
+         vinterbo(ibox2) = vbox(ivInterLJ,ibox2)
+         vintrabo(ibox2) = vbox(ivIntraLJ,ibox2)
+         vextbo(ibox2) = vbox(ivExt,ibox2)
+         vflucqbo(ibox2) = vbox(ivFlucq,ibox2)
+         velectbo(ibox2) = vbox(ivElect,ibox2)
 
          if ( mtype .eq. 3 ) then
-            vtailbo(ibox2) = vbox(3,ibox2)
-            vvibbo(ibox2) = vbox(5,ibox2)
-            vtgbo(ibox2) = vbox(7,ibox2)
-            vbendbo(ibox2) = vbox(6,ibox2)
+            vtailbo(ibox2) = vbox(ivTail,ibox2)
+            vvibbo(ibox2) = vbox(ivStretching,ibox2)
+            vtgbo(ibox2) = vbox(ivTorsion,ibox2)
+            vbendbo(ibox2) = vbox(ivBending,ibox2)
          end if
 
       end do
@@ -70,34 +70,34 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vn,vo,vinsta,vremta,vnewflucq,
 
       if ( mtype .eq. 3 ) then
 ! for swap move
-         vbox(1,ibox)     = vbox(1,ibox) + vnew(1)
-         vbox(2,ibox)  = vbox(2,ibox) + vnew(2)
-         vbox(4,ibox)  = vbox(4,ibox) + vnew(4)
-         vbox(9,ibox)    = vbox(9,ibox)   + vnew(9)
-         vbox(8,ibox)   = vbox(8,ibox)  + vnew(8)+vnew(14)
-         vbox(3,ibox)   = vbox(3,ibox)   + vinsta
-         vbox(5,ibox)    =  vbox(5,ibox)   + vnew(5)
-         vbox(7,ibox)     = vbox(7,ibox)     + vnew(7)
-	 vbox(6,ibox)   = vbox(6,ibox)   + vnew(6)
-         vbox(11,ibox)  = vbox(11,ibox)  + vnewflucq
+         vbox(ivTot,ibox)     = vbox(ivTot,ibox) + vnew(ivTot)
+         vbox(ivInterLJ,ibox)  = vbox(ivInterLJ,ibox) + vnew(ivInterLJ)
+         vbox(ivIntraLJ,ibox)  = vbox(ivIntraLJ,ibox) + vnew(ivIntraLJ)
+         vbox(ivExt,ibox)    = vbox(ivExt,ibox)   + vnew(ivExt)
+         vbox(ivElect,ibox)   = vbox(ivElect,ibox)  + vnew(ivElect)+vnew(ivEwald)
+         vbox(ivTail,ibox)   = vbox(ivTail,ibox)   + vinsta
+         vbox(ivStretching,ibox)    =  vbox(ivStretching,ibox)   + vnew(ivStretching)
+         vbox(ivTorsion,ibox)     = vbox(ivTorsion,ibox)     + vnew(ivTorsion)
+	 vbox(ivBending,ibox)   = vbox(ivBending,ibox)   + vnew(ivBending)
+         vbox(ivFlucq,ibox)  = vbox(ivFlucq,ibox)  + vnewflucq
 
-         vbox(1,boxrem)     = vbox(1,boxrem)     - vold(1)
-         vbox(2,boxrem)  = vbox(2,boxrem)  - vold(2)
-         vbox(3,boxrem)   = vbox(3,boxrem)   - vremta
-         vbox(4,boxrem)  = vbox(4,boxrem)  - vold(4)
-         vbox(5,boxrem)    = vbox(5,boxrem)    - vold(5)
-         vbox(7,boxrem)     = vbox(7,boxrem)     - vold(7)
-         vbox(9,boxrem)    = vbox(9,boxrem)    - vold(9)
-         vbox(6,boxrem)   = vbox(6,boxrem)   - vold(6)
-         vbox(8,boxrem)  = vbox(8,boxrem)  -  (vold(8)+vold(14))
-         vbox(11,boxrem)  = vbox(11,boxrem)  - voldflucq
+         vbox(ivTot,boxrem)     = vbox(ivTot,boxrem)     - vold(ivTot)
+         vbox(ivInterLJ,boxrem)  = vbox(ivInterLJ,boxrem)  - vold(ivInterLJ)
+         vbox(ivTail,boxrem)   = vbox(ivTail,boxrem)   - vremta
+         vbox(ivIntraLJ,boxrem)  = vbox(ivIntraLJ,boxrem)  - vold(ivIntraLJ)
+         vbox(ivStretching,boxrem)    = vbox(ivStretching,boxrem)    - vold(ivStretching)
+         vbox(ivTorsion,boxrem)     = vbox(ivTorsion,boxrem)     - vold(ivTorsion)
+         vbox(ivExt,boxrem)    = vbox(ivExt,boxrem)    - vold(ivExt)
+         vbox(ivBending,boxrem)   = vbox(ivBending,boxrem)   - vold(ivBending)
+         vbox(ivElect,boxrem)  = vbox(ivElect,boxrem)  -  (vold(ivElect)+vold(ivEwald))
+         vbox(ivFlucq,boxrem)  = vbox(ivFlucq,boxrem)  - voldflucq
       else
 
-         vbox(1,ibox)     = vbox(1,ibox) + deltv
-         vbox(2,ibox)  = vbox(2,ibox) + (vn(2) - vo(2))
-         vbox(4,ibox)  = vbox(4,ibox) + (vn(4) - vo(4))
-         vbox(9,ibox)    = vbox(9,ibox)   + (vn(9)   - vo(9))
-         vbox(8,ibox)   = vbox(8,ibox)  + (vn(8) - vo(8))
+         vbox(ivTot,ibox)     = vbox(ivTot,ibox) + deltv
+         vbox(ivInterLJ,ibox)  = vbox(ivInterLJ,ibox) + (vn(ivInterLJ) - vo(ivInterLJ))
+         vbox(ivIntraLJ,ibox)  = vbox(ivIntraLJ,ibox) + (vn(ivIntraLJ) - vo(ivIntraLJ))
+         vbox(ivExt,ibox)    = vbox(ivExt,ibox)   + (vn(ivExt)   - vo(ivExt))
+         vbox(ivElect,ibox)   = vbox(ivElect,ibox)  + (vn(ivElect) - vo(ivElect))
       end if
 
       do j = 1,iunit
@@ -130,9 +130,9 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vn,vo,vinsta,vremta,vnewflucq,
          do ichoiq = 1,500
             call flucq(2,0)
          end do
-         deltv = vbox(1,ibox) - vboxo(ibox)
+         deltv = vbox(ivTot,ibox) - vboxo(ibox)
          weight = exp(-deltv*beta)
-         deltv = vboxo(boxrem) - vbox(1,boxrem)
+         deltv = vboxo(boxrem) - vbox(ivTot,boxrem)
          weiold = exp(-deltv*beta)
          volins=boxlx(ibox)*boxly(ibox)*boxlz(ibox)
          volrem=boxlx(boxrem)*boxly(boxrem)*boxlz(boxrem)
@@ -167,7 +167,7 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vn,vo,vinsta,vremta,vnewflucq,
          vnewt2 = 0.0E0_dp
          voldt2 = 0.0E0_dp
          do ibox2 = 1, nbox
-            vnewt2 = vnewt2 + vbox(1,ibox2)
+            vnewt2 = vnewt2 + vbox(ivTot,ibox2)
             voldt2 = voldt2 + vboxo(ibox2)
          end do
          deltv = vnewt2 - voldt2
@@ -192,17 +192,17 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vn,vo,vinsta,vremta,vnewflucq,
       else
 ! restore the old energy and old coordinates and ewald sum
          do ibox2 = 1,nbox
-            vbox(1,ibox2) = vboxo(ibox2)
-            vbox(2,ibox2) = vinterbo(ibox2)
-            vbox(4,ibox2) = vintrabo(ibox2)
-            vbox(9,ibox2) = vextbo(ibox2)
-            vbox(8,ibox2) = velectbo(ibox2)
-            vbox(11,ibox2) = vflucqbo(ibox2)
+            vbox(ivTot,ibox2) = vboxo(ibox2)
+            vbox(ivInterLJ,ibox2) = vinterbo(ibox2)
+            vbox(ivIntraLJ,ibox2) = vintrabo(ibox2)
+            vbox(ivExt,ibox2) = vextbo(ibox2)
+            vbox(ivElect,ibox2) = velectbo(ibox2)
+            vbox(ivFlucq,ibox2) = vflucqbo(ibox2)
             if ( mtype .eq. 3 ) then
-               vbox(3,ibox2) = vtailbo(ibox2)
-               vbox(5,ibox2) = vvibbo(ibox2)
-               vbox(7,ibox2) = vtgbo(ibox2)
-               vbox(6,ibox2) = vbendbo(ibox2)
+               vbox(ivTail,ibox2) = vtailbo(ibox2)
+               vbox(ivStretching,ibox2) = vvibbo(ibox2)
+               vbox(ivTorsion,ibox2) = vtgbo(ibox2)
+               vbox(ivBending,ibox2) = vbendbo(ibox2)
             end if
          end do
          do j = 1,iunit

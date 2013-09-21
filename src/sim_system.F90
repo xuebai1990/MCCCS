@@ -74,7 +74,7 @@ module sim_system
   logical::lstagea,lstageb,lstagec
 
   !=== Analysis ===
-  integer,parameter::nEnergy=14
+  integer,parameter::nEnergy=14,ivTot=1,ivInterLJ=2,ivTail=3,ivIntraLJ=4,ivStretching=5,ivBending=6,ivTorsion=7,ivElect=8,ivExt=9,iv3body=10,ivFlucq=11,ivIpswb=12,ivWellIpswb=13,ivEwald=14
   real,allocatable::vbox(:,:) !< (j,ibox): energies of ibox; j = 1: total energy; 2: intermolecular LJ; 3: tail correction; 4: intramolecular non-bonded LJ; 5: stretching; 6: bending; 7: torsion; 8: electrostatic; 9: external field; 10: 3-body Feuston-Garofalini; 11: fluctuating charge (vflucqb); 12: vipswb; 13: vwellipswb; 14: Ewald reciprocal-space electrostatic
   integer,allocatable::ucheck(:) !< whether or not to calculate chemical potential for each molecule type
   character(LEN=1)::suffix='a'
@@ -153,7 +153,6 @@ module sim_system
 
   !=== Information about Monte Carlo moves ===
   integer::tmcc,iratio=500
-  logical::lstop=.false.
   real::rmin=1.2_dp,softcut=100.0_dp,softlog
 
   !*** Volume moves ***
@@ -294,7 +293,7 @@ CONTAINS
     allocate(boxlx(nbxmax),boxly(nbxmax),boxlz(nbxmax),rcut(nbxmax),rcutnn(nbxmax),kalp(nbxmax),lsolid(nbxmax),lrect(nbxmax)&
      ,express(nbxmax),ghost_particles(nbxmax),numberDimensionIsIsotropic(nbxmax),inix(nbxmax),iniy(nbxmax)&
      ,iniz(nbxmax),inirot(nbxmax),inimix(nbxmax),nchoiq(nbxmax),box5(nbxmax),box6(nbxmax),zshift(nbxmax),dshift(nbxmax)&
-     ,rmvol(nbxmax),pmvlmt(nbxmax),pmvolb(nbxmax),lideal(nbxmax),ltwice(nbxmax),rmhmat(nbxmax,9),dipolex(nbxmax),dipoley(nbxmax)&
+     ,rmvol(nbxmax),pmvlmt(nbxmax),pmvolb(npabmax),lideal(nbxmax),ltwice(nbxmax),rmhmat(nbxmax,9),dipolex(nbxmax),dipoley(nbxmax)&
      ,dipolez(nbxmax),nchbox(nbxmax),vbox(nEnergy,nbxmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'allocate_system.1: allocation failed',jerr)
 

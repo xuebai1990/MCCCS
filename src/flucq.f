@@ -35,19 +35,7 @@ subroutine flucq (ichoice,boxi)
          end if
       end do
 
-      if (lgrand) then
-! select a chain at random in box 1!
-!         (in box 2 is an ideal gas!)
-         ibox = 1
-         if (nchbox(ibox).eq.0) then
-            bnflcq(imolty,ibox) = bnflcq(imolty,ibox) + 1.0E0_dp
-            return
-         end if
-         i = aint( dble(ncmt(1,imolty))*random(-1) ) + 1
-         i = parbox(i,1,imolty)
-         if ( moltyp(i) .ne. imolty ) write(io_output,*) 'screwup'
-
-      else if ( lanes ) then
+      if ( lanes ) then
 
          if ( ichoice .eq. -1 ) then
 ! equal probability charge moves in two boxes (for swap)
@@ -91,19 +79,7 @@ subroutine flucq (ichoice,boxi)
 ! box as chain i.
 
       If ( lqtrans(imolty) ) then
-         if (lgrand) then
-! select a chain at random in box 1!
-!     (in box 2 is an ideal gas!)
-            ibox = 1
-            if (nchbox(ibox).eq.0) then
-               bnflcq(imolty,ibox) = bnflcq(imolty,ibox) + 1.0E0_dp
-               return
-            end if
-            jchain = aint( dble(ncmt(1,imolty))*random(-1) ) + 1
-            jchain = parbox(jchain,1,imolty)
-            if ( moltyp(jchain) .ne. imolty ) write(io_output,*) 'screwup'
-
-         else if ( lanes ) then
+         if ( lanes ) then
 
             if ( ichoice .eq. -1 ) then
 ! equal probability charge moves in two boxes (for swap)
@@ -163,7 +139,7 @@ subroutine flucq (ichoice,boxi)
 
 ! calculate the polariztion energy of i in the old configuration ***
 
-      call charge(i, qion, vo(11), vo(14))
+      call charge(i, qion, vo(ivFlucq), vo(ivEwald))
 
       If ( linterqt ) then
          do j = 1,iunit
@@ -174,8 +150,8 @@ subroutine flucq (ichoice,boxi)
 
          call charge(jchain, qionj, vflucqjo, vewaldjo)
 
-         vo(11) = vo(11) + vflucqjo
-         vo(14) = vo(14) + vewaldjo
+         vo(ivFlucq) = vo(ivFlucq) + vflucqjo
+         vo(ivEwald) = vo(ivEwald) + vewaldjo
       end if
 
 ! Choose one of the units as the main charge transfer site
@@ -236,15 +212,15 @@ subroutine flucq (ichoice,boxi)
 
 ! calculate the polarization energy of i in the new configuration ***
 
-      call charge(i, qion, vn(11), vn(14))
+      call charge(i, qion, vn(ivFlucq), vn(ivEwald))
 
       if ( linterqt ) then
 
 ! calculate the polarization energy of jchain in the new configuration ***
 
          call charge(jchain, qionj, vflucqjn, vewaldjn)
-         vn(11) = vn(11) + vflucqjn
-         vn(14) = vn(14) + vewaldjn
+         vn(ivFlucq) = vn(ivFlucq) + vflucqjn
+         vn(ivEwald) = vn(ivEwald) + vewaldjn
 
 ! calculate the energy of i in the new configuration ***
          flagon = 2
@@ -256,9 +232,9 @@ subroutine flucq (ichoice,boxi)
          qqu(jchain,mainj) = qionj(mainj)
 
          call energy(i,imolty,vn,flagon,ibox,maini,maini,.false.,ovrlap,.false.,.false.,.false.,.false.)
-         vnewi = vn(1) + vn(11) + vn(14)
-         velectni = vn(8) + vn(14)
-         vinterni = vn(2)
+         vnewi = vn(ivTot) + vn(ivFlucq) + vn(ivEwald)
+         velectni = vn(ivElect) + vn(ivEwald)
+         vinterni = vn(ivInterLJ)
 
 ! calculate the energy of i in the old configuration ***
          flagon = 1
@@ -268,9 +244,9 @@ subroutine flucq (ichoice,boxi)
          qquion(maini,flagon) = qqu(i,maini)
 
          call energy(i,imolty,vo,flagon,ibox,maini,maini,.false.,ovrlap,.false.,.false.,.false.,.false.)
-         voldi = vo(1) + vo(11) + vo(14)
-         velectoi = vo(8) + vo(14)
-         vinteroi = vo(2)
+         voldi = vo(ivTot) + vo(ivFlucq) + vo(ivEwald)
+         velectoi = vo(ivElect) + vo(ivEwald)
+         vinteroi = vo(ivInterLJ)
 
 ! restore the old charges
 
@@ -284,9 +260,9 @@ subroutine flucq (ichoice,boxi)
          rzuion(mainj,flagon) = rzu(jchain,mainj)
          qquion(mainj,flagon) = qionj(mainj)
          call energy(jchain,imolty,vn,flagon,ibox,mainj,mainj,.false.,ovrlap,.false.,.false.,.false.,.false.)
-         vn(1) = vn(1) + vnewi
-         vn(8) = vn(8) + velectni
-         vn(2) = vn(2) + vinterni
+         vn(ivTot) = vn(ivTot) + vnewi
+         vn(ivElect) = vn(ivElect) + velectni
+         vn(ivInterLJ) = vn(ivInterLJ) + vinterni
 
 ! calculate the energy of jchain in the old configuration ***
 
@@ -298,9 +274,9 @@ subroutine flucq (ichoice,boxi)
 
          call energy(jchain,imolty,vo,flagon,ibox,mainj,mainj,.false.,ovrlap,.false.,.false.,.false.,.false.)
 
-         vo(1) = vo(1) + voldi
-         vo(8) = vo(8) + velectoi
-         vo(2) = vo(2) + vinteroi
+         vo(ivTot) = vo(ivTot) + voldi
+         vo(ivElect) = vo(ivElect) + velectoi
+         vo(ivInterLJ) = vo(ivInterLJ) + vinteroi
 
 ! prepare the rxuion etc for ewald sum and dielectric constant
 ! and for energy calculation
@@ -337,30 +313,30 @@ subroutine flucq (ichoice,boxi)
          flagon = 2
          call energy(i,imolty,vn,flagon,ibox,1,iunit,.false.,ovrlap,.false.,.false.,.false.,.false.)
          if (ovrlap) return
-         vn(1) = vn(1) + vn(11) + vn(14)
-         vn(8) = vn(8) + vn(14)
+         vn(ivTot) = vn(ivTot) + vn(ivFlucq) + vn(ivEwald)
+         vn(ivElect) = vn(ivElect) + vn(ivEwald)
 
 ! calculate the energy of i in the old configuration ***
          flagon = 1
          call energy(i,imolty,vo,flagon,ibox,1,iunit,.false.,ovrlap,.false.,.false.,.false.,.false.)
-         vo(1) = vo(1) + vo(11) + vo(14)
-         vo(8) = vo(8) + vo(14)
+         vo(ivTot) = vo(ivTot) + vo(ivFlucq) + vo(ivEwald)
+         vo(ivElect) = vo(ivElect) + vo(ivEwald)
 
       end if
 
 ! Begin Ewald-sum correction
       if ( lewald ) then
          call recip(ibox,vrecipn,vrecipo,1)
-         vn(1) = vn(1) + vrecipn
-         vo(1) = vo(1) + vrecipo
-         vn(8) = vn(8) + vrecipn
-         vo(8) = vo(8) + vrecipo
+         vn(ivTot) = vn(ivTot) + vrecipn
+         vo(ivTot) = vo(ivTot) + vrecipo
+         vn(ivElect) = vn(ivElect) + vrecipn
+         vo(ivElect) = vo(ivElect) + vrecipo
       end if
 
 
 ! check for acceptance ***
 
-      deltv  = vn(1) - vo(1)
+      deltv  = vn(ivTot) - vo(ivTot)
 ! use the thermostat temperature instead of real temp
       deltvb = fqbeta * deltv
 
@@ -377,10 +353,10 @@ subroutine flucq (ichoice,boxi)
          return
       end if
 
-      vbox(1,ibox)     = vbox(1,ibox) + deltv
-      vbox(8,ibox)  = vbox(8,ibox)  + (vn(8) - vo(8))
-      vbox(11,ibox)  = vbox(11,ibox) + (vn(11) - vo(11))
-      vbox(2,ibox) = vbox(2,ibox) + (vn(2) - vo(2))
+      vbox(ivTot,ibox)     = vbox(ivTot,ibox) + deltv
+      vbox(ivElect,ibox)  = vbox(ivElect,ibox)  + (vn(ivElect) - vo(ivElect))
+      vbox(ivFlucq,ibox)  = vbox(ivFlucq,ibox) + (vn(ivFlucq) - vo(ivFlucq))
+      vbox(ivInterLJ,ibox) = vbox(ivInterLJ,ibox) + (vn(ivInterLJ) - vo(ivInterLJ))
 ! write(io_output,*) 'this move has been accepted!!!'
       do j = 1,iunit
          qqu(i,j) = qion(j)

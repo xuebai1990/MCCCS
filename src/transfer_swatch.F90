@@ -6,7 +6,6 @@ module transfer_swatch
   use energy_kspace,only:recip
   use energy_pairwise,only:energy,coru
   use moves_cbmc,only:rosenbluth,schedule,explct,lexshed
-  use transfer_shared,only:lopt_bias,update_bias
   implicit none
   private
   save
@@ -22,10 +21,11 @@ contains
   subroutine swatch()
     use sim_particle,only:ctrmas
     use energy_intramolecular,only:U_bonded
+    use transfer_shared,only:lopt_bias,update_bias,gcmc_setup,gcmc_cleanup,gcmc_exchange
 
     logical::lterm
-    real::rpair,tweight,tweiold,vnbox(nbxmax),vninte(nbxmax),vnintr(nbxmax),vnvibb(nbxmax),vntgb(nbxmax),vnextb(nbxmax),vnbend(nbxmax),vntail(nbxmax),vnelect(nbxmax),vnewald(nbxmax),rx_1(numax),ry_1(numax),rz_1(numax),rxut(4,numax),ryut(4,numax),rzut(4,numax),waddold,waddnew,dvol,vola,volb,rho,dinsta,wnlog,wolog,wdlog,wswat,v(nEnergy),vdum,delen,deleo,dicount,vrecipn,vrecipo,vdum2,total_NBE,total_tor,total_bend,total_vib,vtgn,vbendn,vvibn
-    integer::ipair,iparty,type_a,type_b,imolta,imoltb,ipairb,boxa,boxb,imola,imolb,ibox,iboxal,iboxbl,iboxia,iboxib,izz,from(2*numax),prev(2*numax),orgaia,orgaib,orgbia,orgbib,bdmol_a,bdmol_b,s_type,o_type,new,old,ifirst,iprev,imolty,igrow,islen,iunit,iboxnew,iboxold,self,other,iunita,iunitb
+    real::rpair,tweight,tweiold,vnbox(nEnergy,nbxmax),rx_1(numax),ry_1(numax),rz_1(numax),rxut(4,numax),ryut(4,numax),rzut(4,numax),waddold,waddnew,dvol,vola,volb,rho,dinsta,wnlog,wolog,wdlog,wswat,v(nEnergy),vdum,delen,deleo,dicount,vrecipn,vrecipo,vdum2,total_NBE,total_tor,total_bend,total_vib,vtgn,vbendn,vvibn,Rosenbluth_normalization(ntmax)
+    integer::ipair,iparty,type_a,type_b,imolta,imoltb,ipairb,boxa,boxb,imola,imolb,ibox,iboxal,iboxbl,izz,from(2*numax),prev(2*numax),orgaia,orgaib,orgbia,orgbib,bdmol_a,bdmol_b,s_type,o_type,new,old,ifirst,iprev,imolty,igrow,islen,iunit,iboxnew,iboxold,self,other,iunita,iunitb
     integer::iii,j
     integer::oldchain,newchain,oldunit,newunit,iins
     integer::ic,icbu,jj,mm,imt,jmt,imolin,imolrm
@@ -80,23 +80,36 @@ contains
     bnswat(iparty,ipairb,boxa) = bnswat(iparty,ipairb,boxa) + 1
 
     ! check if the particle types are in their boxes
-    if ((ncmt(boxa,imolta).eq.0).or.(ncmt(boxb,imoltb).eq.0)) then
-       bnswat_empty(iparty,ipairb,boxa) = bnswat_empty(iparty,ipairb,boxa) + 1
-       return
-    else
+    if (ncmt(boxa,imolta).ne.0) then
        ! get particle from box a
        iboxal = int(real(ncmt(boxa,imolta),dp)*random(-1)) + 1
        imola = parbox(iboxal,boxa,imolta)
        if (moltyp(imola).ne.imolta) call err_exit(__FILE__,__LINE__,'screwup',myid+1)
-       iboxia = nboxi(imola)
-       if (iboxia.ne.boxa) call err_exit(__FILE__,__LINE__,'problem in swatch',myid+1)
+       if (nboxi(imola).ne.boxa) call err_exit(__FILE__,__LINE__,'problem in swatch',myid+1)
+    else if (lgrand.and.boxa.ne.1) then
+       call gcmc_setup(imolta,boxa,imola,iboxal)
+    end if
 
+    if (ncmt(boxb,imoltb).ne.0) then
        ! get particle from box b
        iboxbl = int(real(ncmt(boxb,imoltb),dp)*random(-1)) + 1
        imolb = parbox(iboxbl,boxb,imoltb)
        if (moltyp(imolb).ne.imoltb) call err_exit(__FILE__,__LINE__,'screwup',myid+1)
-       iboxib = nboxi(imolb)
-       if (iboxib.ne.boxb) call err_exit(__FILE__,__LINE__,'problem in swatch',myid+1)
+       if (nboxi(imolb).ne.boxb) call err_exit(__FILE__,__LINE__,'problem in swatch',myid+1)
+    else if (lgrand.and.boxb.ne.1) then
+       call gcmc_setup(imoltb,boxb,imolb,iboxbl)
+    end if
+
+    if ((ncmt(boxa,imolta).eq.0).or.(ncmt(boxb,imoltb).eq.0)) then
+       bnswat_empty(iparty,ipairb,boxa) = bnswat_empty(iparty,ipairb,boxa) + 1
+       if (lgrand) then
+          if (boxa.ne.1) then
+             call gcmc_cleanup(imolta,boxa)
+          else if (boxb.ne.1) then
+             call gcmc_cleanup(imoltb,boxb)
+          end if
+       end if
+       return
     end if
 
 !************************
@@ -129,25 +142,25 @@ contains
     tweiold = 1.0E0_dp
 
     ! set the trial energies to zero
-    vnbox(boxa)   = 0.0E0_dp
-    vninte(boxa)  = 0.0E0_dp
-    vnintr(boxa)  = 0.0E0_dp
-    vnvibb(boxa)  = 0.0E0_dp
-    vntgb(boxa)   = 0.0E0_dp
-    vnextb(boxa)  = 0.0E0_dp
-    vnbend(boxa)  = 0.0E0_dp
-    vnelect(boxa) = 0.0E0_dp
-    vnewald(boxa) = 0.0E0_dp
+    vnbox(ivTot,boxa)   = 0.0E0_dp
+    vnbox(ivInterLJ,boxa)  = 0.0E0_dp
+    vnbox(ivIntraLJ,boxa)  = 0.0E0_dp
+    vnbox(ivStretching,boxa)  = 0.0E0_dp
+    vnbox(ivTorsion,boxa)   = 0.0E0_dp
+    vnbox(ivExt,boxa)  = 0.0E0_dp
+    vnbox(ivBending,boxa)  = 0.0E0_dp
+    vnbox(ivElect,boxa) = 0.0E0_dp
+    vnbox(ivEwald,boxa) = 0.0E0_dp
 
-    vnbox(boxb)   = 0.0E0_dp
-    vninte(boxb)  = 0.0E0_dp
-    vnintr(boxb)  = 0.0E0_dp
-    vnvibb(boxb)  = 0.0E0_dp
-    vntgb(boxb)   = 0.0E0_dp
-    vnextb(boxb)  = 0.0E0_dp
-    vnbend(boxb)  = 0.0E0_dp
-    vnelect(boxb) = 0.0E0_dp
-    vnewald(boxb) = 0.0E0_dp
+    vnbox(ivTot,boxb)   = 0.0E0_dp
+    vnbox(ivInterLJ,boxb)  = 0.0E0_dp
+    vnbox(ivIntraLJ,boxb)  = 0.0E0_dp
+    vnbox(ivStretching,boxb)  = 0.0E0_dp
+    vnbox(ivTorsion,boxb)   = 0.0E0_dp
+    vnbox(ivExt,boxb)  = 0.0E0_dp
+    vnbox(ivBending,boxb)  = 0.0E0_dp
+    vnbox(ivElect,boxb) = 0.0E0_dp
+    vnbox(ivEwald,boxb) = 0.0E0_dp
 
     if (boxa.eq.boxb) then
        ! store position 1, a's original site
@@ -204,15 +217,15 @@ contains
 ! ROSENBLUTH ***
 !***************
     ! compute the rosenbluth weights for each molecule type in each box
-    do ic = 1,2
+    oldnew: do ic = 1,2
        if (ic.eq.1) then
           ! if (boxa.eq.boxb) liswatch = .true.
           self = imola
           other = imolb
           s_type = type_a
           o_type = type_b
-          iboxnew = iboxib
-          iboxold = iboxia
+          iboxnew = boxb
+          iboxold = boxa
           imolty = imolta
           igrow = nugrow(imolta)
           iunit = nunit(imolta)
@@ -222,8 +235,8 @@ contains
           other = imola
           s_type = type_b
           o_type = type_a
-          iboxnew = iboxia
-          iboxold = iboxib
+          iboxnew = boxa
+          iboxold = boxb
           imolty = imoltb
           igrow = nugrow(imoltb)
           iunit = nunit(imoltb)
@@ -270,6 +283,11 @@ contains
           call schedule(igrow,imolty,islen,ifirst,iprev,3)
        end if
 
+       if (lgrand.and.boxa.ne.boxb) then
+          Rosenbluth_normalization(imolty)=(real(nchoi(imolty),dp)**islen)*real(nchoih(imoltb),dp)
+          if (lrigid(imolty).and.nsampos(iparty).lt.3) Rosenbluth_normalization(imolty)=Rosenbluth_normalization(imolty)*real(nchoir(imolta),dp)
+       end if
+
        !> \bug Need to check: I wonder if this works with lrigid?
        ! Adding in multiple end regrowths
        if (ncut(iparty,s_type).gt.1) then
@@ -277,6 +295,8 @@ contains
              ifirst = from(s_type+2*(izz-1))
              iprev = prev(s_type+2*(izz-1))
              call schedule(igrow,imolty,islen,ifirst,iprev,5)
+
+             if (lgrand.and.boxa.ne.boxb) Rosenbluth_normalization(imolty)=Rosenbluth_normalization(imolty)*(real(nchoi(imolty),dp)**islen)
           end do
        end if
 
@@ -303,6 +323,8 @@ contains
              end do
           end if
        end if
+
+       if (lgrand.and.iboxnew.ne.1) goto 1000
 
        ! grow molecules
        ! changing for lrigid to include waddnew
@@ -360,6 +382,13 @@ contains
        ! termination of cbmc attempt due to walk termination
        if (lterm) then
           ! if (boxa.eq.boxb) liswatch = .false.
+          if (lgrand) then
+             if (boxa.ne.1) then
+                call gcmc_cleanup(imolta,boxa)
+             else if (boxb.ne.1) then
+                call gcmc_cleanup(imoltb,boxb)
+             end if
+          end if
           return
        end if
 
@@ -453,37 +482,46 @@ contains
 
        if (lterm) then
           ! call err_exit(__FILE__,__LINE__,'interesting screwup in CBMC swatch',myid+1)
+          if (lgrand) then
+             if (boxa.ne.1) then
+                call gcmc_cleanup(imolta,boxa)
+             else if (boxb.ne.1) then
+                call gcmc_cleanup(imoltb,boxb)
+             end if
+          end if
           return
        end if
 
        ! add on the changes in energy
-       delen = v(1) - ( vnew(1) - (vnew(5) + vnew(6) + vnew(7)) )
+       delen = v(ivTot) - ( vnew(ivTot) - (vnew(ivStretching) + vnew(ivBending) + vnew(ivTorsion)) )
        tweight = tweight*exp(-beta*delen)
 
-       vnew(1) = vnew(1) + delen
-       vnew(2) = v(2)
-       vnew(4) = v(4)
-       vnew(9) = v(9)
-       vnew(8) = v(8)
-       vnew(14)= v(14)
+       vnew(ivTot) = vnew(ivTot) + delen
+       vnew(ivInterLJ) = v(ivInterLJ)
+       vnew(ivIntraLJ) = v(ivIntraLJ)
+       vnew(ivExt) = v(ivExt)
+       vnew(ivElect) = v(ivElect)
+       vnew(ivEwald)= v(ivEwald)
        ! End DC-CBMC and switched bead Corrections for NEW configuration
 
        ! save the trial energies
-       vnbox(iboxnew)   = vnbox(iboxnew)  + vnew(1)
-       vninte(iboxnew)  = vninte(iboxnew) + vnew(2)
-       vnintr(iboxnew)  = vnintr(iboxnew) + vnew(4)
-       vnvibb(iboxnew)  = vnvibb(iboxnew) + vnew(5)
-       vntgb(iboxnew)   = vntgb(iboxnew)  + vnew(7)
-       vnextb(iboxnew)  = vnextb(iboxnew) + vnew(9)
-       vnbend(iboxnew)  = vnbend(iboxnew) + vnew(6)
-       vnelect(iboxnew) = vnelect(iboxnew)+ vnew(8)
-       vnewald(iboxnew) = vnewald(iboxnew)+ vnew(14)
+       vnbox(ivTot,iboxnew)   = vnbox(ivTot,iboxnew)  + vnew(ivTot)
+       vnbox(ivInterLJ,iboxnew)  = vnbox(ivInterLJ,iboxnew) + vnew(ivInterLJ)
+       vnbox(ivIntraLJ,iboxnew)  = vnbox(ivIntraLJ,iboxnew) + vnew(ivIntraLJ)
+       vnbox(ivStretching,iboxnew)  = vnbox(ivStretching,iboxnew) + vnew(ivStretching)
+       vnbox(ivTorsion,iboxnew)   = vnbox(ivTorsion,iboxnew)  + vnew(ivTorsion)
+       vnbox(ivExt,iboxnew)  = vnbox(ivExt,iboxnew) + vnew(ivExt)
+       vnbox(ivBending,iboxnew)  = vnbox(ivBending,iboxnew) + vnew(ivBending)
+       vnbox(ivElect,iboxnew) = vnbox(ivElect,iboxnew)+ vnew(ivElect)
+       vnbox(ivEwald,iboxnew) = vnbox(ivEwald,iboxnew)+ vnew(ivEwald)
+
+       if (lgrand.and.iboxold.ne.1) cycle oldnew
 
 !***************
 ! old growth ***
 !***************
        ! rigid add on
-       waddold = 1.0E0_dp
+1000   waddold = 1.0E0_dp
 
        ! grow old chain conformation
        ! JLR 11-24-09 New stuff for rigid swatch
@@ -513,6 +551,13 @@ contains
        if (lterm) then
           write(io_output,*) 'SWATCH: old growth rejected'
           ! if (boxa.eq.boxb) liswatch = .false.
+          if (lgrand) then
+             if (boxa.ne.1) then
+                call gcmc_cleanup(imolta,boxa)
+             else if (boxb.ne.1) then
+                call gcmc_cleanup(imoltb,boxb)
+             end if
+          end if
           return
        end if
 
@@ -550,34 +595,34 @@ contains
 
        if (lterm) call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf SWATCH',myid+1)
 
-       deleo = v(1) - ( vold(1) - (vold(5) + vold(6) + vold(7)) )
+       deleo = v(ivTot) - ( vold(ivTot) - (vold(ivStretching) + vold(ivBending) + vold(ivTorsion)) )
        tweiold = tweiold*exp(-beta*deleo)
 
-       vold(1) = vold(1) + deleo
-       vold(4) = v(4)
-       vold(2) = v(2)
-       vold(9) = v(9)
-       vold(8) = v(8)
-       vold(14)= v(14)
+       vold(ivTot) = vold(ivTot) + deleo
+       vold(ivIntraLJ) = v(ivIntraLJ)
+       vold(ivInterLJ) = v(ivInterLJ)
+       vold(ivExt) = v(ivExt)
+       vold(ivElect) = v(ivElect)
+       vold(ivEwald)= v(ivEwald)
        ! End Correction for DC-CBMC and switched beads for OLD configuration
 
        ! save the trial energies
-       vnbox(iboxold)   = vnbox(iboxold)  - vold(1)
-       vninte(iboxold)  = vninte(iboxold) - vold(2)
-       vnintr(iboxold)  = vnintr(iboxold) - vold(4)
-       vnvibb(iboxold)  = vnvibb(iboxold) - vold(5)
-       vntgb(iboxold)   = vntgb(iboxold)  - vold(7)
-       vnextb(iboxold)  = vnextb(iboxold) - vold(9)
-       vnbend(iboxold)  = vnbend(iboxold) - vold(6)
-       vnelect(iboxold) = vnelect(iboxold)- vold(8)
-       vnewald(iboxold) = vnewald(iboxold)- vold(14)
-    end do
+       vnbox(ivTot,iboxold)   = vnbox(ivTot,iboxold)  - vold(ivTot)
+       vnbox(ivInterLJ,iboxold)  = vnbox(ivInterLJ,iboxold) - vold(ivInterLJ)
+       vnbox(ivIntraLJ,iboxold)  = vnbox(ivIntraLJ,iboxold) - vold(ivIntraLJ)
+       vnbox(ivStretching,iboxold)  = vnbox(ivStretching,iboxold) - vold(ivStretching)
+       vnbox(ivTorsion,iboxold)   = vnbox(ivTorsion,iboxold)  - vold(ivTorsion)
+       vnbox(ivExt,iboxold)  = vnbox(ivExt,iboxold) - vold(ivExt)
+       vnbox(ivBending,iboxold)  = vnbox(ivBending,iboxold) - vold(ivBending)
+       vnbox(ivElect,iboxold) = vnbox(ivElect,iboxold)- vold(ivElect)
+       vnbox(ivEwald,iboxold) = vnbox(ivEwald,iboxold)- vold(ivEwald)
+    end do oldnew
 
     ! Perform the Ewald sum reciprical space corrections
     if (lewald) then
        ! added into tweight even though it really contains new-old
        ! Box A
-       if (.not.lideal(iboxia)) then
+       if (.not.lideal(boxa)) then
           ! store the reciprocal space vector
           if (boxa.eq.boxb) call recip(boxa,vdum,vdum,3)
 
@@ -602,18 +647,18 @@ contains
           end do
           moltion(2) = imoltb
 
-          call recip(iboxia,vrecipn,vrecipo,1)
+          call recip(boxa,vrecipn,vrecipo,1)
 
           delen = vrecipn - vrecipo
           tweight = tweight * exp(-beta*delen)
 
-          vnewald(iboxia) = vnewald(iboxia) + delen
-          vnbox(iboxia) = vnbox(iboxia) + delen
+          vnbox(ivEwald,boxa) = vnbox(ivEwald,boxa) + delen
+          vnbox(ivTot,boxa) = vnbox(ivTot,boxa) + delen
 
           ! update the reciprocal space terms *
           if (boxa.eq.boxb) call recip(boxa,vdum,vdum,2)
        end if
-       if (.not.lideal(iboxib)) then
+       if (.not.lideal(boxb)) then
           ! Box B
           oldchain = imolb
           newchain = imola
@@ -635,13 +680,13 @@ contains
           end do
           moltion(2) = imolta
 
-          call recip(iboxib,vrecipn,vrecipo,1)
+          call recip(boxb,vrecipn,vrecipo,1)
 
           delen = vrecipn - vrecipo
           tweight = tweight * exp(-beta*delen)
 
-          vnewald(iboxib) = vnewald(iboxib) + delen
-          vnbox(iboxib) = vnbox(iboxib) + delen
+          vnbox(ivEwald,boxb) = vnbox(ivEwald,boxb) + delen
+          vnbox(ivTot,boxb) = vnbox(ivTot,boxb) + delen
        end if
     end if
     ! End Ewald-sum Corrections
@@ -694,19 +739,17 @@ contains
                    dinsta = dinsta +  dicount * coru(imt,jmt,rho,ibox)
                 end do
              end do
-          else
-             dinsta = 0.0E0_dp
+             dinsta = dinsta - vbox(ivTail,ibox)
+
+             tweight=tweight*exp(-beta*dinsta)
+
+             vnbox(ivTail,ibox) = dinsta
           end if
           ! END JLR 11-24-09
-          dinsta = dinsta - vbox(3,ibox)
-
-          tweight=tweight*exp(-beta*dinsta)
-
-          vntail(ibox) = dinsta
        end do
     else
-       vntail(boxa) = 0.0E0_dp
-       vntail(boxb) = 0.0E0_dp
+       vnbox(ivTail,boxa) = 0.0E0_dp
+       vnbox(ivTail,boxb) = 0.0E0_dp
     end if
 
     wnlog = log10( tweight )
@@ -715,13 +758,28 @@ contains
     if ( wdlog .lt. -softcut ) then
        ! write(io_output,*) '### underflow in wratio calculation ###'
        if (.not.lideal(boxa).and.boxa.eq.boxb) call recip(boxa,vdum,vdum,4)
+       if (lgrand) then
+          if (boxa.ne.1) then
+             call gcmc_cleanup(imolta,boxa)
+          else if (boxb.ne.1) then
+             call gcmc_cleanup(imoltb,boxb)
+          end if
+       end if
        return
     end if
 
     wswat = tweight / tweiold
 
     if (boxa.ne.boxb) then
-       wswat = wswat*real(orgaia*orgbib,dp)/real((orgbia+1)*(orgaib+1),dp)*exp(beta*(eta2(boxa,imolta)+eta2(boxb,imoltb)-eta2(boxa,imoltb)-eta2(boxb,imolta)))
+       if (lgrand) then
+          if (boxa.eq.1) then
+             wswat = wswat*Rosenbluth_normalization(imolta)/Rosenbluth_normalization(imoltb)*B(imoltb)/B(imolta)*orgaia/real(orgbia+1,dp)
+          else
+             wswat = wswat*Rosenbluth_normalization(imoltb)/Rosenbluth_normalization(imolta)*B(imolta)/B(imoltb)*orgbib/real(orgaib+1,dp)
+          end if
+       else
+          wswat = wswat*real(orgaia*orgbib,dp)/real((orgbia+1)*(orgaib+1),dp)*exp(beta*(eta2(boxa,imolta)+eta2(boxb,imoltb)-eta2(boxa,imoltb)-eta2(boxb,imolta)))
+       end if
 
        if (lopt_bias(imolta)) call update_bias(log(wswat*2.0)/beta/2.0,boxa,boxb,imolta)
        if (lopt_bias(imoltb)) call update_bias(log(wswat*2.0)/beta/2.0,boxb,boxa,imoltb)
@@ -749,24 +807,37 @@ contains
        total_NBE = total_tor + total_bend + total_vib
 
        do jj=1,2
-          if (jj.eq.1) ic = boxa
-          if (jj.eq.2) then
-             if (boxa.eq.boxb) exit
+          if (jj.eq.1) then
+             if (lgrand.and.boxa.ne.1) cycle
+             ic = boxa
+          else if (jj.eq.2) then
+             if ((boxa.eq.boxb).or.(lgrand.and.boxb.ne.1)) exit
              ic = boxb
              total_tor =-total_tor
              total_bend=-total_bend
              total_vib =-total_vib
              total_NBE =-total_NBE
           end if
-          vbox(1,ic) = vbox(1,ic) + vnbox(ic)   + vntail(ic) - total_NBE
-          vbox(2,ic) = vbox(2,ic) + vninte(ic)  + vntail(ic)
-          vbox(4,ic) = vbox(4,ic) + vnintr(ic)
-          vbox(5,ic) = vbox(5,ic) + vnvibb(ic)  - total_vib
-          vbox(7,ic) = vbox(7,ic) + vntgb(ic)   - total_tor
-          vbox(9,ic) = vbox(9,ic) + vnextb(ic)
-          vbox(6,ic) = vbox(6,ic) + vnbend(ic)  - total_bend
-          vbox(3,ic) = vbox(3,ic) + vntail(ic)
-          vbox(8,ic) = vbox(8,ic) + vnelect(ic) + vnewald(ic)
+          vbox(ivTot,ic) = vbox(ivTot,ic) + vnbox(ivTot,ic)   + vnbox(ivTail,ic) - total_NBE
+          vbox(ivInterLJ,ic) = vbox(ivInterLJ,ic) + vnbox(ivInterLJ,ic)  + vnbox(ivTail,ic)
+          vbox(ivIntraLJ,ic) = vbox(ivIntraLJ,ic) + vnbox(ivIntraLJ,ic)
+          vbox(ivStretching,ic) = vbox(ivStretching,ic) + vnbox(ivStretching,ic)  - total_vib
+          vbox(ivTorsion,ic) = vbox(ivTorsion,ic) + vnbox(ivTorsion,ic)   - total_tor
+          vbox(ivExt,ic) = vbox(ivExt,ic) + vnbox(ivExt,ic)
+          vbox(ivBending,ic) = vbox(ivBending,ic) + vnbox(ivBending,ic)  - total_bend
+          vbox(ivTail,ic) = vbox(ivTail,ic) + vnbox(ivTail,ic)
+          vbox(ivElect,ic) = vbox(ivElect,ic) + vnbox(ivElect,ic) + vnbox(ivEwald,ic)
+       end do
+
+       do ic = 1,iunita
+          rxu(imola,ic) = rxut(1,ic)
+          ryu(imola,ic) = ryut(1,ic)
+          rzu(imola,ic) = rzut(1,ic)
+       end do
+       do ic = 1,iunitb
+          rxu(imolb,ic) = rxut(2,ic)
+          ryu(imolb,ic) = ryut(2,ic)
+          rzu(imolb,ic) = rzut(2,ic)
        end do
 
        ! update book keeping
@@ -785,18 +856,19 @@ contains
           ncmt(boxa,imoltb) = orgbia + 1
           ncmt(boxb,imolta) = orgaib + 1
           ncmt(boxb,imoltb) = orgbib - 1
+          if (lgrand) then
+             if (boxa.ne.1) then
+                parall(imolta,temtyp(imolta))=nchain
+                call gcmc_exchange(imolb,orgaib+1)
+                imola=imolb
+             else
+                parall(imoltb,temtyp(imoltb))=nchain
+                call gcmc_exchange(imola,orgbia+1)
+                imolb=imola
+             end if
+          end if
        end if
 
-       do ic = 1,iunita
-          rxu(imola,ic) = rxut(1,ic)
-          ryu(imola,ic) = ryut(1,ic)
-          rzu(imola,ic) = rzut(1,ic)
-       end do
-       do ic = 1,iunitb
-          rxu(imolb,ic) = rxut(2,ic)
-          ryu(imolb,ic) = ryut(2,ic)
-          rzu(imolb,ic) = rzut(2,ic)
-       end do
        if ( lewald ) then
           ! update reciprocal-space sum
           if (.not.lideal(boxa)) call recip(boxa,vdum,vdum,2)
@@ -804,12 +876,21 @@ contains
        end if
 
        ! update center of mass
-       call ctrmas(.false.,boxa,imolb,8)
-       call ctrmas(.false.,boxb,imola,8)
-    else if (lewald.and.boxa.eq.boxb.and..not.lideal(boxa)) then
-       ! recover the reciprocal space vectors
-       ! if the move is not accepted
-       call recip(boxa,vdum,vdum,4)
+       if (.not.(lgrand.and.boxa.ne.1)) call ctrmas(.false.,boxa,imolb,8)
+       if (.not.(lgrand.and.boxb.ne.1)) call ctrmas(.false.,boxb,imola,8)
+    else
+       if (lgrand) then
+          if (boxa.ne.1) then
+             call gcmc_cleanup(imolta,boxa)
+          else if (boxb.ne.1) then
+             call gcmc_cleanup(imoltb,boxb)
+          end if
+       end if
+       if (lewald.and.boxa.eq.boxb.and..not.lideal(boxa)) then
+          ! recover the reciprocal space vectors
+          ! if the move is not accepted
+          call recip(boxa,vdum,vdum,4)
+       end if
     end if
 
 #ifdef __DEBUG__
@@ -867,7 +948,7 @@ contains
     real::gamma_a, gamma_b
     real::theta, cos_theta, sin_theta
 
-#ifdef __DEBUG__
+#ifdef __DEBUG_VERBOSE__
     write(io_output,*) 'BEGIN align_planes in ',myid
 #endif
 
@@ -1146,7 +1227,7 @@ contains
 
     !CC --- FINALLY WE ARE DONE
 
-#ifdef __DEBUG__
+#ifdef __DEBUG_VERBOSE__
 ! Write a check
     ! open(90, file='align.xyz',status='unknown')
     ! nunit_a = nunit(moltyp(imol_a))
