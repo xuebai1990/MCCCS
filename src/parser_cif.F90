@@ -20,6 +20,7 @@ MODULE parser_cif
   use util_runtime,only:err_exit
   use util_files,only:get_iounit,readLine
   use util_string,only:splitAndGetNext
+  use util_memory,only:insert
   use sim_cell
   use sim_particle
   use sim_zeolite,only:ZeoliteUnitCellGridType,ZeoliteBeadType,setUpAtom,setUpCellStruct,foldToCenterCell,foldToUnitCell,fractionalToAbsolute,absoluteToFractional
@@ -27,8 +28,6 @@ MODULE parser_cif
   IMPLICIT NONE
   PRIVATE
   PUBLIC::readCIF
-  integer,parameter::boxZeo=1
-  real,parameter::eps=1.0E-4_dp
 
 CONTAINS
 
@@ -46,10 +45,15 @@ CONTAINS
     LOGICAL,INTENT(IN)::lprint
 
     integer,parameter::maxNumField=20,maxNumSymmOp=50
-    INTEGER::IOCIF,jerr,i,uninitialized,ia,ib,ic,id,nAtom,nField,nSymm,Field(maxNumField)
+    real,parameter::eps=1.0E-4_dp
+    INTEGER::IOCIF,jerr,i,uninitialized,boxZeo,ia,ib,ic,id,nAtom,nField,nSymm,Field(maxNumField)
     CHARACTER(LEN=default_string_length)::line,atom,SymmOp(maxNumSymmOp,3)
+    CHARACTER(LEN=default_string_length),allocatable:: atomic_element(:)
+    CHARACTER(LEN=default_string_length) atomic_element_value
     real::scoord(3),tmpcoord(3),coord(3),dr(3)
+    integer::IOxyz_supercell
 
+    natom=0
     IOCIF=get_iounit()
     open(unit=IOCIF,access='sequential',action='read',file=fileCIF,form='formatted',iostat=jerr,status='old')
     if (jerr.ne.0) then
@@ -59,8 +63,8 @@ CONTAINS
     CALL readLine(IOCIF,line,.false.,jerr)
     IF(jerr.ne.0) call err_exit(__FILE__,__LINE__,'wrong CIF file format',-1)
 
-    read(line(2:),*) zeo%nbead,zunit%dup(1),zunit%dup(2),zunit%dup(3),ztype%ntype
-    allocate(zeo%bead(zeo%nbead),lunitcell(zeo%nbead),ztype%name(ztype%ntype),ztype%radiisq(ztype%ntype),ztype%type(ztype%ntype),ztype%num(ztype%ntype),stat=jerr)
+    read(line(2:),*) zunit%dup(1),zunit%dup(2),zunit%dup(3),ztype%ntype
+    allocate(ztype%name(ztype%ntype),ztype%radiisq(ztype%ntype),ztype%type(ztype%ntype),ztype%num(ztype%ntype),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'readCIF: allocation failed',-1)
 
     do i=1,ztype%ntype
@@ -70,7 +74,6 @@ CONTAINS
        ztype%radiisq(i)=ztype%radiisq(i)*ztype%radiisq(i)
        ztype%num(i)=0
     end do
-
     uninitialized=7
     DO
        CALL readLine(IOCIF,line,.true.,jerr)
@@ -101,10 +104,12 @@ CONTAINS
              if (jerr.ne.0) then
                 EXIT
              else if ((INDEX(line,"loop_").ne.0).or.(line(1:1).eq."_")) then
+                BACKSPACE (IOCIF)
                 exit
              end if
              i = i + 1
              ia = INDEX(line,"'")
+             if (ia.eq.0) ia=INDEX(line," ") !this happens when the ' is notused
              ib = INDEX(line(ia+1:),",")+ia
              ic = INDEX(line(ib+1:),",")+ib
              IF (ia.eq.0) THEN
@@ -112,6 +117,8 @@ CONTAINS
              ELSE
                 id = INDEX(line(ic+1:),"'")+ic
              END IF
+             if (id.eq.ic) id=len_trim(line)+1
+
              SymmOp(i,1)=TRIM(line(ia+1:ib-1))
              SymmOp(i,2)=TRIM(line(ib+1:ic-1))
              SymmOp(i,3)=TRIM(line(ic+1:id-1))
@@ -153,26 +160,31 @@ CONTAINS
                 ia=ic+ia
                 ib=ic+ib
                 SELECT CASE (Field(id))
-                CASE (2)
+                CASE (1)
                    read(line(ia:ib),*) atom
+                CASE (2)
+                   read(line(ia:ib),*) atomic_element_value
+                   call insert(atomic_element,atomic_element_value,i)
                 CASE (3)
                    CALL getReal(line(ia:ib),scoord(1),jerr)
                 CASE (4)
                    CALL getReal(line(ia:ib),scoord(2),jerr)
                 CASE (5)
                    CALL getReal(line(ia:ib),scoord(3),jerr)
-                CASE (1,0)
+                CASE (0)
                    ! Skip this field
                 CASE DEFAULT
                 END SELECT
                 ic=ib
              END DO
              scoord=scoord-floor(scoord)
+             call extend_molecule_type(zeo)
              call fractionalToAbsolute(zeo%bead(i)%coord,scoord/zunit%dup,zcell)
              call setUpAtom(atom,i,zeo,lunitcell,ztype,zcell,zunit)
              CALL readLine(IOCIF,line,.true.,jerr)
              if (jerr.ne.0) EXIT
           END DO
+
           nAtom=i
 
           ! Apply symmetry elements and generate the whole set of atoms in the unit cell
@@ -199,14 +211,18 @@ CONTAINS
                 ! If the atom generated is unique let's add to the atom set..
                 IF (ib.gt.i) THEN
                    i = i + 1
-                   lunitcell(i)=.true.
+                   call insert(lunitcell,.true.,i)
                    ia=zeo%bead(ic)%type
+                   atomic_element_value=atomic_element(ic)
+                   call insert(atomic_element,atomic_element_value,i)
+                   call extend_molecule_type(zeo)
                    zeo%bead(i)%type=ia
                    ztype%num(ia)=ztype%num(ia)+1
                    zeo%bead(i)%coord=coord
                 END IF
              END DO
           END DO
+
           nAtom = i
           CALL finalizef()
           DO id=1,nAtom
@@ -215,7 +231,10 @@ CONTAINS
                    DO ia=0,zunit%dup(1)-1
                       IF (ia.ne.0.or.ib.ne.0.or.ic.ne.0) THEN
                          i=i+1
-                         lunitcell(i)=.false.
+                         atomic_element_value=atomic_element(id)
+                         call insert(atomic_element,atomic_element_value,i)
+                         call extend_molecule_type(zeo)
+                         call insert(lunitcell,.false.,i)
                          zeo%bead(i)%type=zeo%bead(id)%type
                          ztype%num(zeo%bead(id)%type)=ztype%num(zeo%bead(id)%type)+1
                          call absoluteToFractional(scoord,zeo%bead(id)%coord,zcell)
@@ -231,11 +250,24 @@ CONTAINS
        if (uninitialized.eq.0) then
           forall(i=1:3) zcell%boxl(i)%val=zunit%boxl(i)*zunit%dup(i)
           call setUpCellStruct(zcell,zunit,lprint)
+          call setUpUnitCellDummyBox(boxZeo,zunit%dup)
           uninitialized=-1
        end if
     END DO
 
-    if (nAtom.ne.zeo%nbead) call err_exit(__FILE__,__LINE__,'CIF: Number of atoms incorrect',-1)
+    IOxyz_supercell=get_iounit()
+    open(unit=IOxyz_supercell,file="supercell.xyz",status='replace')
+    write(IOxyz_supercell,*) nAtom
+    write(IOxyz_supercell,*)
+    DO id=1,nAtom
+        write(IOxyz_supercell,*) trim(atomic_element(id)),zeo%bead(id)%coord
+    END DO
+
+    zeo%nbead=nAtom
+    if (nAtom.ne.zeo%nbead) then
+        write(*,*) 'the number of atoms should be :',nAtom,'but are instead set to be:',zeo%nbead
+        call err_exit(__FILE__,__LINE__,'CIF: Number of atoms incorrect',-1)
+    endif
 
   END SUBROUTINE readCIF
 
@@ -258,4 +290,24 @@ CONTAINS
     READ(line(1:ib),*,IOSTAT=err) val
 
   END SUBROUTINE getReal
+
+!> \brief Set up dummy box with the size of the unit cell
+  SUBROUTINE setUpUnitCellDummyBox(boxZeo,dup)
+    use sim_system,only:nbox,lsolid,lrect,boxlx,boxly,boxlz
+    INTEGER,INTENT(OUT)::boxZeo
+    INTEGER,INTENT(IN)::dup(3)
+    INTEGER::i
+
+    boxZeo=nbox+1
+    lsolid(boxZeo)=lsolid(1)
+    lrect(boxZeo)=lrect(1)
+    boxlx(boxZeo)=boxlx(1)/dup(1)
+    boxly(boxZeo)=boxly(1)/dup(2)
+    boxlz(boxZeo)=boxlz(1)/dup(3)
+    forall(i=1:3)
+       hmat(boxZeo,3*i-2:3*i)=hmat(1,3*i-2:3*i)/dup(i)
+       hmati(boxZeo,i:i+6:3)=hmati(1,i:i+6:3)*dup(i)
+    end forall
+    call setpbc(boxZeo)
+  END SUBROUTINE setUpUnitCellDummyBox
 END MODULE parser_cif

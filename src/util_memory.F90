@@ -3,15 +3,18 @@ module util_memory
   use util_runtime,only:err_exit
   implicit none
   private
-  public::reallocate
+  public::reallocate,insert
 
   interface reallocate
      module procedure reallocate_l1,reallocate_l2,reallocate_l3,reallocate_l4,reallocate_l5,reallocate_i1,reallocate_i2,reallocate_i3,reallocate_i4,reallocate_i5,reallocate_r1,reallocate_r2,reallocate_r3,reallocate_r4,reallocate_r5,reallocate_c1
   end interface
 
-contains
+  interface insert
+     module procedure insert_to_array_l1,insert_to_array_c1
+  end interface
 
-  SUBROUTINE reallocate_l1(p,lb1_new,ub1_new)
+contains
+ SUBROUTINE reallocate_l1(p,lb1_new,ub1_new)
     LOGICAL,ALLOCATABLE,INTENT(INOUT)::p(:)
     INTEGER,INTENT(IN)::lb1_new,ub1_new
 
@@ -155,4 +158,17 @@ contains
 #include "reallocate_1.F90"
   END subroutine reallocate_c1
 
+  SUBROUTINE insert_to_array_l1(p,val,pos)
+    logical,ALLOCATABLE,INTENT(INOUT)::p(:)
+    logical,INTENT(IN)::val
+    integer,intent(in)::pos
+#include "insert_1.F90"
+  END SUBROUTINE insert_to_array_l1
+
+  SUBROUTINE insert_to_array_c1(p,val,pos)
+    character(LEN=*),ALLOCATABLE,INTENT(INOUT)::p(:)
+    character(LEN=*),INTENT(IN)::val
+    integer,intent(in)::pos
+#include "insert_1.F90"
+  END SUBROUTINE insert_to_array_c1
 end module util_memory

@@ -3,7 +3,7 @@ MODULE sim_particle
   use sim_system,only:lneigh,lneighbor,lgaro
   implicit none
   private
-  public::BeadType,AtomType,MoleculeType,check_neighbor_list,init_neighbor_list,add_neighbor_list,add_neighbor_list_molecule,update_neighbor_list_molecule,save_neighbor_list,restore_neighbor_list,allocate_neighbor_list,ctrmas,lnn,lnn_t,neighbor,neigh_cnt,ndij,nxij,nyij,nzij,neighi,neigh_icnt,ndiji,nxiji,nyiji,nziji
+  public::BeadType,AtomType,MoleculeType,check_neighbor_list,init_neighbor_list,add_neighbor_list,add_neighbor_list_molecule,update_neighbor_list_molecule,save_neighbor_list,restore_neighbor_list,allocate_neighbor_list,ctrmas,lnn,lnn_t,neighbor,neigh_cnt,ndij,nxij,nyij,nzij,neighi,neigh_icnt,ndiji,nxiji,nyiji,nziji,extend_molecule_type
 
   type BeadType
      integer::type
@@ -41,6 +41,20 @@ MODULE sim_particle
   real::ndiji(maxneigh),nxiji(maxneigh),nyiji(maxneigh),nziji(maxneigh)
 
 contains
+  SUBROUTINE extend_molecule_type(p)
+    integer array_size
+    type(MoleculeType),intent(inout)::p
+    type(MoleculeType) p_temp
+    if (.not. allocated(p%bead)) then
+       allocate(p%bead(1))
+    else
+       array_size=size(p%bead)
+       if (allocated(p_temp%bead)) deallocate(p_temp%bead);allocate(p_temp%bead(array_size+1))
+       p_temp%bead(1:array_size) = p%bead
+       call move_alloc(p_temp%bead,p%bead)
+    endif
+  END SUBROUTINE extend_molecule_type
+
   subroutine check_neighbor_list(ibox,imol)
     use sim_system,only:rmtrax,rmtray,rmtraz,rmrotx,rmroty,rmrotz,Armtrax,Armtray,Armtraz,io_output
     integer,intent(in)::ibox,imol
@@ -285,7 +299,7 @@ contains
     use util_runtime,only:err_exit
     use sim_system
     use sim_cell
-    
+
     logical,intent(in)::lall
     integer,intent(in)::ibox,j,mtype
 

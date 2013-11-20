@@ -6,6 +6,8 @@ MODULE sim_zeolite
   use sim_system,only:myid,io_output
   use sim_cell
   use sim_particle
+  use util_memory,only:insert
+
   implicit none
   private
   public::ZeoliteUnitCellGridType,ZeoliteBeadType,ZeolitePotentialType,setUpAtom,setUpCellStruct,foldToCenterCell,foldToUnitCell,fractionalToAbsolute,absoluteToFractional,dgr
@@ -42,6 +44,7 @@ CONTAINS
     type(CellMaskType),intent(inout)::zcell !< the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
     type(ZeoliteUnitCellGridType),intent(inout)::zunit
     LOGICAL,INTENT(IN)::lprint
+    real::unit_cell_volume
 
     integer::i,j
 
@@ -70,6 +73,7 @@ CONTAINS
 ! align crystallography axis a with cartesian axis x, b in x-y plane
 ! hmat is the transformation matrix from cartesian cordinate scoord(2)stem (x,y,z) to (a,b,c)
 ! hmat=(1,4,7;2,5,8;3,6,9)
+    unit_cell_volume=sqrt(1-cos(zcell%ang(1)%val)**2-cos(zcell%ang(2)%val)**2-cos(zcell%ang(3)%val)**2+2*cos(zcell%ang(1)%val)*cos(zcell%ang(2)%val)*cos(zcell%ang(3)%val))
     zcell%hmat(1,1)%val=zcell%boxl(1)%val
     zcell%hmat(2,1)%val=0.
     zcell%hmat(3,1)%val=0.
@@ -81,10 +85,9 @@ CONTAINS
     !ci
     zcell%hmat(1,3)%val=zcell%boxl(3)%val*cos(zcell%ang(2)%val)
     !(b*c*cos(alpha)-bi*ci)/bj
-    zcell%hmat(2,3)%val=zcell%boxl(3)%val*sqrt(cos(zcell%ang(2)%val)**2*cos(zcell%ang(3)%val)**2+cos(zcell%ang(1)%val)**2-2*cos(zcell%ang(1)%val)*cos(zcell%ang(2)%val)*cos(zcell%ang(3)%val))/sin(zcell%ang(3)%val)
+    zcell%hmat(2,3)%val=zcell%boxl(3)%val*(cos(zcell%ang(1)%val)-cos(zcell%ang(2)%val)*cos(zcell%ang(3)%val))/sin(zcell%ang(3)%val)
     !sqrt(c**2-ci**2-cj**2)
-    zcell%hmat(3,3)%val=zcell%boxl(3)%val*sqrt(1-cos(zcell%ang(1)%val)**2-cos(zcell%ang(2)%val)**2-cos(zcell%ang(3)%val)**2+2*cos(zcell%ang(1)%val)*cos(zcell%ang(2)%val)*cos(zcell%ang(3)%val))/sin(zcell%ang(3)%val)
-
+    zcell%hmat(3,3)%val=zcell%boxl(3)%val*unit_cell_volume/sin(zcell%ang(3)%val)
 ! there might be numeric errors in the above trigonometric calculations
     forall(i=1:3,j=1:3,abs(zcell%hmat(j,i)%val).lt.eps) zcell%hmat(j,i)%val=0
 
@@ -101,7 +104,7 @@ CONTAINS
     character(LEN=*),intent(in)::atom
     integer,intent(in)::i
     type(MoleculeType),intent(inout)::zeo
-    logical,intent(out)::lunitcell(zeo%nbead)
+    logical,intent(inout),allocatable::lunitcell(:)
     type(ZeoliteBeadType),intent(inout)::ztype
     type(CellMaskType),intent(inout)::zcell !< the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
     type(ZeoliteUnitCellGridType),intent(in)::zunit
@@ -109,15 +112,16 @@ CONTAINS
     real::scoord(3)
 
     CALL foldToCenterCell(zeo%bead(i)%coord,zcell,scoord)
-
     if (ALL(scoord*zunit%dup.lt.1)) then
-       lunitcell(i)=.true.
+       call insert(lunitcell,.true.,i)
     else
-       lunitcell(i)=.false.
+       call insert(lunitcell,.false.,i)
     end if
-
     pos=str_search(ztype%name,ztype%ntype,atom)
-    if (pos.eq.0) call err_exit(__FILE__,__LINE__,'** setUpAtom: unknown atomtype **',myid+1)
+    if (pos.eq.0) then
+        write(*,*) 'ztype%name,ztype%ntype,atom',ztype%name,ztype%ntype,atom
+        call err_exit(__FILE__,__LINE__,'** setUpAtom: unknown atomtype **',myid+1)
+    endif
 
     zeo%bead(i)%type=pos
 
