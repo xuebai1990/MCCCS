@@ -17,7 +17,8 @@ module util_mp
   END INTERFACE
 
   INTERFACE mp_bcast
-     MODULE PROCEDURE mp_bcast_l0, mp_bcast_l1, mp_bcast_l2, mp_bcast_i0, mp_bcast_i1, mp_bcast_i2, mp_bcast_i3, mp_bcast_r0, mp_bcast_r1, mp_bcast_r2, mp_bcast_r3, mp_bcast_r4, mp_bcast_r5, mp_bcast_c0, mp_bcast_c1
+     MODULE PROCEDURE mp_bcast_l0, mp_bcast_l1, mp_bcast_l2, mp_bcast_i0, mp_bcast_i1, mp_bcast_i2, mp_bcast_i3&
+      , mp_bcast_r0, mp_bcast_r1, mp_bcast_r2, mp_bcast_r3, mp_bcast_r4, mp_bcast_r5, mp_bcast_c0, mp_bcast_c1
   END INTERFACE
 
   INTERFACE mp_gather
@@ -25,7 +26,8 @@ module util_mp
   END INTERFACE
 
   INTERFACE mp_allgather
-     MODULE PROCEDURE mp_allgather_l1, mp_allgatherv_l1, mp_allgather_i0, mp_allgather_r0, mp_allgather_r1, mp_allgatherv_r1, mp_allgatherv_r2
+     MODULE PROCEDURE mp_allgather_l1, mp_allgatherv_l1, mp_allgather_i0, mp_allgather_r0, mp_allgather_r1&
+      , mp_allgatherv_r1, mp_allgatherv_r2
   END INTERFACE
 
   INTERFACE mp_alltoall
@@ -41,7 +43,8 @@ module util_mp
   END INTERFACE
 
   INTERFACE mp_sum
-     MODULE PROCEDURE mp_sum_i0, mp_sum_i1, mp_sum_i2, mp_sum_i3, mp_sum_r0, mp_sum_r1, mp_sum_r2, mp_sum_r3, mp_sum_r4, mp_sum_r5, mp_sum_r22
+     MODULE PROCEDURE mp_sum_i0, mp_sum_i1, mp_sum_i2, mp_sum_i3, mp_sum_r0, mp_sum_r1, mp_sum_r2, mp_sum_r3&
+      , mp_sum_r4, mp_sum_r5, mp_sum_r22
   END INTERFACE
 
   INTERFACE mp_root_sum

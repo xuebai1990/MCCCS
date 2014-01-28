@@ -6,7 +6,9 @@ module util_memory
   public::reallocate,insert
 
   interface reallocate
-     module procedure reallocate_l1,reallocate_l2,reallocate_l3,reallocate_l4,reallocate_l5,reallocate_i1,reallocate_i2,reallocate_i3,reallocate_i4,reallocate_i5,reallocate_r1,reallocate_r2,reallocate_r3,reallocate_r4,reallocate_r5,reallocate_c1
+     module procedure reallocate_l1,reallocate_l2,reallocate_l3,reallocate_l4,reallocate_l5&
+      ,reallocate_i1,reallocate_i2,reallocate_i3,reallocate_i4,reallocate_i5&
+      ,reallocate_r1,reallocate_r2,reallocate_r3,reallocate_r4,reallocate_r5,reallocate_c1
   end interface
 
   interface insert

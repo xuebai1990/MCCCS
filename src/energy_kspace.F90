@@ -4,7 +4,8 @@ MODULE energy_kspace
   use const_phys,only:qqfact
   use util_runtime,only:err_exit
   use util_mp,only:mp_sum,mp_allgather,mp_set_displs
-  use sim_system,only:lsolid,lrect,boxlx,boxly,boxlz,nchain,moltyp,lelect,nboxi,ntype,lqchg,rxu,ryu,rzu,qqu,myid,numprocs,moltion,nunit,rxuion,ryuion,rzuion,qquion,xcm,ycm,zcm,groupid
+  use sim_system,only:lsolid,lrect,boxlx,boxly,boxlz,nchain,moltyp,lelect,nboxi,ntype,lqchg,rxu,ryu,rzu,qqu,myid,numprocs,moltion&
+   ,nunit,rxuion,ryuion,rzuion,qquion,xcm,ycm,zcm,groupid
   use sim_cell
   implicit none
   private
@@ -14,7 +15,8 @@ MODULE energy_kspace
   integer,parameter::vectormax=100000 !< the maximum number of reciprocal vectors for Ewald sum
   integer,allocatable::numvect(:)& !< the total number of reciprocal vectors
    ,numvecto(:)
-  real,allocatable::kx(:,:),ky(:,:),kz(:,:),prefact(:,:),ssumr(:,:),ssumi(:,:),ssumrn(:,:),ssumin(:,:),ssumro(:,:),ssumio(:,:),kxo(:,:),kyo(:,:),kzo(:,:),prefacto(:,:),calpo(:)
+  real,allocatable::kx(:,:),ky(:,:),kz(:,:),prefact(:,:),ssumr(:,:),ssumi(:,:),ssumrn(:,:),ssumin(:,:),ssumro(:,:),ssumio(:,:)&
+   ,kxo(:,:),kyo(:,:),kzo(:,:),prefacto(:,:),calpo(:)
   real,allocatable,target::calp(:) !< calp = kalp / boxlen; kalp is a parameter to control the real space sum
   real::sself,correct
 
@@ -73,7 +75,9 @@ contains
 
     alpsqr4 = 4.0E0_dp*calpi*calpi
 
-    vol = hmat(ibox,1)* (hmat(ibox,5)*hmat(ibox,9) - hmat(ibox,8)*hmat(ibox,6)) + hmat(ibox,4)* (hmat(ibox,8)*hmat(ibox,3) - hmat(ibox,2)*hmat(ibox,9)) + hmat(ibox,7)* (hmat(ibox,2)*hmat(ibox,6) - hmat(ibox,5)*hmat(ibox,3))
+    vol = hmat(ibox,1)* (hmat(ibox,5)*hmat(ibox,9) - hmat(ibox,8)*hmat(ibox,6))&
+     + hmat(ibox,4)* (hmat(ibox,8)*hmat(ibox,3) - hmat(ibox,2)*hmat(ibox,9))&
+     + hmat(ibox,7)* (hmat(ibox,2)*hmat(ibox,6) - hmat(ibox,5)*hmat(ibox,3))
 
     vol = vol/(4.0E0_dp*onepi)
 
@@ -504,12 +508,24 @@ contains
     do ncount = myid+1,numvect(ibox),numprocs
        ! do ncount = 1, numvect(ibox)
        factor = prefact(ncount,ibox)*(ssumr(ncount,ibox)*ssumr(ncount,ibox) + ssumi(ncount,ibox)* ssumi(ncount,ibox))
-       repressx = repressx + factor*(1.0E0_dp - (1.0E0_dp/(4.0E0_dp*calp(ibox) *calp(ibox)) + 1.0E0_dp/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0E0_dp*kx(ncount,ibox)*kx(ncount,ibox))
-       repressy = repressy + factor*(1.0E0_dp - (1.0E0_dp/(4.0E0_dp*calp(ibox) *calp(ibox)) + 1.0E0_dp/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0E0_dp*ky(ncount,ibox)*ky(ncount,ibox))
-       repressz = repressz + factor*(1.0E0_dp - (1.0E0_dp/(4.0E0_dp*calp(ibox) *calp(ibox)) + 1.0E0_dp/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0E0_dp*kz(ncount,ibox)*kz(ncount,ibox))
-       pxy = pxy + factor*(0.0E0_dp - (1.0E0_dp/(4.0E0_dp*calp(ibox) *calp(ibox)) + 1.0E0_dp/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0E0_dp*kx(ncount,ibox)*ky(ncount,ibox))
-       pxz = pxz + factor*(0.0E0_dp - (1.0E0_dp/(4.0E0_dp*calp(ibox) *calp(ibox)) + 1.0E0_dp/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0E0_dp*kx(ncount,ibox)*kz(ncount,ibox))
-       pyz = pyz + factor*(0.0E0_dp - (1.0E0_dp/(4.0E0_dp*calp(ibox) *calp(ibox)) + 1.0E0_dp/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))*2.0E0_dp*ky(ncount,ibox)*kz(ncount,ibox))
+       repressx = repressx + factor*(1.0E0_dp - (1.0E0_dp/(4.0E0_dp*calp(ibox) *calp(ibox))&
+        + 1.0E0_dp/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))&
+        *2.0E0_dp*kx(ncount,ibox)*kx(ncount,ibox))
+       repressy = repressy + factor*(1.0E0_dp - (1.0E0_dp/(4.0E0_dp*calp(ibox) *calp(ibox))&
+        + 1.0E0_dp/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))&
+        *2.0E0_dp*ky(ncount,ibox)*ky(ncount,ibox))
+       repressz = repressz + factor*(1.0E0_dp - (1.0E0_dp/(4.0E0_dp*calp(ibox) *calp(ibox))&
+        + 1.0E0_dp/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))&
+        *2.0E0_dp*kz(ncount,ibox)*kz(ncount,ibox))
+       pxy = pxy + factor*(0.0E0_dp - (1.0E0_dp/(4.0E0_dp*calp(ibox) *calp(ibox))&
+        + 1.0E0_dp/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))&
+        *2.0E0_dp*kx(ncount,ibox)*ky(ncount,ibox))
+       pxz = pxz + factor*(0.0E0_dp - (1.0E0_dp/(4.0E0_dp*calp(ibox) *calp(ibox))&
+        + 1.0E0_dp/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))&
+        *2.0E0_dp*kx(ncount,ibox)*kz(ncount,ibox))
+       pyz = pyz + factor*(0.0E0_dp - (1.0E0_dp/(4.0E0_dp*calp(ibox) *calp(ibox))&
+        + 1.0E0_dp/(kx(ncount,ibox)*kx(ncount,ibox)+ ky(ncount,ibox)*ky(ncount,ibox)+kz(ncount,ibox)* kz(ncount,ibox)))&
+        *2.0E0_dp*ky(ncount,ibox)*kz(ncount,ibox))
     end do
 
     ! RP added for MPI
@@ -599,7 +615,7 @@ contains
   end subroutine recippress
 
   subroutine allocate_kspace()
-    use sim_system,only:nbxmax,io_output
+    use sim_system,only:nbxmax
     integer::jerr
     allocate(kx(vectormax,nbxmax),ky(vectormax,nbxmax),kz(vectormax,nbxmax),prefact(vectormax,nbxmax)&
      ,ssumr(vectormax,nbxmax),ssumi(vectormax,nbxmax),ssumrn(vectormax,nbxmax),ssumin(vectormax,nbxmax)&

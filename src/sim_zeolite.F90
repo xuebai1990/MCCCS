@@ -10,7 +10,8 @@ MODULE sim_zeolite
 
   implicit none
   private
-  public::ZeoliteUnitCellGridType,ZeoliteBeadType,ZeolitePotentialType,setUpAtom,setUpCellStruct,foldToCenterCell,foldToUnitCell,fractionalToAbsolute,absoluteToFractional,dgr
+  public::ZeoliteUnitCellGridType,ZeoliteBeadType,ZeolitePotentialType,setUpAtom,setUpCellStruct,foldToCenterCell,foldToUnitCell&
+   ,fractionalToAbsolute,absoluteToFractional,dgr
 
   integer,parameter::atom_symbol_length=128
 
@@ -52,7 +53,9 @@ CONTAINS
                                &,' --------------------------------------------------',/&
                                &,' box dimensions                    = ',3f10.3,' Angstrom',/&
                                &,' box angles                        = ',3f10.3,' degrees',/&
-                               &,' number of zeolite cells           = ',3i5)") zcell%boxl(1)%val,zcell%boxl(2)%val,zcell%boxl(3)%val,zcell%ang(1)%val,zcell%ang(2)%val,zcell%ang(3)%val,zunit%dup(1),zunit%dup(2),zunit%dup(3)
+                               &,' number of zeolite cells           = ',3i5)")&
+                               zcell%boxl(1)%val,zcell%boxl(2)%val,zcell%boxl(3)%val,zcell%ang(1)%val,zcell%ang(2)%val&
+                               ,zcell%ang(3)%val,zunit%dup(1),zunit%dup(2),zunit%dup(3)
 
     if (abs(zcell%ang(1)%val-90_dp)>eps.or.abs(zcell%ang(2)%val-90_dp)>eps.or.abs(zcell%ang(3)%val-90_dp)>eps) then
        zcell%solid=.true.
@@ -73,7 +76,8 @@ CONTAINS
 ! align crystallography axis a with cartesian axis x, b in x-y plane
 ! hmat is the transformation matrix from cartesian cordinate scoord(2)stem (x,y,z) to (a,b,c)
 ! hmat=(1,4,7;2,5,8;3,6,9)
-    unit_cell_volume=sqrt(1-cos(zcell%ang(1)%val)**2-cos(zcell%ang(2)%val)**2-cos(zcell%ang(3)%val)**2+2*cos(zcell%ang(1)%val)*cos(zcell%ang(2)%val)*cos(zcell%ang(3)%val))
+    unit_cell_volume=sqrt(1-cos(zcell%ang(1)%val)**2-cos(zcell%ang(2)%val)**2-cos(zcell%ang(3)%val)**2&
+     +2*cos(zcell%ang(1)%val)*cos(zcell%ang(2)%val)*cos(zcell%ang(3)%val))
     zcell%hmat(1,1)%val=zcell%boxl(1)%val
     zcell%hmat(2,1)%val=0.
     zcell%hmat(3,1)%val=0.

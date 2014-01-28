@@ -24,16 +24,17 @@ contains
 !> 1. William A Steele, "The interaction of gases with solid surfaces", Pergamon Press, 1974
 !> 2. Joseph Hautman and Michael L Klein, "Simulation of a monolayer of alkyl thiol chains", J Chem Phys 1989,91:4994
   function slitpore(z,ntij)
-	real::slitpore
+    real::slitpore
     real,intent(in)::z
-	integer,intent(in)::ntij
+    integer,intent(in)::ntij
     real::sig3,dz3,dz12
 
     ! Note that vvdW(1,ntij) is 4pi
 
     if (surface_type.eq.1) then
        ! Steele 10-4-3 potential
-       slitpore = onepi/2.0_dp*rsol*vvdW(1,ntij)*vvdW(3,ntij)*delta*(0.4_dp*(vvdW(2,ntij)/z)**10-(vvdW(2,ntij)/z)**4-vvdW(3,ntij)**2/(3.0_dp*delta*(z+0.61_dp*delta)**3))
+       slitpore = onepi/2.0_dp*rsol*vvdW(1,ntij)*vvdW(3,ntij)*delta*(0.4_dp*(vvdW(2,ntij)/z)**10-(vvdW(2,ntij)/z)**4&
+        -vvdW(3,ntij)**2/(3.0_dp*delta*(z+0.61_dp*delta)**3))
     else if (surface_type.eq.2) then
        ! Steele 9-3 potential
        sig3 = vvdW(2,ntij)**3
@@ -124,7 +125,7 @@ contains
   subroutine init_energy_external(io_input,lprint)
     use util_runtime,only:err_exit
     use util_string,only:format_n
-    use sim_system,only:nbox,nbxmax,io_output,lelect_field
+    use sim_system,only:nbox,nbxmax,io_output
     INTEGER,INTENT(IN)::io_input
     LOGICAL,INTENT(IN)::lprint
     integer::jerr

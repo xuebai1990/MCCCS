@@ -1,4 +1,5 @@
-    INTEGER :: istat, lb1, lb1_old, lb2, lb2_old, lb3, lb3_old, lb4, lb4_old, lb5, lb5_old, ub1, ub1_old, ub2, ub2_old, ub3, ub3_old, ub4, ub4_old, ub5, ub5_old
+    INTEGER :: istat, lb1, lb1_old, lb2, lb2_old, lb3, lb3_old, lb4, lb4_old, lb5, lb5_old&
+     , ub1, ub1_old, ub2, ub2_old, ub3, ub3_old, ub4, ub4_old, ub5, ub5_old
 
     IF (allocated(p)) THEN
        lb1_old = LBOUND(p,1)

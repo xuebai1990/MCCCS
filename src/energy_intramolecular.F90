@@ -219,7 +219,8 @@ contains
           tac7 = tac6*thetac
           tac8 = tac7*thetac
           tac9 = tac8*thetac
-          vtorso = vtt(0,itype)+vtt(1,itype)*thetac+vtt(2,itype)*tac2+vtt(3,itype)*tac3+vtt(4,itype)*tac4+vtt(5,itype)*tac5+vtt(6,itype)*tac6+vtt(7,itype)*tac7+vtt(8,itype)*tac8+vtt(9,itype)*tac9
+          vtorso = vtt(0,itype)+vtt(1,itype)*thetac+vtt(2,itype)*tac2+vtt(3,itype)*tac3+vtt(4,itype)*tac4+vtt(5,itype)*tac5&
+           +vtt(6,itype)*tac6+vtt(7,itype)*tac7+vtt(8,itype)*tac8+vtt(9,itype)*tac9
        else if (torsion_type(itype).eq.3) then
           ! type 3: periodic type, angle in protein convention (trans is 180 deg)
           theta=theta+onepi
@@ -232,11 +233,13 @@ contains
           ! type 1: OPLS potential (three terms), angle in protein convention (trans is 180 deg)
           theta=theta+onepi
           ! remember: 1 + cos( theta+onepi ) = 1 - cos( theta )
-          vtorso = vtt(0,itype) + vtt(1,itype)*(1.0E0_dp-thetac) + vtt(2,itype)*(1.E0_dp-cos(2.E0_dp*theta)) + vtt(3,itype)*(1.E0_dp+cos(3.E0_dp*theta))
+          vtorso = vtt(0,itype) + vtt(1,itype)*(1.0E0_dp-thetac) + vtt(2,itype)*(1.E0_dp-cos(2.E0_dp*theta))&
+           + vtt(3,itype)*(1.E0_dp+cos(3.E0_dp*theta))
        else if (torsion_type(itype).eq.5) then
           ! type 5: OPLS potential (four terms), angle in protein convention (trans is 180 deg)
           theta=theta+onepi
-          vtorso = vtt(0,itype) + vtt(1,itype)*(1.0E0_dp-thetac) + vtt(2,itype)*(1.E0_dp-cos(2.E0_dp*theta)) + vtt(3,itype)*(1.E0_dp+cos(3.E0_dp*theta)) + vtt(4,itype)*(1.E0_dp-cos(4.E0_dp*theta))
+          vtorso = vtt(0,itype) + vtt(1,itype)*(1.0E0_dp-thetac) + vtt(2,itype)*(1.E0_dp-cos(2.E0_dp*theta))&
+           + vtt(3,itype)*(1.E0_dp+cos(3.E0_dp*theta)) + vtt(4,itype)*(1.E0_dp-cos(4.E0_dp*theta))
        else if (torsion_type(itype).eq.6) then
           ! type 6: nine-term Fourier cosine series, angle in protein convention (trans is 180 deg)
           theta=theta+onepi
@@ -425,7 +428,8 @@ contains
           if ( ip3 .lt. j ) then
              ip1 = ijtor2(imolty,j,jjtor)
              ip2 = ijtor3(imolty,j,jjtor)
-             vtg = vtg + vtorso(rxvec(j,ip1),ryvec(j,ip1),rzvec(j,ip1),rxvec(ip1,ip2),ryvec(ip1,ip2),rzvec(ip1,ip2),rxvec(ip2,ip3),ryvec(ip2,ip3),rzvec(ip2,ip3),ittor(imolty,j,jjtor))
+             vtg = vtg + vtorso(rxvec(j,ip1),ryvec(j,ip1),rzvec(j,ip1),rxvec(ip1,ip2),ryvec(ip1,ip2),rzvec(ip1,ip2)&
+              ,rxvec(ip2,ip3),ryvec(ip2,ip3),rzvec(ip2,ip3),ittor(imolty,j,jjtor))
           end if
        end do
     end do
@@ -469,7 +473,8 @@ contains
              ip1 = ijben2(imolty,j,jjben)
              it  = itben(imolty,j,jjben)
              if (brbenk(it).lt.-0.1E0_dp) cycle
-             thetac = ( rxvec(ip1,j)*rxvec(ip1,ip2) + ryvec(ip1,j)*ryvec(ip1,ip2) + rzvec(ip1,j)*rzvec(ip1,ip2) ) / ( distanceij(ip1,j)*distanceij(ip1,ip2) )
+             thetac = ( rxvec(ip1,j)*rxvec(ip1,ip2) + ryvec(ip1,j)*ryvec(ip1,ip2)&
+              + rzvec(ip1,j)*rzvec(ip1,ip2) ) / ( distanceij(ip1,j)*distanceij(ip1,ip2) )
              if ( thetac .ge. 1.0E0_dp ) thetac = 1.0E0_dp
              if ( thetac .le. -1.0E0_dp ) thetac = -1.0E0_dp
 
@@ -545,19 +550,23 @@ contains
 
     if (dihedrals%size.gt.0) then
        if (ANY(torsion_type(1:dihedrals%size).eq.-1)) then
-          if (L_spline.and.L_linear) call err_exit(__FILE__,__LINE__,'L_spline and L_linear should have one and only one to be true if using tabulated potential for torsions',myid+1)
+          if (L_spline.and.L_linear) call err_exit(__FILE__,__LINE__&
+           ,'L_spline and L_linear should have one and only one to be true if using tabulated potential for torsions',myid+1)
 
           allocate(splpnts(1:dihedrals%size),deg(1:grid_size,1:dihedrals%size),tabtorso(1:grid_size,1:dihedrals%size),stat=jerr)
-          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_bonded: allocation failed for vib_table 1',myid+1)
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__&
+           ,'init_tabulated_potential_bonded: allocation failed for vib_table 1',myid+1)
           call read_table('fort.40',nttor,deg,tabtorso,splpnts,dihedrals)
           if (L_spline) then
              allocate(torderiv2(1:grid_size,1:dihedrals%size),stat=jerr)
-             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_bonded: allocation failed for tor_table 2',myid+1)
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__&
+              ,'init_tabulated_potential_bonded: allocation failed for tor_table 2',myid+1)
              do ttor=1,nttor
                 call spline(deg(:,ttor),tabtorso(:,ttor),splpnts(ttor),1.0E31_dp,1.0E31_dp,torderiv2(:,ttor))
              end do
           else if (.not.L_linear) then
-             call err_exit(__FILE__,__LINE__,'Must set one of L_spline and L_linear to be true if using tabulated potential for torsions',myid+1)
+             call err_exit(__FILE__,__LINE__&
+              ,'Must set one of L_spline and L_linear to be true if using tabulated potential for torsions',myid+1)
           end if
        end if
     end if

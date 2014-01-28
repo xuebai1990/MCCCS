@@ -23,7 +23,8 @@ MODULE parser_cif
   use util_memory,only:insert
   use sim_cell
   use sim_particle
-  use sim_zeolite,only:ZeoliteUnitCellGridType,ZeoliteBeadType,setUpAtom,setUpCellStruct,foldToCenterCell,foldToUnitCell,fractionalToAbsolute,absoluteToFractional
+  use sim_zeolite,only:ZeoliteUnitCellGridType,ZeoliteBeadType,setUpAtom,setUpCellStruct,foldToCenterCell,foldToUnitCell&
+   ,fractionalToAbsolute,absoluteToFractional
   use fparser,only:initf,parsef,evalf,finalizef
   IMPLICIT NONE
   PRIVATE

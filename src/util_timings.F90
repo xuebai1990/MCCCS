@@ -1,10 +1,10 @@
 module util_timings
+#ifdef __OPENMP__
+  use omp_lib
+#endif
   implicit none
 #ifdef __MPI__
   include 'mpif.h'
-#endif
-#ifdef __OPENMP__
-  include 'omp_lib.h'
 #endif
   private
   public::time_date_str,time_init,time_now

@@ -88,7 +88,11 @@ CONTAINS
 
 !> \brief Hunt the index of a value in a monotonic array using hunting algorithm
 !>
-!> Given an array \a xx(1:n) and a value \a x, return index \a j such that \a x is (insofar as possible) centered in the subrange \a xx(j:j+mm-1). The values in \a xx must be monotonic, either increasing or decreasing. The returned value is not less than 1, nor greater than \a n.
+!> Given an array \a xx(1:n) and a value \a x, return index
+!> \a j such that \a x is (insofar as possible) centered in
+!> the subrange \a xx(j:j+mm-1). The values in \a xx must be
+!> monotonic, either increasing or decreasing. The returned
+!> value is not less than 1, nor greater than \a n.
   FUNCTION HUNT(XX,N,X,JO,MM) RESULT(J)
     INTEGER::J
     INTEGER,INTENT(IN)::N,JO,MM
@@ -147,7 +151,11 @@ CONTAINS
 
 !> \brief Locate the index of a value in a monotonic array using bisection
 !>
-!> Given an array \a xx(1:n) and a value \a x, return index \a j such that \a x is (insofar as possible) centered in the subrange \a xx[j:j+mm-1]. The values in \a xx must be monotonic, either increasing or decreasing. The returned value is not less than 1, nor greater than \a n.
+!> Given an array \a xx(1:n) and a value \a x, return index
+!> \a j such that \a x is (insofar as possible) centered in
+!> the subrange \a xx[j:j+mm-1]. The values in \a xx must be
+!> monotonic, either increasing or decreasing. The returned
+!> value is not less than 1, nor greater than \a n.
   FUNCTION LOCATE(XX,N,X,MM) RESULT(J)
     INTEGER::J
     INTEGER,INTENT(IN)::N,MM

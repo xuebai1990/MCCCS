@@ -14,7 +14,7 @@ module const_phys
 
   real,parameter::MPa2SimUnits=1E-24_double_precision/k_B !< conversion factor for Mpa to simulation unit (including MPa-->Pa, Ang^3-->m^3, J-->K)
 
-  real,parameter::debroglie_factor=h_planck/sqrt(twopi*1E-3_double_precision/N_Avogadro*k_B)*1E10_double_precision !< in Ang
+  real,parameter::debroglie_factor=1.74582182191543E1_double_precision !<h_planck/sqrt(twopi*1E-3_double_precision/N_Avogadro*k_B)*1E10_double_precision !< in Ang
 
   real,parameter::e_unit=1.602176565E-19_double_precision&
    ,eps_0=8.854187817E-12_double_precision&

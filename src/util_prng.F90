@@ -101,14 +101,22 @@ MODULE util_prng
   ! The following are the transition matrices of the two MRG components
   ! (in matrix form), raised to the powers -1, 1, 2**76, and 2**127, resp.
 
-  REAL(KIND=dp), DIMENSION(3,3), parameter :: inv_a1 = reshape((/184888585.0_dp,1.0_dp,0.0_dp,0.0_dp,0.0_dp,1.0_dp,1945170933.0_dp,0.0_dp,0.0_dp/),shape(inv_a1)),& !< Inverse of a1p0
-   inv_a2 = reshape((/0.0_dp,1.0_dp,0.0_dp,360363334.0_dp,0.0_dp,1.0_dp,4225571728.0_dp,0.0_dp,0.0_dp/),shape(inv_a2)),& !< Inverse of a2p0
-   a1p0 = reshape((/0.0_dp,0.0_dp,-810728.0_dp,1.0_dp,0.0_dp,1403580.0_dp,0.0_dp,1.0_dp,0.0_dp/),shape(a1p0)),& !< Transition matrix for the first component raised to the power 2**0
-   a2p0 = reshape((/0.0_dp,0.0_dp,-1370589.0_dp,1.0_dp,0.0_dp,0.0_dp,0.0_dp,1.0_dp,527612.0_dp/),shape(a2p0)),& !< Transition matrix for the second component raised to the power 2**0
-   a1p76 = reshape((/82758667.0_dp,3672831523.0_dp,3672091415.0_dp,1871391091.0_dp,69195019.0_dp,3528743235.0_dp,4127413238.0_dp,1871391091.0_dp,69195019.0_dp/),shape(a1p76)),& !< Transition matrix for the first component raised to the power 2**76
-   a2p76 = reshape((/1511326704.0_dp,4292754251.0_dp,3859662829.0_dp,3759209742.0_dp,1511326704.0_dp,4292754251.0_dp,1610795712.0_dp,3889917532.0_dp,3708466080.0_dp/),shape(a2p76)),& !< Transition matrix for the second component raised to the power 2**76
-   a1p127 = reshape((/2427906178.0_dp,226153695.0_dp,1988835001.0_dp,3580155704.0_dp,1230515664.0_dp,986791581.0_dp,949770784.0_dp,3580155704.0_dp,1230515664.0_dp/),shape(a1p127)),& !< Transition matrix for the first component raised to the power 2**127
-   a2p127 = reshape((/1464411153.0_dp,32183930.0_dp,2824425944.0_dp,277697599.0_dp,1464411153.0_dp,32183930.0_dp,1610723613.0_dp,1022607788.0_dp,2093834863.0_dp/),shape(a2p127)) !< Transition matrix for the second component raised to the power 2**127
+  REAL(KIND=dp), DIMENSION(3,3), parameter :: inv_a1 = reshape((/184888585.0_dp,1.0_dp,0.0_dp,0.0_dp,0.0_dp,1.0_dp&
+   ,1945170933.0_dp,0.0_dp,0.0_dp/),shape(inv_a1)) !< Inverse of a1p0
+  REAL(KIND=dp), DIMENSION(3,3), parameter :: inv_a2 = reshape((/0.0_dp,1.0_dp,0.0_dp,360363334.0_dp,0.0_dp,1.0_dp&
+   ,4225571728.0_dp,0.0_dp,0.0_dp/),shape(inv_a2)) !< Inverse of a2p0
+  REAL(KIND=dp), DIMENSION(3,3), parameter :: a1p0 = reshape((/0.0_dp,0.0_dp,-810728.0_dp,1.0_dp,0.0_dp,1403580.0_dp&
+   ,0.0_dp,1.0_dp,0.0_dp/),shape(a1p0)) !< Transition matrix for the first component raised to the power 2**0
+  REAL(KIND=dp), DIMENSION(3,3), parameter :: a2p0 = reshape((/0.0_dp,0.0_dp,-1370589.0_dp,1.0_dp,0.0_dp,0.0_dp,0.0_dp&
+   ,1.0_dp,527612.0_dp/),shape(a2p0)) !< Transition matrix for the second component raised to the power 2**0
+  REAL(KIND=dp), DIMENSION(3,3), parameter :: a1p76 = reshape((/82758667.0_dp,3672831523.0_dp,3672091415.0_dp,1871391091.0_dp&
+   ,69195019.0_dp,3528743235.0_dp,4127413238.0_dp,1871391091.0_dp,69195019.0_dp/),shape(a1p76)) !< Transition matrix for the first component raised to the power 2**76
+  REAL(KIND=dp), DIMENSION(3,3), parameter :: a2p76 = reshape((/1511326704.0_dp,4292754251.0_dp,3859662829.0_dp,3759209742.0_dp&
+   ,1511326704.0_dp,4292754251.0_dp,1610795712.0_dp,3889917532.0_dp,3708466080.0_dp/),shape(a2p76)) !< Transition matrix for the second component raised to the power 2**76
+  REAL(KIND=dp), DIMENSION(3,3), parameter :: a1p127 = reshape((/2427906178.0_dp,226153695.0_dp,1988835001.0_dp,3580155704.0_dp&
+   ,1230515664.0_dp,986791581.0_dp,949770784.0_dp,3580155704.0_dp,1230515664.0_dp/),shape(a1p127)) !< Transition matrix for the first component raised to the power 2**127
+  REAL(KIND=dp), DIMENSION(3,3), parameter :: a2p127 = reshape((/1464411153.0_dp,32183930.0_dp,2824425944.0_dp,277697599.0_dp&
+   ,1464411153.0_dp,32183930.0_dp,1610723613.0_dp,1022607788.0_dp,2093834863.0_dp/),shape(a2p127)) !< Transition matrix for the second component raised to the power 2**127
 
   ! Interfaces
 

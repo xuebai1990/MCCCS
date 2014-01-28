@@ -10,13 +10,38 @@ module sim_system
 !==========================================================!
 !=============== General Programming Advice ===============!
 !==========================================================!
-! Ideally, global variables should be kept to a MINIMUM. Variables below should go into their separate modules (e.g., MPI-related variables to util_mp, volume-moves-related variables to moves_volume). Exposing too many variables where they are not needed increases the chance that they are modified inadvertently.
+! Ideally, global variables should be kept to a MINIMUM.
+! Variables below should go into their separate modules
+! (e.g., MPI-related variables to util_mp,
+! volume-moves-related variables to moves_volume). Exposing
+! too many variables where they are not needed increases the
+! chance that they are modified inadvertently.
 
-! In many cases, things that you feel are "required" globally (for example when outputing swap statistics, you may want counters defined in transfer_swap available in the main program) can be delegated (calling the subroutine output_swap_stats, defined also in transfer_swap, eliminates the need to expose internal variables of transfer_swap)
+! In many cases, things that you feel are "required"
+! globally (for example when outputing swap statistics, you
+! may want counters defined in transfer_swap available in
+! the main program) can be delegated (calling the subroutine
+! output_swap_stats, defined also in transfer_swap,
+! eliminates the need to expose internal variables of
+! transfer_swap)
 
-! The ideas of software engineering are broad. Not every principle there can be conveniently implemented using Fortran. However, you should always try to look for a general solution than an ad-hoc fix. When problems you are dealing with grow in complexity (they inevitably will), you will find solutions that are general in nature and clear in logic are easier to extend and maintain.
+! The ideas of software engineering are broad. Not every
+! principle there can be conveniently implemented using
+! Fortran. However, you should always try to look for a
+! general solution than an ad-hoc fix. When problems you are
+! dealing with grow in complexity (they inevitably will),
+! you will find solutions that are general in nature and
+! clear in logic are easier to extend and maintain.
 
-! With computer programming, if you find yourself doing the same thing twice, odds are that there is a better way to it. Spend 10 minutes (even hours) to learn a technique that can be implemented in 1 minute, rather than spend 1 minute to come up with a technique that takes 10 minutes. Even if the learning phase takes longer, it will usually pay off in the long run: you may likely apply the better method many times in the future and you have sharpened your programming skills.
+! With computer programming, if you find yourself doing the
+! same thing twice, odds are that there is a better way to
+! it. Spend 10 minutes (even hours) to learn a technique
+! that can be implemented in 1 minute, rather than spend 1
+! minute to come up with a technique that takes 10 minutes.
+! Even if the learning phase takes longer, it will usually
+! pay off in the long run: you may likely apply the better
+! method many times in the future and you have sharpened
+! your programming skills.
 !==========================================================!
 
   !=== Information about the system ===
@@ -65,17 +90,31 @@ module sim_system
    ,lelect_field=.false. !< external electric field
 
   !*** Thermodynamic integration ***
-  real,allocatable::rxwell(:,:),rywell(:,:),rzwell(:,:),sxwell(:,:),sywell(:,:),szwell(:,:),vwellipswot(:),vwellipswnt(:),vipswnt(:),vipswot(:),awell(:,:,:)
+  real,allocatable::rxwell(:,:),rywell(:,:),rzwell(:,:),sxwell(:,:),sywell(:,:),szwell(:,:)&
+   ,vwellipswot(:),vwellipswnt(:),vipswnt(:),vipswot(:),awell(:,:,:)
   integer,allocatable::nwell(:)
   logical,allocatable::lwell(:)
   integer,parameter::nw=4000
   integer::iratipsw
-  real::dvdl,vipsw,pipsw,vwellipsw,pwellipsw,etais,lambdais,bwell,vipswo,vipswn,vwellipswo,vwellipswn,lena,lenc,pwellips(3,3),pips(3,3),dhmat(3,3)
+  real::dvdl,vipsw,pipsw,vwellipsw,pwellipsw,etais,lambdais,bwell,vipswo,vipswn,vwellipswo,vwellipswn&
+   ,lena,lenc,pwellips(3,3),pips(3,3),dhmat(3,3)
   logical::lstagea,lstageb,lstagec
 
   !=== Analysis ===
-  integer,parameter::nEnergy=14,ivTot=1,ivInterLJ=2,ivTail=3,ivIntraLJ=4,ivStretching=5,ivBending=6,ivTorsion=7,ivElect=8,ivExt=9,iv3body=10,ivFlucq=11,ivIpswb=12,ivWellIpswb=13,ivEwald=14
-  real,allocatable::vbox(:,:) !< (j,ibox): energies of ibox; j = 1: total energy; 2: intermolecular LJ; 3: tail correction; 4: intramolecular non-bonded LJ; 5: stretching; 6: bending; 7: torsion; 8: electrostatic; 9: external field; 10: 3-body Feuston-Garofalini; 11: fluctuating charge (vflucqb); 12: vipswb; 13: vwellipswb; 14: Ewald reciprocal-space electrostatic
+  integer,parameter::nEnergy=14,ivTot=1,ivInterLJ=2,ivTail=3,ivIntraLJ=4,ivStretching=5,ivBending=6,ivTorsion=7,ivElect=8,ivExt=9&
+   ,iv3body=10,ivFlucq=11,ivIpswb=12,ivWellIpswb=13,ivEwald=14
+  real,allocatable::vbox(:,:) !< (j,ibox): energies of ibox; 
+                              !< j = 1: total energy;
+                              !< 2: intermolecular LJ;
+                              !< 3: tail correction;
+                              !< 4: intramolecular non-bonded LJ;
+                              !< 5: stretching; 6: bending; 7: torsion;
+                              !< 8: electrostatic;
+                              !< 9: external field;
+                              !< 10: 3-body Feuston-Garofalini;
+                              !< 11: fluctuating charge (vflucqb);
+                              !< 12: vipswb; 13: vwellipswb;
+                              !< 14: Ewald reciprocal-space electrostatic
   integer,allocatable::ucheck(:) !< whether or not to calculate chemical potential for each molecule type
   character(LEN=1)::suffix='a'
   integer::io_output=6,iprint=-1,imv=-1,iblock=-1,iratp=500,idiele=-1,iheatcapacity=-1,nprop,ianalyze=-1,nbin=1,run_num=1
@@ -220,7 +259,9 @@ module sim_system
   logical,parameter::lfepsi=.false. !< If lfepsi is true, the fluctuation of epsilon is used instead of the fluctuation of the sigma.
   logical,allocatable::lflucq(:),lqtrans(:)
   real::pmflcq,taflcq=0.95_dp,fqbeta
-  real,allocatable::bnflcq(:,:),bsflcq(:,:),bnflcq2(:,:),bsflcq2(:,:)& !< accumulators for statistics of fluctuating charge moves; bnflcq and bsflcq record the number of all and successful attempts between updates of maximum displacements, while bnflcq2 and bsflcq record the values for the entire run
+  real,allocatable::bnflcq(:,:),bsflcq(:,:),bnflcq2(:,:),bsflcq2(:,:)& !< accumulators for statistics of fluctuating charge moves;
+   !< bnflcq and bsflcq record the number of all and successful attempts between updates of maximum displacements, while bnflcq2
+   !< and bsflcq record the values for the entire run
    ,fqegp(:),pmfqmt(:),rmflcq(:,:)
   integer,allocatable::nchoiq(:)
 
@@ -292,16 +333,16 @@ CONTAINS
 
     allocate(boxlx(nbxmax),boxly(nbxmax),boxlz(nbxmax),rcut(nbxmax),rcutnn(nbxmax),kalp(nbxmax),lsolid(nbxmax),lrect(nbxmax)&
      ,express(nbxmax),ghost_particles(nbxmax),numberDimensionIsIsotropic(nbxmax),inix(nbxmax),iniy(nbxmax)&
-     ,iniz(nbxmax),inirot(nbxmax),inimix(nbxmax),nchoiq(nbxmax),box5(nbxmax),box6(nbxmax),zshift(nbxmax),dshift(nbxmax)&
+     ,iniz(nbxmax),inirot(nbxmax),inimix(nbxmax),nchoiq(nbxmax),box5(npabmax),box6(npabmax),zshift(nbxmax),dshift(nbxmax)&
      ,rmvol(nbxmax),pmvlmt(nbxmax),pmvolb(npabmax),lideal(nbxmax),ltwice(nbxmax),rmhmat(nbxmax,9),dipolex(nbxmax),dipoley(nbxmax)&
      ,dipolez(nbxmax),nchbox(nbxmax),vbox(nEnergy,nbxmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'allocate_system.1: allocation failed',jerr)
 
     allocate(ucheck(ntmax),nrotbd(ntmax),xcm(nmax),ycm(nmax),zcm(nmax),pmsatc(npamax),pmswtcb(npamax,npabmax),nswatb(npamax,2)&
      ,nsampos(npamax),ncut(npamax,2),gswatc(npamax,2,2*npamax),nswtcb(npamax),box3(npamax,npabmax),box4(npamax,npabmax)&
-     ,temtyp(ntmax),B(ntmax),nunit(ntmax),nugrow(ntmax),nmaxcbmc(ntmax),iurot(ntmax)&
-     ,maxgrow(ntmax),isolute(ntmax),iring(ntmax),nrig(ntmax),irig(ntmax,6),frig(ntmax,6),nrigmin(ntmax),nrigmax(ntmax)&
-     ,rindex(ntmax),riutry(ntmax,initial_size),lelect(ntmax),lflucq(ntmax),lqtrans(ntmax),lexpand(ntmax),lavbmc1(ntmax),lavbmc2(ntmax)&
+     ,temtyp(ntmax),B(ntmax),nunit(ntmax),nugrow(ntmax),nmaxcbmc(ntmax),iurot(ntmax),maxgrow(ntmax),isolute(ntmax),iring(ntmax)&
+     ,nrig(ntmax),irig(ntmax,6),frig(ntmax,6),nrigmin(ntmax),nrigmax(ntmax),rindex(ntmax),riutry(ntmax,initial_size),lelect(ntmax)&
+     ,lflucq(ntmax),lqtrans(ntmax),lexpand(ntmax),lavbmc1(ntmax),lavbmc2(ntmax)&
      ,lavbmc3(ntmax),lbias(ntmax),lring(ntmax),lrigid(ntmax),lrig(ntmax),lq14scale(ntmax),fqegp(ntmax),eta2(nbxmax,ntmax)&
      ,qscale(ntmax),pmbias(ntmax),pmbsmt(ntmax),pmbias2(ntmax),rmtrax(ntmax,nbxmax),rmtray(ntmax,nbxmax),rmtraz(ntmax,nbxmax)&
      ,rmrotx(ntmax,nbxmax),rmroty(ntmax,nbxmax),rmrotz(ntmax,nbxmax),lbranch(ntmax),ininch(ntmax,nbxmax),rmflcq(ntmax,nbxmax)&
@@ -309,9 +350,9 @@ CONTAINS
      ,pmromt(ntmax),nswapb(ntmax),box1(ntmax,npabmax),box2(ntmax,npabmax),nchoi1(ntmax),nchoi(ntmax),nchoir(ntmax)&
      ,nchoih(ntmax),nchtor(ntmax),nchbna(ntmax),nchbnb(ntmax),icbdir(ntmax),icbsta(ntmax),lrplc(ntmax),masst(ntmax)&
      ,rmexpc(ntmax),eetype(ntmax),ncmt(nbxmax,ntmax),ncmt2(nbxmax,ntmax,20),parall(ntmax,nmax)&
-     ,parbox(nmax,nbxmax,ntmax),bnflcq(ntmax,nbxmax),bsflcq(ntmax,nbxmax)&
-     ,bnflcq2(ntmax,nbxmax),bsflcq2(ntmax,nbxmax),rxwell(nw,ntmax),rywell(nw,ntmax),rzwell(nw,ntmax),sxwell(nw,ntmax)&
-     ,sywell(nw,ntmax),szwell(nw,ntmax),nwell(ntmax),lwell(ntmax),moltyp(nmax),rcmu(nmax),sxcm(nmax),sycm(nmax),szcm(nmax),nboxi(nmax)&
+     ,parbox(nmax,nbxmax,ntmax),bnflcq(ntmax,nbxmax),bsflcq(ntmax,nbxmax),bnflcq2(ntmax,nbxmax),bsflcq2(ntmax,nbxmax)&
+     ,rxwell(nw,ntmax),rywell(nw,ntmax),rzwell(nw,ntmax),sxwell(nw,ntmax),sywell(nw,ntmax),szwell(nw,ntmax),nwell(ntmax)&
+     ,lwell(ntmax),moltyp(nmax),rcmu(nmax),sxcm(nmax),sycm(nmax),szcm(nmax),nboxi(nmax)&
      ,favor(nmax),favor2(nmax),ntype(ntmax,initial_size),leaderq(ntmax,initial_size),lplace(ntmax,initial_size)&
      ,lrigi(ntmax,initial_size),invib(ntmax,initial_size),itvib(ntmax,initial_size,6),ijvib(ntmax,initial_size,6)&
      ,inben(ntmax,initial_size),itben(ntmax,initial_size,12),ijben2(ntmax,initial_size,12),ijben3(ntmax,initial_size,12)&
@@ -322,12 +363,11 @@ CONTAINS
 
   subroutine allocate_molecule()
     integer::jerr
-    allocate(splist(npamax,numax,2),lexist(numax),lexclu(ntmax,numax,ntmax,numax)&
-     ,a15type(ntmax,numax,numax),epsilon_f(2,numax),sigma_f(2,numax),ljscale(ntmax,numax,numax),qscale2(ntmax,numax,numax)&
-     ,ee_qqu(numax,smax),rxnew(numax),rynew(numax),rznew(numax),rxu(nmax,numax),ryu(nmax,numax)&
-     ,rzu(nmax,numax),qqu(nmax,numax),rxuion(numax,2),ryuion(numax,2),rzuion(numax,2),qquion(numax,2)&
-     ,linclu(ntmax,numax,numax),lqinclu(ntmax,numax,numax),lainclu(ntmax,numax,numax)&
-     ,xvec(numax,numax),yvec(numax,numax),zvec(numax,numax),growfrom(numax)&
+    allocate(splist(npamax,numax,2),lexist(numax),lexclu(ntmax,numax,ntmax,numax),a15type(ntmax,numax,numax)&
+     ,epsilon_f(2,numax),sigma_f(2,numax),ljscale(ntmax,numax,numax),qscale2(ntmax,numax,numax),ee_qqu(numax,smax)&
+     ,rxnew(numax),rynew(numax),rznew(numax),rxu(nmax,numax),ryu(nmax,numax),rzu(nmax,numax),qqu(nmax,numax)&
+     ,rxuion(numax,2),ryuion(numax,2),rzuion(numax,2),qquion(numax,2),linclu(ntmax,numax,numax)&
+     ,lqinclu(ntmax,numax,numax),lainclu(ntmax,numax,numax),xvec(numax,numax),yvec(numax,numax),zvec(numax,numax),growfrom(numax)&
      ,growprev(numax),grownum(numax),growlist(numax,numax),awell(numax,numax,ntmax),stat=jerr)
     if (jerr.ne.0) then
        call err_exit(__FILE__,__LINE__,'allocate_molecule: allocation failed',jerr)

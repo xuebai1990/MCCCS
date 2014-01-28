@@ -71,8 +71,8 @@ contains
 
 !> \copyright (C) Copr. 1986-92 Numerical Recipes Software +3Y.
   pure subroutine polint(xa,ya,n,x,y)
-    real,intent(in)::xa(n),ya(n),x
     integer,intent(in)::n
+    real,intent(in)::xa(n),ya(n),x
     real,intent(out)::y
 
     integer,parameter::nmax=10

@@ -78,7 +78,7 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vn,vo,vinsta,vremta,vnewflucq,
          vbox(ivTail,ibox)   = vbox(ivTail,ibox)   + vinsta
          vbox(ivStretching,ibox)    =  vbox(ivStretching,ibox)   + vnew(ivStretching)
          vbox(ivTorsion,ibox)     = vbox(ivTorsion,ibox)     + vnew(ivTorsion)
-	 vbox(ivBending,ibox)   = vbox(ivBending,ibox)   + vnew(ivBending)
+         vbox(ivBending,ibox)   = vbox(ivBending,ibox)   + vnew(ivBending)
          vbox(ivFlucq,ibox)  = vbox(ivFlucq,ibox)  + vnewflucq
 
          vbox(ivTot,boxrem)     = vbox(ivTot,boxrem)     - vold(ivTot)

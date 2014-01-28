@@ -26,7 +26,9 @@ contains
     real,intent(out)::press,surf
     integer,intent(in)::ibox
 
-    real::rbcut,rcutsq,calpi,calpisq,pxx,pyy,pzz,xcmi,ycmi,zcmi,rcmi,fxcmi,fycmi,fzcmi,rxuij,ryuij,rzuij,rijsq,rcm,rcmsq,rxui,ryui,rzui,rij,fij,tmp,rs1,rs2,rs4,rs6,rs7,rs8,sr1,sr2,sr3,sr6,sr7,sigma2,epsilon2,qave,repress,rpxx,rpyy,rpzz,rpxy,rpyx,rpxz,rpzx,rpyz,rpzy,vol,volsq,rhosq,pwell
+    real::rbcut,rcutsq,calpi,calpisq,pxx,pyy,pzz,xcmi,ycmi,zcmi,rcmi,fxcmi,fycmi,fzcmi,rxuij,ryuij,rzuij,rijsq,rcm,rcmsq&
+     ,rxui,ryui,rzui,rij,fij,tmp,rs1,rs2,rs4,rs6,rs7,rs8,sr1,sr2,sr3,sr6,sr7,sigma2,epsilon2,qave,repress,rpxx,rpyy,rpzz&
+     ,rpxy,rpyx,rpxz,rpzx,rpyz,rpzy,vol,volsq,rhosq,pwell
     integer::i,imolty,j,jmolty,ii,jj,ntii,ntjj,ntij,iii,jjj,k
     logical::lqimol,lexplt,lij2,lqjmol,lcoulo(numax,numax)
 ! --------------------------------------------------------------------

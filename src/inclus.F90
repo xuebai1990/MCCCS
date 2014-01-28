@@ -18,8 +18,8 @@ subroutine inclus(inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ai
            lqinclu(imolty,m,n) = .true.
            ! by default, don't want any 1-5 r^12 interactions
            lainclu(imolty,m,n) = .false.
-	       ljscale(imolty,m,n) = 1.0
-	       qscale2(imolty,m,n) = 1.0
+           ljscale(imolty,m,n) = 1.0
+           qscale2(imolty,m,n) = 1.0
         end do
      end do
 

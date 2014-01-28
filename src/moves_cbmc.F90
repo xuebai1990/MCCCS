@@ -10,7 +10,8 @@ MODULE moves_cbmc
   implicit none
   private
   save
-  public::config,rosenbluth,schedule,explct,safeschedule,allocate_cbmc,init_cbmc,read_safecbmc,opt_safecbmc,output_cbmc_stats,output_safecbmc,read_checkpoint_cbmc,write_checkpoint_cbmc
+  public::config,rosenbluth,schedule,explct,safeschedule,allocate_cbmc,init_cbmc,read_safecbmc,opt_safecbmc,output_cbmc_stats&
+   ,output_safecbmc,read_checkpoint_cbmc,write_checkpoint_cbmc
 
   ! CBMC.INC
   logical,public::llrig
@@ -51,7 +52,7 @@ contains
       integer::i,j,k,iii,ibox,iunit,igrow,icbu,islen,imolty,iutry
       integer::istt,iett,nchp1,ic,total,bin,count,findex,iw
 
-      real::v(nEnergy),vtorold,vtornew,delen,deleo,vdum,wplace,wrig
+      real::v(nEnergy),vtornew,delen,deleo,vdum,wplace,wrig
       real::dchain,rchain,wnlog,wolog,wdlog,wratio
       real::vrecipn,vrecipo,cwtorfo,cwtorfn,x,y,z
       real::delta_vn,delta_vo
@@ -313,8 +314,8 @@ contains
 ! check new before old
          do iii = 2,1,-1
 ! calculate the true Lennard-Jones energy for the hydrogens
-! iii=1 new conformation
-! iii=2 old conformation
+! iii=1 old conformation
+! iii=2 new conformation
 ! hydrogens were placed and rxuion was assigned above
 
             if (iii .eq. 1) then
@@ -346,7 +347,7 @@ contains
                   write(io_output,*) 'ovrlap problem in old confomation', ' - CONFIG'
                   return
                end if
-               deleo = v(ivTot) + vtorold
+               deleo = v(ivTot) + v(ivTorsion)
                weiold = weiold*exp(-(beta*deleo))
                if ( weiold .lt. softlog ) then
                   write(io_output,*) '##old weight for explicit too low'
@@ -355,7 +356,7 @@ contains
                vold(ivIntraLJ) = vold(ivIntraLJ) + v(ivIntraLJ)
                vold(ivInterLJ) = vold(ivInterLJ) + v(ivInterLJ)
                vold(ivExt)   = vold(ivExt) + v(ivExt)
-               vold(ivTorsion)    = vold(ivTorsion) + vtorold
+               vold(ivTorsion)    = vold(ivTorsion) + v(ivTorsion)
                vold(ivElect) = vold(ivElect) + v(ivElect)
                vold(ivEwald) = vold(ivEwald) + v(ivEwald)
             end if
@@ -538,7 +539,8 @@ contains
 
     ! new stuff
     integer::itor,bin,counta,movetype,ku
-    real::bf_tor(nchtor_max),vtorsion(nchtor_max),phitors(nchtor_max),ctorf(nchtor_max),vfbbtr(nchtor_max),ctorf_acc(nchmax),vfbbtr_acc(nchmax),ran_tor,wei_bend,jacobian
+    real::bf_tor(nchtor_max),vtorsion(nchtor_max),phitors(nchtor_max),ctorf(nchtor_max),vfbbtr(nchtor_max),ctorf_acc(nchmax)&
+     ,vfbbtr_acc(nchmax),ran_tor,wei_bend,jacobian
 
     ! MPI
     integer::rcounts(numprocs),displs(numprocs),my_start,my_end,blocksize,my_itrial,rid
@@ -828,7 +830,8 @@ contains
                             ! write(io_output,*) 'jut4,jut3,jut2,iu',jut4,jut3,jut2,iu
                             ! call err_exit(__FILE__,__LINE__,'trouble jut4',myid+1)
                          end if
-                         vdha = vdha + vtorso(xvec(jut4,jut3),yvec(jut4,jut3),zvec(jut4,jut3),xvec(jut3,jut2),yvec(jut3,jut2),zvec(jut3,jut2),xx(count),yy(count),zz(count),ittor(imolty,iu,it))
+                         vdha = vdha + vtorso(xvec(jut4,jut3),yvec(jut4,jut3),zvec(jut4,jut3),xvec(jut3,jut2),yvec(jut3,jut2)&
+                          ,zvec(jut3,jut2),xx(count),yy(count),zz(count),ittor(imolty,iu,it))
                       end if
                    end do
                 end do
@@ -2642,7 +2645,8 @@ contains
 !> alpha is Ryckaert torsion angle!
   subroutine explct(ichain,vmethyl,lcrysl,lswitch)
       integer::ichain,nngrow,negrow,i,iplus,imins,nn, imolty,iuend,ii,jj
-      real::vmethyl,ch,cc,cch,ca,ah,hch2,hk,ck ,en0,aa1,b1,c1,dln1,a2,b2,c2,dln2,a3,b3,c3,x12,y12,z12,x32,y32 ,z32,xa,ya,za,r,rx,ry,rz,dr,ven,prob,a4,b4,c4,rn,hch ,ce,ratio
+      real::vmethyl,ch,cc,cch,ca,ah,hch2,hk,ck ,en0,aa1,b1,c1,dln1,a2,b2,c2,dln2,a3,b3,c3,x12,y12,z12,x32,y32,z32,xa,ya,za,r&
+       ,rx,ry,rz,dr,ven,prob,a4,b4,c4,rn,hch ,ce,ratio
       real::oa,hoh,hoh2,oh,ok,om
       logical::lcrysl,londone,lswitch,lalkanol
 
@@ -3057,9 +3061,12 @@ contains
             do i = 2,nngrow-iuend
                iplus = i+1
                imins = i-1
-               aa1 = (ryu(ichain,imins)-ryu(ichain,i))*(rzu(ichain ,iplus)-rzu(ichain,i)) - (rzu(ichain,imins)-rzu(ichain ,i))*(ryu(ichain,iplus)-ryu(ichain,i))
-               b1 = -(rxu(ichain,imins)-rxu(ichain,i))*(rzu(ichain ,iplus)-rzu(ichain,i)) + (rzu(ichain,imins)-rzu(ichain ,i))*(rxu(ichain,iplus)-rxu(ichain,i))
-               c1 = (rxu(ichain,imins)-rxu(ichain,i))*(ryu(ichain,iplus) -ryu(ichain,i)) - (ryu(ichain,imins)-ryu(ichain,i))* (rxu(ichain,iplus)-rxu(ichain,i))
+               aa1 = (ryu(ichain,imins)-ryu(ichain,i))*(rzu(ichain ,iplus)-rzu(ichain,i))&
+                - (rzu(ichain,imins)-rzu(ichain ,i))*(ryu(ichain,iplus)-ryu(ichain,i))
+               b1 = -(rxu(ichain,imins)-rxu(ichain,i))*(rzu(ichain ,iplus)-rzu(ichain,i))&
+                + (rzu(ichain,imins)-rzu(ichain ,i))*(rxu(ichain,iplus)-rxu(ichain,i))
+               c1 = (rxu(ichain,imins)-rxu(ichain,i))*(ryu(ichain,iplus) -ryu(ichain,i))&
+                - (ryu(ichain,imins)-ryu(ichain,i))* (rxu(ichain,iplus)-rxu(ichain,i))
                dln1 = sqrt(aa1**2 + b1**2 + c1**2)
                aa1 = aa1/dln1
                b1 = b1/dln1
@@ -3290,11 +3297,14 @@ contains
     ! integer,parameter::max=numax
     logical::lnew,lterm,ovrlap
 
-    integer::i,j,imolty,count,counta,iu,ju,ku,jtvib ,start,iv,index,ivib,nchvib,ibend,ib,type,ip,ichoi,niplace,iw,iufrom,it,jut2,jut3,jut4,ibox,glist,iwalk,iuprev,list,nchben_a,nchben_b,iu2back
+    integer::i,j,imolty,count,counta,iu,ju,ku,jtvib ,start,iv,index,ivib,nchvib,ibend,ib,type,ip,ichoi,niplace,iw,iufrom,it,jut2&
+     ,jut3,jut4,ibox,glist,iwalk,iuprev,list,nchben_a,nchben_b,iu2back
 
-    real::wplace,equil,kforce,bsum_try,mincb ,delcb,ux,uy,uz,r,vvib,bfactor,third,length,bs,rbf,vvibtr ,wei_vib,bendang,vangle,vbbtr,angle,vphi,thetac,rx,ry,rz ,rsint,dist,wei_bend,ang_trial,vdha,vbend,vtorsion ,bsum,alpha,gamma,dum,phi,thetatwo,phitwo
+    real::wplace,equil,kforce,bsum_try,mincb ,delcb,ux,uy,uz,r,vvib,bfactor,third,length,bs,rbf,vvibtr ,wei_vib,bendang,vangle&
+     ,vbbtr,angle,vphi,thetac,rx,ry,rz ,rsint,dist,wei_bend,ang_trial,vdha,vbend,vtorsion ,bsum,alpha,gamma,dum,phi,thetatwo,phitwo
 
-    dimension r(nchbn_max),bfactor(nchbn_max),bendang(numax,numax),ang_trial(nchbn_max),dist(numax),niplace(numax),vbend(nchmax),vtorsion(nchmax),phi(numax),list(numax),glist(numax)
+    dimension r(nchbn_max),bfactor(nchbn_max),bendang(numax,numax),ang_trial(nchbn_max),dist(numax),niplace(numax),vbend(nchmax)&
+     ,vtorsion(nchmax),phi(numax),list(numax),glist(numax)
 
 #ifdef __DEBUG__
     write(io_output,*) 'START PLACE in ',myid
@@ -3699,7 +3709,8 @@ contains
                         call err_exit(__FILE__,__LINE__,'trouble jut4 in place',myid+1)
                      end if
 
-                     vdha = vdha + vtorso(xvec(iu,jut2),yvec(iu,jut2),zvec(iu,jut2),xvec(jut2,jut3),yvec(jut2,jut3),zvec(jut2,jut3),xvec(jut3,jut4),yvec(jut3,jut4),zvec(jut3,jut4),ittor(imolty,iu,it))
+                     vdha = vdha + vtorso(xvec(iu,jut2),yvec(iu,jut2),zvec(iu,jut2),xvec(jut2,jut3),yvec(jut2,jut3)&
+                      ,zvec(jut2,jut3),xvec(jut3,jut4),yvec(jut3,jut4),zvec(jut3,jut4),ittor(imolty,iu,it))
                   end if
                end do
             end do
@@ -3838,7 +3849,8 @@ contains
 !> \author Originally completed by Collin Wick on 1-1-2000
   subroutine safecbmc(iinit,lnew,i,iw,igrow,imolty,count,ux,uy,uz,vphi,vtor,wei_bv,lterm,movetype)
       logical::lnew,lshit,lterm,ldo,lreturn ! lshit is used for diagnistics
-      integer::igrow,imolty,count,counta,j,ja,ivib,iufrom,iuprev,iinit,iu,ju,ku,i,iv,juvib,jtvib,type,iu2,ib,iw,ntogrow,itor,ip,ichoi,ichtor,countb,bin,max,nu,iu1,dir,diracc,start,nchben_a,nchben_b,ibend,iopen,last,iclose,nchvib
+      integer::igrow,imolty,count,counta,j,ja,ivib,iufrom,iuprev,iinit,iu,ju,ku,i,iv,juvib,jtvib,type,iu2,ib,iw,ntogrow,itor,ip&
+       ,ichoi,ichtor,countb,bin,max,nu,iu1,dir,diracc,start,nchben_a,nchben_b,ibend,iopen,last,iclose,nchvib
 
       integer::it,jut2,jut3,jut4,movetype,lu,k,opencount
 
@@ -3848,7 +3860,8 @@ contains
 ! possible in place of numax
       parameter(max=10)
 
-      real::x,y,z,equil,kforce,length,vvib,ux,uy,uz,hdist,lengtha,lengthb,vtor,vphi,thetac,angle,equila,kforcea,ovphi,alpha,phidisp,dum,rxt,ryt,rzt,phiacc,rxa,rya,rza,angles,bangles,r,mincb,delcb,vvibration,ovvib
+      real::x,y,z,equil,kforce,length,vvib,ux,uy,uz,hdist,lengtha,lengthb,vtor,vphi,thetac,angle,equila,kforcea,ovphi,alpha&
+       ,phidisp,dum,rxt,ryt,rzt,phiacc,rxa,rya,rza,angles,bangles,r,mincb,delcb,vvibration,ovvib
 
       dimension alpha(max,numax),equila(max),rxa(max,max),rya(max,max),rza(max,max),rxt(max),ryt(max),rzt(max)&
        ,vbend(2*nchtor_max),phicrank(2*nchtor_max,max),phiacc(max),vtorsion(2*nchtor_max),bf_tor(2*nchtor_max)&
@@ -4509,7 +4522,8 @@ contains
                   lengtha = flength(iufrom,iu)
                   lengthb = distij(iufrom,iuprev)
 
-                  thetac = -( (rxu(i,iu) - rxu(i,iufrom)) * xvec(iuprev,iufrom)  + (ryu(i,iu) - ryu(i,iufrom)) * yvec(iuprev,iufrom) + (rzu(i,iu) - rzu(i,iufrom)) * zvec(iuprev,iufrom))  / (lengtha*lengthb)
+                  thetac = -( (rxu(i,iu) - rxu(i,iufrom)) * xvec(iuprev,iufrom)  + (ryu(i,iu) - ryu(i,iufrom))&
+                   * yvec(iuprev,iufrom) + (rzu(i,iu) - rzu(i,iufrom)) * zvec(iuprev,iufrom))  / (lengtha*lengthb)
 
                   angle = acos(thetac)
                   vphi =  kforcea(count) * (angle-equila(count))**2
@@ -4592,7 +4606,8 @@ contains
 
                         lengthb = flength(iufrom,ju)
 
-                        thetac = ( (rxu(i,ju) - rxu(i,iufrom)) * (rxu(i,iu) - rxu(i,iufrom)) + (ryu(i,ju) - ryu(i,iufrom)) * (ryu(i,iu) - ryu(i,iufrom)) + (rzu(i,ju) - rzu(i,iufrom)) * (rzu(i,iu) - rzu(i,iufrom))) / (lengtha * lengthb)
+                        thetac = ((rxu(i,ju)-rxu(i,iufrom)) * (rxu(i,iu)-rxu(i,iufrom)) + (ryu(i,ju)-ryu(i,iufrom))&
+                         * (ryu(i,iu)-ryu(i,iufrom)) + (rzu(i,ju)-rzu(i,iufrom)) * (rzu(i,iu)-rzu(i,iufrom)))/(lengtha*lengthb)
 
                         angle = acos(thetac)
 
@@ -5020,7 +5035,8 @@ contains
 ! first determine bending energy for iuprev-iufrom-iu
                   if (iuprev.ne.0) then
                      length = distij(iufrom,iuprev)
-                     thetac = -(xx(count)*xvec(iuprev,iufrom)  + yy(count)*yvec(iuprev,iufrom) + zz(count)*zvec(iuprev,iufrom))  / (lengtha*length)
+                     thetac = -(xx(count)*xvec(iuprev,iufrom) + yy(count)*yvec(iuprev,iufrom) + zz(count)*zvec(iuprev,iufrom))&
+                      /(lengtha*length)
 
                      angle = acos(thetac)
 
@@ -5055,7 +5071,7 @@ contains
                         do counta = 1, pastnum(ju)
                            ku = ipast(ju,counta)
                            length = distij(ju,ku)
-                           thetac = - (xvec(iu,ju) * xvec(ju,ku) + yvec(iu,ju) * yvec(ju,ku) + zvec(iu,ju) * zvec(ju,ku)) / (length * lengthb)
+                           thetac = -(xvec(iu,ju)*xvec(ju,ku) + yvec(iu,ju)*yvec(ju,ku) + zvec(iu,ju)*zvec(ju,ku))/(length*lengthb)
                            angle = acos( thetac )
 
                            vphi = vphi + kforceb(iu,ku) * (angle -equilb(iu,ku))**2
@@ -5105,7 +5121,8 @@ contains
                            call err_exit(__FILE__,__LINE__,'trouble jut4 in crankshaft',myid+1)
                         end if
 
-                        vdha = vdha + vtorso(xvec(iu,jut2),yvec(iu,jut2),zvec(iu,jut2),xvec(jut2,jut3),yvec(jut2,jut3),zvec(jut2,jut3),xvec(jut3,jut4),yvec(jut3,jut4),zvec(jut3,jut4),ittor(imolty,iu,it))
+                        vdha = vdha + vtorso(xvec(iu,jut2),yvec(iu,jut2),zvec(iu,jut2),xvec(jut2,jut3),yvec(jut2,jut3)&
+                         ,zvec(jut2,jut3),xvec(jut3,jut4),yvec(jut3,jut4),zvec(jut3,jut4),ittor(imolty,iu,it))
 
  41                     continue
 
@@ -5123,7 +5140,8 @@ contains
 
                         if (jut2.eq.iu.and.jut4.eq.iuprev) then
 ! add torsion energy to vdha
-                           vdha = vdha + vtorso(xvec(ju,jut2),yvec(ju,jut2),zvec(ju,jut2),xvec(jut2,jut3),yvec(jut2,jut3),zvec(jut2,jut3),xvec(jut3,jut4),yvec(jut3,jut4),zvec(jut3,jut4),ittor(imolty,ju,it))
+                           vdha = vdha + vtorso(xvec(ju,jut2),yvec(ju,jut2),zvec(ju,jut2),xvec(jut2,jut3),yvec(jut2,jut3)&
+                            ,zvec(jut2,jut3),xvec(jut3,jut4),yvec(jut3,jut4),zvec(jut3,jut4),ittor(imolty,ju,it))
                         end if
                      end do
 
@@ -5148,7 +5166,8 @@ contains
                            end if
 
 ! add torsion energy to vdha
-                           vdha = vdha + vtorso(xvec(ku,jut2),yvec(ku,jut2),zvec(ku,jut2),xvec(jut2,jut3),yvec(jut2,jut3),zvec(jut2,jut3),xvec(jut3,jut4),yvec(jut3,jut4),zvec(jut3,jut4),ittor(imolty,ku,it))
+                           vdha = vdha + vtorso(xvec(ku,jut2),yvec(ku,jut2),zvec(ku,jut2),xvec(jut2,jut3),yvec(jut2,jut3)&
+                            ,zvec(jut2,jut3),xvec(jut3,jut4),yvec(jut3,jut4),zvec(jut3,jut4),ittor(imolty,ku,it))
  42                        continue
                         end if
                      end do
@@ -5166,7 +5185,8 @@ contains
 
                         if (jut2.eq.ku.and.jut3.eq.ju.and.jut4.eq.iu) then
 ! add torsion energy to vdha
-                           vdha = vdha + vtorso(xvec(nu,jut2),yvec(nu,jut2),zvec(nu,jut2),xvec(jut2,jut3),yvec(jut2,jut3),zvec(jut2,jut3),xvec(jut3,jut4),yvec(jut3,jut4),zvec(jut3,jut4),ittor(imolty,nu,it))
+                           vdha = vdha + vtorso(xvec(nu,jut2),yvec(nu,jut2),zvec(nu,jut2),xvec(jut2,jut3),yvec(jut2,jut3)&
+                            ,zvec(jut2,jut3),xvec(jut3,jut4),yvec(jut3,jut4),zvec(jut3,jut4),ittor(imolty,nu,it))
                         end if
                      end do
                   end do
@@ -5195,7 +5215,7 @@ contains
 
                            lengthb = flength(iu,ku)
 
-                           thetac = (xvec(iu,ju)*xvec(iu,ku) + yvec(iu,ju)*yvec(iu,ku) + zvec(iu,ju)*zvec(iu,ku)) / (lengtha*lengthb)
+                           thetac = (xvec(iu,ju)*xvec(iu,ku) + yvec(iu,ju)*yvec(iu,ku) + zvec(iu,ju)*zvec(iu,ku))/(lengtha*lengthb)
 
                            if (abs(thetac).gt.1) then
                               write(io_output,*) '*********************' ,'****************************'
@@ -5224,13 +5244,14 @@ contains
                      iu = growlist(iw,count)
                      do counta = count+1, ntogrow
                         ju = growlist(iw,counta)
-                        if (.not.((iopen(1).eq.count .or.iopen(1).eq.counta) .and.((iclose.eq.count.or.iclose.eq.counta) .or.iopen(2).eq.count .or.iopen(2).eq.counta))) then
+                        if (.not.((iopen(1).eq.count .or.iopen(1).eq.counta) .and.((iclose.eq.count.or.iclose.eq.counta)&
+                         .or.iopen(2).eq.count .or.iopen(2).eq.counta))) then
 ! we already calculated these
 
                            lengtha = flength(iufrom,iu)
                            lengthb = flength(iufrom,ju)
 
-                           thetac = (xx(count) * xx(counta) + yy(count) * yy(counta) + zz(count) * zz(counta)) /  (lengtha * lengthb)
+                           thetac = (xx(count)*xx(counta) + yy(count)*yy(counta) + zz(count)*zz(counta)) / (lengtha*lengthb)
 
                            angle = acos(thetac)
 
@@ -5484,7 +5505,8 @@ contains
       integer::num,inum,inuma,max
 
       parameter(max=10)
-      dimension fint(numax),ffrom(numax,max),fprev(numax,max) ,flist(numax,max,max),fnum(numax),fnuma(numax,max) ,lpick(numax) ,lfix(numax),inum(max),inuma(max),lfind(numax)
+      dimension fint(numax),ffrom(numax,max),fprev(numax,max),flist(numax,max,max),fnum(numax),fnuma(numax,max),lpick(numax)&
+       ,lfix(numax),inum(max),inuma(max),lfind(numax)
 
 !     --------------------------------------------------------------------
 
@@ -6069,7 +6091,8 @@ contains
   subroutine close(iinit,rx,ry,rz,bondl,angle,lterm)
       logical::lterm
       integer::iinit
-      real::x,y,z,rx,ry,rz,length,lengtha,lengthb ,xa,ya,za,theta,thetac,ux,uy,uz,bondl,avar,bvar,cvar ,rxa,rya,rza ,lengthc,angle,rxf,ryf,rzf,var,dvar,a,bb,c
+      real::x,y,z,rx,ry,rz,length,lengtha,lengthb,xa,ya,za,theta,thetac,ux,uy,uz,bondl,avar,bvar,cvar,rxa,rya,rza,lengthc,angle&
+       ,rxf,ryf,rzf,var,dvar,a,bb,c
 
       dimension rx(6),ry(6),rz(6),x(4),y(4),z(4),ux(3),uy(3),uz(3)
       dimension angle(3)
@@ -6106,7 +6129,7 @@ contains
          y(3) = lengthc * sin( theta )
 
 ! determine the in-plane coordinates with the same length
-         ya = 0.5E0_dp * ( ( x(2)**2 - x(3)**2 - y(3)**2 ) / ( - y(3) ) + ( x(2)**2 * ( x(3) - x(2) ) )  / ( ( - y(3) ) * ( x(2) ) ) )
+         ya = 0.5E0_dp * ( (x(2)**2 - x(3)**2 - y(3)**2) / (-y(3)) + (x(2)**2 * (x(3)-x(2))) / ((- y(3))*x(2)) )
 
          xa = 0.5E0_dp * x(2)
 
@@ -6297,7 +6320,8 @@ contains
 
          return
 
-         avar = cos(angle(1))*(rx(2)*(rx(2)*rz(1) - rx(1)*rz(2)) + ry(2)*(ry(2)*rz(1) - ry(1)*rz(2))) + cos(angle(2))*(rx(1)*(rx(1)*rz(2) - rx(2)*rz(1)) + ry(1)*(ry(1)*rz(2) - ry(2)*rz(1)))
+         avar = cos(angle(1))*(rx(2)*(rx(2)*rz(1) - rx(1)*rz(2)) + ry(2)*(ry(2)*rz(1) - ry(1)*rz(2)))&
+          + cos(angle(2))*(rx(1)*(rx(1)*rz(2) - rx(2)*rz(1)) + ry(1)*(ry(1)*rz(2) - ry(2)*rz(1)))
 
          var = rx(2)**2*(ry(1)**2 + rz(1)**2) + ry(2)**2*(rx(1)**2 + rz(1)**2) + rz(2)**2*(rx(1)**2 + ry(1)**2)&
           - 2.0E0_dp*(rx(1)*rx(2)*ry(1)*ry(2) + rx(1)*rx(2)*rz(1)*rz(2) + ry(1)*ry(2)*rz(1)*rz(2))&
@@ -6313,7 +6337,8 @@ contains
 
          bvar = (rx(1)*ry(2) - rx(2)*ry(1))*sqrt(var)
 
-         cvar = rx(2)**2*(ry(1)**2 + rz(1)**2) + (ry(2)*rz(1) - ry(1)*rz(2))**2 - 2.0E0_dp*rx(1)*rx(2)*(ry(1)*ry(2) + rz(1)*rz(2)) + rx(1)**2*(ry(2)**2 + rz(2)**2)
+         cvar = rx(2)**2*(ry(1)**2 + rz(1)**2) + (ry(2)*rz(1) - ry(1)*rz(2))**2 - 2.0E0_dp*rx(1)*rx(2)*(ry(1)*ry(2)&
+          + rz(1)*rz(2)) + rx(1)**2*(ry(2)**2 + rz(2)**2)
 
          rz(3) = (avar + bvar) / cvar
          rz(4) = (avar - bvar) / cvar
@@ -6339,7 +6364,8 @@ contains
 
   subroutine rigfix(lnew,i,ibox,imolty,lterm,wrig)
     logical::lnew,ovrlap,lterm,lovra,lfind,lshit
-    integer::iw,i,ibox,imolty,iufrom,iuprev,ntogrow,count,iu,counta,ilist,ja,max,num,inum,j,ju,iv,nlist,ichoi,ichtor,ip,itor,it,jut2,jut3,jut4,iwalk,glist,ifrom,inuma
+    integer::iw,i,ibox,imolty,iufrom,iuprev,ntogrow,count,iu,counta,ilist,ja,max,num,inum,j,ju,iv,nlist,ichoi,ichtor,ip,itor&
+     ,it,jut2,jut3,jut4,iwalk,glist,ifrom,inuma
 
     parameter(max=10)
 
@@ -6536,7 +6562,8 @@ contains
                            write(io_output,*) 'iu,jut2,jut3,jut4',iu ,jut2,jut3,jut4
                            call err_exit(__FILE__,__LINE__,'trouble, jut4 does not exist in rigfix',myid+1)
                         end if
-                        vdha = vdha + vtorso(xvec(iu,jut2),yvec(iu,jut2),zvec(iu,jut2),xvec(jut2,jut3),yvec(jut2,jut3),zvec(jut2,jut3),xvec(jut3,jut4),yvec(jut3,jut4),zvec(jut3,jut4),ittor(imolty,iu,it))
+                        vdha = vdha + vtorso(xvec(iu,jut2),yvec(iu,jut2),zvec(iu,jut2),xvec(jut2,jut3),yvec(jut2,jut3)&
+                         ,zvec(jut2,jut3),xvec(jut3,jut4),yvec(jut3,jut4),zvec(jut3,jut4),ittor(imolty,iu,it))
                      end if
                   end do
                end do
@@ -6877,7 +6904,9 @@ contains
     allocate(lexshed(numax),llplace(ntmax),lpnow(numax),lsave(numax),bncb(ntmax,numax),bscb(ntmax,2,numax),fbncb(ntmax,numax)&
      ,fbscb(ntmax,2,numax),iend(numax),ipast(numax,numax),pastnum(numax),fclose(numax,numax),fcount(numax),iwbef(numax)&
      ,ibef(numax,numax),befnum(numax),xx(numax),yy(numax),zz(numax),distij(numax,numax),nextnum(numax),inext(numax,numax)&
-     ,kforceb(numax,numax),equilb(numax,numax),flength(numax,numax),vequil(numax,numax),vkforce(numax,numax),rlist(numax,numax),rfrom(numax),rprev(numax),rnum(numax),iplace(numax,numax),pfrom(numax),pnum(numax),pprev(numax),avbmc_version(nmolty),stat=jerr)
+     ,kforceb(numax,numax),equilb(numax,numax),flength(numax,numax),vequil(numax,numax),vkforce(numax,numax),rlist(numax,numax)&
+     ,rfrom(numax),rprev(numax),rnum(numax),iplace(numax,numax),pfrom(numax),pnum(numax),pprev(numax),avbmc_version(nmolty)&
+     ,stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_cbmc: allocation failed',jerr)
 
     llplace=.FALSE.
@@ -6922,11 +6951,14 @@ contains
        write(io_output,'(A,G16.9)') 'pmcb: ',pmcb
        write(io_output,'(/,A)') 'molecule type: nchoi1  nchoi nchoir nchoih nchtor nchbna nchbnb icbdir icbsta'
        do i=1,nmolty
-          write(io_output,'(I13,A,9(1X,I6))') i,':',nchoi1(i),nchoi(i),nchoir(i),nchoih(i),nchtor(i),nchbna(i),nchbnb(i),icbdir(i),icbsta(i)
+          write(io_output,'(I13,A,9(1X,I6))') i,':',nchoi1(i),nchoi(i),nchoir(i),nchoih(i),nchtor(i),nchbna(i),nchbnb(i)&
+           ,icbdir(i),icbsta(i)
        end do
-       write(io_output,'(/,A)') 'molecule type:    pmcbmt         pmall  avbmc_version    pmbias        pmbsmt       pmbias2         pmfix   lrig'
+       write(io_output,'(/,A)')&
+        'molecule type:    pmcbmt         pmall  avbmc_version    pmbias        pmbsmt       pmbias2         pmfix   lrig'
        do i=1,nmolty
-          write(io_output,'(I13,A,2(1X,G13.6),1X,I10,4(1X,G13.6),1X,L2)') i,':',pmcbmt(i),pmall(i),avbmc_version(i),pmbias(i),pmbsmt(i),pmbias(2),pmfix(i),lrig(i)
+          write(io_output,'(I13,A,2(1X,G13.6),1X,I10,4(1X,G13.6),1X,L2)') i,':',pmcbmt(i),pmall(i),avbmc_version(i),pmbias(i)&
+           ,pmbsmt(i),pmbias(2),pmfix(i),lrig(i)
        end do
     end if
 
@@ -6949,7 +6981,8 @@ contains
        if (nchoir(i).gt.nchmax) then
           nchmax=nchoir(i)
        end if
-       if (nchoih(i).ne.1.and.nunit(i).eq.nugrow(i)) call err_exit(__FILE__,__LINE__,'nchoih must be 1 (one) if nunit = nugrow',myid+1)
+       if (nchoih(i).ne.1.and.nunit(i).eq.nugrow(i)) call err_exit(__FILE__,__LINE__,'nchoih must be 1 (one) if nunit = nugrow'&
+        ,myid+1)
        if (nchtor(i).gt.nchtor_max) then
           nchtor_max=nchtor(i)
        end if
@@ -6973,7 +7006,8 @@ contains
        end if
        if ((lavbmc2(i).or.lavbmc3(i)).and.(.not.lgaro)) lneighbor = .true.
 
-       if (lring(i).and.pmfix(i).lt.1.and..not.lrig(i)) call err_exit(__FILE__,__LINE__,'a ring can only be used with safe-cbmc',myid+1)
+       if (lring(i).and.pmfix(i).lt.1.and..not.lrig(i)) call err_exit(__FILE__,__LINE__,'a ring can only be used with safe-cbmc'&
+        ,myid+1)
     end do
 
     if (any(lbias(1:nmolty)).and.rbsmax.lt.rbsmin) call err_exit(__FILE__,__LINE__,'rbsmax should be greater than rbsmin',myid+1)

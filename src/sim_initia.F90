@@ -20,7 +20,7 @@ CONTAINS
 
     lopenfile=.false.
     do imolty=1,nmolty
-       if (lbranch(imolty).and.(linit.or.(lgrand.and.temtyp(imolty).eq.0))) then
+       if ((lbranch(imolty).or.lrigid(imolty)).and.(linit.or.(lgrand.and.temtyp(imolty).eq.0))) then
           lopenfile=.true.
           exit
        end if
@@ -35,7 +35,7 @@ CONTAINS
 
     do imolty=1,nmolty
        if (lbranch(imolty).or.lrigid(imolty)) then
-          if (linit.or.(lgrand.and.temtyp(imolty).eq.0)) then
+          if (lopenfile) then
              read(io_struct,*)
              do m = 1, nunit(imolty)
                 read(io_struct,*) samx(imolty,m),samy(imolty,m),samz(imolty,m)
@@ -48,6 +48,14 @@ CONTAINS
                 samz(imolty,m) = rzu(ichain,m)
              end do
           end if
+          do m = 2, nunit(imolty)
+             samx(imolty,m) = samx(imolty,m) - samx(imolty,1)
+             samy(imolty,m) = samy(imolty,m) - samy(imolty,1)
+             samz(imolty,m) = samz(imolty,m) - samz(imolty,1)
+          end do
+          samx(imolty,1) = 0._dp
+          samy(imolty,1) = 0._dp
+          samz(imolty,1) = 0._dp
        end if
     end do
 
@@ -104,7 +112,7 @@ CONTAINS
   end subroutine setup_molecule_config
 
 subroutine setup_system_config(file_struct)
-  use const_math,only:degrad,raddeg
+  use const_math,only:degrad
   use util_random,only:random
   use energy_intramolecular,only:vtorso
   use moves_cbmc,only:explct

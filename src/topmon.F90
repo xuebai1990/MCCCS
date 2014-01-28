@@ -4,10 +4,10 @@ program topmon
   use util_mp,only:mp_start,mp_end
   use sim_system,only:myid,numprocs,groupid,thread_num,thread_num_max
   use topmon_main,only:monola
-  implicit none
 #ifdef __OPENMP__
-  include 'omp_lib.h'
+  use omp_lib
 #endif
+  implicit none
   integer::narg,iarg,jerr
   character(LEN=default_path_length)::sarg,file_in='topmon.inp'
   logical::lrun=.true.,lsetinput=.false.,lversion=.false.,lusage =.false.

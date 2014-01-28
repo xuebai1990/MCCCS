@@ -2,7 +2,8 @@ module util_string
   use var_type,only:default_string_length
   implicit none
   private
-  public::splitAndGetNext,integer_to_string,real_to_string,uppercase,lowercase,is_whitespace,str_trim,str_comp,str_search,remove_word,str_compress,typo_match,glob_match,is_blank_line,format_n
+  public::splitAndGetNext,integer_to_string,real_to_string,uppercase,lowercase,is_whitespace&
+   ,str_trim,str_comp,str_search,remove_word,str_compress,typo_match,glob_match,is_blank_line,format_n
   CHARACTER,PARAMETER::whitespace*3=" "//CHAR(9)//CHAR(11),commentChar(3)=(/"#","!","%"/),backslash='\\',star='*',question='?'
 contains
 

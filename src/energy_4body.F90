@@ -68,7 +68,8 @@ CONTAINS
 
        if (UPPERCASE(line(1:8)).eq."FOURBODY") then
           call checkAtom()
-          allocate(quadruplets(0:8,initial_size,1:nbox),coeffs(1:5,1:initial_size),nQuadruplets(1:nbox),qtype(1:initial_size),STAT=jerr)
+          allocate(quadruplets(0:8,initial_size,1:nbox),coeffs(1:5,1:initial_size),nQuadruplets(1:nbox),qtype(1:initial_size)&
+           ,STAT=jerr)
           if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'initiateFourBody: allocation error',jerr)
           call initiateTable(fourbodies,initial_size)
           nEntries=0
@@ -97,7 +98,8 @@ CONTAINS
   end subroutine readFourBody
 
   subroutine buildQuadrupletTable()
-    integer::ibox,lchain,clchain,crchain,rchain,lmolty,clmolty,crmolty,rmolty,lunit,clunit,crunit,runit,nAtomType,itype,io_quadruplets,nboxtmp,jerr
+    integer::ibox,lchain,clchain,crchain,rchain,lmolty,clmolty,crmolty,rmolty,lunit,clunit,crunit,runit,nAtomType,itype&
+     ,io_quadruplets,nboxtmp,jerr
     real::ar(3),br(3)
 
     io_quadruplets=get_iounit()
@@ -139,7 +141,8 @@ CONTAINS
                                    .or.(clchain.eq.crchain.and.clunit.eq.crunit)&
                                    .or.(clchain.eq.rchain.and.clunit.eq.runit)&
                                    .or.(crchain.eq.rchain.and.crunit.eq.runit)) cycle
-                                  itype=indexOf(fourbodies,idx((/ntype(lmolty,lunit),ntype(clmolty,clunit),ntype(crmolty,crunit),ntype(rmolty,runit)/)))
+                                  itype=indexOf(fourbodies,idx((/ntype(lmolty,lunit),ntype(clmolty,clunit),ntype(crmolty,crunit)&
+                                   ,ntype(rmolty,runit)/)))
                                   if (itype.eq.0) cycle !no 4-body defined for this quadruplet
                                   ! write(*,'("Box ",I1,"(",I4,",",I4,",",I4,")->[",I2,",",I2,",",I2,"]:",I2,",",I2,",",I2,". itype=",I5,". Quadruplet ",I2," of size ",I2)')&
                                   !  ibox,lchain,cchain,rchain,lunit,cunit,runit,indexOf(atoms,ntype(lmolty,lunit))&
@@ -158,11 +161,13 @@ CONTAINS
                                   !write(*,'("ar=",D16.9,". br=",D16.9)') dot_product(ar,ar),dot_product(br,br)
                                   if (dot_product(ar,ar).le.coeffs(1,itype).and.dot_product(br,br).le.coeffs(1,itype)) then
                                      nQuadruplets(ibox)=nQuadruplets(ibox)+1
-                                     write(*,'("Box ",I1,": (",I4,",",I4,",",I4,",",I4,")->[",I2,",",I2,",",I2,",",I2,"]: quatype=",I2,". Quadruplet ",I8," of size ",I8,". ar=",D16.9,". br=",D16.9)')&
+                                     write(*,'("Box ",I1,": (",I4,",",I4,",",I4,",",I4,")->[",I2,",",I2,",",I2,",",I2,"]&
+                                      &: quatype=",I2,". Quadruplet ",I8," of size ",I8,". ar=",D16.9,". br=",D16.9)')&
                                       ibox,lchain,clchain,crchain,rchain,lunit,clunit,crunit,runit&
                                       ,indexOf(atoms,ntype(lmolty,lunit)),itype,nQuadruplets(ibox)&
                                       ,size(quadruplets,2),dot_product(ar,ar),dot_product(br,br)
-                                     if (nQuadruplets(ibox).gt.size(quadruplets,2)) call reallocate(quadruplets,0,8,1,2*size(quadruplets,2),1,nbox)
+                                     if (nQuadruplets(ibox).gt.size(quadruplets,2))&
+                                      call reallocate(quadruplets,0,8,1,2*size(quadruplets,2),1,nbox)
                                      quadruplets(0,nQuadruplets(ibox),ibox)=itype
                                      quadruplets(1,nQuadruplets(ibox),ibox)=lchain
                                      quadruplets(2,nQuadruplets(ibox),ibox)=clchain
@@ -183,7 +188,8 @@ CONTAINS
           end do
        end do
 
-       open(unit=io_quadruplets,access='sequential',action='write',file=file_quadruplets,form='formatted',iostat=jerr,status='unknown')
+       open(unit=io_quadruplets,access='sequential',action='write',file=file_quadruplets,form='formatted',iostat=jerr&
+        ,status='unknown')
        if (jerr.ne.0) then
           call err_exit(__FILE__,__LINE__,'cannot open quadruplets file',jerr)
        end if

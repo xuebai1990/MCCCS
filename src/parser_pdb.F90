@@ -67,7 +67,8 @@ CONTAINS
     IF(jerr.ne.0) call err_exit(__FILE__,__LINE__,'wrong PDB file format',-1)
 
     read(line(2:),*) zeo%nbead,zunit%dup(1),zunit%dup(2),zunit%dup(3),ztype%ntype
-    allocate(zeo%bead(zeo%nbead),lunitcell(zeo%nbead),ztype%name(ztype%ntype),ztype%radiisq(ztype%ntype),ztype%type(ztype%ntype),ztype%num(ztype%ntype),stat=jerr)
+    allocate(zeo%bead(zeo%nbead),lunitcell(zeo%nbead),ztype%name(ztype%ntype),ztype%radiisq(ztype%ntype),ztype%type(ztype%ntype)&
+     ,ztype%num(ztype%ntype),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'readPDB: allocation failed',-1)
 
     do i=1,ztype%ntype
@@ -86,7 +87,8 @@ CONTAINS
 
        SELECT CASE (line(1:6))
        CASE ("CRYST1")
-          read(line(7:),*) zcell%boxl(1)%val,zcell%boxl(2)%val,zcell%boxl(3)%val,zcell%ang(1)%val,zcell%ang(2)%val,zcell%ang(3)%val
+          read(line(7:),*) zcell%boxl(1)%val,zcell%boxl(2)%val,zcell%boxl(3)%val,zcell%ang(1)%val,zcell%ang(2)%val&
+           ,zcell%ang(3)%val
           call setUpCellStruct(zcell,zunit,lprint)
           uninitialized=.false.
        CASE ("ATOM","HETATM")
@@ -140,10 +142,12 @@ CONTAINS
        call err_exit(__FILE__,__LINE__,'cannot open file for writing (PDB)',-1)
     end if
 
-    WRITE(IOPDB,'(A6,3(F9.3),3(F7.2),1X,A10)') "CRYST1",zcell%boxl(1)%val,zcell%boxl(2)%val,zcell%boxl(3)%val,zcell%ang(1)%val*raddeg,zcell%ang(2)%val*raddeg,zcell%ang(3)%val*raddeg,"P1        "
+    WRITE(IOPDB,'(A6,3(F9.3),3(F7.2),1X,A10)') "CRYST1",zcell%boxl(1)%val,zcell%boxl(2)%val,zcell%boxl(3)%val&
+     ,zcell%ang(1)%val*raddeg,zcell%ang(2)%val*raddeg,zcell%ang(3)%val*raddeg,"P1        "
 
     DO i=1,zeo%nbead
-       WRITE(IOPDB,'(A6,I5,1X,A4,1X,A3,2X,I4,4X,3(F8.3),2(F6.2),10X,A2)') "ATOM  ",i,ADJUSTL(TRIM(ztype%name(zeo%bead(i)%type))),"ZEO",1,zeo%bead(i)%coord,1.0,0.0,ADJUSTL(TRIM(ztype%name(zeo%bead(i)%type)))
+       WRITE(IOPDB,'(A6,I5,1X,A4,1X,A3,2X,I4,4X,3(F8.3),2(F6.2),10X,A2)') "ATOM  ",i,ADJUSTL(TRIM(ztype%name(zeo%bead(i)%type)))&
+        ,"ZEO",1,zeo%bead(i)%coord,1.0,0.0,ADJUSTL(TRIM(ztype%name(zeo%bead(i)%type)))
     END DO
 
     WRITE(IOPDB,'(A3,/,A3)') "TER","END"

@@ -13,7 +13,12 @@ MODULE moves_volume
   real,allocatable,public::acsvol(:),acnvol(:),acshmat(:,:),acnhmat(:,:),bsvol(:),bnvol(:),bshmat(:,:),bnhmat(:,:)
   real,allocatable::vboxn(:,:),vboxo(:,:),bxo(:),byo(:),bzo(:),xcmo(:),ycmo(:),zcmo(:),rxuo(:,:),ryuo(:,:),rzuo(:,:),qquo(:,:),rcuto(:)
   real::hmato(9),hmatio(9)
-  integer::allow_cutoff_failure=-1 !< controls how volume move failures, the ones that will result in box lengths smaller than twice the cutoff, are handled: -1 = fetal error and program exits; 0 = simply rejects the move, which is equivalent to modifying the lower limit of integration of the partition function; 1 = allows the move and adjusts cutoff to be half of the new box lengths (will be restored if possible); 2 = allows the move but does not adjust the cutoff, which could be problematic because this results in a lower density in the cutoff radius (due to periodic boundary conditions)
+  integer::allow_cutoff_failure=-1 !< controls how volume move failures, the ones that will result in box lengths
+  !< smaller than twice the cutoff, are handled: -1 = fetal error and program exits;
+  !< 0 = simply rejects the move, which is equivalent to modifying the lower limit of integration of the partition function;
+  !< 1 = allows the move and adjusts cutoff to be half of the new box lengths (will be restored if possible);
+  !< 2 = allows the move but does not adjust the cutoff, which could be problematic because this results in a lower density
+  !< in the cutoff radius (due to periodic boundary conditions)
 
 contains
 !> \brief Makes an isotropic volume change for NVT-Gibbs ensemble
@@ -759,7 +764,9 @@ contains
     real::rmvolume
     namelist /mc_volume/ tavol,iratv,pmvlmt,nvolb,pmvolb,box5,box6,pmvol,pmvolx,pmvoly,rmvolume,allow_cutoff_failure
 
-    allocate(acsvol(nbxmax),acnvol(nbxmax),acshmat(nbxmax,9),acnhmat(nbxmax,9),bsvol(nbxmax),bnvol(nbxmax),bshmat(nbxmax,9),bnhmat(nbxmax,9),vboxn(nEnergy,nbxmax),vboxo(nEnergy,nbxmax),bxo(nbxmax),byo(nbxmax),bzo(nbxmax),xcmo(nmax),ycmo(nmax),zcmo(nmax),rxuo(nmax,numax),ryuo(nmax,numax),rzuo(nmax,numax),qquo(nmax,numax),rcuto(nbxmax),stat=jerr)
+    allocate(acsvol(nbxmax),acnvol(nbxmax),acshmat(nbxmax,9),acnhmat(nbxmax,9),bsvol(nbxmax),bnvol(nbxmax),bshmat(nbxmax,9)&
+     ,bnhmat(nbxmax,9),vboxn(nEnergy,nbxmax),vboxo(nEnergy,nbxmax),bxo(nbxmax),byo(nbxmax),bzo(nbxmax),xcmo(nmax),ycmo(nmax)&
+     ,zcmo(nmax),rxuo(nmax,numax),ryuo(nmax,numax),rzuo(nmax,numax),qquo(nmax,numax),rcuto(nbxmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_moves_volume: allocation failed',jerr)
 
     acsvol = 0.E0_dp

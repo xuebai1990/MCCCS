@@ -79,13 +79,13 @@ contains
     integer,intent(out)::irem,iparbox
     nchain=nchain+1
     irem=nchain
+    if (lrigid(imolty)) call setup_molecule_config(imolty,irem)
     moltyp(irem)=imolty
     nboxi(irem)=boxrem
     temtyp(imolty)=temtyp(imolty)+1
     nchbox(boxrem)=nchbox(boxrem)+1
     ncmt(boxrem,imolty)=ncmt(boxrem,imolty)+1
     iparbox=ncmt(boxrem,imolty)
-    if (lrigid(imolty)) call setup_molecule_config(imolty,irem)
   end subroutine gcmc_setup
 
   subroutine gcmc_cleanup(imolty,boxrem)

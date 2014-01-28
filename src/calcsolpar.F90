@@ -10,14 +10,14 @@
 !> \author Neeraj Rai
 !> \date 08/22/2006
 subroutine calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ, Heat_vapor_COUL, pdV, CED_T, CED_LJ,CED_COUL,HSP_T,HSP_LJ, HSP_COUL,ibox,jbox)
-  use const_phys,only:joule2cal,cal2joule
+  use const_phys,only:joule2cal
   use sim_system
   use sim_cell
   implicit none
 
       integer::ibox, jbox, ig, il, imolty
-      integer,dimension(nbxmax):: temp_nmol,box_volume
-      real,dimension(nbxmax)::mol_vol
+      integer,dimension(nbxmax):: temp_nmol
+      real,dimension(nbxmax)::mol_vol,box_volume
       real,dimension(nbxmax)::pres
       real::enchg1, enchg2,enchg3
       real::Heat_vapor_T, Heat_vapor_LJ, Heat_vapor_COUL

@@ -55,8 +55,8 @@ contains
 !> starts and controls the simulation
   subroutine monola(file_in)
     use var_type,only:dp,default_string_length
-    use const_math,only:onepi,twopi,raddeg
-    use const_phys,only:debroglie_factor,N_Avogadro,R_gas,k_B,MPa2SimUnits
+    use const_math,only:twopi,raddeg
+    use const_phys,only:debroglie_factor,N_Avogadro,R_gas,MPa2SimUnits
     use util_math,only:update_average,calculate_statistics
     use util_random,only:random
     use util_string,only:format_n,integer_to_string
@@ -79,10 +79,14 @@ contains
     character(LEN=default_path_length)::file_flt,file_hist,file_ndis,file_cnt,file_config
 
     ! descriptions of different kinds of energies
-    character(LEN=default_string_length)::vname(nEnergy)=(/' Total energy',' Inter LJ',' Tail  LJ',' Intra LJ',' Stretch',' Bond bending',' Torsion',' Coulomb',' External pot',' 3-body Garo',' Fluc Q','','',''/)
+    character(LEN=default_string_length)::vname(nEnergy)=(/' Total energy',' Inter LJ    ',' Tail  LJ    ',' Intra LJ    '&
+     ,' Stretch     ',' Bond bending',' Torsion     ',' Coulomb     ',' External pot',' 3-body Garo ',' Fluc Q      '&
+     ,'             ','             ','             '/)
 
-    integer::io_flt,io_hist,io_cnt,io_ndis,io_config,i,jerr,ibox,itype,itype2,Temp_nmol,nentry,j,nummol,imolty,ii,ntii,point_of_start,point_to_end,igrow,steps,itemp,jbox,itel,ig,il,nbl,n,zzz,ichkpt,nnn_1st,nstep_per_cycle
-    real::v(nEnergy),press1,surf,time_prev,time_cur,rm,temvol,tmp,vhist,eng_list(fmax),temacd,temspd,debroglie,starviro,dummy,inside,bvirial,gconst,ostwald,stdost,molfrac
+    integer::io_flt,io_hist,io_cnt,io_ndis,io_config,i,jerr,ibox,itype,itype2,Temp_nmol,nentry,j,nummol,imolty,ii,ntii&
+     ,point_of_start,point_to_end,igrow,steps,itemp,jbox,itel,ig,il,nbl,n,zzz,ichkpt,nnn_1st,nstep_per_cycle
+    real::v(nEnergy),press1,surf,time_prev,time_cur,rm,temvol,tmp,vhist,eng_list(fmax),temacd,temspd,debroglie,starviro,dummy&
+     ,inside,bvirial,gconst,ostwald,stdost,molfrac
     logical::ovrlap
 
     ! KM for MPI
@@ -94,7 +98,15 @@ contains
        call mp_barrier(groupid)
     end do
 
-    allocate(nminp(ntmax),nmaxp(ntmax),ncmt_list(fmax,ntmax),ndist(0:nmax,ntmax),vstart(nbxmax),vend(nbxmax),pres(nbxmax),molvol(nbxmax),speden(nbxmax),acdens(nbxmax,ntmax),molfra(nbxmax,ntmax),acnbox(nbxmax,ntmax),acnbox2(nbxmax,ntmax,20),acv(nEnergy,nbxmax),acvsq(nEnergy,nbxmax),acvkjmol(nEnergy,nbxmax),acdipole(4,nbxmax),acdipolesq(4,nbxmax),acboxa(nbxmax,3),acboxl(nbxmax,3),acvol(nbxmax),acvolsq(nbxmax),acvolume(nbxmax),acpres(nbxmax),acsurf(nbxmax),acEnthalpy(nbxmax),acEnthalpy1(nbxmax),solcount(nbxmax,ntmax),acsolpar(nprop1,nbxmax,nbxmax),avsolinter(nbxmax,ntmax),avsolintra(nbxmax,ntmax),avsolbend(nbxmax,ntmax),avsoltor(nbxmax,ntmax),avsolelc(nbxmax,ntmax),mnbox(nbxmax,ntmax),asetel(nbxmax,ntmax),nccold1(nprop1,nbxmax,nbxmax),bccold1(nprop1,nbxmax,nbxmax),baver1(nprop1,nbxmax,nbxmax,blockm),nccold(nprop,nbxmax),bccold(nprop,nbxmax),baver(nprop,nbxmax,blockm),aver1(nprop1,nbxmax,nbxmax),stdev1(nprop1,nbxmax,nbxmax),errme1(nprop1,nbxmax,nbxmax),aver(nprop,nbxmax),stdev(nprop,nbxmax),errme(nprop,nbxmax),stat=jerr)
+    allocate(nminp(ntmax),nmaxp(ntmax),ncmt_list(fmax,ntmax),ndist(0:nmax,ntmax),vstart(nbxmax),vend(nbxmax),pres(nbxmax)&
+     ,molvol(nbxmax),speden(nbxmax),acdens(nbxmax,ntmax),molfra(nbxmax,ntmax),acnbox(nbxmax,ntmax),acnbox2(nbxmax,ntmax,20)&
+     ,acv(nEnergy,nbxmax),acvsq(nEnergy,nbxmax),acvkjmol(nEnergy,nbxmax),acdipole(4,nbxmax),acdipolesq(4,nbxmax),acboxa(nbxmax,3)&
+     ,acboxl(nbxmax,3),acvol(nbxmax),acvolsq(nbxmax),acvolume(nbxmax),acpres(nbxmax),acsurf(nbxmax),acEnthalpy(nbxmax)&
+     ,acEnthalpy1(nbxmax),solcount(nbxmax,ntmax),acsolpar(nprop1,nbxmax,nbxmax),avsolinter(nbxmax,ntmax),avsolintra(nbxmax,ntmax)&
+     ,avsolbend(nbxmax,ntmax),avsoltor(nbxmax,ntmax),avsolelc(nbxmax,ntmax),mnbox(nbxmax,ntmax),asetel(nbxmax,ntmax)&
+     ,nccold1(nprop1,nbxmax,nbxmax),bccold1(nprop1,nbxmax,nbxmax),baver1(nprop1,nbxmax,nbxmax,blockm),nccold(nprop,nbxmax)&
+     ,bccold(nprop,nbxmax),baver(nprop,nbxmax,blockm),aver1(nprop1,nbxmax,nbxmax),stdev1(nprop1,nbxmax,nbxmax)&
+     ,errme1(nprop1,nbxmax,nbxmax),aver(nprop,nbxmax),stdev(nprop,nbxmax),errme(nprop,nbxmax),stat=jerr)
     if (jerr.ne.0) then
        call err_exit(__FILE__,__LINE__,'monola: allocation failed',jerr)
     end if
@@ -288,7 +300,7 @@ contains
     do nnn = nnn_1st, nstep
        tmcc = nnstep + nnn
        do ii = 1, nstep_per_cycle
-          acmove = acmove + 1.0E0_dp
+          acmove = acmove + 1
           ! select a move-type at random ***
           rm = random(-1)
 
@@ -384,7 +396,8 @@ contains
                 call update_average(acdipolesq(2,ibox),dipoley(ibox)**2,acmove)
                 call update_average(acdipole(3,ibox),dipolez(ibox),acmove)
                 call update_average(acdipolesq(3,ibox),dipolez(ibox)**2,acmove)
-                call update_average(acdipole(4,ibox),sqrt(dipolex(ibox)*dipolex(ibox)+dipoley(ibox)*dipoley(ibox)+dipolez(ibox)*dipolez(ibox)),acmove)
+                call update_average(acdipole(4,ibox),sqrt(dipolex(ibox)*dipolex(ibox)+dipoley(ibox)*dipoley(ibox)&
+                 +dipolez(ibox)*dipolez(ibox)),acmove)
                 acdipolesq(4,ibox)=acdipolesq(1,ibox)+acdipolesq(2,ibox)+acdipolesq(3,ibox)
              end if
 
@@ -447,7 +460,8 @@ contains
                 io_ndis=get_iounit()
                 do imolty=1,nmolty
                    write(file_ndis,'("n",I2.2,"dis",I1.1,A,".dat")') imolty,run_num,suffix
-                   open(unit=io_ndis,access='sequential',action='write',file=file_ndis,form='formatted',iostat=jerr,status='unknown')
+                   open(unit=io_ndis,access='sequential',action='write',file=file_ndis,form='formatted',iostat=jerr&
+                    ,status='unknown')
                    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open ndis file '//trim(file_ndis),jerr)
                    do n=nminp(imolty),nmaxp(imolty)
                       write(io_ndis,*) n,ndist(n,imolty)
@@ -535,7 +549,8 @@ contains
              if (bnflcq2(i,j) .gt. 0.5E0_dp) then
                 write(io_output,*) 'molecule typ =',i,'  box =',j
                 bsflcq2(i,j) = bsflcq2(i,j)/bnflcq2(i,j)
-                write(io_output,"(' attempts =',f8.1,'   ratio =',f6.3, '   max.displ. =',e11.4)") bnflcq2(i,j),bsflcq2(i,j),rmflcq(i,j)
+                write(io_output,"(' attempts =',f8.1,'   ratio =',f6.3, '   max.displ. =',e11.4)") bnflcq2(i,j),bsflcq2(i,j)&
+                 ,rmflcq(i,j)
              end if
           end do
        end do
@@ -767,56 +782,72 @@ contains
        end do
 
        write(io_output,*)
-       write(io_output,"(A,"//format_n(nbox,"(A,I2)")//")") ' Averages and fluctuations                 ',('       Box ',i,i=1,nbox)
+       write(io_output,"(A,"//format_n(nbox,"(A,I2)")//")") ' Averages and fluctuations                 '&
+        ,('       Box ',i,i=1,nbox)
        write(io_output,*)
        write(io_output,"(A,"//format_n(nbox,"(1X,F12.2)")//")") ' pressure                           [kPa] =',(acpres(i),i=1,nbox)
-       write(io_output,"(A,"//format_n(nbox,"(1X,F12.6)")//")") ' pressure              [simulation units] =',((acpres(i)*MPa2SimUnits*1E-3_dp),i=1,nbox)
+       write(io_output,"(A,"//format_n(nbox,"(1X,F12.6)")//")") ' pressure              [simulation units] ='&
+        ,((acpres(i)*MPa2SimUnits*1E-3_dp),i=1,nbox)
        write(io_output,"(A,"//format_n(nbox,"(1X,F12.4)")//")") ' surface tension                   [mN/m] =',(acsurf(i),i=1,nbox)
        do itype = 1,nmolty
-          write(io_output,"(A,I2,A,"//format_n(nbox,"(1X,F12.3)")//")") ' chem. potential of type  ',itype,'          [K] =',(acchem(i,itype),i=1,nbox)
+          write(io_output,"(A,I2,A,"//format_n(nbox,"(1X,F12.3)")//")") ' chem. potential of type  ',itype,'          [K] ='&
+           ,(acchem(i,itype),i=1,nbox)
        end do
 
        do i=1,3
-          write(io_output,"(A,"//format_n(nbox,"(1X,F12.3)")//")") ' boxlength                            [A] =',(acboxl(ibox,i),ibox=1,nbox)
+          write(io_output,"(A,"//format_n(nbox,"(1X,F12.3)")//")") ' boxlength                            [A] ='&
+           ,(acboxl(ibox,i),ibox=1,nbox)
        end do
 
        if (ANY(lsolid(1:nbox).and..not.lrect(1:nbox))) then
           do i=1,3
-             write(io_output,"(A,"//format_n(nbox,"(1X,F12.3)")//")") ' box angle                          [deg] =',(acboxa(ibox,i)*raddeg,ibox=1,nbox)
+             write(io_output,"(A,"//format_n(nbox,"(1X,F12.3)")//")") ' box angle                          [deg] ='&
+              ,(acboxa(ibox,i)*raddeg,ibox=1,nbox)
           end do
        end if
 
        do itype = 1, nmolty
-          write(io_output,"(A,I2,A,"//format_n(nbox,"(1X,F12.3)")//")") ' no. of chains of type    ',itype,'              =',(acnbox(i,itype),i=1,nbox)
+          write(io_output,"(A,I2,A,"//format_n(nbox,"(1X,F12.3)")//")") ' no. of chains of type    ',itype,'              ='&
+           ,(acnbox(i,itype),i=1,nbox)
        end do
        if (lpbcz) then
-          write(io_output,"(A,"//format_n(nbox,"(1X,F12.3)")//")") ' molar volume                  [cm^3/mol] =',(molvol(i),i=1,nbox)
-          write(io_output,"(A,"//format_n(nbox,"(1X,F12.6)")//")") ' specific density                [g/cm^3] =',(speden(i),i=1,nbox)
+          write(io_output,"(A,"//format_n(nbox,"(1X,F12.3)")//")") ' molar volume                  [cm^3/mol] ='&
+           ,(molvol(i),i=1,nbox)
+          write(io_output,"(A,"//format_n(nbox,"(1X,F12.6)")//")") ' specific density                [g/cm^3] ='&
+           ,(speden(i),i=1,nbox)
           do itype = 1, nmolty
-             write(io_output,"(A,I2,A,"//format_n(nbox,"(1X,F12.5)")//")") ' number density of type   ',itype,' [chain/nm^3] =',(acdens(i,itype),i=1,nbox)
+             write(io_output,"(A,I2,A,"//format_n(nbox,"(1X,F12.5)")//")") ' number density of type   ',itype,' [chain/nm^3] ='&
+              ,(acdens(i,itype),i=1,nbox)
              if (lexpand(itype)) then
                 do itype2=1,numcoeff(itype)
-                   write(io_output,"(A,I2,A,I4,A,2F12.5)") ' number density of type   ',itype,' eetype ',itype2,'  =',acdens(itype,itype)*acnbox2(itype,itype,itype2)/(acnbox(itype,itype)*acmove),acnbox2(itype,itype,itype2)/(acnbox(itype,itype)*acmove)
+                   write(io_output,"(A,I2,A,I4,A,2F12.5)") ' number density of type   ',itype,' eetype ',itype2,'  ='&
+                    ,acdens(itype,itype)*acnbox2(itype,itype,itype2)/(acnbox(itype,itype)*acmove)&
+                    ,acnbox2(itype,itype,itype2)/(acnbox(itype,itype)*acmove)
                 end do
              end if
           end do
        else
-          write(io_output,"(A,"//format_n(nbox,"(1X,F12.4)")//")") ' area per chain                     [A^2/chain] =',(molvol(i),i=1,nbox)
+          write(io_output,"(A,"//format_n(nbox,"(1X,F12.4)")//")") ' area per chain                     [A^2/chain] ='&
+           ,(molvol(i),i=1,nbox)
           do itype = 1, nmolty
-             write(io_output,"(A,I2,A,"//format_n(nbox,"(1X,F12.6)")//")") ' number density of type   ',itype,' [chain/nm^2] =',(acdens(i,itype),i=1,nbox)
+             write(io_output,"(A,I2,A,"//format_n(nbox,"(1X,F12.6)")//")") ' number density of type   ',itype&
+              ,' [chain/nm^2] =',(acdens(i,itype),i=1,nbox)
           end do
        end if
        do itype = 1, nmolty
-          write(io_output,"(A,I2,A,"//format_n(nbox,"(1X,F12.7)")//")") ' molfraction of type      ',itype,'              =',(molfra(i,itype),i=1,nbox)
+          write(io_output,"(A,I2,A,"//format_n(nbox,"(1X,F12.7)")//")") ' molfraction of type      ',itype,'              ='&
+           ,(molfra(i,itype),i=1,nbox)
        end do
        do itype = 1, nmolty
-          write(io_output,"(A,I2,A,"//format_n(nbox,"(1X,F12.3)")//")") ' mean sete length of type ',itype,'        [A^2] =',(asetel(i,itype),i=1,nbox)
+          write(io_output,"(A,I2,A,"//format_n(nbox,"(1X,F12.3)")//")") ' mean sete length of type ',itype,'        [A^2] ='&
+           ,(asetel(i,itype),i=1,nbox)
        end do
 
        write(io_output,*)
        do j=1,11
           ! only 1 to 11 is the energy information
-          write(io_output,"(A14,A,"//format_n(nbox,"(1X,F13.2)")//","//format_n(nbox,"(1X,F10.2)")//")") vname(j),'[K per system and kJ/mol per chain] =',acv(j,1:nbox),acvkjmol(j,1:nbox)
+          write(io_output,"(A14,A,"//format_n(nbox,"(1X,F13.2)")//","//format_n(nbox,"(1X,F10.2)")//")") vname(j)&
+           ,'[K per system and kJ/mol per chain] =',acv(j,1:nbox),acvkjmol(j,1:nbox)
        end do
 
        write(io_output,*)
@@ -879,7 +910,8 @@ contains
        do itype = 1, nmolty
           do ibox = 1, nbox
              if (solcount(ibox,itype).gt.0) then
-                write(io_output,"(2I5,5(1X,F12.5))") itype,ibox,avsolinter(ibox,itype),avsolintra(ibox,itype),avsoltor(ibox,itype),avsolbend(ibox,itype),avsolelc(ibox,itype)
+                write(io_output,"(2I5,5(1X,F12.5))") itype,ibox,avsolinter(ibox,itype),avsolintra(ibox,itype)&
+                 ,avsoltor(ibox,itype),avsolbend(ibox,itype),avsolelc(ibox,itype)
              else
                 write(io_output,"(2I5,5(1X,F12.5))") itype,ibox,0.0,0.0,0.0,0.0,0.0
              end if
@@ -898,7 +930,8 @@ contains
           do i = 1,nprop1
              do ibox = 1,nbox-1
                 do jbox = ibox+1,nbox
-                   call calculate_statistics(baver1(i,ibox,jbox,1:nblock),aver1(i,ibox,jbox),stdev1(i,ibox,jbox),errme1(i,ibox,jbox))
+                   call calculate_statistics(baver1(i,ibox,jbox,1:nblock),aver1(i,ibox,jbox),stdev1(i,ibox,jbox)&
+                    ,errme1(i,ibox,jbox))
                 end do
              end do
           end do
@@ -907,17 +940,27 @@ contains
           write(io_output,*)
           do ibox = 1,nbox-1
              do jbox = ibox+1,nbox
-                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' H_vap      [kJ/mol] btwn box   ',ibox,' and ',jbox,' =',acsolpar(1,ibox,jbox),stdev1(1,ibox,jbox),errme1(1,ibox,jbox)
-                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' H_vap LJ  [kJ/mol] btwn box    ',ibox,' and ',jbox,' =',acsolpar(2,ibox,jbox),stdev1(2,ibox,jbox),errme1(2,ibox,jbox)
-                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' H_vap Coul [kJ/mol] btwn box   ',ibox,' and ',jbox,' =',acsolpar(3,ibox,jbox),stdev1(3,ibox,jbox),errme1(3,ibox,jbox)
+                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' H_vap      [kJ/mol] btwn box   ',ibox,' and ',jbox,' ='&
+                 ,acsolpar(1,ibox,jbox),stdev1(1,ibox,jbox),errme1(1,ibox,jbox)
+                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' H_vap LJ  [kJ/mol] btwn box    ',ibox,' and ',jbox,' ='&
+                 ,acsolpar(2,ibox,jbox),stdev1(2,ibox,jbox),errme1(2,ibox,jbox)
+                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' H_vap Coul [kJ/mol] btwn box   ',ibox,' and ',jbox,' ='&
+                 ,acsolpar(3,ibox,jbox),stdev1(3,ibox,jbox),errme1(3,ibox,jbox)
                 ! write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' DeltaU Ext [kJ/mol] btwn box   ',ibox,' and ',jbox,' =',acsolpar(10,ibox,jbox),stdev1(10,ibox,jbox),errme1(10,ibox,jbox)
-                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' pdV        [kJ/mol] btwn box   ',ibox,' and ',jbox,' =',acsolpar(11,ibox,jbox),stdev1(11,ibox,jbox),errme1(11,ibox,jbox)
-                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' CED [cal/cc]   btwn box        ',ibox,' and ',jbox,' =',acsolpar(4,ibox,jbox),stdev1(4,ibox,jbox),errme1(4,ibox,jbox)
-                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' CED_LJ[cal/cc] btwn box        ',ibox,' and ',jbox,' =',acsolpar(5,ibox,jbox),stdev1(5,ibox,jbox),errme1(5,ibox,jbox)
-                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' CED_Coul[cal/cc] btwn box      ',ibox,' and ',jbox,' =',acsolpar(6,ibox,jbox),stdev1(6,ibox,jbox),errme1(6,ibox,jbox)
-                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' HSP [(cal/cc)^1/2]  btwn box   ',ibox,' and ',jbox,' =',acsolpar(7,ibox,jbox),stdev1(7,ibox,jbox),errme1(7,ibox,jbox)
-                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' HSP_LJ[(cal/cc)^1/2] btwn box  ',ibox,' and ',jbox,' =',acsolpar(8,ibox,jbox),stdev1(8,ibox,jbox),errme1(8,ibox,jbox)
-                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' HSP_Cou[(cal/cc)^1/2] btwn box ',ibox,' and ',jbox,' =',acsolpar(9,ibox,jbox),stdev1(9,ibox,jbox),errme1(9,ibox,jbox)
+                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' pdV        [kJ/mol] btwn box   ',ibox,' and ',jbox,' ='&
+                 ,acsolpar(11,ibox,jbox),stdev1(11,ibox,jbox),errme1(11,ibox,jbox)
+                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' CED [cal/cc]   btwn box        ',ibox,' and ',jbox,' ='&
+                 ,acsolpar(4,ibox,jbox),stdev1(4,ibox,jbox),errme1(4,ibox,jbox)
+                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' CED_LJ[cal/cc] btwn box        ',ibox,' and ',jbox,' ='&
+                 ,acsolpar(5,ibox,jbox),stdev1(5,ibox,jbox),errme1(5,ibox,jbox)
+                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' CED_Coul[cal/cc] btwn box      ',ibox,' and ',jbox,' ='&
+                 ,acsolpar(6,ibox,jbox),stdev1(6,ibox,jbox),errme1(6,ibox,jbox)
+                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' HSP [(cal/cc)^1/2]  btwn box   ',ibox,' and ',jbox,' ='&
+                 ,acsolpar(7,ibox,jbox),stdev1(7,ibox,jbox),errme1(7,ibox,jbox)
+                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' HSP_LJ[(cal/cc)^1/2] btwn box  ',ibox,' and ',jbox,' ='&
+                 ,acsolpar(8,ibox,jbox),stdev1(8,ibox,jbox),errme1(8,ibox,jbox)
+                write(io_output,"(2(A,I2),A,3(1X,F14.4))") ' HSP_Cou[(cal/cc)^1/2] btwn box ',ibox,' and ',jbox,' ='&
+                 ,acsolpar(9,ibox,jbox),stdev1(9,ibox,jbox),errme1(9,ibox,jbox)
              end do
           end do
 
@@ -930,7 +973,8 @@ contains
           ! system volume
           itel = nEnergy + 4*nmolty + 4
           do ibox = 1, nbox
-             write(io_output,"(A,I2,A,3(1X,E12.5))") ' system volume    box ',ibox,' =',aver(itel,ibox),stdev(itel,ibox),errme(itel,ibox)
+             write(io_output,"(A,I2,A,3(1X,E12.5))") ' system volume    box ',ibox,' =',aver(itel,ibox),stdev(itel,ibox)&
+              ,errme(itel,ibox)
           end do
 
           ! pressure
@@ -941,7 +985,8 @@ contains
           ! surface tension
           itel = nEnergy + 4*nmolty + 3
           do ibox = 1, nbox
-             write(io_output,"(A,I2,A,3(1X,F12.5))") ' surface tension  box ',ibox,' =',acsurf(ibox),stdev(itel,ibox),errme(itel,ibox)
+             write(io_output,"(A,I2,A,3(1X,F12.5))") ' surface tension  box ',ibox,' =',acsurf(ibox),stdev(itel,ibox)&
+              ,errme(itel,ibox)
           end do
 
           write(io_output,*)
@@ -957,9 +1002,11 @@ contains
           ! Enthalpy
           do ibox = 1,nbox
              j = nEnergy + 4*nmolty + 5
-             write(io_output, "(A,I2,A,3(1X,F12.4))") ' Enthalpy Inst.[kJ/mol] for box ',ibox,' =',acEnthalpy(ibox),stdev(j,ibox),errme(j,ibox)
+             write(io_output, "(A,I2,A,3(1X,F12.4))") ' Enthalpy Inst.[kJ/mol] for box ',ibox,' =',acEnthalpy(ibox)&
+              ,stdev(j,ibox),errme(j,ibox)
              j = nEnergy + 4*nmolty + 6
-             write(io_output,"(A,I2,A,3(1X,F12.4))") ' Enthalpy Ext. [kJ/mol] for box ',ibox,' =',acEnthalpy1(ibox),stdev(j,ibox),errme(j,ibox)
+             write(io_output,"(A,I2,A,3(1X,F12.4))") ' Enthalpy Ext. [kJ/mol] for box ',ibox,' =',acEnthalpy1(ibox)&
+              ,stdev(j,ibox),errme(j,ibox)
           end do
 
           write(io_output,*)
@@ -982,7 +1029,8 @@ contains
           do itype = 1, nmolty
              itel = 2 + nEnergy + itype
              do ibox = 1, nbox
-                write(io_output,"(2(A,I2),A,3(1X,F12.3))") ' chemical potential  itype ',itype,' box ',ibox,' = ',aver(itel,ibox),stdev(itel,ibox),errme(itel,ibox)
+                write(io_output,"(2(A,I2),A,3(1X,F12.3))") ' chemical potential  itype ',itype,' box ',ibox,' = '&
+                 ,aver(itel,ibox),stdev(itel,ibox),errme(itel,ibox)
              end do
           end do
 
@@ -990,7 +1038,8 @@ contains
           do itype = 1, nmolty
              itel = 2 + nEnergy + nmolty + itype
              do ibox = 1, nbox
-                write(io_output,"(2(A,I2),A,3(1X,F12.3))") ' mean sete length    itype ',itype,' box ',ibox,' = ',aver(itel,ibox),stdev(itel,ibox),errme(itel,ibox)
+                write(io_output,"(2(A,I2),A,3(1X,F12.3))") ' mean sete length    itype ',itype,' box ',ibox,' = '&
+                 ,aver(itel,ibox),stdev(itel,ibox),errme(itel,ibox)
              end do
           end do
 
@@ -999,14 +1048,17 @@ contains
              itel = 2 + nEnergy + 2*nmolty + itype
              do ibox = 1, nbox
                 if (lpbcz) then
-                   write(io_output,"(2(A,I2),A,3(1X,E12.5))") ' number density      itype ',itype,' box ',ibox,' = ',1.0E3_dp*aver(itel,ibox),1.0E3_dp*stdev(itel,ibox),1.0E3_dp*errme(itel,ibox)
+                   write(io_output,"(2(A,I2),A,3(1X,E12.5))") ' number density      itype ',itype,' box ',ibox,' = '&
+                    ,1.0E3_dp*aver(itel,ibox),1.0E3_dp*stdev(itel,ibox),1.0E3_dp*errme(itel,ibox)
                 else
-                   write(io_output,"(2(A,I2),A,3(1X,E12.5))") ' number density      itype ',itype,' box ',ibox,' = ',1.0E2_dp*aver(itel,ibox),1.0E2_dp*stdev(itel,ibox),1.0E2_dp*errme(itel,ibox)
+                   write(io_output,"(2(A,I2),A,3(1X,E12.5))") ' number density      itype ',itype,' box ',ibox,' = '&
+                    ,1.0E2_dp*aver(itel,ibox),1.0E2_dp*stdev(itel,ibox),1.0E2_dp*errme(itel,ibox)
                 end if
                 if (lexpand(itype).and.acnbox(ibox,itype).gt.0.5) then
                    do itype2=1,numcoeff(itype)
                       molfrac = acnbox2(ibox,itype,itype2) /(acmove*acnbox(ibox,itype))
-                      write(io_output,"(2(A,I2),A,2(1X,E12.5))") ' number density      itype ',itype,' typ ',itype2,' = ',1.0E3_dp*aver(itel,ibox)*molfrac,molfrac
+                      write(io_output,"(2(A,I2),A,2(1X,E12.5))") ' number density      itype ',itype,' typ ',itype2,' = '&
+                       ,1.0E3_dp*aver(itel,ibox)*molfrac,molfrac
                    end do
                 end if
              end do
@@ -1016,7 +1068,8 @@ contains
           do itype = 1, nmolty
              itel = 2 + nEnergy + 3*nmolty + itype
              do ibox = 1, nbox
-                write(io_output,"(2(A,I2),A,3(1X,F12.7))") ' mole fraction       itype ',itype,' box ',ibox,' = ',aver(itel,ibox),stdev(itel,ibox),errme(itel,ibox)
+                write(io_output,"(2(A,I2),A,3(1X,F12.7))") ' mole fraction       itype ',itype,' box ',ibox,' = '&
+                 ,aver(itel,ibox),stdev(itel,ibox),errme(itel,ibox)
              end do
           end do
 
@@ -1040,8 +1093,11 @@ contains
                       stdost  = ostwald * sqrt( (stdev(itel,il)/aver(itel,il))**2 + (stdev(itel,ig)/aver(itel,ig))**2 )
                       ! write(42,*) nunit(itype),ostwald,stdost
                       ! write(43,*) nunit(itype),-(gconst*log(ostwald)) + (eta2(ig,itype) - eta2(il,itype)) / 120.27167,gconst*stdost/ostwald
-                      write(io_output,"(3(A,I2),A,2(1X,F15.6))") ' Ostwald Coefficient itype ',itype,' between box ',ig,' and ',il,' = ',ostwald,stdost
-                      write(io_output,"(3(A,I2),A,2(1X,F15.6))") ' Free Enrgy of Trans itype ',itype,' between box ',ig,' and ',il,' [kJ/mol] =',-(gconst*log(ostwald))+(eta2(ig,itype)-eta2(il,itype))*R_gas*1E-3_dp,gconst*stdost/ostwald
+                      write(io_output,"(3(A,I2),A,2(1X,F15.6))") ' Ostwald Coefficient itype ',itype,' between box ',ig&
+                       ,' and ',il,' = ',ostwald,stdost
+                      write(io_output,"(3(A,I2),A,2(1X,F15.6))") ' Free Enrgy of Trans itype ',itype,' between box ',ig&
+                       ,' and ',il,' [kJ/mol] =',-(gconst*log(ostwald))+(eta2(ig,itype)-eta2(il,itype))*R_gas*1E-3_dp&
+                       ,gconst*stdost/ostwald
                    end do
                 end do
              end do
@@ -1052,11 +1108,13 @@ contains
           write(io_output,*)
           write(io_output,*) '-----block averages ------'
           do ibox=1,nbox
-             write(io_output,"('  ------------ box: ' ,I2,/, ' block    energy     density    pressure    surf ten   mol fracs')") ibox
+             write(io_output,"('  ------------ box: ' ,I2,/, ' block    energy     density    pressure    surf ten   mol fracs')")&
+              ibox
              do nbl = 1, nblock
                 ! changed so output the same for all ensembles
                 ! 06/08/09 KM
-                write(io_output,"(1X,I3,"//format_n(nmolty+4,"(1X,E11.4)")//")") nbl,baver(3,ibox,nbl),baver(1,ibox,nbl),baver(2,ibox,nbl),baver(3+nEnergy+4*nmolty,ibox,nbl),(baver(2+nEnergy+3*nmolty+zzz,ibox,nbl),zzz=1,nmolty)
+                write(io_output,"(1X,I3,"//format_n(nmolty+4,"(1X,E11.4)")//")") nbl,baver(3,ibox,nbl),baver(1,ibox,nbl)&
+                 ,baver(2,ibox,nbl),baver(3+nEnergy+4*nmolty,ibox,nbl),(baver(2+nEnergy+3*nmolty+zzz,ibox,nbl),zzz=1,nmolty)
              end do
              if (lmipsw) then
                 write(io_output,*) 'lambdais', lambdais
@@ -1092,22 +1150,30 @@ contains
 #ifdef w_a
 #undef w_a
 #endif
-#define w_a(x) write(io_output,'(1X,A,": ",A)') #x,x
 
 #ifdef w_l
 #undef w_l
 #endif
-#define w_l(x) write(io_output,'(1X,A,": ",L2)') #x,x
 
 #ifdef w_i
 #undef w_i
 #endif
-#define w_i(x) write(io_output,'(1X,A,": ",I0)') #x,x
 
 #ifdef w_r
 #undef w_r
 #endif
+
+#ifdef __TRADITIONAL_CPP__
+#define w_a(x) write(io_output,'(1X,A,": ",A)') "x",x
+#define w_l(x) write(io_output,'(1X,A,": ",L2)') "x",x
+#define w_i(x) write(io_output,'(1X,A,": ",I0)') "x",x
+#define w_r(x) write(io_output,'(1X,A,": ",G16.9)') "x",x
+#else
+#define w_a(x) write(io_output,'(1X,A,": ",A)') #x,x
+#define w_l(x) write(io_output,'(1X,A,": ",L2)') #x,x
+#define w_i(x) write(io_output,'(1X,A,": ",I0)') #x,x
 #define w_r(x) write(io_output,'(1X,A,": ",G16.9)') #x,x
+#endif
 !> \brief Read input data and initializes the positions
 !>
 !> reads a starting configuration from unit 7
@@ -1115,7 +1181,7 @@ contains
 !> \remarks It's usually best to print out information right after it is read in and before doing any other operations (which may fail), so that in the case of program error users will know the progress of input processing
   subroutine readdat(file_in)
     use var_type,only:default_string_length
-    use const_math,only:onepi,raddeg
+    use const_math,only:raddeg
     use const_phys,only:MPa2SimUnits,debroglie_factor
     use util_random,only:ranset
     use util_string,only:integer_to_string,real_to_string,uppercase,format_n
@@ -1144,14 +1210,15 @@ contains
     character(LEN=*),intent(in)::file_in
 
     real,allocatable::ofscale(:),ofscale2(:),qbox(:)
-    integer,allocatable::ncarbon(:),inclmol(:),inclbead(:,:),inclsign(:),ainclmol(:),ainclbead(:,:),a15t(:),idummy(:),temphe(:),nures(:),k_max_l(:),k_max_m(:),k_max_n(:)
+    integer,allocatable::ncarbon(:),inclmol(:),inclbead(:,:),inclsign(:),ainclmol(:),ainclbead(:,:),a15t(:),idummy(:),temphe(:)&
+     ,nures(:),k_max_l(:),k_max_m(:),k_max_n(:)
     logical,allocatable::lhere(:)
 
-    character(LEN=default_path_length)::file_input,file_restart,file_struct,file_run,file_movie,file_solute,file_traj,file_box_movie,file_cell
+    character(LEN=default_path_length)::file_input,file_restart,file_struct,file_run,file_movie,file_solute,file_traj&
+     ,file_box_movie,file_cell
     character(LEN=default_string_length)::line_in
     integer::io_input,io_restart,jerr,seed,ij,ii,jj,i,j,k,ncres,nmtres,iensem,inpbc,im,ibox,izz,z
     logical::lprint,L_Ewald_Auto,lmixlb,lmixjo,lsetup,linit,lreadq,lfound,ltmp
-    logical,parameter::lverbose=.true.,lecho=.true.
     real::fqtemp,dum,pm,pcumu,debroglie,qtot,min_boxl,rmflucq,rtmp
     !* PARAMETER FOR IONIC SYSTEMS
     logical::lionic !< if LIONIC=.TRUE. System contains charged species, so system may not neutral
@@ -1168,7 +1235,8 @@ contains
 
     namelist /io/ file_input,file_restart,file_struct,file_run,file_movie,file_solute,file_traj,io_output&
      ,run_num,suffix,L_movie_xyz
-    namelist /system/ lnpt,lgibbs,lgrand,lanes,lvirial,lmipsw,lexpee,ldielect,lpbc,lpbcx,lpbcy,lpbcz,lfold,lijall,lchgall,lewald,lcutcm,ltailc,lshift,ldual,L_Coul_CBMC,lneigh&
+    namelist /system/ lnpt,lgibbs,lgrand,lanes,lvirial,lmipsw,lexpee,ldielect,lpbc,lpbcx,lpbcy,lpbcz,lfold,lijall,lchgall,lewald&
+     ,lcutcm,ltailc,lshift,ldual,L_Coul_CBMC,lneigh&
      ,lexzeo,lslit,lgraphite,lsami,lmuir,lelect_field,lgaro,lionic,L_Ewald_Auto,lmixlb,lmixjo&
      ,L_spline,L_linear,L_vib_table,L_bend_table,L_elect_table
     namelist /mc_shared/ seed,nbox,nmolty,nchain,nmax,nstep,lstop,iratio,rmin,softcut&
@@ -1292,7 +1360,8 @@ contains
        end if
 
        if (lijall) write(io_output,'(A)') 'All pair interactions are considered (no potential truncation)'
-       if (lchgall) write(io_output,'(A)') 'All the inter- and intra-molecular Coulombic interactions are considered (no potential truncation)'
+       if (lchgall) write(io_output,'(A)')&
+        'All the inter- and intra-molecular Coulombic interactions are considered (no potential truncation)'
        if (lcutcm) then
           write(io_output,'(A)') 'Additional center-of-mass cutoff on computed rcmu'
           if (lijall) call err_exit(__FILE__,__LINE__,'cannot have lijall with lcutcm',myid+1)
@@ -1306,7 +1375,8 @@ contains
        if (L_Coul_CBMC) then
           write(io_output,'(A)') 'Coulombic interactions will be included in the Rosenbluth weights for CBMC growth'
        else
-          write(io_output,'(A)') 'Coulombic interactions will NOT be considered during CBMC growth (added only in the final acceptance test)'
+          write(io_output,'(A)')&
+           'Coulombic interactions will NOT be considered during CBMC growth (added only in the final acceptance test)'
        end if
 
        write(io_output,'(A)') 'Coulombic inter- and intra-molecular interactions will be calculated'
@@ -1359,7 +1429,8 @@ contains
        write(io_output,'(A)') '*******************************************'
     end if
 
-    if (lmixlb.and.lmixjo) call err_exit(__FILE__,__LINE__,'cannot use both Lorentz-Berthelot and Jorgensen combining rules!',myid+1)
+    if (lmixlb.and.lmixjo) call err_exit(__FILE__,__LINE__,'cannot use both Lorentz-Berthelot and Jorgensen combining rules!'&
+     ,myid+1)
 
     ! KM for MPI
     if (numprocs.ne.1) then
@@ -1408,7 +1479,8 @@ contains
        w_i(iratio)
        write(io_output,'(A,F7.3,A)') 'minimum cutoff (rmin): ',rmin,' [Ang]'
        w_r(softcut)
-       write(io_output,'(A,I0,A,I0,A)') 'Write checkpoint file every ',checkpoint_interval,' seconds, and keep the last ',checkpoint_copies,' copies'
+       write(io_output,'(A,I0,A,I0,A)') 'Write checkpoint file every ',checkpoint_interval,' seconds, and keep the last '&
+        ,checkpoint_copies,' copies'
        w_l(linit)
        w_l(lreadq)
     end if
@@ -1457,7 +1529,8 @@ contains
           w_i(nvirial)
           w_r(starvir)
           w_r(stepvir)
-          write(io_output,'(A,I0,A,'//format_n(ntemp,'(2X,F8.3)')//')') '=> Virial coefficient will be calculated at the following ',ntemp,' temperatures:',(virtemp(i),i=1,ntemp)
+          write(io_output,'(A,I0,A,'//format_n(ntemp,'(2X,F8.3)')//')')&
+           '=> Virial coefficient will be calculated at the following ',ntemp,' temperatures:',(virtemp(i),i=1,ntemp)
        end if
     end if
 
@@ -1466,7 +1539,8 @@ contains
        if (nchain.ne.2) call err_exit(__FILE__,__LINE__,'nchain must equal 2',myid+1)
     end if
 
-    allocate(lhere(nntype),temphe(nntype),io_box_movie(nbxmax),ncarbon(ntmax),idummy(ntmax),qbox(nbxmax),nures(ntmax),k_max_l(nbxmax),k_max_m(nbxmax),k_max_n(nbxmax),stat=jerr)
+    allocate(lhere(nntype),temphe(nntype),io_box_movie(nbxmax),ncarbon(ntmax),idummy(ntmax),qbox(nbxmax),nures(ntmax)&
+     ,k_max_l(nbxmax),k_max_m(nbxmax),k_max_n(nbxmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'readdat: allocating system failed',jerr)
     lhere=.false.
 ! -------------------------------------------------------------------
@@ -1495,26 +1569,30 @@ contains
 
              ! boxlx boxly boxlz rcut kalp rcutnn numDimensionIsIstropic lsolid lrect lideal ltwice temperature pressure
              !> provision for different temperatures (just like different pressures) in each box, such as for parallel tempering
-             read(line_in,*) boxlx(i),boxly(i),boxlz(i),rcut(i),kalp(i),rcutnn(i),numberDimensionIsIsotropic(i),lsolid(i),lrect(i),lideal(i),ltwice(i),rtmp,express(i)
+             read(line_in,*) boxlx(i),boxly(i),boxlz(i),rcut(i),kalp(i),rcutnn(i),numberDimensionIsIsotropic(i),lsolid(i)&
+              ,lrect(i),lideal(i),ltwice(i),rtmp,express(i)
 
              if (lprint) then
                 write(io_output,'(A,I0,A,2(F8.3," x "),F8.3)') 'Box ',i,': ',boxlx(i),boxly(i),boxlz(i)
                 write(io_output,'(2(A,F6.3))') '   rcut: ',rcut(i),' [Ang], kalp: ',kalp(i)
                 write(io_output,'(A,F6.3)') '   neighbor list cutoff (rcutnn): ',rcutnn(i)
                 write(io_output,'(A,I0)') '   number of dimensions that are isotropic: ',numberDimensionIsIsotropic(i)
-                write(io_output,'(4(A,L2))') '   lsolid: ',lsolid(i),', lrect: ',lrect(i),', lideal: ',lideal(i),', ltwice: ',ltwice(i)
+                write(io_output,'(4(A,L2))') '   lsolid: ',lsolid(i),', lrect: ',lrect(i),', lideal: ',lideal(i),', ltwice: '&
+                 ,ltwice(i)
                 write(io_output,'(A,F8.3,A)') '   temperature: ',rtmp,' [K]'
                 write(io_output,'(A,G16.9,A)') '   external pressure: ',express(i),' [MPa]'
              end if
 
              if (temp.ge.0) then
-                if (temp.ne.rtmp) call err_exit(__FILE__,__LINE__,'Section SIMULATION_BOX: temperature not the same for each box',myid+1)
+                if (temp.ne.rtmp) call err_exit(__FILE__,__LINE__,'Section SIMULATION_BOX: temperature not the same for each box'&
+                 ,myid+1)
              else
                 temp=rtmp
                 beta = 1.0_dp / temp
              end if
 
-             if (lideal(i).and.lexpee) call err_exit(__FILE__,__LINE__,'Cannot have lideal and lexpee both true (if you want this you will have change code)',myid+1)
+             if (lideal(i).and.lexpee) call err_exit(__FILE__,__LINE__&
+              ,'Cannot have lideal and lexpee both true (if you want this you will have change code)',myid+1)
 
              ! nchain_1 ... nchain_nmolty ghost_particles
              call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
@@ -1522,7 +1600,8 @@ contains
              read(line_in,*) (ininch(j,i),j=1,nmolty),ghost_particles(i)
 
              if (lprint) then
-                write(io_output,'(A,'//format_n(nmolty,'(2X,I0)')//')') '   initial number of chains of each type: ',ininch(1:nmolty,i)
+                write(io_output,'(A,'//format_n(nmolty,'(2X,I0)')//')') '   initial number of chains of each type: '&
+                 ,ininch(1:nmolty,i)
                 write(io_output,'(A,I0)') '   Ghost particles: ',ghost_particles(i)
              end if
 
@@ -1532,8 +1611,10 @@ contains
              read(line_in,*) inix(i),iniy(i),iniz(i),inirot(i),inimix(i),zshift(i),dshift(i),ltmp,rtmp
 
              if (lprint) then
-                write(io_output,'(A,2(I0," x "),I0)') '   initial number of chains in x, y and z directions: ',inix(i),iniy(i),iniz(i)
-                write(io_output,'(2(A,I0),A,F4.1,A,F6.3)') '   initial rotational displacement: ',inirot(i),', inimix: ',inimix(i),', zshift: ',zshift(i),', dshift: ',dshift(i)
+                write(io_output,'(A,2(I0," x "),I0)') '   initial number of chains in x, y and z directions: ',inix(i),iniy(i)&
+                 ,iniz(i)
+                write(io_output,'(2(A,I0),A,F4.1,A,F6.3)') '   initial rotational displacement: ',inirot(i),', inimix: '&
+                 ,inimix(i),', zshift: ',zshift(i),', dshift: ',dshift(i)
                 if (ltmp) write(io_output,'(A,F8.3)') '   Linked cell structures will be used for this box, rintramax = ',rtmp
              end if
 
@@ -1543,7 +1624,8 @@ contains
                 licell=.true.
                 boxlink=i
                 rintramax=rtmp
-                if (lsolid(boxlink).and.(.not.lrect(boxlink))) call err_exit(__FILE__,__LINE__,'Linkcell not implemented for nonrectangular boxes',myid+1)
+                if (lsolid(boxlink).and.(.not.lrect(boxlink))) call err_exit(__FILE__,__LINE__&
+                 ,'Linkcell not implemented for nonrectangular boxes',myid+1)
              end if
 
              if (i.eq.1 .and. lexzeo) then
@@ -1594,7 +1676,16 @@ contains
     call allocate_neighbor_list()
 ! -------------------------------------------------------------------
     !> read parameters about molecule types
-    !> The division of variables between here and in the section specific to a particular MC move is somewhat arbitrary. Variables that are "intrinsic" to the type of molecules are place here, such as whether it's rigid (lrigid), is a ring (lring), etc, while variables that are model- or algorithm-specific are placed in the corresponding MC move sections, such as whether the molecule has fluctuating charges (lflucq), need to treat with expanded ensemble moves (lexpand), etc.
+    !> The division of variables between here and in the
+    !> section specific to a particular MC move is somewhat
+    !> arbitrary. Variables that are "intrinsic" to the type
+    !> of molecules are place here, such as whether it's
+    !> rigid (lrigid), is a ring (lring), etc, while
+    !> variables that are model- or algorithm-specific are
+    !> placed in the corresponding MC move sections, such as
+    !> whether the molecule has fluctuating charges
+    !> (lflucq), need to treat with expanded ensemble moves
+    !> (lexpand), etc.
 
     ! Looking for section MOLECULE_TYPE
     REWIND(io_input)
@@ -1622,7 +1713,9 @@ contains
              end if
 
              ! nunit nugrow ncarbon maxcbmc maxgrow iring lelect lring lrigid lbranch lrplc lsetup lq14scale qscale iurot isolute eta
-             read(line_in,*) nunit(imol),nugrow(imol),ncarbon(imol),nmaxcbmc(imol),maxgrow(imol),iring(imol),lelect(imol),lring(imol),lrigid(imol),lbranch(imol),lrplc(imol),lsetup,lq14scale(imol),qscale(imol),iurot(imol),isolute(imol),(eta2(i,imol),i=1,nbox)
+             read(line_in,*) nunit(imol),nugrow(imol),ncarbon(imol),nmaxcbmc(imol),maxgrow(imol),iring(imol),lelect(imol)&
+              ,lring(imol),lrigid(imol),lbranch(imol),lrplc(imol),lsetup,lq14scale(imol),qscale(imol),iurot(imol),isolute(imol)&
+              ,(eta2(i,imol),i=1,nbox)
 
              if (lprint) then
                 write(io_output,'(A,I0)') 'molecule type: ',imol
@@ -1632,7 +1725,9 @@ contains
                 write(io_output,'(A,I0)') '   maximum number of units for CBMC: ', nmaxcbmc(imol)
                 write(io_output,'(A,I0)') '   maximum number of interior segments for SAFE-CBMC regrowth: ',maxgrow(imol)
                 write(io_output,'(A,I0)') '   number of atoms in a ring (if lring=.true.): ',iring(imol)
-                write(io_output,'(2(A,I0),7(A,L2),A,F3.1)') '   iurot: ',iurot(imol),', isolute: ',isolute(imol),', lelect: ',lelect(imol),', lring: ',lring(imol),', lrigid: ',lrigid(imol),', lbranch: ',lbranch(imol),', lrplc: ',lrplc(imol),', lsetup: ',lsetup,', lq14scale: ',lq14scale(imol),', qscale: ',qscale(imol)
+                write(io_output,'(2(A,I0),7(A,L2),A,F3.1)') '   iurot: ',iurot(imol),', isolute: ',isolute(imol),', lelect: '&
+                 ,lelect(imol),', lring: ',lring(imol),', lrigid: ',lrigid(imol),', lbranch: ',lbranch(imol),', lrplc: '&
+                 ,lrplc(imol),', lsetup: ',lsetup,', lq14scale: ',lq14scale(imol),', qscale: ',qscale(imol)
                 do i=1,nbox
                    write(io_output,'(A,I0,A,F7.1,A)') '   energy offset for box ', i,': ',eta2(i,imol),' [K]'
                 end do
@@ -1671,7 +1766,8 @@ contains
                 if (rindex(imol).le.0) then
                    riutry(imol,1) = 1
                 else if (lprint) then
-                   write(io_output,'(A,I0,A,'//format_n(rindex(imol),'(1X,I0)')//')') '   The following ',rindex(imol),' beads have flexible side chains:',(riutry(imol,i),i=1,rindex(imol))
+                   write(io_output,'(A,I0,A,'//format_n(rindex(imol),'(1X,I0)')//')') '   The following ',rindex(imol)&
+                    ,' beads have flexible side chains:',(riutry(imol,i),i=1,rindex(imol))
                 end if
              end if
 
@@ -1695,11 +1791,13 @@ contains
                 if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
                 ! unit ntype leaderq
                 read(line_in,*) j,ntype(imol,i),leaderq(imol,i)
-                if (leaderq(imol,i).gt.j.and..not.lchgall) call err_exit(__FILE__,__LINE__,'group-based cut-off screwed for qq',myid+1)
+                if (leaderq(imol,i).gt.j.and..not.lchgall) call err_exit(__FILE__,__LINE__,'group-based cut-off screwed for qq'&
+                 ,myid+1)
                 ntype(imol,i)=indexOf(atoms,ntype(imol,i))
 
                 if (lprint) then
-                   write(io_output,'(/,2(A,I0),A,A,A,I0)') '   bead ',i,': bead type ',atoms%list(ntype(imol,i)),' [',trim(chemid(ntype(imol,i))),'], charge leader ',leaderq(imol,i)
+                   write(io_output,'(/,2(A,I0),A,A,A,I0)') '   bead ',i,': bead type ',atoms%list(ntype(imol,i)),' ['&
+                    ,trim(chemid(ntype(imol,i))),'], charge leader ',leaderq(imol,i)
                 end if
 
                 if (ntype(imol,i).eq.0) then
@@ -1732,7 +1830,8 @@ contains
                    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
                    read(line_in,*) ijvib(imol,i,j),itvib(imol,i,j)
                    if((ijvib(imol,i,j).eq.i).or.(ijvib(imol,i,j).gt.nunit(imol))) then
-                      call err_exit(__FILE__,__LINE__,'check vibrations for mol type '//integer_to_string(imol)//' and bead '//integer_to_string(i),myid+1)
+                      call err_exit(__FILE__,__LINE__,'check vibrations for mol type '//integer_to_string(imol)//' and bead '&
+                       //integer_to_string(i),myid+1)
                    end if
 
                    itvib(imol,i,j)=indexOf(bonds,itvib(imol,i,j))
@@ -1743,7 +1842,8 @@ contains
                    end if
 
                    if (lprint) then
-                      write(io_output,'(2(A,I0),A,F8.5,A,G16.9)') '      bonded to bead ',ijvib(imol,i,j),', type ',bonds%list(itvib(imol,i,j)),', bond length: ',brvib(itvib(imol,i,j)),', k/2: ',brvibk(itvib(imol,i,j))
+                      write(io_output,'(2(A,I0),A,F8.5,A,G16.9)') '      bonded to bead ',ijvib(imol,i,j),', type '&
+                       ,bonds%list(itvib(imol,i,j)),', bond length: ',brvib(itvib(imol,i,j)),', k/2: ',brvibk(itvib(imol,i,j))
                    end if
                 end do
 
@@ -1760,10 +1860,12 @@ contains
                    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
                    read(line_in,*) ijben2(imol,i,j),ijben3(imol,i,j),itben(imol,i,j)
                    if ((ijben2(imol,i,j).gt.nunit(imol)).or.(ijben3(imol,i,j).gt.nunit(imol))) then
-                      call err_exit(__FILE__,__LINE__,'check bending for molecule type '//integer_to_string(imol)//' bead '//integer_to_string(i),myid+1)
+                      call err_exit(__FILE__,__LINE__,'check bending for molecule type '//integer_to_string(imol)//' bead '&
+                       //integer_to_string(i),myid+1)
                    end if
                    if ((ijben2(imol,i,j).eq.i).or.(ijben3(imol,i,j).eq.i).or.(ijben2(imol,i,j).eq.ijben3(imol,i,j))) then
-                      call err_exit(__FILE__,__LINE__,'check bending for molecule type '//integer_to_string(imol)//' bead '//integer_to_string(i),myid+1)
+                      call err_exit(__FILE__,__LINE__,'check bending for molecule type '//integer_to_string(imol)//' bead '&
+                       //integer_to_string(i),myid+1)
                    end if
 
                    itben(imol,i,j)=indexOf(angles,itben(imol,i,j))
@@ -1774,7 +1876,9 @@ contains
                    end if
 
                    if (lprint) then
-                      write(io_output,'(3(A,I0),A,F8.3,A,G16.9)') '      bending interaction through ',ijben2(imol,i,j),' with bead ',ijben3(imol,i,j),', bending type: ',angles%list(itben(imol,i,j)),', bending angle: ',brben(itben(imol,i,j))*raddeg,', k/2: ',brbenk(itben(imol,i,j))
+                      write(io_output,'(3(A,I0),A,F8.3,A,G16.9)') '      bending interaction through ',ijben2(imol,i,j)&
+                       ,' with bead ',ijben3(imol,i,j),', bending type: ',angles%list(itben(imol,i,j)),', bending angle: '&
+                       ,brben(itben(imol,i,j))*raddeg,', k/2: ',brbenk(itben(imol,i,j))
                    end if
                 end do
 
@@ -1792,10 +1896,14 @@ contains
                    read(line_in,*) ijtor2(imol,i,j),ijtor3(imol,i,j),ijtor4(imol,i,j),ittor(imol,i,j)
 
                    if (ijtor2(imol,i,j).gt.nunit(imol).or.ijtor3(imol,i,j).gt.nunit(imol).or.ijtor4(imol,i,j).gt.nunit(imol)) then
-                      call err_exit(__FILE__,__LINE__,'check torsion for molecule type '//integer_to_string(imol)//' bead '//integer_to_string(i),myid+1)
+                      call err_exit(__FILE__,__LINE__,'check torsion for molecule type '//integer_to_string(imol)//' bead '&
+                       //integer_to_string(i),myid+1)
                    end if
-                   if((ijtor2(imol,i,j).eq.i.or.ijtor3(imol,i,j).eq.i.or.ijtor4(imol,i,j).eq.i).or.(ijtor2(imol,i,j).eq.ijtor3(imol,i,j).or.ijtor2(imol,i,j).eq.(ijtor4(imol,i,j)).or.(ijtor3(imol,i,j).eq.ijtor4(imol,i,j)))) then
-                      call err_exit(__FILE__,__LINE__,'check torsion for molecule type '//integer_to_string(imol)//' bead '//integer_to_string(i),myid+1)
+                   if((ijtor2(imol,i,j).eq.i .or. ijtor3(imol,i,j).eq.i .or. ijtor4(imol,i,j).eq.i)&
+                    .or. (ijtor2(imol,i,j).eq.ijtor3(imol,i,j) .or. ijtor2(imol,i,j).eq.(ijtor4(imol,i,j))&
+                    .or. (ijtor3(imol,i,j).eq.ijtor4(imol,i,j)))) then
+                      call err_exit(__FILE__,__LINE__,'check torsion for molecule type '//integer_to_string(imol)//' bead '&
+                       //integer_to_string(i),myid+1)
                    end if
 
                    ittor(imol,i,j)=indexOf(dihedrals,ittor(imol,i,j))
@@ -1804,7 +1912,8 @@ contains
                    end if
 
                    if (lprint) then
-                      write(io_output,'(4(A,I0))') '      torsional interaction through ',ijtor2(imol,i,j),' and ',ijtor3(imol,i,j),' with bead ',ijtor4(imol,i,j),', torsional type: ',dihedrals%list(ittor(imol,i,j))
+                      write(io_output,'(4(A,I0))') '      torsional interaction through ',ijtor2(imol,i,j),' and '&
+                       ,ijtor3(imol,i,j),' with bead ',ijtor4(imol,i,j),', torsional type: ',dihedrals%list(ittor(imol,i,j))
                    end if
                 end do
              end do
@@ -1915,7 +2024,8 @@ contains
                 do j = 1,nunit(imol)
                    qtot = qtot+qelect(ntype(imol,j))
                 end do
-                if(abs(qtot).gt.1E-7_dp) call err_exit(__FILE__,__LINE__,'molecule type '//integer_to_string(imol)//' not neutral. check charges',myid+1)
+                if(abs(qtot).gt.1E-7_dp) call err_exit(__FILE__,__LINE__,'molecule type '//integer_to_string(imol)&
+                 //' not neutral. check charges',myid+1)
              end if
           end do
 
@@ -2017,7 +2127,8 @@ contains
        end if
 
        if (lflucq(i).and..not.lelect(i)) call err_exit(__FILE__,__LINE__,'lelect must be true if flucq is true',myid+1)
-       if (lqtrans(i).and..not.lflucq(i)) call err_exit(__FILE__,__LINE__,'lflucq must be true if intermolecular CT is allowed',myid+1)
+       if (lqtrans(i).and..not.lflucq(i)) call err_exit(__FILE__,__LINE__,'lflucq must be true if intermolecular CT is allowed'&
+        ,myid+1)
     end do
 
     if (ALL(.NOT.lflucq(1:nmolty))) then
@@ -2063,7 +2174,8 @@ contains
     call init_ee(io_input,lprint)
     call init_moves_simple(io_input,lprint)
 
-    allocate(inclmol(ntmax*numax*numax),inclbead(ntmax*numax*numax,2),inclsign(ntmax*numax*numax),ofscale(ntmax*numax*numax),ofscale2(ntmax*numax*numax),ainclmol(ntmax*numax*numax),ainclbead(ntmax*numax*numax,2),a15t(ntmax*numax*numax),stat=jerr)
+    allocate(inclmol(ntmax*numax*numax),inclbead(ntmax*numax*numax,2),inclsign(ntmax*numax*numax),ofscale(ntmax*numax*numax)&
+     ,ofscale2(ntmax*numax*numax),ainclmol(ntmax*numax*numax),ainclbead(ntmax*numax*numax,2),a15t(ntmax*numax*numax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'readdat: allocating molecule failed',jerr)
 
     ! write out move probabilities, in percentage
@@ -2165,7 +2277,8 @@ contains
              read(line_in,*) i,ii,j,jj
 
              if (lprint) then
-                write(io_output,'(4(A,I0))') '      excluding interactions between bead ',ii,' of molecule ',i,' with bead ',jj,' of molecule ',j
+                write(io_output,'(4(A,I0))') '      excluding interactions between bead ',ii,' of molecule ',i,' with bead '&
+                 ,jj,' of molecule ',j
              end if
 
              lexclu(i,ii,j,jj) = .true.
@@ -2196,13 +2309,18 @@ contains
 
              inclnum=inclnum+1
              ! inclmol inclbead_1 inclbead_2 inclsign ofscale ofscale2
-             read(line_in,*) inclmol(inclnum),inclbead(inclnum,1),inclbead(inclnum,2),inclsign(inclnum),ofscale(inclnum),ofscale2(inclnum)
+             read(line_in,*) inclmol(inclnum),inclbead(inclnum,1),inclbead(inclnum,2),inclsign(inclnum),ofscale(inclnum)&
+              ,ofscale2(inclnum)
 
              if (lprint) then
                 if (inclsign(inclnum) .eq. 1) then
-                   write(io_output,'(3(A,I0),2(A,F6.3))') '      including intramolecular interactions for molecule type ',inclmol(inclnum), ' between bead ',inclbead(inclnum,1),' and bead ',inclbead(inclnum,2),', ofscale LJ: ',ofscale(inclnum),', ofscale Q: ',ofscale2(inclnum)
+                   write(io_output,'(3(A,I0),2(A,F6.3))') '      including intramolecular interactions for molecule type '&
+                    ,inclmol(inclnum), ' between bead ',inclbead(inclnum,1),' and bead ',inclbead(inclnum,2),', ofscale LJ: '&
+                    ,ofscale(inclnum),', ofscale Q: ',ofscale2(inclnum)
                 else
-                   write(io_output,'(3(A,I0),2(A,F6.3))') '      excluding intramolecular interactions for molecule type ',inclmol(inclnum), ' between bead ',inclbead(inclnum,1),' and bead ',inclbead(inclnum,2),', ofscale LJ: ',ofscale(inclnum),', ofscale Q: ',ofscale2(inclnum)
+                   write(io_output,'(3(A,I0),2(A,F6.3))') '      excluding intramolecular interactions for molecule type '&
+                    ,inclmol(inclnum), ' between bead ',inclbead(inclnum,1),' and bead ',inclbead(inclnum,2),', ofscale LJ: '&
+                    ,ofscale(inclnum),', ofscale Q: ',ofscale2(inclnum)
                 end if
              end if
           end do
@@ -2234,7 +2352,8 @@ contains
              read(line_in,*) ainclmol(ainclnum),ainclbead(ainclnum,1),ainclbead(ainclnum,2) ,a15t(ainclnum)
 
              if (lprint) then
-                write(io_output,'(4(A,I0))') '      repulsive 1-5 OH interaction for molecule type ',ainclmol(ainclnum),' between bead ',ainclbead(ainclnum,1),' and bead ',ainclbead(ainclnum,2),' of type ',a15t(ainclnum)
+                write(io_output,'(4(A,I0))') '      repulsive 1-5 OH interaction for molecule type ',ainclmol(ainclnum)&
+                 ,' between bead ',ainclbead(ainclnum,1),' and bead ',ainclbead(ainclnum,2),' of type ',a15t(ainclnum)
              end if
           end do
 
@@ -2282,7 +2401,8 @@ contains
     !> Initialize the system or read configuration from the restart file
     if (linit) then
        do ibox = 1,nbox
-          if (lsolid(ibox).and..not.lrect(ibox).and..not.(ibox.eq.1.and.lexzeo)) call err_exit(__FILE__,__LINE__,'Cannot initialize non-rectangular system',myid+1)
+          if (lsolid(ibox).and..not.lrect(ibox).and..not.(ibox.eq.1.and.lexzeo)) call err_exit(__FILE__,__LINE__&
+           ,'Cannot initialize non-rectangular system',myid+1)
        end do
        call setup_system_config(file_struct)
        nnstep = 0
@@ -2335,8 +2455,10 @@ contains
              write(io_output,'(/,A,I0)') 'box      #',im
              do imol = 1,nmolty
                 write(io_output,'(A,I0)') '   molecule type ',imol
-                write(io_output,'(A,3(1X,F10.6))') '      max trans. displacement:  ',rmtrax(imol,im),rmtray(imol,im),rmtraz(imol,im)
-                write(io_output,'(A,3(1X,F10.6))') '      max rot. displacement:    ',rmrotx(imol,im),rmroty(imol,im),rmrotz(imol,im)
+                write(io_output,'(A,3(1X,F10.6))') '      max trans. displacement:  ',rmtrax(imol,im),rmtray(imol,im)&
+                 ,rmtraz(imol,im)
+                write(io_output,'(A,3(1X,F10.6))') '      max rot. displacement:    ',rmrotx(imol,im),rmroty(imol,im)&
+                 ,rmrotz(imol,im)
                 write(io_output,'(A,3(1X,F10.6))') '      max fluc. q displacement: ',rmflcq(imol,im)
              end do
           end do
@@ -2378,9 +2500,11 @@ contains
           else
              read(io_restart,*) boxlx(ibox),boxly(ibox),boxlz(ibox)
              if (lprint) then
-                write(io_output,"(' dimension box ',I0,': a = ',F12.6,'  b = ',F12.6,'  c = ',F12.6)") ibox,boxlx(ibox),boxly(ibox),boxlz(ibox)
+                write(io_output,"(' dimension box ',I0,': a = ',F12.6,'  b = ',F12.6,'  c = ',F12.6)") ibox,boxlx(ibox)&
+                 ,boxly(ibox),boxlz(ibox)
              end if
-             if((allow_cutoff_failure.lt.0).and.(rcut(ibox)/boxlx(ibox).gt.0.5_dp.or.rcut(ibox)/boxly(ibox).gt.0.5_dp.or.rcut(ibox)/boxlz(ibox).gt.0.5_dp)) then
+             if((allow_cutoff_failure.lt.0).and.(rcut(ibox)/boxlx(ibox).gt.0.5_dp.or.rcut(ibox)/boxly(ibox).gt.0.5_dp&
+              .or.rcut(ibox)/boxlz(ibox).gt.0.5_dp)) then
                 call err_exit(__FILE__,__LINE__,'rcut > 0.5*boxlx',myid+1)
              end if
           end if
@@ -2528,7 +2652,8 @@ contains
              end if
              calp(ibox) = kalp(ibox)/min_boxl
              if (kalp(ibox).lt.5.6E0_dp.and.lprint) then
-                write(io_output,'(A,I0,2(A,G16.9))') 'Warning, kalp too small in box ',ibox,': calp = ',calp(ibox),', min_boxl = ',min_boxl
+                write(io_output,'(A,I0,2(A,G16.9))') 'Warning, kalp too small in box ',ibox,': calp = ',calp(ibox)&
+                 ,', min_boxl = ',min_boxl
              end if
           end do
        else
@@ -2540,7 +2665,8 @@ contains
                 ! JLR 11-24-09
                 ! you may want a smaller kalp, e.g. when comparing to previous work
                 ! This does not need to be an error
-                write(io_output,'(A,I0,2(A,G16.9))') 'Warning, kalp too small in box ',ibox,': calp = ',calp(ibox),', rcut = ',rcut(ibox)
+                write(io_output,'(A,I0,2(A,G16.9))') 'Warning, kalp too small in box ',ibox,': calp = ',calp(ibox)&
+                 ,', rcut = ',rcut(ibox)
              end if
           end do
        end if
@@ -2558,7 +2684,8 @@ contains
                 k_max_m(ibox) = aint(hmat(ibox,5)*calp(ibox))+2
                 k_max_n(ibox) = aint(hmat(ibox,9)*calp(ibox))+2
              end if
-             write(io_output,'(I4,A,F9.3,3(1X,I6),1X,F12.4)') ibox,': ',calp(ibox),k_max_l(ibox),k_max_m(ibox),k_max_n(ibox),rcut(ibox)
+             write(io_output,'(I4,A,F9.3,3(1X,I6),1X,F12.4)') ibox,': ',calp(ibox),k_max_l(ibox),k_max_m(ibox),k_max_n(ibox)&
+              ,rcut(ibox)
           end do
        end if
     else if (lchgall) then
@@ -2580,7 +2707,8 @@ contains
           end if
           do i=1,nunit(imol)
              do j=1,invib(imol,i)
-                write(io_output,'(4(1X,I6),1X,F13.4,F14.1)') i,ijvib(imol,i,j),atoms%list(ntype(imol,i)),atoms%list(ntype(imol,ijvib(imol,i,j))),brvib(itvib(imol,i,j)),brvibk(itvib(imol,i,j))
+                write(io_output,'(4(1X,I6),1X,F13.4,F14.1)') i,ijvib(imol,i,j),atoms%list(ntype(imol,i))&
+                 ,atoms%list(ntype(imol,ijvib(imol,i,j))),brvib(itvib(imol,i,j)),brvibk(itvib(imol,i,j))
              end do
           end do
 
@@ -2616,7 +2744,8 @@ contains
           do j=1,nntype
              if (lhere(i).and.lhere(j)) then
                 ij=type_2body(i,j)
-                write(io_output,'(2(1X,I4),2(1X,F13.6),'//format_n(vdW_nParameter(nonbond_type(ij)),'(1X,G12.5)')//')') atoms%list(i),atoms%list(j),qelect(i),qelect(j),vvdW(1:vdW_nParameter(nonbond_type(ij)),ij)
+                write(io_output,'(2(1X,I4),2(1X,F13.6),'//format_n(vdW_nParameter(nonbond_type(ij)),'(1X,G12.5)')//')')&
+                 atoms%list(i),atoms%list(j),qelect(i),qelect(j),vvdW(1:vdW_nParameter(nonbond_type(ij)),ij)
              end if
           end do
        end do
@@ -2651,7 +2780,8 @@ contains
 
                 ! output torsional connectivity information
                 do j = 1,nunit(imolty)
-                   write(io_movie,*) intor(imolty,j),(ijtor2(imolty,j,ii),ijtor3(imolty,j,ii),ijtor4(imolty,j,ii),ii=1,intor(imolty,j))
+                   write(io_movie,*) intor(imolty,j),(ijtor2(imolty,j,ii),ijtor3(imolty,j,ii),ijtor4(imolty,j,ii)&
+                    ,ii=1,intor(imolty,j))
                 end do
              end do
           end if
@@ -2664,7 +2794,8 @@ contains
           do ibox = 1,nbox
              write(file_box_movie,'("box",I1.1,"movie",I1.1,A,".xyz")') ibox ,run_num,suffix
              io_box_movie(ibox)=get_iounit()
-             open(unit=io_box_movie(ibox),access='stream',action='write',file=file_box_movie,form='formatted',iostat=jerr,status='unknown')
+             open(unit=io_box_movie(ibox),access='stream',action='write',file=file_box_movie,form='formatted',iostat=jerr&
+              ,status='unknown')
              if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open box movie file '//trim(file_box_movie),jerr)
           end do
        else
@@ -2720,7 +2851,8 @@ contains
     ! end if
 ! ===================================================================
 
-    deallocate(ncarbon,idummy,qbox,nures,k_max_l,k_max_m,k_max_n,lhere,temphe,inclmol,inclbead,inclsign,ofscale,ofscale2,ainclmol,ainclbead,a15t,stat=jerr)
+    deallocate(ncarbon,idummy,qbox,nures,k_max_l,k_max_m,k_max_n,lhere,temphe,inclmol,inclbead,inclsign,ofscale,ofscale2&
+     ,ainclmol,ainclbead,a15t,stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'readdat: deallocation failed',jerr)
 
     return
@@ -2743,7 +2875,8 @@ contains
 
     logical::lfq,ovrlap
     integer::im,i,ibox,jbox,Temp_nmol,m,mm,imolty,nummol,ii,ntii,intg,ilunit,k,j,itype,itel,zzz,jmolty
-    real::ratflcq,press1,surf,temvol,Temp_Mol_Vol,Temp_Energy,Heat_vapor_T,Heat_vapor_LJ,Heat_vapor_COUL,CED_T,CED_LJ,CED_COUL,HSP_T,HSP_LJ,HSP_COUL,pdV,setx,sety,setz,setel,v(nEnergy),vol,rho,temmass,dpr,dpp
+    real::ratflcq,press1,surf,temvol,Temp_Mol_Vol,Temp_Energy,Heat_vapor_T,Heat_vapor_LJ,Heat_vapor_COUL,CED_T,CED_LJ&
+     ,CED_COUL,HSP_T,HSP_LJ,HSP_COUL,pdV,setx,sety,setz,setel,v(nEnergy),vol,rho,temmass,dpr,dpp
 
 #ifdef __DEBUG__
     write(io_output,*) 'begin MONPER in ',myid
@@ -2831,7 +2964,8 @@ contains
           do ibox = 1,nbox-1
              do jbox = ibox+1,nbox
                 ! WRITE(io_output,*) 'ieouwfe ',ibox,jbox
-                call calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ,Heat_vapor_COUL,pdV,CED_T,CED_LJ,CED_COUL,HSP_T,HSP_LJ,HSP_COUL,ibox,jbox)
+                call calcsolpar(pres,Heat_vapor_T,Heat_vapor_LJ,Heat_vapor_COUL,pdV,CED_T,CED_LJ,CED_COUL,HSP_T,HSP_LJ&
+                 ,HSP_COUL,ibox,jbox)
 
                 ! Heat of vaporization
                 call update_average(acsolpar(1,ibox,jbox),Heat_vapor_T,acnp)
@@ -2853,10 +2987,12 @@ contains
     ! Print out summary current simulation status
     if ((mod(nnn,iprint).eq.0).and.(myid.eq.rootid)) then
        ! write out runtime information ***
-       write(io_output,FMT='(i6,i8,e12.4,f10.3,f12.1,'//format_n(nmolty,"i5")//')') nnn,tmcc,vbox(ivTot,1),boxlx(1),pres(1),(ncmt(1,imolty),imolty=1,nmolty)
+       write(io_output,FMT='(i6,i8,e12.4,f10.3,f12.1,'//format_n(nmolty,"i5")//')') nnn,tmcc,vbox(ivTot,1),boxlx(1),pres(1)&
+        ,(ncmt(1,imolty),imolty=1,nmolty)
        if ( lgibbs ) then
           do ibox = 2, nbox
-             write(io_output,FMT='(14x,e12.4,f10.3,f12.1,'//format_n(nmolty,"i5")//')') vbox(ivTot,ibox),boxlx(ibox),pres(ibox),(ncmt(ibox,imolty),imolty=1,nmolty)
+             write(io_output,FMT='(14x,e12.4,f10.3,f12.1,'//format_n(nmolty,"i5")//')') vbox(ivTot,ibox),boxlx(ibox),pres(ibox)&
+              ,(ncmt(ibox,imolty),imolty=1,nmolty)
           end do
        end if
     end if
@@ -2865,13 +3001,17 @@ contains
        do ibox = 1,nbox
           if ( lpbcz ) then
              if (lsolid(ibox) .and. .not. lrect(ibox)) then
-                write(io_cell,'(i8,6f12.4)') tmcc,cell_length(ibox,1),cell_length(ibox,2),cell_length(ibox,3),cell_ang(ibox,1)*raddeg,cell_ang(ibox,2)*raddeg,cell_ang(ibox,3)*raddeg
-                write(io_traj,FMT='(8E13.5,'//format_n(nmolty,"i5")//')') hmat(ibox,1),hmat(ibox,4),hmat(ibox,5),hmat(ibox,7),hmat(ibox,8),hmat(ibox,9),vbox(ivTot,ibox),pres(ibox),(ncmt(ibox,itype),itype=1,nmolty)
+                write(io_cell,'(i8,6f12.4)') tmcc,cell_length(ibox,1),cell_length(ibox,2),cell_length(ibox,3)&
+                 ,cell_ang(ibox,1)*raddeg,cell_ang(ibox,2)*raddeg,cell_ang(ibox,3)*raddeg
+                write(io_traj,FMT='(8E13.5,'//format_n(nmolty,"i5")//')') hmat(ibox,1),hmat(ibox,4),hmat(ibox,5),hmat(ibox,7)&
+                 ,hmat(ibox,8),hmat(ibox,9),vbox(ivTot,ibox),pres(ibox),(ncmt(ibox,itype),itype=1,nmolty)
              else
-                write(io_traj,'(5E13.5,'//format_n(nmolty,"i5")//')') boxlx(ibox),boxly(ibox),boxlz(ibox),vbox(ivTot,ibox),pres(ibox),(ncmt(ibox,itype),itype=1,nmolty)
+                write(io_traj,'(5E13.5,'//format_n(nmolty,"i5")//')') boxlx(ibox),boxly(ibox),boxlz(ibox),vbox(ivTot,ibox)&
+                 ,pres(ibox),(ncmt(ibox,itype),itype=1,nmolty)
              end if
           else
-             write(io_traj,'(3E12.5,'//format_n(nmolty,"i4")//')') boxlx(ibox)*boxly(ibox),vbox(ivTot,ibox),pres(ibox),(ncmt(ibox,itype),itype=1,nmolty)
+             write(io_traj,'(3E12.5,'//format_n(nmolty,"i4")//')') boxlx(ibox)*boxly(ibox),vbox(ivTot,ibox),pres(ibox)&
+              ,(ncmt(ibox,itype),itype=1,nmolty)
           end if
        end do
     end if
@@ -3056,7 +3196,8 @@ contains
           ! square end-to-end length
           do itype = 1, nmolty
              itel = 2 + nEnergy + nmolty + itype
-             call store_block_average(baver(itel,ibox,nblock),asetel(ibox,itype),mnbox(ibox,itype),bccold(itel,ibox),nccold(itel,ibox))
+             call store_block_average(baver(itel,ibox,nblock),asetel(ibox,itype),mnbox(ibox,itype),bccold(itel,ibox)&
+              ,nccold(itel,ibox))
           end do
 
           ! number density
@@ -3080,7 +3221,8 @@ contains
        do ibox = 1,nbox-1
           do jbox = ibox+1,nbox
              do i = 1,nprop1
-                call store_block_average(baver1(i,ibox,jbox,nblock),acsolpar(i,ibox,jbox),acnp,bccold1(i,ibox,jbox),nccold1(i,ibox,jbox))
+                call store_block_average(baver1(i,ibox,jbox,nblock),acsolpar(i,ibox,jbox),acnp,bccold1(i,ibox,jbox)&
+                 ,nccold1(i,ibox,jbox))
              end do
           end do
        end do
@@ -3149,7 +3291,10 @@ contains
        open(unit=io_chkpt,access='stream',action='read',file=file_chkpt,form='unformatted',iostat=jerr,status='unknown')
        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot read checkpoint file '//trim(file_chkpt),jerr)
 
-       read(io_chkpt) pos_output,pos_movie,pos_box_movie,pos_solute,pos_cell,pos_traj,nnstep,nnn,acmove,vbox,vstart,acdens,molfra,acnbox,acnbox2,acv,acvsq,acvkjmol,acdipole,acdipolesq,acboxa,acboxl,acvol,acvolsq,acvolume,enthalpy,enthalpy2,acnp,acpres,acsurf,acEnthalpy,acEnthalpy1,solcount,acsolpar,avsolinter,avsolintra,avsolbend,avsoltor,avsolelc,mnbox,asetel,acipsw,acdvdl,nblock,nccold1,bccold1,baver1,nccold,bccold,baver
+       read(io_chkpt) pos_output,pos_movie,pos_box_movie,pos_solute,pos_cell,pos_traj,nnstep,nnn,acmove,vbox,vstart,acdens,molfra&
+        ,acnbox,acnbox2,acv,acvsq,acvkjmol,acdipole,acdipolesq,acboxa,acboxl,acvol,acvolsq,acvolume,enthalpy,enthalpy2,acnp,acpres&
+        ,acsurf,acEnthalpy,acEnthalpy1,solcount,acsolpar,avsolinter,avsolintra,avsolbend,avsoltor,avsolelc,mnbox,asetel,acipsw&
+        ,acdvdl,nblock,nccold1,bccold1,baver1,nccold,bccold,baver
     end if
 
     call read_checkpoint_simple(io_chkpt)
@@ -3251,7 +3396,10 @@ contains
     open(unit=io_chkpt,access='stream',action='write',file=file_chkpt,form='unformatted',iostat=jerr,status='unknown')
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open checkpoint file '//trim(file_chkpt),jerr)
 
-    write(io_chkpt) pos_output,pos_movie,pos_box_movie,pos_solute,pos_cell,pos_traj,nnstep,nnn,acmove,vbox,vstart,acdens,molfra,acnbox,acnbox2,acv,acvsq,acvkjmol,acdipole,acdipolesq,acboxa,acboxl,acvol,acvolsq,acvolume,enthalpy,enthalpy2,acnp,acpres,acsurf,acEnthalpy,acEnthalpy1,solcount,acsolpar,avsolinter,avsolintra,avsolbend,avsoltor,avsolelc,mnbox,asetel,acipsw,acdvdl,nblock,nccold1,bccold1,baver1,nccold,bccold,baver
+    write(io_chkpt) pos_output,pos_movie,pos_box_movie,pos_solute,pos_cell,pos_traj,nnstep,nnn,acmove,vbox,vstart,acdens,molfra&
+     ,acnbox,acnbox2,acv,acvsq,acvkjmol,acdipole,acdipolesq,acboxa,acboxl,acvol,acvolsq,acvolume,enthalpy,enthalpy2,acnp,acpres&
+     ,acsurf,acEnthalpy,acEnthalpy1,solcount,acsolpar,avsolinter,avsolintra,avsolbend,avsoltor,avsolelc,mnbox,asetel,acipsw,acdvdl&
+     ,nblock,nccold1,bccold1,baver1,nccold,bccold,baver
 
     call write_checkpoint_simple(io_chkpt)
     call write_checkpoint_cbmc(io_chkpt)
@@ -3271,18 +3419,25 @@ contains
 #ifdef w_nl
 #undef w_nl
 #endif
-#define w_nl(x) write(io_unit,*) '    ',#x,'=',x
 
 #ifdef wa_nl
 #undef wa_nl
 #endif
+
+#ifdef __TRADITIONAL_CPP__
+#define w_nl(x) write(io_unit,*) '    ',"x",'=',x
+#define wa_nl(x,n) if (n.gt.0) write(io_unit,*) '    ',"x",'=',x(1:n)
+#else
+#define w_nl(x) write(io_unit,*) '    ',#x,'=',x
 #define wa_nl(x,n) if (n.gt.0) write(io_unit,*) '    ',#x,'=',x(1:n)
+#endif
 !> \brief Generate standard input files containing all parameters
 !>
 !> Put the following calling statement right after having finished reading
 !> fort.4 in readdat
 !> call generate_standard_input(lionic,L_Ewald_Auto,lmixlb,lmixjo,seed,linit,lreadq,fqtemp,inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ainclbead,a15t,ofscale,ofscale2)
-  subroutine generate_standard_input(lionic,L_Ewald_Auto,lmixlb,lmixjo,seed,linit,lreadq,fqtemp,inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ainclbead,a15t,ofscale,ofscale2)
+  subroutine generate_standard_input(lionic,L_Ewald_Auto,lmixlb,lmixjo,seed,linit,lreadq,fqtemp,inclnum,inclmol,inclbead&
+   ,inclsign,ncarbon,ainclnum,ainclmol,ainclbead,a15t,ofscale,ofscale2)
     use const_phys,only:MPa2SimUnits
     use util_string,only:format_n
     use energy_intramolecular,only:bonds,angles,dihedrals
@@ -3498,20 +3653,29 @@ contains
 ! -------------------------------------------------------------------
     write(io_unit,'(/,"SIMULATION_BOX")')
     do i=1,nbox
-       write(io_unit,'("! boxlx boxly boxlz rcut kalp rcutnn numDimensionIsIstropic lsolid lrect lideal ltwice temperature pressure",/,3(F8.3,1X),3(F6.3,1X),I0,1X,4(L,1X),F7.2,1X,F7.1)') boxlx(i),boxly(i),boxlz(i),rcut(i),kalp(i),rcutnn(i),numberDimensionIsIsotropic(i),lsolid(i),lrect(i),lideal(i),ltwice(i),temp,express(i)/MPa2SimUnits
-       write(io_unit,'("! nchain_1 ... nchain_nmolty ghost_particles",/,'//format_n(nmolty,'(I0,1X)')//',I0)') (ininch(j,i),j=1,nmolty),ghost_particles(i)
+       write(io_unit,'("! boxlx boxly boxlz rcut kalp rcutnn numDimensionIsIstropic lsolid lrect lideal ltwice temperature &
+        &pressure",/,3(F8.3,1X),3(F6.3,1X),I0,1X,4(L1,1X),F7.2,1X,F7.1)') boxlx(i),boxly(i),boxlz(i),rcut(i),kalp(i),rcutnn(i)&
+        ,numberDimensionIsIsotropic(i),lsolid(i),lrect(i),lideal(i),ltwice(i),temp,express(i)/MPa2SimUnits
+       write(io_unit,'("! nchain_1 ... nchain_nmolty ghost_particles",/,'//format_n(nmolty,'(I0,1X)')//',I0)')&
+        (ininch(j,i),j=1,nmolty),ghost_particles(i)
        ! use_linkcell is always .false., and rintramax is 0.0
-       write(io_unit,'("! inix iniy iniz inirot inimix zshift dshift use_linkcell rintramax",/,5(I0,1X),F4.1,1X,F6.3,L,1X,F3.1)') inix(i),iniy(i),iniz(i),inirot(i),inimix(i),zshift(i),dshift(i),.false.,0.0_dp
+       write(io_unit,'("! inix iniy iniz inirot inimix zshift dshift use_linkcell rintramax",/,5(I0,1X),F4.1,1X,F6.3,L1,1X,F3.1)')&
+        inix(i),iniy(i),iniz(i),inirot(i),inimix(i),zshift(i),dshift(i),.false.,0.0_dp
     end do
     write(io_unit,'("END SIMULATION_BOX",/)')
 ! -------------------------------------------------------------------
     write(io_unit,'(/,"MOLECULE_TYPE")')
     do imol=1,nmolty
        ! lsetup is always .false.
-       write(io_unit,'("! nunit nugrow ncarbon maxcbmc maxgrow iring lelect lring lrigid lbranch lrplc lsetup lq14scale qscale iurot isolute eta",/,6(I0,1X),7(L,1X),F3.1,2(1X,I0),'//format_n(nbox,'(1X,F7.1)')//')') nunit(imol),nugrow(imol),ncarbon(imol),nmaxcbmc(imol),maxgrow(imol),iring(imol),lelect(imol),lring(imol),lrigid(imol),lbranch(imol),lrplc(imol),.false.,lq14scale(imol),qscale(imol),iurot(imol),isolute(imol),(eta2(i,imol),i=1,nbox)
-       if (lrigid(imol)) write(io_unit,'("! n, growpoint_1 ... growpoint_n",/,I0,'//format_n(rindex(imol),'(1X,I0)')//')') rindex(imol),(riutry(imol,i),i=1,rindex(imol))
+       write(io_unit,'("! nunit nugrow ncarbon maxcbmc maxgrow iring lelect lring lrigid lbranch lrplc lsetup lq14scale qscale &
+        &iurot isolute eta",/,6(I0,1X),7(L1,1X),F3.1,2(1X,I0),'//format_n(nbox,'(1X,F7.1)')//')') nunit(imol),nugrow(imol)&
+        ,ncarbon(imol),nmaxcbmc(imol),maxgrow(imol),iring(imol),lelect(imol),lring(imol),lrigid(imol),lbranch(imol),lrplc(imol)&
+        ,.false.,lq14scale(imol),qscale(imol),iurot(imol),isolute(imol),(eta2(i,imol),i=1,nbox)
+       if (lrigid(imol)) write(io_unit,'("! n, growpoint_1 ... growpoint_n",/,I0,'//format_n(rindex(imol),'(1X,I0)')//')')&
+        rindex(imol),(riutry(imol,i),i=1,rindex(imol))
        do i=1,nunit(imol)
-          write(io_unit,'("! unit ntype leaderq",/,2(I0,1X),I0,/,"! stretching",/,I0)') i,atoms%list(ntype(imol,i)),leaderq(imol,i),invib(imol,i)
+          write(io_unit,'("! unit ntype leaderq",/,2(I0,1X),I0,/,"! stretching",/,I0)') i,atoms%list(ntype(imol,i))&
+           ,leaderq(imol,i),invib(imol,i)
           do j=1,invib(imol,i)
              write(io_unit,'(I0,1X,I0)') ijvib(imol,i,j),bonds%list(itvib(imol,i,j))
           end do
@@ -3530,11 +3694,13 @@ contains
     write(io_unit,'(/,"MC_SWATCH")')
     do i=1,nswaty
        write(io_unit,'("! moltyp1<->moltyp2 nsampos 2xncut",/,4(I0,1X),I0)') nswatb(i,1:2),nsampos(i),ncut(i,1:2)
-       write(io_unit,'("! gswatc 2x(ifrom, iprev)",/,'//format_n(2*(ncut(i,1)+ncut(i,2))-1,'(I0,1X)')//',I0,/,"! splist")') (gswatc(i,j,1:2*ncut(i,j)),j=1,2)
+       write(io_unit,'("! gswatc 2x(ifrom, iprev)",/,'//format_n(2*(ncut(i,1)+ncut(i,2))-1,'(I0,1X)')//',I0,/,"! splist")')&
+        (gswatc(i,j,1:2*ncut(i,j)),j=1,2)
        do j=1,nsampos(i)
           write(io_unit,'(I0,1X,I0)') splist(i,j,1:2)
        end do
-       write(io_unit,'("! nswtcb pmswtcb",/,I0,'//format_n(nswtcb(i),'(F6.2,1X)')//',/,"! box numbers")') nswtcb(i),pmswtcb(i,1:nswtcb(i))
+       write(io_unit,'("! nswtcb pmswtcb",/,I0,'//format_n(nswtcb(i),'(F6.2,1X)')//',/,"! box numbers")') nswtcb(i)&
+        ,pmswtcb(i,1:nswtcb(i))
        do j=1,nswtcb(i)
           write(io_unit,'(I0,1X,I0)') box3(i,j),box4(i,j)
        end do
@@ -3543,7 +3709,8 @@ contains
 ! -------------------------------------------------------------------
     write(io_unit,'(/,"MC_SWAP")')
     do i=1,nmolty
-       write(io_unit,'("! nswapb pmswapb",/,I0,'//format_n(nswapb(i),'(F6.2,1X)')//',/,"! box1 box2")') nswapb(i),(pmswapb(i,j),j=1,nswapb(i))
+       write(io_unit,'("! nswapb pmswapb",/,I0,'//format_n(nswapb(i),'(F6.2,1X)')//',/,"! box1 box2")') nswapb(i)&
+        ,(pmswapb(i,j),j=1,nswapb(i))
        do j=1,nswapb(i)
           write(io_unit,'(I0,1X,I0)') box1(i,j),box2(i,j)
        end do

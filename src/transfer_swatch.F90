@@ -24,8 +24,12 @@ contains
     use transfer_shared,only:lopt_bias,update_bias,gcmc_setup,gcmc_cleanup,gcmc_exchange
 
     logical::lterm
-    real::rpair,tweight,tweiold,vnbox(nEnergy,nbxmax),rx_1(numax),ry_1(numax),rz_1(numax),rxut(4,numax),ryut(4,numax),rzut(4,numax),waddold,waddnew,dvol,vola,volb,rho,dinsta,wnlog,wolog,wdlog,wswat,v(nEnergy),vdum,delen,deleo,dicount,vrecipn,vrecipo,vdum2,total_NBE,total_tor,total_bend,total_vib,vtgn,vbendn,vvibn,Rosenbluth_normalization(ntmax)
-    integer::ipair,iparty,type_a,type_b,imolta,imoltb,ipairb,boxa,boxb,imola,imolb,ibox,iboxal,iboxbl,izz,from(2*numax),prev(2*numax),orgaia,orgaib,orgbia,orgbib,bdmol_a,bdmol_b,s_type,o_type,new,old,ifirst,iprev,imolty,igrow,islen,iunit,iboxnew,iboxold,self,other,iunita,iunitb
+    real::rpair,tweight,tweiold,vnbox(nEnergy,nbxmax),rx_1(numax),ry_1(numax),rz_1(numax),rxut(4,numax),ryut(4,numax),rzut(4,numax)&
+     ,waddold,waddnew,dvol,vola,volb,rho,dinsta,wnlog,wolog,wdlog,wswat,v(nEnergy),vdum,delen,deleo,dicount,vrecipn,vrecipo,vdum2&
+     ,total_NBE,total_tor,total_bend,total_vib,vtgn,vbendn,vvibn,Rosenbluth_normalization(ntmax)
+    integer::ipair,iparty,type_a,type_b,imolta,imoltb,ipairb,boxa,boxb,imola,imolb,ibox,iboxal,iboxbl,izz,from(2*numax)&
+     ,prev(2*numax),orgaia,orgaib,orgbia,orgbib,bdmol_a,bdmol_b,s_type,o_type,new,old,ifirst,iprev,imolty,igrow,islen,iunit,iboxnew&
+     ,iboxold,self,other,iunita,iunitb
     integer::iii,j
     integer::oldchain,newchain,oldunit,newunit,iins
     integer::ic,icbu,jj,mm,imt,jmt,imolin,imolrm
@@ -458,7 +462,6 @@ contains
 
        !> \bug energy problem for cases which involve the change of the bending type
        !> and torsional type for those units swatched!!!!!!
-       call ctrmas(.false.,iboxnew,other,8)
        if (boxa.eq.boxb) then
           call energy(self,imolty,v,iii,boxa,1,iunit,.true.,lterm,.false.,.false.,.false.,.false.)
        else

@@ -103,7 +103,8 @@ contains
        end if
     end do
     if ( nmcount .ne. nchbox(ibox) ) then
-       call err_exit(__FILE__,__LINE__,'SUMUP: nmcount ne nchbox'//integer_to_string(nmcount)//integer_to_string(nchbox(ibox)),myid+1)
+       call err_exit(__FILE__,__LINE__,'SUMUP: nmcount ne nchbox'//integer_to_string(nmcount)//integer_to_string(nchbox(ibox))&
+        ,myid+1)
     end if
 
 ! ###############################################################
@@ -427,7 +428,8 @@ contains
 
 94                    if (lqinclu(imolty,ii,jj)) then
                          ! calculate intramolecular charge interaction
-                         my_velect=my_velect+qscale2(imolty,ii,jj)*Q2(rij,rijsq,rcutsq,i,imolty,ii,ntii,lqchg(ntii),i,imolty,jj,ntjj,calpi,lcoulo)
+                         my_velect=my_velect+qscale2(imolty,ii,jj)*Q2(rij,rijsq,rcutsq,i,imolty,ii,ntii,lqchg(ntii),i,imolty,jj&
+                          ,ntjj,calpi,lcoulo)
                       end if
                    end if
                 end do
@@ -658,7 +660,8 @@ contains
 !> \param lfavor
 !*****************************************************************
   subroutine energy(i,imolty,v,flagon,ibox,istart,iuend,lljii,ovrlap,ltors,lcharge_table,lfavor,lAtom_traxyz)
-    use sim_particle,only:lnn,lnn_t,neighbor,neigh_cnt,ndij,nxij,nyij,nzij,ctrmas,add_neighbor_list_molecule,neighi,neigh_icnt,ndiji,nxiji,nyiji,nziji
+    use sim_particle,only:lnn,lnn_t,neighbor,neigh_cnt,ndij,nxij,nyij,nzij,ctrmas,add_neighbor_list_molecule,neighi,neigh_icnt&
+     ,ndiji,nxiji,nyiji,nziji
     use energy_intramolecular,only:U_torsion
     use energy_3body,only:U3MolSys
     use energy_4body,only:U4MolSys
@@ -950,7 +953,8 @@ contains
 
           if (lqinclu(imolty,ii,jj) ) then
              ! calculation of intramolecular electrostatics
-             v(ivElect)=v(ivElect)+qscale2(imolty,ii,jj)*Q2(rij,rijsq,rcutsq,nchp2,imolty,ii,ntii,lqchg(ntii),nchp2,imolty,jj,ntjj,calpi,lcoulo)
+             v(ivElect)=v(ivElect)+qscale2(imolty,ii,jj)*Q2(rij,rijsq,rcutsq,nchp2,imolty,ii,ntii,lqchg(ntii),nchp2,imolty,jj&
+              ,ntjj,calpi,lcoulo)
           end if
 
           ! calculation of other non-bonded interactions
@@ -985,7 +989,8 @@ contains
                 correct=correct+qquion(ii,flagon)*qquion(jj,flagon)*(erfunc(calpi*rij)-1.0E0_dp)/rij
                 ! 1,4 interaction which we scale by qscale
              else
-                correct=correct+(1.0E0_dp-qscale2(imolty,ii,jj))*qquion(ii,flagon)*qquion(jj,flagon)*(erfunc(calpi*rij)-1.0E0_dp)/rij
+                correct=correct+(1.0E0_dp-qscale2(imolty,ii,jj))*qquion(ii,flagon)*qquion(jj,flagon)&
+                 *(erfunc(calpi*rij)-1.0E0_dp)/rij
              end if
           end if
        end do
@@ -1120,7 +1125,8 @@ contains
 
     ! RP added for MPI
     integer::rcounts(numprocs),displs(numprocs),my_start,my_end,blocksize,my_itrial
-    real::my_vtry(nchmax),my_vtrintra(nchmax),my_vtrext(nchmax),my_vtrinter(nchmax),my_vtrelect(nchmax),my_vtrewald(nchmax),my_bfac(nchmax),my_vipswot(nchmax),my_vwellipswot(nchmax),my_vipswnt(nchmax),my_vwellipswnt(nchmax)
+    real::my_vtry(nchmax),my_vtrintra(nchmax),my_vtrext(nchmax),my_vtrinter(nchmax),my_vtrelect(nchmax),my_vtrewald(nchmax)&
+     ,my_bfac(nchmax),my_vipswot(nchmax),my_vwellipswot(nchmax),my_vipswnt(nchmax),my_vwellipswnt(nchmax)
     logical::my_lovr(nchmax)
 ! ------------------------------------------
 #ifdef __DEBUG__
@@ -1307,12 +1313,15 @@ contains
                       ! group but on its own distance in SC, but should be corrected
                       ! later by calling energy subroutine.
                       if (L_elect_table) then
-                         v(ivElect) = v(ivElect) + qscale2(imolty,ii,iu)*qqu(icharge,ii)*qqu(icharge,iu)*lininter_elect(rij,ntii,ntjj)
+                         v(ivElect) = v(ivElect) + qscale2(imolty,ii,iu)*qqu(icharge,ii)*qqu(icharge,iu)&
+                          *lininter_elect(rij,ntii,ntjj)
                       else if (lewald) then
                          ! compute real space term of vewald
-                         v(ivElect) = v(ivElect) + qscale2(imolty,ii,iu)*qqu(icharge,ii)*qqu(icharge,iu)*erfunc(calp(ibox)*rij)/ rij
+                         v(ivElect) = v(ivElect) + qscale2(imolty,ii,iu)*qqu(icharge,ii)*qqu(icharge,iu)*erfunc(calp(ibox)*rij)&
+                          / rij
                          ! ewald sum correction term
-                         corr = (1.0E0_dp - qscale2(imolty,ii,iu))*qqu(icharge,ii)*qqu(icharge,iu)*(erfunc(calp(ibox)*rij)-1.0E0_dp) /rij
+                         corr = (1.0E0_dp - qscale2(imolty,ii,iu))*qqu(icharge,ii)*qqu(icharge,iu)&
+                          *(erfunc(calp(ibox)*rij)-1.0E0_dp)/rij
                          v(ivEwald) = v(ivEwald) + corr
                       else
                          v(ivElect) = v(ivElect) + qscale2(imolty,ii,iu)*qqu(icharge,ii)*qqu(i,iu)/rij
@@ -1728,7 +1737,8 @@ contains
        if (jerr.ne.0) exit cycle_read_atoms
 
        if (UPPERCASE(line_in(1:5)).eq.'ATOMS') then
-          allocate(atom_type(1:initial_size),vvdW_b(1:4,1:initial_size),qelect(1:initial_size),mass(1:initial_size),lij(1:initial_size),lqchg(1:initial_size),chemid(1:initial_size),stat=jerr)
+          allocate(atom_type(1:initial_size),vvdW_b(1:4,1:initial_size),qelect(1:initial_size),mass(1:initial_size)&
+           ,lij(1:initial_size),lqchg(1:initial_size),chemid(1:initial_size),stat=jerr)
           if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_pairwise: atoms allocation failed',jerr)
           atom_type = 0
           vvdW_b = 0.0_dp
@@ -1781,7 +1791,8 @@ contains
 
        nmix=nntype*nntype
 
-       allocate(lpl(1:nntype),xiq(1:nntype),jayself(1:nntype),nonbond_type(1:nmix),vvdW(1:4,1:nmix),rminee(1:nmix),ecut(1:nmix),jayq(1:nmix),stat=jerr)
+       allocate(lpl(1:nntype),xiq(1:nntype),jayself(1:nntype),nonbond_type(1:nmix),vvdW(1:4,1:nmix),rminee(1:nmix),ecut(1:nmix)&
+        ,jayq(1:nmix),stat=jerr)
        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_pairwise: nonbond allocation failed',jerr)
 
        lpl = .false.
@@ -1831,7 +1842,8 @@ contains
                 ! Jorgensen mixing rules --- sig_ij = [ sig_i * sig_j ]^(1/2)
                 vvdW(2:4,ij)=sqrt(vvdW_b(2:4,i)*vvdW_b(2:4,j))
              end if
-             vvdW(1,ij) = vvdW(3,ij)/(vvdW(3,ij)-vvdW(4,ij))*((vvdW(3,ij)/vvdW(4,ij))**(vvdW(4,ij)/(vvdW(3,ij)-vvdW(4,ij))))*sqrt(vvdW_b(1,i)*vvdW_b(1,j))
+             vvdW(1,ij) = vvdW(3,ij)/(vvdW(3,ij)-vvdW(4,ij))*((vvdW(3,ij)/vvdW(4,ij))**(vvdW(4,ij)/(vvdW(3,ij)-vvdW(4,ij))))&
+              *sqrt(vvdW_b(1,i)*vvdW_b(1,j))
           else if (nonbond_type(ij).eq.4.or.nonbond_type(ij).eq.5.or.nonbond_type(ij).eq.6) then
              ! MMFF94 or LJ 9-6 or Generalized LJ
              if (lmixlb) then
@@ -1880,7 +1892,8 @@ contains
                 vvdW(2,ij)=-vvdW(2,ij)
              else if (nonbond_type(ij).eq.3) then
                 ! Mie
-                vvdW(1,ij)=vvdW(3,ij)/(vvdW(3,ij)-vvdW(4,ij))*((vvdW(3,ij)/vvdW(4,ij))**(vvdW(4,ij)/(vvdW(3,ij)-vvdW(4,ij))))*vvdW(1,ij)
+                vvdW(1,ij)=vvdW(3,ij)/(vvdW(3,ij)-vvdW(4,ij))*((vvdW(3,ij)/vvdW(4,ij))**(vvdW(4,ij)/(vvdW(3,ij)-vvdW(4,ij))))&
+                 *vvdW(1,ij)
              else if (nonbond_type(ij).eq.4) then
                 ! MMFF94
                 vvdW(3,ij)=vvdW(2,ij)**2
@@ -2397,7 +2410,8 @@ contains
     end if
 
     if (L_elect_table) then
-       allocate(electsplits(1:nntype,1:nntype),relect(1:grid_size,1:nntype,1:nntype),tabelect(1:grid_size,1:nntype,1:nntype),stat=jerr)
+       allocate(electsplits(1:nntype,1:nntype),relect(1:grid_size,1:nntype,1:nntype),tabelect(1:grid_size,1:nntype,1:nntype)&
+        ,stat=jerr)
        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'read_tabulated_potential_pair: allocation failed for elect_table',myid+1)
        call read_table('fort.44',ntabelect,relect,tabelect,electsplits,atoms,lqchg)
     end if

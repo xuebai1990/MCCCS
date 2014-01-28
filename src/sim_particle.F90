@@ -3,7 +3,9 @@ MODULE sim_particle
   use sim_system,only:lneigh,lneighbor,lgaro
   implicit none
   private
-  public::BeadType,AtomType,MoleculeType,check_neighbor_list,init_neighbor_list,add_neighbor_list,add_neighbor_list_molecule,update_neighbor_list_molecule,save_neighbor_list,restore_neighbor_list,allocate_neighbor_list,ctrmas,lnn,lnn_t,neighbor,neigh_cnt,ndij,nxij,nyij,nzij,neighi,neigh_icnt,ndiji,nxiji,nyiji,nziji,extend_molecule_type
+  public::BeadType,AtomType,MoleculeType,check_neighbor_list,init_neighbor_list,add_neighbor_list,add_neighbor_list_molecule&
+   ,update_neighbor_list_molecule,save_neighbor_list,restore_neighbor_list,allocate_neighbor_list,ctrmas,lnn,lnn_t,neighbor&
+   ,neigh_cnt,ndij,nxij,nyij,nzij,neighi,neigh_icnt,ndiji,nxiji,nyiji,nziji,extend_molecule_type
 
   type BeadType
      integer::type
@@ -275,7 +277,9 @@ contains
        end do
     end if
 
-    allocate(lnn(nmax,nmax),lnn_t(nmax,nmax),upnn(nbxmax),upnnsq(nbxmax),upnndg(ntmax,nbxmax),neighbor(maxneigh,nmax),neigh_cnt(nmax),neighboro(maxneigh,nmax),neigh_o(nmax),ndij(maxneigh,nmax),nxij(maxneigh,nmax),nyij(maxneigh,nmax),nzij(maxneigh,nmax),ndijo(maxneigh,nmax),nxijo(maxneigh,nmax),nyijo(maxneigh,nmax),nzijo(maxneigh,nmax),stat=jerr)
+    allocate(lnn(nmax,nmax),lnn_t(nmax,nmax),upnn(nbxmax),upnnsq(nbxmax),upnndg(ntmax,nbxmax),neighbor(maxneigh,nmax)&
+     ,neigh_cnt(nmax),neighboro(maxneigh,nmax),neigh_o(nmax),ndij(maxneigh,nmax),nxij(maxneigh,nmax),nyij(maxneigh,nmax)&
+     ,nzij(maxneigh,nmax),ndijo(maxneigh,nmax),nxijo(maxneigh,nmax),nyijo(maxneigh,nmax),nzijo(maxneigh,nmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'allocate_neighbor_list: allocation failed',jerr)
   end subroutine allocate_neighbor_list
 
