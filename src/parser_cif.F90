@@ -8,7 +8,7 @@
 !> \b   _cell_angle_alpha \n
 !> \b   _cell_angle_beta \n
 !> \b   _cell_angle_gamma \n
-!> \b   _symmetry_equiv_pos_as_xyz \n
+!> \b   _space_group_symop_operation_xyz and _symmetry_equiv_pos_as_xyz \n
 !> \b   _atom_site_label \n
 !> \b   _atom_site_type_symbol \n
 !> \b   _atom_site_fract_x \n
@@ -48,10 +48,7 @@ CONTAINS
     real,parameter::eps=1.0E-4_dp
     INTEGER::IOCIF,jerr,i,uninitialized,boxZeo,ia,ib,ic,id,nAtom,nField,nSymm,Field(maxNumField)
     CHARACTER(LEN=default_string_length)::line,atom,SymmOp(maxNumSymmOp,3)
-    CHARACTER(LEN=default_string_length),allocatable:: atomic_element(:)
-    CHARACTER(LEN=default_string_length) atomic_element_value
     real::scoord(3),tmpcoord(3),coord(3),dr(3)
-    integer::IOxyz_supercell
 
     natom=0
     IOCIF=get_iounit()
@@ -97,19 +94,18 @@ CONTAINS
        else if (index(line,'_cell_angle_gamma').gt.0) then
           CALL getReal(line(index(line,'_cell_angle_gamma')+17:),zcell%ang(3)%val,jerr)
           uninitialized=uninitialized-1
-       else if (index(line,'_symmetry_equiv_pos_as_xyz').gt.0) then ! Read in symmetry operations
+       else if (index(line,'_space_group_symop_operation_xyz').gt.0.or.index(line,'_symmetry_equiv_pos_as_xyz').gt.0) then ! Read in symmetry operations
           i  = 0
           DO
              CALL readLine(IOCIF,line,.true.,jerr)
              if (jerr.ne.0) then
                 EXIT
              else if ((INDEX(line,"loop_").ne.0).or.(line(1:1).eq."_")) then
-                BACKSPACE (IOCIF)
+                BACKSPACE(IOCIF)
                 exit
              end if
              i = i + 1
              ia = INDEX(line,"'")
-             if (ia.eq.0) ia=INDEX(line," ") !this happens when the ' is notused
              ib = INDEX(line(ia+1:),",")+ia
              ic = INDEX(line(ib+1:),",")+ib
              IF (ia.eq.0) THEN
@@ -117,7 +113,6 @@ CONTAINS
              ELSE
                 id = INDEX(line(ic+1:),"'")+ic
              END IF
-             if (id.eq.ic) id=len_trim(line)+1
 
              SymmOp(i,1)=TRIM(line(ia+1:ib-1))
              SymmOp(i,2)=TRIM(line(ib+1:ic-1))
@@ -125,7 +120,7 @@ CONTAINS
           END DO
           nSymm=i
           uninitialized=uninitialized-1
-       else if (uninitialized.lt.0.and.index(line,'_atom_site_label').gt.0) then
+       else if (uninitialized.lt.0.and.index(line,'_atom_site_').gt.0) then
           i=0
           do
              i = i + 1
@@ -160,18 +155,15 @@ CONTAINS
                 ia=ic+ia
                 ib=ic+ib
                 SELECT CASE (Field(id))
-                CASE (1)
-                   read(line(ia:ib),*) atom
                 CASE (2)
-                   read(line(ia:ib),*) atomic_element_value
-                   call insert(atomic_element,atomic_element_value,i)
+                   read(line(ia:ib),*) atom
                 CASE (3)
                    CALL getReal(line(ia:ib),scoord(1),jerr)
                 CASE (4)
                    CALL getReal(line(ia:ib),scoord(2),jerr)
                 CASE (5)
                    CALL getReal(line(ia:ib),scoord(3),jerr)
-                CASE (0)
+                CASE (1,0)
                    ! Skip this field
                 CASE DEFAULT
                 END SELECT
@@ -213,8 +205,6 @@ CONTAINS
                    i = i + 1
                    call insert(lunitcell,.true.,i)
                    ia=zeo%bead(ic)%type
-                   atomic_element_value=atomic_element(ic)
-                   call insert(atomic_element,atomic_element_value,i)
                    call extend_molecule_type(zeo)
                    zeo%bead(i)%type=ia
                    ztype%num(ia)=ztype%num(ia)+1
@@ -231,8 +221,6 @@ CONTAINS
                    DO ia=0,zunit%dup(1)-1
                       IF (ia.ne.0.or.ib.ne.0.or.ic.ne.0) THEN
                          i=i+1
-                         atomic_element_value=atomic_element(id)
-                         call insert(atomic_element,atomic_element_value,i)
                          call extend_molecule_type(zeo)
                          call insert(lunitcell,.false.,i)
                          zeo%bead(i)%type=zeo%bead(id)%type
@@ -254,21 +242,9 @@ CONTAINS
           uninitialized=-1
        end if
     END DO
-
-    IOxyz_supercell=get_iounit()
-    open(unit=IOxyz_supercell,file="supercell.xyz",status='replace')
-    write(IOxyz_supercell,*) nAtom
-    write(IOxyz_supercell,*)
-    DO id=1,nAtom
-        write(IOxyz_supercell,*) trim(atomic_element(id)),zeo%bead(id)%coord
-    END DO
+    close(IOCIF)
 
     zeo%nbead=nAtom
-    if (nAtom.ne.zeo%nbead) then
-        write(*,*) 'the number of atoms should be :',nAtom,'but are instead set to be:',zeo%nbead
-        call err_exit(__FILE__,__LINE__,'CIF: Number of atoms incorrect',-1)
-    endif
-
   END SUBROUTINE readCIF
 
 ! *****************************************************************************

@@ -125,14 +125,14 @@ CONTAINS
 
   END SUBROUTINE readPDB
 
-  SUBROUTINE writePDB (filePDB,iBox)
-    use sim_system
+  SUBROUTINE writePDB(filePDB,zeo,ztype,zcell)
+    use const_math,only:raddeg
     character(LEN=*),intent(in)::filePDB
-    integer,intent(in)::iBox
+    type(MoleculeType),intent(in)::zeo
+    type(ZeoliteBeadType),intent(in)::ztype
+    type(CellMaskType),intent(in)::zcell !< the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
 
-    INTEGER::IOPDB,jerr,iChain,iUnit,iAtom,iType
-
-    if (myid.ne.0) return
+    INTEGER::IOPDB,jerr,i
 
     IOPDB=get_iounit()
     open(unit=IOPDB,access='sequential',action='write',file=filePDB,form='formatted',iostat=jerr,status='unknown')
@@ -140,16 +140,10 @@ CONTAINS
        call err_exit(__FILE__,__LINE__,'cannot open file for writing (PDB)',-1)
     end if
 
-    WRITE(IOPDB,'(A6,3(F9.3),3(F7.2),1X,A10)') "CRYST1",boxlx(ibox),boxly(ibox),boxlz(ibox),cell_ang(ibox,1),cell_ang(ibox,2),cell_ang(ibox,3),"P1        "
+    WRITE(IOPDB,'(A6,3(F9.3),3(F7.2),1X,A10)') "CRYST1",zcell%boxl(1)%val,zcell%boxl(2)%val,zcell%boxl(3)%val,zcell%ang(1)%val*raddeg,zcell%ang(2)%val*raddeg,zcell%ang(3)%val*raddeg,"P1        "
 
-    iAtom=0
-    DO iChain=1,nChain
-       IF (nboxi(iChain).ne.iBox) CYCLE
-       iType=molTyp(iChain)
-       DO iUnit=1,nUnit(iType)
-          iAtom=iAtom+1
-          WRITE(IOPDB,'(A6,I5,1X,A4,1X,I3,2X,I4,4X,3(F8.3),2(F6.2),10X,A2)') "ATOM  ",iAtom,ADJUSTL(chemId(nType(iType,iUnit))),iType,iChain,rxu(iChain,iUnit),ryu(iChain,iUnit),rzu(iChain,iUnit),1.0,0.0,ADJUSTL(chemId(nType(iType,iUnit)))
-       END DO
+    DO i=1,zeo%nbead
+       WRITE(IOPDB,'(A6,I5,1X,A4,1X,A3,2X,I4,4X,3(F8.3),2(F6.2),10X,A2)') "ATOM  ",i,ADJUSTL(TRIM(ztype%name(zeo%bead(i)%type))),"ZEO",1,zeo%bead(i)%coord,1.0,0.0,ADJUSTL(TRIM(ztype%name(zeo%bead(i)%type)))
     END DO
 
     WRITE(IOPDB,'(A3,/,A3)') "TER","END"

@@ -2528,31 +2528,31 @@ their default values and the RDF is zero for $r \leq
 1.2$~\AA, \textbf{rexcl} can then be set to 0.6.
 
 The SERC Daresbury Laboratory's Cambridge Structure Search
-and Retrieval (CSSR) format as adapted in earlier versions
-of topmon, which was possibly merged from bigmac
-(\url{http://molsim.chem.uva.nl/bigmac}), were further
-modified as follows:
+and Retrieval (CSSR) format, adapted in earlier versions of
+topmon, which was possibly merged from bigmac
+(\url{http://molsim.chem.uva.nl/bigmac}), were modified to
+include the following lines at the very beginning (the first
+character is supposed to be comment mark and will be
+ignored). Note that bonding connectivities and charges are
+ignored.
 \begin{table}[h!]
 \begin{tabular}{|l|l|l|}
 \hline
-LINE       & FORMAT                 & DEFINITION\\ \hline
-1          & 6 reals, 3 intergers   & Cell parameters ($a$, $b$, $c$ in~\AA, $\alpha$, $\beta$, $\gamma$ in degree), $u$, $v$, $w$.\\ \hline
-2          & 2 integers             & N atoms, P atom names.\\ \hline
-3..2+P     & string, integer, real  & Atom name, bead type (as defined in \ref{atoms}), rexcl.\\ \hline
-P+3..P+2+N & I5,1X,A4,2X,3(F9.5,1X) & Atom ID, atom name, x, y, z coordinates.\\ \hline
+LINE   & FORMAT                  & DEFINITION\\ \hline
+1      & \#4 integers            & $u$, $v$, $w$, $P$ atom names.\\ \hline
+2..1+P & \#string, integer, real & Atom name, bead type (as defined in \ref{atoms}), rexcl.\\ \hline
 \end{tabular}
 \end{table}
 
 The Protein Data Bank (PDB) format can be used if it
 contains a \textbf{CRYST1} record for the cell parameters
 and the following lines are added to the very beginning of
-the file (the first character is supposed to be comment mark
-and will be ignored):
+the file:
 \begin{table}[h!]
 \begin{tabular}{|l|l|l|}
 \hline
-LINE   & FORMAT                 & DEFINITION\\ \hline
-1      & \#5 intergers           & N atoms, u, v, w, P atom names.\\ \hline
+LINE   & FORMAT                  & DEFINITION\\ \hline
+1      & \#5 intergers           & $N$ atoms, $u$, $v$, $w$, $P$ atom names.\\ \hline
 2..1+P & \#string, integer, real & Atom name, bead type (as defined in \ref{atoms}), rexcl.\\ \hline
 \end{tabular}
 \end{table}
@@ -2560,19 +2560,22 @@ LINE   & FORMAT                 & DEFINITION\\ \hline
 The Crystallographic Information File (CIF) format is
 supported partially (\textbf{\_cell\_length\_\{a,b,c\},
   \_cell\_angle\_\{alpha,beta,gamma\},
+  \_space\_group\_symop\_operation\_xyz and
   \_symmetry\_equiv\_pos\_as\_xyz, \_atom\_site\_label,
   \_atom\_site\_type\_symbol,
   \_atom\_site\_fract\_\{x,y,z\}}).
 \textbf{\_cell\_length\_\{a,b,c\},
   \_cell\_angle\_\{alpha,beta,gamma\}} are used to provide
 the \textit{unit} cell parameters (whereas
-\textit{simulation} cell parameters should be given in CSSR
-and PDB files). Since the program does not store space
-groups symmetry information,
+\textit{simulation} cell parameters are given in CSSR and
+PDB files). Since the program does not store space groups
+symmetry information,
+\textbf{\_space\_group\_symop\_operation\_xyz} or
 \textbf{\_symmetry\_equiv\_pos\_as\_xyz} must be included to
-supply this information. The same lines should be added to
-the very beginning of the file just as in the case of PDB
-format.
+supply this information. The same lines, excluding the
+number of framework atoms, $N$, which is now determined
+automatically, should be added to the very beginning of the
+file just as in the case of CSSR format.
 
 The \textbf{file\_ztb} file will be automatically created if
 it does not yet exist. It may be more convenient to first

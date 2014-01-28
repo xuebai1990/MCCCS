@@ -1,8 +1,7 @@
 ! *****************************************************************************
 !> \brief Handles CSSR (SERC Daresbury Laboratory's Cambridge Structure Search and Retrieval) files
 !>
-!> \note The CSSR format used in topmon was adapted from
-!> but different to the format described below.
+!> \note Bonding connectivities and charges are ignored.
 !> \verbatim
 !> LINE      FORMAT                           DEFINITION
 !> -------------------------------------------------------------------------------------
@@ -16,10 +15,10 @@
 MODULE parser_cssr
   use var_type,only:default_string_length
   use util_runtime,only:err_exit
-  use util_files,only:get_iounit
+  use util_files,only:get_iounit,readLine
   use sim_cell
   use sim_particle
-  use sim_zeolite,only:ZeoliteUnitCellGridType,ZeoliteBeadType,setUpAtom,setUpCellStruct
+  use sim_zeolite,only:ZeoliteUnitCellGridType,ZeoliteBeadType,setUpAtom,setUpCellStruct,fractionalToAbsolute
   IMPLICIT NONE
   PRIVATE
   PUBLIC :: readCSSR
@@ -34,8 +33,9 @@ CONTAINS
     type(ZeoliteUnitCellGridType),intent(out)::zunit
     LOGICAL,INTENT(IN)::lprint
 
-    integer::IOCSSR,jerr,i,pos
-    character(LEN=default_string_length)::atom
+    integer::IOCSSR,jerr,i,cflag,pos
+    character(LEN=default_string_length)::line,atom
+    real::coord(3)
 
     IOCSSR=get_iounit()
     open(unit=IOCSSR,access='sequential',action='read',file=fileCSSR,form='formatted',iostat=jerr,status='old')
@@ -43,21 +43,38 @@ CONTAINS
        call err_exit(__FILE__,__LINE__,'cannot open zeolite CSSR file',-1)
     end if
 
-    read(IOCSSR,*) zcell%boxl(1)%val,zcell%boxl(2)%val,zcell%boxl(3)%val,zcell%ang(1)%val,zcell%ang(2)%val,zcell%ang(3)%val,zunit%dup(1),zunit%dup(2),zunit%dup(3)
-    read(IOCSSR,*) zeo%nbead,ztype%ntype
-    allocate(zeo%bead(zeo%nbead),lunitcell(zeo%nbead),ztype%name(ztype%ntype),ztype%radiisq(ztype%ntype),ztype%type(ztype%ntype),ztype%num(ztype%ntype),stat=jerr)
-    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'readCSSR: allocation failed',-1)
+    CALL readLine(IOCSSR,line,.false.,jerr)
+    IF(jerr.ne.0) call err_exit(__FILE__,__LINE__,'wrong CSSR file format',-1)
+
+    read(line(2:),*) zunit%dup(1),zunit%dup(2),zunit%dup(3),ztype%ntype
+    allocate(ztype%name(ztype%ntype),ztype%radiisq(ztype%ntype),ztype%type(ztype%ntype),ztype%num(ztype%ntype),stat=jerr)
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'readCSSR: ztype allocation failed',-1)
 
     do i=1,ztype%ntype
-       read(IOCSSR,*) ztype%name(i),ztype%type(i),ztype%radiisq(i)
+       CALL readLine(IOCSSR,line,.false.,jerr)
+       IF(jerr.ne.0) call err_exit(__FILE__,__LINE__,'wrong CSSR file format',-1)
+       read(line(2:),*) ztype%name(i),ztype%type(i),ztype%radiisq(i)
        ztype%radiisq(i)=ztype%radiisq(i)*ztype%radiisq(i)
        ztype%num(i)=0
     end do
 
+    read(IOCSSR,*) zcell%boxl(1)%val,zcell%boxl(2)%val,zcell%boxl(3)%val
+    read(IOCSSR,*) zcell%ang(1)%val,zcell%ang(2)%val,zcell%ang(3)%val
     call setUpCellStruct(zcell,zunit,lprint)
 
+    read(IOCSSR,*) zeo%nbead,cflag
+    read(IOCSSR,*)
+    allocate(zeo%bead(zeo%nbead),lunitcell(zeo%nbead),stat=jerr)
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'readCSSR: zeo%nbead allocation failed',-1)
+
     do i = 1,zeo%nbead
-       read(IOCSSR,'(i5,1x,a4,2x,3(f9.5,1x))') pos,atom,zeo%bead(i)%coord(1),zeo%bead(i)%coord(2),zeo%bead(i)%coord(3)
+       ! In order to accommodate number of framework atoms up to five digits, I5 is used instead of I4,1X, which should also work if the latter form is actually used.
+       read(IOCSSR,'(i5,a4,2x,3(f9.5,1x))') pos,atom,coord
+       if (cflag.eq.0) then
+          call fractionalToAbsolute(zeo%bead(i)%coord,coord,zcell)
+       else
+          zeo%bead(i)%coord=coord
+       end if
        call setUpAtom(atom,i,zeo,lunitcell,ztype,zcell,zunit)
     end do
 

@@ -1,6 +1,6 @@
 MODULE sim_zeolite
   use var_type,only:dp,default_string_length
-  use const_math,only:onepi
+  use const_math,only:degrad
   use util_runtime,only:err_exit
   use util_string,only:str_search
   use sim_system,only:myid,io_output
@@ -63,7 +63,7 @@ CONTAINS
 
 ! Fortran intrinsic trigonometric functions takes radian as input
     forall(i=1:3)
-       zcell%ang(i)%val=zcell%ang(i)%val*onepi/180
+       zcell%ang(i)%val=zcell%ang(i)%val*degrad
        zunit%boxl(i)=zcell%boxl(i)%val/zunit%dup(i)
     end forall
 

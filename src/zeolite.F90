@@ -31,9 +31,9 @@ module zeolite
   integer::nlayermax,num_points_interpolation=5,volume_probe=124,volume_nsample=20,area_probe=124,area_nsample=100
   real,allocatable::zgrid(:,:,:,:,:),egrid(:,:,:,:),yjtmp(:),yktmp(:),yltmp(:),xt(:),yt(:),zt(:)
   real::requiredPrecision=1.0E-2_dp,upperLimit=1.0E+5_dp
-  character(LEN=default_path_length)::file_zeocoord='zeolite.cssr',file_ztb='zeolite.ztb'
+  character(LEN=default_path_length)::file_zeocoord='zeolite.cssr',file_ztb='zeolite.ztb',file_supercell=''
 
-  namelist /zeolite_in/ file_zeocoord,dgr,file_ztb,requiredPrecision,num_points_interpolation,upperLimit,ltailcZeo,ltestztb,lpore_volume,volume_probe,volume_nsample,lsurface_area,area_probe,area_nsample
+  namelist /zeolite_in/ file_zeocoord,dgr,file_supercell,file_ztb,requiredPrecision,num_points_interpolation,upperLimit,ltailcZeo,ltestztb,lpore_volume,volume_probe,volume_nsample,lsurface_area,area_probe,area_nsample
 
   type(MoleculeType)::zeo
   type(ZeoliteBeadType)::ztype
@@ -101,6 +101,8 @@ contains
     else if (index(file_zeocoord,'.cssr').gt.0) then
        call readCSSR(file_zeocoord,zeo,lunitcell,ztype,zcell,zunit,lprint)
     end if
+
+    if (lprint.and.len_trim(file_supercell).gt.0) call writePDB(file_supercell,zeo,ztype,zcell)
   end subroutine zeocoord
 
   subroutine addAllBeadTypes()
