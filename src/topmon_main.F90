@@ -8,10 +8,10 @@ MODULE topmon_main
 
   ! variables added for GCMC histogram reweighting
   integer,parameter::fmax=1E6,nprop1=11
-  logical::lstop=.false.,use_checkpoint=.false.,L_add=.false.,L_sub=.false.
+  logical::lstop=.false.,use_checkpoint=.false.
   integer::blockm,checkpoint_interval=1800,checkpoint_copies=1,nstep=1,nnstep,nnn,acmove,acnp,acipsw,nblock&
    ,io_movie,io_solute,io_cell,io_traj&
-   ,N_add=0,N_box2add=1,N_moltyp2add=1,N_sub=0,N_box2sub=1,N_moltyp2sub=1
+   ,N_add=0,box2add=1,moltyp2add=1
   real::enthalpy,enthalpy2& !< enthalpy (NpT) or internal energy (NVT)
      ,acdvdl,binvir(maxvir,maxntemp),binvir2(maxvir,maxntemp)
   real,allocatable::acdens(:,:)& !< (ibox,itype): accumulators of box density
@@ -64,12 +64,14 @@ contains
     use util_timings,only:time_date_str,time_now
     use util_files,only:get_iounit
     use util_mp,only:mp_barrier
+    use sim_initia,only:setup_molecule_config
     use sim_particle,only:ctrmas,neighbor,neigh_cnt
     use energy_pairwise,only:sumup
     use moves_simple,only:translation,rotation,Atom_translation,output_translation_rotation_stats
     use moves_volume,only:volume_1box,volume_2box,output_volume_stats
     use moves_cbmc,only:config,schedule,output_safecbmc,output_cbmc_stats
     use moves_ee,only:eesetup,eemove,ee_index_swap,expand,numcoeff,output_ee_stats
+    use transfer_shared,only:gcmc_setup,gcmc_exchange
     use transfer_swap,only:swap,cnt,output_swap_stats,acchem,bnchem
     use transfer_swatch,only:swatch,output_swatch_stats
     use prop_pressure,only:pressure
@@ -84,7 +86,7 @@ contains
      ,'             ','             ','             '/)
 
     integer::io_flt,io_hist,io_cnt,io_ndis,io_config,i,jerr,ibox,itype,itype2,Temp_nmol,nentry,j,nummol,imolty,ii,ntii&
-     ,point_of_start,point_to_end,igrow,steps,itemp,jbox,itel,ig,il,nbl,n,zzz,ichkpt,nnn_1st,nstep_per_cycle
+     ,igrow,steps,itemp,jbox,itel,ig,il,nbl,n,zzz,ichkpt,nnn_1st,nstep_per_cycle
     real::v(nEnergy),press1,surf,time_prev,time_cur,rm,temvol,tmp,vhist,eng_list(fmax),temacd,temspd,debroglie,starviro,dummy&
      ,inside,bvirial,gconst,ostwald,stdost,molfrac
     logical::ovrlap
@@ -678,36 +680,38 @@ contains
           close(io_config)
        end do
 
-       if (L_add) then
-          do i = nchain+1, nchain+N_add
-             moltyp(i)=N_moltyp2add
-             nboxi(i) = N_box2add
-             rxu(i,1) = random(-1)*boxlx(N_box2add)
-             ryu(i,1) = random(-1)*boxly(N_box2add)
-             rzu(i,1) = random(-1)*boxlz(N_box2add)
-             qqu(i,1) = 0.0
-          end do
-          nchain = nchain+N_add
-       else if (L_sub) then
-          point_of_start = 0
-          do i=1,N_moltyp2sub
-             point_of_start=point_of_start+temtyp(i)
-          end do
-          point_of_start = point_of_start-N_sub+1
-          point_to_end = nchain-N_sub
+       if (N_add.gt.0) then
+          if (lbranch(moltyp2add)) then 
+             ! If we have an input structure, use it. Setting lrigid to .true. will cause gcmc_setup to call setup_molecule_config and setup_molecule_config will use the stored structure instead of growing a new one.
+             lrigid(moltyp2add)=.true.
+          else if (.not.lrigid(moltyp2add)) then
+             ! otherwise grow it
+             call setup_molecule_config(moltyp2add,nchain+1)
+             if (N_add.gt.1) then
+                do ii = 1, nunit(moltyp2add)
+                   rxu(nchain+2:nchain+N_add,ii) = rxu(nchain+1,ii)
+                   ryu(nchain+2:nchain+N_add,ii) = ryu(nchain+1,ii)
+                   rzu(nchain+2:nchain+N_add,ii) = rzu(nchain+1,ii)
+                end do
+             end if
+          end if
 
-          do i = point_of_start,point_to_end
-             moltyp(i)= moltyp(i+N_sub)
-             nboxi(i) = nboxi(i+N_sub)
-             imolty = moltyp(i)
-             do  j = 1, nunit(imolty)
-                rxu(i,j) = rxu(i+N_sub,j)
-                ryu(i,j) = ryu(i+N_sub,j)
-                rzu(i,j) = rzu(i+N_sub,j)
-                qqu(i,j) = qqu(i+N_sub,j)
+          do j = 1, N_add
+             call gcmc_setup(moltyp2add,box2add,i,itemp)
+             rxu(i,1) = random(-1) * boxlx(box2add)
+             ryu(i,1) = random(-1) * boxly(box2add)
+             rzu(i,1) = random(-1) * boxlz(box2add)
+             do ii = 2, nunit(moltyp2add)
+                rxu(i,ii) = rxu(i,1) + rxu(i,ii)
+                ryu(i,ii) = ryu(i,1) + ryu(i,ii)
+                rzu(i,ii) = rzu(i,1) + rzu(i,ii)
              end do
           end do
-          nchain = nchain - N_sub
+       else if (N_add.lt.0) then
+          do j = 1, -N_add
+             i = parbox(j,box2add,moltyp2add)
+             call gcmc_exchange(i,0)
+          end do
        end if
 
        ! write out the final configuration from the run
@@ -1241,7 +1245,7 @@ contains
      ,L_spline,L_linear,L_vib_table,L_bend_table,L_elect_table
     namelist /mc_shared/ seed,nbox,nmolty,nchain,nmax,nstep,lstop,iratio,rmin,softcut&
      ,checkpoint_interval,checkpoint_copies,use_checkpoint,linit,lreadq&
-     ,L_add,L_sub,N_add,N_box2add,N_moltyp2add,N_sub,N_box2sub,N_moltyp2sub
+     ,N_add,box2add,moltyp2add
     namelist /analysis/ iprint,imv,iblock,iratp,idiele,iheatcapacity,ianalyze&
      ,nbin,lrdf,lintra,lstretch,lgvst,lbend,lete,lrhoz,bin_width&
      ,lucall,ucheck,nvirial,starvir,stepvir,ntemp,virtemp
@@ -1463,6 +1467,7 @@ contains
     npamax=ntmax*(ntmax-1)/2
     nprop=nEnergy+(4*ntmax)+6
     if (nmax<nchain+2) nmax=nchain+2
+    if (N_add.gt.0) nmax=nmax+N_add
     softlog = 10.0_dp**(-softcut)
 
     if (lprint) then
@@ -3514,14 +3519,9 @@ contains
     w_nl(softcut)
     w_nl(linit)
     w_nl(lreadq)
-    w_nl(L_add)
-    w_nl(L_sub)
     w_nl(N_add)
-    w_nl(N_box2add)
-    w_nl(N_moltyp2add)
-    w_nl(N_sub)
-    w_nl(N_box2sub)
-    w_nl(N_moltyp2sub)
+    w_nl(box2add)
+    w_nl(moltyp2add)
     write(io_unit,'(" /",/)')
 ! -------------------------------------------------------------------
     write(io_unit,'(/," &analysis")')

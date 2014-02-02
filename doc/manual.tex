@@ -930,36 +930,14 @@ be read from the {\bf file\_restart}. If FALSE, the charges
 will be taken from force field definitions. This should be
 used only for fluctuating charge models.
 
-\noindent{\bf L\_add:} Used to add particles to the system
-to increase a box to the desired size. The particles may be
-helium atoms, L-J particles or any other particles with a
-single interaction site. May be used instead of manually
-adding particles to {\bf file\_restart}. If TRUE, {\bf
-  L\_add} adds particles to the system. Usually FALSE.
+\noindent{\bf N\_add:} Number of chains to add to (positive)
+or to remove from (negative) the system.
 
-\noindent{\bf N\_add:} The number of particles to be added to the system.
+\noindent{\bf box2add:} The box which chains will be
+added to/removed from.
 
-\noindent{\bf N\_box2add:} The box to which the particles will be added.
-
-\noindent{\bf N\_moltyp2add:} The molecule type of the added
-particles. The particles must have a single interaction
-site.
-
-\noindent{\bf L\_sub:} Used to remove particles from the
-system to decrease a box to the desired size. The particles
-may be helium atoms, L-J particles or any other particles
-with a single interaction site. May be used instead of
-manually removing particles from {\bf file\_restart}. If
-TRUE, {\bf L\_sub} removes particles from the system.
-Usually FALSE.
-
-\noindent{\bf N\_sub:} The number of particles to be subtracted from the system.
-
-\noindent{\bf N\_box2sub:}  The box from which the particles will be subtracted.
-
-\noindent{\bf N\_moltyp2sub:} The molecule type of the
-subtracted particles. The particles must have a single
-interaction site.
+\noindent{\bf moltyp2add:} The molecule type of the
+added/removed chains.
 
 \subsection{Namelist \textbf{analysis}}
 \noindent{\bf iprint:} The simulation status will be printed
