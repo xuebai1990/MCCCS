@@ -1326,7 +1326,7 @@ contains
                 do j=1,2
                    write(io_output,FMT='(A,I0)') '   molecule ',j
                    do k = 1,ncut(i,j)
-                      write(io_output,'(3(A,I0))') '   ncut ',k,': grom from ',gswatc(i,j,2*k-1),', prev ',gswatc(i,j,2*k-1)
+                      write(io_output,'(3(A,I0))') '   ncut ',k,': grom from ',gswatc(i,j,2*k-1),', prev ',gswatc(i,j,2*k)
                    end do
                 end do
              end if

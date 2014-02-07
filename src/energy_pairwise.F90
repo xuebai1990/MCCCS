@@ -1720,6 +1720,8 @@ contains
     use util_search,only:initiateTable,addToTable,indexOf,tightenTable
     use util_memory,only:reallocate
     use energy_intramolecular,only:read_ff_bonded
+    use energy_sami,only:susami,sumuir
+    use energy_garofalini,only:init_garofalini
 
     integer,INTENT(IN)::io_ff
     logical,intent(in)::lmixlb,lmixjo
@@ -1923,16 +1925,6 @@ contains
     call read_tabulated_ff_pair()
 
     call read_ff_bonded(io_ff)
-  end subroutine read_ff
-
-  subroutine init_ff(io_input,lprint)
-    use energy_external,only:init_energy_external
-    use energy_sami,only:susami,sumuir
-    use energy_garofalini,only:init_garofalini
-    INTEGER,INTENT(IN)::io_input
-    LOGICAL,INTENT(IN)::lprint
-    integer::i,j,ij
-    real::rbcut,rbcutsq
 
     if (lgaro) then
        call init_garofalini()
@@ -1944,6 +1936,14 @@ contains
           call sumuir()
        end if
     end if
+  end subroutine read_ff
+
+  subroutine init_ff(io_input,lprint)
+    use energy_external,only:init_energy_external
+    INTEGER,INTENT(IN)::io_input
+    LOGICAL,INTENT(IN)::lprint
+    integer::i,j,ij
+    real::rbcut,rbcutsq
 
     !> read external potentials
     call init_energy_external(io_input,lprint)
@@ -1953,9 +1953,10 @@ contains
        rbcut=rcut(1)
        rbcutsq=rbcut*rbcut
        do i = 1, nntype
-          do j = 1, nntype
-             ij = (i-1)*nntype + j
+          do j = i, nntype
+             ij = type_2body(i,j)
              ecut(ij) = U2(rbcut,rbcutsq,1,1,1,i,2,1,1,j,ij)
+             ecut(type_2body(j,i)) = ecut(ij)
           end do
        end do
     end if
@@ -2172,10 +2173,15 @@ contains
 
 !DEC$ ATTRIBUTES FORCEINLINE :: type_2body
   function type_2body(ntii,ntjj)
+    use energy_garofalini,only:idx_garofalini
     integer::type_2body
     integer,intent(in)::ntii,ntjj
 
-    type_2body = (ntii-1)*nntype + ntjj
+    if (lgaro) then
+       type_2body = idx_garofalini(ntii,ntjj)
+    else
+       type_2body = (ntii-1)*nntype + ntjj
+    end if
 
   end function type_2body
 

@@ -1,4 +1,4 @@
-Program started at 2013-06-06 02:22:55.883
+Program started at 2014-03-08 21:53:00.470
 Number of processors: 1
 Threads per processor: 1
  run_num: 1
@@ -73,16 +73,6 @@ Box 1:   46.000 x   46.000 x   46.000
 
 NUMBER OF MOLECULES OF EACH TYPE
  number of chains of each type:   300
-
-NAMELIST EXTERNAL_FIELD
-------------------------------------------
-Steele 10-4-3 slit pore
-On both sides of the simulation box (z = 0 & z = boxlz)
-Surface material bead type: 190
-Surface atom density:  0.11400 [Ang^-3]
-Surface layer spacing:  3.40000 [Ang]
-a1:  2.46000 [Ang]
-Electric field in z direction:     0.00000000     [V/A]
 
 SECTION MOLECULE_TYPE
 ------------------------------------------
@@ -162,102 +152,6 @@ molecule type: 1
 
 MOLECULAR MASS:     116.11540
 
-NAMELIST TRANSFER
-------------------------------------------
-lopt_bias:  F
-freq_opt_bias: 500
-
-NAMELIST MC_VOLUME
-------------------------------------------
-target volume acceptance ratio (tavol): 0.40
-frequency to adjust maximum volume displacement: 500
-initial maximum volume displacement (rmvol): 1000.000
-pmvol:  0.800000000E-03
-   pmvlmt for box 1:   1.00000000    
-nvolb: 1
-   box pair 1: between 1 and 2,   pmvolb =   1.00000000    
-
-NAMELIST MC_SWATCH
-------------------------------------------
-pmswat:   0.00000000    
-   number of swatch pairs (nswaty): 1
-   probability of each swatch pair:   1.00000000    
-
-   swatch molecule type pairs:    2    3
-   nsampos: 1, ncut:  1  1
-   molecule 1
-   ncut 1: grom from 1, prev 1
-   molecule 2
-   ncut 1: grom from 1, prev 1
-   splist:    1    1
-   number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
-   box pair:    1    2
-
-NAMELIST MC_SWAP
-------------------------------------------
-pmswap:   0.00000000    
-   swap probability for molecule type 1 (pmswmt):   1.0000
-   number of swap box pairs for molecule type 1: 1
-   pmswapb:   1.00000000    
-   box pair:    1    2
-
-NAMELIST MC_CBMC
-------------------------------------------
-CBMC inner cutoff (rcutin):  5.000 [Ang]
-AVBMC outer cutoff (rbsmax):  3.500 [Ang], inner cutoff (rbsmin):  2.500 [Ang]
-lpresim:  F
-iupdatefix: 100
-pmcb:  0.300000000    
-
-molecule type: nchoi1  nchoi nchoir nchoih nchtor nchbna nchbnb icbdir icbsta
-            1:     20     16     20      1    100   1000   1000      0      0
-
-molecule type:    pmcbmt         pmall  avbmc_version    pmbias        pmbsmt       pmbias2         pmfix   lrig
-            1:   1.00000       0.00000              0   0.00000       0.00000       0.00000       0.00000      F
-
-NAMELIST MC_FLUCQ
-------------------------------------------
-target fluctuating charge acceptance ratio (taflcq): 0.95
-fluctuating charge temperature:    5.000 [K]
-initial maximum displacement for fluctuating charge moves:  0.100000000    
-pmflcq:   0.00000000    
-   nchoiq for each box:   1
-
-molecule type:  lflucq lqtrans   pmfqmt    fqegp
-            1:       F       F   1.0000   0.0000
-
-NAMELIST MC_EE
-------------------------------------------
-pmexpc:   0.00000000    
-   expanded ens. prob. for molecule type 1 (pmeemt):   1.0000, lexpand:  F
-pmexpc1:   0.00000000    
-
-NAMELIST MC_SIMPLE
-------------------------------------------
-pm_atom_tra:   0.00000000    
-initial maximum displacement for atom translation:  0.100000000E-01
-target translation acceptance ratio: 0.50
-initial maximum displacement for molecule translation:  0.300000000    
-pmtra:  0.650000000    
-   translation probability for molecule type 1 (pmtrmt):   1.0000
-target rotation acceptance ratio: 0.50
-initial maximum displacement for molecule rotation:  0.400000000    
-pmrot:   1.00000000    
-   rotational probability for molecule type 1 (pmromt):   1.0000
-
-percentage move probabilities:
- volume move       :    0.08 %
- swatch move       :    0.00 %
- swap move         :    0.00 %
- CBMC move         :   29.92 %
- fluct. charge move:    0.00 %
- expanded ens. move:    0.00 %
- new EE move       :    0.00 %
- atom trans. move  :    0.00 %
- translation move  :   35.00 %
- rotation move     :   35.00 %
-
 SPECIAL INTERACTION RULES
 ------------------------------------------
   Total: 0 exclusion rules for intermolecular interactions
@@ -316,80 +210,6 @@ CHARGE INCLUSION TABLE
       7  0.500  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
       8  1.000  0.500  1.000  1.000  1.000  1.000  1.000  1.000  1.000
       9  1.000  1.000  1.000  1.000  1.000  0.500  1.000  1.000  1.000
-
-READING CONFIGURATION FROM RESTART FILE
-------------------------------------------
-new maximum displacements read from restart-file
-   max atom trans. displacement:     0.010000    0.010000    0.010000
-   max volume displacement:        0.5411E+03
-
-box      #1
-   molecule type 1
-      max trans. displacement:     0.312800   0.312800   0.312800
-      max rot. displacement:       0.143200   0.143200   0.143200
-      max fluc. q displacement:    0.100000
-
-new box size read from restart-file
- dimension box 1: a =    37.786392  b =    37.786392  c =    37.786392
-
-Finished writing simulation box related info
-
-****Ewald Parameters*****
-ibox:      calp  kmaxl  kmaxm  kmaxn         rcut
-   1:     0.250     10     10     10      14.0000
-
-molecule type 1
-      i      j type_i type_j   bond length           k/2
-      1      2    212    211        1.3440           0.0
-      1      4    212    213        1.2000           0.0
-      1      3    212    214        1.5200           0.0
-      2      1    211    212        1.3440           0.0
-      2      6    211    218        1.4100           0.0
-      3      1    214    212        1.5200           0.0
-      3      5    214    215        1.3300           0.0
-      4      1    213    212        1.2000           0.0
-      5      3    215    214        1.3300           0.0
-      6      2    218    211        1.4100           0.0
-      6      7    218     64        1.5400           0.0
-      7      6     64    218        1.5400           0.0
-      7      8     64     62        1.4300           0.0
-      8      7     62     64        1.4300           0.0
-      8      9     62     61        0.9450           0.0
-      9      8     61     62        0.9450           0.0
-
-      i      j      k type_i type_j type_k        angle        k/2
-      1      2      6    212    211    218       115.00     31250.00
-      1      3      5    212    214    215       119.70     35210.00
-      2      1      3    211    212    214       111.00     17650.00
-      2      1      4    211    212    213       123.00     20150.00
-      2      6      7    211    218     64       111.00     17650.00
-      3      1      4    214    212    213       126.00     20150.00
-      3      1      2    214    212    211       111.00     17650.00
-      4      1      2    213    212    211       123.00     20150.00
-      4      1      3    213    212    214       126.00     20150.00
-      5      3      1    215    214    212       119.70     35210.00
-      6      2      1    218    211    212       115.00     31250.00
-      6      7      8    218     64     62       109.47     25200.00
-      7      6      2     64    218    211       111.00     17650.00
-      7      8      9     64     62     61       108.50     27720.00
-      8      7      6     62     64    218       109.47     25200.00
-      9      8      7     61     62     64       108.50     27720.00
-
-      i      j      k      l type_i type_j type_k type_l torsion type
-      1      2      6      7    212    211    218     64     40
-      2      1      3      5    211    212    214    215     35
-      2      6      7      8    211    218     64     62     45
-      3      1      2      6    214    212    211    218     36
-      4      1      2      6    213    212    211    218     34
-      4      1      3      5    213    212    214    215     37
-      5      3      1      2    215    214    212    211     35
-      5      3      1      4    215    214    212    213     37
-      6      2      1      3    218    211    212    214     36
-      6      2      1      4    218    211    212    213     34
-      6      7      8      9    218     64     62     61     44
-      7      6      2      1     64    218    211    212     40
-      8      7      6      2     62     64    218    211     45
-      9      8      7      6     61     62     64    218     44
 
 PAIRWISE LJ AND COULOMB INTERACTIONS
     i    j         q0(i)         q0(j)     vvdW_1     vvdW_2 ...
@@ -474,6 +294,133 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
   218  214      0.250000      0.000000   195.63       3.8300    
   218  215      0.250000      0.000000   250.12       3.8125    
   218  218      0.250000      0.250000   184.00       3.9500    
+
+NAMELIST TRANSFER
+------------------------------------------
+lopt_bias:  F
+freq_opt_bias: 500
+
+NAMELIST MC_VOLUME
+------------------------------------------
+target volume acceptance ratio (tavol): 0.40
+frequency to adjust maximum volume displacement: 500
+initial maximum volume displacement (rmvol): 1000.000
+pmvol:  0.800000000E-03
+   pmvlmt for box 1:   1.00000000    
+nvolb: 1
+   box pair 1: between 1 and 2,   pmvolb =   1.00000000    
+
+NAMELIST MC_SWATCH
+------------------------------------------
+pmswat:   0.00000000    
+   number of swatch pairs (nswaty): 1
+   probability of each swatch pair:   1.00000000    
+
+   swatch molecule type pairs:    2    3
+   nsampos: 1, ncut:  1  1
+   molecule 1
+   ncut 1: grom from 1, prev 0
+   molecule 2
+   ncut 1: grom from 1, prev 0
+   splist:    1    1
+   number of swatch box pairs: 1
+   probability of the swatch box pair:   1.00000000    
+   box pair:    1    2
+
+NAMELIST MC_SWAP
+------------------------------------------
+pmswap:   0.00000000    
+   swap probability for molecule type 1 (pmswmt):   1.0000
+   number of swap box pairs for molecule type 1: 1
+   pmswapb:   1.00000000    
+   box pair:    1    2
+
+NAMELIST MC_CBMC
+------------------------------------------
+CBMC inner cutoff (rcutin):  5.000 [Ang]
+AVBMC outer cutoff (rbsmax):  3.500 [Ang], inner cutoff (rbsmin):  2.500 [Ang]
+lpresim:  F
+iupdatefix: 100
+pmcb:  0.300000000    
+
+molecule type: nchoi1  nchoi nchoir nchoih nchtor nchbna nchbnb icbdir icbsta
+            1:     20     16     20      1    100   1000   1000      0      0
+
+molecule type:    pmcbmt         pmall  avbmc_version    pmbias        pmbsmt       pmbias2         pmfix   lrig
+            1:   1.00000       0.00000              0   0.00000       0.00000       0.00000       0.00000      F
+
+NAMELIST MC_FLUCQ
+------------------------------------------
+target fluctuating charge acceptance ratio (taflcq): 0.95
+fluctuating charge temperature:    5.000 [K]
+initial maximum displacement for fluctuating charge moves:  0.100000000    
+pmflcq:   0.00000000    
+   nchoiq for each box:   1
+
+molecule type:  lflucq lqtrans   pmfqmt    fqegp
+            1:       F       F   1.0000   0.0000
+
+NAMELIST MC_EE
+------------------------------------------
+pmexpc:   0.00000000    
+   expanded ens. prob. for molecule type 1 (pmeemt):   1.0000, lexpand:  F
+pmexpc1:   0.00000000    
+
+NAMELIST MC_SIMPLE
+------------------------------------------
+pm_atom_tra:   0.00000000    
+initial maximum displacement for atom translation:  0.100000000E-01
+target translation acceptance ratio: 0.50
+initial maximum displacement for molecule translation:  0.300000000    
+pmtra:  0.650000000    
+   translation probability for molecule type 1 (pmtrmt):   1.0000
+target rotation acceptance ratio: 0.50
+initial maximum displacement for molecule rotation:  0.400000000    
+pmrot:   1.00000000    
+   rotational probability for molecule type 1 (pmromt):   1.0000
+
+percentage move probabilities:
+ volume move       :    0.08 %
+ swatch move       :    0.00 %
+ swap move         :    0.00 %
+ CBMC move         :   29.92 %
+ fluct. charge move:    0.00 %
+ expanded ens. move:    0.00 %
+ new EE move       :    0.00 %
+ atom trans. move  :    0.00 %
+ translation move  :   35.00 %
+ rotation move     :   35.00 %
+
+NAMELIST EXTERNAL_FIELD
+------------------------------------------
+Steele 10-4-3 slit pore
+On both sides of the simulation box (z = 0 & z = boxlz)
+Surface material bead type: 190
+Surface atom density:  0.11400 [Ang^-3]
+Surface layer spacing:  3.40000 [Ang]
+a1:  2.46000 [Ang]
+Electric field in z direction:     0.00000000     [V/A]
+
+READING CONFIGURATION FROM RESTART FILE
+------------------------------------------
+new maximum displacements read from restart-file
+   max atom trans. displacement:     0.010000    0.010000    0.010000
+   max volume displacement:        0.5411E+03
+
+box      #1
+   molecule type 1
+      max trans. displacement:     0.312800   0.312800   0.312800
+      max rot. displacement:       0.143200   0.143200   0.143200
+      max fluc. q displacement:    0.100000
+
+new box size read from restart-file
+ dimension box 1: a =    37.786392  b =    37.786392  c =    37.786392
+
+Finished writing simulation box related info
+
+****Ewald Parameters*****
+ibox:      calp  kmaxl  kmaxm  kmaxn         rcut
+   1:     0.250     10     10     10      14.0000
  
  sumup control
  number of chains         300
@@ -569,14 +516,14 @@ molecule  1:   0.00000000
  bond bending       341374.162932329     
  torsional          1058739.19949598     
  external          0.000000000000000E+000
- coulombic energy  -2275332.00463755     
+ coulombic energy  -2275332.00463754     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -2129736.60054127     
+ total energy      -2129736.60054126     
  
- vstart       =     -2119379.2830781778
- vend         =     -2129736.6005412694
- vbox         =     -2129736.6005412731
+ vstart       =     -2119379.2830781792
+ vend         =     -2129736.6005412629
+ vbox         =     -2129736.6005412680
  
  Averages and fluctuations                        Box  1
  
@@ -647,4 +594,4 @@ molecule  1:   0.00000000
  block    energy     density    pressure    surf ten   mol fracs
    1 -0.2120E+07  0.1072E+01  0.0000E+00  0.0000E+00  0.1000E+01
    2 -0.2130E+07  0.1078E+01 -0.7289E+04 -0.6697E+02  0.1000E+01
- Program ended at 2013-06-06 02:23:07.646
+ Program ended at 2014-03-08 21:53:14.302

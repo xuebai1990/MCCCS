@@ -53,7 +53,7 @@ ATOMS
 !i type(i) epsi(i) sigi(i) q(i) mass(i) chemid(i) chname(i) [Angstrom, Kelvin, a.u.]; type 1: Lennard-Jones
   4 1   98.0000  3.75000  0.0000  15.0347000 C   #Tr-UA CH3 alkane
   5 1   46.0000  3.95000  0.0000  14.0268000 C   #Tr-UA CH2 alkane
- 56 1   48.0000  3.74000  0.0000  13.0191000 C   #Tr-UA CH benzene6
+ 56 1   50.5000  3.69500  0.0000  13.0191000 C   #Tr-UA CH benzene6
  60 1   30.0000  3.70000  0.0000  12.0110000 C   #Tr-UA C arom naph
  61 1    0.0000  0.00000  0.4350   1.0079000 H   #Tr-UA H alkanol
 114 1   78.0000  3.15400  0.0000  15.9990000 O   #TIP4P O water

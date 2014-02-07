@@ -1,4 +1,4 @@
-Program started at 2013-06-06 02:32:26.428
+Program started at 2014-03-08 21:54:19.638
 Number of processors: 1
 Threads per processor: 1
  run_num: 1
@@ -85,16 +85,6 @@ Box 2:   96.000 x   96.000 x   96.000
 NUMBER OF MOLECULES OF EACH TYPE
  number of chains of each type:   1000
 
-NAMELIST EXTERNAL_FIELD
-------------------------------------------
-Steele 10-4-3 slit pore
-On both sides of the simulation box (z = 0 & z = boxlz)
-Surface material bead type: 190
-Surface atom density:  0.11400 [Ang^-3]
-Surface layer spacing:  3.40000 [Ang]
-a1:  2.46000 [Ang]
-Electric field in z direction:     0.00000000         0.00000000     [V/A]
-
 SECTION MOLECULE_TYPE
 ------------------------------------------
 molecule type: 1
@@ -122,6 +112,56 @@ molecule type: 1
 
 MOLECULAR MASS:      18.01480
 
+SPECIAL INTERACTION RULES
+------------------------------------------
+  Total: 0 exclusion rules for intermolecular interactions
+
+  Total: 0 inclusion rules for intramolecular interactions
+
+  Total: 0 special rules for intramolecular 1-5 OH interactions
+
+Molecule type: 1
+
+LJ INCLUSION TABLE
+       1   2   3   4
+   1   F   F   F   F
+   2   F   F   F   F
+   3   F   F   F   F
+   4   F   F   F   F
+
+CHARGE INCLUSION TABLE
+       1   2   3   4
+   1   F   F   F   F
+   2   F   F   F   F
+   3   F   F   F   F
+   4   F   F   F   F
+
+1-4 LJ SCALING FACTORS
+             1      2      3      4
+      1  1.000  1.000  1.000  1.000
+      2  1.000  1.000  1.000  1.000
+      3  1.000  1.000  1.000  1.000
+      4  1.000  1.000  1.000  1.000
+
+1-4 CHARGE SCALING FACTORS
+             1      2      3      4
+      1  1.000  1.000  1.000  1.000
+      2  1.000  1.000  1.000  1.000
+      3  1.000  1.000  1.000  1.000
+      4  1.000  1.000  1.000  1.000
+
+PAIRWISE LJ AND COULOMB INTERACTIONS
+    i    j         q0(i)         q0(j)     vvdW_1     vvdW_2 ...
+  114  114      0.000000      0.000000   312.00       3.1540    
+  114  115      0.000000      0.520000   0.0000       0.0000    
+  114  116      0.000000     -1.040000   0.0000       0.0000    
+  115  114      0.520000      0.000000   0.0000       0.0000    
+  115  115      0.520000      0.520000   0.0000       0.0000    
+  115  116      0.520000     -1.040000   0.0000       0.0000    
+  116  114     -1.040000      0.000000   0.0000       0.0000    
+  116  115     -1.040000      0.520000   0.0000       0.0000    
+  116  116     -1.040000     -1.040000   0.0000       0.0000    
+
 NAMELIST TRANSFER
 ------------------------------------------
 lopt_bias:  F
@@ -147,9 +187,9 @@ pmswat:   0.00000000
    swatch molecule type pairs:    2    3
    nsampos: 1, ncut:  1  1
    molecule 1
-   ncut 1: grom from 1, prev 1
+   ncut 1: grom from 1, prev 0
    molecule 2
-   ncut 1: grom from 1, prev 1
+   ncut 1: grom from 1, prev 0
    splist:    1    1
    number of swatch box pairs: 1
    probability of the swatch box pair:   1.00000000    
@@ -219,43 +259,15 @@ percentage move probabilities:
  translation move  :   49.72 %
  rotation move     :   49.72 %
 
-SPECIAL INTERACTION RULES
+NAMELIST EXTERNAL_FIELD
 ------------------------------------------
-  Total: 0 exclusion rules for intermolecular interactions
-
-  Total: 0 inclusion rules for intramolecular interactions
-
-  Total: 0 special rules for intramolecular 1-5 OH interactions
-
-Molecule type: 1
-
-LJ INCLUSION TABLE
-       1   2   3   4
-   1   F   F   F   F
-   2   F   F   F   F
-   3   F   F   F   F
-   4   F   F   F   F
-
-CHARGE INCLUSION TABLE
-       1   2   3   4
-   1   F   F   F   F
-   2   F   F   F   F
-   3   F   F   F   F
-   4   F   F   F   F
-
-1-4 LJ SCALING FACTORS
-             1      2      3      4
-      1  1.000  1.000  1.000  1.000
-      2  1.000  1.000  1.000  1.000
-      3  1.000  1.000  1.000  1.000
-      4  1.000  1.000  1.000  1.000
-
-1-4 CHARGE SCALING FACTORS
-             1      2      3      4
-      1  1.000  1.000  1.000  1.000
-      2  1.000  1.000  1.000  1.000
-      3  1.000  1.000  1.000  1.000
-      4  1.000  1.000  1.000  1.000
+Steele 10-4-3 slit pore
+On both sides of the simulation box (z = 0 & z = boxlz)
+Surface material bead type: 190
+Surface atom density:  0.11400 [Ang^-3]
+Surface layer spacing:  3.40000 [Ang]
+a1:  2.46000 [Ang]
+Electric field in z direction:     0.00000000         0.00000000     [V/A]
 
 READING CONFIGURATION FROM RESTART FILE
 ------------------------------------------
@@ -285,29 +297,6 @@ Finished writing simulation box related info
 ibox:      calp  kmaxl  kmaxm  kmaxn         rcut
    1:     0.229      8      8      8      14.0000
    2:     0.100      9      9      9      32.0000
-
-molecule type 1
-      i      j type_i type_j   bond length           k/2
-      1      2    114    115        0.9572           0.0
-      1      3    114    115        0.9572           0.0
-      2      1    115    114        0.9572           0.0
-      3      1    115    114        0.9572           0.0
-
-      i      j      k type_i type_j type_k        angle        k/2
-
-      i      j      k      l type_i type_j type_k type_l torsion type
-
-PAIRWISE LJ AND COULOMB INTERACTIONS
-    i    j         q0(i)         q0(j)     vvdW_1     vvdW_2 ...
-  114  114      0.000000      0.000000   312.00       3.1540    
-  114  115      0.000000      0.520000   0.0000       0.0000    
-  114  116      0.000000     -1.040000   0.0000       0.0000    
-  115  114      0.520000      0.000000   0.0000       0.0000    
-  115  115      0.520000      0.520000   0.0000       0.0000    
-  115  116      0.520000     -1.040000   0.0000       0.0000    
-  116  114     -1.040000      0.000000   0.0000       0.0000    
-  116  115     -1.040000      0.520000   0.0000       0.0000    
-  116  116     -1.040000     -1.040000   0.0000       0.0000    
  
  sumup control
  number of chains         867
@@ -322,16 +311,16 @@ PAIRWISE LJ AND COULOMB INTERACTIONS
  coulombic energy  -3851610.35225436     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -3397853.23501368     
+ total energy      -3397853.23501367     
  
- box             1  initial v   =   -3397853.23501368     
+ box             1  initial v   =   -3397853.23501367     
  surf. tension :   box 1 =     -32.72632
  pressure check:   box 1 =     -23396.40
  
  sumup control
  number of chains         133
  number of chains of type           1         133
- inter lj energy    6966.23339409259     
+ inter lj energy    6966.23339409258     
  intra lj energy   0.000000000000000E+000
  Tail correction  -0.675802664689419     
  bond vibration    0.000000000000000E+000
@@ -427,10 +416,10 @@ molecule  1:   0.00000000      0.00000000
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -3874257.35591812     
+ coulombic energy  -3874257.35591813     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -3403242.07415054     
+ total energy      -3403242.07415055     
  
  sumup control
  number of chains         133
@@ -442,14 +431,14 @@ molecule  1:   0.00000000      0.00000000
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -51893.0504291607     
+ coulombic energy  -51893.0504291609     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -45655.4734260890     
+ total energy      -45655.4734260892     
  
- vstart       =     -3397853.2350136773       -46068.9125216549
- vend         =     -3403242.0741505413       -45655.4734260890
- vbox         =     -3403242.0741505856       -45655.4734260884
+ vstart       =     -3397853.2350136749       -46068.9125216549
+ vend         =     -3403242.0741505492       -45655.4734260892
+ vbox         =     -3403242.0741505828       -45655.4734260878
  
  Averages and fluctuations                        Box  1       Box  2
  
@@ -484,4 +473,4 @@ molecule  1:   0.00000000      0.00000000
  type  box       vinter       vintra         vtor        vbend        vtail
     1    1      0.00000      0.00000      0.00000      0.00000      0.00000
     1    2      0.00000      0.00000      0.00000      0.00000      0.00000
- Program ended at 2013-06-06 02:32:36.048
+ Program ended at 2014-03-08 21:54:30.640

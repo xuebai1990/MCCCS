@@ -21,7 +21,7 @@ MODULE energy_garofalini
   implicit none
   private
   save
-  public::init_garofalini,isNeighbor,garofalini,vthreebody,triad,triad_en
+  public::init_garofalini,idx_garofalini,isNeighbor,garofalini,vthreebody,triad,triad_en
 
   integer,parameter::pair_max=50000
   real::ga(6,3),gb(6,3),gc(6,3),glambda(4),grij(4,2),ggamma(4,2),gtheta(4),grijsq(4,2)
@@ -33,7 +33,6 @@ contains
     use const_math,only:degrad
     nntype = 3
     vvdW(:,1:6) = 0.0_dp
-    ecut(1:6) = 0.0_dp
     ga = 0.0_dp
     gb = 0.0_dp
     gc = 0.0_dp
@@ -53,7 +52,6 @@ contains
     vvdW(3,1) = 16.0_dp
     vvdW(4,1) = 2.29E0_dp
     mass(1) = 28.09E0_dp
-    ecut(1) = garofalini(rcut(1),1,1)
     chemid(1) = 'Si'
 
     ! O-O
@@ -62,7 +60,6 @@ contains
     vvdW(3,2) = 4.0_dp
     vvdW(4,2) = 2.34E0_dp
     mass(2) = 16.00E0_dp
-    ecut(2) = garofalini(rcut(1),2,2)
     chemid(2) = 'O  '
 
     ! H-H
@@ -77,7 +74,6 @@ contains
     gb(3,2) = 2.0E0_dp
     gc(3,2) = 2.42E0_dp
     mass(3) = 1.0078E0_dp
-    ecut(3) = garofalini(rcut(1),3,3)
     chemid(3) = 'H'
 
     ! Si-O
@@ -85,7 +81,6 @@ contains
     vvdW(2,4) = 0.29E0_dp
     vvdW(3,4) = -8.0_dp
     vvdW(4,4) = 2.34E0_dp
-    ecut(4) = garofalini(rcut(1),1,2)
 
     ! Si-H
     vvdW(1,5) = 499842.9E0_dp
@@ -95,7 +90,6 @@ contains
     ga(5,1) = -33715.5E0_dp
     gb(5,1) = 6.0E0_dp
     gc(5,1) = 2.2E0_dp
-    ecut(5) = garofalini(rcut(1),1,3)
 
     ! 0-H
     vvdW(1,6) = 2886049.4E0_dp
@@ -111,7 +105,6 @@ contains
     ga(6,3) = -6038.7E0_dp
     gb(6,3) = 5.0E0_dp
     gc(6,3) = 2.0E0_dp
-    ecut(6) = garofalini(rcut(1),2,3)
 
     ! Si-O-Si
     glambda(1) = 21732.3E0_dp
@@ -145,16 +138,17 @@ contains
     gtheta(4) = cos(109.5E0_dp*degrad)
   end subroutine init_garofalini
 
-  function idx(ntii,ntjj)
-    integer::idx
+!DEC$ ATTRIBUTES FORCEINLINE :: type_2body
+  function idx_garofalini(ntii,ntjj)
+    integer::idx_garofalini
     integer,intent(in)::ntii,ntjj
 
     if (ntii.eq.ntjj) then
-       idx = ntii
+       idx_garofalini = ntii
     else
-       idx = ntii+ntjj+1
+       idx_garofalini = ntii+ntjj+1
     end if
-  end function idx
+  end function idx_garofalini
 
   function isNeighbor(rijsq,ntii,ntjj)
     logical::isNeighbor
@@ -162,7 +156,7 @@ contains
     integer,intent(in)::ntii,ntjj
     integer::ntij
 
-    ntij = idx(ntii,ntjj)
+    ntij = idx_garofalini(ntii,ntjj)
     isNeighbor = (ntij.eq.4.and.rijsq.lt.grijsq(2,1)).or.(ntij.eq.6.and.rijsq.lt.grijsq(3,1))
   end function isNeighbor
 
@@ -172,7 +166,7 @@ contains
     integer,intent(in)::ntii,ntjj
     integer::ntij,i
 
-    ntij = idx(ntii,ntjj)
+    ntij = idx_garofalini(ntii,ntjj)
 
     garofalini = vvdW(1,ntij)*exp(-rij/vvdW(2,ntij)) + vvdW(3,ntij)*qqfact/rij*erfunc(rij/vvdW(4,ntij))
 

@@ -1,4 +1,4 @@
-Program started at 2013-06-06 02:23:35.336
+Program started at 2014-03-08 21:53:57.395
 Number of processors: 1
 Threads per processor: 1
  run_num: 1
@@ -75,16 +75,6 @@ Box 1:   20.000 x   20.000 x   20.000
 NUMBER OF MOLECULES OF EACH TYPE
  number of chains of each type:   60  180  120
 
-NAMELIST EXTERNAL_FIELD
-------------------------------------------
-Steele 10-4-3 slit pore
-On both sides of the simulation box (z = 0 & z = boxlz)
-Surface material bead type: 190
-Surface atom density:  0.11400 [Ang^-3]
-Surface layer spacing:  3.40000 [Ang]
-a1:  2.46000 [Ang]
-Electric field in z direction:     0.00000000     [V/A]
-
 SECTION MOLECULE_TYPE
 ------------------------------------------
 molecule type: 1
@@ -122,6 +112,81 @@ molecule type: 3
    bead 1: bead type 3 [H], charge leader 1
 
 MOLECULAR MASS:      28.09000     16.00000      1.00780
+
+SPECIAL INTERACTION RULES
+------------------------------------------
+  Total: 0 exclusion rules for intermolecular interactions
+
+      including intramolecular interactions for molecule type 7 between bead 1 and bead 2, ofscale LJ:  1.000, ofscale Q:  1.000
+  Total: 1 inclusion rules for intramolecular interactions
+
+  Total: 0 special rules for intramolecular 1-5 OH interactions
+
+Molecule type: 1
+
+LJ INCLUSION TABLE
+       1
+   1   F
+
+CHARGE INCLUSION TABLE
+       1
+   1   F
+
+1-4 LJ SCALING FACTORS
+             1
+      1  1.000
+
+1-4 CHARGE SCALING FACTORS
+             1
+      1  1.000
+
+Molecule type: 2
+
+LJ INCLUSION TABLE
+       1
+   1   F
+
+CHARGE INCLUSION TABLE
+       1
+   1   F
+
+1-4 LJ SCALING FACTORS
+             1
+      1  1.000
+
+1-4 CHARGE SCALING FACTORS
+             1
+      1  1.000
+
+Molecule type: 3
+
+LJ INCLUSION TABLE
+       1
+   1   F
+
+CHARGE INCLUSION TABLE
+       1
+   1   F
+
+1-4 LJ SCALING FACTORS
+             1
+      1  1.000
+
+1-4 CHARGE SCALING FACTORS
+             1
+      1  1.000
+
+PAIRWISE LJ AND COULOMB INTERACTIONS
+    i    j         q0(i)         q0(j)     vvdW_1     vvdW_2 ...
+    1    1      0.000000      0.000000  0.13597E+08  0.29000    
+    1    2      0.000000      0.000000  0.21457E+08  0.29000    
+    1    3      0.000000      0.000000  0.49984E+06  0.29000    
+    2    1      0.000000      0.000000  0.21457E+08  0.29000    
+    2    2      0.000000      0.000000  0.52520E+07  0.29000    
+    2    3      0.000000      0.000000  0.28860E+07  0.29000    
+    3    1      0.000000      0.000000  0.49984E+06  0.29000    
+    3    2      0.000000      0.000000  0.28860E+07  0.29000    
+    3    3      0.000000      0.000000  0.24630E+06  0.35000    
 
 NAMELIST TRANSFER
 ------------------------------------------
@@ -241,68 +306,15 @@ percentage move probabilities:
  translation move  :   99.95 %
  rotation move     :    0.00 %
 
-SPECIAL INTERACTION RULES
+NAMELIST EXTERNAL_FIELD
 ------------------------------------------
-  Total: 0 exclusion rules for intermolecular interactions
-
-      including intramolecular interactions for molecule type 7 between bead 1 and bead 2, ofscale LJ:  1.000, ofscale Q:  1.000
-  Total: 1 inclusion rules for intramolecular interactions
-
-  Total: 0 special rules for intramolecular 1-5 OH interactions
-
-Molecule type: 1
-
-LJ INCLUSION TABLE
-       1
-   1   F
-
-CHARGE INCLUSION TABLE
-       1
-   1   F
-
-1-4 LJ SCALING FACTORS
-             1
-      1  1.000
-
-1-4 CHARGE SCALING FACTORS
-             1
-      1  1.000
-
-Molecule type: 2
-
-LJ INCLUSION TABLE
-       1
-   1   F
-
-CHARGE INCLUSION TABLE
-       1
-   1   F
-
-1-4 LJ SCALING FACTORS
-             1
-      1  1.000
-
-1-4 CHARGE SCALING FACTORS
-             1
-      1  1.000
-
-Molecule type: 3
-
-LJ INCLUSION TABLE
-       1
-   1   F
-
-CHARGE INCLUSION TABLE
-       1
-   1   F
-
-1-4 LJ SCALING FACTORS
-             1
-      1  1.000
-
-1-4 CHARGE SCALING FACTORS
-             1
-      1  1.000
+Steele 10-4-3 slit pore
+On both sides of the simulation box (z = 0 & z = boxlz)
+Surface material bead type: 190
+Surface atom density:  0.11400 [Ang^-3]
+Surface layer spacing:  3.40000 [Ang]
+a1:  2.46000 [Ang]
+Electric field in z direction:     0.00000000     [V/A]
 
 READING CONFIGURATION FROM RESTART FILE
 ------------------------------------------
@@ -328,24 +340,6 @@ new box size read from restart-file
  dimension box 1: a =    16.176787  b =    16.176787  c =    16.176787
 
 Finished writing simulation box related info
-
-molecule type 1
-
-molecule type 2
-
-molecule type 3
-
-PAIRWISE LJ AND COULOMB INTERACTIONS
-    i    j         q0(i)         q0(j)     vvdW_1     vvdW_2 ...
-    1    1      0.000000      0.000000  0.13597E+08  0.29000    
-    1    2      0.000000      0.000000  0.52520E+07  0.29000    
-    1    3      0.000000      0.000000  0.24630E+06  0.35000    
-    2    1      0.000000      0.000000  0.21457E+08  0.29000    
-    2    2      0.000000      0.000000  0.49984E+06  0.29000    
-    2    3      0.000000      0.000000  0.28860E+07  0.29000    
-    3    1      0.000000      0.000000   519.57       3.8300    
-    3    2      0.000000      0.000000   333.61       3.8300    
-    3    3      0.000000      0.000000   592.00       3.7300    
  
  sumup control
  number of chains         360
@@ -484,9 +478,9 @@ molecule  3:   0.00000000
  3-body garo        524197.468650635     
  total energy      -35041415.6007145     
  
- vstart       =    -34805612.6326730177
- vend         =    -35041415.6007145271
- vbox         =    -35041415.6007130444
+ vstart       =    -34805612.6326730028
+ vend         =    -35041415.6007145345
+ vbox         =    -35041415.6007133126
  
  Averages and fluctuations                        Box  1
  
@@ -526,7 +520,7 @@ molecule  3:   0.00000000
  3-body Garo  [K per system and kJ/mol per chain] =     544962.95      12.59
  Fluc Q       [K per system and kJ/mol per chain] =          0.00       0.00
  
- fluctuation in <vtot> =   135021.12
+ fluctuation in <vtot> =   135021.11
  
  type  box       vinter       vintra         vtor        vbend        vtail
     1    1      0.00000      0.00000      0.00000      0.00000      0.00000
@@ -585,4 +579,4 @@ molecule  3:   0.00000000
    8 -0.3485E+08  0.1861E+01  0.0000E+00  0.0000E+00  0.1667E+00  0.5000E+00  0.3333E+00
    9 -0.3489E+08  0.1854E+01  0.0000E+00  0.0000E+00  0.1667E+00  0.5000E+00  0.3333E+00
   10 -0.3507E+08  0.1855E+01  0.0000E+00  0.0000E+00  0.1667E+00  0.5000E+00  0.3333E+00
- Program ended at 2013-06-06 02:23:56.925
+ Program ended at 2014-03-08 21:54:19.523

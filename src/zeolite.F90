@@ -194,7 +194,7 @@ contains
     ! Calculate zeolite density
     wzeo=dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype)))
     if (lprint) then
-       write(io_output,"(' Tabulated zeolite potential: ',/&
+       write(io_output,"(/,' Tabulated zeolite potential: ',/&
                        &,' --------------------------------------------------',/,"&
                        //format_n(ztype%ntype,"(' number of ',A,':',I0,3X)")//&
                        ",/,' simulation volume                 = ', f10.1, 20x,' Angst**3',/&
@@ -227,7 +227,7 @@ contains
     open(unit=io_ztb,access='stream',action='read',file=file_ztb,form='unformatted',iostat=jerr,status='old')
     if (jerr.eq.0) then
        ! read zeolite table from disk
-       if (lprint) write(io_output,'(A,/)') 'read in tabulated potential'
+       if (lprint) write(io_output,*) 'read in tabulated potential:'
        read(io_ztb) zunittmp,zangtmp,ngridtmp,zntypetmp,lewaldtmp,ltailczeotmp,lshifttmp,rcuttmp
        if (ANY(abs(zunittmp-zunit%boxl).gt.eps).or.ANY(ngridtmp.ne.zunit%ngrid).or.(zntypetmp.ne.ztype%ntype))&
         call err_exit(__FILE__,__LINE__,'problem 1 in zeolite potential table',myid+1)
@@ -356,7 +356,7 @@ contains
     deallocate(lunitcell,zgrid,zeo%bead,ztype%type,ztype%num,ztype%radiisq,ztype%name,zpot%param)
     if (lprint) then
        close(io_ztb)
-       write(io_output,'(4(A,L1),A,G10.3,A,/)') 'tabulated potential: lewald[',lewaldtmp,'] ltailc[',ltailcZeotmp,'] lshift['&
+       write(io_output,'(4(A,L1),A,G10.3,A)') 'lewald[',lewaldtmp,'] ltailc[',ltailcZeotmp,'] lshift['&
         ,lshifttmp,'] ltailcZeo[',ltailcZeo,'] rcut[',rcuttmp,']'
     end if
 

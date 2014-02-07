@@ -1,4 +1,4 @@
-Program started at 2013-11-20 03:20:47.911
+Program started at 2014-03-08 22:02:29.079
 Number of processors: 1
 Threads per processor: 1
  run_num: 1
@@ -85,16 +85,6 @@ Box 2:   90.000 x   90.000 x   90.000
 NUMBER OF MOLECULES OF EACH TYPE
  number of chains of each type:   200
 
-NAMELIST EXTERNAL_FIELD
-------------------------------------------
-Steele 10-4-3 slit pore
-On both sides of the simulation box (z = 0 & z = boxlz)
-Surface material bead type: 190
-Surface atom density:  0.11400 [Ang^-3]
-Surface layer spacing:  3.40000 [Ang]
-a1:  2.46000 [Ang]
-Electric field in z direction:     0.00000000         0.00000000     [V/A]
-
 SECTION MOLECULE_TYPE
 ------------------------------------------
 molecule type: 1
@@ -162,6 +152,67 @@ molecule type: 1
 
 MOLECULAR MASS:     114.23020
 
+SPECIAL INTERACTION RULES
+------------------------------------------
+  Total: 0 exclusion rules for intermolecular interactions
+
+  Total: 0 inclusion rules for intramolecular interactions
+
+  Total: 0 special rules for intramolecular 1-5 OH interactions
+
+Molecule type: 1
+
+LJ INCLUSION TABLE
+       1   2   3   4   5   6   7   8
+   1   F   F   F   F   T   T   T   T
+   2   F   F   F   F   F   T   T   T
+   3   F   F   F   F   F   F   T   T
+   4   F   F   F   F   F   F   F   T
+   5   T   F   F   F   F   F   F   F
+   6   T   T   F   F   F   F   F   F
+   7   T   T   T   F   F   F   F   F
+   8   T   T   T   T   F   F   F   F
+
+CHARGE INCLUSION TABLE
+       1   2   3   4   5   6   7   8
+   1   F   F   F   F   F   F   F   F
+   2   F   F   F   F   F   F   F   F
+   3   F   F   F   F   F   F   F   F
+   4   F   F   F   F   F   F   F   F
+   5   F   F   F   F   F   F   F   F
+   6   F   F   F   F   F   F   F   F
+   7   F   F   F   F   F   F   F   F
+   8   F   F   F   F   F   F   F   F
+
+1-4 LJ SCALING FACTORS
+             1      2      3      4      5      6      7      8
+      1  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
+      2  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
+      3  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
+      4  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
+      5  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
+      6  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
+      7  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
+      8  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
+
+1-4 CHARGE SCALING FACTORS
+             1      2      3      4      5      6      7      8
+      1  1.000  1.000  1.000  0.500  1.000  1.000  1.000  1.000
+      2  1.000  1.000  1.000  1.000  0.500  1.000  1.000  1.000
+      3  1.000  1.000  1.000  1.000  1.000  0.500  1.000  1.000
+      4  0.500  1.000  1.000  1.000  1.000  1.000  0.500  1.000
+      5  1.000  0.500  1.000  1.000  1.000  1.000  1.000  0.500
+      6  1.000  1.000  0.500  1.000  1.000  1.000  1.000  1.000
+      7  1.000  1.000  1.000  0.500  1.000  1.000  1.000  1.000
+      8  1.000  1.000  1.000  1.000  0.500  1.000  1.000  1.000
+
+PAIRWISE LJ AND COULOMB INTERACTIONS
+    i    j         q0(i)         q0(j)     vvdW_1     vvdW_2 ...
+    4    4      0.000000      0.000000   392.00       3.7500    
+    4    5      0.000000      0.000000   268.57       3.8500    
+    5    4      0.000000      0.000000   268.57       3.8500    
+    5    5      0.000000      0.000000   184.00       3.9500    
+
 NAMELIST TRANSFER
 ------------------------------------------
 lopt_bias:  F
@@ -187,9 +238,9 @@ pmswat:   0.00000000
    swatch molecule type pairs:    1    2
    nsampos: 1, ncut:  1  1
    molecule 1
-   ncut 1: grom from 1, prev 1
+   ncut 1: grom from 1, prev 0
    molecule 2
-   ncut 1: grom from 1, prev 1
+   ncut 1: grom from 1, prev 0
    splist:    1    1
    number of swatch box pairs: 1
    probability of the swatch box pair:  1.000000000    
@@ -259,59 +310,15 @@ percentage move probabilities:
  translation move  :   33.00 %
  rotation move     :   33.00 %
 
-SPECIAL INTERACTION RULES
+NAMELIST EXTERNAL_FIELD
 ------------------------------------------
-  Total: 0 exclusion rules for intermolecular interactions
-
-  Total: 0 inclusion rules for intramolecular interactions
-
-  Total: 0 special rules for intramolecular 1-5 OH interactions
-
-Molecule type: 1
-
-LJ INCLUSION TABLE
-       1   2   3   4   5   6   7   8
-   1   F   F   F   F   T   T   T   T
-   2   F   F   F   F   F   T   T   T
-   3   F   F   F   F   F   F   T   T
-   4   F   F   F   F   F   F   F   T
-   5   T   F   F   F   F   F   F   F
-   6   T   T   F   F   F   F   F   F
-   7   T   T   T   F   F   F   F   F
-   8   T   T   T   T   F   F   F   F
-
-CHARGE INCLUSION TABLE
-       1   2   3   4   5   6   7   8
-   1   F   F   F   F   F   F   F   F
-   2   F   F   F   F   F   F   F   F
-   3   F   F   F   F   F   F   F   F
-   4   F   F   F   F   F   F   F   F
-   5   F   F   F   F   F   F   F   F
-   6   F   F   F   F   F   F   F   F
-   7   F   F   F   F   F   F   F   F
-   8   F   F   F   F   F   F   F   F
-
-1-4 LJ SCALING FACTORS
-             1      2      3      4      5      6      7      8
-      1  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
-      2  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
-      3  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
-      4  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
-      5  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
-      6  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
-      7  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
-      8  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
-
-1-4 CHARGE SCALING FACTORS
-             1      2      3      4      5      6      7      8
-      1  1.000  1.000  1.000  0.500  1.000  1.000  1.000  1.000
-      2  1.000  1.000  1.000  1.000  0.500  1.000  1.000  1.000
-      3  1.000  1.000  1.000  1.000  1.000  0.500  1.000  1.000
-      4  0.500  1.000  1.000  1.000  1.000  1.000  0.500  1.000
-      5  1.000  0.500  1.000  1.000  1.000  1.000  1.000  0.500
-      6  1.000  1.000  0.500  1.000  1.000  1.000  1.000  1.000
-      7  1.000  1.000  1.000  0.500  1.000  1.000  1.000  1.000
-      8  1.000  1.000  1.000  1.000  0.500  1.000  1.000  1.000
+Steele 10-4-3 slit pore
+On both sides of the simulation box (z = 0 & z = boxlz)
+Surface material bead type: 190
+Surface atom density:  0.11400 [Ang^-3]
+Surface layer spacing:  3.40000 [Ang]
+a1:  2.46000 [Ang]
+Electric field in z direction:     0.00000000         0.00000000     [V/A]
 
 Generating Initial Structures
 ------------------------------------------
@@ -321,56 +328,6 @@ Spacing:   4.00000000    X  4.00000000    X  20.0000000
 Box 2: 4X4X2
 Dimension:   90.0000000    X  90.0000000    X  90.0000000    
 Spacing:   22.5000000    X  22.5000000    X  45.0000000    
-
-molecule type 1
-      i      j type_i type_j   bond length           k/2
-      1      2      4      5        1.5400           0.0
-      2      1      5      4        1.5400           0.0
-      2      3      5      5        1.5400           0.0
-      3      2      5      5        1.5400           0.0
-      3      4      5      5        1.5400           0.0
-      4      3      5      5        1.5400           0.0
-      4      5      5      5        1.5400           0.0
-      5      4      5      5        1.5400           0.0
-      5      6      5      5        1.5400           0.0
-      6      5      5      5        1.5400           0.0
-      6      7      5      5        1.5400           0.0
-      7      6      5      5        1.5400           0.0
-      7      8      5      4        1.5400           0.0
-      8      7      4      5        1.5400           0.0
-
-      i      j      k type_i type_j type_k        angle        k/2
-      1      2      3      4      5      5       114.00     31250.00
-      2      3      4      5      5      5       114.00     31250.00
-      3      2      1      5      5      4       114.00     31250.00
-      3      4      5      5      5      5       114.00     31250.00
-      4      3      2      5      5      5       114.00     31250.00
-      4      5      6      5      5      5       114.00     31250.00
-      5      4      3      5      5      5       114.00     31250.00
-      5      6      7      5      5      5       114.00     31250.00
-      6      5      4      5      5      5       114.00     31250.00
-      6      7      8      5      5      4       114.00     31250.00
-      7      6      5      5      5      5       114.00     31250.00
-      8      7      6      4      5      5       114.00     31250.00
-
-      i      j      k      l type_i type_j type_k type_l torsion type
-      1      2      3      4      4      5      5      5      1
-      2      3      4      5      5      5      5      5      1
-      3      4      5      6      5      5      5      5      1
-      4      3      2      1      5      5      5      4      1
-      4      5      6      7      5      5      5      5      1
-      5      4      3      2      5      5      5      5      1
-      5      6      7      8      5      5      5      4      1
-      6      5      4      3      5      5      5      5      1
-      7      6      5      4      5      5      5      5      1
-      8      7      6      5      4      5      5      5      1
-
-PAIRWISE LJ AND COULOMB INTERACTIONS
-    i    j         q0(i)         q0(j)     vvdW_1     vvdW_2 ...
-    4    4      0.000000      0.000000   392.00       3.7500    
-    4    5      0.000000      0.000000   268.57       3.8500    
-    5    4      0.000000      0.000000   268.57       3.8500    
-    5    5      0.000000      0.000000   184.00       3.9500    
  
  sumup control
  number of chains         180
@@ -698,8 +655,8 @@ molecule  1:   0.00000000      0.00000000
  sumup control
  number of chains         180
  number of chains of type           1         180
- inter lj energy   -221526.152135229     
- intra lj energy    55881.5815487960     
+ inter lj energy   -221526.152135339     
+ intra lj energy    55881.5815487955     
  Tail correction   -19514.4537596172     
  bond vibration    0.000000000000000E+000
  bond bending       1858351.33389473     
@@ -708,26 +665,26 @@ molecule  1:   0.00000000      0.00000000
  coulombic energy  0.000000000000000E+000
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy       2507405.72095450     
+ total energy       2507405.72095439     
  
  sumup control
  number of chains          20
  number of chains of type           1          20
- inter lj energy   -101.373474617439     
- intra lj energy    963.957853029694     
+ inter lj energy   -101.373474617500     
+ intra lj energy    963.957853029556     
  Tail correction   -21.1506552289709     
  bond vibration    0.000000000000000E+000
- bond bending       239975.206910607     
- torsional          101239.046230083     
+ bond bending       239975.206910606     
+ torsional          101239.046230084     
  external          0.000000000000000E+000
  coulombic energy  0.000000000000000E+000
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy       342076.837519103     
+ total energy       342076.837519101     
  
  vstart       =      -367905.2979132272        -3533.8603734371
- vend         =      2507405.7209545043       342076.8375191028
- vbox         =      2507405.7209554212       342076.8375117208
+ vend         =      2507405.7209543921       342076.8375191013
+ vbox         =      2507405.7209558655       342076.8375351434
  
  Averages and fluctuations                        Box  1       Box  2
  
@@ -763,19 +720,19 @@ molecule  1:   0.00000000      0.00000000
     1    1      0.00000      0.00000      0.00000      0.00000      0.00000
     1    2      0.00000      0.00000      0.00000      0.00000      0.00000
  
- H_vap      [kJ/mol] btwn box    1 and  2 =        37.8062         1.0009         0.3336
- H_vap LJ  [kJ/mol] btwn box     1 and  2 =        39.4018         0.2155         0.0718
- H_vap Coul [kJ/mol] btwn box    1 and  2 =        28.5703         0.1094         0.0365
- pdV        [kJ/mol] btwn box    1 and  2 =        28.5703         0.1094         0.0365
- CED [cal/cc]   btwn box         1 and  2 =        12.9432         0.8770         0.2923
- CED_LJ[cal/cc] btwn box         1 and  2 =        12.1096         0.2043         0.0681
+ H_vap      [kJ/mol] btwn box    1 and  2 =        37.8057         1.0009         0.3336
+ H_vap LJ  [kJ/mol] btwn box     1 and  2 =        39.4014         0.2155         0.0718
+ H_vap Coul [kJ/mol] btwn box    1 and  2 =        28.5698         0.1094         0.0365
+ pdV        [kJ/mol] btwn box    1 and  2 =        28.5698         0.1094         0.0365
+ CED [cal/cc]   btwn box         1 and  2 =        12.9230         0.8756         0.2919
+ CED_LJ[cal/cc] btwn box         1 and  2 =        12.0907         0.2040         0.0680
  CED_Coul[cal/cc] btwn box       1 and  2 =         0.0000         0.0000         0.0000
- HSP [(cal/cc)^1/2]  btwn box    1 and  2 =         3.3372         0.1229         0.0410
- HSP_LJ[(cal/cc)^1/2] btwn box   1 and  2 =         3.4500         0.0294         0.0098
+ HSP [(cal/cc)^1/2]  btwn box    1 and  2 =         3.3346         0.1228         0.0409
+ HSP_LJ[(cal/cc)^1/2] btwn box   1 and  2 =         3.4473         0.0294         0.0098
  HSP_Cou[(cal/cc)^1/2] btwn box  1 and  2 =         0.0000         0.0000         0.0000
  
- specific density box  1 =  0.53349E+00  0.13218E-12  0.44059E-13
- specific density box  2 =  0.52039E-02  0.48130E-15  0.16043E-15
+ specific density box  1 =  0.53349E+00  0.13204E-12  0.44013E-13
+ specific density box  2 =  0.52039E-02  0.47890E-15  0.15963E-15
  system volume    box  1 =  0.64000E+05  0.41159E-08  0.13720E-08
  system volume    box  2 =  0.72900E+06  0.12318E-06  0.41061E-07
  pressure         box  1 =  0.59608E+06   5144.4       1714.8    
@@ -796,7 +753,7 @@ molecule  1:   0.00000000      0.00000000
  Fluc Q           box  1 =  0.00000E+00  0.00000E+00  0.00000E+00
  Total energy     box  2 =  0.28317E+06  0.18521E+04  0.61738E+03
  Inter LJ         box  2 = -0.27666E+03  0.31285E+02  0.10428E+02
- Tail  LJ         box  2 = -0.21151E+02  0.24634E-11  0.82112E-12
+ Tail  LJ         box  2 = -0.21151E+02  0.24634E-11  0.82113E-12
  Intra LJ         box  2 =  0.36512E+04  0.30822E+03  0.10274E+03
  Stretch          box  2 =  0.00000E+00  0.00000E+00  0.00000E+00
  Bond bending     box  2 =  0.18817E+06  0.16677E+04  0.55589E+03
@@ -849,4 +806,4 @@ molecule  1:   0.00000000      0.00000000
    8  0.2823E+06  0.5204E-02  0.1309E+04  0.4811E-01  0.1000E+01
    9  0.2820E+06  0.5204E-02  0.1308E+04  0.3733E-01  0.1000E+01
   10  0.2848E+06  0.5204E-02  0.1313E+04  0.3144E-01  0.1000E+01
- Program ended at 2013-11-20 04:17:21.774
+ Program ended at 2014-03-08 22:59:33.906

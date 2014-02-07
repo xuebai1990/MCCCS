@@ -1,4 +1,4 @@
-Program started at 2013-11-20 03:20:47.911
+Program started at 2014-03-08 22:02:29.080
 Number of processors: 1
 Threads per processor: 1
  run_num: 1
@@ -85,16 +85,6 @@ Box 2:   42.500 x   42.500 x   42.500
 NUMBER OF MOLECULES OF EACH TYPE
  number of chains of each type:   200
 
-NAMELIST EXTERNAL_FIELD
-------------------------------------------
-Steele 10-4-3 slit pore
-On both sides of the simulation box (z = 0 & z = boxlz)
-Surface material bead type: 190
-Surface atom density:  0.11400 [Ang^-3]
-Surface layer spacing:  3.40000 [Ang]
-a1:  2.46000 [Ang]
-Electric field in z direction:     0.00000000         0.00000000     [V/A]
-
 SECTION MOLECULE_TYPE
 ------------------------------------------
 molecule type: 1
@@ -168,6 +158,101 @@ molecule type: 1
 
 MOLECULAR MASS:      90.12120
 
+SPECIAL INTERACTION RULES
+------------------------------------------
+  Total: 0 exclusion rules for intermolecular interactions
+
+  Total: 0 inclusion rules for intramolecular interactions
+
+      repulsive 1-5 OH interaction for molecule type 1 between bead 6 and bead 7 of type 2
+      repulsive 1-5 OH interaction for molecule type 1 between bead 5 and bead 8 of type 2
+  Total: 2 special rules for intramolecular 1-5 OH interactions
+
+Molecule type: 1
+
+LJ INCLUSION TABLE
+       1   2   3   4   5   6   7   8
+   1   F   F   F   F   T   T   F   T
+   2   F   F   F   F   F   T   F   F
+   3   F   F   F   F   F   F   F   F
+   4   F   F   F   F   F   F   F   F
+   5   T   F   F   F   F   F   F   T
+   6   T   T   F   F   F   F   T   T
+   7   F   F   F   F   F   T   F   F
+   8   T   F   F   F   T   T   F   F
+
+CHARGE INCLUSION TABLE
+       1   2   3   4   5   6   7   8
+   1   F   F   F   F   F   F   F   F
+   2   F   F   F   F   F   F   F   F
+   3   F   F   F   F   F   T   F   F
+   4   F   F   F   F   F   F   F   T
+   5   F   F   F   F   F   F   T   T
+   6   F   F   T   F   F   F   T   T
+   7   F   F   F   F   T   T   F   F
+   8   F   F   F   T   T   T   F   F
+
+1-4 LJ SCALING FACTORS
+             1      2      3      4      5      6      7      8
+      1  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
+      2  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
+      3  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
+      4  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
+      5  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
+      6  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
+      7  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
+      8  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
+
+1-4 CHARGE SCALING FACTORS
+             1      2      3      4      5      6      7      8
+      1  1.000  1.000  1.000  0.500  1.000  1.000  0.500  1.000
+      2  1.000  1.000  1.000  1.000  0.500  1.000  1.000  0.500
+      3  1.000  1.000  1.000  1.000  1.000  0.500  1.000  1.000
+      4  0.500  1.000  1.000  1.000  1.000  1.000  1.000  0.500
+      5  1.000  0.500  1.000  1.000  1.000  1.000  0.500  1.000
+      6  1.000  1.000  0.500  1.000  1.000  1.000  1.000  1.000
+      7  0.500  1.000  1.000  1.000  0.500  1.000  1.000  1.000
+      8  1.000  0.500  1.000  0.500  1.000  1.000  1.000  1.000
+
+PAIRWISE LJ AND COULOMB INTERACTIONS
+    i    j         q0(i)         q0(j)     vvdW_1     vvdW_2 ...
+    4    4      0.000000      0.000000   392.00       3.7500    
+    4    5      0.000000      0.000000   268.57       3.8500    
+    4   61      0.000000      0.435000   0.0000       0.0000    
+    4   62      0.000000     -0.700000   381.87       3.3850    
+    4   64      0.000000      0.265000   268.57       3.8500    
+    4   65      0.000000      0.265000   125.22       4.0400    
+    5    4      0.000000      0.000000   268.57       3.8500    
+    5    5      0.000000      0.000000   184.00       3.9500    
+    5   61      0.000000      0.435000   0.0000       0.0000    
+    5   62      0.000000     -0.700000   261.63       3.4850    
+    5   64      0.000000      0.265000   184.00       3.9500    
+    5   65      0.000000      0.265000   85.790       4.1400    
+   61    4      0.435000      0.000000   0.0000       0.0000    
+   61    5      0.435000      0.000000   0.0000       0.0000    
+   61   61      0.435000      0.435000   0.0000       0.0000    
+   61   62      0.435000     -0.700000   0.0000       0.0000    
+   61   64      0.435000      0.265000   0.0000       0.0000    
+   61   65      0.435000      0.265000   0.0000       0.0000    
+   62    4     -0.700000      0.000000   381.87       3.3850    
+   62    5     -0.700000      0.000000   261.63       3.4850    
+   62   61     -0.700000      0.435000   0.0000       0.0000    
+   62   62     -0.700000     -0.700000   372.00       3.0200    
+   62   64     -0.700000      0.265000   261.63       3.4850    
+   62   65     -0.700000      0.265000   121.98       3.6750    
+   64    4      0.265000      0.000000   268.57       3.8500    
+   64    5      0.265000      0.000000   184.00       3.9500    
+   64   61      0.265000      0.435000   0.0000       0.0000    
+   64   62      0.265000     -0.700000   261.63       3.4850    
+   64   64      0.265000      0.265000   184.00       3.9500    
+   64   65      0.265000      0.265000   85.790       4.1400    
+   65    4      0.265000      0.000000   125.22       4.0400    
+   65    5      0.265000      0.000000   85.790       4.1400    
+   65   61      0.265000      0.435000   0.0000       0.0000    
+   65   62      0.265000     -0.700000   121.98       3.6750    
+   65   64      0.265000      0.265000   85.790       4.1400    
+   65   65      0.265000      0.265000   40.000       4.3300    
+
 NAMELIST TRANSFER
 ------------------------------------------
 lopt_bias:  F
@@ -193,9 +278,9 @@ pmswat:   0.00000000
    swatch molecule type pairs:    2    3
    nsampos: 1, ncut:  1  1
    molecule 1
-   ncut 1: grom from 1, prev 1
+   ncut 1: grom from 1, prev 0
    molecule 2
-   ncut 1: grom from 1, prev 1
+   ncut 1: grom from 1, prev 0
    splist:    1    1
    number of swatch box pairs: 1
    probability of the swatch box pair:  1.000000000    
@@ -265,61 +350,15 @@ percentage move probabilities:
  translation move  :   30.00 %
  rotation move     :   35.00 %
 
-SPECIAL INTERACTION RULES
+NAMELIST EXTERNAL_FIELD
 ------------------------------------------
-  Total: 0 exclusion rules for intermolecular interactions
-
-  Total: 0 inclusion rules for intramolecular interactions
-
-      repulsive 1-5 OH interaction for molecule type 1 between bead 6 and bead 7 of type 2
-      repulsive 1-5 OH interaction for molecule type 1 between bead 5 and bead 8 of type 2
-  Total: 2 special rules for intramolecular 1-5 OH interactions
-
-Molecule type: 1
-
-LJ INCLUSION TABLE
-       1   2   3   4   5   6   7   8
-   1   F   F   F   F   T   T   F   T
-   2   F   F   F   F   F   T   F   F
-   3   F   F   F   F   F   F   F   F
-   4   F   F   F   F   F   F   F   F
-   5   T   F   F   F   F   F   F   T
-   6   T   T   F   F   F   F   T   T
-   7   F   F   F   F   F   T   F   F
-   8   T   F   F   F   T   T   F   F
-
-CHARGE INCLUSION TABLE
-       1   2   3   4   5   6   7   8
-   1   F   F   F   F   F   F   F   F
-   2   F   F   F   F   F   F   F   F
-   3   F   F   F   F   F   T   F   F
-   4   F   F   F   F   F   F   F   T
-   5   F   F   F   F   F   F   T   T
-   6   F   F   T   F   F   F   T   T
-   7   F   F   F   F   T   T   F   F
-   8   F   F   F   T   T   T   F   F
-
-1-4 LJ SCALING FACTORS
-             1      2      3      4      5      6      7      8
-      1  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
-      2  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
-      3  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
-      4  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
-      5  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
-      6  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
-      7  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
-      8  1.000  1.000  1.000  1.000  1.000  1.000  1.000  1.000
-
-1-4 CHARGE SCALING FACTORS
-             1      2      3      4      5      6      7      8
-      1  1.000  1.000  1.000  0.500  1.000  1.000  0.500  1.000
-      2  1.000  1.000  1.000  1.000  0.500  1.000  1.000  0.500
-      3  1.000  1.000  1.000  1.000  1.000  0.500  1.000  1.000
-      4  0.500  1.000  1.000  1.000  1.000  1.000  1.000  0.500
-      5  1.000  0.500  1.000  1.000  1.000  1.000  0.500  1.000
-      6  1.000  1.000  0.500  1.000  1.000  1.000  1.000  1.000
-      7  0.500  1.000  1.000  1.000  0.500  1.000  1.000  1.000
-      8  1.000  0.500  1.000  0.500  1.000  1.000  1.000  1.000
+Steele 10-4-3 slit pore
+On both sides of the simulation box (z = 0 & z = boxlz)
+Surface material bead type: 190
+Surface atom density:  0.11400 [Ang^-3]
+Surface layer spacing:  3.40000 [Ang]
+a1:  2.46000 [Ang]
+Electric field in z direction:     0.00000000         0.00000000     [V/A]
 
 READING CONFIGURATION FROM RESTART FILE
 ------------------------------------------
@@ -349,94 +388,6 @@ Finished writing simulation box related info
 ibox:      calp  kmaxl  kmaxm  kmaxn         rcut
    1:     0.229      8      8      8      14.0000
    2:     0.229     10     10     10      14.0000
-
-molecule type 1
-      i      j type_i type_j   bond length           k/2
-      1      2      4      5        1.5400           0.0
-      2      1      5      4        1.5400           0.0
-      2      3      5     65        1.5400           0.0
-      3      2     65      5        1.5400           0.0
-      3      4     65     64        1.5400           0.0
-      3      7     65     62        1.4300           0.0
-      4      3     64     65        1.5400           0.0
-      4      5     64     62        1.4300           0.0
-      5      4     62     64        1.4300           0.0
-      5      6     62     61        0.9450           0.0
-      6      5     61     62        0.9450           0.0
-      7      3     62     65        1.4300           0.0
-      7      8     62     61        0.9450           0.0
-      8      7     61     62        0.9450           0.0
-
-      i      j      k type_i type_j type_k        angle        k/2
-      1      2      3      4      5     65       114.00     31250.00
-      2      3      4      5     65     64       112.00     31250.00
-      2      3      7      5     65     62       109.47     25200.00
-      3      2      1     65      5      4       114.00     31250.00
-      3      4      5     65     64     62       109.47     25200.00
-      3      7      8     65     62     61       108.50     27720.00
-      4      3      2     64     65      5       112.00     31250.00
-      4      5      6     64     62     61       108.50     27720.00
-      4      3      7     64     65     62       109.47     25200.00
-      5      4      3     62     64     65       109.47     25200.00
-      6      5      4     61     62     64       108.50     27720.00
-      7      3      2     62     65      5       109.47     25200.00
-      7      3      4     62     65     64       109.47     25200.00
-      8      7      3     61     62     65       108.50     27720.00
-
-      i      j      k      l type_i type_j type_k type_l torsion type
-      1      2      3      4      4      5     65     64      2
-      1      2      3      7      4      5     65     62      2
-      2      3      4      5      5     65     64     62      2
-      2      3      7      8      5     65     62     61      7
-      3      4      5      6     65     64     62     61      5
-      4      3      2      1     64     65      5      4      2
-      4      3      7      8     64     65     62     61      7
-      5      4      3      2     62     64     65      5      2
-      5      4      3      7     62     64     65     62      2
-      6      5      4      3     61     62     64     65      5
-      7      3      2      1     62     65      5      4      2
-      7      3      4      5     62     65     64     62      2
-      8      7      3      2     61     62     65      5      7
-      8      7      3      4     61     62     65     64      7
-
-PAIRWISE LJ AND COULOMB INTERACTIONS
-    i    j         q0(i)         q0(j)     vvdW_1     vvdW_2 ...
-    4    4      0.000000      0.000000   392.00       3.7500    
-    4    5      0.000000      0.000000   268.57       3.8500    
-    4   61      0.000000      0.435000   0.0000       0.0000    
-    4   62      0.000000     -0.700000   381.87       3.3850    
-    4   64      0.000000      0.265000   268.57       3.8500    
-    4   65      0.000000      0.265000   125.22       4.0400    
-    5    4      0.000000      0.000000   268.57       3.8500    
-    5    5      0.000000      0.000000   184.00       3.9500    
-    5   61      0.000000      0.435000   0.0000       0.0000    
-    5   62      0.000000     -0.700000   261.63       3.4850    
-    5   64      0.000000      0.265000   184.00       3.9500    
-    5   65      0.000000      0.265000   85.790       4.1400    
-   61    4      0.435000      0.000000   0.0000       0.0000    
-   61    5      0.435000      0.000000   0.0000       0.0000    
-   61   61      0.435000      0.435000   0.0000       0.0000    
-   61   62      0.435000     -0.700000   0.0000       0.0000    
-   61   64      0.435000      0.265000   0.0000       0.0000    
-   61   65      0.435000      0.265000   0.0000       0.0000    
-   62    4     -0.700000      0.000000   381.87       3.3850    
-   62    5     -0.700000      0.000000   261.63       3.4850    
-   62   61     -0.700000      0.435000   0.0000       0.0000    
-   62   62     -0.700000     -0.700000   372.00       3.0200    
-   62   64     -0.700000      0.265000   261.63       3.4850    
-   62   65     -0.700000      0.265000   121.98       3.6750    
-   64    4      0.265000      0.000000   268.57       3.8500    
-   64    5      0.265000      0.000000   184.00       3.9500    
-   64   61      0.265000      0.435000   0.0000       0.0000    
-   64   62      0.265000     -0.700000   261.63       3.4850    
-   64   64      0.265000      0.265000   184.00       3.9500    
-   64   65      0.265000      0.265000   85.790       4.1400    
-   65    4      0.265000      0.000000   125.22       4.0400    
-   65    5      0.265000      0.000000   85.790       4.1400    
-   65   61      0.265000      0.435000   0.0000       0.0000    
-   65   62      0.265000     -0.700000   121.98       3.6750    
-   65   64      0.265000      0.265000   85.790       4.1400    
-   65   65      0.265000      0.265000   40.000       4.3300    
  
  sumup control
  number of chains         186
@@ -693,36 +644,36 @@ molecule  1:   0.00000000      0.00000000
  sumup control
  number of chains         189
  number of chains of type           1         189
- inter lj energy   -367065.233356234     
- intra lj energy    94277.9739981360     
+ inter lj energy   -367065.233356198     
+ intra lj energy    94277.9739981341     
  Tail correction   -13215.9904530548     
  bond vibration    0.000000000000000E+000
- bond bending       352836.884343300     
- torsional          302699.713184986     
+ bond bending       352836.884343304     
+ torsional          302699.713184987     
  external          0.000000000000000E+000
- coulombic energy  -1032358.16258236     
+ coulombic energy  -1032358.16258238     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -649608.824412167     
+ total energy      -649608.824412152     
  
  sumup control
  number of chains          11
  number of chains of type           1          11
- inter lj energy   -1131.36388375402     
- intra lj energy    7369.13311691477     
- Tail correction   -22.4372616702490     
+ inter lj energy   -1131.36388375396     
+ intra lj energy    7369.13311691488     
+ Tail correction   -22.4372616702493     
  bond vibration    0.000000000000000E+000
- bond bending       21541.5315872675     
+ bond bending       21541.5315872676     
  torsional          19635.0306500791     
  external          0.000000000000000E+000
- coulombic energy  -29809.1398305689     
+ coulombic energy  -29809.1398305692     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy       17605.1916399383     
+ total energy       17605.1916399384     
  
- vstart       =      -604262.7470180907        16004.4072010520
- vend         =      -649608.8244121668        17605.1916399383
- vbox         =      -649608.8244121515        17605.1916399328
+ vstart       =      -604262.7470180909        16004.4072010520
+ vend         =      -649608.8244121519        17605.1916399384
+ vbox         =      -649608.8244121056        17605.1916399134
  
  Averages and fluctuations                        Box  1       Box  2
  
@@ -758,16 +709,16 @@ molecule  1:   0.00000000      0.00000000
     1    1      0.00000      0.00000      0.00000      0.00000      0.00000
     1    2      0.00000      0.00000      0.00000      0.00000      0.00000
  
- H_vap      [kJ/mol] btwn box    1 and  2 =        38.5251         2.2600         0.7533
+ H_vap      [kJ/mol] btwn box    1 and  2 =        38.5250         2.2600         0.7533
  H_vap LJ  [kJ/mol] btwn box     1 and  2 =        19.2604         1.0416         0.3472
  H_vap Coul [kJ/mol] btwn box    1 and  2 =        23.6588         1.6898         0.5633
  pdV        [kJ/mol] btwn box    1 and  2 =         3.9758         0.5279         0.1760
- CED [cal/cc]   btwn box         1 and  2 =        65.7013         4.8793         1.6264
- CED_LJ[cal/cc] btwn box         1 and  2 =        29.0638         1.8295         0.6098
- CED_Coul[cal/cc] btwn box       1 and  2 =        37.4080         2.9110         0.9703
- HSP [(cal/cc)^1/2]  btwn box    1 and  2 =         8.0884         0.2987         0.0996
- HSP_LJ[(cal/cc)^1/2] btwn box   1 and  2 =         5.3786         0.1705         0.0568
- HSP_Cou[(cal/cc)^1/2] btwn box  1 and  2 =         6.0977         0.2359         0.0786
+ CED [cal/cc]   btwn box         1 and  2 =        65.5454         4.8676         1.6225
+ CED_LJ[cal/cc] btwn box         1 and  2 =        28.9947         1.8249         0.6083
+ CED_Coul[cal/cc] btwn box       1 and  2 =        37.3193         2.9047         0.9682
+ HSP [(cal/cc)^1/2]  btwn box    1 and  2 =         8.0788         0.2984         0.0995
+ HSP_LJ[(cal/cc)^1/2] btwn box   1 and  2 =         5.3722         0.1703         0.0568
+ HSP_Cou[(cal/cc)^1/2] btwn box  1 and  2 =         6.0905         0.2357         0.0786
  
  specific density box  1 =  0.71455E+00  0.14819E-01  0.49397E-02
  specific density box  2 =  0.33733E-01  0.67416E-02  0.22472E-02
@@ -844,4 +795,4 @@ molecule  1:   0.00000000      0.00000000
    8  0.1197E+05  0.2927E-01  0.1224E+04  0.1758E+01  0.1000E+01
    9  0.1792E+05  0.2649E-01  0.1201E+04 -0.1202E+01  0.1000E+01
   10  0.1475E+05  0.2348E-01  0.1099E+04  0.2741E+00  0.1000E+01
- Program ended at 2013-11-20 04:33:11.215
+ Program ended at 2014-03-08 23:15:12.276

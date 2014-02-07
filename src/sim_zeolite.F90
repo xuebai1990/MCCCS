@@ -53,7 +53,7 @@ CONTAINS
                                &,' --------------------------------------------------',/&
                                &,' box dimensions                    = ',3f10.3,' Angstrom',/&
                                &,' box angles                        = ',3f10.3,' degrees',/&
-                               &,' number of zeolite cells           = ',3i5)")&
+                               &,' number of zeolite cells           = ',3i5,/)")&
                                zcell%boxl(1)%val,zcell%boxl(2)%val,zcell%boxl(3)%val,zcell%ang(1)%val,zcell%ang(2)%val&
                                ,zcell%ang(3)%val,zunit%dup(1),zunit%dup(2),zunit%dup(3)
 

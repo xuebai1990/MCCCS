@@ -9,10 +9,8 @@
 DATA=$PBS_O_WORKDIR
 cd $DATA
 
-NODELIST=$(cat $PBS_NODEFILE | uniq)
-echo $NODELIST > tmp-$PBS_JOBID
-read -a NODE < tmp-$PBS_JOBID
-rm tmp-$PBS_JOBID
+NODE=($(cat $PBS_NODEFILE | uniq))
+#echo ${NODE[@]} > tmp-$PBS_JOBID
 
 inode=-1
 ijob=0

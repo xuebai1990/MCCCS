@@ -20,7 +20,7 @@ MODULE parser_cif
   use util_runtime,only:err_exit
   use util_files,only:get_iounit,readLine
   use util_string,only:splitAndGetNext
-  use util_memory,only:insert
+  use util_memory,only:reallocate,insert
   use sim_cell
   use sim_particle
   use sim_zeolite,only:ZeoliteUnitCellGridType,ZeoliteBeadType,setUpAtom,setUpCellStruct,foldToCenterCell,foldToUnitCell&
@@ -45,11 +45,18 @@ CONTAINS
     type(ZeoliteUnitCellGridType),intent(out)::zunit
     LOGICAL,INTENT(IN)::lprint
 
-    integer,parameter::maxNumField=20,maxNumSymmOp=50
+    integer,parameter::initialNumField=10,initialNumSymmOp=50
     real,parameter::eps=1.0E-4_dp
-    INTEGER::IOCIF,jerr,i,uninitialized,boxZeo,ia,ib,ic,id,nAtom,nField,nSymm,Field(maxNumField)
-    CHARACTER(LEN=default_string_length)::line,atom,SymmOp(maxNumSymmOp,3)
+    INTEGER::IOCIF,jerr,i,uninitialized,boxZeo,ia,ib,ic,id,nAtom,nField,nSymm
+    INTEGER,allocatable::Field(:)
+    CHARACTER(LEN=default_string_length)::line,atom
+    CHARACTER(LEN=default_string_length),allocatable::SymmOp(:,:)
     real::scoord(3),tmpcoord(3),coord(3),dr(3)
+
+    allocate(Field(initialNumField),SymmOp(initialNumSymmOp,3),stat=jerr)
+    if (jerr.ne.0) then
+       call err_exit(__FILE__,__LINE__,'readCIF: allocation failed',jerr)
+    end if
 
     natom=0
     IOCIF=get_iounit()
@@ -106,6 +113,9 @@ CONTAINS
                 exit
              end if
              i = i + 1
+             if (i.gt.ubound(SymmOp,1)) then
+                call reallocate(SymmOp,1,i*2,1,3)
+             end if
              ia = INDEX(line,"'")
              ib = INDEX(line(ia+1:),",")+ia
              ic = INDEX(line(ib+1:),",")+ib
@@ -125,6 +135,9 @@ CONTAINS
           i=0
           do
              i = i + 1
+             if (i.gt.ubound(Field,1)) then
+                call reallocate(Field,1,i*2)
+             end if
              IF (INDEX(line,"_atom_site_label").ne.0) THEN
                 Field(i) = 1
              ELSE IF (INDEX(line,"_atom_site_type_symbol").ne.0) THEN
@@ -246,6 +259,9 @@ CONTAINS
     close(IOCIF)
 
     zeo%nbead=nAtom
+
+    deallocate(Field,SymmOp,stat=jerr)
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'readCIF: deallocation failed',jerr)
   END SUBROUTINE readCIF
 
 ! *****************************************************************************
