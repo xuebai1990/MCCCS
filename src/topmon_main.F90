@@ -63,7 +63,6 @@ contains
     use util_runtime,only:err_exit
     use util_timings,only:time_date_str,time_now
     use util_files,only:get_iounit
-    use util_mp,only:mp_barrier
     use sim_initia,only:setup_molecule_config
     use sim_particle,only:ctrmas,neighbor,neigh_cnt
     use energy_pairwise,only:sumup
@@ -91,14 +90,7 @@ contains
      ,inside,bvirial,gconst,ostwald,stdost,molfrac
     logical::ovrlap
 
-    ! KM for MPI
-    ! only one processor at a time reads and writes data from files
-    do i=1,numprocs
-       if (myid.eq.i-1) then
-          call readdat(file_in)
-       end if
-       call mp_barrier(groupid)
-    end do
+    call readdat(file_in)
 
     allocate(nminp(ntmax),nmaxp(ntmax),ncmt_list(fmax,ntmax),ndist(0:nmax,ntmax),vstart(nbxmax),vend(nbxmax),pres(nbxmax)&
      ,molvol(nbxmax),speden(nbxmax),acdens(nbxmax,ntmax),molfra(nbxmax,ntmax),acnbox(nbxmax,ntmax),acnbox2(nbxmax,ntmax,20)&
@@ -681,7 +673,7 @@ contains
        end do
 
        if (N_add.gt.0) then
-          if (lbranch(moltyp2add)) then 
+          if (lbranch(moltyp2add)) then
              ! If we have an input structure, use it. Setting lrigid to .true. will cause gcmc_setup to call setup_molecule_config and setup_molecule_config will use the stored structure instead of growing a new one.
              lrigid(moltyp2add)=.true.
           else if (.not.lrigid(moltyp2add)) then
@@ -1194,6 +1186,7 @@ contains
     use util_files,only:get_iounit,readLine
     use util_search,only:indexOf
     use util_memory,only:reallocate
+    use util_mp,only:mp_bcast
     use sim_particle,only:allocate_neighbor_list
     use sim_initia,only:get_molecule_config,setup_system_config
     use zeolite
@@ -1205,7 +1198,7 @@ contains
     use energy_sami
     use moves_simple,only:init_moves_simple,averageMaximumDisplacement
     use moves_volume,only:init_moves_volume,allow_cutoff_failure
-    use moves_cbmc,only:init_cbmc,allocate_cbmc,read_safecbmc,llplace
+    use moves_cbmc,only:init_cbmc,allocate_cbmc,llplace
     use moves_ee,only:init_ee,numcoeff,sigm,epsil
     use transfer_shared,only:read_transfer
     use transfer_swap,only:init_swap
@@ -1253,9 +1246,11 @@ contains
     namelist /gcmc/ B,nequil,ninstf,ninsth,ndumph
 ! ===================================================================
     !> read project-wide parameters
-    io_input=get_iounit()
-    open(unit=io_input,access='sequential',action='read',file=file_in,form='formatted',iostat=jerr,status='old')
-    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open input file '//trim(file_in),jerr)
+    if (myid.eq.rootid) then
+       io_input=get_iounit()
+       open(unit=io_input,access='sequential',action='read',file=file_in,form='formatted',iostat=jerr,status='old')
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open input file '//trim(file_in),jerr)
+    end if
 ! -------------------------------------------------------------------
     !> read namelist io
     file_input='fort.4'
@@ -1266,8 +1261,23 @@ contains
     file_solute='fort.11'
     file_traj='fort.12'
 
-    read(UNIT=io_input,NML=io,iostat=jerr)
-    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: io',jerr)
+
+    if (myid.eq.rootid) then
+       read(UNIT=io_input,NML=io,iostat=jerr)
+       if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: io',jerr)
+    end if
+
+    call mp_bcast(file_input,rootid,groupid)
+    call mp_bcast(file_restart,rootid,groupid)
+    call mp_bcast(file_struct,rootid,groupid)
+    call mp_bcast(file_run,rootid,groupid)
+    call mp_bcast(file_movie,rootid,groupid)
+    call mp_bcast(file_solute,rootid,groupid)
+    call mp_bcast(file_traj,rootid,groupid)
+    call mp_bcast(io_output,1,rootid,groupid)
+    call mp_bcast(run_num,1,rootid,groupid)
+    call mp_bcast(suffix,rootid,groupid)
+    call mp_bcast(L_movie_xyz,1,rootid,groupid)
 
     if (myid.eq.rootid.and..not.use_checkpoint) then
        lprint=.true.
@@ -1301,9 +1311,50 @@ contains
     lmixlb=.true.
     lmixjo=.false.
 
-    rewind(io_input)
-    read(UNIT=io_input,NML=system,iostat=jerr)
-    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: system',jerr)
+    if (myid.eq.rootid) then
+       rewind(io_input)
+       read(UNIT=io_input,NML=system,iostat=jerr)
+       if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: system',jerr)
+    end if
+
+    call mp_bcast(lnpt,1,rootid,groupid)
+    call mp_bcast(lgibbs,1,rootid,groupid)
+    call mp_bcast(lgrand,1,rootid,groupid)
+    call mp_bcast(lanes,1,rootid,groupid)
+    call mp_bcast(lvirial,1,rootid,groupid)
+    call mp_bcast(lmipsw,1,rootid,groupid)
+    call mp_bcast(lexpee,1,rootid,groupid)
+    call mp_bcast(ldielect,1,rootid,groupid)
+    call mp_bcast(lpbc,1,rootid,groupid)
+    call mp_bcast(lpbcx,1,rootid,groupid)
+    call mp_bcast(lpbcy,1,rootid,groupid)
+    call mp_bcast(lpbcz,1,rootid,groupid)
+    call mp_bcast(lfold,1,rootid,groupid)
+    call mp_bcast(lijall,1,rootid,groupid)
+    call mp_bcast(lchgall,1,rootid,groupid)
+    call mp_bcast(lewald,1,rootid,groupid)
+    call mp_bcast(lcutcm,1,rootid,groupid)
+    call mp_bcast(ltailc,1,rootid,groupid)
+    call mp_bcast(lshift,1,rootid,groupid)
+    call mp_bcast(ldual,1,rootid,groupid)
+    call mp_bcast(L_Coul_CBMC,1,rootid,groupid)
+    call mp_bcast(lneigh,1,rootid,groupid)
+    call mp_bcast(lexzeo,1,rootid,groupid)
+    call mp_bcast(lslit,1,rootid,groupid)
+    call mp_bcast(lgraphite,1,rootid,groupid)
+    call mp_bcast(lsami,1,rootid,groupid)
+    call mp_bcast(lmuir,1,rootid,groupid)
+    call mp_bcast(lelect_field,1,rootid,groupid)
+    call mp_bcast(lgaro,1,rootid,groupid)
+    call mp_bcast(lionic,1,rootid,groupid)
+    call mp_bcast(L_Ewald_Auto,1,rootid,groupid)
+    call mp_bcast(lmixlb,1,rootid,groupid)
+    call mp_bcast(lmixjo,1,rootid,groupid)
+    call mp_bcast(L_spline,1,rootid,groupid)
+    call mp_bcast(L_linear,1,rootid,groupid)
+    call mp_bcast(L_vib_table,1,rootid,groupid)
+    call mp_bcast(L_bend_table,1,rootid,groupid)
+    call mp_bcast(L_elect_table,1,rootid,groupid)
 
     if (lprint) then
        write(io_output,'(/,A)') '***** PROGRAM  =  THE MAGIC BLACK BOX *****'
@@ -1445,12 +1496,14 @@ contains
     !> read force field parameters, including intermolecular potentials and intramolecular bonded interactions (stretching, bending, torsion)
     call read_ff(io_input,lmixlb,lmixjo)
 ! -------------------------------------------------------------------
-    close(io_input)
+    if (myid.eq.rootid) close(io_input)
 ! ===================================================================
     !> read independent-run-specific parameters
-    io_input=get_iounit()
-    open(unit=io_input,access='sequential',action='read',file=file_input,form='formatted',iostat=jerr,status='old')
-    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open main input file '//trim(file_input),myid+1)
+    if (myid.eq.rootid) then
+       io_input=get_iounit()
+       open(unit=io_input,access='sequential',action='read',file=file_input,form='formatted',iostat=jerr,status='old')
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open main input file '//trim(file_input),myid+1)
+    end if
 ! -------------------------------------------------------------------
     !> read namelist mc_shared
     seed=time_now()
@@ -1458,8 +1511,29 @@ contains
     lreadq=.false.
     nmax=0
 
-    read(UNIT=io_input,NML=mc_shared,iostat=jerr)
-    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_shared',jerr)
+    if (myid.eq.rootid) then
+       read(UNIT=io_input,NML=mc_shared,iostat=jerr)
+       if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_shared',jerr)
+    end if
+
+    call mp_bcast(seed,1,rootid,groupid)
+    call mp_bcast(nbox,1,rootid,groupid)
+    call mp_bcast(nmolty,1,rootid,groupid)
+    call mp_bcast(nchain,1,rootid,groupid)
+    call mp_bcast(nmax,1,rootid,groupid)
+    call mp_bcast(nstep,1,rootid,groupid)
+    call mp_bcast(lstop,1,rootid,groupid)
+    call mp_bcast(iratio,1,rootid,groupid)
+    call mp_bcast(rmin,1,rootid,groupid)
+    call mp_bcast(softcut,1,rootid,groupid)
+    call mp_bcast(checkpoint_interval,1,rootid,groupid)
+    call mp_bcast(checkpoint_copies,1,rootid,groupid)
+    call mp_bcast(use_checkpoint,1,rootid,groupid)
+    call mp_bcast(linit,1,rootid,groupid)
+    call mp_bcast(lreadq,1,rootid,groupid)
+    call mp_bcast(N_add,1,rootid,groupid)
+    call mp_bcast(box2add,1,rootid,groupid)
+    call mp_bcast(moltyp2add,1,rootid,groupid)
 
     nbxmax=nbox+1
     npabmax=nbxmax*(nbxmax+1)/2
@@ -1501,9 +1575,35 @@ contains
     ucheck=0
     virtemp=0.0_dp
 
-    rewind(io_input)
-    read(UNIT=io_input,NML=analysis,iostat=jerr)
-    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: analysis',jerr)
+    if (myid.eq.rootid) then
+       rewind(io_input)
+       read(UNIT=io_input,NML=analysis,iostat=jerr)
+       if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: analysis',jerr)
+    end if
+
+    call mp_bcast(iprint,1,rootid,groupid)
+    call mp_bcast(imv,1,rootid,groupid)
+    call mp_bcast(iblock,1,rootid,groupid)
+    call mp_bcast(iratp,1,rootid,groupid)
+    call mp_bcast(idiele,1,rootid,groupid)
+    call mp_bcast(iheatcapacity,1,rootid,groupid)
+    call mp_bcast(ianalyze,1,rootid,groupid)
+    call mp_bcast(nbin,1,rootid,groupid)
+    call mp_bcast(lrdf,1,rootid,groupid)
+    call mp_bcast(lintra,1,rootid,groupid)
+    call mp_bcast(lstretch,1,rootid,groupid)
+    call mp_bcast(lgvst,1,rootid,groupid)
+    call mp_bcast(lbend,1,rootid,groupid)
+    call mp_bcast(lete,1,rootid,groupid)
+    call mp_bcast(lrhoz,1,rootid,groupid)
+    call mp_bcast(bin_width,1,rootid,groupid)
+    call mp_bcast(lucall,1,rootid,groupid)
+    call mp_bcast(ucheck,ntmax,rootid,groupid)
+    call mp_bcast(nvirial,1,rootid,groupid)
+    call mp_bcast(starvir,1,rootid,groupid)
+    call mp_bcast(stepvir,1,rootid,groupid)
+    call mp_bcast(ntemp,1,rootid,groupid)
+    call mp_bcast(virtemp,maxntemp,rootid,groupid)
 
     blockm=nstep/iblock
     if (lprint) then
@@ -1552,128 +1652,163 @@ contains
     !> read parameters about simulation boxes
 
     ! Looking for section SIMULATION_BOX
-    REWIND(io_input)
-    CYCLE_READ_CELL:DO
-       call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section SIMULATION_BOX not found',jerr)
+    if (myid.eq.rootid) then
+       REWIND(io_input)
+       CYCLE_READ_CELL:DO
+          call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section SIMULATION_BOX not found',jerr)
 
-       if (UPPERCASE(line_in(1:14)).eq.'SIMULATION_BOX') then
-          if (lprint) then
-             write(io_output,'(/,A,/,A)') 'SECTION SIMULATION_BOX','------------------------------------------'
+          if (UPPERCASE(line_in(1:14)).eq.'SIMULATION_BOX') then
+             if (lprint) then
+                write(io_output,'(/,A,/,A)') 'SECTION SIMULATION_BOX','------------------------------------------'
+             end if
+             exit cycle_read_cell
+          end if
+       END DO CYCLE_READ_CELL
+    end if
+
+    do i=1,nbox+1
+       if (myid.eq.rootid) then
+          call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SIMULATION_BOX',jerr)
+          if (UPPERCASE(line_in(1:18)).eq.'END SIMULATION_BOX') then
+             if (i.ne.nbox+1) call err_exit(__FILE__,__LINE__,'Section SIMULATION_BOX not complete!',jerr)
+             exit
+          else if (i.eq.nbox+1) then
+             call err_exit(__FILE__,__LINE__,'Section SIMULATION_BOX has more than nbox records!',jerr)
           end if
 
-          do i=1,nbox+1
-             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SIMULATION_BOX',jerr)
-             if (UPPERCASE(line_in(1:18)).eq.'END SIMULATION_BOX') then
-                if (i.ne.nbox+1) call err_exit(__FILE__,__LINE__,'Section SIMULATION_BOX not complete!',jerr)
-                exit
-             else if (i.eq.nbox+1) then
-                call err_exit(__FILE__,__LINE__,'Section SIMULATION_BOX has more than nbox records!',jerr)
-             end if
+          ! boxlx boxly boxlz rcut kalp rcutnn numDimensionIsIstropic lsolid lrect lideal ltwice temperature pressure
+          !> provision for different temperatures (just like different pressures) in each box, such as for parallel tempering
+          read(line_in,*) boxlx(i),boxly(i),boxlz(i),rcut(i),kalp(i),rcutnn(i),numberDimensionIsIsotropic(i),lsolid(i)&
+           ,lrect(i),lideal(i),ltwice(i),rtmp,express(i)
 
-             ! boxlx boxly boxlz rcut kalp rcutnn numDimensionIsIstropic lsolid lrect lideal ltwice temperature pressure
-             !> provision for different temperatures (just like different pressures) in each box, such as for parallel tempering
-             read(line_in,*) boxlx(i),boxly(i),boxlz(i),rcut(i),kalp(i),rcutnn(i),numberDimensionIsIsotropic(i),lsolid(i)&
-              ,lrect(i),lideal(i),ltwice(i),rtmp,express(i)
-
-             if (i.eq.1 .and. lexzeo) then
-                ! load positions of zeolite atoms
-                call zeocoord(file_in,lprint)
-             end if
-
-             if (lprint) then
-                write(io_output,'(A,I0,A,2(F8.3," x "),F8.3)') 'Box ',i,': ',boxlx(i),boxly(i),boxlz(i)
-                write(io_output,'(2(A,F6.3))') '   rcut: ',rcut(i),' [Ang], kalp: ',kalp(i)
-                write(io_output,'(A,F6.3)') '   neighbor list cutoff (rcutnn): ',rcutnn(i)
-                write(io_output,'(A,I0)') '   number of dimensions that are isotropic: ',numberDimensionIsIsotropic(i)
-                write(io_output,'(4(A,L2))') '   lsolid: ',lsolid(i),', lrect: ',lrect(i),', lideal: ',lideal(i),', ltwice: '&
-                 ,ltwice(i)
-                write(io_output,'(A,F8.3,A)') '   temperature: ',rtmp,' [K]'
-                write(io_output,'(A,G16.9,A)') '   external pressure: ',express(i),' [MPa]'
-             end if
-
-             if (temp.ge.0) then
-                if (temp.ne.rtmp) call err_exit(__FILE__,__LINE__,'Section SIMULATION_BOX: temperature not the same for each box'&
-                 ,myid+1)
-             else
-                temp=rtmp
-                beta = 1.0_dp / temp
-             end if
-
-             if (lideal(i).and.lexpee) call err_exit(__FILE__,__LINE__&
-              ,'Cannot have lideal and lexpee both true (if you want this you will have change code)',myid+1)
-
-             ! nchain_1 ... nchain_nmolty ghost_particles
-             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SIMULATION_BOX',jerr)
-             read(line_in,*) (ininch(j,i),j=1,nmolty),ghost_particles(i)
-
-             if (lprint) then
-                write(io_output,'(A,'//format_n(nmolty,'(2X,I0)')//')') '   initial number of chains of each type: '&
-                 ,ininch(1:nmolty,i)
-                write(io_output,'(A,I0)') '   Ghost particles: ',ghost_particles(i)
-             end if
-
-             ! inix iniy iniz inirot inimix zshift dshift use_linkcell rintramax
-             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SIMULATION_BOX',jerr)
-             read(line_in,*) inix(i),iniy(i),iniz(i),inirot(i),inimix(i),zshift(i),dshift(i),ltmp,rtmp
-
-             if (lprint) then
-                write(io_output,'(A,2(I0," x "),I0)') '   initial number of chains in x, y and z directions: ',inix(i),iniy(i)&
-                 ,iniz(i)
-                write(io_output,'(2(A,I0),A,F4.1,A,F6.3)') '   initial rotational displacement: ',inirot(i),', inimix: '&
-                 ,inimix(i),', zshift: ',zshift(i),', dshift: ',dshift(i)
-                if (ltmp) write(io_output,'(A,F8.3)') '   Linked cell structures will be used for this box, rintramax = ',rtmp
-             end if
-
-             ! read linkcell information
-             if (ltmp) then
-                if (licell) call err_exit(__FILE__,__LINE__,'Section SIMULATION_BOX: link cell only allowed for one box',myid+1)
-                licell=.true.
-                boxlink=i
-                rintramax=rtmp
-                if (lsolid(boxlink).and.(.not.lrect(boxlink))) call err_exit(__FILE__,__LINE__&
-                 ,'Linkcell not implemented for nonrectangular boxes',myid+1)
-             end if
-          end do
-
-          temnc = 0
-          do i=1,nmolty
-             temtyp(i)=sum(ininch(i,1:nbox))
-             do j = 1, temtyp(i)
-                temnc = temnc + 1
-                moltyp(temnc) = i
-             end do
-          end do
-
-          if (lprint) then
-             write(io_output,'(/,A)') 'NUMBER OF MOLECULES OF EACH TYPE'
-             write(io_output,'(A,'//format_n(nmolty,'(2X,I0)')//')') ' number of chains of each type: ',temtyp(1:nmolty)
-             if (sum(temtyp(1:nmolty)).ne.nchain) then
-                do j = 1,nbox
-                   write(io_output,*) 'ibox:',j,', ininch:',(ininch(i,j),i=1,nmolty)
-                end do
-                write(io_output,*) 'nchain:',nchain
-                call err_exit(__FILE__,__LINE__,'inconsistant number of chains',myid+1)
-             end if
+          if (temp.ge.0) then
+             if (temp.ne.rtmp) call err_exit(__FILE__,__LINE__,'Section SIMULATION_BOX: temperature not the same for each box'&
+              ,myid+1)
+          else
+             temp=rtmp
           end if
 
-          express = express*MPa2SimUnits
-
-          if (lshift.or.lsami) then
-             ! Keep the rcut same for each box
-             do ibox = 2,nbox
-                if (abs(rcut(1)-rcut(ibox)).gt.1.0E-10_dp) then
-                   call err_exit(__FILE__,__LINE__,'Keep rcut for each box same',myid+1)
-                end if
-             end do
-          end if
-
-          exit cycle_read_cell
+          if (lideal(i).and.lexpee) call err_exit(__FILE__,__LINE__&
+           ,'Cannot have lideal and lexpee both true (if you want this you will have change code)',myid+1)
+       else if (i.eq.nbox+1) then
+          exit
        end if
-    END DO CYCLE_READ_CELL
+
+       if (i.eq.1 .and. lexzeo) then
+          ! load positions of zeolite atoms
+          call zeocoord(file_in,lprint)
+       end if
+
+       call mp_bcast(boxlx(i),1,rootid,groupid)
+       call mp_bcast(boxly(i),1,rootid,groupid)
+       call mp_bcast(boxlz(i),1,rootid,groupid)
+       call mp_bcast(rcut(i),1,rootid,groupid)
+       call mp_bcast(kalp(i),1,rootid,groupid)
+       call mp_bcast(rcutnn(i),1,rootid,groupid)
+       call mp_bcast(numberDimensionIsIsotropic(i),1,rootid,groupid)
+       call mp_bcast(lsolid(i),1,rootid,groupid)
+       call mp_bcast(lrect(i),1,rootid,groupid)
+       call mp_bcast(lideal(i),1,rootid,groupid)
+       call mp_bcast(ltwice(i),1,rootid,groupid)
+       call mp_bcast(express(i),1,rootid,groupid)
+
+       if (lprint) then
+          write(io_output,'(A,I0,A,2(F8.3," x "),F8.3)') 'Box ',i,': ',boxlx(i),boxly(i),boxlz(i)
+          write(io_output,'(2(A,F6.3))') '   rcut: ',rcut(i),' [Ang], kalp: ',kalp(i)
+          write(io_output,'(A,F6.3)') '   neighbor list cutoff (rcutnn): ',rcutnn(i)
+          write(io_output,'(A,I0)') '   number of dimensions that are isotropic: ',numberDimensionIsIsotropic(i)
+          write(io_output,'(4(A,L2))') '   lsolid: ',lsolid(i),', lrect: ',lrect(i),', lideal: ',lideal(i),', ltwice: '&
+           ,ltwice(i)
+          write(io_output,'(A,F8.3,A)') '   temperature: ',rtmp,' [K]'
+          write(io_output,'(A,G16.9,A)') '   external pressure: ',express(i),' [MPa]'
+       end if
+
+       if (myid.eq.rootid) then
+          ! nchain_1 ... nchain_nmolty ghost_particles
+          call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SIMULATION_BOX',jerr)
+          read(line_in,*) (ininch(j,i),j=1,nmolty),ghost_particles(i)
+
+          if (lprint) then
+             write(io_output,'(A,'//format_n(nmolty,'(2X,I0)')//')') '   initial number of chains of each type: '&
+              ,ininch(1:nmolty,i)
+             write(io_output,'(A,I0)') '   Ghost particles: ',ghost_particles(i)
+          end if
+
+          ! inix iniy iniz inirot inimix zshift dshift use_linkcell rintramax
+          call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SIMULATION_BOX',jerr)
+          read(line_in,*) inix(i),iniy(i),iniz(i),inirot(i),inimix(i),zshift(i),dshift(i),ltmp,rtmp
+
+          if (lprint) then
+             write(io_output,'(A,2(I0," x "),I0)') '   initial number of chains in x, y and z directions: ',inix(i),iniy(i)&
+              ,iniz(i)
+             write(io_output,'(2(A,I0),A,F4.1,A,F6.3)') '   initial rotational displacement: ',inirot(i),', inimix: '&
+              ,inimix(i),', zshift: ',zshift(i),', dshift: ',dshift(i)
+             if (ltmp) write(io_output,'(A,F8.3)') '   Linked cell structures will be used for this box, rintramax = ',rtmp
+          end if
+
+          ! read linkcell information
+          if (ltmp) then
+             if (licell) call err_exit(__FILE__,__LINE__,'Section SIMULATION_BOX: link cell only allowed for one box',myid+1)
+             licell=.true.
+             boxlink=i
+             rintramax=rtmp
+             if (lsolid(boxlink).and.(.not.lrect(boxlink))) call err_exit(__FILE__,__LINE__&
+              ,'Linkcell not implemented for nonrectangular boxes',myid+1)
+          end if
+       end if
+
+       call mp_bcast(ininch(:,i),nmolty,rootid,groupid)
+       call mp_bcast(ghost_particles(i),1,rootid,groupid)
+       call mp_bcast(inix(i),1,rootid,groupid)
+       call mp_bcast(iniy(i),1,rootid,groupid)
+       call mp_bcast(iniz(i),1,rootid,groupid)
+       call mp_bcast(inirot(i),1,rootid,groupid)
+       call mp_bcast(inimix(i),1,rootid,groupid)
+       call mp_bcast(zshift(i),1,rootid,groupid)
+       call mp_bcast(dshift(i),1,rootid,groupid)
+    end do
+
+    call mp_bcast(temp,1,rootid,groupid)
+    beta = 1.0_dp / temp
+    call mp_bcast(licell,1,rootid,groupid)
+    call mp_bcast(boxlink,1,rootid,groupid)
+    call mp_bcast(rintramax,1,rootid,groupid)
+
+    temnc = 0
+    do i=1,nmolty
+       temtyp(i)=sum(ininch(i,1:nbox))
+       do j = 1, temtyp(i)
+          temnc = temnc + 1
+          moltyp(temnc) = i
+       end do
+    end do
+
+    if (lprint) then
+       write(io_output,'(/,A)') 'NUMBER OF MOLECULES OF EACH TYPE'
+       write(io_output,'(A,'//format_n(nmolty,'(2X,I0)')//')') ' number of chains of each type: ',temtyp(1:nmolty)
+       if (sum(temtyp(1:nmolty)).ne.nchain) then
+          do j = 1,nbox
+             write(io_output,*) 'ibox:',j,', ininch:',(ininch(i,j),i=1,nmolty)
+          end do
+          write(io_output,*) 'nchain:',nchain
+          call err_exit(__FILE__,__LINE__,'inconsistant number of chains',myid+1)
+       end if
+    end if
+
+    express = express*MPa2SimUnits
+
+    if (lshift.or.lsami) then
+       ! Keep the rcut same for each box
+       do ibox = 2,nbox
+          if (abs(rcut(1)-rcut(ibox)).gt.1.0E-10_dp) then
+             call err_exit(__FILE__,__LINE__,'Keep rcut for each box same',myid+1)
+          end if
+       end do
+    end if
 ! -------------------------------------------------------------------
     call allocate_neighbor_list()
 ! -------------------------------------------------------------------
@@ -1690,367 +1825,348 @@ contains
     !> (lexpand), etc.
 
     ! Looking for section MOLECULE_TYPE
-    REWIND(io_input)
-    CYCLE_READ_MOLTYP:DO
-       call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section MOLECULE_TYPE not found',jerr)
+    nugrow=0
+    nunit=0
+    numax=0
+    if (myid.eq.rootid) then
+       REWIND(io_input)
+       CYCLE_READ_MOLTYP:DO
+          call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section MOLECULE_TYPE not found',jerr)
 
-       if (UPPERCASE(line_in(1:13)).eq.'MOLECULE_TYPE') then
-          if (lprint) then
-             write(io_output,'(/,A,/,A)') 'SECTION MOLECULE_TYPE','------------------------------------------'
-          end if
-          nugrow=0
-          nunit=0
-          ntype=0
-          numax=0
-
-          do imol=1,nmolty+1
-             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
-             if (UPPERCASE(line_in(1:17)).eq.'END MOLECULE_TYPE') then
-                if (imol.ne.nmolty+1) call err_exit(__FILE__,__LINE__,'Section MOLECULE_TYPE not complete!',jerr)
-                exit
-             else if (imol.eq.nmolty+1) then
-                call err_exit(__FILE__,__LINE__,'Section MOLECULE_TYPE has more than nmolty records!',jerr)
-             end if
-
-             ! nunit nugrow ncarbon maxcbmc maxgrow iring lelect lring lrigid lbranch lrplc lsetup lq14scale qscale iurot isolute eta
-             read(line_in,*) nunit(imol),nugrow(imol),ncarbon(imol),nmaxcbmc(imol),maxgrow(imol),iring(imol),lelect(imol)&
-              ,lring(imol),lrigid(imol),lbranch(imol),lrplc(imol),lsetup,lq14scale(imol),qscale(imol),iurot(imol),isolute(imol)&
-              ,(eta2(i,imol),i=1,nbox)
-
+          if (UPPERCASE(line_in(1:13)).eq.'MOLECULE_TYPE') then
              if (lprint) then
-                write(io_output,'(A,I0)') 'molecule type: ',imol
-                write(io_output,'(A,I0)') '   number of units: ',nunit(imol)
-                write(io_output,'(A,I0)') '   number of units for CBMC growth: ', nugrow(imol)
-                write(io_output,'(A,I0)') '   number of carbons for EH alkane: ', ncarbon(imol)
-                write(io_output,'(A,I0)') '   maximum number of units for CBMC: ', nmaxcbmc(imol)
-                write(io_output,'(A,I0)') '   maximum number of interior segments for SAFE-CBMC regrowth: ',maxgrow(imol)
-                write(io_output,'(A,I0)') '   number of atoms in a ring (if lring=.true.): ',iring(imol)
-                write(io_output,'(2(A,I0),7(A,L2),A,F3.1)') '   iurot: ',iurot(imol),', isolute: ',isolute(imol),', lelect: '&
-                 ,lelect(imol),', lring: ',lring(imol),', lrigid: ',lrigid(imol),', lbranch: ',lbranch(imol),', lrplc: '&
-                 ,lrplc(imol),', lsetup: ',lsetup,', lq14scale: ',lq14scale(imol),', qscale: ',qscale(imol)
-                do i=1,nbox
-                   write(io_output,'(A,I0,A,F7.1,A)') '   energy offset for box ', i,': ',eta2(i,imol),' [K]'
-                end do
+                write(io_output,'(/,A,/,A)') 'SECTION MOLECULE_TYPE','------------------------------------------'
              end if
+             ntype=0
 
-             if (nunit(imol).gt.numax) then
-                numax=nunit(imol)
-                if (numax.gt.ubound(ntype,2)) then
-                   call reallocate(ntype,1,ntmax,1,2*numax)
-                   call reallocate(riutry,1,ntmax,1,2*numax)
-                   call reallocate(leaderq,1,ntmax,1,2*numax)
-                   call reallocate(lplace,1,ntmax,1,2*numax)
-                   call reallocate(lrigi,1,ntmax,1,2*numax)
-                   call reallocate(invib,1,ntmax,1,2*numax)
-                   call reallocate(itvib,1,ntmax,1,2*numax,1,6)
-                   call reallocate(ijvib,1,ntmax,1,2*numax,1,6)
-                   call reallocate(inben,1,ntmax,1,2*numax)
-                   call reallocate(itben,1,ntmax,1,2*numax,1,12)
-                   call reallocate(ijben2,1,ntmax,1,2*numax,1,12)
-                   call reallocate(ijben3,1,ntmax,1,2*numax,1,12)
-                   call reallocate(intor,1,ntmax,1,2*numax)
-                   call reallocate(ittor,1,ntmax,1,2*numax,1,12)
-                   call reallocate(ijtor2,1,ntmax,1,2*numax,1,12)
-                   call reallocate(ijtor3,1,ntmax,1,2*numax,1,12)
-                   call reallocate(ijtor4,1,ntmax,1,2*numax,1,12)
-                   call reallocate(irotbd,1,2*numax,1,ntmax)
-                   call reallocate(pmrotbd,1,2*numax,1,ntmax)
-                end if
-             end if
-
-             if (lrigid(imol)) then
-                ! n, growpoint_1 ... growpoint_n
+             do imol=1,nmolty+1
                 call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
                 if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
-                read(line_in,*) rindex(imol),(riutry(imol,i),i=1,rindex(imol))
-                if (rindex(imol).le.0) then
-                   riutry(imol,1) = 1
-                else if (lprint) then
-                   write(io_output,'(A,I0,A,'//format_n(rindex(imol),'(1X,I0)')//')') '   The following ',rindex(imol)&
-                    ,' beads have flexible side chains:',(riutry(imol,i),i=1,rindex(imol))
+                if (UPPERCASE(line_in(1:17)).eq.'END MOLECULE_TYPE') then
+                   if (imol.ne.nmolty+1) call err_exit(__FILE__,__LINE__,'Section MOLECULE_TYPE not complete!',jerr)
+                   exit
+                else if (imol.eq.nmolty+1) then
+                   call err_exit(__FILE__,__LINE__,'Section MOLECULE_TYPE has more than nmolty records!',jerr)
                 end if
-             end if
 
-             lrigi = .false.
-
-             masst(imol) = 0.0E0_dp
-
-             if (lsetup) then
-                call molsetup(io_input,imol,lprint)
-
-                do i = 1,nunit(imol)
-                   lhere(ntype(imol,i)) = .true.
-                end do
-
-                goto 112
-             end if
-
-             do i = 1, nunit(imol)
-                ! linear/branched chain with connectivity table
-                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
-                ! unit ntype leaderq
-                read(line_in,*) j,ntype(imol,i),leaderq(imol,i)
-                if (leaderq(imol,i).gt.j.and..not.lchgall) call err_exit(__FILE__,__LINE__,'group-based cut-off screwed for qq'&
-                 ,myid+1)
-                ntype(imol,i)=indexOf(atoms,ntype(imol,i))
+                ! nunit nugrow ncarbon maxcbmc maxgrow iring lelect lring lrigid lbranch lrplc lsetup lq14scale qscale iurot isolute eta
+                read(line_in,*) nunit(imol),nugrow(imol),ncarbon(imol),nmaxcbmc(imol),maxgrow(imol),iring(imol),lelect(imol)&
+                 ,lring(imol),lrigid(imol),lbranch(imol),lrplc(imol),lsetup,lq14scale(imol),qscale(imol),iurot(imol),isolute(imol)&
+                 ,(eta2(i,imol),i=1,nbox)
 
                 if (lprint) then
-                   write(io_output,'(/,2(A,I0),A,A,A,I0)') '   bead ',i,': bead type ',atoms%list(ntype(imol,i)),' ['&
-                    ,trim(chemid(ntype(imol,i))),'], charge leader ',leaderq(imol,i)
+                   write(io_output,'(A,I0)') 'molecule type: ',imol
+                   write(io_output,'(A,I0)') '   number of units: ',nunit(imol)
+                   write(io_output,'(A,I0)') '   number of units for CBMC growth: ', nugrow(imol)
+                   write(io_output,'(A,I0)') '   number of carbons for EH alkane: ', ncarbon(imol)
+                   write(io_output,'(A,I0)') '   maximum number of units for CBMC: ', nmaxcbmc(imol)
+                   write(io_output,'(A,I0)') '   maximum number of interior segments for SAFE-CBMC regrowth: ',maxgrow(imol)
+                   write(io_output,'(A,I0)') '   number of atoms in a ring (if lring=.true.): ',iring(imol)
+                   write(io_output,'(2(A,I0),7(A,L2),A,F3.1)') '   iurot: ',iurot(imol),', isolute: ',isolute(imol),', lelect: '&
+                    ,lelect(imol),', lring: ',lring(imol),', lrigid: ',lrigid(imol),', lbranch: ',lbranch(imol),', lrplc: '&
+                    ,lrplc(imol),', lsetup: ',lsetup,', lq14scale: ',lq14scale(imol),', qscale: ',qscale(imol)
+                   do i=1,nbox
+                      write(io_output,'(A,I0,A,F7.1,A)') '   energy offset for box ', i,': ',eta2(i,imol),' [K]'
+                   end do
                 end if
 
-                if (ntype(imol,i).eq.0) then
-                   call err_exit(__FILE__,__LINE__,'ERROR: atom type undefined!',myid+1)
+                if (nunit(imol).gt.numax) then
+                   numax=nunit(imol)
+                   if (numax.gt.ubound(ntype,2)) then
+                      call reallocate(ntype,1,ntmax,1,2*numax)
+                      call reallocate(riutry,1,ntmax,1,2*numax)
+                      call reallocate(leaderq,1,ntmax,1,2*numax)
+                      call reallocate(invib,1,ntmax,1,2*numax)
+                      call reallocate(itvib,1,ntmax,1,2*numax,1,6)
+                      call reallocate(ijvib,1,ntmax,1,2*numax,1,6)
+                      call reallocate(inben,1,ntmax,1,2*numax)
+                      call reallocate(itben,1,ntmax,1,2*numax,1,12)
+                      call reallocate(ijben2,1,ntmax,1,2*numax,1,12)
+                      call reallocate(ijben3,1,ntmax,1,2*numax,1,12)
+                      call reallocate(intor,1,ntmax,1,2*numax)
+                      call reallocate(ittor,1,ntmax,1,2*numax,1,12)
+                      call reallocate(ijtor2,1,ntmax,1,2*numax,1,12)
+                      call reallocate(ijtor3,1,ntmax,1,2*numax,1,12)
+                      call reallocate(ijtor4,1,ntmax,1,2*numax,1,12)
+                      call reallocate(irotbd,1,2*numax,1,ntmax)
+                      call reallocate(pmrotbd,1,2*numax,1,ntmax)
+                   end if
                 end if
 
-                iutemp = ntype(imol,i)
-
-                if (lpl(iutemp)) then
-                   lplace(imol,i) = .true.
-                   llplace(imol) = .true.
-                else
-                   lplace(imol,i) = .false.
-                end if
-
-                masst(imol)=masst(imol)+mass(iutemp)
-                lhere(iutemp) = .true.
-
-                ! bond stretching
-                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
-                read(line_in,*) invib(imol,i)
-                if (invib(imol,i).gt.6) then
-                   write(io_output,*) 'imol',imol,'   i',i,'  invib',invib(imol,i)
-                   call err_exit(__FILE__,__LINE__,'too many vibrations',myid+1)
-                end if
-
-                do j = 1, invib(imol,i)
+                if (lrigid(imol)) then
+                   ! n, growpoint_1 ... growpoint_n
                    call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
                    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
-                   read(line_in,*) ijvib(imol,i,j),itvib(imol,i,j)
-                   if((ijvib(imol,i,j).eq.i).or.(ijvib(imol,i,j).gt.nunit(imol))) then
-                      call err_exit(__FILE__,__LINE__,'check vibrations for mol type '//integer_to_string(imol)//' and bead '&
-                       //integer_to_string(i),myid+1)
+                   read(line_in,*) rindex(imol),(riutry(imol,i),i=1,rindex(imol))
+                   if (rindex(imol).le.0) then
+                      riutry(imol,1) = 1
+                   else if (lprint) then
+                      write(io_output,'(A,I0,A,'//format_n(rindex(imol),'(1X,I0)')//')') '   The following ',rindex(imol)&
+                       ,' beads have flexible side chains:',(riutry(imol,i),i=1,rindex(imol))
                    end if
-
-                   itvib(imol,i,j)=indexOf(bonds,itvib(imol,i,j))
-                   if (itvib(imol,i,j).eq.0) then
-                      call err_exit(__FILE__,__LINE__,'ERROR: stretching parameters undefined!',myid+1)
-                   else if (brvib(itvib(imol,i,j)).lt.1E-06_dp) then
-                      call err_exit(__FILE__,__LINE__,'ERROR: stretching parameters undefined!',myid+1)
-                   end if
-
-                   if (lprint) then
-                      write(io_output,'(2(A,I0),A,F8.5,A,G16.9)') '      bonded to bead ',ijvib(imol,i,j),', type '&
-                       ,bonds%list(itvib(imol,i,j)),', bond length: ',brvib(itvib(imol,i,j)),', k/2: ',brvibk(itvib(imol,i,j))
-                   end if
-                end do
-
-                ! bond bending -
-                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
-                read(line_in,*) inben(imol,i)
-                if (inben(imol,i).gt.12) then
-                   call err_exit(__FILE__,__LINE__,'too many bends',myid+1)
                 end if
 
-                do j = 1, inben(imol,i)
-                   call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-                   if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
-                   read(line_in,*) ijben2(imol,i,j),ijben3(imol,i,j),itben(imol,i,j)
-                   if ((ijben2(imol,i,j).gt.nunit(imol)).or.(ijben3(imol,i,j).gt.nunit(imol))) then
-                      call err_exit(__FILE__,__LINE__,'check bending for molecule type '//integer_to_string(imol)//' bead '&
-                       //integer_to_string(i),myid+1)
-                   end if
-                   if ((ijben2(imol,i,j).eq.i).or.(ijben3(imol,i,j).eq.i).or.(ijben2(imol,i,j).eq.ijben3(imol,i,j))) then
-                      call err_exit(__FILE__,__LINE__,'check bending for molecule type '//integer_to_string(imol)//' bead '&
-                       //integer_to_string(i),myid+1)
-                   end if
-
-                   itben(imol,i,j)=indexOf(angles,itben(imol,i,j))
-                   if (itben(imol,i,j).eq.0) then
-                      call err_exit(__FILE__,__LINE__,'ERROR: bending parameters undefined!',myid+1)
-                   else if (brben(itben(imol,i,j)).lt.1E-06_dp) then
-                      call err_exit(__FILE__,__LINE__,'ERROR: bending parameters undefined!',myid+1)
-                   end if
-
-                   if (lprint) then
-                      write(io_output,'(3(A,I0),A,F8.3,A,G16.9)') '      bending interaction through ',ijben2(imol,i,j)&
-                       ,' with bead ',ijben3(imol,i,j),', bending type: ',angles%list(itben(imol,i,j)),', bending angle: '&
-                       ,brben(itben(imol,i,j))*raddeg,', k/2: ',brbenk(itben(imol,i,j))
-                   end if
-                end do
-
-                ! bond torsion -
-                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
-                read(line_in,*) intor(imol,i)
-                if (intor(imol,i).gt.12) then
-                   call err_exit(__FILE__,__LINE__,'too many torsions',myid+1)
+                if (lsetup) then
+                   call molsetup(io_input,imol,lprint)
+                   goto 112
                 end if
 
-                do j = 1, intor(imol,i)
+                do i = 1, nunit(imol)
+                   ! linear/branched chain with connectivity table
                    call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
                    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
-                   read(line_in,*) ijtor2(imol,i,j),ijtor3(imol,i,j),ijtor4(imol,i,j),ittor(imol,i,j)
-
-                   if (ijtor2(imol,i,j).gt.nunit(imol).or.ijtor3(imol,i,j).gt.nunit(imol).or.ijtor4(imol,i,j).gt.nunit(imol)) then
-                      call err_exit(__FILE__,__LINE__,'check torsion for molecule type '//integer_to_string(imol)//' bead '&
-                       //integer_to_string(i),myid+1)
-                   end if
-                   if((ijtor2(imol,i,j).eq.i .or. ijtor3(imol,i,j).eq.i .or. ijtor4(imol,i,j).eq.i)&
-                    .or. (ijtor2(imol,i,j).eq.ijtor3(imol,i,j) .or. ijtor2(imol,i,j).eq.(ijtor4(imol,i,j))&
-                    .or. (ijtor3(imol,i,j).eq.ijtor4(imol,i,j)))) then
-                      call err_exit(__FILE__,__LINE__,'check torsion for molecule type '//integer_to_string(imol)//' bead '&
-                       //integer_to_string(i),myid+1)
-                   end if
-
-                   ittor(imol,i,j)=indexOf(dihedrals,ittor(imol,i,j))
-                   if (ittor(imol,i,j).eq.0) then
-                      call err_exit(__FILE__,__LINE__,'ERROR: torsion parameters undefined!',myid+1)
-                   end if
+                   ! unit ntype leaderq
+                   read(line_in,*) j,ntype(imol,i),leaderq(imol,i)
+                   if (leaderq(imol,i).gt.j.and..not.lchgall) call err_exit(__FILE__,__LINE__,'group-based cut-off screwed for qq'&
+                    ,myid+1)
+                   ntype(imol,i)=indexOf(atoms,ntype(imol,i))
 
                    if (lprint) then
-                      write(io_output,'(4(A,I0))') '      torsional interaction through ',ijtor2(imol,i,j),' and '&
-                       ,ijtor3(imol,i,j),' with bead ',ijtor4(imol,i,j),', torsional type: ',dihedrals%list(ittor(imol,i,j))
+                      write(io_output,'(/,2(A,I0),A,A,A,I0)') '   bead ',i,': bead type ',atoms%list(ntype(imol,i)),' ['&
+                       ,trim(chemid(ntype(imol,i))),'], charge leader ',leaderq(imol,i)
                    end if
+
+                   if (ntype(imol,i).eq.0) then
+                      call err_exit(__FILE__,__LINE__,'ERROR: atom type undefined!',myid+1)
+                   end if
+
+                   ! bond stretching
+                   call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                   if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
+                   read(line_in,*) invib(imol,i)
+                   if (invib(imol,i).gt.nvib_max) then
+                      write(io_output,*) 'imol',imol,'   i',i,'  invib',invib(imol,i)
+                      call err_exit(__FILE__,__LINE__,'too many vibrations',myid+1)
+                   end if
+
+                   do j = 1, invib(imol,i)
+                      call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                      if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
+                      read(line_in,*) ijvib(imol,i,j),itvib(imol,i,j)
+                      if((ijvib(imol,i,j).eq.i).or.(ijvib(imol,i,j).gt.nunit(imol))) then
+                         call err_exit(__FILE__,__LINE__,'check vibrations for mol type '//integer_to_string(imol)//' and bead '&
+                          //integer_to_string(i),myid+1)
+                      end if
+
+                      itvib(imol,i,j)=indexOf(bonds,itvib(imol,i,j))
+                      if (itvib(imol,i,j).eq.0) then
+                         call err_exit(__FILE__,__LINE__,'ERROR: stretching parameters undefined!',myid+1)
+                      else if (brvib(itvib(imol,i,j)).lt.1E-06_dp) then
+                         call err_exit(__FILE__,__LINE__,'ERROR: stretching parameters undefined!',myid+1)
+                      end if
+
+                      if (lprint) then
+                         write(io_output,'(2(A,I0),A,F8.5,A,G16.9)') '      bonded to bead ',ijvib(imol,i,j),', type '&
+                          ,bonds%list(itvib(imol,i,j)),', bond length: ',brvib(itvib(imol,i,j)),', k/2: ',brvibk(itvib(imol,i,j))
+                      end if
+                   end do
+
+                   ! bond bending -
+                   call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                   if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
+                   read(line_in,*) inben(imol,i)
+                   if (inben(imol,i).gt.nben_max) then
+                      call err_exit(__FILE__,__LINE__,'too many bends',myid+1)
+                   end if
+
+                   do j = 1, inben(imol,i)
+                      call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                      if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
+                      read(line_in,*) ijben2(imol,i,j),ijben3(imol,i,j),itben(imol,i,j)
+                      if ((ijben2(imol,i,j).gt.nunit(imol)).or.(ijben3(imol,i,j).gt.nunit(imol))) then
+                         call err_exit(__FILE__,__LINE__,'check bending for molecule type '//integer_to_string(imol)//' bead '&
+                          //integer_to_string(i),myid+1)
+                      end if
+                      if ((ijben2(imol,i,j).eq.i).or.(ijben3(imol,i,j).eq.i).or.(ijben2(imol,i,j).eq.ijben3(imol,i,j))) then
+                         call err_exit(__FILE__,__LINE__,'check bending for molecule type '//integer_to_string(imol)//' bead '&
+                          //integer_to_string(i),myid+1)
+                      end if
+
+                      itben(imol,i,j)=indexOf(angles,itben(imol,i,j))
+                      if (itben(imol,i,j).eq.0) then
+                         call err_exit(__FILE__,__LINE__,'ERROR: bending parameters undefined!',myid+1)
+                      else if (brben(itben(imol,i,j)).lt.1E-06_dp) then
+                         call err_exit(__FILE__,__LINE__,'ERROR: bending parameters undefined!',myid+1)
+                      end if
+
+                      if (lprint) then
+                         write(io_output,'(3(A,I0),A,F8.3,A,G16.9)') '      bending interaction through ',ijben2(imol,i,j)&
+                          ,' with bead ',ijben3(imol,i,j),', bending type: ',angles%list(itben(imol,i,j)),', bending angle: '&
+                          ,brben(itben(imol,i,j))*raddeg,', k/2: ',brbenk(itben(imol,i,j))
+                      end if
+                   end do
+
+                   ! bond torsion -
+                   call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                   if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
+                   read(line_in,*) intor(imol,i)
+                   if (intor(imol,i).gt.ntor_max) then
+                      call err_exit(__FILE__,__LINE__,'too many torsions',myid+1)
+                   end if
+
+                   do j = 1, intor(imol,i)
+                      call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                      if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
+                      read(line_in,*) ijtor2(imol,i,j),ijtor3(imol,i,j),ijtor4(imol,i,j),ittor(imol,i,j)
+
+                      if (ijtor2(imol,i,j).gt.nunit(imol).or.ijtor3(imol,i,j).gt.nunit(imol).or.ijtor4(imol,i,j).gt.nunit(imol)) then
+                         call err_exit(__FILE__,__LINE__,'check torsion for molecule type '//integer_to_string(imol)//' bead '&
+                          //integer_to_string(i),myid+1)
+                      end if
+                      if((ijtor2(imol,i,j).eq.i .or. ijtor3(imol,i,j).eq.i .or. ijtor4(imol,i,j).eq.i)&
+                       .or. (ijtor2(imol,i,j).eq.ijtor3(imol,i,j) .or. ijtor2(imol,i,j).eq.(ijtor4(imol,i,j))&
+                       .or. (ijtor3(imol,i,j).eq.ijtor4(imol,i,j)))) then
+                         call err_exit(__FILE__,__LINE__,'check torsion for molecule type '//integer_to_string(imol)//' bead '&
+                          //integer_to_string(i),myid+1)
+                      end if
+
+                      ittor(imol,i,j)=indexOf(dihedrals,ittor(imol,i,j))
+                      if (ittor(imol,i,j).eq.0) then
+                         call err_exit(__FILE__,__LINE__,'ERROR: torsion parameters undefined!',myid+1)
+                      end if
+
+                      if (lprint) then
+                         write(io_output,'(4(A,I0))') '      torsional interaction through ',ijtor2(imol,i,j),' and '&
+                          ,ijtor3(imol,i,j),' with bead ',ijtor4(imol,i,j),', torsional type: ',dihedrals%list(ittor(imol,i,j))
+                      end if
+                   end do
                 end do
+
+   112          continue
+
+                !kea 6/4/09 -- added for multiple rotation centers
+                ! To assign multiple rotation centers, set iurot(imol) < 0
+                ! Add line after molecule specification, avbmc parameters
+                ! First, number of rotation centers
+                ! Second, identity of centers (0=COM,integer::> 0 = bead number)
+                ! Third, give probability to rotate around different centers
+                if(iurot(imol).lt.0) then
+                   call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                   if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
+                   read(line_in,*) nrotbd(imol),irotbd(1:nrotbd(imol),imol),pmrotbd(1:nrotbd(imol),imol)
+                   if (lprint) then
+                      write(io_output,'(I0,A)') nrotbd(imol),' rotation centers:'
+                      do ii=1,nrotbd(imol)
+                         write(io_output,'(A,I0,A,F5.3)') '   around bead: ',irotbd(ii,imol),', probability: ',pmrotbd(ii,imol)
+                      end do
+                   end if
+                end if
+
+                ! starting the self consistency check for the bond vibrations, bending, and torsions
+                ! this would help in catching errors in fort.4 connectivity. Starting after continue
+                ! so that if we use molsetup subroutine it will provide extra checking. (Neeraj)
+                if (.not.lrigid(imol)) then
+                   do i = 1,nunit(imol)
+                      numvib=invib(imol,i)
+                      numbend=inben(imol,i)
+                      numtor=intor(imol,i)
+                      lfound = .false.
+                      do j = 1,numvib
+                         vib1 = ijvib(imol,i,j)
+                         vibtype  = itvib(imol,i,j)
+                         if(invib(imol,vib1).eq.0) then
+                            write(io_output,*) 'Check vibration for mol. type:',imol, 'bead',vib1,'with',i
+                            call err_exit(__FILE__,__LINE__,'ERROR IN FORT.4 VIBRATIONS',myid+1)
+                         end if
+                         do k =1,invib(imol,vib1)
+                            if(ijvib(imol,vib1,k).eq.i) then
+                               lfound = .true.
+                               if(vibtype.ne.itvib(imol,vib1,k)) then
+                                  write(io_output,*) 'check vibration type of bead',i, 'with',vib1,'molecule type',imol,'vice versa'
+                                  call err_exit(__FILE__,__LINE__,'Error in fort.4 vibration specifications',myid+1)
+                               end if
+                            end if
+                         end do
+                         if(.not.lfound) then
+                            write(io_output,*) 'Check vibration for mol. type:',imol, 'bead ',vib1,'with ',i
+                            call err_exit(__FILE__,__LINE__,'Error in fort.4 vibration iformation',myid+1)
+                         end if
+                      end do
+                      lfound= .false.
+                      do j = 1,numbend
+                         bend2 = ijben2(imol,i,j)
+                         bend3 = ijben3(imol,i,j)
+                         bendtype = itben(imol,i,j)
+                         if(inben(imol,bend3).eq.0) then
+                            write(io_output,*) 'Check bending for mol. type:',imol, 'bead ',bend3,'with ',i
+                            call err_exit(__FILE__,__LINE__,'ERROR IN FORT.4 BENDING',myid+1)
+                         end if
+                         do k = 1,inben(imol,bend3)
+                            if((ijben2(imol,bend3,k).eq.bend2).and. (ijben3(imol,bend3,k).eq.i)) then
+                               lfound = .true.
+                               if(itben(imol,bend3,k).ne.bendtype) then
+                                  write(io_output,*) 'check bending type of bead',i, 'with',bend3,'mol. typ.',imol,'and vice versa'
+                                  call err_exit(__FILE__,__LINE__,'Error in fort.4 bending specifications',myid+1)
+                               end if
+                            end if
+                         end do
+                         if(.not.lfound) then
+                            write(io_output,*) 'Check bending for mol. type:',imol, 'bead ',bend3,'with ',i
+                            call err_exit(__FILE__,__LINE__,'Error in fort.4 bending information',myid+1)
+                         end if
+                      end do
+                      lfound = .false.
+                      do j = 1,numtor
+                         tor2 = ijtor2(imol,i,j)
+                         tor3 = ijtor3(imol,i,j)
+                         tor4 = ijtor4(imol,i,j)
+                         tortype = ittor(imol,i,j)
+                         if(intor(imol,tor4).eq.0) then
+                            write(io_output,*) 'Check torsion for mol. type:',imol, 'bead ',tor4,'with ',i,'and vice versa'
+                            call err_exit(__FILE__,__LINE__,'ERROR IN FORT.4 TORSION',myid+1)
+                         end if
+                         do k = 1,intor(imol,tor4)
+                            if((ijtor2(imol,tor4,k).eq.tor3).and.(ijtor3(imol,tor4 ,k).eq.tor2).and.(ijtor4(imol,tor4,k).eq.i)) then
+                               lfound=.true.
+                               if(ittor(imol,tor4,k).ne.tortype) then
+                                  write(io_output,*) 'check torsion type of bead',i, 'with',tor4,'mol. typ.',imol,'and vice versa'
+                                  call err_exit(__FILE__,__LINE__,'Error in fort.4 torsion specifications',myid+1)
+                               end if
+                            end if
+                         end do
+                         if(.not.lfound) then
+                            write(io_output,*) 'Check torsion for mol. type:',imol, 'bead ',tor4,'with ',i
+                            call err_exit(__FILE__,__LINE__,'Error in fort.4 torsion information',myid+1)
+                         end if
+                      end do
+                   end do
+                end if
+
+                ! Neeraj Adding molecule neutrality check
+                if (.not.(lgaro.or.lionic.or.lexzeo)) then
+                   qtot =0.0E0_dp
+                   do j = 1,nunit(imol)
+                      qtot = qtot+qelect(ntype(imol,j))
+                   end do
+                   if(abs(qtot).gt.1E-7_dp) call err_exit(__FILE__,__LINE__,'molecule type '//integer_to_string(imol)&
+                    //' not neutral. check charges',myid+1)
+                end if
              end do
 
-112          continue
-
-             !kea 6/4/09 -- added for multiple rotation centers
-             ! To assign multiple rotation centers, set iurot(imol) < 0
-             ! Add line after molecule specification, avbmc parameters
-             ! First, number of rotation centers
-             ! Second, identity of centers (0=COM,integer::> 0 = bead number)
-             ! Third, give probability to rotate around different centers
-             if(iurot(imol).lt.0) then
-                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MOLECULE_TYPE',jerr)
-                read(line_in,*) nrotbd(imol),irotbd(1:nrotbd(imol),imol),pmrotbd(1:nrotbd(imol),imol)
-                if (lprint) then
-                   write(io_output,'(I0,A)') nrotbd(imol),' rotation centers:'
-                   do ii=1,nrotbd(imol)
-                      write(io_output,'(A,I0,A,F5.3)') '   around bead: ',irotbd(ii,imol),', probability: ',pmrotbd(ii,imol)
-                   end do
+             if (ALL(.NOT.lelect(1:nmolty))) then
+                if (lewald.or.lchgall) then
+                   if (lprint) write(io_output,'(A)') 'No charges in the system -> lewald is now turned off'
                 end if
              end if
 
-             ! starting the self consistency check for the bond vibrations, bending, and torsions
-             ! this would help in catching errors in fort.4 connectivity. Starting after continue
-             ! so that if we use molsetup subroutine it will provide extra checking. (Neeraj)
-             if (.not.lrigid(imol)) then
-                do i = 1,nunit(imol)
-                   numvib=invib(imol,i)
-                   numbend=inben(imol,i)
-                   numtor=intor(imol,i)
-                   lfound = .false.
-                   do j = 1,numvib
-                      vib1 = ijvib(imol,i,j)
-                      vibtype  = itvib(imol,i,j)
-                      if(invib(imol,vib1).eq.0) then
-                         write(io_output,*) 'Check vibration for mol. type:',imol, 'bead',vib1,'with',i
-                         call err_exit(__FILE__,__LINE__,'ERROR IN FORT.4 VIBRATIONS',myid+1)
-                      end if
-                      do k =1,invib(imol,vib1)
-                         if(ijvib(imol,vib1,k).eq.i) then
-                            lfound = .true.
-                            if(vibtype.ne.itvib(imol,vib1,k)) then
-                               write(io_output,*) 'check vibration type of bead',i, 'with',vib1,'molecule type',imol,'vice versa'
-                               call err_exit(__FILE__,__LINE__,'Error in fort.4 vibration specifications',myid+1)
-                            end if
-                         end if
-                      end do
-                      if(.not.lfound) then
-                         write(io_output,*) 'Check vibration for mol. type:',imol, 'bead ',vib1,'with ',i
-                         call err_exit(__FILE__,__LINE__,'Error in fort.4 vibration iformation',myid+1)
-                      end if
-                   end do
-                   lfound= .false.
-                   do j = 1,numbend
-                      bend2 = ijben2(imol,i,j)
-                      bend3 = ijben3(imol,i,j)
-                      bendtype = itben(imol,i,j)
-                      if(inben(imol,bend3).eq.0) then
-                         write(io_output,*) 'Check bending for mol. type:',imol, 'bead ',bend3,'with ',i
-                         call err_exit(__FILE__,__LINE__,'ERROR IN FORT.4 BENDING',myid+1)
-                      end if
-                      do k = 1,inben(imol,bend3)
-                         if((ijben2(imol,bend3,k).eq.bend2).and. (ijben3(imol,bend3,k).eq.i)) then
-                            lfound = .true.
-                            if(itben(imol,bend3,k).ne.bendtype) then
-                               write(io_output,*) 'check bending type of bead',i, 'with',bend3,'mol. typ.',imol,'and vice versa'
-                               call err_exit(__FILE__,__LINE__,'Error in fort.4 bending specifications',myid+1)
-                            end if
-                         end if
-                      end do
-                      if(.not.lfound) then
-                         write(io_output,*) 'Check bending for mol. type:',imol, 'bead ',bend3,'with ',i
-                         call err_exit(__FILE__,__LINE__,'Error in fort.4 bending information',myid+1)
-                      end if
-                   end do
-                   lfound = .false.
-                   do j = 1,numtor
-                      tor2 = ijtor2(imol,i,j)
-                      tor3 = ijtor3(imol,i,j)
-                      tor4 = ijtor4(imol,i,j)
-                      tortype = ittor(imol,i,j)
-                      if(intor(imol,tor4).eq.0) then
-                         write(io_output,*) 'Check torsion for mol. type:',imol, 'bead ',tor4,'with ',i,'and vice versa'
-                         call err_exit(__FILE__,__LINE__,'ERROR IN FORT.4 TORSION',myid+1)
-                      end if
-                      do k = 1,intor(imol,tor4)
-                         if((ijtor2(imol,tor4,k).eq.tor3).and.(ijtor3(imol,tor4 ,k).eq.tor2).and.(ijtor4(imol,tor4,k).eq.i)) then
-                            lfound=.true.
-                            if(ittor(imol,tor4,k).ne.tortype) then
-                               write(io_output,*) 'check torsion type of bead',i, 'with',tor4,'mol. typ.',imol,'and vice versa'
-                               call err_exit(__FILE__,__LINE__,'Error in fort.4 torsion specifications',myid+1)
-                            end if
-                         end if
-                      end do
-                      if(.not.lfound) then
-                         write(io_output,*) 'Check torsion for mol. type:',imol, 'bead ',tor4,'with ',i
-                         call err_exit(__FILE__,__LINE__,'Error in fort.4 torsion information',myid+1)
-                      end if
-                   end do
-                end do
-             end if
-
-             ! Neeraj Adding molecule neutrality check
-             if(.not.(lgaro.or.lionic.or.lexzeo)) then
-                qtot =0.0E0_dp
-                do j = 1,nunit(imol)
-                   qtot = qtot+qelect(ntype(imol,j))
-                end do
-                if(abs(qtot).gt.1E-7_dp) call err_exit(__FILE__,__LINE__,'molecule type '//integer_to_string(imol)&
-                 //' not neutral. check charges',myid+1)
-             end if
-          end do
-
-          if (ALL(.NOT.lelect(1:nmolty))) then
-             if (lewald.or.lchgall) then
-                if (lprint) write(io_output,'(A)') 'No charges in the system -> lewald is now turned off'
-             end if
+             exit cycle_read_moltyp
           end if
-
-          exit cycle_read_moltyp
-       end if
-    END DO CYCLE_READ_MOLTYP
-
-    if (lprint) then
-       write(io_output,'(/,A,'//format_n(nmolty,'(3X,F10.5)')//')') 'MOLECULAR MASS: ',masst(1:nmolty)
+       END DO CYCLE_READ_MOLTYP
     end if
 
+    call mp_bcast(numax,1,rootid,groupid)
+
     if (numax.gt.0) then
+       allocate(lplace(ntmax,numax),lrigi(ntmax,numax),inclmol(ntmax*numax*numax),inclbead(ntmax*numax*numax,2)&
+        ,inclsign(ntmax*numax*numax),ofscale(ntmax*numax*numax),ofscale2(ntmax*numax*numax),ainclmol(ntmax*numax*numax)&
+        ,ainclbead(ntmax*numax*numax,2),a15t(ntmax*numax*numax),stat=jerr)
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'readdat: allocating molecule failed',jerr)
+       lrigi = .false.
+
        call reallocate(ntype,1,ntmax,1,numax)
        call reallocate(riutry,1,ntmax,1,numax)
        call reallocate(leaderq,1,ntmax,1,numax)
-       call reallocate(lplace,1,ntmax,1,numax)
-       call reallocate(lrigi,1,ntmax,1,numax)
        call reallocate(invib,1,ntmax,1,numax)
        call reallocate(itvib,1,ntmax,1,numax,1,6)
        call reallocate(ijvib,1,ntmax,1,numax,1,6)
@@ -2065,13 +2181,68 @@ contains
        call reallocate(ijtor4,1,ntmax,1,numax,1,12)
        call reallocate(irotbd,1,numax,1,ntmax)
        call reallocate(pmrotbd,1,numax,1,ntmax)
+
+       call mp_bcast(nunit,nmolty,rootid,groupid)
+       call mp_bcast(nugrow,nmolty,rootid,groupid)
+       call mp_bcast(ncarbon,nmolty,rootid,groupid)
+       call mp_bcast(nmaxcbmc,nmolty,rootid,groupid)
+       call mp_bcast(maxgrow,nmolty,rootid,groupid)
+       call mp_bcast(iring,nmolty,rootid,groupid)
+       call mp_bcast(lelect,nmolty,rootid,groupid)
+       call mp_bcast(lring,nmolty,rootid,groupid)
+       call mp_bcast(lrigid,nmolty,rootid,groupid)
+       call mp_bcast(lbranch,nmolty,rootid,groupid)
+       call mp_bcast(lrplc,nmolty,rootid,groupid)
+       call mp_bcast(lq14scale,nmolty,rootid,groupid)
+       call mp_bcast(qscale,nmolty,rootid,groupid)
+       call mp_bcast(iurot,nmolty,rootid,groupid)
+       call mp_bcast(isolute,nmolty,rootid,groupid)
+       call mp_bcast(eta2,nbxmax*ntmax,rootid,groupid)
+       call mp_bcast(rindex,nmolty,rootid,groupid)
+       call mp_bcast(riutry,ntmax*numax,rootid,groupid)
+       call mp_bcast(ntype,ntmax*numax,rootid,groupid)
+       call mp_bcast(leaderq,ntmax*numax,rootid,groupid)
+       call mp_bcast(invib,ntmax*numax,rootid,groupid)
+       call mp_bcast(itvib,ntmax*numax*nvib_max,rootid,groupid)
+       call mp_bcast(ijvib,ntmax*numax*nvib_max,rootid,groupid)
+       call mp_bcast(inben,ntmax*numax,rootid,groupid)
+       call mp_bcast(itben,ntmax*numax*nben_max,rootid,groupid)
+       call mp_bcast(ijben2,ntmax*numax*nben_max,rootid,groupid)
+       call mp_bcast(ijben3,ntmax*numax*nben_max,rootid,groupid)
+       call mp_bcast(intor,ntmax*numax,rootid,groupid)
+       call mp_bcast(ittor,ntmax*numax*ntor_max,rootid,groupid)
+       call mp_bcast(ijtor2,ntmax*numax*ntor_max,rootid,groupid)
+       call mp_bcast(ijtor3,ntmax*numax*ntor_max,rootid,groupid)
+       call mp_bcast(ijtor4,ntmax*numax*ntor_max,rootid,groupid)
+       call mp_bcast(nrotbd,nmolty,rootid,groupid)
+       call mp_bcast(irotbd,numax*ntmax,rootid,groupid)
+       call mp_bcast(pmrotbd,numax*ntmax,rootid,groupid)
+
+       do imol = 1,nmolty
+          masst(imol) = 0.0E0_dp
+
+          do i = 1,nunit(imol)
+             iutemp = ntype(imol,i)
+
+             if (lpl(iutemp)) then
+                lplace(imol,i) = .true.
+                llplace(imol) = .true.
+             else
+                lplace(imol,i) = .false.
+             end if
+
+             masst(imol)=masst(imol)+mass(iutemp)
+             lhere(iutemp) = .true.
+          end do
+       end do
+    end if
+
+    if (lprint) then
+       write(io_output,'(/,A,'//format_n(nmolty,'(3X,F10.5)')//')') 'MOLECULAR MASS: ',masst(1:nmolty)
     end if
 ! -------------------------------------------------------------------
     call allocate_molecule()
     call allocate_energy_bonded()
-    allocate(inclmol(ntmax*numax*numax),inclbead(ntmax*numax*numax,2),inclsign(ntmax*numax*numax),ofscale(ntmax*numax*numax)&
-     ,ofscale2(ntmax*numax*numax),ainclmol(ntmax*numax*numax),ainclbead(ntmax*numax*numax,2),a15t(ntmax*numax*numax),stat=jerr)
-    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'readdat: allocating molecule failed',jerr)
 
     if (lprint) then
        write(io_output,'(/,A,/,A)') 'SPECIAL INTERACTION RULES','------------------------------------------'
@@ -2081,109 +2252,144 @@ contains
     ! read exclusion table for intermolecular interactions
     nexclu=0
     lexclu=.false.
-    REWIND(io_input)
-    CYCLE_READ_EXCLUSION:DO
-       call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-       if (jerr.ne.0) exit cycle_read_exclusion
+    if (myid.eq.rootid) then
+       REWIND(io_input)
+       CYCLE_READ_EXCLUSION:DO
+          call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+          if (jerr.ne.0) exit cycle_read_exclusion
+          if (UPPERCASE(line_in(1:24)).eq.'INTERMOLECULAR_EXCLUSION') then
+             jerr=0
+             exit cycle_read_exclusion
+          end if
+       END DO CYCLE_READ_EXCLUSION
+    end if
 
-       if (UPPERCASE(line_in(1:24)).eq.'INTERMOLECULAR_EXCLUSION') then
-          do
+    call mp_bcast(jerr,1,rootid,groupid)
+
+    if (jerr.eq.0) then
+       do
+          if (myid.eq.rootid) then
              call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
              if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section INTERMOLECULAR_EXCLUSION',jerr)
-             if (UPPERCASE(line_in(1:28)).eq.'END INTERMOLECULAR_EXCLUSION') exit
-
-             nexclu=nexclu+1
-             ! mol_1 bead_1 mol_2 bead_2
-             read(line_in,*) i,ii,j,jj
-
-             if (lprint) then
-                write(io_output,'(4(A,I0))') '      excluding interactions between bead ',ii,' of molecule ',i,' with bead '&
-                 ,jj,' of molecule ',j
-             end if
-
-             lexclu(i,ii,j,jj) = .true.
-             lexclu(j,jj,i,ii) = .true.
-          end do
-
-          if (lprint) then
-             write(io_output,'(A,I0,A,/)') '  Total: ',nexclu,' exclusion rules for intermolecular interactions'
           end if
 
-          exit cycle_read_exclusion
+          call mp_bcast(line_in,rootid,groupid)
+
+          if (UPPERCASE(line_in(1:28)).eq.'END INTERMOLECULAR_EXCLUSION') exit
+
+          nexclu=nexclu+1
+          ! mol_1 bead_1 mol_2 bead_2
+          read(line_in,*) i,ii,j,jj
+
+          if (lprint) then
+             write(io_output,'(4(A,I0))') '      excluding interactions between bead ',ii,' of molecule ',i,' with bead '&
+              ,jj,' of molecule ',j
+          end if
+
+          lexclu(i,ii,j,jj) = .true.
+          lexclu(j,jj,i,ii) = .true.
+       end do
+
+       if (lprint) then
+          write(io_output,'(A,I0,A,/)') '  Total: ',nexclu,' exclusion rules for intermolecular interactions'
        end if
-    END DO CYCLE_READ_EXCLUSION
+    end if
 ! -------------------------------------------------------------------
     !> Looking for section INTRAMOLECULAR_SPECIAL
     ! read exclusion table for intermolecular interactions
     inclnum=0
-    REWIND(io_input)
-    CYCLE_READ_SPECIAL:DO
-       call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-       if (jerr.ne.0) exit cycle_read_special
+    if (myid.eq.rootid) then
+       REWIND(io_input)
+       CYCLE_READ_SPECIAL:DO
+          call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+          if (jerr.ne.0) exit cycle_read_special
 
-       if (UPPERCASE(line_in(1:22)).eq.'INTRAMOLECULAR_SPECIAL') then
-          do
+          if (UPPERCASE(line_in(1:22)).eq.'INTRAMOLECULAR_SPECIAL') then
+             jerr=0
+             exit cycle_read_special
+          end if
+       END DO CYCLE_READ_SPECIAL
+    end if
+
+    call mp_bcast(jerr,1,rootid,groupid)
+
+    if (jerr.eq.0) then
+       do
+          if (myid.eq.rootid) then
              call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
              if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section INTRAMOLECULAR_SPECIAL',jerr)
-             if (UPPERCASE(line_in(1:26)).eq.'END INTRAMOLECULAR_SPECIAL') exit
-
-             inclnum=inclnum+1
-             ! inclmol inclbead_1 inclbead_2 inclsign ofscale ofscale2
-             read(line_in,*) inclmol(inclnum),inclbead(inclnum,1),inclbead(inclnum,2),inclsign(inclnum),ofscale(inclnum)&
-              ,ofscale2(inclnum)
-
-             if (lprint) then
-                if (inclsign(inclnum) .eq. 1) then
-                   write(io_output,'(3(A,I0),2(A,F6.3))') '      including intramolecular interactions for molecule type '&
-                    ,inclmol(inclnum), ' between bead ',inclbead(inclnum,1),' and bead ',inclbead(inclnum,2),', ofscale LJ: '&
-                    ,ofscale(inclnum),', ofscale Q: ',ofscale2(inclnum)
-                else
-                   write(io_output,'(3(A,I0),2(A,F6.3))') '      excluding intramolecular interactions for molecule type '&
-                    ,inclmol(inclnum), ' between bead ',inclbead(inclnum,1),' and bead ',inclbead(inclnum,2),', ofscale LJ: '&
-                    ,ofscale(inclnum),', ofscale Q: ',ofscale2(inclnum)
-                end if
-             end if
-          end do
-
-          if (lprint) then
-             write(io_output,'(A,I0,A,/)') '  Total: ',inclnum,' inclusion rules for intramolecular interactions'
           end if
 
-          exit cycle_read_special
+          call mp_bcast(line_in,rootid,groupid)
+
+          if (UPPERCASE(line_in(1:26)).eq.'END INTRAMOLECULAR_SPECIAL') exit
+
+          inclnum=inclnum+1
+          ! inclmol inclbead_1 inclbead_2 inclsign ofscale ofscale2
+          read(line_in,*) inclmol(inclnum),inclbead(inclnum,1),inclbead(inclnum,2),inclsign(inclnum),ofscale(inclnum)&
+           ,ofscale2(inclnum)
+
+          if (lprint) then
+             if (inclsign(inclnum) .eq. 1) then
+                write(io_output,'(3(A,I0),2(A,F6.3))') '      including intramolecular interactions for molecule type '&
+                 ,inclmol(inclnum), ' between bead ',inclbead(inclnum,1),' and bead ',inclbead(inclnum,2),', ofscale LJ: '&
+                 ,ofscale(inclnum),', ofscale Q: ',ofscale2(inclnum)
+             else
+                write(io_output,'(3(A,I0),2(A,F6.3))') '      excluding intramolecular interactions for molecule type '&
+                 ,inclmol(inclnum), ' between bead ',inclbead(inclnum,1),' and bead ',inclbead(inclnum,2),', ofscale LJ: '&
+                 ,ofscale(inclnum),', ofscale Q: ',ofscale2(inclnum)
+             end if
+          end if
+       end do
+
+       if (lprint) then
+          write(io_output,'(A,I0,A,/)') '  Total: ',inclnum,' inclusion rules for intramolecular interactions'
        end if
-    END DO CYCLE_READ_SPECIAL
+    end if
 ! -------------------------------------------------------------------
     !> Looking for section INTRAMOLECULAR_OH15
     ! read exclusion table for intermolecular interactions
     ainclnum=0
-    REWIND(io_input)
-    CYCLE_READ_OH15:DO
-       call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-       if (jerr.ne.0) exit cycle_read_oh15
+    if (myid.eq.rootid) then
+       REWIND(io_input)
+       CYCLE_READ_OH15:DO
+          call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+          if (jerr.ne.0) exit cycle_read_oh15
 
-       if (UPPERCASE(line_in(1:19)).eq.'INTRAMOLECULAR_OH15') then
-          do
+          if (UPPERCASE(line_in(1:19)).eq.'INTRAMOLECULAR_OH15') then
+             jerr=0
+             exit cycle_read_oh15
+          end if
+       END DO CYCLE_READ_OH15
+    end if
+
+    call mp_bcast(jerr,1,rootid,groupid)
+
+    if (jerr.eq.0) then
+       do
+          if (myid.eq.rootid) then
              call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
              if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section INTRAMOLECULAR_OH15',jerr)
-             if (UPPERCASE(line_in(1:23)).eq.'END INTRAMOLECULAR_OH15') exit
-
-             ainclnum=ainclnum+1
-             ! ainclmol ainclbead_1 ainclbead_2 a15type
-             read(line_in,*) ainclmol(ainclnum),ainclbead(ainclnum,1),ainclbead(ainclnum,2) ,a15t(ainclnum)
-
-             if (lprint) then
-                write(io_output,'(4(A,I0))') '      repulsive 1-5 OH interaction for molecule type ',ainclmol(ainclnum)&
-                 ,' between bead ',ainclbead(ainclnum,1),' and bead ',ainclbead(ainclnum,2),' of type ',a15t(ainclnum)
-             end if
-          end do
-
-          if (lprint) then
-             write(io_output,'(A,I0,A)') '  Total: ',ainclnum,' special rules for intramolecular 1-5 OH interactions'
           end if
 
-          exit cycle_read_oh15
+          call mp_bcast(line_in,rootid,groupid)
+
+          if (UPPERCASE(line_in(1:23)).eq.'END INTRAMOLECULAR_OH15') exit
+
+          ainclnum=ainclnum+1
+          ! ainclmol ainclbead_1 ainclbead_2 a15type
+          read(line_in,*) ainclmol(ainclnum),ainclbead(ainclnum,1),ainclbead(ainclnum,2) ,a15t(ainclnum)
+
+          if (lprint) then
+             write(io_output,'(4(A,I0))') '      repulsive 1-5 OH interaction for molecule type ',ainclmol(ainclnum)&
+              ,' between bead ',ainclbead(ainclnum,1),' and bead ',ainclbead(ainclnum,2),' of type ',a15t(ainclnum)
+          end if
+       end do
+
+       if (lprint) then
+          write(io_output,'(A,I0,A)') '  Total: ',ainclnum,' special rules for intramolecular 1-5 OH interactions'
        end if
-    END DO CYCLE_READ_OH15
+    end if
 ! -------------------------------------------------------------------
     !> set up the inclusion table
     call inclus(inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ainclbead,a15t,ofscale,ofscale2)
@@ -2301,9 +2507,21 @@ contains
        pmfqmt(i)=real(i,dp)/nmolty
     end do
 
-    rewind(io_input)
-    read(UNIT=io_input,NML=mc_flucq,iostat=jerr)
-    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_flucq',jerr)
+    if (myid.eq.rootid) then
+       rewind(io_input)
+       read(UNIT=io_input,NML=mc_flucq,iostat=jerr)
+       if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_flucq',jerr)
+    end if
+
+    call mp_bcast(taflcq,1,rootid,groupid)
+    call mp_bcast(fqtemp,1,rootid,groupid)
+    call mp_bcast(rmflucq,1,rootid,groupid)
+    call mp_bcast(pmflcq,1,rootid,groupid)
+    call mp_bcast(pmfqmt,ntmax,rootid,groupid)
+    call mp_bcast(lflucq,ntmax,rootid,groupid)
+    call mp_bcast(lqtrans,ntmax,rootid,groupid)
+    call mp_bcast(fqegp,ntmax,rootid,groupid)
+    call mp_bcast(nchoiq,nbxmax,rootid,groupid)
 
     if (lprint) then
        write(io_output,'(/,A,/,A)') 'NAMELIST MC_FLUCQ','------------------------------------------'
@@ -2337,9 +2555,17 @@ contains
     if (lgrand) then
        B=0.0_dp
 
-       rewind(io_input)
-       read(UNIT=io_input,NML=gcmc,iostat=jerr)
-       if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: gcmc',jerr)
+       if (myid.eq.rootid) then
+          rewind(io_input)
+          read(UNIT=io_input,NML=gcmc,iostat=jerr)
+          if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: gcmc',jerr)
+       end if
+
+       call mp_bcast(B,ntmax,rootid,groupid)
+       call mp_bcast(nequil,1,rootid,groupid)
+       call mp_bcast(ninstf,1,rootid,groupid)
+       call mp_bcast(ninsth,1,rootid,groupid)
+       call mp_bcast(ndumph,1,rootid,groupid)
 
        if (lprint) then
           write(io_output,'(/,A,/,A)') 'NAMELIST GCMC','------------------------------------------'
@@ -2448,7 +2674,7 @@ contains
 ! -------------------------------------------------------------------
     !> set up force field parameters and read in external potentials
     call init_ff(io_input,lprint)
-    close(io_input)
+    if (myid.eq.rootid) close(io_input)
 ! ===================================================================
     !> Initialize the system or read configuration from the restart file
     if (linit) then
@@ -2458,7 +2684,7 @@ contains
        end do
        call setup_system_config(file_struct)
        nnstep = 0
-    else
+    else if (myid.eq.rootid) then
        if (use_checkpoint) file_restart='save-config'
 
        io_restart=get_iounit()
@@ -2577,22 +2803,22 @@ contains
           call err_exit(__FILE__,__LINE__,'conflicting information in restart and control files',myid+1)
        end if
 
-       read(io_restart,*) nures(1:nmtres)
+       read(io_restart,*) nures(1:nmolty)
 
-       do i=1,nmtres
+       do i=1,nmolty
           if (nures(i).ne.nunit(i)) then
              write(io_output,*) 'unit',i,'nunit',nunit(i),'nures',nures(i)
              call err_exit(__FILE__,__LINE__,'conflicting information in restart and control files',myid+1)
           end if
        end do
 
-       read(io_restart,*) moltyp(1:ncres)
-       read(io_restart,*) nboxi(1:ncres)
+       read(io_restart,*) moltyp(1:nchain)
+       read(io_restart,*) nboxi(1:nchain)
        if (any(lexpand(1:nmolty))) then
-          do i=1,nmtres
+          do i=1,nmolty
              if (lexpand(i)) read(io_restart,*) eetype(i)
           end do
-          do i=1,nmtres
+          do i=1,nmolty
              if (lexpand(i)) read(io_restart,*) rmexpc(i)
           end do
        end if
@@ -2619,6 +2845,37 @@ contains
           end if
        end do
     end if
+
+    call mp_bcast(nnstep,1,rootid,groupid)
+    call mp_bcast(Armtrax,1,rootid,groupid)
+    call mp_bcast(Armtray,1,rootid,groupid)
+    call mp_bcast(Armtraz,1,rootid,groupid)
+    call mp_bcast(rmtrax(1:nmolty,1:nbox),nmolty*nbox,rootid,groupid)
+    call mp_bcast(rmtray(1:nmolty,1:nbox),nmolty*nbox,rootid,groupid)
+    call mp_bcast(rmtraz(1:nmolty,1:nbox),nmolty*nbox,rootid,groupid)
+    call mp_bcast(rmrotx(1:nmolty,1:nbox),nmolty*nbox,rootid,groupid)
+    call mp_bcast(rmroty(1:nmolty,1:nbox),nmolty*nbox,rootid,groupid)
+    call mp_bcast(rmrotz(1:nmolty,1:nbox),nmolty*nbox,rootid,groupid)
+    call mp_bcast(rmflcq(1:nmolty,1:nbox),nmolty*nbox,rootid,groupid)
+    call mp_bcast(rmvol(1:nbox),nbox,rootid,groupid)
+    do ibox=1,nbox
+       if (lsolid(ibox).and..not.lrect(ibox)) then
+          call mp_bcast(rmhmat(ibox,1:9),9,rootid,groupid)
+          call mp_bcast(hmat(ibox,1:9),9,rootid,groupid)
+          call matops(ibox)
+       end if
+    end do
+    call mp_bcast(nchain,1,rootid,groupid)
+    call mp_bcast(moltyp,nchain,rootid,groupid)
+    call mp_bcast(nboxi,nchain,rootid,groupid)
+    if (any(lexpand(1:nmolty))) then
+       call mp_bcast(eetype,nmolty,rootid,groupid)
+       call mp_bcast(rmexpc,nmolty,rootid,groupid)
+    end if
+    call mp_bcast(rxu(1:nchain,1:numax),nchain*numax,rootid,groupid)
+    call mp_bcast(ryu(1:nchain,1:numax),nchain*numax,rootid,groupid)
+    call mp_bcast(rzu(1:nchain,1:numax),nchain*numax,rootid,groupid)
+    call mp_bcast(qqu(1:nchain,1:numax),nchain*numax,rootid,groupid)
 ! ===================================================================
     !> check that particles are in correct boxes
     !> obtain nchbox, ncmt, parbox, parall

@@ -697,13 +697,15 @@ contains
   subroutine init_ee(io_input,lprint)
     use var_type,only:default_path_length
     use util_files,only:get_iounit
+    use util_mp,only:mp_bcast
     integer,intent(in)::io_input
     LOGICAL,INTENT(IN)::lprint
     character(LEN=default_path_length),parameter::file_ee='fort.7'
     integer::io_ee,jerr,imol,j,ii
     namelist /mc_ee/ pmexpc,pmeemt,pmexpc1,lexpand
 
-    allocate(epsil(ntmax,numax,100),sigm(ntmax,numax,100),qcharge(ntmax,numax,100),bnexpc(ntmax,nbxmax),bsexpc(ntmax,nbxmax),eta(nbxmax,ntmax,20),numcoeff(ntmax),stat=jerr)
+    allocate(epsil(ntmax,numax,100),sigm(ntmax,numax,100),qcharge(ntmax,numax,100),bnexpc(ntmax,nbxmax),bsexpc(ntmax,nbxmax)&
+     ,eta(nbxmax,ntmax,20),numcoeff(ntmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_ee: allocation failed',jerr)
 
     bsexpc = 0.0E0_dp
@@ -715,50 +717,68 @@ contains
        pmeemt(imol)=real(imol,dp)/nmolty
     end do
 
-    rewind(io_input)
-    read(UNIT=io_input,NML=mc_ee,iostat=jerr)
-    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_ee',jerr)
+    if (myid.eq.rootid) then
+       rewind(io_input)
+       read(UNIT=io_input,NML=mc_ee,iostat=jerr)
+       if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_ee',jerr)
+    end if
+
+    call mp_bcast(pmexpc,1,rootid,groupid)
+    call mp_bcast(pmeemt,nmolty,rootid,groupid)
+    call mp_bcast(pmexpc1,1,rootid,groupid)
+    call mp_bcast(lexpand,nmolty,rootid,groupid)
 
     if (lprint) then
        write(io_output,'(/,A,/,A)') 'NAMELIST MC_EE','------------------------------------------'
        write(io_output,'(A,G16.9)') 'pmexpc: ',pmexpc
        do imol=1,nmolty
-          write(io_output,'(A,I0,A,F8.4,A,L2)') '   expanded ens. prob. for molecule type ',imol,' (pmeemt): ',pmeemt(imol),', lexpand: ',lexpand(imol)
+          write(io_output,'(A,I0,A,F8.4,A,L2)') '   expanded ens. prob. for molecule type ',imol,' (pmeemt): ',pmeemt(imol)&
+           ,', lexpand: ',lexpand(imol)
        end do
        write(io_output,'(A,G16.9)') 'pmexpc1: ',pmexpc1
     end if
 ! -------------------------------------------------------------------
     if (ANY(lexpand(1:nmolty))) then
-       io_ee=get_iounit()
-       open(unit=io_ee,access='sequential',action='read',file=file_ee,form='formatted',iostat=jerr,status='unknown')
-       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open ee file '//trim(file_ee),jerr)
+       if (myid.eq.rootid) then
+          io_ee=get_iounit()
+          open(unit=io_ee,access='sequential',action='read',file=file_ee,form='formatted',iostat=jerr,status='unknown')
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open ee file '//trim(file_ee),jerr)
+       end if
     end if
 
     do imol=1,nmolty
        if (lexpand(imol)) then
           if (temtyp(imol).gt.1) call err_exit(__FILE__,__LINE__,'Only one chain of this type is allowed!',myid+1)
 
-          read(io_ee,*)
-          read(io_ee,*) numcoeff(imol)
-          do j=1,numcoeff(imol)
+          if (myid.eq.rootid) then
              read(io_ee,*)
-             read(io_ee,*) (epsil(imol,ii,j),ii=1,nunit(imol))
-             read(io_ee,*) (sigm(imol,ii,j),ii=1,nunit(imol))
-             read(io_ee,*) (qcharge(imol,ii,j),ii=1,nunit(imol))
-             read(io_ee,*)
-             read(io_ee,*) (eta(ii,imol,j),ii=1,2)
-             if (lprint) then
-                write(io_output,*) 'itype:',j
-                write(io_output,*) (epsil(imol,ii,j),ii=1,nunit(imol))
-                write(io_output,*) (sigm(imol,ii,j),ii=1,nunit(imol))
-                write(io_output,*) (qcharge(imol,ii,j),ii=1,nunit(imol))
-                write(io_output,*) 'eta:',(eta(ii,imol,j),ii=1,2)
-             end if
-          end do
+             read(io_ee,*) numcoeff(imol)
+             do j=1,numcoeff(imol)
+                read(io_ee,*)
+                read(io_ee,*) (epsil(imol,ii,j),ii=1,nunit(imol))
+                read(io_ee,*) (sigm(imol,ii,j),ii=1,nunit(imol))
+                read(io_ee,*) (qcharge(imol,ii,j),ii=1,nunit(imol))
+                read(io_ee,*)
+                read(io_ee,*) (eta(ii,imol,j),ii=1,2)
+                if (lprint) then
+                   write(io_output,*) 'itype:',j
+                   write(io_output,*) (epsil(imol,ii,j),ii=1,nunit(imol))
+                   write(io_output,*) (sigm(imol,ii,j),ii=1,nunit(imol))
+                   write(io_output,*) (qcharge(imol,ii,j),ii=1,nunit(imol))
+                   write(io_output,*) 'eta:',(eta(ii,imol,j),ii=1,2)
+                end if
+             end do
+          end if
+          call mp_bcast(numcoeff(imol),1,rootid,groupid)
+
+          call mp_bcast(epsil(imol,:,:),nunit(imol)*numcoeff(imol),rootid,groupid)
+          call mp_bcast(sigm(imol,:,:),nunit(imol)*numcoeff(imol),rootid,groupid)
+          call mp_bcast(qcharge(imol,:,:),nunit(imol)*numcoeff(imol),rootid,groupid)
+          call mp_bcast(eta(:,imol,:),2*numcoeff(imol),rootid,groupid)
        end if
     end do
 
-    if (ANY(lexpand(1:nmolty))) close(io_ee)
+    if (myid.eq.rootid.and.ANY(lexpand(1:nmolty))) close(io_ee)
   end subroutine init_ee
 
   subroutine output_ee_stats(io_output)

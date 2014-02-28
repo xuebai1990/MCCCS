@@ -9,24 +9,25 @@ MODULE sim_initia
 
 CONTAINS
   subroutine get_molecule_config(file_struct,linit)
+    use util_mp,only:mp_bcast
     character(LEN=*),intent(in)::file_struct
     logical,intent(in)::linit
 
     integer::jerr,io_struct,imolty,m,ichain
-    logical::lopenfile
+    logical::lusefile
 
     allocate(samx(ntmax,numax),samy(ntmax,numax),samz(ntmax,numax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'store_molecule_config: allocating sam{x,y,z} failed',jerr)
 
-    lopenfile=.false.
+    lusefile=.false.
     do imolty=1,nmolty
        if ((lbranch(imolty).or.lrigid(imolty)).and.(linit.or.(lgrand.and.temtyp(imolty).eq.0))) then
-          lopenfile=.true.
+          lusefile=.true.
           exit
        end if
     end do
 
-    if (lopenfile) then
+    if (lusefile.and.myid.eq.rootid) then
        ! read sample structure from unit 78 -
        io_struct=get_iounit()
        open(unit=io_struct,access='sequential',action='read',file=file_struct,form='formatted',iostat=jerr,status='unknown')
@@ -35,11 +36,16 @@ CONTAINS
 
     do imolty=1,nmolty
        if (lbranch(imolty).or.lrigid(imolty)) then
-          if (lopenfile) then
-             read(io_struct,*)
-             do m = 1, nunit(imolty)
-                read(io_struct,*) samx(imolty,m),samy(imolty,m),samz(imolty,m)
-             end do
+          if (lusefile) then
+             if (myid.eq.rootid) then
+                read(io_struct,*)
+                do m = 1, nunit(imolty)
+                   read(io_struct,*) samx(imolty,m),samy(imolty,m),samz(imolty,m)
+                end do
+             end if
+             call mp_bcast(samx(imolty,:),nunit(imolty),rootid,groupid)
+             call mp_bcast(samy(imolty,:),nunit(imolty),rootid,groupid)
+             call mp_bcast(samz(imolty,:),nunit(imolty),rootid,groupid)
           else if (temtyp(imolty).gt.0) then
              ichain=parall(imolty,1)
              do m = 1, nunit(imolty)
@@ -59,7 +65,7 @@ CONTAINS
        end if
     end do
 
-    if (lopenfile) close(io_struct)
+    if (lusefile.and.myid.eq.rootid) close(io_struct)
   end subroutine get_molecule_config
 
   subroutine setup_molecule_config(imolty,ichain)
@@ -101,7 +107,8 @@ CONTAINS
     lideal(nbxp1) = .true.
     nboxi(ichain) = nbxp1
     call rosenbluth(.true.,lterm,ichain,ichain,imolty,ifrom,nbxp1,nugrow(imolty),ddum,.false.,ddum,2)
-    if (lterm) call err_exit(__FILE__,__LINE__,'Error in gen_molecule_config growing molecule: maybe increasing nchoi would help?',myid+1)
+    if (lterm) call err_exit(__FILE__,__LINE__&
+     ,'Error in gen_molecule_config growing molecule: maybe increasing nchoi would help?',myid+1)
 
     ! assign the coordinates
     do m = 1,nunit(imolty)
@@ -119,8 +126,10 @@ subroutine setup_system_config(file_struct)
 
   character(LEN=*),intent(in)::file_struct
 
-  integer::temtypma(ntmax),mcmt(ntmax,nbxmax),bmap(numax),imap(numax),ibox,unitc,imolty,m,nn,n,kc,ic,jc,intemp,ibuild,zzz,prev,m1,m2,ibtype
-  real::ux(nbxmax),uy(nbxmax),uz(nbxmax),xtemp(numax),ytemp(numax),ztemp(numax),xshift,dic,rot,angold,angnew,xynext,xnext,ynext,znext,vdummy
+  integer::temtypma(ntmax),mcmt(ntmax,nbxmax),bmap(numax),imap(numax),ibox,unitc,imolty,m,nn,n,kc,ic,jc,intemp,ibuild,zzz,prev&
+   ,m1,m2,ibtype
+  real::ux(nbxmax),uy(nbxmax),uz(nbxmax),xtemp(numax),ytemp(numax),ztemp(numax),xshift,dic,rot,angold,angnew,xynext&
+   ,xnext,ynext,znext,vdummy
   logical::lgrown(ntmax),lgrow,lacc(numax)
 
   if (myid.eq.rootid) then
@@ -288,7 +297,8 @@ subroutine setup_system_config(file_struct)
                           zzz = m
                        end if
                     else if (invib(intemp,m) .gt. 2) then
-                       call err_exit(__FILE__,__LINE__,'initia only works for linear molecules! Maybe you should make a fort.78 file and use lbranch?',myid+1)
+                       call err_exit(__FILE__,__LINE__&
+                        ,'initia only works for linear molecules! Maybe you should make a fort.78 file and use lbranch?',myid+1)
                     end if
                  end do
 

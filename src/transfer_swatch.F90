@@ -1251,6 +1251,7 @@ contains
     use var_type,only:default_string_length
     use util_string,only:uppercase
     use util_files,only:readLine
+    use util_mp,only:mp_bcast
     integer,intent(in)::io_input
     LOGICAL,INTENT(IN)::lprint
     character(LEN=default_string_length)::line_in
@@ -1271,9 +1272,15 @@ contains
        pmsatc(i)=real(i,dp)/nswaty
     end do
 
-    rewind(io_input)
-    read(UNIT=io_input,NML=mc_swatch,iostat=jerr)
-    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_swatch',jerr)
+    if (myid.eq.rootid) then
+       rewind(io_input)
+       read(UNIT=io_input,NML=mc_swatch,iostat=jerr)
+       if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_swatch',jerr)
+    end if
+
+    call mp_bcast(pmswat,1,rootid,groupid)
+    call mp_bcast(nswaty,1,rootid,groupid)
+    call mp_bcast(pmsatc,nswaty,rootid,groupid)
 
     if (lprint) then
        write(io_output,'(/,A,/,A)') 'NAMELIST MC_SWATCH','------------------------------------------'
@@ -1288,84 +1295,96 @@ contains
     if (pmswat.gt.0.and.lneigh) call err_exit(__FILE__,__LINE__,'Neighbor list currently does not work with CBMC particle identity switch moves!',myid+1)
 
     ! Looking for section MC_SWATCH
-    REWIND(io_input)
-    CYCLE_READ_SWATCH:DO
-       call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section MC_SWATCH not found',jerr)
+    if (myid.eq.rootid) then
+       REWIND(io_input)
+       CYCLE_READ_SWATCH:DO
+          call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section MC_SWATCH not found',jerr)
 
-       if (UPPERCASE(line_in(1:9)).eq.'MC_SWATCH') then
-          do i=1,nswaty+1
-             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_SWATCH',jerr)
-             if (UPPERCASE(line_in(1:13)).eq.'END MC_SWATCH') then
-                if (i.ne.nswaty+1) call err_exit(__FILE__,__LINE__,'Section MC_SWATCH not complete!',myid+1)
-                exit
-             else if (i.eq.nswaty+1) then
-                call err_exit(__FILE__,__LINE__,'Section MC_SWATCH has more than nswaty records!',myid+1)
-             end if
+          if (UPPERCASE(line_in(1:9)).eq.'MC_SWATCH') then
+             do i=1,nswaty+1
+                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_SWATCH',jerr)
+                if (UPPERCASE(line_in(1:13)).eq.'END MC_SWATCH') then
+                   if (i.ne.nswaty+1) call err_exit(__FILE__,__LINE__,'Section MC_SWATCH not complete!',myid+1)
+                   exit
+                else if (i.eq.nswaty+1) then
+                   call err_exit(__FILE__,__LINE__,'Section MC_SWATCH has more than nswaty records!',myid+1)
+                end if
 
-             ! moltyp1<->moltyp2 nsampos 2xncut
-             read(line_in,*) nswatb(i,1:2),nsampos(i),ncut(i,1:2)
-             if (nswatb(i,1).eq.nswatb(i,2)) then
-                ! safety checks on swatch
-                write(io_output,*) 'nswaty ',i,' has identical moltyp'
-                call err_exit(__FILE__,__LINE__,'cannot swatch identical moltyp',myid+1)
-             end if
+                ! moltyp1<->moltyp2 nsampos 2xncut
+                read(line_in,*) nswatb(i,1:2),nsampos(i),ncut(i,1:2)
+                if (nswatb(i,1).eq.nswatb(i,2)) then
+                   ! safety checks on swatch
+                   write(io_output,*) 'nswaty ',i,' has identical moltyp'
+                   call err_exit(__FILE__,__LINE__,'cannot swatch identical moltyp',myid+1)
+                end if
 
-             if (lprint) then
-                write(io_output,'(/,A,2(4X,I0))') '   swatch molecule type pairs:',nswatb(i,1:2)
-                write(io_output,'(A,I0,A,2(2X,I0))') '   nsampos: ',nsampos(i),', ncut:',ncut(i,1:2)
-             end if
+                if (lprint) then
+                   write(io_output,'(/,A,2(4X,I0))') '   swatch molecule type pairs:',nswatb(i,1:2)
+                   write(io_output,'(A,I0,A,2(2X,I0))') '   nsampos: ',nsampos(i),', ncut:',ncut(i,1:2)
+                end if
 
-             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_SWATCH',jerr)
-             ! gswatc 2x(ifrom, iprev)
-             read(line_in,*) (gswatc(i,j,1:2*ncut(i,j)),j=1,2)
+                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_SWATCH',jerr)
+                ! gswatc 2x(ifrom, iprev)
+                read(line_in,*) (gswatc(i,j,1:2*ncut(i,j)),j=1,2)
 
-             if (lprint) then
-                do j=1,2
-                   write(io_output,FMT='(A,I0)') '   molecule ',j
-                   do k = 1,ncut(i,j)
-                      write(io_output,'(3(A,I0))') '   ncut ',k,': grom from ',gswatc(i,j,2*k-1),', prev ',gswatc(i,j,2*k)
+                if (lprint) then
+                   do j=1,2
+                      write(io_output,FMT='(A,I0)') '   molecule ',j
+                      do k = 1,ncut(i,j)
+                         write(io_output,'(3(A,I0))') '   ncut ',k,': grom from ',gswatc(i,j,2*k-1),', prev ',gswatc(i,j,2*k)
+                      end do
                    end do
-                end do
-             end if
+                end if
 
-             do j = 1,nsampos(i)
+                do j = 1,nsampos(i)
+                   call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                   if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_SWATCH',jerr)
+                   ! splist
+                   read(line_in,*) splist(i,j,1:2)
+                   if (lprint) then
+                      write(io_output,'(A,2(4X,I0))') '   splist:',splist(i,j,1:2)
+                   end if
+                end do
+
                 call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
                 if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_SWATCH',jerr)
-                ! splist
-                read(line_in,*) splist(i,j,1:2)
+                ! nswtcb pmswtcb
+                read(line_in,*) nswtcb(i),pmswtcb(i,1:nswtcb(i))
                 if (lprint) then
-                   write(io_output,'(A,2(4X,I0))') '   splist:',splist(i,j,1:2)
+                   write(io_output,'(A,I0)') '   number of swatch box pairs: ',nswtcb(i)
+                   do j=1,nswtcb(i)
+                      write(io_output,'(A,G16.9)') '   probability of the swatch box pair: ',pmswtcb(i,j)
+                   end do
                 end if
-             end do
 
-             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_SWATCH',jerr)
-             ! nswtcb pmswtcb
-             read(line_in,*) nswtcb(i),pmswtcb(i,1:nswtcb(i))
-             if (lprint) then
-                write(io_output,'(A,I0)') '   number of swatch box pairs: ',nswtcb(i)
-                do j=1,nswtcb(i)
-                   write(io_output,'(A,G16.9)') '   probability of the swatch box pair: ',pmswtcb(i,j)
+                do j = 1,nswtcb(i)
+                   call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                   if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_SWATCH',jerr)
+                   ! box numbers
+                   read(line_in,*) box3(i,j),box4(i,j)
+                   if (lprint) then
+                      write(io_output,'(A,2(4X,I0))') '   box pair:',box3(i,j),box4(i,j)
+                   end if
+                   if (pmswat.gt.0.and.licell.and.(box3(i,j).eq.boxlink.or.box4(i,j).eq.boxlink)) call err_exit(__FILE__,__LINE__,'Cell structure currently does not work with CBMC particle identity switch moves!',myid+1)
                 end do
-             end if
-
-             do j = 1,nswtcb(i)
-                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_SWATCH',jerr)
-                ! box numbers
-                read(line_in,*) box3(i,j),box4(i,j)
-                if (lprint) then
-                   write(io_output,'(A,2(4X,I0))') '   box pair:',box3(i,j),box4(i,j)
-                end if
-                if (pmswat.gt.0.and.licell.and.(box3(i,j).eq.boxlink.or.box4(i,j).eq.boxlink)) call err_exit(__FILE__,__LINE__,'Cell structure currently does not work with CBMC particle identity switch moves!',myid+1)
              end do
-          end do
-          exit cycle_read_swatch
-       end if
-    END DO CYCLE_READ_SWATCH
+             exit cycle_read_swatch
+          end if
+       END DO CYCLE_READ_SWATCH
+    end if
+
+    call mp_bcast(nswatb,npamax*2,rootid,groupid)
+    call mp_bcast(nsampos,nswaty,rootid,groupid)
+    call mp_bcast(ncut,npamax*2,rootid,groupid)
+    call mp_bcast(gswatc,npamax*npamax*4,rootid,groupid)
+    call mp_bcast(splist,npamax*numax*2,rootid,groupid)
+    call mp_bcast(nswtcb,nswaty,rootid,groupid)
+    call mp_bcast(pmswtcb,npamax*npabmax,rootid,groupid)
+    call mp_bcast(box3,npamax*npabmax,rootid,groupid)
+    call mp_bcast(box4,npamax*npabmax,rootid,groupid)
   end subroutine init_swatch
 
   subroutine output_swatch_stats(io_output)

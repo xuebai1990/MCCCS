@@ -6,7 +6,6 @@
     INTEGER, INTENT(IN) :: root
 #endif
     INTEGER :: ierr, npe, myid
-    INTEGER, ALLOCATABLE :: nrecv(:), ndisp(:)
 
 #ifdef __MPI__
 
@@ -31,22 +30,15 @@
 
     IF ( SIZE( mydata, 2 ) < recvcount( myid + 1 ) ) CALL mp_stop(__LINE__)
 
-    ALLOCATE( nrecv( npe ), ndisp( npe ) )
-
-    nrecv( 1:npe ) = recvcount( 1:npe ) * SIZE( mydata, 1 )
-    ndisp( 1:npe ) = displs( 1:npe ) * SIZE( mydata, 1 )
-
 #ifdef ALLGATHER
-    CALL MPI_ALLGATHERV( mydata, nrecv( myid + 1 ), MP_TYPE, &
-     alldata, nrecv, ndisp, MP_TYPE, comm, ierr )
+    CALL MPI_ALLGATHERV( mydata, recvcount(myid+1)*SIZE(mydata,1), MP_TYPE, &
+     alldata, recvcount*SIZE(mydata,1), displs*SIZE(mydata,1), MP_TYPE, comm, ierr )
 #else
-    CALL MPI_GATHERV( mydata, nrecv( myid + 1 ), MP_TYPE, &
-     alldata, nrecv, ndisp, MP_TYPE, root, comm, ierr )
+    CALL MPI_GATHERV( mydata, recvcount(myid+1)*SIZE(mydata,1), MP_TYPE, &
+     alldata, recvcount*SIZE(mydata,1), displs*SIZE(mydata,1), MP_TYPE, root, comm, ierr )
 #endif
 
     IF (ierr/=0) CALL mp_stop(__LINE__)
-
-    DEALLOCATE( nrecv, ndisp )
 
 #else
     IF ( SIZE( alldata, 1 ) /= SIZE( mydata, 1 ) ) CALL mp_stop(__LINE__)

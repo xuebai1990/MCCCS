@@ -44,137 +44,185 @@ MODULE energy_intramolecular
 contains
   subroutine read_ff_bonded(io_ff)
     use util_search,only:tightenTable
+    use util_mp,only:mp_bcast
+    use sim_system,only:rootid,groupid
     integer,intent(in)::io_ff
     integer,parameter::initial_size=20
     integer::i,n,jerr
     character(LEN=default_string_length)::line_in
 
-    call initiateTable(bonds,initial_size)
-    call initiateTable(angles,initial_size)
-    call initiateTable(dihedrals,initial_size)
-
     !> Looking for section BONDS
-    REWIND(io_ff)
-    CYCLE_READ_BONDS:DO
-       call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
-       if (jerr.ne.0) exit cycle_read_bonds
+    n=0
+    if (myid.eq.rootid) then
+       REWIND(io_ff)
+       CYCLE_READ_BONDS:DO
+          call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
+          if (jerr.ne.0) exit cycle_read_bonds
 
-       if (UPPERCASE(line_in(1:5)).eq.'BONDS') then
-          allocate(vib_type(1:initial_size),brvib(1:initial_size),brvibk(1:initial_size),stat=jerr)
-          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_intramolecular: bonds allocation failed',jerr)
-          brvib=0.0E0_dp
-          brvibk=0.0E0_dp
-          n=0
-          do
-             call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
-             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section BONDS',jerr)
-             if (UPPERCASE(line_in(1:9)).eq.'END BONDS') exit
-             n=n+1
-             read(line_in,*) i
-             i=addToTable(bonds,i,expand=.true.)
-             if (i.gt.ubound(vib_type,1)) then
-                call reallocate(vib_type,1,2*ubound(vib_type,1))
-                call reallocate(brvib,1,2*ubound(brvib,1))
-                call reallocate(brvibk,1,2*ubound(brvibk,1))
-             end if
-             read(line_in,*) jerr,vib_type(i),brvib(i),brvibk(i)
-          end do
-          exit cycle_read_bonds
-       end if
-    END DO CYCLE_READ_BONDS
+          if (UPPERCASE(line_in(1:5)).eq.'BONDS') then
+             call initiateTable(bonds,initial_size)
+             allocate(vib_type(1:initial_size),brvib(1:initial_size),brvibk(1:initial_size),stat=jerr)
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_intramolecular: bonds allocation failed',myid)
+             brvib=0.0E0_dp
+             brvibk=0.0E0_dp
+             do
+                call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
+                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section BONDS',jerr)
+                if (UPPERCASE(line_in(1:9)).eq.'END BONDS') exit
+                n=n+1
+                read(line_in,*) i
+                i=addToTable(bonds,i,expand=.true.)
+                if (i.gt.ubound(vib_type,1)) then
+                   call reallocate(vib_type,1,2*ubound(vib_type,1))
+                   call reallocate(brvib,1,2*ubound(brvib,1))
+                   call reallocate(brvibk,1,2*ubound(brvibk,1))
+                end if
+                read(line_in,*) jerr,vib_type(i),brvib(i),brvibk(i)
+             end do
+             exit cycle_read_bonds
+          end if
+       END DO CYCLE_READ_BONDS
+    end if
+
+    call mp_bcast(n,1,rootid,groupid)
 
     if (n.gt.0) then
-       call tightenTable(bonds)
-       call reallocate(vib_type,1,n)
-       call reallocate(brvib,1,n)
-       call reallocate(brvibk,1,n)
+       if (myid.eq.rootid) then
+          call tightenTable(bonds)
+          call reallocate(vib_type,1,n)
+          call reallocate(brvib,1,n)
+          call reallocate(brvibk,1,n)
+       else
+          call initiateTable(bonds,n)
+          allocate(vib_type(1:n),brvib(1:n),brvibk(1:n),stat=jerr)
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_intramolecular: bonds allocation failed',myid)
+       end if
+
+       call mp_bcast(bonds%size,1,rootid,groupid)
+       call mp_bcast(bonds%list,bonds%size,rootid,groupid)
+       call mp_bcast(vib_type,n,rootid,groupid)
+       call mp_bcast(brvib,n,rootid,groupid)
+       call mp_bcast(brvibk,n,rootid,groupid)
     end if
 
     !> Looking for section ANGLES
-    REWIND(io_ff)
-    CYCLE_READ_ANGLES:DO
-       call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
-       if (jerr.ne.0) exit cycle_read_angles
+    n=0
+    if (myid.eq.rootid) then
+       REWIND(io_ff)
+       CYCLE_READ_ANGLES:DO
+          call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
+          if (jerr.ne.0) exit cycle_read_angles
 
-       if (UPPERCASE(line_in(1:6)).eq.'ANGLES') then
-          allocate(ben_type(1:initial_size),brben(1:initial_size),brbenk(1:initial_size),stat=jerr)
-          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_intramolecular: angles allocation failed',jerr)
-          brben=0.0E0_dp
-          brbenk=0.0E0_dp
-          n=0
-          do
-             call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
-             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section ANGLES',jerr)
-             if (UPPERCASE(line_in(1:10)).eq.'END ANGLES') exit
-             n=n+1
-             read(line_in,*) i
-             i=addToTable(angles,i,expand=.true.)
-             if (i.gt.ubound(ben_type,1)) then
-                call reallocate(ben_type,1,2*ubound(ben_type,1))
-                call reallocate(brben,1,2*ubound(brben,1))
-                call reallocate(brbenk,1,2*ubound(brbenk,1))
-             end if
-             read(line_in,*) jerr,ben_type(i),brben(i),brbenk(i)
-             brben(i) = brben(i) * onepi / 180.0E0_dp
-          end do
-          exit cycle_read_angles
-       end if
-    END DO CYCLE_READ_ANGLES
+          if (UPPERCASE(line_in(1:6)).eq.'ANGLES') then
+             call initiateTable(angles,initial_size)
+             allocate(ben_type(1:initial_size),brben(1:initial_size),brbenk(1:initial_size),stat=jerr)
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_intramolecular: angles allocation failed',myid)
+             brben=0.0E0_dp
+             brbenk=0.0E0_dp
+             do
+                call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
+                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section ANGLES',jerr)
+                if (UPPERCASE(line_in(1:10)).eq.'END ANGLES') exit
+                n=n+1
+                read(line_in,*) i
+                i=addToTable(angles,i,expand=.true.)
+                if (i.gt.ubound(ben_type,1)) then
+                   call reallocate(ben_type,1,2*ubound(ben_type,1))
+                   call reallocate(brben,1,2*ubound(brben,1))
+                   call reallocate(brbenk,1,2*ubound(brbenk,1))
+                end if
+                read(line_in,*) jerr,ben_type(i),brben(i),brbenk(i)
+                brben(i) = brben(i) * onepi / 180.0E0_dp
+             end do
+             exit cycle_read_angles
+          end if
+       END DO CYCLE_READ_ANGLES
+    end if
+
+    call mp_bcast(n,1,rootid,groupid)
 
     if (n.gt.0) then
-       call tightenTable(angles)
-       call reallocate(ben_type,1,n)
-       call reallocate(brben,1,n)
-       call reallocate(brbenk,1,n)
+       if (myid.eq.rootid) then
+          call tightenTable(angles)
+          call reallocate(ben_type,1,n)
+          call reallocate(brben,1,n)
+          call reallocate(brbenk,1,n)
+       else
+          call initiateTable(angles,n)
+          allocate(ben_type(1:n),brben(1:n),brbenk(1:n),stat=jerr)
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_intramolecular: angles allocation failed',myid)
+       end if
+
+       call mp_bcast(angles%size,1,rootid,groupid)
+       call mp_bcast(angles%list,angles%size,rootid,groupid)
+       call mp_bcast(ben_type,n,rootid,groupid)
+       call mp_bcast(brben,n,rootid,groupid)
+       call mp_bcast(brbenk,n,rootid,groupid)
     end if
 
     !> Looking for section DIHEDRALS
-    REWIND(io_ff)
-    CYCLE_READ_DIHEDRALS:DO
-       call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
-       if (jerr.ne.0) exit cycle_read_dihedrals
+    n=0
+    if (myid.eq.rootid) then
+       REWIND(io_ff)
+       CYCLE_READ_DIHEDRALS:DO
+          call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
+          if (jerr.ne.0) exit cycle_read_dihedrals
 
-       if (UPPERCASE(line_in(1:9)).eq.'DIHEDRALS') then
-          allocate(vtt(0:9,1:initial_size),torsion_type(1:initial_size),stat=jerr)
-          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_intramolecular: dihedrals allocation failed',jerr)
-          vtt=0.0E0_dp
-          n=0
-          do
-             call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
-             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section DIHEDRALS',jerr)
-             if (UPPERCASE(line_in(1:13)).eq.'END DIHEDRALS') exit
-             n=n+1
-             read(line_in,*) i
-             i=addToTable(dihedrals,i,expand=.true.)
-             if (i.gt.UBOUND(torsion_type,1)) then
-                call reallocate(torsion_type,1,2*UBOUND(torsion_type,1))
-                call reallocate(vtt,0,9,1,2*UBOUND(vtt,2))
-             end if
-             read(line_in,*) jerr,torsion_type(i),vtt(0:torsion_nParameter(torsion_type(i))-1,i)
-             if (torsion_type(i).eq.3) then
-                vtt(2,i)=vtt(2,i)*onepi/180.0E0_dp
-             else if (torsion_type(i).eq.1.or.torsion_type(i).eq.5) then
-                ! convert OPLS to Ryckaert-Bellemans because the latter is more efficient
-                vtt(0,i)=vtt(0,i)+vtt(1,i)+2.0E0_dp*vtt(2,i)+vtt(3,i)
-                vtt(1,i)=-vtt(1,i)+3.0E0_dp*vtt(3,i)
-                vtt(2,i)=-2.0E0_dp*vtt(2,i)+8.0E0_dp*vtt(4,i)
-                vtt(3,i)=-4.0E0_dp*vtt(3,i)
-                vtt(4,i)=-8.0E0_dp*vtt(4,i)
-                if (torsion_type(i).eq.1) then
-                   torsion_type(i)=7
-                else if (torsion_type(i).eq.5) then
-                   torsion_type(i)=8
+          if (UPPERCASE(line_in(1:9)).eq.'DIHEDRALS') then
+             call initiateTable(dihedrals,initial_size)
+             allocate(vtt(0:9,1:initial_size),torsion_type(1:initial_size),stat=jerr)
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_intramolecular: dihedrals allocation failed',myid)
+             vtt=0.0E0_dp
+             do
+                call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
+                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section DIHEDRALS',jerr)
+                if (UPPERCASE(line_in(1:13)).eq.'END DIHEDRALS') exit
+                n=n+1
+                read(line_in,*) i
+                i=addToTable(dihedrals,i,expand=.true.)
+                if (i.gt.UBOUND(torsion_type,1)) then
+                   call reallocate(torsion_type,1,2*UBOUND(torsion_type,1))
+                   call reallocate(vtt,0,9,1,2*UBOUND(vtt,2))
                 end if
-             end if
-          end do
-          exit cycle_read_dihedrals
-       end if
-    END DO CYCLE_READ_DIHEDRALS
-    
+                read(line_in,*) jerr,torsion_type(i),vtt(0:torsion_nParameter(torsion_type(i))-1,i)
+                if (torsion_type(i).eq.3) then
+                   vtt(2,i)=vtt(2,i)*onepi/180.0E0_dp
+                else if (torsion_type(i).eq.1.or.torsion_type(i).eq.5) then
+                   ! convert OPLS to Ryckaert-Bellemans because the latter is more efficient
+                   vtt(0,i)=vtt(0,i)+vtt(1,i)+2.0E0_dp*vtt(2,i)+vtt(3,i)
+                   vtt(1,i)=-vtt(1,i)+3.0E0_dp*vtt(3,i)
+                   vtt(2,i)=-2.0E0_dp*vtt(2,i)+8.0E0_dp*vtt(4,i)
+                   vtt(3,i)=-4.0E0_dp*vtt(3,i)
+                   vtt(4,i)=-8.0E0_dp*vtt(4,i)
+                   if (torsion_type(i).eq.1) then
+                      torsion_type(i)=7
+                   else if (torsion_type(i).eq.5) then
+                      torsion_type(i)=8
+                   end if
+                end if
+             end do
+             exit cycle_read_dihedrals
+          end if
+       END DO CYCLE_READ_DIHEDRALS
+    end if
+
+    call mp_bcast(n,1,rootid,groupid)
+
     if (n.gt.0) then
-       call tightenTable(dihedrals)
-       call reallocate(torsion_type,1,n)
-       call reallocate(vtt,0,9,1,n)
+       if (myid.eq.rootid) then
+          call tightenTable(dihedrals)
+          call reallocate(torsion_type,1,n)
+          call reallocate(vtt,0,9,1,n)
+       else
+          call initiateTable(dihedrals,n)
+          allocate(vtt(0:9,1:n),torsion_type(1:n),stat=jerr)
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_intramolecular: dihedrals allocation failed',myid)
+       end if
+
+       call mp_bcast(dihedrals%size,1,rootid,groupid)
+       call mp_bcast(dihedrals%list,dihedrals%size,rootid,groupid)
+       call mp_bcast(torsion_type,n,rootid,groupid)
+       call mp_bcast(vtt,10*n,rootid,groupid)
     end if
 
     call read_tabulated_ff_bonded()

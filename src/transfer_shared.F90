@@ -4,7 +4,8 @@ module transfer_shared
   implicit none
   private
   save
-  public::read_transfer,update_bias,opt_bias,lopt_bias,freq_opt_bias,read_checkpoint_transfer_shared,write_checkpoint_transfer_shared,gcmc_setup,gcmc_cleanup,gcmc_exchange
+  public::read_transfer,update_bias,opt_bias,lopt_bias,freq_opt_bias,read_checkpoint_transfer_shared&
+   ,write_checkpoint_transfer_shared,gcmc_setup,gcmc_cleanup,gcmc_exchange
 
   real,allocatable::u_bias_diff(:,:) !<u_bias_diff(i,j) is the bias potential difference that should be applied to box i to achieve equal distribution of particles of type j
   integer,allocatable::num_update_bias(:,:)
@@ -14,6 +15,7 @@ module transfer_shared
 contains
   subroutine read_transfer(io_input,lprint)
     use util_string,only:format_n
+    use util_mp,only:mp_bcast
     INTEGER,INTENT(IN)::io_input
     LOGICAL,INTENT(IN)::lprint
     integer::jerr
@@ -25,9 +27,14 @@ contains
     num_update_bias=0
     lopt_bias=.false.
 
-    rewind(io_input)
-    read(UNIT=io_input,NML=transfer,iostat=jerr)
-    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: transfer',jerr)
+    if (myid.eq.rootid) then
+       rewind(io_input)
+       read(UNIT=io_input,NML=transfer,iostat=jerr)
+       if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: transfer',jerr)
+    end if
+
+    call mp_bcast(lopt_bias,nmolty,rootid,groupid)
+    call mp_bcast(freq_opt_bias,1,rootid,groupid)
 
     if (lprint) then
        write(io_output,'(/,A,/,A)') 'NAMELIST TRANSFER','------------------------------------------'

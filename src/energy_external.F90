@@ -125,7 +125,8 @@ contains
   subroutine init_energy_external(io_input,lprint)
     use util_runtime,only:err_exit
     use util_string,only:format_n
-    use sim_system,only:nbox,nbxmax,io_output
+    use util_mp,only:mp_bcast
+    use sim_system,only:nbox,nbxmax,io_output,myid,rootid,groupid
     INTEGER,INTENT(IN)::io_input
     LOGICAL,INTENT(IN)::lprint
     integer::jerr
@@ -136,9 +137,19 @@ contains
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_energy_external: allocation failed',jerr)
     Elect_field=0.0_dp
 
-    rewind(io_input)
-    read(UNIT=io_input,NML=external_field,iostat=jerr)
-    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: external_field',jerr)
+    if (myid.eq.rootid) then
+       rewind(io_input)
+       read(UNIT=io_input,NML=external_field,iostat=jerr)
+       if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: external_field',jerr)
+    end if
+
+    call mp_bcast(surface_type,1,rootid,groupid)
+    call mp_bcast(ntsubst,1,rootid,groupid)
+    call mp_bcast(rsol,1,rootid,groupid)
+    call mp_bcast(delta,1,rootid,groupid)
+    call mp_bcast(a1,1,rootid,groupid)
+    call mp_bcast(Elect_field,nbox,rootid,groupid)
+    call mp_bcast(double_surface,1,rootid,groupid)
 
     if (lprint) then
        write(io_output,'(/,A,/,A)') 'NAMELIST EXTERNAL_FIELD','------------------------------------------'

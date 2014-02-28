@@ -8,10 +8,12 @@ MODULE moves_volume
   implicit none
   private
   save
-  public::volume_1box,volume_2box,init_moves_volume,update_volume_max_displacement,output_volume_stats,read_checkpoint_volume,write_checkpoint_volume,allow_cutoff_failure
+  public::volume_1box,volume_2box,init_moves_volume,update_volume_max_displacement,output_volume_stats,read_checkpoint_volume&
+   ,write_checkpoint_volume,allow_cutoff_failure
 
   real,allocatable,public::acsvol(:),acnvol(:),acshmat(:,:),acnhmat(:,:),bsvol(:),bnvol(:),bshmat(:,:),bnhmat(:,:)
-  real,allocatable::vboxn(:,:),vboxo(:,:),bxo(:),byo(:),bzo(:),xcmo(:),ycmo(:),zcmo(:),rxuo(:,:),ryuo(:,:),rzuo(:,:),qquo(:,:),rcuto(:)
+  real,allocatable::vboxn(:,:),vboxo(:,:),bxo(:),byo(:),bzo(:),xcmo(:),ycmo(:),zcmo(:),rxuo(:,:),ryuo(:,:),rzuo(:,:),qquo(:,:)&
+   ,rcuto(:)
   real::hmato(9),hmatio(9)
   integer::allow_cutoff_failure=-1 !< controls how volume move failures, the ones that will result in box lengths
   !< smaller than twice the cutoff, are handled: -1 = fetal error and program exits;
@@ -758,6 +760,7 @@ contains
   end subroutine volume_1box
 
   subroutine init_moves_volume(io_input,lprint)
+    use util_mp,only:mp_bcast
     integer,intent(in)::io_input
     LOGICAL,INTENT(IN)::lprint
     integer::jerr,i,j,k
@@ -799,9 +802,25 @@ contains
        rmvolume=1.0E-3_dp
     end if
 
-    rewind(io_input)
-    read(UNIT=io_input,NML=mc_volume,iostat=jerr)
-    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_volume',jerr)
+    if (myid.eq.rootid) then
+       rewind(io_input)
+       read(UNIT=io_input,NML=mc_volume,iostat=jerr)
+       if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_volume',jerr)
+    end if
+
+    call mp_bcast(tavol,1,rootid,groupid)
+    call mp_bcast(iratv,1,rootid,groupid)
+    call mp_bcast(pmvlmt,nbox,rootid,groupid)
+    call mp_bcast(nvolb,1,rootid,groupid)
+    call mp_bcast(pmvolb,nvolb,rootid,groupid)
+    call mp_bcast(box5,nvolb,rootid,groupid)
+    call mp_bcast(box6,nvolb,rootid,groupid)
+    call mp_bcast(pmvol,1,rootid,groupid)
+    call mp_bcast(pmvolx,1,rootid,groupid)
+    call mp_bcast(pmvoly,1,rootid,groupid)
+    call mp_bcast(rmvolume,1,rootid,groupid)
+    call mp_bcast(allow_cutoff_failure,1,rootid,groupid)
+
     rmvol=rmvolume
 
     if (.not.lfold.and.pmvol.gt.0)  call err_exit(__FILE__,__LINE__,'volume move only correct with folded coordinates',myid+1)

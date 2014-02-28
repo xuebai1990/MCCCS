@@ -10,7 +10,7 @@ MODULE moves_cbmc
   implicit none
   private
   save
-  public::config,rosenbluth,schedule,explct,safeschedule,allocate_cbmc,init_cbmc,read_safecbmc,opt_safecbmc,output_cbmc_stats&
+  public::config,rosenbluth,schedule,explct,safeschedule,allocate_cbmc,init_cbmc,opt_safecbmc,output_cbmc_stats&
    ,output_safecbmc,read_checkpoint_cbmc,write_checkpoint_cbmc
 
   ! CBMC.INC
@@ -6893,6 +6893,7 @@ contains
   end subroutine allocate_cbmc
 
   subroutine init_cbmc(io_input,lprint)
+    use util_mp,only:mp_bcast
     integer,intent(in)::io_input
     LOGICAL,INTENT(IN)::lprint
     integer::jerr,i
@@ -6938,9 +6939,35 @@ contains
     pmfix=0.0_dp
     lrig=.false.
 
-    rewind(io_input)
-    read(UNIT=io_input,NML=mc_cbmc,iostat=jerr)
-    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_cbmc',jerr)
+    if (myid.eq.rootid) then
+       rewind(io_input)
+       read(UNIT=io_input,NML=mc_cbmc,iostat=jerr)
+       if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_cbmc',jerr)
+    end if
+
+    call mp_bcast(rcutin,1,rootid,groupid)
+    call mp_bcast(pmcb,1,rootid,groupid)
+    call mp_bcast(pmcbmt,nmolty,rootid,groupid)
+    call mp_bcast(pmall,nmolty,rootid,groupid)
+    call mp_bcast(nchoi1,nmolty,rootid,groupid)
+    call mp_bcast(nchoi,nmolty,rootid,groupid)
+    call mp_bcast(nchoir,nmolty,rootid,groupid)
+    call mp_bcast(nchoih,nmolty,rootid,groupid)
+    call mp_bcast(nchtor,nmolty,rootid,groupid)
+    call mp_bcast(nchbna,nmolty,rootid,groupid)
+    call mp_bcast(nchbnb,nmolty,rootid,groupid)
+    call mp_bcast(icbdir,nmolty,rootid,groupid)
+    call mp_bcast(icbsta,nmolty,rootid,groupid)
+    call mp_bcast(rbsmax,1,rootid,groupid)
+    call mp_bcast(rbsmin,1,rootid,groupid)
+    call mp_bcast(avbmc_version,nmolty,rootid,groupid)
+    call mp_bcast(pmbias,nmolty,rootid,groupid)
+    call mp_bcast(pmbsmt,nmolty,rootid,groupid)
+    call mp_bcast(pmbias2,nmolty,rootid,groupid)
+    call mp_bcast(pmfix,nmolty,rootid,groupid)
+    call mp_bcast(lrig,nmolty,rootid,groupid)
+    call mp_bcast(lpresim,1,rootid,groupid)
+    call mp_bcast(iupdatefix,1,rootid,groupid)
 
     if (lprint) then
        write(io_output,'(/,A,/,A)') 'NAMELIST MC_CBMC','------------------------------------------'
@@ -7020,6 +7047,7 @@ contains
     use var_type,only:default_path_length,default_string_length
     use util_string,only:uppercase
     use util_files,only:get_iounit,readLine
+    use util_mp,only:mp_bcast
     integer,intent(in)::io_input
     LOGICAL,INTENT(IN)::lprint
     character(LEN=default_path_length),parameter::file_safecbmc='fort.23'
@@ -7027,80 +7055,107 @@ contains
     integer::io_safecbmc,jerr,imol,i,j,bin,bdum
 
     ! Looking for section SAFE_CBMC
-    REWIND(io_input)
-    CYCLE_READ_SAFECBMC:DO
-       call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section SAFE_CBMC not found',jerr)
+    if (myid.eq.rootid.and.ANY(lrig(1:nmolty))) then
+       REWIND(io_input)
+       CYCLE_READ_SAFECBMC:DO
+          call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section SAFE_CBMC not found',jerr)
 
-       if (UPPERCASE(line_in(1:9)).eq.'SAFE_CBMC') then
-          do imol=1,nmolty+1
-             if (imol.ne.nmolty+1) then
-                if (.not.lrig(imol)) cycle
-             end if
-             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SAFE_CBMC',jerr)
-             if (UPPERCASE(line_in(1:13)).eq.'END SAFE_CBMC') then
-                if (imol.ne.nmolty+1) call err_exit(__FILE__,__LINE__,'Section SAFE_CBMC not complete!',myid+1)
-                exit
-             else if (imol.eq.nmolty+1) then
-                call err_exit(__FILE__,__LINE__,'Section SAFE_CBMC has more than nmolty records!',myid+1)
-             end if
+          if (UPPERCASE(line_in(1:9)).eq.'SAFE_CBMC') then
+             exit cycle_read_safecbmc
+          end if
+       END DO CYCLE_READ_SAFECBMC
+    end if
 
-             read(line_in,*) nrig(imol)
-             if (lprint) then
-                write(io_output,'(2(A,I0))') '   Molecule type ',imol,': nrig = ',nrig(imol)
-             end if
+    do imol=1,nmolty+1
+       if (imol.ne.nmolty+1) then
+          if (.not.lrig(imol)) cycle
+       else if (ALL(.not.lrig(1:nmolty))) then
+          exit
+       end if
 
-             if (nrig(imol).gt.0) then
-                ! read in specific points to keep rigid in growth
-                do i = 1, nrig(imol)
-                   call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-                   if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SAFE_CBMC',jerr)
-                   read(line_in,*) irig(imol,i),frig(imol,i)
-                   lrigi(imol,irig(imol,i)) = .true.
+       if (myid.eq.rootid) then
+          call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SAFE_CBMC',jerr)
 
-                   if (lprint) then
-                      write(io_output,'(3(A,I0))') '      rigid part ',i,': irig = ',irig(imol,i),', frig = ',frig(imol,i)
-                   end if
-                end do
-             else
-                ! we will pick irig at random in each case if nrig = 0
+          if (UPPERCASE(line_in(1:13)).eq.'END SAFE_CBMC') then
+             if (imol.ne.nmolty+1) call err_exit(__FILE__,__LINE__,'Section SAFE_CBMC not complete!',myid+1)
+             exit
+          else if (imol.eq.nmolty+1) then
+             call err_exit(__FILE__,__LINE__,'Section SAFE_CBMC has more than nmolty records!',myid+1)
+          end if
+
+          read(line_in,*) nrig(imol)
+          if (lprint) then
+             write(io_output,'(2(A,I0))') '   Molecule type ',imol,': nrig = ',nrig(imol)
+          end if
+       else if (imol.eq.nmolty+1) then
+          exit
+       end if
+
+       call mp_bcast(nrig(imol),1,rootid,groupid)
+
+       if (nrig(imol).gt.0) then
+          ! read in specific points to keep rigid in growth
+          if (myid.eq.rootid) then
+             do i = 1, nrig(imol)
                 call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
                 if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SAFE_CBMC',jerr)
-                read(line_in,*) nrigmin(imol),nrigmax(imol)
+                read(line_in,*) irig(imol,i),frig(imol,i)
 
                 if (lprint) then
-                   write(io_output,'(2(A,I0))') '      nrigmin: ',nrigmin(imol),', nrigmax: ',nrigmax(imol)
+                   write(io_output,'(3(A,I0))') '      rigid part ',i,': irig = ',irig(imol,i),', frig = ',frig(imol,i)
                 end if
-             end if
-          end do
-          exit cycle_read_safecbmc
+             end do
+          end if
+
+          call mp_bcast(irig(imol,1:nrig(imol)),nrig(imol),rootid,groupid)
+          call mp_bcast(frig(imol,1:nrig(imol)),nrig(imol),rootid,groupid)
+
+          lrigi(imol,irig(imol,:)) = .true.
+       else
+          ! we will pick irig at random in each case if nrig = 0
+          if (myid.eq.rootid) then
+             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SAFE_CBMC',jerr)
+             read(line_in,*) nrigmin(imol),nrigmax(imol)
+          end if
+
+          call mp_bcast(nrigmin(imol),1,rootid,groupid)
+          call mp_bcast(nrigmax(imol),1,rootid,groupid)
+
+          if (lprint) then
+             write(io_output,'(2(A,I0))') '      nrigmin: ',nrigmin(imol),', nrigmax: ',nrigmax(imol)
+          end if
        end if
-    END DO CYCLE_READ_SAFECBMC
+    end do
 ! -------------------------------------------------------------------
-    if (ANY(pmfix(1:nmolty).gt.0)) then
+    if (myid.eq.rootid.AND.ANY(pmfix(1:nmolty).gt.0)) then
        io_safecbmc=get_iounit()
        open(unit=io_safecbmc,access='sequential',action='read',file=file_safecbmc,form='formatted',iostat=jerr,status='unknown')
        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open safecbmc file '//trim(file_safecbmc),jerr)
-    end if
 
-    do imol = 1, nmolty
-       if (pmfix(imol).gt.0) then
-          read(io_safecbmc,*) counttot
-          ! read in from fort.23 the bead-bead distribution
-          do i = 1, iring(imol)
-             do j = 1, iring(imol)
-                if (i.eq.j) cycle
-                do bin = 1, maxbin
-                   read(io_safecbmc,*) bdum,probf(i,j,bin)
-                   hist(i,j,bin) = 0
+       do imol = 1, nmolty
+          if (pmfix(imol).gt.0) then !> \bug Allow only one molecule type to have pmfix > 0
+             read(io_safecbmc,*) counttot
+             ! read in from fort.23 the bead-bead distribution
+             do i = 1, iring(imol)
+                do j = 1, iring(imol)
+                   if (i.eq.j) cycle
+                   do bin = 1, maxbin
+                      read(io_safecbmc,*) bdum,probf(i,j,bin)
+                   end do
                 end do
              end do
-          end do
-       end if
-    end do
+          end if
+       end do
+    end if
 
-    if (ANY(pmfix(1:nmolty).gt.0)) close(io_safecbmc)
+    call mp_bcast(counttot,1,rootid,groupid)
+    call mp_bcast(probf,30*30*maxbin,rootid,groupid)
+    hist = 0._dp
+
+    if (myid.eq.rootid.AND.ANY(pmfix(1:nmolty).gt.0)) close(io_safecbmc)
   end subroutine read_safecbmc
 
   subroutine opt_safecbmc()

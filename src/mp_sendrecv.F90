@@ -32,9 +32,8 @@
        msg_dest = msg_src
     END IF
 
-#ifdef __MPI__
-    CALL MPI_BARRIER(comm, IERR)
-    IF (ierr/=0) CALL mp_stop(__LINE__)
+#ifdef __USE_BARRIER
+    CALL mp_barrier(comm)
 #endif
 
     RETURN

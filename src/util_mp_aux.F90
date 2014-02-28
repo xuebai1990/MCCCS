@@ -12,7 +12,7 @@
 !>  network hardware (InfiniBand) tend to lose performance or get stuck inside
 !>  collective routines if processors are not well synchronized
 !>  A barrier fixes the problem
-#define __USE_BARRIER
+!#define __USE_BARRIER
 
 #ifdef __DOUBLE_PRECISION__
 #define MP_REAL MPI_DOUBLE_PRECISION

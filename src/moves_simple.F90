@@ -7,7 +7,8 @@ MODULE moves_simple
   implicit none
   private
   save
-  public::translation,rotation,Atom_translation,init_moves_simple,update_translation_rotation_max_displacement,averageMaximumDisplacement,output_translation_rotation_stats,read_checkpoint_simple,write_checkpoint_simple
+  public::translation,rotation,Atom_translation,init_moves_simple,update_translation_rotation_max_displacement&
+   ,averageMaximumDisplacement,output_translation_rotation_stats,read_checkpoint_simple,write_checkpoint_simple
 
   real,allocatable,public::acntrax(:,:),acntray(:,:),acntraz(:,:),acnrotx(:,:),acnroty(:,:),acnrotz(:,:),acstrax(:,:)&
    ,acstray(:,:),acstraz(:,:),acsrotx(:,:),acsroty(:,:),acsrotz(:,:),bntrax(:,:),bntray(:,:),bntraz(:,:),bstrax(:,:)&
@@ -717,6 +718,7 @@ contains
     end subroutine Atom_translation
 
   subroutine init_moves_simple(io_input,lprint)
+    use util_mp,only:mp_bcast
     integer,intent(in)::io_input
     LOGICAL,INTENT(IN)::lprint
     integer::jerr,i
@@ -770,9 +772,21 @@ contains
     rmtra=0.3_dp
     rmrot=0.4_dp
 
-    rewind(io_input)
-    read(UNIT=io_input,NML=mc_simple,iostat=jerr)
-    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_simple',jerr)
+    if (myid.eq.rootid) then
+       rewind(io_input)
+       read(UNIT=io_input,NML=mc_simple,iostat=jerr)
+       if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_simple',jerr)
+    end if
+
+    call mp_bcast(armtra,1,rootid,groupid)
+    call mp_bcast(pm_atom_tra,1,rootid,groupid)
+    call mp_bcast(tatra,1,rootid,groupid)
+    call mp_bcast(pmtra,1,rootid,groupid)
+    call mp_bcast(pmtrmt,nmolty,rootid,groupid)
+    call mp_bcast(rmtra,1,rootid,groupid)
+    call mp_bcast(tarot,1,rootid,groupid)
+    call mp_bcast(pmromt,nmolty,rootid,groupid)
+    call mp_bcast(rmrot,1,rootid,groupid)
 
     if (lprint) then
        write(io_output,'(/,A,/,A)') 'NAMELIST MC_SIMPLE','------------------------------------------'

@@ -1719,6 +1719,7 @@ contains
   subroutine read_ff(io_ff,lmixlb,lmixjo)
     use util_search,only:initiateTable,addToTable,indexOf,tightenTable
     use util_memory,only:reallocate
+    use util_mp,only:mp_bcast
     use energy_intramolecular,only:read_ff_bonded
     use energy_sami,only:susami,sumuir
     use energy_garofalini,only:init_garofalini
@@ -1729,67 +1730,87 @@ contains
     character(LEN=default_string_length)::line_in
     integer::jerr,i,j,ij,ji,nmix,itmp
 
-    call initiateTable(atoms,initial_size)
-
     !> Looking for section ATOMS
     nntype=0
-    rewind(io_ff)
-    CYCLE_READ_ATOMS:DO
-       call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
-       if (jerr.ne.0) exit cycle_read_atoms
+    if (myid.eq.rootid) then
+       rewind(io_ff)
+       CYCLE_READ_ATOMS:DO
+          call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
+          if (jerr.ne.0) exit cycle_read_atoms
 
-       if (UPPERCASE(line_in(1:5)).eq.'ATOMS') then
-          allocate(atom_type(1:initial_size),vvdW_b(1:4,1:initial_size),qelect(1:initial_size),mass(1:initial_size)&
-           ,lij(1:initial_size),lqchg(1:initial_size),chemid(1:initial_size),stat=jerr)
-          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_pairwise: atoms allocation failed',jerr)
-          atom_type = 0
-          vvdW_b = 0.0_dp
-          qelect = 0.0_dp
-          mass = 0.0_dp
-          lij = .true.
-          lqchg = .false.
+          if (UPPERCASE(line_in(1:5)).eq.'ATOMS') then
+             call initiateTable(atoms,initial_size)
+             allocate(atom_type(1:initial_size),vvdW_b(1:4,1:initial_size),qelect(1:initial_size),mass(1:initial_size)&
+              ,lij(1:initial_size),lqchg(1:initial_size),chemid(1:initial_size),stat=jerr)
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_pairwise: atoms allocation failed',jerr)
+             atom_type = 0
+             vvdW_b = 0.0_dp
+             qelect = 0.0_dp
+             mass = 0.0_dp
+             lij = .true.
+             lqchg = .false.
 
-          do
-             call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
-             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section ATOMS',jerr)
-             if (UPPERCASE(line_in(1:9)).eq.'END ATOMS') exit
-             nntype=nntype+1
-             read(line_in,*) i
-             i=addToTable(atoms,i,expand=.true.)
-             if (i.gt.ubound(atom_type,1)) then
-                call reallocate(atom_type,1,2*ubound(atom_type,1))
-                call reallocate(vvdW_b,1,4,1,2*ubound(vvdW_b,2))
-                call reallocate(qelect,1,2*ubound(qelect,1))
-                call reallocate(mass,1,2*ubound(mass,1))
-                call reallocate(lij,1,2*ubound(lij,1))
-                call reallocate(lqchg,1,2*ubound(lqchg,1))
-                call reallocate(chemid,1,2*ubound(chemid,1))
-             end if
-             read(line_in,*) j,atom_type(i),vvdW_b(1:vdW_nParameter(atom_type(i)),i),qelect(i),mass(i),chemid(i)
-             if (qelect(i).ne.0) then
-                lqchg(i)=.true.
-             else
-                lqchg(i)=.false.
-             end if
-             if (ALL(vvdW_b(1:vdW_nParameter(atom_type(i)),i).eq.0)) then
-                lij(i)=.false.
-             else
-                lij(i)=.true.
-             end if
-          end do
-          exit cycle_read_atoms
-       end if
-    END DO CYCLE_READ_ATOMS
-    
+             do
+                call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
+                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section ATOMS',myid)
+                if (UPPERCASE(line_in(1:9)).eq.'END ATOMS') exit
+                nntype=nntype+1
+                read(line_in,*) i
+                i=addToTable(atoms,i,expand=.true.)
+                if (i.gt.ubound(atom_type,1)) then
+                   call reallocate(atom_type,1,2*ubound(atom_type,1))
+                   call reallocate(vvdW_b,1,4,1,2*ubound(vvdW_b,2))
+                   call reallocate(qelect,1,2*ubound(qelect,1))
+                   call reallocate(mass,1,2*ubound(mass,1))
+                   call reallocate(lij,1,2*ubound(lij,1))
+                   call reallocate(lqchg,1,2*ubound(lqchg,1))
+                   call reallocate(chemid,1,2*ubound(chemid,1))
+                end if
+                read(line_in,*) j,atom_type(i),vvdW_b(1:vdW_nParameter(atom_type(i)),i),qelect(i),mass(i),chemid(i)
+                if (qelect(i).ne.0) then
+                   lqchg(i)=.true.
+                else
+                   lqchg(i)=.false.
+                end if
+                if (ALL(vvdW_b(1:vdW_nParameter(atom_type(i)),i).eq.0)) then
+                   lij(i)=.false.
+                else
+                   lij(i)=.true.
+                end if
+             end do
+             exit cycle_read_atoms
+          end if
+       END DO CYCLE_READ_ATOMS
+    end if
+
+    call mp_bcast(nntype,1,rootid,groupid)
+
     if (nntype.gt.0) then
-       call tightenTable(atoms)
-       call reallocate(atom_type,1,nntype)
-       call reallocate(vvdW_b,1,4,1,nntype)
-       call reallocate(qelect,1,nntype)
-       call reallocate(mass,1,nntype)
-       call reallocate(lij,1,nntype)
-       call reallocate(lqchg,1,nntype)
-       call reallocate(chemid,1,nntype)
+       if (myid.eq.rootid) then
+          call tightenTable(atoms)
+          call reallocate(atom_type,1,nntype)
+          call reallocate(vvdW_b,1,4,1,nntype)
+          call reallocate(qelect,1,nntype)
+          call reallocate(mass,1,nntype)
+          call reallocate(lij,1,nntype)
+          call reallocate(lqchg,1,nntype)
+          call reallocate(chemid,1,nntype)
+       else
+          call initiateTable(atoms,nntype)
+          allocate(atom_type(1:nntype),vvdW_b(1:4,1:nntype),qelect(1:nntype),mass(1:nntype),lij(1:nntype),lqchg(1:nntype)&
+           ,chemid(1:nntype),stat=jerr)
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_pairwise: atoms allocation failed',myid)
+       end if
+
+       call mp_bcast(atoms%size,1,rootid,groupid)
+       call mp_bcast(atoms%list,atoms%size,rootid,groupid)
+       call mp_bcast(atom_type,nntype,rootid,groupid)
+       call mp_bcast(vvdW_b,4*nntype,rootid,groupid)
+       call mp_bcast(qelect,nntype,rootid,groupid)
+       call mp_bcast(mass,nntype,rootid,groupid)
+       call mp_bcast(lij,nntype,rootid,groupid)
+       call mp_bcast(lqchg,nntype,rootid,groupid)
+       call mp_bcast(chemid,rootid,groupid)
 
        nmix=nntype*nntype
 
@@ -1811,7 +1832,7 @@ contains
        do j = 1, nntype
           if (atom_type(i).ne.atom_type(j)) cycle
 
-          ij = (i-1)*nntype + j
+          ij = type_2body(i,j)
           nonbond_type(ij)=atom_type(i)
 
           if (nonbond_type(ij).eq.1) then
@@ -1866,61 +1887,73 @@ contains
     end do
 
     !> Looking for section NONBOND
-    REWIND(io_ff)
-    CYCLE_READ_NONBOND:DO
-       call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
-       if (jerr.ne.0) exit cycle_read_nonbond
+    if (myid.eq.rootid) then
+       REWIND(io_ff)
+       CYCLE_READ_NONBOND:DO
+          call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
+          if (jerr.ne.0) exit cycle_read_nonbond
+          if (UPPERCASE(line_in(1:7)).eq.'NONBOND') then
+             jerr=0
+             exit cycle_read_nonbond
+          end if
+       END DO CYCLE_READ_NONBOND
+    end if
 
-       if (UPPERCASE(line_in(1:7)).eq.'NONBOND') then
-          nmix=0
-          do
+    call mp_bcast(jerr,1,rootid,groupid)
+
+    if (jerr.eq.0) then
+       nmix=0
+       do
+          if (myid.eq.rootid) then
              call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
              if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section NONBOND',jerr)
-             if (UPPERCASE(line_in(1:11)).eq.'END NONBOND') exit
-             nmix=nmix+1
-             read(line_in,*) i,j
-             i=indexOf(atoms,i)
-             j=indexOf(atoms,j)
-             if (i.eq.0.or.j.eq.0) call err_exit(__FILE__,__LINE__,'read_ff: undefined bead in section NONBOND',jerr)
-             ij=(i-1)*nntype+j
-             read(line_in,*) itmp,itmp,nonbond_type(ij),vvdW(1:vdW_nParameter(nonbond_type(ij)),ij)
+          end if
 
-             if (nonbond_type(ij).eq.1) then
-                ! LJ 12-6
-                vvdW(1,ij)=4.0_dp*vvdW(1,ij)
-                vvdW(3,ij)=vvdW(2,ij)**2
-             else if (nonbond_type(ij).eq.2) then
-                ! Buckingham exp-6
-                vvdW(2,ij)=-vvdW(2,ij)
-             else if (nonbond_type(ij).eq.3) then
-                ! Mie
-                vvdW(1,ij)=vvdW(3,ij)/(vvdW(3,ij)-vvdW(4,ij))*((vvdW(3,ij)/vvdW(4,ij))**(vvdW(4,ij)/(vvdW(3,ij)-vvdW(4,ij))))&
-                 *vvdW(1,ij)
-             else if (nonbond_type(ij).eq.4) then
-                ! MMFF94
-                vvdW(3,ij)=vvdW(2,ij)**2
-             else if (nonbond_type(ij).eq.5) then
-                ! LJ 9-6
-                vvdW(1,ij)=4.0_dp*vvdW(1,ij)
-             else if (nonbond_type(ij).eq.6) then
-                ! Generalized LJ
-                vvdW(1,ij)=4.0_dp*vvdW(1,ij)
-             else if (nonbond_type(ij).ne.7.and.nonbond_type(ij).ne.-1.and.nonbond_type(ij).ne.0) then
-                call err_exit(__FILE__,__LINE__,'read_ff: undefined nonbond type',myid+1)
-             end if
+          call mp_bcast(line_in,rootid,groupid)
 
-             ji=(j-1)*nntype+i
-             nonbond_type(ji)=nonbond_type(ij)
-             vvdW(:,ji)=vvdW(:,ij)
+          if (UPPERCASE(line_in(1:11)).eq.'END NONBOND') exit
+          nmix=nmix+1
+          read(line_in,*) i,j
+          i=indexOf(atoms,i)
+          j=indexOf(atoms,j)
+          if (i.eq.0.or.j.eq.0) call err_exit(__FILE__,__LINE__,'read_ff: undefined bead in section NONBOND',jerr)
+          ij=type_2body(i,j)
+          read(line_in,*) itmp,itmp,nonbond_type(ij),vvdW(1:vdW_nParameter(nonbond_type(ij)),ij)
 
-             if (ANY(vvdW(1:vdw_nParameter(nonbond_type(ij)),ij).ne.0)) then
-                lij(i)=.true.
-                lij(j)=.true.
-             end if
-          end do
-          exit cycle_read_nonbond
-       end if
-    END DO CYCLE_READ_NONBOND
+          if (nonbond_type(ij).eq.1) then
+             ! LJ 12-6
+             vvdW(1,ij)=4.0_dp*vvdW(1,ij)
+             vvdW(3,ij)=vvdW(2,ij)**2
+          else if (nonbond_type(ij).eq.2) then
+             ! Buckingham exp-6
+             vvdW(2,ij)=-vvdW(2,ij)
+          else if (nonbond_type(ij).eq.3) then
+             ! Mie
+             vvdW(1,ij)=vvdW(3,ij)/(vvdW(3,ij)-vvdW(4,ij))*((vvdW(3,ij)/vvdW(4,ij))**(vvdW(4,ij)/(vvdW(3,ij)-vvdW(4,ij))))&
+              *vvdW(1,ij)
+          else if (nonbond_type(ij).eq.4) then
+             ! MMFF94
+             vvdW(3,ij)=vvdW(2,ij)**2
+          else if (nonbond_type(ij).eq.5) then
+             ! LJ 9-6
+             vvdW(1,ij)=4.0_dp*vvdW(1,ij)
+          else if (nonbond_type(ij).eq.6) then
+             ! Generalized LJ
+             vvdW(1,ij)=4.0_dp*vvdW(1,ij)
+          else if (nonbond_type(ij).ne.7.and.nonbond_type(ij).ne.-1.and.nonbond_type(ij).ne.0) then
+             call err_exit(__FILE__,__LINE__,'read_ff: undefined nonbond type',myid+1)
+          end if
+
+          ji=type_2body(j,i)
+          nonbond_type(ji)=nonbond_type(ij)
+          vvdW(:,ji)=vvdW(:,ij)
+
+          if (ANY(vvdW(1:vdw_nParameter(nonbond_type(ij)),ij).ne.0)) then
+             lij(i)=.true.
+             lij(j)=.true.
+          end if
+       end do
+    end if
 
     call read_tabulated_ff_pair()
 
@@ -2357,6 +2390,7 @@ contains
     use util_search,only:indexOf
     use util_memory,only:reallocate
     use util_files,only:get_iounit
+    use util_mp,only:mp_bcast
     character(len=*),intent(in)::file_tab
     integer,intent(out)::ntab
     integer,allocatable,intent(inout)::splits(:,:)
@@ -2366,35 +2400,61 @@ contains
 
     integer::io_tab,mmm,ii,jj,i,jerr
 
-    io_tab=get_iounit()
-    open(unit=io_tab,access='sequential',action='read',file=file_tab,form='formatted',iostat=jerr,status='old')
-    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open tabulated potential file: '//file_tab,myid+1)
+    splits=0
 
-    read(io_tab,*) ntab
+    if (myid.eq.rootid) then
+       io_tab=get_iounit()
+       open(unit=io_tab,access='sequential',action='read',file=file_tab,form='formatted',iostat=jerr,status='old')
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open tabulated potential file: '//file_tab,myid+1)
+
+       read(io_tab,*) ntab
+    end if
+
+    call mp_bcast(ntab,1,rootid,groupid)
+
     do mmm=1,ntab
        ! ii and jj are bead types
-       read(io_tab,*) ii, jj
+       if (myid.eq.rootid) then
+          read(io_tab,*) ii, jj
+       end if
+
+       call mp_bcast(ii,1,rootid,groupid)
+       call mp_bcast(jj,1,rootid,groupid)
+
        ii=indexOf(lists,ii)
        jj=indexOf(lists,jj)
        if (ii.eq.0.or.jj.eq.0) call err_exit(__FILE__,__LINE__,'read_table: undefined bead',myid+1)
        lused(ii)=.true.
        lused(jj)=.true.
        i=1
-       do
-          if (i.gt.size(r,1)) then
-             call reallocate(r,1,2*size(r,1),1,size(r,2),1,size(r,3))
-             call reallocate(tab,1,2*size(tab,1),1,size(tab,2),1,size(tab,3))
-          end if
-          read(io_tab,*,end=17) r(i,ii,jj),tab(i,ii,jj)
-          if (r(i,ii,jj).eq.1000) exit
-          ! write(io_tab+10,*) i,r(i,ii,jj),tab(i,ii,jj)
-          i=i+1
-       end do
-17     splits(ii,jj)=i-1
-       call reallocate(r,1,splits(ii,jj),1,size(r,2),1,size(r,3))
-       call reallocate(tab,1,splits(ii,jj),1,size(tab,2),1,size(tab,3))
+       if (myid.eq.rootid) then
+          do
+             if (i.gt.size(r,1)) then
+                call reallocate(r,1,2*size(r,1),1,size(r,2),1,size(r,3))
+                call reallocate(tab,1,2*size(tab,1),1,size(tab,2),1,size(tab,3))
+             end if
+             read(io_tab,*,end=17) r(i,ii,jj),tab(i,ii,jj)
+             if (r(i,ii,jj).eq.1000) exit
+             ! write(io_tab+10,*) i,r(i,ii,jj),tab(i,ii,jj)
+             i=i+1
+          end do
+17        splits(ii,jj)=i-1
+       end if
+
+       call mp_bcast(splits(ii,jj),1,rootid,groupid)
+
+       if (splits(ii,jj).gt.size(r,1)) then
+          call reallocate(r,1,splits(ii,jj),1,size(r,2),1,size(r,3))
+          call reallocate(tab,1,splits(ii,jj),1,size(tab,2),1,size(tab,3))
+       end if
+
+       call mp_bcast(r(:,ii,jj),splits(ii,jj),rootid,groupid)
+       call mp_bcast(tab(:,ii,jj),splits(ii,jj),rootid,groupid)
     end do
-    close(io_tab)
+    if (myid.eq.rootid) close(io_tab)
+
+    call reallocate(r,1,maxval(splits),1,size(r,2),1,size(r,3))
+    call reallocate(tab,1,maxval(splits),1,size(tab,2),1,size(tab,3))
   end subroutine read_table
 
 !> \brief Read in nonbonding van der Waals and electrostatic potential.

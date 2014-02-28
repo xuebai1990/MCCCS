@@ -95,7 +95,7 @@ module sim_system
   integer,allocatable::nwell(:)
   logical,allocatable::lwell(:)
   integer,parameter::nw=4000
-  integer::iratipsw
+  integer::iratipsw=100000000
   real::dvdl,vipsw,pipsw,vwellipsw,pwellipsw,etais,lambdais,bwell,vipswo,vipswn,vwellipswo,vwellipswn&
    ,lena,lenc,pwellips(3,3),pips(3,3),dhmat(3,3)
   logical::lstagea,lstageb,lstagec
@@ -119,7 +119,8 @@ module sim_system
   character(LEN=1)::suffix='a'
   integer::io_output=6,iprint=-1,imv=-1,iblock=-1,iratp=500,idiele=-1,iheatcapacity=-1,nprop,ianalyze=-1,nbin=1,run_num=1
   real::bin_width=0.2_dp
-  logical::L_movie_xyz=.false.,lrdf=.false.,lintra=.false.,lstretch=.false.,lgvst=.false.,lbend=.false.,lete=.false.,lrhoz=.false.,lucall=.false.
+  logical::L_movie_xyz=.false.,lrdf=.false.,lintra=.false.,lstretch=.false.,lgvst=.false.,lbend=.false.,lete=.false.&
+   ,lrhoz=.false.,lucall=.false.
 
   !*** Histograms for grand-canonical ensemble ***
   integer::nequil=0,ninstf=0,ninsth=0,ndumph=0
@@ -139,6 +140,7 @@ module sim_system
    ,ltwice(:) !< if ltwice=.true. then mimage is applied twice
 
   !=== Force field parameters ===
+  integer,parameter::nvib_max=6,nben_max=12,ntor_max=12
   integer::nntype !< number of types of beads
   logical::L_spline=.false.,L_linear=.false.,L_vib_table=.false.,L_bend_table=.false.,L_elect_table=.false.
   real,allocatable::mass(:),vvdW_b(:,:),qelect(:),vvdW(:,:),ecut(:)&
@@ -353,11 +355,12 @@ CONTAINS
      ,parbox(nmax,nbxmax,ntmax),bnflcq(ntmax,nbxmax),bsflcq(ntmax,nbxmax),bnflcq2(ntmax,nbxmax),bsflcq2(ntmax,nbxmax)&
      ,rxwell(nw,ntmax),rywell(nw,ntmax),rzwell(nw,ntmax),sxwell(nw,ntmax),sywell(nw,ntmax),szwell(nw,ntmax),nwell(ntmax)&
      ,lwell(ntmax),moltyp(nmax),rcmu(nmax),sxcm(nmax),sycm(nmax),szcm(nmax),nboxi(nmax)&
-     ,favor(nmax),favor2(nmax),ntype(ntmax,initial_size),leaderq(ntmax,initial_size),lplace(ntmax,initial_size)&
-     ,lrigi(ntmax,initial_size),invib(ntmax,initial_size),itvib(ntmax,initial_size,6),ijvib(ntmax,initial_size,6)&
-     ,inben(ntmax,initial_size),itben(ntmax,initial_size,12),ijben2(ntmax,initial_size,12),ijben3(ntmax,initial_size,12)&
-     ,intor(ntmax,initial_size),ittor(ntmax,initial_size,12),ijtor2(ntmax,initial_size,12),ijtor3(ntmax,initial_size,12)&
-     ,ijtor4(ntmax,initial_size,12),irotbd(initial_size,ntmax),pmrotbd(initial_size,ntmax),stat=jerr)
+     ,favor(nmax),favor2(nmax),ntype(ntmax,initial_size),leaderq(ntmax,initial_size)&
+     ,invib(ntmax,initial_size),itvib(ntmax,initial_size,nvib_max),ijvib(ntmax,initial_size,nvib_max)&
+     ,inben(ntmax,initial_size),itben(ntmax,initial_size,nben_max),ijben2(ntmax,initial_size,nben_max)&
+     ,ijben3(ntmax,initial_size,nben_max),intor(ntmax,initial_size),ittor(ntmax,initial_size,ntor_max)&
+     ,ijtor2(ntmax,initial_size,ntor_max),ijtor3(ntmax,initial_size,ntor_max),ijtor4(ntmax,initial_size,ntor_max)&
+     ,irotbd(initial_size,ntmax),pmrotbd(initial_size,ntmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'allocate_system.2: allocation failed',jerr)
   end subroutine allocate_system
 

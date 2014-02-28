@@ -2,10 +2,13 @@ MODULE sim_particle
   use var_type,only:dp,default_string_length
   use sim_system,only:lneigh,lneighbor,lgaro
   implicit none
+#ifdef __MPI__
+  include 'mpif.h'
+#endif
   private
   public::BeadType,AtomType,MoleculeType,check_neighbor_list,init_neighbor_list,add_neighbor_list,add_neighbor_list_molecule&
    ,update_neighbor_list_molecule,save_neighbor_list,restore_neighbor_list,allocate_neighbor_list,ctrmas,lnn,lnn_t,neighbor&
-   ,neigh_cnt,ndij,nxij,nyij,nzij,neighi,neigh_icnt,ndiji,nxiji,nyiji,nziji,extend_molecule_type
+   ,neigh_cnt,ndij,nxij,nyij,nzij,neighi,neigh_icnt,ndiji,nxiji,nyiji,nziji,extend_molecule_type,mp_bcast_molecule
 
   type BeadType
      integer::type
@@ -51,11 +54,58 @@ contains
        allocate(p%bead(1))
     else
        array_size=size(p%bead)
-       if (allocated(p_temp%bead)) deallocate(p_temp%bead);allocate(p_temp%bead(array_size+1))
+       if (allocated(p_temp%bead)) deallocate(p_temp%bead)
+       allocate(p_temp%bead(array_size+1))
        p_temp%bead(1:array_size) = p%bead
        call move_alloc(p_temp%bead,p%bead)
     endif
   END SUBROUTINE extend_molecule_type
+
+  SUBROUTINE mp_bcast_molecule(msg,source,comm)
+    use util_runtime,only:err_exit
+    use util_mp,only:mp_bcast
+    TYPE(MoleculeType) :: msg
+    INTEGER, INTENT(IN) :: source, comm
+
+#ifdef __MPI__
+    INTEGER,PARAMETER::COUNT=2
+    INTEGER,DIMENSION(COUNT)::lena,typa
+    INTEGER::ierr,mpiMoleculeType
+    INTEGER(KIND=MPI_ADDRESS_KIND)::baseaddr,loca(COUNT)
+
+    ! call MPI_SIZEOF(msg%bead(1)%coord(1),sizeReal,ierr)
+    ! if (ierr.ne.0) call err_exit(__FILE__,__LINE__,'mp_bcast_molecule: mpi_sizeof failed for msg%bead(1)%coord(1)',ierr)
+
+    ! call MPI_TYPE_MATCH_SIZE(MPI_TYPECLASS_REAL,sizeReal,mpiReal,ierr)
+    ! if (ierr.ne.0) call err_exit(__FILE__,__LINE__,'mp_bcast_molecule: mpi_type_match_size failed for mpiReal',ierr)
+
+    lena=(/1,3/)
+#ifdef __DOUBLE_PRECISION__
+    typa=(/MPI_INTEGER,MPI_DOUBLE_PRECISION/)
+#else
+    typa=(/MPI_INTEGER,MPI_REAL/)
+#endif
+
+    call mpi_get_address(msg%bead(1),baseaddr,ierr)
+    if (ierr.ne.0) call err_exit(__FILE__,__LINE__,'mp_bcast_molecule: mpi_get_address failed for baseaddr',ierr)
+    call mpi_get_address(msg%bead(1)%type,loca(1),ierr)
+    if (ierr.ne.0) call err_exit(__FILE__,__LINE__,'mp_bcast_molecule: mpi_get_address failed for loca(1)',ierr)
+    call mpi_get_address(msg%bead(1)%coord,loca(2),ierr)
+    if (ierr.ne.0) call err_exit(__FILE__,__LINE__,'mp_bcast_molecule: mpi_get_address failed for loca(2)',ierr)
+    loca=loca-baseaddr
+
+    call MPI_TYPE_CREATE_STRUCT(COUNT,lena,loca,typa,mpiMoleculeType,ierr)
+    if (ierr.ne.0) call err_exit(__FILE__,__LINE__,'mp_bcast_molecule: mpi_type_create_struct failed for mpiMoleculeType',ierr)
+
+    call MPI_TYPE_COMMIT(mpiMoleculeType,ierr)
+    if (ierr.ne.0) call err_exit(__FILE__,__LINE__,'mp_bcast_molecule: mpi_type_commit failed for mpiMoleculeType',ierr)
+
+    call MPI_BCAST(msg%bead,msg%nbead,mpiMoleculeType,source,comm,ierr)
+    if (ierr.ne.0) call err_exit(__FILE__,__LINE__,'mp_bcast_molecule: mpi_bcast failed for msg%bead',ierr)
+
+    call MPI_TYPE_FREE(mpiMoleculeType,ierr)
+#endif
+  END SUBROUTINE mp_bcast_molecule
 
   subroutine check_neighbor_list(ibox,imol)
     use sim_system,only:rmtrax,rmtray,rmtraz,rmrotx,rmroty,rmrotz,Armtrax,Armtray,Armtraz,io_output

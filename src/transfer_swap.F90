@@ -1598,13 +1598,15 @@ contains
     use var_type,only:default_string_length
     use util_string,only:uppercase
     use util_files,only:readLine
+    use util_mp,only:mp_bcast
     integer,intent(in)::io_input
     LOGICAL,INTENT(IN)::lprint
     character(LEN=default_string_length)::line_in
     integer::jerr,i,ipair
     namelist /mc_swap/ pmswap,pmswmt
 
-    allocate(acchem(nbxmax,ntmax),bnchem(nbxmax,ntmax),bnattempts(ntmax,npabmax,nbxmax),bnattempts_nonempty(ntmax,npabmax,nbxmax),bsswap(ntmax,npabmax,nbxmax),bnswap(ntmax,npabmax,nbxmax),bnswap_in(ntmax,2),bnswap_out(ntmax,2),stat=jerr)
+    allocate(acchem(nbxmax,ntmax),bnchem(nbxmax,ntmax),bnattempts(ntmax,npabmax,nbxmax),bnattempts_nonempty(ntmax,npabmax,nbxmax)&
+     ,bsswap(ntmax,npabmax,nbxmax),bnswap(ntmax,npabmax,nbxmax),bnswap_in(ntmax,2),bnswap_out(ntmax,2),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_swap: allocation failed',jerr)
 
     bnattempts=0
@@ -1625,9 +1627,14 @@ contains
        pmswmt(i)=real(i,dp)/nmolty
     end do
 
-    rewind(io_input)
-    read(UNIT=io_input,NML=mc_swap,iostat=jerr)
-    if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_swap',jerr)
+    if (myid.eq.rootid) then
+       rewind(io_input)
+       read(UNIT=io_input,NML=mc_swap,iostat=jerr)
+       if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_swap',jerr)
+    end if
+
+    call mp_bcast(pmswap,1,rootid,groupid)
+    call mp_bcast(pmswmt,nmolty,rootid,groupid)
 
     if (lprint) then
        write(io_output,'(/,A,/,A)') 'NAMELIST MC_SWAP','------------------------------------------'
@@ -1638,43 +1645,50 @@ contains
     end if
 
     ! Looking for section MC_SWAP
-    CYCLE_READ_SWAP:DO
-       call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section MC_SWAP not found',jerr)
+    if (myid.eq.rootid) then
+       CYCLE_READ_SWAP:DO
+          call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section MC_SWAP not found',jerr)
 
-       if (UPPERCASE(line_in(1:7)).eq.'MC_SWAP') then
-          do i=1,nmolty+1
-             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_SWAP',jerr)
-             if (UPPERCASE(line_in(1:11)).eq.'END MC_SWAP') then
-                if (i.ne.nmolty+1) call err_exit(__FILE__,__LINE__,'Section MC_SWAP not complete!',myid+1)
-                exit
-             else if (i.eq.nmolty+1) then
-                call err_exit(__FILE__,__LINE__,'Section MC_SWAP has more than nmolty records!',myid+1)
-             end if
-
-             ! nswapb pmswapb
-             read(line_in,*) nswapb(i),(pmswapb(i,ipair),ipair=1,nswapb(i))
-             if (lprint) then
-                write(io_output,'(2(A,I0))') '   number of swap box pairs for molecule type ', i,': ',nswapb(i)
-                do ipair = 1,nswapb(i)
-                   write(io_output,'(A,G16.9)') '   pmswapb: ',pmswapb(i,ipair)
-                end do
-             end if
-
-             do ipair = 1,nswapb(i)
+          if (UPPERCASE(line_in(1:7)).eq.'MC_SWAP') then
+             do i=1,nmolty+1
                 call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
                 if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_SWAP',jerr)
-                ! box1 box2
-                read(line_in,*) box1(i,ipair),box2(i,ipair)
-                if (lprint) then
-                   write(io_output,'(A,2(4X,I0))') '   box pair:',box1(i,ipair),box2(i,ipair)
+                if (UPPERCASE(line_in(1:11)).eq.'END MC_SWAP') then
+                   if (i.ne.nmolty+1) call err_exit(__FILE__,__LINE__,'Section MC_SWAP not complete!',myid+1)
+                   exit
+                else if (i.eq.nmolty+1) then
+                   call err_exit(__FILE__,__LINE__,'Section MC_SWAP has more than nmolty records!',myid+1)
                 end if
+
+                ! nswapb pmswapb
+                read(line_in,*) nswapb(i),(pmswapb(i,ipair),ipair=1,nswapb(i))
+                if (lprint) then
+                   write(io_output,'(2(A,I0))') '   number of swap box pairs for molecule type ', i,': ',nswapb(i)
+                   do ipair = 1,nswapb(i)
+                      write(io_output,'(A,G16.9)') '   pmswapb: ',pmswapb(i,ipair)
+                   end do
+                end if
+
+                do ipair = 1,nswapb(i)
+                   call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                   if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_SWAP',jerr)
+                   ! box1 box2
+                   read(line_in,*) box1(i,ipair),box2(i,ipair)
+                   if (lprint) then
+                      write(io_output,'(A,2(4X,I0))') '   box pair:',box1(i,ipair),box2(i,ipair)
+                   end if
+                end do
              end do
-          end do
-          exit cycle_read_swap
-       end if
-    END DO CYCLE_READ_SWAP
+             exit cycle_read_swap
+          end if
+       END DO CYCLE_READ_SWAP
+    end if
+   
+    call mp_bcast(nswapb,nmolty,rootid,groupid)
+    call mp_bcast(pmswapb,ntmax*npabmax,rootid,groupid)
+    call mp_bcast(box1,ntmax*npabmax,rootid,groupid)
+    call mp_bcast(box2,ntmax*npabmax,rootid,groupid)
   end subroutine init_swap
 
   subroutine output_swap_stats(io_output)

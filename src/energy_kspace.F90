@@ -148,17 +148,13 @@ contains
     call mp_sum(vrecip,1,groupid)
     call mp_allgather(ncount,rcounts,groupid)
     call mp_set_displs(rcounts,displs,numvect(ibox),numprocs)
+    if ( numvect(ibox) .gt. vectormax ) call err_exit(__FILE__,__LINE__,'choose a larger vectormax',myid+1)
     call mp_allgather(my_kx,kx(:,ibox),rcounts,displs,groupid)
     call mp_allgather(my_ky,ky(:,ibox),rcounts,displs,groupid)
     call mp_allgather(my_kz,kz(:,ibox),rcounts,displs,groupid)
     call mp_allgather(my_ssumr,ssumr(:,ibox),rcounts,displs,groupid)
     call mp_allgather(my_ssumi,ssumi(:,ibox),rcounts,displs,groupid)
     call mp_allgather(my_prefact,prefact(:,ibox),rcounts,displs,groupid)
-
-! write(io_output,*) 'in recipsum:',ssumr(100,ibox),ibox
-! safety check ***
-! write(io_output,*) 'A total of ',ncount,' vectors are used'
-    if ( ncount .gt. vectormax ) call err_exit(__FILE__,__LINE__,'choose a larger vectormax',myid+1)
 
     return
   end subroutine recipsum
