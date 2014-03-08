@@ -1,6 +1,5 @@
 program topmon
   use var_type,only:default_path_length
-  use util_timings,only:time_init
   use util_mp,only:mp_start,mp_end
   use sim_system,only:myid,numprocs,groupid,thread_num,thread_num_max
   use topmon_main,only:monola
@@ -12,9 +11,6 @@ program topmon
   character(LEN=default_path_length)::sarg,file_in='topmon.inp'
   logical::lrun=.true.,lsetinput=.false.,lversion=.false.,lusage =.false.
 ! ----------------------------------------------------------------
-! Initialize the timer
-  call time_init()
-
 ! Parse the command line arguments
   narg=command_argument_count()
   iarg=1
@@ -35,17 +31,16 @@ program topmon
            exit
         end if
         call get_command_argument(iarg,sarg)
-        read(sarg,*,iostat=jerr) thread_num
+        read(sarg,*,iostat=jerr) thread_num_max
         if (jerr.ne.0) then
            lusage=.true.
            lrun=.false.
            exit
         end if
-#ifdef __OPENMP__
+!$       thread_num=thread_num_max
 !$       thread_num_max=omp_get_max_threads()
 !$       if (thread_num.gt.thread_num_max) thread_num=thread_num_max
 !$       call omp_set_num_threads(thread_num)
-#endif
      case('--input','-i')
         iarg=iarg+1
         if (iarg.gt.narg) then

@@ -725,6 +725,7 @@ contains
     real::armtra,rmtra,rmrot
     namelist /mc_simple/ armtra,pm_atom_tra,tatra,pmtra,pmtrmt,rmtra,tarot,pmromt,rmrot
 
+    if (allocated(acntrax)) deallocate(acntrax,acntray,acntraz,acnrotx,acnroty,acnrotz,acstrax,acstray,acstraz,acsrotx,acsroty,acsrotz,bntrax,bntray,bntraz,bstrax,bstray,bstraz,bnrotx,bnroty,bnrotz,bsrotx,bsroty,bsrotz,stat=jerr)
     allocate(acntrax(ntmax,nbxmax),acntray(ntmax,nbxmax),acntraz(ntmax,nbxmax),acnrotx(ntmax,nbxmax),acnroty(ntmax,nbxmax)&
      ,acnrotz(ntmax,nbxmax),acstrax(ntmax,nbxmax),acstray(ntmax,nbxmax),acstraz(ntmax,nbxmax),acsrotx(ntmax,nbxmax)&
      ,acsroty(ntmax,nbxmax),acsrotz(ntmax,nbxmax),bntrax(ntmax,nbxmax),bntray(ntmax,nbxmax),bntraz(ntmax,nbxmax)&

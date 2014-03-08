@@ -16,6 +16,7 @@ CONTAINS
     integer::jerr,io_struct,imolty,m,ichain
     logical::lusefile
 
+    if (allocated(samx)) deallocate(samx,samy,samz,stat=jerr)
     allocate(samx(ntmax,numax),samy(ntmax,numax),samz(ntmax,numax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'store_molecule_config: allocating sam{x,y,z} failed',jerr)
 

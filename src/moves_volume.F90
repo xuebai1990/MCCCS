@@ -767,6 +767,7 @@ contains
     real::rmvolume
     namelist /mc_volume/ tavol,iratv,pmvlmt,nvolb,pmvolb,box5,box6,pmvol,pmvolx,pmvoly,rmvolume,allow_cutoff_failure
 
+    if (allocated(acsvol)) deallocate(acsvol,acnvol,acshmat,acnhmat,bsvol,bnvol,bshmat,bnhmat,vboxn,vboxo,bxo,byo,bzo,xcmo,ycmo,zcmo,rxuo,ryuo,rzuo,qquo,rcuto,stat=jerr)
     allocate(acsvol(nbxmax),acnvol(nbxmax),acshmat(nbxmax,9),acnhmat(nbxmax,9),bsvol(nbxmax),bnvol(nbxmax),bshmat(nbxmax,9)&
      ,bnhmat(nbxmax,9),vboxn(nEnergy,nbxmax),vboxo(nEnergy,nbxmax),bxo(nbxmax),byo(nbxmax),bzo(nbxmax),xcmo(nmax),ycmo(nmax)&
      ,zcmo(nmax),rxuo(nmax,numax),ryuo(nmax,numax),rzuo(nmax,numax),qquo(nmax,numax),rcuto(nbxmax),stat=jerr)

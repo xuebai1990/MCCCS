@@ -5,7 +5,7 @@ MODULE energy_intramolecular
   use util_memory,only:reallocate
   use util_string,only:uppercase,integer_to_string
   use util_files,only:readLine
-  use util_search,only:LookupTable,initiateTable,addToTable
+  use util_search,only:LookupTable,initiateTable,destroyTable,addToTable
   use sim_system,only:io_output,brvib,brvibk,brben,brbenk,myid,L_spline,L_linear
   implicit none
   private
@@ -52,6 +52,10 @@ contains
     character(LEN=default_string_length)::line_in
 
     !> Looking for section BONDS
+    if (allocated(bonds%list)) then
+       call destroyTable(bonds)
+       deallocate(vib_type,brvib,brvibk,stat=jerr)
+    end if
     n=0
     if (myid.eq.rootid) then
        REWIND(io_ff)
@@ -106,6 +110,10 @@ contains
     end if
 
     !> Looking for section ANGLES
+    if (allocated(angles%list)) then
+       call destroyTable(angles)
+       deallocate(ben_type,brben,brbenk,stat=jerr)
+    end if
     n=0
     if (myid.eq.rootid) then
        REWIND(io_ff)
@@ -161,6 +169,10 @@ contains
     end if
 
     !> Looking for section DIHEDRALS
+    if (allocated(dihedrals%list)) then
+       call destroyTable(dihedrals)
+       deallocate(vtt,torsion_type,stat=jerr)
+    end if
     n=0
     if (myid.eq.rootid) then
        REWIND(io_ff)
@@ -601,11 +613,13 @@ contains
           if (L_spline.and.L_linear) call err_exit(__FILE__,__LINE__&
            ,'L_spline and L_linear should have one and only one to be true if using tabulated potential for torsions',myid+1)
 
+          if (allocated(splpnts)) deallocate(splpnts,deg,tabtorso,stat=jerr)
           allocate(splpnts(1:dihedrals%size),deg(1:grid_size,1:dihedrals%size),tabtorso(1:grid_size,1:dihedrals%size),stat=jerr)
           if (jerr.ne.0) call err_exit(__FILE__,__LINE__&
            ,'init_tabulated_potential_bonded: allocation failed for vib_table 1',myid+1)
           call read_table('fort.40',nttor,deg,tabtorso,splpnts,dihedrals)
           if (L_spline) then
+             if (allocated(torderiv2)) deallocate(torderiv2,stat=jerr)
              allocate(torderiv2(1:grid_size,1:dihedrals%size),stat=jerr)
              if (jerr.ne.0) call err_exit(__FILE__,__LINE__&
               ,'init_tabulated_potential_bonded: allocation failed for tor_table 2',myid+1)
@@ -620,12 +634,14 @@ contains
     end if
 
     if (bonds%size.gt.0.and.L_vib_table) then
+       if (allocated(vibsplits)) deallocate(vibsplits,vib,tabvib,stat=jerr)
        allocate(vibsplits(1:bonds%size),vib(1:grid_size,1:bonds%size),tabvib(1:grid_size,1:bonds%size),stat=jerr)
        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_bonded: allocation failed for vib_table',myid+1)
        call read_table('fort.41',ntabvib,vib,tabvib,vibsplits,bonds)
     end if
 
     if (angles%size.gt.0.and.L_bend_table) then
+       if (allocated(bendsplits)) deallocate(bendsplits,bend,tabbend,stat=jerr)
        allocate(bendsplits(1:angles%size),bend(1:grid_size,1:angles%size),tabbend(1:grid_size,1:angles%size),stat=jerr)
        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_tabulated_potential_bonded: allocation failed for bend_table',myid+1)
        call read_table('fort.42',ntabbend,bend,tabbend,bendsplits,angles)
@@ -635,6 +651,7 @@ contains
   subroutine allocate_energy_bonded()
     use sim_system,only:numax
     integer::jerr
+    if (allocated(rxvec)) deallocate(rxvec,ryvec,rzvec,distij2,distanceij,stat=jerr)
     allocate(rxvec(numax,numax),ryvec(numax,numax),rzvec(numax,numax),distij2(numax,numax),distanceij(numax,numax),stat=jerr)
     if (jerr.ne.0) then
        call err_exit(__FILE__,__LINE__,'allocate_energy_bonded: allocation failed',jerr)

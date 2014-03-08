@@ -704,6 +704,7 @@ contains
     integer::io_ee,jerr,imol,j,ii
     namelist /mc_ee/ pmexpc,pmeemt,pmexpc1,lexpand
 
+    if (allocated(epsil)) deallocate(epsil,sigm,qcharge,bnexpc,bsexpc,eta,numcoeff,stat=jerr)
     allocate(epsil(ntmax,numax,100),sigm(ntmax,numax,100),qcharge(ntmax,numax,100),bnexpc(ntmax,nbxmax),bsexpc(ntmax,nbxmax)&
      ,eta(nbxmax,ntmax,20),numcoeff(ntmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_ee: allocation failed',jerr)

@@ -4,7 +4,7 @@ module util_search
   use util_string,only:integer_to_string
   implicit none
   private
-  public::LookupTable,initiateTable,addToTable,tightenTable,indexOf,hunt,locate
+  public::LookupTable,initiateTable,destroyTable,addToTable,tightenTable,indexOf,hunt,locate
 
   type LookupTable
      integer::size !< number of element in the table
@@ -25,6 +25,17 @@ CONTAINS
     allocate(table%list(1:initialSize),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'initiateTable: allocation error',jerr)
   end subroutine initiateTable
+
+  !> \brief Destroy specified table
+  subroutine destroyTable(table)
+    type(LookupTable),intent(inout)::table
+
+    integer::jerr
+
+    table%size=0
+    deallocate(table%list,stat=jerr)
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'destroyTable: deallocation error',jerr)
+  end subroutine destroyTable
 
   !> \brief Add item to table
   !>

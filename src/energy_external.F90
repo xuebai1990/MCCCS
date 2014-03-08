@@ -133,6 +133,7 @@ contains
     namelist /external_field/ surface_type,ntsubst,rsol,delta,a1,Elect_field,double_surface
 
     !> read namelist external_field
+    if (allocated(Elect_field)) deallocate(Elect_field,stat=jerr)
     allocate(Elect_field(nbxmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_energy_external: allocation failed',jerr)
     Elect_field=0.0_dp

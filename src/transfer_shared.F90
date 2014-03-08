@@ -20,6 +20,7 @@ contains
     LOGICAL,INTENT(IN)::lprint
     integer::jerr
 
+    if (allocated(u_bias_diff)) deallocate(u_bias_diff,num_update_bias,lopt_bias,stat=jerr)
     allocate(u_bias_diff(nbox,nmolty),num_update_bias(nbox,nmolty),lopt_bias(nmolty),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'read_transfer: memory allocation',jerr)
 

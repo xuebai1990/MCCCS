@@ -613,6 +613,7 @@ contains
   subroutine allocate_kspace()
     use sim_system,only:nbxmax
     integer::jerr
+    if (allocated(kx)) deallocate(kx,ky,kz,prefact,ssumr,ssumi,ssumrn,ssumin,ssumro,ssumio,kxo,kyo,kzo,prefacto,calpo,calp,numvect,numvecto,stat=jerr)
     allocate(kx(vectormax,nbxmax),ky(vectormax,nbxmax),kz(vectormax,nbxmax),prefact(vectormax,nbxmax)&
      ,ssumr(vectormax,nbxmax),ssumi(vectormax,nbxmax),ssumrn(vectormax,nbxmax),ssumin(vectormax,nbxmax)&
      ,ssumro(vectormax,nbxmax),ssumio(vectormax,nbxmax),kxo(vectormax,nbxmax),kyo(vectormax,nbxmax)&

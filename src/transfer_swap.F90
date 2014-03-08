@@ -1605,6 +1605,7 @@ contains
     integer::jerr,i,ipair
     namelist /mc_swap/ pmswap,pmswmt
 
+    if (allocated(acchem)) deallocate(acchem,bnchem,bnattempts,bnattempts_nonempty,bsswap,bnswap,bnswap_in,bnswap_out,stat=jerr)
     allocate(acchem(nbxmax,ntmax),bnchem(nbxmax,ntmax),bnattempts(ntmax,npabmax,nbxmax),bnattempts_nonempty(ntmax,npabmax,nbxmax)&
      ,bsswap(ntmax,npabmax,nbxmax),bnswap(ntmax,npabmax,nbxmax),bnswap_in(ntmax,2),bnswap_out(ntmax,2),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_swap: allocation failed',jerr)

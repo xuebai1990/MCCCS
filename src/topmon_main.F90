@@ -61,7 +61,7 @@ contains
     use util_random,only:random
     use util_string,only:format_n,integer_to_string
     use util_runtime,only:err_exit
-    use util_timings,only:time_date_str,time_now
+    use util_timings,only:time_init,time_date_str,time_now
     use util_files,only:get_iounit
     use sim_initia,only:setup_molecule_config
     use sim_particle,only:ctrmas,neighbor,neigh_cnt
@@ -89,9 +89,13 @@ contains
     real::v(nEnergy),press1,surf,time_prev,time_cur,rm,temvol,tmp,vhist,eng_list(fmax),temacd,temspd,debroglie,starviro,dummy&
      ,inside,bvirial,gconst,ostwald,stdost,molfrac
     logical::ovrlap
+! ----------------------------------------------------------------
+    ! Initialize the timer
+    call time_init()
 
     call readdat(file_in)
 
+    if (allocated(nminp)) deallocate(nminp,nmaxp,ncmt_list,ndist,vstart,vend,pres,molvol,speden,acdens,molfra,acnbox,acnbox2,acv,acvsq,acvkjmol,acdipole,acdipolesq,acboxa,acboxl,acvol,acvolsq,acvolume,acpres,acsurf,acEnthalpy,acEnthalpy1,solcount,acsolpar,avsolinter,avsolintra,avsolbend,avsoltor,avsolelc,mnbox,asetel,nccold1,bccold1,baver1,nccold,bccold,baver,aver1,stdev1,errme1,aver,stdev,errme,stat=jerr)
     allocate(nminp(ntmax),nmaxp(ntmax),ncmt_list(fmax,ntmax),ndist(0:nmax,ntmax),vstart(nbxmax),vend(nbxmax),pres(nbxmax)&
      ,molvol(nbxmax),speden(nbxmax),acdens(nbxmax,ntmax),molfra(nbxmax,ntmax),acnbox(nbxmax,ntmax),acnbox2(nbxmax,ntmax,20)&
      ,acv(nEnergy,nbxmax),acvsq(nEnergy,nbxmax),acvkjmol(nEnergy,nbxmax),acdipole(4,nbxmax),acdipolesq(4,nbxmax),acboxa(nbxmax,3)&
@@ -1644,6 +1648,7 @@ contains
        if (nchain.ne.2) call err_exit(__FILE__,__LINE__,'nchain must equal 2',myid+1)
     end if
 
+    if (allocated(io_box_movie)) deallocate(io_box_movie,stat=jerr)
     allocate(lhere(nntype),temphe(nntype),io_box_movie(nbxmax),ncarbon(ntmax),idummy(ntmax),qbox(nbxmax),nures(ntmax)&
      ,k_max_l(nbxmax),k_max_m(nbxmax),k_max_n(nbxmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'readdat: allocating system failed',jerr)
@@ -2158,6 +2163,7 @@ contains
     call mp_bcast(numax,1,rootid,groupid)
 
     if (numax.gt.0) then
+       if (allocated(lplace)) deallocate(lplace,lrigi,stat=jerr)
        allocate(lplace(ntmax,numax),lrigi(ntmax,numax),inclmol(ntmax*numax*numax),inclbead(ntmax*numax*numax,2)&
         ,inclsign(ntmax*numax*numax),ofscale(ntmax*numax*numax),ofscale2(ntmax*numax*numax),ainclmol(ntmax*numax*numax)&
         ,ainclbead(ntmax*numax*numax,2),a15t(ntmax*numax*numax),stat=jerr)
@@ -3042,7 +3048,7 @@ contains
              end do
           end if
        else
-          io_movie=-1
+          io_movie=10000000
        end if
 
        ! open xyz movie file for individual simulation box
@@ -3055,7 +3061,7 @@ contains
              if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open box movie file '//trim(file_box_movie),jerr)
           end do
        else
-          io_box_movie=-1
+          io_box_movie=10000000
        end if
 
        ! write out isolute movie header
@@ -3070,7 +3076,7 @@ contains
              end do
           end if
        else
-          io_solute=-1
+          io_solute=10000000
        end if
 
        ! cell parameters using crystallographic convention
@@ -3080,7 +3086,7 @@ contains
           open(unit=io_cell,access='stream',action='write',file=file_cell,form='formatted',iostat=jerr,status='unknown')
           if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open cell file '//trim(file_cell),jerr)
        else
-          io_cell=-1
+          io_cell=10000000
        end if
 
        ! set up info at beginning of fort.12 for analysis

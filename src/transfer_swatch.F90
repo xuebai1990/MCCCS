@@ -1258,6 +1258,7 @@ contains
     integer::jerr,i,j,k
     namelist /mc_swatch/ pmswat,nswaty,pmsatc
 
+    if (allocated(bnswat)) deallocate(bnswat,bnswat_empty,bsswat,stat=jerr)
     allocate(bnswat(npamax,npabmax,nbxmax),bnswat_empty(npamax,npabmax,nbxmax),bsswat(npamax,npabmax,nbxmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_swatch: allocation failed',jerr)
 

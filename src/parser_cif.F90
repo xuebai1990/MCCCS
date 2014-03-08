@@ -184,7 +184,7 @@ CONTAINS
                 ic=ib
              END DO
              scoord=scoord-floor(scoord)
-             call extend_molecule_type(zeo)
+             call extend_molecule_type(zeo,i)
              call fractionalToAbsolute(zeo%bead(i)%coord,scoord/zunit%dup,zcell)
              call setUpAtom(atom,i,zeo,lunitcell,ztype,zcell,zunit)
              CALL readLine(IOCIF,line,.true.,jerr)
@@ -219,7 +219,7 @@ CONTAINS
                    i = i + 1
                    call insert(lunitcell,.true.,i)
                    ia=zeo%bead(ic)%type
-                   call extend_molecule_type(zeo)
+                   call extend_molecule_type(zeo,i)
                    zeo%bead(i)%type=ia
                    ztype%num(ia)=ztype%num(ia)+1
                    zeo%bead(i)%coord=coord
@@ -235,7 +235,7 @@ CONTAINS
                    DO ia=0,zunit%dup(1)-1
                       IF (ia.ne.0.or.ib.ne.0.or.ic.ne.0) THEN
                          i=i+1
-                         call extend_molecule_type(zeo)
+                         call extend_molecule_type(zeo,i)
                          call insert(lunitcell,.false.,i)
                          zeo%bead(i)%type=zeo%bead(id)%type
                          ztype%num(zeo%bead(id)%type)=ztype%num(zeo%bead(id)%type)+1

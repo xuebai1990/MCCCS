@@ -513,11 +513,13 @@ contains
     use sim_system,only:nbxmax
     integer::jerr
 
+    if (allocated(hmat)) deallocate(hmat,hmati,cell_length,min_width,cell_vol,cell_ang,stat=jerr)
     allocate(hmat(nbxmax,9),hmati(nbxmax,9),cell_length(nbxmax,3),min_width(nbxmax,3),cell_vol(nbxmax),cell_ang(nbxmax,3),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'allocate_sim_cell: allocation failed',jerr)
 
     hmat=0.0E0_dp
 
+    if (allocated(icell)) deallocate(icell,stat=jerr)
     allocate(icell(nmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'allocate_sim_cell.linked_cell: allocation failed',jerr)
   end subroutine allocate_sim_cell

@@ -28,13 +28,10 @@ module zeolite
   logical,allocatable::lunitcell(:)
   logical::ltailcZeo=.true.,ltestztb=.false.,lpore_volume=.false.,lsurface_area=.false.
 
-  integer::nlayermax,num_points_interpolation=5,volume_probe=124,volume_nsample=20,area_probe=124,area_nsample=100
-  real,allocatable::my_zgrid(:,:,:),zgridMpi(:,:,:),zgrid(:,:,:,:,:),egrid(:,:,:,:),yjtmp(:),yktmp(:),yltmp(:),xt(:),yt(:),zt(:)
+  integer::nlayermax,n_pieces_ztb=1,num_points_interpolation=4,volume_probe=124,volume_nsample=20,area_probe=124,area_nsample=100
+  real,allocatable::my_zgrid(:,:,:),zgrid(:,:,:),egrid(:,:),yjtmp(:),yktmp(:),yltmp(:),xt(:),yt(:),zt(:)
   real::requiredPrecision=1.0E-2_dp,upperLimit=1.0E+5_dp
   character(LEN=default_path_length)::file_zeocoord='zeolite.cssr',file_ztb='zeolite.ztb',file_supercell=''
-
-  namelist /zeolite_in/ file_zeocoord,dgr,file_supercell,file_ztb,requiredPrecision,num_points_interpolation,upperLimit,ltailcZeo&
-   ,ltestztb,lpore_volume,volume_probe,volume_nsample,lsurface_area,area_probe,area_nsample
 
   type(MoleculeType)::zeo
   type(ZeoliteBeadType)::ztype
@@ -75,6 +72,9 @@ contains
 
     integer::io_input,jerr
 
+    namelist /zeolite_in/ file_zeocoord,dgr,file_supercell,file_ztb,n_pieces_ztb,requiredPrecision,num_points_interpolation,upperLimit,ltailcZeo&
+     ,ltestztb,lpore_volume,volume_probe,volume_nsample,lsurface_area,area_probe,area_nsample
+
     if (myid.eq.rootid) then
        io_input=get_iounit()
        open(unit=io_input,access='sequential',action='read',file=file_in,form='formatted',iostat=jerr,status='old')
@@ -89,6 +89,7 @@ contains
     call mp_bcast(dgr,1,rootid,groupid)
     call mp_bcast(file_supercell,rootid,groupid)
     call mp_bcast(file_ztb,rootid,groupid)
+    call mp_bcast(n_pieces_ztb,1,rootid,groupid)
     call mp_bcast(requiredPrecision,1,rootid,groupid)
     call mp_bcast(num_points_interpolation,1,rootid,groupid)
     call mp_bcast(upperLimit,1,rootid,groupid)
@@ -189,8 +190,8 @@ contains
 
     mend=num_points_interpolation/2
     mstart=mend+1-num_points_interpolation
-    allocate(zgrid(3,ztype%ntype,0:zunit%ngrid(1)-1,0:zunit%ngrid(2)-1,0:zunit%ngrid(3)-1)&
-     ,egrid(0:zunit%ngrid(1)-1,0:zunit%ngrid(2)-1,0:zunit%ngrid(3)-1,zpot%ntype),zpot%param(3,ztype%ntype,zpot%ntype)&
+    if (allocated(egrid)) deallocate(egrid,zpot%param,zpot%table,yjtmp,yktmp,yltmp,xt,yt,zt,stat=jerr)
+    allocate(egrid(0:product(zunit%ngrid(1:3))-1,zpot%ntype),zpot%param(3,ztype%ntype,zpot%ntype)&
      ,zpot%table(zpot%ntype),yjtmp(mstart:mend),yktmp(mstart:mend),yltmp(mstart:mend),xt(mstart:mend),yt(mstart:mend)&
      ,zt(mstart:mend),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'addAllBeadTypes: allocation failed',myid+1)
@@ -220,16 +221,64 @@ contains
     end do
   end subroutine addAllBeadTypes
 
+!DEC$ ATTRIBUTES FORCEINLINE :: idx
+  integer function idx(i,j,k)
+    integer,intent(in)::i,j,k
+
+    idx=(k*zunit%ngrid(2)+j)*zunit%ngrid(1)+i
+  end function idx
+
+  subroutine combine_energies(zgrid,egrid,n_points_per_piece,ltailcZeotmp,rcuttmp)
+    integer,intent(in)::n_points_per_piece
+    real,intent(in)::zgrid(1:3,1:ztype%ntype,0:n_points_per_piece-1)
+    real,intent(out)::egrid(0:n_points_per_piece-1,1:zpot%ntype)
+    real,intent(in)::rcuttmp
+    logical,intent(in)::ltailcZeotmp
+    integer::i,j,k,idi,idj
+    real::rci3,rci9,rho
+
+    if (ltailczeo.and..not.ltailcZeotmp) then
+       rci3=1._dp/rcuttmp**3
+       rci9=LJScaling*LJScaling*rci3**3
+       rci3=LJScaling*rci3
+    end if
+
+    egrid=0._dp
+    forall(k=0:n_points_per_piece-1,zgrid(1,1,k).ge.overlapValue) egrid(k,:)=overlapValue
+
+    do j=1,ztype%ntype
+       idj=ztype%type(j)
+       if (lij(idj).or.lqchg(idj)) then
+          rho=ztype%num(j)/zcell%vol
+          do i=1,zpot%ntype
+             idi=zpot%table(i)
+             if (lij(idj).and.lij(idi)) then
+                where(egrid(:,i).lt.overlapValue) egrid(:,i)=egrid(:,i)+zgrid(1,j,:)*zpot%param(1,j,i)&
+                 -zgrid(2,j,:)*zpot%param(2,j,i)
+                if (ltailczeo.and..not.ltailcZeotmp) then
+                   where(egrid(:,i).lt.overlapValue) egrid(:,i)=egrid(:,i)+twopi*rho*(rci9*zpot%param(1,j,i)/9_dp&
+                    -rci3*zpot%param(2,j,i)/3_dp)
+                end if
+             end if
+             if (lqchg(idj).and.lqchg(idi)) then
+                where(egrid(:,i).lt.overlapValue) egrid(:,i)=egrid(:,i)&
+                 +qqfact*qelect(idi)*qelect(idj)*zgrid(3,j,:)
+             end if
+          end do
+       end if
+    end do
+  end subroutine combine_energies
+
   subroutine suzeo(lprint)
     use util_search,only:indexOf
     use util_string,only:format_n
     use util_mp,only:mp_bcast,mp_set_displs,mp_allgather
     logical,intent(in)::lprint
     character(LEN=128)::atom
-    integer::rcounts(numprocs),displs(numprocs),io_ztb,igtype,idi,idj,jerr,sw,i,j,k,oldi,oldj,oldk,st,p,my_start,my_end,blocksize&
-     ,nynx,ngridtmp(3),zntypetmp
-    real::wzeo,zunittmp(3),zangtmp(3),rcuttmp,rci3,rci9,rho
-    logical::lewaldtmp,ltailczeotmp,lshifttmp
+    integer::rcounts(numprocs),displs(numprocs),io_ztb,jerr,i,j,k,st,st0,p,r,n_points_per_piece,my_start,my_end,blocksize&
+     ,nznynx,nynx,ngridtmp(3),zntypetmp
+    real::wzeo,zunittmp(3),zangtmp(3),rcuttmp
+    logical::lewaldtmp,ltailczeotmp,lshifttmp,is_ztb_complete
 
     do i=1,ztype%ntype
        ztype%type(i)=indexOf(atoms,ztype%type(i))
@@ -270,179 +319,125 @@ contains
 
     nlayermax=0
     nynx=product(zunit%ngrid(1:2))
+    nznynx=nynx*zunit%ngrid(3)
+    n_points_per_piece=ceiling(real(nznynx,dp)/n_pieces_ztb,dp)
+    allocate(my_zgrid(3,ztype%ntype,0:ceiling(real(n_points_per_piece,dp)/numprocs,dp)-1),zgrid(3,ztype%ntype,0:n_points_per_piece-1),stat=jerr)
+    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'suzeo: allocation failed',myid+1)
 
     if (myid.eq.rootid) then
+       st=0
+       lewaldtmp=lewald
+       ltailczeotmp=ltailcZeo
+       lshifttmp=lshift
+       rcuttmp=zcell%cut
+
        io_ztb=get_iounit()
        open(unit=io_ztb,access='stream',action='read',file=file_ztb,form='unformatted',iostat=jerr,status='old')
        if (jerr.eq.0) then
           ! read zeolite table from disk
+          is_ztb_complete=.false.
           if (lprint) write(io_output,*) 'read in tabulated potential:'
-          read(io_ztb) zunittmp,zangtmp,ngridtmp,zntypetmp,lewaldtmp,ltailczeotmp,lshifttmp,rcuttmp
+          read(io_ztb,end=100) zunittmp,zangtmp,ngridtmp,zntypetmp,lewaldtmp,ltailczeotmp,lshifttmp,rcuttmp
           if (ANY(abs(zunittmp-zunit%boxl).gt.eps).or.ANY(ngridtmp.ne.zunit%ngrid).or.(zntypetmp.ne.ztype%ntype))&
            call err_exit(__FILE__,__LINE__,'problem 1 in zeolite potential table',myid+1)
-          do igtype=1,ztype%ntype
-             read(io_ztb) atom
-             if (trim(ztype%name(igtype))/=trim(atom)) then
-                write(io_output,*) igtype,' atom should be ',trim(atom)
+          do i=1,ztype%ntype
+             read(io_ztb,end=100) atom
+             if (trim(ztype%name(i))/=trim(atom)) then
+                write(io_output,*) i,' atom should be ',trim(atom)
                 call err_exit(__FILE__,__LINE__,'problem 2 in zeolite potential table',myid+1)
              end if
           end do
-          do k=0,zunit%ngrid(3)-1
-             do j=0,zunit%ngrid(2)-1
-                do i=0,zunit%ngrid(1)-1
-                   do igtype=1,ztype%ntype
-                      do sw=1,3
-                         read(io_ztb,end=100) zgrid(sw,igtype,i,j,k)
-                      end do
-                   end do
-                end do
-             end do
+          do p=0,n_pieces_ztb-1
+             n_points_per_piece=ceiling(real(nznynx-st,dp)/(n_pieces_ztb-p),dp)
+             read(io_ztb,end=100) zgrid(1:3,1:ztype%ntype,0:n_points_per_piece-1)
+             call combine_energies(zgrid(1:3,1:ztype%ntype,0:n_points_per_piece-1),egrid(st:st+n_points_per_piece-1,:),n_points_per_piece,ltailcZeotmp,rcuttmp)
+             st=st+n_points_per_piece
           end do
-          ! if (myid.eq.rootid) then
-          !    rcuttmp=10.0E0_dp
-          !    close(io_ztb)
-          !    open(unit=io_ztb,access='stream',action='write',file=file_ztb,form='unformatted',iostat=jerr,status='unknown')
-          !    if (jerr.ne.0) then
-          !       call err_exit(__FILE__,__LINE__,'cannot create file for tabulated potential',myid+1)
-          !    end if
-          !    write(io_ztb) zunittmp,zangtmp,ngridtmp,zntypetmp,lewaldtmp,ltailczeotmp,lshifttmp,rcuttmp
-          !    do igtype=1,ztype%ntype
-          !       write(io_ztb) ztype%name(igtype)
-          !    end do
-          !    write(io_ztb) zgrid
-          ! end if
-       else
-          oldi=0
-          oldj=0
-          oldk=0
-          st=0
-          lewaldtmp=lewald
-          ltailczeotmp=ltailcZeo
-          lshifttmp=lshift
-          rcuttmp=zcell%cut
-       end if
+          is_ztb_complete=.true.
 
-100    if (jerr.eq.0.and.(sw.le.3..or.igtype.le.ztype%ntype.or.i.lt.zunit%ngrid(1).or.j.lt.zunit%ngrid(2).or.k.lt.zunit%ngrid(3)))&
-        then
-          oldi=i
-          oldj=j
-          oldk=k
-          st=k*nynx+j*zunit%ngrid(1)
-          jerr=1
-          close(io_ztb)
-          write(io_output,*) sw,igtype,oldi,oldj,oldk
+100       if (.not.is_ztb_complete) then
+             jerr=1
+             close(io_ztb)
+             write(io_output,*) st,' points read in.'
+          end if
        end if
     end if
 
     call mp_bcast(jerr,1,rootid,groupid)
-    if (jerr.ne.0) then
-       call mp_bcast(st,1,rootid,groupid)
-       call mp_bcast(lewaldtmp,1,rootid,groupid)
-       call mp_bcast(lshifttmp,1,rootid,groupid)
-    end if
     call mp_bcast(ltailcZeotmp,1,rootid,groupid)
     call mp_bcast(rcuttmp,1,rootid,groupid)
 
     if (jerr.ne.0) then
+       call mp_bcast(st,1,rootid,groupid)
+       call mp_bcast(lewaldtmp,1,rootid,groupid)
+       call mp_bcast(lshifttmp,1,rootid,groupid)
        ! make a tabulated potential of the zeolite
        if (myid.eq.rootid) then
           write(io_output,*) 'make tabulated potential'
-          open(unit=io_ztb,access='stream',action='write',file=file_ztb,form='unformatted',iostat=jerr,status='unknown')
+          open(unit=io_ztb,access='stream',action='readwrite',file=file_ztb,form='unformatted',iostat=jerr,status='unknown')
           if (jerr.ne.0) then
              call err_exit(__FILE__,__LINE__,'cannot create file for tabulated potential',myid+1)
           end if
-          write(io_ztb) zunit%boxl,zcell%ang(1)%val,zcell%ang(2)%val,zcell%ang(3)%val,zunit%ngrid,ztype%ntype,lewald,ltailcZeo&
-           ,lshift,zcell%cut
-          do igtype=1,ztype%ntype
-             write(io_ztb) ztype%name(igtype)
-          end do
+          if (st.eq.0) then
+             write(io_ztb) zunit%boxl,zcell%ang(1)%val,zcell%ang(2)%val,zcell%ang(3)%val,zunit%ngrid,ztype%ntype,lewald,ltailcZeo&
+              ,lshift,zcell%cut
+             do i=1,ztype%ntype
+                write(io_ztb) ztype%name(i)
+             end do
+          else
+             read(io_ztb) zunittmp,zangtmp,ngridtmp,zntypetmp,lewaldtmp,ltailczeotmp,lshifttmp,rcuttmp
+             do i=1,ztype%ntype
+                read(io_ztb) atom
+             end do
+          end if
           write(io_output,*) 'time 1:',time_now()
        end if
-#ifdef __OPENMP__
-       do k=0,zunit%ngrid(3)-1
-          do j=0,zunit%ngrid(2)-1
+
+       st0=st
+       st=0
+       do p=0,n_pieces_ztb-1
+          n_points_per_piece=ceiling(real(nznynx-st,dp)/(n_pieces_ztb-p),dp)
+          if (st.lt.st0) then
+             call mp_bcast(egrid(st:st+n_points_per_piece-1,:),zpot%ntype*n_points_per_piece,rootid,groupid)
+             if (myid.eq.rootid) read(io_ztb) zgrid(:,:,0:n_points_per_piece-1)
+             st=st+n_points_per_piece
+             cycle
+          end if
+          blocksize = n_points_per_piece / numprocs
+          rcounts = blocksize
+          blocksize = n_points_per_piece - blocksize*numprocs
+          if (blocksize.gt.0) rcounts(1:blocksize) = rcounts(1:blocksize) + 1
+          call mp_set_displs(rcounts,displs,blocksize,numprocs)
+          my_start = displs(myid+1) + st
+          my_end = my_start + rcounts(myid+1) - 1
+
 !$omp parallel &
-!$omp private(i) shared(k,j,zgrid) default(shared)
+!$omp private(r,i,j,k) shared(my_start,my_end,my_zgrid) default(shared)
 !$omp do
-             do i=0,zunit%ngrid(1)-1
-                if (k.gt.oldk.or.(k.eq.oldk.and.j.ge.oldj)) then
-                   ! pass to exzeof arguments in fractional coordinates with respect to the unit cell
-                   call exzeof(zgrid(:,:,i,j,k),real(i,dp)/zunit%ngrid(1),real(j,dp)/zunit%ngrid(2),real(k,dp)/zunit%ngrid(3))
-                end if
-!$omp end parallel
-             end do
-             if (myid.eq.rootid) write(io_ztb) zgrid(:,:,:,j,k)
+          do r=my_start,my_end
+             k=r/(nynx)
+             j=(r-k*nynx)/zunit%ngrid(1)
+             i=r-k*nynx-j*zunit%ngrid(1)
+             ! pass to exzeof arguments in fractional coordinates with respect to the unit cell
+             call exzeof(my_zgrid(:,:,r-my_start),real(i,dp)/zunit%ngrid(1),real(j,dp)/zunit%ngrid(2),real(k,dp)/zunit%ngrid(3))
           end do
-       end do
-#else
-       blocksize = (nynx*zunit%ngrid(3) - st) / numprocs
-       rcounts = blocksize
-       blocksize = nynx*zunit%ngrid(3) - st - blocksize*numprocs
-       if (blocksize.gt.0) rcounts(1:blocksize) = rcounts(1:blocksize) + 1
-       call mp_set_displs(rcounts,displs,blocksize,numprocs)
-       my_start = displs(myid+1) + st
-       my_end = my_start + rcounts(myid+1) - 1
+!$omp end parallel
 
-       allocate(zgridMpi(3,ztype%ntype,0:product(zunit%ngrid(1:3))-1),my_zgrid(3,ztype%ntype,0:rcounts(myid+1)-1),stat=jerr)
-       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'suzeo: allocation failed',myid+1)
-       zgridMpi = reshape(zgrid,shape(zgridMpi))
-
-       sw=-1
-       do p=my_start,my_end
-          sw=sw+1
-          k=p/(nynx)
-          j=(p-k*nynx)/zunit%ngrid(1)
-          i=p-k*nynx-j*zunit%ngrid(1)
-          ! pass to exzeof arguments in fractional coordinates with respect to the unit cell
-          call exzeof(my_zgrid(:,:,sw),real(i,dp)/zunit%ngrid(1),real(j,dp)/zunit%ngrid(2),real(k,dp)/zunit%ngrid(3))
+          call mp_allgather(my_zgrid,zgrid(:,:,0:n_points_per_piece-1),rcounts,displs,groupid)
+          if (myid.eq.rootid) write(io_ztb) zgrid(:,:,0:n_points_per_piece-1)
+          call combine_energies(zgrid(1:3,1:ztype%ntype,0:n_points_per_piece-1),egrid(st:st+n_points_per_piece-1,:),n_points_per_piece,ltailcZeotmp,rcuttmp)
+          st=st+n_points_per_piece
        end do
 
-       call mp_allgather(my_zgrid,zgridMpi(:,:,st:),rcounts,displs,groupid)
-       zgrid=reshape(zgridMpi,shape(zgrid))
-       if (myid.eq.rootid) write(io_ztb) zgrid
-       deallocate(zgridMpi,my_zgrid)
-#endif
        if (myid.eq.rootid) then
           write(io_output,*) 'time 2:',time_now()
           if (ltailcZeo) write(io_output,*) 'maxlayer = ',nlayermax
        end if
     end if
 
-    if (ltailczeo.and..not.ltailcZeotmp) then
-       rci3=1._dp/rcuttmp**3
-       rci9=LJScaling*LJScaling*rci3**3
-       rci3=LJScaling*rci3
-    end if
-
-    egrid=0._dp
-    forall(k=0:zunit%ngrid(3)-1,j=0:zunit%ngrid(2)-1,i=0:zunit%ngrid(1)-1,zgrid(1,1,i,j,k).ge.overlapValue)&
-     egrid(i,j,k,:)=overlapValue
-
-    do j=1,ztype%ntype
-       idj=ztype%type(j)
-       if (lij(idj).or.lqchg(idj)) then
-          rho=ztype%num(j)/zcell%vol
-          do i=1,zpot%ntype
-             idi=zpot%table(i)
-             if (lij(idj).and.lij(idi)) then
-                where(egrid(:,:,:,i).lt.overlapValue) egrid(:,:,:,i)=egrid(:,:,:,i)+zgrid(1,j,:,:,:)*zpot%param(1,j,i)&
-                 -zgrid(2,j,:,:,:)*zpot%param(2,j,i)
-                if (ltailczeo.and..not.ltailcZeotmp) then
-                   where(egrid(:,:,:,i).lt.overlapValue) egrid(:,:,:,i)=egrid(:,:,:,i)+twopi*rho*(rci9*zpot%param(1,j,i)/9_dp&
-                    -rci3*zpot%param(2,j,i)/3_dp)
-                end if
-             end if
-             if (lqchg(idj).and.lqchg(idi)) then
-                where(egrid(:,:,:,i).lt.overlapValue) egrid(:,:,:,i)=egrid(:,:,:,i)&
-                 +qqfact*qelect(idi)*qelect(idj)*zgrid(3,j,:,:,:)
-             end if
-          end do
-       end if
-    end do
-
     if (ltestztb.or.lpore_volume) call ztest()
 
-    deallocate(lunitcell,zgrid,zeo%bead,ztype%type,ztype%num,ztype%radiisq,ztype%name,zpot%param)
+    deallocate(lunitcell,my_zgrid,zgrid,zeo%bead,ztype%type,ztype%num,ztype%radiisq,ztype%name,zpot%param)
     if (lprint) then
        close(io_ztb)
        write(io_output,'(4(A,L1),A,G10.3,A)') 'lewald[',lewaldtmp,'] ltailc[',ltailcZeotmp,'] lshift['&
@@ -659,7 +654,7 @@ contains
        mstart=mend+1-num_points_interpolation
 
        ! test if in the reasonable regime
-       if (egrid(j,k,l,igtype).ge.upperLimit) return
+       if (egrid(idx(j,k,l),igtype).ge.upperLimit) return
        ! block centered around: j,k,l
        ! set up hulp array: (allow for going beyond unit cell
        ! for polynom fitting)
@@ -682,7 +677,7 @@ contains
                 xt(j0)=scoord(1)*zunit%hmat(1,1)+scoord(2)*zunit%hmat(1,2)+scoord(3)*zunit%hmat(1,3)
                 if (jp.lt.0) jp=jp+zunit%ngrid(1)
                 if (jp.ge.zunit%ngrid(1)) jp=jp-zunit%ngrid(1)
-                yjtmp(j0)=egrid(jp,kp,lp,igtype)
+                yjtmp(j0)=egrid(idx(jp,kp,lp),igtype)
                 if (yjtmp(j0).ge.upperLimit) return
              end do
              call polint(xt,yjtmp,num_points_interpolation,r(1),yktmp(k0))

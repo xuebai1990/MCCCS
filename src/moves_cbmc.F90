@@ -6881,6 +6881,7 @@ contains
 
   subroutine allocate_cbmc()
     integer::jerr
+    if (allocated(vtr)) deallocate(vtr,vtrorient,vtrelect_intra,vtrelect_inter,bfac,rxp,ryp,rzp,vwellipswot,vwellipswnt,vipswot,vipswnt,lovr,vtvib,vtgtr,vtbend,bsum_tor,stat=jerr)
     allocate(vtr(nEnergy,nchmax),vtrorient(nchmax)&
      ,vtrelect_intra(nchmax),vtrelect_inter(nchmax),bfac(nchmax)&
      ,rxp(numax,nchmax),ryp(numax,nchmax),rzp(numax,nchmax)&
@@ -6902,6 +6903,7 @@ contains
      ,rbsmax,rbsmin,avbmc_version,pmbias,pmbsmt,pmbias2&
      ,pmfix,lrig,lpresim,iupdatefix
 
+    if (allocated(lexshed)) deallocate(lexshed,llplace,lpnow,lsave,bncb,bscb,fbncb,fbscb,iend,ipast,pastnum,fclose,fcount,iwbef,ibef,befnum,xx,yy,zz,distij,nextnum,inext,kforceb,equilb,flength,vequil,vkforce,rlist,rfrom,rprev,rnum,iplace,pfrom,pnum,pprev,avbmc_version,stat=jerr)
     allocate(lexshed(numax),llplace(ntmax),lpnow(numax),lsave(numax),bncb(ntmax,numax),bscb(ntmax,2,numax),fbncb(ntmax,numax)&
      ,fbscb(ntmax,2,numax),iend(numax),ipast(numax,numax),pastnum(numax),fclose(numax,numax),fcount(numax),iwbef(numax)&
      ,ibef(numax,numax),befnum(numax),xx(numax),yy(numax),zz(numax),distij(numax,numax),nextnum(numax),inext(numax,numax)&

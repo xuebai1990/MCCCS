@@ -83,6 +83,7 @@ contains
     initialized=DONE
 
     if (nStream.gt.1) then
+       if (allocated(rng)) deallocate(rng,stat=ierr)
        allocate(rng(0:nStream-1),stat=ierr)
        if (ierr.ne.0) call err_exit(__FILE__,__LINE__,'RANSET: allocation error',ierr)
 

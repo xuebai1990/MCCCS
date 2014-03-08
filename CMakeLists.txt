@@ -3,7 +3,10 @@
 INCLUDE(CMakeForceCompiler)
 
 cmake_minimum_required(VERSION 2.6)
-project(MCCCS Fortran)
+project(MCCCS C CXX Fortran)
+
+include(FortranCInterface)
+FortranCInterface_HEADER(topmon_fortran_interface.h MACRO_NAMESPACE "topmon_" SYMBOLS sim_system:setup_mpi topmon_main:monola)
 
 # make sure that the default is a RELEASE
 if(NOT CMAKE_BUILD_TYPE)
@@ -59,13 +62,6 @@ endif()
 option(USE_MPI "Build a parallel version using message passing interface." ON)
 option(USE_OPENMP "Build a parallel version using threads (shared memory). Cannot combine with USE_MPI yet." OFF)
 
-if(USE_MPI)
-  if(USE_OPENMP)
-    message(WARNING "Thread-based parallelization conflicts with MPI.")
-    set(USE_OPENMP OFF CACHE BOOL "Build a parallel version using threads (shared memory). Cannot combine with USE_MPI yet." FORCE)
-  endif()
-endif()
-
 option(DOUBLE_PRECISION "Turn on to use double precision (real*8) floating numbers" ON)
 if(DOUBLE_PRECISION)
   add_definitions(-D__DOUBLE_PRECISION__)
@@ -74,6 +70,84 @@ endif()
 option(USE_OWN "Use own implementation of certain math functions instead of system-provided ones" ON)
 if(USE_OWN)
   add_definitions(-D__USEOWN__)
+endif()
+
+option(JOB_FARMING "C++ main program manages job distribution and calls topmon Fortran code" OFF)
+if(JOB_FARMING)
+  FortranCInterface_VERIFY(CXX)
+endif()
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} $ENV{CXX_FLAGS}" CACHE STRING "Flags used by the compiler during all build types." FORCE)
+
+# CFLAGS depend on the compiler
+get_filename_component(CXX_COMPILER_NAME ${CMAKE_CXX_COMPILER} NAME)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  # g++
+  set(CMAKE_CXX_FLAGS_RELEASE "-O3 -mtune=native -march=native -ffast-math -fassociative-math -freciprocal-math -fno-signed-zeros -fno-trapping-math -funroll-loops")
+  set(CMAKE_CXX_FLAGS_DEBUG   "-O0 -g -fbounds-check -Wall -Wextra -D__DEBUG__")
+  if(USE_OPENMP)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+  endif()
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+  # icpc
+  set(CMAKE_CXX_FLAGS_RELEASE "-O3 -xHost -ipo -no-prec-div")
+  set(CMAKE_CXX_FLAGS_DEBUG   "-O0 -g -traceback -check all -warn unused -warn declarations -warn truncated_source -warn uncalled -warn ignore_loc -stand f08 -D__DEBUG__")
+  if(USE_OPENMP)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -openmp")
+  endif()
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "PGI")
+  # pgcpp/pgc++
+  set(CMAKE_CXX_FLAGS_RELEASE "-fast -Mipa=fast,inline -O4 -Msmartalloc -Mfprelaxed -Mstack_arrays")
+  set(CMAKE_CXX_FLAGS_DEBUG   "-O0 -g -traceback -Mbounds -Mchkfpstk -Mchkptr -Mchkstk -D__DEBUG__")
+  if(USE_OPENMP)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mp=allcores")
+  endif()
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "XL")
+  # xlc++ from IBM
+  set(CMAKE_CXX_FLAGS_RELEASE "-O5 -qprefetch=aggressive -qunroll=yes")
+  set(CMAKE_CXX_FLAGS_DEBUG   "-O0 -g9 -qstrict -qcheck -qextchk -qflttrap -D__DEBUG__")
+  if(USE_OPENMP)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -qsmp=omp")
+  endif()
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "SunPro")
+  # (sun)CC from Oracle
+  set(CMAKE_CXX_FLAGS_RELEASE "-fast -xipo=2 -xipo_archive=readonly -xprefetch=yes -xprefetch_level=3 -xprefetch_auto_type=indirect_array_access -xvector=simd -m64 -u")
+  set(CMAKE_CXX_FLAGS_DEBUG   "-g -traceback -u -C -xcheck=%all -xcommonchk=yes -w4 -Xlist -D__DEBUG__")
+  if(USE_OPENMP)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -xopenmp")
+  endif()
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MIPSpro")
+  # CC from SGI for Origin; Open64 (initially known as Pro64)
+  set(CMAKE_CXX_FLAGS_RELEASE "-O3 -IPA -mips4 -r12000 -OPT:IEEE_arithmetic=3") #Ofast[=ipxx]
+  set(CMAKE_CXX_FLAGS_DEBUG   "-O0 -g -DEBUG:verbose_runtime:subscript_check=ON:div_check=3:fullwarn")
+  if(USE_OPENMP)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mp")
+  endif()
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "PathScale")
+  # pathCC (derived from MIPSPro)
+  set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -march=auto -inline -funsafe-math-optimizations -OPT:IEEE_arithmetic=3")
+  set(CMAKE_CXX_FLAGS_DEBUG   "-O0 -g2 -ffortran-bounds-check -trapuv -Wall -fullwarn -D__DEBUG__")
+  if(USE_OPENMP)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mp")
+  endif()
+else()
+  message("CMAKE_CXX_COMPILER full path: " ${CMAKE_CXX_COMPILER})
+  message("C++ compiler: " ${CXX_COMPILER_NAME})
+  message("No optimized C++ compiler flags are known, we just try -O2...")
+  set(CMAKE_CXX_FLAGS_RELEASE "-O2")
+  set(CMAKE_CXX_FLAGS_DEBUG   "-O0 -g")
+endif()
+
+if(NOT "${CXX_COMPILER_NAME}" STREQUAL "${SAVE_CXX_COMPILER_NAME}")
+  set(SAVE_CXX_COMPILER_NAME "${CXX_COMPILER_NAME}" CACHE INTERNAL "Compiler name when the cache was generated." FORCE)
+
+  set(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} CACHE STRING "Flags used by the compiler during RELEASE builds." FORCE)
+  set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG} CACHE STRING "Flags used by the compiler during DEBUG builds." FORCE)
+else()
+  # use cache values
+  unset(CMAKE_CXX_FLAGS_RELEASE)
+  unset(CMAKE_CXX_FLAGS_DEBUG)
 endif()
 
 set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} $ENV{FC_FLAGS}" CACHE STRING "Flags for Fortran compiler." FORCE)
@@ -212,9 +286,9 @@ elseif(PROFILER STREQUAL "scalasca")
 endif()
 
 # Set the compiler name to the wrapper, if necessary
-if (DEFINED COMPILER_WRAPPER)
+if(DEFINED COMPILER_WRAPPER)
   CMAKE_FORCE_Fortran_COMPILER(${COMPILER_WRAPPER} ${CMAKE_Fortran_COMPILER_ID})
-endif ()
+endif()
 
 set(EXTRA_LIBRARIES)
 
@@ -223,7 +297,9 @@ if(APPLE)
    list(APPEND EXTRA_LIBRARIES ${ACCELERATE_FRAMEWORK})
 endif()
 
+set(C_INCLUDE_DIRS)
 set(Fortran_INCLUDE_DIRS)
+set(CXX_LINK_FLAGS)
 set(Fortran_LINK_FLAGS)
 
 if(USE_MPI)
@@ -233,11 +309,19 @@ if(USE_MPI)
   endif()
 
   find_package(MPI) # REQUIRED)
-  if(MPI_Fortran_FOUND)
+  if(MPI_FOUND OR MPI_Fortran_FOUND)
     add_definitions(-D__MPI__)
+
+    list(APPEND EXTRA_LIBRARIES ${MPI_LIBRARIES})
     list(APPEND EXTRA_LIBRARIES ${MPI_Fortran_LIBRARIES})
+
+    list(APPEND C_INCLUDE_DIRS ${MPI_INCLUDE_PATH})
     list(APPEND Fortran_INCLUDE_DIRS ${MPI_Fortran_INCLUDE_PATH})
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_COMPILE_FLAGS}")
     set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${MPI_Fortran_COMPILE_FLAGS}")
+
+    set(CXX_LINK_FLAGS "${CXX_LINK_FLAGS} ${MPI_LINK_FLAGS}")
     set(Fortran_LINK_FLAGS "${Fortran_LINK_FLAGS} ${MPI_Fortran_LINK_FLAGS}")
   else()
     message(FATAL_ERROR "MPI support requested, but no MPI compiler found.")

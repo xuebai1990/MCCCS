@@ -1717,7 +1717,7 @@ contains
 
 !> \brief Read in non-bonded potentials
   subroutine read_ff(io_ff,lmixlb,lmixjo)
-    use util_search,only:initiateTable,addToTable,indexOf,tightenTable
+    use util_search,only:initiateTable,destroyTable,addToTable,indexOf,tightenTable
     use util_memory,only:reallocate
     use util_mp,only:mp_bcast
     use energy_intramolecular,only:read_ff_bonded
@@ -1731,6 +1731,10 @@ contains
     integer::jerr,i,j,ij,ji,nmix,itmp
 
     !> Looking for section ATOMS
+    if (allocated(atoms%list)) then
+       call destroyTable(atoms)
+       deallocate(atom_type,vvdW_b,qelect,mass,lij,lqchg,chemid,stat=jerr)
+    end if
     nntype=0
     if (myid.eq.rootid) then
        rewind(io_ff)
@@ -1814,6 +1818,7 @@ contains
 
        nmix=nntype*nntype
 
+       if (allocated(lpl)) deallocate(lpl,xiq,jayself,nonbond_type,vvdW,rminee,ecut,jayq,stat=jerr)
        allocate(lpl(1:nntype),xiq(1:nntype),jayself(1:nntype),nonbond_type(1:nmix),vvdW(1:4,1:nmix),rminee(1:nmix),ecut(1:nmix)&
         ,jayq(1:nmix),stat=jerr)
        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_pairwise: nonbond allocation failed',jerr)
@@ -2470,12 +2475,14 @@ contains
     end if
 
     if (ANY(nonbond_type(:).eq.-1)) then
+       if (allocated(vdWsplits)) deallocate(vdWsplits,rvdW,tabvdW,stat=jerr)
        allocate(vdWsplits(1:nntype,1:nntype),rvdW(1:grid_size,1:nntype,1:nntype),tabvdW(1:grid_size,1:nntype,1:nntype),stat=jerr)
        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'read_tabulated_potential_pair: allocation failed for vdW_table',myid+1)
        call read_table('fort.43',ntabvdW,rvdW,tabvdW,vdWsplits,atoms,lij)
     end if
 
     if (L_elect_table) then
+       if (allocated(electsplits)) deallocate(electsplits,relect,tabelect,stat=jerr)
        allocate(electsplits(1:nntype,1:nntype),relect(1:grid_size,1:nntype,1:nntype),tabelect(1:grid_size,1:nntype,1:nntype)&
         ,stat=jerr)
        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'read_tabulated_potential_pair: allocation failed for elect_table',myid+1)

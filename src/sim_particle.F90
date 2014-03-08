@@ -46,17 +46,19 @@ MODULE sim_particle
   real::ndiji(maxneigh),nxiji(maxneigh),nyiji(maxneigh),nziji(maxneigh)
 
 contains
-  SUBROUTINE extend_molecule_type(p)
-    integer array_size
+  SUBROUTINE extend_molecule_type(p,i)
     type(MoleculeType),intent(inout)::p
-    type(MoleculeType) p_temp
-    if (.not. allocated(p%bead)) then
-       allocate(p%bead(1))
+    integer,intent(in)::i
+    type(MoleculeType)::p_temp
+    integer::array_size
+    if (.not.allocated(p%bead)) then
+       allocate(p%bead(i:i+999))
     else
        array_size=size(p%bead)
-       if (allocated(p_temp%bead)) deallocate(p_temp%bead)
-       allocate(p_temp%bead(array_size+1))
+       if (i.le.array_size) return
+       allocate(p_temp%bead(i+999))
        p_temp%bead(1:array_size) = p%bead
+       deallocate(p%bead)
        call move_alloc(p_temp%bead,p%bead)
     endif
   END SUBROUTINE extend_molecule_type
@@ -327,6 +329,7 @@ contains
        end do
     end if
 
+    if (allocated(lnn)) deallocate(lnn,lnn_t,upnn,upnnsq,upnndg,neighbor,neigh_cnt,neighboro,neigh_o,ndij,nxij,nyij,nzij,ndijo,nxijo,nyijo,nzijo,stat=jerr)
     allocate(lnn(nmax,nmax),lnn_t(nmax,nmax),upnn(nbxmax),upnnsq(nbxmax),upnndg(ntmax,nbxmax),neighbor(maxneigh,nmax)&
      ,neigh_cnt(nmax),neighboro(maxneigh,nmax),neigh_o(nmax),ndij(maxneigh,nmax),nxij(maxneigh,nmax),nyij(maxneigh,nmax)&
      ,nzij(maxneigh,nmax),ndijo(maxneigh,nmax),nxijo(maxneigh,nmax),nyijo(maxneigh,nmax),nzijo(maxneigh,nmax),stat=jerr)
