@@ -325,6 +325,10 @@ module sim_system
   !	real,parameter::a0 = -0.48137E0_dp,b0 = -0.11887E0_dp,aslope = 36.99125E5_dp,bslope = 1041.25E0_dp,ashift = 2.4744E5_dp,bshift = 306.23E0_dp ! slope = 0.9 a=2.32
   !	real,parameter::a0 = 0.0E0_dp,b0 = 0.0E0_dp,aslope = 3.0E5_dp,bslope = 0.0E0_dp,ashift = 8.0E5_dp,bshift = 1200.0E0_dp ! slope = 0.3 a=2.85
 
+  !==Screening related variables
+  real,allocatable::setedist(:),Uads(:),Wrosen(:)
+  logical,allocatable::poredim(:,:)
+
   type(LookupTable)::atoms
 
 CONTAINS
@@ -363,6 +367,13 @@ CONTAINS
      ,ijtor2(ntmax,initial_size,ntor_max),ijtor3(ntmax,initial_size,ntor_max),ijtor4(ntmax,initial_size,ntor_max)&
      ,irotbd(initial_size,ntmax),pmrotbd(initial_size,ntmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'allocate_system.2: allocation failed',jerr)
+
+    if (allocated(setedist)) deallocate(setedist,Uads,Wrosen,poredim)
+    allocate(setedist(ntmax),Uads(ntmax),Wrosen(ntmax),poredim(3,ntmax))
+    setedist=0._dp
+    Uads=0._dp
+    Wrosen=0._dp
+    poredim=.false.
   end subroutine allocate_system
 
   subroutine allocate_molecule()

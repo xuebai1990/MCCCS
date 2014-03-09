@@ -1365,7 +1365,30 @@ contains
           end if
           if (boxins.eq.1) then
              ! molecule added to box 1
-             wratio = weight/bsum * volins * B(imolty) / real(ncmt(boxins,imolty)+1,dp)
+             weight = weight/bsum
+             wratio = weight * volins * B(imolty) / real(ncmt(boxins,imolty)+1,dp)
+             if (nchbox(1).eq.0) then ! Ad-hoc test if the run is for screening
+                arg = (rxnew(1)-rxnew(nugrow(imolty)))**2 + (rynew(1)-rynew(nugrow(imolty)))**2 + (rznew(1)-rznew(nugrow(imolty)))**2
+                setedist(imolty)=setedist(imolty)+arg*weight
+                Uads(imolty)=Uads(imolty)+vnew(ivTot)*weight
+                Wrosen(imolty)=Wrosen(imolty)+weight
+                do ip=1,3
+                   if (poredim(ip,imolty)) cycle
+                   do j=1,nugrow(imolty)
+                      if (ip.eq.1) then
+                         arg = rxnew(j) - rxnew(1)
+                      else if (ip.eq.2) then
+                         arg = rynew(j) - rynew(1)
+                      else
+                         arg = rznew(j) - rznew(1)
+                      end if
+                      if (abs(arg).gt.6.0_dp) then
+                         poredim(ip,imolty)=.true.
+                         exit
+                      end if
+                   end do
+                end do
+             end if
           else
              ! molecule removed from box 1
              wratio = real(ncmt(boxrem,imolty),dp) / (weiold/bsum * volrem * B(imolty))

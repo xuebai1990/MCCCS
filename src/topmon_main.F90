@@ -1141,6 +1141,11 @@ contains
        end if
 
        write(io_output,*) 'Program ended at ',time_date_str()
+       setedist(1:nmolty)=setedist(1:nmolty)/Wrosen(1:nmolty)
+       Uads(1:nmolty)=Uads(1:nmolty)/Wrosen(1:nmolty)
+       write(io_output,'(A,'//format_n(nmolty,'(2X,I0)')//')') 'dim: ',count(poredim(1:3,1:nmolty),1)
+       write(io_output,'(A,'//format_n(nmolty,'(2X,G16.9)')//')') 'sete: ',setedist(1:nmolty)
+       write(io_output,'(A,'//format_n(nmolty,'(2X,G16.9)')//')') 'Uads: ',Uads(1:nmolty)
        close(io_output)
     end if
 
