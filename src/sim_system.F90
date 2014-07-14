@@ -115,7 +115,6 @@ module sim_system
                               !< 11: fluctuating charge (vflucqb);
                               !< 12: vipswb; 13: vwellipswb;
                               !< 14: Ewald reciprocal-space electrostatic
-  integer,allocatable::ucheck(:) !< whether or not to calculate chemical potential for each molecule type
   character(LEN=1)::suffix='a'
   integer::io_output=6,iprint=10000000,imv=10000000,iblock=10000000,iratp=500,idiele=10000000,iheatcapacity=10000000,nprop,ianalyze=10000000,nbin=1,run_num=1
   real::bin_width=0.2_dp
@@ -341,8 +340,8 @@ CONTAINS
      ,dipolez(nbxmax),nchbox(nbxmax),vbox(nEnergy,nbxmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'allocate_system.1: allocation failed',jerr)
 
-    if (allocated(ucheck)) deallocate(ucheck,nrotbd,xcm,ycm,zcm,pmsatc,pmswtcb,nswatb,nsampos,ncut,gswatc,nswtcb,box3,box4,temtyp,B,nunit,nugrow,nmaxcbmc,iurot,maxgrow,isolute,iring,nrig,irig,frig,nrigmin,nrigmax,rindex,riutry,lelect,lflucq,lqtrans,lexpand,lavbmc1,lavbmc2,lavbmc3,lbias,lring,lrigid,lrig,lq14scale,fqegp,eta2,qscale,pmbias,pmbsmt,pmbias2,rmtrax,rmtray,rmtraz,rmrotx,rmroty,rmrotz,lbranch,ininch,rmflcq,pmswmt,pmswapb,pmcbmt,pmall,pmfix,pmfqmt,pmeemt,pmtrmt,pmromt,nswapb,box1,box2,nchoi1,nchoi,nchoir,nchoih,nchtor,nchbna,nchbnb,icbdir,icbsta,lrplc,masst,rmexpc,eetype,ncmt,ncmt2,parall,parbox,bnflcq,bsflcq,bnflcq2,bsflcq2,rxwell,rywell,rzwell,sxwell,sywell,szwell,nwell,lwell,moltyp,rcmu,sxcm,sycm,szcm,nboxi,favor,favor2,ntype,leaderq,invib,itvib,ijvib,inben,itben,ijben2,ijben3,intor,ittor,ijtor2,ijtor3,ijtor4,irotbd,pmrotbd,stat=jerr)
-    allocate(ucheck(ntmax),nrotbd(ntmax),xcm(nmax),ycm(nmax),zcm(nmax),pmsatc(npamax),pmswtcb(npamax,npabmax),nswatb(npamax,2)&
+    if (allocated(nrotbd)) deallocate(nrotbd,xcm,ycm,zcm,pmsatc,pmswtcb,nswatb,nsampos,ncut,gswatc,nswtcb,box3,box4,temtyp,B,nunit,nugrow,nmaxcbmc,iurot,maxgrow,isolute,iring,nrig,irig,frig,nrigmin,nrigmax,rindex,riutry,lelect,lflucq,lqtrans,lexpand,lavbmc1,lavbmc2,lavbmc3,lbias,lring,lrigid,lrig,lq14scale,fqegp,eta2,qscale,pmbias,pmbsmt,pmbias2,rmtrax,rmtray,rmtraz,rmrotx,rmroty,rmrotz,lbranch,ininch,rmflcq,pmswmt,pmswapb,pmcbmt,pmall,pmfix,pmfqmt,pmeemt,pmtrmt,pmromt,nswapb,box1,box2,nchoi1,nchoi,nchoir,nchoih,nchtor,nchbna,nchbnb,icbdir,icbsta,lrplc,masst,rmexpc,eetype,ncmt,ncmt2,parall,parbox,bnflcq,bsflcq,bnflcq2,bsflcq2,rxwell,rywell,rzwell,sxwell,sywell,szwell,nwell,lwell,moltyp,rcmu,sxcm,sycm,szcm,nboxi,favor,favor2,ntype,leaderq,invib,itvib,ijvib,inben,itben,ijben2,ijben3,intor,ittor,ijtor2,ijtor3,ijtor4,irotbd,pmrotbd,stat=jerr)
+    allocate(nrotbd(ntmax),xcm(nmax),ycm(nmax),zcm(nmax),pmsatc(npamax),pmswtcb(npamax,npabmax),nswatb(npamax,2)&
      ,nsampos(npamax),ncut(npamax,2),gswatc(npamax,2,2*npamax),nswtcb(npamax),box3(npamax,npabmax),box4(npamax,npabmax)&
      ,temtyp(ntmax),B(ntmax),nunit(ntmax),nugrow(ntmax),nmaxcbmc(ntmax),iurot(ntmax),maxgrow(ntmax),isolute(ntmax),iring(ntmax)&
      ,nrig(ntmax),irig(ntmax,6),frig(ntmax,6),nrigmin(ntmax),nrigmax(ntmax),rindex(ntmax),riutry(ntmax,initial_size),lelect(ntmax)&

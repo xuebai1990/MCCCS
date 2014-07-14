@@ -1245,7 +1245,7 @@ contains
      ,N_add,box2add,moltyp2add
     namelist /analysis/ iprint,imv,iblock,iratp,idiele,iheatcapacity,ianalyze&
      ,nbin,lrdf,lintra,lstretch,lgvst,lbend,lete,lrhoz,bin_width&
-     ,lucall,ucheck,nvirial,starvir,stepvir,ntemp,virtemp
+     ,lucall,nvirial,starvir,stepvir,ntemp,virtemp
     namelist /mc_flucq/ taflcq,fqtemp,rmflucq,pmflcq,pmfqmt,lflucq,lqtrans,fqegp,nchoiq
     namelist /gcmc/ B,nequil,ninstf,ninsth,ndumph
 ! ===================================================================
@@ -1576,7 +1576,6 @@ contains
     call allocate_kspace()
 ! -------------------------------------------------------------------
     !> read name list analysis
-    ucheck=0
     virtemp=0.0_dp
 
     if (myid.eq.rootid) then
@@ -1602,7 +1601,6 @@ contains
     call mp_bcast(lrhoz,1,rootid,groupid)
     call mp_bcast(bin_width,1,rootid,groupid)
     call mp_bcast(lucall,1,rootid,groupid)
-    call mp_bcast(ucheck,ntmax,rootid,groupid)
     call mp_bcast(nvirial,1,rootid,groupid)
     call mp_bcast(starvir,1,rootid,groupid)
     call mp_bcast(stepvir,1,rootid,groupid)
@@ -1628,12 +1626,8 @@ contains
        w_l(lete)
        w_l(lrhoz)
        w_r(bin_width)
-       if (lucall) then
-          write(io_output,FMT='(A)') '=> Calculate chemical potential for the following molecule types: '
-          do i=1,nmolty
-             if (ucheck(i).gt.0) write(io_output,'(I0,A,I0)') i,': ucheck = ',ucheck(i)
-          end do
-       end if
+       w_l(lucall)
+       if (lucall) lgrand=.true.
        if (lvirial) then
           w_i(nvirial)
           w_r(starvir)
@@ -3327,15 +3321,6 @@ contains
        end if
     end if
 ! -------------------------------------------------------------------
-    if (lucall) then
-       call err_exit(__FILE__,__LINE__,'not recently checked for accuracy',myid+1)
-       ! do j = 1,nmolty
-       !    if ( ucheck(j) .gt. 0 ) then
-       !       call chempt(bsswap,j,ucheck(j))
-       !    end if
-       ! end do
-    end if
-
     ! calculate the integrand of thermosynamic integration
     if (lmipsw.and.(mod(nnn,iratipsw).eq.0)) then
        acipsw = acipsw+1
@@ -3799,7 +3784,6 @@ contains
     w_nl(lrhoz)
     w_nl(bin_width)
     w_nl(lucall)
-    wa_nl(ucheck,nmolty)
     w_nl(nvirial)
     w_nl(starvir)
     w_nl(stepvir)

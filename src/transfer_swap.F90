@@ -1438,6 +1438,8 @@ contains
 
     if (lopt_bias(imolty)) call update_bias(log(wratio*2.0)/beta,boxrem,boxins,imolty)
 
+    if (lucall) wratio=-1.0
+
     if ( random(-1) .le. wratio ) then
 ! write(io_output,*) 'SWAP MOVE ACCEPTED',irem
 ! we can now accept !!!!! ***
