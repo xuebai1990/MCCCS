@@ -36,7 +36,7 @@ MODULE sim_zeolite
   end type ZeolitePotentialType
 
   integer,parameter::boxZeo=1
-  real,parameter::eps=1.0E-4_dp
+  real,parameter::eps=1.0E-6_dp
   real::dgr=0.2_dp
 
 CONTAINS
@@ -50,11 +50,11 @@ CONTAINS
 
     integer::i,j
 
-    if (lprint) write(io_output,"(/,' READING ZEOLITE LATTICE FROM FILE:     ',A100,/&
+    if (lprint) write(io_output,"(/,' READING FRAMEWORK LATTICE FROM FILE:     ',A,/&
                                &,' --------------------------------------------------',/&
-                               &,' box dimensions                    = ',3f10.3,' Angstrom',/&
-                               &,' box angles                        = ',3f10.3,' degrees',/&
-                               &,' number of zeolite cells           = ',3i5,/)")&
+                               &,' box dimensions       = ',3f10.3,' Angstrom',/&
+                               &,' box angles           = ',3f10.3,' degrees',/&
+                               &,' number of unit cells = ',3i5,/)")&
                                file_zeocoord,zcell%boxl(1)%val,zcell%boxl(2)%val,zcell%boxl(3)%val,zcell%ang(1)%val&
                                ,zcell%ang(2)%val,zcell%ang(3)%val,zunit%dup(1),zunit%dup(2),zunit%dup(3)
 
@@ -116,8 +116,8 @@ CONTAINS
     integer::pos
     real::scoord(3)
 
-    CALL foldToCenterCell(zeo%bead(i)%coord,zcell,scoord)
-    if (ALL(scoord*zunit%dup.lt.1)) then
+    call absoluteToFractional(scoord,zeo%bead(i)%coord,zcell)
+    if (ALL(scoord*zunit%dup.lt.1.0_dp-eps)) then
        call insert(lunitcell,.true.,i)
     else
        call insert(lunitcell,.false.,i)

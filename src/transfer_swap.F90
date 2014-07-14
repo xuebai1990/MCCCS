@@ -1522,7 +1522,11 @@ contains
           rxu(irem,ic) = rxnew(ic)
           ryu(irem,ic) = rynew(ic)
           rzu(irem,ic) = rznew(ic)
-          if (leemove.and.lexpee) qqu(irem,ic) = qqu(iins1,ic)
+          if (leemove.and.lexpee) then
+             qqu(irem,ic) = qqu(iins1,ic)
+          else
+             qqu(irem,ic) = qqu(iins,ic)
+          end if
        end do
        do ic = igrow+1,iunit
           rxu(irem,ic) = rxuion(ic,2)

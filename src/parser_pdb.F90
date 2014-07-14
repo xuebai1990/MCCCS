@@ -37,7 +37,7 @@ MODULE parser_pdb
   use util_files,only:get_iounit,readLine
   use sim_cell
   use sim_particle
-  use sim_zeolite,only:ZeoliteUnitCellGridType,ZeoliteBeadType,setUpAtom,setUpCellStruct
+  use sim_zeolite,only:ZeoliteUnitCellGridType,ZeoliteBeadType,setUpAtom,setUpCellStruct,foldToCenterCell
   IMPLICIT NONE
   PRIVATE
   PUBLIC :: readPDB,writePDB,writePDBmovie
@@ -55,7 +55,7 @@ CONTAINS
     INTEGER::IOPDB,jerr,i,resID
     CHARACTER(LEN=default_string_length)::line,atomName,resName,molName,elem
     logical::uninitialized
-    real::occup,beta
+    real::scoord(3),occup,beta
 
     IOPDB=get_iounit()
     open(unit=IOPDB,access='sequential',action='read',file=filePDB,form='formatted',iostat=jerr,status='old')
@@ -115,6 +115,7 @@ CONTAINS
              molName =  resname
           END IF
 
+          CALL foldToCenterCell(zeo%bead(i)%coord,zcell,scoord)
           call setUpAtom(elem,i,zeo,lunitcell,ztype,zcell,zunit)
        CASE ("END","TER")
           EXIT

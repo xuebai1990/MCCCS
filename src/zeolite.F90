@@ -328,25 +328,26 @@ contains
     ! Calculate zeolite density
     wzeo=dot_product(ztype%num(1:ztype%ntype),mass(ztype%type(1:ztype%ntype)))
     if (lprint) then
-       write(io_output,"(/,' Tabulated zeolite potential: ',/&
+       write(io_output,"(/,' Tabulated framework potential: ',/&
                        &,' --------------------------------------------------',/,"&
                        //format_n(ztype%ntype,"(' number of ',A,':',I0,3X)")//&
-                       ",/,' simulation volume                 = ', f10.1, 20x,' Angst**3',/&
-                       &,' number of atomtypes in the lattice= ',i10,/&
-                       &,' number of zeolite atoms           = ',i10,/&
-                       &,' mass zeolite                      = ',e12.5,' grams',/&
-                       &,' one adsorbed molecule in sim box  = ',e12.5 ,' mol/kg',/&
-                       &,' Size unit-cell zeolite: ',f7.4,' x ',f7.4,' x ',f7.4,/&
-                       &,'         x-dir           : ',i12,'  size: ',f7.4,/&
-                       &,'         y-dir           : ',i12,'  size: ',f7.4,/&
-                       &,'         z-dir           : ',i12,'  size: ',f7.4,/)")&
+                       ",/,' number of framework atom types   = ',i10,/&
+                       &,' number of framework atoms        = ',i10,/&
+                       &,' number of atoms in the unit cell = ',i10,/&
+                       &,' framework mass                   = ',e16.9,' grams',/&
+                       &,' framework volume                 = ', f16.5,' Angst**3',/&
+                       &,' one adsorbed molecule in sim box = ',e16.9 ,' mol/kg',/&
+                       &,' unit-cell size: ',f7.4,' x ',f7.4,' x ',f7.4,/&
+                       &,'   x-dir       : ',i5,'  size: ',f7.4,/&
+                       &,'   y-dir       : ',i5,'  size: ',f7.4,/&
+                       &,'   z-dir       : ',i5,'  size: ',f7.4,/)")&
                        (trim(ztype%name(i)),ztype%num(i),i=1,ztype%ntype)&
-                       ,zcell%vol,ztype%ntype,zeo%nbead&
-                       ,wzeo/N_Avogadro,1000.0_dp/wzeo,zunit%boxl(1)&
-                       ,zunit%boxl(2),zunit%boxl(3),zunit%ngrid(1)&
-                       ,zunit%boxl(1)/zunit%ngrid(1),zunit%ngrid(2)&
-                       ,zunit%boxl(2)/zunit%ngrid(2),zunit%ngrid(3)&
-                       ,zunit%boxl(3)/zunit%ngrid(3)
+                       ,ztype%ntype,zeo%nbead,count(lunitcell)&
+                       ,wzeo/N_Avogadro,zcell%vol,1000.0_dp/wzeo&
+                       ,zunit%boxl(1),zunit%boxl(2),zunit%boxl(3)&
+                       ,zunit%ngrid(1),zunit%boxl(1)/zunit%ngrid(1)&
+                       ,zunit%ngrid(2),zunit%boxl(2)/zunit%ngrid(2)&
+                       ,zunit%ngrid(3),zunit%boxl(3)/zunit%ngrid(3)
     end if
 
     if (lsurface_area) call zsurface()
@@ -480,8 +481,8 @@ contains
     deallocate(lunitcell,my_zgrid,zgrid,zeo%bead,ztype%type,ztype%num,ztype%radiisq,ztype%name,zpot%param)
     if (lprint) then
        close(io_ztb)
-       write(io_output,'(4(A,L1),A,G10.3,A)') 'lewald[',lewaldtmp,'] ltailc[',ltailcZeotmp,'] lshift['&
-        ,lshifttmp,'] ltailcZeo[',ltailcZeo,'] rcut[',rcuttmp,']'
+       write(io_output,'(4(A,L1),A,G10.3,A)') 'lewald[',lewaldtmp,'] ltailcZeo[',ltailcZeotmp,'] lshift['&
+        ,lshifttmp,'] AddTailc[',ltailcZeo,'] rcut[',rcuttmp,']'
     end if
 
   end subroutine suzeo

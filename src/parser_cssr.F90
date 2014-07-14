@@ -18,7 +18,7 @@ MODULE parser_cssr
   use util_files,only:get_iounit,readLine
   use sim_cell
   use sim_particle
-  use sim_zeolite,only:ZeoliteUnitCellGridType,ZeoliteBeadType,setUpAtom,setUpCellStruct,fractionalToAbsolute
+  use sim_zeolite,only:ZeoliteUnitCellGridType,ZeoliteBeadType,setUpAtom,setUpCellStruct,foldToCenterCell,fractionalToAbsolute
   IMPLICIT NONE
   PRIVATE
   PUBLIC :: readCSSR
@@ -71,9 +71,11 @@ CONTAINS
        ! In order to accommodate number of framework atoms up to five digits, I5 is used instead of I4,1X, which should also work if the latter form is actually used.
        read(IOCSSR,'(i5,a4,2x,3(f9.5,1x))') pos,atom,coord
        if (cflag.eq.0) then
+          coord=coord-floor(coord)
           call fractionalToAbsolute(zeo%bead(i)%coord,coord,zcell)
        else
           zeo%bead(i)%coord=coord
+          CALL foldToCenterCell(zeo%bead(i)%coord,zcell,coord)
        end if
        call setUpAtom(atom,i,zeo,lunitcell,ztype,zcell,zunit)
     end do

@@ -160,25 +160,7 @@ contains
     tweiold = 1.0E0_dp
 
     ! set the trial energies to zero
-    vnbox(ivTot,boxa)   = 0.0E0_dp
-    vnbox(ivInterLJ,boxa)  = 0.0E0_dp
-    vnbox(ivIntraLJ,boxa)  = 0.0E0_dp
-    vnbox(ivStretching,boxa)  = 0.0E0_dp
-    vnbox(ivTorsion,boxa)   = 0.0E0_dp
-    vnbox(ivExt,boxa)  = 0.0E0_dp
-    vnbox(ivBending,boxa)  = 0.0E0_dp
-    vnbox(ivElect,boxa) = 0.0E0_dp
-    vnbox(ivEwald,boxa) = 0.0E0_dp
-
-    vnbox(ivTot,boxb)   = 0.0E0_dp
-    vnbox(ivInterLJ,boxb)  = 0.0E0_dp
-    vnbox(ivIntraLJ,boxb)  = 0.0E0_dp
-    vnbox(ivStretching,boxb)  = 0.0E0_dp
-    vnbox(ivTorsion,boxb)   = 0.0E0_dp
-    vnbox(ivExt,boxb)  = 0.0E0_dp
-    vnbox(ivBending,boxb)  = 0.0E0_dp
-    vnbox(ivElect,boxb) = 0.0E0_dp
-    vnbox(ivEwald,boxb) = 0.0E0_dp
+    vnbox = 0.0E0_dp
 
 
     if (boxa.eq.boxb) then
