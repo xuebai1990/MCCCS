@@ -283,6 +283,10 @@ module sim_system
   !*** Atom translation ***
   real::pm_atom_tra,Armtrax,Armtray,Armtraz
 
+  !*** Specific atom translation ***
+  integer natomtrans_atoms
+  integer,allocatable::atomtrans_atomlst(:),atomtrans_moleclst(:)
+
   !*** Translation ***
   real::pmtra,tatra=0.5_dp
   real,allocatable::pmtrmt(:),rmtrax(:,:),rmtray(:,:),rmtraz(:,:)

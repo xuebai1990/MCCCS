@@ -1854,10 +1854,9 @@ contains
                    call err_exit(__FILE__,__LINE__,'Section MOLECULE_TYPE has more than nmolty records!',jerr)
                 end if
 
-                ! nunit nugrow ncarbon maxcbmc maxgrow iring lelect lring lrigid lbranch lrplc lsetup lq14scale qscale iurot isolute eta
+                ! nunit nugrow ncarbon maxcbmc maxgrow iring lelect lring lrigid lbranch lsetup lq14scale qscale iurot isolute 
                 read(line_in,*) nunit(imol),nugrow(imol),ncarbon(imol),nmaxcbmc(imol),maxgrow(imol),iring(imol),lelect(imol)&
-                 ,lring(imol),lrigid(imol),lbranch(imol),lrplc(imol),lsetup,lq14scale(imol),qscale(imol),iurot(imol),isolute(imol)&
-                 ,(eta2(i,imol),i=1,nbox)
+                 ,lring(imol),lrigid(imol),lbranch(imol),lsetup,lq14scale(imol),qscale(imol),iurot(imol),isolute(imol)
 
                 if (lprint) then
                    write(io_output,'(A,I0)') 'molecule type: ',imol
@@ -1868,11 +1867,8 @@ contains
                    write(io_output,'(A,I0)') '   maximum number of interior segments for SAFE-CBMC regrowth: ',maxgrow(imol)
                    write(io_output,'(A,I0)') '   number of atoms in a ring (if lring=.true.): ',iring(imol)
                    write(io_output,'(2(A,I0),7(A,L2),A,F3.1)') '   iurot: ',iurot(imol),', isolute: ',isolute(imol),', lelect: '&
-                    ,lelect(imol),', lring: ',lring(imol),', lrigid: ',lrigid(imol),', lbranch: ',lbranch(imol),', lrplc: '&
-                    ,lrplc(imol),', lsetup: ',lsetup,', lq14scale: ',lq14scale(imol),', qscale: ',qscale(imol)
-                   do i=1,nbox
-                      write(io_output,'(A,I0,A,F7.1,A)') '   energy offset for box ', i,': ',eta2(i,imol),' [K]'
-                   end do
+                    ,lelect(imol),', lring: ',lring(imol),', lrigid: ',lrigid(imol),', lbranch: ',lbranch(imol)&
+                    ,', lsetup: ',lsetup,', lq14scale: ',lq14scale(imol),', qscale: ',qscale(imol)
                 end if
 
                 if (nunit(imol).gt.numax) then
@@ -2197,7 +2193,6 @@ contains
        call mp_bcast(lring,nmolty,rootid,groupid)
        call mp_bcast(lrigid,nmolty,rootid,groupid)
        call mp_bcast(lbranch,nmolty,rootid,groupid)
-       call mp_bcast(lrplc,nmolty,rootid,groupid)
        call mp_bcast(lq14scale,nmolty,rootid,groupid)
        call mp_bcast(qscale,nmolty,rootid,groupid)
        call mp_bcast(iurot,nmolty,rootid,groupid)
@@ -2395,7 +2390,108 @@ contains
           write(io_output,'(A,I0,A)') '  Total: ',ainclnum,' special rules for intramolecular 1-5 OH interactions'
        end if
     end if
-! -------------------------------------------------------------------
+!
+!> \brief Read biasing potentials from bottom of file INSTEAD of on the 'nunit'
+!line for each molecule type
+!
+!> For simulations requiring biasing potentials for a large number of molecules,
+!it is a huge pain to modify them when located
+!> at the end of each 'nunit' line in the fort.4. I've restored the original
+!location of the biasing potentials to the end of the
+!> file, where that are simply listed for each molecule in each box.
+    
+  ! Looking for section UNIFORM_BIASING_POTENTIALS
+    REWIND(io_input)
+    UNIFORM_BIASING_POTENTIALS:DO
+       call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section UNIFORM_BIASING_POTENTIALS not found',jerr)
+
+       if (UPPERCASE(line_in(1:26)).eq.'UNIFORM_BIASING_POTENTIALS') then
+             if (lprint) then
+               write(io_output,'(/,A,/,A)') 'SECTION UNIFORM_BIASING_POTENTIALS','------------------------------------------'
+             end if
+             do imol=1,nmolty+1
+                  call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                  if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section UNIFORM_BIASING_POTENTIALS',jerr)
+                  if (UPPERCASE(line_in(1:30)).eq.'END UNIFORM_BIASING_POTENTIALS') then
+                      if (imol.ne.nmolty+1) call err_exit(__FILE__,__LINE__,'Section UNIFORM_BIASING_POTENTIALS not complete!',jerr)
+                      exit
+                  else if (imol.eq.nmolty+1) then
+                      call err_exit(__FILE__,__LINE__,'Section UNIFORM_BIASING_POTENTIALS has more than nmolty records!',jerr)
+                  end if
+                  read(line_in,*) (eta2(i,imol),i=1,nbox)
+
+              end do
+
+              if (lprint) then
+                  write(io_output,'(A)') 'Molecule type, biasing potential 1 through nbox [K]: '
+                      do imol=1,nmolty
+                
+                          write(io_output,'(F7.1,F7.1,F7.1)') (eta2(i,imol),i=1,nbox)
+                      end do
+              end if
+              exit UNIFORM_BIASING_POTENTIALS
+       end if
+END DO UNIFORM_BIASING_POTENTIALS
+
+    
+!> \brief Read in required specification on specific atoms for atom translation
+!moves.
+!
+!> Previously the user could only choose to do atom translations on every atom
+!in the system or none at all. Now, users
+!> can specify the specific atoms they want to do translations on. This still
+!allows the user, if so desired, to do atom
+!> translations on all atoms in the system.
+
+
+  ! Looking for section SPECIFIC_ATOM_TRANSL
+    REWIND(io_input)
+    SPECIFIC_ATOM_TRANSL:DO
+       call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section SPECIFIC_ATOM_TRANSL not found',jerr)
+
+       if (UPPERCASE(line_in(1:20)).eq.'SPECIFIC_ATOM_TRANSL') then
+           if (lprint) then
+             write(io_output,'(/,A,/,A)') 'SECTION SPECIFIC_ATOM_TRANSL','------------------------------------------'
+           end if
+           call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+           if (UPPERCASE(line_in(1:24)).eq.'END SPECIFIC_ATOM_TRANSL') exit
+
+           ! Read in the number of atoms on which to do atom translations
+
+           read(line_in,*) natomtrans_atoms
+
+           allocate(atomtrans_atomlst (natomtrans_atoms))
+           allocate(atomtrans_moleclst(natomtrans_atoms))  
+
+           ! Read in what those atoms are, and then what molecule they belong to
+
+           if( natomtrans_atoms .gt. 0) then
+                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                read(line_in,*) (atomtrans_atomlst(j),j=1,natomtrans_atoms)
+
+                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)      
+                read(line_in,*) (atomtrans_moleclst(j),j=1,natomtrans_atoms)
+
+           end if
+
+
+
+           if (lprint) then
+               write(io_output,*) 'natomtrans_atoms: ', natomtrans_atoms
+               write(io_output,*) 'atomtrans_atomlst: ', (atomtrans_atomlst(j),j=1,natomtrans_atoms)
+               write(io_output,*) 'atomtrans_moleclst: ', (atomtrans_moleclst(j),j=1,natomtrans_atoms)
+           end if
+
+           call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)  
+           if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SPECIFIC_ATOM_TRANSL',jerr)
+           if (UPPERCASE(line_in(1:24)).eq.'END SPECIFIC_ATOM_TRANSL') exit
+
+           exit SPECIFIC_ATOM_TRANSL
+       end if
+END DO SPECIFIC_ATOM_TRANSL
+
     !> set up the inclusion table
     call inclus(inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ainclbead,a15t,ofscale,ofscale2)
 
@@ -3913,10 +4009,10 @@ contains
     write(io_unit,'(/,"MOLECULE_TYPE")')
     do imol=1,nmolty
        ! lsetup is always .false.
-       write(io_unit,'("! nunit nugrow ncarbon maxcbmc maxgrow iring lelect lring lrigid lbranch lrplc lsetup lq14scale qscale &
-        &iurot isolute eta",/,6(I0,1X),7(L1,1X),F3.1,2(1X,I0),'//format_n(nbox,'(1X,F7.1)')//')') nunit(imol),nugrow(imol)&
-        ,ncarbon(imol),nmaxcbmc(imol),maxgrow(imol),iring(imol),lelect(imol),lring(imol),lrigid(imol),lbranch(imol),lrplc(imol)&
-        ,.false.,lq14scale(imol),qscale(imol),iurot(imol),isolute(imol),(eta2(i,imol),i=1,nbox)
+       write(io_unit,'("! nunit nugrow ncarbon maxcbmc maxgrow iring lelect lring lrigid lbranch lsetup lq14scale qscale &
+        &iurot isolute ",/,6(I0,1X),7(L1,1X),F3.1,2(1X,I0),'//format_n(nbox,'(1X,F7.1)')//')') nunit(imol),nugrow(imol)&
+        ,ncarbon(imol),nmaxcbmc(imol),maxgrow(imol),iring(imol),lelect(imol),lring(imol),lrigid(imol),lbranch(imol)&
+        ,.false.,lq14scale(imol),qscale(imol),iurot(imol),isolute(imol)
        if (lrigid(imol)) write(io_unit,'("! n, growpoint_1 ... growpoint_n",/,I0,'//format_n(rindex(imol),'(1X,I0)')//')')&
         rindex(imol),(riutry(imol,i),i=1,rindex(imol))
        do i=1,nunit(imol)
