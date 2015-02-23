@@ -5581,22 +5581,8 @@ contains
          fnum(1) = 1
          fnuma(1,1) = invtry
       else
-! JLR 11-11-09
-! factoring in icbsta for safecbmc
 
-! OLD WAY
-! iutry = int( random(-1) * dble(iring(imolty)) ) + 1
-! NEW WAY - picks between icbsta and last unit of chain
-         iutry = int( random(-1) * dble(iring(imolty)+icbsta(imolty)))+1 -icbsta(imolty)
-
-! need the following of scheduler gets confused!
-         if (lrplc(imolty)) then
-            if(iutry .eq.7 .or. iutry .eq.8) then
-               iutry=5
-            end if
-            if (iutry.eq.5.and.lcrank) goto 100
-         end if
-! END JLR 11-11-09
+         iutry = int( random(-1) * dble(iring(imolty)+icbsta(imolty)))+1 -icbsta(imolty)	! factoring in icbsta for safecbmc
 
 !     *************************
 ! iutry = 1
@@ -5610,36 +5596,30 @@ contains
          invtry = invib(imolty,iutry)
          if (invtry.eq.0) then
             call err_exit(__FILE__,__LINE__,'cant do safecbmc on single bead',myid+1)
-         else if(invtry.eq.1) then
-! At the end point of a molecule
-
-! we will let regular cbmc handle the end points
-            kickout = kickout + 1
+         else if(invtry.eq.1) then								! At the end point of a molecule
+            kickout = kickout + 1								! we will let regular cbmc handle the end points
             goto 100
 
             fprev(1,1) = 0
             ivib = 0
          else
-! at a branch point, decide which way not to grow
-! JLR 11-11-09
-! adding statements so we don't get messed up at the branch point in ODS chains
-! ivib = int(random(-1) * dble(invtry)) + 1
- 13         ivib = int(random(-1) * dble(invtry)) + 1
+
+ 13         ivib = int(random(-1) * dble(invtry)) + 1						! at a branch point, decide which way not to grow
+ 
 !     ********************************
 ! ivib = 2
 !     *******************************
 
             fprev(1,1) = ijvib(imolty,iutry,ivib)
-            if (lrplc(imolty)) then
-               if (icbdir(imolty).eq.1.and.fprev(1,1).gt.iutry) goto 13
-            end if
-! END JLR 11-11-09
+	    
+            if (icbdir(imolty).eq.1.and.fprev(1,1).gt.iutry) goto 13
 
             if (fprev(1,1).gt.iring(imolty) .or.lplace(imolty,fprev(1,1))) then
                kickout = kickout + 1
                goto 100
             end if
          end if
+
          ffrom(1,1) = iutry
          count = 0
          do iv = 1, invtry

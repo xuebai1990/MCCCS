@@ -2401,38 +2401,41 @@ contains
 !> file, where that are simply listed for each molecule in each box.
     
   ! Looking for section UNIFORM_BIASING_POTENTIALS
-    REWIND(io_input)
-    UNIFORM_BIASING_POTENTIALS:DO
-       call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section UNIFORM_BIASING_POTENTIALS not found',jerr)
+    if (myid.eq.rootid) then  
+       REWIND(io_input)
+       UNIFORM_BIASING_POTENTIALS:DO
+          call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section UNIFORM_BIASING_POTENTIALS not found',jerr)
 
-       if (UPPERCASE(line_in(1:26)).eq.'UNIFORM_BIASING_POTENTIALS') then
-             if (lprint) then
-               write(io_output,'(/,A,/,A)') 'SECTION UNIFORM_BIASING_POTENTIALS','------------------------------------------'
-             end if
-             do imol=1,nmolty+1
-                  call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-                  if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section UNIFORM_BIASING_POTENTIALS',jerr)
-                  if (UPPERCASE(line_in(1:30)).eq.'END UNIFORM_BIASING_POTENTIALS') then
-                      if (imol.ne.nmolty+1) call err_exit(__FILE__,__LINE__,'Section UNIFORM_BIASING_POTENTIALS not complete!',jerr)
-                      exit
-                  else if (imol.eq.nmolty+1) then
-                      call err_exit(__FILE__,__LINE__,'Section UNIFORM_BIASING_POTENTIALS has more than nmolty records!',jerr)
-                  end if
-                  read(line_in,*) (eta2(i,imol),i=1,nbox)
+          if (UPPERCASE(line_in(1:26)).eq.'UNIFORM_BIASING_POTENTIALS') then
+                if (lprint) then
+                  write(io_output,'(/,A,/,A)') 'SECTION UNIFORM_BIASING_POTENTIALS','------------------------------------------'
+                end if
+                do imol=1,nmolty+1
+                     call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section UNIFORM_BIASING_POTENTIALS',jerr)
+                     if (UPPERCASE(line_in(1:30)).eq.'END UNIFORM_BIASING_POTENTIALS') then
+                         if (imol.ne.nmolty+1) call err_exit(__FILE__,__LINE__,'Section UNIFORM_BIASING_POTENTIALS not complete!',jerr)
+                         exit
+                     else if (imol.eq.nmolty+1) then
+                         call err_exit(__FILE__,__LINE__,'Section UNIFORM_BIASING_POTENTIALS has more than nmolty records!',jerr)
+                     end if
+                     read(line_in,*) (eta2(i,imol),i=1,nbox)
 
-              end do
+                 end do
 
-              if (lprint) then
-                  write(io_output,'(A)') 'Molecule type, biasing potential 1 through nbox [K]: '
-                      do imol=1,nmolty
+                 if (lprint) then
+                     write(io_output,'(A)') 'Molecule type, biasing potential 1 through nbox [K]: '
+                         do imol=1,nmolty
                 
-                          write(io_output,'(F7.1,F7.1,F7.1)') (eta2(i,imol),i=1,nbox)
-                      end do
-              end if
-              exit UNIFORM_BIASING_POTENTIALS
-       end if
-END DO UNIFORM_BIASING_POTENTIALS
+                             write(io_output,'(F7.1,F7.1,F7.1)') (eta2(i,imol),i=1,nbox)
+                         end do
+                 end if
+                 exit UNIFORM_BIASING_POTENTIALS
+          end if
+       END DO UNIFORM_BIASING_POTENTIALS	  
+    end if
+
 
     
 !> \brief Read in required specification on specific atoms for atom translation
@@ -2446,51 +2449,53 @@ END DO UNIFORM_BIASING_POTENTIALS
 
 
   ! Looking for section SPECIFIC_ATOM_TRANSL
-    REWIND(io_input)
-    SPECIFIC_ATOM_TRANSL:DO
-       call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section SPECIFIC_ATOM_TRANSL not found',jerr)
+    if (myid.eq.rootid) then    
+       REWIND(io_input)
+       SPECIFIC_ATOM_TRANSL:DO
+          call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section SPECIFIC_ATOM_TRANSL not found',jerr)
 
-       if (UPPERCASE(line_in(1:20)).eq.'SPECIFIC_ATOM_TRANSL') then
-           if (lprint) then
-             write(io_output,'(/,A,/,A)') 'SECTION SPECIFIC_ATOM_TRANSL','------------------------------------------'
-           end if
-           call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-           if (UPPERCASE(line_in(1:24)).eq.'END SPECIFIC_ATOM_TRANSL') exit
+          if (UPPERCASE(line_in(1:20)).eq.'SPECIFIC_ATOM_TRANSL') then
+              if (lprint) then
+        	write(io_output,'(/,A,/,A)') 'SECTION SPECIFIC_ATOM_TRANSL','------------------------------------------'
+              end if
+              call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+              if (UPPERCASE(line_in(1:24)).eq.'END SPECIFIC_ATOM_TRANSL') exit
 
-           ! Read in the number of atoms on which to do atom translations
+              ! Read in the number of atoms on which to do atom translations
 
-           read(line_in,*) natomtrans_atoms
+              read(line_in,*) natomtrans_atoms
 
-           allocate(atomtrans_atomlst (natomtrans_atoms))
-           allocate(atomtrans_moleclst(natomtrans_atoms))  
+              allocate(atomtrans_atomlst (natomtrans_atoms))
+              allocate(atomtrans_moleclst(natomtrans_atoms))  
 
-           ! Read in what those atoms are, and then what molecule they belong to
+              ! Read in what those atoms are, and then what molecule they belong to
 
-           if( natomtrans_atoms .gt. 0) then
-                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-                read(line_in,*) (atomtrans_atomlst(j),j=1,natomtrans_atoms)
+              if( natomtrans_atoms .gt. 0) then
+        	   call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+        	   read(line_in,*) (atomtrans_atomlst(j),j=1,natomtrans_atoms)
 
-                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)      
-                read(line_in,*) (atomtrans_moleclst(j),j=1,natomtrans_atoms)
+        	   call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)      
+        	   read(line_in,*) (atomtrans_moleclst(j),j=1,natomtrans_atoms)
 
-           end if
+              end if
 
 
 
-           if (lprint) then
-               write(io_output,*) 'natomtrans_atoms: ', natomtrans_atoms
-               write(io_output,*) 'atomtrans_atomlst: ', (atomtrans_atomlst(j),j=1,natomtrans_atoms)
-               write(io_output,*) 'atomtrans_moleclst: ', (atomtrans_moleclst(j),j=1,natomtrans_atoms)
-           end if
+              if (lprint) then
+        	  write(io_output,*) 'natomtrans_atoms: ', natomtrans_atoms
+        	  write(io_output,*) 'atomtrans_atomlst: ', (atomtrans_atomlst(j),j=1,natomtrans_atoms)
+        	  write(io_output,*) 'atomtrans_moleclst: ', (atomtrans_moleclst(j),j=1,natomtrans_atoms)
+              end if
 
-           call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)  
-           if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SPECIFIC_ATOM_TRANSL',jerr)
-           if (UPPERCASE(line_in(1:24)).eq.'END SPECIFIC_ATOM_TRANSL') exit
+              call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)  
+              if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SPECIFIC_ATOM_TRANSL',jerr)
+              if (UPPERCASE(line_in(1:24)).eq.'END SPECIFIC_ATOM_TRANSL') exit
 
-           exit SPECIFIC_ATOM_TRANSL
-       end if
-END DO SPECIFIC_ATOM_TRANSL
+              exit SPECIFIC_ATOM_TRANSL
+          end if
+       END DO SPECIFIC_ATOM_TRANSL
+    end if    
 
     !> set up the inclusion table
     call inclus(inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ainclbead,a15t,ofscale,ofscale2)

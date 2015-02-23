@@ -521,6 +521,14 @@ contains
 !> The maximum displacement is controlled by \b rAtrax(yz) and the
 !> number of successful trial moves is stored in \b Abstrax(yz).
 !> The attempts are stored in \b Abntrax(yz)
+
+! -- RKL 4/14
+!
+!> \brief  allow atom translations only on specified atoms
+!
+!> Previously the user could only choose to do atom translations on every atom in the system or none at all. Now, users 
+!> can specify the specific atoms they want to do translations on. 
+
     subroutine Atom_translation()
       use sim_particle,only:update_neighbor_list_molecule,ctrmas
       use sim_cell,only:update_linked_cell
@@ -529,9 +537,10 @@ contains
 
       logical::lx,ly,lz,ovrlap
       integer::i,ibox,flagon,iunit,j,imolty,icbu
-      integer::pick_unit
+      integer::pick_unit, pick_chain
       real::rx,ry,rz,dchain,vn(nEnergy),vo(nEnergy),deltv,deltvb,rchain,vdum,vrecipo,vrecipn
       logical::laccept
+      integer::atom_sel, molt_sel, mole_sel, rand_idx      
 
 ! --------------------------------------------------------------------
 #ifdef __DEBUG__
@@ -551,40 +560,46 @@ contains
       end if
 
       ovrlap = .false.
-! select a chain at random ***
-      rchain  = random(-1)
-      do icbu = 1,nmolty
-         if ( rchain .lt. pmtrmt(icbu) ) then
-            imolty = icbu
-            exit
-         end if
-      end do
+      
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Select atom type and get the corresponding molecule type
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-      if (temtyp(imolty).eq.0) return
+       rand_idx = random(-1)*(natomtrans_atoms)+1
+       atom_sel = atomtrans_atomlst (rand_idx)
+       imolty = atomtrans_moleclst(rand_idx)
+       
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!        
+! Now pick the specific molecule 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-      dchain = real(temtyp(imolty),dp)
-      i = int( dchain*random(-1) + 1 )
-      i = parall(imolty,i)
-      ibox = nboxi(i)
+         dchain = real(temtyp(imolty),dp)
+         pick_chain = int( dchain*random(-1) + 1 )
+         pick_chain = parall(imolty,pick_chain)
+         ibox = nboxi(pick_chain)       
+	 
+! Store the atom of interest, the molecule of interest, and the 
+! number of atoms in the molecule
 
-! store number of units of i in iunit ***
+      pick_unit = atom_sel
+      i         = pick_chain
+      iunit     = nunit(imolty)
 
-      iunit = nunit(imolty)
-
-      pick_unit = int(real(iunit*random(-1),dp) + 1 )
-
-! write(io_output,*) pick_unit, imolty, i
+! Used for old enegy evaluation (non-bonded)
 
       do j = 1,iunit
         rxuion(j,1) = rxu(i,j)
         ryuion(j,1) = ryu(i,j)
         rzuion(j,1) = rzu(i,j)
-        qquion(j,1) = qqu(i,j)
-      end do
+        qquion(j,1) = qqu(i,j)       
+      end do       
 
-      moltion(1) = imolty
+      moltion(1) = imolty	       
+      
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Select random displacement, increment attempts
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   
 
-! move i ***
       if (lx) then
          rx =  ( 2.0*random(-1) - 1.0E0_dp ) * Armtrax
          Abntrax = Abntrax + 1.0E0_dp
@@ -603,6 +618,21 @@ contains
       else
          rz=0
       end if
+      
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Calculate the energy of i in the old configuration 
+! Nonbonded is calculated in energy and is based on r*uion coords
+! Bonded is calculated in U_bonded and is based on r*u coords
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      flagon = 1	! 1 refers to the coordinates for the OLD configuration
+      call energy(i,imolty,vo,flagon,ibox,pick_unit,pick_unit,.true.,ovrlap,.false.,.false.,.false.,.true.)
+      if (ovrlap) call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf of ATOM_TRANSLATION',myid+1)
+      
+      call U_bonded(i,imolty,vo(ivStretching),vo(ivBending),vo(ivTorsion))
+
+
+! Update the CURRENT coordinates with our attempted translation
 
       do j = 1,iunit
         if (j .eq. pick_unit) then
@@ -618,19 +648,33 @@ contains
         end if
       end do
 
-      moltion(2) = imolty
+      rxu(pick_chain,pick_unit) = rxu(pick_chain,pick_unit) + rx
+      ryu(pick_chain,pick_unit) = ryu(pick_chain,pick_unit) + ry
+      rzu(pick_chain,pick_unit) = rzu(pick_chain,pick_unit) + rz
 
-! calculate the energy of i in the new configuration ***
-      flagon = 2
+      moltion(2) = imolty       
+      
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Calculate the energy of i in the new configuration 
+! Nonbonded is calculated in energy and is based on r*uion coords
+! Bonded is calculated in U_bonded and is based on r*u coords
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      flagon = 2	! 2 refers to the coordinates for the NEW configuration
       call energy(i,imolty,vn,flagon,ibox,pick_unit,pick_unit,.true.,ovrlap,.false.,.false.,.false.,.true.)
-      if (ovrlap) return
-      call U_bonded(i,imolty,vn(ivStretching),vn(ivBending),vn(ivTorsion))
+      if (ovrlap)  then
+            rxu(pick_chain,pick_unit) = rxu(pick_chain,pick_unit) - rx
+            ryu(pick_chain,pick_unit) = ryu(pick_chain,pick_unit) - ry
+            rzu(pick_chain,pick_unit) = rzu(pick_chain,pick_unit) - rz      
+            return
+      end if
+          
+      call U_bonded(i,imolty,vn(ivStretching),vn(ivBending),vn(ivTorsion))      
 
-! calculate the energy of i in the old configuration ***
-      flagon = 1
-      call energy(i,imolty,vo,flagon,ibox,pick_unit,pick_unit,.true.,ovrlap,.false.,.false.,.false.,.true.)
-      if (ovrlap) call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf of ATOM_TRANSLATION',myid+1)
-      call U_bonded(i,imolty,vo(ivStretching),vo(ivBending),vo(ivTorsion))
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Get the the recip stuff 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       if ( lewald .and. lelect(imolty) ) then
          call recip_atom(ibox,vrecipn,vrecipo,1,pick_unit)
@@ -639,7 +683,11 @@ contains
          vn(ivTot) = vn(ivTot) + vrecipn
          vo(ivTot) = vo(ivTot) + vrecipo
       end if
+      
 ! check for acceptance ***
+
+      vn(ivTot) = vn(ivTot) + vn(ivStretching) + vn(ivBending) + vn(ivTorsion)	! We were missing this part in the last version! Meaning the bonded
+      vo(ivTot) = vo(ivTot) + vo(ivStretching) + vo(ivBending) + vo(ivTorsion) 	! potential wasn't being factored into the acceptance criteria!!!
 
       deltv  = vn(ivTot) - vo(ivTot)
       deltvb = beta * deltv
@@ -656,16 +704,25 @@ contains
          return
       end if
 
-      if ( deltvb .gt. (2.3E0_dp*softcut) ) return
+      if ( deltvb .gt. (2.3E0_dp*softcut) ) then
+		! move rejected      
+            rxu(pick_chain,pick_unit) = rxu(pick_chain,pick_unit) - rx
+            ryu(pick_chain,pick_unit) = ryu(pick_chain,pick_unit) - ry
+            rzu(pick_chain,pick_unit) = rzu(pick_chain,pick_unit) - rz      
+            return
+      end if
 
       if ( deltv .le. 0.0E0_dp ) then
-! accept move
-      else if ( exp(-deltvb) .gt. random(-1) ) then
-! accept move
-      else
-! move rejected
-         return
-      end if
+		! accept move
+      else if ( exp(-deltvb) .gt. random(-1) ) then 	
+		! accept move
+      else 						
+		! move rejected
+            rxu(pick_chain,pick_unit) = rxu(pick_chain,pick_unit) - rx
+            ryu(pick_chain,pick_unit) = ryu(pick_chain,pick_unit) - ry
+            rzu(pick_chain,pick_unit) = rzu(pick_chain,pick_unit) - rz
+            return
+      end if     
 
 ! write(io_output,*) 'TRANSLATION accepted i',i
       vbox(ivTot,ibox)     = vbox(ivTot,ibox) + deltv
