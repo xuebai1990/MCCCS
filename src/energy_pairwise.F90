@@ -363,7 +363,7 @@ contains
 ! ################################################################
 
 ! have to recalculate ewald terms if volume changes
-    if ( .not. lvol .or. (lvol .and. lewald) ) then
+    if ( .not. lvol .or. (lvol .and. any(lelect)) ) then
 ! *******************************
 ! INTRACHAIN INTERACTIONS ***
 ! *******************************
