@@ -1749,7 +1749,7 @@ contains
           if (lprint) then
              write(io_output,'(A,2(I0," x "),I0)') '   initial number of chains in x, y and z directions: ',inix(i),iniy(i)&
               ,iniz(i)
-             write(io_output,'(2(A,I0),A,F4.1,A,F6.3)') '   initial rotational displacement: ',inirot(i),', inimix: '&
+             write(io_output,'(2(A,I0),A,F5.1,A,F7.3)') '   initial rotational displacement: ',inirot(i),', inimix: '&
               ,inimix(i),', zshift: ',zshift(i),', dshift: ',dshift(i)
              if (ltmp) write(io_output,'(A,F8.3)') '   Linked cell structures will be used for this box, rintramax = ',rtmp
           end if
@@ -1866,7 +1866,7 @@ contains
                    write(io_output,'(A,I0)') '   maximum number of units for CBMC: ', nmaxcbmc(imol)
                    write(io_output,'(A,I0)') '   maximum number of interior segments for SAFE-CBMC regrowth: ',maxgrow(imol)
                    write(io_output,'(A,I0)') '   number of atoms in a ring (if lring=.true.): ',iring(imol)
-                   write(io_output,'(2(A,I0),7(A,L2),A,F3.1)') '   iurot: ',iurot(imol),', isolute: ',isolute(imol),', lelect: '&
+                   write(io_output,'(2(A,I0),6(A,L2),A,F3.1)') '   iurot: ',iurot(imol),', isolute: ',isolute(imol),', lelect: '&
                     ,lelect(imol),', lring: ',lring(imol),', lrigid: ',lrigid(imol),', lbranch: ',lbranch(imol)&
                     ,', lsetup: ',lsetup,', lq14scale: ',lq14scale(imol),', qscale: ',qscale(imol)
                 end if
@@ -2428,12 +2428,12 @@ contains
                      write(io_output,'(A)') 'Molecule type, biasing potential 1 through nbox [K]: '
                          do imol=1,nmolty
                 
-                             write(io_output,'(F7.1,F7.1,F7.1)') (eta2(i,imol),i=1,nbox)
+                             write(io_output,'(F7.1, F7.1, F7.1)') (eta2(i,imol),i=1,nbox)
                          end do
                  end if
                  exit UNIFORM_BIASING_POTENTIALS
           end if
-       END DO UNIFORM_BIASING_POTENTIALS	  
+       END DO UNIFORM_BIASING_POTENTIALS
     end if
 
 
@@ -2457,7 +2457,7 @@ contains
 
           if (UPPERCASE(line_in(1:20)).eq.'SPECIFIC_ATOM_TRANSL') then
               if (lprint) then
-        	write(io_output,'(/,A,/,A)') 'SECTION SPECIFIC_ATOM_TRANSL','------------------------------------------'
+                write(io_output,'(/,A,/,A)') 'SECTION SPECIFIC_ATOM_TRANSL','------------------------------------------'
               end if
               call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
               if (UPPERCASE(line_in(1:24)).eq.'END SPECIFIC_ATOM_TRANSL') exit
@@ -2472,20 +2472,20 @@ contains
               ! Read in what those atoms are, and then what molecule they belong to
 
               if( natomtrans_atoms .gt. 0) then
-        	   call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-        	   read(line_in,*) (atomtrans_atomlst(j),j=1,natomtrans_atoms)
+                   call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                   read(line_in,*) (atomtrans_atomlst(j),j=1,natomtrans_atoms)
 
-        	   call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)      
-        	   read(line_in,*) (atomtrans_moleclst(j),j=1,natomtrans_atoms)
+                   call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)      
+                   read(line_in,*) (atomtrans_moleclst(j),j=1,natomtrans_atoms)
 
               end if
 
 
 
               if (lprint) then
-        	  write(io_output,*) 'natomtrans_atoms: ', natomtrans_atoms
-        	  write(io_output,*) 'atomtrans_atomlst: ', (atomtrans_atomlst(j),j=1,natomtrans_atoms)
-        	  write(io_output,*) 'atomtrans_moleclst: ', (atomtrans_moleclst(j),j=1,natomtrans_atoms)
+                  write(io_output,*) 'natomtrans_atoms: ', natomtrans_atoms
+                  write(io_output,*) 'atomtrans_atomlst: ', (atomtrans_atomlst(j),j=1,natomtrans_atoms)
+                  write(io_output,*) 'atomtrans_moleclst: ', (atomtrans_moleclst(j),j=1,natomtrans_atoms)
               end if
 
               call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)  
@@ -3437,8 +3437,8 @@ contains
     ! JLR 11-11-09
     ! do not call analysis if ianalyze is greater than number of cycles
     ! KM 01/10 remove analysis
-    !	 if(mod(nnn,ianalyze).eq.0) then
-    !	    call analysis(1)
+    !if(mod(nnn,ianalyze).eq.0) then
+    !call analysis(1)
     ! end if
     ! END JLR 11-11-09
 
