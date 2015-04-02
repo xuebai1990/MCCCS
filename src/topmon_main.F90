@@ -2427,7 +2427,7 @@ contains
                      write(io_output,'(A)') 'Molecule type, biasing potential 1 through nbox [K]: '
                          do imol=1,nmolty
                 
-                             write(io_output,'(F7.1, F7.1, F7.1)') (eta2(i,imol),i=1,nbox)
+                             write(io_output,'(3(1X,F9.3))') (eta2(i,imol),i=1,nbox)
                          end do
                  end if
                  exit UNIFORM_BIASING_POTENTIALS
@@ -2975,6 +2975,10 @@ contains
           call mp_bcast(rmhmat(ibox,1:9),9,rootid,groupid)
           call mp_bcast(hmat(ibox,1:9),9,rootid,groupid)
           call matops(ibox)
+       else
+          call mp_bcast(boxlx(ibox),1,rootid,groupid)
+          call mp_bcast(boxly(ibox),1,rootid,groupid)
+          call mp_bcast(boxlz(ibox),1,rootid,groupid)
        end if
     end do
     call mp_bcast(nchain,1,rootid,groupid)
