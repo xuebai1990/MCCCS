@@ -2197,7 +2197,6 @@ contains
        call mp_bcast(qscale,nmolty,rootid,groupid)
        call mp_bcast(iurot,nmolty,rootid,groupid)
        call mp_bcast(isolute,nmolty,rootid,groupid)
-       call mp_bcast(eta2,nbxmax*ntmax,rootid,groupid)
        call mp_bcast(rindex,nmolty,rootid,groupid)
        call mp_bcast(riutry,ntmax*numax,rootid,groupid)
        call mp_bcast(ntype,ntmax*numax,rootid,groupid)
@@ -2435,7 +2434,7 @@ contains
           end if
        END DO UNIFORM_BIASING_POTENTIALS
     end if
-
+    call mp_bcast(eta2,nbxmax*ntmax,rootid,groupid)
 
     
 !> \brief Read in required specification on specific atoms for atom translation
@@ -2462,9 +2461,11 @@ contains
               call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
               if (UPPERCASE(line_in(1:24)).eq.'END SPECIFIC_ATOM_TRANSL') exit
 
+
               ! Read in the number of atoms on which to do atom translations
 
               read(line_in,*) natomtrans_atoms
+              !call mp_bcast(natomtrans_atoms,1,rootid,groupid)
 
               allocate(atomtrans_atomlst (natomtrans_atoms))
               allocate(atomtrans_moleclst(natomtrans_atoms))  
@@ -2474,9 +2475,12 @@ contains
               if( natomtrans_atoms .gt. 0) then
                    call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
                    read(line_in,*) (atomtrans_atomlst(j),j=1,natomtrans_atoms)
+                   !call mp_bcast(line_in,rootid,groupid) ! need to check if
+                                                         !correct
 
                    call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)      
                    read(line_in,*) (atomtrans_moleclst(j),j=1,natomtrans_atoms)
+                   !call mp_bcast(line_in,rootid,groupid) ! check if correct
 
               end if
 
@@ -2496,6 +2500,8 @@ contains
           end if
        END DO SPECIFIC_ATOM_TRANSL
     end if    
+    ! need to call mp_bcast for natomtrans_atoms & (atomtrans_atomlst(j),j=1,natomtrans_atoms)
+    !  & (atomtrans_moleclst(j),j=1,natomtrans_atoms)
 
     !> set up the inclusion table
     call inclus(inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ainclbead,a15t,ofscale,ofscale2)
