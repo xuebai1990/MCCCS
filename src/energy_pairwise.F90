@@ -360,7 +360,7 @@ contains
 ! ################################################################
 
 ! have to recalculate ewald terms if volume changes
-    if ( .not. lvol .or. (lvol .and. any(lelect)) ) then
+    if (.not.lvol.or.(lvol.and.ANY(lelect(1:nmolty)))) then
 ! *******************************
 ! INTRACHAIN INTERACTIONS ***
 ! *******************************

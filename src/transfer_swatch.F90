@@ -274,7 +274,7 @@ contains
              if (nsampos(iparty).ge.3) then
                 call align_planes(iparty,self,other,s_type,o_type,rxnew,rynew,rznew)
              else
-                !    ! calculate new vector from initial bead
+                ! calculate new vector from initial bead
                 ! BX: If lrigid=.true., nsampos.eq.1 and nsampos.eq.2 should be treated in another way.
                 first_bead = ifirst
                 second_bead = 0  

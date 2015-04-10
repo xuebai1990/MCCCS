@@ -2817,8 +2817,14 @@ contains
     if (lprint) then
        write(io_output,'(/,A)') 'percentage move probabilities:'
 
-       pcumu = pmvol
-       write(io_output,'(A,F8.2,A)') ' volume move       :',100.0_dp*pmvol,' %'
+       pcumu=0.0_dp
+       if (pmvol.gt.pcumu) then
+           pm = pmvol
+           pcumu = pmvol
+       else
+           pm=0.0_dp
+       end if
+       write(io_output,'(A,F8.2,A)') ' volume move       :',100.0_dp*pm,' %'
 
        if (pmswat.gt.pcumu) then
           pm = pmswat - pcumu
@@ -3061,7 +3067,7 @@ contains
        close(io_restart)
 
        do i=1,nbox
-          if (i.eq.1.and.lexzeo) then
+          if (i.eq.1.and.(lexzeo.or.lionic)) then
              cycle
           else if (abs(qbox(i)).gt.1E-6_dp .and. i.ne.gcbmc_box_num) then
              call err_exit(__FILE__,__LINE__,'box '//integer_to_string(i)//' has a net charge of '//real_to_string(qbox(i)),myid+1)
@@ -3081,15 +3087,14 @@ contains
     call mp_bcast(rmrotz(1:nmolty,1:nbox),nmolty*nbox,rootid,groupid)
     call mp_bcast(rmflcq(1:nmolty,1:nbox),nmolty*nbox,rootid,groupid)
     call mp_bcast(rmvol(1:nbox),nbox,rootid,groupid)
+    call mp_bcast(boxlx(1:nbox),nbox,rootid,groupid)
+    call mp_bcast(boxly(1:nbox),nbox,rootid,groupid)
+    call mp_bcast(boxlz(1:nbox),nbox,rootid,groupid)
     do ibox=1,nbox
        if (lsolid(ibox).and..not.lrect(ibox)) then
           call mp_bcast(rmhmat(ibox,1:9),9,rootid,groupid)
           call mp_bcast(hmat(ibox,1:9),9,rootid,groupid)
           call matops(ibox)
-       else
-          call mp_bcast(boxlx(ibox),1,rootid,groupid)
-          call mp_bcast(boxly(ibox),1,rootid,groupid)
-          call mp_bcast(boxlz(ibox),1,rootid,groupid)
        end if
     end do
     call mp_bcast(nchain,1,rootid,groupid)
