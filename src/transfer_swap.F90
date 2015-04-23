@@ -27,6 +27,7 @@ contains
     use sim_particle,only:update_neighbor_list_molecule,ctrmas,neigh_cnt,neighbor,neigh_icnt
     use sim_initia,only:setup_molecule_config
     use transfer_shared,only:lopt_bias,update_bias,gcmc_setup,gcmc_cleanup,gcmc_exchange
+    use prop_widom,only:calc_prop_widom
 
     logical::ovrlap,lterm,lnew,lempty,ldone,ltors,lovrh(nchmax),lfavor,laccept,lswapinter,lrem_out,lins_in,linsk_in,lremk_in,lfixnow
 
@@ -1407,28 +1408,6 @@ contains
              ! molecule added to box 1
              weight = weight/bsum
              wratio = weight * volins * B(imolty) / real(ncmt(boxins,imolty)+1,dp)
-             if (nchbox(1).eq.0) then ! Ad-hoc test if the run is for screening
-                arg = (rxnew(1)-rxnew(nugrow(imolty)))**2 + (rynew(1)-rynew(nugrow(imolty)))**2 + (rznew(1)-rznew(nugrow(imolty)))**2
-                setedist(imolty)=setedist(imolty)+arg*weight
-                Uads(imolty)=Uads(imolty)+vnew(ivTot)*weight
-                Wrosen(imolty)=Wrosen(imolty)+weight
-                do ip=1,3
-                   if (poredim(ip,imolty)) cycle
-                   do j=1,nugrow(imolty)
-                      if (ip.eq.1) then
-                         arg = rxnew(j) - rxnew(1)
-                      else if (ip.eq.2) then
-                         arg = rynew(j) - rynew(1)
-                      else
-                         arg = rznew(j) - rznew(1)
-                      end if
-                      if (abs(arg).gt.6.0_dp) then
-                         poredim(ip,imolty)=.true.
-                         exit
-                      end if
-                   end do
-                end do
-             end if
           else
              ! molecule removed from box 1
              wratio = real(ncmt(boxrem,imolty),dp) / (weiold/bsum * volrem * B(imolty))
@@ -1501,7 +1480,10 @@ contains
 
     if (lopt_bias(imolty)) call update_bias(log(wratio*2.0)/beta,boxrem,boxins,imolty)
 
-    if (lucall) wratio=-1.0
+    if (lucall) then
+       wratio=-1.0
+       call calc_prop_widom(imolty,weight)
+    end if
 
     if ( random(-1) .le. wratio ) then
 ! write(io_output,*) 'SWAP MOVE ACCEPTED',irem

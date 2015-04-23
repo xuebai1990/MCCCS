@@ -4,6 +4,11 @@ module util_math
   implicit none
   private
   public::cone_angle,erfunc,mbessel,polint,spline,splint,update_average,store_block_average,calculate_statistics,cross_product,normalize_vector
+
+  interface store_block_average
+     module procedure store_block_average_i,store_block_average_r
+  end interface
+
 contains
 !****************************************************************
 !> \brief takes two unit vectors in spherical coordinates and computes
@@ -219,23 +224,21 @@ contains
   end subroutine update_average
 
 !> \brief Calculate and store block averages
-  elemental subroutine store_block_average(block_average,new_value,new_count,last_value,last_count)
+  elemental subroutine store_block_average_i(block_average,new_value,new_count,last_value,last_count)
     real,intent(out)::block_average
     real,intent(in)::new_value
     integer,intent(in)::new_count
     real,intent(inout)::last_value
     integer,intent(inout)::last_count
-    real::inv_dif_count
+#include "store_block_average.F90"
+  end subroutine store_block_average_i
 
-    inv_dif_count=real(new_count-last_count,dp)
-    if (inv_dif_count.gt.0.5_dp) then
-       inv_dif_count=1.0_dp/inv_dif_count
-       ! The sequence of calculations is for avoiding overflow problems
-       block_average=inv_dif_count*new_count*new_value-inv_dif_count*last_count*last_value
-       last_value=new_value
-       last_count=new_count
-    end if
-  end subroutine store_block_average
+  elemental subroutine store_block_average_r(block_average,new_value,new_count,last_value,last_count)
+    real,intent(out)::block_average
+    real,intent(in)::new_value,new_count
+    real,intent(inout)::last_value,last_count
+#include "store_block_average.F90"
+  end subroutine store_block_average_r
 
   pure subroutine calculate_statistics(block_values,mean,stdev,sterr)
     real,intent(in)::block_values(:)

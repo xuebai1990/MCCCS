@@ -77,6 +77,7 @@ contains
     use transfer_swap,only:swap,cnt,output_swap_stats,acchem,bnchem
     use transfer_swatch,only:swatch,output_swatch_stats
     use prop_pressure,only:pressure
+    use prop_widom,only:write_prop_widom,write_prop_widom_with_stats
 
     character(LEN=*),intent(in)::file_in
 
@@ -864,6 +865,8 @@ contains
            ,molecname(itype),'        [A^2] =',(asetel(i,itype),i=1,nbox)
        end do
 
+       if (lucall) call write_prop_widom(io_output)
+
        write(io_output,*)
        do j=1,11
           ! only 1 to 11 is the energy information
@@ -1125,7 +1128,9 @@ contains
           end if
 
           write(io_output,*)
-          ! write block averages  ---
+
+          if (lucall) call write_prop_widom_with_stats(io_output,nblock)
+
           write(io_output,*)
           write(io_output,*) '-----block averages ------'
           do ibox=1,nbox
@@ -1162,11 +1167,6 @@ contains
        end if
 
        write(io_output,*) 'Program ended at ',time_date_str()
-       setedist(1:nmolty)=setedist(1:nmolty)/Wrosen(1:nmolty)
-       Uads(1:nmolty)=Uads(1:nmolty)/Wrosen(1:nmolty)
-       write(io_output,'(A,'//format_n(nmolty,'(2X,I0)')//')') 'dim: ',count(poredim(1:3,1:nmolty),1)
-       write(io_output,'(A,'//format_n(nmolty,'(2X,G16.9)')//')') 'sete: ',setedist(1:nmolty)
-       write(io_output,'(A,'//format_n(nmolty,'(2X,G16.9)')//')') 'Uads: ',Uads(1:nmolty)
        close(io_output)
     end if
 
@@ -1234,6 +1234,7 @@ contains
     use transfer_shared,only:read_transfer
     use transfer_swap,only:init_swap
     use transfer_swatch,only:init_swatch
+    use prop_widom,only:read_prop_widom
 
     character(LEN=*),intent(in)::file_in
 
@@ -1669,7 +1670,7 @@ contains
        w_l(lrhoz)
        w_r(bin_width)
        w_l(lucall)
-       if (lucall) lgrand=.true.
+       if (lucall) call read_prop_widom(io_input,lprint,blockm)
        if (lvirial) then
           w_i(nvirial)
           w_r(starvir)
@@ -3388,6 +3389,7 @@ contains
     use transfer_swap,only:acchem,bnchem
     use prop_pressure,only:pressure
     use parser_pdb,only:writePDBmovie
+    use prop_widom,only:blk_avg_prop_widom
 
     logical::lfq,ovrlap
     integer::im,i,ibox,jbox,Temp_nmol,m,mm,imolty,nummol,ii,ntii,intg,ilunit,k,j,itype,itel,zzz,jmolty
@@ -3748,6 +3750,8 @@ contains
              end do
           end do
        end do
+
+       if (lucall) call blk_avg_prop_widom(nblock)
     end if
 
     if (ldielect.and.(mod(nnn,idiele).eq.0).and.myid.eq.rootid) then
@@ -3805,6 +3809,7 @@ contains
     use transfer_swatch,only:read_checkpoint_swatch
     use transfer_shared,only:read_checkpoint_transfer_shared
     use moves_ee,only:read_checkpoint_ee
+    use prop_widom,only:read_checkpoint_prop_widom
     character(LEN=*),intent(in)::file_chkpt
     integer::io_chkpt,jerr,i,pos_output,pos_movie,pos_box_movie(nbox),pos_solute,pos_cell,pos_traj
 
@@ -3819,6 +3824,7 @@ contains
         ,acdvdl,nblock,nccold1,bccold1,baver1,nccold,bccold,baver
     end if
 
+    if (lucall) call read_checkpoint_prop_widom(io_chkpt,blockm)
     call read_checkpoint_simple(io_chkpt)
     call read_checkpoint_cbmc(io_chkpt)
     call read_checkpoint_volume(io_chkpt)
@@ -3902,6 +3908,7 @@ contains
     use transfer_swatch,only:write_checkpoint_swatch
     use transfer_shared,only:write_checkpoint_transfer_shared
     use moves_ee,only:write_checkpoint_ee
+    use prop_widom,only:write_checkpoint_prop_widom
     character(LEN=*),intent(in)::file_chkpt
     integer::io_chkpt,jerr,i,pos_output,pos_movie,pos_box_movie(nbox),pos_solute,pos_cell,pos_traj
 
@@ -3923,6 +3930,7 @@ contains
      ,acsurf,acEnthalpy,acEnthalpy1,solcount,acsolpar,avsolinter,avsolintra,avsolbend,avsoltor,avsolelc,mnbox,asetel,acipsw,acdvdl&
      ,nblock,nccold1,bccold1,baver1,nccold,bccold,baver
 
+    if (lucall) call write_checkpoint_prop_widom(io_chkpt)
     call write_checkpoint_simple(io_chkpt)
     call write_checkpoint_cbmc(io_chkpt)
     call write_checkpoint_volume(io_chkpt)

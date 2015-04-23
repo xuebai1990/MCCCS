@@ -1,5 +1,4 @@
 module transfer_shared
-  use util_runtime,only:err_exit
   use sim_system
   implicit none
   private
@@ -15,6 +14,7 @@ module transfer_shared
 contains
   subroutine read_transfer(io_input,lprint)
     use util_string,only:format_n
+    use util_runtime,only:err_exit
     use util_mp,only:mp_bcast
     INTEGER,INTENT(IN)::io_input
     LOGICAL,INTENT(IN)::lprint
