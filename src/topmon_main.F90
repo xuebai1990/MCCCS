@@ -2649,7 +2649,7 @@ contains
        write(io_output,'(A,G16.9)') 'pmflcq: ',pmflcq
        write(io_output,'(A,'//format_n(nbox,'(2X,I0)')//')') '   nchoiq for each box: ',nchoiq(1:nbox)
        write(io_output,'(A,I0)') 'nswapq: ',nswapq
-       write(io_output,'(/,A)') 'molecule type:  lflucq lqtrans   pmfqmt    fqegp'
+       write(io_output,'(/,A)') 'molecule type:  lflucq lqtrans   pmfqmt            fqegp'
     end if
 
     if (fqtemp .lt. 0.0_dp) then
@@ -2662,7 +2662,7 @@ contains
 
     do i=1,nmolty
        if (lprint) then
-          write(io_output,'(I13,A,2(1X,L7),2(1X,F8.4))') i,':',lflucq(i),lqtrans(i),pmfqmt(i),fqegp(i)
+          write(io_output,'(I13,A,2(1X,L7),1X,F8.4,1X,F16.4)') i,':',lflucq(i),lqtrans(i),pmfqmt(i),fqegp(i)
        end if
 
        if (lflucq(i).and..not.lelect(i)) call err_exit(__FILE__,__LINE__,'lelect must be true if flucq is true',myid+1)
