@@ -1248,6 +1248,8 @@ contains
     ! real::temx(nmax,numax),temy(nmax,numax),temz(nmax,numax)
     ! KM variable added when analysis removed
     integer::nhere
+    ! temporary FQ integers
+    integer::fqmolty,fqtyp,fqcrosstyp,ntii,ntjj,ntij
 
     namelist /io/ file_input,file_restart,file_struct,file_run,file_movie,file_solute,file_traj,io_output&
      ,run_num,suffix,L_movie_xyz
@@ -1294,7 +1296,7 @@ contains
     call mp_bcast(file_solute,rootid,groupid)
     call mp_bcast(file_traj,rootid,groupid)
     call mp_bcast(io_output,1,rootid,groupid)
-    call mp_bcast(run_num,1,rootid,groupid)
+    call mp_bcast(run_num,rootid,groupid)
     call mp_bcast(suffix,rootid,groupid)
     call mp_bcast(L_movie_xyz,1,rootid,groupid)
 
