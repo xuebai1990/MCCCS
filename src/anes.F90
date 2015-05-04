@@ -121,14 +121,15 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vn,vo,vinsta,vremta,vnewflucq,
 ! begin to optimize the charge configuration
 
       if ( mtype .eq. 3 ) then
-         do ichoiq = 1,500
-            call flucq(-1,0)
+! swap move
+! Bin's recommendations are 1000 total swap moves, 500 biases to be near the swapped molecule,
+! 500 without bias
+         do ichoiq = 1,nswapq
+            call flucq(-1,0) ! call with -1 selects molecule according to favor(i) biasing from either box
          end do
-! do ichoiq = 1,0
-! call flucq(-2,0)
-! end do
+
          do ichoiq = 1,500
-            call flucq(2,0)
+            call flucq(2,0) ! call with 2 selects molecule without bias from either box
          end do
          deltv = vbox(ivTot,ibox) - vboxo(ibox)
          weight = exp(-deltv*beta)
@@ -160,9 +161,9 @@ subroutine anes(i,ibox,boxrem,mtype,laccept,deltv,vn,vo,vinsta,vremta,vnewflucq,
          end if
 
       else
-
+! trans/rot moves
          do ichoiq = 1,nchoiq(ibox)
-            call flucq(0,ibox)
+            call flucq(0,ibox)  !  call with 0, ibox selects random molecule (no biases) in the specified box
          end do
          vnewt2 = 0.0E0_dp
          voldt2 = 0.0E0_dp

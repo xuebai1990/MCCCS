@@ -48,6 +48,9 @@ MODULE topmon_main
   integer,allocatable::io_box_movie(:),nminp(:),nmaxp(:),ncmt_list(:,:),ndist(:,:)& !< GCMC reweighting histograms
    ,mnbox(:,:),solcount(:,:),nccold1(:,:,:),nccold(:,:)
 
+  ! for flexible filenames
+  character(LEN=20)::string
+
 contains
 !> \brief Main control logic of topmon
 !>
@@ -166,12 +169,14 @@ contains
     ! setup files for histogram reweighting
     if(lgrand) then
        if (myid.eq.rootid) then
-          write(file_flt,'("nfl",I1.1,A,".dat")') run_num,suffix
+          file_flt = "nfl"//run_num(1:len_trim(run_num))//suffix//".dat"
+          !write(file_flt,'("nfl",I1.1,A,".dat")') run_num,suffix
           io_flt=get_iounit()
           open(unit=io_flt,access='sequential',action='write',file=file_flt,form='formatted',iostat=jerr,status='unknown')
           if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open flt file '//trim(file_flt),jerr)
 
-          write(file_hist,'("his",I1.1,A,".dat")') run_num,suffix
+          file_hist = "his"//run_num(1:len_trim(run_num))//suffix//".dat"
+          !write(file_hist,'("his",I1.1,A,".dat")') run_num,suffix
           io_hist=get_iounit()
           open(unit=io_hist,access='sequential',action='write',file=file_hist,form='formatted',iostat=jerr,status='unknown')
           if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open hist file '//trim(file_hist),jerr)
@@ -457,7 +462,9 @@ contains
 
                 io_ndis=get_iounit()
                 do imolty=1,nmolty
-                   write(file_ndis,'("n",I2.2,"dis",I1.1,A,".dat")') imolty,run_num,suffix
+                   string = integer_to_string(imolty)
+                   file_ndis = "n"//string(1:len_trim(string))//"dis"//run_num(1:len_trim(run_num))//suffix//".dat"
+                   !write(file_ndis,'("n",I2.2,"dis",I1.1,A,".dat")') imolty,run_num,suffix
                    open(unit=io_ndis,access='sequential',action='write',file=file_ndis,form='formatted',iostat=jerr&
                     ,status='unknown')
                    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open ndis file '//trim(file_ndis),jerr)
@@ -652,7 +659,9 @@ contains
        ! write out the final configuration for each box, Added by Neeraj 06/26/2006 3M ***
        io_config=get_iounit()
        do ibox = 1,nbox
-          write(file_config,'("box",I1.1,"config",I1.1,A,".xyz")') ibox,run_num,suffix
+          string = integer_to_string(ibox)
+          file_config = "box"//string(1:len_trim(string))//"config"//run_num(1:len_trim(run_num))//suffix//".xyz"
+          !write(file_config,'("box",I1.1,"config",I1.1,A,".xyz")') ibox,run_num,suffix
           open(unit=io_config,access='sequential',action='write',file=file_config,form='formatted',iostat=jerr,status='unknown')
           if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open box config file '//trim(file_config),jerr)
 
@@ -711,7 +720,8 @@ contains
        end if
 
        ! write out the final configuration from the run
-       write(file_config,'("config",I1.1,A,".dat")') run_num,suffix
+       file_config = "config"//run_num(1:len_trim(run_num))//suffix//".dat"
+       !write(file_config,'("config",I1.1,A,".dat")') run_num,suffix
        call dump(file_config)
 
 ! -------------------------------------------------------------------
@@ -1251,7 +1261,7 @@ contains
     namelist /analysis/ iprint,imv,iblock,iratp,idiele,iheatcapacity,ianalyze&
      ,nbin,lrdf,lintra,lstretch,lgvst,lbend,lete,lrhoz,bin_width&
      ,lucall,nvirial,starvir,stepvir,ntemp,virtemp
-    namelist /mc_flucq/ taflcq,fqtemp,rmflucq,pmflcq,pmfqmt,lflucq,lqtrans,fqegp,nchoiq
+    namelist /mc_flucq/ taflcq,fqtemp,rmflucq,pmflcq,pmfqmt,lflucq,lqtrans,fqegp,nchoiq,nswapq
     namelist /gcmc/ B,nequil,ninstf,ninsth,ndumph
 ! ===================================================================
     !> read project-wide parameters
@@ -1309,7 +1319,7 @@ contains
        write(io_output,'(A,A)') 'Program started at ',time_date_str()
        write(io_output,'(A,I0)') 'Number of processors: ', numprocs
        write(io_output,'(A,I0)') 'Threads per processor: ',thread_num
-       w_i(run_num)
+       w_a(run_num)
        w_a(suffix)
        w_l(L_movie_xyz)
     end if
@@ -2636,10 +2646,16 @@ contains
        write(io_output,'(A,G16.9)') 'initial maximum displacement for fluctuating charge moves: ',rmflucq
        write(io_output,'(A,G16.9)') 'pmflcq: ',pmflcq
        write(io_output,'(A,'//format_n(nbox,'(2X,I0)')//')') '   nchoiq for each box: ',nchoiq(1:nbox)
+       write(io_output,'(A,I0)') 'nswapq: ',nswapq
        write(io_output,'(/,A)') 'molecule type:  lflucq lqtrans   pmfqmt    fqegp'
     end if
 
-    fqbeta = 1.0_dp/fqtemp
+    if (fqtemp .lt. 0.0_dp) then
+       fqtemp = 0.0_dp
+       nswapq = 1
+    else
+       fqbeta = 1.0_dp/fqtemp
+    endif
     rmflcq = rmflucq
 
     do i=1,nmolty
@@ -2656,6 +2672,57 @@ contains
        if (lanes) call err_exit(__FILE__,__LINE__,'lanes should be false for nonpolarizable systems!',myid+1)
        if (lfepsi) call err_exit(__FILE__,__LINE__,'lfepsi should be false for nonpolarizable systems!',myid+1)
     end if
+
+    !> Additional MC_FLUCQ section to read in jayq, jayself
+    REWIND(io_input)
+    CYCLE_READ_FQ:DO
+       call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section MC_FLUCQ not found',jerr)
+       if (UPPERCASE(line_in(1:12)).eq.'END MC_FLUCQ') exit cycle_read_fq
+       if (UPPERCASE(line_in(1:8)).eq.'MC_FLUCQ') then
+
+          do i=1,nntype
+             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_FLUCQ',jerr)
+
+             !> fqmolty = molecule type number for the fluctuating charge molecule
+             !> fqtyp = ntii = line number where this bead appears in the ATOMS section
+             !> xiq(fqtyp) = hardness parameter for each bead
+             !> jayself(fqtype) = coulomb paramter for each bead
+             read(line_in,*) fqmolty, fqtyp, xiq(fqtyp), jayself(fqtyp)
+             !write(6,*) fqmolty, fqtyp, xiq(fqtyp), jayself(fqtyp)
+          end do
+
+          !write(6,*) nntype
+          do i=1,nntype*nntype
+             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_FLUCQ',jerr)
+
+             !> fqcrosstyp = ntij = (ntii - 1)*nntype + ntjj (nntype is total number of lines in ATOMS section)
+             !> jayq(fqcrosstyp) = coulomb integral parameter for interacting beads
+             read(line_in,*) fqmolty, fqcrosstyp, jayq(fqcrosstyp)
+             !write(6,*) fqmolty, fqcrosstyp, jayq(fqcrosstyp)
+          end do
+       end if
+    end do CYCLE_READ_FQ
+
+    if (lprint) then
+       do i=1,nmolty
+          if (lflucq(i)) then
+             write(io_output,'(/,A,I0)') 'FQ parameters for molecule type ',i
+             do ii=1,nunit(i)
+                ntii = ntype(i,ii)
+                write(io_output,'(/,A,I0,A,2(1X,F14.4))') "fq self terms, bead ",ii,":", xiq(ntii), jayself(ntii)
+                do jj=1,nunit(i)
+                   ntjj = ntype(i,jj)
+                   ntij = type_2body(ntii,ntjj)
+                   if (ii .ne. jj) write(io_output,'(A,I0,A,I0,A,I0,A,3(1X,F14.4))') "fq cross term btwn ",ii,",",jj," (",ntij,") :", jayq(ntij)
+                end do
+             end do
+          end if
+       end do
+    end if
+
 ! -------------------------------------------------------------------
     !> read information for grand-canonical ensemble simulations
     if (lgrand) then
@@ -3158,7 +3225,9 @@ contains
        ! open xyz movie file for individual simulation box
        if (L_movie_xyz) then
           do ibox = 1,nbox
-             write(file_box_movie,'("box",I1.1,"movie",I1.1,A,".xyz")') ibox ,run_num,suffix
+             string = integer_to_string(ibox)
+             file_box_movie = "box"//string(1:len_trim(string))//"movie"//run_num(1:len_trim(run_num))//suffix//".xyz"
+             !write(file_box_movie,'("box",I1.1,"movie",I1.1,A,".xyz")') ibox ,run_num,suffix
              io_box_movie(ibox)=get_iounit()
              open(unit=io_box_movie(ibox),access='stream',action='write',file=file_box_movie,form='formatted',iostat=jerr&
               ,status='unknown')
@@ -3185,7 +3254,8 @@ contains
 
        ! cell parameters using crystallographic convention
        if (ANY(lsolid.and..not.lrect)) then
-          write(file_cell,'("cell_param",I1.1,A,".dat")') run_num,suffix
+          file_cell = "cell_param"//run_num(1:len_trim(run_num))//suffix//".dat"
+          !write(file_cell,'("cell_param",I1.1,A,".dat")') run_num,suffix
           io_cell=get_iounit()
           open(unit=io_cell,access='stream',action='write',file=file_cell,form='formatted',iostat=jerr,status='unknown')
           if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open cell file '//trim(file_cell),jerr)

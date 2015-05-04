@@ -116,7 +116,8 @@ module sim_system
                               !< 12: vipswb; 13: vwellipswb;
                               !< 14: Ewald reciprocal-space electrostatic
   character(LEN=1)::suffix='a'
-  integer::io_output=6,iprint=10000000,imv=10000000,iblock=10000000,iratp=500,idiele=10000000,iheatcapacity=10000000,nprop,ianalyze=10000000,nbin=1,run_num=1
+  character(LEN=5)::run_num='1'
+  integer::io_output=6,iprint=10000000,imv=10000000,iblock=10000000,iratp=500,idiele=10000000,iheatcapacity=10000000,nprop,ianalyze=10000000,nbin=1
   real::bin_width=0.2_dp
   logical::L_movie_xyz=.false.,lrdf=.false.,lintra=.false.,lstretch=.false.,lgvst=.false.,lbend=.false.,lete=.false.&
    ,lrhoz=.false.,lucall=.false.
@@ -125,7 +126,6 @@ module sim_system
   integer::nequil=0,ninstf=0,ninsth=0,ndumph=0
 
   !*** 2nd virial coefficient ***
-  real,allocatable::xiq(:),jayself(:),jayq(:)
   integer,parameter::maxvir=1,maxntemp=3 !< maximum number of bins for the 2nd virial coefficient
   integer::ntemp=0,nvirial=0
   real::virtemp(maxntemp),starvir=0.0_dp,stepvir=0.0_dp
@@ -257,6 +257,7 @@ module sim_system
   real::rcutin=6.0_dp,weight,weiold,vold(nEnergy),vnew(nEnergy),vneworient,voldorient
 
   !*** Fluctuating charge moves ***
+  real,allocatable::xiq(:),jayself(:),jayq(:)
   logical,parameter::lfepsi=.false. !< If lfepsi is true, the fluctuation of epsilon is used instead of the fluctuation of the sigma.
   logical,allocatable::lflucq(:),lqtrans(:)
   real::pmflcq,taflcq=0.95_dp,fqbeta
@@ -265,6 +266,7 @@ module sim_system
    !< and bsflcq record the values for the entire run
    ,fqegp(:),pmfqmt(:),rmflcq(:,:)
   integer,allocatable::nchoiq(:)
+  integer::nswapq
 
   !*** Expanded ensemble moves ***
   integer,parameter::smax=35 !< max no. of mstates

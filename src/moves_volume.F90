@@ -478,7 +478,6 @@ contains
 #ifdef __DEBUG__
     write(io_output,*) 'start VOLUME_1BOX in ',myid
 #endif
-
     ! Select a box at  random to change the volume of box
     rbox = random(-1)
     do ibox = 1,nbox

@@ -490,8 +490,9 @@ contains
                       end do
                    end do
                    v(ivFlucq) = v(ivFlucq) - fqegp(imolty)
-                else
-                   v(ivFlucq) = 0.0E0_dp
+!> removed by BLE 01/15; don't want to zero out this energy overall just because one molecule type is not fluctuating
+                !else
+                   !v(ivFlucq) = 0.0E0_dp
                 end if
              end if
           end if
@@ -691,7 +692,17 @@ contains
     rminsq = rmin * rmin
 
     ovrlap = .false.
-    v = 0.0E0_dp
+    !> changed by BLE (01/15) to be specific to the parts of energy that are calculated in this subroutine
+    !> this avoids zeroing out the FQ energy for polarizable models anytime energy is called
+    !v = 0.0E0_dp
+    v(ivTot) = 0.0E0_dp
+    v(ivInterLJ) = 0.0E0_dp
+    v(ivIntraLJ) = 0.0E0_dp
+    v(ivExt) = 0.0E0_dp
+    v(ivElect) = 0.0E0_dp
+    v(ivEwald) = 0.0E0_dp
+    v(ivTorsion) = 0.0E0_dp
+    v(iv3body) = 0.0E0_dp
     sself  = 0.0E0_dp
     correct = 0.0E0_dp
 

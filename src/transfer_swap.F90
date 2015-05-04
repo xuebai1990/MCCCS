@@ -54,7 +54,6 @@ contains
 #ifdef __DEBUG__
     write(io_output,*) 'START SWAP in ',myid
 #endif
-
     lempty = .false.
     lfixnow = .false.
     lins_in = .false.
@@ -143,7 +142,7 @@ contains
           end if
        end if
 
-       ! write(io_output,*) 'particle ',irem,' is being removed, imolty is:',imolty,' and the box is:',boxrem
+       !write(io_output,*) 'particle ',irem,' is being removed, imolty is:',imolty,' and the box is:',boxrem
 
 ! ===>  for both gibbs and grand-canonical we have:
 ! insert a chain in box: boxins

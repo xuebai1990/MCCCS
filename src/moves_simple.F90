@@ -35,7 +35,6 @@ contains
 #ifdef __DEBUG__
       write(io_output,*) 'start TRANSLATION in ',myid
 #endif
-
       lx=.false.
       ly=.false.
       lz=.false.
@@ -79,6 +78,7 @@ contains
       end do
       moltion(1) = imolty
 
+      !write(io_output,*) 'particle ',i,' is being translated, ',lx,ly,lz,'imolty is:',imolty,' and the box is:',ibox
 ! move i ***
       if (lx) then
          rx =  ( 2.0*random(-1) - 1.0E0_dp ) * rmtrax(imolty,ibox)
@@ -325,6 +325,7 @@ contains
       end do
       moltion(1) = imolty
 
+      !write(io_output,*) 'particle ',i,' is being rotated, ',lx,ly,lz,'imolty is:',imolty,' and the box is:',ibox
 ! choose a random angular displacement ***
 
       if (lx) then
