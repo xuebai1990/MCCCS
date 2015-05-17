@@ -1248,8 +1248,9 @@ contains
     ! real::temx(nmax,numax),temy(nmax,numax),temz(nmax,numax)
     ! KM variable added when analysis removed
     integer::nhere
-    ! temporary FQ integers
+    ! temporary FQ variables
     integer::fqmolty,fqtyp,fqcrosstyp,ntii,ntjj,ntij
+    logical::needMFsection
 
     namelist /io/ file_input,file_restart,file_struct,file_run,file_movie,file_solute,file_traj,io_output&
      ,run_num,suffix,L_movie_xyz
@@ -2660,7 +2661,14 @@ contains
     endif
     rmflcq = rmflucq
 
+    !> allow the MC_FLUCQ section to be skipped for non-polarizable models
+    needMFsection = .false.
+
     do i=1,nmolty
+       if (lflucq(i)) then
+          needMFsection = .true.
+       endif
+
        if (lprint) then
           write(io_output,'(I13,A,2(1X,L7),1X,F8.4,1X,F16.4)') i,':',lflucq(i),lqtrans(i),pmfqmt(i),fqegp(i)
        end if
@@ -2676,55 +2684,57 @@ contains
     end if
 
     !> Additional MC_FLUCQ section to read in jayq, jayself
-    REWIND(io_input)
-    CYCLE_READ_FQ:DO
-       call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section MC_FLUCQ not found',jerr)
-       if (UPPERCASE(line_in(1:12)).eq.'END MC_FLUCQ') exit cycle_read_fq
-       if (UPPERCASE(line_in(1:8)).eq.'MC_FLUCQ') then
-
-          do i=1,nntype
-             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_FLUCQ',jerr)
-
-             !> fqmolty = molecule type number for the fluctuating charge molecule
-             !> fqtyp = ntii = line number where this bead appears in the ATOMS section
-             !> xiq(fqtyp) = hardness parameter for each bead
-             !> jayself(fqtype) = coulomb paramter for each bead
-             read(line_in,*) fqmolty, fqtyp, xiq(fqtyp), jayself(fqtyp)
-             !write(6,*) fqmolty, fqtyp, xiq(fqtyp), jayself(fqtyp)
-          end do
-
-          !write(6,*) nntype
-          do i=1,nntype*nntype
-             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_FLUCQ',jerr)
-
-             !> fqcrosstyp = ntij = (ntii - 1)*nntype + ntjj (nntype is total number of lines in ATOMS section)
-             !> jayq(fqcrosstyp) = coulomb integral parameter for interacting beads
-             read(line_in,*) fqmolty, fqcrosstyp, jayq(fqcrosstyp)
-             !write(6,*) fqmolty, fqcrosstyp, jayq(fqcrosstyp)
-          end do
-       end if
-    end do CYCLE_READ_FQ
-
-    if (lprint) then
-       do i=1,nmolty
-          if (lflucq(i)) then
-             write(io_output,'(/,A,I0)') 'FQ parameters for molecule type ',i
-             do ii=1,nunit(i)
-                ntii = ntype(i,ii)
-                write(io_output,'(/,A,I0,A,2(1X,F14.4))') "fq self terms, bead ",ii,":", xiq(ntii), jayself(ntii)
-                do jj=1,nunit(i)
-                   ntjj = ntype(i,jj)
-                   ntij = type_2body(ntii,ntjj)
-                   if (ii .ne. jj) write(io_output,'(A,I0,A,I0,A,I0,A,3(1X,F14.4))') "fq cross term btwn ",ii,",",jj," (",ntij,") :", jayq(ntij)
-                end do
+    if (needMFsection) then
+       REWIND(io_input)
+       CYCLE_READ_FQ:DO
+          call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section MC_FLUCQ not found',jerr)
+          if (UPPERCASE(line_in(1:12)).eq.'END MC_FLUCQ') exit cycle_read_fq
+          if (UPPERCASE(line_in(1:8)).eq.'MC_FLUCQ') then
+             
+             do i=1,nntype
+                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_FLUCQ',jerr)
+                
+                !> fqmolty = molecule type number for the fluctuating charge molecule
+                !> fqtyp = ntii = line number where this bead appears in the ATOMS section
+                !> xiq(fqtyp) = hardness parameter for each bead
+                !> jayself(fqtype) = coulomb paramter for each bead
+                read(line_in,*) fqmolty, fqtyp, xiq(fqtyp), jayself(fqtyp)
+                !write(6,*) fqmolty, fqtyp, xiq(fqtyp), jayself(fqtyp)
+             end do
+             
+             !write(6,*) nntype
+             do i=1,nntype*nntype
+                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_FLUCQ',jerr)
+                
+                !> fqcrosstyp = ntij = (ntii - 1)*nntype + ntjj (nntype is total number of lines in ATOMS section)
+                !> jayq(fqcrosstyp) = coulomb integral parameter for interacting beads
+                read(line_in,*) fqmolty, fqcrosstyp, jayq(fqcrosstyp)
+                !write(6,*) fqmolty, fqcrosstyp, jayq(fqcrosstyp)
              end do
           end if
-       end do
-    end if
+       end do CYCLE_READ_FQ
 
+       if (lprint) then
+          do i=1,nmolty
+             if (lflucq(i)) then
+                write(io_output,'(/,A,I0)') 'FQ parameters for molecule type ',i
+                do ii=1,nunit(i)
+                   ntii = ntype(i,ii)
+                   write(io_output,'(/,A,I0,A,2(1X,F14.4))') "fq self terms, bead ",ii,":", xiq(ntii), jayself(ntii)
+                   do jj=1,nunit(i)
+                      ntjj = ntype(i,jj)
+                      ntij = type_2body(ntii,ntjj)
+                      if (ii .ne. jj) write(io_output,'(A,I0,A,I0,A,I0,A,3(1X,F14.4))') "fq cross term btwn ",ii,",",jj," (",ntij,") :", jayq(ntij)
+                   end do
+                end do
+             end if
+          end do
+       end if
+    endif
+    
 ! -------------------------------------------------------------------
     !> read information for grand-canonical ensemble simulations
     if (lgrand) then
