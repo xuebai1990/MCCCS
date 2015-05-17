@@ -2654,7 +2654,7 @@ contains
     end if
 
     if (fqtemp .lt. 0.0_dp) then
-       fqtemp = 0.0_dp
+       fqbeta = 0.0_dp
        nswapq = 1
     else
        fqbeta = 1.0_dp/fqtemp
