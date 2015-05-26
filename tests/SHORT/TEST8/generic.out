@@ -1,7 +1,7 @@
-Program started at 2014-03-08 21:54:39.714
+Program started at 2015-05-26 11:21:53.953
 Number of processors: 1
 Threads per processor: 1
- run_num: 1
+ run_num: 1    
  suffix: a
  L_movie_xyz:  F
 
@@ -33,7 +33,7 @@ number of chains: 200
 number of cycles: 100
  iratio: 500
 minimum cutoff (rmin):   1.200 [Ang]
- softcut:   100.000000    
+ softcut:  100.0000000    
 Write checkpoint file every 1800 seconds, and keep the last 1 copies
  linit:  T
  lreadq:  F
@@ -56,6 +56,7 @@ NAMELIST ANALYSIS
  lete:  F
  lrhoz:  F
  bin_width:  0.200000000E-01
+ lucall:  F
 
 SECTION SIMULATION_BOX
 ------------------------------------------
@@ -65,22 +66,22 @@ Box 1:   40.000 x   40.000 x   40.000
    number of dimensions that are isotropic: 0
    lsolid:  F, lrect:  F, lideal:  F, ltwice:  F
    temperature: 3440.000 [K]
-   external pressure:  0.100000000     [MPa]
+   external pressure:  0.100000000E+00 [MPa]
    initial number of chains of each type:   180
    Ghost particles: 0
    initial number of chains in x, y and z directions: 10 x 10 x 2
-   initial rotational displacement: 10, inimix: 0, zshift: 10.0, dshift:  2.000
+   initial rotational displacement: 10, inimix: 0, zshift:  10.0, dshift:   2.000
 Box 2:   90.000 x   90.000 x   90.000
    rcut: 14.000 [Ang], kalp:  0.250
    neighbor list cutoff (rcutnn):  0.000
    number of dimensions that are isotropic: 0
    lsolid:  F, lrect:  F, lideal:  F, ltwice:  F
    temperature: 3440.000 [K]
-   external pressure:  0.100000000     [MPa]
+   external pressure:  0.100000000E+00 [MPa]
    initial number of chains of each type:   20
    Ghost particles: 0
    initial number of chains in x, y and z directions: 4 x 4 x 2
-   initial rotational displacement: 10, inimix: 0, zshift: 20.0, dshift: 11.250
+   initial rotational displacement: 10, inimix: 0, zshift:  20.0, dshift:  11.250
 
 NUMBER OF MOLECULES OF EACH TYPE
  number of chains of each type:   200
@@ -94,9 +95,7 @@ molecule type: 1
    maximum number of units for CBMC: 8
    maximum number of interior segments for SAFE-CBMC regrowth: 8
    number of atoms in a ring (if lring=.true.): 8
-   iurot: 0, isolute: 1000000, lelect:  F, lring:  F, lrigid:  F, lbranch:  F, lrplc:  F, lsetup:  F, lq14scale:  T, qscale: 0.5
-   energy offset for box 1:     0.0 [K]
-   energy offset for box 2:     0.0 [K]
+   iurot: 0, isolute: 1000000, lelect:  F, lring:  F, lrigid:  F, lbranch:  F, lsetup:  F, lq14scale:  T, qscale: 0.5
 
    bead 1: bead type 4 [C], charge leader 1
       bonded to bead 2, type 1, bond length:  1.54000, k/2:   0.00000000    
@@ -159,6 +158,14 @@ SPECIAL INTERACTION RULES
   Total: 0 inclusion rules for intramolecular interactions
 
   Total: 0 special rules for intramolecular 1-5 OH interactions
+
+SECTION UNIFORM_BIASING_POTENTIALS
+------------------------------------------
+Molecule type, biasing potential 1 through nbox [K]: 
+     0.000     0.000
+
+SECTION SPECIFIC_ATOM_TRANSL
+------------------------------------------
 
 Molecule type: 1
 
@@ -224,16 +231,16 @@ target volume acceptance ratio (tavol): 0.40
 frequency to adjust maximum volume displacement: 500
 initial maximum volume displacement (rmvol):    0.001
 pmvol:   0.00000000    
-   pmvlmt for box 1:   1.00000000    
-   pmvlmt for box 2:   1.00000000    
+   pmvlmt for box 1:  1.000000000    
+   pmvlmt for box 2:  1.000000000    
 nvolb: 1
-   box pair 1: between 1 and 2,   pmvolb =   1.00000000    
+   box pair 1: between 1 and 2,   pmvolb =  1.000000000    
 
 NAMELIST MC_SWATCH
 ------------------------------------------
 pmswat:   0.00000000    
    number of swatch pairs (nswaty): 1
-   probability of each swatch pair:   1.00000000    
+   probability of each swatch pair:  1.000000000    
 
    swatch molecule type pairs:    1    2
    nsampos: 1, ncut:  1  1
@@ -243,7 +250,7 @@ pmswat:   0.00000000
    ncut 1: grom from 1, prev 0
    splist:    1    1
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    2
 
 NAMELIST MC_SWAP
@@ -251,7 +258,7 @@ NAMELIST MC_SWAP
 pmswap:   0.00000000    
    swap probability for molecule type 1 (pmswmt):   1.0000
    number of swap box pairs for molecule type 1: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    2
 
 NAMELIST MC_CBMC
@@ -266,18 +273,19 @@ molecule type: nchoi1  nchoi nchoir nchoih nchtor nchbna nchbnb icbdir icbsta
             1:     10      8     10      1    100   1000   1000      0      0
 
 molecule type:    pmcbmt         pmall  avbmc_version    pmbias        pmbsmt       pmbias2         pmfix   lrig
-            1:   1.00000       0.00000              0   0.00000       0.00000       0.00000       0.00000      F
+            1:  1.000000       0.00000              0   0.00000       0.00000       0.00000       0.00000      F
 
 NAMELIST MC_FLUCQ
 ------------------------------------------
 target fluctuating charge acceptance ratio (taflcq): 0.95
 fluctuating charge temperature:    5.000 [K]
-initial maximum displacement for fluctuating charge moves:  0.100000000    
+initial maximum displacement for fluctuating charge moves:  0.100000000E+00
 pmflcq:   0.00000000    
    nchoiq for each box:   1  1
+nswapq: 0
 
-molecule type:  lflucq lqtrans   pmfqmt    fqegp
-            1:       F       F   1.0000   0.0000
+molecule type:  lflucq lqtrans   pmfqmt            fqegp
+            1:       F       F   1.0000           0.0000
 
 NAMELIST MC_EE
 ------------------------------------------
@@ -295,7 +303,7 @@ pmtra:  0.670000000
    translation probability for molecule type 1 (pmtrmt):   1.0000
 target rotation acceptance ratio: 0.50
 initial maximum displacement for molecule rotation:  0.400000000    
-pmrot:   1.00000000    
+pmrot:  1.000000000    
    rotational probability for molecule type 1 (pmromt):   1.0000
 
 percentage move probabilities:
@@ -333,11 +341,11 @@ Spacing:   22.5000000    X  22.5000000    X  45.0000000
  number of chains         180
  number of chains of type           1         180
  inter lj energy   -336290.910449354     
- intra lj energy   -31614.3874638734     
+ intra lj energy   -31614.3874638735     
  Tail correction   -19514.4537596172     
  bond vibration    0.000000000000000E+000
- bond bending      5.924006434539587E-023
- torsional         1.818989403545856E-011
+ bond bending      6.480215002478620E-023
+ torsional        -1.361968315904960E-010
  external          0.000000000000000E+000
  coulombic energy  0.000000000000000E+000
  fluc Q energy     0.000000000000000E+000
@@ -355,15 +363,15 @@ Spacing:   22.5000000    X  22.5000000    X  45.0000000
  intra lj energy   -3512.70971820810     
  Tail correction   -21.1506552289709     
  bond vibration    0.000000000000000E+000
- bond bending      2.965623965565241E-023
- torsional         9.094947017729282E-012
+ bond bending      3.125553188147157E-023
+ torsional        -1.477928890381008E-011
  external          0.000000000000000E+000
  coulombic energy  0.000000000000000E+000
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -3533.86037343706     
+ total energy      -3533.86037343709     
  
- box             2  initial v   =   -3533.86037343706     
+ box             2  initial v   =   -3533.86037343709     
  surf. tension :   box 2 =       0.00000
  pressure check:   box 2 =       1302.20
  
@@ -379,24 +387,24 @@ Spacing:   22.5000000    X  22.5000000    X  45.0000000
  
  ### Translations ###
  
- molecule typ =           1  in box           1
+molecule typ = 1   CCCCCCCC  in box           1
  x-dir: attempts =    1967.0   ratio = 0.847   max.displ. = 0.3000E+00
  y-dir: attempts =    1965.0   ratio = 0.865   max.displ. = 0.3000E+00
  z-dir: attempts =    2004.0   ratio = 0.884   max.displ. = 0.3000E+00
  
- molecule typ =           1  in box           2
+molecule typ = 1   CCCCCCCC  in box           2
  x-dir: attempts =     219.0   ratio = 1.000   max.displ. = 0.3000E+00
  y-dir: attempts =     219.0   ratio = 1.000   max.displ. = 0.3000E+00
  z-dir: attempts =     184.0   ratio = 1.000   max.displ. = 0.3000E+00
  
  ### Rotations ###
  
- molecule typ =           1  in box           1
+molecule typ = 1    CCCCCCCC  in box           1
  x-dir: attempts =    2002.0   ratio = 0.659   max.displ. = 0.4000E+00
  y-dir: attempts =    1946.0   ratio = 0.621   max.displ. = 0.4000E+00
  z-dir: attempts =    2010.0   ratio = 0.742   max.displ. = 0.4000E+00
  
- molecule typ =           1  in box           2
+molecule typ = 1    CCCCCCCC  in box           2
  x-dir: attempts =     222.0   ratio = 1.000   max.displ. = 0.4000E+00
  y-dir: attempts =     220.0   ratio = 1.000   max.displ. = 0.4000E+00
  z-dir: attempts =     223.0   ratio = 1.000   max.displ. = 0.4000E+00
@@ -404,7 +412,7 @@ Spacing:   22.5000000    X  22.5000000    X  45.0000000
  
  ### Configurational-bias ###
  
- molecule typ =           1
+molecule typ = 1    CCCCCCCC
      length  attempts  succ.growth  accepted   %su.gr.    %accep.
         1     873.0     873.0     712.0    100.00     81.56
         2     902.0     902.0     563.0    100.00     62.42
@@ -421,18 +429,11 @@ Spacing:   22.5000000    X  22.5000000    X  45.0000000
 
 ### Molecule swap       ###
 
-molecule typ = 1
+molecule typ = 1    CCCCCCCC
 between box 1 and 2 into box 1   uattempts = 0 attempts = 0   accepted = 0
 between box 1 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
-
-### Molecule swatch     ###
-
-pair typ = 1
-moltyps = 1 and 2
-between box 1 and 2 into box 1   uattempts = 0  attempts = 0  accepted = 0
-between box 1 and 2 into box 2   uattempts = 0  attempts = 0  accepted = 0
  
  ### Charge Fluctuation  ###
  
@@ -447,36 +448,36 @@ molecule  1:   0.00000000      0.00000000
  sumup control
  number of chains         180
  number of chains of type           1         180
- inter lj energy   -243864.331696920     
- intra lj energy    57662.0982870516     
+ inter lj energy   -243864.331696915     
+ intra lj energy    57662.0982870519     
  Tail correction   -19514.4537596172     
  bond vibration    0.000000000000000E+000
- bond bending       1598129.37224181     
- torsional          818839.927012075     
+ bond bending       1598129.37224182     
+ torsional          818839.927012076     
  external          0.000000000000000E+000
  coulombic energy  0.000000000000000E+000
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy       2230767.06584402     
+ total energy       2230767.06584403     
  
  sumup control
  number of chains          20
  number of chains of type           1          20
- inter lj energy   -182.074271360027     
- intra lj energy    5029.78751537654     
+ inter lj energy   -182.074271360045     
+ intra lj energy    5029.78751537536     
  Tail correction   -21.1506552289709     
  bond vibration    0.000000000000000E+000
  bond bending       159762.028790891     
- torsional          98227.5649567411     
+ torsional          98227.5649567410     
  external          0.000000000000000E+000
  coulombic energy  0.000000000000000E+000
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy       262837.306991649     
+ total energy       262837.306991647     
  
- vstart       =      -367905.2979132272        -3533.8603734371
- vend         =      2230767.0658440208       262837.3069916490
- vbox         =      2230767.0658440972       262837.3069916506
+ vstart       =      -367905.2979132273        -3533.8603734371
+ vend         =      2230767.0658440292       262837.3069916472
+ vbox         =      2230767.0658440925       262837.3069916469
  
  Averages and fluctuations                        Box  1       Box  2
  
@@ -523,10 +524,10 @@ molecule  1:   0.00000000      0.00000000
  HSP_LJ[(cal/cc)^1/2] btwn box   1 and  2 =         3.1720         0.2391         0.2391
  HSP_Cou[(cal/cc)^1/2] btwn box  1 and  2 =         0.0000         0.0000         0.0000
  
- specific density box  1 =  0.53349E+00  0.99920E-15  0.99920E-15
- specific density box  2 =  0.52039E-02  0.17347E-17  0.17347E-17
- system volume    box  1 =  0.64000E+05  0.66939E-09  0.66939E-09
- system volume    box  2 =  0.72900E+06  0.38417E-08  0.38417E-08
+ specific density box  1 =  0.53349E+00  0.21716E-12  0.21716E-12
+ specific density box  2 =  0.52039E-02  0.13618E-15  0.13618E-15
+ system volume    box  1 =  0.64000E+05  0.00000E+00  0.00000E+00
+ system volume    box  2 =  0.72900E+06  0.00000E+00  0.00000E+00
  pressure         box  1 =  0.68780E+06  0.11276E+06  0.11276E+06
  pressure         box  2 =   1306.7       8.4471       8.4471    
  surface tension  box  1 =   -466.33859    277.64876    277.64876
@@ -534,7 +535,7 @@ molecule  1:   0.00000000      0.00000000
  
  Total energy     box  1 =  0.19680E+07  0.28190E+06  0.28190E+06
  Inter LJ         box  1 = -0.20194E+06  0.42094E+05  0.42094E+05
- Tail  LJ         box  1 = -0.19514E+05  0.19281E-09  0.19281E-09
+ Tail  LJ         box  1 = -0.19514E+05  0.67666E-09  0.67666E-09
  Intra LJ         box  1 =  0.38924E+05  0.11847E+05  0.11847E+05
  Stretch          box  1 =  0.00000E+00  0.00000E+00  0.00000E+00
  Bond bending     box  1 =  0.14032E+07  0.20839E+06  0.20839E+06
@@ -545,7 +546,7 @@ molecule  1:   0.00000000      0.00000000
  Fluc Q           box  1 =  0.00000E+00  0.00000E+00  0.00000E+00
  Total energy     box  2 =  0.24617E+06  0.16204E+05  0.16204E+05
  Inter LJ         box  2 = -0.12308E+03  0.10094E+02  0.10094E+02
- Tail  LJ         box  2 = -0.21151E+02  0.56843E-13  0.56843E-13
+ Tail  LJ         box  2 = -0.21151E+02  0.10122E-10  0.10122E-10
  Intra LJ         box  2 =  0.17600E+04  0.10474E+04  0.10474E+04
  Stretch          box  2 =  0.00000E+00  0.00000E+00  0.00000E+00
  Bond bending     box  2 =  0.15985E+06  0.83247E+04  0.83247E+04
@@ -565,8 +566,8 @@ molecule  1:   0.00000000      0.00000000
  chemical potential  itype  1 box  2 =         0.000        0.000        0.000
  mean sete length    itype  1 box  1 =        49.688        4.951        4.951
  mean sete length    itype  1 box  2 =        48.086        3.482        3.482
- number density      itype  1 box  1 =   0.28125E+01  0.52042E-14  0.52042E-14
- number density      itype  1 box  2 =   0.27435E-01  0.13553E-16  0.13553E-16
+ number density      itype  1 box  1 =   0.28125E+01  0.11447E-11  0.11447E-11
+ number density      itype  1 box  2 =   0.27435E-01  0.71659E-15  0.71659E-15
  mole fraction       itype  1 box  1 =     1.0000000    0.0000000    0.0000000
  mole fraction       itype  1 box  2 =     1.0000000    0.0000000    0.0000000
  Ostwald Coefficient itype  1 between box  2 and  1 =       102.515625        0.000000
@@ -582,4 +583,7 @@ molecule  1:   0.00000000      0.00000000
  block    energy     density    pressure    surf ten   mol fracs
    1  0.2300E+06  0.5204E-02  0.1315E+04 -0.6621E-01  0.1000E+01
    2  0.2624E+06  0.5204E-02  0.1298E+04  0.2540E-02  0.1000E+01
- Program ended at 2014-03-08 21:55:07.000
+ Program ended at 2015-05-26 11:22:17.124
+dim:   0
+sete:                NaN
+Uads:                NaN

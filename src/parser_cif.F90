@@ -251,7 +251,7 @@ CONTAINS
 
        if (uninitialized.eq.0) then
           forall(i=1:3) zcell%boxl(i)%val=zunit%boxl(i)*zunit%dup(i)
-          call setUpCellStruct(zcell,zunit,lprint)
+          call setUpCellStruct(zcell,zunit,lprint,fileCIF)
           call setUpUnitCellDummyBox(boxZeo,zunit%dup)
           uninitialized=-1
        end if

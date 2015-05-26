@@ -39,7 +39,7 @@ CONTAINS
        if (lbranch(imolty).or.lrigid(imolty)) then
           if (lusefile) then
              if (myid.eq.rootid) then
-                read(io_struct,*)
+                read(io_struct,*) !first read comment line for imolty
                 do m = 1, nunit(imolty)
                    read(io_struct,*) samx(imolty,m),samy(imolty,m),samz(imolty,m)
                 end do

@@ -1718,11 +1718,15 @@ contains
 
   subroutine output_swap_stats(io_output)
     integer,intent(in)::io_output
-    integer::i,j,ibox,jbox,jbox_max
+    integer::i,j,ibox,jbox,jbox_max,ii
 
     write(io_output,'(/,A,/)') '### Molecule swap       ###'
     do i = 1, nmolty
-       write(io_output,'(A,I0)') 'molecule typ = ',i
+       write(io_output,"(A,I0,A)",advance='no') 'molecule typ = ',i,'    '
+       do ii=1,nunit(i)
+          write(io_output,'(A1)',advance='no')chemid(ntype(i,ii))
+       end do
+       write(io_output,*) 
        do j=1,nswapb(i)
           if ( box1(i,j) .eq. box2(i,j) ) then
              jbox_max = 1

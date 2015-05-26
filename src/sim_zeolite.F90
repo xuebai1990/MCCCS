@@ -41,21 +41,22 @@ MODULE sim_zeolite
 
 CONTAINS
 
-  subroutine setUpCellStruct(zcell,zunit,lprint)
+  subroutine setUpCellStruct(zcell,zunit,lprint,file_zeocoord)
     type(CellMaskType),intent(inout)::zcell !< the "type" component of (Cell)zcell is the index in (ZeoliteBeadType)ztype
     type(ZeoliteUnitCellGridType),intent(inout)::zunit
     LOGICAL,INTENT(IN)::lprint
+    character(LEN=*),intent(in)::file_zeocoord
     real::unit_cell_volume
 
     integer::i,j
 
-    if (lprint) write(io_output,"(/,' READING ZEOLITE LATTICE FROM FILE zeolite.cssr:',/&
+    if (lprint) write(io_output,"(/,' READING ZEOLITE LATTICE FROM FILE:     ',A100,/&
                                &,' --------------------------------------------------',/&
                                &,' box dimensions                    = ',3f10.3,' Angstrom',/&
                                &,' box angles                        = ',3f10.3,' degrees',/&
                                &,' number of zeolite cells           = ',3i5,/)")&
-                               zcell%boxl(1)%val,zcell%boxl(2)%val,zcell%boxl(3)%val,zcell%ang(1)%val,zcell%ang(2)%val&
-                               ,zcell%ang(3)%val,zunit%dup(1),zunit%dup(2),zunit%dup(3)
+                               file_zeocoord,zcell%boxl(1)%val,zcell%boxl(2)%val,zcell%boxl(3)%val,zcell%ang(1)%val&
+                               ,zcell%ang(2)%val,zcell%ang(3)%val,zunit%dup(1),zunit%dup(2),zunit%dup(3)
 
     if (abs(zcell%ang(1)%val-90_dp)>eps.or.abs(zcell%ang(2)%val-90_dp)>eps.or.abs(zcell%ang(3)%val-90_dp)>eps) then
        zcell%solid=.true.

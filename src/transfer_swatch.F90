@@ -1390,12 +1390,20 @@ contains
 
   subroutine output_swatch_stats(io_output)
     integer,intent(in)::io_output
-    integer::i,j,ibox,jbox
+    integer::i,j,ibox,jbox,ii
 
     write(io_output,'(/,A,/)') '### Molecule swatch     ###'
     do i = 1, nswaty
        write(io_output,'(A,I0)') 'pair typ = ',i
-       write(io_output,'(2(A,I0))') 'moltyps = ',nswatb(i,1),' and ',nswatb(i,2)
+       write(io_output,'(A,I0,A)',advance='no') 'moltyps = ',nswatb(i,1),'    '
+       do ii=1,nunit(nswatb(i,1))
+          write(io_output,'(A1)',advance='no')chemid(ntype(nswatb(i,1),ii))
+       end do
+       write(io_output,'(A,I0,A)',advance='no')' and ',nswatb(i,2),'    '
+       do ii=1,nunit(nswatb(i,2))
+          write(io_output,'(A1)',advance='no')chemid(ntype(nswatb(i,2),ii))
+       end do
+       write(io_output,*) 
        do j = 1, nswtcb(i)
           do jbox = 1,2
              if (jbox.eq.1) ibox=box3(i,j)

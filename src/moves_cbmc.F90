@@ -7187,14 +7187,18 @@ contains
 !> \brief write some information about config performance
   subroutine output_cbmc_stats(io_output)
     integer,intent(in)::io_output
-    integer::i,inb
+    integer::i,inb,ii
     real::pscb1,pscb2
 
     write(io_output,*)
     write(io_output,*) '### Configurational-bias ###'
     write(io_output,*)
     do i = 1, nmolty
-       write(io_output,*) 'molecule typ =',i
+       write(io_output,"(A,I0,A)",advance='no') 'molecule typ = ',i,'    '
+       do ii=1,nunit(i)
+          write(io_output,'(A1)',advance='no')chemid(ntype(i,ii))
+       end do
+       write(io_output,*)
        write(io_output,*) '    length  attempts  succ.growth  accepted' ,'   %su.gr.    %accep.'
        do inb = 1, nunit(i)
           if ( bncb(i,inb) .gt. 0.0E0_dp ) then

@@ -2059,8 +2059,21 @@ $x$, $y$ and $z$ coordinates and the charge, $q$, of molecule {\bf nchain} \\
 \end{center}
 
 \noindent{\bf file\_struct:} Only necessary if {\bf lbranch}
-in {\bf file\_input} is TRUE for any molecule. If so, this
-is where the structure of the molecule is specified.
+in {\bf file\_input} is TRUE for any molecule(s), in which
+case the structure(s) need be specified here. This is done
+by 1 comment line, followed by lines for each bead consisting 
+of by xyz-coordinates of each bead. For TIP4P, ordering the 
+beads O, H, H, M, for example, 
+\begin{verbatim}
+this line needed for comments
+ 0.0 0.0 0.0
+ 0.9572 0.0 0.0
+ -0.2400 0.926627 0.0
+ 0.0918118904 0.118619462 0.0
+\end{verbatim}
+One example in the test-suite, TEST6, has a 4th column, but
+this column is apparently not read.
+
 
 \noindent{\bf fort.7, fort.44:} Used for the new and the old
 expanded ensemble calculations, respectively. {\bf fort.7}

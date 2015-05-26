@@ -4,9 +4,9 @@
      nbox=           2
      nmolty=           1
      nchain=        1000
-     nstep=        4000
+     nstep=          6000
      lstop= F
-     iratio=         500
+     iratio=          500
      rmin=   1.00000000000000     
      softcut=   100.000000000000     
      linit= F
@@ -32,7 +32,6 @@
      lrhoz= F
      bin_width=  2.000000000000000E-002
      lucall= F
-     ucheck=           0           0
      nvirial=           0
      starvir=  0.000000000000000E+000
      stepvir=  0.000000000000000E+000
@@ -150,8 +149,8 @@ END SIMULATION_BOX
 
 
 MOLECULE_TYPE
-! nunit nugrow ncarbon maxcbmc maxgrow iring lelect lring lrigid lbranch lrplc lsetup lq14scale qscale iurot isolute eta
-4 4 4 4 4 4  T  F  T  T  F  F  F 0.0 0 100000     0.0     0.0
+! nunit nugrow ncarbon maxcbmc maxgrow iring lelect lring lrigid lbranch lsetup lq14scale qscale iurot isolute
+4 4 4 4 4 4  T  F  T  T  F  F 0.0 0 100000
 ! n, growpoint_1 ... growpoint_n
 0
 ! unit ntype leaderq
@@ -233,3 +232,14 @@ INTRAMOLECULAR_OH15
 ! ainclmol ainclbead_1 ainclbead_2 a15type
 END INTRAMOLECULAR_OH15
 
+UNIFORM_BIASING_POTENTIALS
+! for each molecule type, give nbox values
+0.0d0 0.0d0
+END UNIFORM_BIASING_POTENTIALS
+
+
+SPECIFIC_ATOM_TRANSL
+! How many atoms should we be performing translations on?
+! What is the index of those atoms in their respective molecules?
+! What is the molecule type for each atom?
+END SPECIFIC_ATOM_TRANSL

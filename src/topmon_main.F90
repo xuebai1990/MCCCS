@@ -541,7 +541,9 @@ contains
        end if
 
        call output_swap_stats(io_output)
-       call output_swatch_stats(io_output)
+       if (nmolty > 1) then
+          call output_swatch_stats(io_output)
+       end if
 
        write(io_output,*)
        write(io_output,*)    '### Charge Fluctuation  ###'

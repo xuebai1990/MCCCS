@@ -1,7 +1,7 @@
-Program started at 2014-03-08 22:02:29.079
+Program started at 2015-05-26 11:36:03.489
 Number of processors: 1
 Threads per processor: 1
- run_num: 1
+ run_num: 1    
  suffix: a
  L_movie_xyz:  F
 
@@ -56,6 +56,7 @@ NAMELIST ANALYSIS
  lete:  F
  lrhoz:  F
  bin_width:  0.200000000    
+ lucall:  F
 
 SECTION SIMULATION_BOX
 ------------------------------------------
@@ -69,7 +70,7 @@ Box 1:   46.000 x   46.000 x   46.000
    initial number of chains of each type:   300
    Ghost particles: 0
    initial number of chains in x, y and z directions: 7 x 7 x 7
-   initial rotational displacement: 0, inimix: 1, zshift:  0.0, dshift:  3.280
+   initial rotational displacement: 0, inimix: 1, zshift:   0.0, dshift:   3.280
 
 NUMBER OF MOLECULES OF EACH TYPE
  number of chains of each type:   300
@@ -83,8 +84,7 @@ molecule type: 1
    maximum number of units for CBMC: 9
    maximum number of interior segments for SAFE-CBMC regrowth: 1
    number of atoms in a ring (if lring=.true.): 9
-   iurot: 0, isolute: 10000, lelect:  T, lring:  F, lrigid:  F, lbranch:  F, lrplc:  F, lsetup:  F, lq14scale:  T, qscale: 0.5
-   energy offset for box 1:     0.0 [K]
+   iurot: 0, isolute: 10000, lelect:  T, lring:  F, lrigid:  F, lbranch:  F, lsetup:  F, lq14scale:  T, qscale: 0.5
 
    bead 1: bead type 212 [C], charge leader 1
       bonded to bead 2, type 101, bond length:  1.34400, k/2:   0.00000000    
@@ -160,6 +160,14 @@ SPECIAL INTERACTION RULES
 
       repulsive 1-5 OH interaction for molecule type 1 between bead 2 and bead 9 of type 1
   Total: 1 special rules for intramolecular 1-5 OH interactions
+
+SECTION UNIFORM_BIASING_POTENTIALS
+------------------------------------------
+Molecule type, biasing potential 1 through nbox [K]: 
+     0.000
+
+SECTION SPECIFIC_ATOM_TRANSL
+------------------------------------------
 
 Molecule type: 1
 
@@ -356,9 +364,10 @@ fluctuating charge temperature:    5.000 [K]
 initial maximum displacement for fluctuating charge moves:  0.100000000E+00
 pmflcq:   0.00000000    
    nchoiq for each box:   1
+nswapq: 0
 
-molecule type:  lflucq lqtrans   pmfqmt    fqegp
-            1:       F       F   1.0000   0.0000
+molecule type:  lflucq lqtrans   pmfqmt            fqegp
+            1:       F       F   1.0000           0.0000
 
 NAMELIST MC_EE
 ------------------------------------------
@@ -489,14 +498,14 @@ ibox:      calp  kmaxl  kmaxm  kmaxn         rcut
  
  ### Translations ###
  
- molecule typ =           1  in box           1
+molecule typ = 1   COCOCCCOH  in box           1
  x-dir: attempts =  105212.0   ratio = 0.500   max.displ. = 0.3143E+00
  y-dir: attempts =  105291.0   ratio = 0.501   max.displ. = 0.3154E+00
  z-dir: attempts =  104666.0   ratio = 0.501   max.displ. = 0.3162E+00
  
  ### Rotations ###
  
- molecule typ =           1  in box           1
+molecule typ = 1    COCOCCCOH  in box           1
  x-dir: attempts =  105426.0   ratio = 0.499   max.displ. = 0.1414E+00
  y-dir: attempts =  104538.0   ratio = 0.501   max.displ. = 0.1443E+00
  z-dir: attempts =  104766.0   ratio = 0.497   max.displ. = 0.1376E+00
@@ -504,7 +513,7 @@ ibox:      calp  kmaxl  kmaxm  kmaxn         rcut
  
  ### Configurational-bias ###
  
- molecule typ =           1
+molecule typ = 1    COCOCCCOH
      length  attempts  succ.growth  accepted   %su.gr.    %accep.
         1   29914.0   29914.0   17342.0    100.00     57.97
         2   15102.0   15102.0    1021.0    100.00      6.76
@@ -521,18 +530,11 @@ ibox:      calp  kmaxl  kmaxm  kmaxn         rcut
 
 ### Molecule swap       ###
 
-molecule typ = 1
+molecule typ = 1    COCOCCCOH
 between box 1 and 2 into box 1   uattempts = 0 attempts = 0   accepted = 0
 between box 1 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
-
-### Molecule swatch     ###
-
-pair typ = 1
-moltyps = 2 and 3
-between box 1 and 2 into box 1   uattempts = 0  attempts = 0  accepted = 0
-between box 1 and 2 into box 2   uattempts = 0  attempts = 0  accepted = 0
  
  ### Charge Fluctuation  ###
  
@@ -548,20 +550,20 @@ molecule  1:   0.00000000
  number of chains         300
  number of chains of type           1         300
  inter lj energy   -1234956.12044762     
- intra lj energy   -40520.1643864952     
+ intra lj energy   -40520.1643864950     
  Tail correction   -38287.1267539186     
  bond vibration    0.000000000000000E+000
- bond bending       337491.732012047     
+ bond bending       337491.732012045     
  torsional          1066035.15517785     
  external          0.000000000000000E+000
  coulombic energy  -2249397.81605694     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -2121347.21370116     
+ total energy      -2121347.21370115     
  
- vstart       =     -2119379.2830781792
- vend         =     -2121347.2137011564
- vbox         =     -2121347.2137012859
+ vstart       =     -2119379.2830781778
+ vend         =     -2121347.2137011536
+ vbox         =     -2121347.2137011671
  
  Averages and fluctuations                        Box  1
  
@@ -617,7 +619,7 @@ molecule  1:   0.00000000
  Enthalpy Inst.[kJ/mol] for box  1 =     -58.4942       0.7953       0.2651
  Enthalpy Ext. [kJ/mol] for box  1 =     -58.5829       0.1689       0.0563
  
- Cp residual(J/Kmol) =   56.6985910    
+ Cp residual(J/Kmol) =   56.6985909    
    H2 =  0.446854690E+13
    H  =  -2113850.76    
  
@@ -640,4 +642,7 @@ molecule  1:   0.00000000
    8 -0.2112E+07  0.1075E+01 -0.7724E+03 -0.4071E+01  0.1000E+01
    9 -0.2111E+07  0.1084E+01  0.1163E+05  0.2558E+02  0.1000E+01
   10 -0.2114E+07  0.1083E+01 -0.2609E+04 -0.1350E+02  0.1000E+01
- Program ended at 2014-03-08 23:09:34.453
+ Program ended at 2015-05-26 12:26:43.864
+dim:   0
+sete:                NaN
+Uads:                NaN

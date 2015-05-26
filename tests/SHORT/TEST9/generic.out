@@ -1,7 +1,7 @@
-Program started at 2014-03-08 21:55:07.093
+Program started at 2015-05-26 11:24:13.283
 Number of processors: 1
 Threads per processor: 1
- run_num: 1
+ run_num: 1    
  suffix: a
  L_movie_xyz:  F
 
@@ -32,7 +32,7 @@ number of chains: 300
 number of cycles: 1
  iratio: 1
 minimum cutoff (rmin):   1.200 [Ang]
- softcut:   100.000000    
+ softcut:  100.0000000    
 Write checkpoint file every 1800 seconds, and keep the last 1 copies
  linit:  F
  lreadq:  F
@@ -55,6 +55,7 @@ NAMELIST ANALYSIS
  lete:  F
  lrhoz:  F
  bin_width:  0.200000000    
+ lucall:  F
 
 SECTION SIMULATION_BOX
 ------------------------------------------
@@ -64,11 +65,11 @@ Box 1:   35.500 x   35.500 x   35.500
    number of dimensions that are isotropic: 0
    lsolid:  T, lrect:  F, lideal:  F, ltwice:  F
    temperature:  295.000 [K]
-   external pressure:  0.100000000     [MPa]
+   external pressure:  0.100000000E+00 [MPa]
    initial number of chains of each type:   300
    Ghost particles: 0
    initial number of chains in x, y and z directions: 5 x 5 x 5
-   initial rotational displacement: 0, inimix: 1, zshift:  0.0, dshift:  2.000
+   initial rotational displacement: 0, inimix: 1, zshift:   0.0, dshift:   2.000
 
 NUMBER OF MOLECULES OF EACH TYPE
  number of chains of each type:   300
@@ -82,8 +83,7 @@ molecule type: 1
    maximum number of units for CBMC: 24
    maximum number of interior segments for SAFE-CBMC regrowth: 1
    number of atoms in a ring (if lring=.true.): 24
-   iurot: 0, isolute: 100000, lelect:  T, lring:  F, lrigid:  T, lbranch:  T, lrplc:  F, lsetup:  F, lq14scale:  F, qscale: 0.0
-   energy offset for box 1:     0.0 [K]
+   iurot: 0, isolute: 100000, lelect:  T, lring:  F, lrigid:  T, lbranch:  T, lsetup:  F, lq14scale:  F, qscale: 0.0
 
    bead 1: bead type 380 [C], charge leader 1
 
@@ -142,6 +142,14 @@ SPECIAL INTERACTION RULES
   Total: 0 inclusion rules for intramolecular interactions
 
   Total: 0 special rules for intramolecular 1-5 OH interactions
+
+SECTION UNIFORM_BIASING_POTENTIALS
+------------------------------------------
+Molecule type, biasing potential 1 through nbox [K]: 
+     0.000
+
+SECTION SPECIFIC_ATOM_TRANSL
+------------------------------------------
 
 Molecule type: 1
 
@@ -304,15 +312,15 @@ frequency to adjust maximum volume displacement: 500
 initial maximum volume displacement (rmvol):    0.100
 pmvol:  0.150000000E-02
 pmvolx:  0.333000000    , pmvoly:  0.666670000    
-   pmvlmt for box 1:   1.00000000    
+   pmvlmt for box 1:  1.000000000    
 nvolb: 1
-   box pair 1: between 1 and 2,   pmvolb =   1.00000000    
+   box pair 1: between 1 and 2,   pmvolb =  1.000000000    
 
 NAMELIST MC_SWATCH
 ------------------------------------------
 pmswat:   0.00000000    
    number of swatch pairs (nswaty): 1
-   probability of each swatch pair:   1.00000000    
+   probability of each swatch pair:  1.000000000    
 
    swatch molecule type pairs:    2    3
    nsampos: 1, ncut:  1  1
@@ -322,7 +330,7 @@ pmswat:   0.00000000
    ncut 1: grom from 1, prev 0
    splist:    1    1
    number of swatch box pairs: 1
-   probability of the swatch box pair:   1.00000000    
+   probability of the swatch box pair:  1.000000000    
    box pair:    1    2
 
 NAMELIST MC_SWAP
@@ -330,7 +338,7 @@ NAMELIST MC_SWAP
 pmswap:   0.00000000    
    swap probability for molecule type 1 (pmswmt):   1.0000
    number of swap box pairs for molecule type 1: 1
-   pmswapb:   1.00000000    
+   pmswapb:  1.000000000    
    box pair:    1    2
 
 NAMELIST MC_CBMC
@@ -345,18 +353,19 @@ molecule type: nchoi1  nchoi nchoir nchoih nchtor nchbna nchbnb icbdir icbsta
             1:     15     10     15      1     10   1000   1000      0      0
 
 molecule type:    pmcbmt         pmall  avbmc_version    pmbias        pmbsmt       pmbias2         pmfix   lrig
-            1:   1.00000       0.00000              0   0.00000       0.00000       0.00000       0.00000      F
+            1:  1.000000       0.00000              0   0.00000       0.00000       0.00000       0.00000      F
 
 NAMELIST MC_FLUCQ
 ------------------------------------------
 target fluctuating charge acceptance ratio (taflcq): 0.95
 fluctuating charge temperature:    5.000 [K]
-initial maximum displacement for fluctuating charge moves:  0.100000000    
+initial maximum displacement for fluctuating charge moves:  0.100000000E+00
 pmflcq:   0.00000000    
    nchoiq for each box:   1
+nswapq: 0
 
-molecule type:  lflucq lqtrans   pmfqmt    fqegp
-            1:       F       F   1.0000   0.0000
+molecule type:  lflucq lqtrans   pmfqmt            fqegp
+            1:       F       F   1.0000           0.0000
 
 NAMELIST MC_EE
 ------------------------------------------
@@ -374,7 +383,7 @@ pmtra:  0.550000000
    translation probability for molecule type 1 (pmtrmt):   1.0000
 target rotation acceptance ratio: 0.50
 initial maximum displacement for molecule rotation:  0.400000000    
-pmrot:   1.00000000    
+pmrot:  1.000000000    
    rotational probability for molecule type 1 (pmromt):   1.0000
 
 percentage move probabilities:
@@ -445,7 +454,7 @@ ibox:      calp  kmaxl  kmaxm  kmaxn         rcut
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -542302.793946062     
+ coulombic energy  -542302.793946059     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
  total energy      -3898267.96545116     
@@ -466,14 +475,14 @@ ibox:      calp  kmaxl  kmaxm  kmaxn         rcut
  
  ### Translations ###
  
- molecule typ =           1  in box           1
+molecule typ = 1   CCCCCCHHHHHHNNNNNNOOOOOO  in box           1
  x-dir: attempts =      51.0   ratio = 0.549   max.displ. = 0.3256E+00
  y-dir: attempts =      59.0   ratio = 0.373   max.displ. = 0.2171E+00
  z-dir: attempts =      62.0   ratio = 0.565   max.displ. = 0.2119E+00
  
  ### Rotations ###
  
- molecule typ =           1  in box           1
+molecule typ = 1    CCCCCCHHHHHHNNNNNNOOOOOO  in box           1
  x-dir: attempts =      44.0   ratio = 0.568   max.displ. = 0.1184E+00
  y-dir: attempts =      37.0   ratio = 0.486   max.displ. = 0.1013E+00
  z-dir: attempts =      46.0   ratio = 0.478   max.displ. = 0.1159E+00
@@ -492,18 +501,11 @@ ibox:      calp  kmaxl  kmaxm  kmaxn         rcut
 
 ### Molecule swap       ###
 
-molecule typ = 1
+molecule typ = 1    CCCCCCHHHHHHNNNNNNOOOOOO
 between box 1 and 2 into box 1   uattempts = 0 attempts = 0   accepted = 0
 between box 1 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
-
-### Molecule swatch     ###
-
-pair typ = 1
-moltyps = 2 and 3
-between box 1 and 2 into box 1   uattempts = 0  attempts = 0  accepted = 0
-between box 1 and 2 into box 2   uattempts = 0  attempts = 0  accepted = 0
  
  ### Charge Fluctuation  ###
  
@@ -525,14 +527,14 @@ molecule  1:   0.00000000
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -542894.015887846     
+ coulombic energy  -542894.015887832     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -3900050.47071057     
+ total energy      -3900050.47071056     
  
- vstart       =     -3898267.9654511609
- vend         =     -3900050.4707105728
- vbox         =     -3900050.4707103474
+ vstart       =     -3898267.9654511577
+ vend         =     -3900050.4707105607
+ vbox         =     -3900050.4707103446
  
  Averages and fluctuations                        Box  1
  
@@ -569,4 +571,7 @@ molecule  1:   0.00000000
  
  type  box       vinter       vintra         vtor        vbend        vtail
     1    1      0.00000      0.00000      0.00000      0.00000      0.00000
- Program ended at 2014-03-08 21:55:22.953
+ Program ended at 2015-05-26 11:24:26.974
+dim:   0
+sete:                NaN
+Uads:                NaN

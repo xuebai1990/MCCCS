@@ -32,7 +32,6 @@
      lrhoz= F
      bin_width=  0.200000000000000     
      lucall= F
-     ucheck=           0           0
      nvirial=           0
      starvir=  0.000000000000000E+000
      stepvir=  0.000000000000000E+000
@@ -144,8 +143,8 @@ END SIMULATION_BOX
 
 
 MOLECULE_TYPE
-! nunit nugrow ncarbon maxcbmc maxgrow iring lelect lring lrigid lbranch lrplc lsetup lq14scale qscale iurot isolute eta
-9 9 9 9 1 9  T  F  F  F  F  F  T 0.5 0 10000     0.0
+! nunit nugrow ncarbon maxcbmc maxgrow iring lelect lring lrigid lbranch lrplc lsetup lq14scale qscale iurot isolute
+9 9 9 9 1 9 T F F F F T 0.5 0 10000 
 ! unit ntype leaderq
 1 212 1
 ! stretching
@@ -308,3 +307,14 @@ INTRAMOLECULAR_OH15
 1 2 9 1
 END INTRAMOLECULAR_OH15
 
+UNIFORM_BIASING_POTENTIALS
+! for each molecule type, give nbox values
+0.0d0 0.0d0 0.0d0
+END UNIFORM_BIASING_POTENTIALS
+
+
+SPECIFIC_ATOM_TRANSL
+! How many atoms should we be performing translations on?
+! What is the index of those atoms in their respective molecules?
+! What is the molecule type for each atom?
+END SPECIFIC_ATOM_TRANSL

@@ -60,7 +60,7 @@ CONTAINS
 
     read(IOCSSR,*) zcell%boxl(1)%val,zcell%boxl(2)%val,zcell%boxl(3)%val
     read(IOCSSR,*) zcell%ang(1)%val,zcell%ang(2)%val,zcell%ang(3)%val
-    call setUpCellStruct(zcell,zunit,lprint)
+    call setUpCellStruct(zcell,zunit,lprint,fileCSSR)
 
     read(IOCSSR,*) zeo%nbead,cflag
     read(IOCSSR,*)

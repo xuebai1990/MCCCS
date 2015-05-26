@@ -578,7 +578,7 @@ contains
          pick_chain = int( dchain*random(-1) + 1 )
          pick_chain = parall(imolty,pick_chain)
          ibox = nboxi(pick_chain)       
-	 
+
 ! Store the atom of interest, the molecule of interest, and the 
 ! number of atoms in the molecule
 
@@ -1126,8 +1126,9 @@ contains
 
 !> \brief Write some information about translations and rotations
   subroutine output_translation_rotation_stats(io_output)
+    use util_string,only:format_n
     integer,intent(in)::io_output
-    integer::ibox,i
+    integer::ibox,i,ii
     real::ratvol
     character(LEN=default_path_length)::fmt(3)=(/"(' x-dir: attempts =',F10.1,'   ratio =',f6.3, '   max.displ. =',e11.4)"&
      ,"(' y-dir: attempts =',F10.1,'   ratio =',f6.3, '   max.displ. =',e11.4)"&
@@ -1138,7 +1139,11 @@ contains
     write(io_output,*)
     do ibox = 1,nbox
        do i=1,nmolty
-          write(io_output,*) 'molecule typ =',i,' in box',ibox
+          write(io_output,"(A,I0,A)",advance='no') 'molecule typ = ',i,'   '
+          do ii=1,nunit(i)
+             write(io_output,'(A1)',advance='no')chemid(ntype(i,ii))
+          end do
+          write(io_output,*)' in box',ibox
           acntrax(i,ibox) = acntrax(i,ibox) + bntrax(i,ibox)
           acstrax(i,ibox) = acstrax(i,ibox) + bstrax(i,ibox)
           if ( acntrax(i,ibox) .ne. 0.0E0_dp ) then
@@ -1173,7 +1178,11 @@ contains
     write(io_output,*)
     do ibox = 1,nbox
        do i=1,nmolty
-          write(io_output,*) 'molecule typ =',i,' in box',ibox
+          write(io_output,"(A,I0,A)",advance='no') 'molecule typ = ',i,'    '
+          do ii=1,nunit(i)
+             write(io_output,'(A1)',advance='no')chemid(ntype(i,ii))
+          end do
+          write(io_output,*)' in box',ibox
           acnrotx(i,ibox) = acnrotx(i,ibox) + bnrotx(i,ibox)
           acsrotx(i,ibox) = acsrotx(i,ibox) + bsrotx(i,ibox)
           if ( acnrotx(i,ibox) .ne. 0.0E0_dp ) then

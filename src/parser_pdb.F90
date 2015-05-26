@@ -89,7 +89,7 @@ CONTAINS
        CASE ("CRYST1")
           read(line(7:),*) zcell%boxl(1)%val,zcell%boxl(2)%val,zcell%boxl(3)%val,zcell%ang(1)%val,zcell%ang(2)%val&
            ,zcell%ang(3)%val
-          call setUpCellStruct(zcell,zunit,lprint)
+          call setUpCellStruct(zcell,zunit,lprint,filePDB)
           uninitialized=.false.
        CASE ("ATOM","HETATM")
           if (uninitialized) call err_exit(__FILE__,__LINE__,'PDB: CRYST1 needs to be defined before ATOM',-1)
