@@ -1024,7 +1024,6 @@ contains
           ntj = ntype(imolty,j)
           v(ivExt)=v(ivExt)+U_ext(ibox,nchp2,j,ntj)
        end do
-       call mp_sum(v(ivExt),1,groupid)
     end if
 
 ! *********************************************************************
