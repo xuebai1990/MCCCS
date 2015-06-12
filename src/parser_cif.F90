@@ -19,7 +19,7 @@ MODULE parser_cif
   use var_type,only:dp,default_string_length
   use util_runtime,only:err_exit
   use util_files,only:get_iounit,readLine
-  use util_string,only:splitAndGetNext
+  use util_string,only:splitAndGetNext,str_search
   use util_memory,only:reallocate,insert
   use sim_cell
   use sim_particle
@@ -49,7 +49,7 @@ CONTAINS
     real,parameter::eps=1.0E-4_dp
     INTEGER::IOCIF,jerr,i,uninitialized,boxZeo,ia,ib,ic,id,nAtom,nField,nSymm
     INTEGER,allocatable::Field(:)
-    CHARACTER(LEN=default_string_length)::line,atom
+    CHARACTER(LEN=default_string_length)::line,atom,element,label
     CHARACTER(LEN=default_string_length),allocatable::SymmOp(:,:)
     real::scoord(3),tmpcoord(3),coord(3),dr(3)
 
@@ -169,20 +169,32 @@ CONTAINS
                 ia=ic+ia
                 ib=ic+ib
                 SELECT CASE (Field(id))
+                CASE (1)
+                   read(line(ia:ib),*) label
                 CASE (2)
-                   read(line(ia:ib),*) atom
+                   read(line(ia:ib),*) element
                 CASE (3)
                    CALL getReal(line(ia:ib),scoord(1),jerr)
                 CASE (4)
                    CALL getReal(line(ia:ib),scoord(2),jerr)
                 CASE (5)
                    CALL getReal(line(ia:ib),scoord(3),jerr)
-                CASE (1,0)
+                CASE (0)
                    ! Skip this field
                 CASE DEFAULT
                 END SELECT
                 ic=ib
              END DO
+
+             if (str_search(ztype%name,ztype%ntype,label) .gt. 0) then
+                atom=label
+             else if (str_search(ztype%name,ztype%ntype,element) .gt. 0) then
+                atom=element
+             else
+                call err_exit(__FILE__,__LINE__,'parcer_cif: unknown atomtype;&
+                &  _atom_site_label: '//trim(adjustl(label))//' and _atom_site_type_symbol: '//trim(adjustl(element))//' Not found', 0) 
+             endif
+
              scoord=scoord-floor(scoord)
              call extend_molecule_type(zeo,i)
              call fractionalToAbsolute(zeo%bead(i)%coord,scoord/zunit%dup,zcell)
