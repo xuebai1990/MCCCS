@@ -366,6 +366,7 @@ contains
     call mp_bcast(jerr,1,rootid,groupid)
     call mp_bcast(ltailcZeotmp,1,rootid,groupid)
     call mp_bcast(rcuttmp,1,rootid,groupid)
+    call mp_bcast(egrid(:,:),product(zunit%ngrid(1:3))*zpot%ntype,rootid,groupid)
 
     if (jerr.ne.0) then
        call mp_bcast(st,1,rootid,groupid)
