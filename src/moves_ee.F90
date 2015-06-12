@@ -93,7 +93,7 @@ contains
                   ntjj = ntype(j,jj)
                   ntij=type_2body(ntii,ntjj)
                   rminee(ntij) = rmin
-!	write(io_output,*) i,ii,j,jj,rminee(ntij)
+!write(io_output,*) i,ii,j,jj,rminee(ntij)
                end do
             end do
          end do
@@ -114,9 +114,9 @@ contains
                   else
                      rminee(ntij) = 0.0E0_dp
                   end if
-!	write(io_output,*) i,ii,j,jj,rminee(ntij)
-!	write(io_output,*) 'nt', ntii,ntjj,ntij,ntjjs,ntijs
-!	write(io_output,*) 'eps', vvdW(3,ntij),vvdW(3,ntijs),vvdW(1,ntij),
+!write(io_output,*) i,ii,j,jj,rminee(ntij)
+!write(io_output,*) 'nt', ntii,ntjj,ntij,ntjjs,ntijs
+!write(io_output,*) 'eps', vvdW(3,ntij),vvdW(3,ntijs),vvdW(1,ntij),
 !     &              vvdW(1,ntijs),qelect(ntii),qelect(ntjj)
                end do
             end do
@@ -138,9 +138,9 @@ contains
                   else
                      rminee(ntij) = 0.0E0_dp
                   end if
-!	write(io_output,*) i,ii,j,jj,rminee(ntij)
-!	write(io_output,*) 'nt', ntii,ntjj,ntij,ntjjs,ntijs
-!	write(io_output,*) 'eps', vvdW(3,ntij),vvdW(3,ntijs),vvdW(1,ntij),
+!write(io_output,*) i,ii,j,jj,rminee(ntij)
+!write(io_output,*) 'nt', ntii,ntjj,ntij,ntjjs,ntijs
+!write(io_output,*) 'eps', vvdW(3,ntij),vvdW(3,ntijs),vvdW(1,ntij),
 !     &              vvdW(1,ntijs)
                end do
             end do
@@ -161,25 +161,25 @@ contains
                else
                   rminee(ntij) = 0.0E0_dp
                end if
-!	write(io_output,*) i,ii,i,jj,rminee(ntij)
+!write(io_output,*) i,ii,i,jj,rminee(ntij)
             end do
          end do
       end do
 
-!	write(io_output,*) 'enumerate'
-!	do i = 1, nmolty
-!	do ii = 1, nunit(i)
-!	ntii = ntype(i,ii)
-!	do j = 1, nmolty
-!	do jj = 1, nunit(j)
-!	ntjj = ntype(j,jj)
+!write(io_output,*) 'enumerate'
+!do i = 1, nmolty
+!do ii = 1, nunit(i)
+!ntii = ntype(i,ii)
+!do j = 1, nmolty
+!do jj = 1, nunit(j)
+!ntjj = ntype(j,jj)
 ! ntij = (ntii-1)*nntype+ntjj
-!	write(io_output,'(4(i4,1x),3(1x,e17.8))') i,ii,j,jj,rminee(ntij),vvdW(1,ntij),vvdW(3,ntij)
-!	end do
-!	end do
-!	end do
-!	end do
-!	call err_exit(__FILE__,__LINE__,'',myid+1)
+!write(io_output,'(4(i4,1x),3(1x,e17.8))') i,ii,j,jj,rminee(ntij),vvdW(1,ntij),vvdW(3,ntij)
+!end do
+!end do
+!end do
+!end do
+!call err_exit(__FILE__,__LINE__,'',myid+1)
 
 ! associate moltyp with mstate
 
@@ -190,11 +190,11 @@ contains
       do i = 1, nunit(imolty)
          do m = 1, fmstate
             ee_qqu(i,m) = qelect(ntype(nmolty1+m-1,i))
-!	write(io_output,*) i,m,ee_qqu(i,m)
+!write(io_output,*) i,m,ee_qqu(i,m)
          end do
 ! ee_qqu(i,fmstate) = qelect(ntype(imolty,i))
-!	write(io_output,*) i,1,ee_qqu(i,1)
-!	write(io_output,*) i,fmstate,ee_qqu(i,fmstate)
+!write(io_output,*) i,1,ee_qqu(i,1)
+!write(io_output,*) i,fmstate,ee_qqu(i,fmstate)
       end do
 
 ! associate a box with each state (convention: box 2 with states
@@ -238,16 +238,16 @@ contains
 ! call err_exit(__FILE__,__LINE__,'',myid+1)
 ! end if
 ! lmstate = .true.
-!	write(io_output,*) 'starting point', eepointp, mstate
+!write(io_output,*) 'starting point', eepointp, mstate
 
 ! probability accumulators
 
-!	write(io_output,*) 'prob check start'
+!write(io_output,*) 'prob check start'
       do m = 1, fmstate
          ee_prob(m) = 0
-!	write(io_output,*) m, ee_prob(m)
+!write(io_output,*) m, ee_prob(m)
       end do
-!	write(io_output,*) 'prob check end'
+!write(io_output,*) 'prob check end'
 
       return
   end subroutine eesetup
@@ -290,7 +290,7 @@ contains
          end if
       end if
 
-!	write(io_output,*) 'typ', mstate, ee_moltyp(mstate),eepointp,
+!write(io_output,*) 'typ', mstate, ee_moltyp(mstate),eepointp,
 !     &   box_state(mstate), ncmt(box_state(mstate),ee_moltyp(mstate))
 
       if (ncmt(box_state(mstate),ee_moltyp(mstate)).eq.0) then
@@ -303,8 +303,8 @@ contains
 
       wee_ratio = exp(psi(nstate)-psi(mstate))* um_markov(nstate,mstate)/um_markov(mstate,nstate)
 
-!	write(io_output,*) 'mstate', mstate, ee_moltyp(mstate)
-!	write(io_output,*) 'nstate', nstate, ee_moltyp(nstate)
+!write(io_output,*) 'mstate', mstate, ee_moltyp(mstate)
+!write(io_output,*) 'nstate', nstate, ee_moltyp(nstate)
 
       if ((mstate.eq.sstate1.and.nstate.eq.sstate2).or. (mstate.eq.sstate2.and.nstate.eq.sstate1)) then
 
@@ -312,7 +312,7 @@ contains
          boxins1 = box_state(nstate)
 
          eeirem = parbox(eepointp,boxrem1,ee_moltyp(mstate))
-!	write(io_output,*) 'eeirem', eeirem, eepointp
+!write(io_output,*) 'eeirem', eeirem, eepointp
 
          call swap
 
@@ -324,7 +324,7 @@ contains
 
          ibox = box_state(mstate)
          eeirem = parbox(eepointp,ibox,ee_moltyp(mstate))
-!	write(io_output,*) 'eeirem1', eeirem, eepointp
+!write(io_output,*) 'eeirem1', eeirem, eepointp
          imolty = ee_moltyp(nstate)
 
          iunit = nunit(imolty)
@@ -391,13 +391,13 @@ contains
 
          imolty1 = ee_moltyp(nstate)
          parbox(ncmt(ibox,imolty1)+1,ibox,imolty1) = eeirem
-!	write(io_output,*) 'update new', eepointp,ibox,imolty1,
+!write(io_output,*) 'update new', eepointp,ibox,imolty1,
 !     &          parbox(eepointp,ibox,imolty1),
 !     &          parbox(eepointp,ibox,imolty)
 
          parbox(eepointp,ibox,imolty) = parbox(ncmt(ibox,imolty),ibox,imolty)
 
-!	write(io_output,*) 'update new1', imolty,parbox(eepointp,ibox,imolty),
+!write(io_output,*) 'update new1', imolty,parbox(eepointp,ibox,imolty),
 !     &              ncmt(ibox,imolty)
 
          parbox(ncmt(ibox,imolty),ibox,imolty) = 0
@@ -411,7 +411,7 @@ contains
          vbox(ivExt,ibox) = vbox(ivExt,ibox) + (vn(ivExt)-vo(ivExt))
          vbox(ivTail,ibox) = vbox(ivTail,ibox) + (vn(ivTail)-vo(ivTail))
          vbox(ivElect,ibox) = vbox(ivElect,ibox) + (vn(ivElect)-vo(ivElect))
-!	write(io_output,*) vn(ivTail),vo(ivTail),vn(ivInterLJ),vo(ivInterLJ)
+!write(io_output,*) vn(ivTail),vo(ivTail),vn(ivInterLJ),vo(ivInterLJ)
 
 ! update reciprocal space term
 
@@ -421,22 +421,22 @@ contains
 
 ! update the present state
 
-!	ovr = .true.
+!ovr = .true.
 
       temtyp(ee_moltyp(mstate)) = temtyp(ee_moltyp(mstate)) - 1
       temtyp(ee_moltyp(nstate)) = temtyp(ee_moltyp(nstate)) + 1
-!	write(io_output,*) 'ttym', mstate,ee_moltyp(mstate),
+!write(io_output,*) 'ttym', mstate,ee_moltyp(mstate),
 !     &               temtyp(ee_moltyp(mstate))
-!	write(io_output,*) 'ttyn', nstate,ee_moltyp(nstate),
+!write(io_output,*) 'ttyn', nstate,ee_moltyp(nstate),
 !     &               temtyp(ee_moltyp(nstate))
       mstate = nstate
 
-!	write(io_output,*) 'eemove eeirem', eeirem
+!write(io_output,*) 'eemove eeirem', eeirem
       moltyp(eeirem) = ee_moltyp(nstate)
       do i = 1, nunit(ee_moltyp(nstate))
          qqu(eeirem,i) = ee_qqu(i,nstate)
-!	write(io_output,*) 'charges', qqu(eeirem,i)
-!	write(io_output,*) 'charges1'
+!write(io_output,*) 'charges', qqu(eeirem,i)
+!write(io_output,*) 'charges1'
       end do
 
       if (mstate.eq.1.or.mstate.eq.fmstate) then
@@ -456,16 +456,16 @@ contains
          parall(i,idummy(i)) = j
       end do
 
-!	write(io_output,*) 'accept', eepointp, mstate, nstate, eeirem, boxins1
-!	write(io_output,*)'accept1',parbox(eepointp,boxins1,ee_moltyp(nstate))
-!	write(io_output,*) '1line', leemove,lmstate,leeacc
-!	write(io_output,*) '2line', fmstate,sstate1,sstate2,wee_ratio,eeratio
-!	write(io_output,*) '3line',(ee_moltyp(i), i = 1, fmstate)
-!	write(io_output,*) '4line',(box_state(i), i = 1, fmstate)
-!	write(io_output,*) '5line',(psi(i), i = 1, fmstate)
-!	write(io_output,*) '6line',(ee_qqu(1,i), i = 1, fmstate)
-!	write(io_output,*) '7line',(um_markov(i,i+1),i = 1,fmstate-1)
-!	write(io_output,*) '8line',(um_markov(i,i-1),i = 2,fmstate)
+!write(io_output,*) 'accept', eepointp, mstate, nstate, eeirem, boxins1
+!write(io_output,*)'accept1',parbox(eepointp,boxins1,ee_moltyp(nstate))
+!write(io_output,*) '1line', leemove,lmstate,leeacc
+!write(io_output,*) '2line', fmstate,sstate1,sstate2,wee_ratio,eeratio
+!write(io_output,*) '3line',(ee_moltyp(i), i = 1, fmstate)
+!write(io_output,*) '4line',(box_state(i), i = 1, fmstate)
+!write(io_output,*) '5line',(psi(i), i = 1, fmstate)
+!write(io_output,*) '6line',(ee_qqu(1,i), i = 1, fmstate)
+!write(io_output,*) '7line',(um_markov(i,i+1),i = 1,fmstate-1)
+!write(io_output,*) '8line',(um_markov(i,i-1),i = 2,fmstate)
 
  100    continue
         leemove = .false.
@@ -492,7 +492,7 @@ contains
       imolty = ee_moltyp(mstate)
       ibox = box_state(1)
       ibox1 = box_state(fmstate)
-!	write(io_output,*) 'index swap old', mstate, eepointp, box_state(mstate),
+!write(io_output,*) 'index swap old', mstate, eepointp, box_state(mstate),
 !     &             ncmt(box_state(mstate),imolty)
       if (mstate.eq.1) then
          if (random(-1).le.0.5E0_dp) then
@@ -502,7 +502,7 @@ contains
             if (random(-1).le.accr) then
                mstate = fmstate
                eepointp = int(dble(ncmt(ibox1,imolty))*random(-1))+1
-!	write(io_output,*) 'mstate,nstate', 1, 6, accr
+!write(io_output,*) 'mstate,nstate', 1, 6, accr
             end if
          end if
       else if (mstate.eq.fmstate) then
@@ -514,7 +514,7 @@ contains
                mstate = 1
                eepointp = int(dble(ncmt(ibox,imolty))*random(-1))+1
             end if
-!	write(io_output,*) 'mstate,nstate', 6, 1, accr
+!write(io_output,*) 'mstate,nstate', 6, 1, accr
          end if
       end if
 

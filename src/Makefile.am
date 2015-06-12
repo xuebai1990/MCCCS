@@ -6,10 +6,10 @@ noinst_PROGRAMS = topmon
 topmon_SOURCES = topmon.f global_data.f var_type.f const_phys.f const_math.f util_math.f util_string.f util_files.f util_timings.f Atom_energy.f Atom_traxyz.f Intra_energy.f alignplanes.f anes.f boltz.f bondlength.f calcsolpar.f calctor.f charge.f cleanup.f close.f cone.f coneangle.f config.f corp.f coru.f ctrmas.f deriv.f dipole.f dump.f ee_energy.f ee_index_swap.f ee_recip.f eemove.f eesetup.f energy.f exgrph.f exmuir.f expand.f explct.f exsami.f exsix.f flucq.f garo3body.f garofalini.f genlj.f geometry.f inclus.f init_vars.f initia.f ipswsetup.f linkcell.f ljmuir.f ljpsur.f ljsami.f matops.f mmff.f molsetup.f monola.f monper.f newton.f ninesix.f pbc.f place.f pressure.f prvolume.f random.f readdat.f recip.f recip_atom.f recippress.f recipsum.f rigfix.f rigrot.f rosenbluth.f rotxyz.f safecbmc.f safeschedule.f schedule.f setnn.f slitpore.f sphere.f suijtab.f sumup.f susami.f suvibe.f swap.f swatch.f tabulated.f torsion.f traxyz.f update.f update1.f updnn.f v_elect_field.f virial.f volume.f vtorso.f writepdb.f zeolite.f common.inc
 
 # most fortran compilers can directly preprocess c-like directives: use
-# 	$(MPIF90) $(F90FLAGS) -c $<
+#       $(MPIF90) $(F90FLAGS) -c $<
 # if explicit preprocessing by the C preprocessor is needed, use:
-# 	$(CPP) $(CPPFLAGS) $< -o $*.F90
-#	$(MPIF90) $(F90FLAGS) -c $*.F90 -o $*.o
+#       $(CPP) $(CPPFLAGS) $< -o $*.F90
+#       $(MPIF90) $(F90FLAGS) -c $*.F90 -o $*.o
 # remember the tabulator in the first column !!!
 
 .f.o:

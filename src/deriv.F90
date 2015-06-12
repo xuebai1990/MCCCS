@@ -39,9 +39,9 @@
                do j = 1, 3
                   do k = 1, 3
                      dvdl = dvdl - hmatsi(j,k)*dhmat(i,j)* (etais*pips(i,k)+lambdais*pwellips(i,k))
-!	write(io_output,*) i,j,pips(i,j),pwellips(i,j)
+!write(io_output,*) i,j,pips(i,j),pwellips(i,j)
                   end do
-!	write(io_output,*) i,j,pips(i,j)
+!write(io_output,*) i,j,pips(i,j)
                end do
             end do
             dvdl = vol*dvdl+vwellipsw
@@ -50,7 +50,7 @@
          dvdl = (1.0E0_dp-etais)*vipsw-vwellipsw
       end if
 
-!	write(io_output,*) 'deriv', dvdl,vwellipsw,pipsw,pwellipsw,vol
+!write(io_output,*) 'deriv', dvdl,vwellipsw,pipsw,pwellipsw,vol
 
       return
       end

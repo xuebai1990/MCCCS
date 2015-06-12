@@ -313,23 +313,23 @@ module sim_system
   ! real,parameter::a0 = 0.14035E0_dp,b0 = 1.2596E0_dp,aslope = 4.7263E5_dp,bslope = 123.25E0_dp,ashift = 3.3978E5_dp,bshift = 347.63E0_dp ! slope=0.3 a=2.85
   ! real,parameter::a0 = 0.14820E0_dp,b0 = 1.2689E0_dp,aslope = 5.2125E5_dp,bslope = 128.75E0_dp,ashift = 3.8220E5_dp,bshift = 371.29E0_dp ! slope=0.3 a=2.88
   real,parameter::a0 = -0.22818E0_dp,b0 = 0.44662E0_dp,aslope = 14.0738E5_dp,bslope = 351.25E0_dp,ashift = 3.5852E5_dp,bshift = 358.94E0_dp ! slope=0.5 a=2.71
-  !	real,parameter::a0 = -0.23379E0_dp,b0 = 0.43630E0_dp,aslope = 12.78125E5_dp,bslope = 337.5E0_dp,ashift = 3.1904E5_dp,bshift = 337.86E0_dp ! slope=0.5 a=2.68
-  !	real,parameter::a0 = -0.23808E0_dp,b0 = 0.425507E0_dp,aslope = 11.7775E5_dp,bslope = 322.04E0_dp,ashift = 2.8902E5_dp,bshift = 326.875E0_dp ! slope=0.5 a=2.655
-  !	real,parameter::a0 = -0.23641E0_dp,b0 = 0.43409E0_dp,aslope = 12.171E5_dp,bslope = 330E0_dp,ashift = 3.0075E5_dp,bshift = 326.52E0_dp ! slope=0.5 a=2.665
-  !	real,parameter::a0 = -0.23903E0_dp,b0 = 0.42231E0_dp,aslope = 11.5875E5_dp,bslope = 325E0_dp,ashift = 2.8339E5_dp,bshift = 319.44E0_dp ! slope=0.5 a=2.65
-  !	real,parameter::a0 = -0.24796E0_dp,b0 = 0.40345E0_dp,aslope = 9.8238E5_dp,bslope = 304E0_dp,ashift = 2.3206E5_dp,bshift = 288.72E0_dp ! slope=0.5 a=2.60
-  !	real,parameter::a0 = -0.25703E0_dp,b0 = 0.38299E0_dp,aslope = 8.3075E5_dp,bslope = 284.38E0_dp,ashift = 1.8945E5_dp,bshift = 261.09E0_dp ! slope=0.5 a=2.55
-  !	real,parameter::a0 = -0.39106E0_dp,b0 = 0.08431E0_dp,aslope = 25.22875E5_dp,bslope = 662.75E0_dp,ashift = 3.0689E5_dp,bshift = 335.43E0_dp ! slope = 0.7 a=2.52
-  !	real,parameter::a0 = -0.39233E0_dp,b0 = 0.08203E0_dp,aslope = 24.425E5_dp,bslope = 653.75E0_dp,ashift = 2.9499E5_dp,bshift = 328.60E0_dp ! slope = 0.7 a=2.51
-  !	real,parameter::a0 = -0.39357E0_dp,b0 = 0.07946E0_dp,aslope = 23.641E5_dp,bslope = 645E0_dp,ashift = 2.835E5_dp,bshift = 322.13E0_dp ! slope = 0.7 a=2.50
-  !	real,parameter::a0 = -0.394906E0_dp,b0 = 0.075678E0_dp,aslope = 22.88625E5_dp,bslope = 637.735E0_dp,ashift = 2.72469E5_dp,bshift = 316.22E0_dp ! slope = 0.7 a=2.49
-  !	real,parameter::a0 = -0.396175E0_dp,b0 = 0.072973E0_dp,aslope = 22.149125E5_dp,bslope = 629E0_dp,ashift = 2.61798E5_dp,bshift = 309.95E0_dp ! slope = 0.7 a=2.48
-  !	real,parameter::a0 = -0.39745E0_dp,b0 = 0.070157E0_dp,aslope = 21.4335E5_dp,bslope = 620.75E0_dp,ashift = 2.5151E5_dp,bshift = 306.89E0_dp ! slope = 0.7 a=2.47
-  !	real,parameter::a0 = -0.399983E0_dp,b0 = 0.064159E0_dp,aslope = 20.06425E5_dp,bslope = 604.75E0_dp,ashift = 2.32037E5_dp,bshift = 292.09E0_dp ! slope = 0.7 a=2.45
-  !	real,parameter::a0 = -0.40629E0_dp,b0 = 0.050088E0_dp,aslope = 16.9775E5_dp,bslope = 565.50E0_dp,ashift = 1.89213E5_dp,bshift = 263.93E0_dp ! slope = 0.7 a=2.40
-  !	real,parameter::a0 = -0.48332E0_dp,b0 = -0.12334E0_dp,aslope = 34.64125E5_dp,bslope = 1014.25E0_dp,ashift = 2.2815E5_dp,bshift = 294.26E0_dp ! slope = 0.9 a=2.30
-  !	real,parameter::a0 = -0.48137E0_dp,b0 = -0.11887E0_dp,aslope = 36.99125E5_dp,bslope = 1041.25E0_dp,ashift = 2.4744E5_dp,bshift = 306.23E0_dp ! slope = 0.9 a=2.32
-  !	real,parameter::a0 = 0.0E0_dp,b0 = 0.0E0_dp,aslope = 3.0E5_dp,bslope = 0.0E0_dp,ashift = 8.0E5_dp,bshift = 1200.0E0_dp ! slope = 0.3 a=2.85
+  ! real,parameter::a0 = -0.23379E0_dp,b0 = 0.43630E0_dp,aslope = 12.78125E5_dp,bslope = 337.5E0_dp,ashift = 3.1904E5_dp,bshift = 337.86E0_dp ! slope=0.5 a=2.68
+  ! real,parameter::a0 = -0.23808E0_dp,b0 = 0.425507E0_dp,aslope = 11.7775E5_dp,bslope = 322.04E0_dp,ashift = 2.8902E5_dp,bshift = 326.875E0_dp ! slope=0.5 a=2.655
+  ! real,parameter::a0 = -0.23641E0_dp,b0 = 0.43409E0_dp,aslope = 12.171E5_dp,bslope = 330E0_dp,ashift = 3.0075E5_dp,bshift = 326.52E0_dp ! slope=0.5 a=2.665
+  ! real,parameter::a0 = -0.23903E0_dp,b0 = 0.42231E0_dp,aslope = 11.5875E5_dp,bslope = 325E0_dp,ashift = 2.8339E5_dp,bshift = 319.44E0_dp ! slope=0.5 a=2.65
+  ! real,parameter::a0 = -0.24796E0_dp,b0 = 0.40345E0_dp,aslope = 9.8238E5_dp,bslope = 304E0_dp,ashift = 2.3206E5_dp,bshift = 288.72E0_dp ! slope=0.5 a=2.60
+  ! real,parameter::a0 = -0.25703E0_dp,b0 = 0.38299E0_dp,aslope = 8.3075E5_dp,bslope = 284.38E0_dp,ashift = 1.8945E5_dp,bshift = 261.09E0_dp ! slope=0.5 a=2.55
+  ! real,parameter::a0 = -0.39106E0_dp,b0 = 0.08431E0_dp,aslope = 25.22875E5_dp,bslope = 662.75E0_dp,ashift = 3.0689E5_dp,bshift = 335.43E0_dp ! slope = 0.7 a=2.52
+  ! real,parameter::a0 = -0.39233E0_dp,b0 = 0.08203E0_dp,aslope = 24.425E5_dp,bslope = 653.75E0_dp,ashift = 2.9499E5_dp,bshift = 328.60E0_dp ! slope = 0.7 a=2.51
+  ! real,parameter::a0 = -0.39357E0_dp,b0 = 0.07946E0_dp,aslope = 23.641E5_dp,bslope = 645E0_dp,ashift = 2.835E5_dp,bshift = 322.13E0_dp ! slope = 0.7 a=2.50
+  ! real,parameter::a0 = -0.394906E0_dp,b0 = 0.075678E0_dp,aslope = 22.88625E5_dp,bslope = 637.735E0_dp,ashift = 2.72469E5_dp,bshift = 316.22E0_dp ! slope = 0.7 a=2.49
+  ! real,parameter::a0 = -0.396175E0_dp,b0 = 0.072973E0_dp,aslope = 22.149125E5_dp,bslope = 629E0_dp,ashift = 2.61798E5_dp,bshift = 309.95E0_dp ! slope = 0.7 a=2.48
+  ! real,parameter::a0 = -0.39745E0_dp,b0 = 0.070157E0_dp,aslope = 21.4335E5_dp,bslope = 620.75E0_dp,ashift = 2.5151E5_dp,bshift = 306.89E0_dp ! slope = 0.7 a=2.47
+  ! real,parameter::a0 = -0.399983E0_dp,b0 = 0.064159E0_dp,aslope = 20.06425E5_dp,bslope = 604.75E0_dp,ashift = 2.32037E5_dp,bshift = 292.09E0_dp ! slope = 0.7 a=2.45
+  ! real,parameter::a0 = -0.40629E0_dp,b0 = 0.050088E0_dp,aslope = 16.9775E5_dp,bslope = 565.50E0_dp,ashift = 1.89213E5_dp,bshift = 263.93E0_dp ! slope = 0.7 a=2.40
+  ! real,parameter::a0 = -0.48332E0_dp,b0 = -0.12334E0_dp,aslope = 34.64125E5_dp,bslope = 1014.25E0_dp,ashift = 2.2815E5_dp,bshift = 294.26E0_dp ! slope = 0.9 a=2.30
+  ! real,parameter::a0 = -0.48137E0_dp,b0 = -0.11887E0_dp,aslope = 36.99125E5_dp,bslope = 1041.25E0_dp,ashift = 2.4744E5_dp,bshift = 306.23E0_dp ! slope = 0.9 a=2.32
+  ! real,parameter::a0 = 0.0E0_dp,b0 = 0.0E0_dp,aslope = 3.0E5_dp,bslope = 0.0E0_dp,ashift = 8.0E5_dp,bshift = 1200.0E0_dp ! slope = 0.3 a=2.85
 
   !==Screening related variables
   real,allocatable::setedist(:),Uads(:),Wrosen(:)

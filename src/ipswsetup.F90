@@ -100,7 +100,7 @@
                write(io_output,*) hmata(7),hmata(8),hmata(9)
                call err_exit(__FILE__,__LINE__,'',myid+1)
             end if
-!	write(io_output,*) boxlx(1),lena
+!write(io_output,*) boxlx(1),lena
          else if (.not.lsolid(ibox)) then
             if (abs(boxlx(1)-lena).gt.1.0E-6_dp) then
                write(io_output,*) 'input correct boxl', lena

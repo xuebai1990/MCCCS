@@ -543,9 +543,9 @@ contains
 
     if ( ovrlap ) then
        if (lgrand.and.boxins.eq.1) call gcmc_cleanup(imolty,boxrem)
-       #ifdef __DEBUG__
+#ifdef __DEBUG__
           write(io_output,*) 'end SWAP -- ovrlap',myid,irem
-       #endif
+#endif
        return
     end if
 
@@ -899,9 +899,9 @@ contains
     ! check that there is at least one molecule in BOXREM ***
     if (lempty.and..not.lgrand) then
        ! write(io_output,*) 'no molecule in BOXREM'
-       #ifdef __DEBUG__
+#ifdef __DEBUG__
           write(io_output,*) 'end SWAP no molecule in BOXREM',myid,irem
-       #endif
+#endif
        return
     else
        bsswap(imolty,ipairb,boxins) =  bsswap(imolty,ipairb,boxins) + 1
@@ -1108,9 +1108,9 @@ contains
 
     if ( lterm ) then
        ! write(io_output,*) 'SWAP: rosenbluth old rejected'
-       #ifdef __DEBUG__
+#ifdef __DEBUG__
           write(io_output,*) 'end SWAP rosenbluth old rejected',myid,irem
-       #endif
+#endif
        return
     end if
 
@@ -1317,9 +1317,9 @@ contains
 1000 if ( wdlog .lt. -softcut ) then
        ! write(io_output,*) '### underflow in wratio calculation ###'
        if (lgrand.and.boxins.eq.1) call gcmc_cleanup(imolty,boxrem)
-       #ifdef __DEBUG__
+#ifdef __DEBUG__
           write(io_output,*) 'end SWAP in wdlog',myid,irem
-       #endif
+#endif
        return
     end if
 
@@ -1359,9 +1359,9 @@ contains
           ncmt(boxrem,imolty) = ncmt(boxrem,imolty) + 1
        end if
        if (lgrand.and.boxins.eq.1) call gcmc_cleanup(imolty,boxrem)
-       #ifdef __DEBUG__
+#ifdef __DEBUG__
           write(io_output,*) 'end SWAP in lanes',myid,irem
-       #endif
+#endif
        return
     end if
 

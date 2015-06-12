@@ -2620,7 +2620,7 @@ contains
        vwellipswo = vwellipswo+vwellipswot(iwalk)
     end if
 
-    !	write(io_output,*) 'vtry', vtr(ivTot,iwalk),iwalk
+    !write(io_output,*) 'vtry', vtr(ivTot,iwalk),iwalk
 
     do j = 1, ntogrow
        iu = glist(j)
@@ -5582,7 +5582,7 @@ contains
          fnuma(1,1) = invtry
       else
 
-         iutry = int( random(-1) * dble(iring(imolty)+icbsta(imolty)))+1 -icbsta(imolty)	! factoring in icbsta for safecbmc
+         iutry = int( random(-1) * dble(iring(imolty)+icbsta(imolty)))+1 -icbsta(imolty)! factoring in icbsta for safecbmc
 
 !     *************************
 ! iutry = 1
@@ -5596,22 +5596,22 @@ contains
          invtry = invib(imolty,iutry)
          if (invtry.eq.0) then
             call err_exit(__FILE__,__LINE__,'cant do safecbmc on single bead',myid+1)
-         else if(invtry.eq.1) then								! At the end point of a molecule
-            kickout = kickout + 1								! we will let regular cbmc handle the end points
+         else if(invtry.eq.1) then  ! At the end point of a molecule
+            kickout = kickout + 1  ! we will let regular cbmc handle the end points
             goto 100
 
             fprev(1,1) = 0
             ivib = 0
          else
 
- 13         ivib = int(random(-1) * dble(invtry)) + 1						! at a branch point, decide which way not to grow
+ 13         ivib = int(random(-1) * dble(invtry)) + 1  ! at a branch point, decide which way not to grow
  
 !     ********************************
 ! ivib = 2
 !     *******************************
 
             fprev(1,1) = ijvib(imolty,iutry,ivib)
-	    
+
             if (icbdir(imolty).eq.1.and.fprev(1,1).gt.iutry) goto 13
 
             if (fprev(1,1).gt.iring(imolty) .or.lplace(imolty,fprev(1,1))) then

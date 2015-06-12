@@ -32,10 +32,10 @@ do
     # generate dependencies file
     if test -d $TOPDIR/../$DIR
     then
-	cd $TOPDIR/../$DIR
+        cd $TOPDIR/../$DIR
        
-	$TOPDIR/moduledep.sh $DEPENDS > make.depend
-	$TOPDIR/includedep.sh $DEPENDS >> make.depend
+        $TOPDIR/moduledep.sh $DEPENDS > make.depend
+        $TOPDIR/includedep.sh $DEPENDS >> make.depend
     fi
 
     rm -f make.depend.tmp
@@ -43,8 +43,8 @@ do
     # check for missing dependencies
     if grep @ make.depend
     then
-	notfound=1
-	echo WARNING: dependencies not found in directory $DIR
+        notfound=1
+        echo WARNING: dependencies not found in directory $DIR
     else
         echo directory $DIR : ok
     fi

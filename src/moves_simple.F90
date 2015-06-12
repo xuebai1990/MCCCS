@@ -595,7 +595,7 @@ contains
         qquion(j,1) = qqu(i,j)       
       end do       
 
-      moltion(1) = imolty	       
+      moltion(1) = imolty
       
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Select random displacement, increment attempts
@@ -626,7 +626,7 @@ contains
 ! Bonded is calculated in U_bonded and is based on r*u coords
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-      flagon = 1	! 1 refers to the coordinates for the OLD configuration
+      flagon = 1     ! 1 refers to the coordinates for the OLD configuration
       call energy(i,imolty,vo,flagon,ibox,pick_unit,pick_unit,.true.,ovrlap,.false.,.false.,.false.,.true.)
       if (ovrlap) call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf of ATOM_TRANSLATION',myid+1)
       
@@ -661,7 +661,7 @@ contains
 ! Bonded is calculated in U_bonded and is based on r*u coords
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-      flagon = 2	! 2 refers to the coordinates for the NEW configuration
+      flagon = 2     ! 2 refers to the coordinates for the NEW configuration
       call energy(i,imolty,vn,flagon,ibox,pick_unit,pick_unit,.true.,ovrlap,.false.,.false.,.false.,.true.)
       if (ovrlap)  then
             rxu(pick_chain,pick_unit) = rxu(pick_chain,pick_unit) - rx
@@ -687,8 +687,8 @@ contains
       
 ! check for acceptance ***
 
-      vn(ivTot) = vn(ivTot) + vn(ivStretching) + vn(ivBending) + vn(ivTorsion)	! We were missing this part in the last version! Meaning the bonded
-      vo(ivTot) = vo(ivTot) + vo(ivStretching) + vo(ivBending) + vo(ivTorsion) 	! potential wasn't being factored into the acceptance criteria!!!
+      vn(ivTot) = vn(ivTot) + vn(ivStretching) + vn(ivBending) + vn(ivTorsion)  ! We were missing this part in the last version! Meaning the bonded
+      vo(ivTot) = vo(ivTot) + vo(ivStretching) + vo(ivBending) + vo(ivTorsion)  ! potential wasn't being factored into the acceptance criteria!!!
 
       deltv  = vn(ivTot) - vo(ivTot)
       deltvb = beta * deltv
@@ -706,7 +706,7 @@ contains
       end if
 
       if ( deltvb .gt. (2.3E0_dp*softcut) ) then
-		! move rejected      
+                ! move rejected      
             rxu(pick_chain,pick_unit) = rxu(pick_chain,pick_unit) - rx
             ryu(pick_chain,pick_unit) = ryu(pick_chain,pick_unit) - ry
             rzu(pick_chain,pick_unit) = rzu(pick_chain,pick_unit) - rz      
@@ -714,11 +714,11 @@ contains
       end if
 
       if ( deltv .le. 0.0E0_dp ) then
-		! accept move
-      else if ( exp(-deltvb) .gt. random(-1) ) then 	
-		! accept move
-      else 						
-		! move rejected
+               ! accept move
+      else if ( exp(-deltvb) .gt. random(-1) ) then 
+               ! accept move
+      else 
+               ! move rejected
             rxu(pick_chain,pick_unit) = rxu(pick_chain,pick_unit) - rx
             ryu(pick_chain,pick_unit) = ryu(pick_chain,pick_unit) - ry
             rzu(pick_chain,pick_unit) = rzu(pick_chain,pick_unit) - rz
