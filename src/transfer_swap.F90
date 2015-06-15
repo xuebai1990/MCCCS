@@ -544,7 +544,7 @@ contains
     if ( ovrlap ) then
        if (lgrand.and.boxins.eq.1) call gcmc_cleanup(imolty,boxrem)
 #ifdef __DEBUG__
-          write(io_output,*) 'end SWAP -- ovrlap',myid,irem
+          write(io_output,*) 'end SWAP -- ovrlap',myid
 #endif
        return
     end if
@@ -900,7 +900,7 @@ contains
     if (lempty.and..not.lgrand) then
        ! write(io_output,*) 'no molecule in BOXREM'
 #ifdef __DEBUG__
-          write(io_output,*) 'end SWAP no molecule in BOXREM',myid,irem
+          write(io_output,*) 'end SWAP no molecule in BOXREM',myid
 #endif
        return
     else
