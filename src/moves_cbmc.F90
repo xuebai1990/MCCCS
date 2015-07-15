@@ -18,6 +18,7 @@ MODULE moves_cbmc
   logical,allocatable,public::lexshed(:)& !< true if the bead exists at that time of the growth, false when a bead has not yet been grown this time
    ,llplace(:),lpnow(:)
   logical,allocatable::lsave(:)
+  integer,allocatable,public::first_bead_to_swap(:)
   real,allocatable::bncb(:,:),bscb(:,:,:),fbncb(:,:),fbscb(:,:,:) !< temporary accumulators for conf.bias performance
   real::brvibmin(60),brvibmax(60)
 
@@ -8103,16 +8104,16 @@ contains
     integer::jerr,i
     integer,allocatable::avbmc_version(:)
     namelist /mc_cbmc/ rcutin,pmcb,pmcbmt,pmall,nchoi1,nchoi,nchoir,nchoih,nchoig,nchtor,nchbna,nchbnb,icbdir,icbsta&
-     ,rbsmax,rbsmin,avbmc_version,pmbias,pmbsmt,pmbias2&
+     ,rbsmax,rbsmin,avbmc_version,first_bead_to_swap,pmbias,pmbsmt,pmbias2&
      ,pmfix,pmgroup,lrig,lpresim,iupdatefix
 
-    if (allocated(lexshed)) deallocate(lexshed,llplace,lpnow,lsave,bncb,bscb,fbncb,fbscb,iend,ipast,pastnum,fclose,fcount,iwbef,ibef,befnum,xx,yy,zz,distij,nextnum,inext,kforceb,equilb,flength,vequil,vkforce,rlist,rfrom,rprev,rnum,iplace,pfrom,pnum,pprev,avbmc_version,stat=jerr)
+    if (allocated(lexshed)) deallocate(lexshed,llplace,lpnow,lsave,first_bead_to_swap,bncb,bscb,fbncb,fbscb,iend,ipast,pastnum,fclose,fcount,iwbef,ibef,befnum,xx,yy,zz,distij,nextnum,inext,kforceb,equilb,flength,vequil,vkforce,rlist,rfrom,rprev,rnum,iplace,pfrom,pnum,pprev,avbmc_version,stat=jerr)
     allocate(lexshed(numax),llplace(ntmax),lpnow(numax),lsave(numax),bncb(ntmax,numax),bscb(ntmax,2,numax),fbncb(ntmax,numax)&
      ,fbscb(ntmax,2,numax),iend(numax),ipast(numax,numax),pastnum(numax),fclose(numax,numax),fcount(numax),iwbef(numax)&
      ,ibef(numax,numax),befnum(numax),xx(numax),yy(numax),zz(numax),distij(numax,numax),nextnum(numax),inext(numax,numax)&
      ,kforceb(numax,numax),equilb(numax,numax),flength(numax,numax),vequil(numax,numax),vkforce(numax,numax),rlist(numax,numax)&
      ,rfrom(numax),rprev(numax),rnum(numax),iplace(numax,numax),pfrom(numax),pnum(numax),pprev(numax),avbmc_version(nmolty)&
-     ,stat=jerr)
+     ,first_bead_to_swap(nmolty),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_cbmc: allocation failed',jerr)
 
     llplace=.FALSE.
@@ -8138,6 +8139,7 @@ contains
     nchbnb=1000
     icbdir=0
     icbsta=0
+    first_bead_to_swap=1
     avbmc_version=0
     pmbias=0.0_dp
     pmbsmt=0.0_dp
@@ -8168,6 +8170,7 @@ contains
     call mp_bcast(icbsta,nmolty,rootid,groupid)
     call mp_bcast(rbsmax,1,rootid,groupid)
     call mp_bcast(rbsmin,1,rootid,groupid)
+    call mp_bcast(first_bead_to_swap,nmolty,rootid,groupid)
     call mp_bcast(avbmc_version,nmolty,rootid,groupid)
     call mp_bcast(pmbias,nmolty,rootid,groupid)
     call mp_bcast(pmbsmt,nmolty,rootid,groupid)
@@ -8185,10 +8188,10 @@ contains
        write(io_output,'(A,L2)') 'lpresim: ',lpresim
        write(io_output,'(A,I0)') 'iupdatefix: ',iupdatefix
        write(io_output,'(A,G16.9)') 'pmcb: ',pmcb
-       write(io_output,'(/,A)') 'molecule type: nchoi1  nchoi nchoir nchoih nchtor nchbna nchbnb icbdir icbsta'
+       write(io_output,'(/,A)') 'molecule type: nchoi1  nchoi nchoir nchoih nchtor nchbna nchbnb icbdir icbsta 1st_bead_swap'
        do i=1,nmolty
           write(io_output,'(I13,A,9(1X,I6))') i,':',nchoi1(i),nchoi(i),nchoir(i),nchoih(i),nchtor(i),nchbna(i),nchbnb(i)&
-           ,icbdir(i),icbsta(i)
+           ,icbdir(i),icbsta(i),first_bead_to_swap(i)
        end do
        write(io_output,'(/,A)')&
         'molecule type:    pmcbmt         pmall  avbmc_version    pmbias        pmbsmt       pmbias2         pmfix   lrig'

@@ -18,8 +18,19 @@ module var_type
 
   integer,parameter::default_string_length=512,default_path_length=256,atom_symbol_length=4
 
+  type IntegerPtr
+     integer,pointer::val
+  end type IntegerPtr
+
+  type IntegerAllocArray3D
+     integer,allocatable::val(:,:,:)
+  end type IntegerAllocArray3D
+
   type RealPtr
      real,pointer::val
   end type RealPtr
 
+  type RealAllocArray3D
+     real,allocatable::val(:,:,:)
+  end type RealAllocArray3D
 end module var_type

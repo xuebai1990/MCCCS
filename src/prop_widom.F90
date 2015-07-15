@@ -3,60 +3,153 @@
 !> \warning Widom insertion is known to fail at high densities.
 
 module prop_widom
+  use var_type,only:dp,RealAllocArray3D,IntegerAllocArray3D
   implicit none
   private
   save
-  public::read_prop_widom,calc_prop_widom,blk_avg_prop_widom,write_prop_widom,write_prop_widom_with_stats,read_checkpoint_prop_widom,write_checkpoint_prop_widom
+  public::read_prop_widom,inc_prop_widom_counter,calc_prop_widom,blk_avg_prop_widom,write_deltaG_map,write_prop_widom,write_prop_widom_with_stats,read_checkpoint_prop_widom,write_checkpoint_prop_widom
 
+  type(RealAllocArray3D),allocatable::deltaG(:,:)
+  type(RealAllocArray3D),allocatable::deltaG_count(:,:)
   real,allocatable::blk_avg_setedist(:,:,:),setedist(:,:),blk_avg_setedist_prev(:,:),blk_avg_Uads(:,:),Uads(:),blk_avg_Uads_prev(:),Wrosen(:),blk_avg_Wrosen_prev(:)
+  logical,allocatable::ldeltaG_map(:)
+  integer::deltaG_ngrid(3),idx(3)
+  logical::initialized=.false.
+  namelist /widom/ ldeltaG_map,deltaG_ngrid
 contains
   subroutine read_prop_widom(io_input,lprint,blockm)
-    use var_type,only:dp
+    use util_string,only:format_n
     use util_runtime,only:err_exit
-    use sim_system,only:lgrand,ntmax
+    use util_mp,only:mp_bcast
+    use sim_system,only:lgrand,nmolty,myid,rootid,groupid,io_output,nunit
     INTEGER,INTENT(IN)::io_input,blockm
     LOGICAL,INTENT(IN)::lprint
-    integer::jerr
+    integer::i,j,jerr
 
     lgrand=.true.
 
-    if (allocated(blk_avg_setedist)) deallocate(Wrosen,blk_avg_Wrosen_prev,Uads,blk_avg_Uads_prev,blk_avg_Uads,setedist,blk_avg_setedist_prev,blk_avg_setedist,stat=jerr)
-    allocate(Wrosen(ntmax),blk_avg_Wrosen_prev(ntmax),Uads(ntmax),blk_avg_Uads_prev(ntmax),blk_avg_Uads(ntmax,blockm),setedist(4,ntmax),blk_avg_setedist_prev(4,ntmax),blk_avg_setedist(4,ntmax,blockm),stat=jerr)
+    if (allocated(Wrosen)) then
+       do i=1,nmolty
+          do j=0,1
+             deallocate(deltaG(j,i)%val,deltaG_count(j,i)%val,stat=jerr)
+          end do
+       end do
+       deallocate(Wrosen,blk_avg_Wrosen_prev,Uads,blk_avg_Uads_prev,blk_avg_Uads,setedist,blk_avg_setedist_prev,blk_avg_setedist,ldeltaG_map,deltaG,deltaG_count,stat=jerr)
+    end if
+    allocate(Wrosen(nmolty),blk_avg_Wrosen_prev(nmolty),Uads(nmolty),blk_avg_Uads_prev(nmolty),blk_avg_Uads(nmolty,blockm),setedist(4,nmolty),blk_avg_setedist_prev(4,nmolty),blk_avg_setedist(4,nmolty,blockm),ldeltaG_map(nmolty),deltaG(0:1,nmolty),deltaG_count(0:1,nmolty),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'read_prop_widom: memory allocation',jerr)
 
-    setedist=0._dp
     Wrosen=0._dp
+    blk_avg_Wrosen_prev=0._dp
     Uads=0._dp
+    blk_avg_Uads_prev=0._dp
+    blk_avg_Uads=0._dp
+    setedist=0._dp
+    blk_avg_setedist_prev=0._dp
+    blk_avg_setedist=0._dp
+    ldeltaG_map=.false.
+    deltaG_ngrid=0
+
+    if (myid.eq.rootid) then
+       rewind(io_input)
+       read(UNIT=io_input,NML=widom,iostat=jerr)
+       if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: widom',jerr)
+    end if
+
+    call mp_bcast(ldeltaG_map,nmolty,rootid,groupid)
+    call mp_bcast(deltaG_ngrid,3,rootid,groupid)
+
+    if (.not.initialized) call init_prop_widom()
+
+    if (lprint) then
+       write(io_output,'(/,A,/,A)') 'NAMELIST WIDOM','------------------------------------------'
+       write(io_output,'(A,'//format_n(nmolty,'L2')//')') 'ldeltaG_map: ',ldeltaG_map(1:nmolty)
+       write(io_output,'(A,3(1X,I0))') 'deltaG_ngrid: ',deltaG_ngrid
+    end if
   end subroutine read_prop_widom
 
+  subroutine init_prop_widom()
+    use util_runtime,only:err_exit
+    use sim_system,only:nmolty
+    integer,parameter::ibox=1
+    integer::jerr,j,i
+    do i=1,nmolty
+       if (ldeltaG_map(i)) then
+          do j=0,1
+             allocate(deltaG(j,i)%val(0:deltaG_ngrid(1)-1,0:deltaG_ngrid(2)-1,0:deltaG_ngrid(3)-1),deltaG_count(j,i)%val(0:deltaG_ngrid(1)-1,0:deltaG_ngrid(2)-1,0:deltaG_ngrid(3)-1),stat=jerr)
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_prop_widom: memory allocation',jerr)
+             deltaG(j,i)%val=0._dp
+             deltaG_count(j,i)%val=0._dp
+          end do
+       end if
+    end do
+
+    initialized = .true.
+  end subroutine init_prop_widom
+
+  subroutine inc_prop_widom_counter(imolty,tag_bead,r,weight)
+    use sim_cell,only:hmati
+    integer,intent(in)::imolty,tag_bead
+    real,intent(in)::r(3),weight
+    integer,parameter::ibox=1
+    real::scoord(3)
+
+    if (ldeltaG_map(imolty)) then
+       ! convert to fractional coordinates, fold back to central simulation box, and find the grid indices
+       scoord(1) = r(1)*hmati(ibox,1)+r(2)*hmati(ibox,4)+r(3)*hmati(ibox,7)
+       scoord(2) = r(1)*hmati(ibox,2)+r(2)*hmati(ibox,5)+r(3)*hmati(ibox,8)
+       scoord(3) = r(1)*hmati(ibox,3)+r(2)*hmati(ibox,6)+r(3)*hmati(ibox,9)
+       scoord = scoord - floor(scoord)
+       idx = scoord * deltaG_ngrid
+       deltaG_count(tag_bead,imolty)%val(idx(1),idx(2),idx(3)) = deltaG_count(tag_bead,imolty)%val(idx(1),idx(2),idx(3)) + weight
+    end if
+  end subroutine inc_prop_widom_counter
+
   subroutine calc_prop_widom(imolty,weight)
-    use var_type,only:dp
-    use sim_system,only:vnew,rxnew,rynew,rznew,nugrow,ivTot
+    use moves_cbmc,only:first_bead_to_swap
+    use sim_system,only:vnew,ivTot,rxnew,rynew,rznew,xcm,ycm,zcm,nugrow,nchain,beta
     integer,intent(in)::imolty
     real,intent(in)::weight
-    real::s,r1,r2,arg
-    integer::ip
+    real::r(3),s,arg
+    integer::i,j
 
     Wrosen(imolty) = Wrosen(imolty) + weight
     Uads(imolty) = Uads(imolty) + vnew(ivTot)*weight
     s=0.0_dp
-    do ip=1,3
-       if (ip.eq.1) then
-          r1=rxnew(1)
-          r2=rxnew(nugrow(imolty))
-       else if (ip.eq.2) then
-          r1=rynew(1)
-          r2=rynew(nugrow(imolty))
-       else if (ip.eq.3) then
-          r1=rznew(1)
-          r2=rznew(nugrow(imolty))
+    do i=1,3
+       if (i.eq.1) then
+          r(1)=rxnew(1)
+          r(2)=rxnew(nugrow(imolty))
+       else if (i.eq.2) then
+          r(1)=rynew(1)
+          r(2)=rynew(nugrow(imolty))
+       else if (i.eq.3) then
+          r(1)=rznew(1)
+          r(2)=rznew(nugrow(imolty))
        end if
-       arg = (r1-r2)**2
+       arg = (r(1)-r(2))**2
        s = s + arg
-       setedist(ip,imolty) = setedist(ip,imolty) + arg*weight
+       setedist(i,imolty) = setedist(i,imolty) + arg*weight
     end do
     setedist(0,imolty) = setedist(0,imolty) + s*weight
 
+    if (ldeltaG_map(imolty)) then
+       ! Must start with j=1 because we need idx from earlier call to inc_prop_widom_counter()
+       do j=1,0,-1
+          if (j.gt.0) then
+             r(1)=rxnew(first_bead_to_swap(imolty))
+             r(2)=rynew(first_bead_to_swap(imolty))
+             r(3)=rznew(first_bead_to_swap(imolty))
+          else
+             i=nchain+2
+             r(1)=xcm(i)
+             r(2)=ycm(i)
+             r(3)=zcm(i)
+             call inc_prop_widom_counter(imolty,j,r,weight/exp(-beta*vnew(ivTot)))
+          end if
+          deltaG(j,imolty)%val(idx(1),idx(2),idx(3)) = deltaG(j,imolty)%val(idx(1),idx(2),idx(3)) + weight
+       end do
+    end if
   end subroutine calc_prop_widom
 
   subroutine blk_avg_prop_widom(nblock)
@@ -74,6 +167,46 @@ contains
        call store_block_average(blk_avg_Uads(itype,nblock),Uads(itype)/Wrosen(itype),Wrosen(itype),blk_avg_Uads_prev(itype),blk_avg_Wrosen_prev(itype))
     end do
   end subroutine blk_avg_prop_widom
+
+  subroutine write_deltaG_map(io_output,imolty,prefactor)
+    use var_type,only:default_path_length
+    use util_files,only:get_iounit
+    use util_runtime,only:err_exit
+    use moves_cbmc,only:first_bead_to_swap
+    integer,intent(in)::io_output,imolty
+    real,intent(in)::prefactor
+    character(len=default_path_length)::fname
+    integer::iunit,i,j,k,io_deltaG,jerr
+
+    if (ldeltaG_map(imolty)) then
+       io_deltaG=get_iounit()
+
+       do iunit=0,1
+          if (iunit.eq.1) then
+             i=first_bead_to_swap(imolty)
+          else
+             i=iunit
+          end if
+          write(fname,'("deltaG-",I2.2,"-",I2.2,".dat")') imolty,i
+          open(unit=io_deltaG,access='sequential',action='write',file=fname,form='formatted',iostat=jerr,status='unknown')
+          if (jerr.ne.0) then
+             call err_exit(__FILE__,__LINE__,'cannot open file for writing (deltaG)',-1)
+          end if
+
+          where (deltaG_count(iunit,imolty)%val.gt.0) deltaG(iunit,imolty)%val = deltaG(iunit,imolty)%val / real(deltaG_count(iunit,imolty)%val,dp) / prefactor
+
+          do k=0,deltaG_ngrid(3)-1
+             do j=0,deltaG_ngrid(2)-1
+                do i=0,deltaG_ngrid(1)-1
+                   write(io_deltaG,'(G16.9,1X,G16.9)') deltaG(iunit,imolty)%val(i,j,k),deltaG_count(iunit,imolty)%val(i,j,k)
+                end do
+             end do
+          end do
+
+          close(io_deltaG)
+       end do
+    end if
+  end subroutine write_deltaG_map
 
   subroutine write_prop_widom(io_output)
     use sim_system,only:nmolty
@@ -117,17 +250,17 @@ contains
 
   subroutine read_checkpoint_prop_widom(io_chkpt,blockm)
     use util_mp,only:mp_bcast
-    use sim_system,only:myid,rootid,groupid,ntmax
+    use sim_system,only:myid,rootid,groupid,nmolty
     integer,intent(in)::io_chkpt,blockm
     if (myid.eq.rootid) read(io_chkpt) Wrosen,blk_avg_Wrosen_prev,Uads,blk_avg_Uads_prev,blk_avg_Uads,setedist,blk_avg_setedist_prev,blk_avg_setedist
-    call mp_bcast(Wrosen,ntmax,rootid,groupid)
-    call mp_bcast(blk_avg_Wrosen_prev,ntmax,rootid,groupid)
-    call mp_bcast(Uads,ntmax,rootid,groupid)
-    call mp_bcast(blk_avg_Uads_prev,ntmax,rootid,groupid)
-    call mp_bcast(blk_avg_Uads,ntmax*blockm,rootid,groupid)
-    call mp_bcast(setedist,4*ntmax,rootid,groupid)
-    call mp_bcast(blk_avg_setedist_prev,4*ntmax,rootid,groupid)
-    call mp_bcast(blk_avg_setedist,4*ntmax*blockm,rootid,groupid)
+    call mp_bcast(Wrosen,nmolty,rootid,groupid)
+    call mp_bcast(blk_avg_Wrosen_prev,nmolty,rootid,groupid)
+    call mp_bcast(Uads,nmolty,rootid,groupid)
+    call mp_bcast(blk_avg_Uads_prev,nmolty,rootid,groupid)
+    call mp_bcast(blk_avg_Uads,nmolty*blockm,rootid,groupid)
+    call mp_bcast(setedist,4*nmolty,rootid,groupid)
+    call mp_bcast(blk_avg_setedist_prev,4*nmolty,rootid,groupid)
+    call mp_bcast(blk_avg_setedist,4*nmolty*blockm,rootid,groupid)
   end subroutine read_checkpoint_prop_widom
 
   subroutine write_checkpoint_prop_widom(io_chkpt)

@@ -77,7 +77,7 @@ contains
     use transfer_swap,only:swap,cnt,output_swap_stats,acchem,bnchem
     use transfer_swatch,only:swatch,output_swatch_stats
     use prop_pressure,only:pressure
-    use prop_widom,only:write_prop_widom,write_prop_widom_with_stats
+    use prop_widom,only:write_deltaG_map,write_prop_widom,write_prop_widom_with_stats
 
     character(LEN=*),intent(in)::file_in
 
@@ -797,6 +797,7 @@ contains
                 acchem(ibox,itype)=(-1.0E0_dp/beta)*log((acchem(ibox,itype)/bnchem(ibox,itype))/tmp)
                 itel = 2 + nEnergy + itype
                 baver(itel,ibox,:)=(-1.0E0_dp/beta)*log(baver(itel,ibox,:)/tmp)
+                if (lucall) call write_deltaG_map(io_output,itype,tmp)
              end if
           end do
        end do
@@ -2820,7 +2821,7 @@ contains
 
        pcumu=0.0_dp
        if (pmvol.gt.pcumu) then
-           pm = pmvol
+           pm = min(1.0_dp,pmvol)
            pcumu = pmvol
        else
            pm=0.0_dp
@@ -2828,7 +2829,7 @@ contains
        write(io_output,'(A,F8.2,A)') ' volume move       :',100.0_dp*pm,' %'
 
        if (pmswat.gt.pcumu) then
-          pm = pmswat - pcumu
+          pm = min(1.0_dp,pmswat - pcumu)
           pcumu = pmswat
        else
           pm = 0.0_dp
@@ -2836,7 +2837,7 @@ contains
        write(io_output,'(A,F8.2,A)') ' swatch move       :',100.0_dp*pm,' %'
 
        if (pmswap.gt.pcumu) then
-          pm = pmswap - pcumu
+          pm = min(1.0_dp,pmswap - pcumu)
           pcumu = pmswap
        else
           pm = 0.0_dp
@@ -2844,7 +2845,7 @@ contains
        write(io_output,'(A,F8.2,A)') ' swap move         :',100.0_dp*pm,' %'
 
        if (pmcb.gt.pcumu) then
-          pm = pmcb - pcumu
+          pm = min(1.0_dp,pmcb - pcumu)
           pcumu = pmcb
        else
           pm = 0.0_dp
@@ -2852,7 +2853,7 @@ contains
        write(io_output,'(A,F8.2,A)') ' CBMC move         :',100.0_dp*pm,' %'
 
        if (pmflcq.gt.pcumu) then
-          pm = pmflcq - pcumu
+          pm = min(1.0_dp,pmflcq - pcumu)
           pcumu = pmflcq
        else
           pm = 0.0_dp
@@ -2860,7 +2861,7 @@ contains
        write(io_output,'(A,F8.2,A)') ' fluct. charge move:',100.0_dp*pm,' %'
 
        if (pmexpc.gt.pcumu) then
-          pm = pmexpc - pcumu
+          pm = min(1.0_dp,pmexpc - pcumu)
           pcumu = pmexpc
        else
           pm = 0.0_dp
@@ -2868,7 +2869,7 @@ contains
        write(io_output,'(A,F8.2,A)') ' expanded ens. move:',100.0_dp*pm,' %'
 
        if (pmexpc1.gt.pcumu) then
-          pm = pmexpc1 - pcumu
+          pm = min(1.0_dp,pmexpc1 - pcumu)
           pcumu = pmexpc1
        else
           pm = 0.0_dp
@@ -2876,7 +2877,7 @@ contains
        write(io_output,'(A,F8.2,A)') ' new EE move       :',100.0_dp*pm,' %'
 
        if (pm_atom_tra.gt.pcumu) then
-          pm = pm_atom_tra - pcumu
+          pm = min(1.0_dp,pm_atom_tra - pcumu)
           pcumu = pm_atom_tra
        else
           pm = 0.0_dp
@@ -2884,14 +2885,14 @@ contains
        write(io_output,'(A,F8.2,A)') ' atom trans. move  :',100.0_dp*pm,' %'
 
        if (pmtra.gt.pcumu) then
-          pm = pmtra - pcumu
+          pm = min(1.0_dp,pmtra - pcumu)
           pcumu = pmtra
        else
           pm = 0.0_dp
        end if
        write(io_output,'(A,F8.2,A)') ' translation move  :',100.0_dp*pm,' %'
 
-       pm = 1.0_dp - pcumu
+       pm = max(0.0_dp,1.0_dp - pcumu)
        write(io_output,'(A,F8.2,A)') ' rotation move     :',100.0_dp*pm,' %'
     end if
 ! -------------------------------------------------------------------

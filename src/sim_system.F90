@@ -317,7 +317,7 @@ module sim_system
   real,allocatable::pmromt(:),rmrotx(:,:),rmroty(:,:),rmrotz(:,:)
 
   !=== MPI-related ===
-  integer::myid,numprocs,groupid
+  integer::myid=0,numprocs=1,groupid=0
   integer,parameter::rootid=0
 
   !=== OPENMP-related ===

@@ -26,8 +26,9 @@ contains
   subroutine swap()
     use sim_particle,only:update_neighbor_list_molecule,ctrmas,neigh_cnt,neighbor,neigh_icnt
     use sim_initia,only:setup_molecule_config
+    use moves_cbmc,only:first_bead_to_swap
     use transfer_shared,only:lopt_bias,update_bias,gcmc_setup,gcmc_cleanup,gcmc_exchange
-    use prop_widom,only:calc_prop_widom
+    use prop_widom,only:inc_prop_widom_counter,calc_prop_widom
 
     logical::ovrlap,lterm,lnew,lempty,ldone,ltors,lovrh(nchmax),lfavor,laccept,lswapinter,lrem_out,lins_in,linsk_in,lremk_in,lfixnow
 
@@ -211,10 +212,13 @@ contains
     ! select a position of the first/starting unit at RANDOM ***
     ! and calculate the boltzmann weight                     ***
     ! for the chain to be INSERTED                           ***
-    if (lrigid(imolty)) then
-       beg = riutry(imolty,1)
+    if (first_bead_to_swap(imolty).gt.0) then
+       beg = first_bead_to_swap(imolty)
     else
-       beg = 1
+       beg = int(random(-1)*real(first_bead_to_swap(imolty),dp)) + 1
+    end if
+    if (lrigid(imolty)) then
+       beg = riutry(imolty,beg)
     end if
 
     wbias_ins = 1.0E0_dp
@@ -564,6 +568,11 @@ contains
     else
        lfavor = .false.
        if ( lswapinter ) bnchem(boxins,imolty) = bnchem(boxins,imolty) + 1
+    end if
+
+    if (lucall) then
+       ! \warning This assumes random sampling (nchoi1=1) for bead 1
+       call inc_prop_widom_counter(imolty,1,(/rxp(1,1),ryp(1,1),rzp(1,1)/),1.0_dp)
     end if
 
     if ( ovrlap ) then
