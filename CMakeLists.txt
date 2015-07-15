@@ -345,3 +345,4 @@ endif()
 set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${Fortran_INCLUDE_DIRS}")
 
 add_subdirectory(src)
+add_subdirectory(contrib/baip/Fortran)
