@@ -4,7 +4,7 @@ MODULE topmon_main
   implicit none
   private
   save
-  public::monola
+  public::output_version,monola
 
   ! variables added for GCMC histogram reweighting
   integer,parameter::fmax=1E6,nprop1=11
@@ -52,6 +52,24 @@ MODULE topmon_main
   character(LEN=20)::string
 
 contains
+#include "defines.h"
+  !> \brief Output version and build information
+  !>
+  !> defines.h is generated automatically by CMake using
+  !> template defines.h.in. If compiling manually, create
+  !> defines.h and fill in relevant parameters.
+  subroutine output_version(io_version)
+    integer,intent(in)::io_version
+
+    write(io_version,'(/,3A,/,3(2A,/),4A,/)')&
+     'MCCCS topmon (branch: ',__BRANCH__,')',&
+     'Commit hash: ',__COMMIT_HASH__,&
+     'Build on host: ',__BUILD_HOSTNAME__,&
+     'Preprocessor definitions: ',__PREPROCESSOR_DEFINITIONS__,&
+     'Using ',__Fortran_COMPILER_ID__,' compiler: ',__Fortran_COMPILER__
+  end subroutine output_version
+
+
 !> \brief Main control logic of topmon
 !>
 !> reads the control-data from unit 4
@@ -1341,6 +1359,7 @@ contains
        write(io_output,'(A,A)') 'Program started at ',time_date_str()
        write(io_output,'(A,I0)') 'Number of processors: ', numprocs
        write(io_output,'(A,I0)') 'Threads per processor: ',thread_num
+       call output_version(io_output)
        w_a(run_num)
        w_a(suffix)
        w_l(L_movie_xyz)
@@ -1650,6 +1669,7 @@ contains
     call mp_bcast(stepvir,1,rootid,groupid)
     call mp_bcast(ntemp,1,rootid,groupid)
     call mp_bcast(virtemp,maxntemp,rootid,groupid)
+    if (lucall) call read_prop_widom(io_input,lprint,blockm)
 
     blockm=nstep/iblock
     if (lprint) then
@@ -1671,7 +1691,6 @@ contains
        w_l(lrhoz)
        w_r(bin_width)
        w_l(lucall)
-       if (lucall) call read_prop_widom(io_input,lprint,blockm)
        if (lvirial) then
           w_i(nvirial)
           w_r(starvir)

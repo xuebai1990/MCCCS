@@ -2,7 +2,7 @@ program topmon
   use var_type,only:default_path_length
   use util_mp,only:mp_start,mp_end
   use sim_system,only:myid,numprocs,groupid,thread_num,thread_num_max
-  use topmon_main,only:monola
+  use topmon_main,only:output_version,monola
 #ifdef __OPENMP__
   use omp_lib
 #endif
@@ -60,7 +60,7 @@ program topmon
      iarg=iarg+1
   end do
 ! ----------------------------------------------------------------
-  if (lversion) write(*,'(A,/,A,/)') 'MCCCS topmon 2011-01-01','branch: zeolite'
+  if (lversion) call output_version(6)
 
   if (lusage) then
      call get_command_argument(0,sarg)

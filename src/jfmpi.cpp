@@ -346,10 +346,10 @@ public:
     }
 };
 
+#include <unistd.h>
 #ifdef __FORK__
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <unistd.h>
 //#include <string>
 //#include <sstream>
 //#include <iterator>

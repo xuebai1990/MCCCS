@@ -231,7 +231,7 @@ contains
     use util_math,only:calculate_statistics
     use sim_system,only:nmolty
     integer,intent(in)::io_output,nblock
-    real::avg(4),sd(4),se(4)
+    real::avg(0:3),sd(0:3),se(0:3)
     integer::itype,j
 
     write(io_output,"(/,A)") '  ** Properties with Uncertainties from Rosenbluth Sampling **'

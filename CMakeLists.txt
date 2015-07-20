@@ -3,6 +3,7 @@
 INCLUDE(CMakeForceCompiler)
 
 cmake_minimum_required(VERSION 2.6)
+
 project(MCCCS Fortran)
 
 # make sure that the default is a RELEASE
@@ -14,25 +15,29 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_INSTALL_PREFIX "${default_prefix}" CACHE STRING "Choose the installation directory; by default it installs in the current directory." FORCE)
 endif()
 
-########################################################################
 # Check and warn if cache generated on a different host is being reused
-########################################################################
 if(CMAKE_HOST_UNIX)
-    execute_process(COMMAND hostname OUTPUT_VARIABLE TMP_HOSTNAME OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if(DEFINED BUILD_HOSTNAME AND NOT "${BUILD_HOSTNAME}" STREQUAL "${TMP_HOSTNAME}")
-        message(WARNING "
+  execute_process(COMMAND hostname OUTPUT_VARIABLE TMP_HOSTNAME OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if(DEFINED BUILD_HOSTNAME AND NOT "${BUILD_HOSTNAME}" STREQUAL "${TMP_HOSTNAME}")
+    message(WARNING "
             The CMake cache, probably generated on a different host (${BUILD_HOSTNAME}),
             is being reused! This could lead to inconsitencies; therefore, it is
             recommended to regenerate the cache!")
-    endif()
-    set(BUILD_HOSTNAME "${TMP_HOSTNAME}" CACHE INTERNAL "Hostname of the machine where the cache was generated." FORCE)
+  endif()
+  set(BUILD_HOSTNAME "${TMP_HOSTNAME}" CACHE INTERNAL "Hostname of the machine where the cache was generated." FORCE)
 endif()
+
+# Get the current working branch
+execute_process(COMMAND git rev-parse --abbrev-ref HEAD WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE BRANCH OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+# Get the latest abbreviated commit hash of the working branch
+execute_process(COMMAND git log -1 --format=%h WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE COMMIT_HASH OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 SET(SHARED_LIBS_DEFAULT ON)
 IF(CMAKE_GENERATOR MATCHES "Visual Studio")
     SET(SHARED_LIBS_DEFAULT OFF)
 ENDIF()
-option(BUILD_SHARED_LIBS "Enable shared libraries (can be problematic with MPI, Windows)" ${SHARED_LIBS_DEFAULT})
+option(BUILD_SHARED_LIBS "Enable shared libraries (can be problematic with MPI, Windows)." ${SHARED_LIBS_DEFAULT})
 
 if(UNIX AND NOT APPLE)
     option(PREFER_STATIC_LIBS "When finding libraries prefer \".a\" static archives (NOTE: this is enabled only for UNIX (excluding APPLE) platforms but it might not always work!" OFF)
@@ -53,7 +58,7 @@ if(WIN32)
     set(ARCH_IS_64 "FALSE")
   endif()
 else()
-  get_property(ARCH_IS_64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
+  get_property(ARCH_IS_64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS SET)
 endif()
 
 option(USE_MPI "Build a parallel version using message passing interface." ON)
@@ -342,7 +347,11 @@ endforeach()
 if(Fortran_INCLUDE_DIRS)
   list(REMOVE_DUPLICATES Fortran_INCLUDE_DIRS)
 endif()
-set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${Fortran_INCLUDE_DIRS}")
+set_directory_properties(PROPERTIES INCLUDE_DIRECTORIES "${Fortran_INCLUDE_DIRS};${PROJECT_BINARY_DIR}")
 
 add_subdirectory(src)
 add_subdirectory(contrib/baip/Fortran)
+
+get_directory_property(PREPROCESSOR_DEFINITIONS COMPILE_DEFINITIONS)
+get_target_property(SAVE_Fortran_FLAGS topmon INCLUDE_DIRECTORIES)
+configure_file(${PROJECT_SOURCE_DIR}/src/defines.h.in ${PROJECT_BINARY_DIR}/defines.h @ONLY)
