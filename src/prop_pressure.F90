@@ -211,7 +211,7 @@ contains
                          else if (nonbond_type(ntij).eq.2) then
                             ! Buckingham exp-6
                             rs1=vvdW(2,ntij)*rij
-                            fij = fij + (vvdW(1,ntij)*rs1*exp(rs1)+6.0_dp*vvdW(3,ntij)/(rijsq**3))/rijsq 
+                            fij = fij + (vvdW(1,ntij)*rs1*exp(rs1)+6.0_dp*vvdW(3,ntij)/(rijsq**3))/rijsq
                          else if (nonbond_type(ntij).eq.3) then
                             ! Mie
                             sr1 = vvdW(2,ntij) / rij
@@ -250,39 +250,21 @@ contains
                             fij = fij - 12.0_dp*vvdW(1,ntij)/tmp + 6.0_dp*vvdW(2,ntij)/rs8 + 8.0_dp*vvdW(3,ntij)/rs8/rijsq
                          else if (nonbond_type(ntij).eq.8) then
                             ! DPD
-                            ! This section will give the correct force for DPD
-                            ! beads. In its old incarnation left by Thilanga I
-                            ! am not sure that it properly checked the cutoff.
-                            ! in general the force between two dpd particles is
-                            ! given by 
+                            ! In general the force between two DPD particles is
+                            ! given by
                             ! F(r_ij) = -\del_{ij} U(r_{ij})
                             !         = -\del_{ij} (a_{ij}/2 (1-r_{ij}/rmin)^2
                             ! applying the chain rule this gives:
                             !         = -(a_{ij}/2)*(2(1-r_{ij}/rmin))*(-1/rmin)*\hat{r}_{ij}
                             ! simplifying to:
-                            !         =(a_{ij}/rmin)*(1-r_{ij}/rmin)*\hat{r}_{ij}   
+                            !         =(a_{ij}/rmin)*(1-r_{ij}/rmin)*\hat{r}_{ij}
                             ! the form here looks totally bizarrre due to the
                             ! way the code handles the different pieces of
                             ! information.
                             if(rij<=vvdW(2,ntij).and.rij>0.0_dp) then ! if rij<rmin
                                 fij=fij-2.0_dp*vvdW(1,ntij)*(1.0_dp-rij/vvdW(2,ntij))/(rij*vvdW(2,ntij))
-                            else  
-                                ! beads don't interact, no need to add zero and take
-                                ! up CPU cycles
-                                ! this is required for the case that lijall == truei
-                                ! furthermore if rij=0 our fij blows up to
-                                ! infinity. The rest of the parts of the
-                                ! pressure calculation are zero. In this case
-                                ! the direction of the force is ill defined so
-                                ! the pressure is setting to zero as well. 
                             end if
-                            ! Thilanga's version of the force. Kept incase I
-                            ! screw it up even though I suspect that it is
-                            ! incorrect. 
-                            !rs1 = vvdW(2,ntij)*vvdW(2,ntij)
-                            !rs2 = 1.0_dp/vvdW(2,ntij)
-                            !fij = fij - 2.0_dp*vvdW(1,ntij)*(rs2/rij-1.0_dp/rs1) ! why are we dividing by rij?
-                         else if (nonbond_type(ntij).ne.-1.and.nonbond_type(ntij).ne.0) then
+                         else if (ALL(nonbond_type(ntij).ne.(/-1,0,9/))) then
                             call err_exit(__FILE__,__LINE__,'pressure: undefined nonbond type',myid+1)
                          end if
                       end if
@@ -546,13 +528,7 @@ contains
                 tmp=rbcut2**3
                 corp = corp + vvdW(1,ntij)/tmp/tmp-vvdW(2,ntij)/tmp-vvdW(3,ntij)/tmp/rbcut2
              end if
-          else if (nonbond_type(ntij).eq.8) then
-             if (ltailc) then
-                corp = 0.0_dp
-             else if(.not.lshift.and.numberDimensionIsIsotropic(ibox).eq.3) then
-                corp=0.0_dp
-             end if
-          else if (nonbond_type(ntij).ne.-1.and.nonbond_type(ntij).ne.0) then
+          else if (ALL(nonbond_type(ntij).ne.(/-1,0,8,9/))) then
              call err_exit(__FILE__,__LINE__,'corp: undefined nonbond type',myid+1)
           end if
        end do

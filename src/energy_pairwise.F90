@@ -21,9 +21,9 @@ MODULE energy_pairwise
   save
   public::sumup,energy,boltz,coru,read_ff,init_ff,U2,type_2body,vdW_nParameter,nonbond_type
 
-  real,parameter::a15(2)=(/4.0E7_dp,7.5E7_dp/) !< 1-5 correction term for unprotected hydrogen-oxygen interaction; 1 for ether oxygens, 2 for alcohol oxygens
+  real,parameter::overlapValue=1.0E+20_dp,a15(2)=(/4.0E7_dp,7.5E7_dp/) !< 1-5 correction term for unprotected hydrogen-oxygen interaction; 1 for ether oxygens, 2 for alcohol oxygens
   !< OLD VALUES: a15(2)=/17.0_dp**6,16.0_dp**6/)
-  integer,parameter::vdW_nParameter(-1:8)=(/0,0,2,3,4,2,2,4,3,2/)
+  integer,parameter::vdW_nParameter(-1:9)=(/0,0,2,3,4,2,2,4,3,2,3/)
   integer,allocatable::atom_type(:),nonbond_type(:) !< type -1: tabulated potential
   !< type 1: Lennard-Jones 12-6, U(r) = 4*epsilon*[(sigma/r)^12-(sigma/r)^6]
   !< vvdW_b_1 = epsilon, vvdW_b_2 = sigma
@@ -35,7 +35,7 @@ MODULE energy_pairwise
   !< vvdW_b_1 = epsilon, vvdW_b_2 = sigma, vvdW_b_3 = n0, vvdW_b_4 = n1
   !< vvdW_1 = C*epsilon, vvdW_2 = sigma, vvdW_3 = n0, vvdW_4 = n1
   !< type 4: MMFF94 (Merck Molecular Force Field: Thomas A. Halgren, J Am Chem Soc 1992,114:7827-7843) buffered 14-7, U(r) = 4*epsilon*{1.07/[(r/r0)+0.07]}^7 * {1.12/[(r/r0)^7+0.12]-2}
-  !< vvdW_b_1 = 4*epsilon, vvdW_b_2 = r0
+  !< vvdW_b_1 = epsilon, vvdW_b_2 = r0
   !< vvdW_1 = 4*epsilon, vvdW_2 = r0, vvdW_3 = r0^2
   !< type 5: Lennard-Jones 9-6, U(r) = 4*epsilon*[2*(r0/r)^9-3*(r0/r)^6],
   !< vvdW_b_1 = epsilon, vvdW_b_2 = r0
@@ -48,6 +48,17 @@ MODULE energy_pairwise
   !< type 7: Lennard-Jones 12-6-8, U(r) = A/r^12 - B/r^6 - C/r^8
   !< vvdW_b_1 = A, vvdW_b_2 = B, vvdW_b_3 = C
   !< vvdW_1 = A, vvdW_2 = B, vvdW_3 = C
+  !< type 8: DPD potential
+  !< U(r) = a/2 (1-r/rmin)^2 if rij <= rmin
+  !<      = 0.0                 if rij > rmin
+  !< vvdW_b_1 = a, vvdW_b_2 = rmin
+  !< vvdW_1 = a, vvdW_2 = rmin, vvdW_3 = rmin^2
+  !< type 9: Hard-core square-well,
+  !< U(r) = +inf     if r < sigma
+  !<      = -epsilon if sigma <= r < lambda*sigma
+  !<      = 0        if r >= lambda*sigma
+  !< vvdW_b_1 = epsilon, vvdW_b_2 = sigma, vvdW_b_3 = lambda
+  !< vvdW_1 = epsilon, vvdW_2 = sigma, vvdW_3 = lambda*sigma
 
   integer,allocatable::vdWsplits(:,:),electsplits(:,:)
   real,allocatable::rvdW(:,:,:),tabvdW(:,:,:),relect(:,:,:),tabelect(:,:,:)
@@ -949,7 +960,7 @@ contains
           rxuij = rxui - rxuion(jj,flagon)
           ryuij = ryui - ryuion(jj,flagon)
           rzuij = rzui - rzuion(jj,flagon)
-          
+
           ! lpbc is not called here because it's intra-chain interaction
           rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
 
@@ -1710,7 +1721,7 @@ contains
           else if (nonbond_type(ntij).eq.7) then
              ! LJ 12-6-8
              coru = coru + vvdW(1,ntij)/9.0_dp/(rbcut3**3)-vvdW(2,ntij)/3.0_dp/rbcut3-vvdW(3,ntij)/5.0_dp/rbcut3/rbcut2
-          else if (nonbond_type(ntij).ne.4.and.nonbond_type(ntij).ne.-1.and.nonbond_type(ntij).ne.0) then
+          else if (ALL(nonbond_type(ntij).ne.(/-1,0,4,8,9/))) then
              call err_exit(__FILE__,__LINE__,'coru: undefined nonbond type',myid+1)
           end if
        end do
@@ -1844,57 +1855,47 @@ contains
           ij = type_2body(i,j)
           nonbond_type(ij)=atom_type(i)
 
-          if (nonbond_type(ij).eq.1) then
-             ! LJ 12-6
+          if (ANY(nonbond_type(ij).eq.(/1,3,4,5,6,8/))) then
+             ! LJ 12-6 or Mie or MMFF94 or LJ 9-6 or Generalized LJ
              if (lmixlb) then
                 ! Lorentz-Berthelot rules --- sig_ij = 0.5 [ sig_i + sig_j ]
-                if (vvdW_b(2,i).eq.0.0_dp.or.vvdW_b(2,j).eq.0.0_dp) then
-                   vvdW(2:3,ij)=0.0_dp
-                else
-                   vvdW(2,ij)=0.5_dp*(vvdW_b(2,i)+vvdW_b(2,j))
-                   vvdW(3,ij)=vvdW(2,ij)**2
-                end if
+                vvdW(2:4,ij) = 0.5_dp*(vvdW_b(2:4,i)+vvdW_b(2:4,j))
              else if (lmixjo) then
                 ! Jorgensen mixing rules --- sig_ij = [ sig_i * sig_j ]^(1/2)
-                vvdW(3,ij)=vvdW_b(2,i)*vvdW_b(2,j)
-                vvdW(2,ij)=sqrt(vvdW(3,ij))
+                vvdW(2:4,ij) = sqrt(vvdW_b(2:4,i)*vvdW_b(2:4,j))
              end if
-             vvdW(1,ij)=4.0_dp*sqrt(vvdW_b(1,i)*vvdW_b(1,j))
+             if (nonbond_type(ij).eq.3) then
+                vvdW(1,ij) = vvdW(3,ij)/(vvdW(3,ij)-vvdW(4,ij))*((vvdW(3,ij)/vvdW(4,ij))**(vvdW(4,ij)/(vvdW(3,ij)-vvdW(4,ij))))&
+                 *sqrt(vvdW_b(1,i)*vvdW_b(1,j))
+             else if (nonbond_type(ij).eq.8) then
+                vvdW(1,ij) = sqrt(vvdW_b(1,i)*vvdW_b(1,j))
+                vvdW(3,ij) = vvdW(2,ij)*vvdW(2,ij)
+             else
+                vvdW(1,ij) = 4.0_dp*sqrt(vvdW_b(1,i)*vvdW_b(1,j))
+                if (nonbond_type(ij).eq.1.or.nonbond_type(ij).eq.4) vvdW(3,ij) = vvdW(2,ij)*vvdW(2,ij)
+                if ((nonbond_type(ij).eq.1).and.(vvdW_b(2,i).eq.0.0_dp.or.vvdW_b(2,j).eq.0.0_dp)) vvdW(2:3,ij) = 0.0_dp
+             end if
+          else if (nonbond_type(ij).eq.9) then
+             ! Hard-core square-well
+             vvdW(1,ij) = sqrt(vvdW_b(1,i)*vvdW_b(1,j))
+             if (lmixlb) then
+                ! Lorentz-Berthelot rules --- sig_ij = 0.5 [ sig_i + sig_j ]
+                vvdW(2,ij) = 0.5_dp*(vvdW_b(2,i)+vvdW_b(2,j))
+                vvdW(3,ij) = 0.5_dp*(vvdW_b(2,i)*vvdW_b(3,i)+vvdW_b(2,j)*vvdW_b(3,j))
+             else if (lmixjo) then
+                ! Jorgensen mixing rules --- sig_ij = [ sig_i * sig_j ]^(1/2)
+                vvdW(2:3,ij) = sqrt(vvdW_b(2:3,i)*vvdW_b(2:3,j))
+                vvdW(3,ij) = vvdW(2,ij)*vvdW(3,ij)
+             end if
           else if (nonbond_type(ij).eq.2) then
              ! Buckingham exp-6
              vvdW(1,ij)=sqrt(vvdW_b(1,i)*vvdW_b(1,j))
              vvdW(2,ij)=-0.5_dp*(vvdW_b(2,i)+vvdW_b(2,j))
              vvdW(3,ij)=sqrt(vvdW_b(3,i)*vvdW_b(3,j))
-          else if (nonbond_type(ij).eq.3) then
-             ! Mie
-             if (lmixlb) then
-                ! Lorentz-Berthelot rules --- sig_ij = 0.5 [ sig_i + sig_j ]
-                vvdW(2:4,ij)=0.5_dp*(vvdW_b(2:4,i)+vvdW_b(2:4,j))
-             else if (lmixjo) then
-                ! Jorgensen mixing rules --- sig_ij = [ sig_i * sig_j ]^(1/2)
-                vvdW(2:4,ij)=sqrt(vvdW_b(2:4,i)*vvdW_b(2:4,j))
-             end if
-             vvdW(1,ij) = vvdW(3,ij)/(vvdW(3,ij)-vvdW(4,ij))*((vvdW(3,ij)/vvdW(4,ij))**(vvdW(4,ij)/(vvdW(3,ij)-vvdW(4,ij))))&
-              *sqrt(vvdW_b(1,i)*vvdW_b(1,j))
-          else if (nonbond_type(ij).eq.4.or.nonbond_type(ij).eq.5.or.nonbond_type(ij).eq.6.or.nonbond_type(ij).eq.8) then
-             ! MMFF94 or LJ 9-6 or Generalized LJ
-             if (lmixlb) then
-                ! Lorentz-Berthelot rules --- sig_ij = 0.5 [ sig_i + sig_j ]
-                vvdW(2:4,ij)=0.5_dp*(vvdW_b(2:4,i)+vvdW_b(2:4,j))
-             else if (lmixjo) then
-                ! Jorgensen mixing rules --- sig_ij = [ sig_i * sig_j ]^(1/2)
-                vvdW(2:4,ij)=sqrt(vvdW_b(2:4,i)*vvdW_b(2:4,j))
-             end if
-             if (nonbond_type(ij).eq.4) vvdW(3,ij)=vvdW(2,ij)*vvdW(2,ij)
-             vvdW(1,ij)=4.0_dp*sqrt(vvdW_b(1,i)*vvdW_b(1,j))
           else if (nonbond_type(ij).eq.7) then
              ! LJ 12-6-8
              vvdW(1:3,ij)=sqrt(vvdW_b(1:3,i)*vvdW_b(1:3,j))
           end if
-	if(nonbond_type(ij).eq.8) then
-		vvdw(3,ij) = vvdW(2,ij)*vvdW(2,ij)
-		vvdW(1,ij) = sqrt(vvdW_b(1,i)*vvdW_b(1,j))
-        end if
        end do
     end do
 
@@ -1952,10 +1953,13 @@ contains
           else if (nonbond_type(ij).eq.6) then
              ! Generalized LJ
              vvdW(1,ij)=4.0_dp*vvdW(1,ij)
-	  else if(nonbond_type(ij).eq.8) then
-		! DOD
-		vvdW(3,ij) = vvdW(2,ij)**2
-          else if (nonbond_type(ij).ne.7.and.nonbond_type(ij).ne.-1.and.nonbond_type(ij).ne.0) then
+          else if (nonbond_type(ij).eq.8) then
+             ! DPD potential
+             vvdW(3,ij)=vvdW(2,ij)**2
+          else if (nonbond_type(ij).eq.9) then
+             ! Hard-core square-well
+             vvdW(3,ij)=vvdW(2,ij)*vvdW(3,ij)
+          else if (ALL(nonbond_type(ij).ne.(/-1,0,7/))) then
              call err_exit(__FILE__,__LINE__,'read_ff: undefined nonbond type',myid+1)
           end if
 
@@ -2335,20 +2339,15 @@ contains
           rs12=rs6*rs6
           U2=vvdW(1,ntij)/rs12-vvdW(2,ntij)/rs6-vvdW(3,ntij)/rs8
        else if (nonbond_type(ntij).eq.8) then
-          !DPD
-          ! a segmented potential where
-          ! U(rij) = a_ij/2 (1-rij/rmin)^2 for rij <= rmin
-          !        = 0.0 if rij > rmin
-          ! Must be specified here because some parts of the code don't check
-          ! the rcut before evaluating the potential which could result in
-          ! unphysical energies for a DPD system.
-          rij=sqrt(rijsq) 
-          if(rij<=vvDW(2,ntij)) then 
-              rs1 = rij/vvdW(2,ntij)
-              rs2 = 1.0_dp-rs1
-              U2 = vvdW(1,ntij)*rs2*rs2
-          else 
-              U2 = 0.0_dp 
+          ! DPD potential
+          rij=sqrt(rijsq)
+          if (rij<=vvDW(2,ntij)) U2 = vvdW(1,ntij)*(1.0_dp-rij/vvdW(2,ntij))**2
+       else if (nonbond_type(ntij).eq.9) then
+          ! Hard-core square-well
+          if (rij.lt.vvdW(2,ntij)) then
+             U2 = overlapValue
+          else if (rij.lt.vvdw(3,ntij)) then
+             U2 = -vvdW(1,ntij)
           end if
        else if (nonbond_type(ntij).eq.-1) then
           ! tabulated potential
