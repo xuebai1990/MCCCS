@@ -256,6 +256,14 @@ module sim_system
    ,moltion(2)
   real::rcutin=6.0_dp,weight,weiold,vold(nEnergy),vnew(nEnergy),vneworient,voldorient
 
+  ! --- Q.Paul C. --- variables for CBMC_bend_table 
+  logical::L_cbmc_bend=.false.  ! whether to use tabulated bending table for CBMC move
+  real,allocatable::lin_bend_type(:),lin_bend_table(:,:),lin_bend_prob(:,:) ! Tabulated bending table for linear CBMC bead growth
+  real,allocatable::br_bend_type(:),br_bend_theta1(:,:),br_bend_theta2(:,:,:),br_bend_phi12(:,:,:,:),br_bend_prob(:,:) ! Tabulated bending table for one-branch CBMC bead growth
+  integer,allocatable::lin_bend_dim(:),br_bend_dim1(:),br_bend_dim2(:),br_bend_dim3(:) ! The dimensions for the above bending tables
+  ! --- Q.Paul C. ---
+
+
   !*** Fluctuating charge moves ***
   real,allocatable::xiq(:),jayself(:),jayq(:)
   logical,parameter::lfepsi=.false. !< If lfepsi is true, the fluctuation of epsilon is used instead of the fluctuation of the sigma.

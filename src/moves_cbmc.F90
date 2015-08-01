@@ -1745,6 +1745,16 @@ contains
     real::distgrow2
     real::lengtha,lengthb,lengtha2,lengthb2,lengthc,lengthc2,lengthFP,lengthFP2
 
+    ! Q. Paul C. -- for tabulated CBMC bending growth
+    logical::use_bend_table=.false. ! whether to use this type of growth
+    real::delta_prob 
+    real,dimension(2)::theta1_interval,theta2_interval,phi12_interval ! the angle interval being picked
+    integer::ileft,iright,imedian,iprob,ilin,ibr  ! used for searching the angle interval when given a random number (sorting)
+    integer::itheta1,itheta2,iphi12
+    integer::branch_num !number of branch points
+    integer::type2
+    real::phi12
+
     ! MPI
     integer::rcounts(numprocs),displs(numprocs),my_start,my_end,blocksize,my_itrial,rid
     real::my_ang_trial(nchbn_max),my_vbend(nchbn_max),my_bfactor(nchbn_max)
@@ -1858,343 +1868,719 @@ contains
     ! initialize wei_bend
     wei_bend = 1.0E0_dp
     vbbtr = 0.0E0_dp
-    nchben_a = nchbna(imolty)
-    ! MPI
-    if (numprocs.gt.1) then
-       rid=myid
-    else
-       rid=-1
-    end if
-    blocksize = nchben_a/numprocs
-    rcounts = blocksize
-    blocksize = nchben_a - blocksize * numprocs
-    if (blocksize.gt.0) rcounts(1:blocksize) = rcounts(1:blocksize) + 1
-    call mp_set_displs(rcounts,displs,blocksize,numprocs)
-    my_start = displs(myid+1) + 1
-    my_end = my_start + rcounts(myid+1) - 1
 
-    ! determine the iugrow-iufrom-iuprev angles
-    do count = angstart,ntogrow
-       iugrow = growlist(iw,count)
-       kforce = -1000.0E0_dp
-       do ib = 1, inben(imolty,iugrow)
-          iulast = ijben2(imolty,iugrow,ib)
-          if ( iulast .eq. iufrom ) then
-             iu2back = ijben3(imolty,iugrow,ib)
-             if ( iu2back .eq. iuprev ) then
-                type = itben(imolty,iugrow,ib)
-                equil = brben(type)
-                kforce = brbenk(type)
-                exit
-             end if
-          end if
-       end do
-
-       if ( kforce .gt. 0.1E0_dp ) then
-          ! flexible bond angle
-          ! initialize bsum_try
-          bsum_try = 0.0E0_dp
-
-          if (L_bend_table) then
-             distgrow = bondlen(count)
-             distgrow2 = distgrow*distgrow
-          end if
-
-          ! compute trial angles and energies
-          my_itrial = 0
-          do ibend = my_start,my_end
-             my_itrial = my_itrial + 1
-             if (lnew.or.ibend.ne.1) then
-                ! new conformation or old conformation skipping 1st
-                ! choose the angle uniformly on sin(theta)
-                rsint = 2.0E0_dp*random(rid) - 1.0E0_dp
-                angle = acos(rsint)
-
-                ! calculate the bond angle energy
-                if (L_bend_table) then
-                   lengthc2 = lengthFP2 + distgrow2 - 2.0E0_dp*lengthFP*distgrow*cos(angle)
-                   lengthc = sqrt(lengthc2)
-                   vangle = lininter_bend(lengthc,type)
-                else
-                   vangle = kforce * (angle - equil)**2
+    ! Q. Paul C. -- Determine if CBMC_bend_table is used
+    if ( L_cbmc_bend ) then 
+        ! linear case
+        if ( ntogrow .eq. 1 .and. angstart .eq. 1) then
+            branch_num = 0
+            iugrow = growlist(iw,ntogrow)
+            
+            do ib = 1, inben(imolty,iugrow)
+                iulast = ijben2(imolty,iugrow,ib)
+                if ( iulast .eq. iufrom ) then 
+                    iu2back = ijben3(imolty,iugrow,ib)
+                    if ( iu2back .eq. iuprev ) then 
+                        type = itben(imolty,iugrow,ib)
+                        equil = brben(type)
+                        kforce = brbenk(type)
+                        exit 
+                    end if
                 end if
+            end do    
+            
+            ! Look for the tabulated values corresponding to the angle type
+            use_bend_table = .false.
+            do ilin=1,size(lin_bend_type)
+                if ( lin_bend_type(ilin) .eq. type ) then 
+                    use_bend_table = .true.
+                    exit 
+                end if
+            end do
 
-                my_ang_trial(my_itrial) = angle
-                my_vbend(my_itrial)=vangle
-                my_bfactor(my_itrial) = exp(-beta*vangle)
-                bsum_try = bsum_try + my_bfactor(my_itrial)
-             else
-                ! first ibend is the old conformation
+        ! one-branch case
+        else if ( ntogrow .eq. 2 .and. angstart .eq. 1 ) then
+            branch_num = 1
+            
+            ! find force field parameter for theta1 and theta2
+            do count = angstart,ntogrow
+                iugrow = growlist(iw,count)
+                do ib = 1, inben(imolty,iugrow)
+                    iulast = ijben2(imolty,iugrow,ib)
+                    if ( iulast .eq. iufrom ) then
+                        iu2back = ijben3(imolty,iugrow,ib)
+                        if ( iu2back .eq. iuprev ) then
+                            if (count .eq. angstart) then
+                                type = itben(imolty,iugrow,ib)
+                                equil = brben(type)
+                                kforce = brbenk(type)
+                            else
+                                type2 = itben(imolty,iugrow,ib)
+                            end if
+                            exit
+                        end if
+                    end if
+                end do
+            end do   
+
+            ! Look for the tabulated values corresponding to the angle type
+            use_bend_table = .false.
+            do ibr=1,size(br_bend_type)
+                if ( (br_bend_type(ibr) .eq. type) .and. (type .eq. type2) ) then
+                    use_bend_table = .true.
+                    exit
+                end if
+            end do
+        
+        ! double-branch case, not implemented for tabulated CBMC growth yet
+        else
+            use_bend_table = .false.
+        end if
+    end if
+
+    ! if use tabulated CBMC_bend_table to grow a linear bead
+    if (use_bend_table .and. branch_num .eq. 0) then
+        bsum_try = 0.0E0_dp
+
+        if ( lnew ) then
+            ! new conformation
+            ! first, perform the biased selection for (almost) equally-likely space
+            rid=-1
+            rbf = random(rid)
+                    
+            ! log(n) selection of the tabulated value
+            ileft=1
+            iright=lin_bend_dim(ilin)
+            do while ( iright-ileft .gt. 1)
+                imedian=(ileft+iright)/2
+                if ( rbf .gt. lin_bend_prob(ilin,imedian)) then
+                    ileft=imedian
+                else
+                    iright=imedian
+                end if
+            end do
+                    
+            ! Make sure that it is the leftest one (in case some values are identical)
+            if (ileft .gt. 1) then
+                do while ( lin_bend_prob(ilin,ileft-1) .eq. lin_bend_prob(ilin,ileft) )
+                    ileft=ileft-1
+                    if (ileft .eq. 1) then
+                        exit
+                    end if
+                end do
+            end if
+                    
+            theta1_interval(1)=lin_bend_table(ilin,ileft)
+            theta1_interval(2)=lin_bend_table(ilin,iright)
+                
+            ! then perform random selection among the interval
+            rbf = random(rid)
+            angle=rbf*(theta1_interval(2)-theta1_interval(1))+theta1_interval(1)
+            vangle = kforce * (angle - equil)**2
+            delta_prob=(lin_bend_prob(ilin,iright)-lin_bend_prob(ilin,ileft))
+            bsum_try = bsum_try + sin(angle)*exp(-beta*vangle)*(theta1_interval(2)-theta1_interval(1))/delta_prob
+        else
+            ! old conformation
+            xvecgrow = rxu(i,iugrow) - rxui
+            yvecgrow = ryu(i,iugrow) - ryui
+            zvecgrow = rzu(i,iugrow) - rzui
+            distgrow = bondlen(ntogrow)
+            distgrow2 = distgrow*distgrow
+            ! dot product divided by lengths gives cos(angle)
+            anglec = ( xvecprev*xvecgrow + yvecprev*yvecgrow  + zvecprev*zvecgrow ) / (distprev*distgrow)
+            angle = acos(anglec)
+            vangle = kforce * (angle - equil)**2
+                    
+            ! log(n) selection of the angle interval
+            ileft=1
+            iright=lin_bend_dim(ilin)
+            do while ( iright-ileft .gt. 1)
+                imedian=(ileft+iright)/2
+                if ( angle .gt. lin_bend_table(ilin,imedian)) then
+                    ileft=imedian
+                else
+                    iright=imedian
+                end if
+            end do
+                    
+            theta1_interval(1)=lin_bend_table(ilin,ileft)
+            theta1_interval(2)=lin_bend_table(ilin,iright)
+            delta_prob=(lin_bend_prob(ilin,iright)-lin_bend_prob(ilin,ileft))
+            bsum_try = bsum_try + sin(angle)*exp(-beta*vangle)*(theta1_interval(2)-theta1_interval(1))/delta_prob
+        end if
+             
+        ! propagate the rosenbluth weight
+        wei_bend = wei_bend * bsum_try 
+        bendang(angstart) = angle
+        vbbtr = vbbtr + vangle
+            
+        ! The following part is the same as the normal growth
+        if ( lnew ) then
+            ! assign phi(angstart) to 0.0
+            phi(angstart) = 0.0E0_dp
+        else if (angstart.le.ntogrow) then
+            ! set up the cone using iuprev
+            xub = -xvecprev/distprev
+            yub = -yvecprev/distprev
+            zub = -zvecprev/distprev
+            call cone(1,xub,yub,zub,dum,dum)
+
+            iugrow = growlist(iw,angstart)
+
+            ! compute vector from iufrom to iugrow
+            xvecgrow = rxu(i,iugrow) - rxui
+            yvecgrow = ryu(i,iugrow) - ryui
+            zvecgrow = rzu(i,iugrow) - rzui
+            distgrow = bondlen(angstart)
+
+            ! turn this into a unit vector
+            ux = xvecgrow/distgrow
+            uy = yvecgrow/distgrow
+            uz = zvecgrow/distgrow
+
+            call cone(3,ux,uy,uz,bendang(angstart),phi(angstart))
+        end if
+             
+    ! if use tabulated CBMC_bend_table to grow single-branch two beads
+    else if (use_bend_table .and. branch_num .eq. 1) then
+        bsum_try = 0.0E0_dp
+                
+        if ( lnew ) then
+            ! new conformation
+            ! first, perform the biased selection for (almost) equally-likely space
+            rid=-1
+            rbf = random(rid)
+                    
+            ! log(n) selection of the tabulated value, and back calculate the corresponding theta1,theta2,phi12
+            ileft=1
+            iright=br_bend_dim1(ibr)*br_bend_dim2(ibr)*br_bend_dim3(ibr)+1
+            do while ( iright-ileft .gt. 1)
+                imedian=(ileft+iright)/2
+                if ( rbf .gt. br_bend_prob(ibr,imedian)) then
+                    ileft=imedian
+                else
+                    iright=imedian
+                end if
+            end do
+                    
+            ! Make sure that it is the leftest one (in case some values are identical)
+            if (ileft .gt. 1) then
+                do while ( br_bend_prob(ibr,ileft-1) .eq. br_bend_prob(ibr,ileft))
+                    ileft = ileft - 1
+                    if (ileft .eq. 1) then
+                        exit
+                    end if
+                end do
+            end if
+                
+            ! Converting the probability into a particular grid
+            iphi12=mod(ileft,br_bend_dim3(ibr))
+            if ( iphi12 .eq. 0) then
+                iphi12 = br_bend_dim3(ibr)
+            end if
+
+            if ( mod(ileft,br_bend_dim3(ibr)*br_bend_dim2(ibr)) .eq. 0) then
+                itheta2 = br_bend_dim2(ibr)
+            else if (mod(ileft,br_bend_dim3(ibr)) .eq. 0) then
+                itheta2=mod(floor(ileft*1.0E0_dp/br_bend_dim3(ibr)),br_bend_dim2(ibr))
+            else
+                itheta2=mod(floor(ileft*1.0E0_dp/br_bend_dim3(ibr)),br_bend_dim2(ibr))+1
+            end if
+                    
+            if ( mod(ileft,br_bend_dim3(ibr)*br_bend_dim2(ibr)) .eq. 0) then
+                itheta1=floor(ileft*1.0E0_dp/(br_bend_dim3(ibr)*br_bend_dim2(ibr)))
+            else
+                itheta1=floor(ileft*1.0E0_dp/(br_bend_dim3(ibr)*br_bend_dim2(ibr)))+1
+            end if
+                    
+            theta1_interval(1)=br_bend_theta1(ibr,itheta1)
+            theta1_interval(2)=br_bend_theta1(ibr,itheta1+1)
+            theta2_interval(1)=br_bend_theta2(ibr,itheta1,itheta2)
+            theta2_interval(2)=br_bend_theta2(ibr,itheta1,itheta2+1)
+            phi12_interval(1)=br_bend_phi12(ibr,itheta1,itheta2,iphi12)
+            phi12_interval(2)=br_bend_phi12(ibr,itheta1,itheta2,iphi12+1)
+            delta_prob=br_bend_prob(ibr,iright)-br_bend_prob(ibr,ileft)
+
+            ! then perform random selection for theta1
+            rbf = random(rid)
+            angle=rbf*(theta1_interval(2)-theta1_interval(1))+theta1_interval(1)
+            vangle = kforce * (angle - equil)**2
+            bendang(1) = angle
+            phi(1) = 0.0E0_dp
+            vbbtr = vbbtr + vangle
+                    
+            ! theta2
+            rbf = random(rid)
+            angle=rbf*(theta2_interval(2)-theta2_interval(1))+theta2_interval(1)
+            vangle = kforce * (angle - equil)**2
+            bendang(2) = angle
+            vbbtr = vbbtr + vangle
+                    
+            ! phi12
+            rbf = random(rid)
+            phitwo=rbf*(phi12_interval(2)-phi12_interval(1))+phi12_interval(1)
+                    
+            ! calculate theta12 from phi12, and calculate the bending potential based on theta12
+            angle=cone_angle(bendang(1),phi(1),bendang(2),phitwo)
+            vangle = kforce * (angle - equil)**2
+            vbbtr = vbbtr + vangle
+                    
+            if ( phitwo .gt. onepi ) then
+                phitwo=phitwo-twopi
+            end if
+                    
+            phi(2) = phitwo
+            delta_prob=br_bend_prob(ibr,iright)-br_bend_prob(ibr,ileft)
+            bsum_try = sin(bendang(1))*sin(bendang(2))*exp(-beta*vbbtr)* &
+                (theta1_interval(2)-theta1_interval(1))*(theta2_interval(2)-theta2_interval(1))* &
+                (phi12_interval(2)-phi12_interval(1))/delta_prob
+
+        else
+            ! old conformation
+            ! first calculate theta1 and theta2, and find out the corresponding probability
+            do count = 1, ntogrow
+                iugrow = growlist(iw,count)
                 xvecgrow = rxu(i,iugrow) - rxui
                 yvecgrow = ryu(i,iugrow) - ryui
                 zvecgrow = rzu(i,iugrow) - rzui
                 distgrow = bondlen(count)
                 distgrow2 = distgrow*distgrow
+                   
                 ! dot product divided by lengths gives cos(angle)
                 anglec = ( xvecprev*xvecgrow + yvecprev*yvecgrow  + zvecprev*zvecgrow ) / (distprev*distgrow)
                 angle = acos(anglec)
+                bendang(count) = angle
+                vangle = kforce * (angle - equil)**2
+                vbbtr = vbbtr + vangle
+                        
+                ! calculate phi1 and phi2 corresponding to theta1 and theta2
+                if ( count .eq. 1) then
+                    xub = -xvecprev/distprev
+                    yub = -yvecprev/distprev
+                    zub = -zvecprev/distprev
+                    call cone(1,xub,yub,zub,dum,dum)
+                end if
+                   
+                ux = xvecgrow/distgrow
+                uy = yvecgrow/distgrow
+                uz = zvecgrow/distgrow
+                call cone(3,ux,uy,uz,bendang(count),phi(count))
+                
+                ! find the unit element corresponding to the angle
+                if ( count .eq. 1) then
+                    ileft=1
+                    iright=br_bend_dim1(ibr)+1
+                    do while ( iright-ileft .gt. 1)
+                         imedian=(ileft+iright)/2
+                         if ( angle .gt. br_bend_theta1(ibr,imedian)) then
+                            ileft=imedian
+                         else
+                            iright=imedian
+                         end if
+                     end do
+                      
+                     itheta1=ileft
+                     theta1_interval(1)=br_bend_theta1(ibr,itheta1)
+                     theta1_interval(2)=br_bend_theta1(ibr,itheta1+1)
+                     iprob = (itheta1-1)*br_bend_dim2(ibr)*br_bend_dim3(ibr)
+                else
+                     ! find itheta2
+                     ileft=1
+                     iright=br_bend_dim2(ibr)+1
+                     do while ( iright-ileft .gt. 1)
+                        imedian=(ileft+iright)/2
+                        if ( angle .gt. br_bend_theta2(ibr,itheta1,imedian)) then
+                            ileft = imedian
+                        else
+                            iright = imedian
+                        end if
+                     end do
+                      
+                     itheta2=ileft
+                     theta2_interval(1)=br_bend_theta2(ibr,itheta1,itheta2)
+                     theta2_interval(2)=br_bend_theta2(ibr,itheta1,itheta2+1)
+                     iprob = iprob+(itheta2-1)*br_bend_dim3(ibr)
+
+                     ! find iphi12
+                     phi12=phi(1)-phi(2)
+                     if ( phi12 .lt. 0) then
+                        phi12=phi12+twopi
+                     end if
+                            
+                     ileft=1
+                     iright=br_bend_dim3(ibr)+1
+                     do while ( iright-ileft .gt. 1)
+                        imedian=(ileft+iright)/2
+                        if ( phi12 .gt. br_bend_phi12(ibr,itheta1,itheta2,imedian)) then
+                            ileft=imedian
+                        else
+                            iright=imedian
+                        end if
+                     end do
+                      
+                     iphi12=ileft
+                     phi12_interval(1)=br_bend_phi12(ibr,itheta1,itheta2,iphi12)
+                     phi12_interval(2)=br_bend_phi12(ibr,itheta1,itheta2,iphi12+1)
+                     iprob = iprob+iphi12
+                end if   
+            end do
+                    
+            ! calculate theta12
+            angle=cone_angle(bendang(1),phi(1),bendang(2),phi(2))
+            vangle = kforce * (angle - equil)**2
+            vbbtr = vbbtr + vangle
+                    
+            ! weight calculation
+            delta_prob=(br_bend_prob(ibr,iprob+1)-br_bend_prob(ibr,iprob))      
+            bsum_try = sin(bendang(1))*sin(bendang(2))*exp(-beta*vbbtr)* &
+              (theta1_interval(2)-theta1_interval(1))*(theta2_interval(2)-theta2_interval(1))* &
+              (phi12_interval(2)-phi12_interval(1))/delta_prob
+        end if 
+        
+        ! propagate the rosenbluth weight
+        wei_bend = wei_bend * bsum_try
+
+    ! if not use tabulated CBMC_bend_table, regular CBMC growth
+    else
+ 
+        nchben_a = nchbna(imolty)
+        ! MPI
+        if (numprocs.gt.1) then
+            rid=myid
+        else
+            rid=-1
+        end if
+        blocksize = nchben_a/numprocs
+        rcounts = blocksize
+        blocksize = nchben_a - blocksize * numprocs
+        if (blocksize.gt.0) rcounts(1:blocksize) = rcounts(1:blocksize) + 1
+            call mp_set_displs(rcounts,displs,blocksize,numprocs)
+            my_start = displs(myid+1) + 1
+            my_end = my_start + rcounts(myid+1) - 1
+
+            ! determine the iugrow-iufrom-iuprev angles
+            do count = angstart,ntogrow
+                iugrow = growlist(iw,count)
+                kforce = -1000.0E0_dp
+                do ib = 1, inben(imolty,iugrow)
+                    iulast = ijben2(imolty,iugrow,ib)
+                    if ( iulast .eq. iufrom ) then
+                        iu2back = ijben3(imolty,iugrow,ib)
+                        if ( iu2back .eq. iuprev ) then
+                            type = itben(imolty,iugrow,ib)
+                            equil = brben(type)
+                            kforce = brbenk(type)
+                            exit
+                        end if
+                    end if
+                end do
+
+            if ( kforce .gt. 0.1E0_dp ) then
+                ! flexible bond angle
+                ! initialize bsum_try
+                bsum_try = 0.0E0_dp
 
                 if (L_bend_table) then
-                   lengthc2 = lengthFP2 + distgrow2 - 2.0E0_dp*lengthFP*distgrow*anglec
-                   lengthc = sqrt(lengthc2)
-                   vangle = lininter_bend(lengthc,type)
+                    distgrow = bondlen(count)
+                    distgrow2 = distgrow*distgrow
+                end if
+
+                ! compute trial angles and energies
+                my_itrial = 0
+                do ibend = my_start,my_end
+                    my_itrial = my_itrial + 1
+                    if (lnew.or.ibend.ne.1) then
+                        ! new conformation or old conformation skipping 1st
+                        ! choose the angle uniformly on sin(theta)
+                        rsint = 2.0E0_dp*random(rid) - 1.0E0_dp
+                        angle = acos(rsint)
+
+                        ! calculate the bond angle energy
+                        if (L_bend_table) then
+                            lengthc2 = lengthFP2 + distgrow2 - 2.0E0_dp*lengthFP*distgrow*cos(angle)
+                            lengthc = sqrt(lengthc2)
+                            vangle = lininter_bend(lengthc,type)
+                        else
+                            vangle = kforce * (angle - equil)**2
+                        end if
+
+                        my_ang_trial(my_itrial) = angle
+                        my_vbend(my_itrial)=vangle
+                        my_bfactor(my_itrial) = exp(-beta*vangle)
+                        bsum_try = bsum_try + my_bfactor(my_itrial)
+                    else
+                        ! first ibend is the old conformation
+                        xvecgrow = rxu(i,iugrow) - rxui
+                        yvecgrow = ryu(i,iugrow) - ryui
+                        zvecgrow = rzu(i,iugrow) - rzui
+                        distgrow = bondlen(count)
+                        distgrow2 = distgrow*distgrow
+                        ! dot product divided by lengths gives cos(angle)
+                        anglec = ( xvecprev*xvecgrow + yvecprev*yvecgrow  + zvecprev*zvecgrow ) / (distprev*distgrow)
+                        angle = acos(anglec)
+
+                        if (L_bend_table) then
+                            lengthc2 = lengthFP2 + distgrow2 - 2.0E0_dp*lengthFP*distgrow*anglec
+                            lengthc = sqrt(lengthc2)
+                            vangle = lininter_bend(lengthc,type)
+                        else
+                            vangle = kforce * (angle - equil)**2
+                        end if
+
+                        my_ang_trial(1) = angle
+                        my_vbend(1)=vangle
+                        my_bfactor(1) = exp( -beta*vangle )
+                        bsum_try = bsum_try + my_bfactor(1)
+                    end if
+                end do
+
+                if ( lnew ) then
+                    ! select one of the trial sites via bias
+                    rbf = random(rid)*bsum_try
+                    bs = 0.0E0_dp
+                    do ibend = 1,rcounts(myid+1)
+                        bs = bs + my_bfactor(ibend)
+                        if ( rbf .lt. bs ) then
+                            angle = my_ang_trial(ibend)
+                            vangle=my_vbend(ibend)
+                            exit
+                        end if
+                    end do
                 else
-                   vangle = kforce * (angle - equil)**2
+                    ! select the old conformation
+                    angle = my_ang_trial(1)
+                    vangle=my_vbend(1)
                 end if
 
-                my_ang_trial(1) = angle
-                my_vbend(1)=vangle
-                my_bfactor(1) = exp( -beta*vangle )
-                bsum_try = bsum_try + my_bfactor(1)
-             end if
-          end do
+                if (numprocs.gt.1) then
+                    call mp_allgather(bsum_try,bfactor,groupid)
+                    bsum_try=sum(bfactor(1:numprocs))
+                    call mp_allgather(angle,ang_trial,groupid)
+                    call mp_allgather(vangle,vbend,groupid)
 
-          if ( lnew ) then
-             ! select one of the trial sites via bias
-             rbf = random(rid)*bsum_try
-             bs = 0.0E0_dp
-             do ibend = 1,rcounts(myid+1)
-                bs = bs + my_bfactor(ibend)
-                if ( rbf .lt. bs ) then
-                   angle = my_ang_trial(ibend)
-                   vangle=my_vbend(ibend)
-                   exit
+                    if ( lnew ) then
+                        ! select one of the trial sites via bias
+                        rbf = random(-1)*bsum_try
+                        bs = 0.0E0_dp
+                        do ibend = 1,numprocs
+                            bs = bs + bfactor(ibend)
+                            if ( rbf .lt. bs ) then
+                                angle = ang_trial(ibend)
+                                vangle=vbend(ibend)
+                                exit
+                            end if
+                        end do
+                    else
+                        ! select the old conformation
+                        angle = ang_trial(1)
+                        vangle=vbend(1)
+                    end if
                 end if
-             end do
-          else
-             ! select the old conformation
-             angle = my_ang_trial(1)
-             vangle=my_vbend(1)
-          end if
 
-          if (numprocs.gt.1) then
-             call mp_allgather(bsum_try,bfactor,groupid)
-             bsum_try=sum(bfactor(1:numprocs))
-             call mp_allgather(angle,ang_trial,groupid)
-             call mp_allgather(vangle,vbend,groupid)
+                ! propagate the rosenbluth weight
+                wei_bend = wei_bend * bsum_try/dble(nchben_a)
+            
+            else if (kforce.lt.-0.1E0_dp) then
+                ! freely-joint beads
+                rsint = 2.0E0_dp*random(-1) - 1.0E0_dp
+                angle = acos(rsint)
+                vangle=0.0E0_dp
+            else
+                ! fixed bond angle
+                angle = equil
+                vangle = 0.0E0_dp
+            end if
+            bendang(count) = angle
+            vbbtr = vbbtr + vangle
+        end do
 
-             if ( lnew ) then
-                ! select one of the trial sites via bias
-                rbf = random(-1)*bsum_try
+        ! Neeraj  iugrow-iufrom-iuprev bend angle has been selected!
+        if ( lnew ) then
+            ! assign phi(angstart) to 0.0
+            phi(angstart) = 0.0E0_dp
+        else if (angstart.le.ntogrow) then
+            ! set up the cone using iuprev
+            xub = -xvecprev/distprev
+            yub = -yvecprev/distprev
+            zub = -zvecprev/distprev
+            call cone(1,xub,yub,zub,dum,dum)
+
+            iugrow = growlist(iw,angstart)
+
+            ! compute vector from iufrom to iugrow
+            xvecgrow = rxu(i,iugrow) - rxui
+            yvecgrow = ryu(i,iugrow) - ryui
+            zvecgrow = rzu(i,iugrow) - rzui
+            distgrow = bondlen(angstart)
+
+            ! turn this into a unit vector
+            ux = xvecgrow/distgrow
+            uy = yvecgrow/distgrow
+            uz = zvecgrow/distgrow
+
+            call cone(3,ux,uy,uz,bendang(angstart),phi(angstart))
+        end if
+
+        nchben_b = nchbnb(imolty)
+        ! MPI
+        blocksize = nchben_b/numprocs
+        rcounts = blocksize
+        blocksize = nchben_b - blocksize * numprocs
+        if (blocksize.gt.0) rcounts(1:blocksize) = rcounts(1:blocksize) + 1
+        call mp_set_displs(rcounts,displs,blocksize,numprocs)
+        my_start = displs(myid+1) + 1
+        my_end = my_start + rcounts(myid+1) - 1
+
+        ! determine the angles of the grown beads relative to anglestart
+        ! skip angstart in the loop below
+        do count = angstart+1,ntogrow
+            iugrow = growlist(iw,count)
+
+            ! initialize bsum_try
+            bsum_try = 0.0E0_dp
+
+            if (L_bend_table) then
+                lengtha = bondlen(count)
+                lengtha2 = lengtha * lengtha
+            end if
+
+            ! compute trial energies and weights
+            my_itrial = 0
+            do ibend = my_start,my_end
+                my_itrial = my_itrial + 1
+                vphi = 0.0E0_dp
+                if (lnew.or.ibend.ne.1) then
+                    ! perform all ibend for NEW and OLD (except for 1st in OLD)
+                    ! determine a value of phitwo
+                    phitwo = random(rid)*twopi
+
+                    do aaa = angstart,count-1
+                        iuone = growlist(iw,aaa)
+                        angle=cone_angle(bendang(aaa),phi(aaa),bendang(count),phitwo)
+
+                        do ib = 1, inben(imolty,iugrow)
+                            iulast = ijben2(imolty,iugrow,ib)
+                            if ( iulast .eq. iufrom ) then
+                                iu2back = ijben3(imolty,iugrow,ib)
+                                if ( iu2back .eq. iuone ) then
+                                    type = itben(imolty,iugrow,ib)
+                                    ! calculate the bond angle energy
+                                    if (L_bend_table) then
+                                        lengthb = bondlen(aaa)
+                                        lengthb2 = lengthb*lengthb
+                                        lengthc2 = lengtha2 + lengthb2 - 2.0E0_dp*lengtha*lengthb*cos(angle)
+                                        lengthc = sqrt(lengthc2)
+                                        vphi = vphi + lininter_bend (lengthc,type)
+                                    else
+                                        vphi = vphi + brbenk(type) * (angle - brben(type))**2
+                                    end if
+                                end if
+                            end if
+                        end do
+                    end do
+
+                    ! store the boltzmann factors and phi
+                    my_ang_trial(my_itrial) = phitwo
+                    my_vbend(my_itrial)=vphi
+                    my_bfactor(my_itrial) = exp(-beta*vphi)
+                    bsum_try = bsum_try + my_bfactor(my_itrial)
+                else
+                    ! compute vector from iufrom to iugrow
+                    xvecgrow = rxu(i,iugrow) - rxui
+                    yvecgrow = ryu(i,iugrow) - ryui
+                    zvecgrow = rzu(i,iugrow) - rzui
+                    distgrow = bondlen(count)
+
+                    ! turn this into a unit vector
+                    ux = xvecgrow/distgrow
+                    uy = yvecgrow/distgrow
+                    uz = zvecgrow/distgrow
+
+                    call cone(3,ux,uy,uz,bendang(count),phitwo)
+
+                    do aaa = angstart,count-1
+                        iuone = growlist(iw,aaa)
+                        angle=cone_angle(bendang(aaa),phi(aaa),bendang(count),phitwo)
+
+                        do ib = 1, inben(imolty,iugrow)
+                            iulast = ijben2(imolty,iugrow,ib)
+                            if ( iulast .eq. iufrom ) then
+                                iu2back = ijben3(imolty,iugrow,ib)
+                                if ( iu2back .eq. iuone ) then
+                                    type = itben(imolty,iugrow,ib)
+                                    ! calculate the bond angle energy
+                                    if (L_bend_table) then
+                                        lengthb = bondlen(aaa)
+                                        lengthb2 = lengthb * lengthb
+                                        lengthc2 = lengtha2 + lengthb2 - 2.0E0_dp*lengtha*lengthb*cos(angle)
+                                        lengthc = sqrt(lengthc2)
+                                        vphi = vphi + lininter_bend(lengthc,type)
+                                    else
+                                        vphi = vphi + brbenk(type) * (angle - brben(type))**2
+                                    end if
+                                end if
+                            end if
+                        end do
+                    end do
+
+                    my_ang_trial(1) = phitwo
+                    my_vbend(1)=vphi
+                    my_bfactor(1) = exp( -beta * vphi )
+                    bsum_try = bsum_try + my_bfactor(1)
+                end if
+            end do
+
+            if ( lnew ) then
+                ! select a value of phitwo in a biased fashion
+                rbf = random(rid)*bsum_try
                 bs = 0.0E0_dp
-                do ibend = 1,numprocs
-                   bs = bs + bfactor(ibend)
-                   if ( rbf .lt. bs ) then
-                      angle = ang_trial(ibend)
-                      vangle=vbend(ibend)
-                      exit
-                   end if
+                do ibend = 1,rcounts(myid+1)
+                    bs = bs + my_bfactor(ibend)
+                    if ( rbf .lt. bs ) then
+                        phitwo = my_ang_trial(ibend)
+                        vphi=my_vbend(ibend)
+                        exit
+                    end if
                 end do
-             else
-                ! select the old conformation
-                angle = ang_trial(1)
-                vangle=vbend(1)
-             end if
-          end if
+            else
+                ! select the OLD value of phitwo
+                phitwo = my_ang_trial(1)
+                vphi=my_vbend(1)
+            end if
 
-          ! propagate the rosenbluth weight
-          wei_bend = wei_bend * bsum_try/dble(nchben_a)
-       else if (kforce.lt.-0.1E0_dp) then
-          ! freely-joint beads
-          rsint = 2.0E0_dp*random(-1) - 1.0E0_dp
-          angle = acos(rsint)
-          vangle=0.0E0_dp
-       else
-          ! fixed bond angle
-          angle = equil
-          vangle = 0.0E0_dp
-       end if
-       bendang(count) = angle
-       vbbtr = vbbtr + vangle
-    end do
+            if (numprocs.gt.1) then
+                call mp_allgather(bsum_try,bfactor,groupid)
+                bsum_try=sum(bfactor(1:numprocs))
+                call mp_allgather(phitwo,ang_trial,groupid)
+                call mp_allgather(vphi,vbend,groupid)
 
-    ! Neeraj  iugrow-iufrom-iuprev bend angle has been selected!
-    if ( lnew ) then
-       ! assign phi(angstart) to 0.0
-       phi(angstart) = 0.0E0_dp
-    else if (angstart.le.ntogrow) then
-       ! set up the cone using iuprev
-       xub = -xvecprev/distprev
-       yub = -yvecprev/distprev
-       zub = -zvecprev/distprev
-       call cone(1,xub,yub,zub,dum,dum)
-
-       iugrow = growlist(iw,angstart)
-
-       ! compute vector from iufrom to iugrow
-       xvecgrow = rxu(i,iugrow) - rxui
-       yvecgrow = ryu(i,iugrow) - ryui
-       zvecgrow = rzu(i,iugrow) - rzui
-       distgrow = bondlen(angstart)
-
-       ! turn this into a unit vector
-       ux = xvecgrow/distgrow
-       uy = yvecgrow/distgrow
-       uz = zvecgrow/distgrow
-
-       call cone(3,ux,uy,uz,bendang(angstart),phi(angstart))
-    end if
-
-    nchben_b = nchbnb(imolty)
-    ! MPI
-    blocksize = nchben_b/numprocs
-    rcounts = blocksize
-    blocksize = nchben_b - blocksize * numprocs
-    if (blocksize.gt.0) rcounts(1:blocksize) = rcounts(1:blocksize) + 1
-    call mp_set_displs(rcounts,displs,blocksize,numprocs)
-    my_start = displs(myid+1) + 1
-    my_end = my_start + rcounts(myid+1) - 1
-
-    ! determine the angles of the grown beads relative to anglestart
-    ! skip angstart in the loop below
-    do count = angstart+1,ntogrow
-       iugrow = growlist(iw,count)
-
-       ! initialize bsum_try
-       bsum_try = 0.0E0_dp
-
-       if (L_bend_table) then
-          lengtha = bondlen(count)
-          lengtha2 = lengtha * lengtha
-       end if
-
-       ! compute trial energies and weights
-       my_itrial = 0
-       do ibend = my_start,my_end
-          my_itrial = my_itrial + 1
-          vphi = 0.0E0_dp
-          if (lnew.or.ibend.ne.1) then
-             ! perform all ibend for NEW and OLD (except for 1st in OLD)
-             ! determine a value of phitwo
-             phitwo = random(rid)*twopi
-
-             do aaa = angstart,count-1
-                iuone = growlist(iw,aaa)
-                angle=cone_angle(bendang(aaa),phi(aaa),bendang(count),phitwo)
-
-                do ib = 1, inben(imolty,iugrow)
-                   iulast = ijben2(imolty,iugrow,ib)
-                   if ( iulast .eq. iufrom ) then
-                      iu2back = ijben3(imolty,iugrow,ib)
-                      if ( iu2back .eq. iuone ) then
-                         type = itben(imolty,iugrow,ib)
-                         ! calculate the bond angle energy
-                         if (L_bend_table) then
-                            lengthb = bondlen(aaa)
-                            lengthb2 = lengthb*lengthb
-                            lengthc2 = lengtha2 + lengthb2 - 2.0E0_dp*lengtha*lengthb*cos(angle)
-                            lengthc = sqrt(lengthc2)
-                            vphi = vphi + lininter_bend (lengthc,type)
-                         else
-                            vphi = vphi + brbenk(type) * (angle - brben(type))**2
-                         end if
-                      end if
-                   end if
-                end do
-             end do
-
-             ! store the boltzmann factors and phi
-             my_ang_trial(my_itrial) = phitwo
-             my_vbend(my_itrial)=vphi
-             my_bfactor(my_itrial) = exp(-beta*vphi)
-             bsum_try = bsum_try + my_bfactor(my_itrial)
-          else
-             ! compute vector from iufrom to iugrow
-             xvecgrow = rxu(i,iugrow) - rxui
-             yvecgrow = ryu(i,iugrow) - ryui
-             zvecgrow = rzu(i,iugrow) - rzui
-             distgrow = bondlen(count)
-
-             ! turn this into a unit vector
-             ux = xvecgrow/distgrow
-             uy = yvecgrow/distgrow
-             uz = zvecgrow/distgrow
-
-             call cone(3,ux,uy,uz,bendang(count),phitwo)
-
-             do aaa = angstart,count-1
-                iuone = growlist(iw,aaa)
-                angle=cone_angle(bendang(aaa),phi(aaa),bendang(count),phitwo)
-
-                do ib = 1, inben(imolty,iugrow)
-                   iulast = ijben2(imolty,iugrow,ib)
-                   if ( iulast .eq. iufrom ) then
-                      iu2back = ijben3(imolty,iugrow,ib)
-                      if ( iu2back .eq. iuone ) then
-                         type = itben(imolty,iugrow,ib)
-                         ! calculate the bond angle energy
-                         if (L_bend_table) then
-                            lengthb = bondlen(aaa)
-                            lengthb2 = lengthb * lengthb
-                            lengthc2 = lengtha2 + lengthb2 - 2.0E0_dp*lengtha*lengthb*cos(angle)
-                            lengthc = sqrt(lengthc2)
-                            vphi = vphi + lininter_bend(lengthc,type)
-                         else
-                            vphi = vphi + brbenk(type) * (angle - brben(type))**2
-                         end if
-                      end if
-                   end if
-                end do
-             end do
-
-             my_ang_trial(1) = phitwo
-             my_vbend(1)=vphi
-             my_bfactor(1) = exp( -beta * vphi )
-             bsum_try = bsum_try + my_bfactor(1)
-          end if
-       end do
-
-       if ( lnew ) then
-          ! select a value of phitwo in a biased fashion
-          rbf = random(rid)*bsum_try
-          bs = 0.0E0_dp
-          do ibend = 1,rcounts(myid+1)
-             bs = bs + my_bfactor(ibend)
-             if ( rbf .lt. bs ) then
-                phitwo = my_ang_trial(ibend)
-                vphi=my_vbend(ibend)
-                exit
-             end if
-          end do
-       else
-          ! select the OLD value of phitwo
-          phitwo = my_ang_trial(1)
-          vphi=my_vbend(1)
-       end if
-
-       if (numprocs.gt.1) then
-          call mp_allgather(bsum_try,bfactor,groupid)
-          bsum_try=sum(bfactor(1:numprocs))
-          call mp_allgather(phitwo,ang_trial,groupid)
-          call mp_allgather(vphi,vbend,groupid)
-
-          if ( lnew ) then
-             ! select a value of phitwo in a biased fashion
-             rbf = random(-1)*bsum_try
-             bs = 0.0E0_dp
-             do ibend = 1,numprocs
-                bs = bs + bfactor(ibend)
-                if ( rbf .lt. bs ) then
-                   phitwo = ang_trial(ibend)
-                   vphi=vbend(ibend)
-                   exit
+                if ( lnew ) then
+                    ! select a value of phitwo in a biased fashion
+                    rbf = random(-1)*bsum_try
+                    bs = 0.0E0_dp
+                    do ibend = 1,numprocs
+                        bs = bs + bfactor(ibend)
+                        if ( rbf .lt. bs ) then
+                            phitwo = ang_trial(ibend)
+                            vphi=vbend(ibend)
+                            exit
+                        end if
+                    end do
+                else
+                    ! select the OLD value of phitwo
+                    phitwo = ang_trial(1)
+                    vphi=vbend(1)
                 end if
-             end do
-          else
-             ! select the OLD value of phitwo
-             phitwo = ang_trial(1)
-             vphi=vbend(1)
-          end if
-       end if
+            end if
 
-       ! propagate angle weight
-       wei_bend = wei_bend * (bsum_try/dble(nchben_b))
+            ! propagate angle weight
+            wei_bend = wei_bend * (bsum_try/dble(nchben_b))
 
-       ! store the angle for phitwo
-       phi(count) = phitwo
-       vbbtr = vbbtr + vphi
-    end do
-
+            ! store the angle for phitwo
+            phi(count) = phitwo
+            vbbtr = vbbtr + vphi
+        end do
+    end if
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 ! End Bond angle biased selection ---           c
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccc
