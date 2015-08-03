@@ -5979,7 +5979,8 @@ contains
             goto 100
          end if
 
-         invtry = invib(imolty,iutry)
+         invtry = invib(imolty,iutry) ! determining the number of vibrations that bead no. iutry has 
+
          if (invtry.eq.0) then
             call err_exit(__FILE__,__LINE__,'cant do safecbmc on single bead',myid+1)
          else if(invtry.eq.1) then  ! At the end point of a molecule
@@ -5996,7 +5997,7 @@ contains
 ! ivib = 2
 !     *******************************
 
-            fprev(1,1) = ijvib(imolty,iutry,ivib)
+            fprev(1,1) = ijvib(imolty,iutry,ivib) ! find the previous bead of bead iutry
 
             if (icbdir(imolty).eq.1.and.fprev(1,1).gt.iutry) goto 13
 
@@ -6011,6 +6012,7 @@ contains
          do iv = 1, invtry
             if (iv.ne.ivib.and. .not.lplace(imolty,ijvib(imolty,iutry,iv))) then
                count = count + 1
+               ! take down the bead number that is connected to iutry and is about to be regrown next
                flist(1,1,count) = ijvib(imolty,iutry,iv)
                lexshed(flist(1,1,count)) = .false.
             end if
@@ -6092,6 +6094,14 @@ contains
          goto 100
       end if
 
+! Paul -- don't allow the growth to stop at a branch point
+      do j = 1, fnum(index)
+         if (fnuma(index, j) .gt. 1) then
+            kickout = kickout + 1
+            goto 100
+         end if
+      end do
+
       lfixed = .false.
 
 ! lets set logic so rosenbluth can read it
@@ -6112,6 +6122,7 @@ contains
             grownum(count) = fnuma(iw,j)
             growfrom(count) = ffrom(iw,j)
             growprev(count) = fprev(iw,j)
+
             do ja = 1, fnuma(iw,j)
                lpick(ja) = .false.
             end do
