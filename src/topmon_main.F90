@@ -2975,7 +2975,7 @@ contains
                  ,boxly(ibox),boxlz(ibox)
              end if
              if((allow_cutoff_failure.lt.0).and.(rcut(ibox)/boxlx(ibox).gt.0.5_dp.or.rcut(ibox)/boxly(ibox).gt.0.5_dp&
-              .or.rcut(ibox)/boxlz(ibox).gt.0.5_dp)) then
+              .or.rcut(ibox)/boxlz(ibox).gt.0.5_dp).and.lcutcm) then
                 call err_exit(__FILE__,__LINE__,'rcut > 0.5*boxlx',myid+1)
              end if
           end if
