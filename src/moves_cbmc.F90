@@ -23,7 +23,7 @@ MODULE moves_cbmc
 
   ! FIX.INC
   integer::endnum,wbefnum,nplace,nrigi,counttot,counthist
-  real::hist(30,30,maxbin),probf(30,30,maxbin)
+  real::hist(60,60,maxbin),probf(60,60,maxbin)
   integer,allocatable::iend(:),ipast(:,:),pastnum(:),fclose(:,:),fcount(:),iwbef(:),ibef(:,:),befnum(:),nextnum(:),inext(:,:)&
    ,rlist(:,:),rfrom(:),rprev(:),rnum(:),iplace(:,:),pfrom(:),pnum(:),pprev(:)
   logical::lcrank
@@ -7531,7 +7531,7 @@ contains
     end if
 
     call mp_bcast(counttot,1,rootid,groupid)
-    call mp_bcast(probf,30*30*maxbin,rootid,groupid)
+    call mp_bcast(probf,60*60*maxbin,rootid,groupid) ! Paul
     hist = 0._dp
 
     if (myid.eq.rootid.AND.ANY(pmfix(1:nmolty).gt.0)) close(io_safecbmc)
