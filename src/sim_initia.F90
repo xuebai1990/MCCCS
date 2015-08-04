@@ -3,7 +3,8 @@ MODULE sim_initia
   use sim_system
   implicit none
   private
-  public::get_molecule_config,setup_molecule_config,setup_system_config
+  public::get_molecule_config,setup_molecule_config,setup_system_config, setup_cbmc_bend
+  ! Q.Paul C.--added setup_cbmc_bend in the above line for tabulated CBMC bending growth
 
   real,allocatable,dimension(:,:)::samx,samy,samz
 
@@ -427,4 +428,117 @@ subroutine setup_system_config(file_struct)
 
   return
 end subroutine setup_system_config
+
+! --- Q.Paul C. --- read input file for tabulated CBMC bending growth
+subroutine setup_cbmc_bend(file_cbmc_bend)
+  character(LEN=*),intent(in)::file_cbmc_bend
+  integer::jerr,io_cbmc_bend
+  integer::i,j,k,count
+  integer::trash
+  integer::lin_num,br_num,itwobranch
+  integer::ilin,ibr
+  integer::max_lin_bend_dim,max_br_bend_dim1,max_br_bend_dim2,max_br_bend_dim3
+        
+  io_cbmc_bend=get_iounit()
+  open(unit=io_cbmc_bend,access='sequential',action='read',file=file_cbmc_bend &
+     ,form='formatted',iostat=jerr,status='unknown')
+  if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open tabulated alkane bending table' &
+     //trim(file_cbmc_bend),myid+1)
+    
+! ---First read general configuration
+     read(io_cbmc_bend,*)
+     read(io_cbmc_bend,*) lin_num,br_num,itwobranch
+     allocate(lin_bend_type(lin_num))
+     allocate(lin_bend_dim(lin_num))
+     allocate(br_bend_type(br_num))
+     allocate(br_bend_dim1(br_num))
+     allocate(br_bend_dim2(br_num))
+     allocate(br_bend_dim3(br_num))
+     
+! ---Then read linear part
+     if ( lin_num .ge. 1) then
+        read(io_cbmc_bend,*) 
+        do ilin=1,lin_num
+           read(io_cbmc_bend,*) 
+           read(io_cbmc_bend,*) lin_bend_type(ilin),lin_bend_dim(ilin)
+           if ( ilin .eq. 1) then
+              max_lin_bend_dim=lin_bend_dim(ilin)
+           else
+              max_lin_bend_dim=max(lin_bend_dim(ilin),max_lin_bend_dim)
+           end if
+        end do
+     
+     
+        allocate(lin_bend_table(ilin,max_lin_bend_dim))
+        allocate(lin_bend_prob(ilin,max_lin_bend_dim))
+      
+        do ilin=1,lin_num
+           read(io_cbmc_bend,*)
+           do i=1,lin_bend_dim(ilin)
+              read(io_cbmc_bend,*) lin_bend_table(ilin,i),lin_bend_prob(ilin,i)
+           end do
+        end do
+     end if
+
+! ---Secondly read single-branched part
+     ! first the dimensionality information
+     if ( br_num .ge. 1) then
+        read(io_cbmc_bend,*)
+        do ibr=1,br_num
+           read(io_cbmc_bend,*)
+           read(io_cbmc_bend,*) br_bend_type(ibr),br_bend_dim1(ibr),&
+              br_bend_dim2(ibr),br_bend_dim3(ibr)
+           if ( ibr .eq. 1) then
+              max_br_bend_dim1=br_bend_dim1(ibr)
+              max_br_bend_dim2=br_bend_dim2(ibr)
+              max_br_bend_dim3=br_bend_dim3(ibr)
+           else
+              max_br_bend_dim1=max(br_bend_dim1(ibr),max_br_bend_dim1)
+              max_br_bend_dim2=max(br_bend_dim2(ibr),max_br_bend_dim2)
+              max_br_bend_dim3=max(br_bend_dim3(ibr),max_br_bend_dim3)
+           end if 
+        end do
+        
+        allocate(br_bend_theta1(br_num,max_br_bend_dim1+1))
+        allocate(br_bend_theta2(br_num,max_br_bend_dim1+1,max_br_bend_dim2+1))
+        allocate(br_bend_phi12(br_num,max_br_bend_dim1+1,max_br_bend_dim2+1,max_br_bend_dim3+1))
+        allocate(br_bend_prob(br_num,max_br_bend_dim1*max_br_bend_dim2*max_br_bend_dim3+1))
+        
+        ! secondly the probability part
+        do ibr=1,br_num
+           read(io_cbmc_bend,*)
+           i=2
+           j=2
+           k=2
+           br_bend_prob(ibr,1)=0
+           read(io_cbmc_bend,*) br_bend_theta1(ibr,1),br_bend_theta1(ibr,2),br_bend_theta2(ibr,1,1),&
+              br_bend_theta2(ibr,1,2),br_bend_phi12(ibr,1,1,1),&
+              br_bend_phi12(ibr,1,1,2),br_bend_prob(ibr,2)
+                
+           do count=2,br_bend_dim1(ibr)*br_bend_dim2(ibr)*br_bend_dim3(ibr)
+              if (mod(count,br_bend_dim2(ibr)*br_bend_dim3(ibr)) .eq. 1) then
+                 i=i+1
+                 j=2
+                 k=2
+                 read(io_cbmc_bend,*) trash,br_bend_theta1(ibr,i),br_bend_theta2(ibr,i-1,j-1),br_bend_theta2(ibr,i-1,j),&
+                    br_bend_phi12(ibr,i-1,j-1,k-1),br_bend_phi12(ibr,i-1,j-1,k),br_bend_prob(ibr,count+1)
+              else if (mod(count,br_bend_dim3(ibr)) .eq. 1) then
+                 j=j+1
+                 k=2
+                 read(io_cbmc_bend,*) trash,trash,trash,br_bend_theta2(ibr,i-1,j),&
+                    br_bend_phi12(ibr,i-1,j-1,k-1),br_bend_phi12(ibr,i-1,j-1,k),br_bend_prob(ibr,count+1)
+              else
+                 k=k+1
+                 read(io_cbmc_bend,*) trash,trash,trash,trash,trash,&
+                    br_bend_phi12(ibr,i-1,j-1,k),br_bend_prob(ibr,count+1)
+              end if
+           end do
+        end do
+     end if
+    
+     close(io_cbmc_bend)
+        
+end subroutine setup_cbmc_bend
+! --- Q.Paul C. ---
+
 END MODULE sim_initia

@@ -1209,7 +1209,8 @@ contains
     use util_memory,only:reallocate
     use util_mp,only:mp_bcast
     use sim_particle,only:allocate_neighbor_list
-    use sim_initia,only:get_molecule_config,setup_system_config
+    use sim_initia,only:get_molecule_config,setup_system_config,setup_cbmc_bend
+    ! Q. Paul C. -- add setup_cbmc_bend for tabulated CBMC bending growth in the above line
     use zeolite
     use energy_kspace,only:calp,allocate_kspace
     use energy_pairwise,only:read_ff,init_ff,type_2body,vdW_nParameter,nonbond_type
@@ -1233,7 +1234,9 @@ contains
     logical,allocatable::lhere(:)
 
     character(LEN=default_path_length)::file_input,file_restart,file_struct,file_run,file_movie,file_solute,file_traj&
-     ,file_box_movie,file_cell
+     ,file_box_movie,file_cell,file_cbmc_bend
+    ! Q. Paul C. --adding file_cbmc_bend for tabulated CBMC bending growth
+
     character(LEN=default_string_length)::line_in
     integer::io_input,io_restart,jerr,seed,ij,ii,jj,i,j,k,ncres,nmtres,iensem,inpbc,im,ibox,izz,z
     logical::lprint,L_Ewald_Auto,lmixlb,lmixjo,lsetup,linit,lreadq,lfound,ltmp
@@ -1255,11 +1258,12 @@ contains
     logical::needMFsection
 
     namelist /io/ file_input,file_restart,file_struct,file_run,file_movie,file_solute,file_traj,io_output&
-     ,run_num,suffix,L_movie_xyz
+     ,run_num,suffix,L_movie_xyz, file_cbmc_bend
+    ! Q. Paul C. -- file_cbmc_bend & L_cbmc_bend are for tabulated CBMC bending growth 
     namelist /system/ lnpt,lgibbs,lgrand,lanes,lvirial,lmipsw,lexpee,ldielect,lpbc,lpbcx,lpbcy,lpbcz,lfold,lijall,lchgall,lewald&
      ,lcutcm,ltailc,lshift,ldual,L_Coul_CBMC,lneigh&
      ,lexzeo,lslit,lgraphite,lsami,lmuir,lelect_field,lgaro,lionic,L_Ewald_Auto,lmixlb,lmixjo&
-     ,L_spline,L_linear,L_vib_table,L_bend_table,L_elect_table
+     ,L_spline,L_linear,L_vib_table,L_bend_table,L_elect_table,L_cbmc_bend
     namelist /mc_shared/ seed,nbox,nmolty,nchain,nmax,nstep,lstop,iratio,rmin,softcut&
      ,checkpoint_interval,checkpoint_copies,use_checkpoint,linit,lreadq&
      ,N_add,box2add,moltyp2add
@@ -1284,7 +1288,7 @@ contains
     file_movie='movie1a.dat'
     file_solute='fort.11'
     file_traj='fort.12'
-
+    file_cbmc_bend='cbmc_bend_table.dat' ! Q. Paul C. -- tabulated CBMC bending growth
 
     if (myid.eq.rootid) then
        read(UNIT=io_input,NML=io,iostat=jerr)
@@ -1302,6 +1306,7 @@ contains
     call mp_bcast(run_num,rootid,groupid)
     call mp_bcast(suffix,rootid,groupid)
     call mp_bcast(L_movie_xyz,1,rootid,groupid)
+    call mp_bcast(file_cbmc_bend,rootid,groupid) !Q.Paul C. -- tabulated CBMC bending growth
 
     if (myid.eq.rootid.and..not.use_checkpoint) then
        lprint=.true.
@@ -1334,6 +1339,7 @@ contains
     L_Ewald_Auto=.true.
     lmixlb=.true.
     lmixjo=.false.
+    L_cbmc_bend=.false. ! Q. Paul C. -- for tabulated CBMC bending growth
 
     if (myid.eq.rootid) then
        rewind(io_input)
@@ -1379,6 +1385,7 @@ contains
     call mp_bcast(L_vib_table,1,rootid,groupid)
     call mp_bcast(L_bend_table,1,rootid,groupid)
     call mp_bcast(L_elect_table,1,rootid,groupid)
+    call mp_bcast(L_cbmc_bend,1,rootid,groupid) ! Q. Paul C. -- for tabulated CBMC bending growth
 
     if (lprint) then
        write(io_output,'(/,A)') '***** PROGRAM  =  THE MAGIC BLACK BOX *****'
@@ -2870,6 +2877,12 @@ contains
     if (myid.eq.rootid) close(io_input)
 ! ===================================================================
     !> Initialize the system or read configuration from the restart file
+    
+    ! Q. Paul C. -- for tabulated CBMC bending growth
+    if (L_cbmc_bend) then
+        call setup_cbmc_bend(file_cbmc_bend)
+    end if
+
     if (linit) then
        do ibox = 1,nbox
           if (lsolid(ibox).and..not.lrect(ibox).and..not.(ibox.eq.1.and.lexzeo)) call err_exit(__FILE__,__LINE__&
