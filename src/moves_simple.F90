@@ -1140,9 +1140,7 @@ contains
     do ibox = 1,nbox
        do i=1,nmolty
           write(io_output,"(A,I0,A)",advance='no') 'molecule typ = ',i,'   '
-          do ii=1,nunit(i)
-             write(io_output,'(A1)',advance='no')chemid(ntype(i,ii))
-          end do
+          write(io_output,'(A10)',advance='no')molecname(i)
           write(io_output,*)' in box',ibox
           acntrax(i,ibox) = acntrax(i,ibox) + bntrax(i,ibox)
           acstrax(i,ibox) = acstrax(i,ibox) + bstrax(i,ibox)
@@ -1178,10 +1176,8 @@ contains
     write(io_output,*)
     do ibox = 1,nbox
        do i=1,nmolty
-          write(io_output,"(A,I0,A)",advance='no') 'molecule typ = ',i,'    '
-          do ii=1,nunit(i)
-             write(io_output,'(A1)',advance='no')chemid(ntype(i,ii))
-          end do
+          write(io_output,"(A,I0,A)",advance='no') 'molecule typ = ',i,'   '
+          write(io_output,'(A10)',advance='no')molecname(i)
           write(io_output,*)' in box',ibox
           acnrotx(i,ibox) = acnrotx(i,ibox) + bnrotx(i,ibox)
           acsrotx(i,ibox) = acsrotx(i,ibox) + bsrotx(i,ibox)

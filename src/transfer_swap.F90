@@ -1737,10 +1737,8 @@ contains
 
     write(io_output,'(/,A,/)') '### Molecule swap       ###'
     do i = 1, nmolty
-       write(io_output,"(A,I0,A)",advance='no') 'molecule typ = ',i,'    '
-       do ii=1,nunit(i)
-          write(io_output,'(A1)',advance='no')chemid(ntype(i,ii))
-       end do
+          write(io_output,"(A,I0,A)",advance='no') 'molecule typ = ',i,'   '
+          write(io_output,'(A10)',advance='no')molecname(i)
        write(io_output,*) 
        do j=1,nswapb(i)
           if ( box1(i,j) .eq. box2(i,j) ) then

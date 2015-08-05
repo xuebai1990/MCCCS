@@ -1396,13 +1396,9 @@ contains
     do i = 1, nswaty
        write(io_output,'(A,I0)') 'pair typ = ',i
        write(io_output,'(A,I0,A)',advance='no') 'moltyps = ',nswatb(i,1),'    '
-       do ii=1,nunit(nswatb(i,1))
-          write(io_output,'(A1)',advance='no')chemid(ntype(nswatb(i,1),ii))
-       end do
+       write(io_output,'(A10)',advance='no')molecname(nswatb(i,1))
        write(io_output,'(A,I0,A)',advance='no')' and ',nswatb(i,2),'    '
-       do ii=1,nunit(nswatb(i,2))
-          write(io_output,'(A1)',advance='no')chemid(ntype(nswatb(i,2),ii))
-       end do
+       write(io_output,'(A10)',advance='no')molecname(nswatb(i,2))
        write(io_output,*) 
        do j = 1, nswtcb(i)
           do jbox = 1,2

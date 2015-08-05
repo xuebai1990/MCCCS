@@ -794,42 +794,44 @@ contains
        end do
 
        write(io_output,*)
-       write(io_output,"(A,"//format_n(nbox,"(A,I2)")//")") ' Averages and fluctuations                 '&
+       write(io_output,"(A,"//format_n(nbox,"(A,I2)")//")") ' Averages and fluctuations                           '&
         ,('       Box ',i,i=1,nbox)
        write(io_output,*)
-       write(io_output,"(A,"//format_n(nbox,"(1X,F12.2)")//")") ' pressure                           [kPa] =',(acpres(i),i=1,nbox)
-       write(io_output,"(A,"//format_n(nbox,"(1X,F12.6)")//")") ' pressure              [simulation units] ='&
+       write(io_output,"(A,"//format_n(nbox,"(1X,F12.2)")//")") ' pressure                                      [kPa] ='&
+        ,(acpres(i),i=1,nbox)
+       write(io_output,"(A,"//format_n(nbox,"(1X,F12.6)")//")") ' pressure                         [simulation units] ='&
         ,((acpres(i)*MPa2SimUnits*1E-3_dp),i=1,nbox)
-       write(io_output,"(A,"//format_n(nbox,"(1X,F12.4)")//")") ' surface tension                   [mN/m] =',(acsurf(i),i=1,nbox)
+       write(io_output,"(A,"//format_n(nbox,"(1X,F12.4)")//")") ' surface tension                              [mN/m] ='&
+        ,(acsurf(i),i=1,nbox)
        do itype = 1,nmolty
-          write(io_output,"(A,I2,A,"//format_n(nbox,"(1X,F12.3)")//")") ' chem. potential of type  ',itype,'          [K] ='&
-           ,(acchem(i,itype),i=1,nbox)
+          write(io_output,"(A,I2,A,A10,A,"//format_n(nbox,"(1X,F12.3)")//")") ' chem. potential of type  ',itype,' '&
+          ,molecname(itype),'          [K] =',(acchem(i,itype),i=1,nbox)
        end do
 
        do i=1,3
-          write(io_output,"(A,"//format_n(nbox,"(1X,F12.3)")//")") ' boxlength                            [A] ='&
+          write(io_output,"(A,"//format_n(nbox,"(1X,F12.3)")//")") ' boxlength                                       [A] ='&
            ,(acboxl(ibox,i),ibox=1,nbox)
        end do
 
        if (ANY(lsolid(1:nbox).and..not.lrect(1:nbox))) then
           do i=1,3
-             write(io_output,"(A,"//format_n(nbox,"(1X,F12.3)")//")") ' box angle                          [deg] ='&
+             write(io_output,"(A,"//format_n(nbox,"(1X,F12.3)")//")") ' box angle                                     [deg] ='&
               ,(acboxa(ibox,i)*raddeg,ibox=1,nbox)
           end do
        end if
 
        do itype = 1, nmolty
-          write(io_output,"(A,I2,A,"//format_n(nbox,"(1X,F12.3)")//")") ' no. of chains of type    ',itype,'              ='&
-           ,(acnbox(i,itype),i=1,nbox)
+          write(io_output,"(A,I2,A,A10,A,"//format_n(nbox,"(1X,F12.3)")//")") ' no. of chains of type    ',itype,' '&
+           ,molecname(itype),'              =',(acnbox(i,itype),i=1,nbox)
        end do
        if (lpbcz) then
-          write(io_output,"(A,"//format_n(nbox,"(1X,F12.3)")//")") ' molar volume                  [cm^3/mol] ='&
+          write(io_output,"(A,"//format_n(nbox,"(1X,F12.3)")//")") ' molar volume                             [cm^3/mol] ='&
            ,(molvol(i),i=1,nbox)
-          write(io_output,"(A,"//format_n(nbox,"(1X,F12.6)")//")") ' specific density                [g/cm^3] ='&
+          write(io_output,"(A,"//format_n(nbox,"(1X,F12.6)")//")") ' specific density                           [g/cm^3] ='&
            ,(speden(i),i=1,nbox)
           do itype = 1, nmolty
-             write(io_output,"(A,I2,A,"//format_n(nbox,"(1X,F12.5)")//")") ' number density of type   ',itype,' [chain/nm^3] ='&
-              ,(acdens(i,itype),i=1,nbox)
+             write(io_output,"(A,I2,A,A10,A,"//format_n(nbox,"(1X,F12.5)")//")") ' number density of type   ',itype,' '&
+              ,molecname(itype),' [chain/nm^3] =',(acdens(i,itype),i=1,nbox)
              if (lexpand(itype)) then
                 do itype2=1,numcoeff(itype)
                    write(io_output,"(A,I2,A,I4,A,2F12.5)") ' number density of type   ',itype,' eetype ',itype2,'  ='&
@@ -842,17 +844,17 @@ contains
           write(io_output,"(A,"//format_n(nbox,"(1X,F12.4)")//")") ' area per chain                     [A^2/chain] ='&
            ,(molvol(i),i=1,nbox)
           do itype = 1, nmolty
-             write(io_output,"(A,I2,A,"//format_n(nbox,"(1X,F12.6)")//")") ' number density of type   ',itype&
-              ,' [chain/nm^2] =',(acdens(i,itype),i=1,nbox)
+             write(io_output,"(A,I2,A,A10,A,"//format_n(nbox,"(1X,F12.6)")//")") ' number density of type  ',itype,' '&
+              ,molecname(itype),' [chain/nm^2] =',(acdens(i,itype),i=1,nbox)
           end do
        end if
        do itype = 1, nmolty
-          write(io_output,"(A,I2,A,"//format_n(nbox,"(1X,F12.7)")//")") ' molfraction of type      ',itype,'              ='&
-           ,(molfra(i,itype),i=1,nbox)
+          write(io_output,"(A,I2,A,A10,A,"//format_n(nbox,"(1X,F12.7)")//")") ' molfraction of type      ',itype,' '&
+           ,molecname(itype),'              =',(molfra(i,itype),i=1,nbox)
        end do
        do itype = 1, nmolty
-          write(io_output,"(A,I2,A,"//format_n(nbox,"(1X,F12.3)")//")") ' mean sete length of type ',itype,'        [A^2] ='&
-           ,(asetel(i,itype),i=1,nbox)
+          write(io_output,"(A,I2,A,A10,A,"//format_n(nbox,"(1X,F12.3)")//")") ' mean sete length of type ',itype,' '&
+           ,molecname(itype),'        [A^2] =',(asetel(i,itype),i=1,nbox)
        end do
 
        write(io_output,*)
@@ -1875,13 +1877,18 @@ contains
                 else if (imol.eq.nmolty+1) then
                    call err_exit(__FILE__,__LINE__,'Section MOLECULE_TYPE has more than nmolty records!',jerr)
                 end if
-
+                
+                if (scan(line_in(1:10),'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ') >= 1) then
                 ! nunit nugrow ncarbon maxcbmc maxgrow iring lelect lring lrigid lbranch lsetup lq14scale qscale iurot isolute 
-                read(line_in,*) nunit(imol),nugrow(imol),ncarbon(imol),nmaxcbmc(imol),maxgrow(imol),iring(imol),lelect(imol)&
-                 ,lring(imol),lrigid(imol),lbranch(imol),lsetup,lq14scale(imol),qscale(imol),iurot(imol),isolute(imol)
-
+                    read(line_in,*) molecname(imol),nunit(imol),nugrow(imol),ncarbon(imol),nmaxcbmc(imol),maxgrow(imol),iring(imol)&
+               ,lelect(imol),lring(imol),lrigid(imol),lbranch(imol),lsetup,lq14scale(imol),qscale(imol),iurot(imol),isolute(imol)
+                else
+                    read(line_in,*) nunit(imol),nugrow(imol),ncarbon(imol),nmaxcbmc(imol),maxgrow(imol),iring(imol),lelect(imol)&
+                    ,lring(imol),lrigid(imol),lbranch(imol),lsetup,lq14scale(imol),qscale(imol),iurot(imol),isolute(imol)
+                    molecname(imol)='undefined'
+                end if
                 if (lprint) then
-                   write(io_output,'(A,I0)') 'molecule type: ',imol
+                   write(io_output,'(A,I1,A,A10)') 'molecule type: ',imol,' ',molecname(imol)
                    write(io_output,'(A,I0)') '   number of units: ',nunit(imol)
                    write(io_output,'(A,I0)') '   number of units for CBMC growth: ', nugrow(imol)
                    write(io_output,'(A,I0)') '   number of carbons for EH alkane: ', ncarbon(imol)
