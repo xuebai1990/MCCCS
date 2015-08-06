@@ -394,6 +394,12 @@ files. In this manual, references to files such as {\bf
 \noindent{\bf L\_movie\_xyz:} Yields a single movie file in
 xyz format if TRUE.
 
+\noindent{\bf L\_movie\_pdb:} Yields a single movie file in
+pdb format if \textbf{TRUE}. Residue names are taken as first three
+letters in the corresponding {\bf molecname} variable. If
+molecule names are not specified, residue names will be
+printed as "UND".
+
 \subsection{Namelist \textbf{system}}
 \noindent{\bf lnpt:} if TRUE then a NPT volume move is used
 to equilibrate with a pressure bath (implies cubic

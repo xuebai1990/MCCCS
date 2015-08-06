@@ -45,8 +45,8 @@ MODULE topmon_main
   !< 4+(2+nEnergy)+4*nmolty                         = enthalpy ext
   !< ---------------------------------------------------------
   !< \endverbatim
-  integer,allocatable::io_box_movie(:),nminp(:),nmaxp(:),ncmt_list(:,:),ndist(:,:)& !< GCMC reweighting histograms
-   ,mnbox(:,:),solcount(:,:),nccold1(:,:,:),nccold(:,:)
+  integer,allocatable::io_box_movie(:),io_box_movie_pdb(:),nminp(:),nmaxp(:),ncmt_list(:,:)&
+   ,mnbox(:,:),solcount(:,:),nccold1(:,:,:),nccold(:,:),ndist(:,:) !< GCMC reweighting histograms
 
   ! for flexible filenames
   character(LEN=20)::string
@@ -514,6 +514,7 @@ contains
        if (io_movie.ge.0) close(io_movie)
        do ibox=1,nbox
           if (io_box_movie(ibox).ge.0) close(io_box_movie(ibox))
+          if (io_box_movie_pdb(ibox).ge.0) close(io_box_movie_pdb(ibox))
        end do
        if (io_solute.ge.0) close(io_solute)
        if (io_cell.ge.0) close(io_cell)
@@ -1236,7 +1237,7 @@ contains
     logical,allocatable::lhere(:)
 
     character(LEN=default_path_length)::file_input,file_restart,file_struct,file_run,file_movie,file_solute,file_traj&
-     ,file_box_movie,file_cell,file_cbmc_bend
+     ,file_box_movie,file_box_movie_pdb,file_cell,file_cbmc_bend
     ! Q. Paul C. --adding file_cbmc_bend for tabulated CBMC bending growth
 
     character(LEN=default_string_length)::line_in
@@ -1260,7 +1261,7 @@ contains
     logical::needMFsection
 
     namelist /io/ file_input,file_restart,file_struct,file_run,file_movie,file_solute,file_traj,io_output&
-     ,run_num,suffix,L_movie_xyz, file_cbmc_bend
+     ,run_num,suffix,L_movie_xyz,L_movie_pdb,file_cbmc_bend
     ! Q. Paul C. -- file_cbmc_bend & L_cbmc_bend are for tabulated CBMC bending growth 
     namelist /system/ lnpt,lgibbs,lgrand,lanes,lvirial,lmipsw,lexpee,ldielect,lpbc,lpbcx,lpbcy,lpbcz,lfold,lijall,lchgall,lewald&
      ,lcutcm,ltailc,lshift,ldual,L_Coul_CBMC,lneigh&
@@ -1308,6 +1309,7 @@ contains
     call mp_bcast(run_num,rootid,groupid)
     call mp_bcast(suffix,rootid,groupid)
     call mp_bcast(L_movie_xyz,1,rootid,groupid)
+    call mp_bcast(L_movie_pdb,1,rootid,groupid)
     call mp_bcast(file_cbmc_bend,rootid,groupid) !Q.Paul C. -- tabulated CBMC bending growth
 
     if (myid.eq.rootid.and..not.use_checkpoint) then
@@ -1334,6 +1336,7 @@ contains
        w_a(run_num)
        w_a(suffix)
        w_l(L_movie_xyz)
+       w_l(L_movie_pdb)
     end if
 ! -------------------------------------------------------------------
     !> read namelist system
@@ -1672,8 +1675,9 @@ contains
     end if
 
     if (allocated(io_box_movie)) deallocate(io_box_movie,stat=jerr)
-    allocate(lhere(nntype),temphe(nntype),io_box_movie(nbxmax),ncarbon(ntmax),idummy(ntmax),qbox(nbxmax),nures(ntmax)&
-     ,k_max_l(nbxmax),k_max_m(nbxmax),k_max_n(nbxmax),stat=jerr)
+    if (allocated(io_box_movie_pdb)) deallocate(io_box_movie_pdb,stat=jerr)
+    allocate(lhere(nntype),temphe(nntype),io_box_movie(nbxmax),io_box_movie_pdb(nbxmax),ncarbon(ntmax),idummy(ntmax)&
+     ,qbox(nbxmax),nures(ntmax),k_max_l(nbxmax),k_max_m(nbxmax),k_max_n(nbxmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'readdat: allocating system failed',jerr)
     lhere=.false.
 ! -------------------------------------------------------------------
@@ -3277,6 +3281,22 @@ contains
           io_box_movie=10000000
        end if
 
+       ! open pdb movie file for individual simulation box
+       if (L_movie_pdb) then
+          do ibox = 1,nbox
+             string = integer_to_string(ibox)
+             file_box_movie_pdb = "box"//string(1:len_trim(string))//"movie"//run_num(1:len_trim(run_num))//suffix//".pdb"
+             !write(file_box_movie,'("box",I1.1,"movie",I1.1,A,".xyz")') ibox
+             !,run_num,suffix
+             io_box_movie_pdb(ibox)=get_iounit()
+             open(unit=io_box_movie_pdb(ibox),access='stream',action='write',file=file_box_movie_pdb,form='formatted'&
+              ,iostat=jerr,status='unknown')
+             if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open box movie file '//trim(file_box_movie_pdb),jerr)
+          end do
+       else
+          io_box_movie_pdb=10000000
+       end if
+
        ! write out isolute movie header
        if (ANY(isolute(1:nmolty).le.nstep)) then
           io_solute=get_iounit()
@@ -3348,6 +3368,7 @@ contains
     use transfer_shared,only:opt_bias,lopt_bias,freq_opt_bias
     use transfer_swap,only:acchem,bnchem
     use prop_pressure,only:pressure
+    use parser_pdb,only:writePDBmovie
 
     logical::lfq,ovrlap
     integer::im,i,ibox,jbox,Temp_nmol,m,mm,imolty,nummol,ii,ntii,intg,ilunit,k,j,itype,itel,zzz,jmolty
@@ -3538,6 +3559,13 @@ contains
                 end do
              end do
           end if
+
+          if (L_movie_pdb) then
+              do ibox = 1,nbox
+                  call writePDBmovie(io_box_movie_pdb(ibox),ibox)
+              end do
+          end if
+                         
        end if
     end if
 ! -------------------------------------------------------------------

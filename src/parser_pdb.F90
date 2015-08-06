@@ -40,7 +40,7 @@ MODULE parser_pdb
   use sim_zeolite,only:ZeoliteUnitCellGridType,ZeoliteBeadType,setUpAtom,setUpCellStruct
   IMPLICIT NONE
   PRIVATE
-  PUBLIC :: readPDB,writePDB
+  PUBLIC :: readPDB,writePDB,writePDBmovie
 
 CONTAINS
   SUBROUTINE readPDB(filePDB,zeo,lunitcell,ztype,zcell,zunit,lprint)
@@ -153,4 +153,56 @@ CONTAINS
     WRITE(IOPDB,'(A3,/,A3)') "TER","END"
 
   END SUBROUTINE writePDB
+
+  subroutine writePDBmovie(unitPDB,boxnum)
+
+      use sim_system
+      integer,intent(in)::unitPDB,boxnum
+      integer::i,j,ntj,imolty,atomcount,chaincount
+      character(LEN=4)::resname
+      write(unitPDB,'(A6,3(F9.3),3(F7.2),1X,A10)') "CRYST1",boxlx(boxnum),boxly(boxnum),boxlz(boxnum)&
+       ,90.0,90.0,90.0,"P1        "
+      
+      atomcount  = 0
+      chaincount = 0
+      do i = 1,nchain
+          if (nboxi(i).eq.boxnum) then
+              chaincount = chaincount + 1
+              imolty = moltyp(i)
+              do j = 1,nunit(imolty)
+                  atomcount = atomcount + 1
+                  ntj = ntype(imolty,j)
+                  resname=to_upper(molecname(imolty)(1:4))
+                  write(unitPDB,'(A6,I5,1X,A4,1X,A3,2X,I4,4X,3(F8.3),2(F6.2),10X,A2)')"ATOM  ",atomcount&
+                   ,ADJUSTL(TRIM(chemid(ntj))),ADJUSTL(TRIM(resname)),chaincount,rxu(i,j),ryu(i,j),rzu(i,j),1.0,0.0&
+                   ,ADJUSTL(TRIM(chemid(ntj)))
+              end do
+          end if
+      end do
+      
+      write(unitPDB,'(A3)') "END"
+
+  end subroutine writePDBmovie
+
+  function to_upper(strIn) result(strOut)
+! Adapted from http://www.star.le.ac.uk/~cgp/fortran.html (25 May 2012)
+! Original author: Clive Page
+
+     implicit none
+
+     character(len=*), intent(in) :: strIn
+     character(len=len(strIn)) :: strOut
+     integer :: i,j
+
+     do i = 1, len(strIn)
+          j = iachar(strIn(i:i))
+          if (j>= iachar("a") .and. j<=iachar("z") ) then
+               strOut(i:i) = achar(iachar(strIn(i:i))-32)
+          else
+               strOut(i:i) = strIn(i:i)
+          end if
+     end do
+
+  end function to_upper       
+        
 END MODULE parser_pdb
