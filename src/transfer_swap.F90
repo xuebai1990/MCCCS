@@ -900,7 +900,9 @@ contains
     if (lempty.and..not.lgrand) then
        ! write(io_output,*) 'no molecule in BOXREM'
 #ifdef __DEBUG__
-          write(io_output,*) 'end SWAP no molecule in BOXREM',myid
+        ! Paul -- bug fix: avoid printing out irem because it is not defined in my methan swap case, use iins instead
+        !write(io_output,*) 'end SWAP no molecule in BOXREM',myid,irem
+        write(io_output,*) 'end SWAP no molecule in BOXREM',myid,iins
 #endif
        return
     else
