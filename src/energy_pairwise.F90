@@ -23,7 +23,7 @@ MODULE energy_pairwise
 
   real,parameter::a15(2)=(/4.0E7_dp,7.5E7_dp/) !< 1-5 correction term for unprotected hydrogen-oxygen interaction; 1 for ether oxygens, 2 for alcohol oxygens
   !< OLD VALUES: a15(2)=/17.0_dp**6,16.0_dp**6/)
-  integer,parameter::vdW_nParameter(-1:8)=(/0,0,2,3,4,2,2,4,3,4/)
+  integer,parameter::vdW_nParameter(-1:8)=(/0,0,2,3,4,2,2,4,3,2/)
   integer,allocatable::atom_type(:),nonbond_type(:) !< type -1: tabulated potential
   !< type 1: Lennard-Jones 12-6, U(r) = 4*epsilon*[(sigma/r)^12-(sigma/r)^6]
   !< vvdW_b_1 = epsilon, vvdW_b_2 = sigma
@@ -1764,7 +1764,6 @@ contains
              mass = 0.0_dp
              lij = .true.
              lqchg = .false.
-
              do
                 call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
                 if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section ATOMS',myid)
@@ -1883,7 +1882,7 @@ contains
              end if
              vvdW(1,ij) = vvdW(3,ij)/(vvdW(3,ij)-vvdW(4,ij))*((vvdW(3,ij)/vvdW(4,ij))**(vvdW(4,ij)/(vvdW(3,ij)-vvdW(4,ij))))&
               *sqrt(vvdW_b(1,i)*vvdW_b(1,j))
-          else if (nonbond_type(ij).eq.4.or.nonbond_type(ij).eq.5.or.nonbond_type(ij).eq.6) then
+          else if (nonbond_type(ij).eq.4.or.nonbond_type(ij).eq.5.or.nonbond_type(ij).eq.6.or.nonbond_type(ij).eq.8) then
              ! MMFF94 or LJ 9-6 or Generalized LJ
              if (lmixlb) then
                 ! Lorentz-Berthelot rules --- sig_ij = 0.5 [ sig_i + sig_j ]
@@ -1898,7 +1897,10 @@ contains
              ! LJ 12-6-8
              vvdW(1:3,ij)=sqrt(vvdW_b(1:3,i)*vvdW_b(1:3,j))
           end if
-
+	if(nonbond_type(ij).eq.8) then
+		vvdw(3,ij) = vvdW(2,ij)*vvdW(2,ij)
+		vvdW(1,ij) = sqrt(vvdW_b(1,i)*vvdW_b(1,j))
+        end if
        end do
     end do
 
@@ -1956,6 +1958,9 @@ contains
           else if (nonbond_type(ij).eq.6) then
              ! Generalized LJ
              vvdW(1,ij)=4.0_dp*vvdW(1,ij)
+	  else if(nonbond_type(ij).eq.8) then
+		! DOD
+		vvdW(3,ij) = vvdW(2,ij)**2
           else if (nonbond_type(ij).ne.7.and.nonbond_type(ij).ne.-1.and.nonbond_type(ij).ne.0) then
              call err_exit(__FILE__,__LINE__,'read_ff: undefined nonbond type',myid+1)
           end if
@@ -2329,6 +2334,11 @@ contains
           rs8=rs6*rijsq
           rs12=rs6*rs6
           U2=vvdW(1,ntij)/rs12-vvdW(2,ntij)/rs6-vvdW(3,ntij)/rs8
+	else if (nonbond_type(ntij).eq.8) then
+		!DOD
+		rs1 = rij/vvdW(2,ntij)
+		rs2 = 1.0_dp-rs1
+		U2 = vvdW(1,ntij)*rs2*rs2
        else if (nonbond_type(ntij).eq.-1) then
           ! tabulated potential
           U2=lininter_vdW(rij,ntii,ntjj)

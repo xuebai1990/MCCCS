@@ -248,6 +248,12 @@ contains
                             rs8=rs4*rs4
                             tmp=rs8*rs4*rijsq !^14
                             fij = fij - 12.0_dp*vvdW(1,ntij)/tmp + 6.0_dp*vvdW(2,ntij)/rs8 + 8.0_dp*vvdW(3,ntij)/rs8/rijsq
+                         else if (nonbond_type(ntij).eq.8) then
+			                           ! DPD
+			                          rs1 = vvdW(2,ntij)*vvdW(2,ntij)
+			                          rs2 = 1.0_dp/vvdW(2,ntij)
+                         fij = fij - 2.0_dp*vvdW(1,ntij)*(rs2/rij-1.0_dp/rs1)
+
                          else if (nonbond_type(ntij).ne.-1.and.nonbond_type(ntij).ne.0) then
                             call err_exit(__FILE__,__LINE__,'pressure: undefined nonbond type',myid+1)
                          end if
@@ -475,8 +481,8 @@ contains
              else if (.not.lshift.and.numberDimensionIsIsotropic(ibox).eq.3) then ! impulsive force corrections
                 corp = corp + vvdW(1,ntij)*(tmp**vvdW(3,ntij)-tmp**vvdW(4,ntij))*rbcut3
              end if
-          else if (nonbond_type(ntij).eq.4) then
-             ! MMFF94
+          else if (nonbond_type(ntij).eq.8.or.nonbond_type(ntij).eq.4) then
+             ! MMFF94 or DPD
              if (ltailc) then ! tail corrections for MMFF94 are not implemented yet
              else if (.not.lshift.and.numberDimensionIsIsotropic(ibox).eq.3) then ! impulsive force corrections
                 if (vvdW(2,ntij).ne.0) then
