@@ -301,8 +301,8 @@ sub-directory. This often boils down to:
 $ mkdir -p MCCCS/exe-itasca
 $ cd MCCCS/exe-itasca
 $ FC=ifort cmake -DDOUBLE_PRECISION=ON -DUSE_MPI=OFF \
--DUSE_OPENMP=OFF -DUSE_OWN=ON -DCMAKE_BUILD_TYPE=RELEASE ~/MCCCS/topmon
-# 1. assuming the code is in ~/MCCCS/topmon directory;
+-DUSE_OPENMP=OFF -DUSE_OWN=ON -DCMAKE_BUILD_TYPE=RELEASE ~/MCCCS/
+# 1. assuming the code is in ~/MCCCS/ directory;
 # 2. ccmake can be used in place of cmake for a graphical interface
 $ make -j8 # build using 8 cores
 \end{verbatim}
@@ -1159,8 +1159,7 @@ performed, this specifies the probability to perform it on a
 particular pair. Must be {\textbf nswaty} values.
 
 \subsubsection{Section \textbf{MC\_SWATCH}}
-For each of the \textbf{nswaty} pairs, including the
-following:
+Swatch move can be done by either regular CBMC (two molecules differ only at one or two ends) or SAFE-CBMC (two molecules also differ in the internal part). For each of the \textbf{nswaty} pairs, including the following, if it is regular CBMC swatch pair:
 
 \noindent{\bf nswatb:} Specifies the two molecule types for this swatch pair.
 
@@ -1189,7 +1188,62 @@ box pair for a swatch move. Must be {\bf nswtcb} values.
 \noindent{\bf box\_numbers:} Specifies the two boxes in each
 of the {\bf nswtcb} pairs. Note that two boxes can be the
 same, in which case the move is performed inside a single
-box.
+box. \\
+
+\noindent {\bf Example \#1}\hfill\break
+Swatch move between ethane and propane, between box 1 and 2.
+
+\begin{verbatim}
+MC_SWATCH
+! moltyp1<->moltyp2 nsampos 2xncut  1. Ethane (1-2) <--> Propane (1-2-3)
+  1           2       2      1 1
+! gswatc 2x(ifrom, iprev)
+  2 1 2 1
+! splist
+   1 1
+   2 2
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 2
+END MC_SWATCH
+\end{verbatim}
+
+\noindent In this example, suppose that we are swatching between ethane and propane, keeping the first two beads of ethane/propane at the same place. {\bf nsampos} and {\bf splist} are set in this way so that bead no. 1 and 2 are kept in the same position. {\bf 2xncut} is 1 since only one growth direction is needed. To grow the additional bead, we are growing from bead no. 2, and thus {\bf ifrom} is 2 and {\bf iprev} is 1. The second set of (ifrom, iprev) represents the corresponding beads on propane. \\
+
+\noindent To use swatch between two molecules that differ in the internal part, there are additional information that need to be stated:
+
+\noindent{\bf S}: The presence of S in the beginning of the line indicates that this swatch move contains SAFE-CBMC part.
+
+\noindent{\bf 2xncut-safe}: Similar to {\bf 2xncut}, the number of interior segments that need to be regrown to swatch between two molecules. Note that one segment may contain many beads.
+
+\noindent{\bf gswatcsafe 2x(ifrom, iprev, index)}: Specify where SAFE-CBMC starts ({\bf ifrom}), the previous bead of {\bf ifrom} ({\bf iprev}) and the number of {\bf backbone} beads to regrow. Note that if there is no regular CBMC part ({\bf 2xncut} = 0), the line containing {\bf gswatc} must be deleted!  
+
+\noindent {\bf IMPORTANT}: Additionally, set one {\bf pmfix} in the {\bf mc\_cbmc} section to be larger than zero so that the fort.23 SAFE-CBMC guiding probability input file can be properly read. You can set it to be a small number to avoid doing SAFE-CBMC. Only one fort.23 file is needed. Moreover, remember to set {\bf iring} correctly (usually the same as {\bf nunit}) to enable SAFE-CBMC functionality. \\
+
+\noindent {\bf Example \#2}\hfill\break
+Swatch move between 3-methylpentane and pentane, between box 1 and 2.
+
+\begin{verbatim}
+MC_SWATCH
+! moltyp1<->moltyp2 nsampos 2xncut 2xncut-safe  
+! 3-methylpentane (1-2-3(6)-4-5) <--> Pentane (1-2-3-4-5)
+S  1           2       3    0 0  1 1
+! gswatcsafe 2x(ifrom, iprev, index)
+  2 1 2 2 1 2
+! splist
+   1 1
+   2 2
+   5 5
+! nswtcb pmswtcb
+1  1.00
+! box numbers
+1 2
+END MC_SWATCH
+\end{verbatim}
+
+\noindent In this case, beads are numbered so that the linear part is from 1 to 5, with methyl branch on 3-methylpentane being bead no. 6. We are doing swatch with SAFE-CBMC, keeping bead no. 1, 2 and 5 in the same place and regrowing bead no. 3, 4 and 6. {\bf 2xncut} are 0 because no regular CBMC part is needed, and {\bf 2xncut-safe} are 1 since one interior segment (containing 2 or 3 beads) is to be regrown. Since we are regrowing from bead no. 3, {\bf ifrom} is 2 and {\bf iprev} is 1. Two backbone beads are to be regrown so that {\bf index} is 2.
+
 
 \subsubsection{Namelist \textbf{mc\_swap}}
 \noindent{\bf pmswap:} Specifies the probability to perform
@@ -1336,7 +1390,10 @@ CBMC move, {\bf pmfix} specifies the probability to perform
 a SAFE-CBMC move. Usually 0 unless the molecule is large or
 contains flexible rings. Must be {\bf nmolty} values.
 SAFE-CBMC moves require the {\bf fort.23} input file, which
-can be generated via a presimulation (see {\bf lpresim}).
+can be generated via a presimulation (see {\bf lpresim}). 
+Currently, only one {\bf fort.23} file is needed for 
+all the molecules.
+Must be larger than zero if any swatch pair uses SAFE-CBMC.
 
 \noindent{\bf lrig:} If TRUE, rigid segments should be grown
 from non-rigid segments during SAFE-CBMC. The default
@@ -1846,14 +1903,15 @@ be listed first in the molecule specification section of
   nunit} for all other models.
 
 \noindent{\bf maxcbmc:} The maximum number of beads that are
-allowed to grow with CBMC. Should be equal to {\bf nugrow}.
+allowed to grow with CBMC. Should be equal to {\bf nugrow}
+if the whole molecule needs to be grown.
 
 \noindent{\bf maxgrow:} The maximum number of interior
 segments to consider in a SAFE-CBMC regrowth (see {\bf
   pmfix}).
 
-\noindent{\bf iring:} The number of ring atoms that needs to
-be regrown with SAFE-CBMC. Only used if {\bf lring} is TRUE.
+\noindent{\bf iring:} The number of ring or interior atoms 
+that needs to be regrown with SAFE-CBMC.
 
 \noindent{\bf lelect:} set to TRUE if the molecule contains
 one or more beads with partial charges.

@@ -5,7 +5,7 @@ module transfer_swatch
   use sim_cell
   use energy_kspace,only:recip
   use energy_pairwise,only:energy,coru
-  use moves_cbmc,only:rosenbluth,schedule,explct,lexshed
+  use moves_cbmc,only:rosenbluth,schedule,safeschedule,explct,lexshed
   implicit none
   private
   save
@@ -26,10 +26,11 @@ contains
     logical::lterm
     real::rpair,tweight,tweiold,vnbox(nEnergy,nbxmax),rx_1(numax),ry_1(numax),rz_1(numax),rxut(4,numax),ryut(4,numax),rzut(4,numax)&
      ,waddold,waddnew,dvol,vola,volb,rho,dinsta,wnlog,wolog,wdlog,wswat,v(nEnergy),vdum,delen,deleo,dicount,vrecipn,vrecipo,vdum2&
-     ,total_NBE,total_tor,total_bend,total_vib,vtgn,vbendn,vvibn,Rosenbluth_normalization(ntmax)
+     ,total_NBE,total_tor,total_bend,total_vib,vtgn,vbendn,vvibn,Rosenbluth_normalization(ntmax)&
+     ,vnewtemp(nEnergy),voldtemp(nEnergy) !< temporarily store vnew and vold between regular CBMC and SAFE-CBMC
     integer::ipair,iparty,type_a,type_b,imolta,imoltb,ipairb,boxa,boxb,imola,imolb,ibox,iboxal,iboxbl,izz,from(2*numax)&
      ,prev(2*numax),orgaia,orgaib,orgbia,orgbib,bdmol_a,bdmol_b,s_type,o_type,new,old,ifirst,iprev,imolty,igrow,islen,iunit,iboxnew&
-     ,iboxold,self,other,iunita,iunitb
+     ,iboxold,self,other,iunita,iunitb,fromsafe(2*numax),prevsafe(2*numax),indexsafe(2*numax),iindex
     integer::iii,j
     integer::oldchain,newchain,oldunit,newunit,iins
     integer::ic,icbu,jj,mm,imt,jmt,imolin,imolrm
@@ -131,6 +132,18 @@ contains
        prev(type_b+2*(izz-1)) = gswatc(iparty,type_b,2+2*(izz-1))
     end do
 
+    do izz = 1,ncutsafe(iparty,type_a)
+       fromsafe(type_a+2*(izz-1)) = gswatcsafe(iparty,type_a,1+3*(izz-1))
+       prevsafe(type_a+2*(izz-1)) = gswatcsafe(iparty,type_a,2+3*(izz-1))
+       indexsafe(type_a+2*(izz-1)) = gswatcsafe(iparty,type_a,3+3*(izz-1))
+    end do
+
+    do izz = 1,ncutsafe(iparty,type_b)
+       fromsafe(type_b+2*(izz-1)) = gswatcsafe(iparty,type_b,1+3*(izz-1))
+       prevsafe(type_b+2*(izz-1)) = gswatcsafe(iparty,type_b,2+3*(izz-1))
+       indexsafe(type_b+2*(izz-1)) = gswatcsafe(iparty,type_b,3+3*(izz-1))
+    end do
+
     ! store number of units in iunita and iunitb
     iunita = nunit(imolta)
     iunitb = nunit(imoltb)
@@ -165,6 +178,7 @@ contains
     vnbox(ivBending,boxb)  = 0.0E0_dp
     vnbox(ivElect,boxb) = 0.0E0_dp
     vnbox(ivEwald,boxb) = 0.0E0_dp
+
 
     if (boxa.eq.boxb) then
        ! store position 1, a's original site
@@ -246,6 +260,10 @@ contains
           iunit = nunit(imoltb)
        end if
 
+       ! initialize vnewtemp and voldtemp
+       vnewtemp = 0.0E0_dp
+       voldtemp = 0.0E0_dp
+
        ! store the beads that are identical
        do icbu = 1, nsampos(iparty)
           new = splist(iparty,icbu,s_type)
@@ -255,17 +273,20 @@ contains
           rznew(new) = rzu(other,old)
        end do
 
-       ! set up growth schedule
-       ifirst = from(s_type)
-       iprev = prev(s_type)
+       ! If there exists regular CBMC part, do it; otherwise do SAFE-CBMC part
+       if (ncut(iparty,s_type) .gt. 0) then
 
-       !*** rigid molecule add on ***
-       if (lrigid(imolty)) then
-          !cc--- JLR 11-24-09
-          !cc--- adding some if statements for rigid swaps:
-          !cc--- if we have swapped the whole rigid part we will
-          !cc--- not compute the vectors from ifirst in old position
-          !if (nsampos(iparty).lt.iunit) then
+          ! set up growth schedule
+          ifirst = from(s_type)
+          iprev = prev(s_type)
+
+          !*** rigid molecule add on ***
+          if (lrigid(imolty)) then
+             !cc--- JLR 11-24-09
+             !cc--- adding some if statements for rigid swaps:
+             !cc--- if we have swapped the whole rigid part we will
+             !cc--- not compute the vectors from ifirst in old position
+             !if (nsampos(iparty).lt.iunit) then
              ! if ((rindex(imolty).eq.0).or.(ifirst.lt.riutry(imolty,1))) then
              if (nsampos(iparty).ge.3) then
                 call align_planes(iparty,self,other,s_type,o_type,rxnew,rynew,rznew)
@@ -281,344 +302,646 @@ contains
              ! end if
           !end if
           !> \bug problem if nsampos.eq.iunit, but rindex.gt.0
-          call schedule(igrow,imolty,islen,ifirst,iprev,4)
-          !cc---END JLR 11-24-09
-       else
-          call schedule(igrow,imolty,islen,ifirst,iprev,3)
-       end if
-
-       if (lgrand.and.boxa.ne.boxb) then
-          Rosenbluth_normalization(imolty)=(real(nchoi(imolty),dp)**islen)*real(nchoih(imoltb),dp)
-          if (lrigid(imolty).and.nsampos(iparty).lt.3) Rosenbluth_normalization(imolty)=Rosenbluth_normalization(imolty)*real(nchoir(imolta),dp)
-       end if
-
-       !> \bug Need to check: I wonder if this works with lrigid?
-       ! Adding in multiple end regrowths
-       if (ncut(iparty,s_type).gt.1) then
-          do izz = 2,ncut(iparty,s_type)
-             ifirst = from(s_type+2*(izz-1))
-             iprev = prev(s_type+2*(izz-1))
-             call schedule(igrow,imolty,islen,ifirst,iprev,5)
-
-             if (lgrand.and.boxa.ne.boxb) Rosenbluth_normalization(imolty)=Rosenbluth_normalization(imolty)*(real(nchoi(imolty),dp)**islen)
-          end do
-       end if
-
-!***************
-! new growth ***
-!***************
-       if (boxa.eq.boxb) then
-          ! moving molecules for rosenbluth
-          if (ic.eq.1) then
-             nboxi(other) = 0
-             ! putting molecule b in position 1
-             ! do izz = 1, nsampos(iparty)
-             !    bdmol_b = splist(iparty,izz,type_b)
-             !    rxu(other,bdmol_b) = rxut(3,izz)
-             !    ryu(other,bdmol_b) = ryut(3,izz)
-             !    rzu(other,bdmol_b) = rzut(3,izz)
-             ! end do
+             call schedule(igrow,imolty,islen,ifirst,iprev,4)
+             !cc---END JLR 11-24-09
           else
-             ! putting molecule a into its (fully grown) trial position 2
-             do izz = 1, nunit(moltyp(other))
-                rxu(other,izz) = rxut(1,izz)
-                ryu(other,izz) = ryut(1,izz)
-                rzu(other,izz) = rzut(1,izz)
+             call schedule(igrow,imolty,islen,ifirst,iprev,3)
+          end if
+
+          if (lgrand.and.boxa.ne.boxb) then
+             Rosenbluth_normalization(imolty)=(real(nchoi(imolty),dp)**islen)*real(nchoih(imoltb),dp)
+             if (lrigid(imolty).and.nsampos(iparty).lt.3) Rosenbluth_normalization(imolty)=Rosenbluth_normalization(imolty)*real(nchoir(imolta),dp)
+          end if
+
+          !> \bug Need to check: I wonder if this works with lrigid?
+          ! Adding in multiple end regrowths
+          if (ncut(iparty,s_type).gt.1) then
+             do izz = 2,ncut(iparty,s_type)
+                ifirst = from(s_type+2*(izz-1))
+                iprev = prev(s_type+2*(izz-1))
+                call schedule(igrow,imolty,islen,ifirst,iprev,5)
+
+                if (lgrand.and.boxa.ne.boxb) Rosenbluth_normalization(imolty)=Rosenbluth_normalization(imolty)*(real(nchoi(imolty),dp)**islen)
              end do
           end if
-       end if
 
-       if (lgrand.and.iboxnew.ne.1) goto 1000
+          ! Paul -- SAFE-SWATCH: if there are beads needed to be regrown using SAFE-CBMC
+          ! set lexshed to be false to avoid the calculation of intramolecular LJ interactions
+          if (ncutsafe(iparty,s_type) .gt. 0) then
+             lexshed = .false. 
+             do icbu = 1, nsampos(iparty)
+                jj = splist(iparty,icbu,s_type)
+                lexshed(jj) = .true.
+             end do
+          end if
 
-       ! grow molecules
-       ! changing for lrigid to include waddnew
+!******************
+! CBMC - new growth
+!******************
+          if (boxa.eq.boxb) then
+             ! moving molecules for rosenbluth
+             if (ic.eq.1) then
+                nboxi(other) = 0
+                ! putting molecule b in position 1
+                ! do izz = 1, nsampos(iparty)
+                !    bdmol_b = splist(iparty,izz,type_b)
+                !    rxu(other,bdmol_b) = rxut(3,izz)
+                !    ryu(other,bdmol_b) = ryut(3,izz)
+                !    rzu(other,bdmol_b) = rzut(3,izz)
+                ! end do
+             else
+                ! putting molecule a into its (fully grown) trial position 2
+                do izz = 1, nunit(moltyp(other))
+                   rxu(other,izz) = rxut(1,izz)
+                   ryu(other,izz) = ryut(1,izz)
+                   rzu(other,izz) = rzut(1,izz)
+                end do
+             end if
+          end if
+
+          if (lgrand.and.iboxnew.ne.1) goto 1000
+
+          ! grow molecules
+          ! changing for lrigid to include waddnew
+          waddnew = 1.0E0_dp
+
+          ! JLR 11-24-09 New stuff for rigid swatch
+          ! Different logic/calls to rosenbluth for rigid molecules
+          if (lrigid(imolty)) then
+             if (nsampos(iparty).ge.iunit) then
+                !molecule is all there
+                !don't regrow anything in rosenbluth
+                icallrose = 4
+                !> \bug why don't do rigrot if ifirst.ge.riutry (ifirst is part of rigid beads)?
+                ! else if ((nsampos(iparty).ge.3).or.(rindex(imolty).gt.0.and.ifirst.ge.riutry(imolty,1))) then
+             else if (nsampos(iparty).ge.3) then
+                ! rigid part is grown, don't do rigrot in rosebluth
+                icallrose = 3
+             else
+                ! rigid part is not grown, do rigrot
+                icallrose = 2
+             end if
+          else
+             ! flexible molecule call rosenbluth in normal fashion
+             icallrose = 2
+          end if
+          ! END JLR 11-24-09
+
+          ! grow new chain conformation
+          !> \bug why call with other and self instead of self and self as for interbox swatch?
+          if (boxa.eq.boxb) then
+             call rosenbluth(.true.,lterm,self,self,imolty,islen,boxa,igrow,waddnew,.false.,vdum2,icallrose)
+          else
+             call rosenbluth(.true.,lterm,other,self,imolty,islen,iboxnew,igrow,waddnew,.false.,vdum2,icallrose)
+          end if
+
+          if (boxa.eq.boxb) then
+             ! moving molecules back
+             if (ic.eq.1) then
+                nboxi(other) = iboxnew
+                ! do izz = 1, nsampos(iparty)
+                !    bdmol_b = splist(iparty,izz,type_b)
+                !    rxu(other,bdmol_b) = rxut(4,izz)
+                !    ryu(other,bdmol_b) = ryut(4,izz)
+                !    rzu(other,bdmol_b) = rzut(4,izz)
+                ! end do
+             else
+                do izz = 1, nunit(moltyp(other))
+                   rxu(other,izz) = rx_1(izz)
+                   ryu(other,izz) = ry_1(izz)
+                   rzu(other,izz) = rz_1(izz)
+                end do
+             end if
+          end if
+
+          ! termination of cbmc attempt due to walk termination
+          if (lterm) then
+             ! if (boxa.eq.boxb) liswatch = .false.
+             if (lgrand) then
+                if (boxa.ne.1) then
+                   call gcmc_cleanup(imolta,boxa)
+                else if (boxb.ne.1) then
+                   call gcmc_cleanup(imoltb,boxb)
+                end if
+             end if
+             return
+          end if
+
+          ! propagate new rosenbluth weight
+          tweight = tweight*weight*waddnew
+       
+          !*** end rigid add on ***
+
+          ! save the new coordinates
+          do jj = 1,igrow
+             rxut(ic,jj) = rxnew(jj)
+             ryut(ic,jj) = rynew(jj)
+             rzut(ic,jj) = rznew(jj)
+          end do
+
+          ! Corrections for switched beads, and DC-CBMC
+          ! Assign all of the grown new and old beads to rxuion
+          ! with rxuion: new = 2
+          iii = 2
+          do j=1,igrow
+             rxuion(j,iii) = rxnew(j)
+             ryuion(j,iii) = rynew(j)
+             rzuion(j,iii) = rznew(j)
+             qquion(j,iii) = qqu(self,j)
+          end do
+
+          ! added from new-combined code
+          if (iunit.ne.igrow) then
+             ! for explicit-hydrogen model, put on the hydrogens
+             ! use phony number iins and call explct to add constrained hydrogens
+             iins = nchain + 1
+             moltyp(iins) = imolty
+             do j=1,igrow
+                rxu(iins,j) = rxnew(j)
+                ryu(iins,j) = rynew(j)
+                rzu(iins,j) = rznew(j)
+             end do
+             call explct(iins,vdum,.false.,.false.)
+             do j = igrow + 1, iunit
+                rxuion(j,iii) = rxu(iins,j)
+                ryuion(j,iii) = ryu(iins,j)
+                rzuion(j,iii) = rzu(iins,j)
+                qquion(j,iii) = qqu(self,j)
+                rxut(ic,j) = rxu(iins,j)
+                ryut(ic,j) = ryu(iins,j)
+                rzut(ic,j) = rzu(iins,j)
+             end do
+          end if
+
+          ! DC-CBMC correction only if there is no SAFE-SWATCH!
+          ! Begin DC-CBMC, explicit-hydrogen and
+          ! switched bead corrections for NEW configuration
+          ! Calculate the true site-site energy
+
+          if (ncutsafe(iparty,s_type) .eq. 0) then
+             if (boxa.eq.boxb) then
+                if (ic.eq.1) then
+                   ! exclude molecule b from energy calculation, put in other box *
+                   nboxi(imolb) = 0
+                else
+                   ! put molecule a into position 2 (fully grown trial position)
+                   ! for the energy of b's new position (second time around)
+                   do jj = 1,nunit(imolta)
+                      rxu(imola,jj) = rxut(1,jj)
+                      ryu(imola,jj) = ryut(1,jj)
+                      rzu(imola,jj) = rzut(1,jj)
+                   end do
+                end if
+             end if
+
+             !> \bug energy problem for cases which involve the change of the bending type
+             !> and torsional type for those units swatched!!!!!!
+             if (boxa.eq.boxb) then
+                call energy(self,imolty,v,iii,boxa,1,iunit,.true.,lterm,.false.,.false.,.false.,.false.)
+             else
+                call energy(other,imolty,v,iii,iboxnew,1,iunit,.true.,lterm,.false.,.false.,.false.,.false.)
+             end if
+
+             if (boxa.eq.boxb) then
+                ! return to normal
+                if (ic.eq.1) then
+                   ! return b to original box
+                   nboxi(imolb) = boxb
+                else
+                   ! return a to position 1
+                   do jj = 1, nunit(imolta)
+                      rxu(imola,jj) = rx_1(jj)
+                      ryu(imola,jj) = ry_1(jj)
+                      rzu(imola,jj) = rz_1(jj)
+                   end do
+                end if
+             end if
+
+             if (lterm) then
+             ! call err_exit(__FILE__,__LINE__,'interesting screwup in CBMC swatch',myid+1)
+                if (lgrand) then
+                   if (boxa.ne.1) then
+                      call gcmc_cleanup(imolta,boxa)
+                   else if (boxb.ne.1) then
+                      call gcmc_cleanup(imoltb,boxb)
+                   end if
+                end if
+                return
+             end if
+
+             ! add on the changes in energy
+             delen = v(ivTot) - ( vnew(ivTot) - (vnew(ivStretching) + vnew(ivBending) + vnew(ivTorsion)) )
+             tweight = tweight*exp(-beta*delen)
+
+             vnew(ivTot) = vnew(ivTot) + delen
+             vnew(ivInterLJ) = v(ivInterLJ)
+             vnew(ivIntraLJ) = v(ivIntraLJ)
+             vnew(ivExt) = v(ivExt)
+             vnew(ivElect) = v(ivElect)
+             vnew(ivEwald)= v(ivEwald)
+             ! End DC-CBMC and switched bead Corrections for NEW configuration
+
+             ! save the trial energies
+             vnbox(ivTot,iboxnew)   = vnbox(ivTot,iboxnew)  + vnew(ivTot)
+             vnbox(ivInterLJ,iboxnew)  = vnbox(ivInterLJ,iboxnew) + vnew(ivInterLJ)
+             vnbox(ivIntraLJ,iboxnew)  = vnbox(ivIntraLJ,iboxnew) + vnew(ivIntraLJ)
+             vnbox(ivStretching,iboxnew)  = vnbox(ivStretching,iboxnew) + vnew(ivStretching)
+             vnbox(ivTorsion,iboxnew)   = vnbox(ivTorsion,iboxnew)  + vnew(ivTorsion)
+             vnbox(ivExt,iboxnew)  = vnbox(ivExt,iboxnew) + vnew(ivExt)
+             vnbox(ivBending,iboxnew)  = vnbox(ivBending,iboxnew) + vnew(ivBending)
+             vnbox(ivElect,iboxnew) = vnbox(ivElect,iboxnew)+ vnew(ivElect)
+             vnbox(ivEwald,iboxnew) = vnbox(ivEwald,iboxnew)+ vnew(ivEwald)
+          else
+             ! if there is still SAFE-CBMC move, temporarily store energies in vnewtemp
+             vnewtemp = vnew
+          end if
+
+          if (lgrand.and.iboxold.ne.1) cycle oldnew
+
+!******************
+! CBMC - old growth
+!******************
+          ! rigid add on
+1000      waddold = 1.0E0_dp
+
+          ! grow old chain conformation
+          ! JLR 11-24-09 New stuff for rigid swatch
+          if (lrigid(imolty)) then
+             if (nsampos(iparty).ge.iunit) then
+                !molecule is all there
+                !don't regrow anything in rosenbluth
+                icallrose = 4
+                !> \bug why don't do rigrot if ifirst.ge.riutry (ifirst is part of rigid beads)?
+                ! else if ((nsampos(iparty).ge.3).or.(rindex(imolty).gt.0.and.ifirst.ge.riutry(imolty,1))) then
+             else if (nsampos(iparty).ge.3) then
+                ! rigid part is grown, don't do rigrot in rosebluth
+                icallrose = 3
+             else
+                ! rigid part is not grown, do rigrot
+                icallrose = 2
+             end if
+          else
+             ! flexible molecule call rosenbluth in normal fashion
+             icallrose = 2
+          end if
+
+          call rosenbluth(.false.,lterm,self,self,imolty,islen,iboxold,igrow,waddold,.false.,vdum2,icallrose)
+          ! END JLR 11-24-09
+
+          ! termination of old walk due to problems generating orientations
+          if (lterm) then
+             write(io_output,*) 'SWATCH: old growth rejected'
+             ! if (boxa.eq.boxb) liswatch = .false.
+             if (lgrand) then
+                if (boxa.ne.1) then
+                   call gcmc_cleanup(imolta,boxa)
+                else if (boxb.ne.1) then
+                   call gcmc_cleanup(imoltb,boxb)
+                end if
+             end if
+             return
+          end if
+
+          ! propagate old rosenbluth weight
+          tweiold = tweiold*weiold*waddold
+
+          ! end rigid add on
+
+          ! store the old grown beads and explict placed beads positions
+          ! 1 = old conformation
+          iii = 1
+          do j = 1,iunit
+             rxuion(j,1) = rxu(self,j)
+             ryuion(j,1) = ryu(self,j)
+             rzuion(j,1) = rzu(self,j)
+             qquion(j,1) = qqu(self,j)
+          end do
+
+          ! Begin corrections for DC-CBMC and switched beads for OLD configuration
+          ! correct the acceptance rules
+          ! calculate the full rcut site-site energy
+          ! only when there is no SAFE-SWATCH
+
+          if (ncutsafe(iparty,s_type) .eq. 0) then
+             ! excluding molecule b for first loop
+             if (ic.eq.1.and.boxa.eq.boxb) then
+                nboxi(imolb) = 0
+             end if
+
+             ! get total energy
+             call energy(self,imolty,v,iii,iboxold,1,iunit,.true.,lterm,.false.,.false.,.false.,.false.)
+
+             if (ic.eq.1.and.boxa.eq.boxb) then
+                ! return b to current box
+                nboxi(imolb) = boxb
+             end if
+
+             if (lterm) call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf SWATCH',myid+1)
+
+             deleo = v(ivTot) - ( vold(ivTot) - (vold(ivStretching) + vold(ivBending) + vold(ivTorsion)) )
+             tweiold = tweiold*exp(-beta*deleo)
+
+             vold(ivTot) = vold(ivTot) + deleo
+             vold(ivIntraLJ) = v(ivIntraLJ)
+             vold(ivInterLJ) = v(ivInterLJ)
+             vold(ivExt) = v(ivExt)
+             vold(ivElect) = v(ivElect)
+             vold(ivEwald)= v(ivEwald)
+             ! End Correction for DC-CBMC and switched beads for OLD configuration
+
+             ! save the trial energies
+             vnbox(ivTot,iboxold)   = vnbox(ivTot,iboxold)  - vold(ivTot)
+             vnbox(ivInterLJ,iboxold)  = vnbox(ivInterLJ,iboxold) - vold(ivInterLJ)
+             vnbox(ivIntraLJ,iboxold)  = vnbox(ivIntraLJ,iboxold) - vold(ivIntraLJ)
+             vnbox(ivStretching,iboxold)  = vnbox(ivStretching,iboxold) - vold(ivStretching)
+             vnbox(ivTorsion,iboxold)   = vnbox(ivTorsion,iboxold)  - vold(ivTorsion)
+             vnbox(ivExt,iboxold)  = vnbox(ivExt,iboxold) - vold(ivExt)
+             vnbox(ivBending,iboxold)  = vnbox(ivBending,iboxold) - vold(ivBending)
+             vnbox(ivElect,iboxold) = vnbox(ivElect,iboxold)- vold(ivElect)
+             vnbox(ivEwald,iboxold) = vnbox(ivEwald,iboxold)- vold(ivEwald)
+          else
+             ! if there is still SAFE-CBMC move, temporarily store energies in voldtemp
+             voldtemp = vold
+          end if
+
+      end if ! if there is regular SAFE-CBMC part
+
+
+!*******************************
+! SAFE-CBMC - new and old growth
+!*******************************
+       ! Paul -- now grow SAFE-CBMC part
        waddnew = 1.0E0_dp
 
-       ! JLR 11-24-09 New stuff for rigid swatch
-       ! Different logic/calls to rosenbluth for rigid molecules
-       if (lrigid(imolty)) then
-          if (nsampos(iparty).ge.iunit) then
-             !molecule is all there
-             !don't regrow anything in rosenbluth
-             icallrose = 4
-             !> \bug why don't do rigrot if ifirst.ge.riutry (ifirst is part of rigid beads)?
-             ! else if ((nsampos(iparty).ge.3).or.(rindex(imolty).gt.0.and.ifirst.ge.riutry(imolty,1))) then
-          else if (nsampos(iparty).ge.3) then
-             ! rigid part is grown, don't do rigrot in rosebluth
-             icallrose = 3
-          else
-             ! rigid part is not grown, do rigrot
-             icallrose = 2
-          end if
-       else
-          ! flexible molecule call rosenbluth in normal fashion
-          icallrose = 2
-       end if
-       ! END JLR 11-24-09
+       do izz = 1, ncutsafe(iparty,s_type) 
 
-       ! grow new chain conformation
-       !> \bug why call with other and self instead of self and self as for interbox swatch?
-       if (boxa.eq.boxb) then
-          call rosenbluth(.true.,lterm,self,self,imolty,islen,boxa,igrow,waddnew,.false.,vdum2,icallrose)
-       else
-          call rosenbluth(.true.,lterm,other,self,imolty,islen,iboxnew,igrow,waddnew,.false.,vdum2,icallrose)
-       end if
-
-       if (boxa.eq.boxb) then
-          ! moving molecules back
-          if (ic.eq.1) then
-             nboxi(other) = iboxnew
-             ! do izz = 1, nsampos(iparty)
-             !    bdmol_b = splist(iparty,izz,type_b)
-             !    rxu(other,bdmol_b) = rxut(4,izz)
-             !    ryu(other,bdmol_b) = ryut(4,izz)
-             !    rzu(other,bdmol_b) = rzut(4,izz)
-             ! end do
-          else
-             do izz = 1, nunit(moltyp(other))
-                rxu(other,izz) = rx_1(izz)
-                ryu(other,izz) = ry_1(izz)
-                rzu(other,izz) = rz_1(izz)
-             end do
-          end if
-       end if
-
-       ! termination of cbmc attempt due to walk termination
-       if (lterm) then
-          ! if (boxa.eq.boxb) liswatch = .false.
-          if (lgrand) then
-             if (boxa.ne.1) then
-                call gcmc_cleanup(imolta,boxa)
-             else if (boxb.ne.1) then
-                call gcmc_cleanup(imoltb,boxb)
+          if (boxa.eq.boxb) then
+             ! moving molecules for rosenbluth
+             if (ic.eq.1) then
+                nboxi(other) = 0
+             else
+                ! putting molecule a into its (fully grown) trial position 2
+                do jj = 1, nunit(moltyp(other))
+                   rxu(other,jj) = rxut(1,jj)
+                   ryu(other,jj) = ryut(1,jj)
+                   rzu(other,jj) = rzut(1,jj)
+                end do
              end if
           end if
-          return
-       end if
+ 
+          ifirst = fromsafe(s_type+2*(izz-1))
+          iprev = prevsafe(s_type+2*(izz-1))
+          iindex = indexsafe(s_type+2*(izz-1))
+          call safeschedule(igrow,imolty,islen,ifirst,iindex+1,5,iprev)
 
-       ! propagate new rosenbluth weight
-       tweight = tweight*weight*waddnew
-
-       !*** end rigid add on ***
-
-       ! save the new coordinates
-       do jj = 1,igrow
-          rxut(ic,jj) = rxnew(jj)
-          ryut(ic,jj) = rynew(jj)
-          rzut(ic,jj) = rznew(jj)
-       end do
-
-       ! Corrections for switched beads, and DC-CBMC
-       ! Assign all of the grown new and old beads to rxuion
-       ! with rxuion: new = 2
-       iii = 2
-       do j=1,igrow
-          rxuion(j,iii) = rxnew(j)
-          ryuion(j,iii) = rynew(j)
-          rzuion(j,iii) = rznew(j)
-          qquion(j,iii) = qqu(self,j)
-       end do
-
-       ! added from new-combined code
-       if (iunit.ne.igrow) then
-          ! for explicit-hydrogen model, put on the hydrogens
-          ! use phony number iins and call explct to add constrained hydrogens
-          iins = nchain + 1
-          moltyp(iins) = imolty
-          do j=1,igrow
-             rxu(iins,j) = rxnew(j)
-             ryu(iins,j) = rynew(j)
-             rzu(iins,j) = rznew(j)
-          end do
-          call explct(iins,vdum,.false.,.false.)
-          do j = igrow + 1, iunit
-             rxuion(j,iii) = rxu(iins,j)
-             ryuion(j,iii) = ryu(iins,j)
-             rzuion(j,iii) = rzu(iins,j)
-             qquion(j,iii) = qqu(self,j)
-             rxut(ic,j) = rxu(iins,j)
-             ryut(ic,j) = ryu(iins,j)
-             rzut(ic,j) = rzu(iins,j)
-          end do
-       end if
-
-       ! Begin DC-CBMC, explicit-hydrogen and
-       ! switched bead corrections for NEW configuration
-       ! Calculate the true site-site energy
-       if (boxa.eq.boxb) then
-          if (ic.eq.1) then
-             ! exclude molecule b from energy calculation, put in other box *
-             nboxi(imolb) = 0
+          if (boxa.eq.boxb) then
+              call rosenbluth(.true.,lterm,self,self,imolty,islen,boxa,igrow,waddnew,.true.,vdum2,2)
           else
-             ! put molecule a into position 2 (fully grown trial position)
-             ! for the energy of b's new position (second time around)
-             do izz = 1,nunit(imolta)
-                rxu(imola,izz) = rxut(1,izz)
-                ryu(imola,izz) = ryut(1,izz)
-                rzu(imola,izz) = rzut(1,izz)
-             end do
+              call rosenbluth(.true.,lterm,other,self,imolty,islen,iboxnew,igrow,waddnew,.true.,vdum2,2)
           end if
-       end if
 
-       !> \bug energy problem for cases which involve the change of the bending type
-       !> and torsional type for those units swatched!!!!!!
-       if (boxa.eq.boxb) then
-          call energy(self,imolty,v,iii,boxa,1,iunit,.true.,lterm,.false.,.false.,.false.,.false.)
-       else
-          call energy(other,imolty,v,iii,iboxnew,1,iunit,.true.,lterm,.false.,.false.,.false.,.false.)
-       end if
-
-       if (boxa.eq.boxb) then
-          ! return to normal
-          if (ic.eq.1) then
-             ! return b to original box
-             nboxi(imolb) = boxb
-          else
-             ! return a to position 1
-             do izz = 1, nunit(imolta)
-                rxu(imola,izz) = rx_1(izz)
-                ryu(imola,izz) = ry_1(izz)
-                rzu(imola,izz) = rz_1(izz)
-             end do
+          if (boxa.eq.boxb) then
+              ! moving molecules back
+              if (ic.eq.1) then
+                 nboxi(other) = iboxnew
+              else
+                 do jj = 1, nunit(moltyp(other))
+                    rxu(other,jj) = rx_1(jj)
+                    ryu(other,jj) = ry_1(jj)
+                    rzu(other,jj) = rz_1(jj)
+                 end do
+              end if
           end if
-       end if
 
-       if (lterm) then
-          ! call err_exit(__FILE__,__LINE__,'interesting screwup in CBMC swatch',myid+1)
-          if (lgrand) then
-             if (boxa.ne.1) then
-                call gcmc_cleanup(imolta,boxa)
-             else if (boxb.ne.1) then
-                call gcmc_cleanup(imoltb,boxb)
-             end if
-          end if
-          return
-       end if
+          ! termination of cbmc attempt due to walk termination
+          if (lterm) then
+              ! if (boxa.eq.boxb) liswatch = .false.
+              if (lgrand) then
+                 if (boxa.ne.1) then
+                    call gcmc_cleanup(imolta,boxa)
+                 else if (boxb.ne.1) then
+                    call gcmc_cleanup(imoltb,boxb)
+                 end if
+              end if
+              return
+           end if
 
-       ! add on the changes in energy
-       delen = v(ivTot) - ( vnew(ivTot) - (vnew(ivStretching) + vnew(ivBending) + vnew(ivTorsion)) )
-       tweight = tweight*exp(-beta*delen)
+           ! propagate new rosenbluth weight
+           tweight = tweight*weight*waddnew
 
-       vnew(ivTot) = vnew(ivTot) + delen
-       vnew(ivInterLJ) = v(ivInterLJ)
-       vnew(ivIntraLJ) = v(ivIntraLJ)
-       vnew(ivExt) = v(ivExt)
-       vnew(ivElect) = v(ivElect)
-       vnew(ivEwald)= v(ivEwald)
-       ! End DC-CBMC and switched bead Corrections for NEW configuration
+           ! save the new coordinates
+           do jj = 1,igrow
+              rxut(ic,jj) = rxnew(jj)
+              ryut(ic,jj) = rynew(jj)
+              rzut(ic,jj) = rznew(jj)
+           end do
 
-       ! save the trial energies
-       vnbox(ivTot,iboxnew)   = vnbox(ivTot,iboxnew)  + vnew(ivTot)
-       vnbox(ivInterLJ,iboxnew)  = vnbox(ivInterLJ,iboxnew) + vnew(ivInterLJ)
-       vnbox(ivIntraLJ,iboxnew)  = vnbox(ivIntraLJ,iboxnew) + vnew(ivIntraLJ)
-       vnbox(ivStretching,iboxnew)  = vnbox(ivStretching,iboxnew) + vnew(ivStretching)
-       vnbox(ivTorsion,iboxnew)   = vnbox(ivTorsion,iboxnew)  + vnew(ivTorsion)
-       vnbox(ivExt,iboxnew)  = vnbox(ivExt,iboxnew) + vnew(ivExt)
-       vnbox(ivBending,iboxnew)  = vnbox(ivBending,iboxnew) + vnew(ivBending)
-       vnbox(ivElect,iboxnew) = vnbox(ivElect,iboxnew)+ vnew(ivElect)
-       vnbox(ivEwald,iboxnew) = vnbox(ivEwald,iboxnew)+ vnew(ivEwald)
+           ! Corrections for switched beads, and DC-CBMC
+           ! Assign all of the grown new and old beads to rxuion
+           ! with rxuion: new = 2
+           iii = 2
+           do j=1,igrow
+              rxuion(j,iii) = rxnew(j)
+              ryuion(j,iii) = rynew(j)
+              rzuion(j,iii) = rznew(j)
+              qquion(j,iii) = qqu(self,j)
+           end do
 
-       if (lgrand.and.iboxold.ne.1) cycle oldnew
+           ! added from new-combined code
+           if (iunit.ne.igrow) then
+              ! for explicit-hydrogen model, put on the hydrogens
+              ! use phony number iins and call explct to add constrained hydrogens
+              iins = nchain + 1
+              moltyp(iins) = imolty
+              do j=1,igrow
+                 rxu(iins,j) = rxnew(j)
+                 ryu(iins,j) = rynew(j)
+                 rzu(iins,j) = rznew(j)
+              end do
+              call explct(iins,vdum,.false.,.false.)
+              do j = igrow + 1, iunit
+                 rxuion(j,iii) = rxu(iins,j)
+                 ryuion(j,iii) = ryu(iins,j)
+                 rzuion(j,iii) = rzu(iins,j)
+                 qquion(j,iii) = qqu(self,j)
+                 rxut(ic,j) = rxu(iins,j)
+                 ryut(ic,j) = ryu(iins,j)
+                 rzut(ic,j) = rzu(iins,j)
+              end do
+           end if
+   
+           ! accumulates energies in vnewtemp
+           vnewtemp = vnewtemp + vnew
 
-!***************
-! old growth ***
-!***************
-       ! rigid add on
-1000   waddold = 1.0E0_dp
+           ! Begin DC-CBMC, explicit-hydrogen and
+           ! switched bead corrections for NEW configuration
+           ! Calculate the true site-site energy
+           ! Only when it is the last step of SAFE-SWATCH!
 
-       ! grow old chain conformation
-       ! JLR 11-24-09 New stuff for rigid swatch
-       if (lrigid(imolty)) then
-          if (nsampos(iparty).ge.iunit) then
-             !molecule is all there
-             !don't regrow anything in rosenbluth
-             icallrose = 4
-             !> \bug why don't do rigrot if ifirst.ge.riutry (ifirst is part of rigid beads)?
-             ! else if ((nsampos(iparty).ge.3).or.(rindex(imolty).gt.0.and.ifirst.ge.riutry(imolty,1))) then
-          else if (nsampos(iparty).ge.3) then
-             ! rigid part is grown, don't do rigrot in rosebluth
-             icallrose = 3
-          else
-             ! rigid part is not grown, do rigrot
-             icallrose = 2
-          end if
-       else
-          ! flexible molecule call rosenbluth in normal fashion
-          icallrose = 2
-       end if
+           if (izz .eq. ncutsafe(iparty,s_type)) then
+              if (boxa.eq.boxb) then
+                 if (ic.eq.1) then
+                    ! exclude molecule b from energy calculation, put in other box *
+                    nboxi(imolb) = 0
+                 else
+                    ! put molecule a into position 2 (fully grown trial position)
+                    ! for the energy of b's new position (second time around)
+                    do jj = 1,nunit(imolta)
+                       rxu(imola,jj) = rxut(1,jj)
+                       ryu(imola,jj) = ryut(1,jj)
+                       rzu(imola,jj) = rzut(1,jj)
+                    end do
+                 end if
+              end if
 
-       call rosenbluth(.false.,lterm,self,self,imolty,islen,iboxold,igrow,waddold,.false.,vdum2,icallrose)
-       ! END JLR 11-24-09
+              !> \bug energy problem for cases which involve the change of the bending type
+              !> and torsional type for those units swatched!!!!!!
+              if (boxa.eq.boxb) then
+                 call energy(self,imolty,v,iii,boxa,1,iunit,.true.,lterm,.false.,.false.,.false.,.false.)
+              else
+                 call energy(other,imolty,v,iii,iboxnew,1,iunit,.true.,lterm,.false.,.false.,.false.,.false.)
+              end if
 
-       ! termination of old walk due to problems generating orientations
-       if (lterm) then
-          write(io_output,*) 'SWATCH: old growth rejected'
-          ! if (boxa.eq.boxb) liswatch = .false.
-          if (lgrand) then
-             if (boxa.ne.1) then
-                call gcmc_cleanup(imolta,boxa)
-             else if (boxb.ne.1) then
-                call gcmc_cleanup(imoltb,boxb)
-             end if
-          end if
-          return
-       end if
+              if (boxa.eq.boxb) then
+                 ! return to normal
+                 if (ic.eq.1) then
+                    ! return b to original box
+                    nboxi(imolb) = boxb
+                 else
+                    ! return a to position 1
+                    do jj = 1, nunit(imolta)
+                       rxu(imola,jj) = rx_1(jj)
+                       ryu(imola,jj) = ry_1(jj)
+                       rzu(imola,jj) = rz_1(jj)
+                    end do
+                 end if
+              end if
 
-       ! propagate old rosenbluth weight
-       tweiold = tweiold*weiold*waddold
+              if (lterm) then
+                 ! call err_exit(__FILE__,__LINE__,'interesting screwup in CBMC swatch',myid+1)
+                 if (lgrand) then
+                    if (boxa.ne.1) then
+                       call gcmc_cleanup(imolta,boxa)
+                    else if (boxb.ne.1) then
+                       call gcmc_cleanup(imoltb,boxb)
+                    end if
+                 end if
+                 return
+              end if
 
-       ! end rigid add on
+              ! use vnewtemp which is accumulated from CBMC and SAFE-CBMC
+              vnew = vnewtemp
 
-       ! store the old grown beads and explict placed beads positions
-       ! 1 = old conformation
-       iii = 1
-       do j = 1,iunit
-          rxuion(j,1) = rxu(self,j)
-          ryuion(j,1) = ryu(self,j)
-          rzuion(j,1) = rzu(self,j)
-          qquion(j,1) = qqu(self,j)
+              ! add on the changes in energy
+              delen = v(ivTot) - ( vnew(ivTot) - (vnew(ivStretching) + vnew(ivBending) + vnew(ivTorsion)) )
+              tweight = tweight*exp(-beta*delen)
+
+              vnew(ivTot) = vnew(ivTot) + delen
+              vnew(ivInterLJ) = v(ivInterLJ)
+              vnew(ivIntraLJ) = v(ivIntraLJ)
+              vnew(ivExt) = v(ivExt)
+              vnew(ivElect) = v(ivElect)
+              vnew(ivEwald)= v(ivEwald)
+              ! End DC-CBMC and switched bead Corrections for NEW configuration
+
+              ! save the trial energies
+              vnbox(ivTot,iboxnew)   = vnbox(ivTot,iboxnew)  + vnew(ivTot)
+              vnbox(ivInterLJ,iboxnew)  = vnbox(ivInterLJ,iboxnew) + vnew(ivInterLJ)
+              vnbox(ivIntraLJ,iboxnew)  = vnbox(ivIntraLJ,iboxnew) + vnew(ivIntraLJ)
+              vnbox(ivStretching,iboxnew)  = vnbox(ivStretching,iboxnew) + vnew(ivStretching)
+              vnbox(ivTorsion,iboxnew)   = vnbox(ivTorsion,iboxnew)  + vnew(ivTorsion)
+              vnbox(ivExt,iboxnew)  = vnbox(ivExt,iboxnew) + vnew(ivExt)
+              vnbox(ivBending,iboxnew)  = vnbox(ivBending,iboxnew) + vnew(ivBending)
+              vnbox(ivElect,iboxnew) = vnbox(ivElect,iboxnew)+ vnew(ivElect)
+              vnbox(ivEwald,iboxnew) = vnbox(ivEwald,iboxnew)+ vnew(ivEwald)
+           end if
+
+           if (lgrand.and.iboxold.ne.1) cycle oldnew
+           
+           ! SAFE-CBMC old growth
+           ! rigid add on
+           waddold = 1.0E0_dp
+
+           call rosenbluth(.false.,lterm,self,self,imolty,islen,iboxold,igrow,waddold,.true.,vdum2,2)
+
+           ! termination of old walk due to problems generating orientations
+           if (lterm) then
+               write(io_output,*) 'SAFE-SWATCH: old growth rejected'
+               ! if (boxa.eq.boxb) liswatch = .false.
+               if (lgrand) then
+                   if (boxa.ne.1) then
+                       call gcmc_cleanup(imolta,boxa)
+                   else if (boxb.ne.1) then
+                       call gcmc_cleanup(imoltb,boxb)
+                   end if
+               end if
+               return
+           end if
+
+           ! propagate old rosenbluth weight
+           tweiold = tweiold*weiold*waddold
+           ! end rigid add on
+
+           ! store the old grown beads and explict placed beads positions
+           ! 1 = old conformation
+           iii = 1
+           do j = 1,iunit
+              rxuion(j,1) = rxu(self,j)
+              ryuion(j,1) = ryu(self,j)
+              rzuion(j,1) = rzu(self,j)
+              qquion(j,1) = qqu(self,j)
+           end do
+
+           ! accumulates energies in voldtemp
+           voldtemp = voldtemp + vold
+
+           ! Begin corrections for DC-CBMC and switched beads for OLD configuration
+           ! correct the acceptance rules
+           ! calculate the full rcut site-site energy
+           ! only when this is the last SAFE-SWATCH
+
+           if (izz .eq. ncutsafe(iparty,s_type)) then
+              ! excluding molecule b for first loop
+              if (ic.eq.1.and.boxa.eq.boxb) then
+                 nboxi(imolb) = 0
+              end if
+
+              ! get total energy
+              call energy(self,imolty,v,iii,iboxold,1,iunit,.true.,lterm,.false.,.false.,.false.,.false.)
+
+              if (ic.eq.1.and.boxa.eq.boxb) then
+                 ! return b to current box
+                 nboxi(imolb) = boxb
+              end if
+
+              if (lterm) call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf SWATCH',myid+1)
+
+              ! use voldtemp which is accumulated from CBMC and SAFE-CBMC
+              vold = voldtemp
+
+              deleo = v(ivTot) - ( vold(ivTot) - (vold(ivStretching) + vold(ivBending) + vold(ivTorsion)) )
+              tweiold = tweiold*exp(-beta*deleo)
+
+              vold(ivTot) = vold(ivTot) + deleo
+              vold(ivIntraLJ) = v(ivIntraLJ)
+              vold(ivInterLJ) = v(ivInterLJ)
+              vold(ivExt) = v(ivExt)
+              vold(ivElect) = v(ivElect)
+              vold(ivEwald)= v(ivEwald)
+              ! End Correction for DC-CBMC and switched beads for OLD configuration
+
+              ! save the trial energies
+              vnbox(ivTot,iboxold)   = vnbox(ivTot,iboxold)  - vold(ivTot)
+              vnbox(ivInterLJ,iboxold)  = vnbox(ivInterLJ,iboxold) - vold(ivInterLJ)
+              vnbox(ivIntraLJ,iboxold)  = vnbox(ivIntraLJ,iboxold) - vold(ivIntraLJ)
+              vnbox(ivStretching,iboxold)  = vnbox(ivStretching,iboxold) - vold(ivStretching)
+              vnbox(ivTorsion,iboxold)   = vnbox(ivTorsion,iboxold)  - vold(ivTorsion)
+              vnbox(ivExt,iboxold)  = vnbox(ivExt,iboxold) - vold(ivExt)
+              vnbox(ivBending,iboxold)  = vnbox(ivBending,iboxold) - vold(ivBending)
+              vnbox(ivElect,iboxold) = vnbox(ivElect,iboxold)- vold(ivElect)
+              vnbox(ivEwald,iboxold) = vnbox(ivEwald,iboxold)- vold(ivEwald)
+           end if
        end do
-
-       ! Begin corrections for DC-CBMC and switched beads for OLD configuration
-       ! correct the acceptance rules
-       ! calculate the full rcut site-site energy
-
-       ! excluding molecule b for first loop
-       if (ic.eq.1.and.boxa.eq.boxb) then
-          nboxi(imolb) = 0
-       end if
-
-       ! get total energy
-       call energy(self,imolty,v,iii,iboxold,1,iunit,.true.,lterm,.false.,.false.,.false.,.false.)
-
-       if (ic.eq.1.and.boxa.eq.boxb) then
-          ! return b to current box
-          nboxi(imolb) = boxb
-       end if
-
-       if (lterm) call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf SWATCH',myid+1)
-
-       deleo = v(ivTot) - ( vold(ivTot) - (vold(ivStretching) + vold(ivBending) + vold(ivTorsion)) )
-       tweiold = tweiold*exp(-beta*deleo)
-
-       vold(ivTot) = vold(ivTot) + deleo
-       vold(ivIntraLJ) = v(ivIntraLJ)
-       vold(ivInterLJ) = v(ivInterLJ)
-       vold(ivExt) = v(ivExt)
-       vold(ivElect) = v(ivElect)
-       vold(ivEwald)= v(ivEwald)
-       ! End Correction for DC-CBMC and switched beads for OLD configuration
-
-       ! save the trial energies
-       vnbox(ivTot,iboxold)   = vnbox(ivTot,iboxold)  - vold(ivTot)
-       vnbox(ivInterLJ,iboxold)  = vnbox(ivInterLJ,iboxold) - vold(ivInterLJ)
-       vnbox(ivIntraLJ,iboxold)  = vnbox(ivIntraLJ,iboxold) - vold(ivIntraLJ)
-       vnbox(ivStretching,iboxold)  = vnbox(ivStretching,iboxold) - vold(ivStretching)
-       vnbox(ivTorsion,iboxold)   = vnbox(ivTorsion,iboxold)  - vold(ivTorsion)
-       vnbox(ivExt,iboxold)  = vnbox(ivExt,iboxold) - vold(ivExt)
-       vnbox(ivBending,iboxold)  = vnbox(ivBending,iboxold) - vold(ivBending)
-       vnbox(ivElect,iboxold) = vnbox(ivElect,iboxold)- vold(ivElect)
-       vnbox(ivEwald,iboxold) = vnbox(ivEwald,iboxold)- vold(ivEwald)
     end do oldnew
 
     ! Perform the Ewald sum reciprical space corrections
@@ -1255,6 +1578,7 @@ contains
     integer,intent(in)::io_input
     LOGICAL,INTENT(IN)::lprint
     character(LEN=default_string_length)::line_in
+    character(LEN=5)::trash_string ! Paul -- for SAFE-swatch read line
     integer::jerr,i,j,k
     namelist /mc_swatch/ pmswat,nswaty,pmsatc
 
@@ -1314,7 +1638,16 @@ contains
                 end if
 
                 ! moltyp1<->moltyp2 nsampos 2xncut
-                read(line_in,*) nswatb(i,1:2),nsampos(i),ncut(i,1:2)
+                ! Paul -- SAFE-swatch part
+                if (scan(line_in(1:5),'sS') >= 1) then
+                    read(line_in,*) trash_string,nswatb(i,1:2),nsampos(i),ncut(i,1:2),ncutsafe(i,1:2)
+                    if (ncut(i,1) .eq. 0 .and. ncutsafe(i,1) .eq. 0) then
+                        call err_exit(__FILE__,__LINE__,'ncut and ncutsafe cannot be zero at the same time',myid+1)
+                    end if
+                else
+                    read(line_in,*) nswatb(i,1:2),nsampos(i),ncut(i,1:2)
+                    ncutsafe(i,1:2) = 0
+                end if
                 if (nswatb(i,1).eq.nswatb(i,2)) then
                    ! safety checks on swatch
                    write(io_output,*) 'nswaty ',i,' has identical moltyp'
@@ -1323,19 +1656,32 @@ contains
 
                 if (lprint) then
                    write(io_output,'(/,A,2(4X,I0))') '   swatch molecule type pairs:',nswatb(i,1:2)
-                   write(io_output,'(A,I0,A,2(2X,I0))') '   nsampos: ',nsampos(i),', ncut:',ncut(i,1:2)
+                   write(io_output,'(A,I0,A,2(2X,I0),A,2(2X,I0))') '   nsampos: ',nsampos(i),', ncut:',ncut(i,1:2),', ncutsafe:',ncutsafe(i,1:2)
                 end if
 
-                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_SWATCH',jerr)
-                ! gswatc 2x(ifrom, iprev)
-                read(line_in,*) (gswatc(i,j,1:2*ncut(i,j)),j=1,2)
+                ! Read gswatc information
+                if (ncut(i,1) .gt. 0) then
+                    call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_SWATCH',jerr)
+                    ! gswatc 2x(ifrom, iprev)
+                    read(line_in,*) (gswatc(i,j,1:2*ncut(i,j)),j=1,2)
+                end if
+
+                if (ncutsafe(i,1) .gt. 0) then
+                    call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                    if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_SWATCH',jerr)
+                    ! gswatcsafe (ifrom, iprev, index)
+                    read(line_in,*) (gswatcsafe(i,j,1:3*ncutsafe(i,j)),j=1,2)
+                end if
 
                 if (lprint) then
                    do j=1,2
                       write(io_output,FMT='(A,I0)') '   molecule ',j
                       do k = 1,ncut(i,j)
-                         write(io_output,'(3(A,I0))') '   ncut ',k,': grom from ',gswatc(i,j,2*k-1),', prev ',gswatc(i,j,2*k)
+                         write(io_output,'(3(A,I0))') '   ncut ',k,': grow from ',gswatc(i,j,2*k-1),', prev ',gswatc(i,j,2*k)
+                      end do
+                      do k = 1, ncutsafe(i, j)
+                         write(io_output,'(4(A,I0))') '   ncutsafe ',k,': grow from ',gswatcsafe(i,j,3*k-2),', prev ',gswatcsafe(i,j,3*k-1),', index ',gswatcsafe(i,j,3*k)               
                       end do
                    end do
                 end if
@@ -1380,7 +1726,9 @@ contains
     call mp_bcast(nswatb,npamax*2,rootid,groupid)
     call mp_bcast(nsampos,nswaty,rootid,groupid)
     call mp_bcast(ncut,npamax*2,rootid,groupid)
+    call mp_bcast(ncutsafe,npamax*2,rootid,groupid)
     call mp_bcast(gswatc,npamax*npamax*4,rootid,groupid)
+    call mp_bcast(gswatcsafe,npamax*npamax*6,rootid,groupid)
     call mp_bcast(splist,npamax*numax*2,rootid,groupid)
     call mp_bcast(nswtcb,nswaty,rootid,groupid)
     call mp_bcast(pmswtcb,npamax*npabmax,rootid,groupid)

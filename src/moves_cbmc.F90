@@ -1321,7 +1321,7 @@ contains
 
     if (movetype.eq.1) then
        ! this part is just for config right now
-       if (kickout.eq.50) call err_exit(__FILE__,__LINE__,'kickout is 50',myid+1)
+       if (kickout.eq.500) call err_exit(__FILE__,__LINE__,'kickout is 500',myid+1)
 
        ! select the first bead to grow from
        if (lrigid(imolty)) then
@@ -5879,16 +5879,21 @@ contains
 !> \b iwbef = two beads before iend \n
 !> \b fclose(iu) = beads to calculate interaction with from iu \n
 !> \b fcount(iu) = number of fcloses for iu \n
+!> \b movetype = 2 swap move
+!> \b          = 5 SAFE-swatch move
+!> \b findex = how many backbone beads to regrow 
 !> \b COLLIN = MASTER of the known universe
 !> \author Originally completed by Collin Wick around 1-1-2000
 !******************************************************************
-  subroutine safeschedule(igrow,imolty,islen,iutry,findex,movetype)
+  subroutine safeschedule(igrow,imolty,islen,iutry,findex,movetype,iprev)
       logical::lcount,lpick,lterm,lfixed,lfix,lfind
       integer::igrow,imolty,count,counta,iw,ivib,iv,iu ,ju,iutry
       integer::j,ja,kickout,invtry,index,fintnum,fint,k ,islen
       integer::ffrom,fprev,flist,fnum,fnuma,findex ,countb,iv1
       integer::movetype,fmaxgrow,kickouta,iufrom ,iuprev
       integer::num,inum,inuma,max
+
+      integer,optional::iprev
 
       parameter(max=10)
       dimension fint(numax),ffrom(numax,max),fprev(numax,max),flist(numax,max,max),fnum(numax),fnuma(numax,max),lpick(numax)&
@@ -5906,6 +5911,10 @@ contains
             call err_exit(__FILE__,__LINE__,'you can not use safecbmc for swap unless it is a ring',myid+1)
          end if
          fmaxgrow = nunit(imolty)
+      else if (movetype.eq.5) then
+         if (.not. present(iprev)) then
+            call err_exit(__FILE__,__LINE__,'you can not use safe-swatch without indicating iprev',myid+1)
+         end if
       else
          fmaxgrow = maxgrow(imolty) + 1
       end if
@@ -5922,8 +5931,10 @@ contains
 
       if (kickouta.eq.5) call err_exit(__FILE__,__LINE__,'',myid+1)
 
-      if (movetype.eq.2) then
+      if (movetype .eq. 2) then
          findex = fmaxgrow
+      else if (movetype .eq. 5) then
+         ! don't do anything here because for SAFE-SWATCH, findex is an input variable 
       else
          findex = int( random(-1) * dble(fmaxgrow - 1)) + 2
       end if
@@ -5966,6 +5977,30 @@ contains
          end do
          fnum(1) = 1
          fnuma(1,1) = invtry
+
+      else if (movetype.eq.5) then
+      ! Paul -- SAFE-SWATCH part
+         ! ffrom(1,1) and fprev(1,1) are read from input ifrom and iprev
+         ffrom(1,1) = iutry
+         fprev(1,1) = iprev
+         invtry = invib(imolty,iutry)
+
+         if (invtry .lt. 2) then
+            call err_exit(__FILE__,__LINE__,'cannot do safe-swatch starting from an end bead',myid+1)
+         end if
+
+         count = 0
+         do iv = 1, invtry
+            if (ijvib(imolty,iutry,iv).ne.iprev .and. .not.lplace(imolty,ijvib(imolty,iutry,iv))) then
+                count = count + 1
+                ! take down the bead number that is connected to iutry and is about to be regrown next
+                flist(1,1,count) = ijvib(imolty,iutry,iv)
+                lexshed(flist(1,1,count)) = .false.
+            end if
+         end do
+
+         fnum(1) = 1
+         fnuma(1,1) = count
       else
 
          iutry = int( random(-1) * dble(iring(imolty)+icbsta(imolty)))+1 -icbsta(imolty)! factoring in icbsta for safecbmc
@@ -6097,8 +6132,12 @@ contains
 ! Paul -- don't allow the growth to stop at a branch point
       do j = 1, fnum(index)
          if (fnuma(index, j) .gt. 1) then
-            kickout = kickout + 1
-            goto 100
+            if (movetype .eq. 5) then
+               call err_exit(__FILE__,__LINE__,'the safe-swatch closing bead cannot be at a branch point',myid+1) 
+            else
+                kickout = kickout + 1
+                goto 100
+            end if
          end if
       end do
 
@@ -7509,6 +7548,7 @@ contains
        end if
     end do
 ! -------------------------------------------------------------------
+
     if (myid.eq.rootid.AND.ANY(pmfix(1:nmolty).gt.0)) then
        io_safecbmc=get_iounit()
        open(unit=io_safecbmc,access='sequential',action='read',file=file_safecbmc,form='formatted',iostat=jerr,status='unknown')
