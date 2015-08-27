@@ -26,6 +26,7 @@ contains
     logical::lterm
     real::rpair,tweight,tweiold,vnbox(nEnergy,nbxmax),rx_1(numax),ry_1(numax),rz_1(numax),rxut(4,numax),ryut(4,numax),rzut(4,numax)&
      ,waddold,waddnew,dvol,vola,volb,rho,dinsta,wnlog,wolog,wdlog,wswat,v(nEnergy),vdum,delen,deleo,dicount,vrecipn,vrecipo,vdum2&
+     ,cwtorfn,cwtorfo&
      ,total_NBE,total_tor,total_bend,total_vib,vtgn,vbendn,vvibn,Rosenbluth_normalization(ntmax)&
      ,vnewtemp(nEnergy),voldtemp(nEnergy) !< temporarily store vnew and vold between regular CBMC and SAFE-CBMC
     integer::ipair,iparty,type_a,type_b,imolta,imoltb,ipairb,boxa,boxb,imola,imolb,ibox,iboxal,iboxbl,izz,from(2*numax)&
@@ -695,9 +696,9 @@ contains
           call safeschedule(igrow,imolty,islen,ifirst,iindex+1,5,iprev)
 
           if (boxa.eq.boxb) then
-              call rosenbluth(.true.,lterm,self,self,imolty,islen,boxa,igrow,waddnew,.true.,vdum2,2)
+              call rosenbluth(.true.,lterm,self,self,imolty,islen,boxa,igrow,waddnew,.true.,cwtorfn,2)
           else
-              call rosenbluth(.true.,lterm,other,self,imolty,islen,iboxnew,igrow,waddnew,.true.,vdum2,2)
+              call rosenbluth(.true.,lterm,other,self,imolty,islen,iboxnew,igrow,waddnew,.true.,cwtorfn,2)
           end if
 
           if (boxa.eq.boxb) then
@@ -727,7 +728,7 @@ contains
            end if
 
            ! propagate new rosenbluth weight
-           tweight = tweight*weight*waddnew
+           tweight = tweight*weight*waddnew/cwtorfn
 
            ! save the new coordinates
            do jj = 1,igrow
@@ -862,7 +863,7 @@ contains
            ! rigid add on
            waddold = 1.0E0_dp
 
-           call rosenbluth(.false.,lterm,self,self,imolty,islen,iboxold,igrow,waddold,.true.,vdum2,2)
+           call rosenbluth(.false.,lterm,self,self,imolty,islen,iboxold,igrow,waddold,.true.,cwtorfo,2)
 
            ! termination of old walk due to problems generating orientations
            if (lterm) then
@@ -879,7 +880,7 @@ contains
            end if
 
            ! propagate old rosenbluth weight
-           tweiold = tweiold*weiold*waddold
+           tweiold = tweiold*weiold*waddold/cwtorfo
            ! end rigid add on
 
            ! store the old grown beads and explict placed beads positions
