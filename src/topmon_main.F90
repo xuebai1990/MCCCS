@@ -2927,25 +2927,11 @@ contains
        ! 06/08/09 KM
        read(io_restart,*) (rmvol(ibox),ibox=1,nbox)
 
-       do ibox=1,nbox
-          if (lsolid(ibox).and..not.lrect(ibox)) then
-             read(io_restart,*) (rmhmat(ibox,j),j=1,9)
-          end if
-       end do
-
        if (lprint) then
           write(io_output,'(/,A,/,A)') 'READING CONFIGURATION FROM RESTART FILE','------------------------------------------'
           write(io_output,'(A)') 'new maximum displacements read from restart-file'
           write(io_output,'(A,3(2X,F10.6))') '   max atom trans. displacement: ',Armtrax,Armtray,Armtraz
           write(io_output,'(A,3(1X,E11.4))') '   max volume displacement:      ',(rmvol(ibox), ibox = 1,nbox)
-          do ibox=1,nbox
-             if (lsolid(ibox).and..not.lrect(ibox)) then
-                write(io_output,'(A,I0)') '   rmhmat for box ',ibox
-                write(io_output,'(3(4X,G16.9))') rmhmat(ibox,1),rmhmat(ibox,4),rmhmat(ibox,7)
-                write(io_output,'(3(4X,G16.9))') rmhmat(ibox,2),rmhmat(ibox,5),rmhmat(ibox,8)
-                write(io_output,'(3(4X,G16.9))') rmhmat(ibox,3),rmhmat(ibox,6),rmhmat(ibox,9)
-             end if
-          end do
           do im=1,nbox
              write(io_output,'(/,A,I0)') 'box      #',im
              do imol = 1,nmolty
