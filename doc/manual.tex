@@ -1784,9 +1784,9 @@ is FALSE. Note that in the case of a non-orthorhombic
 system, {\bf linit} must be FALSE and the system must start
 from {\bf file\_restart}. In the {\bf file\_restart} one must
 specify maximum displacements for the H-matrix elements
-(9 values) followed by the H-matrix. This replaces
-maximum volume displacement and {\bf boxlx}, {\bf boxly}, 
-{\bf boxlz}, respectively.
+(9 values) after maximum volume displacements. This means
+non-orthorombic box displacemnent will become a dummy variable.
+Later, H-matrix has to be specified after maximum displacements.
 
 \noindent{\bf lideal:} If TRUE, the box is treated as an
 ideal gas, and pair interactions are not computed. In
