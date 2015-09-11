@@ -172,6 +172,8 @@ contains
        ntype(nmolty,1)=area_probe
     end if
 
+    
+
     zpot%ntype=0
     do imol=1,nmolty
        do iunit=1,nunit(imol)
@@ -279,27 +281,29 @@ contains
 
     nynx = product(zunit%ngrid(1:2))
     nznynx = nynx*zunit%ngrid(3)
+    write(io_output,"(A)") 'Writing energy grids in zeolite to files for each bead'
 
     do ii=1,zpot%ntype
-    io_egrid = get_iounit()
-    write(filename_egrid,"(I1)") ii
-    filename_egrid='energy_grid_'//trim(filename_egrid)//'.out'
-    open(unit=io_egrid,file=filename_egrid,status='replace')
-    write(io_egrid,*) zunit%ngrid(:)
-       do r = 0, nznynx - 1
-           k=r/(nynx)
-           j=(r-k*nynx)/zunit%ngrid(1)
-           i=r-k*nynx-j*zunit%ngrid(1) 
-           scoord(1) = (real(i,dp)/zunit%ngrid(1) )/zunit%dup(1)
-           scoord(2) = (real(j,dp)/zunit%ngrid(2) )/zunit%dup(2)
-           scoord(3) = (real(k,dp)/zunit%ngrid(3) )/zunit%dup(3)
-           !scoord(1)=scoord(1)/zunit%dup(1)
-           !scoord(2)=scoord(2)/zunit%dup(2)
-           !scoord(3)=scoord(3)/zunit%dup(3)
-           ri(1)=scoord(1)*zcell%hmat(1,1)%val+scoord(2)*zcell%hmat(1,2)%val+scoord(3)*zcell%hmat(1,3)%val
-           ri(2)=scoord(2)*zcell%hmat(2,2)%val+scoord(3)*zcell%hmat(2,3)%val
-           ri(3)=scoord(3)*zcell%hmat(3,3)%val
-           write(io_egrid,"(3I4,3F8.3,E11.3)")  i, j, k, ri, egrid(r, ii)
+        io_egrid = get_iounit()
+        write(filename_egrid,"(I,A,A)") atoms%list(zpot%table(ii)),'_', chemid(zpot%table(ii))
+        filename_egrid= adjustl(filename_egrid)
+        filename_egrid='energy_grid_'//trim(filename_egrid)//'.out'
+        open(unit=io_egrid,file=filename_egrid,status='replace')
+        write(io_egrid,*) zunit%ngrid(:)
+        do r = 0, nznynx - 1
+            k=r/(nynx)
+            j=(r-k*nynx)/zunit%ngrid(1)
+            i=r-k*nynx-j*zunit%ngrid(1)
+            scoord(1) = (real(i,dp)/zunit%ngrid(1) )/zunit%dup(1)
+            scoord(2) = (real(j,dp)/zunit%ngrid(2) )/zunit%dup(2)
+            scoord(3) = (real(k,dp)/zunit%ngrid(3) )/zunit%dup(3)
+            !scoord(1)=scoord(1)/zunit%dup(1)
+            !scoord(2)=scoord(2)/zunit%dup(2)
+            !scoord(3)=scoord(3)/zunit%dup(3)
+            ri(1)=scoord(1)*zcell%hmat(1,1)%val+scoord(2)*zcell%hmat(1,2)%val+scoord(3)*zcell%hmat(1,3)%val
+            ri(2)=scoord(2)*zcell%hmat(2,2)%val+scoord(3)*zcell%hmat(2,3)%val
+            ri(3)=scoord(3)*zcell%hmat(3,3)%val
+            write(io_egrid,"(3I4,3F8.3,E11.3)")  i, j, k, ri, egrid(r, ii)
         enddo
     close(io_egrid)
     enddo
