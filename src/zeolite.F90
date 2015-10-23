@@ -26,7 +26,7 @@ module zeolite
   integer,parameter::boxZeo=1
 
   logical,allocatable::lunitcell(:)
-  logical::ltailcZeo=.true.,ltestztb=.false.,lpore_volume=.false.,lsurface_area=.false.
+  logical::ltailcZeo=.true.,ltestztb=.false.,lpore_volume=.false.,lsurface_area=.false.,printztb=.false.
 
   integer::nlayermax,n_pieces_ztb=1,num_points_interpolation=4,volume_probe=124,volume_nsample=20,area_probe=124,area_nsample=100
   real,allocatable::my_zgrid(:,:,:),zgrid(:,:,:),egrid(:,:),yjtmp(:),yktmp(:),yltmp(:),xt(:),yt(:),zt(:)
@@ -73,7 +73,7 @@ contains
     integer::io_input,jerr
 
     namelist /zeolite_in/ file_zeocoord,dgr,file_supercell,file_ztb,n_pieces_ztb,requiredPrecision,num_points_interpolation,upperLimit,ltailcZeo&
-     ,ltestztb,lpore_volume,volume_probe,volume_nsample,lsurface_area,area_probe,area_nsample
+     ,ltestztb,lpore_volume,volume_probe,volume_nsample,lsurface_area,area_probe,area_nsample,printztb
 
     if (myid.eq.rootid) then
        io_input=get_iounit()
@@ -172,6 +172,8 @@ contains
        ntype(nmolty,1)=area_probe
     end if
 
+    
+
     zpot%ntype=0
     do imol=1,nmolty
        do iunit=1,nunit(imol)
@@ -268,6 +270,45 @@ contains
        end if
     end do
   end subroutine combine_energies
+
+  subroutine write_energies(egrid, n_points_per_piece)
+    integer,intent(in) :: n_points_per_piece
+    real,intent(in) :: egrid(0:n_points_per_piece-1,1:zpot%ntype)
+    real :: ri(3), scoord(3)
+    character(LEN=128)::filename_egrid
+    integer io_egrid, nynx, nznynx
+    integer i, j, k, r, ii
+
+    nynx = product(zunit%ngrid(1:2))
+    nznynx = nynx*zunit%ngrid(3)
+    write(io_output,"(A)") 'Writing energy grids in zeolite to files for each bead'
+
+    do ii=1,zpot%ntype
+        io_egrid = get_iounit()
+        write(filename_egrid,"(I,A,A)") atoms%list(zpot%table(ii)),'_', chemid(zpot%table(ii))
+        filename_egrid= adjustl(filename_egrid)
+        filename_egrid='energy_grid_'//trim(filename_egrid)//'.out'
+        open(unit=io_egrid,file=filename_egrid,status='replace')
+        write(io_egrid,*) zunit%ngrid(:)
+        do r = 0, nznynx - 1
+            k=r/(nynx)
+            j=(r-k*nynx)/zunit%ngrid(1)
+            i=r-k*nynx-j*zunit%ngrid(1)
+            scoord(1) = (real(i,dp)/zunit%ngrid(1) )/zunit%dup(1)
+            scoord(2) = (real(j,dp)/zunit%ngrid(2) )/zunit%dup(2)
+            scoord(3) = (real(k,dp)/zunit%ngrid(3) )/zunit%dup(3)
+            !scoord(1)=scoord(1)/zunit%dup(1)
+            !scoord(2)=scoord(2)/zunit%dup(2)
+            !scoord(3)=scoord(3)/zunit%dup(3)
+            ri(1)=scoord(1)*zcell%hmat(1,1)%val+scoord(2)*zcell%hmat(1,2)%val+scoord(3)*zcell%hmat(1,3)%val
+            ri(2)=scoord(2)*zcell%hmat(2,2)%val+scoord(3)*zcell%hmat(2,3)%val
+            ri(3)=scoord(3)*zcell%hmat(3,3)%val
+            write(io_egrid,"(3I4,3F8.3,E11.3)")  i, j, k, ri, egrid(r, ii)
+        enddo
+    close(io_egrid)
+    enddo
+
+  end subroutine write_energies
 
   subroutine suzeo(lprint)
     use util_search,only:indexOf
@@ -437,6 +478,7 @@ contains
     end if
 
     if (ltestztb.or.lpore_volume) call ztest()
+    if (printztb) call write_energies(egrid(st:st+n_points_per_piece-1,:), n_points_per_piece)
 
     deallocate(lunitcell,my_zgrid,zgrid,zeo%bead,ztype%type,ztype%num,ztype%radiisq,ztype%name,zpot%param)
     if (lprint) then

@@ -2925,8 +2925,9 @@ contains
 
        ! changed so fort.77 the same for all ensembles
        ! 06/08/09 KM
-       read(io_restart,*) (rmvol(ibox),ibox=1,nbox)
 
+       read(io_restart,*) (rmvol(ibox),ibox=1,nbox)
+ 
        do ibox=1,nbox
           if (lsolid(ibox).and..not.lrect(ibox)) then
              read(io_restart,*) (rmhmat(ibox,j),j=1,9)
@@ -2937,7 +2938,7 @@ contains
           write(io_output,'(/,A,/,A)') 'READING CONFIGURATION FROM RESTART FILE','------------------------------------------'
           write(io_output,'(A)') 'new maximum displacements read from restart-file'
           write(io_output,'(A,3(2X,F10.6))') '   max atom trans. displacement: ',Armtrax,Armtray,Armtraz
-          write(io_output,'(A,3(1X,E11.4))') '   max volume displacement:      ',(rmvol(ibox), ibox = 1,nbox)
+          write(io_output,'(A,3(1X,E11.4))') '   max volume displacement: ',(rmvol(ibox), ibox = 1,nbox)
           do ibox=1,nbox
              if (lsolid(ibox).and..not.lrect(ibox)) then
                 write(io_output,'(A,I0)') '   rmhmat for box ',ibox
