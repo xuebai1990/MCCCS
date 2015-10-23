@@ -11,7 +11,7 @@ MODULE moves_cbmc
   private
   save
   public::config,rosenbluth,schedule,explct,safeschedule,allocate_cbmc,init_cbmc,opt_safecbmc,output_cbmc_stats&
-   ,output_safecbmc,read_checkpoint_cbmc,write_checkpoint_cbmc
+   ,output_safecbmc,read_checkpoint_cbmc,write_checkpoint_cbmc,align_lines,dihedral_rigrot
 
   ! CBMC.INC
   logical,public::llrig
@@ -50,7 +50,7 @@ contains
       logical::lterm,ovrlap,ltors,lfixnow
 
       integer::i,j,k,iii,ibox,iunit,igrow,icbu,islen,imolty,iutry
-      integer::istt,iett,nchp1,ic,total,bin,count,findex,iw
+      integer::istt,iett,nchp1,ic,total,bin,count,findex,iw,grouptype
 
       real::v(nEnergy),vtornew,delen,deleo,vdum,wplace,wrig
       real::dchain,rchain,wnlog,wolog,wdlog,wratio
@@ -78,11 +78,16 @@ contains
 
       if (temtyp(imolty).eq.0) return
 
-! determine whether to use fecbmc or not ***
+! determine whether to use safe-cbmc or group-cbmc or not ***
       if (random(-1).lt.pmfix(imolty)) then
          lfixnow = .true.
+         grouptype = 0
+      else if (random(-1).lt.pmgroup(imolty)) then
+         lfixnow = .false.
+         grouptype = 1
       else
          lfixnow = .false.
+         grouptype = 0
       end if
 
       dchain = real(temtyp(imolty),dp)
@@ -105,7 +110,7 @@ contains
       if (lfixnow) then
          call safeschedule(igrow,imolty,islen,iutry,findex,1)
       else
-         call schedule(igrow,imolty,islen,iutry,0,1)
+         call schedule(igrow,imolty,islen,iutry,0,1,grouptype)
       end if
 
 ! determine how many beads are being regrown
@@ -124,9 +129,13 @@ contains
 ! Call qqcheck to setup the group based qq cutoff
 ! call qqcheck(i,ibox,rxnew(1),rynew(1),rznew(1))
 ! end if
-
+     
 ! grow new chain conformation
-      call rosenbluth(.true.,lterm,i,i,imolty,islen,ibox,igrow,vdum,lfixnow,cwtorfn,1)
+      if (grouptype .eq. 1) then
+         call group_cbmc_grow(.true.,lterm,i,imolty,ibox)
+      else
+         call rosenbluth(.true.,lterm,i,i,imolty,islen,ibox,igrow,vdum,lfixnow,cwtorfn,1)
+      end if
 
 ! termination of cbmc attempt due to walk termination ---
       if ( lterm ) then
@@ -147,7 +156,11 @@ contains
       end if
 
 ! grow old chain conformation
-      call rosenbluth(.false.,lterm,i,i,imolty,islen,ibox,igrow,vdum,lfixnow,cwtorfo,1)
+      if (grouptype .eq. 1) then
+         call group_cbmc_grow(.false.,lterm,i,imolty,ibox)
+      else 
+         call rosenbluth(.false.,lterm,i,i,imolty,islen,ibox,igrow,vdum,lfixnow,cwtorfo,1)
+      end if
 
 ! termination of old walk due to problems generating orientations
       if ( lterm ) then
@@ -1292,19 +1305,28 @@ contains
 !> 3 = swatch moves for flexible molecules;\n
 !> 4 = swap/swatch moves for partially rigid molecules;\n
 !> 5 = swatch moves for molecules with more than 1 cuts
+!> \param grouptype 0 = NOT use group-CBMC
+!> 1 = group-CBMC scheduler for long chain molecules
+!> 2 = group-CBMC scheduler for repeat unit (iutry is needed)
 !*****************************************************************
-  subroutine schedule(igrow,imolty,index,iutry,iprev,movetype)
+  subroutine schedule(igrow,imolty,index,iutry,iprev,movetype,grouptype)
     logical::lfind(numax)
     integer::random_index
-    integer::kickout,icbu,igrow,imolty,iutry,iut,invtry,iu,ju
-    integer::ibead,count,ivib,idir,movetype,iprev,itry,i,ib2
+    integer::kickout,icbu,igrow,imolty,iutry,iut,invtry,iu,ju,gcbmc_prev,grouptype
+    integer::ibead,count,ivib,idir,movetype,iprev,itry,i,ib2,isegment
     integer::temp_store(numax),temp_count,izz,outer_sites(numax),index,outer_num,outer_prev(numax),iufrom,outer_try
+    integer :: gcbmc_imolty,unit_num_local
     real::dbgrow
     logical,parameter::lprint = .false.
 ! ------------------------------------------------------------------
 #ifdef __DEBUG__
     write(io_output,*) 'start SCHEDULE in ',myid
 #endif
+
+    if (grouptype .eq. 1) then
+       gcbmc_imolty = gcbmc_mol_list(imolty)
+       unit_num_local = gcbmc_unit_num(gcbmc_imolty)
+    end if
 
     kickout = 0
 
@@ -1331,6 +1353,8 @@ contains
        else if (lrig(imolty).and.nrig(imolty).gt.0) then
           dbgrow = random(-1)*real(nrig(imolty),dp) + 1.0_dp
           iutry = irig(imolty,int(dbgrow))
+       else if (grouptype .eq. 2) then
+          ! group-CBMC of repeat unit, iutry is given
        else if (icbsta(imolty).gt.0) then
           iutry = icbsta(imolty)
        else if (icbsta(imolty).eq.0) then
@@ -1345,8 +1369,38 @@ contains
           ju = int(random(-1)*real(nrigmax(imolty)-nrigmin(imolty)+1,dp)) + nrigmin(imolty)
        end if
 
-       idir = icbdir(imolty)
-       growfrom(1) = iutry
+       ! if group-CBMC is used, iutry is selected differently
+       if (grouptype .eq. 1) then
+          if (random(-1) .le. 0.5) then
+              idir = 1
+          else
+              idir = -1
+          end if
+
+          ! choose which segment to grow
+          ! for idir .eq. 1, isegment = (1,...,n-1)
+          ! for idir .eq. -1, isegment = (2,...,n)
+          isegment = int(random(-1) * (unit_num_local - 1)) + 1 !< 1,...,n - 1
+          if (idir .eq. -1) then
+             isegment = isegment + 1
+          end if   
+ 
+          if (idir .eq. -1) then
+             iutry = gcbmc_unit_list(gcbmc_imolty, isegment, 1)
+             gcbmc_prev = gcbmc_unit_list(gcbmc_imolty, isegment, 2) 
+          else
+             iutry = gcbmc_unit_list(gcbmc_imolty, isegment, 2)
+             gcbmc_prev = gcbmc_unit_list(gcbmc_imolty, isegment, 1) 
+          end if
+          growfrom(1) = iutry
+       else if (grouptype .eq. 2) then
+          idir = icbdir(imolty)
+          growfrom(1) = iutry
+       else
+          idir = icbdir(imolty)
+          growfrom(1) = iutry
+       end if
+
        invtry = invib(imolty,iutry)
        index = 1
 
@@ -1359,6 +1413,9 @@ contains
              kickout = kickout + 1
              goto 11
           end if
+
+          ! group-CBMC does not allow that kind of move
+          if (grouptype .eq. 1) call err_exit(__FILE__,__LINE__,'something wrong with group-CBMC scheduler',myid+1)
 
           growprev(1) = 0
           grownum(1) = invtry
@@ -1375,10 +1432,16 @@ contains
        else
           ! at a branch point, decide how many branches to regrow
           ! regrow all of legal branches (check idir )
+
+          ! if group-CBMC of repeat unit, something is wrong
+          if (grouptype.eq.2) call err_exit(__FILE__,__LINE__,'something wrong with group-CBMC scheduler',myid+1) 
+
           count = 0
           do ivib = 1,invtry
              iut = ijvib(imolty,iutry,ivib)
-             if (idir.eq.1.and.iut.lt.iutry) then
+             if (grouptype.eq.1 .and. iut.eq.gcbmc_prev) then
+                growprev(1) = iut
+             else if (idir.eq.1.and.iut.lt.iutry) then
                 !> \bug this is the one and only previous nongrown bead. This is potentially a bug; certain numbering scheme will fail
                 growprev(1) = iut
              else
@@ -2822,6 +2885,157 @@ contains
 
     return
   end subroutine bondlength
+  
+  !> \brief Translate and rotate the rigid body such that the first and second beads match with given ones
+  !> 1) Translate so that bead 1 matches with given bead 1
+  !> 2) Rotate so that bead 2 matches with given bead 2
+  !> If bead 3 is given as well, call subroutine align_rotate to do the rigid rotation around vector 12
+  !> \param first_bead, second_bead: the two bead numbers that need to be aligned with two target beads 
+  !> \param nbead: number of repeat unit beads to move
+  !> \param xi, yi, zi: input and output coordinates
+  !> \param xtarget, ytarget, ztarget: size of 2, the coordinates of 2 given beads
+  subroutine align_lines(first_bead, second_bead, nbead, xi, yi, zi, xtarget, ytarget, ztarget)
+      use util_runtime, only : err_exit
+      use util_math, only : cross_product,normalize_vector
+      integer, intent(in) :: first_bead, second_bead, nbead
+      real, intent(inout) :: xi(numax), yi(numax), zi(numax)
+      real, intent(in) :: xtarget(2), ytarget(2), ztarget(2)
+      real :: Qrot(3,3)
+      real :: xtrans, ytrans, ztrans, costheta, sintheta, smallc, bigc, s, bead_err
+      real :: vector_a(3), vector_b(3), vector_n(3), vector_w(3), vector_rot(3)
+      integer :: ibead
+
+      !----- Translation part
+      xtrans = xtarget(1) - xi(first_bead)
+      ytrans = ytarget(1) - yi(first_bead)
+      ztrans = ztarget(1) - zi(first_bead)
+      
+      do ibead = 1, nbead
+          xi(ibead) = xi(ibead) + xtrans
+          yi(ibead) = yi(ibead) + ytrans
+          zi(ibead) = zi(ibead) + ztrans
+      end do
+
+      !----- Rotation part
+      ! use cross_product to determine the normal vector to the plane
+      ! the plane is determined by two vectors, xi(1)-->xi(2) and xtarget(1)-->xtarget(2)
+      vector_a(1) = xtarget(2) - xtarget(1)
+      vector_a(2) = ytarget(2) - ytarget(1)
+      vector_a(3) = ztarget(2) - ztarget(1)
+      vector_b(1) = xi(second_bead) - xi(first_bead)
+      vector_b(2) = yi(second_bead) - yi(first_bead)
+      vector_b(3) = zi(second_bead) - zi(first_bead)
+
+      ! if (in the old growth) vector_a and vector_b are the same, skip the rotation part to avoid numerical issues
+      if (norm2(vector_a - vector_b) .le. 1e-4) then
+          return
+      end if
+
+      vector_n = cross_product(vector_a, vector_b)
+      vector_n = normalize_vector(vector_n)
+      vector_w = cross_product(vector_n, vector_a) !< vector_w and vector_a are the orthogonal vector in the planeof vector_a and vector_b
+
+      ! calculate angle theta to rotate 
+      costheta = dot_product(vector_a, vector_b) / (norm2(vector_a) * norm2(vector_b))
+      sintheta = norm2(cross_product(vector_a, vector_b)) / (norm2(vector_a) * norm2(vector_b))
+      s = atan2(dot_product(vector_w, vector_b), dot_product(vector_a, vector_b))
+      if (atan2(dot_product(vector_w, vector_b), dot_product(vector_a, vector_b)) .gt. 0) then
+          sintheta = -sintheta
+      end if
+    
+      ! set up the rotation matrix (see wikipedia "rotation matrix, axis and angle" for theoretical details)
+      ! for clarity, the same notation is used as in wikipedia (smallc, bigc, s)
+      smallc = costheta
+      s = sintheta
+      bigc = 1 - smallc 
+      Qrot(1, 1) = vector_n(1) * vector_n(1) * bigc + smallc
+      Qrot(1, 2) = vector_n(2) * vector_n(1) * bigc - vector_n(3) * s
+      Qrot(1, 3) = vector_n(1) * vector_n(3) * bigc + vector_n(2) * s
+      Qrot(2, 1) = vector_n(2) * vector_n(1) * bigc + vector_n(3) * s
+      Qrot(2, 2) = vector_n(2) * vector_n(2) * bigc + smallc
+      Qrot(2, 3) = vector_n(2) * vector_n(3) * bigc - vector_n(1) * s
+      Qrot(3, 1) = vector_n(3) * vector_n(1) * bigc - vector_n(2) * s
+      Qrot(3, 2) = vector_n(3) * vector_n(2) * bigc + vector_n(1) * s
+      Qrot(3, 3) = vector_n(3) * vector_n(3) * bigc + smallc
+
+      ! do the rotation, and determine the new coordinate for xi, yi and zi
+      do ibead = 1, nbead
+          vector_b(1) = xi(ibead) - xi(first_bead)
+          vector_b(2) = yi(ibead) - yi(first_bead)
+          vector_b(3) = zi(ibead) - zi(first_bead)
+          vector_rot = matmul(Qrot, vector_b) ! the new vector after rotation
+          xi(ibead) = xi(first_bead) + vector_rot(1)
+          yi(ibead) = yi(first_bead) + vector_rot(2)
+          zi(ibead) = zi(first_bead) + vector_rot(3)
+      end do
+
+      ! make sure it matches
+      bead_err = abs((xi(second_bead) - xtarget(2))**2 + (yi(second_bead) - ytarget(2))**2 + (zi(second_bead) - ztarget(2))**2)
+      if (bead_err .gt. 1e-4) then
+         call err_exit(__FILE__,__LINE__,'error in align_lines subroutine, the second bead does not match with the target',-1) 
+      end if
+     
+  end subroutine align_lines
+
+  !> \brief fix the first (or last) two beads, and rotate the third one by angle phi (0, 2pi)
+  !> \param bead1_coord, bead2_coord: coordinates of first (or last) two beads that serve as axis, dim = 3
+  !> \param nbead: number of repeat unit beads
+  !> \param xi, yi, zi: input coordinates
+  !> \param phi: the input angle phi (0, 2pi)
+  !> \param xout, yout, zout: output coordinates
+  subroutine dihedral_rigrot(bead1_coord, bead2_coord, nbead, xi, yi, zi, phi, xout, yout, zout)
+      use util_runtime, only : err_exit
+      use util_math, only : normalize_vector
+      integer, intent(in) :: nbead
+      real, intent(in) :: xi(numax), yi(numax), zi(numax), bead1_coord(3), bead2_coord(3)
+      real, intent(out) :: xout(numax), yout(numax), zout(numax)
+      real, intent(inout) :: phi
+
+      integer :: ibead
+      real :: vector_grow_dist
+      real :: vector_prev(3), vector_grow(3), vector_prev_normalized(3), W(3, 3), Qrot(3, 3)
+      real :: I(3, 3)
+
+      xout = xi
+      yout = yi
+      zout = zi
+
+      ! compute the unit vector as the rotation axis
+      vector_prev = bead2_coord - bead1_coord
+      vector_prev_normalized = normalize_vector(vector_prev)
+
+      ! set up the rotation matrix (according to Rodrigues rotation formula)
+      W(1, 1) = 0.0
+      W(1, 2) = - vector_prev_normalized(3)
+      W(1, 3) = vector_prev_normalized(2)
+      W(2, 1) = vector_prev_normalized(3)
+      W(2, 2) = 0.0
+      W(2, 3) = - vector_prev_normalized(1)
+      W(3, 1) = - vector_prev_normalized(2)
+      W(3, 2) = vector_prev_normalized(1)
+      W(3, 3) = 0.0
+      I = 0.0
+      I(1, 1) = 1.0
+      I(2, 2) = 1.0
+      I(3, 3) = 1.0
+
+      Qrot = I + sin(phi) * W + (2. * sin(.5 * phi)**2) * matmul(W, W) 
+
+      ! loop over all unit and grow
+      do ibead = 1, nbead
+          vector_grow(1) = xout(ibead) - bead2_coord(1)
+          vector_grow(2) = yout(ibead) - bead2_coord(2)
+          vector_grow(3) = zout(ibead) - bead2_coord(3)
+  
+          vector_grow = matmul(Qrot, vector_grow)
+ 
+          xout(ibead) = vector_grow(1) + bead2_coord(1)
+          yout(ibead) = vector_grow(2) + bead2_coord(2)
+          zout(ibead) = vector_grow(3) + bead2_coord(3)
+      end do
+
+  end subroutine dihedral_rigrot
+
 
 !************************************************************
 !> \brief Performs a rotational configurational bias move
@@ -7295,6 +7509,638 @@ contains
       return
   end subroutine rigfix
 
+  !> \brief Performs group CBMC
+  !>
+  !> \param lnew true for new configurations
+  !> \param lterm true if early terminated
+  !> \param i perform rosenbluth growth for chain i
+  !> \param imolty molecule type of chain i
+  !> \param ibox box number of chain i
+  subroutine group_cbmc_grow(lnew,lterm,i,imolty,ibox)
+      use sim_particle,only:ctrmas
+      use util_mp,only:mp_set_displs,mp_allgather
+      logical::lnew,lterm
+      integer::i,imolty,ibox
+
+      logical::l_reach_end,laccept,ovrlap,lexist_temp(numax),lexshed_original(numax)
+      integer::gcbmc_imolty,i_grow_unit,unit_num_local,repeat_unit_list(numax),glist(numax)
+      integer::iufrom,iuprev,idir,unit_index,repeat_unit_imolty,iw,igrow,i_repeat_unit,repeat_unit_nunit
+      integer::islen,iutry,nchoi_group,ichoig,ichoi,ibead,jbead,itor,ichtor,ip,iu,iv,ju,it,jut2,jut3,jut4
+      integer::first_bead,second_bead,bead_count
+      integer::growfrom_mol(numax),growprev_mol(numax),grownum_mol(numax),growlist_mol(numax,numax) !< growlist of the original molecule
+      real::vdum,cwtorf,repeat_unit_weight_tot,accum_prob,rand_tor,rand_nonb,bsum,weight_temp,weiold_temp
+      real :: wnlog,wolog,wdlog,wratio,vnew_torsion,phi,maxlen,length
+      real :: xvec_temp(numax,numax),yvec_temp(numax,numax),zvec_temp(numax,numax),distij_temp(numax,numax)
+      real, allocatable::repeat_unit_rx(:,:),repeat_unit_ry(:,:),repeat_unit_rz(:,:)
+      real :: xtarget(3), ytarget(3), ztarget(3), vnew_temp(nEnergy), vold_temp(nEnergy)
+      real :: repeat_unit_rx_chosen(numax), repeat_unit_ry_chosen(numax), repeat_unit_rz_chosen(numax)
+      real :: repeat_unit_rxp(numax), repeat_unit_ryp(numax), repeat_unit_rzp(numax), bead1_coord(3),bead2_coord(3)
+      real, allocatable :: repeat_unit_energy(:,:), rxnew_temp(:), rynew_temp(:), rznew_temp(:)
+    
+      ! MPI
+      integer :: rcounts(numprocs),displs(numprocs),my_start,my_end,blocksize,my_itrial,rid
+      real, allocatable :: my_bf_tor(:), my_vtorsion(:), my_phitors(:), my_vtorsion_procs(:),bf_tor(:), vtorsion(:),phitors(:)
+    
+      iw = 1
+      l_reach_end = .false.
+      igrow = nugrow(imolty)
+      gcbmc_imolty = gcbmc_mol_list(imolty)
+      ichtor = nchtor(imolty)
+      ichoi = nchoi(imolty)
+      nchoi_group = nchoig(imolty)
+      unit_num_local = gcbmc_unit_num(gcbmc_imolty)
+      allocate(repeat_unit_energy(nchoi_group,nEnergy))
+      allocate(rxnew_temp(igrow), rynew_temp(igrow), rznew_temp(igrow))
+      allocate(my_bf_tor(ichtor), my_vtorsion(ichtor), my_phitors(ichtor), my_vtorsion_procs(ichtor),&
+         bf_tor(ichtor), vtorsion(ichtor), phitors(ichtor))
+      allocate(repeat_unit_rx(nchoi_group,numax))
+      allocate(repeat_unit_ry(nchoi_group,numax))
+      allocate(repeat_unit_rz(nchoi_group,numax))
+ 
+      growprev_mol = growprev
+      growfrom_mol = growfrom
+      grownum_mol = grownum
+      growlist_mol = growlist
+
+      rxnew_temp(1:igrow) = rxnew(1:igrow)
+      rynew_temp(1:igrow) = rynew(1:igrow)
+      rznew_temp(1:igrow) = rznew(1:igrow)
+      lexshed_original(1:igrow) = lexshed(1:igrow)
+      lexist_temp(1:igrow) = lexshed(1:igrow)
+      lexist(1:igrow) = lexist_temp(1:igrow)
+      xvec_temp = 0
+      yvec_temp = 0
+      zvec_temp = 0
+      distij_temp = 0
+
+      if (lnew) then
+          weight = 1.0E0_dp
+      else
+          weiold = 1.0E0_dp
+      end if
+         
+      ! calculate the bond vectors that already exist and store in *vec_temp
+      do iu = 1, igrow
+          do iv = 1, invib(imolty,iu)
+              ju = ijvib(imolty,iu,iv)
+              if (lexist(iu) .and. lexist(ju)) then
+                  xvec_temp(iu, ju) = rxnew(ju) - rxnew(iu) 
+                  yvec_temp(iu, ju) = rynew(ju) - rynew(iu) 
+                  zvec_temp(iu, ju) = rznew(ju) - rznew(iu) 
+                  distij_temp(iu,ju) = sqrt(xvec_temp(iu,ju)**2 + yvec_temp(iu,ju)**2 + zvec_temp(iu,ju)**2)
+              end if
+          end do
+      end do
+      
+      ! MPI
+      if (numprocs.gt.1) then
+          rid=myid
+      else
+          rid=-1
+      end if
+      blocksize = ichtor/numprocs
+      rcounts = blocksize
+      blocksize = ichtor - blocksize * numprocs
+      if (blocksize.gt.0) rcounts(1:blocksize) = rcounts(1:blocksize) + 1
+      call mp_set_displs(rcounts,displs,blocksize,numprocs)
+      my_start = displs(myid+1) + 1
+      my_end = my_start + rcounts(myid+1) - 1
+
+      ! loop over all segments to grow
+      do while (.true.)    
+         repeat_unit_weight_tot = 0.0E0_dp
+         iufrom = growfrom_mol(iw)
+         iuprev = growprev_mol(iw)
+
+         ! determine which segment to grow (i_grow_unit)
+         ! TO BE ADDED: the growth of the first and last segment alone
+         do unit_index = 1, unit_num_local
+             if ((iufrom .eq. gcbmc_unit_list(gcbmc_imolty, unit_index, 2)) .and. &
+                 (iuprev .eq. gcbmc_unit_list(gcbmc_imolty, unit_index, 1))) then
+                 idir = 1
+                 i_grow_unit = unit_index
+                 goto 925
+             else if ((unit_index .gt. 1) .and. (iufrom .eq. gcbmc_unit_list(gcbmc_imolty, unit_index, 1)) .and. &
+                 (iuprev .eq. gcbmc_unit_list(gcbmc_imolty, unit_index, 2))) then
+                 idir = -1
+                 i_grow_unit = unit_index - 1
+                 goto 925
+             else if (iufrom .eq. 1 .and. iuprev .eq. 0) then
+                 idir = 1
+                 i_grow_unit = 1
+                 goto 925
+             else if (iufrom .eq. igrow .and. iuprev .eq. 0) then
+                 idir = -1
+                 i_grow_unit = unit_num_local
+                 goto 925
+             end if
+         end do 
+         
+         ! this is not the bead to start the segment, continue
+         iw = iw + 1
+         cycle
+
+925      continue
+      
+         if ((idir .eq. -1 .and. i_grow_unit .eq. 1) .or. &
+            (idir .eq. 1 .and. i_grow_unit .eq. unit_num_local)) then
+             l_reach_end = .true.             
+         end if
+
+         repeat_unit_imolty = gcbmc_unit_moltype(gcbmc_imolty, i_grow_unit)
+         repeat_unit_nunit = nugrow(repeat_unit_imolty)
+
+         ! temporarily store weight and energy to avoid being overwritten by rosenbluth of repeat unit
+         weight_temp = weight
+         weiold_temp = weiold
+         vnew_temp = vnew
+         vold_temp = vold
+     
+         ! localize the correspondence between ibead in repeat_unit list and the original molecule
+         do unit_index = 1, repeat_unit_nunit
+             ibead = gcbmc_unit_list(gcbmc_imolty, i_grow_unit, unit_index)
+             repeat_unit_list(unit_index) = ibead
+         end do
+
+         !---Use rosenbluth to grow the repeat unit
+         if (idir .eq. -1) then
+             iutry = repeat_unit_nunit
+         else
+             iutry = 1
+         end if
+         
+         call schedule(repeat_unit_nunit,repeat_unit_imolty,islen,iutry,0,1,2)
+
+         i_repeat_unit = parall(repeat_unit_imolty,1)
+         
+         ! run nchoig repeat unit growth, gather weight and pick a configuration
+         do ichoig = 1, nchoi_group
+             rxnew(1:repeat_unit_nunit) = rxu(i_repeat_unit, 1:repeat_unit_nunit)
+             rynew(1:repeat_unit_nunit) = ryu(i_repeat_unit, 1:repeat_unit_nunit)
+             rznew(1:repeat_unit_nunit) = rzu(i_repeat_unit, 1:repeat_unit_nunit)
+
+             if (lnew .or. ichoig .ne. 1) then
+                 ! perform regular CBMC on the repeat unit molecule
+                 call rosenbluth(.true.,lterm,i_repeat_unit,i_repeat_unit,repeat_unit_imolty,islen,&
+                    gcbmc_box_num,repeat_unit_nunit,vdum,.false.,cwtorf,1)
+                 if (lterm) call err_exit(__FILE__,__LINE__,'termination in repeat unit growth. Try increasing box size?',myid+1)
+                 call rosenbluth(.false.,lterm,i_repeat_unit,i_repeat_unit,repeat_unit_imolty,islen,&
+                    gcbmc_box_num,repeat_unit_nunit,vdum,.false.,cwtorf,1)
+                 if (lterm) call err_exit(__FILE__,__LINE__,'termination in repeat unit old growth. Some bug in the code?',myid+1)
+
+                 ! check for acceptance of trial configuration ***
+                 wnlog = log10 (weight)
+                 wolog = log10 (weiold)
+                 wdlog = wnlog - wolog
+
+                 if ( wdlog .lt. -softcut ) then
+                     call err_exit(__FILE__,__LINE__,'termination in repeat unit growth. Try increasing box size?',myid+1)
+                 end if
+
+                 wratio = weight / weiold
+
+                 if (random(rid) .le. wratio ) then
+                     laccept = .true.
+                     vbox(ivTot,gcbmc_box_num) = vbox(ivTot,gcbmc_box_num) + ( vnew(ivTot) - vold(ivTot) )
+                     vbox(ivInterLJ,gcbmc_box_num) = vbox(ivInterLJ,gcbmc_box_num) +&
+                         (vnew(ivInterLJ) - vold(ivInterLJ))
+                     vbox(ivIntraLJ,gcbmc_box_num) = vbox(ivIntraLJ,gcbmc_box_num) +&
+                         (vnew(ivIntraLJ)- vold(ivIntraLJ))
+                     vbox(ivStretching,gcbmc_box_num) = vbox(ivStretching,gcbmc_box_num) +&
+                         (vnew(ivStretching)- vold(ivStretching))
+                     vbox(ivTorsion,gcbmc_box_num) = vbox(ivTorsion,gcbmc_box_num) +&
+                         (vnew(ivTorsion)- vold(ivTorsion))
+                     vbox(ivExt,gcbmc_box_num) = vbox(ivExt,gcbmc_box_num) + (vnew(ivExt) - vold(ivExt))
+                     vbox(ivBending,gcbmc_box_num) = vbox(ivBending,gcbmc_box_num) +&
+                         (vnew(ivBending) - vold(ivBending))
+                     vbox(ivElect,gcbmc_box_num) = vbox(ivElect,gcbmc_box_num) &
+                      + (vnew(ivElect) - vold(ivElect)) + (vnew(ivEwald) - vold(ivEwald))
+                 
+                     rxu(i_repeat_unit, 1:repeat_unit_nunit) = rxnew(1:repeat_unit_nunit)
+                     ryu(i_repeat_unit, 1:repeat_unit_nunit) = rynew(1:repeat_unit_nunit)
+                     rzu(i_repeat_unit, 1:repeat_unit_nunit) = rznew(1:repeat_unit_nunit)
+
+                     ! update COM
+                     call ctrmas(.false.,gcbmc_box_num,i_repeat_unit,7)
+                 else
+                     laccept = .false.
+                 end if
+    
+                 ! store the repeat unit coordinates
+                 repeat_unit_rx(ichoig, 1:repeat_unit_nunit) = rxu(i_repeat_unit, 1:repeat_unit_nunit)
+                 repeat_unit_ry(ichoig, 1:repeat_unit_nunit) = ryu(i_repeat_unit, 1:repeat_unit_nunit)
+                 repeat_unit_rz(ichoig, 1:repeat_unit_nunit) = rzu(i_repeat_unit, 1:repeat_unit_nunit)
+
+             else
+                 ! old growth of the repeat unit
+            
+                 ! use the repeat unit coordinates from original molecules 
+                 do unit_index = 1, repeat_unit_nunit
+                     ibead = repeat_unit_list(unit_index)
+                     rxu(i_repeat_unit, unit_index) = rxu(i, ibead)
+                     ryu(i_repeat_unit, unit_index) = ryu(i, ibead)
+                     rzu(i_repeat_unit, unit_index) = rzu(i, ibead)
+                 end do
+
+                 ! old growth
+                 call rosenbluth(.false.,lterm,i_repeat_unit,i_repeat_unit,repeat_unit_imolty,islen,&
+                    gcbmc_box_num,repeat_unit_nunit,vdum,.false.,cwtorf,1)
+                 if (lterm) call err_exit(__FILE__,__LINE__,'termination in repeat unit old growth. Some bug in the code?',myid+1)
+                 laccept = .false.
+
+                 ! store the repeat unit coordinates
+                 repeat_unit_rx(ichoig, 1:repeat_unit_nunit) = rxu(i_repeat_unit, 1:repeat_unit_nunit)
+                 repeat_unit_ry(ichoig, 1:repeat_unit_nunit) = ryu(i_repeat_unit, 1:repeat_unit_nunit)
+                 repeat_unit_rz(ichoig, 1:repeat_unit_nunit) = rzu(i_repeat_unit, 1:repeat_unit_nunit)
+                
+                 ! restore the original repeat unit coordinates 
+                 rxu(i_repeat_unit, 1:repeat_unit_nunit) = rxnew(1:repeat_unit_nunit)
+                 ryu(i_repeat_unit, 1:repeat_unit_nunit) = rynew(1:repeat_unit_nunit)
+                 rzu(i_repeat_unit, 1:repeat_unit_nunit) = rznew(1:repeat_unit_nunit)
+                
+             end if
+                
+             ! update trial energy
+             if (laccept) then
+                 repeat_unit_energy(ichoig,ivTot) = vnew(ivTot)
+                 repeat_unit_energy(ichoig,ivStretching) = vnew(ivStretching)
+                 repeat_unit_energy(ichoig,ivBending) = vnew(ivBending)
+                 repeat_unit_energy(ichoig,ivTorsion) = vnew(ivTorsion) 
+             else
+                 repeat_unit_energy(ichoig,ivTot) = vold(ivTot)
+                 repeat_unit_energy(ichoig,ivStretching) = vold(ivStretching)
+                 repeat_unit_energy(ichoig,ivBending) = vold(ivBending)
+                 repeat_unit_energy(ichoig,ivTorsion) = vold(ivTorsion) 
+             end if
+
+             repeat_unit_weight_tot = repeat_unit_weight_tot + exp(-beta * repeat_unit_energy(ichoig, ivTot))
+         end do
+
+         ! select one of the repeat unit structure RANDOMLY
+         ! because the bias has already been introduced towards lower energy structure when we do CBMC
+         if (lnew) then
+             ichoig = int(random(rid) * nchoi_group) + 1
+         else
+             ichoig = 1
+         end if
+             
+         ! assigin coordinates of the repeat unit structure 
+         repeat_unit_rx_chosen = repeat_unit_rx(ichoig, 1:repeat_unit_nunit)
+         repeat_unit_ry_chosen = repeat_unit_ry(ichoig, 1:repeat_unit_nunit)
+         repeat_unit_rz_chosen = repeat_unit_rz(ichoig, 1:repeat_unit_nunit)
+         
+         !---grow the original molecule, initialize coordinates, energies and weights
+         rxnew(1:igrow) = rxnew_temp(1:igrow)
+         rynew(1:igrow) = rynew_temp(1:igrow)
+         rznew(1:igrow) = rznew_temp(1:igrow)
+         lexist(1:igrow) = lexist_temp(1:igrow)
+         weight  = weight_temp
+         vnew = vnew_temp
+         weiold = weiold_temp
+         vold = vold_temp
+         xvec = xvec_temp
+         yvec = yvec_temp
+         zvec = zvec_temp
+        
+         ! translate and rotate the repeat unit rigidly so that first two beads match ifrom and iprev
+         if (lnew) then
+             xtarget(1) = rxnew(iuprev)
+             ytarget(1) = rynew(iuprev)
+             ztarget(1) = rznew(iuprev) 
+             xtarget(2) = rxnew(iufrom)
+             ytarget(2) = rynew(iufrom)
+             ztarget(2) = rznew(iufrom)
+         else
+             xtarget(1) = rxu(i, iuprev)
+             ytarget(1) = ryu(i, iuprev)
+             ztarget(1) = rzu(i, iuprev) 
+             xtarget(2) = rxu(i, iufrom)
+             ytarget(2) = ryu(i, iufrom)
+             ztarget(2) = rzu(i, iufrom)
+         end if
+
+         do unit_index = 1, repeat_unit_nunit
+             ibead = repeat_unit_list(unit_index)
+             if (ibead .eq. iufrom) second_bead = unit_index
+             if (ibead .eq. iuprev) first_bead = unit_index
+         end do
+
+         call align_lines(first_bead, second_bead, repeat_unit_nunit, repeat_unit_rx_chosen, &
+repeat_unit_ry_chosen, repeat_unit_rz_chosen, xtarget, ytarget, ztarget)
+
+         bead1_coord(1) = xtarget(1)
+         bead1_coord(2) = ytarget(1)
+         bead1_coord(3) = ztarget(1)
+         bead2_coord(1) = xtarget(2)
+         bead2_coord(2) = ytarget(2)
+         bead2_coord(3) = ztarget(2)
+
+         do ip = 1, ichoi
+             bsum_tor(ip) = 0.0E0_dp
+             my_itrial = 0
+
+             do itor = my_start, my_end
+                 my_itrial = my_itrial + 1
+                
+                 if (  lnew .or. ip .gt. 1 .or. itor .gt. 1) then
+                     ! new conformation
+                     phi = random(-1) * twopi
+                 else
+                     phi = 0.0E0_dp
+                 end if
+
+                 call dihedral_rigrot(bead1_coord, bead2_coord, repeat_unit_nunit, repeat_unit_rx_chosen, &
+                    repeat_unit_ry_chosen, repeat_unit_rz_chosen, phi, repeat_unit_rxp, &
+                    repeat_unit_ryp, repeat_unit_rzp)
+
+                 ! update bond vectors in the repeat unit to the original molecules
+                 do iu = 1, repeat_unit_nunit
+                     ibead = repeat_unit_list(iu)
+                     lexist(ibead) = .true.
+                     do iv = 1, invib(repeat_unit_imolty, iu)
+                         ju = ijvib(repeat_unit_imolty, iu, iv)
+                         jbead = repeat_unit_list(ju)
+                         xvec(ibead, jbead) = repeat_unit_rxp(ju) - repeat_unit_rxp(iu) 
+                         yvec(ibead, jbead) = repeat_unit_ryp(ju) - repeat_unit_ryp(iu) 
+                         zvec(ibead, jbead) = repeat_unit_rzp(ju) - repeat_unit_rzp(iu)
+                     end do
+                 end do 
+
+                 ! find the new torsional angle and compute the torsional potential
+                 vnew_torsion = 0.0E0_dp
+
+                 ! the first type: the middle two beads are iufrom and iuprev
+                 do iv = 1, invib(imolty, iuprev)
+                     iu = ijvib(imolty, iuprev, iv)
+                     if (iu .ne. iufrom) then
+                         do it = 1, intor(imolty, iu)
+                             jut2 = ijtor2(imolty, iu, it)
+                             jut3 = ijtor3(imolty, iu, it)
+                             if (jut2 .eq. iuprev .and. jut3 .eq. iufrom) then
+                                 jut4 = ijtor4(imolty, iu, it)
+                    
+                                 ! if jut4 does NOT exist, do NOT count it
+                                 if (.not. lexist(jut4)) then
+                                     cycle
+                                 else
+                                     vnew_torsion = vnew_torsion + vtorso(xvec(jut4,jut3),yvec(jut4,jut3),zvec(jut4,jut3),xvec(jut3,jut2),yvec(jut3,jut2)&
+                          ,zvec(jut3,jut2),xvec(jut2,iu),yvec(jut2,iu),zvec(jut2,iu),ittor(imolty,iu,it))
+                                 end if
+                             end if
+                         end do
+                     end if
+                 end do
+
+                 ! the second type: iuprev and iufrom are the first two beads
+                 iu = iuprev
+
+                 do it = 1, intor(imolty, iu)
+                     jut2 = ijtor2(imolty, iu, it)
+                     if (jut2 .eq. iufrom) then
+                         jut3 = ijtor3(imolty, iu, it)
+                         jut4 = ijtor4(imolty, iu, it)
+
+                         ! if jut3 or jut4 does NOT exist, do NOT count it
+                         if ((.not. lexist(jut3)) .or. (.not. lexist(jut4))) then
+                             cycle
+                         else
+                             !vnew_torsion = vnew_torsion + vtorso(xvec(jut4,jut3),yvec(jut4,jut3),zvec(jut4,jut3),xvec(jut3,jut2),yvec(jut3,jut2)&
+                          !,zvec(jut3,jut2),xvec(jut2,iu),yvec(jut2,iu),zvec(jut2,iu),ittor(imolty,iu,it)) 
+                         end if
+                     end if
+                 end do 
+              
+                 ! the third type: iufrom is the first bead
+                 iu = iufrom
+        
+                 do it = 1, intor(imolty, iu)
+                     jut2 = ijtor2(imolty, iu, it)
+                     if (jut2 .ne. iuprev) then
+                         jut3 = ijtor3(imolty, iu, it)
+                         jut4 = ijtor4(imolty, iu, it)
+
+                         ! if jut2, jut3 or jut4 does NOT exist, do NOT count it
+                         if ((.not. lexist(jut2)) .or. (.not. lexist(jut3)) .or. (.not. lexist(jut4))) then
+                             cycle
+                         else
+                             !vnew_torsion = vnew_torsion + vtorso(xvec(jut4,jut3),yvec(jut4,jut3),zvec(jut4,jut3),xvec(jut3,jut2),yvec(jut3,jut2)&
+                          !,zvec(jut3,jut2),xvec(jut2,iu),yvec(jut2,iu),zvec(jut2,iu),ittor(imolty,iu,it))
+                         end if
+                     end if
+                 end do
+
+                 ! compute boltzmann factor
+                 my_bf_tor(my_itrial) = exp (-vnew_torsion * beta)
+
+                 ! store vtorsion and phi for this trial
+                 my_phitors(my_itrial) = phi
+                 my_vtorsion(my_itrial) = vnew_torsion
+                 bsum_tor(ip) = bsum_tor(ip) + my_bf_tor(my_itrial)
+
+                 ! recover lexist
+                 lexist = lexist_temp
+             end do
+
+             ! select one of the trial phi
+             if (lnew .or. ip .ne. 1) then
+                 rand_tor = random(rid) * bsum_tor(ip)
+                 accum_prob = 0.0E0_dp
+             
+                 do itor = 1, rcounts(myid+1)
+                     accum_prob = accum_prob + my_bf_tor(itor)
+                     if (rand_tor .lt. accum_prob) then
+                         phi = my_phitors(itor)
+                         my_vtorsion_procs(ip) = my_vtorsion(itor) 
+                         exit 
+                     end if
+                 end do
+             else
+                 phi = my_phitors(1)
+                 my_vtorsion_procs(ip) = my_vtorsion(1)
+             end if  
+
+             if (numprocs .gt. 1) then
+                 call mp_allgather(bsum_tor(ip),bf_tor,groupid)
+                 bsum_tor(ip)=sum(bf_tor(1:numprocs))
+                 call mp_allgather(my_vtorsion_procs(ip),vtorsion,groupid)
+                 call mp_allgather(phi,phitors,groupid)
+
+                 if (lnew .or. ip .ne. 1) then
+                     do itor = 1, numprocs
+                         rand_tor = random(-1) * bsum_tor(ip)
+                         accum_prob = 0.0E0_dp
+                         if (rand_tor .lt. accum_prob) then
+                             phi = phitors(itor)
+                             my_vtorsion_procs(ip) = vtorsion(itor)
+                             exit
+                         end if
+                     end do
+                 else
+                     phi = phitors(1)
+                     my_vtorsion_procs(ip) = vtorsion(1)
+                 end if
+             end if
+
+             bsum_tor(ip) = bsum_tor(ip) / real(ichtor,dp)
+             
+             ! update the bead coordinates and existence
+             call dihedral_rigrot(bead1_coord, bead2_coord, repeat_unit_nunit, repeat_unit_rx_chosen, &
+                repeat_unit_ry_chosen, repeat_unit_rz_chosen, phi, repeat_unit_rxp, &
+                repeat_unit_ryp, repeat_unit_rzp)
+
+             bead_count = 0
+             do unit_index = 1, repeat_unit_nunit
+                 ibead = repeat_unit_list(unit_index)
+                 if (ibead .ne. iufrom .and. ibead .ne. iuprev) then !< as long as they are not overlapping beads
+                     bead_count = bead_count + 1
+                     rxp(bead_count, ip) = repeat_unit_rxp(unit_index)
+                     ryp(bead_count, ip) = repeat_unit_ryp(unit_index)
+                     rzp(bead_count, ip) = repeat_unit_rzp(unit_index)
+                 end if
+             end do
+         end do
+
+         ! now that we have phi, update the max len for boltz
+         maxlen = 0.0E0_dp
+         bead_count = 0
+         do unit_index = 1, repeat_unit_nunit
+             ibead = repeat_unit_list(unit_index)
+             if (ibead .ne. iufrom .and. ibead .ne. iuprev) then
+                 bead_count = bead_count + 1
+                 glist(bead_count) = ibead
+                 lexist(ibead) = .true.
+
+                 do ip = 1, ichoi
+                     length = sqrt((rxp(bead_count, ip) - rxu(i, iufrom))**2 + &
+                        (ryp(bead_count, ip) - ryu(i, iufrom))**2 + &
+                        (rzp(bead_count, ip) - rzu(i, iufrom))**2)
+                     if (length .gt. maxlen) maxlen = length
+                 end do
+             end if
+         end do
+
+         ! now that we have the trial site, compute non-bonded energy
+         call boltz(lnew,.false.,ovrlap,i,i,imolty,ibox,ichoi,iufrom,repeat_unit_nunit-2,glist,maxlen)
+
+         if (ovrlap) then
+             lterm = .true.
+             return
+         end if
+
+         ! now that we have performed all the growths, it's time to sum up and calculate the weight
+         bsum = 0.0E0_dp
+         do ip = 1, ichoi
+             bsum = bsum + bfac(ip) * bsum_tor(ip)  !< include both torsional and LJ/qq
+         end do 
+
+         if (lnew) then
+             weight = weight * bsum  !< IMPORTANT: intra-repeat-unit weight is NOT included here to avoid overcounting!
+             if ( weight .lt. softlog ) then
+                 lterm=.true.
+                 return
+             end if
+
+             ! select one trial site as the final one
+             accum_prob = 0.0E0_dp
+             rand_nonb = random(-1) * bsum
+
+             do ip = 1, ichoi
+                 if ( .not. lovr(ip) ) then
+                     accum_prob = accum_prob + bfac(ip) * bsum_tor(ip)
+                     if (rand_nonb .lt. accum_prob) then
+                         exit
+                     end if
+                 end if 
+             end do 
+         else
+             weiold = weiold * bsum
+             if (weiold .lt. softlog) write(io_output,*)  '###old weight too low in group-CBMC growth'
+         end if
+
+         ! update the trial energy and weight
+         if (lnew) then
+             weight = weight * repeat_unit_weight_tot !< now include intra-repeat-unit weight
+             vnew(ivTot) = vnew(ivTot) + repeat_unit_energy(ichoig, ivTot) + my_vtorsion_procs(ip) + vtr(ivTot,ip)
+             vnew(ivStretching) = vnew(ivStretching) + repeat_unit_energy(ichoig,ivStretching)
+             vnew(ivBending) = vnew(ivBending) + repeat_unit_energy(ichoig,ivBending)
+             vnew(ivTorsion) = vnew(ivTorsion) + repeat_unit_energy(ichoig,ivTorsion) + my_vtorsion_procs(ip)
+             vnew(ivExt)   = vnew(ivExt)   + vtr(ivExt,ip)
+             vnew(ivIntraLJ) = vnew(ivIntraLJ) + vtr(ivIntraLJ,ip)
+             vnew(ivInterLJ) = vnew(ivInterLJ) + vtr(ivInterLJ,ip)
+             vnew(ivElect) = vnew(ivElect) + vtr(ivElect,ip)
+             vnew(ivEwald) = vnew(ivEwald) + vtr(ivEwald,ip)
+         else
+             weiold = weiold * repeat_unit_weight_tot
+             vold(ivTot) = vold(ivTot) + repeat_unit_energy(1,ivTot) + my_vtorsion_procs(1) + vtr(ivTot,1)
+             vold(ivStretching) = vold(ivStretching) + repeat_unit_energy(1,ivStretching)
+             vold(ivBending) = vold(ivBending) + repeat_unit_energy(1,ivBending)
+             vold(ivTorsion) = vold(ivTorsion) + repeat_unit_energy(1,ivTorsion) + my_vtorsion_procs(1)
+             vold(ivExt)   = vold(ivExt)   + vtr(ivExt,1)
+             vold(ivIntraLJ) = vold(ivIntraLJ) + vtr(ivIntraLJ,1)
+             vold(ivInterLJ) = vold(ivInterLJ) + vtr(ivInterLJ,1)
+             vold(ivElect) = vold(ivElect) + vtr(ivElect,1)
+             vold(ivEwald) = vold(ivEwald) + vtr(ivEwald,1)
+         end if
+
+         ! update the coordinates and vectors
+         bead_count = 0
+         do unit_index = 1, repeat_unit_nunit
+             ibead = repeat_unit_list(unit_index)
+             if (ibead .ne. iufrom .and. ibead .ne. iuprev) then
+                 bead_count = bead_count + 1
+                 if (lnew) then
+                     rxnew(ibead) = rxp(bead_count, ip)
+                     rynew(ibead) = ryp(bead_count, ip)
+                     rznew(ibead) = rzp(bead_count, ip)
+                 end if
+
+                 do iv = 1, invib(imolty, ibead)
+                     ju = ijvib(imolty, ibead, iv)
+                     if (lexist(ju)) then
+                         if (lnew) then
+                             xvec(ibead, ju) = rxnew(ju) - rxnew(ibead)
+                             yvec(ibead, ju) = rynew(ju) - rynew(ibead)
+                             zvec(ibead, ju) = rznew(ju) - rznew(ibead)
+                         else
+                             xvec(ibead, ju) = rxu(i, ju) -rxu(i, ibead)
+                             yvec(ibead, ju) = ryu(i, ju) -ryu(i, ibead)
+                             zvec(ibead, ju) = rzu(i, ju) -rzu(i, ibead)
+                         end if
+                         distij(ibead, ju) = sqrt(xvec(ibead, ju)**2 + yvec(ibead, ju)**2 + zvec(ibead, ju)**2)
+                         xvec(ju, ibead) = - xvec(ibead, ju)
+                         yvec(ju, ibead) = - yvec(ibead, ju)
+                         zvec(ju, ibead) = - zvec(ibead, ju)
+                         distij(ju, ibead) = distij(ibead, ju)
+                     end if
+                 end do
+             end if
+         end do
+
+         ! recover tons of things
+         growprev = growprev_mol
+         growfrom = growfrom_mol
+         grownum = grownum_mol
+         growlist = growlist_mol
+         rxnew_temp(1:igrow) = rxnew(1:igrow)
+         rynew_temp(1:igrow) = rynew(1:igrow)
+         rznew_temp(1:igrow) = rznew(1:igrow)
+         lexist_temp(1:igrow) = lexist(1:igrow)
+         xvec_temp = xvec
+         yvec_temp = yvec
+         zvec_temp = zvec
+         distij_temp = distij
+
+         if (l_reach_end) then
+            lexshed(1:igrow) = lexshed_original(1:igrow)
+            exit
+         else
+            ! now that we have grown this segment, move along
+            iw = iw + 1
+         end if
+
+     end do
+  end subroutine group_cbmc_grow
+
   subroutine allocate_cbmc()
     integer::jerr
     if (allocated(vtr)) deallocate(vtr,vtrorient,vtrelect_intra,vtrelect_inter,bfac,rxp,ryp,rzp,vwellipswot,vwellipswnt,vipswot,vipswnt,lovr,vtvib,vtgtr,vtbend,bsum_tor,stat=jerr)
@@ -7315,9 +8161,9 @@ contains
     LOGICAL,INTENT(IN)::lprint
     integer::jerr,i
     integer,allocatable::avbmc_version(:)
-    namelist /mc_cbmc/ rcutin,pmcb,pmcbmt,pmall,nchoi1,nchoi,nchoir,nchoih,nchtor,nchbna,nchbnb,icbdir,icbsta&
+    namelist /mc_cbmc/ rcutin,pmcb,pmcbmt,pmall,nchoi1,nchoi,nchoir,nchoih,nchoig,nchtor,nchbna,nchbnb,icbdir,icbsta&
      ,rbsmax,rbsmin,avbmc_version,pmbias,pmbsmt,pmbias2&
-     ,pmfix,lrig,lpresim,iupdatefix
+     ,pmfix,pmgroup,lrig,lpresim,iupdatefix
 
     if (allocated(lexshed)) deallocate(lexshed,llplace,lpnow,lsave,bncb,bscb,fbncb,fbscb,iend,ipast,pastnum,fclose,fcount,iwbef,ibef,befnum,xx,yy,zz,distij,nextnum,inext,kforceb,equilb,flength,vequil,vkforce,rlist,rfrom,rprev,rnum,iplace,pfrom,pnum,pprev,avbmc_version,stat=jerr)
     allocate(lexshed(numax),llplace(ntmax),lpnow(numax),lsave(numax),bncb(ntmax,numax),bscb(ntmax,2,numax),fbncb(ntmax,numax)&
@@ -7345,6 +8191,7 @@ contains
     nchoi=16
     nchoir=16
     nchoih=1
+    nchoig=16
     nchtor=100
     nchbna=1000
     nchbnb=1000
@@ -7355,6 +8202,7 @@ contains
     pmbsmt=0.0_dp
     pmbias2=0.0_dp
     pmfix=0.0_dp
+    pmgroup=0.0_dp
     lrig=.false.
 
     if (myid.eq.rootid) then
@@ -7371,6 +8219,7 @@ contains
     call mp_bcast(nchoi,nmolty,rootid,groupid)
     call mp_bcast(nchoir,nmolty,rootid,groupid)
     call mp_bcast(nchoih,nmolty,rootid,groupid)
+    call mp_bcast(nchoig,nmolty,rootid,groupid)
     call mp_bcast(nchtor,nmolty,rootid,groupid)
     call mp_bcast(nchbna,nmolty,rootid,groupid)
     call mp_bcast(nchbnb,nmolty,rootid,groupid)
@@ -7383,6 +8232,7 @@ contains
     call mp_bcast(pmbsmt,nmolty,rootid,groupid)
     call mp_bcast(pmbias2,nmolty,rootid,groupid)
     call mp_bcast(pmfix,nmolty,rootid,groupid)
+    call mp_bcast(pmgroup,nmolty,rootid,groupid)
     call mp_bcast(lrig,nmolty,rootid,groupid)
     call mp_bcast(lpresim,1,rootid,groupid)
     call mp_bcast(iupdatefix,1,rootid,groupid)
@@ -7459,7 +8309,70 @@ contains
 
     call allocate_cbmc()
     call read_safecbmc(io_input,lprint)
+    if (ANY(pmgroup(1:nmolty).gt.0)) call read_groupcbmc(io_input,lprint)
   end subroutine init_cbmc
+
+  subroutine read_groupcbmc(io_input,lprint)
+    use var_type,only:default_path_length,default_string_length
+    use util_string,only:uppercase
+    use util_files,only:get_iounit,readLine
+    use util_mp,only:mp_bcast
+    integer,intent(in)::io_input
+    logical,intent(in)::lprint
+    character(LEN=default_string_length)::line_in
+    integer::imol,unit_index,iunit,jerr,gcbmc_molty,repeat_unit_nunit
+
+    ! Look for section GROUP_CBMC
+    if (myid.eq.rootid .AND.ANY(pmgroup(1:nmolty).gt.0) ) then
+        REWIND(io_input)
+        CYCLE_READ_GROUPCBMC:DO
+            call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+            if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section GROUP_CBMC not found',jerr)
+
+            if (UPPERCASE(line_in(1:10)).eq.'GROUP_CBMC') then
+                exit cycle_read_groupcbmc
+            end if
+        END DO CYCLE_READ_GROUPCBMC
+
+        call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section GROUP_CBMC',jerr)
+        if (UPPERCASE(line_in(1:14)).eq.'END GROUP_CBMC') &
+            call err_exit(__FILE__,__LINE__,'Section GROUP_CBMC not complete!',myid+1)
+        read(line_in,*) gcbmc_box_num
+
+        call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section GROUP_CBMC',jerr)        
+        read(line_in,*) gcbmc_mol_num
+        allocate(gcbmc_mol_list(gcbmc_mol_num))
+        allocate(gcbmc_unit_num(gcbmc_mol_num))
+        allocate(gcbmc_unit_moltype(gcbmc_mol_num, maxval(nunit)))
+        allocate(gcbmc_unit_list(gcbmc_mol_num, maxval(nunit), maxval(nunit)))
+
+        do imol=1, gcbmc_mol_num
+            call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+            read(line_in,*) gcbmc_molty, gcbmc_unit_num(imol)
+            gcbmc_mol_list(gcbmc_molty) = imol 
+
+            call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+            read(line_in,*) gcbmc_unit_moltype(imol,1:gcbmc_unit_num(imol))
+
+            ! corresponding list for each segment
+            do unit_index = 1, gcbmc_unit_num(imol)
+                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                repeat_unit_nunit = nunit(gcbmc_unit_moltype(imol, unit_index))
+                read(line_in,*) gcbmc_unit_list(imol, unit_index, 1:repeat_unit_nunit)
+            end do
+        end do
+    end if
+ 
+    call mp_bcast(gcbmc_box_num,1,rootid,groupid)
+    call mp_bcast(gcbmc_mol_num,1,rootid,groupid)
+    call mp_bcast(gcbmc_mol_list,gcbmc_mol_num,rootid,groupid)
+    call mp_bcast(gcbmc_unit_num,gcbmc_mol_num,rootid,groupid)
+    call mp_bcast(gcbmc_unit_moltype,gcbmc_mol_num*maxval(nunit),rootid,groupid)
+    call mp_bcast(gcbmc_unit_list,gcbmc_mol_num*maxval(nunit)*maxval(nunit),rootid,groupid)
+
+  end subroutine read_groupcbmc 
 
   subroutine read_safecbmc(io_input,lprint)
     use var_type,only:default_path_length,default_string_length

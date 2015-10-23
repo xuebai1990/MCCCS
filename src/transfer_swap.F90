@@ -220,12 +220,12 @@ contains
     iutry = beg
     glist(1) = beg
     if (lrigid(imolty)) then
-       call schedule(igrow,imolty,ifrom,iutry,0,4)
+       call schedule(igrow,imolty,ifrom,iutry,0,4,0)
     else if (lring(imolty)) then
        lfixnow = .true.
        call safeschedule(igrow,imolty,ifrom,iutry,findex,2)
     else
-       call schedule(igrow,imolty,ifrom,iutry,0,2)
+       call schedule(igrow,imolty,ifrom,iutry,0,2,0)
     end if
 
     if ( .not. lswapinter .and. lbias(imolty)) then

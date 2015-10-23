@@ -303,10 +303,10 @@ contains
              ! end if
           !end if
           !> \bug problem if nsampos.eq.iunit, but rindex.gt.0
-             call schedule(igrow,imolty,islen,ifirst,iprev,4)
+             call schedule(igrow,imolty,islen,ifirst,iprev,4,0)
              !cc---END JLR 11-24-09
           else
-             call schedule(igrow,imolty,islen,ifirst,iprev,3)
+             call schedule(igrow,imolty,islen,ifirst,iprev,3,0)
           end if
 
           if (lgrand.and.boxa.ne.boxb) then
@@ -320,7 +320,7 @@ contains
              do izz = 2,ncut(iparty,s_type)
                 ifirst = from(s_type+2*(izz-1))
                 iprev = prev(s_type+2*(izz-1))
-                call schedule(igrow,imolty,islen,ifirst,iprev,5)
+                call schedule(igrow,imolty,islen,ifirst,iprev,5,0)
 
                 if (lgrand.and.boxa.ne.boxb) Rosenbluth_normalization(imolty)=Rosenbluth_normalization(imolty)*(real(nchoi(imolty),dp)**islen)
              end do

@@ -102,7 +102,7 @@ CONTAINS
     rznew(1) = 0.0E0_dp
 
     ! determine the growth schedule
-    call schedule(nugrow(imolty),imolty,ifrom,1,0,2)
+    call schedule(nugrow(imolty),imolty,ifrom,1,0,2,0)
 
     ! actually grow the structure
     nbxp1 = nbox   + 1

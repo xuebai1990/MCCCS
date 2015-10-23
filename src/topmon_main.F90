@@ -781,10 +781,10 @@ contains
                 ! not counting the first inserted bead
                 igrow = nugrow(itype)
                 if (.not. lrigid(itype)) then
-                   call schedule(igrow,itype,steps,1,0,2)
+                   call schedule(igrow,itype,steps,1,0,2,0)
                    tmp=real(nchoi1(itype)*nchoih(itype),dp)*(real(nchoi(itype),dp)**steps)*(debroglie**3)
                 else
-                   call schedule(igrow,itype,steps,1,0,4)
+                   call schedule(igrow,itype,steps,1,0,4,0)
                    tmp=real(nchoi1(itype)*nchoir(itype)*nchoih(itype),dp)*(real(nchoi(itype),dp)**steps)*(debroglie**3)
                 end if
                 acchem(ibox,itype)=(-1.0E0_dp/beta)*log((acchem(ibox,itype)/bnchem(ibox,itype))/tmp)

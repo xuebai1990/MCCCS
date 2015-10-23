@@ -3,7 +3,7 @@ module util_math
   use const_math,only:onepi
   implicit none
   private
-  public::cone_angle,erfunc,mbessel,polint,spline,splint,update_average,store_block_average,calculate_statistics
+  public::cone_angle,erfunc,mbessel,polint,spline,splint,update_average,store_block_average,calculate_statistics,cross_product,normalize_vector
 contains
 !****************************************************************
 !> \brief takes two unit vectors in spherical coordinates and computes
@@ -68,6 +68,28 @@ contains
 !     &         *(1.0E0_dp + (4.0E0_dp*nu**2-1)/(8.0E0_dp*z) +
 !     &         (4.0E0_dp*nu**2-1)*(4.0E0_dp*nu**2-9.0E0_dp)/(2.0E0_dp*64.0E0_dp*z**2))
   end function mbessel
+  
+  !< \Brief normalize vector a
+  !< \param a: input vector
+  function normalize_vector(a)
+      real, dimension(3), intent(in) :: a
+      real, dimension(3) :: normalize_vector
+      real :: norm_factor
+      norm_factor = sqrt(a(1)**2 + a(2)**2 + a(3)**2)
+      normalize_vector(1) = a(1) / norm_factor
+      normalize_vector(2) = a(2) / norm_factor
+      normalize_vector(3) = a(3) / norm_factor
+  end function normalize_vector
+
+  !< \Brief calculate the normalized cross product of vector a and b
+  !< \param a, b input vectors a and b, with dimension of 3
+  function cross_product(a, b)
+      real, dimension(3) :: cross_product
+      real, dimension(3), intent(in) :: a, b
+      cross_product(1) = a(2) * b(3) - a(3) * b(2)
+      cross_product(2) = a(3) * b(1) - a(1) * b(3)
+      cross_product(3) = a(1) * b(2) - a(2) * b(1)
+  end function cross_product
 
 !> \copyright (C) Copr. 1986-92 Numerical Recipes Software +3Y.
   pure subroutine polint(xa,ya,n,x,y)
@@ -225,6 +247,8 @@ contains
     stdev=sqrt(sum((block_values-mean)**2)/nblock)
     if (nblock.gt.1) sterr=stdev/sqrt(real(nblock-1,dp))
   end subroutine calculate_statistics
+
+
 
 !      subroutine coordinate_transform(x,y,z,invh,sx,sy,sz)
 !      real,intent(in)::x,y,z,invhmat

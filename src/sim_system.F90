@@ -238,9 +238,25 @@ module sim_system
   integer::iupdatefix=100
   logical::lpresim=.false.
 
+  !*** CBMC_bend_table (Bin's tabulated angle CBMC method)
+  logical::L_cbmc_bend=.false.  ! whether to use tabulated bending table for CBMC move
+  real,allocatable::lin_bend_type(:),lin_bend_table(:,:),lin_bend_prob(:,:) ! Tabulated bending table for linear CBMC bead growth
+  real,allocatable::br_bend_type(:),br_bend_theta1(:,:),br_bend_theta2(:,:,:),br_bend_phi12(:,:,:,:),br_bend_prob(:,:) ! Tabulated bending table for one-branch CBMC bead growth
+  integer,allocatable::lin_bend_dim(:),br_bend_dim1(:),br_bend_dim2(:),br_bend_dim3(:) ! The dimensions for the above bending tables
+
+  !*** Group_CBMC
+  real,allocatable::pmgroup(:)
+  integer::gcbmc_box_num !< box number that contains the repeat units
+  !integer::repeat_unit_num !< total number of repeat units
+  integer::gcbmc_mol_num !< number of molecules using group CBMC
+  integer,allocatable::gcbmc_mol_list(:) !< corresponding list of moltype with gcbmc_moltype
+  integer,allocatable::gcbmc_unit_num(:) !< number of repeat unit for moltype with gcbmc_moltype
+  integer,allocatable::gcbmc_unit_moltype(:,:) !< molecule type of repeat units   
+  integer,allocatable::gcbmc_unit_list(:,:,:) !< corresponding list of beads
+
   !*** CBMC shared variables ***
   integer,allocatable::nugrow(:),nmaxcbmc(:),iurot(:),maxgrow(:)&
-   ,nchoi1(:),nchoi(:),nchoir(:),nchoih(:),nchtor(:),nchbna(:),nchbnb(:)& !< number of candidates during CBMC regrowth for the first bead, subsequent beads (flexible and rigid), explicit-hydrogen, torsion, and bendings
+   ,nchoi1(:),nchoi(:),nchoir(:),nchoih(:),nchtor(:),nchoig(:),nchbna(:),nchbnb(:)& !< number of candidates during CBMC regrowth for the first bead, subsequent beads (flexible and rigid), explicit-hydrogen, torsion, and bendings
    ,nrotbd(:),irotbd(:,:),icbdir(:),icbsta(:)&
    ,growfrom(:)& !< (index): the bead from which the new beads are to be grown at the index-th step
    ,growprev(:)& !< (index): the bead that exists and is connected to growfrom(index)
@@ -258,12 +274,6 @@ module sim_system
    ,moltion(2)
   real::rcutin=6.0_dp,weight,weiold,vold(nEnergy),vnew(nEnergy),vneworient,voldorient
 
-  ! --- Q.Paul C. --- variables for CBMC_bend_table 
-  logical::L_cbmc_bend=.false.  ! whether to use tabulated bending table for CBMC move
-  real,allocatable::lin_bend_type(:),lin_bend_table(:,:),lin_bend_prob(:,:) ! Tabulated bending table for linear CBMC bead growth
-  real,allocatable::br_bend_type(:),br_bend_theta1(:,:),br_bend_theta2(:,:,:),br_bend_phi12(:,:,:,:),br_bend_prob(:,:) ! Tabulated bending table for one-branch CBMC bead growth
-  integer,allocatable::lin_bend_dim(:),br_bend_dim1(:),br_bend_dim2(:),br_bend_dim3(:) ! The dimensions for the above bending tables
-  ! --- Q.Paul C. ---
 
   !*** Fluctuating charge moves ***
   real,allocatable::xiq(:),jayself(:),jayq(:)
@@ -359,10 +369,10 @@ CONTAINS
      ,dipolez(nbxmax),nchbox(nbxmax),vbox(nEnergy,nbxmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'allocate_system.1: allocation failed',jerr)
 
-    if (allocated(nrotbd)) deallocate(nrotbd,xcm,ycm,zcm,pmsatc,pmswtcb,nswatb,nsampos,ncut,gswatc,nswtcb,box3,box4,ncutsafe,gswatcsafe,temtyp,B,molecname,nunit,nugrow,nmaxcbmc,iurot,maxgrow,isolute,iring,nrig,irig,frig,nrigmin,nrigmax,rindex,riutry,lelect,lflucq,lqtrans,lexpand,lavbmc1,lavbmc2,lavbmc3,lbias,lring,lrigid,lrig,lq14scale,fqegp,eta2,qscale,pmbias,pmbsmt,pmbias2,rmtrax,rmtray,rmtraz,rmrotx,rmroty,rmrotz,lbranch,ininch,rmflcq,pmswmt,pmswapb,pmcbmt,pmall,pmfix,pmfqmt,pmeemt,pmtrmt,pmromt,nswapb,box1,box2,nchoi1,nchoi,nchoir,nchoih,nchtor,nchbna,nchbnb,icbdir,icbsta,lrplc,masst,rmexpc,eetype,ncmt,ncmt2,parall,parbox,bnflcq,bsflcq,bnflcq2,bsflcq2,rxwell,rywell,rzwell,sxwell,sywell,szwell,nwell,lwell,moltyp,rcmu,sxcm,sycm,szcm,nboxi,favor,favor2,ntype,leaderq,invib,itvib,ijvib,inben,itben,ijben2,ijben3,intor,ittor,ijtor2,ijtor3,ijtor4,irotbd,pmrotbd,stat=jerr) ! Paul -- SAFE-swatch variable allocation
+    if (allocated(nrotbd)) deallocate(nrotbd,xcm,ycm,zcm,pmsatc,pmswtcb,nswatb,nsampos,ncut,gswatc,nswtcb,box3,box4,ncutsafe,gswatcsafe,temtyp,B,molecname,nunit,nugrow,nmaxcbmc,iurot,maxgrow,isolute,iring,nrig,irig,frig,nrigmin,nrigmax,rindex,riutry,lelect,lflucq,lqtrans,lexpand,lavbmc1,lavbmc2,lavbmc3,lbias,lring,lrigid,lrig,lq14scale,fqegp,eta2,qscale,pmbias,pmbsmt,pmbias2,rmtrax,rmtray,rmtraz,rmrotx,rmroty,rmrotz,lbranch,ininch,rmflcq,pmswmt,pmswapb,pmcbmt,pmall,pmfix,pmfqmt,pmeemt,pmtrmt,pmromt,pmgroup,nswapb,box1,box2,nchoi1,nchoi,nchoir,nchoih,nchoig,nchtor,nchbna,nchbnb,icbdir,icbsta,lrplc,masst,rmexpc,eetype,ncmt,ncmt2,parall,parbox,bnflcq,bsflcq,bnflcq2,bsflcq2,rxwell,rywell,rzwell,sxwell,sywell,szwell,nwell,lwell,moltyp,rcmu,sxcm,sycm,szcm,nboxi,favor,favor2,ntype,leaderq,invib,itvib,ijvib,inben,itben,ijben2,ijben3,intor,ittor,ijtor2,ijtor3,ijtor4,irotbd,pmrotbd,stat=jerr)
     allocate(nrotbd(ntmax),xcm(nmax),ycm(nmax),zcm(nmax),pmsatc(npamax),pmswtcb(npamax,npabmax),nswatb(npamax,2)&
      ,nsampos(npamax),ncut(npamax,2),gswatc(npamax,2,2*npamax),nswtcb(npamax),box3(npamax,npabmax),box4(npamax,npabmax)&
-     ,ncutsafe(npamax,2),gswatcsafe(npamax,3,2*npamax)& ! Paul -- SAFE-swatch variable allocation
+     ,ncutsafe(npamax,2),gswatcsafe(npamax,3,2*npamax)&
      ,temtyp(ntmax),B(ntmax),molecname(ntmax),nunit(ntmax),nugrow(ntmax),nmaxcbmc(ntmax),iurot(ntmax),maxgrow(ntmax),isolute(ntmax),iring(ntmax)&
      ,nrig(ntmax),irig(ntmax,6),frig(ntmax,6),nrigmin(ntmax),nrigmax(ntmax),rindex(ntmax),riutry(ntmax,initial_size),lelect(ntmax)&
      ,lflucq(ntmax),lqtrans(ntmax),lexpand(ntmax),lavbmc1(ntmax),lavbmc2(ntmax)&
@@ -370,7 +380,7 @@ CONTAINS
      ,qscale(ntmax),pmbias(ntmax),pmbsmt(ntmax),pmbias2(ntmax),rmtrax(ntmax,nbxmax),rmtray(ntmax,nbxmax),rmtraz(ntmax,nbxmax)&
      ,rmrotx(ntmax,nbxmax),rmroty(ntmax,nbxmax),rmrotz(ntmax,nbxmax),lbranch(ntmax),ininch(ntmax,nbxmax),rmflcq(ntmax,nbxmax)&
      ,pmswmt(ntmax),pmswapb(ntmax,npabmax),pmcbmt(ntmax),pmall(ntmax),pmfix(ntmax),pmfqmt(ntmax),pmeemt(ntmax),pmtrmt(ntmax)&
-     ,pmromt(ntmax),nswapb(ntmax),box1(ntmax,npabmax),box2(ntmax,npabmax),nchoi1(ntmax),nchoi(ntmax),nchoir(ntmax)&
+     ,pmromt(ntmax),pmgroup(ntmax),nswapb(ntmax),box1(ntmax,npabmax),box2(ntmax,npabmax),nchoig(ntmax),nchoi1(ntmax),nchoi(ntmax),nchoir(ntmax)&
      ,nchoih(ntmax),nchtor(ntmax),nchbna(ntmax),nchbnb(ntmax),icbdir(ntmax),icbsta(ntmax),lrplc(ntmax),masst(ntmax)&
      ,rmexpc(ntmax),eetype(ntmax),ncmt(nbxmax,ntmax),ncmt2(nbxmax,ntmax,20),parall(ntmax,nmax)&
      ,parbox(nmax,nbxmax,ntmax),bnflcq(ntmax,nbxmax),bsflcq(ntmax,nbxmax),bnflcq2(ntmax,nbxmax),bsflcq2(ntmax,nbxmax)&
