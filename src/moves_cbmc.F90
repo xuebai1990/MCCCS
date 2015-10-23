@@ -53,7 +53,7 @@ contains
       integer::istt,iett,nchp1,ic,total,bin,count,findex,iw,grouptype
 
       real::v(nEnergy),vtornew,delen,deleo,vdum,wplace,wrig
-      real::dchain,rchain,wnlog,wolog,wdlog,wratio
+      real::dchain,rchain,wnlog,wolog,wdlog,wratio,rcbmc
       real::vrecipn,vrecipo,cwtorfo,cwtorfn,x,y,z
       real::delta_vn,delta_vo
 
@@ -79,10 +79,11 @@ contains
       if (temtyp(imolty).eq.0) return
 
 ! determine whether to use safe-cbmc or group-cbmc or not ***
-      if (random(-1).lt.pmfix(imolty)) then
+      rcbmc = random(-1)
+      if (rcbmc.lt.pmfix(imolty)) then
          lfixnow = .true.
          grouptype = 0
-      else if (random(-1).lt.pmgroup(imolty)) then
+      else if (rcbmc.lt.pmgroup(imolty)) then
          lfixnow = .false.
          grouptype = 1
       else
