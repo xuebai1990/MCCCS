@@ -3321,7 +3321,7 @@ contains
           open(unit=io_cell,access='stream',action='write',file=file_cell,form='formatted',iostat=jerr,status='unknown')
           if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open cell file '//trim(file_cell),jerr)
        else
-          io_cell=10000000
+          io_cell=-1
        end if
 
        ! set up info at beginning of fort.12 for analysis
