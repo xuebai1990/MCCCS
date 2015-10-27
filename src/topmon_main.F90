@@ -594,7 +594,7 @@ contains
           end if
           if ( abs(v(ivInterLJ) - vbox(ivInterLJ,ibox)) .gt. 0.000001) then
              write(io_output,*) '### problem  ###'
-             write(io_output,*) ' Inter mol.en.: ',v(ivInterLJ),vbox(ivInterLJ,ibox)
+             write(io_output,*) ' Inter mol.en.: ',v(ivInterLJ),vbox(ivInterLJ,ibox),v(ivInterLJ) - vbox(ivInterLJ,ibox)
              if (lsolid(ibox) .and. .not. lrect(ibox)) then
                 write(io_output,*)'You might check the cutoff wrt box widths'
                 write(io_output,*) 'Normal PBC might be failing'
@@ -602,50 +602,50 @@ contains
           end if
           if ( abs(v(ivTail) - vbox(ivTail,ibox)) .gt. 0.000001) then
              write(io_output,*) '### problem  ###'
-             write(io_output,*) ' Tail corr.en.: ',v(ivTail),vbox(ivTail,ibox)
+             write(io_output,*) ' Tail corr.en.: ',v(ivTail),vbox(ivTail,ibox),v(ivTail) - vbox(ivTail,ibox)
           end if
           if ( abs(v(ivIntraLJ) - vbox(ivIntraLJ,ibox)) .gt. 0.000001) then
              write(io_output,*) '### problem  ###'
-             write(io_output,*) ' Intra mol.en.: ',v(ivIntraLJ),vbox(ivIntraLJ,ibox)
+             write(io_output,*) ' Intra mol.en.: ',v(ivIntraLJ),vbox(ivIntraLJ,ibox),v(ivIntraLJ) - vbox(ivIntraLJ,ibox)
           end if
           if ( abs(v(ivStretching) - vbox(ivStretching,ibox)) .gt. 0.001) then
              write(io_output,*) '### problem  ###'
-             write(io_output,*) ' bond vib. en.: ',v(ivStretching),vbox(ivStretching,ibox)
+             write(io_output,*) ' bond vib. en.: ',v(ivStretching),vbox(ivStretching,ibox),v(ivStretching) - vbox(ivStretching,ibox)
           end if
           if ( abs(v(ivBending) - vbox(ivBending,ibox)) .gt. 0.001) then
              write(io_output,*) '### problem  ###'
-             write(io_output,*) ' Bond ben.en.: ',v(ivBending),vbox(ivBending,ibox)
+             write(io_output,*) ' Bond ben.en.: ',v(ivBending),vbox(ivBending,ibox),v(ivBending) - vbox(ivBending,ibox)
           end if
           if ( abs(v(ivTorsion) - vbox(ivTorsion,ibox)) .gt. 0.001) then
              write(io_output,*) '### problem  ###'
-             write(io_output,*) ' Torsion.en.: ',v(ivTorsion),vbox(ivTorsion,ibox)
+             write(io_output,*) ' Torsion.en.: ',v(ivTorsion),vbox(ivTorsion,ibox),v(ivTorsion) - vbox(ivTorsion,ibox)
           end if
           if ( abs(v(ivExt) - vbox(ivExt,ibox)) .gt. 0.0001) then
              write(io_output,*) '### problem  ###'
-             write(io_output,*) ' Externa.en.: ',v(ivExt),vbox(ivExt,ibox)
+             write(io_output,*) ' Externa.en.: ',v(ivExt),vbox(ivExt,ibox),v(ivExt) - vbox(ivExt,ibox)
           end if
           if ( abs(v(ivElect) - vbox(ivElect,ibox)) .gt. 0.000001) then
              write(io_output,*) '### problem  ###'
-             write(io_output,*) ' Coulomb.en.: ',v(ivElect),vbox(ivElect,ibox)
+             write(io_output,*) ' Coulomb.en.: ',v(ivElect),vbox(ivElect,ibox),v(ivElect) - vbox(ivElect,ibox)
           end if
           if ( abs(v(ivFlucq) - vbox(ivFlucq,ibox)) .gt. 0.0001) then
              write(io_output,*) '### problem  ###'
-             write(io_output,*) ' Fluc Q en.: ',v(ivFlucq),vbox(ivFlucq,ibox)
+             write(io_output,*) ' Fluc Q en.: ',v(ivFlucq),vbox(ivFlucq,ibox),v(ivFlucq) - vbox(ivFlucq,ibox)
           end if
           if ( abs(v(iv3body) - vbox(iv3body,ibox) ) .gt.0.001) then
              write(io_output,*) '### problem ###'
-             write(io_output,*) ' 3-body en.: ',v(iv3body),vbox(iv3body,ibox)
+             write(io_output,*) ' 3-body en.: ',v(iv3body),vbox(iv3body,ibox),v(iv3body) - vbox(iv3body,ibox)
           end if
           if ( ldielect ) then
              if ( abs(dipolexo - dipolex(ibox)) .gt. 0.0001) then
                 write(io_output,*) '### problem  ###'
-                write(io_output,*) ' Dipole X: ',dipolexo,dipolex(ibox)
+                write(io_output,*) ' Dipole X: ',dipolexo,dipolex(ibox),dipolexo - dipolex(ibox)
              end if
           end if
           if (lmipsw) then
              if (abs(vwellipsw-vbox(ivWellIpswb,ibox)).gt.0.001) then
                 write(io_output,*) '### problem  ###'
-                write(io_output,*) ' well en.: ',vwellipsw,vbox(ivWellIpswb,ibox)
+                write(io_output,*) ' well en.: ',vwellipsw,vbox(ivWellIpswb,ibox),vwellipsw-vbox(ivWellIpswb,ibox)
              end if
           end if
        end if
