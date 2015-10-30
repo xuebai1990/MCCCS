@@ -1095,8 +1095,14 @@ move, are also cumulative.
 
 \subsubsection{Namelist \textbf{mc\_volume}}
 \noindent{\bf tavol:} Specifies the target acceptance rate
-for volume moves. Reasonable values for volume equilibration
+for volume moves. We used to think reasonable values for volume equilibration
 and full equilibration might be 0.4 and 0.5, respectively.
+Ilja (9/24/15):"Please take a look at 
+Mountain, R. D.; Thirumalai, D. Physica A: Statistical Mechanics and its Applications
+1994, 210, 453–460.
+Although MCCCS-MN is much more complex, I think that our
+recommended target acceptance rate for translation, rotation,
+and volume moves should be about 30\%.  [50\% is almost certainly too high.]"
 
 \noindent{\bf iratv:} The maximum volume displacement will
 be adjusted every {\bf iratv} cycles. {\bf iratv} is
@@ -1692,7 +1698,14 @@ displacements, in~\AA, for all molecule types. Only used if
 from {\bf file\_restart}.
 
 \noindent{\bf tatra:} The target acceptance ratio for
-translational moves. 0.5 is a good value.
+translational moves. We used to think 0.5 is a good value, 
+but now think the following:
+Ilja (9/24/15):"Please take a look at 
+Mountain, R. D.; Thirumalai, D. Physica A: Statistical Mechanics and its Applications
+1994, 210, 453–460.
+Although MCCCS-MN is much more complex, I think that our
+recommended target acceptance rate for translation, rotation,
+and volume moves should be about 30\%.  [50\% is almost certainly too high.]"
 
 Note that, although not specified, the fraction of rotation
 moves is equal to $1 - {\bf pmtra}$.
@@ -1708,7 +1721,14 @@ if {\bf linit} is TRUE. If {\bf linit} is FALSE, it is read
 from {\bf file\_restart}.
 
 \noindent{\bf tarot:} The target acceptance ratio for
-rotational moves. 0.5 is a good value.
+rotational moves. We used to think 0.5 is a good value,
+but now think the following:
+Ilja (9/24/15):"Please take a look at 
+Mountain, R. D.; Thirumalai, D. Physica A: Statistical Mechanics and its Applications
+1994, 210, 453–460.
+Although MCCCS-MN is much more complex, I think that our
+recommended target acceptance rate for translation, rotation,
+and volume moves should be about 30\%.  [50\% is almost certainly too high.]"
 
 \subsection{Section \textbf{SIMULATION\_BOX}}
 For each of the \textbf{nbox} simulation boxes, including
