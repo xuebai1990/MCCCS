@@ -271,13 +271,13 @@ contains
     end do
   end subroutine combine_energies
 
-  subroutine write_energies(egrid, n_points_per_piece)
-    integer,intent(in) :: n_points_per_piece
-    real,intent(in) :: egrid(0:n_points_per_piece-1,1:zpot%ntype)
+  subroutine write_energies(egrid)
+    real,intent(in) :: egrid(0:,1:)
     real :: ri(3), scoord(3)
     character(LEN=128)::filename_egrid
     integer io_egrid, nynx, nznynx
     integer i, j, k, r, ii
+
 
     nynx = product(zunit%ngrid(1:2))
     nznynx = nynx*zunit%ngrid(3)
@@ -294,12 +294,9 @@ contains
             k=r/(nynx)
             j=(r-k*nynx)/zunit%ngrid(1)
             i=r-k*nynx-j*zunit%ngrid(1)
-            scoord(1) = (real(i,dp)/zunit%ngrid(1) )/zunit%dup(1)
-            scoord(2) = (real(j,dp)/zunit%ngrid(2) )/zunit%dup(2)
-            scoord(3) = (real(k,dp)/zunit%ngrid(3) )/zunit%dup(3)
-            !scoord(1)=scoord(1)/zunit%dup(1)
-            !scoord(2)=scoord(2)/zunit%dup(2)
-            !scoord(3)=scoord(3)/zunit%dup(3)
+            scoord(1) = (real(i,dp)/zunit%ngrid(1))/zunit%dup(1)
+            scoord(2) = (real(j,dp)/zunit%ngrid(2))/zunit%dup(2)
+            scoord(3) = (real(k,dp)/zunit%ngrid(3))/zunit%dup(3)
             ri(1)=scoord(1)*zcell%hmat(1,1)%val+scoord(2)*zcell%hmat(1,2)%val+scoord(3)*zcell%hmat(1,3)%val
             ri(2)=scoord(2)*zcell%hmat(2,2)%val+scoord(3)*zcell%hmat(2,3)%val
             ri(3)=scoord(3)*zcell%hmat(3,3)%val
@@ -478,7 +475,7 @@ contains
     end if
 
     if (ltestztb.or.lpore_volume) call ztest()
-    if (printztb) call write_energies(egrid(st:st+n_points_per_piece-1,:), n_points_per_piece)
+    if (printztb) call write_energies(egrid(:,:))
 
     deallocate(lunitcell,my_zgrid,zgrid,zeo%bead,ztype%type,ztype%num,ztype%radiisq,ztype%name,zpot%param)
     if (lprint) then
