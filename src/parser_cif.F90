@@ -117,6 +117,7 @@ CONTAINS
                 call reallocate(SymmOp,1,i*2,1,3)
              end if
              ia = INDEX(line,"'")
+             if (ia.eq.0) ia=INDEX(line," ")
              ib = INDEX(line(ia+1:),",")+ia
              ic = INDEX(line(ib+1:),",")+ib
              IF (ia.eq.0) THEN
@@ -124,6 +125,7 @@ CONTAINS
              ELSE
                 id = INDEX(line(ic+1:),"'")+ic
              END IF
+             if (id.eq.ic) id=len_trim(line)+1
 
              SymmOp(i,1)=TRIM(line(ia+1:ib-1))
              SymmOp(i,2)=TRIM(line(ib+1:ic-1))
