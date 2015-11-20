@@ -68,7 +68,7 @@ contains
     use energy_3body,only:U3System
     use energy_4body,only:U4System
 
-    real::v(nEnergy),vrecipsum,vwell,my_velect
+    real::v(nEnergy),vrecipsum,vwell,my_velect,Uintra
     logical::ovrlap,lvol
     logical::lexplt,lqimol,lqjmol,lcoulo(numax,numax),lij2,liji,lqchgi
     integer::i,imolty,ii,j,jmolty,jj,ntii,ntjj,ntij,iunit,ibox,nmcount,ntj,k,mmm
@@ -77,6 +77,8 @@ contains
     real::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq,vol
     ! Neeraj & RP for MPI
     real::sum_vvib,sum_vbend,sum_vtg
+    ! For group-CBMC
+    real::v_gcbmc(nmolty, nchbox(gcbmc_box_num))
 ! --------------------------------------------------------------------
 #ifdef __DEBUG__
     write(io_output,*) 'start SUMUP in ',myid,' for box ', ibox
@@ -95,6 +97,9 @@ contains
     ovrlap = .false.
     v = 0.0E0_dp
     vwell = 0.0E0_dp
+    v_gcbmc = 0.0E0_dp
+    gcbmc_weight = 0.0E0_dp
+
     ! check the molecule count ***
     nmcount = 0
     do i = 1, nchain
@@ -422,14 +427,26 @@ contains
                                end do
                             end if
 
-                            v(ivIntraLJ)=v(ivIntraLJ)+U2(rij,rijsq,i,imolty,ii,ntii,i,imolty,jj,ntjj,ntij)
+                            Uintra = U2(rij,rijsq,i,imolty,ii,ntii,i,imolty,jj,ntjj,ntij)
+                            v(ivIntraLJ)=v(ivIntraLJ) + Uintra
+
+                            if (ibox .eq. gcbmc_box_num) then !< update group-CBMC repeat unit rosenbluth weight
+                                v_gcbmc(imolty, nmcount) = v_gcbmc(imolty, nmcount) + Uintra
+                            end if
+
                          end if
                       end if !if (linclu(imolty,ii,jj))
 
 94                    if (lqinclu(imolty,ii,jj)) then
                          ! calculate intramolecular charge interaction
-                         my_velect=my_velect+qscale2(imolty,ii,jj)*Q2(rij,rijsq,rcutsq,i,imolty,ii,ntii,lqchg(ntii),i,imolty,jj&
-                          ,ntjj,calpi,lcoulo)
+                         Uintra = qscale2(imolty,ii,jj)*Q2(rij,rijsq,rcutsq,i,imolty,ii,ntii,lqchg(ntii),i,imolty,jj&
+                            ,ntjj,calpi,lcoulo)
+                         my_velect=my_velect+Uintra
+
+                         if (ibox .eq. gcbmc_box_num) then !< update group-CBMC repeat unit rosenbluth weight
+                             v_gcbmc(imolty, nmcount) = v_gcbmc(imolty, nmcount) + Uintra  
+                         end if
+                          
                       end if
                    end if
                 end do
@@ -448,6 +465,7 @@ contains
 ! -----------------------------------------
        call mp_sum(v(ivIntraLJ),1,groupid)
        call mp_sum(my_velect,1,groupid)
+       call mp_sum(v_gcbmc,nmolty*nchbox(gcbmc_box_num),groupid)
        v(ivElect) = v(ivElect) + my_velect
 
 !$$$       vtemp = v(ivElect) - vtemp
@@ -512,11 +530,17 @@ contains
              v(ivStretching)=v(ivStretching)+sum_vvib
              v(ivBending)=v(ivBending)+sum_vbend
              v(ivTorsion)=v(ivTorsion)+sum_vtg
+
+             if (ibox .eq. gcbmc_box_num) then !< update group-CBMC repeat unit rosenbluth weight
+                 v_gcbmc(imolty, nmcount) = v_gcbmc(imolty, nmcount) + sum_vvib + sum_vbend + sum_vtg
+             end if
+
           end do
        end do
        call mp_sum(v(ivStretching),1,groupid)
        call mp_sum(v(ivBending),1,groupid)
        call mp_sum(v(ivTorsion),1,groupid)
+       call mp_sum(v_gcbmc,nchbox(gcbmc_box_num),groupid)
     end if !if ( .not. lvol .or. (lvol .and. lewald) )
 
 ! ################################################################
@@ -594,6 +618,15 @@ contains
 ! write(io_output,*) 'vsc, new self cor:',vsc*qqfact
 ! write(io_output,*) 'recip space part :',vrecipsum*qqfact
 ! write(io_output,*) 'sc and recip:',(vsc+vrecipsum)*qqfact
+
+    ! The calculation of group-CBMC repeat unit total weight
+    if (ibox .eq. gcbmc_box_num) then
+        do imolty = 1, nmolty
+            do nmcount = 1, ncmt(ibox,imolty)
+                gcbmc_weight(imolty) = gcbmc_weight(imolty) + exp(-beta * v_gcbmc(imolty, nmcount))
+            end do
+        end do
+    end if
 
     if (.not.L_elect_table) then
        v(ivElect) = v(ivElect)*qqfact
@@ -1270,11 +1303,12 @@ contains
              ! loop over all the grown beads
              do count = 1,ntogrow
                 ii = glist(count)
+                ! assign bead type for ii,iu, and the cross term
+                ntii = ntype(imolty,ii)
+                ntij=type_2body(ntii,ntjj)
+
                 ! see if iu has nonbonded intramolecular interaction with ii
                 if (linclu(imolty,ii,iu).or.(L_Coul_CBMC.and.(lqinclu(imolty,ii,iu).or.lewald))) then
-                   ! assign bead type for ii,iu, and the cross term
-                   ntii = ntype(imolty,ii)
-                   ntij=type_2body(ntii,ntjj)
 
                    if (lexpee) rminsq = rminee(ntij)*rminee(ntij)
                    ! determine distances

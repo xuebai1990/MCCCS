@@ -3058,7 +3058,7 @@ contains
        do i=1,nbox
           if (i.eq.1.and.lexzeo) then
              cycle
-          else if (abs(qbox(i)).gt.1E-6_dp) then
+          else if (abs(qbox(i)).gt.1E-6_dp .and. i.ne.gcbmc_box_num) then
              call err_exit(__FILE__,__LINE__,'box '//integer_to_string(i)//' has a net charge of '//real_to_string(qbox(i)),myid+1)
           end if
        end do
@@ -3245,8 +3245,16 @@ contains
                    temphe(nhere) = izz
                 end if
              end do
-             write(io_movie,*) nstep/imv,nchain,nmolty,nbox,nhere
-             write(io_movie,*) (rcut(ibox),ibox=1,nbox)
+
+             if (ANY(pmgroup(1:nmolty).gt.0) .and. .not. l_gcbmc_movie) then
+                 ! The information about group-CBMC reservoir molecules will not be written in the movie file
+                 write(io_movie,*) nstep/imv,nchain-nchbox(gcbmc_box_num),nmolty,nbox-1,nhere
+                 write(io_movie,*) (rcut(ibox),ibox=1,nbox-1) !< assume the last box is the reservoir box!!
+             else
+                 write(io_movie,*) nstep/imv,nchain,nmolty,nbox,nhere
+                 write(io_movie,*) (rcut(ibox),ibox=1,nbox)
+             end if
+
              write(io_movie,*) (temphe(izz),izz=1,nhere)
 
              do imolty = 1,nmolty
@@ -3522,42 +3530,50 @@ contains
           ! write out the movie configurations ***
           write(io_movie,*) nnn
           do ibox = 1, nbox
-             write(io_movie,*) (ncmt(ibox,zzz),zzz=1,nmolty)
+             if (ibox.ne.gcbmc_box_num .or. l_gcbmc_movie) then
+                 !< write out box information unless this is the reservoir box and l_gcbmc_movie is false
+                 write(io_movie,*) (ncmt(ibox,zzz),zzz=1,nmolty)
 
-             if (lsolid(ibox) .and. .not. lrect(ibox)) then
-                write(io_movie,*) (hmat(ibox,zzz),zzz=1,9)
-             else
-                write(io_movie,*) boxlx(ibox),boxly(ibox),boxlz(ibox)
+                 if (lsolid(ibox) .and. .not. lrect(ibox)) then
+                    write(io_movie,*) (hmat(ibox,zzz),zzz=1,9)
+                 else
+                    write(io_movie,*) boxlx(ibox),boxly(ibox),boxlz(ibox)
+                 end if
              end if
           end do
           do m = 1, nchain
              imolty = moltyp(m)
-             write(io_movie,'(4(1x,i5),3(1x,f16.6))') m,imolty,nunit(imolty),nboxi(m),xcm(m),ycm(m),zcm(m)
-             do mm = 1, nunit(imolty)
-                write(io_movie,'(4(1x,f14.6),i5)') rxu(m,mm),ryu(m,mm),rzu(m,mm),qqu(m,mm),atoms%list(ntype(imolty,mm))
-             end do
+             if (l_gcbmc_movie .or. nboxi(m).ne.gcbmc_box_num) then
+                 !< only write if the molecule is not in the reservoir box, or l_gcbmc_movie is true
+                 write(io_movie,'(4(1x,i5),3(1x,f16.6))') m,imolty,nunit(imolty),nboxi(m),xcm(m),ycm(m),zcm(m)
+                 do mm = 1, nunit(imolty)
+                     write(io_movie,'(4(1x,f14.6),i5)') rxu(m,mm),ryu(m,mm),rzu(m,mm),qqu(m,mm),atoms%list(ntype(imolty,mm))
+                 end do
+             end if
           end do
 
           ! KM for MPI
           if (L_movie_xyz) then
              do ibox = 1,nbox
-                nummol = 0
-                do i = 1,nchain
-                   if (nboxi(i).eq.ibox) then
-                      nummol = nummol + nunit(moltyp(i))
-                   end if
-                end do
-                write(io_box_movie(ibox),*) nummol
-                write(io_box_movie(ibox),*)
-                do i = 1,nchain
-                   if(nboxi(i).eq.ibox) then
-                      imolty = moltyp(i)
-                      do ii = 1,nunit(imolty)
-                         ntii = ntype(imolty,ii)
-                         write(io_box_movie(ibox),'(a4,5x,3f15.4)') chemid(ntii), rxu(i,ii), ryu(i,ii), rzu(i,ii)
-                      end do
-                   end if
-                end do
+                if (l_gcbmc_movie .or. nboxi(m).ne.gcbmc_box_num) then
+                    nummol = 0
+                    do i = 1,nchain
+                       if (nboxi(i).eq.ibox) then
+                          nummol = nummol + nunit(moltyp(i))
+                       end if
+                    end do
+                    write(io_box_movie(ibox),*) nummol
+                    write(io_box_movie(ibox),*)
+                    do i = 1,nchain
+                       if(nboxi(i).eq.ibox) then
+                          imolty = moltyp(i)
+                          do ii = 1,nunit(imolty)
+                             ntii = ntype(imolty,ii)
+                             write(io_box_movie(ibox),'(a4,5x,3f15.4)') chemid(ntii), rxu(i,ii), ryu(i,ii), rzu(i,ii)
+                          end do
+                       end if
+                    end do
+                 end if
              end do
           end if
 

@@ -245,14 +245,15 @@ module sim_system
   integer,allocatable::lin_bend_dim(:),br_bend_dim1(:),br_bend_dim2(:),br_bend_dim3(:) ! The dimensions for the above bending tables
 
   !*** Group_CBMC
-  real,allocatable::pmgroup(:)
-  integer::gcbmc_box_num !< box number that contains the repeat units
-  !integer::repeat_unit_num !< total number of repeat units
+  real,allocatable::pmgroup(:) !< probability of performing group-CBMC
+  real,allocatable::gcbmc_weight(:) !< the total boltzmann weight of reservoir repeat units, for each repeat unit type 
+  integer::gcbmc_box_num=0 !< box number that contains the repeat units
   integer::gcbmc_mol_num !< number of molecules using group CBMC
   integer,allocatable::gcbmc_mol_list(:) !< corresponding list of moltype with gcbmc_moltype
   integer,allocatable::gcbmc_unit_num(:) !< number of repeat unit for moltype with gcbmc_moltype
   integer,allocatable::gcbmc_unit_moltype(:,:) !< molecule type of repeat units   
   integer,allocatable::gcbmc_unit_list(:,:,:) !< corresponding list of beads
+  logical::l_gcbmc_movie=.false. !< whether to write gcbmc reservoir box information to the movie file
 
   !*** CBMC shared variables ***
   integer,allocatable::nugrow(:),nmaxcbmc(:),iurot(:),maxgrow(:)&
