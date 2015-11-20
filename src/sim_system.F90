@@ -246,7 +246,6 @@ module sim_system
 
   !*** Group_CBMC
   real,allocatable::pmgroup(:) !< probability of performing group-CBMC
-  real,allocatable::gcbmc_weight(:) !< the total boltzmann weight of reservoir repeat units, for each repeat unit type 
   integer::gcbmc_box_num=0 !< box number that contains the repeat units
   integer::gcbmc_mol_num !< number of molecules using group CBMC
   integer,allocatable::gcbmc_mol_list(:) !< corresponding list of moltype with gcbmc_moltype

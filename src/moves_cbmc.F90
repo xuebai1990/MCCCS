@@ -461,11 +461,6 @@ contains
             rzu(i,ic)  = rzuion(ic,2)
          end do
 
-         ! update group-CBMC repeat unit rosenbluth weight
-         if (ibox .eq. gcbmc_box_num) then
-             gcbmc_weight(imolty) = gcbmc_weight(imolty) - exp(-beta * vold(ivTot)) + exp(-beta * vnew(ivTot))
-         end if
-
          if (lewald.and.lelect(imolty).and..not.lideal(ibox)) then
 ! update reciprocal-space sum
             call recip(ibox,vdum,vdum,2)
@@ -8224,7 +8219,6 @@ contains
         if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section GROUP_CBMC',jerr)        
         read(line_in,*) gcbmc_mol_num
 
-        allocate(gcbmc_weight(nmolty))
         allocate(gcbmc_mol_list(gcbmc_mol_num))
         allocate(gcbmc_unit_num(gcbmc_mol_num))
         allocate(gcbmc_unit_moltype(gcbmc_mol_num, maxval(nunit)))
