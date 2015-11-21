@@ -2339,11 +2339,21 @@ contains
           rs8=rs6*rijsq
           rs12=rs6*rs6
           U2=vvdW(1,ntij)/rs12-vvdW(2,ntij)/rs6-vvdW(3,ntij)/rs8
-	else if (nonbond_type(ntij).eq.8) then
-		!DOD
-		rs1 = rij/vvdW(2,ntij)
-		rs2 = 1.0_dp-rs1
-		U2 = vvdW(1,ntij)*rs2*rs2
+       else if (nonbond_type(ntij).eq.8) then
+          !DPD
+          ! a segmented potential where
+          ! U(rij) = a_ij/2 (1-rij/rmin)^2 for rij <= rmin
+          !        = 0.0 if rij > rmin
+          ! Must be specified here because some parts of the code don't check
+          ! the rcut before evaluating the potential which could result in
+          ! unphysical energies for a DPD system. 
+          if(rij<=vvDW(2,ntij)) then 
+              rs1 = rij/vvdW(2,ntij)
+              rs2 = 1.0_dp-rs1
+              U2 = vvdW(1,ntij)*rs2*rs2
+          else 
+              U2 = 0.0_dp 
+          end if
        else if (nonbond_type(ntij).eq.-1) then
           ! tabulated potential
           U2=lininter_vdW(rij,ntii,ntjj)
