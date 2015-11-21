@@ -1743,27 +1743,29 @@ contains
 
     write(io_output,'(/,A,/)') '### Molecule swatch     ###'
     do i = 1, nswaty
-       write(io_output,'(A,I0)') 'pair typ = ',i
-       write(io_output,'(A,I0,A)',advance='no') 'moltyps = ',nswatb(i,1),'    '
-       write(io_output,'(A10)',advance='no')molecname(nswatb(i,1))
-       write(io_output,'(A,I0,A)',advance='no')' and ',nswatb(i,2),'    '
-       write(io_output,'(A10)',advance='no')molecname(nswatb(i,2))
-       write(io_output,*) 
-       do j = 1, nswtcb(i)
-          do jbox = 1,2
-             if (jbox.eq.1) ibox=box3(i,j)
-             if (jbox.eq.2) then
-                if (box3(i,j).eq.box4(i,j)) exit
-                ibox=box4(i,j)
-             end if
-             ! JLR 12-1-09 changing to exclude empty box attempts from swatch rate
-             write(io_output,"('between box ',I0,' and ',I0,' into box ',I0,'   uattempts = ',I0,   '  attempts = ',I0,'  accepted = ',I0)") box3(i,j),box4(i,j),ibox,bnswat(i,j,ibox),bnswat(i,j,ibox)-bnswat_empty(i,j,ibox),bsswat(i,j,ibox)
-             if (bnswat(i,j,ibox) .gt. 0) then
-                write(io_output,"(' accepted % =',F7.3)") 100.0_dp*real(bsswat(i,j,ibox),dp)/real(bnswat(i,j,ibox)-bnswat_empty(i,j,ibox),dp)
-             end if
-             ! EN JLR 12-1-09
+       if (sum(bnswat(i,:,:)) .gt. 0) then ! only output if swatch attempt > 0
+          write(io_output,'(A,I0)') 'pair typ = ',i
+          write(io_output,'(A,I0,A)',advance='no') 'moltyps = ',nswatb(i,1),'    '
+          write(io_output,'(A10)',advance='no')molecname(nswatb(i,1))
+          write(io_output,'(A,I0,A)',advance='no')' and ',nswatb(i,2),'    '
+          write(io_output,'(A10)',advance='no')molecname(nswatb(i,2))
+          write(io_output,*)
+          do j = 1, nswtcb(i)
+             do jbox = 1,2
+                if (jbox.eq.1) ibox=box3(i,j)
+                if (jbox.eq.2) then
+                   if (box3(i,j).eq.box4(i,j)) exit
+                   ibox=box4(i,j)
+                end if
+                ! JLR 12-1-09 changing to exclude empty box attempts from swatch rate
+                write(io_output,"('between box ',I0,' and ',I0,' into box ',I0,'   uattempts = ',I0,   '  attempts = ',I0,'  accepted = ',I0)") box3(i,j),box4(i,j),ibox,bnswat(i,j,ibox),bnswat(i,j,ibox)-bnswat_empty(i,j,ibox),bsswat(i,j,ibox)
+                if (bnswat(i,j,ibox) .gt. 0) then
+                   write(io_output,"(' accepted % =',F7.3)") 100.0_dp*real(bsswat(i,j,ibox),dp)/real(bnswat(i,j,ibox)-bnswat_empty(i,j,ibox),dp)
+                end if
+                ! EN JLR 12-1-09
+             end do
           end do
-       end do
+       end if
     end do
   end subroutine output_swatch_stats
 

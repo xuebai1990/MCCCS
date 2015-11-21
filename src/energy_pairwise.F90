@@ -625,7 +625,7 @@ contains
        write(io_output,*) 'sumup control'
        write(io_output,*) 'number of chains', nchbox(ibox)
        do i = 1, nmolty
-          write(io_output,*) 'number of chains of type',i,ncmt(ibox,i)
+          write(io_output,"(A,I2,A,A10,I8)") 'number of chains of type   ',i,' ', molecname(i),ncmt(ibox,i)
        end do
        write(io_output,*) 'inter lj energy ', v(ivInterLJ)
        write(io_output,*) 'intra lj energy ', v(ivIntraLJ)
