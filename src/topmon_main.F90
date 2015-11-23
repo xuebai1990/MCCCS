@@ -1892,7 +1892,7 @@ contains
                     molecname(imol)='undefined'
                 end if
                 if (lprint) then
-                   write(io_output,'(A,I1,A,A10)') 'molecule type: ',imol,' ',molecname(imol)
+                   write(io_output,'(A,I2,A,A10)') 'molecule type: ',imol,' ',molecname(imol)
                    write(io_output,'(A,I0)') '   number of units: ',nunit(imol)
                    write(io_output,'(A,I0)') '   number of units for CBMC growth: ', nugrow(imol)
                    write(io_output,'(A,I0)') '   number of carbons for EH alkane: ', ncarbon(imol)
