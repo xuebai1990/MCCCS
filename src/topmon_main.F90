@@ -3555,7 +3555,7 @@ contains
           ! KM for MPI
           if (L_movie_xyz) then
              do ibox = 1,nbox
-                if (l_gcbmc_movie .or. nboxi(m).ne.gcbmc_box_num) then
+                if (l_gcbmc_movie .or. ibox.ne.gcbmc_box_num) then
                     nummol = 0
                     do i = 1,nchain
                        if (nboxi(i).eq.ibox) then
