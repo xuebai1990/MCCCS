@@ -65,7 +65,8 @@ contains
 ! select a chain at random ***
       vnew=0.
       vold=0.
-
+      delta_vn = 0.0_dp
+      delta_vo = 0.0_dp
       rchain  = random(-1)
       do icbu = 1,nmolty
          if ( rchain .lt. pmcbmt(icbu) ) then
@@ -2481,7 +2482,7 @@ contains
             ux = xvecgrow/distgrow
             uy = yvecgrow/distgrow
             uz = zvecgrow/distgrow
-
+ 
             call cone(3,ux,uy,uz,bendang(angstart),phi(angstart))
         end if
 
@@ -2521,7 +2522,6 @@ contains
                     do aaa = angstart,count-1
                         iuone = growlist(iw,aaa)
                         angle=cone_angle(bendang(aaa),phi(aaa),bendang(count),phitwo)
-
                         do ib = 1, inben(imolty,iugrow)
                             iulast = ijben2(imolty,iugrow,ib)
                             if ( iulast .eq. iufrom ) then

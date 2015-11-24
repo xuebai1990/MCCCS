@@ -211,7 +211,7 @@ contains
                          else if (nonbond_type(ntij).eq.2) then
                             ! Buckingham exp-6
                             rs1=vvdW(2,ntij)*rij
-                            fij = fij + (vvdW(1,ntij)*rs1*exp(rs1)+6.0_dp*vvdW(3,ntij)/(rijsq**3))/rijsq !i suspect this is wrong
+                            fij = fij + (vvdW(1,ntij)*rs1*exp(rs1)+6.0_dp*vvdW(3,ntij)/(rijsq**3))/rijsq 
                          else if (nonbond_type(ntij).eq.3) then
                             ! Mie
                             sr1 = vvdW(2,ntij) / rij
