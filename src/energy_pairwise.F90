@@ -323,9 +323,7 @@ contains
                    rxuij = rxu(i,ii) - rxu(i,jj)
                    ryuij = ryu(i,ii) - ryu(i,jj)
                    rzuij = rzu(i,ii) - rzu(i,jj)
-                   ! JLR 11-17-09  need call to mimage for intrachain
-                   if (lpbc) call mimage(rxuij,ryuij,rzuij,ibox)
-                   ! END JLR 11-17-09
+                   ! lpbc is not called here because it's intra-chain interaction
                    rij = sqrt(rxuij*rxuij + ryuij*ryuij + rzuij*rzuij)
 
                    ! correct should only be calculated if ii and jj should NOT interact,
@@ -391,9 +389,7 @@ contains
                       rxuij = rxu(i,ii) - rxu(i,jj)
                       ryuij = ryu(i,ii) - ryu(i,jj)
                       rzuij = rzu(i,ii) - rzu(i,jj)
-                      ! JLR 11-17-09  need call to mimage for intrachain
-                      if (lpbc) call mimage(rxuij,ryuij,rzuij,ibox)
-                      ! END JLR 11-17-09
+                      ! lpbc is not called here because it's intra-chain interaction
                       rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
                       rij  = sqrt(rijsq)
                       if (linclu(imolty,ii,jj)) then
@@ -412,7 +408,8 @@ contains
                             ! return
                             goto 299
                             ! -------------------------------
-                         else if (rijsq.lt.rcutsq.or.lijall) then
+                         else
+                            ! there's no cutoff when calculating the intra-chain interaction
                             !> \bug skip intra if it is bending 1-3 and using a table?
                             if (L_bend_table) then
                                do mmm=1,inben(imolty,ii)
@@ -959,10 +956,8 @@ contains
           rxuij = rxuion(ii,flagon) - rxuion(jj,flagon)
           ryuij = ryuion(ii,flagon) - ryuion(jj,flagon)
           rzuij = rzuion(ii,flagon) - rzuion(jj,flagon)
-          ! JLR 11-19-09 always do mimage for intrachain
-          ! if (lpbc .and. lmim) call mimage( rxuij,ryuij,rzuij,ibox)
-          if (lpbc) call mimage(rxuij,ryuij,rzuij,ibox)
-          ! END JLR 11-19-09
+          
+          ! lpbc is not called here because it's intra-chain interaction
           rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
           rij = sqrt(rijsq)
 
@@ -979,7 +974,8 @@ contains
                    ovrlap = .true.
                    ! write(io_output,*) 'intra ovrlap:',ii,jj
                    return
-                else if (rijsq.lt.rcutsq .or. lijall) then
+                else
+                   ! there's no cutoff when calculating the intra-chain interaction
                    !> \bug skip intra if it is bending 1-3 and using a table?
                    if (L_bend_table) then
                       do mmm=1,inben(imolty,ii)
@@ -1294,7 +1290,7 @@ contains
                       ryuij  = ryu(i,iu) - ryp(count,itrial)
                       rzuij  = rzu(i,iu) - rzp(count,itrial)
                    end if
-                   if (lpbc) call mimage(rxuij,ryuij,rzuij,ibox)
+                   ! lpbc is not called here because it's intra-chain interaction
                    rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
                    rij = sqrt(rijsq)
                 end if
@@ -1305,7 +1301,8 @@ contains
                          my_lovr(my_itrial) = .true.
                          ! write(io_output,*) 'intra overlap'
                          goto 19
-                      else if (rijsq.lt.rcutsq .or. lijall) then
+                      else
+                         ! there's no cutoff when calculating the intra-chain interaction
                          !> \bug skip intra if it is bending 1-3 and using a table?
                          if (L_bend_table) then
                             do mmm=1,inben(imolty,ii)
