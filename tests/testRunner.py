@@ -71,9 +71,13 @@ if directives["test"]:
     mainLog.write("====== tests ======\n")
     suite=testUtils.simpleTests(srcRoot=Root,exeRoot=os.path.join(buildDir,"src"),testsRoot=logDirPath,command="topmon")
     testRunner=unittest.TextTestRunner(stream=mainLog,verbosity=2)
-    testRunner.run(suite)
+    retCode=testRunner.run(suite).wasSuccessful()
+    if retCode:
+        exitCode=0
+    else:
+        exitCode=-1
 
 mainLog.write(" ******* "+time.strftime("%y%m%d-%H:%M")+" prepare check-in FINISHED *******\n")
 mainLog.close()
-
+sys.exit(exitCode)
 
