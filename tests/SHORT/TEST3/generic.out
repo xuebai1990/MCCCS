@@ -1,9 +1,10 @@
-Program started at 2015-05-26 14:08:46.577
+Program started at 2015-11-25 11:22:01.951
 Number of processors: 1
 Threads per processor: 1
  run_num: 1    
  suffix: a
  L_movie_xyz:  F
+ L_movie_pdb:  F
 
 ***** PROGRAM  =  THE MAGIC BLACK BOX *****
 Isobaric-isothermal ensemble
@@ -77,7 +78,7 @@ NUMBER OF MOLECULES OF EACH TYPE
 
 SECTION MOLECULE_TYPE
 ------------------------------------------
-molecule type: 1
+molecule type:  1 undefined 
    number of units: 3
    number of units for CBMC growth: 3
    number of carbons for EH alkane: 3
@@ -169,11 +170,11 @@ pmswat:   0.00000000
    probability of each swatch pair:  1.000000000    
 
    swatch molecule type pairs:    2    3
-   nsampos: 1, ncut:  1  1
+   nsampos: 1, ncut:  1  1, ncutsafe:  0  0
    molecule 1
-   ncut 1: grom from 1, prev 0
+   ncut 1: grow from 1, prev 0
    molecule 2
-   ncut 1: grom from 1, prev 0
+   ncut 1: grow from 1, prev 0
    splist:    1    1
    number of swatch box pairs: 1
    probability of the swatch box pair:  1.000000000    
@@ -258,7 +259,7 @@ READING CONFIGURATION FROM RESTART FILE
 ------------------------------------------
 new maximum displacements read from restart-file
    max atom trans. displacement:     0.010000    0.010000    0.010000
-   max volume displacement:        0.3647E+03
+   max volume displacement:   0.3647E+03
 
 box      #1
    molecule type 1
@@ -273,7 +274,7 @@ Finished writing simulation box related info
  
  sumup control
  number of chains        1000
- number of chains of type           1        1000
+number of chains of type    1 undefined     1000
  inter lj energy    1004756.02056258     
  intra lj energy   0.000000000000000E+000
  Tail correction   -22159.5983844262     
@@ -303,14 +304,14 @@ Finished writing simulation box related info
  
  ### Translations ###
  
-molecule typ = 1   OHH  in box           1
+molecule typ = 1   undefined   in box           1
  x-dir: attempts =    4286.0   ratio = 0.500   max.displ. = 0.3217E+00
  y-dir: attempts =    4091.0   ratio = 0.497   max.displ. = 0.3217E+00
  z-dir: attempts =    4082.0   ratio = 0.497   max.displ. = 0.3217E+00
  
  ### Rotations ###
  
-molecule typ = 1    OHH  in box           1
+molecule typ = 1   undefined   in box           1
  x-dir: attempts =    4207.0   ratio = 0.505   max.displ. = 0.4064E+00
  y-dir: attempts =    4228.0   ratio = 0.501   max.displ. = 0.4064E+00
  z-dir: attempts =    4101.0   ratio = 0.489   max.displ. = 0.4064E+00
@@ -321,7 +322,7 @@ molecule typ = 1    OHH  in box           1
 
 ### Molecule swap       ###
 
-molecule typ = 1    OHH
+molecule typ = 1   undefined 
 between box 1 and 2 into box 1   uattempts = 0 attempts = 0   accepted = 0
 between box 1 and 2 into box 2   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
@@ -339,7 +340,7 @@ molecule  1:   0.00000000
  
  sumup control
  number of chains        1000
- number of chains of type           1        1000
+number of chains of type    1 undefined     1000
  inter lj energy    1002376.35953561     
  intra lj energy   0.000000000000000E+000
  Tail correction   -22157.8896206770     
@@ -347,30 +348,30 @@ molecule  1:   0.00000000
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -6669467.46967265     
+ coulombic energy  -6669467.46967263     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -5667091.11013703     
+ total energy      -5667091.11013702     
  
  vstart       =     -5662975.9201778714
- vend         =     -5667091.1101370342
- vbox         =     -5667091.1101369476
+ vend         =     -5667091.1101370193
+ vbox         =     -5667091.1101369252
  
- Averages and fluctuations                        Box  1
+ Averages and fluctuations                                  Box  1
  
- pressure                           [kPa] =   -122900.84
- pressure              [simulation units] =    -8.901673
- surface tension                   [mN/m] =     203.6832
- chem. potential of type   1          [K] =        0.000
- boxlength                            [A] =       31.008
- boxlength                            [A] =       31.008
- boxlength                            [A] =       31.008
- no. of chains of type     1              =     1000.000
- molar volume                  [cm^3/mol] =       17.955
- specific density                [g/cm^3] =     1.003379
- number density of type    1 [chain/nm^3] =     33.53995
- molfraction of type       1              =    1.0000000
- mean sete length of type  1        [A^2] =        1.000
+ pressure                                      [kPa] =   -122900.84
+ pressure                         [simulation units] =    -8.901673
+ surface tension                              [mN/m] =     203.6832
+ chem. potential of type   1 undefined           [K] =        0.000
+ boxlength                                       [A] =       31.008
+ boxlength                                       [A] =       31.008
+ boxlength                                       [A] =       31.008
+ no. of chains of type     1 undefined               =     1000.000
+ molar volume                             [cm^3/mol] =       17.955
+ specific density                           [g/cm^3] =     1.003379
+ number density of type    1 undefined  [chain/nm^3] =     33.53995
+ molfraction of type       1 undefined               =    1.0000000
+ mean sete length of type  1 undefined         [A^2] =        1.000
  
  Total energy [K per system and kJ/mol per chain] =   -5661053.20     -47.07
  Inter LJ     [K per system and kJ/mol per chain] =     979956.37       8.15
@@ -410,7 +411,7 @@ molecule  1:   0.00000000
  Enthalpy Inst.[kJ/mol] for box  1 =     -49.2889       2.3010       1.1505
  Enthalpy Ext. [kJ/mol] for box  1 =     -47.0796       0.0660       0.0330
  
- Cp residual(J/Kmol) =   5.04982279    
+ Cp residual(J/Kmol) =   5.04982281    
    H2 =  0.320451330E+14
    H  =  -5660837.24    
  
@@ -428,7 +429,7 @@ molecule  1:   0.00000000
    3 -0.5660E+07  0.1003E+01 -0.1369E+06  0.2018E+03  0.1000E+01
    4 -0.5652E+07  0.1003E+01 -0.4046E+05  0.2464E+03  0.1000E+01
    5 -0.5665E+07  0.1006E+01 -0.4180E+05  0.1341E+03  0.1000E+01
- Program ended at 2015-05-26 14:09:02.059
+ Program ended at 2015-11-25 11:22:19.259
 dim:   0
 sete:                NaN
 Uads:                NaN
