@@ -154,7 +154,6 @@ contains
                       if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
 
                       rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-                      rij  = sqrt(rijsq)
                       rcm = rbcut + rcmi + rcmu(j)
                       rcmsq = rcm*rcm
 
@@ -207,7 +206,6 @@ contains
                          if (lpbc) call mimage(rxuij,ryuij,rzuij,ibox)
 
                          rijsq=(rxuij*rxuij)+(ryuij*ryuij)+(rzuij*rzuij)
-                         rij=sqrt(rijsq)
 
                          if (rijsq.lt.rminsq .and. .not.(lexpand(imolty).or.lexpand(jmolty))) then
                             if ( .not. lvol .and.myid.eq.rootid) then
@@ -223,10 +221,10 @@ contains
                             ! return
                             goto 199
                          else if (rijsq.lt.rcutsq .or. lijall) then
-                            v(ivInterLJ)=v(ivInterLJ)+U2(rij,rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
+                            v(ivInterLJ)=v(ivInterLJ)+U2(rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
                          end if
 
-                         v(ivElect)=v(ivElect)+Q2(rij,rijsq,rcutsq,i,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
+                         v(ivElect)=v(ivElect)+Q2(rijsq,rcutsq,i,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
 
                          if (lneigh.and.rijsq.le.rcutnn(ibox)**2) then
                             lnn(i,j) = .true.
@@ -239,10 +237,10 @@ contains
 !cc  calculation of neighbors assumes everything is sequential
                          !> \bug Wouldn't testing for center-of-mass distance be a better criteria?
                          if (lneighbor.and.ii.eq.1.and.jj.eq.1.and.rijsq.lt.rbsmax**2.and.rijsq.gt.rbsmin**2) then
-                            call add_neighbor_list(i,j,rij,rxuij,ryuij,rzuij)
+                            call add_neighbor_list(i,j,sqrt(rijsq),rxuij,ryuij,rzuij)
                          else if (lgaro) then
                             if (isNeighbor(rijsq,ntii,ntjj)) then
-                               call add_neighbor_list(i,j,rij,rxuij,ryuij,rzuij)
+                               call add_neighbor_list(i,j,sqrt(rijsq),rxuij,ryuij,rzuij)
                             end if
                          end if
                       end do bead2
@@ -391,9 +389,8 @@ contains
                       rzuij = rzu(i,ii) - rzu(i,jj)
                       ! lpbc is not called here because it's intra-chain interaction
                       rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-                      rij  = sqrt(rijsq)
-                      if (linclu(imolty,ii,jj)) then
 
+                      if (linclu(imolty,ii,jj)) then
                          if (rijsq.lt.rminsq.and..not.lexpand(imolty)) then
                             if ( .not. lvol ) then
                                write(io_output,*) 'overlap intra'
@@ -414,22 +411,20 @@ contains
                             if (L_bend_table) then
                                do mmm=1,inben(imolty,ii)
                                   if (ijben3(imolty,ii,mmm).eq.jj)then
-                                     v(ivIntraLJ) = v(ivIntraLJ) + lininter_bend(rij,itben(imolty,ii,mmm))
+                                     v(ivIntraLJ) = v(ivIntraLJ) + lininter_bend(sqrt(rij),itben(imolty,ii,mmm))
                                      goto 94
                                   end if
                                end do
                             end if
 
-                            v(ivIntraLJ)=v(ivIntraLJ) + U2(rij,rijsq,i,imolty,ii,ntii,i,imolty,jj,ntjj,ntij)
-
+                            v(ivIntraLJ)=v(ivIntraLJ)+U2(rijsq,i,imolty,ii,ntii,i,imolty,jj,ntjj,ntij)
                          end if
                       end if !if (linclu(imolty,ii,jj))
 
 94                    if (lqinclu(imolty,ii,jj)) then
                          ! calculate intramolecular charge interaction
-                         my_velect = my_velect + qscale2(imolty,ii,jj)*Q2(rij,rijsq,rcutsq,i,imolty,ii,ntii,lqchg(ntii),i,imolty,jj&
-                            ,ntjj,calpi,lcoulo)
-                          
+                         my_velect=my_velect+qscale2(imolty,ii,jj)*Q2(rijsq,rcutsq,i,imolty,ii,ntii,lqchg(ntii),i,imolty,jj&
+                          ,ntjj,calpi,lcoulo)
                       end if
                    end if
                 end do
@@ -787,7 +782,6 @@ contains
                 ! minimum image the ctrmas pair separations ***
                 if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
                 rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-                rij  = sqrt(rijsq)
                 rcm = rbcut + rcmi + rcmu(j)
                 rcmsq = rcm*rcm
                 ! write(io_output,*) rcm,rcmi,rcmu(j)
@@ -859,7 +853,6 @@ contains
                    ! minimum image the pair separations ***
                    if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
                    rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-                   rij  = sqrt(rijsq)
                    if (rijsq.lt.rminsq .and. .not.(lexpand(imolty).or.lexpand(jmolty))) then
                       ovrlap = .true.
                       ! write(io_output,*) 'inter ovrlap:',i,j, myid
@@ -871,20 +864,20 @@ contains
                       ! return
                       goto 99
                    else if ((rijsq .lt. rcutsq) .or. lijall) then
-                      v(ivInterLJ)=v(ivInterLJ)+U2(rij,rijsq,nchp2,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
+                      v(ivInterLJ)=v(ivInterLJ)+U2(rijsq,nchp2,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
                    end if
 
-                   v(ivElect)=v(ivElect)+Q2(rij,rijsq,rcutsq,nchp2,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
+                   v(ivElect)=v(ivElect)+Q2(rijsq,rcutsq,nchp2,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
 
                    if (lneigh.and.flagon.eq.2.and.rijsq.le.rcutnn(ibox)**2) lnn_t(j,i)=.true.
 
                    ! KM lneighbor and lgaro does not work in parallel
                    !> \bug Wouldn't testing for center-of-mass distance be a better criteria?
                    if (lneighbor.and.ii.eq.1.and.jj.eq.1.and.flagon.eq.2.and.rijsq.lt.rbsmax**2.and.rijsq.gt.rbsmin**2) then
-                      call add_neighbor_list_molecule(j,rij,rxuij,ryuij,rzuij)
+                      call add_neighbor_list_molecule(j,sqrt(rijsq),rxuij,ryuij,rzuij)
                    else if (lgaro.and.flagon.eq.2) then
                       if (isNeighbor(rijsq,ntii,ntjj)) then
-                         call add_neighbor_list_molecule(j,rij,rxuij,ryuij,rzuij)
+                         call add_neighbor_list_molecule(j,sqrt(rijsq),rxuij,ryuij,rzuij)
                       end if
                    end if
                 end do
@@ -959,11 +952,10 @@ contains
           
           ! lpbc is not called here because it's intra-chain interaction
           rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-          rij = sqrt(rijsq)
 
           if (lqinclu(imolty,ii,jj) ) then
              ! calculation of intramolecular electrostatics
-             v(ivElect)=v(ivElect)+qscale2(imolty,ii,jj)*Q2(rij,rijsq,rcutsq,nchp2,imolty,ii,ntii,lqchg(ntii),nchp2,imolty,jj&
+             v(ivElect)=v(ivElect)+qscale2(imolty,ii,jj)*Q2(rijsq,rcutsq,nchp2,imolty,ii,ntii,lqchg(ntii),nchp2,imolty,jj&
               ,ntjj,calpi,lcoulo)
           end if
 
@@ -980,13 +972,13 @@ contains
                    if (L_bend_table) then
                       do mmm=1,inben(imolty,ii)
                          if (ijben3(imolty,ii,mmm).eq.jj) then
-                            v(ivIntraLJ) = v(ivIntraLJ) + lininter_bend(rij,itben(imolty,ii,mmm))
+                            v(ivIntraLJ) = v(ivIntraLJ) + lininter_bend(sqrt(rij),itben(imolty,ii,mmm))
                             goto 96
                          end if
                       end do
                    end if
 
-                   v(ivIntraLJ)=v(ivIntraLJ)+U2(rij,rijsq,nchp2,imolty,ii,ntii,nchp2,imolty,jj,ntjj,ntij)
+                   v(ivIntraLJ)=v(ivIntraLJ)+U2(rijsq,nchp2,imolty,ii,ntii,nchp2,imolty,jj,ntjj,ntij)
                 end if
              end if
           end if
@@ -996,6 +988,7 @@ contains
              ! the interactions of the placed atoms with themselves, and with the
              ! rest of their own molecule, if there's no interaction
              ! these are 1,2 and 1,3
+             rij = sqrt(rijsq)
              if (.not. lqinclu(imolty,ii,jj)) then
                 correct=correct+qquion(ii,flagon)*qquion(jj,flagon)*(erfunc(calpi*rij)-1.0E0_dp)/rij
                 ! 1,4 interaction which we scale by qscale
@@ -1209,7 +1202,6 @@ contains
              if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
 
              rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-             rij  = sqrt(rijsq)
 
              if ( ldual ) then
                 rcm = rcutin + rcmu(j) + maxlen
@@ -1292,7 +1284,6 @@ contains
                    end if
                    ! lpbc is not called here because it's intra-chain interaction
                    rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-                   rij = sqrt(rijsq)
                 end if
                 if ( linclu(imolty,ii,iu) .or. lqinclu(imolty,ii,iu)) then
                    if ( linclu(imolty,ii,iu) ) then
@@ -1307,13 +1298,13 @@ contains
                          if (L_bend_table) then
                             do mmm=1,inben(imolty,ii)
                                if (ijben3(imolty,ii,mmm).eq.iu) then
-                                  v(ivIntraLJ) = v(ivIntraLJ) + lininter_bend(rij,itben(imolty,ii,mmm))
+                                  v(ivIntraLJ) = v(ivIntraLJ) + lininter_bend(sqrt(rijsq),itben(imolty,ii,mmm))
                                   goto 96
                                end if
                             end do
                          end if
 
-                         v(ivIntraLJ)=v(ivIntraLJ)+U2(rij,rijsq,i,imolty,ii,ntii,i,imolty,iu,ntjj,ntij)
+                         v(ivIntraLJ)=v(ivIntraLJ)+U2(rijsq,i,imolty,ii,ntii,i,imolty,iu,ntjj,ntij)
                       end if
                    end if
 
@@ -1325,6 +1316,7 @@ contains
                       ! present, so it calculates electrostatic interaction not based on
                       ! group but on its own distance in SC, but should be corrected
                       ! later by calling energy subroutine.
+                      rij = sqrt(rijsq)
                       if (L_elect_table) then
                          v(ivElect) = v(ivElect) + qscale2(imolty,ii,iu)*qqu(icharge,ii)*qqu(icharge,iu)&
                           *lininter_elect(rij,ntii,ntjj)
@@ -1344,6 +1336,7 @@ contains
                    ! will only add correction if lqinclu is false.
                 else if (L_Coul_CBMC.and.lewald) then
                    ! ewald sum correction term
+                   rij = sqrt(rijsq)
                    corr = qqu(icharge,ii)*qqu(icharge,iu)*(erfunc(calp(ibox)*rij)-1.0E0_dp) /rij
                    v(ivEwald) = v(ivEwald) + corr
                 end if
@@ -1435,7 +1428,6 @@ contains
                       ! minimum image the ctrmas pair separations
                       if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
                       rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-                      rij   = sqrt(rijsq)
                       ! determine cutoff
                       if ( ldual ) then
                          ! must be lfirst so no previous bead
@@ -1473,7 +1465,6 @@ contains
                       ! minimum image the pair separations ***
                       if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
                       rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-                      rij   = sqrt(rijsq)
                       ! compute vinter (eg. lennard-jones)
                       if (rijsq.lt.rminsq.and..not.(lexpand(imolty).or.lexpand(jmolty))) then
                          my_lovr(my_itrial) = .true.
@@ -1481,7 +1472,7 @@ contains
                          ! write(io_output,*) 'rjsq:',rijsq,rminsq
                          goto 19
                       else if (rijsq.lt.rcinsq.or.lijall) then
-                         v(ivInterLJ)=v(ivInterLJ)+U2(rij,rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
+                         v(ivInterLJ)=v(ivInterLJ)+U2(rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
                       end if
 
                       ! compute velect (coulomb and ewald)
@@ -1491,6 +1482,7 @@ contains
                          ! present, so it calculates electrostatic interaction not based on
                          ! group but on its own distance in SC, but should be corrected
                          ! later by calling energy subroutine.
+                         rij = sqrt(rijsq)
                          if (L_elect_table) then
                             v(ivElect) = v(ivElect) + qqu(icharge,ii)*qqu(j,jj)*lininter_elect(rij,ntii,ntjj)
                          else if (lewald) then
@@ -2011,7 +2003,7 @@ contains
        do i = 1, nntype
           do j = i, nntype
              ij = type_2body(i,j)
-             ecut(ij) = U2(rbcut,rbcutsq,1,1,1,i,2,1,1,j,ij)
+             ecut(ij) = U2(rbcutsq,1,1,1,i,2,1,1,j,ij)
              ecut(type_2body(j,i)) = ecut(ij)
           end do
        end do
@@ -2247,17 +2239,18 @@ contains
 !> and in coru (tail corrections to energy), prop_pressure::pressure
 !> (force calculation), corp (tail corrections to pressure)
 !DEC$ ATTRIBUTES FORCEINLINE :: U2
-  function U2(rij,rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
+  function U2(rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
     real::U2
-    real,intent(in)::rij,rijsq
+    real,intent(in)::rijsq
     integer,intent(in)::i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij
 
-    real::sr,sr2,sr3,sr6,rs1,rs2,rs6,rs7,rs8,rs12,tmp,sigma2,epsilon2,qave
+    real::sr,sr2,sr3,sr6,rs1,rs2,rs6,rs7,rs8,rs12,tmp,sigma2,epsilon2,qave,rij
 
     U2 = 0.0_dp
     if (lij(ntii).and.lij(ntjj)) then
        if (lgaro) then
           ! KEA Feuston-Garofalini potential; do NOT work with CBMC/boltz
+          rij = sqrt(rijsq)
           U2=garofalini(rij,ntii,ntjj)
        else if (lsami) then
           U2=ljsami(rijsq,ntij)
@@ -2301,13 +2294,16 @@ contains
           end if
        else if (nonbond_type(ntij).eq.2) then
           ! Buckingham exp-6
+          rij = sqrt(rijsq)
           U2 = vvdW(1,ntij)*exp(vvdW(2,ntij)*rij) - vvdW(3,ntij)/(rijsq**3)
        else if (nonbond_type(ntij).eq.3) then
           ! Mie
+          rij = sqrt(rijsq)
           sr = vvdW(2,ntij) / rij
           U2 = vvdW(1,ntij)*(sr**vvdW(3,ntij)-sr**vvdW(4,ntij))
        else if (nonbond_type(ntij).eq.4) then
           ! MMFF94
+          rij = sqrt(rijsq)
           if (vvdW(2,ntij).ne.0) then
              rs1 = rij/vvdW(2,ntij)
              rs2 = rs1*rs1
@@ -2316,12 +2312,14 @@ contains
           end if
        else if (nonbond_type(ntij).eq.5) then
           ! LJ 9-6
+          rij = sqrt(rijsq)
           sr = vvdW(2,ntij)/rij
           sr3 = sr**3
           sr6 = sr3*sr3
           U2 = vvdW(1,ntij)*sr6*(2.0_dp*sr3 - 3.0_dp)
        else if (nonbond_type(ntij).eq.6) then
           ! Generalized LJ
+          rij = sqrt(rijsq)
           sr = vvdW(2,ntij) / rij
           if (rij.le.vvdW(2,ntij)) then
              tmp = sr**(vvdW(3,ntij)/2.0_dp)
@@ -2343,7 +2341,8 @@ contains
           !        = 0.0 if rij > rmin
           ! Must be specified here because some parts of the code don't check
           ! the rcut before evaluating the potential which could result in
-          ! unphysical energies for a DPD system. 
+          ! unphysical energies for a DPD system.
+          rij=sqrt(rijsq) 
           if(rij<=vvDW(2,ntij)) then 
               rs1 = rij/vvdW(2,ntij)
               rs2 = 1.0_dp-rs1
@@ -2353,6 +2352,7 @@ contains
           end if
        else if (nonbond_type(ntij).eq.-1) then
           ! tabulated potential
+          rij = sqrt(rijsq)
           U2=lininter_vdW(rij,ntii,ntjj)
        else if (nonbond_type(ntij).ne.0) then
           call err_exit(__FILE__,__LINE__,'U2: undefined nonbond type',myid+1)
@@ -2380,9 +2380,9 @@ contains
 !> two beads interact; however, they may not yet exist during
 !> CBMC regrowth.
 !DEC$ ATTRIBUTES FORCEINLINE :: Q2
-  function Q2(rij,rijsq,rcutsq,i,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
-    real::Q2
-    real,intent(in)::rij,rijsq,rcutsq,calpi
+  function Q2(rijsq,rcutsq,i,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
+    real::Q2,rij
+    real,intent(in)::rijsq,rcutsq,calpi
     integer,intent(in)::i,imolty,ii,ntii,j,jmolty,jj,ntjj
     logical,intent(in)::lqchgi
     logical,intent(inout)::lcoulo(numax,numax)
@@ -2411,6 +2411,7 @@ contains
              end if
           end if
           if (lchgall.or.lcoulo(iii,jjj) ) then
+             rij = sqrt(rijsq)
              if (L_elect_table) then
                 Q2=qqu(i,ii)*qqu(j,jj)*lininter_elect(rij,ntii,ntjj)
              else
@@ -2418,6 +2419,7 @@ contains
              end if
           end if
        else if (lchgall.or.rijsq.lt.rcutsq) then
+          rij = sqrt(rijsq)
           Q2=qqu(i,ii)*qqu(j,jj)*erfunc(calpi*rij)/rij
        end if
     end if

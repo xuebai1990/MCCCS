@@ -152,7 +152,7 @@ subroutine virial(binvir,binvir2)
                         selfadd2 = epsilon2*(consa2/sr6-consb2)/sr6
                      end if
                   else
-                     vinter = vinter + U2(sqrt(rijsq),rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
+                     vinter = vinter + U2(rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
                   end if
 
                   if ( lqimol .and. lqjmol .and. .not. lmatrix ) then
