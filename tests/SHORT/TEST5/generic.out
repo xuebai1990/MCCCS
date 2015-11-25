@@ -1,9 +1,10 @@
-Program started at 2015-05-26 10:55:06.939
+Program started at 2015-11-25 11:21:25.879
 Number of processors: 1
 Threads per processor: 1
  run_num: 1    
  suffix: a
  L_movie_xyz:  T
+ L_movie_pdb:  F
 
 ***** PROGRAM  =  THE MAGIC BLACK BOX *****
 Isobaric-isothermal ensemble
@@ -78,7 +79,7 @@ NUMBER OF MOLECULES OF EACH TYPE
 
 SECTION MOLECULE_TYPE
 ------------------------------------------
-molecule type: 1
+molecule type:  1 undefined 
    number of units: 1
    number of units for CBMC growth: 1
    number of carbons for EH alkane: 1
@@ -88,7 +89,7 @@ molecule type: 1
    iurot: 0, isolute: 5000000, lelect:  T, lring:  F, lrigid:  F, lbranch:  F, lsetup:  F, lq14scale:  F, qscale: 1.0
 
    bead 1: bead type 1 [Si], charge leader 1
-molecule type: 2
+molecule type:  2 undefined 
    number of units: 1
    number of units for CBMC growth: 1
    number of carbons for EH alkane: 1
@@ -98,7 +99,7 @@ molecule type: 2
    iurot: 0, isolute: 5000000, lelect:  T, lring:  F, lrigid:  F, lbranch:  F, lsetup:  F, lq14scale:  F, qscale: 1.0
 
    bead 1: bead type 2 [O], charge leader 1
-molecule type: 3
+molecule type:  3 undefined 
    number of units: 1
    number of units for CBMC growth: 1
    number of carbons for EH alkane: 1
@@ -218,11 +219,11 @@ pmswat:   0.00000000
    probability of each swatch pair:  1.000000000    
 
    swatch molecule type pairs:    1    4
-   nsampos: 1, ncut:  1  1
+   nsampos: 1, ncut:  1  1, ncutsafe:  0  0
    molecule 1
-   ncut 1: grom from 1, prev 1
+   ncut 1: grow from 1, prev 1
    molecule 2
-   ncut 1: grom from 1, prev 1
+   ncut 1: grow from 1, prev 1
    splist:    1    1
    number of swatch box pairs: 2
    probability of the swatch box pair:  0.500000000    
@@ -329,7 +330,7 @@ READING CONFIGURATION FROM RESTART FILE
 ------------------------------------------
 new maximum displacements read from restart-file
    max atom trans. displacement:     0.010000    0.010000    0.010000
-   max volume displacement:        0.1300E+03
+   max volume displacement:   0.1300E+03
 
 box      #1
    molecule type 1
@@ -352,9 +353,9 @@ Finished writing simulation box related info
  
  sumup control
  number of chains         360
- number of chains of type           1          60
- number of chains of type           2         180
- number of chains of type           3         120
+number of chains of type    1 undefined       60
+number of chains of type    2 undefined      180
+number of chains of type    3 undefined      120
  inter lj energy   -35366947.3121633     
  intra lj energy   0.000000000000000E+000
  bond vibration    0.000000000000000E+000
@@ -400,34 +401,34 @@ Finished writing simulation box related info
  
  ### Translations ###
  
-molecule typ = 1   S  in box           1
+molecule typ = 1   undefined   in box           1
  x-dir: attempts =   19860.0   ratio = 0.511   max.displ. = 0.2948E+00
  y-dir: attempts =   19886.0   ratio = 0.504   max.displ. = 0.2933E+00
  z-dir: attempts =   20132.0   ratio = 0.500   max.displ. = 0.2888E+00
  
-molecule typ = 2   O  in box           1
+molecule typ = 2   undefined   in box           1
  x-dir: attempts =   59802.0   ratio = 0.500   max.displ. = 0.4573E+00
  y-dir: attempts =   60006.0   ratio = 0.495   max.displ. = 0.4573E+00
  z-dir: attempts =   60036.0   ratio = 0.496   max.displ. = 0.4511E+00
  
-molecule typ = 3   H  in box           1
+molecule typ = 3   undefined   in box           1
  x-dir: attempts =   40120.0   ratio = 0.502   max.displ. = 0.1518E+01
  y-dir: attempts =   39745.0   ratio = 0.504   max.displ. = 0.1523E+01
  z-dir: attempts =   40231.0   ratio = 0.506   max.displ. = 0.1515E+01
  
  ### Rotations ###
  
-molecule typ = 1    S  in box           1
+molecule typ = 1   undefined   in box           1
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.4000E+00
  y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.4000E+00
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.4000E+00
  
-molecule typ = 2    O  in box           1
+molecule typ = 2   undefined   in box           1
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.4000E+00
  y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.4000E+00
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.4000E+00
  
-molecule typ = 3    H  in box           1
+molecule typ = 3   undefined   in box           1
  x-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.4000E+00
  y-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.4000E+00
  z-dir: attempts =       0.0   ratio = 0.000   max.displ. = 0.4000E+00
@@ -438,25 +439,21 @@ molecule typ = 3    H  in box           1
 
 ### Molecule swap       ###
 
-molecule typ = 1    S
+molecule typ = 1   undefined 
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
-molecule typ = 2    O
+molecule typ = 2   undefined 
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
-molecule typ = 3    H
+molecule typ = 3   undefined 
 between box 1 and 1 into box 1   uattempts = 0 attempts = 0   accepted = 0
 number of times move in: 0  accepted = 0
 number of times move out: 0  accepted = 0
 
 ### Molecule swatch     ###
 
-pair typ = 1
-moltyps = 1    S and 4    
-between box 1 and 1 into box 1   uattempts = 0  attempts = 0  accepted = 0
-between box 2 and 2 into box 2   uattempts = 0  attempts = 0  accepted = 0
  
  ### Charge Fluctuation  ###
  
@@ -472,9 +469,9 @@ molecule  3:   0.00000000
  
  sumup control
  number of chains         360
- number of chains of type           1          60
- number of chains of type           2         180
- number of chains of type           3         120
+number of chains of type    1 undefined       60
+number of chains of type    2 undefined      180
+number of chains of type    3 undefined      120
  inter lj energy   -35565613.0693652     
  intra lj energy   0.000000000000000E+000
  bond vibration    0.000000000000000E+000
@@ -487,35 +484,35 @@ molecule  3:   0.00000000
  3-body garo        524197.468650635     
  total energy      -35041415.6007145     
  
- vstart       =    -34805612.6326730102
- vend         =    -35041415.6007145271
- vbox         =    -35041415.6007134691
+ vstart       =    -34805612.6326730028
+ vend         =    -35041415.6007145345
+ vbox         =    -35041415.6007133126
  
- Averages and fluctuations                        Box  1
+ Averages and fluctuations                                  Box  1
  
- pressure                           [kPa] =         0.00
- pressure              [simulation units] =     0.000000
- surface tension                   [mN/m] =       0.0000
- chem. potential of type   1          [K] =        0.000
- chem. potential of type   2          [K] =        0.000
- chem. potential of type   3          [K] =        0.000
- boxlength                            [A] =       16.133
- boxlength                            [A] =       16.133
- boxlength                            [A] =       16.133
- no. of chains of type     1              =       60.000
- no. of chains of type     2              =      180.000
- no. of chains of type     3              =      120.000
- molar volume                  [cm^3/mol] =        7.023
- specific density                [g/cm^3] =     1.853441
- number density of type    1 [chain/nm^3] =     14.29050
- number density of type    2 [chain/nm^3] =     42.87150
- number density of type    3 [chain/nm^3] =     28.58100
- molfraction of type       1              =    0.1666667
- molfraction of type       2              =    0.5000000
- molfraction of type       3              =    0.3333333
- mean sete length of type  1        [A^2] =        0.000
- mean sete length of type  2        [A^2] =        0.000
- mean sete length of type  3        [A^2] =        0.000
+ pressure                                      [kPa] =         0.00
+ pressure                         [simulation units] =     0.000000
+ surface tension                              [mN/m] =       0.0000
+ chem. potential of type   1 undefined           [K] =        0.000
+ chem. potential of type   2 undefined           [K] =        0.000
+ chem. potential of type   3 undefined           [K] =        0.000
+ boxlength                                       [A] =       16.133
+ boxlength                                       [A] =       16.133
+ boxlength                                       [A] =       16.133
+ no. of chains of type     1 undefined               =       60.000
+ no. of chains of type     2 undefined               =      180.000
+ no. of chains of type     3 undefined               =      120.000
+ molar volume                             [cm^3/mol] =        7.023
+ specific density                           [g/cm^3] =     1.853441
+ number density of type    1 undefined  [chain/nm^3] =     14.29050
+ number density of type    2 undefined  [chain/nm^3] =     42.87150
+ number density of type    3 undefined  [chain/nm^3] =     28.58100
+ molfraction of type       1 undefined               =    0.1666667
+ molfraction of type       2 undefined               =    0.5000000
+ molfraction of type       3 undefined               =    0.3333333
+ mean sete length of type  1 undefined         [A^2] =        0.000
+ mean sete length of type  2 undefined         [A^2] =        0.000
+ mean sete length of type  3 undefined         [A^2] =        0.000
  
  Total energy [K per system and kJ/mol per chain] =  -34933816.53    -806.82
  Inter LJ     [K per system and kJ/mol per chain] =  -35478779.48    -819.41
@@ -529,7 +526,7 @@ molecule  3:   0.00000000
  3-body Garo  [K per system and kJ/mol per chain] =     544962.95      12.59
  Fluc Q       [K per system and kJ/mol per chain] =          0.00       0.00
  
- fluctuation in <vtot> =   135021.12
+ fluctuation in <vtot> =   135021.11
  
  type  box       vinter       vintra         vtor        vbend        vtail
     1    1      0.00000      0.00000      0.00000      0.00000      0.00000
@@ -588,7 +585,7 @@ molecule  3:   0.00000000
    8 -0.3485E+08  0.1861E+01  0.0000E+00  0.0000E+00  0.1667E+00  0.5000E+00  0.3333E+00
    9 -0.3489E+08  0.1854E+01  0.0000E+00  0.0000E+00  0.1667E+00  0.5000E+00  0.3333E+00
   10 -0.3507E+08  0.1855E+01  0.0000E+00  0.0000E+00  0.1667E+00  0.5000E+00  0.3333E+00
- Program ended at 2015-05-26 10:55:27.690
+ Program ended at 2015-11-25 11:21:49.839
 dim:   0  0  0
 sete:                NaN               NaN               NaN
 Uads:                NaN               NaN               NaN

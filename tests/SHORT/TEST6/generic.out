@@ -1,9 +1,10 @@
-Program started at 2015-05-26 10:56:10.474
+Program started at 2015-11-25 11:21:49.929
 Number of processors: 1
 Threads per processor: 1
  run_num: 1    
  suffix: a
  L_movie_xyz:  F
+ L_movie_pdb:  F
 
 ***** PROGRAM  =  THE MAGIC BLACK BOX *****
 NVT Gibbs ensemble
@@ -88,7 +89,7 @@ NUMBER OF MOLECULES OF EACH TYPE
 
 SECTION MOLECULE_TYPE
 ------------------------------------------
-molecule type: 1
+molecule type:  1 undefined 
    number of units: 4
    number of units for CBMC growth: 4
    number of carbons for EH alkane: 4
@@ -192,11 +193,11 @@ pmswat:   0.00000000
    probability of each swatch pair:  1.000000000    
 
    swatch molecule type pairs:    2    3
-   nsampos: 1, ncut:  1  1
+   nsampos: 1, ncut:  1  1, ncutsafe:  0  0
    molecule 1
-   ncut 1: grom from 1, prev 0
+   ncut 1: grow from 1, prev 0
    molecule 2
-   ncut 1: grom from 1, prev 0
+   ncut 1: grow from 1, prev 0
    splist:    1    1
    number of swatch box pairs: 1
    probability of the swatch box pair:  1.000000000    
@@ -281,7 +282,7 @@ READING CONFIGURATION FROM RESTART FILE
 ------------------------------------------
 new maximum displacements read from restart-file
    max atom trans. displacement:     0.010000    0.010000    0.010000
-   max volume displacement:        0.2186E-01  0.1000E-02
+   max volume displacement:   0.2186E-01  0.1000E-02
 
 box      #1
    molecule type 1
@@ -308,7 +309,7 @@ ibox:      calp  kmaxl  kmaxm  kmaxn         rcut
  
  sumup control
  number of chains         867
- number of chains of type           1         867
+number of chains of type    1 undefined      867
  inter lj energy    453757.117240683     
  intra lj energy   0.000000000000000E+000
  Tail correction   -5694.81670937465     
@@ -319,15 +320,15 @@ ibox:      calp  kmaxl  kmaxm  kmaxn         rcut
  coulombic energy  -3851610.35225436     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -3397853.23501368     
+ total energy      -3397853.23501367     
  
- box             1  initial v   =   -3397853.23501368     
+ box             1  initial v   =   -3397853.23501367     
  surf. tension :   box 1 =     -32.72632
  pressure check:   box 1 =     -23396.40
  
  sumup control
  number of chains         133
- number of chains of type           1         133
+number of chains of type    1 undefined      133
  inter lj energy    6966.23339409258     
  intra lj energy   0.000000000000000E+000
  Tail correction  -0.675802664689419     
@@ -360,24 +361,24 @@ ibox:      calp  kmaxl  kmaxm  kmaxn         rcut
  
  ### Translations ###
  
-molecule typ = 1   OHHM  in box           1
+molecule typ = 1   undefined   in box           1
  x-dir: attempts =    1466.0   ratio = 0.497   max.displ. = 0.5202E+00
  y-dir: attempts =    1474.0   ratio = 0.473   max.displ. = 0.4931E+00
  z-dir: attempts =    1419.0   ratio = 0.474   max.displ. = 0.4957E+00
  
-molecule typ = 1   OHHM  in box           2
+molecule typ = 1   undefined   in box           2
  x-dir: attempts =     223.0   ratio = 0.650   max.displ. = 0.6400E+02
  y-dir: attempts =     242.0   ratio = 0.616   max.displ. = 0.6400E+02
  z-dir: attempts =     228.0   ratio = 0.636   max.displ. = 0.6400E+02
  
  ### Rotations ###
  
-molecule typ = 1    OHHM  in box           1
+molecule typ = 1   undefined   in box           1
  x-dir: attempts =    1440.0   ratio = 0.535   max.displ. = 0.6760E+00
  y-dir: attempts =    1413.0   ratio = 0.487   max.displ. = 0.6185E+00
  z-dir: attempts =    1380.0   ratio = 0.513   max.displ. = 0.6522E+00
  
-molecule typ = 1    OHHM  in box           2
+molecule typ = 1   undefined   in box           2
  x-dir: attempts =     246.0   ratio = 0.707   max.displ. = 0.3142E+01
  y-dir: attempts =     203.0   ratio = 0.709   max.displ. = 0.3142E+01
  z-dir: attempts =     210.0   ratio = 0.662   max.displ. = 0.3142E+01
@@ -389,7 +390,7 @@ molecule typ = 1    OHHM  in box           2
 
 ### Molecule swap       ###
 
-molecule typ = 1    OHHM
+molecule typ = 1   undefined 
 between box 1 and 2 into box 1   uattempts = 29 attempts = 29   accepted = 0
  suc.growth % =100.000   accepted % =  0.000
 between box 1 and 2 into box 2   uattempts = 27 attempts = 27   accepted = 0
@@ -409,7 +410,7 @@ molecule  1:   0.00000000      0.00000000
  
  sumup control
  number of chains         867
- number of chains of type           1         867
+number of chains of type    1 undefined      867
  inter lj energy    471015.281767578     
  intra lj energy   0.000000000000000E+000
  Tail correction   -5694.81670937465     
@@ -417,45 +418,45 @@ molecule  1:   0.00000000      0.00000000
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -3874257.35591812     
+ coulombic energy  -3874257.35591813     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
  total energy      -3403242.07415055     
  
  sumup control
  number of chains         133
- number of chains of type           1         133
- inter lj energy    6237.57700307168     
+number of chains of type    1 undefined      133
+ inter lj energy    6237.57700307169     
  intra lj energy   0.000000000000000E+000
  Tail correction  -0.675802664689419     
  bond vibration    0.000000000000000E+000
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -51893.0504291613     
+ coulombic energy  -51893.0504291609     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -45655.4734260896     
+ total energy      -45655.4734260892     
  
- vstart       =     -3397853.2350136773       -46068.9125216549
- vend         =     -3403242.0741505460       -45655.4734260896
- vbox         =     -3403242.0741505711       -45655.4734260889
+ vstart       =     -3397853.2350136749       -46068.9125216549
+ vend         =     -3403242.0741505492       -45655.4734260892
+ vbox         =     -3403242.0741505828       -45655.4734260878
  
- Averages and fluctuations                        Box  1       Box  2
+ Averages and fluctuations                                  Box  1       Box  2
  
- pressure                           [kPa] =     -4471.38      1227.76
- pressure              [simulation units] =    -0.323861     0.088926
- surface tension                   [mN/m] =     -76.4923      -0.2448
- chem. potential of type   1          [K] =    -3863.452    -5919.374
- boxlength                            [A] =       31.394       80.095
- boxlength                            [A] =       31.394       80.095
- boxlength                            [A] =       31.394       80.095
- no. of chains of type     1              =      867.000      133.000
- molar volume                  [cm^3/mol] =       21.492     2326.569
- specific density                [g/cm^3] =     0.838222     0.007743
- number density of type    1 [chain/nm^3] =     28.02079      0.25884
- molfraction of type       1              =    1.0000000    1.0000000
- mean sete length of type  1        [A^2] =        0.023        0.022
+ pressure                                      [kPa] =     -4471.38      1227.76
+ pressure                         [simulation units] =    -0.323861     0.088926
+ surface tension                              [mN/m] =     -76.4923      -0.2448
+ chem. potential of type   1 undefined           [K] =    -3863.452    -5919.374
+ boxlength                                       [A] =       31.394       80.095
+ boxlength                                       [A] =       31.394       80.095
+ boxlength                                       [A] =       31.394       80.095
+ no. of chains of type     1 undefined               =      867.000      133.000
+ molar volume                             [cm^3/mol] =       21.492     2326.569
+ specific density                           [g/cm^3] =     0.838222     0.007743
+ number density of type    1 undefined  [chain/nm^3] =     28.02079      0.25884
+ molfraction of type       1 undefined               =    1.0000000    1.0000000
+ mean sete length of type  1 undefined         [A^2] =        0.023        0.022
  
  Total energy [K per system and kJ/mol per chain] =   -3400424.54     -45542.06     -32.61      -2.85
  Inter LJ     [K per system and kJ/mol per chain] =     464137.99       6963.67       4.45       0.44
@@ -474,7 +475,7 @@ molecule  1:   0.00000000      0.00000000
  type  box       vinter       vintra         vtor        vbend        vtail
     1    1      0.00000      0.00000      0.00000      0.00000      0.00000
     1    2      0.00000      0.00000      0.00000      0.00000      0.00000
- Program ended at 2015-05-26 10:56:19.615
+ Program ended at 2015-11-25 11:22:01.860
 dim:   0
 sete:                NaN
 Uads:                NaN
