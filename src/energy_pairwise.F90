@@ -383,10 +383,10 @@ contains
                       ntij=type_2body(ntii,ntjj)
 
                       if (lexpee) rminsq = rminee(ntij)*rminee(ntij)
-
-                      rxuij = rxu(i,ii) - rxu(i,jj)
-                      ryuij = ryu(i,ii) - ryu(i,jj)
-                      rzuij = rzu(i,ii) - rzu(i,jj)
+! KNS 11-23-15 insert rxui, ryui rzui from above
+                      rxuij = rxui - rxu(i,jj)
+                      ryuij = ryui - ryu(i,jj)
+                      rzuij = rzui - rzu(i,jj)
                       ! lpbc is not called here because it's intra-chain interaction
                       rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
 
@@ -945,10 +945,10 @@ contains
           ntij=type_2body(ntii,ntjj)
 
           if (lexpee) rminsq = rminee(ntij)*rminee(ntij)
-
-          rxuij = rxuion(ii,flagon) - rxuion(jj,flagon)
-          ryuij = ryuion(ii,flagon) - ryuion(jj,flagon)
-          rzuij = rzuion(ii,flagon) - rzuion(jj,flagon)
+!KNS 11-23-15 insert rxui, ryui, rzui determined above
+          rxuij = rxui - rxuion(jj,flagon)
+          ryuij = ryui - ryuion(jj,flagon)
+          rzuij = rzui - rzuion(jj,flagon)
           
           ! lpbc is not called here because it's intra-chain interaction
           rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
