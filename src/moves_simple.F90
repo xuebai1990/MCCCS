@@ -1134,6 +1134,30 @@ contains
      ,"(' y-dir: attempts =',F10.1,'   ratio =',f6.3, '   max.displ. =',e11.4)"&
      ,"(' z-dir: attempts =',F10.1,'   ratio =',f6.3, '   max.displ. =',e11.4)"/)
 
+    if (pm_atom_tra.ge.1E-6) then
+        write(io_output,*)
+        write(io_output,*) '### Atom Translations ###'
+        write(io_output,*)
+        if ( Abstrax .ne. 0.0E0_dp ) then
+            ratvol = Abstrax / Abntrax
+        else
+            ratvol = 0.0E0_dp
+        end if
+        write(io_output,fmt(1)) Abntrax,ratvol,Armtrax
+        if ( Abstrax .ne. 0.0E0_dp ) then
+            ratvol = Abstray / Abntray
+        else
+            ratvol = 0.0E0_dp
+        end if
+        write(io_output,fmt(1)) Abntray,ratvol,Armtray
+        if ( Abstrax .ne. 0.0E0_dp ) then
+            ratvol = Abstraz / Abntraz
+        else
+            ratvol = 0.0E0_dp
+        end if
+        write(io_output,fmt(1)) Abntraz,ratvol,Armtraz
+    end if
+
     write(io_output,*)
     write(io_output,*) '### Translations ###'
     write(io_output,*)
