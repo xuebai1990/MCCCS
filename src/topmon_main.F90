@@ -2482,59 +2482,54 @@ contains
 
   ! Looking for section SPECIFIC_ATOM_TRANSL
     if (myid.eq.rootid) then    
-       REWIND(io_input)
-       SPECIFIC_ATOM_TRANSL:DO
-          call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section SPECIFIC_ATOM_TRANSL not found',jerr)
+        REWIND(io_input)
+        READ_ATOM_TRANSL:DO
+            call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+            if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section SPECIFIC_ATOM_TRANSL not found',jerr)
+            if (UPPERCASE(line_in(1:20)).eq.'SPECIFIC_ATOM_TRANSL') then
+                if (lprint) then
+                    write(io_output,'(/,A,/,A)') 'SECTION SPECIFIC_ATOM_TRANSL','------------------------------------------'
+                end if
+                jerr = 0
+                exit READ_ATOM_TRANSL
+            end if
+        end do READ_ATOM_TRANSL
+    end if
 
-          if (UPPERCASE(line_in(1:20)).eq.'SPECIFIC_ATOM_TRANSL') then
-              if (lprint) then
-                write(io_output,'(/,A,/,A)') 'SECTION SPECIFIC_ATOM_TRANSL','------------------------------------------'
-              end if
-              call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-              if (UPPERCASE(line_in(1:24)).eq.'END SPECIFIC_ATOM_TRANSL') exit
+    call mp_bcast(jerr,1,rootid,groupid)
+    if (jerr.eq.0) then
+        do
+            if (myid.eq.rootid) then
+                call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SPECIFIC_ATOM_TRANSL',jerr)
+            end if
+     
+            call mp_bcast(line_in,rootid,groupid)
+            if (UPPERCASE(line_in(1:24)).eq.'END SPECIFIC_ATOM_TRANSL') exit
 
+            ! Read in the number of atoms on which to do atom translations
+            read(line_in,*) natomtrans_atoms
+            allocate(atomtrans_atomlst (natomtrans_atoms))
+            allocate(atomtrans_moleclst(natomtrans_atoms))  
 
-              ! Read in the number of atoms on which to do atom translations
+            ! Read in what those atoms are, and then what molecule they belong to
 
-              read(line_in,*) natomtrans_atoms
-              !call mp_bcast(natomtrans_atoms,1,rootid,groupid)
+            if( natomtrans_atoms .gt. 0) then
+                if (myid.eq.rootid) call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                call mp_bcast(line_in,rootid,groupid)
+                read(line_in,*) (atomtrans_atomlst(j),j=1,natomtrans_atoms)
+                if (myid.eq.rootid) call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
+                call mp_bcast(line_in,rootid,groupid)
+                read(line_in,*) (atomtrans_moleclst(j),j=1,natomtrans_atoms)
+            end if
 
-              allocate(atomtrans_atomlst (natomtrans_atoms))
-              allocate(atomtrans_moleclst(natomtrans_atoms))  
-
-              ! Read in what those atoms are, and then what molecule they belong to
-
-              if( natomtrans_atoms .gt. 0) then
-                   call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-                   read(line_in,*) (atomtrans_atomlst(j),j=1,natomtrans_atoms)
-                   !call mp_bcast(line_in,rootid,groupid) ! need to check if
-                                                         !correct
-
-                   call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)      
-                   read(line_in,*) (atomtrans_moleclst(j),j=1,natomtrans_atoms)
-                   !call mp_bcast(line_in,rootid,groupid) ! check if correct
-
-              end if
-
-
-
-              if (lprint) then
-                  write(io_output,*) 'natomtrans_atoms: ', natomtrans_atoms
-                  write(io_output,*) 'atomtrans_atomlst: ', (atomtrans_atomlst(j),j=1,natomtrans_atoms)
-                  write(io_output,*) 'atomtrans_moleclst: ', (atomtrans_moleclst(j),j=1,natomtrans_atoms)
-              end if
-
-              call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)  
-              if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SPECIFIC_ATOM_TRANSL',jerr)
-              if (UPPERCASE(line_in(1:24)).eq.'END SPECIFIC_ATOM_TRANSL') exit
-
-              exit SPECIFIC_ATOM_TRANSL
-          end if
-       END DO SPECIFIC_ATOM_TRANSL
-    end if    
-    ! need to call mp_bcast for natomtrans_atoms & (atomtrans_atomlst(j),j=1,natomtrans_atoms)
-    !  & (atomtrans_moleclst(j),j=1,natomtrans_atoms)
+            if (lprint) then
+                write(io_output,*) 'natomtrans_atoms:   ', natomtrans_atoms
+                write(io_output,*) 'atomtrans_atomlst:  ', (atomtrans_atomlst(j),j=1,natomtrans_atoms)
+                write(io_output,*) 'atomtrans_moleclst: ', (atomtrans_moleclst(j),j=1,natomtrans_atoms)
+            end if
+        end do
+    end if
 
     !> set up the inclusion table
     call inclus(inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ainclbead,a15t,ofscale,ofscale2)
