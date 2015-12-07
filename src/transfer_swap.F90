@@ -31,7 +31,7 @@ contains
     logical::ovrlap,lterm,lnew,lempty,ldone,ltors,lovrh(nchmax),lfavor,laccept,lswapinter,lrem_out,lins_in,linsk_in,lremk_in,lfixnow
 
     integer::boxins,boxrem,imol,ichoi,ip,iwalk,idum,iins1,imolty1
-    integer::istt,iett,itype,ipair,ipairb,beg
+    integer::istt,iett,itype,ipair,ipairb,beg,try
 
     integer::iutry,icbu,ifrom,irem,iins,glist(numax),findex,iii,j,ibox,iunit,ic,pointp,imolty,imt,jmt,igrow,pointp2,jins,jmolty,neighj_num,neighk_num,joffset,koffset,kmolty,kins,target,neigh_old
 
@@ -192,6 +192,12 @@ contains
     else if ( lavbmc2(imolty) .or. lavbmc3(imolty) ) then
        iins = 0
     else
+    
+       write(io_output,*)'WARNING: intrabox swaps cannot be performed without AVBMC.'
+       write(io_output,*)'         Attempted a intrabox swap for molty: ', imolty
+       write(io_output,*)'         Which has lavbmc1,2, and 3 of: ',lavbmc1(imolty),lavbmc2(imolty),lavbmc3(imolty)
+       write(io_output,*)'         Make sure avbmc_version is defined for EACH MOLECULE TYPE in fort.4!!'
+       
        iins = irem !> \bug irem not defined
        if (lexpee.and.leemove) then
           iins1 = iins
@@ -410,16 +416,28 @@ contains
 ! select a particle in the in region defined by the particle
 ! jins's bonding region through neighbor list
 ! and move to the out region or the region bounded by kins in AVBMC3
-             if ( neighj_num .eq. 0 .or. (neighj_num .eq. 1 .and. neighbor(1,jins) .eq. kins) ) then
+             if ( neighj_num .eq. 0 .or. ( lavbmc3(imolty).and.(neighj_num .eq. 1 .and. neighbor(1,jins) .eq. kins)) ) then
 !> \bug what shall we do now?
                 lempty = .true.
                 return
              else
+                try = 0
 114             pointp=int(dble(neighj_num)*random(-1))+1
+                try = try+1
 ! irem = neighbor(pointp,jins,imolty)
 ! write(io_output,*) 'jins,irem:',jins,irem,neighj_num
-                irem = neighbor(pointp,jins)
-                if ( irem .eq. kins ) goto 114
+                irem = neighbor(pointp,jins) 
+               if ( lavbmc3(imolty).and.(irem .eq. kins )) goto 114
+		
+!> \bug: previously there was no check		
+               if ( (moltyp(irem) .ne. imolty).and.(try.lt.(neighj_num*neighj_num))) then 
+		   goto 114 ! Make sure you're picking one that's the correct molty
+		else if (moltyp(irem) .ne. imolty) then
+		   lempty = .true.
+		   return
+		end if
+
+	
                 if ( moltyp(irem) .ne. imolty )  write(io_output,*) 'screwup swap2, irem:',irem, moltyp(irem),imolty,neighj_num,pointp,jins
                 ibox = nboxi(irem)
                 if ( ibox .ne. boxrem ) then
