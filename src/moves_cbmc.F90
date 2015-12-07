@@ -529,16 +529,19 @@ contains
 !> \param lfixnow SAFE-CBMC
 !> \param cwtorf rosenbluth weight of the crank-shaft move for the last torsion
 !> \param movetype 1 = config moves;\n
-!>           2 = swap/swatch moves for flexible molecule or swatch moves for rigid molecules that need rigrot (number of same-position atoms smaller than 2, i.e., less than sufficient to determine orientation);\n
+!>           2 = swap/swatch moves for flexible molecule 
 !>           3 = swatch moves for rigid molecules that do not need rigrot but do need regrowth;\n
 !>           4 = swatch moves for completely rigid molecule that regrow nothing
-  subroutine rosenbluth(lnew,lterm,i,icharge,imolty,ifrom,ibox,igrow,wadd,lfixnow,cwtorf,movetype)
+!>           5 = swatch moves for rigid molecules when nsampos=2
+!>           0 = swatch moves for rigid molecules when nsampos=1
+  subroutine rosenbluth(lnew,lterm,i,icharge,imolty,ifrom,ibox,igrow,wadd,lfixnow,cwtorf,movetype,first_bead,second_bead)
     use util_random,only:sphere
     use util_mp,only:mp_set_displs,mp_allgather
 
     ! variables passed to the subroutine
     logical::lnew,lterm,lwbef
     integer::i,j,ja,icharge,imolty,ifrom,ibox,igrow
+    integer,optional::first_bead,second_bead
 
     ! local variables
     logical::ovrlap,ltorsion,lfixnow,lfixed,lreturn
@@ -612,8 +615,8 @@ contains
 !   we don't want to do rigrot for rigid swatch when nsampos .ge. 3
     if (lrigid(imolty).and.movetype.ne.1) then
        wadd = 1.0E0_dp
-       if (movetype.eq.2) then
-          call rigrot(lnew,lterm,i,icharge,imolty,ibox,wadd)
+       if (movetype.eq.2.or.movetype.eq.0.or.movetype.eq.5) then
+          call rigrot(lnew,lterm,i,icharge,imolty,ibox,wadd,first_bead,second_bead,movetype)
        end if
 
        if (rindex(imolty).eq.0) then
@@ -3042,13 +3045,13 @@ contains
 !>
 !> \attention all rigid beads should come after riutry
 !************************************************************
-  subroutine rigrot(lnew,lterm,iskip,imol,imolty,ibox,wadd)
+  subroutine rigrot(lnew,lterm,iskip,imol,imolty,ibox,wadd,first_bead,second_bead,mvtp)
     logical::lnew,ovrlap,lterm,ltors
 
-    integer::ibox,igrow,j,ip,iwalk,iunit,imolty,iu,iskip
-    integer::ichoi,imol,glist(numax),ntogrow,count
+    integer::ibox,igrow,j,ip,iwalk,iunit,imolty,iu,iskip,igrow2
+    integer::ichoi,imol,glist(numax),ntogrow,count,mvtp,first_bead,second_bead
 
-    real::rx,ry,rz,rxorig,ryorig,rzorig,rxnw,rynw,rznw
+    real::rx,ry,rz,rxorig,ryorig,rzorig,rxnw,rynw,rznw,phi,ax1(3),ax2(3)
     real::xdgamma,ydgamma,zdgamma,xcosdg,xsindg,ycosdg,ysindg,zcosdg,zsindg,rbf,rxur(numax),ryur(numax),rzur(numax),length
     real::w,bsum,wadd,maxlen,bs
 ! ----------------------------------------------------------------------
@@ -3062,13 +3065,22 @@ contains
     ichoi = nchoir(imolty)
     ltors = .false.
     iunit = nunit(imolty)
-    igrow = riutry(imolty,1)
+    if(mvtp.eq.0) then  !BX
+       igrow = first_bead
+       igrow2 = 0
+    else if(mvtp.eq.5) then
+       igrow = second_bead
+       igrow2 = first_bead
+    else
+       igrow = riutry(imolty,1)
+       igrow2 = 0
+    end if    
 
     if (lnew) then
        rxorig = rxnew(igrow)
        ryorig = rynew(igrow)
        rzorig = rznew(igrow)
-       do j = igrow+1, iunit
+       do j = 1, iunit
           rxur(j) = rxnew(j)
           ryur(j) = rynew(j)
           rzur(j) = rznew(j)
@@ -3077,7 +3089,7 @@ contains
        rxorig = rxu(imol,igrow)
        ryorig = ryu(imol,igrow)
        rzorig = rzu(imol,igrow)
-       do j = igrow+1, iunit
+       do j = 1, iunit
           rxur(j) = rxu(imol,j)
           ryur(j) = ryu(imol,j)
           rzur(j) = rzu(imol,j)
@@ -3086,76 +3098,123 @@ contains
 
     ! find maxlen
     maxlen = 0.0E0_dp
-    do j = igrow+1, iunit
+    do j = 1, iunit
        length = (rxur(j)-rxorig)**2+(ryur(j)-ryorig)**2 +(rzur(j)-rzorig)**2
        if (length.gt.maxlen) maxlen = length
     end do
     maxlen = sqrt(maxlen)
 
-    do ip = 1, ichoi
-       if (lnew.or.ip.ne.1) then
-          xdgamma = twopi*random(-1)
-          ydgamma = twopi*random(-1)
-          zdgamma = twopi*random(-1)
-          ! set up rotation matrix
-          xcosdg = cos(xdgamma)
-          xsindg = sin(xdgamma)
-          ycosdg = cos(ydgamma)
-          ysindg = sin(ydgamma)
-          zcosdg = cos(zdgamma)
-          zsindg = sin(zdgamma)
+    if(mvtp.eq.0.or.mvtp.eq.2) then
+       do ip = 1, ichoi
+          if (lnew.or.ip.ne.1) then
+             xdgamma = twopi*random(-1)
+             ydgamma = twopi*random(-1)
+             zdgamma = twopi*random(-1)
+             ! set up rotation matrix
+             xcosdg = cos(xdgamma)
+             xsindg = sin(xdgamma)
+             ycosdg = cos(ydgamma)
+             ysindg = sin(ydgamma)
+             zcosdg = cos(zdgamma)
+             zsindg = sin(zdgamma)
 
-          ! set molecule to rotate around
-          ! rotate around all axis
-          count = 0
-          do j = igrow+1, iunit
-             count = count + 1
-             ry = ryur(j) - ryorig
-             rz = rzur(j) - rzorig
-             rynw = xcosdg * ry + xsindg * rz
-             rznw = xcosdg * rz - xsindg * ry
-             ryp(count,ip) = ryorig + rynw
-             rzp(count,ip) = rzorig + rznw
+             ! set molecule to rotate around
+             ! rotate around all axis
+             count = 1
+             do j = 1, iunit
+                if(j.eq.igrow) cycle
+                ry = ryur(j) - ryorig
+                rz = rzur(j) - rzorig
+                rynw = xcosdg * ry + xsindg * rz
+                rznw = xcosdg * rz - xsindg * ry
+                ryp(count,ip) = ryorig + rynw
+                rzp(count,ip) = rzorig + rznw
 
-             rx = rxur(j) - rxorig
-             rz = rzp(count,ip) - rzorig
-             rxnw = ycosdg * rx - ysindg * rz
-             rznw = ycosdg * rz + ysindg * rx
-             rxp(count,ip) = rxorig + rxnw
-             rzp(count,ip) = rzorig + rznw
+                rx = rxur(j) - rxorig
+                rz = rzp(count,ip) - rzorig
+                rxnw = ycosdg * rx - ysindg * rz
+                rznw = ycosdg * rz + ysindg * rx
+                rxp(count,ip) = rxorig + rxnw
+                rzp(count,ip) = rzorig + rznw
 
-             rx = rxp(count,ip) - rxorig
-             ry = ryp(count,ip) - ryorig
-             rxnw = zcosdg * rx + zsindg * ry
-             rynw = zcosdg * ry - zsindg * rx
-             rxp(count,ip) = rxorig + rxnw
-             ryp(count,ip) = ryorig + rynw
-          end do
+                rx = rxp(count,ip) - rxorig
+                ry = ryp(count,ip) - ryorig
+                rxnw = zcosdg * rx + zsindg * ry
+                rynw = zcosdg * ry - zsindg * rx
+                rxp(count,ip) = rxorig + rxnw
+                ryp(count,ip) = ryorig + rynw
 
-       else
-          count = 0
-          do j = igrow+1, iunit
-             count = count + 1
-             rxp(count,ip) = rxu(imol,j)
-             ryp(count,ip) = ryu(imol,j)
-             rzp(count,ip) = rzu(imol,j)
-          end do
+                count = count + 1
+             end do
+
+          else
+             count = 1
+             do j = 1, iunit
+                if(j.eq.igrow) cycle
+                rxp(count,ip) = rxu(imol,j)
+                ryp(count,ip) = ryu(imol,j)
+                rzp(count,ip) = rzu(imol,j)
+                count = count + 1
+             end do
+          end if
+       end do
+
+    !BX: for nsampos.eq.2
+    else
+
+       do ip=1,ichoi
+
+          if(lnew) then
+             count = 1
+             do j=1,iunit
+                if(j.eq.first_bead.or.j.eq.second_bead) cycle
+                rxp(count,ip) = rxnew(j)
+                ryp(count,ip) = rynew(j)
+                rzp(count,ip) = rznew(j)
+                count = count + 1
+             end do
+             ax1(1) = rxnew(first_bead)
+             ax1(2) = rynew(first_bead)
+             ax1(3) = rznew(first_bead)
+             ax2(1) = rxnew(second_bead)
+             ax2(2) = rynew(second_bead)
+             ax2(3) = rznew(second_bead)
+          else
+             count = 1
+             do j=1,iunit
+                if(j.eq.first_bead.or.j.eq.second_bead) cycle
+                rxp(count,ip) = rxu(imol,j)
+                ryp(count,ip) = ryu(imol,j)
+                rzp(count,ip) = rzu(imol,j)
+                count = count + 1
+             end do
+             ax1(1) = rxu(imol,first_bead)
+             ax1(2) = ryu(imol,first_bead)
+             ax1(3) = rzu(imol,first_bead)
+             ax2(1) = rxu(imol,second_bead)
+             ax2(2) = ryu(imol,second_bead)
+             ax2(3) = rzu(imol,second_bead)
+          end if
+
+          if(lnew.or.ip.ne.1) then
+             phi = twopi*random(-1)
+             call dihedral_rigrot(ax1,ax2,iunit-2,rxp(:,ip),ryp(:,ip),rzp(:,ip),phi,rxp(:,ip),ryp(:,ip),rzp(:,ip))
+          end if
+
+       end do
+    end if
+
+    count = 1
+    do j=1,iunit
+       lexist(j) = .false.
+       if(j.eq.igrow.or.(mvtp.eq.5.and.j.eq.igrow2)) then
+          lexist(j) = .true.
+          cycle
        end if
-    end do
-
-    ntogrow = iunit-igrow
-
-    do j=1,igrow-1
-       lexist(j) = .false.
-    end do
-
-    lexist(igrow) = .true.
-    count = 0
-    do j = igrow+1, iunit
-       count = count + 1
        glist(count) = j
-       lexist(j) = .false.
+       count = count + 1
     end do
+    ntogrow = count - 1
 
     call boltz( lnew,.false.,ovrlap,iskip,imol,imolty,ibox ,ichoi,igrow,ntogrow,glist,maxlen )
 

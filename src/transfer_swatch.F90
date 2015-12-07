@@ -5,7 +5,7 @@ module transfer_swatch
   use sim_cell
   use energy_kspace,only:recip
   use energy_pairwise,only:energy,coru
-  use moves_cbmc,only:rosenbluth,schedule,safeschedule,explct,lexshed
+  use moves_cbmc,only:rosenbluth,schedule,safeschedule,explct,lexshed,align_lines
   implicit none
   private
   save
@@ -27,11 +27,11 @@ contains
     real::rpair,tweight,tweiold,vnbox(nEnergy,nbxmax),rx_1(numax),ry_1(numax),rz_1(numax),rxut(4,numax),ryut(4,numax),rzut(4,numax)&
      ,waddold,waddnew,dvol,vola,volb,rho,dinsta,wnlog,wolog,wdlog,wswat,v(nEnergy),vdum,delen,deleo,dicount,vrecipn,vrecipo,vdum2&
      ,cwtorfn,cwtorfo&
-     ,total_NBE,total_tor,total_bend,total_vib,vtgn,vbendn,vvibn,Rosenbluth_normalization(ntmax)&
+     ,total_NBE,total_tor,total_bend,total_vib,vtgn,vbendn,vvibn,Rosenbluth_normalization(ntmax),xtarget(2),ytarget(2),ztarget(2)&
      ,vnewtemp(nEnergy),voldtemp(nEnergy) !< temporarily store vnew and vold between regular CBMC and SAFE-CBMC
     integer::ipair,iparty,type_a,type_b,imolta,imoltb,ipairb,boxa,boxb,imola,imolb,ibox,iboxal,iboxbl,izz,from(2*numax)&
      ,prev(2*numax),orgaia,orgaib,orgbia,orgbib,bdmol_a,bdmol_b,s_type,o_type,new,old,ifirst,iprev,imolty,igrow,islen,iunit,iboxnew&
-     ,iboxold,self,other,iunita,iunitb,fromsafe(2*numax),prevsafe(2*numax),indexsafe(2*numax),iindex
+     ,iboxold,self,other,iunita,iunitb,fromsafe(2*numax),prevsafe(2*numax),indexsafe(2*numax),iindex,first_bead,second_bead
     integer::iii,j
     integer::oldchain,newchain,oldunit,newunit,iins
     integer::ic,icbu,jj,mm,imt,jmt,imolin,imolrm
@@ -291,14 +291,28 @@ contains
              ! if ((rindex(imolty).eq.0).or.(ifirst.lt.riutry(imolty,1))) then
              if (nsampos(iparty).ge.3) then
                 call align_planes(iparty,self,other,s_type,o_type,rxnew,rynew,rznew)
-                ! else
-                !    !> \bug if nsampos.eq.2, the second same-position bead will not get placed at the other molecules's corresponding site
+             else
                 !    ! calculate new vector from initial bead
-                !    do j = 1,iunit
-                !       rxnew(j) = rxnew(ifirst) - (rxu(self,ifirst) - rxu(self,j))
-                !       rynew(j) = rynew(ifirst) - (ryu(self,ifirst) - ryu(self,j))
-                !       rznew(j) = rznew(ifirst) - (rzu(self,ifirst) - rzu(self,j))
-                !    end do
+                ! BX: If lrigid=.true., nsampos.eq.1 and nsampos.eq.2 should be treated in another way.
+                first_bead = ifirst
+                second_bead = 0  
+                do j = 1,iunit
+                   rxnew(j) = rxnew(ifirst) - (rxu(self,ifirst) - rxu(self,j))
+                   rynew(j) = rynew(ifirst) - (ryu(self,ifirst) - ryu(self,j))
+                   rznew(j) = rznew(ifirst) - (rzu(self,ifirst) - rzu(self,j))
+                end do
+                if(nsampos(iparty).eq.2) then
+                   second_bead = iprev
+                   old = from(o_type)
+                   xtarget(1) = rxu(other,old)
+                   ytarget(1) = ryu(other,old)
+                   ztarget(1) = rzu(other,old)
+                   old = prev(o_type)
+                   xtarget(2) = rxu(other,old)
+                   ytarget(2) = ryu(other,old)
+                   ztarget(2) = rzu(other,old)
+                   call align_lines(first_bead,second_bead,iunit,rxnew,rynew,rznew,xtarget,ytarget,ztarget)
+                end if
              end if
              ! end if
           !end if
@@ -378,9 +392,11 @@ contains
              else if (nsampos(iparty).ge.3) then
                 ! rigid part is grown, don't do rigrot in rosebluth
                 icallrose = 3
-             else
+             else if (nsampos(iparty).eq.2) then !BX
                 ! rigid part is not grown, do rigrot
-                icallrose = 2
+                icallrose = 5
+             else
+                icallrose = 0
              end if
           else
              ! flexible molecule call rosenbluth in normal fashion
@@ -391,9 +407,9 @@ contains
           ! grow new chain conformation
           !> \bug why call with other and self instead of self and self as for interbox swatch?
           if (boxa.eq.boxb) then
-             call rosenbluth(.true.,lterm,self,self,imolty,islen,boxa,igrow,waddnew,.false.,vdum2,icallrose)
+             call rosenbluth(.true.,lterm,self,self,imolty,islen,boxa,igrow,waddnew,.false.,vdum2,icallrose,first_bead,second_bead)
           else
-             call rosenbluth(.true.,lterm,other,self,imolty,islen,iboxnew,igrow,waddnew,.false.,vdum2,icallrose)
+             call rosenbluth(.true.,lterm,other,self,imolty,islen,iboxnew,igrow,waddnew,.false.,vdum2,icallrose,first_bead,second_bead)
           end if
 
           if (boxa.eq.boxb) then
@@ -577,16 +593,18 @@ contains
              else if (nsampos(iparty).ge.3) then
                 ! rigid part is grown, don't do rigrot in rosebluth
                 icallrose = 3
-             else
+             else if (nsampos(iparty).eq.2) then !BX
                 ! rigid part is not grown, do rigrot
-                icallrose = 2
+                icallrose = 5
+             else
+                icallrose = 0
              end if
           else
              ! flexible molecule call rosenbluth in normal fashion
              icallrose = 2
           end if
 
-          call rosenbluth(.false.,lterm,self,self,imolty,islen,iboxold,igrow,waddold,.false.,vdum2,icallrose)
+          call rosenbluth(.false.,lterm,self,self,imolty,islen,iboxold,igrow,waddold,.false.,vdum2,icallrose,first_bead,second_bead)
           ! END JLR 11-24-09
 
           ! termination of old walk due to problems generating orientations
