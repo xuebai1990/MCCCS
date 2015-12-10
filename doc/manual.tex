@@ -2456,6 +2456,8 @@ liquid phase (less compressible) allows for huge
 fluctuations in the volume because the volume of the liquid
 has to change only by a relatively small amount to allow for
 a relatively huge change in the volume of the vapor phase.
+The volume of the vapor box does not need to be much
+larger than the liquid box near the critical temperature.
 
 Split up the attempted Monte Carlo move probabilities so
 that we perform {\sl no} volume moves ({\bf pmvol} = 0) and
@@ -2489,16 +2491,19 @@ accurate calculation of the potential energy, so we set {\bf
   rcut} to 14~\AA. Don't forget to copy {\bf config\#\#.dat}
 to {\bf file\_restart} for each new simulation.
 
-We want one accepted volume move for every ten cycles, so we
-set {\bf pmvol} to 0.2 / $N_{\rm molecules}$ as we will be
-going for a target acceptance ratio of 50\% for volume moves
-({\bf tavol} = 0.5). We set {\bf iratv} so that the maximum
+We want one accepted volume move per cycle at temperatures near 
+the critical point, so we set {\bf pmvol} to 2 / $N_{\rm molecules}$ 
+as we will be going for a target acceptance ratio of 50\% for 
+volume moves ({\bf tavol} = 0.5). We set {\bf iratv} so that the maximum
 volume displacement is allowed to change, for example, once
 every 250 cycles. Now we want some swap moves too, so we set
 {\bf pmswap} = 0.01 and run the simulation for 10000 cycles.
-Like the volume move, we want one accepted every 10 cycles,
-but we have no target acceptance ratio, so we have to see by
-trial and error what value of {\bf pmswap} is appropriate.
+Like the volume move, we want one accepted every 1 cycles (at 
+lower temperatures 1 accepted volume and swap move every ten cycles 
+is sufficient), but we have no target acceptance ratio, so we 
+have to see by trial and error what value of {\bf pmswap} is appropriate.
+In general, it is best to have a similar amount of accepted swap and
+volume moves.
 
 For the stated probabilities, here's a sample of the output
 file as it pertains to the swap move:
@@ -2517,8 +2522,8 @@ between box 1 and  2 into box 2\\
 
 Because we ran 10000 cycles, we had $10000 / (254 + 275)
 \approx 19 $ cycles between swap moves. Since we want that
-to be closer to 10, we increase {\bf pmswap} to $0.01 \times
-\frac{19}{10} = 0.019$ for the next simulation. Note that
+to be closer to 1, we increase {\bf pmswap} to $0.01 \times
+\frac{19}{1} = 0.19$ for the next simulation. Note that
 since there is an overall flux of molecules from the liquid
 to the vapor box, the simulation has not reached
 equilibrium.
@@ -2527,7 +2532,7 @@ equilibrium.
 Once we have stable vapor and liquid phases in our
 simulation, it is time to begin production. At this point,
 we should know that we will have one accepted volume move
-and one accepted swap move every 10 cycles. We set {\bf
+and one accepted swap move every cycle. We set {\bf
   iratio} and {\bf iratv} to a value greater than or equal
 to {\bf nstep}. If these two values change during the
 production period, it would violate the principle of
@@ -2571,7 +2576,7 @@ the temperature will cause molecules to move from the vapor
 box to the liquid box. The number of accepted swap moves
 also will decrease since it becomes more difficult to swap
 at lower temperatures. We should adjust {\bf pmswap} to
-bring the number back up to one accepted move per 10 cycles.
+bring the number back up to between 1 and 10 accepted moves per 10 cycles.
 
 To ensure that we keep around 50 molecules in the vapor
 phase, we will have to rescale the vapor box lengths.
