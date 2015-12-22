@@ -903,6 +903,16 @@ will be allowed. If not provided, nmax defaults to nchain + 2
 \noindent{\bf nstep:} The number of Monte Carlo cycles
 (steps) to run the simulation.
 
+\noindent{\bf time\_limit:} Time in seconds specifying for
+how long the code should run. It will exit either after {\bf nstep}
+or after {\bf time\_limit} seconds, whichever happens first. This
+is useful when running on HPCs to fully utilize alloted walltimes. 
+The limit has a (120s + average time per cycle) grace period 
+for the final sumup and other finishing touches. 
+Should sumup take longer than that {\bf time\_limit} 
+should be adjusted correspondingly. The variable is
+optional and the default value is 0.
+
 \noindent{\bf lstop:} If TRUE, {\bf nstep} refers to MC
 steps. If FALSE, {\bf nstep} refers to cycles. This
 statement controls all references to ``cycles'' or ``steps''
