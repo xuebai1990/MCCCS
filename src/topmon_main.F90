@@ -10,7 +10,7 @@ MODULE topmon_main
   integer,parameter::fmax=1E6,nprop1=11
   logical::lstop=.false.,use_checkpoint=.false.
   integer::blockm,checkpoint_interval=1800,checkpoint_copies=1,nstep=1,nnstep,nnn,acmove,acnp,acipsw,nblock&
-   ,io_movie,io_solute,io_cell,io_traj&
+   ,io_movie,io_solute,io_cell,io_traj,time_limit=0&
    ,N_add=0,box2add=1,moltyp2add=1
   real::enthalpy,enthalpy2& !< enthalpy (NpT) or internal energy (NVT)
      ,acdvdl,binvir(maxvir,maxntemp),binvir2(maxvir,maxntemp)
@@ -90,7 +90,7 @@ contains
     integer::io_flt,io_hist,io_cnt,io_ndis,io_config,i,jerr,ibox,itype,itype2,Temp_nmol,nentry,j,nummol,imolty,ii,ntii&
      ,igrow,steps,itemp,jbox,itel,ig,il,nbl,n,zzz,ichkpt,nnn_1st,nstep_per_cycle
     real::v(nEnergy),press1,surf,time_prev,time_cur,rm,temvol,tmp,vhist,eng_list(fmax),temacd,temspd,debroglie,starviro,dummy&
-     ,inside,bvirial,gconst,ostwald,stdost,molfrac
+     ,inside,bvirial,gconst,ostwald,stdost,molfrac,time_st,time_av,time_cycle=0.0E0_dp
     logical::ovrlap
 ! ----------------------------------------------------------------
     ! Initialize the timer
@@ -302,6 +302,7 @@ contains
     time_prev = time_now()
     do nnn = nnn_1st, nstep
        tmcc = nnstep + nnn
+       time_st = time_now()
        do ii = 1, nstep_per_cycle
           acmove = acmove + 1
           ! select a move-type at random ***
@@ -493,6 +494,11 @@ contains
              call write_checkpoint_main('save-stats.'//integer_to_string(ichkpt))
           end if
        end if
+       if (time_limit.gt.0) then
+           time_cycle = time_cycle + (time_cur - time_st)
+           time_av = time_cycle / (nnn-nnn_1st+1.0E0_dp)
+           if (time_cur.gt.(time_limit-time_av-120.0E0_dp)) exit
+       end if 
     end do
 !********************************************
 ! ends the loop over cycles                **
@@ -1267,7 +1273,7 @@ contains
      ,lcutcm,ltailc,lshift,ldual,L_Coul_CBMC,lneigh&
      ,lexzeo,lslit,lgraphite,lsami,lmuir,lelect_field,lgaro,lionic,L_Ewald_Auto,lmixlb,lmixjo&
      ,L_spline,L_linear,L_vib_table,L_bend_table,L_elect_table,L_cbmc_bend
-    namelist /mc_shared/ seed,nbox,nmolty,nchain,nmax,nstep,lstop,iratio,rmin,softcut&
+    namelist /mc_shared/ seed,nbox,nmolty,nchain,nmax,nstep,time_limit,lstop,iratio,rmin,softcut&
      ,checkpoint_interval,checkpoint_copies,use_checkpoint,linit,lreadq&
      ,N_add,box2add,moltyp2add
     namelist /analysis/ iprint,imv,iblock,iratp,idiele,iheatcapacity,ianalyze&
@@ -1551,13 +1557,14 @@ contains
        read(UNIT=io_input,NML=mc_shared,iostat=jerr)
        if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_shared',jerr)
     end if
-
+ 
     call mp_bcast(seed,1,rootid,groupid)
     call mp_bcast(nbox,1,rootid,groupid)
     call mp_bcast(nmolty,1,rootid,groupid)
     call mp_bcast(nchain,1,rootid,groupid)
     call mp_bcast(nmax,1,rootid,groupid)
     call mp_bcast(nstep,1,rootid,groupid)
+    call mp_bcast(time_limit,1,rootid,groupid)
     call mp_bcast(lstop,1,rootid,groupid)
     call mp_bcast(iratio,1,rootid,groupid)
     call mp_bcast(rmin,1,rootid,groupid)
@@ -1590,6 +1597,9 @@ contains
           write(io_output,'(A,I0)') 'number of steps: ',nstep
        else
           write(io_output,'(A,I0)') 'number of cycles: ',nstep
+       end if
+       if (time_limit.gt.0) then
+          write(io_output,'(A,I0,A)') 'the code will try to run for ',time_limit,' seconds'
        end if
        w_i(iratio)
        write(io_output,'(A,F7.3,A)') 'minimum cutoff (rmin): ',rmin,' [Ang]'

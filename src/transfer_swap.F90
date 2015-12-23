@@ -355,7 +355,14 @@ contains
              z = rzu(irem,1) - rzu(jins,1)
              if ( lpbc ) call mimage(x,y,z,boxins)
              rijsq = x*x + y*y + z*z
-             if ( rijsq .lt. rbsmax**2 .and. rijsq .gt. rbsmin**2)  goto 119
+             if (rijsq.lt.rbsmax**2.and.rijsq.gt.rbsmin**2) then
+                 if (ncmt(boxrem,imolty).ne.1) then
+                     goto 119
+                 else
+                     lempty = .true.
+                     return
+                 end if
+             end if
 
              if ( moltyp(irem) .ne. imolty )  write(io_output,*) 'screwup swap1, irem:',irem, moltyp(irem),imolty
              ibox = nboxi(irem)
@@ -428,16 +435,15 @@ contains
 ! write(io_output,*) 'jins,irem:',jins,irem,neighj_num
                 irem = neighbor(pointp,jins) 
                if ( lavbmc3(imolty).and.(irem .eq. kins )) goto 114
-		
+
 !> \bug: previously there was no check		
                if ( (moltyp(irem) .ne. imolty).and.(try.lt.(neighj_num*neighj_num))) then 
-		   goto 114 ! Make sure you're picking one that's the correct molty
-		else if (moltyp(irem) .ne. imolty) then
-		   lempty = .true.
-		   return
-		end if
+                   goto 114 ! Make sure you're picking one that's the correct molty
+                else if (moltyp(irem) .ne. imolty) then
+                   lempty = .true.
+                   return
+                end if
 
-	
                 if ( moltyp(irem) .ne. imolty )  write(io_output,*) 'screwup swap2, irem:',irem, moltyp(irem),imolty,neighj_num,pointp,jins
                 ibox = nboxi(irem)
                 if ( ibox .ne. boxrem ) then

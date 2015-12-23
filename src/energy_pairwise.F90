@@ -411,7 +411,7 @@ contains
                             if (L_bend_table) then
                                do mmm=1,inben(imolty,ii)
                                   if (ijben3(imolty,ii,mmm).eq.jj)then
-                                     v(ivIntraLJ) = v(ivIntraLJ) + lininter_bend(sqrt(rij),itben(imolty,ii,mmm))
+                                     v(ivIntraLJ) = v(ivIntraLJ) + lininter_bend(sqrt(rijsq),itben(imolty,ii,mmm))
                                      goto 94
                                   end if
                                end do
@@ -972,7 +972,7 @@ contains
                    if (L_bend_table) then
                       do mmm=1,inben(imolty,ii)
                          if (ijben3(imolty,ii,mmm).eq.jj) then
-                            v(ivIntraLJ) = v(ivIntraLJ) + lininter_bend(sqrt(rij),itben(imolty,ii,mmm))
+                            v(ivIntraLJ) = v(ivIntraLJ) + lininter_bend(sqrt(rijsq),itben(imolty,ii,mmm))
                             goto 96
                          end if
                       end do
