@@ -8288,7 +8288,7 @@ contains
         if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section GROUP_CBMC',jerr)
         read(line_in,*) gcbmc_mol_num
 
-        allocate(gcbmc_mol_list(gcbmc_mol_num))
+        allocate(gcbmc_mol_list(nmolty))
         allocate(gcbmc_unit_num(gcbmc_mol_num))
         allocate(gcbmc_unit_moltype(gcbmc_mol_num, maxval(nunit)))
         allocate(gcbmc_unit_list(gcbmc_mol_num, maxval(nunit), maxval(nunit)))
@@ -8312,7 +8312,7 @@ contains
 
     call mp_bcast(gcbmc_box_num,1,rootid,groupid)
     call mp_bcast(gcbmc_mol_num,1,rootid,groupid)
-    call mp_bcast(gcbmc_mol_list,gcbmc_mol_num,rootid,groupid)
+    call mp_bcast(gcbmc_mol_list,nmolty,rootid,groupid)
     call mp_bcast(gcbmc_unit_num,gcbmc_mol_num,rootid,groupid)
     call mp_bcast(gcbmc_unit_moltype,gcbmc_mol_num*maxval(nunit),rootid,groupid)
     call mp_bcast(gcbmc_unit_list,gcbmc_mol_num*maxval(nunit)*maxval(nunit),rootid,groupid)
