@@ -19,7 +19,7 @@ MODULE moves_cbmc
    ,llplace(:),lpnow(:)
   logical,allocatable::lsave(:)
   integer,allocatable,public::first_bead_to_swap(:)
-  real,allocatable::bncb(:,:),bscb(:,:,:),fbncb(:,:),fbscb(:,:,:) !< temporary accumulators for conf.bias performance
+  real,allocatable::bncb(:,:,:),bscb(:,:,:,:),fbncb(:,:,:),fbscb(:,:,:,:) !< temporary accumulators for conf.bias performance
   real::brvibmin(60),brvibmax(60)
 
   ! FIX.INC
@@ -38,9 +38,9 @@ contains
 !> \brief Performs a length conserving configurational bias move
 !> for linear, branched, anisotropic, and explicit atom molecules
 !>
-!> \b bncb(inb): number of trial attempts starting at unit inb \n
-!> \b bscb(1,inb): number of successful generations of trial configuration \n
-!> \b bscb(2,inb): number of accepted trial configurations
+!> \b bncb(i,ibox,inb): number of trial attempts starting at unit inb for imolty i in box ibox \n
+!> \b bscb(i,1,ibox,inb): number of successful generations of trial configuration \n
+!> \b bscb(i,2,ibox,inb): number of accepted trial configurations
 !>
 !> \author rewritten from old config and branch subroutines by M.G. Martin 9-19-97
 !*****************************************************************
@@ -123,9 +123,9 @@ contains
       end do
 
       if (lfixnow) then
-         fbncb(imolty,findex-1) = fbncb(imolty,findex-1) + 1.0E0_dp
+         fbncb(imolty,ibox,findex-1) = fbncb(imolty,ibox,findex-1) + 1.0E0_dp
       else
-         bncb(imolty,total) = bncb(imolty,total) + 1.0E0_dp
+         bncb(imolty,ibox,total) = bncb(imolty,ibox,total) + 1.0E0_dp
       end if
 
 ! if ( lelect(imolty) ) then
@@ -420,11 +420,11 @@ contains
 
       if (lfixnow) then
          wratio = weight * cwtorfo / ( weiold * cwtorfn)
-         fbscb(imolty,1,findex-1) =  fbscb(imolty,1,findex-1) + 1.0E0_dp
+         fbscb(imolty,1,ibox,findex-1) =  fbscb(imolty,1,ibox,findex-1) + 1.0E0_dp
       else
          wratio = weight / weiold
 ! write(99,*) weight,weiold
-         bscb(imolty,1,total) = bscb(imolty,1,total) + 1.0E0_dp
+         bscb(imolty,1,ibox,total) = bscb(imolty,1,ibox,total) + 1.0E0_dp
       end if
 
 ! write(99,*) wratio
@@ -435,9 +435,9 @@ contains
 ! write(io_output,*) 'CONFIG accepted',i,ibox
 ! we can now accept !!!!! ***
          if (lfixnow) then
-            fbscb(imolty,2,findex-1) = fbscb(imolty,2,findex-1)  + 1.0E0_dp
+            fbscb(imolty,2,ibox,findex-1) = fbscb(imolty,2,ibox,findex-1)  + 1.0E0_dp
          else
-            bscb(imolty,2,total) = bscb(imolty,2,total) + 1.0E0_dp
+            bscb(imolty,2,ibox,total) = bscb(imolty,2,ibox,total) + 1.0E0_dp
          end if
 
          vbox(ivTot,ibox)    = vbox(ivTot,ibox)    + ( vnew(ivTot) - vold(ivTot) )
@@ -8108,8 +8108,8 @@ contains
      ,pmfix,pmgroup,lrig,lpresim,iupdatefix
 
     if (allocated(lexshed)) deallocate(lexshed,llplace,lpnow,lsave,first_bead_to_swap,bncb,bscb,fbncb,fbscb,iend,ipast,pastnum,fclose,fcount,iwbef,ibef,befnum,xx,yy,zz,distij,nextnum,inext,kforceb,equilb,flength,vequil,vkforce,rlist,rfrom,rprev,rnum,iplace,pfrom,pnum,pprev,avbmc_version,stat=jerr)
-    allocate(lexshed(numax),llplace(ntmax),lpnow(numax),lsave(numax),bncb(ntmax,numax),bscb(ntmax,2,numax),fbncb(ntmax,numax)&
-     ,fbscb(ntmax,2,numax),iend(numax),ipast(numax,numax),pastnum(numax),fclose(numax,numax),fcount(numax),iwbef(numax)&
+    allocate(lexshed(numax),llplace(ntmax),lpnow(numax),lsave(numax),bncb(ntmax,nbxmax,numax),bscb(ntmax,2,nbxmax,numax),fbncb(ntmax,nbxmax,numax)&
+     ,fbscb(ntmax,2,nbxmax,numax),iend(numax),ipast(numax,numax),pastnum(numax),fclose(numax,numax),fcount(numax),iwbef(numax)&
      ,ibef(numax,numax),befnum(numax),xx(numax),yy(numax),zz(numax),distij(numax,numax),nextnum(numax),inext(numax,numax)&
      ,kforceb(numax,numax),equilb(numax,numax),flength(numax,numax),vequil(numax,numax),vkforce(numax,numax),rlist(numax,numax)&
      ,rfrom(numax),rprev(numax),rnum(numax),iplace(numax,numax),pfrom(numax),pnum(numax),pprev(numax),avbmc_version(nmolty)&
@@ -8482,35 +8482,37 @@ contains
 !> \brief write some information about config performance
   subroutine output_cbmc_stats(io_output)
     integer,intent(in)::io_output
-    integer::i,inb,ii
+    integer::i,inb,ii,ibox
     real::pscb1,pscb2
 
     write(io_output,*)
     write(io_output,*) '### Configurational-bias ###'
     write(io_output,*)
     do i = 1, nmolty
-       write(io_output,"(A,I0,A)",advance='no') 'molecule typ = ',i,'    '
-       write(io_output,'(A10)',advance='no')molecname(i)
-       write(io_output,*)
-       write(io_output,*) '    length  attempts  succ.growth  accepted' ,'   %su.gr.    %accep.'
-       do inb = 1, nunit(i)
-          if ( bncb(i,inb) .gt. 0.0E0_dp ) then
-             pscb1 = bscb(i,1,inb) * 100.0E0_dp / bncb(i,inb)
-             pscb2 = bscb(i,2,inb) * 100.0E0_dp / bncb(i,inb)
-             write(io_output,'(i9,3f10.1,2f10.2)') inb, bncb(i,inb), bscb(i,1,inb), bscb(i,2,inb), pscb1, pscb2
-          end if
-       end do
-       if (pmfix(i).gt.0.0E0_dp) then
-          write(io_output,*) ' SAFE-CBMC move '
-          write(io_output,*) '    length  attempts  succ.growth  ', 'accepted   %su.gr.    %accep.'
+       do ibox = 1, nbox
+          write(io_output,"(A,I0,A)",advance='no') 'molecule typ = ',i,'    '
+          write(io_output,'(A10,A,I0)',advance='no')molecname(i),' in box ',ibox
+          write(io_output,*)
+          write(io_output,*) '    length  attempts  succ.growth  accepted' ,'   %su.gr.    %accep.'
           do inb = 1, nunit(i)
-             if (fbncb(i,inb) .gt. 0.0E0_dp ) then
-                pscb1 = fbscb(i,1,inb) * 100.0E0_dp  / fbncb(i,inb)
-                pscb2 = fbscb(i,2,inb) * 100.0E0_dp  / fbncb(i,inb)
-                write(io_output,'(i9,3f10.1,2f10.2)') inb,fbncb(i,inb), fbscb(i,1,inb), fbscb(i,2,inb) , pscb1, pscb2
+             if ( bncb(i,ibox,inb) .gt. 0.0E0_dp ) then
+                pscb1 = bscb(i,1,ibox,inb) * 100.0E0_dp / bncb(i,ibox,inb)
+                pscb2 = bscb(i,2,ibox,inb) * 100.0E0_dp / bncb(i,ibox,inb)
+                write(io_output,'(i9,3f10.1,2f10.2)') inb, bncb(i,ibox,inb), bscb(i,1,ibox,inb), bscb(i,2,ibox,inb), pscb1, pscb2
              end if
           end do
-       end if
+          if (pmfix(i).gt.0.0E0_dp) then
+             write(io_output,*) ' SAFE-CBMC move '
+             write(io_output,*) '    length  attempts  succ.growth  ', 'accepted   %su.gr.    %accep.'
+             do inb = 1, nunit(i)
+                if (fbncb(i,ibox,inb) .gt. 0.0E0_dp ) then
+                   pscb1 = fbscb(i,1,ibox,inb) * 100.0E0_dp  / fbncb(i,ibox,inb)
+                   pscb2 = fbscb(i,2,ibox,inb) * 100.0E0_dp  / fbncb(i,ibox,inb)
+                   write(io_output,'(i9,3f10.1,2f10.2)') inb,fbncb(i,ibox,inb), fbscb(i,1,ibox,inb), fbscb(i,2,ibox,inb) , pscb1, pscb2
+                end if
+             end do
+          end if
+       end do
     end do
     write(io_output,*)
   end subroutine output_cbmc_stats
@@ -8579,10 +8581,10 @@ contains
     use util_mp,only:mp_bcast
     integer,intent(in)::io_chkpt
     if (myid.eq.rootid) read(io_chkpt) bncb,bscb,fbncb,fbscb
-    call mp_bcast(bncb,ntmax*numax,rootid,groupid)
-    call mp_bcast(bscb,ntmax*2*numax,rootid,groupid)
-    call mp_bcast(fbncb,ntmax*numax,rootid,groupid)
-    call mp_bcast(fbscb,ntmax*2*numax,rootid,groupid)
+    call mp_bcast(bncb,ntmax*nbxmax*numax,rootid,groupid)
+    call mp_bcast(bscb,ntmax*2*nbxmax*numax,rootid,groupid)
+    call mp_bcast(fbncb,ntmax*nbxmax*numax,rootid,groupid)
+    call mp_bcast(fbscb,ntmax*2*nbxmax*numax,rootid,groupid)
   end subroutine read_checkpoint_cbmc
 
   subroutine write_checkpoint_cbmc(io_chkpt)
