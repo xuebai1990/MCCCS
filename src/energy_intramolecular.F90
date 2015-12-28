@@ -499,11 +499,11 @@ contains
 !> that have an end-bead with an index smaller than the current bead
 !DEC$ ATTRIBUTES FORCEINLINE :: U_bonded
   subroutine U_bonded(i,imolty,vvib,vbend,vtg)
-    use sim_system,only:nunit,invib,itvib,ijvib,inben,itben,ijben2,ijben3,L_vib_table
+    use sim_system,only:nunit,invib,itvib,ijvib,inben,itben,ijben2,ijben3,L_vib_table,L_bend_table
     real,intent(out)::vvib,vbend,vtg
     integer,intent(in)::i,imolty
 
-    real::theta,thetac
+    real::theta,thetac,rbend,rbendsq
     integer::j,jjvib,ip1,ip2,it,jjben
 
     call calc_connectivity(i,imolty)
@@ -539,17 +539,18 @@ contains
              if ( thetac .le. -1.0E0_dp ) thetac = -1.0E0_dp
 
              theta = acos(thetac)
+             ! if bend table exists compute bending energy from that. Otherwise
+             ! if we have a freely jointed chain then the energy is still zero.
+             ! Otherwise compute the energy. Max value of freely jointed chain
+             ! chosen to match the geometry subroutine in CBMC. 
+             if (L_bend_table) then
+                rbendsq=distij2(ip1,j)+distij2(ip1,ip2)-2.0E0_dp*distanceij(ip1,j)*distanceij(ip1,ip2)*thetac
+                rbend = sqrt(rbendsq)
+                vbend = vbend + lininter_bend(rbend,it)
+             else if (.not.(brbenk(it).lt.-0.1E0_dp)) then 
+                vbend = vbend +  brbenk(it) * (theta-brben(it))**2
+             end if
 
-             ! if (L_bend_table) then
-             ! rbendsq=distij2(ip1,j)+distij2(ip1,ip2)-2.0E0_dp*distanceij(ip1,j)*distanceij(ip1,ip2)*thetac
-             ! rbend = sqrt(rbendsq)
-             ! vbend = vbend + lininter_bend(rbend,it)
-             ! else
-             vbend = vbend +  brbenk(it) * (theta-brben(it))**2
-             ! end if
-
-! write(io_output,*) 'j,ip1,ip2, it',j,ip1,ip2, it
-! write(io_output,*) 'bend energy, theta ',brbenk(it) * (theta-brben(it))**2,theta
           end if
        end do
     end do
