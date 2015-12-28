@@ -2385,8 +2385,13 @@ contains
                         distgrow2 = distgrow*distgrow
                         ! dot product divided by lengths gives cos(angle)
                         anglec = ( xvecprev*xvecgrow + yvecprev*yvecgrow  + zvecprev*zvecgrow ) / (distprev*distgrow)
-                        angle = acos(anglec)
-
+                        if(anglec.gt.1.0E0_dp) then 
+                           angle = 0.0E0_dp
+                        else if(anglec.lt.-1.0E0_dp) then
+                           angle = onepi
+                        else
+                           angle = acos(anglec)
+                        end if
                         if (L_bend_table) then
                             lengthc2 = lengthFP2 + distgrow2 - 2.0E0_dp*lengthFP*distgrow*anglec
                             lengthc = sqrt(lengthc2)
@@ -4129,7 +4134,6 @@ contains
 
 ! determine angle with iuprev
             thetac = -(ux*rx + uy*ry + uz*rz)
-
             bendang(ku,iuprev) = acos(thetac)
 
             alpha = bendang(ku,iuprev)
@@ -5183,7 +5187,6 @@ contains
 
                   thetac = -( (rxu(i,iu) - rxu(i,iufrom)) * xvec(iuprev,iufrom)  + (ryu(i,iu) - ryu(i,iufrom))&
                    * yvec(iuprev,iufrom) + (rzu(i,iu) - rzu(i,iufrom)) * zvec(iuprev,iufrom))  / (lengtha*lengthb)
-
                   angle = acos(thetac)
                   vphi =  kforcea(count) * (angle-equila(count))**2
 
@@ -5267,7 +5270,6 @@ contains
 
                         thetac = ((rxu(i,ju)-rxu(i,iufrom)) * (rxu(i,iu)-rxu(i,iufrom)) + (ryu(i,ju)-ryu(i,iufrom))&
                          * (ryu(i,iu)-ryu(i,iufrom)) + (rzu(i,ju)-rzu(i,iufrom)) * (rzu(i,iu)-rzu(i,iufrom)))/(lengtha*lengthb)
-
                         angle = acos(thetac)
 
                         vphi = kforceb(iu,ju) * (angle-equilb(iu,ju))**2
@@ -5696,7 +5698,6 @@ contains
                      length = distij(iufrom,iuprev)
                      thetac = -(xx(count)*xvec(iuprev,iufrom) + yy(count)*yvec(iuprev,iufrom) + zz(count)*zvec(iuprev,iufrom))&
                       /(lengtha*length)
-
                      angle = acos(thetac)
 
                      vphi = vphi + kforcea(count) * (angle-equila(count) )**2
@@ -5879,7 +5880,7 @@ contains
                            if (abs(thetac).gt.1) then
                               write(io_output,*) '*********************' ,'****************************'
                               write(io_output,*) iu,ku,xvec(iu,ku) ,yvec(iu,ku) ,zvec(iu,ku),lengthb
-                              call err_exit(__FILE__,__LINE__,'shitfuck',myid+1)
+                              call err_exit(__FILE__,__LINE__,'thetac outsie of range',myid+1)
                            end if
 
                            angle = acos(thetac)
@@ -5911,7 +5912,6 @@ contains
                            lengthb = flength(iufrom,ju)
 
                            thetac = (xx(count)*xx(counta) + yy(count)*yy(counta) + zz(count)*zz(counta)) / (lengtha*lengthb)
-
                            angle = acos(thetac)
 
                            vphi = vphi + kforceb(iu,ju) * (angle -equilb(iu,ju))**2

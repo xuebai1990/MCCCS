@@ -343,7 +343,6 @@ contains
 ! calculate dot product of cross products ***
     dot = x12*x23 + y12*y23 + z12*z23
     thetac = - (dot / ( d12 * d23 ))
-
     if (thetac.gt.1.0E0_dp) thetac=1.0E0_dp
     if (thetac.lt.-1.0E0_dp) thetac=-1.0E0_dp
     theta = acos(thetac)
@@ -535,10 +534,13 @@ contains
              if (brbenk(it).lt.-0.1E0_dp) cycle
              thetac = ( rxvec(ip1,j)*rxvec(ip1,ip2) + ryvec(ip1,j)*ryvec(ip1,ip2)&
               + rzvec(ip1,j)*rzvec(ip1,ip2) ) / ( distanceij(ip1,j)*distanceij(ip1,ip2) )
-             if ( thetac .ge. 1.0E0_dp ) thetac = 1.0E0_dp
-             if ( thetac .le. -1.0E0_dp ) thetac = -1.0E0_dp
-
-             theta = acos(thetac)
+             if(thetac.gt.1.0E0_dp) then
+                theta = 0.0E0_dp
+             else if (thetac.lt.-1.0E0_dp) then
+                theta = onepi
+             else
+                theta = acos(thetac)
+             end if
              ! if bend table exists compute bending energy from that. Otherwise
              ! if we have a freely jointed chain then the energy is still zero.
              ! Otherwise compute the energy. Max value of freely jointed chain
