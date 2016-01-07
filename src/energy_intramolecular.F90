@@ -6,7 +6,7 @@ MODULE energy_intramolecular
   use util_string,only:uppercase,integer_to_string
   use util_files,only:readLine
   use util_search,only:LookupTable,initiateTable,destroyTable,addToTable
-  use sim_system,only:io_output,brvib,brvibk,brben,brbenk,myid,L_spline,L_linear
+  use sim_system,only:io_output,brvib,brvibk,brben,brbenk,maxRegrowVib,minRegrowVib,myid,L_spline,L_linear
   implicit none
   private
   save
@@ -65,10 +65,12 @@ contains
 
           if (UPPERCASE(line_in(1:5)).eq.'BONDS') then
              call initiateTable(bonds,initial_size)
-             allocate(vib_type(1:initial_size),brvib(1:initial_size),brvibk(1:initial_size),stat=jerr)
+             allocate(vib_type(1:initial_size),brvib(1:initial_size),brvibk(1:initial_size),minRegrowVib(1:initial_size),maxRegrowVib(1:initial_size),stat=jerr)
              if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_intramolecular: bonds allocation failed',myid)
              brvib=0.0E0_dp
              brvibk=0.0E0_dp
+             maxRegrowVib=0.0E0_dp
+             minRegrowVib=0.0E0_dp
              do
                 call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
                 if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section BONDS',jerr)
@@ -79,9 +81,11 @@ contains
                 if (i.gt.ubound(vib_type,1)) then
                    call reallocate(vib_type,1,2*ubound(vib_type,1))
                    call reallocate(brvib,1,2*ubound(brvib,1))
-                   call reallocate(brvibk,1,2*ubound(brvibk,1))
+                   call reallocate(brvibk,1,2*ubound(brvibk,1)) 
+                   call reallocate(minRegrowVib,1,2*ubound(minRegrowVib,1))
+                   call reallocate(maxRegrowVib,1,2*ubound(maxRegrowVib,1))
                 end if
-                read(line_in,*) jerr,vib_type(i),brvib(i),brvibk(i)
+                read(line_in,*) jerr,vib_type(i),brvib(i),brvibk(i),minRegrowVib(i),maxRegrowVib(i)
              end do
              exit cycle_read_bonds
           end if
@@ -96,9 +100,11 @@ contains
           call reallocate(vib_type,1,n)
           call reallocate(brvib,1,n)
           call reallocate(brvibk,1,n)
+          call reallocate(minRegrowVib,1,n)
+          call reallocate(maxRegrowVib,1,n)
        else
           call initiateTable(bonds,n)
-          allocate(vib_type(1:n),brvib(1:n),brvibk(1:n),stat=jerr)
+          allocate(vib_type(1:n),brvib(1:n),brvibk(1:n),minRegrowVib(1:n),maxRegrowVib(1:n),stat=jerr)
           if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_intramolecular: bonds allocation failed',myid)
        end if
 
@@ -107,6 +113,8 @@ contains
        call mp_bcast(vib_type,n,rootid,groupid)
        call mp_bcast(brvib,n,rootid,groupid)
        call mp_bcast(brvibk,n,rootid,groupid)
+       call mp_bcast(minRegrowVib,n,rootid,groupid)
+       call mp_bcast(maxRegrowVib,n,rootid,groupid)
     end if
 
     !> Looking for section ANGLES

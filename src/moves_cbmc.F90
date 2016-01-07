@@ -1867,7 +1867,7 @@ contains
           ! compute bond length
           equil = brvib(jtvib)
           kforce = brvibk(jtvib)
-          call bondlength( jtvib,equil,kforce,beta,length,vvib )
+          call bondlength( jtvib,equil,kforce,beta,length,vvib)
        else
           ! compute bond length
           rxuij = rxu(i,iugrow) - rxui
@@ -2847,21 +2847,27 @@ contains
 !***********************************************************
   subroutine bondlength(vibtype,requil,kvib,betaT,length,vvib)
     integer::vibtype
-    real::length,bond,bf,vvib,betaT,kvib,requil
-
+    real::length,bond,bf,vvib,betaT,kvib,requil,minRegrow,maxRegrow,regrowWidth,maxRegrowSq
+    maxRegrow = maxRegrowVib(vibtype)
+    maxRegrowSq = maxRegrow**2
+    minRegrow = minRegrowVib(vibtype)
     vvib = 0.0E0_dp
-
+    regrowWidth = maxRegrow-minRegrow
     if ( kvib .gt. 0.1E0_dp ) then
        ! random bond length from Boltzmann distribution ---
-107    bond = (0.2E0_dp*random(-1)+0.9E0_dp)
+       ! selects a bondlength from the minimum to the maximum specified in
+       ! fort.4
+       ! for efficiency sake we first select a value from the distribution
+       ! P(L) =  L^2 dL
+107    bond = (regrowWidth*random(-1)+minRegrow)
 
        ! correct for jacobian by dividing by the max^2
-       ! 1.21  = (1.1)^2, the equilibrium bond length cancels out
-       bf = bond*bond*bond/(1.21E0_dp)
+       bf = bond*bond/(maxRegrowSq)
        if ( random(-1) .ge. bf ) goto 107
        bond = bond * requil
 
-       ! correct for the bond energy
+       ! correct for the bond energy by applying the boltzmann
+       ! weight to the bond length selection. 
        vvib = kvib * (bond-requil )**2
        bf = exp ( -(vvib * betaT) )
        if ( random(-1) .ge. bf ) goto 107
@@ -2872,11 +2878,10 @@ contains
     else if (L_vib_table) then
        ! random bond length from Boltzmann distribution ---
        !     ---  +/- 25% of equilibrium bond length
-108    bond = (0.5E0_dp*random(-1)+0.75E0_dp)
+108    bond = (regrowWidth*random(-1)+minRegrow)
 
     ! correct for jacobian by dividing by the max^2
-    ! 1.5625  = (1.25)^2, the equilibrium bond length cancels out
-       bf = bond*bond*bond/(1.5625E0_dp)
+       bf = bond*bond*bond/(maxRegrowSq)
        if ( random(-1) .ge. bf ) goto 108
 
        bond = bond * requil

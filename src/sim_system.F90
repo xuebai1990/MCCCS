@@ -143,7 +143,7 @@ module sim_system
   integer::nntype !< number of types of beads
   logical::L_spline=.false.,L_linear=.false.,L_vib_table=.false.,L_bend_table=.false.,L_elect_table=.false.
   real,allocatable::mass(:),vvdW_b(:,:),qelect(:),vvdW(:,:),ecut(:)&
-   ,brvib(:),brvibk(:),brben(:),brbenk(:)&
+   ,brvib(:),brvibk(:),brben(:),brbenk(:),maxRegrowVib(:),minRegrowVib(:)&
    ,ljscale(:,:,:),qscale2(:,:,:)
   character(len=atom_symbol_length),allocatable::chemid(:)
   integer,allocatable::a15type(:,:,:)
