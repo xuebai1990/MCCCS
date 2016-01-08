@@ -777,6 +777,15 @@ potential.
 \noindent{\bf brvibk:} force constant, $k/2$, in
 Kelvin/\AA$^2$. A value of zero indicates fixed bond length.
 
+\noindent{\bf Optional variables:}
+ These variables are optional and should be included when 
+you are running a simulation using CBMC and flexible bonds.
+Default values if not included are 0.0 and 2.0 meaning the 
+bond can regrow to $\pm$ 100\% of their equilibrium bond
+length. These values are inefficient but likely to select
+the entire range of possible values. Below is described
+a method by which these values can be selected. 
+ 
 \noindent{\bf minimumRegrow:} fraction describing shortest 
 allowable bond length during a CBMC regrowth when allowing 
 for flexible bonds. Expressed as $L_{min}$/brvib.
@@ -787,21 +796,18 @@ for flexible bonds. Exressed as $L_{max}$/brvib.
 
 Extreme care should be taken when selecting the maximum and 
 minimum values for regrowth of flexible bonds when using CBMC 
-move types. You want to chose values covering a range that 
-will not arbitrarily cut off the tails when looking at a bond 
-length distribution, but narrow enough to not significantly 
-impact the efficiency of a simulation. The easiest way to 
-determine a good range on these values is to run a short and 
-simple simulation of of just the molecule of interest with a 
-very wide range of allowed values. View the resulting bond 
-length distribution and determine reasonable ranges from this. 
-Caution is still necessary as in a full simulation the average 
-bond length is not necessarily equal to the equilibrium bond 
-length. In some simulations the center of your distribution will 
-be shifted away from the equilibrum value. So again even after 
-you have selected values, you should check to ensure that you 
-are not arbitrarily cutting off your bond length distribtuon. 
-Common values in the past have been 0.9-1.1. 
+move types. If you have too wide of a range then your simulation
+will be very inefficient as it will sample too many bond lengths 
+that it is likely to reject. If your range is too narrow then 
+your simulation will not produce accurate results. You should 
+test your values by running shorter simulations to ensure that
+you are not arbitrarily cutting short your distribution. Bond
+lengths will generally fall with in 4 standard deviations of 
+your equilibrium bond length where the standard devition
+$\sigma=\sqrt{(\beta k)^{-1}}$ where $k$ is the force constant
+and $\beta=k_B T$. Plots of the bond length distribution for 
+each bond type can be used to determine if this value is 
+reasonable for you.  
 
 \subsection{Section \textbf{ANGLES}}
 \label{angles}
