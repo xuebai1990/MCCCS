@@ -48,7 +48,7 @@ contains
     use sim_system,only:rootid,groupid
     integer,intent(in)::io_ff
     integer,parameter::initial_size=20
-    integer::i,n,jerr
+    integer::i,n,jerr,readstat
     character(LEN=default_string_length)::line_in
 
     !> Looking for section BONDS
@@ -69,7 +69,7 @@ contains
              if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_intramolecular: bonds allocation failed',myid)
              brvib=0.0E0_dp
              brvibk=0.0E0_dp
-             maxRegrowVib=0.0E0_dp
+             maxRegrowVib=2.0E0_dp
              minRegrowVib=0.0E0_dp
              do
                 call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
@@ -85,7 +85,15 @@ contains
                    call reallocate(minRegrowVib,1,2*ubound(minRegrowVib,1))
                    call reallocate(maxRegrowVib,1,2*ubound(maxRegrowVib,1))
                 end if
-                read(line_in,*) jerr,vib_type(i),brvib(i),brvibk(i),minRegrowVib(i),maxRegrowVib(i)
+                readstat=0
+                read(line_in,*,iostat=readstat) jerr,vib_type(i),brvib(i),brvibk(i),minRegrowVib(i),maxRegrowVib(i)
+                if (readstat.eq.-1 ) then ! if the max and min regrows are not specified
+                   read(line_in,*) jerr,vib_type(i),brvib(i),brvibk(i)
+                   minRegrowVib(i)=0.0E0_dp
+                   maxRegrowVib(i)=2.0E0_dp
+                else if(.not.(readstat.eq.0)) then
+                    call err_exit(__FILE__,__LINE__,'error in reading bond values',readstat)
+                end if
              end do
              exit cycle_read_bonds
           end if
