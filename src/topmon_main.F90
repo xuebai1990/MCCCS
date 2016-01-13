@@ -3277,7 +3277,7 @@ contains
              end do
           end if
        else
-          io_movie=10000000
+          io_movie=-1
        end if
 
        ! open xyz movie file for individual simulation box
@@ -3292,7 +3292,7 @@ contains
              if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open box movie file '//trim(file_box_movie),jerr)
           end do
        else
-          io_box_movie=10000000
+          io_box_movie=-1
        end if
 
        ! open pdb movie file for individual simulation box
@@ -3308,7 +3308,7 @@ contains
              if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open box movie file '//trim(file_box_movie_pdb),jerr)
           end do
        else
-          io_box_movie_pdb=10000000
+          io_box_movie_pdb=-1
        end if
 
        ! write out isolute movie header
@@ -3323,7 +3323,7 @@ contains
              end do
           end if
        else
-          io_solute=10000000
+          io_solute=-1
        end if
 
        ! cell parameters using crystallographic convention
