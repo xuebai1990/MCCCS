@@ -6,7 +6,7 @@ MODULE energy_intramolecular
   use util_string,only:uppercase,integer_to_string
   use util_files,only:readLine
   use util_search,only:LookupTable,initiateTable,destroyTable,addToTable
-  use sim_system,only:io_output,brvib,brvibk,brben,brbenk,myid,L_spline,L_linear
+  use sim_system,only:io_output,brvib,brvibk,brben,brbenk,maxRegrowVib,minRegrowVib,myid,L_spline,L_linear
   implicit none
   private
   save
@@ -48,7 +48,7 @@ contains
     use sim_system,only:rootid,groupid
     integer,intent(in)::io_ff
     integer,parameter::initial_size=20
-    integer::i,n,jerr
+    integer::i,n,jerr,readstat
     character(LEN=default_string_length)::line_in
 
     !> Looking for section BONDS
@@ -65,10 +65,12 @@ contains
 
           if (UPPERCASE(line_in(1:5)).eq.'BONDS') then
              call initiateTable(bonds,initial_size)
-             allocate(vib_type(1:initial_size),brvib(1:initial_size),brvibk(1:initial_size),stat=jerr)
+             allocate(vib_type(1:initial_size),brvib(1:initial_size),brvibk(1:initial_size),minRegrowVib(1:initial_size),maxRegrowVib(1:initial_size),stat=jerr)
              if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_intramolecular: bonds allocation failed',myid)
              brvib=0.0E0_dp
              brvibk=0.0E0_dp
+             maxRegrowVib=2.0E0_dp
+             minRegrowVib=0.0E0_dp
              do
                 call readLine(io_ff,line_in,skipComment=.true.,iostat=jerr)
                 if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section BONDS',jerr)
@@ -79,9 +81,19 @@ contains
                 if (i.gt.ubound(vib_type,1)) then
                    call reallocate(vib_type,1,2*ubound(vib_type,1))
                    call reallocate(brvib,1,2*ubound(brvib,1))
-                   call reallocate(brvibk,1,2*ubound(brvibk,1))
+                   call reallocate(brvibk,1,2*ubound(brvibk,1)) 
+                   call reallocate(minRegrowVib,1,2*ubound(minRegrowVib,1))
+                   call reallocate(maxRegrowVib,1,2*ubound(maxRegrowVib,1))
                 end if
-                read(line_in,*) jerr,vib_type(i),brvib(i),brvibk(i)
+                readstat=0
+                read(line_in,*,iostat=readstat) jerr,vib_type(i),brvib(i),brvibk(i),minRegrowVib(i),maxRegrowVib(i)
+                if (readstat.eq.-1 ) then ! if the max and min regrows are not specified
+                   read(line_in,*) jerr,vib_type(i),brvib(i),brvibk(i)
+                   minRegrowVib(i)=0.0E0_dp
+                   maxRegrowVib(i)=2.0E0_dp
+                else if(.not.(readstat.eq.0)) then
+                    call err_exit(__FILE__,__LINE__,'error in reading bond values',readstat)
+                end if
              end do
              exit cycle_read_bonds
           end if
@@ -96,9 +108,11 @@ contains
           call reallocate(vib_type,1,n)
           call reallocate(brvib,1,n)
           call reallocate(brvibk,1,n)
+          call reallocate(minRegrowVib,1,n)
+          call reallocate(maxRegrowVib,1,n)
        else
           call initiateTable(bonds,n)
-          allocate(vib_type(1:n),brvib(1:n),brvibk(1:n),stat=jerr)
+          allocate(vib_type(1:n),brvib(1:n),brvibk(1:n),minRegrowVib(1:n),maxRegrowVib(1:n),stat=jerr)
           if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_intramolecular: bonds allocation failed',myid)
        end if
 
@@ -107,6 +121,8 @@ contains
        call mp_bcast(vib_type,n,rootid,groupid)
        call mp_bcast(brvib,n,rootid,groupid)
        call mp_bcast(brvibk,n,rootid,groupid)
+       call mp_bcast(minRegrowVib,n,rootid,groupid)
+       call mp_bcast(maxRegrowVib,n,rootid,groupid)
     end if
 
     !> Looking for section ANGLES
@@ -343,7 +359,6 @@ contains
 ! calculate dot product of cross products ***
     dot = x12*x23 + y12*y23 + z12*z23
     thetac = - (dot / ( d12 * d23 ))
-
     if (thetac.gt.1.0E0_dp) thetac=1.0E0_dp
     if (thetac.lt.-1.0E0_dp) thetac=-1.0E0_dp
     theta = acos(thetac)
@@ -499,11 +514,11 @@ contains
 !> that have an end-bead with an index smaller than the current bead
 !DEC$ ATTRIBUTES FORCEINLINE :: U_bonded
   subroutine U_bonded(i,imolty,vvib,vbend,vtg)
-    use sim_system,only:nunit,invib,itvib,ijvib,inben,itben,ijben2,ijben3,L_vib_table
+    use sim_system,only:nunit,invib,itvib,ijvib,inben,itben,ijben2,ijben3,L_vib_table,L_bend_table
     real,intent(out)::vvib,vbend,vtg
     integer,intent(in)::i,imolty
 
-    real::theta,thetac
+    real::theta,thetac,rbend,rbendsq
     integer::j,jjvib,ip1,ip2,it,jjben
 
     call calc_connectivity(i,imolty)
@@ -535,21 +550,25 @@ contains
              if (brbenk(it).lt.-0.1E0_dp) cycle
              thetac = ( rxvec(ip1,j)*rxvec(ip1,ip2) + ryvec(ip1,j)*ryvec(ip1,ip2)&
               + rzvec(ip1,j)*rzvec(ip1,ip2) ) / ( distanceij(ip1,j)*distanceij(ip1,ip2) )
-             if ( thetac .ge. 1.0E0_dp ) thetac = 1.0E0_dp
-             if ( thetac .le. -1.0E0_dp ) thetac = -1.0E0_dp
+             if(thetac.gt.1.0E0_dp) then
+                theta = 0.0E0_dp
+             else if (thetac.lt.-1.0E0_dp) then
+                theta = onepi
+             else
+                theta = acos(thetac)
+             end if
+             ! if bend table exists compute bending energy from that. Otherwise
+             ! if we have a freely jointed chain then the energy is still zero.
+             ! Otherwise compute the energy. Max value of freely jointed chain
+             ! chosen to match the geometry subroutine in CBMC. 
+             if (L_bend_table) then
+                rbendsq=distij2(ip1,j)+distij2(ip1,ip2)-2.0E0_dp*distanceij(ip1,j)*distanceij(ip1,ip2)*thetac
+                rbend = sqrt(rbendsq)
+                vbend = vbend + lininter_bend(rbend,it)
+             else if (.not.(brbenk(it).lt.-0.1E0_dp)) then 
+                vbend = vbend +  brbenk(it) * (theta-brben(it))**2
+             end if
 
-             theta = acos(thetac)
-
-             ! if (L_bend_table) then
-             ! rbendsq=distij2(ip1,j)+distij2(ip1,ip2)-2.0E0_dp*distanceij(ip1,j)*distanceij(ip1,ip2)*thetac
-             ! rbend = sqrt(rbendsq)
-             ! vbend = vbend + lininter_bend(rbend,it)
-             ! else
-             vbend = vbend +  brbenk(it) * (theta-brben(it))**2
-             ! end if
-
-! write(io_output,*) 'j,ip1,ip2, it',j,ip1,ip2, it
-! write(io_output,*) 'bend energy, theta ',brbenk(it) * (theta-brben(it))**2,theta
           end if
        end do
     end do

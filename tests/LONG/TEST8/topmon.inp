@@ -61,7 +61,7 @@ END NONBOND
 
 BONDS
 !i type(i) brvib(i) brvibk(i) [Angstrom]; type 1: U = brvibk * ( r_ij - brvib ) ^ 2
-  1 1 1.54000   0.00000
+  1 1 1.54000   0.00000 0.9 1.1
 END BONDS
 
 ANGLES

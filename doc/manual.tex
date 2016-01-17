@@ -532,11 +532,10 @@ an equilibrium bond length and zero force constant.
 \noindent{\bf L\_bend\_table:} Calculates 1-3 nonbonded
 ``bending'' using linear interpolation. Requires file {\bf
   fort.42} with distances in Angstrom starting at 0.0. The
-tabulated bending is calculated using distances, not angles,
-so the 1-3 interactions must be included explicitly in
-\ref{intra_special}, and the angle should be specified with
-an equilibrium angle and a very small but non-zero force
-constant.
+tabulated bending is calculated using distances, not angles.
+Additionally, in the {\bf topmon.inp} file you must specify
+a potential with the same identifier as the potential in the
+{\bf fort.42} file. The k-value you specify must be postive.
 
 \noindent{\bf L\_elect\_table:} Calculate electrostatic
 potential using linear interpolation. Currently, this is
@@ -762,6 +761,7 @@ for this interaction.
 \noindent{\bf vdW parameters:} the parameters for the
 selected potential functional form.
 
+
 \subsection{Section \textbf{BONDS}}
 \label{bonds}
 
@@ -776,6 +776,38 @@ potential.
 
 \noindent{\bf brvibk:} force constant, $k/2$, in
 Kelvin/\AA$^2$. A value of zero indicates fixed bond length.
+
+\noindent{\bf Optional variables:}
+ These variables are optional and should be included when 
+you are running a simulation using CBMC and flexible bonds.
+Default values if not included are 0.0 and 2.0 meaning the 
+bond can regrow to $\pm$ 100\% of their equilibrium bond
+length. These values are inefficient but likely to select
+the entire range of possible values. Below is described
+a method by which these values can be selected. 
+ 
+\noindent{\bf minimumRegrow:} fraction describing shortest 
+allowable bond length during a CBMC regrowth when allowing 
+for flexible bonds. Expressed as $L_{min}$/brvib.
+
+\noindent{\bf maximumRegrow:} fraction describing longest 
+allowable bond length during a CBMC regrowth when allowing 
+for flexible bonds. Exressed as $L_{max}$/brvib.
+
+Extreme care should be taken when selecting the maximum and 
+minimum values for regrowth of flexible bonds when using CBMC 
+move types. If you have too wide of a range then your simulation
+will be very inefficient as it will sample too many bond lengths 
+that it is likely to reject. If your range is too narrow then 
+your simulation will not produce accurate results. You should 
+test your values by running shorter simulations to ensure that
+you are not arbitrarily cutting short your distribution. Bond
+lengths will generally fall with in 4 standard deviations of 
+your equilibrium bond length where the standard devition
+$\sigma=\sqrt{(\beta k)^{-1}}$ where $k$ is the force constant
+and $\beta=k_B T$. Plots of the bond length distribution for 
+each bond type can be used to determine if this value is 
+reasonable for you.  
 
 \subsection{Section \textbf{ANGLES}}
 \label{angles}
@@ -1181,7 +1213,10 @@ performed, this specifies the probability to perform it on a
 particular pair. Must be {\textbf nswaty} values.
 
 \subsubsection{Section \textbf{MC\_SWATCH}}
-Swatch move can be done by either regular CBMC (two molecules differ only at one or two ends) or SAFE-CBMC (two molecules also differ in the internal part). For each of the \textbf{nswaty} pairs, including the following, if it is regular CBMC swatch pair:
+Swatch move can be done by either regular CBMC (two molecules 
+differ only at one or two ends) or SAFE-CBMC (two molecules 
+also differ in the internal part). For each of the \textbf{nswaty} 
+pairs, including the following, if it is regular CBMC swatch pair:
 
 \noindent{\bf nswatb:} Specifies the two molecule types for this swatch pair.
 
@@ -1739,6 +1774,27 @@ Mountain, R. D.; Thirumalai, D. Physica A: Statistical Mechanics and its Applica
 Although MCCCS-MN is much more complex, I think that our
 recommended target acceptance rate for translation, rotation,
 and volume moves should be about 30\%.  [50\% is almost certainly too high.]"
+
+If you have specific atom translations that you want to use you can set up the 
+section as follows:
+\begin{verbatim}
+SPECIFIC_ATOM_TRANSL
+! How many atoms should we be performing translations on?
+3
+! What is the index of those atoms in their respective molecules?
+1 2 3
+! What is the molecule type for each atom?
+1 1 1
+END SPECIFIC_ATOM_TRANSL
+\end{verbatim}
+
+In this example we will be performing this move type on 3 different beads as indictaed by 3 in
+the first noncomment input line after the section header. The next input line specifies the index
+of those beads within their molecule. In this example we only move the first 3 beads in a molecule. 
+The last line specifies which molecule the bead belongs to. It is convienient to keep the molecule
+number and the bead number vertically alligned so you can tell which molecules and which beads are
+having this move type applied.  
+
 
 \subsection{Section \textbf{SIMULATION\_BOX}}
 For each of the \textbf{nbox} simulation boxes, including
@@ -2842,7 +2898,12 @@ ltailcZeo, lshift, or rcut (but not if you change force
 field parameters), do you need to re-generate the table.
 \section{DPD specific notes} \label{sec:dpdunitconversions}
 \subsection{DPD Unit Conversions} 
-Unit conversions between simulation units and coarse grained units is rather straight forwards. For example, say you want to set up a system in which \\ \indent $r_c = 7 \AA$ \\ \indent {\tt Number of Beads = 500} \\ \indent {\tt coarse grained density = 2} \\ The course grained density is given by 
+Unit conversions between simulation units and coarse grained 
+units is rather straight forwards. For example, say you want 
+to set up a system in which \\ \indent $r_c = 7 \AA$ 
+\\ \indent {\tt Number of Beads = 500} 
+\\ \indent {\tt coarse grained density = 2} 
+\\ The course grained density is given by 
 \begin{equation}
 \rho_{C.G.} = \frac{n_{beads}}{V_{simulation}}r_c^{3}
 \end{equation}

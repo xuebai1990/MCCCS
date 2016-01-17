@@ -1867,7 +1867,7 @@ contains
           ! compute bond length
           equil = brvib(jtvib)
           kforce = brvibk(jtvib)
-          call bondlength( jtvib,equil,kforce,beta,length,vvib )
+          call bondlength( jtvib,equil,kforce,beta,length,vvib)
        else
           ! compute bond length
           rxuij = rxu(i,iugrow) - rxui
@@ -2385,8 +2385,13 @@ contains
                         distgrow2 = distgrow*distgrow
                         ! dot product divided by lengths gives cos(angle)
                         anglec = ( xvecprev*xvecgrow + yvecprev*yvecgrow  + zvecprev*zvecgrow ) / (distprev*distgrow)
-                        angle = acos(anglec)
-
+                        if(anglec.gt.1.0E0_dp) then 
+                           angle = 0.0E0_dp
+                        else if(anglec.lt.-1.0E0_dp) then
+                           angle = onepi
+                        else
+                           angle = acos(anglec)
+                        end if
                         if (L_bend_table) then
                             lengthc2 = lengthFP2 + distgrow2 - 2.0E0_dp*lengthFP*distgrow*anglec
                             lengthc = sqrt(lengthc2)
@@ -2842,21 +2847,27 @@ contains
 !***********************************************************
   subroutine bondlength(vibtype,requil,kvib,betaT,length,vvib)
     integer::vibtype
-    real::length,bond,bf,vvib,betaT,kvib,requil
-
+    real::length,bond,bf,vvib,betaT,kvib,requil,minRegrow,maxRegrow,regrowWidth,maxRegrowSq
+    maxRegrow = maxRegrowVib(vibtype)
+    maxRegrowSq = maxRegrow**2
+    minRegrow = minRegrowVib(vibtype)
     vvib = 0.0E0_dp
-
+    regrowWidth = maxRegrow-minRegrow
     if ( kvib .gt. 0.1E0_dp ) then
        ! random bond length from Boltzmann distribution ---
-107    bond = (0.2E0_dp*random(-1)+0.9E0_dp)
+       ! selects a bondlength from the minimum to the maximum specified in
+       ! fort.4
+       ! for efficiency sake we first select a value from the distribution
+       ! P(L) =  L^2 dL
+107    bond = (regrowWidth*random(-1)+minRegrow)
 
        ! correct for jacobian by dividing by the max^2
-       ! 1.21  = (1.1)^2, the equilibrium bond length cancels out
-       bf = bond*bond*bond/(1.21E0_dp)
+       bf = bond*bond/(maxRegrowSq)
        if ( random(-1) .ge. bf ) goto 107
        bond = bond * requil
 
-       ! correct for the bond energy
+       ! correct for the bond energy by applying the boltzmann
+       ! weight to the bond length selection. 
        vvib = kvib * (bond-requil )**2
        bf = exp ( -(vvib * betaT) )
        if ( random(-1) .ge. bf ) goto 107
@@ -2867,11 +2878,10 @@ contains
     else if (L_vib_table) then
        ! random bond length from Boltzmann distribution ---
        !     ---  +/- 25% of equilibrium bond length
-108    bond = (0.5E0_dp*random(-1)+0.75E0_dp)
+108    bond = (regrowWidth*random(-1)+minRegrow)
 
     ! correct for jacobian by dividing by the max^2
-    ! 1.5625  = (1.25)^2, the equilibrium bond length cancels out
-       bf = bond*bond*bond/(1.5625E0_dp)
+       bf = bond*bond*bond/(maxRegrowSq)
        if ( random(-1) .ge. bf ) goto 108
 
        bond = bond * requil
@@ -4129,7 +4139,6 @@ contains
 
 ! determine angle with iuprev
             thetac = -(ux*rx + uy*ry + uz*rz)
-
             bendang(ku,iuprev) = acos(thetac)
 
             alpha = bendang(ku,iuprev)
@@ -5183,7 +5192,6 @@ contains
 
                   thetac = -( (rxu(i,iu) - rxu(i,iufrom)) * xvec(iuprev,iufrom)  + (ryu(i,iu) - ryu(i,iufrom))&
                    * yvec(iuprev,iufrom) + (rzu(i,iu) - rzu(i,iufrom)) * zvec(iuprev,iufrom))  / (lengtha*lengthb)
-
                   angle = acos(thetac)
                   vphi =  kforcea(count) * (angle-equila(count))**2
 
@@ -5267,7 +5275,6 @@ contains
 
                         thetac = ((rxu(i,ju)-rxu(i,iufrom)) * (rxu(i,iu)-rxu(i,iufrom)) + (ryu(i,ju)-ryu(i,iufrom))&
                          * (ryu(i,iu)-ryu(i,iufrom)) + (rzu(i,ju)-rzu(i,iufrom)) * (rzu(i,iu)-rzu(i,iufrom)))/(lengtha*lengthb)
-
                         angle = acos(thetac)
 
                         vphi = kforceb(iu,ju) * (angle-equilb(iu,ju))**2
@@ -5696,7 +5703,6 @@ contains
                      length = distij(iufrom,iuprev)
                      thetac = -(xx(count)*xvec(iuprev,iufrom) + yy(count)*yvec(iuprev,iufrom) + zz(count)*zvec(iuprev,iufrom))&
                       /(lengtha*length)
-
                      angle = acos(thetac)
 
                      vphi = vphi + kforcea(count) * (angle-equila(count) )**2
@@ -5879,7 +5885,7 @@ contains
                            if (abs(thetac).gt.1) then
                               write(io_output,*) '*********************' ,'****************************'
                               write(io_output,*) iu,ku,xvec(iu,ku) ,yvec(iu,ku) ,zvec(iu,ku),lengthb
-                              call err_exit(__FILE__,__LINE__,'shitfuck',myid+1)
+                              call err_exit(__FILE__,__LINE__,'thetac outsie of range',myid+1)
                            end if
 
                            angle = acos(thetac)
@@ -5911,7 +5917,6 @@ contains
                            lengthb = flength(iufrom,ju)
 
                            thetac = (xx(count)*xx(counta) + yy(count)*yy(counta) + zz(count)*zz(counta)) / (lengtha*lengthb)
-
                            angle = acos(thetac)
 
                            vphi = vphi + kforceb(iu,ju) * (angle -equilb(iu,ju))**2

@@ -509,7 +509,7 @@ contains
              else if (.not.lshift.and.numberDimensionIsIsotropic(ibox).eq.3) then ! impulsive force corrections
                 corp = corp + vvdW(1,ntij)*(tmp**vvdW(3,ntij)-tmp**vvdW(4,ntij))*rbcut3
              end if
-          else if (nonbond_type(ntij).eq.8.or.nonbond_type(ntij).eq.4) then
+          else if (nonbond_type(ntij).eq.4) then
              ! MMFF94 or DPD
              if (ltailc) then ! tail corrections for MMFF94 are not implemented yet
              else if (.not.lshift.and.numberDimensionIsIsotropic(ibox).eq.3) then ! impulsive force corrections
@@ -545,6 +545,12 @@ contains
              else if (.not.lshift.and.numberDimensionIsIsotropic(ibox).eq.3) then ! impulsive force corrections
                 tmp=rbcut2**3
                 corp = corp + vvdW(1,ntij)/tmp/tmp-vvdW(2,ntij)/tmp-vvdW(3,ntij)/tmp/rbcut2
+             end if
+          else if (nonbond_type(ntij).eq.8) then
+             if (ltailc) then
+                corp = 0.0_dp
+             else if(.not.lshift.and.numberDimensionIsIsotropic(ibox).eq.3) then
+                corp=0.0_dp
              end if
           else if (nonbond_type(ntij).ne.-1.and.nonbond_type(ntij).ne.0) then
              call err_exit(__FILE__,__LINE__,'corp: undefined nonbond type',myid+1)
