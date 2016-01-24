@@ -3,7 +3,7 @@ module util_string
   implicit none
   private
   public::splitAndGetNext,integer_to_string,real_to_string,uppercase,lowercase,is_whitespace&
-   ,str_trim,str_comp,str_search,remove_word,str_compress,typo_match,glob_match,is_blank_line,format_n
+   ,str_trim,str_comp,str_search,remove_word,str_compress,typo_match,glob_match,is_blank_line,format_n,stripComments
   CHARACTER,PARAMETER::whitespace*3=" "//CHAR(9)//CHAR(11),commentChar(3)=(/"#","!","%"/),backslash='\\',star='*',question='?'
 contains
 
@@ -403,4 +403,22 @@ contains
 
     write(fmtstr_n,FMT='(I0,A)') n,trim(fmtstr)
   end function format_n
+
+!> \brief Strips comments from read in lines to allow for variable length intput
+!> Note: copied and modified from
+!> http://rosettacode.org/wiki/Strip_comments_from_a_string#Fortran
+  subroutine stripComments(str)
+    implicit none
+    character(len=*),intent(inout) :: str
+    character(len=len(str)) ::str2
+    integer :: i
+    i = index(str,"#")
+    if (i>0) then
+      str2 = str(1:i-1)
+    else
+      str2 = str
+    end if
+    str = str2
+  end subroutine
+
 end module util_string
