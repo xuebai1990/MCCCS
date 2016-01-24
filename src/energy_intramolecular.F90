@@ -3,7 +3,7 @@ MODULE energy_intramolecular
   use const_math,only:onepi,twopi,raddeg
   use util_runtime,only:err_exit
   use util_memory,only:reallocate
-  use util_string,only:uppercase,integer_to_string
+  use util_string,only:uppercase,integer_to_string,stripComments
   use util_files,only:readLine
   use util_search,only:LookupTable,initiateTable,destroyTable,addToTable
   use sim_system,only:io_output,brvib,brvibk,brben,brbenk,maxRegrowVib,minRegrowVib,myid,L_spline,L_linear
@@ -86,6 +86,7 @@ contains
                    call reallocate(maxRegrowVib,1,2*ubound(maxRegrowVib,1))
                 end if
                 readstat=0
+                call stripComments(line_in)
                 read(line_in,*,iostat=readstat) jerr,vib_type(i),brvib(i),brvibk(i),minRegrowVib(i),maxRegrowVib(i)
                 if (readstat.eq.-1 ) then ! if the max and min regrows are not specified
                    read(line_in,*) jerr,vib_type(i),brvib(i),brvibk(i)
