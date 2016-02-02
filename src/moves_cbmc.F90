@@ -2943,7 +2943,7 @@ contains
 
       ! if (in the old growth) vector_a and vector_b are the same, skip the rotation part to avoid numerical issues
       vector_diff = vector_a - vector_b
-      if (sqrt(dot_product(vector_diff,vector_diff)) .le. 1e-4) then
+      if (dot_product(vector_diff,vector_diff) .le. 1e-8) then
           return
       end if
 
