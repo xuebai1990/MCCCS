@@ -2917,6 +2917,7 @@ contains
       real :: Qrot(3,3)
       real :: xtrans, ytrans, ztrans, costheta, sintheta, smallc, bigc, s, bead_err
       real :: vector_a(3), vector_b(3), vector_n(3), vector_w(3), vector_rot(3)
+      real :: vector_diff(3), vector_cross(3)
       integer :: ibead
 
       !----- Translation part
@@ -2941,17 +2942,18 @@ contains
       vector_b(3) = zi(second_bead) - zi(first_bead)
 
       ! if (in the old growth) vector_a and vector_b are the same, skip the rotation part to avoid numerical issues
-      if (norm2(vector_a - vector_b) .le. 1e-4) then
+      vector_diff = vector_a - vector_b
+      if (sqrt(dot_product(vector_diff,vector_diff)) .le. 1e-4) then
           return
       end if
 
-      vector_n = cross_product(vector_a, vector_b)
-      vector_n = normalize_vector(vector_n)
+      vector_cross = cross_product(vector_a, vector_b)
+      vector_n = normalize_vector(vector_cross)
       vector_w = cross_product(vector_n, vector_a) !< vector_w and vector_a are the orthogonal vector in the planeof vector_a and vector_b
 
       ! calculate angle theta to rotate 
-      costheta = dot_product(vector_a, vector_b) / (norm2(vector_a) * norm2(vector_b))
-      sintheta = norm2(cross_product(vector_a, vector_b)) / (norm2(vector_a) * norm2(vector_b))
+      costheta = dot_product(vector_a, vector_b) / (sqrt(dot_product(vector_a,vector_a)*dot_product(vector_b,vector_b)))
+      sintheta = sqrt(dot_product(vector_cross, vector_cross) / (dot_product(vector_a,vector_a)*dot_product(vector_b,vector_b)))
       s = atan2(dot_product(vector_w, vector_b), dot_product(vector_a, vector_b))
       if (atan2(dot_product(vector_w, vector_b), dot_product(vector_a, vector_b)) .gt. 0) then
           sintheta = -sintheta
