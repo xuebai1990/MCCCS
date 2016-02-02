@@ -1775,25 +1775,6 @@ Although MCCCS-MN is much more complex, I think that our
 recommended target acceptance rate for translation, rotation,
 and volume moves should be about 30\%.  [50\% is almost certainly too high.]"
 
-If you have specific atom translations that you want to use you can set up the 
-section as follows:
-\begin{verbatim}
-SPECIFIC_ATOM_TRANSL
-! How many atoms should we be performing translations on?
-3
-! What is the index of those atoms in their respective molecules?
-1 2 3
-! What is the molecule type for each atom?
-1 1 1
-END SPECIFIC_ATOM_TRANSL
-\end{verbatim}
-
-In this example we will be performing this move type on 3 different beads as indictaed by 3 in
-the first noncomment input line after the section header. The next input line specifies the index
-of those beads within their molecule. In this example we only move the first 3 beads in a molecule. 
-The last line specifies which molecule the bead belongs to. It is convienient to keep the molecule
-number and the bead number vertically alligned so you can tell which molecules and which beads are
-having this move type applied.  
 
 
 \subsection{Section \textbf{SIMULATION\_BOX}}
@@ -2208,10 +2189,26 @@ Each row is for values in each box. Currently this section
 is mandatory.
 
 \subsection{Section \textbf{SPECIFIC\_ATOM\_TRANSL}}
-(This section needs to be updated)
-How many atoms should we be performing translations on?
-What is the index of those atoms in their respective molecules?
-What is the molecule type for each atom?
+Currently, this section is required in the input file.
+If you have specific atom translations that you want to use you can set up the
+section as follows:
+\begin{verbatim}
+SPECIFIC_ATOM_TRANSL
+! How many atoms should we be performing translations on?
+3
+! What is the index of those atoms in their respective molecules?
+1 2 3
+! What is the molecule type for each atom?
+1 1 1
+END SPECIFIC_ATOM_TRANSL
+\end{verbatim}
+
+In this example we will be performing this move type on 3 different beads as indicated by 3 in
+the first noncomment input line after the section header. The next input line specifies the index
+of those beads within their molecule. In this example we only move the first 3 beads in a molecule.
+The last line specifies which molecule the bead belongs to. It is convienient to keep the molecule
+number and the bead number vertically alligned so you can tell which molecules and which beads are
+having this move type applied.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Other Input and Output Files}
