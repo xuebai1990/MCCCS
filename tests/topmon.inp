@@ -5,8 +5,8 @@
     file_run    ='run1a.dat'
     file_movie  ='movie1a.dat'
     io_output   = 2
-    run_num     = 1
-    suffix      = a
+    run_num     = '1'
+    suffix      = 'a'
     L_movie_xyz = T
  /
 
@@ -109,8 +109,8 @@ ATOMS
  37 1  236.0000  2.91000  0.0000  14.0268000 C   #LJ CH2 octane fit
  38 1  484.7600  6.04710  0.0000 100.2030000 C   #Teja heptane 366K
  39 1  456.8200  6.04710  0.0000 100.2030000 C   #Teja heptane 450K
- 40 1   98.0000  3.75000  0.0000  43.0883000 C   #Tr-UA CH3 alkane
- 50 1   46.0000  3.95000  0.0000  42.0804000 C   #Tr-UA CH2 alkane
+ 40 1   98.0000  3.75000  0.0000  43.0883000 C   #Tr-UA CH3 alkane<- incorrect mass?
+ 50 1   46.0000  3.95000  0.0000  42.0804000 C   #Tr-UA CH2 alkane <- incorrect mass?
  51 1   85.0000  3.67500  0.0000  14.0269000 C   #Tr-UA CH2 alkene
  52 1   47.0000  3.73000  0.0000  13.0191000 C   #Tr-UA CH alkene
  53 1   20.0000  3.85000  0.0000  12.0110000 C   #Tr-UA C alkene
@@ -237,8 +237,8 @@ ATOMS
 172 1   60.0000  3.55000  0.1290  12.0110000 C   #Tr-AA C nitrile
 173 1    4.0000  3.30000  0.2690  12.0110000 C   #Tr-AA H3[C]-C=-N
 174 1   15.3000  3.31000  0.0000   1.0079000 H   #Tr-AA [H]3C-C=-N
-177 1    0.0000  0.00000  1.2160  28.0899000 Si   #[Si]-O-Si
-178 1   70.0000  3.35000 -0.6080  15.9994000 O   #Si-[O]-Si
+177 1   22.0000  2.30000  1.5000  28.0855000 Si  #TraPPE-zeo Si
+178 1   53.0000  3.30000 -0.7500  15.9990000 O   #TraPPE-zeo O
 179 1    0.5000  6.40000  0.3040  28.0000000 Si   #O-[Si]-CH2
 180 1   98.0000  3.75000  0.0000  15.0347000 C   #[CH3]-Si-O
 181 1   46.0000  3.95000  0.0000  14.0268000 C   #[CH2]-Si-O
@@ -378,7 +378,7 @@ ATOMS
 383 1  160.0000  3.25000 -0.7380  14.0074700 N   #N in TATB
 384 1   42.0000  2.70000 -0.1040  15.9998000 O   #O in TATB
 385 1   12.0000  0.50000  0.3860   1.0079000 H   #H in TATB
-389 2 1.611603E7 2.76 2.030789E6 -1.2 15.9994 O #BKS [O]
+389 2    1.611603E7 2.76  2.030789E6 -1.2 15.9994 O #BKS [O]
 390 2 0 0 0 2.4 28.0899 Si #BKS [Si]
 391 4 34.117501 3.937738 0.0 12.011 C #MMFF94 [C]-C
 392 4 10.856778 2.9698485 0.0 1.0078 H #MMFF94 [H]-H
@@ -391,6 +391,12 @@ ATOMS
 ! all-atom Williams potential (J Chem Phys 1967,47(11):4680), paramter set IV
 398 2 2.81431E8 3.96875 5.90759E5 0.0 39.948 C #[C]Hx
 399 2 1.323E6 3.74 1.6254E4 0.0 1.0079 H #C[H]x
+! missed parameters above
+400 1    0.0000  0.00000  0.2260  15.9990000 M   #COM in O2
+401 1  155.0000  2.39000 -0.4400  15.9990000 O   #cyclic O ether
+402 1   52.5000  3.91000  0.1700  14.0268000 C   #cyclic O-[CH2]-CH2
+403 1   52.5000  3.91000  0.0500  14.0268000 C   #cyclic O-CH2-[CH2]-CH2
+404 1   52.5000  3.91000  0.0000  14.0268000 C   #cyclic CH2-[CH2]-CH2
 END ATOMS
 
 NONBOND
@@ -497,6 +503,7 @@ BONDS
 122 1 1.31400   352275.
 123 1 1.24300   352275.
 124 1 1.00000   176138.
+125 1 1.44000   0.00000 #CH2-O cyclic
 END BONDS
 
 ANGLES
@@ -555,8 +562,8 @@ ANGLES
  53 1 111.0000   35300.0
  54 1 123.0000   40300.0
  55 1 107.0000   17600.0
- 56 1 112.0000   30200.0
- 57 1 112.0000   25150.0
+ 56 1 112.0000   30200.0 #CHx-(O)-CHy cyclic
+ 57 1 112.0000   25150.0 #CHx-(CHy)-O cyclic
  58 1 112.9000   31250.0
  59 1 106.4000   21955.0
  60 1 109.5000   25178.0
@@ -613,7 +620,7 @@ ANGLES
 END ANGLES
 
 DIHEDRALS
-!i type(i) vtt0(i) vtt1(i) vtt2(i) vtt3(i); !!!check vtorso.f, calctor.f!!!
+!i type(i) vtt0(i) vtt1(i) vtt2(i) vtt3(i); !!!check manual
 !===Begin TraPPE-UA alkane===
   1 1  0.0  355.030  -68.190  791.320  0.0  0.0  0.0  0.0  0.0  0.0  #for linear segment (OPLS: Jorgensen, Madura, Swenson JACS 1984 106, 813)
   2 1  -251.060  428.730  -111.850  441.270  0.0  0.0  0.0  0.0  0.0  0.0  #for segment containing a ternary carbon CH as mid-segment (split OPLS torsion; Siepmann et al Mol Phys 1997, 90, 687-693)
@@ -727,4 +734,8 @@ DIHEDRALS
 200 3  4277.6250  2  180.0  #H--N--C--C
 201 3  1409.10  2  180.0  #O--N--C--C
 202 3  6290.6250  2  180.0  #C--C--C--C, C--C--C--N, N--C--C--N
+!===Begin cyclic alkanes and ethers
+203 6  5073.0    6840.0    3509.0      63.0 #cyclic CH2-CH2-CH2-CH2
+204 6  7031.0    5218.0    2287.0    -569.0 #cyclic CH2-CH2-CH2-O
+205 6  7037.0   14958.0    7606.0    1546.0 #cyclic CH2-CH2-O-CH2
 END DIHEDRALS

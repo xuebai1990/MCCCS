@@ -1,12 +1,8 @@
 To run the test suite:
-	Type in the full path of your code directory at the top of compile.pl and RUNTEST.pl ($CODE_DIR = <full path>)
-	Run compile.pl to compile the code with the various flags set for all necessary ensembles
-	Run RUNTEST.pl to actually run the test simulations
-	For the parallel version, specify the number of processors by changing $num_proc (TEST5 always runs on 1 processor)
-	Check DIFF to see the differences between the test simulations and previous (correct) simulations (prev.out)
-	If any of the tests need to be changed, make sure the names of the executables in compile.pl
-	and RUNTEST.pl are correct
-	When the code is compiled using ifort with options -O3 -no-prec-div -ipo on metropolis1 or Calhoun, the
+        Make sure you have loaded the necessary libraries (ompi, intel, cmake)
+        ./testRunner.py #runs test suite and generates ../test-yearmonthdate
+        to check if compiles correctly open ../test-yearmonthdate/build.log
+        to check if runs successfully open ../test-yearmonthdate/main.log
 	tests in the SHORT directory are designed to take less than 15 seconds on 1 processor and the
 	tests in the LONG directory are designed to take about 1 hour
 
@@ -31,5 +27,5 @@ TEST8:  n-octane, NVT-Gibbs ensemble, initializes the system
         see M. G. Martin and J. I. Siepmann, J. Phys. Chem. B, 102, 2569-2577 (1998)
 TEST9:  solid TATB, NpT ensemble
 	see N. Rai, D. Bhatt, J. I. Siepmann, and L. E. Fried, J. Chem. Phys., 129, 194510 (2008) 
-
-
+TEST10: 1-butanol/water adsorption, NPT-Gibbs, 3 box; note that grid spacing is larger than normal (0.4 Angst.)
+        see R. DeJaco, P. Bai, M. Tsapatsis, and J. I. Siepmann, Langmuir, "Adsorptive Separation of 1-Butanol from Aqueous Solutions using MFI- and FER-type Zeolite Frameworks: A Monte Carlo Study" (2016)
