@@ -152,7 +152,7 @@ nytprof.out
 *.log
 *.lot
 *.fls
-*.out
+manual.out
 *.toc
 
 ## Intermediate documents:
