@@ -7,9 +7,8 @@
 ###PBS -q devel
 
 PROG=$HOME/path/to/topmon
-DATA=/path/to/data
 FILELOG=log
-cd $DATA
+cd "$( dirname "${BASH_SOURCE[0]}" )"
 
 #for FCUR in melt cool volume equil1;do
 #    echo "$FCUR: " >> $FILELOG

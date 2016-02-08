@@ -89,6 +89,7 @@ contains
 
   subroutine inc_prop_widom_counter(imolty,tag_bead,r,weight)
     use sim_cell,only:hmati
+    use sim_system,only:lsolid,lrect,boxlx,boxly,boxlz
     integer,intent(in)::imolty,tag_bead
     real,intent(in)::r(3),weight
     integer,parameter::ibox=1
@@ -96,9 +97,15 @@ contains
 
     if (ldeltaG_map(imolty)) then
        ! convert to fractional coordinates, fold back to central simulation box, and find the grid indices
-       scoord(1) = r(1)*hmati(ibox,1)+r(2)*hmati(ibox,4)+r(3)*hmati(ibox,7)
-       scoord(2) = r(1)*hmati(ibox,2)+r(2)*hmati(ibox,5)+r(3)*hmati(ibox,8)
-       scoord(3) = r(1)*hmati(ibox,3)+r(2)*hmati(ibox,6)+r(3)*hmati(ibox,9)
+       if (lsolid(ibox) .and. .not.lrect(ibox)) then
+          scoord(1) = r(1)*hmati(ibox,1)+r(2)*hmati(ibox,4)+r(3)*hmati(ibox,7)
+          scoord(2) = r(1)*hmati(ibox,2)+r(2)*hmati(ibox,5)+r(3)*hmati(ibox,8)
+          scoord(3) = r(1)*hmati(ibox,3)+r(2)*hmati(ibox,6)+r(3)*hmati(ibox,9)
+       else
+          scoord(1) = r(1)/boxlx(ibox)
+          scoord(2) = r(2)/boxly(ibox)
+          scoord(3) = r(3)/boxlz(ibox)
+       end if
        scoord = scoord - floor(scoord)
        idx = scoord * deltaG_ngrid
        deltaG_count(tag_bead,imolty)%val(idx(1),idx(2),idx(3)) = deltaG_count(tag_bead,imolty)%val(idx(1),idx(2),idx(3)) + weight

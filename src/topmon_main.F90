@@ -1287,15 +1287,13 @@ contains
     logical::needMFsection
 
     namelist /io/ file_input,file_restart,file_struct,file_run,file_movie,file_solute,file_traj,io_output&
-     ,run_num,suffix,L_movie_xyz,L_movie_pdb,file_cbmc_bend
-    ! Q. Paul C. -- file_cbmc_bend & L_cbmc_bend are for tabulated CBMC bending growth 
+     ,run_num,suffix,L_movie_xyz,L_movie_pdb,file_cbmc_bend,checkpoint_interval,checkpoint_copies,use_checkpoint
     namelist /system/ lnpt,lgibbs,lgrand,lanes,lvirial,lmipsw,lexpee,ldielect,lpbc,lpbcx,lpbcy,lpbcz,lfold,lijall,lchgall,lewald&
      ,lcutcm,ltailc,lshift,ldual,L_Coul_CBMC,lneigh&
      ,lexzeo,lslit,lgraphite,lsami,lmuir,lelect_field,lgaro,lionic,L_Ewald_Auto,lmixlb,lmixjo&
      ,L_spline,L_linear,L_vib_table,L_bend_table,L_elect_table,L_cbmc_bend
     namelist /mc_shared/ seed,nbox,nmolty,nchain,nmax,nstep,time_limit,lstop,iratio,rmin,softcut&
-     ,checkpoint_interval,checkpoint_copies,use_checkpoint,linit,lreadq&
-     ,N_add,box2add,moltyp2add
+     ,linit,lreadq,N_add,box2add,moltyp2add
     namelist /analysis/ iprint,imv,iblock,iratp,idiele,iheatcapacity,ianalyze&
      ,nbin,lrdf,lintra,lstretch,lgvst,lbend,lete,lrhoz,bin_width&
      ,lucall,nvirial,starvir,stepvir,ntemp,virtemp
@@ -1337,6 +1335,9 @@ contains
     call mp_bcast(L_movie_xyz,1,rootid,groupid)
     call mp_bcast(L_movie_pdb,1,rootid,groupid)
     call mp_bcast(file_cbmc_bend,rootid,groupid) !Q.Paul C. -- tabulated CBMC bending growth
+    call mp_bcast(checkpoint_interval,1,rootid,groupid)
+    call mp_bcast(checkpoint_copies,1,rootid,groupid)
+    call mp_bcast(use_checkpoint,1,rootid,groupid)
 
     if (myid.eq.rootid.and..not.use_checkpoint) then
        lprint=.true.
@@ -1590,9 +1591,6 @@ contains
     call mp_bcast(iratio,1,rootid,groupid)
     call mp_bcast(rmin,1,rootid,groupid)
     call mp_bcast(softcut,1,rootid,groupid)
-    call mp_bcast(checkpoint_interval,1,rootid,groupid)
-    call mp_bcast(checkpoint_copies,1,rootid,groupid)
-    call mp_bcast(use_checkpoint,1,rootid,groupid)
     call mp_bcast(linit,1,rootid,groupid)
     call mp_bcast(lreadq,1,rootid,groupid)
     call mp_bcast(N_add,1,rootid,groupid)
@@ -1669,9 +1667,10 @@ contains
     call mp_bcast(stepvir,1,rootid,groupid)
     call mp_bcast(ntemp,1,rootid,groupid)
     call mp_bcast(virtemp,maxntemp,rootid,groupid)
-    if (lucall) call read_prop_widom(io_input,lprint,blockm)
 
     blockm=nstep/iblock
+    if (lucall) call read_prop_widom(io_input,lprint,blockm)
+
     if (lprint) then
        write(io_output,'(/,A,/,A)') 'NAMELIST ANALYSIS','------------------------------------------'
        w_i(iprint)

@@ -60,6 +60,9 @@ contains
     lfixnow = .false.
     lins_in = .false.
     linsk_in = .false.
+    rxuion = 0.0_dp
+    ryuion = 0.0_dp
+    rzuion = 0.0_dp
 
     if (lexpee.and.leemove) then
        imolty = ee_moltyp(nstate)
@@ -688,7 +691,7 @@ contains
              ! write(io_output,*) rxu(idum,j),ryu(idum,j),rzu(idum,j)
           end do
        end if
-       moltion(iii) = imolty
+       moltion = imolty
 
        ibox=boxins
        nboxi(iins) = ibox
@@ -1154,7 +1157,7 @@ contains
        ! store the old grown beads and explict placed beads positions
        ! 1 = old conformation
        iii = 1
-       moltion(1) = imolty
+       moltion = imolty
        do j = 1,iunit
           rxuion(j,1) = rxu(irem,j)
           ryuion(j,1) = ryu(irem,j)
