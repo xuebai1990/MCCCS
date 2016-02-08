@@ -473,7 +473,7 @@ contains
   subroutine volume_1box()
     real::rbox,volo,voln,rbcut,dx,dy,dz,dfac,df,v(nEnergy),dele,min_boxl
     integer::ibox,boxvch,jhmat,i,imolty,j,ichoiq
-    logical::lx,ly,lz,ovrlap,ladjust
+    logical::lx,ly,lz,ovrlap,ladjust,l_couple,l_consv
 ! --------------------------------------------------------------------
 #ifdef __DEBUG__
     write(io_output,*) 'start VOLUME_1BOX in ',myid
@@ -495,18 +495,46 @@ contains
     lx = .false.
     ly = .false.
     lz = .false.
+    
+    ! Is this going to be a bilayer move? If so, what kind?
+    
+    l_consv  = .false.
+    l_couple = .false.
+    
+    if(boxvch.eq.1.and.l_bilayer) then 
+       if ((pm_consv.gt.0).and.(random(-1).lt.pm_consv)) then
+	     l_consv = .true.
+       else
+             l_couple = .true.
+       end if
+    end if       
+    
+    
     if ( lsolid(boxvch) ) then
        ! volume move independently in x, y, z directions
        rbox = random(-1)
-       if ( rbox .le. pmvolx ) then
-          lx = .true.
-       else if ( rbox .le. pmvoly ) then
-          ly = .true.
+       if(l_couple) then
+          if(rbox.le.pmvol_xy) then
+	     lx = .true.
+	     ly = .true.
+	  else
+	     lz = .true.
+	  end if
+       else if (l_consv) then
+	     lx = .true.
+	     ly = .true.  
+	     lz = .true.	         
        else
-          lz = .true.
-       end if
+          if ( rbox .le. pmvolx ) then
+             lx = .true.
+          else if ( rbox .le. pmvoly ) then
+             ly = .true.
+          else
+             lz = .true.
+          end if
+       end if 
 
-       if (.not.lrect(boxvch)) then
+       if (.not.lrect(boxvch).and..not.l_bilayer) then
           volo = cell_vol(boxvch)
           ! select one of the cell edge
           if ( lx ) then
@@ -528,7 +556,7 @@ contains
           else
              jhmat = 9
           end if
-       end if
+       end if 
     end if
 
     if (.not.lsolid(boxvch).or.lrect(boxvch)) then
@@ -540,8 +568,35 @@ contains
     end if
 
     if ( lsolid(boxvch) .and. .not. lrect(boxvch) ) then
-       bnhmat(boxvch,jhmat) = bnhmat(boxvch,jhmat) + 1.0E0_dp
-       hmat(boxvch,jhmat) = hmat(boxvch,jhmat) + rmhmat(boxvch,jhmat)* ( 2.0E0_dp*random(-1) - 1.0E0_dp )
+    
+       if(l_couple) then ! Case 1: a coupled xy bilayer move
+          if(lx.and.ly) then
+	     ! Update attempts
+	     bnhmat(boxvch,1) = bnhmat(boxvch,1) + 1.0E0_dp
+	     bnhmat(boxvch,5) = bnhmat(boxvch,5) + 1.0E0_dp
+	     
+	     ! Do a random move in boxlength using x and apply the equivalent change to y
+	     hmat(boxvch,1) = hmat(boxvch,1) + rmhmat(boxvch,1)* ( 2.0E0_dp*random(-1) - 1.0E0_dp )
+	     hmat(boxvch,5) = hmat(boxvch,1)
+	  else
+	     bnhmat(boxvch,9) = bnhmat(boxvch,9) + 1.0E0_dp
+	     hmat(boxvch,9) = hmat(boxvch,9) + rmhmat(boxvch,9)* ( 2.0E0_dp*random(-1) - 1.0E0_dp )
+	  end if       
+       else if(l_consv) then ! Case 2: a volume conserving bilayer move
+          ! Update attempts
+	  bnhmat(boxvch,1) = bnhmat(boxvch,1) + 1.0E0_dp
+	  bnhmat(boxvch,5) = bnhmat(boxvch,5) + 1.0E0_dp
+	  bnhmat(boxvch,9) = bnhmat(boxvch,9) + 1.0E0_dp	     
+	     
+	  ! Do a random move in boxlength using x and apply the equivalent change to y
+	  hmat(boxvch,1) = hmat(boxvch,1) + rmhmat(boxvch,1)* ( 2.0E0_dp*random(-1) - 1.0E0_dp )
+	  hmat(boxvch,9) =  hmat(boxvch,5)* hmat(boxvch,5)/hmat(boxvch,1)/hmat(boxvch,1)*hmat(boxvch,9) ! since x and y are equivalent, this is saying that [(x^2_old)/(X^2_new)]*z_old = z_new
+	  hmat(boxvch,5) = hmat(boxvch,1)
+       else ! Case 3: everything else
+          bnhmat(boxvch,jhmat) = bnhmat(boxvch,jhmat) + 1.0E0_dp
+          hmat(boxvch,jhmat) = hmat(boxvch,jhmat) + rmhmat(boxvch,jhmat)* ( 2.0E0_dp*random(-1) - 1.0E0_dp )
+       end if
+
        call matops(boxvch)
 
        voln = cell_vol(boxvch)
@@ -564,7 +619,21 @@ contains
                 rbcut=-1.0_dp
              end if
           else if (rbcut.lt.rcut(boxvch)) then
-             hmat(boxvch,jhmat) = hmato(jhmat)
+	  
+	     if(l_couple) then
+	        if(lx.and.ly) then
+		   hmat(boxvch,1) = hmato(1)
+		   hmat(boxvch,5) = hmato(5)
+		else
+		   hmat(boxvch,9) = hmato(9)
+		end if
+	     else if (l_consv) then
+	        hmat(boxvch,1) = hmato(1)
+		hmat(boxvch,4) = hmato(5)
+		hmat(boxvch,5) = hmato(9)
+	     else 
+                hmat(boxvch,jhmat) = hmato(jhmat)
+	     end if
              if (allow_cutoff_failure.eq.-1) then
                 call dump('final-config')
                 write(io_output,*) 'w1:',min_width(boxvch,1),'w2:',min_width(boxvch,2),'w3:',min_width(boxvch,3)
@@ -586,13 +655,15 @@ contains
                 do j = 1, nunit(imolty)
                    rxu(i,j) = rxu(i,j) + dx
                 end do
-             else if ( ly ) then
+             end if
+	     if ( ly ) then
                 dy = sycm(i)*(hmat(boxvch,5)-hmato(5))+szcm(i)*(hmat(boxvch,8)-hmato(8))
                 ycm(i) = ycm(i) + dy
                 do j = 1, nunit(imolty)
                    ryu(i,j) = ryu(i,j) + dy
                 end do
-             else
+             end if
+	     if ( lz ) then
                 dz = szcm(i)*(hmat(boxvch,9)-hmato(9))
                 zcm(i) = zcm(i) + dz
                 do j = 1, nunit(imolty)
@@ -737,7 +808,20 @@ contains
        ! accepted
        bsvol(boxvch) = bsvol(boxvch) + 1.0E0_dp
        if ( lsolid(boxvch) .and. .not. lrect(boxvch) ) then
-          bshmat(boxvch,jhmat) = bshmat(boxvch,jhmat) + 1.0E0_dp
+          if(l_couple) then
+	     if(lx.and.ly) then
+	     	bshmat(boxvch,1) = bshmat(boxvch,1) + 1.0E0_dp
+	     	bshmat(boxvch,5) = bshmat(boxvch,5) + 1.0E0_dp
+	     else
+	     	bshmat(boxvch,9) = bshmat(boxvch,9) + 1.0E0_dp
+	     end if
+	  else if (l_consv) then
+	     bshmat(boxvch,1) = bshmat(boxvch,1) + 1.0E0_dp
+	     bshmat(boxvch,5) = bshmat(boxvch,5) + 1.0E0_dp
+	     bshmat(boxvch,9) = bshmat(boxvch,9) + 1.0E0_dp
+	  else
+	     bshmat(boxvch,jhmat) = bshmat(boxvch,jhmat) + 1.0E0_dp
+	  end if
        end if
        call update_box(boxvch)
        return
@@ -764,7 +848,7 @@ contains
     LOGICAL,INTENT(IN)::lprint
     integer::jerr,i,j,k
     real::rmvolume
-    namelist /mc_volume/ tavol,iratv,pmvlmt,nvolb,pmvolb,box5,box6,pmvol,pmvolx,pmvoly,rmvolume,allow_cutoff_failure
+    namelist /mc_volume/ tavol,iratv,pmvlmt,nvolb,pmvolb,box5,box6,pmvol,pmvolx,pmvoly,rmvolume,allow_cutoff_failure,l_bilayer,pm_consv, pmvol_xy
 
     if (allocated(acsvol)) deallocate(acsvol,acnvol,acshmat,acnhmat,bsvol,bnvol,bshmat,bnhmat,vboxn,vboxo,bxo,byo,bzo,xcmo,ycmo,zcmo,rxuo,ryuo,rzuo,qquo,rcuto,stat=jerr)
     allocate(acsvol(nbxmax),acnvol(nbxmax),acshmat(nbxmax,9),acnhmat(nbxmax,9),bsvol(nbxmax),bnvol(nbxmax),bshmat(nbxmax,9)&
@@ -781,6 +865,9 @@ contains
     bshmat = 0.0E0_dp
     bnhmat = 0.0E0_dp
     rcuto = rcut
+    l_bilayer = .false.
+    pm_consv = 0.0d0
+    pmvol_xy = 0.0d0
 
     !> read namelist mc_volume
     nvolb=nbox*(nbox-1)/2
@@ -843,6 +930,17 @@ contains
           write(io_output,'(3(A,I0),A,G16.9)') '   box pair ',i,': between ',box5(i),' and ',box6(i),',   pmvolb = ',pmvolb(i)
           if ((lsolid(box5(i)).and..not.lrect(box5(i))).and.(lsolid(box6(i)).and..not.lrect(box6(i)))) call err_exit(__FILE__,__LINE__,'can not perform volume move between two non-rectangular boxes',myid+1)
        end do
+       if(l_bilayer) then
+          write(io_output,*)'l_bilayer is true.'
+	  if(pm_consv.gt.0)write(io_output,*)'...Will perform volume conserving cell moves with a probability of: ',pm_consv
+	  if(pm_consv.lt.1) then
+	     write(io_output,*)'...Will perform coupled xy volume moves with a probability of:      ',1-pm_consv
+	     write(io_output,*)'...and the probability for coupled volume moves in xy, and z are:   ',pmvol_xy, 1-pmvol_xy
+	  end if
+	  
+	  if(.not.lsolid(1)) call err_exit(__FILE__,__LINE__,'mc_volume: If l_bilayer is true, lsolid must be true  for box 1.',-1)
+	  if(lrect(1))       call err_exit(__FILE__,__LINE__,'mc_volume: If l_bilayer is true, lrect  must be false for box 1.',-1)	 
+       end if
     end if
   end subroutine init_moves_volume
 

@@ -201,6 +201,8 @@ module sim_system
   real,allocatable::pmvlmt(:),pmvolb(:),rmvol(:),rmhmat(:,:)
   integer::nvolb,iratv=500
   integer,allocatable::box5(:),box6(:)
+  logical::l_bilayer
+  real::pm_consv, pmvol_xy
 
   !*** CBMC particle identity switch (swatch) moves ***
   real::pmswat

@@ -1141,7 +1141,7 @@ for volume moves. We used to think reasonable values for volume equilibration
 and full equilibration might be 0.4 and 0.5, respectively.
 Ilja (9/24/15):"Please take a look at 
 Mountain, R. D.; Thirumalai, D. Physica A: Statistical Mechanics and its Applications
-1994, 210, 453–460.
+1994, 210, 453--460.
 Although MCCCS-MN is much more complex, I think that our
 recommended target acceptance rate for translation, rotation,
 and volume moves should be about 30\%.  [50\% is almost certainly too high.]"
@@ -1200,6 +1200,21 @@ if possible); 2 = allows the move but does not adjust the
 cutoff, which could be problematic because this results in a
 lower density in the cutoff radius (due to periodic boundary
 conditions)
+
+\noindent{\bf l\_bilayer:} Allow special volume moves in box 1.
+requires lsolid and lrect be set to true and false, respectively,
+for box 1. 
+
+\noindent{\bf pm\_consv:} Used when l\_bilayer is true.
+Probability to perform a volume-conserving
+coupled $xy$ cell move. This means $x$ and $y$ box lengths will fluctuate in 
+tandem, and cell volume is held constant by compensating changes in 
+the $z$ box length. The probability to perform a coupled $xy$ volume move
+where volume is \textit{not} fixed is given by 1-pm\_consv.
+
+\noindent{\bf pmvol\_xy:}  Used when l\_bilayer is true. 
+For a coupled $xy$ volume move, the probability to attempt a move in $x$ and $y$ boxlength,
+as opposed to $z$ box length. 
 
 \subsubsection{Namelist \textbf{mc\_swatch}}
 \noindent{\bf pmswat:} Specifies the probability to perform
