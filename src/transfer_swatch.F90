@@ -36,6 +36,7 @@ contains
     integer::oldchain,newchain,oldunit,newunit,iins
     integer::ic,icbu,jj,mm,imt,jmt,imolin,imolrm
     integer::icallrose
+    real::tmpvvib,tmpvbend,tmpvtg
 ! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #ifdef __DEBUG__
     write(io_output,*) 'start SWATCH in ',myid
@@ -430,6 +431,34 @@ contains
           tweight = tweight*weight*waddnew
        
           !*** end rigid add on ***
+	  
+	  ! make a copy of original coords
+
+	  do izz = 1, nunit(moltyp(self))
+	     rxut(ic,izz) = rxu(self,izz)
+	     ryut(ic,izz) = ryu(self,izz)
+	     rzut(ic,izz) = rzu(self,izz)
+	  end do       
+	   
+	  ! Copy the rosenbluth-generated coords to "real (r*u)" coords
+
+	  do izz = 1, nunit(moltyp(self))
+	     rxu(self,izz) = rxnew(izz)
+	     ryu(self,izz) = rynew(izz)
+	     rzu(self,izz) = rznew(izz)
+	  end do   
+
+	  ! Calculated U_bonded
+
+	  call U_bonded(self,imolty,tmpvvib,tmpvbend,tmpvtg)
+
+	  ! Copy back the "real (r*u)" coords 
+
+	  do izz = 1, nunit(moltyp(self))
+	     rxu(self,izz) = rxut(ic,izz)
+	     ryu(self,izz) = ryut(ic,izz)
+	     rzu(self,izz) = rzut(ic,izz)
+	  end do	 
 
           ! save the new coordinates
           do jj = 1,igrow
@@ -529,7 +558,7 @@ contains
              end if
 
              ! add on the changes in energy
-             delen = v(ivTot) - ( vnew(ivTot) - (vnew(ivStretching) + vnew(ivBending) + vnew(ivTorsion)) )
+             delen = v(ivTot) - ( vnew(ivTot) - (tmpvvib+tmpvbend+tmpvtg) )
              tweight = tweight*exp(-beta*delen)
 
              vnew(ivTot) = vnew(ivTot) + delen
@@ -544,10 +573,10 @@ contains
              vnbox(ivTot,iboxnew)   = vnbox(ivTot,iboxnew)  + vnew(ivTot)
              vnbox(ivInterLJ,iboxnew)  = vnbox(ivInterLJ,iboxnew) + vnew(ivInterLJ)
              vnbox(ivIntraLJ,iboxnew)  = vnbox(ivIntraLJ,iboxnew) + vnew(ivIntraLJ)
-             vnbox(ivStretching,iboxnew)  = vnbox(ivStretching,iboxnew) + vnew(ivStretching)
-             vnbox(ivTorsion,iboxnew)   = vnbox(ivTorsion,iboxnew)  + vnew(ivTorsion)
+             vnbox(ivStretching,iboxnew)  = vnbox(ivStretching,iboxnew) + tmpvvib 
+             vnbox(ivBending,iboxnew)	  = vnbox(ivBending,iboxnew)	+ tmpvbend
+             vnbox(ivTorsion,iboxnew)	  = vnbox(ivTorsion,iboxnew)	+ tmpvtg  
              vnbox(ivExt,iboxnew)  = vnbox(ivExt,iboxnew) + vnew(ivExt)
-             vnbox(ivBending,iboxnew)  = vnbox(ivBending,iboxnew) + vnew(ivBending)
              vnbox(ivElect,iboxnew) = vnbox(ivElect,iboxnew)+ vnew(ivElect)
              vnbox(ivEwald,iboxnew) = vnbox(ivEwald,iboxnew)+ vnew(ivEwald)
           else
@@ -607,6 +636,10 @@ contains
           tweiold = tweiold*weiold*waddold
 
           ! end rigid add on
+	  
+	  ! Calculated U_bonded
+
+	  call U_bonded(self,imolty,tmpvvib,tmpvbend,tmpvtg)
 
           ! store the old grown beads and explict placed beads positions
           ! 1 = old conformation
@@ -639,7 +672,7 @@ contains
 
              if (lterm) call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf SWATCH',myid+1)
 
-             deleo = v(ivTot) - ( vold(ivTot) - (vold(ivStretching) + vold(ivBending) + vold(ivTorsion)) )
+              deleo = v(ivTot) - ( vold(ivTot) - (tmpvvib+tmpvbend+tmpvtg) )
              tweiold = tweiold*exp(-beta*deleo)
 
              vold(ivTot) = vold(ivTot) + deleo
@@ -654,10 +687,10 @@ contains
              vnbox(ivTot,iboxold)   = vnbox(ivTot,iboxold)  - vold(ivTot)
              vnbox(ivInterLJ,iboxold)  = vnbox(ivInterLJ,iboxold) - vold(ivInterLJ)
              vnbox(ivIntraLJ,iboxold)  = vnbox(ivIntraLJ,iboxold) - vold(ivIntraLJ)
-             vnbox(ivStretching,iboxold)  = vnbox(ivStretching,iboxold) - vold(ivStretching)
-             vnbox(ivTorsion,iboxold)   = vnbox(ivTorsion,iboxold)  - vold(ivTorsion)
+             vnbox(ivStretching,iboxold) = vnbox(ivStretching,iboxold) - tmpvvib 
+             vnbox(ivBending,iboxold)	= vnbox(ivBending,iboxold)    - tmpvbend
+             vnbox(ivTorsion,iboxold)	= vnbox(ivTorsion,iboxold)    - tmpvtg  
              vnbox(ivExt,iboxold)  = vnbox(ivExt,iboxold) - vold(ivExt)
-             vnbox(ivBending,iboxold)  = vnbox(ivBending,iboxold) - vold(ivBending)
              vnbox(ivElect,iboxold) = vnbox(ivElect,iboxold)- vold(ivElect)
              vnbox(ivEwald,iboxold) = vnbox(ivEwald,iboxold)- vold(ivEwald)
           else
