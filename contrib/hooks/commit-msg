@@ -1,0 +1,16 @@
+#!/bin/sh
+
+while read line; do
+    # Skip comments
+    if [ "${line:0:1}" == "#" ]; then
+        continue
+    elif [ ${#line} -ge 72 ]; then
+        echo "[POLICY] Commit messages exceed 72 characters in the following line:"
+        echo
+        echo "${line}"
+        echo
+        exit 1
+    fi
+done < "$1"
+
+exit 0

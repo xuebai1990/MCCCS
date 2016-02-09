@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+
+if git rev-parse --verify HEAD >/dev/null 2>&1
+then
+    against=HEAD
+else
+    # Initial commit: diff against an empty tree object
+    against=4b825dc642cb6eb9a060e54bf8d69288fbee4904
+fi
+
+# If you want to allow non-ascii filenames set this variable to true.
+allownonascii=$(git config hooks.allownonascii)
+
+# Redirect output to stderr.
+exec 1>&2
+
+# Cross platform projects tend to avoid non-ascii filenames; prevent
+# them from being added to the repository. We exploit the fact that the
+# printable range starts at the space character and ends with tilde.
+if [ "$allownonascii" != "true" ] &&
+    # Note that the use of brackets around a tr range is ok here, (it's
+    # even required, for portability to Solaris 10's /usr/bin/tr), since
+    # the square bracket bytes happen to fall in the designated range.
+    test $(git diff --cached --name-only --diff-filter=A -z $against |
+      LC_ALL=C tr -d '[ -~]\0' | wc -c) != 0
+then
+    echo "[POLICY] File name must use ASCII characters."
+    echo
+    echo "To be portable it is advisable to rename the file ..."
+    echo "If you know what you are doing you can disable this"
+    echo "check using:"
+    echo
+    echo "  git config hooks.allownonascii true"
+    echo
+    exit 1
+fi
+
+shopt -s nocasematch
+
+while read file; do
+    if grep -q $'\r' "$file"; then
+        echo "[POLICY] Carriage returns (^M, Windows line endings) are not allowed in: $file"
+        exit 2
+    elif grep -q $'\t' "$file"; then
+        if [[ $file =~ Makefile || $file =~ configure ]]; then
+            # TABs are OK for Makefiles and configure scripts
+            continue
+        else
+            echo "[POLICY] Tabs are not allowed in: $file"
+            exit 3
+        fi
+    elif [ $(tail -c 1 "$file") ]; then
+        echo "[POLICY] A new-line character is required at the end of: $file"
+        exit 4
+    elif grep -q -E ' +$' "$file"; then
+        if [[ $file =~ \.md$ ]]; then
+            # End-of-line whitespace is sometimes significant for Markdown files
+            continue
+        else
+            echo "[POLICY] Whitespace is not allowed at the end of line. Found in: $file"
+            exit 5
+        fi
+    elif [ $(sed -n -e :a -e '/^\n*$/{$p;N;ba' -e '}' "$file" | wc -l) != 0 ]; then
+        echo "[POLICY] Multiple blank lines are not allowed at the end of: $file"
+        exit 6
+    fi
+done < <(git diff --cached --name-only --diff-filter=ACMR $against)
+
+# If there are whitespace errors, print the offending file names and fail.
+exec git diff-index --check --cached $against --

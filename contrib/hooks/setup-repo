@@ -1,0 +1,9 @@
+#!/bin/sh
+
+git config --local core.autocrlf input
+git config --local core.whitespace trailing-space,space-before-tab,tab-in-indent,-indent-with-non-tab,-cr-at-eol
+git config --local branch.autosetuprebase always
+
+cd "$( dirname "${BASH_SOURCE[0]}" )/../../.git/hooks"
+ln -sf ../../contrib/hooks/pre-commit .
+ln -sf ../../contrib/hooks/commit-msg .
