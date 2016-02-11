@@ -26,7 +26,8 @@ def diffLine(str1,str2,incomparable_val=1):
     return distance
 
 def getLine(file,lineNr):
-  bannerRe=re.compile(r"Program started|Program ended|Number of processors|Threads per processor")
+  bannerRe=re.compile(r"Program started|Program ended|Number of processors|Threads per processor|"
+                        +r"MCCCS topmon|Commit hash|Build on host|Preprocessor definitions|compiler")
   line=file.readline()
   if line!="":
     lineNr=lineNr+1
