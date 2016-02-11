@@ -1,6 +1,13 @@
-Program started at 2015-11-25 11:23:16.684
+Program started at 2016-02-10 21:26:23.698
 Number of processors: 1
 Threads per processor: 1
+
+MCCCS topmon (branch: ABE)
+Commit hash: 6cec999
+Build on host: ln0003
+Preprocessor definitions: __DOUBLE_PRECISION__;__USEOWN__;__MPI__
+Using Intel compiler: /soft/intel/x86_64/2013/composer_xe_2013/composer_xe_2013.5.192/bin/intel64/ifort
+
  run_num: 1    
  suffix: a
  L_movie_xyz:  F
@@ -270,8 +277,9 @@ lpresim:  F
 iupdatefix: 10
 pmcb:  0.340000000    
 
-molecule type: nchoi1  nchoi nchoir nchoih nchtor nchbna nchbnb icbdir icbsta
+molecule type: nchoi1  nchoi nchoir nchoih nchtor nchbna nchbnb icbdir icbsta 1st_bead_swap
             1:     10      8     10      1    100   1000   1000      0      0
+      1
 
 molecule type:    pmcbmt         pmall  avbmc_version    pmbias        pmbsmt       pmbias2         pmfix   lrig
             1:  1.000000       0.00000              0   0.00000       0.00000       0.00000       0.00000      F
@@ -478,7 +486,7 @@ number of chains of type    1 undefined       20
  
  vstart       =      -367905.2979132272        -3533.8603734371
  vend         =      2230767.0658440208       262837.3069916490
- vbox         =      2230767.0658440981       262837.3069916506
+ vbox         =      2230767.0658440972       262837.3069916506
  
  Averages and fluctuations                                  Box  1       Box  2
  
@@ -584,7 +592,4 @@ number of chains of type    1 undefined       20
  block    energy     density    pressure    surf ten   mol fracs
    1  0.2300E+06  0.5204E-02  0.1315E+04 -0.6621E-01  0.1000E+01
    2  0.2624E+06  0.5204E-02  0.1298E+04  0.2540E-02  0.1000E+01
- Program ended at 2015-11-25 11:23:48.311
-dim:   0
-sete:                NaN
-Uads:                NaN
+ Program ended at 2016-02-10 21:26:48.554

@@ -1,6 +1,13 @@
-Program started at 2015-11-25 11:22:19.345
+Program started at 2016-02-10 21:25:28.726
 Number of processors: 1
 Threads per processor: 1
+
+MCCCS topmon (branch: ABE)
+Commit hash: 6cec999
+Build on host: ln0003
+Preprocessor definitions: __DOUBLE_PRECISION__;__USEOWN__;__MPI__
+Using Intel compiler: /soft/intel/x86_64/2013/composer_xe_2013/composer_xe_2013.5.192/bin/intel64/ifort
+
  run_num: 1    
  suffix: a
  L_movie_xyz:  F
@@ -310,8 +317,9 @@ lpresim:  F
 iupdatefix: 100
 pmcb:  0.350000000    
 
-molecule type: nchoi1  nchoi nchoir nchoih nchtor nchbna nchbnb icbdir icbsta
+molecule type: nchoi1  nchoi nchoir nchoih nchtor nchbna nchbnb icbdir icbsta 1st_bead_swap
             1:     10      8     10      1    100   1000   1000      0      0
+      1
 
 molecule type:    pmcbmt         pmall  avbmc_version    pmbias        pmbsmt       pmbias2         pmfix   lrig
             1:  1.000000       0.00000              0   0.00000       0.00000       0.00000       0.00000      F
@@ -661,7 +669,4 @@ number of chains of type    1 undefined       13
  block    energy     density    pressure    surf ten   mol fracs
    1  0.1093E+05  0.2616E-01  0.9522E+03 -0.4199E+00  0.1000E+01
    2  0.1706E+05  0.2798E-01  0.7601E+03  0.7053E+00  0.1000E+01
- Program ended at 2015-11-25 11:22:36.433
-dim:   0
-sete:                NaN
-Uads:                NaN
+ Program ended at 2016-02-10 21:25:42.912

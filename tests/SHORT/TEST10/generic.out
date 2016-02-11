@@ -1,6 +1,13 @@
-Program started at 2016-02-01 22:38:40.089
+Program started at 2016-02-10 21:27:04.162
 Number of processors: 1
 Threads per processor: 1
+
+MCCCS topmon (branch: ABE)
+Commit hash: 6cec999
+Build on host: ln0003
+Preprocessor definitions: __DOUBLE_PRECISION__;__USEOWN__;__MPI__
+Using Intel compiler: /soft/intel/x86_64/2013/composer_xe_2013/composer_xe_2013.5.192/bin/intel64/ifort
+
  run_num: 1    
  suffix: a
  L_movie_xyz:  F
@@ -63,11 +70,11 @@ NAMELIST ANALYSIS
 SECTION SIMULATION_BOX
 ------------------------------------------
 
- READING ZEOLITE LATTICE FROM FILE:     MFI-1.cif                                                                                           
+ READING FRAMEWORK LATTICE FROM FILE:     MFI-1.cif                                                                                                                                                                                                                                                       
  --------------------------------------------------
- box dimensions                    =     40.044    39.798    40.149 Angstrom
- box angles                        =     90.000    90.000    90.000 degrees
- number of zeolite cells           =     2    2    3
+ box dimensions       =     40.044    39.798    40.149 Angstrom
+ box angles           =     90.000    90.000    90.000 degrees
+ number of unit cells =     2    2    3
 
 Box 1:   40.044 x   39.798 x   40.149
    rcut: 14.000 [Ang], kalp:  3.500
@@ -442,10 +449,13 @@ lpresim:  F
 iupdatefix: 100000000
 pmcb:  0.733000000    
 
-molecule type: nchoi1  nchoi nchoir nchoih nchtor nchbna nchbnb icbdir icbsta
+molecule type: nchoi1  nchoi nchoir nchoih nchtor nchbna nchbnb icbdir icbsta 1st_bead_swap
             1:     32     16     16      1    100   1000   1000      0      0
+      1
             2:     32     16     16      1    100   1000   1000      0      0
+      1
             3:     32     16     16      1    100   1000   1000      0      0
+      1
 
 molecule type:    pmcbmt         pmall  avbmc_version    pmbias        pmbsmt       pmbias2         pmfix   lrig
             1:   0.00000       0.00000              0   0.00000       0.00000       0.00000       0.00000      F
@@ -573,21 +583,22 @@ ibox:      calp  kmaxl  kmaxm  kmaxn         rcut
    2:     0.229      9      9      9      14.0000
    3:     0.053      7      7      7      60.0000
 
- Tabulated zeolite potential: 
+ Tabulated framework potential: 
  --------------------------------------------------
  number of O:2304    number of Si:1152    number of Al:0
- simulation volume                 =    63984.3                     Angst**3
- number of atomtypes in the lattice=          3
- number of zeolite atoms           =       3456
- mass zeolite                      =  0.11494E-18 grams
- one adsorbed molecule in sim box  =  0.14447E-01 mol/kg
- Size unit-cell zeolite: 20.0220 x 19.8990 x 13.3830
-         x-dir           :           50  size:  0.4004
-         y-dir           :           49  size:  0.4061
-         z-dir           :           33  size:  0.4055
+ number of framework atom types   =          3
+ number of framework atoms        =       3456
+ number of atoms in the unit cell =        288
+ framework mass                   =  0.114936181E-18 grams
+ framework volume                 =      63984.30148 Angst**3
+ one adsorbed molecule in sim box =  0.144474865E-01 mol/kg
+ unit-cell size: 20.0220 x 19.8990 x 13.3830
+   x-dir       :    50  size:  0.4004
+   y-dir       :    49  size:  0.4061
+   z-dir       :    33  size:  0.4055
 
  read in tabulated potential:
-lewald[T] ltailc[T] lshift[F] ltailcZeo[T] rcut[  14.0    ]
+lewald[T] ltailcZeo[T] lshift[F] AddTailc[T] rcut[  14.0    ]
  
  sumup control
  number of chains         109
@@ -878,7 +889,7 @@ number of chains of type    3 undefined        1
  
  vstart       =       447714.6926662242     -9061870.5928109866        -1484.4042737162
  vend         =      -492674.3632142121     -9082616.6396042723        -1751.1662859778
- vbox         =      -492674.3632142127     -9082616.6396041662        -1751.1662859777
+ vbox         =      -492674.3632142127     -9082616.6396041662        -1751.1662859778
  
  Averages and fluctuations                                  Box  1       Box  2       Box  3
  
@@ -930,7 +941,4 @@ number of chains of type    3 undefined        1
     3    1      0.00000      0.00000      0.00000      0.00000      0.00000
     3    2      0.00000      0.00000      0.00000      0.00000      0.00000
     3    3      0.00000      0.00000      0.00000      0.00000      0.00000
- Program ended at 2016-02-01 22:39:27.960
-dim:   0  0  0
-sete:                NaN               NaN               NaN
-Uads:                NaN               NaN               NaN
+ Program ended at 2016-02-10 21:27:44.745
