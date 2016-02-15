@@ -5,348 +5,146 @@
 !> B2(T) = -2*Pi*stepvir* Sum(i=2,n-1)[ <Exp[-beta*u(r)]-1> ri^2 \n
 !> 1/2( <Exp[-beta*u(r1)]-1> r1 + <Exp[-beta*u(rn)]-1> rn
 !> \author Marcus Martin 1-15-97
-subroutine virial(binvir,binvir2)
+!> revised by Robert Hembree 2-10-2016
+!> \brief Computes the 2nd virial coefficient
+!>
+!> Uses a trapezoidal integration to integrate the virial coefficient of a
+!> specific conformation of two molecules. The contribution to B2 is then weighted
+!> according to the configurational intramolecular energy. 
+!> I.e. we compute the boltzmann weighted (via intramolecular energy) B2 virail
+!> coefficient
+!> subroutine parameters:
+!>      binvirnumerator: The numerator in the average B2 calculation
+!>      binvirdenominator: the denominator of the average B2 calculation.
+subroutine virial(binvirnumerator,binvirdenominator)
   use const_math,only:onepi,twopi
-  use const_phys,only:qqfact
   use util_runtime,only:err_exit
   use sim_system
-  use energy_pairwise,only:U2,type_2body
-  use energy_sami,only:ljsami,ljmuir
+  use energy_pairwise,only:U2,type_2body,energy
+  use energy_intramolecular,only:U_bonded
   implicit none
-
       integer::i, imolty, ii, j, jmolty, jj, ntii, ntjj , ntij,nnn,ip,itemp,iii
-      real::vinter,rminsq,rxui,ryui,rzui,rxuij ,ryuij,rzuij,rijsq,sr6,velect,mayer
-
       real::xdiff,ydiff ,zdiff,dvircm
       real::binvir
-      dimension binvir(maxvir,maxntemp),mayer(maxntemp)
-
-      logical::ovrlap,lqimol,lqjmol,lmatrix
-
-! only use for polarizable models
-      integer::chgmax
-      parameter (chgmax=10)
-      integer::ip1,ip2,iunit,numchg ,mainsite(2,2),lam1,lam2
-      real::a(chgmax,chgmax),b2(chgmax,1) ,mainxiq(2,2)
-
-      real::consa1,consa2,consb1,consb2,selfadd1 ,selfadd2,epsilon2,vmin
-
-      real::mass_t,binvir2(maxvir,maxntemp), factor,corr,vprev,deri_u
-
-! --------------------------------------------------------------------
+      real::mass_t, factor,corr,vprev,deri_u
+      real::binvirnumerator,binvirdenominator
+      real::Uintramol1,Uintramol2,vvbend,vvib,vvtors,uIntermolecular
+      real::xcmsep,ycmsep,zcmsep,deviation,their_distance
+      real::mayerterm,boltzfact,smallexpfact,fullexpfact,integralvalue
+      real::storefirstval
+      real::vEnergy(nEnergy),vmol1(nEnergy),vmol2(nEnergy)
+      logical::olp=.false., firstval=.true.
+      integer::iunit
 #ifdef __DEBUG__
       write(io_output,*) 'start VIRIAL in ',myid
-      write(io_output,*) 'binvir',binvir
 #endif
 
-      rminsq = rmin * rmin
-      vmin = -2000.0E0_dp
+      firstval=.true.
+      ! start by comptuing the intramolecular energy. 
+      ! this is used to properly weight the integral
+      call U_bonded(1,moltyp(1),vvib,vvbend,vvtors)
+      Uintramol1=vvib+vvbend+vvtors
+      call U_bonded(2,moltyp(2),vvib,vvbend,vvtors)
+      Uintramol2=vvib+vvbend+vvtors
+      ! We now need to include the nonbonded portion of the intramolecular
+      ! energies. It is very important that we don't have the molecules in the
+      ! same box. 
+      ! This is done to distinguish the inter- and intramolecular portions of
+      ! the electric and ewald interactions. Being in individual boxes we won't
+      ! see them interact with each other. 
+      ! also note I will later want to subtract the intramolecular portion of
+      ! these energies from the energy calculated when the molecules are in the
+      ! same box. 
 
-      if ( lfepsi ) then
-         consa1 = 4.0E0_dp*aslope*a0*(2.0E0_dp/1.6E0_dp)
-         consb1 = 4.0E0_dp*bslope*b0*(2.0E0_dp/1.6E0_dp)
-         consa2 = 2.0E0_dp*aslope*(4.0E0_dp/2.56E0_dp)
-         consb2 = 2.0E0_dp*bslope*(4.0E0_dp/2.56E0_dp)
-      end if
-
+      call energy(1,moltyp(1),vmol1,1,nboxi(1),1,nunit(1),.true.,olp,.false.,.false.,.false.,.false.)
+      call energy(2,moltyp(2),vmol2,1,nboxi(2),1,nunit(2),.true.,olp,.false.,.false.,.false.,.false.)
+      Uintramol1 = Uintramol1+vmol1(ivElect)+vmol1(ivIntraLJ)
+      Uintramol2 = Uintramol2+vmol2(ivElect)+vmol2(ivIntraLJ)
 
       if ( nboxi(1) .eq. nboxi(2) ) then
-         write(io_output,*) 'particles found in same box'
+         !write(io_output,*) 'particles found in same box'
          call err_exit(__FILE__,__LINE__,'',myid+1)
       end if
-
-! ################################################################
-
-! *******************************
-! INTERCHAIN INTERACTIONS ***
-! *******************************
-
+      olp=.false.
+      ! calculate the differences in their COM in each direction
       xdiff = xcm(2) - xcm(1)
       ydiff = ycm(2) - ycm(1)
       zdiff = zcm(2) - zcm(1)
-      dvircm = starvir
-      i = 1
-      imolty = moltyp(i)
+      imolty = moltyp(1)
+      jmolty = moltyp(2)
       iunit = nunit(imolty)
+      ! old code retained for future development
       mass_t = 0.0E0_dp
       do ii = 1, iunit
          mass_t = mass_t + mass(ntype(imolty,ii))
       end do
       mass_t = mass_t/1000E0_dp
       factor = -(6.6260755E-34_dp)**2*6.0221367E23_dp*1E20_dp /  (24.0E0_dp*onepi*mass_t*1.380658E-23_dp*twopi)
-
-      lqimol = lelect(imolty)
-
-      if ( lflucq(imolty) .and. lflucq(moltyp(2))) then
-         lmatrix = .true.
-
-! count charge site for type 1 molecule
-         numchg = 0
-         do ii = 1, iunit
-            ntii = ntype(imolty,ii)
-            if ( lqchg(ntii) ) numchg = numchg + 1
-         end do
-      else
-         lmatrix = .false.
-      end if
-
-      do nnn = 1,nvirial
-
-         if ( lmatrix ) then
-! initialize matrix
-            do ii = 1,chgmax
-               do jj = 1,chgmax
-                  a(ii,jj) = 0
-               end do
-               b2(ii,1) = 0
-            end do
-         end if
-
-         ovrlap = .false.
-         vinter = 0.0E0_dp
-         velect = 0.0E0_dp
-! loop over all beads ii of chain i
-         ip1 = 0
-         do 99 ii = 1, nunit(imolty)
-            ntii = ntype(imolty,ii)
-            if ( lqchg(ntii) ) ip1 = ip1 + 1
-            rxui = rxu(i,ii)  + xdiff - dvircm
-            ryui = ryu(i,ii)  + ydiff
-            rzui = rzu(i,ii)  + zdiff
-
-! loop over chain 2
-            j = 2
-            jmolty = moltyp(j)
-            lqjmol = lelect(jmolty)
-! loop over all beads jj of chain j
-            ip2 = numchg
-            do 97 jj = 1, nunit(jmolty)
-! check exclusion table
-               if ( lexclu(imolty,ii,jmolty,jj) ) goto 97
-               ntjj = ntype(jmolty,jj)
-               if ( lqchg(ntjj) ) ip2 = ip2 + 1
-
-               ntij = type_2body(ntii,ntjj)
-
-               if (lexpee) rminsq = rminee(ntij)*rminee(ntij)
-
-               rxuij = rxui - rxu(j,jj)
-               ryuij = ryui - ryu(j,jj)
-               rzuij = rzui - rzu(j,jj)
-
-               rijsq = (rxuij*rxuij)+(ryuij*ryuij) + (rzuij*rzuij)
-               if ( lmatrix .and. lqchg(ntii) .and. lqchg(ntjj) ) then
-                  a(ip1,ip2) = qqfact/sqrt(rijsq)
-                  a(ip2,ip1) = a(ip1,ip2)
-               end if
-
-               if ( rijsq .lt. rminsq ) then
-                  ovrlap = .true.
-                  goto 100
-               else
-                  if ( lfepsi ) then
-                     if ( lij(ntii) .and. lij(ntjj) ) then
-                        sr6 = rijsq*rijsq*rijsq
-                        epsilon2 = vvdW(1,ntij)
-                        selfadd1 = epsilon2*(consa1/sr6-consb1)/sr6
-                        selfadd2 = epsilon2*(consa2/sr6-consb2)/sr6
-                     end if
-                  else
-                     vinter = vinter + U2(rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
-                  end if
-
-                  if ( lqimol .and. lqjmol .and. .not. lmatrix ) then
-                     velect = velect + qqfact*qqu(i,ii)*qqu(j,jj) /sqrt(rijsq)
-                  end if
-
-               end if
-
- 97         continue
- 99      continue
-
-! use Matrix Minimization to solve the equilibrium charge
-
-         if ( lmatrix ) then
-
-            iii = 2
-            do ip = 1,2
-               imolty = moltyp(ip)
-               iunit = nunit(imolty)
-               ip1 = ( ip-1)*numchg
-               do ii = 1, iunit
-                  ntii = ntype(imolty,ii)
-                  if ( lqchg(ntii) ) then
-                     ip1 = ip1 + 1
-                     a(ip1,ip1) = 2.0E0_dp*jayself(ntii)
-                     b2(ip1,1) = -xiq(ntii)
-                     if ( abs(xiq(ntii)) .gt. 1.0E-10_dp ) then
-                        if ( iii .eq. 1 ) then
-                           iii = 2
-                        else if ( iii .eq. 2 ) then
-                           iii = 1
-                        end if
-                        mainsite(ip,iii) = ip1
-                        mainxiq(ip,iii) = -xiq(ntii)
-                     end if
-                     ip2 = ip1
-                     do jj = ii+1,iunit
-                        ntjj = ntype(imolty,jj)
-                        if ( lqchg(ntjj) ) then
-                           ip2 = ip2 + 1
-                           ntij = (ntii-1)*nntype + ntjj
-                           a(ip1,ip2) = jayq(ntij)
-                           a(ip2,ip1) = jayq(ntij)
-                        end if
-                     end do
-                  end if
-               end do
-            end do
-
-! undetermined multiplier
-            if ( lqtrans(imolty) ) then
-               lam1 = ip2 + 1
-               do ii = 1, numchg*2
-                  a(lam1,ii) = 1
-                  a(ii,lam2) = 1
-               end do
-            else
-               lam1 = ip2 + 1
-               lam2 = ip2 + 2
-               do ii = 1, numchg
-                  a(lam1,ii) = 1
-                  a(ii,lam1) = 1
-               end do
-               do ii = numchg+1,ip2
-                  a(lam2,ii) = 1
-                  a(ii,lam2) = 1
-               end do
-            end if
-
-            if ( lfepsi ) then
-               ip1 = mainsite(1,1)
-               ip2 = mainsite(2,1)
-               b2(ip1,1) = b2(ip1,1) + selfadd1
-               b2(ip2,1) = b2(ip2,1) + selfadd1
-               a(ip1,ip1) = a(ip1,ip1) + selfadd2
-               a(ip1,ip2) = a(ip1,ip2) + selfadd2
-               a(ip2,ip1) = a(ip1,ip2)
-               a(ip2,ip2) = a(ip2,ip2) + selfadd2
-               if ( nunit(imolty) .eq. 5 ) then
-                  ip1 = mainsite(1,2)
-                  ip2 = mainsite(2,2)
-                  b2(ip1,1) = b2(ip1,1) + selfadd1
-                  b2(ip2,1) = b2(ip2,1) + selfadd1
-                  a(ip1,ip1) = a(ip1,ip1) + selfadd2
-                  a(ip1,ip2) = a(ip1,ip2) + selfadd2
-                  a(ip2,ip1) = a(ip1,ip2)
-                  a(ip2,ip2) = a(ip2,ip2) + selfadd2
-                  ip1 = mainsite(1,1)
-                  ip2 = mainsite(1,2)
-                  a(ip1,ip2) = a(ip1,ip2) + selfadd2
-                  a(ip2,ip1) = a(ip1,ip2)
-                  ip2 = mainsite(2,2)
-                  a(ip1,ip2) = a(ip1,ip2) + selfadd2
-                  a(ip2,ip1) = a(ip1,ip2)
-                  ip1 = mainsite(2,1)
-                  a(ip1,ip2) = a(ip1,ip2) + selfadd2
-                  a(ip2,ip1) = a(ip1,ip2)
-                  ip2 = mainsite(1,2)
-                  a(ip1,ip2) = a(ip1,ip2) + selfadd2
-                  a(ip2,ip1) = a(ip1,ip2)
-               end if
-            end if
-
-            ! commenting this out JMS 6-20-00 ***
-            ! call dgesv(chgmax,1,a,chgmax,ipiv,b2,chgmax,info)
-            ! ***
-
-            ! write(21,*) b2
-            ! do ii = 1, nunit(imolty)
-            !    write(21,*) rxu(i,ii)+xdiff-dvircm,ryu(i,ii)+ydiff,rzu(i,ii)+zdiff
-            ! end do
-            ! do ii = 1, nunit(imolty)
-            !    write(21,*) rxu(2,ii),ryu(2,ii),rzu(2,ii)
-            ! end do
-            ! write(11,*) sr6**(1.0/6.0E0_dp),b2(1,1),b2(2,1)
-
-            velect = 0.0E0_dp
-            do ip = 1, 2
-               ii = mainsite(ip,1)
-               if ( lfepsi ) then
-                  velect = velect-0.5E0_dp*b2(ii,1)*(mainxiq(ip,1) +selfadd1)
-! write(21,*) b2(ii,1),mainxiq(ip,1)
-                  vinter = epsilon2*((aslope*a0*a0+ashift)/sr6 -(bslope*b0*b0+bshift))/sr6
-               else
-                  velect = velect-0.5E0_dp*b2(ii,1)*mainxiq(ip,1)
-               end if
-               if ( nunit(imolty) .eq. 5 ) then
-                  ii = mainsite(ip,2)
-                  if ( lfepsi ) then
-                     velect = velect-0.5E0_dp*b2(ii,1)*(mainxiq(ip,2) +selfadd1)
-! write(21,*) b2(ii,1),mainxiq(ip,2)
-                     vinter = epsilon2*((aslope*a0*a0+ashift)/sr6 -(bslope*b0*b0+bshift))/sr6
-                  else
-                     velect = velect-0.5E0_dp*b2(ii,1)*mainxiq(ip,2)
-                  end if
-               end if
-            end do
-            velect = velect - fqegp(moltyp(1)) - fqegp(moltyp(2))
-            if ( velect + vinter*4.0E0_dp .lt. vmin ) then
-               vmin = velect + vinter*4.0E0_dp
-               write(11,*) 'vmin:',vmin
-               do ii = 1, nunit(imolty)
-                  write(11,*) rxu(i,ii)+xdiff-dvircm,ryu(i,ii)+ydiff ,rzu(i,ii)+zdiff
-               end do
-               do ii = 1, nunit(imolty)
-                  write(11,*) rxu(2,ii),ryu(2,ii),rzu(2,ii)
-               end do
-               rewind(11)
-            end if
-! write(11,*) 'energy:',velect+vinter*4.0E0_dp
-
-         end if
-
-
- 100     if ( ovrlap ) then
-            do itemp = 1, ntemp
-               mayer(itemp) = -1.0E0_dp
-            end do
-         else
-            do itemp = 1,ntemp
-               mayer(itemp) = exp(-(vinter+velect)/virtemp(itemp))-1.0E0_dp
-            end do
-         end if
-! write(io_output,*) 'mayer',mayer
-! write(io_output,*) 'nnn',nnn
-         do itemp = 1,ntemp
-            binvir(nnn,itemp) = binvir(nnn,itemp) + mayer(itemp)
-         end do
-         if ( nnn .eq. 1 ) then
-            corr = 0.0E0_dp
-            vprev = vinter + velect
-         else
-            deri_u = (vinter+velect-vprev)/stepvir
-            corr = deri_u * deri_u * factor
-            vprev = vinter + velect
-         end if
-         do itemp = 1, ntemp
-            binvir2(nnn,itemp) = binvir2(nnn,itemp) + (mayer(itemp)+1.0E0_dp)*corr/(virtemp(itemp)**3)
-         end do
-         dvircm = dvircm + stepvir
+      deviation = starvir
+      integralvalue=0.0E0_dp
+      do while (deviation > rmin)
+        !set the "trial" location of the chain2
+        do jj=1,nunit(jmolty)
+            ! center them ontop of each other in the y- and z- directions.
+            ! Slowly translate molecule 2 down the x axis until we reach begin
+            ! to overlap. If we overlap then the energy will be infinity. 
+            rxuion(jj,2) = rxu(2,jj)-xdiff+deviation
+            ryuion(jj,2) = ryu(2,jj)-ydiff
+            rzuion(jj,2) = rzu(2,jj)-zdiff
+        end do
+        ! compute the energy of the system as if the second molecule was in hte
+        ! same box as the first molecule at a distance of deviation away. 
+        call energy(2,jmolty,vEnergy,2,nboxi(1),1,nunit(jmolty),.false.,olp,.false.,.false.,.false.,.false.)
+        uIntermolecular = vEnergy(ivInterLJ)+vEnergy(ivTail)+vEnergy(ivElect)+vEnergy(iv3body)+vEnergy(ivFlucq)
+        ! subtract out the intramolecular contrubutions to the electric
+        ! energies that were calculated before leaving only the
+        ! intermolecular contributions. Only the intramolecular components
+        ! for mol2 were calculated here so only those need to be removed.
+        uIntermolecular = uIntermolecular-vmol2(ivElect)
+        ! lets do the soft cut stuff
+        smallexpfact = -uIntermolecular/virtemp
+        fullexpfact = -(Uintramol1+Uintramol2)/virtemp
+        if(smallexpfact < -1.0*softcut) then
+            mayerterm=0.0
+        else if (smallexpfact > softcut.or.olp) then
+            ! essentially these are states where the energy appears to be
+            ! infinite. 
+            mayerterm = 0.0E0_dp
+        else
+            mayerterm = exp(-uIntermolecular/virtemp)
+        end if 
+        ! the 2* accounts for the double counting of terms in the trapezoidal
+        ! method. These are later removed by dividing by 2. 
+        integralvalue=integralvalue+2*(1-mayerterm)*deviation**2
+        if(firstval) then
+          !stores the first term because the first and last terms have half
+          !value of the rest of the terms in the trapezoidal integration scheme. 
+          firstval = .false.
+          storefirstval = integralvalue/2.0
+        end if
+        deviation = deviation-stepvir
       end do
-! ################################################################
+      ! handles the end points of the trapezoidal rule which have half of the
+      ! value of all of the other points. 
+      integralvalue = integralvalue-storefirstval
+      integralvalue = integralvalue-(1.0-mayerterm)*(deviation+stepvir)**2
+      ! now multiply by the constant terms in the integral... 2pi*dr and divide
+      ! by two for the trapezoidal rule
+      integralvalue = integralvalue*twopi*stepvir/2.0
+
+      if(fullexpfact < -1.0*softcut) then
+          boltzfact=0.0
+      else if (fullexpfact > softcut) then
+          call err_exit(__FILE__,__LINE__,'',myid+1)
+      else
+          boltzfact = exp(-(fullexpfact)/virtemp)
+      end if 
+      fullexpfact = -(Uintramol1+Uintramol2)/virtemp
+      binvirdenominator=binvirdenominator+boltzfact
+      binvirnumerator = binvirnumerator+boltzfact*integralvalue
 #ifdef __DEBUG__
-      write(io_output,*) 'binvir',binvir
+      write(io_output,*) "B2: ", binvirnumerator/binvirdenominator
       write(io_output,*) 'end VIRIAL in ',myid
 #endif
-      return
-      end
 
-
-
-
-
-
-
-
-
+end subroutine virial 

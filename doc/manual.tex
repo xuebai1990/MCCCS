@@ -418,7 +418,13 @@ polarizable force fields.
 \noindent{\bf lvirial:} if TRUE then one chain will be
 simulated in each box independently and the second virial
 coefficient will be calculated for their interactions at a
-series of distances along the x-axis.
+series of distances along the x-axis. Note that when this is
+selected {\bf lpbcx} should be set to FALSE, {\bf lgibbs}
+should be set to TRUE, {\bf lchgall} should be set to true,
+and finally {\bf lewald} should be set to false. When chosing
+move probabilities it should be noted that translation moves
+are entirely pointless when doing a virial coefficient
+calculation.
 
 \noindent{\bf lmipsw:} if TRUE, then thermodynamic
 integration is performed for the phases, fort.35 must be
@@ -1104,12 +1110,32 @@ be {\bf nmolty} values.
 \noindent{\bf nvirial:} If {\bf lvirial} is TRUE, the second
 virial coefficient will be calculated for a molecule. {\bf
   nvirial} determines the number of configurations to
-consider at each step. This is a specialized simulation and
-not for the general case.
+consider at each step. This value is deprecated and should
+be set to 1. any other values will likely cause an error.
+This is a specialized simulation and not for the general case.
+Currently the number of configurations calculated at each step
+is determined by dividing the number of simulation cycles by 
+{\bf imv}. The number of configurations needed will depend on 
+the details of your molecules. The goal is to get a good
+representative coverage of the configurations of both molecules.
+For example, for a molecule such as ethane using a TraPPE forcefield
+(where bondlengths are constant) you will want to span all
+all possible rotations of the molecule, where as for propane you want
+to sample the same rotational space in addition to possible values for
+bending at each rotation. For alkanes using the TraPPE forcefield a total
+of 5000 configurations with snapshots taken every 4-10 cycles is common.
+For systems where each degree of freedom is less constrained, many more
+configurations may be needed to reach convergence. 
 
 \noindent{\bf startvir, stepvir:} If the second virial
 coefficient is being calculated, these determine the
 starting center of mass distance and step size, in {\AA}.
+For efficiency this value should be no larger than the 
+{\bf rcut}. Tail corrections should not be used. Virial
+coefficient calculations are very sensitive to the value
+of {\bf starvir} and to {\bf rcut}. When doing viral 
+coefficent calculations care should be taken to adjust
+these values for best results. 
 
 \subsection{Namelist \textbf{external\_field}}
 \noindent{\bf Elect\_field:} The electric field strength, in

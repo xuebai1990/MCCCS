@@ -13,7 +13,7 @@ MODULE topmon_main
    ,io_movie,io_solute,io_cell,io_traj,time_limit=0&
    ,N_add=0,box2add=1,moltyp2add=1
   real::enthalpy,enthalpy2& !< enthalpy (NpT) or internal energy (NVT)
-     ,acdvdl,binvir(maxvir,maxntemp),binvir2(maxvir,maxntemp)
+     ,acdvdl,binvir,binvir2
   real,allocatable::acdens(:,:)& !< (ibox,itype): accumulators of box density
    ,molfra(:,:)& !< (ibox,itype): accumulators of mole fraction
    ,acnbox(:,:)& !< accumulators of ncmt
@@ -899,53 +899,10 @@ contains
        write(io_output,*)
        ! Output 2nd virial coefficient data
 2000   if (lvirial) then
-          starviro = starvir
-          dummy = real(nstep/imv,dp)
-          do itemp = 1,ntemp
-             starvir = starviro
-             binvir(1,itemp) = binvir(1,itemp)/dummy
-             ! write(45,*) starvir,binvir(1,itemp)
-             inside = starvir*starvir*binvir(1,itemp)
-             ! write(46,*) starvir,inside
-             bvirial = 0.5E0_dp*inside
-             ! write(47,*) starvir,bvirial
-             starvir = starvir + stepvir
-
-             do i = 2,nvirial-1
-                binvir(i,itemp) = binvir(i,itemp)/dummy
-                ! write(45,*) starvir,binvir(i,itemp)
-                inside = starvir*starvir*binvir(i,itemp)
-                ! write(46,*) starvir,inside
-                bvirial = bvirial + inside
-                ! write(47,*) starvir,bvirial
-                starvir = starvir + stepvir
-             end do
-
-             binvir(nvirial,itemp) = binvir(nvirial,itemp)/dummy
-             ! write(45,*) starvir,binvir(nvirial,itemp)
-             inside = starvir*starvir*binvir(nvirial,itemp)
-             ! write(46,*) starvir,inside
-             ! write(47,*) starvir,bvirial
-             starvir = starvir + stepvir
-             bvirial = bvirial + 0.5E0_dp*inside
-
-             write(io_output,*) 'At temperature of',virtemp(itemp)
-             write(io_output,*) 'bvirial ', -(twopi*stepvir*bvirial),' [A^3 / molecule]'
-             write(io_output,*) 'bvirial ',-N_Avogadro*1E-24_dp*twopi* stepvir*bvirial,' [cm^3 / mole]'
-
-             ! if ( lvirial2 ) then
-             starvir = starviro + 0.5E0_dp*stepvir
-             do i = 2, nvirial
-                binvir2(i,itemp) =  binvir2(i,itemp)/dummy
-                inside = starvir*starvir*binvir2(i,itemp)
-                bvirial = bvirial + inside
-                starvir = starvir + stepvir
-             end do
-             bvirial = -(twopi*stepvir*bvirial)
-             write(io_output,*) 'With quantum correction:'
-             write(io_output,*) 'bvirial ',bvirial,' [A^3 / molecule]'
-             write(io_output,*) 'bvirial ',N_Avogadro*1E-24_dp*bvirial,' [cm^3 / mole]'
-          end do
+           write(io_output,*) 'At temperature of ', virtemp
+           bvirial = binvir/binvir2
+           write(io_output,*) 'bvirial ', bvirial, ' [ A^3 / molecule ]'
+           write(io_output,*) 'bvirial ', bvirial*N_Avogadro*1E-24_dp, ' [ cm^3 / mole ]'
        end if
 
        ! solute values
@@ -1666,7 +1623,7 @@ contains
     call mp_bcast(starvir,1,rootid,groupid)
     call mp_bcast(stepvir,1,rootid,groupid)
     call mp_bcast(ntemp,1,rootid,groupid)
-    call mp_bcast(virtemp,maxntemp,rootid,groupid)
+    call mp_bcast(virtemp,1,rootid,groupid)
 
     blockm=nstep/iblock
     if (lucall) call read_prop_widom(io_input,lprint,blockm)
@@ -1694,8 +1651,8 @@ contains
           w_i(nvirial)
           w_r(starvir)
           w_r(stepvir)
-          write(io_output,'(A,I0,A,'//format_n(ntemp,'(2X,F8.3)')//')')&
-           '=> Virial coefficient will be calculated at the following ',ntemp,' temperatures:',(virtemp(i),i=1,ntemp)
+          write(io_output,*)&
+           '=> Virial coefficient will be calculated at the following temperature:',virtemp
        end if
     end if
 
@@ -4090,7 +4047,7 @@ contains
     w_nl(starvir)
     w_nl(stepvir)
     w_nl(ntemp)
-    wa_nl(virtemp,ntemp)
+    w_nl(virtemp)
     write(io_unit,'(" /",/)')
 ! -------------------------------------------------------------------
     write(io_unit,'(/," &external_field")')

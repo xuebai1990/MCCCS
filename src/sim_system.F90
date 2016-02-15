@@ -126,9 +126,9 @@ module sim_system
   integer::nequil=0,ninstf=0,ninsth=0,ndumph=0
 
   !*** 2nd virial coefficient ***
-  integer,parameter::maxvir=1,maxntemp=3 !< maximum number of bins for the 2nd virial coefficient
+  integer,parameter::maxvir=1,maxntemp=1 !< maximum number of bins for the 2nd virial coefficient
   integer::ntemp=0,nvirial=0
-  real::virtemp(maxntemp),starvir=0.0_dp,stepvir=0.0_dp
+  real::virtemp,starvir=0.0_dp,stepvir=0.0_dp
 
   !*** Dielectric constant ***
   real,allocatable::dipolex(:),dipoley(:),dipolez(:)
