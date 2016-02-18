@@ -1,10 +1,10 @@
-Program started at 2016-02-10 21:24:49.262
+Program started at 2016-02-18 18:01:46.932
 Number of processors: 1
 Threads per processor: 1
 
 MCCCS topmon (branch: ABE)
-Commit hash: 6cec999
-Build on host: ln0003
+Commit hash: cf2a30e
+Build on host: ln0004
 Preprocessor definitions: __DOUBLE_PRECISION__;__USEOWN__;__MPI__
 Using Intel compiler: /soft/intel/x86_64/2013/composer_xe_2013/composer_xe_2013.5.192/bin/intel64/ifort
 
@@ -533,8 +533,8 @@ number of chains of type    1 undefined      300
  total energy      -2129736.60054126     
  
  vstart       =     -2119379.2830781792
- vend         =     -2129736.6005412629
- vbox         =     -2129736.6005412680
+ vend         =     -2129736.6005412620
+ vbox         =     -2129736.6005412694
  
  Averages and fluctuations                                  Box  1
  
@@ -605,4 +605,4 @@ number of chains of type    1 undefined      300
  block    energy     density    pressure    surf ten   mol fracs
    1 -0.2120E+07  0.1072E+01  0.0000E+00  0.0000E+00  0.1000E+01
    2 -0.2130E+07  0.1078E+01 -0.7289E+04 -0.6697E+02  0.1000E+01
- Program ended at 2016-02-10 21:25:02.375
+ Program ended at 2016-02-18 18:02:00.115

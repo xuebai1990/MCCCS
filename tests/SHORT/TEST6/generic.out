@@ -1,10 +1,10 @@
-Program started at 2016-02-10 21:26:03.763
+Program started at 2016-02-18 18:03:03.192
 Number of processors: 1
 Threads per processor: 1
 
 MCCCS topmon (branch: ABE)
-Commit hash: 6cec999
-Build on host: ln0003
+Commit hash: cf2a30e
+Build on host: ln0004
 Preprocessor definitions: __DOUBLE_PRECISION__;__USEOWN__;__MPI__
 Using Intel compiler: /soft/intel/x86_64/2013/composer_xe_2013/composer_xe_2013.5.192/bin/intel64/ifort
 
@@ -434,21 +434,21 @@ number of chains of type    1 undefined      867
  sumup control
  number of chains         133
 number of chains of type    1 undefined      133
- inter lj energy    6237.57700307169     
+ inter lj energy    6237.57700307171     
  intra lj energy   0.000000000000000E+000
  Tail correction  -0.675802664689419     
  bond vibration    0.000000000000000E+000
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -51893.0504291609     
+ coulombic energy  -51893.0504291612     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -45655.4734260892     
+ total energy      -45655.4734260895     
  
  vstart       =     -3397853.2350136749       -46068.9125216549
- vend         =     -3403242.0741505492       -45655.4734260892
- vbox         =     -3403242.0741505828       -45655.4734260878
+ vend         =     -3403242.0741505539       -45655.4734260895
+ vbox         =     -3403242.0741505874       -45655.4734260884
  
  Averages and fluctuations                                  Box  1       Box  2
  
@@ -483,4 +483,4 @@ number of chains of type    1 undefined      133
  type  box       vinter       vintra         vtor        vbend        vtail
     1    1      0.00000      0.00000      0.00000      0.00000      0.00000
     1    2      0.00000      0.00000      0.00000      0.00000      0.00000
- Program ended at 2016-02-10 21:26:14.006
+ Program ended at 2016-02-18 18:03:13.403

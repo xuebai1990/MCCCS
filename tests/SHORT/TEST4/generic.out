@@ -1,10 +1,10 @@
-Program started at 2016-02-10 21:25:28.726
+Program started at 2016-02-18 18:02:28.003
 Number of processors: 1
 Threads per processor: 1
 
 MCCCS topmon (branch: ABE)
-Commit hash: 6cec999
-Build on host: ln0003
+Commit hash: cf2a30e
+Build on host: ln0004
 Preprocessor definitions: __DOUBLE_PRECISION__;__USEOWN__;__MPI__
 Using Intel compiler: /soft/intel/x86_64/2013/composer_xe_2013/composer_xe_2013.5.192/bin/intel64/ifort
 
@@ -535,10 +535,10 @@ molecule  1:   0.00000000      0.00000000
  number of chains         187
 number of chains of type    1 undefined      187
  inter lj energy   -339462.604758098     
- intra lj energy    98619.7462783838     
+ intra lj energy    98619.7462783839     
  Tail correction   -13534.1064121553     
  bond vibration    0.000000000000000E+000
- bond bending       367422.731437483     
+ bond bending       367422.731437484     
  torsional          285793.395541869     
  external          0.000000000000000E+000
  coulombic energy  -1024491.15286848     
@@ -550,20 +550,20 @@ number of chains of type    1 undefined      187
  number of chains          13
 number of chains of type    1 undefined       13
  inter lj energy   -1799.56083753583     
- intra lj energy    7452.75290038237     
+ intra lj energy    7452.75290038248     
  Tail correction   -30.6608868706119     
  bond vibration    0.000000000000000E+000
- bond bending       25856.7448906334     
+ bond bending       25856.7448906336     
  torsional          23297.8236130257     
  external          0.000000000000000E+000
- coulombic energy  -35841.3669026570     
+ coulombic energy  -35841.3669026569     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy       18966.3936638486     
+ total energy       18966.3936638491     
  
- vstart       =      -604262.7470180909        16004.4072010520
- vend         =      -612117.8843688446        18966.3936638486
- vbox         =      -612117.8843688380        18966.3936638494
+ vstart       =      -604262.7470180907        16004.4072010520
+ vend         =      -612117.8843688453        18966.3936638491
+ vbox         =      -612117.8843688389        18966.3936638493
  
  Averages and fluctuations                                  Box  1       Box  2
  
@@ -669,4 +669,4 @@ number of chains of type    1 undefined       13
  block    energy     density    pressure    surf ten   mol fracs
    1  0.1093E+05  0.2616E-01  0.9522E+03 -0.4199E+00  0.1000E+01
    2  0.1706E+05  0.2798E-01  0.7601E+03  0.7053E+00  0.1000E+01
- Program ended at 2016-02-10 21:25:42.912
+ Program ended at 2016-02-18 18:02:42.150

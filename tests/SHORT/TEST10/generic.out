@@ -1,10 +1,10 @@
-Program started at 2016-02-10 21:27:04.162
+Program started at 2016-02-18 18:04:04.967
 Number of processors: 1
 Threads per processor: 1
 
 MCCCS topmon (branch: ABE)
-Commit hash: 6cec999
-Build on host: ln0003
+Commit hash: cf2a30e
+Build on host: ln0004
 Preprocessor definitions: __DOUBLE_PRECISION__;__USEOWN__;__MPI__
 Using Intel compiler: /soft/intel/x86_64/2013/composer_xe_2013/composer_xe_2013.5.192/bin/intel64/ifort
 
@@ -615,9 +615,9 @@ number of chains of type    3 undefined        0
  coulombic energy  -182851.535781949     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy       447714.692666224     
+ total energy       447714.692666225     
  
- box             1  initial v   =    447714.692666224     
+ box             1  initial v   =    447714.692666225     
  surf. tension :   box 1 =      19.05400
  pressure check:   box 1 =      -2315.96
  
@@ -845,7 +845,7 @@ number of chains of type    3 undefined        0
  intra lj energy   -4938.87450659646     
  Tail correction   -2359.12835536998     
  bond vibration    0.000000000000000E+000
- bond bending       74506.9816187048     
+ bond bending       74506.9816187049     
  torsional          72750.3012532771     
  external          -413991.805465737     
  coulombic energy  -185740.963642617     
@@ -865,10 +865,10 @@ number of chains of type    3 undefined        1
  bond bending       1364.69856940921     
  torsional          1462.11433308555     
  external          0.000000000000000E+000
- coulombic energy  -10607330.1651697     
+ coulombic energy  -10607330.1651696     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -9082616.63960427     
+ total energy      -9082616.63960426     
  
  sumup control
  number of chains           9
@@ -887,9 +887,9 @@ number of chains of type    3 undefined        1
  well energy       0.000000000000000E+000
  total energy      -1751.16628597779     
  
- vstart       =       447714.6926662242     -9061870.5928109866        -1484.4042737162
- vend         =      -492674.3632142121     -9082616.6396042723        -1751.1662859778
- vbox         =      -492674.3632142127     -9082616.6396041662        -1751.1662859778
+ vstart       =       447714.6926662246     -9061870.5928109866        -1484.4042737162
+ vend         =      -492674.3632142121     -9082616.6396042611        -1751.1662859778
+ vbox         =      -492674.3632142122     -9082616.6396041494        -1751.1662859777
  
  Averages and fluctuations                                  Box  1       Box  2       Box  3
  
@@ -941,4 +941,4 @@ number of chains of type    3 undefined        1
     3    1      0.00000      0.00000      0.00000      0.00000      0.00000
     3    2      0.00000      0.00000      0.00000      0.00000      0.00000
     3    3      0.00000      0.00000      0.00000      0.00000      0.00000
- Program ended at 2016-02-10 21:27:44.745
+ Program ended at 2016-02-18 18:04:46.605

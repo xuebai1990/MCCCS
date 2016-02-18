@@ -1,10 +1,10 @@
-Program started at 2016-02-10 21:25:43.089
+Program started at 2016-02-18 18:02:42.452
 Number of processors: 1
 Threads per processor: 1
 
 MCCCS topmon (branch: ABE)
-Commit hash: 6cec999
-Build on host: ln0003
+Commit hash: cf2a30e
+Build on host: ln0004
 Preprocessor definitions: __DOUBLE_PRECISION__;__USEOWN__;__MPI__
 Using Intel compiler: /soft/intel/x86_64/2013/composer_xe_2013/composer_xe_2013.5.192/bin/intel64/ifort
 
@@ -496,7 +496,7 @@ number of chains of type    3 undefined      120
  
  vstart       =    -34805612.6326730028
  vend         =    -35041415.6007145345
- vbox         =    -35041415.6007133126
+ vbox         =    -35041415.6007135659
  
  Averages and fluctuations                                  Box  1
  
@@ -595,4 +595,4 @@ number of chains of type    3 undefined      120
    8 -0.3485E+08  0.1861E+01  0.0000E+00  0.0000E+00  0.1667E+00  0.5000E+00  0.3333E+00
    9 -0.3489E+08  0.1854E+01  0.0000E+00  0.0000E+00  0.1667E+00  0.5000E+00  0.3333E+00
   10 -0.3507E+08  0.1855E+01  0.0000E+00  0.0000E+00  0.1667E+00  0.5000E+00  0.3333E+00
- Program ended at 2016-02-10 21:26:03.508
+ Program ended at 2016-02-18 18:03:02.627

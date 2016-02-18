@@ -95,7 +95,7 @@ if(JOB_FARMING)
     endif()
   elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
     # icpc
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -xHost -ipo -no-prec-div")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -xHost -ipo -prec-div")
     set(CMAKE_CXX_FLAGS_DEBUG   "-O0 -g -traceback -check all -warn unused -warn declarations -warn truncated_source -warn uncalled -warn ignore_loc -stand f08 -D__DEBUG__")
     if(USE_OPENMP)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -openmp")
@@ -187,7 +187,7 @@ elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "G95")
   endif()
 elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
   # ifort
-  set(CMAKE_Fortran_FLAGS_RELEASE "-free -fpp -O3 -xHost -ipo -no-prec-div")# -opt-streaming-stores always -no-unroll-aggressive -scalar-rep -Zp16 -nolib-inline") #-tpp2 for SGI Altix ia64 architecture
+  set(CMAKE_Fortran_FLAGS_RELEASE "-free -fpp -O3 -xHost -ipo -prec-div")# -opt-streaming-stores always -no-unroll-aggressive -scalar-rep -Zp16 -nolib-inline") #-tpp2 for SGI Altix ia64 architecture
   set(CMAKE_Fortran_FLAGS_DEBUG   "-free -fpp -O0 -g -traceback -check all -warn unused -warn declarations -warn truncated_source -warn uncalled -warn ignore_loc -stand f08 -D__DEBUG__")
   if(USE_OPENMP)
     set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -openmp")

@@ -1,10 +1,10 @@
-Program started at 2016-02-10 21:26:48.835
+Program started at 2016-02-18 18:03:49.829
 Number of processors: 1
 Threads per processor: 1
 
 MCCCS topmon (branch: ABE)
-Commit hash: 6cec999
-Build on host: ln0003
+Commit hash: cf2a30e
+Build on host: ln0004
 Preprocessor definitions: __DOUBLE_PRECISION__;__USEOWN__;__MPI__
 Using Intel compiler: /soft/intel/x86_64/2013/composer_xe_2013/composer_xe_2013.5.192/bin/intel64/ifort
 
@@ -580,4 +580,4 @@ number of chains of type    1 undefined      300
  
  type  box       vinter       vintra         vtor        vbend        vtail
     1    1      0.00000      0.00000      0.00000      0.00000      0.00000
- Program ended at 2016-02-10 21:27:03.908
+ Program ended at 2016-02-18 18:04:04.091
