@@ -517,7 +517,7 @@ contains
            time_cycle = time_cycle + (time_cur - time_st)
            time_av = time_cycle / (nnn-nnn_1st+1.0E0_dp)
            if (time_cur.gt.(time_limit-time_av-120.0E0_dp)) exit
-       end if 
+       end if
     end do
 !********************************************
 ! ends the loop over cycles                **
@@ -1536,7 +1536,7 @@ contains
        read(UNIT=io_input,NML=mc_shared,iostat=jerr)
        if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_shared',jerr)
     end if
- 
+
     call mp_bcast(seed,1,rootid,groupid)
     call mp_bcast(nbox,1,rootid,groupid)
     call mp_bcast(nmolty,1,rootid,groupid)
@@ -1868,9 +1868,9 @@ contains
                 else if (imol.eq.nmolty+1) then
                    call err_exit(__FILE__,__LINE__,'Section MOLECULE_TYPE has more than nmolty records!',jerr)
                 end if
-                
+
                 if (scan(line_in(1:10),'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ') >= 1) then
-                ! nunit nugrow ncarbon maxcbmc maxgrow iring lelect lring lrigid lbranch lsetup lq14scale qscale iurot isolute 
+                ! nunit nugrow ncarbon maxcbmc maxgrow iring lelect lring lrigid lbranch lsetup lq14scale qscale iurot isolute
                     read(line_in,*) molecname(imol),nunit(imol),nugrow(imol),ncarbon(imol),nmaxcbmc(imol),maxgrow(imol),iring(imol)&
                ,lelect(imol),lring(imol),lrigid(imol),lbranch(imol),lsetup,lq14scale(imol),qscale(imol),iurot(imol),isolute(imol)
                 else
@@ -2418,9 +2418,9 @@ contains
 !> at the end of each 'nunit' line in the fort.4. I've restored the original
 !location of the biasing potentials to the end of the
 !> file, where that are simply listed for each molecule in each box.
-    
+
   ! Looking for section UNIFORM_BIASING_POTENTIALS
-    if (myid.eq.rootid) then  
+    if (myid.eq.rootid) then
        REWIND(io_input)
        UNIFORM_BIASING_POTENTIALS:DO
           call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
@@ -2446,7 +2446,7 @@ contains
                  if (lprint) then
                      write(io_output,'(A)') 'Molecule type, biasing potential 1 through nbox [K]: '
                          do imol=1,nmolty
-                
+
                              write(io_output,'(3(1X,F9.3))') (eta2(i,imol),i=1,nbox)
                          end do
                  end if
@@ -2456,7 +2456,7 @@ contains
     end if
     call mp_bcast(eta2,nbxmax*ntmax,rootid,groupid)
 
-    
+
 !> \brief Read in required specification on specific atoms for atom translation
 !moves.
 !
@@ -2468,7 +2468,7 @@ contains
 
 
   ! Looking for section SPECIFIC_ATOM_TRANSL
-    if (myid.eq.rootid) then    
+    if (myid.eq.rootid) then
         REWIND(io_input)
         READ_ATOM_TRANSL:DO
             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
@@ -2490,14 +2490,14 @@ contains
                 call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
                 if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section SPECIFIC_ATOM_TRANSL',jerr)
             end if
-     
+
             call mp_bcast(line_in,rootid,groupid)
             if (UPPERCASE(line_in(1:24)).eq.'END SPECIFIC_ATOM_TRANSL') exit
 
             ! Read in the number of atoms on which to do atom translations
             read(line_in,*) natomtrans_atoms
             allocate(atomtrans_atomlst (natomtrans_atoms))
-            allocate(atomtrans_moleclst(natomtrans_atoms))  
+            allocate(atomtrans_moleclst(natomtrans_atoms))
 
             ! Read in what those atoms are, and then what molecule they belong to
 
@@ -2699,11 +2699,11 @@ contains
           if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section MC_FLUCQ not found',jerr)
           if (UPPERCASE(line_in(1:12)).eq.'END MC_FLUCQ') exit cycle_read_fq
           if (UPPERCASE(line_in(1:8)).eq.'MC_FLUCQ') then
-             
+
              do i=1,nntype
                 call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
                 if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_FLUCQ',jerr)
-                
+
                 !> fqmolty = molecule type number for the fluctuating charge molecule
                 !> fqtyp = ntii = line number where this bead appears in the ATOMS section
                 !> xiq(fqtyp) = hardness parameter for each bead
@@ -2711,12 +2711,12 @@ contains
                 read(line_in,*) fqmolty, fqtyp, xiq(fqtyp), jayself(fqtyp)
                 !write(6,*) fqmolty, fqtyp, xiq(fqtyp), jayself(fqtyp)
              end do
-             
+
              !write(6,*) nntype
              do i=1,nntype*nntype
                 call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
                 if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section MC_FLUCQ',jerr)
-                
+
                 !> fqcrosstyp = ntij = (ntii - 1)*nntype + ntjj (nntype is total number of lines in ATOMS section)
                 !> jayq(fqcrosstyp) = coulomb integral parameter for interacting beads
                 read(line_in,*) fqmolty, fqcrosstyp, jayq(fqcrosstyp)
@@ -2742,7 +2742,7 @@ contains
           end do
        end if
     endif
-    
+
 ! -------------------------------------------------------------------
     !> read information for grand-canonical ensemble simulations
     if (lgrand) then
@@ -2876,7 +2876,7 @@ contains
     if (myid.eq.rootid) close(io_input)
 ! ===================================================================
     !> Initialize the system or read configuration from the restart file
-    
+
     ! Q. Paul C. -- for tabulated CBMC bending growth
     if (L_cbmc_bend) then
         call setup_cbmc_bend(file_cbmc_bend)
@@ -2915,7 +2915,7 @@ contains
        ! 06/08/09 KM
 
        read(io_restart,*) (rmvol(ibox),ibox=1,nbox)
- 
+
        do ibox=1,nbox
           if (lsolid(ibox).and..not.lrect(ibox)) then
              read(io_restart,*) (rmhmat(ibox,j),j=1,9)
@@ -3570,7 +3570,7 @@ contains
                   call writePDBmovie(io_box_movie_pdb(ibox),ibox)
               end do
           end if
-                         
+
        end if
     end if
 ! -------------------------------------------------------------------

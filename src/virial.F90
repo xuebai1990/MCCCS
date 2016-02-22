@@ -10,7 +10,7 @@
 !>
 !> Uses a trapezoidal integration to integrate the virial coefficient of a
 !> specific conformation of two molecules. The contribution to B2 is then weighted
-!> according to the configurational intramolecular energy. 
+!> according to the configurational intramolecular energy.
 !> I.e. we compute the boltzmann weighted (via intramolecular energy) B2 virail
 !> coefficient
 !> subroutine parameters:
@@ -40,7 +40,7 @@ subroutine virial(binvirnumerator,binvirdenominator)
 #endif
 
       firstval=.true.
-      ! start by comptuing the intramolecular energy. 
+      ! start by comptuing the intramolecular energy.
       ! this is used to properly weight the integral
       call U_bonded(1,moltyp(1),vvib,vvbend,vvtors)
       Uintramol1=vvib+vvbend+vvtors
@@ -48,13 +48,13 @@ subroutine virial(binvirnumerator,binvirdenominator)
       Uintramol2=vvib+vvbend+vvtors
       ! We now need to include the nonbonded portion of the intramolecular
       ! energies. It is very important that we don't have the molecules in the
-      ! same box. 
+      ! same box.
       ! This is done to distinguish the inter- and intramolecular portions of
       ! the electric and ewald interactions. Being in individual boxes we won't
-      ! see them interact with each other. 
+      ! see them interact with each other.
       ! also note I will later want to subtract the intramolecular portion of
       ! these energies from the energy calculated when the molecules are in the
-      ! same box. 
+      ! same box.
 
       call energy(1,moltyp(1),vmol1,1,nboxi(1),1,nunit(1),.true.,olp,.false.,.false.,.false.,.false.)
       call energy(2,moltyp(2),vmol2,1,nboxi(2),1,nunit(2),.true.,olp,.false.,.false.,.false.,.false.)
@@ -87,13 +87,13 @@ subroutine virial(binvirnumerator,binvirdenominator)
         do jj=1,nunit(jmolty)
             ! center them ontop of each other in the y- and z- directions.
             ! Slowly translate molecule 2 down the x axis until we reach begin
-            ! to overlap. If we overlap then the energy will be infinity. 
+            ! to overlap. If we overlap then the energy will be infinity.
             rxuion(jj,2) = rxu(2,jj)-xdiff+deviation
             ryuion(jj,2) = ryu(2,jj)-ydiff
             rzuion(jj,2) = rzu(2,jj)-zdiff
         end do
         ! compute the energy of the system as if the second molecule was in hte
-        ! same box as the first molecule at a distance of deviation away. 
+        ! same box as the first molecule at a distance of deviation away.
         call energy(2,jmolty,vEnergy,2,nboxi(1),1,nunit(jmolty),.false.,olp,.false.,.false.,.false.,.false.)
         uIntermolecular = vEnergy(ivInterLJ)+vEnergy(ivTail)+vEnergy(ivElect)+vEnergy(iv3body)+vEnergy(ivFlucq)
         ! subtract out the intramolecular contrubutions to the electric
@@ -108,24 +108,24 @@ subroutine virial(binvirnumerator,binvirdenominator)
             mayerterm=0.0
         else if (smallexpfact > softcut.or.olp) then
             ! essentially these are states where the energy appears to be
-            ! infinite. 
+            ! infinite.
             mayerterm = 0.0E0_dp
         else
             mayerterm = exp(-uIntermolecular/virtemp)
-        end if 
+        end if
         ! the 2* accounts for the double counting of terms in the trapezoidal
-        ! method. These are later removed by dividing by 2. 
+        ! method. These are later removed by dividing by 2.
         integralvalue=integralvalue+2*(1-mayerterm)*deviation**2
         if(firstval) then
           !stores the first term because the first and last terms have half
-          !value of the rest of the terms in the trapezoidal integration scheme. 
+          !value of the rest of the terms in the trapezoidal integration scheme.
           firstval = .false.
           storefirstval = integralvalue/2.0
         end if
         deviation = deviation-stepvir
       end do
       ! handles the end points of the trapezoidal rule which have half of the
-      ! value of all of the other points. 
+      ! value of all of the other points.
       integralvalue = integralvalue-storefirstval
       integralvalue = integralvalue-(1.0-mayerterm)*(deviation+stepvir)**2
       ! now multiply by the constant terms in the integral... 2pi*dr and divide
@@ -138,7 +138,7 @@ subroutine virial(binvirnumerator,binvirdenominator)
           call err_exit(__FILE__,__LINE__,'',myid+1)
       else
           boltzfact = exp(-(fullexpfact)/virtemp)
-      end if 
+      end if
       fullexpfact = -(Uintramol1+Uintramol2)/virtemp
       binvirdenominator=binvirdenominator+boltzfact
       binvirnumerator = binvirnumerator+boltzfact*integralvalue
@@ -147,4 +147,4 @@ subroutine virial(binvirnumerator,binvirdenominator)
       write(io_output,*) 'end VIRIAL in ',myid
 #endif
 
-end subroutine virial 
+end subroutine virial

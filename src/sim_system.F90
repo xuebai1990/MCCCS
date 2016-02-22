@@ -103,7 +103,7 @@ module sim_system
   !=== Analysis ===
   integer,parameter::nEnergy=14,ivTot=1,ivInterLJ=2,ivTail=3,ivIntraLJ=4,ivStretching=5,ivBending=6,ivTorsion=7,ivElect=8,ivExt=9&
    ,iv3body=10,ivFlucq=11,ivIpswb=12,ivWellIpswb=13,ivEwald=14
-  real,allocatable::vbox(:,:) !< (j,ibox): energies of ibox; 
+  real,allocatable::vbox(:,:) !< (j,ibox): energies of ibox;
                               !< j = 1: total energy;
                               !< 2: intermolecular LJ;
                               !< 3: tail correction;
@@ -252,7 +252,7 @@ module sim_system
   integer::gcbmc_mol_num !< number of molecules using group CBMC
   integer,allocatable::gcbmc_mol_list(:) !< corresponding list of moltype with gcbmc_moltype
   integer,allocatable::gcbmc_unit_num(:) !< number of repeat unit for moltype with gcbmc_moltype
-  integer,allocatable::gcbmc_unit_moltype(:,:) !< molecule type of repeat units   
+  integer,allocatable::gcbmc_unit_moltype(:,:) !< molecule type of repeat units
   integer,allocatable::gcbmc_unit_list(:,:,:) !< corresponding list of beads
   logical::l_gcbmc_movie=.false. !< whether to write gcbmc reservoir box information to the movie file
 
