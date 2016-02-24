@@ -1,12 +1,12 @@
-Program started at 2016-02-10 21:26:23.698
+Program started at 2016-02-25 14:09:12.202
 Number of processors: 1
 Threads per processor: 1
 
 MCCCS topmon (branch: ABE)
-Commit hash: 6cec999
-Build on host: ln0003
+Commit hash: 8517b14
+Build on host: metropolis1.chem.umn.edu
 Preprocessor definitions: __DOUBLE_PRECISION__;__USEOWN__;__MPI__
-Using Intel compiler: /soft/intel/x86_64/2013/composer_xe_2013/composer_xe_2013.5.192/bin/intel64/ifort
+Using Intel compiler: /share/apps/intel/composer_xe_2013.1.117/bin/intel64/ifort
 
  run_num: 1    
  suffix: a
@@ -278,8 +278,7 @@ iupdatefix: 10
 pmcb:  0.340000000    
 
 molecule type: nchoi1  nchoi nchoir nchoih nchtor nchbna nchbnb icbdir icbsta 1st_bead_swap
-            1:     10      8     10      1    100   1000   1000      0      0
-      1
+            1:     10      8     10      1    100   1000   1000      0      0      1
 
 molecule type:    pmcbmt         pmall  avbmc_version    pmbias        pmbsmt       pmbias2         pmfix   lrig
             1:  1.000000       0.00000              0   0.00000       0.00000       0.00000       0.00000      F
@@ -457,11 +456,11 @@ molecule  1:   0.00000000      0.00000000
  sumup control
  number of chains         180
 number of chains of type    1 undefined      180
- inter lj energy   -243864.331696920     
+ inter lj energy   -243864.331696923     
  intra lj energy    57662.0982870516     
  Tail correction   -19514.4537596172     
  bond vibration    0.000000000000000E+000
- bond bending       1598129.37224181     
+ bond bending       1598129.37224182     
  torsional          818839.927012075     
  external          0.000000000000000E+000
  coulombic energy  0.000000000000000E+000
@@ -472,8 +471,8 @@ number of chains of type    1 undefined      180
  sumup control
  number of chains          20
 number of chains of type    1 undefined       20
- inter lj energy   -182.074271360027     
- intra lj energy    5029.78751537654     
+ inter lj energy   -182.074271360018     
+ intra lj energy    5029.78751537596     
  Tail correction   -21.1506552289709     
  bond vibration    0.000000000000000E+000
  bond bending       159762.028790891     
@@ -482,17 +481,17 @@ number of chains of type    1 undefined       20
  coulombic energy  0.000000000000000E+000
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy       262837.306991649     
+ total energy       262837.306991648     
  
  vstart       =      -367905.2979132272        -3533.8603734371
- vend         =      2230767.0658440208       262837.3069916490
- vbox         =      2230767.0658440972       262837.3069916506
+ vend         =      2230767.0658440185       262837.3069916484
+ vbox         =      2230767.0658440818       262837.3069916493
  
  Averages and fluctuations                                  Box  1       Box  2
  
- pressure                                      [kPa] =    687802.75      1306.65
- pressure                         [simulation units] =    49.817357     0.094641
- surface tension                              [mN/m] =    -466.3386      -0.0318
+ pressure                                      [kPa] =    687802.77      1306.65
+ pressure                         [simulation units] =    49.817359     0.094641
+ surface tension                              [mN/m] =    -466.3385      -0.0318
  chem. potential of type   1 undefined           [K] =        0.000        0.000
  boxlength                                       [A] =       40.000       90.000
  boxlength                                       [A] =       40.000       90.000
@@ -539,7 +538,7 @@ number of chains of type    1 undefined       20
  system volume    box  2 =  0.72900E+06  0.38417E-08  0.38417E-08
  pressure         box  1 =  0.68780E+06  0.11276E+06  0.11276E+06
  pressure         box  2 =   1306.7       8.4471       8.4471    
- surface tension  box  1 =   -466.33859    277.64876    277.64876
+ surface tension  box  1 =   -466.33848    277.64865    277.64865
  surface tension  box  2 =     -0.03183      0.03437      0.03437
  
  Total energy     box  1 =  0.19680E+07  0.28190E+06  0.28190E+06
@@ -592,4 +591,4 @@ number of chains of type    1 undefined       20
  block    energy     density    pressure    surf ten   mol fracs
    1  0.2300E+06  0.5204E-02  0.1315E+04 -0.6621E-01  0.1000E+01
    2  0.2624E+06  0.5204E-02  0.1298E+04  0.2540E-02  0.1000E+01
- Program ended at 2016-02-10 21:26:48.554
+ Program ended at 2016-02-25 14:09:42.951

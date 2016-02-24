@@ -132,7 +132,7 @@ contains
 ! Call qqcheck to setup the group based qq cutoff
 ! call qqcheck(i,ibox,rxnew(1),rynew(1),rznew(1))
 ! end if
-     
+
 ! grow new chain conformation
       if (grouptype .eq. 1) then
          call group_cbmc_grow(.true.,lterm,i,imolty,ibox)
@@ -161,7 +161,7 @@ contains
 ! grow old chain conformation
       if (grouptype .eq. 1) then
          call group_cbmc_grow(.false.,lterm,i,imolty,ibox)
-      else 
+      else
          call rosenbluth(.false.,lterm,i,i,imolty,islen,ibox,igrow,vdum,lfixnow,cwtorfo,1)
       end if
 
@@ -530,7 +530,7 @@ contains
 !> \param lfixnow SAFE-CBMC
 !> \param cwtorf rosenbluth weight of the crank-shaft move for the last torsion
 !> \param movetype 1 = config moves;\n
-!>           2 = swap/swatch moves for flexible molecule 
+!>           2 = swap/swatch moves for flexible molecule
 !>           3 = swatch moves for rigid molecules that do not need rigrot but do need regrowth;\n
 !>           4 = swatch moves for completely rigid molecule that regrow nothing
 !>           5 = swatch moves for rigid molecules when nsampos=2
@@ -1389,14 +1389,14 @@ contains
           isegment = int(random(-1) * (unit_num_local - 1)) + 1 !< 1,...,n - 1
           if (idir .eq. -1) then
              isegment = isegment + 1
-          end if   
- 
+          end if
+
           if (idir .eq. -1) then
              iutry = gcbmc_unit_list(gcbmc_imolty, isegment, 1)
-             gcbmc_prev = gcbmc_unit_list(gcbmc_imolty, isegment, 2) 
+             gcbmc_prev = gcbmc_unit_list(gcbmc_imolty, isegment, 2)
           else
              iutry = gcbmc_unit_list(gcbmc_imolty, isegment, 2)
-             gcbmc_prev = gcbmc_unit_list(gcbmc_imolty, isegment, 1) 
+             gcbmc_prev = gcbmc_unit_list(gcbmc_imolty, isegment, 1)
           end if
           growfrom(1) = iutry
        else if (grouptype .eq. 2) then
@@ -1440,7 +1440,7 @@ contains
           ! regrow all of legal branches (check idir )
 
           ! if group-CBMC of repeat unit, something is wrong
-          if (grouptype.eq.2) call err_exit(__FILE__,__LINE__,'something wrong with group-CBMC scheduler',myid+1) 
+          if (grouptype.eq.2) call err_exit(__FILE__,__LINE__,'something wrong with group-CBMC scheduler',myid+1)
 
           count = 0
           do ivib = 1,invtry
@@ -1816,7 +1816,7 @@ contains
 
     ! Q. Paul C. -- for tabulated CBMC bending growth
     logical::use_bend_table=.false. ! whether to use this type of growth
-    real::delta_prob 
+    real::delta_prob
     real,dimension(2)::theta1_interval,theta2_interval,phi12_interval ! the angle interval being picked
     integer::ileft,iright,imedian,iprob,ilin,ibr  ! used for searching the angle interval when given a random number (sorting)
     integer::itheta1,itheta2,iphi12
@@ -1939,38 +1939,38 @@ contains
     vbbtr = 0.0E0_dp
 
     ! Q. Paul C. -- Determine if CBMC_bend_table is used
-    if ( L_cbmc_bend ) then 
+    if ( L_cbmc_bend ) then
         ! linear case
         if ( ntogrow .eq. 1 .and. angstart .eq. 1) then
             branch_num = 0
             iugrow = growlist(iw,ntogrow)
-            
+
             do ib = 1, inben(imolty,iugrow)
                 iulast = ijben2(imolty,iugrow,ib)
-                if ( iulast .eq. iufrom ) then 
+                if ( iulast .eq. iufrom ) then
                     iu2back = ijben3(imolty,iugrow,ib)
-                    if ( iu2back .eq. iuprev ) then 
+                    if ( iu2back .eq. iuprev ) then
                         type = itben(imolty,iugrow,ib)
                         equil = brben(type)
                         kforce = brbenk(type)
-                        exit 
+                        exit
                     end if
                 end if
-            end do    
-            
+            end do
+
             ! Look for the tabulated values corresponding to the angle type
             use_bend_table = .false.
             do ilin=1,size(lin_bend_type)
-                if ( lin_bend_type(ilin) .eq. type ) then 
+                if ( lin_bend_type(ilin) .eq. type ) then
                     use_bend_table = .true.
-                    exit 
+                    exit
                 end if
             end do
 
         ! one-branch case
         else if ( ntogrow .eq. 2 .and. angstart .eq. 1 ) then
             branch_num = 1
-            
+
             ! find force field parameter for theta1 and theta2
             do count = angstart,ntogrow
                 iugrow = growlist(iw,count)
@@ -1990,7 +1990,7 @@ contains
                         end if
                     end if
                 end do
-            end do   
+            end do
 
             ! Look for the tabulated values corresponding to the angle type
             use_bend_table = .false.
@@ -2000,7 +2000,7 @@ contains
                     exit
                 end if
             end do
-        
+
         ! double-branch case, not implemented for tabulated CBMC growth yet
         else
             use_bend_table = .false.
@@ -2016,7 +2016,7 @@ contains
             ! first, perform the biased selection for (almost) equally-likely space
             rid=-1
             rbf = random(rid)
-                    
+
             ! log(n) selection of the tabulated value
             ileft=1
             iright=lin_bend_dim(ilin)
@@ -2028,7 +2028,7 @@ contains
                     iright=imedian
                 end if
             end do
-                    
+
             ! Make sure that it is the leftest one (in case some values are identical)
             if (ileft .gt. 1) then
                 do while ( lin_bend_prob(ilin,ileft-1) .eq. lin_bend_prob(ilin,ileft) )
@@ -2038,10 +2038,10 @@ contains
                     end if
                 end do
             end if
-                    
+
             theta1_interval(1)=lin_bend_table(ilin,ileft)
             theta1_interval(2)=lin_bend_table(ilin,iright)
-                
+
             ! then perform random selection among the interval
             rbf = random(rid)
             angle=rbf*(theta1_interval(2)-theta1_interval(1))+theta1_interval(1)
@@ -2059,7 +2059,7 @@ contains
             anglec = ( xvecprev*xvecgrow + yvecprev*yvecgrow  + zvecprev*zvecgrow ) / (distprev*distgrow)
             angle = acos(anglec)
             vangle = kforce * (angle - equil)**2
-                    
+
             ! log(n) selection of the angle interval
             ileft=1
             iright=lin_bend_dim(ilin)
@@ -2071,18 +2071,18 @@ contains
                     iright=imedian
                 end if
             end do
-                    
+
             theta1_interval(1)=lin_bend_table(ilin,ileft)
             theta1_interval(2)=lin_bend_table(ilin,iright)
             delta_prob=(lin_bend_prob(ilin,iright)-lin_bend_prob(ilin,ileft))
             bsum_try = bsum_try + sin(angle)*exp(-beta*vangle)*(theta1_interval(2)-theta1_interval(1))/delta_prob
         end if
-             
+
         ! propagate the rosenbluth weight
-        wei_bend = wei_bend * bsum_try 
+        wei_bend = wei_bend * bsum_try
         bendang(angstart) = angle
         vbbtr = vbbtr + vangle
-            
+
         ! The following part is the same as the normal growth
         if ( lnew ) then
             ! assign phi(angstart) to 0.0
@@ -2109,17 +2109,17 @@ contains
 
             call cone(3,ux,uy,uz,bendang(angstart),phi(angstart))
         end if
-             
+
     ! if use tabulated CBMC_bend_table to grow single-branch two beads
     else if (use_bend_table .and. branch_num .eq. 1) then
         bsum_try = 0.0E0_dp
-                
+
         if ( lnew ) then
             ! new conformation
             ! first, perform the biased selection for (almost) equally-likely space
             rid=-1
             rbf = random(rid)
-                    
+
             ! log(n) selection of the tabulated value, and back calculate the corresponding theta1,theta2,phi12
             ileft=1
             iright=br_bend_dim1(ibr)*br_bend_dim2(ibr)*br_bend_dim3(ibr)+1
@@ -2131,7 +2131,7 @@ contains
                     iright=imedian
                 end if
             end do
-                    
+
             ! Make sure that it is the leftest one (in case some values are identical)
             if (ileft .gt. 1) then
                 do while ( br_bend_prob(ibr,ileft-1) .eq. br_bend_prob(ibr,ileft))
@@ -2141,7 +2141,7 @@ contains
                     end if
                 end do
             end if
-                
+
             ! Converting the probability into a particular grid
             iphi12=mod(ileft,br_bend_dim3(ibr))
             if ( iphi12 .eq. 0) then
@@ -2155,13 +2155,13 @@ contains
             else
                 itheta2=mod(floor(ileft*1.0E0_dp/br_bend_dim3(ibr)),br_bend_dim2(ibr))+1
             end if
-                    
+
             if ( mod(ileft,br_bend_dim3(ibr)*br_bend_dim2(ibr)) .eq. 0) then
                 itheta1=floor(ileft*1.0E0_dp/(br_bend_dim3(ibr)*br_bend_dim2(ibr)))
             else
                 itheta1=floor(ileft*1.0E0_dp/(br_bend_dim3(ibr)*br_bend_dim2(ibr)))+1
             end if
-                    
+
             theta1_interval(1)=br_bend_theta1(ibr,itheta1)
             theta1_interval(2)=br_bend_theta1(ibr,itheta1+1)
             theta2_interval(1)=br_bend_theta2(ibr,itheta1,itheta2)
@@ -2177,27 +2177,27 @@ contains
             bendang(1) = angle
             phi(1) = 0.0E0_dp
             vbbtr = vbbtr + vangle
-                    
+
             ! theta2
             rbf = random(rid)
             angle=rbf*(theta2_interval(2)-theta2_interval(1))+theta2_interval(1)
             vangle = kforce * (angle - equil)**2
             bendang(2) = angle
             vbbtr = vbbtr + vangle
-                    
+
             ! phi12
             rbf = random(rid)
             phitwo=rbf*(phi12_interval(2)-phi12_interval(1))+phi12_interval(1)
-                    
+
             ! calculate theta12 from phi12, and calculate the bending potential based on theta12
             angle=cone_angle(bendang(1),phi(1),bendang(2),phitwo)
             vangle = kforce * (angle - equil)**2
             vbbtr = vbbtr + vangle
-                    
+
             if ( phitwo .gt. onepi ) then
                 phitwo=phitwo-twopi
             end if
-                    
+
             phi(2) = phitwo
             delta_prob=br_bend_prob(ibr,iright)-br_bend_prob(ibr,ileft)
             bsum_try = sin(bendang(1))*sin(bendang(2))*exp(-beta*vbbtr)* &
@@ -2214,14 +2214,14 @@ contains
                 zvecgrow = rzu(i,iugrow) - rzui
                 distgrow = bondlen(count)
                 distgrow2 = distgrow*distgrow
-                   
+
                 ! dot product divided by lengths gives cos(angle)
                 anglec = ( xvecprev*xvecgrow + yvecprev*yvecgrow  + zvecprev*zvecgrow ) / (distprev*distgrow)
                 angle = acos(anglec)
                 bendang(count) = angle
                 vangle = kforce * (angle - equil)**2
                 vbbtr = vbbtr + vangle
-                        
+
                 ! calculate phi1 and phi2 corresponding to theta1 and theta2
                 if ( count .eq. 1) then
                     xub = -xvecprev/distprev
@@ -2229,12 +2229,12 @@ contains
                     zub = -zvecprev/distprev
                     call cone(1,xub,yub,zub,dum,dum)
                 end if
-                   
+
                 ux = xvecgrow/distgrow
                 uy = yvecgrow/distgrow
                 uz = zvecgrow/distgrow
                 call cone(3,ux,uy,uz,bendang(count),phi(count))
-                
+
                 ! find the unit element corresponding to the angle
                 if ( count .eq. 1) then
                     ileft=1
@@ -2247,7 +2247,7 @@ contains
                             iright=imedian
                          end if
                      end do
-                      
+
                      itheta1=ileft
                      theta1_interval(1)=br_bend_theta1(ibr,itheta1)
                      theta1_interval(2)=br_bend_theta1(ibr,itheta1+1)
@@ -2264,7 +2264,7 @@ contains
                             iright = imedian
                         end if
                      end do
-                      
+
                      itheta2=ileft
                      theta2_interval(1)=br_bend_theta2(ibr,itheta1,itheta2)
                      theta2_interval(2)=br_bend_theta2(ibr,itheta1,itheta2+1)
@@ -2275,7 +2275,7 @@ contains
                      if ( phi12 .lt. 0) then
                         phi12=phi12+twopi
                      end if
-                            
+
                      ileft=1
                      iright=br_bend_dim3(ibr)+1
                      do while ( iright-ileft .gt. 1)
@@ -2286,32 +2286,32 @@ contains
                             iright=imedian
                         end if
                      end do
-                      
+
                      iphi12=ileft
                      phi12_interval(1)=br_bend_phi12(ibr,itheta1,itheta2,iphi12)
                      phi12_interval(2)=br_bend_phi12(ibr,itheta1,itheta2,iphi12+1)
                      iprob = iprob+iphi12
-                end if   
+                end if
             end do
-                    
+
             ! calculate theta12
             angle=cone_angle(bendang(1),phi(1),bendang(2),phi(2))
             vangle = kforce * (angle - equil)**2
             vbbtr = vbbtr + vangle
-                    
+
             ! weight calculation
-            delta_prob=(br_bend_prob(ibr,iprob+1)-br_bend_prob(ibr,iprob))      
+            delta_prob=(br_bend_prob(ibr,iprob+1)-br_bend_prob(ibr,iprob))
             bsum_try = sin(bendang(1))*sin(bendang(2))*exp(-beta*vbbtr)* &
               (theta1_interval(2)-theta1_interval(1))*(theta2_interval(2)-theta2_interval(1))* &
               (phi12_interval(2)-phi12_interval(1))/delta_prob
-        end if 
-        
+        end if
+
         ! propagate the rosenbluth weight
         wei_bend = wei_bend * bsum_try
 
     ! if not use tabulated CBMC_bend_table, regular CBMC growth
     else
- 
+
         nchben_a = nchbna(imolty)
         ! MPI
         if (numprocs.gt.1) then
@@ -2386,7 +2386,7 @@ contains
                         distgrow2 = distgrow*distgrow
                         ! dot product divided by lengths gives cos(angle)
                         anglec = ( xvecprev*xvecgrow + yvecprev*yvecgrow  + zvecprev*zvecgrow ) / (distprev*distgrow)
-                        if(anglec.gt.1.0E0_dp) then 
+                        if(anglec.gt.1.0E0_dp) then
                            angle = 0.0E0_dp
                         else if(anglec.lt.-1.0E0_dp) then
                            angle = onepi
@@ -2453,7 +2453,7 @@ contains
 
                 ! propagate the rosenbluth weight
                 wei_bend = wei_bend * bsum_try/dble(nchben_a)
-            
+
             else if (kforce.lt.-0.1E0_dp) then
                 ! freely-joint beads
                 rsint = 2.0E0_dp*random(-1) - 1.0E0_dp
@@ -2491,7 +2491,7 @@ contains
             ux = xvecgrow/distgrow
             uy = yvecgrow/distgrow
             uz = zvecgrow/distgrow
- 
+
             call cone(3,ux,uy,uz,bendang(angstart),phi(angstart))
         end if
 
@@ -2868,7 +2868,7 @@ contains
        bond = bond * requil
 
        ! correct for the bond energy by applying the boltzmann
-       ! weight to the bond length selection. 
+       ! weight to the bond length selection.
        vvib = kvib * (bond-requil )**2
        bf = exp ( -(vvib * betaT) )
        if ( random(-1) .ge. bf ) goto 107
@@ -2900,12 +2900,12 @@ contains
 
     return
   end subroutine bondlength
-  
+
   !> \brief Translate and rotate the rigid body such that the first and second beads match with given ones
   !> 1) Translate so that bead 1 matches with given bead 1
   !> 2) Rotate so that bead 2 matches with given bead 2
   !> If bead 3 is given as well, call subroutine align_rotate to do the rigid rotation around vector 12
-  !> \param first_bead, second_bead: the two bead numbers that need to be aligned with two target beads 
+  !> \param first_bead, second_bead: the two bead numbers that need to be aligned with two target beads
   !> \param nbead: number of repeat unit beads to move
   !> \param xi, yi, zi: input and output coordinates
   !> \param xtarget, ytarget, ztarget: size of 2, the coordinates of 2 given beads
@@ -2925,7 +2925,7 @@ contains
       xtrans = xtarget(1) - xi(first_bead)
       ytrans = ytarget(1) - yi(first_bead)
       ztrans = ztarget(1) - zi(first_bead)
-      
+
       do ibead = 1, nbead
           xi(ibead) = xi(ibead) + xtrans
           yi(ibead) = yi(ibead) + ytrans
@@ -2952,19 +2952,19 @@ contains
       vector_n = normalize_vector(vector_cross)
       vector_w = cross_product(vector_n, vector_a) !< vector_w and vector_a are the orthogonal vector in the planeof vector_a and vector_b
 
-      ! calculate angle theta to rotate 
+      ! calculate angle theta to rotate
       costheta = dot_product(vector_a, vector_b) / (sqrt(dot_product(vector_a,vector_a)*dot_product(vector_b,vector_b)))
       sintheta = sqrt(dot_product(vector_cross, vector_cross) / (dot_product(vector_a,vector_a)*dot_product(vector_b,vector_b)))
       s = atan2(dot_product(vector_w, vector_b), dot_product(vector_a, vector_b))
       if (atan2(dot_product(vector_w, vector_b), dot_product(vector_a, vector_b)) .gt. 0) then
           sintheta = -sintheta
       end if
-    
+
       ! set up the rotation matrix (see wikipedia "rotation matrix, axis and angle" for theoretical details)
       ! for clarity, the same notation is used as in wikipedia (smallc, bigc, s)
       smallc = costheta
       s = sintheta
-      bigc = 1 - smallc 
+      bigc = 1 - smallc
       Qrot(1, 1) = vector_n(1) * vector_n(1) * bigc + smallc
       Qrot(1, 2) = vector_n(2) * vector_n(1) * bigc - vector_n(3) * s
       Qrot(1, 3) = vector_n(1) * vector_n(3) * bigc + vector_n(2) * s
@@ -2989,9 +2989,9 @@ contains
       ! make sure it matches
       bead_err = abs((xi(second_bead) - xtarget(2))**2 + (yi(second_bead) - ytarget(2))**2 + (zi(second_bead) - ztarget(2))**2)
       if (bead_err .gt. 1e-4) then
-         call err_exit(__FILE__,__LINE__,'error in align_lines subroutine, the second bead does not match with the target',-1) 
+         call err_exit(__FILE__,__LINE__,'error in align_lines subroutine, the second bead does not match with the target',-1)
       end if
-     
+
   end subroutine align_lines
 
   !> \brief fix the first (or last) two beads, and rotate the third one by angle phi (0, 2pi)
@@ -3035,16 +3035,16 @@ contains
       I(2, 2) = 1.0
       I(3, 3) = 1.0
 
-      Qrot = I + sin(phi) * W + (2. * sin(.5 * phi)**2) * matmul(W, W) 
+      Qrot = I + sin(phi) * W + (2. * sin(.5 * phi)**2) * matmul(W, W)
 
       ! loop over all unit and grow
       do ibead = 1, nbead
           vector_grow(1) = xout(ibead) - bead2_coord(1)
           vector_grow(2) = yout(ibead) - bead2_coord(2)
           vector_grow(3) = zout(ibead) - bead2_coord(3)
-  
+
           vector_grow = matmul(Qrot, vector_grow)
- 
+
           xout(ibead) = vector_grow(1) + bead2_coord(1)
           yout(ibead) = vector_grow(2) + bead2_coord(2)
           zout(ibead) = vector_grow(3) + bead2_coord(3)
@@ -3087,7 +3087,7 @@ contains
     else
        igrow = riutry(imolty,1)
        igrow2 = 0
-    end if    
+    end if
 
     if (lnew) then
        rxorig = rxnew(igrow)
@@ -6162,7 +6162,7 @@ contains
 !> \b fcount(iu) = number of fcloses for iu \n
 !> \b movetype = 2 swap move
 !> \b          = 5 SAFE-swatch move
-!> \b findex = how many backbone beads to regrow 
+!> \b findex = how many backbone beads to regrow
 !> \b COLLIN = MASTER of the known universe
 !> \author Originally completed by Collin Wick around 1-1-2000
 !******************************************************************
@@ -6215,7 +6215,7 @@ contains
       if (movetype .eq. 2) then
          findex = fmaxgrow
       else if (movetype .eq. 5) then
-         ! don't do anything here because for SAFE-SWATCH, findex is an input variable 
+         ! don't do anything here because for SAFE-SWATCH, findex is an input variable
       else
          findex = int( random(-1) * dble(fmaxgrow - 1)) + 2
       end if
@@ -6295,7 +6295,7 @@ contains
             goto 100
          end if
 
-         invtry = invib(imolty,iutry) ! determining the number of vibrations that bead no. iutry has 
+         invtry = invib(imolty,iutry) ! determining the number of vibrations that bead no. iutry has
 
          if (invtry.eq.0) then
             call err_exit(__FILE__,__LINE__,'cant do safecbmc on single bead',myid+1)
@@ -6308,7 +6308,7 @@ contains
          else
 
  13         ivib = int(random(-1) * dble(invtry)) + 1  ! at a branch point, decide which way not to grow
- 
+
 !     ********************************
 ! ivib = 2
 !     *******************************
@@ -6414,7 +6414,7 @@ contains
       do j = 1, fnum(index)
          if (fnuma(index, j) .gt. 1) then
             if (movetype .eq. 5) then
-               call err_exit(__FILE__,__LINE__,'the safe-swatch closing bead cannot be at a branch point',myid+1) 
+               call err_exit(__FILE__,__LINE__,'the safe-swatch closing bead cannot be at a branch point',myid+1)
             else
                 kickout = kickout + 1
                 goto 100
@@ -7604,12 +7604,12 @@ contains
       real :: repeat_unit_rz(numax)
       real :: repeat_unit_rxp(numax), repeat_unit_ryp(numax), repeat_unit_rzp(numax), bead1_coord(3),bead2_coord(3)
       real, allocatable :: rxnew_temp(:), rynew_temp(:), rznew_temp(:)
-    
+
       ! MPI
       integer :: rcounts(numprocs),displs(numprocs),my_start,my_end,blocksize,my_itrial,rid
       real, allocatable :: my_bf_tor(:), my_vtorsion(:), my_phitors(:), my_vtorsion_procs(:)
       real, allocatable :: bf_tor(:), vtorsion(:),phitors(:)
-    
+
       iw = 1
       l_reach_end = .false.
       lterm = .false.
@@ -7621,7 +7621,7 @@ contains
       allocate(rxnew_temp(igrow), rynew_temp(igrow), rznew_temp(igrow))
       allocate(my_bf_tor(ichtor), my_vtorsion(ichtor), my_phitors(ichtor), my_vtorsion_procs(ichtor),&
          bf_tor(ichtor), vtorsion(ichtor), phitors(ichtor))
- 
+
       growprev_mol = growprev
       growfrom_mol = growfrom
       grownum_mol = grownum
@@ -7639,20 +7639,20 @@ contains
       else
           weiold = 1.0E0_dp
       end if
-         
+
       ! calculate the bond vectors that already exist and store in *vec_temp
       do iu = 1, igrow
           do iv = 1, invib(imolty,iu)
               ju = ijvib(imolty,iu,iv)
               if (lexist(iu) .and. lexist(ju)) then
-                  xvec(iu, ju) = rxnew(ju) - rxnew(iu) 
-                  yvec(iu, ju) = rynew(ju) - rynew(iu) 
-                  zvec(iu, ju) = rznew(ju) - rznew(iu) 
+                  xvec(iu, ju) = rxnew(ju) - rxnew(iu)
+                  yvec(iu, ju) = rynew(ju) - rynew(iu)
+                  zvec(iu, ju) = rznew(ju) - rznew(iu)
                   distij(iu,ju) = sqrt(xvec(iu,ju)**2 + yvec(iu,ju)**2 + zvec(iu,ju)**2)
               end if
           end do
       end do
-      
+
       ! MPI
       if (numprocs.gt.1) then
           rid=myid
@@ -7668,7 +7668,7 @@ contains
       my_end = my_start + rcounts(myid+1) - 1
 
       ! loop over all segments to grow
-      do while (.true.)    
+      do while (.true.)
          iufrom = growfrom_mol(iw)
          iuprev = growprev_mol(iw)
 
@@ -7694,17 +7694,17 @@ contains
                  i_grow_unit = unit_num_local
                  goto 925
              end if
-         end do 
-         
+         end do
+
          ! this is not the bead to start the segment, continue
          iw = iw + 1
          cycle
 
 925      continue
-      
+
          if ((idir .eq. -1 .and. i_grow_unit .eq. 1) .or. &
             (idir .eq. 1 .and. i_grow_unit .eq. unit_num_local)) then
-             l_reach_end = .true.             
+             l_reach_end = .true.
          end if
 
          repeat_unit_imolty = gcbmc_unit_moltype(gcbmc_imolty, i_grow_unit)
@@ -7722,8 +7722,8 @@ contains
              dchain = real(temtyp(repeat_unit_imolty),dp)
              i_repeat_unit = int( dchain*random(-1) + 1)
              i_repeat_unit = parall(repeat_unit_imolty,i_repeat_unit)
-             repeat_unit_rx(1:repeat_unit_nunit) = rxu(i_repeat_unit, 1:repeat_unit_nunit) 
-             repeat_unit_ry(1:repeat_unit_nunit) = ryu(i_repeat_unit, 1:repeat_unit_nunit) 
+             repeat_unit_rx(1:repeat_unit_nunit) = rxu(i_repeat_unit, 1:repeat_unit_nunit)
+             repeat_unit_ry(1:repeat_unit_nunit) = ryu(i_repeat_unit, 1:repeat_unit_nunit)
              repeat_unit_rz(1:repeat_unit_nunit) = rzu(i_repeat_unit, 1:repeat_unit_nunit)
          else
              ! use the existing conformation
@@ -7736,11 +7736,11 @@ contains
 
              ! energy calculation step1: temporarily store the bead positions of repeat unit 1
              i_repeat_unit = parall(repeat_unit_imolty,1)
-             rxnew(1:repeat_unit_nunit) = rxu(i_repeat_unit, 1:repeat_unit_nunit) 
-             rynew(1:repeat_unit_nunit) = ryu(i_repeat_unit, 1:repeat_unit_nunit) 
-             rznew(1:repeat_unit_nunit) = rzu(i_repeat_unit, 1:repeat_unit_nunit) 
-                 
-             ! step2: use the repeat unit coordinates from original molecule to replace repeat unit 1 
+             rxnew(1:repeat_unit_nunit) = rxu(i_repeat_unit, 1:repeat_unit_nunit)
+             rynew(1:repeat_unit_nunit) = ryu(i_repeat_unit, 1:repeat_unit_nunit)
+             rznew(1:repeat_unit_nunit) = rzu(i_repeat_unit, 1:repeat_unit_nunit)
+
+             ! step2: use the repeat unit coordinates from original molecule to replace repeat unit 1
              do unit_index = 1, repeat_unit_nunit
                  ibead = repeat_unit_list(unit_index)
                  rxu(i_repeat_unit, unit_index) = rxu(i, ibead)
@@ -7748,7 +7748,7 @@ contains
                  rzu(i_repeat_unit, unit_index) = rzu(i, ibead)
              end do
          end if
-     
+
          ! compute the bonded energy for this molecule
          do ibead = 1, repeat_unit_nunit
              rxuion(ibead, 1) = rxu(i_repeat_unit, ibead)
@@ -7756,23 +7756,23 @@ contains
              rzuion(ibead, 1) = rzu(i_repeat_unit, ibead)
              qquion(ibead, 1) = qqu(i_repeat_unit, ibead)
          end do
-         
+
          call U_bonded(i_repeat_unit,repeat_unit_imolty,vvib,vbend,vtg)
-             
+
          call energy(i_repeat_unit,repeat_unit_imolty,v_repeat_unit,1,gcbmc_box_num,1,&
              repeat_unit_nunit,.true.,ovrlap,.false.,.true.,.false.,.false.)
-  
-         repeat_unit_energy = v_repeat_unit           
+
+         repeat_unit_energy = v_repeat_unit
          repeat_unit_energy(ivTot) = repeat_unit_energy(ivTot) + vvib + vbend + vtg
          repeat_unit_energy(ivStretching) = vvib
          repeat_unit_energy(ivBending) = vbend
          repeat_unit_energy(ivTorsion) = vtg
 
          if (.not. lnew) then
-             ! recover the coordinates 
+             ! recover the coordinates
              rxu(i_repeat_unit, 1:repeat_unit_nunit) = rxnew(1:repeat_unit_nunit)
              ryu(i_repeat_unit, 1:repeat_unit_nunit) = rynew(1:repeat_unit_nunit)
-             rzu(i_repeat_unit, 1:repeat_unit_nunit) = rznew(1:repeat_unit_nunit) 
+             rzu(i_repeat_unit, 1:repeat_unit_nunit) = rznew(1:repeat_unit_nunit)
 
              ! recover r*new
              rxnew(1:repeat_unit_nunit) = rxnew_temp(1:repeat_unit_nunit)
@@ -7785,19 +7785,19 @@ contains
          if (lnew) then
              xtarget(1) = rxnew(iuprev)
              ytarget(1) = rynew(iuprev)
-             ztarget(1) = rznew(iuprev) 
+             ztarget(1) = rznew(iuprev)
              xtarget(2) = rxnew(iufrom)
              ytarget(2) = rynew(iufrom)
              ztarget(2) = rznew(iufrom)
          else
              xtarget(1) = rxu(i, iuprev)
              ytarget(1) = ryu(i, iuprev)
-             ztarget(1) = rzu(i, iuprev) 
+             ztarget(1) = rzu(i, iuprev)
              xtarget(2) = rxu(i, iufrom)
              ytarget(2) = ryu(i, iufrom)
              ztarget(2) = rzu(i, iufrom)
          end if
-         
+
          ! for later dihedral_rigrot the repeat unit
          bead1_coord(1) = xtarget(1)
          bead1_coord(2) = ytarget(1)
@@ -7805,24 +7805,24 @@ contains
          bead2_coord(1) = xtarget(2)
          bead2_coord(2) = ytarget(2)
          bead2_coord(3) = ztarget(2)
-         
+
          ! find the two overlapping beads for the align_lines and dihedral_rigrot
          do unit_index = 1, repeat_unit_nunit
              ibead = repeat_unit_list(unit_index)
              if (ibead .eq. iufrom) second_bead = unit_index
              if (ibead .eq. iuprev) first_bead = unit_index
          end do
-         
+
          call align_lines(first_bead, second_bead, repeat_unit_nunit, repeat_unit_rx, &
                     repeat_unit_ry, repeat_unit_rz, xtarget, ytarget, ztarget)
-        
+
          do ip = 1, ichoi
              bsum_tor(ip) = 0.0E0_dp
              my_itrial = 0
-             
+
              do itor = my_start, my_end
                  my_itrial = my_itrial + 1
-       
+
                  if (lnew .or. ip .gt. 1 .or. itor .gt. 1) then
                      ! new conformation
                      phi = random(rid) * twopi
@@ -7833,7 +7833,7 @@ contains
 
                  call dihedral_rigrot(bead1_coord, bead2_coord, repeat_unit_nunit, repeat_unit_rx, &
                     repeat_unit_ry, repeat_unit_rz, phi, repeat_unit_rxp, repeat_unit_ryp, repeat_unit_rzp)
-    
+
                  ! update bond vectors for the calculation of the torsional potential
                  do iu = 1, repeat_unit_nunit
                      ibead = repeat_unit_list(iu)
@@ -7841,11 +7841,11 @@ contains
                      do iv = 1, invib(repeat_unit_imolty, iu)
                          ju = ijvib(repeat_unit_imolty, iu, iv)
                          jbead = repeat_unit_list(ju)
-                         xvec(ibead, jbead) = repeat_unit_rxp(ju) - repeat_unit_rxp(iu) 
-                         yvec(ibead, jbead) = repeat_unit_ryp(ju) - repeat_unit_ryp(iu) 
+                         xvec(ibead, jbead) = repeat_unit_rxp(ju) - repeat_unit_rxp(iu)
+                         yvec(ibead, jbead) = repeat_unit_ryp(ju) - repeat_unit_ryp(iu)
                          zvec(ibead, jbead) = repeat_unit_rzp(ju) - repeat_unit_rzp(iu)
                      end do
-                 end do 
+                 end do
 
                  ! find the new torsional angle and compute the torsional potential
                  vnew_torsion = 0.0E0_dp
@@ -7859,7 +7859,7 @@ contains
                              jut3 = ijtor3(imolty, iu, it)
                              if (jut2 .eq. iuprev .and. jut3 .eq. iufrom) then
                                  jut4 = ijtor4(imolty, iu, it)
-                    
+
                                  ! if jut4 does NOT exist, do NOT count it
                                  if (.not. lexist(jut4)) then
                                      cycle
@@ -7889,19 +7889,19 @@ contains
              if (lnew .or. ip .gt. 1) then
                  rand_tor = random(rid) * bsum_tor(ip)
                  accum_prob = 0.0E0_dp
-             
+
                  do itor = 1, rcounts(myid+1)
                      accum_prob = accum_prob + my_bf_tor(itor)
                      if (rand_tor .lt. accum_prob) then
                          phi = my_phitors(itor)
                          my_vtorsion_procs(ip) = my_vtorsion(itor)
-                         exit 
+                         exit
                      end if
                  end do
              else
                  phi = my_phitors(1)
                  my_vtorsion_procs(ip) = my_vtorsion(1)
-             end if  
+             end if
 
              if (numprocs .gt. 1) then
                  call mp_allgather(bsum_tor(ip),bf_tor,groupid)
@@ -7926,7 +7926,7 @@ contains
              end if
 
              bsum_tor(ip) = bsum_tor(ip) / real(ichtor,dp)
-             
+
              ! update the bead coordinates and existence
              if (lnew .or. ip .gt. 1) then
                  call dihedral_rigrot(bead1_coord, bead2_coord, repeat_unit_nunit, repeat_unit_rx, &
@@ -7982,10 +7982,10 @@ contains
          bsum = 0.0E0_dp
          do ip = 1, ichoi   !< the weight includes torsional and LJ/qq
              bsum = bsum + bfac(ip) * bsum_tor(ip)
-         end do 
+         end do
 
          if (lnew) then
-             weight = weight * bsum  
+             weight = weight * bsum
              if ( weight .lt. softlog ) then
                  lterm=.true.
                  return
@@ -8001,8 +8001,8 @@ contains
                      if (rand_nonb .lt. accum_prob) then
                          exit
                      end if
-                 end if 
-             end do 
+                 end if
+             end do
          else
              weiold = weiold * bsum
              if (weiold .lt. softlog) write(io_output,*)  '###old weight too low in group-CBMC growth'
@@ -8190,7 +8190,7 @@ contains
        write(io_output,'(A,G16.9)') 'pmcb: ',pmcb
        write(io_output,'(/,A)') 'molecule type: nchoi1  nchoi nchoir nchoih nchtor nchbna nchbnb icbdir icbsta 1st_bead_swap'
        do i=1,nmolty
-          write(io_output,'(I13,A,9(1X,I6))') i,':',nchoi1(i),nchoi(i),nchoir(i),nchoih(i),nchtor(i),nchbna(i),nchbnb(i)&
+          write(io_output,'(I13,A,10(1X,I6))') i,':',nchoi1(i),nchoi(i),nchoir(i),nchoih(i),nchtor(i),nchbna(i),nchbnb(i)&
            ,icbdir(i),icbsta(i),first_bead_to_swap(i)
        end do
        write(io_output,'(/,A)')&
@@ -8285,7 +8285,7 @@ contains
         read(line_in,*) gcbmc_box_num
 
         call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section GROUP_CBMC',jerr)        
+        if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section GROUP_CBMC',jerr)
         read(line_in,*) gcbmc_mol_num
 
         allocate(gcbmc_mol_list(gcbmc_mol_num))
@@ -8296,7 +8296,7 @@ contains
         do imol=1, gcbmc_mol_num
             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
             read(line_in,*) gcbmc_molty, gcbmc_unit_num(imol)
-            gcbmc_mol_list(gcbmc_molty) = imol 
+            gcbmc_mol_list(gcbmc_molty) = imol
 
             call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
             read(line_in,*) gcbmc_unit_moltype(imol,1:gcbmc_unit_num(imol))
@@ -8309,7 +8309,7 @@ contains
             end do
         end do
     end if
- 
+
     call mp_bcast(gcbmc_box_num,1,rootid,groupid)
     call mp_bcast(gcbmc_mol_num,1,rootid,groupid)
     call mp_bcast(gcbmc_mol_list,gcbmc_mol_num,rootid,groupid)
@@ -8317,7 +8317,7 @@ contains
     call mp_bcast(gcbmc_unit_moltype,gcbmc_mol_num*maxval(nunit),rootid,groupid)
     call mp_bcast(gcbmc_unit_list,gcbmc_mol_num*maxval(nunit)*maxval(nunit),rootid,groupid)
 
-  end subroutine read_groupcbmc 
+  end subroutine read_groupcbmc
 
   subroutine read_safecbmc(io_input,lprint)
     use var_type,only:default_path_length,default_string_length

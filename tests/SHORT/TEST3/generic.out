@@ -1,12 +1,12 @@
-Program started at 2016-02-10 21:25:13.821
+Program started at 2016-02-25 14:07:58.673
 Number of processors: 1
 Threads per processor: 1
 
 MCCCS topmon (branch: ABE)
-Commit hash: 6cec999
-Build on host: ln0003
+Commit hash: 8517b14
+Build on host: metropolis1.chem.umn.edu
 Preprocessor definitions: __DOUBLE_PRECISION__;__USEOWN__;__MPI__
-Using Intel compiler: /soft/intel/x86_64/2013/composer_xe_2013/composer_xe_2013.5.192/bin/intel64/ifort
+Using Intel compiler: /share/apps/intel/composer_xe_2013.1.117/bin/intel64/ifort
 
  run_num: 1    
  suffix: a
@@ -204,8 +204,7 @@ iupdatefix: 100
 pmcb:   0.00000000    
 
 molecule type: nchoi1  nchoi nchoir nchoih nchtor nchbna nchbnb icbdir icbsta 1st_bead_swap
-            1:     10      8     10      1    100   1000   1000      0      0
-      1
+            1:     10      8     10      1    100   1000   1000      0      0      1
 
 molecule type:    pmcbmt         pmall  avbmc_version    pmbias        pmbsmt       pmbias2         pmfix   lrig
             1:  1.000000       0.00000              0   0.00000       0.00000       0.00000       0.00000      F
@@ -356,14 +355,14 @@ number of chains of type    1 undefined     1000
  bond bending      0.000000000000000E+000
  torsional         0.000000000000000E+000
  external          0.000000000000000E+000
- coulombic energy  -6669467.46967263     
+ coulombic energy  -6669467.46967262     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
- total energy      -5667091.11013702     
+ total energy      -5667091.11013700     
  
  vstart       =     -5662975.9201778714
- vend         =     -5667091.1101370193
- vbox         =     -5667091.1101369252
+ vend         =     -5667091.1101370044
+ vbox         =     -5667091.1101369169
  
  Averages and fluctuations                                  Box  1
  
@@ -419,7 +418,7 @@ number of chains of type    1 undefined     1000
  Enthalpy Inst.[kJ/mol] for box  1 =     -49.2889       2.3010       1.1505
  Enthalpy Ext. [kJ/mol] for box  1 =     -47.0796       0.0660       0.0330
  
- Cp residual(J/Kmol) =   5.04982281    
+ Cp residual(J/Kmol) =   5.04982282    
    H2 =  0.320451330E+14
    H  =  -5660837.24    
  
@@ -437,4 +436,4 @@ number of chains of type    1 undefined     1000
    3 -0.5660E+07  0.1003E+01 -0.1369E+06  0.2018E+03  0.1000E+01
    4 -0.5652E+07  0.1003E+01 -0.4046E+05  0.2464E+03  0.1000E+01
    5 -0.5665E+07  0.1006E+01 -0.4180E+05  0.1341E+03  0.1000E+01
- Program ended at 2016-02-10 21:25:28.532
+ Program ended at 2016-02-25 14:08:16.305

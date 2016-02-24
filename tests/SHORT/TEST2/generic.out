@@ -1,12 +1,12 @@
-Program started at 2016-02-10 21:25:02.581
+Program started at 2016-02-25 14:08:33.024
 Number of processors: 1
 Threads per processor: 1
 
 MCCCS topmon (branch: ABE)
-Commit hash: 6cec999
-Build on host: ln0003
+Commit hash: 8517b14
+Build on host: metropolis1.chem.umn.edu
 Preprocessor definitions: __DOUBLE_PRECISION__;__USEOWN__;__MPI__
-Using Intel compiler: /soft/intel/x86_64/2013/composer_xe_2013/composer_xe_2013.5.192/bin/intel64/ifort
+Using Intel compiler: /share/apps/intel/composer_xe_2013.1.117/bin/intel64/ifort
 
  run_num: 1    
  suffix: a
@@ -526,10 +526,8 @@ iupdatefix: 10
 pmcb:  0.300000000    
 
 molecule type: nchoi1  nchoi nchoir nchoih nchtor nchbna nchbnb icbdir icbsta 1st_bead_swap
-            1:     10      8     10      1    100   1000   1000      0      0
-      1
-            2:     10      8     10      1    100   1000   1000      0      0
-      1
+            1:     10      8     10      1    100   1000   1000      0      0      1
+            2:     10      8     10      1    100   1000   1000      0      0      1
 
 molecule type:    pmcbmt         pmall  avbmc_version    pmbias        pmbsmt       pmbias2         pmfix   lrig
             1:  0.100000E+00   0.00000              0   0.00000       0.00000       0.00000       0.00000      F
@@ -623,7 +621,7 @@ number of chains of type    1 undefined       52
 number of chains of type    2 undefined      204
  inter lj energy   -1349538.39469023     
  intra lj energy   -77233.1378939768     
- Tail correction   -45641.0958611113     
+ Tail correction   -45641.0958611112     
  bond vibration    0.000000000000000E+000
  bond bending       8456269.70522317     
  torsional          414177.104673605     
@@ -720,19 +718,19 @@ number of chains of type    1 undefined       52
 number of chains of type    2 undefined      204
  inter lj energy   -1344158.87451408     
  intra lj energy   -76554.9695221614     
- Tail correction   -45641.0958611113     
+ Tail correction   -45641.0958611112     
  bond vibration    0.000000000000000E+000
- bond bending       8466407.74123686     
- torsional          429101.261526603     
- external           57.3161393747179     
+ bond bending       8466407.74123685     
+ torsional          429101.261526602     
+ external           57.3161393747148     
  coulombic energy  -452500.410795896     
  fluc Q energy     0.000000000000000E+000
  well energy       0.000000000000000E+000
  total energy       7022352.06407069     
  
  vstart       =      6993864.9324951796
- vend         =      7022352.0640706941
- vbox         =      7022352.0640706336
+ vend         =      7022352.0640706914
+ vbox         =      7022352.0640706345
  
  Averages and fluctuations                                  Box  1
  
@@ -774,14 +772,14 @@ number of chains of type    2 undefined      204
     2    1      0.00000      0.00000      0.00000      0.00000      0.00000
  
  
- specific density box  1 =  0.78845E+00  0.28594E-14  0.20219E-14
+ specific density box  1 =  0.78845E+00  0.27696E-14  0.19584E-14
  system volume    box  1 =  0.76150E+05  0.14381E-09  0.10169E-09
  pressure         box  1 =  -12849.       4052.8       2865.8    
  surface tension  box  1 =      8.43495     33.71906     23.84298
  
  Total energy     box  1 =  0.70100E+07  0.10436E+05  0.73795E+04
  Inter LJ         box  1 = -0.13470E+07  0.32894E+04  0.23260E+04
- Tail  LJ         box  1 = -0.45641E+05  0.38179E-09  0.26996E-09
+ Tail  LJ         box  1 = -0.45641E+05  0.37297E-09  0.26373E-09
  Intra LJ         box  1 = -0.77421E+05  0.37782E+02  0.26716E+02
  Stretch          box  1 =  0.00000E+00  0.00000E+00  0.00000E+00
  Bond bending     box  1 =  0.84622E+07  0.36140E+04  0.25555E+04
@@ -802,7 +800,7 @@ number of chains of type    2 undefined      204
  chemical potential  itype  2 box  1 =         0.000        0.000        0.000
  mean sete length    itype  1 box  1 =        30.907        0.011        0.008
  mean sete length    itype  2 box  1 =        94.628        0.148        0.105
- number density      itype  1 box  1 =   0.68287E+00  0.23421E-15  0.16561E-15
+ number density      itype  1 box  1 =   0.68287E+00  0.22569E-15  0.15959E-15
  number density      itype  2 box  1 =   0.26789E+01  0.11450E-13  0.80960E-14
  mole fraction       itype  1 box  1 =     0.2031250    0.0000000    0.0000000
  mole fraction       itype  2 box  1 =     0.7968750    0.0000000    0.0000000
@@ -814,4 +812,4 @@ number of chains of type    2 undefined      204
    1  0.6995E+07  0.7885E+00 -0.1761E+05  0.3269E+02  0.2031E+00  0.7969E+00
    2  0.7017E+07  0.7885E+00 -0.7703E+04 -0.3925E+02  0.2031E+00  0.7969E+00
    3  0.7018E+07  0.7885E+00 -0.1323E+05  0.3186E+02  0.2031E+00  0.7969E+00
- Program ended at 2016-02-10 21:25:13.519
+ Program ended at 2016-02-25 14:08:46.112
