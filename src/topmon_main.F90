@@ -109,7 +109,7 @@ contains
     integer::io_flt,io_hist,io_cnt,io_ndis,io_config,i,jerr,ibox,itype,itype2,Temp_nmol,nentry,j,nummol,imolty,ii,ntii&
      ,igrow,steps,itemp,jbox,itel,ig,il,nbl,n,zzz,ichkpt,nnn_1st,nstep_per_cycle
     real::v(nEnergy),press1,surf,time_prev,time_cur,rm,temvol,tmp,vhist,eng_list(fmax),temacd,temspd,debroglie,starviro,dummy&
-     ,inside,bvirial,gconst,ostwald,stdost,molfrac,time_st,time_av,time_cycle=0.0E0_dp
+     ,inside,bvirial,gconst,ostwald,stdost,molfrac,time_st,time_av,time_cycle=0.0E0_dp,nImages
     logical::ovrlap
 ! ----------------------------------------------------------------
     ! Initialize the timer
@@ -899,8 +899,9 @@ contains
        write(io_output,*)
        ! Output 2nd virial coefficient data
 2000   if (lvirial) then
+           nImages = real(nstep/imv,dp)
            write(io_output,*) 'At temperature of ', virtemp
-           bvirial = binvir/binvir2
+           bvirial = binvir/nImages
            write(io_output,*) 'bvirial ', bvirial, ' [ A^3 / molecule ]'
            write(io_output,*) 'bvirial ', bvirial*N_Avogadro*1E-24_dp, ' [ cm^3 / mole ]'
        end if

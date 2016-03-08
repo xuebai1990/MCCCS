@@ -14,9 +14,9 @@
 !> I.e. we compute the boltzmann weighted (via intramolecular energy) B2 virail
 !> coefficient
 !> subroutine parameters:
-!>      binvirnumerator: The numerator in the average B2 calculation
-!>      binvirdenominator: the denominator of the average B2 calculation.
-subroutine virial(binvirnumerator,binvirdenominator)
+!>      bVirialClassical
+!>      bVirialQuantum
+subroutine virial(bVirialClassical,bVirialQuantum)
   use const_math,only:onepi,twopi
   use util_runtime,only:err_exit
   use sim_system
@@ -27,7 +27,7 @@ subroutine virial(binvirnumerator,binvirdenominator)
       real::xdiff,ydiff ,zdiff,dvircm
       real::binvir
       real::mass_t, factor,corr,vprev,deri_u
-      real::binvirnumerator,binvirdenominator
+      real::bVirialClassical,bVirialQuantum
       real::Uintramol1,Uintramol2,vvbend,vvib,vvtors,uIntermolecular
       real::xcmsep,ycmsep,zcmsep,deviation,their_distance
       real::mayerterm,boltzfact,smallexpfact,fullexpfact,integralvalue
@@ -40,26 +40,14 @@ subroutine virial(binvirnumerator,binvirdenominator)
 #endif
 
       firstval=.true.
-      ! start by comptuing the intramolecular energy.
-      ! this is used to properly weight the integral
-      call U_bonded(1,moltyp(1),vvib,vvbend,vvtors)
-      Uintramol1=vvib+vvbend+vvtors
-      call U_bonded(2,moltyp(2),vvib,vvbend,vvtors)
-      Uintramol2=vvib+vvbend+vvtors
-      ! We now need to include the nonbonded portion of the intramolecular
-      ! energies. It is very important that we don't have the molecules in the
-      ! same box.
-      ! This is done to distinguish the inter- and intramolecular portions of
-      ! the electric and ewald interactions. Being in individual boxes we won't
-      ! see them interact with each other.
-      ! also note I will later want to subtract the intramolecular portion of
-      ! these energies from the energy calculated when the molecules are in the
-      ! same box.
-
-      call energy(1,moltyp(1),vmol1,1,nboxi(1),1,nunit(1),.true.,olp,.false.,.false.,.false.,.false.)
+      ! normally the algorithms describe first computing the intramolecular
+      ! energy. This is not needed here as the correct weighting is already
+      ! enforced by cbmc. We do however need to calculate the intramolecular
+      ! portion of the electrostatic interactions. The energy subroutine makes
+      ! no distinction between inter- and intra- molecular electrostatics. By
+      ! computing them here in separate boxes we can later subtract out the
+      ! contribution of the electrostatic energies.
       call energy(2,moltyp(2),vmol2,1,nboxi(2),1,nunit(2),.true.,olp,.false.,.false.,.false.,.false.)
-      Uintramol1 = Uintramol1+vmol1(ivElect)+vmol1(ivIntraLJ)
-      Uintramol2 = Uintramol2+vmol2(ivElect)+vmol2(ivIntraLJ)
 
       if ( nboxi(1) .eq. nboxi(2) ) then
          !write(io_output,*) 'particles found in same box'
@@ -82,6 +70,7 @@ subroutine virial(binvirnumerator,binvirdenominator)
       factor = -(6.6260755E-34_dp)**2*6.0221367E23_dp*1E20_dp /  (24.0E0_dp*onepi*mass_t*1.380658E-23_dp*twopi)
       deviation = starvir
       integralvalue=0.0E0_dp
+
       do while (deviation > rmin)
         !set the "trial" location of the chain2
         do jj=1,nunit(jmolty)
@@ -103,7 +92,6 @@ subroutine virial(binvirnumerator,binvirdenominator)
         uIntermolecular = uIntermolecular-vmol2(ivElect)
         ! lets do the soft cut stuff
         smallexpfact = -uIntermolecular/virtemp
-        fullexpfact = -(Uintramol1+Uintramol2)/virtemp
         if(smallexpfact < -1.0*softcut) then
             mayerterm=0.0
         else if (smallexpfact > softcut.or.olp) then
@@ -124,6 +112,7 @@ subroutine virial(binvirnumerator,binvirdenominator)
         end if
         deviation = deviation-stepvir
       end do
+
       ! handles the end points of the trapezoidal rule which have half of the
       ! value of all of the other points.
       integralvalue = integralvalue-storefirstval
@@ -132,18 +121,9 @@ subroutine virial(binvirnumerator,binvirdenominator)
       ! by two for the trapezoidal rule
       integralvalue = integralvalue*twopi*stepvir/2.0
 
-      if(fullexpfact < -1.0*softcut) then
-          boltzfact=0.0
-      else if (fullexpfact > softcut) then
-          call err_exit(__FILE__,__LINE__,'',myid+1)
-      else
-          boltzfact = exp(-(fullexpfact)/virtemp)
-      end if
-      fullexpfact = -(Uintramol1+Uintramol2)/virtemp
-      binvirdenominator=binvirdenominator+boltzfact
-      binvirnumerator = binvirnumerator+boltzfact*integralvalue
+      bVirialClassical = bVirialClassical+integralvalue
+
 #ifdef __DEBUG__
-      write(io_output,*) "B2: ", binvirnumerator/binvirdenominator
       write(io_output,*) 'end VIRIAL in ',myid
 #endif
 
