@@ -341,6 +341,9 @@ contains
 !> the periodic box if it has left the box.
 !> \param lall controls whether this is done for just chain \a j or for the entire box
 !> \param ibox is the box of the particle
+!> \param ldx is whether or not the COM > x-direction boxlength
+!> \param ldy is whether or not the COM > y-direction boxlength
+!> \param ldz is whether or not the COM > z-direction boxlength
 !> \param j is the particle number
 !> \param mtype 1 = calling from translation, should need only 1 operation to fold back,
 !> unless the simulation box is non-orthorhombic in which case 2 operations may be needed
@@ -589,7 +592,15 @@ contains
 
           if (ldx .or. ldy .or. ldz ) then
              if ( (iadjust .ge. iwarn) ) then
-                if (mtype .eq. 1) write(io_output,*) 'translational move'
+                if (mtype .eq. 1) then
+                   write(io_output,*) 'translational move'
+                   if ((boxlx(ibox) .lt. rmtrax(imolty,ibox)) .or.&
+                       (boxly(ibox) .lt. rmtray(imolty,ibox)) .or.&
+                       (boxlz(ibox) .lt. rmtraz(imolty,ibox))) then
+                       write(io_output,FMT='(A)') 'Future error possibly due to max displacement &
+ for translation being > boxlength. Consider decreasing iratio.'
+                   end if
+                end if
                 if (mtype .eq. 2) write(io_output,*) 'rotational move'
                 if (mtype .eq. 3) write(io_output,*) 'swap move'
                 if (mtype .eq. 4) write(io_output,*) 'switch move'
