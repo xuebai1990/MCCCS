@@ -11,7 +11,7 @@ MODULE topmon_main
   logical::lstop=.false.,use_checkpoint=.false.
   integer::blockm,checkpoint_interval=1800,checkpoint_copies=1,nstep=1,nnstep,nnn,acmove,acnp,acipsw,nblock&
    ,io_movie,io_solute,io_cell,io_traj,time_limit=0&
-   ,N_add=0,box2add=1,moltyp2add=1
+   ,N_add=0,box2add=1,moltyp2add=1 !< defaults for mc_shared
   real::enthalpy,enthalpy2& !< enthalpy (NpT) or internal energy (NVT)
      ,acdvdl,binvir,binvir2
   real,allocatable::acdens(:,:)& !< (ibox,itype): accumulators of box density
@@ -552,7 +552,7 @@ contains
        end do
        if (io_solute.ge.0) close(io_solute)
        if (io_cell.ge.0) close(io_cell)
-       close(io_traj)
+       if (ltraj) close(io_traj)
 
        if (lgrand) then
           close(io_flt)
@@ -1255,7 +1255,7 @@ contains
     logical::needMFsection
 
     namelist /io/ file_input,file_restart,file_struct,file_run,file_movie,file_solute,file_traj,io_output&
-     ,run_num,suffix,L_movie_xyz,L_movie_pdb,file_cbmc_bend,checkpoint_interval,checkpoint_copies,use_checkpoint
+     ,run_num,suffix,L_movie_xyz,L_movie_pdb,file_cbmc_bend,checkpoint_interval,checkpoint_copies,use_checkpoint,ltraj
     namelist /system/ lnpt,lgibbs,lgrand,lanes,lvirial,lmipsw,lexpee,ldielect,lpbc,lpbcx,lpbcy,lpbcz,lfold,lijall,lchgall,lewald&
      ,lcutcm,ltailc,lshift,ldual,L_Coul_CBMC,lneigh&
      ,lexzeo,lslit,lgraphite,lsami,lmuir,lelect_field,lgaro,lionic,L_Ewald_Auto,lmixlb,lmixjo&
@@ -1302,6 +1302,7 @@ contains
     call mp_bcast(suffix,rootid,groupid)
     call mp_bcast(L_movie_xyz,1,rootid,groupid)
     call mp_bcast(L_movie_pdb,1,rootid,groupid)
+    call mp_bcast(ltraj,1,rootid,groupid)
     call mp_bcast(file_cbmc_bend,rootid,groupid) !Q.Paul C. -- tabulated CBMC bending growth
     call mp_bcast(checkpoint_interval,1,rootid,groupid)
     call mp_bcast(checkpoint_copies,1,rootid,groupid)
@@ -1716,7 +1717,7 @@ contains
           read(line_in,*) boxlx(i),boxly(i),boxlz(i),rcut(i),kalp(i),rcutnn(i),numberDimensionIsIsotropic(i),lsolid(i)&
            ,lrect(i),lideal(i),ltwice(i),rtmp,express(i)
 
-          if (temp.ge.0) then
+          if ((temp.ge.0).and.(i.gt.1)) then ! temp is initialized in sim_system.F90 to -1.0_dp
              if (temp.ne.rtmp) call err_exit(__FILE__,__LINE__,'Section SIMULATION_BOX: temperature not the same for each box'&
               ,myid+1)
           else
@@ -3001,14 +3002,34 @@ contains
                 call err_exit(__FILE__,__LINE__,'rcut > half cell width',myid+1)
              end if
           else
+             ! "normal" box info
              read(io_restart,*) boxlx(ibox),boxly(ibox),boxlz(ibox)
              if (lprint) then
-                write(io_output,"(' dimension box ',I0,': a = ',F12.6,'  b = ',F12.6,'  c = ',F12.6)") ibox,boxlx(ibox)&
-                 ,boxly(ibox),boxlz(ibox)
+                write(io_output,"(' dimension box ',I0,': a = ',F12.6,'  b = ',F12.6,'  c = ',F12.6,' rcut =',F12.6)") ibox,boxlx(ibox)&
+                 ,boxly(ibox),boxlz(ibox),rcut(ibox)
              end if
-             if((allow_cutoff_failure.lt.0).and.(rcut(ibox)/boxlx(ibox).gt.0.5_dp.or.rcut(ibox)/boxly(ibox).gt.0.5_dp&
-              .or.rcut(ibox)/boxlz(ibox).gt.0.5_dp).and.lcutcm) then
-                call err_exit(__FILE__,__LINE__,'rcut > 0.5*boxlx',myid+1)
+             ! check if rcut too large and address accordingly
+             if(((rcut(ibox)/boxlx(ibox).gt.0.5_dp).or.(rcut(ibox)/boxly(ibox).gt.0.5_dp)&
+                  .or.(rcut(ibox)/boxlz(ibox).gt.0.5_dp)).and.lcutcm) then
+                if (allow_cutoff_failure.lt.0) then
+                   ! error exit
+                   call err_exit(__FILE__,__LINE__,'rcut > 0.5*boxlx',myid+1)
+                else if (allow_cutoff_failure.eq.1) then
+                   ! fix rcut to half minimum boxlength
+                   rcut(ibox) = min(boxlx(ibox),boxly(ibox))/2.0_dp
+                   if (lpbcz) then
+                      rcut(ibox)=min(rcut(ibox),boxlz(ibox)/2.0_dp)
+                   end if
+                   if (rcut(ibox).le.0) then
+                      call err_exit(__FILE__,__LINE__,'rcut initialization&
+                                                        & error. Maybe a boxlength is negative', myid+1)
+                   end if
+                   ! restore maximum displacement for translation if needed
+                   call restore_displ_transl(ibox)
+                end if
+             else if (allow_cutoff_failure.eq.1) then
+                   call restore_displ_transl(ibox) ! check if need to restore max displ. trans.
+                                                   ! and perform if needed
              end if
           end if
        end do
@@ -3340,10 +3361,12 @@ contains
        end if
 
        ! set up info at beginning of fort.12 for analysis
-       io_traj=get_iounit()
-       open(unit=io_traj,access='stream',action='write',file=file_traj,form='formatted',iostat=jerr,status='unknown')
-       if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open traj file '//trim(file_traj),jerr)
-       if (lprint) write(io_traj,*) nstep,iratp,nbox,nmolty,(masst(i),i=1,nmolty)
+       if (ltraj) then
+          io_traj=get_iounit()
+          open(unit=io_traj,access='stream',action='write',file=file_traj,form='formatted',iostat=jerr,status='unknown')
+          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'cannot open traj file '//trim(file_traj),jerr)
+          if (lprint) write(io_traj,*) nstep,iratp,nbox,nmolty,(masst(i),i=1,nmolty)
+       end if
     end if
 ! -------------------------------------------------------------------
     ! KM 01/10 remove analysis
@@ -3525,7 +3548,8 @@ contains
        end if
     end if
 
-    if ((lgibbs.or.lnpt.or.lgrand).and.(.not.lvirial).and.(myid.eq.rootid)) then
+    if((lgibbs.or.lnpt.or.lgrand)&
+      .and.(.not.lvirial).and.(myid.eq.rootid).and.ltraj) then
        do ibox = 1,nbox
           if ( lpbcz ) then
              if (lsolid(ibox) .and. .not. lrect(ibox)) then
@@ -3905,7 +3929,7 @@ contains
        end do
        if (io_solute.ge.0) write(UNIT=io_solute,FMT="()",ADVANCE='NO',POS=pos_solute)
        if (io_cell.ge.0) write(UNIT=io_cell,FMT="()",ADVANCE='NO',POS=pos_cell)
-       write(UNIT=io_traj,FMT="()",ADVANCE='NO',POS=pos_traj)
+       if (ltraj) write(UNIT=io_traj,FMT="()",ADVANCE='NO',POS=pos_traj)
     end if
   end subroutine read_checkpoint_main
 

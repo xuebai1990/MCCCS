@@ -598,7 +598,8 @@ contains
                        (boxly(ibox) .lt. rmtray(imolty,ibox)) .or.&
                        (boxlz(ibox) .lt. rmtraz(imolty,ibox))) then
                        write(io_output,FMT='(A)') 'Future error possibly due to max displacement &
- for translation being > boxlength. Consider decreasing iratio.'
+                                                    & for translation being > boxlength. &
+                                                    & Consider decreasing iratio.'
                    end if
                 end if
                 if (mtype .eq. 2) write(io_output,*) 'rotational move'

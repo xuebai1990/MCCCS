@@ -910,6 +910,22 @@ contains
        if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: mc_volume',jerr)
     end if
 
+
+    if (ALL(pmvlmt(1:nbox).eq.-1)) then
+       ! no pmvlmt provided; give defaults
+       do i=1,nbox
+          pmvlmt(i)=real(i,dp)/nbox
+       end do
+       if (lexzeo) pmvlmt(1) = 0.0E0_dp
+    else if (ANY(pmvlmt(1:nbox).eq.-1)) then
+       call err_exit(__FILE__,__LINE__,'error in pmvlmt: probabilities not &
+                                        & specified for all boxes', myid+1)
+    else if ((lexzeo) .and. (pmvlmt(1).gt.0.0E0_dp)) then
+       call err_exit(__FILE__,__LINE__,'error in pmvlmt: you should not be &
+                                        & doing volume moves on box 1 when lexzeo = T', myid+1)
+    end if
+
+
     call mp_bcast(tavol,1,rootid,groupid)
     call mp_bcast(iratv,1,rootid,groupid)
     call mp_bcast(pmvlmt,nbox,rootid,groupid)

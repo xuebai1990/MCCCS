@@ -172,7 +172,7 @@ contains
        ntype(nmolty,1)=area_probe
     end if
 
-    
+
 
     zpot%ntype=0
     do imol=1,nmolty
@@ -285,7 +285,7 @@ contains
 
     do ii=1,zpot%ntype
         io_egrid = get_iounit()
-        write(filename_egrid,"(I,A,A)") atoms%list(zpot%table(ii)),'_', chemid(zpot%table(ii))
+        write(filename_egrid,"(I2,A,A)") atoms%list(zpot%table(ii)),'_', chemid(zpot%table(ii))
         filename_egrid= adjustl(filename_egrid)
         filename_egrid='energy_grid_'//trim(filename_egrid)//'.out'
         open(unit=io_egrid,file=filename_egrid,status='replace')
@@ -416,6 +416,7 @@ contains
           write(io_output,*) 'make tabulated potential'
           open(unit=io_ztb,access='stream',action='readwrite',file=file_ztb,form='unformatted',iostat=jerr,status='unknown')
           if (jerr.ne.0) then
+             write(*,*) 'error in trying to create tabulated potential: iostat =', jerr
              call err_exit(__FILE__,__LINE__,'cannot create file for tabulated potential',myid+1)
           end if
           if (st.eq.0) then

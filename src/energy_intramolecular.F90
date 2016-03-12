@@ -54,7 +54,7 @@ contains
     !> Looking for section BONDS
     if (allocated(bonds%list)) then
        call destroyTable(bonds)
-       deallocate(vib_type,brvib,brvibk,stat=jerr)
+       deallocate(vib_type,brvib,brvibk,minRegrowVib,maxRegrowVib,stat=jerr)
     end if
     n=0
     if (myid.eq.rootid) then
@@ -81,14 +81,18 @@ contains
                 if (i.gt.ubound(vib_type,1)) then
                    call reallocate(vib_type,1,2*ubound(vib_type,1))
                    call reallocate(brvib,1,2*ubound(brvib,1))
-                   call reallocate(brvibk,1,2*ubound(brvibk,1)) 
+                   call reallocate(brvibk,1,2*ubound(brvibk,1))
                    call reallocate(minRegrowVib,1,2*ubound(minRegrowVib,1))
                    call reallocate(maxRegrowVib,1,2*ubound(maxRegrowVib,1))
                 end if
                 readstat=0
                 call stripComments(line_in)
                 read(line_in,*,iostat=readstat) jerr,vib_type(i),brvib(i),brvibk(i),minRegrowVib(i),maxRegrowVib(i)
-                if (readstat.eq.-1 ) then ! if the max and min regrows are not specified
+                ! if the max and min regrows are not specified, you will get an
+                ! error in iostat. The following is a dirty way to keep
+                ! backwards compability if the max and min regrows are not
+                ! specified
+                if ((readstat .eq. -1 ) .or. (readstat .eq. -2)) then ! if the max and min regrows are not specified
                    read(line_in,*) jerr,vib_type(i),brvib(i),brvibk(i)
                    minRegrowVib(i)=0.0E0_dp
                    maxRegrowVib(i)=2.0E0_dp
@@ -561,12 +565,12 @@ contains
              ! if bend table exists compute bending energy from that. Otherwise
              ! if we have a freely jointed chain then the energy is still zero.
              ! Otherwise compute the energy. Max value of freely jointed chain
-             ! chosen to match the geometry subroutine in CBMC. 
+             ! chosen to match the geometry subroutine in CBMC.
              if (L_bend_table) then
                 rbendsq=distij2(ip1,j)+distij2(ip1,ip2)-2.0E0_dp*distanceij(ip1,j)*distanceij(ip1,ip2)*thetac
                 rbend = sqrt(rbendsq)
                 vbend = vbend + lininter_bend(rbend,it)
-             else if (.not.(brbenk(it).lt.-0.1E0_dp)) then 
+             else if (.not.(brbenk(it).lt.-0.1E0_dp)) then
                 vbend = vbend +  brbenk(it) * (theta-brben(it))**2
              end if
 

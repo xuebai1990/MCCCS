@@ -208,7 +208,7 @@ elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "PGI")
   add_definitions(-D__TRADITIONAL_CPP__)
 elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "XL")
   # xlf/xlf90/xlf95/xlf2003/xlf2008 from IBM
-  set(CMAKE_Fortran_FLAGS_RELEASE "-qfree=f90 -WF,-qfpp -O5 -qprefetch=aggressive -qunroll=yes -qalias=nostd")
+  set(CMAKE_Fortran_FLAGS_RELEASE "-g -qarch=qp -qtune=qp -qfree=f90 -WF,-O3 -qnoipa -qsmp=omp:noauto -qsimd=auto -qhot=level=2 -qprefetch -qunroll=yes -qalias=nostd")
   set(CMAKE_Fortran_FLAGS_DEBUG   "-qfree=f90 -WF,-qfpp -O0 -g9 -qalias=nostd -qstrict -qcheck -qextchk -qflttrap -WF,-D__DEBUG__")
   if(USE_OPENMP)
     set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -qsmp=omp")

@@ -120,7 +120,7 @@ module sim_system
   integer::io_output=6,iprint=10000000,imv=10000000,iblock=10000000,iratp=500,idiele=10000000,iheatcapacity=10000000,nprop,ianalyze=10000000,nbin=1
   real::bin_width=0.2_dp
   logical::L_movie_xyz=.false.,lrdf=.false.,lintra=.false.,lstretch=.false.,lgvst=.false.,lbend=.false.,lete=.false.&
-   ,lrhoz=.false.,lucall=.false.,L_movie_pdb=.false.
+   ,lrhoz=.false.,lucall=.false.,L_movie_pdb=.false.,ltraj=.true.
 
   !*** Histograms for grand-canonical ensemble ***
   integer::nequil=0,ninstf=0,ninsth=0,ndumph=0

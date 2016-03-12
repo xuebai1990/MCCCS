@@ -117,15 +117,14 @@ CONTAINS
                 call reallocate(SymmOp,1,i*2,1,3)
              end if
              ia = INDEX(line,"'")
+             ib = INDEX(line,",")
              if (ia.eq.0) ia=INDEX(line," ")
-             ib = INDEX(line(ia+1:),",")+ia
+             if (ia.gt.ib) ia=0 ! fix if grab space at end of line
              ic = INDEX(line(ib+1:),",")+ib
-             IF (ia.eq.0) THEN
-                id = LEN_TRIM(line)+1
-             ELSE
-                id = INDEX(line(ic+1:),"'")+ic
-             END IF
-             if (id.eq.ic) id=len_trim(line)+1
+             id = INDEX(line(ic+1:),"'")+ic
+             if ((id.eq.0).or.(id.eq.ic)) then
+                id = len_trim(line)+1
+             end if
 
              SymmOp(i,1)=TRIM(line(ia+1:ib-1))
              SymmOp(i,2)=TRIM(line(ib+1:ic-1))
@@ -194,7 +193,7 @@ CONTAINS
                 atom=element
              else
                 call err_exit(__FILE__,__LINE__,'parcer_cif: unknown atomtype;&
-                &  _atom_site_label: '//trim(adjustl(label))//' and _atom_site_type_symbol: '//trim(adjustl(element))//' Not found', 0) 
+                &  _atom_site_label: '//trim(adjustl(label))//' and _atom_site_type_symbol: '//trim(adjustl(element))//' Not found', 0)
              endif
 
              scoord=scoord-floor(scoord)
