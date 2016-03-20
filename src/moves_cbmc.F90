@@ -8136,7 +8136,7 @@ contains
     fbscb = 0.0E0_dp
     counthist=0
 
-    !> read namelist cbmc
+    ! defaults for namelist mc_cbmc
     do i=1,nmolty
        pmcbmt(i)=real(i,dp)/nmolty
     end do
@@ -8160,6 +8160,7 @@ contains
     pmgroup=0.0_dp
     lrig=.false.
 
+    !> read namelist mc_cbmc
     if (myid.eq.rootid) then
        rewind(io_input)
        read(UNIT=io_input,NML=mc_cbmc,iostat=jerr)
@@ -8200,7 +8201,7 @@ contains
        write(io_output,'(A,L2)') 'lpresim: ',lpresim
        write(io_output,'(A,I0)') 'iupdatefix: ',iupdatefix
        write(io_output,'(A,G16.9)') 'pmcb: ',pmcb
-       write(io_output,'(/,A)') 'molecule type: nchoi1  nchoi nchoir nchoih nchtor nchbna nchbnb icbdir icbsta 1st_bead_swap'
+       write(io_output,'(/,A)') 'molecule type: nchoi1  nchoi nchoir nchoih nchtor nchbna nchbnb icbdir icbsta first_bead_to_swap'
        do i=1,nmolty
           write(io_output,'(I13,A,10(1X,I6))') i,':',nchoi1(i),nchoi(i),nchoir(i),nchoih(i),nchtor(i),nchbna(i),nchbnb(i)&
            ,icbdir(i),icbsta(i),first_bead_to_swap(i)

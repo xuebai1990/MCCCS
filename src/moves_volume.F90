@@ -872,6 +872,7 @@ contains
      ,zcmo(nmax),rxuo(nmax,numax),ryuo(nmax,numax),rzuo(nmax,numax),qquo(nmax,numax),rcuto(nbxmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_moves_volume: allocation failed',jerr)
 
+    ! defaults for namelist mc_volume
     acsvol = 0.E0_dp
     acnvol = 0.E0_dp
     acshmat = 0.0E0_dp
@@ -885,14 +886,14 @@ contains
     pm_consv = 0.0d0
     pmvol_xy = 0.0d0
 
-    !> read namelist mc_volume
     nvolb=nbox*(nbox-1)/2
     do i=1,nvolb
        pmvolb(i)=real(i,dp)/nvolb
     end do
     k=0
+
     do i=1,nbox
-       pmvlmt(i)=real(i,dp)/nbox
+       pmvlmt(i)=-1 !dummy integer, set default after read if needed
        do j=i+1,nbox
           k=k+1
           box5(k)=i
@@ -904,6 +905,9 @@ contains
     else
        rmvolume=1.0E-3_dp
     end if
+
+    ! end defaults for namelist mc_volume
+    !> read namelist mc_volume
     if (myid.eq.rootid) then
        rewind(io_input)
        read(UNIT=io_input,NML=mc_volume,iostat=jerr)
