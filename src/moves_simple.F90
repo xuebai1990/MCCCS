@@ -970,7 +970,7 @@ contains
           ! molecule type imolty in box im
           if ( bntrax(imolty,im) .gt. 0.5E0_dp ) then
              ! compute possible new ratio
-             ratrax = bstrax(imolty,im) / bntrax(imolty,im)
+             ratrax = bstrax(imolty,im) / bntrax(imolty,im) ! percent acceptance
              rttrax = rmtrax(imolty,im) * ratrax / tatra
 
              if ( rttrax .gt. 2.0E0_dp * rcut(im)) then
@@ -1096,7 +1096,7 @@ contains
               ,bntraz(imolty,im),bnrotx(imolty,im),bnroty(imolty,im),bnrotz(imolty,im),bstrax(imolty,im),bstray(imolty,im)&
               ,bstraz(imolty,im),bsrotx(imolty,im),bsroty(imolty,im),bsrotz(imolty,im)
              ! write(io_output,"(' ratio       ',6(f7.4,1x))") ratrax, ratray, ratraz,rarotx, raroty,rarotz
-             write(io_output,"(' max.displ. ',6(1x,f9.4))") rmtrax(imolty,im),rmtray(imolty,im),rmtraz(imolty,im),rmrotx(imolty,im)&
+             write(io_output,"(' max.displ. ',6(1x,f11.4))") rmtrax(imolty,im),rmtray(imolty,im),rmtraz(imolty,im),rmrotx(imolty,im)&
               ,rmroty(imolty,im),rmrotz(imolty,im)
           end if
 

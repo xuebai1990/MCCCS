@@ -4,17 +4,17 @@ MODULE moves_volume
   use util_kdtree,only:construct_kdtree
   use sim_system
   use sim_cell
-  use energy_kspace,only:recip,calp,save_kvector,restore_kvector
+  use energy_kspace,only:recip,calp,save_kvector,restore_kvector,compute_kvectors
   use energy_pairwise,only:sumup
   implicit none
   private
   save
   public::volume_1box,volume_2box,init_moves_volume,update_volume_max_displacement,output_volume_stats,read_checkpoint_volume&
-   ,write_checkpoint_volume,allow_cutoff_failure
+   ,write_checkpoint_volume,allow_cutoff_failure,restore_displ_transl
 
   real,allocatable,public::acsvol(:),acnvol(:),acshmat(:,:),acnhmat(:,:),bsvol(:),bnvol(:),bshmat(:,:),bnhmat(:,:)
   real,allocatable::vboxn(:,:),vboxo(:,:),bxo(:),byo(:),bzo(:),xcmo(:),ycmo(:),zcmo(:),rxuo(:,:),ryuo(:,:),rzuo(:,:),qquo(:,:)&
-   ,rcuto(:)
+   ,rcut_original(:)
   real::hmato(9),hmatio(9)
   integer::allow_cutoff_failure=-1 !< controls how volume move failures, the ones that will result in box lengths
   !< smaller than twice the cutoff, are handled: -1 = fetal error and program exits;
@@ -153,14 +153,14 @@ contains
              ladjust=.false.
              if (rbcut(hbox).lt.rcut(hbox)) then
                 ladjust=.true.
-             else if (rcut(hbox).lt.rcuto(hbox)) then
+             else if (rcut(hbox).lt.rcut_original(hbox)) then
                 ladjust=.true.
-                if (rbcut(hbox).gt.rcuto(hbox)) rbcut(hbox)=rcuto(hbox)
+                if (rbcut(hbox).gt.rcut_original(hbox)) rbcut(hbox)=rcut_original(hbox)
              end if
              if (ladjust) then
                 rbox=rbcut(hbox)
-                rbcut(hbox)=rcut(hbox)
-                rcut(hbox)=rbox
+                rbcut(hbox)=rcut(hbox) ! set rbcut back to old cutoff
+                rcut(hbox)=rbox ! update cutoff to half min boxlength
              else
                 rbcut(hbox)=-1.0_dp
              end if
@@ -168,14 +168,14 @@ contains
              ladjust=.false.
              if (rbcut(jbox).lt.rcut(jbox)) then
                 ladjust=.true.
-             else if (rcut(jbox).lt.rcuto(jbox)) then
+             else if (rcut(jbox).lt.rcut_original(jbox)) then
                 ladjust=.true.
-                if (rbcut(jbox).gt.rcuto(jbox)) rbcut(jbox)=rcuto(jbox)
+                if (rbcut(jbox).gt.rcut_original(jbox)) rbcut(jbox)=rcut_original(jbox)
              end if
              if (ladjust) then
                 rbox=rbcut(jbox)
-                rbcut(jbox)=rcut(jbox)
-                rcut(jbox)=rbox
+                rbcut(jbox)=rcut(jbox) ! set rbcut back to old cutoff
+                rcut(jbox)=rbox        ! update cutoff to half min boxlength
              else
                 rbcut(jbox)=-1.0_dp
              end if
@@ -288,24 +288,26 @@ contains
        end do
 
        if (allow_cutoff_failure.ne.2) then
+          ! initialize rbcut to half minimum of new boxlength
           rbcut(boxa) = min(boxlx(boxa),boxly(boxa))/2.0_dp
           rbcut(boxb) = min(boxlx(boxb),boxly(boxb))/2.0_dp
           if (lpbcz) then
              rbcut(boxa)=min(rbcut(boxa),boxlz(boxa)/2.0_dp)
              rbcut(boxb)=min(rbcut(boxb),boxlz(boxb)/2.0_dp)
           end if
+          ! determine what to do with rbcut
           if (allow_cutoff_failure.eq.1) then
              ladjust=.false.
              if (rbcut(boxa).lt.rcut(boxa)) then
                 ladjust=.true.
-             else if (rcut(boxa).lt.rcuto(boxa)) then
+             else if (rcut(boxa).lt.rcut_original(boxa)) then
                 ladjust=.true.
-                if (rbcut(boxa).gt.rcuto(boxa)) rbcut(boxa)=rcuto(boxa)
+                if (rbcut(boxa).gt.rcut_original(boxa)) rbcut(boxa)=rcut_original(boxa)
              end if
              if (ladjust) then
                 rbox=rbcut(boxa)
-                rbcut(boxa)=rcut(boxa)
-                rcut(boxa)=rbox
+                rbcut(boxa)=rcut(boxa) ! set rbcut back to old rcut
+                rcut(boxa)=rbox ! update cutoff to half min boxlength
              else
                 rbcut(boxa)=-1.0_dp
              end if
@@ -313,14 +315,14 @@ contains
              ladjust=.false.
              if (rbcut(boxb).lt.rcut(boxb)) then
                 ladjust=.true.
-             else if (rcut(boxb).lt.rcuto(boxb)) then
+             else if (rcut(boxb).lt.rcut_original(boxb)) then
                 ladjust=.true.
-                if (rbcut(boxb).gt.rcuto(boxb)) rbcut(boxb)=rcuto(boxb)
+                if (rbcut(boxb).gt.rcut_original(boxb)) rbcut(boxb)=rcut_original(boxb)
              end if
              if (ladjust) then
                 rbox=rbcut(boxb)
-                rbcut(boxb)=rcut(boxb)
-                rcut(boxb)=rbox
+                rbcut(boxb)=rcut(boxb) ! set rbcut back to old cutoff
+                rcut(boxb)=rbox        ! update cutoff to half min boxlength
              else
                 rbcut(boxb)=-1.0_dp
              end if
@@ -454,6 +456,27 @@ contains
        end if
        call update_box(boxa)
        call update_box(boxb)
+       if (allow_cutoff_failure.eq.1) then
+          ! if rbcut>0, we needed to change the cutoff. In this case we need to
+          ! make sure that the maximum displacements are not too large
+          if (rbcut(boxa).gt.0) then
+             call restore_displ_transl(boxa)
+             if (L_Ewald_Auto) then
+                ! new kvectors needed
+                kalp(boxa) = 3.2_dp/rcut(boxa)
+                calp(boxa) = kalp(boxa)
+                call compute_kvectors(boxa)
+             end if
+          end if
+          if (rbcut(boxb).gt.0) then
+             call restore_displ_transl(boxb)
+             if (L_Ewald_Auto) then
+                kalp(boxb) = 3.2_dp/rcut(boxb)
+                calp(boxb) = kalp(boxb)
+                call compute_kvectors(boxb)
+             end if
+          end if
+       end if
        return
     end if
 
@@ -463,9 +486,10 @@ contains
     call restore_configuration((/boxa,boxb/))
 
     if (allow_cutoff_failure.eq.1) then
-       ! restore cutoff if needed
-       if (rbcut(boxa).gt.0) rcut(boxa)=rbcut(boxa)
-       if (rbcut(boxb).gt.0) rcut(boxb)=rbcut(boxb)
+       ! if rejected, rbcut contains the cutoff before volume move.
+       ! we need to restore that value
+       if (rbcut(boxa).gt.0) rcut(boxa) = rbcut(boxa)
+       if (rbcut(boxb).gt.0) rcut(boxb) = rbcut(boxb)
     end if
 
 #ifdef __DEBUG__
@@ -481,7 +505,7 @@ contains
 !> number of successful trial moves is stored in \b bsvol.
   subroutine volume_1box()
     real::rbox,volo,voln,rbcut,dx,dy,dz,dfac,df,v(nEnergy),dele,min_boxl
-    integer::ibox,boxvch,jhmat,i,imolty,j,ichoiq
+    integer::ibox,boxvch,jhmat,i,imolty,j,ichoiq,nchain_boxvch
     logical::lx,ly,lz,ovrlap,ladjust,l_couple,l_consv
 ! --------------------------------------------------------------------
 #ifdef __DEBUG__
@@ -500,6 +524,8 @@ contains
 
     call save_box(boxvch)
     call save_configuration((/boxvch/))
+
+    nchain_boxvch = 0
 
     lx = .false.
     ly = .false.
@@ -616,14 +642,14 @@ contains
              ladjust=.false.
              if (rbcut.lt.rcut(boxvch)) then
                 ladjust=.true.
-             else if (rcut(boxvch).lt.rcuto(boxvch)) then
+             else if (rcut(boxvch).lt.rcut_original(boxvch)) then
                 ladjust=.true.
-                if (rbcut.gt.rcuto(boxvch)) rbcut=rcuto(boxvch)
+                if (rbcut.gt.rcut_original(boxvch)) rbcut=rcut_original(boxvch)
              end if
              if (ladjust) then
                 rbox=rbcut
-                rbcut=rcut(boxvch)
-                rcut(boxvch)=rbox
+                rbcut=rcut(boxvch) ! set rbcut back to old cutoff
+                rcut(boxvch)=rbox  ! update cutoff to half min boxlength
              else
                 rbcut=-1.0_dp
              end if
@@ -657,6 +683,7 @@ contains
        ! determine the displacement of the COM
        do i = 1,nchain
           if (nboxi(i) .eq. boxvch) then
+             nchain_boxvch = nchain_boxvch + 1
              imolty = moltyp(i)
              if ( lx ) then
                 dx = sxcm(i)*(hmat(boxvch,1)-hmato(1))+sycm(i)*(hmat(boxvch,4)-hmato(4))+szcm(i)*(hmat(boxvch,7)-hmato(7))
@@ -703,22 +730,31 @@ contains
        end if
 
        if (allow_cutoff_failure.ne.2) then
+          ! determine rbcut: max possible rcut = 2*mininumBoxlength
           rbcut = min(boxlx(boxvch),boxly(boxvch))/2.0_dp
           if (lpbcz) rbcut=min(rbcut,boxlz(boxvch)/2.0_dp)
           if (allow_cutoff_failure.eq.1) then
              ladjust=.false.
              if (rbcut.lt.rcut(boxvch)) then
                 ladjust=.true.
-             else if (rcut(boxvch).lt.rcuto(boxvch)) then
+             else if (rcut(boxvch).lt.rcut_original(boxvch)) then
+                ! must have made previous change to rcut
                 ladjust=.true.
-                if (rbcut.gt.rcuto(boxvch)) rbcut=rcuto(boxvch)
+                if (rbcut.gt.rcut_original(boxvch)) then
+                   ! box size has increased so new rbcut predicted to be >
+                   ! original. Set rbcut back to original so rcut is then
+                   ! changed back to original
+                   rbcut=rcut_original(boxvch)
+                end if
              end if
              if (ladjust) then
+                ! we need to adjust rcut
                 rbox=rbcut
-                rbcut=rcut(boxvch)
-                rcut(boxvch)=rbox
+                rbcut=rcut(boxvch) ! set rbcut back to old cutoff
+                rcut(boxvch)=rbox  ! update cutoff to half min boxlength
              else
-                rbcut=-1.0_dp
+                rbcut=-1.0_dp !later used as flag to designate that there is no need
+                              !to change rcut to rbcut
              end if
           else if (rbcut.lt.rcut(boxvch)) then
              boxlx(boxvch) = bxo(boxvch)
@@ -731,7 +767,7 @@ contains
                 write(io_output,*) 'boxvch',boxvch
                 call err_exit(__FILE__,__LINE__,'A move was attempted that would lead to a boxlength less than twice rcut',myid+1)
              else if (allow_cutoff_failure.eq.0) then
-                return
+                return !just reject the move
              end if
           end if
        end if
@@ -742,6 +778,7 @@ contains
        do i = 1, nchain
           ! Check if the chain i is in the correct box
           if (nboxi(i) .eq. boxvch) then
+             nchain_boxvch = nchain_boxvch + 1
              imolty = moltyp(i)
              if (lsolid(boxvch)) then
                 if ( lx ) then
@@ -779,6 +816,8 @@ contains
           end if
        end do
     end if
+    ! if no molecules in box, reject move
+    if (nchain_boxvch.eq.0) goto 500
 
     if ( lchgall ) then
        if (lsolid(boxvch).and.(.not.lrect(boxvch))) then
@@ -840,6 +879,19 @@ contains
           end if
        end if
        call update_box(boxvch)
+       if (allow_cutoff_failure.eq.1) then
+          ! if rbcut>0, we needed to change the cutoff. In this case we need to
+          ! make sure that the maximum displacements are not too large
+          ! and potentially update k_max
+          if (rbcut.gt.0) then
+             call restore_displ_transl(boxvch)
+             if (L_Ewald_Auto) then
+                kalp(boxvch) = 3.2_dp/rcut(boxvch)
+                calp(boxvch) = kalp(boxvch)
+                call compute_kvectors(boxvch)
+             end if
+          end if
+       end if
        return
     end if
 
@@ -847,9 +899,13 @@ contains
 500 call restore_box(boxvch)
     call restore_configuration((/boxvch/))
 
+    ! if rejected, restore rcut
     if (allow_cutoff_failure.eq.1) then
-       ! restore cutoff if needed
-       if (rbcut.gt.0) rcut(boxvch)=rbcut
+       ! restore cutoff if needed.
+       ! if rbcut > 0, a move was attempted that would make rcut < a
+       ! boxlength/2. rbcut now contains original value, so we must change rcut
+       ! back to the original value
+       if (rbcut.gt.0) rcut(boxvch) = rbcut
     end if
 
 #ifdef __DEBUG__
@@ -866,10 +922,10 @@ contains
     real::rmvolume
     namelist /mc_volume/ tavol,iratv,pmvlmt,nvolb,pmvolb,box5,box6,pmvol,pmvolx,pmvoly,rmvolume,allow_cutoff_failure,l_bilayer,pm_consv, pmvol_xy
 
-    if (allocated(acsvol)) deallocate(acsvol,acnvol,acshmat,acnhmat,bsvol,bnvol,bshmat,bnhmat,vboxn,vboxo,bxo,byo,bzo,xcmo,ycmo,zcmo,rxuo,ryuo,rzuo,qquo,rcuto,stat=jerr)
+    if (allocated(acsvol)) deallocate(acsvol,acnvol,acshmat,acnhmat,bsvol,bnvol,bshmat,bnhmat,vboxn,vboxo,bxo,byo,bzo,xcmo,ycmo,zcmo,rxuo,ryuo,rzuo,qquo,rcut_original,stat=jerr)
     allocate(acsvol(nbxmax),acnvol(nbxmax),acshmat(nbxmax,9),acnhmat(nbxmax,9),bsvol(nbxmax),bnvol(nbxmax),bshmat(nbxmax,9)&
      ,bnhmat(nbxmax,9),vboxn(nEnergy,nbxmax),vboxo(nEnergy,nbxmax),bxo(nbxmax),byo(nbxmax),bzo(nbxmax),xcmo(nmax),ycmo(nmax)&
-     ,zcmo(nmax),rxuo(nmax,numax),ryuo(nmax,numax),rzuo(nmax,numax),qquo(nmax,numax),rcuto(nbxmax),stat=jerr)
+     ,zcmo(nmax),rxuo(nmax,numax),ryuo(nmax,numax),rzuo(nmax,numax),qquo(nmax,numax),rcut_original(nbxmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_moves_volume: allocation failed',jerr)
 
     ! defaults for namelist mc_volume
@@ -881,7 +937,7 @@ contains
     bnvol = 0.0E0_dp
     bshmat = 0.0E0_dp
     bnhmat = 0.0E0_dp
-    rcuto = rcut
+    rcut_original = rcut
     l_bilayer = .false.
     pm_consv = 0.0d0
     pmvol_xy = 0.0d0
@@ -961,6 +1017,7 @@ contains
           write(io_output,'(A,I0,A,G16.9)') '   pmvlmt for box ',i,': ',pmvlmt(i)
        end do
        write(io_output,'(A,I0)') 'nvolb: ',nvolb
+       write(io_output,'(A,I0)') 'cutoff will be addressed with option:  ',allow_cutoff_failure
        do i = 1,nvolb
           write(io_output,'(3(A,I0),A,G16.9)') '   box pair ',i,': between ',box5(i),' and ',box6(i),',   pmvolb = ',pmvolb(i)
           if ((lsolid(box5(i)).and..not.lrect(box5(i))).and.(lsolid(box6(i)).and..not.lrect(box6(i)))) call err_exit(__FILE__,__LINE__,'can not perform volume move between two non-rectangular boxes',myid+1)
@@ -1127,6 +1184,22 @@ contains
        end if
     end do
   end subroutine save_configuration
+
+!> \brief Restore max displacement in translation
+! this is only called if we are decreasing the cutoff to be half the boxlength,
+! in which case we need to make sure the maximum displacement is not too large
+! for this new cutoff
+  subroutine restore_displ_transl(box)
+    integer,intent(in)::box
+    integer::imolty
+
+    ! adjust maximum displacement in traslation if needed
+    do imolty = 1,nmolty
+       if (rmtrax(imolty,box) .gt. 2.0E0_dp*rcut(box)) rmtrax(imolty,box)=2.0E0_dp*rcut(box)
+       if (rmtray(imolty,box) .gt. 2.0E0_dp*rcut(box)) rmtray(imolty,box)=2.0E0_dp*rcut(box)
+       if (rmtraz(imolty,box) .gt. 2.0E0_dp*rcut(box)) rmtraz(imolty,box)=2.0E0_dp*rcut(box)
+    end do
+  end subroutine restore_displ_transl
 
 !> \brief Restore old energy, box lengths
   subroutine restore_box(box)

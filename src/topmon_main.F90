@@ -1193,7 +1193,7 @@ contains
 !> \remarks It's usually best to print out information right after it is read in and before doing any other operations (which may fail), so that in the case of program error users will know the progress of input processing
   subroutine readdat(file_in)
     use var_type,only:default_string_length
-    use const_math,only:raddeg
+    use const_math,only:raddeg, onepi
     use const_phys,only:MPa2SimUnits,debroglie_factor
     use util_random,only:ranset
     use util_string,only:integer_to_string,real_to_string,uppercase,format_n
@@ -1208,14 +1208,14 @@ contains
     use sim_initia,only:get_molecule_config,setup_system_config,setup_cbmc_bend
     ! Q. Paul C. -- add setup_cbmc_bend for tabulated CBMC bending growth in the above line
     use zeolite
-    use energy_kspace,only:calp,allocate_kspace
+    use energy_kspace,only:calp,allocate_kspace,k_max_l,k_max_m,k_max_n,compute_kvectors
     use energy_pairwise,only:read_ff,init_ff,type_2body,vdW_nParameter,nonbond_type
     use energy_intramolecular,only:bonds,angles,dihedrals,allocate_energy_bonded
     use energy_3body,only:readThreeBody
     use energy_4body,only:readFourBody
     use energy_sami
     use moves_simple,only:init_moves_simple,averageMaximumDisplacement
-    use moves_volume,only:init_moves_volume,allow_cutoff_failure
+    use moves_volume,only:init_moves_volume,allow_cutoff_failure,restore_displ_transl
     use moves_cbmc,only:init_cbmc,allocate_cbmc,llplace
     use moves_ee,only:init_ee,numcoeff,sigm,epsil
     use transfer_shared,only:read_transfer
@@ -1227,7 +1227,7 @@ contains
 
     real,allocatable::ofscale(:),ofscale2(:),qbox(:)
     integer,allocatable::ncarbon(:),inclmol(:),inclbead(:,:),inclsign(:),ainclmol(:),ainclbead(:,:),a15t(:),idummy(:),temphe(:)&
-     ,nures(:),k_max_l(:),k_max_m(:),k_max_n(:)
+     ,nures(:)
     logical,allocatable::lhere(:)
 
     character(LEN=default_path_length)::file_input,file_restart,file_struct,file_run,file_movie,file_solute,file_traj&
@@ -1679,7 +1679,7 @@ contains
     if (allocated(io_box_movie)) deallocate(io_box_movie,stat=jerr)
     if (allocated(io_box_movie_pdb)) deallocate(io_box_movie_pdb,stat=jerr)
     allocate(lhere(nntype),temphe(nntype),io_box_movie(nbxmax),io_box_movie_pdb(nbxmax),ncarbon(ntmax),idummy(ntmax)&
-     ,qbox(nbxmax),nures(ntmax),k_max_l(nbxmax),k_max_m(nbxmax),k_max_n(nbxmax),stat=jerr)
+     ,qbox(nbxmax),nures(ntmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'readdat: allocating system failed',jerr)
     lhere=.false.
 ! -------------------------------------------------------------------
@@ -2910,6 +2910,8 @@ contains
        call setup_system_config(file_struct)
        nnstep = 0
     else if (myid.eq.rootid) then
+       ! begin read restart file with
+       ! rootid----------------------------------------------------------------------------
        if (use_checkpoint) file_restart='save-config'
 
        io_restart=get_iounit()
@@ -2966,9 +2968,10 @@ contains
                 write(io_output,'(A,3(1X,F10.6))') '      max fluc. q displacement: ',rmflcq(imol,im)
              end do
           end do
-          write(io_output,'(/,A)') 'new box size read from restart-file'
+          write(io_output,'(/,A)') 'reading new box size from restart-file'
        end if
 
+       ! read box dimension info
        do ibox=1,nbox
           if (ibox.eq.1.and.lexzeo) then
              if (lsolid(ibox).and..not.lrect(ibox)) then
@@ -3090,8 +3093,11 @@ contains
              call err_exit(__FILE__,__LINE__,'box '//integer_to_string(i)//' has a net charge of '//real_to_string(qbox(i)),myid+1)
           end if
        end do
+       ! end read restart file with
+       ! rootid----------------------------------------------------------------------------
     end if
 
+    ! broadcast variables read in to other processors
     call mp_bcast(nnstep,1,rootid,groupid)
     call mp_bcast(Armtrax,1,rootid,groupid)
     call mp_bcast(Armtray,1,rootid,groupid)
@@ -3107,6 +3113,7 @@ contains
     call mp_bcast(boxlx(1:nbox),nbox,rootid,groupid)
     call mp_bcast(boxly(1:nbox),nbox,rootid,groupid)
     call mp_bcast(boxlz(1:nbox),nbox,rootid,groupid)
+    if (allow_cutoff_failure.eq.1) call mp_bcast(rcut(1:nbox),nbox,rootid,groupid)
     do ibox=1,nbox
        if (lsolid(ibox).and..not.lrect(ibox)) then
           call mp_bcast(rmhmat(ibox,1:9),9,rootid,groupid)
@@ -3234,15 +3241,7 @@ contains
           write(io_output,'(/,A)') '****Ewald Parameters*****'
           write(io_output,'(A)') 'ibox:      calp  kmaxl  kmaxm  kmaxn         rcut'
           do ibox=1,nbox
-             if ((.not.lsolid(ibox)).or.lrect(ibox)) then
-                k_max_l(ibox) = aint(boxlx(ibox)*calp(ibox))+1
-                k_max_m(ibox) = aint(boxly(ibox)*calp(ibox))+1
-                k_max_n(ibox) = aint(boxlz(ibox)*calp(ibox))+1
-             else
-                k_max_l(ibox) = aint(hmat(ibox,1)*calp(ibox))+2
-                k_max_m(ibox) = aint(hmat(ibox,5)*calp(ibox))+2
-                k_max_n(ibox) = aint(hmat(ibox,9)*calp(ibox))+2
-             end if
+             call compute_kvectors(ibox)
              write(io_output,'(I4,A,F9.3,3(1X,I6),1X,F12.4)') ibox,': ',calp(ibox),k_max_l(ibox),k_max_m(ibox),k_max_n(ibox)&
               ,rcut(ibox)
           end do
@@ -3386,7 +3385,7 @@ contains
     ! end if
 ! ===================================================================
 
-    deallocate(ncarbon,idummy,qbox,nures,k_max_l,k_max_m,k_max_n,lhere,temphe,inclmol,inclbead,inclsign,ofscale,ofscale2&
+    deallocate(ncarbon,idummy,qbox,nures,lhere,temphe,inclmol,inclbead,inclsign,ofscale,ofscale2&
      ,ainclmol,ainclbead,a15t,stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'readdat: deallocation failed',jerr)
 

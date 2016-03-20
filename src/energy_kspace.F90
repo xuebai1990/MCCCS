@@ -5,16 +5,17 @@ MODULE energy_kspace
   use util_runtime,only:err_exit
   use util_mp,only:mp_sum,mp_allgather,mp_set_displs
   use sim_system,only:lsolid,lrect,boxlx,boxly,boxlz,nchain,moltyp,lelect,nboxi,ntype,lqchg,rxu,ryu,rzu,qqu,myid,numprocs,moltion&
-   ,nunit,rxuion,ryuion,rzuion,qquion,xcm,ycm,zcm,groupid
+   ,nunit,rxuion,ryuion,rzuion,qquion,xcm,ycm,zcm,groupid,rcut
   use sim_cell
   implicit none
   private
   save
   public::recipsum,recip,recip_atom,ee_recip,recippress,calp,sself,correct,save_kvector,restore_kvector,allocate_kspace
+  public::k_max_l, k_max_m, k_max_n, compute_kvectors
 
   integer,parameter::vectormax=100000 !< the maximum number of reciprocal vectors for Ewald sum
   integer,allocatable::numvect(:)& !< the total number of reciprocal vectors
-   ,numvecto(:)
+   ,numvecto(:),k_max_l(:),k_max_m(:),k_max_n(:)
   real,allocatable::kx(:,:),ky(:,:),kz(:,:),prefact(:,:),ssumr(:,:),ssumi(:,:),ssumrn(:,:),ssumin(:,:),ssumro(:,:),ssumio(:,:)&
    ,kxo(:,:),kyo(:,:),kzo(:,:),prefacto(:,:),calpo(:)
   real,allocatable,target::calp(:) !< calp = kalp / boxlen; kalp is a parameter to control the real space sum
@@ -47,6 +48,9 @@ contains
     vrecip = 0.0E0_dp
 
     calpi = calp(ibox)
+    kmaxl = k_max_l(ibox)
+    kmaxm = k_max_m(ibox)
+    kmaxn = k_max_n(ibox)
 
     if ( (.not. lsolid(ibox)) .or. lrect(ibox) )  then
        bx1 = boxlx(ibox)
@@ -61,16 +65,10 @@ contains
        hmatik(1) = twopi/bx1
        hmatik(5) = twopi/by1
        hmatik(9) = twopi/bz1
-       kmaxl = aint(bx1*calpi)+1
-       kmaxm = aint(by1*calpi)+1
-       kmaxn = aint(bz1*calpi)+1
     else
        do i = 1,9
           hmatik(i) = twopi*hmati(ibox,i)
        end do
-       kmaxl = aint(hmat(ibox,1)*calpi)+2
-       kmaxm = aint(hmat(ibox,5)*calpi)+2
-       kmaxn = aint(hmat(ibox,9)*calpi)+2
     end if
 
     alpsqr4 = 4.0E0_dp*calpi*calpi
@@ -613,12 +611,27 @@ contains
   subroutine allocate_kspace()
     use sim_system,only:nbxmax
     integer::jerr
-    if (allocated(kx)) deallocate(kx,ky,kz,prefact,ssumr,ssumi,ssumrn,ssumin,ssumro,ssumio,kxo,kyo,kzo,prefacto,calpo,calp,numvect,numvecto,stat=jerr)
+    if (allocated(kx)) deallocate(kx,ky,kz,prefact,ssumr,ssumi,ssumrn,ssumin,ssumro,ssumio,kxo,kyo,kzo,prefacto,calpo,calp,numvect,numvecto,&
+                                  k_max_l,k_max_m,k_max_n,stat=jerr)
     allocate(kx(vectormax,nbxmax),ky(vectormax,nbxmax),kz(vectormax,nbxmax),prefact(vectormax,nbxmax)&
      ,ssumr(vectormax,nbxmax),ssumi(vectormax,nbxmax),ssumrn(vectormax,nbxmax),ssumin(vectormax,nbxmax)&
      ,ssumro(vectormax,nbxmax),ssumio(vectormax,nbxmax),kxo(vectormax,nbxmax),kyo(vectormax,nbxmax)&
-     ,kzo(vectormax,nbxmax),prefacto(vectormax,nbxmax),calpo(nbxmax),calp(nbxmax),numvect(nbxmax),numvecto(nbxmax),stat=jerr)
+     ,kzo(vectormax,nbxmax),prefacto(vectormax,nbxmax),calpo(nbxmax),calp(nbxmax),numvect(nbxmax),numvecto(nbxmax)&
+     ,k_max_l(nbxmax),k_max_m(nbxmax),k_max_n(nbxmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'allocate_kspace: allocation failed',jerr)
     numvect=0
   end subroutine allocate_kspace
+
+  subroutine compute_kvectors(ibox)
+    integer, intent(in)::ibox
+    if ((.not.lsolid(ibox)).or.lrect(ibox)) then
+       k_max_l(ibox) = aint(calp(ibox)*calp(ibox)*boxlx(ibox)*rcut(ibox)/onepi)+1
+       k_max_m(ibox) = aint(calp(ibox)*calp(ibox)*boxly(ibox)*rcut(ibox)/onepi)+1
+       k_max_n(ibox) = aint(calp(ibox)*calp(ibox)*boxlz(ibox)*rcut(ibox)/onepi)+1
+    else
+       k_max_l(ibox) = aint(calp(ibox)*calp(ibox)*hmat(ibox,1)*rcut(ibox)/onepi)+2
+       k_max_m(ibox) = aint(calp(ibox)*calp(ibox)*hmat(ibox,5)*rcut(ibox)/onepi)+2
+       k_max_n(ibox) = aint(calp(ibox)*calp(ibox)*hmat(ibox,9)*rcut(ibox)/onepi)+2
+    end if
+  end subroutine compute_kvectors
 end MODULE energy_kspace

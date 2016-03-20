@@ -1233,7 +1233,8 @@ cutoff to be half of the new box lengths (will be restored
 if possible); 2 = allows the move but does not adjust the
 cutoff, which could be problematic because this results in a
 lower density in the cutoff radius (due to periodic boundary
-conditions)
+conditions). This should be set to -1 for production
+(the default).
 
 \noindent{\bf l\_bilayer:} Allow special volume moves in box 1.
 requires lsolid and lrect be set to true and false, respectively,
