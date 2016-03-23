@@ -45,7 +45,7 @@ contains
 !> \author rewritten from old config and branch subroutines by M.G. Martin 9-19-97
 !*****************************************************************
   subroutine config()
-    use sim_particle,only:update_neighbor_list_molecule,ctrmas
+    use sim_particle,only:update_neighbor_list_molecule,ctrmas,update_coord_in_tree
     use sim_cell,only:update_linked_cell
 
       logical::lterm,ovrlap,ltors,lfixnow
@@ -57,7 +57,6 @@ contains
       real::dchain,rchain,wnlog,wolog,wdlog,wratio,rcbmc
       real::vrecipn,vrecipo,cwtorfo,cwtorfn,x,y,z
       real::delta_vn,delta_vo
-
 ! ------------------------------------------------------------------
 
 #ifdef __DEBUG__
@@ -452,11 +451,24 @@ contains
          vbox(ivWellIpswb,ibox) = vbox(ivWellIpswb,ibox) + (vwellipswn-vwellipswo)
          vipsw = vbox(ivIpswb,ibox)
          vwellipsw = vbox(ivWellIpswb,ibox)
+
+         ! Update coordinates in kdtree
+         if (lkdtree .and. lkdtree_box(ibox)) then
+             do ic = 1, iunit
+                 rxu_update(ic) = rxnew(ic)
+                 ryu_update(ic) = rynew(ic)
+                 rzu_update(ic) = rznew(ic)
+             end do
+             call update_coord_in_tree(i, igrow, ibox, ibox, .true., .false.)
+         end if
+
+         ! Update coordinates in r*u arrays
          do ic = 1, igrow
             rxu(i,ic) = rxnew(ic)
             ryu(i,ic) = rynew(ic)
             rzu(i,ic) = rznew(ic)
          end do
+
          do ic = igrow+1, iunit
             rxu(i,ic)  = rxuion(ic,2)
             ryu(i,ic)  = ryuion(ic,2)

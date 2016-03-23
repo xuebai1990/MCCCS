@@ -22,7 +22,7 @@ contains
 !> number of successful trial moves is stored in \b bstrax(yz).
 !> The attempts are stored in \b bntrax(yz)
   subroutine translation()
-    use sim_particle,only:update_neighbor_list_molecule,ctrmas
+    use sim_particle,only:update_neighbor_list_molecule,ctrmas,update_coord_in_tree
     use sim_cell,only:update_linked_cell
 
       logical::lx,ly,lz,ovrlap
@@ -203,6 +203,18 @@ contains
       vwellipsw = vbox(ivWellIpswb,ibox)
       vbox(iv3body,ibox) = vbox(iv3body,ibox) + (vn(iv3body)-vo(iv3body))
 
+      ! Update coordinates in kdtree
+      if (lkdtree .and. lkdtree_box(ibox)) then
+          do j = 1, iunit
+              rxu_update(j) = rxuion(j,2)
+              ryu_update(j) = ryuion(j,2)
+              rzu_update(j) = rzuion(j,2)
+          end do
+
+          call update_coord_in_tree(i, iunit, ibox, ibox, .true., .false.)
+      end if
+
+      ! Update coordinates in r*u arrays
       do j = 1,iunit
          if (lx) rxu(i,j) = rxuion(j,2)
          if (ly) ryu(i,j) = ryuion(j,2)
@@ -251,7 +263,7 @@ contains
 !> and rotates the molecule around this axis by \b dgamma radians.
 !> The maximum angular displacement is \b dgamax.
     subroutine rotation()
-      use sim_particle,only:update_neighbor_list_molecule,ctrmas
+      use sim_particle,only:update_neighbor_list_molecule,ctrmas,update_coord_in_tree
 
       logical::lx,ly,lz,ovrlap
       integer::i,ibox,flagon,iunit,j,imolty,iuroty,icbu
@@ -483,6 +495,18 @@ contains
       vipsw = vbox(ivIpswb,ibox)
       vwellipsw = vbox(ivWellIpswb,ibox)
 
+      ! Update coordinates in kdtree
+      if (lkdtree .and. lkdtree_box(ibox)) then
+          do j = 1, iunit
+              rxu_update(j) = rxuion(j,2)
+              ryu_update(j) = ryuion(j,2)
+              rzu_update(j) = rzuion(j,2)
+          end do
+
+          call update_coord_in_tree(i, iunit, ibox, ibox, .true., .false.)
+      end if
+
+      ! Update coordinates in r*u arrays
       do j = 1, iunit
          rxu(i,j) = rxuion(j,2)
          ryu(i,j) = ryuion(j,2)

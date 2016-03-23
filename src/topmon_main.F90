@@ -84,6 +84,7 @@ contains
     use util_runtime,only:err_exit
     use util_timings,only:time_init,time_date_str,time_now
     use util_files,only:get_iounit
+    use util_kdtree,only:allocate_kdtree,construct_kdtree
     use sim_initia,only:setup_molecule_config
     use sim_particle,only:ctrmas,neighbor,neigh_cnt
     use energy_pairwise,only:sumup
@@ -147,6 +148,13 @@ contains
        end do
     end if
 
+    !> Set up the kd-tree
+    if (lkdtree) then
+        do ibox = 1, nbox
+            if (lkdtree_box(ibox)) call construct_kdtree(ibox, ibox, .true.)
+        end do
+    end if
+
     if (licell) then
        ! check that rintramax is really valid
        do i=1,nchain
@@ -184,6 +192,7 @@ contains
           write(io_cnt,*) 'ii:',nnstep,(neigh_cnt(i),i=1,nchain)
        end if
     end if
+
 
     ! setup files for histogram reweighting
     if(lgrand) then
@@ -1194,6 +1203,7 @@ contains
     use util_search,only:indexOf
     use util_memory,only:reallocate
     use util_mp,only:mp_bcast
+    use util_kdtree,only:read_kdtree,allocate_kdtree
     use sim_particle,only:allocate_neighbor_list
     use sim_initia,only:get_molecule_config,setup_system_config,setup_cbmc_bend
     ! Q. Paul C. -- add setup_cbmc_bend for tabulated CBMC bending growth in the above line
@@ -1249,7 +1259,7 @@ contains
     namelist /system/ lnpt,lgibbs,lgrand,lanes,lvirial,lmipsw,lexpee,ldielect,lpbc,lpbcx,lpbcy,lpbcz,lfold,lijall,lchgall,lewald&
      ,lcutcm,ltailc,lshift,ldual,L_Coul_CBMC,lneigh&
      ,lexzeo,lslit,lgraphite,lsami,lmuir,lelect_field,lgaro,lionic,L_Ewald_Auto,lmixlb,lmixjo&
-     ,L_spline,L_linear,L_vib_table,L_bend_table,L_elect_table,L_cbmc_bend
+     ,L_spline,L_linear,L_vib_table,L_bend_table,L_elect_table,L_cbmc_bend, lkdtree
     namelist /mc_shared/ seed,nbox,nmolty,nchain,nmax,nstep,time_limit,lstop,iratio,rmin,softcut&
      ,linit,lreadq,N_add,box2add,moltyp2add
     namelist /analysis/ iprint,imv,iblock,iratp,idiele,iheatcapacity,ianalyze&
@@ -1331,6 +1341,7 @@ contains
     lmixlb=.true.
     lmixjo=.false.
     L_cbmc_bend=.false. ! Q. Paul C. -- for tabulated CBMC bending growth
+    lkdtree=.false.
 
     if (myid.eq.rootid) then
        rewind(io_input)
@@ -1377,6 +1388,7 @@ contains
     call mp_bcast(L_bend_table,1,rootid,groupid)
     call mp_bcast(L_elect_table,1,rootid,groupid)
     call mp_bcast(L_cbmc_bend,1,rootid,groupid) ! Q. Paul C. -- for tabulated CBMC bending growth
+    call mp_bcast(lkdtree,1,rootid,groupid)
 
     if (lprint) then
        write(io_output,'(/,A)') '***** PROGRAM  =  THE MAGIC BLACK BOX *****'
@@ -1593,6 +1605,7 @@ contains
     call allocate_system()
     call allocate_sim_cell()
     call allocate_kspace()
+    call allocate_kdtree()
 ! -------------------------------------------------------------------
     !> read name list analysis
     virtemp=0.0_dp
@@ -2522,6 +2535,11 @@ contains
     !> set up the inclusion table
     call inclus(inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ainclbead,a15t,ofscale,ofscale2)
 
+! -------------------------------------------------------------------
+    ! read kdtree related variables
+    if (lkdtree) call read_kdtree(io_input)
+
+! -------------------------------------------------------------------
     !> write out connectivity and bonded interactions
     if (lprint) then
        do imolty=1,nmolty
@@ -3155,6 +3173,7 @@ contains
 
     if (.not.linit) call get_molecule_config(file_struct,linit=.false.)
 
+
 ! -------------------------------------------------------------------
     !> Set up Ewald parameters, write out both intra- and inter-molecular interaction parameters
     if (lewald) then
@@ -3357,6 +3376,7 @@ contains
     use const_phys,only:N_Avogadro,R_gas,MPa2SimUnits
     use util_math,only:update_average,store_block_average
     use util_string,only:format_n
+    use util_kdtree,only:update_tree_height,construct_kdtree
     use energy_intramolecular,only:U_bonded
     use energy_pairwise,only:energy,coru
     use moves_simple,only:update_translation_rotation_max_displacement
@@ -3377,6 +3397,19 @@ contains
     write(io_output,*) 'begin MONPER in ',myid
 #endif
 ! -------------------------------------------------------------------
+
+    ! re-construct mol_tree if the height exceeds two times the optimal height
+    ! NOT used when volume move is used, because volume move reconstructs the whole tree
+    if (lkdtree) then
+        do ibox = 1, nbox
+            if (lkdtree_box(ibox)) then
+                call update_tree_height(mol_tree(ibox)%tree)
+                !< reconstruct the tree if the height gets too large
+                if (mol_tree(ibox)%tree%height .ge. (2.0*tree_height(ibox))) call construct_kdtree(ibox, ibox, .false.)
+            end if
+        end do
+    end if
+
     ! Optimize and output MC move parameters
     if (ANY(lopt_bias).and.mod(nnn,freq_opt_bias).eq.0) then
        call opt_bias()
@@ -4251,4 +4284,5 @@ contains
     close(io_unit)
 ! ===================================================================
   end subroutine generate_standard_input
+
 END MODULE topmon_main

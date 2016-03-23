@@ -182,7 +182,8 @@ module sim_system
   integer,allocatable::moltyp(:),nboxi(:)
   real,allocatable::masst(:),rcmu(:),xcm(:),ycm(:),zcm(:)& !< center-of-mass coordinates of each chain
    ,sxcm(:),sycm(:),szcm(:)& !< center-of-mass coordinates of each chain in scaled units, for use in non-orthorhombic simulation cells
-   ,rxu(:,:),ryu(:,:),rzu(:,:),qqu(:,:)
+   ,rxu(:,:),ryu(:,:),rzu(:,:),qqu(:,:)&
+   ,rxu_update(:),ryu_update(:),rzu_update(:)
 
   !=== Counters ===
   integer,allocatable::ncmt(:,:)& !< (ibox,itype): number of molecules of itype in ibox
@@ -354,17 +355,61 @@ module sim_system
 
   type(LookupTable)::atoms
 
+  ! kdtree related variables
+  ! Data types
+  type :: interval
+      real :: lower, upper
+  end type interval
+
+  type :: tree_node
+      ! internal tree node
+      type(tree_node), pointer :: left_node !< left node
+      type(tree_node), pointer :: right_node !< right node
+      type(tree_node), pointer :: parent_node !< parent node
+      real, dimension(3) :: coord !< coordinates
+      integer :: ichain !< chain no.
+      integer :: ibead  !< bead no.
+      integer :: ix     !< with a value of 0, -1, 1, indicating which periodic image the particle is
+      integer :: iy
+      integer :: iz
+      type(interval), pointer :: cube !< the bounding box of the node
+      logical :: l_cube_updated !< if the cube has been updated
+      integer :: cut_dim !< the cutting dimension of the node
+      integer :: height !< height of the current node
+  end type tree_node
+
+  type :: tree
+     type(tree_node), pointer :: tree_root !< root of this tree
+     integer :: height !< height of the tree
+     integer :: node_num   !< number of nodes in this tree
+     type(interval), pointer :: cube(:) !< the bounding cube of the tree
+     type(interval), pointer :: bound(:) !< the min and max of the coordinates in the center box
+     integer :: box     !< which box the tree represents
+  end type tree
+
+  type :: tree_ptr
+      type(tree), pointer :: tree
+  end type tree_ptr
+
+  type(tree_ptr), allocatable :: mol_tree(:)
+  logical :: lkdtree=.false.             !< whether kdtree is used in general
+  logical, allocatable :: lkdtree_box(:) !< whether this box uses kdtree
+  real, allocatable :: kdtree_buffer_len(:)  !< the length of the buffer region used in kdtree
+  integer, allocatable :: tree_height(:)  !< the optimal height of each tree
+
 CONTAINS
   subroutine allocate_system()
     integer,parameter::initial_size=15
     integer::jerr
 
-    if (allocated(boxlx)) deallocate(boxlx,boxly,boxlz,rcut,rcutnn,kalp,lsolid,lrect,express,ghost_particles,numberDimensionIsIsotropic,inix,iniy,iniz,inirot,inimix,nchoiq,box5,box6,zshift,dshift,rmvol,pmvlmt,pmvolb,lideal,ltwice,rmhmat,dipolex,dipoley,dipolez,nchbox,vbox,stat=jerr)
+    if (allocated(boxlx)) deallocate(boxlx,boxly,boxlz,rcut,rcutnn,kalp,lsolid,lrect,express,ghost_particles&
+        ,numberDimensionIsIsotropic,inix,iniy,iniz,inirot,inimix,nchoiq,box5,box6,zshift,dshift,rmvol,pmvlmt&
+        ,pmvolb,lideal,ltwice,rmhmat,dipolex,dipoley,dipolez,nchbox,vbox,stat=jerr)
     allocate(boxlx(nbxmax),boxly(nbxmax),boxlz(nbxmax),rcut(nbxmax),rcutnn(nbxmax),kalp(nbxmax),lsolid(nbxmax),lrect(nbxmax)&
      ,express(nbxmax),ghost_particles(nbxmax),numberDimensionIsIsotropic(nbxmax),inix(nbxmax),iniy(nbxmax)&
      ,iniz(nbxmax),inirot(nbxmax),inimix(nbxmax),nchoiq(nbxmax),box5(npabmax),box6(npabmax),zshift(nbxmax),dshift(nbxmax)&
-     ,rmvol(nbxmax),pmvlmt(nbxmax),pmvolb(npabmax),lideal(nbxmax),ltwice(nbxmax),rmhmat(nbxmax,9),dipolex(nbxmax),dipoley(nbxmax)&
-     ,dipolez(nbxmax),nchbox(nbxmax),vbox(nEnergy,nbxmax),stat=jerr)
+     ,rmvol(nbxmax),pmvlmt(nbxmax),pmvolb(npabmax),lideal(nbxmax),ltwice(nbxmax),rmhmat(nbxmax,9),dipolex(nbxmax)&
+     ,dipoley(nbxmax),dipolez(nbxmax),nchbox(nbxmax),vbox(nEnergy,nbxmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'allocate_system.1: allocation failed',jerr)
 
     if (allocated(nrotbd)) deallocate(nrotbd,xcm,ycm,zcm,pmsatc,pmswtcb,nswatb,nsampos,ncut,gswatc,nswtcb,box3,box4,ncutsafe,gswatcsafe,temtyp,B,molecname,nunit,nugrow,nmaxcbmc,iurot,maxgrow,isolute,iring,nrig,irig,frig,nrigmin,nrigmax,rindex,riutry,lelect,lflucq,lqtrans,lexpand,lavbmc1,lavbmc2,lavbmc3,lbias,lring,lrigid,lrig,lq14scale,fqegp,eta2,qscale,pmbias,pmbsmt,pmbias2,rmtrax,rmtray,rmtraz,rmrotx,rmroty,rmrotz,lbranch,ininch,rmflcq,pmswmt,pmswapb,pmcbmt,pmall,pmfix,pmfqmt,pmeemt,pmtrmt,pmromt,pmgroup,nswapb,box1,box2,nchoi1,nchoi,nchoir,nchoih,nchoig,nchtor,nchbna,nchbnb,icbdir,icbsta,lrplc,masst,rmexpc,eetype,ncmt,ncmt2,parall,parbox,bnflcq,bsflcq,bnflcq2,bsflcq2,rxwell,rywell,rzwell,sxwell,sywell,szwell,nwell,lwell,moltyp,rcmu,sxcm,sycm,szcm,nboxi,favor,favor2,ntype,leaderq,invib,itvib,ijvib,inben,itben,ijben2,ijben3,intor,ittor,ijtor2,ijtor3,ijtor4,irotbd,pmrotbd,stat=jerr)
@@ -395,12 +440,15 @@ CONTAINS
 
   subroutine allocate_molecule()
     integer::jerr
-    if (allocated(splist)) deallocate(splist,lexist,lexclu,a15type,epsilon_f,sigma_f,ljscale,qscale2,ee_qqu,rxnew,rynew,rznew,rxu,ryu,rzu,qqu,rxuion,ryuion,rzuion,qquion,linclu,lqinclu,lainclu,xvec,yvec,zvec,growfrom,growprev,grownum,growlist,awell,stat=jerr)
+    if (allocated(splist)) deallocate(splist,lexist,lexclu,a15type,epsilon_f,sigma_f,ljscale,qscale2,ee_qqu&
+     ,rxnew,rynew,rznew,rxu,ryu,rzu,qqu,rxuion,ryuion,rzuion,qquion,rxu_update,ryu_update,rzu_update,linclu&
+     ,lqinclu,lainclu,xvec,yvec,zvec,growfrom,growprev,grownum,growlist,awell,stat=jerr)
     allocate(splist(npamax,numax,2),lexist(numax),lexclu(ntmax,numax,ntmax,numax),a15type(ntmax,numax,numax)&
      ,epsilon_f(2,numax),sigma_f(2,numax),ljscale(ntmax,numax,numax),qscale2(ntmax,numax,numax),ee_qqu(numax,smax)&
      ,rxnew(numax),rynew(numax),rznew(numax),rxu(nmax,numax),ryu(nmax,numax),rzu(nmax,numax),qqu(nmax,numax)&
-     ,rxuion(numax,2),ryuion(numax,2),rzuion(numax,2),qquion(numax,2),linclu(ntmax,numax,numax)&
-     ,lqinclu(ntmax,numax,numax),lainclu(ntmax,numax,numax),xvec(numax,numax),yvec(numax,numax),zvec(numax,numax),growfrom(numax)&
+     ,rxuion(numax,2),ryuion(numax,2),rzuion(numax,2),qquion(numax,2),rxu_update(numax),ryu_update(numax),rzu_update(numax)&
+     ,linclu(ntmax,numax,numax),lqinclu(ntmax,numax,numax),lainclu(ntmax,numax,numax)&
+     ,xvec(numax,numax),yvec(numax,numax),zvec(numax,numax),growfrom(numax)&
      ,growprev(numax),grownum(numax),growlist(numax,numax),awell(numax,numax,ntmax),stat=jerr)
     if (jerr.ne.0) then
        call err_exit(__FILE__,__LINE__,'allocate_molecule: allocation failed',jerr)

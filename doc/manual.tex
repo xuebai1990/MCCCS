@@ -550,6 +550,11 @@ force-matched/coarse-grained potential, so each potential in
 fort.44 is the same. The tabulated potentials are then
 multiplied by the partial atomic charges within the code.
 
+\noindent{\bf lkdtree:} Kd-tree data structure is used to
+speed up the simulation. Currently only does NOT support
+MPI. It usually provides speed up for large system size
+(e.g. interaction sites greater than 6,000). False by default.
+
 \subsection{Namelist \textbf{zeolite\_in}}
 \label{zeolite_in}
 Please see \ref{zeolite} for more information.
@@ -2250,6 +2255,36 @@ of those beads within their molecule. In this example we only move the first 3 b
 The last line specifies which molecule the bead belongs to. It is convienient to keep the molecule
 number and the bead number vertically alligned so you can tell which molecules and which beads are
 having this move type applied.
+
+\subsection{Section \textbf{KDTREE}}
+Parameters for setting up Kd-tree data structure. Only read
+if lkdtree in topmon.inp is TRUE.
+
+The section has four lines, with the first "KDTREE" and the
+last "END KDTREE". The second line indicates whether
+the simulation box uses kdtree, while the third line
+indicates the length of the buffer region used in the data
+structure. 
+
+The buffer region length should be
+greater than the largest distance between center-of-mass
+and any bead in this molecule. Otherwise, there can be
+errors related to Kd-tree, or energy errors.
+The efficiency of the simulation decreases as the buffer
+region size increases, as more beads in the periodic
+boundary conditions need to be stored.
+
+\noindent {\bf Example}\hfill\break
+Kdtree section setup for two-box $NVT$-Gibbs simulations,
+with both boxes use Kd-tree and the buffer region sizes
+are 5 \AA.
+
+\begin{verbatim}
+KDTREE
+T T
+5 5
+END KDTREE
+\end{verbatim}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Other Input and Output Files}

@@ -24,7 +24,7 @@ contains
 !> Works for linear or branched molecules and for DC-CBMC and explicit atom
 !> \author Rewritten from old swap and swapbr subroutines by M.G. Martin (9-18-97)
   subroutine swap()
-    use sim_particle,only:update_neighbor_list_molecule,ctrmas,neigh_cnt,neighbor,neigh_icnt
+    use sim_particle,only:update_neighbor_list_molecule,ctrmas,neigh_cnt,neighbor,neigh_icnt,update_coord_in_tree
     use sim_initia,only:setup_molecule_config
     use moves_cbmc,only:first_bead_to_swap
     use transfer_shared,only:lopt_bias,update_bias,gcmc_setup,gcmc_cleanup,gcmc_exchange
@@ -1511,6 +1511,17 @@ contains
           end if
        end if
 
+       ! Update coordinates in kdtree
+       if (lkdtree .and. (lkdtree_box(boxrem) .or. lkdtree_box(boxins))) then
+          do ic = 1, igrow
+              rxu_update(ic) = rxnew(ic)
+              ryu_update(ic) = rynew(ic)
+              rzu_update(ic) = rznew(ic)
+              if (leemove.and.lexpee) qqu(irem,ic) = qqu(iins1,ic)
+           end do
+           call update_coord_in_tree(irem, igrow, boxrem, boxins, .true., .false.)
+       end if
+
        ! update the position, it will be used to get the bonded energy
        do ic = 1,igrow
           rxu(irem,ic) = rxnew(ic)
@@ -1522,6 +1533,7 @@ contains
              qqu(irem,ic) = qqu(iins,ic)
           end if
        end do
+
        do ic = igrow+1,iunit
           rxu(irem,ic) = rxuion(ic,2)
           ryu(irem,ic) = ryuion(ic,2)

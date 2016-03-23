@@ -19,7 +19,7 @@ contains
 !> several critical bug fixes as well.
 !> \since 9-25-02 JMS
   subroutine swatch()
-    use sim_particle,only:ctrmas
+    use sim_particle,only:ctrmas,update_coord_in_tree
     use energy_intramolecular,only:U_bonded
     use transfer_shared,only:lopt_bias,update_bias,gcmc_setup,gcmc_cleanup,gcmc_exchange
 
@@ -1189,6 +1189,26 @@ contains
           vbox(ivElect,ic) = vbox(ivElect,ic) + vnbox(ivElect,ic) + vnbox(ivEwald,ic)
        end do
 
+       ! Update coordinates in kdtree for A
+       if (lkdtree .and. (lkdtree_box(boxa) .or. lkdtree_box(boxb))) then
+           do ic = 1, iunita
+               rxu_update(ic) = rxut(1, ic)
+               ryu_update(ic) = ryut(1, ic)
+               rzu_update(ic) = rzut(1, ic)
+           end do
+
+           call update_coord_in_tree(imola, iunita, boxa, boxb, .true., .false.)
+
+           do ic = 1, iunitb
+               rxu_update(ic) = rxut(2, ic)
+               ryu_update(ic) = ryut(2, ic)
+               rzu_update(ic) = rzut(2, ic)
+           end do
+
+           call update_coord_in_tree(imolb, iunitb, boxb, boxa, .true., .false.)
+       end if
+
+       ! Update coordinates in r*u arrays
        do ic = 1,iunita
           rxu(imola,ic) = rxut(1,ic)
           ryu(imola,ic) = ryut(1,ic)

@@ -1,6 +1,7 @@
 MODULE moves_volume
   use util_random,only:random
   use util_runtime,only:err_exit
+  use util_kdtree,only:construct_kdtree
   use sim_system
   use sim_cell
   use energy_kspace,only:recip,calp,save_kvector,restore_kvector
@@ -400,6 +401,14 @@ contains
        calp(boxb) = kalp(boxb)/min_boxl
     end if
 
+    ! create kdtree for the sumup
+    if (lkdtree) then
+        ! construct a kdtree for the fictitious box nbox+1
+        ! when sumup is called from the volume move, the energy of nbox+1 and nbox+2 will be calculated instead of ibox
+        if (lkdtree_box(boxa)) call construct_kdtree(boxa, nbox+1, .false.)
+        if (lkdtree_box(boxb)) call construct_kdtree(boxb, nbox+2, .false.)
+    end if
+
     do i = 1,2
        if ( i .eq. 1 ) ibox = boxa
        if ( i .eq. 2 ) ibox = boxb
@@ -780,6 +789,13 @@ contains
        calp(boxvch) = kalp(boxvch)/boxlx(boxvch)
     end if
 
+    ! create kdtree for the sumup
+    if (lkdtree) then
+        ! construct a kdtree for the fictitious box nbox+1
+        ! when sumup is called from the volume move, the energy of nbox+1 will be calculated instead of ibox
+        if (lkdtree_box(ibox)) call construct_kdtree(ibox, nbox+1, .false.)
+    end if
+
     call sumup(ovrlap,v,boxvch,.true.)
     if ( ovrlap ) goto 500
     vboxn(:,boxvch) = v
@@ -1150,6 +1166,7 @@ contains
 
   subroutine update_box(box)
     use sim_particle,only:ctrmas
+    use util_kdtree,only:update_box_kdtree
     integer,intent(in)::box
 
     if ( .not. lanes ) then
@@ -1163,6 +1180,12 @@ contains
 
     ! update centers of mass
     call ctrmas(.true.,box,0,5)
+
+    ! update coordinates in kdtree
+    if (lkdtree .and. lkdtree_box(box)) then
+        call update_box_kdtree(box)
+    end if
+
     ! update linkcell, if applicable
     if (licell .and. (box .eq. boxlink)) then
        call build_linked_cell()

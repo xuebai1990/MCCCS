@@ -7,6 +7,7 @@ MODULE energy_pairwise
   use util_string,only:uppercase
   use util_files,only:readLine
   use util_mp,only:mp_sum,mp_lor,mp_allgather
+  use util_kdtree,only:update_tree_height,range_search
   use sim_system
   use sim_cell
   use energy_kspace,only:calp,sself,correct
@@ -88,6 +89,11 @@ contains
     real::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq,vol
     ! Neeraj & RP for MPI
     real::sum_vvib,sum_vbend,sum_vtg
+   ! kdtree
+    type(tree), pointer :: tree
+    real :: coord(3)
+    real, allocatable :: inter_list(:,:)
+    integer :: iTree, iInter, inter_list_dim, dist_calc_num, dist_calc_num_temp
 ! --------------------------------------------------------------------
 #ifdef __DEBUG__
     write(io_output,*) 'start SUMUP in ',myid,' for box ', ibox
@@ -119,7 +125,6 @@ contains
         ,myid+1)
     end if
 
-! ###############################################################
 ! *******************************
 ! INTERCHAIN INTERACTIONS ***
 ! *******************************
@@ -127,142 +132,209 @@ contains
 
     ! loop over all chains i
     if (.not.lideal(ibox)) then
-       ! MPI
-       do i = 1, nchain - 1
-          ! check if i is in relevant box ###
-          if ( nboxi(i) .eq. ibox ) then
-             imolty = moltyp(i)
-             lqimol = lelect(imolty)
+        if (lkdtree .and. lkdtree_box(ibox)) then
+            dist_calc_num = 0
 
-             if ( lcutcm .and. lvol ) then
-                xcmi = xcm(i)
-                ycmi = ycm(i)
-                zcmi = zcm(i)
-                rcmi = rcmu(i)
-             else
-                lij2 = .true.
-             end if
+            ! if called from regular move, ibox = ibox
+            ! if called from volume move, ibox = nbox + 1, i.e., to calculate the energy for the coordinates after the volume change
+            if (.not. lvol) then
+                tree => mol_tree(ibox)%tree
+            else
+                iTree = 0
+                do i = nbox+1, nbox+2
+                    if (associated(mol_tree(i)%tree)) then
+                        if (mol_tree(i)%tree%box .eq. ibox) then
+                            iTree = i
+                            exit
+                        end if
+                    end if
+                end do
+                if (iTree .eq. 0) call err_exit(__FILE__,__LINE__,'Error in update_box_kdtree: iTree not found',myid)
+                tree => mol_tree(iTree)%tree
+            end if
 
-             if ( nugrow(imolty) .eq. nunit(imolty) ) then
-                lexplt = .false.
-             else
-                lexplt = .true.
-             end if
+            if (myid .eq. 0) then
 
-             ! loop over all chains j with j>i
-             molecule2: do j = i + 1 + myid, nchain, numprocs
-                ! check for simulation box ###
-                if ( nboxi(j) .eq. ibox ) then
-                   jmolty = moltyp(j)
-                   lqjmol = lelect(jmolty)
+                ! if not volume move, then update and output the height of the tree
+                if (.not. lvol) then
+                    call update_tree_height(tree)
+                    write(io_output, *) "Height of the tree for box",ibox," is ", tree%height
+                end if
 
-                   if (lcutcm .and. lvol ) then
-                      ! check if ctrmas within rcmsq
-                      rxuij = xcmi - xcm(j)
-                      ryuij = ycmi - ycm(j)
-                      rzuij = zcmi - zcm(j)
-                      ! minimum image the ctrmas pair separations
-                      if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
+                do i = 1, nchain - 1
+                    if (nboxi(i) .eq. ibox) then
+                        imolty = moltyp(i)
+                        do ii = 1, nunit(imolty)
+                            coord(1) = rxu(i, ii)
+                            coord(2) = ryu(i, ii)
+                            coord(3) = rzu(i, ii)
+                            ntii = ntype(imolty, ii)
+                            lqchgi = lqchg(ntii)
 
-                      rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-                      rcm = rbcut + rcmi + rcmu(j)
-                      rcmsq = rcm*rcm
+                            call range_search(tree, coord, nmax*numax, rmin, rbcut, i, ii, .true., ovrlap, inter_list_dim,&
+                            inter_list, dist_calc_num_temp, .false.)
 
-                      ! if ( lneighbor .and. rcmsq .lt. rbsmax**2 .and. rcmsq .gt. rbsmin**2 ) then
-                      ! neigh_cnt(i,jmolty)=neigh_cnt(i,jmolty)+1
-                      ! neighbor(neigh_cnt(i,jmolty),i,jmolty)=j
-                      ! neigh_cnt(j,imolty)=neigh_cnt(j,imolty)+1
-                      ! neighbor(neigh_cnt(j,imolty),j,imolty)=i
-                      ! end if
-
-                      if ( rijsq .gt. rcmsq ) then
-                         if ( lqimol .and. lqjmol .and. lchgall ) then
-                            lij2 = .false.
-                         else
-                            cycle molecule2
-                         end if
-                      else
-                         lij2 = .true.
-                      end if
-                   end if
-
-                   do ii = 1,nunit(imolty)
-                      ntii = ntype(imolty,ii)
-                      liji = lij(ntii)
-                      lqchgi = lqchg(ntii)
-                      rxui = rxu(i,ii)
-                      ryui = ryu(i,ii)
-                      rzui = rzu(i,ii)
-
-                      ! loop over all beads jj of chain j
-                      bead2: do jj = 1, nunit(jmolty)
-                         ! check exclusion table
-                         if (lexclu(imolty,ii,jmolty,jj)) cycle bead2
-
-                         ntjj = ntype(jmolty,jj)
-                         if ( lij2 ) then
-                            if ((.not.(liji.and.lij(ntjj))).and.(.not.(lqchgi.and.lqchg(ntjj)))) cycle bead2
-                         else
-                            if (.not.(lqchgi.and.lqchg(ntjj))) cycle bead2
-                         end if
-
-                         ntij=type_2body(ntii,ntjj)
-
-                         if (lexpee) rminsq=rminee(ntij)*rminee(ntij)
-
-                         rxuij = rxui - rxu(j,jj)
-                         ryuij = ryui - ryu(j,jj)
-                         rzuij = rzui - rzu(j,jj)
-                         ! minimum image the pair separations ***
-                         if (lpbc) call mimage(rxuij,ryuij,rzuij,ibox)
-
-                         rijsq=(rxuij*rxuij)+(ryuij*ryuij)+(rzuij*rzuij)
-
-                         if (rijsq.lt.rminsq .and. .not.(lexpand(imolty).or.lexpand(jmolty))) then
-                            if ( .not. lvol .and.myid.eq.rootid) then
-                               write(io_output,*) 'overlap inter'
-                               write(io_output,*)'rijsq rminsq',rijsq,rminsq
-                               write(io_output,*) 'i ii', i, ii
-                               write(io_output,*) 'i-pos', rxui,ryui,rzui
-                               write(io_output,*) 'j jj', j, jj
-                               write(io_output,*) 'j-pos',  rxu(j,jj),ryu(j,jj),rzu(j,jj)
+                            dist_calc_num = dist_calc_num + dist_calc_num_temp
+                            if (ovrlap) then
+                                if ( .not. lvol .and.myid.eq.rootid) then
+                                    write(io_output, *) 'Overlap in sumup'
+                                end if
+                                goto 199
+                            else
+                                do iInter = 1, inter_list_dim
+                                    rijsq = inter_list(1, iInter)
+                                    j = inter_list(2, iInter)
+                                    jj = inter_list(3, iInter)
+                                    jmolty = moltyp(j)
+                                    ntjj = ntype(jmolty, jj)
+                                    ntij = type_2body(ntii, ntjj)
+                                    v(ivInterLJ)=v(ivInterLJ)+U2(rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
+                                    v(ivElect)=v(ivElect)+Q2(rijsq,rcutsq,i,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
+                                end do
                             end if
-                            ovrlap = .true.
-                            ! RP added for MPI to compensate ovrlap
-                            ! return
-                            goto 199
-                         else if (rijsq.lt.rcutsq .or. lijall) then
-                            v(ivInterLJ)=v(ivInterLJ)+U2(rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
-                         end if
+                        end do
+                    end if
+                end do
+            end if !< if myid .eq. 0
+        else ! if lkdtree
 
-                         v(ivElect)=v(ivElect)+Q2(rijsq,rcutsq,i,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
+1999 continue
+           ! MPI
+           do i = 1, nchain - 1
+              ! check if i is in relevant box ###
+              if ( nboxi(i) .eq. ibox ) then
+                 imolty = moltyp(i)
+                 lqimol = lelect(imolty)
 
-                         if (lneigh.and.rijsq.le.rcutnn(ibox)**2) then
-                            lnn(i,j) = .true.
-                            lnn(j,i) = .true.
-                         end if
+                 if ( lcutcm .and. lvol ) then
+                    xcmi = xcm(i)
+                    ycmi = ycm(i)
+                    zcmi = zcm(i)
+                    rcmi = rcmu(i)
+                 else
+                    lij2 = .true.
+                 end if
+
+                 if ( nugrow(imolty) .eq. nunit(imolty) ) then
+                    lexplt = .false.
+                 else
+                    lexplt = .true.
+                 end if
+
+                 ! loop over all chains j with j>i
+                 molecule2: do j = i + 1 + myid, nchain, numprocs
+                    ! check for simulation box ###
+                    if ( nboxi(j) .eq. ibox ) then
+                       jmolty = moltyp(j)
+                       lqjmol = lelect(jmolty)
+
+                       if (lcutcm .and. lvol ) then
+                          ! check if ctrmas within rcmsq
+                          rxuij = xcmi - xcm(j)
+                          ryuij = ycmi - ycm(j)
+                          rzuij = zcmi - zcm(j)
+                          ! minimum image the ctrmas pair separations
+                          if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
+
+                          rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
+                          rcm = rbcut + rcmi + rcmu(j)
+                          rcmsq = rcm*rcm
+
+                          ! if ( lneighbor .and. rcmsq .lt. rbsmax**2 .and. rcmsq .gt. rbsmin**2 ) then
+                          ! neigh_cnt(i,jmolty)=neigh_cnt(i,jmolty)+1
+                          ! neighbor(neigh_cnt(i,jmolty),i,jmolty)=j
+                          ! neigh_cnt(j,imolty)=neigh_cnt(j,imolty)+1
+                          ! neighbor(neigh_cnt(j,imolty),j,imolty)=i
+                          ! end if
+
+                          if ( rijsq .gt. rcmsq ) then
+                             if ( lqimol .and. lqjmol .and. lchgall ) then
+                                lij2 = .false.
+                             else
+                                cycle molecule2
+                             end if
+                          else
+                             lij2 = .true.
+                          end if
+                       end if
+
+                       do ii = 1,nunit(imolty)
+                          ntii = ntype(imolty,ii)
+                          liji = lij(ntii)
+                          lqchgi = lqchg(ntii)
+                          rxui = rxu(i,ii)
+                          ryui = ryu(i,ii)
+                          rzui = rzu(i,ii)
+
+                          ! loop over all beads jj of chain j
+                          bead2: do jj = 1, nunit(jmolty)
+                             ! check exclusion table
+                             if (lexclu(imolty,ii,jmolty,jj)) cycle bead2
+
+                             ntjj = ntype(jmolty,jj)
+                             if ( lij2 ) then
+                                if ((.not.(liji.and.lij(ntjj))).and.(.not.(lqchgi.and.lqchg(ntjj)))) cycle bead2
+                             else
+                                if (.not.(lqchgi.and.lqchg(ntjj))) cycle bead2
+                             end if
+
+                             ntij=type_2body(ntii,ntjj)
+
+                             if (lexpee) rminsq=rminee(ntij)*rminee(ntij)
+
+                             rxuij = rxui - rxu(j,jj)
+                             ryuij = ryui - ryu(j,jj)
+                             rzuij = rzui - rzu(j,jj)
+                             ! minimum image the pair separations ***
+                             if (lpbc) call mimage(rxuij,ryuij,rzuij,ibox)
+
+                             rijsq=(rxuij*rxuij)+(ryuij*ryuij)+(rzuij*rzuij)
+                             if (rijsq.lt.rminsq .and. .not.(lexpand(imolty).or.lexpand(jmolty))) then
+                                if ( .not. lvol .and.myid.eq.rootid) then
+                                   write(io_output,*) 'overlap inter'
+                                   write(io_output,*)'rijsq rminsq',rijsq,rminsq
+                                   write(io_output,*) 'i ii', i, ii
+                                   write(io_output,*) 'i-pos', rxui,ryui,rzui
+                                   write(io_output,*) 'j jj', j, jj
+                                   write(io_output,*) 'j-pos',  rxu(j,jj),ryu(j,jj),rzu(j,jj)
+                                end if
+                                ovrlap = .true.
+                                ! RP added for MPI to compensate ovrlap
+                                ! return
+                                goto 199
+                             else if (rijsq.lt.rcutsq .or. lijall) then
+                                v(ivInterLJ)=v(ivInterLJ)+U2(rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
+                             end if
+
+                             v(ivElect)=v(ivElect)+Q2(rijsq,rcutsq,i,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
+
+                             if (lneigh.and.rijsq.le.rcutnn(ibox)**2) then
+                                lnn(i,j) = .true.
+                                lnn(j,i) = .true.
+                             end if
 
 !cc  KM for MPI
 !cc  all processors need to know neighbor information
 !cc  lneighbor and lgaro will not work in parallel
 !cc  calculation of neighbors assumes everything is sequential
-                         !> \bug Wouldn't testing for center-of-mass distance be a better criteria?
-                         if (lneighbor.and.ii.eq.1.and.jj.eq.1.and.rijsq.lt.rbsmax**2.and.rijsq.gt.rbsmin**2) then
-                            call add_neighbor_list(i,j,sqrt(rijsq),rxuij,ryuij,rzuij)
-                         else if (lgaro) then
-                            if (isNeighbor(rijsq,ntii,ntjj)) then
-                               call add_neighbor_list(i,j,sqrt(rijsq),rxuij,ryuij,rzuij)
-                            end if
-                         end if
-                      end do bead2
-                   end do !do ii = 1,nunit(imolty)
-                end if
-             end do molecule2
-          end if
-       end do !do i = 1, nchain - 1
-
+                             !> \bug Wouldn't testing for center-of-mass distance be a better criteria?
+                             if (lneighbor.and.ii.eq.1.and.jj.eq.1.and.rijsq.lt.rbsmax**2.and.rijsq.gt.rbsmin**2) then
+                                call add_neighbor_list(i,j,sqrt(rijsq),rxuij,ryuij,rzuij)
+                             else if (lgaro) then
+                                if (isNeighbor(rijsq,ntii,ntjj)) then
+                                   call add_neighbor_list(i,j,sqrt(rijsq),rxuij,ryuij,rzuij)
+                                end if
+                             end if
+                          end do bead2
+                       end do !do ii = 1,nunit(imolty)
+                    end if
+                 end do molecule2
+              end if
+           end do !do i = 1, nchain - 1
+       end if ! if lkdtree
 ! Returning from ovrlap--------------
 199    continue
+
 ! KM don't check overlap until allreduce is finished
 ! if(ovrlap .eq. .true.)then
 ! write(io_output,*)'521: in sumup ovrlap=',ovrlap,'myid=',myid
@@ -685,6 +757,11 @@ contains
     real::v(nEnergy),rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq,ryuij,rzuij,rij,rijsq,rbcut,calpi
     real::vwell
     real::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq
+    ! kdtree
+    type(tree), pointer :: tree
+    real :: coord(3)
+    real, allocatable :: inter_list(:,:)
+    integer :: iInter, inter_list_dim, dist_calc_num, dist_calc_num_temp
 ! --------------------------------------------------------------------
 #ifdef __DEBUG__
     write(io_output,*) 'start ENERGY in ',myid,' for molecule ',i,' in box ',ibox
@@ -767,134 +844,170 @@ contains
     if (.not.(lideal(ibox))) then
 ! END JLR 11-24-09
 ! RP added for MPI
-       do k = myid+1,nmole,numprocs
-! do k = 1, nmole
-          if (licell.and.(ibox.eq.boxlink)) then
-             j = jcell(k)
-          else
-             j = k
-          end if
+       if (lkdtree .and. lkdtree_box(ibox)) then
+           tree => mol_tree(ibox)%tree
+           dist_calc_num = 0
 
-          jmolty = moltyp(j)
-          lqjmol = lelect(jmolty)
-          growjj = nugrow(jmolty)
+           ! loop over all units in chain i
+           do ii = myid+istart, iuend, numprocs
+               ntii = ntype(imolty,ii)
+               liji = lij(ntii)
+               lqchgi = lqchg(ntii)
+               coord(1) = rxuion(ii, flagon)
+               coord(2) = ryuion(ii, flagon)
+               coord(3) = rzuion(ii, flagon)
+
+               call range_search(tree, coord, nmax*numax, rmin, rbcut, i, ii, .false., ovrlap, inter_list_dim,&
+                     inter_list, dist_calc_num_temp, .false.)
+               dist_calc_num = dist_calc_num + dist_calc_num_temp
+               if (ovrlap) goto 99
+
+               ! After all the interaction sites within the cutoff are found
+               ! Loop over all these sites and calculate the inter LJ as well as the electrostatics
+               do iInter = 1, inter_list_dim
+                    rijsq = inter_list(1, iInter)
+                    j = inter_list(2, iInter)
+                    jj = inter_list(3, iInter)
+                    jmolty = moltyp(j)
+                    if (lexclu(imolty,ii,jmolty,jj)) cycle !< check exclusion table
+                    ntjj = ntype(jmolty, jj)
+                    ntij = type_2body(ntii, ntjj)
+
+                    v(ivInterLJ)=v(ivInterLJ)+U2(rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
+
+                    ! In calculating electrostatics, nchp2 rather than i is used
+                    ! because the value here is only needed for determing the charge of this bead qqu(nchp2,ii)
+                    ! in the swatch move, qqu(nchp2,ii) may be different from qqu(i,ii), because i is the mol to be swatched
+                    ! and nchp2 is the mol to replace, so qqu(nchp2,ii) should be used here
+                    ! in all other moves, qqu(nchp2,ii) == qqu(i,ii)
+                    v(ivElect)=v(ivElect)+Q2(rijsq,rcutsq,nchp2,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
+               end do
+           end do
+       else
+           do k = myid+1,nmole,numprocs
+! do k = 1, nmole
+              if (licell.and.(ibox.eq.boxlink)) then
+                 j = jcell(k)
+              else
+                 j = k
+              end if
+
+              jmolty = moltyp(j)
+              lqjmol = lelect(jmolty)
+              growjj = nugrow(jmolty)
 
 ! check for simulation box ###
-          if ( ( ibox .eq. nboxi(j) ) .and. (i .ne. j )) then
-             if ( lneigh ) then
-                if ( .not. lnn(j,i) ) cycle
-             end if
+              if ( ( ibox .eq. nboxi(j) ) .and. (i .ne. j )) then
+                 if ( lneigh ) then
+                    if ( .not. lnn(j,i) ) cycle
+                 end if
 
-             if (lcutcm .or. lfavor) then
-                ! check if ctrmas within rcmsq
-                rxuij = xcmi - xcm(j)
-                ryuij = ycmi - ycm(j)
-                rzuij = zcmi - zcm(j)
-                ! minimum image the ctrmas pair separations ***
-                if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
-                rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-                rcm = rbcut + rcmi + rcmu(j)
-                rcmsq = rcm*rcm
-                ! write(io_output,*) rcm,rcmi,rcmu(j)
-                if ( lfavor ) then
-                   favor(j) = (rminsq/rijsq)**2*5.0E0_dp
-                   favor2(j) = rminsq/rijsq
+                 if (lcutcm .or. lfavor) then
+                    ! check if ctrmas within rcmsq
+                    rxuij = xcmi - xcm(j)
+                    ryuij = ycmi - ycm(j)
+                    rzuij = zcmi - zcm(j)
+                    ! minimum image the ctrmas pair separations ***
+                    if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
+                    rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
+                    rcm = rbcut + rcmi + rcmu(j)
+                    rcmsq = rcm*rcm
+                    ! write(io_output,*) rcm,rcmi,rcmu(j)
+                    if ( lfavor ) then
+                        favor(j) = (rminsq/rijsq)**2*5.0E0_dp
+                        favor2(j) = rminsq/rijsq
+                    end if
+                    if ( rijsq .gt. rcmsq .and. lcutcm) then
+                        if ( lqimol .and. lqjmol .and. lchgall ) then
+                            lij2 = .false.
+                        else
+                            cycle
+                        end if
+                    else
+                        lij2 = .true.
+                    end if
                 end if
-                if ( rijsq .gt. rcmsq .and. lcutcm) then
-                   if ( lqimol .and. lqjmol .and. lchgall ) then
-                      lij2 = .false.
-                   else
-                      cycle
-                   end if
-                else
-                   lij2 = .true.
+
+                if ( lcharge_table .and. (.not. lchgall) ) then
+                    ! called from CBMC and must set up charge-interaction table ---
+                    do ii = 1,nugrow(imolty)
+                        do jj = 1,nugrow(jmolty)
+                            iii = leaderq(imolty,ii)
+                            jjj = leaderq(jmolty,jj)
+                            if ( iii .eq. ii .and. jjj .eq. jj ) then
+                                rxuij = rxuion(ii,flagon) - rxu(j,jj)
+                                ryuij = ryuion(ii,flagon) - ryu(j,jj)
+                                rzuij = rzuion(ii,flagon) - rzu(j,jj)
+                                if ( lpbc )  call mimage(rxuij,ryuij,rzuij,ibox)
+                                rijsq = rxuij*rxuij + ryuij*ryuij  + rzuij*rzuij
+                                if ((rijsq .lt. rcutsq) .or. lijall) then
+                                    lcoulo(ii,jj) = .true.
+                                else
+                                    lcoulo(ii,jj) = .false.
+                                end if
+                            end if
+                        end do
+                    end do
                 end if
-             end if
 
-             if ( lcharge_table .and. (.not. lchgall) ) then
-                ! called from CBMC and must set up charge-interaction table ---
-                do ii = 1,nugrow(imolty)
-                   do jj = 1,nugrow(jmolty)
-                      iii = leaderq(imolty,ii)
-                      jjj = leaderq(jmolty,jj)
-                      if ( iii .eq. ii .and. jjj .eq. jj ) then
-                         rxuij = rxuion(ii,flagon) - rxu(j,jj)
-                         ryuij = ryuion(ii,flagon) - ryu(j,jj)
-                         rzuij = rzuion(ii,flagon) - rzu(j,jj)
-                         if ( lpbc )  call mimage(rxuij,ryuij,rzuij,ibox)
-                         rijsq = rxuij*rxuij + ryuij*ryuij  + rzuij*rzuij
-                         if ((rijsq .lt. rcutsq) .or. lijall) then
-                            lcoulo(ii,jj) = .true.
-                         else
-                            lcoulo(ii,jj) = .false.
-                         end if
-                      end if
-                   end do
+                ! loop over all beads ii of chain i
+                do ii = istart, iuend
+                    ntii = ntype(imolty,ii)
+                    liji = lij(ntii)
+                    lqchgi = lqchg(ntii)
+                    rxui = rxuion(ii,flagon)
+                    ryui = ryuion(ii,flagon)
+                    rzui = rzuion(ii,flagon)
+
+                    ! loop over all beads jj of chain j
+                    do jj = 1, nunit(jmolty)
+                        ! check exclusion table
+                        if ( lexclu(imolty,ii,jmolty,jj) ) cycle
+
+                        ntjj = ntype(jmolty,jj)
+                        if ( lij2 ) then
+                            if ((.not.(liji.and.lij(ntjj))).and.(.not.(lqchgi.and.lqchg(ntjj))))  cycle
+                        else
+                            if (.not.(lqchgi.and.lqchg(ntjj))) cycle
+                        end if
+
+                        ntij=type_2body(ntii,ntjj)
+
+                        if (lexpee) rminsq = rminee(ntij)*rminee(ntij)
+
+                        rxuij = rxui - rxu(j,jj)
+                        ryuij = ryui - ryu(j,jj)
+                        rzuij = rzui - rzu(j,jj)
+                        ! minimum image the pair separations ***
+                        if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
+                        rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
+                        if (rijsq.lt.rminsq .and. .not.(lexpand(imolty).or.lexpand(jmolty))) then
+                            ovrlap = .true.
+                        ! RP added for MPI
+                        ! return
+                            goto 99
+                        else if ((rijsq .lt. rcutsq) .or. lijall) then
+                            v(ivInterLJ)=v(ivInterLJ)+U2(rijsq,nchp2,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
+                        end if
+
+                        v(ivElect)=v(ivElect)+Q2(rijsq,rcutsq,nchp2,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
+
+                        if (lneigh.and.flagon.eq.2.and.rijsq.le.rcutnn(ibox)**2) lnn_t(j,i)=.true.
+
+                        ! KM lneighbor and lgaro does not work in parallel
+                        !> \bug Wouldn't testing for center-of-mass distance be a better criteria?
+                        if (lneighbor.and.ii.eq.1.and.jj.eq.1.and.flagon.eq.2.and.rijsq.lt.rbsmax**2.and.rijsq.gt.rbsmin**2) then
+                            call add_neighbor_list_molecule(j,sqrt(rijsq),rxuij,ryuij,rzuij)
+                        else if (lgaro.and.flagon.eq.2) then
+                            if (isNeighbor(rijsq,ntii,ntjj)) then
+                                call add_neighbor_list_molecule(j,sqrt(rijsq),rxuij,ryuij,rzuij)
+                            end if
+                        end if
+                    end do
                 end do
-             end if
-
-             ! loop over all beads ii of chain i
-             do ii = istart, iuend
-                ntii = ntype(imolty,ii)
-                liji = lij(ntii)
-                lqchgi = lqchg(ntii)
-                rxui = rxuion(ii,flagon)
-                ryui = ryuion(ii,flagon)
-                rzui = rzuion(ii,flagon)
-
-                ! loop over all beads jj of chain j
-                do jj = 1, nunit(jmolty)
-                   ! check exclusion table
-                   if ( lexclu(imolty,ii,jmolty,jj) ) cycle
-
-                   ntjj = ntype(jmolty,jj)
-                   if ( lij2 ) then
-                      if ((.not.(liji.and.lij(ntjj))).and.(.not.(lqchgi.and.lqchg(ntjj))))  cycle
-                   else
-                      if (.not.(lqchgi.and.lqchg(ntjj))) cycle
-                   end if
-
-                   ntij=type_2body(ntii,ntjj)
-
-                   if (lexpee) rminsq = rminee(ntij)*rminee(ntij)
-
-                   rxuij = rxui - rxu(j,jj)
-                   ryuij = ryui - ryu(j,jj)
-                   rzuij = rzui - rzu(j,jj)
-                   ! minimum image the pair separations ***
-                   if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
-                   rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-                   if (rijsq.lt.rminsq .and. .not.(lexpand(imolty).or.lexpand(jmolty))) then
-                      ovrlap = .true.
-                      ! write(io_output,*) 'inter ovrlap:',i,j, myid
-                      ! write(io_output,*) 'i xyz',rxui,ryui,rzui
-                      ! write(io_output,*) 'j xyz',rxu(j,jj),ryu(j,jj),rzu(j,jj)
-                      ! write(io_output,*) 'ii:',ii,'jj:',jj
-                      ! write(io_output,*) 'distance', sqrt(rijsq)
-                      ! RP added for MPI
-                      ! return
-                      goto 99
-                   else if ((rijsq .lt. rcutsq) .or. lijall) then
-                      v(ivInterLJ)=v(ivInterLJ)+U2(rijsq,nchp2,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
-                   end if
-
-                   v(ivElect)=v(ivElect)+Q2(rijsq,rcutsq,nchp2,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
-
-                   if (lneigh.and.flagon.eq.2.and.rijsq.le.rcutnn(ibox)**2) lnn_t(j,i)=.true.
-
-                   ! KM lneighbor and lgaro does not work in parallel
-                   !> \bug Wouldn't testing for center-of-mass distance be a better criteria?
-                   if (lneighbor.and.ii.eq.1.and.jj.eq.1.and.flagon.eq.2.and.rijsq.lt.rbsmax**2.and.rijsq.gt.rbsmin**2) then
-                      call add_neighbor_list_molecule(j,sqrt(rijsq),rxuij,ryuij,rzuij)
-                   else if (lgaro.and.flagon.eq.2) then
-                      if (isNeighbor(rijsq,ntii,ntjj)) then
-                         call add_neighbor_list_molecule(j,sqrt(rijsq),rxuij,ryuij,rzuij)
-                      end if
-                   end if
-                end do
-             end do
-          end if
-       end do
+            end if
+          end do
+        end if !< if kdtree
     end if
 
 ! RP added for MPI
@@ -1143,6 +1256,12 @@ contains
     real::my_vtry(nchmax),my_vtrintra(nchmax),my_vtrext(nchmax),my_vtrinter(nchmax),my_vtrelect(nchmax),my_vtrewald(nchmax)&
      ,my_bfac(nchmax),my_vipswot(nchmax),my_vwellipswot(nchmax),my_vipswnt(nchmax),my_vwellipswnt(nchmax)
     logical::my_lovr(nchmax)
+
+    ! kdtree
+    type(tree), pointer :: tree
+    real :: coord(3)
+    real, allocatable :: inter_list(:,:)
+    integer :: iInter, inter_list_dim, dist_calc_num, dist_calc_num_temp
 ! ------------------------------------------
 #ifdef __DEBUG__
     write(io_output,*) 'start BOLTZ in ',myid
@@ -1203,27 +1322,30 @@ contains
        end if
 
 !> \todo to be MPI parallelized
-       do j = 1,nchain
-          lcmno(j) = .false.
-          if ( ( nboxi(j) .eq. ibox ) .and. ( i .ne. j ) ) then
-             rxuij = rxui-xcm(j)
-             ryuij = ryui-ycm(j)
-             rzuij = rzui-zcm(j)
-             ! minimum image the pseudo-ctrmas pair separation
-             if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
+!> COM distance calculation, not needed if lkdtree is used
+       if ((.not. lkdtree) .and. (.not. lkdtree_box(ibox))) then
+           do j = 1,nchain
+              lcmno(j) = .false.
+              if ( ( nboxi(j) .eq. ibox ) .and. ( i .ne. j ) ) then
+                 rxuij = rxui-xcm(j)
+                 ryuij = ryui-ycm(j)
+                 rzuij = rzui-zcm(j)
+                 ! minimum image the pseudo-ctrmas pair separation
+                 if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
 
-             rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
+                 rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
 
-             if ( ldual ) then
-                rcm = rcutin + rcmu(j) + maxlen
-                rcmsq = rcm*rcm
-             else
-                rcm = rcutmax + rcmu(j) + maxlen
-                rcmsq = rcm*rcm
-             end if
-             if (rijsq .gt. rcmsq ) lcmno(j) = .true.
-          end if
-       end do
+                 if ( ldual ) then
+                    rcm = rcutin + rcmu(j) + maxlen
+                    rcmsq = rcm*rcm
+                 else
+                    rcm = rcutmax + rcmu(j) + maxlen
+                    rcmsq = rcm*rcm
+                 end if
+                 if (rijsq .gt. rcmsq ) lcmno(j) = .true.
+              end if
+           end do
+       end if !< if not lkdtree
     end if
 
     ! RP added for MPI
@@ -1398,116 +1520,169 @@ contains
 ! INTERCHAIN INTERACTIONS ***
 ! *******************************
 ! loop over all chains except i
-          do_nmole:do k = 1, nmole
-             if (licell.and.(ibox.eq.boxlink)) then
-                j = jcell(k)
-             else
-                j = k
-             end if
+          if (lkdtree .and. lkdtree_box(ibox)) then
+              tree => mol_tree(ibox)%tree
+              dist_calc_num = 0
 
-             ! check for simulation box
-             if ( ( nboxi(j) .eq. ibox ) .and. ( i .ne. j ) ) then
-                ! check neighbor list
-                if (lneigh.and..not.lnew) then
-                   if (.not.lnn(j,i)) cycle do_nmole
-                end if
-                ! check COM table calculated above
-                if (.not.lfirst.and.lcmno(j).and.lcutcm) cycle do_nmole
+              ! loop over all beads of molecule i grown this step
+              do count = 1, ntogrow
+                  ! assign bead type for ii
+                  ii = glist(count)
+                  ntii = ntype(imolty,ii)
+                  liji = lij(ntii)
+                  lqchgi = lqchg(ntii)
 
-                jmolty = moltyp(j)
-                lqjmol = lelect(jmolty)
-                growjj = nugrow(jmolty)
+                  ! assign positions to coord
+                  coord(1) = rxp(count,itrial)
+                  coord(2) = ryp(count,itrial)
+                  coord(3) = rzp(count,itrial)
 
-                ! loop over all beads of molecule i grown this step
-108             do count = 1,ntogrow
-                   ! assign bead type for ii
-                   ii = glist(count)
-                   ntii = ntype(imolty,ii)
-                   liji = lij(ntii)
-                   lqchgi = lqchg(ntii)
+                  call range_search(tree, coord, nmax*numax, rmin, rcutin, i, ii, .false., ovrlap, inter_list_dim,&
+                         inter_list, dist_calc_num_temp, .false.)
 
-                   ! assign positions to r*ui
-                   rxui = rxp(count,itrial)
-                   ryui = ryp(count,itrial)
-                   rzui = rzp(count,itrial)
+                  dist_calc_num = dist_calc_num + dist_calc_num_temp
 
-                   if ( lfirst .and. lcutcm ) then
-                      ! check if ctrmas within rcmsq
-                      rxuij = rxui-xcm(j)
-                      ryuij = ryui-ycm(j)
-                      rzuij = rzui-zcm(j)
-                      ! minimum image the ctrmas pair separations
-                      if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
-                      rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-                      ! determine cutoff
-                      if ( ldual ) then
-                         ! must be lfirst so no previous bead
-                         rcm = rcutin + rcmu(j)
-                      else
-                         ! standard lcutcm cutoff
-                         rcm = rcutmax + rcmu(j)
-                      end if
-                      ! check if interaction distance is greater than cutoff
-                      rcmsq = rcm*rcm
-                      if ( rijsq .gt. rcmsq ) cycle do_nmole
-                   end if
+                  if (ovrlap) then
+                      my_lovr(my_itrial) = .true.
+                      goto 19
+                  else
+                      do iInter = 1, inter_list_dim
+                          rijsq = inter_list(1, iInter)
+                          j = inter_list(2, iInter)
+                          jj = inter_list(3, iInter)
+                          jmolty = moltyp(j)
+                          if (lexclu(imolty,ii,jmolty,jj)) cycle !< check exclusion table
+                          ntjj = ntype(jmolty, jj)
+                          ntij = type_2body(ntii, ntjj)
+                          v(ivInterLJ)=v(ivInterLJ)+U2(rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
 
-                   ! loop over all beads jj of chain j
-                   do jj = 1,nunit(jmolty)
-                      ! check exclusion table
-                      if ( lexclu(imolty,ii,jmolty,jj) ) cycle
-                      ! start iswatch add-on ***
-                      !> \todo is there a way to pull this out of the loops?
-                      ! if (liswatch.and.j.eq.other.and.(.not.liswinc(jj,jmolty))) then
-                      !    cycle
-                      ! end if
-                      ! end iswatch add-on ***
+                          if (L_Coul_CBMC.and.lqchg(ntii).and.lqchg(ntjj)) then
+                              rij = sqrt(rijsq)
+                              if (L_elect_table) then
+                                  v(ivElect) = v(ivElect) + qqu(icharge,ii)*qqu(j,jj)*lininter_elect(rij,ntii,ntjj)
+                              else if (lewald) then
+                                  ! compute real space term of velect
+                                  v(ivElect) = v(ivElect) + qqu(icharge,ii)*qqu(j,jj)*erfunc(calp(ibox)*rij)/rij
+                              else
+                                  ! compute all electrostatic interactions
+                                  v(ivElect) = v(ivElect) + qqu(icharge,ii)*qqu(j,jj)/ rij
+                              end if
+                          end if
+                       end do
+                  end if
+              end do
+          else !< if kdtree
+              do_nmole:do k = 1, nmole
+                 if (licell.and.(ibox.eq.boxlink)) then
+                    j = jcell(k)
+                 else
+                    j = k
+                 end if
 
-                      ntjj = ntype(jmolty,jj)
-                      if ((.not.(liji.and.lij(ntjj))).and.(.not.(lqchgi.and.lqchg(ntjj)))) cycle
+                 ! check for simulation box
+                 if ( ( nboxi(j) .eq. ibox ) .and. ( i .ne. j ) ) then
+                    ! check neighbor list
+                    if (lneigh.and..not.lnew) then
+                       if (.not.lnn(j,i)) cycle do_nmole
+                    end if
+                    ! check COM table calculated above
+                    if (.not.lfirst.and.lcmno(j).and.lcutcm) cycle do_nmole
 
-                      ntij=type_2body(ntii,ntjj)
+                    jmolty = moltyp(j)
+                    lqjmol = lelect(jmolty)
+                    growjj = nugrow(jmolty)
 
-                      if (lexpee) rminsq = rminee(ntij)*rminee(ntij)
+                    ! loop over all beads of molecule i grown this step
+108                 do count = 1,ntogrow
+                       ! assign bead type for ii
+                       ii = glist(count)
+                       ntii = ntype(imolty,ii)
+                       liji = lij(ntii)
+                       lqchgi = lqchg(ntii)
 
-                      rxuij = rxui - rxu(j,jj)
-                      ryuij = ryui - ryu(j,jj)
-                      rzuij = rzui - rzu(j,jj)
-                      ! minimum image the pair separations ***
-                      if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
-                      rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-                      ! compute vinter (eg. lennard-jones)
-                      if (rijsq.lt.rminsq.and..not.(lexpand(imolty).or.lexpand(jmolty))) then
-                         my_lovr(my_itrial) = .true.
-                         ! write(io_output,*) 'j:',j,jj
-                         ! write(io_output,*) 'rjsq:',rijsq,rminsq
-                         goto 19
-                      else if (rijsq.lt.rcinsq.or.lijall) then
-                         v(ivInterLJ)=v(ivInterLJ)+U2(rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
-                      end if
+                       ! assign positions to r*ui
+                       rxui = rxp(count,itrial)
+                       ryui = ryp(count,itrial)
+                       rzui = rzp(count,itrial)
 
-                      ! compute velect (coulomb and ewald)
-                      if (L_Coul_CBMC.and.lqchg(ntii).and.lqchg(ntjj).and.rijsq.lt.rcinsq) then
-                         ! boltz.f has problem to compute the electrostatic interactions
-                         ! in a group-based way because the leader q might not be grown at
-                         ! present, so it calculates electrostatic interaction not based on
-                         ! group but on its own distance in SC, but should be corrected
-                         ! later by calling energy subroutine.
-                         rij = sqrt(rijsq)
-                         if (L_elect_table) then
-                            v(ivElect) = v(ivElect) + qqu(icharge,ii)*qqu(j,jj)*lininter_elect(rij,ntii,ntjj)
-                         else if (lewald) then
-                            ! compute real space term of velect
-                            v(ivElect) = v(ivElect) + qqu(icharge,ii)*qqu(j,jj)*erfunc(calp(ibox)*rij)/rij
-                         else
-                            ! compute all electrostatic interactions
-                            v(ivElect) = v(ivElect) + qqu(icharge,ii)*qqu(j,jj)/ rij
-                         end if
-                      end if
-                   end do
-                end do
-             end if
-          end do do_nmole
+                       if ( lfirst .and. lcutcm ) then
+                          ! check if ctrmas within rcmsq
+                          rxuij = rxui-xcm(j)
+                          ryuij = ryui-ycm(j)
+                          rzuij = rzui-zcm(j)
+                          ! minimum image the ctrmas pair separations
+                          if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
+                          rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
+                          ! determine cutoff
+                          if ( ldual ) then
+                             ! must be lfirst so no previous bead
+                             rcm = rcutin + rcmu(j)
+                          else
+                             ! standard lcutcm cutoff
+                             rcm = rcutmax + rcmu(j)
+                          end if
+                          ! check if interaction distance is greater than cutoff
+                          rcmsq = rcm*rcm
+                          if ( rijsq .gt. rcmsq ) cycle do_nmole
+                       end if
+
+                       ! loop over all beads jj of chain j
+                       do jj = 1,nunit(jmolty)
+                          ! check exclusion table
+                          if ( lexclu(imolty,ii,jmolty,jj) ) cycle
+                          ! start iswatch add-on ***
+                          !> \todo is there a way to pull this out of the loops?
+                          ! if (liswatch.and.j.eq.other.and.(.not.liswinc(jj,jmolty))) then
+                          !    cycle
+                          ! end if
+                          ! end iswatch add-on ***
+
+                          ntjj = ntype(jmolty,jj)
+                          if ((.not.(liji.and.lij(ntjj))).and.(.not.(lqchgi.and.lqchg(ntjj)))) cycle
+
+                          ntij=type_2body(ntii,ntjj)
+
+                          if (lexpee) rminsq = rminee(ntij)*rminee(ntij)
+
+                          rxuij = rxui - rxu(j,jj)
+                          ryuij = ryui - ryu(j,jj)
+                          rzuij = rzui - rzu(j,jj)
+                          ! minimum image the pair separations ***
+                          if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
+                          rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
+                          ! compute vinter (eg. lennard-jones)
+                          if (rijsq.lt.rminsq.and..not.(lexpand(imolty).or.lexpand(jmolty))) then
+                             my_lovr(my_itrial) = .true.
+                             ! write(io_output,*) 'j:',j,jj
+                             ! write(io_output,*) 'rjsq:',rijsq,rminsq
+                             goto 19
+                          else if (rijsq.lt.rcinsq.or.lijall) then
+                             v(ivInterLJ)=v(ivInterLJ)+U2(rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
+                          end if
+
+                          ! compute velect (coulomb and ewald)
+                          if (L_Coul_CBMC.and.lqchg(ntii).and.lqchg(ntjj).and.rijsq.lt.rcinsq) then
+                             ! boltz.f has problem to compute the electrostatic interactions
+                             ! in a group-based way because the leader q might not be grown at
+                             ! present, so it calculates electrostatic interaction not based on
+                             ! group but on its own distance in SC, but should be corrected
+                             ! later by calling energy subroutine.
+                             rij = sqrt(rijsq)
+                             if (L_elect_table) then
+                                v(ivElect) = v(ivElect) + qqu(icharge,ii)*qqu(j,jj)*lininter_elect(rij,ntii,ntjj)
+                             else if (lewald) then
+                                ! compute real space term of velect
+                                v(ivElect) = v(ivElect) + qqu(icharge,ii)*qqu(j,jj)*erfunc(calp(ibox)*rij)/rij
+                             else
+                                ! compute all electrostatic interactions
+                                v(ivElect) = v(ivElect) + qqu(icharge,ii)*qqu(j,jj)/ rij
+                             end if
+                          end if
+                       end do
+                    end do
+                 end if
+              end do do_nmole
+          end if !< lkdtree
        end if
 ! ################################################################
 
