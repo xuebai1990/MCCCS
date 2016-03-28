@@ -48,9 +48,6 @@ contains
     vrecip = 0.0E0_dp
 
     calpi = calp(ibox)
-    kmaxl = k_max_l(ibox)
-    kmaxm = k_max_m(ibox)
-    kmaxn = k_max_n(ibox)
 
     if ( (.not. lsolid(ibox)) .or. lrect(ibox) )  then
        bx1 = boxlx(ibox)

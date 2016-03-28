@@ -4,7 +4,7 @@ MODULE moves_volume
   use util_kdtree,only:construct_kdtree
   use sim_system
   use sim_cell
-  use energy_kspace,only:recip,calp,save_kvector,restore_kvector,compute_kvectors
+  use energy_kspace,only:recip,calp,save_kvector,restore_kvector
   use energy_pairwise,only:sumup
   implicit none
   private

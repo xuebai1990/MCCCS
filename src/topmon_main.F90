@@ -1209,7 +1209,6 @@ contains
     ! Q. Paul C. -- add setup_cbmc_bend for tabulated CBMC bending growth in the above line
     use zeolite
     use energy_kspace,only:calp,allocate_kspace,k_max_l,k_max_m,k_max_n,compute_kmax
-    use energy_kspace,only:calp,allocate_kspace,k_max_l,k_max_m,k_max_n,compute_kvectors
     use energy_pairwise,only:read_ff,init_ff,type_2body,vdW_nParameter,nonbond_type
     use energy_intramolecular,only:bonds,angles,dihedrals,allocate_energy_bonded
     use energy_3body,only:readThreeBody
