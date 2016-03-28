@@ -11,7 +11,7 @@ MODULE energy_kspace
   private
   save
   public::recipsum,recip,recip_atom,ee_recip,recippress,calp,sself,correct,save_kvector,restore_kvector,allocate_kspace
-  public::k_max_l, k_max_m, k_max_n, compute_kvectors
+  public::k_max_l, k_max_m, k_max_n, compute_kmax
 
   integer,parameter::vectormax=100000 !< the maximum number of reciprocal vectors for Ewald sum
   integer,allocatable::numvect(:)& !< the total number of reciprocal vectors
@@ -48,9 +48,6 @@ contains
     vrecip = 0.0E0_dp
 
     calpi = calp(ibox)
-    kmaxl = k_max_l(ibox)
-    kmaxm = k_max_m(ibox)
-    kmaxn = k_max_n(ibox)
 
     if ( (.not. lsolid(ibox)) .or. lrect(ibox) )  then
        bx1 = boxlx(ibox)
@@ -70,6 +67,10 @@ contains
           hmatik(i) = twopi*hmati(ibox,i)
        end do
     end if
+    call compute_kmax(ibox)
+    kmaxl = k_max_l(ibox)
+    kmaxm = k_max_m(ibox)
+    kmaxn = k_max_n(ibox)
 
     alpsqr4 = 4.0E0_dp*calpi*calpi
 
@@ -622,7 +623,7 @@ contains
     numvect=0
   end subroutine allocate_kspace
 
-  subroutine compute_kvectors(ibox)
+  subroutine compute_kmax(ibox)
     integer, intent(in)::ibox
     if ((.not.lsolid(ibox)).or.lrect(ibox)) then
        k_max_l(ibox) = aint(calp(ibox)*calp(ibox)*boxlx(ibox)*rcut(ibox)/onepi)+1
@@ -633,5 +634,5 @@ contains
        k_max_m(ibox) = aint(calp(ibox)*calp(ibox)*hmat(ibox,5)*rcut(ibox)/onepi)+2
        k_max_n(ibox) = aint(calp(ibox)*calp(ibox)*hmat(ibox,9)*rcut(ibox)/onepi)+2
     end if
-  end subroutine compute_kvectors
+  end subroutine compute_kmax
 end MODULE energy_kspace

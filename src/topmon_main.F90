@@ -1208,7 +1208,7 @@ contains
     use sim_initia,only:get_molecule_config,setup_system_config,setup_cbmc_bend
     ! Q. Paul C. -- add setup_cbmc_bend for tabulated CBMC bending growth in the above line
     use zeolite
-    use energy_kspace,only:calp,allocate_kspace,k_max_l,k_max_m,k_max_n,compute_kvectors
+    use energy_kspace,only:calp,allocate_kspace,k_max_l,k_max_m,k_max_n,compute_kmax
     use energy_pairwise,only:read_ff,init_ff,type_2body,vdW_nParameter,nonbond_type
     use energy_intramolecular,only:bonds,angles,dihedrals,allocate_energy_bonded
     use energy_3body,only:readThreeBody
@@ -3241,7 +3241,7 @@ contains
           write(io_output,'(/,A)') '****Ewald Parameters*****'
           write(io_output,'(A)') 'ibox:      calp  kmaxl  kmaxm  kmaxn         rcut'
           do ibox=1,nbox
-             call compute_kvectors(ibox)
+             call compute_kmax(ibox)
              write(io_output,'(I4,A,F9.3,3(1X,I6),1X,F12.4)') ibox,': ',calp(ibox),k_max_l(ibox),k_max_m(ibox),k_max_n(ibox)&
               ,rcut(ibox)
           end do

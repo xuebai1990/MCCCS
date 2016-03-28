@@ -551,8 +551,8 @@ contains
 !
 !> \brief  allow atom translations only on specified atoms
 !
-!> Previously the user could only choose to do atom translations on every atom in the system or none at all. Now, users 
-!> can specify the specific atoms they want to do translations on. 
+!> Previously the user could only choose to do atom translations on every atom in the system or none at all. Now, users
+!> can specify the specific atoms they want to do translations on.
 
     subroutine Atom_translation()
       use sim_particle,only:update_neighbor_list_molecule,ctrmas
@@ -565,7 +565,7 @@ contains
       integer::pick_unit, pick_chain
       real::rx,ry,rz,dchain,vn(nEnergy),vo(nEnergy),deltv,deltvb,rchain,vdum,vrecipo,vrecipn
       logical::laccept
-      integer::atom_sel, molt_sel, mole_sel, rand_idx      
+      integer::atom_sel, molt_sel, mole_sel, rand_idx
 
 ! --------------------------------------------------------------------
 #ifdef __DEBUG__
@@ -585,7 +585,7 @@ contains
       end if
 
       ovrlap = .false.
-      
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Select atom type and get the corresponding molecule type
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -593,17 +593,17 @@ contains
        rand_idx = random(-1)*(natomtrans_atoms)+1
        atom_sel = atomtrans_atomlst (rand_idx)
        imolty = atomtrans_moleclst(rand_idx)
-       
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!        
-! Now pick the specific molecule 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Now pick the specific molecule
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
          dchain = real(temtyp(imolty),dp)
          pick_chain = int( dchain*random(-1) + 1 )
          pick_chain = parall(imolty,pick_chain)
-         ibox = nboxi(pick_chain)       
+         ibox = nboxi(pick_chain)
 
-! Store the atom of interest, the molecule of interest, and the 
+! Store the atom of interest, the molecule of interest, and the
 ! number of atoms in the molecule
 
       pick_unit = atom_sel
@@ -616,14 +616,14 @@ contains
         rxuion(j,1) = rxu(i,j)
         ryuion(j,1) = ryu(i,j)
         rzuion(j,1) = rzu(i,j)
-        qquion(j,1) = qqu(i,j)       
-      end do       
+        qquion(j,1) = qqu(i,j)
+      end do
 
       moltion(1) = imolty
-      
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Select random displacement, increment attempts
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       if (lx) then
          rx =  ( 2.0*random(-1) - 1.0E0_dp ) * Armtrax
@@ -643,9 +643,9 @@ contains
       else
          rz=0
       end if
-      
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Calculate the energy of i in the old configuration 
+! Calculate the energy of i in the old configuration
 ! Nonbonded is calculated in energy and is based on r*uion coords
 ! Bonded is calculated in U_bonded and is based on r*u coords
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -653,7 +653,7 @@ contains
       flagon = 1     ! 1 refers to the coordinates for the OLD configuration
       call energy(i,imolty,vo,flagon,ibox,pick_unit,pick_unit,.true.,ovrlap,.false.,.false.,.false.,.true.)
       if (ovrlap) call err_exit(__FILE__,__LINE__,'disaster ovrlap in old conf of ATOM_TRANSLATION',myid+1)
-      
+
       call U_bonded(i,imolty,vo(ivStretching),vo(ivBending),vo(ivTorsion))
 
 
@@ -677,10 +677,10 @@ contains
       ryu(pick_chain,pick_unit) = ryu(pick_chain,pick_unit) + ry
       rzu(pick_chain,pick_unit) = rzu(pick_chain,pick_unit) + rz
 
-      moltion(2) = imolty       
-      
+      moltion(2) = imolty
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Calculate the energy of i in the new configuration 
+! Calculate the energy of i in the new configuration
 ! Nonbonded is calculated in energy and is based on r*uion coords
 ! Bonded is calculated in U_bonded and is based on r*u coords
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -690,15 +690,15 @@ contains
       if (ovrlap)  then
             rxu(pick_chain,pick_unit) = rxu(pick_chain,pick_unit) - rx
             ryu(pick_chain,pick_unit) = ryu(pick_chain,pick_unit) - ry
-            rzu(pick_chain,pick_unit) = rzu(pick_chain,pick_unit) - rz      
+            rzu(pick_chain,pick_unit) = rzu(pick_chain,pick_unit) - rz
             return
       end if
-          
-      call U_bonded(i,imolty,vn(ivStretching),vn(ivBending),vn(ivTorsion))      
+
+      call U_bonded(i,imolty,vn(ivStretching),vn(ivBending),vn(ivTorsion))
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! Get the the recip stuff 
+! Get the the recip stuff
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       if ( lewald .and. lelect(imolty) ) then
@@ -708,7 +708,7 @@ contains
          vn(ivTot) = vn(ivTot) + vrecipn
          vo(ivTot) = vo(ivTot) + vrecipo
       end if
-      
+
 ! check for acceptance ***
 
       vn(ivTot) = vn(ivTot) + vn(ivStretching) + vn(ivBending) + vn(ivTorsion)  ! We were missing this part in the last version! Meaning the bonded
@@ -730,24 +730,24 @@ contains
       end if
 
       if ( deltvb .gt. (2.3E0_dp*softcut) ) then
-                ! move rejected      
+                ! move rejected
             rxu(pick_chain,pick_unit) = rxu(pick_chain,pick_unit) - rx
             ryu(pick_chain,pick_unit) = ryu(pick_chain,pick_unit) - ry
-            rzu(pick_chain,pick_unit) = rzu(pick_chain,pick_unit) - rz      
+            rzu(pick_chain,pick_unit) = rzu(pick_chain,pick_unit) - rz
             return
       end if
 
       if ( deltv .le. 0.0E0_dp ) then
                ! accept move
-      else if ( exp(-deltvb) .gt. random(-1) ) then 
+      else if ( exp(-deltvb) .gt. random(-1) ) then
                ! accept move
-      else 
+      else
                ! move rejected
             rxu(pick_chain,pick_unit) = rxu(pick_chain,pick_unit) - rx
             ryu(pick_chain,pick_unit) = ryu(pick_chain,pick_unit) - ry
             rzu(pick_chain,pick_unit) = rzu(pick_chain,pick_unit) - rz
             return
-      end if     
+      end if
 
 ! write(io_output,*) 'TRANSLATION accepted i',i
       vbox(ivTot,ibox)     = vbox(ivTot,ibox) + deltv

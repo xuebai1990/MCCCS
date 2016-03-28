@@ -4,7 +4,7 @@ MODULE moves_volume
   use util_kdtree,only:construct_kdtree
   use sim_system
   use sim_cell
-  use energy_kspace,only:recip,calp,save_kvector,restore_kvector,compute_kvectors
+  use energy_kspace,only:recip,calp,save_kvector,restore_kvector
   use energy_pairwise,only:sumup
   implicit none
   private
@@ -465,7 +465,6 @@ contains
                 ! new kvectors needed
                 kalp(boxa) = 3.2_dp/rcut(boxa)
                 calp(boxa) = kalp(boxa)
-                call compute_kvectors(boxa)
              end if
           end if
           if (rbcut(boxb).gt.0) then
@@ -473,7 +472,6 @@ contains
              if (L_Ewald_Auto) then
                 kalp(boxb) = 3.2_dp/rcut(boxb)
                 calp(boxb) = kalp(boxb)
-                call compute_kvectors(boxb)
              end if
           end if
        end if
@@ -888,7 +886,6 @@ contains
              if (L_Ewald_Auto) then
                 kalp(boxvch) = 3.2_dp/rcut(boxvch)
                 calp(boxvch) = kalp(boxvch)
-                call compute_kvectors(boxvch)
              end if
           end if
        end if
