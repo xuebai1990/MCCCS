@@ -23,14 +23,22 @@ contains
   subroutine pressure(press,surf,ibox)
     use const_math,only:sqrtpi
     use const_phys,only:k_B
+    use util_kdtree,only:range_search
     real,intent(out)::press,surf
     integer,intent(in)::ibox
 
     real::rbcut,rcutsq,calpi,calpisq,pxx,pyy,pzz,xcmi,ycmi,zcmi,rcmi,fxcmi,fycmi,fzcmi,rxuij,ryuij,rzuij,rijsq,rcm,rcmsq&
-     ,rxui,ryui,rzui,rij,fij,tmp,rs1,rs2,rs4,rs6,rs7,rs8,sr1,sr2,sr3,sr6,sr7,sigma2,epsilon2,qave,repress,rpxx,rpyy,rpzz&
+     ,rxui,ryui,rzui,rij,fij,repress,rpxx,rpyy,rpzz&
      ,rpxy,rpyx,rpxz,rpzx,rpyz,rpzy,vol,volsq,rhosq,pwell
     integer::i,imolty,j,jmolty,ii,jj,ntii,ntjj,ntij,iii,jjj,k
     logical::lqimol,lexplt,lij2,lqjmol,lcoulo(numax,numax)
+
+    ! kdtree
+    type(tree), pointer :: tree
+    logical :: ovrlap
+    real :: coord(3), fxcm(nchain), fycm(nchain), fzcm(nchain)
+    real, allocatable :: inter_list(:,:)
+    integer :: iInter, inter_list_dim, dist_calc_num, dist_calc_num_temp
 ! --------------------------------------------------------------------
     if (lsolid(ibox).and.(.not.lrect(ibox))) then
        vol = cell_vol(ibox)
@@ -87,217 +95,222 @@ contains
              lij2 = .true.
           end if
 
-          ! loop over all chains j with j>i
-          do j = i + 1, nchain
-             ! check for simulation box ###
-             if ( nboxi(j) .eq. ibox ) then
-                jmolty = moltyp(j)
-                lqjmol = lelect(jmolty)
-                fxcmi = 0.0E0_dp
-                fycmi = 0.0E0_dp
-                fzcmi = 0.0E0_dp
-                if ( lcutcm ) then
-                   ! check if ctrmas within rcmsq
+          if (lkdtree .and. lkdtree_box(ibox)) then
+             tree => mol_tree(ibox)%tree
+
+             fxcm = 0.0E0_dp !< these are 1d arrays
+             fycm = 0.0E0_dp
+             fzcm = 0.0E0_dp
+
+             ! find all bead pairs and accumulate forces
+             do ii = 1, nunit(imolty)
+                coord(1) = rxu(i, ii)
+                coord(2) = ryu(i, ii)
+                coord(3) = rzu(i, ii)
+                ntii = ntype(imolty, ii)
+
+                ! find beads that are within the cutoff from bead ii
+                call range_search(tree, coord, nmax*numax, 0.0, rbcut, i, ii, .true., ovrlap, inter_list_dim,&
+                            inter_list, dist_calc_num_temp, .true.)
+
+                ! loop over all beads found
+                bead: do iInter = 1, inter_list_dim
+                   rijsq = inter_list(1, iInter)
+                   j = inter_list(2, iInter)
+                   jj = inter_list(3, iInter)
+                   jmolty = moltyp(j)
+
+                   ! check exclusion table
+                   if (lexclu(imolty,ii,jmolty,jj)) cycle bead
+
+                   rxuij = inter_list(4, iInter)
+                   ryuij = inter_list(5, iInter)
+                   rzuij = inter_list(6, iInter)
+                   ntjj = ntype(jmolty, jj)
+                   ntij = type_2body(ntii, ntjj)
+                   lqjmol = lelect(jmolty)
+                   rij = sqrt(rijsq)
+                   fij = 0.0E0_dp
+
+                   ! calculate the charge interactions
+                   if (lqimol .and. lqjmol .and. lqchg(ntii) .and. lqchg(ntjj)) then
+                       if (.not. lewald) then
+                          if (.not. lchgall) then
+                             iii = leaderq(imolty, ii)
+                             jjj = leaderq(jmolty, jj)
+                             if ((iii .eq. ii) .and. (jjj .eq. jj)) then
+                                ! set up the charge-interaction table
+                                if (rijsq.lt.rcutsq) then
+                                   lcoulo(iii,jjj) = .true.
+                                else
+                                   lcoulo(iii,jjj) = .false.
+                                end if
+                             end if
+                          end if
+                          !> \todo tabulated potential
+                          if (lchgall.or.lcoulo(iii,jjj) ) then
+                             fij = -qqfact*qqu(i,ii)*qqu(j,jj)/rijsq/rij
+                          end if
+                       else
+                          fij = -qqfact*qqu(i,ii)*qqu(j,jj)/rijsq&
+                             *(2.0_dp*calpi*exp(-calpisq*rijsq)/sqrtpi+erfunc(calpi*rij)/rij)
+                       end if
+                   end if
+
+                   ! LJ part of the fij
+                   fij = fij + fij_calculation(i, imolty, ii, j, jmolty, jj, rijsq, rij, ntii, ntjj, ntij)
+
+                   ! Accumulate the forces in f*cm arrays
+                   fxcm(j) = fxcm(j) + rxuij * fij
+                   fycm(j) = fycm(j) + ryuij * fij
+                   fzcm(j) = fzcm(j) + rzuij * fij
+
+                end do bead
+             end do
+
+             ! loop over jchain and calculate pressure accumulants
+             do j = i + 1, nchain
+                if ((nboxi(j) .eq. ibox) .and. &
+                    ((abs(fxcm(j)) .gt. 0.0) .or. (abs(fycm(j)) .gt. 0.0) .or. (abs(fzcm(j)) .gt. 0.0))) then
                    rxuij = xcmi - xcm(j)
                    ryuij = ycmi - ycm(j)
                    rzuij = zcmi - zcm(j)
-                   ! minimum image the ctrmas pair separations
-                   if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
-                   rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-                   rcm = rbcut + rcmi + rcmu(j)
-                   rcmsq = rcm*rcm
-                   if (rijsq .le. rcmsq) then
-                      lij2 = .true.
-                   else if (lqimol .and. lqjmol .and. lchgall) then
-                      lij2 = .false.
-                   else
-                      cycle
-                   end if
+                   if (lpbc) call mimage(rxuij,ryuij,rzuij,ibox)
+
+                   press = press + fxcm(j)*rxuij + fycm(j)*ryuij + fzcm(j)*rzuij
+
+                   ! for surface tension
+                   ! this is correct for the coulombic part and for LJ.  Note sign difference!
+                   pxx = pxx - fxcm(j) * rxuij
+                   pyy = pyy - fycm(j) * ryuij
+                   pzz = pzz - fzcm(j) * rzuij
+                   pips(1,2) = pips(1,2) - rxuij * fycm(j)
+                   pips(1,3) = pips(1,3) - rxuij * fzcm(j)
+                   pips(2,1) = pips(2,1) - ryuij * fxcm(j)
+                   pips(2,3) = pips(2,3) - ryuij * fzcm(j)
+                   pips(3,1) = pips(3,1) - rzuij * fxcm(j)
+                   pips(3,2) = pips(3,2) - rzuij * fycm(j)
                 end if
+             end do
 
-                ! loop over all beads ii of chain i
-                do ii = 1, nunit(imolty)
-                   ntii = ntype(imolty,ii)
-                   rxui = rxu(i,ii)
-                   ryui = ryu(i,ii)
-                   rzui = rzu(i,ii)
-
-                   ! loop over all beads jj of chain j
-                   bead2: do jj = 1, nunit(jmolty)
-                      ! check exclusion table
-                      if (lexclu(imolty,ii,jmolty,jj)) cycle bead2
-
-                      ntjj = ntype(jmolty,jj)
-                      if ( lij2 ) then
-                         if ((.not.(lij(ntii).and.lij(ntjj))) .and.(.not.(lqchg(ntii).and.lqchg(ntjj)))) cycle bead2
-                      else
-                         if (.not.(lqchg(ntii).and.lqchg(ntjj))) cycle bead2
-                      end if
-
-                      ntij=type_2body(ntii,ntjj)
-
-                      rxuij = rxui - rxu(j,jj)
-                      ryuij = ryui - ryu(j,jj)
-                      rzuij = rzui - rzu(j,jj)
-                      ! minimum image the pair separations ***
+          else
+             ! loop over all chains j with j>i
+             do j = i + 1, nchain
+                ! check for simulation box ###
+                if ( nboxi(j) .eq. ibox ) then
+                   jmolty = moltyp(j)
+                   lqjmol = lelect(jmolty)
+                   fxcmi = 0.0E0_dp
+                   fycmi = 0.0E0_dp
+                   fzcmi = 0.0E0_dp
+                   if ( lcutcm ) then
+                      ! check if ctrmas within rcmsq
+                      rxuij = xcmi - xcm(j)
+                      ryuij = ycmi - ycm(j)
+                      rzuij = zcmi - zcm(j)
+                      ! minimum image the ctrmas pair separations
                       if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
-                      rijsq = rxuij*rxuij+ryuij*ryuij+rzuij*rzuij
-                      rij=sqrt(rijsq)
+                      rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
+                      rcm = rbcut + rcmi + rcmu(j)
+                      rcmsq = rcm*rcm
+                      if (rijsq .le. rcmsq) then
+                         lij2 = .true.
+                      else if (lqimol .and. lqjmol .and. lchgall) then
+                         lij2 = .false.
+                      else
+                         cycle
+                      end if
+                   end if
 
-                      ! compute whether the charged groups will interact & fij
-                      fij = 0.0E0_dp
-                      if (lqimol.and.lqjmol.and.lqchg(ntii).and.lqchg(ntjj) ) then
-                         if (.not.lewald) then
-                            if (.not.lchgall) then
-                               iii = leaderq(imolty,ii)
-                               jjj = leaderq(jmolty,jj)
-                               if (iii.eq.ii.and.jjj.eq.jj) then
-                                  ! set up the charge-interaction table
-                                  if (rijsq.lt.rcutsq) then
-                                     lcoulo(iii,jjj) = .true.
-                                  else
-                                     lcoulo(iii,jjj) = .false.
+                   ! loop over all beads ii of chain i
+                   do ii = 1, nunit(imolty)
+                      ntii = ntype(imolty,ii)
+                      rxui = rxu(i,ii)
+                      ryui = ryu(i,ii)
+                      rzui = rzu(i,ii)
+
+                      ! loop over all beads jj of chain j
+                      bead2: do jj = 1, nunit(jmolty)
+                         ! check exclusion table
+                         if (lexclu(imolty,ii,jmolty,jj)) cycle bead2
+
+                         ntjj = ntype(jmolty,jj)
+                         if ( lij2 ) then
+                            if ((.not.(lij(ntii).and.lij(ntjj))) .and.(.not.(lqchg(ntii).and.lqchg(ntjj)))) cycle bead2
+                         else
+                            if (.not.(lqchg(ntii).and.lqchg(ntjj))) cycle bead2
+                         end if
+
+                         ntij=type_2body(ntii,ntjj)
+
+                         rxuij = rxui - rxu(j,jj)
+                         ryuij = ryui - ryu(j,jj)
+                         rzuij = rzui - rzu(j,jj)
+                         ! minimum image the pair separations ***
+                         if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
+                         rijsq = rxuij*rxuij+ryuij*ryuij+rzuij*rzuij
+                         rij=sqrt(rijsq)
+
+                         ! compute whether the charged groups will interact & fij
+                         fij = 0.0E0_dp
+                         if (lqimol.and.lqjmol.and.lqchg(ntii).and.lqchg(ntjj) ) then
+                            if (.not.lewald) then
+                               if (.not.lchgall) then
+                                  iii = leaderq(imolty,ii)
+                                  jjj = leaderq(jmolty,jj)
+                                  if (iii.eq.ii.and.jjj.eq.jj) then
+                                     ! set up the charge-interaction table
+                                     if (rijsq.lt.rcutsq) then
+                                        lcoulo(iii,jjj) = .true.
+                                     else
+                                        lcoulo(iii,jjj) = .false.
+                                     end if
                                   end if
                                end if
-                            end if
-                            !> \todo tabulated potential
-                            if (lchgall.or.lcoulo(iii,jjj) ) then
-                               fij = -qqfact*qqu(i,ii)*qqu(j,jj)/rijsq/rij
-                            end if
-                         else if (lchgall.or.rijsq.lt.rcutsq) then
-                               fij = -qqfact*qqu(i,ii)*qqu(j,jj)/rijsq*(2.0_dp*calpi*exp(-calpisq*rijsq)/sqrtpi+erfunc(calpi*rij)/rij)
-                         end if
-                      end if
-
-                      if (rijsq.lt.rcutsq.or.lijall) then
-                         !> \todo when lsami, lmuir, lgaro is .true.
-                         if (lgaro.or.lsami.or.lmuir) then
-                         else if (nonbond_type(ntij).eq.1) then
-                            ! LJ 12-6
-                            if (lexpand(imolty).and.lexpand(jmolty)) then
-                               sigma2=(sigma_f(imolty,ii)+sigma_f(jmolty,jj))/2.0_dp
-                               sr2=sigma2*sigma2/rijsq
-                               epsilon2=4.0_dp*sqrt(epsilon_f(imolty,ii)*epsilon_f(jmolty,jj))
-                            else if (lexpand(imolty)) then
-                               sigma2=(sigma_f(imolty,ii)+vvdW_b(2,ntjj))/2.0_dp
-                               sr2=sigma2*sigma2/rijsq
-                               epsilon2=4.0_dp*sqrt(epsilon_f(imolty,ii)*vvdW_b(1,ntjj))
-                            else if (lexpand(jmolty)) then
-                               sigma2=(vvdW_b(2,ntii)+sigma_f(jmolty,jj))/2.0_dp
-                               sr2=sigma2*sigma2/rijsq
-                               epsilon2=4.0_dp*sqrt(vvdW_b(1,ntii)*epsilon_f(jmolty,jj))
-                            else
-                               sr2=vvdW(3,ntij)/rijsq
-                               epsilon2=vvdW(1,ntij)
-                            end if
-
-                            if (lfepsi) then
-                               sr6 = (1.0_dp/rijsq)**3
-                               if ((.not.lqchg(ntii)).and.(.not.lqchg(ntjj))) then
-                                  if (nunit(imolty).eq.4) then
-                                     !> \bug TIP-4P structure (temperary use?)
-                                     qave = (qqu(i,4)+qqu(j,4))/2.0_dp
-                                  else
-                                     qave = (qqu(i,4)+qqu(i,5)+qqu(j,4)+qqu(j,5))*0.85_dp
-                                  end if
-                               else
-                                  qave=(qqu(i,ii)+qqu(j,jj))/2.0_dp
+                               !> \todo tabulated potential
+                               if (lchgall.or.lcoulo(iii,jjj) ) then
+                                  fij = -qqfact*qqu(i,ii)*qqu(j,jj)/rijsq/rij
                                end if
-                               fij = fij + 12.0_dp*epsilon2*sr6*(-sr6*(aslope*(qave-a0)*(qave-a0)+ashift)+0.5_dp*(bslope*(qave-b0)*(qave-b0)+ bshift))/rijsq
-                            else
-                               sr6 = sr2**3
-                               fij = fij - 12.0_dp*epsilon2*sr6*(sr6-0.5_dp)/rijsq
+                            else if (lchgall.or.rijsq.lt.rcutsq) then
+                                  fij = -qqfact*qqu(i,ii)*qqu(j,jj) &
+                                        /rijsq*(2.0_dp*calpi*exp(-calpisq*rijsq)/sqrtpi+erfunc(calpi*rij)/rij)
                             end if
-                         else if (nonbond_type(ntij).eq.2) then
-                            ! Buckingham exp-6
-                            rs1=vvdW(2,ntij)*rij
-                            fij = fij + (vvdW(1,ntij)*rs1*exp(rs1)+6.0_dp*vvdW(3,ntij)/(rijsq**3))/rijsq
-                         else if (nonbond_type(ntij).eq.3) then
-                            ! Mie
-                            sr1 = vvdW(2,ntij) / rij
-                            fij = fij - vvdW(1,ntij)*(vvdW(3,ntij)*sr1**vvdW(3,ntij)-vvdW(4,ntij)*sr1**vvdW(4,ntij))/rijsq
-                         else if (nonbond_type(ntij).eq.4) then
-                            ! MMFF94
-                            if (vvdW(2,ntij).ne.0) then
-                               rs1 = rij/vvdW(2,ntij)
-                               rs2 = rs1*rs1
-                               rs6 = rs2**3
-                               rs7 = rs1*rs6
-                               sr1 = 1.07_dp/(rs1+0.07_dp)
-                               sr7 = sr1**7.0_dp
-                               fij = fij - 7.0_dp*vvdW(1,ntij)*rs1*sr7*( sr1*(1.12_dp/(rs7+0.12_dp)-2.0_dp)/1.07_dp + 1.12_dp*rs6/((rs7+0.12_dp)*(rs7+0.12_dp)) )/rijsq
-                            end if
-                         else if (nonbond_type(ntij).eq.5) then
-                            ! LJ 9-6
-                            sr3=(vvdW(2,ntij)/rij)**3
-                            sr6=sr3*sr3
-                            fij = fij - 18.0_dp*vvdW(1,ntij)*sr6*(sr3-1.0_dp)/rijsq
-                         else if (nonbond_type(ntij).eq.6) then
-                            ! Generalized LJ
-                            sr1 = vvdW(2,ntij)/rij
-                            if (rij.le.vvdW(2,ntij)) then
-                               tmp = sr1**(vvdW(3,ntij)/2.0_dp)
-                               fij = fij - vvdW(1,ntij)*vvdW(3,ntij)*tmp*(tmp-1.0_dp)/rijsq
-                            else
-                               tmp = sr1**vvdW(4,ntij)
-                               fij = fij - vvdW(1,ntij)*2.0_dp*vvdW(4,ntij)*tmp*(tmp-1.0_dp)/rijsq
-                            end if
-                         else if (nonbond_type(ntij).eq.7) then
-                            ! LJ 12-6-8
-                            rs4=rijsq*rijsq
-                            rs8=rs4*rs4
-                            tmp=rs8*rs4*rijsq !^14
-                            fij = fij - 12.0_dp*vvdW(1,ntij)/tmp + 6.0_dp*vvdW(2,ntij)/rs8 + 8.0_dp*vvdW(3,ntij)/rs8/rijsq
-                         else if (nonbond_type(ntij).eq.8) then
-                            ! DPD
-                            ! In general the force between two DPD particles is
-                            ! given by
-                            ! F(r_ij) = -\del_{ij} U(r_{ij})
-                            !         = -\del_{ij} (a_{ij}/2 (1-r_{ij}/rmin)^2
-                            ! applying the chain rule this gives:
-                            !         = -(a_{ij}/2)*(2(1-r_{ij}/rmin))*(-1/rmin)*\hat{r}_{ij}
-                            ! simplifying to:
-                            !         =(a_{ij}/rmin)*(1-r_{ij}/rmin)*\hat{r}_{ij}
-                            ! the form here looks totally bizarrre due to the
-                            ! way the code handles the different pieces of
-                            ! information.
-                            if(rij<=vvdW(2,ntij).and.rij>0.0_dp) then ! if rij<rmin
-                                fij=fij-2.0_dp*vvdW(1,ntij)*(1.0_dp-rij/vvdW(2,ntij))/(rij*vvdW(2,ntij))
-                            end if
-                         else if (ALL(nonbond_type(ntij).ne.(/-1,0,9/))) then
-                            call err_exit(__FILE__,__LINE__,'pressure: undefined nonbond type',myid+1)
                          end if
-                      end if
-                      fxcmi = fxcmi + fij * rxuij
-                      fycmi = fycmi + fij * ryuij
-                      fzcmi = fzcmi + fij * rzuij
-                   end do bead2
-                end do
 
-                ! calculate distance between c-o-m ---
-                rxuij = xcmi - xcm(j)
-                ryuij = ycmi - ycm(j)
-                rzuij = zcmi - zcm(j)
-                ! minimum image the pair separations ***
-                if (lpbc) call mimage(rxuij,ryuij,rzuij,ibox)
+                         if (rijsq.lt.rcutsq.or.lijall) then
+                             fij = fij + fij_calculation(i, imolty, ii, j, jmolty, jj, rijsq, rij, ntii, ntjj, ntij)
+                         end if
+                         fxcmi = fxcmi + fij * rxuij
+                         fycmi = fycmi + fij * ryuij
+                         fzcmi = fzcmi + fij * rzuij
+                      end do bead2
+                   end do
 
-                press = press +  fxcmi*rxuij + fycmi*ryuij + fzcmi*rzuij
+                   ! calculate distance between c-o-m ---
+                   rxuij = xcmi - xcm(j)
+                   ryuij = ycmi - ycm(j)
+                   rzuij = zcmi - zcm(j)
+                   ! minimum image the pair separations ***
+                   if (lpbc) call mimage(rxuij,ryuij,rzuij,ibox)
 
-                ! for surface tension
-                ! this is correct for the coulombic part and for LJ.  Note sign difference!
-                pxx = pxx - fxcmi*rxuij
-                pyy = pyy - fycmi*ryuij
-                pzz = pzz - fzcmi*rzuij
-                pips(1,2) = pips(1,2) - rxuij*fycmi
-                pips(1,3) = pips(1,3) - rxuij*fzcmi
-                pips(2,1) = pips(2,1) - ryuij*fxcmi
-                pips(2,3) = pips(2,3) - ryuij*fzcmi
-                pips(3,1) = pips(3,1) - rzuij*fxcmi
-                pips(3,2) = pips(3,2) - rzuij*fycmi
-             end if
-          end do
-       end if
-    end do
+                   press = press +  fxcmi*rxuij + fycmi*ryuij + fzcmi*rzuij
+
+                   ! for surface tension
+                   ! this is correct for the coulombic part and for LJ.  Note sign difference!
+                   pxx = pxx - fxcmi*rxuij
+                   pyy = pyy - fycmi*ryuij
+                   pzz = pzz - fzcmi*rzuij
+                   pips(1,2) = pips(1,2) - rxuij*fycmi
+                   pips(1,3) = pips(1,3) - rxuij*fzcmi
+                   pips(2,1) = pips(2,1) - ryuij*fxcmi
+                   pips(2,3) = pips(2,3) - ryuij*fzcmi
+                   pips(3,1) = pips(3,1) - rzuij*fxcmi
+                   pips(3,2) = pips(3,2) - rzuij*fycmi
+                end if
+             end do !< loop over j>i
+          end if !< if lkdtree
+       end if    !< if particle i is in this box
+    end do       !< loop over particle i
 
     call mp_sum(press,1,groupid)
     call mp_sum(pxx,1,groupid)
@@ -538,4 +551,121 @@ contains
 
     return
   end function corp
+
+  ! calculate fij in the pressure calculation, given the molecule number i and j
+  ! the molecule type imolty and jmolty
+  ! the bead number ii and jj
+  ! the distance squared between two beads, rijsq
+  ! and the interaction type ntii, ntjj and ntij
+  function fij_calculation(i, imolty, ii, j, jmolty, jj, rijsq, rij, ntii, ntjj, ntij) result(fij)
+      real :: fij
+      integer, intent(in) :: i, imolty, ii, j, jmolty, jj, ntii, ntjj, ntij
+      real, intent(in) :: rijsq, rij
+      real::rs1,rs2,rs4,rs6,rs7,rs8,sr1,sr2,sr3,sr6,sr7,sigma2,epsilon2,qave,tmp
+
+      fij = 0.0E0_dp
+      !> \todo when lsami, lmuir, lgaro is .true.
+      if (lgaro.or.lsami.or.lmuir) then
+      else if (nonbond_type(ntij).eq.1) then
+          ! LJ 12-6
+          if (lexpand(imolty).and.lexpand(jmolty)) then
+              sigma2=(sigma_f(imolty,ii)+sigma_f(jmolty,jj))/2.0_dp
+              sr2=sigma2*sigma2/rijsq
+              epsilon2=4.0_dp*sqrt(epsilon_f(imolty,ii)*epsilon_f(jmolty,jj))
+          else if (lexpand(imolty)) then
+              sigma2=(sigma_f(imolty,ii)+vvdW_b(2,ntjj))/2.0_dp
+              sr2=sigma2*sigma2/rijsq
+              epsilon2=4.0_dp*sqrt(epsilon_f(imolty,ii)*vvdW_b(1,ntjj))
+          else if (lexpand(jmolty)) then
+              sigma2=(vvdW_b(2,ntii)+sigma_f(jmolty,jj))/2.0_dp
+              sr2=sigma2*sigma2/rijsq
+              epsilon2=4.0_dp*sqrt(vvdW_b(1,ntii)*epsilon_f(jmolty,jj))
+          else
+              sr2=vvdW(3,ntij)/rijsq
+              epsilon2=vvdW(1,ntij)
+          end if
+
+          if (lfepsi) then
+              sr6 = (1.0_dp/rijsq)**3
+              if ((.not.lqchg(ntii)).and.(.not.lqchg(ntjj))) then
+                  if (nunit(imolty).eq.4) then
+                      !> \bug TIP-4P structure (temperary use?)
+                      qave = (qqu(i,4)+qqu(j,4))/2.0_dp
+                  else
+                      qave = (qqu(i,4)+qqu(i,5)+qqu(j,4)+qqu(j,5))*0.85_dp
+                  end if
+              else
+                  qave=(qqu(i,ii)+qqu(j,jj))/2.0_dp
+              end if
+              fij = fij + 12.0_dp*epsilon2*sr6*(-sr6*(aslope*(qave-a0)*(qave-a0)+ashift) &
+                    +0.5_dp*(bslope*(qave-b0)*(qave-b0)+ bshift))/rijsq
+          else
+              sr6 = sr2**3
+              fij = fij - 12.0_dp*epsilon2*sr6*(sr6-0.5_dp)/rijsq
+          end if
+      else if (nonbond_type(ntij).eq.2) then
+          ! Buckingham exp-6
+          rs1=vvdW(2,ntij)*rij
+          fij = fij + (vvdW(1,ntij)*rs1*exp(rs1)+6.0_dp*vvdW(3,ntij)/(rijsq**3))/rijsq
+      else if (nonbond_type(ntij).eq.3) then
+          ! Mie
+          sr1 = vvdW(2,ntij) / rij
+          fij = fij - vvdW(1,ntij)*(vvdW(3,ntij)*sr1**vvdW(3,ntij)-vvdW(4,ntij)*sr1**vvdW(4,ntij))/rijsq
+      else if (nonbond_type(ntij).eq.4) then
+          ! MMFF94
+          if (vvdW(2,ntij).ne.0) then
+              rs1 = rij/vvdW(2,ntij)
+              rs2 = rs1*rs1
+              rs6 = rs2**3
+              rs7 = rs1*rs6
+              sr1 = 1.07_dp/(rs1+0.07_dp)
+              sr7 = sr1**7.0_dp
+              fij = fij - 7.0_dp*vvdW(1,ntij)*rs1*sr7*( sr1*(1.12_dp/(rs7+0.12_dp)-2.0_dp)/1.07_dp &
+                    + 1.12_dp*rs6/((rs7+0.12_dp)*(rs7+0.12_dp)) )/rijsq
+          end if
+      else if (nonbond_type(ntij).eq.5) then
+          ! LJ 9-6
+          sr3=(vvdW(2,ntij)/rij)**3
+          sr6=sr3*sr3
+          fij = fij - 18.0_dp*vvdW(1,ntij)*sr6*(sr3-1.0_dp)/rijsq
+      else if (nonbond_type(ntij).eq.6) then
+          ! Generalized LJ
+          sr1 = vvdW(2,ntij)/rij
+          if (rij.le.vvdW(2,ntij)) then
+              tmp = sr1**(vvdW(3,ntij)/2.0_dp)
+              fij = fij - vvdW(1,ntij)*vvdW(3,ntij)*tmp*(tmp-1.0_dp)/rijsq
+          else
+              tmp = sr1**vvdW(4,ntij)
+              fij = fij - vvdW(1,ntij)*2.0_dp*vvdW(4,ntij)*tmp*(tmp-1.0_dp)/rijsq
+          end if
+      else if (nonbond_type(ntij).eq.7) then
+          ! LJ 12-6-8
+          rs4=rijsq*rijsq
+          rs8=rs4*rs4
+          tmp=rs8*rs4*rijsq !^14
+          fij = fij - 12.0_dp*vvdW(1,ntij)/tmp + 6.0_dp*vvdW(2,ntij)/rs8 + 8.0_dp*vvdW(3,ntij)/rs8/rijsq
+      else if (nonbond_type(ntij).eq.8) then
+          ! DPD
+          ! In general the force between two DPD particles is
+          ! given by
+          ! F(r_ij) = -\del_{ij} U(r_{ij})
+          !         = -\del_{ij} (a_{ij}/2 (1-r_{ij}/rmin)^2
+          ! applying the chain rule this gives:
+          !         = -(a_{ij}/2)*(2(1-r_{ij}/rmin))*(-1/rmin)*\hat{r}_{ij}
+          ! simplifying to:
+          !         =(a_{ij}/rmin)*(1-r_{ij}/rmin)*\hat{r}_{ij}
+          ! the form here looks totally bizarrre due to the
+          ! way the code handles the different pieces of
+          ! information.
+          if(rij<=vvdW(2,ntij).and.rij>0.0_dp) then ! if rij<rmin
+              fij=fij-2.0_dp*vvdW(1,ntij)*(1.0_dp-rij/vvdW(2,ntij))/(rij*vvdW(2,ntij))
+          end if
+      else if (ALL(nonbond_type(ntij).ne.(/-1,0,9/))) then
+          call err_exit(__FILE__,__LINE__,'pressure: undefined nonbond type',myid+1)
+      end if
+
+      return
+
+  end function fij_calculation
+
 end MODULE prop_pressure
