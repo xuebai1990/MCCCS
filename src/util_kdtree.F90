@@ -13,12 +13,43 @@ MODULE util_kdtree
              empty_tree, allocate_kdtree, construct_kdtree, update_box_kdtree, read_kdtree
 
     ! global variables
-    real, allocatable, public :: search_output(:,:) !< the returned array in the range search 
-    integer, public :: current_dim !< the current dimension of the search_output
     real, public :: rmin_square, rcut_square
-    real :: coord_replaced(3) !< used in the deletion 
+    real :: coord_replaced(3) !< used in the deletion
 
 contains
+
+    ! comparison in kd-tree structure
+    ! a_i, a_j: the first dimension of two coordinates to be compared
+    ! b_i, b_j: the second ...
+    ! c_i, c_j: the third ...
+    ! return: whether the coordinate of bead i is "smaller" than that of bead j
+    ! compare a dimension first, if ties, compare b dimension, if ties, compare c dimension
+    function smallerThan(a_i, a_j, b_i, b_j, c_i, c_j)
+        real :: a_i, a_j, b_i, b_j, c_i, c_j
+        logical :: smallerThan
+
+        if (a_i .lt. a_j) then
+            smallerThan = .true.
+        else if (a_i .gt. a_j) then
+            smallerThan = .false.
+        else
+            ! if the first dimension is the same, compare the second dimension
+            if (b_i .lt. b_j) then
+                smallerThan = .true.
+            else if (b_i .gt. b_j) then
+                smallerThan = .false.
+            else
+                ! if the second dimension is the same, compare the third dimension
+                if (c_i .lt. c_j) then
+                    smallerThan = .true.
+                else
+                    smallerThan = .false.
+                end if
+            end if
+        end if
+
+        return
+    end function
 
     ! Calculate the distance squared between two vectors
     ! vector1, vector2: two vectors being calculated
@@ -124,6 +155,8 @@ contains
     ! coord_to_compare: 3d real array, the coodinate of the node to be compared (typically the current node)
     ! cut_dim: the cutting dimension of the current node
     ! lLeft: return true if it should go left, false if it should go right
+    ! this fxn is similar to smaller_than(), but the input array structure is different
+    ! for efficient reason, we use l_left in the node search, insertion, deletion and range_search
     function l_left(coord_to_add, coord_to_compare, cut_dim) result(lLeft)
         real, dimension(3) :: coord_to_add, coord_to_compare
         integer :: cut_dim, next_cut_dim, next_next_cut_dim
@@ -294,8 +327,6 @@ contains
             current_node%parent_node => parent_node
             current_node%cut_dim = cut_dim
             current_node%height = height
-            !current_node%cube%lower = 0
-            !current_node%cube%upper = 0
             allocate(current_node%cube)
             if (.not. associated(current_node%parent_node)) call set_cube(mol_tree, current_node, lLeft)
             mol_tree%node_num = mol_tree%node_num + 1
@@ -755,7 +786,7 @@ contains
     !         false if called from energy or boltz subroutine, account for all the interactions when bead is not in ichain
     ! loverlap: return true if there's an overlap
     ! actual_dim: actual dimension of the search_output
-    ! search_output_array: 3*actual_dim real array which have information about the qualified beads to calculate interactions
+    ! search_output_array: 3 or 6 * actual_dim real array which have information about the qualified beads to calculate interactions
     ! dist_calc_num: number of distance calculation used
     ! lPressure: whether called from pressure calculation, if so, have additional dimension of output arrays for r*uij
     subroutine range_search(mol_tree, ref_coord, max_dim, rmin, rcut, ichain, ibead, lsumup, &
@@ -766,9 +797,9 @@ contains
         real, intent(in) :: rmin, rcut
         logical, intent(in) :: lPressure
         logical :: lsumup, loverlap
-        integer :: actual_dim
-        real, allocatable :: search_output_array(:,:)
-        integer :: i, dist_calc_num, search_output_dim
+        real, allocatable :: search_output_array(:, :), search_output(:, :)
+        integer :: i, dist_calc_num, search_output_dim, actual_dim
+        integer ::  i_search_output
 
         ! Initialize the variables
         if (allocated(search_output)) deallocate(search_output)
@@ -782,22 +813,26 @@ contains
 
         allocate(search_output(search_output_dim, max_dim))
 
-        current_dim = 1
         loverlap = .false.
         rmin_square = rmin * rmin
         rcut_square = rcut * rcut
         dist_calc_num = 0
-        
-        ! Start searching
-        call range_search_in_tree(mol_tree, mol_tree%tree_root, ref_coord, 1, ichain, ibead, lsumup, loverlap, dist_calc_num, lPressure)
-        actual_dim = current_dim - 1
-        if (allocated(search_output_array)) deallocate(search_output_array)
 
+        ! Start searching
+        i_search_output = 1
+        call range_search_in_tree(mol_tree, mol_tree%tree_root, ref_coord, 1, ichain, ibead &
+            , lsumup, loverlap, dist_calc_num, lPressure, search_output, i_search_output)
+
+        actual_dim = i_search_output - 1
+
+        ! allocate the search_output_array for returning the right size of search output array
+        if (allocated(search_output_array)) deallocate(search_output_array)
         allocate(search_output_array(search_output_dim, actual_dim))
 
         do i = 1, actual_dim
             search_output_array(1:search_output_dim, i) = search_output(1:search_output_dim, i)
         end do
+
     end subroutine range_search
 
     ! recursively do the range search
@@ -812,8 +847,10 @@ contains
     ! loverlap: return true if there's an overlap
     ! dist_calc_num: number of distance calculation used
     ! lPressure: whether called from pressure calculations, add additional 3d output for r*uij
+    ! search_output: 3 or 6 * max_dim array which has information about the qualified beads to calculate interactions
+    ! i_search_output: the current index of search_output
     recursive subroutine range_search_in_tree(mol_tree, current_node, ref_coord, cut_dim, ichain, ibead, lsumup&
-                , loverlap, dist_calc_num, lPressure)
+                , loverlap, dist_calc_num, lPressure, search_output, i_search_output)
         use sim_system,only:io_output
 
         type(tree), pointer :: mol_tree
@@ -821,10 +858,9 @@ contains
         integer, intent(in) :: cut_dim, ichain, ibead
         type(tree_node), pointer :: current_node, node_closer, node_farther
         logical, intent(in) :: lPressure
+        real :: search_output(:, :), dist_square
+        integer :: i_search_output, dist_calc_num, next_cut_dim
         logical :: lsumup, loverlap, lLeft
-        integer :: dist_calc_num
-        real :: dist_square
-        integer :: next_cut_dim 
 
         ! if overlap, then return
         if (loverlap) return
@@ -839,21 +875,19 @@ contains
             if (dist_square .lt. rmin_square) then
                 if (check_interaction(ichain, ibead, current_node%ichain, current_node%ibead)) then
                     loverlap = .true.
-                    !write(io_output,*) "overlap in kdtree search: j, jj, dist_square", current_node%ichain, current_node%ibead, dist_square
-                    !write(io_output,*) "overlap in kdtree search: coord", ref_coord, current_node%coord
                     return
                 end if
             else if (dist_square .le. rcut_square) then
-                search_output(1, current_dim) = dist_square
-                search_output(2, current_dim) = current_node%ichain
-                search_output(3, current_dim) = current_node%ibead
+                search_output(1, i_search_output) = dist_square
+                search_output(2, i_search_output) = current_node%ichain
+                search_output(3, i_search_output) = current_node%ibead
 
                 if (lPressure) then
-                    search_output(4, current_dim) = ref_coord(1) - current_node%coord(1)
-                    search_output(5, current_dim) = ref_coord(2) - current_node%coord(2)
-                    search_output(6, current_dim) = ref_coord(3) - current_node%coord(3)
+                    search_output(4, i_search_output) = ref_coord(1) - current_node%coord(1)
+                    search_output(5, i_search_output) = ref_coord(2) - current_node%coord(2)
+                    search_output(6, i_search_output) = ref_coord(3) - current_node%coord(3)
                 end if
-                current_dim = current_dim + 1
+                i_search_output = i_search_output + 1
             end if
         end if
 
@@ -873,7 +907,7 @@ contains
         if (associated(node_closer)) then
             if (.not. node_closer%l_cube_updated) call set_cube(mol_tree, node_closer, lLeft)
             call range_search_in_tree(mol_tree, node_closer, ref_coord, next_cut_dim, ichain, ibead, lsumup, loverlap&
-                    ,dist_calc_num, lPressure)
+                    , dist_calc_num, lPressure, search_output, i_search_output)
         end if
 
         ! search on the farther node if necessary
@@ -882,119 +916,192 @@ contains
             dist_square = dist_square_from_point_to_cube(mol_tree, ref_coord, node_farther, rcut_square)
             if (dist_square .le. rcut_square) then
                 call range_search_in_tree(mol_tree, node_farther, ref_coord, next_cut_dim, ichain, ibead, lsumup, loverlap&
-                        ,dist_calc_num, lPressure)
+                        , dist_calc_num, lPressure, search_output, i_search_output)
             end if 
         end if
     end subroutine range_search_in_tree
 
-    ! Merge subroutine used in the merge sort
-    subroutine merge(A,AINDEX,AA,AAA,NA,B,BINDEX,BB,BBB,NB,C,CINDEX,CC,CCC,NC)
-        integer, intent(in) :: NA,NB,NC         ! Normal usage: NA+NB = NC
-        real, intent(in out) :: A(NA), AA(NA), AAA(NA)
-        integer, intent(in out) :: AINDEX(NA)        ! B overlays C(NA+1:NC)
-        real, intent(in)     :: B(NB), BB(NB), BBB(NB)
-        integer, intent(in out) :: BINDEX(NB)
-        real, intent(in out) :: C(NC), CC(NC), CCC(NC)
-        integer, intent(in out) :: CINDEX(NC)
- 
-        integer :: I,J,K
- 
-        I = 1; J = 1; K = 1;
-        do while(I <= NA .and. J <= NB)
-            if (A(I) < B(J) .or. (A(I).eq.B(J).and.AA(I).lt.BB(J)) .or. (A(I).eq.B(J).and.AA(I).eq.BB(J).and.AAA(I).lt.BBB(J))) then
-                C(K) = A(I)
-                CC(K) = AA(I)
-                CCC(K) = AAA(I)
-                CINDEX(K) = AINDEX(I)
-                I = I+1
+    ! Find the k-th element of an unordered array; used to find the median of the array
+    ! k: the k-th element to be found
+    ! coord_array1, 2 and 3: array of coordinates, based on which the sorting is done;
+    !                        first compare coordinates in array 1, if ties, compare those in array 2
+    ! index_array: the array with all the indices of the array
+    ! bead_index: the index of the k-th element found (its index in the index_array)
+    subroutine find_k(k, coord_array1, coord_array2, coord_array3, index_array, bead_index)
+        integer, intent(in) :: k
+        real, intent(in out) :: coord_array1(:), coord_array2(:), coord_array3(:)
+        integer, intent(in out) :: index_array(:)
+        integer, intent(out) :: bead_index
+
+        integer :: hi, lo, i, j
+
+        lo = 1
+        hi = size(index_array)
+
+        do while (hi .gt. lo)
+
+            call partition(coord_array1, coord_array2, coord_array3, index_array, lo, hi, j)
+
+            if (j .gt. k) then
+                ! all the elements whose indices are greater than j are greater than the k-th element
+                ! recursively search in the left side
+                hi = j - 1
+            else if (j .lt. k) then
+                ! all the elements whose indices are smaller than i are greater than the k-th element
+                ! recursively search in the right side
+                lo = j + 1
             else
-                C(K) = B(J)
-                CC(K) = BB(J)
-                CCC(K) = BBB(J)
-                CINDEX(K) = BINDEX(J)
-                J = J+1
-            endif
-            K = K + 1
-        enddo
-        do while (I <= NA)
-            C(K) = A(I)
-            CC(K) = AA(I)
-            CCC(K) = AAA(I)
-            CINDEX(K) = AINDEX(I)
-            I = I + 1
-            K = K + 1
-        enddo
-        return
-    end subroutine merge
-
-    ! merge_sort subroutine
-    recursive subroutine merge_sort(A,AINDEX,AA,AAA,N)
-        integer, intent(in) :: N
-        real, dimension(N), intent(in out) :: A,AA,AAA
-        integer, dimension(N), intent(in out) :: AINDEX
-        real, dimension((N+1)/2) :: T,TT,TTT
-        integer, dimension((N+1)/2) :: TINDEX
-
-        integer :: NA,NB,V
-        real :: VA
+                ! j .eq. k, which means we find the k-th element
+                ! return the k-th (j-th) element
+                bead_index = index_array(j)
+                return
  
-        if (N < 2) return
-        if (N == 2) then
-            if (A(1).gt.A(2) .or. (A(1).eq.A(2).and.AA(1).gt.AA(2)) .or. (A(1).eq.A(2).and.AA(1).eq.AA(2).and.AAA(1).gt.AAA(2))) then
-                VA = A(1)
-                A(1) = A(2)
-                A(2) = VA
-                VA = AA(1)
-                AA(1) = AA(2)
-                AA(2) = VA
-                VA = AAA(1)
-                AAA(1) = AAA(2)
-                AAA(2) = VA
-                V = AINDEX(1)
-                AINDEX(1) = AINDEX(2)
-                AINDEX(2) = V
             end if
-            return
-        end if      
-        NA=(N+1)/2
-        NB=N-NA
+        end do
  
-        call merge_sort(A,AINDEX,AA,AAA,NA)
-        call merge_sort(A(NA+1),AINDEX(NA+1),AA(NA+1),AAA(NA+1),NB)
- 
-        if (A(NA).gt.A(NA+1) .or. (A(NA).eq.A(NA+1).and.AA(NA).gt.AA(NA+1)) .or. &
-            (A(NA).eq.A(NA+1).and.AA(NA).eq.AA(NA+1).and.AAA(NA).gt.AAA(NA+1))) then
-            T(1:NA)=A(1:NA)
-            TT(1:NA)=AA(1:NA)
-            TTT(1:NA)=AAA(1:NA)
-            TINDEX(1:NA)=AINDEX(1:NA)
-            call merge(T,TINDEX,TT,TTT,NA,A(NA+1),AINDEX(NA+1),AA(NA+1),AAA(NA+1),NB,A,AINDEX,AA,AAA,N)
-        endif
-        return
-    end subroutine merge_sort
+        bead_index = index_array(k)
 
-    ! find the median of the coord_array
-    ! sort the coord_array, chain_array and bead_array in ascending order of the coord_array
-    ! coord_array: array consisting of coordinates
-    ! N: the coord_array dimension
-    ! median_index: returned value of the index of the median found
-    ! index_array: returned array with the sorted index
-    ! median_index_unsorted: returned avlue of the index of the median before sorting
-    subroutine find_median(coord_array1, coord_array2, coord_array3, N, median_index, index_array, median_index_unsorted)
-        integer, intent(in) :: N
-        real, dimension(N), intent(in out) :: coord_array1, coord_array2, coord_array3
-        integer, dimension(N) :: index_array
-        integer, intent(out) :: median_index, median_index_unsorted
+        return
+    end subroutine find_k
+
+    ! subroutine used in the selection algorithm to find the k-th element
+    ! coord_array1, 2 and 3: same as find_k
+    ! index_array: same as find_k
+    ! lo, hi: the low and high bound of the selection algorithm search
+    ! j: the j-th element found
+    subroutine partition(coord_array1, coord_array2, coord_array3, index_array, lo, hi, j)
+        real, intent(in out) :: coord_array1(:), coord_array2(:), coord_array3(:)
+        integer, intent(in out) :: index_array(:)
+        integer, intent(in) :: lo, hi
+        integer, intent(out) :: j
+
         integer :: i
 
-        ! initialize the index_array
-        do i = 1, N
-            index_array(i) = i
+        i = lo + 1
+        j = hi
+
+        do while (.true.)
+
+            ! i loops from left to right until either reaches the end or find a value that is greater than a[lo]
+            do while (smallerThan(coord_array1(i),coord_array1(lo),coord_array2(i),coord_array2(lo),coord_array3(i),coord_array3(lo)))
+                i = i + 1
+                if (i .ge. hi) exit
+            end do
+
+            ! j loops from right to left until either reaches the end or find a value that is smaller than a[lo]
+            do while (smallerThan(coord_array1(lo),coord_array1(j),coord_array2(lo),coord_array2(j),coord_array3(lo),coord_array3(j)))
+                j = j - 1
+                if (j .le. lo) exit
+            end do
+
+            ! if i and j cross, exit the while loop
+            if (i .ge. j) exit
+
+            ! else, exchange the element of i and j and continue
+            call swap_real_array(coord_array1, i, j)
+            call swap_real_array(coord_array2, i, j)
+            call swap_real_array(coord_array3, i, j)
+            call swap_int_array(index_array, i, j)
         end do
 
-        ! sort
-        call merge_sort(coord_array1, index_array, coord_array2, coord_array3, N)
-        
+        ! exchange the element of lo and j
+        call swap_real_array(coord_array1, lo, j)
+        call swap_real_array(coord_array2, lo, j)
+        call swap_real_array(coord_array3, lo, j)
+        call swap_int_array(index_array, lo, j)
+
+        return
+    end subroutine partition
+
+    ! swap i and j element of a real array
+    ! array: input array
+    ! i, j: two indices where two elements need to be swapped
+    subroutine swap_real_array(array, i, j)
+        real :: array(:)
+        integer :: i, j
+
+        real :: real_temp
+
+        real_temp = array(i)
+        array(i) = array(j)
+        array(j) = real_temp
+
+        return
+    end subroutine
+
+    ! swap i and j element of an integer array
+    ! same as above, except that this is for integer array
+    subroutine swap_int_array(array, i, j)
+        integer :: array(:)
+        integer :: i, j
+
+        integer :: int_temp
+
+        int_temp = array(i)
+        array(i) = array(j)
+        array(j) = int_temp
+
+        return
+    end subroutine
+
+    ! Initialize the tree coordinates by inserting the median coordinates of the cutting dimension
+    ! mol_tree: the pointer to the tree
+    ! rxu_tot, ryu_tot, rzu_tot: Arrays of x, y or z coordinates to be input
+    ! index_array: N-dimensional array of indices, used to indicate/distinguish each bead
+    ! tree_construction_list: the array of indices which indicate the sequence of inserting beads into the tree
+    ! iList: the current index of tree_construction_list
+    ! N_tot: the total dimension of the particles (originally), remains the same during recursive calls
+    ! N: the number of total beads, also the "true" dimension of all the arrays
+    ! cut_dim: the cutting dimension of the current node
+    ! l_mpi: whether MPI is used to construct the coordinates
+    ! i_numprocs: if MPI is used, the number of processors that has already been filled in with part of the list
+    ! n_index_array: if MPI is used, the index_array for specific processor
+    ! index_array_numprocs: if MPI is used, 2d-array (1st dim: index array index; 2nd dim: the number of cores) which
+    !                       has information about the index array each processor works on
+    ! i_level: if MPI is used, the cutting dimension of the bead that each processor starts with
+    recursive subroutine init_tree_coordinates(rxu_tot, ryu_tot, rzu_tot, index_array, tree_construct_list, iList, N_tot, N, cut_dim &
+            , l_mpi, i_numprocs, n_index_array, index_array_numprocs, i_level)
+        use sim_system, only : numprocs, myid
+        integer, intent(in) :: N_tot, N
+        integer :: iList, bead_index
+        real, intent(in) :: rxu_tot(:), ryu_tot(:), rzu_tot(:)
+        integer, dimension(N_tot) :: tree_construct_list
+        real, dimension(N) :: coord_sort1, coord_sort2, coord_sort3
+        integer, dimension(N) :: index_array
+        integer, allocatable :: index_array_left(:), index_array_right(:)
+        integer :: cut_dim, next_cut_dim, median_index
+        integer :: i, nLeft, nRight
+        logical :: l_mpi !< if true, do not recursively process the array, stop after the array is sorted
+        integer :: i_numprocs, i_level, num_array
+        integer :: n_index_array(:), index_array_numprocs(:, :)
+
+        if (cut_dim .eq. 1) then
+            do i = 1, N
+                bead_index = index_array(i)
+                coord_sort1(i) = rxu_tot(bead_index)
+                coord_sort2(i) = ryu_tot(bead_index)
+                coord_sort3(i) = rzu_tot(bead_index)
+            end do
+            next_cut_dim = 2
+        else if (cut_dim .eq. 2) then
+            do i = 1, N
+                bead_index = index_array(i)
+                coord_sort1(i) = ryu_tot(bead_index)
+                coord_sort2(i) = rzu_tot(bead_index)
+                coord_sort3(i) = rxu_tot(bead_index)
+            end do
+            next_cut_dim = 3
+        else
+            do i = 1, N
+                bead_index = index_array(i)
+                coord_sort1(i) = rzu_tot(bead_index)
+                coord_sort2(i) = rxu_tot(bead_index)
+                coord_sort3(i) = ryu_tot(bead_index)
+            end do
+            next_cut_dim = 1
+        end if 
+
+        ! find and record the median node into tree_construct_list
         ! find median
         if (mod(N, 2) == 0) then
             median_index = N / 2
@@ -1002,109 +1109,59 @@ contains
             median_index = (N + 1) / 2
         end if
 
-        median_index_unsorted = index_array(median_index)
+        call find_k(median_index, coord_sort1, coord_sort2, coord_sort3, index_array, bead_index)
 
-    end subroutine find_median
+        ! record the median in the tree_construct_list
+        tree_construct_list(iList) = bead_index
+        iList = iList + 1
 
-    ! Initialize the tree coordinates by inserting the median coordinates of the cutting dimension
-    ! mol_tree: the pointer to the tree
-    ! x_coord, y_coord, z_coord: N-dimensional array of x, y or z coordinates to be input
-    ! chain_array, bead_array: N-dimensional array containing chain and bead number information, one-to-one correspondence to x_coord
-    ! ix_array, iy_array, iz_array: N-dim array containing ix, iy and iz information
-    ! Ndim: the dimension of the x_coord, y_coord and z_coord arrays
-    ! N: the number of total beads
-    ! cut_dim: the cutting dimension of the current node 
-    recursive subroutine init_tree_coordinates(mol_tree, x_coord, y_coord, z_coord, chain_array, bead_array &
-                            , ix_array, iy_array, iz_array, Ndim, N, cut_dim)
-        type(tree), pointer :: mol_tree
-        integer, intent(in) :: Ndim, N
-        real, dimension(Ndim) :: x_coord, y_coord, z_coord
-        real, dimension(N) :: coord_sort1, coord_sort2, coord_sort3
-        real, allocatable :: x_coord_left(:), x_coord_right(:), y_coord_left(:), y_coord_right(:), z_coord_left(:), z_coord_right(:)
-        integer, allocatable :: chain_array_left(:), chain_array_right(:), bead_array_left(:), bead_array_right(:)
-        integer, allocatable :: ix_array_left(:), iy_array_left(:), iz_array_left(:)
-        integer, allocatable :: ix_array_right(:), iy_array_right(:), iz_array_right(:)
-        integer, dimension(Ndim) :: chain_array, bead_array, ix_array, iy_array, iz_array
-        integer :: cut_dim, next_cut_dim, median_index, median_index_unsorted
-        integer, dimension(N) :: index_array
-        integer :: i, j, k, ichain, ibead, ix, iy, iz, nLeft, nRight
-        real, dimension(3) :: coord
-
-        if (cut_dim .eq. 1) then
-            coord_sort1(1:N) = x_coord(1:N)
-            coord_sort2(1:N) = y_coord(1:N)
-            coord_sort3(1:N) = z_coord(1:N)
-            next_cut_dim = 2
-        else if (cut_dim .eq. 2) then
-            coord_sort1(1:N) = y_coord(1:N)
-            coord_sort2(1:N) = z_coord(1:N)
-            coord_sort3(1:N) = x_coord(1:N)
-            next_cut_dim = 3
-        else
-            coord_sort1(1:N) = z_coord(1:N)
-            coord_sort2(1:N) = x_coord(1:N)
-            coord_sort3(1:N) = y_coord(1:N)
-            next_cut_dim = 1
-        end if 
-
-        ! find and insert the median node
-        call find_median(coord_sort1, coord_sort2, coord_sort3, N, median_index, index_array, median_index_unsorted)
-        coord(1) = x_coord(median_index_unsorted)
-        coord(2) = y_coord(median_index_unsorted) 
-        coord(3) = z_coord(median_index_unsorted)
-        ichain = chain_array(median_index_unsorted)
-        ibead = bead_array(median_index_unsorted)
-        ix = ix_array(median_index_unsorted)
-        iy = iy_array(median_index_unsorted)
-        iz = iz_array(median_index_unsorted)
-        mol_tree => insert_node(mol_tree, coord, ichain, ibead, ix, iy, iz)
-        
+        ! Count the number of elements in the left and right array
         nLeft = median_index - 1
         nRight = N - median_index
 
+        ! if l_mpi is TRUE, it means that we are trying to divide the array and then distribute the sub-arrays
+        ! to different cores for further recursive sorting
+        ! of course only returns the sub-array when 2^(i_level) reaches numprocs
+        if (l_mpi) then
+            num_array = 2**(i_level)
+            i_level = i_level + 1
+
+            if (num_array .eq. numprocs) then
+                n_index_array(i_numprocs) = nLeft
+                index_array_numprocs(1: nLeft, i_numprocs) = index_array(1: nLeft)
+                i_numprocs = i_numprocs + 1
+                n_index_array(i_numprocs) = nRight
+                index_array_numprocs(1: nRight, i_numprocs) = index_array(median_index + 1 : N)
+                i_numprocs = i_numprocs + 1
+                i_level = i_level - 1
+                return
+            end if
+        end if
+
         ! Split arrays for the recursive call
         if (nLeft .ge. 1) then
-            allocate(x_coord_left(nLeft), y_coord_left(nLeft), z_coord_left(nLeft), chain_array_left(nLeft) &
-                        ,bead_array_left(nLeft), ix_array_left(nLeft), iy_array_left(nLeft), iz_array_left(nLeft))
-            do i = 1, nLeft
-                k = index_array(i)
-                x_coord_left(i) = x_coord(k)
-                y_coord_left(i) = y_coord(k)
-                z_coord_left(i) = z_coord(k)
-                chain_array_left(i) = chain_array(k)
-                bead_array_left(i) = bead_array(k)
-                ix_array_left(i) = ix_array(k)
-                iy_array_left(i) = iy_array(k)
-                iz_array_left(i) = iz_array(k)
-            end do
-            
-            call init_tree_coordinates(mol_tree, x_coord_left, y_coord_left, z_coord_left, &
-                chain_array_left, bead_array_left, ix_array_left, iy_array_left, iz_array_left, nLeft, nLeft, next_cut_dim) 
+            allocate(index_array_left(nLeft))
+            index_array_left(1:nLeft) = index_array(1:nLeft)
+
+            call init_tree_coordinates(rxu_tot, ryu_tot, rzu_tot, index_array_left, &
+                tree_construct_list, iList, N_tot, nLeft, next_cut_dim, l_mpi, i_numprocs, n_index_array, index_array_numprocs, i_level)
         end if
 
         if (nRight .ge. 1) then
-             allocate(x_coord_right(nRight), y_coord_right(nRight), z_coord_right(nRight), chain_array_right(nRight) &
-                        , bead_array_right(nRight), ix_array_right(nRight), iy_array_right(nRight), iz_array_right(nRight))
-            j = 1
-            do i = median_index + 1, N
-                k = index_array(i)
-                x_coord_right(j) = x_coord(k)
-                y_coord_right(j) = y_coord(k)
-                z_coord_right(j) = z_coord(k)
-                chain_array_right(j) = chain_array(k)
-                bead_array_right(j) = bead_array(k)
-                ix_array_right(j) = ix_array(k)
-                iy_array_right(j) = iy_array(k)
-                iz_array_right(j) = iz_array(k)
-                j = j + 1
-            end do
-    
-            call init_tree_coordinates(mol_tree, x_coord_right, y_coord_right, z_coord_right, &
-                chain_array_right, bead_array_right, ix_array_right, iy_array_right, iz_array_right, nRight, nRight, next_cut_dim) 
+            allocate(index_array_right(nRight))
+            index_array_right(1 : nRight) = index_array(median_index + 1 : N)
+
+            call init_tree_coordinates(rxu_tot, ryu_tot, rzu_tot, index_array_right, &
+                tree_construct_list, iList, N_tot, nRight, next_cut_dim, l_mpi, i_numprocs, n_index_array, index_array_numprocs, i_level)
         end if
+
+        if (l_mpi) then
+            i_level = i_level - 1
+        end if
+
+        return
          
     end subroutine init_tree_coordinates
-
 
     ! To construct/re-construct the kdtree
     !< ibox: for which simulation box
@@ -1113,6 +1170,7 @@ contains
     subroutine construct_kdtree(ibox, iTree, lOutput)
         use sim_system
         use util_runtime,only:err_exit
+        use util_mp,only:mp_set_displs,mp_allgather
 
         ! kd-tree variables
         logical :: lOutput, lAdd
@@ -1120,23 +1178,33 @@ contains
         type(interval), pointer :: cubeP(:)
         type(tree), pointer :: tree
         real, allocatable :: rxu_tot(:), ryu_tot(:), rzu_tot(:)
-        integer, allocatable :: bead_array(:), chain_array(:), ix_array(:), iy_array(:), iz_array(:)
-        integer :: i, ix, iy, iz, ichain, ibead, Ntot, Nactual
+        integer, allocatable :: bead_array(:), chain_array(:), ix_array(:), iy_array(:), iz_array(:), index_array(:), tree_construct_list(:)
+        integer :: i, ix, iy, iz, ichain, ibead, N_max, N_tot, bead_index
         integer, allocatable :: nx(:), ny(:), nz(:)
-        integer :: imolty
+        integer :: imolty, iList
         real :: xmin, xmax, ymin, ymax, zmin, zmax, xcoord, ycoord, zcoord, rbcut_plus_buffer
+        real, dimension(3) :: coord
+
+        ! MPI
+        integer :: rcounts(numprocs),displs(numprocs),blocksize
+        integer :: my_iList, my_n_index_array, n_index_array_max, i_level, cut_dim, i_numprocs
+        integer, allocatable :: my_tree_construct_list(:), my_index_array(:), n_index_array(:), index_array_numprocs(:, :)
 
         if (.not. lkdtree_box(ibox)) call err_exit(__FILE__,__LINE__,'Cannot create kdtree for a box with lkdtree_box=F ',myid+1)
 
-        Ntot = 0
+        N_max = 0
         rbcut_plus_buffer = rcut(ibox) + kdtree_buffer_len(ibox)
         do ichain = 1, nchain
             if (nboxi(ichain) .eq. ibox) then
                 imolty = moltyp(ichain)
-                Ntot = Ntot + nunit(imolty)
+                N_max = N_max + nunit(imolty)
             end if
         end do
-        if (lpbc) Ntot = Ntot * 27
+
+        ! kd-tree does not support the case where no particle is in the box
+        if (N_max .eq. 0) call err_exit(__FILE__,__LINE__,'Cannot apply kd-tree when no particle is in the box ', myid+1)
+
+        if (lpbc) N_max = N_max * 27
 
         if (lOutput) write(io_output, *) "Starting to construct the kd-tree"
         allocate(cubeP(3))
@@ -1160,8 +1228,8 @@ contains
             nz = [0]
         end if
     
-        allocate(rxu_tot(Ntot), ryu_tot(Ntot),rzu_tot(Ntot), chain_array(Ntot), bead_array(Ntot) &
-            ,ix_array(Ntot), iy_array(Ntot), iz_array(Ntot))
+        allocate(rxu_tot(N_max), ryu_tot(N_max),rzu_tot(N_max), chain_array(N_max), bead_array(N_max) &
+            ,ix_array(N_max), iy_array(N_max), iz_array(N_max))
 
         i = 1
         xmin = 0.0E0_dp
@@ -1170,8 +1238,12 @@ contains
         ymax = boxly(ibox)
         zmin = 0.0E0_dp
         zmax = boxlz(ibox)
-        Nactual = 0
+        N_tot = 0
 
+        ! loop over all beads (including their 27 periodic boundary conditions)
+        ! for beads in the central box, determine the max amd min on each dimension
+        ! for beads not in the central box, check whether it's within (max+buffer_len) to (min-buffer_len)
+        ! if so, record the bead information and prepare for sorting and insertion
         do ix = 1, size(nx)
             do iy = 1, size(ny)
                 do iz = 1, size(nz)
@@ -1212,7 +1284,7 @@ contains
                                     iy_array(i) = ny(iy)
                                     iz_array(i) = nz(iz)
                                     i = i + 1
-                                    Nactual = Nactual + 1
+                                    N_tot = N_tot + 1
                                 end if
                             end do
                         end if
@@ -1221,14 +1293,96 @@ contains
             end do
         end do
 
+        ! min & max for coordinates at each dimension
         tree%bound(1)%lower = xmin
         tree%bound(1)%upper = xmax
         tree%bound(2)%lower = ymin
         tree%bound(2)%upper = ymax
         tree%bound(3)%lower = zmin
         tree%bound(3)%upper = zmax
-        call init_tree_coordinates(tree, rxu_tot, ryu_tot, rzu_tot, chain_array, bead_array &
-                , ix_array, iy_array, iz_array, Ntot, Nactual, 1)
+
+        ! construct the index array
+        allocate(index_array(N_tot))
+        do i = 1, N_tot
+            index_array(i) = i
+        end do
+
+        ! Recursively sort the coordinate array in x, y and z dimensions
+        ! and to output the median each time to the output array tree_construct_list
+        ! which is a list of indices that indicate the sequence of which bead is added to the tree first
+        allocate(tree_construct_list(N_tot))
+        iList = 1
+
+        ! while the number of sub-arrays to be sorted is fewer than the number of processors
+        ! continue to sort and divide the arrays to be sub-arrays
+        allocate(n_index_array(numprocs))
+        n_index_array_max = N_tot / numprocs + 1
+
+        ! Each column of index_array_numprocs contains the index array that each core needs to process
+        allocate(index_array_numprocs(n_index_array_max, numprocs))
+
+        if (numprocs .gt. 1) then
+            ! This call divides the array into numprocs sub-arrays, with each sub-array element stored
+            ! in index_array_numprocs, and the size of each sub-array stored in the n_index_array
+            i_level = 1
+            i_numprocs = 1
+            call init_tree_coordinates(rxu_tot, ryu_tot, rzu_tot, index_array, tree_construct_list &
+                    , iList, N_tot, N_tot, 1, .true., i_numprocs, n_index_array, index_array_numprocs, i_level)
+
+            ! Compute the cut_dim of the sub-array from i_level
+            i_level = floor(log(real(numprocs)) / log(2.)) + 1
+            cut_dim = mod(i_level, 3)
+            if (cut_dim .eq. 0) cut_dim = 3
+
+            ! the number of elements to be processed varies with each core
+            do i = 1, numprocs
+                rcounts(i) = n_index_array(i)
+            end do
+
+            call mp_set_displs(rcounts, displs, blocksize, numprocs)
+
+            ! assign the variables to each core
+            my_iList = 1
+            my_n_index_array = n_index_array(myid+1)
+            allocate(my_index_array(my_n_index_array))
+            my_index_array(1: my_n_index_array) = index_array_numprocs(1: my_n_index_array, myid+1)
+        else
+            ! if it's a one-core case
+            my_iList = 1
+            my_n_index_array = N_tot
+            allocate(my_index_array(N_tot))
+            my_index_array(1:N_tot) = index_array(1:N_tot)
+            cut_dim = 1
+        end if
+
+        allocate(my_tree_construct_list(my_n_index_array))
+
+        ! each core searches for its own array
+        call init_tree_coordinates(rxu_tot, ryu_tot, rzu_tot, my_index_array, &
+                my_tree_construct_list, my_iList, my_n_index_array, my_n_index_array, cut_dim, &
+                .false., 1, n_index_array, index_array_numprocs, i_level)
+
+        ! if multiple core run, collect results from each core
+        if (numprocs .gt. 1) then
+            call mp_allgather(my_tree_construct_list, tree_construct_list(iList: N_tot), rcounts, displs, groupid)
+        else
+            tree_construct_list = my_tree_construct_list
+        end if
+
+        ! Sequentially add nodes into the tree
+        ! the tree is guaranteed to be balanced
+        do i = 1, N_tot
+            bead_index = tree_construct_list(i)
+            coord(1) = rxu_tot(bead_index)
+            coord(2) = ryu_tot(bead_index)
+            coord(3) = rzu_tot(bead_index)
+            ichain = chain_array(bead_index)
+            ibead = bead_array(bead_index)
+            ix = ix_array(bead_index)
+            iy = iy_array(bead_index)
+            iz = iz_array(bead_index)
+            tree => insert_node(tree, coord, ichain, ibead, ix, iy, iz)
+        end do
         tree_height(ibox) = tree%height
 
         !write(io_output,*) 'Finished constructing the tree at ',time_date_str()

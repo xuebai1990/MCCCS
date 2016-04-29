@@ -153,49 +153,49 @@ contains
                 tree => mol_tree(iTree)%tree
             end if
 
-            if (myid .eq. 0) then
+            ! if not volume move, then update and output the height of the tree
+            if (.not. lvol) then
+                call update_tree_height(tree)
+                if (myid .eq. 0) write(io_output, *) "Height of the tree for box",ibox," is ", tree%height
+            end if
 
-                ! if not volume move, then update and output the height of the tree
-                if (.not. lvol) then
-                    call update_tree_height(tree)
-                    write(io_output, *) "Height of the tree for box",ibox," is ", tree%height
-                end if
+            ! the kd-tree parallelize i, which differs from non kd-tree, which parallelizes j
+            ! the load balancing is not as perfect as j, but considering usually i >> numprocs
+            ! this parallelization is not bad
+            do i = 1 + myid, nchain - 1, numprocs
+                if (nboxi(i) .eq. ibox) then
+                    imolty = moltyp(i)
+                    do ii = 1, nunit(imolty)
+                        coord(1) = rxu(i, ii)
+                        coord(2) = ryu(i, ii)
+                        coord(3) = rzu(i, ii)
+                        ntii = ntype(imolty, ii)
+                        lqchgi = lqchg(ntii)
 
-                do i = 1, nchain - 1
-                    if (nboxi(i) .eq. ibox) then
-                        imolty = moltyp(i)
-                        do ii = 1, nunit(imolty)
-                            coord(1) = rxu(i, ii)
-                            coord(2) = ryu(i, ii)
-                            coord(3) = rzu(i, ii)
-                            ntii = ntype(imolty, ii)
-                            lqchgi = lqchg(ntii)
+                        call range_search(tree, coord, nmax*numax, rmin, rbcut, i, ii, .true., ovrlap, inter_list_dim,&
+                             inter_list, dist_calc_num_temp, .false.)
 
-                            call range_search(tree, coord, nmax*numax, rmin, rbcut, i, ii, .true., ovrlap, inter_list_dim,&
-                            inter_list, dist_calc_num_temp, .false.)
-
-                            dist_calc_num = dist_calc_num + dist_calc_num_temp
-                            if (ovrlap) then
-                                if ( .not. lvol .and.myid.eq.rootid) then
-                                    write(io_output, *) 'Overlap in sumup'
-                                end if
-                                goto 199
-                            else
-                                do iInter = 1, inter_list_dim
-                                    rijsq = inter_list(1, iInter)
-                                    j = inter_list(2, iInter)
-                                    jj = inter_list(3, iInter)
-                                    jmolty = moltyp(j)
-                                    ntjj = ntype(jmolty, jj)
-                                    ntij = type_2body(ntii, ntjj)
-                                    v(ivInterLJ)=v(ivInterLJ)+U2(rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
-                                    v(ivElect)=v(ivElect)+Q2(rijsq,rcutsq,i,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
-                                end do
+                        dist_calc_num = dist_calc_num + dist_calc_num_temp
+                        if (ovrlap) then
+                            if ( .not. lvol .and.myid.eq.rootid) then
+                                write(io_output, *) 'Overlap in sumup'
                             end if
-                        end do
-                    end if
-                end do
-            end if !< if myid .eq. 0
+                            goto 199
+                        else
+                            do iInter = 1, inter_list_dim
+                                rijsq = inter_list(1, iInter)
+                                j = inter_list(2, iInter)
+                                jj = inter_list(3, iInter)
+                                jmolty = moltyp(j)
+                                ntjj = ntype(jmolty, jj)
+                                ntij = type_2body(ntii, ntjj)
+                                v(ivInterLJ)=v(ivInterLJ)+U2(rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
+                                v(ivElect)=v(ivElect)+Q2(rijsq,rcutsq,i,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
+                            end do
+                        end if
+                    end do
+                end if
+            end do !< i
         else ! if lkdtree
 
 1999 continue
@@ -849,7 +849,12 @@ contains
            dist_calc_num = 0
 
            ! loop over all units in chain i
-           do ii = myid+istart, iuend, numprocs
+           ! energy calculation using kd-tree does not loop over j
+           ! so here it parallelizes the number of beads whose positions are changed
+           ! this results in poor parallel efficiency if the number of beads changed in a move is
+           ! smaller than the # of cores (e.g. > 2 cores for ethane, > 1 core for LJ)
+           ! but it works well for most simulations, where # of cores > # of beads per molecule
+           do ii = istart + myid, iuend, numprocs
                ntii = ntype(imolty,ii)
                liji = lij(ntii)
                lqchgi = lqchg(ntii)
@@ -1022,6 +1027,7 @@ contains
 
     call mp_sum(v(ivInterLJ),1,groupid)
     call mp_sum(v(ivElect),1,groupid)
+
 ! -----------------------------------------------
 
 !kea - garo: add three body loop for intermolecular interactions
