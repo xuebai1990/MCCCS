@@ -10,7 +10,8 @@ MODULE util_kdtree
     public :: init_tree, insert_node, range_search, find_min, find_max, delete_node, &
              check_tree_coord, check_tree_cube, search_node_in_tree, update_cube, &
              init_tree_coordinates, update_tree_height, vector_dist_square, &
-             empty_tree, allocate_kdtree, construct_kdtree, update_box_kdtree, read_kdtree
+             empty_tree, allocate_kdtree, construct_kdtree, update_box_kdtree, read_kdtree, &
+             allocate_nxyz
 
     ! global variables
     real, public :: rmin_square, rcut_square
@@ -790,14 +791,14 @@ contains
     ! dist_calc_num: number of distance calculation used
     ! lPressure: whether called from pressure calculation, if so, have additional dimension of output arrays for r*uij
     subroutine range_search(mol_tree, ref_coord, max_dim, rmin, rcut, ichain, ibead, lsumup, &
-        loverlap, actual_dim, search_output_array, dist_calc_num, lPressure)
+        loverlap, actual_dim, search_output, dist_calc_num, lPressure)
         type(tree), pointer :: mol_tree
         real, dimension(3), intent(in) :: ref_coord
         integer, intent(in) :: max_dim, ichain, ibead 
         real, intent(in) :: rmin, rcut
         logical, intent(in) :: lPressure
         logical :: lsumup, loverlap
-        real, allocatable :: search_output_array(:, :), search_output(:, :)
+        real, allocatable :: search_output(:, :)
         integer :: i, dist_calc_num, search_output_dim, actual_dim
         integer ::  i_search_output
 
@@ -824,14 +825,6 @@ contains
             , lsumup, loverlap, dist_calc_num, lPressure, search_output, i_search_output)
 
         actual_dim = i_search_output - 1
-
-        ! allocate the search_output_array for returning the right size of search output array
-        if (allocated(search_output_array)) deallocate(search_output_array)
-        allocate(search_output_array(search_output_dim, actual_dim))
-
-        do i = 1, actual_dim
-            search_output_array(1:search_output_dim, i) = search_output(1:search_output_dim, i)
-        end do
 
     end subroutine range_search
 
@@ -1208,26 +1201,19 @@ contains
 
         if (lOutput) write(io_output, *) "Starting to construct the kd-tree"
         allocate(cubeP(3))
-        do i = 1, 3
-            cubeP(i)%lower = -2.5*boxlx(ibox)
-            cubeP(i)%upper = 2.5*boxlx(ibox)
-        end do
+
+        cubeP(1)%lower = -2.5 * boxlx(ibox)
+        cubeP(1)%upper = 2.5 * boxlx(ibox)
+        cubeP(2)%lower = -2.5 * boxly(ibox)
+        cubeP(2)%upper = 2.5 * boxly(ibox)
+        cubeP(3)%lower = -2.5 * boxlz(ibox)
+        cubeP(3)%upper = 2.5 * boxlz(ibox)
 
         if (associated(mol_tree(iTree)%tree)) call empty_tree(mol_tree(iTree)%tree)
         tree => init_tree(mol_tree(iTree)%tree, ibox, cubeP)
 
-        if (lpbc) then
-            allocate(nx(3), ny(3), nz(3))
-            nx = [0, -1, 1]
-            ny = [0, -1, 1]
-            nz = [0, -1, 1]
-        else
-            allocate(nx(1), ny(1), nz(1))
-            nx = [0]
-            ny = [0]
-            nz = [0]
-        end if
-    
+        call allocate_nxyz(nx, ny, nz)
+
         allocate(rxu_tot(N_max), ryu_tot(N_max),rzu_tot(N_max), chain_array(N_max), bead_array(N_max) &
             ,ix_array(N_max), iy_array(N_max), iz_array(N_max))
 
@@ -1497,6 +1483,10 @@ contains
 
     end subroutine read_kdtree
 
+    ! check whether two interaction sites have any interaction
+    ! if not, then its distance can be smaller than rmin
+    ! i, ii, j, jj: mol and bead id
+    ! l_interaction: if return true, there is interaction
     function check_interaction(i, ii, j, jj) result(l_interaction)
         use sim_system,only:moltyp,ntype,lij,lqchg
 
@@ -1522,4 +1512,39 @@ contains
 
         return
     end function check_interaction
+
+    ! allocate the nx or ny or nz array, used for representing the PBC
+    ! nxyz: 1d array, 3 elements if pbc on this direction is used; 1 otherwise
+    subroutine allocate_nxyz(nx, ny, nz)
+        use sim_system,only:lpbcx, lpbcy, lpbcz
+
+        integer, allocatable, intent(out) :: nx(:), ny(:), nz(:)
+
+        if (lpbcx) then
+            allocate(nx(3))
+            nx = [0, -1, 1]
+        else
+            allocate(nx(1))
+            nx = [0]
+        end if
+
+        if (lpbcy) then
+            allocate(ny(3))
+            ny = [0, -1, 1]
+        else
+            allocate(ny(1))
+            ny = [0]
+        end if
+
+        if (lpbcz) then
+            allocate(nz(3))
+            nz = [0, -1, 1]
+        else
+            allocate(nz(1))
+            nz = [0]
+        end if
+
+        return
+    end subroutine allocate_nxyz
+
 END MODULE util_kdtree

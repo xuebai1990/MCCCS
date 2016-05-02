@@ -89,11 +89,6 @@ contains
     real::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq,vol
     ! Neeraj & RP for MPI
     real::sum_vvib,sum_vbend,sum_vtg
-   ! kdtree
-    type(tree), pointer :: tree
-    real :: coord(3)
-    real, allocatable :: inter_list(:,:)
-    integer :: iTree, iInter, inter_list_dim, dist_calc_num, dist_calc_num_temp
 ! --------------------------------------------------------------------
 #ifdef __DEBUG__
     write(io_output,*) 'start SUMUP in ',myid,' for box ', ibox
@@ -133,72 +128,10 @@ contains
     ! loop over all chains i
     if (.not.lideal(ibox)) then
         if (lkdtree .and. lkdtree_box(ibox)) then
-            dist_calc_num = 0
-
-            ! if called from regular move, ibox = ibox
-            ! if called from volume move, ibox = nbox + 1, i.e., to calculate the energy for the coordinates after the volume change
-            if (.not. lvol) then
-                tree => mol_tree(ibox)%tree
-            else
-                iTree = 0
-                do i = nbox+1, nbox+2
-                    if (associated(mol_tree(i)%tree)) then
-                        if (mol_tree(i)%tree%box .eq. ibox) then
-                            iTree = i
-                            exit
-                        end if
-                    end if
-                end do
-                if (iTree .eq. 0) call err_exit(__FILE__,__LINE__,'Error in update_box_kdtree: iTree not found',myid)
-                tree => mol_tree(iTree)%tree
-            end if
-
-            ! if not volume move, then update and output the height of the tree
-            if (.not. lvol) then
-                call update_tree_height(tree)
-                if (myid .eq. 0) write(io_output, *) "Height of the tree for box",ibox," is ", tree%height
-            end if
-
-            ! the kd-tree parallelize i, which differs from non kd-tree, which parallelizes j
-            ! the load balancing is not as perfect as j, but considering usually i >> numprocs
-            ! this parallelization is not bad
-            do i = 1 + myid, nchain - 1, numprocs
-                if (nboxi(i) .eq. ibox) then
-                    imolty = moltyp(i)
-                    do ii = 1, nunit(imolty)
-                        coord(1) = rxu(i, ii)
-                        coord(2) = ryu(i, ii)
-                        coord(3) = rzu(i, ii)
-                        ntii = ntype(imolty, ii)
-                        lqchgi = lqchg(ntii)
-
-                        call range_search(tree, coord, nmax*numax, rmin, rbcut, i, ii, .true., ovrlap, inter_list_dim,&
-                             inter_list, dist_calc_num_temp, .false.)
-
-                        dist_calc_num = dist_calc_num + dist_calc_num_temp
-                        if (ovrlap) then
-                            if ( .not. lvol .and.myid.eq.rootid) then
-                                write(io_output, *) 'Overlap in sumup'
-                            end if
-                            goto 199
-                        else
-                            do iInter = 1, inter_list_dim
-                                rijsq = inter_list(1, iInter)
-                                j = inter_list(2, iInter)
-                                jj = inter_list(3, iInter)
-                                jmolty = moltyp(j)
-                                ntjj = ntype(jmolty, jj)
-                                ntij = type_2body(ntii, ntjj)
-                                v(ivInterLJ)=v(ivInterLJ)+U2(rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
-                                v(ivElect)=v(ivElect)+Q2(rijsq,rcutsq,i,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
-                            end do
-                        end if
-                    end do
-                end if
-            end do !< i
-        else ! if lkdtree
-
-1999 continue
+            ! computing inter-molecular interactions using kd-tree
+            call energy_inter_kd_tree_sumup(ibox, lvol, v, ovrlap)
+            if (ovrlap) return
+        else
            ! MPI
            do i = 1, nchain - 1
               ! check if i is in relevant box ###
@@ -331,23 +264,24 @@ contains
                  end do molecule2
               end if
            end do !do i = 1, nchain - 1
-       end if ! if lkdtree
-! Returning from ovrlap--------------
-199    continue
+           ! Returning from ovrlap--------------
+199        continue
 
 ! KM don't check overlap until allreduce is finished
 ! if(ovrlap .eq. .true.)then
 ! write(io_output,*)'521: in sumup ovrlap=',ovrlap,'myid=',myid
 ! end if
 ! -----------------------------------------
-       call mp_lor(ovrlap,1,groupid)
-       if(ovrlap)then
-          ! write(io_output,*)'530: in sumup ovrlap=',ovrlap,'myid=',myid
-          return
-       end if
+           call mp_lor(ovrlap,1,groupid)
+           if(ovrlap)then
+               ! write(io_output,*)'530: in sumup ovrlap=',ovrlap,'myid=',myid
+               return
+           end if
 
-       call mp_sum(v(ivInterLJ),1,groupid)
-       call mp_sum(v(ivElect),1,groupid)
+           call mp_sum(v(ivInterLJ),1,groupid)
+           call mp_sum(v(ivElect),1,groupid)
+
+       end if ! if lkdtree
 
 ! KEA garofalini 3 body potential
        if (lgaro.and..not.lideal(ibox)) then
@@ -757,11 +691,6 @@ contains
     real::v(nEnergy),rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq,ryuij,rzuij,rij,rijsq,rbcut,calpi
     real::vwell
     real::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq
-    ! kdtree
-    type(tree), pointer :: tree
-    real :: coord(3)
-    real, allocatable :: inter_list(:,:)
-    integer :: iInter, inter_list_dim, dist_calc_num, dist_calc_num_temp
 ! --------------------------------------------------------------------
 #ifdef __DEBUG__
     write(io_output,*) 'start ENERGY in ',myid,' for molecule ',i,' in box ',ibox
@@ -845,49 +774,8 @@ contains
 ! END JLR 11-24-09
 ! RP added for MPI
        if (lkdtree .and. lkdtree_box(ibox)) then
-           tree => mol_tree(ibox)%tree
-           dist_calc_num = 0
-
-           ! loop over all units in chain i
-           ! energy calculation using kd-tree does not loop over j
-           ! so here it parallelizes the number of beads whose positions are changed
-           ! this results in poor parallel efficiency if the number of beads changed in a move is
-           ! smaller than the # of cores (e.g. > 2 cores for ethane, > 1 core for LJ)
-           ! but it works well for most simulations, where # of cores > # of beads per molecule
-           do ii = istart + myid, iuend, numprocs
-               ntii = ntype(imolty,ii)
-               liji = lij(ntii)
-               lqchgi = lqchg(ntii)
-               coord(1) = rxuion(ii, flagon)
-               coord(2) = ryuion(ii, flagon)
-               coord(3) = rzuion(ii, flagon)
-
-               call range_search(tree, coord, nmax*numax, rmin, rbcut, i, ii, .false., ovrlap, inter_list_dim,&
-                     inter_list, dist_calc_num_temp, .false.)
-               dist_calc_num = dist_calc_num + dist_calc_num_temp
-               if (ovrlap) goto 99
-
-               ! After all the interaction sites within the cutoff are found
-               ! Loop over all these sites and calculate the inter LJ as well as the electrostatics
-               do iInter = 1, inter_list_dim
-                    rijsq = inter_list(1, iInter)
-                    j = inter_list(2, iInter)
-                    jj = inter_list(3, iInter)
-                    jmolty = moltyp(j)
-                    if (lexclu(imolty,ii,jmolty,jj)) cycle !< check exclusion table
-                    ntjj = ntype(jmolty, jj)
-                    ntij = type_2body(ntii, ntjj)
-
-                    v(ivInterLJ)=v(ivInterLJ)+U2(rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
-
-                    ! In calculating electrostatics, nchp2 rather than i is used
-                    ! because the value here is only needed for determing the charge of this bead qqu(nchp2,ii)
-                    ! in the swatch move, qqu(nchp2,ii) may be different from qqu(i,ii), because i is the mol to be swatched
-                    ! and nchp2 is the mol to replace, so qqu(nchp2,ii) should be used here
-                    ! in all other moves, qqu(nchp2,ii) == qqu(i,ii)
-                    v(ivElect)=v(ivElect)+Q2(rijsq,rcutsq,nchp2,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
-               end do
-           end do
+           call energy_inter_kd_tree_energy(i, imolty, v, flagon, ibox, istart, iuend, ovrlap, lcoulo)
+           if (ovrlap) return
        else
            do k = myid+1,nmole,numprocs
 ! do k = 1, nmole
@@ -1012,21 +900,22 @@ contains
                 end do
             end if
           end do
-        end if !< if kdtree
-    end if
 
 ! RP added for MPI
 ! Returning from ovrlap--------------
-99  continue
+99        continue
 
-    call mp_lor(ovrlap,1,groupid)
-    if(ovrlap)then
-       ! write(io_output,*)'630 in energy ovrlap=',ovrlap,'myid=',myid
-       return
-    end if
+          call mp_lor(ovrlap,1,groupid)
+          if(ovrlap)then
+              ! write(io_output,*)'630 in energy ovrlap=',ovrlap,'myid=',myid
+              return
+          end if
 
-    call mp_sum(v(ivInterLJ),1,groupid)
-    call mp_sum(v(ivElect),1,groupid)
+          call mp_sum(v(ivInterLJ),1,groupid)
+          call mp_sum(v(ivElect),1,groupid)
+
+        end if !< if kdtree
+    end if !< if box is ideal
 
 ! -----------------------------------------------
 
@@ -1263,11 +1152,6 @@ contains
      ,my_bfac(nchmax),my_vipswot(nchmax),my_vwellipswot(nchmax),my_vipswnt(nchmax),my_vwellipswnt(nchmax)
     logical::my_lovr(nchmax)
 
-    ! kdtree
-    type(tree), pointer :: tree
-    real :: coord(3)
-    real, allocatable :: inter_list(:,:)
-    integer :: iInter, inter_list_dim, dist_calc_num, dist_calc_num_temp
 ! ------------------------------------------
 #ifdef __DEBUG__
     write(io_output,*) 'start BOLTZ in ',myid
@@ -1329,7 +1213,7 @@ contains
 
 !> \todo to be MPI parallelized
 !> COM distance calculation, not needed if lkdtree is used
-       if ((.not. lkdtree) .and. (.not. lkdtree_box(ibox))) then
+       if (.not. (lkdtree .and. lkdtree_box(ibox))) then
            do j = 1,nchain
               lcmno(j) = .false.
               if ( ( nboxi(j) .eq. ibox ) .and. ( i .ne. j ) ) then
@@ -1527,56 +1411,12 @@ contains
 ! *******************************
 ! loop over all chains except i
           if (lkdtree .and. lkdtree_box(ibox)) then
-              tree => mol_tree(ibox)%tree
-              dist_calc_num = 0
+              call energy_inter_kd_tree_boltz(i, icharge, imolty, v, ibox, ntogrow, ovrlap, glist, itrial)
 
-              ! loop over all beads of molecule i grown this step
-              do count = 1, ntogrow
-                  ! assign bead type for ii
-                  ii = glist(count)
-                  ntii = ntype(imolty,ii)
-                  liji = lij(ntii)
-                  lqchgi = lqchg(ntii)
-
-                  ! assign positions to coord
-                  coord(1) = rxp(count,itrial)
-                  coord(2) = ryp(count,itrial)
-                  coord(3) = rzp(count,itrial)
-
-                  call range_search(tree, coord, nmax*numax, rmin, rcutin, i, ii, .false., ovrlap, inter_list_dim,&
-                         inter_list, dist_calc_num_temp, .false.)
-
-                  dist_calc_num = dist_calc_num + dist_calc_num_temp
-
-                  if (ovrlap) then
-                      my_lovr(my_itrial) = .true.
-                      goto 19
-                  else
-                      do iInter = 1, inter_list_dim
-                          rijsq = inter_list(1, iInter)
-                          j = inter_list(2, iInter)
-                          jj = inter_list(3, iInter)
-                          jmolty = moltyp(j)
-                          if (lexclu(imolty,ii,jmolty,jj)) cycle !< check exclusion table
-                          ntjj = ntype(jmolty, jj)
-                          ntij = type_2body(ntii, ntjj)
-                          v(ivInterLJ)=v(ivInterLJ)+U2(rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
-
-                          if (L_Coul_CBMC.and.lqchg(ntii).and.lqchg(ntjj)) then
-                              rij = sqrt(rijsq)
-                              if (L_elect_table) then
-                                  v(ivElect) = v(ivElect) + qqu(icharge,ii)*qqu(j,jj)*lininter_elect(rij,ntii,ntjj)
-                              else if (lewald) then
-                                  ! compute real space term of velect
-                                  v(ivElect) = v(ivElect) + qqu(icharge,ii)*qqu(j,jj)*erfunc(calp(ibox)*rij)/rij
-                              else
-                                  ! compute all electrostatic interactions
-                                  v(ivElect) = v(ivElect) + qqu(icharge,ii)*qqu(j,jj)/ rij
-                              end if
-                          end if
-                       end do
-                  end if
-              end do
+              if (ovrlap) then
+                  my_lovr(my_itrial) = .true.
+                  goto 19
+              end if
           else !< if kdtree
               do_nmole:do k = 1, nmole
                  if (licell.and.(ibox.eq.boxlink)) then
@@ -2704,4 +2544,236 @@ contains
        call read_table('fort.44',ntabelect,relect,tabelect,electsplits,atoms,lqchg)
     end if
   end subroutine read_tabulated_ff_pair
+
+!> \brief compute inter-molecular interaction using kd-tree in the sumup
+  subroutine energy_inter_kd_tree_sumup(ibox, lvol, v, ovrlap)
+     integer, intent(in) :: ibox
+     logical, intent(in) :: lvol
+     real, intent(in out) :: v(nEnergy)
+     logical, intent(out) :: ovrlap
+
+     integer :: i, imolty, ii, j, jmolty, jj, ntii, ntjj, ntij
+     logical :: lqchgi, lcoulo(numax,numax)
+     type(tree), pointer :: tree
+     real :: coord(3), rbcut, rijsq, calpi, rcutsq
+     real, allocatable :: inter_list(:,:)
+     integer :: iTree, iInter, inter_list_dim, dist_calc_num, dist_calc_num_temp
+
+     ! if called from regular move, ibox = ibox
+     ! if called from volume move, ibox = nbox + 1, i.e., to calculate the energy for the coordinates after the volume change
+     if (.not. lvol) then
+         tree => mol_tree(ibox)%tree
+     else
+         iTree = 0
+         do i = nbox+1, nbox+2
+             if (associated(mol_tree(i)%tree)) then
+                 if (mol_tree(i)%tree%box .eq. ibox) then
+                     iTree = i
+                     exit
+                 end if
+              end if
+          end do
+          if (iTree .eq. 0) call err_exit(__FILE__,__LINE__,'Error in update_box_kdtree: iTree not found',myid)
+          tree => mol_tree(iTree)%tree
+     end if
+
+     ! if not volume move, then update and output the height of the tree
+     if (.not. lvol) then
+         call update_tree_height(tree)
+         if (myid .eq. 0) write(io_output, *) "Height of the tree for box",ibox," is ", tree%height
+     end if
+
+     rbcut = rcut(ibox)
+     rcutsq = rbcut * rbcut
+     calpi = calp(ibox)
+     dist_calc_num = 0
+
+     ! the kd-tree parallelize i, which differs from non kd-tree, which parallelizes j
+     ! the load balancing is not as perfect as j, but considering usually i >> numprocs
+     ! this parallelization is not bad
+     do i = 1 + myid, nchain - 1, numprocs
+         if (nboxi(i) .eq. ibox) then
+             imolty = moltyp(i)
+             do ii = 1, nunit(imolty)
+                 coord(1) = rxu(i, ii)
+                 coord(2) = ryu(i, ii)
+                 coord(3) = rzu(i, ii)
+                 ntii = ntype(imolty, ii)
+                 lqchgi = lqchg(ntii)
+
+                 call range_search(tree, coord, nmax*numax, rmin, rbcut, i, ii, .true., ovrlap, inter_list_dim,&
+                       inter_list, dist_calc_num_temp, .false.)
+
+                 dist_calc_num = dist_calc_num + dist_calc_num_temp
+
+                 if (ovrlap) then
+                     if ((.not. lvol) .and. (myid .eq. rootid)) write(io_output, *) 'Overlap in sumup'
+                     goto 399
+                 else
+                     do iInter = 1, inter_list_dim
+                         rijsq = inter_list(1, iInter)
+                         j = inter_list(2, iInter)
+                         jj = inter_list(3, iInter)
+                         jmolty = moltyp(j)
+                         ntjj = ntype(jmolty, jj)
+                         ntij = type_2body(ntii, ntjj)
+                         v(ivInterLJ)=v(ivInterLJ)+U2(rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
+                         v(ivElect)=v(ivElect)+Q2(rijsq,rcutsq,i,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
+                     end do
+                 end if
+             end do
+         end if
+     end do !< i
+
+399  continue
+     call mp_lor(ovrlap,1,groupid)
+     if (ovrlap) return
+
+     call mp_sum(v(ivInterLJ),1,groupid)
+     call mp_sum(v(ivElect),1,groupid)
+     return
+
+  end subroutine energy_inter_kd_tree_sumup
+
+!> \brief compute inter-molecular interaction using kd-tree in the energy
+  subroutine energy_inter_kd_tree_energy(i, imolty, v, flagon, ibox, istart, iuend, ovrlap, lcoulo)
+     integer, intent(in) :: ibox
+     real, intent(in out) :: v(nEnergy)
+     logical, intent(out) :: ovrlap
+
+     integer :: i, imolty, ii, j, jmolty, jj, ntii, ntjj, ntij, flagon, istart, iuend, nchp2
+     logical :: lqchgi, lcoulo(numax,numax), liji
+     type(tree), pointer :: tree
+     real :: coord(3), rbcut, rijsq, calpi, rcutsq
+     real, allocatable :: inter_list(:,:)
+     integer :: iTree, iInter, inter_list_dim, dist_calc_num, dist_calc_num_temp
+
+     tree => mol_tree(ibox)%tree
+     dist_calc_num = 0
+     nchp2 = nchain + 2
+     rbcut = rcut(ibox)
+     calpi = calp(ibox)
+     rcutsq = rbcut * rbcut
+
+     ! loop over all units in chain i
+     ! energy calculation using kd-tree does not loop over j
+     ! so here it parallelizes the number of beads whose positions are changed
+     ! this results in poor parallel efficiency if the number of beads changed in a move is
+     ! smaller than the # of cores (e.g. > 2 cores for ethane, > 1 core for LJ)
+     ! but it works well for most simulations, where # of cores > # of beads per molecule
+     do ii = istart + myid, iuend, numprocs
+         ntii = ntype(imolty,ii)
+         liji = lij(ntii)
+         lqchgi = lqchg(ntii)
+         coord(1) = rxuion(ii, flagon)
+         coord(2) = ryuion(ii, flagon)
+         coord(3) = rzuion(ii, flagon)
+
+         call range_search(tree, coord, nmax*numax, rmin, rbcut, i, ii, .false., ovrlap, inter_list_dim,&
+              inter_list, dist_calc_num_temp, .false.)
+         dist_calc_num = dist_calc_num + dist_calc_num_temp
+         if (ovrlap) goto 499
+
+         ! After all the interaction sites within the cutoff are found
+         ! Loop over all these sites and calculate the inter LJ as well as the electrostatics
+         do iInter = 1, inter_list_dim
+             rijsq = inter_list(1, iInter)
+             j = inter_list(2, iInter)
+             jj = inter_list(3, iInter)
+             jmolty = moltyp(j)
+             if (lexclu(imolty,ii,jmolty,jj)) cycle !< check exclusion table
+             ntjj = ntype(jmolty, jj)
+             ntij = type_2body(ntii, ntjj)
+
+             v(ivInterLJ)=v(ivInterLJ)+U2(rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
+
+             ! In calculating electrostatics, nchp2 rather than i is used
+             ! because the value here is only needed for determing the charge of this bead qqu(nchp2,ii)
+             ! in the swatch move, qqu(nchp2,ii) may be different from qqu(i,ii), because i is the mol to be swatched
+             ! and nchp2 is the mol to replace, so qqu(nchp2,ii) should be used here
+             ! in all other moves, qqu(nchp2,ii) == qqu(i,ii)
+             v(ivElect)=v(ivElect)+Q2(rijsq,rcutsq,nchp2,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
+         end do
+     end do
+
+499  continue
+
+    call mp_lor(ovrlap,1,groupid)
+    if (ovrlap) return
+
+    call mp_sum(v(ivInterLJ),1,groupid)
+    call mp_sum(v(ivElect),1,groupid)
+    return
+
+  end subroutine energy_inter_kd_tree_energy
+
+!> \brief compute inter-molecular interaction using kd-tree in the boltz
+  subroutine energy_inter_kd_tree_boltz(i, icharge, imolty, v, ibox, ntogrow, ovrlap, glist, itrial)
+     integer, intent(in) :: ibox, glist(numax), ntogrow, itrial
+     real, intent(in out) :: v(nEnergy)
+     logical, intent(out) :: ovrlap
+
+     integer :: i, imolty, ii, j, jmolty, jj, ntii, ntjj, ntij, icharge, count
+     logical :: lqchgi, lcoulo(numax,numax), liji
+     type(tree), pointer :: tree
+     real :: coord(3), rbcut, rijsq, calpi, rij
+     real, allocatable :: inter_list(:,:)
+     integer :: iTree, iInter, inter_list_dim, dist_calc_num, dist_calc_num_temp
+
+     tree => mol_tree(ibox)%tree
+     dist_calc_num = 0
+
+     if (ldual) then
+         rbcut = rcutin
+     else
+         rbcut = rcut(ibox)
+     end if
+
+     ! loop over all beads of molecule i grown this step
+     do count = 1, ntogrow
+         ! assign bead type for ii
+         ii = glist(count)
+         ntii = ntype(imolty,ii)
+         liji = lij(ntii)
+         lqchgi = lqchg(ntii)
+
+         ! assign positions to coord
+         coord(1) = rxp(count,itrial)
+         coord(2) = ryp(count,itrial)
+         coord(3) = rzp(count,itrial)
+
+         call range_search(tree, coord, nmax*numax, rmin, rbcut, i, ii, .false., ovrlap, inter_list_dim,&
+             inter_list, dist_calc_num_temp, .false.)
+
+         dist_calc_num = dist_calc_num + dist_calc_num_temp
+
+         if (ovrlap) return
+
+         do iInter = 1, inter_list_dim
+             rijsq = inter_list(1, iInter)
+             j = inter_list(2, iInter)
+             jj = inter_list(3, iInter)
+             jmolty = moltyp(j)
+             if (lexclu(imolty,ii,jmolty,jj)) cycle !< check exclusion table
+             ntjj = ntype(jmolty, jj)
+             ntij = type_2body(ntii, ntjj)
+             v(ivInterLJ)=v(ivInterLJ)+U2(rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
+
+             if (L_Coul_CBMC.and.lqchg(ntii).and.lqchg(ntjj)) then
+                 rij = sqrt(rijsq)
+                 if (L_elect_table) then
+                     v(ivElect) = v(ivElect) + qqu(icharge,ii)*qqu(j,jj)*lininter_elect(rij,ntii,ntjj)
+                 else if (lewald) then
+                     ! compute real space term of velect
+                     v(ivElect) = v(ivElect) + qqu(icharge,ii)*qqu(j,jj)*erfunc(calp(ibox)*rij)/rij
+                 else
+                     ! compute all electrostatic interactions
+                     v(ivElect) = v(ivElect) + qqu(icharge,ii)*qqu(j,jj)/ rij
+                 end if
+             end if
+         end do
+     end do
+
+     return
+  end subroutine energy_inter_kd_tree_boltz
 end MODULE energy_pairwise
