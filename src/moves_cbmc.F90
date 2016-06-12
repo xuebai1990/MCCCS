@@ -8437,6 +8437,7 @@ contains
                    end do
                 end do
              end do
+             exit
           end if
        end do
     end if
