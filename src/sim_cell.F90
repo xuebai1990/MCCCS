@@ -419,6 +419,7 @@ contains
 ! replace removed occupant with last occupant and erase last spot
                 iucell(ico,n) = iucell(ico,nicell(ico))
                 iucell(ico,nicell(ico)) = 0
+                icell(imol) = 0
                 exit
              end if
           end do
