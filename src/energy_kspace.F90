@@ -80,7 +80,7 @@ contains
 
     vol = vol/(4.0E0_dp*onepi)
 
-    hmaxsq = alpsqr4*onepi*onepi
+    hmaxsq = alpsqr4*calpi*rcut(ibox)*calpi*rcut(ibox)
 
     ! RP added for MPI
     blocksize = kmaxl/numprocs
