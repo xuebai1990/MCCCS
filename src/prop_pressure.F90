@@ -1,6 +1,6 @@
 MODULE prop_pressure
   use var_type,only:dp
-  use const_phys,only:qqfact
+  use const_phys,only:qqfact,N_Avogadro
   use util_math,only:erfunc
   use util_mp,only:mp_sum
   use sim_system
@@ -20,11 +20,11 @@ contains
 !> \note New potenial functional form needs to be added here,
 !> and in U2 (energy calculation), coru (tail corrections to
 !> energy), corp (tail corrections to pressure)
-  subroutine pressure(press,surf,ibox)
+  subroutine pressure(press,surf,comp,ibox)
     use const_math,only:sqrtpi
     use const_phys,only:k_B
     use util_kdtree,only:range_search
-    real,intent(out)::press,surf
+    real,intent(out)::press,surf,comp
     integer,intent(in)::ibox
 
     real::rbcut,rcutsq,calpi,calpisq,pxx,pyy,pzz,xcmi,ycmi,zcmi,rcmi,fxcmi,fycmi,fzcmi,rxuij,ryuij,rzuij,rijsq,rcm,rcmsq&
@@ -49,6 +49,7 @@ contains
     if (lideal(ibox)) then
        press = k_B*1.0E27_dp * (nchbox(ibox)+ghost_particles(ibox))/beta/vol
        surf = 0.0_dp
+       comp = 1.0_dp
        return
     end if
 
@@ -428,9 +429,9 @@ contains
        end do
     end if
 
+    comp = press * vol * beta/(nchbox(ibox)+ghost_particles(ibox))
     press = k_B*1.0E27_dp * press
-
-    return
+   return
   end subroutine pressure
 
 !> \brief Impulsive force and tail corrections to pressure

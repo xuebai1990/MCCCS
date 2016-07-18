@@ -23,11 +23,11 @@ MODULE topmon_main
    ,acboxa(:,:)& !< (ibox,j) accumulators of cell angles for ibox
    ,acboxl(:,:)& !< (ibox,j) accumulators of cell lengths for ibox
    ,acvol(:),acvolsq(:),acvolume(:)& !< accumulators of box volume
-   ,acpres(:),acsurf(:)& !< accumulators of pressure and surface tension
+   ,acpres(:),acsurf(:),accomp(:)& !< accumulators of pressure,surface tension and compressibility factor
    ,acEnthalpy(:),acEnthalpy1(:)& !< accumulators of enthalpies using calculated pressure (acEnthalpy) and specified enthalpy (acEnthalpy1)
    ,acsolpar(:,:,:),avsolinter(:,:),avsolintra(:,:),avsolbend(:,:),avsoltor(:,:),avsolelc(:,:)&
    ,asetel(:,:)& !< (ibox,itype): accumulators of square end-to-end distance; counter is in mnbox
-   ,vstart(:),vend(:),pres(:),molvol(:),speden(:)&
+   ,vstart(:),vend(:),pres(:),compress(:),molvol(:),speden(:)&
    ,aver1(:,:,:),stdev1(:,:,:),errme1(:,:,:),bccold1(:,:,:),baver1(:,:,:,:)& !< accumulators for solubility parameter and heat of vaporization (Neeraj)
    ,aver(:,:),stdev(:,:),errme(:,:),bccold(:,:),baver(:,:,:) !< (j,ibox): properties of ibox; j =
   !< \verbatim
@@ -109,7 +109,7 @@ contains
 
     integer::io_flt,io_hist,io_cnt,io_ndis,io_config,i,jerr,ibox,itype,itype2,Temp_nmol,nentry,j,nummol,imolty,ii,ntii&
      ,igrow,steps,itemp,jbox,itel,ig,il,nbl,n,zzz,ichkpt,nnn_1st,nstep_per_cycle
-    real::v(nEnergy),press1,surf,time_prev,time_cur,rm,temvol,tmp,vhist,eng_list(fmax),temacd,temspd,debroglie,starviro,dummy&
+    real::v(nEnergy),press1,surf,comp,time_prev,time_cur,rm,temvol,tmp,vhist,eng_list(fmax),temacd,temspd,debroglie,starviro,dummy&
      ,inside,bvirial,gconst,ostwald,stdost,molfrac,time_st,time_av,time_cycle=0.0E0_dp,nImages
     logical::ovrlap
 ! ----------------------------------------------------------------
@@ -120,9 +120,9 @@ contains
 
     if (allocated(nminp)) deallocate(nminp,nmaxp,ncmt_list,ndist,vstart,vend,pres,molvol,speden,acdens,molfra,acnbox,acnbox2,acv,acvsq,acvkjmol,acdipole,acdipolesq,acboxa,acboxl,acvol,acvolsq,acvolume,acpres,acsurf,acEnthalpy,acEnthalpy1,solcount,acsolpar,avsolinter,avsolintra,avsolbend,avsoltor,avsolelc,mnbox,asetel,nccold1,bccold1,baver1,nccold,bccold,baver,aver1,stdev1,errme1,aver,stdev,errme,stat=jerr)
     allocate(nminp(ntmax),nmaxp(ntmax),ncmt_list(fmax,ntmax),ndist(0:nmax,ntmax),vstart(nbxmax),vend(nbxmax),pres(nbxmax)&
-     ,molvol(nbxmax),speden(nbxmax),acdens(nbxmax,ntmax),molfra(nbxmax,ntmax),acnbox(nbxmax,ntmax),acnbox2(nbxmax,ntmax,20)&
+     ,compress(nbxmax),molvol(nbxmax),speden(nbxmax),acdens(nbxmax,ntmax),molfra(nbxmax,ntmax),acnbox(nbxmax,ntmax),acnbox2(nbxmax,ntmax,20)&
      ,acv(nEnergy,nbxmax),acvsq(nEnergy,nbxmax),acvkjmol(nEnergy,nbxmax),acdipole(4,nbxmax),acdipolesq(4,nbxmax),acboxa(nbxmax,3)&
-     ,acboxl(nbxmax,3),acvol(nbxmax),acvolsq(nbxmax),acvolume(nbxmax),acpres(nbxmax),acsurf(nbxmax),acEnthalpy(nbxmax)&
+     ,acboxl(nbxmax,3),acvol(nbxmax),acvolsq(nbxmax),acvolume(nbxmax),acpres(nbxmax),acsurf(nbxmax),accomp(nbxmax),acEnthalpy(nbxmax)&
      ,acEnthalpy1(nbxmax),solcount(nbxmax,ntmax),acsolpar(nprop1,nbxmax,nbxmax),avsolinter(nbxmax,ntmax),avsolintra(nbxmax,ntmax)&
      ,avsolbend(nbxmax,ntmax),avsoltor(nbxmax,ntmax),avsolelc(nbxmax,ntmax),mnbox(nbxmax,ntmax),asetel(nbxmax,ntmax)&
      ,nccold1(nprop1,nbxmax,nbxmax),bccold1(nprop1,nbxmax,nbxmax),baver1(nprop1,nbxmax,nbxmax,blockm),nccold(nprop,nbxmax)&
@@ -252,6 +252,7 @@ contains
     acnp = 0
     acpres = 0.0E0_dp
     acsurf = 0.0E0_dp
+    accomp = 0.0E0_dp
     acEnthalpy = 0.0E0_dp
     acEnthalpy1 = 0.0E0_dp
     solcount = 0
@@ -303,18 +304,19 @@ contains
           end if
 
           ! calculate initial pressure ***
-          call pressure( press1, surf, ibox )
+          call pressure( press1, surf, comp, ibox )
           if (myid.eq.rootid) then
              write(io_output,"(' surf. tension :   box',i2,' =',f14.5)") ibox, surf
              write(io_output,"(' pressure check:   box',i2,' =',f14.2)") ibox, press1
-          end if
+             write(io_output,"(' compress factor:  box',i2,' =',f14.5)") ibox, comp 
+         end if
        end do
 
        if (myid.eq.rootid) then
           write(io_output,*)
           write(io_output,*) '+++++ start of markov chain +++++'
           write(io_output,*)
-          write(io_output,*)  'Cycle   Total   Energy    Boxlength   Pressure  Molecules'
+          write(io_output,*)  'Cycle   Total   Energy    Boxlength    Pressure     Compress    Molecules'
        end if
     end if
 
@@ -839,6 +841,9 @@ contains
         ,((acpres(i)*MPa2SimUnits*1E-3_dp),i=1,nbox)
        write(io_output,"(A,"//format_n(nbox,"(1X,F12.4)")//")") ' surface tension                              [mN/m] ='&
         ,(acsurf(i),i=1,nbox)
+       write(io_output,"(A,"//format_n(nbox,"(1X,F12.5)")//")") ' compress factor                                     ='&
+        ,(accomp(i),i=1,nbox)
+
        do itype = 1,nmolty
           write(io_output,"(A,I2,A,A10,A,"//format_n(nbox,"(1X,F12.3)")//")") ' chem. potential of type  ',itype,' '&
           ,molecname(itype),'          [K] =',(acchem(i,itype),i=1,nbox)
@@ -998,6 +1003,20 @@ contains
              write(io_output,"(A,I2,A,3(1X,F12.5))") ' surface tension  box ',ibox,' =',acsurf(ibox),stdev(itel,ibox)&
               ,errme(itel,ibox)
           end do
+          
+         ! compressibility factor
+         itel = nEnergy + 4*nmolty + 7
+          do ibox = 1, nbox
+             write(io_output,"(A,I2,A,3(1X,F12.5))") ' compress factor  box ',ibox,' =',accomp(ibox),stdev(itel,ibox)&
+              ,errme(itel,ibox)
+          end do
+
+          ! compressibility factor
+          itel = nEnergy + 4*nmolty + 7
+          do ibox = 1, nbox
+             write(io_output,"(A,I2,A,3(1X,F12.5))") ' compressibility  box ',ibox,' =',accomp(ibox),stdev(itel,ibox)&
+              ,errme(itel,ibox)
+          end do
 
           write(io_output,*)
           ! energies
@@ -1120,13 +1139,13 @@ contains
           write(io_output,*)
           write(io_output,*) '-----block averages ------'
           do ibox=1,nbox
-             write(io_output,"('  ------------ box: ' ,I2,/, ' block    energy     density    pressure    surf ten   mol fracs')")&
+             write(io_output,"('  ------------ box: ' ,I2,/, ' block    energy     density    pressure       Z        surf ten   mol fracs')")&
               ibox
              do nbl = 1, nblock
                 ! changed so output the same for all ensembles
                 ! 06/08/09 KM
-                write(io_output,"(1X,I3,"//format_n(nmolty+4,"(1X,E11.4)")//")") nbl,baver(3,ibox,nbl),baver(1,ibox,nbl)&
-                 ,baver(2,ibox,nbl),baver(3+nEnergy+4*nmolty,ibox,nbl),(baver(2+nEnergy+3*nmolty+zzz,ibox,nbl),zzz=1,nmolty)
+                write(io_output,"(1X,I3,"//format_n(nmolty+5,"(1X,E11.4)")//")") nbl,baver(3,ibox,nbl),baver(1,ibox,nbl)&
+                 ,baver(2,ibox,nbl),baver(7+nEnergy+4*nmolty,ibox,nbl),baver(nEnergy+4*nmolty+3,ibox,nbl),(baver(2+nEnergy+3*nmolty+zzz,ibox,nbl),zzz=1,nmolty)
              end do
              if (lmipsw) then
                 write(io_output,*) 'lambdais', lambdais
@@ -1572,7 +1591,7 @@ contains
     npabmax=nbxmax*(nbxmax+1)/2
     ntmax=nmolty+1
     npamax=ntmax*(ntmax-1)/2
-    nprop=nEnergy+(4*ntmax)+6
+    nprop=nEnergy+(4*ntmax)+7
     if (nmax<nchain+2) nmax=nchain+2
     if (N_add.gt.0) nmax=nmax+N_add
     softlog = 10.0_dp**(-softcut)
@@ -3412,7 +3431,7 @@ contains
 
     logical::lfq,ovrlap
     integer::im,i,ibox,jbox,Temp_nmol,m,mm,imolty,nummol,ii,ntii,intg,ilunit,k,j,itype,itel,zzz,jmolty
-    real::ratflcq,press1,surf,temvol,Temp_Mol_Vol,Temp_Energy,Heat_vapor_T,Heat_vapor_LJ,Heat_vapor_COUL,CED_T,CED_LJ&
+    real::ratflcq,press1,surf,comp,temvol,Temp_Mol_Vol,Temp_Energy,Heat_vapor_T,Heat_vapor_LJ,Heat_vapor_COUL,CED_T,CED_LJ&
      ,CED_COUL,HSP_T,HSP_LJ,HSP_COUL,pdV,setx,sety,setz,setel,v(nEnergy),vol,rho,temmass,dpr,dpp
 
 #ifdef __DEBUG__
@@ -3483,10 +3502,12 @@ contains
        ! calculate pressure ***
        acnp = acnp + 1
        do ibox = 1, nbox
-          call pressure( press1, surf, ibox )
+          call pressure( press1, surf, comp, ibox )
           pres(ibox) = press1
+          compress(ibox) = comp
           call update_average(acpres(ibox),press1,acnp)
           call update_average(acsurf(ibox),surf,acnp)
+          call update_average(accomp(ibox),comp,acnp)
 
           if (lsolid(ibox) .and. .not. lrect(ibox)) then
              temvol = cell_vol(ibox)
@@ -3537,12 +3558,12 @@ contains
     ! Print out summary current simulation status
     if ((mod(nnn,iprint).eq.0).and.(myid.eq.rootid)) then
        ! write out runtime information ***
-       write(io_output,FMT='(i6,i8,e12.4,f10.3,f12.1,'//format_n(nmolty,"i5")//')') nnn,tmcc,vbox(ivTot,1),boxlx(1),pres(1)&
-        ,(ncmt(1,imolty),imolty=1,nmolty)
+       write(io_output,FMT='(i6,i8,e12.4,f10.3,f12.1,f12.2,'//format_n(nmolty,"i12")//')') nnn,tmcc,vbox(ivTot,1),boxlx(1),pres(1)&
+        ,compress(1),(ncmt(1,imolty),imolty=1,nmolty)
        if ( lgibbs ) then
           do ibox = 2, nbox
-             write(io_output,FMT='(14x,e12.4,f10.3,f12.1,'//format_n(nmolty,"i5")//')') vbox(ivTot,ibox),boxlx(ibox),pres(ibox)&
-              ,(ncmt(ibox,imolty),imolty=1,nmolty)
+             write(io_output,FMT='(14x,e12.4,f10.3,f12.1,f12.2,'//format_n(nmolty,"i12")//')') vbox(ivTot,ibox),boxlx(ibox),pres(ibox)&
+              ,compress(ibox),(ncmt(ibox,imolty),imolty=1,nmolty)
           end do
        end if
     end if
@@ -3732,6 +3753,14 @@ contains
           ! surface tension
           itel = nEnergy + 4*nmolty + 3
           call store_block_average(baver(itel,ibox,nblock),acsurf(ibox),acnp,bccold(itel,ibox),nccold(itel,ibox))
+           
+          ! compressibility factor
+          itel = nEnergy + 4*nmolty + 7
+          call store_block_average(baver(itel,ibox,nblock),accomp(ibox),acnp,bccold(itel,ibox),nccold(itel,ibox))
+
+          ! compressibility factor
+          itel = nEnergy + 4*nmolty + 7
+          call store_block_average(baver(itel,ibox,nblock),accomp(ibox),acnp,bccold(itel,ibox),nccold(itel,ibox))
 
           ! box volume
           itel = nEnergy + 4*nmolty + 4
