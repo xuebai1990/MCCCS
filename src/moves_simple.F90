@@ -203,8 +203,8 @@ contains
       vwellipsw = vbox(ivWellIpswb,ibox)
       vbox(iv3body,ibox) = vbox(iv3body,ibox) + (vn(iv3body)-vo(iv3body))
 
-      ! Update coordinates in kdtree
-      if (lkdtree .and. lkdtree_box(ibox)) then
+      ! Update beads coordinates in kdtree
+      if ((.not. lcutcm) .and. lkdtree .and. lkdtree_box(ibox)) then
           do j = 1, iunit
               rxu_update(j) = rxuion(j,2)
               ryu_update(j) = ryuion(j,2)
@@ -213,6 +213,7 @@ contains
 
           call update_coord_in_tree(i, iunit, ibox, ibox, .true., .false.)
       end if
+
 
       ! Update coordinates in r*u arrays
       do j = 1,iunit
@@ -495,8 +496,8 @@ contains
       vipsw = vbox(ivIpswb,ibox)
       vwellipsw = vbox(ivWellIpswb,ibox)
 
-      ! Update coordinates in kdtree
-      if (lkdtree .and. lkdtree_box(ibox)) then
+      ! Update coordinates in bead-based kdtree
+      if ((.not. lcutcm) .and. lkdtree .and. lkdtree_box(ibox)) then
           do j = 1, iunit
               rxu_update(j) = rxuion(j,2)
               ryu_update(j) = ryuion(j,2)

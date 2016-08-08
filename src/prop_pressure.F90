@@ -7,6 +7,7 @@ MODULE prop_pressure
   use sim_cell
   use energy_kspace,only:recippress,calp
   use energy_pairwise
+  use util_kdtree,only:range_search
   implicit none
   private
   save
@@ -23,7 +24,6 @@ contains
   subroutine pressure(press,surf,ibox)
     use const_math,only:sqrtpi
     use const_phys,only:k_B
-    use util_kdtree,only:range_search
     real,intent(out)::press,surf
     integer,intent(in)::ibox
 
@@ -33,12 +33,9 @@ contains
     integer::i,imolty,j,jmolty,ii,jj,ntii,ntjj,ntij,iii,jjj,k
     logical::lqimol,lexplt,lij2,lqjmol,lcoulo(numax,numax)
 
-    ! kdtree
-    type(tree), pointer :: tree
+    ! Kdtree
+    real, allocatable :: lij_list(:,:)
     logical :: ovrlap
-    real :: coord(3), fxcm(nchain), fycm(nchain), fzcm(nchain)
-    real, allocatable :: inter_list(:,:)
-    integer :: iInter, inter_list_dim, dist_calc_num, dist_calc_num_temp
 ! --------------------------------------------------------------------
     if (lsolid(ibox).and.(.not.lrect(ibox))) then
        vol = cell_vol(ibox)
@@ -79,121 +76,30 @@ contains
     do i = myid+1, nchain - 1,numprocs
        ! check if i is in relevant box ###
        if ( nboxi(i) .eq. ibox ) then
-          imolty = moltyp(i)
-          lqimol = lelect(imolty)
-          if (nugrow(imolty).eq.nunit(imolty)) then
-             lexplt = .false.
+          if ((.not. lcutcm) .and. lkdtree .and. lkdtree_box(ibox)) then
+             call press_calc_kdtree(ibox, i, press, pxx, pyy, pzz)
           else
-             lexplt = .true.
-          end if
-          xcmi = xcm(i)
-          ycmi = ycm(i)
-          zcmi = zcm(i)
-          if (lcutcm) then
-             rcmi = rcmu(i)
-          else
-             lij2 = .true.
-          end if
+             imolty = moltyp(i)
+             lqimol = lelect(imolty)
+             if (nugrow(imolty).eq.nunit(imolty)) then
+                 lexplt = .false.
+             else
+                 lexplt = .true.
+             end if
+             xcmi = xcm(i)
+             ycmi = ycm(i)
+             zcmi = zcm(i)
+             if (lcutcm) then
+                 rcmi = rcmu(i)
+             else
+                 lij2 = .true.
+             end if
 
-          if (lkdtree .and. lkdtree_box(ibox)) then
-             tree => mol_tree(ibox)%tree
+             if (lcutcm .and. lkdtree .and. lkdtree_box(ibox)) then
+                  call energy_inter_com_kd_tree(ibox, i, xcmi, ycmi, zcmi, rbcut, 0.0 &
+                       , .false., lij_list, .true., ovrlap)
+             end if
 
-             fxcm = 0.0E0_dp !< these are 1d arrays
-             fycm = 0.0E0_dp
-             fzcm = 0.0E0_dp
-
-             ! find all bead pairs and accumulate forces
-             do ii = 1, nunit(imolty)
-                coord(1) = rxu(i, ii)
-                coord(2) = ryu(i, ii)
-                coord(3) = rzu(i, ii)
-                ntii = ntype(imolty, ii)
-
-                ! find beads that are within the cutoff from bead ii
-                call range_search(tree, coord, nmax*numax, 0.0, rbcut, i, ii, .true., ovrlap, inter_list_dim,&
-                            inter_list, dist_calc_num_temp, .true.)
-
-                ! loop over all beads found
-                bead: do iInter = 1, inter_list_dim
-                   rijsq = inter_list(1, iInter)
-                   j = inter_list(2, iInter)
-                   jj = inter_list(3, iInter)
-                   jmolty = moltyp(j)
-
-                   ! check exclusion table
-                   if (lexclu(imolty,ii,jmolty,jj)) cycle bead
-
-                   rxuij = inter_list(4, iInter)
-                   ryuij = inter_list(5, iInter)
-                   rzuij = inter_list(6, iInter)
-                   ntjj = ntype(jmolty, jj)
-                   ntij = type_2body(ntii, ntjj)
-                   lqjmol = lelect(jmolty)
-                   rij = sqrt(rijsq)
-                   fij = 0.0E0_dp
-
-                   ! calculate the charge interactions
-                   if (lqimol .and. lqjmol .and. lqchg(ntii) .and. lqchg(ntjj)) then
-                       if (.not. lewald) then
-                          if (.not. lchgall) then
-                             iii = leaderq(imolty, ii)
-                             jjj = leaderq(jmolty, jj)
-                             if ((iii .eq. ii) .and. (jjj .eq. jj)) then
-                                ! set up the charge-interaction table
-                                if (rijsq.lt.rcutsq) then
-                                   lcoulo(iii,jjj) = .true.
-                                else
-                                   lcoulo(iii,jjj) = .false.
-                                end if
-                             end if
-                          end if
-                          !> \todo tabulated potential
-                          if (lchgall.or.lcoulo(iii,jjj) ) then
-                             fij = -qqfact*qqu(i,ii)*qqu(j,jj)/rijsq/rij
-                          end if
-                       else
-                          fij = -qqfact*qqu(i,ii)*qqu(j,jj)/rijsq&
-                             *(2.0_dp*calpi*exp(-calpisq*rijsq)/sqrtpi+erfunc(calpi*rij)/rij)
-                       end if
-                   end if
-
-                   ! LJ part of the fij
-                   fij = fij + fij_calculation(i, imolty, ii, j, jmolty, jj, rijsq, rij, ntii, ntjj, ntij)
-
-                   ! Accumulate the forces in f*cm arrays
-                   fxcm(j) = fxcm(j) + rxuij * fij
-                   fycm(j) = fycm(j) + ryuij * fij
-                   fzcm(j) = fzcm(j) + rzuij * fij
-
-                end do bead
-             end do
-
-             ! loop over jchain and calculate pressure accumulants
-             do j = i + 1, nchain
-                if ((nboxi(j) .eq. ibox) .and. &
-                    ((abs(fxcm(j)) .gt. 0.0) .or. (abs(fycm(j)) .gt. 0.0) .or. (abs(fzcm(j)) .gt. 0.0))) then
-                   rxuij = xcmi - xcm(j)
-                   ryuij = ycmi - ycm(j)
-                   rzuij = zcmi - zcm(j)
-                   if (lpbc) call mimage(rxuij,ryuij,rzuij,ibox)
-
-                   press = press + fxcm(j)*rxuij + fycm(j)*ryuij + fzcm(j)*rzuij
-
-                   ! for surface tension
-                   ! this is correct for the coulombic part and for LJ.  Note sign difference!
-                   pxx = pxx - fxcm(j) * rxuij
-                   pyy = pyy - fycm(j) * ryuij
-                   pzz = pzz - fzcm(j) * rzuij
-                   pips(1,2) = pips(1,2) - rxuij * fycm(j)
-                   pips(1,3) = pips(1,3) - rxuij * fzcm(j)
-                   pips(2,1) = pips(2,1) - ryuij * fxcm(j)
-                   pips(2,3) = pips(2,3) - ryuij * fzcm(j)
-                   pips(3,1) = pips(3,1) - rzuij * fxcm(j)
-                   pips(3,2) = pips(3,2) - rzuij * fycm(j)
-                end if
-             end do
-
-          else
              ! loop over all chains j with j>i
              do j = i + 1, nchain
                 ! check for simulation box ###
@@ -203,6 +109,17 @@ contains
                    fxcmi = 0.0E0_dp
                    fycmi = 0.0E0_dp
                    fzcmi = 0.0E0_dp
+
+                   ! Ctrmas cutoff
+                   if (lcutcm .and. lkdtree .and. lkdtree_box(ibox)) then
+                       if (lij_list(1, j) .lt. 0.5d0) then
+                           cycle
+                       else
+                           lij2 = .true.
+                           goto 1025
+                       end if
+                   end if
+
                    if ( lcutcm ) then
                       ! check if ctrmas within rcmsq
                       rxuij = xcmi - xcm(j)
@@ -221,6 +138,8 @@ contains
                          cycle
                       end if
                    end if
+
+1025               continue
 
                    ! loop over all beads ii of chain i
                    do ii = 1, nunit(imolty)
@@ -667,5 +586,130 @@ contains
       return
 
   end function fij_calculation
+
+  ! Pressure calculation when bead-kdtree is used
+  ! ibox, i: box and molecule of interest
+  ! press: accumulated pressure
+  ! pxx, pyy, pzz: accumulated surface tension?
+  subroutine press_calc_kdtree(ibox, i, press, pxx, pyy, pzz)
+     use const_math, only : sqrtpi
+     integer, intent(in) :: ibox, i
+     real :: rbcut, press, pxx, pyy, pzz
+
+     type(tree), pointer :: kd_tree
+     real :: coord(3), fxcm(nchain), fycm(nchain), fzcm(nchain)
+     logical :: ovrlap, lqimol, lqjmol, lcoulo(numax,numax)
+     real, allocatable :: inter_list(:,:)
+     integer :: iInter, inter_list_dim, dist_calc_num, dist_calc_num_temp
+     real :: rij, rijsq, rcutsq, rxuij, ryuij, rzuij, xcmi, ycmi, zcmi, fij, calpi, calpisq
+     integer :: ii, iii, j, jj, jjj, imolty, jmolty, ntii, ntjj, ntij
+
+     kd_tree => mol_tree(ibox)%tree
+     rbcut = rcut(ibox)
+     rcutsq = rbcut * rbcut
+     imolty = moltyp(i)
+     lqimol = lelect(imolty)
+     xcmi = xcm(i)
+     ycmi = ycm(i)
+     zcmi = zcm(i)
+     calpi=calp(ibox)
+     calpisq=calpi*calpi
+
+     fxcm = 0.0E0_dp !< these are 1d arrays
+     fycm = 0.0E0_dp
+     fzcm = 0.0E0_dp
+
+     ! find all bead pairs and accumulate forces
+     do ii = 1, nunit(imolty)
+         coord(1) = rxu(i, ii)
+         coord(2) = ryu(i, ii)
+         coord(3) = rzu(i, ii)
+         ntii = ntype(imolty, ii)
+
+         ! find beads that are within the cutoff from bead ii
+         call range_search(kd_tree, coord, nmax*numax, 0.0, rbcut, i, ii, .true., ovrlap, inter_list_dim,&
+                            inter_list, dist_calc_num_temp, .true.)
+
+         ! loop over all beads found
+         bead: do iInter = 1, inter_list_dim
+             rijsq = inter_list(1, iInter)
+             j = inter_list(2, iInter)
+             jj = inter_list(3, iInter)
+             jmolty = moltyp(j)
+
+             ! check exclusion table
+             if (lexclu(imolty,ii,jmolty,jj)) cycle bead
+
+             rxuij = inter_list(4, iInter)
+             ryuij = inter_list(5, iInter)
+             rzuij = inter_list(6, iInter)
+             ntjj = ntype(jmolty, jj)
+             ntij = type_2body(ntii, ntjj)
+             lqjmol = lelect(jmolty)
+             rij = sqrt(rijsq)
+             fij = 0.0E0_dp
+
+             ! calculate the charge interactions
+             if (lqimol .and. lqjmol .and. lqchg(ntii) .and. lqchg(ntjj)) then
+                 if (.not. lewald) then
+                      if (.not. lchgall) then
+                         iii = leaderq(imolty, ii)
+                         jjj = leaderq(jmolty, jj)
+                         if ((iii .eq. ii) .and. (jjj .eq. jj)) then
+                             ! set up the charge-interaction table
+                             if (rijsq.lt.rcutsq) then
+                                lcoulo(iii,jjj) = .true.
+                             else
+                                lcoulo(iii,jjj) = .false.
+                             end if
+                          end if
+                      end if
+                      !> \todo tabulated potential
+                      if (lchgall.or.lcoulo(iii,jjj) ) then
+                          fij = -qqfact*qqu(i,ii)*qqu(j,jj)/rijsq/rij
+                      end if
+                 else
+                      fij = -qqfact*qqu(i,ii)*qqu(j,jj)/rijsq&
+                            *(2.0_dp*calpi*exp(-calpisq*rijsq)/sqrtpi+erfunc(calpi*rij)/rij)
+                 end if
+             end if
+
+             ! LJ part of the fij
+             fij = fij + fij_calculation(i, imolty, ii, j, jmolty, jj, rijsq, rij, ntii, ntjj, ntij)
+
+             ! Accumulate the forces in f*cm arrays
+             fxcm(j) = fxcm(j) + rxuij * fij
+             fycm(j) = fycm(j) + ryuij * fij
+             fzcm(j) = fzcm(j) + rzuij * fij
+
+          end do bead
+    end do
+
+    ! loop over jchain and calculate pressure accumulants
+    do j = i + 1, nchain
+         if ((nboxi(j) .eq. ibox) .and. &
+              ((abs(fxcm(j)) .gt. 0.0) .or. (abs(fycm(j)) .gt. 0.0) .or. (abs(fzcm(j)) .gt. 0.0))) then
+             rxuij = xcmi - xcm(j)
+             ryuij = ycmi - ycm(j)
+             rzuij = zcmi - zcm(j)
+             if (lpbc) call mimage(rxuij,ryuij,rzuij,ibox)
+
+             press = press + fxcm(j)*rxuij + fycm(j)*ryuij + fzcm(j)*rzuij
+
+             ! for surface tension
+             ! this is correct for the coulombic part and for LJ.  Note sign difference!
+             pxx = pxx - fxcm(j) * rxuij
+             pyy = pyy - fycm(j) * ryuij
+             pzz = pzz - fzcm(j) * rzuij
+             pips(1,2) = pips(1,2) - rxuij * fycm(j)
+             pips(1,3) = pips(1,3) - rxuij * fzcm(j)
+             pips(2,1) = pips(2,1) - ryuij * fxcm(j)
+             pips(2,3) = pips(2,3) - ryuij * fzcm(j)
+             pips(3,1) = pips(3,1) - rzuij * fxcm(j)
+             pips(3,2) = pips(3,2) - rzuij * fycm(j)
+         end if
+    end do
+
+  end subroutine press_calc_kdtree
 
 end MODULE prop_pressure

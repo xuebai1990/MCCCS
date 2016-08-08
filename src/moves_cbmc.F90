@@ -453,7 +453,7 @@ contains
          vwellipsw = vbox(ivWellIpswb,ibox)
 
          ! Update coordinates in kdtree
-         if (lkdtree .and. lkdtree_box(ibox)) then
+         if ((.not. lcutcm) .and. lkdtree .and. lkdtree_box(ibox)) then
              do ic = 1, iunit
                  rxu_update(ic) = rxnew(ic)
                  ryu_update(ic) = rynew(ic)

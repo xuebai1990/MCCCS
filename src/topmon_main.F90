@@ -3398,7 +3398,7 @@ contains
     use const_phys,only:N_Avogadro,R_gas,MPa2SimUnits
     use util_math,only:update_average,store_block_average
     use util_string,only:format_n
-    use util_kdtree,only:update_tree_height,construct_kdtree
+    use util_kdtree,only:update_tree_height,construct_kdtree, check_tree_coord
     use energy_intramolecular,only:U_bonded
     use energy_pairwise,only:energy,coru
     use moves_simple,only:update_translation_rotation_max_displacement

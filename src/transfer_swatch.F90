@@ -1190,7 +1190,7 @@ contains
        end do
 
        ! Update coordinates in kdtree for A
-       if (lkdtree .and. (lkdtree_box(boxa) .or. lkdtree_box(boxb))) then
+       if ((.not. lcutcm) .and. lkdtree .and. (lkdtree_box(boxa) .or. lkdtree_box(boxb))) then
            do ic = 1, iunita
                rxu_update(ic) = rxut(1, ic)
                ryu_update(ic) = ryut(1, ic)
@@ -1256,8 +1256,8 @@ contains
        end if
 
        ! update center of mass
-       if (.not.(lgrand.and.boxa.ne.1)) call ctrmas(.false.,boxa,imolb,8)
-       if (.not.(lgrand.and.boxb.ne.1)) call ctrmas(.false.,boxb,imola,8)
+       if (.not.(lgrand.and.boxa.ne.1)) call ctrmas(.false.,boxa,imolb,8,boxb)
+       if (.not.(lgrand.and.boxb.ne.1)) call ctrmas(.false.,boxb,imola,8,boxa)
     else
        if (lgrand) then
           if (boxa.ne.1) then

@@ -385,6 +385,7 @@ module sim_system
      integer :: node_num   !< number of nodes in this tree
      type(interval), pointer :: cube(:) !< the bounding cube of the tree
      type(interval), pointer :: bound(:) !< the min and max of the coordinates in the center box
+     type(interval), pointer :: bound_all(:) !< the min and max of the coordinates in the periodic images
      integer :: box     !< which box the tree represents
   end type tree
 

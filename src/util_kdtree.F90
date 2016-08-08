@@ -11,7 +11,7 @@ MODULE util_kdtree
              check_tree_coord, check_tree_cube, search_node_in_tree, update_cube, &
              init_tree_coordinates, update_tree_height, vector_dist_square, &
              empty_tree, allocate_kdtree, construct_kdtree, update_box_kdtree, read_kdtree, &
-             allocate_nxyz
+             allocate_nxyz, scale_kdtree
 
     ! global variables
     real, public :: rmin_square, rcut_square
@@ -29,19 +29,19 @@ contains
         real :: a_i, a_j, b_i, b_j, c_i, c_j
         logical :: smallerThan
 
-        if (a_i .lt. a_j) then
+        if ((a_i - a_j) .lt. -1e-6) then
             smallerThan = .true.
-        else if (a_i .gt. a_j) then
+        else if ((a_i - a_j) .gt. 1e-6) then
             smallerThan = .false.
         else
             ! if the first dimension is the same, compare the second dimension
-            if (b_i .lt. b_j) then
+            if ((b_i - b_j) .lt. -1e-6) then
                 smallerThan = .true.
-            else if (b_i .gt. b_j) then
+            else if ((b_i - b_j) .gt. 1e-6) then
                 smallerThan = .false.
             else
                 ! if the second dimension is the same, compare the third dimension
-                if (c_i .lt. c_j) then
+                if ((c_i - c_j) .lt. -1e-6) then
                     smallerThan = .true.
                 else
                     smallerThan = .false.
@@ -163,19 +163,19 @@ contains
         integer :: cut_dim, next_cut_dim, next_next_cut_dim
         logical :: lLeft
 
-        if (coord_to_add(cut_dim) .lt. coord_to_compare(cut_dim)) then
+        if ((coord_to_add(cut_dim) - coord_to_compare(cut_dim)) .lt. -1e-6) then
             lLeft = .true.
-        else if (coord_to_add(cut_dim) .gt. coord_to_compare(cut_dim)) then
+        else if ((coord_to_add(cut_dim) - coord_to_compare(cut_dim)) .gt. 1e-6) then
             lLeft = .false.
         else
             next_cut_dim = cut_dim_next(cut_dim)
-            if (coord_to_add(next_cut_dim) .lt. coord_to_compare(next_cut_dim)) then
+            if ((coord_to_add(next_cut_dim) - coord_to_compare(next_cut_dim)) .lt. -1e-6) then
                 lLeft = .true.
-            else if (coord_to_add(next_cut_dim) .gt. coord_to_compare(next_cut_dim)) then
+            else if ((coord_to_add(next_cut_dim) - coord_to_compare(next_cut_dim)) .gt. 1e-6) then
                 lLeft = .false.
             else
                 next_next_cut_dim = cut_dim_next(next_cut_dim)
-                if (coord_to_add(next_next_cut_dim) .lt. coord_to_compare(next_next_cut_dim)) then
+                if ((coord_to_add(next_next_cut_dim) - coord_to_compare(next_next_cut_dim)) .lt. -1e-6) then
                     lLeft = .true.
                 else
                     lLeft = .false.
@@ -239,6 +239,7 @@ contains
         allocate(mol_tree)
         allocate(mol_tree%cube(3))
         allocate(mol_tree%bound(3))
+        allocate(mol_tree%bound_all(3))
         mol_tree%cube = cubeP
         mol_tree%node_num = 0
         mol_tree%height = 0
@@ -253,6 +254,7 @@ contains
         if (associated(mol_tree)) call empty_node(mol_tree%tree_root)
         deallocate(mol_tree%cube)
         deallocate(mol_tree%bound)
+        deallocate(mol_tree%bound_all)
         deallocate(mol_tree)
     end subroutine empty_tree
 
@@ -284,12 +286,21 @@ contains
         type(tree), pointer :: mol_tree, mol_tree_inserted
         real, dimension(3) :: coord_to_add
         integer, intent(in) :: ichain, ibead, ix, iy, iz
+        integer :: i
     
         if (.not. associated(mol_tree)) call err_exit(__FILE__,__LINE__,'kd-tree has not been initialized yet!',1)
 
         mol_tree%tree_root => insert_node_into_tree(mol_tree, coord_to_add, ichain, ibead, ix, iy, iz, &
                                 mol_tree%tree_root, 1, 1, .true., null())
+
+        ! Update the boundary
+        do i = 1, 3
+            if (coord_to_add(i) .gt. mol_tree%bound_all(i)%upper) mol_tree%bound_all(i)%upper = coord_to_add(i) + 0.01
+            if (coord_to_add(i) .lt. mol_tree%bound_all(i)%lower) mol_tree%bound_all(i)%lower = coord_to_add(i) - 0.01
+        end do
+
         mol_tree_inserted => mol_tree
+
     end function insert_node
 
     ! Insert the coordinates coord_to_add to the proper node
@@ -476,27 +487,11 @@ contains
         real, dimension(3), intent(in) :: coord_to_delete
         real, dimension(3) :: coord_to_compare
         type(tree_node), pointer :: node_replaced
-        !type(tree_node), pointer :: node_to_delete
-        !type(tree_node), pointer, optional :: node_to_delete_input
-        !logical :: l_node_to_delete
-
-        !if (present(node_to_delete_input)) then
-        !    l_node_to_delete = .true.
-        !    node_to_delete => node_to_delete_input
-        !else
-        !    l_node_to_delete = .false.
-        !end if
 
         coord_replaced = [10000, 10000, 10000] !< set to unrealistic values       
         coord_to_compare = coord_replaced
 
-        !if (l_node_to_delete) then
-        !   ! if the node to be deleted has been specified
-        !    node_to_delete => delete_node_in_tree(mol_tree, node_to_delete, coord_to_delete, node_to_delete%cut_dim, .false.)
-        !else
-            ! if not, start searching from the tree root
         mol_tree%tree_root => delete_node_in_tree(mol_tree, mol_tree%tree_root, coord_to_delete, 1, .false.)      
-        !end if
  
         mol_tree%node_num = mol_tree%node_num - 1
         mol_tree_deleted => mol_tree
@@ -530,7 +525,9 @@ contains
             call err_exit(__FILE__,__LINE__,'Did not find the node!',1)
         end if
 
-        if (vector_dist_square(current_node%coord, coord_to_delete, 1e-6) .lt. 1e-6) then
+        if ((abs(current_node%coord(1) - coord_to_delete(1)) .lt. 1e-6) .and. &
+            (abs(current_node%coord(2) - coord_to_delete(2)) .lt. 1e-6) .and. &
+            (abs(current_node%coord(3) - coord_to_delete(3)) .lt. 1e-6)) then
 
             ! if this is the node to delete
             if (associated(current_node%right_node)) then
@@ -650,8 +647,12 @@ contains
             return
         end if
 
-        if (vector_dist_square(current_node%coord, coord_to_search, 1e-6) .le. 1e-6) then
+        if ((abs(current_node%coord(1) - coord_to_search(1)) .lt. 1e-6) .and. &
+            (abs(current_node%coord(2) - coord_to_search(2)) .lt. 1e-6) .and. &
+            (abs(current_node%coord(3) - coord_to_search(3)) .lt. 1e-6)) then
+
             node_found => current_node
+
         else if (l_left(coord_to_search, current_node%coord, cut_dim)) then
             node_found => search_node_in_tree(mol_tree, current_node%left_node, coord_to_search, cut_dim_next(cut_dim))
         else    
@@ -662,25 +663,58 @@ contains
 
     ! Check the validity of the tree, for the coordinates only
     ! mol_tree: the pointer to the tree
+    ! lcutcm: whether it is COM-kdtree
     ! lValid: whether the tree structure is correct
-    function check_tree_coord(mol_tree) result(lValid)
+    function check_tree_coord(mol_tree, lcutcm) result(lValid)
         type(tree), pointer :: mol_tree
-        logical :: lValid
-        lValid = check_coord_in_tree(mol_tree%tree_root, 1)
+        logical :: lValid, lcutcm
+        integer :: ibox, i
+
+        ibox = mol_tree%box
+
+        lValid = check_coord_in_tree(mol_tree%tree_root, 1, lcutcm, ibox)
+        if (.not. lValid) then
+            do i = 1, 3
+                write(*,*) "mol_tree%bound_all", mol_tree%bound_all(i)%lower, mol_tree%bound_all(i)%upper
+            end do
+        end if
     end function check_tree_coord
     
     ! Check the validity of the node in the tree
     ! current_node: the node being examined
+    ! lcutcm: whether it is COM-kdtree
+    ! ibox: the box of the tree
     ! lValid: whether the tree structure at this node is correct
-    recursive function check_coord_in_tree(current_node, cut_dim) result(lValid)
+    recursive function check_coord_in_tree(current_node, cut_dim, lcutcm, ibox) result(lValid)
+        use sim_system, only : xcm, ycm, zcm, boxlx, boxly, boxlz
         type(tree_node), pointer :: current_node, max_node_left, min_node_right
-        logical :: lValid
-        integer :: cut_dim, next_cut_dim
+        logical :: lValid, lcutcm
+        integer :: cut_dim, next_cut_dim, ibox, ichain
+        real :: x_coord, y_coord, z_coord, xcm_coord, ycm_coord, zcm_coord
 
         ! if the cutting dimension does not match
         if (current_node%cut_dim .ne. cut_dim) then
             lValid = .false.
             return
+        end if
+
+        ! check whether the coordinate matches with the coordinates in the unordered array
+        if (lcutcm) then
+            ichain = current_node%ichain
+            x_coord = current_node%coord(1)
+            y_coord = current_node%coord(2)
+            z_coord = current_node%coord(3)
+            xcm_coord = xcm(ichain) + boxlx(ibox) * current_node%ix
+            ycm_coord = ycm(ichain) + boxly(ibox) * current_node%iy
+            zcm_coord = zcm(ichain) + boxlz(ibox) * current_node%iz
+
+            if ((abs(x_coord-xcm_coord) .gt. 1e-6 ) .or. &
+                (abs(y_coord-ycm_coord) .gt. 1e-6 ) .or. &
+                (abs(z_coord-zcm_coord) .gt. 1e-6 )) then
+
+                lValid = .false.
+                return
+            end if
         end if
 
         next_cut_dim = cut_dim_next(cut_dim)
@@ -692,18 +726,19 @@ contains
                 lValid = .false.
                 return
             else
-                lValid = check_coord_in_tree(current_node%left_node, next_cut_dim)
+                lValid = check_coord_in_tree(current_node%left_node, next_cut_dim, lcutcm, ibox)
                 if (.not. lValid) return
             end if
         end if
     
         if (associated(current_node%right_node)) then
             min_node_right => find_min(current_node%right_node, cut_dim, next_cut_dim)
-            if (.not. l_left(current_node%coord, min_node_right%coord, cut_dim)) then
+            if ((l_left(min_node_right%coord, current_node%coord, cut_dim)) &
+              .and. (.not. l_left(current_node%coord, min_node_right%coord, cut_dim))) then
                 lValid = .false.
                 return
             else
-                lValid = check_coord_in_tree(current_node%right_node, next_cut_dim)
+                lValid = check_coord_in_tree(current_node%right_node, next_cut_dim, lcutcm, ibox)
                 if (.not. lValid) return
             end if
         end if
@@ -792,6 +827,7 @@ contains
     ! lPressure: whether called from pressure calculation, if so, have additional dimension of output arrays for r*uij
     subroutine range_search(mol_tree, ref_coord, max_dim, rmin, rcut, ichain, ibead, lsumup, &
         loverlap, actual_dim, search_output, dist_calc_num, lPressure)
+        use sim_system, only : lcutcm
         type(tree), pointer :: mol_tree
         real, dimension(3), intent(in) :: ref_coord
         integer, intent(in) :: max_dim, ichain, ibead 
@@ -805,14 +841,24 @@ contains
         ! Initialize the variables
         if (allocated(search_output)) deallocate(search_output)
 
-        !< dist_square, ichain, ibead for 3 dimensions, if lPressure, additional 3d for rxuij, ryuij and rzuij
-        if (lPressure) then
-            search_output_dim = 6
+        ! If lcutcm == .false. (all beads are stored)
+        ! dist_square, ichain, ibead for 3 dimensions, if lPressure, additional 3d for rxuij, ryuij and rzuij
+        ! else if lcutcm == .true. (COMs are stored)
+        ! 1 dimension (search_output ~= lij2), logical,
+        ! indicating whether we should include the interaction between i and j
+        if (lcutcm) then
+            search_output_dim = 1
         else
-            search_output_dim = 3
+            if (lPressure) then
+                search_output_dim = 6
+            else
+                search_output_dim = 3
+            end if
         end if
 
         allocate(search_output(search_output_dim, max_dim))
+
+        if (lcutcm) search_output(1,:) = 0.0 !< 0.0 = false, 1.0 = true
 
         loverlap = .false.
         rmin_square = rmin * rmin
@@ -844,7 +890,7 @@ contains
     ! i_search_output: the current index of search_output
     recursive subroutine range_search_in_tree(mol_tree, current_node, ref_coord, cut_dim, ichain, ibead, lsumup&
                 , loverlap, dist_calc_num, lPressure, search_output, i_search_output)
-        use sim_system,only:io_output
+        use sim_system,only:io_output,lcutcm
 
         type(tree), pointer :: mol_tree
         real, dimension(3), intent(in) :: ref_coord
@@ -866,21 +912,29 @@ contains
             dist_square = vector_dist_square(current_node%coord, ref_coord, rcut_square)
             dist_calc_num = dist_calc_num + 1
             if (dist_square .lt. rmin_square) then
-                if (check_interaction(ichain, ibead, current_node%ichain, current_node%ibead)) then
-                    loverlap = .true.
-                    return
-                end if
+                ! It is debatable whether we need to call overlap if two beads that are closer than rmin
+                ! but they don't have interactions (e.g. H and O in TIP4P water)
+                !if (check_interaction(ichain, ibead, current_node%ichain, current_node%ibead)) then
+                loverlap = .true.
+                !    return
+                !end if
             else if (dist_square .le. rcut_square) then
-                search_output(1, i_search_output) = dist_square
-                search_output(2, i_search_output) = current_node%ichain
-                search_output(3, i_search_output) = current_node%ibead
+                if (lcutcm) then
+                    search_output(1, current_node%ichain) = 1.0 !< 1.0 = true, 0.0 = false
+                else
+                    search_output(1, i_search_output) = dist_square
+                    search_output(2, i_search_output) = current_node%ichain
+                    search_output(3, i_search_output) = current_node%ibead
 
-                if (lPressure) then
-                    search_output(4, i_search_output) = ref_coord(1) - current_node%coord(1)
-                    search_output(5, i_search_output) = ref_coord(2) - current_node%coord(2)
-                    search_output(6, i_search_output) = ref_coord(3) - current_node%coord(3)
+                    if (lPressure) then
+                        search_output(4, i_search_output) = ref_coord(1) - current_node%coord(1)
+                        search_output(5, i_search_output) = ref_coord(2) - current_node%coord(2)
+                        search_output(6, i_search_output) = ref_coord(3) - current_node%coord(3)
+                    end if
+
+                    i_search_output = i_search_output + 1
                 end if
-                i_search_output = i_search_output + 1
+
             end if
         end if
 
@@ -1169,12 +1223,12 @@ contains
         logical :: lOutput, lAdd
         integer, intent(in) :: ibox, iTree
         type(interval), pointer :: cubeP(:)
-        type(tree), pointer :: tree
+        type(tree), pointer :: kd_tree
         real, allocatable :: rxu_tot(:), ryu_tot(:), rzu_tot(:)
         integer, allocatable :: bead_array(:), chain_array(:), ix_array(:), iy_array(:), iz_array(:), index_array(:), tree_construct_list(:)
         integer :: i, ix, iy, iz, ichain, ibead, N_max, N_tot, bead_index
         integer, allocatable :: nx(:), ny(:), nz(:)
-        integer :: imolty, iList
+        integer :: imolty, iList, nbead
         real :: xmin, xmax, ymin, ymax, zmin, zmax, xcoord, ycoord, zcoord, rbcut_plus_buffer
         real, dimension(3) :: coord
 
@@ -1190,7 +1244,14 @@ contains
         do ichain = 1, nchain
             if (nboxi(ichain) .eq. ibox) then
                 imolty = moltyp(ichain)
-                N_max = N_max + nunit(imolty)
+
+                ! if COM cutoff, store only COM
+                ! if not COM cutoff, store all the beads
+                if (lcutcm) then
+                    N_max = N_max + 1
+                else
+                    N_max = N_max + nunit(imolty)
+                end if
             end if
         end do
 
@@ -1202,6 +1263,7 @@ contains
         if (lOutput) write(io_output, *) "Starting to construct the kd-tree"
         allocate(cubeP(3))
 
+        ! Initialize the outer boundary of the cube
         cubeP(1)%lower = -2.5 * boxlx(ibox)
         cubeP(1)%upper = 2.5 * boxlx(ibox)
         cubeP(2)%lower = -2.5 * boxly(ibox)
@@ -1210,7 +1272,7 @@ contains
         cubeP(3)%upper = 2.5 * boxlz(ibox)
 
         if (associated(mol_tree(iTree)%tree)) call empty_tree(mol_tree(iTree)%tree)
-        tree => init_tree(mol_tree(iTree)%tree, ibox, cubeP)
+        kd_tree => init_tree(mol_tree(iTree)%tree, ibox, cubeP)
 
         call allocate_nxyz(nx, ny, nz)
 
@@ -1227,19 +1289,31 @@ contains
         N_tot = 0
 
         ! loop over all beads (including their 27 periodic boundary conditions)
-        ! for beads in the central box, determine the max amd min on each dimension
-        ! for beads not in the central box, check whether it's within (max+buffer_len) to (min-buffer_len)
+        ! for beads/mlcls in the central box, determine the max amd min on each dimension
+        ! for beads/mlcls not in the central box, check whether it's within (max+buffer_len) to (min-buffer_len)
         ! if so, record the bead information and prepare for sorting and insertion
+        if (lcutcm) nbead = 1 !< to make sure that only COM is stored
+
         do ix = 1, size(nx)
             do iy = 1, size(ny)
                 do iz = 1, size(nz)
                     do ichain = 1, nchain
                         if (nboxi(ichain) .eq. ibox) then
                             imolty = moltyp(ichain)
-                            do ibead = 1, nunit(imolty)
-                                xcoord = rxu(ichain, ibead) + nx(ix) * boxlx(ibox)
-                                ycoord = ryu(ichain, ibead) + ny(iy) * boxly(ibox)
-                                zcoord = rzu(ichain, ibead) + nz(iz) * boxlz(ibox)
+
+                            ! if all beads are stored, the next do loop is over all the beads in the mlcl
+                            if (.not. lcutcm) nbead = nunit(imolty)
+
+                            do ibead = 1, nbead
+                                if (lcutcm) then
+                                    xcoord = xcm(ichain) + nx(ix) * boxlx(ibox)
+                                    ycoord = ycm(ichain) + ny(iy) * boxly(ibox)
+                                    zcoord = zcm(ichain) + nz(iz) * boxlz(ibox)
+                                else
+                                    xcoord = rxu(ichain, ibead) + nx(ix) * boxlx(ibox)
+                                    ycoord = ryu(ichain, ibead) + ny(iy) * boxly(ibox)
+                                    zcoord = rzu(ichain, ibead) + nz(iz) * boxlz(ibox)
+                                end if
 
                                 if ((ix .eq. 1) .and. (iy .eq. 1) .and. (iz .eq. 1)) then
                                     if (xcoord .gt. xmax) xmax = xcoord
@@ -1280,12 +1354,18 @@ contains
         end do
 
         ! min & max for coordinates at each dimension
-        tree%bound(1)%lower = xmin
-        tree%bound(1)%upper = xmax
-        tree%bound(2)%lower = ymin
-        tree%bound(2)%upper = ymax
-        tree%bound(3)%lower = zmin
-        tree%bound(3)%upper = zmax
+        kd_tree%bound(1)%lower = xmin
+        kd_tree%bound(1)%upper = xmax
+        kd_tree%bound(2)%lower = ymin
+        kd_tree%bound(2)%upper = ymax
+        kd_tree%bound(3)%lower = zmin
+        kd_tree%bound(3)%upper = zmax
+        kd_tree%bound_all(1)%lower = 0.0
+        kd_tree%bound_all(1)%upper = 0.0
+        kd_tree%bound_all(2)%lower = 0.0
+        kd_tree%bound_all(2)%upper = 0.0
+        kd_tree%bound_all(3)%lower = 0.0
+        kd_tree%bound_all(3)%upper = 0.0
 
         ! construct the index array
         allocate(index_array(N_tot))
@@ -1367,14 +1447,14 @@ contains
             ix = ix_array(bead_index)
             iy = iy_array(bead_index)
             iz = iz_array(bead_index)
-            tree => insert_node(tree, coord, ichain, ibead, ix, iy, iz)
+            kd_tree => insert_node(kd_tree, coord, ichain, ibead, ix, iy, iz)
         end do
-        tree_height(ibox) = tree%height
+        tree_height(ibox) = kd_tree%height
 
         !write(io_output,*) 'Finished constructing the tree at ',time_date_str()
         if (lOutput) then
-            write(io_output, *) "The number of nodes in the tree", tree%node_num
-            write(io_output, *) "The height of the tree", tree%height
+            write(io_output, *) "The number of nodes in the tree", kd_tree%node_num
+            write(io_output, *) "The height of the tree", kd_tree%height
         end if
 
     end subroutine construct_kdtree
@@ -1403,38 +1483,50 @@ contains
 
 
     ! update the kdtree for the volume move
-    ! point mol_tree(ibox)%tree to the mol_tree(nbox+1)%tree
+    ! if bead-kdtree, point mol_tree(ibox)%tree to the mol_tree(nbox+1)%tree
+    ! if COM-kdtree, update the boundary
     subroutine update_box_kdtree(ibox)
         use sim_system
 
         integer, intent(in) :: ibox
         integer :: iTree !< the index of the updated mol_tree
         integer :: i
+        type(tree), pointer :: kd_tree
 
-        ! find iTree
-        iTree = 0
-        do i = nbox+1, nbox+2
-            if (associated(mol_tree(i)%tree)) then
-                if (mol_tree(i)%tree%box .eq. ibox) then
-                    iTree = i
-                    exit
+        if (lcutcm) then
+            kd_tree => mol_tree(ibox)%tree
+            if (boxlx(ibox) .gt. kd_tree%bound(1)%upper) kd_tree%bound(1)%upper = boxlx(ibox)
+            if (boxly(ibox) .gt. kd_tree%bound(2)%upper) kd_tree%bound(2)%upper = boxly(ibox)
+            if (boxlz(ibox) .gt. kd_tree%bound(3)%upper) kd_tree%bound(3)%upper = boxlz(ibox)
+        else
+            ! find iTree
+            iTree = 0
+            do i = nbox+1, nbox+2
+                if (associated(mol_tree(i)%tree)) then
+                    if (mol_tree(i)%tree%box .eq. ibox) then
+                        iTree = i
+                        exit
+                    end if
                 end if
-            end if
-        end do 
-        if (iTree .eq. 0) call err_exit(__FILE__,__LINE__,'Error in update_box_kdtree: iTree not found',myid)
+            end do
 
-        ! Empty the old tree 
-        call empty_node(mol_tree(ibox)%tree%tree_root)
+            if (iTree .eq. 0) call err_exit(__FILE__,__LINE__,'Error in update_box_kdtree: iTree not found',myid)
+
+            ! Empty the old tree
+            call empty_node(mol_tree(ibox)%tree%tree_root)
+
+            ! Update the new tree
+            mol_tree(ibox)%tree%tree_root => mol_tree(iTree)%tree%tree_root
+            mol_tree(ibox)%tree%height = mol_tree(iTree)%tree%height
+            mol_tree(ibox)%tree%node_num = mol_tree(iTree)%tree%node_num
+            mol_tree(ibox)%tree%cube = mol_tree(iTree)%tree%cube
+            mol_tree(ibox)%tree%bound = mol_tree(iTree)%tree%bound
+            mol_tree(ibox)%tree%bound_all = mol_tree(iTree)%tree%bound_all
+            mol_tree(ibox)%tree%box = mol_tree(iTree)%tree%box
+            deallocate(mol_tree(iTree)%tree)
+
+        end if
  
-        ! Update the new tree
-        mol_tree(ibox)%tree%tree_root => mol_tree(iTree)%tree%tree_root
-        mol_tree(ibox)%tree%height = mol_tree(iTree)%tree%height
-        mol_tree(ibox)%tree%node_num = mol_tree(iTree)%tree%node_num 
-        mol_tree(ibox)%tree%cube = mol_tree(iTree)%tree%cube 
-        mol_tree(ibox)%tree%bound = mol_tree(iTree)%tree%bound
-        mol_tree(ibox)%tree%box = mol_tree(iTree)%tree%box
-        deallocate(mol_tree(iTree)%tree) 
-        
     end subroutine update_box_kdtree
 
     ! read the kdtree related variables
@@ -1546,5 +1638,57 @@ contains
 
         return
     end subroutine allocate_nxyz
+
+    ! scale the coordinates in the kd-tree
+    ! used in the COM-kdtree in terms of a volume move
+    ! ibox: the box number to scale the coordinates
+    subroutine scale_kdtree(ibox, fac)
+        use sim_system
+
+        integer, intent(in) :: ibox
+        real, intent(in) :: fac
+
+        type(tree), pointer :: iTree
+        integer :: i
+
+        ! Find the tree
+        iTree => mol_tree(ibox)%tree
+
+        ! Traverse the tree and update coordinates
+        call scale_coordinate_in_tree(iTree, iTree%tree_root, ibox, fac)
+
+        ! Update boundary
+        do i = 1, 3
+            iTree%bound(i)%upper = iTree%bound(i)%upper * fac
+            iTree%bound_all(i)%upper = iTree%bound_all(i)%upper * fac
+            iTree%bound_all(i)%lower = iTree%bound_all(i)%lower * fac
+        end do
+
+    end subroutine scale_kdtree
+
+    ! Traversing the tree and scale the coordinates
+    ! mol_tree: pointer to the tree
+    ! current_node: current node to scale
+    recursive subroutine scale_coordinate_in_tree(mol_tree, current_node, ibox, fac)
+        use sim_system, only : xcm, ycm, zcm, boxlx, boxly, boxlz
+        type(tree), pointer :: mol_tree
+        type(tree_node), pointer :: current_node
+        integer, intent(in) :: ibox
+        real, intent(in) :: fac
+        integer :: i
+        real :: dx, dy, dz
+
+        ! Update coordinates of the current node
+        do i = 1, 3
+            current_node%coord(i) = current_node%coord(i) * fac
+            current_node%cube%lower = current_node%cube%lower * fac
+            current_node%cube%upper = current_node%cube%upper * fac
+        end do
+
+        ! Traverse the children
+        if (associated(current_node%left_node)) call scale_coordinate_in_tree(mol_tree, current_node%left_node, ibox, fac)
+        if (associated(current_node%right_node)) call scale_coordinate_in_tree(mol_tree, current_node%right_node, ibox, fac)
+
+    end subroutine scale_coordinate_in_tree
 
 END MODULE util_kdtree

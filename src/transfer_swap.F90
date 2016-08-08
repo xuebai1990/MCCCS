@@ -1511,13 +1511,13 @@ contains
           end if
        end if
 
-       ! Update coordinates in kdtree
-       if (lkdtree .and. (lkdtree_box(boxrem) .or. lkdtree_box(boxins))) then
-          do ic = 1, igrow
-              rxu_update(ic) = rxnew(ic)
-              ryu_update(ic) = rynew(ic)
-              rzu_update(ic) = rznew(ic)
-              if (leemove.and.lexpee) qqu(irem,ic) = qqu(iins1,ic)
+       ! Update coordinates in bead-kdtree
+       if ((.not. lcutcm) .and. lkdtree .and. (lkdtree_box(boxrem) .or. lkdtree_box(boxins))) then
+           do ic = 1, igrow
+               rxu_update(ic) = rxnew(ic)
+               ryu_update(ic) = rynew(ic)
+               rzu_update(ic) = rznew(ic)
+               if (leemove.and.lexpee) qqu(irem,ic) = qqu(iins1,ic)
            end do
            call update_coord_in_tree(irem, igrow, boxrem, boxins, .true., .false.)
        end if
@@ -1635,7 +1635,7 @@ contains
        end if
 
 ! update center of mass
-       if (.not.(lgrand.and.boxins.ne.1)) call ctrmas(.false.,boxins,irem,3)
+       if (.not.(lgrand.and.boxins.ne.1)) call ctrmas(.false.,boxins,irem,3,boxrem)
 ! update linkcell, if applicable
        if ( licell .and. ((boxins .eq. boxlink) .or. (boxrem .eq. boxlink))) then
           call update_linked_cell(irem)
