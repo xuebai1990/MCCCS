@@ -557,10 +557,10 @@ multiplied by the partial atomic charges within the code.
 speed up the simulation. It supports bead based kd-tree (lcutcm = F)
 and center-of-mass based kd-tree (lcutcm = T).
 It provides speed up for large system size
-(e.g. interaction sites greater than 6,000). 
-If the molecule is small and rigid (e.g. water), 
+(e.g. interaction sites greater than 6,000).
+If the molecule is small and rigid (e.g. water),
 center-of-mass kd-tree performs better than bead kd-tree.
-However, if the molecule is large, bead-based kd-tree is a better choice. 
+However, if the molecule is large, bead-based kd-tree is a better choice.
 False by default.
 
 \subsection{Namelist \textbf{zeolite\_in}}
@@ -2273,7 +2273,7 @@ The section has four lines, with the first "KDTREE" and the
 last "END KDTREE". The second line indicates whether
 the simulation box uses kdtree, while the third line
 indicates the length of the buffer region used in the data
-structure. 
+structure.
 
 The buffer region length should be
 greater than the largest distance between center-of-mass

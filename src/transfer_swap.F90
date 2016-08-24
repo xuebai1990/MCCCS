@@ -197,12 +197,12 @@ contains
     else if ( lavbmc2(imolty) .or. lavbmc3(imolty) ) then
        iins = 0
     else
-    
+
        write(io_output,*)'WARNING: intrabox swaps cannot be performed without AVBMC.'
        write(io_output,*)'         Attempted a intrabox swap for molty: ', imolty
        write(io_output,*)'         Which has lavbmc1,2, and 3 of: ',lavbmc1(imolty),lavbmc2(imolty),lavbmc3(imolty)
        write(io_output,*)'         Make sure avbmc_version is defined for EACH MOLECULE TYPE in fort.4!!'
-       
+
        iins = irem !> \bug irem not defined
        if (lexpee.and.leemove) then
           iins1 = iins
@@ -441,11 +441,11 @@ contains
                 try = try+1
 ! irem = neighbor(pointp,jins,imolty)
 ! write(io_output,*) 'jins,irem:',jins,irem,neighj_num
-                irem = neighbor(pointp,jins) 
+                irem = neighbor(pointp,jins)
                if ( lavbmc3(imolty).and.(irem .eq. kins )) goto 114
 
-!> \bug: previously there was no check		
-               if ( (moltyp(irem) .ne. imolty).and.(try.lt.(neighj_num*neighj_num))) then 
+!> \bug: previously there was no check
+               if ( (moltyp(irem) .ne. imolty).and.(try.lt.(neighj_num*neighj_num))) then
                    goto 114 ! Make sure you're picking one that's the correct molty
                 else if (moltyp(irem) .ne. imolty) then
                    lempty = .true.
@@ -1760,7 +1760,7 @@ contains
           end if
        END DO CYCLE_READ_SWAP
     end if
-   
+
     call mp_bcast(nswapb,nmolty,rootid,groupid)
     call mp_bcast(pmswapb,ntmax*npabmax,rootid,groupid)
     call mp_bcast(box1,ntmax*npabmax,rootid,groupid)
@@ -1775,7 +1775,7 @@ contains
     do i = 1, nmolty
           write(io_output,"(A,I0,A)",advance='no') 'molecule typ = ',i,'   '
           write(io_output,'(A10)',advance='no')molecname(i)
-       write(io_output,*) 
+       write(io_output,*)
        do j=1,nswapb(i)
           if ( box1(i,j) .eq. box2(i,j) ) then
              jbox_max = 1
