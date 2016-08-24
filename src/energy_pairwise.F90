@@ -20,7 +20,7 @@ MODULE energy_pairwise
   implicit none
   private
   save
-  public::sumup,energy,boltz,coru,read_ff,init_ff,U2,type_2body,vdW_nParameter,nonbond_type
+  public::sumup,energy,boltz,coru,read_ff,init_ff,U2,type_2body,vdW_nParameter,nonbond_type,energy_inter_com_kd_tree
 
   real,parameter::overlapValue=1.0E+20_dp,a15(2)=(/4.0E7_dp,7.5E7_dp/) !< 1-5 correction term for unprotected hydrogen-oxygen interaction; 1 for ether oxygens, 2 for alcohol oxygens
   !< OLD VALUES: a15(2)=/17.0_dp**6,16.0_dp**6/)
@@ -89,6 +89,9 @@ contains
     real::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq,vol
     ! Neeraj & RP for MPI
     real::sum_vvib,sum_vbend,sum_vtg
+    ! Kdtree
+    real, allocatable :: lij_list(:,:)
+    integer :: i_run
 ! --------------------------------------------------------------------
 #ifdef __DEBUG__
     write(io_output,*) 'start SUMUP in ',myid,' for box ', ibox
@@ -126,8 +129,9 @@ contains
     if (lneigh.or.lneighbor.or.lgaro) call init_neighbor_list(ibox)
 
     ! loop over all chains i
+    do i_run = 1, 1
     if (.not.lideal(ibox)) then
-        if (lkdtree .and. lkdtree_box(ibox)) then
+        if ((.not. lcutcm) .and. lkdtree .and. lkdtree_box(ibox)) then
             ! computing inter-molecular interactions using kd-tree
             call energy_inter_kd_tree_sumup(ibox, lvol, v, ovrlap)
             if (ovrlap) return
@@ -154,12 +158,28 @@ contains
                     lexplt = .true.
                  end if
 
+                 if (lcutcm .and. lkdtree .and. lkdtree_box(ibox)) then
+                    call energy_inter_com_kd_tree(ibox, i, xcm(i), ycm(i), zcm(i), rbcut, rmin &
+                        , .false., lij_list, .true., ovrlap)
+                    if (ovrlap) goto 199
+                 end if
+
                  ! loop over all chains j with j>i
                  molecule2: do j = i + 1 + myid, nchain, numprocs
+
                     ! check for simulation box ###
                     if ( nboxi(j) .eq. ibox ) then
                        jmolty = moltyp(j)
                        lqjmol = lelect(jmolty)
+
+                       if (lcutcm .and. lkdtree .and. lkdtree_box(ibox)) then
+                           if (lij_list(1, j) .lt. 0.5d0) then
+                               cycle molecule2
+                           else
+                               lij2 = .true.
+                               goto 1024
+                           end if
+                       end if
 
                        if (lcutcm .and. lvol ) then
                           ! check if ctrmas within rcmsq
@@ -190,6 +210,8 @@ contains
                              lij2 = .true.
                           end if
                        end if
+
+1024                   continue
 
                        do ii = 1,nunit(imolty)
                           ntii = ntype(imolty,ii)
@@ -308,7 +330,7 @@ contains
           v(ivInterLJ) = v(ivInterLJ) + v(ivTail)
        end if
     end if
-
+    end do
 !$$$c      write(io_output,*)
 !$$$c      write(io_output,*) '+++++++'
 !$$$c      vtemp = v(ivElect)
@@ -691,6 +713,8 @@ contains
     real::v(nEnergy),rcutsq,rminsq,rxui,rzui,ryui,rxuij,rcinsq,ryuij,rzuij,rij,rijsq,rbcut,calpi
     real::vwell
     real::xcmi,ycmi,zcmi,rcmi,rcm,rcmsq
+
+    real, allocatable :: lij_list(:,:)
 ! --------------------------------------------------------------------
 #ifdef __DEBUG__
     write(io_output,*) 'start ENERGY in ',myid,' for molecule ',i,' in box ',ibox
@@ -773,10 +797,17 @@ contains
     if (.not.(lideal(ibox))) then
 ! END JLR 11-24-09
 ! RP added for MPI
-       if (lkdtree .and. lkdtree_box(ibox)) then
+       if ((.not. lcutcm) .and. lkdtree .and. lkdtree_box(ibox)) then
            call energy_inter_kd_tree_energy(i, imolty, v, flagon, ibox, istart, iuend, ovrlap, lcoulo)
            if (ovrlap) return
        else
+           ! compute the COM distances if COM-based kdtree is used
+           if (lcutcm .and. lkdtree .and. lkdtree_box(ibox)) then
+               call energy_inter_com_kd_tree(ibox, i, xcmi, ycmi, zcmi, rbcut, rmin &
+                    , .false., lij_list, .false., ovrlap)
+               if (ovrlap) return
+           end if
+
            do k = myid+1,nmole,numprocs
 ! do k = 1, nmole
               if (licell.and.(ibox.eq.boxlink)) then
@@ -793,6 +824,15 @@ contains
               if ( ( ibox .eq. nboxi(j) ) .and. (i .ne. j )) then
                  if ( lneigh ) then
                     if ( .not. lnn(j,i) ) cycle
+                 end if
+
+                 if (lcutcm .and. lkdtree .and. lkdtree_box(ibox)) then
+                     if (lij_list(1, j) .lt. 0.5d0) then !< if outside com-cutoff, cycle the do loop on mlcls
+                         cycle
+                     else
+                         lij2 = .true.
+                         goto 2047 !< skip the following brute-force com-cutoff calculation
+                     end if
                  end if
 
                  if (lcutcm .or. lfavor) then
@@ -820,6 +860,8 @@ contains
                         lij2 = .true.
                     end if
                 end if
+
+2047            continue
 
                 if ( lcharge_table .and. (.not. lchgall) ) then
                     ! called from CBMC and must set up charge-interaction table ---
@@ -1142,7 +1184,7 @@ contains
     integer::ichoi,growjj,igrow,count,glist(numax),icharge,cnt,jcell(nmax)
     integer::i,imolty,ibox,ntogrow,itrial,ntii,j,jj,ntjj,ntij,iu,jmolty,iufrom,ii,k,nmole
     ! integer::NRtype
-    real::rminsq,rxui,ryui,rzui,rxuij,ryuij,rzuij,rij,rijsq,maxlen,rcm,rcmsq,corr,rcutmax
+    real::rminsq,rxui,ryui,rzui,rxuij,ryuij,rzuij,rij,rijsq,maxlen,rcm,rcmsq,corr,rcutmax,rbcut
     real::v(nEnergy),vwell,rcutsq,rcinsq
     integer::mmm
 
@@ -1152,6 +1194,7 @@ contains
      ,my_bfac(nchmax),my_vipswot(nchmax),my_vwellipswot(nchmax),my_vipswnt(nchmax),my_vwellipswnt(nchmax)
     logical::my_lovr(nchmax)
 
+    real, allocatable :: lij_list(:,:)
 ! ------------------------------------------
 #ifdef __DEBUG__
     write(io_output,*) 'start BOLTZ in ',myid
@@ -1161,6 +1204,7 @@ contains
 
     ! determine the potential cutoffs
     rcutsq = rcut(ibox)*rcut(ibox)
+    rbcut = rcut(ibox)
 
     ! KM initialize variables
     do j=1,ichoi
@@ -1181,6 +1225,7 @@ contains
 
     if ( ldual ) then
        ! use rcutin for both types of interactions (except intra)
+       rbcut = rcutin
        rcinsq = rcutin*rcutin
     else
        ! compute the cutoffs squared for each interaction
@@ -1212,8 +1257,19 @@ contains
        end if
 
 !> \todo to be MPI parallelized
-!> COM distance calculation, not needed if lkdtree is used
-       if (.not. (lkdtree .and. lkdtree_box(ibox))) then
+!> COM distance calculation
+       if (lkdtree .and. lkdtree_box(ibox)) then
+           call energy_inter_com_kd_tree(ibox, i, rxui, ryui, rzui, rbcut, 0.0, lfirst, lij_list, .false., ovrlap)
+
+           ! update lij_list to lcmno
+           do j = 1, nchain
+               if (lij_list(1, j) .lt. 0.5d0) then
+                   lcmno(j) = .true.
+               else
+                   lcmno(j) = .false.
+               end if
+           end do
+       else
            do j = 1,nchain
               lcmno(j) = .false.
               if ( ( nboxi(j) .eq. ibox ) .and. ( i .ne. j ) ) then
@@ -1410,7 +1466,7 @@ contains
 ! INTERCHAIN INTERACTIONS ***
 ! *******************************
 ! loop over all chains except i
-          if (lkdtree .and. lkdtree_box(ibox)) then
+          if ((.not. lcutcm) .and. lkdtree .and. lkdtree_box(ibox)) then
               call energy_inter_kd_tree_boltz(i, icharge, imolty, v, ibox, ntogrow, ovrlap, glist, itrial)
 
               if (ovrlap) then
@@ -1418,6 +1474,13 @@ contains
                   goto 19
               end if
           else !< if kdtree
+
+              ! compute COM distances if lfirst (where COM distances have not been computed) and COM-kdtree is used
+              if (lcutcm .and. lfirst .and. lkdtree .and. lkdtree_box(ibox)) then
+                 call energy_inter_com_kd_tree(ibox, i, rxp(1,itrial), ryp(1,itrial), rzp(1,itrial) &
+                    , rbcut, 0.0, lfirst, lij_list, .false., ovrlap)
+              end if
+
               do_nmole:do k = 1, nmole
                  if (licell.and.(ibox.eq.boxlink)) then
                     j = jcell(k)
@@ -1453,23 +1516,27 @@ contains
 
                        if ( lfirst .and. lcutcm ) then
                           ! check if ctrmas within rcmsq
-                          rxuij = rxui-xcm(j)
-                          ryuij = ryui-ycm(j)
-                          rzuij = rzui-zcm(j)
-                          ! minimum image the ctrmas pair separations
-                          if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
-                          rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
-                          ! determine cutoff
-                          if ( ldual ) then
-                             ! must be lfirst so no previous bead
-                             rcm = rcutin + rcmu(j)
+                          if (lkdtree .and. lkdtree_box(ibox)) then
+                             if (lij_list(1, j) .lt. 0.5d0) cycle do_nmole
                           else
-                             ! standard lcutcm cutoff
-                             rcm = rcutmax + rcmu(j)
+                             rxuij = rxui-xcm(j)
+                             ryuij = ryui-ycm(j)
+                             rzuij = rzui-zcm(j)
+                             ! minimum image the ctrmas pair separations
+                             if ( lpbc ) call mimage(rxuij,ryuij,rzuij,ibox)
+                             rijsq = rxuij*rxuij + ryuij*ryuij + rzuij*rzuij
+                             ! determine cutoff
+                             if ( ldual ) then
+                                ! must be lfirst so no previous bead
+                                rcm = rcutin + rcmu(j)
+                             else
+                                ! standard lcutcm cutoff
+                                rcm = rcutmax + rcmu(j)
+                             end if
+                             ! check if interaction distance is greater than cutoff
+                             rcmsq = rcm*rcm
+                             if ( rijsq .gt. rcmsq ) cycle do_nmole
                           end if
-                          ! check if interaction distance is greater than cutoff
-                          rcmsq = rcm*rcm
-                          if ( rijsq .gt. rcmsq ) cycle do_nmole
                        end if
 
                        ! loop over all beads jj of chain j
@@ -2554,7 +2621,7 @@ contains
 
      integer :: i, imolty, ii, j, jmolty, jj, ntii, ntjj, ntij
      logical :: lqchgi, lcoulo(numax,numax)
-     type(tree), pointer :: tree
+     type(tree), pointer :: kd_tree
      real :: coord(3), rbcut, rijsq, calpi, rcutsq
      real, allocatable :: inter_list(:,:)
      integer :: iTree, iInter, inter_list_dim, dist_calc_num, dist_calc_num_temp
@@ -2562,7 +2629,7 @@ contains
      ! if called from regular move, ibox = ibox
      ! if called from volume move, ibox = nbox + 1, i.e., to calculate the energy for the coordinates after the volume change
      if (.not. lvol) then
-         tree => mol_tree(ibox)%tree
+         kd_tree => mol_tree(ibox)%tree
      else
          iTree = 0
          do i = nbox+1, nbox+2
@@ -2574,13 +2641,13 @@ contains
               end if
           end do
           if (iTree .eq. 0) call err_exit(__FILE__,__LINE__,'Error in update_box_kdtree: iTree not found',myid)
-          tree => mol_tree(iTree)%tree
+          kd_tree => mol_tree(iTree)%tree
      end if
 
      ! if not volume move, then update and output the height of the tree
      if (.not. lvol) then
-         call update_tree_height(tree)
-         if (myid .eq. 0) write(io_output, *) "Height of the tree for box",ibox," is ", tree%height
+         call update_tree_height(kd_tree)
+         if (myid .eq. 0) write(io_output, *) "Height of the tree for box",ibox," is ", kd_tree%height
      end if
 
      rbcut = rcut(ibox)
@@ -2601,7 +2668,7 @@ contains
                  ntii = ntype(imolty, ii)
                  lqchgi = lqchg(ntii)
 
-                 call range_search(tree, coord, nmax*numax, rmin, rbcut, i, ii, .true., ovrlap, inter_list_dim,&
+                 call range_search(kd_tree, coord, nmax*numax, rmin, rbcut, i, ii, .true., ovrlap, inter_list_dim,&
                        inter_list, dist_calc_num_temp, .false.)
 
                  dist_calc_num = dist_calc_num + dist_calc_num_temp
@@ -2643,12 +2710,12 @@ contains
 
      integer :: i, imolty, ii, j, jmolty, jj, ntii, ntjj, ntij, flagon, istart, iuend, nchp2
      logical :: lqchgi, lcoulo(numax,numax), liji
-     type(tree), pointer :: tree
+     type(tree), pointer :: kd_tree
      real :: coord(3), rbcut, rijsq, calpi, rcutsq
      real, allocatable :: inter_list(:,:)
      integer :: iTree, iInter, inter_list_dim, dist_calc_num, dist_calc_num_temp
 
-     tree => mol_tree(ibox)%tree
+     kd_tree => mol_tree(ibox)%tree
      dist_calc_num = 0
      nchp2 = nchain + 2
      rbcut = rcut(ibox)
@@ -2669,7 +2736,7 @@ contains
          coord(2) = ryuion(ii, flagon)
          coord(3) = rzuion(ii, flagon)
 
-         call range_search(tree, coord, nmax*numax, rmin, rbcut, i, ii, .false., ovrlap, inter_list_dim,&
+         call range_search(kd_tree, coord, nmax*numax, rmin, rbcut, i, ii, .false., ovrlap, inter_list_dim,&
               inter_list, dist_calc_num_temp, .false.)
          dist_calc_num = dist_calc_num + dist_calc_num_temp
          if (ovrlap) goto 499
@@ -2776,4 +2843,42 @@ contains
 
      return
   end subroutine energy_inter_kd_tree_boltz
+
+!> \brief compute inter-molecular interaction using COM kd-tree in the boltz subroutine
+!> \brief return the lij_list
+!> ibox: the box of interest
+!> i: the molecule of interest
+!> r*ui: coordinates of interest
+!> rbcut: rcut used (full rcut or rcutin)
+!> rbmin: rmin used in the range_search
+!> lfirst: whether the first bead in the swap move
+!> lij_list: a quasi-1d list, j-th element indicates whether j mlcl has interaction with mlcl i
+!> lsumup: whether it is the sumup call
+!> ovrlap: whether there is overlap
+  subroutine energy_inter_com_kd_tree(ibox, i, rxui, ryui, rzui, rbcut, rbmin, lfirst, lij_list, lsumup, ovrlap)
+     integer :: ibox, i
+     type(tree), pointer :: tree
+     real :: coord(3), rbcut_plus_buffer, rxui, ryui, rzui, rbcut, rbmin
+     real, allocatable :: lij_list(:,:)
+     integer::inter_list_dim, dist_calc_num_temp
+     logical :: lfirst, ovrlap, lsumup
+
+     tree => mol_tree(ibox)%tree
+
+     if (lfirst) then
+         rbcut_plus_buffer = rbcut + kdtree_buffer_len(ibox)
+     else
+         rbcut_plus_buffer = rbcut + 2.0 * kdtree_buffer_len(ibox)
+     end if
+
+     ! do the range_search in kd-tree and get back the "logical" array
+     ! indicating what molecules are within the COM cutoff (cutoff+rmsq)
+     coord(1) = rxui
+     coord(2) = ryui
+     coord(3) = rzui
+     call range_search(tree, coord, nmax, rbmin, rbcut_plus_buffer, i, 1, lsumup, ovrlap, inter_list_dim,&
+                       lij_list, dist_calc_num_temp, .false.)
+
+     return
+  end subroutine energy_inter_com_kd_tree
 end MODULE energy_pairwise

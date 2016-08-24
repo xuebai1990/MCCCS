@@ -278,7 +278,7 @@ contains
                 ! calculate new vector from initial bead
                 ! BX: If lrigid=.true., nsampos.eq.1 and nsampos.eq.2 should be treated in another way.
                 first_bead = ifirst
-                second_bead = 0  
+                second_bead = 0
                 do j = 1,iunit
                    rxnew(j) = rxnew(ifirst) - (rxu(self,ifirst) - rxu(self,j))
                    rynew(j) = rynew(ifirst) - (ryu(self,ifirst) - ryu(self,j))
@@ -326,7 +326,7 @@ contains
           ! Paul -- SAFE-SWATCH: if there are beads needed to be regrown using SAFE-CBMC
           ! set lexshed to be false to avoid the calculation of intramolecular LJ interactions
           if (ncutsafe(iparty,s_type) .gt. 0) then
-             lexshed = .false. 
+             lexshed = .false.
              do icbu = 1, nsampos(iparty)
                 jj = splist(iparty,icbu,s_type)
                 lexshed(jj) = .true.
@@ -429,36 +429,36 @@ contains
 
           ! propagate new rosenbluth weight
           tweight = tweight*weight*waddnew
-       
-          !*** end rigid add on ***
-	  
-	  ! make a copy of original coords
 
-	  do izz = 1, nunit(moltyp(self))
-	     rxut(ic,izz) = rxu(self,izz)
-	     ryut(ic,izz) = ryu(self,izz)
-	     rzut(ic,izz) = rzu(self,izz)
-	  end do       
-	   
-	  ! Copy the rosenbluth-generated coords to "real (r*u)" coords
+      !*** end rigid add on ***
 
-	  do izz = 1, nunit(moltyp(self))
-	     rxu(self,izz) = rxnew(izz)
-	     ryu(self,izz) = rynew(izz)
-	     rzu(self,izz) = rznew(izz)
-	  end do   
+      ! make a copy of original coords
 
-	  ! Calculated U_bonded
+      do izz = 1, nunit(moltyp(self))
+         rxut(ic,izz) = rxu(self,izz)
+         ryut(ic,izz) = ryu(self,izz)
+         rzut(ic,izz) = rzu(self,izz)
+      end do
 
-	  call U_bonded(self,imolty,tmpvvib,tmpvbend,tmpvtg)
+      ! Copy the rosenbluth-generated coords to "real (r*u)" coords
 
-	  ! Copy back the "real (r*u)" coords 
+      do izz = 1, nunit(moltyp(self))
+         rxu(self,izz) = rxnew(izz)
+         ryu(self,izz) = rynew(izz)
+         rzu(self,izz) = rznew(izz)
+      end do
 
-	  do izz = 1, nunit(moltyp(self))
-	     rxu(self,izz) = rxut(ic,izz)
-	     ryu(self,izz) = ryut(ic,izz)
-	     rzu(self,izz) = rzut(ic,izz)
-	  end do	 
+      ! Calculated U_bonded
+
+      call U_bonded(self,imolty,tmpvvib,tmpvbend,tmpvtg)
+
+      ! Copy back the "real (r*u)" coords
+
+      do izz = 1, nunit(moltyp(self))
+         rxu(self,izz) = rxut(ic,izz)
+         ryu(self,izz) = ryut(ic,izz)
+         rzu(self,izz) = rzut(ic,izz)
+      end do
 
           ! save the new coordinates
           do jj = 1,igrow
@@ -573,9 +573,9 @@ contains
              vnbox(ivTot,iboxnew)   = vnbox(ivTot,iboxnew)  + vnew(ivTot)
              vnbox(ivInterLJ,iboxnew)  = vnbox(ivInterLJ,iboxnew) + vnew(ivInterLJ)
              vnbox(ivIntraLJ,iboxnew)  = vnbox(ivIntraLJ,iboxnew) + vnew(ivIntraLJ)
-             vnbox(ivStretching,iboxnew)  = vnbox(ivStretching,iboxnew) + tmpvvib 
-             vnbox(ivBending,iboxnew)	  = vnbox(ivBending,iboxnew)	+ tmpvbend
-             vnbox(ivTorsion,iboxnew)	  = vnbox(ivTorsion,iboxnew)	+ tmpvtg  
+             vnbox(ivStretching,iboxnew)  = vnbox(ivStretching,iboxnew) + tmpvvib
+             vnbox(ivBending,iboxnew) = vnbox(ivBending,iboxnew) + tmpvbend
+             vnbox(ivTorsion,iboxnew) = vnbox(ivTorsion,iboxnew) + tmpvtg
              vnbox(ivExt,iboxnew)  = vnbox(ivExt,iboxnew) + vnew(ivExt)
              vnbox(ivElect,iboxnew) = vnbox(ivElect,iboxnew)+ vnew(ivElect)
              vnbox(ivEwald,iboxnew) = vnbox(ivEwald,iboxnew)+ vnew(ivEwald)
@@ -636,10 +636,10 @@ contains
           tweiold = tweiold*weiold*waddold
 
           ! end rigid add on
-	  
-	  ! Calculated U_bonded
 
-	  call U_bonded(self,imolty,tmpvvib,tmpvbend,tmpvtg)
+      ! Calculated U_bonded
+
+      call U_bonded(self,imolty,tmpvvib,tmpvbend,tmpvtg)
 
           ! store the old grown beads and explict placed beads positions
           ! 1 = old conformation
@@ -687,9 +687,9 @@ contains
              vnbox(ivTot,iboxold)   = vnbox(ivTot,iboxold)  - vold(ivTot)
              vnbox(ivInterLJ,iboxold)  = vnbox(ivInterLJ,iboxold) - vold(ivInterLJ)
              vnbox(ivIntraLJ,iboxold)  = vnbox(ivIntraLJ,iboxold) - vold(ivIntraLJ)
-             vnbox(ivStretching,iboxold) = vnbox(ivStretching,iboxold) - tmpvvib 
-             vnbox(ivBending,iboxold)	= vnbox(ivBending,iboxold)    - tmpvbend
-             vnbox(ivTorsion,iboxold)	= vnbox(ivTorsion,iboxold)    - tmpvtg  
+             vnbox(ivStretching,iboxold) = vnbox(ivStretching,iboxold) - tmpvvib
+             vnbox(ivBending,iboxold) = vnbox(ivBending,iboxold)    - tmpvbend
+             vnbox(ivTorsion,iboxold) = vnbox(ivTorsion,iboxold)    - tmpvtg
              vnbox(ivExt,iboxold)  = vnbox(ivExt,iboxold) - vold(ivExt)
              vnbox(ivElect,iboxold) = vnbox(ivElect,iboxold)- vold(ivElect)
              vnbox(ivEwald,iboxold) = vnbox(ivEwald,iboxold)- vold(ivEwald)
@@ -707,7 +707,7 @@ contains
        ! Paul -- now grow SAFE-CBMC part
        waddnew = 1.0E0_dp
 
-       do izz = 1, ncutsafe(iparty,s_type) 
+       do izz = 1, ncutsafe(iparty,s_type)
 
           if (boxa.eq.boxb) then
              ! moving molecules for rosenbluth
@@ -722,7 +722,7 @@ contains
                 end do
              end if
           end if
- 
+
           ifirst = fromsafe(s_type+2*(izz-1))
           iprev = prevsafe(s_type+2*(izz-1))
           iindex = indexsafe(s_type+2*(izz-1))
@@ -803,7 +803,7 @@ contains
                  rzut(ic,j) = rzu(iins,j)
               end do
            end if
-   
+
            ! accumulates energies in vnewtemp
            vnewtemp = vnewtemp + vnew
 
@@ -891,7 +891,7 @@ contains
            end if
 
            if (lgrand.and.iboxold.ne.1) cycle oldnew
-           
+
            ! SAFE-CBMC old growth
            ! rigid add on
            waddold = 1.0E0_dp
@@ -1190,7 +1190,7 @@ contains
        end do
 
        ! Update coordinates in kdtree for A
-       if (lkdtree .and. (lkdtree_box(boxa) .or. lkdtree_box(boxb))) then
+       if ((.not. lcutcm) .and. lkdtree .and. (lkdtree_box(boxa) .or. lkdtree_box(boxb))) then
            do ic = 1, iunita
                rxu_update(ic) = rxut(1, ic)
                ryu_update(ic) = ryut(1, ic)
@@ -1256,8 +1256,8 @@ contains
        end if
 
        ! update center of mass
-       if (.not.(lgrand.and.boxa.ne.1)) call ctrmas(.false.,boxa,imolb,8)
-       if (.not.(lgrand.and.boxb.ne.1)) call ctrmas(.false.,boxb,imola,8)
+       if (.not.(lgrand.and.boxa.ne.1)) call ctrmas(.false.,boxa,imolb,8,boxb)
+       if (.not.(lgrand.and.boxb.ne.1)) call ctrmas(.false.,boxb,imola,8,boxa)
     else
        if (lgrand) then
           if (boxa.ne.1) then
@@ -1735,7 +1735,7 @@ contains
                          write(io_output,'(3(A,I0))') '   ncut ',k,': grow from ',gswatc(i,j,2*k-1),', prev ',gswatc(i,j,2*k)
                       end do
                       do k = 1, ncutsafe(i, j)
-                         write(io_output,'(4(A,I0))') '   ncutsafe ',k,': grow from ',gswatcsafe(i,j,3*k-2),', prev ',gswatcsafe(i,j,3*k-1),', index ',gswatcsafe(i,j,3*k)               
+                         write(io_output,'(4(A,I0))') '   ncutsafe ',k,': grow from ',gswatcsafe(i,j,3*k-2),', prev ',gswatcsafe(i,j,3*k-1),', index ',gswatcsafe(i,j,3*k)
                       end do
                    end do
                 end if

@@ -1,7 +1,7 @@
 MODULE moves_volume
   use util_random,only:random
   use util_runtime,only:err_exit
-  use util_kdtree,only:construct_kdtree
+  use util_kdtree,only:construct_kdtree, scale_kdtree
   use sim_system
   use sim_cell
   use energy_kspace,only:recip,calp,save_kvector,restore_kvector
@@ -407,8 +407,22 @@ contains
     if (lkdtree) then
         ! construct a kdtree for the fictitious box nbox+1
         ! when sumup is called from the volume move, the energy of nbox+1 and nbox+2 will be calculated instead of ibox
-        if (lkdtree_box(boxa)) call construct_kdtree(boxa, nbox+1, .false.)
-        if (lkdtree_box(boxb)) call construct_kdtree(boxb, nbox+2, .false.)
+        ! when lcutcm (COM-kdtree), simply scale the coordinates
+        if (lkdtree_box(boxa)) then
+            if (lcutcm) then
+                call scale_kdtree(boxa, dfac(boxa))
+            else
+                call construct_kdtree(boxa, nbox+1, .false.)
+            end if
+        end if
+
+        if (lkdtree_box(boxb)) then
+            if (lcutcm) then
+                call scale_kdtree(boxb, dfac(boxb))
+            else
+                call construct_kdtree(boxb, nbox+2, .false.)
+            end if
+        end if
     end if
 
     do i = 1,2
@@ -827,10 +841,14 @@ contains
     end if
 
     ! create kdtree for the sumup
-    if (lkdtree) then
+    if (lkdtree .and. lkdtree_box(ibox)) then
         ! construct a kdtree for the fictitious box nbox+1
         ! when sumup is called from the volume move, the energy of nbox+1 will be calculated instead of ibox
-        if (lkdtree_box(ibox)) call construct_kdtree(ibox, nbox+1, .false.)
+        if (lcutcm) then
+            call scale_kdtree(ibox, dfac)
+        else
+            call construct_kdtree(ibox, nbox+1, .false.)
+        end if
     end if
 
     call sumup(ovrlap,v,boxvch,.true.)
@@ -1202,7 +1220,7 @@ contains
   subroutine restore_box(box)
     integer,intent(in)::box
     integer::j
-    real::vdum
+    real::vdum, dfac
 
     vbox(ivTot,box) = vboxo(ivTot,box)
     vbox(ivInterLJ,box) = vboxo(ivInterLJ,box)
@@ -1211,6 +1229,11 @@ contains
     vbox(ivElect,box) = vboxo(ivElect,box)
     vbox(ivFlucq,box)= vboxo(ivFlucq,box)
     vbox(iv3body,box)= vboxo(iv3body,box)
+
+    dfac = bxo(box) / boxlx(box)
+
+    ! rescale the COM-kdtree
+    if (lcutcm .and. lkdtree .and. lkdtree_box(box)) call scale_kdtree(box, dfac)
 
     boxlx(box)   = bxo(box)
     boxly(box)   = byo(box)
@@ -1252,6 +1275,7 @@ contains
           end if
        end if
     end do
+
   end subroutine restore_configuration
 
   subroutine update_box(box)
@@ -1271,8 +1295,8 @@ contains
     ! update centers of mass
     call ctrmas(.true.,box,0,5)
 
-    ! update coordinates in kdtree
-    if (lkdtree .and. lkdtree_box(box)) then
+    ! update coordinates in bead-kdtree
+    if ((.not. lcutcm) .and. lkdtree .and. lkdtree_box(box)) then
         call update_box_kdtree(box)
     end if
 

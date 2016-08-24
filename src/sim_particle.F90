@@ -356,17 +356,26 @@ contains
 !> 8 = calling from swatch, 2 opeartions \n
 !> 9 = calling from energy for the dummy atom, 2 operations \n
 !> 10= calling from atom_translation, 1 operation
-  subroutine ctrmas(lall,ibox,j,mtype)
+!> j_box, optional, used for COM-kdtree, when updating molecule coordinates for swap/swatch moves,
+!>          the old box information is still needed
+  subroutine ctrmas(lall,ibox,j,mtype, jbox)
     use util_runtime,only:err_exit
     use sim_system
     use sim_cell
 
     logical,intent(in)::lall
     integer,intent(in)::ibox,j,mtype
+    integer,intent(in),optional::jbox
 
-    integer::stt,edd,i,imolty,iunit,iadjust,ii,itype,inboxx,inboxy,inboxz,iwarn
+    integer::stt,edd,i,imolty,iunit,iadjust,ii,itype,inboxx,inboxy,inboxz,iwarn,old_box
     real::rbx,rby,rbz,nxcm,nycm,nzcm,dx,dy,dz,sx,sy,sz,nxcm2,nycm2,nzcm2,dmaxsq,rxuij,ryuij,rzuij,rijsq
     logical::lintbx,ldx,ldy,ldz
+
+    if (present(jbox)) then
+        old_box = jbox
+    else
+        old_box = ibox
+    end if
 
     rbx = boxlx(ibox)
     rby = boxly(ibox)
@@ -465,25 +474,6 @@ contains
                 dy = nycm2-nycm
                 dz = nzcm2-nzcm
 
-                ! update coordinates in kd-tree
-                if (lkdtree .and. lkdtree_box(ibox)) then
-                    do ii = 1, iunit
-                        rxu_update(ii) = rxu(i, ii) + dx
-                        ryu_update(ii) = ryu(i, ii) + dy
-                        rzu_update(ii) = rzu(i, ii) + dz
-                    end do
-
-                    if ((mtype .eq. 5) .or. (mtype .eq. 9)) then
-                        ! if energy call or volume move, do not update the kdtree
-                        ! for energy call, it's a fictious bead
-                        ! for volume move, we'll reconstruct the tree later
-                        call update_coord_in_tree(i, iunit, ibox, ibox, .false., .true.)
-                    else
-                        call update_coord_in_tree(i, iunit, ibox, ibox, .true., .true.)
-                    end if
-                end if
-
-                ! update coordinates in r*xu array
                 do ii = 1, iunit
                    rxu(i,ii) = rxu(i,ii) + dx
                    ryu(i,ii) = ryu(i,ii) + dy
@@ -554,7 +544,7 @@ contains
              end if
 
              ! Update coordinates in kdtree
-             if ((ldx .or. ldy .or. ldz) .and. lkdtree .and. lkdtree_box(ibox)) then
+             if ((ldx .or. ldy .or. ldz) .and. (.not. lcutcm) .and. lkdtree .and. lkdtree_box(ibox)) then
                  do ii = 1, iunit
                      rxu_update(ii) = rxu(i, ii) + dx
                      ryu_update(ii) = ryu(i, ii) + dy
@@ -620,10 +610,30 @@ contains
              goto 25
           end if
 
+          ! Update COM-based kd-tree
+          if ((.not. lall) .and. lcutcm .and. lkdtree .and. lkdtree_box(ibox) .and. (mtype .ne. 5) .and. (mtype .ne. 9)) then
+              ! if energy call or volume move, do not update the kdtree
+              ! for energy call, it's a fictious bead
+              ! for volume move, we'll reconstruct the tree later
+              rxu_update(1) = xcm(i)
+              ryu_update(1) = ycm(i)
+              rzu_update(1) = zcm(i)
+          end if
+
           ! assign the new center of mass
           xcm(i) = nxcm
           ycm(i) = nycm
           zcm(i) = nzcm
+
+          ! Update COM-based kd-tree if there is a coordinate change
+          if ((.not. lall) .and. lcutcm .and. lkdtree .and. lkdtree_box(ibox) .and. (mtype .ne. 5) .and. (mtype .ne. 9)) then
+              if ((abs(xcm(i)-rxu_update(1)) .gt. 1e-7) .or. &
+                    (abs(ycm(i)-ryu_update(1)) .gt. 1e-7) .or. &
+                    (abs(zcm(i)-rzu_update(1)) .gt. 1e-7)) then
+                  call update_coord_in_tree(i, 1, old_box, ibox, .true., .true.)
+              end if
+          end if
+
           if ( (lcutcm .or. ldual) .and. iwarn .ne. 1 ) then
              dmaxsq = 0.0E0_dp
              do ii=1,iunit
@@ -654,7 +664,7 @@ contains
   subroutine update_coord_in_tree(i, iunit, box_to_delete, box_to_insert, l_update_tree, lctrmas)
       use util_runtime,only:err_exit
       use sim_system
-      use util_kdtree,only: construct_kdtree,search_node_in_tree,delete_node,insert_node, allocate_nxyz
+      use util_kdtree,only: construct_kdtree,search_node_in_tree,delete_node,insert_node, allocate_nxyz, check_tree_coord
       logical :: l_update_tree !< whether to update kdtree IF THE KDTREE IS USED
                              ! (not used when some ghost particle coordinates are updated; or the tree has not yet been initialized)
       logical, intent(in) :: lctrmas !< if called from ctrmas, delete all the beads first before insertion
@@ -662,7 +672,7 @@ contains
       !< the molecule number; the number of units; and the box number to delete and insert
       integer, intent(in) :: i, iunit, box_to_delete, box_to_insert
       integer :: j, ibox
-      real :: dx, dy, dz
+      real :: dx, dy, dz, x_coord, y_coord, z_coord
 
       !kdtree variables
       type(tree), pointer :: kd_tree
@@ -670,7 +680,7 @@ contains
       integer :: ix, iy, iz, iDim
       real, dimension(3) :: old_coord, new_coord
       logical :: lAdd
-      real :: xmin, xmax, ymin, ymax, zmin, zmax, rbcut_plus_buffer
+      real :: xmin, xmax, ymin, ymax, zmin, zmax, rbcut_plus_buffer, xmin_all, xmax_all, ymin_all, ymax_all, zmin_all, zmax_all
       type(tree_node), pointer :: node_found
 
       ! if kdtree is used, ready to update kdtree first
@@ -699,6 +709,12 @@ contains
             ymax = kd_tree%bound(2)%upper + rbcut_plus_buffer
             zmin = kd_tree%bound(3)%lower - rbcut_plus_buffer
             zmax = kd_tree%bound(3)%upper + rbcut_plus_buffer
+            xmin_all = kd_tree%bound_all(1)%lower
+            xmax_all = kd_tree%bound_all(1)%upper
+            ymin_all = kd_tree%bound_all(2)%lower
+            ymax_all = kd_tree%bound_all(2)%upper
+            zmin_all = kd_tree%bound_all(3)%lower
+            zmax_all = kd_tree%bound_all(3)%upper
          end if
 
          if ((.not. lctrmas) .and. (box_to_delete .eq. box_to_insert)) then
@@ -714,12 +730,22 @@ contains
                          do iz = 1, size(nz)
                              dz = nz(iz) * boxlz(ibox)
                              do j = 1, iunit
-                                 old_coord(1) = rxu(i, j) + dx
-                                 old_coord(2) = ryu(i, j) + dy
-                                 old_coord(3) = rzu(i, j) + dz
-                                 new_coord(1) = rxu_update(j) + dx
-                                 new_coord(2) = ryu_update(j) + dy
-                                 new_coord(3) = rzu_update(j) + dz
+
+                                 if (lcutcm) then
+                                     old_coord(1) = rxu_update(1) + dx
+                                     old_coord(2) = ryu_update(1) + dy
+                                     old_coord(3) = rzu_update(1) + dz
+                                     new_coord(1) = xcm(i) + dx
+                                     new_coord(2) = ycm(i) + dy
+                                     new_coord(3) = zcm(i) + dz
+                                 else
+                                     old_coord(1) = rxu(i, j) + dx
+                                     old_coord(2) = ryu(i, j) + dy
+                                     old_coord(3) = rzu(i, j) + dz
+                                     new_coord(1) = rxu_update(j) + dx
+                                     new_coord(2) = ryu_update(j) + dy
+                                     new_coord(3) = rzu_update(j) + dz
+                                 end if
 
                                  ! Don't need to do anything if old and new coord are the same (e.g. in CBMC)
                                  if ((abs(old_coord(1)-new_coord(1)) .gt. 1e-10) .or. (abs(old_coord(2)-new_coord(2)) .gt. 1e-10) &
@@ -735,9 +761,9 @@ contains
                                          end do
                                          lAdd = .true.
                                      else
-                                         if ((old_coord(1) .gt. xmin) .and. (old_coord(1) .lt. xmax) &
-                                            .and. (old_coord(2) .gt. ymin) .and. (old_coord(2) .lt. ymax) &
-                                            .and. (old_coord(3) .gt. zmin) .and. (old_coord(3) .lt. zmax)) then
+                                         if ((old_coord(1) .gt. xmin_all) .and. (old_coord(1) .lt. xmax_all) &
+                                            .and. (old_coord(2) .gt. ymin_all) .and. (old_coord(2) .lt. ymax_all) &
+                                            .and. (old_coord(3) .gt. zmin_all) .and. (old_coord(3) .lt. zmax_all)) then
                                              node_found => search_node_in_tree(kd_tree, kd_tree%tree_root, old_coord, 1)
                                              if (associated(node_found)) then
                                                  kd_tree => delete_node(kd_tree, old_coord)
@@ -772,23 +798,33 @@ contains
              ! do the deletion and insertion separately
              if (lkdtree_box(box_to_delete)) then
                   do j = 1, iunit
+
+                     if (lcutcm) then
+                         x_coord = rxu_update(1)
+                         y_coord = ryu_update(1)
+                         z_coord = rzu_update(1)
+                     else
+                         x_coord = rxu(i, j)
+                         y_coord = ryu(i, j)
+                         z_coord = rzu(i, j)
+                     end if
+
                      do ix = 1, size(nx)
-                         old_coord(1) = rxu(i, j) + nx(ix) * boxlx(ibox)
+                         old_coord(1) = x_coord + nx(ix) * boxlx(ibox)
                          do iy = 1, size(ny)
-                             old_coord(2) = ryu(i, j) + ny(iy) * boxly(ibox)
+                             old_coord(2) = y_coord + ny(iy) * boxly(ibox)
                              do iz = 1, size(nz)
-                                 old_coord(3) = rzu(i, j) + nz(iz) * boxlz(ibox)
+                                 old_coord(3) = z_coord + nz(iz) * boxlz(ibox)
 
                                  if ((ix .eq. 1) .and. (iy .eq. 1) .and. (iz .eq. 1)) then
                                      kd_tree => delete_node(kd_tree, old_coord)
                                  else
-                                     if ((old_coord(1) .gt. xmin) .and. (old_coord(1) .lt. xmax) &
-                                         .and. (old_coord(2) .gt. ymin) .and. (old_coord(2) .lt. ymax) &
-                                         .and. (old_coord(3) .gt. zmin) .and. (old_coord(3) .lt. zmax)) then
+                                     if ((old_coord(1) .gt. xmin_all) .and. (old_coord(1) .lt. xmax_all) &
+                                         .and. (old_coord(2) .gt. ymin_all) .and. (old_coord(2) .lt. ymax_all) &
+                                         .and. (old_coord(3) .gt. zmin_all) .and. (old_coord(3) .lt. zmax_all)) then
                                          node_found => search_node_in_tree(kd_tree, kd_tree%tree_root, old_coord, 1)
-                                         if (associated(node_found)) then
-                                             kd_tree => delete_node(kd_tree, old_coord)
-                                         end if
+                                         if (associated(node_found)) kd_tree => delete_node(kd_tree, old_coord)
+
                                      end if
                                  end if
                              end do
@@ -806,21 +842,37 @@ contains
                      rbcut_plus_buffer = rcut(ibox) + kdtree_buffer_len(ibox)
                  end if
 
+                 if (lcutcm) then
+                     x_coord = xcm(i)
+                     y_coord = ycm(i)
+                     z_coord = zcm(i)
+                 end if
+
                  do j = 1, iunit
+
+                     if (.not. lcutcm) then
+                         x_coord = rxu_update(j)
+                         y_coord = ryu_update(j)
+                         z_coord = rzu_update(j)
+                     end if
+
                      do ix = 1, size(nx)
-                         new_coord(1) = rxu_update(j) + nx(ix) * boxlx(ibox)
+                         new_coord(1) = x_coord + nx(ix) * boxlx(ibox)
                          do iy = 1, size(ny)
-                             new_coord(2) = ryu_update(j) + ny(iy) * boxly(ibox)
+                             new_coord(2) = y_coord + ny(iy) * boxly(ibox)
                              do iz = 1, size(nz)
-                                 new_coord(3) = rzu_update(j) + nz(iz) * boxlz(ibox)
+                                 new_coord(3) = z_coord + nz(iz) * boxlz(ibox)
 
                                  if ((ix .eq. 1) .and. (iy .eq. 1) .and. (iz .eq. 1)) then
-                                     do iDim = 1, 3
-                                         if (new_coord(iDim) .gt. kd_tree%bound(iDim)%upper) &
-                                             kd_tree%bound(iDim)%upper = new_coord(iDim)
-                                         if (new_coord(iDim) .lt. kd_tree%bound(iDim)%lower) &
-                                             kd_tree%bound(iDim)%lower = new_coord(iDim)
-                                     end do
+                                     if (.not. lcutcm) then
+                                         do iDim = 1, 3
+                                             if (new_coord(iDim) .gt. kd_tree%bound(iDim)%upper) &
+                                                 kd_tree%bound(iDim)%upper = new_coord(iDim)
+                                             if (new_coord(iDim) .lt. kd_tree%bound(iDim)%lower) &
+                                                 kd_tree%bound(iDim)%lower = new_coord(iDim)
+                                         end do
+                                     end if
+
                                      kd_tree => insert_node(kd_tree, new_coord, i, j, nx(ix), ny(iy), nz(iz))
                                  else
                                      if ((new_coord(1) .gt. (kd_tree%bound(1)%lower-rbcut_plus_buffer)) &
@@ -829,7 +881,9 @@ contains
                                         .and. (new_coord(2) .lt. (kd_tree%bound(2)%upper+rbcut_plus_buffer)) &
                                         .and. (new_coord(3) .gt. (kd_tree%bound(3)%lower-rbcut_plus_buffer)) &
                                         .and. (new_coord(3) .lt. (kd_tree%bound(3)%upper+rbcut_plus_buffer))) then
+
                                         kd_tree => insert_node(kd_tree, new_coord, i, j, nx(ix), ny(iy), nz(iz))
+
                                      end if
                                  end if
                              end do
