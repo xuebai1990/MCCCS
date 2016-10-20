@@ -92,7 +92,7 @@ subroutine virial(bVirialClassical,bVirialQuantum)
         uIntermolecular = uIntermolecular-vmol2(ivElect)
         ! lets do the soft cut stuff
         smallexpfact = -uIntermolecular/virtemp
-        if(smallexpfact < -1.0*softcut) then
+        if(smallexpfact < -2.3E0_dp*softcut) then
             mayerterm=0.0
         else if (smallexpfact > softcut.or.olp) then
             ! essentially these are states where the energy appears to be
