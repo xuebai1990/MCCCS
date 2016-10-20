@@ -581,27 +581,29 @@ contains
           end if
        end if
 
-       if (.not.lrect(boxvch).and..not.l_bilayer) then
+       if (.not.lrect(boxvch)) then
           volo = cell_vol(boxvch)
           ! select one of the cell edge
-          if ( lx ) then
-             rbox = 3.0_dp*random(-1)
-             if ( rbox .le. 1.0E0_dp ) then
-                jhmat = 1
-             else if (rbox .le. 2.0E0_dp ) then
-                jhmat = 4
+          if ( .not.l_bilayer ) then
+             if ( lx ) then
+                rbox = 3.0_dp*random(-1)
+                if ( rbox .le. 1.0E0_dp ) then
+                   jhmat = 1
+                else if (rbox .le. 2.0E0_dp ) then
+                   jhmat = 4
+                else
+                   jhmat = 7
+                end if
+             else if ( ly ) then
+                rbox = 2.0_dp*random(-1)
+                if ( rbox .le. 1.0E0_dp ) then
+                   jhmat = 5
+                else
+                   jhmat = 8
+                end if
              else
-                jhmat = 7
+                jhmat = 9
              end if
-          else if ( ly ) then
-             rbox = 2.0_dp*random(-1)
-             if ( rbox .le. 1.0E0_dp ) then
-                jhmat = 5
-             else
-                jhmat = 8
-             end if
-          else
-             jhmat = 9
           end if
        end if
     end if
@@ -676,8 +678,8 @@ contains
                 end if
              else if (l_consv) then
                 hmat(boxvch,1) = hmato(1)
-                hmat(boxvch,4) = hmato(5)
-                hmat(boxvch,5) = hmato(9)
+                hmat(boxvch,4) = hmato(5) !possibly an error. Check before using l_consv
+                hmat(boxvch,5) = hmato(9) ! same as line above
              else
                 hmat(boxvch,jhmat) = hmato(jhmat)
              end if
