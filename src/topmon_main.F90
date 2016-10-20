@@ -1003,15 +1003,8 @@ contains
              write(io_output,"(A,I2,A,3(1X,F12.5))") ' surface tension  box ',ibox,' =',acsurf(ibox),stdev(itel,ibox)&
               ,errme(itel,ibox)
           end do
-          
-         ! compressibility factor
-         itel = nEnergy + 4*nmolty + 7
-          do ibox = 1, nbox
-             write(io_output,"(A,I2,A,3(1X,F12.5))") ' compress factor  box ',ibox,' =',accomp(ibox),stdev(itel,ibox)&
-              ,errme(itel,ibox)
-          end do
 
-          ! compressibility factor
+         ! compressibility factor
           itel = nEnergy + 4*nmolty + 7
           do ibox = 1, nbox
              write(io_output,"(A,I2,A,3(1X,F12.5))") ' compressibility  box ',ibox,' =',accomp(ibox),stdev(itel,ibox)&
@@ -3754,10 +3747,6 @@ contains
           itel = nEnergy + 4*nmolty + 3
           call store_block_average(baver(itel,ibox,nblock),acsurf(ibox),acnp,bccold(itel,ibox),nccold(itel,ibox))
            
-          ! compressibility factor
-          itel = nEnergy + 4*nmolty + 7
-          call store_block_average(baver(itel,ibox,nblock),accomp(ibox),acnp,bccold(itel,ibox),nccold(itel,ibox))
-
           ! compressibility factor
           itel = nEnergy + 4*nmolty + 7
           call store_block_average(baver(itel,ibox,nblock),accomp(ibox),acnp,bccold(itel,ibox),nccold(itel,ibox))
