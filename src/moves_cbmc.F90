@@ -281,7 +281,6 @@ contains
 ! delen=2.3E0_dp*softcut
 ! end if
 ! END JLR 11-19-09
-! weight    = weight*exp(-(beta*delen))
                delta_vn= delen
                vnew(ivTot)     = vnew(ivTot) + delen
                vnew(ivInterLJ) = v(ivInterLJ)
@@ -309,7 +308,6 @@ contains
 ! deleo=2.3E0_dp*softcut
 ! end if
 ! END JLR 11-19-09
-! weiold    = weiold*exp(-(beta*deleo))
                delta_vo = deleo
                vold(ivTot)     = vold(ivTot) + deleo
                vold(ivInterLJ) = v(ivInterLJ)
@@ -398,8 +396,6 @@ contains
             vrecipn = (etais+(1.0E0_dp-etais)*lambdais)*vrecipn
             vrecipo = (etais+(1.0E0_dp-etais)*lambdais)*vrecipo
          end if
-         weight = weight * exp(-(beta*vrecipn))
-         weiold = weiold * exp(-(beta*vrecipo))
          vnew(ivTot) = vnew(ivTot) + vrecipn
          vold(ivTot) = vold(ivTot) + vrecipo
       end if
@@ -411,7 +407,7 @@ contains
       wolog = log10 ( weiold )
 ! write(io_output,*) 'weight:',weight
 ! write(io_output,*) 'weiold:',weiold
-      wdlog = wnlog - wolog
+      wdlog = wnlog - wolog - beta*(delta_vn + vrecipn - delta_vo - vrecipo)/log(10.0_dp)
       if ( wdlog .lt. -softcut ) then
 ! write(99,*) 'cbmc softcut',i
          return
@@ -427,7 +423,7 @@ contains
       end if
 
 ! write(99,*) wratio
-      wratio=wratio*exp(beta*(delta_vo-delta_vn))
+      wratio=wratio*exp(beta*(delta_vo+vrecipo-delta_vn-vrecipn))
 ! write(99,*) wratio,vold,vnew
 
       if ( random(-1) .le. wratio ) then
