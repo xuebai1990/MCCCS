@@ -261,7 +261,7 @@ contains
                                 v(ivInterLJ)=v(ivInterLJ)+U2(rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
                              end if
 
-                             v(ivElect)=v(ivElect)+Q2(rijsq,rcutsq,i,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
+                             v(ivElect)=v(ivElect)+Q2(rijsq,rcutsq,i,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo,ibox)
 
                              if (lneigh.and.rijsq.le.rcutnn(ibox)**2) then
                                 lnn(i,j) = .true.
@@ -463,7 +463,7 @@ contains
 94                    if (lqinclu(imolty,ii,jj)) then
                          ! calculate intramolecular charge interaction
                          my_velect=my_velect+qscale2(imolty,ii,jj)*Q2(rijsq,rcutsq,i,imolty,ii,ntii,lqchg(ntii),i,imolty,jj&
-                          ,ntjj,calpi,lcoulo)
+                          ,ntjj,calpi,lcoulo,ibox)
                       end if
                    end if
                 end do
@@ -925,7 +925,7 @@ contains
                             v(ivInterLJ)=v(ivInterLJ)+U2(rijsq,nchp2,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
                         end if
 
-                        v(ivElect)=v(ivElect)+Q2(rijsq,rcutsq,nchp2,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
+                        v(ivElect)=v(ivElect)+Q2(rijsq,rcutsq,nchp2,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo,ibox)
 
                         if (lneigh.and.flagon.eq.2.and.rijsq.le.rcutnn(ibox)**2) lnn_t(j,i)=.true.
 
@@ -1017,7 +1017,7 @@ contains
           if (lqinclu(imolty,ii,jj) ) then
              ! calculation of intramolecular electrostatics
              v(ivElect)=v(ivElect)+qscale2(imolty,ii,jj)*Q2(rijsq,rcutsq,nchp2,imolty,ii,ntii,lqchg(ntii),nchp2,imolty,jj&
-              ,ntjj,calpi,lcoulo)
+              ,ntjj,calpi,lcoulo,ibox)
           end if
 
           ! calculation of other non-bonded interactions
@@ -1399,7 +1399,7 @@ contains
                       if (L_elect_table) then
                          v(ivElect) = v(ivElect) + qscale2(imolty,ii,iu)*qqu(icharge,ii)*qqu(icharge,iu)&
                           *lininter_elect(rij,ntii,ntjj)
-                      else if (lewald) then
+                      else if (lewald.and.(.not.lideal(ibox))) then
                          ! compute real space term of vewald
                          v(ivElect) = v(ivElect) + qscale2(imolty,ii,iu)*qqu(icharge,ii)*qqu(icharge,iu)*erfunc(calp(ibox)*rij)&
                           / rij
@@ -1412,8 +1412,8 @@ contains
                       end if
                    end if
                    ! end charge calculation
-                   ! will only add correction if lqinclu is false.
                 else if (L_Coul_CBMC.and.lewald) then
+                   ! will only add correction here if lqinclu is false.
                    ! ewald sum correction term
                    rij = sqrt(rijsq)
                    corr = qqu(icharge,ii)*qqu(icharge,iu)*(erfunc(calp(ibox)*rij)-1.0E0_dp) /rij
@@ -2467,10 +2467,10 @@ contains
 !> two beads interact; however, they may not yet exist during
 !> CBMC regrowth.
 !DEC$ ATTRIBUTES FORCEINLINE :: Q2
-  function Q2(rijsq,rcutsq,i,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
+  function Q2(rijsq,rcutsq,i,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo,ibox)
     real::Q2,rij
     real,intent(in)::rijsq,rcutsq,calpi
-    integer,intent(in)::i,imolty,ii,ntii,j,jmolty,jj,ntjj
+    integer,intent(in)::i,imolty,ii,ntii,j,jmolty,jj,ntjj,ibox
     logical,intent(in)::lqchgi
     logical,intent(inout)::lcoulo(numax,numax)
 
@@ -2478,7 +2478,7 @@ contains
 
     Q2=0.0E0_dp
     if(lqchgi.and.lqchg(ntjj)) then
-       if (.not.lewald) then
+       if (.not.lewald.or.lideal(ibox)) then
           if (.not.lchgall) then
              ! All-Atom charges (charge-group look-up table)
              iii = leaderq(imolty,ii)
@@ -2685,7 +2685,7 @@ contains
                          ntjj = ntype(jmolty, jj)
                          ntij = type_2body(ntii, ntjj)
                          v(ivInterLJ)=v(ivInterLJ)+U2(rijsq,i,imolty,ii,ntii,j,jmolty,jj,ntjj,ntij)
-                         v(ivElect)=v(ivElect)+Q2(rijsq,rcutsq,i,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
+                         v(ivElect)=v(ivElect)+Q2(rijsq,rcutsq,i,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo,ibox)
                      end do
                  end if
              end do
@@ -2759,7 +2759,7 @@ contains
              ! in the swatch move, qqu(nchp2,ii) may be different from qqu(i,ii), because i is the mol to be swatched
              ! and nchp2 is the mol to replace, so qqu(nchp2,ii) should be used here
              ! in all other moves, qqu(nchp2,ii) == qqu(i,ii)
-             v(ivElect)=v(ivElect)+Q2(rijsq,rcutsq,nchp2,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo)
+             v(ivElect)=v(ivElect)+Q2(rijsq,rcutsq,nchp2,imolty,ii,ntii,lqchgi,j,jmolty,jj,ntjj,calpi,lcoulo,ibox)
          end do
      end do
 
