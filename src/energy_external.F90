@@ -100,7 +100,11 @@ contains
 
     if (lexzeo) then
        vtmp=exzeo(rxu(i,j),ryu(i,j),rzu(i,j),ntj,ignoreTable=.false.)
-       if (i.le.nchain.and.abs(vtmp).gt.1E5_dp) write(io_output,*) i,j,rxu(i,j),ryu(i,j),rzu(i,j),vtmp
+       if (i.le.nchain.and.abs(vtmp).gt.upper_limit_zeo) then
+          write(io_output,*) '###problem: energy for molnum = ',i,'bead =',j,'is larger than'
+          write(io_output,*) 'upper_limit_zeo. You will want to increase upperLimit in topmon.inp and/or'
+          write(io_output,*) 'look into this. rx, ry, rz =',rxu(i,j),ryu(i,j),rzu(i,j),'vtmp = ',vtmp
+       end if
        U_ext = U_ext + vtmp
     end if
 

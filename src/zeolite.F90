@@ -20,7 +20,7 @@ module zeolite
   implicit none
   private
   save
-  public::zeocoord,suzeo,exzeo
+  public::zeocoord,suzeo,exzeo,upper_limit_zeo
 
   real,parameter::overlapValue=1.0E+20_dp,LJScaling=2E4_dp
   integer,parameter::boxZeo=1
@@ -30,7 +30,7 @@ module zeolite
 
   integer::nlayermax,n_pieces_ztb=1,num_points_interpolation=4,volume_probe=124,volume_nsample=20,area_probe=124,area_nsample=100
   real,allocatable::my_zgrid(:,:,:),zgrid(:,:,:),egrid(:,:),yjtmp(:),yktmp(:),yltmp(:),xt(:),yt(:),zt(:)
-  real::requiredPrecision=1.0E-2_dp,upperLimit=1.0E+5_dp
+  real::requiredPrecision=1.0E-2_dp,upperLimit=1.0E+5_dp,upper_limit_zeo
   character(LEN=default_path_length)::file_zeocoord='zeolite.cssr',file_ztb='zeolite.ztb',file_supercell=''
 
   type(MoleculeType)::zeo
@@ -84,6 +84,7 @@ contains
        if (jerr.ne.0.and.jerr.ne.-1) call err_exit(__FILE__,__LINE__,'reading namelist: zeolite_in',jerr)
        close(io_input)
     end if
+    upper_limit_zeo = upperLimit
 
     call mp_bcast(file_zeocoord,rootid,groupid)
     call mp_bcast(dgr,1,rootid,groupid)
@@ -93,6 +94,7 @@ contains
     call mp_bcast(requiredPrecision,1,rootid,groupid)
     call mp_bcast(num_points_interpolation,1,rootid,groupid)
     call mp_bcast(upperLimit,1,rootid,groupid)
+    call mp_bcast(upper_limit_zeo,1,rootid,groupid)
     call mp_bcast(ltailcZeo,1,rootid,groupid)
     call mp_bcast(ltestztb,1,rootid,groupid)
     call mp_bcast(lpore_volume,1,rootid,groupid)
