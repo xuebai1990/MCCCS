@@ -2445,18 +2445,17 @@ contains
 !> at the end of each 'nunit' line in the fort.4. I've restored the original
 !location of the biasing potentials to the end of the
 !> file, where that are simply listed for each molecule in each box.
+  ! initialize biasing potential to be 0 in all boxes
+  eta2 = 0.0E0_dp
 
   ! Looking for section UNIFORM_BIASING_POTENTIALS
     if (myid.eq.rootid) then
        REWIND(io_input)
        UNIFORM_BIASING_POTENTIALS:DO
           call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
-          if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Section UNIFORM_BIASING_POTENTIALS not found',jerr)
+          if (jerr.ne.0) exit UNIFORM_BIASING_POTENTIALS
 
           if (UPPERCASE(line_in(1:26)).eq.'UNIFORM_BIASING_POTENTIALS') then
-                if (lprint) then
-                  write(io_output,'(/,A,/,A)') 'SECTION UNIFORM_BIASING_POTENTIALS','------------------------------------------'
-                end if
                 do imol=1,nmolty+1
                      call readLine(io_input,line_in,skipComment=.true.,iostat=jerr)
                      if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'Reading section UNIFORM_BIASING_POTENTIALS',jerr)
@@ -2470,16 +2469,16 @@ contains
 
                  end do
 
-                 if (lprint) then
-                     write(io_output,'(A)') 'Molecule type, biasing potential 1 through nbox [K]: '
-                         do imol=1,nmolty
-
-                             write(io_output,'(3(1X,F9.3))') (eta2(i,imol),i=1,nbox)
-                         end do
-                 end if
                  exit UNIFORM_BIASING_POTENTIALS
           end if
        END DO UNIFORM_BIASING_POTENTIALS
+       if (lprint) then
+           write(io_output,'(/,A,/,A)') 'SECTION UNIFORM_BIASING_POTENTIALS','------------------------------------------'
+           write(io_output,'(A)') 'Molecule type, biasing potential 1 through nbox [K]: '
+           do imol=1,nmolty
+               write(io_output,'(3(1X,F9.3))') (eta2(i,imol),i=1,nbox)
+           end do
+       end if
     end if
     call mp_bcast(eta2,nbxmax*ntmax,rootid,groupid)
 
