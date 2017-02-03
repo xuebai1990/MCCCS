@@ -12,7 +12,7 @@ MODULE moves_volume
   public::volume_1box,volume_2box,init_moves_volume,update_volume_max_displacement,output_volume_stats,read_checkpoint_volume&
    ,write_checkpoint_volume,allow_cutoff_failure,restore_displ_transl
 
-  real,allocatable,public::acsvol(:),acnvol(:),acshmat(:,:),acnhmat(:,:),bsvol(:),bnvol(:),bshmat(:,:),bnhmat(:,:)
+  real,allocatable,public::acsvol(:),acnvol(:),acshmat(:,:),acnhmat(:,:),bsvol(:),bnvol(:),bshmat(:,:),bnhmat(:,:),acc_displ(:)
   real,allocatable::vboxn(:,:),vboxo(:,:),bxo(:),byo(:),bzo(:),xcmo(:),ycmo(:),zcmo(:),rxuo(:,:),ryuo(:,:),rzuo(:,:),qquo(:,:)&
    ,rcut_original(:)
   real::hmato(9),hmatio(9)
@@ -30,7 +30,7 @@ contains
 !> The maximum change is controlled by \b rmtrax and the
 !> number of successful trial moves is stored in \b bsvol.
   subroutine volume_2box()
-    real::rpair,rm,rbox,volo(nbxmax),volt,voln(nbxmax),rbcut(nbxmax),dfac(nbxmax),df,dx,dy,dz,expdv,min_boxl,v(nEnergy),dele
+    real::rpair,rm,rbox,volo(nbxmax),volt,voln(nbxmax),rbcut(nbxmax),dfac(nbxmax),df,dx,dy,dz,expdv,min_boxl,v(nEnergy),dele,displ
     integer::ipair,ipairb,boxa,boxb,ibox,i,hbox,jbox,jhmat,imolty,j,ichoiq
     logical::lncubic,lx(nbxmax),ly(nbxmax),lz(nbxmax),ovrlap,ladjust
 ! --------------------------------------------------------------------
@@ -54,6 +54,7 @@ contains
     boxb = box6(ipairb)
 
     bnvol(ipairb) = bnvol(ipairb) + 1.0E0_dp
+    displ = 0.0E0_dp !< the accepted displacement
 
     call save_box(boxa)
     call save_box(boxb)
@@ -261,6 +262,7 @@ contains
     else
        ! calculate new volume
        expdv=rmvol(ipairb)*(2.0E0_dp*random(-1)-1.0E0_dp)
+       displ = abs(expdv) !< magnitude of the volume displacement
        expdv = volo(boxa)/volo(boxb)*exp(expdv)
        voln(boxa)= expdv*volt/(1+expdv)
        voln(boxb)= volt-voln(boxa)
@@ -465,6 +467,7 @@ contains
     if (random(-1) .lt. exp(-beta*dele) ) then
        ! accepted
        bsvol(ipairb) = bsvol(ipairb) + 1.0E0_dp
+       acc_displ(ipairb) = acc_displ(ipairb) + displ
        if ( lncubic ) then
           bshmat(hbox,jhmat) = bshmat(hbox,jhmat) + 1.0E0_dp
        end if
@@ -516,7 +519,7 @@ contains
 !> The maximum change is controlled by \b rmtrax and the
 !> number of successful trial moves is stored in \b bsvol.
   subroutine volume_1box()
-    real::rbox,volo,voln,rbcut,dx,dy,dz,dfac,df,v(nEnergy),dele,min_boxl
+    real::rbox,volo,voln,rbcut,dx,dy,dz,dfac,df,v(nEnergy),dele,min_boxl,displ
     integer::ibox,boxvch,jhmat,i,imolty,j,ichoiq,nchain_boxvch
     logical::lx,ly,lz,ovrlap,ladjust,l_couple,l_consv
 ! --------------------------------------------------------------------
@@ -533,6 +536,7 @@ contains
     end do
 
     bnvol(boxvch) = bnvol(boxvch) + 1.0E0_dp
+    displ = 0.0E0_dp
 
     call save_box(boxvch)
     call save_configuration((/boxvch/))
@@ -724,7 +728,9 @@ contains
        end do
     else
        ! calculate new volume
-       voln = volo + rmvol(boxvch) * ( 2.0E0_dp*random(-1) - 1.0E0_dp )
+       displ = rmvol(boxvch) * ( 2.0E0_dp*random(-1) - 1.0E0_dp )
+       voln = volo + displ
+       displ = abs(displ)
 
        if (lsolid(boxvch)) then
           ! volume move independently in x, y, z directions
@@ -892,6 +898,7 @@ contains
     if (random(-1) .lt. exp(-(beta*dele)) ) then
        ! accepted
        bsvol(boxvch) = bsvol(boxvch) + 1.0E0_dp
+       acc_displ(boxvch) = acc_displ(boxvch) + displ
        if ( lsolid(boxvch) .and. .not. lrect(boxvch) ) then
           if(l_couple) then
              if(lx.and.ly) then
@@ -951,10 +958,10 @@ contains
     real::rmvolume
     namelist /mc_volume/ tavol,iratv,pmvlmt,nvolb,pmvolb,box5,box6,pmvol,pmvolx,pmvoly,rmvolume,allow_cutoff_failure,l_bilayer,pm_consv, pmvol_xy
 
-    if (allocated(acsvol)) deallocate(acsvol,acnvol,acshmat,acnhmat,bsvol,bnvol,bshmat,bnhmat,vboxn,vboxo,bxo,byo,bzo,xcmo,ycmo,zcmo,rxuo,ryuo,rzuo,qquo,rcut_original,stat=jerr)
+    if (allocated(acsvol)) deallocate(acsvol,acnvol,acshmat,acnhmat,bsvol,bnvol,acc_displ,bshmat,bnhmat,vboxn,vboxo,bxo,byo,bzo,xcmo,ycmo,zcmo,rxuo,ryuo,rzuo,qquo,rcut_original,stat=jerr)
     allocate(acsvol(nbxmax),acnvol(nbxmax),acshmat(nbxmax,9),acnhmat(nbxmax,9),bsvol(nbxmax),bnvol(nbxmax),bshmat(nbxmax,9)&
      ,bnhmat(nbxmax,9),vboxn(nEnergy,nbxmax),vboxo(nEnergy,nbxmax),bxo(nbxmax),byo(nbxmax),bzo(nbxmax),xcmo(nmax),ycmo(nmax)&
-     ,zcmo(nmax),rxuo(nmax,numax),ryuo(nmax,numax),rzuo(nmax,numax),qquo(nmax,numax),rcut_original(nbxmax),stat=jerr)
+     ,zcmo(nmax),rxuo(nmax,numax),ryuo(nmax,numax),rzuo(nmax,numax),qquo(nmax,numax),rcut_original(nbxmax),acc_displ(nbxmax),stat=jerr)
     if (jerr.ne.0) call err_exit(__FILE__,__LINE__,'init_moves_volume: allocation failed',jerr)
 
     ! defaults for namelist mc_volume
@@ -964,6 +971,7 @@ contains
     acnhmat = 0.0E0_dp
     bsvol = 0.0E0_dp
     bnvol = 0.0E0_dp
+    acc_displ = 0.0E0_dp
     bshmat = 0.0E0_dp
     bnhmat = 0.0E0_dp
     rcut_original = rcut
@@ -1130,7 +1138,7 @@ contains
   subroutine output_volume_stats(io_output)
     integer,intent(in)::io_output
     integer::ibox,j
-    real::ratvol
+    real::ratvol,acc_displ_avg
     character(LEN=default_path_length)::fmt="(' h-matrix attempts =',f8.1,'   ratio =',f6.3, '   max.displ. =',e11.4)"
 
     write(io_output,*)
@@ -1151,10 +1159,13 @@ contains
           acsvol(ibox) = acsvol(ibox) + bsvol(ibox)
           if ( acnvol(ibox) .ne. 0.0E0_dp ) then
              ratvol = acsvol(ibox) / acnvol(ibox)
+             acc_displ_avg = acc_displ(ibox)/acsvol(ibox)
           else
              ratvol = 0.0E0_dp
+             acc_displ_avg = 0.0E0_dp
           end if
-          write(io_output,"(' attempts =',f8.1,'   ratio =',f6.3, '   max.displ. =',e11.4)") acnvol(ibox),ratvol,rmvol(ibox)
+          write(io_output,"(' attempts =',f8.1,'   ratio =',f6.3, 'max.displ. =',e11.4,'   avg.acc.displ. =',e11.4)") &
+            acnvol(ibox),ratvol,rmvol(ibox),acc_displ_avg
        end if
     end do
   end subroutine output_volume_stats
