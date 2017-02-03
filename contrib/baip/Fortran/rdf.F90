@@ -128,13 +128,12 @@ contains
              g(ibin,iblock,ibox)=n(ibin,iblock,ibox)/dble(beadcount(1))/nct(1,ibox)/nideal
           end do
        end do
-    end do ! end loop over boxes
 
-    ! accumulate averages
-    forall(ibox=1:nbox,nframe_eff(ibox).gt.0)
+       ! accumulate averages
        navg(:,:,ibox)=real(nframe_eff(ibox)-1)/real(nframe_eff(ibox))*navg(:,:,ibox)+numint(:,:,ibox)/nframe_eff(ibox)
        gavg(:,:,ibox)=real(nframe_eff(ibox)-1)/real(nframe_eff(ibox))*gavg(:,:,ibox)+g(:,:,ibox)/nframe_eff(ibox)
-    end forall
+    end do ! end loop over boxes
+
   end subroutine calcRdf
 
 !> \brief Average and output site-site RDF
