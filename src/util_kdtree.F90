@@ -1467,7 +1467,7 @@ contains
         ! allocate allocatable arrays
         if (allocated(mol_tree)) deallocate(mol_tree, tree_height, lkdtree_box, kdtree_buffer_len)
         allocate(mol_tree(nbox+2), tree_height(nbox+2)) !< nbox+2 because the extra 2 will be used to temporarily store tree in volume moves
-        allocate(lkdtree_box(nbox),kdtree_buffer_len(nbox))
+        allocate(lkdtree_box(nbox+1),kdtree_buffer_len(nbox+1))
 
         ! set default value of lkdtree_box to be false
         do ibox = 1, nbox
