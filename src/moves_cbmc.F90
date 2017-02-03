@@ -376,6 +376,8 @@ contains
          end do
       end if
 
+      vrecipn = 0.0E0_dp
+      vrecipo = 0.0E0_dp
       if (lewald.and.lelect(imolty).and..not.lideal(ibox)) then
 ! reciprocal space sum ---
 ! rxuion: 1= old configuration; 2= new configuration
