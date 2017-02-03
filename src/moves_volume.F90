@@ -830,8 +830,20 @@ contains
           end if
        end do
     end if
-    ! if no molecules in box, reject move
-    if (nchain_boxvch.eq.0) goto 500
+
+    if (nchain_boxvch.eq.0) then
+       ! if no molecules in box
+       if (allow_cutoff_failure.lt.0) then
+          ! if default, error exit
+          call err_exit(__FILE__,__LINE__,'Volume 1box attempted with no molec in box', myid+1)
+       else
+          ! allow_cutoff_failure was set to account for this
+          ! reject move and do not count this as an attempt
+          bnvol(boxvch) = bnvol(boxvch) - 1.0E0_dp
+          goto 500
+       end if
+    end if
+
 
     if ( lchgall ) then
        if (lsolid(boxvch).and.(.not.lrect(boxvch))) then
