@@ -6315,6 +6315,9 @@ contains
 
             fprev(1,1) = 0
             ivib = 0
+         else if (invtry.eq.3.and.maxgrow(imolty).eq.1) then
+            kickout = kickout + 1 ! do not start 1 bead safecbmc from a branch point
+            goto 100
          else
 
  13         ivib = int(random(-1) * dble(invtry)) + 1  ! at a branch point, decide which way not to grow
