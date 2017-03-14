@@ -67,31 +67,6 @@ subroutine inclus(inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ai
         end do
      end do
 
-     ! include or exclude additional beads accoring to incl
-     do n = 1,inclnum
-        if ( inclmol(n) .eq. imolty ) then
-           m = inclbead(n,1)
-           nb = inclbead(n,2)
-           if (inclsign(n).gt.0) then
-              linclu(imolty,m,nb) = .true.
-              linclu(imolty,nb,m) = .true.
-              lqinclu(imolty,m,nb) = .true.
-              lqinclu(imolty,nb,m) = .true.
-              ljscale(imolty,m,nb) = ofscale(n)
-              ljscale(imolty,nb,m) = ofscale(n)
-              qscale2(imolty,m,nb) = ofscale2(n)
-              qscale2(imolty,nb,m) = ofscale2(n)
-           else if (inclsign(n).lt.0) then
-              linclu(imolty,m,nb) = .false.
-              linclu(imolty,nb,m) = .false.
-              lqinclu(imolty,m,nb) = .false.
-              lqinclu(imolty,nb,m) = .false.
-           else
-              write(io_output,*) 'INCLUS: n,inclsign(n)',n,inclsign(n)
-              call err_exit(__FILE__,__LINE__,'inclusign must be 1 or -1',myid+1)
-           end if
-        end if
-     end do
 
      ! add in 1-5 interactions according to aincl
      do m = 1,ainclnum
@@ -158,20 +133,6 @@ subroutine inclus(inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ai
         end do
      end do
 
-     ! self consistency check
-     do m = 1,nunit(imolty)
-        do n = m+1,nunit(imolty)
-           if (linclu(imolty,m,n) .neqv. linclu(imolty,n,m)) then
-              linclu(imolty,m,n) = .false.
-              linclu(imolty,n,m) = .false.
-           end if
-
-           if (lqinclu(imolty,m,n) .neqv. lqinclu(imolty,n,m)) then
-              lqinclu(imolty,m,n) = .false.
-              lqinclu(imolty,n,m) = .false.
-           end if
-        end do
-     end do
 
      !> \bug Removing this part for TATB (NR-2007) (Does TATB has interactions between rigid beads?)
      if (lrigid(imolty)) then
@@ -179,9 +140,9 @@ subroutine inclus(inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ai
 
         ! there will be no intramolecular forces between rigid beads
         ! or beads connected one away from a rigid bead
-        do m = 1,invib(imolty,riutry(imolty,1))
+        do m = 1,invib(imolty,riutry(imolty,1)) ! loop over all beads connected to grow point
            mb = ijvib(imolty,riutry(imolty,1),m)
-           do n = riutry(imolty,1), nunit(imolty)
+           do n = riutry(imolty,1), nunit(imolty) ! loop over all beads higher than growpoint
               linclu(imolty,n,mb) = .false.
               linclu(imolty,mb,n) = .false.
               lqinclu(imolty,n,mb) = .false.
@@ -189,12 +150,57 @@ subroutine inclus(inclnum,inclmol,inclbead,inclsign,ncarbon,ainclnum,ainclmol,ai
            end do
         end do
         do m = riutry(imolty,1), nunit(imolty)
-           do n = riutry(imolty,1), nunit(imolty)
+           do n = riutry(imolty,1), nunit(imolty) ! loop over all beads higher than grow point
               linclu(imolty,m,n) = .false.
+              linclu(imolty,n,m) = .false.
               lqinclu(imolty,m,n) = .false.
+              lqinclu(imolty,n,m) = .false.
            end do
         end do
      end if
+
+     ! include or exclude additional beads accoring to incl
+     do n = 1,inclnum
+        if ( inclmol(n) .eq. imolty ) then
+           m = inclbead(n,1)
+           nb = inclbead(n,2)
+           if (inclsign(n).gt.0) then
+              linclu(imolty,m,nb) = .true.
+              linclu(imolty,nb,m) = .true.
+              lqinclu(imolty,m,nb) = .true.
+              lqinclu(imolty,nb,m) = .true.
+              ljscale(imolty,m,nb) = ofscale(n)
+              ljscale(imolty,nb,m) = ofscale(n)
+              qscale2(imolty,m,nb) = ofscale2(n)
+              qscale2(imolty,nb,m) = ofscale2(n)
+           else if (inclsign(n).lt.0) then
+              linclu(imolty,m,nb) = .false.
+              linclu(imolty,nb,m) = .false.
+              lqinclu(imolty,m,nb) = .false.
+              lqinclu(imolty,nb,m) = .false.
+           else
+              write(io_output,*) 'INCLUS: n,inclsign(n)',n,inclsign(n)
+              call err_exit(__FILE__,__LINE__,'inclusign must be 1 or -1',myid+1)
+           end if
+        end if
+     end do
+
+     ! self consistency check
+     do m = 1,nunit(imolty)
+        do n = m+1,nunit(imolty)
+           if (linclu(imolty,m,n) .neqv. linclu(imolty,n,m)) then
+              write(io_output,*) 'LJ interaction between beads',m, n,'was not consistent, turning off'
+              linclu(imolty,m,n) = .false.
+              linclu(imolty,n,m) = .false.
+           end if
+
+           if (lqinclu(imolty,m,n) .neqv. lqinclu(imolty,n,m)) then
+              write(io_output,*) 'Charge interaction between beads',m, n,'was not consistent, turning off'
+              lqinclu(imolty,m,n) = .false.
+              lqinclu(imolty,n,m) = .false.
+           end if
+        end do
+     end do
   end do
 end subroutine inclus
 
