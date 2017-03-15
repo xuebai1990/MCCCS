@@ -230,7 +230,7 @@ contains
     ichoi = nchoi1(imolty)
 
     ! select starting unit ***
-    ! always using bead 1 as the starting unit
+    ! always using bead beg as the starting unit
     iutry = beg
     glist(1) = beg
     if (lrigid(imolty)) then
@@ -638,7 +638,7 @@ contains
 
     if (lrigid(imolty)) then
        ! calculate new vector from initial bead
-       do j = beg,iunit
+       do j = beg,iunit ! note starts from beg, not all beads placed if grow point
           rxnew(j) = rxnew(beg)  - (rxu(irem,beg) - rxu(irem,j))
           rynew(j) = rynew(beg)  - (ryu(irem,beg) - ryu(irem,j))
           rznew(j) = rznew(beg)  - (rzu(irem,beg) - rzu(irem,j))
@@ -1544,7 +1544,13 @@ contains
        vbendn = 0.0_dp
        vvibn = 0.0_dp
        if (lrigid(imolty).and.(pm_atom_tra.gt.0.000001)) then
+          ! account for change in bending and torsion energy for grow point
           call U_bonded(irem,imolty,vvibn,vbendn,vtgn)
+          vvibn = vvibn - vnew(ivStretching) ! do not double count
+          vtgn = vtgn  - vnew(ivTorsion) ! do not double count any new torsions
+                                         ! that were regrown with grow points
+          vbendn = vbendn - vnew(ivBending) ! do not double count any new
+                                    !bending angles that were regrown with grow points
        end if
        total_NBE = vtgn+vbendn+vvibn
 
