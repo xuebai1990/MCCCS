@@ -462,6 +462,12 @@ interaction are considered.
 \noindent{\bf lewald:} if TRUE then ewald-sum will be used to
 calculate the electrostatic interactions.
 
+\noindent{\bf lrecip:} if TRUE an efficient way to calculate
+cosine and sine for reciprocal space energy is enabled. (Warining:
+does not work for non-rectangular box. Use with caution when 
+running with more than one processor, since it may be even slower
+than not using this feature.)
+
 \noindent{\bf lcutcm:} if TRUE then a cutoff of the centers
 of mass will be used with a value of rcmu as calculated in
 ctrmas.

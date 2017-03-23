@@ -67,6 +67,7 @@ module sim_system
   logical::lijall=.false.& !< if LIJALL = .TRUE. then all i-j interactions are considered (no potential cut-off). Must set lcutcm and ltailc to false for lijall = true *** check top of sumup.f if lijall = true and lchgall is false
    ,lchgall=.false.& !< if LCHGALL= .TRUE. then all the electrostatic interaction are considered
    ,lewald=.false.& !< if LEWALD=.TRUE. then ewald-sum will be used to calculate the electrostatic interactions.
+   ,lrecip=.false.& !< if LRECIP=.TRUE. then sin and cos in reciprocal space will be calculated recursively.
    ,lcutcm=.true.& !< if LCUTCM=.TRUE. then a cutoff of the centers of mass will be used with a value of rcmu as calculated in ctrmas
    ,L_Ewald_Auto=.true.
 

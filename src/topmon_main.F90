@@ -1269,7 +1269,7 @@ contains
     namelist /io/ file_input,file_restart,file_struct,file_run,file_movie,file_solute,file_traj,io_output&
      ,run_num,suffix,L_movie_xyz,L_movie_pdb,file_cbmc_bend,checkpoint_interval,checkpoint_copies,use_checkpoint,ltraj
     namelist /system/ lnpt,lgibbs,lgrand,lanes,lvirial,lmipsw,lexpee,ldielect,lpbc,lpbcx,lpbcy,lpbcz,lfold,lijall,lchgall,lewald&
-     ,lcutcm,ltailc,lshift,ldual,L_Coul_CBMC,lneigh&
+     ,lrecip,lcutcm,ltailc,lshift,ldual,L_Coul_CBMC,lneigh&
      ,lexzeo,lslit,lgraphite,lsami,lmuir,lelect_field,lgaro,lionic,L_Ewald_Auto,lmixlb,lmixjo&
      ,L_spline,L_linear,L_vib_table,L_bend_table,L_elect_table,L_cbmc_bend, lkdtree
     namelist /mc_shared/ seed,nbox,nmolty,nchain,nmax,nstep,time_limit,lstop,iratio,rmin,softcut&
@@ -1378,6 +1378,7 @@ contains
     call mp_bcast(lijall,1,rootid,groupid)
     call mp_bcast(lchgall,1,rootid,groupid)
     call mp_bcast(lewald,1,rootid,groupid)
+    call mp_bcast(lrecip,1,rootid,groupid)
     call mp_bcast(lcutcm,1,rootid,groupid)
     call mp_bcast(ltailc,1,rootid,groupid)
     call mp_bcast(lshift,1,rootid,groupid)
